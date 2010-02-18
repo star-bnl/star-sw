@@ -156,9 +156,6 @@ Int_t StJetSkimEventMaker::Make()
     StMuEvent* muEvent = muDst->event();
     assert(muEvent);
 
-    static const StThreeVectorF noVertex(-999,-999,-999);
-    if (muEvent->primaryVertexPosition() == noVertex) return kStOk;
-    
     StBbcTriggerDetector* bbc = &(muEvent->bbcTriggerDetector());
     assert(bbc);
     StRunInfo* runInfo = &(muEvent->runInfo()); assert(runInfo);
@@ -309,7 +306,7 @@ void StJetSkimEventMaker::fillTriggerSimulationInfo(StJetSkimTrig &skimTrig)
   StEmcTriggerMaker *emcTrigMaker = dynamic_cast<StEmcTriggerMaker*>(GetMaker("bemctrigger"));
 
   if (trigSimu) {
-    StTriggerSimuResult trigResult = trigSimu->detailedResult(skimTrig.trigId());
+    const StTriggerSimuResult& trigResult = trigSimu->detailedResult(skimTrig.trigId());
     skimTrig.setShouldFire(trigSimu->isTrigger(skimTrig.trigId()));
     skimTrig.setShouldFireBBC(trigResult.bbcDecision());
     skimTrig.setShouldFireBemc(trigResult.bemcDecision());
@@ -337,6 +334,15 @@ void StJetSkimEventMaker::fillTriggerSimulationInfo(StJetSkimTrig &skimTrig)
       skimTrig.setL2ResultEmulated(trigResult.l2Result(kJet));
     }
 
+    // 2009
+    for (map<int,int>::const_iterator i = trigResult.barrelJetPatches().begin(); i != trigResult.barrelJetPatches().end(); ++i)
+      skimTrig.addBarrelJetPatchAboveThreshold(i->first,i->second);
+
+    for (map<int,int>::const_iterator i = trigResult.endcapJetPatches().begin(); i != trigResult.endcapJetPatches().end(); ++i)
+      skimTrig.addEndcapJetPatchAboveThreshold(i->first,i->second);
+
+    for (map<int,int>::const_iterator i = trigResult.overlapJetPatches().begin(); i != trigResult.overlapJetPatches().end(); ++i)
+      skimTrig.addOverlapJetPatchAboveThreshold(i->first,i->second);
   } else if (emcTrigMaker) {
     skimTrig.setShouldFire(emcTrigMaker->isTrigger(skimTrig.trigId()));
     

@@ -151,11 +151,29 @@ void EemcTrigUtil::getFeePed4(const TDatime& date, int mxChan, int *feePed4)
   static const char* dir = "/star/u/pibero/public/StarTrigSimuSetup/ped";
   vector<TDatime> dates;
   scanPed4DirForDates(dir,dates);
-  TDatime ts = getTimeStampFromDates(date,dates);
-  char currentdir[FILENAME_MAX];
-  sprintf(currentdir,"%s/%02d.%02d.%4d",dir,ts.GetMonth(),ts.GetDay(),ts.GetYear());
-  LOG_INFO << "Using ped4 directory " << currentdir << endm;
-  readPed4(currentdir,mxChan,feePed4);
+  TDatime timeStamp = getTimeStampFromDates(date,dates);
+  TString timeStampString = Form("%02d.%02d.%4d",timeStamp.GetMonth(),timeStamp.GetDay(),timeStamp.GetYear());
+  char pathname[FILENAME_MAX];
+  sprintf(pathname,"%s/%s",dir,timeStampString.Data());
+  LOG_INFO << "Using ped4 directory " << pathname << endm;
+  readPed4(pathname,mxChan,feePed4);
+
+  // Check for additional pedestal files from this time stamp, e.g. 05.06.2009_crate5board2.ped4
+  for (int crate = 1; crate <= 6; ++crate) {
+    for (int board = 1; board <= 4; ++board) {
+      sprintf(pathname,"%s/%s_crate%dboard%d.ped4",dir,timeStampString.Data(),crate,board);
+      if (FILE* fp = fopen(pathname,"r")) {
+	LOG_INFO << "Using ped4 file " << pathname << endm;
+	int ped4val;
+	for (int chan = 0; fscanf(fp,"%d",&ped4val)!= EOF; ++chan) {
+	  int rdo = (crate-1)*mxChan+(board-1)*32+chan;
+	  feePed4[rdo] = ped4val;
+	  LOG_DEBUG << Form("crate=%d board=%d chan=%d rdo=%d ped4=%d",crate,board,chan,rdo,ped4val) << endm;
+	}
+	fclose(fp);
+      }
+    }
+  }
 }
 
 //==================================================
@@ -202,4 +220,3 @@ EemcTrigUtil::readPed4(const char *path, int mxChan, int *feePed4) {
     }
   }
 }
-

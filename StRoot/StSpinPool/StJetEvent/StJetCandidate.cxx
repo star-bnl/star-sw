@@ -18,10 +18,9 @@ StJetCandidate::StJetCandidate(const TVector3& vertex, float pt, float eta, floa
 {
   // Front plate of BEMC towers or BPRS layer (See StEmcGeom/geometry/StEmcGeom.cxx)
   // This only works for BEMC jets.
-  static const float BEMC_RADIUS = 225.405;
-
+  static const double BEMC_RADIUS = 225.405;
   TVector3 pos = momentum();
-  pos.SetPerp(BEMC_RADIUS);
+  pos.SetMag(fabs(BEMC_RADIUS/pos.Unit().y()));
   pos += vertex;
   mDetEta = pos.Eta();
 }
@@ -68,16 +67,22 @@ StJetTower* StJetCandidate::getTowerById(int id) const
   return 0;
 }
 
-bool StJetCandidate::getJetPatchEtaPhi(int jetPatch, float& eta, float& phi)
+float StJetCandidate::getJetPatchPhi(int jetPatch)
+{
+  return TVector2::Phi_mpi_pi((150 - (jetPatch % 6) * 60) * TMath::DegToRad());
+}
+
+bool StJetCandidate::getBarrelJetPatchEtaPhi(int jetPatch, float& eta, float& phi)
 {
   //
   // Pibero Djawotho <pibero@tamu.edu>
   // Texas A&M University
   // 5 September 2009
+  // Revised 9 Feruary 2010 to include middle jet patches
   //
 
   // Sanity check
-  if (jetPatch < 0 || jetPatch >= 12) return false;
+  if (jetPatch < 0 || jetPatch >= 18) return false;
 
   //
   // The jet patches are numbered starting with JP0 centered at 150 degrees
@@ -107,24 +112,47 @@ bool StJetCandidate::getJetPatchEtaPhi(int jetPatch, float& eta, float& phi)
   // http://www.nikhef.nl/~ogrebeny/emc/files/BEMC.pdf
   // http://drupal.star.bnl.gov/STAR/system/files/BEMC_y2004.pdf
   //
-  eta = (jetPatch < 6) ? 0.5 : -0.5;
-  phi = 150 - (jetPatch % 6) * 60; // Degrees
 
-  // Degrees to radians
-  phi *= TMath::DegToRad();
+  if (jetPatch >=  0 && jetPatch <  6) eta =  0.5;
+  if (jetPatch >=  6 && jetPatch < 12) eta = -0.5;
+  if (jetPatch >= 12 && jetPatch < 18) eta = -0.1;
 
-  // Map phi into [-pi,pi]
-  phi = TVector2::Phi_mpi_pi(phi);
+  phi = getJetPatchPhi(jetPatch);
 
   return true;
 }
 
-bool StJetCandidate::getJetPatchId(float eta, float phi, int& id)
+bool StJetCandidate::getEndcapJetPatchEtaPhi(int jetPatch, float& eta, float& phi)
+{
+  if (jetPatch >= 0 && jetPatch < 6)
+    eta = 1.5;
+  else
+    return false;
+
+  phi = getJetPatchPhi(jetPatch);
+
+  return true;
+}
+
+bool StJetCandidate::getOverlapJetPatchEtaPhi(int jetPatch, float& eta, float& phi)
+{
+  if (jetPatch >= 0 && jetPatch < 6)
+    eta = 0.9;
+  else
+    return false;
+
+  phi = getJetPatchPhi(jetPatch);
+
+  return true;
+}
+
+bool StJetCandidate::getBarrelJetPatchId(float eta, float phi, int& id)
 {
   //
   // Pibero Djawotho <pibero@tamu.edu>
   // Texas A&M University
   // 5 September 2009
+  // To do: Need to include possibility of returning middle jet patch
   //
 
   // Jet patch id is left at -1 on failure
@@ -158,4 +186,56 @@ bool StJetCandidate::getJetPatchId(float eta, float phi, int& id)
   }
 
   return (0 <= id && id < 12);
+}
+
+bool StJetCandidate::getEndcapJetPatchId(float eta, float phi, int& id)
+{
+  // Jet patch id is left at -1 on failure
+  id = -1;
+
+  // Check range of eta
+  if (eta < 1 || eta > 2) return false;
+
+  // Map phi into [-pi,pi] if necessary
+  if (phi < -M_PI || phi > M_PI) phi = TVector2::Phi_mpi_pi(phi);
+
+  // Get jet patch id
+  static const double PI_OVER_3 = M_PI/3;
+
+  if (1 <= eta && eta <= 2) {
+    if ( 2*PI_OVER_3 <= phi && phi <         M_PI) id = 0;
+    if (   PI_OVER_3 <= phi && phi <  2*PI_OVER_3) id = 1;
+    if (           0 <= phi && phi <    PI_OVER_3) id = 2;
+    if (  -PI_OVER_3 <= phi && phi <            0) id = 3;
+    if (-2*PI_OVER_3 <= phi && phi <   -PI_OVER_3) id = 4;
+    if (       -M_PI <= phi && phi < -2*PI_OVER_3) id = 5;
+  }
+
+  return (0 <= id && id < 6);
+}
+
+bool StJetCandidate::getOverlapJetPatchId(float eta, float phi, int& id)
+{
+  // Jet patch id is left at -1 on failure
+  id = -1;
+
+  // Check range of eta
+  if (eta < 0.4 || eta > 1.4) return false;
+
+  // Map phi into [-pi,pi] if necessary
+  if (phi < -M_PI || phi > M_PI) phi = TVector2::Phi_mpi_pi(phi);
+
+  // Get jet patch id
+  static const double PI_OVER_3 = M_PI/3;
+
+  if (0.4 <= eta && eta <= 1.4) {
+    if ( 2*PI_OVER_3 <= phi && phi <         M_PI) id = 0;
+    if (   PI_OVER_3 <= phi && phi <  2*PI_OVER_3) id = 1;
+    if (           0 <= phi && phi <    PI_OVER_3) id = 2;
+    if (  -PI_OVER_3 <= phi && phi <            0) id = 3;
+    if (-2*PI_OVER_3 <= phi && phi <   -PI_OVER_3) id = 4;
+    if (       -M_PI <= phi && phi < -2*PI_OVER_3) id = 5;
+  }
+
+  return (0 <= id && id < 6);
 }

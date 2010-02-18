@@ -16,6 +16,9 @@
 #define STAR_StTriggerSimuMaker
 
 #include <vector>
+#include <map>
+
+#include "StTriggerSimuResult.h"
 
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -32,7 +35,7 @@ class StEemcTriggerSimu;
 class StEmcTriggerSimu;
 class StL2TriggerSimu;
 class StGenericL2Emulator;
-class StTriggerSimuResult;
+//class StTriggerSimuResult;
 const int numSimulators=5;
 
 class StTriggerSimuMaker : public StMaker {
@@ -48,7 +51,9 @@ private:
 
   
   /// detailed results for individual trigger simulations
-  std::vector<StTriggerSimuResult> mResults;
+  std::map<int,StTriggerSimuResult> mResults;
+
+  void buildDetailedResult(int trigId);
 
 public:
   StTriggerSimuMaker(const char *name="StarTrigSimu");
@@ -73,7 +78,7 @@ public:
   std::vector<int> triggerIds() const;
   
   /// returns object containing detailed information about simulation of given trigger
-  const StTriggerSimuResult& detailedResult(unsigned int trigId);
+  const StTriggerSimuResult& detailedResult(int trigId) { return mResults[trigId]; }
   
   //hang all activated trigger detectors below
   StBbcTriggerSimu  *bbc;
@@ -87,9 +92,12 @@ public:
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.21 2009/11/16 07:51:20 pibero Exp $
+// $Id: StTriggerSimuMaker.h,v 1.22 2010/02/18 20:07:03 pibero Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.22  2010/02/18 20:07:03  pibero
+// Run 9 updates
+//
 // Revision 1.21  2009/11/16 07:51:20  pibero
 // Added LOG_DEBUG messages and triggerIds()
 //

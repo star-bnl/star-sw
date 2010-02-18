@@ -65,11 +65,8 @@ void StjeJetEventTreeWriter::Finish()
 
 void StjeJetEventTreeWriter::fillJetTree()
 {
-  static const StThreeVectorF noVertex(-999,-999,-999);
   for(vector<AnalyzerCtl>::iterator iAnalyzer = _analyzerCtlList.begin(); iAnalyzer != _analyzerCtlList.end(); ++iAnalyzer) {
     StFourPMaker* fourPMaker = iAnalyzer->_fourPMaker;
-    // If just one branch has no vertex, bail out...
-    if (fourPMaker->getVertex() == noVertex) return;
     list<StProtoJet>* protoJetList = iAnalyzer->_protoJetList;
     fillJetTreeForOneJetFindingAlgorithm(*iAnalyzer->_jetEvent, protoJetList, fourPMaker);
   }

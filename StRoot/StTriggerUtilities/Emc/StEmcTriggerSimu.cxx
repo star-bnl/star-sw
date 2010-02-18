@@ -268,7 +268,43 @@ int StEmcTriggerSimu::defineTriggers(int runNumber)
   return kStOk;
 }
 
-int StEmcTriggerSimu::EM201output() const
+int StEmcTriggerSimu::EM201output() const { return (*mEM201)[0].output; }
+
+int StEmcTriggerSimu::getOverlapJetPatchTh0() const { return mEM201->getRegister(0); }
+int StEmcTriggerSimu::getOverlapJetPatchTh1() const { return mEM201->getRegister(1); }
+int StEmcTriggerSimu::getOverlapJetPatchTh2() const { return mEM201->getRegister(2); }
+
+int StEmcTriggerSimu::getOverlapJetPatchThreshold(int trigId) const
 {
-  return (*mEM201)[0].output;
+  switch (trigId) {
+  case 240410:
+  case 240411:
+    return getOverlapJetPatchTh1(); // JP1
+  case 240650:
+  case 240651:
+  case 240652:
+    return getOverlapJetPatchTh2(); // L2JetHigh
+  }
+  return -1;
+}
+
+void StEmcTriggerSimu::getOverlapJetPatchAdc(int i, int& jp, int& adc) const
+{
+  int jp_partial = (*mEM201)[0].channels[6+i] >> 12 & 0x3;
+  jp  = (1-i)*3+jp_partial-1;
+  adc = (*mEM201)[0].info[i];
+}
+
+map<int,int> StEmcTriggerSimu::getOverlapJetPatchesAboveThreshold(int trigId) const
+{
+  int th = getOverlapJetPatchThreshold(trigId);
+  map<int,int> patches;
+  if (th != -1) {
+    for (int i = 0; i < 2; ++i) {
+      int jp, adc;
+      getOverlapJetPatchAdc(i,jp,adc);
+      if (adc > th) patches.insert(make_pair(jp,adc));
+    }
+  }
+  return patches;
 }

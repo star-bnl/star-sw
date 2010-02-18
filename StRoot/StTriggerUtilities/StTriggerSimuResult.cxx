@@ -1,4 +1,4 @@
-// $Id: StTriggerSimuResult.cxx,v 1.4 2009/09/23 23:22:42 fine Exp $
+// $Id: StTriggerSimuResult.cxx,v 1.5 2010/02/18 20:07:03 pibero Exp $
 
 #include <utility>
 using std::make_pair;
@@ -19,23 +19,6 @@ ClassImp(StTriggerSimuResult)
 
 StTriggerSimuResult::StTriggerSimuResult() : TObject(), mBbcDecision(kDoNotCare),
     mBemcDecision(kDoNotCare), mEemcDecision(kDoNotCare), mL2Decision(kDoNotCare) { }
-
-StTriggerSimuResult::StTriggerSimuResult(const StTriggerSimuResult & o) {
-    mTriggerId          = o.mTriggerId;
-    mBbcDecision        = o.mBbcDecision;
-    mBemcDecision       = o.mBemcDecision;
-    mEemcDecision       = o.mEemcDecision;
-    mL2Decision         = o.mL2Decision;
-    mHighTowerIds       = o.mHighTowerIds;
-    mHighTowerAdcs      = o.mHighTowerAdcs;
-    mTriggerPatchIds    = o.mTriggerPatchIds;
-    mTriggerPatchAdcs   = o.mTriggerPatchAdcs;
-    mJetPatchIds        = o.mJetPatchIds;
-    mJetPatchAdcs       = o.mJetPatchAdcs;
-    memcpy( mL2Result, o.mL2Result, 128);
-}
-
-StTriggerSimuResult::~StTriggerSimuResult() { }
 
 int StTriggerSimuResult::highTowerAdc(short towerId) const {
     for(unsigned i=0; i<mHighTowerIds.size(); i++) {
@@ -126,6 +109,9 @@ void StTriggerSimuResult::setL2Result(const unsigned int* result) {
 
 /*****************************************************************************
  * $Log: StTriggerSimuResult.cxx,v $
+ * Revision 1.5  2010/02/18 20:07:03  pibero
+ * Run 9 updates
+ *
  * Revision 1.4  2009/09/23 23:22:42  fine
  * add the missed cstring header file
  *

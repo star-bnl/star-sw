@@ -17,6 +17,9 @@ class TCU;
 #include <set>
 using std::set;
 
+#include <map>
+using std::map;
+
 #include "StTriggerUtilities/StVirtualTriggerSimu.h"
 #include "StTriggerUtilities/StTriggerSimuResult.h"
 
@@ -53,10 +56,18 @@ public:
   void setBemc(StBemcTriggerSimu* bemc);
   void setEemc(StEemcTriggerSimu* eemc);
 
-  // Use these setters to overwrite thresholds from the database
+  // Use these setters to overwrite thresholds from the database (2009)
   void setOverlapJetPatchTh0(int value);
   void setOverlapJetPatchTh1(int value);
   void setOverlapJetPatchTh2(int value);
+
+  int getOverlapJetPatchTh0() const;
+  int getOverlapJetPatchTh1() const;
+  int getOverlapJetPatchTh2() const;
+
+  int getOverlapJetPatchThreshold(int trigId) const;
+  void getOverlapJetPatchAdc(int i, int& jp, int& adc) const;
+  map<int,int> getOverlapJetPatchesAboveThreshold(int trigId) const;
 
 private:
   int get2009_DSMRegisters(int runNumber);

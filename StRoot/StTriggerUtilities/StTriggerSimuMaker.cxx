@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.31 2009/11/16 07:51:19 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.32 2010/02/18 20:07:02 pibero Exp $
 
 
 #include <Stiostream.h>
@@ -161,8 +161,12 @@ Int_t StTriggerSimuMaker::Make() {
 
   std::vector<int> trigIds = triggerIds();
   TString line = "Triggers: ";
-  for (size_t i = 0; i < trigIds.size(); ++i) line += Form("%d ",trigIds[i]);
+  for (size_t i = 0; i < trigIds.size(); ++i)
+    line += Form("%d ",trigIds[i]);
   LOG_DEBUG << line << endm;
+
+  for (size_t i = 0; i < trigIds.size(); ++i)
+    buildDetailedResult(trigIds[i]);
 
   return kStOK;
 }
@@ -191,13 +195,8 @@ std::vector<int> StTriggerSimuMaker::triggerIds() const
   return v;
 }
 
-const StTriggerSimuResult& StTriggerSimuMaker::detailedResult(unsigned int trigId) {
-    // first check if we already filled this result
-    for(unsigned i=0; i<mResults.size(); i++) {
-        if(mResults[i].triggerId() == trigId) return mResults[i];
-    }
-    
-    StTriggerSimuResult result;
+void StTriggerSimuMaker::buildDetailedResult(int trigId) {
+    StTriggerSimuResult& result = mResults[trigId];
     result.setTriggerId(trigId);
     if(bbc) {
         result.setBbcDecision(bbc->triggerDecision(trigId));
@@ -222,17 +221,31 @@ const StTriggerSimuResult& StTriggerSimuMaker::detailedResult(unsigned int trigI
                 result.addJetPatch((*itr).first,(*itr).second);	    
             }
         }
+	// Record JPs above Threshold (2009)
+	map<int,int> jetPatches = bemc->getBarrelJetPatchesAboveThreshold(trigId);
+	for (map<int,int>::const_iterator i = jetPatches.begin(); i != jetPatches.end(); ++i) {
+	  result.addBarrelJetPatchAdc(i->first,i->second);
+	}
     }
     if(eemc) {
         result.setEemcDecision(eemc->triggerDecision(trigId));
-        // fill HT/TP/JP details here
+	// Record JPs above Threshold (2009)
+	map<int,int> jetPatches = eemc->getEndcapJetPatchesAboveThreshold(trigId);
+	for (map<int,int>::const_iterator i = jetPatches.begin(); i != jetPatches.end(); ++i) {
+	  result.addEndcapJetPatchAdc(i->first,i->second);
+	}
+    }
+    if (emc) {
+      // Record JPs above Threshold (2009)
+      map<int,int> jetPatches = emc->getOverlapJetPatchesAboveThreshold(trigId);
+      for (map<int,int>::const_iterator i = jetPatches.begin(); i != jetPatches.end(); ++i) {
+	result.addOverlapJetPatchAdc(i->first,i->second);
+      }
     }
     if(lTwo) {
         result.setL2Decision(lTwo->triggerDecision(trigId));
         result.setL2Result(lTwo->result());
     }
-    mResults.push_back(result);
-    return mResults.back();
 }
 
 Int_t StTriggerSimuMaker::Finish() {
@@ -241,6 +254,9 @@ Int_t StTriggerSimuMaker::Finish() {
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.32  2010/02/18 20:07:02  pibero
+ * Run 9 updates
+ *
  * Revision 1.31  2009/11/16 07:51:19  pibero
  * Added LOG_DEBUG messages and triggerIds()
  *

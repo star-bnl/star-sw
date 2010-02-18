@@ -742,8 +742,58 @@ int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
   return kStOk;
 }
 
+int StEemcTriggerSimu::getEndcapJetPatchTh0() const { return mE101->getRegister(0); }
+int StEemcTriggerSimu::getEndcapJetPatchTh1() const { return mE101->getRegister(1); }
+int StEemcTriggerSimu::getEndcapJetPatchTh2() const { return mE101->getRegister(2); }
+
+int StEemcTriggerSimu::getEndcapHighTowerTh0() const { return mE001->getRegister(0); }
+int StEemcTriggerSimu::getEndcapHighTowerTh1() const { return mE001->getRegister(1); }
+int StEemcTriggerSimu::getEndcapHighTowerTh2() const { return mE001->getRegister(2); }
+
+int StEemcTriggerSimu::getEndcapJetPatchThreshold(int trigId) const
+{
+  switch (trigId) {
+  case 240410:			// JP1
+  case 240411:
+    return getEndcapJetPatchTh1();
+  case 240650:			// L2JetHigh
+  case 240651:
+  case 240652:
+    return getEndcapJetPatchTh2();
+  }
+  return -1;
+}
+
+int StEemcTriggerSimu::getEndcapJetPatchAdc(int jp) const { return (*mE101)[1-jp/3].info[jp%3]; }
+
+map<int,int> StEemcTriggerSimu::getEndcapJetPatchesAboveThreshold(int trigId) const
+{
+  map<int,int> patches;
+  int th = getEndcapJetPatchThreshold(trigId);
+  if (th != -1) {
+    for (int jp = 0; jp < 6; ++jp) {
+      int adc = getEndcapJetPatchAdc(jp);
+      if (adc > th) patches.insert(make_pair(jp,adc));
+    }
+  }
+  return patches;
+}
+
+int StEemcTriggerSimu::getEndcapHighTower(int tp) const
+{
+  return feeTPTreeADC->TP(tp)->getOutHT();
+}
+
+int StEemcTriggerSimu::getEndcapPatchSum(int tp) const
+{
+  return feeTPTreeADC->TP(tp)->getOutTPsum();
+}
+
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.29  2010/02/18 20:07:10  pibero
+// Run 9 updates
+//
 // Revision 1.28  2010/01/08 15:18:39  pibero
 // Default input source is "MuDst" for all subdetectors.
 //

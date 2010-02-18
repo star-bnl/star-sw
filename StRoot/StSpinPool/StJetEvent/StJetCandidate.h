@@ -65,8 +65,14 @@ public:
   const TRefArray& particles() const { return mParticles; }
 
   // Utility functions to get jet patch eta and phi from jet patch id and vice-versa
-  static bool getJetPatchEtaPhi(int id, float& eta, float& phi);
-  static bool getJetPatchId(float eta, float phi, int& id);
+  static float getJetPatchPhi(int jetPatch);
+  static bool getBarrelJetPatchEtaPhi(int id, float& eta, float& phi);
+  static bool getEndcapJetPatchEtaPhi(int id, float& eta, float& phi);
+  static bool getOverlapJetPatchEtaPhi(int id, float& eta, float& phi);
+
+  static bool getBarrelJetPatchId(float eta, float phi, int& id);
+  static bool getEndcapJetPatchId(float eta, float phi, int& id);
+  static bool getOverlapJetPatchId(float eta, float phi, int& id);
 
   void setPtEtaPhiE(float pt, float eta, float phi, float E);
   void setPxPyPzE(float px, float py, float pz, float E);

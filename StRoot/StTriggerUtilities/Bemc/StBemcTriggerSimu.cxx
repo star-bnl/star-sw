@@ -2804,3 +2804,40 @@ int StBemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 
   return kStOk;
 }
+
+int StBemcTriggerSimu::getBarrelJetPatchTh0() const { return mB101->getRegister(0); }
+int StBemcTriggerSimu::getBarrelJetPatchTh1() const { return mB101->getRegister(1); }
+int StBemcTriggerSimu::getBarrelJetPatchTh2() const { return mB101->getRegister(2); }
+
+int StBemcTriggerSimu::getBarrelHighTowerTh0() const { return mB001->getRegister(0); }
+int StBemcTriggerSimu::getBarrelHighTowerTh1() const { return mB001->getRegister(1); }
+int StBemcTriggerSimu::getBarrelHighTowerTh2() const { return mB001->getRegister(2); }
+
+int StBemcTriggerSimu::getBarrelJetPatchThreshold(int trigId) const
+{
+  switch (trigId) {
+  case 240410:			// JP1
+  case 240411:
+    return getBarrelJetPatchTh1();
+  case 240650:			// L2JetHigh
+  case 240651:
+  case 240652:
+    return getBarrelJetPatchTh2();
+  }
+  return -1;
+}
+
+int StBemcTriggerSimu::getBarrelJetPatchAdc(int jp) const { return (*mB101)[jp%6].info[(jp+6)/6-1]; }
+
+map<int,int> StBemcTriggerSimu::getBarrelJetPatchesAboveThreshold(int trigId) const
+{
+  map<int,int> patches;
+  int th = getBarrelJetPatchThreshold(trigId);
+  if (th != -1) {
+    for (int jp = 0; jp < 18; ++jp) {
+      int adc = getBarrelJetPatchAdc(jp);
+      if (adc > th) patches.insert(make_pair(jp,adc));
+    }
+  }
+  return patches;
+}
