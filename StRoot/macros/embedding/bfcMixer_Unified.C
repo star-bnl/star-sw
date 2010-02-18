@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Unified.C,v 1.4 2009/02/23 20:58:03 fisyak Exp $
+// $Id: bfcMixer_Unified.C,v 1.5 2010/02/18 23:55:30 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -42,7 +42,7 @@ void bfcMixer_Unified(const Int_t Nevents=1,
   TString chain2Opt("NoInput PrepEmbed gen_T geomT sim_T trs -ittf -tpc_daq nodefault");
   chain2Opt += " "; chain2Opt += geom;
   TString chain3Opt = prod;
-  chain3Opt += " Embedding onlraw GeantOut MiniMcMk -in NoInput,useInTracker"; 
+  chain3Opt += " Embedding onlraw GeantOut MiniMcMk -in NoInput,useInTracker EmbeddingShortCut"; 
   chain3Opt += " "; chain3Opt += geom;
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");
@@ -125,6 +125,9 @@ void bfcMixer_Unified(const Int_t Nevents=1,
 }
   
 // $Log: bfcMixer_Unified.C,v $
+// Revision 1.5  2010/02/18 23:55:30  fisyak
+// Add EmbeddingShortCut to chain3 for embedding with Trs
+//
 // Revision 1.4  2009/02/23 20:58:03  fisyak
 // Add to production chain Iana option to turn on dE/dx. V0, Xi, ...
 //
