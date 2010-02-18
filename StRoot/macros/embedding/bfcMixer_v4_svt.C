@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_v4_svt.C,v 1.1 2007/05/31 18:39:05 andrewar Exp $
+// $Id: bfcMixer_v4_svt.C,v 1.2 2010/02/18 23:55:30 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -137,7 +137,7 @@ void bfcMixer_v4(const Int_t Nevents=10,
 
   //  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050515 ry2005b tpc_daq tpc svt_daq SvtD event Kalman Tree evout useCDV SCEbyE tofdat EST xiSvt pmdRaw Xi2 V02 Kink2 CMuDst");
 
-  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050515 ry2005b tpc_daq tpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2 EST ToF svtEmbed SvtD svtdEdx xiSvt l3onl fpd eemcD pmdRaw"); 
+  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050515 ry2005b tpc_daq tpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2 EST ToF svtEmbed SvtD svtdEdx xiSvt l3onl fpd eemcD pmdRaw EmbeddingShortCut"); 
 
   //  StRTSClientFCF *fcfMk = (StRTSClientFCF *) chain3->GetMaker("");
   //  fcfMk->SetMode("0x1");

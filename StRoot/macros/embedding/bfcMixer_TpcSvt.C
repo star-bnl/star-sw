@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcSvt.C,v 1.4 2009/02/23 20:58:03 fisyak Exp $
+// $Id: bfcMixer_TpcSvt.C,v 1.5 2010/02/18 23:55:30 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -27,7 +27,7 @@ void bfcMixer_TpcSvt(const Int_t Nevents=100,Int_t isSvtIn=1, Int_t isSsdIn=0,
   TString chain2Opt("NoInput PrepEmbed gen_T geomT sim_T trs -ittf -tpc_daq nodefault");
   chain2Opt += " "; chain2Opt += geomP07ib;
   TString chain3Opt = prodP07ib;
-  chain3Opt += " Embedding onlraw GeantOut MiniMcMk McAna -in NoInput,useInTracker"; 
+  chain3Opt += " Embedding onlraw GeantOut MiniMcMk McAna -in NoInput,useInTracker EmbeddingShortCut"; 
   if (isSvtIn) chain3Opt += " SvtEmbed";
   chain3Opt += " "; chain3Opt += geomP07ib;
   // Dynamically link some shared libs
