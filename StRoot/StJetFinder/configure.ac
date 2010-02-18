@@ -1,6 +1,6 @@
 # Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 
-AC_INIT(StJetFinder, 1.0.0)
+AC_INIT(StJetFinder, 1.0.1)
 AM_INIT_AUTOMAKE
 
 #AC_DISABLE_SHARED
