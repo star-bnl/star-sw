@@ -43,6 +43,10 @@ headers = \
 	StProtoJet.h \
 	StProtoJetPair.h
 
+
+library_includedir=$(includedir)/StJetFinder
+library_include_HEADERS = $(headers)
+
 lib_LTLIBRARIES = libStJetFinder.la
 
 libStJetFinder_la_SOURCES = $(sources) $(headers) StJetFinderLinkDef.h
