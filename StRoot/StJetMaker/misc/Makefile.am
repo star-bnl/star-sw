@@ -8,6 +8,9 @@ headers = \
 	StjFourVecForJetFinder.h \
 	StjRunJetFinder.h
 
+library_includedir=$(includedir)/StJetMaker
+library_include_HEADERS = $(headers)
+
 lib_LTLIBRARIES = libStJetMakerMisc.la
 
 libStJetMakerMisc_la_SOURCES = $(sources) $(headers) MiscLinkDef.h

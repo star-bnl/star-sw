@@ -41,6 +41,9 @@ headers	= \
 	StjTrgSoftPass.h \
 	StjTrgTree.h
 
+library_includedir=$(includedir)/StJetMaker
+library_include_HEADERS = $(headers)
+
 lib_LTLIBRARIES = libStJetMakerTrigger.la
 
 libStJetMakerTrigger_la_SOURCES = $(sources) $(headers) TriggerLinkDef.h

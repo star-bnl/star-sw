@@ -34,6 +34,8 @@ headers	= \
 	StjDijetListTriggerBJP.h \
 	StjDijetListTriggerBHT.h
 
+library_includedir=$(includedir)/StJetMaker
+library_include_HEADERS = $(headers)
 
 lib_LTLIBRARIES = libStJetMakerDijets.la
 

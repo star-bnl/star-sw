@@ -32,6 +32,9 @@ headers	= \
 	StjJetVariationTrack.h \
 	StjJetPrint.h
 
+library_includedir=$(includedir)/StJetMaker
+library_include_HEADERS = $(headers)
+
 lib_LTLIBRARIES = libStJetMakerJets.la
 
 libStJetMakerJets_la_SOURCES = $(sources) $(headers) JetsLinkDef.h

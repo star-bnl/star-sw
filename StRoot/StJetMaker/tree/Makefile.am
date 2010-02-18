@@ -51,6 +51,9 @@ headers	= \
 	StjVertexWriter.h
 
 
+library_includedir=$(includedir)/StJetMaker
+library_include_HEADERS = $(headers)
+
 lib_LTLIBRARIES = libStJetMakerTree.la
 
 libStJetMakerTree_la_SOURCES = $(sources) $(headers) TreeLinkDef.h

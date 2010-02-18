@@ -53,6 +53,9 @@ headers	= \
 	StjTowerEnergyVariationEnergy.h
 
 
+library_includedir=$(includedir)/StJetMaker
+library_include_HEADERS = $(headers)
+
 lib_LTLIBRARIES = libStJetMakerTowers.la
 
 libStJetMakerTowers_la_SOURCES = $(sources) $(headers) TowersLinkDef.h

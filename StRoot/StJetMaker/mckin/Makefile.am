@@ -6,6 +6,9 @@ sources	= \
 headers	= \
 	StjMCKin.h
 
+library_includedir=$(includedir)/StJetMaker
+library_include_HEADERS = $(headers)
+
 lib_LTLIBRARIES = libStJetMakerMckin.la
 
 libStJetMakerMckin_la_SOURCES = $(sources) $(headers) MckinLinkDef.h

@@ -8,6 +8,9 @@ headers	= \
 	StjSpin.h \
 	StjSpinTree.h
 
+library_includedir=$(includedir)/StJetMaker
+library_include_HEADERS = $(headers)
+
 lib_LTLIBRARIES = libStJetMakerSpin.la
 
 libStJetMakerSpin_la_SOURCES = $(sources) $(headers) SpinLinkDef.h

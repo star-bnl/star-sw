@@ -38,6 +38,8 @@ headers	= \
 	StjTrackToTLorentzVector.h \
 	StjTrackTowerEnergyListToFourVecList.h
 
+library_includedir=$(includedir)/StJetMaker
+library_include_HEADERS = $(headers)
 
 lib_LTLIBRARIES = libStJetMakerTracks.la
 

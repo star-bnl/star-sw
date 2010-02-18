@@ -30,6 +30,9 @@ headers	= \
 	StjMCParticleToFourVec.h \
 	StjMCTree.h
 
+library_includedir=$(includedir)/StJetMaker
+library_include_HEADERS = $(headers)
+
 lib_LTLIBRARIES = libStJetMakerMcparticles.la
 
 libStJetMakerMcparticles_la_SOURCES = $(sources) $(headers) McparticlesLinkDef.h

@@ -8,6 +8,9 @@ headers	= \
 	StjVertex.h \
 	StjVertexTree.h
 
+library_includedir=$(includedir)/StJetMaker
+library_include_HEADERS = $(headers)
+
 lib_LTLIBRARIES = libStJetMakerVertex.la
 
 libStJetMakerVertex_la_SOURCES = $(sources) $(headers) VertexLinkDef.h
