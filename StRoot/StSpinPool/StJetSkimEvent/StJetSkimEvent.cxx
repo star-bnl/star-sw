@@ -1,11 +1,9 @@
-
 //StJetSkimEvent.cxx
 //M.L. Miller (MIT)
 //12/06
 
 #include <iostream>
 #include <string>
-using namespace std;
 
 //local
 #include "StJetSkimEvent.h"
