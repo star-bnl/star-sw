@@ -1,3 +1,4 @@
+// -*- mode:c++ -*-
 //StJetSkimEvent
 //M.L. Miller (MIT)
 //12/06
@@ -15,7 +16,8 @@
 class StPythiaEvent;
 
 #include <map>
-using std::map;
+
+using namespace std;
 
 class StJetSkimTrigHeader : public TObject
 {
