@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.8 2009/03/16 13:41:45 fisyak Exp $
+ * $Id: StTpcHitMaker.h,v 1.9 2010/02/19 23:36:08 fisyak Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.9  2010/02/19 23:36:08  fisyak
+ * Add hit Id
+ *
  * Revision 1.8  2009/03/16 13:41:45  fisyak
  * Switch to new scheme (avoid legacy) for TPX cluster reading
  *
@@ -83,7 +86,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
   tpc_t   *fTpc;
   Short_t  ADCs[512];
   UShort_t IDTs[512];
-
+  UShort_t fId; // current cluster Id
  protected:
   StTpcHit *CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t row);
   StTpcHit *CreateTpcHit(const daq_cld  &cluster, Int_t sector, Int_t row);

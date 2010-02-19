@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.14 2010/01/12 22:55:17 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.15 2010/02/19 23:36:08 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -118,10 +118,10 @@ Int_t StTpcRTSHitMaker::Make() {
   Int_t maxSector = IAttr("maxSector");
   Int_t minRow    = IAttr("minRow");
   Int_t maxRow    = IAttr("maxRow");
-  Int_t Id = 0;
   for (Int_t sec = minSector; sec <= maxSector; sec++) {
     StTpcDigitalSector *digitalSector = tpcRawData->GetSector(sec);
     if (! digitalSector) continue;
+    UShort_t Id = 0;
     daq_dta *dta = fTpx->put("adc_sim"); // used for any kind of data; transparent pointer
     Int_t nup = 0;
     Int_t NoAdcs = 0;
@@ -225,10 +225,10 @@ Int_t StTpcRTSHitMaker::Make() {
 	Double_t q = ADC2GeV*dta->sim_cld[i].cld.charge;
 	Id++;
 	StTpcHit *hit = new StTpcHit(global.position(),hard_coded_errors,hw,q
-				     , (unsigned char ) 0  // counter 
-				     , (unsigned short) dta->sim_cld[i].track_id  // idTruth=0
-				     , (unsigned short) dta->sim_cld[i].quality   // quality=0,
-				     , (unsigned short) Id  // id =0,
+				     , (UChar_t ) 0  // counter 
+				     , (UShort_t) dta->sim_cld[i].track_id  // idTruth=0
+				     , (UShort_t) dta->sim_cld[i].quality   // quality=0,
+				     , Id                                   // id =0,
 				     , dta->sim_cld[i].cld.p1 //  mnpad
 				     , dta->sim_cld[i].cld.p2 //  mxpad
 				     , dta->sim_cld[i].cld.t1 //  mntmbk
