@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.7 2010/02/16 02:13:34 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.8 2010/02/19 18:06:39 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.8  2010/02/19 18:06:39  hmasui
+ * Change the vertex range to +/-200 cm for vz histograms
+ *
  * Revision 1.7  2010/02/16 02:13:34  hmasui
  * Add parent-parent geant id in the histogram name
  *
@@ -199,8 +202,8 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
   StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
 
   // Event-wise informations
-  mhVz         = new TH1D("hVz", "z-vertex", 100, -50, 50);
-  mhVzAccepted = new TH1D("hVzAccepted", "z-vertex with z-vertex cut", 100, -50, 50);
+  mhVz         = new TH1D("hVz", "z-vertex", 400, -200, 200);
+  mhVzAccepted = new TH1D("hVzAccepted", "z-vertex with z-vertex cut", 400, -200, 200);
   mhVz->SetXTitle("v_{z} (cm)");
   mhVzAccepted->SetXTitle("v_{z} (cm)");
 
