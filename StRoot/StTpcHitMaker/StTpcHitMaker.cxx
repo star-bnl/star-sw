@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.21 2010/01/12 22:54:36 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.22 2010/02/19 23:36:08 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.22  2010/02/19 23:36:08  fisyak
+ * Add hit Id
+ *
  * Revision 1.21  2010/01/12 22:54:36  fisyak
  * Propagate flags from online clustering into StEvent
  *
@@ -180,6 +183,7 @@ Int_t StTpcHitMaker::Make() {
   Int_t maxRow    = IAttr("maxRow");
   
   for (Int_t sector = minSector; sector <= maxSector; sector++) {
+    fId = 0;
     // invoke tpcReader to fill the TPC DAQ sector structure
     TString cldadc("cld");
     if ( kMode==kTpxRaw || kMode == kTpcRaw) cldadc = "adc";
@@ -327,13 +331,13 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
   Double_t gain = (row<=13) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
   Double_t wire_coupling = (row<=13) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
   Double_t q = cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * 
-				   (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
+				 (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 
   StTpcHit *hit = new StTpcHit(global.position(),hard_coded_errors,hw,q
-            , (unsigned char ) 0  // c
-            , (unsigned short) 0  // idTruth=0
-            , (unsigned short) 0  // quality=0,
-            , (unsigned short) 0  // id =0,
+            , (UChar_t ) 0  // c
+            , (UShort_t) 0  // idTruth=0
+            , (UShort_t) 0  // quality=0,
+            , ++fId         // id
             , cluster.p1 //  mnpad
             , cluster.p2 //  mxpad
             , cluster.t1 //  mntmbk
@@ -380,10 +384,10 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   static StThreeVector<double> hard_coded_errors(fgDp,fgDt,fgDperp);
 
   StTpcHit *hit = new StTpcHit(global.position(),hard_coded_errors,hw,q
-            , (unsigned char ) 0  // c
-            , (unsigned short) 0  // idTruth=0
-            , (unsigned short) 0  // quality=0,
-            , (unsigned short) 0  // id =0,
+            , (UChar_t ) 0  // c
+            , (UShort_t) 0  // idTruth=0
+            , (UShort_t) 0  // quality=0,
+            , ++fId         // id =0
             , cluster.p1 //  mnpad
             , cluster.p2 //  mxpad
             , cluster.t1 //  mntmbk
