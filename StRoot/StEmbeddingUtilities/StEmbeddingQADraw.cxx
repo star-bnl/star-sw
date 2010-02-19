@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.10 2010/02/16 02:14:03 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.11 2010/02/19 18:07:45 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.11  2010/02/19 18:07:45  hmasui
+ * Divide runlist into two different pads
+ *
  * Revision 1.10  2010/02/16 02:14:03  hmasui
  * Print PDF file only for all QA plots
  *
@@ -739,22 +742,41 @@ Bool_t StEmbeddingQADraw::drawRunEventId() const
   hEventId->Draw();
 
   /// List of run id
-  mMainPad->cd(3);
-  TPaveText* runlist = new TPaveText(0.1, 0.2, 0.9, 0.8);
-  runlist->SetTextFont(42);
-  runlist->SetTextSize(0.05);
-  runlist->SetBorderSize(1);
-  runlist->SetFillColor(10);
-  runlist->AddText("Run id         statistics");
+  TPaveText* runlist[2];
+  for(Int_t i=0;i<2;i++){
+    runlist[i] = new TPaveText(0.1, 0.05, 0.9, 0.95);
+    runlist[i]->SetTextFont(42);
+    runlist[i]->SetTextSize(0.04);
+    runlist[i]->SetBorderSize(1);
+    runlist[i]->SetFillColor(10);
+    runlist[i]->AddText("Run id         statistics");
+  }
 
+  // Count total number of runs
+  Int_t runTotal = 0 ;
+  for(Int_t irun=0; irun<hRunNumber->GetNbinsX(); irun++){
+    if(hRunNumber->GetBinContent(irun+1)>0.0) runTotal++;
+  }
+
+  Int_t runAccepted = 0 ;
   for(Int_t irun=0; irun<hRunNumber->GetNbinsX(); irun++){
     const Double_t count = hRunNumber->GetBinContent(irun+1);
     if(count==0.0) continue ;
 
+    Int_t pad = 0;
+    if( runTotal < 10 ) pad = 0;
+    else                pad = (runAccepted<10) ? 0 : 1 ;
     const Int_t runid = StEmbeddingQAUtilities::instance()->getRunId((Int_t)hRunNumber->GetBinLowEdge(irun+1), mYear);
-    runlist->AddText(Form("%10d  %10d events", runid, (Int_t)count));
+    runlist[pad]->AddText(Form("%10d  %10d events", runid, (Int_t)count));
+
+    runAccepted++ ;
   }
-  runlist->Draw();
+
+  mMainPad->cd(3) ;
+  runlist[0]->Draw();
+
+  mMainPad->cd(4) ;
+  runlist[1]->Draw();
 
   mCanvas->cd();
   mCanvas->Update();
