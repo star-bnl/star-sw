@@ -1,4 +1,4 @@
-// $Id: St2009pubMcMaker.cxx,v 1.3 2010/02/18 19:48:10 stevens4 Exp $
+// $Id: St2009pubMcMaker.cxx,v 1.4 2010/02/19 21:04:10 stevens4 Exp $
 //
 //*-- Author : Justin Stevens, IUCF
 // 
@@ -265,8 +265,8 @@ St2009pubMcMaker::doMCanalysis(){
 
   //initialize momentum vectors
   StThreeVectorF pW;        float eW;
-  StThreeVectorF pNeutrino; float eNeutrino;
-  StThreeVectorF pElectron; float eElectron;
+  StThreeVectorF pNeutrino; //float eNeutrino;
+  StThreeVectorF pElectron; //float eElectron;
 
   StMcVertex *V=mMcEvent->primaryVertex(); 
   mVertex=TVector3(V->position().x(),V->position().y(),V->position().z());
@@ -276,7 +276,7 @@ St2009pubMcMaker::doMCanalysis(){
   while(found<2 && i<mMcEvent->tracks().size()){//loop tracks
     StMcTrack* mcTrack = mMcEvent->tracks()[i];
     int pdgId=mcTrack->pdgId();
-    float pt=mcTrack->pt();
+    //float pt=mcTrack->pt();
     //LOG_INFO<<"pdgId "<<pdgId<<" pt "<<pt<<" pz "<<mcTrack->momentum().z()<<endm;
     if(pdgId==11 || pdgId==-11){ //select e+ and e-
       if(abs(mcTrack->parent()->pdgId()) == 24 ){ 
@@ -328,6 +328,9 @@ St2009pubMcMaker::doMCanalysis(){
 }
 
 // $Log: St2009pubMcMaker.cxx,v $
+// Revision 1.4  2010/02/19 21:04:10  stevens4
+// cleanup unused variables
+//
 // Revision 1.3  2010/02/18 19:48:10  stevens4
 // add more effic histograms and cleanup
 //
