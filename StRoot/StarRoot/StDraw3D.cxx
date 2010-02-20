@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.90 2010/02/11 21:59:35 fine Exp $
+// $Id: StDraw3D.cxx,v 1.91 2010/02/20 08:36:44 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -289,6 +289,7 @@ TVirtualPad *StDraw3D::InitPad()
       fPad->SetFillColor(fBkColor);
       fPad->Modified();
       fPad->Update();
+      fPad->GetCanvas()->GetCanvasImp()->Iconify();
    }
    return Pad();
 }
