@@ -1,4 +1,4 @@
-// $Id: StDataReadModule.h,v 1.7 2009/12/28 08:31:33 fine Exp $
+// $Id: StDataReadModule.h,v 1.8 2010/02/20 10:51:19 fine Exp $
 
 #ifndef STAR_StDataReadModule
 #define STAR_StDataReadModule
@@ -106,6 +106,13 @@ class StDataReadModule : public TModule {
     Bool_t   fDemo; //< Demo mode: re-open the file after end-of-file
     Bool_t   fRecording; //< The status of the record mode
     Bool_t   fSuspendRecording; //< The suspend recording temporary
+    //! time to process the entire Event
+    TStopwatch  *fMakeEventTimer; 
+    //! Time  to update the image. 
+    TStopwatch  *fUpdateTimer; 
+    TStopwatch  *fMakeEmcHitsTimer; 
+    TStopwatch  *fMakeTracksTimer; 
+    TStopwatch  *fMakeTpcHitsTimer; 
     
     void ClearTracks(Option_t *);
     void ClearHits(Option_t *);
@@ -123,7 +130,7 @@ public:
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StDataReadModule.h,v 1.7 2009/12/28 08:31:33 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StDataReadModule.h,v 1.8 2010/02/20 10:51:19 fine Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   

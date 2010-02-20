@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.25 2009/12/28 08:31:33 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.26 2010/02/20 10:51:19 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -20,6 +20,7 @@
 #include "StEvpReader.h"
 #include "StDraw3D.h"
 #include "StMemStat.h"
+#include "TRandom.h"
 
 #include "Riostream.h"
 #include "TCanvas.h"
@@ -36,7 +37,7 @@
 #include "StTpcDb/StTpcDbMaker.h"
 #include "StDbUtilities/StCoordinates.hh"
 #include "StDbUtilities/StTpcPadCoordinate.hh"
-
+#include "TQtUtil.h"
 #include "StEventUtilities/StuDraw3DEvent.h"
 
 #include "DAQ_TPC/daq_tpc.h"
@@ -117,7 +118,8 @@ StDataReadModule::StDataReadModule(const char *name):TModule(name)
 , fL3TracksOn(0),fEmcHitsOn(1),fL3HitsOn(1),fBemcOnlineStatus(),fRecordReady(kFALSE)
 , fEmcDataLength(),fTracks(),fHits(),fGuiObject(),fTpc(),fBtow(),fEmc_in(),fLengthBtow()
 , fEventDisplay(), fDemo(kFALSE),fRecording (kFALSE),fSuspendRecording(kTRUE)
-
+, fMakeEventTimer(), fUpdateTimer(), fMakeEmcHitsTimer(), fMakeTracksTimer()
+, fMakeTpcHitsTimer() 
 {
   //
    Int_t lookUpSize = sizeof(fDeLookUp);
@@ -163,6 +165,11 @@ StDataReadModule::~StDataReadModule()
       fEventPoolReader = 0;
    }
    delete fEventDisplay; fEventDisplay = 0;
+   delete fMakeEventTimer; 
+   delete fUpdateTimer; 
+   delete fMakeEmcHitsTimer; 
+   delete fMakeTracksTimer; 
+   delete fMakeTpcHitsTimer; 
 }
 //_____________________________________________________________________________
 StuDraw3DEvent  *StDataReadModule::Display()
@@ -256,9 +263,18 @@ Int_t StDataReadModule::Make()
    }
    MakeTitle(retStatus);
    if ( retStatus == kStOk )  {
-       Display()->Update();
+      Display()->Update();
+      // disable the TCanvas update
+      TVirtualPad  *p =Display()->Pad();
+      bool init = false;
+      if (p && !init) {
+         QWidget *qw = TQtUtil::canvasWidget(p);
+         if (qw) {
+            init = true;
+            qw->setUpdatesEnabled(false);
+         }
+      }
    }
-
    return retStatus;
 }
 //_____________________________________________________________________________
@@ -272,7 +288,7 @@ Int_t StDataReadModule::MakeEmcHits()
 #ifndef CONTROLROOM
        dr /= 4;
 #endif 
-       if (dr > 0.1) {
+       if (dr > 0.2) {
           Display()->EmcHit(i,colorAttribute,4070,dr);
           Display()->SetComment(fSizeProvider->GetObjectInfo(i,0));
        }
@@ -292,48 +308,61 @@ Int_t StDataReadModule::MakeEvent()
    //
    //   Read emc hits
    //
-    if (fEmcHitsOn)
-    {
-       readerName = "Emc";
-       fEmcDataLength = EmcReader(); 
-       counter +=  fEmcDataLength >0 ? fEmcDataLength : 0;
-  	    fprintf(stderr,"%s:  %d bytes...\n", readerName, counter);
-       MakeEmcHits();
-    }
+   if (fEmcHitsOn)
+   {
+      if (!fMakeEmcHitsTimer) fMakeEmcHitsTimer = new TStopwatch;
+      fMakeEmcHitsTimer->Start(kFALSE);
+
+      readerName = "Emc";
+      fEmcDataLength = EmcReader(); 
+      counter +=  fEmcDataLength >0 ? fEmcDataLength : 0;
+      fprintf(stderr,"%s:  %d bytes...\n", readerName, counter);
+      MakeEmcHits();
+      fMakeEmcHitsTimer->Stop();
+   }
 
    //
    //   Read l3 tracks 
    //
    if (fL3TracksOn) {
+      if (!fMakeTracksTimer) fMakeTracksTimer = new TStopwatch;
+      fMakeTracksTimer->Start(kFALSE);
+
       readerName = "L3";
       int l3Counter = 0;
       if (L3Reader() == kStOk) {
-          l3Counter = MakeTracks();
+         l3Counter = MakeTracks();
       }
 
       // Check status
       if (l3Counter == 0) 
-          fprintf(stderr,"%s: not present...\n", readerName);
+         fprintf(stderr,"%s: not present...\n", readerName);
       else if (l3Counter   < 0) 
-          fprintf(stderr,"%s: problems in data (%d)...\n", readerName,l3Counter);
+         fprintf(stderr,"%s: problems in data (%d)...\n", readerName,l3Counter);
       else {
          fprintf(stderr,"%s:  %d bytes...\n", readerName, l3Counter);
          counter += l3Counter;
       }
-    }
-    if (fL3HitsOn) {
+      fMakeTracksTimer->Stop();
+
+   }
+   if (fL3HitsOn) {
+      if (!fMakeTpcHitsTimer) fMakeTpcHitsTimer = new TStopwatch;
+      fMakeTpcHitsTimer->Start(kFALSE);
+
       readerName = "tpc";
       int l3HitsCount = MakeTpcHits();
       if (l3HitsCount == 0 ) 
-                 fprintf(stderr,"%s: hits were not present...\n", readerName);
+         fprintf(stderr,"%s: hits were not present...\n", readerName);
       else if (l3HitsCount > 0 ) 
-                 fprintf(stderr,"%s: %d hits were rendered...\n", readerName,l3HitsCount );
-  
+         fprintf(stderr,"%s: %d hits were rendered...\n", readerName,l3HitsCount );
       counter += l3HitsCount;
-    }
-//    if (counter > 0) 
-//    MakeTitle();
-    return  ( counter > 0) ? kStOK : kStErr;
+      fMakeTpcHitsTimer->Stop();
+
+   }
+   //    if (counter > 0) 
+   //    MakeTitle();
+   return  ( counter > 0) ? kStOK : kStErr;
 }
 
 //_____________________________________________________________________________
@@ -485,36 +514,36 @@ int StDataReadModule::L3Reader()
 int StDataReadModule::MakeTpcHits()
 { 
    UInt_t nHits = 0; 
+   static TRandom rnd;
    if (fDataP) {
-      vector<float> &hittxyz = fHittxyz;
-      hittxyz.clear();
       // if (hittxyz.capacity() < TPC_READER_MAX_CLUSTERS) hittxyz.reserve(TPC_READER_MAX_CLUSTERS);
       daqReader *reader = fDataP; // *fEventPoolReader;
-
       for(int sector=0;sector<24;sector++) {
          if ( tpcReader(reader,  sector) && tpc.has_clusters ) {
-         for(int row=0;row<45;row++) {
-           for(int j=0;j<tpc.cl_counts[row];j++) {
-              float x,y,z;
-              tpc_cl *c = &tpc.cl[row][j];
-              int time = int(c->t);
-              tpc_hit_postion(sector+1,row+1,*c, x, y,z);
-              if (time) {
-                 // skip next hit
-                 hittxyz.push_back(x); hittxyz.push_back(y); hittxyz.push_back(z);
-              }
-          }
-        }}
-     }
-
-     nHits = hittxyz.size()/3;
-     if (nHits) {
-        Display()->Points(fHittxyz, 17,8,0.12);
-        TString info = Form("<p><b>Total TPC hits: </b>%d",nHits );
-        Display()->SetComment(info.Data()) ;
-     }
-  }
-  return nHits;
+            vector<float> &hittxyz = fHittxyz;
+            hittxyz.clear();
+            for(int row=0;row<45;row++) {
+               int nClusters = tpc.cl_counts[row];
+//               int skip = 0.3*nClusters;
+               for(int j=0;j<nClusters;j+=4) {
+                  float x,y,z;
+                  tpc_cl *c = &tpc.cl[row][j];
+                  int time = int(c->t);
+                  tpc_hit_postion(sector+1,row+1,*c, x, y,z);
+                  if (time) 
+                     hittxyz.push_back(x); hittxyz.push_back(y); hittxyz.push_back(z);
+               }
+            }
+            nHits += hittxyz.size()/3;
+            if (nHits) {
+               Display()->Points(hittxyz, 1+24*rnd.Rndm(),8,0.12);
+               // TString info = Form("<p><b>Total TPC hits: </b>%d from %d sector",nHits,sector+1);
+               // Display()->SetComment(info.Data()) ;
+            }
+         }
+      }
+   }
+   return nHits;
 }
 
 //_____________________________________________________________________________
