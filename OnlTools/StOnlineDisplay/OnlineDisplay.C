@@ -2,8 +2,9 @@ class StSteeringModule;
 StSteeringModule *displayMaker=0;
 
 StSteeringModule *OnlineDisplay (const char *daqFile=
-      "st_physics_adc_10118050_raw_4320001.daq"
-      ) {
+      "st_physics_11029020_raw_1030002.daq"
+//      "st_physics_adc_10118050_raw_4320001.daq"     
+       ) {
 gROOT->Macro("Load.C");
 gSystem->Load("RTS");
 gSystem->Load("StTpcDb");
@@ -21,9 +22,9 @@ gSystem->Load("StOnlineDisplay");
  ds->SetDaqFileName(daqFile);
  ds->SetL3TracksOn(0);
  ds->SetL3HitsOn(1);
- ds->SetEmcHitsOn(1);
+ ds->SetEmcHitsOn(0);
  ds->SetMagneticField(0.5); 
- ds->SetDebug(4);
+//  ds->SetDebug(4);
  ds->Init();
  ds->Make();
  displayMaker=ds;

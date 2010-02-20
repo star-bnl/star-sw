@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.12 2009/12/28 08:31:33 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.13 2010/02/20 10:51:19 fine Exp $
 
 
 #include "StSteeringModule.h"
@@ -31,7 +31,7 @@
 
  */
 StSteeringModule::StSteeringModule(const char *name):TModule(name)
-, fAnimate(kFALSE),fAnimating(kFALSE)
+, fAnimate(-1),fAnimating(kFALSE)
 {
  // -----------------------------------
  //  St_db_Maker *dbMk = new St_db_Maker("dbName","MySQL:StarDb","$STAR/StarDb");
@@ -291,7 +291,7 @@ void  StSteeringModule::ResetConnection()
 //_____________________________________________________________________________
 void  StSteeringModule::StopEvents()
 {
-   Animate(kFALSE);
+   Animate(-1);
 //   if (fDataReadModule) fDataReadModule->StopEvents();
 }
 //_____________________________________________________________________________
@@ -307,19 +307,19 @@ void  StSteeringModule::Animating()
         Clear();
         int res = Make();
     if ( (res == kStOk) || (res == kStERR) ) {
-       if (gPad) gPad->Update();
+       //if (gPad) gPad->Update();
        QCoreApplication::processEvents();
     } else {
        StopEvents();
     }
   fAnimating = kFALSE; 
-  if (fAnimate) Animate();
+  Animate(fAnimate);
 }
 //_____________________________________________________________________________
-void  StSteeringModule::Animate(Bool_t on) 
+void  StSteeringModule::Animate(Int_t ms) 
 {
-  fAnimate = on;
-  if (fAnimate )  QTimer::singleShot(800, this, SLOT(Animating())); 
+  fAnimate = ms;
+  if (fAnimate>=0)  QTimer::singleShot(fAnimate, this, SLOT(Animating())); 
 }
 
 //_____________________________________________________________________________
