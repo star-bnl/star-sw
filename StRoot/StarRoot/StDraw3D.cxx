@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.91 2010/02/20 08:36:44 fine Exp $
+// $Id: StDraw3D.cxx,v 1.92 2010/02/21 08:30:44 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -1164,7 +1164,10 @@ TObject *StDraw3D::Tower(float radius
 */
 //__________________________________________________________________________________________
 TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda2, float phi,float dphi, Color_t col,Style_t sty, Size_t siz)
-{ 
+{   
+   if (gGeometry) {
+       gGeometry->GetListOfMatrices()->Clear();
+   }
    if (lambda2-lambda1 < 0 ) {
        Warning("StDraw3D::Tower", "The illegal negative value for dlambda = %f", lambda2-lambda1);
        float swp = lambda1;
