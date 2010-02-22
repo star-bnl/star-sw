@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.7 2010/01/27 23:02:57 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.8 2010/02/22 02:28:51 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -232,11 +232,15 @@ int StTGeoHelper::IsActive (StDetectorId did) const
   return ((fActiveModu & ((Long64_t)1)<<did)!=0);
 }
 //_____________________________________________________________________________
-int StTGeoHelper::IsActive () const
+int StTGeoHelper::IsActive (const TGeoVolume *volu) const
 {
- const TGeoVolume *mod = GetModu();  
- if (!mod) return 0;
- return (IsFlag(mod,StVoluInfo::kActive));
+ if (volu) {
+   return (IsFlag(volu,StVoluInfo::kActive));
+ } else {
+   const TGeoVolume *modu = GetModu();  
+   if (!modu) return 0;
+   return (IsFlag(modu,StVoluInfo::kActive));
+ }
 }
 //_____________________________________________________________________________
 StVoluInfo *StTGeoHelper::SetFlag(const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg,int act)
@@ -321,6 +325,10 @@ void StTGeoHelper::InitHitPlane()
   StTGeoIter it;
   const TGeoVolume *vol=0;
   for (;(vol=*it);++it) {
+    if (IsModule(vol)) {
+      if (!IsMODULE(vol)) {it.Skip();continue;}
+      if (!IsActive(vol)) {it.Skip();continue;}
+    }
     vol->GetShape()->ComputeBBox();
 //		First visit
     if (!it.IsFirst()) continue;		//First visit only
@@ -331,6 +339,10 @@ void StTGeoHelper::InitHitPlane()
 
   it.Reset();
   for (;(vol=*it);++it) {
+    if (IsModule(vol)) {
+      if (!IsMODULE(vol)) {it.Skip();continue;}
+      if (!IsActive(vol)) {it.Skip();continue;}
+    }
     if (!it.IsFirst()) 	continue;	//First visit only
     StHitPlaneInfo *ghp = IsHitPlane(vol);
     if (!ghp) 		continue;
@@ -338,6 +350,38 @@ void StTGeoHelper::InitHitPlane()
     
   }
 
+}
+//_____________________________________________________________________________
+int StTGeoHelper::SetHitErrCalc(StDetectorId modId,TNamed *hitErrCalc
+                               ,const StTGeoSele *sel)
+
+{
+  assert(IsActive(modId));
+  const char *modu = ModName(modId);
+  assert(modu);
+  int kount=0;
+  StTGeoIter it;
+  const TGeoVolume *vol=0;
+  for (;(vol=*it);++it) {
+    if (!it.IsFirst()) 				continue;
+    if (IsModule(vol)) {
+      if (!IsMODULE(vol)) 		{it.Skip();continue;}
+      if (!IsActive(vol)) 		{it.Skip();continue;}
+      if (strcmp(modu,vol->GetName()))	{it.Skip();continue;}
+    }
+    StHitPlaneInfo* hpi = IsHitPlane(vol);
+    if (!hpi) 					continue;
+    StHitPlane* hp = hpi->GetHitPlane (it.GetPath()); 
+    assert(hp);
+    if (hp->GetHitErrCalc()==hitErrCalc) 	continue;
+    if (sel) {//check selector
+      const TGeoNode *node = it.GetNode();
+      if (!sel->Select(it.GetPath(),node->GetNumber(),hp->GetPnt()))	continue;
+    }
+    hp->SetHitErrCalc(hitErrCalc);
+    kount++;
+  }
+  return kount;
 }
 //_____________________________________________________________________________
 StTGeoHelper::~StTGeoHelper()
@@ -746,6 +790,7 @@ StHitPlane *StHitPlaneInfo::MakeHitPlane(const StTGeoIter &it)
     pnt[0] = rMed*cos(pMed); 
     pnt[1] = rMed*sin(pMed); 
     it.LocalToMaster(pnt, ht->fPnt);
+    ht->fRmed = rMed;
   }
   return hp;
 }
@@ -830,6 +875,16 @@ static float myDir[3][3];
   return myDir;
 }
 //_____________________________________________________________________________
+const float *StHitTube::GetOrg(const float *hit) const 
+{
+static float myOrg[3];
+  TCL::vsub(hit,fOrg,myOrg,3);
+  float fak = TCL::vdot(myOrg,myOrg,3);
+  TCL::vlinco(myOrg,fRmed/fak,fOrg,1.,myOrg,3);
+  return myOrg;
+}
+  
+
 //_____________________________________________________________________________
   enum {kEND,kDOWN,kNEXT,kUPP};
 //_____________________________________________________________________________
@@ -864,6 +919,11 @@ StTGeoIter &StTGeoIter::Down()
 StTGeoIter &StTGeoIter::Next()
 {
   fKase = kNEXT; return ++(*this);
+}
+//_____________________________________________________________________________
+StTGeoIter &StTGeoIter::Skip()
+{
+  fKase = kNEXT; return (*this);
 }
 //_____________________________________________________________________________
 StTGeoIter &StTGeoIter::Upp()
