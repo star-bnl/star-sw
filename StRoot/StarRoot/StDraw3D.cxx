@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.92 2010/02/21 08:30:44 fine Exp $
+// $Id: StDraw3D.cxx,v 1.93 2010/02/22 11:42:56 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -113,7 +113,8 @@ namespace {
 //___________________________________________________
 class poly_line_3D : public TPolyLine3D, public view_3D {
    public:
-     poly_line_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyLine3D(n,p),view_3D(){;}
+     poly_line_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyLine3D(n,p),view_3D()
+     {  SetBit(kCanDelete);}
      virtual ~poly_line_3D(){;}
      virtual char  *GetObjectInfo(Int_t x, Int_t y) const
      {
@@ -137,7 +138,8 @@ class poly_line_3D : public TPolyLine3D, public view_3D {
 //___________________________________________________
 class poly_marker_3D : public TPolyMarker3D, public view_3D {
    public:
-     poly_marker_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyMarker3D(n,p,1,option),view_3D(){;}
+     poly_marker_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyMarker3D(n,p,1,option),view_3D()
+     {  SetBit(kCanDelete);}
      virtual ~poly_marker_3D(){;}
      virtual char  *GetObjectInfo(Int_t x, Int_t y) const
      {
@@ -162,9 +164,13 @@ class poly_marker_3D : public TPolyMarker3D, public view_3D {
 class volume_view_3D : public TVolume, public view_3D {
    public:
      volume_view_3D(const Text_t *name, const Text_t *title, TShape *shape, Option_t *option="")
-   : TVolume(name,title, shape,option),view_3D(){;}
-     volume_view_3D() : TVolume(),view_3D(){;}
-     virtual ~volume_view_3D(){;}
+   : TVolume(name,title, shape,option),view_3D()
+     {         SetBit(kCanDelete);     }
+     volume_view_3D() : TVolume(),view_3D()
+     {        SetBit(kCanDelete);        }
+     virtual ~volume_view_3D(){
+        if (fListOfShapes) fListOfShapes->Delete();
+ ;   }
      virtual char  *GetObjectInfo(Int_t x, Int_t y) const
      {
         const TString &customInfo = info();
@@ -397,6 +403,11 @@ void  StDraw3D::Clear(Option_t *opt)
    } else if ( TVirtualViewer3D *viewer = Viewer() ) {
       viewer->Clear();
    }
+   if (gGeometry) {
+       gGeometry->GetListOfMatrices()->Clear();
+       gGeometry->GetListOfShapes()->Delete();
+   }
+   TCollection::EmptyGarbageCollection();
 }
 
 //___________________________________________________
@@ -1166,7 +1177,7 @@ TObject *StDraw3D::Tower(float radius
 TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda2, float phi,float dphi, Color_t col,Style_t sty, Size_t siz)
 {   
    if (gGeometry) {
-       gGeometry->GetListOfMatrices()->Clear();
+      gGeometry->GetListOfMatrices()->Clear();
    }
    if (lambda2-lambda1 < 0 ) {
        Warning("StDraw3D::Tower", "The illegal negative value for dlambda = %f", lambda2-lambda1);
@@ -1210,8 +1221,12 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
    x2Far = TMath::Sqrt(y2Far*y2Far + zFar*zFar) * TMath::Tan(dphi/2); 
 
    float dy = TMath::Tan(lambda )*siz/2;
-      
-   TTRAP *trap = new TTRAP(  "CALO", Form("Angle%d",lambda)
+   
+   // to fight Rene Brun one has to assign an unique name fro each tower. Weird !
+   
+   // const char *towerName= gGeometry ? Form("CALO%d", gGeometry->GetListOfShapes()->GetSize()): "CALO";
+     
+   TTRAP *trap = new TTRAP( "CALO", Form("Angle%d",lambda)
          , "Barrel"                // Material
          , siz/2                   // dz
          , lambda*TMath::RadToDeg()// Float_t theta (ROOT needs degree)
@@ -1225,6 +1240,7 @@ TObject *StDraw3D::Tower(float radius, float lambda, float lambda1, float lambda
          , x2Far                   // Float_t tl2
          , 0                       // Float_t alpha2 (ROOT needs degree)
          );
+   if (gGeometry) gGeometry->GetListOfShapes()->Remove(trap);
    bool draw = false;
    if (!fTopVolume) {
        draw = true;
