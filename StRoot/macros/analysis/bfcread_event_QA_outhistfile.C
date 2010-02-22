@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QA_outhistfile.C,v 1.13 2008/03/07 19:26:11 genevb Exp $ 
+// $Id: bfcread_event_QA_outhistfile.C,v 1.14 2010/02/22 20:05:16 genevb Exp $ 
 // $Log: bfcread_event_QA_outhistfile.C,v $
+// Revision 1.14  2010/02/22 20:05:16  genevb
+// Using StTpcDbMaker now requires StMagFMaker
+//
 // Revision 1.13  2008/03/07 19:26:11  genevb
 // Ye olde loading of StdetectorDbMaker library change
 //
@@ -135,6 +138,7 @@ void bfcread_event_QA_outhistfile(
   St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB,calibDB2);
   calibMk->SetDateTime("year_2b");
   calibMk->SetDebug();  
+  StMagFMaker* magfMk = new StMagFMaker; // now required for StTpcDbMaker
   StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
 
 // constructor for other maker (not used in chain)

@@ -108,6 +108,7 @@ void run(const int firstEvt,
   // Create Makers
   StIOMaker            IOMaker("IOMaker","r",files,"bfcTree");
   St_db_Maker          dbMaker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
+  StMagFMaker          magfMk; // now required for StTpcDbMaker
   StTpcDbMaker         tpcDbMk("tpcDb");
   StDetectorDbMaker    detDbMk;
   StRedoTracks         redoMk;
@@ -182,8 +183,11 @@ void RedoSpaceCharge(const int NEvts,
 }
 
 //----------------------------------------------------------
-// $Id: RedoSpaceCharge.C,v 1.2 2005/08/31 15:02:43 fisyak Exp $
+// $Id: RedoSpaceCharge.C,v 1.3 2010/02/22 20:05:16 genevb Exp $
 // $Log: RedoSpaceCharge.C,v $
+// Revision 1.3  2010/02/22 20:05:16  genevb
+// Using StTpcDbMaker now requires StMagFMaker
+//
 // Revision 1.2  2005/08/31 15:02:43  fisyak
 // Add dependence StMagF vs StarMagField
 //
