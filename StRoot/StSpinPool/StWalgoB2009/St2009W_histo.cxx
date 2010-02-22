@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.11 2010/01/29 01:56:01 stevens4 Exp $
+// $Id: St2009W_histo.cxx,v 1.12 2010/02/22 15:49:34 seelej Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -249,7 +249,24 @@ St2009WMaker::initHistos(){
   hA[140]=h=new TH1F("muclustPtBalnoE",Form("PT Balance > %.1f && awaySide PT < %.1f (EEMC not included); 2x2 Cluster ET",par_ptBalance,par_awayTotET),100,0,100);
   hA[141]=h=new TH1F("muclustAwayPtnoE","AwaySide PT < 8 (EEMC not included); 2x2 Cluster ET",100,0,100);
   
-  // free 
+  // Histograms added for background subtraction and systematic
+  char str[200];
+  for (int i=0; i<20; i++) {
+    sprintf(str,"neg_failAwaySide_Awayside_pt_bin_%d",i);
+    hA[142+i] = new TH2F(str,str,100,0,100,20,0,20);
+  }
+
+  for (int i=0; i<20; i++) {
+    sprintf(str,"pos_failAwaySide_Awayside_pt_bin_%d",i);
+    hA[162+i] = new TH2F(str,str,100,0,100,20,0,20);
+  }
+
+  hA[182+2] = new TH1F("pos_muclustpTbal_wE","pos_muclustpTbal_wE",100,0,100);
+  hA[182+1] = new TH1F("neg_muclustpTbal_wE","neg_muclustpTbal_wE",100,0,100);
+  hA[182+4] = new TH1F("pos_muclustpTbal_noE","pos_muclustpTbal_noE",100,0,100);
+  hA[182+3] = new TH1F("neg_muclustpTbal_noE","neg_muclustpTbal_noE",100,0,100);
+  hA[182+6] = new TH1F("pos_muclustpTbal_back","pos_muclustpTbal_back",100,0,100);
+  hA[182+5] = new TH1F("neg_muclustpTbal_back","neg_muclustpTbal_back",100,0,100);
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
@@ -263,6 +280,9 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
+// Revision 1.12  2010/02/22 15:49:34  seelej
+// Joe : Changes to code for inclusion of background subtraction and systematic studies
+//
 // Revision 1.11  2010/01/29 01:56:01  stevens4
 // disable lepton track reco in TPC sector 20
 //

@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.11 2010/01/28 03:42:55 balewski Exp $
+// $Id: St2009W_algo.cxx,v 1.12 2010/02/22 15:49:34 seelej Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -37,6 +37,13 @@ St2009WMaker::find_W_boson(){
 	  hA[140]->Fill(T.cluster.ET);
 	if(T.awayTotET_noEEMC < 8)//old awayside pt cut
 	  hA[141]->Fill(T.cluster.ET);
+          if(T.ptBalance_noEEMC.Perp()>par_ptBalance && T.awayTotET_noEEMC<par_awayTotET) {
+          if (T.prMuTrack->charge() < 0) {
+            hA[182+3]->Fill(T.cluster.ET);
+          } else if (T.prMuTrack->charge() > 0) {
+            hA[182+4]->Fill(T.cluster.ET);
+          }
+        }
       }
 
       if(T.cluster.ET /T.nearTotET< par_nearTotEtFrac) continue; // too large nearET
@@ -55,6 +62,39 @@ St2009WMaker::find_W_boson(){
       hA[133]->Fill(T.awayTotET,T.ptBalance.Perp());
       hA[134]->Fill(T.cluster.ET,T.sPtBalance);
       hA[135]->Fill(T.awayTotET,T.sPtBalance);
+
+      for (int i=0; i<20; i++) {
+        float awayTot_cut = 10.+2.*((float) i);
+        for (int j=0; j<20; j++) {
+          float pTBal_cut = 5.+((float) j);
+          if (!(T.ptBalance.Perp()>pTBal_cut && T.awayTotET<awayTot_cut)) {
+            if (T.prMuTrack->charge() < 0) {
+              hA[142+i]->Fill(T.cluster.ET,j);
+            } else if (T.prMuTrack->charge() > 0) {
+              hA[162+i]->Fill(T.cluster.ET,j);
+            }
+          }
+        }
+      }
+
+      //plots for backg sub yield
+      if(T.ptBalance.Perp()>par_ptBalance && T.awayTotET<par_awayTotET) {
+        hA[136]->Fill(T.cluster.ET);//signal
+        hA[62]->Fill(T.pointTower.iEta ,T.cluster.energy);
+        if (T.prMuTrack->charge() < 0) {
+          hA[182+1]->Fill(T.cluster.ET);
+        } else if (T.prMuTrack->charge() > 0) {
+          hA[182+2]->Fill(T.cluster.ET);
+        }
+      } else {
+        hA[137]->Fill(T.cluster.ET);//background
+        if (T.prMuTrack->charge() < 0) {
+          hA[182+5]->Fill(T.cluster.ET);
+        } else if (T.prMuTrack->charge() > 0) {
+          hA[182+6]->Fill(T.cluster.ET);
+        }
+      }
+
 
       //plots for backg sub yield
       if(T.ptBalance.Perp()>par_ptBalance && T.awayTotET<par_awayTotET) {
@@ -499,6 +539,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.12  2010/02/22 15:49:34  seelej
+// Joe : Changes to code for inclusion of background subtraction and systematic studies
+//
 // Revision 1.11  2010/01/28 03:42:55  balewski
 // cleanup
 //
