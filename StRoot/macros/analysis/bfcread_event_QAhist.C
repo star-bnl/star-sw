@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QAhist.C,v 1.16 2008/03/07 19:26:11 genevb Exp $
+// $Id: bfcread_event_QAhist.C,v 1.17 2010/02/22 20:05:16 genevb Exp $
 // $Log: bfcread_event_QAhist.C,v $
+// Revision 1.17  2010/02/22 20:05:16  genevb
+// Using StTpcDbMaker now requires StMagFMaker
+//
 // Revision 1.16  2008/03/07 19:26:11  genevb
 // Ye olde loading of StdetectorDbMaker library change
 //
@@ -158,6 +161,7 @@ void bfcread_event_QAhist(
   const char* calibDB = "MySQL:StarDb";
   const char* calibDB2 = "$STAR/StarDb";
   St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB,calibDB2);
+  StMagFMaker* magfMk = new StMagFMaker; // now required for StTpcDbMaker
   //calibMk->SetDateTime("year_2b");
   calibMk->SetDebug();  
   StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
