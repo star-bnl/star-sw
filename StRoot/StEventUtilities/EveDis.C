@@ -1,4 +1,4 @@
-// $Id: EveDis.C,v 1.4 2009/09/07 04:39:18 fine Exp $
+// $Id: EveDis.C,v 1.5 2010/02/22 06:11:49 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #ifndef __CINT__
@@ -109,7 +109,7 @@ void AddHits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, StTrackType typ
                   hitPoints.push_back( hit->position().z());
               }
 //--
-//-- PAY YOUR ATTENTION:  you  MUST call the "Points" to get your hits poistion renndred
+//-- PAY YOUR ATTENTION:  you  MUST call the "Points" to get your hits position rendred
 //
               std::vector<float>::iterator xyz = hitPoints.begin();
               Points(hitPoints.size()/3,&*xyz,trackColor,sty,siz);
