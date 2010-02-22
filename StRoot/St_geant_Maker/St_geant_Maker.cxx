@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.125 2010/01/07 19:16:24 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.126 2010/02/22 15:02:18 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.126  2010/02/22 15:02:18  fisyak
+// Clean up, fix bug #1860 by replacing skip => trig
+//
 // Revision 1.125  2010/01/07 19:16:24  perev
 // mArgs for agvolume is 9 now
 //
@@ -499,7 +502,7 @@
 #include "StMagF.h"
 #include "StMessMgr.h"
 #ifdef DetectorIndex
-#include "StarG2T2VMCMap.h"
+#include "StarDetectorMap.h"
 #endif
 #ifdef F77_NAME
 #define    geometry	 F77_NAME(geometry,GEOMETRY)
@@ -726,8 +729,10 @@ Int_t St_geant_Maker::Init(){
   if (m_geom_gdat)  {
     AddRunco(new St_geom_gdat(*m_geom_gdat));
   }
+#if 0
   BookHist();   // Create Histograms    
-  if (m_Mode%100 != 1 &&  IsActive() ) { // Mixer mode == 1 or reco - do not modify EvtHddr and MagF
+#endif
+  if (m_Mode%10 != 1 && IsActive() ) { // Mixer mode == 1 or reco - do not modify EvtHddr and MagF
     fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
     if (!fEvtHddr) {                            // Standalone run
       fEvtHddr = new StEvtHddr(m_ConstSet);
@@ -761,7 +766,7 @@ Int_t St_geant_Maker::Init(){
       }
       gMessMgr->Info()  << "St_geant_Maker::Init mfscale = " << mfscale		       << endm;
       struct Field_t {
-	const char *name;
+	const Char_t *name;
 	Float_t scale;
       };
       const Field_t FieldOptions[5] = {
@@ -798,38 +803,38 @@ Int_t St_geant_Maker::Init(){
   }
   // Kinematics
   if (fInputFile == "" && IsActive()) {// default
-      Do("subevent 0;");
-      // gkine #particles partid ptrange yrange phirange vertexrange
-      Do("gkine        80      6    1. 1. -4. 4. 0 6.28      0. 0.;");
-      Do("mode g2tm prin 1;");
-      //  Do("next;");
-      //  Do("dcut cave z 1 10 10 0.03 0.03;");
-      if ((m_Mode/1000)%10 == 1) {// phys_off
-	gMessMgr->Info() << "St_geant_Maker::Init switch off physics" << endm;
-	Do("DCAY 0");
-	Do("ANNI 0");
-	Do("BREM 0");
-	Do("COMP 0");
-	Do("HADR 0");
-	Do("MUNU 0");
-	Do("PAIR 0");
-	Do("PFIS 0");
-	Do("PHOT 0");
-	Do("RAYL 0");
-	Do("LOSS 4"); // no fluctuations 
-	//  Do("LOSS 1"); // with delta electron above dcute
-	Do("DRAY 0");
-	Do("MULS 0");
-	Do("STRA 0");
-	//                                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
-	Do("CUTS     1e-3   1e-3   .001   .001   .001  .001  .001  1e-3  .001   .001 50.e-6");
-	Do("gclose all");
-	Do("physi");
-      }	
-      if (Debug() > 1) {
-	Do("debug on;");
-	Do("swit 2 2;");
-      }
+    Do("subevent 0;");
+    // gkine #particles partid ptrange yrange phirange vertexrange
+    Do("gkine        80      6    1. 1. -4. 4. 0 6.28      0. 0.;");
+    Do("mode g2tm prin 1;");
+    //  Do("next;");
+    //  Do("dcut cave z 1 10 10 0.03 0.03;");
+    if ((m_Mode/1000)%10 == 1) {// phys_off
+      gMessMgr->Info() << "St_geant_Maker::Init switch off physics" << endm;
+      Do("DCAY 0");
+      Do("ANNI 0");
+      Do("BREM 0");
+      Do("COMP 0");
+      Do("HADR 0");
+      Do("MUNU 0");
+      Do("PAIR 0");
+      Do("PFIS 0");
+      Do("PHOT 0");
+      Do("RAYL 0");
+      Do("LOSS 4"); // no fluctuations 
+      //  Do("LOSS 1"); // with delta electron above dcute
+      Do("DRAY 0");
+      Do("MULS 0");
+      Do("STRA 0");
+      //                                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
+      Do("CUTS     1e-3   1e-3   .001   .001   .001  .001  .001  1e-3  .001   .001 50.e-6");
+      Do("gclose all");
+      Do("physi");
+    }	
+    if (Debug() > 1) {
+      Do("debug on;");
+      Do("swit 2 2;");
+    }
   }
   return StMaker::Init();
 }
@@ -1687,7 +1692,7 @@ Int_t St_geant_Maker::Skip(Int_t Nskip)
 {
   if (Nskip >= 0) {
     Char_t kuip[20];
-    sprintf (kuip,"skip %i",Nskip);
+    sprintf (kuip,"trig %i",Nskip);
     if (GetDebug()) printf("St_geant_Maker skip %i\n record(s)",Nskip); 
     Do((const char*)kuip);
     
@@ -1842,10 +1847,11 @@ void St_geant_Maker::FillHist(){
   
   gMessMgr->Info() << "St_geant_Maker:: geant event vertex: " << 
     gvt->ge_x[0] << "\t" << gvt->ge_x[1] << "\t" << gvt->ge_x[2] << endm;
-  
+#if 0  
   m_histvx->Fill(gvt->ge_x[0]);
   m_histvy->Fill(gvt->ge_x[1]);
   m_histvz->Fill(gvt->ge_x[2]);
+#endif
 }
 //________________________________________________________________________________
 TGeoVolume* St_geant_Maker::Ag2Geom() { 
