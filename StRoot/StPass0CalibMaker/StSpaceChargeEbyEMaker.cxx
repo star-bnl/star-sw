@@ -827,10 +827,42 @@ void StSpaceChargeEbyEMaker::FillGapHists(StTrack* tri, StPhysicalHelixD& hh,
     while (hphi > TMath::Pi()/12.) hphi -= TMath::Pi()/6.;
     if (TMath::Abs(hphi) > 0.75*TMath::Pi()/12.) break;
 
-    gap += fsign * gsign * hh.geometricSignedDistance(hp.x(),hp.y());
     if (inGapRow==13) zgap += (hp.z() / 7.595) * ( prow == 14 ? 2.2 : 5.395 ); // ~z at gap
     else if (inGapRow==12) zgap += (hp.z() / 12.795) * ( prow == 14 ? 7.4 : 5.395 ); // ~z at gap
     else return;
+
+    // Measurement method described at:
+    // http://drupal.star.bnl.gov/STAR/blog/genevb/2010/feb/21/gridleak-update-using-residuals-along-padrows
+    Double_t residual = hh.geometricSignedDistance(hp.x(),hp.y());
+
+    UInt_t sec = hit->sector();
+    Double_t sector_angle = (TMath::Pi()/6.) * (sec < 13 ? 3 - sec : sec - 21);
+    Double_t pathlen = hh.pathLength(hp.x(),hp.y());
+    Double_t theta = TMath::ATan2(hh.cy(pathlen),hh.cx(pathlen)) - sector_angle;
+    Double_t phi = hp.phi() - sector_angle;
+
+    Double_t Eff1 = TMath::Cos(theta);
+    Double_t Eff2 = 1;
+    Double_t Eff3 = 0;
+
+    Float_t x1[3],x2[3];
+    x1[0] = hp.perp()*TMath::Sin(phi);
+    x1[1] = hp.perp()*TMath::Cos(phi);
+    x1[2] = hp.z();
+    m_ExB->Undo3DGridLeakDistortion(x1,x2);
+    Double_t dX = x2[0]-x1[0];
+    if (TMath::Abs(dX) > 1e-20) {
+      // warning: no available GridLeak calculation may lead
+      //   to slightly different results
+      Eff3 = gsign * ((x2[1]-x1[1])/dX) * TMath::Sin(theta);
+      x1[0] = 0;
+      m_ExB->Undo3DGridLeakDistortion(x1,x2);
+      Eff2 = (x2[0]-x1[0])/dX;
+    }
+
+    Double_t DistortionX = Eff2 * residual / (Eff1 + Eff3);
+ 
+    gap += fsign * gsign * DistortionX;
     ct++;
   }
 
@@ -968,8 +1000,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.26 2010/01/27 15:11:00 fisyak Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.27 2010/02/23 23:59:41 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.27  2010/02/23 23:59:41  genevb
+// Reduce positional biases in GridLeak measurements
+//
 // Revision 1.26  2010/01/27 15:11:00  fisyak
 // eliminate access to StTpcDbMaker, use directly gStTpcDb
 //
