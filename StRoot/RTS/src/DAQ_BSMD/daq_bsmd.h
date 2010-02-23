@@ -48,7 +48,11 @@ public:
                 static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
+	u_char rdo_id[7] ;	// for RDO checks in get_l2
+	u_int rdo_warns[7] ;	// number of warning issued...
+
 	unsigned int t_data ;	// for trg_cmd pattern tests!
+
 
 } ;
 

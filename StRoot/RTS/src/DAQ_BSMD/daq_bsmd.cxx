@@ -682,14 +682,14 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 {
 	const int BSMD_BYTES_MIN = ((2400+10+3)*4) ;	// this is the minimum
 	const int BSMD_BYTES_MAX = ((2400+10+3+30)*4) ;
-	const u_int BSMD_VERSION = 0x8035 ;		// Nov 09
+//	const u_int BSMD_VERSION = 0x8035 ;		// Nov 09
 	const u_int BSMD_SIGNATURE = 0x42534D44 ;	// "BSMD"
 	const u_int BSMD_HDR_ID = 5 ;	// by some definiton somewhere...
 
 	int t_cou = 0 ;
 	int bad = 0 ;
 	u_int *d32 = (u_int *)buff ;
-
+	int id_check_failed = 0 ;
 
 	//HACKINTOSH!
 	words = 2413 ;
@@ -735,7 +735,13 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		bad |= 1 ;
 	}
 
-	int rdo_id = d32[3] & 0xFF ;	// fiber ID via jumpers...
+	int rdo_in_dta = d32[3] & 0xFF ;	// fiber ID via jumpers...
+	if(rdo_id[rdo] != 0xFF) {
+		if(rdo_id[rdo] != rdo_in_dta) {
+			id_check_failed++ ;
+		}
+	}
+
 	// compare to what?
 	LOG(DBG,"RDO %d: in data %d",rdo,rdo_id) ;
 
@@ -865,7 +871,7 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 	}
 
 
-	int trailer_event = d32[last_ix - 2 - mesg_length] & 0xFFFF ;
+//	int trailer_event = d32[last_ix - 2 - mesg_length] & 0xFFFF ;
 
 
 //	if(trailer_event != d32[0]) {
@@ -931,6 +937,23 @@ int daq_bsmd::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		return 0 ;	// no trigger!
 	}
 	else {
+
+		if(id_check_failed) {
+			rdo_warns[rdo]++ ;
+			if(rdo_warns[rdo] < 5) {
+				LOG(CAUTION,"RDO %d: rdo check failed: expect 0x%02X, found 0x%02X",
+				    rdo,rdo_id[rdo],rdo_in_dta) ;
+			}			
+		}
+
+/*
+		rdo_warns[rdo]++ ;
+		if(rdo_warns[rdo]<2) {
+			LOG(TERR,"RDO %d: rdo check: expect 0x%02X, found 0x%02X",
+			    rdo,rdo_id[rdo],rdo_in_dta) ;
+		}
+*/
+
 		return t_cou ;
 	}
 }
