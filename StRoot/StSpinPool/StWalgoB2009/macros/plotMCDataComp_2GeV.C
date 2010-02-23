@@ -77,7 +77,7 @@ void plotMCDataComp_2GeV() {
   // calculate the statistical uncertainty and the background
   // shape systematic uncertainty 
   for (int i=1; i<=49; i++) {
-    ex[i] = 2.0; 
+    ex[i-1] = 2.0; 
 
     err = 0.;
     err += pos_raw_stat_err2->GetBinContent(i);
