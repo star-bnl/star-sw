@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.11 2010/02/19 18:07:45 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.12 2010/02/23 16:56:47 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.12  2010/02/23 16:56:47  hmasui
+ * Add phi distributions QA (MC vs reconstructed)
+ *
  * Revision 1.11  2010/02/19 18:07:45  hmasui
  * Divide runlist into two different pads
  *
@@ -715,7 +718,7 @@ Bool_t StEmbeddingQADraw::drawVertices() const
   mPDF->NewPage() ;
 
   /// Print figures
-  print(*mCanvas, "eventqa_vertices");
+//  print(*mCanvas, "eventqa_vertices");
   //----------------------------------------------------------------------------------------------------
 
   delete header ;
@@ -905,6 +908,16 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
   hPt->SetAxisRange(0, mPtMax, "X");
   hPt->Draw();
 
+  // Fitting by pol0
+  gStyle->SetOptFit(1);
+  TF1* ptFit = new TF1("ptFit", "pol0", 0.0, mPtMax);
+  ptFit->SetLineColor(kRed);
+  ptFit->SetLineWidth(1);
+  ptFit->SetLineStyle(2);
+  ptFit->SetParameter(0, hPt->GetMean(2));
+  hPt->Fit(ptFit, "rq0");
+  ptFit->Draw("same");
+
   mMainPad->cd(5);
   hEta->Draw("h");
   hY->Draw("hsame");
@@ -930,6 +943,8 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
 
   delete header ;
 
+  gStyle->SetOptFit(0);
+
   return kTRUE ;
 }
 
@@ -948,27 +963,30 @@ Bool_t StEmbeddingQADraw::drawTrack() const
   // Track-wise informations (Comparison between MC and reconstructed particles)
   ///  1: Geant id
   const Bool_t isGeantIdOk = drawGeantId();
+
+  ///  2: Azimuthal angle distributions
+  const Bool_t isPhiOk      = drawPhi();
  
-  ///  2: (pseudo-)rapidity distributions
+  ///  3: (pseudo-)rapidity distributions
   const Bool_t isRapidityOk = drawRapidity();
  
-  ///  3: Momentum and pt
+  ///  4: Momentum and pt
   const Bool_t isMomentumOk = drawMomentum();
   const Bool_t isPtOk       = drawPt();
  
-  ///  4: dE/dx
+  ///  5: dE/dx
   const Bool_t isdEdxOk     = drawdEdx();
  
-  ///  5: Global dca
+  ///  6: Global dca
   const Bool_t isDcaOk      = drawDca();
  
-  ///  6: NHit
+  ///  7: NHit
   const Bool_t isNHitOk     = drawNHit();
 
   LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm ;
   LOG_INFO << endm ;
   
-  return isGeantIdOk && isRapidityOk && isMomentumOk && isPtOk && isdEdxOk && isDcaOk && isNHitOk ;
+  return isGeantIdOk && isPhiOk && isRapidityOk && isMomentumOk && isPtOk && isdEdxOk && isDcaOk && isNHitOk ;
 }
 
 //____________________________________________________________________________________________________
@@ -1062,6 +1080,17 @@ Bool_t StEmbeddingQADraw::drawGeantId() const
 }
 
 //____________________________________________________________________________________________________
+Bool_t StEmbeddingQADraw::drawPhi() const
+{
+  /// QA for azimuthal angle (phi) distributions
+
+  /// Make sure (1) input ROOT files and (2) input geantid
+  if(!isOpen()) return kFALSE ;
+
+  return drawProjection2D("phi");
+}
+
+//____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawRapidity() const
 {
   /// QA for (pseudo-)rapidity
@@ -1130,9 +1159,13 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
   /// Utility function to draw 1D projection histgrams from 2D
 
   /// Input 2D histogram is pt or momentum vs eta or y
+  /// or pt vs phi
+  //
   /// Projection into eta or y for pt = 0.2 - 5 GeV/c (0.5 GeV/c step)
   /// or
   /// Projection into pt or momentum for |Delta eta| = 0.5 in |eta| < 2
+  /// or 
+  /// Projection into pt for phi distributions
 
   TString nameLower(name);
   nameLower.ToLower();
@@ -1169,6 +1202,12 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
     histoName = "hPtVsY";
     isProjectionX = kTRUE ;
   }
+  else if( nameLower.Contains("phi")){
+    xTitle = "p_{T}";
+    yTitle = "#phi";
+    histoName = "hPtVsPhi";
+    isProjectionX = kTRUE ;
+  }
   else{
     Error("DrawProjection2D", "Unknown variable, %s", name.Data());
     LOG_INFO << "  Current implemented variables are" << endm;
@@ -1179,6 +1218,7 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
     LOG_INFO << "   momentum                     p" << endm;
     LOG_INFO << "   eta or pseudorapidity        eta" << endm;
     LOG_INFO << "   y or rapidity                y" << endm;
+    LOG_INFO << "   phi                          phi" << endm;
     LOG_INFO << "-----------------------------------------------------------------" << endm;
     LOG_INFO << endm;
     LOG_INFO << "NOTE : Input is case insensitive" << endm;
@@ -1261,6 +1301,7 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
       else{
         yMax = (hReal) ? TMath::Max(hEmbed->GetMaximum(), hReal->GetMaximum())*1.2 : hEmbed->GetMaximum()*1.2 ;
       }
+      hEmbed->SetMinimum(0.0);
       hEmbed->SetMaximum( yMax * 1.2 );
 
       if( isProjectionX ){
@@ -1270,7 +1311,7 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
         hEmbed->SetTitle(Form("%1.1f < #eta < %1.1f", xMin, xMax));
         hEmbed->SetAxisRange(0, mPtMax, "X");
       }
-      hEmbed->SetYTitle(Form("(1/N_{trk})dN/%s", yTitle.Data()));
+      hEmbed->SetYTitle(Form("(1/N_{trk})dN/d%s", yTitle.Data()));
 
       mMainPad->cd(ibin+1);
       hEmbed->Draw();

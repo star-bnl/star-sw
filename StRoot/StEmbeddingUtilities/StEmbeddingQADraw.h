@@ -42,8 +42,11 @@
 //
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.h,v 1.7 2010/02/16 02:14:03 hmasui Exp $
+ * $Id: StEmbeddingQADraw.h,v 1.8 2010/02/23 16:56:37 hmasui Exp $
  * $Log: StEmbeddingQADraw.h,v $
+ * Revision 1.8  2010/02/23 16:56:37  hmasui
+ * Add phi distributions QA (MC vs reconstructed)
+ *
  * Revision 1.7  2010/02/16 02:14:03  hmasui
  * Print PDF file only for all QA plots
  *
@@ -94,6 +97,7 @@ class StEmbeddingQADraw {
     Bool_t drawTrack() const ;     /// Draw Reconstructed track histograms
 
     Bool_t drawGeantId() const;    /// Geant id
+    Bool_t drawPhi() const ;       /// Azimuthal angle (phi) distributions
     Bool_t drawRapidity() const;   /// (pseudo-)rapidity in different eta bins
     Bool_t drawPt() const;         /// pt (|eta|<2, 0.5 eta increment)
     Bool_t drawMomentum() const;   /// momentum (|eta|<2, 0.5 eta increment)
