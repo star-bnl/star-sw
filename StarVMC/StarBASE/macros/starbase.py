@@ -80,6 +80,7 @@ def main():
     parser.add_option( "--top",     help="Top volume.  All volumes below this volume will be probed", dest="top", default="HALL" )
     parser.add_option( "--wrapper", help="Set false for native execution (don't do this)",  dest="wrapper",   default=True )
     parser.add_option( "--verbose", help="Default 1.  0 supresses all output.  >1 shows output of root, zebra, etc...", dest="verbose", default=0 )
+    parser.add_option( "--path",    help="Define the output path",                dest="path",   default="./" )
     (opts, args) = parser.parse_args()
 
     if ( opts.geom == "NONE" ):
@@ -107,7 +108,7 @@ def main():
         if ( opts.verbose > 0 ):
             print "++ Generating MC for "+opts.geom+" in volume "+opts.top
             
-        cmd = 'root.exe -l -q -b StarVMC/StarBASE/macros/starbase.C\\(\\\"'+name+'\\\",'+str(opts.etamin)+','+str(opts.etamax)+','+str(opts.phimin)+','+str(opts.phimax)+'\\)'
+        cmd = 'root.exe -l -q -b StarVMC/StarBASE/macros/starbase.C\\(\\\"'+name+'\\\",'+str(opts.etamin)+','+str(opts.etamax)+','+str(opts.phimin)+','+str(opts.phimax)+',\\\"'+opts.path+'\\\"\\)'
         if ( opts.verbose > 1 ):
             os.system( cmd )
         else:
@@ -139,6 +140,8 @@ def make_geometry( opts, library="$STAR_LIB" ):
     if ( opts.name != "NONE" ):
         name = opts.name
 
+    path = opts.path
+
     if ( opts.verbose > 0 ):
         print "++ Converting geometry "+geometry+" to ROOT geometry format"
 
@@ -157,6 +160,8 @@ def make_geometry( opts, library="$STAR_LIB" ):
 
     for line in os.popen( 'g2root /tmp/'+geometry+'.rz '+name+'.h' ).readlines():
         pass # ditto
+
+    os.system('mv '+name+'.h '+path+'/'+name+'.h')
 
     #
     # Make the geometry available to root

@@ -20,6 +20,9 @@ def main():
    parser.add_option( "-b", "--base",   dest="baseline", help="Set the baseline geometry [required]",     metavar="BASE",   default="NONE" )
    parser.add_option( "-g", "--geom",   dest="geometry", help="Set the comparison geometry [required]",   metavar="GEOM",   default="NONE" )
    parser.add_option( "-v", "--volume", dest="volume",   help="Set the top level volume [required]",      metavar="VOLUME", default="CAVE" )
+   parser.add_option( "--basepath",     dest="basepath", default="NONE" )
+   parser.add_option( "--geompath",     dest="geompath", default="NONE" )
+   
    parser.add_option( "--thumbnail",    dest="thumbnail", default=False, action="store_true",
                       help="Creates thumbnails of the front page of the PDF file." )
    
@@ -53,7 +56,13 @@ def main():
    from ROOT import gStyle
 
    gStyle.SetHistMinimumZero();
-   gStyle.SetCanvasColor(kWhite); 
+   gStyle.SetCanvasColor(kWhite);
+
+   # Setup temporary symbolic links to the root files
+   if ( opts.basepath != "NONE" ):
+      os.system("ln -s "+opts.basepath+"/"+opts.baseline+".root .")
+   if ( opts.geompath != "NONE" ):
+      os.system("ln -s "+opts.geompath+"/"+opts.geometry+".root .")      
    
    canvas = CanvasPDF(    name="differential-"+opts.baseline+"-vs-"+opts.geometry+"-"+opts.volume,
                           title="Geometry differential for volume="+opts.volume+ " "+opts.baseline+" vs "+opts.geometry,
@@ -68,7 +77,11 @@ def main():
                           canvas=canvas
                           )
 
-
+   # Remove temporary symbolic links to the root files
+   if ( opts.basepath != "NONE" ):
+      os.system("rm "+opts.basepath+"/"+opts.baseline+".root")
+   if ( opts.geompath != "NONE" ):
+      os.system("rm "+opts.geompath+"/"+opts.geometry+".root")      
 
 
 if __name__ == '__main__':

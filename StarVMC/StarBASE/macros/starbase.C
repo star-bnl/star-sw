@@ -28,7 +28,8 @@ void starbase( const char *gy="y2006c",
 	       Float_t etaMin=eta_min, 
 	       Float_t etaMax=eta_max,
 	       Float_t phiMin=phi_min,
-	       Float_t phiMax=phi_max  )
+	       Float_t phiMax=phi_max, 
+	       const Char_t *path="./" )
 {
 
   // Silence ROOT
@@ -43,7 +44,7 @@ void starbase( const char *gy="y2006c",
   gSystem->ExpandPathName(tsy);
 
   // Create the geometry
-  gROOT->LoadMacro   ( tsy+".h" );
+  gROOT->LoadMacro   ( TString(path)+tsy+".h" );
   gROOT->ProcessLine ( tsy+"()" );
 
 
@@ -71,7 +72,7 @@ void starbase( const char *gy="y2006c",
   chain->Finish();
 
   // Write histograms to disk
-  TFile *file = new TFile(Form("%s.root",gy),"recreate");
+  TFile *file = new TFile(Form("%s/%s.root",path,gy),"recreate");
   file->cd();
   mk->GetHistList()->Write();
 
