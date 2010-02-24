@@ -1,6 +1,6 @@
 {
 //=========Macro generated from canvas: CanvasName/ STAR Maker Histogram Canvas
-//=========  (Thu Jan 14 14:28:34 2010) by ROOT version5.22/00
+//=========  (Wed Feb 24 15:23:50 2010) by ROOT version5.22/00
    TCanvas *CanvasName = new TCanvas("CanvasName", " STAR Maker Histogram Canvas",0,0,600,780);
    gStyle->SetOptFit(1);
    CanvasName->Range(0,0,1,1);
@@ -25,7 +25,7 @@
    text = pt->AddText("Hists");
    pt->Draw();
    
-   pl = new TPaveLabel(0.7,0.01,0.95,0.03,"Thu Jan 14 14:28:34 2010","br");
+   pl = new TPaveLabel(0.7,0.01,0.95,0.03,"Wed Feb 24 15:23:50 2010","br");
    pl->SetTextSize(0.6);
    pl->Draw();
    
