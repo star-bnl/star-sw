@@ -178,9 +178,19 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     return kStFatal;
   }
 
-  // Select the highest ranked vertex
+  // Select the highest ranked vertex + some quality cuts
   StPrimaryVertex* pvtx = event->primaryVertex();
   if (!pvtx || pvtx->numberOfDaughters()<5 || pvtx->numMatchesWithBEMC()<1) return kStOk;
+  StVertexFinderId vid = pvtx->vertexFinderId();
+  float min_rank = -1e6;
+  switch (vid) {
+    case minuitVertexFinder   : min_rank = -5; break;
+    case ppvVertexFinder      :
+    case ppvNoCtbVertexFinder : min_rank = 0; break;
+    default                   : break;
+  }
+  if (pvtx->ranking() < min_rank) return kStOk;
+  
   StSPtrVecTrackNode& theNodes = event->trackNodes();
   unsigned int nnodes = theNodes.size();
   if (!nnodes) return kStOk;
@@ -1000,8 +1010,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.27 2010/02/23 23:59:41 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.28 2010/02/24 22:58:21 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.28  2010/02/24 22:58:21  genevb
+// Even the highest ranked vertex might need to be above a minimum ranking
+//
 // Revision 1.27  2010/02/23 23:59:41  genevb
 // Reduce positional biases in GridLeak measurements
 //
