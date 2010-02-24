@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.12 2010/02/23 16:56:47 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.13 2010/02/24 18:13:23 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.13  2010/02/24 18:13:23  hmasui
+ * Modify color code explanation more explicitly. Comparison of phi distributions between reconstructed embedding with MC tracks
+ *
  * Revision 1.12  2010/02/23 16:56:47  hmasui
  * Add phi distributions QA (MC vs reconstructed)
  *
@@ -246,14 +249,21 @@ void StEmbeddingQADraw::init()
   lineRealBlue ->SetLineColor(kBlue);   lineRealBlue ->SetLineWidth(2);
   lineRealBlack->SetLineColor(kBlack);  lineRealBlack->SetLineWidth(2);
 
-  TLegend* colorCode = new TLegend(0.2, 0.15, 0.8, 0.45);
-  colorCode->SetTextSize(0.04);
+  TLegend* colorCode = new TLegend(0.05, 0.15, 0.8, 0.45);
+  colorCode->SetTextSize(0.035);
   colorCode->SetFillColor(10);
   colorCode->SetHeader("Color code for embedding and real data");
-  colorCode->AddEntry(lineEmbedding, "Embedding (red)", "L");
-  colorCode->AddEntry(lineRealBlue,  "Real (blue)", "L");
-  colorCode->AddEntry(lineRealBlack, "Real (black)", "L");
+  colorCode->AddEntry(lineRealBlack, "MC (black)", "L");
+  colorCode->AddEntry(lineEmbedding, "Reconstructed embedding tracks* (red)", "L");
+  colorCode->AddEntry(lineRealBlue,  "Real** (blue)", "L");
   colorCode->Draw();
+
+  TLatex* note0 = new TLatex(0.1, 0.10, "* matched pairs or contaminated pairs");
+  TLatex* note1 = new TLatex(0.1, 0.05, "** black is also used, see legend for each pad");
+  note0->SetTextSize(0.03);
+  note1->SetTextSize(0.03);
+  note0->Draw();
+  note1->Draw();
 
   mCanvas->cd();
   mCanvas->Update();
@@ -1087,7 +1097,8 @@ Bool_t StEmbeddingQADraw::drawPhi() const
   /// Make sure (1) input ROOT files and (2) input geantid
   if(!isOpen()) return kFALSE ;
 
-  return drawProjection2D("phi");
+  /// Comparison of embedding with MC
+  return drawProjection2D("phi", kTRUE);
 }
 
 //____________________________________________________________________________________________________
@@ -1154,7 +1165,7 @@ Bool_t StEmbeddingQADraw::drawPt() const
 }
 
 //____________________________________________________________________________________________________
-Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
+Bool_t StEmbeddingQADraw::drawProjection2D(const TString name, const Bool_t isMC) const
 {
   /// Utility function to draw 1D projection histgrams from 2D
 
@@ -1166,6 +1177,10 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
   /// Projection into pt or momentum for |Delta eta| = 0.5 in |eta| < 2
   /// or 
   /// Projection into pt for phi distributions
+  ///
+  /// if isMC = kTRUE (default is kFALSE), compare the reconstructed embedding tracks with the MC tracks
+  /// NOTE: only applied for stable MC particles. If they have decay daughters,
+  ///       force to plot real data
 
   TString nameLower(name);
   nameLower.ToLower();
@@ -1229,15 +1244,30 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
 
   gStyle->SetPadRightMargin(0.05);
 
+  // MC tracks
+  TH2* h2DMc = (TH2D*) getHistogram(Form("%s_0_%d", histoName.Data(), mGeantId));
+
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
     TString headerTitle("");
     if ( mIsEmbeddingOnly ){
       headerTitle = Form("Projection of %s for each %s bin (Embedding:%s)", 
             yTitle.Data(), xTitle.Data(), getParticleName(mDaughterGeantId[id]));
+
+      if(isMC && !isDecay()){
+        headerTitle = Form("Projection of %s for each %s bin (Embedding:%s, MC:%s)", 
+            yTitle.Data(), xTitle.Data(), getParticleName(mDaughterGeantId[id]), getParticleName(mGeantId));
+      }
     }
     else{
-      headerTitle = Form("Projection of %s for each %s bin (Embedding:%s, Real:%s)", 
-          yTitle.Data(), xTitle.Data(), getParticleName(mDaughterGeantId[id]), getParticleName(getGeantIdReal(id)));
+      TString data("Real");
+      Int_t geantid = getGeantIdReal(id) ;
+      if(isMC && !isDecay()){
+        data    = "MC";
+        geantid = mGeantId ;
+      }
+
+      headerTitle = Form("Projection of %s for each %s bin (Embedding:%s, %s:%s)", 
+          yTitle.Data(), xTitle.Data(), getParticleName(mDaughterGeantId[id]), data.Data(), getParticleName(geantid));
     }
     TPaveText* header = initCanvas(headerTitle);
 
@@ -1273,13 +1303,16 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
 
       TH1* hEmbed = 0;
       TH1* hReal  = 0;
+      TH1* hMc    = 0;
       if( isProjectionX ){
         if( h2DEmbed ) hEmbed = (TH1D*) h2DEmbed->ProjectionX(Form("h%sEmbed_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
         if( h2DReal )  hReal  = (TH1D*) h2DReal->ProjectionX(Form("h%sReal_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
+        if( h2DMc )    hMc    = (TH1D*) h2DMc->ProjectionX(Form("h%sMc_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
       }
       else{
         if( h2DEmbed ) hEmbed = (TH1D*) h2DEmbed->ProjectionY(Form("h%sEmbed_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
         if( h2DReal )  hReal  = (TH1D*) h2DReal->ProjectionY(Form("h%sReal_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
+        if( h2DMc )    hMc    = (TH1D*) h2DMc->ProjectionY(Form("h%sMc_%d_%d", name.Data(), id, ibin), xMinBin, xMaxBin);
       }
 
       hEmbed->SetLineColor(kRed);
@@ -1290,6 +1323,12 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
         hReal->SetLineColor(kBlue);
         hReal->Sumw2();
         hReal->Scale( getNormalization(*hReal) );
+      }
+
+      if( hMc ){
+        hMc->SetLineColor(kBlack);
+        hMc->Sumw2();
+        hMc->Scale( getNormalization(*hMc) );
       }
 
       /// Set maximum of y-axis
@@ -1315,7 +1354,14 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name) const
 
       mMainPad->cd(ibin+1);
       hEmbed->Draw();
-      if(hReal) hReal->Draw("hsame");
+
+      /// Check if MC particle have decay daughters
+      if(isMC && !isDecay()){
+        hMc->Draw("same");
+      }
+      else{
+        if(hReal) hReal->Draw("hsame");
+      }
       hEmbed->Draw("same");
     }
 
