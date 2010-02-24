@@ -1,9 +1,9 @@
 #!/opt/star/sl45_gcc346/bin/perl
-# Script to record the memeopry the OnlinePresneter occupied.
+# Script to record the memory the OnlinePresenter occupies.
 # Usage: perl mempstat.pl -
-# ------  It discovered the PID of the root4starN process
-#         creates the log file "PID".log and record there
-#         the memory usage each second if it is growing.
+# ------  It discoveres the PID of the root4starN process;
+#         creates the log file "PID";log and record there
+#         the memory usage every second if it is growing.
 #
 # ------------ checkMemory -------------
 my $averageMem=0;
@@ -33,7 +33,7 @@ sub checkMemory
   while(($line = <fileToTest>) && ($line !~ /^VmSize/) ){}
   if (length($line)){
      my @vmsize = split(" ",$line);
-    ($sec,$min,$hour,$mday,$mon,$year,$wday,
+     ($sec,$min,$hour,$mday,$mon,$year,$wday,
      $yday,$isdst)=localtime(time);
      if ( statMem($vmsize[1]) >0) {
         open(SPYFILE, ">>$pid.log") or die;
@@ -64,7 +64,7 @@ while(1) {
       sleep 2;
     }
   } else {
-     # wait presented
+     # wait for the presenter to show up
      print "Waiting for the presenter to start\n";
      sleep 10;
   }
