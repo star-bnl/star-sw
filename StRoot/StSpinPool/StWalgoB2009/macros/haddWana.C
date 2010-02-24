@@ -1,4 +1,4 @@
-//$Id: haddWana.C,v 1.14 2010/02/06 01:12:46 balewski Exp $
+//$Id: haddWana.C,v 1.15 2010/02/24 18:26:24 balewski Exp $
 // line added after tag=DNP2009 by Jan
 // run list chaned to match final run selection for SL09g 
 
@@ -37,7 +37,7 @@ void haddWana() {
   haddWana("run9setP1234");
 }
 
-void haddWana(char *set,TString iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-pt5/data/") {
+void haddWana(char *set,TString iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-feb24/data/") {
 
   TString out=iPath;
 
@@ -226,6 +226,9 @@ void MergeRootfile(  TDirectory *target, TList *sourcelist ) {
 
 
 // $Log: haddWana.C,v $
+// Revision 1.15  2010/02/24 18:26:24  balewski
+// added macros computing/plotting AL
+//
 // Revision 1.14  2010/02/06 01:12:46  balewski
 // skips unpol CNI fills
 //
