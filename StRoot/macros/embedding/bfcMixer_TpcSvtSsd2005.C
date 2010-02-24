@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcSvtSsd2005.C,v 1.2 2009/02/23 20:58:03 fisyak Exp $
+// $Id: bfcMixer_TpcSvtSsd2005.C,v 1.3 2010/02/18 23:55:30 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -29,7 +29,7 @@ void bfcMixer_TpcSvtSsd2005(const Int_t Nevents=100,Int_t isSvtIn=1, Int_t isSsd
   TString chain2Opt("NoInput PrepEmbed gen_T geomT sim_T trs -ittf -tpc_daq nodefault");
   chain2Opt += " "; chain2Opt += geomP07ib;
   TString chain3Opt = prodP07ib;
-  chain3Opt += " Embedding onlraw GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker"; 
+  chain3Opt += " Embedding onlraw GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker EmbeddingShortCut"; 
   if (isSvtIn) chain3Opt += " SvtEmbed";
   if (isSsdIn) {
     chain1Opt += ",ssddat";

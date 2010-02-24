@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcSvtSsd.C,v 1.8 2009/07/29 17:21:43 didenko Exp $
+// $Id: bfcMixer_TpcSvtSsd.C,v 1.9 2010/02/18 23:55:30 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -35,9 +35,9 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
   TString chain2Opt("NoInput PrepEmbed gen_T geomT sim_T trs -ittf -tpc_daq nodefault");
   chain2Opt += " "; chain2Opt += geomP07ib;
   TString chain3Opt = prodP08if;
-  //  chain3Opt += " Embedding onlraw GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker"; 
-  chain3Opt += " Embedding onlraw McEvent McEvOut GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker -hitfilt"; 
-  //  chain3Opt += " Embedding onlraw McEvent McEvOut GeantOut IdTruth -in NoInput -hitfilt"; 
+  //  chain3Opt += " Embedding onlraw GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker EmbeddingShortCut"; 
+  chain3Opt += " Embedding onlraw McEvent McEvOut GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker -hitfilt EmbeddingShortCut"; 
+  //  chain3Opt += " Embedding onlraw McEvent McEvOut GeantOut IdTruth -in NoInput -hitfilt EmbeddingShortCut"; 
 
   if (isSvtIn) chain3Opt += " SvtEmbed";
   if (isSsdIn) {

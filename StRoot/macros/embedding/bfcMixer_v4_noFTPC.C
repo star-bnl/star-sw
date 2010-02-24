@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_v4_noFTPC.C,v 1.4 2007/05/31 18:41:44 andrewar Exp $
+// $Id: bfcMixer_v4_noFTPC.C,v 1.5 2010/02/18 23:55:30 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -138,11 +138,11 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
 
 // use Simu NoDefault NoInput onlraw -onlcl and standard chain options
 //  expand P2005, get rid of corrections and ftpc:
-chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050515 ry2005b tpc_daq tpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2 EST ToF svt_daq SvtD svtdEdx xiSvt l3onl fpd eemcD pmdRaw"); 
-//chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl B2005 l3onl fcf emcDY2 fpd trgd ZDCvtx DbV20060421 useCDV ITTF tofDat -SvtIT SCEbyE");
+chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl DbV20050515 ry2005b tpc_daq tpc emcDY2 global dst Kalman event evout QA Tree GeantOut fcf ctf -Prevtx -nohits CMuDST ZDCvtx tofDat Xi2 Kink2 EST ToF svt_daq SvtD svtdEdx xiSvt l3onl fpd eemcD pmdRaw EmbeddingShortCut"); 
+//chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl B2005 l3onl fcf emcDY2 fpd trgd ZDCvtx DbV20060421 useCDV ITTF tofDat -SvtIT SCEbyE EmbeddingShortCut");
 
-//chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl ry2005b,tpc_daq,tpc_T, globT tls db tpcDB,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout l3onl fcf emcDY2 fpd trgd ZDCvtx DbV20060421 useCDV ITTF tofDat -SvtIT MuDST -trg VFMinuit GeantOut");
-  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl ry2005b,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,Tree,evout l3onl fcf emcDY2 fpd trgd ZDCvtx DbV20060421 useCDV ITTF tofDat -SvtIT MuDST -trg  VFMinuit GeantOut ");
+//chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl ry2005b,tpc_daq,tpc_T, globT tls db tpcDB,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout l3onl fcf emcDY2 fpd trgd ZDCvtx DbV20060421 useCDV ITTF tofDat -SvtIT MuDST -trg VFMinuit GeantOut EmbeddingShortCut");
+  chain3->SetFlags("Simu NoDefault NoInput onlraw -onlcl ry2005b,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,Tree,evout l3onl fcf emcDY2 fpd trgd ZDCvtx DbV20060421 useCDV ITTF tofDat -SvtIT MuDST -trg  VFMinuit GeantOut  EmbeddingShortCut");
 
 
 
