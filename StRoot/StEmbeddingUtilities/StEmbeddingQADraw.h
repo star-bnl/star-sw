@@ -42,8 +42,11 @@
 //
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.h,v 1.8 2010/02/23 16:56:37 hmasui Exp $
+ * $Id: StEmbeddingQADraw.h,v 1.9 2010/02/24 18:11:47 hmasui Exp $
  * $Log: StEmbeddingQADraw.h,v $
+ * Revision 1.9  2010/02/24 18:11:47  hmasui
+ * Added isMC flag in drawProjection2D() to switch real or MC tracks
+ *
  * Revision 1.8  2010/02/23 16:56:37  hmasui
  * Add phi distributions QA (MC vs reconstructed)
  *
@@ -73,7 +76,7 @@ class TPDF ;
 class StEmbeddingQADraw {
   public:
     /// Input embedding/real data file names made by StEmbeddingQAAnalyzer
-    /// Aded 'isEmbeddingOnly' argument
+    /// Added 'isEmbeddingOnly' argument
     ///   true            --> draw QA only for the embedding
     ///   false (default) --> draw QA both embedding and real data
     StEmbeddingQADraw(const TString embeddingFile, const TString realDataFile, const Int_t geantid,
@@ -195,7 +198,10 @@ class StEmbeddingQADraw {
     /// dE/dx vs p, projections, mean/sigma vs momentum
     Bool_t drawdEdxVsMomentum(const Bool_t isMcMomentum=kTRUE) const ;
 
-    Bool_t drawProjection2D(const TString name) const; /// (pseudo-)rapidity, momentum, pt
+    // Added isMC flag
+    //  isMC = kTRUE            --> Compare reconstructed embedding tracks with MC tracks
+    //  isMC = kFALSE (default) --> Compare reconstructed embedding tracks with real data
+    Bool_t drawProjection2D(const TString name, const Bool_t isMC = kFALSE) const; /// (pseudo-)rapidity, momentum, pt and phi
     Bool_t drawProjection3D(const TString name) const; /// For dca and nhit projections in (pt, eta) space
 
     /// Canvas/Pad initialization
