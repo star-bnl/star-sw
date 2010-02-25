@@ -98,7 +98,7 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   Float_t pos[3] = {coorLTD.position().x(),coorLTD.position().y(),coorLTD.position().z()};
   if ( mExB ) {
     Float_t posMoved[3];
-    mExB->UndoDistortion(pos,posMoved);   // input pos[], returns posMoved[]
+    mExB->UndoDistortion(pos,posMoved,coorL.fromSector());   // input pos[], returns posMoved[]
     StThreeVector<double> newPos(posMoved[0],posMoved[1],posMoved[2]);
     coorLTD.setPosition(newPos);
   }
