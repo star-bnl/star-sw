@@ -661,12 +661,14 @@ MediumMagboltz86::GetGasNumber(std::string gas, int& number) const {
     number = 34; return true;
   }
   // Ethanol
-  if (gas == "ETHANOL" || gas == "ETHYL-ALCOHOL" || gas == "GRAIN-ALCOHOL" || gas == "C2H5OH") {
+  if (gas == "ETHANOL" || gas == "ETHYL-ALCOHOL" || gas == "GRAIN-ALCOHOL" || 
+      gas == "C2H5OH") {
     number = 35; return true;
   }
   // Propanol
-  if (gas == "PROPANOL" || gas == "2-PROPANOL" || gas == "ISO-PROPANOL" || gas == "ISOPROPANOL" ||
-      gas == "ISOPROPYL" || gas == "ISOPROPYL-ALCOHOL" || gas == "C3H7OH") {
+  if (gas == "PROPANOL" || gas == "2-PROPANOL" || gas == "ISO-PROPANOL" || 
+      gas == "ISOPROPANOL" || gas == "ISOPROPYL" || 
+      gas == "ISOPROPYL-ALCOHOL" || gas == "C3H7OH") {
     number = 36; return true;
   }
   // Cesium / Caesium.
@@ -685,7 +687,8 @@ MediumMagboltz86::GetGasNumber(std::string gas, int& number) const {
     number = 40; return true;
   }
   // Deuterated methane
-  if (gas == "DEUT-METHANE" || gas == "DEUTERIUM-METHANE" || gas == "DEUTERATED-METHANE" || gas == "CD4") {
+  if (gas == "DEUT-METHANE" || gas == "DEUTERIUM-METHANE" || 
+      gas == "DEUTERATED-METHANE" || gas == "CD4") {
     number = 41; return true;
   }
   // BF3
@@ -695,7 +698,8 @@ MediumMagboltz86::GetGasNumber(std::string gas, int& number) const {
   // C2HF5 and C2H2F4.
   if (gas == "C2HF5" || gas == "C2H2F4" || gas == "C2F5H" || gas == "C2F4H2" || 
       gas == "FREON-134" || gas == "FREON-134-A" || gas == "FREON-125" ||
-      gas == "ZYRON-125" || gas == "TETRAFLUOROETHANE" || gas == "PENTAFLUOROETHANE") {
+      gas == "ZYRON-125" || gas == "TETRAFLUOROETHANE" || 
+      gas == "PENTAFLUOROETHANE") {
     number = 43; return true;
   }
   // CHF3
@@ -703,12 +707,14 @@ MediumMagboltz86::GetGasNumber(std::string gas, int& number) const {
     number = 50; return true;
   }
   // CF3Br
-  if (gas == "CF3BR" || gas == "TRIFLUOROBROMOMETHANE" || gas == "HALON-1301" || gas == "FREON-13B1") {
+  if (gas == "CF3BR" || gas == "TRIFLUOROBROMOMETHANE" || 
+      gas == "HALON-1301" || gas == "FREON-13B1") {
     number = 51; return true;
   }
   // C3F8
-  if (gas == "C3F8" || gas == "OCTAFLUOROPROPANE" || gas == "R218" || gas == "FREON-218" ||
-      gas == "PERFLUOROPROPANE" || gas == "RC-218" || gas == "PFC-218") {
+  if (gas == "C3F8" || gas == "OCTAFLUOROPROPANE" || gas == "R218" || 
+      gas == "FREON-218" || gas == "PERFLUOROPROPANE" || 
+      gas == "RC-218" || gas == "PFC-218") {
     number = 52; return true;
   }
   // Ozone
@@ -723,7 +729,8 @@ MediumMagboltz86::GetGasNumber(std::string gas, int& number) const {
   if (gas == "H2S" || gas == "HYDROGEN-SULPHIDE" || gas == "HYDROGEN-SULFIDE" ||
       gas == "HEPATIC-ACID" || gas == "SEWER-GAS" || gas == "SULFUR-HYDRIDE" ||
       gas == "DIHYDROGEN-MONOSULFIDE" || gas == "DIHYDROGEN-MONOSULPHIDE" ||
-      gas == "SULPHUR-HYDRIDE" || gas == "STINK-DAMP" || gas == "SULFURETED-HYDROGEN") {
+      gas == "SULPHUR-HYDRIDE" || gas == "STINK-DAMP" || 
+      gas == "SULFURETED-HYDROGEN") {
     number = 55; return true;
   }
   // n-butane
@@ -735,17 +742,20 @@ MediumMagboltz86::GetGasNumber(std::string gas, int& number) const {
     number = 57; return true;
   }
   // Nitrogen
-  if (gas == "NI" || gas == "NITROGEN" || gas == "NI-ANISOTROPIC" || gas == "NITROGEN-ANISOTROPIC" ||
+  if (gas == "NI" || gas == "NITROGEN" || gas == "NI-ANISOTROPIC" || 
+      gas == "NITROGEN-ANISOTROPIC" ||
       gas == "N2" || gas == "N2-ANISOTROPIC") {
     number = 58; return true;
   }
   // Germane, GeH4
-  if (gas == "GERMANE" || gas == "GERM" || gas == "GERMANIUM-HYDRIDE" || gas == "GERMANIUM-TETRAHYDRIDE" ||
+  if (gas == "GERMANE" || gas == "GERM" || gas == "GERMANIUM-HYDRIDE" || 
+      gas == "GERMANIUM-TETRAHYDRIDE" ||
       gas == "GERMANOMETHANE" || gas == "MONOGERMANE" || gas == "GEH4") {
     number = 59; return true;
   }
   // Silane, SiH4
-  if (gas == "SILANE" || gas == "SIL" || gas == "SILICON-HYDRIDE" || gas == "SILICON-TETRAHYDRIDE" ||
+  if (gas == "SILANE" || gas == "SIL" || gas == "SILICON-HYDRIDE" || 
+      gas == "SILICON-TETRAHYDRIDE" ||
       gas == "SILICANE" || gas == "MONOSILANE" || gas == "SIH4") {
     number = 60; return true;
   }
@@ -955,7 +965,8 @@ MediumMagboltz86::Mixer() {
     // Check if there is still sufficient space.
     if (np0 + nIn + 2 >= nMaxLevels) {
       std::cerr << "MediumMagboltz86::Mixer:" << std::endl;
-      std::cerr << "    Max. number of levels (" << nMaxLevels << ") exceeded." << std::endl;
+      std::cerr << "    Max. number of levels (" << nMaxLevels 
+                << ") exceeded." << std::endl;
       return false;
     }
     
@@ -1119,7 +1130,7 @@ MediumMagboltz86::Mixer() {
     std::cout << "    Energy [eV]    Collision Rate [ns-1]" << std::endl;
     for (int i = 0; i < 8; ++i) {    
       std::cout << "    " << std::setw(10) 
-                << (i + 1) * eFinal / 16
+                << (2 * i + 1) * eFinal / 16
                 << "    " << std::setw(18)
                 << cfTot[(i + 1) * nEnergySteps / 16] << std::endl;
     }
