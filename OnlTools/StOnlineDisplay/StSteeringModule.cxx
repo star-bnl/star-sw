@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.13 2010/02/20 10:51:19 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.14 2010/02/25 02:39:50 fine Exp $
 
 
 #include "StSteeringModule.h"
@@ -318,7 +318,7 @@ void  StSteeringModule::Animating()
 //_____________________________________________________________________________
 void  StSteeringModule::Animate(Int_t ms) 
 {
-  fAnimate = ms;
+  fAnimate = ms ? ms : 10;
   if (fAnimate>=0)  QTimer::singleShot(fAnimate, this, SLOT(Animating())); 
 }
 
