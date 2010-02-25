@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.81 2009/12/11 04:53:57 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.82 2010/02/25 21:49:05 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.82  2010/02/25 21:49:05  genevb
+ * Using sector number to better handle post-membrane hits, prep for sector-by-sector GL, and GGVoltage errors
+ *
  * Revision 1.81  2009/12/11 04:53:57  genevb
  * Give the enum constants unique names
  *
@@ -297,9 +300,10 @@ enum   DistortSelect                                                  <br>
   kSpaceCharge       = 0x400,    // Bit 11                            <br>
   kSpaceChargeR2     = 0x800,    // Bit 12                            <br>
   kShortedRing       = 0x1000,   // Bit 13                            <br>
-  kFast2DBMap        = 0x2000,   // bit 14                            <br>
-  kGridLeak          = 0x4000    // bit 15                            <br>
-  k3DGridLeak        = 0x8000    // bit 16                            <br>
+  kFast2DBMap        = 0x2000,   // Bit 14                            <br>
+  kGridLeak          = 0x4000    // Bit 15                            <br>
+  k3DGridLeak        = 0x8000    // Bit 16                            <br>
+  kGGVoltError       = 0x10000   // Bit 17                            <br>
 } ;                                                                   <br>
 
 Note that the option flag used in the chain is 2x larger 
@@ -674,7 +678,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
 
   mDistortionMode = mode;
   if ( !( mode & ( kBMap | kPadrow13 | kTwist | kClock | kMembrane | kEndcap | kIFCShift | kSpaceCharge | kSpaceChargeR2 
-                         | kShortedRing | kFast2DBMap | kGridLeak | k3DGridLeak ))) 
+                         | kShortedRing | kFast2DBMap | kGridLeak | k3DGridLeak | kGGVoltError ))) 
     {
        mDistortionMode |= kFast2DBMap ;
        mDistortionMode |= kPadrow13 ;
@@ -831,10 +835,12 @@ void StMagUtilities::BrBz3DField( const Float_t r, const Float_t z, const Float_
 
 
 /// Main Entry Point for requests to UNDO the E and B field distortions
-void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
   // Control by flags JCD Oct 4, 2001
   Float_t Xprime1[3], Xprime2[3] ;
+
+  SectorNumber( Sector, x ) ;
 
   // Set it up
   for (unsigned int i=0; i<3; ++i) {
@@ -849,14 +855,14 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
     }
       
   if (mDistortionMode & kBMap) {
-      FastUndoBDistortion    ( Xprime1, Xprime2 ) ;
+      FastUndoBDistortion    ( Xprime1, Xprime2, Sector ) ;
       for (unsigned int i=0; i<3; ++i) {
 	  Xprime1[i] = Xprime2[i];
       }
   }
       
   if (mDistortionMode & kFast2DBMap) {
-      FastUndo2DBDistortion    ( Xprime1, Xprime2 ) ;
+      FastUndo2DBDistortion    ( Xprime1, Xprime2, Sector ) ;
       for (unsigned int i=0; i<3; ++i) {
 	  Xprime1[i] = Xprime2[i];
       }
@@ -870,7 +876,7 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
 
 
   if (mDistortionMode & kPadrow13) {
-      UndoPad13Distortion    ( Xprime1, Xprime2 ) ;
+      UndoPad13Distortion    ( Xprime1, Xprime2, Sector ) ;
       for (unsigned int i=0; i<3; ++i) {
 	  Xprime1[i] = Xprime2[i];
       }
@@ -878,7 +884,7 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
   
   if (mDistortionMode & kTwist) {
 
-      UndoTwistDistortion    ( Xprime1, Xprime2 ) ;
+      UndoTwistDistortion    ( Xprime1, Xprime2, Sector ) ;
       for (unsigned int i=0; i<3; ++i) {
 	  Xprime1[i] = Xprime2[i];
       }
@@ -886,7 +892,7 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
 
   if (mDistortionMode & kClock) {
       
-      UndoClockDistortion    ( Xprime1, Xprime2 ) ; 
+      UndoClockDistortion    ( Xprime1, Xprime2, Sector ) ; 
       for (unsigned int i=0; i<3; ++i) {
 	  Xprime1[i] = Xprime2[i];
       }
@@ -894,7 +900,7 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
 
   if (mDistortionMode & kMembrane) {
       
-      UndoMembraneDistortion ( Xprime1, Xprime2 ) ;
+      UndoMembraneDistortion ( Xprime1, Xprime2, Sector ) ;
       for (unsigned int i=0; i<3; ++i) {
 	  Xprime1[i] = Xprime2[i];
       }
@@ -903,28 +909,28 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
 
   if (mDistortionMode & kEndcap) 
     { 
-      UndoEndcapDistortion ( Xprime1, Xprime2 ) ; 
+      UndoEndcapDistortion ( Xprime1, Xprime2, Sector ) ; 
       for (unsigned int i=0; i<3; ++i) {
 	Xprime1[i] = Xprime2[i];
       }
     }
     
   if (mDistortionMode & kIFCShift) { 
-      UndoIFCShiftDistortion ( Xprime1, Xprime2 ) ;
+      UndoIFCShiftDistortion ( Xprime1, Xprime2, Sector ) ;
       for (unsigned int i=0; i<3; ++i) {
 	  Xprime1[i] = Xprime2[i];
       }
   }
 
   if (mDistortionMode & kSpaceCharge) { 
-      UndoSpaceChargeDistortion ( Xprime1, Xprime2 ) ;
+      UndoSpaceChargeDistortion ( Xprime1, Xprime2, Sector ) ;
       for (unsigned int i=0; i<3; ++i) {
 	  Xprime1[i] = Xprime2[i];
       }
   }
 
   if (mDistortionMode & kSpaceChargeR2) { 
-      UndoSpaceChargeR2Distortion ( Xprime1, Xprime2 ) ;
+      UndoSpaceChargeR2Distortion ( Xprime1, Xprime2, Sector ) ;
       for (unsigned int i=0; i<3; ++i) {
 	  Xprime1[i] = Xprime2[i];
       }
@@ -937,21 +943,21 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
   }
 
   if (mDistortionMode & kShortedRing) { 
-      UndoShortedRingDistortion ( Xprime1, Xprime2 ) ;
+      UndoShortedRingDistortion ( Xprime1, Xprime2, Sector ) ;
       for (unsigned int i=0; i<3; ++i) {
 	  Xprime1[i] = Xprime2[i];
       }
   }
 
   if (mDistortionMode & kGridLeak) { 
-      UndoGridLeakDistortion ( Xprime1, Xprime2 ) ;
+      UndoGridLeakDistortion ( Xprime1, Xprime2, Sector ) ;
       for (unsigned int i=0; i<3; ++i) {
 	  Xprime1[i] = Xprime2[i];
       }
   }
 
   if (mDistortionMode & k3DGridLeak) { 
-      Undo3DGridLeakDistortion ( Xprime1, Xprime2 ) ;
+      Undo3DGridLeakDistortion ( Xprime1, Xprime2, Sector ) ;
       for (unsigned int i=0; i<3; ++i) {
 	  Xprime1[i] = Xprime2[i];
       }
@@ -961,6 +967,13 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
       cout << "StMagUtilities ERROR **** Do not use kGridLeak and k3DGridLeak at the same time" << endl ;
       cout << "StMagUtilities ERROR **** These routines have overlapping functionality." << endl ;
       exit(1) ;
+  }
+
+  if (mDistortionMode & kGGVoltError) {
+      UndoGGVoltErrorDistortion ( Xprime1, Xprime2, Sector ) ;
+      for (unsigned int i=0; i<3; ++i) {
+          Xprime1[i] = Xprime2[i];
+      }
   }
 
   // Return it
@@ -976,10 +989,10 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
 
 
 /// Main Entry Point for requests to DO the E and B field distortions (for simulations)
-void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
-  UndoDistortion ( x, Xprime ) ;
+  UndoDistortion ( x, Xprime, Sector ) ;
 
   Xprime[0] = 2*x[0] - Xprime[0] ;
   Xprime[1] = 2*x[1] - Xprime[1] ;
@@ -997,15 +1010,15 @@ void StMagUtilities::DoDistortion( const Float_t x[], Float_t Xprime[] )
     This avoids the time required to set up a table of distorted values but
     is slow for a very large number of points ( > 10,000 ).
 */
-void StMagUtilities::UndoBDistortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::UndoBDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
   Double_t ah ;                                        // ah carries the sign opposite of E (for forward integration)
   Float_t  B[3] ; 
   Int_t    sign, index = 1 , NSTEPS ;              
   
-  if ( x[2] >= 0.0 ) sign =  1 ;                       // (TPC West)
-  else               sign = -1 ;                       // (TPC East)  
+  SectorNumber( Sector, x ) ;                          // Calculate sector number if not known
+  sign = ( Sector <= 12 ? 1 : -1 ) ;                   // 1 = TPC West, -1 = TPC East
 
   Xprime[0]  =  x[0] ;                                 // Integrate backwards from TPC plane to 
   Xprime[1]  =  x[1] ;                                 // the point the electron cluster was born. 
@@ -1039,15 +1052,15 @@ void StMagUtilities::UndoBDistortion( const Float_t x[], Float_t Xprime[] )
     This avoids the time required to set up a table of distorted values but
     is slow for a very large number of points ( > 10,000 ).
 */
-void StMagUtilities::Undo2DBDistortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::Undo2DBDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
   Double_t ah ;                             // ah carries the sign opposite of E (for forward integration)
   Float_t  B[3] ; 
   Int_t    sign, index = 1 , NSTEPS ;              
   
-  if ( x[2] >= 0.0 ) sign =  1 ;                       // (TPC West)
-  else               sign = -1 ;                       // (TPC East)  
+  SectorNumber( Sector, x ) ;                          // Calculate sector number if not known
+  sign = ( Sector <= 12 ? 1 : -1 ) ;                   // 1 = TPC West, -1 = TPC East
 
   Xprime[0]  =  x[0] ;                                 // Integrate backwards from TPC plane to 
   Xprime[1]  =  x[1] ;                                 // the point the electron cluster was born. 
@@ -1081,7 +1094,7 @@ void StMagUtilities::Undo2DBDistortion( const Float_t x[], Float_t Xprime[] )
     about 1 minute of CPU time to generate the table but it is very fast after the
     table has been created.  Use it when you have a large number of points ( > 10,000 ).
 */
-void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
   static  Float_t dx3D[EMap_nPhi][EMap_nR][EMap_nZ], dy3D[EMap_nPhi][EMap_nR][EMap_nZ] ;
@@ -1097,10 +1110,8 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] )
 
   Float_t r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   Float_t phi    =  TMath::ATan2(x[1],x[0]) ;
-  if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
-  Float_t z      =  x[2] ;
-  if ( z > 0 && z <  0.2 ) z =  0.2 ;               // Protect against discontinuity at CM
-  if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
+  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  Float_t z = LimitZ( Sector, x ) ;                 // Protect against discontinuity at CM
 
   if ( DoOnce == 0 )
     {
@@ -1162,7 +1173,7 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] )
     very fast after the table has been created. Use it when you have a large number 
     of points ( > 10,000 ).
 */
-void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
   static  Float_t dR[EMap_nR][EMap_nZ], dRPhi[EMap_nR][EMap_nZ] ;
@@ -1177,10 +1188,8 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
 
   Float_t r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   Float_t phi    =  TMath::ATan2(x[1],x[0]) ;
-  if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
-  Float_t z      =  x[2] ;
-  if ( z > 0 && z <  0.2 ) z =  0.2 ;               // Protect against discontinuity at CM
-  if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
+  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  Float_t z = LimitZ( Sector, x ) ;                 // Protect against discontinuity at CM
 
   if ( DoOnce == 0 )
     {
@@ -1239,7 +1248,7 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
     an angle between the E and B fields, there will be a distortion in the recorded
     tracks.  This routine takes out that distortion.
  */
-void StMagUtilities::UndoTwistDistortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::UndoTwistDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
   Double_t        Zdrift ;
@@ -1248,10 +1257,10 @@ void StMagUtilities::UndoTwistDistortion( const Float_t x[], Float_t Xprime[] )
   // Work in TPC coordinates but note that XTWIST and YTWIST reported in Magnet coord system 
   // so they have been negated (below)  
   
-  if ( x[2] >= 0.0 ) sign =  1 ;                       // (TPC West)
-  else               sign = -1 ;                       // (TPC East)  
+  Float_t z = LimitZ( Sector, x ) ;                 // Protect against discontinuity at CM
+  sign = ( Sector <= 12 ? 1 : -1 ) ;                // 1 = TPC West, -1 = TPC East
 
-  Zdrift = sign * ( TPC_Z0 - TMath::Abs(x[2]) ) ;
+  Zdrift = sign * ( TPC_Z0 - TMath::Abs(z) ) ;
   Xprime[0] = x[0] - (     Const_1 * YTWIST - Const_2 * XTWIST ) * Zdrift/1000 ;
   Xprime[1] = x[1] - ( -1* Const_1 * XTWIST - Const_2 * YTWIST ) * Zdrift/1000 ;
   Xprime[2] = x[2] ;                                   // Subtract to undo the distortion 
@@ -1272,7 +1281,7 @@ void StMagUtilities::UndoTwistDistortion( const Float_t x[], Float_t Xprime[] )
     lines to leak out of the anode and gated grid region.  HHWieman has modelled this
     effect and his solution is used to remove the distortions.
  */
-void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
   const Int_t   ORDER    = 2     ;               // ORDER = 1 is linear, ORDER = 2 is quadratice interpolation (Leave at 2 for legacy reasons)
@@ -1307,7 +1316,7 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] )
   static Float_t  SumArray[NZDRIFT][NYARRAY] ;
   static Int_t    ilow = 0, jlow = 0 ;
   
-  Float_t  y, Zdrift, save_sum[3] ;
+  Float_t  y, z, Zdrift, save_sum[3] ;
   Double_t r, phi, phi0, sum = 0.0 ;
 
   if ( DoOnce == 0 ) 
@@ -1339,7 +1348,8 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] )
   phi0   =  ( (Int_t)((TMath::Abs(phi)+PI/12.)/(PI/6.) + 6.0 ) - 6.0 ) * PI/6. ;
   if ( phi < 0 ) phi0 *= -1. ;
   y      =  r * TMath::Cos( phi0 - phi ) ;
-  Zdrift =  TPC_Z0 - TMath::Abs(x[2]) ;
+  z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
+  Zdrift =  TPC_Z0 - TMath::Abs(z) ;
 
   Search ( NZDRIFT, ZDriftArray,  Zdrift, ilow ) ;
   Search ( NYARRAY, YArray, y, jlow ) ;
@@ -1382,17 +1392,19 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] )
     input a rotation angle for each end, if you wish.  Note: this is a coordinate transformation
     and not a distortion correction.  It is here for historical reasons.
  */
-void StMagUtilities::UndoClockDistortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::UndoClockDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
-  Double_t r, phi ;
+  Double_t r, phi, z ;
 
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi    =  TMath::ATan2(x[1],x[0]) ;
 
-  if ( x[2] < 0 )  phi += EASTCLOCKERROR/1000. ;    // Phi rotation error in milli-radians
-  if ( x[2] > 0 )  phi += WESTCLOCKERROR/1000. ;    // Phi rotation error in milli-radians
-  // Do nothing if x[2] = 0 
+  z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
+
+  if ( z < 0 )  phi += EASTCLOCKERROR/1000. ;       // Phi rotation error in milli-radians
+  if ( z > 0 )  phi += WESTCLOCKERROR/1000. ;       // Phi rotation error in milli-radians
+  // Do nothing if z = 0 
 
   Xprime[0] = r * TMath::Cos(phi) ;
   Xprime[1] = r * TMath::Sin(phi) ;
@@ -1408,7 +1420,7 @@ void StMagUtilities::UndoClockDistortion( const Float_t x[], Float_t Xprime[] )
 /*!
 
  */
-void StMagUtilities::UndoMembraneDistortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::UndoMembraneDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
   cout << "StMagUtilities::UndoMembrane  This routine was made obosolete on 10/1/2009.  Do not use it." << endl ;
@@ -1452,7 +1464,7 @@ void StMagUtilities::UndoMembraneDistortion( const Float_t x[], Float_t Xprime[]
 /*!
 
  */
-void StMagUtilities::UndoEndcapDistortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::UndoEndcapDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 {
 
   cout << "StMagUtilities::UndoEndcap  This routine was made obosolete on 10/1/2009.  Do not use it." << endl ;
@@ -1501,7 +1513,7 @@ void StMagUtilities::UndoEndcapDistortion( const Float_t x[], Float_t Xprime[] )
     Electrostatic equations solved in Rectangular Coodinates by Jim Thomas
     Updated to work in cylindrical coordinates by Jamie Dunlop  11/01/2001
 */
-void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 { 
 
   Float_t  Er_integral, Ephi_integral ;
@@ -1548,10 +1560,8 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
   
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi    =  TMath::ATan2(x[1],x[0]) ;
-  if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
-  z      =  x[2] ;
-  if ( z > 0 && z <  0.2 ) z =  0.2 ;               // Protect against discontinuity at CM
-  if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
+  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
 
   Interpolate2DEdistortion( ORDER, r, z, shiftEr, Er_integral ) ;
   Ephi_integral = 0.0 ;  // Efield is symmetric in phi
@@ -1580,7 +1590,7 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
     for legacy reasons.  Electrostatic equations solved by Jamie Dunlop  11/01/2001
     Updated to include linear increase of charge from endcap to CM by Jim Thomas 12/18/2001
 */
-void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 { 
   
   Float_t  Er_integral, Ephi_integral ;
@@ -1630,10 +1640,8 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
   
   r   =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi =  TMath::ATan2(x[1],x[0]) ;
-  if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
-  z   =  x[2] ;
-  if ( z > 0 && z <  0.2 ) z =  0.2 ;               // Protect against discontinuity at CM
-  if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
+  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
 
   Interpolate2DEdistortion( ORDER, r, z, spaceEr, Er_integral ) ;
   Ephi_integral = 0.0 ;  // E field is symmetric in phi
@@ -1673,7 +1681,7 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
   and is greater than 1.0 when there is more charge in the East half to the TPC.
   Original work by H. H. Wieman, N. Smirnov, and J. Thomas 
 */
-void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 { 
   
   const Int_t     ORDER       =    1 ;  // Linear interpolation = 1, Quadratic = 2         
@@ -1772,10 +1780,8 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
   
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi    =  TMath::ATan2(x[1],x[0]) ;
-  if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
-  z      =  x[2] ;
-  if ( z > 0 && z <  0.2 ) z =  0.2 ;               // Protect against discontinuity at CM
-  if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
+  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
 
   Interpolate2DEdistortion( ORDER, r, z, spaceR2Er, Er_integral ) ;
   Ephi_integral = 0.0 ;  // E field is symmetric in phi
@@ -1787,7 +1793,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
   // Subtract to Undo the distortions and apply the EWRatio on the East end of the TPC 
   if ( r > 0.0 ) 
     {
-      if ( x[2] < 0.0 ) 
+      if ( z < 0.0 ) 
 	{
 	  phi =  phi - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
 	  r   =  r   - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
@@ -1832,7 +1838,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
     Electrostatic Equations from SN0253 by Howard Wieman.
     Note that we use Howard's funny coordinate system where Z==0 at the GG.
 */
-void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 { 
   
   const   Int_t   ORDER     = 1     ;            // Linear interpolation = 1, Quadratic = 2         
@@ -1940,8 +1946,12 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 			sum += ( 1 - Rfrac - TMath::Cos(k*WestOuterShortZ[m]) ) * WestOuterMissingOhms[m] ; 
 		      Eout = 2 * ( Rfrac*WestOuterExtraSum + sum ) / (k*WestOuterRtot*TPC_Z0) ;		
 		    }
-		  //Ein   =  2 * RStep * -1*deltaV / ( k * Pitch * Rtot * CathodeV ) ;        // (test) Gating Grid studies (note -1)
-		  //Eout  =  2 * RStep * -1*deltaV / ( k * Pitch * Rtot * CathodeV ) ;        // (test) Gating Grid studies (note -1)
+		  //if ( z > 0 )                       // (test) Gating Grid studies
+                  //  {
+		  //    Ein   =  2 * RStep * -1*deltaV / ( k * Pitch * Rtot * CathodeV ) ;  // (test) Gating Grid studies (note -1)
+		  //    Eout  =  2 * RStep * -1*deltaV / ( k * Pitch * Rtot * CathodeV ) ;  // (test) Gating Grid studies (note -1)
+                  //  }
+                  //else { Ein = 0.0 ; Eout = 0.0 ; }  // (test) Gating Grid studies
 		  Double_t An   =  Ein  * TMath::BesselK0( k*OFCRadius ) - Eout * TMath::BesselK0( k*IFCRadius ) ;
 		  Double_t Bn   =  Eout * TMath::BesselI0( k*IFCRadius ) - Ein  * TMath::BesselI0( k*OFCRadius ) ;
 		  Double_t Numerator =
@@ -1965,12 +1975,114 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
   
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi    =  TMath::ATan2(x[1],x[0]) ;
-  if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
-  z      =  x[2] ;
-  if ( z > 0 && z <  0.2 ) z =  0.2 ;               // Protect against discontinuity at CM
-  if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
+  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
 
   Interpolate2DEdistortion( ORDER, r, z, shortEr, Er_integral ) ;
+  Ephi_integral = 0.0 ;  // Efield is symmetric in phi
+
+  // Subtract to Undo the distortions
+  if ( r > 0.0 ) 
+    {
+      phi =  phi - ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      r   =  r   - ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
+    }
+
+  Xprime[0] = r * TMath::Cos(phi) ;
+  Xprime[1] = r * TMath::Sin(phi) ;
+  Xprime[2] = x[2] ;
+
+}
+
+  
+//________________________________________
+
+
+/// Gated Grid Voltage Error
+/*!
+    This code assumes that information about the GG voltage errors will come from the DB.  
+    
+    Calculate the effect of having an incorrect voltage on the East or West Gated Grids.
+
+    Electrostatic Equations from SN0253 by Howard Wieman.
+    Note that we use Howard's funny coordinate system where Z==0 at the GG.
+*/
+
+void StMagUtilities::UndoGGVoltErrorDistortion( const Float_t x[], Float_t Xprime[], Int_t Sector )
+{ 
+  
+  const   Int_t   ORDER     = 1     ;               // Linear interpolation = 1, Quadratic = 2         
+
+  static  Bool_t  DoOnce    = true  ;               // Note that this is the reverse logic compared to DoOnce elsewhere in StMagUtilities.
+ 
+  Float_t  Er_integral, Ephi_integral ;
+  Double_t r, phi, z ;
+
+  // if (fTpcVolts) DoOnce = UpdateGGVoltError() ;  // Reserved for Gene VB to do this correctly
+  deltaVGGEast = -10.0 ;                            // deltas should come from DB
+  deltaVGGWest =  10.0 ;                            // deltas should come from DB
+
+  if ( DoOnce )  // Note reversed logic compared to other methods in StMagUtilities
+    {
+
+      cout << "StMagUtilities::UndoGG VE  Please wait for the tables to fill ...  ~5 seconds" << endl ;
+
+      Int_t Nterms = 100 ;
+      for ( Int_t i = 0 ; i < EMap_nZ ; ++i ) 
+	{
+	  z = eZList[i] ;
+	  for ( Int_t j = 0 ; j < EMap_nR ; ++j ) 
+	    {
+	      r = eRList[j] ;
+	      GGVoltErrorEr[i][j] = 0.0 ; 	    
+              if (r < IFCRadius) continue; 
+              if (r > OFCRadius) continue; 
+              if (TMath::Abs(z) > TPC_Z0)  continue;
+	      Double_t IntegralOverZ = 0.0 ;
+	      for ( Int_t n = 1 ; n < Nterms ; ++n ) 
+		{
+		  Double_t k    =  n * TMath::Pi() / TPC_Z0 ;
+		  Double_t Ein  =  0 ;                    // Error potential on the IFC
+		  Double_t Eout =  0 ;                    // Error potential on the OFC
+		  if ( z < 0 ) 
+		    {
+		      Ein   =  -2.0 * deltaVGGEast / ( k * (CathodeV - GG) ) ;        // GG (note -1)
+		      Eout  =  -2.0 * deltaVGGEast / ( k * (CathodeV - GG) ) ;        // GG (note -1)
+
+		    }
+		  if ( z == 0 ) continue ;
+		  if ( z > 0 ) 
+		    {
+		      Ein   =  -2.0 * deltaVGGWest / ( k * (CathodeV - GG) ) ;        // GG (note -1)
+		      Eout  =  -2.0 * deltaVGGWest / ( k * (CathodeV - GG) ) ;        // GG (note -1)
+		    }
+
+		  Double_t An   =  Ein  * TMath::BesselK0( k*OFCRadius ) - Eout * TMath::BesselK0( k*IFCRadius ) ;
+		  Double_t Bn   =  Eout * TMath::BesselI0( k*IFCRadius ) - Ein  * TMath::BesselI0( k*OFCRadius ) ;
+		  Double_t Numerator =
+		    An * TMath::BesselI1( k*r ) - Bn * TMath::BesselK1( k*r ) ;
+		  Double_t Denominator =
+		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI0( k*IFCRadius ) -
+		    TMath::BesselK0( k*IFCRadius ) * TMath::BesselI0( k*OFCRadius ) ;
+		  Double_t zterm = TMath::Cos( k*(TPC_Z0-TMath::Abs(z)) ) - 1 ;
+		  IntegralOverZ += zterm * Numerator / Denominator ;
+	          if ( n>10 && fabs(IntegralOverZ)*1.e-10 > fabs(Numerator/Denominator) ) break;   // Assume series converges, break if small terms
+		}
+	      GGVoltErrorEr[i][j] = IntegralOverZ ;
+ 	    }
+	}
+      DoOnce = false ;     // Note reversed logic compared to other methods in StMagUtilies
+    }
+  
+  if ( deltaVGGEast == 0.0 && deltaVGGWest == 0 ) 
+       { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ; return ; }
+  
+  r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
+  phi    =  TMath::ATan2(x[1],x[0]) ;
+  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  z = LimitZ ( Sector ,x ) ;                        // Protect against discontinuity at CM
+
+  Interpolate2DEdistortion( ORDER, r, z, GGVoltErrorEr, Er_integral ) ;
   Ephi_integral = 0.0 ;  // Efield is symmetric in phi
 
   // Subtract to Undo the distortions
@@ -2055,6 +2167,7 @@ void StMagUtilities::ReadField( )
   if ( mDistortionMode & kShortedRing )   printf (" + ShortedRing") ;
   if ( mDistortionMode & kGridLeak )      printf (" + GridLeak") ;
   if ( mDistortionMode & k3DGridLeak )    printf (" + 3DGridLeak") ;
+  if ( mDistortionMode & kGGVoltError )   printf (" + GGVoltError") ;
 
   printf("\n");
   
@@ -3831,14 +3944,52 @@ Int_t StMagUtilities::IsPowerOfTwo(Int_t i)
 
 //________________________________________
 
+/// Calculate Sector Number from coordinate position if not already known.  
+/*!
+  Use this function only if sector number has not been passed into StMagUtilties by calling function.
+  This function assumes that -z values are on the East end of the TPC.  This may not be true
+  for pileup events.  SectorNumber from datatapes is better, if available.
+*/
+
+void StMagUtilities::SectorNumber( Int_t& Sector , const Float_t x[] )
+{
+  if (Sector > 0) return                ;  // Already valid
+  Float_t phi = TMath::ATan2(x[1],x[0]) ;
+  if ( phi < 0 ) phi += TMath::TwoPi()  ;  // Use range from 0-360
+  Sector = ( ( 30 - (int)(12*phi/TMath::Pi()) )%24 ) / 2 ;
+  if ( x[2] < 0 ) Sector = 24 - Sector  ;  // Note that order of these two if statements is important
+  else if ( Sector == 0 ) Sector = 12   ;
+}
+
+
+//________________________________________
+
+/// Limit z based on Sector Number
+/*!
+  Use this function to protect against discontinuity at the CM
+  by doing calculations no closer than 0.2 cm from it
+*/
+
+Float_t StMagUtilities::LimitZ( Int_t& Sector , const Float_t x[] )
+{
+  Float_t z = x[2];
+  SectorNumber( Sector, x ) ;
+  if (Sector <= 12 && z < 0.2) z = 0.2 ;
+  else if (Sector >= 13 && z > -0.2) z = -0.2 ;
+  return z ;
+}
+
+
+//________________________________________
 
 /// Grid Leakage Calculation
 /*!
   Calculate the distortions due to charge leaking out of the gap between the inner and outer sectors
   as well as the gap between the IFC and the innersector, as well as outersector and OFC.
   Original work by Gene VanBuren, and J. Thomas 
+  NOTE: This routine is obsolete: 10/31/2009  Recommend that you use Undo3DGridLeakDistortion, instead.
 */
-void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 { 
   
   const  Int_t     ORDER       =  1   ;  // Linear interpolation = 1, Quadratic = 2         
@@ -3913,15 +4064,14 @@ void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[]
   
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi    =  TMath::ATan2(x[1],x[0]) ;
-  if ( phi < 0 ) phi += 2*TMath::Pi() ;              // Table uses phi from 0 to 2*Pi
-  z      =  TMath::Abs(x[2]) ;                       // Force symmetry in Z 
-  if ( z > 0 && z <  0.2 ) z =  0.2 ;                // Protect against discontinuity at CM
-  if ( z < 0 && z > -0.2 ) z = -0.2 ;                // Protect against discontinuity at CM
+  if ( phi < 0 ) phi += TMath::TwoPi() ;             // Table uses phi from 0 to 2*Pi
+  z = LimitZ( Sector, x ) ;                          // Protect against discontinuity at CM
   
   Float_t phi0     =  TMath::Pi() * ((Int_t)(0.499 + phi*6/TMath::Pi())) / 6.0 ;  
   Float_t local_y  =  r * TMath::Cos( phi - phi0 ) ; // Cheat! Cheat! Use local y because charge is a flat sheet.
 
-  Er_integral   =  Interpolate2DTable( ORDER, local_y, z, ROWS, COLUMNS, Rlist, Zedlist, EroverEz ) ;
+  // Assume symmetry in Z for call to table, below
+  Er_integral   =  Interpolate2DTable( ORDER, local_y, TMath::Abs(z), ROWS, COLUMNS, Rlist, Zedlist, EroverEz ) ;
   Ephi_integral =  0.0 ;                             // E field is symmetric in phi
 
   // Get Space Charge 
@@ -3930,7 +4080,7 @@ void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[]
   // Subtract to Undo the distortions and apply the EWRatio factor to the data on the East end of the TPC
   if ( r > 0.0 ) 
     {
-      if ( x[2] < 0.0 )
+      if ( z < 0.0 )
 	{
 	  phi =  phi - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
 	  r   =  r   - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
@@ -3957,7 +4107,7 @@ void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[]
   Calculate the 3D distortions due to charge leaking out of the gap between the inner and outer sectors.
   Original work by Gene VanBuren, and J. Thomas 
 */
-void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime[] )
+void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime[] , Int_t Sector )
 { 
      
   const Int_t   ORDER       =    1  ;  // Linear interpolation = 1, Quadratic = 2         
@@ -4013,6 +4163,8 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 
   if ( DoOnce == 0 )
     {
+      for (Int_t i = 0 ; i < 25; i++ ) GLWeights[i] = 1; // Placeholder for future use
+
       cout << "StMagUtilities::Undo3DGrid Please wait for the tables to fill ...  ~5 seconds * PHISLICES" << endl ;
     
       for ( Int_t k = 0 ; k < PHISLICES ; k++ )
@@ -4126,10 +4278,8 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
   
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi    =  TMath::ATan2(x[1],x[0]) ;
-  z      =  TMath::Abs(x[2]) ;                      // Assume a solution that is symmetric in Z !!
-  if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
-  if ( z > 0 && z <  0.2 ) z =  0.2 ;               // Protect against discontinuity at CM
-  if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
+  if ( phi < 0 ) phi += TMath::TwoPi() ;            // Table uses phi from 0 to 2*Pi
+  z = LimitZ( Sector, x ) ;                         // Protect against discontinuity at CM
 
   Float_t phi_prime, local_y, r_eff, FLIP = 1.0 ;
   phi_prime = phi ;
@@ -4146,8 +4296,9 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
   if ( local_y > GAPRADIUS - GAP13_14 && local_y < GAPRADIUS ) r_eff = (GAPRADIUS - GAP13_14) / TMath::Cos(phi_prime) ;
   if ( local_y < GAPRADIUS + GAP13_14 && local_y > GAPRADIUS ) r_eff = (GAPRADIUS + GAP13_14) / TMath::Cos(phi_prime) ;
 
-  Er_integral   = Interpolate3DTable( ORDER, r_eff, z, phi_prime, neR3D, EMap_nZ, PHISLICES, eRadius, eZList, Philist, ArrayoftiltEr )   ;
-  Ephi_integral = Interpolate3DTable( ORDER, r_eff, z, phi_prime, neR3D, EMap_nZ, PHISLICES, eRadius, eZList, Philist, ArrayoftiltEphi ) ;
+  // Assume symmetry in Z when looking up data in tables, below
+  Er_integral   = Interpolate3DTable( ORDER, r_eff, TMath::Abs(z), phi_prime, neR3D, EMap_nZ, PHISLICES, eRadius, eZList, Philist, ArrayoftiltEr )   ;
+  Ephi_integral = Interpolate3DTable( ORDER, r_eff, TMath::Abs(z), phi_prime, neR3D, EMap_nZ, PHISLICES, eRadius, eZList, Philist, ArrayoftiltEphi ) ;
   Ephi_integral *= FLIP ;                           // Note possible change of sign if we have reflection symmetry!!
 
   if (fSpaceChargeR2) GetSpaceChargeR2();           // Get latest spacecharge values from DB 
@@ -4156,16 +4307,10 @@ void StMagUtilities::Undo3DGridLeakDistortion( const Float_t x[], Float_t Xprime
 
   if ( r > 0.0 ) 
     {
-      if ( x[2] < 0.0 ) 
-	{
-	  phi =  phi - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * SpaceChargeEWRatio * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
-      else
-	{
-	  phi =  phi - SpaceChargeR2 * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
-	  r   =  r   - SpaceChargeR2 * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
-	}
+      Float_t Weight = SpaceChargeR2 * GLWeights[Sector] ;
+      if ( z < 0.0 ) Weight *= SpaceChargeEWRatio ;
+      phi =  phi - Weight * ( Const_0*Ephi_integral - Const_1*Er_integral ) / r ;      
+      r   =  r   - Weight * SpaceChargeEWRatio * ( Const_0*Er_integral   + Const_1*Ephi_integral ) ;  
     }
 
   Xprime[0] = r * TMath::Cos(phi) ;
