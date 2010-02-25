@@ -19,7 +19,9 @@ MediumSilicon::MediumSilicon() :
   eSatVel(1.02e-2), hSatVel(0.72e-2),
   eHallFactor(1.15), hHallFactor(0.7),
   eTrapCs(1.e-15), hTrapCs(1.e-15),
-  eTrapDensity(1.e13), hTrapDensity(1.e13),  
+  eTrapDensity(1.e13), hTrapDensity(1.e13),
+  eTrapTime(0.), hTrapTime(0.),
+  trappingModel(0),  
   eImpactA0(3.318e5), eImpactA1(0.703e6), eImpactA2(0.),
   eImpactB0(1.135e6), eImpactB1(1.231e6), eImpactB2(0.),
   hImpactA0(1.582e6), hImpactA1(0.671e6), hImpactA2(0.),
@@ -102,6 +104,8 @@ MediumSilicon::SetTrapCrossSection(const double ecs, const double hcs) {
   } else {
     hTrapCs = hcs;
   }
+  
+  trappingModel = 0;
 
 }
 
@@ -115,6 +119,29 @@ MediumSilicon::SetTrapDensity(const double n) {
     eTrapDensity = n;
     hTrapDensity = n;
   }
+  
+  trappingModel = 0;
+
+}
+
+void
+MediumSilicon::SetTrappingTime(const double etau, const double htau) {
+
+  if (etau <= 0.) {
+    std::cerr << "MediumSilicon::SetTrappingTime:" << std::endl;
+    std::cerr << "    Trapping time [ns-1] must be greater than zero." << std::endl;
+  } else {
+    eTrapTime = etau;
+  }
+  
+  if (htau <= 0.) {
+    std::cerr << "MediumSilicon::SetTrappingTime:" << std::endl;
+    std::cerr << "    Trapping time [ns-1] must be greater than zero." << std::endl;
+  } else {
+    hTrapTime = htau;
+  }
+  
+  trappingModel = 1;
 
 }
 
@@ -203,7 +230,23 @@ MediumSilicon::ElectronAttachment(
     isChanged = false;
   }
   
-  eta = eTrapCs * eTrapDensity;
+  switch (trappingModel) {
+    case 0:
+      eta = eTrapCs * eTrapDensity;
+      break;
+    case 1:
+      double vx, vy, vz;
+      ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
+      eta = eTrapTime * sqrt(vx * vx + vy * vy + vz * vz);
+      if (eta > 0.) eta = 1. / eta;
+      break;
+    default:
+      std::cerr << "MediumSilicon::ElectronAttachment:" << std::endl;
+      std::cerr << "    Unknown model activated. Program bug!" << std::endl;
+      return false;
+      break;      
+  }
+    
   return true;
 
 }            
@@ -292,7 +335,23 @@ MediumSilicon::HoleAttachment(
     isChanged = false;
   }
   
-  eta = hTrapCs * hTrapDensity;
+  switch (trappingModel) {
+    case 0:
+      eta = hTrapCs * hTrapDensity;
+      break;
+    case 1:
+      double vx, vy, vz;
+      HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
+      eta = hTrapTime * sqrt(vx * vx + vy * vy + vz * vz);
+      if (eta > 0.) eta = 1. / eta;
+      break;
+    default:
+      std::cerr << "MediumSilicon::HoleAttachment:" << std::endl;
+      std::cerr << "    Unknown model activated. Program bug!" << std::endl;
+      return false;
+      break;      
+  }
+  
   return true;
 
 }
@@ -693,7 +752,8 @@ MediumSilicon::UpdateSaturationVelocityMinimos() {
   
 }
 
-void MediumSilicon::UpdateSaturationVelocityCanali() {
+void 
+MediumSilicon::UpdateSaturationVelocityCanali() {
 
   // References:
   // - C. Canali, G. Majni, R. Minder, G. Ottaviani,
@@ -769,7 +829,8 @@ MediumSilicon::UpdateImpactIonisationGrant() {
   
 }
 
-bool MediumSilicon::ElectronMobilityMinimos(const double e, double& mu) const {
+bool 
+MediumSilicon::ElectronMobilityMinimos(const double e, double& mu) const {
 
   // Reference:
   // - Minimos User's Guide (1999)
@@ -783,7 +844,8 @@ bool MediumSilicon::ElectronMobilityMinimos(const double e, double& mu) const {
   
 }
 
-bool MediumSilicon::ElectronMobilityCanali(const double e, double& mu) const {
+bool 
+MediumSilicon::ElectronMobilityCanali(const double e, double& mu) const {
 
   // Reference:
   // - Sentaurus Device User Guide (2007)
@@ -797,7 +859,8 @@ bool MediumSilicon::ElectronMobilityCanali(const double e, double& mu) const {
   
 }
 
-bool MediumSilicon::ElectronImpactIonisationVanOverstraetenDeMan(const double e, 
+bool 
+MediumSilicon::ElectronImpactIonisationVanOverstraetenDeMan(const double e, 
                                                            double& alpha) const {
 
   // References:
@@ -817,7 +880,8 @@ bool MediumSilicon::ElectronImpactIonisationVanOverstraetenDeMan(const double e,
 
 }
 
-bool MediumSilicon::ElectronImpactIonisationGrant(const double e, double& alpha) const {
+bool 
+MediumSilicon::ElectronImpactIonisationGrant(const double e, double& alpha) const {
 
   // Reference:
   //  - W. N. Grant, Solid State Electronics 16 (1973), 1189 - 1203
@@ -835,7 +899,8 @@ bool MediumSilicon::ElectronImpactIonisationGrant(const double e, double& alpha)
 
 }
 
-bool MediumSilicon::HoleMobilityMinimos(const double e, double& mu) const {
+bool 
+MediumSilicon::HoleMobilityMinimos(const double e, double& mu) const {
 
   // Reference:
   // - Minimos User's Guide (1999)
@@ -849,7 +914,8 @@ bool MediumSilicon::HoleMobilityMinimos(const double e, double& mu) const {
   
 }
 
-bool MediumSilicon::HoleMobilityCanali(const double e, double& mu) const {
+bool 
+MediumSilicon::HoleMobilityCanali(const double e, double& mu) const {
 
   // Reference:
   // - Sentaurus Device User Guide (2007)
@@ -863,7 +929,8 @@ bool MediumSilicon::HoleMobilityCanali(const double e, double& mu) const {
   
 }
 
-bool MediumSilicon::HoleImpactIonisationVanOverstraetenDeMan(const double e, 
+bool 
+MediumSilicon::HoleImpactIonisationVanOverstraetenDeMan(const double e, 
                                                        double& alpha) const {
 
   // Reference:
@@ -879,7 +946,8 @@ bool MediumSilicon::HoleImpactIonisationVanOverstraetenDeMan(const double e,
 
 }
 
-bool MediumSilicon::HoleImpactIonisationGrant(const double e, double& alpha) const {
+bool 
+MediumSilicon::HoleImpactIonisationGrant(const double e, double& alpha) const {
 
   // Reference:
   //  - W. N. Grant, Solid State Electronics 16 (1973), 1189 - 1203
@@ -896,7 +964,8 @@ bool MediumSilicon::HoleImpactIonisationGrant(const double e, double& alpha) con
 }
 
 
-bool MediumSilicon::LoadOpticalData(const std::string filename) {
+bool 
+MediumSilicon::LoadOpticalData(const std::string filename) {
 
   // Open the file
   std::ifstream infile;
@@ -966,37 +1035,221 @@ bool MediumSilicon::LoadOpticalData(const std::string filename) {
 
 }
 
-double MediumSilicon::IonisationRate(const double energy, const int q) {
 
-  double f = 0.;
+void
+MediumSilicon::ElectronScatteringRates() {
+
+  // Reference:
+  //  - C. Jacoboni and L. Reggiani,
+  //    Rev. Mod. Phys. 55, 645-705
+
+  // Mass density [g/cm3]
+  const double rho = GetMassDensity();
+  // Lattice temperature [eV]
+  const double kbt = BoltzmannConstant * temperature;  
   
-  // Fischetti-Laux-Cartier model
+  // Band parameters
+  // Longitudinal and transverse effective electron masses
+  const double ml = 0.98;
+  const double mt = 0.19;
+  // Density of states effective mass
+  const double md = pow(ml * mt * mt, 1. / 3.);
+  // Non-parabolicity coefficient [eV-1]
+  const double alpha = 0.5;
+   
+  // Acoustic phonon intraband scattering  
+  // Acoustic deformation potential [eV]
+  const double defpot = 9.;
+  // Longitudinal and transverse velocity of sound [cm/ns]
+  const double ut = 9.0e-4;
+  const double ul = 5.3e-4;
+  // Average velocity of sound [cm/ns]
+  const double u = (ul + 2. * ut) / 3.;    
+  // Prefactor for acoustic deformation potential scattering
+  const double cIntra = 
+    sqrt(2. * md * ElectronMass) * md * ElectronMassGramme * 
+    kbt * defpot * defpot /
+    (Pi * HbarC * pow(Hbar, 3.) * u * u * rho);
   
-  // Electrons
-  if (q < 0) {
-    // Prefactor [ps-1]
-    const double p[3] = {6.25e-2, 3., 6.8e2};
-    // Threshold energies [eV]
-    const double eth[3] = {1.1, 1.8, 3.45};
-    // Exponent
-    const double b[3] = {2., 2., 2.};
-    for (int i = 0; i < 3; ++i) {
-      if (energy < eth[i]) break;
-      f += p[i] * pow(energy - eth[i], b[i]);
+  // Phonon induced interband scattering  
+  // Coupling constants [eV/cm]
+  const double dtk1 =  0.5e8;
+  const double dtk2 =  0.8e8;
+  const double dtk3 = 11.0e8;
+  const double dtk4 =  0.3e8;
+  const double dtk5 =  2.0e8;
+  const double dtk6 =  2.0e8;
+  // Phonon energies [eV]
+  const double eph1 = 12.1e-3;
+  const double eph2 = 18.5e-3;
+  const double eph3 = 62.0e-3;
+  const double eph4 = 19.0e-3;
+  const double eph5 = 47.4e-3;
+  const double eph6 = 59.0e-3;
+  // Occupation number
+  const double nocc1 = 1. / (exp(eph1 / kbt) - 1);
+  const double nocc2 = 1. / (exp(eph2 / kbt) - 1);
+  const double nocc3 = 1. / (exp(eph3 / kbt) - 1);
+  const double nocc4 = 1. / (exp(eph4 / kbt) - 1);
+  const double nocc5 = 1. / (exp(eph5 / kbt) - 1);
+  const double nocc6 = 1. / (exp(eph6 / kbt) - 1);
+  // Prefactors for interband scattering
+  const double cInter = 
+    sqrt(md * ElectronMass) * md * ElectronMassGramme /
+    (sqrt(2.) * Pi * HbarC * Hbar * rho);
+  const double cInter1 = cInter * dtk1 * dtk1 / eph1;
+  const double cInter2 = cInter * dtk2 * dtk2 / eph2;
+  const double cInter3 = cInter * dtk3 * dtk3 / eph3;
+  const double cInter4 = 4 * cInter * dtk4 * dtk4 / eph4;
+  const double cInter5 = 4 * cInter * dtk5 * dtk5 / eph5;
+  const double cInter6 = 4 * cInter * dtk6 * dtk6 / eph6;
+
+  // Impact ionisation
+  // Reference:
+  // - E. Cartier, M. V. Fischetti, E. A. Eklund and F. R. McFeely,
+  //   Appl. Phys. Lett 62, 3339-3341
+  // Coefficients [ns-1]
+  const double p[3] = {6.25e1, 3.e3, 6.8e5};
+  // Threshold energies [eV]
+  const double eth[3] = {1.1, 1.8, 3.45};
+
+  double en = 1.e-4;
+  const double estep = 0.005;
+  int nSteps = 2000;
+  double ef = 0.;
+  double f;  
+  for (int i = 0; i < nSteps; ++i) {
+    en += estep;    
+    // Acoustic intraband scattering
+    f = cIntra * sqrt(en * (1. + alpha * en)) * (1. + 2. * alpha * en);
+    // Interband scattering
+    // Phonon 1 (TA)
+    // Absorption
+    ef = en + eph1;
+    f = cInter1 * nocc1 * sqrt(ef * (1. + alpha * ef)) * (1. + 2. * alpha * ef);
+    // Emission
+    if (en > eph1) {
+      ef = en - eph1;
+      f = cInter1 * (nocc1 + 1) * sqrt(ef * (1. + alpha * ef)) * (1. + 2. * alpha * ef);
     }
-  } else {
-    // Holes
-    const double p[2] = {2.e-3, 1.};
-    const double eth[2] = {1.1, 1.45};
-    const double b[2] = {6., 4.};
-    if (energy < eth[0]) return f;
-    f += p[0] * pow(energy - eth[0], b[0]);
-    if (energy - eth[1]) return f;
-    f += p[1] * pow(energy - eth[1], b[1]);
+    // Phonon 2 (LA)
+    // Absorption
+    ef = en + eph2;
+    f = cInter2 * nocc2 * sqrt(ef * (1. + alpha * ef)) * (1. + 2. * alpha * ef);
+    // Emission
+    if (en > eph2) {
+      ef = en - eph2;
+      f = cInter2 * (nocc2 + 1) * sqrt(ef * (1. + alpha * ef)) * (1. + 2. * alpha * ef);
+    }
+    // Phonon 3 (LO)
+    // Absorption
+    ef = en + eph3;
+    f = cInter3 * nocc3 * sqrt(ef * (1. + alpha * ef)) * (1. + 2. * alpha * ef);
+    // Emission
+    if (en > eph3) {
+      ef = en - eph3;
+      f = cInter3 * (nocc3 + 1) * sqrt(ef * (1. + alpha * ef)) * (1. + 2. * alpha * ef);
+    }
+    // Phonon 4 (TA)
+    // Absorption
+    ef = en + eph4;
+    f = cInter4 * nocc4 * sqrt(ef * (1. + alpha * ef)) * (1. + 2. * alpha * ef);
+    // Emission
+    if (en > eph4) {
+      ef = en - eph4;
+      f = cInter4 * (nocc4 + 1) * sqrt(ef * (1. + alpha * ef)) * (1. + 2. * alpha * ef);
+    }
+    // Phonon 5 (TA)
+    // Absorption
+    ef = en + eph5;
+    f = cInter5 * nocc5 * sqrt(ef * (1. + alpha * ef)) * (1. + 2. * alpha * ef);
+    // Emission
+    if (en > eph5) {
+      ef = en - eph5;
+      f = cInter5 * (nocc5 + 1) * sqrt(ef * (1. + alpha * ef)) * (1. + 2. * alpha * ef);
+    }
+    // Phonon 6 (TA)
+    // Absorption
+    ef = en + eph6;
+    f = cInter6 * nocc6 * sqrt(ef * (1. + alpha * ef)) * (1. + 2. * alpha * ef);
+    // Emission
+    if (en > eph6) {
+      ef = en - eph6;
+      f = cInter6 * (nocc6 + 1) * sqrt(ef * (1. + alpha * ef)) * (1. + 2. * alpha * ef);
+    }
+    // Impact ionisation
+    f = 0.;
+    if (en > eth[0]) f += p[0] * (en - eth[0]) * (en - eth[0]);
+    if (en > eth[1]) f += p[1] * (en - eth[1]) * (en - eth[1]);
+    if (en > eth[2]) f += p[2] * (en - eth[2]) * (en - eth[2]);
+  }
+
+}
+
+void
+MediumSilicon::HoleScatteringRates() {
+
+  // Mass density [g/cm3]
+  const double rho = GetMassDensity();
+  // Lattice temperature [eV]
+  const double kbt = BoltzmannConstant * temperature;  
+
+  // Acoustic phonon interband scattering
+  // Acoustic deformation potential [eV]
+  const double defpot = 5.0;
+  // Longitudinal and transverse velocity of sound [cm/ns]
+  const double ut = 9.0e-4;
+  const double ul = 5.3e-4;
+  // Average velocity of sound [cm/ns]
+  const double u = (ul + 2. * ut) / 3.;
+  // Prefactor
+  const double cAc = defpot * defpot * pow(kbt, 3.) /
+                     (pow(2., 4.5) * Pi * rho * pow(u, 4.));
+
+  // Impact ionisation
+  // Reference:
+  // - DAMOCLES web page
+  const double p[2] = {2., 1.e3};
+  const double eth[2] = {1.1, 1.45};
+  const double b[2] = {6., 4.};
+  
+  double en = 1.e-4;
+  const double estep = 0.005;
+  double f;
+  int nSteps = 2000;
+  for (int i = 0; i < nSteps; ++i) {
+    en += estep;    
+    // Impact ionisation
+    f = 0.;
+    if (en > eth[0]) f += p[0] * pow(en - eth[0], b[0]);
+    if (en > eth[1]) f += p[1] * pow(en - eth[1], b[1]);
+  }
+
+}
+
+void 
+MediumSilicon::ComputeHoleIntegrals(const double x, double& f3, double& f4, double& g3, double& g4) {
+
+  const double x2 = x * x;
+  const double x3 = x2 * x;
+  const double x4 = x2 * x2;
+  const double sq2 = sqrt(2);
+  
+  if (x <= 3. / sq2) {
+    f3 = 2. * x2 * (1. - 34. * sq2 * x / 105. + x2 / 12.);
+    g3 = 2. * x2 * (1. + 34. * sq2 * x / 105. + x2 / 12.);
+    f4 = x3 * (136. * sq2 / 105. - x + 44. * sq2 * x2 / 315.);
+    g4 = x3 * (136. * sq2 / 105. + x + 44. * sq2 * x2 / 315.);
+    return;
   }
   
-  return f;
-
+  f3 = 1017. / 280. + (68. - 2358. / x2 + 41931. / x4) * exp(-3.) - 8. * exp(-sq2 * x) * 
+       (x2 + 4. * sq2 * x * 28. + 72. * sq2 / x + 252. / x2 + 270. * sq2 / x3 + 270. / x4);
+  f4 = 801. / 140. + exp(-3.) * (312. - 13248. / x2 + 300078. / x4) - exp(sq2 * x) * 
+       (8. * sq2 * x3 + 72. * x2 + 288. * sq2 * x + 1824. + 4320. * sq2 / x + 14400. / x2 + 15120. * sq2 / x3 + 15120. / x4);
+  g3 = 5913. / 280. + 136. * sq2 / (105. * x3) - 9. * (4. - 162. / (5. * x2) + 729. / (7. * x4));       
+  g4 = 6371. / 140. + 2. * x4 - 81. + 729. / x2 - 19683. / (8. * x4);
+  
 }
 
 }

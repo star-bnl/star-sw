@@ -15,15 +15,16 @@ double AvalancheMicroscopic::c2 = c1 * c1 / 4.;
 AvalancheMicroscopic::AvalancheMicroscopic() :
   sensor(0), 
   nElectrons(0), nIons(0),  
-  histogram(0), hasEnergyHistogram(false),
+  histEnergy(0), hasEnergyHistogram(false),
+  histDistance(0), hasDistanceHistogram(false), distanceOption('z'),
   useSignal(false), useDriftLines(false),
   deltaCut(0.),
   nCollSkip(100),
-  hasUserHandleAttachment(false), 
+  hasUserHandleAttachment(false),
   hasUserHandleInelastic(false),
   hasUserHandleIonisation(false),
   userHandleAttachment(0), userHandleInelastic(0),
-  userHandleIonisation(0), 
+  userHandleIonisation(0),
   debug(false), warning(false) {
 
 }
@@ -49,7 +50,7 @@ AvalancheMicroscopic::EnableEnergyHistogramming(TH1F* histo) {
     return;
   }
   
-  histogram = histo;
+  histEnergy = histo;
   hasEnergyHistogram = true;
   
 }
@@ -58,6 +59,34 @@ void
 AvalancheMicroscopic::DisableEnergyHistogramming() {
 
   hasEnergyHistogram = false;
+  
+}
+
+void 
+AvalancheMicroscopic::EnableDistanceHistogramming(TH1F* histo, const char opt) {
+
+  if (histo == 0) {
+    std::cerr << "AvalancheMicroscopic::EnableDistanceHistogramming:" 
+              << std::endl;
+    std::cerr << "    Histogram is not defined." << std::endl;
+    return;
+  }
+  
+  histDistance = histo;
+  hasDistanceHistogram = true;
+
+  if (opt == 'x' || opt == 'y' || opt == 'z' || opt == 'r') {
+    distanceOption = opt;
+  } else {
+    distanceOption = 'z';
+  }
+  
+}
+
+void 
+AvalancheMicroscopic::DisableDistanceHistogramming() {
+
+  hasDistanceHistogram = false;
   
 }
 
@@ -135,7 +164,8 @@ AvalancheMicroscopic::GetDriftLinePoint(
     return;
   }
 
-  if (ip > endpoints[iel].driftLine.size()) {
+  const int np = endpoints[iel].driftLine.size();
+  if (ip > np) {
     x = endpoints[iel].x;
     y = endpoints[iel].y;
     z = endpoints[iel].z;
@@ -314,6 +344,9 @@ AvalancheMicroscopic::AvalancheElectron(
   newElectron.t0 = t0;  newElectron.t  = t0;
   newElectron.dx = dx0; newElectron.dy = dy0; newElectron.dz = dz0;
   newElectron.e0 = Max(e0, Small); newElectron.energy = newElectron.e0;
+  if (hasDistanceHistogram) {
+    newElectron.xLast = x0; newElectron.yLast = y0; newElectron.zLast = z0;
+  }  
   newElectron.driftLine.clear();
   stack.push_back(newElectron);
 
@@ -364,7 +397,7 @@ AvalancheMicroscopic::AvalancheElectron(
         }
 
         if (hasEnergyHistogram) {
-          histogram->Fill(energy);
+          histEnergy->Fill(energy);
         }
 
         // Get the local electric field and medium
@@ -404,7 +437,7 @@ AvalancheMicroscopic::AvalancheElectron(
             return false;
           }          
         }
-
+        
         a = c1 * (dx * ex + dy * ey + dz * ez) * sqrt(energy);
         b = c2 * (ex * ex + ey * ey + ez * ez);
 
@@ -472,7 +505,27 @@ AvalancheMicroscopic::AvalancheElectron(
           case 1:
             if (hasUserHandleIonisation) {
               userHandleIonisation(x, y, z, t, cstype, level, medium);
-            }          
+            }
+            if (hasDistanceHistogram) {
+              switch (distanceOption) {
+                case 'x':
+                  histDistance->Fill(stack[iEl].xLast - x);
+                  break;
+                case 'y':
+                  histDistance->Fill(stack[iEl].yLast - y);
+                  break;
+                case 'z':
+                  histDistance->Fill(stack[iEl].zLast - z);
+                  break;
+                case 'r':
+                  const double rion = pow(stack[iEl].xLast - x, 2) + 
+                                      pow(stack[iEl].yLast - y, 2) + 
+                                      pow(stack[iEl].zLast - z, 2);
+                  histDistance->Fill(sqrt(rion));
+                  break;
+              }
+              stack[iEl].xLast = x; stack[iEl].yLast = y; stack[iEl].zLast = z;              
+            }                          
             // Randomise secondary electron direction
             phi = TwoPi * RndmUniform();
             ctheta = 1. - 2. * RndmUniform();

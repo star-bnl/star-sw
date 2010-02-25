@@ -24,6 +24,7 @@ class MediumSilicon : public Medium {
     // Trapping cross-section
     void SetTrapCrossSection(const double ecs, const double hcs);
     void SetTrapDensity(const double n);
+    void SetTrappingTime(const double etau, const double htau);
   
     // Electron transport parameters
     bool ElectronVelocity(const double ex, const double ey, const double ez,
@@ -86,6 +87,8 @@ class MediumSilicon : public Medium {
     // Trapping parameters
     double eTrapCs, hTrapCs;
     double eTrapDensity, hTrapDensity;
+    double eTrapTime, hTrapTime;
+    int trappingModel;
     
     // Impact ionisation parameters
     double eImpactA0, eImpactA1, eImpactA2;
@@ -136,7 +139,9 @@ class MediumSilicon : public Medium {
     std::vector<opticalData> opticalDataTable;    
     bool LoadOpticalData(const std::string filename);
 
-    double IonisationRate(const double energy, const int q);
+    void ElectronScatteringRates();
+    void HoleScatteringRates();
+    void ComputeHoleIntegrals(const double x, double& f3, double& f4, double& g3, double& g4);
 
 };
 

@@ -28,6 +28,10 @@ class AvalancheMicroscopic {
     // Switch on/off filling histograms for energy distribution
     void EnableEnergyHistogramming(TH1F* histo);
     void DisableEnergyHistogramming();
+    
+    // Switch on/off filling histograms for distance distribution
+    void EnableDistanceHistogramming(TH1F* histo, const char opt = 'z');
+    void DisableDistanceHistogramming();
 
     // Switch on/off storage of drift lines
     void EnableDriftLines() {useDriftLines = true;}
@@ -107,6 +111,7 @@ class AvalancheMicroscopic {
       double energy;
       // Drift line
       std::vector<point> driftLine;
+      double xLast, yLast, zLast;
     };
     std::vector<electron> stack;
     std::vector<electron> endpoints;
@@ -117,8 +122,11 @@ class AvalancheMicroscopic {
     // Number of electron trajectories (including captured electrons)
     int nEndpoints;
 
-    TH1F* histogram;
-    bool hasEnergyHistogram;    
+    TH1F* histEnergy;
+    bool hasEnergyHistogram; 
+    TH1F* histDistance;
+    bool hasDistanceHistogram;
+    char distanceOption;
     bool useSignal;
     bool useDriftLines;
     

@@ -19,6 +19,7 @@ static const double ProtonMass   = 938.27203e6;
 static const double NeutronMass  = 939.56536e6;
 
 static const double FineStructureConstant   =   7.2973525376e-3;
+static const double Hbar                    =   6.58211899e-7;    // eV ns
 static const double HbarC                   = 197.3269631e-7;     // eV cm
 static const double ElectronMassGramme      =   9.10938215e-28;   // g
 static const double AtomicMassUnit          =   1.660538782e-24;  // g
