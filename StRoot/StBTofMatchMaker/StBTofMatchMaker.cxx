@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.4 2009/09/15 00:30:45 dongx Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.5 2010/02/25 05:17:10 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.5  2010/02/25 05:17:10  dongx
+ * Geometry initalization moved from Init() to InitRun()
+ *
  * Revision 1.4  2009/09/15 00:30:45  dongx
  * 1) Added the functionality to perform the matching with MuDst directly.
  * 2) Several updates on the track cuts used for matching
@@ -149,6 +152,15 @@ Int_t StBTofMatchMaker::Init(){
   mTofEventCounter = 0;
   mAcceptAndBeam = 0;
   
+
+  return kStOK;
+}
+
+
+//---------------------------------------------------------------------------
+Int_t StBTofMatchMaker::InitRun(Int_t runnumber){
+
+  // determine TOF configuration from run#
   LOG_INFO << "StBTofMatchMaker -- Initializing TofGeometry (Init)" << endm;
   /////////////////////////////////////////////////////////////////////
   // TOF geometry initializtion -- from GEANT geometry directly
@@ -178,17 +190,12 @@ Int_t StBTofMatchMaker::Init(){
   return kStOK;
 }
 
-
-//---------------------------------------------------------------------------
-Int_t StBTofMatchMaker::InitRun(Int_t runnumber){
-
-  // determine TOF configuration from run#
-
-  return kStOK;
-}
-
 //----------------------------------------------------------------------------
 Int_t StBTofMatchMaker::FinishRun(Int_t runnumber){
+
+  LOG_INFO << "StBTofMatchMaker -- cleaning up geometry (Finish)" << endm;
+  if (!mInitFromOther && mBTofGeom) delete mBTofGeom;
+  mBTofGeom=0;
 
   return kStOK;
 }
@@ -207,9 +214,6 @@ Int_t StBTofMatchMaker::Finish(){
   //if (mHisto) writeHistogramsToFile();
   if (mHistoFileName!="") writeHistogramsToFile();
 
-  LOG_INFO << "StBTofMatchMaker -- cleaning up geometry (Finish)" << endm;
-  if (!mInitFromOther && mBTofGeom) delete mBTofGeom;
-  mBTofGeom=0;
 
   return kStOK;
 }
