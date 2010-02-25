@@ -845,7 +845,7 @@ void StSpaceChargeEbyEMaker::FillGapHists(StTrack* tri, StPhysicalHelixD& hh,
     // http://drupal.star.bnl.gov/STAR/blog/genevb/2010/feb/21/gridleak-update-using-residuals-along-padrows
     Double_t residual = hh.geometricSignedDistance(hp.x(),hp.y());
 
-    UInt_t sec = hit->sector();
+    Int_t sec = hit->sector();
     Double_t sector_angle = (TMath::Pi()/6.) * (sec < 13 ? 3 - sec : sec - 21);
     Double_t pathlen = hh.pathLength(hp.x(),hp.y());
     Double_t theta = TMath::ATan2(hh.cy(pathlen),hh.cx(pathlen)) - sector_angle;
@@ -859,14 +859,14 @@ void StSpaceChargeEbyEMaker::FillGapHists(StTrack* tri, StPhysicalHelixD& hh,
     x1[0] = hp.perp()*TMath::Sin(phi);
     x1[1] = hp.perp()*TMath::Cos(phi);
     x1[2] = hp.z();
-    m_ExB->Undo3DGridLeakDistortion(x1,x2);
+    m_ExB->Undo3DGridLeakDistortion(x1,x2,sec);
     Double_t dX = x2[0]-x1[0];
     if (TMath::Abs(dX) > 1e-20) {
       // warning: no available GridLeak calculation may lead
       //   to slightly different results
       Eff3 = gsign * ((x2[1]-x1[1])/dX) * TMath::Sin(theta);
       x1[0] = 0;
-      m_ExB->Undo3DGridLeakDistortion(x1,x2);
+      m_ExB->Undo3DGridLeakDistortion(x1,x2,sec);
       Eff2 = (x2[0]-x1[0])/dX;
     }
 
@@ -1010,8 +1010,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.28 2010/02/24 22:58:21 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.29 2010/02/25 21:50:18 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.29  2010/02/25 21:50:18  genevb
+// Pass sector number to StMagUtilities, correct unsigned int usage
+//
 // Revision 1.28  2010/02/24 22:58:21  genevb
 // Even the highest ranked vertex might need to be above a minimum ranking
 //
