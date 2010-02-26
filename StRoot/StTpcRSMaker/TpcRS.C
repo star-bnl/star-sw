@@ -83,6 +83,7 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
   cout << "ChainOpt : " << ChainOpt.Data() << "\tOuput file " << RootFile.Data() << endl;
   TString output = RootFile;
   output.ReplaceAll(".root","O.root");
+  output.ReplaceAll("*","");
   if (NEvents < 0) {
     bfc(-1,ChainOpt.Data(),0,0,0);
     return;

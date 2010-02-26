@@ -99,6 +99,7 @@ class StTpcRSMaker : public StMaker {
   TF1  *mChargeFractionOuter;        //!
   TF1  *mPadResponseFunctionOuter;   //!
   TF1  *mPolya;                      //!
+  TF1  *mGG;                         //! Gating Grid Transperency
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
   PAI  *mPAI;                        //!
   Double_t             mLaserScale;  //!
@@ -171,14 +172,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.13 2010/01/26 19:47:26 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.14 2010/02/26 18:53:33 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.13 2010/01/26 19:47:26 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.14 2010/02/26 18:53:33 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.14  2010/02/26 18:53:33  fisyak
+// Take longitudinal Diffusion from Laser track fit, add Gating Grid
+//
 // Revision 1.13  2010/01/26 19:47:26  fisyak
 // Include dE/dx calibration and distortions in the simulation
 //
