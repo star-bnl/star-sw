@@ -41,7 +41,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.29 2010/02/16 00:21:23 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.30 2010/02/26 18:53:33 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -76,7 +76,7 @@ StTpcRSMaker::StTpcRSMaker(const char *name):
   mCluster(3.2), tauGlobalOffSet(0), 
   OmegaTauC(3.02), //fit of data// (2.0), //from Blair fit OmegaTauC(2.96), //OmegaTauC(3.58), 
   transverseDiffusionConstant(0.0640), // fit of data // (0.0450) 
-  longitudinalDiffusionConstant(0.0570), // W from Howard's note /(0.0360),
+  longitudinalDiffusionConstant(0.0232), // from Laser fit 232 +/- 25 mkm/sqrt(cm)//(0.0570), // W from Howard's note /(0.0360),
   Inner_wire_to_plane_couplingScale(5.8985e-01*1.43), // comparision with data
   Outer_wire_to_plane_couplingScale(5.0718e-01*1.43), //  -"-
   FanoFactor(0.3),
@@ -404,7 +404,7 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
   //   mPoly->FillRandom("funcP",100000);
   //   delete func;
   // tss
-  
+  mGG = new TF1("GaitingGridTransperency","1-6.27594134307865925e+00*TMath::Exp(-2.87987e-01*(x-1.46222e+01))",21,56);
   W = St_tss_tssparC::instance()->ave_ion_pot()*GeV; // eV
   Inner_wire_to_plane_coupling = St_tss_tssparC::instance()->wire_coupling_in() ;
   Outer_wire_to_plane_coupling = St_tss_tssparC::instance()->wire_coupling_out();
@@ -611,6 +611,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	}
 	// dE/dx correction
 	Double_t dEdxCor = 1;
+	
 	if (m_TpcdEdxCorrection) {
 	  dEdxY2_t CdEdx;
 	  memset (&CdEdx, 0, sizeof(dEdxY2_t));
@@ -635,6 +636,11 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	  }
 	  if (dEdxCor <= 0.) continue;
 	}
+	// Apply Gating Grid
+	if (Pad.timeBucket() > mGG->GetXmin() && Pad.timeBucket() < mGG->GetXmax()) {
+	  dEdxCor *= mGG->Eval(Pad.timeBucket());
+	}
+	if (dEdxCor < minSignal) continue;
 #ifdef __ClusterProfile__
 	Double_t padH = Pad.pad();        
 	Double_t tbkH = Pad.timeBucket(); 
@@ -1060,7 +1066,6 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
       gain = St_tpcPadGainT0C::instance()->Gain(Sector,row,pad);
       if (gain <= 0.0) continue;
       ped    = mAveragePedestal;
-      if (pedRMS > 5.0) continue; // noisy pads
       static  Short_t ADCs[__MaxNumberOfTimeBins__];
       static UShort_t IDTs[__MaxNumberOfTimeBins__];
       memset(ADCs, 0, sizeof(ADCs));
@@ -1070,8 +1075,13 @@ void  StTpcRSMaker::DigitizeSector(Int_t sector){
       for (bin = 0; bin < NoOfTimeBins; bin++,index++) {
 	//	Int_t index= NoOfTimeBins*((row-1)*NoOfPads+pad-1)+bin;
 	// Digits : gain + ped
-	if (pedRMS > 0) {
-	  adc = (Int_t) (SignalSum[index].Sum/gain + gRandom->Gaus(ped,pedRMS));
+	//  GG TF1 *ff = new TF1("ff","TMath::Sqrt(4.76658e+01*TMath::Exp(-2.87987e-01*(x-1.46222e+01)))",21,56)
+	Double_t pRMS = pedRMS;
+	if (bin >= 21 && bin <= 56) {
+	  pRMS = TMath::Sqrt(pedRMS*pedRMS + 4.76658e+01*TMath::Exp(-2.87987e-01*(bin-1.46222e+01)));
+	}
+	if (pRMS > 0) {
+	  adc = (Int_t) (SignalSum[index].Sum/gain + gRandom->Gaus(ped,pRMS));
 	  adc = adc - (int) ped;
 	}
 	else            adc = (Int_t) (SignalSum[index].Sum/gain);
@@ -1325,8 +1335,11 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.29 2010/02/16 00:21:23 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.30 2010/02/26 18:53:33 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.30  2010/02/26 18:53:33  fisyak
+// Take longitudinal Diffusion from Laser track fit, add Gating Grid
+//
 // Revision 1.29  2010/02/16 00:21:23  fisyak
 // Speed up by a factor 3.5 by ignoring individual pad T0
 //
