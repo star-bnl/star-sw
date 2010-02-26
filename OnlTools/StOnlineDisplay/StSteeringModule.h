@@ -1,4 +1,4 @@
-// $Id: StSteeringModule.h,v 1.6 2010/02/20 10:51:19 fine Exp $
+// $Id: StSteeringModule.h,v 1.7 2010/02/26 01:43:07 fine Exp $
 
 #ifndef STAR_StSteeringModule
 #define STAR_StSteeringModule
@@ -65,7 +65,7 @@ class StSteeringModule : public QObject, public TModule, StDetectorGeometryInter
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSteeringModule.h,v 1.6 2010/02/20 10:51:19 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSteeringModule.h,v 1.7 2010/02/26 01:43:07 fine Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
           
   }
@@ -80,7 +80,7 @@ class StSteeringModule : public QObject, public TModule, StDetectorGeometryInter
     virtual void   PrintVolumes();
     virtual void   RemoveVolume(const char *name);
     virtual void   SetFileName(const char* fileName);
-
+    virtual void   SetDrawOption(Option_t *option);
     
     // St Data interfcae
       

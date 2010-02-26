@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.14 2010/02/25 02:39:50 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.15 2010/02/26 01:43:07 fine Exp $
 
 
 #include "StSteeringModule.h"
@@ -8,6 +8,7 @@
 #include "TPad.h"
 #include "TDataSetIter.h"
 #include "StDataReadModule.h"
+#include "StuDraw3DEvent.h"
 
 #include "St_db_Maker/St_db_Maker.h"
 #include "StTpcDb/StTpcDbMaker.h"
@@ -326,10 +327,15 @@ void  StSteeringModule::Animate(Int_t ms)
 void  StSteeringModule::SetDemo(Bool_t on)
 {
    if (fDataReadModule) fDataReadModule->SetDemo(on); 
-} 
+}
 
 //_____________________________________________________________________________
 Bool_t  StSteeringModule::Demo() const
 {
      return (fDataReadModule) ? fDataReadModule->Demo(): kFALSE; 
+}
+//_____________________________________________________________________________
+void   StSteeringModule::SetDrawOption(Option_t *option)
+{
+   if (fDataReadModule) fDataReadModule->Display()->SetDrawOption(option);
 }
