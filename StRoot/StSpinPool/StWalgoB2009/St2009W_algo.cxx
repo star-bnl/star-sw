@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.12 2010/02/22 15:49:34 seelej Exp $
+// $Id: St2009W_algo.cxx,v 1.13 2010/02/26 21:40:00 seelej Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -95,15 +95,6 @@ St2009WMaker::find_W_boson(){
         }
       }
 
-
-      //plots for backg sub yield
-      if(T.ptBalance.Perp()>par_ptBalance && T.awayTotET<par_awayTotET) {
-        hA[136]->Fill(T.cluster.ET);//signal
-	hA[62]->Fill(T.pointTower.iEta ,T.cluster.energy);
-      }
-      else 
-        hA[137]->Fill(T.cluster.ET);//background
-            
       //plots for backg sub yield (old awayTot cut DNP)
       if(T.awayTotET < 8)
         hA[138]->Fill(T.cluster.ET);//old signal
@@ -539,6 +530,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.13  2010/02/26 21:40:00  seelej
+// Joe : Fix to code. Forgot to remove an older piece of code when doing a previous update.
+//
 // Revision 1.12  2010/02/22 15:49:34  seelej
 // Joe : Changes to code for inclusion of background subtraction and systematic studies
 //
