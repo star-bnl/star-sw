@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine
 // 
-// $Id: StDataReadModule.cxx,v 1.26 2010/02/20 10:51:19 fine Exp $
+// $Id: StDataReadModule.cxx,v 1.27 2010/02/26 01:43:06 fine Exp $
 
 #include "StDataReadModule.h"
 #include "StTpcDb/StTpcDb.h"
@@ -176,7 +176,7 @@ StuDraw3DEvent  *StDataReadModule::Display()
 {
    if (!fEventDisplay)  {
       delete gEventDisplay;  gEventDisplay = 0;
-      fEventDisplay = new StuDraw3DEvent("TPC,StarFloor,StarBeam"); // ("TPC,StarLogo,StarFloor,StarBeamMAG_HALF_YZ_CUT,ENDCAP,MAG_HALF_XZ_CUT");
+      fEventDisplay = new StuDraw3DEvent("TPC,ENDCAP,StarFloor,StarBeam"); // ("TPC,StarLogo,StarFloor,StarBeamMAG_HALF_YZ_CUT,ENDCAP,MAG_HALF_XZ_CUT");
    }
    return fEventDisplay;
 }
