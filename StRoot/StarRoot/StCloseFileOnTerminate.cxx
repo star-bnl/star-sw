@@ -8,6 +8,8 @@ StCloseFileOnTerminate *StCloseFileOnTerminate::fgCloseFileOnTerminate = 0;
 //_________________________________________________________
 StCloseFileOnTerminate &StCloseFileOnTerminate::Instantiate()
 {
+   // Create Asynch signal handler
+
   if (! fgCloseFileOnTerminate ) {
      fgCloseFileOnTerminate = new StCloseFileOnTerminate;
      fgCloseFileOnTerminate->Add(); 
