@@ -18,6 +18,8 @@
 #include <vector>
 #include <map>
 
+using namespace std;
+
 #include "StTriggerSimuResult.h"
 
 #ifndef StMaker_H
@@ -46,14 +48,16 @@ private:
   St_db_Maker *mDbMk;
     
   /// collection of subdetector trigger simulators, individual pointers also available publicly below
-  //std::vector<StVirtualTriggerSimu*> mSimulators;
+  //vector<StVirtualTriggerSimu*> mSimulators;
   StVirtualTriggerSimu* mSimulators[numSimulators];
 
   
   /// detailed results for individual trigger simulations
-  std::map<int,StTriggerSimuResult> mResults;
+  map<int,StTriggerSimuResult> mResults;
 
   void buildDetailedResult(int trigId);
+  bool get2009DsmRegistersFromOfflineDatabase(int runNumber);
+  bool get2009DsmRegistersFromOnlineDatabase(int runNumber);
 
 public:
   StTriggerSimuMaker(const char *name="StarTrigSimu");
@@ -75,7 +79,7 @@ public:
   TObjArray  *mHList; // output histo access point
   void setHList(TObjArray * x){mHList=x;}
   bool isTrigger(int trigId);
-  std::vector<int> triggerIds() const;
+  vector<int> triggerIds() const;
   
   /// returns object containing detailed information about simulation of given trigger
   const StTriggerSimuResult& detailedResult(int trigId) { return mResults[trigId]; }
@@ -92,9 +96,12 @@ public:
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.22 2010/02/18 20:07:03 pibero Exp $
+// $Id: StTriggerSimuMaker.h,v 1.23 2010/03/01 18:48:36 pibero Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.23  2010/03/01 18:48:36  pibero
+// More updates for Run 9
+//
 // Revision 1.22  2010/02/18 20:07:03  pibero
 // Run 9 updates
 //

@@ -12,13 +12,13 @@ class StBemcTriggerSimu;
 class StEemcTriggerSimu;
 struct DSMLayer_EM201_2009;
 struct DSMLayer_LD301_2009;
+struct TriggerDefinition;
 class TCU;
 
 #include <set>
-using std::set;
-
 #include <map>
-using std::map;
+
+using namespace std;
 
 #include "StTriggerUtilities/StVirtualTriggerSimu.h"
 #include "StTriggerUtilities/StTriggerSimuResult.h"
@@ -56,22 +56,18 @@ public:
   void setBemc(StBemcTriggerSimu* bemc);
   void setEemc(StEemcTriggerSimu* eemc);
 
+  DSMLayer_EM201_2009* get2009_DSMLayer2_Result();
+  DSMLayer_LD301_2009* get2009_DSMLayer3_Result();
+
+  void defineTrigger(const TriggerDefinition& trigdef);
+
   // Use these setters to overwrite thresholds from the database (2009)
-  void setOverlapJetPatchTh0(int value);
-  void setOverlapJetPatchTh1(int value);
-  void setOverlapJetPatchTh2(int value);
-
-  int getOverlapJetPatchTh0() const;
-  int getOverlapJetPatchTh1() const;
-  int getOverlapJetPatchTh2() const;
-
-  int getOverlapJetPatchThreshold(int trigId) const;
+  void setOverlapJetPatchTh(int i, int value);
+  int  overlapJetPatchTh(int i) const;
   void getOverlapJetPatchAdc(int i, int& jp, int& adc) const;
-  map<int,int> getOverlapJetPatchesAboveThreshold(int trigId) const;
 
 private:
   int get2009_DSMRegisters(int runNumber);
-  int defineTriggers(int runNumber);
 
   TDatime mDBTime;
   StBemcTriggerSimu* mBemc;
@@ -83,6 +79,9 @@ private:
 
   ClassDef(StEmcTriggerSimu,1);
 };
+
+inline DSMLayer_EM201_2009* StEmcTriggerSimu::get2009_DSMLayer2_Result() { return mEM201; }
+inline DSMLayer_LD301_2009* StEmcTriggerSimu::get2009_DSMLayer3_Result() { return mLD301; }
 
 inline int  StEmcTriggerSimu::BHT() const { return EM201output()       & 0xf; }
 inline int  StEmcTriggerSimu::EHT() const { return EM201output() >>  4 & 0x3; }
@@ -96,8 +95,6 @@ inline int  StEmcTriggerSimu::AJP() const { return EM201output() >> 12 & 0x1; }
 inline int StEmcTriggerSimu::BAJP() const { return EM201output() >> 13 & 0x1; }
 inline int StEmcTriggerSimu::EAJP() const { return EM201output() >> 14 & 0x1; }
 
-inline void StEmcTriggerSimu::setOverlapJetPatchTh0(int value) { mOverlapJetPatchTh[0] = value; }
-inline void StEmcTriggerSimu::setOverlapJetPatchTh1(int value) { mOverlapJetPatchTh[1] = value; }
-inline void StEmcTriggerSimu::setOverlapJetPatchTh2(int value) { mOverlapJetPatchTh[2] = value; }
+inline void StEmcTriggerSimu::setOverlapJetPatchTh(int i, int value) { mOverlapJetPatchTh[i] = value; }
 
 #endif // ST_EMC_TRIGGER_SIMU_H

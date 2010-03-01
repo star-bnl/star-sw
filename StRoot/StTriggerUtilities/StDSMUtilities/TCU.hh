@@ -7,18 +7,13 @@
 #ifndef TCU_HH
 #define TCU_HH
 
+struct TriggerDefinition;
+
 #include <string>
 #include <map>
 #include <set>
 
 using namespace std;
-
-struct TriggerDefinition {
-  int    idx_trigger;
-  string name;
-  int    triggerId;
-  int    physicsBits;
-};
 
 class TCU {
 public:

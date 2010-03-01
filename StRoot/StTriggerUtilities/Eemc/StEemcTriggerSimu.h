@@ -129,25 +129,15 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   bool getHttpInfo(int tpId, EemcHttpInfo &httpInfo);
 
   // Use these setters to overwrite thresholds from the database (2009)
-  void setEndcapJetPatchTh0(int value) { mEndcapJetPatchTh[0] = value; }
-  void setEndcapJetPatchTh1(int value) { mEndcapJetPatchTh[1] = value; }
-  void setEndcapJetPatchTh2(int value) { mEndcapJetPatchTh[2] = value; }
+  void setEndcapJetPatchTh(int i, int value) { mEndcapJetPatchTh[i] = value; }
+  void setEndcapHighTowerTh(int i, int value) { mEndcapHighTowerTh[i] = value; }
 
-  void setEndcapHighTowerTh0(int value) { mEndcapHighTowerTh[0] = value; }
-  void setEndcapHighTowerTh1(int value) { mEndcapHighTowerTh[1] = value; }
+  int endcapJetPatchTh(int i) const;
+  int endcapHighTowerTh(int i) const;
 
-  int getEndcapJetPatchTh0() const;
-  int getEndcapJetPatchTh1() const;
-  int getEndcapJetPatchTh2() const;
+  int endcapJetPatchAdc(int jp) const;
+  int endcapHighTowerAdc(int towerId) const { return 0; }
 
-  int getEndcapHighTowerTh0() const;
-  int getEndcapHighTowerTh1() const;
-  int getEndcapHighTowerTh2() const;
-
-  int getEndcapJetPatchThreshold(int trigId) const;
-  int getEndcapJetPatchAdc(int jp) const;
-
-  map<int,int> getEndcapJetPatchesAboveThreshold(int trigId) const;
   int getEndcapHighTower(int tp) const;
   int getEndcapPatchSum(int tp) const;
 
@@ -159,6 +149,9 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.18  2010/03/01 18:48:42  pibero
+// More updates for Run 9
+//
 // Revision 1.17  2010/02/18 20:07:10  pibero
 // Run 9 updates
 //

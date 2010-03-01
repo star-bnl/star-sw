@@ -3,12 +3,10 @@
 //12/06
 
 #include <iostream>
-#include <string>
 
 //local
-#include "StJetSkimEvent.h"
-
 #include "StPythiaEvent.h"
+#include "StJetSkimEvent.h"
 
 ClassImp(StJetSkimTrigHeader)
 ClassImp(StJetSkimTrig)
@@ -98,16 +96,10 @@ StJetSkimTrig::StJetSkimTrig(const StJetSkimTrig& t) : TObject()
     this->mTriggerPatches           = t.mTriggerPatches;
     this->mJetPatches               = t.mJetPatches;
     this->mTotalEnergy              = t.totalEnergy();
-
-    this->mBarrelJetPatches         = t.mBarrelJetPatches;
-    this->mEndcapJetPatches         = t.mEndcapJetPatches;
-    this->mOverlapJetPatches        = t.mOverlapJetPatches;
-
-    memcpy(this->mL2ResultEmulated, t.mL2ResultEmulated, 36);
+    memcpy(this->mL2ResultEmulated, t.mL2ResultEmulated, sizeof(mL2ResultEmulated));
 }
 
-StJetSkimTrig::~StJetSkimTrig() 
-{ /* no-op */ }
+StJetSkimTrig::~StJetSkimTrig() { /* no-op */ }
 
 StJetSkimTrig& StJetSkimTrig::operator=(const StJetSkimTrig& rhs)
 {
@@ -125,12 +117,7 @@ StJetSkimTrig& StJetSkimTrig::operator=(const StJetSkimTrig& rhs)
         this->mTriggerPatches           = rhs.mTriggerPatches;
         this->mJetPatches               = rhs.mJetPatches;
         this->mTotalEnergy              = rhs.totalEnergy();
-
-	this->mBarrelJetPatches         = rhs.mBarrelJetPatches;
-	this->mEndcapJetPatches         = rhs.mEndcapJetPatches;
-	this->mOverlapJetPatches        = rhs.mOverlapJetPatches;
-
-	memcpy(this->mL2ResultEmulated, rhs.mL2ResultEmulated, 36);
+	memcpy(this->mL2ResultEmulated, rhs.mL2ResultEmulated, sizeof(mL2ResultEmulated));
     }
         
     return *this;
@@ -148,12 +135,7 @@ void StJetSkimTrig::init() {
     this->mTowers.clear();
     this->mTriggerPatches.clear();
     this->mJetPatches.clear();
-
-    this->mBarrelJetPatches.clear();
-    this->mEndcapJetPatches.clear();
-    this->mOverlapJetPatches.clear();
-
-    memset(mL2ResultEmulated, 0, 36);
+    memset(mL2ResultEmulated, 0, sizeof(mL2ResultEmulated));
 }   
 
 void StJetSkimTrig::clear() {
@@ -333,12 +315,28 @@ StJetSkimEvent::StJetSkimEvent() : TObject(), mTriggers(new TClonesArray("StJetS
     mBestVertRef = NULL;
     mFill = mRunId = mEventId = mbx7 = mbx48 = mSpinBits = 0;
     mEbbc = mWbbc = mBbcTimeBin = 0;
+    mZdcWestRate = 0;
+    mZdcEastRate = 0;
+    mZdcCoincidenceRate = 0;
+    mBbcWestRate = 0;
+    mBbcEastRate = 0;
+    mBbcCoincidenceRate = 0;
     mIsValid = mIsPolLong = mIsPolTrans = mIsMaskedUsingBx48 = mOffsetBx48minusBX7 = mSpin4usingBx48 = 0;
-    //for (int i=0; i<32; ++i) {
-    //    for (int i=0; i<mL2Result.GetSize(); ++i) {
-    //        mL2Result[i] = 0;
-    //    }   
-    memset(mL2Result, 0, 36);
+
+    memset(mL2Result, 0, sizeof(mL2Result));
+
+    memset(mBarrelJetPatchTh,0,sizeof(mBarrelJetPatchTh));
+    memset(mEndcapJetPatchTh,0,sizeof(mEndcapJetPatchTh));
+    memset(mOverlapJetPatchTh,0,sizeof(mOverlapJetPatchTh));
+
+    memset(mBarrelHighTowerTh,0,sizeof(mBarrelHighTowerTh));
+    memset(mEndcapHighTowerTh,0,sizeof(mEndcapHighTowerTh));
+
+    memset(mBarrelJetPatchAdc,0,sizeof(mBarrelJetPatchAdc));
+    memset(mEndcapJetPatchAdc,0,sizeof(mEndcapJetPatchAdc));
+    memset(mOverlapJetPatchAdc,0,sizeof(mOverlapJetPatchAdc));
+
+    mEmcLayer2 = 0;
 }
 
 StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
@@ -368,6 +366,13 @@ StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
     this->mEbbc         = other.eBbc();
     this->mWbbc         = other.wBbc();
     this->mBbcTimeBin   = other.bbcTimeBin();
+
+    mZdcWestRate = other.mZdcWestRate;
+    mZdcEastRate = other.mZdcEastRate;
+    mZdcCoincidenceRate = other.mZdcCoincidenceRate;
+    mBbcWestRate = other.mBbcWestRate;
+    mBbcEastRate = other.mBbcEastRate;
+    mBbcCoincidenceRate = other.mBbcCoincidenceRate;
     
     this->mIsValid      = other.isValid();
     this->mIsPolLong    = other.isPolLong();
@@ -375,8 +380,21 @@ StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
     this->mIsMaskedUsingBx48 = other.isMaskedUsingBx48();
     this->mOffsetBx48minusBX7 = other.offsetBx48minusBX7();
     this->mSpin4usingBx48 = other.spin4usingBx48();
-    //this->mL2Result     = other.l2Result();
-    memcpy(this->mL2Result, other.mL2Result, 36);
+
+    memcpy(this->mL2Result, other.mL2Result, sizeof(mL2Result));
+
+    memcpy(mBarrelJetPatchTh,other.mBarrelJetPatchTh,sizeof(mBarrelJetPatchTh));
+    memcpy(mEndcapJetPatchTh,other.mEndcapJetPatchTh,sizeof(mEndcapJetPatchTh));
+    memcpy(mOverlapJetPatchTh,other.mOverlapJetPatchTh,sizeof(mOverlapJetPatchTh));
+
+    memcpy(mBarrelHighTowerTh,other.mBarrelHighTowerTh,sizeof(mBarrelHighTowerTh));
+    memcpy(mEndcapHighTowerTh,other.mEndcapHighTowerTh,sizeof(mEndcapHighTowerTh));
+
+    memcpy(mBarrelJetPatchAdc,other.mBarrelJetPatchAdc,sizeof(mBarrelJetPatchAdc));
+    memcpy(mEndcapJetPatchAdc,other.mEndcapJetPatchAdc,sizeof(mEndcapJetPatchAdc));
+    memcpy(mOverlapJetPatchAdc,other.mOverlapJetPatchAdc,sizeof(mOverlapJetPatchAdc));
+
+    mEmcLayer2 = other.mEmcLayer2;
 }
 
 StJetSkimEvent::~StJetSkimEvent()
@@ -415,6 +433,13 @@ StJetSkimEvent& StJetSkimEvent::operator=(const StJetSkimEvent &rhs)
         this->mEbbc         = rhs.eBbc();
         this->mWbbc         = rhs.wBbc();
         this->mBbcTimeBin   = rhs.bbcTimeBin();
+
+	mZdcWestRate = rhs.mZdcWestRate;
+	mZdcEastRate = rhs.mZdcEastRate;
+	mZdcCoincidenceRate = rhs.mZdcCoincidenceRate;
+	mBbcWestRate = rhs.mBbcWestRate;
+	mBbcEastRate = rhs.mBbcEastRate;
+	mBbcCoincidenceRate = rhs.mBbcCoincidenceRate;
         
         this->mIsValid      = rhs.isValid();
         this->mIsPolLong    = rhs.isPolLong();
@@ -422,8 +447,21 @@ StJetSkimEvent& StJetSkimEvent::operator=(const StJetSkimEvent &rhs)
         this->mIsMaskedUsingBx48 = rhs.isMaskedUsingBx48();
         this->mOffsetBx48minusBX7 = rhs.offsetBx48minusBX7();
         this->mSpin4usingBx48 = rhs.spin4usingBx48();
-        //this->mL2Result     = rhs.l2Result();
-	memcpy(this->mL2Result, rhs.mL2Result, 36);        
+
+	memcpy(this->mL2Result, rhs.mL2Result, sizeof(mL2Result));
+
+	memcpy(mBarrelJetPatchTh,rhs.mBarrelJetPatchTh,sizeof(mBarrelJetPatchTh));
+	memcpy(mEndcapJetPatchTh,rhs.mEndcapJetPatchTh,sizeof(mEndcapJetPatchTh));
+	memcpy(mOverlapJetPatchTh,rhs.mOverlapJetPatchTh,sizeof(mOverlapJetPatchTh));
+
+	memcpy(mBarrelHighTowerTh,rhs.mBarrelHighTowerTh,sizeof(mBarrelHighTowerTh));
+	memcpy(mEndcapHighTowerTh,rhs.mEndcapHighTowerTh,sizeof(mEndcapHighTowerTh));
+
+	memcpy(mBarrelJetPatchAdc,rhs.mBarrelJetPatchAdc,sizeof(mBarrelJetPatchAdc));
+	memcpy(mEndcapJetPatchAdc,rhs.mEndcapJetPatchAdc,sizeof(mEndcapJetPatchAdc));
+	memcpy(mOverlapJetPatchAdc,rhs.mOverlapJetPatchAdc,sizeof(mOverlapJetPatchAdc));
+
+	mEmcLayer2 = rhs.mEmcLayer2;
     }
     
     return *this;
@@ -434,18 +472,31 @@ void StJetSkimEvent::clear()
     mMudstFileName = "Undefined";
     mFill = mRunId = mEventId =  mbx7 = mbx48 = mSpinBits = 0;
     mEbbc = mWbbc = mBbcTimeBin = 0;
+    mZdcWestRate = 0;
+    mZdcEastRate = 0;
+    mZdcCoincidenceRate = 0;
+    mBbcWestRate = 0;
+    mBbcEastRate = 0;
+    mBbcCoincidenceRate = 0;
     mIsValid = mIsPolLong = mIsPolTrans = mIsMaskedUsingBx48 = mOffsetBx48minusBX7 = mSpin4usingBx48 = 0;
     mTriggers->Clear("c");
     mVertices->Clear("c");
     mBestVert = NULL;
     mBestVertRef.Clear();
     mTrigHeaderArrayRef.Clear();
-    //for (int i=0; i<32; ++i) {
-    //    for (int i=0; i<mL2Result.GetSize(); ++i) {
-    //        mL2Result[i] = 0;
-    //    }
-    //mL2Result.Clear();
-    
+
+    memset(mBarrelJetPatchTh,0,sizeof(mBarrelJetPatchTh));
+    memset(mEndcapJetPatchTh,0,sizeof(mEndcapJetPatchTh));
+    memset(mOverlapJetPatchTh,0,sizeof(mOverlapJetPatchTh));
+
+    memset(mBarrelHighTowerTh,0,sizeof(mBarrelHighTowerTh));
+    memset(mEndcapHighTowerTh,0,sizeof(mEndcapHighTowerTh));
+
+    memset(mBarrelJetPatchAdc,0,sizeof(mBarrelJetPatchAdc));
+    memset(mEndcapJetPatchAdc,0,sizeof(mEndcapJetPatchAdc));
+    memset(mOverlapJetPatchAdc,0,sizeof(mOverlapJetPatchAdc));
+
+    mEmcLayer2 = 0;
 }
 
 void StJetSkimEvent::Clear(const char *option) {
@@ -474,16 +525,6 @@ void StJetSkimEvent::setBestVert(const StJetSkimVert & v) {
 void StJetSkimEvent::setBestVert(int clonesArrayIndex) {
     mBestVertRef = (StJetSkimVert*)mVertices->At(clonesArrayIndex);
 }
-
-/*
-void StJetSkimEvent::setL2Result(int* vals)
-{
-    assert(vals);
-    for (int i=0; i<32; ++i) {
-        mL2Result[i] = vals[i];
-    }
-}
-*/
 
 void StJetSkimEvent::setL2Result(const void *address) {
     memcpy(mL2Result, address, 20);
@@ -528,4 +569,34 @@ StJetSkimTrig* StJetSkimEvent::trigger(int trigId) {
         if(trigger->trigId() == trigId) return trigger;
     }
     return NULL;
+}
+
+map<int,int> StJetSkimEvent::barrelJetPatchesAboveTh(int i) const
+{
+  map<int,int> m;
+  for (int jp = 0; jp < 18; ++jp) {
+    int adc = barrelJetPatchAdc(jp);
+    if (adc > barrelJetPatchTh(i)) m.insert(make_pair(jp,adc));
+  }
+  return m;
+}
+
+map<int,int> StJetSkimEvent::endcapJetPatchesAboveTh(int i) const
+{
+  map<int,int> m;
+  for (int jp = 0; jp < 6; ++jp) {
+    int adc = endcapJetPatchAdc(jp);
+    if (adc > endcapJetPatchTh(i)) m.insert(make_pair(jp,adc));
+  }
+  return m;
+}
+
+map<int,int> StJetSkimEvent::overlapJetPatchesAboveTh(int i) const
+{
+  map<int,int> m;
+  for (int jp = 0; jp < 6; ++jp) {
+    int adc = overlapJetPatchAdc(jp);
+    if (adc > overlapJetPatchTh(i)) m.insert(make_pair(jp,adc));
+  }
+  return m;
 }

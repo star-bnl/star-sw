@@ -11,8 +11,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.32 2010/02/18 20:07:02 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.33 2010/03/01 18:48:36 pibero Exp $
 
+// MySQL C API
+#include "/usr/include/mysql/mysql.h"
+
+// DSM crates
+#include "RTS/trg/include/trgConfNum.h"
+#include "StDSMUtilities/StDSM2009Utilities.hh"
 
 #include <Stiostream.h>
 #include "StChain.h"
@@ -142,6 +148,9 @@ Int_t StTriggerSimuMaker::InitRun(int runNumber) {
       emc->setEemc(eemc);
       emc->setMC(mMCflag);
       mSimulators[3] = emc;
+      if (!get2009DsmRegistersFromOfflineDatabase(runNumber) && !get2009DsmRegistersFromOnlineDatabase(runNumber)) {
+	LOG_WARN << "Can't get 2009 DSM registers" << endm;
+      }
     }
 
     for (Int_t i = 0; i < numSimulators; ++i)
@@ -159,7 +168,7 @@ Int_t StTriggerSimuMaker::Make() {
     }
   }
 
-  std::vector<int> trigIds = triggerIds();
+  vector<int> trigIds = triggerIds();
   TString line = "Triggers: ";
   for (size_t i = 0; i < trigIds.size(); ++i)
     line += Form("%d ",trigIds[i]);
@@ -183,13 +192,13 @@ bool StTriggerSimuMaker::isTrigger(int trigId) {
   return true;
 }
 
-std::vector<int> StTriggerSimuMaker::triggerIds() const
+vector<int> StTriggerSimuMaker::triggerIds() const
 {
-  std::vector<int> v;
+  vector<int> v;
 
   if (mYear >= 2009 && emc) {
-    std::set<int> s = emc->triggerIds();
-    std::copy(s.begin(),s.end(),std::back_inserter(v));
+    set<int> s = emc->triggerIds();
+    copy(s.begin(),s.end(),back_inserter(v));
   }
 
   return v;
@@ -221,26 +230,11 @@ void StTriggerSimuMaker::buildDetailedResult(int trigId) {
                 result.addJetPatch((*itr).first,(*itr).second);	    
             }
         }
-	// Record JPs above Threshold (2009)
-	map<int,int> jetPatches = bemc->getBarrelJetPatchesAboveThreshold(trigId);
-	for (map<int,int>::const_iterator i = jetPatches.begin(); i != jetPatches.end(); ++i) {
-	  result.addBarrelJetPatchAdc(i->first,i->second);
-	}
     }
     if(eemc) {
         result.setEemcDecision(eemc->triggerDecision(trigId));
-	// Record JPs above Threshold (2009)
-	map<int,int> jetPatches = eemc->getEndcapJetPatchesAboveThreshold(trigId);
-	for (map<int,int>::const_iterator i = jetPatches.begin(); i != jetPatches.end(); ++i) {
-	  result.addEndcapJetPatchAdc(i->first,i->second);
-	}
     }
     if (emc) {
-      // Record JPs above Threshold (2009)
-      map<int,int> jetPatches = emc->getOverlapJetPatchesAboveThreshold(trigId);
-      for (map<int,int>::const_iterator i = jetPatches.begin(); i != jetPatches.end(); ++i) {
-	result.addOverlapJetPatchAdc(i->first,i->second);
-      }
     }
     if(lTwo) {
         result.setL2Decision(lTwo->triggerDecision(trigId));
@@ -252,8 +246,179 @@ Int_t StTriggerSimuMaker::Finish() {
   return StMaker::Finish();
 }
 
+bool StTriggerSimuMaker::get2009DsmRegistersFromOfflineDatabase(int runNumber)
+{
+  return false;
+}
+
+bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
+{
+  // Open connection to Run 9 database
+
+  MYSQL mysql;
+  const char* host = "dbbak.starp.bnl.gov";
+  const char* user = "";
+  const char* pass = "";
+  unsigned int port = 3408;
+  const char* database = "Conditions_rts";
+  const char* unix_socket = NULL;
+  unsigned long client_flag = 0;
+  TString query;
+
+  LOG_INFO << Form("host=%s user=\"%s\" pass=\"%s\" port=%d database=%s",host,user,pass,port,database) << endm;
+
+  mysql_init(&mysql);
+
+  if (!mysql_real_connect(&mysql,host,user,pass,database,port,unix_socket,client_flag)) {
+    LOG_WARN << "Can't connect to database: " << mysql_error(&mysql) << endm;
+    return false;
+  }
+
+  // For simulation, get run number from DB time stamp
+
+  if (mMCflag) {
+    query = Form("select idx_rn from triggers where beginTime >= '%s' limit 1",GetDBTime().AsSQLString());
+    LOG_INFO << query << endm;
+    mysql_query(&mysql,query);
+
+    if (MYSQL_RES* result = mysql_store_result(&mysql)) {
+      while (MYSQL_ROW row = mysql_fetch_row(result)) {
+        runNumber = atoi(row[0]);
+      }
+    }
+    LOG_INFO << "DB Time = " << GetDBTime().AsSQLString() << endm;
+    LOG_INFO << "Run Number = " << runNumber << endm;
+  }
+
+  // object=DSM crate, idx=DSM board
+  query = Form("select object,idx,reg,label,value,defaultvalue from dict where hash=(select dicthash from run where idx_rn = %d)",runNumber);
+  LOG_INFO << query << endm;
+  mysql_query(&mysql,query);
+
+  if (MYSQL_RES* result = mysql_store_result(&mysql)) {
+    LOG_INFO << setw(10) << "object"
+	     << setw(10) << "idx"
+	     << setw(10) << "reg"
+	     << setw(30) << "label"
+	     << setw(10) << "value"
+	     << setw(15) << "defaultvalue"
+	     << endm;
+
+    while (MYSQL_ROW row = mysql_fetch_row(result)) {
+      int object = atoi(row[0]);
+      int idx = atoi(row[1]);
+      int reg = atoi(row[2]);
+      TString label = row[3];
+      int value = atoi(row[4]);
+      int defaultvalue = atoi(row[5]);
+
+      LOG_INFO << setw(10) << object
+	       << setw(10) << idx
+	       << setw(10) << reg
+	       << setw(30) << label
+	       << setw(10) << value
+	       << setw(15) << defaultvalue
+	       << endm;
+
+      if (value == -1) value = defaultvalue;
+
+      switch (object) {
+      case L1_CONF_NUM:
+	switch (idx) {
+	case 20:		// EM201
+	  emc->get2009_DSMLayer2_Result()->setRegister(reg,value);
+	  break;
+	case 30:		// LD301
+	  emc->get2009_DSMLayer3_Result()->setRegister(reg,value);
+	  break;
+	}
+	break;
+      case BC1_CONF_NUM:
+	switch (idx) {
+	case 21:		// EE101
+	  eemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
+	  break;
+	case 23:		// EE001
+	  eemc->get2009_DSMLayer0_Result()->setRegister(reg,value);
+	  break;
+	case 33:		// BC101
+	  bemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
+	  break;
+	}
+	break;
+      case BCW_CONF_NUM:
+	switch (idx) {
+	case 16:		// BW001
+	  for (int dsm = 0; dsm < 15; ++dsm)
+	    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[reg] = value;
+	  break;
+	}
+	break;
+      case BCE_CONF_NUM:
+	switch (idx) {
+	case 16:		// BE001
+	  for (int dsm = 15; dsm < 30; ++dsm)
+	    (*bemc->get2009_DSMLayer0_Result())[dsm].registers[reg] = value;
+	  break;
+	}
+	break;
+      }
+    }
+    mysql_free_result(result);
+  }
+
+  // Trigger definitions
+
+  TriggerDefinition triggers[32];
+
+  query = Form("select idx_trigger,name,offlineBit from triggers where idx_rn = %d", runNumber);
+  LOG_INFO << query << endm;
+  mysql_query(&mysql,query);
+
+  if (MYSQL_RES* result = mysql_store_result(&mysql)) {
+    while (MYSQL_ROW row = mysql_fetch_row(result)) {
+      int idx_trigger = atoi(row[0]);
+      triggers[idx_trigger].idx_trigger = idx_trigger;
+      strcpy(triggers[idx_trigger].name,row[1]);
+      triggers[idx_trigger].triggerId = atoi(row[2]);
+    }
+    mysql_free_result(result);
+  }
+
+  query = Form("select idx_idx,onbits from pwc where idx_rn = %d", runNumber);
+  LOG_INFO << query << endm;
+  mysql_query(&mysql,query);
+
+  if (MYSQL_RES* result = mysql_store_result(&mysql)) {
+    LOG_INFO << setw(20) << "idx_trigger"
+             << setw(20) << "name"
+             << setw(20) << "offlineBit"
+             << setw(20) << "physicsBits"
+             << endm;
+
+    while (MYSQL_ROW row = mysql_fetch_row(result)) {
+      int idx_trigger = atoi(row[0]);
+      triggers[idx_trigger].physicsBits = atoi(row[1]);
+      emc->defineTrigger(triggers[idx_trigger]);
+      LOG_INFO << setw(20) << idx_trigger
+               << setw(20) << triggers[idx_trigger].name
+               << setw(20) << triggers[idx_trigger].triggerId
+               << setw(20) << Form("0x%04x", triggers[idx_trigger].physicsBits)
+               << endm;
+    }
+    mysql_free_result(result);
+  }
+
+  mysql_close(&mysql);
+
+  return true;
+}
+
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.33  2010/03/01 18:48:36  pibero
+ * More updates for Run 9
+ *
  * Revision 1.32  2010/02/18 20:07:02  pibero
  * Run 9 updates
  *
