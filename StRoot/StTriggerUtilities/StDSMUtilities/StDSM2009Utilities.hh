@@ -13,6 +13,7 @@
 #include "DSMLayer_E101_2009.hh"
 #include "DSMLayer_EM201_2009.hh"
 #include "DSMLayer_LD301_2009.hh"
+#include "TriggerDefinition.hh"
 #include "TCU.hh"
 
 #endif	// ST_DSM_2009_UTILITIES_HH

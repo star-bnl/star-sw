@@ -4,6 +4,7 @@
 // 7 Jan 2009
 //
 
+#include "TriggerDefinition.hh"
 #include "TCU.hh"
 
 void TCU::defineTrigger(const TriggerDefinition& triggerDef)

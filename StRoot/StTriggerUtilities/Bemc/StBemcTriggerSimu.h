@@ -210,27 +210,16 @@ public:
   void setHList(TObjArray * x){mHList=x;}
 
   // Use these setters to overwrite thresholds from the database (2009)
-  void setBarrelJetPatchTh0(int value) { mBarrelJetPatchTh[0] = value; }
-  void setBarrelJetPatchTh1(int value) { mBarrelJetPatchTh[1] = value; }
-  void setBarrelJetPatchTh2(int value) { mBarrelJetPatchTh[2] = value; }
+  void setBarrelJetPatchTh(int i, int value) { mBarrelJetPatchTh[i] = value; }
+  void setBarrelHighTowerTh(int i, int value) { mBarrelHighTowerTh[i] = value; }
 
-  void setBarrelHighTowerTh0(int value) { mBarrelHighTowerTh[0] = value; }
-  void setBarrelHighTowerTh1(int value) { mBarrelHighTowerTh[1] = value; }
-  void setBarrelHighTowerTh2(int value) { mBarrelHighTowerTh[2] = value; }
-  void setBarrelHighTowerTh3(int value) { mBarrelHighTowerTh[3] = value; }
+  int barrelJetPatchTh(int i) const;
+  int barrelHighTowerTh(int i) const;
 
-  int getBarrelJetPatchTh0() const;
-  int getBarrelJetPatchTh1() const;
-  int getBarrelJetPatchTh2() const;
+  int barrelJetPatchAdc(int jp) const;
+  int barrelHighTowerAdc(int towerId) const { return 0; }
 
-  int getBarrelHighTowerTh0() const;
-  int getBarrelHighTowerTh1() const;
-  int getBarrelHighTowerTh2() const;
-
-  int getBarrelJetPatchThreshold(int trigId) const;
-  int getBarrelJetPatchAdc(int jp) const;
-  
-  public:
+public:
   enum {kOnline=1, kOffline, kExpert};
   void setConfig(int x) {mConfig=x;}
   
@@ -270,7 +259,6 @@ public:
   const vector< pair<int, int> > getTowersAboveThreshold(int trigId) const;
   const vector< pair<int, int> > getTriggerPatchesAboveThreshold(int trigId) const;
   const vector< pair<int, int> > getJetPatchesAboveThreshold(int trigId) const;
-  map<int,int> getBarrelJetPatchesAboveThreshold(int trigId) const;
 
   //access to HT,TP,JP thresholds
   int getTowerThreshold(int trigId, int dsmid) const;

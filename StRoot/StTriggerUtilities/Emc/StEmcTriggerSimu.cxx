@@ -55,8 +55,8 @@ void StEmcTriggerSimu::InitRun(int runNumber)
   mDBTime = chain->GetDBTime();
   mYear = mDBTime.GetYear();
 
-  get2009_DSMRegisters(runNumber);
-  defineTriggers(runNumber);
+  //get2009_DSMRegisters(runNumber);
+  //defineTriggers(runNumber);
 }
 
 void StEmcTriggerSimu::Make()
@@ -183,128 +183,18 @@ int StEmcTriggerSimu::get2009_DSMRegisters(int runNumber)
   return kStOk;
 }
 
-int StEmcTriggerSimu::defineTriggers(int runNumber)
+void StEmcTriggerSimu::defineTrigger(const TriggerDefinition& trigdef)
 {
-  // Open connection to Run 9 database
-
-  MYSQL mysql;
-  const char* host = "dbbak.starp.bnl.gov";
-  const char* user = "";
-  const char* pass = "";
-  unsigned int port = 3408;
-  const char* database = "Conditions_rts";
-  const char* unix_socket = NULL;
-  unsigned long client_flag = 0;
-
-  LOG_INFO << Form("host=%s user=\"%s\" pass=\"%s\" port=%d database=%s",host,user,pass,port,database) << endm;
-
-  mysql_init(&mysql);
-
-  if (!mysql_real_connect(&mysql,host,user,pass,database,port,unix_socket,client_flag)) {
-    LOG_WARN << "Can't connect to database: " << mysql_error(&mysql) << endm;
-    return kStWarn;
-  }
-
-  // For simulation, get run number from DB time stamp
-
-  if (mMCflag) {
-    TString query3 = Form("select idx_rn from triggers where beginTime >= '%s' limit 1", mDBTime.AsSQLString());
-    LOG_INFO << query3 << endm;
-    mysql_query(&mysql,query3);
-
-    if (MYSQL_RES* result = mysql_store_result(&mysql)) {
-      while (MYSQL_ROW row = mysql_fetch_row(result)) {
-	runNumber = atoi(row[0]);
-      }
-    }
-    LOG_INFO << "DB Time = " << mDBTime.AsSQLString() << endm;
-    LOG_INFO << "Run Number = " << runNumber << endm;
-  }
-
-  // Trigger definitions
-
-  TriggerDefinition triggers[32];
-
-  TString query = Form("select idx_trigger,name,offlineBit from triggers where idx_rn = %d", runNumber);
-  LOG_INFO << query << endm;
-  mysql_query(&mysql,query);
-
-  if (MYSQL_RES* result = mysql_store_result(&mysql)) {
-    while (MYSQL_ROW row = mysql_fetch_row(result)) {
-      int idx_trigger = atoi(row[0]);
-      triggers[idx_trigger].idx_trigger = idx_trigger;
-      triggers[idx_trigger].name = row[1];
-      triggers[idx_trigger].triggerId = atoi(row[2]);
-    }
-    mysql_free_result(result);
-  }
-
-  TString query2 = Form("select idx_idx,onbits from pwc where idx_rn = %d", runNumber);
-  LOG_INFO << query2 << endm;
-  mysql_query(&mysql,query2);
-
-  if (MYSQL_RES* result = mysql_store_result(&mysql)) {
-    LOG_INFO << setw(20) << "idx_trigger"
-             << setw(20) << "name"
-             << setw(20) << "offlineBit"
-             << setw(20) << "physicsBits"
-             << endm;
-
-    while (MYSQL_ROW row = mysql_fetch_row(result)) {
-      int idx_trigger = atoi(row[0]);
-      triggers[idx_trigger].physicsBits = atoi(row[1]);
-      mTcu->defineTrigger(triggers[idx_trigger]);
-      LOG_INFO << setw(20) << idx_trigger
-               << setw(20) << triggers[idx_trigger].name
-               << setw(20) << triggers[idx_trigger].triggerId
-               << setw(20) << Form("0x%04x", triggers[idx_trigger].physicsBits)
-               << endm;
-    }
-    mysql_free_result(result);
-  }
-
-  mysql_close(&mysql);
-
-  return kStOk;
+  mTcu->defineTrigger(trigdef);
 }
 
 int StEmcTriggerSimu::EM201output() const { return (*mEM201)[0].output; }
 
-int StEmcTriggerSimu::getOverlapJetPatchTh0() const { return mEM201->getRegister(0); }
-int StEmcTriggerSimu::getOverlapJetPatchTh1() const { return mEM201->getRegister(1); }
-int StEmcTriggerSimu::getOverlapJetPatchTh2() const { return mEM201->getRegister(2); }
-
-int StEmcTriggerSimu::getOverlapJetPatchThreshold(int trigId) const
-{
-  switch (trigId) {
-  case 240410:
-  case 240411:
-    return getOverlapJetPatchTh1(); // JP1
-  case 240650:
-  case 240651:
-  case 240652:
-    return getOverlapJetPatchTh2(); // L2JetHigh
-  }
-  return -1;
-}
+int StEmcTriggerSimu::overlapJetPatchTh(int i) const { return mEM201->getRegister(i); }
 
 void StEmcTriggerSimu::getOverlapJetPatchAdc(int i, int& jp, int& adc) const
 {
   int jp_partial = (*mEM201)[0].channels[6+i] >> 12 & 0x3;
   jp  = (1-i)*3+jp_partial-1;
   adc = (*mEM201)[0].info[i];
-}
-
-map<int,int> StEmcTriggerSimu::getOverlapJetPatchesAboveThreshold(int trigId) const
-{
-  int th = getOverlapJetPatchThreshold(trigId);
-  map<int,int> patches;
-  if (th != -1) {
-    for (int i = 0; i < 2; ++i) {
-      int jp, adc;
-      getOverlapJetPatchAdc(i,jp,adc);
-      if (adc > th) patches.insert(make_pair(jp,adc));
-    }
-  }
-  return patches;
 }
