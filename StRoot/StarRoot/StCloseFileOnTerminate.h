@@ -1,6 +1,6 @@
 #ifndef STAR_STCLOSEFILEONTERMINATE
 #define STAR_STCLOSEFILEONTERMINATE
-// $Id: StCloseFileOnTerminate.h,v 1.1 2010/02/25 20:44:05 fine Exp $
+// $Id: StCloseFileOnTerminate.h,v 1.2 2010/03/01 19:59:57 fine Exp $
 
 #include "TSysEvtHandler.h"
 
@@ -13,7 +13,7 @@ class StCloseFileOnTerminate : public TSignalHandler {
  private:
        static StCloseFileOnTerminate *fgCloseFileOnTerminate;
  protected:
-       StCloseFileOnTerminate() : TSignalHandler(kSigTermination) { }
+       StCloseFileOnTerminate() : TSignalHandler(kSigTermination, kFALSE) { }
  public:
        //! Create an instance of the signal handler (Should be called at once  by code)
        static StCloseFileOnTerminate &Instantiate();
