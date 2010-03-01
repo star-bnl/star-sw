@@ -48,7 +48,8 @@
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
 #include "StTriggerUtilities/StTriggerSimuResult.h"
 #include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
-
+#include "StTriggerUtilities/Eemc/StEemcTriggerSimu.h"
+#include "StTriggerUtilities/Emc/StEmcTriggerSimu.h"
 
 void copyVertex(StMuPrimaryVertex& v, StJetSkimVert& sv);
 
@@ -223,6 +224,14 @@ Int_t StJetSkimEventMaker::Make()
         }
     }
 
+    //ZDC and BBC rates:
+    mEvent->setZdcWestRate(muEvent->runInfo().zdcWestRate());
+    mEvent->setZdcEastRate(muEvent->runInfo().zdcEastRate());
+    mEvent->setZdcCoincidenceRate(muEvent->runInfo().zdcCoincidenceRate());
+    mEvent->setBbcWestRate(muEvent->runInfo().bbcWestRate());
+    mEvent->setBbcEastRate(muEvent->runInfo().bbcEastRate());
+    mEvent->setBbcCoincidenceRate(muEvent->runInfo().bbcCoincidenceRate());
+
     //spin specific info from Mudst:
     int bx7 = muEvent->l0Trigger().bunchCrossingId7bit(muEvent->runId());
     int bx48 =  muEvent->l0Trigger().bunchCrossingId();
@@ -259,6 +268,29 @@ Int_t StJetSkimEventMaker::Make()
     
     //highest ranking vertex is always in position 0
     mEvent->setBestVert(0);
+
+    // EMC info
+    if (StTriggerSimuMaker* trigSimu = dynamic_cast<StTriggerSimuMaker*>(GetMakerInheritsFrom("StTriggerSimuMaker"))) {
+      for (int i = 0; i < 3; ++i) {
+	mEvent->setBarrelJetPatchTh(i,trigSimu->bemc->barrelJetPatchTh(i));
+	mEvent->setEndcapJetPatchTh(i,trigSimu->eemc->endcapJetPatchTh(i));
+	mEvent->setOverlapJetPatchTh(i,trigSimu->emc->overlapJetPatchTh(i));
+      }
+
+      for (int i = 0; i < 4; ++i) mEvent->setBarrelHighTowerTh(i,trigSimu->bemc->barrelHighTowerTh(i));
+      for (int i = 0; i < 2; ++i) mEvent->setEndcapHighTowerTh(i,trigSimu->eemc->endcapHighTowerTh(i));
+
+      for (int jp = 0; jp < 18; ++jp) mEvent->setBarrelJetPatchAdc(jp,trigSimu->bemc->barrelJetPatchAdc(jp));
+      for (int jp = 0; jp <  6; ++jp) mEvent->setEndcapJetPatchAdc(jp,trigSimu->eemc->endcapJetPatchAdc(jp));
+
+      for (int i = 0; i < 2; ++i) {
+	int jp, adc;
+	trigSimu->emc->getOverlapJetPatchAdc(i,jp,adc);
+	mEvent->setOverlapJetPatchAdc(jp,adc);
+      }
+
+      mEvent->setEmcLayer2(trigSimu->emc->EM201output());
+    }
     
     //fill tree
     mTree->Fill();
@@ -333,16 +365,6 @@ void StJetSkimEventMaker::fillTriggerSimulationInfo(StJetSkimTrig &skimTrig)
     if (trigResult.l2Decision()==1) {
       skimTrig.setL2ResultEmulated(trigResult.l2Result(kJet));
     }
-
-    // 2009
-    for (map<int,int>::const_iterator i = trigResult.barrelJetPatches().begin(); i != trigResult.barrelJetPatches().end(); ++i)
-      skimTrig.addBarrelJetPatchAboveThreshold(i->first,i->second);
-
-    for (map<int,int>::const_iterator i = trigResult.endcapJetPatches().begin(); i != trigResult.endcapJetPatches().end(); ++i)
-      skimTrig.addEndcapJetPatchAboveThreshold(i->first,i->second);
-
-    for (map<int,int>::const_iterator i = trigResult.overlapJetPatches().begin(); i != trigResult.overlapJetPatches().end(); ++i)
-      skimTrig.addOverlapJetPatchAboveThreshold(i->first,i->second);
   } else if (emcTrigMaker) {
     skimTrig.setShouldFire(emcTrigMaker->isTrigger(skimTrig.trigId()));
     
