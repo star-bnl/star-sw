@@ -32,6 +32,7 @@
         cd <refer refersTo='localDir'/>
         root4star -q -b <refer refersTo='outputDir'/>/scripts/doEStruct.C\(\"\",\"$SCRATCH\",\"<refer refersTo='outputDir'/>/scripts\",<refer refersTo='eventsPerJob'/>\)            </command>
             <stdout URL="file:OUTPUTDIR/logs/$JOBID.log"/>
+            <stderr URL="file:OUTPUTDIR/logs/$JOBID.err"/>
             <output fromScratch="data/*.root" toURL="file:OUTPUTDIR/data/" />
             <output fromScratch="cuts/*.root" toURL="file:OUTPUTDIR/cuts/" />
             <output fromScratch="QA/*.root"   toURL="file:OUTPUTDIR/QA/" />
@@ -85,6 +86,8 @@
             </libraries>
             <centralities id='centralities' widget='entry'>1 4 7 10 14 25</centralities>
             <ptCentralities id='ptCentralities' typedef='const  double ptMultCut[] = ' typedef2='int mbNPtBins = '>1 4 7 10 14 25</ptCentralities>
+            <!-- A few Pythia specific declarations. -->
+            <useAllTracks id='useAllTracks' typedef='bool useAllTracks = ' widget='entry'>false</useAllTracks>
     <!-- Reader depends on type of data. -->
             <declareReader id='declareReader' widget = 'text'>
     TPythia6* pythia=getPythia(kinematics,beam,target,energy,pythiaTune);
@@ -94,7 +97,7 @@
 
     //  reader = reader interface + pointer to Data Maker + cut classes
 
-    StEStructPythia** reader = new StEStructPythia(pythia,ecuts,tcuts,-1);
+    StEStructPythia** reader = new StEStructPythia(pythia,ecuts,tcuts,useAllTracks,-1);
 
     // EventType is for qaHistograms. Depends on type of reader though.
     int EventType = 2;
