@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQAHists.cxx,v 1.6 2008/03/19 22:02:00 prindle Exp $
+ * $Id: StEStructQAHists.cxx,v 1.7 2010/03/02 21:43:38 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -161,7 +161,7 @@ void StEStructQAHists::fillBaseHistograms(StEStructEvent* event, StEStructEventR
       if(aaGenPart[ic])aaGenPart[ic]->Fill(reader->getParticipants());
     }
   } else if(mEType==2){
-    if(ic>0){
+    if(ic>=0){
       ppELines[ic]->Fill(reader->getNPartonic());
       ppALines[ic]->Fill(reader->getNPartonic());
     }
@@ -323,6 +323,11 @@ void StEStructQAHists::writeTrackHistograms(TFile* tf){
 /**********************************************************************
  *
  * $Log: StEStructQAHists.cxx,v $
+ * Revision 1.7  2010/03/02 21:43:38  prindle
+ * Use outerHelix() for global tracks
+ *   Add sensible triggerId histograms
+ *   Starting to add support to sort events (available for Hijing)
+ *
  * Revision 1.6  2008/03/19 22:02:00  prindle
  * Updated some dataset definitions.
  *

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.cxx,v 1.7 2008/12/02 23:35:32 prindle Exp $
+ * $Id: StEStructCuts.cxx,v 1.8 2010/03/02 21:43:37 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -11,6 +11,8 @@
  *               cuts are done in derived classes
  *
  ***********************************************************************/
+#include <stdlib.h>
+
 #include "StEStructCuts.h"
 #include "StString.h"
 #include "Stiostream.h"
@@ -288,7 +290,7 @@ void StEStructCuts::loadUserCuts(const char* name,const char* val1,const char* v
   delete [] tmp;
 }
 
-//-------------------------------------------------------------------            
+//-------------------------------------------------------------------          
 int StEStructCuts::createCutHists(const char* name, float* range, int nvals){
  
 
@@ -350,6 +352,29 @@ void StEStructCuts::fillHistogram(const char* name, float value, bool passed){
   if(passed) mvarHistsCut[i]->Fill(value);
 
 }
+//------------------------------------------------------------------------
+void StEStructCuts::fillHistogram(const char* name, float val1, float val2, bool passed){
+
+  // Add "2D" to name.
+  char *hName = new char[strlen(name)+2];
+  sprintf(hName,"%s2D",name);
+  int i;
+  for(i=0; i<mnumVars; i++)if(strstr(mvarName[i],hName)) break;
+
+  if(i==mnumVars) return;
+
+  TAxis *x = mvarHistsNoCut[i]->GetXaxis();
+  val1 = (val1 > x->GetXmin()) ? val1 : x->GetXmin()+0.5;
+  val1 = (val1 < x->GetXmax()) ? val1 : x->GetXmax()-0.5;
+
+  TAxis *y = mvarHistsNoCut[i]->GetYaxis();
+  val2 = (val2 > y->GetXmin()) ? val2 : y->GetXmin()+0.5;
+  val2 = (val2 < y->GetXmax()) ? val2 : y->GetXmax()-0.5;
+
+  mvarHistsNoCut[i]->Fill(val1,val2);
+  if(passed) mvarHistsCut[i]->Fill(val1,val2);
+
+}
 
 void StEStructCuts::fillHistograms(bool passed){
 
@@ -409,6 +434,11 @@ void StEStructCuts::printCuts(const char* fileName){
 /***********************************************************************
  *
  * $Log: StEStructCuts.cxx,v $
+ * Revision 1.8  2010/03/02 21:43:37  prindle
+ * Use outerHelix() for global tracks
+ *   Add sensible triggerId histograms
+ *   Starting to add support to sort events (available for Hijing)
+ *
  * Revision 1.7  2008/12/02 23:35:32  prindle
  * Added code for pileup rejection in EventCuts and MuDstReader.
  * Modified trigger selections for some data sets in EventCuts.

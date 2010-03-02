@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *$Id: StEStructAnalysisMaker.h,v 1.7 2006/04/26 18:48:58 dkettler Exp $
+ *$Id: StEStructAnalysisMaker.h,v 1.8 2010/03/02 21:43:37 prindle Exp $
  *   
  *
  *
@@ -47,6 +47,10 @@ public:
     void          SetAnalysis(StEStructAnalysis * analysis);
     void          SetAnalyses(StEStructAnalysis ** analyses, int n);
     void          SetQAHists(StEStructQAHists* qa);
+    bool          quickSort(int *arr, int elements);
+    bool          quickSort(double *arr, int elements);
+    void          SetSorting(bool sort);
+    int           GetSortedIndex(int i);
     int           getAnalysisIndex();          
     void          writeQAHists(const char* fileName);
 
@@ -76,7 +80,7 @@ public:
 
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.7 2006/04/26 18:48:58 dkettler Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.8 2010/03/02 21:43:37 prindle Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 //-------------------------------------------------
 
 
@@ -91,6 +95,8 @@ private:
     Bool_t		doReactionPlaneAnalysis; 	//Flag to indicate whether or not to find the reaction plane
     char*		mWeightFile;			//File that contains phi weights
 //    Bool_t		doPhiWgtAnalysis;		//Flag to indicate whether to calculate PhiWgts this pass
+    bool                mSorting;
+    int*                mIndex;
     // --> new pointers for data I/O, cuts, and analysis
 
     StEStructEventReader* mreader; //! base class for reading an event
@@ -132,6 +138,10 @@ inline void StEStructAnalysisMaker::SetQAHists(StEStructQAHists* qa){
   if(!qa) return;
   if(mQAHists)delete mQAHists; 
   mQAHists = qa;
+}
+
+inline void StEStructAnalysisMaker::SetSorting(bool sort){
+  mSorting = sort;
 }
 
 inline void StEStructAnalysisMaker::toggleMemoryInfo(){
@@ -192,7 +202,13 @@ inline void StEStructAnalysisMaker::logAnalysisStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.h,v $
+ * Revision 1.8  2010/03/02 21:43:37  prindle
+ * Use outerHelix() for global tracks
+ *   Add sensible triggerId histograms
+ *   Starting to add support to sort events (available for Hijing)
+ *
  * Revision 1.7  2006/04/26 18:48:58  dkettler
+ *
  * Added reaction plane determination for the analysis
  *
  * Revision 1.6  2006/04/04 22:05:03  porter

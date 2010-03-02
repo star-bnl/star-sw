@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.h,v 1.13 2008/12/02 23:35:34 prindle Exp $
+ * $Id: StEStructEventCuts.h,v 1.14 2010/03/02 21:43:38 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -20,6 +20,8 @@
 #include "StMuDSTMaker/COMMON/StMuL3EventSummary.h"
 #include "StEStructCuts.h"
 #include "Stiostream.h"
+#include "TH1F.h"
+#include "TH2F.h"
 
 class StEStructEventCuts : public StEStructCuts {
 
@@ -55,6 +57,7 @@ public:
 
 
   bool goodTrigger(StMuDst* muDst);
+  bool goodVertexTopology(StMuDst* muDst);
   bool goodPrimaryVertexZ( float z );
   bool goodCentrality( float n);
   bool goodZVertSep(float dz);
@@ -70,190 +73,6 @@ public:
 };
 
 inline void StEStructEventCuts::loadUserCuts(const char* name, const char** vals, int nvals){}
-
-inline bool StEStructEventCuts::goodTrigger(StMuDst* muDst) {
-
-  StMuEvent* muEvent = muDst->event();
-  if (mtrgByRunPeriod) {
-
-    if (!strcmp("CuCu22GeVProductionMinBiasP05if",mRunPeriod)) {
-        // Accept all triggers.
-        return true;
-    } else if (!strcmp("CuCu62GeVProductionMinBias2005",mRunPeriod)) {
-        if (muEvent->triggerIdCollection().nominal().isTrigger(76007) ||
-            muEvent->triggerIdCollection().nominal().isTrigger(76011)) {
-            return true;
-        }
-    } else if (!strcmp("CuCu200GeVProductionMinBias2005",mRunPeriod)) {
-        if (muEvent->triggerIdCollection().nominal().isTrigger(66007)) {
-            return true;
-        }
-    } else if (!strcmp("CuCu62GeVProductionMinBias2007ic",mRunPeriod)) {
-        // Assume vertex characteristics essentially the same
-        // as the 200GeV CuCu data.
-        if (muEvent->runNumber()<6069077) {
-            if (!muEvent->triggerIdCollection().nominal().isTrigger(76002) &&
-                !muEvent->triggerIdCollection().nominal().isTrigger(76011)) {
-                return false;
-            }
-        } else {
-            if (!muEvent->triggerIdCollection().nominal().isTrigger(76007) &&
-                !muEvent->triggerIdCollection().nominal().isTrigger(76011)) {
-                return false;
-            }
-        }
-        bool keep = false;
-        if (muDst->event()->refMult() >= 17) {
-            if (fabs(muDst->primaryVertex()->meanDip())/muDst->event()->ctbMultiplicity() < (0.8/800)) {
-                 keep = true;
-            }
-        } else {
-            if (muDst->primaryVertex()->ranking()>-2.5) {
-                keep = true;
-            }
-        }
-        return keep;
-    } else if (!strcmp("CuCu200GeVProductionMinBias2007ic",mRunPeriod)) {
-        if (!muEvent->triggerIdCollection().nominal().isTrigger(66007)) {
-            return false;
-        }
-        bool keep = false;
-        if (muDst->event()->refMult() >= 17) {
-            if (0 == muDst->event()->ctbMultiplicity()) {
-                keep = false;
-            } else if (fabs(muDst->primaryVertex()->meanDip())/muDst->event()->ctbMultiplicity() < (0.8/800)) {
-                keep = true;
-            }
-        } else {
-            if (muDst->primaryVertex()->ranking()>-2.5) {
-                keep = true;
-            }
-        }
-        return keep;
-    } else if (!strcmp("2007ProductionMinBias",mRunPeriod)) {
-        // This is 200GeV ProductionMinBias AuAu data from 2007
-        // First triggerId has killer bits on, second killer bits off.
-        // I don't know what killer bits are. Are they important?
-        // Trigger page suggests ID 200001 should be in mbvpd.
-        // Multiplicity distribution of that id is cleary wrong.
-        if (muEvent->triggerIdCollection().nominal().isTrigger(200001) ||
-            muEvent->triggerIdCollection().nominal().isTrigger(200003) ||
-            muEvent->triggerIdCollection().nominal().isTrigger(200020)) {
-            badTrigger++;
-        }
-        if (!muEvent->triggerIdCollection().nominal().isTrigger(200013)) {
-            return false;
-        }
-        // Not sure these vertex criteria have been optimized.
-        bool keep = false;
-        if (muDst->event()->refMult() >= 17) {
-            if (fabs(muDst->primaryVertex()->meanDip())/muDst->event()->ctbMultiplicity() < (0.8/800)) {
-                 keep = true;
-            }
-        } else {
-            if (muDst->primaryVertex()->ranking()>-2.5) {
-                keep = true;
-            }
-        }
-        return keep;
-    } else if (!strcmp("2007LowLuminosity",mRunPeriod)) {
-        // This is 200GeV LowLuminosity AuAu data from 2007
-        if (muEvent->triggerIdCollection().nominal().isTrigger(200001) ||
-            muEvent->triggerIdCollection().nominal().isTrigger(200003) ||
-            muEvent->triggerIdCollection().nominal().isTrigger(200013)) {
-            badTrigger++;
-        }
-        if (!muEvent->triggerIdCollection().nominal().isTrigger(200020)) {
-            return false;
-        }
-        // Not sure these vertex criteria have been optimized.
-        bool keep = false;
-        if (muDst->event()->refMult() >= 17) {
-            if (fabs(muDst->primaryVertex()->meanDip())/muDst->event()->ctbMultiplicity() < (0.8/800)) {
-                 keep = true;
-            }
-        } else {
-            if (muDst->primaryVertex()->ranking()>-2.5) {
-                keep = true;
-            }
-        }
-        return keep;
-    } else if (!strcmp("AuAu200GeVMinBias2004",mRunPeriod)) {
-        if (muEvent->runNumber() < 5023099) {
-            if (muEvent->triggerIdCollection().nominal().isTrigger(15003)) {
-                return true;
-            }
-        } else if (muEvent->runNumber() > 503098) {
-            if (muEvent->triggerIdCollection().nominal().isTrigger(15007)) {
-                return true;
-            }
-        }
-        return false;
-    } else if (!strcmp("AuAu62GeVMinBias2004",mRunPeriod)) {
-        if (((muEvent->triggerIdCollection().nominal().isTrigger(35004) ||
-              muEvent->triggerIdCollection().nominal().isTrigger(35007))
-            ||
-            ((muEvent->triggerIdCollection().nominal().isTrigger(35001) ||
-              muEvent->triggerIdCollection().nominal().isTrigger(35009) )
-              && muEvent->ctbMultiplicity()>15))) {
-            return true;
-        }
-    } else if (!strcmp("AuAu200GeVMinBias2001",mRunPeriod)) {
-        StMuL3EventSummary l3 = muEvent->l3EventSummary();
-        if (!(l3.unbiasedTrigger())) {
-            return false;
-        }
-        unsigned int t = muEvent->l0Trigger().triggerWord();
-        if ( 0x1000 == t ) {
-            return true;
-        }
-    } else if (!strcmp("AuAu200GeVCentral2001",mRunPeriod)) {
-        StMuL3EventSummary l3 = muEvent->l3EventSummary();
-        if (!(l3.unbiasedTrigger())) {
-	        return false;
-        }
-        unsigned int t = muEvent->l0Trigger().triggerWord();
-        if ( 0x1100 == t ) {
-	        return true;
-       }
-    } else if (!strcmp("dAu200GeVMinBias2003",mRunPeriod)) {
-        if (muEvent->triggerIdCollection().nominal().isTrigger(2001) ||
-	        muEvent->triggerIdCollection().nominal().isTrigger(2003)) {
-            return true;
-        }
-    } else if(!strcmp("ppMinBias",mRunPeriod)){
-        if(muEvent->triggerIdCollection().nominal().isTrigger(8192)) {
-            return true;
-        }
-    } else if(!strcmp("ppProductionMinBias2005",mRunPeriod)){
-        if(muEvent->triggerIdCollection().nominal().isTrigger(96011) ||
-           muEvent->triggerIdCollection().nominal().isTrigger(106011)) {
-               return true;
-        }
-    } else if(!strcmp("pp400MinBias2005",mRunPeriod)){
-        // Not 100% sure of these triggers. Small data set, probably not worth spending much time on.
-        if(muEvent->triggerIdCollection().nominal().isTrigger(96011) ||
-           muEvent->triggerIdCollection().nominal().isTrigger(106011)) {
-               return true;
-        }
-    } else if(!strcmp("pp2006MinBias2006",mRunPeriod)){
-        if(muEvent->triggerIdCollection().nominal().isTrigger(117001)) {
-               return true;
-        }
-    } else if(!strcmp("ppProductionMB622006",mRunPeriod)){
-        if(muEvent->triggerIdCollection().nominal().isTrigger(147001)) {
-               return true;
-        }
-    }
-  } else {
-        unsigned int t = muEvent->l0Trigger().triggerWord();
-        mvalues[mtWordName.idx] = (float)t;
-        return ( (mtWord[0]==mtWord[1] && mtWord[0]==0) ||
-                 (t>=mtWord[0] && t<=mtWord[1])  ) ;
-  }
-  return false;
-
-}
 
 inline bool StEStructEventCuts::goodPrimaryVertexZ(float z) {
   mvalues[mpVertexZName.idx] = z;
@@ -280,6 +99,11 @@ inline bool StEStructEventCuts::goodZVertSep(float dz){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.h,v $
+ * Revision 1.14  2010/03/02 21:43:38  prindle
+ * Use outerHelix() for global tracks
+ *   Add sensible triggerId histograms
+ *   Starting to add support to sort events (available for Hijing)
+ *
  * Revision 1.13  2008/12/02 23:35:34  prindle
  * Added code for pileup rejection in EventCuts and MuDstReader.
  * Modified trigger selections for some data sets in EventCuts.

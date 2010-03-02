@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.h,v 1.5 2006/04/04 22:05:03 porter Exp $
+ * $Id: StEStructCuts.h,v 1.6 2010/03/02 21:43:38 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -72,6 +72,7 @@ public:
 
 
   virtual void fillHistogram(const char* name, float value, bool passed);
+  virtual void fillHistogram(const char* name, float val1, float val2, bool passed);
   virtual void fillHistograms(bool passed);
   virtual void writeCutHists(TFile* tf);
   virtual bool loadBaseCuts(const char* name,const char** vals,int nvals)=0;
@@ -184,6 +185,11 @@ inline void StEStructCuts::setRange(const char* cutName, float xmin, float xmax)
 /***********************************************************************
  *
  * $Log: StEStructCuts.h,v $
+ * Revision 1.6  2010/03/02 21:43:38  prindle
+ * Use outerHelix() for global tracks
+ *   Add sensible triggerId histograms
+ *   Starting to add support to sort events (available for Hijing)
+ *
  * Revision 1.5  2006/04/04 22:05:03  porter
  * a handful of changes:
  *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
