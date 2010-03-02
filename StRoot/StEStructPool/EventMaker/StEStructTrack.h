@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.h,v 1.7 2008/12/02 23:45:49 prindle Exp $
+ * $Id: StEStructTrack.h,v 1.8 2010/03/02 21:47:18 prindle Exp $
  *
  * Author: Jeff Porter merge of work from Aya Ishihara and Jeff Reid
  *
@@ -71,6 +71,12 @@ private:
   Float_t           mXt; //!
   Float_t           mCurvature; //!
   Float_t           mAssignedMass; //!
+  Float_t           mMidTPCRadius;    //|
+  Float_t           mOuterMidTPCRadius;    //|
+  Float_t           mMaxRadius;    //|
+  Float_t           mEndCapRadius; //|
+  Int_t             mEndCapOuterMid; //!
+  Int_t             mEndCapOuter; //!
   StLorentzVectorF  mFourMomentum; //!
   StThreeVectorF    mStartPos; //!
   StThreeVectorF    mNominalTpcExitPoint; //!
@@ -125,6 +131,12 @@ public:
   Float_t Dedx() const { return mDedx; }
   Float_t Chi2() const { return mChi2; }
   Float_t AssignedMass() const { return mAssignedMass; };
+  Float_t MidTPCRadius() const { return mMidTPCRadius; };
+  Float_t OuterMidTPCRadius() const { return mOuterMidTPCRadius; };
+  Float_t MaxRadius() const { return mMaxRadius; };
+  Float_t EndCapRadius() const { return mEndCapRadius; };
+  Int_t EndCapOuter() const { return mEndCapOuter; };
+  Int_t EndCapOuterMid() const { return mEndCapOuterMid; };
 
   Int_t NFitPoints() const { return mNFitPoints; }
   Int_t NFoundPoints() const { return mNFoundPoints; }
@@ -239,6 +251,10 @@ inline int      StEStructTrack::getYtBin() const { return mytbin; };
 /***********************************************************************
  *
  * $Log: StEStructTrack.h,v $
+ * Revision 1.8  2010/03/02 21:47:18  prindle
+ * Support to retrieve track radius when it crosses endplate
+ *   Add way to retrieve centrality
+ *
  * Revision 1.7  2008/12/02 23:45:49  prindle
  * Added curvature and calculation of OuterMidTpcPoint.
  *

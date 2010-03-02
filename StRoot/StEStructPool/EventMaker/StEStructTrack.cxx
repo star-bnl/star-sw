@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.cxx,v 1.7 2008/12/02 23:45:48 prindle Exp $
+ * $Id: StEStructTrack.cxx,v 1.8 2010/03/02 21:47:18 prindle Exp $
  *
  * Author: Jeff Porter merge of code from Aya Ishihara and Jeff Reid
  *
@@ -156,27 +156,58 @@ void StEStructTrack::FillTpcReferencePoints(){
   pairD candidates = mHelix.pathLength(200.0);
   double sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
   double endLength = mHelix.pathLength(WestEnd,EndCapNormal);
-  if (endLength < 0.0) endLength = mHelix.pathLength(EastEnd,EndCapNormal);
-  double firstExitLength = (endLength < sideLength) ? endLength : sideLength;
+  int endcap;
+  if (endLength < 0.0) {
+      endcap = +1;
+      endLength = mHelix.pathLength(EastEnd,EndCapNormal);
+  } else {
+      endcap = -1;
+  }
+  double firstExitLength = endLength;
+  if (endLength > sideLength) {
+      mEndCapOuter = 0;
+      firstExitLength = sideLength;
+  } else {
+      mEndCapOuter = endcap;
+  }
   mNominalTpcExitPoint = mHelix.at(firstExitLength);
 
   candidates = mHelix.pathLength(50.0);
   sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
   mNominalTpcEntrancePoint = mHelix.at(sideLength);
 
-  candidates = mHelix.pathLength(127.0);
+  // With cuts |\eta| < 1 and |V_z| < 50cm all tracks should cross 127cm radius before
+  // intersecting endcap. (Need to double check this is true for lowest momentum helix we accept.)
+  mMidTPCRadius = 127.0;
+  candidates = mHelix.pathLength(mMidTPCRadius);
   sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
   mMidTpcPoint = mHelix.at(sideLength);
 
-  // Add OuterMid point at 163.5. This is to help with my crossing cut for LS tracks
-  // that have different pt.
-  candidates = mHelix.pathLength(163.5);
+  // Add OuterMid point at 163.5. This is to help with my crossing cut for LS tracks that have different pt.
+  // Possible track may have excited via endcap at this radius.
+  mOuterMidTPCRadius = 163.5;
+  candidates = mHelix.pathLength(mOuterMidTPCRadius);
   sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
-  endLength = mHelix.pathLength(WestEnd,EndCapNormal);
-  if (endLength < 0.0) endLength = mHelix.pathLength(EastEnd,EndCapNormal);
-  firstExitLength = (endLength < sideLength) ? endLength : sideLength;
+  firstExitLength = endLength;
+  if (endLength > sideLength) {
+      mEndCapOuterMid = 0;
+      firstExitLength = sideLength;
+  } else {
+      mEndCapOuterMid = endcap;
+  }
   mOuterMidTpcPoint = mHelix.at(firstExitLength);
-  
+
+  // Store maximum radius this track will get to. Not all tracks get to specific radii.
+  double curve = mHelix.curvature();
+  if (curve > 0.000001) {
+      mMaxRadius = 2/curve;
+  } else {
+      mMaxRadius = 99999.0;   // Arbitrary number bigger than anything we care about.
+  }
+  // Store radius of track intersection with endcap.
+  StThreeVectorF vendcap = mHelix.at(endLength);
+  mEndCapRadius = sqrt(vendcap.x()*vendcap.x() + vendcap.y()*vendcap.y());
+
   mIsComplete=true;  // finished with calculations
 
 }
@@ -242,6 +273,10 @@ Float_t StEStructTrack::PIDpiMinus() const {
 /**********************************************************************
  *
  * $Log: StEStructTrack.cxx,v $
+ * Revision 1.8  2010/03/02 21:47:18  prindle
+ * Support to retrieve track radius when it crosses endplate
+ *   Add way to retrieve centrality
+ *
  * Revision 1.7  2008/12/02 23:45:48  prindle
  * Added curvature and calculation of OuterMidTpcPoint.
  *

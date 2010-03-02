@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCentrality.cxx,v 1.7 2007/01/26 17:19:49 msd Exp $
+ * $Id: StEStructCentrality.cxx,v 1.8 2010/03/02 21:47:18 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -51,6 +51,7 @@ int StEStructCentrality::centrality(const double impact) {
         return -1;
     }
 
+    mValue = impact;
     int found  = 0;
     int retVal = 0;
     for(retVal=0;retVal<mnumCentralities-1;retVal++) {
@@ -207,6 +208,10 @@ void StEStructCentrality::Print() {
 /***********************************************************************
  *
  * $Log: StEStructCentrality.cxx,v $
+ * Revision 1.8  2010/03/02 21:47:18  prindle
+ * Support to retrieve track radius when it crosses endplate
+ *   Add way to retrieve centrality
+ *
  * Revision 1.7  2007/01/26 17:19:49  msd
  * Added Print function.
  *
