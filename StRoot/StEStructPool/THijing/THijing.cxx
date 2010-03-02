@@ -27,11 +27,18 @@ void THijing::init() {
 THijing::~THijing() {
 }
 
-void THijing::SetRandomSeed(int iseed) {
+void THijing::SetRandomSeed(int iseed, int k1, int k2) {
   int lux = 2;
-  int k1 = 0;
-  int k2 = 0;
-  rluxgox_(&lux,&iseed,&k1,&k2);
+  rluxgo_(&lux,&iseed,&k1,&k2);
+}
+void THijing::GetRandomSeed(int *lux, int *iseed, int *k1, int *k2) {
+  rluxat_(lux,iseed,k1,k2);
+}
+void THijing::SaveRandomSeeds(int *ivec) {
+  rluxut_(ivec);
+}
+void THijing::RestoreRandomSeeds(int *ivec) {
+  rluxin_(ivec);
 }
 void THijing::GenerateEvent() {
   // Comment out the following line, so that THijing always

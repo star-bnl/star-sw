@@ -23,7 +23,7 @@ FOR      = g77
 LD       = g++
 FORLD    = g77
 
-OBJS  = hijev.o  hijing.o hipyset.o
+OBJS  = aranlux.o hijev.o  hijing.o hipyset.o
 all: THijing.so
 # mix fortran and C++ in the linking.
 # Note that the library -lg2c is needed if g++ is used to link
@@ -43,6 +43,8 @@ StEStructHijingDict.o: StEStructHijingDict.C
 	$(CXX) $(CXXFLAGS) -I$(ROOTINCDIR) -c $^
 StEStructHijingDict.C: StEStructHijing.h
 	rootcint -f $@ -c $^
+aranlux.o:  aranlux.f
+	$(FOR) $(FORFLAGS) -c $^
 hijev.o:  hijev.f
 	$(FOR) $(FORFLAGS) -c $^
 hipyset.o: hipyset.f
