@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.cxx,v 1.12 2006/10/02 22:22:50 prindle Exp $
+ * $Id: StEStructPythia.cxx,v 1.13 2010/03/02 21:46:24 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -23,6 +23,7 @@ StEStructPythia::StEStructPythia() {
     mECuts        = 0;
     mTCuts        = 0;
     mInChain      = false;
+    museAllTracks = false;
     mEventsToDo   = 100;
     mEventCount   = 0;
     mAmDone       = false;
@@ -31,11 +32,13 @@ StEStructPythia::StEStructPythia() {
 StEStructPythia::StEStructPythia(TPythia6* pythia,
                                  StEStructEventCuts* ecuts,
                                  StEStructTrackCuts* tcuts,
+                                 bool useAllTracks,
                                  int  eventsToDo) {
     mPythia       = pythia;
     mECuts        = ecuts;
     mTCuts        = tcuts;
     mInChain      = false;
+    museAllTracks = useAllTracks;
     mEventsToDo   = eventsToDo;
     mEventCount   = 0;
     mAmDone       = false;
@@ -66,19 +69,25 @@ StEStructEvent* StEStructPythia::next() {
     retVal->SetVy(0);
     retVal->SetVz(0);
     retVal->SetBField(0.5);
-    
+
     mstarTrigger=false;
     int nTracks = countGoodTracks();
 
-    retVal->SetCentrality( (float) nTracks );
-    if(!mECuts->goodCentrality(retVal->Centrality()) || !mstarTrigger){
+    float centMeasure;
+    if (museAllTracks) {
+        centMeasure = getNPartonic();
+    } else {
+        centMeasure = nTracks;
+    }
+    retVal->SetCentrality(centMeasure);
+    if(!mECuts->goodCentrality(centMeasure) || !mstarTrigger){
         delete retVal;
         retVal=NULL;
         mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,false);
     } else { 
-         fillTracks(retVal);
-         retVal->FillChargeCollections();
-         mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,true);
+        fillTracks(retVal);
+        retVal->FillChargeCollections();
+        mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,true);
     }
 
     return retVal;
@@ -282,6 +291,9 @@ void StEStructPythia::setTrackCuts(StEStructTrackCuts* cuts) {
 /**********************************************************************
  *
  * $Log: StEStructPythia.cxx,v $
+ * Revision 1.13  2010/03/02 21:46:24  prindle
+ * Option to use getNPartonic as a centrality measure
+ *
  * Revision 1.12  2006/10/02 22:22:50  prindle
  * Changed the values stored in PID for different particle types so I can
  * use same cuts for Pythia (and Hijing) as I do for data.
