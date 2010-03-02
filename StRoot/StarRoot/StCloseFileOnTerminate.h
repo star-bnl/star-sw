@@ -1,13 +1,13 @@
 #ifndef STAR_STCLOSEFILEONTERMINATE
 #define STAR_STCLOSEFILEONTERMINATE
-// $Id: StCloseFileOnTerminate.h,v 1.3 2010/03/01 23:37:41 fine Exp $
+// $Id: StCloseFileOnTerminate.h,v 1.4 2010/03/02 00:41:25 fine Exp $
 
 #include "TSysEvtHandler.h"
 
 //! \author Valery Fine(fine@bnl.gov)
 //! \date 27=5/02/2010
 
-/*! \brief  Class StTerminateNotified is a abstract visitor to propagate the termiantion signal
+/*! \brief  Class StTerminateNotified is a abstract visitor to propagate the termination signal
  */
 class StTerminateNotified {
     public:
@@ -16,7 +16,7 @@ class StTerminateNotified {
       virtual  void SetNotified() = 0;
       virtual  bool Notified() const = 0;
 };
-/*! \brief  Class StCloseFileOnTerminate - catch the SIGTERM signal *sent by Condor for example) to close all open ROOT files.to draw the 3D primitives like 3D points and 3D lines
+/*! \brief  Class StCloseFileOnTerminate - catch the SIGTERM signal (sent by Condor for example) to close all open ROOT files.
  */
 class StCloseFileOnTerminate : public TSignalHandler {
  private:
