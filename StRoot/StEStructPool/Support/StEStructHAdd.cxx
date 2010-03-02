@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.cxx,v 1.14 2009/11/09 21:32:59 prindle Exp $
+ * $Id: StEStructHAdd.cxx,v 1.15 2010/03/02 21:48:30 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -89,8 +89,8 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                         }
                         if (0==n) {
                             outhist=(TH2D *)tmp->Clone();
-                            // This part is (was) only intended to be used with mode 5 (pid)
                             if (symmXX && isXXHist[k]) {
+                                // This part is (was) only intended to be used with mode 5 (pid)
                                 if (cb->notSymmetrizedXX(nlist[n],j)) {
                                     symmetrizeXX(outhist);
                                 }
@@ -99,8 +99,8 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                             outhist->SetTitle(tmp->GetTitle());
                         } else {
                             cpy = (TH2D *)tmp->Clone();
-                            // This part is (was) only intended to be used with mode 5 (pid)
                             if (symmXX && isXXHist[k]) {
+                                // This part is (was) only intended to be used with mode 5 (pid)
                                 if (cb->notSymmetrizedXX(nlist[n],j)) {
                                     symmetrizeXX(cpy);
                                 }
@@ -407,7 +407,7 @@ void StEStructHAdd::symmetrizeXX(TH2 *hist) {
 
 };
 //------------------------------------------------------------------------
-void StEStructHAdd::addDensities(const char* outfile, TFile* inFile) {
+void StEStructHAdd::old_addDensities(const char* outfile, TFile* inFile) {
 
     TFile* outFile = new TFile(outfile,"RECREATE");
 
@@ -440,34 +440,66 @@ void StEStructHAdd::addDensities(const char* outfile, TFile* inFile) {
         }
 
         TH2D *ls[6], *us[6], *tmp;
+        TH2D *cLS[6], *cUS[6];
         inFile->GetObject("SibppTPCMidTZ_cutBin_0_zBuf_0",tmp);
         for (int i=0;i<6;i++) {
             ls[i] = (TH2D *) tmp->Clone();  ls[i]->Clear();
             us[i] = (TH2D *) tmp->Clone();  us[i]->Clear();
+            cLS[i] = (TH2D *) tmp->Clone();
+            cUS[i] = (TH2D *) tmp->Clone();
         }
         TString hDensName;
         const char *typePP[] = {"SibppTPCMidTZ_cutBin_", "SibppTPCMidTZC_cutBin_", "SibppTPCMidTZNC_cutBin_", "MixppTPCMidTZ_cutBin_", "MixppTPCMidTZC_cutBin_", "MixppTPCMidTZNC_cutBin_"};
         const char *typeMM[] = {"SibmmTPCMidTZ_cutBin_", "SibmmTPCMidTZC_cutBin_", "SibmmTPCMidTZNC_cutBin_", "MixmmTPCMidTZ_cutBin_", "MixmmTPCMidTZC_cutBin_", "MixmmTPCMidTZNC_cutBin_"};
         const char *typePM[] = {"SibpmTPCMidTZ_cutBin_", "SibpmTPCMidTZC_cutBin_", "SibpmTPCMidTZNC_cutBin_", "MixpmTPCMidTZ_cutBin_", "MixpmTPCMidTZC_cutBin_", "MixpmTPCMidTZNC_cutBin_"};
         const char *typeMP[] = {"SibmpTPCMidTZ_cutBin_", "SibmpTPCMidTZC_cutBin_", "SibmpTPCMidTZNC_cutBin_", "MixmpTPCMidTZ_cutBin_", "MixmpTPCMidTZC_cutBin_", "MixmpTPCMidTZNC_cutBin_"};
+        const char *pairPos[] = {"TPCMidTZ_LS_", "TPCMidTZC_LS_", "TPCMidTZNC_LS_", "TPCMidTZ_US_", "TPCMidTZC_US_", "TPCMidTZNC_US_"};
         for (int iCut=0;iCut<nCut;iCut++) {
+            inFile->cd();
+            for (int i=0;i<6;i++) {
+                cLS[i]->Clear();
+                cUS[i]->Clear();
+            }
+            hDensName = pairPos[0]; hDensName += iCut; cLS[0]->SetName(hDensName.Data());
+            hDensName = pairPos[1]; hDensName += iCut; cLS[1]->SetName(hDensName.Data());
+            hDensName = pairPos[2]; hDensName += iCut; cLS[2]->SetName(hDensName.Data());
+            hDensName = pairPos[3]; hDensName += iCut; cUS[0]->SetName(hDensName.Data());
+            hDensName = pairPos[4]; hDensName += iCut; cUS[1]->SetName(hDensName.Data());
+            hDensName = pairPos[5]; hDensName += iCut; cUS[2]->SetName(hDensName.Data());
             for (int zBuf=0;zBuf<nZBuf;zBuf++) {
                 for (int it=0;it<6;it++) {
                     hDensName = typePP[it]; hDensName += iCut; hDensName += "_zBuf_"; hDensName += zBuf;
                     inFile->GetObject(hDensName.Data(),tmp);
+                    cLS[it]->Add(tmp);
                     ls[it]->Add(tmp);
                     hDensName = typeMM[it]; hDensName += iCut; hDensName += "_zBuf_"; hDensName += zBuf;
                     inFile->GetObject(hDensName.Data(),tmp);
+                    cLS[it]->Add(tmp);
                     ls[it]->Add(tmp);
 
                     hDensName = typePM[it]; hDensName += iCut; hDensName += "_zBuf_"; hDensName += zBuf;
                     inFile->GetObject(hDensName.Data(),tmp);
+                    cUS[it]->Add(tmp);
                     us[it]->Add(tmp);
                     hDensName = typeMP[it]; hDensName += iCut; hDensName += "_zBuf_"; hDensName += zBuf;
                     inFile->GetObject(hDensName.Data(),tmp);
+                    cUS[it]->Add(tmp);
                     us[it]->Add(tmp);
                 }
             }
+            cLS[0]->Divide(cLS[3]);
+            cLS[1]->Divide(cLS[4]);
+            cLS[2]->Divide(cLS[5]);
+            cUS[0]->Divide(cUS[3]);
+            cUS[1]->Divide(cUS[4]);
+            cUS[2]->Divide(cUS[5]);
+            outFile->cd();
+            cLS[0]->Write();
+            cLS[1]->Write();
+            cLS[2]->Write();
+            cUS[0]->Write();
+            cUS[1]->Write();
+            cUS[2]->Write();
         }
         ls[0]->Divide(ls[3]);  ls[0]->SetName("TPCMidTZ_LS");
         ls[1]->Divide(ls[4]);  ls[1]->SetName("TPCMidTZC_LS");
@@ -482,8 +514,421 @@ void StEStructHAdd::addDensities(const char* outfile, TFile* inFile) {
         us[0]->Write();
         us[1]->Write();
         us[2]->Write();
+        for (int i=0;i<6;i++) {
+            delete ls[i];
+            delete us[i];
+            delete cLS[i];
+            delete cUS[i];
+        }
     }
     outFile->Close();
+    delete outFile;
+}
+void StEStructHAdd::addDensities(const char* outfile, TFile* inFile) {
+
+
+    // If pair density histograms are in input file add z and cut bins,
+    // form LS and US, take ratio of sibling to mixed and write to output file.
+    TH2 *sibDens; inFile->GetObject("SibppTPCMidTZ_cutBin_0_zBuf_0",sibDens);
+    TH2 *mixDens; inFile->GetObject("MixppTPCMidTZ_cutBin_0_zBuf_0",mixDens);
+    if (!sibDens || !mixDens) {
+        return;
+    }
+
+    // Find number of cut bins and number of zBuffers.
+    int nCut = 0;
+    int nZBuf = 0;
+    TString hSibName("SibppTPCMidTZ_cutBin_");
+    while (nCut<99) {
+        TString full(hSibName.Data()); full += nCut; full += "_zBuf_0";
+        inFile->GetObject(full.Data(),sibDens);
+        if (sibDens) {
+            nCut++;
+        } else {
+            break;
+        }
+    }
+    while (nZBuf<99) {
+        TString full(hSibName.Data()); full += "0_zBuf_"; full += nZBuf;
+        inFile->GetObject(full.Data(),sibDens);
+        if (sibDens) {
+            nZBuf++;
+        } else {
+            break;
+        }
+    }
+
+
+    TH1D *tmp1D;
+    TH2D *tmp2D;
+
+    TH1D *sep1D[2][2][4][2];
+    TH1D *Sum_sep1D[2][2][4][2];
+    inFile->GetObject("SibppTPCAvgTSep_cutBin_0_zBuf_0",tmp1D);
+    for (int irel=0;irel<2;irel++) {
+        for (int ich=0;ich<2;ich++) {
+            for (int ipos=0;ipos<4;ipos++) {
+                for (int idir=0;idir<2;idir++) {
+                    Sum_sep1D[irel][ich][ipos][idir] = (TH1D *) tmp1D->Clone();
+                }
+            }
+        }
+    }
+
+    TH1D *dpt1D[2][2][2][2];
+    TH1D *Sum_dpt1D[2][2][2][2];
+    inFile->GetObject("SibppTPCMidTdptP_cutBin_0_zBuf_0",tmp1D);
+    for (int irel=0;irel<2;irel++) {
+        for (int ich=0;ich<2;ich++) {
+            for (int ity=0;ity<2;ity++) {
+                for (int idir=0;idir<2;idir++) {
+                    Sum_dpt1D[irel][ich][ity][idir] = (TH1D *) tmp1D->Clone();
+                }
+            }
+        }
+    }
+
+    TH2D *sep2D[2][2][4];
+    TH2D *Sum_sep2D[2][2][4];
+    inFile->GetObject("SibppTPCAvgTZ_cutBin_0_zBuf_0",tmp2D);
+    for (int irel=0;irel<2;irel++) {
+        for (int ich=0;ich<2;ich++) {
+            for (int ipos=0;ipos<4;ipos++) {
+                Sum_sep2D[irel][ich][ipos] = (TH2D *) tmp2D->Clone();
+            }
+        }
+    }
+
+    TH2D *cross[2][2][2];
+    TH2D *Sum_cross[2][2][2];
+    inFile->GetObject("SibppTPCMidTZC_cutBin_0_zBuf_0",tmp2D);
+    for (int irel=0;irel<2;irel++) {
+        for (int ich=0;ich<2;ich++) {
+            for (int icr=0;icr<2;icr++) {
+                Sum_cross[irel][ich][icr] = (TH2D *) tmp2D->Clone();
+            }
+        }
+    }
+
+    TH2D *dpt2D[2][2][3];
+    TH2D *Sum_dpt2D[2][2][3];
+    inFile->GetObject("SibppTPCEntTdpt_cutBin_0_zBuf_0",tmp2D);
+    for (int irel=0;irel<2;irel++) {
+        for (int ich=0;ich<2;ich++) {
+            for (int ipos=0;ipos<3;ipos++) {
+                Sum_dpt2D[irel][ich][ipos] = (TH2D *) tmp2D->Clone();
+            }
+        }
+    }
+
+    TString hName;
+    const char *pos[] = {"Ent", "Mid", "Exit", "Avg"};
+    const char *dir[] = {"T", "Z"};
+    const char *ty[] = {"P", "N"};
+    const char *crs[] = {"C", "NC"};
+
+    // Loop over cut bins.
+    // For each cut bin we sum over zBuffers, calculate and write Sib/Mix for LS and US
+    // We also sum over cut bins, calculating Sib/Mix at end.
+    const char *rel[] = {"Sib", "Mix"};
+    const char *ch[] = {"pp", "mm", "pm", "mp"};
+    const char *chType[] = {"LS", "US"};
+
+    TFile* outFile = new TFile(outfile,"RECREATE");
+
+    for (int iCut=0;iCut<nCut;iCut++) {
+        // Reset histograms for this cut. Will sum over zBuffers.
+        inFile->cd();
+        for (int irel=0;irel<2;irel++) {
+            for (int ich=0;ich<2;ich++) {
+                for (int ipos=0;ipos<4;ipos++) {
+                    inFile->GetObject("SibppTPCAvgTSep_cutBin_0_zBuf_0",tmp1D);
+                    for (int idir=0;idir<2;idir++) {
+                        sep1D[irel][ich][ipos][idir] = (TH1D *) tmp1D->Clone();
+                        sep1D[irel][ich][ipos][idir]->Clear();
+                    }
+                }
+                inFile->GetObject("SibppTPCMidTdptP_cutBin_0_zBuf_0",tmp1D);
+                for (int ity=0;ity<2;ity++) {
+                    for (int idir=0;idir<2;idir++) {
+                        dpt1D[irel][ich][ity][idir] = (TH1D *) tmp1D->Clone();
+                        dpt1D[irel][ich][ity][idir]->Clear();
+                    }
+                }
+                inFile->GetObject("SibppTPCAvgTZ_cutBin_0_zBuf_0",tmp2D);
+                for (int ipos=0;ipos<4;ipos++) {
+                    sep2D[irel][ich][ipos] = (TH2D *) tmp2D->Clone();
+                    sep2D[irel][ich][ipos]->Clear();
+                }
+                inFile->GetObject("SibppTPCMidTZC_cutBin_0_zBuf_0",tmp2D);
+                for (int icr=0;icr<2;icr++) {
+                    cross[irel][ich][icr] = (TH2D *) tmp2D->Clone();
+                    cross[irel][ich][icr]->Clear();
+                }
+                inFile->GetObject("SibppTPCEntTdpt_cutBin_0_zBuf_0",tmp2D);
+                for (int ipos=0;ipos<3;ipos++) {
+                    dpt2D[irel][ich][ipos] = (TH2D *) tmp2D->Clone();
+                    dpt2D[irel][ich][ipos]->Clear();
+                }
+            }
+        }
+
+        for (int zBuf=0;zBuf<nZBuf;zBuf++) {
+            // First do 1D T, Z separations.
+            for (int ipos=0;ipos<4;ipos++) {
+                for (int idir=0;idir<2;idir++) {
+                    for (int irel=0;irel<2;irel++) {
+                        for (int ich=0;ich<4;ich++) {
+                            hName = rel[irel]; hName += ch[ich]; hName += "TPC"; hName += pos[ipos]; hName += dir[idir];
+                            hName += "Sep_cutBin_"; hName += iCut; hName += "_zBuf_"; hName += zBuf;
+                            inFile->GetObject(hName.Data(),tmp1D);
+                            sep1D[irel][ich/2][ipos][idir]->Add(tmp1D);
+                            Sum_sep1D[irel][ich/2][ipos][idir]->Add(tmp1D);
+                        }
+                    }
+                }
+            }
+            // Now 1D T*dpt, Z*dpt for P and N curvature
+            for (int ity=0;ity<2;ity++) {
+                for (int idir=0;idir<2;idir++) {
+                    for (int irel=0;irel<2;irel++) {
+                        for (int ich=0;ich<4;ich++) {
+                            hName = rel[irel]; hName += ch[ich]; hName += "TPCMid"; hName += dir[idir]; hName += "dpt"; hName += ty[ity];
+                            hName += "_cutBin_"; hName += iCut; hName += "_zBuf_"; hName += zBuf;
+                            inFile->GetObject(hName.Data(),tmp1D);
+                            dpt1D[irel][ich/2][ity][idir]->Add(tmp1D);
+                            Sum_dpt1D[irel][ich/2][ity][idir]->Add(tmp1D);
+                        }
+                    }
+                }
+            }
+            // Now for 2D T-Z separations.
+            for (int ipos=0;ipos<4;ipos++) {
+                for (int irel=0;irel<2;irel++) {
+                    for (int ich=0;ich<4;ich++) {
+                        hName = rel[irel]; hName += ch[ich]; hName += "TPC"; hName += pos[ipos];
+                        hName += "TZ_cutBin_"; hName += iCut; hName += "_zBuf_"; hName += zBuf;
+                        inFile->GetObject(hName.Data(),tmp2D);
+                        sep2D[irel][ich/2][ipos]->Add(tmp2D);
+                        Sum_sep2D[irel][ich/2][ipos]->Add(tmp2D);
+                    }
+                }
+            }
+            // Now 2D T, Z - dpt separations
+            for (int ipos=0;ipos<3;ipos++) {
+                for (int irel=0;irel<2;irel++) {
+                    for (int ich=0;ich<4;ich++) {
+                        hName = rel[irel]; hName += ch[ich]; hName += "TPC"; hName += pos[ipos];
+                        hName += "Tdpt_cutBin_"; hName += iCut; hName += "_zBuf_"; hName += zBuf;
+                        inFile->GetObject(hName.Data(),tmp2D);
+                        dpt2D[irel][ich/2][ipos]->Add(tmp2D);
+                        Sum_dpt2D[irel][ich/2][ipos]->Add(tmp2D);
+                    }
+                }
+            }
+            // Finally, 2D T-Z separations dependent on crossing or not.
+            for (int icr=0;icr<2;icr++) {
+                for (int irel=0;irel<2;irel++) {
+                    for (int ich=0;ich<4;ich++) {
+                        hName = rel[irel]; hName += ch[ich]; hName += "TPCMidTZ"; hName += crs[icr];
+                        hName += "_cutBin_"; hName += iCut; hName += "_zBuf_"; hName += zBuf;
+                        inFile->GetObject(hName.Data(),tmp2D);
+                        cross[irel][ich/2][icr]->Add(tmp2D);
+                        Sum_cross[irel][ich/2][icr]->Add(tmp2D);
+                    }
+                }
+            }
+        }
+
+        // Calculate sibling/mixed (normalized) and write.
+        // Also want to set the name appropriately for when we read these from a file.
+        outFile->cd();
+
+        for (int ipos=0;ipos<4;ipos++) {
+            for (int idir=0;idir<2;idir++) {
+                for (int ich=0;ich<2;ich++) {
+                    sep1D[0][ich][ipos][idir]->Scale(sep1D[1][ich][ipos][idir]->Integral()/sep1D[0][ich][ipos][idir]->Integral());
+                    sep1D[0][ich][ipos][idir]->Divide(sep1D[1][ich][ipos][idir]);
+                    hName = chType[ich]; hName += pos[ipos]; hName += dir[idir]; hName += "Sep_cutBin_"; hName += iCut; 
+                    sep1D[0][ich][ipos][idir]->SetName(hName.Data());
+                    sep1D[0][ich][ipos][idir]->SetTitle(hName.Data());
+                    sep1D[0][ich][ipos][idir]->Write();
+                }
+            }
+        }
+        for (int ity=0;ity<2;ity++) {
+            for (int idir=0;idir<2;idir++) {
+                for (int ich=0;ich<2;ich++) {
+                    dpt1D[0][ich][ity][idir]->Scale(dpt1D[1][ich][ity][idir]->Integral()/dpt1D[0][ich][ity][idir]->Integral());
+                    dpt1D[0][ich][ity][idir]->Divide(dpt1D[1][ich][ity][idir]);
+                    hName = chType[ich]; hName += dir[idir]; hName += ty[ity]; hName += "_cutBin_"; hName += iCut; 
+                    dpt1D[0][ich][ity][idir]->SetName(hName.Data());
+                    dpt1D[0][ich][ity][idir]->SetTitle(hName.Data());
+                    dpt1D[0][ich][ity][idir]->Write();
+                }
+            }
+        }
+        for (int ipos=0;ipos<4;ipos++) {
+            for (int ich=0;ich<2;ich++) {
+                sep2D[0][ich][ipos]->Scale(sep2D[1][ich][ipos]->Integral()/sep2D[0][ich][ipos]->Integral());
+                sep2D[0][ich][ipos]->Divide(sep2D[1][ich][ipos]);
+                hName = chType[ich]; hName += pos[ipos]; hName += "TZ_cutBin_"; hName += iCut; 
+                sep2D[0][ich][ipos]->SetName(hName.Data());
+                sep2D[0][ich][ipos]->SetTitle(hName.Data());
+                sep2D[0][ich][ipos]->Write();
+            }
+        }
+        for (int ipos=0;ipos<3;ipos++) {
+            for (int ich=0;ich<2;ich++) {
+                dpt2D[0][ich][ipos]->Scale(dpt2D[1][ich][ipos]->Integral()/dpt2D[0][ich][ipos]->Integral());
+                dpt2D[0][ich][ipos]->Divide(dpt2D[1][ich][ipos]);
+                hName = chType[ich]; hName += pos[ipos]; hName += "Tdpt_cutBin_"; hName += iCut; 
+                dpt2D[0][ich][ipos]->SetName(hName.Data());
+                dpt2D[0][ich][ipos]->SetTitle(hName.Data());
+                dpt2D[0][ich][ipos]->Write();
+            }
+        }
+        for (int icr=0;icr<2;icr++) {
+            for (int ich=0;ich<2;ich++) {
+                cross[0][ich][icr]->Scale(cross[1][ich][icr]->Integral()/cross[0][ich][icr]->Integral());
+                cross[0][ich][icr]->Divide(cross[1][ich][icr]);
+                hName = chType[ich]; hName += "MidTZ"; hName += crs[icr]; hName += "_cutBin_"; hName += iCut; 
+                cross[0][ich][icr]->SetName(hName.Data());
+                cross[0][ich][icr]->SetTitle(hName.Data());
+                cross[0][ich][icr]->Write();
+            }
+        }
+
+        for (int irel=0;irel<2;irel++) {
+            for (int ipos=0;ipos<4;ipos++) {
+                for (int idir=0;idir<2;idir++) {
+                    for (int ich=0;ich<2;ich++) {
+                        delete sep1D[irel][ich][ipos][idir];
+                    }
+                }
+            }
+            for (int ity=0;ity<2;ity++) {
+                for (int idir=0;idir<2;idir++) {
+                    for (int ich=0;ich<2;ich++) {
+                        delete dpt1D[irel][ich][ity][idir];
+                    }
+                }
+            }
+            for (int ipos=0;ipos<4;ipos++) {
+                for (int ich=0;ich<2;ich++) {
+                    delete sep2D[irel][ich][ipos];
+                }
+            }
+            for (int ipos=0;ipos<3;ipos++) {
+                for (int ich=0;ich<2;ich++) {
+                    delete dpt2D[irel][ich][ipos];
+                }
+            }
+            for (int icr=0;icr<2;icr++) {
+                for (int ich=0;ich<2;ich++) {
+                    delete cross[irel][ich][icr];
+                }
+            }
+        }
+    }
+
+    // Finished loop over cut bins.
+    // Now calculate and write ratios for summed cut bins.
+    outFile->cd();
+
+    for (int ipos=0;ipos<4;ipos++) {
+        for (int idir=0;idir<2;idir++) {
+            for (int ich=0;ich<2;ich++) {
+                Sum_sep1D[0][ich][ipos][idir]->Scale(Sum_sep1D[1][ich][ipos][idir]->Integral()/Sum_sep1D[0][ich][ipos][idir]->Integral());
+                Sum_sep1D[0][ich][ipos][idir]->Divide(Sum_sep1D[1][ich][ipos][idir]);
+                hName = chType[ich]; hName += pos[ipos]; hName += dir[idir]; hName += "Sep";
+                Sum_sep1D[0][ich][ipos][idir]->SetName(hName.Data());
+                Sum_sep1D[0][ich][ipos][idir]->SetTitle(hName.Data());
+                Sum_sep1D[0][ich][ipos][idir]->Write();
+            }
+        }
+    }
+    for (int ity=0;ity<2;ity++) {
+        for (int idir=0;idir<2;idir++) {
+            for (int ich=0;ich<2;ich++) {
+                Sum_dpt1D[0][ich][ity][idir]->Scale(Sum_dpt1D[1][ich][ity][idir]->Integral()/Sum_dpt1D[0][ich][ity][idir]->Integral());
+                Sum_dpt1D[0][ich][ity][idir]->Divide(Sum_dpt1D[1][ich][ity][idir]);
+                hName = chType[ich]; hName += dir[idir]; hName += ty[ity];
+                Sum_dpt1D[0][ich][ity][idir]->SetName(hName.Data());
+                Sum_dpt1D[0][ich][ity][idir]->SetTitle(hName.Data());
+                Sum_dpt1D[0][ich][ity][idir]->Write();
+            }
+        }
+    }
+    for (int ipos=0;ipos<4;ipos++) {
+        for (int ich=0;ich<2;ich++) {
+            Sum_sep2D[0][ich][ipos]->Scale(Sum_sep2D[1][ich][ipos]->Integral()/Sum_sep2D[0][ich][ipos]->Integral());
+            Sum_sep2D[0][ich][ipos]->Divide(Sum_sep2D[1][ich][ipos]);
+            hName = chType[ich]; hName += pos[ipos]; hName += "TZ";
+            Sum_sep2D[0][ich][ipos]->SetName(hName.Data());
+            Sum_sep2D[0][ich][ipos]->SetTitle(hName.Data());
+            Sum_sep2D[0][ich][ipos]->Write();
+        }
+    }
+    for (int ipos=0;ipos<3;ipos++) {
+        for (int ich=0;ich<2;ich++) {
+            Sum_dpt2D[0][ich][ipos]->Scale(Sum_dpt2D[1][ich][ipos]->Integral()/Sum_dpt2D[0][ich][ipos]->Integral());
+            Sum_dpt2D[0][ich][ipos]->Divide(Sum_dpt2D[1][ich][ipos]);
+            hName = chType[ich]; hName += pos[ipos]; hName += "Tdpt";
+            Sum_dpt2D[0][ich][ipos]->SetName(hName.Data());
+            Sum_dpt2D[0][ich][ipos]->SetTitle(hName.Data());
+            Sum_dpt2D[0][ich][ipos]->Write();
+        }
+    }
+    for (int icr=0;icr<2;icr++) {
+        for (int ich=0;ich<2;ich++) {
+            Sum_cross[0][ich][icr]->Scale(Sum_cross[1][ich][icr]->Integral()/Sum_cross[0][ich][icr]->Integral());
+            Sum_cross[0][ich][icr]->Divide(Sum_cross[1][ich][icr]);
+            hName = chType[ich]; hName += "MidTZ"; hName += crs[icr];
+            Sum_cross[0][ich][icr]->SetName(hName.Data());
+            Sum_cross[0][ich][icr]->SetTitle(hName.Data());
+            Sum_cross[0][ich][icr]->Write();
+        }
+    }
+    // Maybe we need to delete histograms or garbage collection gets confused.
+    // (Maybe we just have to be careful to not confuse root into attempting to transfer
+    //  histograms from input to output files.)
+
+
+    for (int irel=0;irel<2;irel++) {
+        for (int ipos=0;ipos<4;ipos++) {
+            for (int idir=0;idir<2;idir++) {
+                for (int ich=0;ich<2;ich++) {
+                    delete Sum_sep1D[irel][ich][ipos][idir];
+                }
+            }
+        }
+        for (int ity=0;ity<2;ity++) {
+            for (int idir=0;idir<2;idir++) {
+                for (int ich=0;ich<2;ich++) {
+                    delete Sum_dpt1D[irel][ich][ity][idir];
+                }
+            }
+        }
+        for (int ipos=0;ipos<4;ipos++) {
+            for (int ich=0;ich<2;ich++) {
+                delete Sum_sep2D[irel][ich][ipos];
+            }
+        }
+        for (int ipos=0;ipos<3;ipos++) {
+            for (int ich=0;ich<2;ich++) {
+                delete Sum_dpt2D[irel][ich][ipos];
+            }
+        }
+        for (int icr=0;icr<2;icr++) {
+            for (int ich=0;ich<2;ich++) {
+                delete Sum_cross[irel][ich][icr];
+            }
+        }
+    }
+
+    outFile->Close();
+    delete outFile;
 }
 
 //------------------------------------------------------------------------
@@ -547,6 +992,10 @@ void StEStructHAdd::combineUS(TFile * modFile) {
 /***********************************************************************
  *
  * $Log: StEStructHAdd.cxx,v $
+ * Revision 1.15  2010/03/02 21:48:30  prindle
+ * Fix addDensities (for checking pair cuts)
+ *   Lots of small changes
+ *
  * Revision 1.14  2009/11/09 21:32:59  prindle
  * Fix warnings about casting char * to a const char * by redeclaring as const char *.
  *

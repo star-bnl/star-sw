@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.24 2009/11/09 21:32:59 prindle Exp $
+ * $Id: StEStructSupport.cxx,v 1.25 2010/03/02 21:48:30 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -105,6 +105,7 @@ StEStructSupport::StEStructSupport(TFile* tf, int bgmode, float* npairs) : mtf(t
   mapplyDEtaFix=false; // must set explicitly now
   mDoSymmetrize = false;
   mPairNormalization = false;
+  mPairWeighting = true;
   mIdenticalPair = true;
 
   // Scan file for number of z-buffer bins
@@ -234,6 +235,34 @@ float *StEStructSupport::getChargePairs(int zBin) {
 };
 
 //---------------------------------------------------------
+double StEStructSupport::getCIdNdEtadPhi() {
+    // A == sum over zBins  {nA+} + {nA-}
+    // B == sum over zBins  {nB+} + {nB-}
+    // return 0.5 sqrt(A*B) / nEvents
+
+    double retVal = 0;
+    TH1 *hNSum;
+    TString hSibName;
+
+    double nEvents = 0;
+    double nTracksA = 0;
+    double nTracksB = 0;
+    TH1 *hEta;
+    TString hname;
+    for (int iz=0;iz<mNumZBins;iz++) {
+        hSibName = "NEventsSib_zBuf_"; hSibName += iz;  mtf->GetObject(hSibName.Data(),hNSum);  nEvents += hNSum->Integral();
+
+        hname = "etaPA_zBuf_";  hname += iz;  mtf->GetObject(hname.Data(),hEta);  nTracksA += hEta->Integral();
+        hname = "etaMA_zBuf_";  hname += iz;  mtf->GetObject(hname.Data(),hEta);  nTracksA += hEta->Integral();
+        hname = "etaPB_zBuf_";  hname += iz;  mtf->GetObject(hname.Data(),hEta);  nTracksB += hEta->Integral();
+        hname = "etaMB_zBuf_";  hname += iz;  mtf->GetObject(hname.Data(),hEta);  nTracksB += hEta->Integral();
+    }
+
+    // The 0.5 is because we integrate tracks over two units of rapidity.
+    retVal = 0.5 * sqrt( nTracksA * nTracksB ) / (2*3.1415926 * nEvents);
+    return retVal;
+}
+//---------------------------------------------------------
 double *StEStructSupport::getd2NdEtadPhi(int zBin, bool include2s) {
     double* retVal = new double[6];
     // (nA+)*(nB+), (nA+)*(nB-), (nA-)*(nB+), (nA-)*(nB-), (nA+)+(nA-)+(nB+)+(nB-)
@@ -287,22 +316,27 @@ double *StEStructSupport::getd2NdEtadPhi(int zBin, bool include2s) {
 //---------------------------------------------------------
 // These are the values of d2N/dEtadPhi used when combining \Delta\rho/\rho_{ref}
 // First four values are product  A+B+, A+B-, A-B+, A-A-.
-// Firth value is A+ + A- + B+ + B- (or one have of that, look in getd2NdEtadPhi).
+// Fifth value is A+ + A- + B+ + B- (or one have of that, look in getd2NdEtadPhi).
 double *StEStructSupport::getScaleFactors() {
     double* retVal = new double[5];
     retVal = getd2NdEtadPhi(0);
+    for (int iType=0;iType<4;iType++) {
+        retVal[iType] *= retVal[5];
+    }
 
     double *d2NdEtadPhi;
     for (int iz=1;iz<mNumZBins;iz++) {
         d2NdEtadPhi = getd2NdEtadPhi(iz);
-        for (int iType=0;iType<5;iType++) {
-            retVal[iType] += d2NdEtadPhi[iType];
+        for (int iType=0;iType<4;iType++) {
+            retVal[iType] += d2NdEtadPhi[iType] * d2NdEtadPhi[5];
         }
+        retVal[5] += d2NdEtadPhi[5];
         delete [] d2NdEtadPhi;
     }
-    for (int iType=0;iType<5;iType++) {
-        retVal[iType] /= mNumZBins;
+    for (int iType=0;iType<4;iType++) {
+        retVal[iType] /= (mNumZBins*retVal[5]);
     }
+    retVal[5] /= mNumZBins;
     return retVal;
 }
 double *StEStructSupport::getScaleFactors(int zBin) {
@@ -378,7 +412,7 @@ TH2D** StEStructSupport::getLocalClones(const char* name, int zBin){
 //-----------------------------------------------------
 void StEStructSupport::rescale(TH2D** hists, int zBin) {
     // Divide hists by bin widths, divide by Nevents.
-    // Bin by bin rrors should be scaled properly, but won't include errors on the scale factors.
+    // Bin by bin errors should be scaled properly, but won't include errors on the scale factors.
 
     if(!mtf) return;
 
@@ -390,7 +424,7 @@ void StEStructSupport::rescale(TH2D** hists, int zBin) {
     double nMix = hNum->Integral();
 
     for (int i=0;i<4;i++) {
-    	cout << "\ni=" << i << " Integral: " << hists[i]->Integral();
+//        cout << "\ni=" << i << " Integral: " << hists[i]->Integral();
         if (hists[i]->Integral() > 0) {
             // dividing by ex*ey converts all input hists from counts to densities, so all operations and final result should also be density.
             double dx = (hists[i]->GetXaxis())->GetBinWidth(1);
@@ -403,19 +437,11 @@ void StEStructSupport::rescale(TH2D** hists, int zBin) {
 
             if (mPairNormalization) {
                 // This is original normalization. Average value of \Delta\rho should be one.
-                double nSibPairs = hists[i]->Integral();
-                double nMixPairs = hists[i+4]->Integral();
-		cout << "\ni=" << i << " Scaling by: " << nSibPairs/nMixPairs << endl;
-                if (nMixPairs > 0) {
-                    hists[i+4]->Scale(nSibPairs/nMixPairs);
-                } else {
-                    hists[i+4]->Scale(0);
-                }
-                //if (nSibPairs > 0) {
-                //    hists[i]->Scale(nMixPairs/nSibPairs);
-                //} else {
-                //    hists[i]->Scale(0);
-                //}
+                TH2D *tmp = (TH2D *) hists[i]->Clone();
+                tmp->Divide(hists[i+4]);
+                double scale = tmp->Integral() / (tmp->GetNbinsX() * tmp->GetNbinsY());
+                hists[i+4]->Scale(scale);
+                delete tmp;
             } else {
                 // We know how many sibling and mixed events there were.
                 // In this normalization we should be able to integrate (weighted with an
@@ -670,8 +696,14 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf) {
     for(int i=0;i<4;i++) {
         retVal[i]->SetName(swapIn(retVal[i]->GetName(),oldName[i],newName[i]));
         retVal[i]->SetTitle(swapIn(retVal[i]->GetTitle(),oldTitle[i],newTitle[i]));
+        retVal[i]->Reset();
     }
 
+    double wIdentical[4] = {1, 1, 1, 1};
+    if (mIdenticalPair) {
+        wIdentical[1] = 2;
+        wIdentical[2] = 0;
+    }
     if (opt < 3) {
         // In the final scaling to \Delta\rho/\sqrt(\rho_{ref}) or \Delta\rho/\rho_{ref}
         // one might want to use a {d^2N\over d\eta d\phi} for that specific
@@ -682,58 +714,50 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf) {
         //    Combining centralities in this way will not give the same result as using a larger
         //    centrality bin to begin with, but may remove some of the systematic problems.
 
-	// We want to first calculate the total number of events and pairs for all zbins
-	double nEvents = 0.;
-	double totPairs = 0.;
-	double Totals[4] = {0, 0, 0, 0};
+        // We weight each zBin by the total number of sibling pairs (integrated over (\eta_\Delta,\phi_\Delta)).
+        // First sum over zBins to get total number of pairs.
+        TH2D** temp;
+        double *wScale[4];
+        wScale[0] = new double[mNumZBins];
+        wScale[1] = new double[mNumZBins];
+        wScale[2] = new double[mNumZBins];
+        wScale[3] = new double[mNumZBins];
+        double wTotal[4]  = {0, 0, 0, 0};
         for (int iz=0;iz<mNumZBins;iz++) {
-	    double *d2NdEtadPhi = getd2NdEtadPhi(iz, false);
-	    nEvents += d2NdEtadPhi[5];
-	    totPairs += d2NdEtadPhi[4]*d2NdEtadPhi[5];
-	    for (int iType=0;iType<4;iType++) {
-		Totals[iType] += d2NdEtadPhi[iType]*d2NdEtadPhi[5];
-	    }
-	}
-		
-        double *d2NdEtadPhi = getd2NdEtadPhi(0);
-        double dNdEtadPhi = d2NdEtadPhi[4]*d2NdEtadPhi[5];
-        for (int iType=0;iType<4;iType++) {
-	    if(d2NdEtadPhi[iType]!=0.) {
-                retVal[iType]->Scale(d2NdEtadPhi[iType]*d2NdEtadPhi[5]/Totals[iType]);
-	    } else
-		retVal[iType]->Scale(0.);
+            temp = getLocalClones(name, iz);
+            for (int iType=0;iType<4;iType++) {
+                wScale[iType][iz] = temp[iType]->Integral();
+                wTotal[iType]    += wScale[iType][iz];
+                delete temp[iType];
+            }
+            delete [] temp;
         }
-        delete [] d2NdEtadPhi;
 
-        for (int iz=1;iz<mNumZBins;iz++) {
-            d2NdEtadPhi = getd2NdEtadPhi(iz);
-            dNdEtadPhi += d2NdEtadPhi[4]*d2NdEtadPhi[5];
+        // Now sum \Delta\rho / \rho_{ref} weighting by number of pairs in each zBin.
+        for (int iz=0;iz<mNumZBins;iz++) {
             TH2D** tmpVal= buildCommon(name, opt, sf, iz);
             for (int iType=0;iType<4;iType++) {
-		if(d2NdEtadPhi[iType]!=0) {
-            	    retVal[iType]->Add(tmpVal[iType],d2NdEtadPhi[iType]*d2NdEtadPhi[5]/Totals[iType]);
-		}
+                if (0 != wTotal[iType]) {
+                    retVal[iType]->Add(tmpVal[iType], wIdentical[iType]*wScale[iType][iz]/wTotal[iType]);
+                }
                 delete tmpVal[iType];
             }
             delete [] tmpVal;
-            delete [] d2NdEtadPhi;
         }
-        //double sqrtRho = dNdEtadPhi / mNumZBins;
-	dNdEtadPhi *= 1./(nEvents);
-        double sqrtRho = dNdEtadPhi;
+
+        // Have weighted \Delta\rho / \rho_{ref}.
+        // Scale by some power of d^2N/d\eta d\phi (always using CI for this to be able to compare different charge combinations correctly).
+        double sqrtRho = getCIdNdEtadPhi();
+        cout << "@@@@@ Using d^2N/detadphi = " << sqrtRho << endl;
         for (int iType=0;iType<4;iType++) {
-	    retVal[iType]->Scale(1./4.);
+            // >>>>>
+            retVal[iType]->Scale(1./4.);
             if (0 < sqrtRho) {
-                // Note: I can imagine cases where a bin is empty (or nearly so) so it should
-                //       not count. Currently rely on some other QA to catch.
-                //retVal[iType]->Scale(1.0/mNumZBins);
                 if (0 == opt) {
-		    // Do nothing
-                    //retVal[iType]->Scale(1.0/pow(sqrtRho,2));
-		} else if (1 == opt) {
-		    retVal[iType]->Scale(dNdEtadPhi);
+                    // Do nothing
+                } else if (1 == opt) {
+                    retVal[iType]->Scale(sqrtRho*sqrtRho);
                 } else if (2 == opt) {
-                    //retVal[iType]->Scale(1.0/sqrtRho);
                     retVal[iType]->Scale(sqrtRho);
                 }
             } else {
@@ -741,6 +765,8 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf) {
             }
         }
     } else {
+        // We probably want to weight by number of pairs here as well.
+        // Make sure other section works, then fix this.
         for (int iz=1;iz<mNumZBins;iz++) {
             TH2D** tmpVal= buildCommon(name, opt, sf, iz);
             for (int iType=0;iType<_pair_totalmax;iType++) {
@@ -751,8 +777,8 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf) {
         }
         // Scale according to opt.
         for (int iType=0;iType<4;iType++) {
-            retVal[iType]->Scale(1.0/mNumZBins);
-            retVal[iType+4]->Scale(1.0/mNumZBins);
+            retVal[iType]->Scale(wIdentical[iType]/mNumZBins);
+            retVal[iType+4]->Scale(wIdentical[iType]/mNumZBins);
             retVal[iType]->Add(retVal[iType+4],-1);
             for (int ix=1;ix<=retVal[iType]->GetNbinsX();ix++) {
                 for (int iy=1;iy<=retVal[iType]->GetNbinsY();iy++) {
@@ -807,7 +833,7 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf, int z
                                 // Optionally scale number of mix pairs to be same as sibling.
     }
     if (strstr(name,"DEta") || strstr(name,"SEta")) {
-        fixDEta((TH2**)retVal,8); // does nothing unless mapplyDEtaFix is set
+        fixDEtaGeometric((TH2**)retVal,8); // does nothing unless mapplyDEtaFix is set
     }
 
     float scf1=0.;
@@ -940,7 +966,7 @@ TH2D** StEStructSupport::buildPtCommon(const char* name, int opt, int subtract, 
     }
 
     if(strstr(name,"DEta") || strstr(name,"SEta")) {
-        fixDEta((TH2**)hlocal,32);
+        fixDEtaGeometric((TH2**)hlocal,32);
     }
     double *ptHat = getptHat(zBin);
     double ptHatA[4], ptHatB[4];
@@ -1199,7 +1225,7 @@ TH2D** StEStructSupport::buildChargeTypesSumOfRatios(const char* name, int opt, 
     for(int i=0;i<8;i++) hlocal[i]->Scale(1.0/mnpairs[i]);
   } else rescale(hlocal,zBin);  // automatic scaling, norm sib to pairs per event, norm mix to sib
 
-  if(strstr(name,"DEta") || strstr(name,"SEta"))fixDEta((TH2**)hlocal,8); // does nothing unless mapplyDEtaFix is set
+  if(strstr(name,"DEta") || strstr(name,"SEta"))fixDEtaGeometric((TH2**)hlocal,8); // does nothing unless mapplyDEtaFix is set
 
   // four returned hists
   TH2D** retVal= new TH2D*[4]; // 0=LS 1=US 2=CD=LS-US 3=CI=LS+US
@@ -1372,6 +1398,49 @@ void StEStructSupport::scaleBackGround(TH2D* sib, TH2D* mix, float sf) {
 }
 
 //----------------------------------------------------------------
+void StEStructSupport::fixDEtaGeometric(TH2** h, int numHists) {
+
+    // That other version of fixDEta is actually trying to do a complicated
+    // acceptance correction. The geometric part is well defined, and we
+    // do only that here.
+    // No need to assume max and min eta are same distance from 0.
+    // Makes it look slightly more complicated.
+    // Take geometry from first histogram.
+
+    if(!mapplyDEtaFix) return;
+
+    TAxis *x = h[0]->GetXaxis();
+    TAxis *y = h[0]->GetYaxis();
+    double etaMax = x->GetXmax();
+    double etaMin = x->GetXmin();
+    double H = 0.5*( etaMax - etaMin );
+    double x0 = 0.5*( etaMax + etaMin );
+    for (int ix=1;ix<=x->GetNbins();ix++) {
+        double eta1 = x->GetBinLowEdge(ix);
+        double eta2 = x->GetBinUpEdge(ix);
+        double corr;
+        if (eta2 <= x0) {
+            corr = H / ( 0.5*(eta2+eta1) - etaMin );
+        } else if (eta1 >= x0) {
+            corr = H / ( etaMax - 0.5*(eta2+eta1) );
+        } else {
+            double area = H*(eta2-eta1);
+            double aplus  = (eta2-x0)*0.5*(H + etaMax-eta2);
+            double aminus = (x0-eta1)*0.5*(H + eta1-etaMin);
+            corr = area / (aplus + aminus);
+        }
+        for (int iy=1;iy<=y->GetNbins();iy++) {
+            for (int ih=0;ih<numHists;ih++) {
+                double val = h[ih]->GetBinContent(ix,iy);
+                double err = h[ih]->GetBinError(ix,iy);
+                h[ih]->SetBinContent(ix,iy,val*corr);
+                h[ih]->SetBinError(ix,iy,err*corr);
+            }
+        }
+    }
+}
+        
+//----------------------------------------------------------------
 void StEStructSupport::fixDEta(TH2** h, int numHists) {
 
   // Expect histograms in groups of eight. The first eight are number,
@@ -1511,6 +1580,10 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.25  2010/03/02 21:48:30  prindle
+ * Fix addDensities (for checking pair cuts)
+ *   Lots of small changes
+ *
  * Revision 1.24  2009/11/09 21:32:59  prindle
  * Fix warnings about casting char * to a const char * by redeclaring as const char *.
  *
