@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCentrality.h,v 1.7 2007/01/26 17:19:50 msd Exp $
+ * $Id: StEStructCentrality.h,v 1.8 2010/03/02 21:47:18 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -19,6 +19,7 @@ enum StEStructCentType { ESNTracks=0, ESGenImpact }; // may be others from gener
 
 class StEStructCentrality {
 
+  double mValue;
   double *mcentralities;
   int  mnumCentralities;
   double *mpts, *mptcents;
@@ -40,6 +41,7 @@ class StEStructCentrality {
   double maxCentrality(int id);
 
   int centrality( double impact );
+  double GetCentValue();
   int ptIndex(const double pt);
   int ptCentrality(const double cent);
 
@@ -67,6 +69,10 @@ class StEStructCentrality {
 
 
 
+inline double StEStructCentrality::GetCentValue() {
+  return mValue;
+}
+
 inline double StEStructCentrality::minCentrality(int id){
   if(mcentralities && id>=0 && id<mnumCentralities ) return mcentralities[id];
   return -1;
@@ -87,6 +93,10 @@ inline StEStructCentType StEStructCentrality::getCentType(){ return mCentType;};
 /***********************************************************************
  *
  * $Log: StEStructCentrality.h,v $
+ * Revision 1.8  2010/03/02 21:47:18  prindle
+ * Support to retrieve track radius when it crosses endplate
+ *   Add way to retrieve centrality
+ *
  * Revision 1.7  2007/01/26 17:19:50  msd
  * Added Print function.
  *
