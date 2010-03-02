@@ -44,6 +44,7 @@ void doEStruct( const char* filelist,
     <variable sumOf='ptCentralities'/>
 
     <variable inLine='useImpactParameter'/>
+    <variable inLine='useAllTracks'/>
 
     <variable inLine='cutMode'/>
     <variable inLine='analysisMode'/>
@@ -87,12 +88,13 @@ void doEStruct( const char* filelist,
         estructMaker->SetReactionPlaneAnalysis(weightsFile);
     }
 
-    // Before start of event loop allow special processing.
-    <variable refersTo='beforeEventLoop'/>
+    <variable inLine='sortEvents'/>
+    <variable refersTo='preLoop'/>
 
     int counter=0, istat=0, i=0;
     while (istat!=2) {
 
+        <variable refersTo='preEvent'/>
         istat=estructMaker-&gt;Make();
 
         i++; counter++;
@@ -103,9 +105,11 @@ void doEStruct( const char* filelist,
         if ( maxNumEvents!=0 &amp;&amp; i&gt;=maxNumEvents ) {
             istat=2;
         }
-        // Any special event loop code goes here.
-        <variable refersTo='insideEventLoop'/>
+        <variable refersTo='postEvent'/>
     }
+
+    <variable refersTo='postLoop'/>
+
     // --&gt; statistics file
     ofstream ofs(getOutFileName(outputDir,jobName,"stats"));
     estructMaker-&gt;logAllStats(ofs);
@@ -127,9 +131,6 @@ void doEStruct( const char* filelist,
 
     // --&gt; root QA histogram file
     estructMaker-&gt;writeQAHists(getOutFileName(outputDir,jobName,"QA"));
-
-    // Any special clean up code goes here.
-    <variable refersTo='afterEventLoop'/>
 
     // --&gt; Write out the data in the form of root histograms.
     estructMaker-&gt;Finish();

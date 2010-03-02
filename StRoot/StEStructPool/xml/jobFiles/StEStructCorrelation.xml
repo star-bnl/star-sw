@@ -12,6 +12,7 @@
             <ptCentralities id='ptCentralities' widget='none' typedef='const  double ptMultCut[] = ' typedef2='int mbNPtBins = '>0 2000</ptCentralities>
             <cutMode id='cutMode' widget='combobox' Comment='2pt analysis binning mode' typedef='int cutBinMode = '>3</cutMode>
             <analysisMode id='analysisMode' widget='entry' Comment='2pt analysis option flag' typedef='int analysisMode = '>0</analysisMode>
+            <sortEvents id='sortEvents' widget='entry' Comment='if true we sort events on multiplicity/z vertex' typedef='bool sortEvents = '>false</sortEvents>
             <declareAnalysis id='declareAnalysis' widget='text'>
     // choose the mode for the binning
     int numberOfAnalyses = mbNBins-1;
@@ -35,15 +36,6 @@
     pcuts-&gt;printCutStats(ofs);
             </pairCutsWrite>
             <weightsFile id='weightsFile' widget='entry' Comment='weights file for reaction plane analysis' typedef='char *weightsFile = '>none</weightsFile>
-            <beforeEventLoop id='beforeEventLoop' widget = 'text'>
-    // Put special processing that needs to be done before the evet loop here.
-            </beforeEventLoop>
-            <insideEventLoop id='insideEventLoop' widget = 'text'>
-        // Special processing per event can go here.
-            </insideEventLoop>
-            <afterEventLoop id='afterEventLoop' widget = 'text'>
-    // If special processing needs clean up code put it here.
-            </afterEventLoop>
         </doEStructMacro>
 
     </standardElements>

@@ -64,13 +64,14 @@
         </jobControl>
 
         <!-- To drive everything we need an xml file for star-submit. -->
-        <starSubmit nProcesses='20' simulateSubmission='true'>
+        <starSubmit nProcesses='20' simulateSubmission='true' fileListSyntax='paths'>
             <command>
     starver <refer refersTo='starLibVersion'/>
     cd <refer refersTo='localDir'/>
     root4star -q -b <refer refersTo='outputDir'/>/scripts/doEStruct.C\(\"\",\"$SCRATCH\",\"<refer refersTo='outputDir'/>/scripts\",<refer refersTo='eventsPerJob'/>\)
             </command>
             <stdout URL="file:OUTPUTDIR/logs/$JOBID.log"/>
+            <stderr URL="file:OUTPUTDIR/logs/$JOBID.err"/>
             <output fromScratch="data/*.root" toURL="file:OUTPUTDIR/data/" />
             <output fromScratch="cuts/*.root" toURL="file:OUTPUTDIR/cuts/" />
             <output fromScratch="QA/*.root"   toURL="file:OUTPUTDIR/QA/" />
@@ -134,6 +135,56 @@
     // EventType is for qaHistograms. Depends on type of reader though.
     int EventType = 1;
             </declareReader>
+
+            <preLoop id='preLoop' widget = 'text'>
+    // Put special processing that needs to be done before the event loop here.
+    // In this case we may want to sort Hijing accoring to multiplicity or impact parameter.
+    int **iv = new int*[maxNumEvents];
+    if (sortEvents) {
+        for (int ie=0;ie&lt;maxNumEvents;ie++) {
+            iv[ie] = new int[25];
+        }
+        int preCount=0, preStat=0, preI=0;
+        estructMaker->SetSorting(true);
+        double *centMeasure = new double [maxNumEvents];
+        while (preStat!=2) {
+            hijingGenerator-&gt;SaveRandomSeeds(iv[preI]);
+            preStat=estructMaker-&gt;Make();
+            centMeasure[preI] = cent->GetCentValue();
+
+            preI++; preCount++;
+            if (preCount==200) {
+                cout&lt;&lt;"checking event ="&lt;&lt;preI&lt;&lt;endl;
+                preCount=0;
+            }
+            if ( maxNumEvents!=0 &amp;&amp; preI&gt;=maxNumEvents ) {
+                preStat=2;
+            }
+        }
+        estructMaker->SetSorting(false);
+        estructMaker->quickSort(centMeasure,maxNumEvents);
+    }
+            </preLoop>
+            <preEvent id='preEvent' widget = 'text'>
+        // Special processing before each event can go here.
+        if (sortEvents) {
+            int ie = estructMaker-&gt;GetSortedIndex(i);
+            hijingGenerator-&gt;RestoreRandomSeeds(iv[ie]);
+        }
+            </preEvent>
+            <postEvent id='postEvent' widget = 'text'>
+        // Special processing after each event can go here.
+            </postEvent>
+            <postLoop id='postLoop' widget = 'text'>
+    // If special processing needs clean up code put it here.
+    if (sortEvents) {
+        for (int ie=0;ie&lt;maxNumEvents;ie++) {
+            delete iv[ie];
+        }
+        delete [] iv;
+        delete [] centMeasure;
+    }
+            </postLoop>
         </doEStructMacro>
     </standardElements>
 </jobDescription>
