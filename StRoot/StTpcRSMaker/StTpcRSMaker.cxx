@@ -37,11 +37,11 @@
 #include "StDetectorDbMaker/St_asic_thresholds_tpxC.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0C.h"
-
+#include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.30 2010/02/26 18:53:33 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.31 2010/03/02 21:10:27 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -494,6 +494,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
       if (tpc_hit->volume_id <= 0 || tpc_hit->volume_id > 1000000) continue;
       do {
 	Int_t iPadrow = volId%100;
+	Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(iPadrow);
+	if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(iSector,iRdo)) continue;
 	Int_t Id         = tpc_hit->track_p;
 	Int_t TrackId    = Id;
 	Int_t id3        = tpc_track[Id-1].start_vertex_p;
@@ -1335,8 +1337,11 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.30 2010/02/26 18:53:33 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.31 2010/03/02 21:10:27 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.31  2010/03/02 21:10:27  fisyak
+// Make aware about TpcRDOMasks
+//
 // Revision 1.30  2010/02/26 18:53:33  fisyak
 // Take longitudinal Diffusion from Laser track fit, add Gating Grid
 //
