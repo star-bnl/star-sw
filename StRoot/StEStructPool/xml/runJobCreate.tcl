@@ -4,6 +4,11 @@
 
 if {[file exists /star/u/prindle/bin/lib]} {
     if {[lsearch $auto_path /star/u/prindle/bin/lib] < 0} {
+        # 64 bit version of Tcl is now default on rcf (I guess)
+        # For now we need to set TCLLIBPATH environment variable
+        # before invoking run*.tcl.
+#        set env(TCLLIBPATH) /usr/lib64
+        lappend auto_path /star/u/prindle/bin/tDOM-0.8.2
         lappend auto_path /star/u/prindle/bin/lib
     }
 }
@@ -37,5 +42,4 @@ if {[llength $argv] == 1} {
     $::jobCreate::jobSelectComboBox configure -state normal
     $::jobCreate::jobSelectButton configure -text "Using file"
 }
-bind $::jobCreate::interfaceWindow <Control-q> exit
 
