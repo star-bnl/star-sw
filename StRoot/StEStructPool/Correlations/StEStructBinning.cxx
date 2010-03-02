@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.cxx,v 1.13 2009/05/08 00:09:54 prindle Exp $
+ * $Id: StEStructBinning.cxx,v 1.14 2010/03/02 21:45:27 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -146,19 +146,19 @@ void StEStructBinning::setEtaRange(float xmin, float xmax){
 
   //--> eta ranges <--
 
-  minEta=xmin;
-  maxEta=xmax;
-  dEta= (maxEta-minEta)/(float)nEta;
+  minEta = xmin;
+  maxEta = xmax;
+  dEta   = (maxEta-minEta)/(float)nEta;
 
-  maxDEta=2*maxEta;//2*maxEta;
-  minDEta=0.;//0; //2*minEta;
-  dDEta=(maxDEta-minDEta)/((float)nDEta-0.5);
+  maxDEta = (maxEta-minEta);//2*maxEta;
+  minDEta = 0.;//0; //2*minEta;
+  dDEta   = (maxDEta-minDEta)/((float)nDEta-0.5);
 
   calculateDEtaWeights(); // --> MUST do whenever setEtaRange is called!!!!
 
-  maxSEta=2*maxEta;
-  minSEta=2*minEta;
-  dSEta=(maxSEta-minSEta)/(float)nSEta;
+  maxSEta = 2*maxEta;
+  minSEta = 2*minEta;
+  dSEta   = (maxSEta-minSEta)/(float)nSEta;
 
 }
 
@@ -188,6 +188,11 @@ void StEStructBinning::calculateDEtaWeights() {
 /***********************************************************************
  *
  * $Log: StEStructBinning.cxx,v $
+ * Revision 1.14  2010/03/02 21:45:27  prindle
+ * Had a problem with pair cuts when one track exited via endplate
+ *   Calculate maxDEta properly
+ *   Warning if you try turning histograms for pair cuts on
+ *
  * Revision 1.13  2009/05/08 00:09:54  prindle
  * In 2ptCorrelations we added switches to select blocks of histograms to fill.
  * (See constructor in StEStruct2ptCorrelations.cxx)

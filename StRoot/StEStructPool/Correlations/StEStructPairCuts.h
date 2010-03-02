@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.18 2009/11/09 21:32:41 prindle Exp $
+ * $Id: StEStructPairCuts.h,v 1.19 2010/03/02 21:45:28 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -198,6 +198,8 @@ public:
        double                  NominalTpcExitSeparation()       const;
        double                  NominalTpcXYExitSeparation()     const;
        double                  NominalTpcZExitSeparation()      const;    
+       double                  TpcZEndcapExitSeparation()       const;    
+       double                  TpcRadialEndCapSeparation() const;
        double                  NominalTpcAvgXYSeparation()      const;
        double                  NominalTpcAvgZSeparation()       const;
        bool                    TracksCrossInPhi()               const;
@@ -369,6 +371,12 @@ inline int StEStructPairCuts::goodDeltaXY() {
     return 0;
 }
 
+// For OuterMidTPC we have the complication of tracks exiting via endcap.
+// OuterMidTpcZSeparation() will return a negative number in this case and
+// the pair will not be flagged to skip the pair cuts.
+// I expect a small fraction of pairs are like this so we keep this code
+// simple and hopefully fast, passing a few more pairs on to detailed
+// pair cuts than are really necessary. 
 inline int StEStructPairCuts::goodDeltaZ() {
     if ( mGooddeltaZdeltaXYCut &&
          MidTpcZSeparation() > mgooddzdxy[0] &&
@@ -560,22 +568,41 @@ inline int StEStructPairCuts::cutMerging2() {
     // If tracks ever get close we cut them. Ignore TPC entrance.
     //  Doesn't seem to take care of crossing tracks.
     // Turns out when one of the tracks leaves via the endcap the nominal
-    // Z separation is -1. We try only use the XY separation in this case.
+    // Z separation is -1. We use only the XY separation in this case.
+    //
+    // Ooops. Looks like that final case of only using the XY separation when
+    // the nominal Z separation is negative allows cutting pairs where one track leaves
+    // the TPC endcap and the other has arbitrary eta. Not what I wanted.
+    // Use difference in radius instead of Z when track leaves via endcap.
+    // Also, if track does not make it to a given radius ignore the cut there.
     if (!mMergingCut2) {
         return 0;
     }
+    // For normal eta and Z-Vertex cuts all tracks will exceed the MidTPC radius before
+    // passing the Z position of the endcap.
     if ( (MidTpcZSeparation()<mMerging2[0]) && (MidTpcXYSeparation()<mMerging2[1]) ) {
         return ++(mMergingCounter2[mType]);
     }
-    if ( (OuterMidTpcZSeparation()<mMerging2[0]) && (OuterMidTpcXYSeparation()<mMerging2[1]) ) {
-        return ++(mMergingCounter2[mType]);
+    // Possible for track to pass through endcap before getting to radius of OuterMidTPC.
+    // If tracks go through different endcaps do not cut.
+    // If only one track goes through an endcap or they go through same endcap then
+    // replace z difference cut with radial difference cut.
+    // Not sure XY separation cut is optimal in endcap case.
+    if ( OuterMidTpcZSeparation()>0 ) {
+        if ( OuterMidTpcZSeparation()<mMerging2[0] && OuterMidTpcXYSeparation()<mMerging2[1] ) {
+            return ++(mMergingCounter2[mType]);
+        }
+    } else if ( OuterMidTpcZSeparation()>-3 ) {
+        if ( (TpcRadialEndCapSeparation()<mMerging2[0]) && (OuterMidTpcXYSeparation()<mMerging2[1]) ) {
+            return ++(mMergingCounter2[mType]);
+        }
     }
-    if ( NominalTpcZExitSeparation()>0) {
+    if (NominalTpcZExitSeparation() > 0) {
         if ( (NominalTpcZExitSeparation()<mMerging2[0]) && (NominalTpcXYExitSeparation()<mMerging2[1]) ) {
             return ++(mMergingCounter2[mType]);
         }
-    } else {
-        if (NominalTpcXYExitSeparation()<mMerging2[1]) {
+    } else if ( NominalTpcZExitSeparation() > -3) {
+        if ( (TpcRadialEndCapSeparation()<mMerging2[0]) && (NominalTpcXYExitSeparation()<mMerging2[1]) ) {
             return ++(mMergingCounter2[mType]);
         }
     }
@@ -592,9 +619,24 @@ inline int StEStructPairCuts::cutCrossing2() {
         return 0;
     }
     // If tracks are far enough apart in Z don't bother to look for crossing.
-    if ( (MidTpcZSeparation()>mCrossing2[0]) && (OuterMidTpcZSeparation()>mCrossing2[1]) ) {
+    // If one (or both) tracks pass through endcap before OuterMid point
+    // we ignore that check.
+    if ( OuterMidTpcZSeparation()>0 ) {
+        if ( MidTpcZSeparation()>mCrossing2[0] && OuterMidTpcZSeparation()>mCrossing2[1] ) {
+            return 0;
+        }
+    } else if ( OuterMidTpcZSeparation()==-3 ) {
         return 0;
+    } else {
+        if ( MidTpcZSeparation()>mCrossing2[0] ) {
+            return 0;
+        }
     }
+// Following is the old cut. Problem for low pt tracks (which probably makes almost
+//  no difference overall.
+//    if ( (MidTpcZSeparation()>mCrossing2[0]) && (OuterMidTpcZSeparation()>mCrossing2[1]) ) {
+//        return 0;
+//    }
     if (!TracksCrossInPhi()) {
         return 0;
     }
@@ -918,6 +960,11 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.19  2010/03/02 21:45:28  prindle
+ * Had a problem with pair cuts when one track exited via endplate
+ *   Calculate maxDEta properly
+ *   Warning if you try turning histograms for pair cuts on
+ *
  * Revision 1.18  2009/11/09 21:32:41  prindle
  * Fix warnings about casting char * to a const char * by redeclaring as const char *.
  *
