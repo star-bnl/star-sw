@@ -222,6 +222,7 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
         }
     }
     float  sf[2];
+    bool scaleYt = false;
     double argList[10];
     double start = 0.95;
     double step  = 0.001;
@@ -243,7 +244,6 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
             ehelp->mapplyDEtaFix      = false;
             ehelp->mPairNormalization = false;
             ehelp->mIdenticalPair     = true;
-            ehelp->setBGMode(1);
 
             // Make sure LS histogram for zBin 0 is in file.
             if (0 == ehelp->histogramExists("YtYt", 0)) {
@@ -252,53 +252,62 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
 
             // A lot of stuff so we can find a scaling factor for \rho_{ref}
             // such that \Delta\rho is almost always positive.
-            minData.mSupport    = ehelp;
-            minData.mChargeType = 0;
-
             minuit = new TMinuit(1);
-            minuit->SetFCN(minimizeNegative);
-            minuit->mnparm( 0, "rho_ref scale factor", start, step, bmin, bmax, errFlag );
-            minuit->SetErrorDef(1);
-            minuit->SetPrintLevel(-1);
-            argList[0] = 1;
-            minuit->mnexcm("SET STR",argList,1,errFlag);
-            argList[0] = 500;
-            cout << ">>>>>Starting scale factor 0 fit for centrality " << ic << " yt bin " << ibin << endl;
-            minuit->mnexcm("MIGRAD",argList,1,errFlag);
-            minuit->GetParameter(0,sFactor[0][ibin][ic],eSFactor[0][ibin][ic]);
-            if (0 != errFlag) {
-                cout << "++++Out of chesse error; Fit failed. Using scale factor = 1" << endl;
-                sFactor[0][ibin][ic]  =   1;
-                eSFactor[0][ibin][ic] = 100;
+            if (!scaleYt) {
+                ehelp->setBGMode(0);
+                sf[0] = 1;
+                sf[1] = 1;
+                ytyt  = ehelp->buildChargeTypes("YtYt",5,sf);
+                ytytC = ehelp->buildCommon("YtYt",5,sf);
+            } else {
+                ehelp->setBGMode(1);
+                minData.mSupport    = ehelp;
+                minData.mChargeType = 0;
+
+                minuit->SetFCN(minimizeNegative);
+                minuit->mnparm( 0, "rho_ref scale factor", start, step, bmin, bmax, errFlag );
+                minuit->SetErrorDef(1);
+                minuit->SetPrintLevel(-1);
+                argList[0] = 1;
+                minuit->mnexcm("SET STR",argList,1,errFlag);
+                argList[0] = 500;
+                cout << ">>>>>Starting scale factor 0 fit for centrality " << ic << " yt bin " << ibin << endl;
+                minuit->mnexcm("MIGRAD",argList,1,errFlag);
+                minuit->GetParameter(0,sFactor[0][ibin][ic],eSFactor[0][ibin][ic]);
+                if (0 != errFlag) {
+                    cout << "++++Out of chesse error; Fit failed. Using scale factor = 1" << endl;
+                    sFactor[0][ibin][ic]  =   1;
+                    eSFactor[0][ibin][ic] = 100;
+                }
+                delete minuit;
+
+                // Seems like I should be able to reset the TMinuit object to do a
+                // different fit. Didn't work on my first attempts, so I just create
+                // a new one.
+                minData.mChargeType = 1;
+                minuit = new TMinuit(1);
+                minuit->SetFCN(minimizeNegative);
+                minuit->mnparm( 0, "rho_ref scale factor", start, step, bmin, bmax, errFlag );
+                minuit->SetErrorDef(1);
+                minuit->SetPrintLevel(-1);
+                argList[0] = 1;
+                minuit->mnexcm("SET STR",argList,1,errFlag);
+                argList[0] = 500;
+                cout << ">>>>>Starting scale factor 1 fit for centrality " << ic << " yt bin " << ibin << endl;
+                minuit->mnexcm("MIGRAD",argList,1,errFlag);
+                minuit->GetParameter(0,sFactor[1][ibin][ic],eSFactor[1][ibin][ic]);
+                if (0 != errFlag) {
+                    cout << "++++Out of chesse error; Fit failed. Using scale factor = 1" << endl;
+                    sFactor[1][ibin][ic]  =   1;
+                    eSFactor[1][ibin][ic] = 100;
+                }
+
+                sf[0] = sFactor[0][ibin][ic];
+                sf[1] = sFactor[1][ibin][ic];
+                ytyt  = ehelp->buildChargeTypes("YtYt",5,sf);
+                ytytC = ehelp->buildCommon("YtYt",5,sf);
             }
             delete minuit;
-
-            // Seems like I should be able to reset the TMinuit object to do a
-            // different fit. Didn't work on my first attempts, so I just create
-            // a new one.
-            minData.mChargeType = 1;
-            minuit = new TMinuit(1);
-            minuit->SetFCN(minimizeNegative);
-            minuit->mnparm( 0, "rho_ref scale factor", start, step, bmin, bmax, errFlag );
-            minuit->SetErrorDef(1);
-            minuit->SetPrintLevel(-1);
-            argList[0] = 1;
-            minuit->mnexcm("SET STR",argList,1,errFlag);
-            argList[0] = 500;
-            cout << ">>>>>Starting scale factor 1 fit for centrality " << ic << " yt bin " << ibin << endl;
-            minuit->mnexcm("MIGRAD",argList,1,errFlag);
-            minuit->GetParameter(0,sFactor[1][ibin][ic],eSFactor[1][ibin][ic]);
-            if (0 != errFlag) {
-                cout << "++++Out of chesse error; Fit failed. Using scale factor = 1" << endl;
-                sFactor[1][ibin][ic]  =   1;
-                eSFactor[1][ibin][ic] = 100;
-            }
-            delete minuit;
-
-            sf[0] = sFactor[0][ibin][ic];
-            sf[1] = sFactor[1][ibin][ic];
-            ytyt  = ehelp->buildChargeTypes("YtYt",5,sf);
-            ytytC = ehelp->buildCommon("YtYt",5,sf);
 
             out->cd();
             for (int icharge=0;icharge<4;icharge++) {
