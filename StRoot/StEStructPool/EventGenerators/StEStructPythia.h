@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.h,v 1.9 2009/02/03 14:30:23 fisyak Exp $
+ * $Id: StEStructPythia.h,v 1.10 2010/03/02 21:46:24 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -29,7 +29,7 @@ class StEStructPythia : public StEStructEventReader {
   StEStructTrackCuts* mTCuts;
   bool mInChain;
   bool mAmDone;
-  bool mUseAllTracks;
+  bool museAllTracks;
   int mnumTracks;
   int mEventsToDo;
   bool mstarTrigger;
@@ -47,6 +47,7 @@ class StEStructPythia : public StEStructEventReader {
   StEStructPythia(TPythia6* pythia,
                   StEStructEventCuts* ecuts,
                   StEStructTrackCuts* tcuts,
+                  bool useAllTracks,
                   int  eventsToDo);
 
   virtual ~StEStructPythia(){};
@@ -189,6 +190,9 @@ inline float* StEStructPythia::globalDCA(float* p, float* v){
 /**********************************************************************
  *
  * $Log: StEStructPythia.h,v $
+ * Revision 1.10  2010/03/02 21:46:24  prindle
+ * Option to use getNPartonic as a centrality measure
+ *
  * Revision 1.9  2009/02/03 14:30:23  fisyak
  * Add missing includes for ROOT 5.22
  *
