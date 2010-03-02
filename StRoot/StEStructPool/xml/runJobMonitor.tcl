@@ -4,6 +4,7 @@ exec tclsh "$0" "$@"
 
 if {[file exists /star/u/prindle/bin/lib]} {
     if {[lsearch $auto_path /star/u/prindle/bin/lib] < 0} {
+        lappend auto_path /star/u/prindle/bin/tDOM-0.8.2
         lappend auto_path /star/u/prindle/bin/lib
     }
 }
@@ -46,4 +47,3 @@ if {[llength $argv] == 1} {
 wm withdraw .
 ::jobMonitor::createWindow $projectDir
 
-bind $::jobMonitor::bWindow <Control-q> ::jobMonitor::exit

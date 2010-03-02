@@ -13,7 +13,7 @@ namespace eval ::jobMonitor:: {
     variable pattern ""
     variable matchResults
     variable matchFrame
-    variable ignoreCase yes
+    variable ignoreCase 1
 
     variable patternCount
     variable tagName
@@ -82,33 +82,48 @@ proc ::jobMonitor::createWindow {{scriptDir ""} {logDir ""}} {
 
     set file [menu $m.file]
     $m add cascade -label File -menu $file
-#    $file add command -label "Select all jobs"           -command [namespace code selectAll]
     set d [menu $file.select -postcommand [namespace code [list countTypes $file.select selectJobs]]]
     $file add cascade -label "Select jobs" -menu $d
-    $d add command -label all -command [namespace code [list selectJobs all]]
+    $d add command -label all -command [namespace code [list selectJobs all]] -accelerator "Alt-S"
     set d [menu $file.deselect -postcommand [namespace code [list countTypes $file.deselect deselectJobs]]]
     $file add cascade -label "Deselect jobs" -menu $d
-    $d add command -label all -command [namespace code [list deselectJobs all]]
+    $d add command -label all -command [namespace code [list deselectJobs all]] -accelerator "Alt-D"
     set d [menu $file.toggle -postcommand [namespace code [list countTypes $file.toggle toggleSelect]]]
     $file add cascade -label "Toggle select" -menu $d
-    $d add command -label all -command [namespace code [list toggleSelect all]]
+    $d add command -label all -command [namespace code [list toggleSelect all]] -accelerator "Alt-T"
+    # Accelerators don't seem to actually invoke code.
+    bind $::jobMonitor::bWindow <Alt-S> [namespace code [list selectJobs all]]
+    bind $::jobMonitor::bWindow <Alt-D> [namespace code [list deselectJobs all]]
+    bind $::jobMonitor::bWindow <Alt-T> [namespace code [list toggleSelect all]]
 
-    $file add command -label "Submit selected jobs"      -command [namespace code submitSelected]
-    $file add command -label "Kill selected jobs"        -command [namespace code killSelected]
-    $file add command -label "Clear selected job errors" -command [namespace code clearErrors]
-    $file add command -label "Update status"             -command [namespace code updateStatusIndicators]
-    $file add command -label Exit -command [namespace code exit]
+    $file add command -label "Submit selected jobs"      -command [namespace code submitSelected]         -accelerator "Ctrl-S"
+    $file add command -label "Kill selected jobs"        -command [namespace code killSelected]           -accelerator "Ctrl-K"
+    $file add command -label "Clear selected job errors" -command [namespace code clearErrors]            -accelerator "Alt-C"
+    $file add command -label "Release selected jobs"     -command [namespace code releaseJobs]            -accelerator "Alt-R"
+    $file add command -label "Update status"             -command [namespace code updateStatusIndicators] -accelerator "Ctrl-U"
+    $file add command -label Exit                        -command [namespace code exit]                   -accelerator "Ctrl-Q"
+    #
+    bind $::jobMonitor::bWindow <Control-S> [namespace code submitSelected]
+    bind $::jobMonitor::bWindow <Control-K> [namespace code killSelected]
+    bind $::jobMonitor::bWindow <Alt-C>     [namespace code clearErrors]
+    bind $::jobMonitor::bWindow <Alt-R>     [namespace code releaseJobs]
+    bind $::jobMonitor::bWindow <Control-U> [namespace code updateStatusIndicators]
+    bind $::jobMonitor::bWindow <Control-Q> [namespace code exit]
 
     set edit [menu $m.edit]
     $m add cascade -label Edit -menu $edit
     $edit add checkbutton -label "Ignore case"          -variable ::jobMonitor::ignoreCase
     $edit add command     -label "Editor..."            -command [namespace code chooseEditor]
-    $edit add command     -label "log file type..."     -command [namespace code setFileType]
+    $edit add command     -label "log file type..."     -command [namespace code setFileType] -accelerator "Alt-L"
     $edit add command     -label "Number of matches..." -command [namespace code matchingNumber]
+    #
+    bind $::jobMonitor::bWindow <Alt-L>     [namespace code setFileType]
 
     set help [menu $m.help]
     $m add cascade -label Help -menu $help
-    $help add command -label Help -command [namespace code [list displayHelp ""]]
+    $help add command -label Help -command [namespace code [list displayHelp ""]] -accelerator "F1"
+    #
+    bind $::::jobMonitor::bWindow <F1> [namespace code [list displayHelp ""]]
 
     # Create menu we will use in a popup to select a file to edit (or peek if job is running.)
     set ::jobMonitor::viewMenu [menu $::jobMonitor::bWindow.view -postcommand [namespace code checkPopup]]
@@ -130,10 +145,11 @@ proc ::jobMonitor::createWindow {{scriptDir ""} {logDir ""}} {
     label       $::jobMonitor::bWindow.f1.patt_label  -text "Regular expression:" -justify left
     entry       $::jobMonitor::bWindow.f1.pattern     -textvariable ::jobMonitor::pattern
     button      $::jobMonitor::bWindow.f1.search      -text "Search" -command [namespace code searchFiles]
-    bind $::jobMonitor::bWindow.f1.pattern  <Return> [namespace code searchFiles]
+    bind $::jobMonitor::bWindow             <Control-s> [namespace code searchFiles]
+    bind $::jobMonitor::bWindow.f1.pattern  <Return>    [namespace code searchFiles]
 
     grid $::jobMonitor::bWindow.f1.source_label $::jobMonitor::bWindow.f1.scriptDir  $::jobMonitor::bWindow.f1.selectScriptDir -sticky we
-    grid $::jobMonitor::bWindow.f1.result_label $::jobMonitor::bWindow.f1.logDir  $::jobMonitor::bWindow.f1.selectLogDir -sticky we
+    grid $::jobMonitor::bWindow.f1.result_label $::jobMonitor::bWindow.f1.logDir     $::jobMonitor::bWindow.f1.selectLogDir    -sticky we
     grid $::jobMonitor::bWindow.f1.patt_label   $::jobMonitor::bWindow.f1.pattern    $::jobMonitor::bWindow.f1.search          -sticky we
     grid columnconfigure    $::jobMonitor::bWindow.f1 1 -weight 1
 
@@ -147,7 +163,8 @@ proc ::jobMonitor::createWindow {{scriptDir ""} {logDir ""}} {
                            -yscrollcommand {$::jobMonitor::bWindow.f2.y set}   \
                            -xscrollcommand {$::jobMonitor::bWindow.f2.x set}
     scrollbar $::jobMonitor::bWindow.f2.x -command {$::jobMonitor::bWindow.f2.text xview} -orient horizontal
-    scrollbar $::jobMonitor::bWindow.f2.y -command {$::jobMonitor::bWindow.f2.text yview}
+    scrollbar $::jobMonitor::bWindow.f2.y -command {after 0 {::jobMonitor::checkFind}; $::jobMonitor::bWindow.f2.text yview}
+    bind $::jobMonitor::bWindow.f2.text <B2-Motion> ::jobMonitor::checkFind
 
     grid $::jobMonitor::bWindow.f2.text $::jobMonitor::bWindow.f2.y
     grid $::jobMonitor::bWindow.f2.y -sticky ns
@@ -172,6 +189,7 @@ proc ::jobMonitor::createWindow {{scriptDir ""} {logDir ""}} {
     # "error" and "fn" tags
     #
     $::jobMonitor::bWindow.f2.text tag configure "fn"      -underline 1 -background lightblue
+    $::jobMonitor::bWindow.f2.text tag configure "ital"    -font {times 12 italic}
     $::jobMonitor::bWindow.f2.text tag configure "error"   -background red
     # bind the filename tag to pop-up another window with
     # the complete text of that file.
@@ -235,6 +253,10 @@ proc ::jobMonitor::searchFiles {} {
         $::jobMonitor::bWindow.f2.text tag configure tag$iTag -underline 1 -background $col
         incr iTag
     }
+
+    # Save current position in result window.
+    # This is 0.0 (start), end, or a [list jobName pos] near the middle of the current display.
+    set currPos [::jobMonitor::getPosition]
 
     #
     # Clear the result window, then get a list of files
@@ -306,7 +328,80 @@ proc ::jobMonitor::searchFiles {} {
     if {$::jobMonitor::anchorJob ne "" && [lsearch $::jobMonitor::jobList $::jobMonitor::anchorJob] >= 0} {
         $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob configure -relief ridge
     }
+
+    # Set position so that (ideally) we have same file name in middle of display.
+    ::jobMonitor::setPosition $currPos
+
+    # Check states for findNext, findPrev.
+    ::jobMonitor::checkFind
 }
+
+# getPosition --
+#    Find position in display so when we re-fill text widget we can set to appropriate position
+#
+# Arguments:
+#    None
+# Result:
+#    0.0, end, or [list jobName position] if in middle of display
+# Side effects:
+#    None
+#
+#
+proc ::jobMonitor::getPosition {} {
+    set t $::jobMonitor::bWindow.f2.text
+    foreach {f l} [$t yview] {break}
+    if {$f == 0} {
+        return 0.0
+    } elseif {$l == 1} {
+        return end
+    } else {
+        set pos [expr ($f+$l)/2.0]
+        set midLine [expr round($pos*[$t index "end - 1 c"])]
+        set lineNo $midLine
+        set line [$t get $lineNo.0 $lineNo.end]
+        set job [string map {sched ""} [file rootname $line]]
+        # Want to pick line corresponding to a jobName, not a pattern match
+        while {[lsearch $::jobMonitor::jobList $job] < 0} {
+            incr lineNo -1
+            if {$lineNo == 0} {
+                return start
+            }
+            set line [$t get $lineNo.0 $lineNo.end]
+            set job [string map {sched ""} [file rootname $line]]
+        }
+        return [list $line $pos]
+    }
+}
+# setPosition --
+#    Set position of display.
+#      When Search is performed text widget is cleared, then refilled.
+#      We want to be near the job that we were looking at before.
+#      Special cases if we were at beginning or end of jobName list.
+#
+# Arguments:
+#    None
+# Result:
+#    start, end, or [list jobName position] if in middle of display
+# Side effects:
+#    None
+#
+#
+proc ::jobMonitor::setPosition {pos} {
+    set t $::jobMonitor::bWindow.f2.text
+    if {[llength $pos] == 1} {
+        $t see $pos
+    } else {
+        foreach {txt ypos} $pos {break}
+        set tpos [$t search $txt 0.0]
+        if {$tpos == ""} {
+            $t yview $ypos
+        } else {
+            $t see $tpos
+        }
+    }
+}
+
+
 
 # searchPattern --
 #    Search for lines containing the given pattern in a file
@@ -416,7 +511,7 @@ proc ::jobMonitor::searchPattern {jobName filename pattern ignoreCase} {
     $::jobMonitor::bWindow.f2.text insert end "\n"
 }
 # addMatchWidgets --
-#    For each search patter we add widgets to move to the previsou match,
+#    For each search pattern we add widgets to move to the previous match,
 #    indicate the number of matches or move to the next match.
 #
 # Arguments:
@@ -445,48 +540,87 @@ proc ::jobMonitor::addMatchWidgets {pattern count iCol} {
 }
 # findPrev --
 #    Move text widget to previous match.
+#      Change, Dec. 15, 2009: Start search before visible region.
+#      On match, check to see if there is a previous and disable widget if not.
 #
 # Arguments:
-#    pattern      Regular expresion that was searched for
+#    pat      Regular expresion that was searched for
 # Result:
 #    None
 # Side effects:
-#    Moves where we see in the text widget
+#    Moves where we see in the text widget (one line before match wich will be
+#      job line, unless there may be multiple matches).
 #
 #
-proc ::jobMonitor::findPrev {pattern} {
+proc ::jobMonitor::findPrev {pat} {
     set t $::jobMonitor::bWindow.f2.text
-    set prev [$t tag prevrange $::jobMonitor::tagName($pattern) insert]
-    if {$prev eq ""} {
-        $::jobMonitor::matchFrame.f$pattern.up configure -state disabled
-    } else {
-        $t mark set insert [lindex $prev 0]
-        $t see [lindex $prev 0]
-        $::jobMonitor::matchFrame.f$pattern.down configure -state normal
+    foreach {f l} [$t yview] {break}
+    set firstVis [expr round($f*[$t index "end - 1 c"])]
+    set prev [$t tag prevrange $::jobMonitor::tagName($pat) $firstVis.0]
+    if {$prev ne ""} {
+        $t see [lindex $prev 0]-1l
     }
+    ::jobMonitor::checkFind
 }
 # findNext --
 #    Move text widget to next match.
+#      Change, Dec. 15, 2009: Start search after visible region.
+#      On match, check to see if there is a next and disable widget if not.
 #
 # Arguments:
-#    pattern      Regular expresion that was searched for
+#    pat      Regular expresion that was searched for
 # Result:
 #    None
 # Side effects:
 #    Moves where we see in the text widget
 #
 #
-proc ::jobMonitor::findNext {pattern} {
+proc ::jobMonitor::findNext {pat} {
     set t $::jobMonitor::bWindow.f2.text
-    set next [$t tag nextrange $::jobMonitor::tagName($pattern) insert]
-    if {$next eq ""} {
-        $::jobMonitor::matchFrame.f$pattern.down configure -state disabled
-    } else {
-        $t mark set insert [lindex $next 1]
+    foreach {f l} [$t yview] {break}
+    set lastVis [expr round($l*[$t index "end - 1 c"])]
+    set next [$t tag nextrange $::jobMonitor::tagName($pat) $lastVis.end]
+    if {$next ne ""} {
         $t see [lindex $next 0]
-        $::jobMonitor::matchFrame.f$pattern.up configure -state normal
+    }
+    ::jobMonitor::checkFind
+}
+# checkFind --
+#    For each pattern check if findNext or findPrev will work. If not, we
+#      disable the button.
+#
+# Arguments:
+#    pats     Regular expresion that was searched for. Default of "" means search all patterns.
+# Result:
+#    None
+# Side effects:
+#    Enables/disables find buttons.
+#
+#
+proc ::jobMonitor::checkFind {{pats {}}} {
+    if {$pats eq ""} {
+        set pats $::jobMonitor::pattern
+    }
+    set t $::jobMonitor::bWindow.f2.text
+    foreach {f l} [$t yview] {break}
+    set firstVis [expr round($f*[$t index "end - 1 c"])]
+    set lastVis  [expr round($l*[$t index "end - 1 c"])]
+    foreach pat $pats {
+        set prev [$t tag prevrange $::jobMonitor::tagName($pat) $firstVis.0]
+        if {$prev eq ""} {
+            $::jobMonitor::matchFrame.f$pat.up configure -state disabled
+        } else {
+            $::jobMonitor::matchFrame.f$pat.up configure -state normal
+        }
+        set next [$t tag nextrange $::jobMonitor::tagName($pat) $lastVis.end]
+        if {$next eq ""} {
+            $::jobMonitor::matchFrame.f$pat.down configure -state disabled
+        } else {
+            $::jobMonitor::matchFrame.f$pat.down configure -state normal
+        }
     }
 }
+
 
 # countTypes --
 #    Invoked just before showing menu
@@ -730,7 +864,7 @@ proc ::jobMonitor::getFileName {} {
     set line [lindex [$::jobMonitor::bWindow.f2.text index current] 0]
     set line [lindex [split $line .] 0]
     set fileName [$::jobMonitor::bWindow.f2.text get $line.0 $line.end]
-    if {[file extension $fileName] eq ".log"} {
+    if {[file extension $fileName] eq $::jobMonitor::LOGTYPE} {
         return [file join $::jobMonitor::logDir $fileName]
     } elseif {[file extension $fileName] eq ".csh"} {
         return [file join $::jobMonitor::scriptDir $fileName]
@@ -912,7 +1046,15 @@ proc ::jobMonitor::checkPopup {} {
     } else {
         catch {$::jobMonitor::viewMenu delete "condorLog"}
     }
-    set f [file join $::jobMonitor::logDir $job.log]
+    set condor [file join $::jobMonitor::scriptDir sched$job.condor]
+    if {[file exists $condor]} {
+        if {[catch {$::jobMonitor::viewMenu index condor} err]} {
+            $::jobMonitor::viewMenu add command -label "condor" -command [namespace code condorJob]
+        }
+    } else {
+        catch {$::jobMonitor::viewMenu delete "condor"}
+    }
+    set f [file join $::jobMonitor::logDir ${job}$::jobMonitor::LOGTYPE]
     if {[file exists $f] && [info exists ::env(SGE_ROOT)]
         && (($status eq "") || ($status eq "DONE"))} {
         if {[catch {$::jobMonitor::viewMenu index qacct} err]} {
@@ -964,6 +1106,22 @@ proc ::jobMonitor::condorJobLog {} {
     set cLog [file join $::jobMonitor::scriptDir sched$job.condor.log]
     set f [open $cLog]
     displayText [read $f] "contents of condor.log file for $job"
+    close $f
+}
+
+# condorJob --
+#    Invoked via a popup menu
+#
+# Arguments:
+# Result:
+# Side effects:
+#    Put contents of *.condor file into tk text widget.
+#
+proc ::jobMonitor::condorJob {} {
+    set job $::jobMonitor::selectedJob
+    set condor [file join $::jobMonitor::scriptDir sched$job.condor]
+    set f [open $condor]
+    displayText [read $f] "contents of condor file for $job"
     close $f
 }
 
@@ -1028,7 +1186,7 @@ proc ::jobMonitor::qacctJob {} {
 proc ::jobMonitor::submitSelected {} {
     global env
 
-    set dontWarn false
+    set dontWarn true
     foreach job $::jobMonitor::actionList {
         set fName [file join $::jobMonitor::scriptDir sched$job.csh]
         set f [open $fName]
@@ -1083,6 +1241,9 @@ proc ::jobMonitor::submitSelected {} {
             }
             # Condor is warning about log file on NFS possibly causing corruption.
             # Warn user one time.
+            # That NFS message went away.
+            # Looks like condor is returning a non-zero value or writing a normal message to
+            # stderr. Ignore errors (by setting dontWarn true before loop).
             if {[catch {eval exec [string range $runCmd $start end]} err] && !$dontWarn} {
                 if {"ok" eq [tk_messageBox -icon warning \
                                    -title "condor warning" \
@@ -1138,8 +1299,8 @@ proc ::jobMonitor::killSelected {} {
 #        } else {
             set jName [string map {condor csh} $jobName]
             foreach {clusterId procId cmd} $condClustList {
-                set f [file tail $cmd]
-                if {$f eq $jName} {
+                # See comment after next use of getJobName as far as use of file tail here.
+                if {[file tail $cmd] eq [file tail $jName]} {
                     # By default condor_rm only works on node job was submitted from.
                     # Can parse *.condor.log file to find submission node.
                     # Log file has ip address but the < and > required by condor_rm are being
@@ -1200,6 +1361,57 @@ proc ::jobMonitor::clearErrors {} {
             if {[lsearch $qj $f] >= 0} {
                 set jobID [lindex $qj 0]
                 catch {eval exec qmod -c $jobID}
+            }
+        }
+    }
+    updateStatusIndicators
+}
+
+# releaseJobs --
+#    Invoked via menu
+#
+# Arguments:
+# Result:
+# Side effects:
+#    Release hold on condor job
+#
+proc ::jobMonitor::releaseJobs {} {
+    global env
+
+    if {![catch {exec condor_q -submitter $env(USER) -format " %i " clusterid -format " %s " procId -format " %s " CMD} formatted]} {
+        set condClustList $formatted
+    } else {
+        set condClustList [list]
+    }
+    foreach job $::jobMonitor::actionList {
+        set jobName [getJobName [file join $::jobMonitor::scriptDir sched$job.csh]]
+        set jName [string map {condor csh} $jobName]
+        foreach {clusterId procId cmd} $condClustList {
+            # See comment after next use of getJobName as far as use of file tail here.
+            if {[file tail $cmd] eq [file tail $jName]} {
+                # By default condor_rm only works on node job was submitted from.
+                # Can parse *.condor.log file to find submission node.
+                # Log file has ip address but the < and > required by condor_rm are being
+                # grabbed by tcl's exec (I guess). Kludge around this using nslookup to
+                # find hostname
+                #>>>>> Not sure if condor_release needs to specify node. I think it does.
+                set condorLogName [string map {csh condor.log} $cmd]
+                set f [open $condorLogName]
+                while { [gets $f line] >= 0 } {
+                    if {[string first "submitted from host:" $line] >= 0 &&
+                        [regexp {<(.*):} $line m1 ip] } {
+                        # dig seems to be able to find the hostname.
+                        set hostName [exec dig +short -x $ip]
+                        set hostName [string trim $hostName .]
+                        if {[catch {exec condor_release -name $hostName $clusterId} mess]} {
+                            puts $mess
+                        } else {
+                            puts "Success: $mess"
+                        }
+                        break
+                    }
+                }
+                close $f
             }
         }
     }
@@ -1267,11 +1479,16 @@ proc ::jobMonitor::updateStatusIndicators {{job ""}} {
             # Replace .condor with .csh in jobName
             set jName [string map {condor csh} $jobName]
             foreach {clusterId procId cmd jobStat} $condClustList {
-                if {[file tail $cmd] eq $jName} {
+                # Not sure I want to use file tail here.
+                # It looks like there has been a change to using the full path for the
+                # jobName.
+                if {[file tail $cmd] eq [file tail $jName]} {
                     if {$jobStat == 1} {
                         set ST I
                     } elseif {$jobStat == 2} {
                         set ST R
+                    } elseif {$jobStat == 5} {
+                        set ST H
                     } else {
                         set ST ""
                     }
@@ -1597,7 +1814,12 @@ proc ::jobMonitor::displayHelp {w} {
     $w insert end " o Search:\n" bullet
     $w insert end "- Searching through the log files is done " n
     $w insert end "every time you push the Search button (or hit Enter " n
-    $w insert end "when the search entry widget has focus.)\n\n" n
+    $w insert end "when the search entry widget has focus.) " n
+    $w insert end "We try to keep the job near the center of the screen " n
+    $w insert end "close to the center of the screen after the update, even " n
+    $w insert end "if many matching lines have been added or removed although " n
+    $w insert end "if the display is at the beginning (or end) before the Search " n
+    $w insert end "it will be at the beginning (or end) after the Search.\n\n " n
 
     $w insert end " o Results area\n" bullet
     $w insert end "- This contains the file names of all files that have " n
@@ -1624,8 +1846,11 @@ proc ::jobMonitor::displayHelp {w} {
     $w insert end "For each search item there is the string, the number of matches and " n
     $w insert end "buttons to bring the next/previous matching job into the visible " n
     $w insert end "region of the window. " n
-    $w insert end "The search always starts at the location of the previous matching " n
-    $w insert end "batch job (on the first line if no button has been clicked yet.)\n\n" n
+    $w insert end "The search looks for the first match that is not currently displayed. " n
+    $w insert end "If the match is far away it will usually be centered. " n
+    $w insert end "If the match is near the display may scroll only a few lines. " n
+    $w insert end "If there are no previous (next) matches the previous (next) " n
+    $w insert end "button is disabled. \n\n" n
 
 
     $w insert end "File Viewing Window\n\n" header
