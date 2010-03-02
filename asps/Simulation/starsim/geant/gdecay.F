@@ -1,6 +1,9 @@
-* $Id: gdecay.F,v 1.3 2009/07/11 21:27:42 perev Exp $
+* $Id: gdecay.F,v 1.4 2010/03/02 17:40:42 perev Exp $
 * $Name:  $
 * $Log: gdecay.F,v $
+* Revision 1.4  2010/03/02 17:40:42  perev
+* For year < 2009 setenv G3KrollWada YES switches on new Daltz decay
+*
 * Revision 1.3  2009/07/11 21:27:42  perev
 * Remove <cr>
 *
@@ -61,8 +64,8 @@ C.
       Integer   Nba/100/
       Real      P(5,5)
       Integer   nt,n1,n2,n3,i,idal
-      character *2 cKrollWada
-      integer      iKrollWada/-1/
+      character *8 cKrollWada,cSTAR
+      integer      iKrollWada/-1/,iYear
       save         iKrollWada,cKrollWada
 C.    ------------------------------------------------------------------
 C.
@@ -173,9 +176,16 @@ C-- a Dalitz decay is recognised by e+/e- or mu+/mu- pair
            endif
         enddo
         if (iKrollWada .lt.0) then
-          iKrollWada=1
           call getenv('G3KrollWada',cKrollWada)
-          if (cKrollWada(1:2) .eq. 'NO') iKrollWada=0
+          call getenv('STAR',cSTAR)
+          iYear = (ichar(cSTAR(3:3))-ichar('0'))*10
+     1          + (ichar(cSTAR(4:4))-ichar('0'))
+          if (iYear.le.0 .or. iYear .gt. 99) iYear = 10
+          iKrollWada=1
+          if (iYear.lt.9) iKrollWada=0
+
+          if (cKrollWada(1:2) .eq. 'NO' ) iKrollWada=0
+          if (cKrollWada(1:3) .eq. 'YES') iKrollWada=1
         endif
 
         if (iKrollWada .ne.0
