@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.26 2009/11/09 21:32:41 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.27 2010/03/02 21:45:27 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -163,6 +163,11 @@ void StEStruct2ptCorrelations::init(){
   cout << "  Fill Sum Histograms (SYt, SEta) = " << mdoFillSumHistograms << endl;
   cout << "  Don't fill mean pt histograms = " << mdontFillMeanPt << endl;
   cout << "  Don't fill YtYt histograms = " << mdontFillYtYt << endl;
+    if (mdoPairCutHistograms) {
+        cout << "  >>>>> You have tried to turn on Pair Cut Histograms. Those have not been re-implemented yet. " << endl;
+        cout << "  >>>>> If you really want them we should do something about it. " << endl;
+        mdoPairCutHistograms = false;
+    }
 
   for(int i=0;i<8;i++)numPairs[i]=numPairsProcessed[i]=mpossiblePairs[i]=0;
 
@@ -497,7 +502,7 @@ void StEStruct2ptCorrelations::moveEvents(){
 }
 
 //--------------------------------------------------------------------------
-bool StEStruct2ptCorrelations::makeSiblingAndMixedPairs(){
+bool StEStruct2ptCorrelations::makeSiblingAndMixedPairs() {
 
   if(!mCurrentEvent) return false; // logic problem!
   if (mCurrentEvent->VertexZ() > kZBuffMax) {
@@ -523,9 +528,15 @@ bool StEStruct2ptCorrelations::makeSiblingAndMixedPairs(){
   int mult = mCurrentEvent->Ntrack();
   //cout << "Event " << mCurrentEvent->EventID() << ": " << mult << " tracks;   Z = " << mCurrentEvent->VertexZ() << ", i = " << i << endl;
   //cout << i <<"\t"; mbuffer[i].Print();
-  while(1){
-    mMixingEvent=mbuffer[i].nextEvent(mult);
-    if(!mMixingEvent) break;
+  while (1) {
+    mMixingEvent = mbuffer[i].nextEvent(mult);
+    if (!mMixingEvent) break;
+    // Require magnetic field to have same sign.
+    // Changing BField sign seems to interchage + and -.
+    // Do we want to require same magnitude?
+    if (mCurrentEvent->BField()*mMixingEvent->BField() < 0) {
+        continue;
+    }
     //cout << "\t  mixing " << mMixingEvent->EventID() << ": " << mMixingEvent->Ntrack()  << " tracks." << endl;
     int iZBin = 0;
     if (mZBufferCutBinning) {
@@ -776,11 +787,11 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
 
     mPair.SetTrack1(*Iter1);
     int it2;
-    if(j==0 || j==3) { 
-      Iter2=Iter1+1; 
+    if (j==0 || j==3) { 
+      Iter2 = Iter1+1; 
       it2 = it1;
     } else { 
-      Iter2=t2->begin(); 
+      Iter2 = t2->begin(); 
       it2 = -1;
     }
 
@@ -789,11 +800,15 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
     for(; Iter2!=t2->end(); ++Iter2){
       it2++;
       numPairs[j]++;
-// QA pair histograms have not been implemented yet.
-// Looks like the mdoPairDensityHistograms sections do that job.
-// I think the idea of those was that they were turned on during initial data
-//  check, then turned off to save CPU time.
-//      mQAHists->fillPairHistograms(*Iter1,*Iter2,i,0);
+      // QA pair histograms have not been implemented yet.
+      // Looks like the mdoPairDensityHistograms sections do that job.
+      // I think the idea of those was that they were turned on during initial data
+      //  check, then turned off to save CPU time.
+      //      mQAHists->fillPairHistograms(*Iter1,*Iter2,i,0);
+      //
+      // Pair density histograms are only being filled for pairs that pair cuts.
+      // If you want to use pair density histograms to tune pair cuts you should
+      // turn pair cuts off.
       mPair.SetTrack2(*Iter2);
       if( mskipPairCuts || (mPair.cutPair(mdoPairCutHistograms)==0) ){
         numPairsProcessed[j]++;
@@ -952,6 +967,9 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
           qinv[icb].q[b->iq(mPair.qInv())]+=nwgt;
           nqinv[icb].q[b->iq(mPair.qInv())]+=1;
 
+          // Note that pair density histograms are filled within the pair cut check block.
+          // Could move end of that block earlier and recalculate everything we need for
+          // histograms (in case pair failed cuts). 
           int jden = cb->getPairDensityBin(jcb);
           int ipcb = -1;
           if (jden >= 0) {
@@ -2107,6 +2125,11 @@ void StEStruct2ptCorrelations::createHist1D(TH1F*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.27  2010/03/02 21:45:27  prindle
+ * Had a problem with pair cuts when one track exited via endplate
+ *   Calculate maxDEta properly
+ *   Warning if you try turning histograms for pair cuts on
+ *
  * Revision 1.26  2009/11/09 21:32:41  prindle
  * Fix warnings about casting char * to a const char * by redeclaring as const char *.
  *

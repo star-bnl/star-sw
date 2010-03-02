@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.cxx,v 1.12 2009/11/09 21:32:41 prindle Exp $
+ * $Id: StEStructPairCuts.cxx,v 1.13 2010/03/02 21:45:28 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -727,13 +727,33 @@ StEStructPairCuts::NominalTpcXYExitSeparation() const {
 
 double 
 StEStructPairCuts::NominalTpcZExitSeparation() const {
-  // There is a problem when both tracks exit the TPC through the same endcap, then both exit
-  //   points have z = (+/-) 200, and the z separation is exactly zero.
-  // With normal eta and primaryVertex cuts, most tracks should exit the side of the TPC, 
-  //   so we will just skip the problem pairs.
-  if ( fabs(mTrack1->NominalTpcExitPoint().z())==200 || fabs(mTrack2->NominalTpcExitPoint().z())==200 ) return -1;
-  StThreeVectorF diff = mTrack1->NominalTpcExitPoint() - mTrack2->NominalTpcExitPoint();
-  return (double)(fabs(diff.z()+mZoffset));
+    // There is a problem when both tracks exit the TPC through the same endcap, then both exit
+    //   points have z = (+/-) 200, and the z separation is exactly zero.
+    // Distinguish casese
+    //   -1 One track crosses endcap.
+    //   -2 Both tracks cross same endcap.
+    //   -3 Both tracks cross endcap but different endcaps.
+    // Not sure what I was thinking, comparing floating point numbers with ==.
+    // if ( fabs(mTrack1->NominalTpcExitPoint().z())==200 || fabs(mTrack2->NominalTpcExitPoint().z())==200 ) return -1;
+    if ( mTrack1->EndCapOuter()!=0 || mTrack2->EndCapOuter()!=0 ) {
+        if ( mTrack1->EndCapOuter()==mTrack2->EndCapOuter() ) {
+            return -2;
+        } else if ( mTrack1->EndCapOuter()==0 || mTrack2->EndCapOuter()==0 ) {
+            return -1;
+        } else {
+            return -3;
+        }
+    }
+    StThreeVectorF diff = mTrack1->NominalTpcExitPoint() - mTrack2->NominalTpcExitPoint();
+    return (double)(fabs(diff.z()+mZoffset));
+
+}
+double 
+StEStructPairCuts::TpcRadialEndCapSeparation() const {
+    // Use Radial dseparation at endcap in some cases when one or both tracks cross
+    // endcap before getting to some radius.
+    float rdiff = mTrack1->EndCapRadius() - mTrack2->EndCapRadius();
+    return (double)(fabs(rdiff));
 
 }
 
@@ -775,22 +795,23 @@ StEStructPairCuts::NominalTpcAvgZSeparation() const {
 bool StEStructPairCuts::TracksCrossInPhi() const {
     // Try a direct (but must be quite a bit slower than the cross product)
     // calculation of phi differences. I think the cross product method had too many corner cases.
+    // Really want dPhi between -pi and pi. I was making sure they were between -2pi and 2pi.
     double phiEnt1  = mTrack1->NominalTpcEntrancePoint().phi();
     double phiEnt2  = mTrack2->NominalTpcEntrancePoint().phi();
     double dphiEnt = phiEnt1 - phiEnt2;
-    while (dphiEnt > 2*M_PI) {
+    while (dphiEnt > M_PI) {
         dphiEnt -= 2*M_PI;
     }
-    while (dphiEnt < -2*M_PI) {
+    while (dphiEnt < -M_PI) {
         dphiEnt += 2*M_PI;
     }
     double phiExit1 = mTrack1->NominalTpcExitPoint().phi();
     double phiExit2 = mTrack2->NominalTpcExitPoint().phi();
     double dphiExit = phiExit1 - phiExit2;
-    while (dphiExit > 2*M_PI) {
+    while (dphiExit > M_PI) {
         dphiExit -= 2*M_PI;
     }
-    while (dphiExit < -2*M_PI) {
+    while (dphiExit < -M_PI) {
         dphiExit += 2*M_PI;
     }
     if ((dphiEnt*dphiExit < 0) && (fabs(dphiEnt) < M_PI/4)) {
@@ -801,18 +822,18 @@ bool StEStructPairCuts::TracksCrossInPhi() const {
 
 //--------------------------------------------------------
 double 
-StEStructPairCuts::MidTpcXYSeparation() const {
-  StThreeVectorF diff = mTrack1->MidTpcPoint() - mTrack2->MidTpcPoint();
-  //cout << "Mid XY Sep" << diff.perp() << endl;
-  return (double)(diff.perp());
-}
-
-double 
 StEStructPairCuts::MidTpcSeparation() const {
   StThreeVectorF off(0,0,mZoffset);
   StThreeVectorF diff = mTrack1->MidTpcPoint() - mTrack2->MidTpcPoint() + off;
   //cout << "Mid XY Sep" << diff.perp() << endl;
   return (double)(diff.mag());
+}
+
+double 
+StEStructPairCuts::MidTpcXYSeparation() const {
+  StThreeVectorF diff = mTrack1->MidTpcPoint() - mTrack2->MidTpcPoint();
+  //cout << "Mid XY Sep" << diff.perp() << endl;
+  return (double)(diff.perp());
 }
 
 double 
@@ -822,18 +843,28 @@ StEStructPairCuts::MidTpcZSeparation() const {
   return (double)(fabs(diff.z()+mZoffset));
 }
 //--------------------------------------------------------
-double StEStructPairCuts::OuterMidTpcXYSeparation() const {
-    StThreeVectorF diff = mTrack1->OuterMidTpcPoint() - mTrack2->OuterMidTpcPoint();
-    return (double)(diff.perp());
-}
-
 double StEStructPairCuts::OuterMidTpcSeparation() const {
     StThreeVectorF off(0,0,mZoffset);
     StThreeVectorF diff = mTrack1->OuterMidTpcPoint() - mTrack2->OuterMidTpcPoint() + off;
     return (double)(diff.mag());
 }
 
+double StEStructPairCuts::OuterMidTpcXYSeparation() const {
+    StThreeVectorF diff = mTrack1->OuterMidTpcPoint() - mTrack2->OuterMidTpcPoint();
+    return (double)(diff.perp());
+}
+
 double StEStructPairCuts::OuterMidTpcZSeparation() const {
+    // See comments for NominalTpcZExitSeparation()
+    if ( mTrack1->EndCapOuterMid()!=0 || mTrack2->EndCapOuterMid()!=0 ) {
+        if ( mTrack1->EndCapOuterMid()==mTrack2->EndCapOuterMid() ) {
+            return -2;
+        } else if ( mTrack1->EndCapOuterMid()==0 || mTrack2->EndCapOuterMid()==0 ) {
+            return -1;
+        } else {
+            return -3;
+        }
+    }
     StThreeVectorF diff = mTrack1->OuterMidTpcPoint() - mTrack2->OuterMidTpcPoint();
     return (double)(fabs(diff.z()+mZoffset));
 }
@@ -897,6 +928,11 @@ int StEStructPairCuts::getdEdxPID(const StEStructTrack *t) {
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.cxx,v $
+ * Revision 1.13  2010/03/02 21:45:28  prindle
+ * Had a problem with pair cuts when one track exited via endplate
+ *   Calculate maxDEta properly
+ *   Warning if you try turning histograms for pair cuts on
+ *
  * Revision 1.12  2009/11/09 21:32:41  prindle
  * Fix warnings about casting char * to a const char * by redeclaring as const char *.
  *
