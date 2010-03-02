@@ -2,6 +2,7 @@
 
 #include "TROOT.h"
 #include "TSystem.h"
+#include "TApplication.h"
 #include "TFile.h"
 
 StCloseFileOnTerminate *StCloseFileOnTerminate::fgCloseFileOnTerminate = 0;
@@ -18,12 +19,12 @@ StCloseFileOnTerminate &StCloseFileOnTerminate::Instantiate()
 }
 //_________________________________________________________
 Bool_t StCloseFileOnTerminate::Notify() {
-  // close all TFile
   if (fNotificator)  {
      fNotificator->SetNotified();
      Error(__FUNCTION__," Job will be terminated soon by the external signal . . . . ");
   }  else  {
-     Error(__FUNCTION__," Closing files   . . . . ");
+      // close all TFile  & Terminate
+     Error(__FUNCTION__," Closing all TFiles   . . . . ");
      TSeqCollection   *files = gROOT->GetListOfFiles();
      int count = 0;
      if (files && files->GetSize() >0 ) {
@@ -33,6 +34,8 @@ Bool_t StCloseFileOnTerminate::Notify() {
      }
      if (count) Error(__FUNCTION__, "%d files have been closed", count);
      else Print(" There was no open file to close");
+     Error(__FUNCTION__,"Terminating  . . . . ");
+     gApplication->Terminate(15);
   }
   return kTRUE;
 }
