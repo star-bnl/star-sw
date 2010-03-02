@@ -163,14 +163,13 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
   if (jBeg > 1) Skip(jBeg-1);
   // End of the event loop as soon as the application receives TERM (-15) system signal
   class teminator : public StTerminateNotified {
-     private:
         bool fEnd_of_time;
      public: 
-        teminator() : StTerminateNotified(), fEnd_of_time(false) 
-        { StCloseFileOnTerminate::Instantiate().SetNotificator(this); }
-        void SetNotified() { fEnd_of_time = true; }
+        teminator() : StTerminateNotified(), fEnd_of_time(false){;}
+        void SetNotifiedCallBack() { fEnd_of_time = true; }
         bool Notified() const { return !fEnd_of_time; }
-  } endOfTime ;
+  } endOfTime;
+  
   for (jCur=jBeg; jCur<=jEnd  && endOfTime.Notified(); jCur++) {
      evnt.Reset(); evnt.Start("QAInfo:");
 
@@ -273,8 +272,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.74 2010/03/01 23:37:41 fine Exp $
+// $Id: StChain.cxx,v 1.75 2010/03/02 23:09:24 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.75  2010/03/02 23:09:24  fine
+// Simplify Close/Terminate interface
+//
 // Revision 1.74  2010/03/01 23:37:41  fine
 // Terminate StChain::EventLoop with the extrenal TERM 15 signal
 //
