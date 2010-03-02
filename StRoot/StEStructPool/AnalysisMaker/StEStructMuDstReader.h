@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.h,v 1.9 2008/12/02 23:35:35 prindle Exp $
+ * $Id: StEStructMuDstReader.h,v 1.10 2010/03/02 21:43:38 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -13,6 +13,7 @@
 #ifndef __STEBEEMUEventREADER__H
 #define __STEBEEMUEventREADER__H
 
+#include "TH1F.h"
 #include "TH2F.h"
 #include "StEStructEventReader.h"
 #include "StEStructPool/Pileup/Pileup.h"
@@ -35,10 +36,14 @@ public:
   bool mInChain;
   bool mAmDone;
   bool mUseGlobalTracks;
+  int  mPrimaryVertexId;
   int  mNumGoodTracks;//!
   int  mhasdEdxCuts;
   TH2F*  dEdxBefore;
   TH2F*  dEdxAfter;
+
+  Float_t mEta;
+  Float_t mPhi;
 
   Pileup      *mPileup;
 
@@ -79,6 +84,11 @@ inline bool StEStructMuDstReader::done(){ return mAmDone; };
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.h,v $
+ * Revision 1.10  2010/03/02 21:43:38  prindle
+ * Use outerHelix() for global tracks
+ *   Add sensible triggerId histograms
+ *   Starting to add support to sort events (available for Hijing)
+ *
  * Revision 1.9  2008/12/02 23:35:35  prindle
  * Added code for pileup rejection in EventCuts and MuDstReader.
  * Modified trigger selections for some data sets in EventCuts.

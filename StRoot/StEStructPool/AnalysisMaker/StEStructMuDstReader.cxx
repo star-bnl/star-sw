@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.16 2009/05/08 00:04:22 prindle Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.17 2010/03/02 21:43:38 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -59,7 +59,12 @@ void StEStructMuDstReader::setMuDstMaker(StMuDstMaker* maker, bool inChain){
   mMaker=maker; 
 };
 
-void StEStructMuDstReader::setEventCuts(StEStructEventCuts* ecuts) { mECuts=ecuts; };
+void StEStructMuDstReader::setEventCuts(StEStructEventCuts* ecuts) {
+    mECuts=ecuts;
+    // I want to create histograms for trigger ids here.
+    // However, I need an StMuEvent which I think I don't have until fillEvent.
+    // Create histograms there.
+};
 void StEStructMuDstReader::setTrackCuts(StEStructTrackCuts* tcuts) {
     mTCuts=tcuts;
     if ( !mTCuts->goodElectron(100.0) ) {      
@@ -121,8 +126,7 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
     if(!muEvent) return retVal;
 
     retVal=new StEStructEvent();
-       
-    unsigned int tword=muEvent->l0Trigger().triggerWord();
+
     mNumGoodTracks = 0;
 
     float x;
@@ -134,7 +138,16 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
     x = muEvent->eventSummary().primaryVertexPosition().x();
     y = muEvent->eventSummary().primaryVertexPosition().y();
     z = muEvent->eventSummary().primaryVertexPosition().z();
+    int nMultVertex = 0;
+    if (muEvent->eventSummary().numberOfVertices()>1) {
+        nMultVertex++;
+    }
 
+    // goodTrigger (currently) does a topological cut on vertex shape of the "current" primary vertex.
+    // Need to require tracks are associated with this vertex.
+    // Unless someone redefines the currentVertexIndex it will be set to 0 and the dca cuts should
+    // remove all tracks we don't want.
+    mPrimaryVertexId = muDst->currentVertexIndex();
     if ((fabs(x) < 1e-5) && (fabs(y) < 1e-5) && (fabs(z) < 1e-5)) {
         useEvent = false;
     } else if ( !mECuts->goodTrigger(muDst)  ||
@@ -170,7 +183,21 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
         
     }
 
-    mECuts->fillHistogram(mECuts->triggerWordName(),(float)tword,useEvent);
+    // Fill (before) trigger information for this event
+    const StTriggerId& l0Nom = muEvent->triggerIdCollection().nominal();
+    int nTrig = 0;
+    for (unsigned int idx=0;idx<l0Nom.maxTriggerIds();idx++) {
+        if (0 == l0Nom.triggerId(idx)) {
+            break;
+        }
+        nTrig++;
+    }
+    for (int idx=0;idx<nTrig;idx++) {
+        mECuts->fillHistogram(mECuts->triggerWordName(),l0Nom.triggerId(idx),useEvent);
+        for (int idy=idx+1;idy<nTrig;idy++) {
+            mECuts->fillHistogram(mECuts->triggerWordName(),l0Nom.triggerId(idx),l0Nom.triggerId(idy),useEvent);
+        }
+    }
     mECuts->fillHistogram(mECuts->primaryVertexZName(),z,useEvent);
     mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,useEvent);
 
@@ -228,6 +255,11 @@ bool StEStructMuDstReader::fillTracks(StEStructEvent* estructEvent) {
         } else {
             track = muDst->primaryTracks(i);
         }
+        // Even global tracks are associated with a particular primary vertex (for calculating DCA).
+// This check seems way too slow. See if we can get dca to calculate wrt mPrimaryVertex.
+//        if (track->vertexIndex() != mPrimaryVertexId) {
+//            continue;
+//        }
 
         if (mhasdEdxCuts) {
             dEdxBefore->Fill((track->p()).mag(),track->dEdx());
@@ -254,19 +286,35 @@ bool StEStructMuDstReader::isTrackGood(StMuTrack* track) {
 
     bool useTrack=true;
 
+    // When using global tracks use the outerHelix to calculate eta, phi and dca.
+    Float_t mDCA;
+    if (mUseGlobalTracks) {
+        StMuDst* muDst=mMaker->muDst();
+        StMuEvent* muEvent=muDst->event();
+        const StThreeVectorF &pvert = muEvent->eventSummary().primaryVertexPosition();
+        StPhysicalHelixD helix = track->outerHelix();
+        double dist = helix.pathLength(pvert,false);
+        const StThreeVectorF &pos = helix.at(dist) - pvert;
+        const StThreeVectorF &dir = helix.cat(dist);
+
+        mEta = dir.pseudoRapidity();
+        mPhi = dir.phi();
+        mDCA = pos.mag();
+    } else {
+        mEta = track->eta();
+        mPhi = track->phi();
+        mDCA = track->dcaGlobal(mPrimaryVertexId).magnitude();
+    }
+
     // Do eta cut first so my ThisCut can use the eta value.
-    useTrack = (mTCuts->goodEta(track->eta()) && useTrack);
+    useTrack = (mTCuts->goodEta(mEta) && useTrack);
     useTrack = (mTCuts->goodFlag(track->flag()) && useTrack);
     useTrack = (mTCuts->goodCharge(track->charge()) && useTrack);
     useTrack = (mTCuts->goodNFitPoints(track->nHitsFit()) && useTrack);
     useTrack = (mTCuts->goodNFitNMax((float)((float)track->nHitsFit()/(float)track->nHitsPoss())) && useTrack);
-    if (mUseGlobalTracks) {
-        useTrack = (mTCuts->goodGlobalDCA(track->dca().magnitude()) && useTrack);
-    } else {
-        useTrack = (mTCuts->goodGlobalDCA(track->dcaGlobal().magnitude()) && useTrack);
-    }
+    useTrack = (mTCuts->goodGlobalDCA(mDCA) && useTrack);
     useTrack = (mTCuts->goodChi2(track->chi2()) && useTrack);
-    useTrack = (mTCuts->goodPhi(track->phi()) && useTrack);
+    useTrack = (mTCuts->goodPhi(mPhi) && useTrack);
     if(track->pt() < 0.15) useTrack = false;  // basic pt cut, ranges checked in isTrackGoodToUse
 
 //>>>>> delta p_t / p_t cut. Make sure charge sign is well defined.
@@ -361,7 +409,8 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
   // In some productions we have dcaGlobal() = (0,0,0) for global tracks.
   // dca() seems to be useful though.
   if (mUseGlobalTracks) {
-      gb = mTrack->dca();
+//      gb = mTrack->dca();
+      gb = mTrack->dcaGlobal();
   } else {
       gb = mTrack->dcaGlobal();
   }
@@ -372,13 +421,15 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
   eTrack->SetByGlobal(gb.y());
   eTrack->SetBzGlobal(gb.z());
 
-  // Note: For global tracks eta and phi are calculated at DCA to primary vertex.
-  //       (Not sure how far back this goes. Need to check if using globals with old data)
-  eTrack->SetEta(mTrack->eta());
-  eTrack->SetPhi(mTrack->phi());
-
+  eTrack->SetEta(mEta);
+  eTrack->SetPhi(mPhi);
   eTrack->SetDedx(mTrack->dEdx());
   eTrack->SetChi2(mTrack->chi2());
+  if (mUseGlobalTracks) {
+      eTrack->SetHelix(mTrack->outerHelix());
+  } else {
+      eTrack->SetHelix(mTrack->helix());
+  }
 
   //
   // -> note in my analysis I chose nSigma instead of prob.
@@ -402,22 +453,17 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
   eTrack->SetDetectorID(1); //TPC
   eTrack->SetFlag(mTrack->flag());
   eTrack->SetCharge(mTrack->charge());
-
-  eTrack->SetHelix(mTrack->helix());
-  // It seems that the calculation of entrance, mid and exit points still works
-  // when we use the outerHelix instead of helix (which should be helix parameters
-  // at the point closest to the primary vertex). I believe the two are different
-  // to account for multiple scattering and energy loss. Expect properties of the
-  // track within the TPC to be described better by outerHelix.
-  //>>>>>Make this modification with the next set of updates (where I expect we will
-  //     be using global tracks instead of primary tracks.)
-//  eTrack->SetHelix(mTrack->outerHelix());
 }; 
   
 
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.17  2010/03/02 21:43:38  prindle
+ * Use outerHelix() for global tracks
+ *   Add sensible triggerId histograms
+ *   Starting to add support to sort events (available for Hijing)
+ *
  * Revision 1.16  2009/05/08 00:04:22  prindle
  * Just putting Yuri's TMath back in
  *

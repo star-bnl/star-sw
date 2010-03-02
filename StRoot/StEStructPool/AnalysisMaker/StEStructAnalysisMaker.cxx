@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEStructAnalysisMaker.cxx,v 1.7 2007/01/26 17:09:25 msd Exp $
+ * $Id: StEStructAnalysisMaker.cxx,v 1.8 2010/03/02 21:43:37 prindle Exp $
  *
  *************************************************************************
  *
@@ -120,6 +120,9 @@ StEStructAnalysisMaker::Make(){
      if(mreader->done()) return kStEOF;
    } else {
      int ia = getAnalysisIndex();         // 0 if numAnalysis = 1
+     if (mSorting) {
+         return kStOK;
+     }
      if(ia>=0 && ia < numAnalysis) {
        if(doReactionPlaneAnalysis) {
          pEStructEvent->SetPhiWgt(mWeightFile);
@@ -170,6 +173,104 @@ void StEStructAnalysisMaker::writeQAHists(const char* fileName){
   tfq->Close();
 }
 
+//  quickSort
+//
+//  This public-domain C implementation by Darel Rex Finley.
+//
+//  * Returns YES if sort was successful, or NO if the nested
+//    pivots went too deep, in which case your array will have
+//    been re-ordered, but probably not sorted correctly.
+//
+//  * This function assumes it is called with valid parameters.
+//
+//  * Example calls:
+//    quickSort(&myArray[0],5); // sorts elements 0, 1, 2, 3, and 4
+//    quickSort(&myArray[3],5); // sorts elements 3, 4, 5, 6, and 7
+
+bool StEStructAnalysisMaker::quickSort(int *arr, int elements) {
+
+    #define  MAX_LEVELS  1000
+
+    int  piv, beg[MAX_LEVELS], end[MAX_LEVELS], i=0, L, R, pM ;
+    mIndex = new int[elements];
+    for (int i=0;i<elements;i++) {
+        mIndex[i] = i;
+    }
+
+    beg[0]=0; end[0]=elements;
+    while (i>=0) {
+        L=beg[i]; R=end[i]-1;
+        if (L<R) {
+            piv=arr[L];
+            pM =mIndex[L];
+            if (i==MAX_LEVELS-1) return false;
+            while (L<R) {
+                while (arr[R]>=piv && L<R) R--;
+                if (L<R) {
+                    mIndex[L]=mIndex[R];
+                    arr[L++]=arr[R];
+                }
+                while (arr[L]<=piv && L<R) L++;
+                if (L<R) {
+                    mIndex[R]=mIndex[L];
+                    arr[R--]=arr[L];
+                }
+            }
+            arr[L]=piv;
+            mIndex[L]=pM;
+            beg[i+1]=L+1;
+            end[i+1]=end[i];
+            end[i++]=L;
+        } else {
+            i--;
+        }
+    }
+    return true;
+}
+bool StEStructAnalysisMaker::quickSort(double *arr, int elements) {
+
+    #define  MAX_LEVELS  1000
+
+    double  piv;
+    int  beg[MAX_LEVELS], end[MAX_LEVELS], i=0, L, R, pM ;
+    mIndex = new int[elements];
+    for (int i=0;i<elements;i++) {
+        mIndex[i] = i;
+    }
+
+    beg[0]=0; end[0]=elements;
+    while (i>=0) {
+        L=beg[i]; R=end[i]-1;
+        if (L<R) {
+            piv=arr[L];
+            pM =mIndex[L];
+            if (i==MAX_LEVELS-1) return false;
+            while (L<R) {
+                while (arr[R]>=piv && L<R) R--;
+                if (L<R) {
+                    mIndex[L]=mIndex[R];
+                    arr[L++]=arr[R];
+                }
+                while (arr[L]<=piv && L<R) L++;
+                if (L<R) {
+                    mIndex[R]=mIndex[L];
+                    arr[R--]=arr[L];
+                }
+            }
+            arr[L]=piv;
+            mIndex[L]=pM;
+            beg[i+1]=L+1;
+            end[i+1]=end[i];
+            end[i++]=L;
+        } else {
+            i--;
+        }
+    }
+    return true;
+}
+int StEStructAnalysisMaker::GetSortedIndex(int i) {
+    return mIndex[i];
+}
 
 //-----------------------------------------------------------------
 void StEStructAnalysisMaker::writeDiagnostics(int opt){
@@ -194,6 +295,7 @@ void StEStructAnalysisMaker::compiledLoop(){
 void StEStructAnalysisMaker::SetReactionPlaneAnalysis(char* weightFile) {
   doReactionPlaneAnalysis = true;
   mWeightFile = weightFile;
+  cout << "  Setting doReactionPlaneAnalysis = " << doReactionPlaneAnalysis << " with a weight file " << mWeightFile << endl;
 }
 
 //-----------------------------------------
@@ -205,6 +307,11 @@ void StEStructAnalysisMaker::SetReactionPlaneAnalysis(char* weightFile) {
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.cxx,v $
+ * Revision 1.8  2010/03/02 21:43:37  prindle
+ * Use outerHelix() for global tracks
+ *   Add sensible triggerId histograms
+ *   Starting to add support to sort events (available for Hijing)
+ *
  * Revision 1.7  2007/01/26 17:09:25  msd
  * Minor bug fix in AnalysisMaker, cleaned up EmptyAnalysis
  *
