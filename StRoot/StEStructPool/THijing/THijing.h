@@ -6,7 +6,10 @@
 extern "C" {
   void hijset_(float *efrm, char *frame, char *proj, char *targ, int *iap, int *izp, int *iat, int *izt);
   void hijing_(char *frame, float *bmin, float *bmax);
-  void rluxgox_(int *lux,int *iseed, int *k1, int *k2);
+  void rluxgo_(int *lux,int *iseed, int *k1, int *k2);
+  void rluxat_(int *lux,int *iseed, int *k1, int *k2);
+  void rluxut_(int *ivec);
+  void rluxin_(int *ivec);
   void hijev_();
   // definition for the common blocks in Hijing
   extern struct {
@@ -77,7 +80,10 @@ class THijing {
  public:
   THijing( const char *paramFile );
   ~THijing();
-  void SetRandomSeed(int iseed);
+  void SetRandomSeed(int iseed, int k1=0, int k2=0);
+  void GetRandomSeed(int *lux, int *iseed, int *k1, int *k2);
+  void SaveRandomSeeds(int *ivec);
+  void RestoreRandomSeeds(int *ivec);
   void GenerateEvent();
   int EventsToDo()      const { return int(headpss_.vsshep[3]); }
   int EventsGenerated() const { return mNevent; }
