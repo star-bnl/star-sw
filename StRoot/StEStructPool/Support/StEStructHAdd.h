@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.h,v 1.4 2008/05/01 23:46:40 prindle Exp $
+ * $Id: StEStructHAdd.h,v 1.5 2010/03/02 21:48:30 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -31,6 +31,7 @@ class StEStructHAdd : public TObject {
   void addCuts(const char* outfile, const char* infile,
                int* nlist, int num, int parentDist[][2], int nParentDist, int symmXX=0);
   void symmetrizeXX(TH2 *hist);
+  void old_addDensities(const char* outfile, TFile* inFile);
   void addDensities(const char* outfile, TFile* inFile);
   void combineUS(TFile * modFile);
 
@@ -44,8 +45,12 @@ class StEStructHAdd : public TObject {
 /***********************************************************************
  *
  * $Log: StEStructHAdd.h,v $
+ * Revision 1.5  2010/03/02 21:48:30  prindle
+ * Fix addDensities (for checking pair cuts)
+ *   Lots of small changes
+ *
  * Revision 1.4  2008/05/01 23:46:40  prindle
- * Changed to use TH1D and TH2D (instead of TH1 and TH2) in some places so
+ *   Changed to use TH1D and TH2D (instead of TH1 and TH2) in some places so
  * we can use GetObject method to enforce type checking. Found I had missed
  * duplicating a \phi_\Delta row in one case. Also added a method to include
  * sum of pairdensity histograms in output file.

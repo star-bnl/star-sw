@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.15 2009/07/29 21:47:47 dkettler Exp $
+ * $Id: StEStructSupport.h,v 1.16 2010/03/02 21:48:30 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -35,6 +35,7 @@ public:
   bool  msilent;
   bool  mDoSymmetrize;
   bool  mPairNormalization;
+  bool  mPairWeighting;
   bool  mIdenticalPair;
 
   bool  goodName(const char* name); // test if name is one of ours
@@ -69,6 +70,7 @@ public:
   float *getChargeNumber(int zBin);
   float *getChargePairs(int zBin);
 
+  double getCIdNdEtadPhi();
   double *getd2NdEtadPhi(int zBin, bool include2s=true);
   double *getScaleFactors();
   double *getScaleFactors(int zBin);
@@ -109,7 +111,8 @@ public:
   TH2D** buildChargeTypesSumOfRatios(const char* name, int opt, float* sf, int zBin);
   
   void scaleBackGround(TH2D* sib, TH2D* mix, float sf=0);
-  void fixDEta(TH2** h, int numHists); // correct triangle in hists with DEta
+  void fixDEtaGeometric(TH2** h, int numHists); // correct triangle in hists with DEta
+  void fixDEta(TH2** h, int numHists); // tries to do an acceptance correction
 
   // helper for writing ascii dump of set a of histograms to file=fname
   void writeAscii(TH2D** h, int numHists, const char* fname, int optErrors);
@@ -134,6 +137,10 @@ inline bool StEStructSupport::silent() { return msilent; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.16  2010/03/02 21:48:30  prindle
+ * Fix addDensities (for checking pair cuts)
+ *   Lots of small changes
+ *
  * Revision 1.15  2009/07/29 21:47:47  dkettler
  * New weighting for z bins
  *
