@@ -271,22 +271,25 @@ Int_t StJetSkimEventMaker::Make()
 
     // EMC info
     if (StTriggerSimuMaker* trigSimu = dynamic_cast<StTriggerSimuMaker*>(GetMakerInheritsFrom("StTriggerSimuMaker"))) {
-      for (int i = 0; i < 3; ++i) {
-	mEvent->setBarrelJetPatchTh(i,trigSimu->bemc->barrelJetPatchTh(i));
-	mEvent->setEndcapJetPatchTh(i,trigSimu->eemc->endcapJetPatchTh(i));
-	mEvent->setOverlapJetPatchTh(i,trigSimu->emc->overlapJetPatchTh(i));
+      if (trigSimu->bemc) {
+	for (int i = 0; i < 3; ++i) mEvent->setBarrelJetPatchTh(i,trigSimu->bemc->barrelJetPatchTh(i));
+	for (int i = 0; i < 4; ++i) mEvent->setBarrelHighTowerTh(i,trigSimu->bemc->barrelHighTowerTh(i));
+	for (int jp = 0; jp < 18; ++jp) mEvent->setBarrelJetPatchAdc(jp,trigSimu->bemc->barrelJetPatchAdc(jp));
       }
 
-      for (int i = 0; i < 4; ++i) mEvent->setBarrelHighTowerTh(i,trigSimu->bemc->barrelHighTowerTh(i));
-      for (int i = 0; i < 2; ++i) mEvent->setEndcapHighTowerTh(i,trigSimu->eemc->endcapHighTowerTh(i));
+      if (trigSimu->eemc) {
+	for (int i = 0; i < 3; ++i) mEvent->setEndcapJetPatchTh(i,trigSimu->eemc->endcapJetPatchTh(i));
+	for (int i = 0; i < 2; ++i) mEvent->setEndcapHighTowerTh(i,trigSimu->eemc->endcapHighTowerTh(i));
+	for (int jp = 0; jp < 6; ++jp) mEvent->setEndcapJetPatchAdc(jp,trigSimu->eemc->endcapJetPatchAdc(jp));
+      }
 
-      for (int jp = 0; jp < 18; ++jp) mEvent->setBarrelJetPatchAdc(jp,trigSimu->bemc->barrelJetPatchAdc(jp));
-      for (int jp = 0; jp <  6; ++jp) mEvent->setEndcapJetPatchAdc(jp,trigSimu->eemc->endcapJetPatchAdc(jp));
-
-      for (int i = 0; i < 2; ++i) {
-	int jp, adc;
-	trigSimu->emc->getOverlapJetPatchAdc(i,jp,adc);
-	mEvent->setOverlapJetPatchAdc(jp,adc);
+      if (trigSimu->emc) {
+	for (int i = 0; i < 3; ++i) mEvent->setOverlapJetPatchTh(i,trigSimu->emc->overlapJetPatchTh(i));
+	for (int i = 0; i < 2; ++i) {
+	  int jp, adc;
+	  trigSimu->emc->getOverlapJetPatchAdc(i,jp,adc);
+	  mEvent->setOverlapJetPatchAdc(jp,adc);
+	}
       }
 
       mEvent->setEmcLayer2(trigSimu->emc->EM201output());
