@@ -9,6 +9,5 @@ void starsim() {
   gSystem->Load("libStarMagField.so");
   gSystem->Load("St_geant_Maker");
   (new St_geant_Maker())->Init();
-  TGiant3::Geant3()
   TGiant3::Geant3()->GetKuipPrompt();
 }
