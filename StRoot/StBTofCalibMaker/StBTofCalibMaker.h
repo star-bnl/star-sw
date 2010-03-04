@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.h,v 1.3 2009/12/04 22:26:34 geurts Exp $
+ * $Id: StBTofCalibMaker.h,v 1.4 2010/03/04 23:10:20 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.h,v $
+ * Revision 1.4  2010/03/04 23:10:20  dongx
+ * Added cleanup for PID variables in MuBTofPidTraits when processMuDst()
+ *
  * Revision 1.3  2009/12/04 22:26:34  geurts
  * Split original CalibMaker into dedicated StVpdCalibMaker and BTOF-specific StBTofCalibMaker (Xin):
  * - function added to directly access the MuDst
@@ -49,6 +52,7 @@ class StBTofHeader;
 class StBTofHitCollection;
 class StBTofPidTraits;
 class StMuDst;
+class StMuBTofPidTraits;
 #include "StPhysicalHelixD.hh"
 
 #if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
@@ -113,6 +117,9 @@ private:
   void processStEvent();
   ///
   void processMuDst();
+  ///
+  void cleanCalibMuDst();
+  void cleanCalib(StMuBTofPidTraits&);  //! functions to clean up calib done before in MuDst
         
   /// calculate tstart from Vpd
   void tstart(const Double_t Vz, Double_t *tstart, Double_t *tdiff);  //! tstart calculation splitted into 2 steps
@@ -196,7 +203,7 @@ private:
     TH1D*    hEventCounter;     //!
             
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.3 2009/12/04 22:26:34 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.4 2010/03/04 23:10:20 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StBTofCalibMaker,2)
 };
