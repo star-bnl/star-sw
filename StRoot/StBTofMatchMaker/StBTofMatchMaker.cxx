@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.6 2010/03/04 00:08:47 dongx Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.7 2010/03/04 03:54:28 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.7  2010/03/04 03:54:28  dongx
+ * Further improvement on the processMuDst speed in Step F.
+ *
  * Revision 1.6  2010/03/04 00:08:47  dongx
  * Removed primary check for globals at projection in accessing MuDst function as it takes significant CPU time. Waiting for MuDst update
  * Added some more debugging output for CPU time usage
@@ -966,6 +969,16 @@ void StBTofMatchMaker::processMuDst(){
   //.........................................................................
   /// B. loop over global tracks and determine all cell-track matches
   //
+  Int_t index2Primary[50000]; // map
+  memset(index2Primary, -1, sizeof(index2Primary));
+  for(int ip=0;ip<(int)mMuDst->numberOfPrimaryTracks();ip++) {
+    StMuTrack *pTrack = mMuDst->primaryTracks(ip);
+    if(!pTrack) continue;
+    int gIndex = pTrack->index2Global();
+    if(gIndex<0) continue;
+    index2Primary[gIndex] = ip;
+  }
+
   tofCellHitVector allCellsHitVec;
   StructCellHit cellHit;
 
@@ -979,8 +992,8 @@ void StBTofMatchMaker::processMuDst(){
     if(!theTrack) continue;
 
     bool isPrimary = kFALSE;
-//    int iv = theTrack->vertexIndex();   //! this function takes long, commented out
-//    if(iv>=0) isPrimary = kTRUE;        //! now, waiting for MuDst update
+    int pIndex = index2Primary[iNode];
+    if(pIndex>=0) isPrimary = kTRUE;
 
     StThreeVectorF mom = theTrack->momentum();
     float pt = mom.perp();
@@ -1449,25 +1462,15 @@ void StBTofMatchMaker::processMuDst(){
     }
     nValidSingleHitCells++;
 
-    int iv = globalTrack->vertexIndex();
-    if(iv>=0) nValidSinglePrimHitCells++;
-
     /// set cross-indices
     tofHit->setAssociatedTrackId(globalTrack->id());
     tofHit->setIndex2Global(trackNode);
     globalTrack->setIndex2BTofHit(FinalMatchedCellsVec[ii].index2BTofHit);
 
-    int ip = -1;
-    for(int j=0;j<(int)mMuDst->numberOfPrimaryTracks();j++) {
-      StMuTrack *pTrack = mMuDst->primaryTracks(j);
-      if(!pTrack) continue;
-      if(pTrack->index2Global() == trackNode) {
-        ip = j;
-        break;
-      }
-    }
+    int ip = index2Primary[trackNode];
     StMuTrack *primaryTrack = 0;
     if(ip>=0) {
+      nValidSinglePrimHitCells++;
       tofHit->setIndex2Primary(ip);
       primaryTrack = (StMuTrack *)mMuDst->primaryTracks(ip);
       if(primaryTrack) {
