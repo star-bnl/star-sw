@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.7 2010/03/04 03:54:28 dongx Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.8 2010/03/04 21:40:54 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.8  2010/03/04 21:40:54  dongx
+ * Added clean up in processMuDst to remove associations done before
+ *
  * Revision 1.7  2010/03/04 03:54:28  dongx
  * Further improvement on the processMuDst speed in Step F.
  *
@@ -914,6 +917,11 @@ void StBTofMatchMaker::processMuDst(){
      if(!aHit) continue;
      if(aHit->tray()<=0||aHit->tray()>mNTray) continue;  // barrel tray hits
 
+     // clean up any association done before
+     aHit->setIndex2Primary(-1);
+     aHit->setIndex2Global(-1);
+     aHit->setAssociatedTrackId(-1);
+
      int trayId = aHit->tray();
      int moduleId = aHit->module();
      int cellId = aHit->cell();
@@ -990,6 +998,11 @@ void StBTofMatchMaker::processMuDst(){
     //    cellHitVec.clear();
     StMuTrack *theTrack = mMuDst->globalTracks(iNode);
     if(!theTrack) continue;
+
+    // clean up any association done before
+    StMuBTofPidTraits pidTof;
+    theTrack->setBTofPidTraits(pidTof);
+    theTrack->setIndex2BTofHit(-1);
 
     bool isPrimary = kFALSE;
     int pIndex = index2Primary[iNode];
