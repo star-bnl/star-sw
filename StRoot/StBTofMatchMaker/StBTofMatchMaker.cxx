@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.8 2010/03/04 21:40:54 dongx Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.9 2010/03/04 21:59:27 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.9  2010/03/04 21:59:27  dongx
+ * Further addition in the initial clean up for primary tracks too
+ *
  * Revision 1.8  2010/03/04 21:40:54  dongx
  * Added clean up in processMuDst to remove associations done before
  *
@@ -1006,7 +1009,14 @@ void StBTofMatchMaker::processMuDst(){
 
     bool isPrimary = kFALSE;
     int pIndex = index2Primary[iNode];
-    if(pIndex>=0) isPrimary = kTRUE;
+    if(pIndex>=0) { 
+      isPrimary = kTRUE;
+      StMuTrack *pTrack = (StMuTrack *)mMuDst->primaryTracks(pIndex);
+      if(pTrack) {
+        pTrack->setBTofPidTraits(pidTof);
+        pTrack->setIndex2BTofHit(-1);
+      }
+    }
 
     StThreeVectorF mom = theTrack->momentum();
     float pt = mom.perp();
