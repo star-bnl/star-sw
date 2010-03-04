@@ -9,5 +9,7 @@ void starsim() {
   gSystem->Load("libStarMagField.so");
   gSystem->Load("St_geant_Maker");
   (new St_geant_Maker())->Init();
+  printf ("\n\n . . . . Switching to the starsim interactive session:\n");
   TGiant3::Geant3()->GetKuipPrompt();
+  printf ("\n----------\nRestore the ROOT interactive session\n");
 }
