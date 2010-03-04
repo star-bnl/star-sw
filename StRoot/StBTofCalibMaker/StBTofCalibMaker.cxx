@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.3 2009/12/04 22:26:34 geurts Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.4 2010/03/04 23:10:20 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.4  2010/03/04 23:10:20  dongx
+ * Added cleanup for PID variables in MuBTofPidTraits when processMuDst()
+ *
  * Revision 1.3  2009/12/04 22:26:34  geurts
  * Split original CalibMaker into dedicated StVpdCalibMaker and BTOF-specific StBTofCalibMaker (Xin):
  * - function added to directly access the MuDst
@@ -702,6 +705,8 @@ void StBTofCalibMaker::processMuDst()
     return;
   }
 
+  cleanCalibMuDst();
+
   Int_t nhits = mMuDst->numberOfBTofHit();
   LOG_INFO << " Fired TOF cells + upVPD tubes : " << nhits << endm;
 
@@ -908,6 +913,47 @@ void StBTofCalibMaker::processMuDst()
     }
   }  // end tof hits
 
+  return;
+}
+
+//_____________________________________________________________________________
+void StBTofCalibMaker::cleanCalibMuDst()
+{
+  if(!mMuDst) return;
+
+  Int_t nPrimary = mMuDst->numberOfPrimaryTracks();
+  Int_t nGlobal = mMuDst->numberOfGlobalTracks();
+  for(int i=0;i<nPrimary;i++) {
+    StMuTrack *pTrack = (StMuTrack *)mMuDst->primaryTracks(i);
+    if(!pTrack) continue;
+    StMuBTofPidTraits pid = pTrack->btofPidTraits();
+    cleanCalib(pid);
+    pTrack->setBTofPidTraits(pid);
+  }
+ for(int i=0;i<nGlobal;i++) {
+    StMuTrack *gTrack = (StMuTrack *)mMuDst->globalTracks(i);
+    if(!gTrack) continue;
+    StMuBTofPidTraits pid = gTrack->btofPidTraits();
+    cleanCalib(pid);          
+    gTrack->setBTofPidTraits(pid);
+  }
+  return;
+}
+
+//_____________________________________________________________________________
+void StBTofCalibMaker::cleanCalib(StMuBTofPidTraits& pid)
+{
+  pid.setTimeOfFlight(-999.);
+  pid.setPathLength(-999.);
+  pid.setBeta(-999.);
+  pid.setSigmaElectron(-999.);
+  pid.setSigmaPion(-999.);
+  pid.setSigmaKaon(-999.);
+  pid.setSigmaProton(-999.);
+  pid.setProbElectron(-999.);
+  pid.setProbPion(-999.);
+  pid.setProbKaon(-999.);
+  pid.setProbProton(-999.);
   return;
 }
 
