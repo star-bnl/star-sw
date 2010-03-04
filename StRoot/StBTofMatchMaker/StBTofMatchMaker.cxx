@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.5 2010/02/25 05:17:10 dongx Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.6 2010/03/04 00:08:47 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,10 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.6  2010/03/04 00:08:47  dongx
+ * Removed primary check for globals at projection in accessing MuDst function as it takes significant CPU time. Waiting for MuDst update
+ * Added some more debugging output for CPU time usage
+ *
  * Revision 1.5  2010/02/25 05:17:10  dongx
  * Geometry initalization moved from Init() to InitRun()
  *
@@ -951,6 +955,12 @@ void StBTofMatchMaker::processMuDst(){
     if(daqCellsHitVec.size()) mEventCounterHisto->Fill(6);
   }
 //  if(!daqCellsHitVec.size()) return;
+  if (doPrintCpuInfo) {
+    timer.stop();
+    LOG_INFO << "CPU time after Step A - loading hits : "
+	 << timer.elapsedTime() << " sec" << endm;
+    timer.start();    
+  }
 
 
   //.........................................................................
@@ -958,9 +968,6 @@ void StBTofMatchMaker::processMuDst(){
   //
   tofCellHitVector allCellsHitVec;
   StructCellHit cellHit;
-
-  StTimer projTimer;
-  if (doPrintCpuInfo) projTimer.start();
 
   Int_t nGlobals = mMuDst->numberOfGlobalTracks();
   Int_t nAllTracks=0;
@@ -972,8 +979,8 @@ void StBTofMatchMaker::processMuDst(){
     if(!theTrack) continue;
 
     bool isPrimary = kFALSE;
-    int iv = theTrack->vertexIndex();
-    if(iv>=0) isPrimary = kTRUE;
+//    int iv = theTrack->vertexIndex();   //! this function takes long, commented out
+//    if(iv>=0) isPrimary = kTRUE;        //! now, waiting for MuDst update
 
     StThreeVectorF mom = theTrack->momentum();
     float pt = mom.perp();
@@ -1102,9 +1109,10 @@ void StBTofMatchMaker::processMuDst(){
   }
   // end of Sect.B
   if (doPrintCpuInfo) {
-    projTimer.stop();
-    LOG_INFO << "CPU time for Step B - projection : "
-	 << projTimer.elapsedTime() << " sec" << endm;
+    timer.stop();
+    LOG_INFO << "CPU time after Step B - projection : "
+	 << timer.elapsedTime() << " sec" << endm;
+    timer.start();    
   }
 
   //.........................................................................
@@ -1157,6 +1165,12 @@ void StBTofMatchMaker::processMuDst(){
   } //end {sec. C}
   if(Debug()) { LOG_INFO << "C: before/after: " << allCellsHitVec.size() << "/" << matchHitCellsVec.size() << endm; }
   if(mHisto&&matchHitCellsVec.size()) mEventCounterHisto->Fill(8);
+  if (doPrintCpuInfo) {
+    timer.stop();
+    LOG_INFO << "CPU time after Step C - matching : "
+	 << timer.elapsedTime() << " sec" << endm;
+    timer.start();    
+  }
 
   //.........................................................................
   /// D. sort hit vectors  and deal with (discard) cells matched by multiple tracks
@@ -1235,6 +1249,12 @@ void StBTofMatchMaker::processMuDst(){
     mCellsPerEventMatch1->Fill(singleHitCellsVec.size()+multiHitsCellsVec.size());
     if(singleHitCellsVec.size()) mEventCounterHisto->Fill(9);
   } 
+  if (doPrintCpuInfo) {
+    timer.stop();
+    LOG_INFO << "CPU time after Step D - erasing : "
+	 << timer.elapsedTime() << " sec" << endm;
+    timer.start();    
+  }
 
   //.........................................................................
   /// E. sort and deal singleHitCellsVector for multiple cells associated to single tracks
@@ -1377,6 +1397,12 @@ void StBTofMatchMaker::processMuDst(){
 
   if(Debug()) { LOG_INFO << "E: before/after: " << singleHitCellsVec.size() << "/" << FinalMatchedCellsVec.size() << endm; }
   // end of Sect.E
+  if (doPrintCpuInfo) {
+    timer.stop();
+    LOG_INFO << "CPU time after Step E - sorting : "
+	 << timer.elapsedTime() << " sec" << endm;
+    timer.start();    
+  }
 
   //.........................................................................
   //// F. perform further selection and fill valid track histograms, ntuples and BTofPidTraits
@@ -1474,6 +1500,12 @@ void StBTofMatchMaker::processMuDst(){
   
   if(Debug()) { LOG_INFO << "F: before/after" << FinalMatchedCellsVec.size() << "/" <<nValidSinglePrimHitCells << endm; }
  // end of Sect.F
+  if (doPrintCpuInfo) {
+    timer.stop();
+    LOG_INFO << "CPU time after Step F - final : "
+	 << timer.elapsedTime() << " sec" << endm;
+    timer.start();    
+  }
 
   LOG_INFO << " #(daq hits): " << daqCellsHitVec.size()
        << "\t#(proj hits): " << allCellsHitVec.size()
