@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.66 2009/11/24 19:29:19 posk Exp $
+// $Id: plot.C,v 1.67 2010/03/05 17:04:38 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -39,7 +39,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
   Bool_t includeFtpc = kTRUE;
   //Bool_t includeFtpc = kFALSE;
-  Bool_t reCent = kTRUE;
+  Bool_t reCent = kFALSE;
 
   bool multiGraph  = kFALSE;                            // set flags
   bool singleGraph = kFALSE;
@@ -309,23 +309,25 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
   const Int_t firstMultFtpc = 38; // these must be set by hand
   const Int_t firstMultTpc  = 27;
-  int nSingles;
+  Int_t nSingles;
+  Int_t nName;
   if (reCent) {
-    const int nNames = sizeof(baseName3) / sizeof(char*);
+    nName = sizeof(baseName3) / sizeof(char*);
     nSingles = firstMultFtpc + 1;
   } else if (includeFtpc) {
-    const int nNames = sizeof(baseName1) / sizeof(char*);
+    nName = sizeof(baseName1) / sizeof(char*);
     nSingles = firstMultFtpc + 1;
   } else {
-    const int nNames = sizeof(baseName2) / sizeof(char*);
+    nName = sizeof(baseName2) / sizeof(char*);
     nSingles = firstMultTpc + 1;
   }
+  const Int_t nNames = nName;
 
   // construct arrays of base and short names
-  char* baseName[]  = new char*[nNames];
-  char* shortName[] = new char*[nNames];
+  char* baseName[nNames];
+  char* shortName[nNames];
   for (int n = 0; n < nNames; n++) {
-    baseName[n]  = new char[35];
+    baseName[n] = new char[35];
     shortName[n] = new char[35];
     float etaMax;
     if (reCent) {
@@ -762,9 +764,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       if (histProjName) delete histProjName;
     }
   }
-  for (int m = 0; m < nNames; m++) {  
-    delete [] shortName[m];
-  }
   delete [] shortName;
 
   return can;
@@ -889,6 +888,10 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.67  2010/03/05 17:04:38  posk
+// ROOT 5.22 compatable.
+// Moved doFlowEvents.C here from StRoot/macros/analysis/
+//
 // Revision 1.66  2009/11/24 19:29:19  posk
 // Added reCenter to remove acceptance correlations as an option instead of phiWgt.
 //

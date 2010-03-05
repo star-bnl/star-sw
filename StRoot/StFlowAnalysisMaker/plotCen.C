@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.27 2006/07/06 16:58:39 posk Exp $
+// $Id: plotCen.C,v 1.28 2010/03/05 17:04:40 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -109,7 +109,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_PidElectronPart",
     "Flow_PidPositronPart",
     "Flow_PidMult",
-    "Flow_CosPhiLab",
+//     "Flow_CosPhiLab",
     "Flow_Yield2D_Sel",
     "Flow_Yield.Eta_Sel",
     "Flow_Yield.Pt_Sel",
@@ -148,12 +148,13 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_Cumul_vEta_Order4_Sel",
     "Flow_Cumul_vPt_Order4_Sel" 
 };
-  const int nNames = sizeof(baseName) / sizeof(char*);
+  int nName = sizeof(baseName) / sizeof(char*);
+  const Int_t nNames = nName;
   const int nDoubles = 9;
   const int nSingles = 46 + nDoubles;
 
   // construct array of short names
-  char* shortName[] = new char*[nNames];
+  char* shortName[nNames];
   for (int n = 0; n < nNames; n++) {
     shortName[n] = new char[35];
     strcpy(shortName[n], baseName[n]);
@@ -494,11 +495,23 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       hist->SetMarkerColor(2);
       hist->Draw();
       lineDiagonal->Draw();
-    } else if (strstr(shortName[pageNumber],"CosPhi")!=0) {  // CosPhiLab
-      TLine* lineZeroHar = new TLine(0.5, 0., 3.5, 0.);
+//     } else if (strstr(shortName[pageNumber],"CosPhi")!=0) {  // CosPhiLab
+//       TLine* lineZeroHar = new TLine(0.5, 0., 3.5, 0.);
+//       gStyle->SetOptStat(0);
+//       hist->Draw();
+//       lineZeroHar->Draw();
+    } else if (strstr(shortName[pageNumber],"Mult")!=0) {  // Mult
+      float mult = hist->GetMean();
+      cout << centr << ": " << mult << endl;
+      (TVirtualPad::Pad())->SetLogy();
       gStyle->SetOptStat(0);
       hist->Draw();
-      lineZeroHar->Draw();
+    } else if (strstr(shortName[pageNumber],"MultPart")!=0) {  // Part Mult
+      float multPart = hist->GetMean();
+      cout << centr << ": " << multPart << endl;
+      (TVirtualPad::Pad())->SetLogy();
+      gStyle->SetOptStat(0);
+      hist->Draw();
     } else if (strstr(shortName[pageNumber],"PidMult")!=0) {  // PID Mult
       (TVirtualPad::Pad())->SetLogy();
       gStyle->SetOptStat(0);
@@ -538,10 +551,12 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       gStyle->SetOptStat(0);
       hist->Draw();
       lineZeroHar->Draw();
-      for (int n=1; n < 4; n++) {
+      for (int n=1; n <= 4; n++) {
 	v   = hist->GetBinContent(n);                       // output v values
 	err = hist->GetBinError(n);
 	if (n==2) cout << " v2 = " << setprecision(3) << v << " +/- " << 
+		    setprecision(2) << err << endl;
+	if (n==4) cout << " v4 = " << setprecision(3) << v << " +/- " << 
 		    setprecision(2) << err << endl;
 	if (TMath::IsNaN(v)) {
 	  hist->SetBinContent(n, 0.);
@@ -623,8 +638,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
-// Revision 1.27  2006/07/06 16:58:39  posk
-// Calculation of v1 for LYZ selection=2 is done with mixed harmonics.
+// Revision 1.28  2010/03/05 17:04:40  posk
+// ROOT 5.22 compatable.
+// Moved doFlowEvents.C here from StRoot/macros/analysis/
 //
 // Revision 1.26  2006/03/22 22:02:12  posk
 // Updates to macros.
