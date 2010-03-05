@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.18 2003/09/02 17:58:12 perev Exp $
+// $Id: StFlowSelection.h,v 1.19 2010/03/05 16:49:46 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -88,34 +88,34 @@ inline Int_t StFlowSelection::Sub() const { return mSubevent; }
 inline void StFlowSelection::SetPidPart(const Char_t* pid)  { 
   strncpy(mPidPart, pid, 9); mPidPart[9] = '\0'; }
 
-inline void StFlowSelection::SetPtPart(Float_t lo, Float_t hi) {
+inline void StFlowSelection::SetPtPart(const Float_t lo, const Float_t hi) {
   mPtPart[0] = lo; mPtPart[1] = hi; }
 
-inline void StFlowSelection::SetPtBinsPart(Int_t bins) {
+inline void StFlowSelection::SetPtBinsPart(const Int_t bins) {
   mPtBinsPart = bins; }
 
-inline void StFlowSelection::SetPPart(Float_t lo, Float_t hi) {
+inline void StFlowSelection::SetPPart(const Float_t lo, const Float_t hi) {
   mPPart[0] = lo; mPPart[1] = hi; }
 
-inline void StFlowSelection::SetEtaPart(Float_t lo, Float_t hi) {
+inline void StFlowSelection::SetEtaPart(const Float_t lo, const Float_t hi) {
   mEtaPart[0] = lo; mEtaPart[1] = hi; }
 
-inline void StFlowSelection::SetYPart(Float_t lo, Float_t hi) {
+inline void StFlowSelection::SetYPart(const Float_t lo, const Float_t hi) {
   mYPart[0] = lo; mYPart[1] = hi; }
 
-inline void StFlowSelection::SetFitPtsPart(Int_t lo, Int_t hi) {
+inline void StFlowSelection::SetFitPtsPart(const Int_t lo, const Int_t hi) {
   mFitPtsPart[0] = lo; mFitPtsPart[1] = hi; }
 
-inline void StFlowSelection::SetDedxPtsPart(Int_t lo, Int_t hi) {
+inline void StFlowSelection::SetDedxPtsPart(const Int_t lo, const Int_t hi) {
   mDedxPtsPart[0] = lo; mDedxPtsPart[1] = hi; }
 
-inline void StFlowSelection::SetFitOverMaxPtsPart(Float_t lo, Float_t hi) {
+inline void StFlowSelection::SetFitOverMaxPtsPart(const Float_t lo, const Float_t hi) {
   mFitOverMaxPtsPart[0] = lo; mFitOverMaxPtsPart[1] = hi; }
 
-inline void StFlowSelection::SetChiSqPart(Float_t lo, Float_t hi) {
+inline void StFlowSelection::SetChiSqPart(const Float_t lo, const Float_t hi) {
   mChiSqPart[0] = lo; mChiSqPart[1] = hi; }
 
-inline void StFlowSelection::SetDcaGlobalPart(Float_t lo, Float_t hi) {
+inline void StFlowSelection::SetDcaGlobalPart(const Float_t lo, const Float_t hi) {
   mDcaGlobalPart[0] = lo; mDcaGlobalPart[1] = hi; }
 
 inline void StFlowSelection::SetHarmonic(const Int_t& harN) {
@@ -141,6 +141,9 @@ inline void StFlowSelection::SetSubevent(const Int_t& subN) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.19  2010/03/05 16:49:46  posk
+// Compatable with ROOT 5.22
+//
 // Revision 1.18  2003/09/02 17:58:12  perev
 // gcc 3.2 updates + WarnOff
 //

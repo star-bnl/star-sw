@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.54 2009/11/24 19:23:06 posk Exp $
+//  $Id: StFlowMaker.h,v 1.55 2010/03/05 16:49:44 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -71,7 +71,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.54 2009/11/24 19:23:06 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.55 2010/03/05 16:49:44 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -95,6 +95,7 @@ protected:
   Flow::ReCent_t       mReCentY;                  //! Recentering parameters
 
 private:
+
   TString          mEventFileName;            //! IO Maker file name
   TString          mEventFileNameOld;         //! IO Maker Old file name
   Char_t           mPicoEventDir[64];         // Pico-DST directory name
@@ -194,6 +195,9 @@ inline Bool_t StFlowMaker::PhiWgtCalc() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.55  2010/03/05 16:49:44  posk
+//  Compatable with ROOT 5.22
+//
 //  Revision 1.54  2009/11/24 19:23:06  posk
 //  Added reCenter option to remove acceptance correlations instead of phiWgt.
 //
