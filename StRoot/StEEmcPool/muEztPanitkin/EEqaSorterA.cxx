@@ -1,4 +1,4 @@
-// $Id: EEqaSorterA.cxx,v 1.8 2010/03/05 23:16:44 ogrebeny Exp $
+// $Id: EEqaSorterA.cxx,v 1.9 2010/03/05 23:46:42 ogrebeny Exp $
 #include <string.h>
 #include <stdlib.h>
 
@@ -182,15 +182,15 @@ int EEqaSorterA::usePed4(const Char_t *filename) {
     FILE *fd=fopen(filename,"r");
     if (fd) {
 	ok = 1;
-	for(int cr=0;cr<MaxTwCrateID;cr++) {
+	for(int cr=MinTwCrateID;cr<=MaxTwCrateID;cr++) {
 	    for(int ch=0;ch<MaxTwCrateCh; ch++) {
-    		int xcr, xch, ped4;
-    		float xped;
+    		int xcr = -1, xch = -1, ped4 = 0;
+    		float xped = 0;
     		int ret=fscanf(fd,"%d %d %f %d",&xcr,&xch,&xped,&ped4);
-    		if ((ret == 4) && (xcr == cr + 1) && (xch == ch)) {
-	    	    feePed[cr*MaxTwCrateCh + ch]=4*ped4;
+    		if ((ret == 4) && (xcr >= MinTwCrateID) && (xcr <= MaxTwCrateID) && (xch >= 0) && (xch < MaxTwCrateCh)) {
+	    	    feePed[(xcr - 1)*MaxTwCrateCh + xch]=4*ped4;
 		} else {
-		    LOG_ERROR << "Bad format in " << filename << ": read xcr=" << xcr << ", xch=" << xch << ", xped=" << xped << ", ped4=" << ped4 << ", ret=" << ret << "; expected xcr=" << (cr + 1) << ", xch=" << ch << endm;
+		    LOG_ERROR << "Bad format in " << filename << ": read xcr=" << xcr << ", xch=" << xch << ", xped=" << xped << ", ped4=" << ped4 << ", ret=" << ret << "; expected xcr=" << cr << ", xch=" << ch << endm;
 		    ok = 0;
 		}
 	    }
@@ -206,6 +206,9 @@ int EEqaSorterA::usePed4(const Char_t *filename) {
 
 
 // $Log: EEqaSorterA.cxx,v $
+// Revision 1.9  2010/03/05 23:46:42  ogrebeny
+// Make it a little less strict on the ped file format
+//
 // Revision 1.8  2010/03/05 23:16:44  ogrebeny
 // A little more debug output
 //
