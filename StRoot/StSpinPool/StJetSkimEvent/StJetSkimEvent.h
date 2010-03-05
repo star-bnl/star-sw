@@ -78,18 +78,9 @@ public:
     map<int,int>& triggerPatchesAboveThreshold(int detector) const;
     map<int,int>& jetPatchesAboveThreshold(int detector) const;
 
-    // don't use these. these are for test.
-    TArrayI towersAboveThreshold_(int detector) const;
-    TArrayI triggerPatchesAboveThreshold_(int detector) const;
-    TArrayI jetPatchesAboveThreshold_(int detector) const;
-
-
     int totalEnergy() const;
 
-    UInt_t* L2ResultEmulated();
-
-    // don't this. this is for test.
-    UInt_t L2ResultEmulated_(int i);
+    const TArrayI& L2ResultEmulated() const;
 
     //setters
     void setTrigId(int aTrigId);
@@ -107,13 +98,11 @@ public:
 
     void setTotalEnergy(int aEnergy);
 
-    void setL2ResultEmulated(const void *address);
+    void setL2ResultEmulated(const TArrayI& rhs);
     
 private:
     void init();
 
-    TArrayI map2tarrayI(map<int, int>& theMap) const;
-    
     Int_t       mTrigId;
     Int_t       mDidFire;
     Int_t       mShouldFire;
@@ -128,21 +117,20 @@ private:
 
     Int_t mTotalEnergy;
 
-    UInt_t mL2ResultEmulated[64];
+    TArrayI mL2ResultEmulated;
     
     ClassDef(StJetSkimTrig,4);
 };
     
 inline int StJetSkimTrig::trigId() const {return mTrigId;}
-inline bool StJetSkimTrig::didFire() const  {return (mDidFire > 0) ? true : false;}
+inline bool StJetSkimTrig::didFire() const  {return mDidFire > 0;}
 inline int StJetSkimTrig::shouldFire() const  {return mShouldFire;}
 inline int StJetSkimTrig::shouldFireBBC() const  {return mShouldFireBBC;}
 inline int StJetSkimTrig::shouldFireBemc() const  {return mShouldFireBemc;}
 inline int StJetSkimTrig::shouldFireEemc() const  {return mShouldFireEemc;}
 inline int StJetSkimTrig::shouldFireL2() const  {return mShouldFireL2;}
 inline int StJetSkimTrig::totalEnergy() const {return mTotalEnergy;}
-inline UInt_t* StJetSkimTrig::L2ResultEmulated() {return mL2ResultEmulated;}
-inline UInt_t StJetSkimTrig::L2ResultEmulated_(int i) {return mL2ResultEmulated[i];}
+inline const TArrayI& StJetSkimTrig::L2ResultEmulated() const {return mL2ResultEmulated;}
 
 inline void StJetSkimTrig::setTrigId(int aTrigId) {mTrigId = aTrigId;}
 inline void StJetSkimTrig::setDidFire(bool aFire) {mDidFire = aFire;}
@@ -280,7 +268,7 @@ public:
   void setIsMaskedUsingBx48(int i) {mIsMaskedUsingBx48 = i;}
   void setOffsetBx48minusBX7(int i) {mOffsetBx48minusBX7 = i;}
   void setSpin4UsingBx48(int i) {mSpin4usingBx48 = i;}
-  void setL2Result(const void *address);
+  void setL2Result(const TArrayI& rhs);
   void setMcEvent(const StPythiaEvent *ptr) {mMcEvent = ptr;}
     
   //gets
@@ -321,11 +309,7 @@ public:
   const TClonesArray* vertices() const {return mVertices;}
   StJetSkimVert* bestVert() const;
 
-  //const TArrayI& l2Result() const {return mL2Result;}
-  UInt_t* L2Result() {return mL2Result;}
-
-  // don't this. this is for test.
-  UInt_t L2Result_(int i) {return mL2Result[i];}
+  const TArrayI& L2Result() const { return mL2Result; }
 
   const StPythiaEvent* mcEvent() const {return mMcEvent;}
 
@@ -414,7 +398,7 @@ private:
     
   ///L2 Trigger array:
   ///Direct copy from StMuEvent::L2Result()
-  UInt_t mL2Result[64];
+  TArrayI mL2Result;
 
   int mBarrelJetPatchTh[3];
   int mEndcapJetPatchTh[3];

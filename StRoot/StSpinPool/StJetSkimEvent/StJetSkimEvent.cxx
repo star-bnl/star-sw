@@ -96,7 +96,7 @@ StJetSkimTrig::StJetSkimTrig(const StJetSkimTrig& t) : TObject()
     this->mTriggerPatches           = t.mTriggerPatches;
     this->mJetPatches               = t.mJetPatches;
     this->mTotalEnergy              = t.totalEnergy();
-    memcpy(this->mL2ResultEmulated, t.mL2ResultEmulated, sizeof(mL2ResultEmulated));
+    this->mL2ResultEmulated         = t.mL2ResultEmulated;
 }
 
 StJetSkimTrig::~StJetSkimTrig() { /* no-op */ }
@@ -117,7 +117,7 @@ StJetSkimTrig& StJetSkimTrig::operator=(const StJetSkimTrig& rhs)
         this->mTriggerPatches           = rhs.mTriggerPatches;
         this->mJetPatches               = rhs.mJetPatches;
         this->mTotalEnergy              = rhs.totalEnergy();
-	memcpy(this->mL2ResultEmulated, rhs.mL2ResultEmulated, sizeof(mL2ResultEmulated));
+	this->mL2ResultEmulated         = rhs.mL2ResultEmulated;
     }
         
     return *this;
@@ -135,7 +135,7 @@ void StJetSkimTrig::init() {
     this->mTowers.clear();
     this->mTriggerPatches.clear();
     this->mJetPatches.clear();
-    memset(mL2ResultEmulated, 0, sizeof(mL2ResultEmulated));
+    this->mL2ResultEmulated.Reset();
 }   
 
 void StJetSkimTrig::clear() {
@@ -186,32 +186,6 @@ map<int,int>& StJetSkimTrig::jetPatchesAboveThreshold(int detector) const{
     return (*theMap);
 }
 
-TArrayI StJetSkimTrig::towersAboveThreshold_(int detector) const
-{
-  return map2tarrayI(towersAboveThreshold(detector));
- }
-
-TArrayI StJetSkimTrig::triggerPatchesAboveThreshold_(int detector) const
-{
-  return map2tarrayI(triggerPatchesAboveThreshold(detector));
- }
-
-TArrayI StJetSkimTrig::jetPatchesAboveThreshold_(int detector) const
-{
-  return map2tarrayI(jetPatchesAboveThreshold(detector));
- }
-
-TArrayI StJetSkimTrig::map2tarrayI(map<int, int>& theMap) const
-{
- TArrayI ret(theMap.size()*2);
-  int i(0);
-  for(map<int, int>::const_iterator it = theMap.begin(); it != theMap.end(); ++it) {
-    ret[i++] = it->first;
-    ret[i++] = it->second;
-  }
-  return ret;
-}
-
 void StJetSkimTrig::addTowerAboveThreshold(int detector, int aID, int aADC) {
     pair<int,int> p1(aID,aADC);
     if(detector == 1) p1.first = (-1)*aID;
@@ -239,9 +213,8 @@ void StJetSkimTrig::addJetPatchAboveThreshold(int detector, int aID, int aADC) {
     }
 }
 
-void StJetSkimTrig::setL2ResultEmulated(const void *address) {
-    memcpy(mL2ResultEmulated, address, 20);
-    memcpy(mL2ResultEmulated+5, (int*)address+6, 16);
+void StJetSkimTrig::setL2ResultEmulated(const TArrayI& rhs) {
+    mL2ResultEmulated = rhs;
 }
 
 StJetSkimVert::StJetSkimVert()
@@ -323,8 +296,6 @@ StJetSkimEvent::StJetSkimEvent() : TObject(), mTriggers(new TClonesArray("StJetS
     mBbcCoincidenceRate = 0;
     mIsValid = mIsPolLong = mIsPolTrans = mIsMaskedUsingBx48 = mOffsetBx48minusBX7 = mSpin4usingBx48 = 0;
 
-    memset(mL2Result, 0, sizeof(mL2Result));
-
     memset(mBarrelJetPatchTh,0,sizeof(mBarrelJetPatchTh));
     memset(mEndcapJetPatchTh,0,sizeof(mEndcapJetPatchTh));
     memset(mOverlapJetPatchTh,0,sizeof(mOverlapJetPatchTh));
@@ -381,7 +352,7 @@ StJetSkimEvent::StJetSkimEvent(const StJetSkimEvent &other) : TObject()
     this->mOffsetBx48minusBX7 = other.offsetBx48minusBX7();
     this->mSpin4usingBx48 = other.spin4usingBx48();
 
-    memcpy(this->mL2Result, other.mL2Result, sizeof(mL2Result));
+    mL2Result = other.mL2Result;
 
     memcpy(mBarrelJetPatchTh,other.mBarrelJetPatchTh,sizeof(mBarrelJetPatchTh));
     memcpy(mEndcapJetPatchTh,other.mEndcapJetPatchTh,sizeof(mEndcapJetPatchTh));
@@ -448,7 +419,7 @@ StJetSkimEvent& StJetSkimEvent::operator=(const StJetSkimEvent &rhs)
         this->mOffsetBx48minusBX7 = rhs.offsetBx48minusBX7();
         this->mSpin4usingBx48 = rhs.spin4usingBx48();
 
-	memcpy(this->mL2Result, rhs.mL2Result, sizeof(mL2Result));
+	mL2Result = rhs.mL2Result;
 
 	memcpy(mBarrelJetPatchTh,rhs.mBarrelJetPatchTh,sizeof(mBarrelJetPatchTh));
 	memcpy(mEndcapJetPatchTh,rhs.mEndcapJetPatchTh,sizeof(mEndcapJetPatchTh));
@@ -526,9 +497,8 @@ void StJetSkimEvent::setBestVert(int clonesArrayIndex) {
     mBestVertRef = (StJetSkimVert*)mVertices->At(clonesArrayIndex);
 }
 
-void StJetSkimEvent::setL2Result(const void *address) {
-    memcpy(mL2Result, address, 20);
-    memcpy(mL2Result+5, (int*)address+6, 16);
+void StJetSkimEvent::setL2Result(const TArrayI& rhs) {
+    mL2Result = rhs;
 }
 
 void StJetSkimEvent::setTrig(const StJetSkimTrig& t)
