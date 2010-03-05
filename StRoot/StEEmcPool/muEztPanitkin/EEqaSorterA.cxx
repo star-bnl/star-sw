@@ -1,4 +1,4 @@
-// $Id: EEqaSorterA.cxx,v 1.7 2009/04/30 21:20:31 ogrebeny Exp $
+// $Id: EEqaSorterA.cxx,v 1.8 2010/03/05 23:16:44 ogrebeny Exp $
 #include <string.h>
 #include <stdlib.h>
 
@@ -190,7 +190,7 @@ int EEqaSorterA::usePed4(const Char_t *filename) {
     		if ((ret == 4) && (xcr == cr + 1) && (xch == ch)) {
 	    	    feePed[cr*MaxTwCrateCh + ch]=4*ped4;
 		} else {
-		    LOG_ERROR << "Bad format in " << filename << ": read xcr=" << xcr << ", xch=" << xch << ", xped=" << xped << ", ped4=" << ped4 << endm;
+		    LOG_ERROR << "Bad format in " << filename << ": read xcr=" << xcr << ", xch=" << xch << ", xped=" << xped << ", ped4=" << ped4 << ", ret=" << ret << "; expected xcr=" << (cr + 1) << ", xch=" << ch << endm;
 		    ok = 0;
 		}
 	    }
@@ -206,6 +206,9 @@ int EEqaSorterA::usePed4(const Char_t *filename) {
 
 
 // $Log: EEqaSorterA.cxx,v $
+// Revision 1.8  2010/03/05 23:16:44  ogrebeny
+// A little more debug output
+//
 // Revision 1.7  2009/04/30 21:20:31  ogrebeny
 // Improved constness after fixing bug 1457
 //
