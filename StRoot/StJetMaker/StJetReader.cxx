@@ -341,7 +341,7 @@ void StJetReader::exampleFastAna()
 		}
 		if (trig->shouldFireL2() == 1) {
 		  cout << "\tshTrigger L2: " << trig->trigId() <<endl;
-		  UInt_t *l2temp = trig->L2ResultEmulated();
+		  const TArrayI& l2temp = trig->L2ResultEmulated();
 		  for (int ii=0; ii<9; ii++) {
 		    cout << "SimL2--- " << ii << "\t" << l2temp[ii] << endl;
 		  }
@@ -364,7 +364,7 @@ void StJetReader::exampleFastAna()
 		}
 	}
 	*/
-	UInt_t *l2temp = skEv->L2Result();
+	const TArrayI& l2temp = skEv->L2Result();
 	for (int ii=0; ii<9; ii++) {
 	  if (l2temp[ii]!=0)  cout << "DatL2--- " << ii << "\t" << l2temp[ii] << endl;
 	}
