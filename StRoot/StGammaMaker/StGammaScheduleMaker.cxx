@@ -69,40 +69,42 @@ Int_t StGammaScheduleMaker::Init()
     mCurrentEvent = 0;
     mStampIndex = 0;
     
-    LOG_INFO << "Init() - Distributing status tables across " << mTotalEvents << " events" << endm;
+    if(mStamps.size())
+    {
 
-    // If no timestamps have been entered then use default 2006 pp value
-    if(!mStamps.size())
-    {
-        LOG_INFO << "Init() - No timestamps have been entered for simulation, resorting to default!" << endm;
-        addTimestamp(20060522, 112810, 1);
-    }
+        LOG_INFO << "Init() - Distributing status tables across " << mTotalEvents << " events" << endm;
 
-    // Calculate integrated weight to ensure proper normalization
-    double totalWeight = 0;
-    
-    vector<stamp>::iterator it;
-    
-    for(it = mStamps.begin(); it != mStamps.end(); ++it)
-    {
-        totalWeight += (*it).weight;
+     	// Calculate integrated weight to ensure proper normalization
+        double totalWeight = 0;
+
+        vector<stamp>::iterator it;
+
+        for(it = mStamps.begin(); it != mStamps.end(); ++it)
+        {
+            totalWeight += (*it).weight;
+        }
+
+        // Calculate the events at which the status tables will switch
+        double usedEvents = 0;
+        for(it = mStamps.begin(); it != mStamps.end(); ++it)
+        {
+            double newEvents = ((*it).weight / totalWeight) * mTotalEvents;
+            (*it).event = usedEvents;
+            usedEvents += newEvents;
+        }
+
+ 	LOG_INFO << "Init() - Using the timestamps" << endm;
+        LOG_INFO << "Init() - \tDate\t\tTime\tWeight\tInitial Event" << endm;
+        for(it = mStamps.begin(); it != mStamps.end(); ++it)
+        {
+            LOG_INFO << "Init() - \t" << it->date << "\t" << it->time << "\t" << it->weight << "\t" << it->event << endm;
+        }
+ 
     }
-    
-    // Calculate the events at which the status tables will switch
-    double usedEvents = 0;
-    for(it = mStamps.begin(); it != mStamps.end(); ++it)
+    else
     {
-        double newEvents = ((*it).weight / totalWeight) * mTotalEvents;
-        (*it).event = usedEvents;
-        usedEvents += newEvents;
-    }    
-    
-    LOG_INFO << "Init() - Using the timestamps" << endm;
-    LOG_INFO << "Init() - \tDate\t\tTime\tWeight\tInitial Event" << endm;
-    for(it = mStamps.begin(); it != mStamps.end(); ++it)
-    {
-        LOG_INFO << "Init() - \t" << it->date << "\t" << it->time << "\t" << it->weight << "\t" << it->event << endm;
-    }        
+        LOG_INFO << "Init() - Using the default timestamp" << endm;
+    }
 
     return StMaker::Init();
 
