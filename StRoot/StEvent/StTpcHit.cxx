@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.15 2009/11/23 16:34:07 fisyak Exp $
+ * $Id: StTpcHit.cxx,v 2.16 2010/03/05 16:30:19 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
+ * Revision 2.16  2010/03/05 16:30:19  fisyak
+ * Add hit id
+ *
  * Revision 2.15  2009/11/23 16:34:07  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -62,7 +65,7 @@
  **************************************************************************/
 #include "StTpcHit.h"
 #include "StTrack.h"
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.15 2009/11/23 16:34:07 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.16 2010/03/05 16:30:19 fisyak Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
@@ -81,7 +84,7 @@ StTpcHit::StTpcHit(const StThreeVectorF& p,
 	         unsigned short idTruth, unsigned short quality, unsigned short id,
 	         short mnpad, short mxpad, short mntmbk,
 	         short mxtmbk, float cl_x, float cl_t)
-    : StHit(p, e, hw, q, c, idTruth, quality)
+  : StHit(p, e, hw, q, c, idTruth, quality, id)
 {
     mMcl_x = static_cast<short>(cl_x*64);
     mMcl_t = static_cast<short>(cl_t*64);
