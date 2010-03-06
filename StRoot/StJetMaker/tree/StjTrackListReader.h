@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackListReader.h,v 1.7 2008/08/11 06:07:53 tai Exp $
+// $Id: StjTrackListReader.h,v 1.7.2.1 2010/03/06 01:45:26 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKLISTREADER_H
 #define STJTRACKLISTREADER_H
@@ -42,6 +42,8 @@ private:
   UShort_t _nHitsFit[4096];
   Double_t _nSigmaPion[4096];
   Double_t _Tdca[4096];
+  Double_t _dcaX[4096];
+  Double_t _dcaY[4096];
   Double_t _dcaZ[4096];
   Double_t _dcaD[4096];
   Double_t _BField;

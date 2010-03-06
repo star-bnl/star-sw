@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackList.h,v 1.1 2008/11/27 07:09:36 tai Exp $
+// $Id: StjTrackList.h,v 1.1.2.1 2010/03/06 01:45:13 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKLIST_H
 #define STJTRACKLIST_H
@@ -25,6 +25,8 @@ public:
   unsigned short nHitsFit;
   double         nSigmaPion;
   double         Tdca;
+  double         dcaX;
+  double         dcaY;
   float          dcaZ;
   float          dcaD;
   double         BField;

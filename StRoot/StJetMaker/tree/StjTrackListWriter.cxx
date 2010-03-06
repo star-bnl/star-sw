@@ -1,4 +1,4 @@
-// $Id: StjTrackListWriter.cxx,v 1.4 2008/08/04 06:10:47 tai Exp $
+// $Id: StjTrackListWriter.cxx,v 1.4.2.1 2010/03/06 01:45:26 tai Exp $
 #include "StjTrackListWriter.h"
 
 #include <TDirectory.h>
@@ -34,6 +34,8 @@ StjTrackListWriter::StjTrackListWriter(const char* treeName, TDirectory* file)
   _tree->Branch("nHitsFit"      ,  _nHitsFit        , "nHitsFit[nTracks]/s"      );
   _tree->Branch("nSigmaPion"    ,  _nSigmaPion      , "nSigmaPion[nTracks]/D"    );
   _tree->Branch("Tdca"          ,  _Tdca            , "Tdca[nTracks]/D"          );
+  _tree->Branch("dcaX"          ,  _dcaX            , "dcaX[nTracks]/D"          );
+  _tree->Branch("dcaY"          ,  _dcaY            , "dcaY[nTracks]/D"          );
   _tree->Branch("dcaZ"          ,  _dcaZ            , "dcaZ[nTracks]/D"          );
   _tree->Branch("dcaD"          ,  _dcaD            , "dcaD[nTracks]/D"          );
   _tree->Branch("BField"        , &_BField          , "BField/D"                 );
@@ -73,6 +75,8 @@ void StjTrackListWriter::Fill(const StjTrackList& trackList)
     _nHitsFit[i]       = track.nHitsFit;
     _nSigmaPion[i]     = track.nSigmaPion;
     _Tdca[i]           = track.Tdca;
+    _dcaX[i]           = track.dcaX;
+    _dcaY[i]           = track.dcaY;
     _dcaZ[i]           = track.dcaZ;
     _dcaD[i]           = track.dcaD;
     _exitDetectorId[i] = track.exitDetectorId;

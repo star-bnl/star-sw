@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackListWriter.h,v 1.5 2008/08/04 06:10:47 tai Exp $
+// $Id: StjTrackListWriter.h,v 1.5.2.1 2010/03/06 01:45:26 tai Exp $
 #ifndef STJTRACKLISTWRITER_H
 #define STJTRACKLISTWRITER_H
 
@@ -41,6 +41,8 @@ private:
   UShort_t _nHitsFit[4096];
   Double_t _nSigmaPion[4096];
   Double_t _Tdca[4096];
+  Double_t _dcaX[4096];
+  Double_t _dcaY[4096];
   Double_t _dcaZ[4096];
   Double_t _dcaD[4096];
   Double_t _BField;

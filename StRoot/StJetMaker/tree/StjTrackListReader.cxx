@@ -1,4 +1,4 @@
-// $Id: StjTrackListReader.cxx,v 1.5 2008/08/11 03:51:00 tai Exp $
+// $Id: StjTrackListReader.cxx,v 1.5.2.1 2010/03/06 01:45:26 tai Exp $
 #include "StjTrackListReader.h"
 
 #include <TTree.h>
@@ -23,6 +23,8 @@ void StjTrackListReader::SetBranchAddress(TTree *tree)
   tree->SetBranchAddress("nHitsFit"       ,  _nHitsFit        );
   tree->SetBranchAddress("nSigmaPion"     ,  _nSigmaPion      );
   tree->SetBranchAddress("Tdca"           ,  _Tdca            );
+  tree->SetBranchAddress("dcaX"           ,  _dcaX            );
+  tree->SetBranchAddress("dcaY"           ,  _dcaY            );
   tree->SetBranchAddress("dcaZ"           ,  _dcaZ            );
   tree->SetBranchAddress("dcaD"           ,  _dcaD            );
   tree->SetBranchAddress("BField"         , &_BField          );
@@ -31,7 +33,7 @@ void StjTrackListReader::SetBranchAddress(TTree *tree)
   tree->SetBranchAddress("trackIndex"     ,  _trackIndex      );
   tree->SetBranchAddress("exitDetectorId" ,  _exitDetectorId  );
   tree->SetBranchAddress("exitTowerId"    ,  _exitTowerId     );
-  tree->SetBranchAddress("vertexZ"        , &_vertexZ      );
+  tree->SetBranchAddress("vertexZ"        , &_vertexZ         );
   tree->SetBranchAddress("detectorId"     , &_detectorId      );
   tree->SetBranchAddress("runNumber"      , &_runNumber       );
 }
@@ -63,6 +65,8 @@ void StjTrackListReader::readEntry()
     track.nHitsFit       = _nHitsFit[i];
     track.nSigmaPion     = _nSigmaPion[i];
     track.Tdca           = _Tdca[i];
+    track.dcaX           = _dcaX[i];
+    track.dcaY           = _dcaY[i];
     track.dcaZ           = _dcaZ[i];
     track.dcaD           = _dcaD[i];
     track.BField         = _BField;

@@ -1,4 +1,4 @@
-// $Id: StjTPCMuDst.cxx,v 1.3 2008/08/03 00:29:03 tai Exp $
+// $Id: StjTPCMuDst.cxx,v 1.3.2.1 2010/03/06 01:45:41 tai Exp $
 #include "StjTPCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuTrack.h>
@@ -10,6 +10,10 @@
 #include <StEmcUtil/geometry/StEmcGeom.h>
 
 #include <TVector3.h>
+
+#include <iostream>
+
+using namespace std;
 
 StjTPCMuDst::StjTPCMuDst(StMuDstMaker* uDstMaker)
   : _uDstMaker(uDstMaker)
@@ -64,6 +68,8 @@ StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magnet
   track.Tdca       = mutrack->dcaGlobal().mag();
   track.dcaZ       = mutrack->dcaZ();
   track.dcaD       = mutrack->dcaD();
+  track.dcaX      = mutrack->dcaGlobal().x();
+  track.dcaY      = mutrack->dcaGlobal().y();
 
   track.BField      = magneticField;
   track.bemcRadius = StEmcGeom::instance("bemc")->Radius() + 5;
