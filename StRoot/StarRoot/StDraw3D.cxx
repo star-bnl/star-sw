@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.94 2010/03/08 14:38:42 fine Exp $
+// $Id: StDraw3D.cxx,v 1.95 2010/03/08 18:17:13 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -115,6 +115,8 @@ class poly_line_3D : public TPolyLine3D, public view_3D {
    public:
      poly_line_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyLine3D(n,p),view_3D()
      {  SetBit(kCanDelete);}
+     poly_line_3D(Int_t n, Double_t *p, Option_t *option="") : TPolyLine3D(n,p),view_3D()
+     {  SetBit(kCanDelete);}
      virtual ~poly_line_3D(){;}
      virtual char  *GetObjectInfo(Int_t x, Int_t y) const
      {
@@ -139,6 +141,8 @@ class poly_line_3D : public TPolyLine3D, public view_3D {
 class poly_marker_3D : public TPolyMarker3D, public view_3D {
    public:
      poly_marker_3D(Int_t n, Float_t *p, Option_t *option="") : TPolyMarker3D(n,p,1,option),view_3D()
+     {  SetBit(kCanDelete);}
+     poly_marker_3D(Int_t n, Double_t *p, Option_t *option="") : TPolyMarker3D(n,p,1,option),view_3D()
      {  SetBit(kCanDelete);}
      virtual ~poly_marker_3D(){;}
      virtual char  *GetObjectInfo(Int_t x, Int_t y) const
@@ -516,6 +520,33 @@ TObject *StDraw3D::Points(int n, const float *xyz, Color_t col,Style_t sty,Size_
 
 //__________________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
+/*! Add \a n 3D coordinates from the \a xyz array of \c double values to the display list with the \a col color, \a sty style, and \a siz size if provided
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating ount values ( the array should be 3*n long at least )
+   \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
+*/
+//__________________________________________________________________________________________
+TObject *StDraw3D::Points(int n, const double *xyz, Color_t col,Style_t sty,Size_t siz)
+{ 
+   //
+   // Draw "n" points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyMarker3D class
+   // with the ROOT color, style, size attributes
+   //
+   
+   poly_marker_3D *plMk  = new poly_marker_3D(n,(Double_t*)xyz);
+   if (col != colorDefault) plMk->SetMarkerColor(col);
+   if (sty != styDefault)   plMk->SetMarkerStyle(sty);
+   if (siz != sizDefault)   plMk->SetMarkerSize(siz);
+   fView = plMk;
+   return Draw(plMk);
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
 /*! Add \a n 3D coordinates from the \a xyz array to the display list with the \a col color, \a sty style, and \a siz size if provided
    \param   xyz - the vector of the floating ount values ( the container should be 3*n long at least )
    \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
@@ -536,6 +567,26 @@ TObject *StDraw3D::Points(const std::vector<float> &xyz, Color_t col,Style_t sty
 
 //__________________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
+/*! Add \a n 3D coordinates from the \a xyz array to the display list with the \a col color, \a sty style, and \a siz size if provided
+   \param   xyz - the vector of the floating ount values ( the container should be 3*n long at least )
+   \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
+*/
+//__________________________________________________________________________________________
+TObject *StDraw3D::Points(const std::vector<double> &xyz, Color_t col,Style_t sty,Size_t siz)
+{ 
+   //
+   // Draw the "xyz" vector of the float coordinates 
+   // with ROOT TPolyMarker3D class
+   // with the ROOT color, style, size attributes
+   //
+   return Points(xyz.size()/3,&xyz[0],col,sty,siz);
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
 /*! Add \a n 3D coordinates from the \a xyz array to the display list with the \a sty pre-defined style if provided 
    \param     n - the number of the 3D coordinates 
    \param   xyz - the pointer to the array of the floating point values ( the array should be 3*n long at least )
@@ -544,6 +595,29 @@ TObject *StDraw3D::Points(const std::vector<float> &xyz, Color_t col,Style_t sty
 */
 //__________________________________________________________________________________________
 TObject *StDraw3D::Points(int n, const float *xyz, EDraw3DStyle sty)
+{
+   //
+   // Draw "n" points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyMarker3D class and the predefined attrbutes
+   //
+   // This is an overloaded member function, provided for convenience.
+   // It behaves essentially like the above function.
+   //
+   
+  const StDraw3DStyle &style =  Style(sty);
+  return Points(n, xyz, style.Col(),style.Sty(),style.Siz());
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Add \a n 3D coordinates from the \a xyz array to the display list with the \a sty pre-defined style if provided 
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating point values ( the array should be 3*n long at least )
+   \param   sty  - EDraw3DStyle value selecting some predefined style 
+   \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
+*/
+//__________________________________________________________________________________________
+TObject *StDraw3D::Points(int n, const double *xyz, EDraw3DStyle sty)
 {
    //
    // Draw "n" points of the "xyz" array of the float coordinates 
@@ -581,6 +655,28 @@ TObject *StDraw3D::Points(const std::vector<float> &xyz, EDraw3DStyle sty)
 
 //__________________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
+/*! Add 3D coordinates from the \a xyz  vector to the display list with the \a sty pre-defined style if provided 
+   \param   xyz - the vector of the floating point values ( the array should be 3*n long at least )
+   \param   sty  - EDraw3DStyle value selecting some predefined style 
+   \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
+*/
+//__________________________________________________________________________________________
+TObject *StDraw3D::Points(const std::vector<double> &xyz, EDraw3DStyle sty)
+{
+   //
+   // Draw "xyz" vector of the float coordinates 
+   // with ROOT TPolyMarker3D class and the predefined attrbutes
+   //
+   // This is an overloaded member function, provided for convenience.
+   // It behaves essentially like the above function.
+   //
+   
+  const StDraw3DStyle &style =  Style(sty);
+  return Points(xyz, style.Col(),style.Sty(),style.Siz());
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
 /*! Add \a n 3D coordinates from the \a xyz array to the display list with the pre-defined \c kVtx style
    It is designed to be used from the interactive \c "gdb" session because it needs 2 parameters only it 
    \param     n - the number of the 3D coordinates 
@@ -589,6 +685,27 @@ TObject *StDraw3D::Points(const std::vector<float> &xyz, EDraw3DStyle sty)
 */
 //___________________________________________________
 TObject *StDraw3D::Draw3D(int n,  const float *xyz)
+{
+   //
+   // Draw "n" points of the "xyz" array of the float coordinates 
+   // and the kVtx attrbute
+   //
+   // This is an overloaded member function, provided for convenience.
+   // It behaves essentially like the above function.
+   //
+   return Points(n,xyz,kVtx);
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Add \a n 3D coordinates from the \a xyz array to the display list with the pre-defined \c kVtx style
+   It is designed to be used from the interactive \c "gdb" session because it needs 2 parameters only it 
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating point values ( the array should be 3*n long at least )
+   \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
+*/
+//___________________________________________________
+TObject *StDraw3D::Draw3D(int n,  const double *xyz)
 {
    //
    // Draw "n" points of the "xyz" array of the float coordinates 
@@ -650,6 +767,32 @@ TObject *StDraw3D::Line(int n,  const float *xyz, Color_t col,Style_t sty,Size_t
    fView = plLine;
    return Draw(plLine);
 }
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Add \a n connected points defined by the \a "xyz" array of the 3D coordinates to the display list with the \a col color, \a sty style, and \a siz size if provided
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating ount values ( the array should be 3*n long at least )
+   \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \return - a pointer to the ROOT "view" TPolyLine3D created to render the input \a xyz array 
+*/
+//__________________________________________________________________________________________
+TObject *StDraw3D::Line(int n,  const double *xyz, Color_t col,Style_t sty,Size_t siz)
+{
+   //
+   // Draw "n" connected points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyline3D class
+   // with the ROOT color, style, size attributes
+   //
+   poly_line_3D *plLine  = new poly_line_3D(n,(Float_t*)xyz);
+   if (col != colorDefault) plLine->SetLineColor(col);
+   if (sty != styDefault)   plLine->SetLineStyle(sty);
+   if (siz != sizDefault)   plLine->SetLineWidth(Width_t(siz));
+   fView = plLine;
+   return Draw(plLine);
+}
 //__________________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
 /*! Add \a n connected points defined by the \a "xyz" array of the 3D coordinates to the display list with the \a col color, \a sty style, and \a siz size if provided
@@ -661,6 +804,26 @@ TObject *StDraw3D::Line(int n,  const float *xyz, Color_t col,Style_t sty,Size_t
 */
 //__________________________________________________________________________________________
 TObject *StDraw3D::Line(const std::vector<float> &xyz, Color_t col,Style_t sty,Size_t siz)
+{
+   //
+   // Draw the "xyz" vector of the float coordinates 
+   // with ROOT TPolyline3D class
+   // with the ROOT color, style, size attributes
+   //
+   return Line(xyz.size()/3, &xyz[0], col,sty,siz);
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Add \a n connected points defined by the \a "xyz" array of the 3D coordinates to the display list with the \a col color, \a sty style, and \a siz size if provided
+   \param   xyz - the vector of the floating ount values ( the array should be 3*n long at least )
+   \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \return - a pointer to the ROOT "view" TPolyLine3D created to render the input \a xyz array 
+*/
+//__________________________________________________________________________________________
+TObject *StDraw3D::Line(const std::vector<double> &xyz, Color_t col,Style_t sty,Size_t siz)
 {
    //
    // Draw the "xyz" vector of the float coordinates 
@@ -693,6 +856,27 @@ TObject *StDraw3D::Line(const std::vector<float> &xyz, EDraw3DStyle sty)
 
 //__________________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
+/*! Add the connected points defined by the \xyz vector  of 3D coordinates to the display list with the \a sty pre-defined style if provided 
+   \param   xyz - the vector of the floating ount values ( the array should be 3*n long at least )
+   \param   sty  - EDraw3DStyle value selecting some predefined style 
+   \return - a pointer to the ROOT "view" TPolyLine3D created to render the input \a xyz array 
+*/
+//___________________________________________________
+TObject *StDraw3D::Line(const std::vector<double> &xyz, EDraw3DStyle sty)
+{
+   //
+   // Draw "n" connected points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyLine3D class and the predefined attrbutes
+   //
+   // This is an overloaded member function, provided for convenience.
+   // It behaves essentially like the above function.
+   //
+   const StDraw3DStyle &style =  Style(sty);
+   return Line(xyz, style.Col(),style.Sty(),style.Siz() );
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
 /*! Add \a n  connected points defined by the \xyz array of 3D coordinates to the display list with the \a sty pre-defined style if provided 
    \param     n - the number of the 3D coordinates 
    \param   xyz - the pointer to the array of the floating ount values ( the array should be 3*n long at least )
@@ -701,6 +885,28 @@ TObject *StDraw3D::Line(const std::vector<float> &xyz, EDraw3DStyle sty)
 */
 //___________________________________________________
 TObject *StDraw3D::Line(int n,  const float *xyz,EDraw3DStyle sty)
+{
+   //
+   // Draw "n" connected points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyLine3D class and the predefined attrbutes
+   //
+   // This is an overloaded member function, provided for convenience.
+   // It behaves essentially like the above function.
+   //
+   const StDraw3DStyle &style =  Style(sty);
+   return Line(n,xyz,  style.Col(),style.Sty(),style.Siz() );
+}
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Add \a n  connected points defined by the \xyz array of 3D coordinates to the display list with the \a sty pre-defined style if provided 
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating ount values ( the array should be 3*n long at least )
+   \param   sty  - EDraw3DStyle value selecting some predefined style 
+   \return - a pointer to the ROOT "view" TPolyLine3D created to render the input \a xyz array 
+*/
+//___________________________________________________
+TObject *StDraw3D::Line(int n, const double *xyz,EDraw3DStyle sty)
 {
    //
    // Draw "n" connected points of the "xyz" array of the float coordinates 
