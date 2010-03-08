@@ -32,8 +32,8 @@ my $maxFilesPerProcess = 1 ;       # 1 file per job
 my $fileListSyntax     = "paths" ; # Read local file on disk
 my $nevents            = 1000 ;    # Number of maximum events
 my $ptOption           = "FlatPt"; # Default pt option
-my $generatorDir       = "/project/projectdirs/star/embedding/$production";     # Default generator (csh/list) directory
-my $logDirectory       = "$generatorDir/LOG"; # Default log files directory
+my $generatorDir       = getGeneratorDirectory($production);
+my $logDirectory       = getLogDirectory($production);
 my $libraryPath        = ".sl44_gcc346";      # Default library path
 
 # Scripts
@@ -97,6 +97,12 @@ if( $help )
 # Debugging messages
 #----------------------------------------------------------------------------------------------------
 printDebug("Verbose mode. Print debugging messages ...");
+
+#----------------------------------------------------------------------------------------------------
+# Set generator/directory from production name
+#----------------------------------------------------------------------------------------------------
+$generatorDir = getGeneratorDirectory($production);
+$logDirectory = getLogDirectory($production);
 
 #----------------------------------------------------------------------------------------------------
 # Make sure tag/daq file and log file directory exists. If not, stop.
@@ -186,24 +192,29 @@ print OUT "<!-- Start job -->\n";
 $tagFile = "\$EMBEDTAGDIR/\${FILEBASENAME}.tags.root"; #Define tag file
 printDebug("Set tags file: $tagFile, bfcMixer: $bfcMixer ...");
 
-print OUT "root4star -b -q $bfcMixer\\($nevents, \\\"\$INPUTFILE0\\\", \\\"$tagFile\\\", &PTLOW;, &PTHIGH;, &ETALOW;, &ETAHIGH;, &PID;, &MULT;, \\\"$production\\\", \\\"$ptOption\\\"\\\)\n";
+print OUT "root4star -b -q $bfcMixer\\($nevents,\\\"\$INPUTFILE0\\\",\\\"$tagFile\\\",&PTLOW;,&PTHIGH;,&ETALOW;,&ETAHIGH;,&PID;,&MULT;,\\\"$production\\\",\\\"$ptOption\\\"\\\)\n";
 print OUT "ls -la .\n";
 
 #----------------------------------------------------------------------------------------------------
-# Copy log file in the working directory
+# Copy log/error files in the working directory
 #----------------------------------------------------------------------------------------------------
 my $logFileName = "\${FILEBASENAME}.\$JOBID.log";
 printDebug("Set logfilename: $logFileName ...");
+
+my $errFileName = "\${FILEBASENAME}.\$JOBID.log";
+printDebug("Set errfilename: $errFileName ...");
+
 print OUT "cp $logDirectory/\$JOBID.log $logFileName\n";
+print OUT "cp $logDirectory/\$JOBID.elog $errFileName\n";
 print OUT "\n";
 
 #----------------------------------------------------------------------------------------------------
 # put log file in HPSS
 #----------------------------------------------------------------------------------------------------
-my $hpssLogDir = "/nersc/projects/starofl/embedding/\$TRG/&PNAME;_&FSET;_$requestNumber;/$production.$library/\${EMYEAR}/\${EMDAY}";
+my $hpssLogDir = "/nersc/projects/starofl/embedding/\$TRG/&PNAME;_&FSET;_$requestNumber/$production.$library/\${EMYEAR}/\${EMDAY}";
 printDebug("Set archive log/root files in HPSS: $hpssLogDir ...");
 print OUT "<!-- Archive in HPSS -->\n";
-print OUT "hsi \"mkdir -p $hpssLogDir; prompt; cd $hpssLogDir; mput *.root; mput $logFileName\"\n";
+print OUT "hsi \"mkdir -p $hpssLogDir; prompt; cd $hpssLogDir; mput *.root; mput $logFileName; mput $errFileName\"\n";
 print OUT "\n";
 print OUT "</command>\n";
 print OUT "\n";
@@ -263,6 +274,24 @@ sub getLibrary {
   $production =~ s/SL(\d+)i([a-z])/SL$1$2/;
   return $production ;
 }
+
+#----------------------------------------------------------------------------------------------------
+# Get generator directory
+#----------------------------------------------------------------------------------------------------
+sub getGeneratorDirectory {
+  my $production = shift @_ ;
+  return "/project/projectdirs/star/embedding/$production";
+}
+
+#----------------------------------------------------------------------------------------------------
+# Get LOG directory
+#----------------------------------------------------------------------------------------------------
+sub getLogDirectory {
+  my $production = shift @_ ;
+  my $generator  = getGeneratorDirectory($production);
+  my $log        = "$generator/LOG";
+  return $log;
+};
 
 #----------------------------------------------------------------------------------------------------
 # Check directory exists
