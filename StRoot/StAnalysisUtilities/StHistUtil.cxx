@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.64 2010/01/14 19:29:53 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.65 2010/03/08 18:04:33 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.65  2010/03/08 18:04:33  genevb
+// Include analysis score/result on plots
+//
 // Revision 2.64  2010/01/14 19:29:53  genevb
 // Fix ROOT quirk with 1 page print, fix string/char conversions, protect LOG calls
 //
@@ -648,10 +651,11 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
           // Will need to display both histograms if doing reference analysis...
           TH1* hobjR = (TH1*) (dirListR ? dirListR->FindObject(oname) : 0);
           TH1* hobjO = hobj;
+          TVirtualPad* objPad = 0;
           for (int analRepeat = 0;analRepeat < (hobjR ? 2 : 1); analRepeat++) {
 
 	  padAdvance = kTRUE;
-          if (analRepeat) {graphPadR->cd(curPad); hobj=hobjR;}
+          if (analRepeat) {objPad=gPad; graphPadR->cd(curPad); hobj=hobjR;}
 	  else graphPad->cd(curPad);
 
           // set x & y grid off by default
@@ -793,11 +797,13 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
           if (oName.Contains("NullPrimVtx")) {
             latex.SetTextAngle(90);
             latex.SetTextAlign(3);
+            latex.SetTextColor(4);
             latex.DrawLatex(0.5,0,Form("   found:  %d",
               (int) (hobj->GetBinContent(hobj->FindBin(1.)))));
             latex.SetTextAlign(1);
             latex.DrawLatex(-0.5,0,Form("   missed:  %d",
               (int) (hobj->GetBinContent(hobj->FindBin(-1.)))));
+            latex.SetTextColor(1);
           }
 
           if (oName.Contains("TpcSector")) {
@@ -903,10 +909,26 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
                 result = hobjO->KolmogorovTest(hobjR,(huR ? huR->Options() : ""));
                 break;
             }
+            bool analPass = (result >= cut);
 
-            LOG_INFO << Form("  -   %d. Reference Test (mode=%d) Score: %f (vs. cut = %f => %s)",
-                        histReadCounter,mode,result,cut,
-                        (result < cut ? "FAIL" : "PASS")) << endm;
+            TString score = Form("Score: %4.2f (%s vs. %4.2f)",result,
+                        (analPass ? "PASS" : "FAIL"),cut);
+
+            if (objPad) {
+              objPad->cd();
+              float sz = latex.GetTextSize();
+              latex.SetTextSize(0.038);
+              latex.SetTextAngle(90);
+              latex.SetTextAlign(11);
+              latex.SetTextColor(analPass ? kGreen+4 : kRed+2);
+              latex.DrawTextNDC(0.999,0.001,score.Data());
+              objPad->Update();
+              latex.SetTextColor(1);
+              latex.SetTextSize(sz);
+            }
+
+            LOG_INFO << Form("  -   %d. Reference Test (mode=%d) %s",
+                        histReadCounter,mode,score.Data()) << endm;
             if (!R_ostr) R_ostr = new ofstream(m_refResultsFile);
             (*R_ostr) << m_CurPage << " " << curPad << " " << oname << " " << result << endl;
           }
