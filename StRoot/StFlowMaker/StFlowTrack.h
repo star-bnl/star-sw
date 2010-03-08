@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.27 2004/08/18 00:19:21 oldi Exp $
+// $Id: StFlowTrack.h,v 1.28 2010/03/08 16:52:53 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //         FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -36,6 +36,10 @@ public:
   Float_t       PidAntiDeuteron() const;
   Float_t       PidElectron()     const;
   Float_t       PidPositron()     const;
+
+  Float_t       Mass()        const; // direct cumulant maker
+  Int_t         id()          const;
+  Int_t         Flag()        const;
 
   const Char_t* Pid()         const;
   Float_t       Phi()         const;
@@ -113,6 +117,10 @@ public:
   void SetDcaGlobal3(StThreeVectorD gdca3);
   void SetTopologyMap(StTrackTopologyMap map);
   
+  void SetMass(Float_t); // direct cumulant maker
+  void Setid(int);
+  void SetFlag(int);
+
 private:
 
   Int_t   mPidPiPlus;
@@ -125,7 +133,7 @@ private:
   Int_t   mPidAntiDeuteron;
   Int_t   mPidElectron;
   Int_t   mPidPositron;
-  Char_t  mPid[10];
+  Char_t  mPid[12];
   Float_t mPhi;
   Float_t mPhiGlobal;
   Float_t mEta;
@@ -157,6 +165,10 @@ private:
   Float_t mProtonPbarProb;
   StThreeVectorD mDcaGlobal3;  
   StTrackTopologyMap mTopology;
+
+  Float_t mMass; // direct cumulant maker
+  Int_t   mId;
+  Int_t   mFlag;
 
   ClassDef(StFlowTrack, 1)                     // macro for rootcint
 };
@@ -203,6 +215,9 @@ inline Float_t  StFlowTrack::ProtonPbarProb() const { return mProtonPbarProb; }
 inline StThreeVectorD StFlowTrack::DcaGlobal3() const { return mDcaGlobal3; }
 inline const StTrackTopologyMap& StFlowTrack::TopologyMap() const { return mTopology; }
 
+inline Float_t  StFlowTrack::Mass()         const { return mMass; }
+inline Int_t  StFlowTrack::id()             const { return mId; }
+inline Int_t  StFlowTrack::Flag()         const { return mFlag; }
 
 inline Float_t StFlowTrack::P()             const { 
   float momentum = mPt/::sqrt(1-(tanh(mEta)*tanh(mEta)));
@@ -343,11 +358,20 @@ inline void StFlowTrack::SetDcaGlobal3(StThreeVectorD gdca3) { mDcaGlobal3 = gdc
 
 inline void StFlowTrack::SetTopologyMap(StTrackTopologyMap map) { mTopology = map; }
 
+inline void StFlowTrack::SetMass(Float_t mass) { mMass = mass; }
+
+inline void StFlowTrack::Setid(Int_t id) {mId = id;}
+
+inline void StFlowTrack::SetFlag(Int_t flag) {mFlag = flag;}
+
 #endif
 
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.28  2010/03/08 16:52:53  posk
+// Added StFlowDirectCumulantMaker written by Dhevan Gangadharan.
+//
 // Revision 1.27  2004/08/18 00:19:21  oldi
 // Several changes were necessary to comply with latest changes of MuDsts and StEvent:
 //
