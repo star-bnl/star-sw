@@ -201,7 +201,7 @@ print OUT "ls -la .\n";
 my $logFileName = "\${FILEBASENAME}.\$JOBID.log";
 printDebug("Set logfilename: $logFileName ...");
 
-my $errFileName = "\${FILEBASENAME}.\$JOBID.log";
+my $errFileName = "\${FILEBASENAME}.\$JOBID.elog";
 printDebug("Set errfilename: $errFileName ...");
 
 print OUT "cp $logDirectory/\$JOBID.log $logFileName\n";
