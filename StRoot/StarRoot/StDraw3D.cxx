@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.93 2010/02/22 11:42:56 fine Exp $
+// $Id: StDraw3D.cxx,v 1.94 2010/03/08 14:38:42 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -559,7 +559,7 @@ TObject *StDraw3D::Points(int n, const float *xyz, EDraw3DStyle sty)
 
 //__________________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
-/*! Add \a 3D coordinates from the \a xyz  vector to the display list with the \a sty pre-defined style if provided 
+/*! Add 3D coordinates from the \a xyz  vector to the display list with the \a sty pre-defined style if provided 
    \param   xyz - the vector of the floating point values ( the array should be 3*n long at least )
    \param   sty  - EDraw3DStyle value selecting some predefined style 
    \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
@@ -579,6 +579,14 @@ TObject *StDraw3D::Points(const std::vector<float> &xyz, EDraw3DStyle sty)
   return Points(xyz, style.Col(),style.Sty(),style.Siz());
 }
 
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*! Add \a n 3D coordinates from the \a xyz array to the display list with the pre-defined \c kVtx style
+   It is designed to be used from the interactive \c "gdb" session because it needs 2 parameters only it 
+   \param     n - the number of the 3D coordinates 
+   \param   xyz - the pointer to the array of the floating point values ( the array should be 3*n long at least )
+   \return - a pointer to the ROOT "view" TPolyMarker3D created to render the input \a xyz array 
+*/
 //___________________________________________________
 TObject *StDraw3D::Draw3D(int n,  const float *xyz)
 {
@@ -767,6 +775,7 @@ void StDraw3D::AddComment(const char *cmnt)
    if (fView) fView->addComment(cmnt);
 }
 
+//___________________________________________________
 //! Save the current 3D scene using "wrl" file format
 /*! \param  filename - the file name to save the 3d scene
    \note : The "wrl" format can be converted to the standatd 3D PDF format 
@@ -807,6 +816,7 @@ void StDraw3D::Print(const char *filename, const char*type) const
    Save(filename,type);
 }
 
+//___________________________________________________
 //! This is an overloaded member function, provided for convenience.
 /*! Save the current 3D scene using the 3D "wrl" format if possible otherwise use the \a type file format 
    \param  filename - the file name to save the 3d scene
@@ -825,6 +835,7 @@ void StDraw3D::Save(const char *filename, const char*type) const
 }
 
 
+//___________________________________________________
 //! Set the varous drawing option. The method passes the input \a options to TQtCoinWidget::SetDrawOption method 
 /*! \param  options - [ <shape1> [, shape2 [, . . .  shape-n] - a comma separated list of the OpenInventor files with no extension\n
                     | <em> { parameter : value } </em> - enclosed into the curly brackets a pair "parameter : value"\n
@@ -1358,5 +1369,27 @@ void StDraw3D::SetFooter(const char *footer)
    viewerFooter += footer; viewerFooter += "}";
    SetDrawOption(viewerFooter.Data());
 }
+
+//__________________________________________________________________________________________
+//! Animate the viewer from the gdb session 
+/*! For example, use
+  \code
+      gdb> p gEventDisplay->Point(0,0,0,1,1,1)
+  \endcode
+   to add one 3D point to the plot followed by 
+  \code
+      gdb> p gEventDisplay->Animate();
+  \endcode 
+  to be able to interract with the display.
+  To continue the debugger session select "option"->"Interrupt" menu
+*/
+//__________________________________________________________________________________________
+void StDraw3D::Animate()
+{
+   while(!gROOT->IsInterrupted()) {
+      gSystem->ProcessEvents();
+   }
+}
+
 
 ClassImp(StDraw3D)
