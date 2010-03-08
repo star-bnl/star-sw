@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.38 2010/02/01 23:15:27 fine Exp $
+ * $Id: StMuDst.h,v 1.39 2010/03/08 19:06:51 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -103,6 +103,8 @@ public:
   static void fixTrackIndices(TClonesArray* primary, TClonesArray* global);
   /// checks and if necessary corrects the indecies of elements pointing to each other (e.g., a primary track's index to the corresponding global track)
   void fixTrackIndices();
+  //fills gloabl track's mIndex2Global with the index to the respective primary track
+  static void fixTrackIndicesG(int mult=1);
   /// creates a StEvent from the StMuDst (this) and returns a pointer to it. (This function is not yet finished)  
   StEvent* createStEvent();
   /// helper function to create a StTrackGeometry
@@ -380,6 +382,13 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.39  2010/03/08 19:06:51  tone421
+ * Two things. Global tracks how are filled with an index to primary at birth. Added StMuDst::fixTrackIndicesG(), which is used for matching the primary track indices to global tracks. Previously, this was quite slow -  see this post:
+ *
+ * http://www.star.bnl.gov/HyperNews-star/protected/get/starsoft/8092/1/1/1.html
+ *
+ * for more details.
+ *
  * Revision 1.38  2010/02/01 23:15:27  fine
  * replace non-static method
  *

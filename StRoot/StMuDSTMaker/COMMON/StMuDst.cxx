@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.49 2010/02/01 23:15:27 fine Exp $
+ * $Id: StMuDst.cxx,v 1.50 2010/03/08 19:06:51 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -218,6 +218,61 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
     }
   }
   DEBUGVALUE2(timer.elapsedTime());
+}
+
+void StMuDst::fixTrackIndicesG(int mult) {
+	/// Match global track index to primary track
+	//mult = 0 means there is just a single vertex in the event, mult>0 means there are multiple...
+
+	if (mult==0){
+		if(!(fabs(event()->primaryVertexPosition().x()) < 1.e-5 && fabs(event()->primaryVertexPosition().y()) < 1.e-5 && fabs(event()->primaryVertexPosition().z()) < 1.e-5)){   
+			int startpos = 0;
+			int tid, pid;
+			for (int i=0;i<globalTracks()->GetEntries();i++){
+				tid = globalTracks(i)->id();
+				globalTracks(i)->setIndex2Global(-2);
+				for(int j=startpos;j<StMuDst::primaryTracks()->GetEntries();j++){
+					pid = primaryTracks(j)->id();
+					if(pid==tid) {
+						globalTracks(i)->setIndex2Global(j);
+						if (j==startpos) startpos++;
+						break;
+					}
+					else if (pid > tid) break; 
+				}
+			}
+		}
+		return;
+	}
+	//New MuDsts with multiple vertices....	
+	const int Nvert = primaryVertices()->GetEntries();
+	if(!Nvert) return;
+	int curVer =  currentVertexIndex();
+	int startpos[Nvert];
+	for(int i=0;i<Nvert;i++) startpos[i]=0;	
+	int tid, pid;
+	for (int i=0;i<globalTracks()->GetEntries();i++){
+		tid = globalTracks(i)->id();
+		globalTracks(i)->setIndex2Global(-2);
+		globalTracks(i)->setVertexIndex(-2);			
+		//Scan through vertices
+		for(int j=0;j<Nvert;j++){
+			if(globalTracks(i)->index2Global() >= 0) break;
+			StMuDst::setVertexIndex(j);
+			//Scan through primary tracks in a given vertex
+			for(int k=startpos[j];k<primaryTracks()->GetEntries();k++){
+				pid = primaryTracks(k)->id();
+				if(pid==tid) {
+					globalTracks(i)->setIndex2Global(k);
+					globalTracks(i)->setVertexIndex(j);
+					if (k==startpos[j]) startpos[j]++;
+					break;
+				}
+				else if (pid > tid) break; 
+			}
+		}
+	}
+	setVertexIndex(curVer);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -651,6 +706,13 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.50  2010/03/08 19:06:51  tone421
+ * Two things. Global tracks how are filled with an index to primary at birth. Added StMuDst::fixTrackIndicesG(), which is used for matching the primary track indices to global tracks. Previously, this was quite slow -  see this post:
+ *
+ * http://www.star.bnl.gov/HyperNews-star/protected/get/starsoft/8092/1/1/1.html
+ *
+ * for more details.
+ *
  * Revision 1.49  2010/02/01 23:15:27  fine
  * replace non-static method
  *
