@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.1 2010/03/05 17:04:35 posk Exp $
-// located at /StRoot/macros/analysis/doFlowEvents.C
+// $Id: doFlowEvents.C,v 1.2 2010/03/08 16:54:49 posk Exp $
+// Put a link to this at /StRoot/macros/analysis/doFlowEvents.C
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -82,7 +82,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
     ilist++; 
   }
 
-  Int_t maxTheta = 5;
+  Int_t maxTheta = 5;  // LYZ
   Int_t nSels    = 2;
   Bool_t reCent  = kFALSE;
 
@@ -118,9 +118,10 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
   // particles:h+, h-, pi+, pi-, pi, k+, k-, k, e-, e+, e, pr-, pr+, pr, d+, d-, and d
 //   flowSelect.SetPidPart("pr-");               // for parts. wrt plane
 //   flowSelect.SetPtPart(0.15, 6.0);            // for parts. wrt plane
+//   flowSelect.SetPtPart(0.15, 2.0);            // for parts. wrt plane
 //   flowSelect.SetPtBinsPart(60);               // for parts. wrt plane
 //   flowSelect.SetPPart(0.15, 5.);              // for parts. wrt plane
-//   flowSelect.SetEtaPart(-1.3, 1.3);           // for parts. wrt plane
+//   flowSelect.SetEtaPart(-1.1, 1.1);           // for parts. wrt plane
 //   flowSelect.SetFitPtsPart(20, 50);           // for parts. wrt plane
 //   flowSelect.SetFitOverMaxPtsPart(0.52, 1.);  // for parts. wrt plane
 //   flowSelect.SetChiSqPart(0.1, 1.3);          // for parts. wrt plane
@@ -182,7 +183,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
   
   //////////////
   // Flow Makers
-  //   The AnalysisMaker, CumulantMaker, ScalarProdMaker, and LeeYangZerosMaker 
+  //   The AnalysisMaker, CumulantMaker, ScalarProdMaker, DirectCumulantMaker, and LeeYangZerosMaker 
   //   may be used with a selection object.
   Bool_t reCentMaker;
   Bool_t phiWgtMaker;
@@ -190,6 +191,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
   Bool_t cumuMaker;
   Bool_t spMaker;
   Bool_t lyzMaker;
+  Bool_t dirCumuMaker;
   if (firstPass) {
     if (reCent) {
       reCentMaker = kTRUE;
@@ -199,23 +201,24 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
       phiWgtMaker = kTRUE;
     }
     anaMaker    = kFALSE;
-    cumMaker   = kFALSE;
+    cumuMaker   = kFALSE;
     spMaker     = kFALSE;
     lyzMaker    = kFALSE;
   } else {
     reCentMaker = kFALSE;
     phiWgtMaker = kFALSE;
     anaMaker    = kTRUE;
-    cumMaker   = kFALSE;
+    cumuMaker   = kFALSE;
     spMaker     = kFALSE;
     lyzMaker    = kFALSE;
+    dirCumuMaker= kTRUE;
   }
   Bool_t includeTpcTracks  = kTRUE;
   Bool_t includeFtpcTracks = kTRUE; // must be kTRUE if sel 1 is FTPC EP
 
 // For LYZ and anaMaker
   Float_t ptRange_for_vEta[2] = {0.15, 2.};
-  Float_t etaRange_for_vPt[2] = {0., 1.3}; // show only TPC particles in v(pt)
+  Float_t etaRange_for_vPt[2] = {0., 1.1}; // show only TPC particles in v(pt)
 //   Float_t ptRange_for_vEta[2] = {0., 0.}; // integrate over the full pt range
 //   Float_t etaRange_for_vPt[2] = {0., 0.}; // integrate over the full eta range
 //   Float_t etaRange_for_vPt[2] = {2.5, 4.}; // show only FTPC particles in v(pt)
@@ -256,7 +259,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
       flowAnalysisMaker->SetEtaRange_for_vPt(etaRange_for_vPt[0], etaRange_for_vPt[1]);
       flowAnalysisMaker->SetV1Ep1Ep2(v1Ep1Ep2);
     }
-    if (cumMaker) {
+    if (cumuMaker) {
       StFlowCumulantMaker*  flowCumulantMaker = new StFlowCumulantMaker();
       flowCumulantMaker->SetHistoRanges(includeFtpcTracks);
     }
@@ -270,6 +273,9 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
       flowLeeYangZerosMaker->SetPtRange_for_vEta(ptRange_for_vEta[0], ptRange_for_vEta[1]);
       flowLeeYangZerosMaker->SetEtaRange_for_vPt(etaRange_for_vPt[0], etaRange_for_vPt[1]);
     }
+    if (dirCumuMaker) {
+      StFlowDirectCumulantMaker*  flowDirectCumulantMaker = new StFlowDirectCumulantMaker();
+    }
   } else {
     if (anaMaker) {
       sprintf(makerName, "FlowAnalysis");
@@ -280,7 +286,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
       flowAnalysisMaker->SetEtaRange_for_vPt(etaRange_for_vPt[0], etaRange_for_vPt[1]);
       flowAnalysisMaker->SetV1Ep1Ep2(v1Ep1Ep2);
     }
-    if (cumMaker) {
+    if (cumuMaker) {
       sprintf(makerName, "FlowCumulant");
       StFlowCumulantMaker* flowCumulantMaker = new 
 	StFlowCumulantMaker(makerName, flowSelect);
@@ -299,6 +305,11 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
       flowLeeYangZerosMaker->SetHistoRanges(includeFtpcTracks);
       flowLeeYangZerosMaker->SetPtRange_for_vEta(ptRange_for_vEta[0], ptRange_for_vEta[1]);
       flowLeeYangZerosMaker->SetEtaRange_for_vPt(etaRange_for_vPt[0], etaRange_for_vPt[1]);
+    }
+    if (dirCumuMaker) {
+      sprintf(makerName, "FlowDirectCumulant");
+      StFlowDirectCumulantMaker* flowDirectCumulantMaker = new 
+	StFlowDirectCumulantMaker(makerName, flowSelect);
     }
   }
   if (phiWgtMaker) {
@@ -323,6 +334,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
 //   flowCumulantMaker->SetDebug();
 //   flowScalarProdMaker->SetDebug();
 //   flowLeeYangZerosMaker->SetDebug();
+//   flowDirectCumulantMaker->SetDebug();
 //   chain->SetDebug();
 //   StMuDebug::setLevel(0);
 
@@ -364,8 +376,8 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
 //   StFlowCutTrack::SetFitPtsTpc(0, 0);
 //   StFlowCutTrack::SetFitOverMaxPts(0., 0.);
 //   StFlowCutTrack::SetChiSqTpc(0., 0.);
-//   StFlowCutTrack::SetPtTpc(0.15, 12.);
-//   StFlowCutTrack::SetEtaTpc(-1.0, 1.0);
+//    StFlowCutTrack::SetPtTpc(0.15, 2.); // for integrated cumulant
+//    StFlowCutTrack::SetEtaTpc(-1.1, 1.1); // for integrated cumulant
 //   StFlowCutTrack::SetChgTpc(0., 0.);
   
    StFlowCutTrack::IncludeFtpcTracks(includeFtpcTracks);
@@ -409,12 +421,13 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
 //     StFlowEvent::SetEtaSubs();
 //     StFlowEvent::SetRanSubs();
 
-  // Disable weights for the event plane and integrated flow
-    if (reCent) {
+  // Disable weights for the event plane and integrated flow for LYZ
+    if (reCent && lyzMaker) {
       StFlowEvent::SetPtWgt(kFALSE);
     }
 //   StFlowEvent::SetPtWgtSaturation(1.);
-   StFlowEvent::SetEtaWgt(kFALSE);
+    StFlowEvent::SetPtWgt(kTRUE);
+    StFlowEvent::SetEtaWgt(kFALSE);
 
    // In LeeYangZeros do not use mixed harmonics for v1
 //    StFlowLeeYangZerosMaker::SetV1Mixed(kFALSE);
@@ -444,7 +457,6 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
 EventLoop: if (iEvt <= nEvents && istat != 2) {
      
      cout << "===== Event " << iEvt << " start ===== " << endl;
-     
      chain->Clear();
      istat = chain->Make(iEvt);
      if (istat == 2) 
@@ -474,13 +486,13 @@ EventLoop: if (iEvt <= nEvents && istat != 2) {
 
    // Move the flow.cumulant.root, flow.scalar.root, and flow.LeeYangZeros.root files
    // into the flow.hist.root file.
-   if (cumMaker) {
-    TFile cumFile("flow.cumulant.root", "READ");
-    if (cumFile.IsOpen()) { 
-      cumFile.ReadAll();
+   if (cumuMaker) {
+    TFile cumuFile("flow.cumulant.root", "READ");
+    if (cumuFile.IsOpen()) { 
+      cumuFile.ReadAll();
       for (int mm=0; mm<30; mm++)  // temporary fix for a root bug
 	(*cumulConstants)(mm) =
-	  (*((TVectorD* )cumFile.Get("CumulConstants")))(mm);
+	  (*((TVectorD* )cumuFile.Get("CumulConstants")))(mm);
     } else {
       cout << "### Can't find file flow.cumulant.root" << endl;
     }
@@ -554,8 +566,8 @@ EventLoop: if (iEvt <= nEvents && istat != 2) {
      TFile anaFile("flow.hist.root", "RECREATE");
    }
    if (anaFile.IsOpen()) {
-     if (cumMaker) {
-       cumFile.GetList()->Write();
+     if (cumuMaker) {
+       cumuFile.GetList()->Write();
        cumulConstants->Write("CumulConstants",TObject::kOverwrite | TObject::kSingleKey);
        cumulMethodTag->Write("CumulMethodTag",TObject::kOverwrite | TObject::kSingleKey);
      }    
@@ -601,15 +613,6 @@ void doFlowEvents(Int_t nEvents, Bool_t firstPass) {
 //  Char_t* fileExt="*.event.root";
 //  Char_t* fileExt="*.MuDst.root";
 
-  // PDSF pico files
-  //Simulated events, v1=4%, v2=5% 
-//   Char_t* filePath="/auto/pdsfdv35/rhstar/aihong/simV1/simV1/V2_5Pct_V1Vary_New/dir9";
-//   if (nEvents < 250) {
-//     Char_t* fileExt="evgen.1.nt.flowpicoevent.root";
-//    } else {
-//      Char_t* fileExt="*.flowpicoevent.root";
-//    }
-
   // 200 GeV
 
   // run 4 P05ic
@@ -625,8 +628,10 @@ void doFlowEvents(Int_t nEvents, Bool_t firstPass) {
   // run 7 P07id
   // muDST files
   Char_t* filePath="/eliza12/starprod/reco/2007ProductionMinBias/FullField/P07id/2007/131/8131027/";
+  //Char_t* filePath="./outDir/muDST/";
   if (nEvents < 450) {
-    Char_t* fileExt="st_physics_8131027_raw_2040050.MuDst.root";
+    //Char_t* fileExt="st_physics_8102049_raw_1010001.MuDst.root"; // 45 events
+    Char_t* fileExt="st_physics_8131027_raw_1010001.MuDst.root";
   } else {
     Char_t* fileExt="*.MuDst.root";
   }
@@ -637,9 +642,8 @@ void doFlowEvents(Int_t nEvents, Bool_t firstPass) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
-// Revision 1.1  2010/03/05 17:04:35  posk
-// ROOT 5.22 compatable.
-// Moved doFlowEvents.C here from StRoot/macros/analysis/
+// Revision 1.2  2010/03/08 16:54:49  posk
+// Added StFlowDirectCumulantMaker written by Dhevan Gangadharan.
 //
 // Revision 1.65  2009/11/24 19:40:35  posk
 // Added reCenter to remove acceptance correlations as an option instead of phiWgt.

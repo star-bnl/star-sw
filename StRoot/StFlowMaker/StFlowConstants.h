@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.27 2009/11/24 19:23:00 posk Exp $
+// $Id: StFlowConstants.h,v 1.28 2010/03/08 16:52:49 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -21,32 +21,41 @@ class Flow{
  public:
 
   enum {
-    nHars             = 4, // 4
+    nHars             = 4,   // 4
     nSels             = 2,
     nSubs             = 2,
-    nTheta            = 5, // 5 LYZ
-    nTheta1           = 5, // 5 LYZ
+    nTheta            = 5,   // 5 LYZ
+    nTheta1           = 5,   // 5 LYZ
     nRBins            = 150, // LYZ
     nPhiBins          = 120,
     nPhiBinsFtpc      = 120,
-    nEtaBins          = 90, // 90
+    nEtaBins          = 90,  // 90
     nEtaBinsTpcOnly   = 30,
     nPtBins           = 40,
     nPtBinsPart       = 60,
-    nCumulIntegOrders = 3, // Cum
-    nCumulInteg_qMax  = 8, // Cum
-    nCumulDiffOrders  = 2, // Cum
-    nCumulDiff_qMax   = 8, // Cum
-    nCumulMixHar_pMax = 8, // for directed flow. Eq.(29) in Borghini v1 paper
-    nCumulMixHar_qMax = 4, // for directed flow
+    nCumulIntegOrders = 3,   // Cumu
+    nCumulInteg_qMax  = 8,   // Cumu
+    nCumulDiffOrders  = 2,   // Cumu
+    nCumulDiff_qMax   = 8,   // Cumu
+    nCumulMixHar_pMax = 8,   // for directed flow. Eq.(29) in Borghini v1 paper
+    nCumulMixHar_qMax = 4,   // for directed flow
     nCents            = 9,
-    zdcsmd_nPsiBins   = 64 // ZDCSMD
+    zdcsmd_nPsiBins   = 64,  // ZDCSMD
+    TERMS             = 10,  // DirCumu correlation
+    TYPES             = 2,   // differential or integrated
+    PHASES            = 2,   // cos or sin
+    SPECIES           = 1,   // number of different particles
+    PTBINS            = 62,  // DirCumu
+    MAXMULT           = 3000 // DirCumu maximum multiplicity of an event
   };
 
   typedef Double_t PhiWgt_t[nSels][2][nPhiBins]; // only odd and even harmonics
   typedef Double_t PhiWgtFtpc_t[nSels][2][nPhiBinsFtpc];
   typedef Double_t ZDCSMD_PsiWgt_t[64];  
   typedef Double_t ReCent_t[nSels][nHars][4];   // 3 TPCs for LYZ, 4 for ana
+  typedef Double_t ReCentering_shifts_t[2][9][3][2][3];//cos or sin ; cent bin ; charge/charge combo ; B field sign ; TPC side/TPC side combo 
+  //typedef Double_t ReCentering_shifts_t[2][9][3][2];
+  typedef Double_t PhiWgtFtpc_2D_t[6][6][120];
 
   static Float_t etaMin;
   static Float_t etaMax;
@@ -82,6 +91,9 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.28  2010/03/08 16:52:49  posk
+// Added StFlowDirectCumulantMaker written by Dhevan Gangadharan.
+//
 // Revision 1.27  2009/11/24 19:23:00  posk
 // Added reCenter option to remove acceptance correlations instead of phiWgt.
 //

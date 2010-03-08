@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.117 2009/11/24 19:23:04 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.118 2010/03/08 16:52:51 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -37,6 +37,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TProfile.h"
+#include "TProfile2D.h"
 #include "StuRefMult.hh"
 #include "StPionPlus.hh"
 #include "StPionMinus.hh"
@@ -104,8 +105,7 @@ Int_t StFlowMaker::Make() {
     mEventFileName = strrchr(pIOMaker->GetFile(),'/')+1;
     if (Debug()) { 
       gMessMgr->Info() << "FlowMaker: filename: " << mEventFileName << endm;
-      gMessMgr->Info() << "FlowMaker: Old filename: " 
-		       << mEventFileNameOld << endm;  
+      gMessMgr->Info() << "FlowMaker: Old filename: "  << mEventFileNameOld << endm;  
     }
 
     // new file?
@@ -138,14 +138,14 @@ Int_t StFlowMaker::Make() {
     
   } else if (mMuEventRead) {
     pMu = (StMuDst*)GetInputDS("MuDst");
-    pMuEvent = pMu->event();
-    pMuTracks = pMu->primaryTracks();
-    pMuGlobalTracks = pMu->globalTracks();
-      
-    if (!FillFromMuDST()) return kStEOF; // false if EOF
-    if (!pFlowEvent) return kStOK; // could have been deleted
-    if (mPicoEventWrite) FillPicoEvent();
-
+    if (pMu) {
+      pMuEvent = pMu->event();
+      pMuTracks = pMu->primaryTracks();
+      pMuGlobalTracks = pMu->globalTracks();
+      if (!FillFromMuDST()) return kStEOF; // false if EOF
+      if (!pFlowEvent) return kStOK; // could have been deleted
+      if (mPicoEventWrite) FillPicoEvent();
+    }
   } else {
     // StEvent
     pEvent = dynamic_cast<StEvent*>(GetInputDS("StEvent"));
@@ -234,7 +234,7 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.117 2009/11/24 19:23:04 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.118 2010/03/08 16:52:51 posk Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
@@ -1359,6 +1359,7 @@ Bool_t StFlowMaker::FillFromMuDST() {
         gMessMgr->Info() << "FlowMaker: FillFromMuVersion0DST(): WARNING! primary track has no reference to global track (pMuGlobalTrack = 0)" << endl;
         continue;
       }
+      pFlowTrack->Setid(pMuTrack->id()); // added 2/17/10
       pFlowTrack->SetPtGlobal(pMuGlobalTrack->pt());
       pFlowTrack->SetPhi(pMuTrack->phi());
       pFlowTrack->SetPhiGlobal(pMuGlobalTrack->phi());
@@ -1923,6 +1924,9 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.118  2010/03/08 16:52:51  posk
+// Added StFlowDirectCumulantMaker written by Dhevan Gangadharan.
+//
 // Revision 1.117  2009/11/24 19:23:04  posk
 // Added reCenter option to remove acceptance correlations instead of phiWgt.
 //
