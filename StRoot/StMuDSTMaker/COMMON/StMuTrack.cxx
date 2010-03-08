@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.42 2009/12/01 21:56:35 tone421 Exp $
+ * $Id: StMuTrack.cxx,v 1.43 2010/03/08 19:06:51 tone421 Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -480,39 +480,27 @@ void StMuTrack::Print(Option_t *option) const {
 
 }
 
-const StMuTrack*	StMuTrack::primaryTrack() const {
+const StMuTrack* StMuTrack::primaryTrack() const {
 
 	if(mType==1) return this;
 	const StMuTrack *prim = 0;
 
+//	StMuDst *tMuDst = 
+	
 	//For old MuDsts where there was one vertex per event
-	if (StMuDst::numberOfPrimaryVertices()==0){
-		if(!(fabs(StMuDst::event()->primaryVertexPosition().x()) < 1.e-5 && fabs(StMuDst::event()->primaryVertexPosition().y()) < 1.e-5 && fabs(StMuDst::event()->primaryVertexPosition().z()) < 1.e-5)){   
-			for (int i=0;i<StMuDst::primaryTracks()->GetEntries();i++){
-				if(mId == StMuDst::primaryTracks(i)->id()) return StMuDst::primaryTracks(i);
-			}
-//			cout<<"Return is "<<prim<<endl;
-		}
-		else return prim;
+	if(mIndex2Global==-1){
+		int nVer = StMuDst::numberOfPrimaryVertices();
+		StMuDst::fixTrackIndicesG(nVer);
 	}
-
-	Int_t Nvert = StMuDst::primaryVertices()->GetEntries();
-	if(!Nvert) return prim;
-	Int_t curVer =  StMuDst::currentVertexIndex();
-	for(Int_t i=0;i<Nvert;i++){
-			StMuDst::setVertexIndex(i);
-			for(Int_t j=0;j<StMuDst::primaryTracks()->GetEntries();j++){
-				if(mId == StMuDst::primaryTracks(j)->id()) {
-					StMuDst::setVertexIndex(curVer);
-					return StMuDst::primaryTracks(j);
-
-				}
-
-			}
-	}
+	if(mIndex2Global < 0 ) return prim;
+	
+	if(StMuDst::numberOfPrimaryVertices()==0) return StMuDst::primaryTracks(mIndex2Global);
+	int curVer =  StMuDst::currentVertexIndex();
+	StMuDst::setVertexIndex(mVertexIndex);
+	prim =  StMuDst::primaryTracks(mIndex2Global);
 	StMuDst::setVertexIndex(curVer);
 	return prim;
-} 
+}
 
 int StMuTrack::vertexIndex() const {
 
@@ -523,7 +511,7 @@ int StMuTrack::vertexIndex() const {
 		}
 		else return -1;
 	}
-	if(mType==1) return mVertexIndex;
+	if(this->type()==1) return mVertexIndex;
 	if(primaryTrack()!=0) {
 		int index = primaryTrack()->vertexIndex();
 		return index;
@@ -537,6 +525,13 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.43  2010/03/08 19:06:51  tone421
+ * Two things. Global tracks how are filled with an index to primary at birth. Added StMuDst::fixTrackIndicesG(), which is used for matching the primary track indices to global tracks. Previously, this was quite slow -  see this post:
+ *
+ * http://www.star.bnl.gov/HyperNews-star/protected/get/starsoft/8092/1/1/1.html
+ *
+ * for more details.
+ *
  * Revision 1.42  2009/12/01 21:56:35  tone421
  * Implemented changes as per http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1734
  *

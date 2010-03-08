@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.97 2010/01/25 18:46:16 fine Exp $
+ * $Id: StMuDstMaker.cxx,v 1.98 2010/03/08 19:06:51 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -858,6 +858,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
   }
   mStMuDst->set(this);
   mStMuDst->fixTofTrackIndices();
+  mStMuDst->fixTrackIndicesG(mStMuDst->numberOfPrimaryVertices());
 }
 
 
@@ -1483,8 +1484,15 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.98  2010/03/08 19:06:51  tone421
+ * Two things. Global tracks how are filled with an index to primary at birth. Added StMuDst::fixTrackIndicesG(), which is used for matching the primary track indices to global tracks. Previously, this was quite slow -  see this post:
+ *
+ * http://www.star.bnl.gov/HyperNews-star/protected/get/starsoft/8092/1/1/1.html
+ *
+ * for more details.
+ *
  * Revision 1.97  2010/01/25 18:46:16  fine
- * RT #1826. Add protection against of the zero rps pointer and add the safe version of the StMuRpsCollection(const StRpsCollection & rps)  ctor
+ *  RT #1826. Add protection against of the zero rps pointer and add the safe version of the StMuRpsCollection(const StRpsCollection & rps)  ctor
  *
  * Revision 1.96  2010/01/25 03:57:39  tone421
  * Added FMS and Roman pot arrays
