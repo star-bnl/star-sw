@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.50 2010/03/08 19:06:51 tone421 Exp $
+ * $Id: StMuDst.cxx,v 1.51 2010/03/09 23:59:49 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -228,6 +228,7 @@ void StMuDst::fixTrackIndicesG(int mult) {
 		if(!(fabs(event()->primaryVertexPosition().x()) < 1.e-5 && fabs(event()->primaryVertexPosition().y()) < 1.e-5 && fabs(event()->primaryVertexPosition().z()) < 1.e-5)){   
 			int startpos = 0;
 			int tid, pid;
+			if(!globalTracks()) return;
 			for (int i=0;i<globalTracks()->GetEntries();i++){
 				tid = globalTracks(i)->id();
 				globalTracks(i)->setIndex2Global(-2);
@@ -245,12 +246,15 @@ void StMuDst::fixTrackIndicesG(int mult) {
 		return;
 	}
 	//New MuDsts with multiple vertices....	
+	if(!primaryVertices()) return;
 	const int Nvert = primaryVertices()->GetEntries();
 	if(!Nvert) return;
 	int curVer =  currentVertexIndex();
 	int startpos[Nvert];
 	for(int i=0;i<Nvert;i++) startpos[i]=0;	
 	int tid, pid;
+	if(!globalTracks()) return;
+
 	for (int i=0;i<globalTracks()->GetEntries();i++){
 		tid = globalTracks(i)->id();
 		globalTracks(i)->setIndex2Global(-2);
@@ -258,8 +262,8 @@ void StMuDst::fixTrackIndicesG(int mult) {
 		//Scan through vertices
 		for(int j=0;j<Nvert;j++){
 			if(globalTracks(i)->index2Global() >= 0) break;
-			StMuDst::setVertexIndex(j);
-			//Scan through primary tracks in a given vertex
+			setVertexIndex(j);
+			if(!primaryTracks()) continue;
 			for(int k=startpos[j];k<primaryTracks()->GetEntries();k++){
 				pid = primaryTracks(k)->id();
 				if(pid==tid) {
@@ -706,6 +710,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.51  2010/03/09 23:59:49  tone421
+ * Added null point protection in StMuDst::fixTrackIndicesG(int mult)
+ *
  * Revision 1.50  2010/03/08 19:06:51  tone421
  * Two things. Global tracks how are filled with an index to primary at birth. Added StMuDst::fixTrackIndicesG(), which is used for matching the primary track indices to global tracks. Previously, this was quite slow -  see this post:
  *
