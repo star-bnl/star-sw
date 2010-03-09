@@ -37,8 +37,8 @@ my $logDirectory       = getLogDirectory($production);
 my $libraryPath        = ".sl44_gcc346";      # Default library path
 
 # Scripts
-my $getYearFromFile = "$staroflDir/aarose/getYearFomrFile.pl";
-my $getDayFromFile  = "$staroflDir/aarose/getDayFomrFile.pl";
+my $getYearFromFile = "$staroflDir/aarose/getYearFromFile.pl";
+my $getDayFromFile  = "$staroflDir/aarose/getDayFromFile.pl";
 
 GetOptions (
     'daq=s' => \$daqsDirectory,            # Daq file directory
@@ -103,6 +103,12 @@ printDebug("Verbose mode. Print debugging messages ...");
 #----------------------------------------------------------------------------------------------------
 $generatorDir = getGeneratorDirectory($production);
 $logDirectory = getLogDirectory($production);
+
+#----------------------------------------------------------------------------------------------------
+# Make sure perl scripts exist
+#----------------------------------------------------------------------------------------------------
+checkFile($getYearFromFile);
+checkFile($getDayFromFile);
 
 #----------------------------------------------------------------------------------------------------
 # Make sure tag/daq file and log file directory exists. If not, stop.
@@ -292,6 +298,27 @@ sub getLogDirectory {
   my $log        = "$generator/LOG";
   return $log;
 };
+
+#----------------------------------------------------------------------------------------------------
+# Check file exists
+#----------------------------------------------------------------------------------------------------
+sub checkFile {
+  my $file = shift @_ ;
+  if( -f $file ){
+    if($verbose){
+      printDebug("OK: $file");
+    }
+
+    return;
+  }
+
+  print "\n";
+  print "    Error: No $file exists. Stop. \n";
+  print "    Make sure you've put the correct path for $file file. \n";
+  print "\n";
+  exit(0);
+}
+
 
 #----------------------------------------------------------------------------------------------------
 # Check directory exists
