@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.51 2010/03/09 23:59:49 tone421 Exp $
+ * $Id: StMuDst.cxx,v 1.52 2010/03/10 15:03:06 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -232,7 +232,8 @@ void StMuDst::fixTrackIndicesG(int mult) {
 			for (int i=0;i<globalTracks()->GetEntries();i++){
 				tid = globalTracks(i)->id();
 				globalTracks(i)->setIndex2Global(-2);
-				for(int j=startpos;j<StMuDst::primaryTracks()->GetEntries();j++){
+				if(!primaryTracks()) return;
+				for(int j=startpos;j<primaryTracks()->GetEntries();j++){
 					pid = primaryTracks(j)->id();
 					if(pid==tid) {
 						globalTracks(i)->setIndex2Global(j);
@@ -710,6 +711,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.52  2010/03/10 15:03:06  tone421
+ * Added more pointer protection in StMuDst::fixTrackIndicesG()
+ *
  * Revision 1.51  2010/03/09 23:59:49  tone421
  * Added null point protection in StMuDst::fixTrackIndicesG(int mult)
  *
