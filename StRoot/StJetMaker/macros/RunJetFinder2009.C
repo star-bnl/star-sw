@@ -1,3 +1,9 @@
+//
+// Pibero Djawotho <pibero@tamu.edu>
+// Texas A&M University
+// 10 March 2009
+//
+
 void RunJetFinder2009(int nevents = 1e6,
 		      const char* mudstfile = "/star/data60/reco/production2009_200Gev_Single/ReversedFullField/P10ic/2009/125/10125066/st_physics_adc_10125066_raw_6320001.MuDst.root",
 		      const char* jetfile   = "st_physics_adc_10125066_raw_6320001.jets.root",
@@ -52,16 +58,54 @@ void RunJetFinder2009(int nevents = 1e6,
   filterMaker->addTrigger(230420); // AJP
 
   // 2009 pp200
-  filterMaker->addTrigger(240530); // BHT3
-  filterMaker->addTrigger(240620); // L2BGamma
-  filterMaker->addTrigger(240630); // L2EGamma
-  filterMaker->addTrigger(240631); // L2EGamma
-  filterMaker->addTrigger(240650); // L2JetHigh
-  filterMaker->addTrigger(240651); // L2JetHigh
-  filterMaker->addTrigger(240652); // L2JetHigh
-  filterMaker->addTrigger(240410); // JP1
-  filterMaker->addTrigger(240411); // JP1
-  filterMaker->addTrigger(240641); // Upsilon
+  // http://www.star.bnl.gov/protected/common/common2009/trigger2009/triggers2009.html
+  // BHT3
+  filterMaker->addTrigger(240530);
+  // L2BGamma
+  filterMaker->addTrigger(240620);
+  // L2EGamma
+  filterMaker->addTrigger(240630);
+  filterMaker->addTrigger(240631);
+  // L2JetHigh
+  filterMaker->addTrigger(240650);
+  filterMaker->addTrigger(240651);
+  filterMaker->addTrigger(240652);
+  // JP1
+  filterMaker->addTrigger(240410);
+  filterMaker->addTrigger(240411);
+  // Upsilon
+  filterMaker->addTrigger(240641);
+  // Luminosity monitors
+  // BBCMB
+  filterMaker->addTrigger(240010);
+  filterMaker->addTrigger(240110);
+  filterMaker->addTrigger(240120);
+  filterMaker->addTrigger(240220);
+  // BBCMB-Cat0
+  filterMaker->addTrigger(240011);
+  filterMaker->addTrigger(240111);
+  filterMaker->addTrigger(240121);
+  filterMaker->addTrigger(240221);
+  // BBCMB-Cat1
+  filterMaker->addTrigger(240012);
+  filterMaker->addTrigger(240112);
+  filterMaker->addTrigger(240122);
+  filterMaker->addTrigger(240222);
+  // BBCMB-Cat2
+  filterMaker->addTrigger(240013);
+  filterMaker->addTrigger(240113);
+  filterMaker->addTrigger(240123);
+  filterMaker->addTrigger(240223);
+  // BBCMB-Cat3
+  filterMaker->addTrigger(240014);
+  filterMaker->addTrigger(240114);
+  filterMaker->addTrigger(240124);
+  filterMaker->addTrigger(240224);
+  // BBCMB-Cat4
+  filterMaker->addTrigger(240015);
+  filterMaker->addTrigger(240115);
+  filterMaker->addTrigger(240125);
+  filterMaker->addTrigger(240225);
 
   // star database
   St_db_Maker* starDb = new St_db_Maker("StarDb","MySQL:StarDb");
