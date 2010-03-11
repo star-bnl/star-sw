@@ -1,6 +1,6 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StSteeringModule.cxx,v 1.15 2010/02/26 01:43:07 fine Exp $
+// $Id: StSteeringModule.cxx,v 1.16 2010/03/11 00:38:41 fine Exp $
 
 
 #include "StSteeringModule.h"
@@ -333,6 +333,12 @@ void  StSteeringModule::SetDemo(Bool_t on)
 Bool_t  StSteeringModule::Demo() const
 {
      return (fDataReadModule) ? fDataReadModule->Demo(): kFALSE; 
+} 
+
+//_____________________________________________________________________________
+StuDraw3DEvent * StSteeringModule::Display()
+{
+   return (fDataReadModule) ? fDataReadModule->Display(): 0;
 }
 //_____________________________________________________________________________
 void   StSteeringModule::SetDrawOption(Option_t *option)
