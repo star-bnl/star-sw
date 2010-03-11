@@ -1,4 +1,4 @@
-// $Id: StSteeringModule.h,v 1.7 2010/02/26 01:43:07 fine Exp $
+// $Id: StSteeringModule.h,v 1.8 2010/03/11 00:38:42 fine Exp $
 
 #ifndef STAR_StSteeringModule
 #define STAR_StSteeringModule
@@ -42,6 +42,7 @@
 class  StDataReadModule;
 class  TCanvas;
 class  TQtRootViewer3D;
+class  StuDraw3DEvent;
    
 class StSteeringModule : public QObject, public TModule, StDetectorGeometryInterface{
 #ifndef __CINT__
@@ -65,7 +66,7 @@ class StSteeringModule : public QObject, public TModule, StDetectorGeometryInter
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSteeringModule.h,v 1.7 2010/02/26 01:43:07 fine Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSteeringModule.h,v 1.8 2010/03/11 00:38:42 fine Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
           
   }
@@ -111,6 +112,7 @@ class StSteeringModule : public QObject, public TModule, StDetectorGeometryInter
     virtual void   SetGuiObject(QObject *gui);
     virtual void   NextEventsSlot(int interval);
     virtual void   StopEvents();
+    virtual StuDraw3DEvent *Display();
     // Thread synch:
     Bool_t IsDisplayNext() const ;
 #ifndef __CINT__
