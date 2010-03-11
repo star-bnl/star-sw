@@ -1,4 +1,4 @@
-// $Id: StiTpcSeedFinder.cxx,v 2.1 2010/02/16 23:11:14 fisyak Exp $
+// $Id: StiTpcSeedFinder.cxx,v 2.2 2010/03/11 22:59:00 fisyak Exp $
 #include "StiTpcSeedFinder.h"
 #include "StiToolkit.h"
 #include "StiHit.h"
@@ -163,7 +163,7 @@ void StiTpcSeedFinder::findTpcTracks() {
       hit = *cit;
       if (! hit->stHit()) continue;
       const StTpcHit *tpcHit = dynamic_cast<const StTpcHit*>(hit->stHit());
-      if (! tpcHit) continue;
+      if ( ! tpcHit) continue;
       hitc.mMinPad  = padp((Int_t) tpcHit->minPad(),  tpcHit->padrow()-1);
       hitc.mMaxPad  = padp((Int_t) tpcHit->maxPad(),  tpcHit->padrow()-1);
       hitc.mMinTmbk = (Int_t) tpcHit->minTmbk();
@@ -255,7 +255,6 @@ void StiTpcSeedFinder::findTpcTracks() {
   Int_t nSeed = 0;
   while (! seeds.empty()) {
     Seed_t &aSeed = seeds.back();
-    cout<< "seed: " << nSeed++ << "\t" <<aSeed.total_hits<<" total hits "<<aSeed.used_per_total<<endl;
     vector<StiHit*>        _seedHits;
     for (vector<Hit_t *>::iterator hitb = aSeed.vhit.begin(); hitb != aSeed.vhit.end(); hitb++) {
       hit = (*hitb)->hit;
@@ -263,14 +262,20 @@ void StiTpcSeedFinder::findTpcTracks() {
       _seedHits.push_back(hit);
     }
     seeds.pop_back();
-    if (_seedHits.size() < 4) continue;
+    cout<< "seed: " << nSeed++ << "\t" <<aSeed.total_hits<<" total hits "<<aSeed.used_per_total;
+    cout << " no. unused hits " << _seedHits.size();
+    if (_seedHits.size() < 4) {cout << endl; continue;}
     StiKalmanTrack* track = StiToolkit::instance()->getTrackFactory()->getInstance();
-    if (track->initialize(_seedHits)) continue;
-    if (((StiKalmanTrackFinder *)track->getTrackFinder())->Fit(track)) continue;
+    if (track->initialize(_seedHits)) {cout << " initialization failed" << endl; continue;}
+    if (((StiKalmanTrackFinder *)track->getTrackFinder())->Fit(track)) {cout << " fit failed " << endl; continue;}
+    cout << " fitted with " << track->getFitPointCount() << endl;
     track->setSeedHitCount(track->getSeedHitCount()+100);
   }
 }
 // $Log: StiTpcSeedFinder.cxx,v $
+// Revision 2.2  2010/03/11 22:59:00  fisyak
+// Fix print out
+//
 // Revision 2.1  2010/02/16 23:11:14  fisyak
 // Add Yury Gorbunov's TPC seed finder
 //
