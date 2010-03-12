@@ -1,4 +1,4 @@
-// $Id: StiTpcSeedFinder.cxx,v 2.2 2010/03/11 22:59:00 fisyak Exp $
+// $Id: StiTpcSeedFinder.cxx,v 2.3 2010/03/12 21:38:50 fisyak Exp $
 #include "StiTpcSeedFinder.h"
 #include "StiToolkit.h"
 #include "StiHit.h"
@@ -15,6 +15,10 @@ static const Double_t DriftVelocity = 5.5e-6;
 static const Int_t split = 99;
 static const Int_t bsize = 64000;
 static const Int_t kMaxSector = 24;
+//#define EXTRAPOLATION_CUT
+//#define KINK_REJECTION  
+#define OVERLAP_REJECTION
+
 static Double_t innerR[13] = {60.000,  64.800,  69.600,  74.400,  79.200, //  5
 			      84.000,  88.800,  93.600,  98.800, 104.000, // 10
 			      109.200, 114.400, 119.600};
@@ -198,11 +202,16 @@ void StiTpcSeedFinder::findTpcTracks() {
     for(Int_t j=0;j<46;j++)
       sort(hitSecRow[i][j].begin(), hitSecRow[i][j].end(),HitsCompareStatus );
   Int_t HitsUsedTimes = 0;
+  Int_t size_array_tmp;
   vector<Seed_t> seeds;
   seeds.clear();
   Seed_t seed;
   seed.vhit.clear();
-  
+  Double_t tx_first, tz_first;
+  Double_t x_extra, z_extra;
+  Double_t tx_second,  tz_second;
+  Hit_t *cluIt1, *cluIt2, *cluIt3;
+  Int_t PADrow_taken;
   for(Int_t i=0;i<kMaxSector;i++){
     for(Int_t j=45;j>0;j--){
       for (vector<Hit_t>::iterator hitbIt1 = hitSecRow[i][j].begin();hitbIt1 != hitSecRow[i][j].end(); ++hitbIt1){
@@ -221,16 +230,63 @@ void StiTpcSeedFinder::findTpcTracks() {
 	      seed.vhit.push_back(hitSecond);
 	      seed.vhit.push_back(hitFirst);
 	      for(Int_t ij=(j-2);ij>=0;ij--){
+		/* zero it !! */
+		PADrow_taken=0;
 		for (vector<Hit_t>::iterator hitbIt3 = hitSecRow[i][(ij)].begin();hitbIt3 != hitSecRow[i][(ij)].end(); ++hitbIt3){
-		  if(OverONot(hitSecond,(&(*hitbIt3)),2) && hitSecond->taken < 3 && hitbIt3->taken < 3 ){
+		  /* if the padrow taken .. skip all the remaining hits ... */
+		  if(PADrow_taken) continue;
+		  size_array_tmp =seed.vhit.size();
+		  /* pointers to the last three hits in the vector */
+		  cluIt1=&(*hitbIt3); // latest
+		  cluIt2=seed.vhit[(--size_array_tmp)]; // one before latest
+		  cluIt3=seed.vhit[(--size_array_tmp)]; // the third
+		  /* extrapolation part */
+		  tx_first = (cluIt2->x - cluIt3->x)/(cluIt2->y - cluIt3->y);
+		  tz_first = (cluIt2->z - cluIt3->z)/(cluIt2->y - cluIt3->y);
+		  x_extra = tx_first * (cluIt1->y - cluIt2->y) + cluIt2->x;
+		  z_extra = tz_first * (cluIt1->y - cluIt2->y) + cluIt2->z;
+		  /*  mode distributions
+		      ddiffz->Fill(z_extra - cluIt1->z);
+		      ddiffx->Fill(x_extra - cluIt1->x);
+		  */
+		  //  cuts based on the extrapolation
+		   if(
+#ifdef EXTRAPOLATION_CUT
+		      (z_extra - cluIt1->z) < 1.3 && (z_extra - cluIt1->z)> -1.3 && 
+		      (x_extra - cluIt1->x) < 0.7 && (x_extra - cluIt1->x)> -0.7 && 
+#endif
+#ifdef OVERLAP_REJECTION
+		      OverONot(hitSecond,(&(*hitbIt3)),2) &&
+#endif
+		      hitSecond->taken < 3 && hitbIt3->taken < 3){
+		    /*          more plots
+				ddiffz1->Fill(z_extra-cluIt1->z);
+				ddiffx1->Fill(x_extra-cluIt1->x);
+		    */
+		    tx_second = (cluIt1->x - cluIt2->x)/(cluIt1->y - cluIt2->y);
+		    tz_second = (cluIt1->z - cluIt2->z)/(cluIt1->y - cluIt2->y);
+#ifdef KINK_REJECTION
+		    // kink cuts maybe a good idea to add those kinks to the associated hits somehow ... ?
+		    if((tz_first-tz_second) > 0.4 || (tz_first-tz_second) < -0.4)  continue; // cut on z
+		    if((tx_first-tx_second) > 0.2 || (tx_first-tx_second) < -0.2 ) continue; // cut on x angle
+#endif 
 		    HitsUsedTimes+=hitbIt3->taken;
 		    hitSecond=&(*hitbIt3);
 		    hitbIt3->taken++;
 		    seed.vhit.push_back(hitSecond);
+		    /* this will mark the padrow if it's taken  */
+		    PADrow_taken++;
 		  }
 		  else{
 		    // something should go here ... 
 		  }
+		 
+		  /*
+		  // let's check some residuals
+		  dphix->Fill(tx_first-tx_second);
+		  dphiz->Fill(tz_first-tz_second);
+		  dphiz1->Fill(tz_first-tz_second);
+		  */
 		}
 	      }
 	      // skip the seed if it has too many reused hits 
@@ -273,6 +329,9 @@ void StiTpcSeedFinder::findTpcTracks() {
   }
 }
 // $Log: StiTpcSeedFinder.cxx,v $
+// Revision 2.3  2010/03/12 21:38:50  fisyak
+// Add EXTRAPOLATION_CUT, OVERLAP_REJECTION and KINK_REJECTION flags (Y.Gorbunov)
+//
 // Revision 2.2  2010/03/11 22:59:00  fisyak
 // Fix print out
 //
