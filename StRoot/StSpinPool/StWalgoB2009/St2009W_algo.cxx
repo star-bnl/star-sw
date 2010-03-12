@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.13 2010/02/26 21:40:00 seelej Exp $
+// $Id: St2009W_algo.cxx,v 1.14 2010/03/12 21:08:11 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -33,11 +33,10 @@ St2009WMaker::find_W_boson(){
 
       //signal plots w/o EEMC in veto
       if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
-	if(T.ptBalance_noEEMC.Perp()>par_ptBalance && T.awayTotET_noEEMC<par_awayTotET)//ptBalance cut && awayside pt cut
-	  hA[140]->Fill(T.cluster.ET);
 	if(T.awayTotET_noEEMC < 8)//old awayside pt cut
 	  hA[141]->Fill(T.cluster.ET);
-          if(T.ptBalance_noEEMC.Perp()>par_ptBalance && T.awayTotET_noEEMC<par_awayTotET) {
+	if(T.ptBalance_noEEMC.Perp()>par_ptBalance && T.awayTotET_noEEMC<par_awayTotET) {//ptBalance cut && awayside pt cut
+	  hA[140]->Fill(T.cluster.ET);
           if (T.prMuTrack->charge() < 0) {
             hA[182+3]->Fill(T.cluster.ET);
           } else if (T.prMuTrack->charge() > 0) {
@@ -530,6 +529,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.14  2010/03/12 21:08:11  balewski
+// simplify logic for filling histos for noE background
+//
 // Revision 1.13  2010/02/26 21:40:00  seelej
 // Joe : Fix to code. Forgot to remove an older piece of code when doing a previous update.
 //
