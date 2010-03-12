@@ -26,6 +26,7 @@ gSystem->Load("StOnlineDisplay");
  ds->SetMagneticField(0.5); 
 //  ds->SetDebug(4);
  ds->Init();
+ ds->Display()->Point(0,0,0);
  ds->Make();
  displayMaker=ds;
  return ds;
