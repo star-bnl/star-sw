@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.8 2010/02/19 18:06:39 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.9 2010/03/12 19:27:02 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.9  2010/03/12 19:27:02  hmasui
+ * Reduce bin size for event number histograms, and allow automatic bin extention
+ *
  * Revision 1.8  2010/02/19 18:06:39  hmasui
  * Change the vertex range to +/-200 cm for vz histograms
  *
@@ -232,10 +235,13 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
   utility->setStyle(mhdVy);
   utility->setStyle(mhdVz);
 
-  mhEventId   = new TH1D("hEventId", "Event id", 500000, 0, 500000);
+  mhEventId   = new TH1D("hEventId", "Event id", 1000, 0, 1000);
   mhRunNumber = new TH1D("hRunNumber", "Run id - (Year - 1999)#times10^{6}", 400000, 0, 400000);
   mhEventId->SetXTitle("Event id");
   mhRunNumber->SetXTitle("Run number");
+
+  // Set bit to automatic bin extention
+  mhEventId->SetBit(TH1::kCanRebin);
 
   utility->setStyle( mhEventId   ) ;
   utility->setStyle( mhRunNumber ) ;
