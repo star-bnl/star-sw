@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.65 2010/03/08 18:04:33 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.66 2010/03/12 07:29:05 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.66  2010/03/12 07:29:05  genevb
+// Additional capability for saving images of each pad
+//
 // Revision 2.65  2010/03/08 18:04:33  genevb
 // Include analysis score/result on plots
 //
@@ -273,6 +276,7 @@ StHistUtil::StHistUtil(){
   m_CurPage = 0;
   m_OutType = "ps"; // postscript output by default
   m_OutMultiPage = kTRUE;
+  m_OutIndividuals = "";
   m_RunYear = 0;
 
   maxHistCopy = 4096;
@@ -314,6 +318,10 @@ StHistUtil::~StHistUtil(){
 //_____________________________________________________________________________
 void StHistUtil::SetOutFile(const Char_t *fileName, const Char_t* type) {
   m_OutFileName = fileName;
+  if (m_OutFileName.EndsWith("+")) {
+    m_OutIndividuals = ".eps"; // only option working in ROOT 5.22
+    m_OutFileName.Chop();
+  }
   if (type) {
     m_OutType = type;
   } else {
@@ -566,6 +574,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
       TH1* hobj = (TH1*) obj;
       const char* oname = obj->GetName();
       TString oName = oname;
+      oName.ReplaceAll(' ','_');
       histReadCounter++;
       LOG_INFO << Form(" %d. Reading ... %s::%s; Title=\"%s\"\n",
         histReadCounter,obj->ClassName(),oname, obj->GetTitle()) << endm;
@@ -914,6 +923,9 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             TString score = Form("Score: %4.2f (%s vs. %4.2f)",result,
                         (analPass ? "PASS" : "FAIL"),cut);
 
+            if (m_OutIndividuals.Length())
+              gPad->Print(Form("Ref_%s%s",oName.Data(),m_OutIndividuals.Data()));
+
             if (objPad) {
               objPad->cd();
               float sz = latex.GetTextSize();
@@ -925,12 +937,15 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
               objPad->Update();
               latex.SetTextColor(1);
               latex.SetTextSize(sz);
+              if (m_OutIndividuals.Length())
+                gPad->Print(Form("%s%s",oName.Data(),m_OutIndividuals.Data()));
             }
+
 
             LOG_INFO << Form("  -   %d. Reference Test (mode=%d) %s",
                         histReadCounter,mode,score.Data()) << endm;
             if (!R_ostr) R_ostr = new ofstream(m_refResultsFile);
-            (*R_ostr) << m_CurPage << " " << curPad << " " << oname << " " << result << endl;
+            (*R_ostr) << m_CurPage << " " << curPad << " " << oName << " " << result << endl;
           }
 
         }

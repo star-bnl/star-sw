@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.9 2010/01/14 19:29:53 genevb Exp $
+// $Id: StHistUtil.h,v 2.10 2010/03/12 07:29:05 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.10  2010/03/12 07:29:05  genevb
+// Additional capability for saving images of each pad
+//
 // Revision 2.9  2010/01/14 19:29:53  genevb
 // Fix ROOT quirk with 1 page print, fix string/char conversions, protect LOG calls
 //
@@ -76,6 +79,7 @@ class StHistUtil {
   TString m_CurFileNameR; // Name of the current ref output file
   TString m_OutType;    // Output file type
   Bool_t  m_OutMultiPage; // Output file is multipage
+  TString m_OutIndividuals; // Additional output of each pad
   Int_t   m_CurPrefix;
   Int_t   m_CurPage;
   TString m_GlobalTitle; // Title at top of each page of output
@@ -169,7 +173,7 @@ class StHistUtil {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.9 2010/01/14 19:29:53 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.10 2010/03/12 07:29:05 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
