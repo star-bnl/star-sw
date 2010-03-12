@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.66 2010/03/12 07:29:05 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.67 2010/03/12 17:28:15 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.67  2010/03/12 17:28:15  genevb
+// Same ROOT quirk fix as done in rev. 2.64, but for reference hists
+//
 // Revision 2.66  2010/03/12 07:29:05  genevb
 // Additional capability for saving images of each pad
 //
@@ -364,7 +367,7 @@ void StHistUtil::CloseOutFile() {
     if (m_OutMultiPage) m_CurFileName.Append(")");
     if (m_OutType.CompareTo("CC")) {
       // single page seems to have a bug with "()" notation as of Root 5.22.00
-      if (m_CurPage==1) m_CurFileName.Remove(m_CurFileName.Length()-2);
+      if (m_CurPage==1) m_CurFileName.Chop().Chop();
       m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
     } else
       m_HistCanvas->SaveSource(m_CurFileName.Data());
@@ -372,6 +375,8 @@ void StHistUtil::CloseOutFile() {
       m_HistCanvasR->Modified();
       m_HistCanvasR->Update();
       m_CurFileNameR.Append(")");
+      // single page seems to have a bug with "()" notation as of Root 5.22.00
+      if (m_CurPage==1) m_CurFileNameR.Chop().Chop();
       m_HistCanvasR->Print(m_CurFileNameR.Data(),m_OutType.Data());
       // anal mode doesn't support single page output
     }
