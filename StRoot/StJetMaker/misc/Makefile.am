@@ -20,4 +20,4 @@ nodist_libStJetMakerMisc_la_SOURCES = MiscDict.cxx
 BUILT_SOURCES = MiscDict.cxx
 CLEANFILES = MiscDict.cxx MiscDict.h
 MiscDict.cxx: $(headers) MiscLinkDef.h
-	$(ROOTCINT) -f $@ -c -I../.. -I../fourvec -I../jets $^
+	$(ROOTCINT) -f $@ -c $(CPPFLAGS) -I../.. -I../fourvec -I../jets $^
