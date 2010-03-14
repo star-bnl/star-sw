@@ -5,6 +5,8 @@
 // using namespace std;
 
 namespace std {
+template <class T> class StBiTree;
+
 template <> 
 template <class T>
 class iterator<input_iterator_tag, class StBiTree<T> > {    
@@ -14,49 +16,49 @@ class iterator<input_iterator_tag, class StBiTree<T> > {
     iterator<input_iterator_tag, class StBiTree<T> > *fCurrentIterator;
     iterator& operator++(int) { return *this; }
  public:
-  iterator():p(0), fCurrentBranch(StBiTree<T>::kLeaf),fCurrentIterator()  {}
-  iterator(StBiTree<T>* x):p(x), fCurrentBranch(p->WhereAmI()),fCurrentIterator()  {}
+  iterator():p(), fCurrentBranch(StBiTree<T>::kLeaf),fCurrentIterator()  {}
+  iterator(StBiTree<T>* x):p(x), fCurrentBranch(StBiTree<T>::kLeaf),fCurrentIterator()  
+  {
+     if (p && !(p->IsLeaf() || p->IsEmpty() )  ) fCurrentBranch = 0;
+  }
   iterator(const iterator& mit) : p(mit.p), fCurrentBranch(mit.fCurrentBranch), 
       fCurrentIterator(mit.fCurrentIterator ? new iterator(*(mit.fCurrentIterator)) : 0)  {}
   ~iterator() { delete fCurrentIterator; fCurrentIterator = 0; }
-  iterator& operator++() {
-     if (p) {
-        switch (fCurrentBranch) {
-        case StBiTree<T>::kLeft:  break;
-        case StBiTree<T>::kRight: break;
-        case StBiTree<T>::kLeaf: fCurrentBranch = StBiTree<T>::kLeft; break;
-        }
-        if (!fCurrentIterator) fCurrentIterator = p->Branch(fCurrentBranch)->begin();
-        else if (*fCurrentIterator != p->end() )  ++(*fCurrentIterator);
-        if ( (*fCurrentIterator != p->end() ) && fCurrentBranch == StBiTree<T>::kLeft ) {
-           delete fCurrentIterator;  fCurrentIterator = 0;
-           fCurrentBranch = StBiTree<T>::kRight;
-           fCurrentIterator =  p->Branch(fCurrentBranch)->begin();
-        }
-     }
-     return *this;
-  }
   bool operator==(const iterator& rhs) {return p==rhs.p;}
   bool operator!=(const iterator& rhs) {return p!=rhs.p;}
   StBiTree<T>& operator*() {
-    return fCurrentIterator ?  fCurrentIterator->operator*():
-                           *(p->Branch(fCurrentBranch));
+    return fCurrentIterator ?  fCurrentIterator->operator*(): 
+       (fCurrentBranch == StBiTree<T>::kLeaf) ? 
+       *(p) 
+       :
+       *(p->Branch(fCurrentBranch? StBiTree<T>::kRight:StBiTree<T>::kLeft));
   }
   iterator& next(int direction) {
-     switch (direction) {
-        case StBiTree<T>::kLeft:  break;
-        case StBiTree<T>::kRight: break;
-        case StBiTree<T>::kLeaf: fCurrentBranch = StBiTree<T>::kLeft; break;
-     }
-     if (!fCurrentIterator) fCurrentIterator = p->Branch(fCurrentBranch)->begin();
-     else if (*fCurrentIterator != p->end() )  ++(*fCurrentIterator);
-     if ( (*fCurrentIterator != p->end() ) && fCurrentBranch == StBiTree<T>::kLeft ) {
-        delete fCurrentIterator;  fCurrentIterator = 0;
-        fCurrentBranch = StBiTree<T>::kRight;
-        fCurrentIterator =  p->Branch(fCurrentBranch)->begin();
+     if (p) {
+        if (fCurrentBranch == StBiTree<T>::kLeaf ) {
+           delete fCurrentIterator;  fCurrentIterator = 0;
+        } else {
+           int newDirection = direction ? StBiTree<T>::kRight: StBiTree<T>::kLeft;
+           if (newDirection != fCurrentBranch) {
+              delete fCurrentIterator;  fCurrentIterator = 0;
+              fCurrentBranch = newDirection;
+           }
+           if (!fCurrentIterator) {
+              StBiTree<T> *b = fCurrentBranch ? p->Right() : p->Left();
+              if (b) fCurrentIterator = b->CreateIterator();
+           } else if (*fCurrentIterator != p->end() )  ++(*fCurrentIterator);
+           if ( fCurrentIterator && (*fCurrentIterator == p->end() ) && fCurrentBranch == StBiTree<T>::kLeft ) {
+              delete fCurrentIterator;  fCurrentIterator = 0;
+              fCurrentBranch = StBiTree<T>::kRight;
+              StBiTree<T> *b = p->Right();
+              fCurrentIterator =  b? b->CreateIterator():0;
+           }
+        }
+        if (!fCurrentIterator) p=0; // end iteration
      }
      return *this;
   }
+  iterator& operator++() {   return next(fCurrentBranch);  }
 
 };
 
