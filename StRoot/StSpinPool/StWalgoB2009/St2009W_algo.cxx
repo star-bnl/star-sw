@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.14 2010/03/12 21:08:11 balewski Exp $
+// $Id: St2009W_algo.cxx,v 1.15 2010/03/14 22:50:31 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -35,7 +35,7 @@ St2009WMaker::find_W_boson(){
       if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
 	if(T.awayTotET_noEEMC < 8)//old awayside pt cut
 	  hA[141]->Fill(T.cluster.ET);
-	if(T.ptBalance_noEEMC.Perp()>par_ptBalance && T.awayTotET_noEEMC<par_awayTotET) {//ptBalance cut && awayside pt cut
+	if(T.sPtBalance_noEEMC>par_ptBalance ) {//only signed ptBalance cut 
 	  hA[140]->Fill(T.cluster.ET);
           if (T.prMuTrack->charge() < 0) {
             hA[182+3]->Fill(T.cluster.ET);
@@ -77,7 +77,7 @@ St2009WMaker::find_W_boson(){
       }
 
       //plots for backg sub yield
-      if(T.ptBalance.Perp()>par_ptBalance && T.awayTotET<par_awayTotET) {
+      if(T.sPtBalance>par_ptBalance ) {
         hA[136]->Fill(T.cluster.ET);//signal
         hA[62]->Fill(T.pointTower.iEta ,T.cluster.energy);
         if (T.prMuTrack->charge() < 0) {
@@ -108,7 +108,7 @@ St2009WMaker::find_W_boson(){
  
 	
       //put final W cut here
-      if(T.ptBalance.Perp()<par_ptBalance || T.awayTotET>par_awayTotET)  continue;
+      if(T.sPtBalance<par_ptBalance)  continue;
       //::::::::::::::::::::::::::::::::::::::::::::::::
       //:::::accepted W events for x-section :::::::::::
       //::::::::::::::::::::::::::::::::::::::::::::::::
@@ -192,6 +192,8 @@ St2009WMaker::findPtBalance(){
 	  T.ptBalance_noEEMC+=jetVec;
       }
       T.ptBalance_noEEMC+=clustPt;
+      T.sPtBalance_noEEMC=T.ptBalance_noEEMC.Dot(clustPt);
+      T.sPtBalance_noEEMC/=T.cluster.ET;
 
     }// end of loop over tracks
   }// end of loop over vertices
@@ -529,6 +531,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.15  2010/03/14 22:50:31  balewski
+// *** empty log message ***
+//
 // Revision 1.14  2010/03/12 21:08:11  balewski
 // simplify logic for filling histos for noE background
 //

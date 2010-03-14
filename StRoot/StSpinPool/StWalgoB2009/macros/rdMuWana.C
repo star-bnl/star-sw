@@ -366,7 +366,7 @@ int rdMuWana(
   
   if(spinSort){
     spDb=new StSpinDbMaker("spinDb");
-    enum {mxSM=3};
+    enum {mxSM=1};
     St2009pubSpinMaker *spinMkA[mxSM];
     for(int kk=0;kk<mxSM;kk++) {
       char ttx[100]; sprintf(ttx,"%cspin",'A'+kk);
@@ -452,6 +452,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.24  2010/03/14 22:50:34  balewski
+// *** empty log message ***
+//
 // Revision 1.23  2010/02/18 22:35:16  stevens4
 // add tpc effic study and allow energy scaling for data and MC
 //

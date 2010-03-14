@@ -6,8 +6,7 @@ TString spinPre='A';
 plWana(  int page=13,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
   iPath="./";
   //iPath="/star/data05/scratch/stevens4/wAnalysis";
-  iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-Jan29b/data/";
-  //iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-pt4/data/";
+  iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-a1/data/";
   //core0="R10090018";
   //core0="run9setABCD";
   core0="run9setP1234";
@@ -705,6 +704,9 @@ void doAllMC(){
 
 
 // $Log: plWana.C,v $
+// Revision 1.12  2010/03/14 22:50:34  balewski
+// *** empty log message ***
+//
 // Revision 1.11  2010/02/04 03:48:25  balewski
 // add ET for lumi monitor
 //

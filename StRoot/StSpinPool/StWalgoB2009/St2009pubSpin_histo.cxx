@@ -1,4 +1,4 @@
-// $Id: St2009pubSpin_histo.cxx,v 1.6 2010/02/04 03:48:12 balewski Exp $
+// $Id: St2009pubSpin_histo.cxx,v 1.7 2010/03/14 22:50:31 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -21,14 +21,14 @@ St2009pubSpinMaker::initHistos(){
   TList *Lx;  TLine *ln;
   TH1 *h;
   char txt[1000], txt0[100];
-  int nCase=10;
+  int nCase=12;
 
   hA[0]=h=new TH1F(core+"StatEve",core+" event count",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
  
-  const char *key[]={"inp","badBx48","BG1","BG2","Wcut","eta","W25","Q/pT","Q +","Q -"};
-  for(int i=0;i<10;i++) h->Fill(key[i],0.); // preset the order of keys
+  const char *key[]={"inp","badBx48","BG1","BG2","Wcut","eta","W25","Qlow","Qhigh","Q +","Q -"};
+  for(int i=0;i<11;i++) h->Fill(key[i],0.); // preset the order of keys
  
 
   hA[1]=new TH1F(core+"bX48","Rate vs. raw bx48; bXing= raw bx48",128,-0.5,127.5);
@@ -45,16 +45,24 @@ St2009pubSpinMaker::initHistos(){
 
   hA[8]=h=new TH1F(core+"QpT","reco Q/PT,W ET>25 GeV; reco Q/PT  (1/GeV)",100,-0.099,0.099);
   Lx=h->GetListOfFunctions();
-  ln=new TLine(par_QPTplus,0,par_QPTplus,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-  ln=new TLine(par_QPTminus,0,par_QPTminus,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(par_QPTlow,0,par_QPTlow,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(-par_QPTlow,0,-par_QPTlow,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  float highCut=par_QPThighA - (par_QPThighET1-par_QPThighET0)*par_QPThighB;
+  float avrC=(par_QPThighA+highCut)/2.;
+  ln=new TLine(-avrC,0,-avrC,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(avrC,0,avrC,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
 
   hA[9]=h=new TH2F(core+"QpT2","TPC PRIM  Q/PT ; 2x2 cluster ET (GeV); Q/PT  (1/GeV)",100,0.,100.,100,-0.099,0.099);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kBlue);  Lx->Add(ln);
-  ln=new TLine(0,par_QPTminus,100,par_QPTminus);  ln->SetLineColor(kRed);  Lx->Add(ln);  
-  ln=new TLine(0,par_QPTplus,100,par_QPTplus);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(0,par_QPTlow,100,par_QPTlow);  ln->SetLineColor(kRed);  Lx->Add(ln);  
+  ln=new TLine(0,-par_QPTlow,100,-par_QPTlow);  ln->SetLineColor(kRed);  Lx->Add(ln);  
+
   ln=new TLine(25,-0.1, 25,0.1);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(par_QPThighET0,par_QPThighA,par_QPThighET1,highCut);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  ln=new TLine(par_QPThighET0,-par_QPThighA,par_QPThighET1,-highCut);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  
 
   //use 10-19
   char cPM[2]={'P','N'}; // Positive, Negative
@@ -112,6 +120,9 @@ St2009pubSpinMaker::initHistos(){
 
 
 // $Log: St2009pubSpin_histo.cxx,v $
+// Revision 1.7  2010/03/14 22:50:31  balewski
+// *** empty log message ***
+//
 // Revision 1.6  2010/02/04 03:48:12  balewski
 // add ET for lumi monitor
 //

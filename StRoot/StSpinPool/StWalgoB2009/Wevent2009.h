@@ -1,4 +1,4 @@
-// $Id: Wevent2009.h,v 1.4 2010/01/10 01:45:10 stevens4 Exp $
+// $Id: Wevent2009.h,v 1.5 2010/03/14 22:50:31 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -60,7 +60,7 @@ class WeveEleTrack { // electron track info
   int awayNTow,nearNTow; // # towers on away aide  
    
   TVector3 ptBalance,ptBalance_noEEMC;
-  float sPtBalance;
+  float sPtBalance,sPtBalance_noEEMC;// signed pT balance (GeV/c)
 
   TVector3 hadronicRecoil; 
 
@@ -71,7 +71,8 @@ class WeveEleTrack { // electron track info
     prMuTrack=glMuTrack=0; 
     awayTpcPT=nearTpcPT=nearTotET=awayTotET=nearEmcET=awayEmcET=nearBtowET=awayBtowET=nearEtowET=awayEtowET=smallNearTpcPT=nearTotET_noEEMC=awayTotET_noEEMC=0; awayNTr=awayNTow=nearNTr=nearNTow=smallNearNTr=0; 
     
-    ptBalance=TVector3(0,0,0); ptBalance_noEEMC=TVector3(0,0,0); sPtBalance=0;
+    ptBalance=TVector3(0,0,0); ptBalance_noEEMC=TVector3(0,0,0); 
+    sPtBalance=sPtBalance_noEEMC=0;
 
     hadronicRecoil=TVector3(0,0,0); } 
   
@@ -220,6 +221,9 @@ class Wevent2009 {
 
 
 // $Log: Wevent2009.h,v $
+// Revision 1.5  2010/03/14 22:50:31  balewski
+// *** empty log message ***
+//
 // Revision 1.4  2010/01/10 01:45:10  stevens4
 // fix plots w/o EEMC in veto
 //

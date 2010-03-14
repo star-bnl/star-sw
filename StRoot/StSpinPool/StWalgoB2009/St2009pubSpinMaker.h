@@ -1,4 +1,4 @@
-// $Id: St2009pubSpinMaker.h,v 1.3 2010/01/28 20:10:05 balewski Exp $
+// $Id: St2009pubSpinMaker.h,v 1.4 2010/03/14 22:50:31 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -31,7 +31,7 @@ class St2009pubSpinMaker : public StMaker {
   int nRun;
   int Tfirst,Tlast;
 
-  float par_QPTplus,par_QPTminus; // cuts to drop not sure charges
+  float par_QPTlow,par_QPThighET0,par_QPThighET1, par_QPThighA ,par_QPThighB; // cuts to drop questionable reco charge charges
   float par_leptonEta1, par_leptonEta2; // narrow the range
 
   St2009WMaker *wMK; // W-algo maker with all data
@@ -61,7 +61,7 @@ class St2009pubSpinMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009pubSpinMaker.h,v 1.3 2010/01/28 20:10:05 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009pubSpinMaker.h,v 1.4 2010/03/14 22:50:31 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -72,6 +72,9 @@ class St2009pubSpinMaker : public StMaker {
 
 
 // $Log: St2009pubSpinMaker.h,v $
+// Revision 1.4  2010/03/14 22:50:31  balewski
+// *** empty log message ***
+//
 // Revision 1.3  2010/01/28 20:10:05  balewski
 // added eta dependent spin sorting
 //

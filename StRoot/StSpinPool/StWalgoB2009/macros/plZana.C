@@ -3,10 +3,10 @@ TCanvas *can=0;
 //=================================================
 plZana(  int page=3,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
   iPath="./";
-  iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-Jan29b/data/";
-iPath="/star/data05/scratch/stevens4/wAnalysisOut/apsXsec/rcfMC/";
+  iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-feb24/data/";
+  //iPath="/star/data05/scratch/stevens4/wAnalysisOut/apsXsec/rcfMC/";
   core0="run9setP1234";
-core0="rcf10014";;
+  //core0="rcf10014";;
   //core0="mcSetD1_ppWprod";
   //core0="mcSetD2_ppQCD10_inf_filter";
   //core0="mcSetD1_ppZprod";
@@ -78,6 +78,7 @@ core0="rcf10014";;
 
  case 3:{  
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+    //can->SetGrayscale();
     c->Divide(2,2);gStyle->SetOptStat(10);
     char **nameX=nameC;
     for(int i=0;i<4;i++) {
@@ -179,6 +180,9 @@ void doAll(){
 
 
 // $Log: plZana.C,v $
+// Revision 1.8  2010/03/14 22:50:34  balewski
+// *** empty log message ***
+//
 // Revision 1.7  2010/02/04 03:48:25  balewski
 // add ET for lumi monitor
 //
