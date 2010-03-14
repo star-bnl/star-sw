@@ -1,4 +1,4 @@
-// $Id: St2009pubMcMaker.cxx,v 1.4 2010/02/19 21:04:10 stevens4 Exp $
+// $Id: St2009pubMcMaker.cxx,v 1.5 2010/03/14 22:50:31 balewski Exp $
 //
 //*-- Author : Justin Stevens, IUCF
 // 
@@ -71,7 +71,7 @@ St2009pubMcMaker::doWanalysis(){
       assert(T.nearTotET>0); // internal logical error
       
       if(T.cluster.ET /T.nearTotET< wMK->par_nearTotEtFrac) continue; // too large nearET
-      if(T.awayTotET> wMK->par_awayTotET) continue; // too large awayET
+      if(T.awayTotET> 30.) continue; // too large awayET , Jan
       //Full W cuts applied at this point
 
       //W info from pythia record
@@ -239,7 +239,7 @@ St2009pubMcMaker::doWefficiency(){
       
       if(T.cluster.ET/T.nearTotET< wMK->par_nearTotEtFrac) 
 	continue; // too large nearET
-      if(T.ptBalance.Perp() < wMK->par_ptBalance || T.awayTotET > wMK->par_awayTotET)
+      if(T.ptBalance.Perp() < wMK->par_ptBalance || T.awayTotET > 30.) //Jan
 	continue;
       
       //pass all W cuts 
@@ -328,6 +328,9 @@ St2009pubMcMaker::doMCanalysis(){
 }
 
 // $Log: St2009pubMcMaker.cxx,v $
+// Revision 1.5  2010/03/14 22:50:31  balewski
+// *** empty log message ***
+//
 // Revision 1.4  2010/02/19 21:04:10  stevens4
 // cleanup unused variables
 //

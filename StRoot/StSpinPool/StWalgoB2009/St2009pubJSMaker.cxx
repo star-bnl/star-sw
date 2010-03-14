@@ -1,4 +1,4 @@
-// $Id: St2009pubJSMaker.cxx,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: St2009pubJSMaker.cxx,v 1.2 2010/03/14 22:50:31 balewski Exp $
 //
 //*-- Author :  Justin Stevens, IUCF
 // 
@@ -31,7 +31,7 @@ Int_t St2009pubJSMaker::Init(){
   assert(wMK);
   par_countTrPt=wMK->par_countTrPt;
   par_countTowEt=wMK->par_countTowEt;
-  par_awayTotET=wMK->par_awayTotET;
+  par_awayTotET=30; // old, clean it up, Jan
   assert(HList);
   initHistos();
   return StMaker::Init();
@@ -66,7 +66,7 @@ St2009pubJSMaker::doWanalysis(){
       assert(T.nearTotET>0); // internal logical error
       
       if(T.cluster.ET /T.nearTotET< wMK->par_nearTotEtFrac) continue; // too large nearET
-      if(T.awayTotET> wMK->par_awayTotET) continue; // too large awayET
+      if(T.awayTotET> par_awayTotET) continue; // too large awayET, Jan
       //Transverse mass reco
 
       //hadronic recoil 
@@ -119,7 +119,7 @@ St2009pubJSMaker::doWanalysis(){
       hA[8]->Fill(T.awayNTr);
 
       etowQA(2,-999); //before away cut do etowQA
-      if(T.awayTotET> wMK->par_awayTotET) { // too large awayET
+      if(T.awayTotET> par_awayTotET) { // too large awayET, Jan
 	if(T.awayNTr > par_awayNTrCut)  
 	  hA[9]->Fill(T.cluster.ET);   
 	else                           
@@ -189,6 +189,9 @@ St2009pubJSMaker::etowQA(int whichCut,float zVert){//whichCut gives where in alg
 
 
 // $Log: St2009pubJSMaker.cxx,v $
+// Revision 1.2  2010/03/14 22:50:31  balewski
+// *** empty log message ***
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //

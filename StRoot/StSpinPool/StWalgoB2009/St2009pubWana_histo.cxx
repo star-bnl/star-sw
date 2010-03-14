@@ -1,4 +1,4 @@
-// $Id: St2009pubWana_histo.cxx,v 1.2 2010/01/21 17:54:31 stevens4 Exp $
+// $Id: St2009pubWana_histo.cxx,v 1.3 2010/03/14 22:50:31 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -110,12 +110,12 @@ St2009pubWanaMaker::initHistos(){
   hA[40]=h=new TH1F(core+"etaBin3sigNoE","electron 0 < |#eta| < .3; 2x2 cluster ET",100,1,101);
   
   //charge sorted for X sec
-  hA[41]=h=new TH1F(core+"clustPtBalP",Form("PT Balance > %.1f && awaySide PT < %.1f Q=+; 2x2 Cluster ET",wMK->par_ptBalance,wMK->par_awayTotET),100,0,100);
-  hA[42]=h=new TH1F(core+"clustPtBal_bckgrdP",Form("PT Balance < %.1f || awaySide PT > %.1f Q=+; 2x2 Cluster ET",wMK->par_ptBalance,wMK->par_awayTotET),100,0,100);
-  hA[43]=h=new TH1F(core+"clustPtBalnoEP",Form("PT Balance > %.1f && awaySide PT < %.1f (EEMC not included) Q=+; 2x2 Cluster ET",wMK->par_ptBalance,wMK->par_awayTotET),100,0,100);
-  hA[44]=h=new TH1F(core+"clustPtBalN",Form("PT Balance > %.1f && awaySide PT < %.1f Q=-; 2x2 Cluster ET",wMK->par_ptBalance,wMK->par_awayTotET),100,0,100);
-  hA[45]=h=new TH1F(core+"clustPtBal_bckgrdN",Form("PT Balance < %.1f || awaySide PT > %.1f Q=-; 2x2 Cluster ET",wMK->par_ptBalance,wMK->par_awayTotET),100,0,100);
-  hA[46]=h=new TH1F(core+"clustPtBalnoEN",Form("PT Balance > %.1f && awaySide PT < %.1f (EEMC not included) Q=-; 2x2 Cluster ET",wMK->par_ptBalance,wMK->par_awayTotET),100,0,100);
+  hA[41]=h=new TH1F(core+"clustPtBalP",Form("PT Balance > %.1f  Q=+; 2x2 Cluster ET",wMK->par_ptBalance),100,0,100);
+  hA[42]=h=new TH1F(core+"clustPtBal_bckgrdP",Form("PT Balance < %.1f Q=+; 2x2 Cluster ET",wMK->par_ptBalance),100,0,100);
+  hA[43]=h=new TH1F(core+"clustPtBalnoEP",Form("PT Balance > %.1f (EEMC not included) Q=+; 2x2 Cluster ET",wMK->par_ptBalance),100,0,100);
+  hA[44]=h=new TH1F(core+"clustPtBalN",Form("PT Balance > %.1f  Q=-; 2x2 Cluster ET",wMK->par_ptBalance),100,0,100);
+  hA[45]=h=new TH1F(core+"clustPtBal_bckgrdN",Form("PT Balance < %.1f  Q=-; 2x2 Cluster ET",wMK->par_ptBalance),100,0,100);
+  hA[46]=h=new TH1F(core+"clustPtBalnoEN",Form("PT Balance > %.1f  (EEMC not included) Q=-; 2x2 Cluster ET",wMK->par_ptBalance),100,0,100);
   
   
 

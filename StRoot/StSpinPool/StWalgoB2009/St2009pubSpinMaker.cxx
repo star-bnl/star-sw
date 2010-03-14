@@ -1,4 +1,4 @@
-// $Id: St2009pubSpinMaker.cxx,v 1.5 2010/02/04 03:48:12 balewski Exp $
+// $Id: St2009pubSpinMaker.cxx,v 1.6 2010/03/14 22:50:31 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -19,8 +19,12 @@ ClassImp(St2009pubSpinMaker)
 St2009pubSpinMaker::St2009pubSpinMaker(const char *name):StMaker(name){
   wMK=0;HList=0;
   core=name;
-  par_QPTplus=0.015;
-  par_QPTminus=-0.015; 
+  par_QPTlow=0.015;
+
+  par_QPThighET0=25; 
+  par_QPThighET1=50; 
+  par_QPThighA=0.08; 
+  par_QPThighB=1.6e-3; 
   par_leptonEta1=-1.; par_leptonEta2=1.;
  }
 
@@ -76,8 +80,8 @@ St2009pubSpinMaker::InitRun  (int runNo){
   sprintf(txt,"bXing= bx7+off=%d",spinDb->BX7offset());
   hA[4]->GetXaxis()->SetTitle(txt);
 
-  LOG_INFO<<Form("::InitRun(%d) done, W-spin sorting  params: exclude Q/PT in [%.2f, %.2f], leptonEta in[%.1f,%.1f]",
-		 par_QPTplus,par_QPTminus,par_leptonEta1, par_leptonEta2
+  LOG_INFO<<Form("::InitRun(%d) done, W-spin sorting  params: exclude |Q/PT| < %.2f OR |Q/PT| above line %.3*(ET-%.1f)-%6e if ET<%.1f, for AL use leptonEta in[%.1f,%.1f]",
+		 par_QPTlow,par_QPThighET0, par_QPThighA ,par_QPThighB,par_QPThighET1,par_leptonEta1, par_leptonEta2
 		 )<<endm;	 
   return kStOK;
 }
@@ -157,17 +161,18 @@ St2009pubSpinMaker::bXingSort(){
       float frac24=T.cluster.ET/(T.cl4x4.ET);
       if(iv==0 && it==0 && frac24<wMK->par_clustFrac24) {
 	hA[31]->Fill(T.cluster.ET);
-	if( T.cluster.ET <20. ) {	hA[7]->Fill(spin4);  hA[0]->Fill("BG2",1.);}
+	if( T.cluster.ET <20. ) { hA[7]->Fill(spin4);  hA[0]->Fill("BG2",1.);}
       }
 
       if(T.isMatch2Cl==false) continue;
       assert(T.cluster.nTower>0); // internal logical error
       assert(T.nearTotET>0); // internal logical error
       
+
        //put final W cut here
       if(fabs(T.primP.Eta()) > wMK->par_leptonEta) continue;     
       if(T.cluster.ET /T.nearTotET<  wMK->par_nearTotEtFrac) continue; // too large nearET
-      if(T.ptBalance.Perp()<wMK->par_ptBalance || T.awayTotET>  wMK->par_awayTotET)  continue;
+      if(T.sPtBalance<wMK->par_ptBalance )  continue;
       hA[0]->Fill("Wcut",1.);
 
       hA[30]->Fill(T.prMuTrack->eta());
@@ -184,12 +189,19 @@ St2009pubSpinMaker::bXingSort(){
       float q2pt=T.prMuTrack->charge()/T.prMuTrack->pt();
       if(ET>par_myET) hA[8]->Fill(q2pt);
       hA[9]->Fill(ET,q2pt);
-      if( q2pt> par_QPTminus && q2pt< par_QPTplus) continue;
+      
+      // apply cut on reco charge
+      if( fabs(q2pt)< par_QPTlow) continue;
+      float p_Q=T.prMuTrack->charge();
+      if(ET>par_myET) hA[0]->Fill("Qlow",1.);
 
-      const StMuTrack *prTr=T.prMuTrack; assert(prTr);
-      float p_Q=prTr->charge();
+      if( fabs(q2pt)< par_QPTlow) continue;
+      float highCut=par_QPThighA - (ET-par_QPThighET0)*par_QPThighB;
+      // printf("fff ET=%f q2pr=%f highCut=%f passed=%d\n",ET, q2pt,highCut,fabs(q2pt)<highCut);
+      if( ET>par_myET && ET<par_QPThighET1 && fabs(q2pt)>highCut) continue;
+
       if(ET>par_myET) {
-	hA[0]->Fill("Q/pT",1.);
+	hA[0]->Fill("Qhigh",1.);
 	if(p_Q>0) hA[0]->Fill("Q +",1.);
 	else  hA[0]->Fill("Q -",1.);
       }
@@ -210,6 +222,9 @@ St2009pubSpinMaker::bXingSort(){
 
 
 // $Log: St2009pubSpinMaker.cxx,v $
+// Revision 1.6  2010/03/14 22:50:31  balewski
+// *** empty log message ***
+//
 // Revision 1.5  2010/02/04 03:48:12  balewski
 // add ET for lumi monitor
 //

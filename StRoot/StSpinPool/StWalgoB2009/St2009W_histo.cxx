@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.12 2010/02/22 15:49:34 seelej Exp $
+// $Id: St2009W_histo.cxx,v 1.13 2010/03/14 22:50:31 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -160,16 +160,12 @@ St2009WMaker::initHistos(){
   hA[50]=h=new TH1F("muTwayET"," TPC away-cone PT sum;   PT (GeV)",100,0,100);
   hA[51]=h=new TH1F("muBwayET"," BTOW away-cone ET sum;   ET (GeV)",100,0,100);
   hA[52]=h=new TH2F("muTotwayET2D"," away TPC+EMC ET sum  vs. 2x2 cluster ET;  2x2 ET (GeV); away ET (GeV)",50,0,100,150,0,100);
-  Lx=h->GetListOfFunctions();
-  ln=new TLine(0,par_awayTotET,200,par_awayTotET);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
 
   hA[53]=h=new TH2F("muAwayET2Db"," away EMC ET sum  vs. 2x2 cluster ET;  2x2 ET (GeV); away EMC ET (GeV)",50,0,100,80,0,80);
 
 
   hA[54]=h=new TH1F("muAwayTotEt"," away-cone TPC+EMC ET sum ; away ET (GeV)",200,0,100);
-  Lx=h->GetListOfFunctions();
-  ln=new TLine(par_awayTotET,0,par_awayTotET,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
   hA[55]=h=new TH1F("muEwayET"," ETOW away-cone ET sum;   ET (GeV)",100,0,100); // away side energy  
   
@@ -236,17 +232,21 @@ St2009WMaker::initHistos(){
 
   hA[132]=h=new TH2F("muptBalance_clust","ptBalance vs cluster ET; 2x2 Cluster ET; ptBalance",100,0,100,100,0,100);
   hA[133]=h=new TH2F("muptBalance_awayTot","ptBalance vs awayside PT; awayside PT; ptBalance",100,0,100,100,0,100);
-  Lx=h->GetListOfFunctions();
-  ln=new TLine(par_awayTotET,par_ptBalance,par_awayTotET,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-  Lx=h->GetListOfFunctions();
-  ln=new TLine(0,par_ptBalance,par_awayTotET,par_ptBalance);  ln->SetLineColor(kRed);  Lx->Add(ln);
+
   hA[134]=h=new TH2F("musPtBalance_clust","sPtBalance vs cluster ET; 2x2 Cluster ET; sPtBalance",100,0,100,100,-100,100);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,par_ptBalance,100,par_ptBalance);  ln->SetLineColor(kRed);  Lx->Add(ln);
+
   hA[135]=h=new TH2F("musPtBalance_awayTot","sPtBalance vs awayside PT; awayside PT; sPtBalance",100,0,100,100,-100,100);
-  hA[136]=h=new TH1F("muclustPtBal",Form("PT Balance > %.1f && awaySide PT < %.1f ; 2x2 Cluster ET",par_ptBalance,par_awayTotET),100,0,100);
-  hA[137]=h=new TH1F("muclustPtBal_bckgrd",Form("PT Balance < %.1f || awaySide PT > %.1f ; 2x2 Cluster ET",par_ptBalance,par_awayTotET),100,0,100);
+  Lx=h->GetListOfFunctions();
+  ln=new TLine(0,par_ptBalance,100,par_ptBalance);  ln->SetLineColor(kRed);  Lx->Add(ln);
+
+
+  hA[136]=h=new TH1F("muclustPtBal",Form("PT Balance > %.1f ; 2x2 Cluster ET",par_ptBalance),100,0,100);
+  hA[137]=h=new TH1F("muclustPtBal_bckgrd",Form("PT Balance < %.1f ; 2x2 Cluster ET",par_ptBalance),100,0,100);
   hA[138]=h=new TH1F("muclustAwayPt","AwaySide PT < 8 ; 2x2 Cluster ET",100,0,100);
   hA[139]=h=new TH1F("muclustAwayPt_bckgrd","AwaySide PT > 8 ; 2x2 Cluster ET",100,0,100);
-  hA[140]=h=new TH1F("muclustPtBalnoE",Form("PT Balance > %.1f && awaySide PT < %.1f (EEMC not included); 2x2 Cluster ET",par_ptBalance,par_awayTotET),100,0,100);
+  hA[140]=h=new TH1F("muclustPtBalnoE",Form("PT Balance > %.1f (EEMC not included); 2x2 Cluster ET",par_ptBalance),100,0,100);
   hA[141]=h=new TH1F("muclustAwayPtnoE","AwaySide PT < 8 (EEMC not included); 2x2 Cluster ET",100,0,100);
   
   // Histograms added for background subtraction and systematic
@@ -280,6 +280,9 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
+// Revision 1.13  2010/03/14 22:50:31  balewski
+// *** empty log message ***
+//
 // Revision 1.12  2010/02/22 15:49:34  seelej
 // Joe : Changes to code for inclusion of background subtraction and systematic studies
 //

@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.h,v 1.9 2010/02/18 22:34:50 stevens4 Exp $
+// $Id: St2009WMaker.h,v 1.10 2010/03/14 22:50:31 balewski Exp $
 
 #ifndef STAR_St2009WMaker
 #define STAR_St2009WMaker
@@ -79,12 +79,12 @@ class St2009WMaker : public StMaker {
   int   par_kSigPed, par_AdcThres;
   float par_maxADC, par_clustET, par_clustFrac24, par_nearTotEtFrac;
   float par_nearDeltaR, par_awayDeltaPhi, par_smallNearDeltaR;
-  float par_delR3D, par_highET, par_awayTotET, par_ptBalance;
+  float par_delR3D, par_highET,  par_ptBalance;
   float par_leptonEta; // 
   int   par_inpRunNo; // to control run dependent cuts, ugly solution JB
 
   float par_countTrPt,par_countTowEt; 
-  int par_useEtow;                    
+  int   par_useEtow;                    
   float par_etowScale;
   float par_btowScale;
 
@@ -99,8 +99,8 @@ class St2009WMaker : public StMaker {
   void setEleTrackCuts(int nfp, int hfr, float rin, float rout, float mpt) {
     par_nFitPts=nfp;  par_nHitFrac=hfr; 
     par_trackRin=rin;  par_trackRout=rout; par_trackPt=mpt;}
-  void setWbosonCuts(float a, float fr2, float b, float bal) {
-    par_highET=a; par_nearTotEtFrac=fr2;  par_awayTotET=b; par_ptBalance=bal;}
+  void setWbosonCuts(float a, float fr2,  float bal) {
+    par_highET=a; par_nearTotEtFrac=fr2;  par_ptBalance=bal;}
   void setEmcCuts(int ksp , float madc, float clet, float fr1, float dr){
     par_kSigPed=ksp; par_maxADC=madc; par_clustET=clet; 
     par_clustFrac24=fr1;}
@@ -187,7 +187,7 @@ class St2009WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.9 2010/02/18 22:34:50 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.10 2010/03/14 22:50:31 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -198,6 +198,9 @@ class St2009WMaker : public StMaker {
 
 
 // $Log: St2009WMaker.h,v $
+// Revision 1.10  2010/03/14 22:50:31  balewski
+// *** empty log message ***
+//
 // Revision 1.9  2010/02/18 22:34:50  stevens4
 // add tpc effic study and allow energy scaling for data and MC
 //

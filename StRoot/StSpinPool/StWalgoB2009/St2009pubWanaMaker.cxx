@@ -1,4 +1,4 @@
-// $Id: St2009pubWanaMaker.cxx,v 1.3 2010/01/23 02:35:38 stevens4 Exp $
+// $Id: St2009pubWanaMaker.cxx,v 1.4 2010/03/14 22:50:31 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -85,7 +85,7 @@ St2009pubWanaMaker::evalWeleTrackSign(){
 
       float absEta=fabs(T.primP.Eta());
       if(T.cluster.ET/T.nearTotET_noEEMC>wMK->par_nearTotEtFrac){
-        if(T.ptBalance_noEEMC.Perp()>wMK->par_ptBalance && T.awayTotET_noEEMC<wMK->par_awayTotET){//signal w/o endcap in veto
+        if(T.sPtBalance_noEEMC>wMK->par_ptBalance){//signal w/o endcap in veto
 	  //charge sorted
 	  if(p_ipn==0)
 	    hA[43]->Fill(T.cluster.ET);
@@ -104,7 +104,7 @@ St2009pubWanaMaker::evalWeleTrackSign(){
       if(T.cluster.ET /T.nearTotET< wMK->par_nearTotEtFrac) continue; // too large nearET
       
       //xSec binned 
-      if(T.ptBalance.Perp()>wMK->par_ptBalance && T.awayTotET<wMK->par_awayTotET){//signal
+      if(T.sPtBalance>wMK->par_ptBalance ){//signal
 	//charge sorted
 	if(p_ipn==0)
 	  hA[41]->Fill(T.cluster.ET);
@@ -133,7 +133,7 @@ St2009pubWanaMaker::evalWeleTrackSign(){
 	  hA[37]->Fill(T.cluster.ET);
       }
 	
-      if(T.ptBalance.Perp()<wMK->par_ptBalance || T.awayTotET>wMK->par_awayTotET)  continue;
+      if(T.sPtBalance<wMK->par_ptBalance )  continue;
       
       hA[0]->Fill("acc",1.);
       
@@ -245,6 +245,9 @@ St2009pubWanaMaker::varyCuts4backgStudy(){
 }
 
 // $Log: St2009pubWanaMaker.cxx,v $
+// Revision 1.4  2010/03/14 22:50:31  balewski
+// *** empty log message ***
+//
 // Revision 1.3  2010/01/23 02:35:38  stevens4
 // add ability to scale jet et and use real btow peds for rcf mc
 //
