@@ -42,8 +42,11 @@
 //
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.h,v 1.9 2010/02/24 18:11:47 hmasui Exp $
+ * $Id: StEmbeddingQADraw.h,v 1.10 2010/03/15 21:05:23 hmasui Exp $
  * $Log: StEmbeddingQADraw.h,v $
+ * Revision 1.10  2010/03/15 21:05:23  hmasui
+ * Separate MC vertices QA into 2 pages. Added constraint on z-vertex cut for vx(vy) vs vz histograms.
+ *
  * Revision 1.9  2010/02/24 18:11:47  hmasui
  * Added isMC flag in drawProjection2D() to switch real or MC tracks
  *
@@ -207,6 +210,10 @@ class StEmbeddingQADraw {
     /// Canvas/Pad initialization
     // Header for current QA, division of (x,y), default is (0,0), no division
     TPaveText* initCanvas(const TString header, const Int_t nx=0, const Int_t ny=0) const;
+
+    /// Get accepted minimum/maximum vz from histogram
+    Double_t getVzAcceptedMinimum() const ; /// Minimum vz
+    Double_t getVzAcceptedMaximum() const ; /// Maximum vz
 
     // Data members
     static UInt_t mCanvasId ; /// Canvas id
