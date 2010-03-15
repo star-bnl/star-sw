@@ -46,7 +46,7 @@ class iterator<input_iterator_tag, class StBiTree<T> > {
            if (!fCurrentIterator) {
               StBiTree<T> *b = fCurrentBranch ? p->Right() : p->Left();
               if (b) fCurrentIterator = b->CreateIterator();
-           } else if (*fCurrentIterator != p->end() )  ++(*fCurrentIterator);
+           } else if (*fCurrentIterator != p->end() )  fCurrentIterator->next();
            if ( fCurrentIterator && (*fCurrentIterator == p->end() ) && fCurrentBranch == StBiTree<T>::kLeft ) {
               delete fCurrentIterator;  fCurrentIterator = 0;
               fCurrentBranch = StBiTree<T>::kRight;
@@ -58,7 +58,8 @@ class iterator<input_iterator_tag, class StBiTree<T> > {
      }
      return *this;
   }
-  iterator& operator++() {   return next(fCurrentBranch);  }
+  iterator& next()       {   return next(fCurrentBranch);  }
+  iterator& operator++() {   return next();  }
 
 };
 
