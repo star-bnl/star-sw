@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.13 2010/02/24 18:13:23 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.14 2010/03/15 21:05:24 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.14  2010/03/15 21:05:24  hmasui
+ * Separate MC vertices QA into 2 pages. Added constraint on z-vertex cut for vx(vy) vs vz histograms.
+ *
  * Revision 1.13  2010/02/24 18:13:23  hmasui
  * Modify color code explanation more explicitly. Comparison of phi distributions between reconstructed embedding with MC tracks
  *
@@ -676,7 +679,10 @@ Bool_t StEmbeddingQADraw::drawVertices() const
   /// Draw event vertices
   LOG_INFO << "QA for event-vertices ..." << endm;
 
-  TPaveText* header = initCanvas("Event vertices", 3, 3);
+  /// Get minimum/maximum z-vertex cut
+  const Double_t vzMin = getVzAcceptedMinimum() ;
+  const Double_t vzMax = getVzAcceptedMaximum() ;
+  TPaveText* header = initCanvas(Form("Event vertices, offline cuts: %1.1f < v_{z} < %1.1f cm", vzMin, vzMax), 2, 2);
 
   /// z-vertex
   mMainPad->cd(1);
@@ -693,26 +699,36 @@ Bool_t StEmbeddingQADraw::drawVertices() const
   hVz->Draw("same");
 
   /// y vs x vertices
-  mMainPad->cd(4);
+  mMainPad->cd(2);
   TH2* hVyVx = (TH2D*) getHistogram("hVyVx");
   if(!hVyVx) return kFALSE ;
   hVyVx->Draw("colz");
 
-  /// x vs z vertices
-  mMainPad->cd(5);
+  /// x vs z vertices, constrained within z-vertex cuts
+  mMainPad->cd(3);
   TH2* hVxVz = (TH2D*) getHistogram("hVxVz");
   if(!hVxVz) return kFALSE ;
+  hVxVz->SetAxisRange(vzMin, vzMax, "X");
   hVxVz->Draw("colz");
 
-  /// y vs z vertices
-  mMainPad->cd(6);
+  /// y vs z vertices, constrained within z-vertex cuts
+  mMainPad->cd(4);
   TH2* hVyVz = (TH2D*) getHistogram("hVyVz");
   if(!hVyVz) return kFALSE ;
+  hVyVz->SetAxisRange(vzMin, vzMax, "X");
   hVyVz->Draw("colz");
+
+  mCanvas->cd();
+  mCanvas->Update();
+  mPDF->NewPage() ;
+
+  /// V(Data) - V(MC)
+  delete header ;
+  header = initCanvas("Event vertices, #Deltav = v(Data) - v(MC)", 2, 2);
 
   /// dVx, dVy, dVz
   for(Int_t i=0; i<3; i++){
-    mMainPad->cd(i+7);
+    mMainPad->cd(i+1);
     TH1* hdV = 0 ;
     if( i == 0 ) hdV = (TH1D*) getHistogram("hdVx");
     if( i == 1 ) hdV = (TH1D*) getHistogram("hdVy");
@@ -724,7 +740,6 @@ Bool_t StEmbeddingQADraw::drawVertices() const
 
   mCanvas->cd();
   mCanvas->Update();
-
   mPDF->NewPage() ;
 
   /// Print figures
@@ -1835,6 +1850,44 @@ TPaveText* StEmbeddingQADraw::initCanvas(const TString headerTitle, const Int_t 
   if( nx != 0 && ny != 0 ) mMainPad->Divide(nx, ny);
 
   return header ;
+}
+
+//____________________________________________________________________________________________________
+Double_t StEmbeddingQADraw::getVzAcceptedMinimum() const
+{
+  /// Get minimum vz value from histogram
+  TH1* hVzAccepted = (TH1D*) getHistogram("hVzAccepted");
+
+  Double_t vzMin = -200.0 ;
+  for(Int_t ix=0; ix<hVzAccepted->GetNbinsX(); ix++){
+    const Double_t count = hVzAccepted->GetBinContent(ix+1);
+    if(count!=0){
+      vzMin = hVzAccepted->GetBinLowEdge(ix+1);
+      LOG_INFO << "Find minimum vz cut, v_z(min) = " << vzMin << " (cm) " << endm ;
+      break ;
+    }
+  }
+
+  return vzMin ;
+}
+
+//____________________________________________________________________________________________________
+Double_t StEmbeddingQADraw::getVzAcceptedMaximum() const
+{
+  /// Get maximum vz value from histogram
+  TH1* hVzAccepted = (TH1D*) getHistogram("hVzAccepted");
+
+  Double_t vzMax = 200.0 ;
+  for(Int_t ix=hVzAccepted->GetNbinsX()-1; ix!=-1; ix--){
+    const Double_t count = hVzAccepted->GetBinContent(ix+1);
+    if(count!=0){
+      vzMax = hVzAccepted->GetBinLowEdge(ix+1) + hVzAccepted->GetBinWidth(ix+1);
+      LOG_INFO << "Find maximum vz cut, v_z(max) = " << vzMax << " (cm) " << endm ;
+      break ;
+    }
+  }
+
+  return vzMax ;
 }
 
 //____________________________________________________________________________________________________
