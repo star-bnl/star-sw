@@ -1,10 +1,10 @@
-// $Id: StTpcdEdxCorrection.h,v 1.18 2010/01/26 21:04:42 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.19 2010/03/15 23:33:17 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
 #include "TObject.h"
 #include "Stiostream.h"
-#include "St_tpcCorrectionC.h"
+#include "StDetectorDbMaker/St_tpcCorrectionC.h"
 #include "tables/St_tpcGas_Table.h"
 #include "tables/St_TpcSecRowCor_Table.h"
 #include "tables/St_tpcGas_Table.h"
