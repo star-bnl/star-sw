@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.51 2010/01/26 21:04:42 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.52 2010/03/15 23:29:47 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.52  2010/03/15 23:29:47  fisyak
+ * switch from St_tpcAnodeHVC => St_tpcAnodeHVavgC
+ *
  * Revision 1.51  2010/01/26 21:04:42  fisyak
  * Add new dE/dx calibration tables: TpcRowQ, tpcMethaneIn, tpcWaterOut, TpcZDC
  *
@@ -167,7 +170,7 @@
 #include "math_constants.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMaker/StDetectorDbMagnet.h"
-#include "StDetectorDbMaker/St_tpcAnodeHVC.h"
+#include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0C.h"
 #if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
@@ -321,7 +324,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
 //_____________________________________________________________________________
 Int_t StTpcDbMaker::Make(){
   // check that TPC is tripped 
-  if (St_tpcAnodeHVC::instance()->tripped()) {
+  if (St_tpcAnodeHVavgC::instance()->tripped()) {
     gMessMgr->Info() << "StTpcDbMaker::TPC has tripped - declaring EOF to avoid possibly bad data" << endm;
     return kStEOF;
   }
