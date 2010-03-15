@@ -22,7 +22,134 @@ MakeChairInstance(tpcOmegaTau,Calibrations/tpc/tpcOmegaTau);
 #include "St_tpcDriftVelocityC.h"
 MakeChairInstance(tpcDriftVelocity,Calibrations/tpc/tpcDriftVelocity);
 #include "St_TpcSecRowCorC.h"
-MakeChairInstance(TpcSecRowCor,Calibrations/tpc/TpcSecRowCor);
+ClassImp(St_TpcSecRowCorC);
+#include "St_TpcSecRowBC.h"
+MakeChairInstance2(TpcSecRowCor,St_TpcSecRowBC,Calibrations/tpc/TpcSecRowB);
+#include "St_TpcSecRowCC.h"
+MakeChairInstance2(TpcSecRowCor,St_TpcSecRowCC,Calibrations/tpc/TpcSecRowC);
+#include "St_TpcSecRowXC.h"
+MakeChairInstance2(TpcSecRowCor,St_TpcSecRowXC,Calibrations/tpc/TpcSecRowX);
+#include "St_tpcCorrectionC.h"
+ClassImp(St_tpcCorrectionC);
+//________________________________________________________________________________
+Double_t St_tpcCorrectionC::CalcCorrection(Int_t i, Double_t x, Double_t z) {
+  tpcCorrection_st *cor =  ((St_tpcCorrection *) Table())->GetTable() + i;
+  return SumSeries(cor, x, z);
+}
+//________________________________________________________________________________
+Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x, Double_t z) {
+  Double_t Sum = 0;
+  if (! cor) return Sum;
+  Int_t N = TMath::Abs(cor->npar)%100;
+  if (N == 0) return Sum;
+  static Double_t T0, T1, T2;
+  // parameterization variable
+  Double_t X;
+  if (cor->npar  < 0) X = TMath::Exp(x);
+  else {
+    switch  (cor->type) {
+    case 10:// ADC correction offset + poly for ADC
+    case 11:// ADC correction offset + poly for log(ADC) and |Z|  
+      X = TMath::Log(x);      break;
+    case 1: // Tchebyshev [-1,1] 
+      if (cor->min < cor->max)   X = -1 + 2*TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
+      break;
+    case 2: // Shifted TChebyshev [0,1]
+      if (cor->min < cor->max)   X = TMath::Max(0.,TMath::Min(1.,(X - cor->min)/( cor->max - cor->min)));
+      break;
+    case 3: 
+      if (TMath::Abs(TMath::Abs(x) - 1) < 1.e-7) X = 0;
+      else                                       X = TMath::Log(1. - TMath::Abs(x));
+      break;
+    case 4:
+      if (TMath::Abs(TMath::Abs(x) - 1) < 1.e-7) X = 0;
+      else                                       X = TMath::Sign(TMath::Log(1. - TMath::Abs(x)),x);
+      break;
+    default:      X = x;    break;
+    }
+  }
+  if (cor->type != 1 && cor->type != 2 &&
+      cor->min < cor->max) {
+    if (X < cor->min) X = cor->min;
+    if (X > cor->max) X = cor->max;
+  }
+  switch (cor->type) {
+  case 1: // Tchebyshev [-1,1] 
+    T0 = 1;
+    Sum = cor->a[0]*T0;
+    if (N == 1) break;
+    T1 = X;
+    Sum += cor->a[1]*T1;
+    for (int n = 2; n <= N; n++) {
+      T2 = 2*X*T1 - T0;
+      Sum += cor->a[n]*T2;
+      T0 = T1;
+      T1 = T2;
+    }
+    break;
+  case 2: // Shifted TChebyshev [0,1]
+    T0 = 1;
+    Sum = cor->a[0]*T0;
+    if (N == 1) break;
+    T1 = 2*X - 1;
+    Sum += cor->a[1]*T1;
+    for (int n = 2; n <= N; n++) {
+      T2 = 2*(2*X - 1)*T1 - T0;
+      Sum += cor->a[n]*T2;
+      T0 = T1;
+      T1 = T2;
+    }
+    break;
+  case 10: // ADC correction offset + poly for ADC
+    Sum = cor->a[N-1];
+    for (int n = N-2; n>=0; n--) Sum = X*Sum + cor->a[n];
+    Sum += TMath::Log(1. + cor->OffSet/x);
+    Sum  = TMath::Exp(Sum);
+    Sum *= x;
+    break;
+  case 11: // ADC correction offset + poly for log(ADC) and |Z|
+    Sum = cor->a[1] + z*cor->a[2] + z*X*cor->a[3] + TMath::Exp(X*(cor->a[4] + X*(cor->a[5] + X*cor->a[6])));
+    Sum *= TMath::Exp(-cor->a[0]);
+    break;
+  default: // polynomials
+    Sum = cor->a[N-1];
+    for (int n = N-2; n>=0; n--) Sum = X*Sum + cor->a[n];
+    break;
+  }
+  return Sum;
+}
+#include "St_TpcRowQC.h"
+MakeChairInstance2(tpcCorrection,St_TpcRowQC,Calibrations/tpc/TpcRowQ);
+#include "St_TpcDriftDistOxygenC.h"
+MakeChairInstance2(tpcCorrection,St_TpcDriftDistOxygenC,Calibrations/tpc/TpcDriftDistOxygen);
+#include "St_TpcMultiplicityC.h"
+MakeChairInstance2(tpcCorrection,St_TpcMultiplicityC,Calibrations/tpc/TpcMultiplicity);
+#include "St_TpcZCorrectionBC.h"
+MakeChairInstance2(tpcCorrection,St_TpcZCorrectionBC,Calibrations/tpc/TpcZCorrectionB);
+#include "St_TpcdXCorrectionBC.h"
+MakeChairInstance2(tpcCorrection,St_TpcdXCorrectionBC,Calibrations/tpc/TpcdXCorrectionB);
+#include "St_tpcPressureBC.h"
+MakeChairInstance2(tpcCorrection,St_tpcPressureBC,Calibrations/tpc/tpcPressureB);
+#include "St_tpcMethaneInC.h"
+MakeChairInstance2(tpcCorrection,St_tpcMethaneInC,Calibrations/tpc/tpcMethaneIn);
+#include "St_tpcGasTemperatureC.h"
+MakeChairInstance2(tpcCorrection,St_tpcGasTemperatureC,Calibrations/tpc/tpcGasTemperature);
+#include "St_tpcWaterOutC.h"
+MakeChairInstance2(tpcCorrection,St_tpcWaterOutC,Calibrations/tpc/tpcWaterOut);
+#include "St_TpcdChargeC.h"
+MakeChairInstance2(tpcCorrection,St_TpcdChargeC,Calibrations/tpc/TpcdCharge);
+#include "St_TpcZDCC.h"
+MakeChairInstance2(tpcCorrection,St_TpcZDCC,Calibrations/tpc/TpcZDC);
+#include "St_TpcSpaceChargeC.h"
+MakeChairInstance2(tpcCorrection,St_TpcSpaceChargeC,Calibrations/tpc/TpcSpaceCharge);
+#include "St_TpcPhiDirectionC.h"
+MakeChairInstance2(tpcCorrection,St_TpcPhiDirectionC,Calibrations/tpc/TpcPhiDirection);
+#include "St_TpcdEdxCorC.h"
+MakeChairInstance2(tpcCorrection,St_TpcdEdxCorC,Calibrations/tpc/TpcdEdxCor);
+#include "St_TpcLengthCorrectionBC.h"
+MakeChairInstance2(tpcCorrection,St_TpcLengthCorrectionBC,Calibrations/tpc/TpcLengthCorrectionB);
+
+
 #include "St_tpcEffectiveGeomC.h"
 MakeChairInstance(tpcEffectiveGeom,Calibrations/tpc/tpcEffectiveGeom);
 #include "St_tpcElectronicsC.h"

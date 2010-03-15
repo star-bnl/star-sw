@@ -13,7 +13,7 @@ class St_tpcRDOMasksC : public TChair {
   UInt_t 	sector(Int_t i = 0) 	        {return Struct(i)->sector;}
   UInt_t 	mask(Int_t i = 0) 	        {return Struct(i)->mask;}
   UInt_t        getSectorMask(UInt_t sector);
-  UInt_t        rdoForPadrow(Int_t row) {
+  static UInt_t rdoForPadrow(Int_t row) { //Function returns the rdo board number for a given padrow index. Range of map used is 1-45.
     UInt_t rdo = 0;
     if      (row > 0 && row <=  8) rdo = 1;
     else if (row > 8 && row <= 13) rdo = 2;
