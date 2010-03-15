@@ -113,7 +113,9 @@ class StBiTree
          {
             return iterator<input_iterator_tag, class StBiTree<PAR> >();
          }
-
+         bool empty() const   { return IsEmpty(); }
+         iterator<input_iterator_tag, class StBiTree<PAR> >  find(const PAR &data); 
+         iterator<input_iterator_tag, class StBiTree<PAR> >  find(const StBiTree<PAR> &node); 
 };
 
 //___________________________________________________________________
@@ -257,57 +259,85 @@ const PAR &StBiTree<PAR>::Data() const
     return mParameters;
 }
 
-//___________________________________________________________________
+//_____________________________________________________________________________
 template <class PAR>
 PAR &StBiTree<PAR>::Data()
 {
     return mParameters;
 }
 
-//___________________________________________________________________
+//_____________________________________________________________________________
 template <class PAR>
 void StBiTree<PAR>::push_back( const PAR &data)
 {
-   iterator<input_iterator_tag, class StBiTree<PAR> > it = begin();
-   while (it != end())    {
-      StBiTree<PAR> &branch = *it; 
-      if (branch.IsEmpty() ) {
-         mParameters = data;
-         mIsLeaf=true;
-         break;
-      } else if ( branch.IsLeaf() ) {
-         // Add the new plane and right leaf
-         StBiTree<PAR> *rightLeaf = new StBiTree<PAR>(data,true);
-         StBiTree<PAR> *parent    = branch.Parent();
-         if (parent) {
-            StBiTree<PAR> *newParentPlane = new StBiTree<PAR>(Plane(branch.Data(),data),false);
+   StBiTree<PAR> &branch = *this; 
+   if (branch.IsEmpty() ) {
+      mParameters = data;
+      mIsLeaf=true;
+   } else if ( branch.IsLeaf() ) {
+      // Add the new plane and right leaf
+      StBiTree<PAR> *rightLeaf = new StBiTree<PAR>(data,true);
+      StBiTree<PAR> *parent    = branch.Parent();
+      if (parent) {
+         StBiTree<PAR> *newParentPlane = new StBiTree<PAR>(Plane(branch.Data(),data),false);
 
-            newParentPlane->SetRight(rightLeaf);
-            newParentPlane->SetLeft(&branch);
-            newParentPlane->SetParent(parent);
+         newParentPlane->SetRight(rightLeaf);
+         newParentPlane->SetLeft(&branch);
+         newParentPlane->SetParent(parent);
 
-            parent->SetBranch(newParentPlane,branch.WhereAmI());
-            branch.SetParent(newParentPlane);
-            rightLeaf->SetParent(newParentPlane);
-         } else {
-            StBiTree<PAR> *leftLeaf    = new StBiTree<PAR>(branch.Data(),true);
-            branch.SetLeft(leftLeaf);
-            leftLeaf->SetParent(&branch);
-
-            branch.SetRight(rightLeaf);
-            rightLeaf->SetParent(&branch);
-
-            branch.Data() = Plane(branch.Data(),data);
-            branch.SetLeaf(false);
-         }
-         break;
+         parent->SetBranch(newParentPlane,branch.WhereAmI());
+         branch.SetParent(newParentPlane);
+         rightLeaf->SetParent(newParentPlane);
       } else {
-         // define the direction
-         it.next ( Where(branch.Data(),data) ); 
+         StBiTree<PAR> *leftLeaf    = new StBiTree<PAR>(branch.Data(),true);
+         branch.SetLeft(leftLeaf);
+         leftLeaf->SetParent(&branch);
+
+         branch.SetRight(rightLeaf);
+         rightLeaf->SetParent(&branch);
+
+         branch.Data() = Plane(branch.Data(),data);
+         branch.SetLeaf(false);
+      }
+   } else {
+      // define the direction
+      EBranch loc = Where(data);
+      StBiTree<PAR> *next = Branch( loc ); 
+      if(next) {
+         next->push_back(data);
+      } else {
+         SetBranch(new StBiTree<PAR>(branch.Data(),true),loc);
       }
    }
 }
 
+//_____________________________________________________________________________
+template <class PAR>
+iterator<input_iterator_tag, class StBiTree<PAR> >  StBiTree<PAR>::find(const StBiTree<PAR> &node)
+{
+   iterator<input_iterator_tag, class StBiTree<PAR> > it = find(node.Data());
+   if ( it == node.begin()) return it;
+   return  end();
+}
+
+//_____________________________________________________________________________
+template <class PAR>
+iterator<input_iterator_tag, class StBiTree<PAR> >  StBiTree<PAR>::find(const PAR &data)
+{
+   if (empty() || IsLeaf() ) {
+      return begin();
+   } else {
+      EBranch loc = Where(data);
+      StBiTree<PAR> *next = Branch( loc ); 
+      if(next) {
+         return next->find(data);
+      } else {
+         return begin();
+      }
+   }
+}
+
+//_____________________________________________________________________________
 template<>
 inline int StBiTree< vector<float> >::Where( const vector<float> &plane, const vector<float>  &data)
 {
@@ -316,6 +346,7 @@ inline int StBiTree< vector<float> >::Where( const vector<float> &plane, const v
    return dist > 0;
 }
 
+//_____________________________________________________________________________
 template<>
 inline vector<float> StBiTree< vector<float> >::Plane( const vector<float> &left, const vector<float>  &right)
 {
@@ -381,6 +412,7 @@ void StBiTree<PAR>::Print(int shift) const
    }
 }
 
+//_____________________________________________________________________________
 template<>
 inline void StBiTree< vector<float> >::PrintData(int shift) const
 {
