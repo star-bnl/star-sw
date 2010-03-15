@@ -20,8 +20,8 @@ TH1F *hAsy[mxQ];
 TH1F *hLum=new TH1F("hLum","hLum", 50,0.5,50.5); // for lumi monitor and 
 
 void rdN2AL(TString inpCore="run9setP1234") {
-  TString  iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-p/data/";
-  iPath="sortJan29CNI/final/";
+  TString  iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-a3/data/";
+  // iPath="sortJan29CNI/final/";
   //iPath="sortJan29CNI/dropQ2Pt/";
   //iPath="sortJan29XXX/halfQ2Pt/";
   //iPath="sortJan29CNI/dropPtBal/";
@@ -77,7 +77,7 @@ void rdN2AL(TString inpCore="run9setP1234") {
   hAsy[1]->Write();
 
   //........ nice plot with summary
-  can=new TCanvas(inpCore, inpCore,500,400);
+  can=new TCanvas(inpCore, inpCore,500,370);
   gStyle->SetOptStat(0);
   TPad *c=makeTitle(can,(iPath+inpCore).Data());
   c->SetFillColor(kWhite); 

@@ -1,4 +1,4 @@
-// $Id: St2009pubSpinMaker.cxx,v 1.6 2010/03/14 22:50:31 balewski Exp $
+// $Id: St2009pubSpinMaker.cxx,v 1.7 2010/03/15 17:05:46 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -19,12 +19,12 @@ ClassImp(St2009pubSpinMaker)
 St2009pubSpinMaker::St2009pubSpinMaker(const char *name):StMaker(name){
   wMK=0;HList=0;
   core=name;
-  par_QPTlow=0.015;
+  par_QPTlow=0.010;
 
   par_QPThighET0=25; 
   par_QPThighET1=50; 
   par_QPThighA=0.08; 
-  par_QPThighB=1.6e-3; 
+  par_QPThighB=0.0013; 
   par_leptonEta1=-1.; par_leptonEta2=1.;
  }
 
@@ -222,6 +222,9 @@ St2009pubSpinMaker::bXingSort(){
 
 
 // $Log: St2009pubSpinMaker.cxx,v $
+// Revision 1.7  2010/03/15 17:05:46  balewski
+// cleanup, used for W AL sort March 15, 2010
+//
 // Revision 1.6  2010/03/14 22:50:31  balewski
 // *** empty log message ***
 //
