@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.9 2010/03/12 19:27:02 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.10 2010/03/15 21:03:56 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.10  2010/03/15 21:03:56  hmasui
+ * Modify binning for histograms of vertices
+ *
  * Revision 1.9  2010/03/12 19:27:02  hmasui
  * Reduce bin size for event number histograms, and allow automatic bin extention
  *
@@ -213,9 +216,19 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
   utility->setStyle(mhVz);
   utility->setStyle(mhVzAccepted);
 
-  mhVyVx = new TH2D("hVyVx", "v_{y} vs v_{x}", 100, -5, 5, 100, -5, 5);
-  mhVxVz = new TH2D("hVxVz", "v_{x} vs v_{z}", 300, -150, 150, 100, -5, 5);
-  mhVyVz = new TH2D("hVyVz", "v_{y} vs v_{z}", 300, -150, 150, 100, -5, 5);
+  // Bins for vertices
+  const Int_t vtxBin     = 800 ;
+  const Double_t vtxMin  = -2.0 ;
+  const Double_t vtxMax  =  2.0 ;
+  const Double_t binSize = (vtxMax-vtxMin)/static_cast<Double_t>(vtxBin);
+
+  // Shift vertices range by binSize/2 to locate v=0 at the middle of 0-th bin
+  const Double_t vtxMinShift = vtxMin - binSize/2.0 ;
+  const Double_t vtxMaxShift = vtxMax - binSize/2.0 ;
+
+  mhVyVx = new TH2D("hVyVx", "v_{y} vs v_{x}", vtxBin, vtxMinShift, vtxMaxShift, vtxBin, vtxMinShift, vtxMaxShift);
+  mhVxVz = new TH2D("hVxVz", "v_{x} vs v_{z}", 300, -150, 150, vtxBin, vtxMinShift, vtxMaxShift);
+  mhVyVz = new TH2D("hVyVz", "v_{y} vs v_{z}", 300, -150, 150, vtxBin, vtxMinShift, vtxMaxShift);
   mhVyVx->SetXTitle("v_{x} (cm)"); mhVyVx->SetYTitle("v_{y} (cm)");
   mhVxVz->SetXTitle("v_{z} (cm)"); mhVxVz->SetYTitle("v_{x} (cm)");
   mhVyVz->SetXTitle("v_{z} (cm)"); mhVyVz->SetYTitle("v_{y} (cm)");
@@ -224,9 +237,9 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
   utility->setStyle(mhVxVz);
   utility->setStyle(mhVyVz);
 
-  mhdVx = new TH1D("hdVx", "#Delta x = v_{x} - v_{x}(MC)", 100, -1-0.5, 1+0.5);
-  mhdVy = new TH1D("hdVy", "#Delta y = v_{y} - v_{y}(MC)", 100, -1-0.5, 1+0.5);
-  mhdVz = new TH1D("hdVz", "#Delta z = v_{z} - v_{z}(MC)", 100, -1-0.5, 1+0.5);
+  mhdVx = new TH1D("hdVx", "#Delta x = v_{x} - v_{x}(MC)",  vtxBin, vtxMinShift, vtxMaxShift);
+  mhdVy = new TH1D("hdVy", "#Delta y = v_{y} - v_{y}(MC)",  vtxBin, vtxMinShift, vtxMaxShift);
+  mhdVz = new TH1D("hdVz", "#Delta z = v_{z} - v_{z}(MC)",  vtxBin, vtxMinShift, vtxMaxShift);
   mhdVx->SetXTitle("#Deltav_{x} = v_{x} - v_{x}(MC) (cm)");
   mhdVy->SetXTitle("#Deltav_{y} = v_{y} - v_{y}(MC) (cm)");
   mhdVz->SetXTitle("#Deltav_{z} = v_{z} - v_{z}(MC) (cm)");
