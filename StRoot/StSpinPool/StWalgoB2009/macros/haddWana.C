@@ -1,4 +1,4 @@
-//$Id: haddWana.C,v 1.16 2010/03/14 19:37:27 balewski Exp $
+//$Id: haddWana.C,v 1.17 2010/03/15 17:05:51 balewski Exp $
 // line added after tag=DNP2009 by Jan
 // run list chaned to match final run selection for SL09g 
 
@@ -37,7 +37,7 @@ void haddWana() {
   haddWana("run9setP1234");
 }
 
-void haddWana(char *set,TString iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-a1/data/") {
+void haddWana(char *set,TString iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-a3/data/") {
 
   TString out=iPath;
 
@@ -224,6 +224,9 @@ void MergeRootfile(  TDirectory *target, TList *sourcelist ) {
 
 
 // $Log: haddWana.C,v $
+// Revision 1.17  2010/03/15 17:05:51  balewski
+// cleanup, used for W AL sort March 15, 2010
+//
 // Revision 1.16  2010/03/14 19:37:27  balewski
 // Removed F10383, has TPC problem according to Gene
 //

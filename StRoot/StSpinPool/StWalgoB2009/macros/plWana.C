@@ -1,12 +1,17 @@
 TCanvas *can=0;
 const float PI=2*acos(0);
 TString spinPre='A';
+/* to fix/change colors of lines embedded in histos do:
+root [5] TLine* ln = (TLine*)muWET->GetListOfFunctions()->At(0)
+root [6] ln->SetLineColor(kRed)
+root [7] muWET->Draw()         
+*/
 
 //=================================================
 plWana(  int page=13,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
-  iPath="./";
+  //iPath="out-a1/";
   //iPath="/star/data05/scratch/stevens4/wAnalysis";
-  iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-a1/data/";
+  iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-a3/data/";
   //core0="R10090018";
   //core0="run9setABCD";
   core0="run9setP1234";
@@ -42,7 +47,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   char *nameL[]={"muBjetET","muBclEjetE2D","muTjetET"};//pg 11
   char *nameM[]={"muTwayET","muBwayET","muBclETPt","muEwayET"};//pg 12
   
-  char *nameW[]={"muTotwayET2D","muAwayTotEt","muWET","muW2D1"};//pg 13
+  char *nameW[]={"muTotwayET2D","musPtBalance_clust","muWET","muW2D1"};//pg 13
   char *namePB[]={"musPtBalance_clust", "musPtBalance_awayTot","muWeta"};// pg 14 -Pt-Balance plots
   char *nameB1[]={"muSEadc1","muSPadc1"}; // pg 15 BSMD spectra
   char *nameN[]={"muTrdEdX","muWdedx"}; //pg 16
@@ -326,8 +331,9 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
 
       c->cd(i+1); h->Draw();
       if(i<3)	h->SetAxisRange(0,60);   
-      if(i==0 || i==3 ) h->Draw("colz");
+      if(i!=2 ) h->Draw("colz");
       if(i==0 )	h->SetAxisRange(0,60,"y");
+      if(i==1 )	{h->SetAxisRange(0,60,"x");h->SetAxisRange(-40,60,"y");}
       if(i==2 ) {
 	h->Draw("eh");  	h->SetAxisRange(0,60);
 	//	if(strstr("run9",core0)>=0) h->SetMaximum(80);
@@ -704,6 +710,9 @@ void doAllMC(){
 
 
 // $Log: plWana.C,v $
+// Revision 1.13  2010/03/15 17:05:51  balewski
+// cleanup, used for W AL sort March 15, 2010
+//
 // Revision 1.12  2010/03/14 22:50:34  balewski
 // *** empty log message ***
 //
