@@ -50,8 +50,8 @@ Double_t bichselZ(Double_t *x,Double_t *par) {
   Int_t k = 0;
   if (type == 3) k = 1;
   //  Double_t Scale = BetheBloch::Sirrf(4.,par[2],k)/
-  //    TMath::Exp(m_Bichsel->GetMostProbableZ(TMath::Log10(4),par[3]));
-  return TMath::Exp(m_Bichsel->GetMostProbableZ(TMath::Log10(poverm),par[3]));
+  //    TMath::Exp(Bichsel::Instance()->GetMostProbableZ(TMath::Log10(4),par[3]));
+  return TMath::Exp(Bichsel::Instance()->GetMostProbableZ(TMath::Log10(poverm),par[3]));
 }
 Double_t bichsel70(Double_t *x,Double_t *par) {
   Double_t pove   = x[0];
@@ -60,8 +60,8 @@ Double_t bichsel70(Double_t *x,Double_t *par) {
   Int_t k = 0;
   if (type == 3) k = 1;
   //  Double_t Scale = BetheBloch::Sirrf(4.,par[2],k)/
-  //    TMath::Exp(m_Bichsel->GetI70(TMath::Log10(4),par[3]));
-  return m_Bichsel->GetI70(TMath::Log10(poverm),par[3]);
+  //    TMath::Exp(Bichsel::Instance()->GetI70(TMath::Log10(4),par[3]));
+  return Bichsel::Instance()->GetI70(TMath::Log10(poverm),par[3]);
 }
 Double_t bichsel60(Double_t *x,Double_t *par) {
   Double_t pove   = x[0];
@@ -70,8 +70,8 @@ Double_t bichsel60(Double_t *x,Double_t *par) {
   Int_t k = 0;
   if (type == 3) k = 1;
   //  Double_t Scale = BetheBloch::Sirrf(4.,par[2],k)/
-  //    TMath::Exp(m_Bichsel->GetI60(TMath::Log10(4),par[3]));
-  return m_Bichsel->GetI60(TMath::Log10(poverm),par[3]);
+  //    TMath::Exp(Bichsel::Instance()->GetI60(TMath::Log10(4),par[3]));
+  return Bichsel::Instance()->GetI60(TMath::Log10(poverm),par[3]);
 }
 void bichsel() {
   if (gClassTable->GetID("StBichsel") < 0) {
@@ -80,7 +80,7 @@ void bichsel() {
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StBichsel");
   }
-  if (!m_Bichsel) m_Bichsel = new Bichsel();
+  if (!m_Bichsel) m_Bichsel = Bichsel::Instance();
   TCanvas *c1 = new TCanvas("c1");
   c1->SetLogx();
   c1->SetLogy();
