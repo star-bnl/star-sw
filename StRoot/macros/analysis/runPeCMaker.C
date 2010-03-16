@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: runPeCMaker.C,v 1.9 2006/08/15 21:42:49 jeromel Exp $
+// $Id: runPeCMaker.C,v 1.10 2010/03/16 16:23:09 fisyak Exp $
 //
 // Description: 
 // Chain for StPeCMaker based on doEvents.C. Runs StEventMaker and StPeCMaker.
@@ -32,6 +32,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: runPeCMaker.C,v $
+// Revision 1.10  2010/03/16 16:23:09  fisyak
+// StTpcDb requires StDetectorDbMaker
+//
 // Revision 1.9  2006/08/15 21:42:49  jeromel
 // Fix rhic -> rhic.bnl.gov
 //
@@ -108,6 +111,7 @@ void runPeCMaker(Int_t nevents, const Char_t **fileList, const char *qaflag)
     gSystem->Load("StEvent");
     gSystem->Load("StarMagField");
     gSystem->Load("StMagF");
+    gSystem->Load("StDetectorDbMaker");
     gSystem->Load("StTpcDb");
     gSystem->Load("StEventMaker");
     gSystem->Load("StPeCMaker");

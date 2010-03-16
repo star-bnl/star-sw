@@ -8,8 +8,8 @@ void tpcDbTest() {
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
   gSystem->Load("StDetectorDbMaker");
-  gSystem->Load("StDbUtilities");
   gSystem->Load("StarMagField");
+  gSystem->Load("StDbUtilities");
   gSystem->Load("StTpcDb");
   
   //  Create the makers to be called by the current chain

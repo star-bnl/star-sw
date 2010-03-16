@@ -67,6 +67,7 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
   gSystem->Load("StTreeMaker");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
+  gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StTpcDb");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StBichsel");
