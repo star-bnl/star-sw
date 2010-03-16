@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.17 2007/12/10 18:03:22 genevb Exp $
+// $Id: bfcread_hist_files_add.C,v 2.18 2010/03/16 15:05:22 jeromel Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.18  2010/03/16 15:05:22  jeromel
+// Fix for the move of TpcC def
+//
 // Revision 2.17  2007/12/10 18:03:22  genevb
 // Additional library needed
 //
@@ -95,6 +98,8 @@ void bfcread_hist_files_add(
   gSystem->Load("StUtilities");
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("libglobal_Tables");
+  gSystem->Load("libStDb_Tables");
+  gSystem->Load("StDetectorDbMaker");
   gSystem->Load("libtpc_Tables");
   gSystem->Load("libStDb_Tables.so");
   gSystem->Load("StTpcDb");
