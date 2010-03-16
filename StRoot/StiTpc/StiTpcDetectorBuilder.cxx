@@ -29,7 +29,7 @@
 #include "StDbUtilities/StCoordinates.hh"
 #include "StTpcDb/StTpcDb.h"
 #include "StMatrixD.hh"
-#include "StDetectorDbMaker/St_tpcAnodeHVC.h"
+#include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0C.h"
 //#define TPC_IDEAL_GEOM
 
@@ -77,7 +77,8 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     //  {"TPGV","the Gas Volume placed in TPC","HALL_1/CAVE_1/TPCE_1/TPGV_1-2/*","",""},
     //  {"TPSS","a division of gas volume corresponding to a supersectors","HALL_1/CAVE_1/TPCE_1/TPGV_1-2/TPSS_1-12/*","",""},
     {"TPAD","inner pad row","HALL_1/CAVE_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d","tpc",""},// <+++
-    {"TPA1","outer pad row","HALL_1/CAVE_1/TPCE_1/TPGV_%d/TPSS_%d/TPA1_%d","tpc",""}
+    {"TPA1","outer pad row","HALL_1/CAVE_1/TPCE_1/TPGV_%d/TPSS_%d/TPA1_%d","tpc",""},
+    {"tpad","all pad rows","/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TpcSectorWhole_%d/TpcGas_1/TpcPadPlane_%d/tpad_%d","tpc"} // VMC
   };
   _padPlane = gStTpcDb->PadPlaneGeometry();
   if (!_padPlane)
@@ -204,7 +205,7 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       pDetector->setName(name.Data());
       pDetector->setIsOn(true);
 
-      int iRdo = rdoForPadrow(row+1);
+      int iRdo  = s_pRdoMasks->rdoForPadrow(row+1);
       bool west = s_pRdoMasks->isOn(sector+1, iRdo);
       bool east = s_pRdoMasks->isOn( 24-(sector+1)%12, iRdo);
 
@@ -216,12 +217,12 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 #endif
       if (west) {
 	Int_t sec = sector+1;
-	west = St_tpcAnodeHVC::instance()->livePadrow(sec,row+1) &&
+	west = St_tpcAnodeHVavgC::instance()->livePadrow(sec,row+1) &&
 	       St_tpcPadGainT0C::instance()->livePadrow(sec,row+1);
       }
       if (east) {
 	Int_t sec = 24-(sector+1)%12;
-	east = St_tpcAnodeHVC::instance()->livePadrow(sec,row+1) &&
+	east = St_tpcAnodeHVavgC::instance()->livePadrow(sec,row+1) &&
 	       St_tpcPadGainT0C::instance()->livePadrow(sec,row+1);
       }
       pDetector->setIsActive(new StiTpcIsActiveFunctor(_active,west,east));
