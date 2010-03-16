@@ -362,6 +362,17 @@ void DrawEff() {
 #endif  
 }
 //________________________________________________________________________________
+void DrawPrimVx() {
+  Char_t *XYZ[3] = {"X","Y","Z"};
+  for (Int_t i = 0; i < 3; i++) {
+    TH1* h = (TH1 *) gDirectory->Get(Form("DifPv%s",XYZ[i]));
+    if (! h) continue;
+    TCanvas *c = new TCanvas(Form("PrimaryVertex%sdiff",XYZ[i]),Form("PrimaryVertex%sdiff",XYZ[i]));
+    h->Draw();
+    DrawPng(c);
+  }
+}
+//________________________________________________________________________________
 void Draw(const Char_t *fNameTPT, const Char_t *fNameSTI=0) {
   if (fNameTPT) fIn[0] = new TFile(fNameTPT);
   if (fNameSTI) fIn[1] = new TFile(fNameSTI);
@@ -374,6 +385,7 @@ void Draw(const Char_t *fNameTPT, const Char_t *fNameSTI=0) {
   DrawpTdif("pTRel"); 
   DrawpTdif("pTRelGl");
   DrawEff();
+  DrawPrimVx();
 }
 
 //________________________________________________________________________________
@@ -425,12 +437,12 @@ void MiniMcPlots(const Char_t *files="*minimc.root") {  // root.exe 'MiniMcPlots
 //   const Int_t                   &mNMcGoodGlobal20 = iter("mNMcGoodGlobal20");
 //   const Int_t                         &mNRcGlobal = iter("mNRcGlobal");
 //   const Int_t                   &mNRcGoodGlobal20 = iter("mNRcGoodGlobal20");
-//   const Float_t                           &mVertexX = iter("mVertexX");
-//   const Float_t                           &mVertexY = iter("mVertexY");
-//   const Float_t                           &mVertexZ = iter("mVertexZ");
-//   const Float_t                         &mMcVertexX = iter("mMcVertexX");
-//   const Float_t                         &mMcVertexY = iter("mMcVertexY");
-//   const Float_t                         &mMcVertexZ = iter("mMcVertexZ");
+  const Float_t                           &mVertexX = iter("mVertexX");
+  const Float_t                           &mVertexY = iter("mVertexY");
+  const Float_t                           &mVertexZ = iter("mVertexZ");
+  const Float_t                         &mMcVertexX = iter("mMcVertexX");
+  const Float_t                         &mMcVertexY = iter("mMcVertexY");
+  const Float_t                         &mMcVertexZ = iter("mMcVertexZ");
 //   const Float_t                          &mMagField = iter("mMagField");
 //   const Float_t                &mCenterOfMassEnergy = iter("mCenterOfMassEnergy");
 //   const Float_t                    &mBackgroundRate = iter("mBackgroundRate");
@@ -532,6 +544,9 @@ void MiniMcPlots(const Char_t *files="*minimc.root") {  // root.exe 'MiniMcPlots
 //   const Short_t          *&mMatchedPairs_mNPossible = iter("mMatchedPairs.mNPossible");
 //yf  const Char_t          *&mMatchedPairs_mIsValidPr = iter("mMatchedPairs.mIsValidPr");
   //#include "miniMc.h"
+  TH1D *DifPvX = new TH1D("DifPvX","Difference in X for Rc - Mc positions",100,-0.25,0.25);
+  TH1D *DifPvY = new TH1D("DifPvY","Difference in Y for Rc - Mc positions",100,-0.25,0.25);
+  TH1D *DifPvZ = new TH1D("DifPvZ","Difference in Z for Rc - Mc positions",100,-0.25,0.25);
   TString Title("");
   if (tFile.Contains("tpt",TString::kIgnoreCase)) Title = "TPT :";
   else                                            Title = "ITTF:";
@@ -577,6 +592,12 @@ void MiniMcPlots(const Char_t *files="*minimc.root") {  // root.exe 'MiniMcPlots
   //  gROOT->LoadMacro("MiniMc.h");
   Int_t nread = 0;
   while (iter.Next()) {
+    DifPvX->Fill(mVertexX - mMcVertexX);
+    DifPvY->Fill(mVertexY - mMcVertexY);
+    DifPvZ->Fill(mVertexZ - mMcVertexZ);
+    if (TMath::Abs(mVertexX - mMcVertexX) > 0.25 ||
+	TMath::Abs(mVertexY - mMcVertexY) > 0.25 ||
+	TMath::Abs(mVertexZ - mMcVertexZ) > 0.25) continue;
     //     cout << "Vertex " << mVertexX << "\t" << mVertexY << "\t" << mVertexZ
     // 	 << "\tMC\t" << mMcVertexX << "\t" << mMcVertexY << "\t" << mMcVertexZ << endl;
     //     cout << "mNMcTrack " << mNMcTrack
