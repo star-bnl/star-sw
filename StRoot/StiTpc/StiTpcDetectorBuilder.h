@@ -20,7 +20,6 @@ public:
     void         useVMCGeometry();		
     //    virtual void AverageVolume(TGeoPhysicalNode *nodeP);
  protected:
-    int rdoForPadrow(int iPadrow);
     StiMaterial * _fcMaterial;    
     StTpcPadPlaneI   * _padPlane; 
     StTpcDimensionsI * _dimensions; 
@@ -82,34 +81,5 @@ inline double StiTpcDetectorBuilder::phiForEastSector(unsigned int iSector,
   double dPhi = (static_cast<int>(iSector+1) - offset)*deltaPhi;
   return nice(dPhi);  
 } // phiForEastSector
-
-
-///Function returns the rdo board number for a given 
-///padrow index. 
-///Range of map used is 1-45. 
-inline int StiTpcDetectorBuilder::rdoForPadrow(int iPadrow)
-{
-  int iRdo = 0;
-  if (iPadrow>0&&iPadrow<=8){
-    iRdo = 1;
-  }
-  else if (iPadrow>8&&iPadrow<=13){
-    iRdo = 2;
-  }
-  else if (iPadrow>13&&iPadrow<=21){
-    iRdo = 3;
-  }
-  else if (iPadrow>21&&iPadrow<=29){
-    iRdo = 4;
-  }
-  else if (iPadrow>29&&iPadrow<=37){
-    iRdo = 5;
-  }
-  else if (iPadrow>37&&iPadrow<=45){
-    iRdo = 6;
-  }
-  return iRdo;
-} // rdoForPadrow
-
 
 #endif 
