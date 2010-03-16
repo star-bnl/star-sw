@@ -278,6 +278,7 @@ Bfc_st BFC[] = { // standard chains
   {"clearDAQCTB" ,""  ,"","","" ,""                             ,"clear DAQ CTB Hits for embedding",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
+  {"StUtilities" ,""  ,"","","","StUtilities",                                   "Load StUtilities",kFALSE},
   {"FieldOn"     ,""  ,"","MagF"                                   ,"","" ,"Constant nominal field",kFALSE},
   {"FieldOff"    ,""  ,"","MagF"                                          ,"","" ,"No Field option",kFALSE},
   {"HalfField"   ,""  ,"","MagF"                                         ,"","","Half Field option",kFALSE},
