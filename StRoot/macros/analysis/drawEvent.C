@@ -1,6 +1,9 @@
 //*-- Author :  Valeri Fine (fine@bnl.gov)
-// $Id: drawEvent.C,v 1.13 2006/08/15 21:42:45 jeromel Exp $
+// $Id: drawEvent.C,v 1.14 2010/03/16 16:23:09 fisyak Exp $
 // $Log: drawEvent.C,v $
+// Revision 1.14  2010/03/16 16:23:09  fisyak
+// StTpcDb requires StDetectorDbMaker
+//
 // Revision 1.13  2006/08/15 21:42:45  jeromel
 // Fix rhic -> rhic.bnl.gov
 //
@@ -128,6 +131,7 @@ void doEventsQQ(const Int_t nevents=999,
   gSystem->Load("StarMagField");
   gSystem->Load("StMagF");
   gSystem->Load("StEvent");
+  gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StTpcDb");
   gSystem->Load("StEventMaker");
   gSystem->Load("St_geom_Maker");

@@ -1,5 +1,8 @@
-// $Id: makeStrangeMuDst.C,v 2.7 2006/08/15 21:42:48 jeromel Exp $
+// $Id: makeStrangeMuDst.C,v 2.8 2010/03/16 16:23:09 fisyak Exp $
 // $Log: makeStrangeMuDst.C,v $
+// Revision 2.8  2010/03/16 16:23:09  fisyak
+// StTpcDb requires StDetectorDbMaker
+//
 // Revision 2.7  2006/08/15 21:42:48  jeromel
 // Fix rhic -> rhic.bnl.gov
 //
@@ -62,6 +65,7 @@ void load() {
   gSystem->Load("StEvent");
   gSystem->Load("StarMagField");
   gSystem->Load("StMagF");
+  gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StTpcDb");
   // The following is needed if reading from dst Branch instead of Event Branch
 //  gSystem->Load("StEventMaker");

@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.18 2006/08/15 21:42:32 jeromel Exp $
+// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.19 2010/03/16 16:23:08 fisyak Exp $
 // $Log: bfcread_dst_EventQA_outhistfile.C,v $
+// Revision 1.19  2010/03/16 16:23:08  fisyak
+// StTpcDb requires StDetectorDbMaker
+//
 // Revision 1.18  2006/08/15 21:42:32  jeromel
 // Fix rhic -> rhic.bnl.gov
 //
@@ -127,6 +130,7 @@ void bfcread_dst_EventQA_outhistfile(
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
+  gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
   gSystem->Load("StEmcUtil");

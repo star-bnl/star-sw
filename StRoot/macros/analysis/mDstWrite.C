@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: mDstWrite.C,v 3.4 2006/08/15 21:42:47 jeromel Exp $
+// $Id: mDstWrite.C,v 3.5 2010/03/16 16:23:09 fisyak Exp $
 // Author: Thomas Ullrich, Oct 2000
 //
 //////////////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////////////
 //
 // $Log: mDstWrite.C,v $
+// Revision 3.5  2010/03/16 16:23:09  fisyak
+// StTpcDb requires StDetectorDbMaker
+//
 // Revision 3.4  2006/08/15 21:42:47  jeromel
 // Fix rhic -> rhic.bnl.gov
 //
@@ -66,6 +69,7 @@ void mDstWrite(Int_t nevents, const Char_t **fileList, const Char_t *outfile)
     gSystem->Load("StEvent");
     gSystem->Load("StarMagField");
     gSystem->Load("StMagF");
+    gSystem->Load("StDetectorDbMaker");
     gSystem->Load("StTpcDb");
     gSystem->Load("StEventMaker");
     gSystem->Load("StMiniDstMaker");

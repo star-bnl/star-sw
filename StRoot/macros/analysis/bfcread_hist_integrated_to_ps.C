@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_integrated_to_ps.C,v 3.1 2008/05/30 17:49:12 genevb Exp $
+// $Id: bfcread_hist_integrated_to_ps.C,v 3.2 2010/03/16 16:23:08 fisyak Exp $
 // $Log: bfcread_hist_integrated_to_ps.C,v $
+// Revision 3.2  2010/03/16 16:23:08  fisyak
+// StTpcDb requires StDetectorDbMaker
+//
 // Revision 3.1  2008/05/30 17:49:12  genevb
 // Macro to sum over multiple files and prefixes to create output plots
 //
@@ -88,6 +91,7 @@ void bfcread_hist_integrated_to_ps(
     gSystem->Load("libglobal_Tables");
     gSystem->Load("libtpc_Tables");
     gSystem->Load("libStDb_Tables.so");
+    gSystem->Load("StDetectorDbMaker");
     gSystem->Load("StTpcDb");
     gSystem->Load("StEvent");
     gSystem->Load("StPmdUtil");

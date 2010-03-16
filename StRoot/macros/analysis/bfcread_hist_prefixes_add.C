@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_prefixes_add.C,v 3.1 2008/05/28 05:16:07 genevb Exp $
+// $Id: bfcread_hist_prefixes_add.C,v 3.2 2010/03/16 16:23:08 fisyak Exp $
 // $Log: bfcread_hist_prefixes_add.C,v $
+// Revision 3.2  2010/03/16 16:23:08  fisyak
+// StTpcDb requires StDetectorDbMaker
+//
 // Revision 3.1  2008/05/28 05:16:07  genevb
 // Allow summing over (ignoring) histogram prefixes
 //
@@ -50,6 +53,7 @@ void bfcread_hist_prefixes_add(
   gSystem->Load("libglobal_Tables");
   gSystem->Load("libtpc_Tables");
   gSystem->Load("libStDb_Tables.so");
+  gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
   gSystem->Load("StPmdUtil");
