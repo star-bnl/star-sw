@@ -37,17 +37,10 @@ class StTpcRSMaker : public StMaker {
  public:
   enum EMode {kPAI         = 0,// switch to PAI from GEANT
 	      kBICHSEL     = 1,// switch to Bichsel from GEANT 
-	      kGAIN        = 2,// use GAIN correction (in/out)
-	      kGAINO       = 3,// use GAIN correction (in) output is uncorrected data
-	      kGAINOAtALL  = 4,// do not use GAIN at all
-	      kPedestal    = 5,// do use Pedestal and noise
-	      kAVERAGEPEDESTAL = 6, // use Pedestal in average i.e. Gaus(mAveragePedestal,mAveragePedestalRMS) for pedestal itself 
- 	      //              and Gaus(0,mPedestalRMS) for noise
-	      kNONOISE     = 7,// No pedestal noise
-	      kdEdxCorr    = 8,// do use TpcdEdxCorrection
-	      kDistortion  = 9,// include distortions
-	      kNoToflight  =10,// don't account for particle time of flight
-	      kTree        =11// make Tree
+	      kGAINOAtALL  = 2,// do not use GAIN at all
+	      kdEdxCorr    = 3,// do use TpcdEdxCorrection
+	      kDistortion  = 4,// include distortions
+	      kNoToflight  = 5 // don't account for particle time of flight
   };
   StTpcRSMaker(const char *name="TpcRS");
   virtual              ~StTpcRSMaker();
@@ -172,14 +165,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.14 2010/02/26 18:53:33 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.15 2010/03/16 19:41:46 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.14 2010/02/26 18:53:33 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.15 2010/03/16 19:41:46 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.15  2010/03/16 19:41:46  fisyak
+// Move diffusion and sec/row correction in DB, clean up
+//
 // Revision 1.14  2010/02/26 18:53:33  fisyak
 // Take longitudinal Diffusion from Laser track fit, add Gating Grid
 //
