@@ -50,7 +50,7 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
   } else {
     ChainOpt += "tpcDB,TpcHitMover,TpxClu,";
   }
-  
+  //  Bool_t needAlias = kFALSE;
   TString FileIn(fileIn);
   if (FileIn == "") {
     ChainOpt += "gstar,"; RootFile += "gstar_y8";
@@ -70,6 +70,13 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
       ChainOpt += "fzin,";
       RootFile.ReplaceAll(".fzd","");
       RootFile.ReplaceAll(".fz","");
+    } else {
+      if (FileIn.Contains(".geant.root",TString::kIgnoreCase)) {
+	RootFile = Form("%s",gSystem->BaseName(FileIn.Data())); 
+	ChainOpt += "in,";
+	RootFile.ReplaceAll(".geant.root","");
+	//	needAlias = kTRUE;
+      }
     }
   }
   ChainOpt += RunOpt;
@@ -92,6 +99,7 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
   if (ChainOpt.Contains("TpcRS",TString::kIgnoreCase)) {
     StTpcRSMaker *tpcRS = (StTpcRSMaker *) chain->Maker("TpcRS");
     if (tpcRS) {
+      //      if (needAlias) tpcRS->SetInput("geant","bfc/.make/inputStream/.make/inputStream_Root/.data/bfcTree/geantBranch");
       Int_t m_Mode = tpcRS->GetMode();
 #if 1
       if (Opt.Contains("pai",TString::kIgnoreCase))     {SETBIT(m_Mode,StTpcRSMaker::kPAI); CLRBIT(m_Mode,StTpcRSMaker::kBICHSEL);}
