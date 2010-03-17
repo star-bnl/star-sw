@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.67 2010/03/12 17:28:15 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.68 2010/03/17 02:53:06 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.68  2010/03/17 02:53:06  genevb
+// Add hists even if not in first file
+//
 // Revision 2.67  2010/03/12 17:28:15  genevb
 // Same ROOT quirk fix as done in rev. 2.64, but for reference hists
 //
@@ -1310,7 +1313,8 @@ Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
         TString oName = obj->GetName();
         if (ignorePrefixes) oName = StripPrefixes(oName.Data(),tempInt);
 // now want to add these histograms to the copied ones:
-	Int_t imk = 0;
+	Int_t tempint,imk = 0;
+        Bool_t notfound = true;
 	for (imk=0;imk<numHistCopy;imk++) {
           if (newHist[imk]) {		
              TString nName = newHist[imk]->GetName();
@@ -1319,12 +1323,33 @@ Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
 	       //LOG_INFO << "  ---- hist num to add --- " << imk << endm;
 	       newHist[imk]->Add((TH1 *)obj);
 	       histAddCount++;
+               notfound = false;
 	       //LOG_INFO << " !!! Added histograms with Name: " << newHist[imk]->GetName() <<  endm;
 	     } // strcmp
 	  }  // if newHist[imk] exists   
 	}  // loop over imk
+        if (notfound) {
+
+          if (imk>=maxHistCopy){
+            Int_t newMaxHistCopy = maxHistCopy * 4;
+            TH1** temp1 = new TH1ptr[newMaxHistCopy];
+            memset(temp1,0,newMaxHistCopy*sizeOfTH1Ptr);
+            memcpy(temp1,newHist,maxHistCopy*sizeOfTH1Ptr);
+            delete newHist;
+            newHist = temp1;
+            maxHistCopy = newMaxHistCopy;
+          } // if imk
+          newHist[imk] = ((TH1 *)obj->Clone());
+          if (ignorePrefixes) {
+            newHist[imk]->SetName (StripPrefixes(newHist[imk]->GetName (),tempint).Data());
+            newHist[imk]->SetTitle(StripPrefixes(newHist[imk]->GetTitle(),tempint).Data());
+          }
+          numHistCopy++;
+	  histAddCount++;
+
+        }   // notfound
       }   // if obj inherits from th1
-    }    //while
+    }   //while
   } //dirlist
 
   LOG_INFO << " StHistUtil::AddHists: Total No. Histograms Added  = " << 
