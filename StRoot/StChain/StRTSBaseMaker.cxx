@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.cxx,v 1.12 2010/03/17 15:58:30 fine Exp $
+ * $Id: StRTSBaseMaker.cxx,v 1.13 2010/03/17 16:01:08 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StRTSBaseMaker.cxx,v $
+ * Revision 1.13  2010/03/17 16:01:08  fine
+ * RT #1880. Fix the the bug of the assert condition
+ *
  * Revision 1.12  2010/03/17 15:58:30  fine
  * RT #1880. Fix the the bug of the assert condition
  *
@@ -216,7 +219,7 @@ StRtsTable *StRTSBaseMaker::GetNextAdc(int sec)
 {
    // Get "adc" DAQ data assuming the maker name 
    // matches the "detector name"
-   assert(sec <=0 && "Only positive  value is allowed");
+   assert(sec > 0 && "Only positive  value is allowed");
    return GetNext(Form("adc[%i]",sec));
 }
 //__________________________________________________________________________________________
@@ -248,7 +251,7 @@ StRtsTable *StRTSBaseMaker::GetNextLegacy(int sec)
 {
    // Get "legacy" DAQ data assuming the maker name 
    // matches the "detector name"
-   assert(sec <=0 && "Only positive  value is allowed");
+   assert(sec > 0 && "Only positive  value is allowed");
    return GetNext(Form("legacy[%i]",sec));
 }
 
