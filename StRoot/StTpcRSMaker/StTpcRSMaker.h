@@ -25,7 +25,7 @@ using namespace units;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h" 
 #include "StTpcDb/StTpcDb.h"
-#include "StTpcDb/StTpcdEdxCorrection.h" 
+#include "StdEdxY2Maker/StTpcdEdxCorrection.h" 
 #include "StMagF.h"
 class Altro;
 struct SignalSum_t {
@@ -165,14 +165,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.15 2010/03/16 19:41:46 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.16 2010/03/17 15:53:16 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.15 2010/03/16 19:41:46 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.16 2010/03/17 15:53:16 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.16  2010/03/17 15:53:16  fisyak
+// Move StTpcdEdxCorrection to StdEdxY2Maker to avoid dependence of StTpcDb on StDetectorDbMaker
+//
 // Revision 1.15  2010/03/16 19:41:46  fisyak
 // Move diffusion and sec/row correction in DB, clean up
 //
