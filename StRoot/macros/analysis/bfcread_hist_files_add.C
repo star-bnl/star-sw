@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.18 2010/03/16 15:05:22 jeromel Exp $
+// $Id: bfcread_hist_files_add.C,v 2.19 2010/03/17 02:53:06 genevb Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.19  2010/03/17 02:53:06  genevb
+// Add hists even if not in first file
+//
 // Revision 2.18  2010/03/16 15:05:22  jeromel
 // Fix for the move of TpcC def
 //
@@ -221,6 +224,10 @@ void bfcread_hist_files_add(
 
        cout << "bfcread_hist_files_add.C, # histograms added = " << 
 	 hCCount << endl;
+
+       HM[bnum]->SetHArraySize(HU[bnum]->getNewHistSize());
+       HM[bnum]->SetHArray(HU[bnum]->getNewHist());
+       HM[bnum]->Make();
 
      }  //else (ifl not #1)
 
