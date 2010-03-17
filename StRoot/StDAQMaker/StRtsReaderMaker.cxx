@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.30 2009/11/23 15:56:15 fisyak Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.31 2010/03/17 19:52:44 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.31  2010/03/17 19:52:44  fine
+ * Comment out the redundant debug message
+ *
  * Revision 1.30  2009/11/23 15:56:15  fisyak
  * reduce print out
  *
@@ -348,10 +351,12 @@ TDataSet *StRtsReaderMaker::FillTable()
       fRtsTable->AppendRows(fDatReader->Record(),1);
       fRtsTable->SetNRows(1);
    } else {
-      if (!fLastQuery.IsNull()) {
+      if (!fLastQuery.IsNull() ) {
+#ifdef HARD_DEBUG         
          LOG_DEBUG <<" StRtsReaderMaker::FillTable(): No data has been found for \"" 
                   << fLastQuery << "\" to fill the table"
                   << endm;
+#endif
       }
       if (fRtsTable && Debug() > 3 ) fRtsTable->Print(0,5);
       delete fRtsTable; 
