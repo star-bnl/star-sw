@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.52 2010/03/15 23:29:47 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.53 2010/03/17 15:53:15 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.53  2010/03/17 15:53:15  fisyak
+ * Move StTpcdEdxCorrection to StdEdxY2Maker to avoid dependence of StTpcDb on StDetectorDbMaker
+ *
  * Revision 1.52  2010/03/15 23:29:47  fisyak
  * switch from St_tpcAnodeHVC => St_tpcAnodeHVavgC
  *
@@ -272,7 +275,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     LOG_QA << "Instantiate ExB The option passed will be " << Form("%d 0x%X\n",mask,mask) << endm;
     // option handling needs some clean up, but right now we stay compatible
     Int_t option = (mask & 0x7FFFFFFE) >> 1;
-    StMagUtilities *magU = new StMagUtilities(gStTpcDb, GetDataBase("RunLog"), option);
+    StMagUtilities *magU = new StMagUtilities(gStTpcDb, option);
     m_TpcDb->SetExB(magU);
   }
   m_tpg_pad_plane = new St_tpg_pad_plane("tpg_pad_plane",1);
