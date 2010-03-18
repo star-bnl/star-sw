@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.55 2010/03/08 18:17:13 fine Exp $
+// $Id: StDraw3D.h,v 1.56 2010/03/18 17:34:55 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -251,12 +251,18 @@ public:
    virtual TObject *Point(float x, float y, float z
          ,  EDraw3DStyle sty);
 
-   virtual TObject *Line(int n,  const float *xyz
+   virtual TObject *Line(int n,  const double *xyz
          ,  Color_t col= Color_t(-1)
          ,  Style_t sty= Style_t(-1)
          ,  Size_t siz = Size_t (-1));
 
-   virtual TObject *Line(int n,  const double *xyz
+   virtual TObject *Line(float x0, float y0, float z0
+         ,  float x1, float y1, float z1
+         ,  Color_t col= Color_t(-1)
+         ,  Style_t sty= Style_t(-1)
+         ,  Size_t siz = Size_t (-1));
+
+   virtual TObject *Line(int n,  const float *xyz
          ,  Color_t col= Color_t(-1)
          ,  Style_t sty= Style_t(-1)
          ,  Size_t siz = Size_t (-1));
