@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.17 2010/03/18 16:52:17 balewski Exp $
+// $Id: St2009W_algo.cxx,v 1.18 2010/03/18 18:46:40 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -171,10 +171,9 @@ St2009WMaker::findPtBalance(){
       TVector3 clustPt(T.primP.X(),T.primP.Y(),0);
       clustPt.SetMag(T.cluster.ET);
       T.ptBalance+=clustPt;
-      T.sPtBalance=T.ptBalance.Dot(clustPt);
-      float den = fabs(T.sPtBalance);
-      T.sPtBalance *= T.ptBalance.Perp()/den; 
-
+      T.sPtBalance = T.ptBalance.Perp();
+      if(T.ptBalance.Dot(clustPt)<0) T.sPtBalance *=-1.;
+      
       //****loop over branch without EEMC****
       mJets = getJets(mJetTreeBranch_noEEMC);
       int nJetsNE=nJets;
@@ -193,9 +192,8 @@ St2009WMaker::findPtBalance(){
 	  T.ptBalance_noEEMC+=jetVec;
       }
       T.ptBalance_noEEMC+=clustPt;
-      T.sPtBalance_noEEMC=T.ptBalance_noEEMC.Dot(clustPt);
-      den = fabs(T.sPtBalance_noEEMC);
-      T.sPtBalance_noEEMC *= T.ptBalance_noEEMC.Perp()/den; 
+      T.sPtBalance_noEEMC = T.ptBalance_noEEMC.Perp();
+      if(T.ptBalance_noEEMC.Dot(clustPt)<0) T.sPtBalance_noEEMC *=-1.;
 
     }// end of loop over tracks
   }// end of loop over vertices
@@ -533,6 +531,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.18  2010/03/18 18:46:40  balewski
+// simplified sPtBalance calculation
+//
 // Revision 1.17  2010/03/18 16:52:17  balewski
 // corrected sPtBalance for no-endcap
 //
