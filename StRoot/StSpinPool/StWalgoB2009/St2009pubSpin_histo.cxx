@@ -1,4 +1,4 @@
-// $Id: St2009pubSpin_histo.cxx,v 1.7 2010/03/14 22:50:31 balewski Exp $
+// $Id: St2009pubSpin_histo.cxx,v 1.8 2010/03/18 18:46:40 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -53,7 +53,7 @@ St2009pubSpinMaker::initHistos(){
   ln=new TLine(avrC,0,avrC,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
 
 
-  hA[9]=h=new TH2F(core+"QpT2","TPC PRIM  Q/PT ; 2x2 cluster ET (GeV); Q/PT  (1/GeV)",100,0.,100.,100,-0.099,0.099);
+  hA[9]=h=new TH2F(core+"QpT2","TPC PRIM  Q/PT ; 2x2 cluster ET (GeV); Q/PT  (1/GeV)",100,0.,100.,100,-0.1,0.1);
   Lx=h->GetListOfFunctions();
   ln=new TLine(0,0,100,0);  ln->SetLineColor(kBlue);  Lx->Add(ln);
   ln=new TLine(0,par_QPTlow,100,par_QPTlow);  ln->SetLineColor(kRed);  Lx->Add(ln);  
@@ -120,6 +120,9 @@ St2009pubSpinMaker::initHistos(){
 
 
 // $Log: St2009pubSpin_histo.cxx,v $
+// Revision 1.8  2010/03/18 18:46:40  balewski
+// simplified sPtBalance calculation
+//
 // Revision 1.7  2010/03/14 22:50:31  balewski
 // *** empty log message ***
 //
