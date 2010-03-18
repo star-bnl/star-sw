@@ -1,10 +1,6 @@
 #ifndef _DAQ_PMD_H_
 #define _DAQ_PMD_H_
 
-
-#include <stdio.h>
-#include <DAQ_READER/daq_det.h>
-
 #include <daqFormats.h>
 
 struct pmd_t {
@@ -23,6 +19,9 @@ struct pmd_t {
 
 } ;
 
+#ifndef DAQ_PMD_DATA_STRUCTURE
+#include <stdio.h>
+#include <DAQ_READER/daq_det.h>
 
 class daq_pmd : public daq_det {
 private:
@@ -54,4 +53,5 @@ public:
 } ;
 
 
+#endif   //  DAQ_PMD_DATA_STRUCTURE
 #endif	// _DAQ_PMD_H_
