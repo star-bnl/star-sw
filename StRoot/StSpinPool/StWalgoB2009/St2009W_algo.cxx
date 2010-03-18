@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.15 2010/03/14 22:50:31 balewski Exp $
+// $Id: St2009W_algo.cxx,v 1.16 2010/03/18 15:34:43 seelej Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -172,7 +172,8 @@ St2009WMaker::findPtBalance(){
       clustPt.SetMag(T.cluster.ET);
       T.ptBalance+=clustPt;
       T.sPtBalance=T.ptBalance.Dot(clustPt);
-      T.sPtBalance/=T.cluster.ET;
+      float den = fabs(T.sPtBalance);
+      T.sPtBalance *= T.ptBalance.Perp()/den; 
 
       //****loop over branch without EEMC****
       mJets = getJets(mJetTreeBranch_noEEMC);
@@ -531,6 +532,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.16  2010/03/18 15:34:43  seelej
+// Changed the definition of sPtBalance - Joe
+//
 // Revision 1.15  2010/03/14 22:50:31  balewski
 // *** empty log message ***
 //
