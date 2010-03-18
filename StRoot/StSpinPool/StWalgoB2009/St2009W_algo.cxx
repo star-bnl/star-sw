@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.16 2010/03/18 15:34:43 seelej Exp $
+// $Id: St2009W_algo.cxx,v 1.17 2010/03/18 16:52:17 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -194,7 +194,8 @@ St2009WMaker::findPtBalance(){
       }
       T.ptBalance_noEEMC+=clustPt;
       T.sPtBalance_noEEMC=T.ptBalance_noEEMC.Dot(clustPt);
-      T.sPtBalance_noEEMC/=T.cluster.ET;
+      den = fabs(T.sPtBalance_noEEMC);
+      T.sPtBalance_noEEMC *= T.ptBalance_noEEMC.Perp()/den; 
 
     }// end of loop over tracks
   }// end of loop over vertices
@@ -532,6 +533,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.17  2010/03/18 16:52:17  balewski
+// corrected sPtBalance for no-endcap
+//
 // Revision 1.16  2010/03/18 15:34:43  seelej
 // Changed the definition of sPtBalance - Joe
 //
