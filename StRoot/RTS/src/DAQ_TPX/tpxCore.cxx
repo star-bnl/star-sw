@@ -260,7 +260,7 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 	rdo->trg_cou = *l ;		// get the trigger count
 
 	if(rdo->trg_cou > 120) {
-		LOG(ERR,"Bad trg count %d, token %d",rdo->trg_cou, rdo->token) ;
+		if(do_log) LOG(ERR,"Bad trg count %d, token %d",rdo->trg_cou, rdo->token) ;
 //		rdo->trg_cou = 0 ;
 //		rdo->token = -ENOTSUP ;
 //		return rdo->token ;
@@ -270,7 +270,7 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 	l -= rdo->trg_cou * (sizeof(struct trg_data)/4) ;
 
 	if(l < rdo->data_start) {
-		LOG(ERR,"Bad trigger data!") ;
+		if(do_log) LOG(ERR,"Bad trigger data!") ;
 		rdo->data_err = 1 ;
 		rdo->token =  -EBADF ;
 		return rdo->token ;
@@ -361,7 +361,7 @@ int tpx_get_start(char *buff, u_int words, struct tpx_rdo_event *rdo, int do_log
 
 	if((rdo->data_end - rdo->data_start) <= 0) {
 		if(rdo->token != 4097) {
-			LOG(ERR,"Bad RDO data: start 0x%X, end 0x%X, delta %d, tokenn %d!",rdo->data_start,rdo->data_end,rdo->data_end-rdo->data_start,rdo->token) ;
+			if(do_log) LOG(ERR,"Bad RDO data: start 0x%X, end 0x%X, delta %d, tokenn %d!",rdo->data_start,rdo->data_end,rdo->data_end-rdo->data_start,rdo->token) ;
 			rdo->token = -EBADF ;
 		}
 	}
@@ -500,6 +500,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
   int wc ;
   int ret ;
   int delta ;
+  u_int *h_start = h ;
 
   ret = 0 ;
 
@@ -527,13 +528,13 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
   // standard tests of the last ALTRO word...
   if((hi & 0xFFFC0) != 0xAAA80) {
     //if(log) LOG(WARN,"  Error HI in last ALTRO word: 0x%08X 0x%08X",hi,lo) ;
-    ret = -1 ;
+    ret = -2 ;
 
   }
 
   if((lo & 0x0F000) != 0x0A000) {
     //if(log) LOG(WARN,"  Error LO in last ALTRO word: 0x%08X 0x%08X",hi,lo) ;
-    ret = -1 ;
+    ret = -3 ;
   }
 
 
@@ -547,12 +548,12 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 
   if((wc > 529) || (wc<0)) {	// for 512 tb + 15 pre + 2
     //if(log) LOG(WARN,"  Error in last ALTRO word: 0x%08X 0x%08X; bad WC %d",hi,lo,wc) ;
-    ret = -1 ;
+    ret = -4 ;
   }
 
   // we bomb out here if there was any error
   if(ret) {
-	if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?)  bad header [1]",a->rdo+1,a->t,a->id,a->ch) ;
+	if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?)  bad header [1] %d",a->rdo+1,a->t,a->id,a->ch,ret) ;
 	return 0 ;	// already error...
   }
 
@@ -632,14 +633,14 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
     p10++ ;
 
     if(get10(h,p10) != 0x2AA) {
-      //if(log) LOG(WARN,"  Bad 0x2AA 1:2") ;
-      ret = -1 ;
+      //if(log) LOG(WARN,"  Bad 0x2AA 1:2: 0x%X %d",get10(h,p10),wc) ;
+      ret = -2 ;
     }
     p10++ ;
 
     if(get10(h,p10) != 0x2AA) {
       //if(log) LOG(WARN,"  Bad 0x2AA 1:3") ;
-      ret = -1 ;
+      ret = -3 ;
     }
     p10++ ;
 
@@ -648,13 +649,13 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
   case 2 :
     if(get10(h,p10) != 0x2AA) {
       //if(log) LOG(WARN,"  Bad 0x2AA 2:1") ;
-      ret = - 1 ;
+      ret = -4 ;
     }
     p10++ ;
 
     if(get10(h,p10) != 0x2AA) {
       //if(log) LOG(WARN,"  Bad 0x2AA 2:2") ;
-      ret = -1 ;
+      ret = -5 ;
     }
     p10++ ;
 
@@ -663,7 +664,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
   case 3 :
     if(get10(h,p10) != 0x2AA) {
       //if(log) LOG(WARN,"  Bad 0x2AA 3:1") ;
-      ret = -1 ;
+      ret = -6 ;
     }
     p10++ ;
 
@@ -689,7 +690,12 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 #endif
 
   if(ret) {
-	if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?)  bad header [2]",a->rdo+1,a->t,a->id,a->ch) ;
+	if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?)  bad header [2] %d",a->rdo+1,a->t,a->id,a->ch,ret) ;
+//	if(log) {
+//		for(int kk=0;kk<wc;kk++) {
+//			LOG(TERR,"%2d: 0x%08X",kk,h_start[-kk]) ;
+//		}
+//	}
 	return 0 ;	// already error...
   }
 
@@ -701,6 +707,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 
   u_short *p_adc = a->adc ;
   u_short *p_tb = a->tb ;
+  int tb_all = 0 ;
 
   while(p10 < l10) {
 	int tb_cou = get10(h,p10++) ;
@@ -731,11 +738,20 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
 
 	if((tb_last < 0) || (tb_last >= tb_prev)) {
 		//if(log) LOG(WARN,"  A%03d:%02d: Bad tb_last %d => tb_prev %d?",a->id,a->ch,tb_last,tb_prev) ;
-		ret = -1 ;
+		ret = -2 ;
 	}
 
 	if(ret) {
-		if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?)  bad data [1]",a->rdo+1,a->t,a->id,a->ch) ;
+		if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?)  bad data [1] %d",a->rdo+1,a->t,a->id,a->ch,ret) ;
+		return 0 ;
+	}
+
+
+
+
+	tb_all += tb_cou ;
+	if(tb_all >= 512) {
+		if(log) LOG(WARN,"RDO %d: token %d: Altro %03d:%02d (?)  bad tb_all [1] %d",a->rdo+1,a->t,a->id,a->ch,tb_all) ;
 		return 0 ;
 	}
 

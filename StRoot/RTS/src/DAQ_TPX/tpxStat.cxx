@@ -10,7 +10,10 @@
 #include "tpxCore.h"
 #include "tpxStat.h"
 
-tpxStat::tpx_stat_struct tpxStat::r[6] ;
+
+//#include <thread_dbg.h>
+#define TLOG()
+
 
 #define QA_TB_START	147
 #define QA_TB_STOP	153
@@ -160,7 +163,7 @@ for(int i=0;i<6;i++) {
 
 
 	if(r[i].errs) {
-		LOG(ERR,"[RDO %d] had %d ALTRO errors",i+1,r[i].errs) ;
+		LOG(WARN,"[RDO %d] had %d ALTRO errors",i+1,r[i].errs) ;
 	}
 
 	if(r[i].should != should) {
@@ -224,7 +227,7 @@ for(int i=0;i<6;i++) {
 				warn = 1 ;
 				a_err = 1 ;
 				fprintf(ofile,"\t%sERROR: ",ANSI_RED) ;
-				LOG(ERR,"RDO %d: AID %3d:%2d: expect %d counts, have %d",i+1,a,c,expect,have) ;
+				LOG(WARN,"RDO %d: AID %3d:%2d: expect %d counts, have %d",i+1,a,c,expect,have) ;
 			}
 			else {	
 				if(have) {
@@ -361,13 +364,15 @@ void tpxStat::accum(char *rdobuff, int bytes)
 	int errors = 0 ;
 	const u_int MAX_ERRORS = 10 ;
 
+	TLOG() ;
 	t = tpx_get_start(rdobuff, bytes/4, &rdo, 0) ;
 
-	if(t <= 0) return ;	// non data event...
+	if(t <= 0) return ;	// non data event or some error
 
 
 	if(sector && (rdo.sector != sector)) {
 		LOG(ERR,"sector mismatch: expect %d, in data %d",sector,rdo.sector) ;
+		return ;
 	}
 
 	sector = rdo.sector ;
@@ -377,11 +382,11 @@ void tpxStat::accum(char *rdobuff, int bytes)
 		return ;
 	}
 
-	a.what = TPX_ALTRO_DO_ADC ;
+	a.what = TPX_ALTRO_DO_ADC ;	// I need this for the stripes count
 	a.rdo = rdo.rdo - 1 ;	// a.rdo counts from 0
 	a.t = t ;
 	a.sector = rdo.sector ;
-
+	a.ch = 0 ; // can't rely
 
 
 	if(r[a.rdo].errs >= MAX_ERRORS) {
@@ -395,21 +400,32 @@ void tpxStat::accum(char *rdobuff, int bytes)
 
 	data_end = rdo.data_end ;
 
+	TLOG() ;
 
 	do {
+		TLOG() ;
 		data_end = tpx_scan_to_next(data_end, rdo.data_start, &a) ;
-		if(a.err) {
+		TLOG() ;
+		if(a.err || (data_end==0)) {
 			//LOG(ERR,"Got err %d:%d, log error = %d: data_end %p",a.id,a.ch,a.log_err,data_end) ;
 			errors = 1 ;
 		}
 		else {
+			TLOG() ;
+			if((a.rdo >= 6) || (a.ch >= 16)) {
+				LOG(ERR,"What !? %d %d",a.rdo,a.ch) ;
+			}
+			TLOG() ;
 			if(a.count >= 400) {
+				TLOG() ;
 				stripes++ ;
+				TLOG() ;
 				r[a.rdo].a[a.id].c[a.ch].stripes++ ;				
 				if((stripes % 100)==0) {
 					LOG(NOTE,"A lot of stripes: %d",stripes) ;
 				}
 
+				TLOG() ;
 				if(stripes_f) {
 					fprintf(stripes_f,"==> RDO %d, cou %d: %d %d\n",a.rdo,r[a.rdo].count,a.row,a.pad) ;
 					for(int i=0;i<a.count;i++) {
@@ -418,13 +434,20 @@ void tpxStat::accum(char *rdobuff, int bytes)
 				}
 
 			}
+			TLOG() ;
 		}
 		
+		//LOG(TERR,"%d: AID %d:%d",data_end-rdo.data_start,a.id,a.ch) ;
 
+		if((data_end==0) || (a.ch>15) || (a.rdo >= 6)) {
+			LOG(ERR,"Bad boy: rdo %d, AID %d:%d -- %p",a.rdo,a.id,a.ch,data_end) ;
+			continue ;
+		}
 
 		r[a.rdo].a[a.id].c[a.ch].count++ ;
 
-
+		TLOG() ;
+		/* I don't need this anymore
 		for(int i=0;i<a.count;i++) {
 			if(a.adc[i] > r[a.rdo].a[a.id].c[a.ch].max_adc) {
 				r[a.rdo].a[a.id].c[a.ch].max_adc = a.adc[i] ;
@@ -434,69 +457,70 @@ void tpxStat::accum(char *rdobuff, int bytes)
 			}
 
 		}
+		*/
 
 		if(fee_check_on) {
 		
-		int a_ok = -1 ;
-		for(int i=0;i<fee_check_count*2;i++) {
-			int a0 ;
-			a0 = fee_check_data[i][0].aid ;
-			if(a.id==a0) {
-				a_ok = i ;
-				break ;
+			int a_ok = -1 ;
+			for(int i=0;i<fee_check_count*2;i++) {
+				int a0 ;
+				a0 = fee_check_data[i][0].aid ;
+				if(a.id==a0) {
+					a_ok = i ;
+					break ;
+				}
 			}
-		}
 
-		if(a_ok <0) {
-			LOG(WARN,"RDO %d: spurious ALTRO %3d",rdo.rdo,a.id) ;
-			continue ;
-		}
+			if(a_ok <0) {
+				LOG(WARN,"RDO %d: spurious ALTRO %3d",rdo.rdo,a.id) ;
+				continue ;
+			}
 	
-		fee_check_data[a_ok][a.ch].count++ ;
+			fee_check_data[a_ok][a.ch].count++ ;
 
-		double ped, rms, cou ;
-		ped = rms = cou = 0.0 ;
-		for(int i=0;i<a.count;i++) {
-			if(a.tb[i] < 100) {
-				ped += a.adc[i] ;
-				rms += a.adc[i] * a.adc[i];
-				cou++ ;
+			double ped, rms, cou ;
+			ped = rms = cou = 0.0 ;
+			for(int i=0;i<a.count;i++) {
+				if(a.tb[i] < 100) {
+					ped += a.adc[i] ;
+					rms += a.adc[i] * a.adc[i];
+					cou++ ;
+				}
 			}
-		}
 		
-		if(cou == 0.0) cou = 1.0 ;	// oh well...
+			if(cou == 0.0) cou = 1.0 ;	// oh well...
 
-		ped /= cou ;
-		rms /= cou ;
-		rms = sqrt(rms - ped*ped) ;
+			ped /= cou ;
+			rms /= cou ;
+			rms = sqrt(rms - ped*ped) ;
 
-		fee_check_data[a_ok][a.ch].ped += ped ;
-		fee_check_data[a_ok][a.ch].ped_sigma += ped*ped ;
+			fee_check_data[a_ok][a.ch].ped += ped ;
+			fee_check_data[a_ok][a.ch].ped_sigma += ped*ped ;
 
-		fee_check_data[a_ok][a.ch].rms += rms ;
-		fee_check_data[a_ok][a.ch].rms_sigma += rms*rms ;
+			fee_check_data[a_ok][a.ch].rms += rms ;
+			fee_check_data[a_ok][a.ch].rms_sigma += rms*rms ;
+			
+			double d_sum, d_t0 ;
+			d_sum = d_t0 = 0.0 ;
+			for(int i=0;i<a.count;i++) {
+				if((a.tb[i] >= QA_TB_START) && (a.tb[i] <= QA_TB_STOP)) {
+					double d = a.adc[i] - ped ;
 
-		double d_sum, d_t0 ;
-		d_sum = d_t0 = 0.0 ;
-		for(int i=0;i<a.count;i++) {
-			if((a.tb[i] >= QA_TB_START) && (a.tb[i] <= QA_TB_STOP)) {
-				double d = a.adc[i] - ped ;
-
-				d_sum += d ;
-				d_t0 += d*a.tb[i] ;
+					d_sum += d ;
+					d_t0 += d*a.tb[i] ;
+				}
 			}
-		}
 
-		fee_check_data[a_ok][a.ch].charge += d_sum ;
-		fee_check_data[a_ok][a.ch].charge_sigma += d_sum*d_sum ;
+			fee_check_data[a_ok][a.ch].charge += d_sum ;
+			fee_check_data[a_ok][a.ch].charge_sigma += d_sum*d_sum ;
 		
-		if(d_sum == 0.0) d_t0 = 100.0 ;
-		else d_t0 /= d_sum ;
+			if(d_sum == 0.0) d_t0 = 100.0 ;
+			else d_t0 /= d_sum ;
 
-		fee_check_data[a_ok][a.ch].t0 += d_t0 ;
-		fee_check_data[a_ok][a.ch].t0_sigma += d_t0*d_t0 ;
+			fee_check_data[a_ok][a.ch].t0 += d_t0 ;
+			fee_check_data[a_ok][a.ch].t0_sigma += d_t0*d_t0 ;
 
-		//LOG(TERR,"Got A %3d:%02d, count %d: ped %f, rms %f, charge %f, t0 %f",a.id,a.ch,a.count,ped,rms,d_sum,d_t0) ;
+			//LOG(TERR,"Got A %3d:%02d, count %d: ped %f, rms %f, charge %f, t0 %f",a.id,a.ch,a.count,ped,rms,d_sum,d_t0) ;
 
 
 		}	// end of fee_check_on
@@ -507,11 +531,12 @@ void tpxStat::accum(char *rdobuff, int bytes)
 
 	} while(data_end && (data_end > rdo.data_start)) ;
 
+	TLOG() ;
 
 	if(errors) {
 		r[a.rdo].errs++ ;
 		if(r[a.rdo].errs == MAX_ERRORS) {	
-			LOG(ERR,"RDO %d has %d errors -- stopping logging",a.rdo+1,r[a.rdo].errs) ;
+			LOG(WARN,"RDO %d has %d errors -- stopping logging",a.rdo+1,r[a.rdo].errs) ;
 		}
 	} ;
 
