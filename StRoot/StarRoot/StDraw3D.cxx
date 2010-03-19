@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.95 2010/03/08 18:17:13 fine Exp $
+// $Id: StDraw3D.cxx,v 1.96 2010/03/19 03:45:51 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -767,6 +767,31 @@ TObject *StDraw3D::Line(int n,  const float *xyz, Color_t col,Style_t sty,Size_t
    fView = plLine;
    return Draw(plLine);
 }
+
+//__________________________________________________________________________________________
+//! This is an overloaded member function, provided for convenience.
+/*!  Add a line sigment connecting 2 points defined by the \a(\a"x0",\a"y0" \a"z0"\a) and \a(\a"x1",\a"y1" \a"z1"\a) to the display list with the \a col color, \a sty style, and \a siz size if provided
+   \param  x0,y0,z0 - the 3D coordinates of the first point
+   \param  x1,y1,z1 - the 3D coordinates of the second point
+   \param   col - ROOT line color ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   sty - ROOT line style ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \param   siz - ROOT line width ( see: http://root.cern.ch/root/html/TAttLine.html ) 
+   \return - a pointer to the ROOT "view" TPolyLine3D created to render the line segment defined by 2 input points
+*/
+//__________________________________________________________________________________________
+TObject *StDraw3D::Line(float x0, float y0, float z0,  float x1, float y1, float z1, Color_t col,Style_t sty,Size_t siz)
+{
+   //
+   // Draw "n" connected points of the "xyz" array of the float coordinates 
+   // with ROOT TPolyline3D class
+   // with the ROOT color, style, size attributes
+   //
+   std::vector<float> line(6);
+   line.push_back(x0);line.push_back(y0);line.push_back(z0);
+   line.push_back(x1);line.push_back(y1);line.push_back(z1);
+   return Line(line,col,sty,siz);   
+}
+
 
 //__________________________________________________________________________________________
 //! This is an overloaded member function, provided for convenience.
