@@ -36,8 +36,9 @@ public:
 	// run globally
 	int run_stop(FILE *f, u_int rb_mask, int run_type, char *fname) ;
 
-	// singleton....
-	static struct tpx_stat_struct {
+	// singleton.... [why????]
+//	static struct tpx_stat_struct {
+	struct tpx_stat_struct {
 		u_char should ;
 		u_int count ;
 		u_int errs ;

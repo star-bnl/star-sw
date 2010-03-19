@@ -8,7 +8,7 @@
 # make sure to kill all our -lyada which rtsmakefile did...
 LDLIBS = 
 
-HOSTFLAGS +=  -fomit-frame-pointer -funroll-loops
+HOSTFLAGS +=  -g -funroll-loops
 DEFINES += -DRTS_LOG_COLORED
 
 # If I'm in Zagreb...
