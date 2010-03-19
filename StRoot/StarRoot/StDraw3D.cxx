@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.96 2010/03/19 03:45:51 fine Exp $
+// $Id: StDraw3D.cxx,v 1.97 2010/03/19 18:06:06 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -11,7 +11,7 @@
 #include "TPolyMarker3D.h"
 #include "TPolyLine3D.h"
 #include "TSystem.h"
-#include "TROOT.h"
+// #include "TROOT.h"
 #include "TColor.h"
 #include "TEnv.h"
 #include "StCheckQtEnv.h"
@@ -33,7 +33,13 @@ Color_t StDraw3D::fgBkColor      = kBlack;
 Int_t   StDraw3D::fDrawCanvasCounter = -1; 
 
 namespace {
-    const double p2 = TMath::PiOver2();
+     const double p2 = TMath::PiOver2();
+     //__________________________________________________________________________________________
+     static inline void ForceAnimate(unsigned int times=0)
+     {
+         unsigned int  counter = times;
+         while( (!times || counter) && !gSystem->ProcessEvents()) { --counter; } 
+     }
 }
 
 //___________________________________________________
@@ -1101,7 +1107,12 @@ void StDraw3D::SetDrawOption(Option_t *options)
 }
 
 //___________________________________________________
-void StDraw3D::Update()
+//! Render  all items from the current display list onto the screen  and refesh the screen immiately if \a asap is defined
+/*! \param  asap = (defaul:false) force the sysysten to refresh the screen woith the fresh image. 
+                   This option can significantly slow dowbn the rednereing if abused.  
+*/ 
+//___________________________________________________
+void StDraw3D::Update(bool asap)
 {
    TVirtualPad *pad = Pad();
    if (pad) {
@@ -1113,6 +1124,7 @@ void StDraw3D::Update()
    } else {
        UpdateViewer(0);
    }
+   if (asap) ForceAnimate(1);
 }
 
 //___________________________________________________
@@ -1617,9 +1629,7 @@ void StDraw3D::SetFooter(const char *footer)
 //__________________________________________________________________________________________
 void StDraw3D::Animate()
 {
-   while(!gROOT->IsInterrupted()) {
-      gSystem->ProcessEvents();
-   }
+   ForceAnimate();
 }
 
 
