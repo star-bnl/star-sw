@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.56 2010/03/18 17:34:55 fine Exp $
+// $Id: StDraw3D.h,v 1.57 2010/03/19 18:06:06 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -307,7 +307,7 @@ public:
    virtual void Print(const char *filename) const ;
    virtual void Print(const char *filename, const char*type) const ;
    virtual void Save(const char *filename, const char*type="png") const ;
-   virtual void Update();
+   virtual void Update(bool asap=false);
    virtual void Modified();
    virtual void UpdateModified();
    virtual void SetDrawOption(Option_t *option="");
