@@ -1,6 +1,6 @@
 #ifndef STAR_StDraw3D
 #define STAR_StDraw3D
-// $Id: StDraw3D.h,v 1.57 2010/03/19 18:06:06 fine Exp $
+// $Id: StDraw3D.h,v 1.58 2010/03/19 18:32:05 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 
 #include "TObject.h"
@@ -312,7 +312,7 @@ public:
    virtual void UpdateModified();
    virtual void SetDrawOption(Option_t *option="");
    virtual void SetFooter(const char *footer);
-   static  void Animate();
+   virtual void Animate();
 
     void Draw3DTest();
     static void ShowTest();
