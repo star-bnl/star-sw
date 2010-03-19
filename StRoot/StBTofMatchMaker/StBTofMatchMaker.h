@@ -6,11 +6,17 @@
  *
  * The Barrel TOF MatchMaker matches STAR tracks to the BTOF cells.
  * 
- * $Id: StBTofMatchMaker.h,v 1.6 2009/09/15 00:30:45 dongx Exp $
+ * $Id: StBTofMatchMaker.h,v 1.7 2010/03/19 22:25:39 dongx Exp $
  */
 /*****************************************************************
  *
  * $Log: StBTofMatchMaker.h,v $
+ * Revision 1.7  2010/03/19 22:25:39  dongx
+ * - Added getBTofGeom() function for outside use
+ * - Remove AddConst(btofGeometry) to avoid crash due to duplication
+ * - TOT selection window opened to 40 ns
+ * - Added CPU timer printouts for processStEvent() funciton
+ *
  * Revision 1.6  2009/09/15 00:30:45  dongx
  * 1) Added the functionality to perform the matching with MuDst directly.
  * 2) Several updates on the track cuts used for matching
@@ -127,6 +133,8 @@ public:
 
     /// switch to read in StEvent/MuDst
     void setMuDstIn(Bool_t muDstIn=kTRUE);
+    /// method to retrieve the BTofGeom
+    StBTofGeometry* getBTofGeom();
 
 private:
     StTrackGeometry* trackGeometry(StTrack*);//!
@@ -294,7 +302,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.6 2009/09/15 00:30:45 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.7 2010/03/19 22:25:39 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StBTofMatchMaker,1)
 };
@@ -321,4 +329,6 @@ inline void StBTofMatchMaker::setCreateTreeFlag(Bool_t tree){mSaveTree = tree;}
 inline void StBTofMatchMaker::setSaveGeometry(Bool_t geomSave){mGeometrySave = geomSave; }
 
 inline void StBTofMatchMaker::setMuDstIn(Bool_t val) { mMuDstIn = val; }
+
+inline StBTofGeometry* StBTofMatchMaker::getBTofGeom() { return mBTofGeom; }
 #endif

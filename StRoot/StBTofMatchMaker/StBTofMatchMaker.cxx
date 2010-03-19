@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.9 2010/03/04 21:59:27 dongx Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.10 2010/03/19 22:25:39 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,12 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.10  2010/03/19 22:25:39  dongx
+ * - Added getBTofGeom() function for outside use
+ * - Remove AddConst(btofGeometry) to avoid crash due to duplication
+ * - TOT selection window opened to 40 ns
+ * - Added CPU timer printouts for processStEvent() funciton
+ *
  * Revision 1.9  2010/03/04 21:59:27  dongx
  * Further addition in the initial clean up for primary tracks too
  *
@@ -194,7 +200,7 @@ Int_t StBTofMatchMaker::InitRun(Int_t runnumber){
     LOG_INFO << " BTofGeometry initialization ... " << endm;
     TVolume *starHall = (TVolume *)GetDataSet("HALL");
     mBTofGeom->Init(this, starHall);
-    AddConst(new TObjectSet("btofGeometry",mBTofGeom));
+//    AddConst(new TObjectSet("btofGeometry",mBTofGeom));
   }
 
   geomTimer.stop();
@@ -326,16 +332,18 @@ void StBTofMatchMaker::processStEvent(){
     if(daqCellsHitVec.size()) mEventCounterHisto->Fill(6);
   }
 //  if(!daqCellsHitVec.size()) return;
-
+  if (doPrintCpuInfo) {
+    timer.stop();
+    LOG_INFO << "CPU time after Step A - loading hits : "
+         << timer.elapsedTime() << " sec" << endm;
+    timer.start();
+  }
 
   //.........................................................................
   /// B. loop over global tracks and determine all cell-track matches
   //
   tofCellHitVector allCellsHitVec;
   StructCellHit cellHit;
-
-  StTimer projTimer;
-  if (doPrintCpuInfo) projTimer.start();
 
   StSPtrVecTrackNode& nodes = mEvent->trackNodes();
   Int_t nAllTracks=0;
@@ -488,9 +496,10 @@ void StBTofMatchMaker::processStEvent(){
   }
   // end of Sect.B
   if (doPrintCpuInfo) {
-    projTimer.stop();
-    LOG_INFO << "CPU time for Step B - projection : "
-	 << projTimer.elapsedTime() << " sec" << endm;
+    timer.stop();
+    LOG_INFO << "CPU time after Step B - projection : "
+         << timer.elapsedTime() << " sec" << endm;
+    timer.start();
   }
 
   //.........................................................................
@@ -543,6 +552,12 @@ void StBTofMatchMaker::processStEvent(){
   } //end {sec. C}
   if(Debug()) { LOG_INFO << "C: before/after: " << allCellsHitVec.size() << "/" << matchHitCellsVec.size() << endm; }
   if(mHisto&&matchHitCellsVec.size()) mEventCounterHisto->Fill(8);
+  if (doPrintCpuInfo) {
+    timer.stop();
+    LOG_INFO << "CPU time after Step C - matching : "
+         << timer.elapsedTime() << " sec" << endm;
+    timer.start();
+  }
 
   //.........................................................................
   /// D. sort hit vectors  and deal with (discard) cells matched by multiple tracks
@@ -621,6 +636,12 @@ void StBTofMatchMaker::processStEvent(){
     mCellsPerEventMatch1->Fill(singleHitCellsVec.size()+multiHitsCellsVec.size());
     if(singleHitCellsVec.size()) mEventCounterHisto->Fill(9);
   } 
+  if (doPrintCpuInfo) {
+    timer.stop();
+    LOG_INFO << "CPU time after Step D - erasing : "
+         << timer.elapsedTime() << " sec" << endm;
+    timer.start();
+  }
 
   //.........................................................................
   /// E. sort and deal singleHitCellsVector for multiple cells associated to single tracks
@@ -705,7 +726,7 @@ void StBTofMatchMaker::processStEvent(){
       vector<Int_t> ttCandidates;
       for (Int_t i=0;i<nCells;i++) {
         Double_t tt = vtot[i];
-        if(tt<25.&&tt>tot) {
+        if(tt<40.&&tt>tot) {    // open the ToT cut to 40 ns
           tot = tt;
           ttCandidates.clear();
           ttCandidates.push_back(i);
@@ -763,6 +784,12 @@ void StBTofMatchMaker::processStEvent(){
 
   if(Debug()) { LOG_INFO << "E: before/after: " << singleHitCellsVec.size() << "/" << FinalMatchedCellsVec.size() << endm; }
   // end of Sect.E
+  if (doPrintCpuInfo) {
+    timer.stop();
+    LOG_INFO << "CPU time after Step E - sorting : "
+         << timer.elapsedTime() << " sec" << endm;
+    timer.start();
+  }
 
   //.........................................................................
   //// F. perform further selection and fill valid track histograms, ntuples and BTofPidTraits
@@ -844,6 +871,12 @@ void StBTofMatchMaker::processStEvent(){
   
   if(Debug()) { LOG_INFO << "F: before/after" << FinalMatchedCellsVec.size() << "/" <<nValidSinglePrimHitCells << endm; }
  // end of Sect.F
+  if (doPrintCpuInfo) {
+    timer.stop();
+    LOG_INFO << "CPU time after Step F - final : "
+         << timer.elapsedTime() << " sec" << endm;
+    timer.start();
+  }
 
   LOG_INFO << " #(daq hits): " << daqCellsHitVec.size()
        << "\t#(proj hits): " << allCellsHitVec.size()
@@ -1375,7 +1408,7 @@ void StBTofMatchMaker::processMuDst(){
       vector<Int_t> ttCandidates;
       for (Int_t i=0;i<nCells;i++) {
         Double_t tt = vtot[i];
-        if(tt<25.&&tt>tot) {
+        if(tt<40.&&tt>tot) {    // open the ToT to 40 ns
           tot = tt;
           ttCandidates.clear();
           ttCandidates.push_back(i);
