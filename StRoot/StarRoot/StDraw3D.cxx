@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.97 2010/03/19 18:06:06 fine Exp $
+// $Id: StDraw3D.cxx,v 1.98 2010/03/19 18:32:05 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -1629,6 +1629,10 @@ void StDraw3D::SetFooter(const char *footer)
 //__________________________________________________________________________________________
 void StDraw3D::Animate()
 {
+   TVirtualPad *pad = Pad();
+   if (pad && pad->IsModified()) {
+      Update();
+   } 
    ForceAnimate();
 }
 
