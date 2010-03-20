@@ -122,7 +122,7 @@ void getLumi( TFile *fd) {
   sum/=4.;
   for( int k=1; k<=4; k++ ){
     double y= hLum->GetBinContent(k);
-    // printf("%f %f\n",y, y/sum);  
+    printf("k=%d %.0f %.3f +/- %.3f \n",k,y, y/sum, 1/sqrt(y));  
     hLum->SetBinContent(k+10,y/sum);
   }
   hLum->SetBinContent(6,pol1);  
