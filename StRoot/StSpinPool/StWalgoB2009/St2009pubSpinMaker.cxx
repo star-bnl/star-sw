@@ -1,4 +1,4 @@
-// $Id: St2009pubSpinMaker.cxx,v 1.7 2010/03/15 17:05:46 balewski Exp $
+// $Id: St2009pubSpinMaker.cxx,v 1.8 2010/03/20 19:19:05 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -170,12 +170,13 @@ St2009pubSpinMaker::bXingSort(){
       
 
        //put final W cut here
-      if(fabs(T.primP.Eta()) > wMK->par_leptonEta) continue;     
       if(T.cluster.ET /T.nearTotET<  wMK->par_nearTotEtFrac) continue; // too large nearET
       if(T.sPtBalance<wMK->par_ptBalance )  continue;
       hA[0]->Fill("Wcut",1.);
 
       hA[30]->Fill(T.prMuTrack->eta());
+      if(fabs(T.primP.Eta()) > wMK->par_leptonEta) continue;     
+      // allows further cuts on eta
       if(T.prMuTrack->eta()<par_leptonEta1) continue;
       if(T.prMuTrack->eta()>par_leptonEta2) continue;
       hA[0]->Fill("eta",1.);
@@ -195,10 +196,12 @@ St2009pubSpinMaker::bXingSort(){
       float p_Q=T.prMuTrack->charge();
       if(ET>par_myET) hA[0]->Fill("Qlow",1.);
 
-      if( fabs(q2pt)< par_QPTlow) continue;
-      float highCut=par_QPThighA - (ET-par_QPThighET0)*par_QPThighB;
-      // printf("fff ET=%f q2pr=%f highCut=%f passed=%d\n",ET, q2pt,highCut,fabs(q2pt)<highCut);
-      if( ET>par_myET && ET<par_QPThighET1 && fabs(q2pt)>highCut) continue;
+      if(par_QPTlow>0) { // abaility to skip all Q/PT cuts
+	if( fabs(q2pt)< par_QPTlow) continue;
+	float highCut=par_QPThighA - (ET-par_QPThighET0)*par_QPThighB;
+	// printf("fff ET=%f q2pr=%f highCut=%f passed=%d\n",ET, q2pt,highCut,fabs(q2pt)<highCut);
+	if( ET>par_myET && ET<par_QPThighET1 && fabs(q2pt)>highCut) continue;
+      }
 
       if(ET>par_myET) {
 	hA[0]->Fill("Qhigh",1.);
@@ -222,6 +225,9 @@ St2009pubSpinMaker::bXingSort(){
 
 
 // $Log: St2009pubSpinMaker.cxx,v $
+// Revision 1.8  2010/03/20 19:19:05  balewski
+// added ability to drop Q/PT cut for spin analysis
+//
 // Revision 1.7  2010/03/15 17:05:46  balewski
 // cleanup, used for W AL sort March 15, 2010
 //

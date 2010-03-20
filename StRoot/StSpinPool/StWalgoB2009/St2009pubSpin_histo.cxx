@@ -1,4 +1,4 @@
-// $Id: St2009pubSpin_histo.cxx,v 1.8 2010/03/18 18:46:40 balewski Exp $
+// $Id: St2009pubSpin_histo.cxx,v 1.9 2010/03/20 19:19:05 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -44,25 +44,28 @@ St2009pubSpinMaker::initHistos(){
   hA[7]=new TH1F(core+"Y1","BG2: vertex & ET<20 &  ET 2x2 << 4x4 ; spin4 ",16,-0.5,15.5);
 
   hA[8]=h=new TH1F(core+"QpT","reco Q/PT,W ET>25 GeV; reco Q/PT  (1/GeV)",100,-0.099,0.099);
-  Lx=h->GetListOfFunctions();
-  ln=new TLine(par_QPTlow,0,par_QPTlow,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-  ln=new TLine(-par_QPTlow,0,-par_QPTlow,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-  float highCut=par_QPThighA - (par_QPThighET1-par_QPThighET0)*par_QPThighB;
-  float avrC=(par_QPThighA+highCut)/2.;
-  ln=new TLine(-avrC,0,-avrC,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-  ln=new TLine(avrC,0,avrC,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
-
+  float highCut=par_QPThighA - (par_QPThighET1-par_QPThighET0)*par_QPThighB; 
+    
+  if(par_QPTlow>0) { // abaility to skip all Q/PT cuts
+    Lx=h->GetListOfFunctions();
+    ln=new TLine(par_QPTlow,0,par_QPTlow,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+    ln=new TLine(-par_QPTlow,0,-par_QPTlow,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+    float avrC=(par_QPThighA+highCut)/2.; 
+    ln=new TLine(-avrC,0,-avrC,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+    ln=new TLine(avrC,0,avrC,1e6);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  }
 
   hA[9]=h=new TH2F(core+"QpT2","TPC PRIM  Q/PT ; 2x2 cluster ET (GeV); Q/PT  (1/GeV)",100,0.,100.,100,-0.1,0.1);
-  Lx=h->GetListOfFunctions();
-  ln=new TLine(0,0,100,0);  ln->SetLineColor(kBlue);  Lx->Add(ln);
-  ln=new TLine(0,par_QPTlow,100,par_QPTlow);  ln->SetLineColor(kRed);  Lx->Add(ln);  
-  ln=new TLine(0,-par_QPTlow,100,-par_QPTlow);  ln->SetLineColor(kRed);  Lx->Add(ln);  
+    Lx=h->GetListOfFunctions();
+    ln=new TLine(0,0,100,0);  ln->SetLineColor(kBlue);  Lx->Add(ln);
 
-  ln=new TLine(25,-0.1, 25,0.1);  ln->SetLineColor(kRed);  Lx->Add(ln);
-  ln=new TLine(par_QPThighET0,par_QPThighA,par_QPThighET1,highCut);  ln->SetLineColor(kRed);  Lx->Add(ln);
-  ln=new TLine(par_QPThighET0,-par_QPThighA,par_QPThighET1,-highCut);  ln->SetLineColor(kRed);  Lx->Add(ln);
-  
+    if(par_QPTlow>0) { // abaility to skip all Q/PT cuts
+    ln=new TLine(0,par_QPTlow,100,par_QPTlow);  ln->SetLineColor(kRed);  Lx->Add(ln);  
+    ln=new TLine(0,-par_QPTlow,100,-par_QPTlow);  ln->SetLineColor(kRed);  Lx->Add(ln);  
+    ln=new TLine(25,-0.1, 25,0.1);  ln->SetLineColor(kRed);  Lx->Add(ln);
+    ln=new TLine(par_QPThighET0,par_QPThighA,par_QPThighET1,highCut);  ln->SetLineColor(kRed);  Lx->Add(ln);
+    ln=new TLine(par_QPThighET0,-par_QPThighA,par_QPThighET1,-highCut);  ln->SetLineColor(kRed);  Lx->Add(ln);
+  }
 
   //use 10-19
   char cPM[2]={'P','N'}; // Positive, Negative
@@ -120,6 +123,9 @@ St2009pubSpinMaker::initHistos(){
 
 
 // $Log: St2009pubSpin_histo.cxx,v $
+// Revision 1.9  2010/03/20 19:19:05  balewski
+// added ability to drop Q/PT cut for spin analysis
+//
 // Revision 1.8  2010/03/18 18:46:40  balewski
 // simplified sPtBalance calculation
 //
