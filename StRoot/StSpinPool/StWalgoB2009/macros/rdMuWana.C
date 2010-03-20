@@ -1,7 +1,8 @@
 class StChain;
 StChain *chain=0;
-int spinSort=false;
 int useEtow=3;// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
+
+int spinSort=false;
 int isJustin=false;
 bool isRoss=true; 
 int geant=false;
@@ -366,7 +367,7 @@ int rdMuWana(
   
   if(spinSort){
     spDb=new StSpinDbMaker("spinDb");
-    enum {mxSM=1};
+    enum {mxSM=4}; // to study eta-cuts, drop Q/PT cut
     St2009pubSpinMaker *spinMkA[mxSM];
     for(int kk=0;kk<mxSM;kk++) {
       char ttx[100]; sprintf(ttx,"%cspin",'A'+kk);
@@ -377,6 +378,7 @@ int rdMuWana(
       spinMkA[kk]->setHList(HList); 
       if(kk==1) spinMkA[kk]->setEta(-1.,0.);
       if(kk==2) spinMkA[kk]->setEta(0,1.);
+      if(kk==3) spinMkA[kk]->setQPT(-1);// disable Q/PT cut
     }  
   }
   
@@ -452,6 +454,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.25  2010/03/20 19:19:07  balewski
+// added ability to drop Q/PT cut for spin analysis
+//
 // Revision 1.24  2010/03/14 22:50:34  balewski
 // *** empty log message ***
 //
