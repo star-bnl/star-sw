@@ -9,13 +9,14 @@ root [7] muWET->Draw()
 
 //=================================================
 plWana(  int page=13,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
-  iPath="./";
+  //iPath="./";
   //iPath="/star/data05/scratch/stevens4/wAnalysis";
+  iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-march15-PRL/data/";
   //iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-a3/data/";
   //core0="R10090018";
   //core0="run9setABCD";
   core0="run9setP1234";
-  core0="mcSetD1_ppWprod";
+  //core0="mcSetD1_ppWprod";
   //core0="mcSetD2_ppQCD10_inf_filter_tot";
   // core0="mcSetD1_ppZprod";
 
@@ -710,6 +711,9 @@ void doAllMC(){
 
 
 // $Log: plWana.C,v $
+// Revision 1.15  2010/03/20 18:38:43  balewski
+// *** empty log message ***
+//
 // Revision 1.14  2010/03/18 16:52:19  balewski
 // corrected sPtBalance for no-endcap
 //
