@@ -2808,4 +2808,4 @@ int StBemcTriggerSimu::get2009_DSMRegisters(int runNumber)
 int StBemcTriggerSimu::barrelJetPatchTh(int i) const { return mB101->getRegister(i); }
 int StBemcTriggerSimu::barrelHighTowerTh(int i) const { return mB001->getRegister(i); }
 
-int StBemcTriggerSimu::barrelJetPatchAdc(int jp) const { return (*mB101)[jp%6].info[(jp+6)/6-1]; }
+int StBemcTriggerSimu::barrelJetPatchAdc(int jp) const { return (*mB101)[jp%6].info[(jp/6+2)%3]; }
