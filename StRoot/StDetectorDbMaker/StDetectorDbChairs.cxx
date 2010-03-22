@@ -276,6 +276,8 @@ MakeChairInstance(tpcPadGainT0,Calibrations/tpc/tpcPadGainT0);
 MakeChairInstance(tpcSlewing,Calibrations/tpc/tpcSlewing);
 #include "St_tpcAcChargeC.h"
 MakeChairInstance(tpcAcCharge,Calibrations/tpc/tpcAcCharge);
+#include "St_TpcResponseSimulatorC.h"
+MakeChairInstance(TpcResponseSimulator,Calibrations/tpc/TpcResponseSimulator);
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
