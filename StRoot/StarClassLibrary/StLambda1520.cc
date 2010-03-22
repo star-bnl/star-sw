@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLambda1520.cc,v 1.1 2010/03/22 21:22:40 jwebb Exp $
+ * $Id: StLambda1520.cc,v 1.2 2010/03/22 21:32:34 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StLambda1520.cc,v $
+ * Revision 1.2  2010/03/22 21:32:34  jwebb
+ * And set the pdg ID to geant ID mapping.
+ *
  * Revision 1.1  2010/03/22 21:22:40  jwebb
  * Added the Lambda 1520 and antiparticle.
  *
@@ -60,6 +63,6 @@ StLambda1520 StLambda1520::mLambda1520(
              "lambda1520",    1.519500*GeV,      15.6*MeV,         0.0, 
 		    3,              -1,             0,          
 		    0,               0,             0,             
-	     "baryon",               0,            +1,        0,
+	     "baryon",               0,            +1,        20003122,
 	        false,       0.2632*nanosecond
 );
