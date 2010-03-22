@@ -1,4 +1,4 @@
-// $Id: St2009pubSpinMaker.cxx,v 1.8 2010/03/20 19:19:05 balewski Exp $
+// $Id: St2009pubSpinMaker.cxx,v 1.9 2010/03/22 16:11:42 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -167,11 +167,22 @@ St2009pubSpinMaker::bXingSort(){
       if(T.isMatch2Cl==false) continue;
       assert(T.cluster.nTower>0); // internal logical error
       assert(T.nearTotET>0); // internal logical error
+
+      int iQ=0; // plus
+      float p_Q=T.prMuTrack->charge();
+      if( p_Q<0 ) iQ=1;// minus
+      float ET=T.cluster.ET;
       
 
-       //put final W cut here
-      if(T.cluster.ET /T.nearTotET<  wMK->par_nearTotEtFrac) continue; // too large nearET
-      if(T.sPtBalance<wMK->par_ptBalance )  continue;
+      //put final W cut here
+      bool isW= (T.cluster.ET /T.nearTotET>   wMK->par_nearTotEtFrac) && // near cone
+	(T.sPtBalance<wMK->par_ptBalance); // awayET
+
+      if(!isW) { // AL(QCD)
+	if(ET>15 &&ET<20 ) hA[16+iQ]->Fill(spin4);
+	continue;
+      }
+
       hA[0]->Fill("Wcut",1.);
 
       hA[30]->Fill(T.prMuTrack->eta());
@@ -185,7 +196,6 @@ St2009pubSpinMaker::bXingSort(){
       //:::::accepted W events for x-section :::::::::::
       //::::::::::::::::::::::::::::::::::::::::::::::::
 
-      float ET=T.cluster.ET;
       if(ET>par_myET) hA[0]->Fill("W25",1.);
       float q2pt=T.prMuTrack->charge()/T.prMuTrack->pt();
       if(ET>par_myET) hA[8]->Fill(q2pt);
@@ -193,7 +203,6 @@ St2009pubSpinMaker::bXingSort(){
       
       // apply cut on reco charge
       if( fabs(q2pt)< par_QPTlow) continue;
-      float p_Q=T.prMuTrack->charge();
       if(ET>par_myET) hA[0]->Fill("Qlow",1.);
 
       if(par_QPTlow>0) { // abaility to skip all Q/PT cuts
@@ -209,13 +218,11 @@ St2009pubSpinMaker::bXingSort(){
 	else  hA[0]->Fill("Q -",1.);
       }
 
-      int iQ=0; // plus
-      if( p_Q<0 ) iQ=1;// minus
      
       hA[10+iQ]->Fill(ET);
       if(ET>25 &&ET<50 ) hA[12+iQ]->Fill(spin4);
       if(ET>32 &&ET<44 ) hA[14+iQ]->Fill(spin4);
-      if(ET>15 &&ET<20 ) hA[16+iQ]->Fill(spin4);
+     
       hA[18+iQ]->Fill(spin4,ET);	 
      
     } // end of loop over tracks
@@ -225,6 +232,9 @@ St2009pubSpinMaker::bXingSort(){
 
 
 // $Log: St2009pubSpinMaker.cxx,v $
+// Revision 1.9  2010/03/22 16:11:42  balewski
+// better computation of AL(QCD)
+//
 // Revision 1.8  2010/03/20 19:19:05  balewski
 // added ability to drop Q/PT cut for spin analysis
 //

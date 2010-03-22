@@ -1,4 +1,4 @@
-// $Id: St2009pubSpin_histo.cxx,v 1.9 2010/03/20 19:19:05 balewski Exp $
+// $Id: St2009pubSpin_histo.cxx,v 1.10 2010/03/22 16:11:42 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -91,7 +91,7 @@ St2009pubSpinMaker::initHistos(){
     h->SetFillColor(iCol[ipn]);
 
     sprintf(txt0,"Y4_%c",cPM[ipn]);
-    sprintf(txt,"Final W=QCD Q=%c, 2x2 ET=[15,20]GeV ; spin4  ",cPM[ipn]);
+    sprintf(txt,"Final QCD Q=%c, 2x2 ET=[15,20]GeV ; spin4  ",cPM[ipn]);
     hA[16+ipn]=h=new TH1F(core+txt0,txt,16,-0.5,15.5);
     h->SetFillColor(iCol[ipn]);
 
@@ -123,6 +123,9 @@ St2009pubSpinMaker::initHistos(){
 
 
 // $Log: St2009pubSpin_histo.cxx,v $
+// Revision 1.10  2010/03/22 16:11:42  balewski
+// better computation of AL(QCD)
+//
 // Revision 1.9  2010/03/20 19:19:05  balewski
 // added ability to drop Q/PT cut for spin analysis
 //

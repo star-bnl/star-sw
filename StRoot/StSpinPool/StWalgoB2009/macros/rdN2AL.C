@@ -21,10 +21,6 @@ TH1F *hLum=new TH1F("hLum","hLum", 50,0.5,50.5); // for lumi monitor and
 
 void rdN2AL(TString inpCore="run9setP1234") {
   TString  iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-a3/data/";
-  // iPath="sortJan29CNI/final/";
-  //iPath="sortJan29CNI/dropQ2Pt/";
-  //iPath="sortJan29XXX/halfQ2Pt/";
-  //iPath="sortJan29CNI/dropPtBal/";
   //  iPath="sortJan29XXX/moveConeEt/";  // use 'Aspin4' as signal: ET[13,20]
   //iPath="sortJan29CNI/moveConeRevMiss/";  // use 'Aspin4' as signal: ET[13,20]
 
