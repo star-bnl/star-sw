@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.6 2010/01/28 21:54:20 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.7 2010/03/22 21:32:34 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.7  2010/03/22 21:32:34  jwebb
+ * And set the pdg ID to geant ID mapping.
+ *
  * Revision 1.6  2010/01/28 21:54:20  jwebb
  * Added the Sigma(1385) baryons.
  *
@@ -138,6 +141,9 @@ StParticleTable::StParticleTable()
     Geant2Pdg( 702, +3114 ); // Sigma 1385 -
     Geant2Pdg( 703, -3114 ); // Sigma 1385 plus bar
     Geant2Pdg( 704, -3224 ); // Sigma 1385 minus bar 
+
+    Geant2Pdg( +706, +20003122 ); // Lambda 1520 
+    Geant2Pdg( -706, -20003122 ); // Lambda 1520 
 
 #undef Geant2Pdg
 
