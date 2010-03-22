@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.20 2010/03/22 01:33:13 seelej Exp $
+// $Id: St2009W_algo.cxx,v 1.21 2010/03/22 01:45:58 seelej Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -63,10 +63,10 @@ St2009WMaker::find_W_boson(){
       hA[135]->Fill(T.awayTotET,T.sPtBalance);
 
       for (int i=0; i<20; i++) {
-        float awayTot_cut = 0.+2.*((float) i);
+        float awayTot_cut = 10.+2.*((float) i);
         for (int j=0; j<20; j++) {
           float pTBal_cut = 5.+((float) j);
-          if (!(T.sPtBalance>pTBal_cut && T.awayTotET<awayTot_cut)) {
+          if (T.sPtBalance<pTBal_cut) { 
             if (T.prMuTrack->charge() < 0) {
               hA[142+i]->Fill(T.cluster.ET,j);
             } else if (T.prMuTrack->charge() > 0) {
@@ -531,6 +531,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.21  2010/03/22 01:45:58  seelej
+// *** empty log message ***
+//
 // Revision 1.20  2010/03/22 01:33:13  seelej
 // Additional change.
 //
