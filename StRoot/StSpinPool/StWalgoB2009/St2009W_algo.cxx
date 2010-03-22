@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.18 2010/03/18 18:46:40 balewski Exp $
+// $Id: St2009W_algo.cxx,v 1.19 2010/03/22 00:55:45 seelej Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -66,7 +66,7 @@ St2009WMaker::find_W_boson(){
         float awayTot_cut = 10.+2.*((float) i);
         for (int j=0; j<20; j++) {
           float pTBal_cut = 5.+((float) j);
-          if (!(T.ptBalance.Perp()>pTBal_cut && T.awayTotET<awayTot_cut)) {
+          if (!(T.sPtBalance>pTBal_cut && T.awayTotET<awayTot_cut)) {
             if (T.prMuTrack->charge() < 0) {
               hA[142+i]->Fill(T.cluster.ET,j);
             } else if (T.prMuTrack->charge() > 0) {
@@ -531,6 +531,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.19  2010/03/22 00:55:45  seelej
+// Change to use the signed pT balance in background subtraction instead of the unsigned pT balance.
+//
 // Revision 1.18  2010/03/18 18:46:40  balewski
 // simplified sPtBalance calculation
 //
