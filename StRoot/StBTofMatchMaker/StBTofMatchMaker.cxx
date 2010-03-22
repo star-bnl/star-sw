@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.10 2010/03/19 22:25:39 dongx Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.11 2010/03/22 19:40:28 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.11  2010/03/22 19:40:28  dongx
+ * Fixed a bug in setting index2Primary in processMuDst
+ *
  * Revision 1.10  2010/03/19 22:25:39  dongx
  * - Added getBTofGeom() function for outside use
  * - Remove AddConst(btofGeometry) to avoid crash due to duplication
@@ -1015,8 +1018,8 @@ void StBTofMatchMaker::processMuDst(){
   //
   Int_t index2Primary[50000]; // map
   memset(index2Primary, -1, sizeof(index2Primary));
-  for(int ip=0;ip<(int)mMuDst->numberOfPrimaryTracks();ip++) {
-    StMuTrack *pTrack = mMuDst->primaryTracks(ip);
+  for(int ip=0;ip<(int)mMuDst->array(muPrimary)->GetEntries();ip++) {
+    StMuTrack *pTrack = (StMuTrack *)mMuDst->array(muPrimary)->UncheckedAt(ip);
     if(!pTrack) continue;
     int gIndex = pTrack->index2Global();
     if(gIndex<0) continue;
@@ -1044,7 +1047,7 @@ void StBTofMatchMaker::processMuDst(){
     int pIndex = index2Primary[iNode];
     if(pIndex>=0) { 
       isPrimary = kTRUE;
-      StMuTrack *pTrack = (StMuTrack *)mMuDst->primaryTracks(pIndex);
+      StMuTrack *pTrack = (StMuTrack *)mMuDst->array(muPrimary)->UncheckedAt(pIndex);
       if(pTrack) {
         pTrack->setBTofPidTraits(pidTof);
         pTrack->setIndex2BTofHit(-1);
@@ -1528,7 +1531,7 @@ void StBTofMatchMaker::processMuDst(){
     if(ip>=0) {
       nValidSinglePrimHitCells++;
       tofHit->setIndex2Primary(ip);
-      primaryTrack = (StMuTrack *)mMuDst->primaryTracks(ip);
+      primaryTrack = (StMuTrack *)mMuDst->array(muPrimary)->UncheckedAt(ip);
       if(primaryTrack) {
         primaryTrack->setIndex2BTofHit(FinalMatchedCellsVec[ii].index2BTofHit);
       }
