@@ -84,10 +84,15 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
   RootFile.ReplaceAll(",","_");
   if (tauIX > 0) {RootFile += "jI=";RootFile += tauIX;}
   if (tauCX > 0) {RootFile += "tauCX=";RootFile += tauCX;}
-
+  if (RootFile.Contains(";")) {
+    Int_t index = RootFile.Index(";");
+    RootFile = RootFile(0,index);
+  }
   RootFile += ".root";
   RootFile.ReplaceAll(" ","");
   cout << "ChainOpt : " << ChainOpt.Data() << "\tOuput file " << RootFile.Data() << endl;
+  
+
   TString output = RootFile;
   output.ReplaceAll(".root","O.root");
   output.ReplaceAll("*","");
