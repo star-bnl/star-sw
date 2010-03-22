@@ -4,6 +4,7 @@
 #include <vector>
 #include <iterator>
 #include <cassert>
+#include <math.h>
 #include <iostream>
 #include <iomanip>
 
@@ -11,7 +12,7 @@
 
 namespace std {
 
-template <class PAR>
+template <class Key>
 class StBiTree 
 {
    public:
@@ -19,11 +20,11 @@ class StBiTree
    private:
        StBiTree  *mParent;
        std::vector<StBiTree  *>mBranches;
-       PAR            mParameters;
+       Key            mParameters;
        bool           mIsLeaf;
    protected:
          void Insert(StBiTree *node);
-         void Insert(const PAR &data,bool leaf=false);
+         void Insert(const Key &data,bool leaf=false);
          int  Reparent(StBiTree *newParent);
          void SetParent(StBiTree *node);
          void SetLeaf(bool leaf=true) { mIsLeaf = leaf; }
@@ -42,7 +43,7 @@ class StBiTree
          {           mBranches[kLeft] =0;           mBranches[kRight]=0;    }
 
          ////////////////////////////////////////////////////////////////////////////////////////////////////
-         /// \fn  StBiTree(const std::vector<PAR> &mParameters, bool isLeaf=true)
+         /// \fn  StBiTree(const std::vector<Key> &mParameters, bool isLeaf=true)
          ///
          /// \brief  Constructor. 
          ///
@@ -50,11 +51,11 @@ class StBiTree
          /// \param  isLeaf      true if is leaf. 
          ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-         StBiTree(const PAR  &mParameters, bool isLeaf=true) 
+         StBiTree(const Key  &mParameters, bool isLeaf=true) 
               :mParent(), mBranches(kLeaf),mParameters(mParameters) , mIsLeaf(isLeaf)
          {           mBranches[kLeft] =0;           mBranches[kRight]=0;          }
 
-         StBiTree(StBiTree *parent, const PAR &mParameters, bool isLeaf=false) 
+         StBiTree(StBiTree *parent, const Key &mParameters, bool isLeaf=false) 
             :mParent(), mBranches(kLeaf), mParameters(mParameters) , mIsLeaf(isLeaf)
          {            
             mBranches[kLeft] =0; mBranches[kRight]=0;
@@ -75,14 +76,14 @@ class StBiTree
          void SetRight(StBiTree *node);
 
          unsigned int  Depth() const; 
-         const PAR &Data() const;
-         PAR &Data();
+         const Key &Data() const;
+         Key &Data();
 
-         static int Where( const PAR &plane, const PAR &data);
-         static PAR Plane( const PAR &left, const PAR &right);
+         static int Where( const Key &plane, const Key &data);
+         static Key Plane( const Key &left, const Key &right);
          bool IsLeaf() const { return mIsLeaf; }
          bool IsEmpty() const { return !mIsLeaf && Left()==0 && Right() ==0; }
-         EBranch Where( const PAR &data) const
+         EBranch Where( const Key &data) const
          {
             return Where(Data(),data) ? kLeft : kRight;
          }
@@ -96,39 +97,39 @@ class StBiTree
             }
             return iAmHere;
          }
-         void push_back( const PAR &data);
+         const StBiTree *push_back( const Key &data);
          void SetBranch(StBiTree *node,EBranch branch);
          StBiTree *Branch(EBranch branch) const;
          StBiTree *Branch(EBranch branch);
-         iterator<input_iterator_tag, class StBiTree<PAR> > begin() 
+         iterator<input_iterator_tag, class StBiTree<Key> > begin() 
          {
-            return iterator<input_iterator_tag, class StBiTree<PAR> >(this);
+            return iterator<input_iterator_tag, class StBiTree<Key> >(this);
          }
-         iterator<input_iterator_tag, class StBiTree<PAR> > *CreateIterator()
+         iterator<input_iterator_tag, class StBiTree<Key> > *CreateIterator()
          {
-            return new iterator<input_iterator_tag, class StBiTree<PAR> >(this);
+            return new iterator<input_iterator_tag, class StBiTree<Key> >(this);
          }
 
-         static iterator<input_iterator_tag, class StBiTree<PAR> > end() 
+         static iterator<input_iterator_tag, class StBiTree<Key> > end() 
          {
-            return iterator<input_iterator_tag, class StBiTree<PAR> >();
+            return iterator<input_iterator_tag, class StBiTree<Key> >();
          }
          bool empty() const   { return IsEmpty(); }
-         iterator<input_iterator_tag, class StBiTree<PAR> >  find(const PAR &data); 
-         iterator<input_iterator_tag, class StBiTree<PAR> >  find(const StBiTree<PAR> &node); 
+         iterator<input_iterator_tag, class StBiTree<Key> >  find(const Key &data); 
+         iterator<input_iterator_tag, class StBiTree<Key> >  find(const StBiTree<Key> &node); 
 };
 
 //___________________________________________________________________
-template <class PAR>
-StBiTree<PAR>::~StBiTree()
+template <class Key>
+StBiTree<Key>::~StBiTree()
 {
-  cout << __FUNCTION__ << " my parent=" << mParent << " me=" << this << endl;
-  Print(-1); PrintData(-1);
+//  cout << __FUNCTION__ << " my parent=" << mParent << " me=" << this << endl;
+//  Print(-1); PrintData(-1);
   if (mParent) Reparent(0);
-  cout << __FUNCTION__ << " my parent=" << mParent << endl;
+//  cout << __FUNCTION__ << " my parent=" << mParent << endl;
   for (unsigned int i=0;i<mBranches.size();++i) {
     if (mBranches[i]) {
-       cout << __FUNCTION__ << " branch=" << i << " is: " << mBranches[i] <<   endl;
+  //     cout << __FUNCTION__ << " branch=" << i << " is: " << mBranches[i] <<   endl;
        mBranches[i]->SetParent(0);
        delete mBranches[i]; 
        mBranches[i] = 0;
@@ -137,88 +138,88 @@ StBiTree<PAR>::~StBiTree()
 }
 
 //___________________________________________________________________
-template <class PAR>
-void StBiTree<PAR>::Insert(const PAR &data, bool leaf)
+template <class Key>
+void StBiTree<Key>::Insert(const Key &data, bool leaf)
 {
    Insert(new StBiTree(this,data,leaf));
 }
 
 //___________________________________________________________________
-template <class PAR>
-void StBiTree<PAR>::Insert(StBiTree<PAR> *node)
+template <class Key>
+void StBiTree<Key>::Insert(StBiTree<Key> *node)
 {
    
 }
 
 //___________________________________________________________________
-template <class PAR>
-StBiTree<PAR> *StBiTree<PAR>::Branch(StBiTree<PAR>::EBranch branch) const
+template <class Key>
+StBiTree<Key> *StBiTree<Key>::Branch(StBiTree<Key>::EBranch branch) const
 {
    return mBranches[branch];
 }
 
 //___________________________________________________________________
-template <class PAR>
-StBiTree<PAR> *StBiTree<PAR>::Branch(StBiTree<PAR>::EBranch branch)
+template <class Key>
+StBiTree<Key> *StBiTree<Key>::Branch(StBiTree<Key>::EBranch branch)
 {
    return mBranches[branch];
 }
 
 //___________________________________________________________________
-template <class PAR>
-StBiTree<PAR> *StBiTree<PAR>::Left() const
+template <class Key>
+StBiTree<Key> *StBiTree<Key>::Left() const
 {
    return Branch(kLeft);
 }
 
 //___________________________________________________________________
-template <class PAR>
-StBiTree<PAR> *StBiTree<PAR>::Left()
+template <class Key>
+StBiTree<Key> *StBiTree<Key>::Left()
 {
    return Branch(kLeft);
 }
 
 
 //___________________________________________________________________
-template <class PAR>
-void StBiTree<PAR>::SetBranch(StBiTree<PAR> *node,StBiTree<PAR>::EBranch branch)
+template <class Key>
+void StBiTree<Key>::SetBranch(StBiTree<Key> *node,StBiTree<Key>::EBranch branch)
 {
    if (branch!= kLeaf) mBranches[branch]=node;
    else Reparent(0);
 }
 
 //___________________________________________________________________
-template <class PAR>
-void StBiTree<PAR>::SetLeft(StBiTree *left)
+template <class Key>
+void StBiTree<Key>::SetLeft(StBiTree *left)
 {
    SetBranch(left,kLeft);
 }
 
 //___________________________________________________________________
-template <class PAR>
-StBiTree<PAR> *StBiTree<PAR>::Right()
+template <class Key>
+StBiTree<Key> *StBiTree<Key>::Right()
 {
    return Branch(kRight);
 }
 
 //___________________________________________________________________
-template <class PAR>
-StBiTree<PAR> *StBiTree<PAR>::Right() const
+template <class Key>
+StBiTree<Key> *StBiTree<Key>::Right() const
 {
    return Branch(kRight);
 }
 
 //___________________________________________________________________
-template <class PAR>
-void StBiTree<PAR>::SetRight(StBiTree<PAR> *right)
+template <class Key>
+void StBiTree<Key>::SetRight(StBiTree<Key> *right)
 {
    SetBranch(right,kRight);
 }
 
 
 //___________________________________________________________________
-template <class PAR>
-int      StBiTree<PAR>::Reparent(StBiTree<PAR> *newParent)
+template <class Key>
+int      StBiTree<Key>::Reparent(StBiTree<Key> *newParent)
 {
    EBranch branch = kLeft;
    StBiTree *oldParent = Parent(); 
@@ -243,92 +244,105 @@ int      StBiTree<PAR>::Reparent(StBiTree<PAR> *newParent)
 }
 
 //___________________________________________________________________
-template <class PAR>
-void StBiTree<PAR>::SetParent(StBiTree<PAR> *newParent) 
+template <class Key>
+void StBiTree<Key>::SetParent(StBiTree<Key> *newParent) 
 { mParent=newParent;  }
 
 //___________________________________________________________________
-template <class PAR>
-StBiTree<PAR> *StBiTree<PAR>::Parent() const
+template <class Key>
+StBiTree<Key> *StBiTree<Key>::Parent() const
 { return mParent;  }
 
 //___________________________________________________________________
-template <class PAR>
-const PAR &StBiTree<PAR>::Data() const
+template <class Key>
+const Key &StBiTree<Key>::Data() const
 {
     return mParameters;
 }
 
 //_____________________________________________________________________________
-template <class PAR>
-PAR &StBiTree<PAR>::Data()
+template <class Key>
+Key &StBiTree<Key>::Data()
 {
     return mParameters;
 }
 
 //_____________________________________________________________________________
-template <class PAR>
-void StBiTree<PAR>::push_back( const PAR &data)
+template <class Key>
+const StBiTree<Key> *StBiTree<Key>::push_back( const Key &data)
 {
-   StBiTree<PAR> &branch = *this; 
+   const StBiTree<Key> *leafBranch = 0;
+   StBiTree<Key> &branch = *this; 
    if (branch.IsEmpty() ) {
       mParameters = data;
       mIsLeaf=true;
+      leafBranch = this;
    } else if ( branch.IsLeaf() ) {
       // Add the new plane and right leaf
-      StBiTree<PAR> *rightLeaf = new StBiTree<PAR>(data,true);
-      StBiTree<PAR> *parent    = branch.Parent();
+      StBiTree<Key> *rightLeaf = new StBiTree<Key>(data,true);
+      StBiTree<Key> *parent    = branch.Parent();
       if (parent) {
-         StBiTree<PAR> *newParentPlane = new StBiTree<PAR>(Plane(branch.Data(),data),false);
+         StBiTree<Key> *newParentPlane = new StBiTree<Key>(Plane(branch.Data(),data),false);
 
-         newParentPlane->SetRight(rightLeaf);
-         newParentPlane->SetLeft(&branch);
+         if (newParentPlane->Where(data) == kRight) {
+             newParentPlane->SetRight(rightLeaf);
+             newParentPlane->SetLeft(&branch);
+         } else {
+             newParentPlane->SetLeft(rightLeaf);
+             newParentPlane->SetRight(&branch);
+         }
          newParentPlane->SetParent(parent);
 
          parent->SetBranch(newParentPlane,branch.WhereAmI());
          branch.SetParent(newParentPlane);
          rightLeaf->SetParent(newParentPlane);
       } else {
-         StBiTree<PAR> *leftLeaf    = new StBiTree<PAR>(branch.Data(),true);
-         branch.SetLeft(leftLeaf);
-         leftLeaf->SetParent(&branch);
-
-         branch.SetRight(rightLeaf);
-         rightLeaf->SetParent(&branch);
-
+         StBiTree<Key> *leftLeaf    = new StBiTree<Key>(branch.Data(),true);
          branch.Data() = Plane(branch.Data(),data);
+         if ( branch.Where(data) == kRight) {
+            branch.SetLeft(leftLeaf);
+            branch.SetRight(rightLeaf);
+         } else {
+            branch.SetLeft(rightLeaf);
+            branch.SetRight(leftLeaf);
+         }
+         rightLeaf->SetParent(&branch);
+         leftLeaf->SetParent(&branch);
          branch.SetLeaf(false);
       }
+      leafBranch = rightLeaf;
    } else {
       // define the direction
       EBranch loc = Where(data);
-      StBiTree<PAR> *next = Branch( loc ); 
+      StBiTree<Key> *next = Branch( loc ); 
       if(next) {
-         next->push_back(data);
+         leafBranch = next->push_back(data);
       } else {
-         SetBranch(new StBiTree<PAR>(branch.Data(),true),loc);
+         assert(0);
+         SetBranch(new StBiTree<Key>(branch.Data(),true),loc);
       }
    }
+   return leafBranch;
 }
 
 //_____________________________________________________________________________
-template <class PAR>
-iterator<input_iterator_tag, class StBiTree<PAR> >  StBiTree<PAR>::find(const StBiTree<PAR> &node)
+template <class Key>
+iterator<input_iterator_tag, class StBiTree<Key> >  StBiTree<Key>::find(const StBiTree<Key> &node)
 {
-   iterator<input_iterator_tag, class StBiTree<PAR> > it = find(node.Data());
+   iterator<input_iterator_tag, class StBiTree<Key> > it = find(node.Data());
    if ( it == node.begin()) return it;
    return  end();
 }
 
 //_____________________________________________________________________________
-template <class PAR>
-iterator<input_iterator_tag, class StBiTree<PAR> >  StBiTree<PAR>::find(const PAR &data)
+template <class Key>
+iterator<input_iterator_tag, class StBiTree<Key> >  StBiTree<Key>::find(const Key &data)
 {
    if (empty() || IsLeaf() ) {
       return begin();
    } else {
       EBranch loc = Where(data);
-      StBiTree<PAR> *next = Branch( loc ); 
+      StBiTree<Key> *next = Branch( loc ); 
       if(next) {
          return next->find(data);
       } else {
@@ -341,8 +355,10 @@ iterator<input_iterator_tag, class StBiTree<PAR> >  StBiTree<PAR>::find(const PA
 template<>
 inline int StBiTree< vector<float> >::Where( const vector<float> &plane, const vector<float>  &data)
 {
-   float dist = plane[3];
-   for (int i=0;i<3;++i)   dist += plane[i]*data[i];
+   unsigned int nDim=data.size();
+   assert(plane.size() == nDim+1);
+   float dist = plane[nDim];
+   for (unsigned int i=0;i<nDim;++i)   dist += plane[i]*data[i];
    return dist > 0;
 }
 
@@ -356,39 +372,45 @@ inline vector<float> StBiTree< vector<float> >::Plane( const vector<float> &left
    //  D  = - A*X0
    //  PLANE (A+D)/|right -left
 
-   int nDim = left.size();
+   unsigned int nDim = left.size();
    vector<float> plane(nDim+1);
-   int indx = 0;
+   unsigned int indx = 0;
    float length = 0;
+   plane[nDim] = 0;
    for (;indx<nDim;++indx) {
      plane[indx]  = right[indx]-left[indx];
-     plane[nDim] += 0.5*plane[indx]*(right[indx]+left[indx]);
+     plane[nDim] += plane[indx]*(right[indx]+left[indx]);
      length      += plane[indx]*plane[indx];
    }
-   for (;indx>nDim+1;++indx) plane[indx] /= length;
-   plane[nDim] /= 2;
+   for (;indx>nDim+1;++indx) plane[indx] /= sqrt(length);
+   plane[nDim] = -0.5*plane[nDim];
+   cout << endl;
    cout << __FUNCTION__ << "::Left: " << "x="   << left[0] 
-                                    << "; y=" << left[1]
-                                    << "; z=" << left[2]
-                                    << endl;
+                                      << "; y=" << left[1];
+   indx = 2;
+   if (nDim >= 3)              cout  << "; z=" << left[2];
+                                cout  << endl;
 
    cout << __FUNCTION__ << "::Right: "<< "x="   << right[0] 
-                                    << "; y=" << right[1]
-                                    << "; z=" << right[2]
-                                    << endl;
+                                      << "; y=" << right[1];
+   indx = 2;
+   if (nDim >= 3)              cout  << "; z=" << right[2];
+                                cout  << endl;
 
    cout << __FUNCTION__ << "::Plane:" << plane[0] << "*x+" 
-                                   << plane[1] << "*y+"
-                                   << plane[2] << "*z+"
-                                   << plane[3] << endl;
+                                      << plane[1] << "*y+";
+   indx = 2;
+   if (nDim >= 3)      cout     << plane[indx++] << "*z+";
+                       cout      << plane[indx]   << endl;
 
+   cout << endl;
    return plane;
 }
 //___________________________________________________________________
-template <class PAR>
-unsigned int  StBiTree<PAR>::Depth() const
+template <class Key>
+unsigned int  StBiTree<Key>::Depth() const
 {
-   const StBiTree<PAR> *currentNode = Parent();
+   const StBiTree<Key> *currentNode = Parent();
    unsigned int depth = 0;
    while (currentNode) {
       depth++;
@@ -397,8 +419,8 @@ unsigned int  StBiTree<PAR>::Depth() const
    return depth;
 }
 //___________________________________________________________________
-template <class PAR>
-void StBiTree<PAR>::Print(int shift) const
+template <class Key>
+void StBiTree<Key>::Print(int shift) const
 {
    cout << __FUNCTION__ << setw(shift) << "  "<< " me=" << this
          << " Parent=" <<Parent()

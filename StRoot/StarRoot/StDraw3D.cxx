@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.98 2010/03/19 18:32:05 fine Exp $
+// $Id: StDraw3D.cxx,v 1.99 2010/03/22 19:18:28 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -793,8 +793,9 @@ TObject *StDraw3D::Line(float x0, float y0, float z0,  float x1, float y1, float
    // with the ROOT color, style, size attributes
    //
    std::vector<float> line(6);
-   line.push_back(x0);line.push_back(y0);line.push_back(z0);
-   line.push_back(x1);line.push_back(y1);line.push_back(z1);
+   int i = 0;
+   line[i++]=x0;line[i++]=y0;line[i++]=z0;
+   line[i++]=x1;line[i++]=y1;line[i++]=z1;
    return Line(line,col,sty,siz);   
 }
 
