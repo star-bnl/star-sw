@@ -59,8 +59,6 @@ class StTpcRSMaker : public StMaker {
   virtual void Print(Option_t *option="") const;
   void DigitizeSector(Int_t sector);
   void SetLaserScale(Double_t m=1) {mLaserScale = m;}
-  void SetSigmaJitterTI(Double_t p) {mSigmaJitterTI = p;}
-  void SetSigmaJitterTO(Double_t p) {mSigmaJitterTO = p;}
   static Int_t    AsicThresholds(Short_t ADCs[__MaxNumberOfTimeBins__]);
   static Int_t    SearchT(const void *elem1, const void **elem2);
   static Int_t    CompareT(const void **elem1, const void **elem2);
@@ -73,7 +71,6 @@ class StTpcRSMaker : public StMaker {
   SignalSum_t  *ResetSignalSum();
   void SettauIntegrationX(Double_t p =      74.6e-9, Int_t io=0) {mtauIntegrationX[io] = p;}
   void SettauCX(Double_t           p =    1000.0e-9, Int_t io=0) {mtauCX[io] = p;}
-  void SettauIntegration (Double_t p = 2.5* 74.6e-9) {mtauIntegration  = p;}
   void SetCutEle(Double_t p = 1e-3)                  {mCutEle = p;}
  private:
   TTree   *fTree;                     //!
@@ -96,23 +93,12 @@ class StTpcRSMaker : public StMaker {
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
   PAI  *mPAI;                        //!
   Double_t             mLaserScale;  //!
-  Double_t             mTau;         //!
-  Double_t             mTimeBinWidth;//!
   // local variables
   Int_t NumberOfInnerRows;//!
   Int_t numberOfSectors; //!
   Int_t NumberOfRows; //!
   Int_t NoPads; //!
   Int_t numberOfTimeBins; //!
-  Double_t W; //!// = 26.2;// *eV
-  Double_t I0; //! = 15.7 eV for Ar (and  13.1 eV for CH4)
-  const Double_t mCluster; //!
-  //  Double_t firstOuterSectorAnodeWire ; //!
-  Double_t innerSectorzOffSet; //!
-  Double_t outerSectorzOffSet; //!
-  //  Double_t offset; //!
-  Double_t samplingFrequency; //!
-  Double_t tauGlobalOffSet; //!
   Int_t    numberOfInnerSectorAnodeWires; //! 
   Double_t firstInnerSectorAnodeWire; //!
   Double_t lastInnerSectorAnodeWire; //!
@@ -120,25 +106,8 @@ class StTpcRSMaker : public StMaker {
   Double_t firstOuterSectorAnodeWire; //!
   Double_t lastOuterSectorAnodeWire; //!
   Double_t anodeWirePitch; //!
-  Double_t OmegaTauC; //!
-  Double_t transverseDiffusionConstant; //!
-  Double_t longitudinalDiffusionConstant; //!
-  Double_t InnerSectorGasGain; //!
-  Double_t OuterSectorGasGain; //!
-  Double_t Inner_wire_to_plane_coupling; //!
-  Double_t Outer_wire_to_plane_coupling; //!
-  const  Double_t  Inner_wire_to_plane_couplingScale; //!
-  const  Double_t  Outer_wire_to_plane_couplingScale; //!
   Double_t numberOfElectronsPerADCcount; //!
   Double_t anodeWireRadius; //!
-  const Double_t FanoFactor; //! // average Fano factor  
-  const Double_t K3IP; //!
-  const Double_t K3IR; //!
-  const Double_t K3OP; //!
-  const Double_t K3OR; //!
-  const Double_t mAveragePedestal;    //!
-  const Double_t mAveragePedestalRMS; //!
-  const Double_t mAveragePedestalRMSX; //!
   const Double_t minSignal;    //!
   Double_t InnerAlphaVariation; //!
   Double_t OuterAlphaVariation; //!
@@ -149,30 +118,27 @@ class StTpcRSMaker : public StMaker {
   const Double_t ElectronRangePower; //!
   Double_t      mtauIntegrationX[2]; //! for TPX inner=0/outer=1
   Double_t      mtauCX[2];           //! -"- 
-  Double_t      mtauIntegration;  //! for TPC
   const Int_t NoOfSectors;//!
   const Int_t NoOfRows;   //!
   const Int_t NoOfInnerRows;//!
   const Int_t NoOfPads;//!
   const Int_t NoOfTimeBins;//!
-  const Double_t tauF;//!
-  // not used  const Double_t tauFx;//!
-  const Double_t tauP;//!
-  Double_t   mSigmaJitterTI;
-  Double_t   mSigmaJitterTO;
   Altro *mAltro;//!
   Double_t   mCutEle; //! cut for delta electrons
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.16 2010/03/17 15:53:16 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.17 2010/03/22 23:45:06 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.16 2010/03/17 15:53:16 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.17 2010/03/22 23:45:06 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.17  2010/03/22 23:45:06  fisyak
+// Freeze version with new parameters table
+//
 // Revision 1.16  2010/03/17 15:53:16  fisyak
 // Move StTpcdEdxCorrection to StdEdxY2Maker to avoid dependence of StTpcDb on StDetectorDbMaker
 //
