@@ -1,4 +1,4 @@
-// $Id: St2009pubSpinMaker.cxx,v 1.9 2010/03/22 16:11:42 balewski Exp $
+// $Id: St2009pubSpinMaker.cxx,v 1.10 2010/03/22 17:18:32 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -175,8 +175,8 @@ St2009pubSpinMaker::bXingSort(){
       
 
       //put final W cut here
-      bool isW= (T.cluster.ET /T.nearTotET>   wMK->par_nearTotEtFrac) && // near cone
-	(T.sPtBalance<wMK->par_ptBalance); // awayET
+      bool isW= (T.cluster.ET /T.nearTotET> wMK->par_nearTotEtFrac) && // near cone
+	(T.sPtBalance>wMK->par_ptBalance); // awayET
 
       if(!isW) { // AL(QCD)
 	if(ET>15 &&ET<20 ) hA[16+iQ]->Fill(spin4);
@@ -232,6 +232,9 @@ St2009pubSpinMaker::bXingSort(){
 
 
 // $Log: St2009pubSpinMaker.cxx,v $
+// Revision 1.10  2010/03/22 17:18:32  balewski
+// now the < > sign is right
+//
 // Revision 1.9  2010/03/22 16:11:42  balewski
 // better computation of AL(QCD)
 //
