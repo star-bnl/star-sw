@@ -1,6 +1,9 @@
-* $Id: gdecay.F,v 1.4 2010/03/02 17:40:42 perev Exp $
+* $Id: gdecay.F,v 1.5 2010/03/22 22:03:56 perev Exp $
 * $Name:  $
 * $Log: gdecay.F,v $
+* Revision 1.5  2010/03/22 22:03:56  perev
+* Dealing with \/afs/rhic.bnl.gov/star/packages/.DEV fixed
+*
 * Revision 1.4  2010/03/02 17:40:42  perev
 * For year < 2009 setenv G3KrollWada YES switches on new Daltz decay
 *
@@ -64,8 +67,9 @@ C.
       Integer   Nba/100/
       Real      P(5,5)
       Integer   nt,n1,n2,n3,i,idal
-      character *8 cKrollWada,cSTAR
-      integer      iKrollWada/-1/,iYear
+      character *8 cKrollWada
+      character *80 cSTAR
+      integer      iKrollWada/-1/,iYear,ln,lnblnk
       save         iKrollWada,cKrollWada
 C.    ------------------------------------------------------------------
 C.
@@ -178,9 +182,10 @@ C-- a Dalitz decay is recognised by e+/e- or mu+/mu- pair
         if (iKrollWada .lt.0) then
           call getenv('G3KrollWada',cKrollWada)
           call getenv('STAR',cSTAR)
-          iYear = (ichar(cSTAR(3:3))-ichar('0'))*10
-     1          + (ichar(cSTAR(4:4))-ichar('0'))
-          if (iYear.le.0 .or. iYear .gt. 99) iYear = 10
+          ln = lnblnk(cSTAR)
+          iYear = (ichar(cSTAR(ln-2:ln-2))-ichar('0'))*10
+     1          + (ichar(cSTAR(ln-1:ln-1))-ichar('0'))
+          if (iYear.le.0 .or. iYear .gt. 10) iYear = 10
           iKrollWada=1
           if (iYear.lt.9) iKrollWada=0
 
