@@ -1,5 +1,5 @@
 
-// $Id: St2009WMaker.cxx,v 1.11 2010/03/14 22:50:31 balewski Exp $
+// $Id: St2009WMaker.cxx,v 1.12 2010/03/23 15:33:55 seelej Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -106,6 +106,8 @@ St2009WMaker::St2009WMaker(const char *name):StMaker(name){
   par_DsmThres=28; // only for monitoring
   par_maxDisplEve=1; // # of displayed selected events
 
+  use_gains_file = 0;
+
 }
 
 
@@ -128,7 +130,18 @@ St2009WMaker::Init(){
   mRand = new TRandom3(0);
 
   initGeom();
-  
+ 
+  if (use_gains_file == 1) {
+    fstream f1; f1.open(gains_file,ios::in);
+    cout << "Opening gains file " << gains_file << endl;
+    char str[200];
+    while (f1 >> str) {
+      int softID = atoi(str);
+      f1 >> str; gains_BTOW[softID] = atof(str);
+      f1 >> str; f1 >> str;
+    }
+  }
+ 
   if(isMC) par_minPileupVert=1;
 
   // ..... initialization of TPC cuts is run dependent, call it 'hack of the day', should be moved to InitRun() and handle multipl runs per job, after APS, JB
@@ -367,6 +380,9 @@ St2009WMaker::getJets(TString branchName)
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.12  2010/03/23 15:33:55  seelej
+// Edit to files to allow the use of a text file for the gains instead of using the DB.
+//
 // Revision 1.11  2010/03/14 22:50:31  balewski
 // *** empty log message ***
 //
@@ -403,6 +419,9 @@ St2009WMaker::getJets(TString branchName)
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.12  2010/03/23 15:33:55  seelej
+// Edit to files to allow the use of a text file for the gains instead of using the DB.
+//
 // Revision 1.11  2010/03/14 22:50:31  balewski
 // *** empty log message ***
 //

@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.h,v 1.10 2010/03/14 22:50:31 balewski Exp $
+// $Id: St2009WMaker.h,v 1.11 2010/03/23 15:33:55 seelej Exp $
 
 #ifndef STAR_St2009WMaker
 #define STAR_St2009WMaker
@@ -90,7 +90,10 @@ class St2009WMaker : public StMaker {
 
   float par_mcJetNeutScale;
   float par_mcJetChrgScale;
-   
+  
+  char* gains_file;
+  int use_gains_file;
+  float gains_BTOW[4801];
 
  public: // to overwrite default params from .C macro
   void useEtow(int x){ par_useEtow=x; }
@@ -112,6 +115,9 @@ class St2009WMaker : public StMaker {
   void setJetTreeBranch(TString jetTreeBranch, TString jetTreeBranch_noEEMC){ mJetTreeBranch = jetTreeBranch; mJetTreeBranch_noEEMC = jetTreeBranch_noEEMC; }
   void setJetNeutScaleMC(float x){ par_mcJetNeutScale=x; }
   void setJetChrgScaleMC(float x){ par_mcJetChrgScale=x; }
+
+  void setGainsFile(char* x) {gains_file=x; use_gains_file=1;}
+
  private:   
 
   //.... not used in the algo
@@ -187,7 +193,7 @@ class St2009WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.10 2010/03/14 22:50:31 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.11 2010/03/23 15:33:55 seelej Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -198,6 +204,9 @@ class St2009WMaker : public StMaker {
 
 
 // $Log: St2009WMaker.h,v $
+// Revision 1.11  2010/03/23 15:33:55  seelej
+// Edit to files to allow the use of a text file for the gains instead of using the DB.
+//
 // Revision 1.10  2010/03/14 22:50:31  balewski
 // *** empty log message ***
 //
