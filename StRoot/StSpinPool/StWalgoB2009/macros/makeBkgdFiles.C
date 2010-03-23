@@ -16,7 +16,8 @@ void makeBkgdFiles(int charge, int two_or_four) {
   // to do the actual calculation
   // ******************************************************
 
-  TFile *f1 = new TFile("run9setABCD_output4.wana.hist.root");
+  gStyle->SetOptDate(0);
+  TFile *f1 = new TFile("run9setP1234_final.wana.hist.root");
   //TFile *f1 = new TFile("run9setABCD_energy_up.wana.hist.root");
   //TFile *f1 = new TFile("run9setABCD_energy_down.wana.hist.root");
 
@@ -259,10 +260,10 @@ void makeBkgdFiles(int charge, int two_or_four) {
 
   // get the various background shapes made by
   // using different cuts for the awayside backgrounds
-  TH2F *bkgd_hists_from_file[20];
-  TH2F *bkgd_hists_from_file2[20];
+  TH2F *bkgd_hists_from_file[21];
+  TH2F *bkgd_hists_from_file2[21];
   char str[200];
-  for (int i=0; i<20; i++) {
+  for (int i=0; i<=20; i++) {
     if (charge == 1) {
       sprintf(str,"pos_failAwaySide_Awayside_pt_bin_%d",i);
       bkgd_hists_from_file[i] = (TH2F*)f1->Get(str);
@@ -279,11 +280,13 @@ void makeBkgdFiles(int charge, int two_or_four) {
   }
 
   // Now do the rebinning
-  TH1F *bkgd_hists1[20][20];
-  TH1F *bkgd_hists2[20][20];
-  TH1F *bkgd_hists3[20][20];
-  for (int i=0; i<20; i++) {
-    for (int j=0; j<20; j++) {
+  TH1F *bkgd_hists1[21][21];
+  TH1F *bkgd_hists2[21][21];
+  TH1F *bkgd_hists3[21][21];
+  int jval=0;
+  for (int i=0; i<=20; i++) {
+    int j=jval;
+//    for (int j=0; j<20; j++) {
       sprintf(str,"bkgd_hist1_%d_%d",i,j);
       bkgd_hists1[i][j] = new TH1F(str,str,49,1,99);
       sprintf(str,"bkgd_hist2_%d_%d",i,j);
@@ -291,12 +294,14 @@ void makeBkgdFiles(int charge, int two_or_four) {
       sprintf(str,"bkgd_hist3_%d_%d",i,j);
       bkgd_hists3[i][j] = new TH1F(str,str,49,1,99);
       for (int k=1; k<=49; k++) {
-        bkgd_hists1[i][j]->SetBinContent(k,bkgd_hists_from_file[i]->GetBinContent(2*k,j)+bkgd_hists_from_file[i]->GetBinContent(2*k+1,j));
-        bkgd_hists2[i][j]->SetBinContent(k,bkgd_hists_from_file[i]->GetBinContent(2*k,j)+bkgd_hists_from_file[i]->GetBinContent(2*k+1,j));
-        bkgd_hists3[i][j]->SetBinContent(k,bkgd_hists_from_file[i]->GetBinContent(2*k,j)+bkgd_hists_from_file[i]->GetBinContent(2*k+1,j));
+        bkgd_hists1[i][j]->SetBinContent(k,bkgd_hists_from_file[0]->GetBinContent(2*k,i)+bkgd_hists_from_file[0]->GetBinContent(2*k+1,i));
+        bkgd_hists2[i][j]->SetBinContent(k,bkgd_hists_from_file[0]->GetBinContent(2*k,i)+bkgd_hists_from_file[0]->GetBinContent(2*k+1,i));
+        bkgd_hists3[i][j]->SetBinContent(k,bkgd_hists_from_file[0]->GetBinContent(2*k,i)+bkgd_hists_from_file[0]->GetBinContent(2*k+1,i));
       }
-    }
+   // }
   }
+
+
 
   // initiaize the iterative fit functions
   TF1 *func2 = new TF1("func2","[0]+[1]*x",23,39);
@@ -308,22 +313,23 @@ void makeBkgdFiles(int charge, int two_or_four) {
 
   // Now loop over the the 1200 possibilities (400 loops and 3 normalization
   // regions)
-  float final_sig_in_norm[20][20][3];
-  float final_chisquare[20][20];
+  float final_sig_in_norm[21][21][3];
+  float final_chisquare[21][21];
   float signal_in_norm1[50];
   float signal_in_norm2[50];
   float signal_in_norm3[50];
-  TH1F *new_bkgd_hists1[20][20];
-  TH1F *new_bkgd_hists2[20][20];
-  TH1F *new_bkgd_hists3[20][20];
+  TH1F *new_bkgd_hists1[21][21];
+  TH1F *new_bkgd_hists2[21][21];
+  TH1F *new_bkgd_hists3[21][21];
   TH1F *bkgd_shape_unnorm1[20];
   TH1F *bkgd_shape_unnorm2[20];
   TH1F *bkgd_shape_unnorm3[20];
   TH1F *signal_for_new1[20];
   TH1F *signal_for_new2[20];
   TH1F *signal_for_new3[20];
-  for (int i=0; i<20; i++) {
-    for (int j=0; j<20; j++) {
+  for (int i=0; i<=20; i++) {
+    int j=jval;
+//    for (int j=0; j<20; j++) {
 
       func1->SetParameter(0,0.);
       func1->SetParameter(1,0.);
@@ -409,28 +415,44 @@ void makeBkgdFiles(int charge, int two_or_four) {
       new_bkgd_hists2[i][j] = (TH1F*)bkgd_shape_unnorm2[19]->Clone();
       new_bkgd_hists3[i][j] = (TH1F*)bkgd_shape_unnorm3[19]->Clone();
 
-    }
+    //}
   }
 
   // plot all the 1200 histograms
+  gStyle->SetTitleBorderSize(0);
   TCanvas *can6 = new TCanvas("can6","can6",0,0,600,400);
+  signal_final2->SetStats(kFALSE);
+  if (charge == 1) {
+    signal_final2->SetTitle("W+ Background Shapes");
+  } else if (charge == -1) {
+    signal_final2->SetTitle("W- Background Shapes");
+  }
+  signal_final2->GetXaxis()->SetRangeUser(0.,70.);
+  signal_final2->GetXaxis()->SetTitle("2x2 Cluster E_{T} (GeV)");
   signal_final2->Draw();
-  for (int i=0; i<20; i++) {
-    for (int j=0; j<20; j++) {
+  for (int i=0; i<=20; i++) {
+    int j=jval;
+    //for (int j=0; j<20; j++) {
       new_bkgd_hists1[i][j]->Draw("same");
       new_bkgd_hists2[i][j]->Draw("same");
       new_bkgd_hists3[i][j]->Draw("same");
-    }
+    //}
   }
   new_bkgd->Draw("same");
-  can6->Print("new_norm_bkgds.eps");
-  can6->Print("new_norm_bkgds.png");
-
+  if (charge == 1) {
+    can6->Print("Wplus_bkgd_shapes.eps");
+    can6->Print("Wplus_bkgd_shapes.png");
+  } else if (charge == -1) {
+    can6->Print("Wminus_bkgd_shapes.eps");
+    can6->Print("Wminus_bkgd_shapes.png");
+  }
+ 
   TH1F *chi2s = new TH1F("chi2s","chi2s",50,0.,10.);
-  for (int i=0; i<20; i++) {
-    for (int j=0; j<20; j++) {
+  for (int i=0; i<=20; i++) {
+    int j=jval;
+    //for (int j=0; j<20; j++) {
       chi2s->Fill(final_chisquare[i][j]);
-    }
+    //}
   }
  
   TCanvas *can7 = new TCanvas("can7","can7",0,0,600,400);
@@ -497,8 +519,9 @@ void makeBkgdFiles(int charge, int two_or_four) {
   for (int i=13; i<=49; i++) {
     float high = 0.;
     float low = 10000.;
-    for (int j=0; j<20; j++) {
-      for (int k=0; k<20; k++) {
+    for (int j=0; j<=20; j++) {
+      int k=jval;
+      //for (int k=0; k<20; k++) {
         if (new_bkgd_hists1[j][k]->GetBinContent(i) < low) {
           if (new_bkgd_hists1[j][k]->GetBinContent(i) > 0) {
             low = new_bkgd_hists1[j][k]->GetBinContent(i);
@@ -526,7 +549,7 @@ void makeBkgdFiles(int charge, int two_or_four) {
           high = new_bkgd_hists3[j][k]->GetBinContent(i);
         }
 
-      } // end of k-loop
+      //} // end of k-loop
     } // end of j-loop
 
     // calculate the sum
@@ -558,9 +581,9 @@ void makeBkgdFiles(int charge, int two_or_four) {
   // ******************************************************
 
   if (charge == 1) {
-    TFile *f2 = new TFile("bkgd_histos_pos_output4.root","recreate");
+    TFile *f2 = new TFile("bkgd_histos_pos_final.root","recreate");
   } else if (charge == -1) {
-    TFile *f2 = new TFile("bkgd_histos_neg_output4.root","recreate");
+    TFile *f2 = new TFile("bkgd_histos_neg_final.root","recreate");
   } else if (charge == 0) {
     TFile *f2 = new TFile("bkgd_histos_sum.root","recreate");
   }
