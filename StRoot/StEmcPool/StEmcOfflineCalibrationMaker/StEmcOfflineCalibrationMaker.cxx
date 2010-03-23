@@ -116,6 +116,11 @@ Int_t StEmcOfflineCalibrationMaker::InitRun(int run)
     smdSlopes[1]->Write();
     mapcheck->Write();
   }
+
+  mHT0threshold = emcTrigMaker->bemc->barrelHighTowerTh(0);
+  mHT1threshold = emcTrigMaker->bemc->barrelHighTowerTh(1);
+  mHT2threshold = emcTrigMaker->bemc->barrelHighTowerTh(2);
+  mHT3threshold = emcTrigMaker->bemc->barrelHighTowerTh(3);
 	
 	//look for histograms from this run in the current file and switch to them if found, otherwise create them
   char name[200];
@@ -212,10 +217,13 @@ Int_t StEmcOfflineCalibrationMaker::Make()
   for(unsigned int i = 0; i < fastTriggers.size(); i++){
     if(trigs.isTrigger(fastTriggers[i]))return kStOK;
   } 
-	
-	//triggers
+  HT0towersAboveThreshold.clear();
+  HT1towersAboveThreshold.clear();
+  HT2towersAboveThreshold.clear();
+  HT3towersAboveThreshold.clear();
 
- //if(trigs.isTrigger(2) || trigs.isTrigger(117460) || trigs.isTrigger(137460) || trigs.isTrigger(147461)) return kStOK;
+  myEvent->triggerResult.clear();
+  myEvent->towersAboveThreshold.clear();
 	
   myEvent->triggerIds = trigs.triggerIds();
   myEvent->l2Result = event->L2Result();	
@@ -291,8 +299,15 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 	
 	//trigger maker
   for(unsigned int i = 0; i < htTriggers.size(); i++){
-    myEvent->triggerResult[htTriggers[i]]=emcTrigMaker->isTrigger(htTriggers[i]);
-    myEvent->towersAboveThreshold[htTriggers[i]] = emcTrigMaker->bemc->getTowersAboveThreshold((int)htTriggers[i]);
+    if(trigs.isTrigger(htTriggers[i])){
+      myEvent->triggerResult[htTriggers[i]]=emcTrigMaker->isTrigger(htTriggers[i]);
+      if(emcTrigMaker->bemc->getTowersAboveThreshold((int)htTriggers[i]).size() > 0){
+      myEvent->towersAboveThreshold[htTriggers[i]] = emcTrigMaker->bemc->getTowersAboveThreshold((int)htTriggers[i]);
+      }else{
+	if(htTriggers[i] == 240540)myEvent->towersAboveThreshold[htTriggers[i]] = HT2towersAboveThreshold;
+	if(htTriggers[i] == 240570)myEvent->towersAboveThreshold[htTriggers[i]] = HT0towersAboveThreshold;
+      }
+    }
   }
   for(unsigned int i = 0; i < httpTriggers.size(); i++){
     myEvent->triggerResult[httpTriggers[i]]=emcTrigMaker->isTrigger(httpTriggers[i]);
@@ -531,50 +546,58 @@ Int_t StEmcOfflineCalibrationMaker::Finish()
 
 void StEmcOfflineCalibrationMaker::getADCs(int det) //1==BTOW, 2==BPRS, 3=BSMDE, 4=BSMDP
 {
-	det--;
-	StDetectorId detectorid = static_cast<StDetectorId>(kBarrelEmcTowerId + det);
-	StEmcDetector* detector=mEmcCollection->detector(detectorid);
-	if(detector){
-		for(int m=1;m<=120;m++){
-			StEmcModule* module = detector->module(m);
-			if(module)
-			{
-				StSPtrVecEmcRawHit& rawHit=module->hits();
-				for(unsigned int k=0;k<rawHit.size();k++){
-					if(rawHit[k]){
-						int module = rawHit[k]->module();
-						int eta = rawHit[k]->eta(); 
-						int submodule = TMath::Abs(rawHit[k]->sub());
-						int ADC = rawHit[k]->adc();
-						int hitid;
-						int stat=-9;
-						if(det<2) stat = mEmcGeom->getId(module,eta,submodule,hitid);
-					        else if(det==2) stat=mSmdEGeom->getId(module,eta,submodule,hitid);
-						else if(det==3) stat=mSmdPGeom->getId(module,eta,submodule,hitid);
-						if(stat==0){
-						  if(det<2) mADC[det][hitid-1] = ADC;
-						  else{
-						    mADCSmd[det-2][hitid-1]=ADC;
-						    //cout<<"added SMD hit"<<endl;
-						  }
-						}
-						if(det==1){
-							unsigned char CAP =  rawHit[k]->calibrationType();
-							if(CAP > 127) CAP -= 128;
-							mCapacitor[hitid-1] = CAP;
-						}
-						if(det>1){
-						  unsigned char CAP=rawHit[k]->calibrationType();
-						  if(CAP>127) CAP-=128;
-						  mCapacitorSmd[det-2][hitid-1]=CAP;
-						}
-					}
-				}
-			}
-			else { LOG_WARN<<"couldn't find StEmcModule "<<m<<" for detector "<<det<<endm; }
+  det--;
+  StDetectorId detectorid = static_cast<StDetectorId>(kBarrelEmcTowerId + det);
+  StEmcDetector* detector=mEmcCollection->detector(detectorid);
+  if(detector){
+    for(int m=1;m<=120;m++){
+      StEmcModule* module = detector->module(m);
+      if(module)
+	{
+	  StSPtrVecEmcRawHit& rawHit=module->hits();
+	  for(unsigned int k=0;k<rawHit.size();k++){
+	    if(rawHit[k]){
+	      int module = rawHit[k]->module();
+	      int eta = rawHit[k]->eta(); 
+	      int submodule = TMath::Abs(rawHit[k]->sub());
+	      int ADC = rawHit[k]->adc();
+	      int hitid;
+	      int stat=-9;	      
+	      if(det<2) stat = mEmcGeom->getId(module,eta,submodule,hitid);
+	      else if(det==2) stat=mSmdEGeom->getId(module,eta,submodule,hitid);
+	      else if(det==3) stat=mSmdPGeom->getId(module,eta,submodule,hitid);
+	      if(det == 0 && stat == 0){
+		int adc6 = emcTrigMaker->bemc->getHT6bitAdc(hitid);
+		pair<int,int> httowerthreshold (hitid,adc6);
+		if(adc6 > mHT0threshold)HT0towersAboveThreshold.push_back(httowerthreshold);
+		if(adc6 > mHT1threshold)HT1towersAboveThreshold.push_back(httowerthreshold);
+		if(adc6 > mHT2threshold)HT2towersAboveThreshold.push_back(httowerthreshold);
+		if(adc6 > mHT3threshold)HT3towersAboveThreshold.push_back(httowerthreshold);
+	      }
+	      if(stat==0){
+		if(det<2) mADC[det][hitid-1] = ADC;
+		else{
+		  mADCSmd[det-2][hitid-1]=ADC;
+		  //cout<<"added SMD hit"<<endl;
 		}
+	      }
+	      if(det==1){
+		unsigned char CAP =  rawHit[k]->calibrationType();
+		if(CAP > 127) CAP -= 128;
+		mCapacitor[hitid-1] = CAP;
+	      }
+	      if(det>1){
+		unsigned char CAP=rawHit[k]->calibrationType();
+		if(CAP>127) CAP-=128;
+		mCapacitorSmd[det-2][hitid-1]=CAP;
+	      }
+	    }
+	  }
 	}
-	else { LOG_WARN<<"couldn't find StEmcDetector for detector "<<det<<endm; }
+      else { LOG_WARN<<"couldn't find StEmcModule "<<m<<" for detector "<<det<<endm; }
+    }
+  }
+  else { LOG_WARN<<"couldn't find StEmcDetector for detector "<<det<<endm; }
 }
 
 /*

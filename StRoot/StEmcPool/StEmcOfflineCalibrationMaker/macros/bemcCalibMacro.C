@@ -2,15 +2,15 @@ void bemcCalibMacro(const char* dir="./",
 			   const char* name  = "test.root",
 			   const char* filelist = "test.list",
 			   int nFiles = 1,
-			   int nEvents = 100,
+			   int nEvents = 1000,
 		           const char* outPath = "./")
 {
 	gROOT->Macro("LoadLogger.C");
 	gROOT->Macro("loadMuDst.C");
     gSystem->Load("StarMagField.so");
     gSystem->Load("StMagF");
-    gSystem->Load("StTpcDb");
     gSystem->Load("StDetectorDbMaker");
+    gSystem->Load("StTpcDb");
     gSystem->Load("St_db_Maker");
     gSystem->Load("StDbUtilities");
     gSystem->Load("StMcEvent");
@@ -55,8 +55,9 @@ void bemcCalibMacro(const char* dir="./",
 	//emcTrig->setDbMaker(dbMaker);
 
     StTriggerSimuMaker* trigsim = new StTriggerSimuMaker();
-    trigsim->useBbc();
+    //trigsim->useBbc();
     trigsim->useBemc();
+    trigsim->useEemc();
     trigsim->bemc->setConfig(StBemcTriggerSimu::kOffline);
     //StGenericL2Emulator* simL2Mk = new StL2_2008EmulatorMaker;
     //assert(simL2Mk);

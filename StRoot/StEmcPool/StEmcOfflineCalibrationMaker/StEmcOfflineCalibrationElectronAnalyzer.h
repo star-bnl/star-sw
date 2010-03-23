@@ -15,5 +15,6 @@ class StEmcOfflineCalibrationElectronAnalyzer : public TObject
   vector<int> HTtrigs;
 
   void analyze(TChain*, char*,char*);
+  void analyzeTree(TChain*, char*,char*);
   ClassDef(StEmcOfflineCalibrationElectronAnalyzer,1)
 };

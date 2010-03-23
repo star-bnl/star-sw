@@ -46,6 +46,16 @@ private:
 	//StEmcTriggerMaker*	emcTrigMaker;
 	StTriggerSimuMaker* emcTrigMaker;
 
+	int mHT0threshold;
+	int mHT1threshold;
+	int mHT2threshold;
+	int mHT3threshold;
+
+	vector< pair<int,int> > HT0towersAboveThreshold;
+	vector< pair<int,int> > HT1towersAboveThreshold;
+	vector< pair<int,int> > HT2towersAboveThreshold;
+	vector< pair<int,int> > HT3towersAboveThreshold;
+
 	//all these random BEMC objects
 	StBemcTables*		mTables;
 	StEmcGeom*		mEmcGeom;
