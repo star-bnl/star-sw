@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.15 2010/03/20 18:38:34 balewski Exp $
+// $Id: St2009W_histo.cxx,v 1.16 2010/03/23 01:31:40 seelej Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -251,22 +251,22 @@ St2009WMaker::initHistos(){
   
   // Histograms added for background subtraction and systematic
   char str[200];
-  for (int i=0; i<20; i++) {
+  for (int i=0; i<=20; i++) {
     sprintf(str,"neg_failAwaySide_Awayside_pt_bin_%d",i);
-    hA[142+i] = new TH2F(str,str,100,0,100,20,0,20);
+    hA[142+i] = new TH2F(str,str,100,0,100,21,0,21);
   }
 
-  for (int i=0; i<20; i++) {
+  for (int i=0; i<=20; i++) {
     sprintf(str,"pos_failAwaySide_Awayside_pt_bin_%d",i);
-    hA[162+i] = new TH2F(str,str,100,0,100,20,0,20);
+    hA[163+i] = new TH2F(str,str,100,0,100,21,0,21);
   }
 
-  hA[182+2] = new TH1F("pos_muclustpTbal_wE","pos_muclustpTbal_wE",100,0,100);
-  hA[182+1] = new TH1F("neg_muclustpTbal_wE","neg_muclustpTbal_wE",100,0,100);
-  hA[182+4] = new TH1F("pos_muclustpTbal_noE","pos_muclustpTbal_noE",100,0,100);
-  hA[182+3] = new TH1F("neg_muclustpTbal_noE","neg_muclustpTbal_noE",100,0,100);
-  hA[182+6] = new TH1F("pos_muclustpTbal_back","pos_muclustpTbal_back",100,0,100);
-  hA[182+5] = new TH1F("neg_muclustpTbal_back","neg_muclustpTbal_back",100,0,100);
+  hA[184+2] = new TH1F("pos_muclustpTbal_wE","pos_muclustpTbal_wE",100,0,100);
+  hA[184+1] = new TH1F("neg_muclustpTbal_wE","neg_muclustpTbal_wE",100,0,100);
+  hA[184+4] = new TH1F("pos_muclustpTbal_noE","pos_muclustpTbal_noE",100,0,100);
+  hA[184+3] = new TH1F("neg_muclustpTbal_noE","neg_muclustpTbal_noE",100,0,100);
+  hA[184+6] = new TH1F("pos_muclustpTbal_back","pos_muclustpTbal_back",100,0,100);
+  hA[184+5] = new TH1F("neg_muclustpTbal_back","neg_muclustpTbal_back",100,0,100);
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
@@ -280,6 +280,9 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
+// Revision 1.16  2010/03/23 01:31:40  seelej
+// Fix to the filling of the histograms for the background systematic.
+//
 // Revision 1.15  2010/03/20 18:38:34  balewski
 // *** empty log message ***
 //
