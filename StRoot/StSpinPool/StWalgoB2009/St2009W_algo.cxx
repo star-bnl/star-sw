@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.21 2010/03/22 01:45:58 seelej Exp $
+// $Id: St2009W_algo.cxx,v 1.22 2010/03/23 01:31:40 seelej Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -38,9 +38,9 @@ St2009WMaker::find_W_boson(){
 	if(T.sPtBalance_noEEMC>par_ptBalance ) {//only signed ptBalance cut 
 	  hA[140]->Fill(T.cluster.ET);
           if (T.prMuTrack->charge() < 0) {
-            hA[182+3]->Fill(T.cluster.ET);
+            hA[184+3]->Fill(T.cluster.ET);
           } else if (T.prMuTrack->charge() > 0) {
-            hA[182+4]->Fill(T.cluster.ET);
+            hA[184+4]->Fill(T.cluster.ET);
           }
         }
       }
@@ -62,15 +62,15 @@ St2009WMaker::find_W_boson(){
       hA[134]->Fill(T.cluster.ET,T.sPtBalance);
       hA[135]->Fill(T.awayTotET,T.sPtBalance);
 
-      for (int i=0; i<20; i++) {
+      for (int i=0; i<=20; i++) {
         float awayTot_cut = 10.+2.*((float) i);
-        for (int j=0; j<20; j++) {
+        for (int j=0; j<=20; j++) {
           float pTBal_cut = 5.+((float) j);
           if (T.sPtBalance<pTBal_cut) { 
             if (T.prMuTrack->charge() < 0) {
               hA[142+i]->Fill(T.cluster.ET,j);
             } else if (T.prMuTrack->charge() > 0) {
-              hA[162+i]->Fill(T.cluster.ET,j);
+              hA[163+i]->Fill(T.cluster.ET,j);
             }
           }
         }
@@ -81,16 +81,16 @@ St2009WMaker::find_W_boson(){
         hA[136]->Fill(T.cluster.ET);//signal
         hA[62]->Fill(T.pointTower.iEta ,T.cluster.energy);
         if (T.prMuTrack->charge() < 0) {
-          hA[182+1]->Fill(T.cluster.ET);
+          hA[184+1]->Fill(T.cluster.ET);
         } else if (T.prMuTrack->charge() > 0) {
-          hA[182+2]->Fill(T.cluster.ET);
+          hA[184+2]->Fill(T.cluster.ET);
         }
       } else {
         hA[137]->Fill(T.cluster.ET);//background
         if (T.prMuTrack->charge() < 0) {
-          hA[182+5]->Fill(T.cluster.ET);
+          hA[184+5]->Fill(T.cluster.ET);
         } else if (T.prMuTrack->charge() > 0) {
-          hA[182+6]->Fill(T.cluster.ET);
+          hA[184+6]->Fill(T.cluster.ET);
         }
       }
 
@@ -531,6 +531,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.22  2010/03/23 01:31:40  seelej
+// Fix to the filling of the histograms for the background systematic.
+//
 // Revision 1.21  2010/03/22 01:45:58  seelej
 // *** empty log message ***
 //
