@@ -305,7 +305,8 @@ Int_t StEmcOfflineCalibrationMaker::Make()
       myEvent->towersAboveThreshold[htTriggers[i]] = emcTrigMaker->bemc->getTowersAboveThreshold((int)htTriggers[i]);
       }else{
 	if(htTriggers[i] == 240540)myEvent->towersAboveThreshold[htTriggers[i]] = HT2towersAboveThreshold;
-	if(htTriggers[i] == 240570)myEvent->towersAboveThreshold[htTriggers[i]] = HT0towersAboveThreshold;
+	if(htTriggers[i] == 240560)myEvent->towersAboveThreshold[htTriggers[i]] = HT1towersAboveThreshold;
+	if(htTriggers[i] == 240570 || htTriggers[i] == 240550)myEvent->towersAboveThreshold[htTriggers[i]] = HT0towersAboveThreshold;
       }
     }
   }
