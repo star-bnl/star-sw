@@ -1,4 +1,4 @@
-// $Id: St2009W_accessMuDst.cxx,v 1.11 2010/02/18 22:34:50 stevens4 Exp $
+// $Id: St2009W_accessMuDst.cxx,v 1.12 2010/03/23 15:33:55 seelej Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -329,6 +329,9 @@ St2009WMaker::accessBTOW(){
     int capID=0;// just one value for btow
     mBarrelTables->getPedestal(jBP,softID,capID,ped,sigPed); 
     mBarrelTables->getCalib(jBP, softID, 1, gain);
+    if (use_gains_file == 1) {
+      gain = gains_BTOW[softID];
+    }
     //printf("id=%d gain=%f\n",softID,gain);
 
     //method for shifting energy scale 
@@ -678,6 +681,9 @@ St2009WMaker::rejectMcTr(float effic){ //reject track in MC to match TPC efficie
 
 
 //$Log: St2009W_accessMuDst.cxx,v $
+//Revision 1.12  2010/03/23 15:33:55  seelej
+//Edit to files to allow the use of a text file for the gains instead of using the DB.
+//
 //Revision 1.11  2010/02/18 22:34:50  stevens4
 //add tpc effic study and allow energy scaling for data and MC
 //
