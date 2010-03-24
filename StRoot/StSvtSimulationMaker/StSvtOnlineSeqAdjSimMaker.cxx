@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.13 2009/11/11 14:17:15 baumgart Exp $
+ * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.14 2010/03/24 10:49:53 baumgart Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -499,7 +499,7 @@ void  StSvtOnlineSeqAdjSimMaker::WriteMask()
   
   for(int tim = 0; tim < 128; tim++){
     for(int an = 0; an < 240; an++){
-      // if (mMask[an*128 + tim]==kFALSE)	mAdcArray[an*128 + tim]=0;
+       if (mMask[an*128 + tim]==kFALSE)	mAdcArray[an*128 + tim]=0;
     }
   }
 }
