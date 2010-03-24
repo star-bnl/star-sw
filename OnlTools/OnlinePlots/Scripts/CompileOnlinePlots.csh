@@ -59,16 +59,16 @@ cat >EvpPlotServer.C<<__ROOTMACRO__
   gROOT->Macro("Load.C");
   gSystem->Load("RTS");
   if (gROOT->IsBatch()) {
-     // too foolish the loaded
      gSystem->Load("libQtCore.so");
      gSystem->Load("libQtGui.so");
      gSystem->Load("libGui.so");
      gSystem->Load("libGQt.so");
+     gSystem->Load("libQt3Support.so");
   }
-  gSystem->Load("StDaqLib"); 
+  gSystem->Load("StDaqLib");
   gSystem->Load("OnlinePlots");
   gSystem->Load("StDbLib");
-  gSystem->Load("StEEmcDbMaker");
+  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEmcUtil");
   gSystem->Load("StStrangeMuDstMaker");
   gSystem->Load("StMuDSTMaker");
@@ -76,8 +76,6 @@ cat >EvpPlotServer.C<<__ROOTMACRO__
   gSystem->Load("StTriggerUtilities");
   gSystem->Load("StEEmcPoolmuEztPanitkin");
   gSystem->Load("StBEMCPlots");
-  gSystem->Load("StEvent");
-  gSystem->Load("StEEmcUtil");
 
   char* argsS[] = {
                  "-path",
