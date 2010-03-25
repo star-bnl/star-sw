@@ -1,5 +1,8 @@
-* $Id: qnext.age,v 1.4 2010/03/25 17:46:21 perev Exp $
+* $Id: qnext.age,v 1.5 2010/03/25 18:16:07 perev Exp $
 * $Log: qnext.age,v $
+* Revision 1.5  2010/03/25 18:16:07  perev
+* max rejects now 1e6
+*
 * Revision 1.4  2010/03/25 17:46:21  perev
 * Event number accounted by filter now
 *
@@ -93,9 +96,9 @@
 *           PN 28.09.98: push out reconstruction banks
 	    nReject = -1         	
 :AGAIN:     nReject = nReject+1; 	!//If filter drop event, do again
-            if (nReject > 10000) THEN
+            if (nReject > 1000000) THEN
               WRITE(CHMAIL,10008) 
-10008         FORMAT(' ***** THE JOB STOPS NOW because > 10000 rejected *****')
+10008         FORMAT(' ***** THE JOB STOPS NOW because > 1e6 events rejected *****')
               CALL GMAIL(0,1)
               IQUEST(1) = 1
               GO TO 19
