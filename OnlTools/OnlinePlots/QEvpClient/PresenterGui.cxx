@@ -618,6 +618,7 @@ void PresenterGui::MakeConnectionFrame()
   //fStarLogo = new  QPushButton(QIcon(":/starlogo_1.xpm"),"",leftPane);
   //connect(fStarLogo, SIGNAL(clicked()) ,this, SLOT(DoUpdateButton()) );
   // QToolTip::add(fStarLogo,"Experiment shutdown. Don't push this button!");
+  leftPane->addStretch();
   leftPane->addWidget(fProgressBar = new QProgressBar(this));
   fProgressBar-> setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
   fProgressBar->setFixedWidth(mEventInfo->width());
