@@ -17,36 +17,24 @@
 #include "qtabwidget.h"
 #include "qpushbutton.h"
 #include "qmenubar.h"
-#include "qlayout.h"
-#include "qtooltip.h"
+#include <QLayout>
+#include <QHBoxLayout>
+#include <QToolTip>
 #include "qpixmap.h"
 #include "qlineedit.h"
 #include "qlabel.h"
 #include "qcursor.h"
 #include "qtimer.h"
 
-#if QT_VERSION >= 0x40000
-//Added by qt3to4:
 #  include "q3vbox.h"
 #  include "q3hbox.h"
-#  include "q3mainwindow.h"
-#  include "q3popupmenu.h"
+#  include <QtGui/QMenu>
 #  include "qicon.h"
-#  include "q3progressbar.h"
-#  include "q3toolbar.h"
+#  include <QtGui/QProgressBar>
+#  include <QtGui/QToolBar>
 #  include <QCustomEvent>
-#  include <Q3Frame>
+#  include <QFrame>
 #  include <stack>
-#else
-#  include "qprogressbar.h"
-#  include "qtoolbar.h"
-#  include "qiconset.h"
-#  include "qvbox.h"
-#  include "qhbox.h"
-#  include "qmainwindow.h"
-#  include "qpopupmenu.h"
-#  include "qvbuttongroup.h"
-#endif /* QT4 */
 
 #include "EventInfo.h"
 #include "ServerInfo.h"
@@ -61,17 +49,6 @@ char* mystrcat(const char* a, const char* b) {
 static TQtBrowserMenuItem_t gMenu_Data[] = {
   // { filename,      tooltip,            staydown,  id,              button}
 /* File Menu */
-#if QT_VERSION < 0x40000
-  { "&Save",      kFileSave,     Qt::CTRL+Qt::Key_S, "Save histograms in root file",        mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/save.xpm")    },
-  { "Save &As",   kFileSaveAs,   0,                  "Save histograms in root file as ... ",mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/hdisk_t.xpm") },
-  { "&Print",     kFilePrint,    Qt::CTRL+Qt::Key_P, "Print the TCanvas image ",            mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/printer.xpm") },
-  { "&Print All", kFilePrintAll, 0,                  "Print the TCanvas image ",            mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/printer.xpm") },
-  { "onlprinter2",kOnlPrinter2 , 0,                  "Send last print to onlpinter2",       mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/printer.xpm") },
-  { "&Reference", kReference,    Qt::CTRL+Qt::Key_R, "Open reference plots ... ",           
-mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/fileopen.xpm") },
-  { "E&xit",      kFileExit,     Qt::CTRL+Qt::Key_X, "Exit the ROOT application",           mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/quit.xpm")    },
-
-#else /* QT4 */
   { "&Save",      kFileSave,     Qt::CTRL+Qt::Key_S, "Save histograms in root file",        ":/save.xpm"    },
   { "Save &As",   kFileSaveAs,   0,                  "Save histograms in root file as ... ",":/hdisk_t.xpm" },
   { "&Print",     kFilePrint,    Qt::CTRL+Qt::Key_P, "Print the TCanvas image ",            ":/printer.xpm" },
@@ -79,27 +56,17 @@ mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/fileopen.xpm") },
   { "onlprinter2",kOnlPrinter2 , 0,                  "Send last print to onlpinter2",       ":/printer.xpm" },
   { "&Reference", kReference,    Qt::CTRL+Qt::Key_R, "Open reference plots ... ",           ":/fileopen.xpm"},
   { "E&xit",      kFileExit,     Qt::CTRL+Qt::Key_X, "Exit the ROOT application",           ":/quit.xpm"    },
-#endif /* QT4 */
   { "About",      kHelpAbout,      0, "", ""},
 
-#if QT_VERSION < 0x40000
-  { "&Live",      kLive,         Qt::CTRL+Qt::Key_L, "Connect to current run ... ",          mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/connect.xpm")  },
-  { "&File",      kFile,         Qt::CTRL+Qt::Key_F, "Open datafile or directory ... ",      mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/fileopen.xpm") },
-  { "&Update",    kUpdate,       Qt::CTRL+Qt::Key_U, "Update current ",                      mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/update.xpm")   },
-  { "&AutoUpdate",kAutoUpdate,   Qt::CTRL+Qt::Key_A, "Automatically update eventy 10 sec",   mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/update.xpm")   },  
-  { "&bits",kBits,   Qt::CTRL+Qt::Key_B, "Show Trigger and Detector bits",                   mystrcat( gEnv->GetValue("Online.plotsDir","."),"/images/bits.xpm")   },
-#else /* QT4 */
   { "&Live",      kLive,         Qt::CTRL+Qt::Key_L, "Connect to current run ... ",          ":/connect.xpm" },
   { "&File",      kFile,         Qt::CTRL+Qt::Key_F, "Open datafile or directory ... ",      ":/fileopen.xpm"},
   { "&Update",    kUpdate,       Qt::CTRL+Qt::Key_U, "Update current ",                      ":/update.xpm"  },
   { "&AutoUpdate",kAutoUpdate,   Qt::CTRL+Qt::Key_A, "Automatically update eventy 10 sec",   ":/update.xpm"  },
   { "&bits",kBits,   Qt::CTRL+Qt::Key_B, "Show Trigger and Detector bits",                   ":/bits.xpm"    },
-#endif /* QT4 */
   { "View Toolbar",     kToolBar,        0, "show toolbar ",                            "" },
 
   {0,0,0,"",""}
 };
-#if QT_VERSION >= 0x40000
 class  PresenterSuspend {
    // class to suspend signal emitting to complete initialization
    private:
@@ -120,23 +87,18 @@ class  PresenterSuspend {
 #endif
        }
    };
-#endif /* QT4 */
 //------------------------------------------------------------------------
 PresenterGui::PresenterGui(bool isRefWindow) : 
-#if QT_VERSION < 0x40000
-  QMainWindow( 0, "example application main window", WDestructiveClose | WGroupLeader ), 
-#else /* QT4 */
-  Q3MainWindow(),
-#endif /* QT4 */
+
+  QMainWindow(),
   mWidth(400), mHight(500), mStrLive(" Live  "), mStrFile(" File  "), mStrRun("Running"), mStrStop("Stopped")
   ,fGuiRefreshRate(10)
 {
-#if QT_VERSION >= 0x40000
    setAttribute(Qt::WA_DeleteOnClose);
    setWindowModality(Qt::WindowModal);
    PresenterSuspend blockWidgets;
    blockWidgets << this;
-#endif /* QT4 */
+
   // Some preparations here
   // Here is starting directory name
   SetDefaults();
@@ -146,17 +108,12 @@ PresenterGui::PresenterGui(bool isRefWindow) :
 
 //  connect(qApp,SIGNAL(lastWindowClosed () ), qApp, SLOT(quit ()) );
 
-  setUsesTextLabel(true); // use the text labels for the tool bar buttons
+  setToolButtonStyle(Qt::ToolButtonTextOnly); // use the text labels for the tool bar buttons
   
-#if QT_VERSION < 0x40000
-  mCentralWidget = new QHBox(this);
-#else /* QT4 */
-  blockWidgets << (mCentralWidget = new Q3HBox(this));
-#endif /* QT4 */
-  mCentralWidget->setMargin(0);
-#if QT_VERSION >= 0x40000
-  mCentralWidget->setSpacing(0); 
-#endif /* QT4 */
+  blockWidgets << (mCentralWidget = new QWidget(this) );
+  QHBoxLayout *layout = new  QHBoxLayout (mCentralWidget );
+  layout->setMargin(0);
+  layout->setSpacing(0); 
   setCentralWidget(mCentralWidget);
 
 
@@ -549,7 +506,7 @@ void PresenterGui::MakeActions() {
    while (gMenu_Data[i].fMenuText!=NULL) {
       // skip the separators 
       TQtRootAction *action = new TQtRootAction(this,gMenu_Data[i]);
-      fActions.insert(action->Id(),action);
+      fActions[action->Id()] = action;
       connect( action, SIGNAL( activated() ) , this, SLOT(ProcessMessage()) );
       i++;
    }
@@ -562,59 +519,42 @@ void PresenterGui::MakeMenuBar()
    fMenuBar = mainMenu;
 
    // File Menue
-#if QT_VERSION < 0x40000
-   QPopupMenu *fileMenu      = new QPopupMenu();
-#else /* QT4 */
-   Q3PopupMenu *fileMenu      = new Q3PopupMenu();
-#endif /* QT4 */
-   mainMenu->insertItem("&File",fileMenu);
-   fActions[kFileSave]->addTo(fileMenu); 
-   fActions[kFileSaveAs]->addTo(fileMenu); 
-   fActions[kFilePrint]->addTo(fileMenu); 
-   fActions[kFilePrintAll]->addTo(fileMenu); 
-   fActions[kOnlPrinter2]->addTo(fileMenu); 
-   fActions[kReference]->addTo(fileMenu);
-   fileMenu->insertSeparator();
-   fActions[kFileExit]->addTo(fileMenu); 
+   QMenu *fileMenu      = fMenuBar->addMenu("&File");
+   
+   fileMenu->addAction( fActions[kFileSave]);
+   fileMenu->addAction( fActions[kFileSaveAs]);
+   fileMenu->addAction(fActions[kFilePrint]);
+   fileMenu->addAction(fActions[kFilePrintAll]);
+   fileMenu->addAction(fActions[kOnlPrinter2]);
+   fileMenu->addAction(fActions[kReference]);
+   fileMenu->                                 insertSeparator();
+   fileMenu->addAction(fActions[kFileExit]);
 
    // Input Menue
-#if QT_VERSION < 0x40000
-   QPopupMenu *inputMenu      = new QPopupMenu();
-#else /* QT4 */
-   Q3PopupMenu *inputMenu     = new Q3PopupMenu();
-#endif /* QT4 */
-   mainMenu->insertItem("&Input",inputMenu);
-   fActions[kLive]->addTo(inputMenu); 
-   fActions[kLive]->setToggleAction(true);
-   fActions[kLive]->setOn(false);
-   fActions[kFile]->addTo(inputMenu); 
-   fActions[kUpdate]->addTo(inputMenu);
-   fActions[kAutoUpdate]->addTo(inputMenu);
-   fActions[kAutoUpdate]->setToggleAction(true);
-   fActions[kAutoUpdate]->setOn(true);
-   fActions[kBits]->setOn(false);
-   fActions[kBits]->addTo(inputMenu);
+   QMenu *inputMenu     = fMenuBar->addMenu("&Input");
 
+   inputMenu->addAction(fActions[kLive]);
+      fActions[kLive]->setCheckable(true);
+      fActions[kLive]->setChecked(true);
+   inputMenu->addAction(fActions[kFile]);
+   inputMenu->addAction(fActions[kUpdate]);
+   inputMenu->addAction(fActions[kAutoUpdate]);
+      fActions[kAutoUpdate]->setCheckable(true);
+      fActions[kAutoUpdate]->setChecked(true);
+   inputMenu->addAction(fActions[kBits]);
+      fActions[kBits]->setCheckable(false);
+       
    // Option Menue
-#if QT_VERSION < 0x40000
-   QPopupMenu *optionMenu      = new QPopupMenu();
-#else /* QT4 */
-   Q3PopupMenu *optionMenu     = new Q3PopupMenu();
-#endif /* QT4 */
-   mainMenu->insertItem("&Option",optionMenu);
-   fActions[kToolBar]->addTo(optionMenu);
-   fActions[kToolBar]->setToggleAction(true);
-   fActions[kToolBar]->setOn(true);
+   QMenu *optionMenu     = fMenuBar->addMenu("&Option");
 
+   optionMenu->addAction(fActions[kToolBar]);
+      fActions[kToolBar]->setCheckable(true);
+      fActions[kToolBar]->setChecked(true);
+      
    mainMenu->insertSeparator();
-#if QT_VERSION < 0x40000
-   QPopupMenu *helpMenu   = new QPopupMenu();
-#else /* QT4 */
-   Q3PopupMenu *helpMenu  = new Q3PopupMenu();
-#endif /* QT4 */
-   mainMenu->insertItem("&Help",helpMenu);
+   QMenu *helpMenu  = fMenuBar->addMenu("&Help");
    helpMenu->insertSeparator();
-   fActions[kHelpAbout]->addTo(helpMenu);
+   helpMenu->addAction(fActions[kHelpAbout]);
 
    // Option Menue
 
@@ -634,27 +574,25 @@ void PresenterGui::MakeMenuBar()
 
    // create tool bar
    if (fToolBar) { delete fToolBar; fToolBar = 0;}
-#if QT_VERSION < 0x40000
+
    fToolBar = new QToolBar(this);
-#else /* QT4 */
-   fToolBar = new Q3ToolBar(this);
-#endif /* QT4 */
-   addDockWindow(fToolBar);
+   
+
    // populate toolbar
-   fActions[kFileExit]->addTo(fToolBar);
+   fToolBar->addAction(fActions[kFileExit]);
    fToolBar->addSeparator();
-   fActions[kLive]->addTo(fToolBar); 
-   fActions[kFile]->addTo(fToolBar); 
-   fActions[kUpdate]->addTo(fToolBar);
-   fActions[kAutoUpdate]->addTo(fToolBar);
+   fToolBar->addAction(fActions[kLive]);
+   fToolBar->addAction(fActions[kFile]);
+   fToolBar->addAction(fActions[kUpdate]);
+   fToolBar->addAction(fActions[kAutoUpdate]);
    fToolBar->addSeparator();
-   fActions[kBits]->addTo(fToolBar);
+   fToolBar->addAction(fActions[kBits]);
    fToolBar->addSeparator();
-   fActions[kFileSave]->addTo(fToolBar); 
-   fActions[kFileSaveAs]->addTo(fToolBar);
-   fActions[kFilePrint]->addTo(fToolBar);
-   fActions[kFilePrintAll]->addTo(fToolBar);
-   fActions[kOnlPrinter2]->addTo(fToolBar);
+   fToolBar->addAction(fActions[kFileSave]);
+   fToolBar->addAction(fActions[kFileSaveAs]);
+   fToolBar->addAction(fActions[kFilePrint]);
+   fToolBar->addAction(fActions[kFilePrintAll]);
+   fToolBar->addAction(fActions[kOnlPrinter2]);
 }
 
 
@@ -679,29 +617,19 @@ void PresenterGui::MakeConnectionFrame()
 
 
 
-#if QT_VERSION < 0x40000
-  //fStarLogo = new  QPushButton(QIconSet(QPixmap("../images/starlogo_1.xpm")),"",leftPane);
-#else /* QT4 */
   //fStarLogo = new  QPushButton(QIcon(":/starlogo_1.xpm"),"",leftPane);
-#endif /* QT4 */
   //connect(fStarLogo, SIGNAL(clicked()) ,this, SLOT(DoUpdateButton()) );
-#if QT_VERSION < 0x40000
   // QToolTip::add(fStarLogo,"Experiment shutdown. Don't push this button!");
-  fProgressBar = new QProgressBar(leftPane,"Progress");
-#else /* QT4 */
-  // fStarLogo->setToolTip("Experiment shutdown. Don't push this button!");
-  fProgressBar = new Q3ProgressBar(leftPane,"Progress");
-#endif /* QT4 */
+  fProgressBar = new QProgressBar(leftPane);
   //fProgressBar->setMaximumSize(leftPane->width(),25);
-  fProgressBar->setProgress(0,10);
+  fProgressBar->setValue(0);
+  fProgressBar->setRange(0,10);
   
-#if QT_VERSION < 0x40000
   mBitsFrame = new QFrame(0,"Trigger/ Detector-Bits");
-#else /* QT4 */
-  mBitsFrame = new Q3Frame(0,"Trigger/ Detector-Bits");
-#endif /* QT4 */
+  mBitsFrame->setWindowTitle ("Trigger/ Detector-Bits");
+  
   mTriggerDetectorBitsInfo = new TriggerDetectorBitsInfo(mBitsFrame);
-  mBitsFrame->adjustSize();
+
 }
 
 //-------------------------------------------------------------------
@@ -1013,10 +941,10 @@ void PresenterGui::setEventInfo(int run, int event, int count, int token,  unsig
 }
 //______________________________________________________________________________
 void PresenterGui::updateRequest() {
-  int pro = fProgressBar->progress();
+  int pro = fProgressBar->value();
   pro++;
   if (pro>10) pro=0;
-  fProgressBar->setProgress(pro);
+  fProgressBar->setValue(pro);
 
   if ( fTab->currentPage() == fStaticTab ) { 
     emit update(GetCanvas(), GetTabId(), GetSubTabId() );

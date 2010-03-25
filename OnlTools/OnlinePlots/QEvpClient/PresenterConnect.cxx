@@ -3,21 +3,13 @@
 #include "EvpPresenter.h"
 #include "PresenterGui.h"
 
-#if QT_VERSION < 0x40000
-#  include <qfiledialog.h>
-#else /* QT4 */
-#  include <q3filedialog.h>
-#endif /* QT4 */
+#include <QtGui/QFileDialog>
 
 #include "TH1.h"
 #include "TCanvas.h"
 
 PresenterConnect::PresenterConnect(PresenterGui* gui, EvpPresenter* pre) :
-#if QT_VERSION < 0x40000
-  mGui(gui), mPresenter(pre) {
-#else /* QT4 */
   QObject(0),mGui(gui), mPresenter(pre) {
-#endif /* QT4 */
 
   connect(mGui,SIGNAL(live()), this, SLOT(live()) ); 
   connect(mGui,SIGNAL(file()), this, SLOT(file()) ); 
@@ -56,19 +48,12 @@ void PresenterConnect::save() {
 }
 
 void PresenterConnect::saveAs() {
-  QString dir(EvpUtil::GetOutputPath());
-  QString filter("*.root");
-#if QT_VERSION < 0x40000
-  QFileDialog dialog( dir, filter, mGui, "", true );
-#else /* QT4 */
-  Q3FileDialog dialog( dir, filter, mGui, "", true );
-#endif /* QT4 */
-  dialog.exec();
-  if (!dialog.selectedFile().isEmpty()) {
-    mPresenter->Save( dialog.selectedFile().ascii() );
-  }
+   QString dir(EvpUtil::GetOutputPath());
+   QString filter("*.root");
+   QString file = QFileDialog::getSaveFileName ( mGui, tr("Save File"), dir,filter);
+   if (! file .isEmpty() ) 
+       mPresenter->Save( file.toAscii().data() );
 }
-
 
 void PresenterConnect::live() {
   //cout << "liveButton" << endl;
@@ -80,17 +65,9 @@ void PresenterConnect::file() {
   //cout << "fileButton" << endl;
   QString dir(EvpUtil::GetOutputPath());
   QString caption("File dialog");
-#if QT_VERSION < 0x40000
-  QFileDialog dialog(dir, QString(), mGui,caption);
-#else /* QT4 */
-  Q3FileDialog dialog(dir, QString(), mGui,caption);
-#endif /* QT4 */
-  dialog.setCaption(caption);
-  dialog.addFilter("*.root");
-  //  dialog.addFilter("*.map");
-  dialog.exec();
+  QString file = QFileDialog::getOpenFileName(mGui, caption,dir,
+                              tr("ROOT file (*.root *.map )"));
 
-  QString file = dialog.selectedFile();
   QString mapFile = file;
   int iret = 0;
 //  if ( file.find(".map") < 0 ) {   // must be root file, only *.root and *.map are allowed
@@ -99,11 +76,7 @@ void PresenterConnect::file() {
 //  } 
 
   if (iret) {
-#if QT_VERSION < 0x40000
-    cerr << "### error ### Can not open file : " << mapFile << endl;
-#else /* QT4 */
     cerr << "### error ### Can not open file : " << mapFile.toStdString() << endl;
-#endif /* QT4 */
     return;
   }
 
