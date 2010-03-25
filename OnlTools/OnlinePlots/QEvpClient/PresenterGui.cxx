@@ -576,7 +576,7 @@ void PresenterGui::MakeMenuBar()
    if (fToolBar) { delete fToolBar; fToolBar = 0;}
 
    fToolBar = new QToolBar(this);
-   
+   addToolBar(fToolBar);
 
    // populate toolbar
    fToolBar->addAction(fActions[kFileExit]);
