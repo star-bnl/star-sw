@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.9 2010/02/19 23:36:08 fisyak Exp $
+ * $Id: StTpcHitMaker.h,v 1.10 2010/03/25 15:05:54 fisyak Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.10  2010/03/25 15:05:54  fisyak
+ * Add AfterBurner
+ *
  * Revision 1.9  2010/02/19 23:36:08  fisyak
  * Add hit Id
  *
@@ -53,6 +56,7 @@ class StTpcHit;
 class tpc_cl;
 class daq_cld;
 class tpc_t;
+class StTpcHitCollection;
 
 class StTpcHitMaker : public StRTSBaseMaker {
  public:
@@ -92,7 +96,7 @@ class StTpcHitMaker : public StRTSBaseMaker {
   StTpcHit *CreateTpcHit(const daq_cld  &cluster, Int_t sector, Int_t row);
     
  public:
-
+  static void AfterBurner(StTpcHitCollection *hitCollection);
   static Float_t fgDp;             // hardcoded errors
   static Float_t fgDt;
   static Float_t fgDperp;
