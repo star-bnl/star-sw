@@ -176,7 +176,7 @@ PresenterGui::PresenterGui(bool isRefWindow) :
 
          blockWidgets << w;
 
-        QToolTip::add(w,"<P>Click over any TPad with the <b>middle</b> mouse button to <b>zoom</b>");
+        w->setToolTip("<P>Click over any TPad with the <b>middle</b> mouse button to <b>zoom</b>");
         topTab->addTab( w ,TabNames[i][j]);
         topTab->showPage(w);
         mZoomer->Connect(w);
@@ -187,7 +187,7 @@ PresenterGui::PresenterGui(bool isRefWindow) :
 
       blockWidgets << w;
 
-      QToolTip::add(w,"<P>Click over any TPad with the <b>middle</b> mouse button to <b>zoom</b>");
+      w->setToolTip("<P>Click over any TPad with the <b>middle</b> mouse button to <b>zoom</b>");
       fStaticTab->addTab( w ,TabNames[i][0]);
       fStaticTab->showPage(w);
       mZoomer->Connect(w);
