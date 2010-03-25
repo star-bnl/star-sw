@@ -1,29 +1,37 @@
 #!/bin/csh
 #
-# Check out the new OnlinePlots  to offline build tree
+# Check out the new OnlinePlots to build tree
 # 
         
+set macroFile = OnlinePlots.C
+
 echo "--- Compiling PPlots libraries"
 cons
 
 echo "--- Cleaning up"
-test -e EvpPlotServer.C && /bin/rm -f EvpPlotServer.C
-test -e .rootrc && /bin/rm -f .rootrc
+/usr/bin/test -e $macroFile && /bin/rm -f $macroFile
+/usr/bin/test -e .rootrc && /bin/rm -f .rootrc
+
+set filesDir = "/star/u/starqa/OnlineQA/files"
+@ on_evp = `/bin/uname -n | /bin/grep -c evp.starp`
+if ($on_evp > 0) then
+  set filesDir = "/a/pplot/files"
+endif
 
 # prepare .rootrc
 echo "--- Generating a .rootrc file"
-cat >.rootrc <<__ROOTRC__
+/bin/cat > .rootrc <<__ROOTRC__
 # Author: Valeri Fine 10/10/2003
 # Online parameters
 
 Online.GuiRefreshRate:  50
 
-Online.tofConfigPath:   /a/pplot/files/tof/
-Online.eemcMask:     /a/pplot/files/eemc/defaultPanitkinSetup/eemcTwMask.dat
-Online.eemcDbDump:   /a/pplot/files/eemc/defaultPanitkinSetup/eemcDbDump.dat
-Online.eemcPathIn:   /a/pplot/files/eemc/defaultPanitkinSetup/
+Online.tofConfigPath:   ${filesDir}/tof/
+Online.bemcStatus:   ${filesDir}/bemc/bemcStatus.txt
+Online.eemcMask:     ${filesDir}/eemc/defaultPanitkinSetup/eemcTwMask.dat
+Online.eemcDbDump:   ${filesDir}/eemc/defaultPanitkinSetup/eemcDbDump.dat
+Online.eemcPathIn:   ${filesDir}/eemc/defaultPanitkinSetup/
 Online.eemcPathOut:  /onlineweb/www/eemc2005pplot
-Online.bemcStatus:   /a/pplot/files/bemc/bemcStatus.txt
 Online.InputPath:    /a
 Online.OutputPath:   /a/pplot/histos/
 Online.ProjectPath:  OnlTools/OnlinePlots/
@@ -52,18 +60,16 @@ __ROOTRC__
 
 
 
-echo "--- Creating the ROOT macro"
-cat >EvpPlotServer.C<<__ROOTMACRO__
+echo "--- Creating the ROOT macro $macroFile "
+echo "---  (macro must be edited to use as server or presenter)"
+echo "---  (macro must be run using root4starN)"
+/bin/cat > $macroFile <<__ROOTMACRO__
 
 {
   gROOT->Macro("Load.C");
   gSystem->Load("RTS");
   if (gROOT->IsBatch()) {
-     gSystem->Load("libQtCore.so");
-     gSystem->Load("libQtGui.so");
-     gSystem->Load("libGui.so");
-     gSystem->Load("libGQt.so");
-     gSystem->Load("libQt3Support.so");
+     gSystem->Load("libQtRootGui.so");
   }
   gSystem->Load("StDaqLib");
   gSystem->Load("OnlinePlots");
@@ -104,4 +110,4 @@ cat >EvpPlotServer.C<<__ROOTMACRO__
 __ROOTMACRO__
 
 
-cat  EvpPlotServer.C
+#/bin/cat  EvpPlotServer.C
