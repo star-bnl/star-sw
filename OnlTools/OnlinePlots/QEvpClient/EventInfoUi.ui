@@ -5,20 +5,23 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>227</width>
+    <width>240</width>
     <height>302</height>
    </rect>
   </property>
-  <property name="windowTitle" >
-   <string>Frame</string>
+  <property name="sizePolicy" >
+   <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="frameShape" >
-   <enum>QFrame::StyledPanel</enum>
+   <enum>QFrame::NoFrame</enum>
   </property>
   <property name="frameShadow" >
-   <enum>QFrame::Raised</enum>
+   <enum>QFrame::Plain</enum>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout" >
+  <layout class="QHBoxLayout" >
    <item>
     <widget class="QGroupBox" name="groupBox" >
      <property name="title" >

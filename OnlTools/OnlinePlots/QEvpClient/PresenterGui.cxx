@@ -613,11 +613,14 @@ void PresenterGui::MakeConnectionFrame()
   // leftPane->setMaximumSize(230);
   leftPane->addWidget(mEventInfo = new EventInfo(this));
   leftPane->addWidget( mServerInfo = new ServerInfo(this));
+  mServerInfo->setFixedWidth(mEventInfo->width());
 
   //fStarLogo = new  QPushButton(QIcon(":/starlogo_1.xpm"),"",leftPane);
   //connect(fStarLogo, SIGNAL(clicked()) ,this, SLOT(DoUpdateButton()) );
   // QToolTip::add(fStarLogo,"Experiment shutdown. Don't push this button!");
   leftPane->addWidget(fProgressBar = new QProgressBar(this));
+  fProgressBar-> setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Preferred);
+  fProgressBar->setFixedWidth(mEventInfo->width());
   //fProgressBar->setMaximumSize(leftPane->width(),25);
   fProgressBar->setValue(0);
   fProgressBar->setRange(0,10);
