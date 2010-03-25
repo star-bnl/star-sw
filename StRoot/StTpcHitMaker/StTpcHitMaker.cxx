@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.22 2010/02/19 23:36:08 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.23 2010/03/25 15:05:54 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.23  2010/03/25 15:05:54  fisyak
+ * Add AfterBurner
+ *
  * Revision 1.22  2010/02/19 23:36:08  fisyak
  * Add hit Id
  *
@@ -120,6 +123,8 @@
  *
  **************************************************************************/
 #include <assert.h>
+#include "StEvent/StTpcHit.h"
+#include <algorithm>
 #include "StTpcHitMaker.h"
 
 #include "TDataSetIter.h"
@@ -134,16 +139,14 @@
 
 #include "StDaqLib/TPC/trans_table.hh"
 #include "StRtsTable.h"
+#include "StDbUtilities/StTpcCoordinateTransform.hh"
+#include "StTpcDb/StTpcDb.h"
 #include "StDbUtilities/StCoordinates.hh"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcSlewingC.h"
 #include "TFile.h"
 #include "TNtuple.h"
 #include "TH2.h"
-static TNtuple *pulserP = 0;
-Float_t StTpcHitMaker::fgDp    = .1;             // hardcoded errors
-Float_t StTpcHitMaker::fgDt    = .2;
-Float_t StTpcHitMaker::fgDperp = .1;
 #include "St_tpc_cl.h"
 TableClassImpl(St_tpc_cl,tcl_cl);
 #include "St_daq_cld.h"
@@ -155,6 +158,12 @@ TableClassImpl(St_daq_adc_tb,daq_adc_tb);
 #include "St_daq_sim_adc_tb.h"
 TableClassImpl(St_daq_sim_adc_tb,daq_sim_adc_tb);
 ClassImp(StTpcHitMaker);
+static TNtuple *pulserP = 0;
+Float_t StTpcHitMaker::fgDp    = .1;             // hardcoded errors
+Float_t StTpcHitMaker::fgDt    = .2;
+Float_t StTpcHitMaker::fgDperp = .1;
+static Int_t _debug = 0;
+//#define __MAKE_NTUPLE__
 //_____________________________________________________________
 Int_t StTpcHitMaker::Init() {
   LOG_INFO << "StTpcHitMaker::Init as\t"  << GetName() << endm;
@@ -240,6 +249,11 @@ Int_t StTpcHitMaker::Make() {
       daqTpcTable = GetNextDaqElement(mQuery);
     }
   }
+  StEvent *pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
+  if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
+  if (! pEvent) {LOG_INFO << "StTpcHitMaker::Make : StEvent has not been found " << endm; return kStWarn;}
+  StTpcHitCollection *hitCollection = pEvent->tpcHitCollection();
+  if (hitCollection) AfterBurner(hitCollection);
   return kStOK;
 }
 //_____________________________________________________________
@@ -748,4 +762,144 @@ Int_t StTpcHitMaker::RawTpcData(Int_t sector) {
       LOG_INFO << "Read " << Total_data << " pixels from Sector " << sector << endm;
     }
     return Total_data;
+}
+//________________________________________________________________________________
+#ifdef __MAKE_NTUPLE__
+static TNtuple *tup = 0;
+struct TpcHitPair_t {
+  Float_t sec, row, 
+    qK, padK, tbkK, padKmn, padKmx, tbkKmn, tbkKmx, IdTK, QAK,
+    qL, padL, tbkL, padLmn, padLmx, tbkLmn, tbkLmx, IdTL, QAL,
+    padOv, tbkOv;
+};
+static const Char_t *vTpcHitMRPair = "sec:row:"
+  "qK:padK:tbkK:padKmn:padKmx:tbkKmn:tbkKmx:IdTK:QAK:"
+  "qL:padL:tbkL:padLmn:padLmx:tbkLmn:tbkLmx:IdTL:QAL:"
+  "padOv:tbkOv";
+#endif
+//________________________________________________________________________________
+Bool_t TpcHitLess(const StTpcHit *lhs, const StTpcHit *rhs) {
+  return (200*lhs->timeBucket() + lhs->pad()) < (200*rhs->timeBucket() + rhs->pad());
+};
+//________________________________________________________________________________
+void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
+  static Float_t padDiff = 2.5, timeBucketDiff = 5.0;
+  if (! TpcHitCollection) return;
+#ifdef __MAKE_NTUPLE__
+  if (! tup) {
+    if (StChain::GetChain()->GetTFile()) {
+      StChain::GetChain()->GetTFile()->cd();
+      tup = new TNtuple("HitT","Cluster Pair Info",vTpcHitMRPair);
+    }
+  }
+  TpcHitPair_t pairC;
+#endif
+  UInt_t numberOfSectors = TpcHitCollection->numberOfSectors();
+  for (UInt_t sec = 1; sec <= numberOfSectors; sec++) {
+    StTpcSectorHitCollection* sectorCollection = TpcHitCollection->sector(sec-1);
+    if (sectorCollection) {
+      UInt_t numberOfPadrows = sectorCollection->numberOfPadrows();
+      for (UInt_t row = 1; row <= numberOfPadrows; row++) {
+	StTpcPadrowHitCollection *rowCollection = TpcHitCollection->sector(sec-1)->padrow(row-1);
+	if (rowCollection) {
+	  UInt_t NoHits = rowCollection->hits().size();
+	  if (NoHits < 2) continue;
+	  sort(rowCollection->hits().begin(),
+	       rowCollection->hits().end(),
+	       TpcHitLess);
+	  // Merge splitted clusters
+	  Int_t merged = 0;
+	  for (UInt_t k = 0; k < NoHits; k++) {
+	    StTpcHit* kHit = TpcHitCollection->sector(sec-1)->padrow(row-1)->hits().at(k);
+	    if (_debug) {cout << "k " << k; kHit->Print();}
+	    if (kHit->flag())                               continue;
+#ifdef __MAKE_NTUPLE__
+	    pairC.sec    = sec;
+	    pairC.row    = row;
+	    pairC.qK     = kHit->charge();
+	    pairC.padK   = kHit->pad();
+	    pairC.tbkK   = kHit->timeBucket();
+	    pairC.padKmn = kHit->minPad();
+	    pairC.padKmx = kHit->maxPad();
+	    pairC.tbkKmn = kHit->minTmbk();
+	    pairC.tbkKmx = kHit->maxTmbk();
+	    pairC.IdTK   = kHit->idTruth();
+	    pairC.QAK    = kHit->qaTruth();
+#endif
+	    for (UInt_t l = 0; l < NoHits; l++) {
+	      if (k == l) continue;
+	      StTpcHit* lHit = TpcHitCollection->sector(sec-1)->padrow(row-1)->hits().at(l);
+	      if (_debug) {cout << "l " << l; lHit->Print();}
+	      if (lHit->flag()) continue;
+	      // Are extends overlapped ?
+	      Int_t padOverlap = TMath::Min(kHit->maxPad(),lHit->maxPad())
+		-                TMath::Max(kHit->minPad(),lHit->minPad());
+	      if (padOverlap < 0) continue;
+	      Int_t tmbkOverlap = TMath::Min(kHit->maxTmbk(),lHit->maxTmbk()) 
+		-                 TMath::Max(kHit->minTmbk(),lHit->minTmbk());
+	      if (tmbkOverlap < 0) continue;
+#ifdef __MAKE_NTUPLE__
+	      if (tup) {
+		pairC.qL     = lHit->charge();
+		pairC.padL   = lHit->pad();
+		pairC.tbkL   = lHit->timeBucket();
+		pairC.padLmn = lHit->minPad();
+		pairC.padLmx = lHit->maxPad();
+		pairC.tbkLmn = lHit->minTmbk();
+		pairC.tbkLmx = lHit->maxTmbk();
+		pairC.IdTL   = lHit->idTruth();
+		pairC.QAL    = lHit->qaTruth();
+		pairC.padOv  = padOverlap;    
+		pairC.tbkOv  = tmbkOverlap;
+		tup->Fill(&pairC.sec);
+	      }
+#endif
+	      // check hits near by
+	      if (TMath::Abs(kHit->pad()        - lHit->pad())        > padDiff ||
+		  TMath::Abs(kHit->timeBucket() - lHit->timeBucket()) > timeBucketDiff) continue;
+	      UChar_t flag = lHit->flag() | 0x080; 
+	      lHit->setFlag(flag);
+	      if (_debug) {
+		cout << "mk" << k; kHit->Print();
+		cout << "ml" << l; lHit->Print();
+	      }
+	      Float_t q =           lHit->charge()                    + kHit->charge();	
+	      Float_t pad        = (lHit->charge()*lHit->pad()        + kHit->charge()*kHit->pad()       )/q;
+	      Float_t timeBucket = (lHit->charge()*lHit->timeBucket() + kHit->charge()*kHit->timeBucket())/q;
+	      Short_t minPad  = TMath::Min(lHit->minPad(),  kHit->minPad());
+	      Short_t maxPad  = TMath::Max(lHit->maxPad(),  kHit->maxPad());
+	      Short_t minTmbk = TMath::Min(lHit->minTmbk(), kHit->minTmbk());
+	      Short_t maxTmbk = TMath::Max(lHit->maxTmbk(), kHit->maxTmbk());
+	      Int_t IdT = lHit->idTruth();
+	      Double_t QA = lHit->charge()*lHit->qaTruth();
+	      if (IdT == kHit->idTruth()) {
+		QA += kHit->charge()*kHit->qaTruth();
+	      } else {
+		if (lHit->charge()*lHit->qaTruth() < kHit->charge()*kHit->qaTruth()) {
+		  QA = kHit->charge()*kHit->qaTruth();
+		  IdT = kHit->idTruth();
+		}
+	      }
+	      QA = QA/q;
+	      kHit->setIdTruth(IdT, TMath::Nint(QA));
+	      kHit->setCharge(q);
+	      kHit->setExtends(pad,timeBucket,minPad,maxPad,minTmbk,maxTmbk);
+	      static StTpcCoordinateTransform transform(gStTpcDb);
+	      static StTpcLocalSectorCoordinate local;
+	      static StTpcLocalCoordinate global;
+	      StTpcPadCoordinate padcoord(sec, row, pad, timeBucket);
+	      transform(padcoord,local,kFALSE);
+	      transform(local,global);
+	      kHit->setPosition(global.position());
+	      if (_debug) {
+		cout << "m " << k; kHit->Print();
+	      }
+	      merged++;
+	    }
+	  }
+	}
+      }
+    }
+  }
+  return;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.15 2010/02/19 23:36:08 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.16 2010/03/25 15:05:54 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -9,7 +9,7 @@
 #include <assert.h>
 #include <sys/types.h>
 #include <stdio.h>
-
+#include "StTpcHitMaker.h"
 #include "StTpcRTSHitMaker.h"
 
 #include "TString.h"
@@ -38,8 +38,6 @@
 #  include "DAQ_READER/daq_dta.h"
 #  include "DAQ_READER/daqReader.h"
 #endif /* NEW_DAQ_READER */
-
-
 ClassImp(StTpcRTSHitMaker); 
 //________________________________________________________________________________
 StTpcRTSHitMaker::~StTpcRTSHitMaker() {
@@ -151,12 +149,15 @@ Int_t StTpcRTSHitMaker::Make() {
 	  NoAdcs += l;
 	}
       }
-      if (Debug() > 1) {
-	// verify data!
-	dta = fTpx->get("adc_sim");
-	while(dta && dta->iterate()) {
-	  LOG_INFO << Form("*** sec %2d, row %2d, pad %3d: %3d pixels",dta->sec,dta->row,dta->pad,dta->ncontent) << endm;
-	  for(UInt_t i=0;i<dta->ncontent;i++) {
+    }      
+    if (! NoAdcs) continue;
+    if (Debug() > 0) {
+      // verify data!
+      dta = fTpx->get("adc_sim");
+      while(dta && dta->iterate()) {
+	LOG_INFO << Form("*** sec %2d, row %2d, pad %3d: %3d pixels",dta->sec,dta->row,dta->pad,dta->ncontent) << endm;
+	for(UInt_t i=0;i<dta->ncontent;i++) {
+	  if (Debug() > 1 || dta->sim_adc[i].track_id) {
 	    LOG_INFO << Form("    %2d: adc %4d, tb %3d: track %4d",i,
 			     dta->sim_adc[i].adc,
 			     dta->sim_adc[i].tb,
@@ -165,8 +166,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	  }
 	}
       }
-    }      
-    if (! NoAdcs) continue;
+    }
     static StTpcCoordinateTransform transform(gStTpcDb);
     static StTpcLocalSectorCoordinate local;
     static StTpcLocalCoordinate global;
@@ -175,28 +175,32 @@ Int_t StTpcRTSHitMaker::Make() {
     dta = fTpx->get("cld_sim"); // rerun the cluster finder on the simulated data...
     Double_t ADC2GeV = 0;
     Int_t rowOld = -1;
+    static Int_t iBreak = 0;
     while(dta && dta->iterate()) {
-      if (Debug() > 1) {
+      if (Debug() > 0) {
 	LOG_INFO << Form("CLD sec %2d: row %2d: %d clusters",dta->sec, dta->row, dta->ncontent) << endm;
       }
       for(UInt_t i=0;i<dta->ncontent;i++) {
-	if (Debug() > 1) {
-	  LOG_INFO << Form("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X, Id %d, Q %d ",
-			   dta->sim_cld[i].cld.pad,
-			   dta->sim_cld[i].cld.p1,
-			   dta->sim_cld[i].cld.p2,
-			   dta->sim_cld[i].cld.tb,
-			   dta->sim_cld[i].cld.t1,
-			   dta->sim_cld[i].cld.t2,
-			   dta->sim_cld[i].cld.charge,
-			   dta->sim_cld[i].cld.flags,
-			   dta->sim_cld[i].track_id,
-			   dta->sim_cld[i].quality
-			   ) << endm;
-	}
 	if (! dta->sim_cld[i].cld.pad) continue;
 	if (dta->sim_cld[i].cld.tb >= __MaxNumberOfTimeBins__) continue;
 	if (dta->sim_cld[i].cld.charge < fminCharge) continue;
+	if (Debug() > 0) {
+	  if (Debug() > 1 || ( dta->sim_cld[i].cld.p2 - dta->sim_cld[i].cld.p1 <= 1 )) {
+	    LOG_INFO << Form("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X, Id %d, Q %d ",
+			     dta->sim_cld[i].cld.pad,
+			     dta->sim_cld[i].cld.p1,
+			     dta->sim_cld[i].cld.p2,
+			     dta->sim_cld[i].cld.tb,
+			     dta->sim_cld[i].cld.t1,
+			     dta->sim_cld[i].cld.t2,
+			     dta->sim_cld[i].cld.charge,
+			     dta->sim_cld[i].cld.flags,
+			     dta->sim_cld[i].track_id,
+			     dta->sim_cld[i].quality
+			     ) << endm;
+	    iBreak++;
+	  }
+	}
 	if (! hitCollection )  {
 	  hitCollection = new StTpcHitCollection();
 	  rEvent->setTpcHitCollection(hitCollection);
@@ -235,6 +239,10 @@ Int_t StTpcRTSHitMaker::Make() {
 				     , dta->sim_cld[i].cld.t2 //  mxtmbk
 				     , dta->sim_cld[i].cld.pad
 				     , dta->sim_cld[i].cld.tb );
+	/*tpxFCF.h
+	  #define FCF_ROW_EDGE            16      // 0x10 touched end of row
+	  #define FCF_BROKEN_EDGE         32      // 0x20 touches one of the mezzanine edges
+	  #define FCF_DEAD_EDGE           64      // 0x40 touches a dead pad */
 	hit->setFlag(dta->sim_cld[i].cld.flags);
 	hitCollection->addHit(hit);
       }
@@ -279,5 +287,6 @@ Int_t StTpcRTSHitMaker::Make() {
       }
     }
   }
+  StTpcHitMaker::AfterBurner(hitCollection);
   return kStOK;
 }
