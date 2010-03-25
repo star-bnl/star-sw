@@ -33,7 +33,7 @@ struct iccp2k {
   u_short token;
   u_char cmd;
   u_char pad1;
-  u_short pad2;
+  u_short payload_words;   // normally 0.  Number of words of payload.
 };
 /* #else */
 /* struct iccp2k {    */

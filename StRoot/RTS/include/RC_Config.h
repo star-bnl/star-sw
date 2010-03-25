@@ -85,6 +85,52 @@ typedef unsigned int UINT32;
 typedef unsigned short UINT16;
 typedef unsigned char UINT8;
 
+class UINT128 {
+ public:
+  UINT32 x[4];
+
+  UINT128() {
+    zero();
+  }
+
+  void zero() {
+    x[0] = 0;
+    x[1] = 0;
+    x[2] = 0;
+    x[3] = 0;
+  }
+  
+  int is_set(int bit) {
+    int byt=bit/32;
+    bit = bit % 32;
+    
+    return (x[byt] & (1<<bit)) ? 1 : 0;
+  }
+
+  void set(int bit) {
+    int byt=bit/32;
+    bit = bit % 32;
+    
+    x[byt] |= (1<<bit);
+  }
+
+  void clear(int bit) {
+    int byt=bit/32;
+    bit = bit % 32;
+    x[byt] &= (~(1<<bit));
+  }
+
+  char *tostring(char *out = NULL) {
+    static char _out[70];
+    
+    if(out == NULL) out = _out;
+    sprintf(out, "%08x-%08x-%08x-%08x", x[3], x[2], x[1], x[0]);
+    return out;
+  }
+
+};
+
+
 //
 // What systems are in the run
 //
