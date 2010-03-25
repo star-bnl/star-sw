@@ -771,7 +771,7 @@ struct TrgCfg {
 
 struct TrgPSEntry {
   int l0ps;
-  float l1ps;
+  float l1ps;    // This is the floating version of the L0PS.
   float l2ps;
   float l3ps;
 };
