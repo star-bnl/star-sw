@@ -826,10 +826,10 @@ void  PresenterGui::PrintCB()
   TCanvas* cc = 0;
   if ( fTab->currentPage() == fStaticTab ) {
     cc = GetCanvas();
-    sprintf(mPsName,"%s/run%s_tab%dsubTab%d.ps",EvpUtil::GetOutputPath(),mEventInfo->run->text().ascii(),GetTabId(),GetSubTabId());
+    sprintf(mPsName,"%s/run%s_tab%dsubTab%d.ps",EvpUtil::GetOutputPath(),mEventInfo->run->text().toAscii().data(),GetTabId(),GetSubTabId());
   } else {
     cc = GetGroupCanvas();
-    sprintf(mPsName,"%s/run%s_%s.ps",EvpUtil::GetOutputPath(),mEventInfo->run->text().ascii(),GetGroupWidget()->name());
+    sprintf(mPsName,"%s/run%s_%s.ps",EvpUtil::GetOutputPath(),mEventInfo->run->text().toAscii().data(),GetGroupWidget()->name());
   }
   if ( cc ) {
     cc->Print(mPsName);
@@ -838,7 +838,7 @@ void  PresenterGui::PrintCB()
 //______________________________________________________________________________
 void  PresenterGui::PrintAllCB()
 {
-  sprintf(mPsName,"%s/run%s.ps",EvpUtil::GetOutputPath(),mEventInfo->run->text().ascii());
+  sprintf(mPsName,"%s/run%s.ps",EvpUtil::GetOutputPath(),mEventInfo->run->text().toAscii().data());
   emit printAll(mPsName);
 }
 //______________________________________________________________________________

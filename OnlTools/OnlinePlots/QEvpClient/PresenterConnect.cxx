@@ -80,7 +80,7 @@ void PresenterConnect::file() {
     return;
   }
 
-  mPresenter->SetSource( mapFile.ascii() );
+  mPresenter->SetSource( mapFile.toAscii().data() );
   emit updateRequest();
 }
 
