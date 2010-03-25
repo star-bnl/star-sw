@@ -106,7 +106,7 @@ PresenterGui::PresenterGui(bool isRefWindow) :
 
 //  connect(qApp,SIGNAL(lastWindowClosed () ), qApp, SLOT(quit ()) );
 
-  setToolButtonStyle(Qt::ToolButtonTextOnly); // use the text labels for the tool bar buttons
+  setToolButtonStyle(Qt::ToolButtonTextUnderIcon); // use the text labels for the tool bar buttons
   
   blockWidgets << (mCentralWidget = new QWidget(this) );
   QHBoxLayout *layout = new  QHBoxLayout (mCentralWidget );
