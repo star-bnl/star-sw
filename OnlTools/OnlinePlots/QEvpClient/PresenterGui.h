@@ -79,7 +79,7 @@ private:
     int nSubTabs[MAX_TABS];
     //sep
 
-    char *TabNames[MAX_TABS][MAX_SUBTABS];
+    const char *TabNames[MAX_TABS][MAX_SUBTABS];
 
     int  nx[MAX_TABS][MAX_SUBTABS];      // number of horizontal pads on a canvas
     int  ny[MAX_TABS][MAX_SUBTABS];      // number of vertical pads on a canvas

@@ -13,27 +13,25 @@
 #include "TQtWidget.h"
 #include "TQtZoomPadWidget.h"
 
-#include "qapplication.h"
-#include "qtabwidget.h"
-#include "qpushbutton.h"
-#include "qmenubar.h"
-#include <QLayout>
-#include <QHBoxLayout>
-#include <QToolTip>
-#include "qpixmap.h"
-#include "qlineedit.h"
-#include "qlabel.h"
-#include "qcursor.h"
-#include "qtimer.h"
+#include <QApplication>
+#include <QtGui/QTabWidget>
+#include <QtGui/QPushButton>
+#include <QtGui/QMenuBar>
+#include <QtGui/QLayout>
+#include <QtGui/QHBoxLayout>
+#include <QtGui/QToolTip>
+#include <QtGui/QPixmap>
+#include <QtGui/QLineEdit>
+#include <QtGui/QLabel>
+#include <QtGui/QCursor>
+#include <QTimer>
 
-#  include "q3vbox.h"
-#  include "q3hbox.h"
 #  include <QtGui/QMenu>
-#  include "qicon.h"
+#  include <QtGui/QIcon>
 #  include <QtGui/QProgressBar>
 #  include <QtGui/QToolBar>
 #  include <QCustomEvent>
-#  include <QFrame>
+#  include <QtGui/QFrame>
 #  include <stack>
 
 #include "EventInfo.h"
@@ -139,22 +137,24 @@ PresenterGui::PresenterGui(bool isRefWindow) :
   //
   // main tab holding
   fTab = new QTabWidget(mCentralWidget);
-#if QT_VERSION >= 0x40000
+  layout->addWidget(fTab);
+  
+
   blockWidgets << fTab;
-#endif /* QT4 */
+
   fTab->setMargin(0);
   // tab for dynamically defined groups histograms
   fDynamicTab = new QTabWidget(fTab);
-#if QT_VERSION >= 0x40000
+
   blockWidgets << fDynamicTab;
-#endif /* QT4 */
+
   fDynamicTab->setMargin(0);
   fTab->addTab(fDynamicTab,"Extra");
   // tab for statically defined histograms
   fStaticTab = new QTabWidget(fTab);
-#if QT_VERSION >= 0x40000
+
   blockWidgets << fStaticTab;
-#endif /* QT4 */
+
   fStaticTab->setMargin(0);
   fTab->addTab(fStaticTab,"Standard");
 
@@ -163,9 +163,9 @@ PresenterGui::PresenterGui(bool isRefWindow) :
   for(int i=0;i<MAX_TABS;i++) {
     if((nSubTabs[i] != 0) && (nSubTabs[i]<=MAX_SUBTABS)) {
       QTabWidget *topTab = new QTabWidget(fStaticTab);
-#if QT_VERSION >= 0x40000
+
       blockWidgets << topTab;
-#endif /* QT4 */
+
       topTab->setMargin(0);
       // Define upper level tab
       fStaticTab->addTab(topTab,TabNames[i][0]);
@@ -173,9 +173,9 @@ PresenterGui::PresenterGui(bool isRefWindow) :
       // Note that we started with 1                         
       for(int j=1;j<=nSubTabs[i];j++) {
          TQtWidget* w = new TQtWidget(topTab);
-#if QT_VERSION >= 0x40000
+
          blockWidgets << w;
-#endif /* QT4 */
+
         QToolTip::add(w,"<P>Click over any TPad with the <b>middle</b> mouse button to <b>zoom</b>");
         topTab->addTab( w ,TabNames[i][j]);
         topTab->showPage(w);
@@ -184,9 +184,9 @@ PresenterGui::PresenterGui(bool isRefWindow) :
       }
     } else {
       TQtWidget* w = new TQtWidget(fStaticTab);
-#if QT_VERSION >= 0x40000
+
       blockWidgets << w;
-#endif /* QT4 */
+
       QToolTip::add(w,"<P>Click over any TPad with the <b>middle</b> mouse button to <b>zoom</b>");
       fStaticTab->addTab( w ,TabNames[i][0]);
       fStaticTab->showPage(w);
@@ -605,22 +605,19 @@ void PresenterGui::MakeConnectionFrame()
   //
   // Mother Connection frame defined here
   //
-
-#if QT_VERSION < 0x40000
-  QVBox *leftPane = new QVBox(centralWidget());
-#else /* QT4 */
-  Q3VBox *leftPane = new Q3VBox(centralWidget());
-#endif /* QT4 */
-  leftPane->setMaximumSize(230,32767);
-  mEventInfo = new EventInfo(leftPane);
-  mServerInfo = new ServerInfo(leftPane);
-
-
+  
+  QBoxLayout *topLayout = dynamic_cast<QBoxLayout *>(centralWidget()->layout());
+  QVBoxLayout *leftPane = new QVBoxLayout(this);
+  topLayout->addLayout(topLayout);
+  //l eftPane->setSizeConstraint ( QLayout::SetMaximumSize);
+  // leftPane->setMaximumSize(230);
+  leftPane->addWidget(mEventInfo = new EventInfo(this));
+  leftPane->addWidget( mServerInfo = new ServerInfo(this));
 
   //fStarLogo = new  QPushButton(QIcon(":/starlogo_1.xpm"),"",leftPane);
   //connect(fStarLogo, SIGNAL(clicked()) ,this, SLOT(DoUpdateButton()) );
   // QToolTip::add(fStarLogo,"Experiment shutdown. Don't push this button!");
-  fProgressBar = new QProgressBar(leftPane);
+  leftPane->addWidget(fProgressBar = new QProgressBar(this));
   //fProgressBar->setMaximumSize(leftPane->width(),25);
   fProgressBar->setValue(0);
   fProgressBar->setRange(0,10);
