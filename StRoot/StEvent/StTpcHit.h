@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.14 2009/11/23 22:20:51 ullrich Exp $
+ * $Id: StTpcHit.h,v 2.15 2010/03/26 13:47:29 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.15  2010/03/26 13:47:29  fisyak
+ * Add methods to modify hit content
+ *
  * Revision 2.14  2009/11/23 22:20:51  ullrich
  * Minor cleanup performed, fixed compiler warnings.
  *
@@ -66,37 +69,41 @@
 
 #include "StHit.h"
 #include "StMemoryPool.hh"
+#include "TMath.h"
 class StTpcHit : public StHit {
 public:
-    StTpcHit();
+  StTpcHit() : StHit() {mMinpad = mMaxpad = mMintmbk = mMaxtmbk = 0; mMcl_x = mMcl_t = 0; mChargeModified = 0;}
     StTpcHit(const StThreeVectorF& p,
              const StThreeVectorF& e,
-             unsigned int hw, float q, unsigned char c = 0,
-	   unsigned short idTruth=0, unsigned short quality=0,
-	   unsigned short id =0,
-	   short mnpad=0, short mxpad=0, short mntmbk=0,
-	   short mxtmbk=0, float cl_x = 0, float cl_t = 0);
-    ~StTpcHit();
+             UInt_t hw, float q, UChar_t c = 0,
+	     UShort_t idTruth=0, UShort_t quality=0,
+	     UShort_t id =0,
+	     Short_t mnpad=0, Short_t mxpad=0, Short_t mntmbk=0,
+	     Short_t mxtmbk=0, Float_t cl_x = 0, Float_t cl_t = 0) 
+      :  StHit(p, e, hw, q, c, idTruth, quality, id) {setExtends(cl_x, cl_t, mnpad, mxpad, mntmbk, mxtmbk); mChargeModified = 0;}
+    ~StTpcHit() {}
 
     void* operator new(size_t sz,void *p) { return p;}
     void* operator new(size_t) { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
 
-    void           setChargeModified(float charge);
-    unsigned int   sector() const;
-    unsigned int   padrow() const;
-    unsigned int   padsInHit() const;
-    unsigned int   pixelsInHit() const;
-    unsigned char  minPad() const;
-    unsigned char  maxPad() const;
-    short          minTmbk() const;
-    short          maxTmbk() const;
-    virtual int    volumeID() const;
-    short          timeBucketsInHit() const;
-    float          timeBucket() const;
-    float          pad() const;
-    float          chargeModified() const;
-    void           Print(Option_t *option="") const;
+    void     setChargeModified(Float_t charge) {mChargeModified = charge;}
+    void     setPadTmbk(Float_t cl_x, Float_t cl_t) { mMcl_x = TMath::Nint(cl_x*64);  mMcl_t = TMath::Nint(cl_t*64);}
+    void     setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxpad, Short_t mntmbk, Short_t mxtmbk);
+    UInt_t   sector() const {return bits(4, 5);}   // bits 4-8  -> 1-24
+    UInt_t   padrow() const {return bits(9, 6);}   // bits 9-14 -> 1-45
+    UInt_t   padsInHit()   const {return bits(15, 7);}    // bits 15-21
+    UInt_t   pixelsInHit() const {return bits(22,10);};   // bits 22-31 obsolete (TCL only, FCF put no. of time buckets)
+    UChar_t  minPad()   const {return TMath::Nint(mMcl_x/64.) - mMinpad;}
+    UChar_t  maxPad()   const {return TMath::Nint(mMcl_x/64.) + mMaxpad;}
+    Short_t  minTmbk()  const {return TMath::Nint(mMcl_t/64.) - mMintmbk;}
+    Short_t  maxTmbk()  const {return TMath::Nint(mMcl_t/64.) + mMaxtmbk;}
+    Int_t    volumeID() const {return 100 * sector() + padrow();}
+    Short_t  timeBucketsInHit()   const {return bits(22,7);} // number of time bucket fired in this hit
+    Float_t  timeBucket() const {return static_cast<float>(mMcl_t)/64.;}
+    Float_t  pad() const {return static_cast<float>(mMcl_x)/64.;}
+    Float_t  chargeModified() const {return mChargeModified;}
+    void     Print(Option_t *option="") const;
     
 protected:
     static StMemoryPool mPool;  //!
@@ -109,24 +116,5 @@ protected:
     Float_t     mChargeModified; //!
     ClassDef(StTpcHit,4)
 };
-
-//
-//  Inline functions (having them here makes the interface above easier to read)
-//
-inline void           StTpcHit::setChargeModified(float charge) {mChargeModified = charge;}
-inline unsigned int   StTpcHit::sector() const {return bits(4, 5);}   // bits 4-8  -> 1-24
-inline unsigned int   StTpcHit::padrow() const {return bits(9, 6);}   // bits 9-14 -> 1-45
-inline unsigned int   StTpcHit::padsInHit()   const {return bits(15, 7);}    // bits 15-21
-inline unsigned int   StTpcHit::pixelsInHit() const {return bits(22,10);};   // bits 22-31 obsolete (TCL only, FCF put no. of time buckets)
-inline unsigned char  StTpcHit::minPad()   const {return mMcl_x/64 - mMinpad;}
-inline unsigned char  StTpcHit::maxPad()   const {return mMcl_x/64 + mMaxpad;}
-inline short          StTpcHit::minTmbk()  const {return mMcl_t/64 - mMintmbk;}
-inline short          StTpcHit::maxTmbk()  const {return mMcl_t/64 + mMaxtmbk;}
-inline int            StTpcHit::volumeID() const {return 100 * sector() + padrow();}
-inline short          StTpcHit::timeBucketsInHit()   const {return bits(22,7);} // number of time bucket fired in this hit
-inline float          StTpcHit::timeBucket() const {return static_cast<float>(mMcl_t)/64.;}
-inline float          StTpcHit::pad() const {return static_cast<float>(mMcl_x)/64.;}
-inline float          StTpcHit::chargeModified() const {return mChargeModified;}
-
 ostream&              operator<<(ostream& os, StTpcHit const & v);
 #endif

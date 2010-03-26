@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.16 2010/03/05 16:30:19 fisyak Exp $
+ * $Id: StTpcHit.cxx,v 2.17 2010/03/26 13:47:29 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
+ * Revision 2.17  2010/03/26 13:47:29  fisyak
+ * Add methods to modify hit content
+ *
  * Revision 2.16  2010/03/05 16:30:19  fisyak
  * Add hit id
  *
@@ -65,46 +68,29 @@
  **************************************************************************/
 #include "StTpcHit.h"
 #include "StTrack.h"
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.16 2010/03/05 16:30:19 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.17 2010/03/26 13:47:29 fisyak Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
 ClassImp(StTpcHit)
-    
-StTpcHit::StTpcHit()
-{
-    mMinpad = mMaxpad = mMintmbk = mMaxtmbk = 0;
-    mMcl_x = mMcl_t = 0;
-    mChargeModified = 0;
-}
 
-StTpcHit::StTpcHit(const StThreeVectorF& p,
-                   const StThreeVectorF& e,
-                   unsigned int hw, float q, unsigned char c,
-	         unsigned short idTruth, unsigned short quality, unsigned short id,
-	         short mnpad, short mxpad, short mntmbk,
-	         short mxtmbk, float cl_x, float cl_t)
-  : StHit(p, e, hw, q, c, idTruth, quality, id)
-{
-    mMcl_x = static_cast<short>(cl_x*64);
-    mMcl_t = static_cast<short>(cl_t*64);
-    Short_t pad  = mMcl_x/64;
-    Short_t time = mMcl_t/64;
-    mMinpad = pad - mnpad;
-    mMaxpad = mxpad - pad;
-    mMintmbk = time - mntmbk;
-    mMaxtmbk = mxtmbk - time;
-    mChargeModified = 0;
+void StTpcHit::setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxpad, Short_t mntmbk, Short_t mxtmbk) {
+  setPadTmbk(cl_x, cl_t);
+  Short_t pad  = TMath::Nint(mMcl_x/64.);
+  Short_t time = TMath::Nint(mMcl_t/64.);
+  mMinpad = pad - mnpad;
+  mMaxpad = mxpad - pad;
+  mMintmbk = time - mntmbk;
+  mMaxtmbk = mxtmbk - time;
 }
-StTpcHit::~StTpcHit() {/* noop */}
 
 ostream&  operator<<(ostream& os, const StTpcHit& v)
 {
     return os << Form("Tpc s/r %3i/%3i ",v.sector(),v.padrow())
 	    << *((StHit *)&v)
 	    << Form(" min/max pad %3i/%3i npad %2i min/max t %3i/%3i ntime %2i time %10.3f pad %10.3f",
-                      (int)  v.minPad(), (int)  v.maxPad(),(int) v.padsInHit(), 
-                      (int) v.minTmbk(), (int) v.maxTmbk(),(int) v.timeBucketsInHit(),
+                      (Int_t)  v.minPad(), (Int_t)  v.maxPad(),(Int_t) v.padsInHit(), 
+                      (Int_t) v.minTmbk(), (Int_t) v.maxTmbk(),(Int_t) v.timeBucketsInHit(),
                       v.timeBucket(),v.pad()); 
 }
 void   StTpcHit::Print(Option_t *option) const {cout << *this << endl;}
