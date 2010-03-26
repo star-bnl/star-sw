@@ -3,7 +3,7 @@
 # Check out the new OnlinePlots to build tree
 # 
         
-set macroFile = OnlinePlots.C
+set macroFile = EvpPlotServer.C
 
 echo "--- Compiling PPlots libraries"
 cons
