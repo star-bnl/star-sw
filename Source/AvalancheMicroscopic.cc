@@ -14,11 +14,11 @@ double AvalancheMicroscopic::c2 = c1 * c1 / 4.;
 
 AvalancheMicroscopic::AvalancheMicroscopic() :
   sensor(0), 
-  nElectrons(0), nIons(0),  
+  nPhotons(0), nElectrons(0), nIons(0),  
   histEnergy(0), hasEnergyHistogram(false),
   histDistance(0), hasDistanceHistogram(false), distanceOption('z'),
-  useSignal(false), useDriftLines(false),
-  deltaCut(0.),
+  useSignal(false), useDriftLines(false), usePhotons(false),
+  deltaCut(0.), gammaCut(0.),
   nCollSkip(100),
   hasUserHandleAttachment(false),
   hasUserHandleInelastic(false),
@@ -78,7 +78,11 @@ AvalancheMicroscopic::EnableDistanceHistogramming(TH1F* histo, const char opt) {
   if (opt == 'x' || opt == 'y' || opt == 'z' || opt == 'r') {
     distanceOption = opt;
   } else {
-    distanceOption = 'z';
+    std::cerr << "AvalancheMicroscopic::EnableDistanceHistogramming:";
+    std::cerr << "    Unknown option " << opt << "." << std::endl;
+    std::cerr << "    Valid options are x, y, z, r." << std::endl;
+    std::cerr << "    Using default value (r)." << std::endl;
+    distanceOption = 'r';
   }
   
 }
@@ -181,6 +185,28 @@ AvalancheMicroscopic::GetDriftLinePoint(
 }
 
 void 
+AvalancheMicroscopic::GetPhoton(const int i, double& e,
+  double& x0, double& y0, double& z0, double& t0,
+  double& x1, double& y1, double& z1, double& t1,
+  int& status) const {
+ 
+  if (i < 0 || i >= nPhotons) {
+    std::cerr << "AvalancheMicroscopic::GetPhoton:" << std::endl;
+    std::cerr << "    Photon " << i << " does not exist." << std::endl;
+    return;
+  }
+
+  x0 = photons[i].x0; x1 = photons[i].x1;
+  y0 = photons[i].y0; y1 = photons[i].y1;
+  z0 = photons[i].z0; z1 = photons[i].z1;
+  t0 = photons[i].t0; t1 = photons[i].t1;
+  status = photons[i].status;
+  e = photons[i].energy;
+
+
+}
+
+void 
 AvalancheMicroscopic::SetUserHandleAttachment(
     void (*f)(double x, double y, double z, double t, 
               int type, int level, Medium* m)) {
@@ -274,8 +300,10 @@ AvalancheMicroscopic::AvalancheElectron(
   // Clear the stack
   stack.clear();
   endpoints.clear();
+  photons.clear();
   
   // Reset the particle counters
+  nPhotons = 0;
   nElectrons = 1;
   nIons = 0;
   nEndpoints = 0;
@@ -290,7 +318,7 @@ AvalancheMicroscopic::AvalancheElectron(
   }
     
   // Null-collision rate
-  double fLim = medium->GetNullCollisionRate();
+  double fLim = medium->GetElectronNullCollisionRate();
   if (fLim <= 0.) {
     std::cerr << "AvalancheMicroscopic::AvalancheElectron:" << std::endl;
     std::cerr << "    Got null-collision rate <= 0." << std::endl;
@@ -308,7 +336,7 @@ AvalancheMicroscopic::AvalancheElectron(
          
   // Current position, direction and energy
   double x, y, z, t;
-  double dx, dy, dz;
+  double dx, dy, dz, d;
   double energy;
   // Timestep (squared)
   double dt, dt2;
@@ -319,16 +347,11 @@ AvalancheMicroscopic::AvalancheElectron(
   int cstype;
   // Cross-section term
   int level;
-  // Energy loss in inelastic collisions
-  double eloss;
-  // Scattering parameters
-  double s1, s2;
   // Scattering angles
-  double ctheta0, stheta0;
-  double phi0, cphi0, sphi0;
-  double phi, theta;
+  double phi, cphi, sphi;
   double ctheta, stheta;
-  double arg, q, d;
+  double arg;
+
   // Secondary electron energy
   double esec;
   
@@ -356,12 +379,12 @@ AvalancheMicroscopic::AvalancheElectron(
     // Direction has zero norm, draw a random direction
     phi = TwoPi * RndmUniform();
     ctheta = 1. - 2. * RndmUniform();
-    stheta = sin(acos(ctheta));
+    stheta = sqrt(1. - ctheta * ctheta);
     stack[0].dx = cos(phi) * stheta;
     stack[0].dy = sin(phi) * stheta;
     stack[0].dz = ctheta;
   } else if (fabs(d - 1.) > Small) {
-    // Renormalise direction to 1
+    // Normalise direction to 1
     stack[0].dx /= d; stack[0].dy /= d; stack[0].dz /= d;
   }
 
@@ -430,7 +453,7 @@ AvalancheMicroscopic::AvalancheElectron(
           }
           id = medium->GetId();
           // Update the null-collision rate
-          fLim = medium->GetNullCollisionRate();
+          fLim = medium->GetElectronNullCollisionRate();
           if (fLim <= 0.) {
             std::cerr << "AvalancheMicroscopic::AvalancheElectron:" << std::endl;
             std::cerr << "    Got null-collision rate <= 0." << std::endl;
@@ -450,7 +473,7 @@ AvalancheMicroscopic::AvalancheElectron(
           // Update the energy
           newEnergy = Max(energy + (a + b * dt) * dt, Small);
           // Get the real collision rate at the updated energy
-          fReal = medium->GetCollisionRate(newEnergy);
+          fReal = medium->GetElectronCollisionRate(newEnergy);
           if (fReal > fLim) {
             // Real collision rate is higher than null-collision rate
             dt += log(r) / fLim;
@@ -486,7 +509,7 @@ AvalancheMicroscopic::AvalancheElectron(
         // Verify the new position
         if (!sensor->IsInArea(x, y, z)) {
           stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
-          stack[iEl].t = t; stack[iEl].energy = energy;
+          stack[iEl].t = t; stack[iEl].energy = newEnergy;
           stack[iEl].dx = dx; stack[iEl].dy = dy; stack[iEl].dz = dz;          
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
@@ -495,7 +518,8 @@ AvalancheMicroscopic::AvalancheElectron(
         }
         
         // Get the collision type and parameters
-        medium->GetCollision(newEnergy, cstype, level, s1, ctheta0, eloss, esec);
+        medium->GetElectronCollision(newEnergy, cstype, level, energy, ctheta, 
+                                     d, esec);
         
         switch (cstype) {
           // Elastic collision
@@ -528,8 +552,8 @@ AvalancheMicroscopic::AvalancheElectron(
             }                          
             // Randomise secondary electron direction
             phi = TwoPi * RndmUniform();
-            ctheta = 1. - 2. * RndmUniform();
-            stheta = sin(acos(ctheta));
+            double ctheta0 = 1. - 2. * RndmUniform();
+            double stheta0 = sqrt(1. - ctheta0 * ctheta0);
             // Add the secondary electron to the stack
             newElectron = stack[iEl];
             newElectron.x0 = x; newElectron.x = x;
@@ -538,9 +562,9 @@ AvalancheMicroscopic::AvalancheElectron(
             newElectron.t0 = t; newElectron.t = t; 
             newElectron.energy = Max(esec, Small);
             newElectron.e0 = newElectron.energy;
-            newElectron.dx = cos(phi) * stheta;
-            newElectron.dy = sin(phi) * stheta;
-            newElectron.dz = ctheta;
+            newElectron.dx = cos(phi) * stheta0;
+            newElectron.dy = sin(phi) * stheta0;
+            newElectron.dz = ctheta0;
             newElectron.driftLine.clear();
             stack.push_back(newElectron);
             // Increment the electron and ion counters         
@@ -565,11 +589,43 @@ AvalancheMicroscopic::AvalancheElectron(
               userHandleInelastic(x, y, z, t, cstype, level, medium);
             }          
             break;
-          // Super-elastic collision
+          // Excitation
           case 4:
+            if (hasUserHandleInelastic) {
+              userHandleInelastic(x, y, z, t, cstype, level, medium);
+            }
+            if (esec < 0.) {
+              // Radiative de-excitation
+              if (usePhotons) TransportPhoton(x, y, z, t + d, -esec);
+            } else if (esec > 0.) {
+              // Penning ionisation     
+              // Randomise secondary electron direction
+              phi = TwoPi * RndmUniform();
+              double ctheta0 = 1. - 2. * RndmUniform();
+              double stheta0 = sqrt(1. - ctheta0 * ctheta0);
+              // Add the secondary electron to the stack
+              newElectron = stack[iEl];
+              newElectron.x0 = x; newElectron.x = x;
+              newElectron.y0 = y; newElectron.y = y;
+              newElectron.z0 = z; newElectron.z = z;
+              newElectron.t0 = t + d; newElectron.t = t + d; 
+              newElectron.energy = Max(esec, Small);
+              newElectron.e0 = newElectron.energy;
+              newElectron.dx = cos(phi) * stheta0;
+              newElectron.dy = sin(phi) * stheta0;
+              newElectron.dz = ctheta0;
+              newElectron.driftLine.clear();
+              stack.push_back(newElectron);
+              // Increment the electron and ion counters         
+              ++nElectrons; ++nIons;
+            }
+            break; 
+          // Super-elastic collision
+          case 5:
             break;
           default:
-            std::cerr << "AvalancheMicroscopic::AvalancheElectron:" << std::endl;
+            std::cerr << "AvalancheMicroscopic::AvalancheElectron:" 
+                      << std::endl;
             std::cerr << "    Unknown collision type." << std::endl;
             ok = false;
             break;
@@ -577,42 +633,26 @@ AvalancheMicroscopic::AvalancheElectron(
 
         if (!ok) break;
 
-        // Determine scattering angles
-        s2 = (s1 * s1) / (s1 - 1.);
-        stheta0 = sin(acos(ctheta0));
-        phi0 = TwoPi * RndmUniform();
-        sphi0 = sin(phi0);
-        cphi0 = cos(phi0);
-        
-        arg = Max(1. - s1 * eloss / newEnergy, Small);
-        d = 1. - ctheta0 * sqrt(arg);
-        // Update the energy
-        energy = Max(newEnergy * (1. - eloss / (s1 * newEnergy) - 2. * d / s2), Small);
-        q = Min(sqrt((newEnergy / energy) * arg) / s1, 1.);
-        theta = asin(q * stheta0);
-        ctheta = cos(theta);
-        if (ctheta0 < 0.) {
-          double u = (s1 - 1.) * (s1 - 1.) / arg;
-          if (ctheta0 * ctheta0 > u) ctheta *= -1.;
-        }
-        stheta = sin(theta);
-        
         newDz = Min(newDz, 1.);       
         arg = sqrt(newDx * newDx + newDy * newDy);
+        stheta = sqrt(1. - ctheta * ctheta);
+        phi = TwoPi * RndmUniform();
+        sphi = sin(phi); cphi = cos(phi);
+
         if (arg == 0.) {
           dz = ctheta;
-          dx = cphi0 * stheta;
-          dy = sphi0 * stheta;
+          dx = cphi * stheta;
+          dy = sphi * stheta;
         } else {
           a = stheta / arg;
-          dz = newDz * ctheta + arg * stheta * sphi0;
-          dy = newDy * ctheta + a * (newDx * cphi0 - newDy * newDz * sphi0);
-          dx = newDx * ctheta - a * (newDy * cphi0 + newDx * newDz * sphi0);
+          dz = newDz * ctheta + arg * stheta * sphi;
+          dy = newDy * ctheta + a * (newDx * cphi - newDy * newDz * sphi);
+          dx = newDx * ctheta - a * (newDy * cphi + newDx * newDz * sphi);
         }
-        
+
         // Continue with the next electron in the stack?
         if (nCollTemp > nCollSkip) break;
-        
+
       }
       
       if (!ok) continue;
@@ -636,6 +676,94 @@ AvalancheMicroscopic::AvalancheElectron(
   
   return true;
     
+}
+
+void
+AvalancheMicroscopic::TransportPhoton(const double x0, const double y0, 
+                const double z0, const double t0, const double e0) {
+
+  // Make sure that the sensor is defined
+  if (sensor == 0) {
+    std::cerr << "AvalancheMicroscopic::TransportPhoton:" << std::endl;
+    std::cerr << "    Sensor is not defined." << std::endl;
+    return;
+  }
+
+  // Make sure that the starting point is inside a medium
+  Medium* medium;
+  if (!sensor->GetMedium(x0, y0, z0, medium)) {
+    std::cerr << "AvalancheMicroscopic::TransportPhoton:" << std::endl;
+    std::cerr << "    No medium at initial position." << std::endl;
+    return;
+  }
+  
+  // Make sure that the medium is "driftable" and microscopic
+  if (!medium->IsDriftable() || !medium->IsMicroscopic()) {
+    std::cerr << "AvalancheMicroscopic::TransportPhoton:" << std::endl;
+    std::cerr << "    Medium at initial position does not provide " 
+              << " microscopic tracking data." << std::endl;
+    return;
+  }
+  
+//  if (debug) {
+    std::cout << "AvalancheMicroscopic::TransportPhoton:" << std::endl;
+    std::cout << "    Starting photon transport in medium " 
+              << medium->GetName() << "." << std::endl;
+//  }
+  
+  // Get the id number of the drift medium
+  int id = medium->GetId();
+  // Get the density of the drift medium
+  double rho = medium->GetNumberDensity();
+
+  // Position 
+  double x = x0, y = y0, z = z0;
+  double t = t0;
+  // Initial direction (randomised)
+  double ctheta = 1. - 2 * RndmUniform();
+  double stheta = sqrt(1. - ctheta * ctheta);
+  double phi = TwoPi * RndmUniform();
+  double dx = cos(phi) * stheta;
+  double dy = sin(phi) * stheta;
+  double dz = ctheta;
+  // Energy 
+  double e = e0;
+  // Photoabsorption rate
+  double f = 0.;
+  // Timestep
+  double dt = 0.;
+
+  int type, level;
+  double e1, s, esec;
+
+  // return;
+
+  bool ok = true;
+  while (ok) {
+    f = medium->GetPhotonCollisionRate(e);
+    if (f <= 0.) {
+      ok = false;
+      break;
+    }
+    dt = - log(RndmUniformPos()) / f;
+    t += dt;
+    dt *= SpeedOfLight;
+    x += dt * dx; y += dt * dy; z += dt * dz;
+    if (!medium->GetPhotonCollision(e, type, level, e1, ctheta, s, esec)) {
+      ok = false;
+      break;
+    }
+  }
+
+  if (!ok) return;
+
+  photon newPhoton;
+  newPhoton.x0 = x0; newPhoton.y0 = y0; newPhoton.z0 = z0;
+  newPhoton.x1 = x;  newPhoton.y1 = y;  newPhoton.z1 = z;
+  photons.push_back(newPhoton);
+  ++nPhotons;
+  return;
+
 }
 
 }

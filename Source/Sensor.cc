@@ -8,7 +8,7 @@
 
 namespace Garfield {
 
-double Sensor::signalConversion = ElementaryCharge * 1.e18;
+double Sensor::signalConversion = ElementaryCharge * 1.e9;
 
 Sensor::Sensor() :
   nComponents(0), lastComponent(-1), 
@@ -349,7 +349,7 @@ Sensor::AddSignal(const int q, const double t, const double dt,
     delta = tStart + (bin + 1) * tStep - t;    
     // Check if the provided timestep extends over more than one time bin
     if (dt > delta) {
-      electrodes[i].signal[bin] += cur * delta;        
+      electrodes[i].signal[bin] += cur * delta; 
       delta = dt - delta;
       int j = 1;
       while (delta > tStep && bin + j < nTimeBins) {

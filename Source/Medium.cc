@@ -210,10 +210,10 @@ Medium::ElectronAttachment(const double ex, const double ey, const double ez,
 }
 
 double 
-Medium::GetNullCollisionRate() {
+Medium::GetElectronNullCollisionRate() {
 
   if (warning) {
-    std::cerr << "Medium::GetNullCollisionRate:" << std::endl;
+    std::cerr << "Medium::GetElectronNullCollisionRate:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
   return 0.;
@@ -221,10 +221,10 @@ Medium::GetNullCollisionRate() {
 }
 
 double 
-Medium::GetCollisionRate(const double e) {
+Medium::GetElectronCollisionRate(const double e) {
 
   if (warning) {
-    std::cerr << "Medium::GetCollisionRate:" << std::endl;
+    std::cerr << "Medium::GetElectronCollisionRate:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
   return 0.;
@@ -232,11 +232,11 @@ Medium::GetCollisionRate(const double e) {
 }
 
 bool 
-Medium::GetCollision(const double e, int& type, int& level,
-                     double& s, double& ctheta, double& eloss, double& esec) {
+Medium::GetElectronCollision(const double e, int& type, int& level,
+                     double& e1, double& ctheta, double& s, double& esec) {
   
   if (warning) {
-    std::cerr << "Medium::GetCollision:" << std::endl;
+    std::cerr << "Medium::GetElectronCollision:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
   return 0.;
@@ -402,9 +402,28 @@ Medium::GetPhotoAbsorptionCrossSection(const double e,
 
   if (warning) {
     std::cerr << "Medium::GetPhotoAbsorptionCrossSection:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   sigma = 0.;
+  return false;
+
+}
+
+double
+Medium::GetPhotonCollisionRate(const double e) {
+
+  double sigma = 0.;
+  if (!GetPhotoAbsorptionCrossSection(e, sigma)) return 0.;
+  
+  return sigma * density * SpeedOfLight;
+
+}
+
+bool
+Medium::GetPhotonCollision(const double e, int& type, int& level, double& e1,
+                           double& ctheta, double& s, double& esec) {
+
   return false;
 
 }

@@ -23,8 +23,9 @@ OBJS = \
 	$(OBJECT)/Input.o \
 	$(OBJECT)/Medium.o \
 	$(OBJECT)/MediumMagboltz86.o \
-	$(OBJECT)/magboltz-8.6.o \
+	$(OBJECT)/magboltz.o \
 	$(OBJECT)/MediumSilicon.o \
+	$(OBJECT)/OpticalData.o \
 	$(OBJECT)/SolidBox.o \
 	$(OBJECT)/RandomEngineGSL.o \
 	$(OBJECT)/PlottingEngineRoot.o \
@@ -61,9 +62,11 @@ $(OBJECT)/Medium.o: $(SOURCE)/Medium.cc $(INCLUDE)/Medium.hh $(INCLUDE)/Fundamen
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/MediumMagboltz86.o: $(SOURCE)/MediumMagboltz86.cc $(INCLUDE)/MediumMagboltz86.hh $(INCLUDE)/FundamentalConstants.hh $(INCLUDE)/Random.hh
 	$(CC) $(CFLAGS) $< -o $@
-$(OBJECT)/magboltz-8.6.o: $(SOURCE)/magboltz-8.6.f
+$(OBJECT)/magboltz.o: $(SOURCE)/magboltz-8.9.f
 	$(FF) $< -o $@
 $(OBJECT)/MediumSilicon.o: $(SOURCE)/MediumSilicon.cc $(INCLUDE)/MediumSilicon.hh $(INCLUDE)/FundamentalConstants.hh $(INCLUDE)/Medium.hh
+	$(CC) $(CFLAGS) $< -o $@
+$(OBJECT)/OpticalData.o: $(SOURCE)/OpticalData.cc $(INCLUDE)/OpticalData.hh $(INCLUDE)/FundamentalConstants.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/SolidBox.o: $(SOURCE)/SolidBox.cc $(INCLUDE)/SolidBox.hh
 	$(CC) $(CFLAGS) $< -o $@

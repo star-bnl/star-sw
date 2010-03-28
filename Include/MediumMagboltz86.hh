@@ -11,7 +11,15 @@ namespace Garfield {
 
 extern "C" {
   
-  // COMMON blocks used in gas cross-section subroutines
+  // COMMON blocks
+
+  extern struct {
+    double eovb;
+    double wb;
+    double btheta;
+    double bmag;
+  } bfld_;
+
   extern struct {
     long long nGas;
     long long nStep;
@@ -23,7 +31,20 @@ extern "C" {
     double tempc;
     double torr;
     long long ipen;
-  } inpt_; 
+  } inpt_;
+
+  extern struct {
+    double tmax;
+    double small;
+    double api;
+    double estart;
+    double theta;
+    double phi;
+    double tcfmax[8];
+    double rstart;
+    double efield;
+    long long nmax;
+  } setp_;
   
   extern struct {
     double echarg;
@@ -31,16 +52,47 @@ extern "C" {
     double amu;
     double pir2;
   } cnsts_;  
-    
+   
+  extern struct {
+    long long ngasn[6];
+  } gasn_; 
+
   extern struct {
     double an1, an2, an3, an4, an5, an6, an;
     double frac[6];
-  } ratio_;    
+  } ratio_;   
+
+  extern struct {
+    double alpha;
+    double att;
+  } ctowns_; 
 
   void gasmix_(long long* ngs, double* q, 
         double* qin, long long* nin, double* e, double* ei, char* name, 
         double* virl, double* eb, double* peqel, double* peqin, 
         double* penfra, long long* kel, long long* kin, char scrpt[226][30]);
+
+  void setup1_();
+
+  void mixer_();
+
+  void elimit_(long long* ielow);
+  void elimitb_(long long* ielow);
+  void elimitc_(long long* ielow);
+  
+  void monte_();
+  void montea_();
+  void monteb_();
+  void montec_();
+
+  void alpcalc_();
+  void alpclca_();
+  void alpclcb_();
+  void alpclcc_();
+
+  void prnter_();
+  void output_();
+  void output2_();
 
 }
 
@@ -67,25 +119,26 @@ class MediumMagboltz86 : public Medium {
                         std::string& gas6, double& f6);
     void   GetComponent(const int i, std::string& label, double& f);
     
-    // Set/get the highest electron energy to be included in the cross-section table
-    bool   SetMaxEnergy(const double e);
-    double GetMaxEnergy() const;
+    // Set/get the highest electron energy to be included 
+    // in the scattering rates table
+    bool   SetMaxElectronEnergy(const double e);
+    double GetMaxElectronEnergy() const {return eFinal;}
 
     // Switch on/off anisotropic scattering (enabled by default)
-    void   EnableAnisotropicScattering() {anisotropic = true;}
-    void   DisableAnisotropicScattering() {anisotropic = false;}
+    void EnableAnisotropicScattering() {anisotropic = true;}
+    void DisableAnisotropicScattering() {anisotropic = false;}
+
+    void EnableDeexcitation() {deexcitation = true;}
+    void DisableDeexcitation() {deexcitation = false;}
     
-    // Get the (real) collision rate [ns-1] at a given electron energy e [eV]
-    double GetCollisionRate(const double e);
-    // Sample the collision type
-    bool   GetCollision(const double e, int& type, int& level, double& s, 
-                        double& ctheta, double& eloss, double& esec);
-    // Get the number of null-collision intervals
-    bool   GetNullCollisionIntervals(int& nIntervals, double& emax) const;
-    // Get the null-collision rate [ns-1] in the given interval
-    double GetNullCollisionRate(const int interval);
     // Get the overall null-collision rate [ns-1]
-    double GetNullCollisionRate();
+    double GetElectronNullCollisionRate();
+    // Get the (real) collision rate [ns-1] at a given electron energy e [eV]
+    double GetElectronCollisionRate(const double e);
+    // Sample the collision type
+    bool   GetElectronCollision(const double e, int& type, int& level, 
+                        double& e1, double& ctheta, 
+                        double& s, double& esec);
 
     // Reset the collision counters
     void ResetCollisionCounters();
@@ -93,7 +146,8 @@ class MediumMagboltz86 : public Medium {
     int GetNumberOfCollisions() const;
     // Get number of collisions broken down by cross-section type
     int GetNumberOfCollisions(int& nElastic, int& nIonising, int& nAttachment,
-                              int& nInelastic, int& nSuperelastic) const;
+                              int& nInelastic, int& nExcitation, 
+                              int& nSuperelastic) const;
     // Get number of cross-section terms                              
     int GetNumberOfLevels();
     // Get detailed information about a given cross-section term i
@@ -101,6 +155,9 @@ class MediumMagboltz86 : public Medium {
                   std::string& descr, double& e);    
     // Get number of collisions for a specific cross-section term    
     int GetNumberOfCollisions(const int level) const;
+
+    void RunMagboltz(const double e, const double b, const double btheta,
+                     const int ncoll, bool verbose);
                                                                    
   private:
 
@@ -142,24 +199,34 @@ class MediumMagboltz86 : public Medium {
     // Collision frequencies
     double cf[nEnergySteps][nMaxLevels];
    
-    // Ionisation and attachment rates
-    double cfIon[nEnergySteps];
-    double cfAtt[nEnergySteps];
-    
     // Collision counters
     // 0: elastic
     // 1: ionisation
     // 2: attachment
     // 3: inelastic
-    // 4: super-elastic
-    int nCollisions[5];
+    // 4: excitation
+    // 5: super-elastic
+    int nCollisions[6];
     // Number of collisions for each cross-section term
     std::vector<int> nCollisionsDetailed;
+
+    // Deexcitation rates
+    bool deexcitation;
+    double fDeexcitation[nMaxLevels];
+    double fRadiative[nMaxLevels];
+    double fCollIon[nMaxLevels];
+    double fCollLoss[nMaxLevels];
+    // Minimum ionisation potential
+    double minIonPot;
   
     bool GetGasNumber(std::string gas, int& number) const;
     bool GetGasName(const int number, std::string& gas) const;
     bool Mixer();
     void ComputeAngularCut(double parIn, float& cut, double &parOut);
+    void ComputeDeexcitationTable();
+
+//    void RunMagboltz(const double e, const double b, const double btheta,
+//                     const int ncoll, bool verbose);
   
 };
 

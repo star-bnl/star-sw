@@ -12,7 +12,7 @@ namespace Garfield {
 MediumMagboltz86::MediumMagboltz86() :
   Medium(), 
   eFinal(40.), eStep(eFinal / nEnergySteps), 
-  nTerms(0), anisotropic(true) {
+  nTerms(0), anisotropic(true), deexcitation(false) {
   
   // Set physical constants in Magboltz common blocks
   cnsts_.echarg = ElementaryCharge;
@@ -171,10 +171,10 @@ MediumMagboltz86::GetComponent(const int i, std::string& label, double& f) {
 }
 
 bool 
-MediumMagboltz86::SetMaxEnergy(const double e) {
+MediumMagboltz86::SetMaxElectronEnergy(const double e) {
 
   if (e <= 1.e-20) {
-    std::cerr << "MediumMagboltz86::SetMaxEnergy:" << std::endl;
+    std::cerr << "MediumMagboltz86::SetMaxElectronEnergy:" << std::endl;
     std::cerr << "    Provided upper electron energy limit (" << e
               <<  " eV) is too small." << std::endl;
     return false;
@@ -195,14 +195,23 @@ MediumMagboltz86::SetMaxEnergy(const double e) {
 }
 
 double 
-MediumMagboltz86::GetMaxEnergy() const {
+MediumMagboltz86::GetElectronNullCollisionRate() {
 
-  return eFinal;
+  if (isChanged) {
+    if (!Mixer()) {
+      std::cerr << "MediumMagboltz86: Error calculating the "
+                << " collision rates table." << std::endl;
+      return 0.;
+    }
+    isChanged = false;
+  }
+      
+  return cfNull[0];
   
 }
 
 double 
-MediumMagboltz86::GetCollisionRate(const double e) {
+MediumMagboltz86::GetElectronCollisionRate(const double e) {
 
   if (e <= 0.) {
     std::cerr << "MediumMagboltz86: Electron energy must be greater than zero."
@@ -210,12 +219,12 @@ MediumMagboltz86::GetCollisionRate(const double e) {
     return cfTot[0];
   }
   if (e > eFinal) {    
-    std::cerr << "MediumMagboltz86::GetCollisionRate:" << std::endl;
+    std::cerr << "MediumMagboltz86::GetElectronCollisionRate:" << std::endl;
     std::cerr << "    Collision rate at " << e 
               << " eV is not included in the current table." << std::endl;
     std::cerr << "    Increasing energy range to " << 1.05 * e
               << " eV." << std::endl;
-    SetMaxEnergy(1.05 * e);    
+    SetMaxElectronEnergy(1.05 * e);    
   }
     
   if (isChanged) {
@@ -232,74 +241,26 @@ MediumMagboltz86::GetCollisionRate(const double e) {
 }
 
 bool 
-MediumMagboltz86::GetNullCollisionIntervals(int& nIntervals, double& emax) const {
-
-  nIntervals = 8;
-  emax = eFinal;  
-  return true;
-  
-}
-
-double 
-MediumMagboltz86::GetNullCollisionRate(const int interval) {
-
-  if (interval >= 8 || interval < 0) {
-    std::cerr << "MediumMagboltz86::GetNullCollisionRate:" << std::endl;
-    std::cerr << "    Null-collision interval " << interval 
-              << " does not exist." << std::endl;
-    return 0.;
-  }
-  
-  if (isChanged) {
-    if (!Mixer()) {
-      std::cerr << "MediumMagboltz86: Error calculating the collision rates table."
-                << std::endl;
-      return 0.;
-    }
-    isChanged = false;
-  }
-      
-  return cfNull[interval];
-  
-}
-
-double 
-MediumMagboltz86::GetNullCollisionRate() {
-
-  if (isChanged) {
-    if (!Mixer()) {
-      std::cerr << "MediumMagboltz86: Error calculating the collision rates table."
-                << std::endl;
-      return 0.;
-    }
-    isChanged = false;
-  }
-      
-  return cfNull[0];
-  
-}
-
-bool 
-MediumMagboltz86::GetCollision(const double e, int& type, int& level, 
-                double& s, double& ctheta, double& loss, double& esec) {
+MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level, 
+                double& e1, double& ctheta, double& s, double& esec) {
 
   if (e > eFinal) {
-    std::cerr << "MediumMagboltz86::GetCollision:" << std::endl;
-    std::cerr << "    Provided electron energy (" << e 
+    std::cerr << "MediumMagboltz86::GetElectronCollision:" << std::endl;
+    std::cerr << "    Provided electron energy  (" << e 
               << " eV) exceeds current energy range  (" << eFinal 
               << " eV)." << std::endl;
     std::cerr << "    Increasing energy range to " << 1.05 * e
               << " eV." << std::endl;
-    SetMaxEnergy(1.05 * e);
+    SetMaxElectronEnergy(1.05 * e);
   } else if (e <= 0.) {
-    std::cerr << "MediumMagboltz86::GetCollision:" << std::endl;
+    std::cerr << "MediumMagboltz86::GetElectronCollision:" << std::endl;
     std::cerr << "    Electron energy must be greater than zero." << std::endl;
     return false;
   }
   
   if (isChanged) {
     if (!Mixer()) {
-      std::cerr << "MediumMagboltz86: Error calculating " 
+      std::cerr << "MediumMagboltz86: Error calculating" 
                 << " the collision rates table." << std::endl;
       return false;
     }
@@ -309,7 +270,7 @@ MediumMagboltz86::GetCollision(const double e, int& type, int& level,
   // Energy interval
   const int iE = int(e / eStep);
 
-  const double r = RndmUniform();
+  double r = RndmUniform();
   int iLow = 0;
   int iUp  = nTerms - 1;  
   if (r <= cf[iE][iLow]) {
@@ -330,70 +291,104 @@ MediumMagboltz86::GetCollision(const double e, int& type, int& level,
   }
   
   // Collision type
-  type = csType[level] % 5;
-  // Scattering angle
-  if (anisotropic) {
-    switch (scatModel[level]) {
-      case 0:
-        ctheta = 1. - 2. * RndmUniform();
-        break;
-      case 1:
-        ctheta = 1. - RndmUniform() * scatCut[iE][level];
-        if (RndmUniform() > scatParameter[iE][level]) ctheta = -ctheta;
-        break;
-      case 2:
-        ctheta = 1. - 2. * RndmUniform();
-        ctheta = (ctheta + scatParameter[iE][level]) / 
-                 (1. + scatParameter[iE][level] * ctheta);
-        break;
-      default:
-        std::cerr << "MediumMagboltz86::GetCollision:" << std::endl;
-        std::cerr << "    Unknown scattering model. " << std::endl;
-        std::cerr << "    Using isotropic distribution instead." << std::endl;
-        ctheta = 1. - 2. * RndmUniform();
-        break;
-    }
-  } else {
-    ctheta = 1. - 2. * RndmUniform();
-  }
-  
-  s = rgas[level];
-  loss = energyLoss[level];
-  
-  const double w = wSplit[level];
+  type = csType[level] % 6;
+
+  // Energy loss
+  double loss = energyLoss[level];
+  // Secondary electron energy (none by default)
+  esec = 0.;
   // Ionising collision
   if (type == 1) {
+    // Splitting parameter
+    const double w = wSplit[level];
     // Sample the secondary electron energy according to 
     // the Opal-Beaty-Peterson parametrisation  
     esec = w * tan(RndmUniform() * atan(0.5 * (e - loss) / w));
-    if (esec <= 0) {
-      esec = 1.e-20;
-    }
+    if (esec <= 0) esec = 1.e-20;
     loss += esec;
+  // Excitation
+  } else if (type == 4 && deexcitation && fDeexcitation[level] > 0.) {
+    // Determine the de-excitation time
+    s = -log(RndmUniformPos()) / fDeexcitation[level];
+    // Sample the de-excitation process
+    r = RndmUniform();
+    if (r < fRadiative[level]) {
+      // Photon emission
+      esec = - energyLoss[level];
+    } else if (r < fCollIon[level]) {
+      // Penning ionisation
+      esec = RndmUniform() * (energyLoss[level] - minIonPot);
+      if (esec <= 0) esec = 1.e-20;
+    }
   }
 
   bool penning = false;
   // TEMPORARY HANDLING OF PENNING TRANSFERS FOR AR/ISOBUTANE
-  if (penning && level < 47 && type == 3) {
+  if (penning && level < 47 && type == 4) {
     // Excited level of argon
     if (RndmUniform() < 0.4) {
       // Penning ionisation
       type = 1;
-      esec = 1;
+      esec = 1.;
     }
   }
   
   // Make sure the energy loss is smaller than the energy
-  if (e < loss) {
-    loss = e - 0.0001;
-  }
+  if (e < loss) loss = e - 0.0001;
   
+  // Determine the scattering angle
+  double ctheta0;
+  if (anisotropic) {
+    switch (scatModel[level]) {
+      case 0:
+        ctheta0 = 1. - 2. * RndmUniform();
+        break;
+      case 1:
+        ctheta0 = 1. - RndmUniform() * scatCut[iE][level];
+        if (RndmUniform() > scatParameter[iE][level]) ctheta = -ctheta;
+        break;
+      case 2:
+        ctheta0 = 1. - 2. * RndmUniform();
+        ctheta0 = (ctheta0 + scatParameter[iE][level]) / 
+                  (1. + scatParameter[iE][level] * ctheta0);
+        break;
+      default:
+        std::cerr << "MediumMagboltz86::GetElectronCollision:" << std::endl;
+        std::cerr << "    Unknown scattering model. " << std::endl;
+        std::cerr << "    Using isotropic distribution instead." << std::endl;
+        ctheta0 = 1. - 2. * RndmUniform();
+        break;
+    }
+  } else {
+    ctheta0 = 1. - 2. * RndmUniform();
+  }
+
+  const double s1 = rgas[level];
+  const double s2 = (s1 * s1) / (s1 - 1.);
+  const double stheta0 = sin(acos(ctheta0));
+  double arg = 1. - s1 * loss / e,;
+  if (arg < Small) arg = Small;
+  const double d = 1. - ctheta0 * sqrt(arg);
+
+  // Update the energy  
+  e1 = e * (1. - loss / (s1 * e) - 2. * d / s2);
+  if (e1 < Small) e1 = Small;
+  double q = sqrt((e / e1) * arg) / s1;
+  if (q > 1.) q = 1.;
+  const double theta = asin(q * stheta0);
+  
+  ctheta = cos(theta);
+  if (ctheta0 < 0.) {
+    double u = (s1 - 1.) * (s1 - 1.) / arg;
+    if (ctheta0 * ctheta0 > u) ctheta *= -1.;
+  }
+
   // Increase the collision counters
   ++nCollisions[type];
   ++nCollisionsDetailed[level];
   
   if (debug) {
-    std::cout << "MediumMagboltz86::GetCollision:" << std::endl;
+    std::cout << "MediumMagboltz86::GetElectronCollision:" << std::endl;
     std::cout << "    Level:       " << level << std::endl;
     std::cout << "    Type:        " << type << std::endl;
   }
@@ -404,11 +399,8 @@ MediumMagboltz86::GetCollision(const double e, int& type, int& level,
 void 
 MediumMagboltz86::ResetCollisionCounters() {
 
-  nCollisions[0] = 0;
-  nCollisions[1] = 0;
-  nCollisions[2] = 0;
-  nCollisions[3] = 0;
-  nCollisions[4] = 0;
+  nCollisions[0] = 0; nCollisions[1] = 0; nCollisions[2] = 0;
+  nCollisions[3] = 0; nCollisions[4] = 0; nCollisions[5] = 0;
   for (int j = nTerms; j--;) nCollisionsDetailed[j] = 0;
   
 }
@@ -417,7 +409,7 @@ int
 MediumMagboltz86::GetNumberOfCollisions() const {
 
   return nCollisions[0] + nCollisions[1] + nCollisions[2] + 
-         nCollisions[3] + nCollisions[4];
+         nCollisions[3] + nCollisions[4] + nCollisions[5];
   
 }
 
@@ -426,15 +418,17 @@ MediumMagboltz86::GetNumberOfCollisions(int& nElastic,
                                         int& nIonisation, 
                                         int& nAttachment, 
                                         int& nInelastic,
+                                        int& nExcitation,
                                         int& nSuperelastic) const {
 
   nElastic = nCollisions[0]; 
   nIonisation = nCollisions[1];
   nAttachment = nCollisions[2];  
-  nInelastic = nCollisions[3]; 
-  nSuperelastic = nCollisions[4];  
+  nInelastic = nCollisions[3];
+  nExcitation = nCollisions[4]; 
+  nSuperelastic = nCollisions[5];  
   return nCollisions[0] + nCollisions[1] + nCollisions[2] + 
-         nCollisions[3] + nCollisions[4];
+         nCollisions[3] + nCollisions[4] + nCollisions[5];
 
 }
 
@@ -443,8 +437,8 @@ MediumMagboltz86::GetNumberOfLevels() {
 
   if (isChanged) {
     if (!Mixer()) {
-      std::cerr << "MediumMagboltz86: Error calculating the collision rates table." 
-                << std::endl;
+      std::cerr << "MediumMagboltz86: Error calculating the"
+                << " collision rates table." << std::endl;
       return 0;
     }
     isChanged = false;
@@ -475,8 +469,8 @@ MediumMagboltz86::GetLevel(const int i, int& gas, int& type,
   }  
   
   // Collision type
-  type = csType[i] % 5;
-  gas = int(csType[i] / 5);
+  type = csType[i] % 6;
+  gas = int(csType[i] / 6);
   // Description
   descr = "                              ";
   for (int j = 30; j--;) descr[j] = description[i][j];
@@ -891,24 +885,43 @@ MediumMagboltz86::GetGasName(const int number, std::string& gas) const {
 bool 
 MediumMagboltz86::Mixer() {
 
-  // Update Magboltz common blocks
+  // Set constants and parameters in Magboltz common blocks
+  cnsts_.echarg = ElementaryCharge;
+  cnsts_.emass = ElectronMassGramme;
+  cnsts_.amu = AtomicMassUnit;
+  cnsts_.pir2 = BohrRadius * BohrRadius * Pi;  
+  inpt_.ary = RydbergEnergy;
+
   inpt_.akt = BoltzmannConstant * temperature;
   inpt_.tempc = temperature - 273.15;
   inpt_.torr = pressure;
 
+  inpt_.nGas = nComponents;
+  inpt_.nStep = nEnergySteps;
+  inpt_.nAniso = 2;
+  inpt_.efinal = eFinal;
+  inpt_.estep = eStep;
+  
   // Correct for density
-  const double density = LoschmidtNumber * (pressure / 760.) * (273.15 / temperature);
+  const double density = LoschmidtNumber * (pressure / 760.) * 
+                         (273.15 / temperature);
   const double prefactor = density * SpeedOfLight * sqrt(2. / ElectronMass);
 
-  // Fill electron energy array, reset ionisation/attachment coefficients and collision rates
+  // Fill electron energy array, reset collision rates
   for (int i = nEnergySteps; i--;) {
-    cfTot[i] = 0.; cfIon[i] = 0.; cfAtt[i] = 0.;
+    cfTot[i] = 0.; 
     scatModel[i] = 0; 
     for (int j = nMaxLevels; j--;) {
       cf[i][j] = 0.;
       scatParameter[i][j] = 0.5;
       scatCut[i][j] = 1.;
     }
+  }
+  for (int i = nMaxLevels; i--;) {
+    fDeexcitation[i] = 0.;
+    fRadiative[i] = 0.;
+    fCollIon[i] = 0.;
+    fCollLoss[i] = 0.;
   }
   
   // Gas cross-section
@@ -982,7 +995,7 @@ MediumMagboltz86::Mixer() {
     for (int j = 0; j < 30; ++j) {
       description[np][j] = scrpt[1][j];
     }
-    csType[np] = 5 * iGas;
+    csType[np] = 6 * iGas;
     bool withIon = false, withAtt = false;
     // Ionisation
     if (eFinal >= e[2]) {
@@ -995,7 +1008,7 @@ MediumMagboltz86::Mixer() {
       for (int j = 0; j < 30; ++j) {
         description[np][j] = scrpt[2][j];
       }
-      csType[np] = 5 * iGas + 1;
+      csType[np] = 6 * iGas + 1;
     }
     // Attachment
     if (eFinal >= e[3]) {
@@ -1007,7 +1020,7 @@ MediumMagboltz86::Mixer() {
       for (int j = 0; j < 30; ++j) {
         description[np][j] = scrpt[3][j];
       }
-      csType[np] = 5 * iGas + 2;
+      csType[np] = 6 * iGas + 2;
     }
     // Inelastic terms
     for (int j = 0; j < nIn; ++j) {
@@ -1018,11 +1031,16 @@ MediumMagboltz86::Mixer() {
       for (int k = 0; k < 30; ++k) {
         description[np][k] = scrpt[6 + j][k];
       }
-      if (eIn[j] < 0.) {
+      if (description[np][1] == 'E' &&
+          description[np][2] == 'X') {
+        // Excitation
+        csType[np] = 6 * iGas + 4;     
+      } else if (eIn[j] < 0.) {
         // Super-elastic collision
-        csType[np] = 5 * iGas + 4;
+        csType[np] = 6 * iGas + 5;
       } else {
-        csType[np] = 5 * iGas + 3;
+        // Inelastic collision
+        csType[np] = 6 * iGas + 3;
       }
     }
     nTerms += nIn;
@@ -1041,9 +1059,9 @@ MediumMagboltz86::Mixer() {
       if (withIon) {
         ++np;
         cf[iE][np] = q[iE][2] * van;
-        cfIon[iE] += cf[iE][np];
         if (scatModel[np] == 1) {
-          ComputeAngularCut(pEqEl[iE][2], scatCut[iE][np], scatParameter[iE][np]);
+          ComputeAngularCut(pEqEl[iE][2], scatCut[iE][np], 
+                            scatParameter[iE][np]);
         } else if (scatModel[np] == 2) {
           scatParameter[iE][np] = pEqEl[iE][2];
         }
@@ -1052,7 +1070,6 @@ MediumMagboltz86::Mixer() {
       if (withAtt) {
         ++np;
         cf[iE][np] = q[iE][3] * van;
-        cfAtt[iE] += cf[iE][np];
       }
       // Inelastic terms
       for (int j = 0; j < nIn; ++j) {
@@ -1067,7 +1084,8 @@ MediumMagboltz86::Mixer() {
           cf[iE][np] = 0.;
         }
         if (scatModel[np] == 1) {
-          ComputeAngularCut(pEqIn[iE][j], scatCut[iE][np], scatParameter[iE][np]);
+          ComputeAngularCut(pEqIn[iE][j], scatCut[iE][np], 
+                            scatParameter[iE][np]);
         } else if (scatModel[np] == 2) {
           scatParameter[iE][np] = pEqIn[iE][j];
         }
@@ -1096,9 +1114,7 @@ MediumMagboltz86::Mixer() {
     for (int k = 1; k < nTerms; ++k) {
       cf[iE][k] += cf[iE][k - 1];
     }
-    double eroot = sqrt(eStep * (iE + 0.5));
-    cfAtt[iE] *= eroot;
-    cfIon[iE] *= eroot;
+    const double eroot = sqrt(eStep * (iE + 0.5));
     cfTot[iE] *= eroot;
   }
   
@@ -1122,7 +1138,7 @@ MediumMagboltz86::Mixer() {
   // Reset the collision counters
   nCollisionsDetailed.resize(nTerms);
   nCollisions[0] = 0; nCollisions[1] = 0; nCollisions[2] = 0;
-  nCollisions[3] = 0; nCollisions[4] = 0;
+  nCollisions[3] = 0; nCollisions[4] = 0; nCollisions[5] = 0;
   for (int j = nTerms; j--;) nCollisionsDetailed[j] = 0;
   
   if (debug) {
@@ -1135,6 +1151,8 @@ MediumMagboltz86::Mixer() {
                 << cfTot[(i + 1) * nEnergySteps / 16] << std::endl;
     }
   }
+
+  if (deexcitation) ComputeDeexcitationTable();
 
   return true;
 
@@ -1156,6 +1174,279 @@ MediumMagboltz86::ComputeAngularCut(double parIn, float& cut, double &parOut) {
   parOut = cns * fac + 0.5;
   cut = thetac * rads;
   
+}
+
+void
+MediumMagboltz86::ComputeDeexcitationTable() {
+
+  minIonPot = -1.;
+  // Fill radiative deexcitation rates
+  for (int i = 0; i < nTerms; ++i) {
+    fRadiative[i] = 0.;
+    fCollIon[i] = 0.;
+    fCollLoss[i] = 0.;
+    // Find the min. ionisation threshold in the mixture
+    if (csType[i] % 6 == 1) {
+      if (minIonPot <= 0.) {
+        minIonPot = energyLoss[i];
+      } else if (energyLoss[i] < minIonPot) {
+        minIonPot = energyLoss[i];
+      }
+    }
+    if (csType[i] % 6 != 4) continue;
+    switch (gas[int(csType[i] / 6)]) {
+      case 2:
+        // Argon
+        std::string level = "       ";
+        for (int j = 0; j < 7; ++j) level[j] = description[i][5 + j];
+        // Metastable 3p54s levels
+        if (level == "1S5    ") {
+          // Katori, Shimizu (1993)
+          fRadiative[i] = 1. / 38.e9; continue;
+        } else if (level == "1S3    ") {
+          // Small-Warren (1975)
+          fRadiative[i] = 1. / 45.e9;
+        // Radiative 3p54s levels
+        } else if (level == "1S4    ") {
+          fRadiative[i] = 1. / 8.6; continue;
+        } else if (level == "1S2    ") {
+          fRadiative[i] = 1. / 2.2; continue;
+        // 3p54p levels
+        // Wiese et al. (1989)
+        } else if (level == "2P10   ") {
+          fRadiative[i] = 1. / 40.5; continue;
+        } else if (level == "2P9    ") {
+          fRadiative[i] = 1. / 30.7; continue;
+        } else if (level == "2P8    ") {
+          fRadiative[i] = 1. / 30.6; continue;
+        } else if (level == "2P7    ") {
+          fRadiative[i] = 1. / 30.2; continue;
+        } else if (level == "2P6    ") {
+          fRadiative[i] = 1. / 29.4; continue;
+        } else if (level == "2P5    ") {
+          fRadiative[i] = 1. / 24.4; continue;
+        } else if (level == "2P4    ") {
+          fRadiative[i] = 1. / 29.3; continue;
+        } else if (level == "2P3    ") {
+          fRadiative[i] = 1. / 29.0; continue;
+        } else if (level == "2P2    ") {
+          fRadiative[i] = 1. / 28.3; continue;
+        } else if (level == "2P1    ") {
+          fRadiative[i] = 1. / 21.7; continue;
+        // 3p53d levels
+        // Gruzdev, Loginov (1975)
+        } else if (level == "3D6    ") {
+          fRadiative[i] = 1. / 54.2; continue;
+        } else if (level == "3D5    ") {
+          fRadiative[i] = 1. / 40.8; continue;
+        } else if (level == "3D4!   ") {
+          fRadiative[i] = 1. / 52.0; continue;
+        } else if (level == "3D4    ") {
+          fRadiative[i] = 1. / 50.8; continue;
+        } else if (level == "3D3    ") {
+          fRadiative[i] = 1. / 3.5; continue;
+        } else if (level == "3D2    ") {
+          fRadiative[i] = 1. / 9.0; continue;
+        } else if (level == "3D1!!  ") {
+          fRadiative[i] = 1. / 49.9; continue;
+        } else if (level == "3D1!   ") {
+          fRadiative[i] = 1. / 49.0; continue;
+        } else if (level == "3S1!!!!") {
+          fRadiative[i] = 1. / 49.9; continue;
+        } else if (level == "3S1!!! ") {
+          fRadiative[i] = 1. / 49.7; continue;
+        } else if (level == "3S1!!  ") {
+          fRadiative[i] = 1. / 48.3; continue;
+        } else if (level == "3S1!   ") {
+          fRadiative[i] = 1. / 3.36; continue;
+        // 3p55s levels
+        // Gruzdev, Loginov (1975)
+        } else if (level == "2S5    ") {
+          fRadiative[i] = 1. / 42.1; continue;
+        } else if (level == "2S4    ") {
+          fRadiative[i] = 1. / 4.74; continue;
+        } else if (level == "2S3    ") {
+          fRadiative[i] = 1. / 43.9; continue;
+        // 3p54d levels
+        } else if (level == "4D5    ") {
+          fRadiative[i] = 1. / 113.; continue;
+        } else if (level == "4D2    ") {
+          fRadiative[i] = 1. / 10.; continue;
+        } else if (level == "4S1!   ") {
+          fRadiative[i] = 1. / 3.78; continue;
+        // 3p56s levels
+        } else if (level == "3S4    ") {
+          fRadiative[i] = 1. / 5.73; continue;
+        } else if (level == "3S2    ") {
+          fRadiative[i] = 1. / 32.6; continue;
+        // 3p55d levels
+        } else if (level == "5D5    ") {
+          fRadiative[i] = 1. / 111.; continue;
+        } else if (level == "5D2    ") {
+          fRadiative[i] = 1. / 5.42; continue;
+        } else if (level == "5S1!   ") {
+          fRadiative[i] = 1. / 3.69; continue;
+        // 3p57s levels
+        } else if (level == "4S4    ") {
+          fRadiative[i] = 1. / 15.1; continue;
+        } else if (level == "4S2    ") {
+          fRadiative[i] = 1. / 15.7; continue;
+        // Other levels
+        } else if (level == "6D5    ") {
+          // Zurro et al. (1973)
+          fRadiative[i] = 1. / 104.0; continue;
+        } else if (level == "5S4    ") {
+          // Afanaseva, Gruzdev (1975)
+          fRadiative[i] = 1. / 221.6; continue;
+        } else if (level == "6D2    ") {
+          // Zurro et al. (1973)
+          fRadiative[i] = 1. / 300; continue;
+        } else if (level == "HIGH   ") {
+          // Fantasy value
+          fRadiative[i] = 1. / 500.; continue;
+        } 
+        break;
+    }
+  }
+
+  if (nComponents != 2) {
+    std::cout << "MediumMagboltz86::ComputeDeexcitationTable:" << std::endl;
+    std::cout << "    Gas mixture has " << nComponents 
+              << " components." << std::endl;
+    std::cout << "    Collisional deexcitation is implemented only for" 
+              << " binary mixtures." << std::endl;
+  } else if ((gas[0] == 2 && gas [1] == 8) || (gas[0] == 8 && gas[1] == 2)) {
+    // Ar-CH4
+    int ar = 0;
+    double fB = 3.842488;
+    fB *= pressure / 760.;
+    if (gas[0] == 2) {
+      fB *= fraction[1];
+      ar = 0;
+    } else {
+      fB *= fraction[0];
+      ar = 1;
+    }
+    for (int j = nTerms; j--;) {
+      if (int(csType[j] / 6) == ar && csType[j] % 6 == 4) {
+        fCollIon[j] = fB;
+      }
+    }    
+  } else {
+    std::cout << "MediumMagboltz86::ComputeDeexcitationTable:" << std::endl;
+    std::cout << "    No data on collisional deexcitation present."
+              << std::endl;
+  }
+
+  if (debug) std::cout << "MediumMagboltz86::ComputeDeexcitationTable:" << std::endl; 
+  for (int i = 0; i < nTerms; ++i) {
+    fDeexcitation[i] = fRadiative[i] + fCollIon[i] + fCollLoss[i];
+    if (fDeexcitation[i] > 0.) {
+      if (debug) {
+        std::string descr = "                              ";
+        for (int j = 30; j--;) descr[j] = description[i][j];
+        std::cout << "    " << descr << std::endl;
+        std::cout << "    Deexcitation rate:     " 
+                  << fDeexcitation[i] << " ns-1" << std::endl;
+        std::cout << "    Radiative decay rate:  "
+                  << fRadiative[i] << " ns-1" << std::endl;
+        std::cout << "    Penning transfer rate: "
+                  << fCollIon[i] << " ns-1" << std::endl;
+      } 
+      fRadiative[i] /= fDeexcitation[i];
+      fCollIon[i] /= fDeexcitation[i];
+      fCollLoss[i] /= fDeexcitation[i];
+      fCollIon[i] += fRadiative[i];
+      fCollLoss[i] += fCollIon[i];
+    }
+  }
+  
+}
+
+void
+MediumMagboltz86::RunMagboltz(const double e, 
+                              const double bmag, const double btheta,
+                              const int ncoll, bool verbose) {
+
+  // Set input parameters in Magboltz common blocks
+  inpt_.nGas = nComponents;
+  inpt_.nStep = nEnergySteps;
+
+  inpt_.tempc = temperature - 273.15;
+  inpt_.torr = pressure;
+  inpt_.nAniso = 2;
+  inpt_.ipen = 0;
+  setp_.nmax = ncoll;
+
+  setp_.efield = e;
+  bfld_.bmag = bmag;
+  bfld_.btheta = btheta;
+
+  gasn_.ngasn[0] = gas[0]; gasn_.ngasn[1] = gas[1]; gasn_.ngasn[2] = gas[2];
+  gasn_.ngasn[3] = gas[3]; gasn_.ngasn[4] = gas[4]; gasn_.ngasn[5] = gas[5];
+  ratio_.frac[0] = 100 * fraction[0]; ratio_.frac[1] = 100 * fraction[1];
+  ratio_.frac[2] = 100 * fraction[2]; ratio_.frac[3] = 100 * fraction[3];
+  ratio_.frac[4] = 100 * fraction[4]; ratio_.frac[5] = 100 * fraction[5];
+
+  // Call Magboltz internal setup routine
+  setup1_();
+
+  // Calculate final energy
+  inpt_.efinal = 0.5;
+  // If E/p > 15 start at 8 eV 
+  if (e * temperature / (293.15 * pressure) > 15) {
+    inpt_.efinal = 8.;
+  }
+  setp_.estart = inpt_.efinal / 50.;
+
+  long long ielow = 1;
+  while (ielow == 1) {
+    mixer_();
+    // Loop to calculate final energy
+    if (bmag == 0. || btheta == 0. || fabs(btheta) == 180.) {
+      elimit_(&ielow);
+    } else if (btheta == 90.) {
+      elimitb_(&ielow);
+    } else {
+      elimitc_(&ielow);
+    }
+    if (ielow == 1) {
+      inpt_.efinal *= sqrt(2.);
+      setp_.estart = inpt_.efinal / 50.;
+    }
+  }
+
+  if (verbose) prnter_();
+  
+  if (bmag == 0.) {
+    monte_();
+  } else if (btheta == 0. || btheta == 180.) {
+    montea_();
+  } else if (btheta == 90.) {
+    monteb_();
+  } else {
+    montec_();
+  }
+  if (verbose) output_();
+
+  // If attachment or ionisation rate is greater than sstmin,
+  // then include spatial gradients in the solution.
+  const double sstmin = 30.;
+  double alpp = ctowns_.alpha * 760. * temperature / (pressure * 293.15);
+  double attp = ctowns_.att   * 760. * temperature / (pressure * 293.15);
+  if (fabs(alpp - attp) > sstmin || alpp > sstmin || attp > sstmin) {
+    if (bmag == 0.) {
+      alpcalc_();
+    } else if (btheta == 0. || btheta == 180.) {
+      alpclca_();
+    } else if (btheta == 90.) {
+      alpclcb_();
+    } else {
+      alpclcc_();
+    }
+  }
+  if (verbose) output2_();
+
 }
 
 }

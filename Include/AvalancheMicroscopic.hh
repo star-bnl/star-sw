@@ -37,10 +37,18 @@ class AvalancheMicroscopic {
     void EnableDriftLines() {useDriftLines = true;}
     void DisableDriftLines() {useDriftLines = false;}
 
+    // Switch on/off photon transport
+    void EnablePhotonTransport() {usePhotons = true;}
+    void DisablePhotonTransport() {usePhotons = false;}
+
     // Set/get energy threshold for electron transport
     // (useful for delta electrons)
-    void   SetTransportCut(const double cut) {deltaCut = cut;}
-    double GetTransportCut() const {return deltaCut;}
+    void   SetElectronTransportCut(const double cut) {deltaCut = cut;}
+    double GetElectronTransportCut() const {return deltaCut;}
+
+    // Set/get energy threshold for photon transport
+    void   SetPhotonTransportCut(const double cut) {gammaCut = cut;}
+    double GetPhotonTransportCut() const {return gammaCut;}
     
     // Set number of collisions to be skipped
     void SetCollisionSteps(const int n = 100);
@@ -55,6 +63,12 @@ class AvalancheMicroscopic {
     int GetNumberOfDriftLinePoints(const int i = 0) const;
     void GetDriftLinePoint(double& x, double& y, double& z, double &t,
                            const int ip, const int iel = 0) const;
+
+    int  GetNumberOfPhotons() const {return nPhotons;}
+    void GetPhoton(const int i, double& e,
+                   double& x0, double& y0, double& z0, double& t0,
+                   double& x1, double& y1, double& z1, double& t1,
+                   int& status) const;
 
     // Run an avalanche calculation for an electron with given
     // initial coordinates, energy and direction (random if not specified)
@@ -116,6 +130,19 @@ class AvalancheMicroscopic {
     std::vector<electron> stack;
     std::vector<electron> endpoints;
 
+    int nPhotons;
+    struct photon {
+      // Status
+      int status;
+      // Energy
+      double energy;
+      // Starting point
+      double x0, y0, z0, t0;
+      // End point
+      double x1, y1, z1, t1;
+    };
+    std::vector<photon> photons;
+
     // Number of electrons and ions produced
     int nElectrons;
     int nIons;
@@ -129,8 +156,12 @@ class AvalancheMicroscopic {
     char distanceOption;
     bool useSignal;
     bool useDriftLines;
+    bool usePhotons;
     
+    // Transport cuts
     double deltaCut;
+    double gammaCut;
+
     int nCollSkip;
     
     // User procedures
@@ -149,6 +180,10 @@ class AvalancheMicroscopic {
 
     // Switch on/off debugging and warning messages
     bool debug, warning;
+
+    // Photon transport
+    void TransportPhoton(const double x, const double y, const double z,
+                         const double t, const double e);
 
     double Min(const double x1, const double x2) const {
       return x1 > x2 ? x2 : x1;

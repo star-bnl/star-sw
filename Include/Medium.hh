@@ -90,13 +90,13 @@ class Medium {
     // Microscopic electron transport properties
     // Null-collision rate [ns-1]
     virtual 
-    double GetNullCollisionRate();
+    double GetElectronNullCollisionRate();
     // Collision rate [ns-1] for given electron energy
     virtual 
-    double GetCollisionRate(const double e);
+    double GetElectronCollisionRate(const double e);
     virtual 
-    bool GetCollision(const double e, int& type, int& level, double& s,
-                      double& ctheta, double& eloss, double& esec);
+    bool GetElectronCollision(const double e, int& type, int& level, double& e1,
+                      double& ctheta, double& s, double& esec);
     virtual 
     int GetNumberOfLevels();
 
@@ -151,7 +151,12 @@ class Medium {
     virtual 
     bool GetPhotoAbsorptionCrossSection(const double e, 
                                         double& sigma, const int i = 0);
-    
+    virtual
+    double GetPhotonCollisionRate(const double e);
+    virtual 
+    bool GetPhotonCollision(const double e, int& type, int& level, double& e1,
+                            double& ctheta, double& s, double& esec);
+
     // Plotting
     void PlotElectronVelocity(const double emin, const double emax);
     void PlotHoleVelocity(const double emin, const double emax);
@@ -162,21 +167,21 @@ class Medium {
     void PlotElectronTownsend(const double emin, const double emax);
     void PlotHoleTownsend(const double emin, const double emax);
     void PlotElectronHoleTownsend(const double emin, const double emax);
-    
+
     void PlotElectronAttachment(const double emin, const double emax);
     void PlotHoleAttachment(const double emin, const double emax);
     void PlotElectronHoleAttachment(const double emin, const double emax);
-        
+
     // Switch on/off debugging and warning messages
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
     void EnableWarnings()   {warning = true;}
     void DisableWarnings()  {warning = false;}
 
-  protected:  
-  
+  protected:
+
     static int idCounter;
-       
+
     // Id number
     int id;
     // Name
@@ -188,22 +193,22 @@ class Medium {
     // Static dielectric constant
     double epsilon;
     // Number of components
-    int nComponents;    
+    int nComponents;
     // (Effective) atomic number Z
     double atomicNumber;
     // Atomic weight A
     double atomicWeight;
     // Number density [cm-3]
     double density;
-  
+
     // Transport flags
     bool driftable, microscopic, ionisable;
     // Update flag
     bool isChanged;
-    
+
     // Switch on/off debugging and warning messages
-    bool debug, warning;    
-    
+    bool debug, warning;
+
     void PlotVelocityCommon(const double emin, const double emax);
     void PlotTownsendCommon(const double emin, const double emax);
     void PlotAttachmentCommon(const double emin, const double emax);
