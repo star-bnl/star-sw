@@ -16,8 +16,7 @@ extern "C" {
   extern struct {
     double eovb;
     double wb;
-    double btheta;
-    double bmag;
+    double btheta, bmag;
   } bfld_;
 
   extern struct {
@@ -38,8 +37,7 @@ extern "C" {
     double small;
     double api;
     double estart;
-    double theta;
-    double phi;
+    double theta, phi;
     double tcfmax[8];
     double rstart;
     double efield;
@@ -52,16 +50,30 @@ extern "C" {
     double amu;
     double pir2;
   } cnsts_;  
-   
+
+  // Gas mixture   
   extern struct {
     long long ngasn[6];
   } gasn_; 
-
   extern struct {
     double an1, an2, an3, an4, an5, an6, an;
     double frac[6];
-  } ratio_;   
-
+  } ratio_;
+   
+  // Output
+  extern struct {
+    double wx;
+    double wy;
+    double wz;
+  } vel_;  
+  extern struct {
+    double difxx, difyy, difzz;
+    double difyz, difxy, difxz;
+  } diflab_;
+  extern struct {
+    double difln;
+    double diftr;
+  } difvel_;
   extern struct {
     double alpha;
     double att;
@@ -161,7 +173,7 @@ class MediumMagboltz86 : public Medium {
                                                                    
   private:
 
-    static const int nEnergySteps = 4000;
+    static const int nEnergySteps = 20000;
     static const int nMaxGases = 6;
     static const int nMaxInelasticTerms = 220;
     static const int nMaxLevels = 512;

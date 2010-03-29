@@ -780,7 +780,8 @@ MediumSilicon::UpdateTransportParameters() {
         UpdateLatticeMobilitySah();
         break;     
       case 3:
-        UpdateLatticeMobilityReggiani(); 
+        UpdateLatticeMobilityReggiani();
+        break; 
       default:
         std::cerr << "MediumSilicon::UpdateTransportParameters:" 
                   << std::endl;
