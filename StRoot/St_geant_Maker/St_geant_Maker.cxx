@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.126 2010/02/22 15:02:18 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.127 2010/03/29 20:37:54 fine Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.127  2010/03/29 20:37:54  fine
+// RT #1890 Fix the geometry leak that entails the warning message
+//
 // Revision 1.126  2010/02/22 15:02:18  fisyak
 // Clean up, fix bug #1860 by replacing skip => trig
 //
@@ -626,21 +629,22 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
      ds = StMaker::FindDataSet(logInput,uppMk,dowMk); 
   } else {
      if (lookupHall) {
-        if (!fVolume) ((St_geant_Maker *)this)->Work();
-  
-        if (fVolume) {
-           ds = fVolume;
-           if (gGeometry) {
-              TList *listOfVolume = gGeometry->GetListOfNodes();
+        if (!fVolume) {
+           ((St_geant_Maker *)this)->Work();
+           if (fVolume) {
+              ds = fVolume;
+              if (gGeometry) {
+                 TList *listOfVolume = gGeometry->GetListOfNodes();
 
-              // Remove hall from the list of ROOT nodes to make it free of ROOT control
-              listOfVolume->Remove(fVolume);
-              listOfVolume->Remove(fVolume);
+                 // Remove hall from the list of ROOT nodes to make it free of ROOT control
+                 listOfVolume->Remove(fVolume);
+                 listOfVolume->Remove(fVolume);
+              }
+              // Add "hall" into ".const" area of this maker
+              ((St_geant_Maker *)this)->AddConst(fVolume);
+              if (Debug()) fVolume->ls(3);
            }
-            // Add "hall" into ".const" area of this maker
-            ((St_geant_Maker *)this)->AddConst(fVolume);
-            if (Debug()) fVolume->ls(3);
-        } 
+        }
     } else if (lookupGeoDir) {
         if (!fGeoDirectory) {
            TString file("pams/geometry");
