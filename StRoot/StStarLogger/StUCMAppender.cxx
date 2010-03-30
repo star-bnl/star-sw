@@ -149,6 +149,7 @@ void StUCMAppender::close()
    closeConnection();
 	this->closed = true;
 }
+#if 0
 //_________________________________________________________________________
 static void ReplaceVariable(TString &string, const char *var)
 {
@@ -173,6 +174,7 @@ static void ReplaceVariable(TString &string, const char *var)
       string.ReplaceAll(fullName,varValue);
    }
 }
+#endif
 //_________________________________________________________________________
 void StUCMAppender::flushBuffer()
 {
@@ -246,7 +248,7 @@ void StUCMAppender::flushBuffer()
           pair->Delete();
           delete pair;
       }
-      buffer.clear();
+      buffer.clear();        
    }
    closeConnection();
 }
