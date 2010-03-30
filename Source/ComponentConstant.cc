@@ -55,7 +55,7 @@ ComponentConstant::ElectricField(
            - (z - z0) * fz;
   } else {
     v = 0.;
-    if (warning) {
+    if (debug) {
       std::cerr << "ComponentConstant::ElectricField:" << std::endl;
       std::cerr << "    Potential is not defined." << std::endl;
     }
@@ -135,10 +135,8 @@ ComponentConstant::SetElectricField(
   fx = ex; fy = ey; fz = ez;
   if (fx * fx + fy * fy + fz * fz > Small) return;
   
-  if (warning) {
-    std::cerr << "ElectricFieldConstant::SetField:" << std::endl;
-    std::cerr << "    Electric field is zero." << std::endl;  
-  }
+  std::cerr << "ElectricFieldConstant::SetField:" << std::endl;
+  std::cerr << "    Electric field is set to zero." << std::endl;  
   ready = true;
   
 }
@@ -183,7 +181,7 @@ ComponentConstant::CheckSolidType(Solid* s) {
 void 
 ComponentConstant::CheckBoundaryConditionType(int& bctype, double& bcval) {
 
-  if (warning) {
+  if (debug) {
     std::cerr << "ComponentConstant::CheckBoundaryConditionType:" << std::endl;
     std::cerr << "    Boundary conditions are ignored." << std::endl;
   }
@@ -204,8 +202,8 @@ ComponentConstant::Reset() {
 
 void
 ComponentConstant::UpdatePeriodicity() {
-
-  if (warning) {
+  
+  if (debug) {
     std::cerr << "ComponentConstant::UpdatePeriodicity:" << std::endl;
     std::cerr << "    Periodicities are not supported." << std::endl;
   }

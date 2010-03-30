@@ -35,7 +35,7 @@ class FieldView {
   private:
   
     // Options
-    bool warning, debug;
+    bool debug;
     
     // Projection for viewing
     double project[3][3];

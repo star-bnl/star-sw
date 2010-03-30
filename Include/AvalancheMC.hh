@@ -69,11 +69,9 @@ class AvalancheMC {
     bool AvalancheElectronHole(const double x0, const double y0, const double z0, 
                                const double t0);
 
-    // Switch on/off debugging and warning messages
+    // Switch on/off debugging messages
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
-    void EnableWarnings()   {warning = true;}
-    void DisableWarnings()  {warning = false;}
 
   private:
 
@@ -117,7 +115,7 @@ class AvalancheMC {
     bool useIons;
     bool withElectrons;
     bool withHoles;
-    bool debug, warning;
+    bool debug;
     
     // Compute a drift line with starting point (x0, y0, z0)
     bool DriftLine(const double x0, const double y0, const double z0, const double t0, const int q);

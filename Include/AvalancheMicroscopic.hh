@@ -33,6 +33,9 @@ class AvalancheMicroscopic {
     void EnableDistanceHistogramming(TH1F* histo, const char opt = 'z');
     void DisableDistanceHistogramming();
 
+    void EnableSecondaryEnergyHistogramming(TH1F* histo);
+    void DisableSecondaryEnergyHistogramming();
+
     // Switch on/off storage of drift lines
     void EnableDriftLines() {useDriftLines = true;}
     void DisableDriftLines() {useDriftLines = false;}
@@ -92,11 +95,9 @@ class AvalancheMicroscopic {
                                            int type, int level, Medium* m));
     void UnsetUserHandleIonisation();
 
-    // Switch on/off debugging and warning messages
+    // Switch on/off debugging messages
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
-    void EnableWarnings()   {warning = true;}
-    void DisableWarnings()  {warning = false;}
 
   private:
 
@@ -154,6 +155,8 @@ class AvalancheMicroscopic {
     TH1F* histDistance;
     bool hasDistanceHistogram;
     char distanceOption;
+    TH1F* histSecondary;
+    bool hasSecondaryHistogram;
     bool useSignal;
     bool useDriftLines;
     bool usePhotons;
@@ -178,8 +181,8 @@ class AvalancheMicroscopic {
          (double x, double y, double z, double t, 
          int type, int level, Medium* m);
 
-    // Switch on/off debugging and warning messages
-    bool debug, warning;
+    // Switch on/off debugging messages
+    bool debug;
 
     // Photon transport
     void TransportPhoton(const double x, const double y, const double z,

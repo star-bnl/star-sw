@@ -136,6 +136,11 @@ class MediumMagboltz86 : public Medium {
     bool   SetMaxElectronEnergy(const double e);
     double GetMaxElectronEnergy() const {return eFinal;}
 
+    // Switch on/off automatic adjustment of max. energy when an
+    // energy exceeding the present range is requested
+    void EnableEnergyRangeAdjustment() {adjust = true;}
+    void DisableEnergyRangeAdjustment() {adjust = false;}
+
     // Switch on/off anisotropic scattering (enabled by default)
     void EnableAnisotropicScattering() {anisotropic = true;}
     void DisableAnisotropicScattering() {anisotropic = false;}
@@ -183,7 +188,8 @@ class MediumMagboltz86 : public Medium {
     double fraction[nMaxGases];
    
     // Energy spacing of collision rate tables
-    double eFinal, eStep; 
+    double eFinal, eStep;
+    bool adjust; 
   
     // Number of different cross-section types in the current gas mixture
     int nTerms;

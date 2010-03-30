@@ -16,7 +16,7 @@ Medium::Medium() :
   nComponents(1), atomicNumber(1.), atomicWeight(0.), density(0.),
   driftable(false), microscopic(false), ionisable(false),
   isChanged(true),
-  debug(false), warning(false) {
+  debug(false) {
   
 }
 
@@ -139,8 +139,7 @@ bool
 Medium::ElectronVelocity(const double ex, const double ey, const double ez, 
                          const double bx, const double by, const double bz, 
                          double& vx, double& vy, double& vz) {
-
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::ElectronVelocity:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -170,7 +169,7 @@ Medium::ElectronDiffusion(const double ex, const double ey, const double ez,
                           const double bx, const double by, const double bz,
                           double cov[3][3]) {
 
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::ElectronDiffusionTensor:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -186,7 +185,7 @@ Medium::ElectronTownsend(const double ex, const double ey, const double ez,
                          const double bx, const double by, const double bz,
                          double& alpha) {
 
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::ElectronTownsend:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -200,7 +199,7 @@ Medium::ElectronAttachment(const double ex, const double ey, const double ez,
                            const double bx, const double by, const double bz,
                            double& eta) {
 
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::ElectronAttachment:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -212,7 +211,7 @@ Medium::ElectronAttachment(const double ex, const double ey, const double ez,
 double 
 Medium::GetElectronNullCollisionRate() {
 
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::GetElectronNullCollisionRate:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -223,7 +222,7 @@ Medium::GetElectronNullCollisionRate() {
 double 
 Medium::GetElectronCollisionRate(const double e) {
 
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::GetElectronCollisionRate:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -235,7 +234,7 @@ bool
 Medium::GetElectronCollision(const double e, int& type, int& level,
                      double& e1, double& ctheta, double& s, double& esec) {
   
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::GetElectronCollision:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -246,7 +245,7 @@ Medium::GetElectronCollision(const double e, int& type, int& level,
 int 
 Medium::GetNumberOfLevels() {
 
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::GetNumberOfLevels:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -259,7 +258,7 @@ Medium::HoleVelocity(const double ex, const double ey, const double ez,
                      const double bx, const double by, const double bz, 
                      double& vx, double& vy, double& vz) {
             
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::HoleVelocity:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -289,7 +288,7 @@ Medium::HoleDiffusion(const double ex, const double ey, const double ez,
                       const double bx, const double by, const double bz,
                       double cov[3][3]) {
 
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::HoleDiffusionTensor:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -305,7 +304,7 @@ Medium::HoleTownsend(const double ex, const double ey, const double ez,
                      const double bx, const double by, const double bz,
                      double& alpha) {
 
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::HoleTownsend:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -319,7 +318,7 @@ Medium::HoleAttachment(const double ex, const double ey, const double ez,
                        const double bx, const double by, const double bz,
                        double& eta) {
             
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::HoleAttachment:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -333,7 +332,7 @@ Medium::IonVelocity(const double ex, const double ey, const double ez,
                     const double bx, const double by, const double bz, 
                     double& vx, double& vy, double& vz) {
 
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::IonVelocity:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -363,7 +362,7 @@ Medium::IonDissociation(const double ex, const double ey, const double ez,
                         const double bx, const double by, const double bz,
                         double& diss) {
 
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::IonDissociation:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -375,7 +374,7 @@ Medium::IonDissociation(const double ex, const double ey, const double ez,
 bool 
 Medium::GetOpticalDataRange(double& emin, double& emax, const int i) {
 
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::GetOpticalDataRange:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -387,7 +386,7 @@ bool
 Medium::GetDielectricFunction(const double e, 
                               double& eps1, double& eps2, const int i) {
 
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::GetDielectricFunction:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." << std::endl;
   }
@@ -400,7 +399,7 @@ bool
 Medium::GetPhotoAbsorptionCrossSection(const double e, 
                                        double& sigma, const int i) {
 
-  if (warning) {
+  if (debug) {
     std::cerr << "Medium::GetPhotoAbsorptionCrossSection:" << std::endl;
     std::cerr << "    " << name << ": Function is not implemented." 
               << std::endl;

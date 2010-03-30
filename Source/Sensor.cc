@@ -21,7 +21,7 @@ Sensor::Sensor() :
   hasUserArea(false),
   xMinUser(0.), yMinUser(0.), zMinUser(0.), 
   xMaxUser(0.), yMaxUser(0.), zMaxUser(0.),
-  debug(false), warning(false) {
+  debug(false) {
     
   components.clear();
   electrodes.clear();
@@ -309,6 +309,16 @@ Sensor::GetVoltageRange(double& vmin, double& vmax) {
   }
   
   return true;
+
+}
+
+void
+Sensor::ClearSignal() {
+
+  for (int i = nElectrodes; i--;) {
+    for (int j = nTimeBins; j--;) electrodes[i].signal[j] = 0.;
+  }
+  nEvents = 0;
 
 }
 

@@ -114,6 +114,8 @@ class ComponentFieldMap: public ComponentBase {
     bool deleteBackground;
     // Scan for multiple elements that contain a point
     bool checkMultipleElement;
+    // Warnings flag
+    bool warning;
 
     // Geometry checks
     bool CheckSolidType(Solid* s);

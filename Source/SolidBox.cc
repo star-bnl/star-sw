@@ -15,12 +15,10 @@ SolidBox::SolidBox(const double cx, const double cy, const double cz,
   cPhi(1.),   sPhi(0.),
   cTheta(1.), sTheta(0.) {
   
-  if (debug) {
-    std::cout << "SolidBox:" << std::endl;
-    std::cout << "    " << cx - lx << " < x < " << cx + lx << std::endl;
-    std::cout << "    " << cy - ly << " < y < " << cz + lz << std::endl;
-    std::cout << "    " << cy - ly << " < z < " << cz + lz << std::endl;
-  }
+  std::cout << "SolidBox:" << std::endl;
+  std::cout << "    " << cx - lx << " < x < " << cx + lx << std::endl;
+  std::cout << "    " << cy - ly << " < y < " << cz + lz << std::endl;
+  std::cout << "    " << cz - lz << " < z < " << cz + lz << std::endl;
   
 }
 
@@ -36,9 +34,7 @@ SolidBox::SolidBox(const double cx, const double cy, const double cz,
   
   const double d = sqrt(dx * dx + dy * dy + dz * dz);  
   if (d < Small) {
-    if (warning || debug) {
-      std::cerr << "SolidBox: Direction vector is not defined." << std::endl;
-    }
+    std::cerr << "SolidBox: Direction vector is not defined." << std::endl;
   } else {
     dX = dx / Small; dY = dy / Small; dZ = dz / Small;
     double phi, theta;
@@ -101,6 +97,32 @@ SolidBox::GetBoundingBox(double& xmin, double& ymin, double& zmin,
   ymin = cY - lY; ymax = cY + lY;
   zmin = cZ - lZ; zmax = cZ + lZ;
   return true;
+
+}
+
+bool
+SolidBox::GetCenter(double& x, double& y, double& z) {
+
+  x = cX; y = cY; z = cZ;
+  return true;
+  
+}
+
+bool
+SolidBox::GetDimensions(double& l1, double& l2, double& l3) {
+
+  l1 = lX; l2 = lY; l3 = lZ;
+  return true;
+
+}
+
+bool
+SolidBox::GetDirection(double& x, double& y, double& z) {
+
+ x = sTheta * cPhi;
+ y = sTheta * sPhi;
+ z = cTheta;
+ return true;
 
 }
 

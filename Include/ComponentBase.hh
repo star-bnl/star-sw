@@ -105,10 +105,8 @@ class ComponentBase {
     void ZRotationSymmetry() {zRotationSymmetry = true; UpdatePeriodicity();}
 
     // Switch on/off debugging and warning messages
-    void EnableDebugging();
-    void DisableDebugging();
-    void EnableWarnings();
-    void DisableWarnings();
+    void EnableDebugging()  {debug = true;}
+    void DisableDebugging() {debug = false;}
 
   protected:
     
@@ -149,8 +147,8 @@ class ComponentBase {
     // Constant magnetic field
     double bx0, by0, bz0;
     
-    // Switch on/off debugging and warning messages
-    bool debug, warning;  
+    // Switch on/off debugging messages
+    bool debug;  
     
     // Geometry checks
     virtual bool CheckSolidType(Solid* s) = 0;

@@ -22,6 +22,11 @@ class SolidBox : public Solid {
     bool IsInside(const double x, const double y, const double z);
     bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
                         double& xmax, double& ymax, double& zmax);
+    bool IsBox() {return true;}
+
+    bool GetCenter(double& x, double& y, double& z);
+    bool GetDimensions(double& l1, double& l2, double& l3);
+    bool GetDirection(double& x, double& y, double& z);
     
     
   private:

@@ -15,7 +15,7 @@ class PlottingEngine {
     PlottingEngine() : xMin(0.), xMax(1.), yMin(0.), yMax(1.),
       xLabel("x"), yLabel("y"), title(""),
       color1("orange"), color2("dark-green"), 
-      debug(false), warning(false) {}
+      debug(false) {}
 
     // Destructor
     virtual ~PlottingEngine() {}
@@ -51,11 +51,9 @@ class PlottingEngine {
     virtual 
     void PlotSignal(Sensor* s, const std::string label) = 0;
 
-    // Switch on/off debugging and warning messages
+    // Switch on/off debugging messages
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
-    void EnableWarnings()  {warning = true;}
-    void DisableWarnings() {warning = false;}
 
   protected:
     double xMin, xMax;
@@ -65,7 +63,7 @@ class PlottingEngine {
     std::string title;    
     std::string color1, color2;
     
-    bool debug, warning;
+    bool debug;
 
 };
 

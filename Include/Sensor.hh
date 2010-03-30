@@ -57,6 +57,7 @@ class Sensor {
     bool GetVoltageRange(double& vmin, double& vmax);
 
     void NewSignal() {++nEvents;}
+    void ClearSignal();
     void AddSignal(const int q, const double t, const double dt,
                    const double x,  const double y,  const double z,
                    const double vx, const double vy, const double vz);
@@ -68,11 +69,9 @@ class Sensor {
     double GetSignal(const std::string label, const int bin);
     void PlotSignal(const std::string label);
 
-    // Switch on/off debugging and warning messages
+    // Switch on/off debugging messages
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}    
-    void EnableWarnings()   {warning = true;}
-    void DisableWarnings()  {warning = false;}
 
   private:
 
@@ -107,8 +106,8 @@ class Sensor {
     double xMinUser, yMinUser, zMinUser;
     double xMaxUser, yMaxUser, zMaxUser;
 
-    // Switch on/off debugging and warning messages
-    bool debug, warning;
+    // Switch on/off debugging messages
+    bool debug;
 
     // Return the current sensor size
     bool GetBoundingBox(double& xmin, double& ymin, double& zmin,

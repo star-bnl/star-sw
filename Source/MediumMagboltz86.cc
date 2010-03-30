@@ -11,7 +11,7 @@ namespace Garfield {
 
 MediumMagboltz86::MediumMagboltz86() :
   Medium(), 
-  eFinal(40.), eStep(eFinal / nEnergySteps), 
+  eFinal(40.), eStep(eFinal / nEnergySteps), adjust(true), 
   nTerms(0), anisotropic(true), deexcitation(false) {
   
   // Set physical constants in Magboltz common blocks
@@ -218,7 +218,7 @@ MediumMagboltz86::GetElectronCollisionRate(const double e) {
               << std::endl;
     return cfTot[0];
   }
-  if (e > eFinal) {    
+  if (e > eFinal && adjust) {    
     std::cerr << "MediumMagboltz86::GetElectronCollisionRate:" << std::endl;
     std::cerr << "    Collision rate at " << e 
               << " eV is not included in the current table." << std::endl;
@@ -235,7 +235,8 @@ MediumMagboltz86::GetElectronCollisionRate(const double e) {
     }
     isChanged = false;
   }
-  
+
+  if (e > eFinal) return cfTot[nEnergySteps - 1];  
   return cfTot[int(e / eStep)];
 
 }
@@ -244,7 +245,7 @@ bool
 MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level, 
                 double& e1, double& ctheta, double& s, double& esec) {
 
-  if (e > eFinal) {
+  if (e > eFinal && adjust) {
     std::cerr << "MediumMagboltz86::GetElectronCollision:" << std::endl;
     std::cerr << "    Provided electron energy  (" << e 
               << " eV) exceeds current energy range  (" << eFinal 
@@ -268,8 +269,8 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
   }
 
   // Energy interval
-  const int iE = int(e / eStep);
-
+  const int iE = e < eFinal ? int(e / eStep) : nEnergySteps - 1;
+  
   double r = RndmUniform();
   int iLow = 0;
   int iUp  = nTerms - 1;  
@@ -959,7 +960,11 @@ MediumMagboltz86::Mixer() {
     std::cout << "    between 0 and " << eFinal << " eV." << std::endl;
   }
   nTerms = 0;
-  // std::ofstream outfile("csCH4.txt", std::ios::out);
+  
+  std::ofstream outfile;
+  if (debug) outfile.open("cs.txt", std::ios::out);
+  outfile << "# " << std::endl;
+
   // Loop over the gases in the mixture.  
   for (int iGas = 0; iGas < nComponents; ++iGas) {
     // Retrieve the gas cross-section data from Magboltz.
@@ -1046,8 +1051,11 @@ MediumMagboltz86::Mixer() {
     nTerms += nIn;
     // Loop over the energy table
     for (int iE = 0; iE < nEnergySteps; ++iE) {
-      np = np0;      
-      // outfile << iE * eStep << "  " << q[iE][1] << "  " << q[iE][2] << "  " << q[iE][3] << "  ";
+      np = np0;
+      if (debug) {
+        outfile << iE * eStep << "  " << q[iE][1] << "  " << q[iE][2] 
+                << "  " << q[iE][3] << "  ";
+      }
       // Elastic scattering
       cf[iE][np] = q[iE][1] * van;
       if (scatModel[np] == 1) {
@@ -1074,7 +1082,7 @@ MediumMagboltz86::Mixer() {
       // Inelastic terms
       for (int j = 0; j < nIn; ++j) {
         ++np;
-        // outfile << qIn[iE][j] << "  ";
+        if (debug) outfile << qIn[iE][j] << "  ";
         cf[iE][np] = qIn[iE][j] * van;
         if (cf[iE][np] < 0.) {
           std::cerr << "MediumMagboltz86::Mixer:" << std::endl;
@@ -1090,10 +1098,10 @@ MediumMagboltz86::Mixer() {
           scatParameter[iE][np] = pEqIn[iE][j];
         }
       }
-      // outfile << std::endl;
+      if (debug) outfile << std::endl;
     }
   }
-  // outfile.close();
+  if (debug) outfile.close();
 
   for (int iE = nEnergySteps; iE--;) {
     // Calculate the total collision frequency

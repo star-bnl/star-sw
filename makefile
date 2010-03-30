@@ -19,6 +19,7 @@ OBJS = \
 	$(OBJECT)/ComponentAnsys121.o \
 	$(OBJECT)/ComponentAnsys123.o \
 	$(OBJECT)/ComponentTcad2d.o \
+	$(OBJECT)/ComponentNeBem2d.o \
 	$(OBJECT)/FieldView.o \
 	$(OBJECT)/Input.o \
 	$(OBJECT)/Medium.o \
@@ -45,6 +46,8 @@ $(OBJECT)/ComponentBase.o: $(SOURCE)/ComponentBase.cc $(INCLUDE)/ComponentBase.h
 $(OBJECT)/ComponentConstant.o: $(SOURCE)/ComponentConstant.cc $(INCLUDE)/ComponentConstant.hh $(INCLUDE)/ComponentBase.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/ComponentUser.o: $(SOURCE)/ComponentUser.cc $(INCLUDE)/ComponentUser.hh $(INCLUDE)/ComponentBase.hh
+	$(CC) $(CFLAGS) $< -o $@       
+$(OBJECT)/ComponentNeBem2d.o: $(SOURCE)/ComponentNeBem2d.cc $(INCLUDE)/ComponentNeBem2d.hh $(INCLUDE)/ComponentBase.hh
 	$(CC) $(CFLAGS) $< -o $@        
 $(OBJECT)/ComponentFieldMap.o: $(SOURCE)/ComponentFieldMap.cc $(INCLUDE)/ComponentFieldMap.hh $(INCLUDE)/ComponentBase.hh
 	$(CC) $(CFLAGS) $< -o $@

@@ -167,7 +167,7 @@ ComponentUser::CheckSolidType(Solid* s) {
 void 
 ComponentUser::CheckBoundaryConditionType(int& bctype, double& bcval) {
 
-  if (warning) {
+  if (debug) {
     std::cerr << "ComponentUser::CheckBoundaryConditionType:" << std::endl;
     std::cerr << "    Boundary conditions are ignored." << std::endl;
   }
@@ -191,10 +191,8 @@ ComponentUser::Reset() {
 void
 ComponentUser::UpdatePeriodicity() {
 
-  if (warning) {
-    std::cerr << "ComponentUser::UpdatePeriodicity:" << std::endl;
-    std::cerr << "    Periodicities are not supported." << std::endl;
-  }
+  std::cerr << "ComponentUser::UpdatePeriodicity:" << std::endl;
+  std::cerr << "    Periodicities are not supported." << std::endl;
 
 }
 

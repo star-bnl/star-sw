@@ -17,6 +17,7 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   nPhotons(0), nElectrons(0), nIons(0),  
   histEnergy(0), hasEnergyHistogram(false),
   histDistance(0), hasDistanceHistogram(false), distanceOption('z'),
+  histSecondary(0), hasSecondaryHistogram(false),
   useSignal(false), useDriftLines(false), usePhotons(false),
   deltaCut(0.), gammaCut(0.),
   nCollSkip(100),
@@ -25,7 +26,7 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   hasUserHandleIonisation(false),
   userHandleAttachment(0), userHandleInelastic(0),
   userHandleIonisation(0),
-  debug(false), warning(false) {
+  debug(false) {
 
 }
 
@@ -91,6 +92,28 @@ void
 AvalancheMicroscopic::DisableDistanceHistogramming() {
 
   hasDistanceHistogram = false;
+  
+}
+
+void 
+AvalancheMicroscopic::EnableSecondaryEnergyHistogramming(TH1F* histo) {
+
+  if (histo == 0) {
+    std::cerr << "AvalancheMicroscopic::EnableSecondaryEnergyHistogramming:" 
+              << std::endl;
+    std::cerr << "    Histogram is not defined." << std::endl;
+    return;
+  }
+  
+  histSecondary = histo;
+  hasSecondaryHistogram = true;
+  
+}
+
+void 
+AvalancheMicroscopic::DisableSecondaryEnergyHistogramming() {
+
+  hasSecondaryHistogram = false;
   
 }
 
@@ -548,8 +571,9 @@ AvalancheMicroscopic::AvalancheElectron(
                   histDistance->Fill(sqrt(rion));
                   break;
               }
-              stack[iEl].xLast = x; stack[iEl].yLast = y; stack[iEl].zLast = z;              
-            }                          
+              stack[iEl].xLast = x; stack[iEl].yLast = y; stack[iEl].zLast = z;  
+            }
+            if (hasSecondaryHistogram) histSecondary->Fill(esec);
             // Randomise secondary electron direction
             phi = TwoPi * RndmUniform();
             double ctheta0 = 1. - 2. * RndmUniform();

@@ -12,7 +12,7 @@ ComponentBase::ComponentBase() :
   xAxiallyPeriodic(false),  yAxiallyPeriodic(false),  zAxiallyPeriodic(false),
   xRotationSymmetry(false), yRotationSymmetry(false), zRotationSymmetry(false),
   bx0(0.), by0(0.), bz0(0.),
-  debug(false), warning(false) {
+  debug(false) {
 
   media.clear();
   solids.clear();
@@ -206,34 +206,6 @@ ComponentBase::IsInBoundingBox(const double x, const double y, const double z) {
       z >= zMinBoundingBox && z <= zMaxBoundingBox) return true;
   return false;
 
-}
-
-void 
-ComponentBase::EnableDebugging() {
-
-  debug = true;
-  
-}
-
-void 
-ComponentBase::DisableDebugging() {
-
-  debug = false;
-  
-}
-
-void 
-ComponentBase::EnableWarnings() {
-
-  warning = true;
-  
-}
-
-void 
-ComponentBase::DisableWarnings() {
-
-  warning = false;
-  
 }
 
 }

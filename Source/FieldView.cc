@@ -48,7 +48,7 @@ namespace sharesensor {
 }
 
 FieldView::FieldView(Sensor* s):
-  warning(false), debug(false),
+  debug(false),
   nContours(20),
   fcont(0) {
   

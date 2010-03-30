@@ -172,11 +172,9 @@ class Medium {
     void PlotHoleAttachment(const double emin, const double emax);
     void PlotElectronHoleAttachment(const double emin, const double emax);
 
-    // Switch on/off debugging and warning messages
+    // Switch on/off debugging  messages
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
-    void EnableWarnings()   {warning = true;}
-    void DisableWarnings()  {warning = false;}
 
   protected:
 
@@ -206,8 +204,8 @@ class Medium {
     // Update flag
     bool isChanged;
 
-    // Switch on/off debugging and warning messages
-    bool debug, warning;
+    // Switch on/off debugging messages
+    bool debug;
 
     void PlotVelocityCommon(const double emin, const double emax);
     void PlotTownsendCommon(const double emin, const double emax);

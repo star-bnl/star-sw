@@ -18,7 +18,7 @@ AvalancheMC::AvalancheMC() :
   useSignal(false), useEquilibration(true), 
   useDiffusion(true), useIons(true), 
   withElectrons(true), withHoles(true),
-  debug(false), warning(false) {
+  debug(false) {
    
 }
 
@@ -727,12 +727,10 @@ AvalancheMC::ComputeAlphaEta(const int q) {
       }
       // See whether we succeeded
       if (!done) {
-        if (warning) {
-          std::cerr << "AvalancheMC::ComputeAlphaEta:" << std::endl;
-          std::cerr << "    Unable to even out backwards alpha steps." << std::endl;
-          std::cerr << "    Avalanche calculation is probably inaccurate." 
-                    << std::endl;
-        }
+        std::cerr << "AvalancheMC::ComputeAlphaEta:" << std::endl;
+        std::cerr << "    Unable to even out backwards alpha steps." << std::endl;
+        std::cerr << "    Avalanche calculation is probably inaccurate." 
+                  << std::endl;
         return false;
       }
     }
@@ -810,12 +808,10 @@ AvalancheMC::ComputeAlphaEta(const int q) {
         }
       }
       if (!done) {
-        if (warning) {
-          std::cerr << "AvalancheMC::ComputeAlphaEta:" << std::endl;
-          std::cerr << "    Unable to even out backwards eta steps." << std::endl;
-          std::cerr << "    Avalanche calculation is probably inaccurate." 
-                    << std::endl;
-        }
+        std::cerr << "AvalancheMC::ComputeAlphaEta:" << std::endl;
+        std::cerr << "    Unable to even out backwards eta steps." << std::endl;
+        std::cerr << "    Avalanche calculation is probably inaccurate." 
+                  << std::endl;
         return false;
       }
     }
