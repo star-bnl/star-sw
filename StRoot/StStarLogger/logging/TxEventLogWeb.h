@@ -2,7 +2,7 @@
  * @file TxEventLogWeb.h
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogWeb.h,v 1.1 2009/06/17 22:12:00 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogWeb.h,v 1.2 2010/03/30 20:05:37 fine Exp $
  *
  * TxEventLogWeb provides an interface for applications so that they can send
  * event across of the Web into a CEDPS formated messages.
@@ -39,6 +39,32 @@ namespace TxLogging {
      *
      */
     virtual ~TxEventLogWeb (){}
+	// --- 
+      virtual  StUcmTasks  *getTaskList ();
+      virtual  StUcmTasks  *getTaskList (int limit);
+      virtual  StUcmTasks  *getTaskList (int limit, int offset); 
+ 
+      virtual  StUcmJobs   *getJobList();
+      virtual  StUcmJobs   *getJobList(StRecord *task);
+      virtual  StUcmJobs   *getJobList(StRecord *task, int limit);
+      virtual  StUcmJobs   *getJobList(int limit);
+      virtual  StUcmJobs   *getJobList(int limit, int offset);
+      virtual  StUcmJobs   *getJobList(StRecord *task, int limit, int offset);
+
+      virtual  StUcmEvents *getEventList();
+      virtual  StUcmEvents *getEventList(StRecord *job);
+      virtual  StUcmEvents *getEventList(StRecord *job,int limit);
+      virtual  StUcmEvents *getEventList(int limit);
+      virtual  StUcmEvents *getEventList(int limit, int offset);
+      virtual  StUcmEvents *getEventList(StRecord *job,int limit, int offset);
+	
+ 	 virtual  void setDbJobID (int bJobID);
+
+    virtual  int  queryTableSize(const char *tableName);
+    virtual  int  queryTableSize(const char *tableName, const char *where);
+    virtual  int  queryTableSize(const char *tableName, const StRecord   *where);
+
+	
   };
 }
 #endif

@@ -12,7 +12,7 @@
  * This file is part of the UCM project funded under an SBIR
  * Copyright (c) 2007-2008 STAR Collaboration - Brookhaven National Laboratory
  *
- * @(#)cpp/api:$Id: StRecord.cxx,v 1.1 2010/01/29 00:08:38 fine Exp $
+ * @(#)cpp/api:$Id: StRecord.cxx,v 1.2 2010/03/30 20:05:36 fine Exp $
  *
  *
  *
@@ -32,39 +32,39 @@
  */
  
 #include <string>
+#include <iostream>
 
 #include "StDbFieldI.h"
 #include "StRecord.h"
 #include "StDataException.h"
 
+using namespace TxLogging;
 using namespace std;
+//________________________________________________________________________
+StRecord::StRecord() : fFields() 
+{
+}
 
 //________________________________________________________________________
-StRecord::StRecord(const FieldList &fields) 
-  : fFields(NULL) {
+StRecord::StRecord(const FieldList &fields) : fFields(fields) {
   // If the length is 0, the record is already in
   // an unusable state so throwing an exception is kosher.
   if ( fields.empty() ) {
     throw StDataException("Attempted to create an empty record",
 			  StDataException::RECORD);
   }
-
   // TODO: Deep copy?
-  fFields = fields;
 }
 
 
 //________________________________________________________________________
-StRecord::StRecord(const StRecord &r) 
-  : fFields(NULL) {
+StRecord::StRecord(const StRecord &r) : fFields() {
   copy(r);
 }
 
 //________________________________________________________________________
-
 StRecord::~StRecord() {
-  if (!fFields.empty()) {
-  }
+  if (!fFields.empty()) { }
 }
 
 
@@ -121,6 +121,11 @@ const FieldList& StRecord::getFields() const {
 }
 
 //________________________________________________________________________
+FieldList& StRecord::getFields() {
+   return fFields;
+}
+
+//________________________________________________________________________
 StDbFieldI* StRecord::getField(const char *name) const 
 {
   StDbFieldI* field = 0;
@@ -140,7 +145,12 @@ StDbFieldI* StRecord::getField(unsigned int col) const
       ( col > 0 && col <= fFields.size() ) ? fFields[col-1] : 0;
 }
 //________________________________________________________________________
-const std::vector<StRecord*> &StRecord::getRecords() const{
+const RecordList &StRecord::getRecords() const{
+   return fRecords; 
+}
+
+//________________________________________________________________________
+RecordList &StRecord::getRecords() {
    return fRecords; 
 }
 
@@ -158,16 +168,40 @@ void StRecord::removeField(const char *name) {
 
 
 //________________________________________________________________________
-void StRecord::removeField(int col) {
+void StRecord::removeField(int col) 
+{
   int i;
   FieldList::iterator iter;
 
-  for (iter = fFields.begin(), i=0;
-       iter != fFields.end();
-       i++, iter++) {
-    if (i = col) {
+  for (iter = fFields.begin(), i=0; iter != fFields.end(); i++, iter++) 
+  {
+    if ( i == col ) {
       fFields.erase(iter);
       break;
     }
   }
+}
+
+//________________________________________________________________________
+void StRecord::printHeader() const
+{
+   FieldList::const_iterator it = fFields.begin();
+   for (; it != fFields.end(); ++it) {
+     cout << (*it)->getName() << " | " ;
+   }
+   cout << endl;
+   for (; it != fFields.end(); ++it) {
+     cout << (*it)->getTypeAsString() << " | " ;
+   }
+   cout << endl;
+}
+
+//________________________________________________________________________
+void StRecord::print() const
+{
+   FieldList::const_iterator it = fFields.begin();
+   for (; it != fFields.end(); ++it) {
+     cout << (*it)->getValueAsString() << " | " ;
+   }
+   cout << endl;
 }

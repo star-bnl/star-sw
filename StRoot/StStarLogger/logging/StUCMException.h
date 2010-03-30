@@ -2,7 +2,7 @@
  * @file StUCMException.h
  * @author Stephen Tramer
  *
- * @(#)cpp/api:$Id: StUCMException.h,v 1.1 2010/01/26 23:43:45 fine Exp $
+ * @(#)cpp/api:$Id: StUCMException.h,v 1.2 2010/03/30 20:05:36 fine Exp $
  *
  * StUCMException is the generic exception thrown by UCM; it serves
  * as the base class for the more specific TxDataException and TxModuleException

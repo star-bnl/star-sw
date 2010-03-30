@@ -2,7 +2,7 @@
  * @file TxEventLog.h
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLog.h,v 1.2 2009/07/27 21:10:55 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLog.h,v 1.3 2010/03/30 20:05:37 fine Exp $
  *
  * TxEventLog provides an interface for applications so that they can write
  * event information into a CEDPS formated file.
@@ -16,6 +16,10 @@
 #include "TxUCMConstants.h"
 
 namespace TxLogging {
+class StUcmTasks;
+class StUcmJobs;
+class StUcmEvents;
+class StRecord;
 
     /**
      * TxEventLog is an abstarct inteface to the logginh system
@@ -242,6 +246,84 @@ public:
     virtual void logEnd (const std::string& key, const std::string& value)=0;
     void logEnd (const char *key   = TxUCMConstants::appEnd,
 		 const char *value = "application ended");
+//_______________________
+//    
+      virtual  StUcmTasks  *getTaskList ();
+      virtual  StUcmTasks  *getTaskList (int limit);
+      virtual  StUcmTasks  *getTaskList (int limit, int offset) = 0; 
+	  
+      virtual  StUcmJobs   *getJobList();
+      virtual  StUcmJobs   *getJobList(StRecord *task);
+      virtual  StUcmJobs   *getJobList(StRecord *task, int limit);
+      virtual  StUcmJobs   *getJobList(int limit);
+      virtual  StUcmJobs   *getJobList(int limit, int offset);
+      virtual  StUcmJobs   *getJobList(StRecord *task, int limit, int offset)=0;
+
+      virtual  StUcmEvents *getEventList();
+      virtual  StUcmEvents *getEventList(StRecord *job);
+      virtual  StUcmEvents *getEventList(StRecord *job,int limit);
+      virtual  StUcmEvents *getEventList(int limit);
+      virtual  StUcmEvents *getEventList(int limit, int offset);
+      virtual  StUcmEvents *getEventList(StRecord *job,int limit, int offset)=0;
+
+      virtual  int  queryTableSize(const char *tableName);
+      virtual  int  queryTableSize(const char *tableName, const char *where)=0;
+      virtual  int  queryTableSize(const char *tableName, const StRecord   *where)=0;
+
+    /* The current Db if for the last selected job
+     *       
+     * @param int dbJobID, value of Job ID
+     *
+     */
+     virtual void setDbJobID (int dbJobID)=0;
   };
 }
+#ifndef TXEVENT_DEFAULT_IMPLEMENTAION
+#define TXEVENT_DEFAULT_IMPLEMENTAION(classname)       \
+ StUcmTasks  *classname::getTaskList ()                \
+ { return TxEventLog::getTaskList() ; }                \
+ StUcmTasks  *classname::getTaskList (int limit)       \
+ { return TxEventLog::getTaskList(limit); }            \
+ StUcmJobs  *classname::getJobList ()                  \
+ { return TxEventLog::getJobList() ; }                 \
+ StUcmJobs  *classname::getJobList (StRecord *task)    \
+ { return TxEventLog::getJobList(task) ; }             \
+ StUcmJobs  *classname::getJobList (int limit)         \
+ { return TxEventLog::getJobList(limit); }             \
+ StUcmJobs  *classname::getJobList (StRecord *task,int limit) \
+ { return TxEventLog::getJobList(task,limit); }        \
+ StUcmJobs  *classname::getJobList (int limit,int offset)     \
+ { return TxEventLog::getJobList(limit,offset); }    \
+ StUcmEvents  *classname::getEventList ()              \
+ { return TxEventLog::getEventList() ; }               \
+ StUcmEvents  *classname::getEventList (StRecord *job) \
+ { return TxEventLog::getEventList(job) ; }            \
+ StUcmEvents  *classname::getEventList (int limit)     \
+ { return TxEventLog::getEventList(limit); }           \
+ StUcmEvents  *classname::getEventList (StRecord *job,int limit) \
+ { return TxEventLog::getEventList(job,limit); }       \
+ StUcmEvents  *classname::getEventList (int limit,int offset)    \
+ { return TxEventLog::getEventList(limit,offset); }    \
+ int classname::queryTableSize (const char *table_name)\
+ { return TxEventLog::queryTableSize(table_name); } 
+
+#define TXEVENT_DEFAULT_IMPLEMENTAION_2(classname)            \
+ StUcmTasks  *classname::getTaskList (int limit, int offset)  \
+ {  assert(0 && "getTaskList has not been implemented yet");  \
+    return 0; }                                               \
+ StUcmJobs  *classname::getJobList (StRecord *task,int limit, int offset)                 \
+ { assert(0 && task && limit && offset &&  "getJobList has not been implemented yet");    \
+    return 0; }                                               \
+ StUcmEvents  *classname::getEventList (StRecord *job,int limit, int offset)              \
+ { assert(0 && job && limit && offset&& "getEventList has not been implemented yet");     \
+    return 0; }                                               \
+ int classname::queryTableSize (const char *table_name, const char *where)                \
+ { assert(0 && table_name && where && "queryTableSize has not been implemented yet");     \
+   return 0; }                                                \
+ int classname::queryTableSize (const char *table_name, const StRecord *where)            \
+ { assert(0 && table_name && where && "queryTableSize has not been implemented yet");     \
+   return 0; }                                                \
+ void classname::setDbJobID (int bJobID)                      \
+ { assert(0 && bJobID && "setDbJobID has not been implemented yet"); }
+#endif
 #endif

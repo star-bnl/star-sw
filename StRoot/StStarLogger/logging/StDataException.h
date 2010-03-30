@@ -2,7 +2,7 @@
  * @file StDataException.h
  * @author Stephen Tramer
  *
- * @(#)cpp/api:$Id: StDataException.h,v 1.1 2010/01/26 23:43:44 fine Exp $
+ * @(#)cpp/api:$Id: StDataException.h,v 1.2 2010/03/30 20:05:36 fine Exp $
  *
  * StDataException is the most generic exception class thrown by the base
  * part of the data tier (and is so named because the base part of the library

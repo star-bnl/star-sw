@@ -8,20 +8,31 @@ EXE   =
 SOEXT = so
 endif
 
-# CC  = gcc
-CC  = g++
-CXX = g++
-LD  = g++
+X86_DIR = X86
+X86_64_DIR = X86_64
+OPTSTAR_64 = /opt/star/sl53_x8664_gcc432
+
+CC  = g++ -fPIC 
+CXX = g++ -fPIC 
+LD  = g++ 
+
+#CC  = g++ -fPIC 
+#CXX = g++ -fPIC 
+#LD  = g++ 
+STAR_USM_BASE_DIR = StRoot/logging
 
 # Standard definitions
-INCDIRS   = . StRoot/StStarLogger/logging $(OPTSTAR)/include $(OPTSTAR)/include/mysql
+INCDIRS   = . $(STAR_USM_BASE_DIR)          \
+              $(STAR)/StRoot                \
+              $(OPTSTAR)/include            \
+              $(OPTSTAR)/include/mysql
 
 CFLAGS    = -Wall -c  $(INCDIRS:%=-I%) 
 CXXFLAGS  = $(CFLAGS)
 # EASYFLAGS = -c  $(INCDIRS:%=-I%) 
 LDFLAGS   = -o
 SOFLAGS   = -shared -Wl,-Bdynamic -o
-
+DISTTAR   =  ucmdist.tar.gz
 # Because it is not defined in my PATH, I need to define by hand
 ifeq ($(OS),Windows_NT)
 JAVAC= /cygdrive/c/Program\ Files/Java/jdk1.5/jdk/bin/javac.exe
@@ -41,8 +52,6 @@ UCMINC = $(STAR_USM_MODULE_DIR)/TxEventLog.h
 
 PERL_INC = $(shell ./perllink.pl)
 PERL_LDL = $(shell ./perllink.pl LD)
-
-STAR_USM_BASE_DIR = StRoot/StStarLogger/logging
 # targets and sources
 
 # $(MYMOD).cxx
@@ -50,30 +59,59 @@ STAR_USM_BASE_DIR = StRoot/StStarLogger/logging
 
 SRCCPPS +=TxEventLogCollector.cpp  \
           TxEventLog.cpp           \
-          TxEventLogFactory.cxx    \
           TxEventLogFile.cpp       \
           TxEventLogWeb.cpp        \
+          StRecord.cxx             \
+          StDbFieldI.cxx           \
+          TxEventLogFactory.cxx    \
+          FieldList.cxx            \
+          RecordList.cxx           \
+          StDataException.cxx      \
+          StDbFieldIIterator.cxx   \
+          StRecordIterator.cxx     \
+          StUcmEvent.cxx           \
+          StUcmEvents.cxx          \
+          StUCMException.cxx       \
+          StUcmJob.cxx             \
+          StUcmJobs.cxx            \
+          StUcmTask.cxx            \
+          StUcmTasks.cxx           \
           TxUCMCollector.cxx
-          
-SRCS += $(SRCCPPS:%=$(STAR_USM_BASE_DIR)/%)
 
-INCS = $(STAR_USM_BASE_DIR)/TxEventLogCollector.h      \
-       $(STAR_USM_BASE_DIR)/TxEventLogFactory.h        \
-       $(STAR_USM_BASE_DIR)/TxEventLogFile.h           \
-       $(STAR_USM_BASE_DIR)/TxEventLog.h               \
-       $(STAR_USM_BASE_DIR)/TxEventLogWeb.h            \
-       $(STAR_USM_BASE_DIR)/TxUCMCollector.h           \
-       $(STAR_USM_BASE_DIR)/TxUCMConstants.h           \
-       $(STAR_USM_BASE_DIR)/TxUCMUtils.h
+
+SRCS += $(SRCCPPS:%=$(STAR_USM_BASE_DIR)/%)
 
 INCSI = $(STAR_USM_BASE_DIR)/TxEventLogFactory.h       \
         $(STAR_USM_BASE_DIR)/TxEventLog.h              \
+        $(STAR_USM_BASE_DIR)/StRecord.h                \
+        $(STAR_USM_BASE_DIR)/StDbFieldI.h              \
+        $(STAR_USM_BASE_DIR)/RecordList.h              \
+        $(STAR_USM_BASE_DIR)/StUcmJobs.h               \
+        $(STAR_USM_BASE_DIR)/StUcmTasks.h              \
+        $(STAR_USM_BASE_DIR)/StUcmEvents.h             \
+        $(STAR_USM_BASE_DIR)/StRecordIterator.h        \
         $(STAR_USM_BASE_DIR)/TxUCMConstants.h
+        
+INCS = $(STAR_USM_BASE_DIR)/TxEventLogCollector.h      \
+       $(STAR_USM_BASE_DIR)/TxEventLogFile.h           \
+       $(STAR_USM_BASE_DIR)/TxEventLogWeb.h            \
+       $(STAR_USM_BASE_DIR)/TxUCMCollector.h           \
+       $(STAR_USM_BASE_DIR)/StDbFieldIIterator.h       \
+       $(STAR_USM_BASE_DIR)/TxUCMCollector.h           \
+       $(STAR_USM_BASE_DIR)/TxUCMUtils.h               \
+       $(STAR_USM_BASE_DIR)/FieldList.h                \
+       $(STAR_USM_BASE_DIR)/StUcmJob.h                \
+       $(STAR_USM_BASE_DIR)/StUcmTask.h               \
+       $(STAR_USM_BASE_DIR)/StUcmEvent.h              \
+       $(INCSI)
 
 SWIGI = $(STAR_USM_BASE_DIR)/$(MYMOD).i
 
-OBJS  = $(filter-out %.cxx,$(SRCS:%.cpp=%.o))
-OBJS += $(filter-out %.cpp,$(SRCS:%.cxx=%.o))
+OBJSTMP  = $(notdir $(filter-out %.cxx,$(SRCS:%.cpp=%.o)))
+OBJSTMP += $(notdir $(filter-out %.cpp,$(SRCS:%.cxx=%.o)))
+
+X86_OBJS = $(OBJSTMP:%=$(X86_DIR)/%)
+X86_64_OBJS = $(OBJSTMP:%=$(X86_64_DIR)/%)
 
 # JAVASRC = $(STAR_USM_BASE_DIR)/loadlogging.java
 JAVAS= $(MYMOD).java
@@ -85,27 +123,53 @@ PDEPS= $(MYMOD)_perl_wrap.cxx
 POBJS= $(MYMOD)_perl_wrap.o  $(PSRCS:%.cxx=%.o)
 
 # Main target $(MYMOD).$(SOEXT)  $(MYMOD)_main.class $(MYMOD)_perl.$(SOEXT)
-all: lib$(MYMOD)Impl.$(SOEXT) $(MYJAR).jar
+all: $(X86_DIR) $(X86_64_DIR) $(X86_DIR)/lib$(MYMOD)_java.$(SOEXT)  $(X86_64_DIR)/lib$(MYMOD)_java.$(SOEXT)  $(MYJAR).jar
 	@ echo "Try % perl test.pl"
 	@ echo "Try % $(JAVAX) -Djava.library.path=./ $(MYMOD)_main"
 
+$(X86_DIR): 
+	mkdir $@
+   
+$(X86_64_DIR): 
+	mkdir $@
+   
 # $(OBJS): $(SRCS)
 # make jar
-$(MYJAR).jar: lib$(MYMOD)_java.$(SOEXT)
+$(MYJAR).jar: $(X86_DIR)/lib$(MYMOD)_java.$(SOEXT)
 	javac -d ./ *.java
 	jar -cf $@ com
 
 # the needed .so for the pm to work
-lib$(MYMOD)Impl.$(SOEXT): $(OBJS)
-	$(LD) $(SOFLAGS) $@ $(OBJS) -L$(OPTSTAR)/lib -llog4cxx -L$(OPTSTAR)/lib/mysql -lmysqlclient 
+$(X86_64_DIR)/lib$(MYMOD)Impl.$(SOEXT): $(X86_64_OBJS)
+	$(LD) -m64  $(SOFLAGS) $@ $^ -L$(OPTSTAR_64)/lib -llog4cxx -L/usr/lib64/mysql -lmysqlclient 
+
+$(X86_DIR)/lib$(MYMOD)Impl.$(SOEXT): $(X86_OBJS) 
+	$(LD) -m32 $(SOFLAGS)  $@ $^ -L$(OPTSTAR)/lib -llog4cxx -L/usr/lib/mysql -lmysqlclient 
 
 # the needed .so for the pm to work
 lib$(MYMOD)_perl.$(SOEXT): $(POBJS)  lib$(MYMOD)Impl.$(SOEXT)
 	$(LD) $(SOFLAGS) $@ $(POBJS) $(PERL_LDL)  -L. -l$(MYMOD)Impl
 
-lib$(MYMOD)_java.$(SOEXT): $(JOBJS) lib$(MYMOD)Impl.$(SOEXT)
-	$(LD) $(SOFLAGS) $@ $(JOBJS) -L. -l$(MYMOD)Impl
-	ln -s  lib$(MYMOD)_java.$(SOEXT) lib$(MYMOD).$(SOEXT) 
+$(X86_DIR)/lib$(MYMOD)_java.$(SOEXT): $(JOBJS:%=$(X86_DIR)/%) $(X86_DIR)/lib$(MYMOD)Impl.$(SOEXT)
+	$(LD) -m32 $(SOFLAGS) $@ $(JOBJS:%=$(X86_DIR)/%) -L$(X86_DIR) -l$(MYMOD)Impl
+	cd $(X86_DIR) && ln -s  lib$(MYMOD)_java.$(SOEXT) lib$(MYMOD).$(SOEXT) 
+
+$(X86_64_DIR)/lib$(MYMOD)_java.$(SOEXT):  $(JOBJS:%=$(X86_64_DIR)/%) $(X86_64_DIR)/lib$(MYMOD)Impl.$(SOEXT)
+	$(LD) -m64 $(SOFLAGS) $@ $(JOBJS:%=$(X86_64_DIR)/%) -L$(X86_64_DIR) -l$(MYMOD)Impl
+	cd $(X86_64_DIR) && ln -s  lib$(MYMOD)_java.$(SOEXT) lib$(MYMOD).$(SOEXT) 
+
+
+$(X86_DIR)/%.o:  $(STAR_USM_BASE_DIR)/%.cpp
+	$(CC) -m32 $(CFLAGS) $< -o $@
+
+$(X86_DIR)/%.o:  $(STAR_USM_BASE_DIR)/%.cxx
+	$(CC) -m32 $(CFLAGS) $< -o $@
+
+$(X86_64_DIR)/%.o:  $(STAR_USM_BASE_DIR)/%.cpp
+	$(CC) -m64 $(CFLAGS) $< -o $@
+
+$(X86_64_DIR)/%.o:  $(STAR_USM_BASE_DIR)/%.cxx
+	$(CC) -m64 $(CFLAGS) $< -o $@
 
 #+
 # SWIG dependencies
@@ -124,9 +188,12 @@ $(MYMOD)_java_wrap.cxx: $(SWIGI) $(INCSI)
 $(MYMOD)_perl_wrap.o: $(MYMOD)_perl_wrap.cxx
 	$(CC)  $< -o $@ $(PERL_INC)
 
-$(MYMOD)_java_wrap.o: $(MYMOD)_java_wrap.cxx
-	$(CC)  -c $(INCDIRS:%=-I%)   $(JINC) $<
+$(X86_DIR)/$(MYMOD)_java_wrap.o: $(MYMOD)_java_wrap.cxx
+	$(CC) -m32 -o $(X86_DIR)/$(MYMOD)_java_wrap.o  -c $(INCDIRS:%=-I%)   $(JINC) $<
 
+$(X86_64_DIR)/$(MYMOD)_java_wrap.o: $(MYMOD)_java_wrap.cxx
+	$(CC)  -m64 -o $(X86_64_DIR)/$(MYMOD)_java_wrap.o -c $(INCDIRS:%=-I%)   $(JINC) $<
+   
 # $(MYMOD)_main.class: test.java $(MYMOD).java $(SRCS:%.cpp=%.java)
 $(MYMOD)_main.class:  $(MYMOD).java $(UCMINC:%.h=%.java)
 	$(JAVAC) $?
@@ -134,15 +201,19 @@ $(MYMOD)_main.class:  $(MYMOD).java $(UCMINC:%.h=%.java)
 
 # Global
 .c.o:
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) -m32 $(CFLAGS) $< -o $(X86_DIR)/$@
+	$(CC) -m64 $(CFLAGS) $< -o $(X86_64_DIR)/$@
 
 .cxx.o:
-	$(CXX) $(CXXFLAGS) $< -o $@
+	$(CXX) -m32 $(CXXFLAGS) $< -o $(X86_DIR)/$@
+	$(CXX) -m64 $(CXXFLAGS) $< -o $(X86_64_DIR)/$@
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS)  $< -o $@
+	$(CXX) -m32 $(CXXFLAGS)  $< -o $(X86_DIR)/$@
+	$(CXX) -m64 $(CXXFLAGS)  $< -o $(X86_64_DIR)/$@
 
 clean:
+	/bin/rm -rf $(X86_64_DIR)  $(X86_DIR)
 	/bin/rm -f *.o
 	/bin/rm -rf com
 	/bin/rm -f *.java
@@ -154,10 +225,30 @@ clean:
 
 distclean: clean
 	/bin/rm -f $(MYJAR).jar
-	/bin/rm -f *.$(SOEXT)
+	/bin/rm -f *.$(SOEXT)  $(X86_64_DIR)/*.$(SOEXT) $(X86_DIR)/*.$(SOEXT)
+	/bin/rm -f $(DISTTAR)
 
 
 print:
 	echo $(JOBJS)
+        
+printsrc:
+	@echo $(SRCS)                
+
+printobj:
+	@echo $(OBJS)
+	@echo X86_OBJS $(X86_OBJS)
+	@echo =====================================
+	@echo X86_64_OBJS $(X86_64_OBJS)
+	@echo =====================================
+        
+dist:   $(DISTTAR)
+
+$(DISTTAR):   StRoot/logging/testUcm.java $(MYJAR).jar  lib$(MYMOD)Impl.$(SOEXT) lib$(MYMOD)_java.$(SOEXT) lib$(MYMOD).$(SOEXT)
+	tar -czvf ucmdist.tar.gz  --strip-components=2 $? -C $(OPTSTAR)/lib liblog4cxx.so liblog4cxx.so.10 liblog4cxx.so.10.0.0
+        
+upload:   $(dist) $(DISTTAR)
+	cp $? ~/WWW/tmp
+	tar -tzvf ~/WWW/tmp/$(DISTTAR)
 
 

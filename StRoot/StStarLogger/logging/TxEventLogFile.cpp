@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.4 2009/06/26 19:23:45 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.5 2010/03/30 20:05:37 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -18,6 +18,9 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <cassert>
+
+using namespace TxLogging;
 
 TxLogging::TxEventLogFile::TxEventLogFile ():TxLogging::TxEventLog() {
   // No broker task/job id info provided. Check if the default env
@@ -266,3 +269,6 @@ void TxLogging::TxEventLogFile::writeDown(const std::string& message)
   httpstring+="\'>/dev/null";
   system( httpstring.c_str());
 }
+
+TXEVENT_DEFAULT_IMPLEMENTAION(TxEventLogFile)
+TXEVENT_DEFAULT_IMPLEMENTAION_2(TxEventLogFile) 
