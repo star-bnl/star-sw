@@ -134,4 +134,4 @@ StUcmEvents *TxEventLog::getEventList(int limit, int offset)
 
 //________________________________________________________________
 int TxEventLog::queryTableSize(const char *tableName)
-{   return queryTableSize(tableName,(const char*)0);            }
+{   return queryTableSize(tableName,(const char*)0);             }
