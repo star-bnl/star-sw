@@ -10,7 +10,7 @@
  *
  * Copyright (c) 2007-2008 STAR Collaboration - Brookhaven National Laboratory
  *
- * @(#)cpp/api:$Id: StDbFieldI.cxx,v 1.4 2010/01/29 00:08:38 fine Exp $
+ * @(#)cpp/api:$Id: StDbFieldI.cxx,v 1.5 2010/03/30 20:05:36 fine Exp $
  *
  *
  *
@@ -30,17 +30,21 @@
  */
  
 #include <string>
+#include <iostream>
 
 #include "StDbFieldI.h"
 using namespace std;
+using namespace TxLogging;
+// using namespace StDbField;
 
 std::map<StDbFieldI::EDataType,std::string> StDbFieldI::fTypeMap;
 std::map<StDbFieldI::EDataType,std::string> StDbFieldI::fTypeMapName;
 std::map<std::string,StDbFieldI::EDataType> StDbFieldI::fTypeMapInv;
-
+namespace TxLogging {
 struct Init_StDbFieldI {
    Init_StDbFieldI() { StDbFieldI::MakeTypeMap();} 
 };
+}
 namespace {
   Init_StDbFieldI a;
 }
@@ -87,7 +91,8 @@ StDbFieldI::StDbFieldI(const char* name, StDbFieldI::EDataType type, int length)
 StDbFieldI::StDbFieldI(const char* name, const char*value,
 		 StDbFieldI::EDataType type, int length)
   : fType(kINVALID),
-    fIgnore(true) {
+    fIgnore(true) 
+{
   if (string(name).empty()) {
     throw StDataException("Attempted to define field with empty name.",
 			  StDataException::FIELD,
@@ -112,7 +117,16 @@ StDbFieldI::StDbFieldI(const char* name, const char*value,
 
   fName = name;
   fType = type;
+  if (!value) value = " ";
   setValueFromString(value);
+#ifdef DEBUG  
+  cout << __FUNCTION__ 
+       << ":  name =" << name
+	   << "; value =" << value
+	   << " type =" << type
+	   << "; lenght=" << length
+	   << endl;
+#endif	   
 }
 
 
@@ -180,7 +194,7 @@ StDbFieldI::setValueFromString(const char* strValue)
   else  {
     fNull =string(strValue).empty();
   }
-
+ 
   fEncodedValue = value;
   fIgnore      = false;
 }
@@ -260,7 +274,7 @@ void StDbFieldI::MakeTypeMap() {
       fTypeMapInv.insert(pair<std::string,EDataType>(typeid(datatype).name(),k##TYPENAME));         \
       break;}
 #endif
-  for (int i=0;i<kEND;++i) {
+  for (int i=kBOOL;i<kEND;++i) {
     switch (i) {
        TYPEtypeNAME(BOOL,bool)
        TYPEtypeNAME(INT,int)
@@ -269,7 +283,8 @@ void StDbFieldI::MakeTypeMap() {
        TYPEtypeNAME(ULONG,unsigned long)
        TYPEtypeNAME(DOUBLE,double)
        TYPEtypeNAME(CHAR,char)
-       TYPEtypeNAME(STRING,string)
+       TYPEtypeNAME(UNIXTIME,unsigned int)
+       //TYPEtypeNAME(STRING,string)       
        default: {
          fTypeMap.insert(pair<EDataType,std::string>(kINVALID,"invalid"));
          fTypeMapName.insert(pair<EDataType,std::string>(kINVALID,"unkown"));
@@ -286,6 +301,7 @@ void StDbFieldI::MakeTypeMap() {
   void StDbFieldI::setValue(const DATATYPE &value) {setValue<DATATYPE>(value);} \
   DATATYPE  StDbFieldI::to##dataname() const { return toValue<DATATYPE>(); }
 #endif
+    DBVALUECONV_(char,Char)
     DBVALUECONV_(int,Int)
     DBVALUECONV_(unsigned int,UInt)
     DBVALUECONV_(long,Long)

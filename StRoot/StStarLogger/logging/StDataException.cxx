@@ -2,7 +2,7 @@
  * @file StDataException.cpp
  * @author Stephen Tramer
  *
- * @(#)cpp/api:$Id: StDataException.cxx,v 1.1 2010/01/26 23:43:44 fine Exp $
+ * @(#)cpp/api:$Id: StDataException.cxx,v 1.2 2010/03/30 20:05:36 fine Exp $
  *
  * See StDataException.h for detals.
  */
@@ -10,6 +10,7 @@
 #include <string>
  
 #include "StDataException.h"
+// using namespace TxLogging;
 
 StDataException::StDataException( const std::string& description,
 				  ObjectType object,

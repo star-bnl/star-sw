@@ -1,7 +1,8 @@
-// import java.lang.System;
+import java.lang.System;
 import com.txLogging.*;
 class Test {
  public static void main(String [] argv) {
-      TxEventLog ev = TxEventLogFactory.create("ucm");
+     System.out.println("test");
+     TxEventLog ev = TxEventLogFactory.create("ucm");
     }
 }

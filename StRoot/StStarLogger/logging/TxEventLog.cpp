@@ -88,3 +88,50 @@ void TxEventLog::logEnd (const char *key, const char *value)
 {
    this->logEnd (string(key),string(value));
 }
+
+//________________________________________________________________
+StUcmTasks  *TxEventLog::getTaskList()
+{ return getTaskList(0); }
+//________________________________________________________________
+StUcmTasks  *TxEventLog::getTaskList (int limit) 
+{ return getTaskList(limit,0); }
+
+//________________________________________________________________
+StUcmJobs   *TxEventLog::getJobList() 
+{ return getJobList((StRecord *)0); }
+
+//________________________________________________________________
+StUcmJobs   *TxEventLog::getJobList(StRecord *task) 
+{ return getJobList(task,0); }
+	  
+//________________________________________________________________
+StUcmJobs   *TxEventLog::getJobList(int limit)
+{ return getJobList(0,limit,0); }
+  
+//________________________________________________________________
+StUcmJobs   *TxEventLog::getJobList(StRecord *task,int limit)
+{ return getJobList(task,limit,0); }
+//________________________________________________________________
+StUcmJobs   *TxEventLog::getJobList (int limit, int offset)
+{   return getJobList(0,limit,offset); }
+//________________________________________________________________
+StUcmEvents *TxEventLog::getEventList() 
+{ return getEventList((StRecord *)0);                            }
+//________________________________________________________________
+StUcmEvents *TxEventLog::getEventList(StRecord *job) 
+{ return getEventList(job,0);                                    }
+
+//________________________________________________________________
+StUcmEvents *TxEventLog::getEventList(StRecord *job,int limit) 
+{ return getEventList(job,limit, 0);                             }
+
+//________________________________________________________________
+StUcmEvents *TxEventLog::getEventList(int limit) 
+{ return getEventList(0,limit, 0);                               }
+//________________________________________________________________
+StUcmEvents *TxEventLog::getEventList(int limit, int offset)
+{ return getEventList(0,limit, offset);                          }
+
+//________________________________________________________________
+int TxEventLog::queryTableSize(const char *tableName)
+{   return queryTableSize(tableName,(const char*)0);            }

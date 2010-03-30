@@ -11,7 +11,7 @@
  * This file is part of the UCM project funded under an SBIR
  * Copyright (c) 2007-2008 STAR Collaboration - Brookhaven National Laboratory
  *
- * @(#)cpp/api:$Id: StDbFieldI.h,v 1.3 2010/01/29 00:08:38 fine Exp $
+ * @(#)cpp/api:$Id: StDbFieldI.h,v 1.4 2010/03/30 20:05:36 fine Exp $
  *
  *
  *
@@ -36,19 +36,19 @@
 #include <string>
 #include <sstream>
 #include <map>
-#include <vector>
 #include <typeinfo>
 
 #include "StDataException.h"
-
-class StDbFieldI;
-typedef std::vector<StDbFieldI*> FieldList;
+#include "FieldList.h"
 
 /**
  * Abstraction for the field in memory.
  */
+namespace TxLogging {
+class Init_StDbFieldI;
+
 class StDbFieldI {
- friend class Init_StDbFieldI;
+ friend class TxLogging::Init_StDbFieldI;
  public:
   /**
    * List of types supported by UCM.  The INVALID type is provided to set
@@ -66,6 +66,7 @@ class StDbFieldI {
     kULONG,
     kDOUBLE,
     kCHAR,
+    kUNIXTIME,
     kSTRING,
     kEND
   };
@@ -98,7 +99,7 @@ class StDbFieldI {
    * @param value The value to encode in the variant.
    * @param length Non-optional for strings; sets the max length of the string.
    */
-    StDbFieldI(const char* name, void *value, int length=0);
+    // StDbFieldI(const char* name, void *value, int length=0);
 
   /**
    * Constructor: Creates a complete field.  Note that it may
@@ -115,8 +116,8 @@ class StDbFieldI {
   /**
    * Copy operators: Copy constructor and operator=.
    */
-  StDbFieldI(const StDbFieldI& f);
-  const StDbFieldI& operator=(const StDbFieldI& f);
+  StDbFieldI(const StDbFieldI& );
+  const StDbFieldI& operator=(const StDbFieldI& );
 
   /**
    * Destructor: No-op.
@@ -148,7 +149,7 @@ class StDbFieldI {
    void setValue(const unsigned long &value);
    void setValue(const double        &value);
    void setValue(const char          &value);
-   void setValue(const std::string   &value);
+  //  void setValue(const std::string   &value);
    
    int           toInt() const;
    unsigned      toUInt() const;
@@ -203,7 +204,7 @@ class StDbFieldI {
    * IGNORE flag to 'false' (a value has been explicitly set)
    * @param null True if the field is to be set NULL.
    */
-  void setNull(bool null);
+  void setNull(bool Nil);
 
   /**
    * Sets whether or not the field should be ignored when
@@ -264,7 +265,6 @@ class StDbFieldI {
   static std::map<EDataType,std::string> fTypeMapName;
   static std::map<std::string,EDataType> fTypeMapInv;
 };
-
 
 
 //---------------
@@ -352,5 +352,5 @@ StDbFieldI::typeMatches() const
             StUCMException::ERROR);
   }
 }
-
+}
 #endif

@@ -2,7 +2,7 @@
  * @file StUCMException.cpp
  * @author Stephen Tramer
  *
- * @(#)cpp/api:$Id: StUCMException.cxx,v 1.1 2010/01/26 23:43:45 fine Exp $
+ * @(#)cpp/api:$Id: StUCMException.cxx,v 1.2 2010/03/30 20:05:36 fine Exp $
  *
  * See StUCMException.h for detals.
  */
@@ -10,7 +10,7 @@
 #include <string>
  
 #include "StUCMException.h"
-
+//using namespace TxLogging;
 StUCMException::StUCMException(const std::string& description,
 			       Severity severity)
   : description_(description),

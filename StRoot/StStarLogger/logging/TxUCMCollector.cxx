@@ -2,14 +2,22 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.16 2009/09/24 19:15:38 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.17 2010/03/30 20:05:37 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
  */
 #include "StStarLogger/StLoggerConfig.h"
 #include "TxUCMCollector.h"
+#include "StDbFieldI.h"
+#include "FieldList.h"
+#include "StDbFieldIIterator.h"
+#include "StUcmTasks.h"
+#include "StUcmJobs.h"
+#include "StUcmEvents.h"
+
 #include <stdlib.h>
+#include <iostream>
 #include <log4cxx/logger.h>
 #include <log4cxx/consoleappender.h>
 #include <log4cxx/patternlayout.h>
@@ -21,6 +29,9 @@ using namespace log4cxx;
 using namespace log4cxx::helpers;
 using namespace log4cxx::spi;
 using namespace std;
+
+using namespace TxLogging;
+using namespace StDbField;
 
 #define TRY
 #define CATCH(a)
@@ -50,6 +61,17 @@ using namespace std;
     const char *TxUCMCollector::fgStatusFileName    = "current.logfile.name";
     const char *TxUCMCollector::fgStatusFileModTime = "current.logfile.modtime";
     const char *TxUCMCollector::fgStatusFilePos     = "current.logfile.pos";
+
+    
+//_____________________________________________________________________________
+namespace {
+   string itoa(int i)
+   {
+      char buffer[100];
+      sprintf(buffer,"%d",i);
+      return string(buffer);
+   }
+}
 
 //_________________________________________________________________________
 MYSQL *TxUCMCollector::getConnection()
@@ -90,10 +112,24 @@ MYSQL *TxUCMCollector::getConnection (const char *cdbUrl,const char *cdbUsername
                      , 0,0
                      )))
          {
-             fprintf(stderr, "TxUCMCollector::getConnection:  ---- > No connection: %s %s %s %s %d  %s  \n",host, user, passwd, db, port,mysql_error(connection));
+            string error = __FUNCTION__ 
+                          + string("host: ") + host
+                          + string("; user: ") + user
+                          + string(" passwd: ") + passwd
+                          + string(" db: ") + db
+                          + string(" port:") + itoa(port)
+                          + " error: " + mysql_error(connection);
+             log->debug(error.c_str());
              connection = 0;
              fIsConnectionOpen = false;
          } else {
+            string error = "Ok conenction to Db : "  
+                          + string("host: <") + host
+                          + string("> user: <") + user
+                          + string("> passwd: <") + passwd
+                          + string("> db: <") + db
+                          + string("> port: ") + itoa(port);
+            log->debug(error.c_str());
             fIsConnectionOpen = true;
          }
       }
@@ -110,12 +146,18 @@ unsigned int TxUCMCollector::execute(const string &sql)
 //_________________________________________________________________________
 unsigned int  TxUCMCollector::execute(const char *sql)
 {
-	unsigned int ret=1;
+   unsigned int ret=1;
    if (getConnection()) {
       String query = sql;
       log->debug(string("TxUCMCollector::execute ") + sql);
+      if (fResult) {
+         mysql_free_result(fResult); 
+         fResult = 0;
+      }
       if (( ret = mysql_query(connection,query.c_str()) )) {
          log->error(std::string("MYSQL QUERY:") + mysql_error(connection));
+      } else {
+         fResult = mysql_store_result(connection); 
       }
     }
     return ret;
@@ -125,6 +167,10 @@ unsigned int  TxUCMCollector::execute(const char *sql)
 void TxUCMCollector::closeConnection()
 {
   if (fIsConnectionOpen) {
+     if (fResult) {
+         mysql_free_result(fResult); 
+         fResult = 0;
+     }
      mysql_close(connection); 
      if (mysql_errno(connection))   fprintf(stderr,"MYSQL close ERROR %s  \n",mysql_error(connection));
      connection = 0;
@@ -134,7 +180,11 @@ void TxUCMCollector::closeConnection()
 
 //______________________________________________________________________
 TxUCMCollector::TxUCMCollector ()
-: connection(0),fIsConnectionOpen(false), sleepTime(10),currLogFilePos(0)
+: connection()
+  ,fResult(),fField(),fRow()   
+  ,fIsConnectionOpen(false), sleepTime(10),currLogFilePos(0)
+  ,fBrokerJobID(-1), fDbJobID(-1)
+
 {
    // init the logger
    log =  Logger::getLogger(_T("TxUCMCollector")); 
@@ -149,6 +199,12 @@ TxUCMCollector::TxUCMCollector ()
    }
    // log->setLevel(Level::DEBUG);
 }
+
+TxUCMCollector::~TxUCMCollector ()
+{
+    closeConnection();
+}
+
  /**
   * Tests if this string ends with the specified suffix.
   */
@@ -691,8 +747,7 @@ void TxUCMCollector::addJob () {
 
    // Insert new record only if it does not exist
    if (!this->recordExists (string("brokerJobID = \"") + msgHashMap[fgBJobID] + "\"",
-                             "Jobs_" + msgHashMap[fgRequester] + 
-                            "_" + msgHashMap[fgBTaskID])) {
+                             jobTableName())) {
 
        std::string newJobKeys = "taskID, brokerJobID";
        std::string newJobVals = string("(SELECT taskID FROM Tasks WHERE brokerTaskID=") +
@@ -715,12 +770,33 @@ void TxUCMCollector::addJob () {
         }
 
         insertRecord (string("(") + newJobKeys + ") VALUES (" + newJobVals + ")", 
-                       "Jobs_" + msgHashMap[fgRequester] + 
-                       "_"     + msgHashMap[fgBTaskID]);
+                       jobTableName());
     } else {
        log->debug ("Record with brokerJobID = " + msgHashMap[fgBJobID] +
                     " already exists");
     }
+} 
+
+//________________________________________________
+string TxUCMCollector::tableNamePrefix(const char *prefix) const
+{
+   string fullTableName = 
+            string(prefix)
+          + string("_") + msgHashMap.find(fgRequester)->second
+          + string("_") + msgHashMap.find(fgBTaskID)->second; 
+     log->debug(string(__FUNCTION__)+ "<" + fullTableName + ">");
+	 return fullTableName;
+}
+
+//________________________________________________
+string TxUCMCollector::jobTableName() const 
+{
+    return  tableNamePrefix("Jobs");
+}
+//________________________________________________
+std::string TxUCMCollector::eventTableName() const
+{
+   return  tableNamePrefix("Events");
 }
 
     /**
@@ -733,11 +809,8 @@ void TxUCMCollector::updateJob () {
   // Update only if a record exists. If it does not exist, just
   // create a new entry
   if (this->recordExists (string("brokerJobID = \"") + msgHashMap[fgBJobID] + "\"",
-                            "Jobs_" + msgHashMap[fgRequester] + 
-                            "_"     + msgHashMap[fgBTaskID])) {
-      updateRecord (                  msgHashMap[fgValue], 
-                          "Jobs_"        + msgHashMap[fgRequester] + 
-                          "_"            + msgHashMap[fgBTaskID], 
+                            jobTableName() ) )  {
+      updateRecord ( msgHashMap[fgValue], jobTableName(),
                        "brokerJobID = '" + msgHashMap[fgBJobID] + "'");
   } else {
       log->debug ("Record with brokerJobID = " +  msgHashMap[fgBJobID] +
@@ -756,11 +829,9 @@ void TxUCMCollector::setJobsField (const string &fieldName) {
 
 void TxUCMCollector::setJobsField (const char * fieldName) {
    if (this->recordExists (string("brokerJobID = \"") + msgHashMap[fgBJobID] + "\"",
-                            "Jobs_" + msgHashMap[fgRequester] + 
-                            "_" + msgHashMap[fgBTaskID])) {
+                            jobTableName() )) {
       updateRecord (string(fieldName) + " = '" +  msgHashMap[fgValue] + "'", 
-                       "Jobs_" + msgHashMap[fgRequester] + 
-                       "_" + msgHashMap[fgBTaskID], 
+                       jobTableName() , 
                        "brokerJobID = '" + msgHashMap[fgBJobID] + "'");
    } else {
       log->error (string("Record with brokerJobID = ") + msgHashMap[fgBJobID] +
@@ -797,8 +868,7 @@ void TxUCMCollector::addEvent () {
         // event. If not, create one for this new job. Also create new
         // jobs and events tables if they dont exist already
    if (!this->recordExists (string("brokerJobID = \"") + msgHashMap[fgBJobID] + "\"",
-                            "Jobs_" + msgHashMap[fgRequester] + 
-                            "_" + msgHashMap[fgBTaskID])) {
+                            jobTableName())) {
 
       log->info (msgHashMap[fgBTaskID] 
                     + " does not exist in Jobs table");
@@ -812,15 +882,13 @@ void TxUCMCollector::addEvent () {
                        "((SELECT taskID FROM Tasks WHERE brokerTaskID=" +
                        "'" + msgHashMap[fgBTaskID] + "')" +
                        ", '" + msgHashMap[fgBJobID] + "')",
-                       "Jobs_" + msgHashMap[fgRequester] + 
-                       "_" + msgHashMap[fgBTaskID]);
+                       jobTableName());
    }
 
    // Insert the new events table record
 
    std::string newEventKeys = "jobID, levelID, context, time, stageID, messageKey, messageValue";
-   std::string newEventVals = string("(SELECT jobID FROM `Jobs_") + msgHashMap[fgRequester] + 
-           "_" +  msgHashMap[fgBTaskID] + "` WHERE brokerJobID=" +
+   std::string newEventVals = string("(SELECT jobID FROM `") + jobTableName() + "` WHERE brokerJobID=" +
            "'" + msgHashMap[fgBJobID] + "')" +
            ", '" + msgHashMap[fgLevel] + "'" +
            ", '" + msgHashMap[fgContext] + "'" +
@@ -830,8 +898,7 @@ void TxUCMCollector::addEvent () {
            ", '" + msgHashMap[fgValue] + "'";
                   
    insertRecord (string("(") + newEventKeys + ") VALUES (" + newEventVals + ")", 
-                    "Events_" + msgHashMap[fgRequester] + 
-                    "_" + msgHashMap[fgBTaskID]);
+                    eventTableName());
    }
 
  /**
@@ -839,9 +906,7 @@ void TxUCMCollector::addEvent () {
   */
 void TxUCMCollector::createJobsTable () {
        // create new jobs table if it does not exist
-    std::string tableName = "`" + string("Jobs_")
-           + msgHashMap[fgRequester] + "_"
-           + msgHashMap[fgBTaskID]+ "` ";
+    std::string tableName = "`" + jobTableName() + "` ";
     this->createTable (tableName , std::string("jobspattern"));
 //    this->createTable (tableName + fgJobsTableCols);
 }
@@ -852,9 +917,7 @@ void TxUCMCollector::createJobsTable () {
 //________________________________________________
 void TxUCMCollector::createEventsTable () {
        // create new events table if it does not exist
-   std::string tableName = "`" + string("Events_")
-           + msgHashMap[fgRequester] + "_"
-           + msgHashMap[fgBTaskID] + "` ";
+   std::string tableName = "`" + eventTableName() + "` ";
    this->createTable (tableName, std::string("eventspattern"));
 //   this->createTable (tableName + fgEventsTableCols);
 }
@@ -929,16 +992,13 @@ boolean TxUCMCollector::recordExists (const string&selectStr, const string&table
 
 //________________________________________________
 boolean TxUCMCollector::recordExists (const char * selectStr, const char * tableName) {
-   MYSQL_RES *exists = 0;
    unsigned long nRows = 0;
    TRY
    {
       execute(string("SELECT * FROM `") + tableName 
                                     + "` WHERE " + selectStr);
-      exists = mysql_store_result(connection); 
-      if (exists) {
-         nRows = mysql_num_rows(exists);
-         mysql_free_result(exists);
+      if (fResult) {
+         nRows = mysql_num_rows(fResult);
       }
    }
    closeConnection();
@@ -950,7 +1010,8 @@ boolean TxUCMCollector::recordExists (const char * selectStr, const char * table
    return nRows ? true: false;
 }
 
-    /**
+//___________________________________________________________________________________
+ /**
      * createTable: Execute the SQL query to CREATE a table if it does
      *              not already exist
      *
@@ -962,7 +1023,7 @@ void TxUCMCollector::createTable (const string&table,const string&like)
    createTable (table.c_str(), likestr);
 }
 
-//________________________________________________
+//___________________________________________________________________________________
 void TxUCMCollector::createTable (const char * table, const char *like) {
    TRY{
        std::string query = string("CREATE TABLE IF NOT EXISTS ") + table;
@@ -981,7 +1042,7 @@ void TxUCMCollector::createTable (const char * table, const char *like) {
      * @param options the encapsulated list of options
      *    
      */  
-//________________________________________________
+//___________________________________________________________________________________
 void TxUCMCollector::usage (Options options)
 {
 #ifdef FUTURE
@@ -991,7 +1052,166 @@ void TxUCMCollector::usage (Options options)
 #endif
 }
 
-    
+//___________________________________________________________________________________
+StUcmTasks *TxUCMCollector::getTaskList(int limit, int offset)
+{
+   static  StUcmTasks tasks;
+   fillTaskList(tasks,limit,offset);
+   return &tasks;
+}
+
+//___________________________________________________________________________________
+StUcmJobs  *TxUCMCollector::getJobList(StRecord *task, int limit, int offset)
+{
+   static StUcmJobs jobs;
+   fillJobList(jobs,limit,offset,task);
+   return &jobs;
+}
+
+//___________________________________________________________________________________
+StUcmEvents  *TxUCMCollector::getEventList(StRecord *job,int limit, int offset)
+{
+   static StUcmEvents events;
+   fillEventList(events,limit,offset);
+   return &events;
+}
+  
+//___________________________________________________________________________________
+int  TxUCMCollector::fillTaskList(StUcmTasks &tasks, int limit, int offset) 
+{
+   RecordList &l = tasks.getTasks();
+   return  fillUcmList("Tasks",l,limit,offset);
+}
+
+//___________________________________________________________________________________
+int TxUCMCollector::fillUcmList(const char *type, RecordList &records, int limit, int offset) 
+{
+    my_ulonglong nRows = 0;
+    records.Clear();
+    try {
+        if (string(type) == "Tasks")  {
+	        queryTaskTable(limit,offset);
+        } else if (string(type) == "Jobs" ) {
+	        queryJobTable(limit,offset);
+        } else if (string(type) == "Events" ) {
+           queryEventTable(limit,offset);
+	    } else {
+           queryTable(type,limit,offset);
+       }
+	    if (fResult) {
+            nRows = mysql_num_rows(fResult) ;
+            log->debug(string(itoa(nRows)) + " rows from " + itoa(offset) + " row" );
+            for (my_ulonglong i=0; i<nRows;++i) 
+            {
+                StRecord *task = new StRecord;     
+                fillFields(task->getFields());
+                records.push_back(task);
+            }
+	    }
+    } catch (const StDataException &e) {
+       log->error(e.getDescription() );
+    }
+    return nRows;
+}
+
+//___________________________________________________________________________________
+int TxUCMCollector::fillJobList(StUcmJobs &jobs, int limit, int offset)
+{
+   RecordList &l = jobs.getJobs();
+   return fillUcmList("Jobs",l,limit,offset);
+}
+
+//___________________________________________________________________________________
+void  TxUCMCollector::setBrokerTaskID(const StRecord *task)
+{
+   const char *requestId = 0;
+   if (task) {
+      requestId = task->getField("brokerTaskID")->getValueAsString();
+      setBrokerTaskID(requestId);
+   }
+}
+
+//___________________________________________________________________________________
+void  TxUCMCollector::setBrokerJobID(const StRecord *job)
+{
+   if (job) { 
+      int brokerJobID = job->getField("brokerJobID")->toInt();
+      setBrokerJobID(brokerJobID);
+      int jobID       = job->getField("jobID")->toInt(); 
+      setDbJobID(jobID);
+   }
+}
+//___________________________________________________________________________________
+int TxUCMCollector::fillJobList(StUcmJobs &jobs, int limit, int offset,const StRecord *task)
+{
+   int row = 0;
+   RecordList &l = jobs.getJobs();
+   setBrokerTaskID(task);
+   row = fillUcmList("Jobs",l,limit,offset);
+//   if (!row) { //old style to be done yet if needed
+//      requestId = task->getField("taskID")->getValueAsString();
+//   }
+   return row;
+}
+
+
+//___________________________________________________________________________________
+int  TxUCMCollector::fillEventList(StUcmEvents &events, int limit, int offset,const StRecord *job)
+{
+   RecordList &l = events.getEvents();
+   if (job) setBrokerJobID (job);
+   return fillUcmList("Events",l,limit,offset);
+}
+
+//___________________________________________________________________________________
+void TxUCMCollector::fillFields(FieldList &fields)
+{
+   fRow = mysql_fetch_row(fResult);
+   if (fRow) {
+      fField = mysql_fetch_fields(fResult);
+      unsigned int n_fields = mysql_num_fields(fResult);
+      log->debug(string("Fetching ") + itoa(n_fields) + " fields ");
+      for (unsigned int i=0;i<n_fields; ++i)
+      {         
+         fields.push_back(createField(i));
+      }
+   }  else {
+      log->error(mysql_error(connection));
+   }
+}
+//___________________________________________________________________________________
+StDbFieldI::EDataType TxUCMCollector::MapSqlField(enum_field_types type) 
+{
+ StDbFieldI::EDataType ucmType = StDbFieldI::kINVALID;
+  switch (type) {
+   case MYSQL_TYPE_TINY: case MYSQL_TYPE_SHORT:case MYSQL_TYPE_LONG:
+        ucmType =StDbFieldI::kINT; 
+        break;
+   case MYSQL_TYPE_TIMESTAMP: case MYSQL_TYPE_DATE: case  MYSQL_TYPE_TIME:
+        case MYSQL_TYPE_DATETIME:  case MYSQL_TYPE_YEAR:  
+        ucmType = StDbFieldI::kUNIXTIME; 
+        break;   
+#if 0
+   case ucmType =StDbFieldI::kLONG; break;
+   case ucmType =StDbFieldI::kULONG; break;
+   case ucmType =StDbFieldI::kDOUBLE; break;
+#endif
+   case MYSQL_TYPE_STRING: case MYSQL_TYPE_VAR_STRING:
+        ucmType =StDbFieldI::kCHAR; break;
+   // case ucmType =StDbFieldI::kSTRING; break;
+   default:  break;
+  }
+  return ucmType;
+}
+
+//___________________________________________________________________________________
+StDbFieldI *TxUCMCollector::createField(unsigned int fieldIndx)
+{
+   StDbFieldI *field = new StDbFieldI(fField[fieldIndx].org_name, fRow[fieldIndx],MapSqlField(fField[fieldIndx].type),1);
+   return field;
+}
+
+     
     /**
      * print current version
      *
@@ -1079,9 +1299,7 @@ void TxUCMCollector::usage (Options options)
        }
 #endif
 }// end main()
-
-
-     // Task table column names
+    // Task table column names
      const char * TxUCMCollector::fgTaskCols = "('taskID', 'brokerTaskID', 'brokerID', "
        "'requesterID', 'taskName', 'taskDescription', 'taskSize', "
        "'taskRemainSize', 'submitTime', 'updateTime', 'archiveFlag')";
@@ -1136,3 +1354,214 @@ void TxUCMCollector::usage (Options options)
      const char * TxUCMCollector::fgEventCols = "('eventID', 'jobID', 'levelID', "
        "'context', 'time', 'stageID', 'messageKey', 'messageValue', "
        "'cpuLoad', 'totalMem', 'usedMem', 'appMem')";
+//_____________________________________________________________________________
+int  TxUCMCollector::queryTableSize(const char *tableName,const StRecord *where)
+{
+   int size = 0;
+   if(string(tableName) == "Jobs") {
+      setBrokerTaskID(where);
+   } else if (string(tableName) == "Events") {
+      setBrokerJobID(where);
+   }
+   size = queryTableSize(tableName);
+   return size;
+}    
+//_____________________________________________________________________________
+int  TxUCMCollector::queryTableSize(const char *tableName, const char *where)
+{
+   int size = 0;
+   string whichTask;
+   if ( !where ) { 
+      if ((string(tableName) == "Tasks" ) && (msgHashMap.find(fgRequester) != msgHashMap.end())) {
+         whichTask=string("requesterID='")+ msgHashMap[fgRequester]+"' ";
+         where = whichTask.c_str();
+      } else if (string(tableName) == "Jobs" ) {
+         tableName = jobTableName().c_str();
+      } else if (string(tableName) == "Events" ) {
+         tableName = eventTableName().c_str();
+      }
+   }
+   string query = string("select count(*) from `")+ tableName + "`";
+   if (where &&where[0]) {
+       query += string(" WHERE ") + where;
+   }
+   execute (query);
+   if (fResult) {
+      if (mysql_num_rows(fResult)==1) { 
+         fRow = mysql_fetch_row(fResult);
+         if (!fRow) {
+            log->error(mysql_error(connection));
+         }  else {
+            size = atoi(*fRow);
+         } //
+      } else {
+            log->error(string("wrong  result for <") + query + ">");
+      }
+   }
+   return size;
+}
+//_____________________________________________________________________________
+void  TxUCMCollector::queryTable(const char *tableName, int limit, int offset, const char *where)
+{
+   // limit = 0 - no limit
+    string query =  string("select * from `") + tableName + "` ";
+    if (where  && where[0] ) {
+       query += string("WHERE ") + where;
+    }
+    if (limit > 0)  query += " LIMIT " + itoa(limit);
+    if (offset > 0) {
+       if(limit <= 0 ) query += "LIMIT 9999999 ";
+       query += " OFFSET " + itoa(offset);
+    }
+    execute (query);
+}
+
+//_____________________________________________________________________________
+void  TxUCMCollector::queryTaskTable(int limit, int offset) 
+{
+   string where=string(" requesterID='")+ msgHashMap[fgRequester]+"' ";
+   where += string(" ORDER BY ") + "taskID" + " DESC ";
+//   where += " ORDER BY " + fgTaskCols[0] + " DESC ";
+   queryTable("Tasks",limit,offset,where.c_str());
+}
+//_____________________________________________________________________________
+void  TxUCMCollector::queryJobTable(int limit, int offset) 
+{
+   queryTable(jobTableName().c_str(),limit,offset);
+   if (!fResult) {
+       string where = " taskID=47948 ";
+       queryTable("Jobs",limit,offset, where.c_str()); // old style
+   }
+}
+
+//_____________________________________________________________________________
+void  TxUCMCollector::queryJobTable(const char *taskID,int limit, int offset) 
+{
+   queryTable(jobTableName().c_str(),limit,offset);
+   if (!fResult) {
+       string where = string(" taskID='") + taskID + "' ";
+       queryTable("Jobs",limit,offset, where.c_str()); // old style
+   }
+}
+//_____________________________________________________________________________
+void  TxUCMCollector::queryEventTable(int limit, int offset)
+{
+   string where=string("jobID='")+ itoa(fDbJobID)+"' ";
+   queryTable(eventTableName().c_str(),limit,offset,where.c_str());
+   if (!fResult) queryTable("Messages",limit,offset,where.c_str()); // old style
+}
+
+//_____________________________________________________________________________
+void  TxUCMCollector::queryEventTable(const char *jobDbID, int limit, int offset)
+{
+   string where=string(" jobID='")+ jobDbID+"' ";
+   queryTable(eventTableName().c_str(),limit,offset,where.c_str());
+   if (!fResult) queryTable("Messages",limit,offset,where.c_str()); // old style
+}
+
+// TxLogEvent interface implemantation
+
+
+void TxUCMCollector::writeDown(const std::string& message)
+{
+
+}
+//___________________________________________________________________________________________________
+void TxUCMCollector::setEnvBrokerTaskID (const std::string& envBrokerTaskID)
+{
+}
+   
+//___________________________________________________________________________________________________
+void TxUCMCollector::setEnvBrokerJobID (const std::string& envBrokerJobID)
+{
+}
+
+//___________________________________________________________________________________________________
+void TxUCMCollector::setBrokerTaskID (const std::string& brokerTaskID)
+{
+    msgHashMap[fgBTaskID] = brokerTaskID;
+}
+
+//___________________________________________________________________________________________________
+void TxUCMCollector::setBrokerJobID (int brokerJobID)
+{ 
+    fBrokerJobID = brokerJobID;
+}
+
+//___________________________________________________________________________________________________
+void TxUCMCollector::setDbJobID (int dbJobID)
+{ 
+    fDbJobID = dbJobID;
+}
+
+//___________________________________________________________________________________________________
+void TxUCMCollector::setRequesterName (const std::string& requester)
+{
+   msgHashMap[fgRequester] = requester;
+}
+
+//___________________________________________________________________________________________________
+void TxUCMCollector::setContext (const std::string& context)
+{
+}
+
+//___________________________________________________________________________________________________
+void TxUCMCollector::logStart (const std::string& key, const std::string& value)
+{
+}
+
+//___________________________________________________________________________________________________
+void TxUCMCollector::logJobSubmitLocation (const std::string& url)
+{
+}
+
+//___________________________________________________________________________________________________
+void TxUCMCollector::setJobSubmitLocation (const std::string& url)
+{
+}
+
+//___________________________________________________________________________________________________
+void TxUCMCollector::logTask (unsigned int size)
+{
+}
+
+//___________________________________________________________________________________________________
+void TxUCMCollector::logTask (const std::string& taskAttributes)
+{
+}
+
+//___________________________________________________________________________________________________
+void TxUCMCollector::logJobSubmitState (State state)
+{
+}
+
+//___________________________________________________________________________________________________
+void TxUCMCollector::setJobSubmitState (State state)
+{
+}
+
+void TxUCMCollector::logJobSubmitID (const std::string& ID)
+{
+}
+
+void TxUCMCollector::setJobSubmitID (const std::string& ID)
+{
+}
+
+void TxUCMCollector::logEvent (const std::string& logMsg, 
+         Level level,Stage stage, const std::string& msgContext)
+{
+}         
+
+void TxUCMCollector::logEvent (const std::string& userKey, 
+         const std::string& userValue, Level level, Stage stage, 
+         const std::string& msgContext)
+{
+}
+
+void TxUCMCollector::logEnd (const std::string& key, const std::string& value)
+{
+}
+
+TXEVENT_DEFAULT_IMPLEMENTAION(TxUCMCollector)
+

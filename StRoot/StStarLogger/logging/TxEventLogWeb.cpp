@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.2 2009/06/18 16:54:31 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.3 2010/03/30 20:05:37 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -10,8 +10,11 @@
 #include "TxEventLogWeb.h"
 
 #include <string>
+#include <cassert>
 
-void TxLogging::TxEventLogWeb::writeDown(const std::string& message)
+using namespace TxLogging;
+
+void TxEventLogWeb::writeDown(const std::string& message)
 {
   std::string httpstring="wget -b  -q -o /dev/null ";
   httpstring+= "-O /dev/null \'http://connery.star.bnl.gov/ucm/?m=";
@@ -29,3 +32,6 @@ void TxLogging::TxEventLogWeb::writeDown(const std::string& message)
   httpstring+="\'>/dev/null";
   system( httpstring.c_str());
 }
+	// --- 
+TXEVENT_DEFAULT_IMPLEMENTAION(TxEventLogWeb)	
+TXEVENT_DEFAULT_IMPLEMENTAION_2(TxEventLogWeb)	

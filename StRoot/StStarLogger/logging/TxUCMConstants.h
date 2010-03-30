@@ -2,7 +2,7 @@
  * @file TxUCMDBConstants.h
  * @author Stephen Tramer
  *
- * @(#)cpp/api:$Id: TxUCMConstants.h,v 1.2 2009/06/25 00:17:08 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMConstants.h,v 1.3 2010/03/30 20:05:37 fine Exp $
  *
  * This file is a collection of constants (collection names and record names)
  * used by the UCM API.  Rather than create a static object to contain all of
@@ -20,8 +20,8 @@ namespace TxUCMConstants {
   /**
    * Properties file
    */
-  static const char* propsFile = "ucmlogging.properties";
-  static const char* logFileDir = "directory.name";
+  static const char* propsFile   = "ucmlogging.properties";
+  static const char* logFileDir  = "directory.name";
   static const char* logFileName = "logfile.name";
 
   /**
@@ -56,5 +56,28 @@ namespace TxUCMConstants {
   static const char* appStart     = "com.txcorp.ucm.app.start";
   static const char* appEnd       = "com.txcorp.ucm.app.end";
 }
-
+#ifndef UNUSED_UCM__MESSAGES 
+#define UNUSED_UCM__MESSAGES           \
+namespace {                            \
+   bool unused =                       \
+        TxUCMConstants::propsFile &&   \
+        TxUCMConstants::logFileDir &&  \
+        TxUCMConstants::logFileName && \
+        TxUCMConstants::envBrokerTaskID &&  \
+        TxUCMConstants::envBrokerJobID &&   \
+        TxUCMConstants::defaultRequester && \
+        TxUCMConstants::logEvent &&     \
+        TxUCMConstants::submitEvent &&  \
+        TxUCMConstants::newTask &&      \
+        TxUCMConstants::updateTask &&   \
+        TxUCMConstants::addJob &&       \
+        TxUCMConstants::updateJob &&    \
+        TxUCMConstants::siteLocation && \
+        TxUCMConstants::stateID &&      \
+        TxUCMConstants::gridJobID &&    \
+        TxUCMConstants::defaultKey      \
+        ;                               \
+}
+UNUSED_UCM__MESSAGES
+#endif
 #endif

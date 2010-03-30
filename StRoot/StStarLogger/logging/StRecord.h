@@ -11,7 +11,7 @@
  * This file is part of the UCM project funded under an SBIR
  * Copyright (c) 2007-2008 STAR Collaboration - Brookhaven National Laboratory
  *
- * @(#)cpp/api:$Id: StRecord.h,v 1.1 2010/01/29 00:08:38 fine Exp $
+ * @(#)cpp/api:$Id: StRecord.h,v 1.2 2010/03/30 20:05:36 fine Exp $
  *
  *
  *
@@ -37,17 +37,16 @@
 #include <vector>
 
 #include "StDbFieldI.h"
-
-class StRecord;
-
-typedef std::vector<StRecord*>  RecordList;
-
+#include "RecordList.h"
+namespace TxLogging {
 /**
  * Abstraction for records in memory.
  * TODO: Is the key information necessary for records as well as collections?
  */
 class StRecord {
  public:
+   StRecord();
+
   /**
    * Constructor: Creates a record from the provided vector of
    * fields.
@@ -55,7 +54,7 @@ class StRecord {
    *               field list.
    * @throws StDataException If the length of the vector is zero.
    */
-  StRecord(const std::vector<StDbFieldI*>& fields);
+  StRecord(const TxLogging::FieldList& fields);
 
   /**
    * Copying mechanisms.  Copy constructor and operator= rely on the
@@ -67,7 +66,7 @@ class StRecord {
   /**
    * Destructor: Deletes sublist.
    */
-  ~StRecord();//!Deconstructor
+  virtual ~StRecord();//!Deconstructor
 
   /**
    * Returns a string representing the record.  Primarily useful for
@@ -109,12 +108,16 @@ class StRecord {
   /**
    * Returns the complete list of stored fields.
    */
-  const FieldList &getFields() const;
+  TxLogging::FieldList &getFields();
+  const TxLogging::FieldList &getFields() const;
+  void printHeader() const;
+  void print() const;
 
   /**
    * Returns the complete list of child records
    */
-  const std::vector<StRecord*> &getRecords() const;
+  TxLogging::RecordList &getRecords();
+  const  TxLogging::RecordList &getRecords() const;
 private:
   /**
    * @internal
@@ -130,10 +133,10 @@ private:
  
  private:
 
-  FieldList   fFields;
-  RecordList  fRecords;
+  TxLogging::FieldList   fFields;
+  TxLogging::RecordList  fRecords;
 };
-
+}
 #endif
 
 

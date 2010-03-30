@@ -2,7 +2,7 @@
  * @file TxEventLogFactory.h
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogFactory.h,v 1.1 2009/06/17 22:12:00 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFactory.h,v 1.2 2010/03/30 20:05:37 fine Exp $
  *
  * TxEventLogFactory instantiuate the concrete implementation for 
  * * TxEventLOf interface
