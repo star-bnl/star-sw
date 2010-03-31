@@ -729,11 +729,11 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
     return;
   }
   
-//  if (debug) {
+  if (debug) {
     std::cout << "AvalancheMicroscopic::TransportPhoton:" << std::endl;
     std::cout << "    Starting photon transport in medium " 
               << medium->GetName() << "." << std::endl;
-//  }
+  }
   
   // Get the id number of the drift medium
   int id = medium->GetId();
@@ -752,15 +752,13 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
   double dz = ctheta;
   // Energy 
   double e = e0;
-  // Photoabsorption rate
+  // Photon collision rate
   double f = 0.;
   // Timestep
   double dt = 0.;
 
   int type, level;
   double e1, s, esec;
-
-  // return;
 
   bool ok = true;
   while (ok) {
@@ -777,6 +775,31 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
       ok = false;
       break;
     }
+    switch (type) {
+      case 1:
+        // Ionisation
+        // Randomise secondary electron direction
+        phi = TwoPi * RndmUniform();
+        ctheta = 1. - 2. * RndmUniform();
+        stheta = sqrt(1. - ctheta * ctheta);
+        // Add the secondary electron to the stack
+        electron newElectron;
+        newElectron.x0 = x; newElectron.x = x;
+        newElectron.y0 = y; newElectron.y = y;
+        newElectron.z0 = z; newElectron.z = z;
+        newElectron.t0 = t; newElectron.t = t; 
+        newElectron.energy = Max(esec, Small);
+        newElectron.e0 = newElectron.energy;
+        newElectron.dx = cos(phi) * stheta;
+        newElectron.dy = sin(phi) * stheta;
+        newElectron.dz = ctheta;
+        newElectron.driftLine.clear();
+        stack.push_back(newElectron);
+        // Increment the electron and ion counters         
+        ++nElectrons; ++nIons;
+        break;
+    }
+    break;      
   }
 
   if (!ok) return;
@@ -784,6 +807,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
   photon newPhoton;
   newPhoton.x0 = x0; newPhoton.y0 = y0; newPhoton.z0 = z0;
   newPhoton.x1 = x;  newPhoton.y1 = y;  newPhoton.z1 = z;
+  newPhoton.energy = e0;
   photons.push_back(newPhoton);
   ++nPhotons;
   return;

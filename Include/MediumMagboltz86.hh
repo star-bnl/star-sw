@@ -144,9 +144,15 @@ class MediumMagboltz86 : public Medium {
     // Switch on/off anisotropic scattering (enabled by default)
     void EnableAnisotropicScattering() {anisotropic = true;}
     void DisableAnisotropicScattering() {anisotropic = false;}
-
-    void EnableDeexcitation() {deexcitation = true;}
+    
+    // Switch on/off de-excitation treatment
+    void EnableDeexcitation()  {deexcitation = true;}
     void DisableDeexcitation() {deexcitation = false;}
+
+    // When enabled, the gas cross-section table is written to file
+    // when loaded into memory
+    void EnableCrossSectionOutput()  {csoutput = true;}
+    void DisableCrossSectionOutput() {csoutput = false;}
     
     // Get the overall null-collision rate [ns-1]
     double GetElectronNullCollisionRate();
@@ -156,6 +162,11 @@ class MediumMagboltz86 : public Medium {
     bool   GetElectronCollision(const double e, int& type, int& level, 
                         double& e1, double& ctheta, 
                         double& s, double& esec);
+
+    double GetPhotonCollisionRate(const double e);
+    bool   GetPhotonCollision(const double e, int& type, int& level,
+                              double& e1, double& ctheta, 
+                              double& s, double& esec);
 
     // Reset the collision counters
     void ResetCollisionCounters();
@@ -174,7 +185,7 @@ class MediumMagboltz86 : public Medium {
     int GetNumberOfCollisions(const int level) const;
 
     void RunMagboltz(const double e, const double b, const double btheta,
-                     const int ncoll, bool verbose);
+                     const int ncoll = 5, bool verbose = true);
                                                                    
   private:
 
@@ -182,6 +193,7 @@ class MediumMagboltz86 : public Medium {
     static const int nMaxGases = 6;
     static const int nMaxInelasticTerms = 220;
     static const int nMaxLevels = 512;
+    static const int nMaxPhotonLevels = 12;
     
     // Gas mixture
     int gas[nMaxGases];
@@ -191,11 +203,14 @@ class MediumMagboltz86 : public Medium {
     double eFinal, eStep;
     bool adjust; 
   
+    // Flag enabling/disabling output of cross-section table to file
+    bool csoutput;
     // Number of different cross-section types in the current gas mixture
     int nTerms;
     // Recoil energy parameter
     double rgas[nMaxLevels];
-    // Parameter for Opal-Beaty-Peterson splitting function [eV]
+    // For ionisation: Opal-Beaty-Peterson splitting parameter [eV]
+    // For excitation: Photon energy
     double wSplit[nMaxLevels];
     // Energy loss
     double energyLoss[nMaxLevels];
@@ -236,16 +251,22 @@ class MediumMagboltz86 : public Medium {
     double fCollLoss[nMaxLevels];
     // Minimum ionisation potential
     double minIonPot;
+
+    // Number of photon collision cross-section terms
+    int nPhotonTerms;    
+    // Total photon collision frequencies
+    std::vector<double> cfTotGamma;
+    // Photon collision frequencies
+    double cfGamma[nEnergySteps][nMaxPhotonLevels];
+    int csTypeGamma[nMaxPhotonLevels];
   
-    bool GetGasNumber(std::string gas, int& number) const;
-    bool GetGasName(const int number, std::string& gas) const;
+    bool GetGasNumber(std::string gasname, int& number) const;
+    bool GetGasName(const int number, std::string& gasname) const;
     bool Mixer();
     void ComputeAngularCut(double parIn, float& cut, double &parOut);
     void ComputeDeexcitationTable();
+    bool ComputePhotonCollisionTable();
 
-//    void RunMagboltz(const double e, const double b, const double btheta,
-//                     const int ncoll, bool verbose);
-  
 };
 
 }

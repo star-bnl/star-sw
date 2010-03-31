@@ -16,9 +16,9 @@ SolidBox::SolidBox(const double cx, const double cy, const double cz,
   cTheta(1.), sTheta(0.) {
   
   std::cout << "SolidBox:" << std::endl;
-  std::cout << "    " << cx - lx << " < x < " << cx + lx << std::endl;
-  std::cout << "    " << cy - ly << " < y < " << cz + lz << std::endl;
-  std::cout << "    " << cz - lz << " < z < " << cz + lz << std::endl;
+  std::cout << "    " << cx - lx << " < x [cm] < " << cx + lx << std::endl;
+  std::cout << "    " << cy - ly << " < y [cm] < " << cz + lz << std::endl;
+  std::cout << "    " << cz - lz << " < z [cm] < " << cz + lz << std::endl;
   
 }
 

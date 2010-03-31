@@ -6,12 +6,13 @@
 #include "MediumMagboltz86.hh"
 #include "Random.hh"
 #include "FundamentalConstants.hh"
+#include "OpticalData.hh"
 
 namespace Garfield {
 
 MediumMagboltz86::MediumMagboltz86() :
   Medium(), 
-  eFinal(40.), eStep(eFinal / nEnergySteps), adjust(true), 
+  eFinal(40.), eStep(eFinal / nEnergySteps), adjust(true), csoutput(false), 
   nTerms(0), anisotropic(true), deexcitation(false) {
   
   // Set physical constants in Magboltz common blocks
@@ -315,7 +316,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
     r = RndmUniform();
     if (r < fRadiative[level]) {
       // Photon emission
-      esec = - energyLoss[level];
+      esec = - wSplit[level];
     } else if (r < fCollIon[level]) {
       // Penning ionisation
       esec = RndmUniform() * (energyLoss[level] - minIonPot);
@@ -390,6 +391,115 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
   
   if (debug) {
     std::cout << "MediumMagboltz86::GetElectronCollision:" << std::endl;
+    std::cout << "    Level:       " << level << std::endl;
+    std::cout << "    Type:        " << type << std::endl;
+  }
+  return true;
+
+}
+
+double 
+MediumMagboltz86::GetPhotonCollisionRate(const double e) {
+
+  if (e <= 0.) {
+    std::cerr << "MediumMagboltz86: Photon energy must be greater than zero."
+              << std::endl;
+    return cfTotGamma[0];
+  }
+  if (e > eFinal && adjust) {
+    std::cerr << "MediumMagboltz86::GetPhotonCollisionRate:" << std::endl;
+    std::cerr << "    Collision rate at " << e 
+              << " eV is not included in the current table." << std::endl;
+    std::cerr << "    Increasing energy range to " << 1.05 * e
+              << " eV." << std::endl;
+    SetMaxElectronEnergy(1.05 * e);
+  }
+    
+  if (isChanged) {
+    if (!Mixer()) {
+      std::cerr << "MediumMagboltz86:" << std::endl;
+      std::cerr << "     Error calculating the collision rates table."
+                << std::endl;
+      return 0.;
+    }
+    isChanged = false;
+  }
+
+  if (e > eFinal) return cfTotGamma[nEnergySteps - 1];
+  return cfTotGamma[int(e / eStep)];
+
+}
+
+bool
+MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
+                                     double& e1, double& ctheta, double& s,
+                                     double& esec) {
+
+  if (e > eFinal && adjust) {
+    std::cerr << "MediumMagboltz86::GetPhotonCollision:" << std::endl;
+    std::cerr << "    Provided electron energy  (" << e 
+              << " eV) exceeds current energy range  (" << eFinal 
+              << " eV)." << std::endl;
+    std::cerr << "    Increasing energy range to " << 1.05 * e
+              << " eV." << std::endl;
+    SetMaxElectronEnergy(1.05 * e);
+  } else if (e <= 0.) {
+    std::cerr << "MediumMagboltz86::GetElectronCollision:" << std::endl;
+    std::cerr << "    Electron energy must be greater than zero." << std::endl;
+    return false;
+  }
+  
+  if (isChanged) {
+    if (!Mixer()) {
+      std::cerr << "MediumMagboltz86: Error calculating" 
+                << " the collision rates table." << std::endl;
+      return false;
+    }
+    isChanged = false;
+  }
+
+  // Energy interval
+  const int iE = e < eFinal ? int(e / eStep) : nEnergySteps - 1;
+  
+  double r = RndmUniform();
+  int iLow = 0;
+  int iUp  = nPhotonTerms - 1;  
+  if (r <= cf[iE][iLow]) {
+    level = iLow;
+  } else if (r >= cf[iE][nPhotonTerms - 1]) {
+    level = nPhotonTerms - 1;
+  } else {
+    int iMid;
+    while (iUp - iLow > 1) {
+      iMid = (iLow + iUp) >> 1;
+      if (r < cf[iE][iMid]) {
+        iUp = iMid;
+      } else {
+        iLow = iMid;
+      }
+    }
+    level = iUp;
+  }
+  
+  // Collision type
+  type = csType[level] % 6;
+  int ngas = int(csType[level] / 6);
+
+  // Secondary electron energy
+  esec = 0.;
+  // Ionising collision
+  if (type == 1) {
+    esec = e - minIonPot;
+    if (esec < 1.e-20) esec = 1.e-20;
+    e1 = 0.;
+  }
+
+  // Determine the scattering angle
+  ctheta = 1. - 2. * RndmUniform();
+  
+  if (debug) {
+    std::cout << "MediumMagboltz86::GetPhotonCollision:" << std::endl;
+    std::cout << "    Gas:         " << ngas << std::endl;
     std::cout << "    Level:       " << level << std::endl;
     std::cout << "    Type:        " << type << std::endl;
   }
@@ -496,387 +606,406 @@ MediumMagboltz86::GetNumberOfCollisions(const int level) const {
 
 
 bool 
-MediumMagboltz86::GetGasNumber(std::string gas, int& number) const {
+MediumMagboltz86::GetGasNumber(std::string gasname, int& number) const {
 
   // Convert to upper-case
-  for (unsigned int i = 0; i < gas.length(); ++i) {
-    gas[i] = toupper(gas[i]);
+  for (unsigned int i = 0; i < gasname.length(); ++i) {
+    gasname[i] = toupper(gasname[i]);
   }
   
-  if (gas == "") {
+  if (gasname == "") {
     number = 0; return false;
   }
   
   // CF4
-  if (gas == "CF4" || gas == "FREON" || 
-      gas == "FREON-14" || gas == "TETRAFLUOROMETHANE") {
+  if (gasname == "CF4" || gasname == "FREON" || 
+      gasname == "FREON-14" || gasname == "TETRAFLUOROMETHANE") {
     number = 1; return true;
   }
   // Argon
-  if (gas == "AR" || gas == "ARGON") {
+  if (gasname == "AR" || gasname == "ARGON") {
     number = 2; return true;
   }
   // Helium 4
-  if (gas == "HE" || gas == "HELIUM" || gas == "HE-4" || gas == "HELIUM-4") {
+  if (gasname == "HE" || gasname == "HELIUM" || gasname == "HE-4" || 
+      gasname == "HELIUM-4") {
     number = 3; return true;
   }
   // Helium 3
-  if (gas == "HE-3" || gas == "HELIUM-3") {
+  if (gasname == "HE-3" || gasname == "HELIUM-3") {
     number = 4; return true;
   }
   // Neon
-  if (gas == "NE" || gas == "NEON") {
+  if (gasname == "NE" || gasname == "NEON") {
     number = 5; return true;
   }
   // Krypton
-  if (gas == "KR" || gas == "KRYPTON") {
+  if (gasname == "KR" || gasname == "KRYPTON") {
     number = 6; return true;
   }
   // Xenon
-  if (gas == "XE" || gas == "XENON") {
+  if (gasname == "XE" || gasname == "XENON") {
     number = 7; return true;
   }
   // Methane
-  if (gas == "CH4" || gas == "METHANE" ) {
+  if (gasname == "CH4" || gasname == "METHANE" ) {
     number = 8; return true;
   }
   // Ethane
-  if (gas == "C2H6" || gas == "ETHANE") {
+  if (gasname == "C2H6" || gasname == "ETHANE") {
     number = 9; return true;
   }
   // Propane
-  if (gas == "C3H8" || gas == "PROPANE") {
+  if (gasname == "C3H8" || gasname == "PROPANE") {
     number = 10; return true;
   }
   // Isobutane
-  if (gas == "C4H10" || gas == "ISOBUTANE" || gas == "ISO" || 
-      gas == "IC4H10" || gas == "ISO-C4H10" || gas == "ISOC4H10") {
+  if (gasname == "C4H10" || gasname == "ISOBUTANE" || gasname == "ISO" || 
+      gasname == "IC4H10" || gasname == "ISO-C4H10" || gasname == "ISOC4H10") {
     number = 11; return true;
   }
   // CO2 (isotropic)
-  if (gas == "CO2" || gas == "CARBON-DIOXIDE") {
+  if (gasname == "CO2" || gasname == "CARBON-DIOXIDE") {
     number = 12; return true;
   }
   // Neopentane
-  if (gas == "NEOPENTANE" || gas == "NEO-PENTANE" || 
-      gas == "NEO-C5H12" || gas == "NEOC5H12" || gas == "C5H12") {
+  if (gasname == "NEOPENTANE" || gasname == "NEO-PENTANE" || 
+      gasname == "NEO-C5H12" || gasname == "NEOC5H12" || gasname == "C5H12") {
     number = 13; return true;
   }
   // Water
-  if (gas == "H2O" || gas == "WATER" || gas == "WATER-VAPOUR") {
+  if (gasname == "H2O" || gasname == "WATER" || gasname == "WATER-VAPOUR") {
     number = 14; return true;
   }
   // Oxygen
-  if (gas == "O2" || gas == "OXYGEN") {
+  if (gasname == "O2" || gasname == "OXYGEN") {
     number = 15; return true;
   }
   // Nitrogen
-  if (gas == "N2" || gas == "NITROGEN" || 
-      gas == "NITROGEN-ISOTROPIC" || gas == "N2-ISOTROPIC") {
+  if (gasname == "N2" || gasname == "NITROGEN" || 
+      gasname == "NITROGEN-ISOTROPIC" || gasname == "N2-ISOTROPIC") {
     number = 16; return true;
   }
   // Nitric oxide (NO)
-  if (gas == "NO" || gas == "NITRIC-OXIDE" || gas == "NITROGEN-MONOXIDE") {
+  if (gasname == "NO" || gasname == "NITRIC-OXIDE" || 
+      gasname == "NITROGEN-MONOXIDE") {
     number = 17; return true;
   }
   // Nitrous oxide (N2O)
-  if (gas == "N2O" || gas == "NITROUS-OXIDE" || 
-      gas == "DINITROGEN-MONOXIDE" || gas == "LAUGHING-GAS") {
+  if (gasname == "N2O" || gasname == "NITROUS-OXIDE" || 
+      gasname == "DINITROGEN-MONOXIDE" || gasname == "LAUGHING-GAS") {
     number = 18; return true;
   }
   // Ethene (C2H4)
-  if (gas == "C2H4" || gas == "ETHENE" || gas == "ETHYLENE") {
+  if (gasname == "C2H4" || gasname == "ETHENE" || gasname == "ETHYLENE") {
     number = 19; return true;
   }
   // Acetylene (C2H2)
-  if (gas == "C2H2" || gas == "ACETYL" || 
-      gas == "ACETYLENE" || gas == "ETHYNE") {
+  if (gasname == "C2H2" || gasname == "ACETYL" || 
+      gasname == "ACETYLENE" || gasname == "ETHYNE") {
     number = 20; return true;
   }
   // Hydrogen
-  if (gas == "H2" || gas == "HYDROGEN") {
+  if (gasname == "H2" || gasname == "HYDROGEN") {
     number = 21; return true;
   }
   // Deuterium
-  if (gas == "D2" || gas == "DEUTERIUM") {
+  if (gasname == "D2" || gasname == "DEUTERIUM") {
     number = 22; return true;
   }
   // Carbon monoxide (CO)
-  if (gas == "CO" || gas == "CARBON-MONOXIDE") {
+  if (gasname == "CO" || gasname == "CARBON-MONOXIDE") {
     number = 23; return true;
   }
   // Methylal (dimethoxymethane, CH3-O-CH2-O-CH3, "hot" version)
-  if (gas == "METHYLAL" || gas == "METHYLAL-HOT" || 
-      gas == "DIMETHOXYMETHANE" || gas == "DMM" || gas == "C3H8O2") {
+  if (gasname == "METHYLAL" || gasname == "METHYLAL-HOT" || 
+      gasname == "DIMETHOXYMETHANE" || gasname == "DMM" || 
+      gasname == "C3H8O2") {
     number = 24; return true;
   }
   // DME
-  if (gas == "DME" || gas == "DIMETHYL-ETHER" || gas == "METHOXYMETHANE" || 
-      gas == "METHYL-ETHER" || gas == "WOOD-ETHER" || gas == "C2H6O") {
+  if (gasname == "DME" || gasname == "DIMETHYL-ETHER" || 
+      gasname == "METHOXYMETHANE" || 
+      gasname == "METHYL-ETHER" || gasname == "WOOD-ETHER" || 
+      gasname == "C2H6O") {
     number = 25; return true;
   }
   // Reid step
-  if (gas == "REID-STEP") {
+  if (gasname == "REID-STEP") {
     number = 26; return true;
   }
   // Maxwell model
-  if (gas == "MAXWELL-MODEL") {
+  if (gasname == "MAXWELL-MODEL") {
     number = 27; return true;
   }
   // Reid ramp
-  if (gas == "REID-RAMP") {
+  if (gasname == "REID-RAMP") {
     number = 28; return true;
   }
   // C2F6
-  if (gas == "C2F6" || gas == "FREON-116" || gas == "ZYRON-116" || 
-      gas == "ZYRON-116-N5" || gas == "HEXAFLUOROETHANE") {
+  if (gasname == "C2F6" || gasname == "FREON-116" || gasname == "ZYRON-116" || 
+      gasname == "ZYRON-116-N5" || gasname == "HEXAFLUOROETHANE") {
     number = 29; return true;
   }
   // SF6
-  if (gas == "SF6" || gas == "SULPHUR-HEXAFLUORIDE" || 
-      gas == "SULFUR-HEXAFLUORIDE") {
+  if (gasname == "SF6" || gasname == "SULPHUR-HEXAFLUORIDE" || 
+      gasname == "SULFUR-HEXAFLUORIDE") {
     number = 30; return true;
   }
   // NH3
-  if (gas == "NH3" || gas == "AMMONIA") {
+  if (gasname == "NH3" || gasname == "AMMONIA") {
     number = 31; return true;
   }
   // Propene
-  if (gas == "C3H6" || gas == "PROPENE" || gas == "PROPYLENE") {
+  if (gasname == "C3H6" || gasname == "PROPENE" || gasname == "PROPYLENE") {
     number = 32; return true;
   }
   // Cyclopropane
-  if (gas == "C-PROPANE" || gas == "CYCLO-PROPANE" || 
-      gas == "CYCLOPROPANE" || gas == "C-C3H6" || gas == "CYCLO-C3H6") {
+  if (gasname == "C-PROPANE" || gasname == "CYCLO-PROPANE" || 
+      gasname == "CYCLOPROPANE" || gasname == "C-C3H6" || 
+      gasname == "CYCLO-C3H6") {
     number = 33; return true;
   }
   // Methanol
-  if (gas == "METHANOL" || gas == "METHYL-ALCOHOL" || 
-      gas == "WOOD-ALCOHOL" || gas == "CH3OH") {
+  if (gasname == "METHANOL" || gasname == "METHYL-ALCOHOL" || 
+      gasname == "WOOD-ALCOHOL" || gasname == "CH3OH") {
     number = 34; return true;
   }
   // Ethanol
-  if (gas == "ETHANOL" || gas == "ETHYL-ALCOHOL" || gas == "GRAIN-ALCOHOL" || 
-      gas == "C2H5OH") {
+  if (gasname == "ETHANOL" || gasname == "ETHYL-ALCOHOL" || 
+      gasname == "GRAIN-ALCOHOL" || gasname == "C2H5OH") {
     number = 35; return true;
   }
   // Propanol
-  if (gas == "PROPANOL" || gas == "2-PROPANOL" || gas == "ISO-PROPANOL" || 
-      gas == "ISOPROPANOL" || gas == "ISOPROPYL" || 
-      gas == "ISOPROPYL-ALCOHOL" || gas == "C3H7OH") {
+  if (gasname == "PROPANOL" || gasname == "2-PROPANOL" || 
+      gasname == "ISO-PROPANOL" || gasname == "ISOPROPANOL" || 
+      gasname == "ISOPROPYL" || 
+      gasname == "ISOPROPYL-ALCOHOL" || gasname == "C3H7OH") {
     number = 36; return true;
   }
   // Cesium / Caesium.
-  if (gas == "CS" || gas == "CESIUM" || gas == "CAESIUM") {
+  if (gasname == "CS" || gasname == "CESIUM" || gasname == "CAESIUM") {
     number = 37; return true;
   }
   // Fluorine
-  if (gas == "F2" || gas == "FLUOR" || gas == "FLUORINE") {
+  if (gasname == "F2" || gasname == "FLUOR" || gasname == "FLUORINE") {
     number = 38; return true;
   }
-  if (gas == "CS2" || gas == "CARBON-DISULPHIDE" || gas == "CARBON-DISULFIDE") {
+  if (gasname == "CS2" || gasname == "CARBON-DISULPHIDE" || 
+      gasname == "CARBON-DISULFIDE") {
     number = 39; return true;
   }
   // COS
-  if (gas == "COS" || gas == "CARBONYL-SULPHIDE" || gas == "CARBONYL-SULFIDE") {
+  if (gasname == "COS" || gasname == "CARBONYL-SULPHIDE" || 
+      gasname == "CARBONYL-SULFIDE") {
     number = 40; return true;
   }
   // Deuterated methane
-  if (gas == "DEUT-METHANE" || gas == "DEUTERIUM-METHANE" || 
-      gas == "DEUTERATED-METHANE" || gas == "CD4") {
+  if (gasname == "DEUT-METHANE" || gasname == "DEUTERIUM-METHANE" || 
+      gasname == "DEUTERATED-METHANE" || gasname == "CD4") {
     number = 41; return true;
   }
   // BF3
-  if (gas == "BF3" || gas == "BORON-TRIFLUORIDE") {
+  if (gasname == "BF3" || gasname == "BORON-TRIFLUORIDE") {
     number = 42; return true;
   }
   // C2HF5 and C2H2F4.
-  if (gas == "C2HF5" || gas == "C2H2F4" || gas == "C2F5H" || gas == "C2F4H2" || 
-      gas == "FREON-134" || gas == "FREON-134-A" || gas == "FREON-125" ||
-      gas == "ZYRON-125" || gas == "TETRAFLUOROETHANE" || 
-      gas == "PENTAFLUOROETHANE") {
+  if (gasname == "C2HF5" || gasname == "C2H2F4" || gasname == "C2F5H" || 
+      gasname == "C2F4H2" || gasname == "FREON-134" || 
+      gasname == "FREON-134-A" || gasname == "FREON-125" ||
+      gasname == "ZYRON-125" || gasname == "TETRAFLUOROETHANE" || 
+      gasname == "PENTAFLUOROETHANE") {
     number = 43; return true;
   }
   // CHF3
-  if (gas == "CHF3" || gas == "FREON-23" || gas == "TRIFLUOROMETHANE") {
+  if (gasname == "CHF3" || gasname == "FREON-23" || 
+      gasname == "TRIFLUOROMETHANE") {
     number = 50; return true;
   }
   // CF3Br
-  if (gas == "CF3BR" || gas == "TRIFLUOROBROMOMETHANE" || 
-      gas == "HALON-1301" || gas == "FREON-13B1") {
+  if (gasname == "CF3BR" || gasname == "TRIFLUOROBROMOMETHANE" || 
+      gasname == "HALON-1301" || gasname == "FREON-13B1") {
     number = 51; return true;
   }
   // C3F8
-  if (gas == "C3F8" || gas == "OCTAFLUOROPROPANE" || gas == "R218" || 
-      gas == "FREON-218" || gas == "PERFLUOROPROPANE" || 
-      gas == "RC-218" || gas == "PFC-218") {
+  if (gasname == "C3F8" || gasname == "OCTAFLUOROPROPANE" || 
+      gasname == "R218" || gasname == "FREON-218" || 
+      gasname == "PERFLUOROPROPANE" || 
+      gasname == "RC-218" || gasname == "PFC-218") {
     number = 52; return true;
   }
   // Ozone
-  if (gas == "OZONE" || gas == "O3") {
+  if (gasname == "OZONE" || gasname == "O3") {
     number = 53; return true;
   }
   // Mercury
-  if (gas == "MERCURY" || gas == "HG" || gas == "HG2") {
+  if (gasname == "MERCURY" || gasname == "HG" || gasname == "HG2") {
     number = 54; return true;
   }
   // H2S
-  if (gas == "H2S" || gas == "HYDROGEN-SULPHIDE" || gas == "HYDROGEN-SULFIDE" ||
-      gas == "HEPATIC-ACID" || gas == "SEWER-GAS" || gas == "SULFUR-HYDRIDE" ||
-      gas == "DIHYDROGEN-MONOSULFIDE" || gas == "DIHYDROGEN-MONOSULPHIDE" ||
-      gas == "SULPHUR-HYDRIDE" || gas == "STINK-DAMP" || 
-      gas == "SULFURETED-HYDROGEN") {
+  if (gasname == "H2S" || gasname == "HYDROGEN-SULPHIDE" || 
+      gasname == "HYDROGEN-SULFIDE" ||
+      gasname == "HEPATIC-ACID" || gasname == "SEWER-GAS" || 
+      gasname == "SULFUR-HYDRIDE" ||
+      gasname == "DIHYDROGEN-MONOSULFIDE" || 
+      gasname == "DIHYDROGEN-MONOSULPHIDE" ||
+      gasname == "SULPHUR-HYDRIDE" || gasname == "STINK-DAMP" || 
+      gasname == "SULFURETED-HYDROGEN") {
     number = 55; return true;
   }
   // n-butane
-  if (gas == "N-BUTANE" || gas == "N-C4H10") {
+  if (gasname == "N-BUTANE" || gasname == "N-C4H10") {
     number = 56; return true;
   }
   // n-pentane
-  if (gas == "N-PENTANE" || gas == "N-C5H12") {
+  if (gasname == "N-PENTANE" || gasname == "N-C5H12") {
     number = 57; return true;
   }
   // Nitrogen
-  if (gas == "NI" || gas == "NITROGEN" || gas == "NI-ANISOTROPIC" || 
-      gas == "NITROGEN-ANISOTROPIC" ||
-      gas == "N2" || gas == "N2-ANISOTROPIC") {
+  if (gasname == "NI" || gasname == "NITROGEN" || 
+      gasname == "NI-ANISOTROPIC" || 
+      gasname == "NITROGEN-ANISOTROPIC" ||
+      gasname == "N2" || gasname == "N2-ANISOTROPIC") {
     number = 58; return true;
   }
   // Germane, GeH4
-  if (gas == "GERMANE" || gas == "GERM" || gas == "GERMANIUM-HYDRIDE" || 
-      gas == "GERMANIUM-TETRAHYDRIDE" ||
-      gas == "GERMANOMETHANE" || gas == "MONOGERMANE" || gas == "GEH4") {
+  if (gasname == "GERMANE" || gasname == "GERM" || 
+      gasname == "GERMANIUM-HYDRIDE" || 
+      gasname == "GERMANIUM-TETRAHYDRIDE" ||
+      gasname == "GERMANOMETHANE" || gasname == "MONOGERMANE" || 
+      gasname == "GEH4") {
     number = 59; return true;
   }
   // Silane, SiH4
-  if (gas == "SILANE" || gas == "SIL" || gas == "SILICON-HYDRIDE" || 
-      gas == "SILICON-TETRAHYDRIDE" ||
-      gas == "SILICANE" || gas == "MONOSILANE" || gas == "SIH4") {
+  if (gasname == "SILANE" || gasname == "SIL" || 
+      gasname == "SILICON-HYDRIDE" || 
+      gasname == "SILICON-TETRAHYDRIDE" ||
+      gasname == "SILICANE" || gasname == "MONOSILANE" || gasname == "SIH4") {
     number = 60; return true;
   }
   
   std::cerr << "MediumMagboltz86::GetGasNumber():" << std::endl;
-  std::cerr << "    Gas " << gas << " is not defined." << std::endl;
+  std::cerr << "    Gas " << gasname << " is not defined." << std::endl;
   return false;
   
 }
 
 bool 
-MediumMagboltz86::GetGasName(const int number, std::string& gas) const {
+MediumMagboltz86::GetGasName(const int number, std::string& gasname) const {
   
   switch (number) {
     case 0:
-      gas = ""; return false; break;
+      gasname = ""; return false; break;
     case 1:
-      gas = "CF4"; break;
+      gasname = "CF4"; break;
     case 2:
-      gas = "Ar"; break;
+      gasname = "Ar"; break;
     case 3:
-      gas = "He"; break;
+      gasname = "He"; break;
     case 4:
-      gas = "He-3"; break;
+      gasname = "He-3"; break;
     case 5:
-      gas = "Ne"; break;
+      gasname = "Ne"; break;
     case 6:
-      gas = "Kr"; break;
+      gasname = "Kr"; break;
     case 7:
-      gas = "Xe"; break;
+      gasname = "Xe"; break;
     case 8:
-      gas = "CH4"; break;
+      gasname = "CH4"; break;
     case 9:
-      gas = "C2H6"; break;
+      gasname = "C2H6"; break;
     case 10:
-      gas = "C3H8"; break;
+      gasname = "C3H8"; break;
     case 11:
-      gas = "iC4H10"; break;
+      gasname = "iC4H10"; break;
     case 12:
-      gas = "CO2"; break;
+      gasname = "CO2"; break;
     case 13:
-      gas = "Neopentane"; break;
+      gasname = "Neopentane"; break;
     case 14:
-      gas = "H2O"; break;
+      gasname = "H2O"; break;
     case 15:
-      gas = "O2"; break;
+      gasname = "O2"; break;
     case 16:
-      gas = "N2"; break;
+      gasname = "N2"; break;
     case 17:
-      gas = "NO"; break;
+      gasname = "NO"; break;
     case 18:
-      gas = "N2O"; break;
+      gasname = "N2O"; break;
     case 19:
-      gas = "C2H4"; break;
+      gasname = "C2H4"; break;
     case 20:
-      gas = "C2H2"; break;
+      gasname = "C2H2"; break;
     case 21:
-      gas = "H2"; break;
+      gasname = "H2"; break;
     case 22:
-      gas = "D2"; break;
+      gasname = "D2"; break;
     case 23:
-      gas = "CO"; break;
+      gasname = "CO"; break;
     case 24:
-      gas = "Methylal"; break;
+      gasname = "Methylal"; break;
     case 25:
-      gas = "DME"; break;
+      gasname = "DME"; break;
     case 26:
-      gas = "Reid-Step"; break;
+      gasname = "Reid-Step"; break;
     case 27:
-      gas = "Maxwell-Model"; break;
+      gasname = "Maxwell-Model"; break;
     case 28:
-      gas = "Reid-Ramp"; break;
+      gasname = "Reid-Ramp"; break;
     case 29:
-      gas = "C2F6"; break;
+      gasname = "C2F6"; break;
     case 30:
-      gas = "SF6"; break;
+      gasname = "SF6"; break;
     case 31:
-      gas = "NH3"; break;
+      gasname = "NH3"; break;
     case 32:
-      gas = "C3H6"; break;
+      gasname = "C3H6"; break;
     case 33:
-      gas = "Cyclopropane"; break;
+      gasname = "Cyclopropane"; break;
     case 34:
-      gas = "Methanol"; break;
+      gasname = "Methanol"; break;
     case 35:
-      gas = "Ethanol"; break;
+      gasname = "Ethanol"; break;
     case 36:
-      gas = "Propanol"; break;
+      gasname = "Propanol"; break;
     case 37:
-      gas = "Cs"; break;
+      gasname = "Cs"; break;
     case 38:
-      gas = "F2"; break;
+      gasname = "F2"; break;
     case 39:
-      gas = "CS2"; break;
+      gasname = "CS2"; break;
     case 40:
-      gas = "COS"; break;
+      gasname = "COS"; break;
     case 41:
-      gas = "CD4"; break;
+      gasname = "CD4"; break;
     case 42:
-      gas = "BF3"; break;
+      gasname = "BF3"; break;
     case 43:
-      gas = "C2HF5"; break;
+      gasname = "C2HF5"; break;
     case 50:
-      gas = "CHF3"; break;
+      gasname = "CHF3"; break;
     case 51:
-      gas = "CF3Br"; break;
+      gasname = "CF3Br"; break;
     case 52:
-      gas = "C3F8"; break;
+      gasname = "C3F8"; break;
     case 53:
-      gas = "O3"; break;
+      gasname = "O3"; break;
     case 54:
-      gas = "Hg"; break;
+      gasname = "Hg"; break;
     case 55:
-      gas = "H2S"; break;
+      gasname = "H2S"; break;
     case 56:
-      gas = "n-C4H10"; break;
+      gasname = "n-C4H10"; break;
     case 57:
-      gas = "n-C5H12"; break;
+      gasname = "n-C5H12"; break;
     case 58:
-      gas = "N2"; break;
+      gasname = "N2"; break;
     case 59:
-      gas = "GeH4"; break;
+      gasname = "GeH4"; break;
     case 60:
-      gas = "SiH4"; break;
+      gasname = "SiH4"; break;
     default:
-      gas = ""; return false; break;
+      gasname = ""; return false; break;
     }
 
     return true;
@@ -962,7 +1091,7 @@ MediumMagboltz86::Mixer() {
   nTerms = 0;
   
   std::ofstream outfile;
-  if (debug) outfile.open("cs.txt", std::ios::out);
+  if (csoutput) outfile.open("cs.txt", std::ios::out);
   outfile << "# " << std::endl;
 
   // Loop over the gases in the mixture.  
@@ -1052,7 +1181,7 @@ MediumMagboltz86::Mixer() {
     // Loop over the energy table
     for (int iE = 0; iE < nEnergySteps; ++iE) {
       np = np0;
-      if (debug) {
+      if (csoutput) {
         outfile << iE * eStep << "  " << q[iE][1] << "  " << q[iE][2] 
                 << "  " << q[iE][3] << "  ";
       }
@@ -1082,7 +1211,7 @@ MediumMagboltz86::Mixer() {
       // Inelastic terms
       for (int j = 0; j < nIn; ++j) {
         ++np;
-        if (debug) outfile << qIn[iE][j] << "  ";
+        if (csoutput) outfile << qIn[iE][j] << "  ";
         cf[iE][np] = qIn[iE][j] * van;
         if (cf[iE][np] < 0.) {
           std::cerr << "MediumMagboltz86::Mixer:" << std::endl;
@@ -1098,10 +1227,10 @@ MediumMagboltz86::Mixer() {
           scatParameter[iE][np] = pEqIn[iE][j];
         }
       }
-      if (debug) outfile << std::endl;
+      if (csoutput) outfile << std::endl;
     }
   }
-  if (debug) outfile.close();
+  if (csoutput) outfile.close();
 
   for (int iE = nEnergySteps; iE--;) {
     // Calculate the total collision frequency
@@ -1161,6 +1290,12 @@ MediumMagboltz86::Mixer() {
   }
 
   if (deexcitation) ComputeDeexcitationTable();
+  if (!ComputePhotonCollisionTable()) {
+     std::cerr << "MediumMagboltz86: " << std::endl;
+     std::cerr << "    Photon collision rates could not be calculated." 
+               << std::endl;
+     if (deexcitation)return false;
+  }
 
   return true;
 
@@ -1202,6 +1337,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       }
     }
     if (csType[i] % 6 != 4) continue;
+    wSplit[i] = energyLoss[i];
     switch (gas[int(csType[i] / 6)]) {
       case 2:
         // Argon
@@ -1371,6 +1507,51 @@ MediumMagboltz86::ComputeDeexcitationTable() {
   
 }
 
+bool
+MediumMagboltz86::ComputePhotonCollisionTable() {
+
+  OpticalData data;
+  double cs;
+  std::string gasname;
+
+  const double density = LoschmidtNumber * (pressure / 760.) * 
+                         (273.15 / temperature);
+
+  // Reset the collision rate arrays
+  cfTotGamma.resize(nEnergySteps);
+  for (int j = nEnergySteps; j--;) {
+    cfTotGamma[j] = 0.;
+    for (int i = nMaxPhotonLevels; i--;) cfGamma[j][i] = 0.;
+  }
+
+  nPhotonTerms = 0;
+  for (int i = 0; i < nComponents; ++i) {
+    const double prefactor = density * SpeedOfLight * fraction[i];
+    GetGasName(gas[i], gasname);
+    if (!data.SetMaterial(gasname)) return false;
+    for (int j = 0; j < nEnergySteps; ++j) {
+      data.GetPhotoabsorptionCrossSection(j * eStep, cs);
+      cfTotGamma[j] += cs * prefactor;
+      cfGamma[j][nPhotonTerms] = cs * prefactor;
+      // Temporary: only one term per gas (absorption)
+      csTypeGamma[nPhotonTerms] = i * 6 + 2;
+    }
+    ++nPhotonTerms;
+  }
+
+  // Normalise the collision rates
+  for (int j = 0; j < nEnergySteps; ++j) {
+    if (cfTotGamma[j] <= 0.) continue;
+    for (int i = 0; i < nPhotonTerms; ++i) {
+      cfGamma[j][i] /= cfTotGamma[j];
+      if (i > 0) cfGamma[j][i] += cfGamma[j][i - 1];
+    }
+  }
+
+  return true;
+
+}
+
 void
 MediumMagboltz86::RunMagboltz(const double e, 
                               const double bmag, const double btheta,
@@ -1465,7 +1646,7 @@ MediumMagboltz86::RunMagboltz(const double e,
   double alpha = ctowns_.alpha;
   double eta   = ctowns_.att;
 
-  std::cout << "Drift velocity: " << vz << std::endl;
+  std::cout << "Drift velocity: " << vx << " " << vy << " " << vz << std::endl;
   std::cout << "Longitudinal diffusion: " << dl << std::endl;
   std::cout << "Transverse diffusion:   " << dt << std::endl;
   std::cout << "Townsend coefficient:   " << alpha << std::endl;
