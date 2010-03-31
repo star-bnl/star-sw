@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.127 2010/03/29 20:37:54 fine Exp $
+// $Id: St_geant_Maker.cxx,v 1.128 2010/03/31 19:15:45 fine Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.128  2010/03/31 19:15:45  fine
+// RT #1890 Fix the side effect introduced  yesterdays
+//
 // Revision 1.127  2010/03/29 20:37:54  fine
 // RT #1890 Fix the geometry leak that entails the warning message
 //
@@ -629,10 +632,11 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
      ds = StMaker::FindDataSet(logInput,uppMk,dowMk); 
   } else {
      if (lookupHall) {
+        ds = fVolume;
         if (!fVolume) {
            ((St_geant_Maker *)this)->Work();
+           ds = fVolume;
            if (fVolume) {
-              ds = fVolume;
               if (gGeometry) {
                  TList *listOfVolume = gGeometry->GetListOfNodes();
 

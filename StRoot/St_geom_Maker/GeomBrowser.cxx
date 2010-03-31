@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.21 2009/12/31 00:01:50 perev Exp $
+// ** $Id: GeomBrowser.cxx,v 1.22 2010/03/31 19:16:00 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #ifndef  NO_GEANT_MAKER
@@ -579,7 +579,7 @@ void GeomBrowser::STAR_geometry_activated( const QString &geoVersion )
       } else {          
          fChain->Init(); Geant3Init = 1;     
       }
-      // fGeometrySelector->setEnabled(FALSE); // we can communicate GEANT one time ony :(
+      // fGeometrySelector->setEnabled(FALSE); // we can communicate GEANT one time only :(
       TVolume *v = dynamic_cast<TVolume *>(Geant().GetDataSet("HALL"));
       if (v) {
          // Make CAVE invisible
