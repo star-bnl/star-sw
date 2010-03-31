@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.17 2010/03/30 20:05:37 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.18 2010/03/31 15:48:27 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -784,7 +784,7 @@ string TxUCMCollector::tableNamePrefix(const char *prefix) const
             string(prefix)
           + string("_") + msgHashMap.find(fgRequester)->second
           + string("_") + msgHashMap.find(fgBTaskID)->second; 
-     log->debug(string(__FUNCTION__)+ "<" + fullTableName + ">");
+    ((TxUCMCollector*) this)->log->debug(string(__FUNCTION__)+ "<" + fullTableName + ">");
 	 return fullTableName;
 }
 
