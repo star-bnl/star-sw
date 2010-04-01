@@ -43,7 +43,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.33 2010/03/22 23:45:05 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.34 2010/04/01 22:17:06 fisyak Exp $";
 #define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -209,6 +209,12 @@ Int_t StTpcRSMaker::InitRun(Int_t runnumberOf) {
 	}
       }
     }
+  }
+  if (! nAliveInner && ! nAliveOuter) {
+    LOG_INFO << "Illegal date/time. Tpc Anode Voltage is not set to run condition: AliveInner: " << nAliveInner 
+	     << "\tAliveOuter: " << nAliveOuter 
+	     << "\tStop the run" << endm;
+    return kStFatal;
   }
   if (nAliveInner > 1) innerSectorAnodeVoltage /= nAliveInner;
   if (nAliveOuter > 1) outerSectorAnodeVoltage /= nAliveOuter;
@@ -489,7 +495,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	if (Debug() && iRow && iRow != iPadrow) continue;
 	Int_t iRdo    = StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(iPadrow);
 	
-	if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(iSector,iRdo)) continue;
+	if ( ! StDetectorDbTpcRDOMasks::instance()->isOn(iSector,iRdo))    continue;
+	if ( ! St_tpcAnodeHVavgC::instance()->livePadrow(iSector,iPadrow)) continue;
 	Int_t Id         = tpc_hit->track_p;
 	Int_t TrackId    = Id;
 	Int_t id3 = 0, ipart = 8, charge = 1;
@@ -1339,8 +1346,11 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.33 2010/03/22 23:45:05 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.34 2010/04/01 22:17:06 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.34  2010/04/01 22:17:06  fisyak
+// Add checking for TPC is switched off at all and stop if so
+//
 // Revision 1.33  2010/03/22 23:45:05  fisyak
 // Freeze version with new parameters table
 //
