@@ -1,4 +1,4 @@
-// $Id: EdMu.C,v 1.13 2010/04/01 20:49:52 fine Exp $
+// $Id: EdMu.C,v 1.14 2010/04/01 22:44:25 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 
@@ -16,10 +16,10 @@ class StuDraw3DMuEvent;
 StuDraw3DMuEvent *gEd = 0; //< The pointer to the current instance of the Event Display. You may want it to change the the drawing option
 class StBemcTables;
 StBemcTables* mBemcTables = 0;
-bool gRotationIsOn = false; //< Fl;ag whether the animated rotation was initialized to do it at once
+bool gRotationIsOn = false; //< Flag whether the animated rotation was initialized to do it at once
 
 //! \file EdMu.C 
-/** \file $STAR/macros/mudst/EdMu.C 
+/*! \file $STAR/macros/mudst/EdMu.C 
   \brief EdMu.C macro is the simple ROOT macro to draw the StMuDst from ROOT file
   
    Additions to use BEMC towers (for display of upsilon events) by Manuel Calderon de la Barca. Feb 2010.
@@ -186,8 +186,8 @@ void addTracks(bool cuts=false) {
 //____________________________________________________________________________________
 //! This mrd (RedrawEvent) function \b redraws all hits and/or tracks from the \c current event
 /*! 
-   \param doTowerCuts - apply the tower cut  (see: mrd(bool doTowerCuts, bool doTrackCuts, bool clear) )
-   \param doTrackCuts - apply the track cut (see: mrd(bool doTowerCuts, bool doTrackCuts, bool clear) )
+   \param doTowerCuts - apply the tower cut (see: mae(bool rotation, bool doTowerCuts, bool doTrackCuts, int skipEvent )  )
+   \param doTrackCuts - apply the track cut (see: mae(bool rotation, bool doTowerCuts, bool doTrackCuts, int skipEvent )  )
    \param clear - flag to mark whether the screen has to be cleaned 
                    first (before any new component is added)
    \htmlonly
@@ -281,7 +281,7 @@ void mae(bool rotation=false, bool doTowerCuts=false, bool doTrackCuts=false,  i
    \param detectorNames  - the list of the detector names or "0" to draw none 
    \note To start "Event Display" \c EdMu just invoke:
    \code 
-     ln -s $STAR/StRoot/macors/.rootrc
+     ln -s $STAR/StRoot/macros/.rootrc
      root4star EdMu.C 
    \endcode
    \image html "http://nuclear.ucdavis.edu/~calderon/Images/upsEvent.gif" "The tracks in the TPC and also the signal seen in the BEMC ( Courtesy of Manuel Calderon de la Barca Sanchez )"
