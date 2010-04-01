@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.126 2009/11/05 17:37:52 fine Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.127 2010/04/01 00:27:33 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.127  2010/04/01 00:27:33  perev
+ * Zero fied = 2e-6
+ *
  * Revision 2.126  2009/11/05 17:37:52  fine
  * remove the compilation warnings
  *
@@ -561,12 +564,13 @@ void StiKalmanTrackNode::propagateCurv(const StiKalmanTrackNode *parent)
 //______________________________________________________________________________
 double StiKalmanTrackNode::getHz() const
 {
-  static const Double_t EC = 2.99792458e-4;
+  
+static const double EC = 2.99792458e-4,ZEROHZ = 2e-6;
    if (mHz) return mHz;
    double h[3];
    StarMagField::Instance()->BField(&(getGlobalPoint().x()),h);
    h[2] = EC*h[2];
-   if (fabs(h[2]) < 3e-33) h[2]=3e-33;
+   if (fabs(h[2]) < ZEROHZ) h[2]=3e-33;
    mHz = h[2];
    return mHz;
 }
