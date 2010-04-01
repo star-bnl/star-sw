@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.127 2010/04/01 00:27:33 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.128 2010/04/01 20:25:34 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.128  2010/04/01 20:25:34  perev
+ * Remove test to small error _cPP
+ *
  * Revision 2.127  2010/04/01 00:27:33  perev
  * Zero fied = 2e-6
  *
@@ -1146,11 +1149,11 @@ void StiKalmanTrackNode::propagateError()
     }
   propagateMtx();
   errPropag6(mFE.A,mMtx().A,kNPars);
-  int smallErr = !(mFE._cYY>1e-20 && mFE._cZZ>1e-20 && mFE._cEE>1e-20&& mFE._cPP>1.e-30&& mFE._cTT>1.e-20);
+  int smallErr = !(mFE._cYY>1e-20 && mFE._cZZ>1e-20 && mFE._cEE>1e-20 && mFE._cTT>1.e-20);
   if (smallErr) {
     LOG_INFO << Form("***SmallErr: cYY=%g cZZ=%g cEE=%g cCC=%g cTT=%g"
           ,mFE._cYY,mFE._cZZ,mFE._cEE,mFE._cPP,mFE._cTT) << endm;
-    assert(mFE._cYY>0 && mFE._cZZ>0 && mFE._cEE>0 && mFE._cPP>0 && mFE._cTT>0);
+    assert(mFE._cYY>0 && mFE._cZZ>0 && mFE._cEE>0 && mFE._cPP>=0 && mFE._cTT>0);
   }
   assert(fabs(mFE._cXX)<1.e-6);
   assert(mFE._cYY*mFE._cZZ-mFE._cZY*mFE._cZY>0);
