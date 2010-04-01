@@ -1,6 +1,7 @@
-// $Id: EdMu.C,v 1.14 2010/04/01 22:44:25 fine Exp $
+// $Id: EdMu.C,v 1.15 2010/04/01 22:52:10 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
+//  Additions to use BEMC towers (for display of upsilon events) by Manuel Calderon de la Barca. Feb 2010.
 
 class StMuEmcHit;
 class StMuDst;
