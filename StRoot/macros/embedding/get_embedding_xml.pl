@@ -52,6 +52,8 @@ GetOptions (
     'requestnumber=n' => \$requestNumber,  # Request number
     'tag=s' => \$tagsDirectory,            # Set tags file directory
     'trg=s' => \$trgsetupName,             # Set trigger setup name
+    'triggerid=s' => \$triggerId,          # Set trigger id cut
+    'zvertex=s' => \$zvertexCut,           # Set z-vertex cut
     'verbose' => \$verbose
 );
 
@@ -74,11 +76,17 @@ my $usage = q(
   -m (or --mixer) [bfcMixer]   Set bfcMixer macro (default is bfcMixer_TpcSvtSSd.C)
   -pro [production]            Set production. ex. -p P08ie (default is P08ic)
   -pt [pt option]              Set pt option (default is FlatPt)
-                               (will add current available pt options below soon, hiroshi)
+                               
+      ***  Current available pt options are
+      option               description
+      FlatPt               Generate flat (pt,y) by 'phasespace' command
+      strange              Generate sloped pt. Slope is defined by temperature (default is 300MeV)
 
-  -r [request number]          Set request number (default is 9999999999)
-  -tag [tags file directory]   Set tag file directory (default is /home/starofl/embedding/$production)
-  -trg [trigger setup name]    Set trigger setup name (default is 2007ProductionMinBias)
+  -r [request number]                   Set request number (default is 9999999999)
+  -tag [tags file directory]            Set tag file directory (default is /home/starofl/embedding/$production)
+  -trg [trigger setup name]             Set trigger setup name (default is 2007ProductionMinBias)
+  -trig (or --triggerid) [trigger id]   Set trigger id cut
+  -z (or --zvertex) [max. z-vertex cut] Set z-vertex cut. The cut will be |vz| < cut
 
   -v or --verbose              Verbose flag to show debug messages
 
@@ -198,7 +206,7 @@ print OUT "<!-- Start job -->\n";
 $tagFile = "\$EMBEDTAGDIR/\${FILEBASENAME}.tags.root"; #Define tag file
 printDebug("Set tags file: $tagFile, bfcMixer: $bfcMixer ...");
 
-print OUT "root4star -b -q $bfcMixer\\($nevents,\\\"\$INPUTFILE0\\\",\\\"$tagFile\\\",&PTLOW;,&PTHIGH;,&ETALOW;,&ETAHIGH;,&PID;,&MULT;,\\\"$production\\\",\\\"$ptOption\\\"\\\)\n";
+print OUT "root4star -b -q $bfcMixer\\($nevents,\\\"\$INPUTFILE0\\\",\\\"$tagFile\\\",&PTLOW;,&PTHIGH;,&ETALOW;,&ETAHIGH;,&PID;,&MULT;,\\\"$production\\\",\\\"$ptOption\\\",-$zvertexCut,$zvertexCut\\\)\n";
 print OUT "ls -la .\n";
 
 #----------------------------------------------------------------------------------------------------
@@ -282,11 +290,20 @@ sub getLibrary {
 }
 
 #----------------------------------------------------------------------------------------------------
+# Get production directory
+#----------------------------------------------------------------------------------------------------
+sub getProductionDirectory {
+  my $production = shift @_ ;
+  return "/project/projectdirs/star/embedding/$production";
+}
+
+#----------------------------------------------------------------------------------------------------
 # Get generator directory
 #----------------------------------------------------------------------------------------------------
 sub getGeneratorDirectory {
   my $production = shift @_ ;
-  return "/project/projectdirs/star/embedding/$production";
+  my $productionDir = getProductionDirectory($production);
+  return "$productionDir/LIST";
 }
 
 #----------------------------------------------------------------------------------------------------
@@ -294,9 +311,8 @@ sub getGeneratorDirectory {
 #----------------------------------------------------------------------------------------------------
 sub getLogDirectory {
   my $production = shift @_ ;
-  my $generator  = getGeneratorDirectory($production);
-  my $log        = "$generator/LOG";
-  return $log;
+  my $productionDir = getProductionDirectory($production);
+  return "$productionDir/LOG";
 };
 
 #----------------------------------------------------------------------------------------------------
