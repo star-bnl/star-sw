@@ -1,4 +1,4 @@
-// $Id: StuDraw3DMuEvent.cxx,v 1.16 2010/01/28 05:16:24 fine Exp $
+// $Id: StuDraw3DMuEvent.cxx,v 1.17 2010/04/02 22:34:09 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DMuEvent.h"
 #include "Gtypes.h"
@@ -248,7 +248,7 @@ void   StuDraw3DMuEvent::Endcaps(const StMuEmcCollection &emc,Style_t sty)
     static const float dPhi = 2*EndcapGeom()->getPhiHalfWidth(isec,isub);
     static const float deta = 2*EndcapGeom()->getEtaHalfWidth(ieta);
     static const float radius = 270.; // no idea where I should pick it from.
-    float energy = adc*60./4096-0.1;
+    float energy = adc*60./4096-0.15;
     if ( energy > 0.15 ) {
     
        // If edep less then MIP (~300 MeV), 60GeV <-> 4096 ADC counts
@@ -261,7 +261,7 @@ void   StuDraw3DMuEvent::Endcaps(const StMuEmcCollection &emc,Style_t sty)
        } else                         colorResponce = kRed;
 	
        static const double maxSize =  400.; // (cm)
-       static const double scale   =   120.; // (cm/Gev)
+       static const double scale   =   15; // 120.; // (cm/Gev)
        double size =(energy > 0.3 ? scale : scale/30.)*energy;
        if (size > maxSize)  size = maxSize ;
        Tower( radius
