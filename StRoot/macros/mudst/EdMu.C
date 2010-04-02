@@ -1,4 +1,4 @@
-// $Id: EdMu.C,v 1.17 2010/04/02 22:44:49 fine Exp $
+// $Id: EdMu.C,v 1.18 2010/04/02 22:52:31 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //  Additions to use BEMC towers (for display of upsilon events) by Manuel Calderon de la Barca. Feb 2010.
@@ -202,7 +202,7 @@ void addTracks(bool cuts=false) {
     <tr><th colspan=2> Courtesy of  <a href="http://nuclear.ucdavis.edu/~calderon">Manuel Calderon de la Barca Sanchez</a> </th></tr>
     </table>
    \endhtmlonly
-   \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EdMu.C.Endcap.tracks.png "The first event  from Run 9046031 pProduction2008 produced by EdMu.C macros"   
+   \image html http://www.star.bnl.gov/public/comp/vis/StDraw3D/examples/EdMu.C.Endcap.tracks.png "The event  42752 from Run 8112020 2007Production2 (upsilon) produced by EdMu.C macros"   
 */
 //____________________________________________________________________________________
 void mrd(bool doTowerCuts=false, bool doTrackCuts=false, bool clear=true) 
