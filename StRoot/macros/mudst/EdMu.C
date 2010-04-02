@@ -1,4 +1,4 @@
-// $Id: EdMu.C,v 1.15 2010/04/01 22:52:10 fine Exp $
+// $Id: EdMu.C,v 1.16 2010/04/02 22:09:15 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //  Additions to use BEMC towers (for display of upsilon events) by Manuel Calderon de la Barca. Feb 2010.
@@ -73,7 +73,7 @@ bool gRotationIsOn = false; //< Flag whether the animated rotation was initializ
 /*! Look up all BEMC  tower adc values and render it  if (adc > ped + 3 * rms)
  This function loops over all the \a softIds, gets the \a ADC values, \a pedestals
  and \a gain calibrations and calculates the energy. \br
- The towers with dc > ped + 3 * rms will be drawn:
+ \br The towers with dc > ped + 3 * rms will be drawn:
 - green for E<0.3 GeV, 
 - blue for 0.3 < E < 1 GeV, 
 - yellow for 1 < E < 4 GeV (which is approximately the HT threshold for the upsilon trigger at Level-0)
@@ -97,54 +97,49 @@ void addEmcHits(bool cuts=false) {
     //StMuEmcHit *hit = 0;
     //while (hit = (StMuEmcHit *)next()  ) {
     for (int softId = 1; softId<=4800; ++softId) {
-	int adc = StMuDst::muEmcCollection()->getTowerADC(softId);
-	Color_t colorResponce=kWhite;
-	int status;
-	mBemcTables->getStatus(1, softId, status);
-	if (status != 1) continue;
-	float ped, rms;
-	mBemcTables->getPedestal(1, softId, 0, ped, rms);
-	if (adc < ped + 3 * rms) continue;
-	float calib;
-	mBemcTables->getCalib(1, softId, 1, calib);
-	float energy = calib * (adc - ped);
+      int adc = StMuDst::muEmcCollection()->getTowerADC(softId);
+      Color_t colorResponce=kWhite;
+      int status;
+      mBemcTables->getStatus(1, softId, status);
+      if (status != 1) continue;
+      float ped, rms;
+      mBemcTables->getPedestal(1, softId, 0, ped, rms);
+      if (adc < ped + 3 * rms) continue;
+      float calib;
+      mBemcTables->getCalib(1, softId, 1, calib);
+      float energy = calib * (adc - ped);
 	//energy = (adc/285.0*3.7);
-	if (softId==1) {
-	    cout << "id =" << softId << "  energy =" << energy << endl;
-	    cout << "    adc    = " << adc << endl;
-	    cout << "    status = " << status << endl;
-	    cout << "    ped    = " << ped << endl;
-	    cout << "    rms    = " << rms << endl;
-	    cout << "    calib  = " << calib << endl;
-	}
-	if (energy > 0  && energy < 30) {
-	    // If edep less then MIP (~300 MeV), 60GeV <-> 4096 ADC counts
-	    if (  energy  < 0.3 )   {   
-		colorResponce = kBlue; 
-                // style = 4001;                 //wireframe 
-		// If edep larger than MIP but less then 1 GeV 
-	    }
-	    else if (energy  < 1.0 )
-		colorResponce = kGreen;
-	    
-	    // If between 1 GeV and lowest HT threshold (4 GeV for Run7)
-	    else if (  energy  < 4.0 && energy>1.0)
-		colorResponce = kYellow;
-	    // If above lowest HT thershold
-	    else
-		colorResponce = kRed;
-	    
-	    const double maxSize =  400.; // (cm)
-	    const double scale   =  10.; // (cm/Gev)
-	    float size =(scale)*energy;
-	    if (size > maxSize)  size = maxSize ;
-	    if (!cuts || (cuts && energy>1.0)) {
-		gEd->EmcHit(softId,colorResponce, 0, size);
-		gEd->AddComment(Form("energy =  %f size=%f ",energy,size));
-	    }
-	    //  gEd->EmcHit(softId, adc*0.1);	
-	}
-    }
+      if (softId==1) {
+         cout << "id =" << softId << "  energy =" << energy << endl;
+         cout << "    adc    = " << adc << endl;
+         cout << "    status = " << status << endl;
+         cout << "    ped    = " << ped << endl;
+         cout << "    rms    = " << rms << endl;
+         cout << "    calib  = " << calib << endl;
+      }
+      if (energy > 0  && energy < 30) {
+         // If edep less then MIP (~300 MeV), 60GeV <-> 4096 ADC counts
+         if (  energy  < 0.3 )   {                colorResponce = kBlue; 
+             // style = 4001;                 //wireframe 
+             // If edep larger than MIP but less then 1 GeV 
+         } else if (energy  < 1.0 )               colorResponce = kGreen;
+
+         // If between 1 GeV and lowest HT threshold (4 GeV for Run7)
+         else if (  energy  < 4.0 && energy>1.0)  colorResponce = kYellow;
+         // If above lowest HT thershold
+         else                                     colorResponce = kRed;
+
+         const double maxSize =  400.; // (cm)
+         const double scale   =  10.; // (cm/Gev)
+         float size =(scale)*energy;
+         if (size > maxSize)  size = maxSize ;
+         if (!cuts || (cuts && energy>1.0)) {
+           gEd->EmcHit(softId,colorResponce, 0, size);
+           gEd->AddComment(Form("energy =  %f size=%f ",energy,size));
+        }
+    //  gEd->EmcHit(softId, adc*0.1);	
+     }
+  }
 }
 
 //____________________________________________________________________________________
