@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.13 2010/02/09 01:07:32 andrewar Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.14 2010/04/02 20:14:50 didenko Exp $
  *
  */
 
@@ -49,145 +49,162 @@ struct embedSettings{
   Double_t vzlow;
   Double_t vzhigh;
   Int_t NReqTrg;
-  Int_t ReqTrgId[32];
+  static const Int_t nTriggerId = 32 ;
+  Int_t ReqTrgId[nTriggerId];
   TString mode;
 };
 
 static embedSettings  *mSettings = 0;
-//________________________________________________________________________________
-StPrepEmbedMaker::StPrepEmbedMaker(const Char_t *name) : StMaker(name) {
-  mEventCounter = 0;
+
+//____________________________________________________________________________________________________
+StPrepEmbedMaker::StPrepEmbedMaker(const Char_t *name) : StMaker(name) 
+{
   mGeant3=0;
+  mTagFile = "" ;
+  mMoreTagsFile = "" ;
+  mEventCounter = 0;
 
   if( !mSettings ){
     mSettings = new embedSettings();
+
+    /// Default z-vertex selection (only apply if mSkipMode = kTRUE)
+    mSettings->vzlow  = -200.0 ;
+    mSettings->vzhigh =  200.0 ;
+
+    /// Default multiplicity is 0
     mSettings->mult=0.;
+
+    /// Default temperature is 300 MeV
+    mSettings->temperature=300.0 ; // MeV ???
+
+    /// Default is no trigger selection
+    mSettings->NReqTrg = 0 ;
+    for(Int_t itrg=0; itrg<mSettings->nTriggerId; itrg++){
+      mSettings->ReqTrgId[itrg] = 0 ;
+    }
+
+    /// Default mode is flatpt
+    mSettings->mode = "flatpt";
   }
   mFile = 0;
+  mMoreFile = 0 ;
   mTree = 0;
-  mSkipMode = kFALSE;
-  mSpreadMode = kFALSE;
+  mSkipMode = kFALSE; /// Do not skip the false vertex
+  mSpreadMode = kFALSE; /// Do not smear z-vertex
 }
-//________________________________________________________________________________
+//____________________________________________________________________________________________________
 StPrepEmbedMaker::~StPrepEmbedMaker() { 
   SafeDelete(mFile);
 }
-//________________________________________________________________________________
-Int_t StPrepEmbedMaker::Init() {
 
-	srand((unsigned)time(0));
-        mSettings->rnd1 = abs(int(rand()*10000)+getpid());
-        mSettings->rnd2 = abs(int(rand()*10000)+getpid());
+//____________________________________________________________________________________________________
+Int_t StPrepEmbedMaker::Init() 
+{
+  srand((unsigned)time(0));
+  mSettings->rnd1 = abs(int(rand()*10000)+getpid());
+  mSettings->rnd2 = abs(int(rand()*10000)+getpid());
 
-	if (mSettings->mode.Contains("trange"))
-	{
-	    mSpreadMode= kTRUE;
-	    LOG_INFO <<"Setting spreader mode for embedding mode "<<mSettings->mode
-	<<endm;
-	}
+  if (mSettings->mode.CompareTo("strange", TString::kIgnoreCase) == 0)
+  {
+    mSpreadMode= kTRUE;
+    LOG_INFO <<"StPrepEmbedMaker::Init  Setting spreader mode for embedding mode "<<mSettings->mode <<endm;
+  }
 
-    return StMaker::Init();
+  return StMaker::Init();
 }
 
-//----
-Int_t StPrepEmbedMaker::InitRun(int runnum)
+//____________________________________________________________________________________________________
+Int_t StPrepEmbedMaker::InitRun(const int runnum)
 {
   //Call geant maker, set defaults
   if (! mGeant3) {
     mGeant3 = TGiant3::Geant3();
     if( ! mGeant3)
       {
-	LOG_ERROR << "Geant3 pointer not found. exiting."<<endm;
+	LOG_ERROR << "StPrepEmbedMaker::InitRun  Geant3 pointer not found. exiting."<<endm;
 	return kStErr;
       }
-    if (mTagFile == "") {
-      LOG_ERROR << "TagFile has not been defined" << endm;
-      return kStErr;
-    }
-    mFile = new TFile(mTagFile);
-    if (! mFile ) {
-      LOG_ERROR << "TagFile : " << mTagFile << " cannot be opened" << endm;
-      return kStErr;
-    }
-    mTree = (TTree *) mFile->Get("Tag");
-    if (! mTree ) {
-      LOG_ERROR << "In TagFile : " << mTagFile << " cannot find TTree \"Tag\"" << endm;
-      return kStErr;
-    }
+  }
 
-    // Check mode type, select settings
-   if (mSpreadMode){
-	LOG_INFO << "Spreader mode set."<<endm;
-         mMoreTagsFile = mTagFile;
-         int indx1 = mMoreTagsFile.Index(".tags",0);
-         int indx2 = mMoreTagsFile.Last('.');
-         if (indx1!=indx2) mMoreTagsFile.Remove(indx1+1,(indx2-indx1));
-         mMoreTagsFile.Insert(indx1+1,"moretags.");
-         mMoreFile = new TFile(mMoreTagsFile);
-         if (mMoreFile ) {
-                 
-            mMoreTree = (TTree *) mMoreFile->Get("MoreTags");
-            if (! mMoreTree ) {
-               LOG_ERROR << "In MoreTagsFile : " << mMoreTagsFile << " cannot find TTree \"MoreTags\"" << endm;
-               return kStErr;
-            }//end if more tree
+  // Skip initialization if tags file has not been defined
+  if (mTagFile.IsWhitespace()){
+    LOG_ERROR << "StPrepEmbedMaker::InitRun  TagFile has not been defined" << endm;
+    return kStErr;
+  }
 
-	 }
-	 else
-	   {
-	     LOG_INFO << "File moretags.root not found. If this embedding is for years 2007 through 2009, this will most likely cause the embedding to quit prematurely."<<endm;
-	   }//end if mMoreFile
-   }//end spreadMode setup
+  // Open Tags file
+  mFile = TFile::Open(mTagFile);
+  if (! mFile ) {
+    LOG_ERROR << "StPrepEmbedMaker::Init  TagFile : " << mTagFile << " cannot be opened" << endm;
+    return kStErr;
+  }
 
+  // Get Tag tree
+  mTree = (TTree *) mFile->Get("Tag");
+  if (! mTree ) {
+    LOG_ERROR << "StPrepEmbedMaker::Init  In TagFile : " << mTagFile << " cannot find TTree \"Tag\"" << endm;
+    return kStErr;
+  }
+
+  // Check mode type, select settings
+  if (mSpreadMode){
+    LOG_INFO << "StPrepEmbedMaker::Init  Spreader mode set. Looking for MoreTags file ..."<<endm;
+    mMoreTagsFile = mTagFile;
+    const int indx1 = mMoreTagsFile.Index(".tags",0);
+    const int indx2 = mMoreTagsFile.Last('.');
+    if (indx1!=indx2) mMoreTagsFile.Remove(indx1+1,(indx2-indx1));
+    mMoreTagsFile.Insert(indx1+1,"moretags.");
+    mMoreFile = TFile::Open(mMoreTagsFile);
+
+    if (mMoreFile ) { 
+      mMoreTree = (TTree *) mMoreFile->Get("MoreTags");
+      if (! mMoreTree ) {
+        LOG_ERROR << "StPrepEmbedMaker::Init  In MoreTagsFile : " << mMoreTagsFile << " cannot find TTree \"MoreTags\"" << endm;
+        return kStErr;
+      }//end if more tree 
+    }
+    else {
+      LOG_INFO << "StPrepEmbedMaker::Init  File moretags.root not found. If this embedding is for years 2007 through 2009, this will most likely cause the embedding to quit prematurely."<<endm;
+      return kStErr ;
+    }//end if mMoreFile
+  }//end spreadMode setup
+
+
+  if(mSettings->mode.CompareTo("Spectrum", TString::kIgnoreCase) == 0)
+  { 
+    // Call the old gentx binary for this request. 
+    // We need to port this code into the StPrepEmbedMaker,
+    // but the underlying functions don't exist in St_geant_Maker 
+    // at this time (11-25-09).
+    // magic numbers: 1000 events, temp.fz need to be resolved
+    TString cmd;
+    cmd = Form("root4star -q \'~starofl/embedding/getVerticiesFromTags.C\(1000,\"./\",\"%s\")\'", 
+     	  mTagFile.Data());
+    cmd = Form("~starofl/embedding/GENTX/gentx %s %s %i %i %f %f %f %i %f %f %f %i",
+     	  mTagFile.Data(),"temp.fz",
+     	  1000,mSettings->mult,mSettings->etalow, mSettings->etahigh, 
+     	  0.0,0,mSettings->ptlow, mSettings->pthigh,mSettings->temperature,
+     	  mSettings->rnd1);
+    gSystem->Exec(cmd.Data());
+
+    Do("gfile p temp.fz"); 
+  }//end if Spectrum
+
+  // Common geant settings
+//  Do("make gstar"); // Make user-defined particles available
+  gSystem->Load("libgstar");
    
-   if(mSettings->mode.Contains("Spectrum"))
-     {
+  Do("detp  hadr_on");
+  TString cmd("rndm ");
+  cmd+=mSettings->rnd1; cmd+=" "; cmd+=mSettings->rnd2;
+  Do(cmd.Data());
 
-      // Call the old gentx binary for this request. 
-      // We need to port this code into the StPrepEmbedMaker,
-      // but the underlying functions don't exist in St_geant_Maker 
-      // at this time (11-25-09).
-      // magic numbers: 1000 events, temp.fz need to be resolved
-       TString cmd;
-       cmd = Form("root4star -q \'~starofl/embedding/getVerticiesFromTags.C\(1000,\"./\",\"%s\")\'", 
-		  mTagFile.Data());
-       cmd = Form("~starofl/embedding/GENTX/gentx %s %s %i %i %f %f %f %i %f %f %f %i",
-		  mTagFile.Data(),"temp.fz",
-		  1000,mSettings->mult,mSettings->etalow, mSettings->etahigh, 
-		  0.0,0,mSettings->ptlow, mSettings->pthigh,mSettings->temperature,
-		  mSettings->rnd1);
-       gSystem->Exec(cmd.Data());
-
-
-       Do("gfile p temp.fz");
-     }//end if Spectrum
-
-   else{
-//    Do("detp  hadr_on");
- //   Do("make gstar");
-       gSystem->Load("libgstar");
-   
-
-    
-    Do("detp  hadr_on");
-    TString cmd("rndm ");
-    cmd+=mSettings->rnd1; cmd+=" "; cmd+=mSettings->rnd2;
-    Do(cmd.Data());
-    
-    Do("vec/cr BUFF(1) r 0");
-    Do("vec/cr BR2(6) R 100. 0. 0. 0. 0. 0.");
-    Do("vec/cr MODE2(6) I 1412 0 0 0 0 0");
-    Do("spart 995 'LAMBDASTAR' 3 1.5195  0  4.22e-23 BUFF 0 BR2 MODE2");
-    Do("user/output o temp.fz");
-
-   }// end default type selection (FlatPt)
-  }//end if !mGeant3
   return 0;
 }
 
-
-//________________________________________________________________________________
-Int_t StPrepEmbedMaker::Make() {
+//____________________________________________________________________________________________________
+Int_t StPrepEmbedMaker::Make() 
+{
   mEventCounter++;  // increase counter
   StEvtHddr* EvtHddr = (StEvtHddr*) GetDataSet("EvtHddr");
   if (! EvtHddr) {
@@ -205,45 +222,67 @@ Int_t StPrepEmbedMaker::Make() {
   LOG_INFO << "StPrepEmbedMaker::Make Run/Event = " << EvtHddr->GetRunNumber()
 	   << "/" << EvtHddr->GetEventNumber() 
 	   << " has been found with uncorrectedNumberOfPrimaries = " <<  mTree->GetV1()[0] 
-	   << " and primaryVertexFlag = " << mTree->GetV2()[0]  <<  endm;
-   if (mTree->GetV1()[0] <= 0 || mTree->GetV2()[0] )
-   {
-     LOG_ERROR << "StPrepEmbedMaker::Make reject this event" << endm;
-     return kStErr;
-   }
+	   << " and primaryVertexFlag = " << mTree->GetV2()[0]  <<  endm; 
+
+  if (mTree->GetV1()[0] <= 0 || mTree->GetV2()[0] )
+  {
+    LOG_ERROR << "StPrepEmbedMaker::Make reject this event" << endm;
+    return kStErr;
+  }
  
-  Int_t numberOfPrimaryTracks = (Int_t) mTree->GetV1()[0];
   // Extract info for mult for this event
-  Int_t npart;
-  if(mSettings->mult < 1.) 
-    {
-      npart=int(mSettings->mult * numberOfPrimaryTracks);
-      if (! npart)
-      {
-	LOG_INFO << "StPrepEmbedMaker::Event " << EvtHddr->GetEventNumber() 
-	      << " has too small numberOfPrimaryTracks " << numberOfPrimaryTracks << " for the mult fraction requested. Forcing npart to 1." << endm; 
-	npart=1;
-      }
-  
-    }
-  else
-    {
-      npart = int (mSettings->mult);
-    }
+  const Int_t numberOfPrimaryTracks = (Int_t) mTree->GetV1()[0];
+  const Int_t npart = getMultiplicity( *EvtHddr, numberOfPrimaryTracks ) ;
 
-
-  nFound = (Int_t) mTree->Draw("primaryVertexX:primaryVertexY:primaryVertexZ",
+  nFound = (Int_t) mTree->Draw("primaryVertexX:primaryVertexY:primaryVertexZ:TriggerId",
 			       Form("mRunNumber==%i&&mEventNumber==%i",
 				    EvtHddr->GetRunNumber(),
 				    EvtHddr->GetEventNumber()),
 			       "goff");
-  Double_t xyz[3] = {mTree->GetV1()[0],mTree->GetV2()[0],mTree->GetV3()[0]};
+  const Double_t xyz[3] = {mTree->GetV1()[0],mTree->GetV2()[0],mTree->GetV3()[0]};
+
   // Skip event if no primary vertex - effectively if tags say it is 0,0,0
-  if (mSkipMode == kTRUE){ 
-    if (fabs(xyz[0])<1e-7 && fabs(xyz[1])<1e-7 && fabs(xyz[2])<1e-7 ){
+  if (fabs(xyz[0])<1e-7 && fabs(xyz[1])<1e-7 && fabs(xyz[2])<1e-7 ){
+    LOG_INFO << "StPrepEmbedMaker::Event " << EvtHddr->GetEventNumber()
+             << " has tags with vertex approx at (0,0,0) - probably no PV, skipping."
+             << endm;
+    return kStSKIP;
+  }
+
+  // Skip event if vertexZ is not in the required range
+  if (mSkipMode == kTRUE){
+    if (xyz[2]<mSettings->vzlow || xyz[2]>mSettings->vzhigh ){
       LOG_INFO << "StPrepEmbedMaker::Event " << EvtHddr->GetEventNumber()
-	       << " has tags with vertex approx at (0,0,0) - probably no PV, skipping."
-	       << endm;
+        << " has tags with vertex at (" << xyz[0] << "," << xyz[1] << "," << xyz[2]
+        << ") - out of Vz range, skipping." << endm;
+      return kStSKIP;
+    }
+    LOG_INFO << "StPrepEmbedMaker::Event " << EvtHddr->GetEventNumber()
+      << " has tags with vertex at (" << xyz[0] << "," << xyz[1] << "," << xyz[2]
+      << ") - within requested Vz range !" << endm;
+  }          
+  
+  // more skipping. cut on trigger id.
+  if (mSkipMode == kTRUE){
+    LOG_INFO << "StPrepEmbedMaker::Event " << EvtHddr->GetEventNumber()
+      << " has Triggers: " << endm;
+    for (Int_t iTrg=0 ; iTrg<mSettings->nTriggerId ; iTrg++){
+      LOG_INFO << mTree->GetV4()[iTrg] << " ";
+    }
+    LOG_INFO << endm;
+
+    Bool_t fired = kFALSE;
+    for (Int_t iTrg=0 ; iTrg<mSettings->nTriggerId ; iTrg++){
+      for (Int_t iReqTrg=0; iReqTrg<mSettings->NReqTrg ; iReqTrg++) {
+        if (mTree->GetV4()[iTrg] == mSettings->ReqTrgId[iReqTrg]){
+          LOG_INFO << "StPrepEmbedMaker::Requested trigger " << mSettings->ReqTrgId[iReqTrg] << " is fired!" << endm;
+          fired = kTRUE;
+        }
+      }
+    }
+
+    if (!fired && mSettings->NReqTrg>0) {
+      LOG_INFO << "StPrepEmbedMaker::No requested triggers are fired in this event, skipping." << endm;
       return kStSKIP;
     }
   }
@@ -254,49 +293,49 @@ Int_t StPrepEmbedMaker::Make() {
   //make sure zlow!=zhigh in particle definition - not sure of result. 
   //Z vertex will be forced in vxyz statement.
 
-       Double_t xyzerr[3] = {0.,0.,0.};
-          Double_t vzlow = xyz[2];
-          Double_t vzhigh = xyz[2];
+  Double_t xyzerr[3] = {0.,0.,0.};
+//  Double_t vzlow = xyz[2];
+//  Double_t vzhigh = xyz[2];
    
-  if(mSettings->mode.Contains("strange"))
-    {
+  if(mSettings->mode.CompareTo("strange", TString::kIgnoreCase) == 0)
+  {
       // For this embedding type, we smear the start position of the particle
       // with the vertex errors. Old embedding (2007 through 2009) needs an
       // external file (moretags.root).
       nFound=0;
       nFound = (Int_t) mTree->Draw("sigmaPVX:sigmaPVY:sigmaPVZ",
-				   Form("RunId==%i&&EvtId==%i",
+				   Form("mRunNumber==%i&&mEventNumber==%i",
 					EvtHddr->GetRunNumber(),
 					EvtHddr->GetEventNumber()),"goff");
-     //get primary vertex errors from moretags.root
-      if(!nFound && mMoreTree) {
-	nFound = (Int_t) mMoreTree->Draw("VXERR:VYERR:VZERR",
+
+      //get primary vertex errors from moretags.root
+      if(nFound == -1 && mMoreTree) {
+        nFound = (Int_t) mMoreTree->Draw("VXERR:VYERR:VZERR",
              Form("RunId==%i&&EvtId==%i",
                   EvtHddr->GetRunNumber(),
                   EvtHddr->GetEventNumber()),
              "goff");
-      }
-     if (nFound != 1) {
-          LOG_ERROR << "StPrepEmbedMaker::Make Run/Event = " << EvtHddr->GetRunNumber() << "/" << EvtHddr->GetEventNumber()
-             << " has been found in moretags file" << nFound << " times" <<  endm;
-          return kStErr;
-     }
-     //xyzerr[0] = mMoreTree->GetV1()[0];
-     //xyzerr[1] = mMoreTree->GetV2()[0];
 
-     xyzerr[0] = 0;
-     xyzerr[1] = 0;
+        LOG_INFO << "StPrepEmbedMaker::Make Use moretags file to extract vertex errors, nFound =" << nFound << endm ;
+      }
+
+      if (nFound != 1) {
+        LOG_ERROR << "StPrepEmbedMaker::Make Run/Event = " << EvtHddr->GetRunNumber() << "/" << EvtHddr->GetEventNumber()
+             << " has been found in moretags file " << nFound << " times" <<  endm;
+        return kStErr;
+     }
+     xyzerr[0] = mMoreTree->GetV1()[0];
+     xyzerr[1] = mMoreTree->GetV2()[0];
      xyzerr[2] = mMoreTree->GetV3()[0];
      LOG_INFO << xyzerr[0] << " " << xyzerr[1] << " " << xyzerr[2] << endm;
-     vzlow = -100.0;
-     vzhigh = 100.0;
+//     vzlow = -100.0;
+//     vzhigh = 100.0;
 
      //Set the vertex for StEvent with StGenericVertexMaker
      StGenericVertexMaker * vmaker = (StGenericVertexMaker*) GetMaker("GenericVertex");
      StFixedVertexFinder * vfinder = (StFixedVertexFinder *) vmaker->GetGenericFinder();
      vfinder->SetVertexPosition(xyz[0],xyz[1],xyz[2]);
   }
-
 
 
   TString cmd;
@@ -316,7 +355,7 @@ Int_t StPrepEmbedMaker::Make() {
   
   Do(cmd.Data());
   Do(Form("gvertex %f %f %f",xyz[0],xyz[1],xyz[2]));
-  if( mSettings->mode.Contains("strange") )
+  if( mSettings->mode.CompareTo("strange", TString::kIgnoreCase) == 0 )
     {
 	Do(Form("gspread %f %f %f", xyzerr[0],xyzerr[1],xyzerr[2]));
     }
@@ -330,6 +369,7 @@ Int_t StPrepEmbedMaker::Make() {
   return kStOK;
 }
 
+//____________________________________________________________________________________________________
 Int_t StPrepEmbedMaker::Finish()
 {
   TString cmd("user/output c temp.fz");
@@ -337,8 +377,7 @@ Int_t StPrepEmbedMaker::Finish()
   return 0;
 }
 
-
-//_____________________________________________________________________________
+//____________________________________________________________________________________________________
 void StPrepEmbedMaker::Do(const Char_t *job)
 {  
   Int_t l=strlen(job);
@@ -347,17 +386,20 @@ void StPrepEmbedMaker::Do(const Char_t *job)
     mGeant3->Kuexel(job);
   }
 }
-//________________________________________________________________________________
-void StPrepEmbedMaker::SetPartOpt(Int_t pid, Double_t mult)  
+
+//____________________________________________________________________________________________________
+void StPrepEmbedMaker::SetPartOpt(const Int_t pid, const Double_t mult)  
 { 
   mSettings->mult=mult; mSettings->pid=pid; 
   LOG_INFO << "StPrepEmbedMaker::SetPartOpt mult = " << mSettings->mult
 	   << " pid = " << mSettings->pid << endm;
 }
-//________________________________________________________________________________
-void StPrepEmbedMaker::SetOpt(Double_t ptlow, Double_t pthigh,
-			      Double_t etalow, Double_t etahigh, Double_t philow,
-			      Double_t phihigh, TString type) {
+
+//____________________________________________________________________________________________________
+void StPrepEmbedMaker::SetOpt(const Double_t ptlow, const Double_t pthigh,
+			      const Double_t etalow, const Double_t etahigh, const Double_t philow,
+			      const Double_t phihigh, const TString type) 
+{
   mSettings->ptlow=ptlow;   mSettings->pthigh=pthigh; 
   mSettings->etalow=etalow; mSettings->etahigh=etahigh;
   mSettings->philow=philow;  mSettings->phihigh=phihigh;
@@ -365,14 +407,120 @@ void StPrepEmbedMaker::SetOpt(Double_t ptlow, Double_t pthigh,
   LOG_INFO << "StPrepEmbedMaker::SetOpt ptlow = " << mSettings->ptlow << " pthigh = " << mSettings->pthigh
 	   << " etalow = " << mSettings->etalow << " etahigh = " << mSettings->etahigh
 	   << " philow = " << mSettings->philow << " phihigh = " << mSettings->phihigh
-	   <<"Mode: "<< type.Data() << endm;
+	   <<" Mode: "<< type.Data() << endm;
 }
-void StPrepEmbedMaker::SetTemp(double t)
+
+//____________________________________________________________________________________________________
+void StPrepEmbedMaker::SetTemp(const double t)
 {
   mSettings->temperature=t;
+  LOG_INFO << "StPrepEmbedMaker::SetTemp  set temperature= " << mSettings->temperature << endm;
 }
+
+//____________________________________________________________________________________________________
+void StPrepEmbedMaker::SetTagFile(const Char_t *file)
+{
+  mTagFile = file;
+  LOG_INFO << "StPrepEmbedMaker::SetTagFile  set tags file= " << mTagFile << endm;
+}
+
+//____________________________________________________________________________________________________
+void StPrepEmbedMaker::SetSkipMode(const Bool_t flag)
+{
+  LOG_INFO << "StPrepEmbedMaker::SetSkipMode  set skip mode= ";
+  mSkipMode = flag;
+
+  if( mSkipMode ){
+    LOG_INFO << " ON" << endm ;
+  }
+  else{
+    LOG_INFO << " OFF" << endm ;
+  }
+}
+
+//____________________________________________________________________________________________________
+void StPrepEmbedMaker::SetSpreadMode(const Bool_t flag)
+{
+  mSpreadMode=flag;
+
+  LOG_INFO << "StPrepEmbedMaker::SetSpreadMode  set spread mode= ";
+
+  if( mSpreadMode ){
+    LOG_INFO << " ON" << endm ;
+  }
+  else{
+    LOG_INFO << " OFF" << endm ;
+  }
+}
+
+//____________________________________________________________________________________________________
+Int_t StPrepEmbedMaker::getMultiplicity(const StEvtHddr& EvtHddr, const Int_t nprimarytracks) const
+{
+  /// Get multiplicity generated in the embedding
+
+  Int_t npart = 0;
+  if(mSettings->mult < 1.) 
+    {
+      npart=int(mSettings->mult * nprimarytracks);
+      if (! npart)
+      {
+	LOG_INFO << "StPrepEmbedMaker::Event " << EvtHddr.GetEventNumber() 
+	      << " has too small numberOfPrimaryTracks " << nprimarytracks << " for the mult fraction requested. Forcing npart to 1." << endm; 
+	npart=1;
+      }
+  
+    }
+  else
+    {
+      npart = int (mSettings->mult);
+    }
+
+  return npart ;
+}
+
+//________________________________________________________________________________
+void StPrepEmbedMaker::SetTrgOpt(const Int_t TrgId) 
+{
+  // Skip TrgId = 0
+  if(TrgId == 0){
+    LOG_ERROR << "StPrepEmbedMaker::SetTrgOpt Input trigger id = 0. Skip" << endm;
+    return;
+  }
+
+  if(mSettings->NReqTrg >= mSettings->nTriggerId) {
+    LOG_ERROR << "StPrepEmbedMaker::SetTrgOpt too many triggers are requested!" <<endm;
+    return;
+  }
+
+  mSettings->ReqTrgId[mSettings->NReqTrg] = TrgId ;
+  mSettings->NReqTrg ++ ;
+  LOG_INFO << "StPrepEmbedMaker::SetTrgOpt trigger " << mSettings->ReqTrgId[mSettings->NReqTrg-1] << " requested" << endm;
+}
+
+//________________________________________________________________________________
+void StPrepEmbedMaker::SetZVertexCut(const Double_t vzlow, const Double_t vzhigh)
+{
+  // Make sure vzlow < vzhigh
+  if( (vzlow > vzhigh) || (vzlow == 0.0 && vzhigh == 0.0) ){
+    LOG_ERROR << "StPrepEmbedMaker::SetZVertexCut  input vzlow > vzhigh or vzlow = vzhigh = 0" << endm;
+    return;
+  }
+
+  mSettings->vzlow  = vzlow ;
+  mSettings->vzhigh = vzhigh ;
+  LOG_INFO << "StPrepEmbedMaker::SetZVertexCut  Cut z-vertex in " << mSettings->vzlow 
+    << " < vz < "
+    << mSettings->vzhigh
+    << " (cm)" << endm;
+}
+
+
+
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.14  2010/04/02 20:14:50  didenko
+ * StPrepEmbedMaker for Hiroshi
+ *
  * Revision 1.13  2010/02/09 01:07:32  andrewar
  * Changed defualt setting of mSpreadMode to kFALSE. Modified logic when looking up
  * vertex errors; first looks at tags.root, then (if failure) attempts moretags.root.
