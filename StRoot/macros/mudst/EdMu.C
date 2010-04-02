@@ -1,4 +1,4 @@
-// $Id: EdMu.C,v 1.16 2010/04/02 22:09:15 fine Exp $
+// $Id: EdMu.C,v 1.17 2010/04/02 22:44:49 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //  Additions to use BEMC towers (for display of upsilon events) by Manuel Calderon de la Barca. Feb 2010.
@@ -91,7 +91,8 @@ bool gRotationIsOn = false; //< Flag whether the animated rotation was initializ
    \endhtmlonly
 */
 //____________________________________________________________________________________
-void addEmcHits(bool cuts=false) {
+void addEmcHits(bool cuts=false) { 
+     if (!cuts) gEd->Endcaps();
     //TClonesArray *emcs = StMuDst::emcArray(1);
     //TIter next(emcs);
     //StMuEmcHit *hit = 0;
