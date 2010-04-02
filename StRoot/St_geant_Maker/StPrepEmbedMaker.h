@@ -4,11 +4,14 @@
  * \author A. Rose LBL, Y. Fisyak BNL, L. Barnby U. Birmingham
  * \date   May 2007
  *
- * $Id: StPrepEmbedMaker.h,v 1.6 2010/02/09 01:08:38 andrewar Exp $
+ * $Id: StPrepEmbedMaker.h,v 1.7 2010/04/02 20:14:50 didenko Exp $
  *
  *
  * -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.h,v $
+ * Revision 1.7  2010/04/02 20:14:50  didenko
+ * StPrepEmbedMaker for Hiroshi
+ *
  * Revision 1.6  2010/02/09 01:08:38  andrewar
  * Added default value for embedding mode for backward compatibility.
  *
@@ -40,6 +43,7 @@
 #include "TString.h"
 
 class StEvent;
+class StEvtHddr ;
 class StTrack;
 class TFile;
 class TGiant3;
@@ -53,33 +57,49 @@ class StPrepEmbedMaker : public StMaker {
   
   Int_t  Init();                      // called once at the beginning of your job
   Int_t  Make();                      // invoked for every event
-  Int_t   Finish();
-  Int_t  InitRun(int runnum);
+  Int_t  Finish();
+  Int_t  InitRun(const int runnum);
   virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.6 2010/02/09 01:08:38 andrewar Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.7 2010/04/02 20:14:50 didenko Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
-  void SetPartOpt(Int_t pid, Double_t mult);
-  void SetOpt(Double_t ptlow, Double_t pthigh,
-	      Double_t etalow, Double_t etahigh, Double_t philow,
-	      Double_t phihigh, TString type="FlatPt");
-  void SetTemp(double t);
-  void SetTagFile(const Char_t *file) {mTagFile = file;}
-  void SetSkipMode(Bool_t flag=kTRUE) {mSkipMode = flag;}
-  void SetSpreadMode(Bool_t flag=kFALSE) {mSpreadMode=flag;}
+  void SetPartOpt(const Int_t pid, const Double_t mult); /// Set geantid(pid) and multiplicity
+
+  /// Set (ptlow, pthigh), (etalow, etahigh), (philow, phihigh), and type
+  /// type can be
+  ///   flatpt           Flat (pt, y) by 'phasespace'
+  ///   flatp            Flat (p, y) by gkine
+  ///   strange          Sloped momentum by input temperature (default T is 300 MeV)
+  ///
+  ///  NOTE: type is case insensitive, FlatPt, flatpt, FLATPT work
+  void SetOpt(const Double_t ptlow, const Double_t pthigh,
+	      const Double_t etalow, const Double_t etahigh, const Double_t philow,
+	      const Double_t phihigh, const TString type="FlatPt");
+  void SetTemp(const double t);
+  void SetTagFile(const Char_t *file) ;
+  void SetSkipMode(const Bool_t flag=kTRUE) ;
+  void SetSpreadMode(const Bool_t flag=kFALSE) ;
+  void SetTrgOpt(const Int_t TrgId); // Set trigger id cut
+  void SetZVertexCut(const Double_t vzlow, const Double_t vzhigh); // Set z-vertex cut
  private:
+  /// Get multiplicity used in the embedding
+  ///  if input mult = 1  ---> generate 1 particle / event
+  ///  if input mult < 1  ---> generate nprimarytracks * mult particle / event (typically 5%)
+  Int_t getMultiplicity(const StEvtHddr& EvtHddr, const Int_t nprimarytracks) const ;
+
   TGiant3 *mGeant3;
-  TString mTagFile;
-  TString mMoreTagsFile;
-  Int_t mEventCounter;
-  TFile *mFile;
+  TString mTagFile; /// Tags file name
+  TString mMoreTagsFile; /// More tags file name for vertex error (will be removed in future)
+  Int_t mEventCounter; /// Number of events
+  TFile *mFile; /// 
   TFile *mMoreFile;
   TTree *mTree;
   TTree *mMoreTree;
   Bool_t mSkipMode;
   Bool_t mSpreadMode;
+
   ClassDef(StPrepEmbedMaker,0)    
 };
 #endif
