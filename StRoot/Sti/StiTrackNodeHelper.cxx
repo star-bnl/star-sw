@@ -649,6 +649,7 @@ int StiTrackNodeHelper::propagateMCS()
 {  
   mMcs.reset();
   if (!mDetector) 			return 0;
+  mMcs._ptinCorr =  0;
   if (fabs(mBestPars._ptin)<=1e-3)	return 0;
   double pt     = 1./fabs(mBestPars._ptin);
 

@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.117 2010/02/17 14:28:07 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.117 2010/02/17 14:28:07 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.118 2010/04/03 04:04:57 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.118 2010/04/03 04:04:57 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.118  2010/04/03 04:04:57  perev
+ * Account field=0
+ *
  * Revision 2.117  2010/02/17 14:28:07  fisyak
  * Add seed quality information
  *
@@ -1588,7 +1591,7 @@ double Xi2=0;
     P._curv = curv;
     double hh = P._hz;
     hh = (fabs(hh)<1e-10)? 0:1./hh;
-    P._ptin = (hh)? curv*hh:1e-6;
+    P._ptin = (hh)? curv*hh:1e-3;
     P._tanl = cirl.GetSin()/cirl.GetCos();
     P._cosCA = cirl.Dir()[0]/cirl.GetCos();
     P._sinCA = cirl.Dir()[1]/cirl.GetCos();
