@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.128 2010/04/01 20:25:34 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.129 2010/04/03 04:02:29 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.129  2010/04/03 04:02:29  perev
+ * Account field=0
+ *
  * Revision 2.128  2010/04/01 20:25:34  perev
  * Remove test to small error _cPP
  *
@@ -471,7 +474,7 @@ static int myCount=0;
   memset(_beg,0,_end-_beg+1);
   _ext=0; _inf=0;
   mId = ++myCount; 
-
+  mHz = 999;
   Break(mId);
 }
 //______________________________________________________________________________
@@ -549,7 +552,7 @@ void StiKalmanTrackNode::get(double& alpha,
 //______________________________________________________________________________
 double StiKalmanTrackNode::getPt() const
 {
-  return (fabs(mFP._ptin)<1e-6) ? 1e6: 1./fabs(mFP._ptin);
+  return (fabs(mFP._ptin)<1e-3) ? 1e3: 1./fabs(mFP._ptin);
 }
 //______________________________________________________________________________
 void StiKalmanTrackNode::propagateCurv(const StiKalmanTrackNode *parent)
@@ -569,11 +572,11 @@ double StiKalmanTrackNode::getHz() const
 {
   
 static const double EC = 2.99792458e-4,ZEROHZ = 2e-6;
-   if (mHz) return mHz;
+   if (mHz<999) return mHz;
    double h[3];
    StarMagField::Instance()->BField(&(getGlobalPoint().x()),h);
    h[2] = EC*h[2];
-   if (fabs(h[2]) < ZEROHZ) h[2]=3e-33;
+   if (fabs(h[2]) < ZEROHZ) h[2]=0;
    mHz = h[2];
    return mHz;
 }
@@ -873,7 +876,7 @@ Break(nCall);
   if (debug() & 8) { PrintpT("E");}
 
   // Multiple scattering
-  if (StiKalmanTrackFinderParameters::instance()->mcsCalculated() && fabs(getHz())>1e-5 )  
+  if (StiKalmanTrackFinderParameters::instance()->mcsCalculated() && getHz())  
     propagateMCS(pNode,tDet);
   if (debug() & 8) { PrintpT("M");}
   return position;
@@ -999,8 +1002,9 @@ int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
     mgP.dl0 = mgP.cosCA1*mgP.dx+mgP.sinCA1*mgP.dy;
     double sind = mgP.dl0*rho;
   
-    if (fabs(dsin) < 0.02 && mgP.cosCA1 >0 && mgP.cosCA2 >0) { //tiny angle
+    if (fabs(dsin) < 0.02 ) { //tiny angle
       mgP.dl = mgP.dl0*(1.+sind*sind/6);
+      
     } else {
       double cosd = mgP.cosCA2*mgP.cosCA1+mgP.sinCA2*mgP.sinCA1;
       mgP.dl = atan2(sind,cosd)/rho;
@@ -1021,7 +1025,9 @@ int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
     if (mFP._x*mgP.cosCA2+mFP._y*mgP.sinCA2<=0)	return kEnded; 
   }
   mFP._hz      = getHz();
-  mFP._curv    = mFP._hz*mFP._ptin;
+  if (fabs(mFP._hz) > 1e-10) 	{ mFP._curv = mFP._hz*mFP._ptin;}
+  else 				{ mFP._curv = 1e-6 ;}
+
   mPP() = mFP;
   _state = kTNProEnd;
   return ians;
@@ -1316,7 +1322,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
 {  
   propagateCurv(previousNode);
   double pt = getPt();
-#if 0
+#if 1
   if (pt>=1e3) {
     mPP() = mFP; mPE() = mFE;
     return;
@@ -1531,6 +1537,7 @@ static int nCall=0; nCall++;
   double eta  = nice(mFP._eta + dp2);
   if (fabs(eta)>kMaxEta) return -14;
   double pti  = mFP._ptin + dp3;
+  if (fabs(pti) < 1e-3) pti=1e-3;
   double cur  = pti*getHz();
   if (fabs(cur)>kMaxCur) return -16;
   assert(finite(cur));
@@ -1684,7 +1691,7 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
      << " p0:" << n.mFP._y 
      << " p1:" << n.mFP._z 
      << " p2:" << n.mFP._eta 
-      << " p3:" << n.mFP._ptin 
+     << " p3:" << n.mFP._ptin 
      << " p4:" << n.mFP._tanl
      << " c00:" <<n.mFE._cYY<< " c11:"<<n.mFE._cZZ 
      << " pT:" << n.getPt() << endl;

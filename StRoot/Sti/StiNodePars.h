@@ -3,7 +3,8 @@
 class StiNodePars {
 public:	
 void reset(){memset(this,0,sizeof(StiNodePars));_cosCA=1;}
-void ready(){_cosCA=cos(_eta);_sinCA=sin(_eta);_curv = _hz*_ptin;}
+void ready(){_cosCA=cos(_eta);_sinCA=sin(_eta);_curv = _hz*_ptin;
+             if (fabs(_curv) < 1e-6) _curv=1e-6;}
 StiNodePars &merge(double wt,StiNodePars &other);
 double  operator[](int idx) const {return P[idx];}
 double &operator[](int idx)       {return P[idx];}
