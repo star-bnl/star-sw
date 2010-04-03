@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.6 2009/09/15 00:17:27 dongx Exp $
+ * $Id: StBTofGeometry.cxx,v 1.7 2010/04/03 02:00:53 dongx Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.7  2010/04/03 02:00:53  dongx
+ * X0 (radial offset) included in the tray alignment
+ *
  * Revision 1.6  2009/09/15 00:17:27  dongx
  * Corrected the calculation for tray alignment parameters in X-Y
  *
@@ -717,15 +720,20 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
    for (Int_t i=0;i<mNTrays;i++) {
 
      double phi0 = geomAlign[i].phi0;
+     double x0 = geomAlign[i].x0;
      double phi;
      if(i<60) {
        phi = 72 - i*6;   // phi angle of tray Id = i+1, west
-       mTrayX0[i] = TMath::Sin(phi*TMath::Pi()/180.)*phi0;
-       mTrayY0[i] = -1.*TMath::Cos(phi*TMath::Pi()/180.)*phi0;
+       double cs = TMath::Cos(phi*TMath::Pi()/180.);
+       double ss = TMath::Sin(phi*TMath::Pi()/180.);
+       mTrayX0[i] = phi0*ss + x0*cs;
+       mTrayY0[i] = -phi0*cs + x0*ss;
      } else {
        phi = 108 + (i-60)*6;   // phi angle of tray Id = i+1, east
-       mTrayX0[i] = -1.*TMath::Sin(phi*TMath::Pi()/180.)*phi0;
-       mTrayY0[i] = TMath::Cos(phi*TMath::Pi()/180.)*phi0; 
+       double cs = TMath::Cos(phi*TMath::Pi()/180.);
+       double ss = TMath::Sin(phi*TMath::Pi()/180.);
+       mTrayX0[i] = -phi0*ss + x0*cs;
+       mTrayY0[i] = phi0*cs + x0*ss;
      }
      mTrayZ0[i] = geomAlign[i].z0;
 
