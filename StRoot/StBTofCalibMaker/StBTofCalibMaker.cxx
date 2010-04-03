@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.4 2010/03/04 23:10:20 dongx Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.5 2010/04/03 15:43:58 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.5  2010/04/03 15:43:58  dongx
+ * Change the default to use event vertex for start position for Run10 AuAu
+ *
  * Revision 1.4  2010/03/04 23:10:20  dongx
  * Added cleanup for PID variables in MuBTofPidTraits when processMuDst()
  *
@@ -96,7 +99,7 @@ StBTofCalibMaker::StBTofCalibMaker(const char *name) : StMaker(name)
   mMuDst = 0;
 
   mSlewingCorr = kTRUE;
-  mUseEventVertex = kFALSE;
+  mUseEventVertex = kTRUE; //kFALSE;
   mMuDstIn = kFALSE;
 
   setCreateHistoFlag(kFALSE);
