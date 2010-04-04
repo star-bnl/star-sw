@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.C,v 1.2 2010/04/01 22:18:07 fisyak Exp $
+// $Id: TpcResponseSimulator.C,v 1.3 2010/04/04 23:14:33 fisyak Exp $
 // $Log: TpcResponseSimulator.C,v $
+// Revision 1.3  2010/04/04 23:14:33  fisyak
+// Add Row Correction
+//
 // Revision 1.2  2010/04/01 22:18:07  fisyak
 // Freeze version W
 //
@@ -25,6 +28,18 @@ TDataSet *CreateTable() {
     0.213732,0.000197346,0.317265,-0.000111175, //W	
     0.21252 ,0.000285084,0.314919,-9.87074e-05};//E	
   
+#else /* __Version_X__ */
+/* SecRow3CGFdaq_2005_CuCu22N */
+  const Double_t SecRowDaq[12] = {
+/* WE	*/ 0.0562349,-0.00071352,0.00899116,-0.00041805,
+/* W	*/ 0.0468808,-0.000681293,0.0139564,-0.000545008,
+/* E	*/ 0.0739047,-0.00140537,0.00633511,-0.000324046};
+/* SecRow3CGFcucu22.W */
+  const Double_t SecRowTpcRS[12] = {
+/* WE	*/ 0.21711,0.000170942,0.318614,-6.66108e-05,
+/* W	*/ 0.21719,0.000157678,0.316109,4.18145e-05,
+/* E	*/ 0.216267,0.000258353,0.318745,-0.000125219};
+
 #endif
   //
   memset(&row,0,tableSet->GetRowSize());
@@ -84,6 +99,12 @@ TDataSet *CreateTable() {
   Float_t *a = &row.SecRowCorIW[0];
   for (Int_t i = 0; i < 8; i++) {
     a[i] = SecRowTpcRS[i] - SecRowDaq[i];
+  }
+#else /* __Version_X__ */
+  Float_t *a = &row.SecRowCorIW[0];
+  for (Int_t i = 0; i < 8; i++) {
+    Int_t j = i%4;
+    a[i] = SecRowTpcRS[j] - SecRowDaq[j];
   }
 #endif
   tableSet->AddAt(&row);
