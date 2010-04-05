@@ -82,15 +82,19 @@ Created August,14 1997
 *                                 generate
        prin2 mult,%L(Cname); (2x,'*** generating ',i5,1x,a,'''s')
        do I=1,Mult
-          call RANNOR(a,b)
-          pt      = Gamma2(0.)/miky_SLOPE(Ip)
-          y       = miky_DY(Ip)*a
-          phi     = TwoPi*Rndm(1)
-          pLab(1) = pt*cos(phi)
-          pLab(2) = pt*sin(phi)
-          pLab(3) = sqrt(Amass**2+pt**2)*sinh(y)
-          prin4 Ipart,Plab; (' *** next particle ',i3,4F9.3)
-          CALL AGSKINE(Plab,Ipart,Ivert,Ub,0,Itr)
+         Itr=0;
+         while(Itr.eq.0) {
+           call RANNOR(a,b)
+           pt      = Gamma2(0.)/miky_SLOPE(Ip)
+           if (miky_DY(Ip)>0) {  y = miky_DY(Ip)*a; }
+           else               {  y = miky_DY(Ip)*(RNDM(3)-0.5)*2;}
+           phi     = TwoPi*Rndm(1)
+           pLab(1) = pt*cos(phi)
+           pLab(2) = pt*sin(phi)
+           pLab(3) = sqrt(Amass**2+pt**2)*sinh(y)
+           prin4 Ipart,Plab; (' *** next particle ',i3,4F9.3)
+           CALL AGSKINE(Plab,Ipart,Ivert,Ub,0,Itr)
+         }
        enddo
     enddo
 * 
