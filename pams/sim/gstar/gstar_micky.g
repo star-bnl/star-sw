@@ -23,9 +23,9 @@ Created August,14 1997
           version = 1                  ! versioning schema
           np    = 5                    ! number of particle types
           code  = {8,  9,  11, 12, 14} ! list of particle codes
-          mult  = {3., 3., 2., 2., 1.} ! particle multiplicities
+          mult  = {3., 3., 2., 2., 1.} ! particle multiplicities(+ve Poisson)
           slope = {5., 5., 4., 4.,3.3} ! PT spectra slopes (c/GeV)
-          dy    = {2., 2., 2., 2., 2.} ! width of rapidity Gaussian
+          dy    = {2., 2., 2., 2., 2.} ! width of rapidity Gaussian(-ve uniform)
        endfill
        first = .false.
     endif
