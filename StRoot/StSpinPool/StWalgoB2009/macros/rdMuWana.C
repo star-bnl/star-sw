@@ -14,7 +14,7 @@ int rdMuWana(
 	     int nFiles  = 1000, // max # of muDst files
 	     int isMC=1, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve, 20=rcf10010,... 26=rcf10016
 	     int useJetFinder = 2, // 0 - no jets & crash; 1 generate jet trees; 2 read jet trees
-             TString jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/aps2010/jetTree/" //default location of jet trees to be used
+             TString jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/jetTree4.5.10/" //default location of jet trees to be used
  ) { 
 
   //jetTreeDir = "./";
@@ -454,7 +454,11 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.26  2010/04/06 01:50:52  stevens4
+// update path to jet trees with DCA cut fix
+//
 // Revision 1.25  2010/03/20 19:19:07  balewski
+//
 // added ability to drop Q/PT cut for spin analysis
 //
 // Revision 1.24  2010/03/14 22:50:34  balewski
