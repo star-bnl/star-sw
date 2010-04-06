@@ -1,6 +1,10 @@
-* $Id: gstar_part.g,v 1.22 2010/03/19 22:10:47 perev Exp $
+* $Id: gstar_part.g,v 1.23 2010/04/06 14:16:25 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.23  2010/04/06 14:16:25  jwebb
+* Redefined the geant ID of the lambda(1520) from 706 to 995, to make
+* consistent with usage in embedding group.
+*
 * Revision 1.22  2010/03/19 22:10:47  perev
 * Lambda1520 added (Hiroshi request)
 *
@@ -224,7 +228,7 @@
                          pdg=0      bratio = {1,}        mode={4909,}
 ***2010***************************************************************************** 
 *  requested by Hiroshi
-  Particle StLambda1520  code=706  TrkTyp=3  mass=1.5195  charge=0   tlife=4.22e-23,
+  Particle StLambda1520  code=995  TrkTyp=3  mass=1.5195  charge=0   tlife=4.22e-23,
                          pdg=0     bratio= {1,}           mode= {1412,}
 
  End

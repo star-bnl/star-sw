@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.7 2010/03/22 21:32:34 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.8 2010/04/06 14:16:22 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.8  2010/04/06 14:16:22  jwebb
+ * Redefined the geant ID of the lambda(1520) from 706 to 995, to make
+ * consistent with usage in embedding group.
+ *
  * Revision 1.7  2010/03/22 21:32:34  jwebb
  * And set the pdg ID to geant ID mapping.
  *
@@ -142,8 +146,8 @@ StParticleTable::StParticleTable()
     Geant2Pdg( 703, -3114 ); // Sigma 1385 plus bar
     Geant2Pdg( 704, -3224 ); // Sigma 1385 minus bar 
 
-    Geant2Pdg( +706, +20003122 ); // Lambda 1520 
-    Geant2Pdg( -706, -20003122 ); // Lambda 1520 
+    Geant2Pdg( +995, +20003122 ); // Lambda 1520 
+    Geant2Pdg( -995, -20003122 ); // Lambda 1520 
 
 #undef Geant2Pdg
 
