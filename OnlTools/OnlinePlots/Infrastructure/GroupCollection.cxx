@@ -14,6 +14,7 @@
 #include "L2UpsilonTowersHistogramGroup.h"
 #include "L2UpsilonMassHistogramGroup.h"
 #include "VPDHistogramGroup.h"
+#include "BESHistogramGroup.h"
 #include "VPDHiHistogramGroup.h"
 #include "FMSHistogramGroup.h"
 #include "pp2ppHistogramGroup.h"
@@ -50,6 +51,7 @@ void GroupCollection::serverCreate() {
   insert( new UPCHistogramCtbGroup("Upc","Ctb","upc","any") );
   insert( new UPCHistogramZdcGroup("Upc","Zdc","upc","any") );
   insert( new VPDHistogramGroup("Trigger","vpd","any","trg") );
+  insert( new BESHistogramGroup("Trigger","BES","any","trg") );
 #ifdef NEW_DAQ_READER
   insert( new VPDHiHistogramGroup("Trigger","vpdHi","any","trg") );
 #endif
