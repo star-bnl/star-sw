@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.557 2010/02/19 23:39:20 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.558 2010/04/06 16:00:44 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -691,6 +691,7 @@ Int_t StBFChain::Instantiate()
       if (mode) 
 	ProcessLine(Form("((StMaker *) %p)->SetMode(%i);", mk, mode));
     }
+    if (maker == "StBTofCalibMaker" && GetOption("UseEventVertex")) mk->SetAttr("UseEventVertex",kTRUE);
   Add2Chain:
     if (! mk) continue;
     if (name == "") strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
