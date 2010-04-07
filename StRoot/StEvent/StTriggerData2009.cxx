@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.24 2010/01/26 20:33:16 fisyak Exp $
+ * $Id: StTriggerData2009.cxx,v 2.25 2010/04/07 14:43:00 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.25  2010/04/07 14:43:00  ullrich
+ * Added streamer and added new access function for BBC large tile earliest TAC and difference
+ *
  * Revision 2.24  2010/01/26 20:33:16  fisyak
  * Fix for 64 bit
  *
@@ -93,13 +96,12 @@
 
 ClassImp(StTriggerData2009)
 
-StTriggerData2009::StTriggerData2009()
+StTriggerData2009::StTriggerData2009():mData()
 {
     printf("StTriggerData2009 Default Constructor\n");    
-    if (mData) readData(0,0);
 }
 
-StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
+StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run):mData()
 {
     //printf("StTriggerData2009 Constructor with trigger data block\n");    
     mYear=2009; mRun = run; debug = 0;
@@ -107,7 +109,7 @@ StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run)
     readData(data,1);
 }
 
-StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run, int bs, int dbg)
+StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run, int bs, int dbg):mData()
 {
     mYear=2009; mRun = run; debug = dbg;
     if(debug) printf("StTriggerData2009 Constructor with trigger data block and byteswap option=%d\n",bs);    
@@ -460,6 +462,25 @@ unsigned short StTriggerData2009::bbcTimeDifference() const
 {
     return L1_DSM->VTX[3]%8192;
 }
+
+unsigned short StTriggerData2009::bbcEarliestTDCLarge(StBeamDirection eastwest, int prepost) const
+{
+  int buffer = prepostAddress(prepost);
+  if (buffer >=0){
+    if (mBBC[buffer]){
+      if (eastwest==east) {return  mBBC[buffer]->BBClayer1[11] & 0x0fff;}
+      else {return ((mBBC[buffer]->BBClayer1[11] & 0xf000) >> 12)
+	          +((mBBC[buffer]->BBClayer1[10] & 0x00ff) << 4 );}
+    }
+  }
+  return 0;
+}
+
+unsigned short StTriggerData2009::bbcTimeDifferenceLarge() const
+{
+  return L1_DSM->VTX[2]%8192;
+}
+
 
 unsigned short StTriggerData2009::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const
 {
@@ -1267,5 +1288,19 @@ void StTriggerData2009::killFMS(){
         j=offlen[y9QT2_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y9QT2_CONF_NUM].offset, 0, j); offlen[y9QT2_CONF_NUM].length=0;};
         j=offlen[y9QT3_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y9QT3_CONF_NUM].offset, 0, j); offlen[y9QT3_CONF_NUM].length=0;};
         j=offlen[y9QT4_CONF_NUM].length; if (j>0){memset((char*)mData + offlen[y9QT4_CONF_NUM].offset, 0, j); offlen[y9QT4_CONF_NUM].length=0;};
+    }
+}
+
+void StTriggerData2009::Streamer(TBuffer &R__b)
+{
+    // Stream an object of class StTriggerData2009.
+    
+    if (R__b.IsReading()) {
+        R__b.ReadClassBuffer(StTriggerData2009::Class(),this);
+        cout << "StTriggerData2009::Streamer read trigger data!!!"<<endl;
+        if(mData) readData();
+    }
+    else {
+        R__b.WriteClassBuffer(StTriggerData2009::Class(),this);
     }
 }
