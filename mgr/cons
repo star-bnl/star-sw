@@ -31,7 +31,7 @@ use Cwd;
 
 use vars qw( $CVS_id $CVS_ver $ver_num $ver_rev $version );
 
-$CVS_id = '$Id: cons,v 1.104 2009/09/09 19:21:26 jeromel Exp $ ';
+$CVS_id = '$Id: cons,v 1.105 2010/04/07 13:12:33 jeromel Exp $ ';
 $CVS_ver = (split(/\s+/, $CVS_id))[2];
 
 $ver_num = "2.3";
@@ -3002,39 +3002,46 @@ sub scan {
 }
 
 # Return the include flags that would be used for a C Compile.
+# Changed J.Lauret 2010/03 to swap path precedence
 sub iflags {
     my($self, $env) = @_;
     my($iflags) = '';
+    my($rflags) = '';
     my($dir, $dpath);
+
+
     for $dir (@{$self->{path}}) {
 	$dpath = $dir->path;
+
+	#print "*** DEBUG cons >> dpath $dpath \n";
+
 	# Add the (presumably local) directory to the -I flags
 	# if we're not using repositories, the directory exists,
 	# or it's Linked to a source directory (that is, it *will*
 	# exist by the time the compilation occurs).
 	$iflags .= " ".$env->{INCDIRPREFIX}.$dpath.$env->{INCDIRSUFFIX}
 		if ! @param::rpath || -d $dpath || $dir->is_linked || $dpath eq $param::defaultInclude;
-#else
-#		if ! @param::rpath || -d $dpath || $dir->is_linked;
-#endif
+
 	next if File::Spec->file_name_is_absolute($dpath);
 	if (@param::rpath) {
 	    my $d;
 	    if ($dpath eq $dir::CURDIR) {
 		foreach $d (map($_->path, @param::rpath)) {
-		    $iflags .= " ".$env->{INCDIRPREFIX}.$d.$env->{INCDIRSUFFIX};
+		    #print "Adding ".$env->{INCDIRPREFIX}.$d.$env->{INCDIRSUFFIX}."\n";
+		    $rflags .= " ".$env->{INCDIRPREFIX}.$d.$env->{INCDIRSUFFIX};
 		}
 	    } else {
 		my($rpath);
 		foreach $d (map($_->path, @param::rpath)) {
 		    $rpath = File::Spec->catfile($d, $dpath);
-		    $iflags .= " ".$env->{INCDIRPREFIX}.$rpath.$env->{INCDIRSUFFIX}
+		    $rflags .= " ".$env->{INCDIRPREFIX}.$rpath.$env->{INCDIRSUFFIX}
 				if -d $rpath;
 		}
 	    }
 	}
     }
-    $iflags
+
+    $iflags." ".$rflags;
 }
 
 package File::Spec;
