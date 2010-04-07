@@ -67,7 +67,7 @@ class AvalancheMicroscopic {
     void GetDriftLinePoint(double& x, double& y, double& z, double &t,
                            const int ip, const int iel = 0) const;
 
-    int  GetNumberOfPhotons() const {return nPhotons;}
+    int  GetNumberOfPhotons() const {return usePhotons ? nPhotons : 0;}
     void GetPhoton(const int i, double& e,
                    double& x0, double& y0, double& z0, double& t0,
                    double& x1, double& y1, double& z1, double& t1,

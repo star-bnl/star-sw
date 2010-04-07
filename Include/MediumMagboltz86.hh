@@ -136,13 +136,18 @@ class MediumMagboltz86 : public Medium {
     bool   SetMaxElectronEnergy(const double e);
     double GetMaxElectronEnergy() const {return eFinal;}
 
+    // Set/get the highest photon energy to be included
+    // in the scattering rates table
+    bool   SetMaxPhotonEnergy(const double e);
+    double GetMaxPhotonEnergy() const {return eFinalGamma;}
+
     // Switch on/off automatic adjustment of max. energy when an
     // energy exceeding the present range is requested
-    void EnableEnergyRangeAdjustment() {adjust = true;}
+    void EnableEnergyRangeAdjustment()  {adjust = true;}
     void DisableEnergyRangeAdjustment() {adjust = false;}
 
     // Switch on/off anisotropic scattering (enabled by default)
-    void EnableAnisotropicScattering() {anisotropic = true;}
+    void EnableAnisotropicScattering()  {anisotropic = true;}
     void DisableAnisotropicScattering() {anisotropic = false;}
     
     // Switch on/off de-excitation treatment
@@ -190,6 +195,7 @@ class MediumMagboltz86 : public Medium {
   private:
 
     static const int nEnergySteps = 4000;
+    static const int nEnergyStepsGamma = 1000;
     static const int nMaxGases = 6;
     static const int nMaxInelasticTerms = 220;
     static const int nMaxLevels = 512;
@@ -249,9 +255,13 @@ class MediumMagboltz86 : public Medium {
     double fRadiative[nMaxLevels];
     double fCollIon[nMaxLevels];
     double fCollLoss[nMaxLevels];
+    // Ionisation thresholds
+    double ionPot[nMaxGases];
     // Minimum ionisation potential
     double minIonPot;
 
+    // Energy spacing of photon collision rates table
+    double eFinalGamma, eStepGamma;
     // Number of photon collision cross-section terms
     int nPhotonTerms;    
     // Total photon collision frequencies

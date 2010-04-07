@@ -62,6 +62,39 @@ OpticalData::GetPhotoabsorptionCrossSection(const double e, double& cs) {
 
 }
 
+bool
+OpticalData::GetPhotoionisationYield(const double e, double& eta) {
+
+  if (!hasData) return false;
+  if (e <= ionmin) {
+    eta = 0.; 
+    return true;
+  }
+  if (e >= ionmax) {
+    eta = 1.;
+    return true;
+  }
+
+  // Locate the requested energy in the table
+  int iLow = 0;
+  int iUp = energyIon.size() - 1;
+  int iM;
+  while (iUp - iLow > 1) {
+    iM = (iUp + iLow) >> 1;
+    if (e >= energyIon[iM]) {
+      iLow = iM;
+    } else {
+      iUp = iM;
+    }
+  }
+
+  // Linear interpolation
+  eta = yieldIon[iLow] + (e - energyIon[iLow]) * 
+      (yieldIon[iUp] - yieldIon[iLow]) / (energyIon[iUp] - energyIon[iLow]);
+  return true;
+
+}
+
 void
 OpticalData::Argon() {
 
@@ -124,6 +157,11 @@ OpticalData::Argon() {
   emin = energy[0];
   emax = energy.back();
 
+  energyIon.clear();
+  yieldIon.clear();
+  ionmin = 15.937;
+  ionmax = 15.937;
+
 }
 
 void 
@@ -166,6 +204,26 @@ OpticalData::Methane() {
   emin = energy[0];
   emax = energy.back(); 
 
+  const int nYieldEntries = 27;
+  double xion[nYieldEntries] = {
+    12.76, 12.89, 12.97, 13.09, 13.17, 13.29, 13.41, 13.51, 13.64, 13.72,
+    13.84, 13.94, 14.06, 14.16, 14.26, 14.34, 14.46, 14.61, 14.74, 14.86,
+    14.97, 15.12, 15.34, 15.54, 15.73, 15.88, 16.13};
+                 
+  double yion[nYieldEntries] = {
+    0.000, 0.008, 0.018, 0.040, 0.064, 0.111, 0.169, 0.200, 0.259, 0.302,
+    0.340, 0.381, 0.419, 0.450, 0.500, 0.541, 0.593, 0.662, 0.719, 0.765,
+    0.803, 0.841, 0.893, 0.939, 0.970, 0.982, 0.994};
+
+  energyIon.clear(); energyIon.resize(nYieldEntries);
+  yieldIon.clear();  yieldIon.resize(nYieldEntries);
+  for (int i = nYieldEntries; i--;) {
+    energyIon[i] = xion[i];
+    yieldIon[i] = yion[i];
+  }
+  ionmin = energyIon[0];
+  ionmax = yieldIon.back();
+
 }
 
 void
@@ -199,6 +257,12 @@ OpticalData::Isobutane() {
   
   emin = energy[0];
   emax = energy.back();
+
+  energyIon.clear();
+  yieldIon.clear();
+  ionmin = 10.67;
+  ionmax = 10.67;
+
 
 }
 
