@@ -31,7 +31,7 @@
 #pragma link C++ class StTriggerData2005+;
 #pragma link C++ class StTriggerData2007+;
 #pragma link C++ class StTriggerData2008+;
-#pragma link C++ class StTriggerData2009+;
+#pragma link C++ class StTriggerData2009-;
 
 //IncFile=StDaqLib/TRG/trgStructures.h
 #pragma link C++ class TrgDataType+;
