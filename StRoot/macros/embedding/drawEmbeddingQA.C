@@ -13,6 +13,7 @@ void drawEmbeddingQA(
     const TString embeddingFile = "qa_embedding_2005_P07ie.root",
     const TString realDataFile  = "qa_real_2005_P07ie.root",
     const Int_t geantid = 8,
+    const Double_t ptmax = 5.0, // default is 5 GeV/c
     const Bool_t isEmbeddingOnly = kFALSE
 ){
   gROOT->Macro("${STAR}/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
@@ -28,6 +29,9 @@ void drawEmbeddingQA(
 //  maker->setJPGOn() ; // Print jpg file
 //  maker->setEPSOn() ; // Print eps file
 //  maker->setPSOn() ;  // Print ps file
+
+  // Set maximum pt to be drawn
+  maker->setPtMax(ptmax) ;
 
   // Draw all QA plots
   maker->draw();
@@ -67,6 +71,7 @@ void drawEmbeddingQA(
     const Int_t year,
     const TString production,
     const Int_t geantid,
+    const Double_t ptmax,
     const Bool_t isEmbeddingOnly = kFALSE
 ){
   gROOT->Macro("${STAR}/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
@@ -82,6 +87,9 @@ void drawEmbeddingQA(
 //  maker->setJPGOn() ; // Print jpg file
 //  maker->setEPSOn() ; // Print eps file
 //  maker->setPSOn() ;  // Print ps file
+
+  // Set maximum pt to be drawn
+  maker->setPtMax(ptmax) ;
 
   // Draw all QA plots
   maker->draw();
