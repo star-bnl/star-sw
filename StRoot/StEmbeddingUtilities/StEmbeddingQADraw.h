@@ -42,8 +42,11 @@
 //
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.h,v 1.10 2010/03/15 21:05:23 hmasui Exp $
+ * $Id: StEmbeddingQADraw.h,v 1.11 2010/04/07 19:45:11 hmasui Exp $
  * $Log: StEmbeddingQADraw.h,v $
+ * Revision 1.11  2010/04/07 19:45:11  hmasui
+ * Use box option for dE/dx vs p to reduce the pdf file size
+ *
  * Revision 1.10  2010/03/15 21:05:23  hmasui
  * Separate MC vertices QA into 2 pages. Added constraint on z-vertex cut for vx(vy) vs vz histograms.
  *
@@ -251,8 +254,6 @@ class StEmbeddingQADraw {
 inline Int_t StEmbeddingQADraw::getYear()               const { return mYear ; }
 inline const Char_t* StEmbeddingQADraw::getProduction() const { return mProduction.Data() ; }
 inline Int_t StEmbeddingQADraw::getGeantId()            const { return mGeantId ; }
-
-inline void StEmbeddingQADraw::setPtMax(const Double_t ptmax) { mPtMax = ptmax ; }
 
 #endif
 

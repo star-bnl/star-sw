@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.14 2010/03/15 21:05:24 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.15 2010/04/07 19:45:12 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.15  2010/04/07 19:45:12  hmasui
+ * Use box option for dE/dx vs p to reduce the pdf file size
+ *
  * Revision 1.14  2010/03/15 21:05:24  hmasui
  * Separate MC vertices QA into 2 pages. Added constraint on z-vertex cut for vx(vy) vs vz histograms.
  *
@@ -135,6 +138,15 @@ StEmbeddingQADraw::~StEmbeddingQADraw()
   if( mInputEmbedding || mInputEmbedding->IsOpen() ) mInputEmbedding->Close();
   if( mInputRealData || mInputRealData->IsOpen() ) mInputRealData->Close();
 }
+
+//____________________________________________________________________________________________________
+void StEmbeddingQADraw::setPtMax(const Double_t ptmax)
+{ 
+  mPtMax = ptmax ;
+  LOG_INFO << "StEmbeddingQADraw::setPtMax()  Set maximum pt = " << mPtMax
+    << " GeV/c to be drawn" << endm;
+}
+
 
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::open(const TString embeddingFile, const TString realDataFile)
@@ -1479,11 +1491,12 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
     hdEdxVsMomEmbed->SetAxisRange(0, mPtMax, "X");
     hdEdxVsMomEmbed->SetXTitle(Form("%s momentum (GeV/c)", momName.Data()));
     hdEdxVsMomEmbed->SetTitle("");
+    hdEdxVsMomEmbed->SetMinimum(0);
 
-    hdEdxVsMomEmbed->Draw();
-    if( hdEdxVsMomReal )    hdEdxVsMomReal->Draw("same");
-    if( hdEdxVsMomPidReal ) hdEdxVsMomPidReal->Draw("same");
-    hdEdxVsMomEmbed->Draw("same");
+    hdEdxVsMomEmbed->Draw("box");
+    if( hdEdxVsMomReal )    hdEdxVsMomReal->Draw("box same");
+    if( hdEdxVsMomPidReal ) hdEdxVsMomPidReal->Draw("box same");
+    hdEdxVsMomEmbed->Draw("box same");
 
     mMainPad->cd(2);
 
