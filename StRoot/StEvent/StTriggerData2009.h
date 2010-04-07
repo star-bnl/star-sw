@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.14 2010/01/13 17:55:47 ullrich Exp $
+ * $Id: StTriggerData2009.h,v 2.15 2010/04/07 14:43:00 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.15  2010/04/07 14:43:00  ullrich
+ * Added streamer and added new access function for BBC large tile earliest TAC and difference
+ *
  * Revision 2.14  2010/01/13 17:55:47  ullrich
  * Better mErrorFlags, abort, and debug flag handling, updated MTD DSM access function for run10, clean up compiler warning messages.
  *
@@ -133,6 +136,8 @@ public:
     unsigned short bbcADCSumLargeTile(StBeamDirection eastwest, int prepost=0) const;
     unsigned short bbcEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
     unsigned short bbcTimeDifference() const;
+    unsigned short bbcEarliestTDCLarge(StBeamDirection eastwest, int prepost=0) const;
+    unsigned short bbcTimeDifferenceLarge() const;
     
     // FPD
     unsigned short fpd(StBeamDirection eastwest, int module, int pmt, int prepost=0) const; 
