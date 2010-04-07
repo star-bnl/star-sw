@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.33 2010/01/13 17:55:39 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.34 2010/04/07 14:43:19 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.34  2010/04/07 14:43:19  ullrich
+ * Added new access function for BBC large tile earliest TAC and difference
+ *
  * Revision 2.33  2010/01/13 17:55:39  ullrich
  * Better mErrorFlags, abort, and debug flag handling, updated MTD DSM access function for run10, clean up compiler warning messages.
  *
@@ -239,6 +242,8 @@ public:
     virtual unsigned short bbcADCSumLargeTile(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short bbcEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short bbcTimeDifference() const;
+    virtual unsigned short bbcEarliestTDCLarge(StBeamDirection eastwest, int prepost=0) const;
+    virtual unsigned short bbcTimeDifferenceLarge() const;
   
     // FPD  module #: north=0, south=1, top=2, bottom=3, north preshower=4, south preshower=5
     virtual unsigned short fpd(StBeamDirection eastwest, int module, int pmt, int prepost=0) const; 
