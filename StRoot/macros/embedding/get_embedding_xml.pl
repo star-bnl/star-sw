@@ -206,7 +206,7 @@ print OUT "<!-- Start job -->\n";
 $tagFile = "\$EMBEDTAGDIR/\${FILEBASENAME}.tags.root"; #Define tag file
 printDebug("Set tags file: $tagFile, bfcMixer: $bfcMixer ...");
 
-print OUT "root4star -b -q $bfcMixer\\($nevents,\\\"\$INPUTFILE0\\\",\\\"$tagFile\\\",&PTLOW;,&PTHIGH;,&ETALOW;,&ETAHIGH;,&PID;,&MULT;,\\\"$production\\\",\\\"$ptOption\\\",-$zvertexCut,$zvertexCut\\\)\n";
+print OUT "root4star -b -q $bfcMixer\\($nevents,\\\"\$INPUTFILE0\\\",\\\"$tagFile\\\",&PTLOW;,&PTHIGH;,&ETALOW;,&ETAHIGH;,-$zvertexCut,$zvertexCut,&PID;,&MULT;,\\\"$production\\\",\\\"$ptOption\\\"\\\)\n";
 print OUT "ls -la .\n";
 
 #----------------------------------------------------------------------------------------------------
