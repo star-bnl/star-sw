@@ -29,15 +29,25 @@
 #endif
 #include "StIOInterFace.h"
 #include "StTree.h"
+#include "TTable.h"
+#include "Ttypes.h"
+struct dst_bfc_status_st  {
+  Char_t   maker_name[12];    /* Truncated maker name            */
+  Int_t    status;            /* Status number (warning,error)   */
+};
+class St_dst_bfc_status : public TTable {
+ public:
+  ClassDefTable(St_dst_bfc_status,dst_bfc_status_st)
+  ClassDef(St_dst_bfc_status,1) //C++ container for chain/makers status 
+};
 
-class St_dst_bfc_status;
 
 class StTreeMaker : public StIOInterFace {
 private:
    Int_t  fFinished;			//!noIO
    St_dst_bfc_status *fBfcStatus;	//!noIO
 public:
-   StTreeMaker(const char *name="",const char *ioFile="",const char *treeName=0);
+   StTreeMaker(const Char_t *name="",const Char_t *ioFile="",const Char_t *treeName=0);
    virtual       ~StTreeMaker();
    virtual Int_t  Init();
    virtual Int_t  Make();
@@ -61,8 +71,8 @@ public:
    StBranch *GetBranch(const Char_t *brName)
      {if(!fTree)return 0;return (StBranch*)fTree->Find(brName);};   
 
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.17 2002/04/26 22:14:48 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const Char_t *GetCVS() const
+  {static const Char_t cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.18 2010/04/07 13:07:47 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
    StTree        *fTree;	//!
