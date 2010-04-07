@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.9 2010/02/18 23:54:50 fisyak Exp $
+// $Id: bfcMixer_Tpx.C,v 1.10 2010/04/07 18:31:01 hmasui Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -20,9 +20,12 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
 		  const Double_t pt_high=5.0,
                   const Double_t eta_low=-1.5,
                   const Double_t eta_high=1.5,
+                  const Double_t vzlow = -150.0,
+                  const Double_t vzhigh = 150.0,
 		  const Int_t pid=9,
 		  const Double_t mult=100,
-                  const Char_t *prodName = "P08iepp") {
+                  const Char_t *prodName = "P08iepp",
+                  const Char_t* type = "FlatPt"){
   // production chains for P08ic - p+p, Au+Au 9 GeV and d+Au
   TString prodP08iepp("DbV20081117 B2008a ITTF IAna ppOpt l3onl emcDY2 fpd ftpc trgd ZDCvtx NosvtIT NossdIT Corr4 OSpaceZ2 OGridLeak3D VFMCE -hitfilt");
   TString prodP08icpp("DbV20080712,pp2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine,VFMCE,TpxClu -VFPPV -hitfilt");
@@ -33,6 +36,7 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   TString geomP08ic("ry2008");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
+//  TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
   chain2Opt += " "; chain2Opt += geomP08ic;
   if (prodName == "P08icpp") {   TString chain3Opt = prodP08icpp; }
   else if (prodName == "P08iepp") { TString chain3Opt = prodP08iepp; }
@@ -123,7 +127,6 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   chain3->AddAfter("emcRaw",eemcMixer); 
   chain3->AddAfter("emcRaw",eemcFastSim); 
 
-  
   eemcFastSim->SetEmbeddingMode();
   //  eemcFastSim->SetDebug();
   // eemcMixer->SetDebug();
@@ -150,9 +153,21 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   cout << "bfcMixer: Setting PID: "<<pid<<endl;
   embMk->SetTagFile(tagfile);
   //            pTlow,ptHigh,etaLow,etaHigh,phiLow,phiHigh
-  embMk->SetOpt(  pt_low,    pt_high,  eta_low,    eta_high,    0.,   6.283185); 
+  embMk->SetOpt(  pt_low,    pt_high,  eta_low,    eta_high,    0.,   6.283185, type); 
   //                pid, mult
   embMk->SetPartOpt(  pid,mult);
+
+  // Default is no event selections
+  embMk->SetSkipMode(kFALSE);
+
+  // Make trigger and z-vertex cuts (only if SkipMode is true)
+  // Trigger cut
+  //   Can put multiple trigger id's 
+//  embMk->SetTrgOpt(210020) ;
+
+  // z-vertex cuts
+  embMk->SetZVertexCut(vzlow, vzhigh) ;
+
   TAttr::SetDebug(0);
   Chain->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
   Chain->SetAttr(".Privilege",1,"StBFChain::*" ); 	//StBFChain is priviliged
