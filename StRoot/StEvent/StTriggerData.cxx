@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.13 2010/01/08 22:44:37 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.14 2010/04/07 14:43:19 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.14  2010/04/07 14:43:19  ullrich
+ * Added new access function for BBC large tile earliest TAC and difference
+ *
  * Revision 2.13  2010/01/08 22:44:37  ullrich
  * Updates needed to add StFmsCollection and related classes.
  *
@@ -52,7 +55,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.13 2010/01/08 22:44:37 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.14 2010/04/07 14:43:19 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -199,6 +202,8 @@ unsigned short StTriggerData::bbcADCSum(StBeamDirection eastwest, int prepost) c
 unsigned short StTriggerData::bbcADCSumLargeTile(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::bbcEarliestTDC(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::bbcTimeDifference() const {return 0;}
+unsigned short StTriggerData::bbcEarliestTDCLarge(StBeamDirection eastwest, int prepost) const {return 0;}
+unsigned short StTriggerData::bbcTimeDifferenceLarge() const {return 0;}
 unsigned short StTriggerData::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const {return 0;} 
 unsigned short StTriggerData::fpdSum(StBeamDirection eastwest, int module) const {return 0;}
 unsigned short StTriggerData::nQTdata(int prepost) const {return 0;}
