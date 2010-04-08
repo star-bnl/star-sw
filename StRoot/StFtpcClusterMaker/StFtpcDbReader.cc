@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.45 2010/01/14 18:23:00 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.46 2010/04/08 16:46:16 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.46  2010/04/08 16:46:16  jcs
+// swap data for RDO6,RDO7 FTPC East when Calibrations_ftpc/ftpcElectronics->swapRDO6RDO7East=1
+//
 // Revision 1.45  2010/01/14 18:23:00  jcs
 // store laser tZero in electronicsTable for laser runs so that all events in a
 // laser run are reconstructed with the laser tZero
@@ -552,6 +555,7 @@ Int_t StFtpcDbReader::FtpcElectronics(St_ftpcElectronics *electronics)
      mLaserTZero = electronicsTable->laserTZero;
      if (electronicsTable->uSecondsPerTimebin != 0 ) 
        mMicrosecondsPerTimebin = electronicsTable->uSecondsPerTimebin;
+     mSwapRDO6RDO7East = electronicsTable->swapRDO6RDO7East;
      return kStOK;
   } else {
      LOG_ERROR << " No data in table class St_ftpcElectronics" << endm;

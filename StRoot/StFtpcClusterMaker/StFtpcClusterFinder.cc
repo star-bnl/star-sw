@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.78 2009/12/11 15:41:06 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.79 2010/04/08 16:46:16 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.79  2010/04/08 16:46:16  jcs
+// swap data for RDO6,RDO7 FTPC East when Calibrations_ftpc/ftpcElectronics->swapRDO6RDO7East=1
+//
 // Revision 1.78  2009/12/11 15:41:06  jcs
 // For laser run use laserTZero and no inner cathode correction
 //
@@ -1123,6 +1126,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 				  int iNumPeaks, 
 				  float fastlog[256])
 {
+  int iRowSAVE, iSecSAVE;
   int iADCValue, iADCPlus, iADCMinus;
   int iADCTimePlus, iADCTimeMinus;
   int iSequence, iBin;
@@ -1337,12 +1341,63 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  mPoint->AddAt(new StFtpcConfMapPoint(), numPoint);
 	  StFtpcConfMapPoint *thispoint = (StFtpcConfMapPoint *) mPoint->At(numPoint);
 
-	  thispoint->SetPadRow(iRow+1);           
-	  thispoint->SetSector(iSec+1);
+
+          if (iRow>=10 && mDb->SwapRDO6RDO7East()) {
+             iSecSAVE = iSec;
+             iRowSAVE = iRow;
+             if(iSec==3&&iRow==10){
+                iRow = 16;
+             }  
+             else if(iSec==3&&iRow==11){
+                iRow = 17;
+             }  
+             else if(iSec==3&&iRow==12){
+                iRow = 18;
+             } 
+             else if(iSec==3&&iRow==13){
+                iRow = 19;
+             }
+             else if(iSec==3&&iRow==14){
+                iRow = 18;
+                iSec = 4;
+             }    
+             else if(iSec==3&&iRow==15){
+                iRow = 19;
+                iSec = 4;
+             }
+             else if(iSec==3&&iRow==16){
+                iRow = 10;
+             }
+             else if(iSec==3&&iRow==17) {
+                iRow = 11;
+             }
+             else if(iSec==3&&iRow==18){
+                iRow = 12;
+             }
+             else if(iSec==3&&iRow==19) {
+                iRow = 13;
+             }
+             else if(iSec==4&&iRow==18){
+                iRow = 14;
+                iSec = 3;
+             }
+             else if(iSec==4&&iRow==19){
+                iRow = 15;
+                iSec = 3;
+             }
+             thispoint->SetPadRow(iRow+1);
+	     thispoint->SetSector(iSec+1);
+             iSec = iSecSAVE;
+             iRow = iRowSAVE;
+          }
+          else {
+             thispoint->SetPadRow(iRow+1);
+	     thispoint->SetSector(iSec+1);
+          }
+
 	  thispoint->SetNumberPads(Cluster->EndPad +1 - Cluster->StartPad);
 	  thispoint->SetNumberBins(Peak->Sequence.Length);
 	  thispoint->SetMaxADC((long)Peak->PeakHeight);
-	  thispoint->SetCharge(ChargeSum);
 	  thispoint->SetPadPos(Peak->PadPosition);
 	  thispoint->SetTimePos(Peak->TimePosition);
 	  thispoint->SetPadPosSigma(Peak->PadSigma);
@@ -1801,9 +1856,60 @@ if (mcldebug){
 	      
 	      mPoint->AddAt(new StFtpcConfMapPoint(), numPoint);
 	      StFtpcConfMapPoint *thispoint = (StFtpcConfMapPoint *) mPoint->At(numPoint);
-	      
-	      thispoint->SetPadRow(iRow+1);           
-	      thispoint->SetSector(iSec+1);
+
+              if (iRow>=10 && mDb->SwapRDO6RDO7East()) {
+                 iSecSAVE = iSec;
+                 iRowSAVE = iRow;
+                 if(iSec==3&&iRow==10){
+                    iRow = 16;
+                 } 
+                 else if(iSec==3&&iRow==11){
+                    iRow = 17;
+                 }
+                 else if(iSec==3&&iRow==12){
+                    iRow = 18;
+                 }
+                 else if(iSec==3&&iRow==13){
+                    iRow = 19;
+                 }
+                 else if(iSec==3&&iRow==14){
+                    iRow = 18;
+                    iSec = 4;
+                 }
+                 else if(iSec==3&&iRow==15){
+                    iRow = 19;
+                    iSec = 4;
+                 }
+                 else if(iSec==3&&iRow==16){
+                    iRow = 10;
+                 }
+                 else if(iSec==3&&iRow==17){
+                    iRow = 11;
+                 }
+                 else if(iSec==3&&iRow==18){
+                    iRow = 12;
+                 }
+                 else if(iSec==3&&iRow==19){
+                    iRow = 13;
+                }
+                else if(iSec==4&&iRow==18){
+                    iRow = 14;
+                    iSec = 3;
+                }
+                else if(iSec==4&&iRow==19){
+                    iRow = 15;
+                    iSec = 3;
+                }
+                thispoint->SetPadRow(iRow+1);
+	        thispoint->SetSector(iSec+1);
+                iSec = iSecSAVE;
+                iRow = iRowSAVE;
+              }
+              else {
+                 thispoint->SetPadRow(iRow+1);
+         	 thispoint->SetSector(iSec+1);
+              }
+
 	      thispoint->SetNumberPads(Cluster->EndPad +1 - Cluster->StartPad);
 	      thispoint->SetNumberBins(Peak[iPeakIndex].Sequence.Length);
 	      thispoint->SetMaxADC((long)Peak[iPeakIndex].PeakHeight);
@@ -1921,6 +2027,49 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
  int PadtransPerTimebin;
   int PadtransLower;
   float PhiDeflect, TimeCoordinate;
+
+  if (iRow>=10 && mDb->SwapRDO6RDO7East()) {
+    if(iSec==3&&iRow==10) { 
+       iRow=16;
+    }
+    else if(iSec==3&&iRow==11) {
+       iRow=17;
+    }
+    else if(iSec==3&&iRow==12) {
+       iRow=18;
+    }
+    else if(iSec==3&&iRow==13) {
+       iRow=19;
+    }
+    else if(iSec==3&&iRow==14) {
+       iSec=4;
+       iRow=18;
+    }
+    else if(iSec==3&&iRow==15) {
+       iSec=4;
+       iRow=19;
+    }
+    else if(iSec==3&&iRow==16) {
+       iRow=10;
+    }
+    else if(iSec==3&&iRow==17) {
+       iRow=11;
+    }
+    else if(iSec==3&&iRow==18) {
+       iRow=12;
+    }
+    else if(iSec==3&&iRow==19) {
+       iRow=13;
+    }
+    else if(iSec==4&&iRow==18) {
+       iSec=3;
+       iRow=14;
+    } 
+    else if(iSec==4&&iRow==19) {
+       iSec=3;
+       iRow=15;
+    }
+  }
 
   /* preparatory calculations */
   TimeCoordinate = Peak->TimePosition + 0.5; /*time start at beginning of bin 0*/

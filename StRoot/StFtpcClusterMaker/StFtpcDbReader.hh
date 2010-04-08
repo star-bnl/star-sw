@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.29 2009/08/04 08:37:28 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.30 2010/04/08 16:46:16 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.30  2010/04/08 16:46:16  jcs
+// swap data for RDO6,RDO7 FTPC East when Calibrations_ftpc/ftpcElectronics->swapRDO6RDO7East=1
+//
 // Revision 1.29  2009/08/04 08:37:28  jcs
 // When the flaser option is included in the bfc, the 'perfect' gain table and
 // adjustAverageWest = adjustAverageEast = 0.0, will be used for cluster finding
@@ -193,6 +196,7 @@ protected:
   Float_t mTZero;
   Float_t mLaserTZero;
   Float_t mMicrosecondsPerTimebin;
+  Bool_t mSwapRDO6RDO7East;
 
   Float_t mOffsetCathodeWest;
   Float_t mOffsetCathodeEast;
@@ -331,6 +335,7 @@ public:
    
   Bool_t EastIsInverted() {return mEastIsInverted;}
   Bool_t Asic2EastNotInverted() {return mAsic2EastNotInverted;}
+  Bool_t  SwapRDO6RDO7East() {return mSwapRDO6RDO7East;}
 
   Int_t numberOfMagboltzBins() {return mNumberOfMagboltzBins;}
   Int_t maximumNumberOfMagboltzBins() {return mMaximumNumberOfMagboltzBins;}

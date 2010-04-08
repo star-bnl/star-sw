@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.104  2010/04/08 16:46:16  jcs
+// swap data for RDO6,RDO7 FTPC East when Calibrations_ftpc/ftpcElectronics->swapRDO6RDO7East=1
+//
 // Revision 1.103  2009/11/25 19:50:16  jcs
 // remove all references to StFtpcSoftwareMonitor
 //
@@ -564,6 +567,7 @@ Int_t StFtpcClusterMaker::Init(){
   m_fastsimgas   = (St_ftpcFastSimGas  *)local("ftpcFastSimGas");
   m_fastsimpars  = (St_ftpcFastSimPars *)local("ftpcFastSimPars");
 
+
   // USE_LOCAL_DRIFTMAP:
   //                    To use the FTPC drift map tables in $PWD/StarDb instead of those
   //                    in the MySQL offline database, uncomment the following 4 lines of code
@@ -672,6 +676,7 @@ Int_t StFtpcClusterMaker::Make()
      } else {
         LOG_INFO<<"          microsecondsPerTimebin    = "<<dbReader.microsecondsPerTimebin()<<" (default value from database)"<<endm;
      }
+     LOG_INFO<<"          SwapRDO6RDO7East          = "<<dbReader.SwapRDO6RDO7East()<<endm;
      LOG_INFO<<"          EastIsInverted            = "<<dbReader.EastIsInverted()<<endm;
      LOG_INFO<<"          Asic2EastNotInverted      = "<<dbReader.Asic2EastNotInverted()<<endm;
      LOG_INFO<<"          tzero                     = "<<dbReader.tZero()<<endm;
