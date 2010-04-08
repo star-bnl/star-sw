@@ -72,6 +72,7 @@ void L2UpsilonMassHistogramGroup::draw(TCanvas* cc) {
 bool L2UpsilonMassHistogramGroup::fill(evpReader* evp, char* datap) { 
   L2UpsilonResult L2;
   L2UpsilonResult* mL2 = &L2;
+  memset(mL2,0,sizeof(L2UpsilonResult));
   if (!mL2) return false;
 
 #ifndef NEW_DAQ_READER
@@ -106,9 +107,12 @@ bool L2UpsilonMassHistogramGroup::fill(evpReader* evp, char* datap) {
 }
 
 /*************************************************************************************
- $Id: L2UpsilonMassHistogramGroup.cxx,v 1.3 2009/02/19 22:32:05 genevb Exp $
+ $Id: L2UpsilonMassHistogramGroup.cxx,v 1.4 2010/04/08 18:07:31 genevb Exp $
  *************************************************************************************
  $Log: L2UpsilonMassHistogramGroup.cxx,v $
+ Revision 1.4  2010/04/08 18:07:31  genevb
+ Initialize L2UpsilonResult
+
  Revision 1.3  2009/02/19 22:32:05  genevb
  More thorough default constructor implementations
 
