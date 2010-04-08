@@ -13,7 +13,8 @@ namespace Garfield {
 MediumMagboltz86::MediumMagboltz86() :
   Medium(), 
   eFinal(40.), eStep(eFinal / nEnergySteps), adjust(true), csoutput(false), 
-  nTerms(0), anisotropic(true), deexcitation(false),
+  nTerms(0), anisotropic(true), 
+  penning(false), rPenning(0.), deexcitation(false),
   eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma) {
   
   // Set physical constants in Magboltz common blocks
@@ -216,6 +217,39 @@ MediumMagboltz86::SetMaxPhotonEnergy(const double e) {
   
 }
 
+void
+MediumMagboltz86::EnableDeexcitation() {
+
+  if (penning) {
+    std::cerr << "MediumMagboltz86::EnableDeexcitation:" << std::endl;
+    std::cerr << "    Penning transfer will be switched off." << std::endl;
+  }
+  penning = false;
+  deexcitation = true;
+  isChanged = true;
+
+}
+
+void
+MediumMagboltz86::EnablePenningTransfer(const double r) {
+
+  if (r < 0. || r > 1.) {
+    std::cerr << "MediumMagboltz86::EnablePenningTransfer:" << std::endl;
+    std::cerr << "    Penning transfer probability must be " 
+              << " in the range [0, 1]." << std::endl;
+    return;
+  }
+  
+  rPenning = r;
+  if (deexcitation) {
+    std::cerr << "MediumMagboltz86::EnablePenningTransfer:" << std::endl;
+    std::cerr << "    Deexcitation handling will be switched off." 
+              << std::endl;
+  }
+  penning = true;
+  
+}
+
 double 
 MediumMagboltz86::GetElectronNullCollisionRate() {
 
@@ -343,19 +377,14 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
       esec = RndmUniform() * (energyLoss[level] - minIonPot);
       if (esec <= 0) esec = 1.e-20;
     }
-  }
-
-  bool penning = false;
-  // TEMPORARY HANDLING OF PENNING TRANSFERS FOR AR/ISOBUTANE
-  if (penning && level < 47 && type == 4) {
-    // Excited level of argon
-    if (RndmUniform() < 0.4) {
-      // Penning ionisation
+  } else if (type == 4 && penning) {
+    if (RndmUniform() < rPenning) {
+      esec = RndmUniform() * (energyLoss[level] - minIonPot);
+      if (esec <= 0) esec = 1.e-20;
       type = 1;
-      esec = 1.;
     }
   }
-  
+
   // Make sure the energy loss is smaller than the energy
   if (e < loss) loss = e - 0.0001;
   
@@ -915,120 +944,63 @@ bool
 MediumMagboltz86::GetGasName(const int number, std::string& gasname) const {
   
   switch (number) {
-    case 0:
-      gasname = ""; return false; break;
-    case 1:
-      gasname = "CF4"; break;
-    case 2:
-      gasname = "Ar"; break;
-    case 3:
-      gasname = "He"; break;
-    case 4:
-      gasname = "He-3"; break;
-    case 5:
-      gasname = "Ne"; break;
-    case 6:
-      gasname = "Kr"; break;
-    case 7:
-      gasname = "Xe"; break;
-    case 8:
-      gasname = "CH4"; break;
-    case 9:
-      gasname = "C2H6"; break;
-    case 10:
-      gasname = "C3H8"; break;
-    case 11:
-      gasname = "iC4H10"; break;
-    case 12:
-      gasname = "CO2"; break;
-    case 13:
-      gasname = "Neopentane"; break;
-    case 14:
-      gasname = "H2O"; break;
-    case 15:
-      gasname = "O2"; break;
-    case 16:
-      gasname = "N2"; break;
-    case 17:
-      gasname = "NO"; break;
-    case 18:
-      gasname = "N2O"; break;
-    case 19:
-      gasname = "C2H4"; break;
-    case 20:
-      gasname = "C2H2"; break;
-    case 21:
-      gasname = "H2"; break;
-    case 22:
-      gasname = "D2"; break;
-    case 23:
-      gasname = "CO"; break;
-    case 24:
-      gasname = "Methylal"; break;
-    case 25:
-      gasname = "DME"; break;
-    case 26:
-      gasname = "Reid-Step"; break;
-    case 27:
-      gasname = "Maxwell-Model"; break;
-    case 28:
-      gasname = "Reid-Ramp"; break;
-    case 29:
-      gasname = "C2F6"; break;
-    case 30:
-      gasname = "SF6"; break;
-    case 31:
-      gasname = "NH3"; break;
-    case 32:
-      gasname = "C3H6"; break;
-    case 33:
-      gasname = "Cyclopropane"; break;
-    case 34:
-      gasname = "Methanol"; break;
-    case 35:
-      gasname = "Ethanol"; break;
-    case 36:
-      gasname = "Propanol"; break;
-    case 37:
-      gasname = "Cs"; break;
-    case 38:
-      gasname = "F2"; break;
-    case 39:
-      gasname = "CS2"; break;
-    case 40:
-      gasname = "COS"; break;
-    case 41:
-      gasname = "CD4"; break;
-    case 42:
-      gasname = "BF3"; break;
-    case 43:
-      gasname = "C2HF5"; break;
-    case 50:
-      gasname = "CHF3"; break;
-    case 51:
-      gasname = "CF3Br"; break;
-    case 52:
-      gasname = "C3F8"; break;
-    case 53:
-      gasname = "O3"; break;
-    case 54:
-      gasname = "Hg"; break;
-    case 55:
-      gasname = "H2S"; break;
-    case 56:
-      gasname = "n-C4H10"; break;
-    case 57:
-      gasname = "n-C5H12"; break;
-    case 58:
-      gasname = "N2"; break;
-    case 59:
-      gasname = "GeH4"; break;
-    case 60:
-      gasname = "SiH4"; break;
-    default:
-      gasname = ""; return false; break;
+    case 0:  gasname = ""; return false; break;
+    case 1:  gasname = "CF4";     break;
+    case 2:  gasname = "Ar";      break;
+    case 3:  gasname = "He";      break;
+    case 4:  gasname = "He-3";    break;
+    case 5:  gasname = "Ne";      break;
+    case 6:  gasname = "Kr";      break;
+    case 7:  gasname = "Xe";      break;
+    case 8:  gasname = "CH4";     break;
+    case 9:  gasname = "C2H6";    break;
+    case 10: gasname = "C3H8";    break;
+    case 11: gasname = "iC4H10";  break;
+    case 12: gasname = "CO2";     break;
+    case 13: gasname = "Neopentane"; break;
+    case 14: gasname = "H2O";     break;
+    case 15: gasname = "O2";      break;
+    case 16: gasname = "N2";      break;
+    case 17: gasname = "NO";      break;
+    case 18: gasname = "N2O";     break;
+    case 19: gasname = "C2H4";    break;
+    case 20: gasname = "C2H2";    break;
+    case 21: gasname = "H2";      break;
+    case 22: gasname = "D2";      break;
+    case 23: gasname = "CO";      break;
+    case 24: gasname = "Methylal"; break;
+    case 25: gasname = "DME";     break;
+    case 26: gasname = "Reid-Step";     break;
+    case 27: gasname = "Maxwell-Model"; break;
+    case 28: gasname = "Reid-Ramp";     break;
+    case 29: gasname = "C2F6";    break;
+    case 30: gasname = "SF6";     break;
+    case 31: gasname = "NH3";     break;
+    case 32: gasname = "C3H6";    break;
+    case 33: gasname = "Cyclopropane"; break;
+    case 34: gasname = "Methanol";     break;
+    case 35: gasname = "Ethanol";      break;
+    case 36: gasname = "Propanol";     break;
+    case 37: gasname = "Cs";      break;
+    case 38: gasname = "F2";      break;
+    case 39: gasname = "CS2";     break;
+    case 40: gasname = "COS";     break;
+    case 41: gasname = "CD4";     break;
+    case 42: gasname = "BF3";     break;
+    case 43: gasname = "C2HF5";   break;
+    case 50: gasname = "CHF3";    break;
+    case 51: gasname = "CF3Br";   break;
+    case 52: gasname = "C3F8";    break;
+    case 53: gasname = "O3";      break;
+    case 54: gasname = "Hg";      break;
+    case 55: gasname = "H2S";     break;
+    case 56: gasname = "n-C4H10"; break;
+    case 57: gasname = "n-C5H12"; break;
+    case 58: gasname = "N2";      break;
+    case 59: gasname = "GeH4";    break;
+    case 60: gasname = "SiH4";    break;
+    default: gasname = ""; return false; break;
     }
-
     return true;
 
 }
@@ -1075,7 +1047,8 @@ MediumMagboltz86::Mixer() {
     fCollLoss[i] = 0.;
   }
 
-  for (int i = nMaxGases; i--;) ionPot[i] = 0.;
+  for (int i = nMaxGases; i--;) ionPot[i] = -1.;
+  minIonPot = -1.;
   
   // Gas cross-section
   static double q[nEnergySteps][6];
@@ -1256,6 +1229,16 @@ MediumMagboltz86::Mixer() {
   }
   if (csoutput) outfile.close();
 
+  // Find the min. ionisation threshold
+  for (int i = nMaxGases; i--;) {
+    if (ionPot[i] < 0.) continue;
+    if (minIonPot < 0.) {
+      minIonPot = ionPot[i];
+    } else if (ionPot[i] < minIonPot) {
+      minIonPot = ionPot[i];
+    }
+  }
+
   for (int iE = nEnergySteps; iE--;) {
     // Calculate the total collision frequency
     for (int k = nTerms; k--;) {
@@ -1346,20 +1329,11 @@ MediumMagboltz86::ComputeAngularCut(double parIn, float& cut, double &parOut) {
 void
 MediumMagboltz86::ComputeDeexcitationTable() {
 
-  minIonPot = -1.;
   // Fill radiative deexcitation rates
   for (int i = 0; i < nTerms; ++i) {
     fRadiative[i] = 0.;
     fCollIon[i] = 0.;
     fCollLoss[i] = 0.;
-    // Find the min. ionisation threshold in the mixture
-    if (csType[i] % 6 == 1) {
-      if (minIonPot <= 0.) {
-        minIonPot = energyLoss[i];
-      } else if (energyLoss[i] < minIonPot) {
-        minIonPot = energyLoss[i];
-      }
-    }
     if (csType[i] % 6 != 4) continue;
     wSplit[i] = energyLoss[i];
     switch (gas[int(csType[i] / 6)]) {

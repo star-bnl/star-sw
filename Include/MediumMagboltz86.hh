@@ -130,7 +130,7 @@ class MediumMagboltz86 : public Medium {
                         std::string& gas5, double& f5,
                         std::string& gas6, double& f6);
     void   GetComponent(const int i, std::string& label, double& f);
-    
+ 
     // Set/get the highest electron energy to be included 
     // in the scattering rates table
     bool   SetMaxElectronEnergy(const double e);
@@ -150,9 +150,14 @@ class MediumMagboltz86 : public Medium {
     void EnableAnisotropicScattering()  {anisotropic = true;}
     void DisableAnisotropicScattering() {anisotropic = false;}
     
-    // Switch on/off de-excitation treatment
-    void EnableDeexcitation()  {deexcitation = true;}
+    // Switch on/off de-excitation handling
+    void EnableDeexcitation();
     void DisableDeexcitation() {deexcitation = false;}
+
+    // Switch on/off simplified simulation of Penning transfers by means of 
+    // transfer probabilities (not compatible with de-excitation handling)
+    void EnablePenningTransfer(const double r);
+    void DisablePenningTransfer() {penning = false;}
 
     // When enabled, the gas cross-section table is written to file
     // when loaded into memory
@@ -229,15 +234,15 @@ class MediumMagboltz86 : public Medium {
     float  scatCut[nEnergySteps][nMaxLevels];
     
     // Level description
-    char description[nMaxLevels][30];    
-    
+    char description[nMaxLevels][30]; 
+
     // Total collision frequency
     double cfTot[nEnergySteps];
     // Null-collision frequencies
     double cfNull[8];  
     // Collision frequencies
     double cf[nEnergySteps][nMaxLevels];
-   
+
     // Collision counters
     // 0: elastic
     // 1: ionisation
@@ -249,6 +254,9 @@ class MediumMagboltz86 : public Medium {
     // Number of collisions for each cross-section term
     std::vector<int> nCollisionsDetailed;
 
+    // Penning transfer probabilities
+    bool penning;
+    double rPenning;
     // Deexcitation rates
     bool deexcitation;
     double fDeexcitation[nMaxLevels];
@@ -263,13 +271,13 @@ class MediumMagboltz86 : public Medium {
     // Energy spacing of photon collision rates table
     double eFinalGamma, eStepGamma;
     // Number of photon collision cross-section terms
-    int nPhotonTerms;    
+    int nPhotonTerms; 
     // Total photon collision frequencies
     std::vector<double> cfTotGamma;
     // Photon collision frequencies
     double cfGamma[nEnergySteps][nMaxPhotonLevels];
     int csTypeGamma[nMaxPhotonLevels];
-  
+
     bool GetGasNumber(std::string gasname, int& number) const;
     bool GetGasName(const int number, std::string& gasname) const;
     bool Mixer();
