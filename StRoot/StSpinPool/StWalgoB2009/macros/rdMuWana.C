@@ -1,3 +1,7 @@
+/*Justin:  to generate jetTree for a M-C with real-event time stamp do:
+root4star -b -q 'rdMuWana.C(100,"","/star/data05/scratch/balewski/wrk2/test3/rcj10010_1_100evts.MuDst.root",1,100,1)'
+*/
+
 class StChain;
 StChain *chain=0;
 int useEtow=3;// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
@@ -42,6 +46,7 @@ int rdMuWana(
   if(isMC==21) file =Form("%sWminus_enu/perugia320/y2009a/gheisha_on/p09ig/rcf10011_1000_1000evts.MuDst.root",dir);
   if(isMC==22) file =Form("%sZ_eplus_eminus/perugia320/y2009a/gheisha_on/p09ig/rcf10014_1000_1000evts.MuDst.root",dir);
   if(isMC==23) file =Form("%sW_jet/perugia320/y2009a/gheisha_on/p09ig/rcf10013_1000_1000evts.MuDst.root",dir);
+  if(isMC==26) file =Form("%sQCD/perugia320/y2009a/gheisha_on/p09ig/rcf10016_1058_1000evts.MuDst.root",dir);
   //submit via scheduler 
   if(isMC==30) geant=true; //uses geant files
   
@@ -454,6 +459,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.27  2010/04/08 23:46:21  balewski
+// *** empty log message ***
+//
 // Revision 1.26  2010/04/06 01:50:52  stevens4
 // update path to jet trees with DCA cut fix
 //
