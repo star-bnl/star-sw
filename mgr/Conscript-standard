@@ -190,8 +190,11 @@ if ($FC eq 'g77' or $FC eq 'gfortran'){
 	$LIBS .= " " . $env1->{FLIBS};
     }
 
-    if ( $FC eq 'gfortran' && grep(/.F$/,@srcL) ){
-	print "\tFound .F in sources and adding [".
+    # this is done not only for stand-alone library purpose but for backward
+    # compatibility of root4star linked with -lg2c rather than gfortran (hence
+    # libs would not work as symbol would fail to resolve)
+    if ( $FC eq 'gfortran' && (grep(/.F$/,@srcL) || grep(/.g$/,@srcL)) ){
+	print "\tFound .F or .g in sources and adding [".
 	      $env1->{FLIBS}."] to $pkg\n";
 	$SOFLAGS .= " " . $env1->{FLIBS};
     }
