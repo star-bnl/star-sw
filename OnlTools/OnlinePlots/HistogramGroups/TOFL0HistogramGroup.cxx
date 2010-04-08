@@ -121,7 +121,7 @@ void TOFL0HistogramGroup::draw(TCanvas* cc) {
     cc->cd(i+1);
     gPad->SetGridx(0);
     gPad->SetGridy(0);
-    gPad->SetLogy(1);
+    gPad->SetLogy(TOF_L0_trg[i]->GetEntries() ? 1 : 0);
 
     TOF_L0_trg[i]->GetYaxis()->SetLabelSize(0.06);
     TOF_L0_trg[i]->GetXaxis()->SetLabelSize(0.07);

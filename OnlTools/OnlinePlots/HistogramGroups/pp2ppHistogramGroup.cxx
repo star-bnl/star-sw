@@ -126,7 +126,7 @@ void pp2ppHistogramGroup::draw(TCanvas* cc) {
   pad1->Divide(4, 4);
   for ( int ii=0; ii<mMaxBits; ii++) {
     pad1->cd(ii+1) ; 
-    pad1->cd(ii+1)->SetLogy() ; 
+    gPad->SetLogy(h_P2P[ii]->GetEntries() ? 1 : 0);
     h_P2P[ii]->SetFillColor(4) ;
     h_P2P[ii]->Draw();
   }  

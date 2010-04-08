@@ -78,11 +78,14 @@ void L2UpsilonCountsHistogramGroup::draw(TCanvas* cc) {
   hTag->Draw();
   cc->cd(2);
   hTime->Draw();
-  cc->cd(3)->SetLogx();  
+  cc->cd(3);  
+  gPad->SetLogx(hNumberOfHotTowers->GetEntries() ? 1 : 0);
   hNumberOfHotTowers->Draw("p");
-  cc->cd(4)->SetLogx();  
+  cc->cd(4);  
+  gPad->SetLogx(hAbordRate->GetEntries() ? 1 : 0);
   hAbordRate->Draw("p");
-  cc->cd(6)->SetLogx();  
+  cc->cd(6);  
+  gPad->SetLogx(hAbordRateCurrent->GetEntries() ? 1 : 0);
   hAbordRateCurrent->Draw("p");
   
   cc->cd(5);
@@ -142,9 +145,12 @@ bool L2UpsilonCountsHistogramGroup::fill(evpReader* evp, char* datap) {
 }
 
 /*************************************************************************************
- $Id: L2UpsilonCountsHistogramGroup.cxx,v 1.3 2009/02/19 22:32:05 genevb Exp $
+ $Id: L2UpsilonCountsHistogramGroup.cxx,v 1.4 2010/04/08 23:50:58 genevb Exp $
  *************************************************************************************
  $Log: L2UpsilonCountsHistogramGroup.cxx,v $
+ Revision 1.4  2010/04/08 23:50:58  genevb
+ Use linear for plots with no entries
+
  Revision 1.3  2009/02/19 22:32:05  genevb
  More thorough default constructor implementations
 
