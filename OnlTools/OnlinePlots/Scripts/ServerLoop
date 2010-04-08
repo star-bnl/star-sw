@@ -11,11 +11,7 @@ cat >liveServer.C<<ROOTMACRO
   gROOT->Macro("Load.C");
   gSystem->Load("RTS");
   if (gROOT->IsBatch()) {
-     gSystem->Load("libQtCore.so");
-     gSystem->Load("libQtGui.so");
-     gSystem->Load("libGui.so");
-     gSystem->Load("libGQt.so");
-     gSystem->Load("libQt3Support.so");
+     gSystem->Load("libQtRootGui.so");
   }
   gSystem->Load("StDaqLib");
   gSystem->Load("OnlinePlots");
@@ -43,6 +39,8 @@ ROOTMACRO
 echo "--- Starting Server Loop"
 while 1
         touch server.out
+        echo "- Starting liveServer"
+        date
         nohup root4starN -q -b liveServer.C >>& server.out
         /RTS/bin/LINUX/i686/rtsLog -p 8005 -d WARNING -c server.csh Restarting evpServer in 30 sec... Press 'live' in presenter gui
         sleep 30;

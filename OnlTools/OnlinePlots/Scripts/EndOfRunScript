@@ -21,11 +21,7 @@ cat >endOfRunAction.C<<ROOTMACRO
   gROOT->Macro("Load.C");
   gSystem->Load("RTS");
   if (gROOT->IsBatch()) {
-     gSystem->Load("libQtCore.so");
-     gSystem->Load("libQtGui.so");
-     gSystem->Load("libGui.so");
-     gSystem->Load("libGQt.so");
-     gSystem->Load("libQt3Support.so");
+    gSystem->Load("libQtRootGui.so");
   }
   gSystem->Load("StDaqLib");
   gSystem->Load("OnlinePlots");
@@ -48,4 +44,4 @@ cat >endOfRunAction.C<<ROOTMACRO
 ROOTMACRO
 
 echo "--- Starting end of run action"
-root4star -q endOfRunAction.C
+root4starN -b -q endOfRunAction.C
