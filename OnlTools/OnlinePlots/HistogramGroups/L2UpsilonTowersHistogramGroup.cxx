@@ -80,6 +80,7 @@ void L2UpsilonTowersHistogramGroup::draw(TCanvas* cc) {
 bool L2UpsilonTowersHistogramGroup::fill(evpReader* evp, char* datap) { 
   L2UpsilonResult L2;
   L2UpsilonResult* mL2 = &L2;
+  memset(mL2,0,sizeof(L2UpsilonResult));
   if  (!mL2) return false;
 
 #ifndef NEW_DAQ_READER
@@ -115,9 +116,12 @@ bool L2UpsilonTowersHistogramGroup::fill(evpReader* evp, char* datap) {
 }
 
 /*************************************************************************************
- $Id: L2UpsilonTowersHistogramGroup.cxx,v 1.4 2009/04/15 21:07:31 dkettler Exp $
+ $Id: L2UpsilonTowersHistogramGroup.cxx,v 1.5 2010/04/08 23:50:10 genevb Exp $
  *************************************************************************************
  $Log: L2UpsilonTowersHistogramGroup.cxx,v $
+ Revision 1.5  2010/04/08 23:50:10  genevb
+ Initialize L2UpsilonResult
+
  Revision 1.4  2009/04/15 21:07:31  dkettler
  Avoid segfaults
 
