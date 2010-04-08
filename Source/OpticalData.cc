@@ -35,9 +35,11 @@ OpticalData::GetPhotoabsorptionCrossSection(const double e, double& cs) {
   }
 
   if (e < emin || e > emax) {
-    std::cerr << "OpticalData::GetPhotoabsorptionCrossSection:" << std::endl;
-    std::cerr << "    Requested energy is outside the range." << std::endl;
-    std::cerr << "    " << emin << " < E [eV] < " << emax << std::endl;
+    if (debug) {
+      std::cerr << "OpticalData::GetPhotoabsorptionCrossSection:" << std::endl;
+      std::cerr << "    Requested energy is outside the range." << std::endl;
+      std::cerr << "    " << emin << " < E [eV] < " << emax << std::endl;
+    }
     cs = 0.;
     return false;
   }

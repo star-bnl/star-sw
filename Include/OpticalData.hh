@@ -12,7 +12,8 @@ class OpticalData {
     // Constructor
     OpticalData() : hasData(false), 
                     emin(0.), emax(0.),
-                    ionmin(0.), ionmax(0.) {}
+                    ionmin(0.), ionmax(0.), 
+                    debug(false) {}
     // Destructor
     ~OpticalData() {}
 
@@ -34,6 +35,8 @@ class OpticalData {
     std::vector<double> energyIon;
     std::vector<double> yieldIon;
     double ionmin, ionmax;
+
+    bool debug;
 
     void Argon();
     void Methane();

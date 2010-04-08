@@ -374,12 +374,13 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
       esec = - wSplit[level];
     } else if (r < fCollIon[level]) {
       // Penning ionisation
-      esec = RndmUniform() * (energyLoss[level] - minIonPot);
+      esec = RndmUniform() * (energyLoss[level] * rgas[level] - minIonPot);
       if (esec <= 0) esec = 1.e-20;
     }
   } else if (type == 4 && penning) {
-    if (RndmUniform() < rPenning) {
-      esec = RndmUniform() * (energyLoss[level] - minIonPot);
+    if (energyLoss[level] * rgas[level] > minIonPot && 
+        RndmUniform() < rPenning) {
+      esec = RndmUniform() * (energyLoss[level] * rgas[level] - minIonPot);
       if (esec <= 0) esec = 1.e-20;
       type = 1;
     }
@@ -1238,6 +1239,10 @@ MediumMagboltz86::Mixer() {
       minIonPot = ionPot[i];
     }
   }
+  if (debug) {
+    std::cout << "Lowest ionisation threshold in the mixture: " << minIonPot
+              << " eV" << std::endl;
+  }
 
   for (int iE = nEnergySteps; iE--;) {
     // Calculate the total collision frequency
@@ -1269,7 +1274,7 @@ MediumMagboltz86::Mixer() {
     for (int j = nInterval * i; j < nInterval * (i + 1); ++j) {
       if (cfTot[j] >= cfNull[i]) cfNull[i] = cfTot[j];
     }
-  }  
+  } 
 
   double nullmax = cfNull[0];
   for (int i = 1; i < 8; ++i) {
@@ -1335,7 +1340,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
     fCollIon[i] = 0.;
     fCollLoss[i] = 0.;
     if (csType[i] % 6 != 4) continue;
-    wSplit[i] = energyLoss[i];
+    wSplit[i] = energyLoss[i] * rgas[i];
     switch (gas[int(csType[i] / 6)]) {
       case 2:
         // Argon
@@ -1409,6 +1414,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
           fRadiative[i] = 1. / 4.74; continue;
         } else if (level == "2S3    ") {
           fRadiative[i] = 1. / 43.9; continue;
+        } else if (level == "2S2    ") {
+          fRadiative[i] = 1. / 3.2; continue;       
         // 3p54d levels
         } else if (level == "4D5    ") {
           fRadiative[i] = 1. / 113.; continue;
@@ -1471,26 +1478,29 @@ MediumMagboltz86::ComputeDeexcitationTable() {
     }
     for (int j = nTerms; j--;) {
       if (int(csType[j] / 6) == ar && csType[j] % 6 == 4) {
-        if (energyLoss[j] < minIonPot) continue;
+        if (energyLoss[j] * rgas[j] < minIonPot) continue;
         std::string level = "       ";
         for (int k = 0; k < 7; ++k) level[k] = description[j][5 + k];
-        // 3p54s levels
-        // Average lifetime assumed to be 5 ns
-        if (level == "1S5    " || level == "1S3    " ||
-            level == "1S4    " || level == "1S2    ") {
-          fCollIon[j] = fB / 5.;
         // 3p54p levels
         // Average lifetime assumed to be 30 ns
-        } else if (level == "2P10   " || level == "2P9    " ||
+        if (level == "2P10   " || level == "2P9    " ||
                    level == "2P8    " || level == "2P7    " ||
                    level == "2P6    " || level == "2P5    " ||
                    level == "2P4    " || level == "2P3    " ||
                    level == "2P2    " || level == "2P1    ") {
           fCollIon[j] = fB / 30.;
-        // 3p53d and higher levels
-        // Average lifetime assumed to be 50 ns
-        } else { 
-          fCollIon[j] = fB / 50.;
+        // 3p53d levels
+        // Average lifetime assumed to be 40 ns
+        } else if (level == "3D6    " || level == "3D5    " ||
+                   level == "3D4!   " || level == "3D4    " ||
+                   level == "3D3    " || level == "3D2    " ||
+                   level == "3D1!!  " || level == "3D1!   " ||
+                   level == "3S1!!!!" || level == "3S1!!! " ||
+                   level == "3S1!!  " || level == "3S1!   ") { 
+          fCollIon[j] = fB / 40.;
+        // Higher levels
+        } else {
+          fCollIon[j] = fB * fRadiative[j];
         }
       }
     }    
