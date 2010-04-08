@@ -137,7 +137,7 @@ void MTDtriggerinfoHistogramGroup::draw(TCanvas* cc) {
   MTD_adc[0]->SetFillColor(19);
   MTD_adc[0]->GetYaxis()->SetLabelSize(0.07);
   MTD_adc[0]->GetXaxis()->SetLabelSize(0.055);
-  if(MTD_adc[0]->GetEntries()>0)gPad->SetLogy(1);
+  gPad->SetLogy(MTD_adc[0]->GetEntries() ? 1 : 0);
   MTD_adc[0]->Draw();
   float hmax=MTD_adc[0]->GetMaximum();
   labely.DrawLatex(-200, 0.6*hmax, "Counts");
@@ -146,7 +146,7 @@ void MTDtriggerinfoHistogramGroup::draw(TCanvas* cc) {
   MTD_adc[1]->SetFillColor(19);
   MTD_adc[1]->GetYaxis()->SetLabelSize(0.07);
   MTD_adc[1]->GetXaxis()->SetLabelSize(0.055);
-  if(MTD_adc[1]->GetEntries()>0)gPad->SetLogy(1);
+  gPad->SetLogy(MTD_adc[1]->GetEntries() ? 1 : 0);
   MTD_adc[1]->Draw();
   hmax=MTD_adc[1]->GetMaximum();
   labely.DrawLatex(-200, 0.6*hmax, "Counts");

@@ -281,7 +281,7 @@ void BESHistogramGroup::draw(TCanvas* cc) {
     PlotLine(BEMC_low_min_energy+BEMC_energy_diff,600.0,BEMC_low_min_energy,BEMC_low_min_energy,2,1,2,&line5); // x1,x2,y1,y2,Line_Col,LineWidth,LineStyle
     PlotLine(BEMC_low_min_energy,BEMC_low_min_energy,BEMC_low_min_energy+BEMC_energy_diff,600.0,2,1,2,&line6); // x1,x2,y1,y2,Line_Col,LineWidth,LineStyle
     cc->cd(3);
-    cc->cd(3)->SetLogy(1);
+    gPad->SetLogy(h_bemc_adc_all->GetEntries() ? 1 : 0);
     h_bemc_adc_all ->Draw("h");
     cc->cd(6);
     h_event_type   ->Draw("h");

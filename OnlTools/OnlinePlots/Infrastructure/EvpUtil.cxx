@@ -581,6 +581,9 @@ void EvpUtil::Draw(TH1*h, const char* options) {
   if ( max<=0 ) {
     h->SetMaximum(1);
   }
+  if (! (h->GetEntries())) {
+    (h->GetDimension() > 1 ? gPad->SetLogz(0) : gPad->SetLogy(0));
+  }
   h->Draw(options);
 }
 
@@ -961,7 +964,7 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
 
 /***************************************************************************
  *
- * $Id: EvpUtil.cxx,v 1.15 2010/02/13 00:14:09 genevb Exp $
+ * $Id: EvpUtil.cxx,v 1.16 2010/04/08 23:50:58 genevb Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -971,6 +974,9 @@ bool EvpUtil::HasEntries(GenericFile* gFile , int i, int j) {
  ***************************************************************************
  *
  * $Log: EvpUtil.cxx,v $
+ * Revision 1.16  2010/04/08 23:50:58  genevb
+ * Use linear for plots with no entries
+ *
  * Revision 1.15  2010/02/13 00:14:09  genevb
  * Updates for different default account
  *

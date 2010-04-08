@@ -117,7 +117,7 @@ void FMSHistogramGroup::draw(TCanvas* cc) {
   cc->Divide(2,2);
   for(int i=0; i<mMaxCrate; i++) { 
     cc->cd(i+1); 
-    gPad->SetLogy(1);
+    gPad->SetLogy(h_fms_quad_sum[i]->GetEntries() ? 1 : 0);
     h_fms_quad_sum[i]->GetXaxis()->SetLabelSize(0.07); 
     h_fms_quad_sum[i]->GetYaxis()->SetLabelSize(0.07); 
     h_fms_quad_sum[i]->Draw(); 
