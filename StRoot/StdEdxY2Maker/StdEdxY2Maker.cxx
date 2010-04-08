@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.66 2010/03/17 15:53:17 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.67 2010/04/08 15:53:27 fisyak Exp $
 //#define dChargeCorrection
 //#define SpaceChargeQdZ
 //#define SeparateSums
@@ -57,7 +57,7 @@ using namespace units;
 const static StPidParticle NHYPS = kPidHe3;//kPidTriton;
 const static Int_t tZero= 19950101;
 const static Int_t tMin = 20090301;
-const static Int_t tMax = 20090705;
+const static Int_t tMax = 20100705;
 const static TDatime t0(tZero,0);
 const static Int_t timeOffSet = t0.Convert();
 const static Int_t NdEdxMax  = 60;
