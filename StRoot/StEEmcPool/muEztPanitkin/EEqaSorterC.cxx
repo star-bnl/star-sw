@@ -1,4 +1,4 @@
-// $Id: EEqaSorterC.cxx,v 1.9 2009/04/30 21:20:31 ogrebeny Exp $
+// $Id: EEqaSorterC.cxx,v 1.10 2010/04/09 04:48:33 ogrebeny Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -76,7 +76,7 @@ void EEqaSorterC::sortTower(const EztEmcRawData *t){
     if(t->isCrateVoid(icr)) continue;
     int crateID=icr+1;
     const UShort_t* data=t->data(icr);
-    for(int i=0;i<t->sizeData(icr);i++) {
+    for(int i=0;i<t->sizeData(icr) && i<MaxTwCrateCh;i++) {
       int chan=i;
       const  EEmcDbItem *x = eeDb ? eeDb->getByCrate(crateID,chan) : 0;
       if(!x) continue; // noDB info
@@ -108,7 +108,7 @@ void  EEqaSorterC::sortMapmt(const EztEmcRawData *s, int ver){
     }
     //printf("ddd %d %d\n",icr,crateID);
     const UShort_t* data=s->data(icr);
-    for(int i=0;i<s->sizeData(icr);i++) {
+    for(int i=0;i<s->sizeData(icr) && i<MaxMapmtCrateCh;i++) {
       int chan=i;
       const EEmcDbItem *x = eeDb ? eeDb->getByCrate(crateID,chan) : 0;
       if(!x) continue; // noDB info
@@ -251,6 +251,9 @@ void EEqaSorterC::initRun() {
 
 
 // $Log: EEqaSorterC.cxx,v $
+// Revision 1.10  2010/04/09 04:48:33  ogrebeny
+// Added more protection against out-of-boundary errors. See bug report 1903.
+//
 // Revision 1.9  2009/04/30 21:20:31  ogrebeny
 // Improved constness after fixing bug 1457
 //

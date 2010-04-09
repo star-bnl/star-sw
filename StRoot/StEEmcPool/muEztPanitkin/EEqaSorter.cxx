@@ -1,4 +1,4 @@
-// $Id: EEqaSorter.cxx,v 1.10 2009/03/05 02:37:53 ogrebeny Exp $
+// $Id: EEqaSorter.cxx,v 1.11 2010/04/09 04:48:33 ogrebeny Exp $
 #include <string.h>
 #include <stdlib.h>
 //#include <iostream>
@@ -205,7 +205,7 @@ void EEqaSorter::xRayETOW(EztEmcRawData *t, int token) const {
     int i;
     int nGhost=0, n256=0;
     const UShort_t* data=t->data(icr);
-    for(i=0;i<t->sizeData(icr);i++) {
+    for(i=0;i<t->sizeData(icr) && i<MaxTwCrateCh;i++) {
       if(data[i]>0 && (data[i] &0xff)==0 ) n256++;
       if(i>=121 && data[i]>50) nGhost++;
     }
@@ -253,7 +253,7 @@ void EEqaSorter::xRayESMD(EztEmcRawData *s, int token, int ver, int runNo) const
     int i;
     int n256=0;
     const UShort_t* data=s->data(icr);
-    for(i=0;i<s->sizeData(icr);i++) {
+    for(i=0;i<s->sizeData(icr) && i<MaxMapmtCrateCh;i++) {
       if(data[i]>0 && (data[i] &0xff)==0 ) n256++;
     }
     totN256+=n256;
@@ -457,6 +457,9 @@ void EEqaSorter::spy(EztEmcRawData *t, EztEmcRawData *s, int runNo, int eveId) {
 
 
 // $Log: EEqaSorter.cxx,v $
+// Revision 1.11  2010/04/09 04:48:33  ogrebeny
+// Added more protection against out-of-boundary errors. See bug report 1903.
+//
 // Revision 1.10  2009/03/05 02:37:53  ogrebeny
 // Updates from Renee and Grant
 //
