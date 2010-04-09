@@ -12,8 +12,8 @@ X86_DIR = X86
 X86_64_DIR = X86_64
 OPTSTAR_64 = /opt/star/sl53_x8664_gcc432
 
-CC  = g++ -fPIC 
-CXX = g++ -fPIC 
+CC  = g++ -fPIC -g
+CXX = g++ -fPIC -g
 LD  = g++ 
 
 #CC  = g++ -fPIC 
@@ -244,11 +244,17 @@ printobj:
         
 dist:   $(DISTTAR)
 
-$(DISTTAR):   StRoot/logging/testUcm.java $(MYJAR).jar  lib$(MYMOD)Impl.$(SOEXT) lib$(MYMOD)_java.$(SOEXT) lib$(MYMOD).$(SOEXT)
-	tar -czvf ucmdist.tar.gz  --strip-components=2 $? -C $(OPTSTAR)/lib liblog4cxx.so liblog4cxx.so.10 liblog4cxx.so.10.0.0
+$(X86_64_DIR)/liblog4cxx.so:
+	cp -rf /opt/star/sl53_x8664_gcc432/lib/*log4cxx* $(X86_64_DIR)/
+
+$(X86_DIR)/liblog4cxx.so:
+	cp -rf /opt/star/sl53_gcc432/lib/*log4cxx* $(X86_DIR)/
+
+$(DISTTAR):   StRoot/logging/testUcm.java $(MYJAR).jar $(X86_DIR) $(X86_64_DIR) $(X86_64)
+	tar -czvf ucmdist.tar.gz  --strip-components=2 $? 
         
-upload:   $(dist) $(DISTTAR)
-	cp $? ~/WWW/tmp
+upload:   $(DISTTAR)  $(X86_64_DIR)/liblog4cxx.so  $(X86_DIR)/liblog4cxx.so
+	cp $< ~/WWW/tmp
 	tar -tzvf ~/WWW/tmp/$(DISTTAR)
 
 

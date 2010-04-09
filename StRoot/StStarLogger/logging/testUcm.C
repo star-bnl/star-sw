@@ -61,6 +61,9 @@ int main(int argc , char *argv[])
           }
        }
        ucm.setDbJobID(1);
+       cout << " --------------------------------------" << endl;
+       ucm.logJobAttribute ("queue","Very Long");
+       cout << " --------------------------------------" << endl;
        StUcmEvents &events=*ucm.getEventList(20);
        Iterator event = events.eventIterator();
        while(event.hasNext() ){

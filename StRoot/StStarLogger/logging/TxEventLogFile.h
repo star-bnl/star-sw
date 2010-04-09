@@ -2,7 +2,7 @@
  * @file TxEventLogFile.h
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLogFile.h,v 1.2 2010/03/30 20:05:37 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFile.h,v 1.3 2010/04/09 16:28:19 fine Exp $
  *
  * TxEventLogFile provides an interface for applications so that they can write
  * event information into a CEDPS formated file.
@@ -36,7 +36,8 @@ namespace TxLogging {
      *
      */
     virtual void writeDown(const std::string& message);
-  
+    virtual void writeDown(const char *message);
+
   public:
     /**
      * Constructor
@@ -111,6 +112,16 @@ namespace TxLogging {
      */
     virtual void logStart (const std::string& key, const std::string& value);
 
+    /**
+     * Log the job attrbutes. This method will be called by the
+     * Broker.
+     *
+     * @param string attrbutes key,  For example: "que"
+     * @param string attrbutes value, For example queu name 
+     *
+     */
+     
+    virtual void logJobAttribute (const std::string& key, const std::string& value);
     /**
      * Log the job submit location. This method will be called by the
      * Broker.

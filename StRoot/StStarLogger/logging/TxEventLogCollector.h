@@ -2,7 +2,7 @@
  * @file TxEventLogCollector.h
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogCollector.h,v 1.3 2010/03/30 20:05:37 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogCollector.h,v 1.4 2010/04/09 16:28:19 fine Exp $
  *
  * TxEventLogCollector provides an interface for applications so that they can send
  * event across of the Collector into a CEDPS formated messages.
@@ -31,6 +31,7 @@ namespace TxLogging {
      *
      */
     virtual void writeDown(const std::string& message);
+    virtual void writeDown(const char *message);
     virtual void InitDb();
   
   public:
