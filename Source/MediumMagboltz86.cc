@@ -1400,39 +1400,43 @@ MediumMagboltz86::ComputeDeexcitationTable() {
         } else if (level == "2P1    ") {
           fRadiative[i] = 1. / 21.7; wSplit[i] = 1.652; continue;
         // 3p53d levels
-        // Gruzdev, Loginov (1975)
+        // Lifetimes from Gruzdev, Loginov (1975)
+        // Most levels decay to 4p
+        // Photon energies from NIST database
         } else if (level == "3D6    ") {
-          fRadiative[i] = 1. / 54.2; continue;
+          fRadiative[i] = 1. / 54.2; wSplit[i] = 0.938; continue;
         } else if (level == "3D5    ") {
           fRadiative[i] = 1. / 40.8; continue;
         } else if (level == "3D4!   ") {
-          fRadiative[i] = 1. / 52.0; continue;
+          // No line found, assume equal to 3d4
+          fRadiative[i] = 1. / 52.0; wSplit[i] = 0.918; continue;
         } else if (level == "3D4    ") {
-          fRadiative[i] = 1. / 50.8; continue;
+          fRadiative[i] = 1. / 50.8; wSplit[i] = 0.918; continue;
         } else if (level == "3D3    ") {
-          fRadiative[i] = 1. / 3.5; continue;
+          fRadiative[i] = 1. / 3.5; wSplit[i] = 0.732; continue;
         } else if (level == "3D2    ") {
           fRadiative[i] = 1. / 9.0; continue;
         } else if (level == "3D1!!  ") {
-          fRadiative[i] = 1. / 49.9; continue;
+          fRadiative[i] = 1. / 49.9; wSplit[i] = 0.910;  continue;
         } else if (level == "3D1!   ") {
-          fRadiative[i] = 1. / 49.0; continue;
+          fRadiative[i] = 1. / 49.0; wSplit[i] = 1.023; continue;
         } else if (level == "3S1!!!!") {
-          fRadiative[i] = 1. / 49.9; continue;
+          fRadiative[i] = 1. / 49.9; wSplit[i] = 0.931; continue;
         } else if (level == "3S1!!! ") {
-          fRadiative[i] = 1. / 49.7; continue;
+          fRadiative[i] = 1. / 49.7; wSplit[i] = 0.934; continue;
         } else if (level == "3S1!!  ") {
-          fRadiative[i] = 1. / 48.3; continue;
+          fRadiative[i] = 1. / 48.3; wSplit[i] = 1.062; continue;
         } else if (level == "3S1!   ") {
           fRadiative[i] = 1. / 3.36; continue;
         // 3p55s levels
-        // Gruzdev, Loginov (1975)
+        // Lifetimes from Gruzdev, Loginov (1975)
+        // Photon energies from NIST database
         } else if (level == "2S5    ") {
-          fRadiative[i] = 1. / 42.1; continue;
+          fRadiative[i] = 1. / 42.1; wSplit[i] = 1.161; continue;
         } else if (level == "2S4    ") {
           fRadiative[i] = 1. / 4.74; continue;
         } else if (level == "2S3    ") {
-          fRadiative[i] = 1. / 43.9; continue;
+          fRadiative[i] = 1. / 43.9; wSplit[i] = 1.334; continue;
         } else if (level == "2S2    ") {
           fRadiative[i] = 1. / 3.2; continue;       
         // 3p54d levels
