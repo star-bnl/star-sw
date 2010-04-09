@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.3 2010/03/30 20:05:37 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.4 2010/04/09 16:28:19 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -13,11 +13,16 @@
 #include <cassert>
 
 using namespace TxLogging;
+namespace {
+//const char *WebServiceURL="http://connery.star.bnl.gov/ucm/?m=";
+const char *WebServiceURL="http://f3.star.bnl.gov/UCMCollector/UCMCollector --post-data=\"ucm=";
+}
 
 void TxEventLogWeb::writeDown(const std::string& message)
 {
   std::string httpstring="wget -b  -q -o /dev/null ";
-  httpstring+= "-O /dev/null \'http://connery.star.bnl.gov/ucm/?m=";
+  httpstring+= "-O /dev/null ";
+  httpstring+= WebServiceURL;
 
   std::string qmessage = message;
   std::string searchString( "'" ); 

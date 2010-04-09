@@ -8,7 +8,7 @@
  * @file TxUCMCollector.h
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.h,v 1.4 2010/03/30 20:05:37 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.h,v 1.5 2010/04/09 16:28:19 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -345,6 +345,7 @@ class TxUCMCollector : public TxEventLog{
 // TxEventLog interface
 protected:
     virtual void writeDown(const std::string& message);
+    virtual void writeDown(const char *message);
 public:
 //___________________________________________________________________________________________________
  /**
@@ -413,6 +414,15 @@ public:
      */
     virtual void logStart (const std::string& key, const std::string& value);
 
+    /**
+     * Log the job attrbutes. This method will be called by the
+     * Broker.
+     *
+     * @param string attrbutes key,  For example: "que"
+     * @param string attrbutes value, For example queu name 
+     *
+     */ 
+     virtual void logJobAttribute (const std::string& key, const std::string& value);
 /**
      * Log the job submit location. This method will be called by the
      * Broker.

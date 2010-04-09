@@ -34,6 +34,7 @@ int main () {
   el1->setJobSubmitState (TxLogging::TxEventLog::DONE);
   sleep (1);
   el1->setJobSubmitID ("Job ID asdfasdf");
+  el1->logJobAttribute ("queue","Very Long");
   sleep (1);
   el1->logEnd ();
   delete (el1);

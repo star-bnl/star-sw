@@ -6,6 +6,11 @@ using namespace std;
 TxEventLog::TxEventLog (){;}
 //________________________________________________________________
 TxEventLog::~TxEventLog (){;}
+//________________________________________________________________
+void TxEventLog::writeDown(const char *message)
+{
+    this->writeDown(string(message)); 
+}
 
 //________________________________________________________________
 void TxEventLog::setEnvBrokerTaskID (const char *envBrokerTaskID)
@@ -37,6 +42,11 @@ void TxEventLog::setContext (const char *context)
  void TxEventLog::logStart (const char *key, const char *value)
 {
     this-> logStart (string(key),string(value));
+}
+//________________________________________________________________
+void TxEventLog::logJobAttribute (const char *key, const char *value)
+{
+   this->logJobAttribute(string(key),string(value));
 }
 
 //________________________________________________________________

@@ -2,7 +2,7 @@
  * @file TxEventLog.h
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLog.h,v 1.3 2010/03/30 20:05:37 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLog.h,v 1.4 2010/04/09 16:28:19 fine Exp $
  *
  * TxEventLog provides an interface for applications so that they can write
  * event information into a CEDPS formated file.
@@ -76,7 +76,8 @@ public:
      */
     virtual ~TxEventLog ();
 
-    /**
+    virtual void writeDown(const char *message);
+   /**
      * The concept of a job ID and task ID assigned by broker is
      * assumed to be available here. Set the task ID by passing the
      * name of the environment variable
@@ -152,9 +153,19 @@ public:
     virtual void logJobSubmitLocation (const std::string& url)=0;
     void logJobSubmitLocation (const char *url);
     virtual void setJobSubmitLocation (const std::string& url)=0;
-    void setJobSubmitLocation (const char *url);;
+    void setJobSubmitLocation (const char *url);
 
-   /**
+    /**
+     * Log the job attrbutes. This method will be called by the
+     * Broker.
+     *
+     * @param string attrbutes key,  For example: "que"
+     * @param string attrbutes value, For example queu name 
+     *
+     */ 
+    virtual void logJobAttribute (const std::string& key, const std::string& value)=0;
+    void logJobAttribute (const char *key, const char *value);
+  /**
      * Log the task size. This method will be called by the
      * Broker to log the new task and its size.
      *
@@ -305,7 +316,9 @@ public:
  StUcmEvents  *classname::getEventList (int limit,int offset)    \
  { return TxEventLog::getEventList(limit,offset); }    \
  int classname::queryTableSize (const char *table_name)\
- { return TxEventLog::queryTableSize(table_name); } 
+ { return TxEventLog::queryTableSize(table_name); }    \
+ void classname::writeDown(const char *message)        \
+ { return TxEventLog::writeDown(message); } 
 
 #define TXEVENT_DEFAULT_IMPLEMENTAION_2(classname)            \
  StUcmTasks  *classname::getTaskList (int limit, int offset)  \

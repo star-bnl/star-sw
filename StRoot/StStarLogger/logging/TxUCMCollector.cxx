@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.18 2010/03/31 15:48:27 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.19 2010/04/09 16:28:19 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -123,7 +123,7 @@ MYSQL *TxUCMCollector::getConnection (const char *cdbUrl,const char *cdbUsername
              connection = 0;
              fIsConnectionOpen = false;
          } else {
-            string error = "Ok conenction to Db : "  
+            string error = "Ok connection to Db : "  
                           + string("host: <") + host
                           + string("> user: <") + user
                           + string("> passwd: <") + passwd
@@ -248,6 +248,7 @@ boolean TxUCMCollector::initDb ()  {
    boolean success = false;
    TRY
    {
+           log->debug (" TxUCMCollector::initDb  . . . "); 
            success = this->init ();
            success = success & this->loadDatabase ();
     }
@@ -697,6 +698,7 @@ void TxUCMCollector::processMessage (const char * msg) {
        else {
            log->debug (string("Record with brokerTaskID = ") + msgHashMap[fgBTaskID] +
                     " already exists");
+           
        }
     }
     /**
@@ -785,7 +787,7 @@ string TxUCMCollector::tableNamePrefix(const char *prefix) const
           + string("_") + msgHashMap.find(fgRequester)->second
           + string("_") + msgHashMap.find(fgBTaskID)->second; 
     ((TxUCMCollector*) this)->log->debug(string(__FUNCTION__)+ "<" + fullTableName + ">");
-	 return fullTableName;
+    return fullTableName;
 }
 
 //________________________________________________
@@ -1511,13 +1513,21 @@ void TxUCMCollector::logStart (const std::string& key, const std::string& value)
 }
 
 //___________________________________________________________________________________________________
-void TxUCMCollector::logJobSubmitLocation (const std::string& url)
+void TxUCMCollector::logJobAttribute (const std::string& key , const std::string&value)
 {
+ 
+}
+
+//___________________________________________________________________________________________________
+void TxUCMCollector::logJobSubmitLocation (const std::string&url)
+{
+ 
 }
 
 //___________________________________________________________________________________________________
 void TxUCMCollector::setJobSubmitLocation (const std::string& url)
 {
+ 
 }
 
 //___________________________________________________________________________________________________
