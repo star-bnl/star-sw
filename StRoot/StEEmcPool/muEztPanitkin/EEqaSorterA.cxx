@@ -1,4 +1,4 @@
-// $Id: EEqaSorterA.cxx,v 1.9 2010/03/05 23:46:42 ogrebeny Exp $
+// $Id: EEqaSorterA.cxx,v 1.10 2010/04/09 04:48:33 ogrebeny Exp $
 #include <string.h>
 #include <stdlib.h>
 
@@ -55,11 +55,11 @@ void  EEqaSorterA::sortDaqTower1(const EztEmcRawData *t){
      and count ADC values = n*256 in all data blocks 
   */
   if(!t) return;
-  for(int icr=0;icr<t->getNBlocks();icr++) {
+  for(int icr=0;icr<t->getNBlocks() && icr<MaxTwCrateID;icr++) {
     if(t->isCrateVoid(icr)) continue;
     int crateID=icr+1;
     const UShort_t* data=t->data(icr);
-    for(int i=0;i<t->sizeData(icr);i++) {
+    for(int i=0;i<t->sizeData(icr) && i<MaxTwCrateCh;i++) {
       int chan=i;
       float adc=data[i];
       if (hCrate && hCrate[crateID - 1]) hCrate[crateID - 1]->Fill(adc, chan);
@@ -79,7 +79,7 @@ void  EEqaSorterA::sortDaqTowerHot(const EztEmcRawData *t){
     int crateID=icr+1;
     const UShort_t* data=t->data(icr);
     int *pedA= &feePed[(crateID-1)*MaxTwCrateCh];
-    if (data) for(int i=0;i<t->sizeData(icr);i++) {
+    if (data) for(int i=0;i<t->sizeData(icr) && i<MaxTwCrateCh;i++) {
       int chan=i;
       float adc=data[i]-24+ pedA[i];
       if(adc<hotTwThres) continue;
@@ -103,7 +103,7 @@ void  EEqaSorterA::sortDaqMapmt0(const EztEmcRawData *s, int ver){
       crateID=icr+84;
     }
     const UShort_t* data=s->data(icr);
-    for(int i=0;i<s->sizeData(icr);i++) {
+    for(int i=0;i<s->sizeData(icr) && i<MaxMapmtCrateCh;i++) {
       int chan=i; 
       float adc=data[i];
       if (hCrate && hCrate[crateID-1]) hCrate[crateID-1]->Fill(adc,chan);
@@ -206,6 +206,9 @@ int EEqaSorterA::usePed4(const Char_t *filename) {
 
 
 // $Log: EEqaSorterA.cxx,v $
+// Revision 1.10  2010/04/09 04:48:33  ogrebeny
+// Added more protection against out-of-boundary errors. See bug report 1903.
+//
 // Revision 1.9  2010/03/05 23:46:42  ogrebeny
 // Make it a little less strict on the ped file format
 //
