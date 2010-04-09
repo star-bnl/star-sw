@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.68 2010/03/17 02:53:06 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.69 2010/04/09 21:13:28 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.69  2010/04/09 21:13:28  genevb
+// Use hobj pointer to ensure proper handling with reference hists
+//
 // Revision 2.68  2010/03/17 02:53:06  genevb
 // Add hists even if not in first file
 //
@@ -580,12 +583,12 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
     if (obj->InheritsFrom("TH1")) { 
       TH1* hobj = (TH1*) obj;
-      const char* oname = obj->GetName();
+      const char* oname = hobj->GetName();
       TString oName = oname;
       oName.ReplaceAll(' ','_');
       histReadCounter++;
       LOG_INFO << Form(" %d. Reading ... %s::%s; Title=\"%s\"\n",
-        histReadCounter,obj->ClassName(),oname, obj->GetTitle()) << endm;
+        histReadCounter,hobj->ClassName(),oname, hobj->GetTitle()) << endm;
       if (!started && (m_FirstHistName.CompareTo("*")==0 ||
                        m_FirstHistName.CompareTo(oName)==0))
         started = kTRUE;
@@ -614,7 +617,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
           // this histogram will actually be printed/drawn!!
           LOG_INFO << Form("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",
-	    histCounter,obj->ClassName(),oname, obj->GetTitle()) << endm;
+	    histCounter,hobj->ClassName(),oname, hobj->GetTitle()) << endm;
 
           // Switch to a new page...............................
 	  if (CheckOutFile(oname)) {
@@ -695,7 +698,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 	  if (m_ListOfLogX && m_ListOfLogX->FindObject(oname) &&
 	     hobj->GetEntries() && hobj->GetMaximum() ) {
 	    gPad->SetLogx(1);
-            LOG_INFO << "       -- Will draw in logX scale: " << oname <<endm;
+            if (!analRepeat) {LOG_INFO << "       -- Will draw in logX scale: " << oname <<endm;}
 	  } else gPad->SetLogx(0);
 
 
@@ -705,7 +708,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
               oName.Contains("PointRPTpc") ||
               oName.Contains("PointXYTpc") ) {
             gPad->SetLogz(1);
-            LOG_INFO << "       -- Will draw in logZ scale: " << oname <<endm;
+            if (!analRepeat) {LOG_INFO << "       -- Will draw in logZ scale: " << oname <<endm;}
           } else gPad->SetLogz(0);
 
 // Limit x range for some histograms
@@ -749,16 +752,16 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
           }
 
           // actually draw,print
-          if ((chkdim == 3) && (obj->InheritsFrom("StMultiH2F"))) {
-            obj->Draw("Col");
+          if ((chkdim == 3) && (hobj->InheritsFrom("StMultiH2F"))) {
+            hobj->Draw("Col");
           } else  if ((chkdim==2) && (oName.Contains("PointRPTpc") ||
                       (oName.Contains("PointXYTpc") &&  // Unfortunately was polar for a short time
                        TMath::Abs((hobj->GetYaxis()->GetXmax()/TMath::Pi())-2)<1e-5))) {
-            TH2F* htmp = new TH2F(Form("%s.",obj->GetName()),obj->GetTitle(),1,-200,200,1,-200,200);
+            TH2F* htmp = new TH2F(Form("%s.",hobj->GetName()),hobj->GetTitle(),1,-200,200,1,-200,200);
             htmp->Fill(0.,0.,.1);htmp->SetMinimum(1);
             htmp->SetStats(kFALSE);
             htmp->Draw();
-            obj->Draw("Pol ZCol Same");
+            hobj->Draw("Pol ZCol Same");
           } else if ((chkdim == 2) &&
                      (oName.EndsWith("SvtLoc") ||
                       oName.EndsWith("PVsDedx") ||
@@ -766,9 +769,9 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
                       oName.EndsWith("PointXYSvt") ||
                       oName.Contains("TpcSector") ||
                       oName.Contains("PointXYTpc"))) {
-            obj->Draw("ZCol");
-          } else if ((chkdim == 2) && (!obj->InheritsFrom("StMultiH1F"))) {
-            obj->Draw("Col");
+            hobj->Draw("ZCol");
+          } else if ((chkdim == 2) && (!hobj->InheritsFrom("StMultiH1F"))) {
+            hobj->Draw("Col");
 	    if ((oName.EndsWith("trkGoodF"))||(oName.EndsWith("VtxSvtvsTpc"))) {
               ruler.SetLineColor(46);
               ruler.SetLineWidth(2);
