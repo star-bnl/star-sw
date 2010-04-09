@@ -63,7 +63,7 @@ $(OBJECT)/Input.o: $(SOURCE)/Input.cc $(INCLUDE)/Input.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/Medium.o: $(SOURCE)/Medium.cc $(INCLUDE)/Medium.hh $(INCLUDE)/FundamentalConstants.hh
 	$(CC) $(CFLAGS) $< -o $@
-$(OBJECT)/MediumMagboltz86.o: $(SOURCE)/MediumMagboltz86.cc $(INCLUDE)/MediumMagboltz86.hh $(INCLUDE)/FundamentalConstants.hh $(INCLUDE)/Random.hh
+$(OBJECT)/MediumMagboltz86.o: $(SOURCE)/MediumMagboltz86.cc $(INCLUDE)/MediumMagboltz86.hh $(SOURCE)/OpticalData.cc $(INCLUDE)/FundamentalConstants.hh $(INCLUDE)/Random.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/magboltz.o: $(SOURCE)/magboltz-8.9.f
 	$(FF) $< -o $@

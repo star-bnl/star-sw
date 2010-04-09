@@ -100,8 +100,9 @@ OpticalData::GetPhotoionisationYield(const double e, double& eta) {
 void
 OpticalData::Argon() {
 
-  const int nEntries1 = 92;
-
+  // const int nEntries1 = 92;
+  const int nEntries1 = 0;
+  /*
   // Detailed measurement
   const double xar1[nEntries1] = {  
      91,  98, 103, 104, 105, 106, 107, 110, 112, 113,
@@ -128,7 +129,7 @@ OpticalData::Argon() {
     499, 516, 527, 521, 525, 516, 508, 517, 520, 515,
     518, 518
   };
-
+  //*/
   const int nEntries2 = 17;
 
   const double xar2[nEntries2] = {
@@ -145,12 +146,12 @@ OpticalData::Argon() {
   eps1.clear(); eps1.resize(nEntries1 + nEntries2);
   eps2.clear(); eps2.resize(nEntries1 + nEntries2);
   pacs.clear(); pacs.resize(nEntries1 + nEntries2);
-
+  /*
   for (int i = 0; i < nEntries1; ++i) {
     energy[i] = 11. + (xar1[i] - 44.) * 7. / (783. - 44.);
     pacs[i] = 1.e-18 * (536. - yar1[i]) * 500. / (536. - 206.);
   }
-
+  //*/
   for (int i = nEntries1; i < nEntries1 + nEntries2; ++i) {
     energy[i] = 10. + (xar2[i] - 76.) * 30. / (501. - 76.);
     pacs[i] = 1.e-18 * (548. - yar2[i]) * 30. / (548. - 167.);
@@ -162,7 +163,7 @@ OpticalData::Argon() {
   energyIon.clear();
   yieldIon.clear();
   ionmin = 15.937;
-  ionmax = 15.937;
+  ionmax = 15.936;
 
 }
 
@@ -224,7 +225,7 @@ OpticalData::Methane() {
     yieldIon[i] = yion[i];
   }
   ionmin = energyIon[0];
-  ionmax = yieldIon.back();
+  ionmax = energyIon.back();
 
 }
 

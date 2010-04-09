@@ -14,7 +14,7 @@ MediumMagboltz86::MediumMagboltz86() :
   Medium(), 
   eFinal(40.), eStep(eFinal / nEnergySteps), adjust(true), csoutput(false), 
   nTerms(0), anisotropic(true), 
-  penning(false), rPenning(0.), deexcitation(false),
+  penning(false), rPenning(0.), nPenning(0), deexcitation(false),
   eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma) {
   
   // Set physical constants in Magboltz common blocks
@@ -59,6 +59,7 @@ MediumMagboltz86::MediumMagboltz86() :
   nCollisionsDetailed.clear();
   nCollisions[0] = 0; nCollisions[1] = 0; nCollisions[2] = 0;
   nCollisions[3] = 0; nCollisions[4] = 0;
+  nPhotonCollisions[0] = 0; nPhotonCollisions[1] = 0; nPhotonCollisions[2] = 0;
   
 }
 
@@ -332,8 +333,8 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
   int iUp  = nTerms - 1;  
   if (r <= cf[iE][iLow]) {
     level = iLow;
-  } else if (r >= cf[iE][nTerms - 1]) {
-    level = nTerms - 1;
+  } else if (r >= cf[iE][iUp]) {
+    level = iUp;
   } else {
     int iMid;
     while (iUp - iLow > 1) {
@@ -349,6 +350,10 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
   
   // Collision type
   type = csType[level] % 6;
+
+  // Increase the collision counters
+  ++nCollisions[type];
+  ++nCollisionsDetailed[level];
 
   // Energy loss
   double loss = energyLoss[level];
@@ -376,6 +381,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
       // Penning ionisation
       esec = RndmUniform() * (energyLoss[level] * rgas[level] - minIonPot);
       if (esec <= 0) esec = 1.e-20;
+      ++nPenning;
     }
   } else if (type == 4 && penning) {
     if (energyLoss[level] * rgas[level] > minIonPot && 
@@ -436,12 +442,9 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
     if (ctheta0 * ctheta0 > u) ctheta *= -1.;
   }
 
-  // Increase the collision counters
-  ++nCollisions[type];
-  ++nCollisionsDetailed[level];
-  
-  if (debug) {
+  if (debug && type == 4 && level < 47) {
     std::cout << "MediumMagboltz86::GetElectronCollision:" << std::endl;
+    std::cout << "    Energy:      " << e << std::endl;
     std::cout << "    Level:       " << level << std::endl;
     std::cout << "    Type:        " << type << std::endl;
   }
@@ -515,15 +518,15 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
   double r = RndmUniform();
   int iLow = 0;
   int iUp  = nPhotonTerms - 1;  
-  if (r <= cf[iE][iLow]) {
+  if (r <= cfGamma[iE][iLow]) {
     level = iLow;
-  } else if (r >= cf[iE][nPhotonTerms - 1]) {
-    level = nPhotonTerms - 1;
+  } else if (r >= cfGamma[iE][iUp]) {
+    level = iUp;
   } else {
     int iMid;
     while (iUp - iLow > 1) {
       iMid = (iLow + iUp) >> 1;
-      if (r < cf[iE][iMid]) {
+      if (r < cfGamma[iE][iMid]) {
         iUp = iMid;
       } else {
         iLow = iMid;
@@ -533,8 +536,9 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
   }
   
   // Collision type
-  type = csType[level] % 6;
-  int ngas = int(csType[level] / 6);
+  type = csTypeGamma[level] % 3;
+  int ngas = int(csTypeGamma[level] / 3);
+  ++nPhotonCollisions[type];
 
   // Secondary electron energy
   esec = 0.;
@@ -550,6 +554,7 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
   
   if (debug) {
     std::cout << "MediumMagboltz86::GetPhotonCollision:" << std::endl;
+    std::cout << "    Energy:      " << e << std::endl;
     std::cout << "    Gas:         " << ngas << std::endl;
     std::cout << "    Level:       " << level << std::endl;
     std::cout << "    Type:        " << type << std::endl;
@@ -564,11 +569,13 @@ MediumMagboltz86::ResetCollisionCounters() {
   nCollisions[0] = 0; nCollisions[1] = 0; nCollisions[2] = 0;
   nCollisions[3] = 0; nCollisions[4] = 0; nCollisions[5] = 0;
   for (int j = nTerms; j--;) nCollisionsDetailed[j] = 0;
+  nPenning = 0;
+  nPhotonCollisions[0] = 0; nPhotonCollisions[1] = 0; nPhotonCollisions[2] = 0;
   
 }
 
 int 
-MediumMagboltz86::GetNumberOfCollisions() const {
+MediumMagboltz86::GetNumberOfElectronCollisions() const {
 
   return nCollisions[0] + nCollisions[1] + nCollisions[2] + 
          nCollisions[3] + nCollisions[4] + nCollisions[5];
@@ -576,19 +583,13 @@ MediumMagboltz86::GetNumberOfCollisions() const {
 }
 
 int 
-MediumMagboltz86::GetNumberOfCollisions(int& nElastic, 
-                                        int& nIonisation, 
-                                        int& nAttachment, 
-                                        int& nInelastic,
-                                        int& nExcitation,
-                                        int& nSuperelastic) const {
+MediumMagboltz86::GetNumberOfElectronCollisions(
+        int& nElastic,   int& nIonisation, int& nAttachment, 
+        int& nInelastic, int& nExcitation, int& nSuperelastic) const {
 
-  nElastic = nCollisions[0]; 
-  nIonisation = nCollisions[1];
-  nAttachment = nCollisions[2];  
-  nInelastic = nCollisions[3];
-  nExcitation = nCollisions[4]; 
-  nSuperelastic = nCollisions[5];  
+  nElastic = nCollisions[0];    nIonisation = nCollisions[1];
+  nAttachment = nCollisions[2]; nInelastic = nCollisions[3];
+  nExcitation = nCollisions[4]; nSuperelastic = nCollisions[5];  
   return nCollisions[0] + nCollisions[1] + nCollisions[2] + 
          nCollisions[3] + nCollisions[4] + nCollisions[5];
 
@@ -643,10 +644,11 @@ MediumMagboltz86::GetLevel(const int i, int& gas, int& type,
 }
 
 int 
-MediumMagboltz86::GetNumberOfCollisions(const int level) const {
+MediumMagboltz86::GetNumberOfElectronCollisions(const int level) const {
 
   if (level < 0 || level >= nTerms) {
-    std::cerr << "MediumMagboltz86::GetNumberOfCollisions:" << std::endl;
+    std::cerr << "MediumMagboltz86::GetNumberOfElectronCollisions:" 
+              << std::endl;
     std::cerr << "    Requested cross-section term (" 
               << level << ") does not exist." << std::endl;
     return 0;
@@ -655,6 +657,23 @@ MediumMagboltz86::GetNumberOfCollisions(const int level) const {
 
 }  
 
+int
+MediumMagboltz86::GetNumberOfPhotonCollisions() const {
+
+  return nPhotonCollisions[0] + nPhotonCollisions[1] + nPhotonCollisions[2];
+
+}
+
+int
+MediumMagboltz86::GetNumberOfPhotonCollisions(
+    int& nElastic, int& nIonising, int& nInelastic) const {
+
+  nElastic   = nPhotonCollisions[0];
+  nIonising  = nPhotonCollisions[1];
+  nInelastic = nPhotonCollisions[2];
+  return nPhotonCollisions[0] + nPhotonCollisions[1] + nPhotonCollisions[2];
+
+}
 
 bool 
 MediumMagboltz86::GetGasNumber(std::string gasname, int& number) const {
@@ -1336,9 +1355,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
 
   // Fill radiative deexcitation rates
   for (int i = 0; i < nTerms; ++i) {
-    fRadiative[i] = 0.;
-    fCollIon[i] = 0.;
-    fCollLoss[i] = 0.;
+    fRadiative[i] = fCollIon[i] = fCollLoss[i] = 0.;
     if (csType[i] % 6 != 4) continue;
     wSplit[i] = energyLoss[i] * rgas[i];
     switch (gas[int(csType[i] / 6)]) {
@@ -1510,20 +1527,25 @@ MediumMagboltz86::ComputeDeexcitationTable() {
               << std::endl;
   }
 
-  if (debug) std::cout << "MediumMagboltz86::ComputeDeexcitationTable:" << std::endl; 
+  if (debug) std::cout << "MediumMagboltz86::ComputeDeexcitationTable:" 
+                       << std::endl; 
   for (int i = 0; i < nTerms; ++i) {
     fDeexcitation[i] = fRadiative[i] + fCollIon[i] + fCollLoss[i];
     if (fDeexcitation[i] > 0.) {
       if (debug) {
         std::string descr = "                              ";
         for (int j = 30; j--;) descr[j] = description[i][j];
-        std::cout << "    " << descr << std::endl;
+        std::cout << descr << std::endl;
         std::cout << "    Deexcitation rate:     " 
                   << fDeexcitation[i] << " ns-1" << std::endl;
-        std::cout << "    Radiative decay rate:  "
-                  << fRadiative[i] << " ns-1" << std::endl;
-        std::cout << "    Penning transfer rate: "
-                  << fCollIon[i] << " ns-1" << std::endl;
+        if (fDeexcitation[i] > 0.) {
+          std::cout << "    Radiative decay probability:  "
+                    << fRadiative[i] / fDeexcitation[i] << std::endl;
+          std::cout << "    Penning transfer probability: "
+                    << fCollIon[i] / fDeexcitation[i] << std::endl;
+          std::cout << "    Photon energy: " << wSplit[i] << " eV" 
+                    << std::endl;
+        }
       } 
       fRadiative[i] /= fDeexcitation[i];
       fCollIon[i] /= fDeexcitation[i];
@@ -1565,12 +1587,23 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
       cfTotGamma[j] += cs * prefactor;
       // Ionisation
       cfGamma[j][nPhotonTerms] = cs * prefactor * eta;
-      csTypeGamma[nPhotonTerms] = i * 6 + 1;
+      csTypeGamma[nPhotonTerms] = i * 3 + 1;
       // "Neutral" absorption
       cfGamma[j][nPhotonTerms + 1] = cs * prefactor * (1. - eta);
-      csTypeGamma[nPhotonTerms + 1] = i * 6 + 2;
+      csTypeGamma[nPhotonTerms + 1] = i * 3 + 2;
     }
     nPhotonTerms += 2;
+  }
+  
+  if (csoutput) {
+    std::ofstream csfile;
+    csfile.open("csgamma.txt", std::ios::out);
+    for (int j = 0; j < nEnergyStepsGamma; ++j) {
+      csfile << j * eStepGamma << "  ";
+      for (int i = 0; i < nPhotonTerms; ++i) csfile << cfGamma[j][i] << "  ";
+      csfile << std::endl;
+    }
+    csfile.close();
   }
 
   // Normalise the collision rates

@@ -180,19 +180,27 @@ class MediumMagboltz86 : public Medium {
 
     // Reset the collision counters
     void ResetCollisionCounters();
-    // Get total number of collisions
-    int GetNumberOfCollisions() const;
+    // Get total number of electron collisions
+    int GetNumberOfElectronCollisions() const;
     // Get number of collisions broken down by cross-section type
-    int GetNumberOfCollisions(int& nElastic, int& nIonising, int& nAttachment,
-                              int& nInelastic, int& nExcitation, 
-                              int& nSuperelastic) const;
+    int GetNumberOfElectronCollisions(
+                  int& nElastic, int& nIonising, int& nAttachment,
+                  int& nInelastic, int& nExcitation, int& nSuperelastic) const;
     // Get number of cross-section terms                              
     int GetNumberOfLevels();
     // Get detailed information about a given cross-section term i
     bool GetLevel(const int i, int& gas, int& type, 
                   std::string& descr, double& e);    
     // Get number of collisions for a specific cross-section term    
-    int GetNumberOfCollisions(const int level) const;
+    int GetNumberOfElectronCollisions(const int level) const;
+
+    int GetNumberOfPenningTransfers() const {return nPenning;}
+
+    // Get total number of photon collisions
+    int GetNumberOfPhotonCollisions() const;
+    // Get number of photon collisions by collision type
+    int GetNumberOfPhotonCollisions(
+                  int& nElastic, int& nIonising, int& nInelastic) const;
 
     void RunMagboltz(const double e, const double b, const double btheta,
                      const int ncoll = 5, bool verbose = true);
@@ -257,6 +265,7 @@ class MediumMagboltz86 : public Medium {
     // Penning transfer probabilities
     bool penning;
     double rPenning;
+    int nPenning;
     // Deexcitation rates
     bool deexcitation;
     double fDeexcitation[nMaxLevels];
@@ -277,6 +286,7 @@ class MediumMagboltz86 : public Medium {
     // Photon collision frequencies
     double cfGamma[nEnergySteps][nMaxPhotonLevels];
     int csTypeGamma[nMaxPhotonLevels];
+    int nPhotonCollisions[3];
 
     bool GetGasNumber(std::string gasname, int& number) const;
     bool GetGasName(const int number, std::string& gasname) const;

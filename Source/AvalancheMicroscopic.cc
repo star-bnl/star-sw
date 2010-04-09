@@ -760,49 +760,49 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
   int type, level;
   double e1, s, esec;
 
-  bool ok = true;
-  while (ok) {
-    f = medium->GetPhotonCollisionRate(e);
-    if (f <= 0.) {
-      ok = false;
-      break;
-    }
-    dt = - log(RndmUniformPos()) / f;
-    t += dt;
-    dt *= SpeedOfLight;
-    x += dt * dx; y += dt * dy; z += dt * dz;
-    if (!medium->GetPhotonCollision(e, type, level, e1, ctheta, s, esec)) {
-      ok = false;
-      break;
-    }
-    switch (type) {
-      case 1:
-        // Ionisation
-        // Randomise secondary electron direction
-        phi = TwoPi * RndmUniform();
-        ctheta = 1. - 2. * RndmUniform();
-        stheta = sqrt(1. - ctheta * ctheta);
-        // Add the secondary electron to the stack
-        electron newElectron;
-        newElectron.x0 = x; newElectron.x = x;
-        newElectron.y0 = y; newElectron.y = y;
-        newElectron.z0 = z; newElectron.z = z;
-        newElectron.t0 = t; newElectron.t = t; 
-        newElectron.energy = Max(esec, Small);
-        newElectron.e0 = newElectron.energy;
-        newElectron.dx = cos(phi) * stheta;
-        newElectron.dy = sin(phi) * stheta;
-        newElectron.dz = ctheta;
-        newElectron.driftLine.clear();
-        stack.push_back(newElectron);
-        // Increment the electron and ion counters         
-        ++nElectrons; ++nIons;
-        break;
-    }
-    break;      
+  f = medium->GetPhotonCollisionRate(e);
+  if (f <= 0.) return;
+
+  dt = - log(RndmUniformPos()) / f;
+  t += dt;
+  dt *= SpeedOfLight;
+  x += dt * dx; y += dt * dy; z += dt * dz;
+
+  // Check if the photon is still inside a medium
+  if (!sensor->GetMedium(x, y, z, medium)) { 
+    photon newPhoton;
+    newPhoton.x0 = x0; newPhoton.y0 = y0; newPhoton.z0 = z0;
+    newPhoton.x1 = x;  newPhoton.y1 = y;  newPhoton.z1 = z;
+    newPhoton.energy = e0;
+    photons.push_back(newPhoton);
+    ++nPhotons;
+    return;
   }
 
-  if (!ok) return;
+  if (!medium->GetPhotonCollision(e, type, level, e1, ctheta, s, esec)) return;
+ 
+  if (type == 1) {
+    // Ionisation
+    // Randomise secondary electron direction
+    phi = TwoPi * RndmUniform();
+    ctheta = 1. - 2. * RndmUniform();
+    stheta = sqrt(1. - ctheta * ctheta);
+    // Add the secondary electron to the stack
+    electron newElectron;
+    newElectron.x0 = x; newElectron.x = x;
+    newElectron.y0 = y; newElectron.y = y;
+    newElectron.z0 = z; newElectron.z = z;
+    newElectron.t0 = t; newElectron.t = t; 
+    newElectron.energy = Max(esec, Small);
+    newElectron.e0 = newElectron.energy;
+    newElectron.dx = cos(phi) * stheta;
+    newElectron.dy = sin(phi) * stheta;
+    newElectron.dz = ctheta;
+    newElectron.driftLine.clear();
+    stack.push_back(newElectron);
+    // Increment the electron and ion counters         
+    ++nElectrons; ++nIons;
+  }
 
   photon newPhoton;
   newPhoton.x0 = x0; newPhoton.y0 = y0; newPhoton.z0 = z0;
@@ -810,7 +810,6 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
   newPhoton.energy = e0;
   photons.push_back(newPhoton);
   ++nPhotons;
-  return;
 
 }
 
