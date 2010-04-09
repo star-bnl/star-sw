@@ -1376,27 +1376,29 @@ MediumMagboltz86::ComputeDeexcitationTable() {
         } else if (level == "1S2    ") {
           fRadiative[i] = 1. / 2.2; continue;
         // 3p54p levels
-        // Wiese et al. (1989)
+        // Lifetimes from Wiese et al. (1989)
+        // These levels decay to the 4s state
+        // Photon energies from NIST database
         } else if (level == "2P10   ") {
-          fRadiative[i] = 1. / 40.5; continue;
+          fRadiative[i] = 1. / 40.5; wSplit[i] = 1.359; continue;
         } else if (level == "2P9    ") {
-          fRadiative[i] = 1. / 30.7; continue;
+          fRadiative[i] = 1. / 30.7; wSplit[i] = 1.527; continue;
         } else if (level == "2P8    ") {
-          fRadiative[i] = 1. / 30.6; continue;
+          fRadiative[i] = 1. / 30.6; wSplit[i] = 1.547; continue;
         } else if (level == "2P7    ") {
-          fRadiative[i] = 1. / 30.2; continue;
+          fRadiative[i] = 1. / 30.2; wSplit[i] = 1.530; continue;
         } else if (level == "2P6    ") {
-          fRadiative[i] = 1. / 29.4; continue;
+          fRadiative[i] = 1. / 29.4; wSplit[i] = 1.623; continue;
         } else if (level == "2P5    ") {
-          fRadiative[i] = 1. / 24.4; continue;
+          fRadiative[i] = 1. / 24.4; wSplit[i] = 1.649; continue;
         } else if (level == "2P4    ") {
-          fRadiative[i] = 1. / 29.3; continue;
+          fRadiative[i] = 1. / 29.3; wSplit[i] = 1.559; continue;
         } else if (level == "2P3    ") {
-          fRadiative[i] = 1. / 29.0; continue;
+          fRadiative[i] = 1. / 29.0; wSplit[i] = 1.754; continue;
         } else if (level == "2P2    ") {
-          fRadiative[i] = 1. / 28.3; continue;
+          fRadiative[i] = 1. / 28.3; wSplit[i] = 1.780; continue;
         } else if (level == "2P1    ") {
-          fRadiative[i] = 1. / 21.7; continue;
+          fRadiative[i] = 1. / 21.7; wSplit[i] = 1.652; continue;
         // 3p53d levels
         // Gruzdev, Loginov (1975)
         } else if (level == "3D6    ") {

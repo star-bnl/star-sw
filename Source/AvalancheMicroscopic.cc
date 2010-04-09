@@ -619,8 +619,11 @@ AvalancheMicroscopic::AvalancheElectron(
               userHandleInelastic(x, y, z, t, cstype, level, medium);
             }
             if (esec < 0.) {
+              esec = -esec;
               // Radiative de-excitation
-              if (usePhotons) TransportPhoton(x, y, z, t + d, -esec);
+              if (usePhotons && esec > gammaCut) {
+                TransportPhoton(x, y, z, t + d, esec);
+              }
             } else if (esec > 0.) {
               // Penning ionisation     
               // Randomise secondary electron direction
