@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.6 2010/03/30 21:56:10 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.7 2010/04/09 16:58:42 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -95,6 +95,16 @@ void TxLogging::TxEventLogFile::logEvent (const std::string& userKey,
 		      stage,
 		      userKey,
 		      userValue);
+}
+
+void TxLogging::TxEventLogFile::logJobAttribute (const std::string& key, const std::string& value)
+{
+   if (!( key.empty() || value.empty() ) ) {
+      std::string attribute = key + "='" + value + "' "; 
+      logEvent(TxUCMConstants::updateJob,attribute
+            ,TxEventLogFile::LEVEL_INFO
+            ,TxEventLogFile::STATUS,"SUMS");
+    }
 }
 
 void TxLogging::TxEventLogFile::logJobSubmitLocation (const std::string& url) 
