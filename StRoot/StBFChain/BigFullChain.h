@@ -422,7 +422,7 @@ Bfc_st BFC[] = { // standard chains
   {"geometry"    ,"" ,"","",""                                     ,"geometry","geometry+Mag.Field",kFALSE},
   {"StarMagField","", "","magF"                              ,"","StarMagField","Load StarMagField",kFALSE},
   {"geomNoField" ,"" ,"","-geometry,StarMagField"        ,"","geometryNoField","geometry-Mag.Field",kFALSE},
-  {"UseEventVertex" ,"" ,"",""                    ,"","","Run StBTofCalibMaker w/wo Primary Vertex",kFALSE},
+  {"UseProjectedVertex" ,"" ,"",""                ,"","","Run StBTofCalibMaker w/wo Primary Vertex",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"vpd"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"tls"         ,""  ,"","",""                          "","","WARNING *** Option is OBSOLETE ***",kFALSE},
