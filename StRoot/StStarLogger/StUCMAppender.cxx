@@ -105,7 +105,7 @@ String StUCMAppender::getLogStatement(const spi::LoggingEventPtr& event)
 /* The default behavior holds a single connection open until the appender is closed (typically when garbage collected). */
 void StUCMAppender::closeConnection()
 {
-  if (fIsConnectionOpen && connection) {
+  if (connection) {
       // connection->logEnd(); 
       delete connection; 
   }
@@ -119,6 +119,7 @@ TxEventLog *StUCMAppender::getConnection()
    if (!fIsConnectionOpen) {
 
      if (!connection) {
+//         connection = TxEventLogFactory::create("WEB"); // create ucm collector factory
        connection = TxEventLogFactory::create("U"); // create ucm collector factory
 //       connection = TxEventLogFactory::create(technology.c_str()); // create ucm collector factory
 //       connection = TxEventLogFactory::create();
@@ -132,7 +133,8 @@ TxEventLog *StUCMAppender::getConnection()
            // const char *PROCESSID = getenv("PROCESSID");
        } else {
           fprintf(stderr,"StUCMAppender::getConnection() no JOBINDEX/REQUESTID was provided \n");
-          connection = TxEventLogFactory::create("U"); // create ucm collector factory
+//          connection = TxEventLogFactory::create("WEB"); // create ucm collector factory
+//          connection = TxEventLogFactory::create("U"); // create ucm collector factory
 //          connection = TxEventLogFactory::create(technology.c_str()); // create ucm collector factory
 //          connection = TxEventLogFactory::create();
 //       connection = TxEventLogFactory::create("w"); // to access the Web interface
@@ -235,10 +237,12 @@ void StUCMAppender::flushBuffer()
           if (!taskDone) {
               taskDone = true;
               const char *taskSize = getenv("SUMS_nProcesses");
-              int iTaskSize = atoi(taskSize);
-              if (taskSize && taskSize[0]) connection->logTask(iTaskSize);
+              int nSize = 1;
+              if (taskSize && taskSize[0]) nSize = atoi(taskSize);
+              connection->logTask(nSize);
           }
-
+          fprintf(stderr,"%s\n","StUCMAppender::flushBuffer() . . . . . . . . ." );
+  
           connection->logEvent(  ucmParamters[1].Data()
                                , ucmParamters[2].Data()
                                , trackingLevel
