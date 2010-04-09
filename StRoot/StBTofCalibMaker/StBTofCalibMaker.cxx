@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.5 2010/04/03 15:43:58 dongx Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.6 2010/04/09 21:26:51 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,11 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.6  2010/04/09 21:26:51  geurts
+ * Introduced "UseProjectedVertex" maker attribute to allow selection of the
+ * standard event vertex or one determined by track extrapolation
+ * (typically used in pp collisions).
+ *
  * Revision 1.5  2010/04/03 15:43:58  dongx
  * Change the default to use event vertex for start position for Run10 AuAu
  *
@@ -99,7 +104,7 @@ StBTofCalibMaker::StBTofCalibMaker(const char *name) : StMaker(name)
   mMuDst = 0;
 
   mSlewingCorr = kTRUE;
-  mUseEventVertex = kTRUE; //kFALSE;
+  //fg mUseEventVertex = kTRUE; //kFALSE;
   mMuDstIn = kFALSE;
 
   setCreateHistoFlag(kFALSE);
@@ -152,6 +157,13 @@ Int_t StBTofCalibMaker::Init()
 {
   resetPars();
   resetVpd();
+
+  mUseEventVertex = ! IAttr("UseProjectedVertex");
+  if (mUseEventVertex) {
+    LOG_INFO << "Use event vertex position." << endm;
+  } else {
+    LOG_INFO << "Use projected vertex position." << endm;
+  }
 
   // m_Mode can be set by SetMode() method
   if(m_Mode) {
@@ -533,14 +545,11 @@ void StBTofCalibMaker::processStEvent()
 
   } // end if (mUseEventVertex)
 
-//  if(Debug()) {
-  if(1) {
-    LOG_INFO << " projected Vertex Z = " << mProjVtxZ << endm;
-    LOG_INFO << " Tstart = " << mTStart << " Tdiff = " << mTDiff << endm;
-    LOG_INFO << " NWest = " << mNWest << " NEast = " << mNEast << " TdcSum West = " << mTSumWest << " East = " << mTSumEast << endm; 
-    LOG_INFO << " mValidCalibPar = " << mValidCalibPar << " mValidStartTime = " << mValidStartTime << endm;
-    LOG_INFO << " mVpdVz = " << mVPDVtxZ << endm;
-  }
+  LOG_INFO << " projected Vertex Z = " << mProjVtxZ << endm;
+  LOG_INFO << " Tstart = " << mTStart << " Tdiff = " << mTDiff << endm;
+  LOG_INFO << " NWest = " << mNWest << " NEast = " << mNEast << " TdcSum West = " << mTSumWest << " East = " << mTSumEast << endm; 
+  LOG_INFO << " mValidCalibPar = " << mValidCalibPar << " mValidStartTime = " << mValidStartTime << endm;
+  LOG_INFO << " mVpdVz = " << mVPDVtxZ << endm;
 
   if(mTStart<-1000.) {
     LOG_INFO << " No valid start time for this event. Skip ..." << endm;
