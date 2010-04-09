@@ -2,7 +2,7 @@
  * @file TxEventLogWeb.h
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogWeb.h,v 1.3 2010/04/09 16:28:19 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogWeb.h,v 1.4 2010/04/09 23:39:09 fine Exp $
  *
  * TxEventLogWeb provides an interface for applications so that they can send
  * event across of the Web into a CEDPS formated messages.
@@ -23,8 +23,8 @@ namespace TxLogging {
      * @param string message , Message to be written out
      *
      */
-    virtual void writeDown(const std::string& message);
     virtual void writeDown(const char *message);
+    virtual void writeDown(const std::string& message);
 
   public:
     /**
@@ -32,7 +32,7 @@ namespace TxLogging {
      * - Gets hostname and sets nodeLocation for the running job.  
      *
      */    
-    TxEventLogWeb(){}
+    TxEventLogWeb();
 
     /**
      * Destructor: 
