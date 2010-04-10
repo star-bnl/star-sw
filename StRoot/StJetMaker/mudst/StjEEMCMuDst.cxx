@@ -1,4 +1,4 @@
-// $Id: StjEEMCMuDst.cxx,v 1.4 2009/02/04 22:14:43 kocolosk Exp $
+// $Id: StjEEMCMuDst.cxx,v 1.5 2010/04/10 18:02:10 pibero Exp $
 #include "StjEEMCMuDst.h"
 
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -34,6 +34,10 @@ StjTowerEnergyList StjEEMCMuDst::getEnergyList()
 
     int rawadc, sec, sub, etabin;
     muEmc->getEndcapTowerADC(id, rawadc, sec, sub, etabin);
+
+    assert(1 <= sec && sec <= 12);
+    assert(1 <= sub && sub <= 5);
+    assert(1 <= etabin && etabin <= 12);
 	
     const EEmcDbItem *dbItem = mEeDb->getT(sec,sub-1+'A',etabin);
 	
@@ -49,10 +53,10 @@ StjTowerEnergyList StjEEMCMuDst::getEnergyList()
     energyDeposit.runNumber = _uDstMaker->muDst()->event()->runId();
     energyDeposit.eventId = _uDstMaker->muDst()->event()->eventId();
     energyDeposit.detectorId = 13;
-    energyDeposit.towerId = (sec*5 + sub)*12 + etabin;
+    energyDeposit.towerId = ((sec-1)*5 + (sub-1))*12 + (etabin-1);
 
 
-    EEmcGeomSimple geom;
+    const EEmcGeomSimple& geom = EEmcGeomSimple::Instance();
     TVector3 towerLocation = geom.getTowerCenter(sec-1,sub-1,etabin-1);
 
     energyDeposit.towerR = towerLocation.Perp();
@@ -68,7 +72,7 @@ StjTowerEnergyList StjEEMCMuDst::getEnergyList()
     energyDeposit.energy   = energy;
     energyDeposit.adc      = rawadc;
     energyDeposit.pedestal = dbItem->ped;
-    energyDeposit.rms      = 0.0;
+    energyDeposit.rms      = dbItem->sigPed;
     energyDeposit.status   = dbItem->stat;
 
     if(energyDeposit.energy < 0.01) continue; // drop if less than 10MeV for now
