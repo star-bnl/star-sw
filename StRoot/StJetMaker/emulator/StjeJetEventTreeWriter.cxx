@@ -4,8 +4,10 @@
 // 1 September 2009
 //
 
-#include "StSpinPool/StJets/StJets.h"
-#include "StSpinPool/StJets/StJet.h"
+class StJets;
+
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 #include "StMuTrackFourVec.h"
 
 #include "StMuTrackEmu.h"
@@ -127,10 +129,30 @@ void StjeJetEventTreeWriter::fillJet(StJetEvent& jetEvent, StProtoJet& pj, StFou
       tower->mPedestal   = t->pedestal();
       tower->mRms        = t->rms();
       tower->mStatus     = t->status();
+
+      // StMuTowerEmu has the tower momentum from
+      // the origin. Here we correct for vertex.
+
+      TVector3 vertex(fourPMaker->getVertex().xyz());
       TVector3 mom(t->px(),t->py(),t->pz());
-      tower->mPt         = mom.Pt();
-      tower->mEta        = mom.Eta();
-      tower->mPhi        = mom.Phi();
+      float energy = mom.Mag();
+
+      switch (t->detectorId()) {
+      case kBarrelEmcTowerId:
+	mom.SetPtEtaPhi(StEmcGeom::instance("bemc")->Radius(),mom.Eta(),mom.Phi());
+	mom -= vertex;
+	mom.SetMag(energy);
+	break;
+      case kEndcapEmcTowerId:
+	mom.SetMag(EEmcGeomSimple::Instance().getZMean()/mom.Unit().z());
+	mom -= vertex;
+	mom.SetMag(energy);
+	break;
+      }
+
+      tower->mPt  = mom.Pt();
+      tower->mEta = mom.Eta();
+      tower->mPhi = mom.Phi();
       jet->addTower(tower)->setJet(jet);
     }
 
