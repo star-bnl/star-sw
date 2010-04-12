@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: directCumulants_v2.C,v 1.1 2010/03/08 16:54:47 posk Exp $
+// $Id: directCumulants_v2.C,v 1.2 2010/04/12 21:49:47 posk Exp $
 //
 // Authors: Dhevan Gangadharan, UCLA, Jan 2010
 //
@@ -43,7 +43,8 @@ void directCumulants_v2(){
     float x[CENTBINS] = {15., 25., 35.};
     float SF = 0.01;
   } else {
-    TFile *myfile = new TFile("flow.dirCumulant.root","READ");
+    TFile *myfile = new TFile("Y4_test1.root","READ");
+    //TFile *myfile = new TFile("flow.dirCumulant.root","READ");
     //TFile *myfile = new TFile("~dhevang/test.root","READ");
     //TFile *myfile = new TFile("test.root","READ");
     //TFile *myfile = new TFile("flow.dirCumulant1000.root","READ");
@@ -244,17 +245,17 @@ void directCumulants_v2(){
 	  Cumulant_4[type][species][cent][ptbin] -= Cumulant_term[2][type][species][cent][ptbin] + Cumulant_term[3][type][species][cent][ptbin];
 	  Cumulant_4[type][species][cent][ptbin] -= 2*Cumulant_term[4][type][species][cent][ptbin];
 	  Cumulant_4[type][species][cent][ptbin] -= Cumulant_term[5][type][species][cent][ptbin];
-	  Cumulant_4[type][species][cent][ptbin] += 5*Cumulant_term[6][type][species][cent][ptbin];
-	  Cumulant_4[type][species][cent][ptbin] += 5*Cumulant_term[7][type][species][cent][ptbin];
+	  Cumulant_4[type][species][cent][ptbin] += 4*Cumulant_term[6][type][species][cent][ptbin];
+	  Cumulant_4[type][species][cent][ptbin] += 4*Cumulant_term[7][type][species][cent][ptbin];
 	  Cumulant_4[type][species][cent][ptbin] += 2*Cumulant_term[8][type][species][cent][ptbin];
 	  Cumulant_4[type][species][cent][ptbin] += 2*Cumulant_term[9][type][species][cent][ptbin];
-	  Cumulant_4[type][species][cent][ptbin] += 6*Cumulant_term[10][type][species][cent][ptbin];
+	  Cumulant_4[type][species][cent][ptbin] += -6*Cumulant_term[10][type][species][cent][ptbin];
 	  
 	  
 	  Cumulant_4_e[type][species][cent][ptbin] = Cumulant_term_e[0][type][species][cent][ptbin]**2;
 	  Cumulant_4_e[type][species][cent][ptbin] += 2*(Cumulant_term_e[1][type][species][cent][ptbin])**2;
-	  Cumulant_4_e[type][species][cent][ptbin] += 5*(Cumulant_term_e[6][type][species][cent][ptbin])**2;
-	  Cumulant_4_e[type][species][cent][ptbin] += 5*(Cumulant_term_e[7][type][species][cent][ptbin])**2;
+	  Cumulant_4_e[type][species][cent][ptbin] += 4*(Cumulant_term_e[6][type][species][cent][ptbin])**2;
+	  Cumulant_4_e[type][species][cent][ptbin] += 4*(Cumulant_term_e[7][type][species][cent][ptbin])**2;
 	  Cumulant_4_e[type][species][cent][ptbin] = sqrt(Cumulant_4_e[type][species][cent][ptbin]);
 	  
 
