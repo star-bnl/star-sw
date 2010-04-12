@@ -164,10 +164,21 @@ void StDbServiceBroker::DoLoadBalancing()
 #ifdef DEBUG
   PrintHostList();
 #endif
-  while (RecommendHost()) {                                                                                                                                  
-    LOG_WARN << "Scanned all hosts in a Load Balancer list, no usable hosts found. Will try again in 60 seconds." << endm;                                    
-    sleep(60);                                                                                                                                               
-  }; 
+  bool host_found = false;
+  const int MAX_COUNT = 500;
+  for (int i = 0; i < MAX_COUNT; i++) {
+	if (!RecommendHost()) {
+		host_found = true;
+		break;
+	}
+    LOG_WARN << "Load Balancing attempt No " << i << ". Scanned all hosts in a Load Balancer list, no usable hosts found. Will try again in 60 seconds." << endm;                                    
+	sleep(60);
+  }
+  if (!host_found) {
+    LOG_WARN << "Tried to find a host for " << MAX_COUNT << " times, will abort now." << endm;                                    
+	exit(0);
+  }
+
 #ifdef DEBUG
   cout << " go to "<<GiveHostName()<<" port "<<GiveHostPort()<<"\n";
 #endif
