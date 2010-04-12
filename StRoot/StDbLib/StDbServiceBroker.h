@@ -38,7 +38,8 @@ namespace st_db_service_broker
       NO_XML_BASE,// 1
       NO_USER,    // 2
       NO_DOMAIN,  // 3
-      NO_HOSTS    // 4
+      NO_HOSTS,   // 4
+      BAD_XML     // 5, introduced by Dmitry, to propagate errors correctly
     };
 }
 
