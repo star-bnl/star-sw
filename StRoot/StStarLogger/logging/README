@@ -28,3 +28,12 @@
    java -cp . -Djava.library.path=. testUcm
 
  Valeri
+
+http://wiki.apache.org/tomcat/HowTo 
+ 
+" . . . this class and the shared library should be placed in the $CATALINA_HOME/shared/lib directory.
+
+Note that Tomcat 6.0.14 the $CATALINA_HOME/shared/lib directory does not exist. 
+You will need to add this and you will need to edit $CATALINA_HOME/conf/catalina.properties 
+so that the shared.loader line looks like this shared.loader=$CATALINA_HOME/shared/lib 
+
