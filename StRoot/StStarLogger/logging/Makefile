@@ -123,11 +123,11 @@ PDEPS= $(MYMOD)_perl_wrap.cxx
 POBJS= $(MYMOD)_perl_wrap.o  $(PSRCS:%.cxx=%.o)
 
 # Main target $(MYMOD).$(SOEXT)  $(MYMOD)_main.class $(MYMOD)_perl.$(SOEXT)
-all: $(X86_DIR) $(X86_64_DIR) $(X86_DIR)/lib$(MYMOD)_java.$(SOEXT)  $(X86_64_DIR)/lib$(MYMOD)_java.$(SOEXT)  $(MYJAR).jar
+all: $(X86_DIR) $(X86_64_DIR) $(X86_DIR)/lib$(MYMOD).$(SOEXT)  $(X86_64_DIR)/lib$(MYMOD).$(SOEXT)  $(MYJAR).jar
 	@ echo "Try % perl test.pl"
 	@ echo "Try % $(JAVAX) -Djava.library.path=./ $(MYMOD)_main"
 
-$(X86_DIR): 
+$(X86_DIR):
 	mkdir $@
    
 $(X86_64_DIR): 
@@ -150,13 +150,17 @@ $(X86_DIR)/lib$(MYMOD)Impl.$(SOEXT): $(X86_OBJS)
 lib$(MYMOD)_perl.$(SOEXT): $(POBJS)  lib$(MYMOD)Impl.$(SOEXT)
 	$(LD) $(SOFLAGS) $@ $(POBJS) $(PERL_LDL)  -L. -l$(MYMOD)Impl
 
-$(X86_DIR)/lib$(MYMOD)_java.$(SOEXT): $(JOBJS:%=$(X86_DIR)/%) $(X86_DIR)/lib$(MYMOD)Impl.$(SOEXT)
+$(X86_DIR)/lib$(MYMOD)_java.$(SOEXT): $(JOBJS:%=$(X86_DIR)/%) $(X86_DIR)/lib$(MYMOD)Impl.$(SOEXT) $(X86_DIR)/liblog4cxx.so
 	$(LD) -m32 $(SOFLAGS) $@ $(JOBJS:%=$(X86_DIR)/%) -L$(X86_DIR) -l$(MYMOD)Impl
-	cd $(X86_DIR) && ln -s  lib$(MYMOD)_java.$(SOEXT) lib$(MYMOD).$(SOEXT) 
 
-$(X86_64_DIR)/lib$(MYMOD)_java.$(SOEXT):  $(JOBJS:%=$(X86_64_DIR)/%) $(X86_64_DIR)/lib$(MYMOD)Impl.$(SOEXT)
+$(X86_64_DIR)/lib$(MYMOD)_java.$(SOEXT):  $(JOBJS:%=$(X86_64_DIR)/%) $(X86_64_DIR)/lib$(MYMOD)Impl.$(SOEXT) $(X86_64_DIR)/liblog4cxx.so
 	$(LD) -m64 $(SOFLAGS) $@ $(JOBJS:%=$(X86_64_DIR)/%) -L$(X86_64_DIR) -l$(MYMOD)Impl
+        
+$(X86_64_DIR)/lib$(MYMOD).$(SOEXT):     $(X86_64_DIR)/lib$(MYMOD)_java.$(SOEXT)   
 	cd $(X86_64_DIR) && ln -s  lib$(MYMOD)_java.$(SOEXT) lib$(MYMOD).$(SOEXT) 
+
+$(X86_DIR)/lib$(MYMOD).$(SOEXT):     $(X86_DIR)/lib$(MYMOD)_java.$(SOEXT)   
+	cd $(X86_DIR) && ln -s  lib$(MYMOD)_java.$(SOEXT) lib$(MYMOD).$(SOEXT) 
 
 
 $(X86_DIR)/%.o:  $(STAR_USM_BASE_DIR)/%.cpp
@@ -211,6 +215,9 @@ $(MYMOD)_main.class:  $(MYMOD).java $(UCMINC:%.h=%.java)
 .cpp.o:
 	$(CXX) -m32 $(CXXFLAGS)  $< -o $(X86_DIR)/$@
 	$(CXX) -m64 $(CXXFLAGS)  $< -o $(X86_64_DIR)/$@
+        
+cleanobj:
+	/bin/rm -rf $(X86_64_DIR)/*.o  $(X86_DIR)/*.o
 
 clean:
 	/bin/rm -rf $(X86_64_DIR)  $(X86_DIR)
@@ -244,14 +251,15 @@ printobj:
         
 dist:   $(DISTTAR)
 
-$(X86_64_DIR)/liblog4cxx.so:
+$(X86_64_DIR)/liblog4cxx.so:  $(X86_64_DIR) 
 	cp -rf /opt/star/sl53_x8664_gcc432/lib/*log4cxx* $(X86_64_DIR)/
 
-$(X86_DIR)/liblog4cxx.so:
+$(X86_DIR)/liblog4cxx.so:  $(X86_DIR)
 	cp -rf /opt/star/sl53_gcc432/lib/*log4cxx* $(X86_DIR)/
 
-$(DISTTAR):   StRoot/logging/testUcm.java $(MYJAR).jar $(X86_DIR) $(X86_64_DIR) $(X86_64)
-	tar -czvf ucmdist.tar.gz  --strip-components=2 $? 
+$(DISTTAR):   StRoot/logging/testUcm.java $(MYJAR).jar $(X86_DIR) $(X86_64_DIR) $(X86_64) cleanobj
+	tar -czvf ucmdist.tar.gz  $? 
+#	tar -czvf ucmdist.tar.gz  --strip-components=2 $? 
         
 upload:   $(DISTTAR)  $(X86_64_DIR)/liblog4cxx.so  $(X86_DIR)/liblog4cxx.so
 	cp $< ~/WWW/tmp
