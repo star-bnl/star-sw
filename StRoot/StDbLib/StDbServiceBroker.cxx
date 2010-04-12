@@ -128,7 +128,12 @@ StDbServiceBroker::StDbServiceBroker(const string xmlbase) :
   if (ParsedXml.GetStatus()==stl_xml_tree::NO_XML_BASE)
     {
       MyStatus = st_db_service_broker::NO_XML_BASE;
-      LOG_ERROR <<"StDbServiceBroker::StDbServiceBroker: no XML description of services found "<<endm;
+      LOG_WARN <<"StDbServiceBroker::StDbServiceBroker: no XML description of services found "<<endm;
+    }
+  if (ParsedXml.GetStatus()==stl_xml_tree::BAD_XML)
+    {
+      MyStatus = st_db_service_broker::BAD_XML;
+      LOG_WARN <<"StDbServiceBroker::StDbServiceBroker: malformed/incorrect XML description of services found "<<endm;
     }
 
 #ifdef DEBUG
@@ -149,6 +154,18 @@ StDbServiceBroker::StDbServiceBroker
   StlXmlTree* f = new StlXmlTree(xmlfilter);
   f->ShowTree();
   ParsedXml = StlXmlTree(xmlbase,f);
+
+  if (ParsedXml.GetStatus()==stl_xml_tree::NO_XML_BASE)
+    {
+      MyStatus = st_db_service_broker::NO_XML_BASE;
+      LOG_WARN <<"StDbServiceBroker::StDbServiceBroker: no XML description of services found "<<endm;
+    }
+  if (ParsedXml.GetStatus()==stl_xml_tree::BAD_XML)
+    {
+      MyStatus = st_db_service_broker::BAD_XML;
+      LOG_WARN <<"StDbServiceBroker::StDbServiceBroker: malformed/incorrect XML description of services found "<<endm;
+    }
+
   ParsedXml.ShowTree();
   xmlCleanupParser();
   delete f;
