@@ -174,7 +174,10 @@ $(X86_64_DIR)/%.o:  $(STAR_USM_BASE_DIR)/%.cpp
 
 $(X86_64_DIR)/%.o:  $(STAR_USM_BASE_DIR)/%.cxx
 	$(CC) -m64 $(CFLAGS) $< -o $@
-
+        
+setenv.sh: $(STAR_USM_BASE_DIR)/setenv.sh
+	cp $< $@ 
+	chmod +x $@
 #+
 # SWIG dependencies
 #-
@@ -257,8 +260,9 @@ $(X86_64_DIR)/liblog4cxx.so:  $(X86_64_DIR)
 $(X86_DIR)/liblog4cxx.so:  $(X86_DIR)
 	cp -rf /opt/star/sl53_gcc432/lib/*log4cxx* $(X86_DIR)/
 
-$(DISTTAR):   StRoot/logging/testUcm.java $(MYJAR).jar $(X86_DIR) $(X86_64_DIR) $(X86_64) cleanobj
-	tar -czvf ucmdist.tar.gz  $? 
+$(DISTTAR):   StRoot/logging/testUcm.java $(MYJAR).jar $(X86_DIR) $(X86_64_DIR) $(X86_64) setenv.sh
+	/bin/rm -rf $(X86_64_DIR)/*.o  $(X86_DIR)/*.o
+	tar -czvf $@ $^ 
 #	tar -czvf ucmdist.tar.gz  --strip-components=2 $? 
         
 upload:   $(DISTTAR)  $(X86_64_DIR)/liblog4cxx.so  $(X86_DIR)/liblog4cxx.so
