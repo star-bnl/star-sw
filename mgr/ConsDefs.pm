@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.125 2010/01/27 23:12:19 perev Exp $
+# $Id: ConsDefs.pm,v 1.126 2010/04/13 21:53:40 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -128,8 +128,10 @@
 	$LLIB = "lib";
     }
 
-    if ( -x "/usr/bin/gfortran" or -x "/sw/bin/gfortran"){
-	# give preference to gfortran for now - JL 200908
+    if ( ( -x "/usr/bin/gfortran" or -x "/sw/bin/gfortran" ) && !defined($ENV{USE_G77}) ){
+	# JL 200908 - give preference to gfortran for now 
+	# JL 201004 - added possibility to revertto g77 by defining USE_G77 but 
+	#             this is at your own risk
 	$G77       = "gfortran";
 	$FC        = $G77;
 	if ( defined( $ARG{NODEBUG} ) || $NODEBUG )  {
@@ -198,8 +200,11 @@
     chomp($LIBSTDC);
 
     if ( $G77 eq "gfortran" ){
-#	$LIBG2C  = `$FC $FFLAGS -print-file-name=libgfortran.a | awk '{ if (\$1 != "libgfortran.a") print \$1}'`;
-#	print "$FC $FFLAGS -print-file-name=libgfortran.a ========> LIBG2C = $LIBG2C\n";
+	# JL: For gfortran version <  4.3, -lg2c may still be needed for ensuring 
+	#   symbol resolve but this is a messy hack and should likely be avoided.
+	#   The below line was tried and would not work in those cases.
+        #$LIBG2C  = `$FC $FFLAGS -print-file-name=libgfortran.a | awk '{ if (\$1 != "libgfortran.a") print \$1}'`;
+	#print "$FC $FFLAGS -print-file-name=libgfortran.a ========> LIBG2C = $LIBG2C\n";
     } else {
 	$LIBG2C  = `$CC $CFLAGS  -print-file-name=libg2c.a | awk '{ if (\$1 != "libg2c.a") print \$1}'`;
     }
