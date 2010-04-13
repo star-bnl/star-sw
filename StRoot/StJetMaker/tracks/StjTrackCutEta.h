@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutEta.h,v 1.1 2008/11/27 07:09:33 tai Exp $
+// $Id: StjTrackCutEta.h,v 1.2 2010/04/13 13:30:51 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKCUTETA_H
 #define STJTRACKCUTETA_H
@@ -12,7 +12,7 @@ public:
   StjTrackCutEta(double min = -2.0, double max = 2.0) :_min(min), _max(max) { }
   virtual ~StjTrackCutEta() { }
 
-  bool operator()(const StjTrack& track)
+  bool operator()(const StjTrack& track) const
   {
     if(track.eta < _min) return true;
 

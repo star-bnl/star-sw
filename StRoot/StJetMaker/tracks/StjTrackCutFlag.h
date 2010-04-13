@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutFlag.h,v 1.1 2008/11/27 07:09:34 tai Exp $
+// $Id: StjTrackCutFlag.h,v 1.2 2010/04/13 13:30:51 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKCUTFLAG_H
 #define STJTRACKCUTFLAG_H
@@ -14,7 +14,7 @@ public:
     : _min(min), _max(max) { }
   virtual ~StjTrackCutFlag() { }
 
-  bool operator()(const StjTrack& track)
+  bool operator()(const StjTrack& track) const
   {
     if(track.flag <= _min) return true;
 
