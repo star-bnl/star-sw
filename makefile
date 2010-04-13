@@ -20,6 +20,7 @@ OBJS = \
 	$(OBJECT)/ComponentAnsys121.o \
 	$(OBJECT)/ComponentAnsys123.o \
 	$(OBJECT)/ComponentTcad2d.o \
+	$(OBJECT)/ComponentNeBem2d.o \
 	$(OBJECT)/FieldView.o \
 	$(OBJECT)/Input.o \
 	$(OBJECT)/Medium.o \
