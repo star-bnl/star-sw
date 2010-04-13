@@ -30,6 +30,7 @@
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 
 //StSpinDb
 #include "StSpinPool/StSpinDbMaker/StSpinDbMaker.h"
@@ -259,7 +260,18 @@ Int_t StJetSkimEventMaker::Make()
         
         StJetSkimVert skimVert;
         copyVertex(*muVert, skimVert);
-        
+
+        // ATTENTION!!! Hack to get nBTOFMatch in Run 9. Should be removed once implemented in MuDst.
+        int currentVertexIndex = StMuDst::currentVertexIndex();
+	StMuDst::setVertexIndex(i);
+        int nmatches = 0;
+        TIter nextTrack(StMuDst::primaryTracks());
+        while (StMuTrack* track = (StMuTrack*)nextTrack())
+          if (track->tofHit())
+            ++nmatches;
+	StMuDst::setVertexIndex(currentVertexIndex);
+        skimVert.setNBTOFMatch(nmatches);
+
         mEvent->setVert(skimVert);
     }
     
@@ -317,6 +329,7 @@ void copyVertex(StMuPrimaryVertex& v, StJetSkimVert& sv)
     sv.setVertexFinderId( v.vertexFinderId());
     sv.setRanking( v.ranking() );
     sv.setNTracksUsed( v.nTracksUsed());
+    sv.setNBTOFMatch( v.nBTOFMatch());
     sv.setNCTBMatch( v.nCTBMatch());
     sv.setNBEMCMatch( v.nBEMCMatch());
     sv.setNEEMCMatch( v.nEEMCMatch());

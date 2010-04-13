@@ -223,7 +223,7 @@ StJetSkimVert::StJetSkimVert()
         mPosition[i] = 0.;
         mPosError[i] = 0.;
     }
-    mVertexFinderId  = mNTracksUsed = mNCTBMatch = mNBEMCMatch = mNEEMCMatch = mNCrossCentralMembrane = mRefMultNeg = mRefMultPos = mRefMultFtpcWest = mRefMultFtpcEast = 0;
+    mVertexFinderId  = mNTracksUsed = mNBTOFMatch = mNCTBMatch = mNBEMCMatch = mNEEMCMatch = mNCrossCentralMembrane = mRefMultNeg = mRefMultPos = mRefMultFtpcWest = mRefMultFtpcEast = 0;
     mRanking =  mSumTrackPt = mMeanDip = mChiSquared = 0.;
 }
 
@@ -248,7 +248,7 @@ void StJetSkimVert::clear()
         mPosition[i] = 0.;
         mPosError[i] = 0.;
     }   
-    mVertexFinderId  = mNTracksUsed = mNCTBMatch = mNBEMCMatch = mNEEMCMatch = mNCrossCentralMembrane = mRefMultNeg = mRefMultPos = mRefMultFtpcWest = mRefMultFtpcEast = 0;
+    mVertexFinderId  = mNTracksUsed = mNBTOFMatch = mNCTBMatch = mNBEMCMatch = mNEEMCMatch = mNCrossCentralMembrane = mRefMultNeg = mRefMultPos = mRefMultFtpcWest = mRefMultFtpcEast = 0;
     mRanking =  mSumTrackPt = mMeanDip = mChiSquared = 0.;
 }
 
@@ -267,6 +267,7 @@ bool StJetSkimVert::operator==(const StJetSkimVert &rhs) const {
     
     if(mRanking != rhs.ranking())               return false;
     if(mNTracksUsed != rhs.nTracksUsed())       return false;
+    if(mNBTOFMatch != rhs.nBTOFMatch())         return false;
     if(mNCTBMatch != rhs.nCTBMatch())           return false;
     if(mNBEMCMatch != rhs.nBEMCMatch())         return false;
     if(mNEEMCMatch != rhs.nEEMCMatch())         return false;

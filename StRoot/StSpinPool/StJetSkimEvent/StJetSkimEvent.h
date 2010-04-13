@@ -159,6 +159,7 @@ public:
     void setVertexFinderId(int i) {mVertexFinderId = i;}
     void setRanking(Float_t i) { mRanking = i;}
     void setNTracksUsed(UShort_t i) {mNTracksUsed = i;}
+    void setNBTOFMatch(UShort_t i) { mNBTOFMatch = i;}
     void setNCTBMatch(UShort_t i) { mNCTBMatch = i;}
     void setNBEMCMatch(UShort_t i) { mNBEMCMatch = i;}
     void setNEEMCMatch(UShort_t i) { mNEEMCMatch = i;}
@@ -179,6 +180,7 @@ public:
     int vertexFinderId() const { return mVertexFinderId;} 
     Float_t ranking()  const { return mRanking;}
     UShort_t nTracksUsed() const { return mNTracksUsed;}
+    UShort_t nBTOFMatch() const { return mNBTOFMatch;}
     UShort_t nCTBMatch() const { return mNCTBMatch;}
     UShort_t nBEMCMatch() const { return mNBEMCMatch;}
     UShort_t nEEMCMatch() const { return mNEEMCMatch;}
@@ -202,6 +204,7 @@ private:
     int mVertexFinderId;
     Float_t mRanking;
     UShort_t mNTracksUsed;
+    UShort_t mNBTOFMatch;
     UShort_t mNCTBMatch;
     UShort_t mNBEMCMatch;
     UShort_t mNEEMCMatch;
@@ -216,7 +219,7 @@ private:
     UShort_t mRefMultFtpcWest;
     UShort_t mRefMultFtpcEast;
     
-    ClassDef(StJetSkimVert,1);
+    ClassDef(StJetSkimVert,2);
 };
 
 class StJetSkimEvent : public TObject {
