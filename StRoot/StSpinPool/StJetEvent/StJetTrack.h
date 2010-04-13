@@ -13,7 +13,30 @@
 
 class StJetTrack : public StJetElement {
 public:
-  StJetTrack();
+  StJetTrack()
+    : StJetElement()
+    , mFlag(0)
+    , mCharge(0)
+    , mNHits(0)
+    , mNHitsFit(0)
+    , mNHitsPoss(0)
+    , mNHitsDedx(0)
+    , mDedx(0)
+    , mNSigmaPion(0)
+    , mNSigmaKaon(0)
+    , mNSigmaProton(0)
+    , mNSigmaElectron(0)
+    , mExitPoint(0,0,0)
+    , mExitTowerId(0)
+    , mExitDetectorId(0)
+    , mDca(0)
+    , mDcaX(0)
+    , mDcaY(0)
+    , mDcaZ(0)
+    , mDcaD(0)
+    , mChi2(0)
+    , mChi2Prob(0)
+  {}
 
   friend class StjeJetEventTreeWriter;
 
@@ -32,8 +55,12 @@ public:
   short exitTowerId()         const { return mExitTowerId; }
   short exitDetectorId()      const { return mExitDetectorId; }
   float dca()                 const { return mDca; }
+  float dcaX()                const { return mDcaX; }
+  float dcaY()                const { return mDcaY; }
   float dcaZ()                const { return mDcaZ; }
   float dcaD()                const { return mDcaD; }
+  float chi2()                const { return mChi2; }
+  float chi2prob()            const { return mChi2Prob; }
 
 private:
   short mFlag;
@@ -51,10 +78,14 @@ private:
   short mExitTowerId;
   short mExitDetectorId;
   float mDca;
+  float mDcaX;
+  float mDcaY;
   float mDcaZ;
   float mDcaD;
+  float mChi2;
+  float mChi2Prob;
 
-  ClassDef(StJetTrack, 1);
+  ClassDef(StJetTrack, 2);
 };
 
 #endif // ST_JET_TRACK_H

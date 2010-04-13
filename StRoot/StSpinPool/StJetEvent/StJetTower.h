@@ -13,7 +13,13 @@
 
 class StJetTower : public StJetElement {
 public:
-  StJetTower();
+  StJetTower()
+    : StJetElement()
+    , mAdc(0)
+    , mPedestal(0)
+    , mRms(0)
+    , mStatus(0)
+  {}
 
   friend class StjeJetEventTreeWriter;
 
