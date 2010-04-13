@@ -12,6 +12,7 @@ CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long -g `root-config --cflags`
 OBJS = \
 	$(OBJECT)/AvalancheMicroscopic.o \
 	$(OBJECT)/AvalancheMC.o \
+	$(OBJECT)/TrackHeed.o \
 	$(OBJECT)/ComponentBase.o \
 	$(OBJECT)/ComponentConstant.o \
 	$(OBJECT)/ComponentUser.o \
@@ -19,7 +20,6 @@ OBJS = \
 	$(OBJECT)/ComponentAnsys121.o \
 	$(OBJECT)/ComponentAnsys123.o \
 	$(OBJECT)/ComponentTcad2d.o \
-	$(OBJECT)/ComponentNeBem2d.o \
 	$(OBJECT)/FieldView.o \
 	$(OBJECT)/Input.o \
 	$(OBJECT)/Medium.o \
@@ -40,6 +40,8 @@ clean:
 $(OBJECT)/AvalancheMicroscopic.o: $(SOURCE)/AvalancheMicroscopic.cc $(INCLUDE)/AvalancheMicroscopic.hh $(INCLUDE)/FundamentalConstants.hh $(INCLUDE)/Random.hh $(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/AvalancheMC.o: $(SOURCE)/AvalancheMC.cc $(INCLUDE)/AvalancheMC.hh $(INCLUDE)/FundamentalConstants.hh $(INCLUDE)/Random.hh $(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh
+	$(CC) $(CFLAGS) $< -o $@       
+$(OBJECT)/TrackHeed.o: $(SOURCE)/TrackHeed.cc $(INCLUDE)/TrackHeed.hh $(INCLUDE)/Track.hh
 	$(CC) $(CFLAGS) $< -o $@        
 $(OBJECT)/ComponentBase.o: $(SOURCE)/ComponentBase.cc $(INCLUDE)/ComponentBase.hh $(INCLUDE)/Medium.hh
 	$(CC) $(CFLAGS) $< -o $@
