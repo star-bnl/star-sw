@@ -119,11 +119,10 @@ TxEventLog *StUCMAppender::getConnection()
    if (!fIsConnectionOpen) {
 
      if (!connection) {
-//         connection = TxEventLogFactory::create("WEB"); // create ucm collector factory
-       connection = TxEventLogFactory::create("U"); // create ucm collector factory
+         connection = TxEventLogFactory::create("WEB"); // create ucm collector factory
+//       connection = TxEventLogFactory::create("U"); // create ucm collector factory
 //       connection = TxEventLogFactory::create(technology.c_str()); // create ucm collector factory
 //       connection = TxEventLogFactory::create();
-//       connection = TxEventLogFactory::create("w"); // to access the Web interface
        if ( getenv("JOBINDEX") && getenv("REQUESTID") ) {
            const char *JOBINDEX = getenv("JOBINDEX");
            std::string UCMJOB   = getenv("REQUESTID");
