@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.212 2009/12/23 21:39:23 jwebb Exp $
+* $Id: geometry.g,v 1.213 2010/04/13 21:47:52 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.213  2010/04/13 21:47:52  jwebb
+* Added PHMD to y2010 geometry in preparation for y2010 simulations.
+*
 * Revision 1.212  2009/12/23 21:39:23  jwebb
 * (1) Code modified to use 10 keV e- and gamma transport cuts in the barrel
 *     and endcap calorimeters.   Note that this only takes effect in geometries
@@ -1554,9 +1557,10 @@ replace [exe y2009a;] with [;
 !//______________________________________________________________________________
 *********   y2010   ***
 replace [exe y2010;] with [;
-{ "y2010 baseline: right now y2010+full btof"
+{ "y2010 baseline: y2009a+full tof+phmd, blessed 04/13 jcw"
   exe y2009a; 
   exe BTOF66;
+  exe PHMD02;
 };]
 
 
