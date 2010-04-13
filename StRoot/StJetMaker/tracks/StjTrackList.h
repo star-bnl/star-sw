@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackList.h,v 1.2 2009/09/06 15:32:22 pibero Exp $
+// $Id: StjTrackList.h,v 1.3 2010/04/13 13:30:51 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKLIST_H
 #define STJTRACKLIST_H
@@ -28,8 +28,12 @@ public:
   double         nSigmaProton;
   double         nSigmaElectron;
   double         Tdca;
-  float          dcaZ;
-  float          dcaD;
+  double         dcaX;
+  double         dcaY;
+  double         dcaZ;
+  double         dcaD;
+  double         chi2;
+  double         chi2prob;
   double         BField;
   double         bemcRadius;
   double         vertexZ;
@@ -40,7 +44,7 @@ public:
   double         dEdx;
   int            trackIndex;
   short          id;
-  ClassDef(StjTrack, 1)
+  ClassDef(StjTrack, 2)
 };
 
 typedef std::vector<StjTrack> StjTrackList;
@@ -61,8 +65,12 @@ inline bool operator==(const StjTrack& v1, const StjTrack& v2)
   if(v1.nHitsFit       != v2.nHitsFit)       return false;   
   if(v1.nSigmaPion     != v2.nSigmaPion)     return false;   
   if(v1.Tdca           != v2.Tdca)           return false;   
+  if(v1.dcaX           != v2.dcaX)           return false;   
+  if(v1.dcaY           != v2.dcaY)           return false;   
   if(v1.dcaZ           != v2.dcaZ)           return false;   
   if(v1.dcaD           != v2.dcaD)           return false;   
+  if(v1.chi2           != v2.chi2)           return false;
+  if(v1.chi2prob       != v2.chi2prob)       return false;
   if(v1.BField         != v2.BField)         return false;   
   if(v1.bemcRadius     != v2.bemcRadius)     return false;   
   if(v1.exitDetectorId != v2.exitDetectorId) return false;   

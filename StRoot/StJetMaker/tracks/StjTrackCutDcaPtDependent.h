@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutDcaPtDependent.h,v 1.3 2010/03/26 00:38:38 pibero Exp $
+// $Id: StjTrackCutDcaPtDependent.h,v 1.4 2010/04/13 13:30:51 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKCUTDCAPTDEPENDENT_H
 #define STJTRACKCUTDCAPTDEPENDENT_H
@@ -37,7 +37,7 @@ public:
     : _pt1(pt1), _dcaMax1(dcaMax1), _pt2(pt2), _dcaMax2(dcaMax2) { }
   virtual ~StjTrackCutDcaPtDependent() { }
 
-  bool operator()(const StjTrack& track)
+  bool operator()(const StjTrack& track) const
   {
     if (track.pt < _pt1) return fabs(track.dcaD) > _dcaMax1;
     if (track.pt < _pt2) return fabs(track.dcaD) > fabs(_dcaMax1 + (_dcaMax2 - _dcaMax1) / (_pt2 - _pt1) * (track.pt - _pt1));
