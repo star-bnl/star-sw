@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmu.h,v 1.10 2009/09/06 23:47:06 pibero Exp $
+// $Id: StMuTrackEmu.h,v 1.11 2010/04/13 13:30:26 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMU_H
 #define STMUTRACKEMU_H
@@ -25,8 +25,12 @@ public:
     , _nSigmaProton(0)
     , _nSigmaElectron(0)
     , _Tdca(0)
+    , _dcaX(0)
+    , _dcaY(0)
     , _dcaZ(0)
     , _dcaD(0)
+    , _chi2(0)
+    , _chi2prob(0)
     , _BField(0)
     , _bemcRadius(0)
     , _etaext(0)
@@ -55,8 +59,12 @@ public:
   double         nSigmaProton() const { return _nSigmaProton; }
   double         nSigmaElectron() const { return _nSigmaElectron; }
   double         Tdca()        const { return _Tdca; }
-  Float_t        dcaZ()        const { return _dcaZ; }
-  Float_t        dcaD()        const { return _dcaD; }
+  double         dcaX()        const { return _dcaX; }
+  double         dcaY()        const { return _dcaY; }
+  double         dcaZ()        const { return _dcaZ; }
+  double         dcaD()        const { return _dcaD; }
+  double         chi2()        const { return _chi2; }
+  double         chi2prob()    const { return _chi2prob; }
   double         BField()      const { return _BField; }
   double         bemcRadius()  const { return _bemcRadius; }
   double         etaext()      const { return _etaext; }
@@ -86,8 +94,12 @@ private:
   double         _nSigmaProton;
   double         _nSigmaElectron;
   double         _Tdca;
-  Float_t        _dcaZ;
-  Float_t        _dcaD;
+  double         _dcaX;
+  double         _dcaY;
+  double         _dcaZ;
+  double         _dcaD;
+  double         _chi2;
+  double         _chi2prob;
   double         _BField;
   double         _bemcRadius;
   double         _etaext;

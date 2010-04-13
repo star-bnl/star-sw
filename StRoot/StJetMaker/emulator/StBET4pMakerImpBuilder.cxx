@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImpBuilder.cxx,v 1.8 2009/09/03 23:36:14 pibero Exp $
+// $Id: StBET4pMakerImpBuilder.cxx,v 1.9 2010/04/13 13:30:26 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImpBuilder.h"
 #include "StBET4pMakerImp.h"
@@ -21,6 +21,7 @@
 #include "StjTrackCutDcaPtDependent.h"
 #include "StjTrackCutEta.h"
 #include "StjTrackCutPossibleHitRatio.h"
+#include "StjTrackCutChi2.h"
 
 #include "StjTowerEnergyListCut.h"
 
@@ -36,7 +37,7 @@
 #include "StjAbstractTowerEnergyCorrectionForTracks.h"
 
 StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool useEEMC,
-					       bool use2003Cuts, bool use2005Cuts, bool use2006Cuts,
+					       bool use2003Cuts, bool use2005Cuts, bool use2006Cuts, bool use2009Cuts,
 					       bool useBEMCEnergyVariation, double bemcEnergyVariationRatio,
 					       StMuDstMaker* uDstMaker, bool doTowerSwapFix,
 					       StjAbstractTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks)
@@ -49,6 +50,7 @@ StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool u
     tpc  = new StjTPCMuDst(uDstMaker);
     tpcCut->addCut(new StjTrackCutDca());
     if(use2006Cuts)  tpcCut->addCut(new StjTrackCutDcaPtDependent());
+    if(use2009Cuts)  tpcCut->addCut(new StjTrackCutChi2);
     tpcCut->addCut(new StjTrackCutEta());
     tpcCut->addCut(new StjTrackCutPossibleHitRatio());
   }
