@@ -80,6 +80,7 @@ void StjeJetEventTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJetEvent& je
   jetEvent.Clear();
   jetEvent.setRunId(fourPMaker->GetRunNumber());
   jetEvent.setEventId(fourPMaker->GetEventNumber());
+  jetEvent.setVertex(fourPMaker->getVertex().xyz());
   for (list<StProtoJet>::iterator iJet = protoJetList->begin(); iJet != protoJetList->end(); ++iJet)
     fillJet(jetEvent, *iJet, fourPMaker);
 }
@@ -112,8 +113,12 @@ void StjeJetEventTreeWriter::fillJet(StJetEvent& jetEvent, StProtoJet& pj, StFou
       track->mExitDetectorId = t->exitDetectorId();
       track->mExitPoint.SetPtEtaPhi(t->bemcRadius(),t->etaext(),t->phiext());
       track->mDca            = t->Tdca();
+      track->mDcaX           = t->dcaX();
+      track->mDcaY           = t->dcaY();
       track->mDcaZ           = t->dcaZ();
       track->mDcaD           = t->dcaD();
+      track->mChi2           = t->chi2();
+      track->mChi2Prob       = t->chi2prob();
       TVector3 mom(t->px(),t->py(),t->pz());
       track->mPt             = mom.Pt();
       track->mEta            = mom.Eta();
@@ -140,15 +145,14 @@ void StjeJetEventTreeWriter::fillJet(StJetEvent& jetEvent, StProtoJet& pj, StFou
       switch (t->detectorId()) {
       case kBarrelEmcTowerId:
 	mom.SetPtEtaPhi(StEmcGeom::instance("bemc")->Radius(),mom.Eta(),mom.Phi());
-	mom -= vertex;
-	mom.SetMag(energy);
 	break;
       case kEndcapEmcTowerId:
 	mom.SetMag(EEmcGeomSimple::Instance().getZMean()/mom.Unit().z());
-	mom -= vertex;
-	mom.SetMag(energy);
 	break;
       }
+
+      mom -= vertex;
+      mom.SetMag(energy);
 
       tower->mPt  = mom.Pt();
       tower->mEta = mom.Eta();
