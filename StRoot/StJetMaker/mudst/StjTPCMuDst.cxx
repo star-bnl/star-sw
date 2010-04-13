@@ -1,4 +1,4 @@
-// $Id: StjTPCMuDst.cxx,v 1.5 2009/09/06 15:32:29 pibero Exp $
+// $Id: StjTPCMuDst.cxx,v 1.6 2010/04/13 13:30:38 pibero Exp $
 #include "StjTPCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuTrack.h>
@@ -65,9 +65,12 @@ StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magnet
   track.nSigmaProton = mutrack->nSigmaProton();
   track.nSigmaElectron = mutrack->nSigmaElectron();
   track.Tdca       = mutrack->dcaGlobal().mag();
+  track.dcaX       = mutrack->dcaGlobal().x();
+  track.dcaY       = mutrack->dcaGlobal().y();
   track.dcaZ       = mutrack->dcaZ();
   track.dcaD       = mutrack->dcaD();
-
+  track.chi2       = mutrack->chi2();
+  track.chi2prob   = mutrack->chi2prob();
   track.BField      = magneticField;
   //track.bemcRadius = StEmcGeom::instance("bemc")->Radius() + 5;
 

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.13 2009/12/09 05:12:02 pibero Exp $
+// $Id: StBET4pMaker.h,v 1.14 2010/04/13 13:29:33 pibero Exp $
 #ifndef STBET4PMAKER_H
 #define STBET4PMAKER_H
 
@@ -40,6 +40,7 @@ public:
   void setUse2003Cuts(bool v = true) { _use2003Cuts = v; }
   void setUse2005Cuts(bool v = true) { _use2005Cuts = v; }
   void setUse2006Cuts(bool v = true) { _use2006Cuts = v; }
+  void setUse2009Cuts(bool v = true) { _use2009Cuts = v; }
   void setUseBEMCEnergySum(bool v = true) { _useBEMCEnergySum = v; }
   void setUseBEMCEnergyVariation(bool v = true) { _useBEMCEnergyVariation = v; }
   void setBEMCEnergyVariationRatio(double ratio) {  _bemcEnergyVariationRatio= ratio; }
@@ -52,7 +53,7 @@ public:
   StBET4pMakerImp* GetImp() { return _imp; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.13 2009/12/09 05:12:02 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.14 2010/04/13 13:29:33 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -68,6 +69,7 @@ private:
   bool _use2003Cuts;
   bool _use2005Cuts;
   bool _use2006Cuts;
+  bool _use2009Cuts;
   bool _useBEMCEnergySum;
   bool _useBEMCEnergyVariation;
   double _bemcEnergyVariationRatio;
