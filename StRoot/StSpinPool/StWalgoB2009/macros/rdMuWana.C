@@ -372,7 +372,7 @@ int rdMuWana(
   
   if(spinSort){
     spDb=new StSpinDbMaker("spinDb");
-    enum {mxSM=4}; // to study eta-cuts, drop Q/PT cut
+    enum {mxSM=5}; // to study eta-cuts, drop Q/PT cut
     St2009pubSpinMaker *spinMkA[mxSM];
     for(int kk=0;kk<mxSM;kk++) {
       char ttx[100]; sprintf(ttx,"%cspin",'A'+kk);
@@ -384,6 +384,7 @@ int rdMuWana(
       if(kk==1) spinMkA[kk]->setEta(-1.,0.);
       if(kk==2) spinMkA[kk]->setEta(0,1.);
       if(kk==3) spinMkA[kk]->setQPT(-1);// disable Q/PT cut
+      if(kk==4) spinMkA[kk]->setNoEEMC(); 
     }  
   }
   
@@ -459,6 +460,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.28  2010/04/14 20:00:39  balewski
+// *** empty log message ***
+//
 // Revision 1.27  2010/04/08 23:46:21  balewski
 // *** empty log message ***
 //
