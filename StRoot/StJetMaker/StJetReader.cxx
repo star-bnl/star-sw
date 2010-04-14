@@ -41,7 +41,6 @@ StJetReader::StJetReader(const char* name)
   , mTree(0)
   , mSkimFile(0)
   , mSkimTree(0)
-  , mCounter(0)
   , mValid(false)
   , mSkimEvent(0)
   , mOfstream(0)
@@ -70,6 +69,15 @@ void StJetReader::InitFile(const char* file)
   LOG_INFO << "recover tree" << endm;
   mTree = dynamic_cast<TTree*>(mFile->Get("jet"));
   assert(mTree);
+
+  // Build index table to access jets by run number and event number
+  int nentries = mTree->BuildIndex("mRunNumber","mEventNumber");
+  if (nentries < 0) {
+    LOG_WARN << "Could not build jet tree index: nentries=" << nentries << endm;
+  }
+  else {
+    LOG_INFO << "Built jet tree index: nentries=" << nentries << endm;
+  }
 	
   LOG_INFO << "\tset tree pointer" << endm;
   LOG_INFO << "Number of entries in tree:\t" << mTree->GetEntriesFast() << endm;
@@ -114,6 +122,15 @@ void StJetReader::InitJetSkimFile(const char* file)
 
   mSkimTree = dynamic_cast<TTree*>(mSkimFile->Get("jetSkimTree"));
   assert(mSkimTree);
+
+  // Build index table to access skim events by run number and event number
+  int nentries = mSkimTree->BuildIndex("mRunId","mEventId");
+  if (nentries < 0) {
+    LOG_WARN << "Could not build skim tree index: nentries=" << nentries << endm;
+  }
+  else {
+    LOG_INFO << "Built skim tree index: nentries=" << nentries << endm;
+  }
 
   mSkimEvent = new StJetSkimEvent;
 
@@ -191,17 +208,16 @@ int StJetReader::preparedForDualRead()
 
 Int_t StJetReader::Make()
 {
-  int status = mTree->GetEntry(mCounter);
-  if (status < 0) {
-    LOG_INFO << "StJetReader::getEvent(). ERROR:\tstatus<0.  return null" << endm;
+  if (mTree && mTree->GetEntryWithIndex(GetRunNumber(),GetEventNumber()) < 0) {
+    LOG_WARN << Form("Could not find jet tree entry for run=%d event=%d",GetRunNumber(),GetEventNumber()) << endm;
+    return kStWarn;
   }
 
-  if (mSkimTree) {
-    status = mSkimTree->GetEntry(mCounter);
+  if (mSkimTree && mSkimTree->GetEntryWithIndex(GetRunNumber(),GetEventNumber()) < 0) {
+    LOG_WARN << Form("Could not find skim tree entry for run=%d event=%d",GetRunNumber(),GetEventNumber()) << endm;
+    return kStWarn;
   }
-  
-  mCounter++;
-	
+
   return kStOk;
 }
 
