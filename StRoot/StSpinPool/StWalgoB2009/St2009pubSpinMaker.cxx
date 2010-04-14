@@ -1,4 +1,4 @@
-// $Id: St2009pubSpinMaker.cxx,v 1.10 2010/03/22 17:18:32 balewski Exp $
+// $Id: St2009pubSpinMaker.cxx,v 1.11 2010/04/14 20:00:08 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -26,6 +26,7 @@ St2009pubSpinMaker::St2009pubSpinMaker(const char *name):StMaker(name){
   par_QPThighA=0.08; 
   par_QPThighB=0.0013; 
   par_leptonEta1=-1.; par_leptonEta2=1.;
+  par_useNoEEMC=0;
  }
 
 
@@ -80,8 +81,8 @@ St2009pubSpinMaker::InitRun  (int runNo){
   sprintf(txt,"bXing= bx7+off=%d",spinDb->BX7offset());
   hA[4]->GetXaxis()->SetTitle(txt);
 
-  LOG_INFO<<Form("::InitRun(%d) done, W-spin sorting  params: exclude |Q/PT| < %.2f OR |Q/PT| above line %.3*(ET-%.1f)-%6e if ET<%.1f, for AL use leptonEta in[%.1f,%.1f]",
-		 par_QPTlow,par_QPThighET0, par_QPThighA ,par_QPThighB,par_QPThighET1,par_leptonEta1, par_leptonEta2
+  LOG_INFO<<Form("::InitRun(%d) done, W-spin sorting  params: exclude |Q/PT| < %.2f OR |Q/PT| above line %.3f*(ET-%.1f)-%6e if ET<%.1f, for AL use leptonEta in[%.1f,%.1f] useNoEEMC=%d", runNo,
+		 par_QPTlow,par_QPThighET0, par_QPThighA ,par_QPThighB,par_QPThighET1,par_leptonEta1, par_leptonEta2,par_useNoEEMC
 		 )<<endm;	 
   return kStOK;
 }
@@ -175,9 +176,12 @@ St2009pubSpinMaker::bXingSort(){
       
 
       //put final W cut here
-      bool isW= (T.cluster.ET /T.nearTotET> wMK->par_nearTotEtFrac) && // near cone
-	(T.sPtBalance>wMK->par_ptBalance); // awayET
-
+      bool isW= T.cluster.ET /T.nearTotET> wMK->par_nearTotEtFrac;  // near cone
+      if(par_useNoEEMC) 
+	isW=isW && T.sPtBalance_noEEMC>wMK->par_ptBalance; // awayET
+      else
+	isW=isW && T.sPtBalance>wMK->par_ptBalance; // awayET
+    
       if(!isW) { // AL(QCD)
 	if(ET>15 &&ET<20 ) hA[16+iQ]->Fill(spin4);
 	continue;
@@ -232,6 +236,9 @@ St2009pubSpinMaker::bXingSort(){
 
 
 // $Log: St2009pubSpinMaker.cxx,v $
+// Revision 1.11  2010/04/14 20:00:08  balewski
+// added AL w/o endcap
+//
 // Revision 1.10  2010/03/22 17:18:32  balewski
 // now the < > sign is right
 //
