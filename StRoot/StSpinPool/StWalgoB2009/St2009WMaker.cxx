@@ -1,5 +1,5 @@
 
-// $Id: St2009WMaker.cxx,v 1.12 2010/03/23 15:33:55 seelej Exp $
+// $Id: St2009WMaker.cxx,v 1.13 2010/04/14 22:23:30 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -358,28 +358,20 @@ St2009WMaker::L2algoEtaPhi2IJ(float etaF,float phiF,int &iEta, int &iPhi) {
 //________________________________________________
 //________________________________________________
 TClonesArray*
-St2009WMaker::getJets(TString branchName)
-{
-  StJetReader::JetBranchesMap &jetM= mJetReaderMaker->jetsMap();
-  for(StJetReader::JetBranchesMap::iterator it=jetM.begin(); it!=jetM.end(); ++it)
-  {
-    StJets *stjets = (*it).second;
-    nJets = stjets->nJets();
-    //cout << "wEve.id " << wEve.id << " stjets->eventId() " << stjets->eventId() << endl;
-    assert(stjets->eventId()==wEve.id);
-    assert(stjets->runId()==mRunNo);
-    if ((*it).first!=branchName) continue;
-//     cout << "stjets->nJets():: " <<  nJets << endl;
-//     cout << "wEve.id " << wEve.id << " mRunNo " << mRunNo << " branchName: " << (*it).first << endl;
-    TClonesArray *jets = stjets->jets();
-    return jets;
-  }
-  
-  return 0;
+St2009WMaker::getJets(TString branchName){
+
+  assert(mJetReaderMaker->getStJets(branchName)->eventId()==wEve.id);
+  assert(mJetReaderMaker->getStJets(branchName)->runId()==mRunNo);
+  nJets = mJetReaderMaker->getStJets(branchName)->nJets();
+  return mJetReaderMaker->getStJets(branchName)->jets();
+
 }
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.13  2010/04/14 22:23:30  balewski
+// *** empty log message ***
+//
 // Revision 1.12  2010/03/23 15:33:55  seelej
 // Edit to files to allow the use of a text file for the gains instead of using the DB.
 //
@@ -419,6 +411,9 @@ St2009WMaker::getJets(TString branchName)
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.13  2010/04/14 22:23:30  balewski
+// *** empty log message ***
+//
 // Revision 1.12  2010/03/23 15:33:55  seelej
 // Edit to files to allow the use of a text file for the gains instead of using the DB.
 //
