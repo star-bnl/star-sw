@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtElectronCloud.cc,v 1.15 2009/08/10 05:21:32 baumgart Exp $
+ * $Id: StSvtElectronCloud.cc,v 1.16 2010/04/14 18:21:52 baumgart Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtElectronCloud.cc,v $
+ * Revision 1.16  2010/04/14 18:21:52  baumgart
+ * Fixed a problem for SVT hits near eta=0
+ *
  * Revision 1.15  2009/08/10 05:21:32  baumgart
  * Fix Minor Axis of Initial Electron Cloud Size
  *
@@ -174,11 +177,11 @@ void StSvtElectronCloud::setInitWidths(double w1, double w2)
   //tSigMaj = 0.288675134*fabs(mSDD_thickness*tan(mTheta));  //  [mm]
    tSigMaj = 0.288675134*(fabs(mSDD_thickness*tan(mTheta))+2*w1*cos(mTheta));  //  [mm]
 
-   // if (tSigMaj<w1) {        //almost perpendicular
-   // tSigMaj = w1;          //initial size cannot be smaller than minimal
-   // mTheta=0.;
-   // mPhi = 0.;
-   //}
+  if (tSigMaj<w1) {        //almost perpendicular
+    tSigMaj = w1;          //initial size cannot be smaller than minimal
+    mTheta=0.;
+    mPhi = 0.;
+   }
   tSigMin= w1;          
 
   if ((1. - tSigMin/tSigMaj) < 0.001 || (fabs(mPhi)< 0.001)) mPhi=0.;
