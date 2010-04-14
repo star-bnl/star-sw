@@ -37,6 +37,7 @@ class ComponentNeBem2d : public ComponentBase {
                  const double d, const double bcval);
 
     void SetNumberOfDivisions(const int ndiv);
+    void SetNumberOfCollocationPoints(const int ncoll);
 
     int GetNumberOfPanels()   {return nPanels;}
     int GetNumberOfWires()    {return nWires;}
@@ -60,6 +61,8 @@ class ComponentNeBem2d : public ComponentBase {
  
     int projAxis;
     int nDivisions;
+    int nCollocationPoints;
+    double minSize;
 
     int nPanels;
     struct panel {
@@ -114,6 +117,7 @@ class ComponentNeBem2d : public ComponentBase {
     bool Initialise();
     bool Discretise();
     bool ComputeInfluenceMatrix();
+    void SplitElement(const int iel);
     bool InvertMatrix();
     bool LUDecomposition();
     void LUSubstitution();
