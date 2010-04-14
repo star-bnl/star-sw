@@ -14,14 +14,14 @@ int geant=false;
 int rdMuWana(
 	     int nEve=2e3,
 	     char* inDir   = "",// make it empty for scheduler 
-	     char* file    = "fillListD/F10434/R10085016_230530_230600.lis",
-	     int nFiles  = 1000, // max # of muDst files
-	     int isMC=1, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve, 20=rcf10010,... 26=rcf10016
+	     char* file    = "/star/u/balewski/2009-Wana-pp500/fillListPhys/F10535/R10102105_230531_230601.lis",
+	     int nFiles  = 2, // max # of muDst files
+	     int isMC=0, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve, 20=rcf10010,... 26=rcf10016
 	     int useJetFinder = 2, // 0 - no jets & crash; 1 generate jet trees; 2 read jet trees
              TString jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/jetTree4.5.10/" //default location of jet trees to be used
  ) { 
 
-  //jetTreeDir = "./";
+  jetTreeDir = "/star/data05/scratch/balewski/bug12c/out3/";
   if(isMC==1) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppWprod.lis";
   if(isMC==2) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD2_ppQCD10_inf_filter.lis";
   if(isMC==3) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppZprod.lis";
@@ -106,7 +106,8 @@ int rdMuWana(
   assert( !gSystem->Load("StDetectorDbMaker")); // for St_tpcGasC
   assert( !gSystem->Load("StEEmcUtil"));
   assert( !gSystem->Load("StEEmcDbMaker"));
-  cout << " loading done " << endl;
+
+  assert( !gSystem->Load("StTriggerFilterMaker"));
   assert( !gSystem->Load("StWalgoB2009"));
   if(spinSort)  assert( !gSystem->Load("StSpinDbMaker"));
   
@@ -138,6 +139,8 @@ int rdMuWana(
     assert( !gSystem->Load("StMcEventMaker")); 
   }
   
+  cout << " loading done " << endl;
+
   // create chain    
   chain = new StChain("StChain"); 
   
@@ -225,6 +228,14 @@ int rdMuWana(
   //.... load EEMC database
   StEEmcDbMaker*  mEEmcDatabase = new StEEmcDbMaker("eemcDb");
   
+  if(!isMC) {
+    StTriggerFilterMaker *filterMaker = new StTriggerFilterMaker;
+    filterMaker->addTrigger(230420); // AJP
+    filterMaker->addTrigger(230411); // JP2
+    filterMaker->addTrigger(bht3ID); // regular W -> e+ analysis
+  }
+
+
   //.... Jet finder code ....
   if (useJetFinder > 0)  {
     cout << "BEGIN: running jet finder " << endl;
@@ -261,7 +272,7 @@ int rdMuWana(
     //set the analysis cuts: (see StJetMaker/StppJetAnalyzer.h -> class StppAnaPars )
     StppAnaPars* anapars = new StppAnaPars();
     anapars->setFlagMin(0); //track->flag() > 0
-    anapars->setNhits(5); //track->nHitsFit()>10
+    anapars->setNhits(12); //track->nHitsFit()>12
     anapars->setCutPtMin(0.2); //track->pt() > 0.2
     anapars->setAbsEtaMax(2.0); //abs(track->eta())<1.6
     anapars->setJetPtMin(3.5);
@@ -281,13 +292,8 @@ int rdMuWana(
     cpars->setRequireStableMidpoints(true);
     cpars->setDoSplitMerge(true);
     cpars->setDebug(false);
-    
-    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100, "ConeJets5_100"); //100% subtraction 
-    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100_noEEMC, "ConeJets5_100_noEEMC"); //100% subtraction (no Endcap)
 
-    anapars->setNhits(12); //track->nHitsFit()>12
-    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100, "ConeJets12_100"); //100% subtraction 
-    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100_noEEMC, "ConeJets12_100_noEEMC"); //100% subtraction (no Endcap)
+    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100, "ConeJets12_100"); //100% subtraction     emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100_noEEMC, "ConeJets12_100_noEEMC"); //100% subtraction (no Endcap)
 
     //Tight cuts (esp. SMD)
     pre_ecl->SetClusterConditions("bemc", 4, 0.4, 0.05, 0.02, kFALSE);
@@ -312,8 +318,8 @@ int rdMuWana(
       if(eventCounter>=nEve) break;
       chain->Clear();
       int stat = chain->Make();
-      if(stat) break; // EOF or input error
-        eventCounter++;
+       if(stat != kStOk && stat != kStSkip) break; // EOF or input error
+       eventCounter++;
     }
     cout<<"R"<<runNo<<" nEve="<<eventCounter<<" total "; tt.Print();
     printf("****************************************** \n");
@@ -330,7 +336,7 @@ int rdMuWana(
   if (useJetFinder == 2)
   {
     cout << "Configure to read jet trees " << endl;
-    StJetReader *jetReader = new StJetReader("JetReader",muMk);
+   StJetReader *jetReader = new StJetReader;
     jetReader->InitFile(jetTreeDir+outFile);
   }
 
@@ -340,10 +346,10 @@ int rdMuWana(
   if(isMC) { // MC specific
     WmuMk->setMC(isMC); //pass "version" of MC to maker
     //vary energy scales for syst. uncert. calc.
-    //WmuMk->setJetNeutScaleMC(1.0);  //vary by 7.5%
-    //WmuMk->setJetChrgScaleMC(1.0); //vary by 5.6%
-    //WmuMk->setBtowScale(1.0);     //vary by 7.5%
-    //WmuMk->setEtowScale(1.0);     //vary by 10%
+    //WmuMk->setJetNeutScaleMC(1.0); 
+    //WmuMk->setJetChrgScaleMC(1.0); 
+    //WmuMk->setBtowScale(1.0);     
+    //WmuMk->setEtowScale(1.0);     
     if(isMC<20) WmuMk->setEtowScale(1.3); // rcf simu should have correct SF
   }else {// real data specific
     WmuMk->setTrigID(bht3ID,l2wID,runNo);
@@ -429,7 +435,7 @@ int rdMuWana(
     if(eventCounter>=nEve) break;
     chain->Clear();
     int stat = chain->Make();
-    if(stat) break; // EOF or input error
+     if(stat != kStOk && stat != kStSkip) break; // EOF or input error
     eventCounter++;    
   }
 
@@ -460,6 +466,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.29  2010/04/14 22:24:13  balewski
+// matc to new jet interface, drop 5-hit branch, filter out events w/ good trigger
+//
 // Revision 1.28  2010/04/14 20:00:39  balewski
 // *** empty log message ***
 //
