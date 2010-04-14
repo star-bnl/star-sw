@@ -10,7 +10,7 @@ int spinSort=false;
 int isJustin=false;
 bool isRoss=true; 
 int geant=false;
-
+ 
 int rdMuWana(
 	     int nEve=2e3,
 	     char* inDir   = "",// make it empty for scheduler 
@@ -466,8 +466,8 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
-// Revision 1.29  2010/04/14 22:24:13  balewski
-// matc to new jet interface, drop 5-hit branch, filter out events w/ good trigger
+// Revision 1.30  2010/04/14 22:52:56  balewski
+// *** empty log message ***
 //
 // Revision 1.28  2010/04/14 20:00:39  balewski
 // *** empty log message ***
