@@ -54,7 +54,6 @@ public:
   const char* branchName(int i) const;
   StJets* getStJets(int i) const;
   StJets* getStJets(const char* bname) const;
-  StJets* getStJets(const char* bname, int runNumber, int eventNumber) const;
     
   ///An example analysis method, look here for a demonstration of jet/track histogramming
   void exampleEventAna();
