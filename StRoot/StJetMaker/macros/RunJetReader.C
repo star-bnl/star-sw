@@ -1,4 +1,4 @@
-
+// Read MuDst, jet and skim trees
 // NOTE - chain needs to be declared global so for StHbtEventReader
 //=========================================================================================
 class  StChain;
@@ -33,12 +33,16 @@ void RunJetReader(int nevents=10,
     gSystem->Load("StSpinDbMaker");
     gSystem->Load("StEmcTriggerMaker");
     gSystem->Load("StMCAsymMaker");
+    gSystem->Load("StJets");
+    gSystem->Load("StJetSkimEvent");
+    gSystem->Load("StTriggerUtilities");
+    gSystem->Load("StJetEvent");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetMaker");
-    
+
     cout << " loading done " << endl;
     
-    double pi = atan(1.0)*4.0;
+    double pi = TMath::Pi();
     cout << " loading done " << endl;
    
     chain= new StChain("StChain"); 
@@ -67,7 +71,7 @@ void RunJetReader(int nevents=10,
     //StEpcMaker *epc = new StEpcMaker();
 
     //Instantiate the JetReader
-    StJetReader* jetReader = new StJetReader("JetReader",muDstMaker);
+    StJetReader* jetReader = new StJetReader;
     
     chain->Init();
 

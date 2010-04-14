@@ -1,10 +1,14 @@
+//
+// Read jet and skim trees (no MuDst)
+//
+
 class  StChain;
 StChain *chain;
 int total=0;
 
 void RunFastJetReader(
                       int nevents=10000,
-                      const char* jetInFile = "blah.jet.root",
+                      const char* jetInFile = "blah.jets.root",
                       const char* skimInFile = "blah.skim.root"
                       )
 {
@@ -45,7 +49,7 @@ void RunFastJetReader(
     chain->SetDebug(5);
     
     //Instantiate the JetReader
-    StJetReader* jetReader = new StJetReader("JetReader",0);
+    StJetReader* jetReader = new StJetReader;
     
     chain->Init();
     
