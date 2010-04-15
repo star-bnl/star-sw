@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "StBemcStatusMaker.h"
 
 #include "StEnumerations.h"

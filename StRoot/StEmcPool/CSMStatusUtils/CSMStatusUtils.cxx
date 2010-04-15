@@ -34,6 +34,7 @@ I explicitly write them this way.
 #include <map>
 #include <set>
 #include <string>
+#include <stdio.h>
 
 using namespace std;
 
