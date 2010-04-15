@@ -1,0 +1,42 @@
+#Inventor V2.1 ascii
+# $Id: StarCompass.iv,v 1.1 2010/04/15 17:10:21 fine Exp $
+ DEF STAR_COMPASS Separator {
+ # StarFloor position: -235
+   Translation { translation 0 -235 0  }
+   
+   Separator {
+       Translation { translation 200 0 200  }
+       Material {
+            diffuseColor  0.5 0.5 0.5
+            specularColor 0.8 0.8 0.8
+            shininess     0.99
+            transparency  0.9
+       }
+       Separator {
+          Rotation { rotation 0 1 0  -1.57 }
+          Cylinder {  radius 50   height 3    parts (SIDES |BOTTOM | TOP )  } 
+       }
+       Separator {
+         Material {
+             diffuseColor  0.8 0.0 0.0
+             specularColor 0.9 0.0 0.0
+             shininess     0.99
+             transparency  0.9
+         }
+         Translation { translation 25 0  0 }
+         Rotation { rotation 0 0 1  -1.57 }
+         Cone {  bottomRadius 10 height 50   parts (SIDES | BOTTOM)  }
+       }
+       Separator {
+         Material {
+             diffuseColor  0.0 0.0 0.8
+             specularColor 0.0 0.0 0.9
+             shininess     0.99
+             transparency  0.9
+         }
+         Translation { translation -25  0 0 }
+         Rotation { rotation 0 0 1  +1.57 }
+         Cone {  bottomRadius 10  height 50   parts (SIDES | BOTTOM)  }
+       }
+  }
+}
