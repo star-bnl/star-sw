@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdGeom.h,v 1.12 2007/11/02 11:04:32 rashmi Exp $
+ * $Id: StPmdGeom.h,v 1.13 2010/04/15 06:55:44 rashmi Exp $
  *
  * Author: Dipak Mishra
  *
@@ -16,6 +16,9 @@
  *************************************************************
  *
  * $Log: StPmdGeom.h,v $
+ * Revision 1.13  2010/04/15 06:55:44  rashmi
+ * functions to draw XY and eta/phi coverage & modifcations to mapping
+ *
  * Revision 1.12  2007/11/02 11:04:32  rashmi
  * public GetPmdZ added to get PMD z position
  *
@@ -93,8 +96,11 @@ class StPmdGeom {
   Int_t GetNBoardsChain(Int_t);
   void GetNBoardsSM(Int_t,Int_t*);
 
+  
   void drawPMD(Int_t,Int_t,Int_t);
   void DrawRhombus(Int_t,Int_t,Int_t,Int_t,Int_t,Int_t&,Float_t*,Float_t*);
+  void drawPMDXY(Int_t,Int_t,Int_t);
+  void drawPMDetaphi(Int_t,Int_t,Int_t);
 
   Int_t ChainMapping(Int_t&,Int_t&,Int_t&,Int_t&,Int_t&,Int_t&);
   Int_t ChainMapping(Int_t&,Int_t&,Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
