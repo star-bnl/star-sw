@@ -1,6 +1,6 @@
 /*******************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.27 2010/02/28 02:56:04 rashmi Exp $
+ * $Id: StPmdGeom.cxx,v 1.28 2010/04/15 06:55:48 rashmi Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.28  2010/04/15 06:55:48  rashmi
+ * functions to draw XY and eta/phi coverage & modifcations to mapping
+ *
  * Revision 1.27  2010/02/28 02:56:04  rashmi
  * included year11 as year number and also change in mapping after day48
  *
@@ -2127,6 +2130,26 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
     status[29][17]=0;
   }
   
+  if(rn>84 && (year==10||year==11)){
+    // chain 26 board 11 removed as reported by Prithwish on 25/3/2010
+    // chain 26 board 26 brought back as reported by Prithwish on 25/3/2010
+    status[25][10]=0;
+    status[25][25]=1;
+  }
+  if(rn>96 && (year==10||year==11)){
+    // chain 29 modified as reported by Zubayer on 8/4/2010
+    // chain 26 modified as reported by Zubayer on 8/4/2010
+    for(Int_t brd = 6;brd<12;brd++){
+      status[29][brd]=0;
+    }
+    status[29][8]=1;
+    status[29][24]=0;
+    status[29][25]=0;
+    status[29][26]=0;
+    status[25][25]=0;
+  }
+
+
   for(Int_t i=0;i<48;i++){
     for(Int_t ib=0;ib<36;ib++){
       alive_stat[i]=alive_stat[i]+status[i][ib];
@@ -2335,6 +2358,11 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     chain48(chtemp,supmod,col,row,year);
     break;
   }
+  if(supmod<=0 || col<=0 || row<=0){
+    //    cout<<"chain = "<<chain<<" chtemp="<<chtemp<<" supmod="<<supmod<<" col="<<col<<" row="<<row<<endl;
+    return kStWarn;
+  }
+
   //  cout<<"chain = "<<chain<<" chtemp="<<chtemp<<" supmod="<<supmod<<endl;
   return kStOk;
 }
@@ -6795,6 +6823,124 @@ void StPmdGeom::chain48(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
   }
 }
 
+void StPmdGeom::drawPMDXY(Int_t firstchain,Int_t lastchain, Int_t runno){
+  ///  cout<<" I am drawing the PMD XY"<<endl;
+  readBoardDetail(runno);
+ 
+  Int_t rn=0,year=0;
+  GetRunYear(runno,rn,year);
+  cout<<"runnumber = "<<rn<<" year="<<year<<endl;
+  
+  char histname[20];
+  char gifname[20];
+  if (firstchain<25){
+    sprintf(histname,"CPVXY%d",runno);
+    sprintf(gifname,"CPVXY%d.gif",runno);
+  }else{
+    sprintf(histname,"PMDXY%d",runno);
+    sprintf(gifname,"PMDXY%d.gif",runno);
+  }
+  TH2F * hpmdXY = new TH2F("hpmdXY",histname,100,-135,135,100,-135,135);
+  TCanvas *pmdC2 = new TCanvas("pmdC2","PMDXY canvas",800,800);  
+  hpmdXY->SetStats(kFALSE);
+  pmdC2->cd(1);
+  hpmdXY->Draw("pmdC2");
+
+  Int_t sm=0,row=0,col=0,chmod=-1;
+  Int_t bmax[49];
+  for(Int_t chain=1;chain<49;chain++){
+    bmax[chain]=27;
+    
+    if (year==8){ 
+      if(chain==1 || chain==7 || chain==19 || chain==20 || 
+	 chain==23 || chain==24) 
+	{bmax[chain]=36;}
+    }
+    if(year==10||year==11){
+      if(chain==8||chain==12||chain==23||chain==24){bmax[chain]=36;}
+    }
+  }
+  for (Int_t chain=firstchain;chain<=lastchain;chain++){
+    //    cout<<"Drawing chain="<<chain<<" with "<<bmax[chain]<<" mapped boards"<<endl;
+    //    Int_t workingchannel = 0;
+    for(Int_t chan = 0;chan<27*64;chan++){
+      Int_t mapcheck;
+      if (year==5){
+	mapcheck = ChainMapping(chain,chan,sm,col,row,chmod);
+      }else{
+	mapcheck = ChainMapping(chain,chan,sm,col,row,chmod,year);
+      }
+      
+      if(mapcheck==kStOK && sm>0){
+	Float_t xreal = 0, yreal =0, eta=0,phi=0;
+	IntDetCell_xy(sm,row,col,xreal,yreal,eta,phi);
+	//	cout<<"chain,chan,sm,chmod,mapcheck="<<chain<<","<<chan<<","<<sm<<","<<chmod<<","<<mapcheck<<" "<<xreal<<" / "<<yreal<<" "<<eta<<" / "<<phi<<endl;
+	hpmdXY->Fill(xreal,yreal);
+      }
+    }
+  }
+  pmdC2->Print(gifname,"gif");
+}
+
+void StPmdGeom::drawPMDetaphi(Int_t firstchain,Int_t lastchain, Int_t runno){
+  ///  cout<<" I am drawing the PMD etaphi"<<endl;
+  readBoardDetail(runno);
+ 
+  Int_t rn=0,year=0;
+  GetRunYear(runno,rn,year);
+  cout<<"runnumber = "<<rn<<" year="<<year<<endl;
+  
+  char histname[20];
+  char gifname[20];
+  if (firstchain<25){
+    sprintf(histname,"CPVetaphi%d",runno);
+    sprintf(gifname,"CPVetaphi%d.gif",runno);
+  }else{
+    sprintf(histname,"PMDetaphi%d",runno);
+    sprintf(gifname,"PMDetaphi%d.gif",runno);
+  }
+  TH2F * hpmdetaphi = new TH2F("hpmdetaphi",histname,40,-4.0,-2.0,180,-1.0*TMath::Pi(),TMath::Pi());
+  TCanvas *pmdC3 = new TCanvas("pmdC3","PMDetaphi canvas",800,800);  
+  hpmdetaphi->SetStats(kFALSE);
+  pmdC3->cd(1);
+  hpmdetaphi->Draw("pmdC3");
+
+  Int_t sm,row,col,chmod;
+  Int_t bmax[49];
+  for(Int_t chain=1;chain<49;chain++){
+    bmax[chain]=27;
+    
+    if (year==8){ 
+      if(chain==1 || chain==7 || chain==19 || chain==20 || 
+	 chain==23 || chain==24) 
+	{bmax[chain]=36;}
+    }
+    if(year==10||year==11){
+      if(chain==8||chain==12||chain==23||chain==24){bmax[chain]=36;}
+    }
+  }
+  for (Int_t chain=firstchain;chain<=lastchain;chain++){
+    //    cout<<"Drawing chain="<<chain<<" with "<<bmax[chain]<<" mapped boards"<<endl;
+    //    Int_t workingchannel = 0;
+    for(Int_t chan = 0;chan<27*64;chan++){
+      Int_t mapcheck;
+      if (year==5){
+	mapcheck = ChainMapping(chain,chan,sm,col,row,chmod);
+      }else{
+	mapcheck = ChainMapping(chain,chan,sm,col,row,chmod,year);
+      }
+      
+      if(mapcheck==kStOK && sm>0){
+	Float_t xreal = 0, yreal =0, eta=0,phi=0;
+	IntDetCell_xy(sm,row,col,xreal,yreal,eta,phi);
+	//	cout<<"chain,chan,sm,chmod,mapcheck="<<chain<<","<<chan<<","<<sm<<","<<chmod<<","<<mapcheck<<" "<<xreal<<" / "<<yreal<<" "<<eta<<" / "<<phi<<endl;
+	hpmdetaphi->Fill(eta,phi);
+      }
+    }
+  }
+  pmdC3->Print(gifname,"gif");
+}
+
 void StPmdGeom::drawPMD(Int_t firstchain,Int_t lastchain, Int_t runno){
   ///  cout<<" I am drawing the PMD"<<endl;
   readBoardDetail(runno);
@@ -6804,10 +6950,13 @@ void StPmdGeom::drawPMD(Int_t firstchain,Int_t lastchain, Int_t runno){
   //  cout<<"runnumber = "<<rn<<" year="<<year<<endl;
   
   char histname[20];
+  char gifname[20];
   if (firstchain<25){
     sprintf(histname,"CPV%d",runno);
+    sprintf(gifname,"CPV%d.gif",runno);
   }else{
     sprintf(histname,"PMD%d",runno);
+    sprintf(gifname,"PMD%d.gif",runno);
   }
     //  TH2F *hpmdxy = new TH2F("hpmdxy","NEW CPV CHAINS ",100,-135,135,100,-135,135);
   TH2F * hpmdxy = new TH2F("hpmdxy",histname,100,-135,135,100,-135,135);
@@ -6903,7 +7052,7 @@ void StPmdGeom::drawPMD(Int_t firstchain,Int_t lastchain, Int_t runno){
       }
     }
   }
-  pmdC->Print("Pmd.gif","gif");
+  pmdC->Print(gifname,"gif");
   
 }
 
