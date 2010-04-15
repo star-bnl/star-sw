@@ -15,7 +15,6 @@ class TrackHeed : public Track {
     // Destructor
     ~TrackHeed() {}
 
-    void SetParticle(std::string part);
     void NewTrack(
             const double x0, const double y0, const double z0, const double t0,
             const double dx, const double dy, const double dz);
@@ -23,9 +22,6 @@ class TrackHeed : public Track {
                     int& n, double& e, double& extra);
 
   private:
-
-    double mass;
-    double q;
 
 };
 

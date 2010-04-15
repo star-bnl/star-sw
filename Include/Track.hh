@@ -4,6 +4,9 @@
 #define G_TRACK_H
 
 #include <string>
+#include <cmath>
+
+#include "Sensor.hh"
 
 namespace Garfield {
 
@@ -11,11 +14,28 @@ class Track {
 
   public:
     // Constructor
-    Track() : debug(false) {}
+    Track();
     // Destructor
     virtual ~Track() {}
 
-    virtual void SetParticle(std::string part) = 0;
+    virtual void SetParticle(std::string part);
+
+    void SetEnergy(const double e);
+    void SetBetaGamma(const double bg);
+    void SetBeta(const double beta);
+    void SetGamma(const double gamma);
+    void SetMomentum(const double p);
+    void SetKineticEnergy(const double ekin);
+
+    double GetEnergy() const    {return energy;}
+    double GetBetaGamma() const {return sqrt(beta2 / (1. - beta2));}
+    double GetBeta() const      {return sqrt(beta2);}
+    double GetGamma() const     {return sqrt(1. / (1. - beta2));}
+    double GetMomentum() const  {return mass * sqrt(beta2 / (1. - beta2));}
+    double GetKineticEnergy() const {return energy - mass;}
+
+    void SetSensor(Sensor* s);
+
     virtual void NewTrack(
             const double x0, const double y0, const double z0, const double t0, 
             const double dx, const double dy, const double dz) = 0;
@@ -27,6 +47,14 @@ class Track {
 
   protected:
 
+    double q;
+    double mass;
+    double energy;
+    double beta2;
+
+    Sensor* sensor;
+
+    bool isChanged;
     bool debug;
 
 };

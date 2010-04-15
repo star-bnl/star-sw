@@ -390,7 +390,7 @@ ComponentNeBem2d::ComputeInfluenceMatrix() {
     if (debug) std::cout << "    Iteration " << nIter << std::endl;
     converged = true;
     // Re-dimension the influence matrix
-    int nEntries = nElements;
+    int nEntries = nElements + 1;
     influenceMatrix.resize(nEntries);
     for (int i = nEntries; i--;) influenceMatrix[i].resize(nEntries);
     
@@ -511,6 +511,14 @@ ComponentNeBem2d::ComputeInfluenceMatrix() {
     std::cout << "    Assembly of influence matrix converged after "
               << nIter << " iterations." << std::endl;
   }
+
+  // Add charge neutrality condition
+  for (int i = 0; i < nElements; ++i) {
+    influenceMatrix[nElements][i] = elements[i].len;
+    influenceMatrix[i][nElements] = 0.;
+  }
+  influenceMatrix[nElements][nElements] = 0.;
+
   return true;
   
 }
@@ -554,7 +562,7 @@ ComponentNeBem2d::InvertMatrix() {
   // Check if matrix inversion has already been done
   if (matrixInversionFlag) return true;
  
-  const int nEntries = nElements;
+  const int nEntries = nElements + 1;
  
   // Initialise the inverse influence matrix
   inverseMatrix.resize(nEntries);
@@ -700,7 +708,7 @@ ComponentNeBem2d::LUSubstitution() {
 bool 
 ComponentNeBem2d::GetBoundaryConditions() {   
  
-  const int nEntries = nElements;
+  const int nEntries = nElements + 1;
  
   // Initialise the right-hand side vector 
   boundaryConditions.resize(nEntries);
@@ -717,6 +725,7 @@ ComponentNeBem2d::GetBoundaryConditions() {
       default: boundaryConditions[i] = 0.; return false;
     }
   }
+  boundaryConditions[nElements] = 0.;
 
   return true;
 
@@ -725,11 +734,11 @@ ComponentNeBem2d::GetBoundaryConditions() {
 bool 
 ComponentNeBem2d::Solve() {
 
-  const int nEntries = nElements;
+  const int nEntries = nElements + 1;
 
   int i, j;
   double solution = 0.;
-  for (i = nEntries; i--;) {
+  for (i = nElements; i--;) {
     solution = 0.;
     for (j = nEntries; j--;) {
       solution += inverseMatrix[i][j] * boundaryConditions[j];
