@@ -94,6 +94,7 @@ private:
   int m_thresh_lo;//!
   int m_thresh_hi;//!
   int mPedOffset;//!
+  int mPedOffsetAdjustment;//!
   Bool_t mMask[128*240];//!
 
   ///global variables for temporary store
@@ -118,7 +119,7 @@ private:
   void  FillRawData();
  public:
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtOnlineSeqAdjSimMaker.h,v 1.6 2009/10/08 01:56:22 baumgart Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtOnlineSeqAdjSimMaker.h,v 1.7 2010/04/15 18:37:32 baumgart Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  
  ClassDef(StSvtOnlineSeqAdjSimMaker,1)
 };

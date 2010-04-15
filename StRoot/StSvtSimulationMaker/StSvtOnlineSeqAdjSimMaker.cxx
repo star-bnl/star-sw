@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.15 2010/04/14 02:07:23 baumgart Exp $
+ * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.16 2010/04/15 18:37:35 baumgart Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -35,6 +35,7 @@ StSvtOnlineSeqAdjSimMaker::StSvtOnlineSeqAdjSimMaker(const char* name):StMaker(n
   mSvtBadAnodes=NULL;
   mCurrentPixelData=NULL;
   mCurrent8bitPixelData=NULL;
+  mPedOffsetAdjustment=2;
  
   //This is because of some Makers downd the chain
   GetConfig();
@@ -396,8 +397,8 @@ void StSvtOnlineSeqAdjSimMaker::SequenceSearch()
   int hiCount;
   int SeqBegins=0;
 
-  int HiTresh=mPedOffset+m_thresh_hi;
-  int LoTresh=mPedOffset+m_thresh_lo;
+  int HiTresh=mPedOffset+m_thresh_hi+mPedOffsetAdjustment;
+  int LoTresh=mPedOffset+m_thresh_lo+mPedOffsetAdjustment;
 
   
   Char_t *mAdcArray=mCurrent8bitPixelData->GetArray(); // array of [128*240]
