@@ -20,6 +20,7 @@
 #include <string>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
 
 using namespace std;
 

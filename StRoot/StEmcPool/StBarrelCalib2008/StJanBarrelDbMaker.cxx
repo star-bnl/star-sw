@@ -1,6 +1,7 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StJanBarrelDbMaker.cxx,v 1.4 2009/08/25 16:08:04 fine Exp $
+// $Id: StJanBarrelDbMaker.cxx,v 1.5 2010/04/15 19:13:30 mattheww Exp $
+#include <stdio.h>
 #include <TFile.h>
 #include <TH1.h>
 #include <TH2.h>
@@ -321,6 +322,9 @@ void  StJanBarrelDbMaker::initBprsGeometry(){
 }
 
 // $Log: StJanBarrelDbMaker.cxx,v $
+// Revision 1.5  2010/04/15 19:13:30  mattheww
+// fixed some future gcc issues
+//
 // Revision 1.4  2009/08/25 16:08:04  fine
 // fix the compilation issues under SL5_64_bits  gcc 4.3.2
 //

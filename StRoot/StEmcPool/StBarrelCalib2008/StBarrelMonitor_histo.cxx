@@ -1,7 +1,8 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StBarrelMonitor_histo.cxx,v 1.1 2008/11/24 23:06:36 balewski Exp $
+// $Id: StBarrelMonitor_histo.cxx,v 1.2 2010/04/15 19:13:30 mattheww Exp $
 
+#include <stdio.h>
 #include <TFile.h>
 #include <TH1.h>
 #include <TH2.h>

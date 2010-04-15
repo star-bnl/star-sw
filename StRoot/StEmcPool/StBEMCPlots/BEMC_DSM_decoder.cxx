@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
+#include <stdio.h>
 using namespace std;
 
 // rawDsmL0West and rawDsmL0East are the raw DSM level-0 inputs from the TRGD bank

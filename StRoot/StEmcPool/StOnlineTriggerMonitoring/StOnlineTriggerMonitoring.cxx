@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <stdio.h>
 using namespace std;
 
 #include <TROOT.h>

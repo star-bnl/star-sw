@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.12 2009/02/04 20:33:30 ogrebeny Exp $
+ * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.13 2010/04/15 19:13:29 mattheww Exp $
  * \author Issam Qattan , IUCF, 2006 
  ******************************************************************************
  * Description:
@@ -10,6 +10,7 @@
 #include <TH2.h>
 #include <TCanvas.h>
 #include <TStyle.h>
+#include <stdio.h>
 
 #include "StBemcBeamBckgFinderMaker.h"
 #include "StChain.h"
@@ -562,6 +563,9 @@ void StBemcBeamBckgFinderMaker::GetDecision(int &fDecision, int &eta1, int &phi1
     
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.cxx,v $
+  Revision 1.13  2010/04/15 19:13:29  mattheww
+  fixed some future gcc issues
+
   Revision 1.12  2009/02/04 20:33:30  ogrebeny
   Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 
