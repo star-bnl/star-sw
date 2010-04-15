@@ -46,6 +46,7 @@ MediumSilicon::MediumSilicon() :
   SetMassDensity(2.329);
   
   EnableDrift();
+  EnablePrimaryIonisation();
   microscopic = true;
 
 }

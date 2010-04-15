@@ -7,6 +7,7 @@ namespace Garfield {
 
 Track::Track() :
   mass(MuonMass), energy(1.e9),
+  sensor(0),
   isChanged(true), debug(false) {
 
 
