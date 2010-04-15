@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.20 2007/11/02 10:59:30 rashmi Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.21 2010/04/15 06:52:20 rashmi Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,6 +9,9 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
+ * Revision 1.21  2010/04/15 06:52:20  rashmi
+ * Clustering with option to turn calibration refineclustering on/off
+ *
  * Revision 1.20  2007/11/02 10:59:30  rashmi
  * Applying hitcalibration; eta,phi wrt primary vertex
  *
@@ -103,9 +106,26 @@ Float_t xv,yv,zv;
 //-------------------- 
 StPmdClusterMaker::StPmdClusterMaker(const char *name):StMaker(name)
 {
-	mOptHist=kFALSE;
-	PMD_MIP=0.0;
+  mOptHist=kFALSE;
+  
+  // To be put false if we are working with simulated data
+  // OR
+  // We are working with data without calibration constants in the DB
+  mOptCalibrate=kFALSE;
 
+  // For real data, simulation flag has to be off
+  // This is to set the adccutoff to the noiseless limit of 0.4 later
+  mOptSimulate=kFALSE;
+  //mOptSimulate=kTRUE;
+  
+  // PMD analysis with refined clustering on
+  //  mOptRefineCluster=kTRUE;
+  // PMD analysis with refined clustering off
+  mOptRefineCluster=kFALSE;
+  
+  cout<<" Default options: mOptCalibrate = "<<mOptCalibrate<<" mOptRefineCluster = "<<mOptRefineCluster<<" mOptSimulate="<<mOptSimulate<<endl;
+  PMD_MIP=0.0;
+  
 }
 //-------------------
 
@@ -125,8 +145,12 @@ Int_t StPmdClusterMaker::Init()
 Int_t StPmdClusterMaker::InitRun(Int_t runnr) {
                                                                          
   if(Debug())cout<<"StPmdClusterMaker::InitRun with run "<<runnr<<endl;
-                                                                         
-  ReadCalibrationsConst();
+
+  if(mOptCalibrate==kTRUE){
+    ReadCalibrationsConst();
+  }else{
+    cout<<"Not reading the calibration Constants"<<endl;
+  }
                                                                          
   return StMaker::InitRun(runnr);
                                                                          
@@ -199,8 +223,20 @@ Int_t StPmdClusterMaker::Make()
 	  //	  clout<<" adccutoff="<<adccutoff<<endl;
           clust1->SetAdcCutOff(adccutoff);
         }else{
-          clust1->SetAdcCutOff(7.0);
+	  if(mOptCalibrate==kFALSE) {
+	    clust1->SetAdcCutOff(7.0);
+	    clust1->SetOptCalibrate(kFALSE);
+	  }
         }
+	if(mOptSimulate==kTRUE) {
+	  cout<<" Simulationflag is ON so the cutoff is set to 0.4"<<endl;
+	  clust1->SetAdcCutOff(0.4);
+	  clust1->SetOptSimulate(kTRUE);
+	}
+	if(mOptRefineCluster==kFALSE) {
+	  cout<<" Refined clustering is put off. (Default = ON)"<<endl;
+	  clust1->SetOptRefineCluster(kFALSE);
+	}
 	
   	// Getting the vertex info to set it in StPmdClustering routine.
 	StEvent *currevent = (StEvent*)GetInputDS("StEvent");
@@ -229,8 +265,8 @@ Int_t StPmdClusterMaker::Make()
 	    return kStOK;
 	  }
 	FillStEvent(pmd_det,cpv_det);
-	if(Debug())cout<<" NUmber of pmd clusters="<<((StPmdClusterCollection*)pmd_det->cluster())->Nclusters()<<endl;
-	if(Debug())cout<<" NUmber of cpv clusters="<<((StPmdClusterCollection*)cpv_det->cluster())->Nclusters()<<endl;
+	cout<<" NUmber of pmd clusters="<<((StPmdClusterCollection*)pmd_det->cluster())->Nclusters()<<endl;
+	cout<<" NUmber of cpv clusters="<<((StPmdClusterCollection*)cpv_det->cluster())->Nclusters()<<endl;
 	
 	//      cout<<"stevent filled , to go hist "<<endl;
 	if(mOptHist)FillHistograms(pmd_det,cpv_det);
@@ -397,6 +433,7 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 
 	      Int_t mod=spmcl1->Module();
 	      Float_t ncell=spmcl1->NumofMems();
+	      //	      if(ncell>2){ cout<<" big cluster ="<<ncell<<endl;}
 	      // Filling PmdCluster info in StEvent
 	      StPhmdCluster *pcls = new StPhmdCluster();
 	      //pcls->setModule(mod);           //! Supermodule

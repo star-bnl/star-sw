@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.26 2007/11/02 11:00:06 rashmi Exp $
+ * $Id: StPmdClustering.cxx,v 1.27 2010/04/15 06:52:28 rashmi Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,6 +17,9 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.27  2010/04/15 06:52:28  rashmi
+ * Clustering with option to turn calibration refineclustering on/off
+ *
  * Revision 1.26  2007/11/02 11:00:06  rashmi
  * Applying hitcalibration; eta,phi wrt primary vertex
  *
@@ -131,19 +134,22 @@ const Int_t nmx    = 6912;
 Float_t cell_frac[200][2000];
 //ofstream fout1("cluster.dat");
 
+ofstream fout("refinedcluidet2.dat");
 
 StPmdGeom *geom=new StPmdGeom(); //! utility class
 //-------------------------------------------------
 //! constructor for getting PMD and CPV detectors
 
-  StPmdClustering::StPmdClustering(StPmdDetector *pmd_det, StPmdDetector *cpv_det):StPmdAbsClustering(pmd_det,cpv_det){
- m_pmd_det=pmd_det;
- m_cpv_det=cpv_det;
- SetAdcCutOff(7.0);
- mVertexPos = StThreeVectorF(0.,0.,0.);
-
+StPmdClustering::StPmdClustering(StPmdDetector *pmd_det, StPmdDetector *cpv_det):StPmdAbsClustering(pmd_det,cpv_det){
+  m_pmd_det=pmd_det;
+  m_cpv_det=cpv_det;
+  SetAdcCutOff(7.0);
+  mVertexPos = StThreeVectorF(0.,0.,0.);
+  mOptCalibrate = kTRUE; // calibration is on as default . Set it to kFALSE if calibration not desired
+  mOptSimulate = kFALSE; // working with real data in default. Set it to kTRUE if working with simulated data.
+  mOptRefineCluster = kTRUE; // refine clustering on as default
+  //  cout<<" Calibration is "<<mOptCalibrate<<" Simulated data ="<<mOptSimulate<<"  Refined Clustering ="<<mOptRefineCluster<<endl;
 }
-
 
 //------------------------------
 StPmdClustering::~StPmdClustering()
@@ -153,7 +159,7 @@ StPmdClustering::~StPmdClustering()
 //! finding Pmd and Cpv clusters
 void StPmdClustering::findPmdClusters(StPmdDetector *mdet)
 {
-  //  cout<<"cutoff="<<cutoff<<endl;
+    cout<<"cutoff="<<cutoff<<endl;
   if(mdet)
     {
       StPmdClusterCollection * pmdclus = new StPmdClusterCollection();
@@ -195,25 +201,28 @@ void StPmdClustering::findPmdClusters(StPmdDetector *mdet)
 		      ypad=spmcl->Row();          //! row of the hit = 1 - 72
 		      xpad=spmcl->Column();       //! column of the hit = 1 - 96
 		      //edep=spmcl->Edep();         //! Cell Edep in keV
-		      edep=spmcl->Adc();        
+		      edep=spmcl->Adc();   
+		      if(mOptSimulate==kTRUE){edep = spmcl->Edep();}     
 		      gsuper = spmcl->Gsuper();   //! supermodule = 1 - 12
 		      idet=spmcl->SubDetector();  //! detector(= 1) for Pmd and (=2) for CPV
 		      
 		      xpad = xpad -1; // for using as array parameter make xpad = 0
 		      ypad = ypad -1; // for using as array parameter make ypad = 0
-	// 11th Oct'07 : application of gain factors in ClusterMaker
-
+		      // 11th Oct'07 : application of gain factors in ClusterMaker
+		      if(mOptCalibrate==kTRUE){
+			
 			Float_t cellgain=spmcl->GainCell();       //! CellGain
 			Float_t smchaingain=spmcl->GainSmChain(); //! SmChain Gain      
 			Float_t cellstatus=spmcl->CellStatus();    //! cellstatus
 	                Float_t finalfactor = cellgain*smchaingain*cellstatus;
 			if(finalfactor>0)edep/=finalfactor;
 			if(finalfactor<=0)edep=0;
-//if(idet==1)fout1<<gsuper-1<<" "<<xpad<<" "<<ypad<<" "<<cellgain<<" "<<smchaingain<<" "<<cellstatus<<endl;
-
-//			fout1<<"gain factors "<<gsuper<<" "<<ypad+1<<" "<<xpad+1<<" "<<edep<<" "<<cellgain<<" "<<smchaingain<<" "<<cellstatus<<" "<<finalfactor<<endl;
-	// end of application of gain factors
-
+		      }
+		      //if(idet==1)fout1<<gsuper-1<<" "<<xpad<<" "<<ypad<<" "<<cellgain<<" "<<smchaingain<<" "<<cellstatus<<endl;
+		      
+		      //			fout1<<"gain factors "<<gsuper<<" "<<ypad+1<<" "<<xpad+1<<" "<<edep<<" "<<cellgain<<" "<<smchaingain<<" "<<cellstatus<<" "<<finalfactor<<endl;
+		      // end of application of gain factors
+		      
 		      d1[xpad][ypad]=d1[xpad][ypad]+edep;  //! edep added for each cell
 		    }
 		}
@@ -252,6 +261,7 @@ void StPmdClustering::findPmdClusters(StPmdDetector *mdet)
 	      
 	      arrange(incr);  //! arrange cells in each supercluster
 	      
+	      //	      cout<<"incr="<<incr<<endl;
 	      if(incr<2000)refclust(mdet,incr, id, idet,pmdclus);  //! resolve superclusters into clusters //new
 	    }
 	}
@@ -407,17 +417,17 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det0,Int_t incr, Int_t supmo
       d[i1][i2]=d1[i1][i2];
     }
   }
- //subhasis 15/11/04 added to initialze arrays for centroidCalc refs
+  //subhasis 15/11/04 added to initialze arrays for centroidCalc refs
   for(i=0; i<2000; i++){
-  x[i]=0.;
-  y[i]=0.;
-  z[i]=0.;
-  xc[i]=0.;
-  yc[i]=0.;
-  zc[i]=0.;
-}
-/////////////////////////////////
- 
+    x[i]=0.;
+    y[i]=0.;
+    z[i]=0.;
+    xc[i]=0.;
+    yc[i]=0.;
+    zc[i]=0.;
+  }
+  /////////////////////////////////
+  
   for(i=0; i<2000; i++){
     ncl[i]=-1; // ncl[i] --> initialization starts from '-1'
     rcl[i] = 0.; // initialization of rcs and rcl
@@ -437,9 +447,11 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det0,Int_t incr, Int_t supmo
   
   for(i=0; i<=nsupcl; i++)
     {
+      Int_t countr = 0;
       if(ncl[i] == 0){ //! Super cluster having 'Single' cell
 	id=id+1; icl=icl+1;
 	
+	countr +=1;
 	//!Single cell super-clusters --> single cluster
 	
 	clno=clno+1; i1=inford[1][id]; i2=inford[2][id];
@@ -462,15 +474,22 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det0,Int_t incr, Int_t supmo
 	if(phit)pclust->addHitCollection(phit);
 	
       }
-      else if(ncl[i] == 1)
-	{ // Super cluster having 'Two' cells
-	  //Create the StPmdCluster and add to the ClusterCollection
+      /*
+      // Set up this block to work even if the number of cells is>2 RR
+      else if((ncl[i] == 1 && mOptRefineCluster==kTRUE) || (ncl[i]>0 && mOptRefineCluster==kFALSE))
+      { // Super cluster having 'Two' cells when refined clustering is ON
+      // Super clusters having more than one cell when refined is OFF
+      //Create the StPmdCluster and add to the ClusterCollection
+      */
+      else if(ncl[i]==1)
+	{
 	  StPmdCluster *pclust = new StPmdCluster();
 	  pmdclus->addCluster(pclust);
 	  id=id+1; icl=icl+1;
-	  clno=clno+1; i1=inford[1][id]; i2=inford[2][id]; x1=coord[0][i1][i2];
-	  y1=coord[1][i1][i2]; z1=d[i1][i2];
+	  clno=clno+1; i1=inford[1][id]; i2=inford[2][id]; 
+	  x1=coord[0][i1][i2]; y1=coord[1][i1][i2]; z1=d[i1][i2];
 	  
+	  countr +=1;
 	  //Get StPmdHit* corresponding to the co-ordinate of first cell
 	  StPmdHit* phit = GetHit(m_pmd_det0,supmod,crd_org[0][i1][i2],crd_org[1][i1][i2]);
 	  if(phit)pclust->addHitCollection(phit);
@@ -504,7 +523,7 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det0,Int_t incr, Int_t supmo
 	    }
 	  Double_t b1 = sumxx + sumyy;
 	  Double_t c1 = sumxx*sumyy - sumxy*sumxy;
-          double dis = b1*b1/4.-c1;
+          Double_t dis = b1*b1/4.-c1;
 	  if (fabs(dis) < 1e-6) dis = 0.;
           dis = sqrt(dis);
 	  Double_t r1=b1/2.+dis;
@@ -515,8 +534,8 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det0,Int_t incr, Int_t supmo
 	  //! In two cell cluster SigmaS wil be Zero
 	  if(r1 < r2)
 	    {
-	    clusters[4][clno] = r2; //SigmaL
-	    clusters[5][clno] = r1; //SigmaS
+	      clusters[4][clno] = r2; //SigmaL
+	      clusters[5][clno] = r1; //SigmaS
 	    }
 	  else
 	    {
@@ -534,8 +553,10 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det0,Int_t incr, Int_t supmo
 	}
       else
 	{
+	  //	  cout<<" big supercluster ncell="<<ncl[i]+1<<endl;
 	  id=id+1; iordR[0]=0;
 	  /* super-cluster of more than two cells - broken up into smaller clusters gaussian centers computed. (peaks separated by > 1 cell). Start from top */
+
 	  i1=inford[1][id]; i2=inford[2][id];
 	  x[0]=coord[0][i1][i2]; y[0]=coord[1][i1][i2]; z[0]=d[i1][i2];iordR[0]=0;
 	  x_org[0]=crd_org[0][i1][i2]; y_org[0]=crd_org[1][i1][i2];
@@ -563,106 +584,120 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det0,Int_t incr, Int_t supmo
 	  //! compute the number of Gaussians and their centers ( first guess )
 	  ig=0;
 	  xc[ig]=x[iordR[0]]; yc[ig]=y[iordR[0]]; zc[ig]=z[iordR[0]];
-	  //Find Local maxima
-	  for(j=1;j<=ncl[i];j++)
-	    {
-	      itest=-1; x1=x[iordR[j]]; y1=y[iordR[j]];
-	      for(k=0;k<=ig;k++)
-		{
-		  x2=xc[k]; y2=yc[k]; rr=Dist(x1,y1,x2,y2);
-		  
-		  if( rr >= 1.1 && rr < 1.8 && z[iordR[j]] > zc[k]*0.30)itest=itest+1;
-		  if( rr >= 1.8 && rr < 2.1 && z[iordR[j]] > zc[k]*0.15)itest=itest+1;
-		  if( rr >= 2.1 && rr < 2.8 && z[iordR[j]] > zc[k]*0.05)itest=itest+1;
-		  if( rr >= 2.8)itest=itest+1;
-		} 
-	      if(itest == ig)
-		{
-		  ig=ig+1; xc[ig]=x1; yc[ig]=y1; zc[ig]=z[iordR[j]];
-		}
-	    }
-	  // End of finding l,ocal maxima	
-	memset(cell_frac[0],0,sizeof(cell_frac));
-	   //
+	  
+	  //-----------------------------------------------------------
+	  // If this block is executed then the superclusters larger than
+	  // 2 cells are broken into smaller clusters if the right conditions are met.
+	  
+	  if(mOptRefineCluster==kTRUE){
+	    //Find Local maxima
+	    for(j=1;j<=ncl[i];j++)
+	      {
+		itest=-1; x1=x[iordR[j]]; y1=y[iordR[j]];
+		for(k=0;k<=ig;k++)
+		  {
+		    x2=xc[k]; y2=yc[k]; rr=Dist(x1,y1,x2,y2);
+		    
+		    if( rr >= 1.1 && rr < 1.8 && z[iordR[j]] > zc[k]*0.30)itest=itest+1;
+		    if( rr >= 1.8 && rr < 2.1 && z[iordR[j]] > zc[k]*0.15)itest=itest+1;
+		    if( rr >= 2.1 && rr < 2.8 && z[iordR[j]] > zc[k]*0.05)itest=itest+1;
+		    if( rr >= 2.8)itest=itest+1;
+		  } 
+		if(itest == ig)
+		  {
+		    ig=ig+1; xc[ig]=x1; yc[ig]=y1; zc[ig]=z[iordR[j]];
+		  }
+	      }
+	    // End of finding l,ocal maxima	
+	  }
+	  
+	  //-----------------------------------------------------------------
+	  
+	  memset(cell_frac[0],0,sizeof(cell_frac));
+	  //
 	  
 	  Int_t censtat=CentroidCal(ncl[i],ig,x[0],y[0],z[0],xc[0],yc[0],zc[0],rcl[0],rcs[0],cells[0]);
-	 if(censtat==kStOK){
-
-	  icl=icl+ig+1;
-
-          Float_t temp[2000];
-          Int_t take_cell[2000];
+	  if(censtat==kStOK){
+	    
+	    icl=icl+ig+1;
+	    
+	    Float_t temp[2000];
+	    Int_t take_cell[2000];
             for(Int_t jk=0; jk<2000; jk++)
-                 {
-               temp[jk]=0.;
-              take_cell[jk]=-999;
-                 }
-
-//VP	memset(temp,0,2000*sizeof(Float_t)); //it is already zeroed above
-
-	for(Int_t pb=0;pb<=ig;pb++)
-               {
-										            for(Int_t jk=0; jk<=ncl[i]; jk++)
-											        {
-											if(cell_frac[pb][jk]>temp[jk])
-											        {
-											        take_cell[jk]=pb;
-												temp[jk]=cell_frac[pb][jk];
-												}
-              }
-	}
-
-
-
-
-	  
-	  //! Assign the cluster properties for SuperCluster having more than Two cells
-	  for(k=0; k<=ig; k++)
-	    {
-	      clno=clno+1; 
-	      clusters[0][clno]=xc[k];  
-	      clusters[1][clno]=yc[k]; 
-	      clusters[2][clno]=zc[k];
-	      clusters[3][clno]=cells[k];
-	      clusters[4][clno]=rcl[k];
-	      clusters[5][clno]=rcs[k];
-	      if(clusters[3][clno]==1)
-		{
-		  clusters[4][clno]=0.;
-		  clusters[5][clno]=0.;
-		}
-	      
-	      
-	      //subhasis , ig = no of gaussians.
-	      //
-	      // looping over clusters first and cells within to 
-	      // create StPmdCluster and attach cells to them
-	      
-	      StPmdCluster *pclust = new StPmdCluster();
-	      pmdclus->addCluster(pclust); 
-	      
-	      printclust(supmod,clno,pclust);
-	      
-	      for(Int_t jk=0; jk<=ncl[i]; jk++)
-		{// loop over all cells in supercluster
-
-		//  dist=Dist(x[jk], y[jk], xc[k], yc[k]); 
-		//  if(dist < 2.8){ //changed from 2.1 to 2.8 : dipak
-		//    StPmdHit* phit = GetHit(m_pmd_det0,supmod,x_org[jk],y_org[jk]);
-		 //   if(phit)pclust->addHitCollection(phit);
-		    // attach the hits
-		 // } // if dist loop
+	      {
+		temp[jk]=0.;
+		take_cell[jk]=-999;
+	      }
+	    
+	    //VP	memset(temp,0,2000*sizeof(Float_t)); //it is already zeroed above
+	    
+	    for(Int_t pb=0;pb<=ig;pb++)
+	      {
+		for(Int_t jk=0; jk<=ncl[i]; jk++)
+		  {
+		    if(cell_frac[pb][jk]>temp[jk])
+		      {
+			take_cell[jk]=pb;
+			temp[jk]=cell_frac[pb][jk];
+		      }
+		  }
+	      }
+	    
+	    
+	    
+	    
+	    
+	    //! Assign the cluster properties for SuperCluster having more than Two cells
+	    for(k=0; k<=ig; k++)
+	      {
+		countr +=1;
+		clno=clno+1; 
+		clusters[0][clno]=xc[k];  
+		clusters[1][clno]=yc[k]; 
+		clusters[2][clno]=zc[k];
+		clusters[3][clno]=cells[k];
+		clusters[4][clno]=rcl[k];
+		clusters[5][clno]=rcs[k];
+		if(clusters[3][clno]==1)
+		  {
+		    clusters[4][clno]=0.;
+		    clusters[5][clno]=0.;
+		  }
 		
-	   if(take_cell[jk]==k)
-             {
-               StPmdHit* phit = GetHit(m_pmd_det0,supmod,x_org[jk],y_org[jk]);
-               if(phit)pclust->addHitCollection(phit);
-             }
-			
-		} //for loop 'jk
-	    } //for 'k' loop
-	 }//censtat check
+		
+		//subhasis , ig = no of gaussians.
+		//
+		// looping over clusters first and cells within to 
+		// create StPmdCluster and attach cells to them
+		
+		StPmdCluster *pclust = new StPmdCluster();
+		pmdclus->addCluster(pclust); 
+		
+		printclust(supmod,clno,pclust);
+		
+		for(Int_t jk=0; jk<=ncl[i]; jk++)
+		  {// loop over all cells in supercluster
+		    
+		    //  dist=Dist(x[jk], y[jk], xc[k], yc[k]); 
+		    //  if(dist < 2.8){ //changed from 2.1 to 2.8 : dipak
+		    //    StPmdHit* phit = GetHit(m_pmd_det0,supmod,x_org[jk],y_org[jk]);
+		    //   if(phit)pclust->addHitCollection(phit);
+		    // attach the hits
+		    // } // if dist loop
+		    
+		    if(take_cell[jk]==k)
+		      {
+			StPmdHit* phit = GetHit(m_pmd_det0,supmod,x_org[jk],y_org[jk]);
+			if(phit)pclust->addHitCollection(phit);
+		      }
+		    
+		  } //for loop 'jk
+	      } //for 'k' loop
+	  }//censtat check
 	} // 'else' loop
+      
+      //      if(idet == 2)fout << i <<"\t" << nsupcl << "\t" << clno << "\t" << ncl[i] << "\t" << countr <<"\t" << supmod << "\t" << idet << endl; // idet = 2 for cpv
+      
     }// for loop 'i<nsupcl'
   //  cout<<"CLUSTER NUMBER IS "<<clno<<"supmod**"<<supmod<<endl;
   

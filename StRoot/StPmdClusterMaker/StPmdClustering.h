@@ -4,7 +4,7 @@
  */
 /******************************************************
  *
- * $Id: StPmdClustering.h,v 1.9 2007/11/02 11:00:14 rashmi Exp $
+ * $Id: StPmdClustering.h,v 1.10 2010/04/15 06:52:32 rashmi Exp $
  *
  * Author: Dr. S.C. Phatak
  *         Dipak Mishra
@@ -13,6 +13,9 @@
  * Description: Base class for PMD clusters
  *
  * $Log: StPmdClustering.h,v $
+ * Revision 1.10  2010/04/15 06:52:32  rashmi
+ * Clustering with option to turn calibration refineclustering on/off
+ *
  * Revision 1.9  2007/11/02 11:00:14  rashmi
  * Applying hitcalibration; eta,phi wrt primary vertex
  *
@@ -49,6 +52,10 @@ class StPmdClustering:public StPmdAbsClustering
 
   private:
  
+  // These options are passed to this maker by StPmdClusterMaker
+  Bool_t mOptCalibrate;
+  Bool_t mOptSimulate;
+  Bool_t mOptRefineCluster;
   Double_t cutoff;
   StThreeVectorF mVertexPos;
 
@@ -87,6 +94,11 @@ class StPmdClustering:public StPmdAbsClustering
   void SetVertexPos(const StThreeVectorF&);
   void Cluster_Eta_Phi(Float_t, Float_t, Float_t,Float_t&, Float_t&);
   
+
+  void SetOptCalibrate(Bool_t a=kTRUE){mOptCalibrate = a;}  // Default is on; YES Calibrate
+  void SetOptSimulate(Bool_t a=kFALSE){mOptSimulate = a;}    // Default is off; No Simulation
+  void SetOptRefineCluster(Bool_t a=kTRUE){mOptRefineCluster = a;} // Default is on; Yes Refine Clustering
+
   //! for getting hits of each cluster
   //  StPmdHit* GetHit(StPmdDetector*, Int_t, Int_t, Int_t);
   StPmdHit* GetHit(StPmdDetector*, Int_t, Double_t, Double_t);
