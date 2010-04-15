@@ -18,9 +18,10 @@ int rdMuWana(
 	     int nFiles  = 2, // max # of muDst files
 	     int isMC=0, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve, 20=rcf10010,... 26=rcf10016
 	     int useJetFinder = 2, // 0 - no jets & crash; 1 generate jet trees; 2 read jet trees
-             TString jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/jetTree4.5.10/" //default location of jet trees to be used
+             TString jetTreeDir = "/star/institutions/mit/balewski/2009-pp500-jetsWeve/april15/" //default location of jet trees to be used
  ) { 
 
+  // old Justin's : jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/jetTree4.5.10/"
   // jetTreeDir = "/star/data05/scratch/balewski/bug12c/out3/";
   if(isMC==1) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppWprod.lis";
   if(isMC==2) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD2_ppQCD10_inf_filter.lis";
@@ -293,7 +294,6 @@ int rdMuWana(
     cpars->setDoSplitMerge(true);
     cpars->setDebug(false);
 
-    emcJetMaker->SetAutoSave(Long64_t  autos = 300000000);
     emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100, "ConeJets12_100"); //100% subtraction     
     emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100_noEEMC, "ConeJets12_100_noEEMC"); //100% subtraction (no Endcap)
 
@@ -305,7 +305,7 @@ int rdMuWana(
 
     TChain* tree=muMk->chain(); assert(tree);
     int nEntries=(int) tree->GetEntries();
-    printf("total eve in muDst chain =%d\n",nEntries);  // return ;
+    printf("total eve in muDst chain =%d for run=%d\n",nEntries,runNo);  // return ;
     if(nEntries<0) return;
 
     chain->Init();
@@ -468,6 +468,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.32  2010/04/15 21:15:11  balewski
+// *** empty log message ***
+//
 // Revision 1.31  2010/04/15 18:22:07  balewski
 // *** empty log message ***
 //
