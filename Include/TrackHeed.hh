@@ -18,7 +18,7 @@ class TrackHeed : public Track {
     void NewTrack(
             const double x0, const double y0, const double z0, const double t0,
             const double dx, const double dy, const double dz);
-    bool GetCluster(double& xcls, double& ycls, double& zcls,
+    bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
                     int& n, double& e, double& extra);
 
   private:

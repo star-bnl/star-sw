@@ -92,8 +92,9 @@ TrackBichsel::NewTrack(
 }
 
 bool
-TrackBichsel::GetCluster(double& xcls, double& ycls, double& zcls,
-                      int& n, double& e, double& extra) {
+TrackBichsel::GetCluster(
+          double& xcls, double& ycls, double& zcls, double& tcls,
+          int& n, double& e, double& extra) {
 
 
   if (!isInitialised || !isInMedium) return false;
@@ -104,7 +105,7 @@ TrackBichsel::GetCluster(double& xcls, double& ycls, double& zcls,
   z += dz * d;
   t += d / speed;
 
-  xcls = x; ycls = y; zcls = z;
+  xcls = x; ycls = y; zcls = z; tcls = t;
   n = 0; e = 0.;
 
   Medium* medium;

@@ -19,7 +19,7 @@ TrackHeed::NewTrack(
 }
 
 bool
-TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
+TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
                       int& n, double& e, double& extra) {
 
   n = 1;

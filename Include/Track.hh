@@ -39,8 +39,9 @@ class Track {
     virtual void NewTrack(
             const double x0, const double y0, const double z0, const double t0, 
             const double dx, const double dy, const double dz) = 0;
-    virtual bool GetCluster(double& xcls, double& ycls, double& zcls,
-                            int& n, double& e, double& extra) = 0;
+    virtual bool GetCluster(
+            double& xcls, double& ycls, double& zcls, double& tcls,
+            int& n, double& e, double& extra) = 0;
 
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
