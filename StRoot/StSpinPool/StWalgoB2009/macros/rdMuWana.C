@@ -21,7 +21,7 @@ int rdMuWana(
              TString jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/jetTree4.5.10/" //default location of jet trees to be used
  ) { 
 
-  jetTreeDir = "/star/data05/scratch/balewski/bug12c/out3/";
+  // jetTreeDir = "/star/data05/scratch/balewski/bug12c/out3/";
   if(isMC==1) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppWprod.lis";
   if(isMC==2) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD2_ppQCD10_inf_filter.lis";
   if(isMC==3) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppZprod.lis";
@@ -228,7 +228,7 @@ int rdMuWana(
   //.... load EEMC database
   StEEmcDbMaker*  mEEmcDatabase = new StEEmcDbMaker("eemcDb");
   
-  if(!isMC) {
+  if(!isMC && strstr(file,"fillListPhys")) {
     StTriggerFilterMaker *filterMaker = new StTriggerFilterMaker;
     filterMaker->addTrigger(230420); // AJP
     filterMaker->addTrigger(230411); // JP2
@@ -293,7 +293,9 @@ int rdMuWana(
     cpars->setDoSplitMerge(true);
     cpars->setDebug(false);
 
-    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100, "ConeJets12_100"); //100% subtraction     emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100_noEEMC, "ConeJets12_100_noEEMC"); //100% subtraction (no Endcap)
+    emcJetMaker->SetAutoSave(Long64_t  autos = 300000000);
+    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100, "ConeJets12_100"); //100% subtraction     
+    emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100_noEEMC, "ConeJets12_100_noEEMC"); //100% subtraction (no Endcap)
 
     //Tight cuts (esp. SMD)
     pre_ecl->SetClusterConditions("bemc", 4, 0.4, 0.05, 0.02, kFALSE);
@@ -466,6 +468,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.31  2010/04/15 18:22:07  balewski
+// *** empty log message ***
+//
 // Revision 1.30  2010/04/14 22:52:56  balewski
 // *** empty log message ***
 //
