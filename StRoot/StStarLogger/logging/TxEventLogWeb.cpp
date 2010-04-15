@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.7 2010/04/15 17:50:30 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.8 2010/04/15 20:23:05 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -38,9 +38,21 @@ void TxEventLogWeb::writeDown(const std::string& message)
   }
   httpstring+=qmessage;
   httpstring+="\' \'>&/dev/null";
-  if (message.find(TxUCMConstants::newTask)== std::string::npos)  httpstring+="&";
+  bool delay = false;
+  if (message.find(TxUCMConstants::newTask)== std::string::npos) {
+      httpstring+="&";
+      delay = true;
+  }
   httpstring+="\'";
   system( httpstring.c_str());
+  if (delay) {
+    // Sleep milliSec milliseconds.
+    int milliSec = 240;
+    struct timeval tv;
+    tv.tv_sec  = milliSec / 1000;
+    tv.tv_usec = (milliSec % 1000) * 1000;
+    select(0, 0, 0, 0, &tv);
+  }
 //  printf("%s %s \n", "----------------------------------------",httpstring.c_str());
 }
 	// --- 

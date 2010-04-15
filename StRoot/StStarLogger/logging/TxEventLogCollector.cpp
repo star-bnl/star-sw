@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogCollector.cpp,v 1.5 2010/04/09 16:28:19 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogCollector.cpp,v 1.6 2010/04/15 20:23:05 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -25,7 +25,7 @@ using namespace std;
 TxEventLogCollector::TxEventLogCollector() :
 fCollector(), fTasks(), fJobs(),fEvents(),fDbInit()
 {
-  cout << __FILE__ << __FUNCTION__ << __LINE__ <<endl;
+  cout << __FILE__ << " :: "<< __FUNCTION__ << " : " << __LINE__ <<endl;
   fCollector  = new TxUCMCollector;
 }
 

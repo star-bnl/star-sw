@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.9 2010/04/15 18:28:32 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.10 2010/04/15 20:23:05 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -264,22 +264,6 @@ void TxLogging::TxEventLogFile::writeDown(const std::string& message)
   std::ofstream logFile(logFilePath.c_str (), std::ios::app);
   logFile << message.c_str () << "\n";
   logFile.close();
-
-  std::string httpstring="wget -b  -q -o /dev/null ";
-  httpstring+= "-O /dev/null \'http://connery.star.bnl.gov/ucm/?m=";
-
-  std::string qmessage = message;
-  std::string searchString( "'" ); 
-  std::string replaceString( "%27" );
-
-  std::string::size_type pos = 0;
-  while ( (pos = qmessage.find(searchString, pos)) != std::string::npos ) {
-        qmessage.replace( pos, searchString.size(), replaceString );
-        pos++;
-  }
-  httpstring+=qmessage;
-  httpstring+="\'>/dev/null";
-  system( httpstring.c_str());
 }
 
 TXEVENT_DEFAULT_IMPLEMENTAION(TxEventLogFile)
