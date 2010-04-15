@@ -262,15 +262,17 @@ Int_t StJetSkimEventMaker::Make()
         copyVertex(*muVert, skimVert);
 
         // ATTENTION!!! Hack to get nBTOFMatch in Run 9. Should be removed once implemented in MuDst.
-        int currentVertexIndex = StMuDst::currentVertexIndex();
-	StMuDst::setVertexIndex(i);
-        int nmatches = 0;
-        TIter nextTrack(StMuDst::primaryTracks());
-        while (StMuTrack* track = (StMuTrack*)nextTrack())
-          if (track->tofHit())
-            ++nmatches;
-	StMuDst::setVertexIndex(currentVertexIndex);
-        skimVert.setNBTOFMatch(nmatches);
+	if (GetDBTime().GetYear() >= 2009) {
+	  int currentVertexIndex = StMuDst::currentVertexIndex();
+	  StMuDst::setVertexIndex(i);
+	  int nmatches = 0;
+	  TIter nextTrack(StMuDst::primaryTracks());
+	  while (StMuTrack* track = (StMuTrack*)nextTrack())
+	    if (track->tofHit())
+	      ++nmatches;
+	  StMuDst::setVertexIndex(currentVertexIndex);
+	  skimVert.setNBTOFMatch(nmatches);
+	}
 
         mEvent->setVert(skimVert);
     }
