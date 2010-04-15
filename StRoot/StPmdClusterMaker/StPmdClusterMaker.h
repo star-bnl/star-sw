@@ -3,7 +3,7 @@
  * \author
  */
 /***********************************************************
- * $Id: StPmdClusterMaker.h,v 1.11 2007/08/31 10:54:39 rashmi Exp $
+ * $Id: StPmdClusterMaker.h,v 1.12 2010/04/15 06:52:13 rashmi Exp $
  *
  * Author:
  *
@@ -14,6 +14,9 @@
  ************************************************************
  *
  * $Log: StPmdClusterMaker.h,v $
+ * Revision 1.12  2010/04/15 06:52:13  rashmi
+ * Clustering with option to turn calibration refineclustering on/off
+ *
  * Revision 1.11  2007/08/31 10:54:39  rashmi
  * Included ReadCalibration to read PMD_MIP value from DB; Included inline SetAdcCutOff()
  *
@@ -59,6 +62,9 @@ class StPmdClusterMaker: public StMaker{
  private:
   
   Bool_t mOptHist; 
+  Bool_t mOptCalibrate;
+  Bool_t mOptSimulate;
+  Bool_t mOptRefineCluster;
   Double_t adccutoff;
   Float_t SM_chain_factor[24][48];
   Float_t PMD_MIP;
@@ -97,7 +103,7 @@ class StPmdClusterMaker: public StMaker{
   TH2F *mEtaPhiCpvCluster;  //!  eta vs. phi in Cpv
   TH2F *mPhi2ModCpv;        //!  phi vs.mod  in Cpv
   TH1F *mExtraclusterCpv;        //!  phi vs.mod  in Cpv  
-  TH2F *mClusterEdepFracCpv;  //!  nclust vs. frac. edep in Cpv
+  TH2F *mClusterEdepFracCpv;  //!  nclust vs. frac. edep in CpvPicoEventWrite(Bool_t flag=kFALSE);
   TH1F *mCpvCluster; //!number of Cpv clusters
   
   TH2F *mXYCpvCluster;
@@ -120,10 +126,14 @@ class StPmdClusterMaker: public StMaker{
   void  setPrint(Bool_t a) { mOptHist = a;}
   void  Browse(TBrowser* b); 
   void SetAdcCutOff(Double_t adccutoff);
+
   Bool_t ReadCalibrationsConst();
+  void SetOptCalibrate(Bool_t a=kTRUE){mOptCalibrate = a;}  // Default is on; YES Calibrate
+  void SetOptSimulate(Bool_t a=kFALSE){mOptSimulate = a;}    // Default is off; No Simulation
+  void SetOptRefineCluster(Bool_t a=kTRUE){mOptRefineCluster = a;}    // Default is on; Yes Refine Clustering
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
-    static const char cvs[]="Tag $Name:  $ $Id: StPmdClusterMaker.h,v 1.11 2007/08/31 10:54:39 rashmi Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPmdClusterMaker.h,v 1.12 2010/04/15 06:52:13 rashmi Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
