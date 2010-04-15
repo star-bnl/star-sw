@@ -785,18 +785,16 @@ ComponentNeBem2d::LinePotential(const double a,
   double p = 0.;   
   const double amx = a - x;
   const double apx = a + x;
-  if (y != 0.) {
+  if (fabs(y) > Small) {
     const double y2 = y * y;
-    p = 4. * a - 
-        2. * y * (atan(amx / y) + atan(apx / y)) -
-        amx * log(amx * amx + y2) - 
-        apx * log(apx * apx + y2);
-  } else if (fabs(x) > a) {
-    p = 4. * a - amx * log(amx * amx) - apx * log(apx * apx);
-  } else if (fabs(x) == a) {
-    p = 4. * a * (1. - log(2. * a));
+    p = 2. * a - 
+        y * (atan(amx / y) + atan(apx / y)) -
+        0.5 * amx * log(amx * amx + y2) - 
+        0.5 * apx * log(apx * apx + y2);
+  } else if (fabs(x) != a) {
+    p = 2. * a - 0.5 * amx * log(amx * amx) - 0.5 * apx * log(apx * apx);
   } else {
-    p = - 4. * x * atanh(x / a) - 2. * a * (-2. + log(apx * amx));
+    p = 2. * a * (1. - log(2. * a));
   }
   
   return p / TwoPiEpsilon0;
@@ -821,23 +819,24 @@ void
 ComponentNeBem2d::LineFlux(const double a, 
                            const double x, const double y, 
                            double& ex, double& ey) {
-               
+
+  const double amx = a - x;
+  const double apx = a + x;
   if (fabs(y) > 0.) {
-    ex = 2. * atanh(2. * a * x / (a * a + x * x + y * y));
-    ey = 2. * (atan((a - x) / y) + atan((a + x) / y));
+    const double y2 = y * y;
+    ex = 0.5 * log((apx * apx + y2) / (amx * amx + y2));
+    ey = atan(amx / y) + atan(apx / y);
   } else if (fabs(x) != a) {
-    ex = 2 * atanh(2. * a * x / (a * a + x * x));
+    ex = 0.5 * log((apx * apx) / (amx * amx));
     ey = 0.;
   } else {
     // Singularity at the end points of the line
     const double eps = 1.e-12;
-    const double xp = x + eps;
-    const double xm = x - eps;
-    ex = atanh(2. * a * xp / (a * a + xp * xp)) + 
-         atanh(2. * a * xm / (a * a + xm * xm));
+    ex = 0.25 * 
+         log(pow(apx * apx - eps * eps, 2) / pow(amx * amx - eps * eps, 2));
     ey = 0.;
   }
-  
+
   ex /= TwoPiEpsilon0;
   ey /= TwoPiEpsilon0;
 
