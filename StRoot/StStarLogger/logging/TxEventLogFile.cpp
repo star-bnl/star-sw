@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.8 2010/04/09 23:40:53 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFile.cpp,v 1.9 2010/04/15 18:28:32 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -260,6 +260,7 @@ void TxLogging::TxEventLogFile::writeMessage (const std::string& event,
 //___________________________________________________________________________
 void TxLogging::TxEventLogFile::writeDown(const std::string& message)
 {
+  assert(0 && "TxLogging::TxEventLogFile::writeDown is the wrong  method");
   std::ofstream logFile(logFilePath.c_str (), std::ios::app);
   logFile << message.c_str () << "\n";
   logFile.close();
