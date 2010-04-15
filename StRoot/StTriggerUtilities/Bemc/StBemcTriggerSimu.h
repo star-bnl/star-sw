@@ -217,7 +217,7 @@ public:
   int barrelHighTowerTh(int i) const;
 
   int barrelJetPatchAdc(int jp) const;
-  int barrelHighTowerAdc(int towerId) const { return 0; }
+  int barrelHighTowerAdc(int towerId) const { return getHT6bitAdc(towerId); }
 
 public:
   enum {kOnline=1, kOffline, kExpert};
