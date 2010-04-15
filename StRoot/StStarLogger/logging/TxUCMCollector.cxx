@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.19 2010/04/09 16:28:19 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.20 2010/04/15 20:23:05 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -720,6 +720,13 @@ void TxUCMCollector::processMessage (const char * msg) {
            log->error (string("Record with brokerTaskID = ") + msgHashMap[fgBTaskID] +
                      " does not exist, so creating a new record instead of updating");
            this->createNewTask ();
+           // Try one more time
+           if (this->recordExists (string("brokerTaskID = \"") + msgHashMap[fgBTaskID] + "\"",
+                            "Tasks")) {
+              updateRecord (msgHashMap[fgValue],
+                       "Tasks",
+                       string("brokerTaskID = '") + msgHashMap[fgBTaskID] + "'");
+          }
        }
     }
 
