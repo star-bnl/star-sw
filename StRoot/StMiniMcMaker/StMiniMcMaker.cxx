@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.30 2010/01/27 21:28:10 perev Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.31 2010/04/15 19:17:27 fisyak Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,9 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.31  2010/04/15 19:17:27  fisyak
+ * Add corrections for AppendMCDaughterTrack from Masayuki Wada
+ *
  * Revision 1.30  2010/01/27 21:28:10  perev
  * CleanUp
  *
@@ -143,6 +146,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.31  2010/04/15 19:17:27  fisyak
+ * Add corrections for AppendMCDaughterTrack from Masayuki Wada
+ *
  * Revision 1.30  2010/01/27 21:28:10  perev
  * CleanUp
  *
@@ -274,7 +280,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.30 2010/01/27 21:28:10 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.31 2010/04/15 19:17:27 fisyak Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -542,6 +548,10 @@ StMiniMcMaker::Make()
   //
   if (m_Mode == 1) trackLoopIdT();
   else             trackLoop();
+
+  if (Debug()) mMiniMcEvent->Print();
+  // Append MC tracks that are not daughters of primary MC vertex. 
+  AppendMCDaughterTrack();
 
   //
   // fill the tree and clear all the tracks
@@ -2500,8 +2510,42 @@ size_t StMiniMcMaker::getIndex(size_t mult) {
   if (mult >= 14 ) return 8;
   return 9;
 }
+
+void StMiniMcMaker::AppendMCDaughterTrack() {
+    if (Debug())
+        cout << "##StMiniMcMaker::AppendMCDaughterTrack()"<< endl;
+
+//  vector<int> enteredGlobalTracks;
+    const StPtrVecMcTrack& allmcTracks = mMcEvent->tracks();
+    cout << "size of mcEvent->tracks() : "<< allmcTracks.size() << endl;
+
+    Int_t nAppendMC(0);
+    StMcTrackConstIterator allMcTrkIter = allmcTracks.begin();
+    for (; allMcTrkIter != allmcTracks.end(); ++allMcTrkIter) {
+        StMcTrack* mcGlobTrack = *allMcTrkIter;
+        if (isPrimaryTrack(mcGlobTrack)) continue;
+        if (!acceptRaw(mcGlobTrack)) continue; // loose eta cut (4 units, so should include ftpc).
+//      if (accept(mcGlobTrack) || mcGlobTrack->ftpcHits().size()>=5) { // 10 tpc hits or 5 ftpc hits
+            if (Debug()>1)
+                cout << "accepted mc global track, key "<< mcGlobTrack->key() << endl;
+            // Ok, track is accepted, query the map for its reco tracks.
+
+            StTinyMcTrack tinyMcTrack;
+            fillMcTrackInfo(&tinyMcTrack, mcGlobTrack, 0, 0);
+            mMiniMcEvent->addMcTrack(&tinyMcTrack);
+            nAppendMC++;
+
+//      }  // mc hits condition
+    }  // end of global track match loop
+
+    cout << "\tappended mc tracks: "<< nAppendMC << endl;
+}
+
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.31  2010/04/15 19:17:27  fisyak
+// Add corrections for AppendMCDaughterTrack from Masayuki Wada
+//
 // Revision 1.30  2010/01/27 21:28:10  perev
 // CleanUp
 //
