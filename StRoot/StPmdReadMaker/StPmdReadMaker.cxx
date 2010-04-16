@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.31 2010/04/16 12:04:13 rashmi Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.32 2010/04/16 12:09:40 rashmi Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.32  2010/04/16 12:09:40  rashmi
+ *Modifcation for new DAQ
+ *
  *Revision 1.31  2010/04/16 12:04:13  rashmi
  *Modifcation for new DAQ
  *
@@ -118,7 +121,7 @@
 #include "StPmdUtil/StPmdDBUtil.h"
 #include<StMessMgr.h>
 #include "StRtsTable.h"
-#include "RTS/src/DAQ_PMD/daq_pmd.h"
+#include "RTS/src/DAQ_PMD/pmd.h"
 
 //#include "RTS/src/EVP_READER/pmdReader.h"
 //
