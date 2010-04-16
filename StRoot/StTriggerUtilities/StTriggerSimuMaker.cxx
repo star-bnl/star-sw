@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.33 2010/03/01 18:48:36 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.34 2010/04/16 01:47:38 pibero Exp $
 
 // MySQL C API
 #include "/usr/include/mysql/mysql.h"
@@ -68,6 +68,7 @@ StTriggerSimuMaker::StTriggerSimuMaker(const char *name):StMaker(name) {
     bbc=0;
     bemc=0;
     lTwo=0;
+    mHList=0;
     emc = new StEmcTriggerSimu;
     for (int a=0; a<numSimulators; a++){
       mSimulators[a]=0;
@@ -170,12 +171,11 @@ Int_t StTriggerSimuMaker::Make() {
 
   vector<int> trigIds = triggerIds();
   TString line = "Triggers: ";
-  for (size_t i = 0; i < trigIds.size(); ++i)
+  for (size_t i = 0; i < trigIds.size(); ++i) {
     line += Form("%d ",trigIds[i]);
-  LOG_DEBUG << line << endm;
-
-  for (size_t i = 0; i < trigIds.size(); ++i)
     buildDetailedResult(trigIds[i]);
+  }
+  LOG_DEBUG << line << endm;
 
   return kStOK;
 }
@@ -183,10 +183,7 @@ Int_t StTriggerSimuMaker::Make() {
 bool StTriggerSimuMaker::isTrigger(int trigId) {
 
   for(Int_t i=0; i<numSimulators; i++) {
-    if (mSimulators[i]){  
-      
-      if(mSimulators[i]->triggerDecision(trigId) == kNo) return false;
-    }
+    if (mSimulators[i] && mSimulators[i]->triggerDecision(trigId) == kNo) return false;
   }
   
   return true;
@@ -196,7 +193,11 @@ vector<int> StTriggerSimuMaker::triggerIds() const
 {
   vector<int> v;
 
-  if (mYear >= 2009 && emc) {
+  if (mYear < 2009) {
+    if (bemc) copy(bemc->triggerIds().begin(),bemc->triggerIds().end(),back_inserter(v));
+    if (eemc) copy(eemc->triggerIds().begin(),eemc->triggerIds().end(),back_inserter(v));
+  }
+  else {
     set<int> s = emc->triggerIds();
     copy(s.begin(),s.end(),back_inserter(v));
   }
@@ -416,6 +417,9 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.34  2010/04/16 01:47:38  pibero
+ * Oops, forgot to include triggers before 2009. Thanks, Liaoyuan.
+ *
  * Revision 1.33  2010/03/01 18:48:36  pibero
  * More updates for Run 9
  *

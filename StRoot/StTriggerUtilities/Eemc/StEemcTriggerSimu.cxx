@@ -26,7 +26,7 @@
 #include "StMuDSTMaker/COMMON/StMuEmcCollection.h"
 
 #include "St_db_Maker/St_db_Maker.h"
-  
+
 // ETOW stuff
 #include <StEEmcUtil/database/StEEmcDb.h>
 #include <StEEmcUtil/database/EEmcDbCrate.h>
@@ -112,7 +112,8 @@ StEemcTriggerSimu::Clear(){
   dsm1TreeTRG->clear();
   dsm2TreeTRG->clear();
   dsm3TRG->clear();
-  
+
+  mTriggerIds.clear();
 }
 
 //==================================================
@@ -135,23 +136,21 @@ StEemcTriggerSimu::Init(){
 //==================================================
 
 void  
-StEemcTriggerSimu::addTriggerList( void * adr){
-  vector <int> *trgList=( vector <int> *)adr;
-
+StEemcTriggerSimu::addTriggerList(vector<int>& trgList){
   if(mYear==2006) {
     //fix it if(   yymmdd<20060408  || yymmdd>20060414) return; 
-    if(dsm2TreeADC->getOutEndcapHTTP1bit())   trgList->push_back(127580);//
-    if(dsm2TreeADC->getOutEndcapJP2bit()>=1)  trgList->push_back(127551);//EJP0,add mising mb
-    if(dsm2TreeADC->getOutEndcapJP2bit()>=2)  trgList->push_back(127271);
-    if(dsm2TreeADC->getOutEndcapJP2bit()>=1 && dsm2TreeADC->getOutEtot1bit()) trgList->push_back(127652);
+    if(dsm2TreeADC->getOutEndcapHTTP1bit())   trgList.push_back(127580);//
+    if(dsm2TreeADC->getOutEndcapJP2bit()>=1)  trgList.push_back(127551);//EJP0,add mising mb
+    if(dsm2TreeADC->getOutEndcapJP2bit()>=2)  trgList.push_back(127271);
+    if(dsm2TreeADC->getOutEndcapJP2bit()>=1 && dsm2TreeADC->getOutEtot1bit()) trgList.push_back(127652);
     if(dsm2TreeADC->getOutEndcapHTTP1bit()){
-      trgList->push_back(127831);
-      trgList->push_back(127611);
+      trgList.push_back(127831);
+      trgList.push_back(127611);
     }
   }
   // #### modified by Liaoyuan ####
   else if( mYear == 2009 ){
-    ; // Triggers-Ids are Generated in StEmcTriggerSimu Instead
+    ; // Triggers-Ids are Generated in StEmcTriggerSimu instead
   }
   // #### modified end ####
 
@@ -162,12 +161,8 @@ StEemcTriggerSimu::addTriggerList( void * adr){
 
 StTriggerSimuDecision
 StEemcTriggerSimu::triggerDecision(int trigId) {
-  vector<int> tmpTrigList;
-  addTriggerList(&tmpTrigList);
-  for(unsigned i=0; i<tmpTrigList.size(); i++) {
-    if(trigId == tmpTrigList[i]) return kYes;
-  }
-  return kDoNotCare;
+  if (find(mTriggerIds.begin(),mTriggerIds.end(),trigId) == mTriggerIds.end()) return kDoNotCare;
+  return kYes;
 }
  
 //==================================================
@@ -357,12 +352,12 @@ StEemcTriggerSimu::Make(){
 	compareTRG0_TRG1(); 
 	compareTRG1_TRG2(); 
 	compareTRG2_TRG3();
-      }  
+      }
     }
 
     DSM2EsumSpectra();
 
-
+    addTriggerList(mTriggerIds);
 
   // dsm2TreeADC->print(0); 
   
@@ -750,8 +745,12 @@ int StEemcTriggerSimu::endcapJetPatchAdc(int jp) const { return (*mE101)[1-jp/3]
 int StEemcTriggerSimu::getEndcapHighTower(int tp) const { return feeTPTreeADC->TP(tp)->getOutHT(); }
 int StEemcTriggerSimu::getEndcapPatchSum(int tp) const { return feeTPTreeADC->TP(tp)->getOutTPsum(); }
 
+
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.31  2010/04/16 01:47:46  pibero
+// Oops, forgot to include triggers before 2009. Thanks, Liaoyuan.
+//
 // Revision 1.30  2010/03/01 18:48:42  pibero
 // More updates for Run 9
 //
