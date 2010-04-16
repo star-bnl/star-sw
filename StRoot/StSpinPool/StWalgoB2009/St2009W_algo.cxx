@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.22 2010/03/23 01:31:40 seelej Exp $
+// $Id: St2009W_algo.cxx,v 1.23 2010/04/16 14:35:32 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -63,7 +63,7 @@ St2009WMaker::find_W_boson(){
       hA[135]->Fill(T.awayTotET,T.sPtBalance);
 
       for (int i=0; i<=20; i++) {
-        float awayTot_cut = 10.+2.*((float) i);
+	//  float awayTot_cut = 10.+2.*((float) i);
         for (int j=0; j<=20; j++) {
           float pTBal_cut = 5.+((float) j);
           if (T.sPtBalance<pTBal_cut) { 
@@ -531,6 +531,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.23  2010/04/16 14:35:32  balewski
+// fix borken header
+//
 // Revision 1.22  2010/03/23 01:31:40  seelej
 // Fix to the filling of the histograms for the background systematic.
 //
