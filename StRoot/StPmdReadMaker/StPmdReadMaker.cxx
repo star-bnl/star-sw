@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.30 2008/11/18 12:47:11 rashmi Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.31 2010/04/16 12:04:13 rashmi Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.31  2010/04/16 12:04:13  rashmi
+ *Modifcation for new DAQ
+ *
  *Revision 1.30  2008/11/18 12:47:11  rashmi
  *BadChains for dAu added
  *
@@ -114,6 +117,10 @@
 #include "StPmdUtil/StPmdGeom.h"
 #include "StPmdUtil/StPmdDBUtil.h"
 #include<StMessMgr.h>
+#include "StRtsTable.h"
+#include "RTS/src/DAQ_PMD/daq_pmd.h"
+
+//#include "RTS/src/EVP_READER/pmdReader.h"
 //
 // Interfaces
 //
@@ -122,6 +129,7 @@
 #include "StDaqLib/PMD/PMD_Reader.hh"
 #include "StDAQMaker/StDAQReader.h"
 
+#include "TFile.h"
 // added for StEvent
 #include "StEvent/StEvent.h"
 #include "StEvent/StEventTypes.h"
@@ -131,14 +139,13 @@
 Int_t BadChainZero[25];
 Int_t * BadChain;
 Float_t SM_chain_factor[24][48];
-//ofstream fout("calib_out.dat");
+//ofstream fout("raw_5030002.dat");
 
 //
 ClassImp(StPmdReadMaker) // macro
 //-----------------------------------------------------------------
   
-StPmdReadMaker::StPmdReadMaker(const char *name)
-    : StMaker(name)
+StPmdReadMaker::StPmdReadMaker(const char *name) : StRTSBaseMaker("pmd",name)
 {
   mThePmdReader=NULL;
   mEvtPmdCollection=NULL;
@@ -152,9 +159,10 @@ StPmdReadMaker::StPmdReadMaker(const char *name)
   mPmdGeom = new StPmdGeom();
   mPmdDBUtil = new StPmdDBUtil();
   mChainTh=0;
-  //  mCalibFlag=kFALSE;
 
-  mCalibFlag=kTRUE;
+  mCalibFlag=kFALSE;
+  //  mCalibFlag=kTRUE;
+
   mPmdPrint=kFALSE;
   mHotCells=NULL;                                                          
 }
@@ -186,53 +194,55 @@ Int_t StPmdReadMaker::Init() {
   return StMaker::Init();
 }
 //-----------------------------------------------------------------
+
 Int_t StPmdReadMaker::InitRun(Int_t runnr) {
   if(mPmdPrint)gMessMgr->Info("StPmdReaderMaker::InitRun()");
   
   mRunNumber = runnr;
-  
   mPmdGeom->readBoardDetail(runnr);
-  if(Debug())cout<<"PMDINITRUN*****runnr "<<runnr<<"   "<<mRunNumber<<endl;
+  //  cout<<"PMDINITRUN*****runnr "<<runnr<<"   "<<mRunNumber<<endl;
   
   if(mRunNumber < 5034042) mVmeCond = 1;
   else if(mRunNumber >= 5034042 && mRunNumber < 5049020) mVmeCond = 2;
   else if(mRunNumber >= 5049020 && mRunNumber < 6000000) mVmeCond = 3;
   else if(mRunNumber >= 6000000 && mRunNumber < 7000000) mVmeCond = 4; // run 7 data
   else if(mRunNumber >= 8000000 && mRunNumber < 9000000) mVmeCond = 5; // run 7 data
-  //  else mVmeCond = 4;
+  else if(mRunNumber >= 9000000 && mRunNumber < 12000000) mVmeCond = 5; // run 7 data
   // // Subhasis: 7000000 to 8000000, this was pp , PMD was absent..
   // subhasis (25th aug 2007:) These conditions need to be checked very carefully
   
-  if(mPmdPrint) cout<<"Run Number, VME Condition : "<<mRunNumber<<" "<<mVmeCond<<endl;
-// subhasis // to fix crash in BadChain
-    for(Int_t i=0;i<25;i++) BadChainZero[i]=0;
+  //  cout<<"Run Number, VME Condition : "<<mRunNumber<<" "<<mVmeCond<<endl;
+  // subhasis // to fix crash in BadChain
+  for(Int_t i=0;i<25;i++) BadChainZero[i]=0;
   
   ReadBadChains(runnr);
   ReadCalibrationsConst();
-
+  
   /*
- for(int ic=1;ic<=48;ic++){
-   for(int sm = 1;sm<=24;sm++){
-     if(SM_chain_factor[sm-1][ic-1]>0)cout<<sm<<","<<ic<<","<<SM_chain_factor[sm-1][ic-1]<<endl;
-   }
- }
-                                                             
- for(int ic=1;ic<=48;ic++){
-   for(int icl=0;icl<1728;icl++){
-     if(IsHot(ic,icl))fout<<"HOT "<<ic<<" "<<icl<<endl;
-   }
- }
+    for(int ic=1;ic<=48;ic++){
+    for(int sm = 1;sm<=24;sm++){
+    if(SM_chain_factor[sm-1][ic-1]>0)cout<<sm<<","<<ic<<","<<SM_chain_factor[sm-1][ic-1]<<endl;
+    }
+    }
+    
+    for(int ic=1;ic<=48;ic++){
+    for(int icl=0;icl<1728;icl++){
+    if(IsHot(ic,icl))fout<<"HOT "<<ic<<" "<<icl<<endl;
+    }
+    }
   */
   
   return StMaker::InitRun(runnr);
 }
+
 //----------------------------------------------------
+
 void StPmdReadMaker::ReadBadChains(Int_t runNo){
-                                                             
+  
   Int_t rn,year;
   mPmdGeom->GetRunYear(runNo,rn,year);
   if(Debug())cout<<"runNo="<<runNo<<" year="<<year<<endl;
-                                                             
+  
   if(year==8){
     if(runNo>8342000){
       BadChain = PmdClean::BadChain_y8d342;
@@ -260,7 +270,7 @@ void StPmdReadMaker::ReadBadChains(Int_t runNo){
   } else {
     BadChain = BadChainZero;
   }
-
+  
   if (BadChain[0]>0 && Debug()){
     //if (BadChain[0]>0){
     cout<<"BadChains are ";
@@ -269,128 +279,276 @@ void StPmdReadMaker::ReadBadChains(Int_t runNo){
     }
     cout<<endl;
   }
-                                                             
+  
 }
+
+//-------------------------------------------------------------------
+/*
+StRtsTable *StPmdReadMaker::GetNextLegacy(int sector)
+{
+  TString pmdQuery = Form("legacy[%i]",sector);
+  //  StRtsTable *daqPmdTable = GetNextLegacy();
+  StRtsTable *daqPmdTable = GetNext(pmdQuery.Data());
+  if (daqPmdTable) {
+    return daqPmdTable;
+  }
+  return 0;
+}
+*/
 //------------------------------------------------------------------
+ /*
+StRtsTable *StPmdReadMaker::GetNextRaw(int sector)
+{ 
+  TString pmdRawQuery = Form("raw[%i]",sector);
+  return GetNext(pmdRawQuery.Data());
+}
+ */
+//------------------------------------------------------------------
+
 Int_t StPmdReadMaker::Make() {
+  
   if(mPmdPrint)gMessMgr->Info("StPmdReadMaker::Make()");
-
-  mThePmdData   = GetDataSet("StDAQReader");
+  Int_t adc[2*PMD_CRAMS_MAX*2*(PMD_CRAMS_CH_MAX)];
+  Int_t rn,year;
+  mPmdGeom->GetRunYear(mRunNumber,rn,year);
+  if(Debug())cout<<"runNo="<<mRunNumber<<" year="<<year<<endl;
   
-  if(!mThePmdData) {
-    gMessMgr->Info("StPmdReadMaker::Make()");
-    gMessMgr->Info("DataSet: StDAQReader not there()");
-    gMessMgr->Info("Skip this event");
-    return kStWarn;
-  }
-  else{gMessMgr->Info("GOT DaqReader dataset");}
-  
-  mTheDataReader = (StDAQReader*)(mThePmdData->GetObject());
-  if(!mTheDataReader) {
-    gMessMgr->Info("StPmdReadMaker::Make()");
-    gMessMgr->Info("DataSet: PMDData not there()");
-    gMessMgr->Info("Skip this event");
-    return kStWarn;
-  }
-  else{gMessMgr->Info("GOT DaqReader object, look for PMD**");}
- 
-  if ( !(mTheDataReader->PMDPresent())) {
-    cout << "StPmdreaderMaker::Maker()\n";
-    cout << "\tPMD  not in datastream\n";
-    cout << "\tSkip this event\n" << endl;
-    return kStWarn;
-  }
-  else{cout<<"PMD present seen from datareader"<<endl;}
-  
-  mThePmdReader = mTheDataReader->getPMDReader();
-  
-  if(mThePmdReader) {
-    //printf("**********NPMDHITS==%d\n", mThePmdReader->NPMDHits() );
-  }
-  else {
-    gMessMgr->Info("StPmdReaderMaker::Make()");
-    gMessMgr->Info("Could not get PMD Reader");
-    gMessMgr->Info("Skip this event");
-    return kStWarn;
-  }
-  if(Debug())cout<<"In StPmdReadMaker::Make"<<endl;
-  //  fout<<"In StPmdReadMaker::Make"<<endl;
-  
-  int adc[2*PMD_CRAMS_MAX*2*(PMD_CRAMS_CH_MAX)];
- 
-  
-  int ret=mThePmdReader->getAllPmdCpvData(&adc[0]);
-  if(ret){/*nothing*/}
-  Int_t result=ApplyMapping(&adc[0]);
-  if(result!=kStOK){gMessMgr->Info("Problem in getting PMD data:ApplyMap");
-  return kStWarn;
-  } 
-
-  /*
-  for(int is=1;is<=2*PMD_CRAMS_MAX;is++){
-    for(int ir=1;ir<=PMD_ROW_MAX;ir++){
-      for(int ic=1;ic<=PMD_COL_MAX;ic++){
-        float calib=0;
-        Int_t stCalib = GetCalib(is,ir,ic,calib);
-        if(calib>0) fout<<"is,ir,ic "<<is<<" "<<ir<<" "<<ic<<" "<<calib<<endl;
+  // The new daq was used after 2010
+  if(year>9){
+    
+    Int_t adcChCount=0;
+  //  Float_t Pmdhit[50]={0.};
+  //  Float_t Pmdadc[50]={0.};
+    
+  //  Float_t pmdHIT=0.;
+  //  Float_t pmdADC=0.;
+    
+    for (int sector=1; sector<2;++sector) {
+      cout<<" sector = "<<sector<<endl;
+      while ( GetNextLegacy(sector) ) {
+	//
+	pmd_t*  fpmd = (pmd_t*)*DaqDta()->begin();
+	Int_t nChain=0;
+	for(Int_t crate=0;crate<2;crate++) {
+	  //printf("Crate %s: status %d, mode %d\n",crate==0?"Up":"Dn",fpmd->status[crate],fpmd->mode) ;
+	  for(Int_t c=0;c<12;c++) {
+	    for(Int_t s=0;s<2;s++) {
+	      Int_t chmax = 0;
+	      Int_t chain = 0;
+	      for(Int_t ch=0;ch<1728;ch++) {
+		if(s==0){ nChain=c+12*crate;}
+		if(s==1){ nChain=(c+24)+12*crate;}
+		Double_t ped_mean= (double)fpmd->ped[crate][c][s][ch]/16.0;
+		Double_t ped_rms= (double)fpmd->rms[crate][c][s][ch]/16.0;
+		//Double_t ped_thr= (double)fpmd->thr[crate][c][s][ch]/16.0;
+		Int_t adc_ch = fpmd->adc[crate][c][s][ch];
+		if(adc_ch>0 && chmax<ch) {chmax = ch; chain = nChain;}
+		adc[adcChCount]=adc_ch;
+		adcChCount++;
+	//	if(s==1 && ch>0 && adc_ch>0){
+		  //pmdHIT++;
+		  //pmdADC++;
+		  //Pmdhit[nChain]++;
+		  //Pmdadc[nChain]+=adc_ch;
+	//	}
+		if(adc_ch>0 ||ped_mean>0){
+		  chain_adc[nChain]->Fill(ch,adc_ch);
+		  chain_mean[nChain]->Fill(ch,ped_mean);
+		  chain_rms[nChain]->Fill(ch,ped_rms);
+		  
+		  //printf("CRAM %2d: side %d: ch %4d: adc %4d [ped %4.1f, rms %4.2f, thr %4.1f]\n", c,s,ch, adc_ch, ped_mean, ped_rms, ped_thr) ;
+		}
+		//		if(adc_ch>0)cout<<"Channel="<<ch<<" adc="<<adc_ch<<endl;
+	      }
+	      //	      cout<<"crate = "<<crate<<" c="<<c<<" s = "<<s<<" chmax="<<chmax<<" chain = "<<chain<<" boards = "<<(chmax*1.0)/64<<endl;
+	    }
+	  }
+	}
+	// do something
+	// int ret=mThePmdReader->getAllPmdCpvData(&adc[0]);
+	// if(ret){/*nothing*/}
+	//   cout<<" I am calling applymapping"<<endl;
+	
+	Int_t result=ApplyMapping(&adc[0]);  
+	//   cout<<" applymapping called"<<endl;
+	if(result!=kStOK){gMessMgr->Info("Problem in getting PMD data:ApplyMap");
+	  return kStWarn;
+	} 
       }
+      //getting tofmultiplicity
+      
+      
+      StEvent *currevent = (StEvent*)GetInputDS("StEvent");
+      // cout<<"+++++++++++++++++++++++================+++++++++++++++++"<<endl;
+     // cout<<"getting stevent,id,pmd hit,adc "<<currevent->triggerIdCollection()->nominal()->isTrigger(270005)<<" "<<pmdHIT<<" "<<pmdADC<<endl;
+      //cout<<"+++++++++++++++++++++++================+++++++++++++++++"<<endl;
+//      if(!currevent->triggerIdCollection()->nominal()->isTrigger(260024)) continue;
+      
+      //  cout<<" current event ="<<currevent<<endl;
+      // cout<<"getting ctbm "<<endl;
+      //  int ctbm=currevent->triggerData()->ctbSum(0);
+      
+      StTriggerData *theData =currevent->triggerData();
+      
+      //   cout<<"tofmultiplcity  "<<theData->tofMultiplicity()<<endl;
+      StTriggerDetectorCollection *theTriggers =currevent->triggerDetectorCollection();
+      
+      StZdcTriggerDetector &theZdcTrg = theTriggers->zdc();
+      StBbcTriggerDetector &theBbcTrg = theTriggers->bbc();
+      StCtbTriggerDetector &theCtbTrg = theTriggers->ctb();
+      //cout<<"444"<<theZdcTrg<<" "<<theBbcTrg<<" "<<theCtbTrg<<endl;
+      
+      Float_t  ZdcAdc=theZdcTrg.adcSum();
+      Int_t   BbcAdc=theBbcTrg.adcSum();
+      Double_t ctb = 0;
+      for (unsigned int slat = 0; slat < theCtbTrg.numberOfSlats(); slat++) {
+	for (unsigned int tray = 0; tray < theCtbTrg.numberOfTrays(); tray++) {
+	  ctb += theCtbTrg.mips(tray,slat,0);
+	}
+      }
+      Int_t CtbMult = ctb;
+      if(Debug()){cout<<"ZdcAdc="<<ZdcAdc<<" BbcAdc="<<BbcAdc<<" CtbMult="<<CtbMult<<endl;}
+/*      
+      if(pmdHIT>0){fout<<theZdcTrg.adcSum()<<" "<<theData->tofMultiplicity()<<" "<<pmdHIT<<" "<<pmdADC<<endl;
+	for(Int_t ich=24;ich<48;ich++){
+	  fout<<ich<<" "<<Pmdhit[ich]<<" "<<Pmdadc[ich]<<endl; 
+	  Pmdhit[ich]=0.;
+	  Pmdadc[ich]=0.;
+	  
+	}
+      }
+*/
+      //fcout<<"ZDC , tof, pmd "<<theZdcTrg.adcSum()<<" "<<theData->tofMultiplicity()<<" "<<pmdhit<<" "<<pmdadc<<endl;
+      //pmdhit_tof->Fill(pmdHIT,theData->tofMultiplicity());
+      //pmdadc_tof->Fill(pmdADC,theData->tofMultiplicity());
+      
+      //cout<<"getting tofm "<<endl;
+      //int tofm=(StTriggerData*)(currevent->triggerData())->tofMultiplicity(0);
+      //
+      //cout<<"------------------------------------------------------------   multiplicity :  tof   "<<tofm<<endl;
+      
     }
+  }else{
+    //#else
+    
+    mThePmdData   = GetDataSet("StDAQReader");
+    
+    if(!mThePmdData) {
+      gMessMgr->Info("StPmdReadMaker::Make()");
+      gMessMgr->Info("DataSet: StDAQReader not there()");
+      gMessMgr->Info("Skip this event");
+      return kStWarn;
+    }
+    else{gMessMgr->Info("GOT DaqReader dataset");}
+    
+    mTheDataReader = (StDAQReader*)(mThePmdData->GetObject());
+    if(!mTheDataReader) {
+      gMessMgr->Info("StPmdReadMaker::Make()");
+      gMessMgr->Info("DataSet: PMDData not there()");
+      gMessMgr->Info("Skip this event");
+      return kStWarn;
+    }
+    else{gMessMgr->Info("GOT DaqReader object, look for PMD**");}
+    
+    if ( !(mTheDataReader->PMDPresent())) {
+      cout << "StPmdreaderMaker::Maker()\n";
+      cout << "\tPMD  not in datastream\n";
+      cout << "\tSkip this event\n" << endl;
+      return kStWarn;
+    }
+    else{cout<<"PMD present seen from datareader"<<endl;}
+  
+    mThePmdReader = mTheDataReader->getPMDReader();
+    
+    if(mThePmdReader) {
+      //printf("**********NPMDHITS==%d\n", mThePmdReader->NPMDHits() );
+    }
+    else {
+      gMessMgr->Info("StPmdReaderMaker::Make()");
+      gMessMgr->Info("Could not get PMD Reader");
+      gMessMgr->Info("Skip this event");
+      return kStWarn;
+    }
+    if(Debug())cout<<"In StPmdReadMaker::Make"<<endl;
+    //  fout<<"In StPmdReadMaker::Make"<<endl;
+    
+    Int_t adc[2*PMD_CRAMS_MAX*2*(PMD_CRAMS_CH_MAX)];
+    
+    
+    Int_t ret=mThePmdReader->getAllPmdCpvData(&adc[0]);
+    if(ret){/*nothing*/}
+    Int_t result=ApplyMapping(&adc[0]);
+    if(result!=kStOK){gMessMgr->Info("Problem in getting PMD data:ApplyMap");
+      return kStWarn;
+    } 
+    
+    /*
+      for(int is=1;is<=2*PMD_CRAMS_MAX;is++){
+      for(int ir=1;ir<=PMD_ROW_MAX;ir++){
+      for(int ic=1;ic<=PMD_COL_MAX;ic++){
+      float calib=0;
+      Int_t stCalib = GetCalib(is,ir,ic,calib);
+      if(calib>0) fout<<"is,ir,ic "<<is<<" "<<ir<<" "<<ic<<" "<<calib<<endl;
+      }
+      }
+      }
+    */
+    
+    
+    //	if(mThePmdReader) {
+    //	    delete mThePmdReader;
+    //	}
+    //	mThePmdReader = 0;
   }
-  */
-  
-  
-  //	if(mThePmdReader) {
-  //	    delete mThePmdReader;
-  //	}
-  //	mThePmdReader = 0;
-  
-  
+  //#endif
+    
   return kStOK;
 }
 
 
 Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 {
-// Get Year of run
-/*
-  char runfile[20];
-  sprintf(runfile,"%d",mRunNumber);
-  // Fetch from the run # the day
-  char iRun[8];
-  char iyear[8];
-  for (Int_t ik=0; ik<3; ik++)
+  // Get Year of run
+  /*
+    char runfile[20];
+    sprintf(runfile,"%d",mRunNumber);
+    // Fetch from the run # the day
+    char iRun[8];
+    char iyear[8];
+    for (Int_t ik=0; ik<3; ik++)
     {
-      iRun[ik] = runfile[ik+1];
+    iRun[ik] = runfile[ik+1];
     }
-  iyear[0] = runfile[0];
-  Int_t year =0;
-  year=atoi(iyear);
-*/
+    iyear[0] = runfile[0];
+    Int_t year =0;
+    year=atoi(iyear);
+  */
   Int_t rn=0; Int_t year=0;
   mPmdGeom->GetRunYear(mRunNumber,rn,year);
   if(Debug())cout<<"runNo="<<mRunNumber<<" year="<<year<<endl;
-  //  fout<<"runNo="<<mRunNumber<<" year="<<year<<" day="<<rn<<endl;
-////////////////////////////////////
+  //  cout<<"Applymapping:: runNo="<<mRunNumber<<" year="<<year<<" day="<<rn<<endl;
+  ////////////////////////////////////
   mPmdGeom->readBoardDetail(mRunNumber); //!Read status of the FEE boards to apply proper mapping 
   
   mPmdCollection = new StPmdCollection("PmdCollection");
   m_DataSet->Add(mPmdCollection);
   StPmdDetector* det0 = mPmdCollection->detector(0); //! Collection for CPV
   StPmdDetector* det1 = mPmdCollection->detector(1); //! Collection for PMD
+  //  cout<<"Applymapp: Run Number, VME Condition : "<<mRunNumber<<" "<<mVmeCond<<endl;
   
   Int_t Chain_No,supmod,row,col,SubDet=0,chtemp;
-  int AddCh_Count=0;
+  Int_t AddCh_Count=0;
   Int_t orig_nhits = 0;
   Int_t nhits=0;
   Int_t nhits_sm[24]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-   for(int SEC=0; SEC < PMD_SECTOR; SEC++){
-    for(int CRAM=0; CRAM < PMD_CRAMS_MAX; CRAM++){
-      for(int BLOCK=0; BLOCK < PMD_CRAMS_BLOCK; BLOCK++){
-	for(int CHANNEL=0; CHANNEL < PMD_CRAMS_CH_MAX; CHANNEL++){
+  for(Int_t SEC=0; SEC < PMD_SECTOR; SEC++){               //PMD_SECTOR = 2
+    for(Int_t CRAM=0; CRAM < PMD_CRAMS_MAX; CRAM++){       //PMD_CRAMS_MAX = 12
+      for(Int_t BLOCK=0; BLOCK < PMD_CRAMS_BLOCK; BLOCK++){//PMD_CRAMS_BLOCK = 2
+	for(Int_t CHANNEL=0; CHANNEL < PMD_CRAMS_CH_MAX; CHANNEL++){ //PMD_CRAMS_CH_MAX = 1728
 	  Int_t channel=CHANNEL;  // Input to apply mapping should be 0-1727.
 	  
 	  //Added for diffrent VME Crate conditions ////////////
-
+	  
 	  switch (mVmeCond){
 	    
 	  case 1: 
@@ -447,67 +605,68 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
           // Apply Mapping to get the sm, row and col here
 	  // 	 initialise the refs.  
           Int_t mapp=0;
-           supmod=0;
-	   row=0;
-	   col=0;
-	   chtemp=-1;
+	  supmod=0;
+	  row=0;
+	  col=0;
+	  chtemp=-1;
 
           if(mRunNumber < 6000000)mapp=mPmdGeom->ChainMapping(Chain_No,channel,supmod,col,row,chtemp);  // 2004 data
           if(mRunNumber >= 6000000)mapp=mPmdGeom->ChainMapping(Chain_No,channel,supmod,col,row,chtemp,year);  // 2005 onwards data
 	  Int_t DaqADC=adc[AddCh_Count];
 	  // zeroing zeroeth channel
 	  if(channel==0)DaqADC=0;
-
+	  
 	  AddCh_Count++;
 	  
 	  if(DaqADC>0 && mapp==kStOK){
 	    orig_nhits++;
-	 //Fill chain-channel QA
-		  m_chain_channel->Fill(channel,Chain_No-1);
-
-	  // Apply uniformity calibration here
-	  //
-	      Float_t cellgain = 1;
-	      Float_t smchaingain = 1;
-	      Float_t cellstatus = 1;
-//fout<<" "<<mRunNumber<<" "<<supmod<<" "<<row<<" "<<col<<" "<<DaqADC<<endl;
+	    //Fill chain-channel QA
+	    m_chain_channel->Fill(channel,Chain_No-1);
+	    
+	    // Apply uniformity calibration here
+	    //
+	    Float_t cellgain = 1;
+	    Float_t smchaingain = 1;
+	    Float_t cellstatus = 1;
+	    //fout<<" "<<mRunNumber<<" "<<supmod<<" "<<row<<" "<<col<<" "<<DaqADC<<endl;
+	    //cout<<" "<<mRunNumber<<" "<<supmod<<" "<<row<<" "<<col<<" "<<DaqADC<<endl;
 	    if(mCalibFlag){
 	      Float_t calib = 1;
 	      Float_t final_factor = 0;
-
+	      
 	      if(supmod<=(2*PMD_CRAMS_MAX) && row <=PMD_ROW_MAX && col <=PMD_COL_MAX){
 		
 		Int_t stCalib = GetCalib(supmod,row,col,calib); 
 		if(stCalib != kStOK)gMessMgr->Info("Problem in getting Calibration Constant");
-
+		
                 if(mRunNumber < 8000000){
-//                  final_factor=calib;
+		  //                  final_factor=calib;
                   final_factor=1.;
                 }
                 if(mRunNumber >= 8000000){
-//storing gain factors for StPmdHit to be used in ClusterMaker
+		  //storing gain factors for StPmdHit to be used in ClusterMaker
 	          cellgain=calib;
-	          smchaingain=SM_chain_factor[supmod-1][Chain_No-1];
-// application of finalfactor
+                  smchaingain=SM_chain_factor[supmod-1][Chain_No-1];
+		  // application of finalfactor
                   final_factor=calib*SM_chain_factor[supmod-1][Chain_No-1];
 		  //		  fout<<"ADC, chain, row, col, calib, sm_chain "<<DaqADC<<" "<<Chain_No<<" "<<row<<" "<<col<<" "<<calib<<" "<<SM_chain_factor[supmod-1][Chain_No-1]<<" final_factor="<<final_factor<<endl;
                   if(!Accept(Chain_No,channel)){
-			final_factor=0.0;
-			cellstatus=0;
-		    }
-//	      if(SubDet==1) fout<<supmod-1<<" "<<col-1<<" "<<row-1<<" "<<calib<<" "<<smchaingain<<" "<<cellstatus<<endl;
+		    final_factor=0.0;
+		    cellstatus=0;
+		  }
+		  //	      if(SubDet==1) fout<<supmod-1<<" "<<col-1<<" "<<row-1<<" "<<calib<<" "<<smchaingain<<" "<<cellstatus<<endl;
                 }
 		//if(calib!=0)DaqADC=(Int_t)(DaqADC*calib);
-
-		//		fout<<supmod<<","<<row<<","<<col<<","<<Chain_No<<","<<calib<<","<<SM_chain_factor[supmod-1][Chain_No-1]<<","<<final_factor<<","<<DaqADC;
+		//
+		//				cout<<supmod<<","<<row<<","<<col<<","<<Chain_No<<","<<calib<<","<<SM_chain_factor[supmod-1][Chain_No-1]<<","<<final_factor<<","<<DaqADC<<endl;;
                 if(final_factor>0){
-//subhasi: stop applying gain factor here, apply in clusterMaker
-//                  DaqADC=(Int_t)(1.0*DaqADC/final_factor);
+		  //subhasi: stop applying gain factor here, apply in clusterMaker
+		  //                  DaqADC=(Int_t)(1.0*DaqADC/final_factor);
                 }else{
-//                  DaqADC=0;
+		  //                  DaqADC=0;
                 }
-
-                                                             
+		
+                
   	      } //Check on overflow of supmod, row col
 	    } // Calibration flag     
 	    
@@ -517,6 +676,7 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 	    if(edep<0) edep=0;
 	    
 	    if(DaqADC>0){
+	      //		cout<<"sm, row, col,adc, edep "<<supmod<<","<<row<<","<<col<<","<<DaqADC<<" "<<edep<<endl;;
 	      //Fill StPmdHit
 	      StPmdHit *pmdhit = new StPmdHit();
 	      nhits_sm[supmod-1]++;
@@ -532,38 +692,42 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 	      pmdhit->setGainSmChain(Float_t(smchaingain));        //! smchaingain   
 	      pmdhit->setCellStatus(Float_t(cellstatus));        //! filling cellstatus   
 	      
-	    if(SubDet==2)det0->addHit(pmdhit);
-	    if(SubDet==1)det1->addHit(pmdhit);
-	    nhits++;
+	      if(SubDet==2)det0->addHit(pmdhit);
+	      if(SubDet==1)det1->addHit(pmdhit);
+	      nhits++;
 	    } // Check on non zero DaqADC after calibration and Accept()
-
+	    
 	  } //Check on non zero DaqADC
 	  
 	} //CHANNEL
       } //BLOCK
     } //C-RAM
-   } //SEC
-   
-   if(Debug()){
-     cout<<" NUmber of channels read ="<<AddCh_Count<<endl;
-     cout<<" NUmber of original hits ="<<orig_nhits<<endl;
-     cout<<" number of hits="<<nhits<<endl;
-     for(Int_t ism = 0;ism<24;ism++){
-       if(nhits_sm[ism]>0) cout<<"number if hits in module "<<ism+1<<" is ="<<nhits_sm[ism]<<endl;
-     }
-   }
-   if(mPmdPrint)gMessMgr->Info("StEvent to be called **");
-   Int_t testevt=fillStEvent(det0,det1);  //called as (cpv_det,pmd_det)
-   if(testevt!=kStOK)gMessMgr->Info("Problem in fillStEvent");
-   
-   return kStOK;
+  } //SEC
+  
+  if(Debug()){
+    cout<<" NUmber of channels read ="<<AddCh_Count<<endl;
+    cout<<" NUmber of original hits ="<<orig_nhits<<endl;
+    cout<<" number of hits="<<nhits<<endl;
+    for(Int_t ism = 0;ism<24;ism++){
+      if(nhits_sm[ism]>0) cout<<"number if hits in module "<<ism+1<<" is ="<<nhits_sm[ism]<<endl;
+    }
+  }
+  if(mPmdPrint)gMessMgr->Info("StEvent to be called **");
+  Int_t testevt=fillStEvent(det0,det1);  //called as (cpv_det,pmd_det)
+  if(testevt!=kStOK)gMessMgr->Info("Problem in fillStEvent");
+  
+  return kStOK;
 }
 //-------------------------------------------------------------------------
 
-Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det)
-{
+Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det){
   // Look for StEvent
   StEvent *currevent = (StEvent*)GetInputDS("StEvent");
+  Int_t ctbm=currevent->triggerData()->ctbSum(0);
+  Int_t tofm=currevent->triggerData()->tofMultiplicity(0);
+  //
+  if(Debug())cout<<"------------------------------------------------------------   multiplicity : ctb, tof  "<<ctbm<<" "<<tofm<<endl;
+  
   if(!currevent){
     gMessMgr->Info("NO STEVENT**");
     //	   StEvent *currevent=new StEvent();
@@ -573,34 +737,34 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det
   // Create PhmdCollection, first Maker in Chain, so here it is created
   mEvtPmdCollection = new StPhmdCollection();
   currevent->setPhmdCollection(mEvtPmdCollection);
- 
+  
   //Set the Detectors to PhmdCollection
   if(mEvtPmdCollection){
     mPmdEvent = mEvtPmdCollection->detector(StDetectorId(kPhmdId)); 
     mCpvEvent = mEvtPmdCollection->detector(StDetectorId(kPhmdCpvId));
   }
-    Int_t tothit_pmd=0;
-    Int_t tothit_cpv=0;
+  Int_t tothit_pmd=0;
+  Int_t tothit_cpv=0;
   
-  StEventInfo* eventInfo = currevent->info();
-  Int_t Nevent=eventInfo->id();
+  //  StEventInfo* eventInfo = currevent->info();
+  //  Int_t Nevent=eventInfo->id();
   
-//  if(!mEvtPmdCollection){
+  //  if(!mEvtPmdCollection){
   //  cout<<"No PMDCOLLECTION **, Creating one"<<endl;
   //  mEvtPmdCollection = new StPhmdCollection();
   //  currevent->setPhmdCollection(mEvtPmdCollection);
   //  mPmdEvent = mEvtPmdCollection->detector(StDetectorId(kPhmdId)); 
   //  mCpvEvent = mEvtPmdCollection->detector(StDetectorId(kPhmdCpvId));
   //}
-
+  
   for(Int_t id=1;id<(PMD_CRAMS_MAX+1);id++){
-
+    
     //Fill StEvent info for PMD and CPV, first PMD(subdet=1)
-   //does the id goes from 1 to 12 for PmdHit (for PhmdHit it goes 0-11).
-	  
+    //does the id goes from 1 to 12 for PmdHit (for PhmdHit it goes 0-11).
+    
     StPmdModule * pmd_mod=pmd_det->module(id);
     Int_t nmh1=pmd_det->module_hit(id);
-
+    
     if(nmh1>0){
       TIter next(pmd_mod->Hits());
       StPmdHit *spmcl1;
@@ -619,13 +783,13 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det
 	    
 	    StPhmdHit *phit = new StPhmdHit();
 	    /*
-	    phit->setSuperModule(Int_t(gsuper-1)); // filling supermodule no (range 0-11)
-	    phit->setSubDetector(Int_t(subdet));   // filling subdetector
-	    phit->setRow(Int_t(row));              // filling row
-	    phit->setColumn(Int_t(col));           // filling col
-	    phit->setEnergy(edep);                 // filling energy
-	    phit->setAdc(adc);                     // filling ADC
-	   */
+	      phit->setSuperModule(Int_t(gsuper-1)); // filling supermodule no (range 0-11)
+	      phit->setSubDetector(Int_t(subdet));   // filling subdetector
+	      phit->setRow(Int_t(row));              // filling row
+	      phit->setColumn(Int_t(col));           // filling col
+	      phit->setEnergy(edep);                 // filling energy
+	      phit->setAdc(adc);                     // filling ADC
+	    */
 	    // changed to accommodate numbering scheme (i.e start from 0)
 	    phit->setSuperModule(Int_t(gsuper-1)); // filling supermodule no (range 0-11)
 	    phit->setSubDetector(Int_t(subdet-1));   // filling subdetector (pmd=0,cpv=1)
@@ -633,80 +797,107 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det
 	    phit->setColumn(Int_t(col-1));           // filling col (starts from 0)
 	    phit->setEnergy(edep);                 // filling energy
 	    phit->setAdc(adc);                     // filling ADC
-	tothit_pmd++;
+	    tothit_pmd++;
 	    if(mPmdEvent)mPmdEvent->addHit(phit);
 	  }
 	}
     }
-
+    
     //Now CPV (subdet=2)    //////
     
     Int_t nmh2=cpv_det->module_hit(id);
     StPmdModule * cpv_mod=cpv_det->module(id);
     
-    if(nmh2>0){
-      TIter next(cpv_mod->Hits());
-      StPmdHit *spmcl2;
-      for(Int_t im=0; im<nmh2; im++)
-	{
-	  spmcl2 = (StPmdHit*)next();
-	  if(spmcl2){
-            Int_t subdet=spmcl2->SubDetector();
-	    Int_t gsuper=spmcl2->Gsuper();
-	    Int_t col=spmcl2->Column();
-	    Int_t row=spmcl2->Row();
-	    Float_t edep=spmcl2->Edep();
-	    Int_t adc=spmcl2->Adc();
-	    
-	    StPhmdHit *phit = new StPhmdHit();
-
-	    // changed to accommodate numbering scheme (i.e start from 0)
-	    phit->setSuperModule(Int_t(gsuper-1)); // filling supermodule no (range 0-11)
-	    phit->setSubDetector(Int_t(subdet-1));   // filling subdetector (pmd=0,cpv=1)
-	    phit->setRow(Int_t(row-1));              // filling row (starts from 0)
-	    phit->setColumn(Int_t(col-1));           // filling col (starts from 0)
-	    phit->setEnergy(edep);                 // filling energy
-	    phit->setAdc(adc);                     // filling ADC
-	    
-	tothit_cpv++;
-	    if(mCpvEvent)mCpvEvent->addHit(phit);
+    if(nmh2>0)
+      {
+	TIter next(cpv_mod->Hits());
+	StPmdHit *spmcl2;
+	for(Int_t im=0; im<nmh2; im++)
+	  {
+	    spmcl2 = (StPmdHit*)next();
+	    if(spmcl2){
+	      Int_t subdet=spmcl2->SubDetector();
+	      Int_t gsuper=spmcl2->Gsuper();
+	      Int_t col=spmcl2->Column();
+	      Int_t row=spmcl2->Row();
+	      Float_t edep=spmcl2->Edep();
+	      Int_t adc=spmcl2->Adc();
+	      
+	      StPhmdHit *phit = new StPhmdHit();
+	      
+	      // changed to accommodate numbering scheme (i.e start from 0)
+	      phit->setSuperModule(Int_t(gsuper-1)); // filling supermodule no (range 0-11)
+	      phit->setSubDetector(Int_t(subdet-1));   // filling subdetector (pmd=0,cpv=1)
+	      phit->setRow(Int_t(row-1));              // filling row (starts from 0)
+	      phit->setColumn(Int_t(col-1));           // filling col (starts from 0)
+	      phit->setEnergy(edep);                 // filling energy
+	      phit->setAdc(adc);                     // filling ADC
+	      
+	      tothit_cpv++;
+	      if(mCpvEvent)mCpvEvent->addHit(phit);
+	    }
 	  }
-	}
-    }
+      }
   }
-  m_event_tothit_pmd->Fill(Nevent,tothit_pmd);
-  m_event_tothit_cpv->Fill(Nevent,tothit_cpv);
-
-
+  //  m_event_tothit_pmd->Fill(Nevent,tothit_pmd);
+  //  m_event_tothit_cpv->Fill(Nevent,tothit_cpv);
+  
   return kStOK;
 }
+
 //------------------------------------------------------------------
 
 Int_t StPmdReadMaker::Finish() {
   if(mPmdPrint)gMessMgr->Info("StPmdReadMaker::Finish()");
-  
+  TFile * f = new TFile("11030019run_2010_histo_QA.root", "RECREATE");  
+  for(Int_t nchain=0; nchain<49; nchain++)
+    {
+      chain_mean[nchain]->Write();
+      chain_rms[nchain]->Write();
+      chain_adc[nchain]->Write();
+    }
+  pmdhit_tof->Write();
+  pmdadc_tof->Write();
+  f->Close();
   return StMaker::Finish();
 }
+
 //------------------------------------------------------------------
+
 void StPmdReadMaker::bookHist(){
-  m_event_tothit_pmd = new TH1F("pmd_tothit","tothit vs eventNo (PMD)",10000,0,100000);
-  m_event_tothit_cpv = new TH1F("cpv_tothit","tothit vs eventNo (CPV)",10000,0,100000);
-                                                             
+  //m_event_tothit_pmd = new TH1F("pmd_tothit","tothit vs eventNo (PMD)",10000,0,100000);
+  //m_event_tothit_cpv = new TH1F("cpv_tothit","tothit vs eventNo (CPV)",10000,0,100000);
+  pmdhit_tof = new TH2F("pmdhit_tof","",1000,0,100000, 1000, 0, 10000);
+  pmdadc_tof = new TH2F("pmdadc_tof","",1000,0,100000, 1000, 0, 10000);
+  
   m_chain_channel = new TH2F("chain_chan","channel vs chain No ",1728,-0.5,1727.5,48,-0.5,47.5);
+  for (Int_t chain1 =0;chain1<49;chain1++)
+    {
+      Char_t text[20],title[20];
+      sprintf(text,"chain_rms%02d",chain1);
+      sprintf(title,"chain_rms%02d",chain1);
+      chain_rms[chain1] = new TH1D(text,title,1730,0,1730);
+      sprintf(text,"chain_mean%02d",chain1);
+      sprintf(title,"chain_mean%02d",chain1);
+      chain_mean[chain1] = new TH1D(text,title,1730,0,1730);
+      Char_t text1[20],title1[20];
+      sprintf(text1,"chain_adc%02d",chain1);
+      sprintf(title1,"chain_adc%02d",chain1);
+      chain_adc[chain1] = new TH1D(text1,title1,1730,0,1730);
+    }
 }
-                                                             
-                                                             
+
 //---------------------------------------------------------------------
 Bool_t StPmdReadMaker::IsHot(Int_t chain,Int_t channel){
   // Find out if a given chain/channel is "hot"
   // DB stores element IDs 1-48 => table rows 0-47 => chains 1-48
   // DB stores 1728 channels as 54 x 32bit words (1-1728)
   if (!mHotCells) return kFALSE;
-                                                                                       
+  
   //   channel--;
-  int offset = channel/32;
-  int bit = channel%32;
-                                                                                       
+  Int_t offset = channel/32;
+  Int_t bit = channel%32;
+  
   pmdHotCells_st* chainCells = mHotCells->GetTable(chain-1);
   unsigned int* bitMask = &(chainCells->m00);
   bitMask += offset;
@@ -724,7 +915,9 @@ Bool_t StPmdReadMaker::IsHot(Int_t chain,Int_t channel){
   // if (chain==11|| chain==13) isHot=kTRUE;
   return isHot;
 }
+
 //----------------------------------------------------------
+
 Bool_t StPmdReadMaker::Accept(Int_t chain,Int_t channel){
                                                                                        
   if (channel==0)return kFALSE;
@@ -740,11 +933,13 @@ Bool_t StPmdReadMaker::Accept(Int_t chain,Int_t channel){
   //  Int_t chain_channel = chain*1728+channel;
   //  return !IsHot(chain_channel);
   return !IsHot(chain,channel);
-                                                                                       
+  
 }
+
 //----------------------------------------------------------------------
-Bool_t StPmdReadMaker::ReadCalibrationsConst()
-{
+
+Bool_t StPmdReadMaker::ReadCalibrationsConst(){
+  
   if(Debug()) cout<<" StPmdReadMaker::I AM IN READCALIB "<<endl;
   
   StDbManager* mgr=StDbManager::Instance();
@@ -782,11 +977,11 @@ Bool_t StPmdReadMaker::ReadCalibrationsConst()
   // HOT CELLS
   mHotCells = (St_pmdHotCells*) mDb->Find("pmdHotCells");
   if (!mHotCells) {
-     gMessMgr->Warning("pmdHotCells not found!");
-     return kFALSE;
+    gMessMgr->Warning("pmdHotCells not found!");
+    return kFALSE;
   }
   Int_t nhot = 0;
-  for (int chain=1; chain <= 48; chain++) {
+  for (Int_t chain=1; chain <= 48; chain++) {
     pmdHotCells_st* chainCells = mHotCells->GetTable(chain-1);
     if (!chainCells) {
       cout<<"End-of-DbTable. Stopping."<<endl;
@@ -856,11 +1051,12 @@ Bool_t StPmdReadMaker::ReadCalibrationsConst()
   
 }
 
-
 //------------------------------------------------------------------
-Int_t StPmdReadMaker::GetCalib(int sm,int row,int col,float& calib){
-  if(m_PmdCalibConst)calib=m_PmdCalibConst[sm-1].CellGain[row-1][col-1];
-  //   cout<<"sm,row,col,calib"<<sm<<" "<<row<<" "<<col<<" "<<calib<<endl;
+
+Int_t StPmdReadMaker::GetCalib(int sm,int row,int col,float& calib)
+{
+if(sm>0) if(m_PmdCalibConst)calib=m_PmdCalibConst[sm-1].CellGain[row-1][col-1];
+     //cout<<"sm,row,col,calib"<<sm<<" "<<row<<" "<<col<<" "<<calib<<endl;
   //  if(Debug() && calib>0)fout<<"sm,row,col,calib "<<sm<<" "<<row<<" "<<col<<" "<<calib<<endl;
   return kStOK;
 }
