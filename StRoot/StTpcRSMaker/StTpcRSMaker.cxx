@@ -43,7 +43,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.34 2010/04/01 22:17:06 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.35 2010/04/16 19:29:35 fisyak Exp $";
 #define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -752,7 +752,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	    }
 	    //	if (Debug()) {PrPP(Make,xyzC);}
 	  }
-	  Int_t n0 = TMath::Nint((E - St_TpcResponseSimulatorC::instance()->I0()*eV)/
+	  Int_t n0 = TMath::Nint((dE - St_TpcResponseSimulatorC::instance()->I0())/
 				 St_TpcResponseSimulatorC::instance()->W()/(1. - St_TpcResponseSimulatorC::instance()->FanoFactor()));
 	  Int_t Nt = gRandom->Binomial(n0, 1. - St_TpcResponseSimulatorC::instance()->FanoFactor()) + 1;
 	  Double_t sigmaT = SigmaT;
@@ -1346,8 +1346,11 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.34 2010/04/01 22:17:06 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.35 2010/04/16 19:29:35 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.35  2010/04/16 19:29:35  fisyak
+// W is in eV now
+//
 // Revision 1.34  2010/04/01 22:17:06  fisyak
 // Add checking for TPC is switched off at all and stop if so
 //
