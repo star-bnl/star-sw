@@ -1,14 +1,19 @@
 /*Justin:  to generate jetTree for a M-C with real-event time stamp do:
 root4star -b -q 'rdMuWana.C(2000,"","/star/institutions/mit/balewski/2010-Walgo-simu/2010setA/rck10012_1_2000evts.MuDst.root",1,28,1)'
+
+Jan: physic files, jet read:
+root4star -b -q 'rdMuWana.C(2e3,"","/star/u/balewski/2009-Wana-pp500/fillListPhys/F10535/R10102105a_230531_230601.lis",5000,0,2)'
+
 */
 
 class StChain;
 StChain *chain=0;
 int useEtow=3;// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
 
-int spinSort=false;
+int  spinSort=false;
+bool isJanWjj=false; 
 int isJustin=false;
-bool isRoss=true; 
+bool isRoss=true;
 int geant=false;
  
 int rdMuWana(
@@ -22,7 +27,9 @@ int rdMuWana(
  ) { 
 
   // old Justin's : jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/jetTree4.5.10/"
- 
+
+  if(isJanWjj && !isMC) jetTreeDir = "/star/institutions/mit/balewski/2009-pp500-jets/4.16.2010phys/"; 
+
   if(isMC==1) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppWprod.lis";
   if(isMC==2) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD2_ppQCD10_inf_filter.lis";
   if(isMC==3) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppZprod.lis";
@@ -198,8 +205,8 @@ int rdMuWana(
     dbMk->SetFlavor("missetTCD","eemcPMTcal");  // ETOW gains , not-standard
     dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
   }  
-  if(isMC>=20) { // official rcf1001N M-C samples, January 2010
-    dbMk->SetMaxEntryTime(20100124,0); //use 'ofl' beginTime 2008-12-15 00:00:02 BTOW 'ofl' gains these MC were generated with
+  if(isMC>=20) { // official rcf1001N M-C samples, DBV20100401
+    dbMk->SetMaxEntryTime(20100401,0); //use 'ofl' beginTime 2008-12-15 00:00:03 BTOW 'ofl' gains these MC were generated with
     dbMk->SetFlavor("sim","eemcPMTped"); // to compensate action of fast simu
     dbMk->SetFlavor("sim","eemcPMTcal"); // to compensate action of fast simu
     printf("a-1\n");
@@ -420,6 +427,14 @@ int rdMuWana(
     ZMk->setMaxZMass(114.);// Zmass +20%
   }
 
+  if (isJanWjj){
+    wjjMk=new St2009WjjMaker("Wjj");
+    wjjMk->attachWalgoMaker(WmuMk);
+    wjjMk->setHList(HList);
+    wjjMk->setSpinSort(spinSort);
+    wjjMk->setMC(isMC);
+  }
+
   TChain* tree=muMk->chain(); assert(tree);
   int nEntries=(int) tree->GetEntries();
   printf("total eve in muDst chain =%d\n",nEntries);  // return ;
@@ -468,6 +483,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.34  2010/04/16 16:07:13  balewski
+// *** empty log message ***
+//
 // Revision 1.33  2010/04/16 00:54:01  balewski
 // shoudl work w/ data & new M-C
 //
