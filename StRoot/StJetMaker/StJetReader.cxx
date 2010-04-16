@@ -423,16 +423,18 @@ int StJetReader::numberOfBranches() const
 
 const char* StJetReader::branchName(int i) const
 {
-  return mTree->GetListOfBranches()->At(i)->GetName();
+  TBranch* branch = (TBranch*)mTree->GetListOfBranches()->At(i);
+  return branch ? branch->GetName() : 0;
 }
 
 StJets* StJetReader::getStJets(int i) const
 {
   TBranch* branch = (TBranch*)mTree->GetListOfBranches()->At(i);
-  return *(StJets**)branch->GetAddress();
+  return branch ? *(StJets**)branch->GetAddress() : 0;
 }
 
 StJets* StJetReader::getStJets(const char* bname) const
 {
-  return *(StJets**)mTree->GetBranch(bname)->GetAddress();
+  TBranch* branch = mTree->GetBranch(bname);
+  return branch ? *(StJets**)branch->GetAddress() : 0;
 }
