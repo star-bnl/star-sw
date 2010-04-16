@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.C,v 1.3 2010/04/04 23:14:33 fisyak Exp $
+// $Id: TpcResponseSimulator.C,v 1.4 2010/04/16 19:31:19 fisyak Exp $
 // $Log: TpcResponseSimulator.C,v $
+// Revision 1.4  2010/04/16 19:31:19  fisyak
+// Intermidiate version
+//
 // Revision 1.3  2010/04/04 23:14:33  fisyak
 // Add Row Correction
 //
@@ -15,20 +18,6 @@ TDataSet *CreateTable() {
   if (!TClass::GetClass("St_TpcResponseSimulator")) return 0;
   TpcResponseSimulator_st row;
   St_TpcResponseSimulator *tableSet = new St_TpcResponseSimulator("TpcResponseSimulator",1);
-#if defined(  __Version_V__ )
-  //y2005
-  //SecRow3CGFdaq_2005_CuCu22N.root
-  const Double_t SecRowDaq[8] = {
-    //    0.0600245,-0.00125623, 0.00582222,-0.000315716,// WE	
-    0.0458957,-0.00087154, 0.0136403, -0.000563829,//	W	
-    0.0744207,-0.00126576,-0.00268546,-4.91927e-05}; //	E	
-  const Double_t SecRowTpcRS[8] = {
-    //SecRow3CGFcucu22.U.root
-    //0.213151,0.000240478,0.316155,-0.000106692, //WE	
-    0.213732,0.000197346,0.317265,-0.000111175, //W	
-    0.21252 ,0.000285084,0.314919,-9.87074e-05};//E	
-  
-#else /* __Version_X__ */
 /* SecRow3CGFdaq_2005_CuCu22N */
   const Double_t SecRowDaq[12] = {
 /* WE	*/ 0.0562349,-0.00071352,0.00899116,-0.00041805,
@@ -39,8 +28,6 @@ TDataSet *CreateTable() {
 /* WE	*/ 0.21711,0.000170942,0.318614,-6.66108e-05,
 /* W	*/ 0.21719,0.000157678,0.316109,4.18145e-05,
 /* E	*/ 0.216267,0.000258353,0.318745,-0.000125219};
-
-#endif
   //
   memset(&row,0,tableSet->GetRowSize());
   row.I0                    = 13.1;// eV, CH4 		       
@@ -62,49 +49,28 @@ TDataSet *CreateTable() {
   row.tauXO                 =  74.6e-9;// secs Tpx Outer integration time 
   row.tauCI                 =   0;  
   row.tauCO                 =   0;  
-#if defined( __Version_N__ )
-  row.SigmaJitterTI         = 0.2;//  for Tpx inner 
-  row.SigmaJitterTO         = 0.2;//  for Tpx outer
-#else
-  row.SigmaJitterTI         = 0.0;//  for Tpx inner 
-  row.SigmaJitterTO         = 0.0;//  for Tpx outer 
-#endif
-#if defined(__Version_O__)
-  row.longitudinalDiffusion = 0.0370*1.64;// 0.0232;//K  0.0370;J // cm/sqrt(cm)   ; // 0.0232; from Laser Fit
-#elif defined(  __Version_N__ ) || defined(__Version_P__) || defined(__Version_Q__)
-  row.longitudinalDiffusion = 0.0370;// 0.0232;//K  0.0370;J // cm/sqrt(cm)   ; // 0.0232; from Laser Fit
-#elif defined(  __Version_S__ )
-  row.longitudinalDiffusion = 0.0540;
-#elif defined(  __Version_U__ ) ||  defined(  __Version_V__ )
-  row.longitudinalDiffusion = 0.0445;// 0.0232;//K  0.0370;J // cm/sqrt(cm)   ; // 0.0232; from Laser Fit
-#else
-  row.longitudinalDiffusion = 0.0370; // W
-#endif
-  row.transverseDiffusion   = 0.0775; //  cm/sqrt(cm)  
+  row.SigmaJitterTI         =  0.0;//f 0.2;//ad  0.0; //b for Tpx inner 
+  row.SigmaJitterTO         =  0.15;//g 0.0;//f 0.2;//ad  0.0; //b for Tpx outer 
+  row.longitudinalDiffusion = 0.0370;//abd: 0.0370*1.3;//c  0.0232;//K  0.0370;J // cm/sqrt(cm)   ; // 0.0232; from Laser Fit
+  row.transverseDiffusion   = 0.07725; //f: 0.06336; //abd:  0.06336*1.08; //c cm/sqrt(cm)  ; from Field data fit with OmegaTau = 3.02 // 0.0633
   row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
-#if defined( __Version_N__ )
-  row.OmegaTauScaleI        = 2.145;  // effective reduction of OmegaTau near Inner sector anode wire
-  row.OmegaTauScaleO        = 1.8;    // effective reduction of OmegaTau near Outer sector anode wire
-#elif defined(__Version_O__) 
-  row.OmegaTauScaleI        = 2.145*0.304/0.354;  // effective reduction of OmegaTau near Inner sector anode wire
-  row.OmegaTauScaleO        = 1.8;    // effective reduction of OmegaTau near Outer sector anode wire
-#elif defined(__Version_P__)
-  row.OmegaTauScaleI        = 2.145*1.275;  // effective reduction of OmegaTau near Inner sector anode wire
-  row.OmegaTauScaleO        = 1.8*1.03;    // effective reduction of OmegaTau near Outer sector anode wire
-#else
-  row.OmegaTauScaleI        = 2.145*1.275*1.275;  // effective reduction of OmegaTau near Inner sector anode wire
-  row.OmegaTauScaleO        = 1.8*1.05;    // effective reduction of OmegaTau near Outer sector anode wire
+  row.OmegaTauScaleI        =  2.145*1.25;  //g 2.145*1.15;  //f 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
+  row.OmegaTauScaleO        =   1.8;   //f 1.8;    //a 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
+#if 0 /* d */
+  // d
+  // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
+  // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = - TMath::Log(0.533*0.843485); 
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = - TMath::Log(0.512*0.725267); 
+#else /* e */
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 1.01266301501735545e+00; // e
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 1.12759507000493286e+00; // -"-
 #endif
-#if defined(  __Version_V__ )
-  Float_t *a = &row.SecRowCorIW[0];
-  for (Int_t i = 0; i < 8; i++) {
-    a[i] = SecRowTpcRS[i] - SecRowDaq[i];
-  }
-#else /* __Version_X__ */
+#if 0
   Float_t *a = &row.SecRowCorIW[0];
   for (Int_t i = 0; i < 8; i++) {
     Int_t j = i%4;
-    a[i] = SecRowTpcRS[j] - SecRowDaq[j];
+    a[i] += SecRowTpcRS[j] - SecRowDaq[j];
   }
 #endif
   tableSet->AddAt(&row);

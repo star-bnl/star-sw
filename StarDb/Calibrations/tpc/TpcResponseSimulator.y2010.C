@@ -1,9 +1,12 @@
-// $Id: TpcResponseSimulator.y2010.C,v 1.2 2010/04/04 23:14:33 fisyak Exp $
+// $Id: TpcResponseSimulator.y2010.C,v 1.3 2010/04/16 19:31:19 fisyak Exp $
 // $Log: TpcResponseSimulator.y2010.C,v $
-// Revision 1.2  2010/04/04 23:14:33  fisyak
+// Revision 1.3  2010/04/16 19:31:19  fisyak
+// Intermidiate version
+//
+// Revision 1.3  2010/04/04 23:14:33  fisyak
 // Add Row Correction
 //
-// Revision 1.1  2010/04/01 22:17:57  fisyak
+// Revision 1.2  2010/04/01 22:17:57  fisyak
 // Freeze version W
 //
 TDataSet *CreateTable() { 
@@ -15,36 +18,16 @@ TDataSet *CreateTable() {
   if (!TClass::GetClass("St_TpcResponseSimulator")) return 0;
   TpcResponseSimulator_st row;
   St_TpcResponseSimulator *tableSet = new St_TpcResponseSimulator("TpcResponseSimulator",1);
-#if defined(  __Version_V__ )
-  //y2010
-  //SecRow3CGFdaq_2010_AuAu200N.root
-  const Double_t SecRowDaq[8] = {
-    //    0.25159 ,0.00541165,0.00525316 ,-0.000159434, // WE	
-    0.269851,0.00478697,0.000342209,-0.000143101, // W	
-    0.238935,0.00573471,0.0106868  ,-0.000211026}; // E	
-  const Double_t SecRowTpcRS[8] = {
-    //SecRow3CGFauau200.U.root
-    //    0.30308 ,-5.90499e-05 ,0.22098 ,-0.00029274, // WE	
-    0.292102,-0.00117005  ,0.215507,-0.000314978, //W	
-    0.313958, 0.000952929 ,0.22641 ,-0.000300687}; //E	
-#else /* __Version_X__ */
-#if 0
-/* SecRow3CGFdaq_2010_AuAu200N */
-/* WE	*/ 0.267023,0.007755,-0.000153647,3.7975e-05,
-/* W	*/ 0.291137,0.00274119,-0.00925822,0.000263286,
-/* E	*/ 0.284247,0.00888761,0.00822456,-0.000112362,
-#endif
-/* SecRow3CGFRunX03DEV_calib */
-    const Double_t SecRowDaq[12] = {
-/* WE	*/ 0.296029,0.00427073,-0.0113142,0.000258612,
-/* W	*/ 0.26388,0.00407954,-0.0143448,0.000266297,
-/* E	*/ 0.329723,0.00391894,-0.00964907,0.000286288};
-/* SecRow3CGFauau200.W */
+/* SecRow3CGFRunIX66DEV_calib */
+  const Double_t SecRowDaq[12] = {
+/* WE	*/ 0.00178543,7.59862e-05,0.00359473,1.63784e-05,
+/* W	*/ 0.00213429,5.44094e-05,0.00394723,-9.59276e-06,
+/* E	*/ 0.00163108,8.36518e-05,0.0030858,4.26142e-05};
+/* SecRow3CGFpp200.W */
   const Double_t SecRowTpcRS[12] = {
-/* WE	*/ 0.314961,-0.000310742,0.227639,-0.000341098,
-/* W	*/ 0.305046,-0.00166713,0.221307,-0.00033598,
-/* E	*/ 0.325477,0.000719157,0.230824,-0.000288251}
-#endif
+/* WE	*/ -0.0348841,-0.000377749,0.249109,-0.000362636,
+/* W	*/ -0.0167217,0.000942187,0.237763,-0.000397571,
+/* E	*/ -0.0498431,-0.00153771,0.258119,-0.000285127};
   memset(&row,0,tableSet->GetRowSize());
   row.I0                    = 13.1;// eV, CH4 		       
   row.Cluster    	    = 3.2; // average no. of electrons per primary  			       
@@ -65,57 +48,26 @@ TDataSet *CreateTable() {
   row.tauXO                 =  74.6e-9;// secs Tpx Outer integration time 
   row.tauCI                 =   0;  
   row.tauCO                 =   0;  
-#if defined( __Version_O__ )
-  row.SigmaJitterTI         = 0.0;//  for Tpx inner 
-  row.SigmaJitterTO         = 0.0;//  for Tpx outer
-#elif defined( __Version_P__ )
-  row.SigmaJitterTI         = 0.2;//  for Tpx inner 
-  row.SigmaJitterTO         = 0.2;//  for Tpx outer 
-#else
-  row.SigmaJitterTI         = 0.2;//  for Tpx inner 
-  row.SigmaJitterTO         = 0.2;//  for Tpx outer 
-#endif
-#if defined( __Version_O__ ) || defined( __Version_P__ ) || defined( __Version_Q__ ) 
+  row.SigmaJitterTI         = 0.2;//ad  0.0;// b for Tpx inner 
+  row.SigmaJitterTO         = 0.2;//ad  0.0;// b for Tpx outer 
   row.longitudinalDiffusion = 0.0370;// 0.0232;//K  0.0370;J // cm/sqrt(cm)   ; // 0.0232; from Laser Fit
-#elif  defined( __Version_S__ ) 
-  row.longitudinalDiffusion = 0.0540;//
-#elif defined(  __Version_U__ ) ||  defined(  __Version_V__ )
-  row.longitudinalDiffusion = 0.0445;// 0.0232;//K  0.0370;J // cm/sqrt(cm)   ; // 0.0232; from Laser Fit
-#else
-  row.longitudinalDiffusion = 0.0370; // W
-#endif
-#if defined( __Version_N__ )
-  row.transverseDiffusion   = 0.0640; //  cm/sqrt(cm)  ; from Field data fit with OmegaTau = 3.02 // 0.0633
-#else
-#if defined( __Version_Q__ )
-  row.transverseDiffusion   = 0.0775; //  cm/sqrt(cm)  ; from Field data fit with OmegaTau = 3.02 // 0.0633
-#else
-  row.transverseDiffusion   = 0.0725; //  cm/sqrt(cm)  
-#endif
-#endif
+  row.transverseDiffusion   = 0.06336; //  cm/sqrt(cm)  ; from Field data fit with OmegaTau = 3.02 // 0.0633
   row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
-#if defined( __Version_N__ )
-  row.OmegaTauScaleI        = 2.145;  // effective reduction of OmegaTau near Inner sector anode wire
-  row.OmegaTauScaleO        = 1.8;    // effective reduction of OmegaTau near Outer sector anode wire
-#elif defined (__Version_O__ )
-  row.OmegaTauScaleI        = 2.145*0.75;  // effective reduction of OmegaTau near Inner sector anode wire
-  row.OmegaTauScaleO        = 1.8*0.95;    // effective reduction of OmegaTau near Outer sector anode wire
-#elif defined (__Version_P__ )
-  row.OmegaTauScaleI        = 2.145*1.30;  // effective reduction of OmegaTau near Inner sector anode wire
-  row.OmegaTauScaleO        = 1.8  *1.07;    // effective reduction of OmegaTau near Outer sector anode wire
-#else
-  row.OmegaTauScaleI        = 2.145*1.30*1.30;  // effective reduction of OmegaTau near Inner sector anode wire
-  row.OmegaTauScaleO        = 1.8  *1.07*1.25;    // effective reduction of OmegaTau near Outer sector anode wire
+  row.OmegaTauScaleI        = 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
+  row.OmegaTauScaleO        = 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
+#if 0 /* d */
+  // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
+  // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = - TMath::Log(0.533*0.843485);
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = - TMath::Log(0.512*0.725267);
+#else /* e */
+  row.SecRowCorIW[0] = row.SecRowCorIE[0] = 1.09073701501735543e+00;
+  row.SecRowCorOW[0] = row.SecRowCorOE[0] = 1.03388217000493299e+00;
 #endif
-#if defined(  __Version_V__ )
+#if 0
   Float_t *a = &row.SecRowCorIW[0];
   for (Int_t i = 0; i < 8; i++) {
-    a[i] = SecRowTpcRS[i] - SecRowDaq[i];
-  }
-#else /* __Version_X__ */
-  Float_t *a = &row.SecRowCorIW[0];
-  for (Int_t i = 0; i < 8; i++) {
-    a[i] = SecRowTpcRS[i+4] - SecRowDaq[i+4];
+    a[i] += SecRowTpcRS[i+4] - SecRowDaq[i+4];
   }
 #endif
   tableSet->AddAt(&row);
