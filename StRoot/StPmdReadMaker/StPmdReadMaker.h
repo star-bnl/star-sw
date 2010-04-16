@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.h,v 1.6 2007/08/31 10:50:39 rashmi Exp $
+ *$Id: StPmdReadMaker.h,v 1.7 2010/04/16 12:04:24 rashmi Exp $
  *
  *  StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Pmd Data Reader to store hits in StEvent
  ***************************************************************************
  * $Log: StPmdReadMaker.h,v $
+ * Revision 1.7  2010/04/16 12:04:24  rashmi
+ * Modifcation for new DAQ
+ *
  * Revision 1.6  2007/08/31 10:50:39  rashmi
  * Added routines to read badchains,HotCells,Cell_GNF,SMChain_GNF
  *
@@ -29,11 +32,15 @@
 #ifndef STAR_StPmdReadMaker
 #define STAR_StPmdReadMaker
 
-#ifndef StMaker_H
-#include "StMaker.h"
-#endif
+//include <StRoot/RTS/src/DAQ_READER/daq_det.h>
+#include "StRTSBaseMaker.h"
 // DAQ Libraries
 //#include "StDaqLib/PMD/PMD_Reader.hh"
+//#ifndef NEW_DAQ_READER
+//  class evpReader;
+//#else
+struct pmd_t;
+//#endif /* ! NEW_DAQ_READER */
 class StPhmdCollection;
 class StPhmdHit;
 class StPhmdDetector;
@@ -66,7 +73,7 @@ class EventReader;
 class StPmdGeom;
 class StPmdDBUtil;
 
-class StPmdReadMaker : public StMaker {
+class StPmdReadMaker : public StRTSBaseMaker {
   
   
  public: 
@@ -83,15 +90,23 @@ class StPmdReadMaker : public StMaker {
   void bookHist();
   Int_t GetCalib(int,int,int,float&);  
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPmdReadMaker.h,v 1.6 2007/08/31 10:50:39 rashmi Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StPmdReadMaker.h,v 1.7 2010/04/16 12:04:24 rashmi Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
   
- protected:
- TH1F * m_event_tothit_pmd;
- TH1F * m_event_tothit_cpv;
- TH2F* m_chain_channel;
-
+ protected: 
+  //  virtual StRtsTable *GetNextRaw(int sector);
+  //    virtual StRtsTable * GetNextLegacy(int sector);
+  TH1F * m_event_tothit_pmd;
+  TH1F * m_event_tothit_cpv;
+  TH2F* m_chain_channel;
+  
+  TH1D *chain_mean[49];
+  TH1D *chain_rms[49];
+  TH1D *chain_adc[49];
+  TH2F * pmdhit_tof;
+  TH2F * pmdadc_tof;
+  
  private:
   StDAQReader*           mTheDataReader;//!
   StPMDReader* mThePmdReader;//!
@@ -119,7 +134,7 @@ class StPmdReadMaker : public StMaker {
   
   //calib arrays 
   pmdSMCalib_st* m_PmdCalibConst;
- 
+  
   Int_t ApplyMapping(int*);// Reads raw data from DAQReader and applies mapping
   Bool_t ReadCalibrationsConst(); // Reads calibration constant from DB
   void ReadBadChains(int);//Read Bad Chain information from StPmdCleanConstants
