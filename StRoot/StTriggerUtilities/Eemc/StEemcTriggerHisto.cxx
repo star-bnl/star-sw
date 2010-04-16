@@ -3,6 +3,8 @@
 #include "TObjArray.h"
 #include <cassert>
 
+ClassImp(StEemcTriggerSimu);
+
 //==================================================
 //==================================================
 void  
@@ -173,6 +175,9 @@ StEemcTriggerSimu::initHisto() {
 
 //
 // $Log: StEemcTriggerHisto.cxx,v $
+// Revision 1.6  2010/04/16 01:47:46  pibero
+// Oops, forgot to include triggers before 2009. Thanks, Liaoyuan.
+//
 // Revision 1.5  2009/08/26 19:33:56  fine
 // fix the compilation issues under SL5_64_bits  gcc 4.3.2
 //

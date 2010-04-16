@@ -5,8 +5,10 @@
 #define STAR_StEemcTriggerSimu
 
 #include <TObject.h>
+#include <vector>
 #include <map>
 
+using std::vector;
 using std::map;
 
 #include "StTriggerUtilities/StVirtualTriggerSimu.h"
@@ -19,6 +21,7 @@ class EMCdsm2Tree;
 class EEdsm3;
 class EemcHttpInfo;
 class TH1;
+class TObjArray;
 
 // #### modified by Liaoyuan ####
 
@@ -89,7 +92,7 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
   // #### modified end ####
   
-  
+  vector<int> mTriggerIds;
 
  private:
   // Endcap DSM0...3 Tree only unpacking TRG data, for QA
@@ -123,8 +126,9 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   void Make();
   void getEemcFeeMask();
   void setHList(TObjArray * x){mHList=x;}
-  void addTriggerList( void * );
+  void addTriggerList(vector<int>& trgList);
   StTriggerSimuDecision triggerDecision(int trigId);
+  const vector<int>& triggerIds() const { return mTriggerIds; }
   void connectBemcL0(int  *x) { mBemcEsum5bit=x;};
   bool getHttpInfo(int tpId, EemcHttpInfo &httpInfo);
 
@@ -149,6 +153,9 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.19  2010/04/16 01:47:46  pibero
+// Oops, forgot to include triggers before 2009. Thanks, Liaoyuan.
+//
 // Revision 1.18  2010/03/01 18:48:42  pibero
 // More updates for Run 9
 //

@@ -204,6 +204,7 @@ public:
   void Make();
   
   StTriggerSimuDecision triggerDecision(int trigId);
+  const vector<int>& triggerIds() const { return mFiredTriggers; }
 
   void setHeadMaker(StTriggerSimuMaker *maker) { mHeadMaker = maker; }
   
