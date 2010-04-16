@@ -1,5 +1,5 @@
 /*Justin:  to generate jetTree for a M-C with real-event time stamp do:
-root4star -b -q 'rdMuWana.C(100,"","/star/data05/scratch/balewski/wrk2/test3/rcj10010_1_100evts.MuDst.root",1,100,1)'
+root4star -b -q 'rdMuWana.C(2000,"","/star/institutions/mit/balewski/2010-Walgo-simu/2010setA/rck10012_1_2000evts.MuDst.root",1,28,1)'
 */
 
 class StChain;
@@ -14,15 +14,15 @@ int geant=false;
 int rdMuWana(
 	     int nEve=2e3,
 	     char* inDir   = "",// make it empty for scheduler 
-	     char* file    = "/star/u/balewski/2009-Wana-pp500/fillListPhys/F10535/R10102105_230531_230601.lis",
-	     int nFiles  = 2, // max # of muDst files
+	     char* file    = "/star/u/balewski/2009-Wana-pp500/fillListD/F10535/R10102105_230531_230601.lis",
+	     int nFiles  = 5000, // max # of muDst files
 	     int isMC=0, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve, 20=rcf10010,... 26=rcf10016
-	     int useJetFinder = 2, // 0 - no jets & crash; 1 generate jet trees; 2 read jet trees
-             TString jetTreeDir = "/star/institutions/mit/balewski/2009-pp500-jetsWeve/april15/" //default location of jet trees to be used
+	     int useJetFinder = 2, // 0 - no jets & crash; 1 generate jet trees; 2 read jet trees 
+             TString jetTreeDir = "/star/institutions/mit/balewski/2009-pp500-jets/4.15.2010/" //default location of jet trees to be used
  ) { 
 
   // old Justin's : jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/jetTree4.5.10/"
-  // jetTreeDir = "/star/data05/scratch/balewski/bug12c/out3/";
+ 
   if(isMC==1) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppWprod.lis";
   if(isMC==2) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD2_ppQCD10_inf_filter.lis";
   if(isMC==3) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppZprod.lis";
@@ -45,9 +45,7 @@ int rdMuWana(
     geant=true;
   }
   if(isMC==21) file =Form("%sWminus_enu/perugia320/y2009a/gheisha_on/p09ig/rcf10011_1000_1000evts.MuDst.root",dir);
-  if(isMC==22) file =Form("%sZ_eplus_eminus/perugia320/y2009a/gheisha_on/p09ig/rcf10014_1000_1000evts.MuDst.root",dir);
-  if(isMC==23) file =Form("%sW_jet/perugia320/y2009a/gheisha_on/p09ig/rcf10013_1000_1000evts.MuDst.root",dir);
-  if(isMC==26) file =Form("%sQCD/perugia320/y2009a/gheisha_on/p09ig/rcf10016_1058_1000evts.MuDst.root",dir);
+ 
   //submit via scheduler 
   if(isMC==30) geant=true; //uses geant files
   
@@ -78,8 +76,8 @@ int rdMuWana(
     TString fileG=file; fileG.ReplaceAll("MuDst","geant"); 
     fileG.ReplaceAll("/mu/","/geant/");                     
   }
-  else if(isMC>=20){ //official rcf MC 
-    char *file1=strstr(file,"/rcf")+1;
+  else if(isMC>=20){ // new Jan's MC w/ fixed beam line
+    char *file1=strstr(file,"/rck")+1;
     printf("file1=%s=%s=\n",file1);
     outF=file1; outF.ReplaceAll(".MuDst.root","");
     TString fileG=file; fileG.ReplaceAll("MuDst","geant");
@@ -204,17 +202,19 @@ int rdMuWana(
     dbMk->SetMaxEntryTime(20100124,0); //use 'ofl' beginTime 2008-12-15 00:00:02 BTOW 'ofl' gains these MC were generated with
     dbMk->SetFlavor("sim","eemcPMTped"); // to compensate action of fast simu
     dbMk->SetFlavor("sim","eemcPMTcal"); // to compensate action of fast simu
-
+    printf("a-1\n");
     //get timestamp from static txt file
     int timestamp=-999;
-    ifstream mcTimeStamp("/star/institutions/iucf/stevens4/wAnalysis/aps2010/mcRcfSDT.txt");
+    ifstream mcTimeStamp("/star/institutions/mit/balewski/2010-Walgo-simu/2010setA/mcRckSDT.txt");
     string line;
+    printf("a0\n");
     while(mcTimeStamp.good()){ //loop over file names
       getline(mcTimeStamp,line);
       if(mcTimeStamp.eof()) break;
-      string fileName = line.substr(0,33);
+      string fileName = line.substr(0,30);
+      printf("aa=%s=%s=\n",line.data(),file1);
       if(fileName.compare(file1)==0){ //find correct timestamp
-	timestamp = atoi(line.substr(34,8).data());
+	timestamp = atoi(line.substr(31,8).data());
 	break;
       }
     }
@@ -468,6 +468,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.33  2010/04/16 00:54:01  balewski
+// shoudl work w/ data & new M-C
+//
 // Revision 1.32  2010/04/15 21:15:11  balewski
 // *** empty log message ***
 //
