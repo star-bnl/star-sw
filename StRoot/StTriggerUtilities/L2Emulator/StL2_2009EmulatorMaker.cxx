@@ -18,17 +18,14 @@
 
 ClassImp(StL2_2009EmulatorMaker)
 
-StL2_2009EmulatorMaker::StL2_2009EmulatorMaker(const char *name)
-  : StMaker(name)
-  , mL2jetAlgo2009(0)
-{
+StL2_2009EmulatorMaker::StL2_2009EmulatorMaker(const char *name) : StMaker(name){
 }
 
 //========================================
 StL2_2009EmulatorMaker::~StL2_2009EmulatorMaker(){
 }
 
-#if 0 // disable for now, fix it one pp 2009 run starts,Jan 
+#if 1 // disable for now, fix it one pp 2009 run starts,Jan 
 //========================================
 //========================================
 Int_t  
@@ -40,14 +37,8 @@ StL2_2009EmulatorMaker::InitRun(int runNo){
   LOG_INFO << Form("::setupL2Algos2009(), dbDate=%d  ", mYearMonthDay)<<endm;
 
   
-  mL2algoN=2; // total # of L2 algos (ped, jet, ...)
-  mL2algo =new L2VirtualAlgo *[mL2algoN]; // not cleared memeory leak
-  memset(mL2algo,0,mL2algoN*sizeof(void*));
   //setup every algo one by one, params may be time dependent
-  
-
-  mL2algo[0]=mL2pedAlgo=new L2pedAlgo("ped-algo",mL2EmcDb,mL2EmcDb->logPath,10); // tmp: offset=10
-  mL2algo[1]=mL2jetAlgo2006=new L2jetAlgo2006("jet06-algo",mL2EmcDb,mL2EmcDb->logPath,20); // tmp:offset=20;
+  mL2algo.push_back(new L2jetAlgo2009("jet09-algo",mL2EmcDb,mL2EmcDb->logPath,20)); // tmp:offset=20;
   //   add here L2adc2energy and test saving output
 
 

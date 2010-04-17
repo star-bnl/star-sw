@@ -137,11 +137,15 @@ StGenericL2Emulator2009::make(){
     doBanksFromStRawData(); 
   }
 
-  
-  int ia;
-  for(ia=0;ia<mL2algoN;ia++) {//execute all instantiated L2algos 
+  int L2Result[128]; //first 64 are L2Result, second 64 are C2Result
+  int fakeToken1=0;
+  int fakeToken2=0;
+  memset(L2Result,0,sizeof(L2Result));
+  for(size_t ia=0;ia<mL2algo.size();ia++) {//execute all instantiated L2algos 
     if(mL2algo[ia]==0) continue;
     //mL2algo[ia]-> doEvent(L0trgSwitch, mTotInpEve, (TrgDataType*)mTrigData,mBTOW_in, mBTOW_BANK, mETOW_in, mETOW_BANK);
+    mL2algo[ia]->compute(fakeToken2);
+    mL2algo[ia]->decision(fakeToken1,mBTOW_in,mETOW_in,L2Result);
   } // tmp, accept should be filled in internaly, in next iteration, Jan
   
   //  printf("L2Generic::make   BB=%d EE=%d \n",mBTOW_in,mETOW_in);
@@ -207,8 +211,7 @@ StGenericL2Emulator2009::initRun2(int runNo){
   LOG_INFO  << Form("initRun2() run#=%d  begin",runNo)<<endm;
   L2DbConfig confDB2(mSetPath+"/L2TriggerIds.dat");
 
-  int ia;
-  for(ia=0;ia<mL2algoN;ia++) { //initialize trigger ID for given L2-algo
+  for(size_t ia=0;ia<mL2algo.size();ia++) { //initialize trigger ID for given L2-algo
     // printf("uu i=%d, =%s=\n",ia,mL2algo[ia]->getName());
     if (mL2algo[ia]==0) continue;
     TString algoName=mL2algo[ia]->getName();
@@ -252,8 +255,7 @@ StGenericL2Emulator2009::finish() {
 
   LOG_INFO <<"Finish()=======\n totEveSeen="<< mTotInpEve<<endm;
   
-  int ia;
-  for(ia=0;ia<mL2algoN;ia++) //execute all instantiated L2algos 
+  for(size_t ia=0;ia<mL2algo.size();ia++) //execute all instantiated L2algos 
     if(mL2algo[ia]) mL2algo[ia]->finishRun(); 
   LOG_INFO <<"Finish()======= end"<<endm;
 
@@ -516,8 +518,7 @@ StGenericL2Emulator2009::printBEblocks(){
 void
 StGenericL2Emulator2009::addTriggerList() {
  
- int ia;
-  for(ia=0;ia<mL2algoN;ia++) {
+  for(size_t ia=0;ia<mL2algo.size();ia++) {
     if (mL2algo[ia]==0) continue;
     if (mL2algo[ia]->getOflTrigID()==0) continue; // undefined triggerID
     //if (mL2algo[ia]->accepted()) 
