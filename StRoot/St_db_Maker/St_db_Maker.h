@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.34 2010/01/27 21:34:20 perev Exp $
+// $Id: St_db_Maker.h,v 1.35 2010/04/17 02:07:19 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.35  2010/04/17 02:07:19  perev
+// Method Drop added
+//
 // Revision 1.34  2010/01/27 21:34:20  perev
 // GetValidity now is static
 //
@@ -116,7 +119,7 @@ private:
   int         fEvents[2];       // [0]=nEvents [1]=events with mysql request
   int         fDataSize[2];     // [0]=mysql data this event; [1]=total
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.34 2010/01/27 21:34:20 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.35 2010/04/17 02:07:19 perev Exp $";
  protected:
  public:
                    St_db_Maker(const char *name
@@ -148,6 +151,7 @@ private:
    virtual TDataSet *LoadTable(TDataSet* left);
    virtual TDataSet *FindLeft(StValiSet *val, TDatime vals[2], const TDatime &currenTime);
    virtual TDataSet *OpenMySQL(const char* dbname);
+   static  Int_t     Drop(TDataSet *ds);
            int       Snapshot (int flag);
 
    static EDataSetPass UpdateDB (TDataSet* ds,void *user );
@@ -158,7 +162,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.34 2010/01/27 21:34:20 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.35 2010/04/17 02:07:19 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)
 };
