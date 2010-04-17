@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.116 2010/01/27 21:34:20 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.117 2010/04/17 02:08:33 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.117  2010/04/17 02:08:33  perev
+// ::SetDateTime set time also StMaker::SetDateTime
+//
 // Revision 1.116  2010/01/27 21:34:20  perev
 // GetValidity now is static
 //
@@ -220,52 +223,6 @@ enum eDBMAKER {kUNIXOBJ = 0x2000};
 
 TableClassImpl(St_dbConfig,dbConfig_st)
 //__________________________ class St_db_Maker  ____________________________
-ClassImp(St_db_Maker)
-//_____________________________________________________________________________
-int St_db_Maker::Snapshot (int flag)
-{
-   int ians=0;
-   TFile *tfSnap = 0;
-   TObjectSet set("dbSnapshot",0);
-   const char *fname = SAttr("dbSnapshot");
-   if (!fname || !*fname)                                       return 0;
-   switch (flag) {
-     case 0://Read
-     if (gSystem->AccessPathName(fname, kFileExists))           return 0;
-     if (gSystem->AccessPathName(fname, kReadPermission))       return 0;
-     tfSnap = TFile::Open(fname,"READ");
-     if (!tfSnap)                                               return 0;
-     if (tfSnap->IsZombie()) {delete tfSnap;                    return 0;}
-
-     Info("Snapshot","Use DB from file %s\n",fname);
-     ians = set.Read("dbSnapshot");
-     fDataBase = (TDataSet*)set.GetObject();
-     set.DoOwner(0);
-     assert(fDataBase);
-     break;
-
-     case 1://Write
-     if (!gSystem->AccessPathName(fname, kFileExists))          return 0;
-//// if (gSystem->AccessPathName(fname, kWritePermission))      return 0;
-     tfSnap = TFile::Open(fname,"NEW");
-     if (!tfSnap || tfSnap->IsZombie()) {
-       Error("Snapshot","Can not open file for write");
-       return 0;
-     }
-     TDataSet *parent = fDataBase->GetParent();
-     fDataBase->Shunt(0);
-     set.SetObject(fDataBase);
-     Info("Snapshot","Save DB to file %s\n",fname);
-     ians = set.Write("dbSnapshot",TObject::kOverwrite);
-     fDataBase->Shunt(parent);
-     tfSnap->Close();
-     break;
-   }
-   delete tfSnap;
-   return ians;
-}
-
-
 //__________________________ class St_db_Maker  ____________________________
 ClassImp(St_db_Maker)
 //_____________________________________________________________________________
@@ -684,7 +641,9 @@ SWITCH:  switch (kase) {
     case 2:   // Only CINT object
               newGuy = LoadTable(left);
               if (!val->fDat) { val->fDat = newGuy; val->AddFirst(newGuy);}
-              else            { val->fDat->Update(newGuy); delete newGuy;}
+              else if(val->fDat->InheritsFrom(TTable::Class()))
+	                      { val->fDat->Update(newGuy); delete newGuy ;}
+              else            { delete val->fDat; val->fDat = newGuy     ;}
               val->fTimeMin = valsCINT[0];  val->fTimeMax = valsCINT[1];
               val->fGood=1; kase=4; goto SWITCH;
 
@@ -944,6 +903,7 @@ void St_db_Maker::SetDateTime(Int_t idat,Int_t itim)
   fIsDBTime=0; if (idat==0) return;
   fIsDBTime=1; fDBTime.Set(idat,itim);
   Info("SetDateTime","Setting Startup Date=%d Time=%d",idat,itim);
+  StMaker::SetDateTime(idat,itim);
 }
 //_____________________________________________________________________________
 void   St_db_Maker::SetDateTime(const char *alias)
@@ -954,6 +914,7 @@ void   St_db_Maker::SetDateTime(const char *alias)
   assert(idat);
   Info("SetDateTime","(\"%s\") == Startup Date=%d Time=%d",alias,idat,itim);
   fDBTime.Set(idat,itim);
+  StMaker::SetDateTime(idat,itim);
 }
 //_____________________________________________________________________________
 void   St_db_Maker::SetOn(const char *path)
@@ -1083,6 +1044,23 @@ Int_t  St_db_Maker::GetValidity(const TTable *tb, TDatime *const val)
    return vs->fVers;
 }
 //_____________________________________________________________________________
+Int_t  St_db_Maker::Drop(TDataSet *ds)
+{
+   if (!ds)                             return -1;
+   TString ts("."); ts+=ds->GetName();
+   TDataSet *pa = ds->GetParent();
+   assert(pa);				
+   assert(ts == pa->GetName());
+   StValiSet *vs = (StValiSet*)pa;
+   assert(ds == vs->fDat);
+   TDataSet *ppa = pa->GetParent();
+   ppa->Remove(ds); 
+   pa->Remove(ds); 
+   vs->fDat=0; 
+   delete ds;
+   return 0;
+}
+//_____________________________________________________________________________
 void   St_db_Maker::SetOff(const char *path)
 { AddAlias("Off",path,".onoff"); OnOff();}
 //_____________________________________________________________________________
@@ -1129,6 +1107,67 @@ void St_db_Maker::SetMaxEntryTime(Int_t idate,Int_t itime)
   ut.SetGTime(idate,itime);
   fMaxEntryTime = ut.GetUTime();
 }
+// Now very UGLY trick
+#define private public
+#include "TGeoManager.h"
+//_____________________________________________________________________________
+int St_db_Maker::Snapshot (int flag)
+{
+   int ians=0;
+   TFile *tfSnap = 0;
+   TObjectSet set("dbSnapshot",0);
+   const char *fname = SAttr("dbSnapshot");
+   if (!fname || !*fname)                                       return 0;
+   switch (flag) {
+     case 0://Read
+     if (gSystem->AccessPathName(fname, kFileExists))           return 0;
+     if (gSystem->AccessPathName(fname, kReadPermission))       return 0;
+     tfSnap = TFile::Open(fname,"READ");
+     if (!tfSnap)                                               return 0;
+     if (tfSnap->IsZombie()) {delete tfSnap;                    return 0;}
+
+     Info("Snapshot","Use DB from file %s\n",fname);
+     ians = set.Read("dbSnapshot");
+     fDataBase = (TDataSet*)set.GetObject();
+     set.DoOwner(0);
+     assert(fDataBase);
+//      {
+// //	Special case TGeo geometry must  be touched
+//      TDataSet *geo = (TDataSet*)fDataBase->FindObject(".Geometry");
+//      if (geo) {
+//        geo = ((StValiSet*)geo)->fDat;
+//        TGeoManager *gm = (TGeoManager*)geo->GetObject();
+//        if (gm) { gm->fClosed=0; gm->CloseGeometry(); }
+//      } }
+     break;
+
+     case 1://Write
+     if (!gSystem->AccessPathName(fname, kFileExists))          return 0;
+//// if (gSystem->AccessPathName(fname, kWritePermission))      return 0;
+     tfSnap = TFile::Open(fname,"NEW");
+     if (!tfSnap || tfSnap->IsZombie()) {
+       Error("Snapshot","Can not open file for write");
+       return 0;
+     }
+// //	TGeo geometry must not be saved
+//      TDataSet *geo = (TDataSet*)fDataBase->FindObject(".Geometry");
+//      if (geo) {
+//        geo = ((StValiSet*)geo)->fDat;
+//        Drop(geo);
+//      }
+     TDataSet *parent = fDataBase->GetParent();
+     fDataBase->Shunt(0);
+     set.SetObject(fDataBase);
+     Info("Snapshot","Save DB to file %s\n",fname);
+     ians = set.Write("dbSnapshot",TObject::kOverwrite);
+     fDataBase->Shunt(parent);
+     tfSnap->Close();
+     break;
+   }
+   delete tfSnap;
+   return ians;
+}
+
 
 
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98
