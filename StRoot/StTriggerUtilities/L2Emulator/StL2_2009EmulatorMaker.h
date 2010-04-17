@@ -17,13 +17,8 @@
 #include "StGenericL2Emulator2009.h"
 
 
-// algos used in 2009 ...
-class  L2jetAlgo2009;
-
 class StL2_2009EmulatorMaker : public StMaker, public StGenericL2Emulator2009 {
 private:
-  L2jetAlgo2009* mL2jetAlgo2009;
-
   void  addTriggerList();
   bool  getTriggerData();
 
@@ -41,5 +36,5 @@ public:
 
 #endif
 
-// $Id: StL2_2009EmulatorMaker.h,v 1.1 2010/04/17 05:32:27 pibero Exp $
+// $Id: StL2_2009EmulatorMaker.h,v 1.2 2010/04/17 06:13:30 pibero Exp $
 //

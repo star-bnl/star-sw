@@ -42,8 +42,7 @@ class StGenericL2Emulator2009  {
   bool  mUseMuDst;
   
   // holds all instantiated L2algos
-  L2VirtualAlgo2009 **mL2algo; // actual algos
-  int mL2algoN;  //# of existing algos (time-stamp dependent)
+  vector<L2VirtualAlgo2009*> mL2algo; // actual algos
 
   L2EmcDb   *mL2EmcDb;
   int  mYearMonthDay,mHourMinSec;
