@@ -51,6 +51,7 @@
 #include "L2algoUtil/L2DbTime.h"  // time-dep config
 #include "L2algoUtil/L2btowCalAlgo09.h"
 #include "L2algoUtil/L2etowCalAlgo09.h"
+#include "L2pedAlgo/L2pedAlgo09.h"
 
 //trg-data from ezTree, to read on-line decision, tmp
 #include "StMuDSTMaker/EZTREE/EztTrigBlob.h" // to access DB time stamp
@@ -143,19 +144,23 @@ StGenericL2Emulator2009::make(){
 
   int L2Result[128]; //first 64 are L2Result, second 64 are C2Result
   memset(L2Result,0,sizeof(L2Result));
-  const int token = 1;
+  const int fakeToken1 = 1;
+  const int fakeToken2 = 2;
   L2btowCalAlgo09* l2btowCal09 = dynamic_cast<L2btowCalAlgo09*>(mL2algo[0]);
   L2etowCalAlgo09* l2etowCal09 = dynamic_cast<L2etowCalAlgo09*>(mL2algo[1]);
-  l2btowCal09->calibrateBtow(token,mBTOW_in,mBTOW_BANK);
-  l2etowCal09->calibrateEtow(token,mETOW_in,mETOW_BANK);
+  L2pedAlgo09* l2ped = dynamic_cast<L2pedAlgo09*>(mL2algo[2]);
+  l2btowCal09->calibrateBtow(fakeToken2,mBTOW_in,mBTOW_BANK);
+  l2etowCal09->calibrateEtow(fakeToken2,mETOW_in,mETOW_BANK);
+  int nInpTrg = StMaker::GetChain()->GetIventNumber();
+  l2ped->doPedestals(nInpTrg,L2Result,mBTOW_in,mBTOW_BANK,mETOW_in,mETOW_BANK);
   for(size_t ia=2;ia<mL2algo.size();ia++) {//execute all instantiated L2algos 
     if(mL2algo[ia]==0) continue;
     //mL2algo[ia]-> doEvent(L0trgSwitch, mTotInpEve, (TrgDataType*)mTrigData,mBTOW_in, mBTOW_BANK, mETOW_in, mETOW_BANK);
-    mL2algo[ia]->compute(token);
-    mL2algo[ia]->decision(token,mBTOW_in,mETOW_in,L2Result);
+    mL2algo[ia]->compute(fakeToken2);
+    mL2algo[ia]->decision(fakeToken1,mBTOW_in,mETOW_in,L2Result);
   } // tmp, accept should be filled in internaly, in next iteration, Jan
-  l2btowCal09->clear(token);
-  l2etowCal09->clear(token);
+  l2btowCal09->clear(fakeToken1);
+  l2etowCal09->clear(fakeToken1);
   //  printf("L2Generic::make   BB=%d EE=%d \n",mBTOW_in,mETOW_in);
 
   addTriggerList(); 
