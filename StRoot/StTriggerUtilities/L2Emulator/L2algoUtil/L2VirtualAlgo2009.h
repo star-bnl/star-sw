@@ -3,7 +3,7 @@
 
 
 /*************************************************************
- * $Id: L2VirtualAlgo2009.h,v 1.2 2009/11/19 15:48:42 balewski Exp $
+ * $Id: L2VirtualAlgo2009.h,v 1.3 2010/04/17 05:01:27 pibero Exp $
  * \author Jan Balewski, IUCF, 2006 
  *************************************************************
  * Descripion:
@@ -27,13 +27,14 @@ class L2Histo;
 class L2VirtualAlgo2009 { 
  public:
   enum EmcSwitch { kIsBad=0, kIsBtow, kIsEtow, kIsB_Etow }; // changes action of some methods
-
  protected:  
   bool algoIsOkay; //master 'this algorithm is working' flag.  
                    //Flipped false if it fails consistency checks or is missing anything it needs
   
+  enum {kMaximumNumberOfDsmMasks=4}; //needed for running with old TCU only.
   bool useDsmMask; //needed for running with old TCU only.
-  unsigned short DsmMask[8]; //needed for running with old TCU only.
+  int nmasks; //needed for running with old TCU only.
+  unsigned short DsmMask[kMaximumNumberOfDsmMasks][8]; //needed for running with old TCU only.
 
   //..... main Barrel/Endcap/Both switch
    EmcSwitch mSwitch; // use enum above
@@ -78,7 +79,7 @@ class L2VirtualAlgo2009 {
   int mxHA; // set by user
   void setMaxHist(int k) {  
     if (!(k>0)) {
-      criticalError((char*)"setMaxHist called with negative argument.");
+      criticalError("setMaxHist called with negative argument.");
       k=0;
     }
     mxHA=k;  hA=new L2Histo *[mxHA];
