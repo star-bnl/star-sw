@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.34 2010/04/16 01:47:38 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.35 2010/04/17 17:43:40 pibero Exp $
 
 // MySQL C API
 #include "/usr/include/mysql/mysql.h"
@@ -96,6 +96,12 @@ void StTriggerSimuMaker::useBemc(){
 }
 
 void StTriggerSimuMaker::useL2(StGenericL2Emulator* L2Mk){
+    lTwo=new StL2TriggerSimu(L2Mk);
+    mSimulators[4]=lTwo;
+
+}
+
+void StTriggerSimuMaker::useL2(StGenericL2Emulator2009* L2Mk){
     lTwo=new StL2TriggerSimu(L2Mk);
     mSimulators[4]=lTwo;
 
@@ -417,6 +423,9 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.35  2010/04/17 17:43:40  pibero
+ * *** empty log message ***
+ *
  * Revision 1.34  2010/04/16 01:47:38  pibero
  * Oops, forgot to include triggers before 2009. Thanks, Liaoyuan.
  *
