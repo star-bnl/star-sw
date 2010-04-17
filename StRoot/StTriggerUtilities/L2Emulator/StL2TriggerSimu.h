@@ -10,13 +10,17 @@
 
 #include "StTriggerUtilities/StVirtualTriggerSimu.h"
 class StGenericL2Emulator;
+class StGenericL2Emulator2009;
 
 class StL2TriggerSimu : public StVirtualTriggerSimu {
 private:
     StGenericL2Emulator *mL2maker;
+    StGenericL2Emulator2009 *mL2maker2009;
 
 public:
+    StL2TriggerSimu() : mL2maker(0), mL2maker2009(0) {}
     StL2TriggerSimu(StGenericL2Emulator *x){mL2maker=x;};
+    StL2TriggerSimu(StGenericL2Emulator2009 *x){mL2maker2009=x;};
     void Init();
     void InitRun(int runnumber);
     void Clear(){};
@@ -35,6 +39,9 @@ public:
 
 //
 // $Log: StL2TriggerSimu.h,v $
+// Revision 1.9  2010/04/17 16:41:51  pibero
+// *** empty log message ***
+//
 // Revision 1.8  2008/01/17 01:56:52  kocolosk
 // export 128-byte emulated L2Result
 //

@@ -14,6 +14,7 @@ class  StEEmcDb;
 class  StEmcGeom;
 class  StEmcDecoder;
 class  L2EmcDb;
+class  L2EmcGeom;
 
 #include "L2algoUtil/L2VirtualAlgo2009.h"
 #include "StVirtualTriggerSimu.h"
@@ -45,6 +46,7 @@ class StGenericL2Emulator2009  {
   vector<L2VirtualAlgo2009*> mL2algo; // actual algos
 
   L2EmcDb   *mL2EmcDb;
+  L2EmcGeom *mL2EmcGeom;
   int  mYearMonthDay,mHourMinSec;
   TString  mSetupPath;
 

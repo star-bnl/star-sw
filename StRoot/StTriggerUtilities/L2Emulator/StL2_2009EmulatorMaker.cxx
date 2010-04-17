@@ -13,6 +13,8 @@
 #include "StMuDSTMaker/COMMON/StMuTypes.hh"
 
 //L2 stuff
+#include "L2algoUtil/L2btowCalAlgo09.h"
+#include "L2algoUtil/L2etowCalAlgo09.h"
 #include "L2jetAlgo/L2jetAlgo2009.h"
 #include "StL2_2009EmulatorMaker.h"
 
@@ -34,13 +36,13 @@ StL2_2009EmulatorMaker::InitRun(int runNo){
   //WARN: do NOT use runNo  to controll setup of L2-algos- it would break for M-C
   
   initRun1();
+
   LOG_INFO << Form("::setupL2Algos2009(), dbDate=%d  ", mYearMonthDay)<<endm;
 
-  
   //setup every algo one by one, params may be time dependent
-  mL2algo.push_back(new L2jetAlgo2009("jet09-algo",mL2EmcDb,mL2EmcDb->logPath,20)); // tmp:offset=20;
-  //   add here L2adc2energy and test saving output
-
+  mL2algo.push_back(new L2btowCalAlgo09("btowCal",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,0));
+  mL2algo.push_back(new L2etowCalAlgo09("etowCal",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,0));
+  mL2algo.push_back(new L2jetAlgo2009("jet",mL2EmcDb,mL2EmcDb->logPath,9));
 
   initRun2(runNo);
 
