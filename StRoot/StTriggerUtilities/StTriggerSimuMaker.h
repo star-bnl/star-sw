@@ -37,6 +37,7 @@ class StEemcTriggerSimu;
 class StEmcTriggerSimu;
 class StL2TriggerSimu;
 class StGenericL2Emulator;
+class StGenericL2Emulator2009;
 //class StTriggerSimuResult;
 const int numSimulators=5;
 
@@ -68,6 +69,7 @@ public:
   void    useBemc();
   void    useEmc();
   void    useL2(StGenericL2Emulator* );
+  void    useL2(StGenericL2Emulator2009* );
   void    setMC(int x) {mMCflag=x;}
   
   virtual Int_t     Init();
@@ -96,9 +98,12 @@ public:
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.23 2010/03/01 18:48:36 pibero Exp $
+// $Id: StTriggerSimuMaker.h,v 1.24 2010/04/17 17:43:40 pibero Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.24  2010/04/17 17:43:40  pibero
+// *** empty log message ***
+//
 // Revision 1.23  2010/03/01 18:48:36  pibero
 // More updates for Run 9
 //
