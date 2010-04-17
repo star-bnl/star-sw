@@ -1,11 +1,14 @@
 #include <string.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
 
-  #include "../L2algoUtil/L2Histo.h"
-  #include "../L2algoUtil/L2EmcDb.h"
 #ifdef  IS_REAL_L2  //in l2-ana  environment
   #include "rtsLog.h"
+  #include "../L2algoUtil/L2Histo.h"
+  #include "../L2algoUtil/L2EmcDb.h"
+#else  //full path needed for cvs'd code
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2Histo.h"
+  #include "StTriggerUtilities/L2Emulator/L2algoUtil/L2EmcDb.h"
 #endif
 
 //#define ADD_HARDCODED_DELAY // take it off for real on-line
@@ -14,7 +17,6 @@
 //=============================================
 L2VirtualAlgo2009::L2VirtualAlgo2009(const char* name, L2EmcDb* db, char* outDir, bool needbarrel, bool needendcap, int resOff) :  mDb(db) {
   algoIsOkay=true; //whether the algorithm is in a functional state.  innocent until proven guilty.
-
   mxHA=0;// initially no user defined histos
   mName1=name;
   mOutDir1=outDir;
@@ -27,15 +29,15 @@ L2VirtualAlgo2009::L2VirtualAlgo2009(const char* name, L2EmcDb* db, char* outDir
   mEveStream_etow=globL2eventStream2009.get_etow();
 
   setOflTrigID(0); // relevant only for offline analysis
-  mhN =new   L2Histo(900,(char*)"total events. 0=anyInput 10=anyAccept 11=normalAccept 12=rndAccept",19);
-  mhTc=new   L2Histo(901,(char*)"L2 COMPUTE time per input event;  x: COMPUTE time (CPU kTics); y: events ",180);
-  mhTd=new   L2Histo(902,(char*)"L2 DECISION time per input event;  x: DECISION time (CPU kTics); y: events ",36);
-  mhTcd=new  L2Histo(903,(char*)"L2 COMP+DECI time per input event;  x: COMP+DECIS time (CPU kTics); y: events ",180);
+  mhN =new   L2Histo(900,"total events. 0=anyInput 10=anyAccept 11=normalAccept 12=rndAccept",19);
+  mhTc=new   L2Histo(901,"L2 COMPUTE time per input event;  x: COMPUTE time (CPU kTics); y: events ",180);
+  mhTd=new   L2Histo(902,"L2 DECISION time per input event;  x: DECISION time (CPU kTics); y: events ",36);
+  mhTcd=new  L2Histo(903,"L2 COMP+DECI time per input event;  x: COMP+DECIS time (CPU kTics); y: events ",180);
 
   int mxRunDration=2000;
-  mhRc= new   L2Histo(905,(char*)"rate of COMPUTE; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
-  mhRd= new   L2Histo(906,(char*)"rate of DECISION; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
-  mhRa= new   L2Histo(907,(char*)"rate of ACCEPT; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
+  mhRc= new   L2Histo(905,"rate of COMPUTE; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
+  mhRd= new   L2Histo(906,"rate of DECISION; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
+  mhRa= new   L2Histo(907,"rate of ACCEPT; x: time in this run (seconds); y: rate (Hz)", mxRunDration);
   //j1 printf("L2-%s instantiated, logPath='%s'\n",getName(),mOutDir1.c_str());
   
   // consistency checks, should never fail
@@ -136,7 +138,7 @@ L2VirtualAlgo2009::initRun( int runNo, int *rc_ints, float *rc_floats) {
 
   }
 
-  // printf("L2initRaunVirtual2009-%s kBad=%d\n",getName(),kBad);
+  // printf("L2initRunVirtual2009-%s kBad=%d\n",getName(),kBad);
 
   return kBad;
 }
@@ -170,6 +172,14 @@ L2VirtualAlgo2009::finishRun() {  /* called once at the end of the run */
       fprintf(mLogFile,"#L2-%s: %d histos saved to '%s'\n",getName(),nh,Fname);
   }
   
+  if (mLogFile && useDsmMask)
+    {
+      fprintf(mLogFile,"#L2-%s: %d DSM masks are used.\n",getName(),nmasks);
+      for (int i=0;i<nmasks;i++)
+	  fprintf(mLogFile,"#  Mask %d: 0x%04x 0x%04x 0x%04x 0x%04x 0x%04x 0x%04x 0x%04x 0x%04x\n",
+		  i,DsmMask[i][0],DsmMask[i][1],DsmMask[i][2],DsmMask[i][3],DsmMask[i][4],
+		  DsmMask[i][5],DsmMask[i][6],DsmMask[i][7]);
+    }
   mRunNumber=-2; // clear run #
   for (int i=0; i<mxHA;i++) if(hA[i])hA[i]->reset();
   /* close the output file if it is open */
@@ -197,7 +207,7 @@ L2VirtualAlgo2009::finishCommonHistos() {
   }
   const int nHt=3;
   L2Histo *hT[nHt]={mhTc,mhTd,mhTcd};
-  const char *text[nHt]={"Compute  ","Decision ","Deci+Comp"};
+  char *text[nHt]={"Compute  ","Decision ","Deci+Comp"};
   int ih;
   for(ih=0;ih<nHt;ih++) {
     int iMax=-3, iFWHM=-4;
@@ -436,21 +446,31 @@ bool  L2VirtualAlgo2009::checkDsmMask(unsigned short *lastDSM)
 
   //if (!useDsmMask) printf("useDsmMask=false, short-circuiting.\n");
   if (!useDsmMask)  return 1;  //short circuit if we're not using a mask (ie new TCU is being used).
+  //if (nmasks==0) printf("nmasks=0, short-circuiting.\n");
+  if (nmasks==0) return 1; //if we don't have any masks set up for some reason, return a 'yes'
 
   //printf("%s checkingDSM:\n",getName());
-  for (int i=0;i<8;i++)
+  bool isGood;
+  for (int i=0;i<nmasks;i++)
     {
-      //printf(" Mask: 0x%04x  lastDSM: 0x%04x\n",DsmMask[i],swap_bytes(lastDSM[i]));
-      if((swap_bytes(lastDSM[i]) & DsmMask[i]) != DsmMask[i]) return 0;
+      isGood=true;
+      for (int j=0;j<8 && isGood;j++)
+	{
+	  //printf(" Mask[%d]: 0x%04x  lastDSM: 0x%04x ==>  0x%04x\n",i,
+	  //	 DsmMask[i][j],swap_bytes(lastDSM[j]),(swap_bytes(lastDSM[j]) & DsmMask[i][j]) );
+	  if((swap_bytes(lastDSM[j]) & DsmMask[i][j]) != DsmMask[i][j]) isGood=false;
+	}
+      if (isGood) return 1;
     }
-  //printf("%s matched DSM: [7] Mask: 0x%04x  lastDSM: 0x%04x\n",getName(),DsmMask[7],swap_bytes(lastDSM[7]));
-  return 1;
+//printf("%s has no matching DSM masks.\n",getName());
+  return 0; //we had masks and none of them matched, hence return 'no'.
 }
 
 int L2VirtualAlgo2009::readDsmMask(const char *fileN)
 {
-  for (int i=0;i<8;i++)
-    DsmMask[i]=0;
+  for (int i=0;i<kMaximumNumberOfDsmMasks;i++)
+    for (int j=0;j<8;j++)
+      DsmMask[i][j]=0;
 
   FILE *fd=fopen(fileN,"r");
   if(fd==0) { 
@@ -460,6 +480,7 @@ int L2VirtualAlgo2009::readDsmMask(const char *fileN)
   }
 
   int n=0; // # of read in values
+  nmasks=0; //number of masks being used
   
   const int mx=1000;
   char buf[mx];
@@ -471,16 +492,14 @@ int L2VirtualAlgo2009::readDsmMask(const char *fileN)
     if(buf[0]==0) continue;
     if(buf[0]=='#') continue;
     if(buf[0]=='\n') continue;
-    
-    if(n>=8) {printf("   L2VirtualAlgo2009::readDsmMask:  Too many values in %s.\n",fileN); return -3333;}
-    unsigned int xxx;
-    int ret1=sscanf(buf,"%u",&xxx); 
+    if(nmasks>=kMaximumNumberOfDsmMasks) {printf("   L2VirtualAlgo2009::readDsmMask:  Too many masks %s.\n",fileN); return -3333;}
+    int ret1=sscanf(buf,"%u",&(DsmMask[nmasks][n%8])); 
     if(ret1!=1)  {printf("   L2VirtualAlgo2009::readDsmMask: Problem reading %s.\n",fileN); return -4444;} // wrong input file for this int-par
     n++;
-    DsmMask[n]=xxx; // conversion from uint to ushort to make SL5 happy, JB
+    if (n%8==0) nmasks++;
   }
   fclose(fd);
-  if (n!=8){printf("   L2VirtualAlgo2009::readDsmMask:  Too few values in %s.\n",fileN); return -3333;}
+  if (n%8!=0){printf("   L2VirtualAlgo2009::readDsmMask:  Wrong number of arguments in %s (n=%d).\n",fileN,n); return -3333;}
   useDsmMask=true;
   return 0;  //0=no error occurred
 }
@@ -503,14 +522,8 @@ unsigned short L2VirtualAlgo2009::swap_bytes(unsigned short in)
 
 /******************************************************
   $Log: L2VirtualAlgo2009.cxx,v $
-  Revision 1.3  2009/11/19 15:48:42  balewski
-  add (char*) to many strings to make SL5 happ, few other adjustments
-
-  Revision 1.2  2009/08/26 19:33:57  fine
-  fix the compilation issues under SL5_64_bits  gcc 4.3.2
-
-  Revision 1.1  2009/03/28 19:43:40  balewski
-  2009 code
+  Revision 1.4  2010/04/17 05:01:27  pibero
+  Updates for Run 9 jet tree production
 
   Revision 1.6  2008/01/30 21:56:40  balewski
   E+B high-enery-filter L2-algo fuly functional
