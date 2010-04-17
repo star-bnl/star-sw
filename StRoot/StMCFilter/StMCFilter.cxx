@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StMCFilter.cxx,v 1.7 2009/08/25 20:49:16 fine Exp $
+// @(#)root/eg:$Id: StMCFilter.cxx,v 1.8 2010/04/17 18:45:05 betan Exp $
 // Author: Victor Perev  17/03/2009
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -37,6 +37,7 @@ At the end Finish() is called. Print statistics.  Could be overloaded
 #include "math.h"
 #include <cassert>
 #include <cstring>
+#include <iostream>
 
 #include "StMCFilter.h"
 #include <map>
@@ -64,7 +65,7 @@ StMCFilter::StMCFilter(const char *name)
   assert (it == myMap.end() && "Filter name must be unique");
   myMap[myName] = this;
   gStarFiltAction=(void*)&StMCFilter::Action;
-  printf("*** StMCFilter::StMCFilter(%s) CREATED ***\n",myName.c_str());
+  std::cout << "*** StMCFilter::StMCFilter(" << myName.c_str() << ") CREATED ***" << std::endl;
 }
 //______________________________________________________________________________
 StMCFilter::~StMCFilter()
@@ -84,7 +85,7 @@ int StMCFilter::Select(const char *name)
   assert (it != myMap.end() && "Filter MUST be found");
   if (it == myMap.end()) return 1;
   fgSelected = (*it).second;
-  printf("*** StMCFilter::Select(%s) SELCTED ***\n",myName.c_str());
+  std::cout << "*** StMCFilter::Select(" << myName.c_str() << ") SELCTED ***" << std::endl;
   return 0;
 }
 //______________________________________________________________________________
@@ -161,12 +162,12 @@ void StMCFilter::FINISH()
 {
 static const char *filtName[] = {"RejectEG","RejectGT","RejectGE"};
   if (!fgSelected) return;
-  printf("*** Filter Finish(%s) ***\n",fgSelected->GetName().c_str());
+  std::cout << "*** Filter Finish(" << fgSelected->GetName().c_str() << ") ***" << std::endl;
   for (int i=0; i<3; i++) 
   {
     if (!fgSelected->fCnt[i][0]) continue;
-    printf ("*** Filter %s nTot=%d \tnRej=%d\n",filtName[i]
-           ,fgSelected->fCnt[i][0],fgSelected->fCnt[i][1]);
+    std::cout << "*** Filter " << filtName[i] << " nTot=" << fgSelected->fCnt[i][0] 
+              << "\tnRej=" << fgSelected->fCnt[i][1] << std::endl;
   }
   fgSelected->Finish();
 }

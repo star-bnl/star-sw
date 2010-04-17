@@ -1,9 +1,9 @@
-// @(#)root/eg:$Id: StGenParticle.cxx,v 1.6 2009/06/23 19:52:05 jeromel Exp $
+// @(#)root/eg:$Id: StGenParticle.cxx,v 1.7 2010/04/17 18:45:18 betan Exp $
 
 
 //______________________________________________________________________________
 #include "stdlib.h"
-#include "stdio.h"
+#include <iostream>
 #include "math.h"
 #include <map>
 
@@ -12,14 +12,14 @@
 void StGenParticle::Print(const char *opt) const
 {
 static int nCall=0; nCall++;
-  printf("%4d - ",GetIdx());
-  printf("Ist=%1d",GetStatusCode());
-  printf(" Pdg=%5d",GetPdgCode());
-  printf(" Gea=%3d",GetGeaCode());
+  std::cout << GetIdx() << " -" << std::flush;
+  std::cout << " Ist=" << GetStatusCode() << std::flush;
+  std::cout << " Pdg=" << GetPdgCode() << std::flush;
+  std::cout << " Gea=" << GetGeaCode() << std::flush;
 
-  double V[3];  Vertex(V); printf(" Z=%5.1f ",V[2]);
+  double V[3];  Vertex(V); std::cout << " Z=" << V[2] << std::flush;
 
-  if (GetNDaughters()) printf("\tKids=%d",GetNDaughters());
+  if (GetNDaughters()) std::cout << "\tKids=" << GetNDaughters() << std::flush;
 
   int moth1 = -1,moth2=-1;
   const StGenParticle *m = GetMother(0);
@@ -28,14 +28,14 @@ static int nCall=0; nCall++;
   if (m) moth2 = m->GetIdx();
 
   if (moth1>=0 || moth2>=0) {
-    printf("\tMoth=(");
-    if (moth1>=0) {printf("%d ",moth1);} else {printf("_ ");}
-    if (moth2>=0) {printf("%d ",moth2);} else {printf("_" );}
-    printf(")");
+    std::cout << "\tMoth=(" << std::flush;
+    if (moth1>=0) {std::cout << moth1 << std::flush;} else {std::cout << "_" << std::flush;}
+    std::cout << " " << std::flush;
+    if (moth2>=0) {std::cout << moth2 << std::flush;} else {std::cout << "_" << std::flush;}
+    std::cout << ")" << std::flush;
   }
 
-
-  printf("\n");
+  std::cout << std::endl;
 }
 //______________________________________________________________________________
 double  StGenParticle::GetCalcMass()  const
@@ -102,13 +102,13 @@ int  StGenParticle::GetGeaCode() const { return StGenParticleMaster::Pdg2Gea(Get
 //______________________________________________________________________________
 void StGenParticleMaster::Print(const char *tit) const
 {
-  if (!tit) tit = "";
-   printf("StGenParticleMaster::Print(%s)\n",tit);
+   if (!tit) tit = "";
+   std::cout << "StGenParticleMaster::Print(" << tit << ")" << std::endl;
    const StGenParticle *p=0;
    for (int i=0;p=(*this)(i);i++) {
      p->Print();
    }
-   printf("\n");
+   std::cout << std::endl;
 
 }
 
