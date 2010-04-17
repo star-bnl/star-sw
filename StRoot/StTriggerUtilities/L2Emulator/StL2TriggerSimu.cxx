@@ -9,7 +9,8 @@
 #include <St_db_Maker/St_db_Maker.h>
 
 #include "StL2TriggerSimu.h"
-#include "StL2_2006EmulatorMaker.h" // tmp
+#include "StGenericL2Emulator.h"
+#include "StGenericL2Emulator2009.h"
 
 ClassImp(StL2TriggerSimu)
 
@@ -20,7 +21,7 @@ StL2TriggerSimu::InitRun(int runnumber){
   St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("StarDb");
   assert(mydb);
   mYear=mydb->GetDateTime().GetYear();
-  assert(mL2maker);
+  assert(mL2maker || mL2maker2009);
   LOG_INFO <<Form("L2TriggerSimu::InitRun() year=%d",mYear )<<endm;
  
 }
@@ -40,16 +41,19 @@ StL2TriggerSimu::Init(){
  
 StTriggerSimuDecision   
 StL2TriggerSimu::triggerDecision(int trigId){
-  return mL2maker->isTrigger(trigId);
+  return mL2maker ? mL2maker->isTrigger(trigId) : mL2maker2009->isTrigger(trigId);
 }
 
 const unsigned int* StL2TriggerSimu::result() const {
-    return mL2maker->result();
+  return mL2maker ? mL2maker->result() : mL2maker2009->result();
 }
 
 
 //
 // $Log: StL2TriggerSimu.cxx,v $
+// Revision 1.8  2010/04/17 16:41:51  pibero
+// *** empty log message ***
+//
 // Revision 1.7  2008/01/17 01:56:52  kocolosk
 // export 128-byte emulated L2Result
 //

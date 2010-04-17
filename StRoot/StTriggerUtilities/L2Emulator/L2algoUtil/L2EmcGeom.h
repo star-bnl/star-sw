@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 /*******************************************************
- * $Id: L2EmcGeom.h,v 1.2 2008/01/30 00:47:15 balewski Exp $
+ * $Id: L2EmcGeom.h,v 1.3 2010/04/17 16:42:09 pibero Exp $
  * \author Jan Balewski, IUCF, 2006 
  *******************************************************
  * Descripion:
@@ -23,11 +23,13 @@ class BtowGeom{
   float cosh[mxEtaBin]; 
   float gain2ET_rdo[mxRdo]; // (chan/GeV)coverts ADC to ET in GEV
   float gain2Ene_rdo[mxRdo]; // (chan/GeV)coverts ADC to Energy in GEV
+  unsigned short ped_shifted_rdo[mxRdo];
   unsigned short thr_rdo[mxRdo];
   unsigned short ped_rdo[mxRdo];
   void clear() {  /*  clear content, set threshold @ max as default */
     memset(gain2ET_rdo,    0 ,sizeof(gain2ET_rdo));
     memset(gain2Ene_rdo,   0 ,sizeof(gain2Ene_rdo));
+    memset(ped_shifted_rdo,    0,sizeof(ped_shifted_rdo));
     memset(thr_rdo,    0xFFFF,sizeof(thr_rdo));
     memset(ped_rdo,    0,sizeof(ped_rdo));
   }
@@ -42,11 +44,13 @@ class EtowGeom{
   float cosh[mxEtaBin]; 
   float gain2ET_rdo[mxRdo]; // (chan/GeV)coverts ADC to ET in GEV
   float gain2Ene_rdo[mxRdo]; // (chan/GeV)coverts ADC to Energy in GEV
+  unsigned short ped_shifted_rdo[mxRdo];
   unsigned short thr_rdo[mxRdo];
   unsigned short ped_rdo[mxRdo];
   void clear() {  /*  clear content, set threshold @ max as default */
     memset(gain2ET_rdo,    0 ,sizeof(gain2ET_rdo));
     memset(gain2Ene_rdo,   0 ,sizeof(gain2Ene_rdo));
+    memset(ped_shifted_rdo,    0,sizeof(ped_shifted_rdo));
     memset(thr_rdo,    0xFFFF,sizeof(thr_rdo));
     memset(ped_rdo,    0,sizeof(ped_rdo));
   }

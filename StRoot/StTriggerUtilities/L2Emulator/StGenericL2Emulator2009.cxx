@@ -46,8 +46,11 @@
 
 //L2 stuff
 #include "L2algoUtil/L2EmcDb.h"
+#include "L2algoUtil/L2EmcGeom.h"
 #include "L2algoUtil/L2DbConfig.h"  // time-dep config
 #include "L2algoUtil/L2DbTime.h"  // time-dep config
+#include "L2algoUtil/L2btowCalAlgo09.h"
+#include "L2algoUtil/L2etowCalAlgo09.h"
 
 //trg-data from ezTree, to read on-line decision, tmp
 #include "StMuDSTMaker/EZTREE/EztTrigBlob.h" // to access DB time stamp
@@ -103,6 +106,7 @@ void StGenericL2Emulator2009::init(){
   mGeomB = StEmcGeom::instance("bemc");
   //....
   mL2EmcDb=0; // will be instantiated in InitRun
+  mL2EmcGeom=0;
  
   LOG_INFO << Form("generic:init() , use: MuDst=1 (StEvent=0)=%d isMC=%d",mUseMuDst,mMCflag) <<endm;
 }
@@ -138,16 +142,20 @@ StGenericL2Emulator2009::make(){
   }
 
   int L2Result[128]; //first 64 are L2Result, second 64 are C2Result
-  int fakeToken1=0;
-  int fakeToken2=0;
   memset(L2Result,0,sizeof(L2Result));
-  for(size_t ia=0;ia<mL2algo.size();ia++) {//execute all instantiated L2algos 
+  const int token = 1;
+  L2btowCalAlgo09* l2btowCal09 = dynamic_cast<L2btowCalAlgo09*>(mL2algo[0]);
+  L2etowCalAlgo09* l2etowCal09 = dynamic_cast<L2etowCalAlgo09*>(mL2algo[1]);
+  l2btowCal09->calibrateBtow(token,mBTOW_in,mBTOW_BANK);
+  l2etowCal09->calibrateEtow(token,mETOW_in,mETOW_BANK);
+  for(size_t ia=2;ia<mL2algo.size();ia++) {//execute all instantiated L2algos 
     if(mL2algo[ia]==0) continue;
     //mL2algo[ia]-> doEvent(L0trgSwitch, mTotInpEve, (TrgDataType*)mTrigData,mBTOW_in, mBTOW_BANK, mETOW_in, mETOW_BANK);
-    mL2algo[ia]->compute(fakeToken2);
-    mL2algo[ia]->decision(fakeToken1,mBTOW_in,mETOW_in,L2Result);
+    mL2algo[ia]->compute(token);
+    mL2algo[ia]->decision(token,mBTOW_in,mETOW_in,L2Result);
   } // tmp, accept should be filled in internaly, in next iteration, Jan
-  
+  l2btowCal09->clear(token);
+  l2etowCal09->clear(token);
   //  printf("L2Generic::make   BB=%d EE=%d \n",mBTOW_in,mETOW_in);
 
   addTriggerList(); 
@@ -185,7 +193,7 @@ StGenericL2Emulator2009::initRun1(){
   // override default ped and mask files
   mL2EmcDb->setPedFile ( confL2->getPedFile() );
   mL2EmcDb->setMaskFile( confL2->getMaskFile() );
-
+  mL2EmcGeom = new L2EmcGeom;
 
   // access BTOW DB only re-map ADC back to rdo indexing
   StBemcTables *myTable=new StBemcTables;  
@@ -228,7 +236,7 @@ StGenericL2Emulator2009::initRun2(int runNo){
     
     TString fullPath=Form("%sL2/%d/algos/%s", mSetupPath.Data(), mYear,aa1.Data());
     L2VirtualAlgo2009::readParams(fullPath, mxPar, intsPar, floatsPar);// tmp, no check of # of params
-    assert(mL2algo[ia]->initRun( runNo,intsPar,floatsPar)==0);
+    mL2algo[ia]->initRun(runNo,intsPar,floatsPar);
     mL2algo[ia]->setOflTrigID(trgId);
   }
   LOG_INFO  << "initRun2() done"<<endm;

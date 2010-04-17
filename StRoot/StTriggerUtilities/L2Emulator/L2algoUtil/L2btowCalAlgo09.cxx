@@ -5,7 +5,7 @@
 #include <math.h>
 
 /*********************************************************
-  $Id: L2btowCalAlgo09.cxx,v 1.1 2009/03/29 20:15:08 balewski Exp $
+  $Id: L2btowCalAlgo09.cxx,v 1.2 2010/04/17 16:42:09 pibero Exp $
   \author Jan Balewski, MIT, 2009 
  *****************************************************
   Descripion: 
@@ -30,7 +30,6 @@ the _only_ copy of L2event for all L2-algos
 L2eventStream2009  globL2eventStream2009;
 /*************************/
 
-#if 0 // disabled because "class BtowGeom" has been changed
 //=================================================
 //=================================================
 L2btowCalAlgo09::L2btowCalAlgo09(const char* name, L2EmcDb* db, L2EmcGeom *geoX, char* outDir, int resOff)  :  L2VirtualAlgo2009( name,  db,  outDir, true, false, resOff) { 
@@ -352,8 +351,8 @@ L2btowCalAlgo09::print0(){ // full raw input  ADC array
 
 /****************************************************
   $Log: L2btowCalAlgo09.cxx,v $
-  Revision 1.1  2009/03/29 20:15:08  balewski
-  fix to allocate memory for globL2eventStram2009
+  Revision 1.2  2010/04/17 16:42:09  pibero
+  *** empty log message ***
 
   Revision 1.5  2008/02/01 00:16:40  balewski
   add mxListSize to BTOW/ETOW calibration
@@ -377,4 +376,3 @@ L2btowCalAlgo09::print0(){ // full raw input  ADC array
 */
 
 
-#endif

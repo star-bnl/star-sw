@@ -1,7 +1,7 @@
 #ifndef L2HISTO_h
 #define L2HISTO_h
 /*********************************************************************
- * $Id: L2Histo.h,v 1.2 2007/11/02 03:03:41 balewski Exp $
+ * $Id: L2Histo.h,v 1.3 2010/04/17 16:42:09 pibero Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -52,6 +52,8 @@ class L2Histo {
   int getNunder(){return head.nUnder;}
   int getNover(){return head.nOver;}
   bool findMax( int *iMax, int *iFWHM);
+  bool findMean( int *iMean, int *iRMS);
+
   void printPed( FILE *fd, int x0, int maxBin,char term='\n');
   const int *getData(){ return data; }; 
   const char *getTitle(){ return head.title; } 
@@ -64,6 +66,9 @@ class L2Histo {
 /*
 *********************************************************************
   $Log: L2Histo.h,v $
+  Revision 1.3  2010/04/17 16:42:09  pibero
+  *** empty log message ***
+
   Revision 1.2  2007/11/02 03:03:41  balewski
   modified L2VirtualAlgo
 

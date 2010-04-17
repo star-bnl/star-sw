@@ -1,9 +1,8 @@
 #include <stdio.h>
-#include <assert.h>
 #include <string.h>
 #include <math.h>
 /*********************************************************************
- * $Id: L2Histo.cxx,v 1.4 2008/01/16 23:32:33 balewski Exp $
+ * $Id: L2Histo.cxx,v 1.5 2010/04/17 16:42:09 pibero Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -18,10 +17,20 @@
 //=====================================
 void
 L2Histo::set( int idx, char *tit, int nbx, int nby) {
-  assert(idx>0);
-  assert(nbx>0);
-  assert(nby>0);
-  assert(tit);
+  if (!(idx>0 && nbx >0 && nby >0 && tit))
+    {
+      head.hid=1;
+      head.nBin=1;
+      head.nBinX=1;
+      head.nBinY=1;
+      head.dataSize=head.nBin*sizeof(int);
+      data=new int [head.nBin];
+      memset(data,0,head.dataSize);
+      head.title[0]=0;
+      strncpy(head.title,"set(): HISTOGRAM IS BROKEN IN. CONTACT EXPERT.",mxTx);
+      return;
+    }
+
   head.nOver=head.nUnder=0;
   head.ver=version;
   head.hid=idx;
@@ -39,8 +48,12 @@ L2Histo::set( int idx, char *tit, int nbx, int nby) {
 //=====================================
 void
 L2Histo::setTitle(char *tit){
-  assert(tit);
   head.title[0]=0;
+  if (!tit)
+    {
+      strncpy(head.title,"setTitle():  HISTOGRAM IS BROKEN. CONTACT EXPERT.",mxTx);
+      return;
+    }
   strncpy(head.title,tit,mxTx);
 }
 
@@ -96,7 +109,10 @@ L2Histo::print( int flag, FILE *fd){
 //=====================================
 void
 L2Histo::printCSV(  FILE *fd){
-  
+  if (!fd) {
+    printf("printCSV() passed bad output file!\n");
+    return;
+  }
   fprintf(fd,"#L2H%d,%d,%s,", head.hid,  head.nBin,  head.title);
   if(head.nBinY>1) {
     fprintf(fd,"ny=%d,CVS format not supported for 2D histos,\n",head.nBinY);
@@ -106,6 +122,7 @@ L2Histo::printCSV(  FILE *fd){
 
   for(i=0;i< head.nBin;i++)  fprintf(fd,"%d,",data[i]);
   fprintf(fd,"\n");
+  return;
 }
 
 
@@ -126,6 +143,7 @@ L2Histo::fill( int bin){
 //=====================================
 void
 L2Histo::fillW( int bin, int w){
+  //Fill data[bin] with weight w.
   /* should be:   assert(head.nBinY==1) 
      but it is an online code - proceed, good luck
   */ 
@@ -165,7 +183,6 @@ L2Histo::fillW( int binX, int binY, int w){
 void
 L2Histo::write(FILE *fd, int dbg) {
   if(fd==0) return;
-  //  assert(fd);
   if( head.nBin<=0) return;
   if(dbg) print(dbg-1);
   char *c;
@@ -185,7 +202,11 @@ L2Histo::write(FILE *fd, int dbg) {
 //=====================================
 int
 L2Histo::read(FILE *fd, int dbg) {
-  assert(fd);
+  if (!fd)
+    {
+      printf("L2Histo::read called with no file.  Aborting\n");
+      return -1;
+    }
   char *c;
   unsigned int i;
   
@@ -195,13 +216,30 @@ L2Histo::read(FILE *fd, int dbg) {
   for(i=0;i<sizeof(L2Histo::Head);i++) {
     int val=fgetc(fd);
     if(i==0 && val==EOF) return 1;
-    assert(val!=EOF);
+    if(!(val!=EOF))
+      {
+	printf("L2Histo::read  val==EOF.  Aborting\n");
+	return -1;
+      }
     c[i]=val;
   } 
   //  printf("rd ver %d %d \n", head.ver,version);
-  assert(  head.ver==version); // change it in the future if header ever changes
-  assert( head.nBin>0);
-  assert( head.dataSize== head.nBin*sizeof(int));
+  if (!(  head.ver==version)) // change it in the future if header ever changes
+    {
+      printf("L2Histo::read head.ver!=version.  Aborting\n");
+      return -1;
+    }
+  if (!( head.nBin>0))
+    {
+      printf("L2Histo::read  head.nBin<=0.  Aborting\n");
+      return -1;
+    }
+  if (!( head.dataSize== head.nBin*sizeof(int)))
+    {
+      printf("L2Histo::read  head.dataSize!= head.nBin*sizeof(int).  Aborting\n");
+      return -1;
+    }
+
   data=new int [head.dataSize];
   memset( data,0, head.dataSize); 
   
@@ -211,7 +249,11 @@ L2Histo::read(FILE *fd, int dbg) {
     int val=fgetc(fd);
     if(dbg)printf("i=%d val=%d\n",i,val);
     if(i==0 && val==EOF) return 1;
-    assert(val!=EOF);
+    if(!(val!=EOF))
+    {
+      printf("L2Histo::read  val==EOF.  Aborting\n");
+      return -1;
+    }
     c[i]=val;
   }
 
@@ -226,7 +268,7 @@ L2Histo::read(FILE *fd, int dbg) {
   ======================================== */
 bool 
 L2Histo::findMax( int *iMax, int *iFWHM) {
-  // returns tru if both max & FWHM make sense
+  // returns true if both max & FWHM make sense
   *iMax=*iFWHM=-1;  
 
   /* finds pedestal & FWHM */
@@ -272,6 +314,39 @@ L2Histo::findMax( int *iMax, int *iFWHM) {
    return true;
 }
 
+/*========================================
+  ======================================== */
+bool 
+L2Histo::findMean( int *iMean, int *iRMS) {
+  // returns true if both mean & RMS make sense
+
+  *iMean=*iRMS=-1;  
+  if (head.nBinY>1)
+    return false; //this method doesn't work for 2d plots
+  /* finds mean & RMS without counting overflows */
+  int totalVal=0, weightedVal=0, meanJ=-1, rms=-1;
+  int j;
+  for(j=0; j<head.nBin;j++) {
+    // printf("j=%d  maxVal=%d maxJ=%d  yield=%d\n",j,maxVal, maxJ,data[j]);
+    weightedVal+=data[j]*j;
+    totalVal+=data[j];
+  }
+  if (totalVal>0) meanJ=weightedVal/totalVal;
+  if(meanJ<0) return false; /* no maximum found */
+
+  *iMean=meanJ; // mean was found
+
+  // search for RMS
+  weightedVal=0;
+  for(j=0; j<head.nBin;j++) {
+    // printf("j=%d  maxVal=%d maxJ=%d  yield=%d\n",j,maxVal, maxJ,data[j]);
+    weightedVal+=data[j]*(j-meanJ)*(j-meanJ);
+  }
+  rms=weightedVal/totalVal;
+
+  *iRMS=rms; 
+   return true;
+}
 
 //=====================================
 //=====================================
@@ -294,7 +369,7 @@ L2Histo::printPed( FILE *fd, int x0, int x1,char term){
 	  else if(adc==-10 ) 
 	    fprintf(fd,"<");
 	  else if(adc%10==0) 
-	    fprintf(fd,":");
+	    fprintf(fd,",");
 	  else
 	    fprintf(fd,".");
 	  continue;
@@ -304,7 +379,11 @@ L2Histo::printPed( FILE *fd, int x0, int x1,char term){
 	fprintf(fd,"%c",y2c(val));
       }
 
-      fprintf(fd,"%c",term);
+      // sum higher bins t print overflow
+      int sum=head.nOver;
+      for(j=x1; j<head.nBin;j++) sum+=data[j];
+      
+      fprintf(fd,"ov=%d %c",sum,term);
 }
 
 //=====================================
@@ -315,10 +394,10 @@ L2Histo::y2c(float val){
   char k='?';
   if(valLog<0.) 
     k='-';
-  else if(valLog<10) 
+  else if(valLog<9) 
     k='1'+(int)valLog;
   else  
-    k='a'+(int)(valLog-10);
+    k='a'+(int)(valLog-9);
   return k;
 }
 
@@ -327,6 +406,9 @@ L2Histo::y2c(float val){
 /*
 *********************************************************************
   $Log: L2Histo.cxx,v $
+  Revision 1.5  2010/04/17 16:42:09  pibero
+  *** empty log message ***
+
   Revision 1.4  2008/01/16 23:32:33  balewski
   toward token dependent compute()
 
