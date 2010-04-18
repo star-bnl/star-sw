@@ -1,7 +1,7 @@
 #ifndef L2HISTO_h
 #define L2HISTO_h
 /*********************************************************************
- * $Id: L2Histo.h,v 1.3 2010/04/17 16:42:09 pibero Exp $
+ * $Id: L2Histo.h,v 1.4 2010/04/18 06:05:32 pibero Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -23,17 +23,17 @@ class L2Histo {
   } head;
   int *data; // bin container
   char y2c(float val);// yield -->character
-  void set( int id, char *tit, int mxBinX, int mxBinY ); // generic histo init
+  void set( int id, const char *tit, int mxBinX, int mxBinY ); // generic histo init
 
  public:
   L2Histo();
   // all methods w/o  '2' ignore value of 'nBinY'
 
-  L2Histo( int id, char *tit, int mxBinX, int mxBinY ) { // 2D histo
+  L2Histo( int id, const char *tit, int mxBinX, int mxBinY ) { // 2D histo
     set(id, tit,mxBinX ,mxBinY); }
-  L2Histo( int id, char *tit, int mxBin) {  // 1D histo
+  L2Histo( int id, const char *tit, int mxBin) {  // 1D histo
     set(id, tit, mxBin,1 ); }
-  void setTitle( char *tit); // change title
+  void setTitle(const char *tit); // change title
 
   void print( int flag, FILE *fd=stdout);
   void printCSV( FILE *fd=stdout);
@@ -66,6 +66,9 @@ class L2Histo {
 /*
 *********************************************************************
   $Log: L2Histo.h,v $
+  Revision 1.4  2010/04/18 06:05:32  pibero
+  Address compiler warnings.
+
   Revision 1.3  2010/04/17 16:42:09  pibero
   *** empty log message ***
 

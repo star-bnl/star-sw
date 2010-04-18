@@ -168,7 +168,7 @@ BEdsm2::print( int k) const {
   } 
   printf("\n");
  
-  char *txt="5bit";
+  const char *txt="5bit";
   if(mYear<2006)txt="8bit";
 
   for(i=0;i<2;i++){
@@ -179,6 +179,9 @@ BEdsm2::print( int k) const {
 }
  
 // $Log: BEdsm2.cxx,v $
+// Revision 1.2  2010/04/18 06:05:25  pibero
+// Address compiler warnings.
+//
 // Revision 1.1  2009/10/12 18:04:24  pibero
 // Moved StEEmcUtil/EEdsm to StTriggerUtilities/Eemc
 //

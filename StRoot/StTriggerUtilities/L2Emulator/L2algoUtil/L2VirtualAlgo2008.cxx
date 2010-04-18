@@ -110,7 +110,7 @@ L2VirtualAlgo2008::finishRun() {  /* called once at the end of the run */
   if( mHistFile==0) {
     printf(" L2-%s: finishRun() UNABLE to open run summary log file, continue anyhow\n",getName());
     if (mLogFile)
-      fprintf(mLogFile,"L2-%d histos NOT saved, I/O error\n",getName());
+      fprintf(mLogFile,"L2-%s histos NOT saved, I/O error\n",getName());
   } else { // save histos  
 
     finishRunUser(); 
@@ -149,7 +149,7 @@ L2VirtualAlgo2008::finishCommonHistos() {
   
   const int nHt=3;
   L2Histo *hT[nHt]={mhTc,mhTd,mhTcd};
-  char *text[nHt]={"Compute  ","Decision ","Deci+Comp"};
+  const char *text[nHt]={"Compute  ","Decision ","Deci+Comp"};
   int ih;
   for(ih=0;ih<nHt;ih++) {
     int iMax=-3, iFWHM=-4;
@@ -349,6 +349,9 @@ L2VirtualAlgo2008::printCalibratedData(int token){ //
 
 /******************************************************
   $Log: L2VirtualAlgo2008.cxx,v $
+  Revision 1.7  2010/04/18 06:05:32  pibero
+  Address compiler warnings.
+
   Revision 1.6  2008/01/30 21:56:40  balewski
   E+B high-enery-filter L2-algo fuly functional
 

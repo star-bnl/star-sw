@@ -117,8 +117,8 @@ void StGenericL2Emulator2009::init(){
 //____________________________________________________________
 void
 StGenericL2Emulator2009::make(){
-  int L0trgSwitch=1; // flag passed to L2-algos, derived from L0 decision
 #if 0 // filter some events base on L0-trigger decision, if you want  
+  int L0trgSwitch=1; // flag passed to L2-algos, derived from L0 decision
   StTriggerSimuMaker *L0trgSim=(StTriggerSimuMaker *)StMaker::GetChain()->GetMaker("StarTrigSimu");
   assert(L0trgSim);
   //  L0trgSim->eemc->dsm3TRG->print();

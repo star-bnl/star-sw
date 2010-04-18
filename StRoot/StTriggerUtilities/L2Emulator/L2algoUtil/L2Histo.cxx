@@ -2,7 +2,7 @@
 #include <string.h>
 #include <math.h>
 /*********************************************************************
- * $Id: L2Histo.cxx,v 1.5 2010/04/17 16:42:09 pibero Exp $
+ * $Id: L2Histo.cxx,v 1.6 2010/04/18 06:05:32 pibero Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -16,7 +16,7 @@
 //=====================================
 //=====================================
 void
-L2Histo::set( int idx, char *tit, int nbx, int nby) {
+L2Histo::set( int idx, const char *tit, int nbx, int nby) {
   if (!(idx>0 && nbx >0 && nby >0 && tit))
     {
       head.hid=1;
@@ -47,7 +47,7 @@ L2Histo::set( int idx, char *tit, int nbx, int nby) {
 //=====================================
 //=====================================
 void
-L2Histo::setTitle(char *tit){
+L2Histo::setTitle(const char *tit){
   head.title[0]=0;
   if (!tit)
     {
@@ -406,6 +406,9 @@ L2Histo::y2c(float val){
 /*
 *********************************************************************
   $Log: L2Histo.cxx,v $
+  Revision 1.6  2010/04/18 06:05:32  pibero
+  Address compiler warnings.
+
   Revision 1.5  2010/04/17 16:42:09  pibero
   *** empty log message ***
 
