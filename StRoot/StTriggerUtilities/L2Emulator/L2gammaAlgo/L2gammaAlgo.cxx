@@ -102,7 +102,7 @@ void L2gammaAlgo::init(int geom, int I_par[5], float F_par[5] )
   mMaxET  = (mEEmc)? kEEmcMaxET  : kBEmcMaxET;
   mIdealGainT = (mEEmc)? kEEmcIdealGainT : kBEmcIdealGainT;
 
-  char *names[]={"bemc","eemc"};
+  const char *names[]={"bemc","eemc"};
 
   printf("L2gammaAlgo v0.92 (prociutto)                   \n");
   printf("registering new threshold for %4s \n",names[geom]);

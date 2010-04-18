@@ -3,7 +3,7 @@
 
 
 /*************************************************************
- * $Id: L2VirtualAlgo2009.h,v 1.3 2010/04/17 05:01:27 pibero Exp $
+ * $Id: L2VirtualAlgo2009.h,v 1.4 2010/04/18 06:05:32 pibero Exp $
  * \author Jan Balewski, IUCF, 2006 
  *************************************************************
  * Descripion:
@@ -115,7 +115,7 @@ class L2VirtualAlgo2009 {
   // read-only access to current 'global' event, updated in compute
   void printCalibratedData(int token);
 
-  void criticalError(char* message);
+  void criticalError(const char* message);
 };
 
 

@@ -2,7 +2,7 @@
 #include <string.h>
 #include <assert.h>
 /*********************************************************************
- * $Id: L2BinEvent.cxx,v 1.1 2007/10/11 00:33:12 balewski Exp $
+ * $Id: L2BinEvent.cxx,v 1.2 2010/04/18 06:05:32 pibero Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -95,7 +95,7 @@ L2BinEvent::write(char* headText, int trgLen, void * trgData,
   // ready to write
   unsigned int i;
 
-  char *c=(char*)eve.lenA;
+  const char *c=(char*)eve.lenA;
   for(i=0;i< sizeof(eve.lenA);i++) fputc(c[i],binFd);
 
   c=(char*)headText;
@@ -118,6 +118,9 @@ L2BinEvent::write(char* headText, int trgLen, void * trgData,
 /*
 *********************************************************************
   $Log: L2BinEvent.cxx,v $
+  Revision 1.2  2010/04/18 06:05:32  pibero
+  Address compiler warnings.
+
   Revision 1.1  2007/10/11 00:33:12  balewski
   L2algo added
 

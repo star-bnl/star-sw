@@ -89,19 +89,19 @@ void DSMAlgo_LD301_2009::operator()(DSM& dsm)
   int bht3 = dsm.channels[3] >> 3 & 0x1;
   int bht2 = dsm.channels[3] >> 2 & 0x1;
   int bjp1 = dsm.channels[3] >> 8 & 0x1;
-  int bit1 = (bht3 &&          (dsm.registers[8] & 0x1) ||
-	      bht2 && bjp1  && (dsm.registers[8] & 0x2) ||
-	      bht2 && bbcmb && (dsm.registers[8] & 0x4));
+  int bit1 = ((bht3 &&          (dsm.registers[8] & 0x1)) ||
+	      (bht2 && bjp1  && (dsm.registers[8] & 0x2)) ||
+	      (bht2 && bbcmb && (dsm.registers[8] & 0x4)));
 
   int jp2 = dsm.channels[3] >> 7 & 0x1;
   int ajp = dsm.channels[3] >> 12 & 0x1;
   int eht4 = dsm.channels[3] >> 5 & 0x1;
   int eht2 = dsm.channels[3] >> 4 & 0x1;
   int ejp1 = dsm.channels[3] >> 10 & 0x1;
-  int bit2 = (jp2  &&         (dsm.registers[9] & 0x1) ||
-	      ajp  &&         (dsm.registers[9] & 0x2) ||
-	      eht4 &&         (dsm.registers[9] & 0x4) ||
-	      eht2 && ejp1 && (dsm.registers[9] & 0x8));
+  int bit2 = ((jp2  &&         (dsm.registers[9] & 0x1)) ||
+	      (ajp  &&         (dsm.registers[9] & 0x2)) ||
+	      (eht4 &&         (dsm.registers[9] & 0x4)) ||
+	      (eht2 && ejp1 && (dsm.registers[9] & 0x8)));
 
   int bht = 0;
   switch (dsm.channels[3] & 0x7) {
@@ -112,13 +112,13 @@ void DSMAlgo_LD301_2009::operator()(DSM& dsm)
 
   int jp1 = dsm.channels[3] >> 6 & 0x1;
   int overlap_jp1 = jp1 && !(bjp1 || ejp1);
-  int jp1_selected = (jp1         && (dsm.registers[10] & 0x1) ||
-		      bjp1        && (dsm.registers[10] & 0x2) ||
-		      ejp1        && (dsm.registers[10] & 0x4) ||
-		      overlap_jp1 && (dsm.registers[10] & 0x8));
+  int jp1_selected = ((jp1         && (dsm.registers[10] & 0x1)) ||
+		      (bjp1        && (dsm.registers[10] & 0x2)) ||
+		      (ejp1        && (dsm.registers[10] & 0x4)) ||
+		      (overlap_jp1 && (dsm.registers[10] & 0x8)));
 
   int status = dsm.channels[4] >> 8 & 0xff;
-  int bbcdetlive = ((status & dsm.registers[6] | ~dsm.registers[6]) & 0xff) == 0xff;
+  int bbcdetlive = (((status & dsm.registers[6]) | ~dsm.registers[6]) & 0xff) == 0xff;
   int bbcmblive = bbcmb && bbcdetlive;
   int bbcpre = dsm.registers[0] | dsm.registers[1] << 12;
   if (bbcmblive) --bbcpre;
@@ -128,7 +128,7 @@ void DSMAlgo_LD301_2009::operator()(DSM& dsm)
   int vpde = dsm.channels[1] >> 14 & 0x1;
   int vpdw = dsm.channels[1] >> 15 & 0x1;
   int vpdmb = vpdtac && vpde && vpdw;
-  int vpddetlive = ((status & dsm.registers[7] | ~dsm.registers[7]) & 0xff) == 0xff;
+  int vpddetlive = (((status & dsm.registers[7]) | ~dsm.registers[7]) & 0xff) == 0xff;
   int vpdmblive = vpdmb && vpddetlive;
   int vpdpre = dsm.registers[2] | dsm.registers[3] << 12;
   if (vpdmblive) --vpdpre;

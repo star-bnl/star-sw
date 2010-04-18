@@ -4,7 +4,7 @@
 #include <assert.h>
 
 /*********************************************************************
- * $Id: L2EmcDb.cxx,v 1.5 2007/11/06 22:07:24 balewski Exp $
+ * $Id: L2EmcDb.cxx,v 1.6 2010/04/18 06:05:32 pibero Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -442,8 +442,8 @@ L2EmcDb::changeMaskFullCrate(const char *fname, char BEflag, char *lbl) {
       struct EmcCDbItem  *x=dbByIndex+i;
       if(isEmpty(x)) { continue; }
       if(x->crate!=(int)crate) continue;
-      if (BEflag=='B' && isBTOW(x) ||
-          BEflag=='E' && isETOW(x) ) {
+      if ((BEflag=='B' && isBTOW(x)) ||
+          (BEflag=='E' && isETOW(x))) {
         x->stat=stat;
         x->fail=fail;
         nd++;
@@ -567,6 +567,9 @@ L2EmcDb::changeMaskByName(const char *fname, char *lbl) {
 /*
 *********************************************************************
   $Log: L2EmcDb.cxx,v $
+  Revision 1.6  2010/04/18 06:05:32  pibero
+  Address compiler warnings.
+
   Revision 1.5  2007/11/06 22:07:24  balewski
   added timeStamp controlled L2 setup from Jason
 

@@ -207,7 +207,7 @@ L2VirtualAlgo2009::finishCommonHistos() {
   }
   const int nHt=3;
   L2Histo *hT[nHt]={mhTc,mhTd,mhTcd};
-  char *text[nHt]={"Compute  ","Decision ","Deci+Comp"};
+  const char *text[nHt]={"Compute  ","Decision ","Deci+Comp"};
   int ih;
   for(ih=0;ih<nHt;ih++) {
     int iMax=-3, iFWHM=-4;
@@ -428,7 +428,7 @@ L2VirtualAlgo2009::printCalibratedData(int token){ //
 /* ========================================
   ======================================== */
 void 
-L2VirtualAlgo2009::criticalError(char* message){
+L2VirtualAlgo2009::criticalError(const char* message){
   algoIsOkay=false;
 #ifdef IS_REAL_L2
   LOG(CRIT,"%s",message,0,0,0,0);
@@ -493,7 +493,7 @@ int L2VirtualAlgo2009::readDsmMask(const char *fileN)
     if(buf[0]=='#') continue;
     if(buf[0]=='\n') continue;
     if(nmasks>=kMaximumNumberOfDsmMasks) {printf("   L2VirtualAlgo2009::readDsmMask:  Too many masks %s.\n",fileN); return -3333;}
-    int ret1=sscanf(buf,"%u",&(DsmMask[nmasks][n%8])); 
+    int ret1=sscanf(buf,"%hu",&(DsmMask[nmasks][n%8])); 
     if(ret1!=1)  {printf("   L2VirtualAlgo2009::readDsmMask: Problem reading %s.\n",fileN); return -4444;} // wrong input file for this int-par
     n++;
     if (n%8==0) nmasks++;
@@ -522,6 +522,9 @@ unsigned short L2VirtualAlgo2009::swap_bytes(unsigned short in)
 
 /******************************************************
   $Log: L2VirtualAlgo2009.cxx,v $
+  Revision 1.5  2010/04/18 06:05:32  pibero
+  Address compiler warnings.
+
   Revision 1.4  2010/04/17 05:01:27  pibero
   Updates for Run 9 jet tree production
 

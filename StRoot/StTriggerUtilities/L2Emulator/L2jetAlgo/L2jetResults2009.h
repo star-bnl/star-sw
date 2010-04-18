@@ -2,7 +2,7 @@
 #define L2JETRESULTS2009_H
 
 /*********************************************************************
- * $Id: L2jetResults2009.h,v 1.1 2010/04/17 05:04:13 pibero Exp $
+ * $Id: L2jetResults2009.h,v 1.2 2010/04/18 06:05:39 pibero Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -81,7 +81,7 @@ L2jetResults2009_print(L2jetResults2009 *p) {
 //====================================
 inline unsigned char
 L2jetResults2009_doCheckSum(L2jetResults2009 *p) {
-  if(p==0) {printf("print L2jetResults2009 - NULL pointer ????\n"); return 0xffff;}
+  if(p==0) {printf("print L2jetResults2009 - NULL pointer ????\n"); return 0xff;}
   unsigned char* buf=(unsigned char*) p;
   int len=sizeof( L2jetResults2009);
   unsigned char sum=0;
@@ -93,6 +93,9 @@ L2jetResults2009_doCheckSum(L2jetResults2009 *p) {
 
 /**********************************************************************
   $Log: L2jetResults2009.h,v $
+  Revision 1.2  2010/04/18 06:05:39  pibero
+  Address compiler warnings.
+
   Revision 1.1  2010/04/17 05:04:13  pibero
   Updates for Run 9 jet tree production
 

@@ -16,12 +16,12 @@ int DSMAlgo_EM201_2009::ajpBarrel(const DSM& dsm, int offset) const
   for (int ch = 0; ch < 6; ++ch)
     jpBits[ch] = dsm.channels[ch] >> offset & 0x3;
 
-  return (jpBits[0] && jpBits[1] ||
-	  jpBits[1] && jpBits[2] ||
-	  jpBits[2] && jpBits[3] ||
-	  jpBits[3] && jpBits[4] ||
-	  jpBits[4] && jpBits[5] ||
-	  jpBits[5] && jpBits[0]);
+  return ((jpBits[0] && jpBits[1]) ||
+	  (jpBits[1] && jpBits[2]) ||
+	  (jpBits[2] && jpBits[3]) ||
+	  (jpBits[3] && jpBits[4]) ||
+	  (jpBits[4] && jpBits[5]) ||
+	  (jpBits[5] && jpBits[0]));
 }
 
 int DSMAlgo_EM201_2009::ajpEndcap(const DSM& dsm) const
@@ -40,12 +40,12 @@ int DSMAlgo_EM201_2009::ajpEndcap(const DSM& dsm) const
   jpBits[4] = dsm.channels[7] >> 2 & 0x3; // JPB (12 o'clock)
   jpBits[5] = dsm.channels[7] >> 4 & 0x3; // JPC (2  o'clock)
 
-  return (jpBits[0] && jpBits[1] ||
-	  jpBits[1] && jpBits[2] ||
-	  jpBits[2] && jpBits[3] ||
-	  jpBits[3] && jpBits[4] ||
-	  jpBits[4] && jpBits[5] ||
-	  jpBits[5] && jpBits[0]);
+  return ((jpBits[0] && jpBits[1]) ||
+	  (jpBits[1] && jpBits[2]) ||
+	  (jpBits[2] && jpBits[3]) ||
+	  (jpBits[3] && jpBits[4]) ||
+	  (jpBits[4] && jpBits[5]) ||
+	  (jpBits[5] && jpBits[0]));
 }
 
 void DSMAlgo_EM201_2009::operator()(DSM& dsm)
