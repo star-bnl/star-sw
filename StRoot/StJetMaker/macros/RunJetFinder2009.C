@@ -5,9 +5,10 @@
 //
 
 void RunJetFinder2009(int nevents = 1e6,
-		      const char* mudstfile = "/star/data60/reco/production2009_200Gev_Single/ReversedFullField/P10ic/2009/125/10125066/st_physics_adc_10125066_raw_6320001.MuDst.root",
-		      const char* jetfile   = "st_physics_adc_10125066_raw_6320001.jets.root",
-		      const char* skimfile  = "st_physics_adc_10125066_raw_6320001.skim.root")
+		      const char* mudstfile = "/star/data60/reco/production2009_200Gev_Single/ReversedFullField/P10ic/2009/143/10143008/st_physics_10143008_raw_6020001.MuDst.root",
+		      const char* jetfile   = "st_physics_10143008_raw_6020001.jets.root",
+		      const char* skimfile  = "st_physics_10143008_raw_6020001.skim.root",
+		      bool useL2 = false)
 {
   cout << "Read MuDst file:\t" << mudstfile << endl;
   cout << "Write jet file:\t" << jetfile << endl;
@@ -106,6 +107,9 @@ void RunJetFinder2009(int nevents = 1e6,
   filterMaker->addTrigger(240115);
   filterMaker->addTrigger(240125);
   filterMaker->addTrigger(240225);
+  // VPDMB
+  filterMaker->addTrigger(240020);
+  filterMaker->addTrigger(240025);
 
   // star database
   St_db_Maker* starDb = new St_db_Maker("StarDb","MySQL:StarDb");
@@ -128,14 +132,14 @@ void RunJetFinder2009(int nevents = 1e6,
   simuTrig->useEemc();
   simuTrig->bemc->setConfig(StBemcTriggerSimu::kOffline);
 
-  // Run 9 L2 is not in CVS yet
-#if 0
-  StGenericL2Emulator* simL2Mk = new StL2_2006EmulatorMaker;
-  assert(simL2Mk);
-  simL2Mk->setSetupPath("/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/");
-  simL2Mk->setOutPath("./");
-  simuTrig->useL2(simL2Mk);
-#endif
+  // L2 (only L2btowCalib, L2etowCalib, L2ped, L2jet in CVS as of 17 April 2010)
+  if (useL2) {
+    StL2_2009EmulatorMaker* simL2Mk = new StL2_2009EmulatorMaker;
+    assert(simL2Mk);
+    simL2Mk->setSetupPath("/star/u/pibero/public/StarTrigSimuSetup/");
+    simL2Mk->setOutPath("./");
+    simuTrig->useL2(simL2Mk);
+  }
 
   // Add Mike's 4p maker.
   // Here we also tag whether or not to do the swap.
