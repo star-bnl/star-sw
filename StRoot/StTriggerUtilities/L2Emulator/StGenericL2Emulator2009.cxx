@@ -198,6 +198,8 @@ StGenericL2Emulator2009::initRun1(){
   // override default ped and mask files
   mL2EmcDb->setPedFile ( confL2->getPedFile() );
   mL2EmcDb->setMaskFile( confL2->getMaskFile() );
+
+  // Create L2 geometry interface
   mL2EmcGeom = new L2EmcGeom;
 
   // access BTOW DB only re-map ADC back to rdo indexing
@@ -215,6 +217,7 @@ StGenericL2Emulator2009::initRun1(){
 //========================================
 void
 StGenericL2Emulator2009::initRun2(int runNo){
+  assert(mL2EmcDb->initRun(runNo) == 0);
   //WARN: do NOT use  runNo for any setup - it would berak for M-C
   // read in time-dependent L2 offline trigger ID's
   enum {mxPar=10}; // maximuma for any algo, separate ints & floats

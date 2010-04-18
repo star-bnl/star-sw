@@ -5,7 +5,7 @@
 #include <math.h>
 
 /*********************************************************
-  $Id: L2etowCalAlgo09.cxx,v 1.1 2010/04/17 17:27:31 pibero Exp $
+  $Id: L2etowCalAlgo09.cxx,v 1.2 2010/04/18 02:53:35 pibero Exp $
   \author Jan Balewski, MIT, 2008 
  *****************************************************
   Descripion:
@@ -323,7 +323,7 @@ L2etowCalAlgo09::finishRunUser() {
 //=======================================
 void 
 L2etowCalAlgo09::createHisto() {
-  memset(hA,0,sizeof(hA));
+  memset(hA,0,mxHA*sizeof(L2Histo*));
   //token related spectra
   hA[1]=new  L2Histo(1,"L2-etow-calib: seen tokens;  x:  token value; y: events ",L2eventStream2009::mxToken);
   
@@ -348,6 +348,9 @@ L2etowCalAlgo09::print0(){ // full raw input  ADC array
 
 /**********************************************************************
   $Log: L2etowCalAlgo09.cxx,v $
+  Revision 1.2  2010/04/18 02:53:35  pibero
+  Fixed memset bug.
+
   Revision 1.1  2010/04/17 17:27:31  pibero
   *** empty log message ***
 
