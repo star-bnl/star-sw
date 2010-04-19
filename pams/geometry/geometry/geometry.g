@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.213 2010/04/13 21:47:52 jwebb Exp $
+* $Id: geometry.g,v 1.214 2010/04/19 16:16:03 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.214  2010/04/19 16:16:03  jwebb
+* Restored code to save geometry tag and field setting in the FZD file.
+*
 * Revision 1.213  2010/04/13 21:47:52  jwebb
 * Added PHMD to y2010 geometry in preparation for y2010 simulations.
 *
@@ -1762,6 +1765,9 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
 * and divide by 10 if necessary.
 
    character  Commands*4000
+   character  Geom    *8
+   data       Geom/'unknown '/
+
 
 * - - - - - - - - - - - - - - - - -
 +CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE,QUEST.
@@ -1896,11 +1902,12 @@ If LL>0
                 }
 
   Case YEAR_2B    { old 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
+                  Geom='YEAR_2B ';
                   BtofConfig=4;
                   {RICH,emsEdit}=on;  nmod={24,0}; shift={21,0};
                   nonf={0,2,2};  Itof=2;  richConfig=2;                        nSvtLayer=6; }
 
-  Case YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  BBCM=on;            }
+  Case YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  BBCM=on;  Geom='YEAR_2A ';      }
 
 *************************************************************************************************************
 * as complete as Y2003X below but with all corrections AND pixel detector
@@ -1913,27 +1920,34 @@ If LL>0
   Case YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder;
                   exe y2000; }
   Case Y2000      { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder;
+                  Geom = 'Y2000   ';
                   exe y2000; }
 
   Case YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
+                  Geom = 'Y2001   ';
                   exe y2001; }
   Case Y2001      { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
+                  Geom = 'Y2001   ';
                   exe y2001; }
 
 ****************************************************************************************
   Case YEAR2002   { january 2002 geometry - TPC+CTB+FTPC+CaloPatch2+Rich+SVT3+BBC+FPD;
+                  Geom = 'Y2002   ';
                   exe y2002;
                 }
   Case Y2002      { january 2002 geometry - TPC+CTB+FTPC+CaloPatch2+Rich+SVT3+BBC+FPD;
+                  Geom = 'Y2002   ';
                   exe y2002;
                 }
 ****************************************************************************************
   Case YEAR2003   { draft 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
+                  Geom = 'Y2003   ';
                   exe y2003;
                 }
 
 ****************************************************************************************
   Case Y2003      { draft 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
+                  Geom = 'Y2003   ';
                   exe y2003;
                 }
 
@@ -1945,6 +1959,7 @@ If LL>0
 *    corrected SVT  -- the layer radii (from 250 to 150 microns, see the svt code)
 ****************************************************************************************
   Case Y2003A    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
+                  Geom = 'Y2003a  ';
                  exe y2003a; }
 ***********************************************************************
 * y2003b is y2003a, but with the extra material in the SVT
@@ -1955,15 +1970,18 @@ If LL>0
 * For more info on the extra material in SVT -- see web page
 ****************************************************************************************
   Case Y2003B    { correction 2 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
+                  Geom = 'Y2003b  ';
                  exe y2003b;
                }
 ****************************************************************************************
   Case Y2003C    { Better SVT model on top of 2003B: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
+                  Geom = 'Y2003c  ';
                  exe y2003c;
                }
 
 ****************************************************************************************
   Case Y2003X    { same as y2003b but with full calorimeters and PHMD
+                  Geom = 'Y2003x  ';
                  exe y2003x;
                }
 
@@ -1979,37 +1997,45 @@ If LL>0
 *
 ****************************************************************************************
   Case Y2004     { baseline 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD with low cuts GSTPAR in PHMD;
+                  Geom = 'Y2004x  ';
                  exe y2004;
                }
 
 ****************************************************************************************
   Case Y2004A    { baseline 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD with standard GSTPAR in PHMD;
+                  Geom = 'Y2004a  ';
                  exe y2004a; }
 
 *
 ****************************************************************************************
   Case Y2004B    { corrected 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD with standard GSTPAR in PHMD;
+                  Geom = 'Y2004b  ';
                  exe y2004b; }
 
 ****************************************************************************************
   Case Y2004C    { same as Y2004B but with the SVT chip correction+cone+better SSD+TPC backplane+FTRO
+                  Geom = 'Y2004c  ';
                  exe y2004c; }
 ****************************************************************************************
   Case Y2004D    { Better SVT on top of Y2004B
+                  Geom = 'Y2004d  ';
                  exe y2004d; }
 ****************************************************************************************
 
   Case Y2004X    { hypothetical 2004 geometry: full barrel. Standard cuts in PHMD.;
+                  Geom = 'Y2004x  ';
                  exe y2004x;
                }
 
 ****************************************************************************************
   Case Y2004Y    { same as Y2004X but with the SVT chip correction+cone+better SSD+TPC backplane+FTRO
+                  Geom = 'Y2004y  ';
                  exe y2004y;
                 }
 
 ****************************************************************************************
   Case Y2005    { first cut of 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
+                  Geom = 'Y2005   ';
                 exe y2005;
               }
 ****************************************************************************************
@@ -2067,103 +2093,127 @@ If LL>0
                      FTRO=on;
                      FtroConfig = 1;
 
+                  Geom = 'Y2005x  ';
+
                 }
 
 ****************************************************************************************
   Case Y2005B    { TPC,FTPC,SVT and SSD correction of 2005 geometry
+                  Geom = 'Y2005b  ';
                 exe y2005b;
                }
 
 ****************************************************************************************
   Case Y2005C    { TPC,FTPC,SVT and SSD correction of 2005 geometry
+                  Geom = 'Y2005c  ';
                 exe y2005c;
                }
 
 ****************************************************************************************
   Case Y2005D    { Better SVT on top of Y2005C
+                  Geom = 'Y2005d  ';
                 exe y2005d;
                }
 
 ****************************************************************************************
   Case Y2005E    { Better SVT, bigger shield and SSD on top of Y2005C, and full barrel calorimeter
+                  Geom = 'Y2005e  ';
                  exe y2005e;
                }
 
 ****************************************************************************************
   Case Y2005F    { Y2005E + corrected SSD with gaps and dead area
+                  Geom = 'Y2005f  ';
                  exe y2005f;
 	       }
 ****************************************************************************************
   Case Y2005G    { Y2005F + corrected corrected SVT dead volumes from Rene
+                  Geom = 'Y2005g  ';
                  exe y2005g;
                }
 ****************************************************************************************
   Case Y2005h    { Y2005g + TPC from y2009
+                  Geom = 'Y2005h  ';
                  exe y2005h;
                }
 ****************************************************************************************
 ****************************************************************************************
   Case Y2006    { y2006 baseline which is Y2005D+fixed TPC backplane+New SSD
+                  Geom = 'Y2006   ';
                 exe y2006;
               }
 
   Case Y2006A   { y2006 baseline which is Y2005D+fixed TPC backplane+New SSD
+                  Geom = 'Y2006a  ';
                 exe y2006a;
               }
 
   Case Y2006B   { Y2006A + improved SSD with dead area + improved CALB
+                  Geom = 'Y2006b  ';
                   exe y2006b;
                 }
 
 
   Case Y2006C   { Y2006B without the PHMD
+                  Geom = 'Y2006c  ';
                   exe y2006c;
                 }
 
   Case Y2006G   { Y2006C + new SVT dead material
+                  Geom = 'Y2006g  ';
                   exe y2006g;
                 }
 
   Case y2006h { Y2006h development: y2006g + version 6.1 of the endcap (not yet ready for production)
+                  Geom = 'Y2006h  ';
                   exe y2006h;
                 }
 
 ****************************************************************************************
 ****************************************************************************************
   Case Y2007    { y2006 baseline which is Y2006+FMS
+                  Geom = 'Y2007   ';
                   exe y2007;
 	        }
 ****************************************************************************************
   Case Y2007A   { y2007 (see below) but with corrected SVT (carbon instead of Be water channels)
+                  Geom = 'Y2007a  ';
                   exe y2007a;
                 }
 ****************************************************************************************
   Case Y2007G   { y2007A + dead material from Rene
+                  Geom = 'Y2007g  ';
                   exe y2007g;
                 }
 ****************************************************************************************
   Case Y2007H   { y2007g + TPC 
+                  Geom = 'Y2007h  ';
                   exe y2007h;
                 }
 ****************************************************************************************
 ****************************************************************************************
   Case Y2008    { y2008 baseline: no SVT,  cones,beam support,FTPC in CAVE now
+                  Geom = 'Y2008   ';
                   exe y2008; 
 		}
 ****************************************************************************************
   Case Y2008a   { y2008 + SCONE
+                  Geom = 'Y2008a  ';
                 exe y2008a;
 	        }
 
 ****************************************************************************************
   Case Y2009   { y2009 initial geometry: more detailed TPC
+                  Geom = 'Y2009   ';
                 exe y2009;}
 
   Case Y2009a   { y2009a baseline: more detailed TPC, version 6.1 of the endcap geometry
+                  Geom = 'Y2009a  ';
                 exe y2009a;}
 
 ****************************************************************************************
   Case Y2010   { y2010 
+                  Geom = 'Y2010   ';
                 exe y2010;}
 ****************************************************************************************
   Case DUMM01   { R and D geometry: TPC+DUMM
@@ -3857,4 +3907,15 @@ If LL>0
      NtrSubEv = MLEFT*(NLEFT/MLEFT)
      Prin1 NtrSubEv; (' Ntrack per subevent = ',i6)
    }
+
+c  ==================================================================================================
+c  ==
+c  == Save configuration data used in reconstruction
+c  ==
+c  ==================================================================================================
+   Fill GDAT                     ! GEANT run data
+      mfscale=magfield/5.0       ! magnetic field scale (nominal)
+      gtag={geom(1:4),geom(5:8)} ! geometry tag 
+   EndFill
+
    end
