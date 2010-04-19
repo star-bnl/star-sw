@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.69 2010/04/09 21:13:28 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.70 2010/04/19 19:11:13 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.70  2010/04/19 19:11:13  genevb
+// Fixed bug with AddHists when some files are missing hists
+//
 // Revision 2.69  2010/04/09 21:13:28  genevb
 // Use hobj pointer to ensure proper handling with reference hists
 //
@@ -1318,7 +1321,7 @@ Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
 // now want to add these histograms to the copied ones:
 	Int_t tempint,imk = 0;
         Bool_t notfound = true;
-	for (imk=0;imk<numHistCopy;imk++) {
+	for (imk=0;imk<maxHistCopy;imk++) {
           if (newHist[imk]) {		
              TString nName = newHist[imk]->GetName();
              if (ignorePrefixes) nName = StripPrefixes(nName.Data(),tempInt);
