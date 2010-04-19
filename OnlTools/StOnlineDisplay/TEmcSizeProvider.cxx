@@ -2,7 +2,7 @@
 #include "St_emcOnlineStatus_Table.h"
 #include "EmcChecker.h"
 #include "DAQ_READER/daqReader.h"
-# include "DAQ_BTOW/daq_btow.h"
+#include "DAQ_BTOW/daq_btow.h"
 
 #include <QMessageBox>
 #include <QDebug>
@@ -10,7 +10,7 @@
 //!  TEmcSizeProvider is class to provide the dimensions to visualize the EMC towers
 //________________________________________________________________
 TEmcSizeProvider::TEmcSizeProvider(btow_t **src,void **available,Int_t *len) : TDataProvider(src,available, len)
-  , fScale(4095),fIndex(), fThreshold(200),fEmcChecker(0),fHeader(0),fBemcOnlineStatus(0),fUsePedestals (kTRUE)
+  , fScale(4095),fIndex(), fThreshold(200),fEmcChecker(),fHeader(),fBemcOnlineStatus(),fUsePedestals (kTRUE)
 { 
    fEmcChecker = new EmcChecker(); 
    fScale /= 100;
