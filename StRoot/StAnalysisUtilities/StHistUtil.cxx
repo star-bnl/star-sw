@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.70 2010/04/19 19:11:13 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.71 2010/04/19 20:43:49 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.71  2010/04/19 20:43:49  genevb
+// Fixed bug with AddHists introduced in last fix
+//
 // Revision 2.70  2010/04/19 19:11:13  genevb
 // Fixed bug with AddHists when some files are missing hists
 //
@@ -1332,7 +1335,9 @@ Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
                notfound = false;
 	       //LOG_INFO << " !!! Added histograms with Name: " << newHist[imk]->GetName() <<  endm;
 	     } // strcmp
-	  }  // if newHist[imk] exists   
+          } else {
+            imk++; break;
+          }
 	}  // loop over imk
         if (notfound) {
 
