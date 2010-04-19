@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2010.C,v 1.3 2010/04/16 19:31:19 fisyak Exp $
+// $Id: TpcResponseSimulator.y2010.C,v 1.4 2010/04/19 15:05:58 fisyak Exp $
 // $Log: TpcResponseSimulator.y2010.C,v $
+// Revision 1.4  2010/04/19 15:05:58  fisyak
+// Final (2010_i) parameters for Run X
+//
 // Revision 1.3  2010/04/16 19:31:19  fisyak
 // Intermidiate version
 //
@@ -51,10 +54,10 @@ TDataSet *CreateTable() {
   row.SigmaJitterTI         = 0.2;//ad  0.0;// b for Tpx inner 
   row.SigmaJitterTO         = 0.2;//ad  0.0;// b for Tpx outer 
   row.longitudinalDiffusion = 0.0370;// 0.0232;//K  0.0370;J // cm/sqrt(cm)   ; // 0.0232; from Laser Fit
-  row.transverseDiffusion   = 0.06336; //  cm/sqrt(cm)  ; from Field data fit with OmegaTau = 3.02 // 0.0633
+  row.transverseDiffusion   = 0.06336*1.1585; //i; 0.06336*1.17; //h 0.06336; //  cm/sqrt(cm)  ; from Field data fit with OmegaTau = 3.02 // 0.0633
   row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
-  row.OmegaTauScaleI        = 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
-  row.OmegaTauScaleO        = 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
+  row.OmegaTauScaleI        = 2.145*1.515;  //i; 2.145*1.4;  //h 2.145;  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
+  row.OmegaTauScaleO        = 1.8  *1.201;  //i 1.8  *1.1;    //h 1.8;    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
 #if 0 /* d */
   // Inner_wire_to_plane_coupling ( 0.533 ) * Inner_wire_to_plane_couplingScale ( 0.843485 )
   // Outer_wire_to_plane_coupling ( 0.512 ) * Outer_wire_to_plane_couplingScale ( 0.725267 )
