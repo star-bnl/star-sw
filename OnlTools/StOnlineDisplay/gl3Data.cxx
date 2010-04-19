@@ -1,4 +1,4 @@
-// $Id: gl3Data.cxx,v 1.2 2009/12/06 07:03:50 fine Exp $
+// $Id: gl3Data.cxx,v 1.3 2010/04/19 23:59:27 fine Exp $
 
 #include "gl3Data.h"
 
@@ -147,7 +147,7 @@ int Gl3Data::init() {
   }
   transformer = new l3CoordinateTransformer();
   transformer->Set_parameters_by_hand(0.581, 200.668, 201.138);
-  transformer->LoadTPCLookupTable("/RTS/conf/L3/map.bin");
+  transformer->LoadTPCLookupTable((char*)"/RTS/conf/L3/map.bin");
   // transformer->Print_parameters();
   
   gl3LMVertexFinder *lmv = new gl3LMVertexFinder();
