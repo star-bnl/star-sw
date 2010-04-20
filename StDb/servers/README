@@ -1,7 +1,8 @@
 
 The "dbServers.xml" file is the means by which the 
 DB-API decides which servers to connect on a per-database
-basis. 
+basis, when Load Balancer component is disabled or was not 
+able to find proper configuration files.
 
 1) About the File
 
@@ -59,8 +60,8 @@ It will be used for access to these databases.
 The DB-API will attempt to read 3 dbServer.xml files if
 they exist & in the following order
 
+ - $STDB_SERVERS/dbServers.xml
  - $HOME/dbServers.xml
- - $STDB_SERVERS
  - $STAR/StDb/servers/dbServers.xml
 
 There are no errors as long as 1 file exists and it contains
@@ -81,7 +82,7 @@ The following protocols are used:
 
 For any problems,
 
-Contact: Jeff Porter, porter@bnl.gov 
+Contact: Dmitry Arkhipkin, arkhipkin@bnl.gov 
 
 
 
