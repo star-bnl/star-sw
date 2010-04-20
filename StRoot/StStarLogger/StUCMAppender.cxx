@@ -80,10 +80,12 @@ void StUCMAppender::setOption(const String& option,
 //_________________________________________________________________________
 void StUCMAppender::append(const spi::LoggingEventPtr& event)
 {
-	buffer.push_back(event);
-	
-	if (buffer.size() >= bufferSize)
-		flushBuffer();
+   if (!this->closed) {
+      buffer.push_back(event);
+
+      if (buffer.size() >= bufferSize)
+		  flushBuffer();
+   }
 }
 
 //_________________________________________________________________________
@@ -146,9 +148,11 @@ TxEventLog *StUCMAppender::getConnection()
 //_________________________________________________________________________
 void StUCMAppender::close()
 {
-   flushBuffer();
-   closeConnection();
-	this->closed = true;
+   if (!this->closed) {
+     flushBuffer();
+     closeConnection();
+     this->closed = true;
+  }
 }
 #if 0
 //_________________________________________________________________________
