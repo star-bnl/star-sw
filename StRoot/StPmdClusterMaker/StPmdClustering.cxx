@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.27 2010/04/15 06:52:28 rashmi Exp $
+ * $Id: StPmdClustering.cxx,v 1.28 2010/04/20 23:08:51 rashmi Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,6 +17,9 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.28  2010/04/20 23:08:51  rashmi
+ * removed refinedcluidet2.dat; no refined clusters in 2010 data
+ *
  * Revision 1.27  2010/04/15 06:52:28  rashmi
  * Clustering with option to turn calibration refineclustering on/off
  *
@@ -134,7 +137,7 @@ const Int_t nmx    = 6912;
 Float_t cell_frac[200][2000];
 //ofstream fout1("cluster.dat");
 
-ofstream fout("refinedcluidet2.dat");
+//ofstream fout("refinedcluidet2.dat");
 
 StPmdGeom *geom=new StPmdGeom(); //! utility class
 //-------------------------------------------------
