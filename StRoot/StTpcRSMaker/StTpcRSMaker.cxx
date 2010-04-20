@@ -43,8 +43,8 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.35 2010/04/16 19:29:35 fisyak Exp $";
-#define __ClusterProfile__
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.36 2010/04/20 13:56:24 fisyak Exp $";
+//#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
 //                                    Inner        Outer
@@ -514,7 +514,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	} else {
 	  if (charge == 0) continue;
 	}
-	Double_t dStep =  tpc_hit->ds;
+	Double_t dStep =  TMath::Abs(tpc_hit->ds);
 	Int_t io = 0;
 	if (iPadrow > 13) io = 1;
 	Int_t ioH = io;
@@ -1346,8 +1346,11 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.35 2010/04/16 19:29:35 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.36 2010/04/20 13:56:24 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.36  2010/04/20 13:56:24  fisyak
+// Switch off __ClusterProfile__
+//
 // Revision 1.35  2010/04/16 19:29:35  fisyak
 // W is in eV now
 //
