@@ -112,9 +112,9 @@ BESHistogramGroup::BESHistogramGroup(const char* group, const char* subGroup, co
 : HistogramGroup(group,subGroup,trigger,detector)
 {
 
-    h_bbc_adc_west_vs_east     = new TH2D("h_bbc_adc_west_vs_east","h_bbc_adc_west_vs_east",100,0,5000,100,0,5000);
-    h_bbc_adc_east             = new TH1D("h_bbc_adc_east","h_bbc_adc_east",100,0,5000);
-    h_bbc_adc_west             = new TH1D("h_bbc_adc_west","h_bbc_adc_west",100,0,5000);
+    h_bbc_adc_west_vs_east     = new TH2D("h_bbc_adc_west_vs_east","h_bbc_adc_west_vs_east",100,0,30000,100,0,30000);
+    h_bbc_adc_east             = new TH1D("h_bbc_adc_east","h_bbc_adc_east",100,0,30000);
+    h_bbc_adc_west             = new TH1D("h_bbc_adc_west","h_bbc_adc_west",100,0,30000);
     h_bemc_adc_east            = new TH1D("h_bemc_adc_east","h_bemc_adc_east",100,0,30000);
     h_bemc_adc_west            = new TH1D("h_bemc_adc_west","h_bemc_adc_west",100,0,30000);
     h_event_type               = new TH1D("h_event_type","h_event_type",24,0,6);
@@ -262,9 +262,9 @@ void BESHistogramGroup::draw(TCanvas* cc) {
 
     cc->cd(4);
     h_bbc_adc_west_vs_east->Draw("colz");
-    PlotLine(0.0,5000.0,0.0,5000.0,1,1,2,&line4); // x1,x2,y1,y2,Line_Col,LineWidth,LineStyle
-    PlotLine(BBC_min_adc,BBC_min_adc,BBC_min_adc,5000.0,2,1,2,&line7); // x1,x2,y1,y2,Line_Col,LineWidth,LineStyle
-    PlotLine(BBC_min_adc,5000.0,BBC_min_adc,BBC_min_adc,2,1,2,&line8); // x1,x2,y1,y2,Line_Col,LineWidth,LineStyle
+    PlotLine(0.0,30000.0,0.0,30000.0,1,1,2,&line4); // x1,x2,y1,y2,Line_Col,LineWidth,LineStyle
+    PlotLine(BBC_min_adc,BBC_min_adc,BBC_min_adc,30000.0,2,1,2,&line7); // x1,x2,y1,y2,Line_Col,LineWidth,LineStyle
+    PlotLine(BBC_min_adc,30000.0,BBC_min_adc,BBC_min_adc,2,1,2,&line8); // x1,x2,y1,y2,Line_Col,LineWidth,LineStyle
     cc->cd(1);
     h_bbc_adc_east ->Draw("h");
     cc->cd(1);
@@ -285,12 +285,44 @@ void BESHistogramGroup::draw(TCanvas* cc) {
     h_bemc_adc_all ->Draw("h");
     cc->cd(6);
     h_event_type   ->Draw("h");
-    plotTopLegend("All",0.13,0.3,0.05,1,90.0,&text1);
-    plotTopLegend("BBC",0.268,0.3,0.05,1,90.0,&text2);
-    plotTopLegend("BEMC min. energy",0.4,0.3,0.05,1,90.0,&text3);
-    plotTopLegend("BEMC all cuts",0.54,0.3,0.05,1,90.0,&text4);
-    plotTopLegend("BBC+BEMC",0.67,0.3,0.05,1,90.0,&text5);
-    plotTopLegend("Bad",0.8,0.3,0.05,1,90.0,&text6);
+    if(h_event_type->GetBinContent(h_event_type->FindBin(0)) > 0)
+    {
+        h_event_type->Scale(100.0/((Float_t)h_event_type->GetBinContent(h_event_type->FindBin(0))));
+    }
+
+    char NoP[50];
+    TString HistName;
+
+    HistName = "All events: ";
+    sprintf(NoP,"%2.1f",h_event_type->GetBinContent(h_event_type->FindBin(0)));
+    HistName += NoP;
+    HistName += "%";
+    plotTopLegend((char*)HistName.Data(),0.13,0.15,0.045,1,90.0,&text1);
+    HistName = "BBC: ";
+    sprintf(NoP,"%2.1f",h_event_type->GetBinContent(h_event_type->FindBin(1)));
+    HistName += NoP;
+    HistName += "%";
+    plotTopLegend((char*)HistName.Data(),0.268,0.15,0.045,1,90.0,&text2);
+    HistName = "BEMC min. energy: ";
+    sprintf(NoP,"%2.1f",h_event_type->GetBinContent(h_event_type->FindBin(2)));
+    HistName += NoP;
+    HistName += "%";
+    plotTopLegend((char*)HistName.Data(),0.4,0.15,0.045,1,90.0,&text3);
+    HistName = "BEMC all cuts: ";
+    sprintf(NoP,"%2.1f",h_event_type->GetBinContent(h_event_type->FindBin(3)));
+    HistName += NoP;
+    HistName += "%";
+    plotTopLegend((char*)HistName.Data(),0.54,0.15,0.045,1,90.0,&text4);
+    HistName = "BBC+BEMC: ";
+    sprintf(NoP,"%2.1f",h_event_type->GetBinContent(h_event_type->FindBin(4)));
+    HistName += NoP;
+    HistName += "%";
+    plotTopLegend((char*)HistName.Data(),0.67,0.15,0.045,1,90.0,&text5);
+    HistName = "Bad: ";
+    sprintf(NoP,"%2.1f",h_event_type->GetBinContent(h_event_type->FindBin(5)));
+    HistName += NoP;
+    HistName += "%";
+    plotTopLegend((char*)HistName.Data(),0.8,0.15,0.045,1,90.0,&text6);
 
     cc->Update();
 
