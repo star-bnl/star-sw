@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.117 2010/04/17 02:08:33 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.118 2010/04/21 19:04:31 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.118  2010/04/21 19:04:31  perev
+// Save changed to account changed internal structure
+//
 // Revision 1.117  2010/04/17 02:08:33  perev
 // ::SetDateTime set time also StMaker::SetDateTime
 //
@@ -932,11 +935,18 @@ Int_t  St_db_Maker::Save(const char *path,const TDatime *newtime)
   top = GetDataBase(path);
   if (!top) return 1;
   TDataSetIter nextDS(top,999);
-  while((ds = nextDS())) {
+  TDataSet::EDataSetPass  mode = TDataSet::kContinue;
+  while((ds = nextDS(mode))) {
+    mode = TDataSet::kContinue;
+    if (ds->GetName()[0]=='.') { mode = TDataSet::kPrune; continue; }
     if (!ds->InheritsFrom(TTable::Class()))continue;
     ts = ds->Path();
     i = ts.Index(".const/"); assert(i>0); ts.Replace(0  ,i+7,"");
-    if (ts.Index(".")>=0)               continue;
+    int jdot = ts.Index(".",(Ssiz_t)1,(Ssiz_t)0   ,TString::kExact);
+    assert(jdot>0);
+    int jsla = ts.Index("/",(Ssiz_t)1,(Ssiz_t)jdot,TString::kExact);
+    assert(jsla>0);
+    ts.Remove(jdot,jsla-jdot+1);
     l = ts.Length();
     for (i=0;i<l;i++) {
       if (ts[i]!='/') continue;
@@ -945,7 +955,7 @@ Int_t  St_db_Maker::Save(const char *path,const TDatime *newtime)
     }
     tb = (TTable*)ds;
     if (newtime) { val[0] = *newtime;}
-    else         {i = GetValidity(tb,val); assert(!i);}
+    else         {i = GetValidity(tb,val); assert(i>=0);}
     sprintf(cbuf,".%08d.%06d.C",val[0].GetDate(),val[0].GetTime());
     ts += cbuf;
     out.open((const char*)ts);
