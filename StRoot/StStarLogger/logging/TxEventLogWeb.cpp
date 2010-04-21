@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.8 2010/04/15 20:23:05 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.9 2010/04/21 22:27:41 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -22,7 +22,7 @@ TxEventLogWeb::TxEventLogWeb() : TxEventLogFile() { }
 
 void TxEventLogWeb::writeDown(const std::string& message)
 {
-  std::string httpstring="wget -b  -q -o /dev/null ";
+  std::string httpstring="wget -q -o /dev/null ";
   httpstring+= "-O /dev/null ";
  
   httpstring+= WebServiceURL;
