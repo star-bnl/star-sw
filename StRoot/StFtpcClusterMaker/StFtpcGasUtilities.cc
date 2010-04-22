@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//   $Id: StFtpcGasUtilities.cc,v 1.24 2009/11/14 12:51:08 jcs Exp $
+//   $Id: StFtpcGasUtilities.cc,v 1.25 2010/04/22 16:23:03 jcs Exp $
 //
 //   StFtpcGasUtilities
 //
@@ -11,6 +11,10 @@
 ////////////////////////////////////////////////////////////////////////
 //
 //   $Log: StFtpcGasUtilities.cc,v $
+//   Revision 1.25  2010/04/22 16:23:03  jcs
+//   From "2010-04-13 00:20:01" to "2010-04-19 20:39:00" the extra temperatures for both FTPC West
+//   and FTPC East were stuck. Use the default temperatures for all runs taken in this time period.
+//
 //   Revision 1.24  2009/11/14 12:51:08  jcs
 //   added suggested parentheses to avoid warnings which appeared with system upgrade
 //
@@ -133,6 +137,17 @@ Int_t StFtpcGasUtilities::averageTemperatureWest(Int_t dbDate, Int_t runNumber) 
    Int_t numberBodyTemperaturesWest = 0;
    Float_t averageBodyTemperatureWest = 0.0;
    Float_t averageGasTempWest = 0.0;
+
+   // In 2010 from "2010-04-13 00:20:01" to "2010-04-19 20:39:00" the extra temperatures for
+   // both FTPC West and FTPC East were stuck. Since one reading was propagated to the database
+   // for this whole time period, we decided to use the default temperatures for all runs
+   // taken in this time period.
+
+   if ( (dbDate >= 20100413 && runNumber > 11102099) && (dbDate <= 20100419 && runNumber < 11109080)) {
+     mParam->setGasTemperatureWest(mDb->defaultTemperatureWest() + mDb->adjustAverageWest());
+     LOG_WARN<<"FTPC West Extra temperatures bad for run number "<<runNumber<<" dbDate "<<dbDate<<" using defaultTemperatureWest = "<<mDb->defaultTemperatureWest()<<" + adjustAverageWest "<<mDb->adjustAverageWest()<<" = "<<mParam->gasTemperatureWest()<<endm;
+     return kStWarn;
+   } 
 
 
    // Starting Y2006, calculate FTPC West gas temperature from extra temperatures only 
@@ -368,6 +383,17 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate, Int_t runNumber) 
    Int_t numberBodyTemperaturesEast = 0;
    Float_t averageBodyTemperatureEast = 0.0;
    Float_t averageGasTempEast = 0.0;
+
+   // In 2010 from "2010-04-13 00:20:01" to "2010-04-19 20:39:00" the extra temperatures for
+   // both FTPC West and FTPC East were stuck. Since one reading was propagated to the database
+   // for this whole time period, we decided to use the default temperatures for all runs
+   // taken in this time period.
+
+   if ( (dbDate >= 20100413 && runNumber > 11102099) && (dbDate <= 20100419 && runNumber < 11109080)) {
+     mParam->setGasTemperatureEast(mDb->defaultTemperatureEast() + mDb->adjustAverageEast());
+     LOG_WARN<<"FTPC East Extra temperatures bad for run number "<<runNumber<<" dbDate "<<dbDate<<" using defaultTemperatureEast = "<<mDb->defaultTemperatureEast()<<" + adjustAverageEast = "<<mDb->adjustAverageEast()<<" = "<<mParam->gasTemperatureEast()<<endm;
+     return kStWarn;
+   } 
 
    // Starting Y2006, calculate FTPC East gas temperature from extra temperatures only 
    // and adjust with mDb->adjustAverageEast()
