@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.128 2010/03/31 19:15:45 fine Exp $
+// $Id: St_geant_Maker.cxx,v 1.129 2010/04/23 23:19:26 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.129  2010/04/23 23:19:26  perev
+// Remove not needed and expencive call AgstHits
+//
 // Revision 1.128  2010/03/31 19:15:45  fine
 // RT #1890 Fix the side effect introduced  yesterdays
 //
@@ -1789,7 +1792,7 @@ void St_geant_Maker::Geometry() {
 }
 //______________________________________________________________________________
 Int_t St_geant_Maker::Agstroot() {
-  AgstHits();
+//VP not used  AgstHits();
   return agstroot();
 }
 //_____________________________________________________________________________
@@ -2261,7 +2264,8 @@ Char_t *acfromr(Float_t r) {// 'TYPE'
 }
 #endif
 //________________________________________________________________________________
-Int_t St_geant_Maker::AgstHits() {
+Int_t St_geant_Maker::AgstHits() 
+{
   if (! geant3) return kStErr;
   Int_t JSET = clink->jset;
   if (JSET <= 0) return kStErr;
