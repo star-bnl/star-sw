@@ -46,7 +46,7 @@ class StLoggerManager : public StMessMgr {
 #ifndef __CINT__
    log4cxx::LoggerPtr fLogger;        //!  Logger to server the old STAR MessageManager interface
    static log4cxx::LoggerPtr fgQALogger;      //!  Logger to server QA stream
-   static log4cxx::LoggerPtr fgUCMLogger;     //!  Logger to server UCM stream
+   static log4cxx::LoggerPtr &fgUCMLogger;    //!  Logger to server UCM stream
 #endif
 
    static StMessMgr* mInstance;       //!
@@ -89,12 +89,14 @@ class StLoggerManager : public StMessMgr {
 #endif
 
 protected:
+   friend class StChain;
    virtual void IgnoreRepeats();
    virtual void AllowRepeats();
    virtual void AllowRepeats(int nRepeats);
 
    virtual        int PrintList(messVec* list);
    virtual const messVec* GetAll();
+   static  void       DestroyInstance();                       //!
 
  public:
    virtual ~StLoggerManager();
@@ -247,4 +249,4 @@ inline log4cxx::varia::StarOptionFilterPtr&  StLoggerManager::GetStarOptionFilte
 #endif
 #endif
 
-// $Id: StLoggerManager.h,v 1.15 2009/09/09 00:05:13 fine Exp $
+// $Id: StLoggerManager.h,v 1.16 2010/04/23 22:39:11 fine Exp $

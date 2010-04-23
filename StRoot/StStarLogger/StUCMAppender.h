@@ -44,7 +44,6 @@ namespace log4cxx
 #endif
 
 		class StUCMAppender;
-		typedef helpers::ObjectPtrT<StUCMAppender> StUCMAppenderPtr;
 
 		/**
 		<p><b>WARNING: This version of StUCMAppender
@@ -265,6 +264,7 @@ namespace log4cxx
 			inline size_t getBufferSize() const
 				{ return bufferSize; }
 		}; // class StUCMAppender
+      LOG4CXX_PTR_DEF(StUCMAppender);
     } // namespace db
 }; // namespace log4cxx
 #endif
