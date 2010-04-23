@@ -37,7 +37,8 @@ void Set(const double *errxy,const double *errz);
 void Move(double const F[5][5]);
 void Backward();
 public:
-
+//  dA: delta azimuth angle; dH: error along ort to dir and Z axis
+//  dC: error of curvature;  dZ == dZ; dL = dLambda
 double
 mHH,
 mHA, mAA,
@@ -66,6 +67,7 @@ const double* Dir() const 	{return fD;  }
       void    Nor(double *norVec) const; 
       void    SetEmx(const double *err=0);
 const TCEmx_t *Emx() const 	{return fEmx;} 
+      TCEmx_t *Emx()     	{return fEmx;} 
 double Path(const double pnt[2]) const;
 double Path(const double pnt[2], const double exy[3]) const;
 double Path(const TCircle &tc,double *s2=0) const;
@@ -203,6 +205,7 @@ THelixTrack &operator=(const THelixTrack &from);
 	void Backward();
 ///		Move along helix
 	double Move(double step);
+	double Move(double step,double F[5][5]);
 ///     	Make transformatiom matrix to transform errors
 	void MakeMtx(double step,double F[5][5]);
 ///		Evaluate params with given step along helix
