@@ -58,6 +58,9 @@ class  StMessage  {
   public: StMessage(){}
 };
 
+log4cxx::LoggerPtr StLoggerManager::fgQALogger;      //!  Logger to server QA stream
+log4cxx::LoggerPtr &StLoggerManager::fgUCMLogger = *(new log4cxx::LoggerPtr());    //!  Logger to server UCM stream
+
 const char *StLoggerManager::fgLevels = "FEWIDQU";
 #ifdef __ROOT__
 //    ROOT Error handling subrotuine
@@ -199,15 +202,18 @@ StLoggerManager::StLoggerManager(const char *loggerName)
 //_____________________________________________________________________________
 StLoggerManager::~StLoggerManager() {
 //
-// Destructor - must delete the message lists
+// Destructor - must delete the message listsy
 //
-  if (StLoggerManager::Instance() == this) gMessMgr = 0;
-//  delete [] fCurType; 
+
   fCurType = 0;
-  delete [] fCurOpt;  fCurOpt = 0;
+  if (fCurOpt) delete [] fCurOpt;  fCurOpt = 0;
+
+  if (StLoggerManager::Instance() == this) {
+      DestroyInstance();
+      gMessMgr = 0;
+   }
+
 }
-log4cxx::LoggerPtr StLoggerManager::fgQALogger;      //!  Logger to server QA stream
-log4cxx::LoggerPtr StLoggerManager::fgUCMLogger;     //!  Logger to server UCM stream
 //_____________________________________________________________________________
 StMessMgr* StLoggerManager::Instantiate() 
 {return StLoggerManager::StarLoggerInit(); }
@@ -263,15 +269,15 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
     // Check the mandatory UCM appender
     TString ucmenv = gSystem->Getenv("LOGGING");
     if (ucmenv == "UCM" && gSystem->Getenv("JOBINDEX") && gSystem->Getenv("REQUESTID") ) {
-       StUCMAppenderPtr appender = new StUCMAppender(ucmenv.Data());
+       StUCMAppenderPtr appender(new StUCMAppender(ucmenv.Data()));
        appender->setLayout(new PatternLayout("%m"));
        appender->setName(_T("UCM"));       
        fgUCMLogger->addAppender(appender);
-       StringMatchFilterPtr filter = new StringMatchFilter;
+       StringMatchFilterPtr filter(new StringMatchFilter());
        filter->setStringToMatch(_T("StageID="));
        filter->setAcceptOnMatch(true);
        appender->addFilter(filter);
-       appender->addFilter(new DenyAllFilter);
+       appender->addFilter( DenyAllFilterPtr(new DenyAllFilter));
 
        //Set the default threashold to be 
        fgUCMLogger->setLevel(LOG4CXX_LEVEL_DEBUG);
@@ -287,6 +293,7 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
     // Set the ROOT ErrorHanlding via logger as well
     // See: $ROOTSYS/include/TError.h
     SetErrorHandler(Log4cxx4RootErrorHandler);
+//    Connect(gApplication,"Terminate(Int_t)",mInstance);
   }
   return mInstance;
 }
@@ -509,7 +516,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.37 2009/09/09 00:05:13 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.38 2010/04/23 22:39:11 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -911,6 +918,21 @@ Int_t StLoggerManager::GetLevel(Int_t) const
 #endif
    return kAll;
 }
+
+//_____________________________________________________________________________
+void StLoggerManager:: DestroyInstance()
+{
+    if (mInstance) {
+       // There is no method to chech ref. do it blindly.
+       // fgQALogger->releaseRef(); fgQALogger->releaseRef();
+       fgUCMLogger->releaseRef();
+       // fgUCMLogger->releaseRef();
+       // Logger::getRootLogger()->releaseRef();
+       // StMessMgr *thisPtr = mInstance;
+       mInstance = 0; gMessMgr = 0;
+       // delete thisPtr;
+    }
+}
 #if 0
 //_____________________________________________________________________________
 const char *GetName() 
@@ -927,8 +949,11 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.37 2009/09/09 00:05:13 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.38 2010/04/23 22:39:11 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.38  2010/04/23 22:39:11  fine
+// RT #1911. Make interface log4cxx compliant. Remove the dtor dead-lock and add post-mortim clean up
+//
 // Revision 1.37  2009/09/09 00:05:13  fine
 // Merge log4cxx version 9 and 10
 //
