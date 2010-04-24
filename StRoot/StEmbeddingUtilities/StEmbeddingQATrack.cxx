@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.cxx,v 1.8 2010/02/16 02:11:49 hmasui Exp $
+ * $Id: StEmbeddingQATrack.cxx,v 1.9 2010/04/24 20:20:15 hmasui Exp $
  * $Log: StEmbeddingQATrack.cxx,v $
+ * Revision 1.9  2010/04/24 20:20:15  hmasui
+ * Add geant process, and modift the type of parent, parent-parent geantid to match the data members in minimc tree
+ *
  * Revision 1.8  2010/02/16 02:11:49  hmasui
  * Add parent-parent geantid
  *
@@ -41,7 +44,8 @@ ClassImp(StEmbeddingQATrack)
 
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::StEmbeddingQATrack()
-  : mNCommonHit(-10), mParentParentGeantId(-10), mParentGeantId(-10), mGeantId(-10), mNHit(-10), mNHitPoss(-10), mCharge(-10),
+  : mNCommonHit(-10), mParentParentGeantId(-10), mParentGeantId(-10), mGeantId(-10), mGeantProcess(-10),
+  mNHit(-10), mNHitPoss(-10), mCharge(-10),
   mVectorMc(-9999., -9999., -9999., -9999.),
   mVectorRc(-9999., -9999., -9999., -9999.),
   mPhi(-9999.), mdEdx(-9999.), mDcaGl(-9999.), 
@@ -53,7 +57,8 @@ StEmbeddingQATrack::StEmbeddingQATrack()
 
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StTinyMcTrack& track)
-  : mNCommonHit(-10), mParentParentGeantId(-10), mParentGeantId(track.parentGeantId()), mGeantId(track.geantId()), 
+  : mNCommonHit(-10), 
+  mParentParentGeantId(-10), mParentGeantId(track.parentGeantId()), mGeantId(track.geantId()), mGeantProcess(-10),
   mNHit(track.nHitMc()), mNHitPoss(-10), mCharge(track.chargeMc()),
   mVectorMc(track.pxMc(), track.pyMc(), track.pzMc(), 
       TMath::Sqrt(track.pMc()*track.pMc() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track.geantId())->mass(),2.0))),
@@ -68,7 +73,8 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StTinyMcTrack& 
 
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StMiniMcPair* track)
-  : mNCommonHit(track->commonHits()), mParentParentGeantId(-10), mParentGeantId(track->parentGeantId()), mGeantId(track->geantId()), 
+  : mNCommonHit(track->commonHits()),
+  mParentParentGeantId(-10), mParentGeantId(track->parentGeantId()), mGeantId(track->geantId()), mGeantProcess(-10),
   mNHit(track->fitPts()), mNHitPoss(track->nPossiblePts()), mCharge(track->charge()),
   mVectorMc(track->pxMc(), track->pyMc(), track->pzMc(), 
       TMath::Sqrt(track->pMc()*track->pMc() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track->geantId())->mass(),2.0))),
@@ -86,6 +92,7 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StMiniMcPair* track)
 StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StContamPair* track)
   : mNCommonHit(track->commonHits()), 
   mParentParentGeantId(track->mParentParentGeantId), mParentGeantId(track->parentGeantId()), mGeantId(track->geantId()), 
+  mGeantProcess(track->mGeantProcess),
   mNHit(track->fitPts()), mNHitPoss(track->nPossiblePts()), mCharge(track->charge()),
   mVectorMc(track->pxMc(), track->pyMc(), track->pzMc(), 
       TMath::Sqrt(track->pMc()*track->pMc() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track->geantId())->mass(),2.0))),
@@ -102,7 +109,7 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StContamPair* track)
 
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StMuTrack& track, const Short_t geantid)
-  : mNCommonHit(-10), mParentParentGeantId(-10), mParentGeantId(-10), mGeantId(geantid),
+  : mNCommonHit(-10), mParentParentGeantId(-10), mParentGeantId(-10), mGeantId(geantid), mGeantProcess(-10),
   mNHit(track.nHitsFit(kTpcId)), mNHitPoss(track.nHitsPoss(kTpcId)), mCharge(track.charge()),
   mVectorMc(-9999., -9999., -9999., -9999.), // No MC momentum for real tracks
   mVectorRc(track.p().x(), track.p().y(), track.p().z(), 
@@ -215,19 +222,22 @@ void StEmbeddingQATrack::print() const
 
   LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
   LOG_INFO << Form("StEmbeddingQATrack::print() : Track informations (%s)", mName.Data()) << endm;
-  LOG_INFO << "  getNCommonHit()      " <<  getNCommonHit()  << endm;
-  LOG_INFO << "  getGeantId()         " <<  getGeantId()     << endm;
-  LOG_INFO << "  getNHit()            " <<  getNHit()        << endm;
-  LOG_INFO << "  getMass() (MC, RC)  (" <<  getMassMc() << ", " << getMassRc() << ")" << endm;
-  LOG_INFO << "  getPt() (MC, RC)    (" <<  getPtMc() << ", " << getPtRc() << ")" << endm;
-  LOG_INFO << "  getPx() (MC, RC)    (" <<  getPxMc() << ", " << getPxRc() << ")" << endm;
-  LOG_INFO << "  getPy() (MC, RC)    (" <<  getPyMc() << ", " << getPyRc() << ")" << endm;
-  LOG_INFO << "  getPz() (MC, RC)    (" <<  getPzMc() << ", " << getPzRc() << ")" << endm;
-  LOG_INFO << "  getP()  (MC, RC)    (" <<  getPMc() << ", " << getPRc() << ")" << endm;
-  LOG_INFO << "  getEta() (MC, RC)   (" <<  getEtaMc() << ", " << getEtaRc() << ")" << endm;
-  LOG_INFO << "  getPhi()             " <<  getPhi()         << endm;
-  LOG_INFO << "  getdEdx()            " <<  getdEdx()        << endm;
-  LOG_INFO << "  getDcaGl()           " <<  getDcaGl()       << endm;
+  LOG_INFO << "  getNCommonHit()           " <<  getNCommonHit()  << endm;
+  LOG_INFO << "  getParentParentGeantId()  " <<  getParentParentGeantId()     << endm;
+  LOG_INFO << "  getParentGeantId()        " <<  getParentGeantId()     << endm;
+  LOG_INFO << "  getGeantId()              " <<  getGeantId()     << endm;
+  LOG_INFO << "  getGeantProcess()         " <<  getGeantProcess()     << endm;
+  LOG_INFO << "  getNHit()                 " <<  getNHit()        << endm;
+  LOG_INFO << "  getMass() (MC, RC)       (" <<  getMassMc() << ", " << getMassRc() << ")" << endm;
+  LOG_INFO << "  getPt() (MC, RC)         (" <<  getPtMc() << ", " << getPtRc() << ")" << endm;
+  LOG_INFO << "  getPx() (MC, RC)         (" <<  getPxMc() << ", " << getPxRc() << ")" << endm;
+  LOG_INFO << "  getPy() (MC, RC)         (" <<  getPyMc() << ", " << getPyRc() << ")" << endm;
+  LOG_INFO << "  getPz() (MC, RC)         (" <<  getPzMc() << ", " << getPzRc() << ")" << endm;
+  LOG_INFO << "  getP()  (MC, RC)         (" <<  getPMc() << ", " << getPRc() << ")" << endm;
+  LOG_INFO << "  getEta() (MC, RC)        (" <<  getEtaMc() << ", " << getEtaRc() << ")" << endm;
+  LOG_INFO << "  getPhi()                  " <<  getPhi()         << endm;
+  LOG_INFO << "  getdEdx()                 " <<  getdEdx()        << endm;
+  LOG_INFO << "  getDcaGl()                " <<  getDcaGl()       << endm;
   LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
 }
 
