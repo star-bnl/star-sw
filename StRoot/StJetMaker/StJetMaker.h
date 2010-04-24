@@ -1,33 +1,35 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.56 2009/09/05 22:15:55 pibero Exp $
+// $Id: StJetMaker.h,v 1.57 2010/04/24 04:15:27 pibero Exp $
 #ifndef STJETMAKER_H
 #define STJETMAKER_H
 
-#include "StMaker.h"
-
-#include "emulator/StJetMakerBackwordCompatibility.h"
-
-#include <vector>
-#include <map>
-
+// ROOT
 class TTree;
 
+// STAR
 class StMuDstMaker;
 class StFourPMaker;
 class StJetPars;
 class StppAnaPars;
 class StJets;
-
 class StjeParticleCollector;
 class StjeJetFinderRunner;
 class StjeJetCuts;
-
 class StjeTreeWriter;
+class AbstractFourVec;
+
+// C++ STL
+#include <list>
+#include <vector>
+
+using namespace std;
+
+// STAR
+#include "StMaker.h"
+#include "StJetFinder/StProtoJet.h"
 
 class StJetMaker : public StMaker {
-
 public:
-
   StJetMaker(const char* name, StMuDstMaker* uDstMaker, const char* outputFile);
   virtual ~StJetMaker();
 
@@ -39,37 +41,39 @@ public:
     
   void SetTreeWriter(StjeTreeWriter* treeWriter);
 
-  void addAnalyzer(const StppAnaPars*, StJetPars*, StFourPMaker*, const char* anaName);
+  void addAnalyzer(const StppAnaPars* anapars, StJetPars* jetpars, StFourPMaker* fourPMaker, const char* name);
 
-  // To be removed. Please do not call this method.
   StJets* getStJets(const char* branchName = "ConeJets12") const;
-
-  typedef StJetMakerBackwordCompatibility::jetBranchesMap jetBranchesMap;
-
-  // To be removed. Please do not call this method.
-  jetBranchesMap& getJets() const { return _backwordCompatibility->getJets(); }
-  //
 
   StjeTreeWriter* getTreeWriter() { return _treeWriter; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.56 2009/09/05 22:15:55 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.57 2010/04/24 04:15:27 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
+  struct StJetBranch {
+    TString name;
+    vector<const AbstractFourVec*> particles;
+    list<StProtoJet> protojets;
+    StjeParticleCollector* particleCollector;
+    StjeJetFinderRunner* jetFinder;
+    StjeJetCuts* jetCuts;
 
-  vector<StjeParticleCollector*> _particleCollectorList;
+    StJetBranch(const StppAnaPars* anapars, StJetPars* jetpars, StFourPMaker* fourPMaker, const char* name);
 
-  vector<StjeJetFinderRunner*> _jetFinderList;
+    void clear()
+    {
+      particles.clear();
+      protojets.clear();
+    }
+  };
 
-  vector<StjeJetCuts*> _jetCutsList;
+  vector<StJetBranch*> mJetBranches;
 
   StjeTreeWriter* _defaultTreeWriter;
   StjeTreeWriter* _treeWriter;
 
-  StJetMakerBackwordCompatibility* _backwordCompatibility;
-
-  ClassDef(StJetMaker, 0)
-
+  ClassDef(StJetMaker,0);
 };
 
 #endif // STJETMAKER_H

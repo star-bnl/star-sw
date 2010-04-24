@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjeParticleCollector.h,v 1.2 2008/08/03 00:26:52 tai Exp $
+// $Id: StjeParticleCollector.h,v 1.3 2010/04/24 04:15:35 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STPARTICLECOLLECTOR_H
 #define STPARTICLECOLLECTOR_H
@@ -20,9 +20,10 @@ public:
 
   StjeParticleCollector(const StppAnaPars* ap, StFourPMaker* fp, ParticleList& particleList);
 
-  virtual ~StjeParticleCollector();
+  virtual ~StjeParticleCollector() {}
 
-  void Do();
+  void Do(int iVertex);
+  size_t numberOfVertices() const;
 
 private:
 

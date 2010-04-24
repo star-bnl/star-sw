@@ -1,33 +1,23 @@
-// $Id: StjTPCMuDst.cxx,v 1.6 2010/04/13 13:30:38 pibero Exp $
+// $Id: StjTPCMuDst.cxx,v 1.7 2010/04/24 04:15:39 pibero Exp $
 #include "StjTPCMuDst.h"
 
-#include <StMuDSTMaker/COMMON/StMuTrack.h>
-#include <StMuDSTMaker/COMMON/StMuDst.h>
-#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
-#include <StMuDSTMaker/COMMON/StMuEvent.h>
+#include "StEventTypes.h"
+#include "StMuDSTMaker/COMMON/StMuTypes.hh"
 
 #include <mudst/StMuEmcPosition.h>
 #include <StEmcUtil/geometry/StEmcGeom.h>
 
 #include <TVector3.h>
 
-StjTPCMuDst::StjTPCMuDst(StMuDstMaker* uDstMaker)
-  : _uDstMaker(uDstMaker)
-{
-
-}
-
 StjTrackList StjTPCMuDst::getTrackList()
 {
   StjTrackList ret;
 
-  StMuDst* uDst = _uDstMaker->muDst();
+  int nTracks = StMuDst::numberOfPrimaryTracks();
 
-  long nTracks = uDst->numberOfPrimaryTracks();
-
-  double magneticField = uDst->event()->magneticField()/10.0; // Tesla
+  double magneticField = StMuDst::event()->magneticField()/10.0; // Tesla
   for(int i = 0; i < nTracks; ++i) {
-    const StMuTrack* mutrack = uDst->primaryTracks(i);
+    const StMuTrack* mutrack = StMuDst::primaryTracks(i);
 
     if(mutrack->flag() < 0) continue;
 
@@ -45,9 +35,9 @@ StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magnet
 {
   StjTrack track;
 
-  track.runNumber = _uDstMaker->muDst()->event()->runId();
-  track.eventId = _uDstMaker->muDst()->event()->eventId();
-  track.detectorId = 1;
+  track.runNumber = StMuDst::event()->runId();
+  track.eventId = StMuDst::event()->eventId();
+  track.detectorId = kTpcId;
 
   TVector3 p(mutrack->momentum().x(), mutrack->momentum().y(), mutrack->momentum().z());
 
@@ -71,19 +61,20 @@ StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magnet
   track.dcaD       = mutrack->dcaD();
   track.chi2       = mutrack->chi2();
   track.chi2prob   = mutrack->chi2prob();
-  track.BField      = magneticField;
-  //track.bemcRadius = StEmcGeom::instance("bemc")->Radius() + 5;
+  track.BField     = magneticField;
 
   // The optimum BEMC radius to use in extrapolating the track was determined to be 238.6 cm
   // (slightly behind the shower max plane) in Murad Sarsour's electron jets analysis.
   // http://cyclotron.tamu.edu/star/2006Jets/nov27_2007/details.html
+
   track.bemcRadius = 238.6;	// cm
 
-  StThreeVectorF vertex = _uDstMaker->muDst()->event()->primaryVertexPosition();
+  StThreeVectorF vertex = StMuDst::primaryVertex()->position();
   track.vertexZ = vertex.z(); 
 
   StThreeVectorD momentumAt, positionAt;
   StMuEmcPosition EmcPosition;
+
   if (EmcPosition.trackOnEmc(&positionAt, &momentumAt, mutrack, track.BField, track.bemcRadius))
     {
       track.exitDetectorId = 9;
@@ -108,11 +99,9 @@ StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magnet
       track.exitTowerId = 0;
     }
 
-
   track.dEdx = mutrack->dEdx();
-
+  track.beta = mutrack->globalTrack() ? mutrack->globalTrack()->btofPidTraits().beta() : 0;
   track.trackIndex = i;
-
   track.id = mutrack->id();
 
   return track;

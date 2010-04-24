@@ -1,4 +1,4 @@
-// $Id: StjeParticleCollector.cxx,v 1.2 2008/08/03 00:26:52 tai Exp $
+// $Id: StjeParticleCollector.cxx,v 1.3 2010/04/24 04:15:35 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeParticleCollector.h"
 
@@ -16,17 +16,11 @@ StjeParticleCollector::StjeParticleCollector(const StppAnaPars* ap, StFourPMaker
   , _particleList(particleList)
   , _anaPar(*ap)
 {
-
 }
 
-StjeParticleCollector::~StjeParticleCollector()
+void StjeParticleCollector::Do(int iVertex)
 {
-
-}
-
-void StjeParticleCollector::Do()
-{
-  const vector<AbstractFourVec*> &particleList = _fourPMaker->getTracks();
+  const vector<AbstractFourVec*> &particleList = _fourPMaker->getVertexNodes()[iVertex].tracks;
   
   _particleList.clear();
   
@@ -36,9 +30,12 @@ void StjeParticleCollector::Do()
   
     _particleList.push_back(*particle);
   }
-
 }
 
+size_t StjeParticleCollector::numberOfVertices() const
+{
+  return  _fourPMaker->getVertexNodes().size();
+}
 
 bool StjeParticleCollector::shoudNotPassToJetFinder(const AbstractFourVec* particle) const
 {

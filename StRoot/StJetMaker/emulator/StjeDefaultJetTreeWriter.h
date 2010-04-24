@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjeDefaultJetTreeWriter.h,v 1.5 2009/09/05 18:21:57 pibero Exp $
+// $Id: StjeDefaultJetTreeWriter.h,v 1.6 2010/04/24 04:15:35 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJEDEFAULTJETTREEWRITER_H
 #define STJEDEFAULTJETTREEWRITER_H
@@ -31,13 +31,14 @@ public:
 
   TTree* jetTree() const { return _jetTree; }
 
-  void fillJetTree();
   StJets *getLastStJets() { return _analyzerCtlList[_analyzerCtlList.size() - 1]._jets; }
 
 private:
   
+  void fillJetTreeHeader(int iAnalyzer);
+  void fillJetTree(int iAnalyzer, int iVertex);
   void fillJetTreeForOneJetFindingAlgorithm(StJets& stjets, std::list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker);
-  void fillJet(StJets &stjets, StProtoJet& pj);
+  void fillJet(StJets& stjets, StProtoJet& pj);
 
   struct AnalyzerCtl {
     std::string _branchName;

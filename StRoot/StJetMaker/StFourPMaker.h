@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StFourPMaker.h,v 1.7 2009/12/09 05:12:02 pibero Exp $
+// $Id: StFourPMaker.h,v 1.8 2010/04/24 04:15:27 pibero Exp $
 #ifndef STFOURPMAKER_H
 #define STFOURPMAKER_H
 
@@ -8,22 +8,25 @@
 
 #include "StJetFinder/AbstractFourVec.h"
 
+class StMuPrimaryVertex;
+
+typedef std::vector<AbstractFourVec*> FourList;
+
+struct VertexNode {
+  StMuPrimaryVertex* vertex;
+  FourList tracks;
+};
 
 class StFourPMaker : public StMaker {
 
 public:
 
-  StFourPMaker(const char *name)
-    : StMaker(name) { }
+  StFourPMaker(const char *name) : StMaker(name) { }
 
-  typedef std::vector<AbstractFourVec*> FourList;
-  virtual const StThreeVectorF& getVertex() const = 0;
-  virtual FourList& getTracks() = 0;
+  virtual const vector<VertexNode>& getVertexNodes() const = 0;
   virtual bool bemcCorrupt() const { return false; }
 
 private:
-
-  StThreeVectorF mVertex;
 
   ClassDef(StFourPMaker,1)
 };

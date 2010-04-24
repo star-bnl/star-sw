@@ -1,4 +1,4 @@
-// $Id: StjeDefaultJetTreeWriter.cxx,v 1.8 2010/02/18 20:06:14 pibero Exp $
+// $Id: StjeDefaultJetTreeWriter.cxx,v 1.9 2010/04/24 04:15:35 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeDefaultJetTreeWriter.h"
 
@@ -68,18 +68,11 @@ void StjeDefaultJetTreeWriter::Finish()
   _outFile = 0;
 }
 
-void StjeDefaultJetTreeWriter::fillJetTree()
+void StjeDefaultJetTreeWriter::fillJetTreeHeader(int iAnalyzer)
 {
-  for(vector<AnalyzerCtl>::iterator it = _analyzerCtlList.begin(); it != _analyzerCtlList.end(); ++it) {
-    StFourPMaker* fourPMaker = (*it)._fourPMaker;
-    std::list<StProtoJet>* protoJetList = (*it)._protoJetList;
-    fillJetTreeForOneJetFindingAlgorithm(*(*it)._jets, protoJetList, fourPMaker);
-  }
-  _jetTree->Fill();
-}
+  StFourPMaker* fourPMaker = _analyzerCtlList[iAnalyzer]._fourPMaker;
+  StJets& jets = *_analyzerCtlList[iAnalyzer]._jets;
 
-void StjeDefaultJetTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, std::list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker)
-{
   jets.Clear();
   jets.setBemcCorrupt(fourPMaker->bemcCorrupt());
 
@@ -94,7 +87,20 @@ void StjeDefaultJetTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJets& jets
     jets.setDylanPoints( bet4p->nDylanPoints() );
     jets.setSumEmcE( bet4p->sumEmcEt() );
   }
-	
+}
+
+void StjeDefaultJetTreeWriter::fillJetTree(int iAnalyzer, int iVertex)
+{
+  if (iVertex) return;		// Only use first vertex
+  StFourPMaker* fourPMaker = _analyzerCtlList[iAnalyzer]._fourPMaker;
+  std::list<StProtoJet>* protoJetList = _analyzerCtlList[iAnalyzer]._protoJetList;
+  fillJetTreeForOneJetFindingAlgorithm(*_analyzerCtlList[iAnalyzer]._jets, protoJetList, fourPMaker);
+
+  _jetTree->Fill();
+}
+
+void StjeDefaultJetTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, std::list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker)
+{
   for(list<StProtoJet>::iterator it = protoJetList->begin(); it != protoJetList->end(); ++it) {
     fillJet(jets, *it);
   }

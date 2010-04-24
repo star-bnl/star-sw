@@ -8,6 +8,8 @@ class StJets;
 
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
+#include "StEventTypes.h"
+#include "StMuDSTMaker/COMMON/StMuTypes.hh"
 #include "StMuTrackFourVec.h"
 
 #include "StMuTrackEmu.h"
@@ -25,6 +27,28 @@ class StJets;
 
 #include "StjeJetEventTreeWriter.h"
 
+static int nBTOFMatch(int vertexIndex)
+{
+  // Run 9 production did not use nBTOFMatch in vertex finder.
+  // Here we calculate it from the number of primary tracks with
+  // BTOF hits.
+
+  // Save vertex index
+  int currentVertexIndex = StMuDst::currentVertexIndex();
+
+  // Count how many primary tracks have TOF hits
+  StMuDst::setVertexIndex(vertexIndex);
+  int nmatches = 0;
+  TIter next(StMuDst::primaryTracks());
+  while (StMuTrack* track = (StMuTrack*)next())
+    if (track->tofHit()) ++nmatches;
+
+  // Restore vertex index
+  StMuDst::setVertexIndex(currentVertexIndex);
+
+  return nmatches;
+}
+
 ClassImp(StjeJetEventTreeWriter);
 
 StjeJetEventTreeWriter::StjeJetEventTreeWriter(const char* outFileName)
@@ -34,7 +58,7 @@ StjeJetEventTreeWriter::StjeJetEventTreeWriter(const char* outFileName)
 {
 }
 
-void StjeJetEventTreeWriter::addJetFinder(StFourPMaker* fourPMaker, const vector<const AbstractFourVec*>* particleList, list<StProtoJet>* protoJetList, const char* name, StJets* stjets)
+void StjeJetEventTreeWriter::addJetFinder(StFourPMaker* fourPMaker, const vector<const AbstractFourVec*>* particleList, list<StProtoJet>* protoJetList, const char* name, StJets*)
 {
   AnalyzerCtl anaCtl;
 
@@ -65,37 +89,41 @@ void StjeJetEventTreeWriter::Finish()
   _outFile = 0;
 }
 
-void StjeJetEventTreeWriter::fillJetTree()
+void StjeJetEventTreeWriter::fillJetTreeHeader(int iAnalyzer)
 {
-  for(vector<AnalyzerCtl>::iterator iAnalyzer = _analyzerCtlList.begin(); iAnalyzer != _analyzerCtlList.end(); ++iAnalyzer) {
-    StFourPMaker* fourPMaker = iAnalyzer->_fourPMaker;
-    list<StProtoJet>* protoJetList = iAnalyzer->_protoJetList;
-    fillJetTreeForOneJetFindingAlgorithm(*iAnalyzer->_jetEvent, protoJetList, fourPMaker);
-  }
-  _jetTree->Fill();
+  StJetEvent* jetEvent = _analyzerCtlList[iAnalyzer]._jetEvent;
+  StFourPMaker* fourPMaker = _analyzerCtlList[iAnalyzer]._fourPMaker;
+  jetEvent->Clear();
+  jetEvent->setRunId(fourPMaker->GetRunNumber());
+  jetEvent->setEventId(fourPMaker->GetEventNumber());
 }
 
-void StjeJetEventTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJetEvent& jetEvent, list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker)
+void StjeJetEventTreeWriter::fillJetTree(int iAnalyzer, int iVertex)
 {
-  jetEvent.Clear();
-  jetEvent.setRunId(fourPMaker->GetRunNumber());
-  jetEvent.setEventId(fourPMaker->GetEventNumber());
-  jetEvent.setVertex(fourPMaker->getVertex().xyz());
-  for (list<StProtoJet>::iterator iJet = protoJetList->begin(); iJet != protoJetList->end(); ++iJet)
-    fillJet(jetEvent, *iJet, fourPMaker);
+  AnalyzerCtl& analyzerCtl = _analyzerCtlList[iAnalyzer];
+  fillJetTreeForOneVertex(analyzerCtl._jetEvent,analyzerCtl._protoJetList,analyzerCtl._fourPMaker,iVertex);
 }
 
-void StjeJetEventTreeWriter::fillJet(StJetEvent& jetEvent, StProtoJet& pj, StFourPMaker* fourPMaker)
+void StjeJetEventTreeWriter::fillJetTreeForOneVertex(StJetEvent* jetEvent, list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker, int iVertex)
 {
-  StJetCandidate* jet = jetEvent.addJet(new StJetCandidate(fourPMaker->getVertex().xyz(), pj.pt(), pj.eta(), pj.phi(), pj.e()));
+  StJetVertex* jetVertex = jetEvent->newVertex();
+  copyVertex(fourPMaker->getVertexNodes()[iVertex].vertex,jetVertex);
+  jetVertex->mNBTOFMatch = nBTOFMatch(iVertex);	// Run 9 production only. Remove when nBTOFMatch is properly filled in MuDst.
+  for (list<StProtoJet>::iterator protojet = protoJetList->begin(); protojet != protoJetList->end(); ++protojet)
+    jetVertex->addJet(fillJet(jetEvent,jetVertex,*protojet));
+}
+
+StJetCandidate* StjeJetEventTreeWriter::fillJet(StJetEvent* jetEvent, StJetVertex* jetVertex, StProtoJet& protojet)
+{
+  StJetCandidate* jet = jetEvent->newJet(jetVertex->position(),TLorentzVector(protojet.px(),protojet.py(),protojet.pz(),protojet.e()));
 
   // Loop over jet particles
-  StProtoJet::FourVecList& particleList = pj.list();
+  StProtoJet::FourVecList& particleList = protojet.list();
   for (StProtoJet::FourVecList::const_iterator iParticle = particleList.begin(); iParticle != particleList.end(); ++iParticle) {
     const StMuTrackFourVec* particle = dynamic_cast<const StMuTrackFourVec*>(*iParticle);
 
     if (StMuTrackEmu* t = particle->track()) {
-      StJetTrack* track = jetEvent.newTrack();
+      StJetTrack* track = jetEvent->newTrack();
       track->mId             = t->id();
       track->mDetectorId     = t->detectorId();
       track->mFlag           = t->flag();
@@ -105,17 +133,11 @@ void StjeJetEventTreeWriter::fillJet(StJetEvent& jetEvent, StProtoJet& pj, StFou
       track->mNHitsPoss      = t->nHitsPoss();
       track->mNHitsDedx      = t->nHitsDedx();
       track->mDedx           = t->dEdx();
-      track->mNSigmaPion     = t->nSigmaPion();
-      track->mNSigmaKaon     = t->nSigmaKaon();
-      track->mNSigmaProton   = t->nSigmaProton();
-      track->mNSigmaElectron = t->nSigmaElectron();
+      track->mBeta           = t->beta();
       track->mExitTowerId    = t->exitTowerId();
       track->mExitDetectorId = t->exitDetectorId();
       track->mExitPoint.SetPtEtaPhi(t->bemcRadius(),t->etaext(),t->phiext());
-      track->mDca            = t->Tdca();
-      track->mDcaX           = t->dcaX();
-      track->mDcaY           = t->dcaY();
-      track->mDcaZ           = t->dcaZ();
+      track->mDca.SetXYZ(t->dcaX(),t->dcaY(),t->dcaZ());
       track->mDcaD           = t->dcaD();
       track->mChi2           = t->chi2();
       track->mChi2Prob       = t->chi2prob();
@@ -127,7 +149,7 @@ void StjeJetEventTreeWriter::fillJet(StJetEvent& jetEvent, StProtoJet& pj, StFou
     }
 
     if (StMuTowerEmu* t = particle->tower()) {
-      StJetTower* tower = jetEvent.newTower();
+      StJetTower* tower = jetEvent->newTower();
       tower->mId         = t->id();
       tower->mDetectorId = t->detectorId();
       tower->mAdc        = t->adc();
@@ -138,7 +160,6 @@ void StjeJetEventTreeWriter::fillJet(StJetEvent& jetEvent, StProtoJet& pj, StFou
       // StMuTowerEmu has the tower momentum from
       // the origin. Here we correct for vertex.
 
-      TVector3 vertex(fourPMaker->getVertex().xyz());
       TVector3 mom(t->px(),t->py(),t->pz());
       float energy = mom.Mag();
 
@@ -151,7 +172,7 @@ void StjeJetEventTreeWriter::fillJet(StJetEvent& jetEvent, StProtoJet& pj, StFou
 	break;
       }
 
-      mom -= vertex;
+      mom -= jetVertex->position();
       mom.SetMag(energy);
 
       tower->mPt  = mom.Pt();
@@ -161,7 +182,7 @@ void StjeJetEventTreeWriter::fillJet(StJetEvent& jetEvent, StProtoJet& pj, StFou
     }
 
     if (StMcTrackEmu* t = particle->mctrack()) {
-      StJetParticle* part = jetEvent.newParticle();
+      StJetParticle* part = jetEvent->newParticle();
       part->mId     = t->id();
       part->mPt     = t->pt();
       part->mEta    = t->eta();
@@ -173,4 +194,30 @@ void StjeJetEventTreeWriter::fillJet(StJetEvent& jetEvent, StProtoJet& pj, StFou
       jet->addParticle(part)->setJet(jet);
     }
   } // End loop over jet particles
+
+  jet->computeSumTrackPt();
+  jet->computeSumTowerPt();
+
+  return jet;
+}
+
+void StjeJetEventTreeWriter::copyVertex(const StMuPrimaryVertex* muVertex, StJetVertex* jetVertex)
+{
+  jetVertex->mPosition = muVertex->position().xyz();
+  jetVertex->mPosError = muVertex->posError().xyz();
+  jetVertex->mVertexFinderId = muVertex->vertexFinderId();
+  jetVertex->mRanking = muVertex->ranking();
+  jetVertex->mNTracksUsed = muVertex->nTracksUsed();
+  jetVertex->mNBTOFMatch = muVertex->nBTOFMatch();
+  jetVertex->mNCTBMatch = muVertex->nCTBMatch();
+  jetVertex->mNBEMCMatch = muVertex->nBEMCMatch();
+  jetVertex->mNEEMCMatch = muVertex->nEEMCMatch();
+  jetVertex->mNCrossCentralMembrane = muVertex->nCrossCentralMembrane();
+  jetVertex->mSumTrackPt = muVertex->sumTrackPt();
+  jetVertex->mMeanDip = muVertex->meanDip();
+  jetVertex->mChiSquared = muVertex->chiSquared();
+  jetVertex->mRefMultPos = muVertex->refMultPos();
+  jetVertex->mRefMultNeg = muVertex->refMultNeg();
+  jetVertex->mRefMultFtpcWest = muVertex->refMultFtpcWest();
+  jetVertex->mRefMultFtpcEast = muVertex->refMultFtpcEast();
 }
