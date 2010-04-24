@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.15 2010/04/07 19:45:12 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.16 2010/04/24 19:50:56 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.16  2010/04/24 19:50:56  hmasui
+ * Optimize to draw run number list, and fix bugs for maximum of y-axis in several histograms
+ *
  * Revision 1.15  2010/04/07 19:45:12  hmasui
  * Use box option for dE/dx vs p to reduce the pdf file size
  *
@@ -798,14 +801,20 @@ Bool_t StEmbeddingQADraw::drawRunEventId() const
     if(hRunNumber->GetBinContent(irun+1)>0.0) runTotal++;
   }
 
+  // If number of runs >= 10, divided into 2 pads
   Int_t runAccepted = 0 ;
   for(Int_t irun=0; irun<hRunNumber->GetNbinsX(); irun++){
     const Double_t count = hRunNumber->GetBinContent(irun+1);
     if(count==0.0) continue ;
 
     Int_t pad = 0;
-    if( runTotal < 10 ) pad = 0;
-    else                pad = (runAccepted<10) ? 0 : 1 ;
+    if( runTotal < 10 ) pad = 0 ; // always drawing left pad
+    else{
+      // Divide into 2 pads
+      if( runAccepted < runTotal/2 ) pad = 0;
+      else                           pad = 1 ;
+    }
+
     const Int_t runid = StEmbeddingQAUtilities::instance()->getRunId((Int_t)hRunNumber->GetBinLowEdge(irun+1), mYear);
     runlist[pad]->AddText(Form("%10d  %10d events", runid, (Int_t)count));
 
@@ -1358,17 +1367,15 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name, const Bool_t isMC
         hMc->Scale( getNormalization(*hMc) );
       }
 
-      /// Set maximum of y-axis
-      /// Use real data if N(embedding) < 100
-      Double_t yMax = 0.0 ;
-      if ( hEmbed->GetEntries() < 100 ){
-        yMax = (hReal) ? hReal->GetMaximum() : hEmbed->GetMaximum() ;
-      }
-      else{
-        yMax = (hReal) ? TMath::Max(hEmbed->GetMaximum(), hReal->GetMaximum())*1.2 : hEmbed->GetMaximum()*1.2 ;
-      }
+//      Double_t yMax = 0.0 ;
+//      if ( hEmbed->Integral() < 100 ){
+//        yMax = (hReal) ? hReal->GetMaximum() : hEmbed->GetMaximum() ;
+//      }
+//      else{
+//        yMax = (hReal) ? TMath::Max(hEmbed->GetMaximum(), hReal->GetMaximum()) : hEmbed->GetMaximum() ;
+//      }
       hEmbed->SetMinimum(0.0);
-      hEmbed->SetMaximum( yMax * 1.2 );
+//      hEmbed->SetMaximum( yMax * 1.2 );
 
       if( isProjectionX ){
         hEmbed->SetTitle(Form("%1.1f < p_{T} < %1.1f (GeV/c)", xMin, xMax));
@@ -1384,9 +1391,18 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name, const Bool_t isMC
 
       /// Check if MC particle have decay daughters
       if(isMC && !isDecay()){
+        /// Set maximum of y-axis from MC and embedding
+        hEmbed->SetMaximum( TMath::Max(hMc->GetMaximum(), hEmbed->GetMaximum()) * 1.2 );
+
         hMc->Draw("same");
       }
       else{
+        /// Set maximum of y-axis
+        /// Use max(real, embed) if real exists
+        /// Otherwise use embed
+        const Double_t yMax = (hReal) ? TMath::Max(hReal->GetMaximum(), hEmbed->GetMaximum()) : hEmbed->GetMaximum() ;
+        hEmbed->SetMaximum( yMax * 1.2 );
+
         if(hReal) hReal->Draw("hsame");
       }
       hEmbed->Draw("same");
@@ -1576,7 +1592,16 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
       }
 
       hdEdxEmbed->SetMinimum(0.0);
-      hdEdxEmbed->SetMaximum( TMath::Max(hdEdxEmbed->GetMaximum(), hdEdxEmbed->GetMaximum())*1.2 );
+
+      // Use max(real, embed) if real exists
+      // Use embed if not
+      if( hdEdxReal ){
+        hdEdxEmbed->SetMaximum( TMath::Max(hdEdxReal->GetMaximum(), hdEdxEmbed->GetMaximum())*1.2 );
+      }
+      else{
+        hdEdxEmbed->SetMaximum( hdEdxEmbed->GetMaximum()*1.2 );
+      }
+
       hdEdxEmbed->SetTitle(Form("%1.1f < %s p < %1.1f GeV/c", ptMin, momName.Data(), ptMax));
       hdEdxEmbed->SetYTitle("(1/N_{trk})dN/d(dE/dx)");
 
@@ -1820,7 +1845,17 @@ Bool_t StEmbeddingQADraw::drawProjection3D(const TString name) const
         hEmbed->Scale( getNormalization(*hEmbed) );
         hEmbed->SetLineColor(kRed);
         hEmbed->SetMinimum(0.0);
-        hEmbed->SetMaximum( TMath::Max(hEmbed->GetMaximum(), hEmbed->GetMaximum()) * 1.2 );
+
+        // Set maximum
+        // If real data exists, use max(real, embed)
+        // If not, use embedding histogram
+        if( hReal ){
+          hEmbed->SetMaximum( TMath::Max(hReal->GetMaximum(), hEmbed->GetMaximum()) * 1.2 );
+        }
+        else{
+          hEmbed->SetMaximum( hEmbed->GetMaximum() * 1.2 );
+        }
+
         hEmbed->SetTitle(eta + ", " + pt);
         hEmbed->SetYTitle(Form("(1/N_{trk})dN/d%s", name.Data())) ;
 
