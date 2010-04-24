@@ -10,12 +10,15 @@
 #define ST_JET_EVENT_H
 
 class TClonesArray;
+class TVector3;
+class TLorentzVector;
+class StJetVertex;
 class StJetCandidate;
 class StJetTrack;
 class StJetTower;
 class StJetParticle;
 
-#include "TVector3.h"
+#include "TObject.h"
 
 class StJetEvent : public TObject {
 public:
@@ -26,27 +29,14 @@ public:
 
   int runId() const { return mRunId; }
   int eventId() const { return mEventId; }
-  const TVector3& vertex() const { return mVertex; }
 
-  int numberOfJets() const;
-  int numberOfTracks() const;
-  int numberOfTowers() const;
-  int numberOfParticles() const;
-
-  StJetCandidate* jet(int i) const;
-  StJetTrack* track(int i) const;
-  StJetTower* tower(int i) const;
-  StJetParticle* particle(int i) const;
-
-  TClonesArray* jets() const { return mJets; }
-  TClonesArray* tracks() const { return mTracks; }
-  TClonesArray* towers() const { return mTowers; }
-  TClonesArray* particles() const { return mParticles; }
+  int numberOfVertices() const;
+  const StJetVertex* vertex(int i) const;
 
   void setRunId(int runId) { mRunId = runId; }
   void setEventId(int eventId) { mEventId = eventId; }
-  void setVertex(const float* vxyz) { mVertex = vxyz; }
-  StJetCandidate* addJet(const StJetCandidate* jet);
+  StJetVertex* newVertex();
+  StJetCandidate* newJet(const TVector3& vertex, const TLorentzVector& fourMomentum);
   StJetTrack* newTrack();
   StJetTower* newTower();
   StJetParticle* newParticle();
@@ -54,13 +44,13 @@ public:
 private:
   int mRunId;
   int mEventId;
-  TVector3 mVertex;
+  TClonesArray* mVertices;
   TClonesArray* mJets;
   TClonesArray* mTracks;
   TClonesArray* mTowers;
   TClonesArray* mParticles;
 
-  ClassDef(StJetEvent,3);
+  ClassDef(StJetEvent,4);
 };
 
 #endif // ST_JET_EVENT_H
