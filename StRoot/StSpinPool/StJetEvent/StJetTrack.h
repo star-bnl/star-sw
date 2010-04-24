@@ -22,21 +22,13 @@ public:
     , mNHitsPoss(0)
     , mNHitsDedx(0)
     , mDedx(0)
-    , mNSigmaPion(0)
-    , mNSigmaKaon(0)
-    , mNSigmaProton(0)
-    , mNSigmaElectron(0)
-    , mExitPoint(0,0,0)
     , mExitTowerId(0)
     , mExitDetectorId(0)
-    , mDca(0)
-    , mDcaX(0)
-    , mDcaY(0)
-    , mDcaZ(0)
-    , mDcaD(0)
     , mChi2(0)
     , mChi2Prob(0)
-  {}
+    , mBeta(0)
+  {
+  }
 
   friend class StjeJetEventTreeWriter;
 
@@ -47,45 +39,33 @@ public:
   short nHitsPoss()           const { return mNHitsPoss; }
   short nHitsDedx()           const { return mNHitsDedx; }
   float dEdx()                const { return mDedx; }
-  float nSigmaPion()          const { return mNSigmaPion; }
-  float nSigmaKaon()          const { return mNSigmaKaon; }
-  float nSigmaProton()        const { return mNSigmaProton; }
-  float nSigmaElectron()      const { return mNSigmaElectron; }
   const TVector3& exitPoint() const { return mExitPoint; }
   short exitTowerId()         const { return mExitTowerId; }
   short exitDetectorId()      const { return mExitDetectorId; }
-  float dca()                 const { return mDca; }
-  float dcaX()                const { return mDcaX; }
-  float dcaY()                const { return mDcaY; }
-  float dcaZ()                const { return mDcaZ; }
+  const TVector3& dca()       const { return mDca; }
   float dcaD()                const { return mDcaD; }
   float chi2()                const { return mChi2; }
   float chi2prob()            const { return mChi2Prob; }
+  float beta()                const { return mBeta; }
 
 private:
-  short mFlag;
-  short mCharge;
-  short mNHits;
-  short mNHitsFit;
-  short mNHitsPoss;
-  short mNHitsDedx;
-  float mDedx;
-  float mNSigmaPion;
-  float mNSigmaKaon;
-  float mNSigmaProton;
-  float mNSigmaElectron;
+  short    mFlag;
+  short    mCharge;
+  short    mNHits;
+  short    mNHitsFit;
+  short    mNHitsPoss;
+  short    mNHitsDedx;
+  float    mDedx;
   TVector3 mExitPoint;
-  short mExitTowerId;
-  short mExitDetectorId;
-  float mDca;
-  float mDcaX;
-  float mDcaY;
-  float mDcaZ;
-  float mDcaD;
-  float mChi2;
-  float mChi2Prob;
+  short    mExitTowerId;
+  short    mExitDetectorId;
+  TVector3 mDca;
+  float    mDcaD;
+  float    mChi2;
+  float    mChi2Prob;
+  float    mBeta;
 
-  ClassDef(StJetTrack, 2);
+  ClassDef(StJetTrack,3);
 };
 
 #endif // ST_JET_TRACK_H

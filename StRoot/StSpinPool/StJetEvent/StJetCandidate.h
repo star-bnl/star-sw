@@ -24,10 +24,12 @@ public:
     , mPhi(0)
     , mE(0)
     , mDetEta(0)
+    , mSumTrackPt(0)
+    , mSumTowerPt(0)
   {
   }
 
-  StJetCandidate(const TVector3& vertex, float pt, float eta, float phi, float E);
+  StJetCandidate(const TVector3& vertex, const TLorentzVector& fourMomentum);
 
   TLorentzVector fourMomentum() const;
   TVector3 momentum() const;
@@ -40,8 +42,8 @@ public:
   float py () const { return momentum().Py(); }
   float pz () const { return momentum().Pz(); }
   float detEta() const { return mDetEta; }
-  float sumTrackPt() const;
-  float sumTowerPt() const;
+  float sumTrackPt() const { return mSumTrackPt; }
+  float sumTowerPt() const { return mSumTowerPt; }
   float sumPt() const { return sumTrackPt() + sumTowerPt(); }
   float neutralFraction() const { return sumTowerPt() / sumPt(); }
   float chargedFraction() const { return sumTrackPt() / sumPt(); }
@@ -79,6 +81,8 @@ public:
   StJetTrack* addTrack(StJetTrack* track) { mTracks.Add((TObject*)track); return (StJetTrack*)mTracks.Last(); }
   StJetTower* addTower(StJetTower* tower) { mTowers.Add((TObject*)tower); return (StJetTower*)mTowers.Last(); }
   StJetParticle* addParticle(StJetParticle* particle) { mParticles.Add((TObject*)particle); return (StJetParticle*)mParticles.Last(); }
+  void computeSumTrackPt();
+  void computeSumTowerPt();
 
 private:
   float mPt;
@@ -86,6 +90,8 @@ private:
   float mPhi;
   float mE;
   float mDetEta;
+  float mSumTrackPt;
+  float mSumTowerPt;
 
   TRefArray mTracks;
   TRefArray mTowers;
