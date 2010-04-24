@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.10 2010/03/15 21:03:56 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.11 2010/04/24 20:21:21 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.11  2010/04/24 20:21:21  hmasui
+ * Add geant process check for contaminated pairs
+ *
  * Revision 1.10  2010/03/15 21:03:56  hmasui
  * Modify binning for histograms of vertices
  *
@@ -487,16 +490,17 @@ Bool_t StEmbeddingQA::runRealData(const TString inputFileList)
   for(UInt_t ic=0; ic<StEmbeddingQAConst::mNReal; ic++){
     const Int_t categoryid = ic + StEmbeddingQAConst::mNEmbedding ;
 
-    const Short_t parentid = 0 ;       // real tracks are assumed to be primary
-    const Short_t parentparentid = 0 ; // real tracks are assumed to be primary
-    expandHistograms(categoryid, 2, parentid, parentparentid);
-    expandHistograms(categoryid, 3, parentid, parentparentid);
-    expandHistograms(categoryid, 8, parentid, parentparentid);
-    expandHistograms(categoryid, 9, parentid, parentparentid);
-    expandHistograms(categoryid, 11, parentid, parentparentid);
-    expandHistograms(categoryid, 12, parentid, parentparentid);
-    expandHistograms(categoryid, 14, parentid, parentparentid);
-    expandHistograms(categoryid, 15, parentid, parentparentid);
+    const Int_t parentid = 0 ;       // real tracks are assumed to be primary
+    const Int_t parentparentid = 0 ; // real tracks are assumed to be primary
+    const Int_t geantprocess = 0 ;
+    expandHistograms(categoryid, 2, parentid, parentparentid, geantprocess);
+    expandHistograms(categoryid, 3, parentid, parentparentid, geantprocess);
+    expandHistograms(categoryid, 8, parentid, parentparentid, geantprocess);
+    expandHistograms(categoryid, 9, parentid, parentparentid, geantprocess);
+    expandHistograms(categoryid, 11, parentid, parentparentid, geantprocess);
+    expandHistograms(categoryid, 12, parentid, parentparentid, geantprocess);
+    expandHistograms(categoryid, 14, parentid, parentparentid, geantprocess);
+    expandHistograms(categoryid, 15, parentid, parentparentid, geantprocess);
 
     // Make sure the input particle list
     for(vector<Short_t>::iterator iter = mGeantId[categoryid].begin(); iter != mGeantId[categoryid].end(); iter++){
@@ -629,6 +633,12 @@ StEmbeddingQATrack* StEmbeddingQA::getEmbeddingQATrack(const StMiniMcEvent& mcev
       return 0;
     }
 
+    /// Make sure geantprocess = 5 (DECAY)
+    if ( track->mGeantProcess != 5 ){
+      LOG_DEBUG << Form("StEmbeddingQA::getEmbeddingTrack()  geantprocess = %3d. Skip the track", track->mGeantProcess) << endm;
+      return 0;
+    }
+
     return (new StEmbeddingQATrack(name, track));
   }
   else{
@@ -679,7 +689,8 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
   /// Check geant id
   ///   if it's new, expands the histogram array for it
   ///   if it has already exist, do nothing
-  expandHistograms(categoryid, geantid, track.getParentGeantId(), track.getParentParentGeantId());
+  expandHistograms(categoryid, geantid, track.getParentGeantId(), track.getParentParentGeantId(),
+      track.getGeantProcess());
 
   // Fill geant id
   mhGeantId[categoryid]->Fill(track.getGeantId());
@@ -740,8 +751,8 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQA::pushBackGeantId(const Int_t categoryid, const Short_t geantid, const Short_t parentid,
-    const Short_t parentparentid)
+Bool_t StEmbeddingQA::pushBackGeantId(const Int_t categoryid, const Short_t geantid, const Int_t parentid,
+    const Int_t parentparentid, const Int_t geantprocess)
 {
   /// Add geantid if it's new. If we have already had input geantid in the array, do nothing.
   StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
@@ -754,8 +765,8 @@ Bool_t StEmbeddingQA::pushBackGeantId(const Int_t categoryid, const Short_t gean
     LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm ;
     LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   mGeantId[%d] is empty", categoryid) << endm;
     if( isContaminated ){
-      LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Find a new geant id,  (geant, parent, parent-parent) = (%4d, %4d, %4d)",
-          geantid, parentid, parentparentid, utility->getCategoryName(categoryid).Data()) << endm;
+      LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Find a new geant id,  (geant, parent, parent-parent, process) = (%4d, %4d, %4d, %4d) (%10s)",
+          geantid, parentid, parentparentid, geantprocess, utility->getCategoryName(categoryid).Data()) << endm;
     }
     else{
       LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Find a new geant id,  geantid = %5d (%10s)", 
@@ -779,8 +790,8 @@ Bool_t StEmbeddingQA::pushBackGeantId(const Int_t categoryid, const Short_t gean
     else{
       /// Find a new geant id, store id in mGeantId array
       if( isContaminated ){
-        LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Find a new geant id,  (geant, parent, parent-parent) = (%4d, %4d, %4d)",
-            geantid, parentid, parentparentid, utility->getCategoryName(categoryid).Data()) << endm;
+        LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Find a new geant id,  (geant, parent, parent-parent, process) = (%4d, %4d, %4d, %4d) (%10s)",
+            geantid, parentid, parentparentid, geantprocess, utility->getCategoryName(categoryid).Data()) << endm;
       }
       else{
         LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Find a new geant id,  geantid = %5d (%10s)", 
@@ -811,8 +822,8 @@ Bool_t StEmbeddingQA::pushBackGeantId(const Int_t categoryid, const Short_t gean
       /// Push back a new id collection if the array is empty
       LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm ;
       LOG_INFO << "StEmbeddingQA::pushBackGeantId()  mGeantIdCollection is empty." << endm;
-      LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Push back             (geant, parent, parent-parent) = (%4d, %4d, %4d)", 
-          geantid, parentid, parentparentid) << endm;
+      LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Push back             (geant, parent, parent-parent) = (%4d, %4d, %4d) (process=%4d)", 
+          geantid, parentid, parentparentid, geantprocess) << endm;
       LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm ;
 
       mGeantIdCollection.push_back( idcollection );
@@ -827,8 +838,8 @@ Bool_t StEmbeddingQA::pushBackGeantId(const Int_t categoryid, const Short_t gean
     }
     else{
       /// Push back a new id collection
-      LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Push back             (geant, parent, parent-parent) = (%4d, %4d, %4d)", 
-          geantid, parentid, parentparentid) << endm;
+      LOG_INFO << Form("StEmbeddingQA::pushBackGeantId()   Push back             (geant, parent, parent-parent) = (%4d, %4d, %4d) (process=%4d)", 
+          geantid, parentid, parentparentid, geantprocess) << endm;
       mGeantIdCollection.push_back( idcollection );
 
       isOk = kTRUE ;
@@ -840,12 +851,12 @@ Bool_t StEmbeddingQA::pushBackGeantId(const Int_t categoryid, const Short_t gean
 
 
 //__________________________________________________________________________________________
-void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geantid, const Short_t parentid,
-    const Short_t parentparentid)
+void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geantid, const Int_t parentid,
+    const Int_t parentparentid, const Int_t geantprocess)
 {
   /// Push back geant id if the input geantid is new (return true)
   /// If the input geant id has already stored in mGeantId array, do nothing (return false)
-  if ( !pushBackGeantId(categoryid, geantid, parentid, parentparentid) ) return ;
+  if ( !pushBackGeantId(categoryid, geantid, parentid, parentparentid, geantprocess) ) return ;
 
   // Expand histograms
   mOutput->cd();
