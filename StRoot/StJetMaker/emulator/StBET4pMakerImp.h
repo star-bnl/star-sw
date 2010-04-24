@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMakerImp.h,v 1.9 2009/09/01 12:24:52 pibero Exp $
+// $Id: StBET4pMakerImp.h,v 1.10 2010/04/24 04:15:35 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STBET4PMAKERIMP_H
 #define STBET4PMAKERIMP_H
@@ -38,7 +38,7 @@ public:
   StjBEMC* BEMC() { return _bemc; }
   StjEEMC* EEMC() { return _eemc; }
 
-  StjTrackListCut* getTPCTrackCut()     { return _tpcCut; }
+  StjTrackListCut* getTPCTrackCut() { return _tpcCut; }
   StjTowerEnergyListCut* getBEMCEnergyCut() { return _bemcCut; }
 
 private:

@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.12 2010/04/13 13:29:33 pibero Exp $
+// $Id: StBET4pMaker.cxx,v 1.13 2010/04/24 04:15:27 pibero Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
@@ -50,11 +50,17 @@ Int_t StBET4pMaker::Init()
 
 void StBET4pMaker::Clear(Option_t* opt)
 {
-  for (FourList::iterator it = _tracks.begin(); it != _tracks.end(); ++it) {
-    delete (*it);
-    (*it) = 0;
+  for (size_t i = 0; i < _vertexNodes.size(); ++i) {
+    VertexNode& node = _vertexNodes[i];
+    node.vertex = 0;
+    for (size_t j = 0; j < node.tracks.size(); ++j) {
+      delete node.tracks[j];
+      node.tracks[j] = 0;
+    }
+    node.tracks.clear();
   }
-  _tracks.clear();
+
+  _vertexNodes.clear();
 
   _bemcEnergySumCalculator->Clear();
 
@@ -67,19 +73,28 @@ Int_t StBET4pMaker::Make()
 
   _bemcEnergySumCalculator->Make();
 
-  if (_bemcEnergySumCalculator->sumEmcEt() > 200.) return kStOk;
+  if (_bemcEnergySumCalculator->sumEmcEt() > 500.) return kStOk;
 
-  _vertex = _uDstMaker->muDst()->event()->primaryVertexPosition();
+  // Loop over primary vertices and get those with positive rank
+  for (unsigned int vertexIndex = 0; vertexIndex < StMuDst::numberOfPrimaryVertices(); ++vertexIndex) {
+    StMuDst::setVertexIndex(vertexIndex);
+    StMuPrimaryVertex* vertex = StMuDst::primaryVertex(vertexIndex);
+    if (vertex->ranking() > 0) {
+      _vertexNodes.push_back(VertexNode());
+      VertexNode& node = _vertexNodes.back();
+      node.vertex = vertex;
 
-  pair<StjTrackList, StjTowerEnergyList> trackAndEnergyList = _imp->getTrackAndEnergyList();
+      pair<StjTrackList,StjTowerEnergyList> trackAndEnergyList = _imp->getTrackAndEnergyList();
 
-  FourList tpc4pList = _track2four(trackAndEnergyList.first);
-  _tracks.insert(_tracks.end(), tpc4pList.begin(), tpc4pList.end());
+      FourList tpc4pList = _track2four(trackAndEnergyList.first);
+      node.tracks.insert(node.tracks.end(),tpc4pList.begin(),tpc4pList.end());
 
-  FourList energy4pList = _energy2four(trackAndEnergyList.second);
-  _tracks.insert(_tracks.end(), energy4pList.begin(), energy4pList.end());
+      FourList energy4pList = _energy2four(trackAndEnergyList.second);
+      node.tracks.insert(node.tracks.end(),energy4pList.begin(),energy4pList.end());
+    }
+  }
 
-  return StMaker::Make();
+  return kStOk;
 }
 
 bool StBET4pMaker::isBemcCorrupted() const

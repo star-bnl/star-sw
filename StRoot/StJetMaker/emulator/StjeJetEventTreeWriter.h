@@ -15,6 +15,9 @@ class StJets;
 class StProtoJet;
 class StFourPMaker;
 class StJetEvent;
+class StJetVertex;
+class StJetCandidate;
+class StMuPrimaryVertex;
 
 class TTree;
 class TFile;
@@ -28,22 +31,25 @@ using namespace std;
 class StjeJetEventTreeWriter : public StjeTreeWriter {
 
 public:
+
   StjeJetEventTreeWriter(const char* outFileName);
   virtual ~StjeJetEventTreeWriter() {}
 
   void Init();
   void Finish();
 
-  void addJetFinder(StFourPMaker* fourPMaker, const vector<const AbstractFourVec*>* particleList, list<StProtoJet>* protoJetList, const char* name, StJets* stjets = 0);
+  void addJetFinder(StFourPMaker* fourPMaker, const vector<const AbstractFourVec*>* particleList, list<StProtoJet>* protoJetList, const char* name, StJets* = 0);
 
   TTree* jetTree() const { return _jetTree; }
 
-  void fillJetTree();
+  void fillJetTreeHeader(int iAnalyzer);
+  void fillJetTree(int iAnalyzer, int iVertex);
 
 private:
-  
-  void fillJetTreeForOneJetFindingAlgorithm(StJetEvent& jetEvent, list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker);
-  void fillJet(StJetEvent& jetEvent, StProtoJet& pj, StFourPMaker* fourPMaker);
+
+  void fillJetTreeForOneVertex(StJetEvent* jetEvent, list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker, int iVertex);
+  StJetCandidate* fillJet(StJetEvent* jetEvent, StJetVertex* jetVertex, StProtoJet& protojet);
+  void copyVertex(const StMuPrimaryVertex* muVertex, StJetVertex* jetVertex);
 
   struct AnalyzerCtl {
     string            _branchName;

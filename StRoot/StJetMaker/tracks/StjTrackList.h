@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackList.h,v 1.3 2010/04/13 13:30:51 pibero Exp $
+// $Id: StjTrackList.h,v 1.4 2010/04/24 04:15:44 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKLIST_H
 #define STJTRACKLIST_H
@@ -42,9 +42,10 @@ public:
   double         exitEta;
   double         exitPhi;
   double         dEdx;
+  double         beta;
   int            trackIndex;
   short          id;
-  ClassDef(StjTrack, 2)
+  ClassDef(StjTrack,3)
 };
 
 typedef std::vector<StjTrack> StjTrackList;
@@ -78,6 +79,7 @@ inline bool operator==(const StjTrack& v1, const StjTrack& v2)
   if(v1.exitEta        != v2.exitEta)        return false;   
   if(v1.exitPhi        != v2.exitPhi)        return false;   
   if(v1.dEdx           != v2.dEdx)           return false;   
+  if(v1.beta           != v2.beta)           return false;   
   if(v1.trackIndex     != v2.trackIndex)     return false;   
   if(v1.id             != v2.id)             return false;   
   return true;

@@ -1,54 +1,48 @@
-// $Id: StJetMaker.cxx,v 1.73 2009/09/05 22:15:55 pibero Exp $
-#include "StJetMaker.h"
+// $Id: StJetMaker.cxx,v 1.74 2010/04/24 04:15:27 pibero Exp $
 
+// ROOT
+#include "TTree.h"
+
+// STAR
+#include "StJetFinder/StProtoJet.h"
+#include "StSpinPool/StJets/StJets.h"
+
+// Local
 #include "StjeParticleCollector.h"
 #include "StjeJetFinderRunner.h"
 #include "StjeJetCuts.h"
 #include "StjeTreeWriter.h"
 #include "StjeDefaultJetTreeWriter.h"
 #include "StppJetAnalyzer.h"
+#include "StJetMaker.h"
 
-#include <StJetFinder/StProtoJet.h>
+ClassImp(StJetMaker);
 
-#include "StSpinPool/StJets/StJets.h"
-
-#include <list>
-#include "TTree.h"
-//#include "TBranch.h"
-
-ClassImp(StJetMaker)
-  
 StJetMaker::StJetMaker(const char* name, StMuDstMaker* uDstMaker, const char* outputName) 
   : StMaker(name)
   , _defaultTreeWriter(new StjeDefaultJetTreeWriter(*uDstMaker, outputName))
   , _treeWriter(_defaultTreeWriter)
-  , _backwordCompatibility(new StJetMakerBackwordCompatibility)
 {
-
 }
 
 StJetMaker::~StJetMaker()
 {
   delete _defaultTreeWriter;
-  delete _backwordCompatibility;
 }
 
-
-void StJetMaker::addAnalyzer(const StppAnaPars* ap, StJetPars* jp, StFourPMaker* fp, const char* name)
+StJetMaker::StJetBranch::StJetBranch(const StppAnaPars* anapars, StJetPars* jetpars, StFourPMaker* fourPMaker, const char* name)
+  : name(name)
+  , particleCollector(new StjeParticleCollector(anapars,fourPMaker,this->particles))
+  , jetFinder(new StjeJetFinderRunner(jetpars,this->particles,this->protojets))
+  , jetCuts(new StjeJetCuts(anapars,this->protojets))
 {
-  list<StProtoJet>* protoJetList = new list<StProtoJet>;
+}
 
-  vector<const AbstractFourVec*>* particleList = new vector<const AbstractFourVec*>;
-
-  _particleCollectorList.push_back(new StjeParticleCollector(ap, fp, *particleList));
-
-  _jetFinderList.push_back(new StjeJetFinderRunner(jp, *particleList, *protoJetList));
-
-  _jetCutsList.push_back(new StjeJetCuts(ap, *protoJetList));
-
-  _treeWriter->addJetFinder(fp, particleList, protoJetList, name, new StJets);
-
-  _backwordCompatibility->addAnalyzer(new StppJetAnalyzer(*protoJetList), _treeWriter, name);
+void StJetMaker::addAnalyzer(const StppAnaPars* anapars, StJetPars* jetpars, StFourPMaker* fourPMaker, const char* name)
+{
+  StJetBranch* jetBranch = new StJetBranch(anapars,jetpars,fourPMaker,name);
+  mJetBranches.push_back(jetBranch);
+  _treeWriter->addJetFinder(fourPMaker,&jetBranch->particles,&jetBranch->protojets,name,new StJets);
 }
 
 void StJetMaker::SetTreeWriter(StjeTreeWriter* treeWriter)
@@ -58,7 +52,8 @@ void StJetMaker::SetTreeWriter(StjeTreeWriter* treeWriter)
 
 Int_t StJetMaker::Init() 
 {
-  for_each(_jetFinderList.begin(), _jetFinderList.end(), mem_fun(&StjeJetFinderRunner::Init));
+  for (size_t iBranch = 0; iBranch < mJetBranches.size(); ++iBranch)
+    mJetBranches[iBranch]->jetFinder->Init();
 
   _treeWriter->Init();
 
@@ -67,13 +62,18 @@ Int_t StJetMaker::Init()
 
 Int_t StJetMaker::Make()
 {
-  for_each(_particleCollectorList.begin(), _particleCollectorList.end(), mem_fun(&StjeParticleCollector::Do));
+  for (size_t iBranch = 0; iBranch < mJetBranches.size(); ++iBranch) {
+    StJetBranch* jetBranch = mJetBranches[iBranch];
+    _treeWriter->fillJetTreeHeader(iBranch);
+    for (size_t iVertex = 0; iVertex < jetBranch->particleCollector->numberOfVertices(); ++iVertex) {
+      jetBranch->particleCollector->Do(iVertex);
+      jetBranch->jetFinder->Run();
+      jetBranch->jetCuts->Apply();
+      _treeWriter->fillJetTree(iBranch,iVertex);
+    }
+  }
 
-  for_each(_jetFinderList.begin(), _jetFinderList.end(), mem_fun(&StjeJetFinderRunner::Run));
-
-  for_each(_jetCutsList.begin(), _jetCutsList.end(), mem_fun(&StjeJetCuts::Apply));
-
-  _treeWriter->fillJetTree();
+  _treeWriter->jetTree()->Fill();
 
   return kStOk;
 }

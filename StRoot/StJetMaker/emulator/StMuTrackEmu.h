@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StMuTrackEmu.h,v 1.11 2010/04/13 13:30:26 pibero Exp $
+// $Id: StMuTrackEmu.h,v 1.12 2010/04/24 04:15:35 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STMUTRACKEMU_H
 #define STMUTRACKEMU_H
@@ -38,6 +38,7 @@ public:
     , _exitTowerId(0)
     , _exitDetectorId(0)
     , _dEdx(0)
+    , _beta(0)
     , _trackIndex(0)
     , _id(0)
     , _detectorId(0)
@@ -72,6 +73,7 @@ public:
   short          exitTowerId() const { return _exitTowerId; }
   short          exitDetectorId() const { return _exitDetectorId; }
   double         dEdx()        const { return _dEdx; }
+  double         beta()        const { return _beta; }
   int            trackIndex()  const { return _trackIndex; }
   short          id()          const { return _id; }
   short          detectorId()  const { return _detectorId; }
@@ -107,6 +109,7 @@ private:
   short          _exitTowerId;
   short          _exitDetectorId;
   double         _dEdx;
+  double         _beta;
 
   int            _trackIndex;
 
