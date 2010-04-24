@@ -43,7 +43,7 @@
 #include "Altro.h"
 #include "TRVector.h"
 #define PrPP(A,B) {LOG_INFO << "StTpcRSMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.37 2010/04/24 15:56:32 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.38 2010/04/24 19:58:54 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -823,7 +823,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      Int_t bin_high = TMath::Min(NoOfTimeBins-1,binT + TMath::Nint(dt+mShaperResponse->GetXmax()+0.5));
 	      Int_t NTimeBins = 0;
 	      for(Int_t itbin = 0; itbin <= bin_high-bin_low; itbin++){
-		Double_t t = -dt + itbin - 1; // Jan found shift in z by one time bucket
+		Double_t t = -dt + itbin + 1; // Jan found shift in z by one time bucket
 		tbksdEonPad[itbin] = QAv*localYDirectionCoupling*mShaperResponse->GetSave(&t);
 		NTimeBins++;
 		if (itbin > binT - bin_low && tbksdEonPad[itbin] < minSignal) break;
@@ -1346,8 +1346,11 @@ SignalSum_t  *StTpcRSMaker::ResetSignalSum() {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.37 2010/04/24 15:56:32 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.38 2010/04/24 19:58:54 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.38  2010/04/24 19:58:54  fisyak
+// swap shift sign
+//
 // Revision 1.37  2010/04/24 15:56:32  fisyak
 // Jan found shift in z by one time bucket
 //
