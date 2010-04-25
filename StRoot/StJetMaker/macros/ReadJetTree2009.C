@@ -1,8 +1,8 @@
 #include <map>
 
 void ReadJetTree2009(int nentries = 1e6,
-		     const char* jetfile  = "st_physics_adc_10125066_raw_6320001.jets.root",
-		     const char* skimfile = "st_physics_adc_10125066_raw_6320001.skim.root")
+		     const char* jetfile  = "st_physics_10143008_raw_6020001.jets.root",
+		     const char* skimfile = "st_physics_10143008_raw_6020001.skim.root")
 {
   cout << "nentries = " << nentries << endl;
   cout << "jetfile  = " << jetfile  << endl;
@@ -38,7 +38,7 @@ void ReadJetTree2009(int nentries = 1e6,
     // Enforce event synchronization
     assert(jetEvent->runId() == skimEvent->runId() && jetEvent->eventId() == skimEvent->eventId());
 
-    if (iEntry % 1000 == 0) cout << iEntry << endl;
+    //if (iEntry % 1000 == 0) cout << iEntry << endl;
 
     cout << "run: " << jetEvent->runId() << endl;
     cout << "event: " << jetEvent->eventId() << endl;
@@ -52,10 +52,12 @@ void ReadJetTree2009(int nentries = 1e6,
     }
     cout << endl;
 
+#if 0
     // Get 2009 pp200 JP1 trigger
     StJetSkimTrig* trig = skimEvent->trigger(240410);
     if (!trig) continue;
     if (!trig->didFire()) continue;
+#endif
 
     // Get jet patches above JP1 threshold
     map<int,int> barrelJetPatches = skimEvent->barrelJetPatchesAboveTh(1);
@@ -89,25 +91,46 @@ void ReadJetTree2009(int nentries = 1e6,
     int bbctimebin = skimEvent->bbcTimeBin() >> 9 & 0xf;
     cout << "bbctimebin: " << bbctimebin << endl;
 
-    TVector3 vertex(skimEvent->bestVert()->position());
-    cout << "vertex: " << vertex.x() << '\t' << vertex.y() << '\t' << vertex.z() << endl;
+    cout << "nvertices: " << jetEvent->numberOfVertices() << endl;
 
-    // Jet loop
-    cout << "njets: " << jetEvent->numberOfJets() << endl;
-    for (int iJet = 0; iJet < jetEvent->numberOfJets(); ++iJet) {
-      StJetCandidate* jet = jetEvent->jet(iJet);
-      cout << "Jet #" << iJet << ": pt=" << jet->pt() << " eta=" << jet->eta() << " phi=" << jet->phi() << " rt=" << jet->neutralFraction() << " ntracks=" << jet->numberOfTracks() << " ntowers=" << jet->numberOfTowers() << endl;
-      // Track loop
-      for (int iTrack = 0; iTrack < jet->numberOfTracks(); ++iTrack) {
-	StJetTrack* track = jet->track(iTrack);
-	cout << "Track #" << iTrack << ": id=" << track->id() << " pt=" << track->pt() << " eta=" << track->eta() << " phi=" << track->phi() << endl;
-      }	// End track loop
-      // Tower loop
-      for (int iTower = 0; iTower < jet->numberOfTowers(); ++iTower) {
-	StJetTower* tower = jet->tower(iTower);
-	cout << "Tower #" << iTower << ": id=" << tower->id() << " detid=" << tower->detectorId() << " pt=" << tower->pt() << " eta=" << tower->eta() << " phi=" << tower->phi() << endl;
-      }	// End tower loop
-    } // End jet loop
+    for (int iVertex = 0; iVertex < jetEvent->numberOfVertices(); ++iVertex) {
+      StJetVertex* vertex = jetEvent->vertex(iVertex);
+      cout << "Vertex #" << iVertex
+	   << ": vx=" << vertex->position().x()
+	   << " vy=" << vertex->position().y()
+	   << " vz=" << vertex->position().z() << endl;
+      // Jet loop
+      cout << "njets: " << vertex->numberOfJets() << endl;
+      for (int iJet = 0; iJet < vertex->numberOfJets(); ++iJet) {
+	StJetCandidate* jet = vertex->jet(iJet);
+	cout << "Jet #" << iJet
+	     << ": pt=" << jet->pt()
+	     << " eta=" << jet->eta()
+	     << " phi=" << jet->phi()
+	     << " rt=" << jet->neutralFraction()
+	     << " ntracks=" << jet->numberOfTracks()
+	     << " ntowers=" << jet->numberOfTowers() << endl;
+	// Track loop
+	for (int iTrack = 0; iTrack < jet->numberOfTracks(); ++iTrack) {
+	  StJetTrack* track = jet->track(iTrack);
+	  cout << "Track #" << iTrack
+	       << ": id=" << track->id()
+	       << " pt=" << track->pt()
+	       << " eta=" << track->eta()
+	       << " phi=" << track->phi() << endl;
+	} // End track loop
+	// Tower loop
+	for (int iTower = 0; iTower < jet->numberOfTowers(); ++iTower) {
+	  StJetTower* tower = jet->tower(iTower);
+	  cout << "Tower #" << iTower
+	       << ": id=" << tower->id()
+	       << " detid=" << tower->detectorId()
+	       << " pt=" << tower->pt()
+	       << " eta=" << tower->eta()
+	       << " phi=" << tower->phi() << endl;
+	} // End tower loop
+      } // End jet loop
+    } // End vertex loop
     cout << endl;
   } // End event loop
 }
