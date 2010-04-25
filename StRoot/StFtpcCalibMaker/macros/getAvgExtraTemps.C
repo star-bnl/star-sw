@@ -135,17 +135,17 @@ void getAvgExtraTemps(std::string dbpath = "Conditions_ftpc/ftpcTemps/extra1East
 	}
 
     int i = 0;
-    Double_t extra1EastAvg = 0; 
+    Double_t extraAverage = 0; 
     while ((row = res->Next())) {
         i++;
         if (i%100 == 0) {
             std::cout << "  working on " << i << "th row \n";
         }
         h1->Fill(to_int(row->GetField(0)) - timeMin, to_double(row->GetField(1)));
-        extra1EastAvg += to_double(row->GetField(1));
+        extraAverage += to_double(row->GetField(1));
     }
 	
-   cout<<" extra1EastAvg = ("<<extra1EastAvg<<"/ i  = "<<i<<") = "<<extra1EastAvg/i<<endl;
+   cout<<mParam<<" = ("<<extraAverage<<"/ i  = "<<i<<") = "<<extraAverage/i<<endl;
    delete res;
    delete db;
 
