@@ -10,8 +10,10 @@
 #define ST_JET_CANDIDATE_H
 
 #include "TLorentzVector.h"
+#include "TRef.h"
 #include "TRefArray.h"
 
+class StJetVertex;
 class StJetTrack;
 class StJetTower;
 class StJetParticle;
@@ -55,6 +57,7 @@ public:
   int numberOfTowers() const { return mTowers.GetEntriesFast(); }
   int numberOfParticles() const { return mParticles.GetEntriesFast(); }
 
+  StJetVertex* vertex() const { return (StJetVertex*)mVertex.GetObject(); }
   StJetTrack* track(int i) const { return (StJetTrack*)mTracks.At(i); }
   StJetTower* tower(int i) const { return (StJetTower*)mTowers.At(i); }
   StJetParticle* particle(int i) const { return (StJetParticle*)mParticles.At(i); }
@@ -78,6 +81,7 @@ public:
 
   void setPtEtaPhiE(float pt, float eta, float phi, float E);
   void setPxPyPzE(float px, float py, float pz, float E);
+  void setVertex(const StJetVertex* vertex) { mVertex = (TObject*)vertex; }
   StJetTrack* addTrack(StJetTrack* track) { mTracks.Add((TObject*)track); return (StJetTrack*)mTracks.Last(); }
   StJetTower* addTower(StJetTower* tower) { mTowers.Add((TObject*)tower); return (StJetTower*)mTowers.Last(); }
   StJetParticle* addParticle(StJetParticle* particle) { mParticles.Add((TObject*)particle); return (StJetParticle*)mParticles.Last(); }
@@ -93,11 +97,12 @@ private:
   float mSumTrackPt;
   float mSumTowerPt;
 
+  TRef mVertex;
   TRefArray mTracks;
   TRefArray mTowers;
   TRefArray mParticles;
 
-  ClassDef(StJetCandidate,2);
+  ClassDef(StJetCandidate,3);
 };
 
 inline TLorentzVector StJetCandidate::fourMomentum() const
