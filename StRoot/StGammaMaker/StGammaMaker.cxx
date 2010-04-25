@@ -61,8 +61,13 @@ StMaker(name)
     if(mUseEemc) mRawMaker->useEemc();
     
     if(mUseBemc) mBemcClusterMaker = new StBarrelEmcClusterMaker();
-    if(mUseEemc) mEemcClusterMaker = new StMyClusterMaker("mEemcClusterMaker", mEemcAnalysis, mMuDstMaker);
-    
+    if(mUseEemc) 
+    {
+        mEemcClusterMaker = new StMyClusterMaker("mEemcClusterMaker", mEemcAnalysis, mMuDstMaker);
+        mEemcClusterMaker->setEtaCut(1);
+        mEemcClusterMaker->setPhiCut(1);
+    }
+
     mCandidateMaker = new StGammaCandidateMaker("mGammaCandidateMaker");
     if(mUseBemc) mCandidateMaker->useBemc();
     if(mUseEemc) mCandidateMaker->useEemc();
