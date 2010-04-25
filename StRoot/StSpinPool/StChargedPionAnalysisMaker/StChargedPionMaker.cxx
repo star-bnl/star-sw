@@ -1,4 +1,4 @@
-// $Id: StChargedPionMaker.cxx,v 1.21 2010/04/25 15:18:49 pibero Exp $
+// $Id: StChargedPionMaker.cxx,v 1.22 2010/04/25 16:07:57 pibero Exp $
 
 #include "StChargedPionMaker.h"
 
@@ -154,7 +154,7 @@ Int_t StChargedPionMaker::Init() {
     // do the setup for mPyJets here, since we only run on one file at a time
     if( dynamic_cast<StChargedPionMcEvent*>(mEvent) ) {
         if(mJetMk) {
-	  //mPyJets = ((mJetMk->getJets()).find("PythiaConeJets"))->second->getmuDstJets();
+	    mPyJets = mJetMk->getStJets("PythiaConeJets");
             LOG_INFO << "loaded mPyJets at " << mPyJets << endm;
         }
     }
@@ -167,21 +167,19 @@ Int_t StChargedPionMaker::Init() {
 
 Int_t StChargedPionMaker::InitRun(int runnumber) {
     if(mJetMk) {
-#if 0
         LOG_INFO << "found StJetMaker in the chain" << endm;
-        if((mJetMk->getJets()).count("ConeJets")) {
-	    mJets = ((mJetMk->getJets()).find("ConeJets"))->second->getmuDstJets();
+        if(StJets* stjets = mJetMk->getStJets("ConeJets")) {
+	    mJets = stjets;
             LOG_INFO << "found Jets in Run 5 branch " << mJets << endm;
         }
-        else if((mJetMk->getJets()).count("ConeJets12")) {
-	    mJets = ((mJetMk->getJets()).find("ConeJets12"))->second->getmuDstJets();
+        else if(StJets* stjets = mJetMk->getStJets("ConeJets12")) {
+	    mJets = stjets;
             LOG_INFO << "found Jets in Run 6 branch " << mJets << endm;
         }
         else {
-	    mJets = ((mJetMk->getJets()).find("ConeJets12_0.7"))->second->getmuDstJets();
+	    mJets = mJetMk->getStJets("ConeJets12_0.7");
             LOG_INFO << "found ConeJets12_0.7 branch " << mJets << endm;
         }
-#endif
     }
     else {
         LOG_INFO << "trying to get the jets off disk" << endm;
@@ -454,6 +452,10 @@ void StChargedPionMaker::makeTriggerSimu(StChargedPionBaseEv *ev) {
 
 /*****************************************************************************
  * $Log: StChargedPionMaker.cxx,v $
+ * Revision 1.22  2010/04/25 16:07:57  pibero
+ * Modified StChargedPionMaker.cxx to use the safer StJetMaker::getStJets()
+ * instead of the outdated and no longer available StJetMaker::getJets().
+ *
  * Revision 1.21  2010/04/25 15:18:49  pibero
  * Temporary fix to keep AutoBuild happy. Permanent solution to be posted soon.
  *
