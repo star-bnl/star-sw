@@ -4,6 +4,8 @@ root4star -b -q 'rdMuWana.C(2000,"","/star/institutions/mit/balewski/2010-Walgo-
 Jan: physic files, jet read:
 root4star -b -q 'rdMuWana.C(2e3,"","/star/u/balewski/2009-Wana-pp500/fillListPhys/F10535/R10102105a_230531_230601.lis",5000,0,2)'
 
+Jan: new M-C files, jet read:
+root4star -b -q 'rdMuWana.C(2000,"","/star/institutions/mit/balewski/2010-Walgo-simu/2010setB10016a/rcm10016_4_300evts.MuDst.root",1,100,2)'
 */
 
 class StChain;
@@ -26,33 +28,20 @@ int rdMuWana(
              TString jetTreeDir = "/star/institutions/mit/balewski/2009-pp500-jets/4.15.2010/" //default location of jet trees to be used
  ) { 
 
-  // old Justin's : jetTreeDir = "/star/institutions/iucf/stevens4/wAnalysis/jetTree4.5.10/"
 
-  if(isJanWjj && !isMC) jetTreeDir = "/star/institutions/mit/balewski/2009-pp500-jets/4.16.2010phys/"; 
 
-  if(isMC==1) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppWprod.lis";
-  if(isMC==2) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD2_ppQCD10_inf_filter.lis";
-  if(isMC==3) file  = "/star/institutions/mit/balewski/freezer/2009-W-algoVer4.3s-prelim-Jacobian2/fillListA/mcSetD1_ppZprod.lis";
-  if(isMC==4) file  = "/star/u/balewski/2009-Wana-pp500/fillListA/mcSetD1_ppWplusProd.lis";
-  if(isMC==5) file  = "fillListA/mcSetD1_ppWminusProd.lis";
-  if(isMC==6) file  = "fillListA/mcSetD1_ppWdec.lis";
-  if(isMC==7) file  = "fillListA/mcSetD1_ppZdec.lis";
-  if(isMC==8) geant=true; //uses geant files 
+  if(isJanWjj){ // Jan: use isMC=100 for interactive M-C,
+    if(isMC==0) jetTreeDir = "/star/institutions/mit/balewski/2009-pp500-jets/4.16.2010phys/"; 
 
-  //** official simu January 2010 , rcf10010-rcf10016
-  //** because of hardcoding timestamp these MC muDst's  must be fed 
-  //** individually by external file lists that can be found at 
-  //** /star/institutions/iucf/stevens4/wAnalysis/aps2010/fillListD/
-  //** and submitted to scheduler by scripts there 
-  
-  //single files for testing
-  string dir = "/star/data56/reco/pp500/pythia6_422/";
-  if(isMC==20) {
-    file =Form("%sWplus_enu/perugia320/y2009a/gheisha_on/p09ig/rcf10010_1000_1000evts.MuDst.root",dir);
-    geant=true;
   }
-  if(isMC==21) file =Form("%sWminus_enu/perugia320/y2009a/gheisha_on/p09ig/rcf10011_1000_1000evts.MuDst.root",dir);
- 
+  if(isJanWjj && isMC &&  useJetFinder==2) geant=true;
+
+  if(isMC==100)   jetTreeDir ="/star/institutions/mit/balewski/2010-Walgo-simu/2010setB10016a/"; 
+  if(isMC==101)  ;// free
+  if(isMC==102)   jetTreeDir ="/star/data05/scratch/balewski/2010-Wsimu-a3/jetR04/";
+  if(isMC==103)  jetTreeDir="/star/data01/pwg/balewski/2010-Wsimu-setC/jetR04/";
+  if(isMC==104)  jetTreeDir="/star/data01/pwg/balewski/2010-Wsimu-setC/jetR07/";
+  
   //submit via scheduler 
   if(isMC==30) geant=true; //uses geant files
   
@@ -76,24 +65,11 @@ int rdMuWana(
     outF=outF;
     printf("OutF=%s=\n",outF.Data());
   } 
-  else if(isMC==8){ //include geant.root files from private MC
-    char *file1=strstr(file,"/pp")+1;                      
-    printf("file1=%s=%s=\n",file1);                        
-    outF=file1; outF.ReplaceAll(".MuDst.root","");          
-    TString fileG=file; fileG.ReplaceAll("MuDst","geant"); 
-    fileG.ReplaceAll("/mu/","/geant/");                     
-  }
-  else if(isMC>=20){ // new Jan's MC w/ fixed beam line
-    char *file1=strstr(file,"/rck")+1;
-    printf("file1=%s=%s=\n",file1);
+  else { //  new  MC w/ working time stamp
+    char *file1=strstr(file,"rcn100"); assert(file1);
+    printf("file1=%s=\n",file1);
     outF=file1; outF.ReplaceAll(".MuDst.root","");
     TString fileG=file; fileG.ReplaceAll("MuDst","geant");
-  }
-  else { // private MC events
-    char *file1=strstr(file,"/mc")+1;
-    printf("file1=%s=%s=\n",file1);
-    outF=file1; file1=outF.Data();
-    outF.ReplaceAll(".lis",""); 
   }
   printf("TRIG ID: bht3=%d l2w=%d isMC=%d\n",bht3ID,l2wID,isMC);
   
@@ -121,8 +97,8 @@ int rdMuWana(
     cout << "BEGIN: loading jetfinder libs" << endl;
     gSystem->Load("StEmcRawMaker");
     gSystem->Load("StEmcADCtoEMaker");
-    gSystem->Load("StPreEclMaker");
-    gSystem->Load("StEpcMaker");
+    // gSystem->Load("StPreEclMaker");
+    //  gSystem->Load("StEpcMaker");
     gSystem->Load("StJetSkimEvent");
     gSystem->Load("StJets");
     gSystem->Load("StSpinDbMaker");
@@ -173,66 +149,23 @@ int rdMuWana(
   muMk->SetStatus("GlobalTracks",1);
   muMk->SetStatus("PrimaryTracks",1);
 
-
-  if(geant){                                            
-    StMcEventMaker *mcEventMaker = new StMcEventMaker();  
-    mcEventMaker->doPrintEventInfo = false;               
-    mcEventMaker->doPrintMemoryInfo = false;              
-  }
-
   St_db_Maker   *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
-  if(isMC>0 && isMC<20) { // private 2008 M-C samples
-    // .... Barrel....
-    dbMk->SetFlavor("sim","bemcPed"); // set all ped=0
-    dbMk->SetFlavor("sim","bemcStatus");  // ideal, all=on
-    dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains 
-    dbMk->SetFlavor("sim","bsmdePed"); // set all ped=0
-    dbMk->SetFlavor("sim","bsmdeCalib"); // load those, not used in algo
-    dbMk->SetFlavor("sim","bsmdeStatus"); // ideal, all=on
-    
-    dbMk->SetFlavor("sim","bsmdpPed");   // set all ped=0
-    dbMk->SetFlavor("sim","bsmdpCalib"); // load those, not used in algo
-    dbMk->SetFlavor("sim","bsmdpStatus"); // ideal, all=on
 
-    //.... Endcap.....
-    dbMk->SetFlavor("sim","eemcPMTcal");
-    dbMk->SetFlavor("sim","eemcPMTstat");
-    dbMk->SetFlavor("sim","eemcPMTped");
-  } 
-  else if (isMC==0) { // run 9 data
+  if (isMC==0) { // run 9 data
     dbMk->SetFlavor("Wbose","bsmdeCalib"); // Willie's relative gains E-plane
     dbMk->SetFlavor("Wbose","bsmdpCalib"); // P-plane
     dbMk->SetFlavor("missetTCD","eemcPMTcal");  // ETOW gains , not-standard
     dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
-  }  
-  if(isMC>=20) { // official rcf1001N M-C samples, DBV20100401
-    dbMk->SetMaxEntryTime(20100401,0); //use 'ofl' beginTime 2008-12-15 00:00:03 BTOW 'ofl' gains these MC were generated with
+  }   
+  else if(isMC>=100) {
+    dbMk->SetMaxEntryTime(20100420,0); // keep the same DB snap-shot as used in BFC
     dbMk->SetFlavor("sim","eemcPMTped"); // to compensate action of fast simu
     dbMk->SetFlavor("sim","eemcPMTcal"); // to compensate action of fast simu
-    printf("a-1\n");
-    //get timestamp from static txt file
-    int timestamp=-999;
-    ifstream mcTimeStamp("/star/institutions/mit/balewski/2010-Walgo-simu/2010setA/mcRckSDT.txt");
-    string line;
-    printf("a0\n");
-    while(mcTimeStamp.good()){ //loop over file names
-      getline(mcTimeStamp,line);
-      if(mcTimeStamp.eof()) break;
-      string fileName = line.substr(0,30);
-      printf("aa=%s=%s=\n",line.data(),file1);
-      if(fileName.compare(file1)==0){ //find correct timestamp
-	timestamp = atoi(line.substr(31,8).data());
-	break;
-      }
-    }
-    if(timestamp==-999) {
-      cout<<"Unknown input file, no timestamp found"<<endl;
-      return 0; 
-    }
-    cout<<fileName<<" "<<timestamp<<endl;
-    dbMk->SetDateTime(timestamp,0); //set timestamp
+  } else {
+    printf("???? unforeseen MC flag, ABORT\n"); assert(1==2);
   }
-    
+
+
   //.... load EEMC database
   StEEmcDbMaker*  mEEmcDatabase = new StEEmcDbMaker("eemcDb");
   
@@ -244,21 +177,26 @@ int rdMuWana(
   }
 
 
+  if(geant){                                            
+    StMcEventMaker *mcEventMaker = new StMcEventMaker();  
+    mcEventMaker->doPrintEventInfo = false;               
+    mcEventMaker->doPrintMemoryInfo = false;              
+  }
+  
   //.... Jet finder code ....
   if (useJetFinder > 0)  {
-    cout << "BEGIN: running jet finder " << endl;
     TString outFile = "jets_"+outF+".root";
+    cout << "BEGIN: running jet finder/reader =" <<outFile<<"="<< endl;
   }
-  if (useJetFinder == 1){
-    double pi = atan(1.0)*4.0;
-    
+
+  if (useJetFinder == 1){// run jet finder
+    double pi = atan(1.0)*4.0;    
     // Makers for clusterfinding
     StSpinDbMaker* spDbMaker = new StSpinDbMaker("spinDb");
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
-    StPreEclMaker *pre_ecl=new StPreEclMaker();
-    StEpcMaker *epc=new StEpcMaker();
+    //  StPreEclMaker *pre_ecl=new StPreEclMaker();
+    // StEpcMaker *epc=new StEpcMaker();
 
-    //test Mike's new 4p maker:
     //here we also tag whether or not to do the swap:
     bool doTowerSwapFix = true;
     bool use2003TowerCuts = false;
@@ -304,11 +242,13 @@ int rdMuWana(
     emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100, "ConeJets12_100"); //100% subtraction     
     emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100_noEEMC, "ConeJets12_100_noEEMC"); //100% subtraction (no Endcap)
 
+#if 0 // remove it next time, Jan
     //Tight cuts (esp. SMD)
     pre_ecl->SetClusterConditions("bemc", 4, 0.4, 0.05, 0.02, kFALSE);
     pre_ecl->SetClusterConditions("bsmde", 5, 0.4,0.005, 0.1,kFALSE);
     pre_ecl->SetClusterConditions("bsmdp", 5, 0.4,0.005, 0.1,kFALSE);
     pre_ecl->SetClusterConditions("bprs", 1, 500., 500., 501., kFALSE);
+#endif
 
     TChain* tree=muMk->chain(); assert(tree);
     int nEntries=(int) tree->GetEntries();
@@ -330,7 +270,7 @@ int rdMuWana(
        if(stat != kStOk && stat != kStSkip) break; // EOF or input error
        eventCounter++;
     }
-    cout<<"R"<<runNo<<" nEve="<<eventCounter<<" total "; tt.Print();
+    cout<<"run R"<<runNo<<" nEve="<<eventCounter<<" total "; tt.Print();
     printf("****************************************** \n");
 
     int t2=time(0);
@@ -354,12 +294,12 @@ int rdMuWana(
   St2009WMaker *WmuMk=new St2009WMaker();
   if(isMC) { // MC specific
     WmuMk->setMC(isMC); //pass "version" of MC to maker
-    //vary energy scales for syst. uncert. calc.
+    //vary energy scales for syst. uncert. calc., remove it next time , also from .h,.cxx
     //WmuMk->setJetNeutScaleMC(1.0); 
     //WmuMk->setJetChrgScaleMC(1.0); 
     //WmuMk->setBtowScale(1.0);     
     //WmuMk->setEtowScale(1.0);     
-    if(isMC<20) WmuMk->setEtowScale(1.3); // rcf simu should have correct SF
+    
   }else {// real data specific
     WmuMk->setTrigID(bht3ID,l2wID,runNo);
   }
@@ -377,7 +317,7 @@ int rdMuWana(
   /* evaluation of result, has full acess to W-algo internal data
      including overwrite - be careful */
   
-  WpubMk=new St2009pubWanaMaker("pubJan"); 
+  WpubMk=new St2009pubWanaMaker("pubJan"); // remove it next time??
   WpubMk->attachWalgoMaker(WmuMk); // 
 
   //Collect all output histograms   
@@ -403,7 +343,7 @@ int rdMuWana(
     }  
   }
   
-  if(geant){
+  if(geant && !isJanWjj){
     pubMcMk=new St2009pubMcMaker("pubMc");
     pubMcMk->attachWalgoMaker(WmuMk);
     pubMcMk->setHList(HList);
@@ -428,11 +368,28 @@ int rdMuWana(
   }
 
   if (isJanWjj){
-    wjjMk=new St2009WjjMaker("Wjj");
-    wjjMk->attachWalgoMaker(WmuMk);
-    wjjMk->setHList(HList);
-    wjjMk->setSpinSort(spinSort);
-    wjjMk->setMC(isMC);
+    StMcJetCalibMaker *jetcMk;
+    St2009WjjMaker * wjjMk;
+    char ttx[100]; 
+    for(int kk=0;kk<2;kk++) {// to study various calibration schemes
+      if(geant) {	
+	sprintf(ttx,"%ccalJ",'A'+kk);
+	printf("add jetCalMaker %s %d \n",ttx,kk);
+	jetcMk=new  StMcJetCalibMaker(ttx); 
+	jetcMk->attachWalgoMaker(WmuMk);
+	jetcMk->setHList(HList);
+	jetcMk->setCorrection(kk); // 0=no corrections,
+      }// end of geant
+      
+      sprintf(ttx,"%cWjj",'A'+kk);
+      printf("add Wjj-maker %s %d \n",ttx,kk);      
+      wjjMk=new St2009WjjMaker(ttx);
+      wjjMk->attachWalgoMaker(WmuMk);
+      wjjMk->setHList(HList);
+      wjjMk->setSpinSort(spinSort);
+      wjjMk->setMC(isMC);
+      wjjMk->setCorrection(kk); // 0=no corrections,
+    }// loop over kk
   }
 
   TChain* tree=muMk->chain(); assert(tree);
@@ -456,7 +413,7 @@ int rdMuWana(
     eventCounter++;    
   }
 
-  cout<<"R"<<runNo<<" nEve="<<eventCounter<<" total "; tt.Print();
+  cout<<"run R"<<runNo<<" nEve="<<eventCounter<<" total "; tt.Print();
   printf("****************************************** \n");
 
   int t2=time(0);
@@ -483,6 +440,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.35  2010/04/25 21:12:48  balewski
+// cleanup, remove tome dependete DB setup for M-C
+//
 // Revision 1.34  2010/04/16 16:07:13  balewski
 // *** empty log message ***
 //
