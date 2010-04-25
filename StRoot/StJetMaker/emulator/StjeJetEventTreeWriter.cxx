@@ -198,6 +198,8 @@ StJetCandidate* StjeJetEventTreeWriter::fillJet(StJetEvent* jetEvent, StJetVerte
   jet->computeSumTrackPt();
   jet->computeSumTowerPt();
 
+  jet->setVertex(jetVertex);
+
   return jet;
 }
 
