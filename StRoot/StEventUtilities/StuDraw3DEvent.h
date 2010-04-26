@@ -1,7 +1,7 @@
 #ifndef STAR_StuDraw3DEvent
 #define STAR_StuDraw3DEvent
 
-// $Id: StuDraw3DEvent.h,v 1.19 2009/12/04 19:51:30 fine Exp $
+// $Id: StuDraw3DEvent.h,v 1.20 2010/04/26 22:03:44 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/05/2008
 
 #include "StDraw3D.h"
@@ -74,6 +74,7 @@ class StuDraw3DEvent : public virtual StDraw3D
                   ,  Style_t sty= Style_t(-1)
                   ,  Size_t siz = Size_t (-1));
      virtual void    Hits(const StEvent* event, EStuDraw3DEvent trackHitsOnly=kUsedHits, StTrackType type=global);
+     virtual void    FtpcHits(const StEvent* event, EStuDraw3DEvent trackHitsOnly=kUsedHits, StTrackType type=global);
      virtual void    Hits(const StTrack &track,  EDraw3DStyle sty);
      virtual void    Hits(const StTrack &track);
      virtual void    Hits(const StTrack &track
