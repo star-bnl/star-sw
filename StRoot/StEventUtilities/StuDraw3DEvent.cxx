@@ -1,4 +1,4 @@
-// $Id: StuDraw3DEvent.cxx,v 1.31 2010/01/13 19:39:19 fine Exp $
+// $Id: StuDraw3DEvent.cxx,v 1.32 2010/04/26 22:03:44 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StuDraw3DEvent.h"
 #include "TVirtualPad.h"
@@ -8,11 +8,15 @@
 #include "StTrack.h"
 #include "StHit.h"
 #include "StTpcHit.h"
+#include "StFtpcHit.h"
 #include "StEmcRawHit.h"
 #include "StTrackNode.h"
 #include "StTrackGeometry.h"
 #include "StTpcHitCollection.h"
 #include "StEmcCollection.h"
+#include "StFtpcHitCollection.h"
+#include "StFtpcSectorHitCollection.h"
+#include "StFtpcPlaneHitCollection.h"
 #include "StEmcDetector.h"
 #include "StEmcModule.h"
 #include "StMeasuredPoint.h"
@@ -320,14 +324,48 @@ void  StuDraw3DEvent::Hits(const StTrack &track
     // with the graphical attributes "col", "sty", "siz"
    std::vector<float> hitPoints;
    const StPtrVecHit& trackHits = track.detectorInfo()->hits(kTpcId);
-   for (unsigned int m=0; m<trackHits.size(); m++) {
-      StHit *hit = trackHits[m];
+   unsigned int m=0;
+   StHit *hit = 0;
+   for (m=0; m<trackHits.size(); m++) {
+      hit = trackHits[m];
       hitPoints.push_back( hit->position().x());
       hitPoints.push_back( hit->position().y());
       hitPoints.push_back( hit->position().z());
    }
-   std::vector<float>::iterator xyz = hitPoints.begin();
-   Points(hitPoints.size()/3,&*xyz,col,sty,siz); 
+   {
+      std::vector<float>::iterator xyz = hitPoints.begin();
+      Points(hitPoints.size()/3,&*xyz,col,sty,siz); 
+   }
+   // printf(" Tpc hits # %d\n", m);
+
+   const StPtrVecHit& trackWestHits = track.detectorInfo()->hits(kFtpcWestId);
+
+   hitPoints.clear();
+   for (m=0; m<trackWestHits.size(); m++) {
+      hit = trackWestHits[m];
+      hitPoints.push_back( hit->position().x());
+      hitPoints.push_back( hit->position().y());
+      hitPoints.push_back( hit->position().z());
+   }
+   {
+      std::vector<float>::iterator xyz = hitPoints.begin();
+      Points(hitPoints.size()/3,&*xyz,col,sty,siz); 
+   }
+   // printf(" Ftpc West hits # %d\n", m);
+
+   hitPoints.clear();
+   const StPtrVecHit& trackEastHits = track.detectorInfo()->hits(kFtpcEastId);
+   for (m=0; m<trackEastHits.size(); m++) {
+      hit = trackEastHits[m];
+      hitPoints.push_back( hit->position().x());
+      hitPoints.push_back( hit->position().y());
+      hitPoints.push_back( hit->position().z());
+   }
+   {
+      std::vector<float>::iterator xyz = hitPoints.begin();
+      Points(hitPoints.size()/3,&*xyz,col,sty,siz); 
+   }
+   // printf(" Ftpc East hits # %d\n", m);
 }
 
 //____________________________________________________________________________________
@@ -425,7 +463,6 @@ void StuDraw3DEvent::Tracks(const StSPtrVecTrackNode &theNodes
       }
    }
 }
-
 //___________________________________________________
 void StuDraw3DEvent::Hits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, StTrackType type)
 {
@@ -478,6 +515,62 @@ void StuDraw3DEvent::Hits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, St
       Points(hitPoints.size()/3,&*xyz,kUnusedHit);
       SetComment("Unused TPC hits");
    }
+}
+
+//___________________________________________________
+void StuDraw3DEvent::FtpcHits(const StEvent *event,EStuDraw3DEvent trackHitsOnly, StTrackType type)
+{
+   if (!event) return; // no event
+   unsigned int m, n, h;
+   if (trackHitsOnly != kUnusedHitsOnly) {
+      Style_t sty    = Style(kUsedHit).Sty();
+      Size_t  siz    = Style(kUsedHit).Siz();
+      Style_t styPnt = Style(kTrackBegin).Sty();
+      Size_t  sizPnt = Style(kTrackBegin).Siz();
+      int trackCounter = 0;
+      const StSPtrVecTrackNode& theNodes = event->trackNodes();
+      for (unsigned int i=0; i<theNodes.size(); i++) {
+         StTrack *track = theNodes[i]->track(type);
+         if (track &&  track->flag() > 0
+                   &&  track->detectorInfo()                
+                   &&  ( track->detectorInfo()->numberOfPoints(kFtpcWestId) || track->detectorInfo()->numberOfPoints(kFtpcEastId)  )
+                   && !track->bad() 
+         )
+        {
+           ++trackCounter;
+            double pt = track->geometry()->momentum().perp();
+            Color_t trackColor = StDraw3DStyle::Pt2Color(pt);
+            if ( trackHitsOnly != kUsedHits) {
+               Track(*track,trackColor);
+               TrackInOut(*track, true,  trackColor,  styPnt, sizPnt);
+               TrackInOut(*track, false, trackColor,  styPnt, sizPnt);
+            }
+            if ( trackHitsOnly != kTracksOnly) {
+               Hits(*track,trackColor,sty,siz);
+               if (trackHitsOnly == kUsedHits) SetModel(track);
+           }
+        }
+     }
+     printf(" Ftpc tracks total : %d\n", trackCounter);
+   } else {
+      const StHit *hit= 0;
+      std::vector<float> hitPoints;
+      const StFtpcHitCollection* ftpHits = event->ftpcHitCollection(); 
+      if (ftpHits->numberOfHits()>0) {
+          for (n=0;n<ftpHits-> numberOfPlanes();++n ) {
+             for (m=0; m<ftpHits->plane(n)->numberOfSectors(); m++) { 
+               for (h=0; h<ftpHits->plane(n)->sector(m)->hits().size(); h++) {
+                  hit = ftpHits->plane(n)->sector(m)->hits()[h];
+                  hitPoints.push_back( hit->position().x());
+                  hitPoints.push_back( hit->position().y());
+                  hitPoints.push_back( hit->position().z());
+           } } }
+          std::vector<float>::iterator xyz = hitPoints.begin();
+          Points(hitPoints.size()/3,&*xyz,kUnusedHit);
+          SetComment("Unused FTPC hits");
+          printf(" FTPC hits counter total : %d\n", hitPoints.size()/3);
+     }
+  }
 }
 
 //____________________________________________________________________________________
