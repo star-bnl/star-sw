@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.126 2010/04/13 21:53:40 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.127 2010/04/27 22:08:52 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -810,7 +810,8 @@
     my ($MYSQLLIBDIR,$MYSQLLIB) =
 	script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
 			 $OPTSTAR . "/lib " .  $OPTSTAR . "/lib/mysql ",
-			 "libmysqlclient");
+			 "libmysqlclient_r libmysqlclient");
+    #print "*** $MYSQLLIBDIR,$MYSQLLIB\n";
 
     if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) {
         # if ( $mysqlconf ){
@@ -824,6 +825,7 @@
 	    if (-r "/usr/$LLIB/libmystrings.a") {$MYSQLLIB .= " -lmystrings";}
 	    if (-r "/usr/$LLIB/libssl.a"      ) {$MYSQLLIB .= " -lssl";}
 	    if (-r "/usr/$LLIB/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
+	    if ( $MYSQLLIB =~ m/client_r/     ) {$MYSQLLIB .= " -lpthread";}
 	    # if (-r "/usr/$LLIB/libk5crypto.a" ) {$MYSQLLIB .= " -lcrypto";}
 	    $MYSQLLIB .= " -lz";
 	    # $MYSQLLIB .= " -lz -lcrypt -lnsl";
