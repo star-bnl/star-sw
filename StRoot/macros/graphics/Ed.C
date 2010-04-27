@@ -1,5 +1,5 @@
 
-// $Id: Ed.C,v 1.13 2009/12/15 00:00:21 fine Exp $
+// $Id: Ed.C,v 1.14 2010/04/27 00:03:22 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //! \file Ed.C 
@@ -72,14 +72,21 @@ void rd(int  hits=0, bool clear=false)
    if (event) {
       if (clear) gEventDisplay->Clear();
       if (hits) {
-        if (hits & 1) gEventDisplay->Hits(event);
+        if (hits & 1) gEventDisplay->Hits(event,1);
         if (hits & 2) gEventDisplay->EmcHits(event);
+        if (hits & 4) gEventDisplay->FtpcHits(event,1);
  //       if (hits & 4) gEventDisplay->EmcHits(event,"eemc");
       }
       else gEventDisplay->Tracks(event);
       // gEventDisplay->Update();
    }
 }
+//__________________________________________
+void skipae(int nEvents=1) {
+   if(chain) chain->Skip(nEvents);
+}
+
+//__________________________________________
 //! This function is to search for the next non-empty event and draw it by looping over StBFChain (reading the next events from the file)
 /*! 
    \param tracks - flag to mark whether the tracks from the event should be rendered \n
@@ -98,7 +105,7 @@ void ae(int tracks=-1, int  hits=-1)
  // One may want to replace the "plain"  "if" clause below
  // with the full-fledged filter
    static int defaultTracks = 0;
-   static int defaultHits   = 2;
+   static int defaultHits   = 3;
 
    if (tracks != -1 ) defaultTracks = tracks;
    else tracks = defaultTracks;
@@ -126,8 +133,8 @@ void ae(int tracks=-1, int  hits=-1)
 */
 //__________________________________________
  void Ed(const char* file =
- "/star/data15/reco/production_dAu2008/ReversedFullField/P08ie/2008/025/9025036/st_physics_9025036_raw_1010030.event.root"
- , const char * detectorNames="TPC")
+ "/star/institutions/bnl/fine/testfiles/st_physics_10169042_raw_4030001.event.root"
+ , unsigned int nEvent=1, const char * detectorNames="TPC")
  {
    // Start application open the file provided.
    if ( gSystem->AccessPathName(file)) {
@@ -147,7 +154,7 @@ void ae(int tracks=-1, int  hits=-1)
    }
    gROOT->Macro("Load.C"); 
    gSystem->Load("StDetectorDbMaker");
-   gROOT->Macro(Form("bfc.C(0,\"doevents\",\"%s\")",file));
+   gROOT->Macro(Form("bfc.C(%d,1,\"doevents\",\"%s\")",nEvent,file));
    delete gEventDisplay; // destroy the built-in display
    new StuDraw3DEvent(detectorNames); // create our own one (with no detector geometry)
 //   new StuDraw3DEvent("TPC"); // create our own one (with TPC detector)
