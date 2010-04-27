@@ -1,4 +1,4 @@
-// $Id: StjTPCMuDst.cxx,v 1.7 2010/04/24 04:15:39 pibero Exp $
+// $Id: StjTPCMuDst.cxx,v 1.8 2010/04/27 16:31:48 pibero Exp $
 #include "StjTPCMuDst.h"
 
 #include "StEventTypes.h"
@@ -6,6 +6,7 @@
 
 #include <mudst/StMuEmcPosition.h>
 #include <StEmcUtil/geometry/StEmcGeom.h>
+#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
 #include <TVector3.h>
 
@@ -77,32 +78,34 @@ StjTrack StjTPCMuDst::createTrack(const StMuTrack* mutrack, int i, double magnet
 
   if (EmcPosition.trackOnEmc(&positionAt, &momentumAt, mutrack, track.BField, track.bemcRadius))
     {
-      track.exitDetectorId = 9;
+      track.exitDetectorId = kBarrelEmcTowerId;
       track.exitEta = positionAt.pseudoRapidity();
       track.exitPhi = positionAt.phi();
-      int id(0);
-      StEmcGeom::instance("bemc")->getId(track.exitPhi, track.exitEta, id);
-      track.exitTowerId = id;
+      StEmcGeom::instance("bemc")->getId(track.exitPhi, track.exitEta, track.exitTowerId);
     }
   else if(EmcPosition.trackOnEEmc(&positionAt, &momentumAt, mutrack))
     {
-      track.exitDetectorId = 13;
+      track.exitDetectorId = kEndcapEmcTowerId;
       track.exitEta = positionAt.pseudoRapidity();
       track.exitPhi = positionAt.phi();
-      track.exitTowerId = 0; // todo 
+      int sector, subsector, etabin;
+      EEmcGeomSimple::Instance().getTower(positionAt.xyz(),sector,subsector,etabin);
+      track.exitTowerId = sector*60+subsector*12+etabin;
     }
   else
     {
-      track.exitDetectorId = 0;
+      track.exitDetectorId = -999;
       track.exitEta = -999;
       track.exitPhi = -999;
-      track.exitTowerId = 0;
+      track.exitTowerId = -999;
     }
 
   track.dEdx = mutrack->dEdx();
   track.beta = mutrack->globalTrack() ? mutrack->globalTrack()->btofPidTraits().beta() : 0;
   track.trackIndex = i;
   track.id = mutrack->id();
+  track.firstPoint = mutrack->firstPoint().xyz();
+  track.lastPoint  = mutrack->lastPoint().xyz();
 
   return track;
 }

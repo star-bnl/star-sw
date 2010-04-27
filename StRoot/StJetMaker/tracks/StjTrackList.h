@@ -1,13 +1,13 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackList.h,v 1.4 2010/04/24 04:15:44 pibero Exp $
+// $Id: StjTrackList.h,v 1.5 2010/04/27 16:31:51 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKLIST_H
 #define STJTRACKLIST_H
 
-#include <TObject.h>
-
 #include <ostream>
 #include <vector>
+#include "TObject.h"
+#include "TVector3.h"
 
 class StjTrack : public TObject {
 public:
@@ -45,7 +45,9 @@ public:
   double         beta;
   int            trackIndex;
   short          id;
-  ClassDef(StjTrack,3)
+  TVector3       firstPoint;
+  TVector3       lastPoint;
+  ClassDef(StjTrack,4)
 };
 
 typedef std::vector<StjTrack> StjTrackList;
@@ -82,6 +84,8 @@ inline bool operator==(const StjTrack& v1, const StjTrack& v2)
   if(v1.beta           != v2.beta)           return false;   
   if(v1.trackIndex     != v2.trackIndex)     return false;   
   if(v1.id             != v2.id)             return false;   
+  if(v1.firstPoint     != v2.firstPoint)     return false;
+  if(v1.lastPoint      != v2.lastPoint)      return false;
   return true;
   }
 
