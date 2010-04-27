@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.h,v 1.12 2010/04/16 14:35:32 balewski Exp $
+// $Id: St2009WMaker.h,v 1.13 2010/04/27 16:53:45 stevens4 Exp $
 
 #ifndef STAR_St2009WMaker
 #define STAR_St2009WMaker
@@ -146,6 +146,7 @@ class St2009WMaker : public StMaker {
   bool  passes_L0();
   bool  passes_L2();
   void  find_W_boson();
+  void  tag_Z_boson();
   int   extendTrack2Barrel();
   int   matchTrack2Cluster();
   void  findNearJet();
@@ -195,7 +196,7 @@ class St2009WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.12 2010/04/16 14:35:32 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.13 2010/04/27 16:53:45 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -206,6 +207,9 @@ class St2009WMaker : public StMaker {
 
 
 // $Log: St2009WMaker.h,v $
+// Revision 1.13  2010/04/27 16:53:45  stevens4
+// add code to remove events tagged as Zs from W candidates
+//
 // Revision 1.12  2010/04/16 14:35:32  balewski
 // fix borken header
 //
