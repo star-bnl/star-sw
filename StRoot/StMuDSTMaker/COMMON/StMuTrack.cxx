@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.43 2010/03/08 19:06:51 tone421 Exp $
+ * $Id: StMuTrack.cxx,v 1.44 2010/04/27 20:47:17 tone421 Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -22,8 +22,11 @@
 #include "StarClassLibrary/StParticleTypes.hh"
 #include "StEventUtilities/StuProbabilityPidAlgorithm.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
+#include "StEmcUtil/projection/StEmcPosition.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 #include "THelixTrack.h"
 #include "TMath.h"
+
 namespace {
 	const StThreeVectorF gDummy(-999,-999,-999);
 }
@@ -519,12 +522,119 @@ int StMuTrack::vertexIndex() const {
 	else return -1;
 }
 
-ClassImp(StMuTrack)
+TArrayI StMuTrack::getTower(bool useExitRadius,int det) const{ //1=BTOW, 3=BSMDE, 4=BSMDP... Returns TVector tower. tower[0] is module, tower[1] is eta, tower[2] is sub, and tower[3] is id
+	
+//	StMuTrack* track = this;
+	TArrayI tower(4);
+	tower[0] = -10;
+	tower[1] = -10;
+	tower[2] = -10;		
+	tower[3] = -10;		
 
+	StThreeVectorD momentum,position;
+	Double_t radius;
+	
+	StEmcGeom* mEmcGeom = StEmcGeom::instance("bemc");
+	StEmcGeom* mSmdEGeom= StEmcGeom::instance("bsmde");
+	StEmcGeom* mSmdPGeom= StEmcGeom::instance("bsmdp");
+	
+	if(det==1) radius = mEmcGeom->Radius();
+	if(det==2) radius = mEmcGeom->Radius();
+	if(det==3) radius = mSmdEGeom->Radius();
+	if(det==4) radius = mSmdPGeom->Radius();
+		
+	StEventSummary& evtSummary = StMuDst::event()->eventSummary();
+	Double_t mField = evtSummary.magneticField()/10;
+		
+	//add 30 cm to radius to find out if track left same tower
+	if(useExitRadius) radius += 30.0;
+	
+	StEmcPosition mEmcPosition;
+	bool goodProjection;
+	if(this) goodProjection = mEmcPosition.trackOnEmc(&position,&momentum,this,mField,radius);
+	else return tower;
+	if(goodProjection){
+		int m,e,s,id=0;
+		float eta=position.pseudoRapidity();
+		float phi=position.phi();
+		if(det==1){
+		  mEmcGeom->getBin(phi,eta,m,e,s);
+//		  s = abs(s);
+		  if(mEmcGeom->getId(m,e,s,id)==0){
+		    tower[0] = m;
+		    tower[1] = e;
+			tower[2] = s;		
+			tower[3] = id;		
+		  }
+		}
+		else if(det==3){
+		  int check=mSmdEGeom->getBin(phi,eta,m,e,s);
+		  if(!check){
+		    s = abs(s);
+		    if(mSmdEGeom->getId(m,e,s,id)==0){
+		    tower[0] = m;
+		    tower[1] = e;
+			tower[2] = s;		    
+			tower[3] = id;		}
+		  }
+		}
+		else if(det==4){
+		  int check=mSmdPGeom->getBin(phi,eta,m,e,s);
+		  s = abs(s);
+		  if(!check){
+		    if(mSmdPGeom->getId(m,e,s,id)==0){
+		    tower[0] = m;
+		    tower[1] = e;
+			tower[2] = s;
+			tower[3] = s;   }
+		  }
+		}
+	}
+	return tower;
+}
+
+double StMuTrack::energyBEMC() const { //Return energy of negative 100 GeV is no BEMC hit is matched...
+
+	double hitEnergy;
+	TArrayI tower = getTower();
+	unsigned int iMod = tower[0];
+    unsigned int iEta = tower[1];
+	unsigned int iSub = tower[2];
+	if(iMod < 1 ||iMod > 120) return -100.0;
+
+	if (StMuDst::emcCollection()) {
+		StEmcDetector	*bemcDet = StMuDst::emcCollection()->detector(kBarrelEmcTowerId);
+		StEmcModule	*mod = bemcDet->module(iMod);
+		StSPtrVecEmcRawHit&  hits = mod->hits();
+		for(unsigned int i=0; i<hits.size();i++){
+			if(hits[i]){
+				if((hits[i]->eta() == iEta) && (hits[i]->sub() == iSub)) {
+					hitEnergy = hits[i]->energy();
+					if(hitEnergy > 0) return hitEnergy;
+					else return -100.0;
+				}
+			}
+		}
+	}
+	return -100.0;
+}
+
+bool StMuTrack::matchBEMC() const {
+	double mEmcThres = 0.15;
+	if (energyBEMC() > mEmcThres) return true;
+	return false;
+}
+
+ClassImp(StMuTrack)
 
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.44  2010/04/27 20:47:17  tone421
+ * Added extra functions for BEMC matching. See this post for more details:
+ *
+ * http://www.star.bnl.gov/HyperNews-star/get/starsofi/7816.html
+ *
  * Revision 1.43  2010/03/08 19:06:51  tone421
  * Two things. Global tracks how are filled with an index to primary at birth. Added StMuDst::fixTrackIndicesG(), which is used for matching the primary track indices to global tracks. Previously, this was quite slow -  see this post:
  *

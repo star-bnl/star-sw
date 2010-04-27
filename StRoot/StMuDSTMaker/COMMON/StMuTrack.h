@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.36 2009/12/08 23:24:46 fine Exp $
+ * $Id: StMuTrack.h,v 1.37 2010/04/27 20:47:17 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -34,6 +34,7 @@
 #include "StarClassLibrary/SystemOfUnits.h"
 
 #include "TObject.h"
+#include "TVector.h"
 
 #define __PROB_SCALE__  1000.
 #define __SIGMA_SCALE__ 1000.
@@ -43,7 +44,8 @@ class StRichSpectra;
 class StEvent;
 class StTrack;
 class StVertex;
-
+class StEmcGeom;
+class StEmcPosition;
 class StuProbabilityPidAlgorithm;
 
 class TObjArray;
@@ -109,7 +111,13 @@ class StMuTrack : public TObject {
     static void setProbabilityPidCentrality(double cent); ///< Sets the centrality for calculating Aihong's pid.
     virtual void Print(Option_t* option = "") const;  ///< Print track info
     void setIndex2BTofHit(int i) {mIndex2BTofHit=i;} /// dongx
-  void setIndex2Cov(int i) {mIndex2Cov=i;}    ///< Set index of associated DCA geoemtry for the global track.
+    void setIndex2Cov(int i) {mIndex2Cov=i;}    ///< Set index of associated DCA geoemtry for the global track.
+
+	//Matching to BEMC related functions
+	TArrayI getTower(bool useExitRadius=false, int det=1) const; //Get Tower track is pointing too -  1=BTOW, 3=BSMDE, 4=BSMDP //1=BTOW, 3=BSMDE, 4=BSMDP Returns TVector tower. tower[0] is module, tower[1] is eta, tower[2] is sub, and tower[3] is id
+	double energyBEMC() const;
+	bool matchBEMC() const;
+
 protected:
   Short_t mId;
   Short_t mType;
@@ -217,6 +225,11 @@ inline const StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0)
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.37  2010/04/27 20:47:17  tone421
+ * Added extra functions for BEMC matching. See this post for more details:
+ *
+ * http://www.star.bnl.gov/HyperNews-star/get/starsofi/7816.html
+ *
  * Revision 1.36  2009/12/08 23:24:46  fine
  * Fix issue  #1748 http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1748
  *
