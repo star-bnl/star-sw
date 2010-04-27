@@ -12,7 +12,7 @@ void Draw3D()
    gROOT->Macro("Load.C");  //< Load STAR framework shared libraries
    gEventDisplay->Draw3DTest(); //< Invoke the built-in rendering test 
    gEventDisplay->SetDrawOption("{file:rotation.iv}");
+   gEventDisplay->SetFooter("STAR Event Display Example");
    gEventDisplay->Print("Draw3DTest.wrl"); //< Save the 3D scene into the file
    gEventDisplay->SetDrawOption("{view:all}");
-//   gEventDisplay->SetFooter("STAR Event Display Example");
 }
