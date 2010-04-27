@@ -209,7 +209,7 @@ StLoggerManager::~StLoggerManager() {
   if (fCurOpt) delete [] fCurOpt;  fCurOpt = 0;
 
   if (StLoggerManager::Instance() == this) {
-      DestroyInstance();
+      // DestroyInstance();
       gMessMgr = 0;
    }
 
@@ -516,7 +516,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.38 2010/04/23 22:39:11 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.39 2010/04/27 21:31:44 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -949,10 +949,13 @@ const char *GetName()
 // ostrstream& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.38 2010/04/23 22:39:11 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.39 2010/04/27 21:31:44 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.39  2010/04/27 21:31:44  fine
+// remove the logger destruction side effect
+//
 // Revision 1.38  2010/04/23 22:39:11  fine
-// RT #1911. Make interface log4cxx compliant. Remove the dtor dead-lock and add post-mortim clean up
+//  RT #1911. Make interface log4cxx compliant. Remove the dtor dead-lock and add post-mortim clean up
 //
 // Revision 1.37  2009/09/09 00:05:13  fine
 // Merge log4cxx version 9 and 10

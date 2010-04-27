@@ -91,7 +91,7 @@ Int_t StChain::Finish(){
  SetBIT  (kFiniEnd);
  // StopTimer();
  PrintTotalTime();
- delete gMessMgr; gMessMgr = 0;
+ // delete gMessMgr; gMessMgr = 0;
  return res;
 }
 //_____________________________________________________________________________
@@ -273,8 +273,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.76 2010/04/23 22:40:08 fine Exp $
+// $Id: StChain.cxx,v 1.77 2010/04/27 21:31:44 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.77  2010/04/27 21:31:44  fine
+// remove the logger destruction side effect
+//
 // Revision 1.76  2010/04/23 22:40:08  fine
 // RT #1911. Close the local logger at Finish
 //
