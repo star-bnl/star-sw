@@ -1,6 +1,9 @@
-// $Id: gasTemp_2d_pos.C,v 1.2 2009/11/22 20:48:30 jcs Exp $
+// $Id: gasTemp_2d_pos.C,v 1.3 2010/04/27 20:48:29 jcs Exp $
 //
 // $Log: gasTemp_2d_pos.C,v $
+// Revision 1.3  2010/04/27 20:48:29  jcs
+// Prithwish's changes to automatically name and save the 2d plots in both ps and png format
+//
 // Revision 1.2  2009/11/22 20:48:30  jcs
 // set 2D histogram limits depending on deltaT
 //
@@ -134,7 +137,12 @@ void gasTemp_2d_pos(int ftpc, int lsec, float deltaT, TString a, char *opt)
   hr3->GetXaxis()->SetTitle("#Delta T");
   //
 
-  FILE *file1=fopen ("res.log","r");
+char name[100];
+sprintf(name,"res.log",lsec);
+  
+printf("Input file opened %s \n",name);
+
+  FILE *file1=fopen (name,"r");
   
   Int_t datab1;
 
@@ -175,7 +183,7 @@ void gasTemp_2d_pos(int ftpc, int lsec, float deltaT, TString a, char *opt)
 	      hr3->Fill(T,gas,lpos3-rad3);
     }
 	  else
-	    {cout<<"Funktion nicht vorhanden !"<<endl;break;}
+	    {cout<<"Function not available !"<<endl;break;}
 	}
   if (a=='d')
     {
@@ -194,7 +202,15 @@ void gasTemp_2d_pos(int ftpc, int lsec, float deltaT, TString a, char *opt)
   //cout<<hr1->GetMinimumBin()<<endl;;
   //cout<<minx<<" "<<miny<<endl;
   c1->Update();
+
+  if(ftpc==1) sprintf(name,"w_lsec%d_2d_Del_g-Del_T%g.ps",lsec,deltaT);
+  if(ftpc==2) sprintf(name,"e_lsec%d_2d_Del_g-Del_T%g.ps",lsec,deltaT);
+  c1->SaveAs(name);
+  if(ftpc==1) sprintf(name,"w_lsec%d_2d_Del_g-Del_T%g.png",lsec,deltaT);
+  if(ftpc==2) sprintf(name,"e_lsec%d_2d_Del_g-Del_T%g.png",lsec,deltaT);
+  c1->SaveAs(name);
+
   if (fclose(file1) != 0)
-     cout<<"Datei nicht geschlossen !"<<endl;
+     cout<<"Error closing input file !"<<endl;
 
 }
