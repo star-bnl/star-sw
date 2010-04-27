@@ -1,4 +1,4 @@
-// $Id: EdFtpc.C,v 1.1 2010/04/27 19:05:47 fine Exp $
+// $Id: EdFtpc.C,v 1.2 2010/04/27 23:55:26 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 #ifndef __CINT__
 # include "StuDraw3DEvent.h"
@@ -124,7 +124,7 @@ void ae()
 //__________________________________________
  void EdFtpc(const char* file =
  "/star/institutions/bnl/fine/testfiles/st_physics_10169042_raw_4030001.event.root"
- , unsigned int nEvent=44, const char * detectorNames="TPC")
+ , unsigned int nEvent=44, const char * detectorNames="FTPC,StarFloor,StarCompass,StarBeam")
  {
    // Start application open the file provided.
    if ( gSystem->AccessPathName(file)) {
