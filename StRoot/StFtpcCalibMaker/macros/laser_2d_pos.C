@@ -1,6 +1,9 @@
-// $Id: laser_2d_pos.C,v 1.4 2009/10/14 15:58:43 jcs Exp $
+// $Id: laser_2d_pos.C,v 1.5 2010/04/27 20:48:29 jcs Exp $
 //
 // $Log: laser_2d_pos.C,v $
+// Revision 1.5  2010/04/27 20:48:29  jcs
+// Prithwish's changes to automatically name and save the 2d plots in both ps and png format
+//
 // Revision 1.4  2009/10/14 15:58:43  jcs
 // change and add macros so that in addition to varying t0 and the gas compostion,
 // the gas temperature can be varied
@@ -177,7 +180,7 @@ void laser_2d_pos(int ftpc, int lsec,TString a,char *opt)
 	      hr3->Fill(t0,gas,lpos3-rad3);
 	    }
 	  else
-	    {cout<<"Funktion nicht vorhanden !"<<endl;break;}
+	    {cout<<"Function not available !"<<endl;break;}
 	}
   if (a=='d')
     {
@@ -197,6 +200,18 @@ void laser_2d_pos(int ftpc, int lsec,TString a,char *opt)
   //cout<<minx<<" "<<miny<<endl;
   c1->Update();
   if (fclose(file1) != 0)
-     cout<<"Datei nicht geschlossen !"<<endl;
+     cout<<"Error closing input file"<<endl;
 
+  if(ftpc==1 && lsec==1)c1->SaveAs("w_lsec1_2d_Del_g-Del_t0.png");
+  if(ftpc==1 && lsec==1)c1->SaveAs("w_lsec1_2d_Del_g-Del_t0.ps");
+  if(ftpc==1 && lsec==2)c1->SaveAs("w_lsec2_2d_Del_g-Del_t0.png");
+  if(ftpc==1 && lsec==2)c1->SaveAs("w_lsec2_2d_Del_g-Del_t0.ps");
+  if(ftpc==1 && lsec==3)c1->SaveAs("w_lsec3_2d_Del_g-Del_t0.png");
+  if(ftpc==1 && lsec==3)c1->SaveAs("w_lsec3_2d_Del_g-Del_t0.ps");
+  if(ftpc==2 && lsec==1)c1->SaveAs("e_lsec1_2d_Del_g-Del_t0.png");
+  if(ftpc==2 && lsec==1)c1->SaveAs("e_lsec1_2d_Del_g-Del_t0.ps");
+  if(ftpc==2 && lsec==2)c1->SaveAs("e_lsec2_2d_Del_g-Del_t0.png");
+  if(ftpc==2 && lsec==2)c1->SaveAs("e_lsec2_2d_Del_g-Del_t0.ps");
+  if(ftpc==2 && lsec==3)c1->SaveAs("e_lsec3_2d_Del_g-Del_t0.png");
+  if(ftpc==2 && lsec==3)c1->SaveAs("e_lsec3_2d_Del_g-Del_t0.ps");
 }
