@@ -17,9 +17,10 @@ void makeBkgdFiles(int charge, int two_or_four) {
   // ******************************************************
 
   gStyle->SetOptDate(0);
-  TFile *f1 = new TFile("run9setP1234_final.wana.hist.root");
-  //TFile *f1 = new TFile("run9setABCD_energy_up.wana.hist.root");
-  //TFile *f1 = new TFile("run9setABCD_energy_down.wana.hist.root");
+  //TFile *f1 = new TFile("run9setP1234.wana.hist.root");
+ 
+  TFile *f1 = new TFile("hybrid2/run9setP1234.wana.hist.root");
+  //TFile *f1 = new TFile("noZTag/run9setP1234.wana.hist.root");
 
   // get the signal and missing endcap backgrounds
   if (charge == 1) {
@@ -33,60 +34,67 @@ void makeBkgdFiles(int charge, int two_or_four) {
     TH1F *signal_wo_eemc = (TH1F*)f1->Get("muclustPtBalnoE");
   }
 
-  TH1F *eemc_bkgd = signal_wo_eemc->Clone();
-  eemc_bkgd->Add(signal,-1.);
-  TH1F *signal_final = signal->Clone();
-  signal_final->Add(eemc_bkgd,-1);
-
-  TH1F *eemc_bkgd2 = new TH1F("eemc_bkgd2","eemc_bkgd2",49,1,99);
-
-  // First get the "nominal" background shape
-  TH1F *bkgd_shape1 = (TH1F*)f1->Get("muclustPtBal_bckgrd");
-
-  TH1F *bkgd_shape_nom = new TH1F("bkgd_shape","bkgd_shape",49,1,99);
-  for (int i=1; i<=49; i++) {
-    bkgd_shape_nom->SetBinContent(i,bkgd_shape1->GetBinContent(2*i)+
-                                    bkgd_shape1->GetBinContent(2*i+1));
-  }
-  TH1F *bkgd_shape_nom2 = bkgd_shape_nom->Clone();
-
-  TH1F *signal_final2 = new TH1F("signal_final2","signal_final2",49,1,99);
-  signal_final2->SetLineColor(2);
-  signal_final2->SetLineWidth(2.*signal_final2->GetLineWidth());
-  TH1F *signal2 = new TH1F("signal2","signal2",49,1,99);
-  for (int i=1; i<=49; i++) {
-    signal_final2->SetBinContent(i,signal_final->GetBinContent(2*i)+
-                                   signal_final->GetBinContent(2*i+1));
-    signal2->SetBinContent(i,signal->GetBinContent(2*i)+
-                             signal->GetBinContent(2*i+1));
-    eemc_bkgd2->SetBinContent(i,eemc_bkgd->GetBinContent(2*i)+
-                                eemc_bkgd->GetBinContent(2*i+1));
-  }
-
-  TCanvas *can2 = new TCanvas("can2","can2",0,0,600,400);
-  signal2->Draw();
-  signal_final2->Draw("same");
-  can2->Print("signal_w_eemc.eps");
-  can2->Print("signal_w_eemc.png");
-
   // ******************************************************
   // Read in all the MC data sets for background 
   // subtractions and studies
   // ******************************************************
 
   TFile *MC_fs[6];
-  MC_fs[0] = new TFile("rcf10010.wana.hist.root"); // W+ -> e++nu
-  MC_fs[1] = new TFile("rcf10011.wana.hist.root"); // W- -> e-+nu
-  MC_fs[2] = new TFile("rcf10012.wana.hist.root"); // W -> tau+nu
-  MC_fs[3] = new TFile("rcf10014.wana.hist.root"); // Z -> e++e-
-  MC_fs[4] = new TFile("rcf10015.wana.hist.root"); // Z -> any but e++e-
 
+  /*MC_fs[1] = new TFile("rcf10010.wana.hist.root"); // W+ -> e++nu
+  MC_fs[0] = new TFile("rcf10011.wana.hist.root"); // W- -> e-+nu
+  MC_fs[2] = new TFile("rcf10012.wana.hist.root"); // W -> tau+nu
+  MC_fs[3] = new TFile("rcf10014.wana.hist.root"); // W -> any
+  MC_fs[4] = new TFile("rcf10015.wana.hist.root"); // Z -> any
+*/
+
+  MC_fs[0] = new TFile("hybrid2/rck10010.wana.hist.root"); // W+ -> e++nu
+  MC_fs[1] = new TFile("hybrid2/rck10011.wana.hist.root"); // W- -> e-+nu
+  MC_fs[2] = new TFile("hybrid2/rck10012.wana.hist.root"); // W -> tau+nu
+  MC_fs[3] = new TFile("hybrid2/rck10017.wana.hist.root"); // W -> any
+  MC_fs[4] = new TFile("hybrid2/rck10018.wana.hist.root"); // Z -> any
+
+
+/*
+  MC_fs[0] = new TFile("noZTag/rck10010.wana.hist.root"); // W+ -> e++nu
+  MC_fs[1] = new TFile("noZTag/rck10011.wana.hist.root"); // W- -> e-+nu
+  MC_fs[2] = new TFile("noZTag/rck10012.wana.hist.root"); // W -> tau+nu
+  MC_fs[3] = new TFile("noZTag/rck10017.wana.hist.root"); // W -> any
+  MC_fs[4] = new TFile("noZTag/rck10018.wana.hist.root"); // Z -> any
+*/
+
+  // Because of a screw up between the RFF and FF in the simulation
+  // and reconstruction the charge sign of the MC needs to be inverted
   TH1F *MC_dists_raw[5][3];
   for (int i=0; i<5; i++) {
-    MC_dists_raw[i][0] = (TH1F*)MC_fs[i]->Get("muclustPtBal");
-    MC_dists_raw[i][1] = (TH1F*)MC_fs[i]->Get("muclustPtBalnoE");
+    if (charge == -1) {
+      MC_dists_raw[i][0] = (TH1F*)MC_fs[i]->Get("pos_muclustpTbal_wE");
+      MC_dists_raw[i][1] = (TH1F*)MC_fs[i]->Get("pos_muclustpTbal_noE");
+      //MC_dists_raw[i][2] = (TH1F*)MC_fs[i]->Get("pos_muclustpTbal_bckgrd");
+    } else if (charge == 1) {
+      MC_dists_raw[i][0] = (TH1F*)MC_fs[i]->Get("neg_muclustpTbal_wE");
+      MC_dists_raw[i][1] = (TH1F*)MC_fs[i]->Get("neg_muclustpTbal_noE");
+      ///MC_dists_raw[i][2] = (TH1F*)MC_fs[i]->Get("neg_muclustpTbal_bckgrd");
+    } else if (charge == 0) {
+      MC_dists_raw[i][0] = (TH1F*)MC_fs[i]->Get("muclustPtBal");
+      MC_dists_raw[i][1] = (TH1F*)MC_fs[i]->Get("muclustPtBalnoE");
+      MC_dists_raw[i][2] = (TH1F*)MC_fs[i]->Get("muclustPtBal_bckgrd");
+    }
     MC_dists_raw[i][2] = (TH1F*)MC_fs[i]->Get("muclustPtBal_bckgrd");
+
   }
+
+  //float lumi[5] = {116.5,318.5,76.9,1220.,45.6}; // old MC
+  float lumi[5] = {30.,63.,61.,14.7.,33.};
+  float lumi_fact[6];
+  for (int i=0; i<5; i++) {lumi_fact[i] = 12.0/lumi[i];}
+
+  for (int i=0; i<5; i++) {
+    for (int j=0; j<3; j++) {
+      MC_dists_raw[i][j]->Scale(lumi_fact[i]);
+    }
+  }
+
 
   // Repack the histograms to mesh with the odd staggered binning that
   // is being used
@@ -113,21 +121,78 @@ void makeBkgdFiles(int charge, int two_or_four) {
   // Make the EEMC background the real one of interest now
   for (int i=0; i<5; i++) {
     MC_dists_repack[i][1]->Add(MC_dists_repack[i][0],-1);
+    MC_dists_raw[i][1]->Add(MC_dists_raw[i][0],-1.);
   }
 
-  // Scale all the MC samples to match the sampled luminosity in the 
-  // dataset (assumed to be 13.7 pb-1 at this point)
-  float lumi[5] = {116.5,318.5,76.9,1220.,45.6};
-  float lumi_fact[6];
-  for (int i=0; i<5; i++) {lumi_fact[i] = 13.7/lumi[i];}
+  // **********************************************
+  // Do some otherstuff
+  // **********************************************
 
-  for (int i=0; i<5; i++) {
-    for (int j=0; j<3; j++) {
-      MC_dists_repack[i][j]->Scale(lumi_fact[i]);
-    }
+  TH1F *eemc_bkgd = signal_wo_eemc->Clone();
+  eemc_bkgd->Add(signal,-1.);
+  TH1F *signal_final = signal->Clone();
+  signal_final->Add(eemc_bkgd,-1);
+
+  TH1F *eemc_bkgd2 = new TH1F("eemc_bkgd2","eemc_bkgd2",49,1,99);
+  TH1F *zsig_bkgd2 = new TH1F("zsig_bkgd2","zsig_bkgd2",49,1,99);
+  TH1F *zeemc_bkgd2 = new TH1F("zeemc_bgkd2","zeemc_bkgd2",49,1,99);
+  TH1F *zback_bkgd2 = new TH1F("zback_bkgd2","zback_bkgd2",49,1,99);
+
+  TH1F *wanysig_bkgd2 = new TH1F("wanysig_bkgd2","wanysig_bkgd2",49,1,99);
+  TH1F *wanyeemc_bkgd2 = new TH1F("wanyeemc_bgkd2","wanyeemc_bkgd2",49,1,99);
+  TH1F *wanyback_bkgd2 = new TH1F("wanyback_bkgd2","wanyback_bkgd2",49,1,99);
+
+  TH1F *zsig = MC_dists_raw[4][0]->Clone();
+  TH1F *zeemc = MC_dists_raw[4][1]->Clone();
+  TH1F *zback = MC_dists_raw[4][2]->Clone();
+
+  signal_final->Add(zsig,-1.);
+
+  // First get the "nominal" background shape
+  TH1F *bkgd_shape1 = (TH1F*)f1->Get("muclustPtBal_bckgrd");
+
+  TH1F *bkgd_shape_nom = new TH1F("bkgd_shape","bkgd_shape",49,1,99);
+  for (int i=1; i<=49; i++) {
+    bkgd_shape_nom->SetBinContent(i,bkgd_shape1->GetBinContent(2*i)+
+                                    bkgd_shape1->GetBinContent(2*i+1));
+  }
+  TH1F *bkgd_shape_nom2 = bkgd_shape_nom->Clone();
+
+  TH1F *signal_final2 = new TH1F("signal_final2","signal_final2",49,1,99);
+  signal_final2->SetLineColor(2);
+  signal_final2->SetLineWidth(2.*signal_final2->GetLineWidth());
+  TH1F *signal2 = new TH1F("signal2","signal2",49,1,99);
+  for (int i=1; i<=49; i++) {
+    signal_final2->SetBinContent(i,signal_final->GetBinContent(2*i)+
+                                   signal_final->GetBinContent(2*i+1));
+    signal2->SetBinContent(i,signal->GetBinContent(2*i)+
+                             signal->GetBinContent(2*i+1));
+    eemc_bkgd2->SetBinContent(i,eemc_bkgd->GetBinContent(2*i)+
+                                eemc_bkgd->GetBinContent(2*i+1));
+    zsig_bkgd2->SetBinContent(i,zsig->GetBinContent(2*i)+
+                                zsig->GetBinContent(2*i+1));
+    zeemc_bkgd2->SetBinContent(i,zeemc->GetBinContent(2*i)+
+                                 zeemc->GetBinContent(2*i+1));
+    zback_bkgd2->SetBinContent(i,zback->GetBinContent(2*i)+
+                                 zback->GetBinContent(2*i+1));
+    wanysig_bkgd2->SetBinContent(i,MC_dists_raw[3][0]->GetBinContent(2*i)+
+                                   MC_dists_raw[3][0]->GetBinContent(2*i+1));
+    wanyeemc_bkgd2->SetBinContent(i,MC_dists_raw[3][1]->GetBinContent(2*i)+
+                                    MC_dists_raw[3][1]->GetBinContent(2*i+1));
+    wanyback_bkgd2->SetBinContent(i,MC_dists_raw[3][2]->GetBinContent(2*i)+
+                                    MC_dists_raw[3][2]->GetBinContent(2*i+1));
   }
 
+  TCanvas *can2 = new TCanvas("can2","can2",0,0,600,400);
+  signal2->Draw();
+  signal_final2->Draw("same");
+  can2->Print("signal_w_eemc.eps");
+  can2->Print("signal_w_eemc.png");
+
+
+  // **********************************************
   // plot all the business
+  // **********************************************
   eemc_bkgd->SetLineColor(8);
   eemc_bkgd->SetLineWidth(2.*eemc_bkgd->GetLineWidth());
   bkgd_shape_nom2->SetLineColor(4);
@@ -206,6 +271,9 @@ void makeBkgdFiles(int charge, int two_or_four) {
     bkgd_shape_unnorm[i] = (TH1F*)bkgd_shape_nom->Clone();
     signal_for_new[i] = (TH1F*)signal_final2->Clone();
 
+    // subtract off the Z signal from the background
+    bkgd_shape_unnorm[i]->Add(zback_bkgd2,-1.);
+    
     // calculate the W signal in the normalization bins
     signal_in_norm[8] = func1->Integral(15,17);
     signal_in_norm[9] = func1->Integral(17,19);
@@ -228,10 +296,14 @@ void makeBkgdFiles(int charge, int two_or_four) {
       float norm = normt/normb;
       bkgd_shape_unnorm[i]->Scale(norm);
       bkgd_shape_unnorm[i]->Draw("same");
+      //cout << "norm " << i << " = " << norm << endl;
     }
   
     // With the new signal estimate, calculate the normalization
     // factor 
+    for (int j=1; j<=49; j++) {
+      if (bkgd_shape_unnorm[i]->GetBinContent(j) < 0) {bkgd_shape_unnorm[i]->SetBinContent(j,0.);}
+    }
     signal_for_new[i]->Add(bkgd_shape_unnorm[i],-1.); 
     signal_for_new[i]->Fit(func1,"RQ");
   }
@@ -245,6 +317,7 @@ void makeBkgdFiles(int charge, int two_or_four) {
  
   TH1F *new_bkgd = new TH1F("new_bkgd","new_bkgd",49,1.,99.);
   new_bkgd = (TH1F*)bkgd_shape_unnorm[19]->Clone();
+  new_bkgd->SetName("new_bkgd");
 
   TCanvas *can5 = new TCanvas("can5","can5",0,0,600,400);
   signal_final2->Draw();
@@ -264,19 +337,20 @@ void makeBkgdFiles(int charge, int two_or_four) {
   TH2F *bkgd_hists_from_file2[21];
   char str[200];
   for (int i=0; i<=20; i++) {
-    if (charge == 1) {
-      sprintf(str,"pos_failAwaySide_Awayside_pt_bin_%d",i);
-      bkgd_hists_from_file[i] = (TH2F*)f1->Get(str);
-    } else if (charge == -1) {
-      sprintf(str,"neg_failAwaySide_Awayside_pt_bin_%d",i);
-      bkgd_hists_from_file[i] = (TH2F*)f1->Get(str);
-    } else if (charge == 0) {
+
+//    if (charge == 1) {
+//      sprintf(str,"pos_failAwaySide_Awayside_pt_bin_%d",i);
+//      bkgd_hists_from_file[i] = (TH2F*)f1->Get(str);
+//    } else if (charge == -1) {
+//      sprintf(str,"neg_failAwaySide_Awayside_pt_bin_%d",i);
+//      bkgd_hists_from_file[i] = (TH2F*)f1->Get(str);
+//    } else if (charge == 0) {
       sprintf(str,"pos_failAwaySide_Awayside_pt_bin_%d",i);
       bkgd_hists_from_file[i] = (TH2F*)f1->Get(str);
       sprintf(str,"neg_failAwaySide_Awayside_pt_bin_%d",i);
       bkgd_hists_from_file2[i] = (TH2F*)f1->Get(str);
       bkgd_hists_from_file[i]->Add(bkgd_hists_from_file2[i]);
-    }
+//    }
   }
 
   // Now do the rebinning
@@ -294,9 +368,9 @@ void makeBkgdFiles(int charge, int two_or_four) {
       sprintf(str,"bkgd_hist3_%d_%d",i,j);
       bkgd_hists3[i][j] = new TH1F(str,str,49,1,99);
       for (int k=1; k<=49; k++) {
-        bkgd_hists1[i][j]->SetBinContent(k,bkgd_hists_from_file[0]->GetBinContent(2*k,i)+bkgd_hists_from_file[0]->GetBinContent(2*k+1,i));
-        bkgd_hists2[i][j]->SetBinContent(k,bkgd_hists_from_file[0]->GetBinContent(2*k,i)+bkgd_hists_from_file[0]->GetBinContent(2*k+1,i));
-        bkgd_hists3[i][j]->SetBinContent(k,bkgd_hists_from_file[0]->GetBinContent(2*k,i)+bkgd_hists_from_file[0]->GetBinContent(2*k+1,i));
+        bkgd_hists1[i][j]->SetBinContent(k,bkgd_hists_from_file[0]->GetBinContent(2*k,i+1)+bkgd_hists_from_file[0]->GetBinContent(2*k+1,i+1));
+        bkgd_hists2[i][j]->SetBinContent(k,bkgd_hists_from_file[0]->GetBinContent(2*k,i+1)+bkgd_hists_from_file[0]->GetBinContent(2*k+1,i+1));
+        bkgd_hists3[i][j]->SetBinContent(k,bkgd_hists_from_file[0]->GetBinContent(2*k,i+1)+bkgd_hists_from_file[0]->GetBinContent(2*k+1,i+1));
       }
    // }
   }
@@ -346,6 +420,11 @@ void makeBkgdFiles(int charge, int two_or_four) {
         signal_for_new2[l] = (TH1F*)signal_final2->Clone();
         signal_for_new3[l] = (TH1F*)signal_final2->Clone();
 
+        // subtract off the Z contamination
+        bkgd_shape_unnorm1[l]->Add(zback_bkgd2,-1.);
+        bkgd_shape_unnorm2[l]->Add(zback_bkgd2,-1.);
+        bkgd_shape_unnorm3[l]->Add(zback_bkgd2,-1.);
+
         // calculate the signal in the normalization bins
         signal_in_norm1[8] = func1->Integral(15,17);
         signal_in_norm1[9] = func1->Integral(17,19);
@@ -375,6 +454,9 @@ void makeBkgdFiles(int charge, int two_or_four) {
           float norm = normt/normb;
           bkgd_shape_unnorm1[l]->Scale(norm);
         }
+        for (int m=1; m<=49; m++) {
+          if (bkgd_shape_unnorm1[l]->GetBinContent(m) < 0) {bkgd_shape_unnorm1[l]->SetBinContent(m,0.);}
+        }
         signal_for_new1[l]->Add(bkgd_shape_unnorm1[l],-1.);
         signal_for_new1[l]->Fit(func1,"RQ");
 
@@ -389,13 +471,18 @@ void makeBkgdFiles(int charge, int two_or_four) {
         if (normb > 0 && normt > 0) {
           float norm = normt/normb;
           bkgd_shape_unnorm2[l]->Scale(norm);
+          //cout << "norm " << i << " " << l << " = " << norm << endl;
+        }
+        
+        for (int m=1; m<=49; m++) {
+          if (bkgd_shape_unnorm2[l]->GetBinContent(m) < 0) {bkgd_shape_unnorm2[l]->SetBinContent(m,0.);}
         }
         signal_for_new2[l]->Add(bkgd_shape_unnorm2[l],-1.);
-        signal_for_new2[l]->Fit(func1,"RQ");
+        signal_for_new2[l]->Fit(func2,"RQ");
 
         // calculate the normalization factor for 3 bins
         normt = 0.; normb = 0.;
-        for (int k=8; k<=8; k++) {
+        for (int k=8; k<=10; k++) {
           if (bkgd_shape_unnorm3[l]->GetBinContent(k) > 0) {
             normt += signal_final2->GetBinContent(k)-signal_in_norm3[k];
             normb += bkgd_shape_unnorm3[l]->GetBinContent(k);
@@ -405,9 +492,11 @@ void makeBkgdFiles(int charge, int two_or_four) {
           float norm = normt/normb;
           bkgd_shape_unnorm3[l]->Scale(norm);
         }
+        for (int m=1; m<=49; m++) {
+          if (bkgd_shape_unnorm3[l]->GetBinContent(m) < 0) {bkgd_shape_unnorm3[l]->SetBinContent(m,0.);}
+        }
         signal_for_new3[l]->Add(bkgd_shape_unnorm3[l],-1.);
-        signal_for_new3[l]->Fit(func1,"RQ");
-
+        signal_for_new3[l]->Fit(func3,"RQ");
       } // end of for loop over l
 
       // Save the last iteration as the background histogram
@@ -438,6 +527,8 @@ void makeBkgdFiles(int charge, int two_or_four) {
       new_bkgd_hists3[i][j]->Draw("same");
     //}
   }
+  new_bkgd->SetLineColor(4);
+  //new_bkgd->SetLineWidth(4.*new_bkgd->GetLineWidth());
   new_bkgd->Draw("same");
   if (charge == 1) {
     can6->Print("Wplus_bkgd_shapes.eps");
@@ -468,30 +559,60 @@ void makeBkgdFiles(int charge, int two_or_four) {
   // First get the simple numbers (backgrounds and their 
   // statistical uncertainties)
   TH1F *tauhist = MC_dists_repack[2][0]->Clone();
+  //TH1F *zsig = MC_dists_repack[3][0]->Clone(); 
+  //TH1F *zeemc = MC_dists_repack[3][1]->Clone();
+  //TH1F *zback = MC_dists_repack[3][2]->Clone();
   tauhist->Scale(taufrac);
   float tau_norm = lumi_fact[2];
+  float Z_norm = lumi_fact[4];
   float bkgd_sum = 0.;
   float signal_sum = 0.;
   float raw_sum = 0.;
   float QCD_sum = 0., tau_sum = 0., eemc_sum = 0.;
-  for (int i=13; i<=49; i++) {
+  float QCD_raw_sum = 0.;
+  float Wany_bkgd_sum = 0.;
+  float Wany_eemc_sum = 0.;
+  float zsig_sum = 0., zeemc_sum = 0.,zback_sum = 0.;
+  float wanysig_sum = 0., wanyeemc_sum = 0.,wanyback_sum = 0.;
+  for (int i=13; i<=26; i++) {
     cout << i << " " << new_bkgd->GetBinCenter(i) << " " << new_bkgd->GetBinContent(i) << " " << tauhist->GetBinContent(i) << " " << eemc_bkgd2->GetBinContent(i) << endl;
     bkgd_sum += new_bkgd->GetBinContent(i);
     bkgd_sum += tauhist->GetBinContent(i);
     bkgd_sum += eemc_bkgd2->GetBinContent(i);
+    QCD_raw_sum += bkgd_shape_nom->GetBinContent(i);
     QCD_sum += new_bkgd->GetBinContent(i);
     tau_sum += tauhist->GetBinContent(i);
     eemc_sum += eemc_bkgd2->GetBinContent(i);
     signal_sum += signal_final2->GetBinContent(i);
-    raw_sum += signal2->GetBinContent(i); 
+    raw_sum += signal2->GetBinContent(i);
+    zsig_sum += zsig_bkgd2->GetBinContent(i);
+    zeemc_sum += zeemc_bkgd2->GetBinContent(i);
+    zback_sum += zback_bkgd2->GetBinContent(i);
+    wanysig_sum += wanysig_bkgd2->GetBinContent(i);
+    wanyeemc_sum += wanyeemc_bkgd2->GetBinContent(i);
+    wanyback_sum += wanyback_bkgd2->GetBinContent(i);
+ 
   }
   cout << "The total background for ET>25 is " << bkgd_sum << endl;
-  cout << "QCD = " << QCD_sum << ", tau = " << tau_sum << ", and eemc = " << eemc_sum << endl;
+  cout << "QCD = " << QCD_sum << ", tau = " << tau_sum << ", eemc = " << eemc_sum << ", and Z = " << zsig_sum << endl;
   cout << "Raw = " << raw_sum << endl;
   cout << "Signal = " << signal_sum-QCD_sum << endl;
+  cout << "Z in sig = " << zsig_sum << endl;
+  cout << "Z in eemc = " << zeemc_sum << endl;
+  cout << "Z in back = " << zback_sum << endl;
+  cout << "Wany in sig = " << wanysig_sum << endl;
+  cout << "Wany in eemc = " << wanyeemc_sum << endl;
+  cout << "Wany in back = " << wanyback_sum << endl;
+  cout << "QCD raw in back = " << QCD_raw_sum << endl; 
   cout << "The QCD stat unc. is " << norm*sqrt(QCD_sum/norm) << endl;
   cout << "The tau stat unc. is " << tau_norm*taufrac*sqrt(tau_sum/(tau_norm*taufrac)) << endl;
   cout << "The eemc stat unc. is " << sqrt(eemc_sum) << endl;
+  cout << "The Z stat unc. is " << Z_norm*sqrt(zsig_sum/Z_norm) << endl;
+  
+  cout << "f_tau = " << tau_sum/raw_sum << endl;
+  cout << "f_QCD = " << QCD_sum/raw_sum << endl;
+  cout << "f_EEMC = " << eemc_sum/raw_sum << endl;
+  cout << "f_Z = " << zsig_sum/raw_sum << endl;
 
   // Set up some histograms to hold all the errors that
   // are calculated
@@ -502,28 +623,34 @@ void makeBkgdFiles(int charge, int two_or_four) {
   TH1F *QCD_syst_high_err = new TH1F("QCD_syst_high_err","QCD_syst_high_err",49,1.,99.);
   TH1F *QCD_syst_low_err = new TH1F("QCD_syst_low_err","QCD_syst_low_err",49,1.,99.);
 
-  for (int i=1; i<=49; i++) {
+  for (int i=1; i<=26; i++) {
     raw_stat_err2->SetBinContent(i,signal2->GetBinContent(i));
-    QCD_stat_err2->SetBinContent(i,norm*new_bkgd->GetBinContent(i));
+    QCD_stat_err2->SetBinContent(i,fabs(norm*new_bkgd->GetBinContent(i)));
     eemc_stat_err2->SetBinContent(i,eemc_bkgd2->GetBinContent(i));
     tau_stat_err2->SetBinContent(i,tau_norm*taufrac*tauhist->GetBinContent(i));
-    cout << "Error " << i << " " << raw_stat_err2->GetBinCenter(i) << " " << raw_stat_err2->GetBinContent(i) << " " << QCD_stat_err2->GetBinContent(i) << " " << eemc_stat_err2->GetBinContent(i) << " " << tau_stat_err2->GetBinContent(i) << endl;
+    //cout << "Error " << i << " " << raw_stat_err2->GetBinCenter(i) << " " << raw_stat_err2->GetBinContent(i) << " " << QCD_stat_err2->GetBinContent(i) << " " << eemc_stat_err2->GetBinContent(i) << " " << tau_stat_err2->GetBinContent(i) << endl;
   }
 
   // Now go through all the 1200 background shapes and find the
   // high and low in each ET bin to give the maximum extent uncertainty
   // for each ET bin (and also sum the low and high to give the
   // overall number used in the xsec analysis)  
+
+  TH1F *low_bkgd = new_bkgd->Clone();
+  low_bkgd->SetName("low_bkgd");
+  TH1F *high_bkgd = new_bkgd->Clone();
+  high_bkgd->SetName("high_bkgd");
+
   float low_sum = 0.;
   float high_sum = 0.;
-  for (int i=13; i<=49; i++) {
+  for (int i=13; i<=26; i++) {
     float high = 0.;
     float low = 10000.;
     for (int j=0; j<=20; j++) {
       int k=jval;
       //for (int k=0; k<20; k++) {
         if (new_bkgd_hists1[j][k]->GetBinContent(i) < low) {
-          if (new_bkgd_hists1[j][k]->GetBinContent(i) > 0) {
+          if (new_bkgd_hists1[j][k]->GetBinContent(i) >= 0) {
             low = new_bkgd_hists1[j][k]->GetBinContent(i);
           }
         }
@@ -532,7 +659,7 @@ void makeBkgdFiles(int charge, int two_or_four) {
         }
 
         if (new_bkgd_hists2[j][k]->GetBinContent(i) < low) {
-          if (new_bkgd_hists2[j][k]->GetBinContent(i) > 0) {
+          if (new_bkgd_hists2[j][k]->GetBinContent(i) >= 0) {
             low = new_bkgd_hists2[j][k]->GetBinContent(i);
           }
         }
@@ -541,23 +668,26 @@ void makeBkgdFiles(int charge, int two_or_four) {
         }
 
         if (new_bkgd_hists3[j][k]->GetBinContent(i) < low) {
-          if (new_bkgd_hists3[j][k]->GetBinContent(i) > 0) {
+          if (new_bkgd_hists3[j][k]->GetBinContent(i) >= 0) {
             low = new_bkgd_hists3[j][k]->GetBinContent(i);
           }
         }
         if (new_bkgd_hists3[j][k]->GetBinContent(i) > high) {
           high = new_bkgd_hists3[j][k]->GetBinContent(i);
         }
-
+        //cout << i << " low = " << low << " high = " << high << endl;
       //} // end of k-loop
     } // end of j-loop
 
     // calculate the sum
+    low_bkgd->SetBinContent(i,0.);
     if ((low != 10000) && (new_bkgd->GetBinContent(i)-low > 0)) {
       low_sum += low;
+      low_bkgd->SetBinContent(i,low);
     }
     high_sum += high; 
-
+    high_bkgd->SetBinContent(i,high);
+    //cout << i << " low = " << low << " high = " << high << " nom = " << new_bkgd->GetBinContent(i) << endl;  
     // set the bin-by-bin error too
     if ((low != 10000) && (new_bkgd->GetBinContent(i)-low > 0)) {
       QCD_syst_low_err->SetBinContent(i,new_bkgd->GetBinContent(i)-low);
@@ -599,11 +729,14 @@ void makeBkgdFiles(int charge, int two_or_four) {
     signal_final3->Add(new_bkgd,-1.);
 
     tauhist->Write();
+    zsig->Write();
     signal2->Write();
     signal_final2->Write(); 
     signal_final3->Write();
     eemc_bkgd2->Write(); 
     new_bkgd->Write();
+    low_bkgd->Write();
+    high_bkgd->Write();
     signal_in_norm_region->Write();
 
     raw_stat_err2->Write();
@@ -623,13 +756,14 @@ void makeBkgdFiles(int charge, int two_or_four) {
     }
     signal_final3->Add(new_bkgd,-1.);
 
-
     TH1F *tauhist_repack = new TH1F("tauhist_r","tauhist_r",24,3.,99.);
     TH1F *signal2_repack = new TH1F("signal2_r","signal2_r",24,3.,99.);
     TH1F *signal_final2_repack = new TH1F("signal_final2_r","signal_final2_r",24,3.,99.);
     TH1F *signal_final3_repack = new TH1F("signal_final3_r","signal_final3_r",24,3.,99.);
     TH1F *eemc_bkgd2_repack = new TH1F("eemc_bkgd2_r","eemc_bkgd2_r",24,3.,99.);
     TH1F *new_bkgd_repack = new TH1F("new_bkgd_r","new_bkgd_r",24,3.,99.);
+    TH1F *low_bkgd_repack = new TH1F("low_bkgd_r","low_bkgd_r",24,3.,99.);
+    TH1F *high_bkgd_repack = new TH1F("high_bkgd_r","high_bkgd_r",24,3.,99.);
     TH1F *signal_in_norm_region_repack = new TH1F("signal_in_norm_region_r","signal_in_norm_region_r",24,3.,99.);
 
     TH1F *raw_stat_err2_repack = new TH1F("raw_stat_err2_r","raw_stat_err2_r",24,3.,99.);
@@ -652,6 +786,10 @@ void makeBkgdFiles(int charge, int two_or_four) {
                                          eemc_bkgd2->GetBinContent(2*i+1));
       new_bkgd_repack->SetBinContent(i,new_bkgd->GetBinContent(2*i)+
                                        new_bkgd->GetBinContent(2*i+1));
+      low_bkgd_repack->SetBinContent(i,low_bkgd->GetBinContent(2*i)+
+                                       low_bkgd->GetBinContent(2*i+1));
+      high_bkgd_repack->SetBinContent(i,high_bkgd->GetBinContent(2*i)+
+                                        high_bkgd->GetBinContent(2*i+1));
       signal_in_norm_region_repack->SetBinContent(i,signal_in_norm_region->GetBinContent(2*i)+signal_in_norm_region->GetBinContent(2*i+1));
 
       raw_stat_err2_repack->SetBinContent(i,raw_stat_err2->GetBinContent(2*i)+
@@ -672,6 +810,8 @@ void makeBkgdFiles(int charge, int two_or_four) {
     signal_final3_repack->Write();
     eemc_bkgd2_repack->Write();
     new_bkgd_repack->Write();
+    low_bkgd_repack->Write();
+    high_bkgd_repack->Write();
     signal_in_norm_region_repack->Write();
 
     raw_stat_err2_repack->Write();
