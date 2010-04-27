@@ -1,4 +1,4 @@
-// $Id: St2009W_algo.cxx,v 1.23 2010/04/16 14:35:32 balewski Exp $
+// $Id: St2009W_algo.cxx,v 1.24 2010/04/27 16:53:45 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -6,6 +6,7 @@
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "WeventDisplay.h"
 #include "StSpinPool/StJets/StJet.h"
+#include "StSpinPool/StJets/TowerToJetIndex.h"
 
 #include "St2009WMaker.h"
 
@@ -16,6 +17,8 @@ St2009WMaker::find_W_boson(){
   
   // printf("========= find_W_boson() \n");
   int nGoldW=0;
+  //remove events tagged as Zs
+  if(wEve.zTag) return;
 
   // search for  Ws ............
   for(uint iv=0;iv<wEve.vertex.size();iv++) {
@@ -140,6 +143,66 @@ St2009WMaker::find_W_boson(){
 
 }
 
+
+//________________________________________________
+//________________________________________________
+void
+St2009WMaker::tag_Z_boson(){
+
+  float par_jetPt=10.;
+  float lowMass=70.; float highMass=140.;
+  mJets = getJets("ConeJets12_100"); //select specific jet-type
+
+  //form invariant mass from lepton candidate and jet
+  for(uint iv=0;iv<wEve.vertex.size();iv++) {//vertex loop
+    WeveVertex &V=wEve.vertex[iv];
+    for(uint it=0;it<V.eleTrack.size();it++) {// select track
+      WeveEleTrack &T1=V.eleTrack[it];
+      if(T1.isMatch2Cl==false) continue;
+      assert(T1.cluster.nTower>0); // internal logical error
+      assert(T1.nearTotET>0); // internal logical error
+      if(T1.cluster.ET/T1.nearTotET< par_nearTotEtFrac) continue; // too large nearET
+
+      //match lepton candidate with jet
+      TLorentzVector jetVec;
+      for (int i_jet=0; i_jet< nJets; i_jet++){//jet loop
+        jetVec = *((StJet*)mJets->At(i_jet));
+        if(jetVec.Pt()<par_jetPt) continue;//remove low pt jets
+	
+	//electron like cut on jets
+        StJet* jet = getJet(i_jet);  float maxCluster=0.; 
+        int totTowers=jet->nBtowers+jet->nEtowers;
+        for(int itow=0;itow<totTowers;itow++){//loop over towers
+	  if(jet->tower(itow)->detectorId()==13)//drop endcap towers
+	    continue;
+          
+	  int softId=jet->tower(itow)->towerId();
+          //find highest 2x2 BTOW cluster in jet
+          TVector3 pos=positionBtow[softId-1]; int iEta,iPhi;
+          if( L2algoEtaPhi2IJ(pos.Eta(),pos.Phi(),iEta,iPhi)) 
+	    continue;
+	  float cluster=maxBtow2x2(iEta,iPhi,jet->zVertex).ET;
+          if(cluster>maxCluster) maxCluster=cluster;
+        }
+
+	TVector3 jetVec3(jetVec.X(),jetVec.Y(),jetVec.Z());
+	if(jetVec3.DeltaR(T1.primP)<par_nearDeltaR)
+          continue;//skip jets in candidate phi isolation'cone'
+        
+	//form invM
+        float e1=T1.cluster.energy;
+        TVector3 p1=T1.primP; p1.SetMag(e1);
+        TLorentzVector ele1(p1,e1); //lepton candidate 4- mom
+        TLorentzVector sum=ele1+jetVec;
+        float invM=sqrt(sum*sum);
+	if(maxCluster/jet->jetPt < 0.5) continue;
+	if(invM > lowMass && invM < highMass)
+          wEve.zTag=true;
+      }
+    }
+  }
+  
+}
 
 //________________________________________________
 //________________________________________________
@@ -531,6 +594,9 @@ St2009WMaker::sumEtowCone(float zVert, TVector3 refAxis, int flag,int &nTow){
 }
 
 // $Log: St2009W_algo.cxx,v $
+// Revision 1.24  2010/04/27 16:53:45  stevens4
+// add code to remove events tagged as Zs from W candidates
+//
 // Revision 1.23  2010/04/16 14:35:32  balewski
 // fix borken header
 //

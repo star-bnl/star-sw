@@ -1,5 +1,5 @@
 
-// $Id: St2009WMaker.cxx,v 1.13 2010/04/14 22:23:30 balewski Exp $
+// $Id: St2009WMaker.cxx,v 1.14 2010/04/27 16:53:44 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -266,6 +266,8 @@ St2009WMaker::Make(){
 
   hadronicRecoil();
 
+  tag_Z_boson();
+
   find_W_boson();
   if(nAccEve<2 ||nAccEve%1000==1 ) wEve.print(0x0,isMC);
   
@@ -369,6 +371,9 @@ St2009WMaker::getJets(TString branchName){
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.14  2010/04/27 16:53:44  stevens4
+// add code to remove events tagged as Zs from W candidates
+//
 // Revision 1.13  2010/04/14 22:23:30  balewski
 // *** empty log message ***
 //
@@ -411,6 +416,9 @@ St2009WMaker::getJets(TString branchName){
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.14  2010/04/27 16:53:44  stevens4
+// add code to remove events tagged as Zs from W candidates
+//
 // Revision 1.13  2010/04/14 22:23:30  balewski
 // *** empty log message ***
 //

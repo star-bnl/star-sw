@@ -1,4 +1,4 @@
-// $Id: Wevent2009.h,v 1.5 2010/03/14 22:50:31 balewski Exp $
+// $Id: Wevent2009.h,v 1.6 2010/04/27 16:53:45 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -189,6 +189,7 @@ class Wevent2009 {
   int l2bitET,l2bitRnd;
   int id; // eventID
   int bx7, bx48; // raw from muDst
+  bool zTag;
   vector < WeveVertex> vertex;
   WeveBEMC bemc;
   WeveETOW etow;  
@@ -200,6 +201,7 @@ class Wevent2009 {
     id=0;
     l2bitET=l2bitRnd=0;
     bx7=bx48=-1;
+    zTag=false;
     vertex.clear();
     bemc.clear();
     etow.clear(); 
@@ -221,6 +223,9 @@ class Wevent2009 {
 
 
 // $Log: Wevent2009.h,v $
+// Revision 1.6  2010/04/27 16:53:45  stevens4
+// add code to remove events tagged as Zs from W candidates
+//
 // Revision 1.5  2010/03/14 22:50:31  balewski
 // *** empty log message ***
 //

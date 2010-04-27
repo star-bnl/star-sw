@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.16 2010/03/23 01:31:40 seelej Exp $
+// $Id: St2009W_histo.cxx,v 1.17 2010/04/27 16:53:45 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -248,7 +248,7 @@ St2009WMaker::initHistos(){
   hA[139]=h=new TH1F("muclustAwayPt_bckgrd","AwaySide PT > 8 ; 2x2 Cluster ET",100,0,100);
   hA[140]=h=new TH1F("muclustPtBalnoE",Form("sPT Balance > %.1f (EEMC not included); 2x2 Cluster ET",par_ptBalance),100,0,100);
   hA[141]=h=new TH1F("muclustAwayPtnoE","AwaySide PT < 8 (EEMC not included); 2x2 Cluster ET",100,0,100);
-  
+
   // Histograms added for background subtraction and systematic
   char str[200];
   for (int i=0; i<=20; i++) {
@@ -268,6 +268,8 @@ St2009WMaker::initHistos(){
   hA[184+6] = new TH1F("pos_muclustpTbal_back","pos_muclustpTbal_back",100,0,100);
   hA[184+5] = new TH1F("neg_muclustpTbal_back","neg_muclustpTbal_back",100,0,100);
 
+  
+
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
     if(  hA[i]==0) continue;
@@ -280,6 +282,9 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
+// Revision 1.17  2010/04/27 16:53:45  stevens4
+// add code to remove events tagged as Zs from W candidates
+//
 // Revision 1.16  2010/03/23 01:31:40  seelej
 // Fix to the filling of the histograms for the background systematic.
 //
