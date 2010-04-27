@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImpBuilder.cxx,v 1.9 2010/04/13 13:30:26 pibero Exp $
+// $Id: StBET4pMakerImpBuilder.cxx,v 1.10 2010/04/27 16:31:46 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImpBuilder.h"
 #include "StBET4pMakerImp.h"
@@ -22,6 +22,7 @@
 #include "StjTrackCutEta.h"
 #include "StjTrackCutPossibleHitRatio.h"
 #include "StjTrackCutChi2.h"
+#include "StjTrackCutLastPoint.h"
 
 #include "StjTowerEnergyListCut.h"
 
@@ -53,6 +54,7 @@ StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool u
     if(use2009Cuts)  tpcCut->addCut(new StjTrackCutChi2);
     tpcCut->addCut(new StjTrackCutEta());
     tpcCut->addCut(new StjTrackCutPossibleHitRatio());
+    tpcCut->addCut(new StjTrackCutLastPoint);
   }
 
   StjBEMC* bemc;
