@@ -1,4 +1,4 @@
-// $Id: StjeDefaultJetTreeWriter.cxx,v 1.9 2010/04/24 04:15:35 pibero Exp $
+// $Id: StjeDefaultJetTreeWriter.cxx,v 1.10 2010/04/27 13:44:35 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeDefaultJetTreeWriter.h"
 
@@ -95,8 +95,6 @@ void StjeDefaultJetTreeWriter::fillJetTree(int iAnalyzer, int iVertex)
   StFourPMaker* fourPMaker = _analyzerCtlList[iAnalyzer]._fourPMaker;
   std::list<StProtoJet>* protoJetList = _analyzerCtlList[iAnalyzer]._protoJetList;
   fillJetTreeForOneJetFindingAlgorithm(*_analyzerCtlList[iAnalyzer]._jets, protoJetList, fourPMaker);
-
-  _jetTree->Fill();
 }
 
 void StjeDefaultJetTreeWriter::fillJetTreeForOneJetFindingAlgorithm(StJets& jets, std::list<StProtoJet>* protoJetList, StFourPMaker* fourPMaker)
