@@ -1628,7 +1628,10 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
 void
 MediumMagboltz86::RunMagboltz(const double e, 
                               const double bmag, const double btheta,
-                              const int ncoll, bool verbose) {
+                              const int ncoll, bool verbose,
+                              double& vx, double& vy, double& vz,
+                              double& dl, double& dt,
+                              double& alpha, double& eta) {
 
   // Set input parameters in Magboltz common blocks
   inpt_.nGas = nComponents;
@@ -1709,21 +1712,15 @@ MediumMagboltz86::RunMagboltz(const double e,
   }
   if (verbose) output2_();
 
-  double vx = vel_.wx * 1.e-9;
-  double vy = vel_.wy * 1.e-9;
-  double vz = vel_.wz * 1.e-9;
+  vx = vel_.wx * 1.e-9;
+  vy = vel_.wy * 1.e-9;
+  vz = vel_.wz * 1.e-9;
 
-  double dt = sqrt(0.2 * difvel_.diftr / vz) * 1.e-4;
-  double dl = sqrt(0.2 * difvel_.difln / vz) * 1.e-4;
+  dt = sqrt(0.2 * difvel_.diftr / vz) * 1.e-4;
+  dl = sqrt(0.2 * difvel_.difln / vz) * 1.e-4;
  
-  double alpha = ctowns_.alpha;
-  double eta   = ctowns_.att;
-
-  std::cout << "Drift velocity: " << vx << " " << vy << " " << vz << std::endl;
-  std::cout << "Longitudinal diffusion: " << dl << std::endl;
-  std::cout << "Transverse diffusion:   " << dt << std::endl;
-  std::cout << "Townsend coefficient:   " << alpha << std::endl;
-  std::cout << "Attachment coefficient: " << eta << std::endl;
+  alpha = ctowns_.alpha;
+  eta   = ctowns_.att;
 
 }
 

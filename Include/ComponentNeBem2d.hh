@@ -38,6 +38,12 @@ class ComponentNeBem2d : public ComponentBase {
 
     void SetNumberOfDivisions(const int ndiv);
     void SetNumberOfCollocationPoints(const int ncoll);
+    void SetMinimumElementSize(const double min);
+    void EnableAutoResizing()  {autoSize = true;}
+    void DisableAutoResizing() {autoSize = false;}
+    void EnableRandomCollocation()  {randomCollocation = true;}
+    void DisableRandomCollocation() {randomCollocation = false;}
+    void SetMaxNumberOfIterations(const int niter);
 
     int GetNumberOfPanels()   {return nPanels;}
     int GetNumberOfWires()    {return nWires;}
@@ -63,6 +69,9 @@ class ComponentNeBem2d : public ComponentBase {
     int nDivisions;
     int nCollocationPoints;
     double minSize;
+    bool autoSize;
+    bool randomCollocation;
+    int nMaxIterations;
 
     int nPanels;
     struct panel {
@@ -123,6 +132,7 @@ class ComponentNeBem2d : public ComponentBase {
     void LUSubstitution();
     bool GetBoundaryConditions();
     bool Solve();
+    bool CheckConvergence();
 
     void Rotate(const double xIn, const double yIn, 
                 const double phi, const int opt, 

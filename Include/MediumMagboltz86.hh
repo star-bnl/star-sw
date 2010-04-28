@@ -203,7 +203,10 @@ class MediumMagboltz86 : public Medium {
                   int& nElastic, int& nIonising, int& nInelastic) const;
 
     void RunMagboltz(const double e, const double b, const double btheta,
-                     const int ncoll = 5, bool verbose = true);
+                     const int ncoll, bool verbose,
+                     double& vx, double& vy, double& vz, 
+                     double& dl, double& dt,
+                     double& eta, double& alpha);
                                                                    
   private:
 

@@ -162,9 +162,11 @@ TrackBichsel::GetInverseMeanFreePath(const double bg) {
      3.84313,  3.84313,  3.84314};
 
   if (bg < tabBg[0]) {
-    std::cerr << "TrackBichsel::GetInverseMeanFreePath:" << std::endl;
-    std::cerr << "    Requested value for bg is below the tabulated range."
-              << std::endl;
+    if (debug) {
+      std::cerr << "TrackBichsel::GetInverseMeanFreePath:" << std::endl;
+      std::cerr << "    Requested value for bg is below the tabulated range."
+                << std::endl;
+    }
     return tabImfp[0] * 1.e4;
   } else if (bg > tabBg[nEntries - 1]) {
     return tabImfp[nEntries - 1] * 1.e4;

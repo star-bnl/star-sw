@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <cmath>
 
@@ -10,6 +11,7 @@ namespace Garfield {
 
 ComponentNeBem2d::ComponentNeBem2d() :
   projAxis(2), nDivisions(5), nCollocationPoints(3), minSize(1.e-3),
+  autoSize(false), randomCollocation(false), nMaxIterations(3), 
   nPanels(0), nWires(0), nElements(0), 
   matrixInversionFlag(false) {
 
@@ -50,7 +52,8 @@ ComponentNeBem2d::ElectricField(
     // Transform to local coordinate system
     Rotate(dx, dy, elements[i].phi, Global2Local, xLoc, yLoc);	
     // Compute the potential
-    if (!ComputePotential(elements[i].geoType, elements[i].len, xLoc, yLoc, u)) {
+    if (!ComputePotential(elements[i].geoType, 
+                          elements[i].len, xLoc, yLoc, u)) {
       std::cerr << "ComponentNeBem2d::ElectricField:" << std::endl;
       std::cerr << "    Potential contribution from element " << i
                  << " could not be calculated." << std::endl;
@@ -222,7 +225,7 @@ void
 ComponentNeBem2d::SetNumberOfCollocationPoints(const int ncoll) {
 
   if (ncoll <= 0) {
-    std::cerr << "ComponentNeBem2d::SetNumberOfCollocationPOints:" 
+    std::cerr << "ComponentNeBem2d::SetNumberOfCollocationPoints:" 
               << std::endl;
     std::cerr << "    Number of coll. points must be greater than zero."
               << std::endl;
@@ -232,6 +235,35 @@ ComponentNeBem2d::SetNumberOfCollocationPoints(const int ncoll) {
   nCollocationPoints = ncoll;
   ready = false;
   matrixInversionFlag = false;
+
+}
+
+void
+ComponentNeBem2d::SetMinimumElementSize(const double min) {
+
+  if (min < Small) {
+    std::cerr << "ComponentNeBem2d::SetMinimumElementSize:" << std::endl;
+    std::cerr << "    Provided element size is too small." << std::endl;
+    return;
+  }
+
+  minSize = min;
+  ready = false;
+  matrixInversionFlag = false;
+
+}
+
+void
+ComponentNeBem2d::SetMaxNumberOfIterations(const int niter) {
+  
+  if (niter <= 0) {
+    std::cerr << "ComponentNeBem2d::SetMaxNumberOfIterations:" << std::endl;
+    std::cerr << "    Number of iterations must be greater than zero." 
+              << std::endl;
+    return;
+  }
+
+  nMaxIterations = niter;
 
 }
 
@@ -249,48 +281,54 @@ ComponentNeBem2d::Initialise() {
     std::cout << "    Discretisation ok" << std::endl;
   }
 
-  // Compute the influence matrix
-  if (!ComputeInfluenceMatrix()) {
-    std::cerr << "ComponentNeBem2d::Initialise:" << std::endl;
-    std::cerr << "     Error computing the influence matrix." << std::endl;
-    return false;
-  }
-  if (debug) {
-    std::cout << "ComponentNeBem2d::Initialise:" << std::endl;
-    std::cout << "    Computation of influence matrix ok" << std::endl;
-  }
-  
-  // Invert the influence matrix
-  if (!InvertMatrix()) {
-    std::cerr << "ComponentNeBem2d::Initialise:" << std::endl;
-    std::cerr << "     Error inverting the influence matrix." << std::endl;
-    return false;
-  }
-  if (debug) {
-    std::cout << "ComponentNeBem2d::Initialise:" << std::endl;
-    std::cout << "    Matrix inversion ok" << std::endl;
-  }
-  
-  // Compute the right hand side vector
-  if (!GetBoundaryConditions()) {
-    std::cerr << "ComponentNeBem2d::Initialise:" << std::endl;
-    std::cerr << "     Error computing the potential vector." << std::endl;
-    return false;
-  }
-  if (debug) {
-    std::cout << "ComponentNeBem2d::Initialise:" << std::endl;
-    std::cout << "    Assembly of right-hand-side vector ok" << std::endl;
-  }
+  bool converged = false;
+  int nIter = 0;
+  while (!converged) {
+    ++nIter;
+    if (autoSize) {
+      std::cout << "ComponentNeBem2d::Initialise:" << std::endl;
+      std::cout << "    Iteration " << nIter << std::endl;
+    }
+    // Compute the influence matrix
+    if (!ComputeInfluenceMatrix()) {
+      std::cerr << "ComponentNeBem2d::Initialise:" << std::endl;
+      std::cerr << "     Error computing the influence matrix." << std::endl;
+      return false;
+    }
+    
+    // Invert the influence matrix
+    if (!InvertMatrix()) {
+      std::cerr << "ComponentNeBem2d::Initialise:" << std::endl;
+      std::cerr << "     Error inverting the influence matrix." << std::endl;
+      return false;
+    }
 
-  // Solve for the charge distribution
-  if (!Solve()) {
-    std::cerr << "ComponentNeBem2d::Initialise:" << std::endl;
-    std::cerr << "    Error in Solve function." << std::endl;
-    return false;
-  }
-  if (debug) {
-    std::cout << "ComponentNeBem2d::Initialise:" << std::endl;
-    std::cout << "    Solution ok" << std::endl;
+    if (debug) {
+      std::cout << "ComponentNeBem2d::Initialise:" << std::endl;
+      std::cout << "    Matrix inversion ok" << std::endl;
+    }
+  
+    // Compute the right hand side vector
+    if (!GetBoundaryConditions()) {
+      std::cerr << "ComponentNeBem2d::Initialise:" << std::endl;
+      std::cerr << "     Error computing the potential vector." << std::endl;
+      return false;
+    }
+
+    // Solve for the charge distribution
+    if (!Solve()) {
+      std::cerr << "ComponentNeBem2d::Initialise:" << std::endl;
+      std::cerr << "    Error in Solve function." << std::endl;
+      return false;
+    }
+    if (debug) {
+      std::cout << "ComponentNeBem2d::Initialise:" << std::endl;
+      std::cout << "    Solution ok" << std::endl;
+    }
+
+    converged = CheckConvergence();
+    if (!autoSize) break;
+    if (nIter >= nMaxIterations) break;
   }
   
   return true;
@@ -356,9 +394,6 @@ ComponentNeBem2d::Discretise() {
 bool 
 ComponentNeBem2d::ComputeInfluenceMatrix() {
 
-  bool autoSize = false;
-  bool randomCollocation = false;
-
   if (matrixInversionFlag) return true;
 
   // Coordinates, rotation and length of target and source element
@@ -376,142 +411,80 @@ ComponentNeBem2d::ComputeInfluenceMatrix() {
   double fx, fy;
   double ex, ey;
 
-  // Random number
-  double r;
+  // Influence coefficient
+  double infCoeff;
 
-  // Influence coefficients
-  std::vector<double> infCoeff;
-  infCoeff.resize(nCollocationPoints);
+  // Re-dimension the influence matrix
+  int nEntries = nElements + 1;
+  influenceMatrix.resize(nEntries);
+  for (int i = nEntries; i--;) influenceMatrix[i].resize(nEntries);
 
-  bool converged = false;
-  int nIter = 0;
-  while (!converged) {
-    ++nIter;
-    if (debug) std::cout << "    Iteration " << nIter << std::endl;
-    converged = true;
-    // Re-dimension the influence matrix
-    int nEntries = nElements + 1;
-    influenceMatrix.resize(nEntries);
-    for (int i = nEntries; i--;) influenceMatrix[i].resize(nEntries);
+  // Loop over the target elements (F)
+  for (int iF = 0; iF < nElements; ++iF) {
+    gtF = elements[iF].geoType;
+    phiF = elements[iF].phi;
+    lenF = elements[iF].len;
+    // Boundary type
+    etF = elements[iF].bcType;
+    // Collocation point
+    xF = elements[iF].cX;
+    yF = elements[iF].cY;
     
-    // Loop over the target elements (F)
-    for (int iF = 0; iF < nElements; ++iF) {
-      gtF = elements[iF].geoType;
-      phiF = elements[iF].phi;
-      lenF = elements[iF].len;
-      // Boundary type
-      etF = elements[iF].bcType;
-      
-      // Loop over the source elements (S)
-      for (int jS = 0; jS < nElements; ++jS) {
-        gtS = elements[jS].geoType;
-        xS = elements[jS].cX; yS = elements[jS].cY;
-        phiS = elements[jS].phi;
-        lenS = elements[jS].len;
+    // Loop over the source elements (S)
+    for (int jS = 0; jS < nElements; ++jS) {
+      gtS = elements[jS].geoType;
+      xS = elements[jS].cX; yS = elements[jS].cY;
+      phiS = elements[jS].phi;
+      lenS = elements[jS].len;
         
-        // Loop over the collocation points
-        for (int k = nCollocationPoints; k--;) {
-          // Sample the collocation point
-          xF = elements[iF].cX; yF = elements[iF].cY;
-          if (gtF == 0) {
-            // Panel
-            Rotate(2. * lenF, 0., phiF, Local2Global, dx, dy);
-            xF -= dx / 2.; yF -= dy / 2.;
-            if (randomCollocation) {
-              r = RndmUniformPos();
-            } else {
-              r = (k + 1.) / (nCollocationPoints + 1.);
-            }
-            xF += r * dx; yF += r * dy;
-          } else {
-            // Wire
-            r = TwoPi * RndmUniform();
-            xF += lenF * cos(r); yF += lenF * sin(r);
-          }  
         
-          // Transform to local coordinate system of source element
-          dx = xF - xS; dy = yF - yS;
-          Rotate(dx, dy, phiS, Global2Local, du, dv);
+      // Transform to local coordinate system of source element
+      dx = xF - xS; dy = yF - yS;
+      Rotate(dx, dy, phiS, Global2Local, du, dv);
       
-          infCoeff[k] = 0.;      
-          // Depending on the element type at the field point 
-          // different boundary conditions need to be applied
-          switch (etF) {
-            // Conductor at fixed potential
-            case 0:
-              if (!ComputePotential(gtS, lenS, du, dv, infCoeff[k])) {
-                return false;
-              }
-              break;
-            // Floating conductor (not implemented)
-            case 1:
-              if (!ComputePotential(gtS, lenS, du, dv, infCoeff[k])) {
-                return false;
-              }
-              break;
-            // Dielectric-dielectric interface
-            // Normal component of the displacement vector is continuous 
-            case 2:
-              if (iF == jS) {
-                // Self-influence
-                infCoeff[k] = 1. / (elements[jS].lambda * VacuumPermittivity);
-              } else {
-                // Compute flux at field point in global coordinate system
-                if (!ComputeFlux(gtS, lenS, phiS, du, dv, fx, fy)) {
-                  return false;
-                }
-                // Rotate to local coordinate system of field element
-                Rotate(fx, fy, phiF, Global2Local, ex, ey);
-                infCoeff[k] = ey;
-              }
-              break;
-            default:
-              std::cerr << "ComponentNeBem2d::ComputeInfluenceMatrix:" 
-                        << std::endl;
-              std::cerr << "    Unknown boundary type: " << etF << std::endl;
-              return false;
-              break;
+      infCoeff = 0.;
+      // Depending on the element type at the field point 
+      // different boundary conditions need to be applied
+      switch (etF) {
+        // Conductor at fixed potential
+        case 0:
+         if (!ComputePotential(gtS, lenS, du, dv, infCoeff)) {
+            return false;
           }
-          influenceMatrix[iF][jS] += infCoeff[k];
-        }
-        influenceMatrix[iF][jS] /= nCollocationPoints;
-        if (!autoSize) continue;
-        if (elements[iF].len <= minSize) continue;
-        double rms = 0.;
-        for (int k = nCollocationPoints; k--;) {
-          rms += (infCoeff[k] - influenceMatrix[iF][jS]) * 
-                 (infCoeff[k] - influenceMatrix[iF][jS]);
-        }
-        rms /= nCollocationPoints;
-        if (sqrt(rms) / fabs(influenceMatrix[iF][jS]) > 1.) {
-          converged = false;
-          if (debug) {
-            std::cout << "    Matrix element " 
-                      << iF << ", " << jS << ": " 
-                      << sqrt(rms) / fabs(influenceMatrix[iF][jS]) << std::endl;
-          
-            std::cout << "    Splitting element " << iF << std::endl;
-          }
-          SplitElement(iF);
           break;
-        } 
+       // Floating conductor (not implemented)
+        case 1:
+          if (!ComputePotential(gtS, lenS, du, dv, infCoeff)) {
+            return false;
+          }
+          break;
+        // Dielectric-dielectric interface
+        // Normal component of the displacement vector is continuous 
+        case 2:
+          if (iF == jS) {
+            // Self-influence
+            infCoeff = 1. / (2. * elements[jS].lambda * VacuumPermittivity);
+          } else {
+            // Compute flux at field point in global coordinate system
+            if (!ComputeFlux(gtS, lenS, phiS, du, dv, fx, fy)) {
+              return false;
+             }
+            // Rotate to local coordinate system of field element
+            Rotate(fx, fy, phiF, Global2Local, ex, ey);
+            infCoeff = ey;
+          }
+          break;
+        default:
+          std::cerr << "ComponentNeBem2d::ComputeInfluenceMatrix:" 
+                    << std::endl;
+          std::cerr << "    Unknown boundary type: " << etF << std::endl;
+          return false;
+          break;
       }
-      if (!converged) break;
+      influenceMatrix[iF][jS] = infCoeff;
     }
   }
   
-  if (!converged) {
-    std::cerr << "ComponentNeBem2d::ComputeInfluenceMatrix:" << std::endl;
-    std::cerr << "    Assembly of influence matrix did not converge." 
-              << std::endl;
-    return false;
-  }
-  if (debug && autoSize) {
-    std::cout << "ComponentNeBem2d::ComputeInfluenceMatrix:" << std::endl;
-    std::cout << "    Assembly of influence matrix converged after "
-              << nIter << " iterations." << std::endl;
-  }
-
   // Add charge neutrality condition
   for (int i = 0; i < nElements; ++i) {
     influenceMatrix[nElements][i] = elements[i].len;
@@ -758,6 +731,96 @@ ComponentNeBem2d::Solve() {
 
 }
 
+bool
+ComponentNeBem2d::CheckConvergence() {
+
+  // Potential and normal component of the electric field 
+  // evaluated at the collocation points
+  std::vector<double> v;
+  std::vector<double> ne;
+  v.resize(nCollocationPoints);
+  ne.resize(nCollocationPoints);
+
+  double ex = 0., ey = 0.;
+  double fx = 0., fy = 0., u = 0.;
+  double r;
+
+  double x = 0., y = 0.;
+  double dx = 0., dy = 0.;
+  double xLoc, yLoc;
+
+  if (debug) {
+    std::cout << "ComponentNeBem2d::CheckConvergence:" << std::endl;
+    std::cout << "element #  type      LHS      RHS" 
+              << std::endl;
+  }
+  for (int i = nElements; i--;) {
+    for (int k = nCollocationPoints; k--;) v[k] = ne[k] = 0.;
+    // Sum up the contributions from all boundary elements
+    for (int j = nElements; j--;) {
+      // Loop over the collocation points 
+      for (int k = nCollocationPoints; k--;) {
+        x = elements[i].cX; y = elements[i].cY;
+        if (elements[i].geoType == 0) {
+          // Panel
+          Rotate(2. * elements[i].len, 0., elements[i].phi, Local2Global,
+                 dx, dy);
+          x -= dx / 2.; y -= dy / 2.;
+          if (randomCollocation) {
+            r = RndmUniformPos();
+          } else {
+            r = (k + 1.) / (nCollocationPoints + 1.);
+          }
+          x += r * dx; y += r * dy;
+        } else {
+          // Wire
+          r = TwoPi * RndmUniform();
+          x += elements[i].len * cos(r); y += elements[i].len * sin(r);
+        }
+
+        dx = x - elements[j].cX; dy = y - elements[j].cY;
+        // Transform to local coordinate system
+        Rotate(dx, dy, elements[j].phi, Global2Local, xLoc, yLoc);	
+        // Compute the potential
+        ComputePotential(elements[j].geoType, 
+                         elements[j].len, xLoc, yLoc, u);
+        // Compute the field
+        ComputeFlux(elements[j].geoType, 
+                    elements[j].len, elements[j].phi, xLoc, yLoc, fx, fy);
+        // Rotate to the local coordinate system of the test element
+        Rotate(fx, fy, elements[i].phi, Global2Local, ex, ey);
+        v[k]  += u  * elements[j].solution;
+        ne[k] += ey * elements[j].solution;
+      }
+    }
+    double v0 = 0., ne0 = 0.;
+    for (int k = nCollocationPoints; k--;) {
+      v0 += v[k]; ne0 += ne[k];
+    }
+    v0 /= nCollocationPoints; ne0 /= nCollocationPoints;
+    double ne1;
+    if (elements[i].bcType == 2) {
+      // Dielectric-dielectric interface
+      ne1 = ne0 + elements[i].solution / 
+             (2. * elements[i].lambda * VacuumPermittivity);
+    }
+    if (debug) {
+      if (elements[i].bcType == 0) {
+        std::cout << std::setw(5) << i << "  cond.   " 
+                  << std::setw(10) << v0 << "  " 
+                  << std::setw(10) << elements[i].bcValue << std::endl;
+      } else if (elements[i].bcType == 2) {
+        std::cout << std::setw(5) << i << "  diel.   "
+                  << std::setw(10) << ne0 << "  " << ne1
+                  << "         0" << std::endl;
+      }
+    }
+  }
+
+  return true;
+
+}
+
 void 
 ComponentNeBem2d::Rotate(const double xIn, const double yIn, const double phi, 
                          const int opt, double& xOut, double& yOut) {
@@ -827,7 +890,7 @@ ComponentNeBem2d::LineFlux(const double a,
     ex = 0.5 * log((apx * apx + y2) / (amx * amx + y2));
     ey = atan(amx / y) + atan(apx / y);
   } else if (fabs(x) != a) {
-    ex = 0.5 * log((apx * apx) / (amx * amx));
+    ex = 0.5 * log(apx * apx / (amx * amx));
     ey = 0.;
   } else {
     // Singularity at the end points of the line
