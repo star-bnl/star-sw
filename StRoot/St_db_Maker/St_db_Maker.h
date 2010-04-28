@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.35 2010/04/17 02:07:19 perev Exp $
+// $Id: St_db_Maker.h,v 1.36 2010/04/28 07:23:40 dmitry Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.36  2010/04/28 07:23:40  dmitry
+// =new method to save snapshot+one subsequent dataset for each table in db
+//
 // Revision 1.35  2010/04/17 02:07:19  perev
 // Method Drop added
 //
@@ -119,7 +122,7 @@ private:
   int         fEvents[2];       // [0]=nEvents [1]=events with mysql request
   int         fDataSize[2];     // [0]=mysql data this event; [1]=total
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.35 2010/04/17 02:07:19 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.36 2010/04/28 07:23:40 dmitry Exp $";
  protected:
  public:
                    St_db_Maker(const char *name
@@ -138,6 +141,7 @@ private:
    virtual Int_t   Init();
    virtual Int_t   Make();
    virtual Int_t   Save(const char *path,const TDatime *newtime=0);
+   virtual Int_t   SaveSnapshotPlus(char* path); // snapshot mode, SDT date/time + next dataset in time
    virtual void    SetOff(const Char_t *path);
    virtual void    SetOn (const Char_t *path);
    virtual void    SetFlavor(const char *flav,const char *tabname=".all");
@@ -162,7 +166,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.35 2010/04/17 02:07:19 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.36 2010/04/28 07:23:40 dmitry Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)
 };
