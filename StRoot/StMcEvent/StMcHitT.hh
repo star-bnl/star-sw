@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHitT.hh,v 2.1 2010/04/28 18:10:11 fine Exp $
+ * $Id: StMcHitT.hh,v 2.2 2010/04/28 20:15:45 fine Exp $
  * $Log: StMcHitT.hh,v $
+ * Revision 2.2  2010/04/28 20:15:45  fine
+ * Implementation if the new OO for Mc hits
+ *
  * Revision 2.1  2010/04/28 18:10:11  fine
  * New OO model for Mc event components
  *
@@ -41,7 +44,8 @@ public:
     virtual float                            dS() const { return StEventObject<T>::fData->ds;        }
     virtual long                            key() const { return StEventObject<T>::fData->id;        }
     virtual long                       volumeId() const { return StEventObject<T>::fData->volume_id; }
-    virtual long               parentTrackIndex() const { return StEventObject<T>::fData->track_p;   }	
+    virtual long               parentTrackIndex() const { return StEventObject<T>::fData->track_p;   }
+    virtual float                           tof() const { return StEventObject<T>::fData->tof;       }
 };
 
 #endif
