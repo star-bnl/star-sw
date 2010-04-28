@@ -22,6 +22,7 @@ class StMcHitI {
     virtual float                            dS() const  =0;
     virtual long                            key() const  =0;
     virtual long                       volumeId() const  =0;
+    virtual float                           tof() const  =0;
 
     virtual long               parentTrackIndex() const = 0;
 };
