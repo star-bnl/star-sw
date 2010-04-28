@@ -1,4 +1,4 @@
-// $Id: EdFtpc.C,v 1.2 2010/04/27 23:55:26 fine Exp $
+// $Id: EdFtpc.C,v 1.3 2010/04/28 21:49:12 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 #ifndef __CINT__
 # include "StuDraw3DEvent.h"
@@ -78,6 +78,7 @@ void DrawTrackHits()
 //           if ( trackHitsOnly != kUsedHits) 
            {
               gEdFtp->Track(*track,trackColor);
+              gEdFtp->SetComment(Form("Pt=%f /Gev",pt));
               gEdFtp->TrackInOut(*track, true,  trackColor,  styPnt, sizPnt);
               gEdFtp->TrackInOut(*track, false, trackColor,  styPnt, sizPnt);
            }
