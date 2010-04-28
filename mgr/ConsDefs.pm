@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.127 2010/04/27 22:08:52 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.128 2010/04/28 15:57:06 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -810,7 +810,8 @@
     my ($MYSQLLIBDIR,$MYSQLLIB) =
 	script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
 			 $OPTSTAR . "/lib " .  $OPTSTAR . "/lib/mysql ",
-			 "libmysqlclient_r libmysqlclient");
+			 "libmysqlclient");
+			 #"libmysqlclient_r libmysqlclient");
     #print "*** $MYSQLLIBDIR,$MYSQLLIB\n";
 
     if ($STAR_HOST_SYS =~ /^rh/ or $STAR_HOST_SYS =~ /^sl/) {
