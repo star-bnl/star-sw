@@ -322,9 +322,10 @@ EveDis.C is a ROOT macro that can be used as a templatee to create the custom
          implementation by the end-user
 
 Example:   For example to draw  all tracks for StEvent object the 
-           ROOT sessionas follows can be used:
+           ROOT session as follows can be used:
            
-           >  root.exe
+           > ln -s $STAR/StRoot/macros/.rootrc
+           > root4star
 
            root[0] .x Load.C
            root[1] .x bfc.C(0,"doevents","st_physics_6048025_raw_1020002.event.root")
@@ -347,7 +348,8 @@ Example:   For example to draw  all tracks for StEvent object the
              - Invoke AClIC
              - Create the custom display instance as follows:
 
-                root.exe
+                > ln -s $STAR/StRoot/macros/.rootrc
+                > root4star
                    root [0].x Load.C
                    root [1].L EveDis.C++
                    root [2] EveDis display;
