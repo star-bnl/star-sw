@@ -1,4 +1,4 @@
-// $Id: StMCStepping.cxx,v 1.3 2009/10/13 17:19:35 perev Exp $
+// $Id: StMCStepping.cxx,v 1.4 2010/04/29 03:05:28 perev Exp $
 //
 //
 // Class StMCStepping
@@ -15,9 +15,11 @@
 #include "TGeoNode.h"
 #include "TGeoVolume.h"
 #include "TGeoMedium.h"
+#include "TGeant3.h"
 
+static Gctrak_t *gGctrak=0;
 
-TVirtualMC *myMC=0;
+static TVirtualMC *myMC=0;
 
 ClassImp(StMCStepping)
 int SteppingCasesI[] = {
@@ -69,10 +71,10 @@ const char *SteppingKazesC[] = {
 StMCStepping::StMCStepping(const char *name,const char *tit)
   : GCall(name,tit)
 {
-  int n = (char*)&fCase - (char*)&fEnterLength + sizeof(fCase);
-  memset(&fEnterLength,0,n);	
+  memset(fBeg,0,fEnd-fBeg+1);	
   fKazePrev = -1;
   myMC = 0;
+  fDir = 1;
 }   
 //_____________________________________________________________________________
 void StMCStepping::Print(const Option_t*) const
@@ -108,6 +110,10 @@ TString StMCStepping::KazeAsString(int kase)
 //_____________________________________________________________________________
 void StMCStepping::Case()
 {
+static int nCall = 0; nCall++;
+  fSteps++;
+
+  if(!gGctrak) gGctrak = ((TGeant3*)TVirtualMC::GetMC())->Gctrak();
   fNode = gGeoManager->GetCurrentNode();
   fVolume = fNode->GetVolume();
   fMedium = fVolume->GetMedium();
@@ -115,8 +121,8 @@ void StMCStepping::Case()
   fX0 = fMaterial->GetRadLen();
   myMC = gMC;
   fCase = 0;
-//if(myMC->IsNewTrack 		 ()) fCase |= kNewTrack;
-  if(myMC->TrackLength() == 0      ) fCase |= kNewTrack;
+  if(myMC->IsNewTrack 		 ()) fCase |= kNewTrack;
+//if(myMC->TrackLength() == 0      ) fCase |= kNewTrack;
 //if(myMC->IsTrackAlive 	 ()) fCase |= kTrackAlive;
   if(myMC->IsTrackDisappeared 	 ()) fCase |= kTrackDisappeared;
   if(myMC->IsTrackEntering 	 ()) fCase |= kTrackEntering;
@@ -136,18 +142,18 @@ void StMCStepping::Case()
   int kaze = fKaze;
   if(fKazePrev==fKaze && fKaze !=kCONTINUEtrack) fKaze= kIgnore;
   fKazePrev=kaze;
-  fCasName = CaseAsString(fCase);
-  fKazName = KazeAsString(fKaze);
+//vp  fCasName = CaseAsString(fCase);
+//vp  fKazName = KazeAsString(fKaze);
 
  
-  switch (fCase) {
+  switch (fKaze) {
 
-    case kNewTrack:
-    case kTrackEntering|kNewTrack:;
+    case kNEWtrack:
       fTrackNumber++;
       myMC->TrackPosition(fStartPosition);
-    case kTrackEntering:
+    case kENTERtrack:;
       {
+      fSteps=0;
       myMC->TrackPosition(fEnterPosition);
       fCurrentPosition = fEnterPosition;
       myMC->TrackMomentum(fEnterMomentum);
@@ -155,27 +161,24 @@ void StMCStepping::Case()
       assert(fCurrentMomentum[3]>1e-6);
       fEnterLength     = myMC->TrackLength();
       fCurrentLength   = fEnterLength;
-//      fCharge = myMC->TrackCharge();
-//      fMass   = myMC->TrackMass();
+      fCharge = myMC->TrackCharge();
+      fMass   = myMC->TrackMass();
       fEdep   = 0;
       fEtot   = myMC->Etot();
       }
       break;
 
-    case kTrackInside|kTrackDisappeared:
-    case kTrackInside|kTrackStop:
-    case kTrackDisappeared:
-    case kTrackExiting:
-    case kTrackInside:
-    case kTrackOut:
-    case kTrackStop:
-    case kTrackDisappeared|kTrackOut:
+    case kCONTINUEtrack:;
+    case kEXITtrack:;
+    case kENDEDtrack:;
+    case kOUTtrack:
+      fEdep   = myMC->Edep();
+      fEtot   = myMC->Etot();
+      if(!fDir) RecovEloss();
       myMC->TrackPosition(fCurrentPosition);
       myMC->TrackMomentum(fCurrentMomentum);
       assert(fCurrentMomentum[3]>1e-6);
       fCurrentLength     = myMC->TrackLength();
-      fEdep   = myMC->Edep();
-      fEtot   = myMC->Etot();
     break;
 
     default:
@@ -224,3 +227,18 @@ int StMCStepping::Fun()
   }
   return 0;
 }		
+
+//_____________________________________________________________________________
+void StMCStepping::RecovEloss()
+{
+// 	Update directly Geant3 common when we moving bacward the track
+//	and energy loss is negative
+
+  if (fEdep<=0.) return;
+  fEtot += fEdep*2;
+  gGctrak->getot  = fEtot;
+  gGctrak->gekin += fEdep*2;
+  gGctrak->vout[6] = sqrt(gGctrak->gekin*(fEtot+fMass));
+  ((TGeant3*)gMC)->Gekbin();
+}  
+  
