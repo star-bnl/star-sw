@@ -320,7 +320,7 @@ void StJetReader::exampleFastAna()
     }
     if (trig->shouldFireL2() == 1) {
       LOG_INFO << "\tshTrigger L2: " << trig->trigId() << endm;
-      const TArrayI& l2temp = trig->L2ResultEmulated();
+      const int* l2temp = trig->L2ResultEmulated();
       for (int ii = 0; ii < 9; ++ii) {
 	LOG_INFO << "SimL2--- " << ii << "\t" << l2temp[ii] << endm;
       }
@@ -329,7 +329,7 @@ void StJetReader::exampleFastAna()
 		
   //L2 Info:
   LOG_INFO << "\n--- Non-zero L2 Results:" << endm;
-  const TArrayI& l2temp = skEv->L2Result();
+  const int* l2temp = skEv->L2Result();
   for (int ii=0; ii<9; ii++) {
     if (l2temp[ii]!=0)  LOG_INFO << "DatL2--- " << ii << "\t" << l2temp[ii] << endm;
   }

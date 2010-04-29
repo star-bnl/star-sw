@@ -80,7 +80,7 @@ public:
 
     int totalEnergy() const;
 
-    const TArrayI& L2ResultEmulated() const;
+    const int* L2ResultEmulated() const;
 
     //setters
     void setTrigId(int aTrigId);
@@ -98,7 +98,7 @@ public:
 
     void setTotalEnergy(int aEnergy);
 
-    void setL2ResultEmulated(const TArrayI& rhs);
+    void setL2ResultEmulated(const int* rhs);
     
 private:
     void init();
@@ -117,9 +117,9 @@ private:
 
     Int_t mTotalEnergy;
 
-    TArrayI mL2ResultEmulated;
+    int mL2ResultEmulated[64];
     
-    ClassDef(StJetSkimTrig,4);
+    ClassDef(StJetSkimTrig,5);
 };
     
 inline int StJetSkimTrig::trigId() const {return mTrigId;}
@@ -130,7 +130,7 @@ inline int StJetSkimTrig::shouldFireBemc() const  {return mShouldFireBemc;}
 inline int StJetSkimTrig::shouldFireEemc() const  {return mShouldFireEemc;}
 inline int StJetSkimTrig::shouldFireL2() const  {return mShouldFireL2;}
 inline int StJetSkimTrig::totalEnergy() const {return mTotalEnergy;}
-inline const TArrayI& StJetSkimTrig::L2ResultEmulated() const {return mL2ResultEmulated;}
+inline const int* StJetSkimTrig::L2ResultEmulated() const {return mL2ResultEmulated;}
 
 inline void StJetSkimTrig::setTrigId(int aTrigId) {mTrigId = aTrigId;}
 inline void StJetSkimTrig::setDidFire(bool aFire) {mDidFire = aFire;}
@@ -271,7 +271,7 @@ public:
   void setIsMaskedUsingBx48(int i) {mIsMaskedUsingBx48 = i;}
   void setOffsetBx48minusBX7(int i) {mOffsetBx48minusBX7 = i;}
   void setSpin4UsingBx48(int i) {mSpin4usingBx48 = i;}
-  void setL2Result(const TArrayI& rhs);
+  void setL2Result(const int* rhs);
   void setMcEvent(const StPythiaEvent *ptr) {mMcEvent = ptr;}
     
   //gets
@@ -312,7 +312,7 @@ public:
   const TClonesArray* vertices() const {return mVertices;}
   StJetSkimVert* bestVert() const;
 
-  const TArrayI& L2Result() const { return mL2Result; }
+  const int* L2Result() const { return mL2Result; }
 
   const StPythiaEvent* mcEvent() const {return mMcEvent;}
 
@@ -401,7 +401,7 @@ private:
     
   ///L2 Trigger array:
   ///Direct copy from StMuEvent::L2Result()
-  TArrayI mL2Result;
+  int mL2Result[64];
 
   int mBarrelJetPatchTh[3];
   int mEndcapJetPatchTh[3];
@@ -416,7 +416,7 @@ private:
 
   int mEmcLayer2;
 
-  ClassDef(StJetSkimEvent,4);
+  ClassDef(StJetSkimEvent,5);
 };
 
 // Getters

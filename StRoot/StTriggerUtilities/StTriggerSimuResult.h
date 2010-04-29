@@ -3,7 +3,7 @@
 #ifndef STAR_StTriggerSimuResult
 #define STAR_StTriggerSimuResult
 
-// $Id: StTriggerSimuResult.h,v 1.5 2010/02/18 20:07:03 pibero Exp $
+// $Id: StTriggerSimuResult.h,v 1.6 2010/04/29 10:34:34 pibero Exp $
 
 /*****************************************************************************
  * @class StTriggerSimuResult
@@ -81,7 +81,7 @@ public:
      L2gamma2006:  StDaqLib/TRG/L2gammaResult2006.h
      along with examples of how to unpack them
      **/
-    const void* l2Result(L2ResultType algo, int year=2006) const;
+    const unsigned int* l2Result(L2ResultType algo, int year=2006) const;
     
     void setTriggerId(unsigned int);
     void setBbcDecision(StTriggerSimuDecision);
@@ -125,7 +125,7 @@ private:
     map<int,int> mEndcapJetPatches;
     map<int,int> mOverlapJetPatches;
     
-    UInt_t mL2Result[32];
+    unsigned int mL2Result[64];
     //enum L2ResultOffset { kPed2006=0, kJet2006=14, kGammaBemc2006=6, kGammaEemc2006=8, kUpsilon2006=10 }; //!
     
     ClassDef(StTriggerSimuResult, 1)
@@ -160,6 +160,9 @@ inline const map<int,int>& StTriggerSimuResult::overlapJetPatches() const { retu
 
 /*****************************************************************************
  * $Log: StTriggerSimuResult.h,v $
+ * Revision 1.6  2010/04/29 10:34:34  pibero
+ * Preserve backward compatibility with reading of Run 6 skim trees
+ *
  * Revision 1.5  2010/02/18 20:07:03  pibero
  * Run 9 updates
  *
