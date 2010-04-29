@@ -1,4 +1,4 @@
-// $Id: StTriggerSimuResult.cxx,v 1.5 2010/02/18 20:07:03 pibero Exp $
+// $Id: StTriggerSimuResult.cxx,v 1.6 2010/04/29 10:34:34 pibero Exp $
 
 #include <utility>
 using std::make_pair;
@@ -64,28 +64,26 @@ HttpResult StTriggerSimuResult::httpPair(short towerId) const {
     return result;
 }
 
-const void* StTriggerSimuResult::l2Result(L2ResultType algo, int year) const {
-    void *ptr = NULL;
+const unsigned int* StTriggerSimuResult::l2Result(L2ResultType algo, int year) const {
     switch(algo) {
         case kPed:
-            if(year==2006) ptr = (void*)(mL2Result + L2RESULTS_OFFSET_EMC_PED);
+            if(year==2006) return  mL2Result + L2RESULTS_OFFSET_EMC_PED;
             break;
         case kJet:
-            if(year==2006) ptr = (void*)(mL2Result + L2RESULTS_OFFSET_DIJET);
+            if(year==2006) return mL2Result + L2RESULTS_OFFSET_DIJET;
             break;
         case kGammaBemc:
-            if(year==2006) ptr = (void*)(mL2Result + L2RESULTS_OFFSET_PIG + 2);
+            if(year==2006) return mL2Result + L2RESULTS_OFFSET_PIG + 2;
             break;
         case kGammaEemc:
-            if(year==2006) ptr = (void*)(mL2Result + L2RESULTS_OFFSET_PIG + 0);
+            if(year==2006) return mL2Result + L2RESULTS_OFFSET_PIG;
             break;
         case kUpsilon:
-            if(year==2006) ptr = (void*)(mL2Result + L2RESULTS_OFFSET_UPS);
+            if(year==2006) return mL2Result + L2RESULTS_OFFSET_UPS;
             break;
     }
-    return ptr;
+    return 0;
 }
-
 
 void StTriggerSimuResult::addHighTower(int towerId, int dsmAdc) {
     mHighTowerIds.push_back(towerId);
@@ -103,12 +101,15 @@ void StTriggerSimuResult::addJetPatch(int jetPatchId, int dsmAdc) {
 }
 
 void StTriggerSimuResult::setL2Result(const unsigned int* result) {
-    memcpy(mL2Result, result, 128);
+    memcpy(mL2Result, result, sizeof(mL2Result));
 }
 
 
 /*****************************************************************************
  * $Log: StTriggerSimuResult.cxx,v $
+ * Revision 1.6  2010/04/29 10:34:34  pibero
+ * Preserve backward compatibility with reading of Run 6 skim trees
+ *
  * Revision 1.5  2010/02/18 20:07:03  pibero
  * Run 9 updates
  *

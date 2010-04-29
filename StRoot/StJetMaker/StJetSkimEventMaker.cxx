@@ -189,7 +189,7 @@ Int_t StJetSkimEventMaker::Make()
 
 	if(theYear >= 2006)
 	  {
-	    mEvent->setL2Result(muEvent->L2Result());
+	    mEvent->setL2Result(muEvent->L2Result().GetArray());
 	  }
     }
     else {
@@ -378,7 +378,7 @@ void StJetSkimEventMaker::fillTriggerSimulationInfo(StJetSkimTrig &skimTrig)
     }
     
     if (trigResult.l2Decision()==1) {
-      skimTrig.setL2ResultEmulated(TArrayI(5,(int*)trigResult.l2Result(kJet)));
+      skimTrig.setL2ResultEmulated((int*)trigResult.l2Result(kJet));
     }
   } else if (emcTrigMaker) {
     skimTrig.setShouldFire(emcTrigMaker->isTrigger(skimTrig.trigId()));
