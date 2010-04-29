@@ -1,5 +1,5 @@
 
-// $Id: Ed.C,v 1.14 2010/04/27 00:03:22 fine Exp $
+// $Id: Ed.C,v 1.15 2010/04/29 19:16:36 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 
 //! \file Ed.C 
@@ -72,9 +72,9 @@ void rd(int  hits=0, bool clear=false)
    if (event) {
       if (clear) gEventDisplay->Clear();
       if (hits) {
-        if (hits & 1) gEventDisplay->Hits(event,1);
-        if (hits & 2) gEventDisplay->EmcHits(event);
-        if (hits & 4) gEventDisplay->FtpcHits(event,1);
+        if (hits & 0x1 ) gEventDisplay->Hits(event,1);
+        if (hits & 0x2 ) gEventDisplay->EmcHits(event);
+        if (hits & 0x4 ) gEventDisplay->FtpcHits(event,1);
  //       if (hits & 4) gEventDisplay->EmcHits(event,"eemc");
       }
       else gEventDisplay->Tracks(event);
@@ -82,7 +82,7 @@ void rd(int  hits=0, bool clear=false)
    }
 }
 //__________________________________________
-void skipae(int nEvents=1) {
+void skipe(int nEvents=1) {
    if(chain) chain->Skip(nEvents);
 }
 
