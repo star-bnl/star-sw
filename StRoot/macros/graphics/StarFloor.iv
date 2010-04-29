@@ -10,9 +10,9 @@
             transparency  0.9
   } 
   Cube {
-        width 500
+        width 560
         height 2
-        depth 500
+        depth 560
     }
  }
 }
