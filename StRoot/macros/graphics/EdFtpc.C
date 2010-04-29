@@ -1,4 +1,4 @@
-// $Id: EdFtpc.C,v 1.3 2010/04/28 21:49:12 fine Exp $
+// $Id: EdFtpc.C,v 1.4 2010/04/29 23:57:26 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 #ifndef __CINT__
 # include "StuDraw3DEvent.h"
@@ -118,7 +118,7 @@ void ae()
          rd();     // Draw the tracks
     } else {
         printf(" event is empty %p\n", event);
-        goto newevent;
+        // goto newevent;
    }
  }
  
@@ -137,7 +137,12 @@ void ae()
 
    gROOT->Macro("Load.C"); 
    gSystem->Load("StDetectorDbMaker");
-   gROOT->Macro(Form("bfc.C(%d,1,\"doevents\",\"%s\")",nEvent,file));
+   TString bfcchain = Form("bfc.C(0,\"doevents\",\"%s\")",file);
+   if (nEvent > 1) 
+      bfcchain = Form("bfc.C(%d,%d-1,\"doevents\",\"%s\")",nEvent,nEvent,file);
+   cout << bfcchain.Data() << endl;
+   gROOT->Macro(bfcchain.Data());
+
    delete gEventDisplay; // destroy the built-in display
    ftpChain = (StChain *)StMaker::GetChain();
 // -- Start new display   
