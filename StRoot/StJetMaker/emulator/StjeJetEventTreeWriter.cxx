@@ -108,7 +108,10 @@ void StjeJetEventTreeWriter::fillJetTreeForOneVertex(StJetEvent* jetEvent, list<
 {
   StJetVertex* jetVertex = jetEvent->newVertex();
   copyVertex(fourPMaker->getVertexNodes()[iVertex].vertex,jetVertex);
-  jetVertex->mNBTOFMatch = nBTOFMatch(iVertex);	// Run 9 production only. Remove when nBTOFMatch is properly filled in MuDst.
+  // Run 9 production only. Remove when nBTOFMatch is properly filled in MuDst.
+  if (StMaker::GetChain()->GetDBTime().GetYear() >= 2009) {
+    jetVertex->mNBTOFMatch = nBTOFMatch(iVertex);
+  }
   for (list<StProtoJet>::iterator protojet = protoJetList->begin(); protojet != protoJetList->end(); ++protojet)
     jetVertex->addJet(fillJet(jetEvent,jetVertex,*protojet));
 }
