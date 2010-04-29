@@ -1,4 +1,4 @@
-// $Id: EdFtpc.C,v 1.4 2010/04/29 23:57:26 fine Exp $
+// $Id: EdFtpc.C,v 1.5 2010/04/29 23:57:51 fine Exp $
 // *-- Author :    Valery Fine(fine@bnl.gov)   25/02/2009
 #ifndef __CINT__
 # include "StuDraw3DEvent.h"
@@ -118,7 +118,7 @@ void ae()
          rd();     // Draw the tracks
     } else {
         printf(" event is empty %p\n", event);
-        // goto newevent;
+        goto newevent;
    }
  }
  
