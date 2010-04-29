@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.6 2010/04/09 21:26:51 geurts Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.7 2010/04/29 03:42:37 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.7  2010/04/29 03:42:37  dongx
+ * Remove ranking>0 cut in event vertex selection for start time calculation
+ *
  * Revision 1.6  2010/04/09 21:26:51  geurts
  * Introduced "UseProjectedVertex" maker attribute to allow selection of the
  * standard event vertex or one determined by track extrapolation
@@ -485,17 +488,17 @@ void StBTofCalibMaker::processStEvent()
   mEvtVtxZ = -9999.;
   mProjVtxZ = -9999.;
   float dcaRmin = 9999.;   
-  float rankHmax = -1.;
+  float rankHmax = -1.e9;
 
   if(mUseEventVertex) {
     ///
-    /// select the vertex with highest positive rank within the VPDVtxZ cut range
+    /// select the vertex with highest rank within the VPDVtxZ cut range
     ///
     int nVtx = mEvent->numberOfPrimaryVertices();
     for(int i=0;i<nVtx;i++) {
       StPrimaryVertex *pVtx = mEvent->primaryVertex(i);
       if(!pVtx) continue;
-      if(pVtx->ranking()<0) continue;               //! select positive ranking vertex
+//      if(pVtx->ranking()<0) continue;               //! select positive ranking vertex
       if(fabs(pVtx->position().z())>200.) continue;   //! within 200 cm
       if(fabs(pVtx->position().z()-mVPDVtxZ)>VZDIFFCUT) continue;  //! VPDVtxZ cut
       if(pVtx->ranking()<rankHmax) continue;
@@ -503,7 +506,7 @@ void StBTofCalibMaker::processStEvent()
       rankHmax = pVtx->ranking();
     }
 
-    if(rankHmax<0.) mEvtVtxZ = -9999.;
+//    if(rankHmax<0.) mEvtVtxZ = -9999.;
     tstart(mEvtVtxZ, &mTStart, &mTDiff);
 
   } else {
@@ -725,17 +728,17 @@ void StBTofCalibMaker::processMuDst()
   mEvtVtxZ  = -9999.;
   mProjVtxZ = -9999.;
   float dcaRmin = 9999.;
-  float rankHmax = -1.;
+  float rankHmax = -1.e9;
 
   if(mUseEventVertex) {
     ///
-    /// select the vertex with highest positive rank within the VPDVtxZ cut range
+    /// select the vertex with highest rank within the VPDVtxZ cut range
     ///
     int nVtx = mMuDst->numberOfPrimaryVertices();
     for(int i=0;i<nVtx;i++) {
       StMuPrimaryVertex* pVtx = mMuDst->primaryVertex(i);
       if(!pVtx) continue;
-      if(pVtx->ranking()<0) continue;               //! select positive ranking vertex
+//      if(pVtx->ranking()<0) continue;               //! select positive ranking vertex
       if(fabs(pVtx->position().z())>200.) continue;   //! within 200 cm
       if(fabs(pVtx->position().z()-mVPDVtxZ)>VZDIFFCUT) continue;  //! VPDVtxZ cut
       if(pVtx->ranking()<rankHmax) continue;
@@ -743,7 +746,7 @@ void StBTofCalibMaker::processMuDst()
       rankHmax = pVtx->ranking();
     }
 
-    if(rankHmax<0.) mEvtVtxZ = -9999.;
+//    if(rankHmax<0.) mEvtVtxZ = -9999.;
     tstart(mEvtVtxZ, &mTStart, &mTDiff);
 
   } else {
