@@ -1,4 +1,4 @@
-// $Id: StVMCApplication.cxx,v 1.2 2009/06/07 02:28:36 perev Exp $
+// $Id: StVMCApplication.cxx,v 1.3 2010/04/29 03:05:28 perev Exp $
 // Class StVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
@@ -105,7 +105,7 @@ void StVMCApplication::SetDebug(int l)
   if (!g3g) return; 
 
   g3g->Gcflag()->idebug = mDebug ;
-  g3g->Gcflag()->itest = 100 ;
+  g3g->Gcflag()->itest = mDebug ? 100:0 ;
   if (mDebug > 1) {
     g3g->SetDEBU(1,1,100);
     g3g->SetSWIT(1,2);

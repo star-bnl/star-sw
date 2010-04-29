@@ -1,4 +1,4 @@
-// $Id: StMCStepping.h,v 1.2 2009/06/07 02:28:36 perev Exp $
+// $Id: StMCStepping.h,v 1.3 2010/04/29 03:05:28 perev Exp $
 //
 //
 // Class StMCStepping
@@ -15,7 +15,6 @@ class TGeoNode;
 class TGeoVolume;
 class TGeoMedium;
 class TGeoMaterial;
-
 class StMCStepping : public GCall
 {
   public:
@@ -56,18 +55,22 @@ class StMCStepping : public GCall
 virtual ~StMCStepping(){}    
     // methods
 virtual int  Fun();
+void  SetDir(int dir) 				{fDir=dir; }
+const TLorentzVector &CurrentPosition() const 	{return fCurrentPosition;}
+const TLorentzVector &CurrentMomentum() const 	{return fCurrentMomentum;}
+              double  CurrentLength()   const   {return fCurrentLength  ;}
+                 int  Charge()          const   {return (int)fCharge    ;}
 virtual void Print(const Option_t* opt=0) const;
 static  TString CaseAsString(int kase);
 static  TString KazeAsString(int kase);
 
+protected:
+void Case();
+private:
+void RecovEloss();
+// 		data members
   protected:
-    void Case();
-    // data members
-   TLorentzVector fStartPosition;
-   TLorentzVector fEnterPosition;
-   TLorentzVector fCurrentPosition;
-   TLorentzVector fEnterMomentum;
-   TLorentzVector fCurrentMomentum;
+   char   fBeg[1];
    float  fEnterLength;
    float  fCurrentLength;
    float  fCharge;
@@ -83,16 +86,23 @@ static  TString KazeAsString(int kase);
    int    fKaze;
    int    fKazePrev;
    int    fCase;
-   
-   TString fParName;
-   TString fCasName;
-   TString fKazName;
+   int    fDir;
+   int    fSteps;
    TGeoNode   *fNode;
    TGeoVolume *fVolume;
    TGeoMedium *fMedium;
    TGeoMaterial *fMaterial;
-
-    ClassDef(StMCStepping,0) // Extended TParticle
+   char   fEnd[1];
+   
+   TLorentzVector fStartPosition;
+   TLorentzVector fEnterPosition;
+   TLorentzVector fCurrentPosition;
+   TLorentzVector fEnterMomentum;
+   TLorentzVector fCurrentMomentum;
+   TString fParName;
+   TString fCasName;
+   TString fKazName;
+   ClassDef(StMCStepping,0) // Extended TParticle
 };
 
 #endif //STMC_STEPPING_H   

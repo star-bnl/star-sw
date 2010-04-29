@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.8 2010/02/22 02:28:46 perev Exp $
+// $Id: StTGeoHelper.h,v 1.9 2010/04/29 03:05:28 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -52,7 +52,7 @@ typedef std::vector<void*>                      StVoidArr;
 typedef std::map< const TString, StHitPlane*, InvertLtStr>  StHitPlanePathMap;
 typedef std::pair<const TString, StHitPlane*>               StHitPlanePathPair;
 typedef StHitPlanePathMap::const_iterator                   StHitPlanePathMapIter;
-typedef float Mtx33_t[3][3];
+typedef float Mtx33F_t[3][3];
 
 // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
 class StVoluInfo : public TObject
@@ -95,14 +95,14 @@ virtual ~StHitPlaneInfo(){;}
 void  operator=(const StVoluInfo& ext){*((StVoluInfo*)this)=ext;}
       int Kind() const          {return kHitPlaneInfo;}
       int Axis() const          {return fAxi;}
-const Mtx33_t &GetDir() const   {return fDir;}
+const Mtx33F_t &GetDir() const   {return fDir;}
 const float   *GetOrg() const   {return fOrg;}
       StHitPlane *MakeHitPlane(const StTGeoIter &it);
       StHitPlane *GetHitPlane (const TString &path) const;
       void SetAxis(int axi)     {fAxi=axi;}
 void  Print(const char* opt="") const;
 protected:
-int    fAxi;
+int   fAxi;
 float fOrg[3];
 float fDir[3][3];
 StHitPlanePathMap fHitPlanePathMap;
@@ -122,18 +122,23 @@ void  InitHits();
 void  SetHitErrCalc(TNamed *hitErrCalc)	{fHitErrCalc = hitErrCalc;}
 TNamed *GetHitErrCalc()	const 		{return (TNamed*)fHitErrCalc;}
 
-virtual const Mtx33_t &GetDir(const float *) const {return fDir;}
+virtual const Mtx33F_t &GetDir(const float *) const {return fDir;}
 virtual const float   *GetOrg(const float *) const {return fOrg;}
 virtual const float   *GetPnt()        const {return fOrg;}
 virtual       void  AddHit(void *hit,const float xyz[3]);
 virtual       int   Kind() const {return 0;}
               int   GetNumber()  { return GetUniqueID(); }
+             void   ToLocal(const float xyz[3],float uv[3]) const;
 int   GetNHits() const;
+const StMultiKeyMap *GetHitMap() const {return fHitMap;}
+
 protected:
+char  fBeg[1];
 float fOrg[3];
 float fDir[3][3];
 TNamed *fHitErrCalc;
 StMultiKeyMap *fHitMap;
+char  fEnd[1];
 ClassDef(StHitPlane,0) //
 };
 // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
@@ -145,13 +150,15 @@ public:
       StHitTube(const char *path, int volId);
 virtual ~StHitTube(){;}
 
-virtual const Mtx33_t &GetDir(const float *) const ;
+virtual const Mtx33F_t &GetDir(const float *) const ;
 virtual const float   *GetOrg(const float *) const ;
 virtual const float   *GetPnt() const {return fPnt;}
 virtual       int      Kind()   const {return 1;}
 protected:
+char  fBeg[1];
 float fPnt[3];
 float fRmed;
+char  fEnd[1];
 
 ClassDef(StHitTube,0) //
 };
@@ -171,10 +178,10 @@ class StTGeoHelper : public TObject
 virtual ~StTGeoHelper();
 
 public:
+       int  Load(const char *geo);
        void Init(int mode=0);
 
        void SetModule (const char *voluName,int akt=1);
-       void SetModule (int   moduLevl=2) {fModuLev = moduLevl;}
        void InitInfo();
        void InitModuLev();
 
@@ -214,7 +221,7 @@ static  const char *ModName(int detId);
 const   char  *GetPath() const;
 const TGeoVolume *GetModu() const;
 const TGeoVolume *GetVolu() const;
-StVoidArr     *GetSeedHits()        const {return fSeedHits       ;}
+StVoidArr     *GetSeedHits()         const {return fSeedHits       ;}
 StHitPlaneHardMap *GetPlaneHardMap() const {return fHitPlaneHardMap;}
 
 StHitPlaneInfo* IsHitPlane(const TGeoVolume *volu) const;
@@ -239,12 +246,11 @@ private:
 private:
 char fBeg[1];
 int fMode;      //0=fill infos + hitShape, 1= hit planes
-int fModuLev;
-Long64_t fActiveModu;
+Long64_t	fActiveModu;
 TObjArray      *fVoluInfoArr;           // array of all StVoluIinfo
 TObjArray      *fHitPlaneArr;           // array of StHitPlane's
 StHitPlaneHardMap *fHitPlaneHardMap;    // StHitPlane[hardwarePosition]
-StVoidArr  *fSeedHits;                  // Vector for hits used in seed finder
+StVoidArr      *fSeedHits;              // Vector for hits used in seed finder
 StTGeoHitShape *fHitShape;
 char fEnd[1];
 ClassDef(StTGeoHelper,0) //
@@ -265,15 +271,16 @@ StTGeoIter   &Down();
 StTGeoIter   &Upp();
 StTGeoIter   &Skip();
 
-const TGeoNode    *GetNode(int idx=0) const;
-const TGeoVolume  *GetVolu(int idx=0) const;
-const TGeoHMatrix *GetMatr(int idx=0) const;
+const TGeoNode   *GetNode(int idx=0) const;
+const TGeoVolume *GetVolu(int idx=0) const;
+const TGeoHMatrix*GetMatr(int idx=0) const;
              int  GetLev() const {return fLev;}
              int  GetIdx() const {return (fLev)? fStk[fLev-1]:0;}
 const        int *GetStk() const {return fStk;}
              int  IsFirst()const {return fNow ==1;}
              int  IsLast ()const {return fNow ==2;}
              int  IsEnd()  const {return fVolu==0;}
+             int  IsOmule()const; //candidate to module
              int  State()  const {return fNow;}
             void  LocalToMaster    (const double* local, double* master) const;
             void  LocalToMasterVect(const double* local, double* master) const;
@@ -286,10 +293,10 @@ private:
 private:
         int  fNow; // 1=first visit,2=last visit,3=first and last visit
         int  fKase;
-TGeoVolume    *fVolu;
-TGeoNavigator *fNavi;
         int  fLev;
         int  fStk[100];
+TGeoVolume    *fVolu;
+TGeoNavigator *fNavi;
 
 };
 // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __

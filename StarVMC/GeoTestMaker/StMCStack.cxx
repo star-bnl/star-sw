@@ -1,30 +1,64 @@
-// $Id: StMCStack.cxx,v 1.2 2009/10/13 17:19:35 perev Exp $
+// $Id: StMCStack.cxx,v 1.3 2010/04/29 03:05:28 perev Exp $
 #include <iostream>
 #include <assert.h>
 #include "StMCStack.h"
 #include <TParticle.h>
 #include <TObjArray.h>
 #include <TError.h>
-#include "StarMCParticle.h"
 
-using namespace std;
+class myTParticle : public TParticle {
+ public:
+myTParticle(Int_t pdg, Int_t  status, Int_t  mother1, Int_t  mother2
+           ,Int_t  daughter1, Int_t daughter2
+	   ,Double_t  px, Double_t  py, Double_t  pz
+	   ,Double_t  etot, Double_t  vx, Double_t  vy, Double_t  vz
+	   ,Double_t  time) 
+ :TParticle(pdg,status,mother1,mother2,daughter1, daughter2
+           ,px,py,pz,etot,vx,vy,vz,time)
+  { fId=0;}
+  int  GetId() const {return fId;}
+  void SetId(int id) {fId = id  ;}
+  void SetMother(myTParticle* particle)     { fMother=particle;}
+  void AddDaughter(myTParticle* particle)   { fDaughters.push_back(particle);}
+//void Print(const Option_t *opt=0) const;
+  myTParticle*   GetMother() const          { return fMother;}
+  Int_t          GetNDaughters() const      { return fDaughters.size();}
+  myTParticle*   GetDaughter(Int_t i) const;
+  
+  private:
+  // data members
+  int          fId;
+  myTParticle *fMother;
+  std::vector<myTParticle*> fDaughters;
+};
+
+//_____________________________________________________________________________
+myTParticle* myTParticle::GetDaughter(Int_t i) const 
+{
+  if (i < 0 || i >= (int)fDaughters.size())
+    Fatal("GetDaughter", "Index out of range"); 
+  return fDaughters[i];
+}  
+
 
 ClassImp(StMCStack)
 //_____________________________________________________________________________
 StMCStack::StMCStack(int size) : 
-fParticles(0), fCurrentTrack(-1), fNPrimary(0), fCurrentParticle(0) 
+  fParticles(size),
+  fCurrentTrack(-1),
+  fNPrimary(0),
+  fCurrentParticle(0)
 {
- if (size > 0) fParticles = new TObjArray(size);
 }
 //_____________________________________________________________________________
  StMCStack::~StMCStack() 
 {
- if (fParticles) fParticles->Delete(); delete fParticles;
+ for( int i=0; i<(int)fParticles.size();i++) {delete fParticles[i];}
 }
 //_____________________________________________________________________________
 TParticle* StMCStack::PopPrimaryForTracking(int i)	
 {
-return ((StarMCParticle *)fParticles->At(i))->GetParticle();
+return fParticles[i];
 }
 
 //_____________________________________________________________________________
@@ -33,39 +67,35 @@ void  StMCStack::PushTrack(int toBeDone, int parent, int pdg,
 			     double vx, double vy, double vz, double tof,
 			     double polx, double poly, double polz,
 			     TMCProcess mech, int& ntr, double weight,
-			     int is) {
+			     int is)
+{
 // Creates a new particle with specified properties,
 // adds it to the particles array (fParticles) and if not done to the 
 // stack (fStack).
 // ---
-  static const double yMax = 6.3;
-  static const double pEMax = TMath::TanH(yMax);
 
   const int kFirstDaughter=-1;
   const int kLastDaughter=-1;
   
-  TParticle* particleDef
-    = new TParticle(pdg, is, parent, -1, kFirstDaughter, kLastDaughter,
+  myTParticle* particle
+    = new myTParticle(pdg, is, parent, -1, kFirstDaughter, kLastDaughter,
 		     px, py, pz, e, vx, vy, vz, tof);
    
-  particleDef->SetPolarisation(polx, poly, polz);
-  particleDef->SetWeight(weight);
-  particleDef->SetUniqueID(mech);
+  particle->SetPolarisation(polx, poly, polz);
+  particle->SetWeight(weight);
+  particle->SetUniqueID(mech);
 
-  StarMCParticle* mother = 0;
-  StarMCParticle* particle = 0;
+  myTParticle* mother = 0;
   int ID = GetNtrack();
   if (parent>=0 && toBeDone && mech != kPPrimary) {
-    mother = GetParticle(parent);
-    ID = mother->GetID();
-    particle = new StarMCParticle(ID, particleDef, mother);
-    if (mother) mother->AddDaughter(particle);
+    mother = (myTParticle*)GetParticle(parent);
+    ID = mother->GetId();
+    particle->SetId(ID);  particle->SetMother(mother);
+    mother->AddDaughter(particle);
   }
   else {
-    // rapidity cut
-    if (TMath::Abs(pz/e) > pEMax) toBeDone = 0;
-    particle = new StarMCParticle(ID, particleDef, 0);
-    fParticles->Add(particle);
+    particle->SetId(ID);
+    fParticles.push_back(particle);
   }
   if (mech == kPPrimary) fNPrimary++;    
   if (toBeDone) fStack.push(particle);  
@@ -85,23 +115,21 @@ TParticle* StMCStack::PopNextTrack(int& itrack) {
 
   if (!fCurrentParticle) return 0;  
   
-  itrack = fCurrentParticle->GetID();
+  itrack = fCurrentParticle->GetId();
   fCurrentTrack = itrack;
 
-  return fCurrentParticle->GetParticle();
+  return fCurrentParticle;
 }    
 //_____________________________________________________________________________
 void StMCStack::Print(const Option_t *opt) const {
 // Print(const Option_t *opt=0)s info for all particles.
 // ---
   
-  cout << "StMCStack Info  " << endl;
-  cout << "Total number of particles:   " <<  GetNtrack() << endl;
-  cout << "Number of primary particles: " <<  GetNprimary() << endl;
-
+  printf("*** StMCStack Info ***\n");
+  printf("Total number of particles: %d\n",GetNtrack());
+  printf("Number of primary particles: %d\n",GetNprimary());
   for (int i=0; i<GetNtrack(); i++) {
     GetParticle(i)->Print();
-    //GetParticle(i)->PrintDaughters();
   }  
 }
 //_____________________________________________________________________________
@@ -114,20 +142,15 @@ void StMCStack::Clear(const char *)
   assert(fStack.empty());
   fCurrentTrack = -1;
   fNPrimary = 0;
-  fParticles->Delete();
+  for( int i=0; i<(int)fParticles.size();i++) {delete fParticles[i];}
+  fParticles.clear();
 }       
 //_____________________________________________________________________________
 TParticle* StMCStack::GetCurrentTrack() const
 {
 // Gets the current track particle.
 // ---
-
-  StarMCParticle* current = GetParticle(fCurrentTrack);
-  
-  if (current) 
-    return  current->GetParticle();
-  else 
-    return 0;
+  return GetParticle(fCurrentTrack);
 }
 
 //_____________________________________________________________________________
@@ -136,27 +159,24 @@ int  StMCStack::GetCurrentParentTrackNumber() const
 // Returns the current track parent ID.
 // ---
 
-  StarMCParticle* current = GetParticle(fCurrentTrack);
+  myTParticle* current = GetParticle(fCurrentTrack);
   
   if (!current) return -1; 
   
-  StarMCParticle* mother = current->GetMother();
+  myTParticle* mother = current->GetMother();
   
   if (!mother) return -1;
     
-  return  mother->GetID();
+  return  mother->GetId();
 }  
 
 //_____________________________________________________________________________
-StarMCParticle*  StMCStack::GetParticle(int id) const
+myTParticle*  StMCStack::GetParticle(int id) const
 {
-// Returns id-th particle in fParticles.
-// ---
-
-  if (id < 0 || id >= fParticles->GetEntriesFast())
+// 		Returns id-th particle in fParticles.
+  if (id < 0 || id >= (int)fParticles.size())
     Fatal("GetParticle", "Index out of range"); 
-   
-  return (StarMCParticle*)fParticles->At(id);
+  return fParticles[id];
 }
 
 
