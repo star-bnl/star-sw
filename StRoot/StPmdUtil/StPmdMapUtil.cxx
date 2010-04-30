@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdMapUtil.cxx,v 1.9 2007/08/31 10:55:47 rashmi Exp $
+ * $Id: StPmdMapUtil.cxx,v 1.10 2010/04/30 07:05:46 rashmi Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdMapUtil.cxx,v $
+ * Revision 1.10  2010/04/30 07:05:46  rashmi
+ * Fixed an array for nSmChainBoards
+ *
  * Revision 1.9  2007/08/31 10:55:47  rashmi
  * Changed initialization of channelOR,CR,chainR to -1
  *
@@ -148,7 +151,7 @@ void StPmdMapUtil::SetSMChainCombos(Int_t runno1){
   mPmdGeom->GetRunYear(runno1,rn,year);
   for(Int_t ichain = 0;ichain<48;ichain++){
     for(Int_t ism = 0;ism < 24;ism++){
-      nBoardSMChain[ichain][ism]  = 0;
+      nBoardSMChain[ism][ichain]  = 0;
     }
   }
   
