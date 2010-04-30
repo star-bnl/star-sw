@@ -35,16 +35,18 @@ StJetTrack* StJetCandidate::leadingChargedParticle() const
   return lcp;
 }
 
-void StJetCandidate::computeSumTrackPt()
+float StJetCandidate::sumTrackPt() const
 {
-  mSumTrackPt = 0;
-  for (int i = 0; i < numberOfTracks(); ++i) mSumTrackPt += track(i)->pt();
+  float s = 0;
+  for (int i = 0; i < numberOfTracks(); ++i) s += track(i)->pt();
+  return s;
 }
 
-void StJetCandidate::computeSumTowerPt()
+float StJetCandidate::sumTowerPt() const
 {
-  mSumTowerPt = 0;
-  for (int i = 0; i < numberOfTowers(); ++i) mSumTowerPt += tower(i)->pt();
+  float s = 0;
+  for (int i = 0; i < numberOfTowers(); ++i) s += tower(i)->pt();
+  return s;
 }
 
 StJetTrack* StJetCandidate::getTrackById(int id) const
