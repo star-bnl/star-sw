@@ -38,8 +38,18 @@ void StJetEvent::Clear(Option_t* option)
   mTowers->Clear(option);
 }
 
-int StJetEvent::numberOfVertices() const { return mVertices->GetEntriesFast(); }
-const StJetVertex* StJetEvent::vertex(int i) const { return (StJetVertex*)mVertices->At(i); }
+int StJetEvent::numberOfVertices () const { return mVertices->GetEntriesFast(); }
+int StJetEvent::numberOfJets     () const { return mJets->GetEntriesFast(); }
+int StJetEvent::numberOfTracks   () const { return mTracks->GetEntriesFast(); }
+int StJetEvent::numberOfTowers   () const { return mTowers->GetEntriesFast(); }
+int StJetEvent::numberOfParticles() const { return mParticles->GetEntriesFast(); }
+
+StJetVertex*    StJetEvent::vertex  (int i) const { return (StJetVertex*)mVertices->At(i); }
+StJetCandidate* StJetEvent::jet     (int i) const { return (StJetCandidate*)mJets->At(i); }
+StJetTrack*     StJetEvent::track   (int i) const { return (StJetTrack*)mTracks->At(i); }
+StJetTower*     StJetEvent::tower   (int i) const { return (StJetTower*)mTowers->At(i); }
+StJetParticle*  StJetEvent::particle(int i) const { return (StJetParticle*)mParticles->At(i); }
+
 StJetVertex* StJetEvent::newVertex() { return new ((*mVertices)[mVertices->GetEntriesFast()]) StJetVertex; }
 StJetCandidate* StJetEvent::newJet(const TVector3& vertex, const TLorentzVector& fourMomentum) { return new ((*mJets)[mJets->GetEntriesFast()]) StJetCandidate(vertex,fourMomentum); }
 StJetTrack* StJetEvent::newTrack() { return new ((*mTracks)[mTracks->GetEntriesFast()]) StJetTrack; }

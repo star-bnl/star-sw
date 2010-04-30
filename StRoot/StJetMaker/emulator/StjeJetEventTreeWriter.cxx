@@ -94,8 +94,8 @@ void StjeJetEventTreeWriter::fillJetTreeHeader(int iAnalyzer)
   StJetEvent* jetEvent = _analyzerCtlList[iAnalyzer]._jetEvent;
   StFourPMaker* fourPMaker = _analyzerCtlList[iAnalyzer]._fourPMaker;
   jetEvent->Clear();
-  jetEvent->setRunId(fourPMaker->GetRunNumber());
-  jetEvent->setEventId(fourPMaker->GetEventNumber());
+  jetEvent->mRunId   = fourPMaker->GetRunNumber();
+  jetEvent->mEventId = fourPMaker->GetEventNumber();
 }
 
 void StjeJetEventTreeWriter::fillJetTree(int iAnalyzer, int iVertex)
@@ -198,8 +198,10 @@ StJetCandidate* StjeJetEventTreeWriter::fillJet(StJetEvent* jetEvent, StJetVerte
     }
   } // End loop over jet particles
 
-  jet->computeSumTrackPt();
-  jet->computeSumTowerPt();
+  float sumTowerPt = jet->sumTowerPt();
+  float sumTrackPt = jet->sumTrackPt();
+
+  jet->mRt = sumTowerPt/(sumTowerPt+sumTrackPt);
 
   jet->setVertex(jetVertex);
 
