@@ -1,4 +1,4 @@
-// $Id: St2009pubSpinMaker.cxx,v 1.11 2010/04/14 20:00:08 balewski Exp $
+// $Id: St2009pubSpinMaker.cxx,v 1.12 2010/05/01 01:31:45 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -118,10 +118,14 @@ St2009pubSpinMaker::bXingSort(){
   if(spinDb->offsetBX48minusBX7(bx48,bx7)) {
    printf("BAD bx7=%d bx48=%d del=%d\n",bx7,bx48,spinDb->offsetBX48minusBX7(bx48,bx7));
    hA[0]->Fill("badBx48",1.);
-   return;
-   // assert(spinDb->offsetBX48minusBX7(bx48,bx7)==0); // both counters must be in sync
+   return; // both counters must be in sync
   }
+
+  //remove events tagged as Zs
+  if(wMK->wEve.zTag) return;
+  hA[0]->Fill("noZ",1.);
  
+
   hA[1]->Fill(bx48);
   hA[2]->Fill(bx7);
 
@@ -236,6 +240,9 @@ St2009pubSpinMaker::bXingSort(){
 
 
 // $Log: St2009pubSpinMaker.cxx,v $
+// Revision 1.12  2010/05/01 01:31:45  balewski
+// added W->JJ code & JES calibration
+//
 // Revision 1.11  2010/04/14 20:00:08  balewski
 // added AL w/o endcap
 //

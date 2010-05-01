@@ -1,12 +1,14 @@
-// $Id: St2009WjjMaker.cxx,v 1.1 2010/04/16 01:04:43 balewski Exp $
+// $Id: St2009WjjMaker.cxx,v 1.2 2010/05/01 01:31:44 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
+#include <math.h>
+
 #include <StMuDSTMaker/COMMON/StMuDstMaker.h>
 #include <StMuDSTMaker/COMMON/StMuDst.h>
 #include <StMuDSTMaker/COMMON/StMuEvent.h>
 #include <StMuDSTMaker/COMMON/StMuTriggerIdCollection.h>
-//#include <StEvent/StEventInfo.h> // just to get time
+
 #include <StSpinPool/StSpinDbMaker/StSpinDbMaker.h>
 #include <StMuDSTMaker/COMMON/StMuPrimaryVertex.h>
 
@@ -23,15 +25,19 @@ St2009WjjMaker::St2009WjjMaker(const char *name):StMaker(name){
   wMK=0;HList=0;
   core=name;
  
-  par_jetPtLow=10.;// GeV/c
-  par_jetPtHigh=40.;// GeV/c
-  par_jetEtaLow=-0.8;
-  par_jetEtaHigh=1.1;
+  par_jetPtLow=5.; par_jetPtHigh=60.;// GeV/c
+  par_jetEtaLow=1.0;  par_jetEtaHigh=1.8;
 
-  par_djPtHigh=30;
+  par_djPtLow=1.;  par_djPtHigh=40;// GeV/c
+  par_djPzLow=3; par_djPzHigh=90; // GeV/c
+  par_djEtaMin=0.1;
+  par_etaSumLow=0.01; par_etaSumHigh=2.5;
+
   par_spinSort=false;
   par_vertexZ=100;// cm
   isMC=0;
+  par_corLevel=0; // default no corrections
+  mJEScorrFile="fixMe"; memset(mJEScorrH,0,sizeof(mJEScorrH));
  }
 
 
@@ -43,8 +49,59 @@ St2009WjjMaker::Init(){
   assert(HList);
   initHistos();
   nRun=0;
+  
+  LOG_INFO<<GetName()<<Form("::Init JES corr=%d, input=%s",par_corLevel,mJEScorrFile.Data())<<endl;;
+  if(par_corLevel) {
+    TFile *fd=new TFile(mJEScorrFile); assert(fd);
+    for(int i=0;i<mxJESeta;i++) {
+      TString tit= "jesCorr_iEta"; tit+=i;
+      mJEScorrH[i]=(TH1F*)fd->Get(tit); assert(mJEScorrH[i]);
+      mJEScorrH[i]->Print();
+
+      // add derivate for interpolation    
+      TH1F *h=mJEScorrH[i];      
+      TAxis *ax=h->GetXaxis();      int nb=ax->GetNbins(); 
+      for(int k=1;k<=nb-1;k++) {
+	float x1=ax->GetBinCenter(k);	
+	float x2=ax->GetBinCenter(k+1);	
+	float y1=h->GetBinContent(k);	
+	float y2=h->GetBinContent(k+1);	
+	float tg=(y2-y1)/(x2-x1);	
+	h->SetBinError(k,tg);     
+      }    
+    } // end of loop over eta bins
+  }// end of JES initialialization
 
   return StMaker::Init();
+}
+  
+//_____________________________________________________________________________
+//
+TLorentzVector  
+St2009WjjMaker::trueJet( TLorentzVector rJ) {
+  if (par_corLevel==0) return rJ;
+  int iEta=(rJ.Eta()+1.2)/0.4;
+  if(iEta<0) iEta=0;
+  if(iEta>=mxJESeta ) iEta=mxJESeta-1;
+  TH1F* h=mJEScorrH[iEta];
+  float rPt=rJ.Pt();
+  int bin=h->FindBin(rPt);
+  float x1=h->GetBinCenter(bin);
+
+  if(x1>rPt && bin>1) { // use lower pT bin for interpolation
+    bin--;
+    x1=h->GetBinCenter(bin);
+  }
+  float y1=h->GetBinContent(bin);
+  float tg=h->GetBinError(bin);
+  
+  float truePt=y1+ tg*(rPt-x1);
+  
+  float fac=truePt/rJ.Pt();
+  //printf(" rPt=%.2f  tPt=%.2f  ratio=%.3f\n",rJ.Pt(),truePt ,fac);
+
+  
+  return fac*rJ;
 }
 
 
@@ -85,14 +142,14 @@ St2009WjjMaker::InitRun  (int runNo){
       if(spinDb->isBXfilledUsingInternalBX(bx))  hbxIdeal->Fill(bx);   
     }
     
-
     sprintf(txt,"bXing= bx7+off=%d",spinDb->BX7offset());
     hA[4]->GetXaxis()->SetTitle(txt);
   } // end of spin sort
     
 
-  LOG_INFO<<Form("::InitRun(%d) done, W->jet+jet sorting  params: spinSort=%d |vertZ|<%.0f, jetPt=[%.1f,%.1f] GeV/c, jetEta=[%.1f,%.1f]\n   DJ: pT<%.1f GeV/c",
-		 runNo,par_spinSort,par_vertexZ ,par_jetPtLow,par_jetPtHigh,par_jetEtaLow,par_jetEtaHigh,par_djPtHigh
+  LOG_INFO<<GetName()<<Form("::InitRun(%d) done, W->jet+jet sorting  params: doSpinSort=%d |vertZ|<%.0f cm,\n   jetPt=[%.1f,%.1f] GeV/c, jetEta=[%.1f,%.1f]\n   DJ: pT=[%.1f,%.1f] GeV/c, |Pz|=[%.1f,%.1f] GeV/c, eta1+2=[%.1f,%.1f]",
+		 runNo,par_spinSort,par_vertexZ ,par_jetPtLow,par_jetPtHigh,par_jetEtaLow,par_jetEtaHigh,
+		 par_djPtLow,par_djPtHigh,par_djPzLow,par_djPzHigh,par_etaSumLow, par_etaSumHigh
 		 )<<endm;	 
   return kStOK;
 }
@@ -119,7 +176,7 @@ St2009WjjMaker::bXingSort(){
 
   //...... trigger .........
 
-  if(!isMC){
+  if(!isMC ){ // fixed n the middle of processing
     StMuEvent* muEve = wMK->mMuDstMaker->muDst()->event();
     StMuTriggerIdCollection *tic=&(muEve->triggerIdCollection());
     assert(tic);
@@ -131,15 +188,15 @@ St2009WjjMaker::bXingSort(){
       if(idL[i]==230420) trgOK+=1; // AJP
       if(idL[i]==230411) trgOK+=2; // JP2
     }
-    if(!trgOK) return;
-    hA[0]->Fill("trig",1.);
+    if(trgOK)    hA[0]->Fill("trig",1.);
+    // tmp, do not abort events here, now chain is trigger filtering
   }
   
   //....... find vertex .....
   int nInpPrimV=wMK->mMuDstMaker->muDst()->numberOfPrimaryVertices();
   int nVer=0;
   for(int iv=0;iv<nInpPrimV;iv++) {
-    if(iv) break; // tmp - consider only 1st vertex, since jets are made only for the 1st vertex
+    if(nVer) break; // tmp - consider only 1st vertex, since jets are made only for the 1st vertex
     StMuPrimaryVertex* V= wMK->mMuDstMaker->muDst()->primaryVertex(iv);
     assert(V);
     wMK->mMuDstMaker->muDst()->setVertexIndex(iv);
@@ -153,7 +210,7 @@ St2009WjjMaker::bXingSort(){
   if(nVer<=0) return; 
   hA[0]->Fill("vert",1.);
 
-  //......... require: L2W-trig (ET or rnd) & vertex is reasonable .......
+  //......... require:  vertex is reasonable .......
   
 
   //****loop over branch with EEMC****
@@ -165,51 +222,105 @@ St2009WjjMaker::bXingSort(){
   if(nJets<2) return;
   hA[0]->Fill("mulJ",1.);
 
-
-  TLorentzVector jet[2], Jsum; int kJ=0; 
+  const int mxJ=2;
+  TLorentzVector jet[mxJ]; 
+  int nJ=0;
   for (int i_jet=0; i_jet< nJets; i_jet++){// try to find 2 jets passing cuts
-    // printf("ij=%d\n", i_jet);
-    TLorentzVector J = *((StJet*)jets->At(i_jet));
+    TLorentzVector Jreco = *((StJet*)jets->At(i_jet));
 
-    Jsum+=J;
-    if(kJ==2 &&  J.Pt()>2) hA[0]->Fill("J3",1.);
-    if(kJ>=2)  continue;
+    //...... compute correction .......
+    TLorentzVector J=Jreco; //1:1
+    J=trueJet(J);
 
-    hA[10+kJ]->Fill(J.Pt(), J.Eta());
     if(J.Pt()<par_jetPtLow) continue;
+
+    if(nJ>=mxJ) { // 3rd jet, kill for now 
+      hA[0]->Fill("J3",1.);
+      hA[6]->Fill(fabs(jet[0].DeltaPhi(J)),fabs(jet[1].DeltaPhi(J)));
+      return;
+    }
+    jet[nJ++]=J;
+    if(nJ==1)hA[0]->Fill("J1",1.);
+  }
+  
+  if(nJ<mxJ) return;
+  hA[0]->Fill("J2",1.);
+
+  // 2 jet-event, process it
+  assert(nJ<=mxJ);
+
+  // decide which is jet #1
+  if( fabs(jet[0].Eta()) > fabs(jet[1].Eta()) ) {// swap
+    TLorentzVector J=jet[0];
+    jet[0]=jet[1]; jet[1]=J;
+  }
+
+  //  now jet1 has smaller |eta|
+  hA[10]->Fill(jet[0].Et(),jet[0].Eta());
+  hA[11]->Fill(jet[1].Et(),jet[1].Eta());
+  hA[17]->Fill(jet[0].E(),jet[1].E());
+  hA[18]->Fill(jet[0].Pt(),jet[1].Pt());
+  hA[19]->Fill(jet[0].Eta(),jet[1].Eta());
+  float phiCDdeg=jet[0].DeltaPhi(jet[1])/3.1416*180.;
+  if(phiCDdeg<-90) phiCDdeg+=360; // choose different phi range
+  hA[20]->Fill(phiCDdeg); 
+
+  
+
+  TLorentzVector diJet=jet[0]+jet[1];
+  float invM=sqrt(diJet*diJet);
+ 
+  hA[14]->Fill(invM);
+  hA[16]->Fill(invM, diJet.Pt());
+  hA[15]->Fill( diJet.Z(),diJet.Pt());
+ 
+
+#if 0
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+    hA[15]->Fill(invM, diJet.Z());wrong
+
+    
     if(J.Pt()>par_jetPtHigh) continue;
     if(J.Eta()<par_jetEtaLow) continue;
     if(J.Eta()>par_jetEtaHigh) continue;
-    // printf("kJ=%d,  px=%f %f %f   PT=%f=%f=ET\n",kJ,jet[kJ].X(),jet[kJ].Y(),jet[kJ].Z(),jet[kJ].Pt(),jet[kJ].Et());
-    jet[kJ++]=J;
-    if(kJ==1)hA[0]->Fill("J1",1.);
-    if(kJ==2)hA[0]->Fill("J2",1.);
-  }
 
-
-  if(kJ<2) return;
-  TLorentzVector diJet=jet[0]+jet[1];
-  
-  if(diJet.Pt()>par_djPtHigh) return;
-  hA[0]->Fill("DjPt",1.);
-
-  float invM=sqrt(diJet*diJet);
-
-  // printf("kJ12,  px=%f %f %f   %f=%f  invM=%.1f\n",diJet.X(),diJet.Y(),diJet.Z(),diJet.Pt(),diJet.Et(),invM);
+Jsum+=J; // all jet momentum sum
 
   hA[12]->Fill(diJet.Pt(), diJet.Eta());
 
-  hA[13]->Fill(invM, fabs(jet[0].Eta()+jet[1].Eta()));
-  hA[14]->Fill(invM);
-  hA[15]->Fill(invM, fabs(diJet.Z()));
-  hA[16]->Fill(invM, diJet.Pt());
+  //..... di-jet cuts ......
+  if(diJet.Pt()<par_djPtLow) return;
+  if(diJet.Pt()>par_djPtHigh) return;
+  hA[0]->Fill("DjPt",1.);
+
+  if(fabs(diJet.Eta())<par_djEtaMin) return;
+  hA[0]->Fill("DjEta",1.);
+ 
+  if(fabs(diJet.Z())<par_djPzLow) return;
+  if(fabs(diJet.Z())>par_djPzHigh) return;
+  hA[0]->Fill("DjPz",1.);
+
+  float etaSum=fabs(jet[0].Eta()+jet[1].Eta());
+  hA[13]->Fill(invM, etaSum);
+  if(etaSum<par_etaSumLow) return;
+  if(etaSum>par_etaSumHigh) return;
+  hA[0]->Fill("eta1+2",1.);
+
+  // 
+
+  //::::::::::::: event pass W->jet+jet cuts ::::::::::::
+  if(isJ3) 
+
+
+
 
   //... various correlations
   hA[20]->Fill( diJet.Z(),jet[0].Eta()+jet[1].Eta() );
   if(nJets>2) hA[21]->Fill( Jsum.Z(),diJet.Eta());
-  hA[22]->Fill( diJet.Z(),diJet.Pt());
   
-
+  
+#endif
   /*   TLorentzVector (px,py,pz,E). 
        TLorentzVector v4(TVector3(1., 2., 3.),4.);
        v.SetVect(TVector3(1,2,3)); 
@@ -281,6 +392,9 @@ St2009WjjMaker::bXingSort(){
 
 
 // $Log: St2009WjjMaker.cxx,v $
+// Revision 1.2  2010/05/01 01:31:44  balewski
+// added W->JJ code & JES calibration
+//
 // Revision 1.1  2010/04/16 01:04:43  balewski
 // start
 //

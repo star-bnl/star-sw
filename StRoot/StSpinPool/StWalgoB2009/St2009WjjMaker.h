@@ -1,4 +1,4 @@
-// $Id: St2009WjjMaker.h,v 1.1 2010/04/16 01:04:43 balewski Exp $
+// $Id: St2009WjjMaker.h,v 1.2 2010/05/01 01:31:44 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -22,6 +22,7 @@
 #include "StMaker.h"
 #endif
 #include <TString.h>
+#include <TLorentzVector.h>
 
 class St2009WMaker;
 class StSpinDbMaker;
@@ -31,15 +32,21 @@ class St2009WjjMaker : public StMaker {
   int nRun;
   int Tfirst,Tlast;
 
-  float par_jetPtLow,par_jetPtHigh, par_djPtHigh ; 
+  float par_jetPtLow,par_jetPtHigh;
+  float par_djPtLow, par_djPtHigh , par_djEtaMin , par_djPzLow, par_djPzHigh ; 
   float par_jetEtaLow,par_jetEtaHigh ; 
+  float par_etaSumLow, par_etaSumHigh;
   bool  par_spinSort;
   float par_vertexZ;
+  int par_corLevel; // level of jet energy correction
   int   isMC;
 
   St2009WMaker *wMK; // W-algo maker with all data
   StSpinDbMaker *spinDb;
-  TString core; // name attached to all histos
+  TString core; // name attached to all histo
+  TString  mJEScorrFile;
+  enum {mxJESeta=8};
+  TH1F *mJEScorrH[mxJESeta];
 
   // histograms
   TObjArray *HList;
@@ -57,15 +64,17 @@ class St2009WjjMaker : public StMaker {
   void setHList(TObjArray * x){HList=x;}
   void setSpinSort(bool x){ par_spinSort=x;}
   void setMC(int x){ isMC=x;}
+  void setCorrection(char *name){ mJEScorrFile=name; par_corLevel=1;}
 
   void attachWalgoMaker(St2009WMaker *mk) { wMK=mk;}
   void attachSpinDb(StSpinDbMaker *mk){ spinDb=mk;}
   virtual Int_t FinishRun(int runumber);
 
-
+  TLorentzVector  trueJet( TLorentzVector recoJet) ;
+ 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WjjMaker.h,v 1.1 2010/04/16 01:04:43 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WjjMaker.h,v 1.2 2010/05/01 01:31:44 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -76,6 +85,9 @@ class St2009WjjMaker : public StMaker {
 
 
 // $Log: St2009WjjMaker.h,v $
+// Revision 1.2  2010/05/01 01:31:44  balewski
+// added W->JJ code & JES calibration
+//
 // Revision 1.1  2010/04/16 01:04:43  balewski
 // start
 //

@@ -1,4 +1,4 @@
-// $Id: St2009pubSpin_histo.cxx,v 1.10 2010/03/22 16:11:42 balewski Exp $
+// $Id: St2009pubSpin_histo.cxx,v 1.11 2010/05/01 01:31:45 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -26,9 +26,10 @@ St2009pubSpinMaker::initHistos(){
   hA[0]=h=new TH1F(core+"StatEve",core+" event count",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
- 
-  const char *key[]={"inp","badBx48","BG1","BG2","Wcut","eta","W25","Qlow","Qhigh","Q +","Q -"};
-  for(int i=0;i<11;i++) h->Fill(key[i],0.); // preset the order of keys
+  h->SetMarkerSize(2);//<-- large text
+
+  const char *key[]={"inp","badBx48","noZ","BG1","BG2","Wcut","eta","W25","Qlow","Qhigh","Q +","Q -"};
+  for(int i=0;i<12;i++) h->Fill(key[i],0.); // preset the order of keys
  
 
   hA[1]=new TH1F(core+"bX48","Rate vs. raw bx48; bXing= raw bx48",128,-0.5,127.5);
@@ -123,6 +124,9 @@ St2009pubSpinMaker::initHistos(){
 
 
 // $Log: St2009pubSpin_histo.cxx,v $
+// Revision 1.11  2010/05/01 01:31:45  balewski
+// added W->JJ code & JES calibration
+//
 // Revision 1.10  2010/03/22 16:11:42  balewski
 // better computation of AL(QCD)
 //
