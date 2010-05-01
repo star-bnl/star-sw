@@ -1,4 +1,4 @@
-// $Id: St2009W_histo.cxx,v 1.17 2010/04/27 16:53:45 stevens4 Exp $
+// $Id: St2009W_histo.cxx,v 1.18 2010/05/01 01:31:44 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -23,6 +23,7 @@ St2009WMaker::initHistos(){
   hA[0]=h=new TH1F("muStatEve","W-algo: event count",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
   h->SetLineColor(kBlue);h->SetLineWidth(2);
+  h->SetMarkerSize(2);//<-- large text
 
   char key[][200]={"inp","BHT3Id","L2wId","L2wBits","L2wET","L2wRnd","tpcOn","primVert","vertZ","Pt10",
 		   "B-in","B200","TrB","Tr2Cl","eta1","goldW"};
@@ -282,6 +283,9 @@ St2009WMaker::initHistos(){
 }
 
 // $Log: St2009W_histo.cxx,v $
+// Revision 1.18  2010/05/01 01:31:44  balewski
+// added W->JJ code & JES calibration
+//
 // Revision 1.17  2010/04/27 16:53:45  stevens4
 // add code to remove events tagged as Zs from W candidates
 //

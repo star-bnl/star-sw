@@ -1,4 +1,4 @@
-// $Id: St2009ZMaker.cxx,v 1.9 2010/01/10 03:01:37 balewski Exp $
+// $Id: St2009ZMaker.cxx,v 1.10 2010/05/01 01:31:44 balewski Exp $
 //
 //*-- Author : Ross Corliss, MIT
 //  changes Jan Balewski, MIT
@@ -147,13 +147,10 @@ St2009ZMaker::find_Z_boson(){
 
 	float mass=sqrt(mass2);
 	int Q1Q2=T1.prMuTrack->charge()*T2.prMuTrack->charge();
-	if (Q1Q2==1) { //..  same sign 
+	if (Q1Q2==1) { //..  same sign , can't be Z-> e+ e-
 	  hA[14]->Fill(mass);
 	  continue;
 	}
-	printf("RCC:  Found Z w/ invmass=%f\n",mass);
-        printJan(&T1);
-        printJan(&T2);
 
 	//..... now only opposite sign
 	hA[0]->Fill("QQ",1.);
@@ -162,6 +159,11 @@ St2009ZMaker::find_Z_boson(){
 	hA[33]->Fill(T2.cluster.ET,T2.prMuTrack->charge()/T2.prMuTrack->pt()); 
 	hA[34]->Fill(T1.pointTower.iEta ,T1.cluster.energy);
 	hA[34]->Fill(T2.pointTower.iEta ,T2.cluster.energy);
+#if 0
+	printf("RCC:  Found Z w/ invmass=%f\n",mass);
+        printJan(&T1);
+        printJan(&T2);
+
 
 	if (!wMK->isMC || (wMK->isMC&& wEve.id<500) )
 	  { printf("\n ZZZZZZZZZZZZZZZZZZZ\n");
@@ -173,7 +175,7 @@ St2009ZMaker::find_Z_boson(){
 	    wEve.print();
 	  }
 	
-
+#endif
 
 	if (mass<par_minMassZ) continue; //enforce a lower bound
 	hA[0]->Fill("Zlow",1.);
@@ -223,6 +225,9 @@ St2009ZMaker::find_Z_boson(){
 
 
 // $Log: St2009ZMaker.cxx,v $
+// Revision 1.10  2010/05/01 01:31:44  balewski
+// added W->JJ code & JES calibration
+//
 // Revision 1.9  2010/01/10 03:01:37  balewski
 // cleanup & nicer histos
 //

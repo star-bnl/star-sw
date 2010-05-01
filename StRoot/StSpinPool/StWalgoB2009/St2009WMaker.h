@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.h,v 1.13 2010/04/27 16:53:45 stevens4 Exp $
+// $Id: St2009WMaker.h,v 1.14 2010/05/01 01:31:44 balewski Exp $
 
 #ifndef STAR_St2009WMaker
 #define STAR_St2009WMaker
@@ -38,6 +38,8 @@ class  St2009pubJSMaker;
 class  St2009pubSpinMaker;
 class  St2009pubMcMaker;
 class  St2009WjjMaker;
+class  StMcJetCalibMaker;
+
 class  StJetReader;
 class  StJets;
 class  StJet;
@@ -54,6 +56,8 @@ class St2009WMaker : public StMaker {
  friend class St2009WlumiMaker;
  friend class St2009ZMaker;
  friend class  St2009WjjMaker;
+ friend class  StMcJetCalibMaker;
+
  private:
   StMuDstMaker* mMuDstMaker;
   StJetReader* mJetReaderMaker;
@@ -196,7 +200,7 @@ class St2009WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.13 2010/04/27 16:53:45 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.14 2010/05/01 01:31:44 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -207,6 +211,9 @@ class St2009WMaker : public StMaker {
 
 
 // $Log: St2009WMaker.h,v $
+// Revision 1.14  2010/05/01 01:31:44  balewski
+// added W->JJ code & JES calibration
+//
 // Revision 1.13  2010/04/27 16:53:45  stevens4
 // add code to remove events tagged as Zs from W candidates
 //

@@ -8,15 +8,17 @@ Jan: new M-C files, jet read:
 root4star -b -q 'rdMuWana.C(2000,"","/star/institutions/mit/balewski/2010-Walgo-simu/2010setB10016a/rcm10016_4_300evts.MuDst.root",1,100,2)'
 */
 
+
+
 class StChain;
 StChain *chain=0;
 int useEtow=3;// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
 
 int  spinSort=false;
 bool isJanWjj=false; 
-int isJustin=false;
-bool isRoss=true;
-int geant=false;
+int  isJustin=false;
+bool isRoss=true; 
+int  geant=false;
  
 int rdMuWana(
 	     int nEve=2e3,
@@ -24,23 +26,22 @@ int rdMuWana(
 	     char* file    = "/star/u/balewski/2009-Wana-pp500/fillListD/F10535/R10102105_230531_230601.lis",
 	     int nFiles  = 5000, // max # of muDst files
 	     int isMC=0, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve, 20=rcf10010,... 26=rcf10016
-	     int useJetFinder = 2, // 0 - no jets & crash; 1 generate jet trees; 2 read jet trees 
-             TString jetTreeDir = "/star/institutions/mit/balewski/2009-pp500-jets/4.15.2010/" //default location of jet trees to be used
+	     int useJetFinder = 2 // 0 - no jets & crash; 1 generate jet trees; 2 read jet trees 
  ) { 
 
-
+  TString jetTreeDir = "/star/institutions/mit/balewski/2009-pp500-jets/4.15.2010/"; //default location of jet trees for run 9 data
 
   if(isJanWjj){ // Jan: use isMC=100 for interactive M-C,
     if(isMC==0) jetTreeDir = "/star/institutions/mit/balewski/2009-pp500-jets/4.16.2010phys/"; 
-
   }
   if(isJanWjj && isMC &&  useJetFinder==2) geant=true;
 
-  if(isMC==100)   jetTreeDir ="/star/institutions/mit/balewski/2010-Walgo-simu/2010setB10016a/"; 
-  if(isMC==101)  ;// free
-  if(isMC==102)   jetTreeDir ="/star/data05/scratch/balewski/2010-Wsimu-a3/jetR04/";
-  if(isMC==103)  jetTreeDir="/star/data01/pwg/balewski/2010-Wsimu-setC/jetR04/";
-  if(isMC==104)  jetTreeDir="/star/data01/pwg/balewski/2010-Wsimu-setC/jetR07/";
+
+  if(isMC==100)  jetTreeDir="./";
+  if(isMC==104)   jetTreeDir ="/star/data05/scratch/balewski/2010-Wsimu-a3/jetR04/";
+  if(isMC==105)  jetTreeDir="/star/data01/pwg/balewski/2010-Wsimu-setC/jetR04split05/";
+  if(isMC==107)  jetTreeDir="/star/data01/pwg/balewski/2010-Wsimu-setC/jetR07/";
+
   
   //submit via scheduler 
   if(isMC==30) geant=true; //uses geant files
@@ -194,8 +195,6 @@ int rdMuWana(
     // Makers for clusterfinding
     StSpinDbMaker* spDbMaker = new StSpinDbMaker("spinDb");
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
-    //  StPreEclMaker *pre_ecl=new StPreEclMaker();
-    // StEpcMaker *epc=new StEpcMaker();
 
     //here we also tag whether or not to do the swap:
     bool doTowerSwapFix = true;
@@ -229,26 +228,20 @@ int rdMuWana(
     //Setup the cone finder (See StJetFinder/StConeJetFinder.h -> class StConePars)
     StConePars* cpars = new StConePars();
     cpars->setGridSpacing(105, -3.0, 3.0, 120, -pi, pi);  //include EEMC
-    cpars->setConeRadius(0.7);
+    cpars->setConeRadius(0.7); // default=0.7
     cpars->setSeedEtMin(0.5);
     cpars->setAssocEtMin(0.1);
-    cpars->setSplitFraction(0.5);
+    cpars->setSplitFraction(0.5); //default=0.5. if 0.3 less split? 
     cpars->setPerformMinimization(true);
     cpars->setAddMidpoints(true);
     cpars->setRequireStableMidpoints(true);
     cpars->setDoSplitMerge(true);
+
     cpars->setDebug(false);
 
     emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100, "ConeJets12_100"); //100% subtraction     
     emcJetMaker->addAnalyzer(anapars, cpars, bet4pMakerFrac100_noEEMC, "ConeJets12_100_noEEMC"); //100% subtraction (no Endcap)
 
-#if 0 // remove it next time, Jan
-    //Tight cuts (esp. SMD)
-    pre_ecl->SetClusterConditions("bemc", 4, 0.4, 0.05, 0.02, kFALSE);
-    pre_ecl->SetClusterConditions("bsmde", 5, 0.4,0.005, 0.1,kFALSE);
-    pre_ecl->SetClusterConditions("bsmdp", 5, 0.4,0.005, 0.1,kFALSE);
-    pre_ecl->SetClusterConditions("bprs", 1, 500., 500., 501., kFALSE);
-#endif
 
     TChain* tree=muMk->chain(); assert(tree);
     int nEntries=(int) tree->GetEntries();
@@ -297,8 +290,6 @@ int rdMuWana(
     //vary energy scales for syst. uncert. calc., remove it next time , also from .h,.cxx
     //WmuMk->setJetNeutScaleMC(1.0); 
     //WmuMk->setJetChrgScaleMC(1.0); 
-    //WmuMk->setBtowScale(1.0);     
-    //WmuMk->setEtowScale(1.0);     
     
   }else {// real data specific
     WmuMk->setTrigID(bht3ID,l2wID,runNo);
@@ -372,15 +363,6 @@ int rdMuWana(
     St2009WjjMaker * wjjMk;
     char ttx[100]; 
     for(int kk=0;kk<2;kk++) {// to study various calibration schemes
-      if(geant) {	
-	sprintf(ttx,"%ccalJ",'A'+kk);
-	printf("add jetCalMaker %s %d \n",ttx,kk);
-	jetcMk=new  StMcJetCalibMaker(ttx); 
-	jetcMk->attachWalgoMaker(WmuMk);
-	jetcMk->setHList(HList);
-	jetcMk->setCorrection(kk); // 0=no corrections,
-      }// end of geant
-      
       sprintf(ttx,"%cWjj",'A'+kk);
       printf("add Wjj-maker %s %d \n",ttx,kk);      
       wjjMk=new St2009WjjMaker(ttx);
@@ -388,7 +370,17 @@ int rdMuWana(
       wjjMk->setHList(HList);
       wjjMk->setSpinSort(spinSort);
       wjjMk->setMC(isMC);
-      wjjMk->setCorrection(kk); // 0=no corrections,
+      if(kk==1) wjjMk->setCorrection("/star/u/balewski/2009-Wana-pp500/jesCalib/pp500ver3.jesCorr.root"); 
+      if(geant) {	
+	sprintf(ttx,"%ccalJ",'A'+kk);
+	printf("add jetCalMaker %s %d \n",ttx,kk);
+	jetcMk=new  StMcJetCalibMaker(ttx); 
+	jetcMk->setHList(HList);
+	jetcMk->attachWalgoMaker(WmuMk);
+	jetcMk->attachWjjMaker(wjjMk);
+	jetcMk->setCorrection(kk); // 0=no corrections,
+      }// end of geant
+      
     }// loop over kk
   }
 
@@ -440,8 +432,8 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
-// Revision 1.35  2010/04/25 21:12:48  balewski
-// cleanup, remove tome dependete DB setup for M-C
+// Revision 1.36  2010/05/01 01:31:49  balewski
+// added W->JJ code & JES calibration
 //
 // Revision 1.34  2010/04/16 16:07:13  balewski
 // *** empty log message ***
