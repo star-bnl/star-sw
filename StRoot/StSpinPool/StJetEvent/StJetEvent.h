@@ -36,11 +36,11 @@ public:
   int numberOfTowers   () const;
   int numberOfParticles() const;
 
-  StJetVertex*     vertex(int i) const;
-  StJetCandidate*     jet(int i) const;
-  StJetTrack*       track(int i) const;
-  StJetTower*       tower(int i) const;
-  StJetParticle* particle(int i) const;
+  StJetVertex*     vertex(int i = 0) const;
+  StJetCandidate*     jet(int i)     const;
+  StJetTrack*       track(int i)     const;
+  StJetTower*       tower(int i)     const;
+  StJetParticle* particle(int i)     const;
 
   TClonesArray* vertices () const { return mVertices;  }
   TClonesArray* jets     () const { return mJets;      }
