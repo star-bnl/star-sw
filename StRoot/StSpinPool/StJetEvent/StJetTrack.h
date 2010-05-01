@@ -44,6 +44,8 @@ public:
   short exitDetectorId()      const { return mExitDetectorId; }
   const TVector3& dca()       const { return mDca; }
   float dcaD()                const { return mDcaD; }
+  float dcaXY()               const { return dcaD(); }
+  float dcaZ()                const { return dca().z(); }
   float chi2()                const { return mChi2; }
   float chi2prob()            const { return mChi2Prob; }
   float beta()                const { return mBeta; }
