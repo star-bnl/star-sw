@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdMapUtil.cxx,v 1.10 2010/04/30 07:05:46 rashmi Exp $
+ * $Id: StPmdMapUtil.cxx,v 1.11 2010/05/02 13:13:46 rashmi Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdMapUtil.cxx,v $
+ * Revision 1.11  2010/05/02 13:13:46  rashmi
+ * removed some couts
+ *
  * Revision 1.10  2010/04/30 07:05:46  rashmi
  * Fixed an array for nSmChainBoards
  *
@@ -70,7 +73,7 @@ void StPmdMapUtil::StoreMapInfo(Int_t runno1)
   Int_t year=0;
   Int_t rn = 0;
   mPmdGeom->GetRunYear(runno1,rn,year);
-  cout<<"runno, rn1 "<<runno1<<" "<<rn<<" "<<year<<endl;
+  //  cout<<"runno, rn1 "<<runno1<<" "<<rn<<" "<<year<<endl;
   cout<<"PMD runno, rn1 "<<runno1<<" "<<rn<<" "<<year<<endl;
   if(year<4){
     gMessMgr->Warning("Unphysical year");
@@ -180,9 +183,9 @@ void StPmdMapUtil::SetSMChainCombos(Int_t runno1){
     }
   }
   
-    
+  /*    
   for (Int_t ismchain = 0; ismchain<nSMChain;ismchain++){
     cout<<"ismchain="<<ismchain<<" chain="<<Chain_Combo[ismchain]<<" sm="<<SM_Combo[ismchain]<<" has number of boards = "<<nBoardSMChain[SM_Combo[ismchain]-1][Chain_Combo[ismchain]-1]<<" first board="<<FirstBoard[ismchain]<<endl;
   }
-  
+  */
 }
