@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdMapUtil.h,v 1.4 2007/05/26 00:40:07 perev Exp $
+ * $Id: StPmdMapUtil.h,v 1.5 2010/05/02 13:14:00 rashmi Exp $
  *
  * Author: Dipak Mishra
  *
@@ -15,6 +15,9 @@
  *************************************************************
  *
  * $Log: StPmdMapUtil.h,v $
+ * Revision 1.5  2010/05/02 13:14:00  rashmi
+ * removed some couts
+ *
  * Revision 1.4  2007/05/26 00:40:07  perev
  * Initialization added
  *
@@ -105,7 +108,7 @@ inline Int_t StPmdMapUtil::GetnBoardSMChain(Int_t ism,Int_t ichain){
 inline Int_t StPmdMapUtil::GetnBoardSMChain(Int_t icombo){
   Int_t ism=0,ichain=0;
   ComboSMChain(icombo,ism,ichain);
-  cout<<"ism,ichain="<<ism<<","<<ichain<<endl;
+  //  cout<<"ism,ichain="<<ism<<","<<ichain<<endl;
   return nBoardSMChain[ism-1][ichain-1];
 }
 
