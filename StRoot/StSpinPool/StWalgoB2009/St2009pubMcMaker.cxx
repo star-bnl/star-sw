@@ -1,4 +1,4 @@
-// $Id: St2009pubMcMaker.cxx,v 1.5 2010/03/14 22:50:31 balewski Exp $
+// $Id: St2009pubMcMaker.cxx,v 1.6 2010/05/03 19:54:35 stevens4 Exp $
 //
 //*-- Author : Justin Stevens, IUCF
 // 
@@ -47,11 +47,12 @@ Int_t
 St2009pubMcMaker::Make(){
   //printf("-----------in %s\n", GetName());
   //only get geant particle info for W MC
-  if(wMK->isMC==8 || wMK->isMC==30 || wMK->isMC==20)
-    doMCanalysis();
-  
-  doWanalysis();
-  doWefficiency();
+  if(wMK->isMC==8 || wMK->isMC==30 || wMK->isMC==20){
+    if(doMCanalysis()){
+      doWanalysis();
+      doWefficiency();
+    }
+  }
   return kStOK;
 }
 
@@ -257,7 +258,7 @@ St2009pubMcMaker::doWefficiency(){
 
 //________________________________________________
 //________________________________________________
-void
+bool
 St2009pubMcMaker::doMCanalysis(){
   StMcEvent* mMcEvent = 0;  
   mMcEvent = (StMcEvent*) StMaker::GetChain()->GetDataSet("StMcEvent");
@@ -300,7 +301,9 @@ St2009pubMcMaker::doMCanalysis(){
     }
     i++;
   }
-  
+ 
+  if(found!=2) return false;
+ 
   mWP=TVector3(pW.x(),pW.y(),pW.z());
   mNeutrinoP=TVector3(pNeutrino.x(),pNeutrino.y(),pNeutrino.z());
   mElectronP=TVector3(pElectron.x(),pElectron.y(),pElectron.z());
@@ -324,10 +327,14 @@ St2009pubMcMaker::doMCanalysis(){
     hA[76]->Fill(x1-x2);
   }
 
+  return true;
 
 }
 
 // $Log: St2009pubMcMaker.cxx,v $
+// Revision 1.6  2010/05/03 19:54:35  stevens4
+// only try to calc effic if W->e+nu is found in McEvent
+//
 // Revision 1.5  2010/03/14 22:50:31  balewski
 // *** empty log message ***
 //

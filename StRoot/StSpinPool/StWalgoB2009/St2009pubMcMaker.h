@@ -1,4 +1,4 @@
-// $Id: St2009pubMcMaker.h,v 1.2 2010/01/21 17:54:31 stevens4 Exp $
+// $Id: St2009pubMcMaker.h,v 1.3 2010/05/03 19:54:35 stevens4 Exp $
 //
 //*-- Author :  Justin Stevens, IUCF
 
@@ -39,7 +39,7 @@ class St2009pubMcMaker : public StMaker {
   void initHistos();
   void doWanalysis();
   void doWefficiency();
-  void doMCanalysis();
+  bool doMCanalysis();
    
   TVector3 mWP; 
   TVector3 mNeutrinoP;
@@ -62,7 +62,7 @@ class St2009pubMcMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009pubMcMaker.h,v 1.2 2010/01/21 17:54:31 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009pubMcMaker.h,v 1.3 2010/05/03 19:54:35 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -73,6 +73,9 @@ class St2009pubMcMaker : public StMaker {
 
 
 // $Log: St2009pubMcMaker.h,v $
+// Revision 1.3  2010/05/03 19:54:35  stevens4
+// only try to calc effic if W->e+nu is found in McEvent
+//
 // Revision 1.2  2010/01/21 17:54:31  stevens4
 // add effic histos and charge seperated background plots
 //
