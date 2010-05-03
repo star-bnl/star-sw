@@ -69,6 +69,9 @@ class ComponentBase {
     void WeightingField(const double x, const double y, const double z,
                         double& wx, double& wy, double& wz,
                         const std::string label);
+    virtual
+    void WeightingPotential(const double x, const double y, const double z,
+                            double& w, const std::string label);
 
     // Magnetic field
     // Calculate the magnetic field [hGauss] at (x, y, z)

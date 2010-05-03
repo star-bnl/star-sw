@@ -62,6 +62,15 @@ class ComponentFieldMap: public ComponentBase {
                        double& ex, double& ey, double& ez, double& v, 
                        Medium*& m, int& status) = 0;
 
+    virtual
+    void WeightingField(const double x, const double y, const double z,
+                        double& wx, double& wy, double& wz,
+                        const std::string label) = 0;
+
+    virtual
+    void WeightingPotential(const double x, const double y, const double z,
+                            double& w, const std::string label) = 0;
+
     // Options
     void CheckMapIndices()   {checkMultipleElement = true; lastElement = -1;}
     void NoCheckMapIndices() {checkMultipleElement = false;}
@@ -71,7 +80,9 @@ class ComponentFieldMap: public ComponentBase {
     // Elements
     int nElements;
     struct element {
+      // Nodes
       int emap[10];
+      // Material
       int matmap;
       bool degenerate;
     };
@@ -81,20 +92,30 @@ class ComponentFieldMap: public ComponentBase {
     // Nodes
     int nNodes;
     struct node {
+      // Coordinates
       double xmap, ymap, zmap;
+      // Potential
       double vmap;
+      // Weighting potential
+      double wmap;
     };
     std::vector<node> nodes;
 
     // Materials
     int nMaterials;
     struct material {
+      // Permittivity
       double eps;
+      // Resistivity
       double ohm;
       bool driftmedium;
+      // Associated medium
       Medium* medium;
     };
     std::vector<material> materials;
+
+    bool hasWeightingField;
+    std::string wfield;
 
     // Ranges and periodicities
     double mapxmin, mapymin, mapzmin;
@@ -114,6 +135,7 @@ class ComponentFieldMap: public ComponentBase {
     bool deleteBackground;
     // Scan for multiple elements that contain a point
     bool checkMultipleElement;
+
     // Warnings flag
     bool warning;
 

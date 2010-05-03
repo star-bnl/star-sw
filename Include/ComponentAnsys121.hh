@@ -7,19 +7,20 @@
 
 namespace Garfield {
 
-  // -------------------------------------------------------------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
 class ComponentAnsys121: public ComponentFieldMap { 
 
     RQ_OBJECT("ComponentAnsys121")
-    
+
   public:
-    // Constructor  
-    ComponentAnsys121(char* elist = "ELIST.lis",
-                      char* nlist = "NLIST.lis",
-                      char* mplist = "MPLIST.lis",
-                      char* prnsol = "PRNSOL.lis",
-                      char* unit = "cm");
-    // Destructor                      
+    // Constructors
+    ComponentAnsys121();
+    ComponentAnsys121(std::string elist = "ELIST.lis",
+                      std::string nlist = "NLIST.lis",
+                      std::string mplist = "MPLIST.lis",
+                      std::string prnsol = "PRNSOL.lis",
+                      std::string unit = "cm");
+    // Destructor 
     ~ComponentAnsys121() {}
     
     bool GetMedium(const double x, const double y, const double z, 
@@ -30,7 +31,21 @@ class ComponentAnsys121: public ComponentFieldMap {
     void ElectricField(const double x, const double y, const double z, 
                        double& ex, double& ey, double& ez, double& v, 
                        Medium*& m, int& status);
+
+    void WeightingField(const double x, const double y, const double z,
+                        double& wx, double& wy, double& wz,
+                        const std::string label);
+
+    void WeightingPotential(const double x, const double y, const double z,
+                            double& w, const std::string label);
     
+    bool Initialise(std::string elist = "ELIST.lis",
+                    std::string nlist = "NLIST.lis",
+                    std::string mplist = "MPLIST.lis", 
+                    std::string prnsol = "PRNSOL.lis",
+                    std::string unit = "cm");
+    bool SetWeightingField(std::string prnsol, std::string label);
+
     // Range
     bool IsInBoundingBox(const double x, const double y, const double z) {
       return x >= xMinBoundingBox && x <= xMaxBoundingBox && 

@@ -7,18 +7,19 @@
 
 namespace Garfield {
 
-  // -------------------------------------------------------------------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   class ComponentAnsys123: public ComponentFieldMap { 
 
-    RQ_OBJECT("FieldMapAnsys123")
+    RQ_OBJECT("ComponentAnsys123")
     
   public:
-    // Constructor
-    ComponentAnsys123(char* elist = "ELIST.lis",
-                      char* nlist = "NLIST.lis",
-                      char* mplist = "MPLIST.lis",
-                      char* prnsol = "PRNSOL.lis",
-                      char* unit = "cm");
+    // Constructors
+    ComponentAnsys123();
+    ComponentAnsys123(std::string elist = "ELIST.lis",
+                      std::string nlist = "NLIST.lis",
+                      std::string mplist = "MPLIST.lis",
+                      std::string prnsol = "PRNSOL.lis",
+                      std::string unit = "cm");
     // Destructor
     ~ComponentAnsys123() {}
     
@@ -28,6 +29,13 @@ namespace Garfield {
     void ElectricField(const double x, const double y, const double z, 
                        double& ex, double& ey, double& ez, double& v, 
                        Medium*& m, int& status);
+
+    void WeightingField(const double x, const double y, const double z,
+                        double& wx, double& wy, double& wz,
+                        const std::string label);
+
+    void WeightingPotential(const double x, const double y, const double z,
+                            double& w, const std::string label);
     
     bool GetMedium(const double x, const double y, const double z,
                    Medium*& medium);
@@ -38,6 +46,14 @@ namespace Garfield {
              z >= zMinBoundingBox && y <= zMaxBoundingBox;
     }
         
+    bool Initialise(std::string elist = "ELIST.lis", 
+                    std::string nlist = "NLIST.lis",
+                    std::string mplist = "MPLIST.lis", 
+                    std::string prnsol = "PRNSOL.lis",
+                    std::string unit = "cm");
+
+    bool SetWeightingField(std::string prnsol, std::string label);
+
   protected:
   
     // Verify periodicities

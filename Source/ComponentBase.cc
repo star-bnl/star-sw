@@ -174,6 +174,17 @@ ComponentBase::WeightingField(const double x, const double y, const double z,
   
 }
 
+void
+ComponentBase::WeightingPotential(
+                    const double x, const double y, const double z,
+                    double& w, const std::string label) {
+
+  std::cerr << "ComponentBase::WeightingField:" << std::endl;
+  std::cerr << "    This function is not implemented." << std::endl;
+  w = 0.;
+
+}
+
 void 
 ComponentBase::MagneticField(const double x, const double y, const double z,
     	                     double& bx, double& by, double& bz, int& status) {

@@ -13,7 +13,8 @@ namespace Garfield {
 
 ComponentFieldMap::ComponentFieldMap() :
   nElements(-1), lastElement(-1), 
-  nNodes(-1), nMaterials(-1), 
+  nNodes(-1), nMaterials(-1),
+  hasWeightingField(false), 
   deleteBackground(true), checkMultipleElement(false),
   warning(false) {
   

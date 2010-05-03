@@ -316,6 +316,7 @@ void
 Sensor::ClearSignal() {
 
   for (int i = nElectrodes; i--;) {
+    electrodes[i].charge = 0.;
     for (int j = nTimeBins; j--;) electrodes[i].signal[j] = 0.;
   }
   nEvents = 0;
@@ -329,7 +330,7 @@ Sensor::AddSignal(const int q, const double t, const double dt,
   
   // Get the time bin
   const int bin = int((t - tStart) / tStep);
-  // Check if the starting time is outside the 
+  // Check if the starting time is outside the range 
   if (bin < 0 || bin >= nTimeBins) return;
   if (dt <= 0.) return;
   if (nEvents <= 0) ++nEvents;
@@ -375,6 +376,34 @@ Sensor::AddSignal(const int q, const double t, const double dt,
 
 }
 
+void
+Sensor::AddInducedCharge(const int q, 
+                         const double x0, const double y0, const double z0,
+                         const double x1, const double y1, const double z1) {
+
+  if (debug) std::cout << "Sensor::AddInducedCharge:" << std::endl;
+  for (int i = nElectrodes; i--;) {
+    double w0 = 0., w1 = 0.;
+    // Calculate the weighting potential for the starting point
+    electrodes[i].comp->WeightingPotential(x0, y0, z0, 
+                                           w0, electrodes[i].label);
+    // Calculate the weighting potential for the end point
+    electrodes[i].comp->WeightingPotential(x1, y1, z1,
+                                            w1, electrodes[i].label);
+    double charge = q * (w1 - w0);
+    electrodes[i].charge += charge;
+    if (debug) {
+      std::cout << "    Electrode " << electrodes[i].label << ":" << std::endl;
+      std::cout << "      Weighting potential at (" 
+                << x0 << ", " << y0 << ", " << z0 << "): " << w0 << std::endl;
+      std::cout << "      Weighting potential at ("
+                << x1 << ", " << y1 << ", " << z1 << "): " << w1 << std::endl;
+      std::cout << "      Induced charge: " << charge << std::endl;
+    }
+  }
+
+}
+
 void 
 Sensor::SetTimeWindow(const double tstart, const double tstep, 
                       const int nsteps) {
@@ -400,7 +429,9 @@ Sensor::SetTimeWindow(const double tstart, const double tstep,
               << tStart + nTimeBins * tStep << std::endl;
     std::cout << "    Step size: " << tStep << " ns" << std::endl;
   }
-  
+ 
+  std::cout << "Sensor::SetTimeWindow:" << std::endl;
+  std::cout << "    Resetting all signals." << std::endl; 
   for (int i = nElectrodes; i--;) {
     electrodes[i].signal.clear();
     electrodes[i].signal.resize(nTimeBins);
@@ -416,9 +447,7 @@ Sensor::GetSignal(const std::string label, const int bin) {
   if (bin < 0 || bin >= nTimeBins) return 0.;
   double sig = 0.;
   for (int i = nElectrodes; i--;) {
-    if (electrodes[i].label == label) {
-      sig += electrodes[i].signal[bin];
-    }
+    if (electrodes[i].label == label) sig += electrodes[i].signal[bin];
   }
   if (debug) {
     std::cout << "Sensor::GetSignal:" << std::endl;
@@ -427,6 +456,24 @@ Sensor::GetSignal(const std::string label, const int bin) {
     std::cout << "    Signal: " << sig / tStep;
   }
   return signalConversion * sig / (nEvents * tStep);
+
+}
+
+double
+Sensor::GetInducedCharge(const std::string label) {
+
+  if (nEvents <= 0) return 0.;
+  double charge = 0.;
+  for (int i = nElectrodes; i--;) {
+    if (electrodes[i].label == label) charge += electrodes[i].charge;
+  }
+  if (debug) {
+    std::cout << "Sensor::GetInducedCharge:" << std::endl;
+    std::cout << "    Electrode: " << label << std::endl;
+    std::cout << "    Charge: " << charge / tStep;
+  }
+
+  return charge / nEvents;
 
 }
 

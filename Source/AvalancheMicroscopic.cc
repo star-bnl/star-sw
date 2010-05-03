@@ -18,7 +18,8 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   histEnergy(0), hasEnergyHistogram(false),
   histDistance(0), hasDistanceHistogram(false), distanceOption('z'),
   histSecondary(0), hasSecondaryHistogram(false),
-  useSignal(false), useDriftLines(false), usePhotons(false),
+  useSignal(false), useInducedCharge(false),
+  useDriftLines(false), usePhotons(false),
   deltaCut(0.), gammaCut(0.),
   nCollSkip(100),
   hasUserHandleAttachment(false),
@@ -357,9 +358,10 @@ AvalancheMicroscopic::AvalancheElectron(
   double ex, ey, ez;
   int status;
          
-  // Current position, direction and energy
+  // Current position, direction, velocity and energy
   double x, y, z, t;
   double dx, dy, dz, d;
+  double vx, vy, vz;
   double energy;
   // Timestep (squared)
   double dt, dt2;
@@ -522,18 +524,22 @@ AvalancheMicroscopic::AvalancheElectron(
         newDy = dy * a + ey * b; 
         newDz = dz * a + ez * b;
         // Update the position
-        a = c1 * dt * sqrt(energy);
-        b = dt2 * c2;            
-        x += dx * a + ex * b;
-        y += dy * a + ey * b;
-        z += dz * a + ez * b;
+        a = c1 * sqrt(energy);
+        b = dt * c2; 
+        vx = dx * a + ex * b;
+        vy = dy * a + ey * b;
+        vz = dz * a + ez * b;
+        if (useSignal) sensor->AddSignal(-1, t, dt, x, y, z, vx, vy, vz);
+        x += vx * dt;
+        y += vy * dt;
+        z += vz * dt;
         t += dt;
       
         // Verify the new position
         if (!sensor->IsInArea(x, y, z)) {
           stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
           stack[iEl].t = t; stack[iEl].energy = newEnergy;
-          stack[iEl].dx = dx; stack[iEl].dy = dy; stack[iEl].dz = dz;          
+          stack[iEl].dx = newDx; stack[iEl].dy = newDy; stack[iEl].dz = newDz;          
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
           ok = false;
@@ -700,7 +706,13 @@ AvalancheMicroscopic::AvalancheElectron(
     }
   }
   nEndpoints = endpoints.size();
-  
+
+  if (!useInducedCharge) return true;
+  for (int i = nEndpoints; i--;) {
+    sensor->AddInducedCharge(-1, 
+                         endpoints[i].x0, endpoints[i].y0, endpoints[i].z0,
+                         endpoints[i].x,  endpoints[i].y,  endpoints[i].z);
+  }
   return true;
     
 }

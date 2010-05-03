@@ -25,6 +25,10 @@ class AvalancheMicroscopic {
     void EnableSignalCalculation()  {useSignal = true;}
     void DisableSignalCalculation() {useSignal = false;}
 
+   // Switch on/off calculation of total induced charge
+   void EnableInducedChargeCalculation()  {useInducedCharge = true;}
+   void DisableInducedChargeCalculation() {useInducedCharge = false;}
+
     // Switch on/off filling histograms for energy distribution
     void EnableEnergyHistogramming(TH1F* histo);
     void DisableEnergyHistogramming();
@@ -158,6 +162,7 @@ class AvalancheMicroscopic {
     TH1F* histSecondary;
     bool hasSecondaryHistogram;
     bool useSignal;
+    bool useInducedCharge;
     bool useDriftLines;
     bool usePhotons;
     

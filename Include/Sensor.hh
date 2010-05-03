@@ -56,17 +56,24 @@ class Sensor {
     // Return the voltage range
     bool GetVoltageRange(double& vmin, double& vmax);
 
+    // Signal calculation
     void NewSignal() {++nEvents;}
+    // Reset signals and induced charges of all electrodes
     void ClearSignal();
     void AddSignal(const int q, const double t, const double dt,
                    const double x,  const double y,  const double z,
                    const double vx, const double vy, const double vz);
+    void AddInducedCharge(const int q, 
+                          const double x0, const double y0, const double z0,
+                          const double x1, const double y1, const double z1);
+    // Set/get the time window and binning for the signal calculation
     void SetTimeWindow(const double tstart, const double tstep, 
                        const int nsteps);
     void GetTimeWindow(double& tstart, double& tstep, int& nsteps) {
       tstart = tStart; tstep = tStep; nsteps = nTimeBins;
     }
     double GetSignal(const std::string label, const int bin);
+    double GetInducedCharge(const std::string label);
     void PlotSignal(const std::string label);
 
     // Switch on/off debugging messages
@@ -89,6 +96,7 @@ class Sensor {
       ComponentBase* comp;
       std::string label;
       std::vector<double> signal;
+      double charge;
     };
     std::vector<electrode> electrodes;
 
