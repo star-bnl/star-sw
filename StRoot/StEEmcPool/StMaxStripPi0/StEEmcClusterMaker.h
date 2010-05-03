@@ -10,11 +10,9 @@
 #include "StEEmcUtil/EEmcSmdMap/EEmcSmdMap.h"
 #include "StEEmcUtil/StEEmcSmd/EEmcSmdGeom.h"
 
-#include "StEEmcSimulatorMaker/SlowSimUtil.h" 
-
 #include <map>
 
-class StEEmcClusterMaker : public StMaker, public SlowSimUtil {
+class StEEmcClusterMaker : public StMaker {
 
  public:
 
