@@ -1,6 +1,6 @@
 // *-- Author : Hal Spinka
 // 
-// $Id: StEEmcSlowMaker.cxx,v 2.7 2010/02/12 23:02:38 ogrebeny Exp $
+// $Id: StEEmcSlowMaker.cxx,v 2.8 2010/05/03 20:47:22 ogrebeny Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -21,8 +21,26 @@ ClassImp(StEEmcSlowMaker)
 
 //________________________________________________
 //________________________________________________
-StEEmcSlowMaker::StEEmcSlowMaker( const char* self ,const char* muDstMakerName) : StMaker(self){
-  mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
+StEEmcSlowMaker::StEEmcSlowMaker( const char* self ,const char* )
+    : StMaker(self)
+{
+   mip2ene = 0.001998*0.7;  // This is the SMD thickness of 0.7 mm                                                                                           
+                            // times the minimum ionizing energy loss of                                                                                     
+                            // 1.998 MeV/cm from the PDG book                                                                                                
+   sig1pe = 0.85;           // from info from S. Vigdor on MAPMT test results                                                                                
+   Pmip2ene = 0.001998*0.5; // The pre- and post-shower tiles are                                                                                            
+                            // only 5 mm thick.                                                                                                              
+   Pmip2pe = 2.6*1.5;       // 2.6 mip/tower scint * 1.5 light yield                                                                                         
+                            // in pre- and post-shower elements                                                                                              
+                                                                                                                                                             
+   // loop to init  mip2pe[] - this will eventually need to be                                                                                               
+   // replaced by a table of measured values                                                                                                                 
+   for (int i=0; i<MaxSmdStrips; i++) {                                                                                                                          
+     // This is currently a trapezoidal-parameterization of                                                                                                  
+     // the light curve measurements                                                                                                                         
+     mip2pe[i] = avgNumPePerMip(i);                                                                                                                          
+   }                                                                                                                                                         
+
   eeDb=0;
   mHList=0;
   nInpEve=0; 
@@ -106,10 +124,32 @@ StEEmcSlowMaker::StEEmcSlowMaker( const char* self ,const char* muDstMakerName) 
 
 
 //___________________ _____________________________
-//________________________________________________
 StEEmcSlowMaker::~StEEmcSlowMaker(){
 }
 
+//________________________________________________
+Float_t StEEmcSlowMaker::avgNumPePerMip(int stripID) {                                                                                                           
+//                                                                                                                                                          
+// A parameterization of the average number of photoelectrons                                                                                               
+// per mip for a given SMD strip.  See elog 457.                                                                                                            
+//                                                                                                                                                          
+  float y=0;                                                                                                                                                 
+  float ya=0,yb=0,xa=1,xb=2;                                                                                                                                 
+  if ( stripID<1) {                                                                                                                                          
+    ;                                                                                                                                                        
+  } else if (stripID<20) {                                                                                                                                   
+    xa=1; ya=2.;                                                                                                                                             
+    xb=20; yb=4.;                                                                                                                                            
+  } else if (stripID<250) {                                                                                                                                  
+    xa=20; ya=4.;                                                                                                                                            
+    xb=250; yb=6.;                                                                                                                                           
+  } else {                                                                                                                                                   
+    xa=250; ya=6.;                                                                                                                                           
+    xb=290; yb=9.;                                                                                                                                           
+  }                                                                                                                                                          
+  y=ya+(yb-ya)/(xb-xa) *(stripID -xa);                                                                                                                       
+  return y;                                                                                                                                                  
+}                                                                                                                                                            
  
 //________________________________________________
 //________________________________________________
@@ -130,10 +170,11 @@ Int_t StEEmcSlowMaker::Init(){
   if ( mHList ) InitHisto();
   if ( mSmearPed && !mAddPed) {
        LOG_ERROR<<"::Init() detected mSmearPed=true && mAddPed=false \n will not work due to ETOW hits storage container in muDst not accepting negative ADC values, ABORT" << endm; 
-       exit(1);
+       assert(0);
   }
-  if ( mSmearPed )
+  if ( mSmearPed ) {
     LOG_INFO<<"::Init() detected mSmearPed,  (be sure peds>>N*sig are loaded in DB!), muDst can't store negative ADC for towers, the NUadc will be forced to be non-negative" << endm; 
+  }
   
   return StMaker::Init();
 }
@@ -188,27 +229,8 @@ void StEEmcSlowMaker::InitHisto(){
 
 //________________________________________________
 //________________________________________________
-Int_t StEEmcSlowMaker::InitRun(int runNo){
-  if(runNo==0) {
-    LOG_WARN<<"::InitRun("<<runNo<<") ??? changed to 555, it s OK for M-C - perhaps, JB"<<endm;
-    runNo=555;
-  }
-  return kStOK;
-}
-
-
-
-//________________________________________________
-//________________________________________________
-Int_t StEEmcSlowMaker::Finish(){
-  return kStOK;
-}
-
-
-//________________________________________________
-//________________________________________________
 Int_t StEEmcSlowMaker::Make(){
-
+  StMaker::Make();
   nInpEve++;
   LOG_DEBUG << GetName() << "::Make() is called , iEve " << nInpEve << " mSource="<<mSource<<endm;
   
@@ -928,6 +950,9 @@ void StEEmcSlowMaker::setSmdGainSpread( Float_t s, Int_t sec, Int_t uv, Int_t st
 
 
 // $Log: StEEmcSlowMaker.cxx,v $
+// Revision 2.8  2010/05/03 20:47:22  ogrebeny
+// Some code cleanup
+//
 // Revision 2.7  2010/02/12 23:02:38  ogrebeny
 // By the request of the photon group, added an option to shift EEMC gains in the slow simulator.
 //

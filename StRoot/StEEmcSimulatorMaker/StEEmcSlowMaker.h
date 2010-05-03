@@ -1,4 +1,4 @@
-// $Id: StEEmcSlowMaker.h,v 2.4 2010/02/12 23:02:38 ogrebeny Exp $
+// $Id: StEEmcSlowMaker.h,v 2.5 2010/05/03 20:47:23 ogrebeny Exp $
 
 #ifndef STAR_StEEmcSlowMaker
 #define STAR_StEEmcSlowMaker
@@ -134,26 +134,34 @@
 #endif
 
 class TObjArray;
-class StMuDstMaker;
 class StEEmcDb;
 class StMuEmcCollection;
 class StEmcCollection;
 
-#include "SlowSimUtil.h"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
+#include "StEEmcUtil/EEfeeRaw/EEdims.h"                                                                                                                      
 
-class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
+class StEEmcSlowMaker : public StMaker {
 
- private: 
+private: 
+  // parameters, fixed :                                                                                                                                     
+  Float_t mip2ene; // conversion from mips to  energy in GeV                                                                                                   
+  Float_t sig1pe;  // width of the single photoelectron peak (in p.e.)                                                                                         
+  Float_t mip2pe[MaxSmdStrips]; // conversion from mip to p.e. from ANL                                                                                        
+                              // cosmic ray measurements for SMD strips                                                                                      
+  Float_t Pmip2ene; // as above for pre- and post-shower elements                                                                                              
+  Float_t Pmip2pe; // as above for pre- and post-shower elements                                                                                               
+
+  Float_t avgNumPePerMip(Int_t stripID); // avg # p.e. per mip                                                                                               
+
   enum Source_t { kMuDst, kStEvent };
   Source_t mSource;
 
   enum {mxH=32};
-  StMuDstMaker* mMuDstMaker;  
   StEEmcDb *eeDb;
   TObjArray  *mHList; /// output histo access point
 
-  int   nInpEve; // private event counter
+  Int_t nInpEve; // private event counter
 
   TH1 *hA[mxH]; // some global (test) histograms  
   void InitHisto();
@@ -200,7 +208,7 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
   /// Number of sigma over pedestal defined in DB
   Float_t mKSigma;
 
-  bool mIsEmbeddingMode;  
+  Bool_t mIsEmbeddingMode;  
 
   enum { kPre1=0, kPre2, kPost, kNumberPrepost };
 
@@ -217,23 +225,19 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
   Float_t mTowerGainFact[kEEmcNumSectors][kEEmcNumSubSectors][kEEmcNumEtas];
   Float_t mSmdGainFact[kEEmcNumSectors][kEEmcNumSmdUVs][kEEmcNumStrips];
   
- public: 
+public: 
 
   /// Class constructor
-  StEEmcSlowMaker(const char *self="EEmcSlowSim", const char* muDstMakerName="MuDst");
+  StEEmcSlowMaker(const char *self="EEmcSlowSim", const char* muDstMakerName = 0);
   /// Class destructor
   virtual       ~StEEmcSlowMaker();
 
   /// Initialization
   virtual Int_t Init();
-  /// Run specific initialization
-  virtual Int_t InitRun  (int runNo );
-  /// Finish
-  virtual Int_t Finish();
   /// Processes a single event
   virtual Int_t  Make();
   /// Sets all switches required to perform embedding
-  void setEmbeddingMode(bool x=true);
+  void setEmbeddingMode(Bool_t x=true);
 
   /// Disables slow simulator for the towers.  ADC values stored in the
   /// MuDst/StEvent will reflect the values determined by the fast simulator.
@@ -308,11 +312,11 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.4 2010/02/12 23:02:38 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.5 2010/05/03 20:47:23 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
-  ClassDef(StEEmcSlowMaker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StEEmcSlowMaker, 2)
 };
 
 
@@ -320,6 +324,9 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
 
 
 // $Log: StEEmcSlowMaker.h,v $
+// Revision 2.5  2010/05/03 20:47:23  ogrebeny
+// Some code cleanup
+//
 // Revision 2.4  2010/02/12 23:02:38  ogrebeny
 // By the request of the photon group, added an option to shift EEMC gains in the slow simulator.
 //
