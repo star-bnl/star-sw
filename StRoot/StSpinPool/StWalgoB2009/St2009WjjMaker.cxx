@@ -1,4 +1,4 @@
-// $Id: St2009WjjMaker.cxx,v 1.2 2010/05/01 01:31:44 balewski Exp $
+// $Id: St2009WjjMaker.cxx,v 1.3 2010/05/03 17:24:37 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -36,6 +36,7 @@ St2009WjjMaker::St2009WjjMaker(const char *name):StMaker(name){
   par_spinSort=false;
   par_vertexZ=100;// cm
   isMC=0;
+  spinDb=0;
   par_corLevel=0; // default no corrections
   mJEScorrFile="fixMe"; memset(mJEScorrH,0,sizeof(mJEScorrH));
  }
@@ -125,6 +126,7 @@ Int_t
 St2009WjjMaker::InitRun  (int runNo){
 
   if(par_spinSort) {
+    assert(spinDb);
     assert(runNo>= 10081007); // F10407, first pp500 long fill with defined pol pattern
     assert(runNo<=10103046); // F10536, last pp500 fill in run9
     
@@ -263,7 +265,7 @@ St2009WjjMaker::bXingSort(){
   hA[19]->Fill(jet[0].Eta(),jet[1].Eta());
   float phiCDdeg=jet[0].DeltaPhi(jet[1])/3.1416*180.;
   if(phiCDdeg<-90) phiCDdeg+=360; // choose different phi range
-  hA[20]->Fill(phiCDdeg); 
+  hA[13]->Fill(phiCDdeg); 
 
   
 
@@ -275,52 +277,28 @@ St2009WjjMaker::bXingSort(){
   hA[15]->Fill( diJet.Z(),diJet.Pt());
  
 
-#if 0
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-    hA[15]->Fill(invM, diJet.Z());wrong
-
+  if(par_spinSort) {//........ do spin sorting
     
-    if(J.Pt()>par_jetPtHigh) continue;
-    if(J.Eta()<par_jetEtaLow) continue;
-    if(J.Eta()>par_jetEtaHigh) continue;
+    assert(spinDb->isValid());  // all 3 DB records exist 
+    assert(spinDb->isPolDirLong());  // you do not want mix Long & Trans by accident
+    int bx48=wMK->wEve.bx48;
+    int bx7=wMK->wEve.bx7;
+    if(spinDb->offsetBX48minusBX7(bx48,bx7)) {
+      printf("BAD bx7=%d bx48=%d del=%d\n",bx7,bx48,spinDb->offsetBX48minusBX7(bx48,bx7));
+      hA[0]->Fill("badBx48",1.);
+      return; // both counters must be in sync
+    }
+    hA[2]->Fill(bx7);
+    int bxStar7=spinDb->BXstarUsingBX7(bx7);
+    hA[4]->Fill(bxStar7);
+    
+    int spin4=spinDb->spin4usingBX48(bx48); 
+    hA[5]->Fill(bxStar7,spin4);
+    
+    hA[20]->Fill(invM,spin4);
+    
+  } // end of spin sorting
 
-Jsum+=J; // all jet momentum sum
-
-  hA[12]->Fill(diJet.Pt(), diJet.Eta());
-
-  //..... di-jet cuts ......
-  if(diJet.Pt()<par_djPtLow) return;
-  if(diJet.Pt()>par_djPtHigh) return;
-  hA[0]->Fill("DjPt",1.);
-
-  if(fabs(diJet.Eta())<par_djEtaMin) return;
-  hA[0]->Fill("DjEta",1.);
- 
-  if(fabs(diJet.Z())<par_djPzLow) return;
-  if(fabs(diJet.Z())>par_djPzHigh) return;
-  hA[0]->Fill("DjPz",1.);
-
-  float etaSum=fabs(jet[0].Eta()+jet[1].Eta());
-  hA[13]->Fill(invM, etaSum);
-  if(etaSum<par_etaSumLow) return;
-  if(etaSum>par_etaSumHigh) return;
-  hA[0]->Fill("eta1+2",1.);
-
-  // 
-
-  //::::::::::::: event pass W->jet+jet cuts ::::::::::::
-  if(isJ3) 
-
-
-
-
-  //... various correlations
-  hA[20]->Fill( diJet.Z(),jet[0].Eta()+jet[1].Eta() );
-  if(nJets>2) hA[21]->Fill( Jsum.Z(),diJet.Eta());
-  
-  
-#endif
   /*   TLorentzVector (px,py,pz,E). 
        TLorentzVector v4(TVector3(1., 2., 3.),4.);
        v.SetVect(TVector3(1,2,3)); 
@@ -392,6 +370,9 @@ Jsum+=J; // all jet momentum sum
 
 
 // $Log: St2009WjjMaker.cxx,v $
+// Revision 1.3  2010/05/03 17:24:37  balewski
+// added spin sorting of di-jets
+//
 // Revision 1.2  2010/05/01 01:31:44  balewski
 // added W->JJ code & JES calibration
 //

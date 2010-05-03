@@ -1,4 +1,4 @@
-// $Id: St2009Wjj_histo.cxx,v 1.2 2010/05/01 01:31:44 balewski Exp $
+// $Id: St2009Wjj_histo.cxx,v 1.3 2010/05/03 17:24:37 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -48,14 +48,18 @@ St2009WjjMaker::initHistos(){
   }
 
 
-  // 11,12 free
+  // 12 free
+  hA[13]=new TH1F(core+"phi12","di-jet opening angle; phi(1-2) (deg)",120,-90,270.);
   hA[14]=new TH1F(core+"_K1","di-jet ; invM (GeV)",70,0,210);
   hA[15]=new TH2F(core+"_K2","di-jet ; PZ GeV/c; pT GeV/c  ",30,-120,120,20,0,40);
   hA[16]=new TH2F(core+"_K3","di-jet ; invM (GeV); pT GeV/c",60,0,180,50,0,50);
   hA[17]=new TH2F(core+"_K4","di-jet E vs. E; jet-1 E (GeV); jet-2 E (GeV)",25,0,100,25,0,100);
   hA[18]=new TH2F(core+"_K5","di-jet PT vs. PT; jet-1 PT (GeV/c); jet-2 PT (GeV/c)",50,0,100,50,0,100);
   hA[19]=new TH2F(core+"_K6","di-jet eta vs. eta; #eta_1 ; #eta_2 " ,30,-3.,3.,30,-3.,3.);
-  hA[20]=new TH1F(core+"phi12","di-jet opening angle; phi(1-2) (deg)",120,-90,270.);
+
+
+  hA[20]=h=new TH2F(core+"_spinM","di-jet spin sorting; invM (GeV); spin4;",42,0,210,16,-0.5,15.5);
+      
 
   // add histos to the list (if provided)
   for(int i=0;i<mxHA;i++) {
@@ -69,6 +73,9 @@ St2009WjjMaker::initHistos(){
 
 
 // $Log: St2009Wjj_histo.cxx,v $
+// Revision 1.3  2010/05/03 17:24:37  balewski
+// added spin sorting of di-jets
+//
 // Revision 1.2  2010/05/01 01:31:44  balewski
 // added W->JJ code & JES calibration
 //
