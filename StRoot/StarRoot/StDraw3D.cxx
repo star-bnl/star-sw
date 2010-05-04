@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.99 2010/03/22 19:18:28 fine Exp $
+// $Id: StDraw3D.cxx,v 1.100 2010/05/04 21:33:31 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -35,10 +35,10 @@ Int_t   StDraw3D::fDrawCanvasCounter = -1;
 namespace {
      const double p2 = TMath::PiOver2();
      //__________________________________________________________________________________________
-     static inline void ForceAnimate(unsigned int times=0)
+     static inline void ForceAnimate(unsigned int times=0, int msecDelay=0)
      {
          unsigned int  counter = times;
-         while( (!times || counter) && !gSystem->ProcessEvents()) { --counter; } 
+         while( (!times || counter) && !gSystem->ProcessEvents()) { --counter; if (msecDelay) gSystem->Sleep(msecDelay);} 
      }
 }
 
@@ -1634,7 +1634,7 @@ void StDraw3D::Animate()
    if (pad && pad->IsModified()) {
       Update();
    } 
-   ForceAnimate();
+   ForceAnimate(0,200);
 }
 
 
