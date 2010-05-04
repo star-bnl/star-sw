@@ -254,7 +254,11 @@ Sensor::AddElectrode(ComponentBase* comp, std::string label) {
   newElectrode.label = label;
   electrodes.push_back(newElectrode);
   ++nElectrodes;
-  nEvents = 0;
+  electrodes[nElectrodes - 1].signal.resize(nTimeBins);
+  std::cout << "Sensor::AddElectrode:" << std::endl;
+  std::cout << "    Added readout electrode " << label << "." << std::endl;
+  std::cout << "    All signals are reset." << std::endl;
+  ClearSignal();
 
 }
 

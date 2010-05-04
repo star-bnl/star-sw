@@ -41,11 +41,11 @@ class AvalancheMicroscopic {
     void DisableSecondaryEnergyHistogramming();
 
     // Switch on/off storage of drift lines
-    void EnableDriftLines() {useDriftLines = true;}
+    void EnableDriftLines()  {useDriftLines = true;}
     void DisableDriftLines() {useDriftLines = false;}
 
     // Switch on/off photon transport
-    void EnablePhotonTransport() {usePhotons = true;}
+    void EnablePhotonTransport()  {usePhotons = true;}
     void DisablePhotonTransport() {usePhotons = false;}
 
     // Set/get energy threshold for electron transport
