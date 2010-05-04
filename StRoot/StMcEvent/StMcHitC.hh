@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHitC.hh,v 2.2 2010/04/28 20:15:45 fine Exp $
+ * $Id: StMcHitC.hh,v 2.3 2010/05/04 23:58:43 fine Exp $
  * $Log: StMcHitC.hh,v $
+ * Revision 2.3  2010/05/04 23:58:43  fine
+ * Vertex, and emc models
+ *
  * Revision 2.2  2010/04/28 20:15:45  fine
  * Implementation if the new OO for Mc hits
  *
@@ -100,8 +103,18 @@ MCHITCLASS(StMcBTofHitC,g2t_ctf_hit_st)
   float sTrack() const{ return StEventObject<g2t_ctf_hit_st*>::fData->s_track;};
 ENDMCHITCLASS
 
-// It has no table inteface 
-MCHITCLASS(StMcCalorimeterHitC,g2t_tpc_hit_st)
+// It has no table interface 
+MCHITCLASS(StMcCalorimeterHitC,g2t_emc_hit_st)
+    int     module() const;
+    int     eta() const;
+    int     sub() const;
+ENDMCHITCLASS
+
+// It has no table interface 
+MCHITCLASS(StMcSmdHitC,g2t_emc_hit_st)
+    int     module() const;
+    int     eta() const;
+    int     sub() const;
 ENDMCHITCLASS
 
 //_____________________________________________________________________________
