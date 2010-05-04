@@ -695,7 +695,7 @@ MediumMagboltz86::SetIonMobility(const double mu) {
 }
 
 bool
-MediumMagboltz::IonVelocity(const double ex, const double ey, const doubl ez,
+MediumMagboltz86::IonVelocity(const double ex, const double ey, const double ez,
                             const double bx, const double by, const double bz,
                             double& vx, double& vy, double& vz) {
 
