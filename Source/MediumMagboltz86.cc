@@ -15,7 +15,8 @@ MediumMagboltz86::MediumMagboltz86() :
   eFinal(40.), eStep(eFinal / nEnergySteps), adjust(true), csoutput(false), 
   nTerms(0), anisotropic(true), 
   penning(false), rPenning(0.), nPenning(0), deexcitation(false),
-  eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma) {
+  eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma),
+  hasIonMobility(false), muIon(1.e-9) {
   
   // Set physical constants in Magboltz common blocks
   cnsts_.echarg = ElementaryCharge;
@@ -672,6 +673,39 @@ MediumMagboltz86::GetNumberOfPhotonCollisions(
   nIonising  = nPhotonCollisions[1];
   nInelastic = nPhotonCollisions[2];
   return nPhotonCollisions[0] + nPhotonCollisions[1] + nPhotonCollisions[2];
+
+}
+
+void
+MediumMagboltz86::SetIonMobility(const double mu) {
+
+  if (fabs(mu) < Small) {
+    std::cerr << "MediumMagboltz86::SetIonMobility:" << std::endl;
+    std::cerr << "    Ion mobility must be greater than zero." << std::endl;
+    return;
+  }
+
+  muIon = mu;
+  hasIonMobility = true;
+  std::cout << "MediumMagboltz86::SetIonMobility:" << std::endl;
+  std::cout << "    Ion mobility set to " << mu << " cm2 / (V ns)." 
+            << std::endl;
+  if (mu < 0.)  std::cout << "    Warning: Mobility is negative!" << std::endl;
+
+}
+
+bool
+MediumMagboltz::IonVelocity(const double ex, const double ey, const doubl ez,
+                            const double bx, const double by, const double bz,
+                            double& vx, double& vy, double& vz) {
+
+  if (!hasIonMobility) {
+    vx = vy = vz = 0.;
+    return false;
+  }
+
+  vx = muIon * ex; vy = muIon * ey; vz = muIon * ez;
+  return true;
 
 }
 

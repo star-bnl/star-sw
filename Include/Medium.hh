@@ -122,7 +122,7 @@ class Medium {
                         const double bx, const double by, const double bz,
                         double& eta);                
 
-    // Transport parameters for (negative) ions
+    // Transport parameters for ions
     // Drift velocity [cm / ns]
     virtual 
     bool IonVelocity(const double ex, const double ey, const double ez, 

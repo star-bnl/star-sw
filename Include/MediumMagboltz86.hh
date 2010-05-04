@@ -207,6 +207,11 @@ class MediumMagboltz86 : public Medium {
                      double& vx, double& vy, double& vz, 
                      double& dl, double& dt,
                      double& eta, double& alpha);
+    
+    void SetIonMobility(const double mu);
+    bool IonVelocity(const double ex, const double ey, const double ez,
+                     const double bx, const double by, const double bz,
+                     double& vx, double& vy, double& vz);
                                                                    
   private:
 
@@ -290,6 +295,10 @@ class MediumMagboltz86 : public Medium {
     double cfGamma[nEnergySteps][nMaxPhotonLevels];
     int csTypeGamma[nMaxPhotonLevels];
     int nPhotonCollisions[3];
+
+    // Ion transport properties
+    bool hasIonMobility;
+    double muIon;
 
     bool GetGasNumber(std::string gasname, int& number) const;
     bool GetGasName(const int number, std::string& gasname) const;
