@@ -37,6 +37,8 @@ static const double FourPiEpsilon0          = 4. * Pi * VacuumPermittivity;
 static const double TwoPiEpsilon0           = TwoPi * VacuumPermittivity;
 
 static const double Small = 1.e-20;
+// Max. permitted distance to boundary (for drift line termination)
+static const double BoundaryDistance = 1.e-8;
 
 }
 

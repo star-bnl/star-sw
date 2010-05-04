@@ -432,6 +432,22 @@ AvalancheMicroscopic::AvalancheElectron(
       ok = true;
       nCollTemp = 0;
 
+      // Get the local electric field and medium
+      sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
+      // Sign change
+      ex = -ex; ey = -ey; ez = -ez;
+ 
+      if (status != 0) {
+        // Electron has left all drift media
+        stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
+        stack[iEl].t = t; stack[iEl].energy = energy;
+        stack[iEl].dx = dx; stack[iEl].dy = dy; stack[iEl].dz = dz;
+        endpoints.push_back(stack[iEl]);
+        stack.erase(stack.begin() + iEl);
+        continue;
+      }
+
+
       while (1) {
 
         if (energy < deltaCut) {
@@ -448,22 +464,6 @@ AvalancheMicroscopic::AvalancheElectron(
           histEnergy->Fill(energy);
         }
 
-        // Get the local electric field and medium
-        sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
-        // Sign change
-        ex = -ex; ey = -ey; ez = -ez;
-        
-        if (status != 0) {
-          // Electron has left all drift media
-          stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
-          stack[iEl].t = t; stack[iEl].energy = energy;
-          stack[iEl].dx = dx; stack[iEl].dy = dy; stack[iEl].dz = dz;          
-          endpoints.push_back(stack[iEl]);
-          stack.erase(stack.begin() + iEl);
-          ok = false;
-          break;
-        }
-        
         if (medium->GetId() != id) {
           // Medium has changed
           if (!medium->IsMicroscopic()) {
@@ -480,12 +480,13 @@ AvalancheMicroscopic::AvalancheElectron(
           // Update the null-collision rate
           fLim = medium->GetElectronNullCollisionRate();
           if (fLim <= 0.) {
-            std::cerr << "AvalancheMicroscopic::AvalancheElectron:" << std::endl;
+            std::cerr << "AvalancheMicroscopic::AvalancheElectron:" 
+                      << std::endl;
             std::cerr << "    Got null-collision rate <= 0." << std::endl;
             return false;
           }          
         }
-        
+
         a = c1 * (dx * ex + dy * ey + dz * ez) * sqrt(energy);
         b = c2 * (ex * ex + ey * ey + ez * ez);
 
@@ -503,7 +504,8 @@ AvalancheMicroscopic::AvalancheElectron(
             // Real collision rate is higher than null-collision rate
             dt += log(r) / fLim;
             // Increase the null collision rate and try again
-            std::cerr << "AvalancheMicroscopic::AvalancheElectron:" << std::endl;
+            std::cerr << "AvalancheMicroscopic::AvalancheElectron:" 
+                      << std::endl;
             std::cerr << "    Increasing the null-collision rate by 5%." 
                       << std::endl;
             fLim *= 1.05;
@@ -523,33 +525,105 @@ AvalancheMicroscopic::AvalancheElectron(
         newDx = dx * a + ex * b; 
         newDy = dy * a + ey * b; 
         newDz = dz * a + ez * b;
-        // Update the position
+
+        // Calculate the step length
         a = c1 * sqrt(energy);
         b = dt * c2; 
         vx = dx * a + ex * b;
         vy = dy * a + ey * b;
         vz = dz * a + ez * b;
-        if (useSignal) sensor->AddSignal(-1, t, dt, x, y, z, vx, vy, vz);
-        x += vx * dt;
-        y += vy * dt;
-        z += vz * dt;
-        t += dt;
       
-        // Verify the new position
-        if (!sensor->IsInArea(x, y, z)) {
+        // Get the local electric field and medium at the proposed new position
+        sensor->ElectricField(x + vx * dt, y + vy * dt, z + vz * dt, 
+                              ex, ey, ez, medium, status);
+        // Sign change
+        ex = -ex; ey = -ey; ez = -ez;
+ 
+        // Check if the electron is still inside a drift medium
+        if (status != 0) {
+          // Try to terminate the drift line close to the boundary
+          // by means of iterative bisection
           stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
-          stack[iEl].t = t; stack[iEl].energy = newEnergy;
-          stack[iEl].dx = newDx; stack[iEl].dy = newDy; stack[iEl].dz = newDz;          
+          stack[iEl].t = t; stack[iEl].energy = energy;
+          double dX = vx * dt, dY = vy * dt, dZ = vz * dt;
+          double delta = sqrt(dX * dX + dY * dY + dZ * dZ);
+          if (delta > 0) {
+            dX /= delta; dY /= delta; dZ /= delta;
+          }
+          // Mid-point
+          double xM = x, yM = y, zM = z;
+          while (delta > BoundaryDistance) {
+            delta *= 0.5;
+            dt *= 0.5;
+            xM = x + delta * dX; yM = y + delta * dY; zM = z + delta * dZ; 
+            // Check if the mid-point is inside the drift medium
+            sensor->ElectricField(xM, yM, zM, ex, ey, ez, medium, status);
+            if (status == 0) {
+              x = xM; y = yM; z = zM; t += dt;
+            } 
+          }
+          if (useSignal) sensor->AddSignal(-1, stack[iEl].t, t - stack[iEl].t, 
+                                           0.5 * (x - stack[iEl].x), 
+                                           0.5 * (y - stack[iEl].y),
+                                           0.5 * (z - stack[iEl].z), 
+                                           vx, vy, vz);
+          stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
+          stack[iEl].t = t;
+          stack[iEl].dx = newDx; stack[iEl].dy = newDy; stack[iEl].dz = newDz;
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
           ok = false;
           break;
         }
-        
+
+        // Check if the new position is inside the bounding box
+        if (!sensor->IsInArea(x, y, z)) {
+          // Try to terminate the drift line close to the boundary
+          // by means of iterative bisection
+          stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
+          stack[iEl].t = t; stack[iEl].energy = energy;
+          double dX = vx * dt, dY = vy * dt, dZ = vz * dt;
+          double delta = sqrt(dX * dX + dY * dY + dZ * dZ);
+          if (delta > 0) {
+            dX /= delta; dY /= delta; dZ /= delta;
+          }
+          // Mid-point
+          double xM = x, yM = y, zM = z;
+          while (delta > BoundaryDistance) {
+            delta *= 0.5;
+            dt *= 0.5;
+            xM = x + delta * dX; yM = y + delta * dY; zM = z + delta * dZ; 
+            // Check if the mid-point is inside the drift area
+            if (sensor->IsInArea(x, y, z)) {
+              x = xM; y = yM; z = zM; t += dt;
+            } 
+          }
+          if (useSignal) sensor->AddSignal(-1, stack[iEl].t, t - stack[iEl].t, 
+                                           0.5 * (x - stack[iEl].x), 
+                                           0.5 * (y - stack[iEl].y),
+                                           0.5 * (z - stack[iEl].z), 
+                                           vx, vy, vz);
+          stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
+          stack[iEl].t = t;
+          stack[iEl].dx = newDx; stack[iEl].dy = newDy; stack[iEl].dz = newDz;
+          endpoints.push_back(stack[iEl]);
+          stack.erase(stack.begin() + iEl);
+          ok = false;
+          break;
+        }
+
+        // If activated, calculate the induced signal
+        if (useSignal) sensor->AddSignal(-1, t, dt, 
+                                         x + 0.5 * vx * dt, 
+                                         y + 0.5 * vy * dt,
+                                         z + 0.5 * vy * dt, vx, vy, vz);
+        // Update the coordinates
+        x += vx * dt; y += vy * dt; z += vz * dt; t += dt;
+
         // Get the collision type and parameters
         medium->GetElectronCollision(newEnergy, cstype, level, energy, ctheta, 
                                      d, esec);
-        
+
         switch (cstype) {
           // Elastic collision
           case 0:
@@ -666,7 +740,7 @@ AvalancheMicroscopic::AvalancheElectron(
 
         if (!ok) break;
 
-        newDz = Min(newDz, 1.);       
+        newDz = Min(newDz, 1.); 
         arg = sqrt(newDx * newDx + newDy * newDy);
         stheta = sqrt(1. - ctheta * ctheta);
         phi = TwoPi * RndmUniform();

@@ -171,7 +171,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
                        const double t0, const int q) {
 
   // Current position
-  double x = x0, y = y0, z = z0, t = t0;
+  double x = x0, y = y0, z = z0;
   // Time step
   double delta;
   // Medium
@@ -291,26 +291,31 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     
     if (status != 0) {
       // If the new point is not inside a drift medium,
-      // reduce the step size to bring it back into the medium    
-      for (int i = 5; i--;) {
-        delta *= 0.5;
-        x = point.x + 
-            delta * vx + cphi * ctheta * dx - sphi * dy - cphi * stheta * dz;
-        y = point.y +
-            delta * vy + sphi * ctheta * dx + cphi * dy - sphi * stheta * dz;
-        z = point.z + delta * vz + stheta * dx + ctheta * dz;
-        sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
-        if (status == 0) break;
+      // bring it back to the drift medium and terminate the drift line
+      // close to the boundary 
+      dx = x - point.x; dy = y - point.y; dz = z - point.z;
+      d = sqrt(dx * dx + dy * dy + dz * dz);
+      if (d > 0.) {
+        dx /= d; dy /= d; dz /= d;
       }
+      while (d > BoundaryDistance) {
+        delta *= 0.5;
+        d *= 0.5;
+        x = point.x + dx * d; y = point.y + dy * d; z = point.z + dz * d;
+        // Check if the mid-point is inside the drift medium
+        sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
+        if (status == 0) {
+          point.x = x; point.y = y; point.z = z; point.t += delta;
+        }
+      }
+      drift.push_back(point);
+      ++nDrift;
+      break;   
     }
-    // Attempt to bring the point back into a drift medium failed
-    // Terminate the drift line
-    if (status != 0) break;
     
-    t += delta;
     e = Max(sqrt(ex * ex + ey * ey + ez * ez), Small);
     // Add the new point to drift line
-    point.x = x; point.y = y; point.z = z; point.t = t;
+    point.x = x; point.y = y; point.z = z; point.t += delta;
     drift.push_back(point);
     ++nDrift;
 
@@ -366,8 +371,8 @@ AvalancheMC::AvalancheHole(const double x0, const double y0, const double z0,
 }
 
 bool 
-AvalancheMC::AvalancheElectronHole(const double x0, const double y0, const double z0,
-                                   const double t0) {
+AvalancheMC::AvalancheElectronHole(
+          const double x0, const double y0, const double z0, const double t0) {
                                
   // Initialise the avalanche table
   aval.clear();
@@ -412,7 +417,8 @@ AvalancheMC::Avalanche() {
   
   if (!withHoles && !withElectrons) {
     std::cerr << "AvalancheMC::Avalanche:" << std::endl;
-    std::cerr << "    Neither electron nor hole component are activated." << std::endl;
+    std::cerr << "    Neither electron nor hole component are activated." 
+              << std::endl;
   }
 
   // Loop over the table
