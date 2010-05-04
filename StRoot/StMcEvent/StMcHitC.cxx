@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHitC.cxx,v 2.2 2010/04/28 20:15:45 fine Exp $
+ * $Id: StMcHitC.cxx,v 2.3 2010/05/04 23:58:43 fine Exp $
  * $Log: StMcHitC.cxx,v $
+ * Revision 2.3  2010/05/04 23:58:43  fine
+ * Vertex, and emc models
+ *
  * Revision 2.2  2010/04/28 20:15:45  fine
  * Implementation if the new OO for Mc hits
  *
@@ -14,6 +17,7 @@
  *
  **************************************************************************/
 #include "StMcHitC.hh"
+#include "StEmcUtil/geometry/StEmcGeom.h" // For Barrel Emc
 
 //_____________________________________________________________________________
 //
@@ -191,6 +195,63 @@ unsigned long StMcPixelHitC::ladder() const
     // 1-6, 1-18
   unsigned long iLadder = (volumeId()%1000000)/10000;
   return iLadder;
+}
+
+
+//_____________________________________________________________________________
+//
+//       Calorimeter hits
+//_____________________________________________________________________________
+int  StMcCalorimeterHitC::module() const
+{
+   StEmcGeom *geomBemc = StEmcGeom::getEmcGeom(1);
+   int mod, e, s, d; 
+	geomBemc->getVolIdBemc(volumeId() , mod,e,s,d); // Must check ??
+   return mod;
+}
+//_____________________________________________________________________________
+int  StMcCalorimeterHitC::eta() const
+{
+   StEmcGeom *geomBemc = StEmcGeom::getEmcGeom(1);
+   int mod, e, s, d; 
+	geomBemc->getVolIdBemc(volumeId(), mod,e,s,d); // Must check ??
+   return e;
+}
+//_____________________________________________________________________________
+int  StMcCalorimeterHitC::sub() const
+{
+   StEmcGeom *geomBemc = StEmcGeom::getEmcGeom(1);
+   int mod, e, s, d; 
+	geomBemc->getVolIdBemc(volumeId(), mod,e,s,d); // Must check ??
+   return s;
+}
+
+//_____________________________________________________________________________
+//
+//       Smd hits
+//_____________________________________________________________________________
+int  StMcSmdHitC::module() const
+{
+   StEmcGeom *geomBemc = StEmcGeom::getEmcGeom(3);
+   int mod, e, s, d; 
+	geomBemc->getVolIdBemc(volumeId() , mod,e,s,d); // Must check ??
+   return mod;
+}
+//_____________________________________________________________________________
+int  StMcSmdHitC::eta() const
+{
+   StEmcGeom *geomBemc = StEmcGeom::getEmcGeom(3);
+   int mod, e, s, d; 
+	geomBemc->getVolIdBemc(volumeId(), mod,e,s,d); // Must check ??
+   return e;
+}
+//_____________________________________________________________________________
+int StMcSmdHitC::sub() const
+{
+   StEmcGeom *geomBemc = StEmcGeom::getEmcGeom(3);
+   int mod, e, s, d; 
+	geomBemc->getVolIdBemc(volumeId(), mod,e,s,d); // Must check ??
+   return s;
 }
 
 StMcHitC a(0);
