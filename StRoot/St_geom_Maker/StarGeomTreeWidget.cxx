@@ -631,6 +631,9 @@ void StarGeomTreeWidget::contextMenuRequestedCB(const QPoint &pos)
          itemPosition=fPopupContextMenu->addAction("&Color");
          itemPosition->setWhatsThis("Change the color of the selected object");
          menus.push_back(itemPosition);
+         itemPosition=fPopupContextMenu->addAction("&Wired");
+         itemPosition->setWhatsThis("Make the selected object \"wired\"");
+         menus.push_back(itemPosition);
       }
       response = fPopupContextMenu->exec(QCursor::pos());
       if (response) {
@@ -708,6 +711,8 @@ void StarGeomTreeWidget::contextMenuRequestedCB(const QPoint &pos)
                   }
                   if (rootColor != -1 && vc != rootColor) volume->SetLineColor(rootColor);
                   if (rootStyle != -1 && vs != rootStyle) volume->SetFillStyle(rootStyle);
+               } else if (response == menus[5]) { 
+                  volume->SetFillStyle(4001);
                } else { response = 0; }
                // set visibility
                if (volume->GetVisibility() != s) volume->SetVisibility(s);
