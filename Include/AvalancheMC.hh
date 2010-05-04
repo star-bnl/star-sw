@@ -20,6 +20,10 @@ class AvalancheMC {
     // Switch on/off calculation of induced currents
     void EnableSignalCalculation()  {useSignal = true;}
     void DisableSignalCalculation() {useSignal = false;}
+
+    // Switch on/off calculation of induced charge
+    void EnableInducedChargeCalculation()  {useInducedCharge = true;}
+    void DisableInducedChargeCalculation() {useInducedCharge = false;}
     
     // Switch on/off equilibration of multiplication and attachment 
     // over the drift line
@@ -110,6 +114,7 @@ class AvalancheMC {
     int nEndpoints;
 
     bool useSignal;
+    bool useInducedCharge;
     bool useEquilibration;
     bool useDiffusion;
     bool useIons;
@@ -124,6 +129,7 @@ class AvalancheMC {
     bool ComputeAlphaEta(const int q);
     // Compute the induced signal for the current drift line
     void ComputeSignal(const int q);
+    void ComputeInducedCharge(const int q);
 
     double Min(const double x1, const double x2) const {
       return x1 > x2 ? x2 : x1;

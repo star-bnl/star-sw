@@ -15,7 +15,7 @@ AvalancheMC::AvalancheMC() :
   sensor(0),
   nDrift(0), nAval(0),
   stepModel(2), tMc(0.02), dMc(0.001), nMc(100),
-  useSignal(false), useEquilibration(true), 
+  useSignal(false), useInducedCharge(false), useEquilibration(true), 
   useDiffusion(true), useIons(true), 
   withElectrons(true), withHoles(true),
   debug(false) {
@@ -122,6 +122,7 @@ AvalancheMC::DriftElectron(
   if (!DriftLine(x0, y0, z0, t0, -1)) return false;
   
   if (useSignal) ComputeSignal(-1);
+  if (useInducedCharge) ComputeInducedCharge(-1);
 
   return true;
 
@@ -140,6 +141,7 @@ AvalancheMC::DriftHole(
   if (!DriftLine(x0, y0, z0, t0, 1)) return false;
   
   if (useSignal) ComputeSignal(1);
+  if (useInducedCharge) ComputeInducedCharge(1);
   
   return true;
 
@@ -158,6 +160,7 @@ AvalancheMC::DriftIon(
   if (!DriftLine(x0, y0, z0, t0, 2)) return false;  
   
   if (useSignal) ComputeSignal(1);
+  if (useInducedCharge) ComputeInducedCharge(1);
   
   return true;
 
@@ -441,8 +444,10 @@ AvalancheMC::Avalanche() {
             gain = loss = 0;
             if (ne > 100) {
               // Gaussian approximation
-              gain = int(ne * alpha + RndmGaussian() * sqrt(ne * alpha * (1. - alpha)));
-              loss = int(ne * eta   + RndmGaussian() * sqrt(ne * eta   * (1. - eta)));
+              gain = int(ne * alpha + RndmGaussian() * 
+                         sqrt(ne * alpha * (1. - alpha)));
+              loss = int(ne * eta   + RndmGaussian() * 
+                         sqrt(ne * eta   * (1. - eta)));
             } else {
               // Binomial approximation
               for (int k = ne; k--;) {
@@ -482,6 +487,7 @@ AvalancheMC::Avalanche() {
           }
         }
         if (useSignal) ComputeSignal(-1);
+        if (useInducedCharge) ComputeInducedCharge(-1);
       }
 
       if (!withHoles) {
@@ -514,8 +520,10 @@ AvalancheMC::Avalanche() {
           gain = loss = 0;
           if (ni > 100) {
             // Gaussian approximation
-            gain = int(ni * alpha + RndmGaussian() * sqrt(ni * alpha * (1. - alpha)));
-            loss = int(ni * eta   + RndmGaussian() * sqrt(ni * eta   * (1. - eta)));
+            gain = int(ni * alpha + RndmGaussian() * 
+                       sqrt(ni * alpha * (1. - alpha)));
+            loss = int(ni * eta   + RndmGaussian() * 
+                       sqrt(ni * eta   * (1. - eta)));
           } else {
             // Binomial approximation
             for (int k = ni; k--;) {
@@ -555,6 +563,7 @@ AvalancheMC::Avalanche() {
         }
       }
       if (useSignal) ComputeSignal(1);
+      if (useInducedCharge) ComputeInducedCharge(1);
     }
     ++iAval;
   }
@@ -838,6 +847,16 @@ AvalancheMC::ComputeSignal(const int q) {
                       drift[i].z + 0.5 * dz,
                       dx / dt, dy / dt, dz / dt);
   }
+
+}
+
+void
+AvalancheMC::ComputeInducedCharge(const int q) {
+
+  if (nDrift < 2) return;
+  sensor->AddInducedCharge(q, 
+                drift[0].x,          drift[0].y,          drift[0].z, 
+                drift[nDrift - 1].x, drift[nDrift - 1].y, drift[nDrift - 1].z);
 
 }
 

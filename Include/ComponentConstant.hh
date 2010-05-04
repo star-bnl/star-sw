@@ -25,13 +25,17 @@ class ComponentConstant : public ComponentBase {
     void WeightingField(const double x, const double y, const double z,
                         double& wx, double& wy, double& wz,
                         const std::string label);
+    double WeightingPotential(const double x, const double y, const double z,
+                              const std::string label);
 
     void SetElectricField(const double ex, const double ey, const double ez);
     void SetPotential(const double x, const double y, const double z, 
                       const double v = 0.);
     
-    void AddWeightingField(const double wx, const double wy, const double wz,
+    void SetWeightingField(const double wx, const double wy, const double wz,
                            const std::string label);
+    void SetWeightingPotential(const double x, const double y, const double z,
+                               const double v = 0.);
 
   private:
   
@@ -45,13 +49,15 @@ class ComponentConstant : public ComponentBase {
     // Potential at this point
     double v0;
     
-    // Weighting field(s)
-    int nWeightingFields;
-    struct wfield {
-      double wx, wy, wz;
-      std::string label;
-    };
-    std::vector<wfield> wfields;
+    // Weighting field
+    bool hasWeightingField;
+    std::string wfield;
+    double fwx, fwy, fwz;
+    bool hasWeightingPotential;
+    // Point where the weighting potential was specified
+    double wx0, wy0, wz0;
+    // Weighting potential at this point
+    double w0;
 
     // Geometry checks
     bool CheckSolidType(Solid* s);

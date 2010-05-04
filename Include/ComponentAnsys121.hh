@@ -36,8 +36,8 @@ class ComponentAnsys121: public ComponentFieldMap {
                         double& wx, double& wy, double& wz,
                         const std::string label);
 
-    void WeightingPotential(const double x, const double y, const double z,
-                            double& w, const std::string label);
+    double WeightingPotential(const double x, const double y, const double z,
+                              const std::string label);
     
     bool Initialise(std::string elist = "ELIST.lis",
                     std::string nlist = "NLIST.lis",

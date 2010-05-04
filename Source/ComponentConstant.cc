@@ -10,9 +10,11 @@ ComponentConstant::ComponentConstant() :
   fx(0.), fy(0.), fz(0.),
   hasPotential(false), 
   x0(0.), y0(0.), z0(0.), v0(0.),
-  nWeightingFields(0) {
+  hasWeightingField(false), wfield(""),
+  fwx(0.), fwy(0.), fwz(0.),
+  hasWeightingPotential(false),
+  wx0(0.), wy0(0.), wz0(0.), w0(0.)  {
   
-  wfields.clear();
       
 }
 
@@ -117,14 +119,21 @@ ComponentConstant::WeightingField(
     double& wx, double& wy, double& wz,
     const std::string label) {
 
-  wx = wy = wz = 0.;
-  for (int i = nWeightingFields; i--;) {
-    if (label == wfields[i].label) {
-      wx += wfields[i].wx;
-      wy += wfields[i].wy;
-      wz += wfields[i].wz;
-    }
-  }
+  if (!hasWeightingField || label != wfield) return;
+  wx = fwx; wy = fwy; wz = fwz;
+
+}
+
+double
+ComponentConstant::WeightingPotential(
+    const double x, const double y, const double z, 
+    const std::string label) {
+
+  if (!hasWeightingPotential || label != wfield) return 0.;
+
+  return w0 - (x - wx0) * fwx
+            - (y - wy0) * fwy
+            - (z - wz0) * fwz;
 
 }
 
@@ -152,17 +161,28 @@ ComponentConstant::SetPotential(
 }
 
 void 
-ComponentConstant::AddWeightingField(
+ComponentConstant::SetWeightingField(
             const double wx, const double wy, const double wz,
             const std::string label) {
 
-  wfield newField;
-  newField.wx = wx;
-  newField.wy = wy;
-  newField.wz = wz;
-  newField.label = label;
-  wfields.push_back(newField);
-  ++nWeightingFields;
+  wfield = label;
+  fwx = wx; fwy = wy; fwz = wz;
+  hasWeightingField = true;
+
+}
+
+void 
+ComponentConstant::SetWeightingPotential(
+            const double x, const double y, const double z, const double v) {
+
+  if (!hasWeightingField) {
+    std::cerr << "ComponentConstant::SetWeightingPotential:" << std::endl;
+    std::cerr << "    No weighting field specified." << std::endl;
+    return;
+  }
+  wx0 = x; wy0 = y; wz0 = z;
+  w0 = v;
+  hasWeightingPotential = true;
 
 }
 

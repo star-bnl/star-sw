@@ -382,23 +382,23 @@ Sensor::AddInducedCharge(const int q,
                          const double x1, const double y1, const double z1) {
 
   if (debug) std::cout << "Sensor::AddInducedCharge:" << std::endl;
+  double w0 = 0., w1 = 0.;
   for (int i = nElectrodes; i--;) {
-    double w0 = 0., w1 = 0.;
     // Calculate the weighting potential for the starting point
-    electrodes[i].comp->WeightingPotential(x0, y0, z0, 
-                                           w0, electrodes[i].label);
+    w0 = electrodes[i].comp->WeightingPotential(x0, y0, z0, 
+                                                electrodes[i].label);
     // Calculate the weighting potential for the end point
-    electrodes[i].comp->WeightingPotential(x1, y1, z1,
-                                            w1, electrodes[i].label);
-    double charge = q * (w1 - w0);
-    electrodes[i].charge += charge;
+    w1 = electrodes[i].comp->WeightingPotential(x1, y1, z1,
+                                                electrodes[i].label);
+    electrodes[i].charge += q * (w1 - w0);
     if (debug) {
       std::cout << "    Electrode " << electrodes[i].label << ":" << std::endl;
       std::cout << "      Weighting potential at (" 
                 << x0 << ", " << y0 << ", " << z0 << "): " << w0 << std::endl;
       std::cout << "      Weighting potential at ("
                 << x1 << ", " << y1 << ", " << z1 << "): " << w1 << std::endl;
-      std::cout << "      Induced charge: " << charge << std::endl;
+      std::cout << "      Induced charge: " 
+                << electrodes[i].charge << std::endl;
     }
   }
 

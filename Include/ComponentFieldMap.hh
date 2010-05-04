@@ -68,8 +68,8 @@ class ComponentFieldMap: public ComponentBase {
                         const std::string label) = 0;
 
     virtual
-    void WeightingPotential(const double x, const double y, const double z,
-                            double& w, const std::string label) = 0;
+    double WeightingPotential(const double x, const double y, const double z,
+                              const std::string label) = 0;
 
     // Options
     void CheckMapIndices()   {checkMultipleElement = true; lastElement = -1;}

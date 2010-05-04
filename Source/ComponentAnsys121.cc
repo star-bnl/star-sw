@@ -617,11 +617,12 @@ ComponentAnsys121::ElectricField(
   
   if (debug) {
     printf("ComponentAnsys121::ElectricField:\n");
-    printf("    Global: (%g,%g), Local: (%g,%g,%g,%g) in element %d (degenerate: %d)\n",
-           x, y, t1, t2, t3, t4, imap, elements[imap].degenerate);
-    printf("                          Node             x            y            V\n");
+    printf("    Global: (%g,%g),\n", x, y);
+    printf("    Local: (%g,%g,%g,%g) in element %d (degenerate: %d)\n",
+           t1, t2, t3, t4, imap, elements[imap].degenerate);
+    printf("                  Node             x            y            V\n");
     for (int i = 0; i < 8; i++) {
-      printf("                          %-5d %12g %12g %12g\n",
+      printf("                  %-5d %12g %12g %12g\n",
              elements[imap].emap[i], 
              nodes[elements[imap].emap[i]].xmap, 
              nodes[elements[imap].emap[i]].ymap,
@@ -779,8 +780,9 @@ ComponentAnsys121::WeightingField(
 
   if (debug) {
     printf("ComponentAnsys121::WeightingField:\n");
-    printf("    Global: (%g,%g), Local: (%g,%g,%g,%g) in element %d (degenerate: %d)\n",
-           x, y, t1, t2, t3, t4, imap, elements[imap].degenerate);
+    printf("    Global: (%g,%g),\n", x, y);
+    printf("    Local: (%g,%g,%g,%g) in element %d (degenerate: %d)\n",
+           t1, t2, t3, t4, imap, elements[imap].degenerate);
     printf("                  Node             x            y            V\n");
     for (int i = 0; i < 8; i++) {
       printf("                  %-5d %12g %12g %12g\n",
@@ -870,16 +872,13 @@ ComponentAnsys121::WeightingField(
   
 }
 
-void
+double
 ComponentAnsys121::WeightingPotential(
                     const double xin, const double yin, const double zin,
-                    double& w, const std::string label) {
-
-  // Initial value
-  w = 0.;
+                    const std::string label) {
 
   // Do not proceed if not properly initialised.
-  if (!ready || !hasWeightingField || label != wfield) return;
+  if (!ready || !hasWeightingField || label != wfield) return 0.;
 
   // Copy the coordinates
   double x = xin, y = yin, z = zin;
@@ -900,12 +899,13 @@ ComponentAnsys121::WeightingPotential(
   double t1, t2, t3, t4, jac[4][4], det;
   int imap = FindElement5(x, y, z, t1, t2, t3, t4, jac, det);
   // Check if the point is in the mesh
-  if (imap < 0) return;
+  if (imap < 0) return 0.;
 
   if (debug) {
     printf("ComponentAnsys121::WeightingPotential:\n");
-    printf("    Global: (%g,%g), Local: (%g,%g,%g,%g) in element %d (degenerate: %d)\n",
-           x, y, t1, t2, t3, t4, imap, elements[imap].degenerate);
+    printf("    Global: (%g,%g),\n", x, y);
+    printf("    Local: (%g,%g,%g,%g) in element %d (degenerate: %d)\n",
+           t1, t2, t3, t4, imap, elements[imap].degenerate);
     printf("                  Node             x            y            V\n");
     for (int i = 0; i < 8; ++i) {
       printf("                  %-5d %12g %12g %12g\n",
@@ -918,14 +918,15 @@ ComponentAnsys121::WeightingPotential(
   
   // Calculate quadrilateral field, which can degenerate to a triangular field
   if (elements[imap].degenerate) {
-    w =    nodes[elements[imap].emap[0]].vmap * t1 * (2 * t1 - 1 ) +
+    return nodes[elements[imap].emap[0]].vmap * t1 * (2 * t1 - 1 ) +
            nodes[elements[imap].emap[1]].vmap * t2 * (2 * t2 - 1 ) +
            nodes[elements[imap].emap[2]].vmap * t3 * (2 * t3 - 1 ) +
        4 * nodes[elements[imap].emap[3]].vmap * t1 * t2 +
        4 * nodes[elements[imap].emap[4]].vmap * t1 * t3 +
        4 * nodes[elements[imap].emap[5]].vmap * t2 * t3;
-  } else {
-    w =   -nodes[elements[imap].emap[0]].vmap * (1 - t1) * (1 - t2) * 
+  }
+
+  return  -nodes[elements[imap].emap[0]].vmap * (1 - t1) * (1 - t2) * 
                                                 (1 + t1 + t2) / 4 -
            nodes[elements[imap].emap[1]].vmap * (1 + t1) * (1 - t2) * 
                                                 (1 - t1 + t2) / 4 -
@@ -941,7 +942,6 @@ ComponentAnsys121::WeightingPotential(
                                                 (1 + t2) / 2 +
            nodes[elements[imap].emap[7]].vmap * (1 - t1) * (1 + t2) * 
                                                 (1 - t2) / 2;
-  }
 
 }
 
@@ -964,11 +964,13 @@ ComponentAnsys121::GetMedium(
 
   // Do not proceed if not properly initialised.
   if (!ready) {
-    printf("ComponentAnsys121::GetMedium: Field map not available for interpolation.\n");
+    printf("ComponentAnsys121::GetMedium:\n");
+    printf("    Field map not available for interpolation.\n");
     return false;
   }
   if (warning) {
-    printf("ComponentAnsys121::GetMedium: Warnings have been issued for this field map.\n");
+    printf("ComponentAnsys121::GetMedium:\n");
+    printf("    Warnings have been issued for this field map.\n");
   }
 
   // Find the element that contains this point
@@ -976,23 +978,28 @@ ComponentAnsys121::GetMedium(
   int imap = FindElement5(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) {
     if (debug) {
-      printf("ComponentAnsys121::GetMedium: Point (%g,%g) not in the mesh.\n", x, y);
+      printf("ComponentAnsys121::GetMedium:\n");
+      printf("    Point (%g,%g) not in the mesh.\n", x, y);
     }
     return false;
   }
   if (elements[imap].matmap < 0 || elements[imap].matmap >= nMaterials ) {
     if (debug) {
-      printf("ComponentAnsys121::GetMedium: Point (%g,%g) has out of range material number %d.\n", x, y, imap);
+      printf("ComponentAnsys121::GetMedium:\n");
+      printf("    Point (%g,%g) has out of range material number %d.\n", 
+             x, y, imap);
     }
     return false;
   }
   
   if (debug) {
-    printf("ComponentAnsys121::GetMedium: Global: (%g,%g), Local: (%g,%g,%g,%g) in element %d (degenerate: %d)\n",
-           x, y, t1, t2, t3, t4, imap, elements[imap].degenerate);
-    printf("                          Node             x            y            V\n");
+    printf("ComponentAnsys121::GetMedium:\n");
+    printf("    Global: (%g,%g),\n", x, y);
+    printf("    Local: (%g,%g,%g,%g) in element %d (degenerate: %d)\n",
+           t1, t2, t3, t4, imap, elements[imap].degenerate);
+    printf("                  Node             x            y            V\n");
     for (int i = 0; i < 8; i++) {
-      printf("                          %-5d %12g %12g %12g\n",
+      printf("                 %-5d %12g %12g %12g\n",
         elements[imap].emap[i], 
         nodes[elements[imap].emap[i]].xmap, 
         nodes[elements[imap].emap[i]].ymap,

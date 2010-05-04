@@ -767,8 +767,9 @@ ComponentAnsys123::WeightingField(
   
   if (debug) {
     printf("ComponentAnsys123::WeightingField:\n");
-    printf("    Global: (%g,%g,%g), Local: (%g,%g,%g,%g) in element %d\n",
-           x, y, z, t1, t2, t3, t4, imap);
+    printf("    Global: (%g,%g,%g),\n", x, y, z);
+    printf("    Local: (%g,%g,%g,%g) in element %d\n",
+           t1, t2, t3, t4, imap);
     printf("      Node             x            y            z            V\n");
     for (int i = 0; i < 10; i++) {
       printf("      %-5d %12g %12g %12g %12g\n",
@@ -838,16 +839,13 @@ ComponentAnsys123::WeightingField(
 	      
 }
 
-void
+double
 ComponentAnsys123::WeightingPotential(
                     const double xin, const double yin, const double zin,
-                    double& w, const std::string label) {
+                    const std::string label) {
 
-  // Initial value
-  w = 0.;
-  
   // Do not proceed if not properly initialised.
-  if (!ready || !hasWeightingField || label != wfield) return;   
+  if (!ready || !hasWeightingField || label != wfield) return 0.;
 
   // Copy the coordinates
   double x = xin, y = yin, z = zin;
@@ -867,12 +865,13 @@ ComponentAnsys123::WeightingPotential(
   // Find the element that contains this point
   double t1, t2, t3, t4, jac[4][4], det;
   int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
-  if (imap < 0) return;
+  if (imap < 0) return 0.;
   
   if (debug) {
     printf("ComponentAnsys123::WeightingPotential:\n");
-    printf("    Global: (%g,%g,%g), Local: (%g,%g,%g,%g) in element %d\n",
-           x, y, z, t1, t2, t3, t4, imap);
+    printf("    Global: (%g,%g,%g),\n", x, y, z);
+    printf("    Local: (%g,%g,%g,%g) in element %d\n",
+           t1, t2, t3, t4, imap);
     printf("      Node             x            y            z            V\n");
     for (int i = 0; i < 10; i++) {
       printf("      %-5d %12g %12g %12g %12g\n",
@@ -885,22 +884,23 @@ ComponentAnsys123::WeightingPotential(
   }
 
   // Tetrahedral field
-  w =   nodes[elements[imap].emap[0]].vmap * t1 * (2 * t1 - 1) + 
-        nodes[elements[imap].emap[1]].vmap * t2 * (2 * t2 - 1) + 
-        nodes[elements[imap].emap[2]].vmap * t3 * (2 * t3 - 1) + 
-        nodes[elements[imap].emap[3]].vmap * t4 * (2 * t4 - 1) + 
-    4 * nodes[elements[imap].emap[4]].vmap * t1 * t2 +
-    4 * nodes[elements[imap].emap[5]].vmap * t1 * t3 + 
-    4 * nodes[elements[imap].emap[6]].vmap * t1 * t4 + 
-    4 * nodes[elements[imap].emap[7]].vmap * t2 * t3 + 
-    4 * nodes[elements[imap].emap[8]].vmap * t2 * t4 +  
-    4 * nodes[elements[imap].emap[9]].vmap * t3 * t4;
+  return nodes[elements[imap].emap[0]].vmap * t1 * (2 * t1 - 1) + 
+         nodes[elements[imap].emap[1]].vmap * t2 * (2 * t2 - 1) + 
+         nodes[elements[imap].emap[2]].vmap * t3 * (2 * t3 - 1) + 
+         nodes[elements[imap].emap[3]].vmap * t4 * (2 * t4 - 1) + 
+     4 * nodes[elements[imap].emap[4]].vmap * t1 * t2 +
+     4 * nodes[elements[imap].emap[5]].vmap * t1 * t3 + 
+     4 * nodes[elements[imap].emap[6]].vmap * t1 * t4 + 
+     4 * nodes[elements[imap].emap[7]].vmap * t2 * t3 + 
+     4 * nodes[elements[imap].emap[8]].vmap * t2 * t4 +  
+     4 * nodes[elements[imap].emap[9]].vmap * t3 * t4;
 
 }
 
 bool 
-ComponentAnsys123::GetMedium(const double xin, const double yin, const double zin, 
-                             Medium*& m) {
+ComponentAnsys123::GetMedium(
+            const double xin, const double yin, const double zin, 
+            Medium*& m) {
 
   // Copy the coordinates
   double x = xin, y = yin, z = zin;
@@ -917,34 +917,42 @@ ComponentAnsys123::GetMedium(const double xin, const double yin, const double zi
 
   // Do not proceed if not properly initialised.
   if (!ready) {
-    printf("ComponentAnsys123::GetMedium: Field map not available for interpolation.\n");
+    printf("ComponentAnsys123::GetMedium:\n");
+    printf("    Field map not available for interpolation.\n");
     return false;
   }
-  if (warning) {printf("ComponentAnsys123::GetMedium: Warnings have been issued for this field map.\n");}
+  if (warning) {
+    printf("ComponentAnsys123::GetMedium:\n");
+    printf("    Warnings have been issued for this field map.\n");
+  }
 
   // Find the element that contains this point
   double t1, t2, t3, t4, jac[4][4], det;
   int imap = FindElement13(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) {
     if (debug) {
-      printf("ComponentAnsys123::GetMedium: Point (%g,%g,%g) not in the mesh.\n", x, y, z);      
+      printf("ComponentAnsys123::GetMedium:\n");
+      printf("    Point (%g,%g,%g) not in the mesh.\n", x, y, z);      
     }
     return false;
   }
   if (elements[imap].matmap < 0 || elements[imap].matmap >= nMaterials ) {
     if (debug) {
-      printf("ComponentAnsys123::GetMedium: Point (%g,%g) has out of range material number %d.\n", x, y, imap);
+      printf("ComponentAnsys123::GetMedium:\n");
+      printf("    Point (%g,%g) has out of range material number %d.\n", 
+             x, y, imap);
     }
     return false;
   }
   
   if (debug) {
     printf("ComponentAnsys123::ElectricField:\n");
-    printf("    Global: (%g,%g,%g), Local: (%g,%g,%g,%g) in element %d\n",
-           x, y, z, t1, t2, t3, t4, imap);
-    printf("                          Node             x            y            z            V\n");
+    printf("    Global: (%g,%g,%g),\n", x, y, z);
+    printf("    Local: (%g,%g,%g,%g) in element %d\n",
+           t1, t2, t3, t4, imap);
+    printf("      Node             x            y            z            V\n");
     for (int ii = 0; ii < 10; ++ii) {
-      printf("                          %-5d %12g %12g %12g %12g\n",
+      printf("      %-5d %12g %12g %12g %12g\n",
              elements[imap].emap[ii],
              nodes[elements[imap].emap[ii]].xmap,
              nodes[elements[imap].emap[ii]].ymap,

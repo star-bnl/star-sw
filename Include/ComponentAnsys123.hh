@@ -34,8 +34,8 @@ namespace Garfield {
                         double& wx, double& wy, double& wz,
                         const std::string label);
 
-    void WeightingPotential(const double x, const double y, const double z,
-                            double& w, const std::string label);
+    double WeightingPotential(const double x, const double y, const double z,
+                              const std::string label);
     
     bool GetMedium(const double x, const double y, const double z,
                    Medium*& medium);

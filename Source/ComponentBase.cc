@@ -174,14 +174,14 @@ ComponentBase::WeightingField(const double x, const double y, const double z,
   
 }
 
-void
+double
 ComponentBase::WeightingPotential(
                     const double x, const double y, const double z,
-                    double& w, const std::string label) {
+                    const std::string label) {
 
   std::cerr << "ComponentBase::WeightingField:" << std::endl;
   std::cerr << "    This function is not implemented." << std::endl;
-  w = 0.;
+  return 0.;
 
 }
 
