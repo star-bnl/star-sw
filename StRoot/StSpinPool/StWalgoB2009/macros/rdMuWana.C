@@ -26,7 +26,7 @@ int rdMuWana(
 	     char* file    = "/star/u/balewski/2009-Wana-pp500/fillListD/F10535/R10102105_230531_230601.lis",
 	     int nFiles  = 5000, // max # of muDst files
 	     int isMC=0, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve, 20=rcf10010,... 26=rcf10016
-	     int useJetFinder = 2 // 0 - no jets & crash; 1 generate jet trees; 2 read jet trees 
+	     int useJetFinder = 2 // 0 - no jets=badWalgo; 1 generate jet trees; 2 read jet trees 
  ) { 
 
   TString jetTreeDir = "/star/institutions/mit/balewski/2009-pp500-jets/4.15.2010/"; //default location of jet trees for run 9 data
@@ -98,8 +98,6 @@ int rdMuWana(
     cout << "BEGIN: loading jetfinder libs" << endl;
     gSystem->Load("StEmcRawMaker");
     gSystem->Load("StEmcADCtoEMaker");
-    // gSystem->Load("StPreEclMaker");
-    //  gSystem->Load("StEpcMaker");
     gSystem->Load("StJetSkimEvent");
     gSystem->Load("StJets");
     gSystem->Load("StSpinDbMaker");
@@ -112,8 +110,7 @@ int rdMuWana(
     cout << "END: loading jetfinder libs" << endl;
   }
   else  {
-    cout << "Jets finder is not configured: exiting" << endl;
-    return;
+    cout << "\nWARN: Jet are NOT read in, W-algo will not wrk properly\n " << endl;
   }
 
   // libraries for access to MC record         
@@ -193,7 +190,7 @@ int rdMuWana(
   if (useJetFinder == 1){// run jet finder
     double pi = atan(1.0)*4.0;    
     // Makers for clusterfinding
-    StSpinDbMaker* spDbMaker = new StSpinDbMaker("spinDb");
+    //  StSpinDbMaker* spDbMaker = new StSpinDbMaker("spinDb");
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
 
     //here we also tag whether or not to do the swap:
@@ -278,7 +275,7 @@ int rdMuWana(
   if (useJetFinder == 2)
   {
     cout << "Configure to read jet trees " << endl;
-   StJetReader *jetReader = new StJetReader;
+    StJetReader *jetReader = new StJetReader;
     jetReader->InitFile(jetTreeDir+outFile);
   }
 
@@ -315,7 +312,8 @@ int rdMuWana(
   TObjArray* HList=new TObjArray;
   WmuMk->setHList(HList);
   WpubMk->setHList(HList);
-  
+
+  StSpinDbMaker *spDb=0;
   if(spinSort){
     spDb=new StSpinDbMaker("spinDb");
     enum {mxSM=5}; // to study eta-cuts, drop Q/PT cut
@@ -369,6 +367,7 @@ int rdMuWana(
       wjjMk->attachWalgoMaker(WmuMk);
       wjjMk->setHList(HList);
       wjjMk->setSpinSort(spinSort);
+      wjjMk->attachSpinDb(spDb);
       wjjMk->setMC(isMC);
       if(kk==1) wjjMk->setCorrection("/star/u/balewski/2009-Wana-pp500/jesCalib/pp500ver3.jesCorr.root"); 
       if(geant) {	
@@ -432,6 +431,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.37  2010/05/04 12:14:36  balewski
+// runs now w/o jet tree
+//
 // Revision 1.36  2010/05/01 01:31:49  balewski
 // added W->JJ code & JES calibration
 //

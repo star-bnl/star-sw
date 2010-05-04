@@ -1,4 +1,4 @@
-// $Id: St2009WjjMaker.cxx,v 1.3 2010/05/03 17:24:37 balewski Exp $
+// $Id: St2009WjjMaker.cxx,v 1.4 2010/05/04 12:14:35 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -215,8 +215,10 @@ St2009WjjMaker::bXingSort(){
   //......... require:  vertex is reasonable .......
   
 
-  //****loop over branch with EEMC****
+  //****loop over jet branch with B+EEMC****
+  if(GetMaker("JetReader")==0) return; // most likely jet-maker was not in the chain
   TClonesArray* jets = wMK->getJets("ConeJets12_100"); // select specific jet-tree type 
+  if(jets==0) return; // most likely jet-maker was not in the chain
   int nJets= wMK->nJets;
   //printf("nJets=%d  n2J=%.0f\n",nJets, hA[0]->GetBinContent(1)); 
   if(nJets<1) return;
@@ -370,6 +372,9 @@ St2009WjjMaker::bXingSort(){
 
 
 // $Log: St2009WjjMaker.cxx,v $
+// Revision 1.4  2010/05/04 12:14:35  balewski
+// runs now w/o jet tree
+//
 // Revision 1.3  2010/05/03 17:24:37  balewski
 // added spin sorting of di-jets
 //

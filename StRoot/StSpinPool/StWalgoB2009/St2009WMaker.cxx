@@ -1,5 +1,5 @@
 
-// $Id: St2009WMaker.cxx,v 1.14 2010/04/27 16:53:44 stevens4 Exp $
+// $Id: St2009WMaker.cxx,v 1.15 2010/05/04 12:14:35 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -43,7 +43,10 @@ ClassImp(St2009WMaker)
 St2009WMaker::St2009WMaker(const char *name):StMaker(name){
   char muDstMakerName[]="MuDst"; 
   mMuDstMaker= (StMuDstMaker*)GetMaker(muDstMakerName);  assert(mMuDstMaker);
-  mJetReaderMaker = (StJetReader*)GetMaker("JetReader");  assert(mJetReaderMaker);
+  mJetReaderMaker = (StJetReader*)GetMaker("JetReader");  
+  if(mJetReaderMaker ==0) {
+    LOG_WARN<<GetName()<<Form("::constructor() NO JETS , W-algo is not working properly, continue")<<endm;
+  }
 
   // preset or clear some params
   par_bht3TrgID= par_l2wTrgID=0;
@@ -233,14 +236,16 @@ St2009WMaker::Make(){
   accessBSMD(); 
   if( accessVertex()) return kStOK; //skip event w/o ~any reasonable vertex  
 
-  mJets = getJets(mJetTreeBranch); //get input jet info
-  for (int i_jet=0; i_jet< nJets; ++i_jet){
-    StJet* jet = getJet(i_jet);
-    float jet_pt = jet->Pt();
-    float jet_eta = jet->Eta();
-    float jet_phi = jet->Phi();
-    hA[117]->Fill(jet_eta,jet_phi);
-    hA[118]->Fill(jet_pt);
+  if(mJetReaderMaker) {// just QA plots for jets
+    mJets = getJets(mJetTreeBranch); //get input jet info
+    for (int i_jet=0; i_jet< nJets; ++i_jet){
+      StJet* jet = getJet(i_jet);
+      float jet_pt = jet->Pt();
+      float jet_eta = jet->Eta();
+      float jet_phi = jet->Phi();
+      hA[117]->Fill(jet_eta,jet_phi);
+      hA[118]->Fill(jet_pt);
+    }
   }
 
   if( accessTracks()) return kStOK; //skip event w/o ~any highPt track
@@ -262,11 +267,11 @@ St2009WMaker::Make(){
   findNearJet();
   findAwayJet();
 
-  findPtBalance();
+  if(mJetReaderMaker) findPtBalance();
 
   hadronicRecoil();
 
-  tag_Z_boson();
+  if(mJetReaderMaker) tag_Z_boson();
 
   find_W_boson();
   if(nAccEve<2 ||nAccEve%1000==1 ) wEve.print(0x0,isMC);
@@ -361,7 +366,9 @@ St2009WMaker::L2algoEtaPhi2IJ(float etaF,float phiF,int &iEta, int &iPhi) {
 //________________________________________________
 TClonesArray*
 St2009WMaker::getJets(TString branchName){
-
+  if(mJetReaderMaker ==0) {
+    nJets=-1; return 0;
+  }
   assert(mJetReaderMaker->getStJets(branchName)->eventId()==wEve.id);
   assert(mJetReaderMaker->getStJets(branchName)->runId()==mRunNo);
   nJets = mJetReaderMaker->getStJets(branchName)->nJets();
@@ -371,6 +378,9 @@ St2009WMaker::getJets(TString branchName){
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.15  2010/05/04 12:14:35  balewski
+// runs now w/o jet tree
+//
 // Revision 1.14  2010/04/27 16:53:44  stevens4
 // add code to remove events tagged as Zs from W candidates
 //
@@ -416,6 +426,9 @@ St2009WMaker::getJets(TString branchName){
 
 
 // $Log: St2009WMaker.cxx,v $
+// Revision 1.15  2010/05/04 12:14:35  balewski
+// runs now w/o jet tree
+//
 // Revision 1.14  2010/04/27 16:53:44  stevens4
 // add code to remove events tagged as Zs from W candidates
 //
