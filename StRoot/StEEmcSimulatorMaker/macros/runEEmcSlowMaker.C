@@ -18,9 +18,9 @@ StEEmcA2EMaker *mEEbefore;
 StEEmcA2EMaker *mEEafter;
 
 // Comment out the line below to read EEMC data from StEvent (default is MuDst)
-//#define useMuDst
+#define useMuDst
 
-int runEEmcSlowMaker( int nEve=2800 ){
+int runEEmcSlowMaker( int nEve=2000 ){
 
   int firstSec=1;
   int lastSec=12;
@@ -28,11 +28,11 @@ int runEEmcSlowMaker( int nEve=2800 ){
   Int_t nFiles=10; 
 
 #ifdef useMuDst
-  char* file="mcgamma_svtout_nominalvtx_4400evts.MuDst.root";
+  char* file="rcf1308_01_2000evts.MuDst.root";
 #else
-  char* file="mcgamma_svtout_nominalvtx_4400evts.event.root";
+  char* file="rcf1308_01_2000evts.event.root";
 #endif
-  char* inDir="/star/data04/sim/jwebb/2006/svt_review/";
+  char* inDir="/star/data47/reco/pp200/pythia6_410/11_15gev/cdf_a/y2006c/gheisha_on/p07ic/";
 
 #ifdef useMuDst
   char *outname="mudst";
