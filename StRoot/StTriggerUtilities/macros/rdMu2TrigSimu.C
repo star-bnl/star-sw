@@ -237,7 +237,7 @@ void rdMu2TrigSimu(char *file="/star/data47/reco/pp200/pythia6_410/9_11gev/cdf_a
     }
   }
   
-  cout <<Form("sorting done %d of   nEve=%d, CPU rate=%.1f Hz, total time %.1f minute(s) \n\n",total,nEntries,rate,tMnt)<<endl;
+  //cout <<Form("sorting done %d of   nEve=%d, CPU rate=%.1f Hz, total time %.1f minute(s) \n\n",total,nEntries,rate,tMnt)<<endl;
  
 }
 
