@@ -15,11 +15,8 @@ namespace Garfield {
   public:
     // Constructors
     ComponentAnsys123();
-    ComponentAnsys123(std::string elist = "ELIST.lis",
-                      std::string nlist = "NLIST.lis",
-                      std::string mplist = "MPLIST.lis",
-                      std::string prnsol = "PRNSOL.lis",
-                      std::string unit = "cm");
+    ComponentAnsys123(std::string elist,  std::string nlist,
+                      std::string mplist, std::string prnsol, std::string unit);
     // Destructor
     ~ComponentAnsys123() {}
     

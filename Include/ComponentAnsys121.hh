@@ -15,11 +15,8 @@ class ComponentAnsys121: public ComponentFieldMap {
   public:
     // Constructors
     ComponentAnsys121();
-    ComponentAnsys121(std::string elist = "ELIST.lis",
-                      std::string nlist = "NLIST.lis",
-                      std::string mplist = "MPLIST.lis",
-                      std::string prnsol = "PRNSOL.lis",
-                      std::string unit = "cm");
+    ComponentAnsys121(std::string elist,  std::string nlist,
+                      std::string mplist, std::string prnsol, std::string unit);
     // Destructor 
     ~ComponentAnsys121() {}
     
