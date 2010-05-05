@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.561 2010/04/27 21:31:44 fine Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.562 2010/05/05 20:39:39 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -237,8 +237,9 @@ Int_t StBFChain::Instantiate()
 	if (GetOption("NoMySQLDb"))   {MySQLDb = "";}
 	// Removed twice already and put back (start to be a bit boring)
 	// DO NOT REMOVE THE NEXT OPTION - Used in AutoCalibration
-	if (GetOption("NoCintCalDb")) {MyCintDb = "";}
-	if (GetOption("NoCintDb"))    {MainCintDb = ""; MyCintDb = "";}
+	if (GetOption("NoLocalCintDb")) {MyCintDb = "";}
+	if (GetOption("NoStarCintDb") ) {MainCintDb = "";}
+	if (GetOption("NoCintDb")     ) {MainCintDb = ""; MyCintDb = "";}
 	
 	TString Dirs[3];
 	Int_t j;
