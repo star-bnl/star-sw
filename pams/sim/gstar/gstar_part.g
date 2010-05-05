@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.23 2010/04/06 14:16:25 jwebb Exp $
+* $Id: gstar_part.g,v 1.24 2010/05/05 21:54:17 perev Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.24  2010/05/05 21:54:17  perev
+* K0S->Pi+ Pi- only added
+*
 * Revision 1.23  2010/04/06 14:16:25  jwebb
 * Redefined the geant ID of the lambda(1520) from 706 to 995, to make
 * consistent with usage in embedding group.
@@ -231,6 +234,8 @@
   Particle StLambda1520  code=995  TrkTyp=3  mass=1.5195  charge=0   tlife=4.22e-23,
                          pdg=0     bratio= {1,}           mode= {1412,}
 
+  Particle StK0s         code=707  TrkTyp=3  mass= 0.497671 charge=0 tlife=8.922E-11,
+                         pdg=0     bratio= {1,}           mode= {809,}
  End
 *
 * --------------------------------------------------------------------------
