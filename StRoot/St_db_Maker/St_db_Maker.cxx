@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.120 2010/05/05 15:25:51 dmitry Exp $
+// $Id: St_db_Maker.cxx,v 1.121 2010/05/05 18:35:03 dmitry Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.121  2010/05/05 18:35:03  dmitry
+// addon: single datasets also saved
+//
 // Revision 1.120  2010/05/05 15:25:51  dmitry
 // refactored snapshot code, to include Valeri's patch (save .root files)
 //
@@ -972,7 +975,43 @@ Int_t  St_db_Maker::Save(const char *path,const TDatime *newtime)
   return (!nakt);
 }
 //_____________________________________________________________________________
-Int_t St_db_Maker::SaveDataSetAsCMacro(TTable* tb, TString ts) {
+Int_t St_db_Maker::SaveDataSet(TDataSet* ds, int type, bool savenext) {
+    if (!ds || !ds->InheritsFrom(TTable::Class())) {                                                                                                        
+        // dataset is not inherited from TTable                                                                                                      
+        return 0;                                                                                                                                    
+    }                                                                                                                                                
+    int i = 0;                                                                                                                                         
+    int jdot = 0, jsla = 0; // used for recursive directory creation                                                                                   
+	TString ts; 
+	TString dir; // DataSet directory on disk                                                                                                          
+    ts = ds->Path();                                                                                                                                 
+    i = 0; i = ts.Index(".const/"); assert(i>0); ts.Replace(0,i+7,"");                                                                                                                                                                                                                                   
+    jdot = 0; jdot = ts.Index(".",(Ssiz_t)1,(Ssiz_t)0   ,TString::kExact); assert(jdot>0);                                                           
+    jsla = 0; jsla = ts.Index("/",(Ssiz_t)1,(Ssiz_t)jdot,TString::kExact); assert(jsla>0);                                                           
+    ts.Remove(jdot, jsla-jdot + 1);                                                                                                                  
+    int l = ts.Length();                                                                                                                             
+
+    for (i = 0; i < l; i++) {                                                                                                                        
+      if (ts[i]!='/') continue;                                                                                                                      
+      dir.Replace(0,999,ts,i);                                                                                                                       
+      gSystem->MakeDirectory(dir);                                                                                                                   
+    } 
+	switch(type) {
+		case 0:
+			return SaveDataSetAsRootFile((TTable*)ds, ts, savenext);
+			break;
+		case 1:
+			return SaveDataSetAsCMacro((TTable*)ds, ts, savenext);
+			break;
+        default:
+		// requested format is not known to St_db_Maker, sorry!
+		break;
+	}                                                                                                                                      	
+	return 1;
+}
+
+//_____________________________________________________________________________
+Int_t St_db_Maker::SaveDataSetAsCMacro(TTable* tb, TString ts, bool savenext) {
     TDatime val[2]; // validity of original sets                                                                                                       
     std::ofstream out; // output file handle                                                                                                           
     int i = 0; i = GetValidity(tb,val); assert(i>=0);                                                                                                    
@@ -982,10 +1021,22 @@ Int_t St_db_Maker::SaveDataSetAsCMacro(TTable* tb, TString ts) {
     out.open( ostr.str().c_str() );                                                                                                                  
     tb->SavePrimitive(out,"");                                                                                                                       
     out.close();                                                                                                                                     
+
+	if (savenext == true) {
+    	std::string tbname( std::string(ts.Data()).substr(7) ); // name of data set to search for
+    	if (val[1].GetDate() < 20330101 ) { // table has more values, let's store +1 dataset 
+        	TDataSet* ds_r = 0;                                                                                                                          
+        	ds_r = GetDataBase(tbname.c_str(), &val[1]);                                                                                                 
+			if (ds_r) {
+				SaveDataSetAsCMacro((TTable*)ds_r, ts, false);
+        		delete ds_r;
+			}                                                                                                                                 
+    	}                                                                                                                                                
+	}
 	return 0;
 }
 
-Int_t St_db_Maker::SaveDataSetAsRootFile(TTable* tb, TString ts) {
+Int_t St_db_Maker::SaveDataSetAsRootFile(TTable* tb, TString ts, bool savenext) {
     TDatime val[2]; // validity of original sets                                                                                                       
     int i = 0; i = GetValidity(tb,val); assert(i>=0);                                                                                                    
     std::stringstream ostr;                                                                                                                          
@@ -994,21 +1045,28 @@ Int_t St_db_Maker::SaveDataSetAsRootFile(TTable* tb, TString ts) {
     TFile ofile(ostr.str().c_str(),"RECREATE" );                                                                                                   
     tb->Write();                                                                                                                                 
     ofile.Close(); 
+
+	if (savenext == true) {
+    	std::string tbname( std::string(ts.Data()).substr(7) ); // name of data set to search for
+    	if (val[1].GetDate() < 20330101 ) { // table has more values, let's store +1 dataset 
+        	TDataSet* ds_r = 0;                                                                                                                          
+        	ds_r = GetDataBase(tbname.c_str(), &val[1]);                                                                                                 
+			if (ds_r) {
+				SaveDataSetAsRootFile((TTable*)ds_r, ts, false);
+        		delete ds_r;
+			}                                                                                                                                 
+    	}
+	}                                                                                                                                                
+
 	return 0;
 }
 
 //_____________________________________________________________________________
 Int_t  St_db_Maker::SaveSnapshotPlus(char* path, int type)                                                                            
 {                                                                                                                                                    
-  int i = 0;                                                                                                                                         
-  int jdot = 0, jsla = 0; // used for recursive directory creation                                                                                   
   TDataSet *top = 0, *ds = 0;                                                                                                                        
-  TTable   *tb = 0;                                                                                                                                  
   TString ts; // DataSet path                                                                                                                        
-  TString dir; // DataSet directory on disk                                                                                                          
-  TDatime val[2]; // validity of original sets                                                                                                       
   TDataSet::EDataSetPass  mode = TDataSet::kContinue;                                                                                                
-  std::ofstream out; // output file handle                                                                                                           
   TDatime maxDbTime; 
   maxDbTime.Set(kMaxTime,0);                                                                                                                                 
 
@@ -1017,66 +1075,19 @@ Int_t  St_db_Maker::SaveSnapshotPlus(char* path, int type)
   if (!top) {                                                                                                                                        
     // can't find requested database name                                                                                                            
     return 1;                                                                                                                                        
-  }                                                                                                                                                  
+  }                 
   TDataSetIter nextDS(top,999); 
-
+  ds = nextDS(mode);
+  if (!ds) {
+	 // no subtrees found, let's save this lonely dataset 
+	 SaveDataSet(top, type, true);
+	 return 0;
+  }
   // cycle through available datasets                                                                                                                
   while ((ds = nextDS(mode))) {                                                                                                                      
     mode = TDataSet::kContinue;                                                                                                                      
     if (ds->GetName()[0]=='.') { mode = TDataSet::kPrune; continue; }                                                                                
-    if (!ds->InheritsFrom(TTable::Class())) {                                                                                                        
-        // dataset is not inherited from TTable                                                                                                      
-        continue;                                                                                                                                    
-    }                                                                                                                                                
-    // get DataSet path in hierarchy                                                                                                                 
-    ts = ds->Path();                                                                                                                                 
-    i = 0; i = ts.Index(".const/"); assert(i>0); ts.Replace(0,i+7,"");                                                                               
-                                                                                                                                                     
-    jdot = 0; jdot = ts.Index(".",(Ssiz_t)1,(Ssiz_t)0   ,TString::kExact); assert(jdot>0);                                                           
-    jsla = 0; jsla = ts.Index("/",(Ssiz_t)1,(Ssiz_t)jdot,TString::kExact); assert(jsla>0);                                                           
-    ts.Remove(jdot, jsla-jdot + 1);                                                                                                                  
-                                                                                                                                                     
-    // recursively create directory on disk from DataSet path                                                                                        
-    int l = ts.Length();                                                                                                                             
-    for (i = 0; i < l; i++) {                                                                                                                        
-      if (ts[i]!='/') continue;                                                                                                                      
-      dir.Replace(0,999,ts,i);                                                                                                                       
-      gSystem->MakeDirectory(dir);                                                                                                                   
-    } 
-
-    // cast DataSet to TTable and get validity time range                                                                                            
-    tb = (TTable*)ds;                                                                                                                                
-	i = 0; i = GetValidity(tb,val); assert(i>=0);	
-	switch(type) {
-		case 0:
-			SaveDataSetAsRootFile(tb, ts);
-			break;
-		case 1:
-			SaveDataSetAsCMacro(tb, ts);
-			break;
-        default:
-		// requested format is not known to St_db_Maker, sorry!
-		break;
-	}                                                                                                                                      
-    std::string tbname( std::string(ts.Data()).substr(7) ); // name of data set to search for
-    if (val[1].GetDate() < 20330101 ) { // table has more values, let's store +1 dataset 
-        TDataSet* ds_r = 0;                                                                                                                          
-        ds_r = GetDataBase(tbname.c_str(), &val[1]);                                                                                                 
-        tb = (TTable*)ds_r;                                                                                                                          
-		switch(type) {
-			case 0:
-				SaveDataSetAsRootFile(tb, ts);
-				break;
-			case 1:
-				SaveDataSetAsCMacro(tb, ts);
-				break;
-        	default:
-			// requested format is not known to St_db_Maker, sorry!
-			break;
-		}                                                                                                                                      
-        delete ds_r;                                                                                                                                 
-    }                                                                                                                                                
-                                                                                                                                                     
+	SaveDataSet(ds, type, true);
   }                                                                                                                                                  
   return 0;                                                                                                                                          
 }   
