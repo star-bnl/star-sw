@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.121 2010/05/05 18:35:03 dmitry Exp $
+// $Id: St_db_Maker.cxx,v 1.122 2010/05/05 20:44:15 dmitry Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.122  2010/05/05 20:44:15  dmitry
+// Fixed check for db broker in file mode
+//
 // Revision 1.121  2010/05/05 18:35:03  dmitry
 // addon: single datasets also saved
 //
@@ -603,11 +606,17 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
     if (val->fTimeMin.Get() <= uevent
      && val->fTimeMax.Get() >  uevent)          return kPrune;
 
+   TObjectSet set("dbSnapshot",0);                                                                                                                   
+   const char *fname = mk->SAttr("dbSnapshot");                                                                                                      
+   if (!fname || !*fname) {                                                                                                                          
+     // not in a snapshot mode                                                                                                                       
+   } else { 
     if (!mk->fDBBroker) {
       mk->Error("UpdateDB","DbSnapshot mode: wrong validity for %s ignored( ???? )"
                ,val->GetName());
       return kPrune;
     }
+  }
   TDataSet *par = val->GetParent();
   par->Remove(val->fDat);
   mk->UpdateValiSet(val,currenTime);
