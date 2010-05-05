@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.119 2010/04/28 07:23:40 dmitry Exp $
+// $Id: St_db_Maker.cxx,v 1.120 2010/05/05 15:25:51 dmitry Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.120  2010/05/05 15:25:51  dmitry
+// refactored snapshot code, to include Valeri's patch (save .root files)
+//
 // Revision 1.119  2010/04/28 07:23:40  dmitry
 // =new method to save snapshot+one subsequent dataset for each table in db
 //
@@ -969,7 +972,33 @@ Int_t  St_db_Maker::Save(const char *path,const TDatime *newtime)
   return (!nakt);
 }
 //_____________________________________________________________________________
-Int_t  St_db_Maker::SaveSnapshotPlus(char* path)                                                                            
+Int_t St_db_Maker::SaveDataSetAsCMacro(TTable* tb, TString ts) {
+    TDatime val[2]; // validity of original sets                                                                                                       
+    std::ofstream out; // output file handle                                                                                                           
+    int i = 0; i = GetValidity(tb,val); assert(i>=0);                                                                                                    
+    std::stringstream ostr;                                                                                                                          
+    ostr << ts << "." << std::setw(6) << std::setfill('0') <<val[0].GetDate() << "." << std::setw(6) << std::setfill('0')                            
+         << val[0].GetTime() << ".C"; 
+    out.open( ostr.str().c_str() );                                                                                                                  
+    tb->SavePrimitive(out,"");                                                                                                                       
+    out.close();                                                                                                                                     
+	return 0;
+}
+
+Int_t St_db_Maker::SaveDataSetAsRootFile(TTable* tb, TString ts) {
+    TDatime val[2]; // validity of original sets                                                                                                       
+    int i = 0; i = GetValidity(tb,val); assert(i>=0);                                                                                                    
+    std::stringstream ostr;                                                                                                                          
+    ostr << ts << "." << std::setw(6) << std::setfill('0') <<val[0].GetDate() << "." << std::setw(6) << std::setfill('0')                            
+         << val[0].GetTime() << ".root";                                                                                                             
+    TFile ofile(ostr.str().c_str(),"RECREATE" );                                                                                                   
+    tb->Write();                                                                                                                                 
+    ofile.Close(); 
+	return 0;
+}
+
+//_____________________________________________________________________________
+Int_t  St_db_Maker::SaveSnapshotPlus(char* path, int type)                                                                            
 {                                                                                                                                                    
   int i = 0;                                                                                                                                         
   int jdot = 0, jsla = 0; // used for recursive directory creation                                                                                   
@@ -978,7 +1007,6 @@ Int_t  St_db_Maker::SaveSnapshotPlus(char* path)
   TString ts; // DataSet path                                                                                                                        
   TString dir; // DataSet directory on disk                                                                                                          
   TDatime val[2]; // validity of original sets                                                                                                       
-  TDatime val_r[2]; // validity of "follow-up" sets                                                                                                  
   TDataSet::EDataSetPass  mode = TDataSet::kContinue;                                                                                                
   std::ofstream out; // output file handle                                                                                                           
   TDatime maxDbTime; 
@@ -1018,26 +1046,34 @@ Int_t  St_db_Maker::SaveSnapshotPlus(char* path)
 
     // cast DataSet to TTable and get validity time range                                                                                            
     tb = (TTable*)ds;                                                                                                                                
-    i = 0; i = GetValidity(tb,val); assert(i>=0);                                                                                                    
-    std::stringstream ostr;                                                                                                                          
-    ostr << ts << "." << std::setw(6) << std::setfill('0') <<val[0].GetDate() << "." << std::setw(6) << std::setfill('0')                            
-         << val[0].GetTime() << ".C"; 
-    out.open( ostr.str().c_str() );                                                                                                                  
-    tb->SavePrimitive(out,"");                                                                                                                       
-    out.close();                                                                                                                                     
-                                                                                                                                                     
+	i = 0; i = GetValidity(tb,val); assert(i>=0);	
+	switch(type) {
+		case 0:
+			SaveDataSetAsRootFile(tb, ts);
+			break;
+		case 1:
+			SaveDataSetAsCMacro(tb, ts);
+			break;
+        default:
+		// requested format is not known to St_db_Maker, sorry!
+		break;
+	}                                                                                                                                      
     std::string tbname( std::string(ts.Data()).substr(7) ); // name of data set to search for
     if (val[1].GetDate() < 20330101 ) { // table has more values, let's store +1 dataset 
         TDataSet* ds_r = 0;                                                                                                                          
         ds_r = GetDataBase(tbname.c_str(), &val[1]);                                                                                                 
         tb = (TTable*)ds_r;                                                                                                                          
-        i = 0; i = GetValidity(tb,val_r); assert(i>=0);                                                                                              
-        ostr.str("");                                                                                                                                
-        ostr << ts << "." << std::setw(6) << std::setfill('0') <<val_r[0].GetDate() << "." << std::setw(6) << std::setfill('0')                      
-             << val_r[0].GetTime() << ".C"; 
-        out.open( ostr.str().c_str() );                                                                                                              
-        tb->SavePrimitive(out,"");                                                                                                                   
-        out.close();                                                                                                                                 
+		switch(type) {
+			case 0:
+				SaveDataSetAsRootFile(tb, ts);
+				break;
+			case 1:
+				SaveDataSetAsCMacro(tb, ts);
+				break;
+        	default:
+			// requested format is not known to St_db_Maker, sorry!
+			break;
+		}                                                                                                                                      
         delete ds_r;                                                                                                                                 
     }                                                                                                                                                
                                                                                                                                                      
