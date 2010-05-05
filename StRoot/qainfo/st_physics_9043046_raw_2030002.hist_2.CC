@@ -1,6 +1,6 @@
 {
 //=========Macro generated from canvas: CanvasName/ STAR Maker Histogram Canvas
-//=========  (Mon Apr  5 14:25:24 2010) by ROOT version5.22/00
+//=========  (Wed May  5 16:27:20 2010) by ROOT version5.22/00
    TCanvas *CanvasName = new TCanvas("CanvasName", " STAR Maker Histogram Canvas",1,1,600,756);
    gStyle->SetOptFit(1);
    CanvasName->Range(0,0,1,1);
@@ -25,7 +25,7 @@
    text = pt->AddText("Hists");
    pt->Draw();
    
-   pl = new TPaveLabel(0.7,0.01,0.95,0.03,"Mon Apr  5 14:25:23 2010","br");
+   pl = new TPaveLabel(0.7,0.01,0.95,0.03,"Wed May  5 16:27:20 2010","br");
    pl->SetTextSize(0.6);
    pl->Draw();
    
@@ -124,7 +124,7 @@
    PadName_2 = new TPad("PadName_2", "PadName_2",0.51,0.6766667,0.99,0.99);
    PadName_2->Draw();
    PadName_2->cd();
-   PadName_2->Range(-45,0.1828124,405,20.85469);
+   PadName_2->Range(-45,0.1828125,405,20.85469);
    PadName_2->SetFillColor(10);
    PadName_2->SetBorderMode(0);
    PadName_2->SetBorderSize(2);
@@ -142,13 +142,13 @@
    StEQaV0VtxPhiDist->SetBinContent(7,11);
    StEQaV0VtxPhiDist->SetBinContent(8,8);
    StEQaV0VtxPhiDist->SetBinContent(9,8);
-   StEQaV0VtxPhiDist->SetBinContent(10,10);
+   StEQaV0VtxPhiDist->SetBinContent(10,9);
    StEQaV0VtxPhiDist->SetBinContent(11,14);
    StEQaV0VtxPhiDist->SetBinContent(12,10);
    StEQaV0VtxPhiDist->SetBinContent(13,17);
    StEQaV0VtxPhiDist->SetBinContent(14,13);
    StEQaV0VtxPhiDist->SetBinContent(15,12);
-   StEQaV0VtxPhiDist->SetBinContent(16,13);
+   StEQaV0VtxPhiDist->SetBinContent(16,14);
    StEQaV0VtxPhiDist->SetBinContent(17,5);
    StEQaV0VtxPhiDist->SetBinContent(18,9);
    StEQaV0VtxPhiDist->SetBinContent(19,11);
@@ -158,7 +158,7 @@
    StEQaV0VtxPhiDist->SetBinContent(23,6);
    StEQaV0VtxPhiDist->SetBinContent(24,9);
    StEQaV0VtxPhiDist->SetBinContent(25,6);
-   StEQaV0VtxPhiDist->SetBinContent(26,13);
+   StEQaV0VtxPhiDist->SetBinContent(26,12);
    StEQaV0VtxPhiDist->SetBinContent(27,12);
    StEQaV0VtxPhiDist->SetBinContent(28,10);
    StEQaV0VtxPhiDist->SetBinContent(29,9);
@@ -169,7 +169,7 @@
    StEQaV0VtxPhiDist->SetBinContent(34,8);
    StEQaV0VtxPhiDist->SetBinContent(35,9);
    StEQaV0VtxPhiDist->SetBinContent(36,14);
-   StEQaV0VtxPhiDist->SetEntries(374);
+   StEQaV0VtxPhiDist->SetEntries(373);
    StEQaV0VtxPhiDist->SetDirectory(0);
    
    ptstats = new TPaveStats(0.78,0.675,0.98,0.995,"brNDC");
@@ -180,7 +180,7 @@
    ptstats->SetTextAlign(12);
    text = ptstats->AddText("StEQaV0VtxPhiDist");
    text->SetTextSize(0.04906667);
-   text = ptstats->AddText("Entries = 374    ");
+   text = ptstats->AddText("Entries = 373    ");
    text = ptstats->AddText("Mean  =  174.8");
    text = ptstats->AddText("RMS   =  108.8");
    text = ptstats->AddText("Underflow =      0");

@@ -1,7 +1,7 @@
 {
 //=========Macro generated from canvas: CanvasName/ STAR Maker Histogram Canvas
-//=========  (Mon Apr  5 14:17:56 2010) by ROOT version5.22/00
-   TCanvas *CanvasName = new TCanvas("CanvasName", " STAR Maker Histogram Canvas",1,1,600,756);
+//=========  (Wed May  5 16:39:55 2010) by ROOT version5.22/00
+   TCanvas *CanvasName = new TCanvas("CanvasName", " STAR Maker Histogram Canvas",4,23,600,780);
    gStyle->SetOptFit(1);
    CanvasName->Range(0,0,1,1);
    CanvasName->SetFillColor(10);
@@ -25,7 +25,7 @@
    text = pt->AddText("Hists");
    pt->Draw();
    
-   pl = new TPaveLabel(0.7,0.01,0.95,0.03,"Mon Apr  5 14:17:56 2010","br");
+   pl = new TPaveLabel(0.7,0.01,0.95,0.03,"Wed May  5 16:39:52 2010","br");
    pl->SetTextSize(0.6);
    pl->Draw();
    
@@ -153,42 +153,42 @@
    PadName_2->SetFrameBorderMode(0);
    
    TH1 *StEQaV0VtxPhiDist = new TH1F("StEQaV0VtxPhiDist","StE V0 azimuthal distribution relative to primvtx",36,0,360);
-   StEQaV0VtxPhiDist->SetBinContent(1,959);
+   StEQaV0VtxPhiDist->SetBinContent(1,958);
    StEQaV0VtxPhiDist->SetBinContent(2,938);
    StEQaV0VtxPhiDist->SetBinContent(3,935);
-   StEQaV0VtxPhiDist->SetBinContent(4,950);
-   StEQaV0VtxPhiDist->SetBinContent(5,986);
+   StEQaV0VtxPhiDist->SetBinContent(4,952);
+   StEQaV0VtxPhiDist->SetBinContent(5,987);
    StEQaV0VtxPhiDist->SetBinContent(6,1050);
-   StEQaV0VtxPhiDist->SetBinContent(7,1004);
-   StEQaV0VtxPhiDist->SetBinContent(8,949);
+   StEQaV0VtxPhiDist->SetBinContent(7,1003);
+   StEQaV0VtxPhiDist->SetBinContent(8,948);
    StEQaV0VtxPhiDist->SetBinContent(9,950);
    StEQaV0VtxPhiDist->SetBinContent(10,967);
-   StEQaV0VtxPhiDist->SetBinContent(11,974);
-   StEQaV0VtxPhiDist->SetBinContent(12,942);
-   StEQaV0VtxPhiDist->SetBinContent(13,983);
+   StEQaV0VtxPhiDist->SetBinContent(11,975);
+   StEQaV0VtxPhiDist->SetBinContent(12,943);
+   StEQaV0VtxPhiDist->SetBinContent(13,984);
    StEQaV0VtxPhiDist->SetBinContent(14,945);
    StEQaV0VtxPhiDist->SetBinContent(15,997);
-   StEQaV0VtxPhiDist->SetBinContent(16,1041);
-   StEQaV0VtxPhiDist->SetBinContent(17,994);
-   StEQaV0VtxPhiDist->SetBinContent(18,902);
-   StEQaV0VtxPhiDist->SetBinContent(19,984);
-   StEQaV0VtxPhiDist->SetBinContent(20,948);
+   StEQaV0VtxPhiDist->SetBinContent(16,1039);
+   StEQaV0VtxPhiDist->SetBinContent(17,993);
+   StEQaV0VtxPhiDist->SetBinContent(18,903);
+   StEQaV0VtxPhiDist->SetBinContent(19,985);
+   StEQaV0VtxPhiDist->SetBinContent(20,947);
    StEQaV0VtxPhiDist->SetBinContent(21,949);
    StEQaV0VtxPhiDist->SetBinContent(22,978);
-   StEQaV0VtxPhiDist->SetBinContent(23,876);
-   StEQaV0VtxPhiDist->SetBinContent(24,877);
+   StEQaV0VtxPhiDist->SetBinContent(23,877);
+   StEQaV0VtxPhiDist->SetBinContent(24,876);
    StEQaV0VtxPhiDist->SetBinContent(25,926);
-   StEQaV0VtxPhiDist->SetBinContent(26,851);
-   StEQaV0VtxPhiDist->SetBinContent(27,897);
+   StEQaV0VtxPhiDist->SetBinContent(26,849);
+   StEQaV0VtxPhiDist->SetBinContent(27,896);
    StEQaV0VtxPhiDist->SetBinContent(28,884);
-   StEQaV0VtxPhiDist->SetBinContent(29,847);
-   StEQaV0VtxPhiDist->SetBinContent(30,904);
+   StEQaV0VtxPhiDist->SetBinContent(29,849);
+   StEQaV0VtxPhiDist->SetBinContent(30,903);
    StEQaV0VtxPhiDist->SetBinContent(31,845);
-   StEQaV0VtxPhiDist->SetBinContent(32,867);
-   StEQaV0VtxPhiDist->SetBinContent(33,906);
+   StEQaV0VtxPhiDist->SetBinContent(32,868);
+   StEQaV0VtxPhiDist->SetBinContent(33,907);
    StEQaV0VtxPhiDist->SetBinContent(34,888);
    StEQaV0VtxPhiDist->SetBinContent(35,953);
-   StEQaV0VtxPhiDist->SetBinContent(36,960);
+   StEQaV0VtxPhiDist->SetBinContent(36,959);
    StEQaV0VtxPhiDist->SetEntries(33806);
    StEQaV0VtxPhiDist->SetDirectory(0);
    
@@ -201,7 +201,7 @@
    text = ptstats->AddText("StEQaV0VtxPhiDist");
    text->SetTextSize(0.04906667);
    text = ptstats->AddText("Entries = 33806  ");
-   text = ptstats->AddText("Mean  =  176.8");
+   text = ptstats->AddText("Mean  =  176.7");
    text = ptstats->AddText("RMS   =  103.7");
    text = ptstats->AddText("Underflow =      0");
    text = ptstats->AddText("Overflow  =      0");
@@ -227,7 +227,7 @@
    PadName_3 = new TPad("PadName_3", "PadName_3",0.01,0.3433333,0.49,0.6566667);
    PadName_3->Draw();
    PadName_3->cd();
-   PadName_3->Range(-45,391.4125,405,777.2875);
+   PadName_3->Range(-45,390.0369,405,778.6681);
    PadName_3->SetFillColor(10);
    PadName_3->SetBorderMode(0);
    PadName_3->SetBorderSize(2);
@@ -240,7 +240,7 @@
    PadName_4 = new TPad("PadName_4", "PadName_4",0.51,0.3433333,0.99,0.6566667);
    PadName_4->Draw();
    PadName_4->cd();
-   PadName_4->Range(-2.5,0.7262341,2.5,4.255706);
+   PadName_4->Range(-2.5,0.726247,2.5,4.25559);
    PadName_4->SetFillColor(10);
    PadName_4->SetBorderMode(0);
    PadName_4->SetBorderSize(2);
@@ -254,7 +254,7 @@
    PadName_5 = new TPad("PadName_5", "PadName_5",0.01,0.01,0.49,0.3233333);
    PadName_5->Draw();
    PadName_5->cd();
-   PadName_5->Range(-3.75,-0.797153,3.75,4.164077);
+   PadName_5->Range(-3.75,-0.7971751,3.75,4.164276);
    PadName_5->SetFillColor(10);
    PadName_5->SetBorderMode(0);
    PadName_5->SetBorderSize(2);
@@ -268,7 +268,7 @@
    PadName_6 = new TPad("PadName_6", "PadName_6",0.51,0.01,0.99,0.3233333);
    PadName_6->Draw();
    PadName_6->cd();
-   PadName_6->Range(1.625,-0.6697359,5.375,3.017323);
+   PadName_6->Range(1.625,-0.6697358,5.375,3.017323);
    PadName_6->SetFillColor(10);
    PadName_6->SetBorderMode(0);
    PadName_6->SetBorderSize(2);
