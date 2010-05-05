@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.37 2010/05/05 15:25:51 dmitry Exp $
+// $Id: St_db_Maker.h,v 1.38 2010/05/05 18:35:04 dmitry Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.38  2010/05/05 18:35:04  dmitry
+// addon: single datasets also saved
+//
 // Revision 1.37  2010/05/05 15:25:51  dmitry
 // refactored snapshot code, to include Valeri's patch (save .root files)
 //
@@ -125,7 +128,7 @@ private:
   int         fEvents[2];       // [0]=nEvents [1]=events with mysql request
   int         fDataSize[2];     // [0]=mysql data this event; [1]=total
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.37 2010/05/05 15:25:51 dmitry Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.38 2010/05/05 18:35:04 dmitry Exp $";
  protected:
  public:
                    St_db_Maker(const char *name
@@ -144,8 +147,6 @@ private:
    virtual Int_t   Init();
    virtual Int_t   Make();
    virtual Int_t   Save(const char *path,const TDatime *newtime=0);
-   virtual Int_t   SaveDataSetAsCMacro(TTable* tb, TString ds_name);   // creates [dataset_name].[beginTime].[endTime].C file 
-   virtual Int_t   SaveDataSetAsRootFile(TTable* tb, TString ds_name); // creates [dataset_name].[beginTime].[endTime].root file 
    virtual Int_t   SaveSnapshotPlus(char* path, int type = 0);      // snapshot mode, type: 0 = .root, 1 = .C 
    virtual void    SetOff(const Char_t *path);
    virtual void    SetOn (const Char_t *path);
@@ -160,6 +161,9 @@ private:
    virtual TDataSet *LoadTable(TDataSet* left);
    virtual TDataSet *FindLeft(StValiSet *val, TDatime vals[2], const TDatime &currenTime);
    virtual TDataSet *OpenMySQL(const char* dbname);
+   virtual Int_t   SaveDataSet(TDataSet* ds, int type, bool savenext); // prepares directory and calls appropriate save method
+   virtual Int_t   SaveDataSetAsCMacro(TTable* tb, TString ds_name, bool savenext);   // creates [dataset_name].[beginTime].[endTime].C file 
+   virtual Int_t   SaveDataSetAsRootFile(TTable* tb, TString ds_name, bool savenext); // creates [dataset_name].[beginTime].[endTime].root file 
    static  Int_t     Drop(TDataSet *ds);
            int       Snapshot (int flag);
 
@@ -171,7 +175,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.37 2010/05/05 15:25:51 dmitry Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.38 2010/05/05 18:35:04 dmitry Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)
 };
