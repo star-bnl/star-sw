@@ -1,6 +1,6 @@
 {
 //=========Macro generated from canvas: CanvasName/ STAR Maker Histogram Canvas
-//=========  (Mon Apr  5 14:25:24 2010) by ROOT version5.22/00
+//=========  (Wed May  5 16:27:20 2010) by ROOT version5.22/00
    TCanvas *CanvasName = new TCanvas("CanvasName", " STAR Maker Histogram Canvas",0,0,600,780);
    gStyle->SetOptFit(1);
    CanvasName->Range(0,0,1,1);
@@ -25,7 +25,7 @@
    text = pt->AddText("Hists");
    pt->Draw();
    
-   pl = new TPaveLabel(0.7,0.01,0.95,0.03,"Mon Apr  5 14:25:23 2010","br");
+   pl = new TPaveLabel(0.7,0.01,0.95,0.03,"Wed May  5 16:27:20 2010","br");
    pl->SetTextSize(0.6);
    pl->Draw();
    
@@ -50,7 +50,7 @@
    PadName_1 = new TPad("PadName_1", "PadName_1",0.01,0.6766667,0.49,0.99);
    PadName_1->Draw();
    PadName_1->cd();
-   PadName_1->Range(-0.15,0.2753089,1.35,3.54282);
+   PadName_1->Range(-0.15,0.2753715,1.35,3.542257);
    PadName_1->SetFillColor(10);
    PadName_1->SetBorderMode(0);
    PadName_1->SetBorderSize(2);
@@ -60,7 +60,7 @@
    PadName_1->SetFrameBorderMode(0);
    
    TH1 *StEQaGtrkFitProb = new TH1F("StEQaGtrkFitProb","StE globtrk: prob. fit is correct",100,0,1.2);
-   StEQaGtrkFitProb->SetBinContent(1,868);
+   StEQaGtrkFitProb->SetBinContent(1,867);
    StEQaGtrkFitProb->SetBinContent(2,132);
    StEQaGtrkFitProb->SetBinContent(3,71);
    StEQaGtrkFitProb->SetBinContent(4,52);
@@ -124,12 +124,12 @@
    StEQaGtrkFitProb->SetBinContent(62,23);
    StEQaGtrkFitProb->SetBinContent(63,23);
    StEQaGtrkFitProb->SetBinContent(64,14);
-   StEQaGtrkFitProb->SetBinContent(65,25);
+   StEQaGtrkFitProb->SetBinContent(65,24);
    StEQaGtrkFitProb->SetBinContent(66,19);
    StEQaGtrkFitProb->SetBinContent(67,25);
    StEQaGtrkFitProb->SetBinContent(68,18);
    StEQaGtrkFitProb->SetBinContent(69,23);
-   StEQaGtrkFitProb->SetBinContent(70,26);
+   StEQaGtrkFitProb->SetBinContent(70,27);
    StEQaGtrkFitProb->SetBinContent(71,21);
    StEQaGtrkFitProb->SetBinContent(72,26);
    StEQaGtrkFitProb->SetBinContent(73,39);
@@ -142,9 +142,9 @@
    StEQaGtrkFitProb->SetBinContent(80,45);
    StEQaGtrkFitProb->SetBinContent(81,53);
    StEQaGtrkFitProb->SetBinContent(82,86);
-   StEQaGtrkFitProb->SetBinContent(83,152);
+   StEQaGtrkFitProb->SetBinContent(83,151);
    StEQaGtrkFitProb->SetBinContent(84,290);
-   StEQaGtrkFitProb->SetEntries(3435);
+   StEQaGtrkFitProb->SetEntries(3433);
    StEQaGtrkFitProb->SetDirectory(0);
    
    TPaveStats *ptstats = new TPaveStats(0.78,0.675,0.98,0.995,"brNDC");
@@ -155,9 +155,9 @@
    ptstats->SetTextAlign(12);
    text = ptstats->AddText("StEQaGtrkFitProb");
    text->SetTextSize(0.04906667);
-   text = ptstats->AddText("Entries = 3435   ");
+   text = ptstats->AddText("Entries = 3433   ");
    text = ptstats->AddText("Mean  = 0.4179");
-   text = ptstats->AddText("RMS   = 0.3985");
+   text = ptstats->AddText("RMS   = 0.3984");
    text = ptstats->AddText("Underflow =      0");
    text = ptstats->AddText("Overflow  =      0");
    ptstats->SetOptStat(111111);
@@ -193,9 +193,9 @@
    
    TH1 *StEQaGtrkNPntFitT = new TH1F("StEQaGtrkNPntFitT","StE globtrk: N fit pnts on trk, tpc",50,0,50);
    StEQaGtrkNPntFitT->SetBinContent(6,46);
-   StEQaGtrkNPntFitT->SetBinContent(7,50);
+   StEQaGtrkNPntFitT->SetBinContent(7,49);
    StEQaGtrkNPntFitT->SetBinContent(8,35);
-   StEQaGtrkNPntFitT->SetBinContent(9,33);
+   StEQaGtrkNPntFitT->SetBinContent(9,32);
    StEQaGtrkNPntFitT->SetBinContent(10,45);
    StEQaGtrkNPntFitT->SetBinContent(11,38);
    StEQaGtrkNPntFitT->SetBinContent(12,257);
@@ -205,8 +205,8 @@
    StEQaGtrkNPntFitT->SetBinContent(16,91);
    StEQaGtrkNPntFitT->SetBinContent(17,95);
    StEQaGtrkNPntFitT->SetBinContent(18,86);
-   StEQaGtrkNPntFitT->SetBinContent(19,66);
-   StEQaGtrkNPntFitT->SetBinContent(20,66);
+   StEQaGtrkNPntFitT->SetBinContent(19,65);
+   StEQaGtrkNPntFitT->SetBinContent(20,67);
    StEQaGtrkNPntFitT->SetBinContent(21,71);
    StEQaGtrkNPntFitT->SetBinContent(22,63);
    StEQaGtrkNPntFitT->SetBinContent(23,58);
@@ -232,7 +232,7 @@
    StEQaGtrkNPntFitT->SetBinContent(43,67);
    StEQaGtrkNPntFitT->SetBinContent(44,54);
    StEQaGtrkNPntFitT->SetBinContent(45,20);
-   StEQaGtrkNPntFitT->SetEntries(2987);
+   StEQaGtrkNPntFitT->SetEntries(2985);
    StEQaGtrkNPntFitT->SetDirectory(0);
    
    ptstats = new TPaveStats(0.78,0.675,0.98,0.995,"brNDC");
@@ -243,8 +243,8 @@
    ptstats->SetTextAlign(12);
    text = ptstats->AddText("StEQaGtrkNPntFitT");
    text->SetTextSize(0.04906667);
-   text = ptstats->AddText("Entries = 2987   ");
-   text = ptstats->AddText("Mean  =  23.53");
+   text = ptstats->AddText("Entries = 2985   ");
+   text = ptstats->AddText("Mean  =  23.54");
    text = ptstats->AddText("RMS   =  11.23");
    text = ptstats->AddText("Underflow =      0");
    text = ptstats->AddText("Overflow  =      0");
@@ -367,9 +367,9 @@
    StEQaGtrkPhifT_2_West->SetBinContent(15,28);
    StEQaGtrkPhifT_2_West->SetBinContent(16,28);
    StEQaGtrkPhifT_2_West->SetBinContent(17,36);
-   StEQaGtrkPhifT_2_West->SetBinContent(18,28);
+   StEQaGtrkPhifT_2_West->SetBinContent(18,27);
    StEQaGtrkPhifT_2_West->SetBinContent(19,29);
-   StEQaGtrkPhifT_2_West->SetBinContent(20,31);
+   StEQaGtrkPhifT_2_West->SetBinContent(20,32);
    StEQaGtrkPhifT_2_West->SetBinContent(21,25);
    StEQaGtrkPhifT_2_West->SetBinContent(22,22);
    StEQaGtrkPhifT_2_West->SetBinContent(23,26);
@@ -390,7 +390,7 @@
    StEQaGtrkPhifT_2_West->SetBinContent(38,17);
    StEQaGtrkPhifT_2_West->SetBinContent(39,14);
    StEQaGtrkPhifT_2_West->SetBinContent(40,19);
-   StEQaGtrkPhifT_2_West->SetBinContent(41,14);
+   StEQaGtrkPhifT_2_West->SetBinContent(41,13);
    StEQaGtrkPhifT_2_West->SetBinContent(42,21);
    StEQaGtrkPhifT_2_West->SetBinContent(43,20);
    StEQaGtrkPhifT_2_West->SetBinContent(44,13);
@@ -404,7 +404,7 @@
    StEQaGtrkPhifT_2_West->SetBinContent(52,26);
    StEQaGtrkPhifT_2_West->SetBinContent(53,23);
    StEQaGtrkPhifT_2_West->SetBinContent(54,22);
-   StEQaGtrkPhifT_2_West->SetBinContent(55,22);
+   StEQaGtrkPhifT_2_West->SetBinContent(55,21);
    StEQaGtrkPhifT_2_West->SetBinContent(56,21);
    StEQaGtrkPhifT_2_West->SetBinContent(57,40);
    StEQaGtrkPhifT_2_West->SetBinContent(58,32);
@@ -414,7 +414,7 @@
    StEQaGtrkPhifT_2_West->SetBinContent(62,25);
    StEQaGtrkPhifT_2_West->SetBinContent(63,30);
    StEQaGtrkPhifT_2_West->SetBinContent(64,23);
-   StEQaGtrkPhifT_2_West->SetEntries(1588);
+   StEQaGtrkPhifT_2_West->SetEntries(1586);
    StEQaGtrkPhifT_2_West->SetStats(0);
    StEQaGtrkPhifT_2_West->SetLineStyle(2);
    StEQaGtrkPhifT_2_West->SetLineWidth(2);
@@ -502,20 +502,20 @@
    StEQaGtrkEtaT->SetBinContent(25,117);
    StEQaGtrkEtaT->SetBinContent(26,121);
    StEQaGtrkEtaT->SetBinContent(27,109);
-   StEQaGtrkEtaT->SetBinContent(28,119);
+   StEQaGtrkEtaT->SetBinContent(28,118);
    StEQaGtrkEtaT->SetBinContent(29,107);
-   StEQaGtrkEtaT->SetBinContent(30,90);
+   StEQaGtrkEtaT->SetBinContent(30,89);
    StEQaGtrkEtaT->SetBinContent(31,86);
    StEQaGtrkEtaT->SetBinContent(32,71);
-   StEQaGtrkEtaT->SetBinContent(33,76);
-   StEQaGtrkEtaT->SetBinContent(34,54);
+   StEQaGtrkEtaT->SetBinContent(33,75);
+   StEQaGtrkEtaT->SetBinContent(34,55);
    StEQaGtrkEtaT->SetBinContent(35,31);
    StEQaGtrkEtaT->SetBinContent(36,35);
    StEQaGtrkEtaT->SetBinContent(37,23);
    StEQaGtrkEtaT->SetBinContent(38,12);
    StEQaGtrkEtaT->SetBinContent(39,5);
    StEQaGtrkEtaT->SetBinContent(41,1);
-   StEQaGtrkEtaT->SetEntries(2987);
+   StEQaGtrkEtaT->SetEntries(2985);
    StEQaGtrkEtaT->SetDirectory(0);
    
    ptstats = new TPaveStats(0.78,0.675,0.98,0.995,"brNDC");
@@ -526,8 +526,8 @@
    ptstats->SetTextAlign(12);
    text = ptstats->AddText("StEQaGtrkEtaT");
    text->SetTextSize(0.04906667);
-   text = ptstats->AddText("Entries = 2987   ");
-   text = ptstats->AddText("Mean  = 0.1367");
+   text = ptstats->AddText("Entries = 2985   ");
+   text = ptstats->AddText("Mean  = 0.1362");
    text = ptstats->AddText("RMS   = 0.7109");
    text = ptstats->AddText("Underflow =      1");
    text = ptstats->AddText("Overflow  =      1");
@@ -601,7 +601,7 @@
    StEQaGtrkImpactT_4->SetBinContent(59,50);
    StEQaGtrkImpactT_4->SetBinContent(60,49);
    StEQaGtrkImpactT_4->SetBinContent(61,35);
-   StEQaGtrkImpactT_4->SetBinContent(62,39);
+   StEQaGtrkImpactT_4->SetBinContent(62,38);
    StEQaGtrkImpactT_4->SetBinContent(63,40);
    StEQaGtrkImpactT_4->SetBinContent(64,45);
    StEQaGtrkImpactT_4->SetBinContent(65,32);
@@ -614,7 +614,7 @@
    StEQaGtrkImpactT_4->SetBinContent(72,31);
    StEQaGtrkImpactT_4->SetBinContent(73,27);
    StEQaGtrkImpactT_4->SetBinContent(74,33);
-   StEQaGtrkImpactT_4->SetBinContent(75,32);
+   StEQaGtrkImpactT_4->SetBinContent(75,33);
    StEQaGtrkImpactT_4->SetBinContent(76,29);
    StEQaGtrkImpactT_4->SetBinContent(77,38);
    StEQaGtrkImpactT_4->SetBinContent(78,29);
@@ -638,16 +638,16 @@
    StEQaGtrkImpactT_4->SetBinContent(96,52);
    StEQaGtrkImpactT_4->SetBinContent(97,47);
    StEQaGtrkImpactT_4->SetBinContent(98,43);
-   StEQaGtrkImpactT_4->SetBinContent(99,64);
+   StEQaGtrkImpactT_4->SetBinContent(99,63);
    StEQaGtrkImpactT_4->SetBinContent(100,65);
    StEQaGtrkImpactT_4->SetBinContent(101,86);
    StEQaGtrkImpactT_4->SetBinContent(102,98);
    StEQaGtrkImpactT_4->SetBinContent(103,147);
    StEQaGtrkImpactT_4->SetBinContent(104,51);
-   StEQaGtrkImpactT_4->SetBinContent(105,30);
+   StEQaGtrkImpactT_4->SetBinContent(105,29);
    StEQaGtrkImpactT_4->SetBinContent(106,7);
    StEQaGtrkImpactT_4->SetBinContent(107,1);
-   StEQaGtrkImpactT_4->SetEntries(2989);
+   StEQaGtrkImpactT_4->SetEntries(2987);
    StEQaGtrkImpactT_4->SetStats(0);
    StEQaGtrkImpactT_4->SetLineStyle(3);
    StEQaGtrkImpactT_4->SetLineWidth(2);
@@ -777,7 +777,7 @@
    StEQaGtrkImpactT_2_West->SetBinContent(59,25);
    StEQaGtrkImpactT_2_West->SetBinContent(60,19);
    StEQaGtrkImpactT_2_West->SetBinContent(61,24);
-   StEQaGtrkImpactT_2_West->SetBinContent(62,20);
+   StEQaGtrkImpactT_2_West->SetBinContent(62,19);
    StEQaGtrkImpactT_2_West->SetBinContent(63,25);
    StEQaGtrkImpactT_2_West->SetBinContent(64,20);
    StEQaGtrkImpactT_2_West->SetBinContent(65,18);
@@ -790,7 +790,7 @@
    StEQaGtrkImpactT_2_West->SetBinContent(72,17);
    StEQaGtrkImpactT_2_West->SetBinContent(73,18);
    StEQaGtrkImpactT_2_West->SetBinContent(74,18);
-   StEQaGtrkImpactT_2_West->SetBinContent(75,18);
+   StEQaGtrkImpactT_2_West->SetBinContent(75,19);
    StEQaGtrkImpactT_2_West->SetBinContent(76,16);
    StEQaGtrkImpactT_2_West->SetBinContent(77,24);
    StEQaGtrkImpactT_2_West->SetBinContent(78,9);
@@ -814,16 +814,16 @@
    StEQaGtrkImpactT_2_West->SetBinContent(96,22);
    StEQaGtrkImpactT_2_West->SetBinContent(97,16);
    StEQaGtrkImpactT_2_West->SetBinContent(98,11);
-   StEQaGtrkImpactT_2_West->SetBinContent(99,27);
+   StEQaGtrkImpactT_2_West->SetBinContent(99,26);
    StEQaGtrkImpactT_2_West->SetBinContent(100,20);
    StEQaGtrkImpactT_2_West->SetBinContent(101,31);
    StEQaGtrkImpactT_2_West->SetBinContent(102,56);
    StEQaGtrkImpactT_2_West->SetBinContent(103,58);
    StEQaGtrkImpactT_2_West->SetBinContent(104,27);
-   StEQaGtrkImpactT_2_West->SetBinContent(105,11);
+   StEQaGtrkImpactT_2_West->SetBinContent(105,10);
    StEQaGtrkImpactT_2_West->SetBinContent(106,4);
    StEQaGtrkImpactT_2_West->SetBinContent(107,1);
-   StEQaGtrkImpactT_2_West->SetEntries(1356);
+   StEQaGtrkImpactT_2_West->SetEntries(1354);
    StEQaGtrkImpactT_2_West->SetStats(0);
    StEQaGtrkImpactT_2_West->SetLineStyle(2);
    StEQaGtrkImpactT_2_West->SetLineWidth(2);
@@ -868,7 +868,7 @@
    StEQaGtrkImpactT_3_All->SetBinContent(59,50);
    StEQaGtrkImpactT_3_All->SetBinContent(60,49);
    StEQaGtrkImpactT_3_All->SetBinContent(61,35);
-   StEQaGtrkImpactT_3_All->SetBinContent(62,39);
+   StEQaGtrkImpactT_3_All->SetBinContent(62,38);
    StEQaGtrkImpactT_3_All->SetBinContent(63,40);
    StEQaGtrkImpactT_3_All->SetBinContent(64,45);
    StEQaGtrkImpactT_3_All->SetBinContent(65,32);
@@ -881,7 +881,7 @@
    StEQaGtrkImpactT_3_All->SetBinContent(72,31);
    StEQaGtrkImpactT_3_All->SetBinContent(73,27);
    StEQaGtrkImpactT_3_All->SetBinContent(74,33);
-   StEQaGtrkImpactT_3_All->SetBinContent(75,32);
+   StEQaGtrkImpactT_3_All->SetBinContent(75,33);
    StEQaGtrkImpactT_3_All->SetBinContent(76,29);
    StEQaGtrkImpactT_3_All->SetBinContent(77,38);
    StEQaGtrkImpactT_3_All->SetBinContent(78,29);
@@ -905,16 +905,16 @@
    StEQaGtrkImpactT_3_All->SetBinContent(96,52);
    StEQaGtrkImpactT_3_All->SetBinContent(97,47);
    StEQaGtrkImpactT_3_All->SetBinContent(98,43);
-   StEQaGtrkImpactT_3_All->SetBinContent(99,64);
+   StEQaGtrkImpactT_3_All->SetBinContent(99,63);
    StEQaGtrkImpactT_3_All->SetBinContent(100,65);
    StEQaGtrkImpactT_3_All->SetBinContent(101,86);
    StEQaGtrkImpactT_3_All->SetBinContent(102,98);
    StEQaGtrkImpactT_3_All->SetBinContent(103,147);
    StEQaGtrkImpactT_3_All->SetBinContent(104,51);
-   StEQaGtrkImpactT_3_All->SetBinContent(105,30);
+   StEQaGtrkImpactT_3_All->SetBinContent(105,29);
    StEQaGtrkImpactT_3_All->SetBinContent(106,7);
    StEQaGtrkImpactT_3_All->SetBinContent(107,1);
-   StEQaGtrkImpactT_3_All->SetEntries(2987);
+   StEQaGtrkImpactT_3_All->SetEntries(2985);
    StEQaGtrkImpactT_3_All->SetStats(0);
    StEQaGtrkImpactT_3_All->SetLineStyle(3);
    StEQaGtrkImpactT_3_All->SetLineWidth(2);
