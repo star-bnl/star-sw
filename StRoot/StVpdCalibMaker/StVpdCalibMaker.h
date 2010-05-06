@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.h,v 1.2 2009/11/09 21:26:02 geurts Exp $
+ * $Id: StVpdCalibMaker.h,v 1.3 2010/05/06 22:37:41 geurts Exp $
  *
  *******************************************************************/
 /*!
@@ -14,6 +14,9 @@
 /*****************************************************************
  *
  * $Log: StVpdCalibMaker.h,v $
+ * Revision 1.3  2010/05/06 22:37:41  geurts
+ * Remove slower hits (outliers) in VPD timing calculations (Xin Dong)
+ *
  * Revision 1.2  2009/11/09 21:26:02  geurts
  * basic doxygen added
  *
@@ -96,6 +99,7 @@ private:
   static const Double_t TMAX;      // tdc limit
   static const Double_t VZDIFFCUT; //   VzVpd - VzProj cut
   static const Double_t TDIFFCUT;  // fabs(time - ave(others)) > cut, remove this hit
+  static const Double_t FracTruncated; // fraction of truncation in mean calculation
 
   enum{
     NTDIG = 8,         // 8 per tray in Run 8++
@@ -117,7 +121,8 @@ private:
 
   Double_t   mVPDLeTime[2*NVPD];
   Double_t   mVPDTot[2*NVPD];
-    
+
+  Int_t      mFlag[2*NVPD];    
   Double_t   mTSumEast;
   Double_t   mTSumWest;
   UInt_t     mVPDHitPatternEast;
@@ -128,6 +133,7 @@ private:
   Int_t      mNVzVpd;                   //! number of Vz vertex
 
   /// support two kinds of input
+  Bool_t            mTruncation;       //! switch - do truncation
   StBTofCollection* mBTofColl;         //!
   StMuDst*          mMuDst;
   Bool_t            mMuDstIn;          //! switch - default is to read in StEvent
@@ -143,7 +149,7 @@ private:
   string mCalibFilePvpd; //! filename for pvpd calibration parameters
 
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StVpdCalibMaker.h,v 1.2 2009/11/09 21:26:02 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StVpdCalibMaker.h,v 1.3 2010/05/06 22:37:41 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
   ClassDef(StVpdCalibMaker,1)
 };
