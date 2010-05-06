@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.15 2007/12/13 10:35:21 jcs Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.16 2010/05/06 12:40:38 jcs Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -317,23 +317,43 @@ void StFtpcTrackToStEvent::FillGeometry(StTrack* gTrack, StFtpcTrack* track, boo
     
     abort();
   }
-
-  StThreeVectorF P(track->GetPt() * TMath::Cos(psi), track->GetPt() * TMath::Sin(psi), track->GetPz());
   
-  StTrackGeometry* geometry = new StHelixModel(short(track->GetCharge()),
+  if (outer) {
+
+    //  momentum angle at last point on track
+
+    Double_t Ptotal = TMath::Sqrt(track->GetPt()*track->GetPt() + track->GetPz()*track->GetPz());
+    Double_t psiLast = psi + track->h()*track->curvature()*track->GetTrackLength()*(track->GetPt()/Ptotal);
+    if (psiLast < 0.0) { 
+       psiLast += 2*TMath::Pi(); 
+    }
+     
+     StThreeVectorF P(track->GetPt() * TMath::Cos(psiLast), track->GetPt() * TMath::Sin(psiLast), track->GetPz());
+  
+     StTrackGeometry* geometry = new StHelixModel(short(track->GetCharge()),
+					       psiLast,
+					       track->curvature(),
+					       TMath::ATan2(track->GetPz(),(track->GetPt()+1.e-10)), // dip angle
+					       origin, 
+					       P, 
+					       track->h());
+
+     gTrack->setOuterGeometry(geometry);
+  }
+  
+  else {
+
+     StThreeVectorF P(track->GetPt() * TMath::Cos(psi), track->GetPt() * TMath::Sin(psi), track->GetPz());
+  
+     StTrackGeometry* geometry = new StHelixModel(short(track->GetCharge()),
 					       psi,
 					       track->curvature(),
 					       TMath::ATan2(track->GetPz(),(track->GetPt()+1.e-10)), // dip angle
 					       origin, 
 					       P, 
 					       track->h());
-  
-  if (outer) {
-    gTrack->setOuterGeometry(geometry);
-  }
-  
-  else {
-    gTrack->setGeometry(geometry);
+
+     gTrack->setGeometry(geometry);
   }
   
   return;
