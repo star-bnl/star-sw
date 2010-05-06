@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.3 2010/01/29 19:51:08 geurts Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.4 2010/05/06 22:37:41 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.4  2010/05/06 22:37:41  geurts
+ * Remove slower hits (outliers) in VPD timing calculations (Xin Dong)
+ *
  * Revision 1.3  2010/01/29 19:51:08  geurts
  * Fixed a bug in vzVpdFinder outlier bookkeeping (Xin Dong)
  *
@@ -65,7 +68,8 @@ ClassImp(StVpdCalibMaker)
   const Double_t StVpdCalibMaker::VZDIFFCUT=6.;
 /// TDIFFCUT: fabs(time - ave(others)) > cut, remove this hit
   const Double_t StVpdCalibMaker::TDIFFCUT=0.8;
-
+/// FracTruncated: LowEnergy runs, truncate VPD hit timing for mean calculation
+  const Double_t StVpdCalibMaker::FracTruncated=0.2;
 
 //_____________________________________________________________________________
 StVpdCalibMaker::StVpdCalibMaker(const Char_t *name) : StMaker(name)
@@ -76,6 +80,7 @@ StVpdCalibMaker::StVpdCalibMaker(const Char_t *name) : StMaker(name)
   setVPDHitsCut(1,1);
 
   //mEvent   = 0;
+  mTruncation = kFALSE;  //! Default setting: no truncation in mean calculation for large beam energy collisions
   mMuDst   = 0;
   mMuDstIn = kFALSE;   //! default is to read in StEvent
   mBTofColl       = 0;
@@ -106,6 +111,7 @@ void StVpdCalibMaker::resetVpd()
 {
   memset(mVPDLeTime, 0, sizeof(mVPDLeTime));
   memset(mVPDTot, 0, sizeof(mVPDTot));
+  memset(mFlag, 0, sizeof(mFlag));
 
   for(int i=0;i<MaxVpdVz;i++) {
     mVPDVtxZ[i] = -9999.;
@@ -336,6 +342,13 @@ Bool_t StVpdCalibMaker::loadVpdData()
       return kFALSE;
     }
 
+    if(mMuDst->event() && mMuDst->event()->runInfo().centerOfMassEnergy()<40.) {
+      mTruncation = kTRUE;
+    } else {
+      mTruncation = kFALSE;
+    }
+
+
     Int_t nhits = mMuDst->numberOfBTofHit();
 //    Int_t nhits = mMuDst->btofArray(muBTofHit)->GetEntries();
     for(int i=0;i<nhits;i++) {
@@ -365,6 +378,12 @@ Bool_t StVpdCalibMaker::loadVpdData()
         !thisEvent->btofCollection()->hitsPresent() ) {
       LOG_WARN << " Nothing to do ... bye-bye" << endm;
       return kFALSE;
+    }
+
+    if(thisEvent->runInfo() && thisEvent->runInfo()->centerOfMassEnergy()<40.) { // 40 GeV or less
+      mTruncation = kTRUE;
+    } else {
+      mTruncation = kFALSE;
     }
 
     mBTofColl = thisEvent->btofCollection();
@@ -431,11 +450,13 @@ void StVpdCalibMaker::tsum(const Double_t *tot, const Double_t *time)
 	  mVPDLeTime[i] = time[i] - dcorr;
 	  mTSumEast += mVPDLeTime[i];
 	  mVPDHitPatternEast |= 1<<(i-NVPD);
+          mFlag[i] = 1;
 	} else {
 	  mNWest++;
 	  mVPDLeTime[i] = time[i] - dcorr;
 	  mTSumWest += mVPDLeTime[i];
 	  mVPDHitPatternWest |= 1<<i;
+          mFlag[i] = 1;
 	}
 
       } else {
@@ -460,7 +481,7 @@ void StVpdCalibMaker::vzVpdFinder()
 {
   for(int i=0;i<2*NVPD;i++){
     // check
-    if(mVPDLeTime[i]<1.e-4) continue;
+    if(mVPDLeTime[i]<1.e-4 || !mFlag[i]) continue;
     double vpdtime;
     if(i<NVPD&&mNWest>1) {  // west VPD
       vpdtime = (mVPDLeTime[i]*mNWest-mTSumWest)/(mNWest-1);
@@ -469,6 +490,7 @@ void StVpdCalibMaker::vzVpdFinder()
         mVPDLeTime[i] = 0.;
         mNWest--;
         mVPDHitPatternWest &= ( 0x7ffff - (1<<i) );
+        mFlag[i] = 0;
       }
     }
     if(i>=NVPD&&mNEast>1) {  // east VPD
@@ -478,7 +500,52 @@ void StVpdCalibMaker::vzVpdFinder()
         mVPDLeTime[i] = 0.;
         mNEast--; 
         mVPDHitPatternEast &= ( 0x7ffff - (1<<(i-NVPD)) );
+        mFlag[i] = 0;
       }
+    }
+  }
+
+  // remove slower hit in low energy runs.
+  if(mTruncation) {
+//  if(0) {
+    Int_t hitIndex[2*NVPD];
+    Int_t nTube = NVPD;
+    TMath::Sort(nTube, &mVPDLeTime[0], &hitIndex[0]);
+    for(int i=0;i<NVPD;i++) {
+      cout << " i = " << i << " west time = " << mVPDLeTime[i] << endl;
+    }
+    for(int i=0;i<NVPD;i++) {
+      cout << hitIndex[i] << " ";
+    }
+    cout << endl;
+    int nRejectedWest = (int)(FracTruncated*mNWest+0.5);
+    cout << " NWest before = " << mNWest << " rejected = " << nRejectedWest << endl;
+    for(int i=0;i<nRejectedWest;i++) {
+      int index = hitIndex[i];
+      mTSumWest -= mVPDLeTime[index];
+      mVPDLeTime[index] = 0.;
+      mNWest--;
+      mVPDHitPatternWest &= ( 0x7ffff - (1<<index) );
+      mFlag[index] = 0;
+    }
+
+    TMath::Sort(nTube, &mVPDLeTime[NVPD], &hitIndex[NVPD]);
+    for(int i=0;i<NVPD;i++) {
+      cout << " i = " << i << " east time = " << mVPDLeTime[i+NVPD] << endl;
+    }
+    for(int i=0;i<NVPD;i++) {
+      cout << hitIndex[i+NVPD] << " ";
+    }
+    cout << endl;
+    int nRejectedEast = (int)(FracTruncated*mNEast+0.5);
+    cout << " NEast before = " << mNEast << " rejected = " << nRejectedEast << endl;
+    for(int i=0;i<nRejectedEast;i++) {
+      int index = hitIndex[i+NVPD] + NVPD;
+      mTSumEast -= mVPDLeTime[index];
+      mVPDLeTime[index] = 0.;
+      mNEast--;
+      mVPDHitPatternEast &= ( 0x7ffff - (1<<(index-NVPD)) );
+      mFlag[index] = 0;
     }
   }
 
