@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.31 2010/02/05 16:28:52 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.32 2010/05/07 15:32:16 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -458,7 +458,8 @@ char *daqReader::get(int num, int type)
 
   // Now, mount the sfs file...
   // The mount unmounts and closes previous mount... 
-  ret = sfs->mountSingleDirMem(memmap->mem, event_size);
+  LOG(DBG, "mounting single dir(mem): off=%d sz=%d",evt_offset_in_file, event_size);
+  ret = sfs->mountSingleDirMem(memmap->mem, event_size, evt_offset_in_file);
 
   if(ret < 0) {
     LOG(ERR, "Error mounting sfs?");
@@ -466,7 +467,6 @@ char *daqReader::get(int num, int type)
     return NULL;
   }
 
- 
   // CD to the current event...
   fs_dir *fsdir = sfs->opendir("/");
   for(;;) {
@@ -537,10 +537,12 @@ char *daqReader::get(int num, int type)
 
   // Now we need to fill in the summary information from datap
   //
+  SummaryInfo info;
   fs_dirent *summary = sfs->opendirent("EventSummary");
   if(summary) {
     char *buff = memmap->mem + summary->offset;
-    fillSummaryInfo((gbPayload *)buff);
+    fillSummaryInfo(&info,(gbPayload *)buff);
+    copySummaryInfoIn(&info);
   }
   else { // take it from datap
     LOG(DBG, "No EventSummary, search for legacy datap");
@@ -551,7 +553,8 @@ char *daqReader::get(int num, int type)
     }
     else {
       char *buff = memmap->mem + summary->offset;
-      fillSummaryInfo((DATAP *)buff);
+      fillSummaryInfo(&info,(DATAP *)buff);
+      copySummaryInfoIn(&info);
     }
   }
 
@@ -942,6 +945,32 @@ int daqReader::getNextEventFilename(int num, int type)
   }
 }
 
+int daqReader::copySummaryInfoIn(SummaryInfo *info)
+{  
+  // gbPayload is mostly little endian...
+  token = info->token;
+  evt_time = info->evt_time;
+  detectors = info->detectors;
+  daqbits_l1 = info->daqbits_l1;
+  daqbits_l2 = info->daqbits_l2;
+  evpgroups = info->evpgroups;
+  daqbits = info->daqbits;
+  evp_daqbits = info->evp_daqbits;
+  //seq = info->seq;
+
+  // event descriptor is big endian...
+  trgword = info->trgword;
+  trgcmd = info->trgcmd;
+  daqcmd = info->daqcmd;
+  
+  memcpy(L1summary, info->L1summary, sizeof(L1summary));
+  memcpy(L2summary, info->L2summary, sizeof(L2summary));
+  memcpy(L3summary, info->L3summary, sizeof(L3summary));
+
+  return 0;
+}
+
+
 int daqReader::hackSummaryInfo()
 {
   // gbPayload is mostly little endian...
@@ -966,26 +995,31 @@ int daqReader::hackSummaryInfo()
   return 0;
 }
 
-int daqReader::fillSummaryInfo(gbPayload *pay)
+int daqReader::fillSummaryInfo(SummaryInfo *info, gbPayload *pay)
 {
   // First, determine which gbPayload:
 
+  LOG(DBG, "pay=0x%x",pay);
+
   u_int version = pay->gbPayloadVersion;
+
+  LOG(NOTE, "version = 0x%x", version);
 
   if(((version & 0xff000000) != 0xda000000) && ((b2h32(version) & 0x000000ff ) != 0x40)) {   // Version 0x01
     gbPayload_0x01 *pv = (gbPayload_0x01 *)pay;
     LOG(NOTE, "gbPayload 0x01:  v#=0x%x",b2h32(version));    // picked up from big endian evtdes
-    return fillSummaryInfo_v01(pv);
+    return fillSummaryInfo_v01(info, pv);
   }
 
   if(((version & 0xff000000) != 0xda000000) && ((b2h32(version) & 0x000000ff ) == 0x40)) {   // Version 0x01a
     gbPayload_0x01a *pv = (gbPayload_0x01a *)pay;
     LOG(NOTE, "gbPayload 0x01a:  v#=0x%x", b2h32(version));  // picked up from big endian evtdesc
-    return fillSummaryInfo_v01a(pv);
+    return fillSummaryInfo_v01a(info, pv);
   }
 
   if(version == GB_PAYLOAD_VERSION) {
-    return fillSummaryInfo_v02(pay);
+    LOG(NOTE, "gbPayload 0x02: v#=0x%x",b2h32(version));
+    return fillSummaryInfo_v02(info, pay);
   }
 
   LOG(ERR, "gbPayload Version: 0x%x not known", version);
@@ -993,111 +1027,108 @@ int daqReader::fillSummaryInfo(gbPayload *pay)
 }
 
 
-int daqReader::fillSummaryInfo_v02(gbPayload *pay) {
+int daqReader::fillSummaryInfo_v02(SummaryInfo *info, gbPayload *pay) {
   // gbPayload is mostly little endian...
 
   LOG(NOTE, "gbPayloadVersion=0x%x, trgVersion=0x%x", pay->gbPayloadVersion, pay->EventDescriptor.TrgDataFmtVer);
 
-  token = l2h32(pay->token);
-  evt_time = l2h32(pay->sec);
-  detectors = l2h32(pay->rtsDetMask);
-  daqbits_l1 = l2h32(pay->L1summary[0]);
-  daqbits_l2 = l2h32(pay->L2summary[0]);
-  evpgroups = l2h32(pay->L3summary[3]);
-  daqbits = l2h32(pay->L3summary[0]);
-  evp_daqbits = daqbits;
+  info->token = l2h32(pay->token);
+  info->evt_time = l2h32(pay->sec);
+  info->detectors = l2h32(pay->rtsDetMask);
+  info->daqbits_l1 = l2h32(pay->L1summary[0]);
+  info->daqbits_l2 = l2h32(pay->L2summary[0]);
+  info->evpgroups = l2h32(pay->L3summary[3]);
+  info->daqbits = l2h32(pay->L3summary[0]);
+  info->evp_daqbits = daqbits;
 
   // event descriptor is big endian...
-  trgword = b2h16(pay->EventDescriptor.TriggerWord);
-  trgcmd = pay->EventDescriptor.actionWdTrgCommand;
-  daqcmd = pay->EventDescriptor.actionWdDaqCommand;
+  info->trgword = b2h16(pay->EventDescriptor.TriggerWord);
+  info->trgcmd = pay->EventDescriptor.actionWdTrgCommand;
+  info->daqcmd = pay->EventDescriptor.actionWdDaqCommand;
 
-  for(int i=0;i<2;i++) L1summary[i] = l2h32(pay->L1summary[i]);
-  for(int i=0;i<2;i++) L2summary[i] = l2h32(pay->L2summary[i]);
-  for(int i=0;i<4;i++) L3summary[i] = l2h32(pay->L3summary[i]);
+  for(int i=0;i<2;i++) info->L1summary[i] = l2h32(pay->L1summary[i]);
+  for(int i=0;i<2;i++) info->L2summary[i] = l2h32(pay->L2summary[i]);
+  for(int i=0;i<4;i++) info->L3summary[i] = l2h32(pay->L3summary[i]);
 
   return 0;
 }
 
-int daqReader::fillSummaryInfo_v01a(gbPayload_0x01a *pay)
+int daqReader::fillSummaryInfo_v01a(SummaryInfo *info, gbPayload_0x01a *pay)
 {  
   LOG(NOTE, "gbPayloadVersion=0xda000001, trgVersion=0x%x", pay->EventDescriptor.TrgDataFmtVer);
 
   // gbPayload is mostly little endian...
-  token = l2h32(pay->token);
-  evt_time = l2h32(pay->sec);
-  detectors = l2h32(pay->rtsDetMask);
-  daqbits_l1 = l2h32(pay->L1summary[0]);
-  daqbits_l2 = l2h32(pay->L2summary[0]);
-  evpgroups = l2h32(pay->L3summary[2]);
-  daqbits = l2h32(pay->L3summary[0]);
-  evp_daqbits = daqbits;
+  info->token = l2h32(pay->token);
+  info->evt_time = l2h32(pay->sec);
+  info->detectors = l2h32(pay->rtsDetMask);
+  info->daqbits_l1 = l2h32(pay->L1summary[0]);
+  info->daqbits_l2 = l2h32(pay->L2summary[0]);
+  info->evpgroups = l2h32(pay->L3summary[2]);
+  info->daqbits = l2h32(pay->L3summary[0]);
+  info->evp_daqbits = daqbits;
   
   // event descriptor is big endian...
-  trgword = b2h16(pay->EventDescriptor.TriggerWord);
-  trgcmd = pay->EventDescriptor.actionWdTrgCommand;
-  daqcmd = pay->EventDescriptor.actionWdDaqCommand;
+  info->trgword = b2h16(pay->EventDescriptor.TriggerWord);
+  info->trgcmd = pay->EventDescriptor.actionWdTrgCommand;
+  info->daqcmd = pay->EventDescriptor.actionWdDaqCommand;
 
-  for(int i=0;i<2;i++) L1summary[i] = l2h32(pay->L1summary[i]);
-  for(int i=0;i<2;i++) L2summary[i] = l2h32(pay->L2summary[i]);
-  for(int i=0;i<4;i++) L3summary[i] = l2h32(pay->L3summary[i]);
+  for(int i=0;i<2;i++) info->L1summary[i] = l2h32(pay->L1summary[i]);
+  for(int i=0;i<2;i++) info->L2summary[i] = l2h32(pay->L2summary[i]);
+  for(int i=0;i<4;i++) info->L3summary[i] = l2h32(pay->L3summary[i]);
   
   return 0;
 }
 
-int daqReader::fillSummaryInfo_v01(gbPayload_0x01 *pay)
+int daqReader::fillSummaryInfo_v01(SummaryInfo *info, gbPayload_0x01 *pay)
 {  
   LOG(NOTE, "gbPayloadVersion=0xda000001, trgVersion=0x%x", pay->EventDescriptor.TrgDataFmtVer);
 
   // gbPayload is mostly little endian...
-  token = l2h32(pay->token);
-  evt_time = l2h32(pay->sec);
-  detectors = l2h32(pay->rtsDetMask);
-  daqbits_l1 = l2h32(pay->L1summary[0]);
-  daqbits_l2 = l2h32(pay->L2summary[0]);
-  evpgroups = l2h32(pay->L3summary[2]);
-  daqbits = l2h32(pay->L3summary[0]);
-  evp_daqbits = daqbits;
+  info->token = l2h32(pay->token);
+  info->evt_time = l2h32(pay->sec);
+  info->detectors = l2h32(pay->rtsDetMask);
+  info->daqbits_l1 = l2h32(pay->L1summary[0]);
+  info->daqbits_l2 = l2h32(pay->L2summary[0]);
+  info->evpgroups = l2h32(pay->L3summary[2]);
+  info->daqbits = l2h32(pay->L3summary[0]);
+  info->evp_daqbits = daqbits;
   
   // event descriptor is big endian...
-  trgword = b2h16(pay->EventDescriptor.TriggerWord);
-  trgcmd = pay->EventDescriptor.actionWdTrgCommand;
-  daqcmd = pay->EventDescriptor.actionWdDaqCommand;
+  info->trgword = b2h16(pay->EventDescriptor.TriggerWord);
+  info->trgcmd = pay->EventDescriptor.actionWdTrgCommand;
+  info->daqcmd = pay->EventDescriptor.actionWdDaqCommand;
 
-  for(int i=0;i<2;i++) L1summary[i] = l2h32(pay->L1summary[i]);
-  for(int i=0;i<2;i++) L2summary[i] = l2h32(pay->L2summary[i]);
-  for(int i=0;i<4;i++) L3summary[i] = l2h32(pay->L3summary[i]);
+  for(int i=0;i<2;i++) info->L1summary[i] = l2h32(pay->L1summary[i]);
+  for(int i=0;i<2;i++) info->L2summary[i] = l2h32(pay->L2summary[i]);
+  for(int i=0;i<4;i++) info->L3summary[i] = l2h32(pay->L3summary[i]);
 
   return 0;
 }
 
 
-int daqReader::fillSummaryInfo(DATAP *datap)
+int daqReader::fillSummaryInfo(SummaryInfo *info, DATAP *datap)
 {
   int swap = (datap->bh.byte_order == 0x04030201) ? 0 : 1;
   
-  token = qswap32(swap, datap->bh.token);
-  evt_time = qswap32(swap, datap->time);
-  detectors = qswap32(swap, datap->detector);
-  if(seq != qswap32(swap, datap->seq)) {
-    LOG(ERR,"Event numbers don't match SFS->%d,  datap->%d",
-	seq, qswap32(swap, datap->seq));
-  }
-  daqbits_l1 = qswap32(swap, datap->TRG_L1_summary[0]);
-  daqbits_l2 = qswap32(swap, datap->TRG_L2_summary[0]);
-  evpgroups = qswap32(swap, datap->L3_Summary[2]);
-  trgword = qswap32(swap, datap->trg_word);
-
-  trgcmd = (qswap32(swap, datap->trg_in_word) >> 12) & 0xF ;	// _just_ the trigger command
-  daqcmd = (qswap32(swap, datap->trg_in_word) >> 8) & 0xF ;	// DAQ command
+  info->token = qswap32(swap, datap->bh.token);
+  info->evt_time = qswap32(swap, datap->time);
+  info->detectors = qswap32(swap, datap->detector);
+  info->seq = qswap32(swap, datap->seq);
+  info->daqbits_l1 = qswap32(swap, datap->TRG_L1_summary[0]);
+  info->daqbits_l2 = qswap32(swap, datap->TRG_L2_summary[0]);
+  info->evpgroups = qswap32(swap, datap->L3_Summary[2]);
+  info->trgword = qswap32(swap, datap->trg_word);
+  
+  info->trgcmd = (qswap32(swap, datap->trg_in_word) >> 12) & 0xF ;	// _just_ the trigger command
+  info->daqcmd = (qswap32(swap, datap->trg_in_word) >> 8) & 0xF ;	// DAQ command
 
 
-  daqbits = qswap32(swap, datap->L3_Summary[0]);
-  evp_daqbits = daqbits;
+  info->daqbits = qswap32(swap, datap->L3_Summary[0]);
+  info->evp_daqbits = daqbits;
 
-  for(int i=0;i<2;i++) L1summary[i] = qswap32(swap, datap->TRG_L1_summary[i]);
-  for(int i=0;i<2;i++) L2summary[i] = qswap32(swap, datap->TRG_L2_summary[i]);
-  for(int i=0;i<4;i++) L3summary[i] = qswap32(swap, datap->L3_Summary[i]);
+  for(int i=0;i<2;i++) info->L1summary[i] = qswap32(swap, datap->TRG_L1_summary[i]);
+  for(int i=0;i<2;i++) info->L2summary[i] = qswap32(swap, datap->TRG_L2_summary[i]);
+  for(int i=0;i<4;i++) info->L3summary[i] = qswap32(swap, datap->L3_Summary[i]);
 
   return 0;
 }
@@ -1987,4 +2018,137 @@ void MemMap::unmap()
   actual_mem_start=NULL;
   actual_size=0;
 }
+
+// Must be reading from daq file!
+// Must have a current event by calling a previous "get()"
+// Fills the EvtHeader with the "next" events header
+//
+// return 0 if next event end of file
+// return -1 if other error
+int daqReader::readNextFutureSummaryInfo(SummaryInfo *info)
+{
+  memset(info, 0, sizeof(SummaryInfo));
+
+  if(input_type != file) {
+    LOG(ERR, "Can't read next future evt header unless reading from daq file");
+    return -1;
+  }
+
+  if(sfs->singleDirMount == 0) {
+    LOG(ERR, "Need a current file to read the next one...");
+    return -1;
+  }
+
+  LOG(DBG, "(sfs) singleDirOffset = %d   singleDirSize = %d", sfs->singleDirOffset, sfs->singleDirSize);
+
+  long long int offset = sfs->singleDirOffset + sfs->singleDirSize;
+ 
+  sfs_index *nsfs = new sfs_index();
+  if(!nsfs) {
+    LOG(ERR, "Couldn't create sfs_index");
+    return -1;
+  }
+
+  LOG(DBG, "mounting dir at offset %s:%d",file_name,offset);
+  int ret = nsfs->mountSingleDir(file_name, offset);
+  if(ret < 0) {
+    LOG("ERR", "Error mounting dir at offset %s:%d",file_name,offset);
+
+    delete nsfs;
+    return ret;
+  }
+  if(ret == 0) {
+    LOG(NOTE, "End of file reading next dir...");
+    delete nsfs;
+    return ret;
+  }
+
+  LOG(DBG, "Mounted dir (nsfs)  off: %d  sz: %d",nsfs->singleDirOffset, nsfs->singleDirSize);
+
+
+  // Got to open this myself xxxxxxxxxxx
+  int fd = open(file_name, O_RDONLY);
+  if(fd <=0) {
+    LOG(ERR, "No defined file descriptor");
+    delete nsfs;
+    return -1;
+  }
+  
+  MemMap *nmem = new MemMap();
+  char *mymem = nmem->map(fd, nsfs->singleDirOffset, nsfs->singleDirSize);
+  if(!mymem) {
+    LOG(ERR, "Couldn't map memory");
+    delete nmem;
+    delete nsfs;
+    close(fd);
+    return -1;
+  }
+
+  LOG(DBG, "mapped off=%d sz=%d into 0x%x",nsfs->singleDirOffset, nsfs->singleDirSize, mymem);
+
+  fs_dir *rootdir = nsfs->opendir("/");
+  for(;;) {
+    fs_dirent *ent = nsfs->readdir(rootdir);
+    if(!ent) {
+      nsfs->closedir(rootdir);
+      LOG(ERR, "Error finding event directory in sfs?");
+
+      // Skip directory... go to next
+      nsfs->closedir(rootdir);
+      delete nmem;
+      delete nsfs;
+      close(fd);
+      return -1;
+    }
+
+    if(memcmp(ent->full_name, "/#", 2) == 0) {
+      info->seq = atoi(&ent->full_name[2]);
+
+      nsfs->cd(ent->full_name);
+      nsfs->closedir(rootdir);
+      break;
+    }
+
+    if(allnumeric(&ent->full_name[1])) {
+      info->seq = atoi(&ent->full_name[1]);
+      nsfs->cd(ent->full_name);
+      nsfs->closedir(rootdir);
+      break;
+    }
+    
+    LOG(DBG, "SFS event directory not yet found: %s",ent->full_name);
+  }
+
+  fs_dirent *summary = nsfs->opendirent("EventSummary");
+  if(summary) {
+
+    // recal that the memory is mounted from the beginning of the event
+    // while the offset here is from the beginning of the file
+    int mem_offset = summary->offset-nsfs->singleDirOffset;
+    LOG(DBG, "found summary %d:  file[%d-%d] sz=%d corr=%d)",summary->offset,nsfs->singleDirOffset, nsfs->singleDirOffset+nsfs->singleDirSize,nsfs->singleDirSize, summary->offset-nsfs->singleDirOffset);
+  
+    char *buff = mymem + mem_offset;
+    fillSummaryInfo(info,(gbPayload *)buff);
+  }
+  else { // take it from datap
+    LOG(NOTE, "No EventSummary, search for legacy datap");
+    summary = nsfs->opendirent("legacy");
+    if(!summary) {
+      LOG(NOTE, "No EventSummary and no DATAP... hacking summary info");
+    }
+    else {
+      long long int mem_offset = summary->offset - nsfs->singleDirOffset;
+      char *buff = mymem + mem_offset;
+      fillSummaryInfo(info,(DATAP *)buff);
+      copySummaryInfoIn(info);
+    }
+  }
+
+  delete nsfs;
+  delete nmem;
+  close(fd);
+
+  return 1;
+}
+
 
