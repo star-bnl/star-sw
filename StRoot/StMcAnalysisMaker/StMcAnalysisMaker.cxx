@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.34 2010/01/28 18:11:46 perev Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.35 2010/05/07 20:17:18 fine Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.35  2010/05/07 20:17:18  fine
+ * Add CPP macro to separate McTracks
+ *
  * Revision 1.34  2010/01/28 18:11:46  perev
  * WarnOff
  *
@@ -263,7 +266,6 @@ Int_t StMcAnalysisMaker::Finish()
 Int_t StMcAnalysisMaker::Init()
 {
     // StMcAnalysisMaker - Init
-    
     SetZones();  // This is my method to set the zones for the canvas.
 
     mNtupleFile = GetTFile();
@@ -326,6 +328,11 @@ Int_t StMcAnalysisMaker::Make()
   
   // StEvent
   StEvent* rEvent =  (StEvent*) GetInputDS("StEvent");
+#ifdef STMCTRACKI_HH
+  const StMcTrackI *mTrack = 0;
+#else
+  const StMcTrack  *mTrack = 0;
+#endif  
   
   // StMcEvent
   StMcEvent* mEvent = (StMcEvent*) GetDataSet("StMcEvent");
@@ -454,7 +461,7 @@ Int_t StMcAnalysisMaker::Make()
 	      TpcHitMRPair.pzM      = mhit->localMomentum().z();
 	      TpcHitMRPair.dEM      = mhit->dE();
 	      TpcHitMRPair.dSM      = mhit->dS();
-	      StMcTrack *mTrack     = mhit->parentTrack();
+	      mTrack     = mhit->parentTrack();
 	      if (mTrack) TpcHitMRPair.IdM = mTrack->key();
 	      else        TpcHitMRPair.IdM = 0;
 	      TpcHitMRPair.nM     = theMcHitMap->count(mhit);
@@ -504,7 +511,7 @@ Int_t StMcAnalysisMaker::Make()
 	  TpcHitMRPair.pzM      = mhit->localMomentum().z();
 	  TpcHitMRPair.dEM      = mhit->dE();
 	  TpcHitMRPair.dSM      = mhit->dS();
-	  StMcTrack *mTrack     = mhit->parentTrack();
+	  mTrack     = mhit->parentTrack();
 	  if (mTrack) TpcHitMRPair.IdM = mTrack->key();
 	  else        TpcHitMRPair.IdM = 0;
 	  mTpcHitNtuple->Fill(&TpcHitMRPair.sector);
@@ -555,7 +562,7 @@ Int_t StMcAnalysisMaker::Make()
 		  SvtHitMRPair.pzM      = mhit->localMomentum().z();
 		  SvtHitMRPair.dEM      = mhit->dE();
 		  SvtHitMRPair.dSM      = mhit->dS();
-		  StMcTrack *mTrack     = mhit->parentTrack();
+		  mTrack     = mhit->parentTrack();
 		  if (mTrack) SvtHitMRPair.IdM = mTrack->key();
 		  else        SvtHitMRPair.IdM = 0;
 		  SvtHitMRPair.nM     = svtMcHitMap->count(mhit);
@@ -609,7 +616,7 @@ Int_t StMcAnalysisMaker::Make()
 	      SvtHitMRPair.pzM      = mhit->localMomentum().z();
 	      SvtHitMRPair.dEM      = mhit->dE();
 	      SvtHitMRPair.dSM      = mhit->dS();
-	      StMcTrack *mTrack     = mhit->parentTrack();
+	      mTrack     = mhit->parentTrack();
 	      if (mTrack) SvtHitMRPair.IdM = mTrack->key();
 	      else        SvtHitMRPair.IdM = 0;
 	      mSvtHitNtuple->Fill(&SvtHitMRPair.barrel);
@@ -657,7 +664,7 @@ Int_t StMcAnalysisMaker::Make()
 		  SsdHitMRPair.pzM      = mhit->localMomentum().z();
 		  SsdHitMRPair.dEM      = mhit->dE();
 		  SsdHitMRPair.dSM      = mhit->dS();
-		  StMcTrack *mTrack     = mhit->parentTrack();
+		  mTrack     = mhit->parentTrack();
 		  if (mTrack) SsdHitMRPair.IdM = mTrack->key();
 		  else        SsdHitMRPair.IdM = 0;
 		  SsdHitMRPair.nM     = ssdMcHitMap->count(mhit);
@@ -700,7 +707,7 @@ Int_t StMcAnalysisMaker::Make()
 	    SsdHitMRPair.pzM      = mhit->localMomentum().z();
 	    SsdHitMRPair.dEM      = mhit->dE();
 	    SsdHitMRPair.dSM      = mhit->dS();
-	    StMcTrack *mTrack     = mhit->parentTrack();
+	    mTrack     = mhit->parentTrack();
 	    if (mTrack) SsdHitMRPair.IdM = mTrack->key();
 	    else        SsdHitMRPair.IdM = 0;
 	    mSsdHitNtuple->Fill(&SsdHitMRPair.ladder);
