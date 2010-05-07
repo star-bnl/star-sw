@@ -33,9 +33,13 @@ void DbSaveSnapshot(){
 
   // Update for SIM tables :
 
+  gSystem->Exec("rm ./StarDb/Geometry/tpc/tpcGlobalPosition*");                                                                                      
+  gSystem->Exec("rm ./StarDb/RunLog/onl/starClockOnl*"); 
+
   dbMk->SetFlavor("sim");
   dbMk->SaveSnapshotPlus("Geometry/tpc/tpcGlobalPosition");
   dbMk->SaveSnapshotPlus("RunLog/onl/starClockOnl");
+
 
 	std::string rm;
 	std::stringstream ostr;
