@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
 		    evp->evt_time, evp->detectors, evp->status) ;
 
 
-		if(print_det[0]) printf("***** Seq #%d, token %d\n",evp->seq,evp->token) ;
+		//if(print_det[0]) printf("***** Seq #%d, token %d\n",evp->seq,evp->token) ;
 		/***************** let's do simple detectors; the ones which only have legacy *****/
 
 		if(print_det[0]) {
@@ -148,6 +148,24 @@ int main(int argc, char *argv[])
 			   evp->daqbits,
 			   evp->evpgroups,
 			   evp->evpgroupsinrun);
+		  }
+		}
+
+		if(print_det[0]) {
+		  if(strcmp(print_det, "readahead") == 0) {		    
+		    SummaryInfo nsummary;
+		    int ret = evp->readNextFutureSummaryInfo(&nsummary);
+		   
+		   
+		    if(ret <= 0) {
+		      printf("Event #%d, token %d triggers 0x%x  ---->   No Next Event...",
+			     evp->seq,evp->token,evp->daqbits);
+		    }
+		    else {
+		      printf("Event #%d, token %d triggers 0x%x   ---->   Next Event:  #%d, token %d triggers 0x%x\n",
+			     evp->seq,evp->token,evp->daqbits,
+			     nsummary.seq, nsummary.token, nsummary.daqbits);
+		    }
 		  }
 		}
 
