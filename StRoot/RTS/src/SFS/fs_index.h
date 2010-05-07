@@ -62,7 +62,7 @@ class wrapfile {
   
 
  
-  wrapfile() { type = 0; };
+  wrapfile() { type = 0; wbuff = 0; wfpos = 0; wsize = 0; };
   int openmem(char *wrapbuff, int wrapmsize);
   int opendisk(char *fn, int flags, int perms=0666);
   int openfd(int fd);

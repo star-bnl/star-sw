@@ -58,6 +58,28 @@ enum Input_Type { none, live, file, pointer, dir };
 
 typedef unsigned int u_int;
 
+
+struct SummaryInfo {
+  u_int token ;		// current token
+  u_int evt_time ;	// time in UNIX seconds
+  u_int detectors ;	// detectors present bit mask according to DAQ!
+  u_int daqbits;
+  u_int daqbits_l1;
+  u_int daqbits_l2;
+  u_int evpgroups;
+  u_int evp_daqbits;
+
+  u_int trgword;
+  u_int trgcmd;	// current trigger command
+  u_int daqcmd;	// current DAQ command
+  
+  u_int L1summary[2];
+  u_int L2summary[2];
+  u_int L3summary[4];
+
+  u_int seq ;		// event sequence from EVB    ????
+};
+
 class daqReader {
  public:
   
@@ -209,15 +231,18 @@ class daqReader {
   int getEventSize();
 
   int hackSummaryInfo();
-  int fillSummaryInfo(DATAP *datap);
-  int fillSummaryInfo(gbPayload *gbPayload);
+  int copySummaryInfoIn(SummaryInfo *info);
+  int fillSummaryInfo(SummaryInfo *info, DATAP *datap);
+  int fillSummaryInfo(SummaryInfo *info, gbPayload *gbPayload);
 
   // history...
-  int fillSummaryInfo_v02(gbPayload *gbPayload);
-  int fillSummaryInfo_v01a(gbPayload_0x01a *gbPayload);
-  int fillSummaryInfo_v01(gbPayload_0x01 *gbPayload);
+  int fillSummaryInfo_v02(SummaryInfo *info, gbPayload *gbPayload);
+  int fillSummaryInfo_v01a(SummaryInfo *info, gbPayload_0x01a *gbPayload);
+  int fillSummaryInfo_v01(SummaryInfo *info, gbPayload_0x01 *gbPayload);
 
   MemMap *memmap;
+
+  int readNextFutureSummaryInfo(SummaryInfo *info);
 
  private:	// one shouldn't care... 
 

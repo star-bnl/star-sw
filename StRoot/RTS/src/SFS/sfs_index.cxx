@@ -745,11 +745,18 @@ sfs_index::sfs_index() : fs_index()
   return;
 }
 
-int sfs_index::mountSingleDirMem(char *buffer, int size)
+#if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
+int sfs_index::mountSingleDirMem(char *buffer, int size, long long int offset)
+#else
+int sfs_index::mountSingleDirMem(char *buffer, int size, int offset)
+#endif
 {
   wfile.close();   // just in case
   oflags = O_RDONLY;
   wfile.openmem(buffer, size);
+
+  singleDirOffset = offset;
+  singleDirSize = size;
   return mountSingleDir();
 }
 
@@ -767,10 +774,15 @@ int sfs_index::mountSingleDir(char *fn, int offset)
   // open file...
   wfile.close();   // just in case!
   wfile.opendisk(fn, O_RDONLY);
-  if(wfile.fd < 0) return wfile.fd;
+  if(wfile.fd < 0) {
+    LOG(ERR, "Bad error opening %s mounting single directory (%s)",fn,strerror(errno));
+    return wfile.fd;
+  }
   wfile.lseek(offset, SEEK_SET);
 
-  return mountSingleDir();
+  int ret = mountSingleDir();
+  wfile.close();  
+  return ret;
 }
 
 #if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
@@ -784,9 +796,9 @@ int sfs_index::getSingleDirSize(char *fn, int offset)
   topdir[0] = '\0';
 
 #if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-  LOG(DBG, "singledirdize file=%s, offset=%lld",fn,offset);
+  LOG(DBG, "singledirsize file=%s, offset=%lld",fn,offset);
 #else 
-  LOG(DBG, "singledirdize file=%s, offset=%d",fn,offset);
+  LOG(DBG, "singledirsize file=%s, offset=%d",fn,offset);
 #endif
 
   wfile.close();
@@ -850,8 +862,15 @@ int sfs_index::mountSingleDir()   // mounts from current position of wfile...
   
 #if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   long long int offset = wfile.lseek(0,SEEK_CUR);
+  LOG(DBG, "mountSingleDir()   offset=%lld 0x%x", offset, wfile.wbuff);
+  if(!wfile.wbuff) {   // if a memory mount, already done...
+    singleDirOffset = offset;
+  }
 #else
   int offset = wfile.lseek(0,SEEK_CUR);
+  if(!wfile.wbuff) {
+    singleDirOffset = offset;
+  }
 #endif
 
   singleDirMount = 1;
@@ -874,16 +893,33 @@ int sfs_index::mountSingleDir()   // mounts from current position of wfile...
     strcpy(cwd, "/");
     index_created = 1;
     
+    LOG(NOTE, "Couldn't get any SFS dirs...");
     return -1;
   }
 
-  return mountNextDir();
+  return _mountNextDir();
 }
 
 // returns -1 on error
 // returns 0 on eof (no directory...)
 // returns 1 on valid dir
+
+// entry point for user code
 int sfs_index::mountNextDir()
+{
+#if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
+  long long int offset = wfile.lseek(0,SEEK_CUR);
+  singleDirOffset = offset;
+#else
+  int offset = wfile.lseek(0,SEEK_CUR);
+  singleDirOffset = offset;
+#endif
+
+  return(_mountNextDir());
+}
+
+// if called from sfs_index, already have offsets set...
+int sfs_index::_mountNextDir()
 {
   int files_added=0;
 
@@ -903,6 +939,7 @@ int sfs_index::mountNextDir()
   // get to a non-'/' ittr...
   while(strcmp(singleDirIttr->fullpath,"/") == 0) {
     if(singleDirIttr->next() < 0) {
+      LOG(DBG, "End of file/error before first directory");
       return -1;
     }
     if(singleDirIttr->filepos == -1) {
@@ -915,21 +952,32 @@ int sfs_index::mountNextDir()
   char currdir[256];
   strcpy(basedir, singleDirIttr->fullpath);
   striptofirstdir(basedir);
-  
-
  
   for(;;) {
     
     files_added++;
     addnode(singleDirIttr);
 
+#if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
+    long long int last_offset = singleDirIttr->fileoffset;
+    long long int last_filepos = singleDirIttr->filepos;
+#else
+    int last_offset = singleDirIttr->fileoffset;
+    int last_filepos = singleDirIttr->filepos;
+#endif
+
+    int last_head_sz = singleDirIttr->entry.head_sz;
+    int last_file_sz = seeksize(singleDirIttr->entry.sz);
+      
     if(singleDirIttr->next() < 0) {
-      //      printf("next() ittr return -1\n");
       return -1;
     }
 
     if(singleDirIttr->filepos == -1) {  // end of file...
       // printf("next() ittr filepos = -1\n");
+      if(!wfile.wbuff) {   // if a memory mount, already done...
+	singleDirSize = last_offset + last_head_sz + last_file_sz - singleDirOffset;
+      }
       return (files_added > 0) ?  1 : 0;
     }
 
@@ -943,6 +991,9 @@ int sfs_index::mountNextDir()
     //}
 
     if(strcmp(basedir, currdir) != 0) {
+      if(!wfile.wbuff) {   // if a memory mount, already done...
+	singleDirSize = last_offset + last_head_sz + last_file_sz - singleDirOffset;
+      }
       return (files_added > 0) ? 1 : 0;
     }
   }

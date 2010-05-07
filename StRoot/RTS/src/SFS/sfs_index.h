@@ -125,12 +125,18 @@ class sfs_index : public fs_index {
 #if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   int mountSingleDir(char *fn, long long int offset=0);
   int getSingleDirSize(char *fn, long long int offset);
+  long long int singleDirOffset;
+  int mountSingleDirMem(char *buff, int size, long long int offset=0);
+  int singleDirSize;
 #else
   int mountSingleDir(char *fn, int offset=0);
   int getSingleDirSize(char *fn, int offset);
+  int singleDirOffset;
+  int singleDirSize;
+  int mountSingleDirMem(char *buff, int size, int offset=0);
 #endif
 
-  int mountSingleDirMem(char *buff, int size);
+
   int mountSingleDir();
   int mountNextDir();
 
@@ -151,7 +157,7 @@ class sfs_index : public fs_index {
  private:
 
   void addnode(SFS_ittr *ittr);
- 
+  int _mountNextDir();
 #if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   fs_inode *add_inode(fs_inode *parent, char *name, long long int offset, int sz);
   fs_inode *add_inode_from(fs_inode *neighbor, char *name, long long int offset, int sz);

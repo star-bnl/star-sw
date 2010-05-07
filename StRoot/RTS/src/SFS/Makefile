@@ -32,6 +32,8 @@ example: libsfs.a example.o $(VOBJS)
 
 sfs_single: libsfs.a sfs_single.o $(VOBJS)
 
+daq_test: libsfs.a daq_test.o $(VOBJS)
+
 sfs_header: libsfs.a sfs_header.o $(VOBJS)
 
 libsfs.a: fs_index.o sfs_index.o sfs_index_daq.o get_line.o
