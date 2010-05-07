@@ -5,7 +5,7 @@
 #ifndef EEmcMCData_h
 #define EEmcMCData_h
 /*********************************************************************
- * $Id: EEmcMCData.h,v 1.5 2005/06/03 19:19:48 balewski Exp $
+ * $Id: EEmcMCData.h,v 1.6 2010/05/07 18:51:25 fine Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Monte Carlo Data
@@ -19,7 +19,6 @@ class   St_g2t_emc_hit;
 class   St_g2t_event;
 
 class  EEeventDst;
-class  StMcEventMaker;
 
 const   Float_t kEEmcDefaultEnergyThreshold = 0.0005; // 0.5 MeV
 const   Int_t   kEEmcDefaultMCHitSize       = 0x1000; // 4k hitow
@@ -125,6 +124,9 @@ private:
 
 /*
  * $Log: EEmcMCData.h,v $
+ * Revision 1.6  2010/05/07 18:51:25  fine
+ * remove the redundant dependency
+ *
  * Revision 1.5  2005/06/03 19:19:48  balewski
  * for embedding, GEANT unpcker was split on 2 parts
  *
