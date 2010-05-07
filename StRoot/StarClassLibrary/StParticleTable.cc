@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.8 2010/04/06 14:16:22 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.9 2010/05/07 15:37:11 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.9  2010/05/07 15:37:11  jwebb
+ * Added StKaonZeroMode0809 to represent the k0 --> pi+ pi- w/ 100% br in
+ * gstar_part.g.
+ *
  * Revision 1.8  2010/04/06 14:16:22  jwebb
  * Redefined the geant ID of the lambda(1520) from 706 to 995, to make
  * consistent with usage in embedding group.
@@ -145,6 +149,8 @@ StParticleTable::StParticleTable()
     Geant2Pdg( 702, +3114 ); // Sigma 1385 -
     Geant2Pdg( 703, -3114 ); // Sigma 1385 plus bar
     Geant2Pdg( 704, -3224 ); // Sigma 1385 minus bar 
+
+    Geant2Pdg( 707, 100311 ); // K0 --> pi+ pi- 
 
     Geant2Pdg( +995, +20003122 ); // Lambda 1520 
     Geant2Pdg( -995, -20003122 ); // Lambda 1520 
