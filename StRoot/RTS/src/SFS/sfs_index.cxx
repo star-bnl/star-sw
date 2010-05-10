@@ -395,7 +395,7 @@ int sfs_index::writeFsHeader()
   int ret;
   int sz;
   char *bb;
-  static SFS_Header head;
+  SFS_Header head;
   
   bb = volumeSpec;
   sz = 12;
@@ -434,10 +434,10 @@ int sfs_index::write(char *fn, char *buff, int size)
   int ret;
   char *bb;
   int sz;
-  static char path[256];
+  char path[256];
   int attr = SFS_ATTR_NOCD;
 
-  static char b[256];
+  char b[256];
   SFS_File *file = (SFS_File *)b;
 
   if(cdchanged) {

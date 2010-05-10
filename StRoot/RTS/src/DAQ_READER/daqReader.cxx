@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.32 2010/05/07 15:32:16 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.33 2010/05/10 18:29:09 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -66,6 +66,8 @@ daqReader::daqReader(char *mem, int size)
   
   data_memory = mem;
   data_size = size;  
+
+  crit_cou = 0;
 }
 
 daqReader::daqReader(char *name) 
@@ -226,7 +228,7 @@ int daqReader::setLog(int flg)
 
 char *daqReader::setEvpDisk(char *name)
 {
-	static char saved[256] ;
+	char *saved = _static_str_return_;
 
 	strcpy(saved, evp_disk) ;
 	strncpy(evp_disk,name,sizeof(evp_disk)-1) ;
@@ -1154,7 +1156,7 @@ int daqReader::getNextEventFilenameFromDir(int eventNum)
 int daqReader::getNextEventFilenameFromLive(int type)
 {
   int ret;
-  static ic_msg m ;
+  ic_msg m ;
 
   // evp no longer requests events to be shipped to the pool... 
   // issue get event only if not issued before
@@ -1891,7 +1893,6 @@ static int ask(int desc, ic_msg *m)
 
   int daqReader::getStatusBasedEventDelay()
   {
-    static int crit_cou=0;
 
     int delay = 0;
 

@@ -246,6 +246,9 @@ class daqReader {
 
  private:	// one shouldn't care... 
 
+  char _static_str_return_[256];
+  int crit_cou;
+
   int reconnect(void) ;
 
   char _evp_basedir_[40];

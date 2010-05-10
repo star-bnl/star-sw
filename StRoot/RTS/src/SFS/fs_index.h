@@ -181,6 +181,9 @@ class fs_index {
 
   char *writevbuff;
   int writevbuffsz;
+
+ private:
+  fs_dirent _readdirent_static_;
 };
   
   

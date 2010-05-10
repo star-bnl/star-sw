@@ -106,7 +106,7 @@ int ssd_reader(char *m, struct ssd_t *ssd, u_int driver)
 	// clear mode before
 	ssd->mode = 0 ;
 
-	static u_int occup[4][3] ;
+	u_int occup[4][3] ;
 	memset(occup,0,sizeof(occup)) ;
 
 	for(sec=0;sec<1;sec++) {	// just one sector! I kept the for loop for compatibility

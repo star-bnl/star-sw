@@ -8,7 +8,9 @@
 #include <rtsLog.h>
 #include "cfgutil.h"
 
-
+// seems not thread safe,
+// but this static stuff is fine
+// because the same initialization is OK for all readers...
 static int init=0;
 static char evpgroups[32][40];
 

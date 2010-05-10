@@ -188,7 +188,7 @@ int svt_reader(char *m, struct svt_t *svt, u_int driver)
 					for(jj=0;jj<len;jj++) {
 						int start, last, length, stop ;
 						u_short ss, f8 ;
-						static u_int rr, pp, hy ;
+						u_int rr, pp, hy ;
 						int tbin ;
 						int k ;
 
