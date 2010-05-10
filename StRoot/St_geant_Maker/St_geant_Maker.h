@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.44 2009/12/31 00:02:59 perev Exp $
+// $Id: St_geant_Maker.h,v 1.45 2010/05/10 14:19:52 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.45  2010/05/10 14:19:52  fisyak
+// move geometry load from Init to InitRun in order to allow MagF maker to set mag.field
+//
 // Revision 1.44  2009/12/31 00:02:59  perev
 // Add the material name to the volume name
 //
@@ -122,6 +125,7 @@ public:
    virtual       ~St_geant_Maker(){};
    virtual Int_t  Finish(){SafeDelete(m_DataSet); return kStOK;}
    virtual Int_t  Init();
+   virtual Int_t  InitRun(Int_t run);
 #if 1
    virtual void   SetDateTime(int idat=0,int itim=0);//
 #endif
@@ -204,7 +208,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.44 2009/12/31 00:02:59 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.45 2010/05/10 14:19:52 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
