@@ -1,0 +1,147 @@
+* ****************************************************************
+* This kumac does the following:
+*   1. reads in a list of fz files produced by Gstar on t3e
+*   2. runs g2t
+*   3. runs srs and tss 
+*   4. writes out staf table file
+******************************************************************
+* 
+* $Id: t3e_tss.kumac,v 1.2 1998/08/24 23:36:46 kathy Exp $
+* $Log: t3e_tss.kumac,v $
+* Revision 1.2  1998/08/24 23:36:46  kathy
+* cleaned up
+*
+* Revision 1.1  1998/08/24 18:41:17  didenko
+* t3e_tss.kumac added
+*
+ 
+MACRO t3e_tss _
+   TOP=$STAR _
+   tpc_sector_first=1 _
+   tpc_sector_last=24 _
+   domain=' geometry gstar g2t tpc svt' _
+   chain=' svg tpg srs tss evout' _
+   gstar_settings=' field_only' _
+   first_file=31220 _
+   no_files=10 _
+   list_of_files='gsrun.31222.fz  gsrun.31223.fz  gsrun.31224.fz gsrun.31225.fz' _
+   mds=/star/mds/data/SD98 _
+   hpss=/disk1/star _
+   set=/auau200/hijing135/default/b0_3/year1a/hadronic_on/Gstardata/psc020  _
+   log =''
+
+***********************************************************
+* CALCULATE STUFF FROM MACRO INPUTS 
+***********************************************************
+ no_of_files  = $words([list_of_files])
+ input_file   = [mds][set]/$word([list_of_files],1,1);
+ output       = $word($word([list_of_files],1,1),1,2,'.')//'_'//_
+                $word($word([list_of_files],[no_of_files],1),2,1,'.');
+ output_xdf_file = [hpss][set]/[output].xdf
+ 
+  
+***********************************************************
+* PRINT OUT INPUT VALUES
+***********************************************************
+   
+ message ' *** TOP level directory     --> ' [TOP]
+ message ' *** list of files           --> ' [list_of_files]     
+ message ' *** domains to load         --> ' [domain]
+ message ' *** modules to process      --> ' [chain]  
+ message ' *** gstar settings          --> ' [gstar_settings]
+ message ' *** tpc_sector_first        --> ' [tpc_sector_first]
+ message ' *** tpc_sector_last         --> ' [tpc_sector_last]
+
+***********************************************************
+* GLOBAL VARIABLES 
+* **********************************************************
+ 
+ macro/global/create input_file       [input_file]       'Input file name'
+ macro/global/create output_file      [output_file]      'Output file name'
+ macro/global/create tpc_sector_first [tpc_sector_first] 'first sector in TPC'
+ macro/global/create tpc_sector_last  [tpc_sector_last]  'last sector in TPC'
+ macro/global/create ievent           1                  'Event counter'
+ macro/global/create TOP              [TOP]
+ macro/global/create gstar_settings   [gstar_settings]
+ macro/global/create output_xdf_file  [output_xdf_file] 
+	  
+***********************************************************
+* BEGINNING STUFF 
+* **********************************************************
+ exec $STAR/kumacs/util/setup_defaults 
+   
+ exec setup#setup
+ exec bfc_util#bfc_start _
+      domain=[domain] chain=[chain] gstar_settings=[gstar_settings]
+ if (STAF_STATUS(1).ne. 1) goto ABEND
+ 
+ macro/global/import *
+ log_file = [log] 
+   message ' *** log_file                --> ' [log_file]
+ string =   '---<bfc>-- i:'//[input_file]//' o:'//[output_xdf_file]
+   fmessage $quote([string])  [log_file]
+ string =   '---<bfc>-- f:'//[first]//' s:'//[skip]//' l:'//[last]
+   fmessage $quote([string])  [log_file]
+ string =  '---<bfc>-- c:'//[chain]
+   fmessage $quote([string])  [log_file]
+ if $iquest(1)<>0 goto ABEND
+ 
+ exec bfc_util#bfc_init chain=[chain]
+ if (STAF_STATUS(1).ne. 1) goto ABEND
+
+*****************************************
+*  MAIN EVENT LOOP 
+***************************************** 
+
+ message cpu time = $cptime
+ do file=1,[no_of_files]
+   input_file      = [mds][set]/$word([list_of_files],[file],1);
+   gfile pz [input_file] 
+   if $iquest(1)<>0 goto endl
+   call hepevnt                | compensate absence of hepevt documentation
+   cd [run]/geant; call g2t
+   detp g2tm  dete(cdet=SFSD).onoff=0  gttc.rdir=0
+   i1 = [ievent]+1
+   do ievent=[i1],1000         | loop over events
+     tabclear [event]          | zero all tables
+     trig 1;  if ($iquest(1)<>0) goto endl
+     cd [event]/geant          | sets iquest(1) !
+     for/call g2t;  if ($iquest(1)<>0) goto enda
+     exec bfc_util#bfc_process chain=[chain]
+     if (STAF_STATUS(1).ne. 1) goto ABEND
+     nevents = [nevents] + 1
+     enda:
+   enddo
+   endl:
+ enddo
+
+*****************************************
+*  FINISH
+* ****************************************
+ 
+  message ******** job done with [nevents] events *************
+  
+  exec bfc_util#bfc_finish [chain]
+  if (STAF_STATUS(1).ne. 1) goto ABEND
+  goto END
+  
+ABEND:
+ message "<bfc> Fatal error"
+fmessage "<bfc> Fatal error" [log_file]
+ 
+END:
+ 
+RETURN
+ 
+******************************************************************
+****************************************************************** 
+
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.229 2010/04/23 22:40:08 fine Exp $
+// $Id: StMaker.cxx,v 1.231 2010/04/30 17:13:20 fine Exp $
 //
 //
 /*!
@@ -340,7 +340,7 @@ StMaker::~StMaker()
   TDataSet *ds = this;
   Cleanup(ds);
   StMkDeb::Cancel(this);
-  delete fLogger;  fLogger = 0;
+  // delete fLogger;  fLogger = 0;
 }
 //_____________________________________________________________________________
 const Char_t *StMaker::GetName() const
@@ -1006,7 +1006,7 @@ Int_t StMaker::Finish()
 //VP   Printf("=================================================================================\n");
    
    if (GetParent()==0) StMemStat::Summary();
-   delete fLogger; fLogger=0;
+   // delete fLogger; fLogger=0;
    return nerr;
 }
 
@@ -1955,6 +1955,12 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.231  2010/04/30 17:13:20  fine
+// RT #1911. Protect against of the died pointer
+//
+// Revision 1.230  2010/04/27 21:31:44  fine
+// remove the logger destruction side effect
+//
 // Revision 1.229  2010/04/23 22:40:08  fine
 // RT #1911. Close the local logger at Finish
 //

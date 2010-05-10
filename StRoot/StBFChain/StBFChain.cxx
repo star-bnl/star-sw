@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.560 2010/04/23 22:40:17 fine Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.561 2010/04/27 21:31:44 fine Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -792,7 +792,7 @@ Int_t StBFChain::Finish()
   fBFC = 0;
   TFile *tf = GetTFile();
   if (tf) {tf->Write(); tf->Flush(); tf->Close(); delete tf; SetTFile(0);}
-  delete gMessMgr; gMessMgr = 0;
+//  delete gMessMgr; gMessMgr = 0;
   return ians;
 }
 
