@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.562 2010/05/05 20:39:39 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.563 2010/05/10 14:18:35 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1124,10 +1124,12 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-VMCPassive","Default,TGiant3");
       SetOption("-VMCAppl","Default,TGiant3");
       SetOption("-RootVMC","Default,TGiant3");
+#if 0 /* Not Active geant is not needed any more */
       if (!( GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed"))) {// Not Active geant
 	SetOption("geant","Default,-fzin,-ntin,-gstar,TGiant3");
 	SetOption("MagF","Default,-fzin,-ntin,-gstar,TGiant3");
       }
+#endif
     } else {                                  // root
       if (GetOption("fzin")) {
 	gMessMgr->Error() << "Option fzin cannot be used in root.exe. Use root4star" << endm;
