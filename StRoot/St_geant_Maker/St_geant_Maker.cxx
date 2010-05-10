@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.129 2010/04/23 23:19:26 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.130 2010/05/10 14:19:52 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.130  2010/05/10 14:19:52  fisyak
+// move geometry load from Init to InitRun in order to allow MagF maker to set mag.field
+//
 // Revision 1.129  2010/04/23 23:19:26  perev
 // Remove not needed and expencive call AgstHits
 //
@@ -692,20 +695,20 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
   // Initialize GEANT
-  if (! geant3) {
-    PrintInfo();
-    geant3 = new TGiant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
-    assert(geant3);
-    cquest = (Quest_t  *) geant3->Quest();
-    clink  = (Gclink_t *) geant3->Gclink();
-    cflag  = (Gcflag_t *) geant3->Gcflag();
-    cvolu  = (Gcvolu_t *) geant3->Gcvolu();
-    cnum   = (Gcnum_t  *) geant3->Gcnum();
-    z_iq   = (Int_t    *) geant3->Iq();
-    z_lq   = (Int_t    *) geant3->Lq();
-    z_q    = (Float_t  *) geant3->Q();
-    csets  = (Gcsets_t *) geant3->Gcsets();
-  }
+  if (  geant3) return kStOK;
+  PrintInfo();
+  geant3 = new TGiant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
+  assert(geant3);
+  cquest = (Quest_t  *) geant3->Quest();
+  clink  = (Gclink_t *) geant3->Gclink();
+  cflag  = (Gcflag_t *) geant3->Gcflag();
+  cvolu  = (Gcvolu_t *) geant3->Gcvolu();
+  cnum   = (Gcnum_t  *) geant3->Gcnum();
+  z_iq   = (Int_t    *) geant3->Iq();
+  z_lq   = (Int_t    *) geant3->Lq();
+  z_q    = (Float_t  *) geant3->Q();
+  csets  = (Gcsets_t *) geant3->Gcsets();
+
   TString InputFile(fInputFile);
   if (fInputFile != "") {//check that first word contains .fz then add "gfile p" 
     //                                       -"-          .nt then add "user/input user" 
@@ -730,19 +733,59 @@ Int_t St_geant_Maker::Init(){
       InputFile = "";
     }
   }
+#if 0
+  BookHist();   // Create Histograms    
+#endif
+  // Kinematics
+  if (fInputFile == "" && IsActive()) {// default
+    Do("subevent 0;");
+    // gkine #particles partid ptrange yrange phirange vertexrange
+    Do("gkine        80      6    1. 1. -4. 4. 0 6.28      0. 0.;");
+    Do("mode g2tm prin 1;");
+    //  Do("next;");
+    //  Do("dcut cave z 1 10 10 0.03 0.03;");
+    if ((m_Mode/1000)%10 == 1) {// phys_off
+      gMessMgr->Info() << "St_geant_Maker::Init switch off physics" << endm;
+      Do("DCAY 0");
+      Do("ANNI 0");
+      Do("BREM 0");
+      Do("COMP 0");
+      Do("HADR 0");
+      Do("MUNU 0");
+      Do("PAIR 0");
+      Do("PFIS 0");
+      Do("PHOT 0");
+      Do("RAYL 0");
+      Do("LOSS 4"); // no fluctuations 
+      //  Do("LOSS 1"); // with delta electron above dcute
+      Do("DRAY 0");
+      Do("MULS 0");
+      Do("STRA 0");
+      //                                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
+      Do("CUTS     1e-3   1e-3   .001   .001   .001  .001  .001  1e-3  .001   .001 50.e-6");
+      Do("gclose all");
+      Do("physi");
+    }	
+    if (Debug() > 1) {
+      Do("debug on;");
+      Do("swit 2 2;");
+    }
+  }
+  return kStOK;
+}
+//________________________________________________________________________________
+Int_t St_geant_Maker::InitRun(Int_t run){
   if (mInitialization != "") {
     Do(mInitialization.Data()); 
     Geometry();
+    mInitialization = "";
+    Do("gclose all");
+    Agstroot();
   }
-  Do("gclose all");
-  Agstroot();
   m_geom_gdat = (St_geom_gdat *) Find(".const/geom/geom_gdat");
   if (m_geom_gdat)  {
     AddRunco(new St_geom_gdat(*m_geom_gdat));
   }
-#if 0
-  BookHist();   // Create Histograms    
-#endif
   if (m_Mode%10 != 1 && IsActive() ) { // Mixer mode == 1 or reco - do not modify EvtHddr and MagF
     fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
     if (!fEvtHddr) {                            // Standalone run
@@ -812,42 +855,7 @@ Int_t St_geant_Maker::Init(){
       }
     }
   }
-  // Kinematics
-  if (fInputFile == "" && IsActive()) {// default
-    Do("subevent 0;");
-    // gkine #particles partid ptrange yrange phirange vertexrange
-    Do("gkine        80      6    1. 1. -4. 4. 0 6.28      0. 0.;");
-    Do("mode g2tm prin 1;");
-    //  Do("next;");
-    //  Do("dcut cave z 1 10 10 0.03 0.03;");
-    if ((m_Mode/1000)%10 == 1) {// phys_off
-      gMessMgr->Info() << "St_geant_Maker::Init switch off physics" << endm;
-      Do("DCAY 0");
-      Do("ANNI 0");
-      Do("BREM 0");
-      Do("COMP 0");
-      Do("HADR 0");
-      Do("MUNU 0");
-      Do("PAIR 0");
-      Do("PFIS 0");
-      Do("PHOT 0");
-      Do("RAYL 0");
-      Do("LOSS 4"); // no fluctuations 
-      //  Do("LOSS 1"); // with delta electron above dcute
-      Do("DRAY 0");
-      Do("MULS 0");
-      Do("STRA 0");
-      //                                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
-      Do("CUTS     1e-3   1e-3   .001   .001   .001  .001  .001  1e-3  .001   .001 50.e-6");
-      Do("gclose all");
-      Do("physi");
-    }	
-    if (Debug() > 1) {
-      Do("debug on;");
-      Do("swit 2 2;");
-    }
-  }
-  return StMaker::Init();
+  return kStOK;
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Make()
