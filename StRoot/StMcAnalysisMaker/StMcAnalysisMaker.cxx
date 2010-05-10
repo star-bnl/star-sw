@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.35 2010/05/07 20:17:18 fine Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.36 2010/05/10 17:15:34 fine Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.36  2010/05/10 17:15:34  fine
+ * RT # 1932 Remove the redundant correction. Restore 1.34 rev
+ *
  * Revision 1.35  2010/05/07 20:17:18  fine
  * Add CPP macro to separate McTracks
  *
@@ -328,11 +331,7 @@ Int_t StMcAnalysisMaker::Make()
   
   // StEvent
   StEvent* rEvent =  (StEvent*) GetInputDS("StEvent");
-#ifdef STMCTRACKI_HH
-  const StMcTrackI *mTrack = 0;
-#else
   const StMcTrack  *mTrack = 0;
-#endif  
   
   // StMcEvent
   StMcEvent* mEvent = (StMcEvent*) GetDataSet("StMcEvent");
