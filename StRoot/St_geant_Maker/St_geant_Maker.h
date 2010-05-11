@@ -1,7 +1,7 @@
-// $Id: St_geant_Maker.h,v 1.45 2010/05/10 14:19:52 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.46 2010/05/11 17:12:45 jeromel Exp $
 // $Log: St_geant_Maker.h,v $
-// Revision 1.45  2010/05/10 14:19:52  fisyak
-// move geometry load from Init to InitRun in order to allow MagF maker to set mag.field
+// Revision 1.46  2010/05/11 17:12:45  jeromel
+// Undo changes
 //
 // Revision 1.44  2009/12/31 00:02:59  perev
 // Add the material name to the volume name
@@ -104,7 +104,7 @@ protected:
   Int_t  fIwType;      // HIGZ interface (=0 no HIGZ)
   TDataSet*   fVolume; //!
   TGeoVolume* fTopGeoVolume; //!
-  TString fInputFile; // 
+  TString fInputFile; //
   TFileSet  *fGeoDirectory; // the pointer the STAR geometry source code
   StEvtHddr *fEvtHddr;//! pointer to Event Header
   Bool_t   fRemakeGeometry;// Flag whether we need to remake the geometry
@@ -119,18 +119,17 @@ protected:
   virtual void   BookHist();
   virtual void   FillHist();
 
-public: 
+public:
                   St_geant_Maker(const char *name="geant",
 				 Int_t nwgeant=20,Int_t nwpaw=0, Int_t iwtype=0);
    virtual       ~St_geant_Maker(){};
    virtual Int_t  Finish(){SafeDelete(m_DataSet); return kStOK;}
    virtual Int_t  Init();
-   virtual Int_t  InitRun(Int_t run);
 #if 1
    virtual void   SetDateTime(int idat=0,int itim=0);//
 #endif
            void   SetFieldOpt(const char *opt) {mFieldOpt = opt;}
-   virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
+   virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU
    virtual void   Draw(const char* opt="IN");
    virtual Int_t  Make();
    virtual void   LoadGeometry (const Char_t *option = "detp geometry field_only");  // *MENU
@@ -145,7 +144,7 @@ public:
    virtual Int_t  Skip(Int_t Nskip=1);                        // *MENU*
    virtual TDataSet *Work();
    virtual void   Mark(TVolume *topvol);
-   virtual void   Call(const Char_t *name); // *MENU 
+   virtual void   Call(const Char_t *name); // *MENU
    virtual TRotMatrix *GetMatrix(float theta1, float phi1,
                                  float theta2, float phi2,
                                  float theta3, float phi3);
@@ -156,7 +155,7 @@ public:
    TDataSet* GetVolume() { return fVolume; }
    const TFileSet *GetGeoDirectory() const { return fGeoDirectory;}
    TGeoVolume* GetTopGeoVolume() {return fTopGeoVolume;}
-   static void RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, 
+   static void RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec,
 			    Int_t &k, Char_t *iq);
    virtual void     Geometry();
    virtual Int_t    Agstroot();
@@ -173,17 +172,17 @@ public:
 			      Int_t &NPART, Int_t &IRUN,
 			      Int_t &IEVT, const Char_t *CGNAM,
 			      Float_t *VERT,Int_t &IWTFL,Float_t &WEIGH);
-   
-   virtual void     Gfxzrm(Int_t & Nlevel, 
+
+   virtual void     Gfxzrm(Int_t & Nlevel,
 		     Float_t &x, Float_t &y, Float_t &z,
 		     Float_t &Theta1, Float_t & Phi1,
 		     Float_t &Theta2, Float_t & Phi2,
 		     Float_t &Theta3, Float_t & Phi3,
-		     Float_t &Type);  
+		     Float_t &Type);
    virtual void     Dzddiv(Int_t& idiv ,Int_t &Ldummy,
 			   const Char_t* path,const Char_t* opt,
 			   Int_t& one,Int_t &two,Int_t &three,Int_t& iw);
-   
+
   TGeoVolume* Ag2Geom();
 #ifdef DetectorIndex
   void        DetSetIndex();
@@ -204,11 +203,11 @@ public:
   TH1F     *m_histvx;        //! geant g2t_vertex table, x of prim vtx
   TH1F     *m_histvy;        //! geant g2t_vertex table, y of prim vtx
   TH1F     *m_histvz;        //! geant g2t_vertex table, z of prim vtx
-   
+
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.45 2010/05/10 14:19:52 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.46 2010/05/11 17:12:45 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
