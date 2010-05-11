@@ -823,6 +823,18 @@ class EvbChooser
   int evb4token[4096];         
 };
 
+
+#define RHIC_TRG "RHICTRG\0"
+#define TRG_UDP_PORT 8060
+
+struct RHIC_Trigger {
+  char marker[4];
+  int tm;
+  int evb;
+  int count;
+  int mask;
+};
+
 #endif
 
 
