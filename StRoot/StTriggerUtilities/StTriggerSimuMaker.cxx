@@ -11,10 +11,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.35 2010/04/17 17:43:40 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.36 2010/05/12 23:42:11 pibero Exp $
 
 // MySQL C API
-#include "/usr/include/mysql/mysql.h"
+#include <mysql/mysql.h>
 
 // DSM crates
 #include "RTS/trg/include/trgConfNum.h"
@@ -423,6 +423,9 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.36  2010/05/12 23:42:11  pibero
+ * Changed absolute path for mysql.h to relative path
+ *
  * Revision 1.35  2010/04/17 17:43:40  pibero
  * *** empty log message ***
  *
