@@ -4,9 +4,6 @@
 // 12 Jan 2009
 //
 
-// MySQL C API
-#include "/usr/include/mysql/mysql.h"
-
 // STAR
 #include "St_db_Maker/St_db_Maker.h"
 #include "tables/St_trgDsmReg_Table.h"
