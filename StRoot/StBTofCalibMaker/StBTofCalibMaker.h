@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.h,v 1.4 2010/03/04 23:10:20 dongx Exp $
+ * $Id: StBTofCalibMaker.h,v 1.5 2010/05/12 22:46:21 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.h,v $
+ * Revision 1.5  2010/05/12 22:46:21  geurts
+ * Startless BTOF self-calibration method (Xin)
+ *
  * Revision 1.4  2010/03/04 23:10:20  dongx
  * Added cleanup for PID variables in MuBTofPidTraits when processMuDst()
  *
@@ -46,12 +49,14 @@ using std::vector;
 #endif
 
 class StEvent;
+class StPrimaryVertex;
 class StBTofGeometry;
 class StBTofCollection;
 class StBTofHeader;
 class StBTofHitCollection;
 class StBTofPidTraits;
 class StMuDst;
+class StMuPrimaryVertex;
 class StMuBTofPidTraits;
 #include "StPhysicalHelixD.hh"
 
@@ -94,7 +99,7 @@ public:
   void setHistoFileName(const Char_t*);
 
   /// read calibration parameters from file
-  void setInitFromFile(const Bool_t = kTRUE);
+  void setInitFromFile(const Bool_t val = kTRUE);
   void setCalibFilePvpd(const Char_t*);
   void setCalibFileTot(const Char_t*);
   void setCalibFileZhit(const Char_t*);
@@ -104,6 +109,8 @@ private:
 
   /// Reset the calibration parameters
   void  resetPars();
+  /// initialize StEvent/MuDst pointer
+  void initEvent();
   /// Reset the VPD parameters
   void resetVpd();
   /// Load Vpd data
@@ -125,6 +132,11 @@ private:
   void tstart(const Double_t Vz, Double_t *tstart, Double_t *tdiff);  //! tstart calculation splitted into 2 steps
   /// full calibration function for tray hits
   Double_t tofAllCorr(const Double_t tof, const Double_t tot, const Double_t zlocal, const Int_t iTray, const Int_t iModuleChan);
+  
+  ///
+  void tstart_NoVpd(const StBTofCollection *btofCollection, const StPrimaryVertex *pVtx, Double_t *tstart);
+  void tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVertex *pVtx, Double_t *tstart);
+    
   
   /// book histograms
   void bookHistograms();
@@ -180,6 +192,7 @@ private:
     Double_t   mEvtVtxZ;          //! vertex z from event vertex (mostly TPC vertex)
     Double_t   mTDiff;            //! time difference between east and west
     Double_t   mTStart;           //! start time
+    Int_t      mNTzero;           //! number of hits used in T0 (non-vpd-start)
 
     StPhysicalHelixD* mBeamHelix;  //! beamline helix used for Run 8
     ///
@@ -192,6 +205,7 @@ private:
     Bool_t            mSlewingCorr;  //! switch for slewing correction since run 8
     Bool_t            mUseEventVertex; //! switch for using event vertices
     Bool_t            mInitFromFile; //! switch for reading from files
+    Bool_t            mUseVpdStart;  //! switch for vpd start
 
     string mCalibFilePvpd; //! filename for pvpd calibration parameters
     string mCalibFileTot;  //! filename for ToT calibration parameters
@@ -203,7 +217,7 @@ private:
     TH1D*    hEventCounter;     //!
             
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.4 2010/03/04 23:10:20 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.5 2010/05/12 22:46:21 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StBTofCalibMaker,2)
 };

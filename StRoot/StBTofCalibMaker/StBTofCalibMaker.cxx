@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.7 2010/04/29 03:42:37 dongx Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.8 2010/05/12 22:46:21 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.8  2010/05/12 22:46:21  geurts
+ * Startless BTOF self-calibration method (Xin)
+ *
  * Revision 1.7  2010/04/29 03:42:37  dongx
  * Remove ranking>0 cut in event vertex selection for start time calculation
  *
@@ -75,6 +78,7 @@
 #include "StMuDSTMaker/COMMON/StMuBTofPidTraits.h"
 
 #include "StBTofCalibMaker.h"
+#include "StVpdCalibMaker/StVpdCalibMaker.h"
 
 #ifdef __ROOT__
 ClassImp(StBTofCalibMaker)
@@ -107,8 +111,8 @@ StBTofCalibMaker::StBTofCalibMaker(const char *name) : StMaker(name)
   mMuDst = 0;
 
   mSlewingCorr = kTRUE;
-  //fg mUseEventVertex = kTRUE; //kFALSE;
   mMuDstIn = kFALSE;
+  mUseVpdStart = kTRUE;
 
   setCreateHistoFlag(kFALSE);
   setHistoFileName("btofcalib.root");
@@ -153,6 +157,7 @@ void StBTofCalibMaker::resetVpd()
   mNEast = 0;
   mNWest = 0;
   mValidStartTime = kFALSE;
+  mNTzero = 0;
 }
 
 //____________________________________________________________________________
@@ -191,18 +196,37 @@ Int_t StBTofCalibMaker::InitRun(int runnumber)
 {
   // tof run configurations
 
+  /// retrieve the BTOF calibration parameters (from database or file)
   Int_t val = initParameters(runnumber);
   if(val==kStOK) {
     mValidCalibPar = kTRUE;
+    LOG_INFO << " ==> Initialized valid calibration parameters." << endm;
   } else {
     mValidCalibPar = kFALSE;
+    LOG_WARN << " ==> No valid calibration parameters! " << endm;
   }
 
-  if(mValidCalibPar) {
-    LOG_INFO << " ==> Good! Valid cali parameters! " << endm;
+  /// Look for StVpCalibMaker and decide on its setting (based on its dbase entry) to use VPD for TOF start-timing
+  StVpdCalibMaker *vpdCalib = (StVpdCalibMaker *)GetMaker("vpdCalib");
+  if(vpdCalib) {
+    mUseVpdStart = vpdCalib->useVpdStart();
+    if (mUseVpdStart) {LOG_INFO << "Found VPD Calibration Maker: use VPD for start timing" << endm;}
+    else         {LOG_INFO << "Found VPD Calibration Maker: VPD NOT used for start timing" << endm;}
   } else {
-    LOG_WARN << " ==> No valid cali parameters! " << endm;
+    mUseVpdStart = kFALSE;  // no vpdCalibMaker, do tray self calibration
+    LOG_INFO << "NO VPD Calibration Maker found:  VPD NOT used for start timing" << endm;
   }
+
+  /// If no VPD is used then one should have selected to use the EventVertex from the TPC, and warn if not.
+  if(!mUseVpdStart && !mUseEventVertex) {
+    LOG_WARN << " Try to run calibration without VPD as the start time and DON'T use the event vertex! Wrong command! Exit!" << endm;
+    return kStOK;
+  }
+
+//fg    if(!mUseVpdStart) {
+//fg    LOG_INFO << " Run BTOF tray self calibration without VPD!!! " << endm;
+//fg  }
+
 
   return kStOK;
 
@@ -458,8 +482,28 @@ Int_t StBTofCalibMaker::Make()
     return kStOK;
   }
 
+  //fg moved to InitRun()
+//fg  StVpdCalibMaker *vpdCalib = (StVpdCalibMaker *)GetMaker("vpdCalib");
+//fg  if(vpdCalib) {
+//fg    mUseVpdStart = vpdCalib->useVpdStart();
+//fg  } else {
+//fg    mUseVpdStart = kFALSE;  // no vpdCalibMaker, do tray self calibration
+//fg  }
+//fg
+//fg  if(!mUseVpdStart && !mUseEventVertex) {
+//fg    LOG_WARN << " Try to run calibration without VPD as the start time and DON'T use the event vertex! Wrong command! Exit!" << endm;
+//fg    return kStOK;
+//fg  }
+//fg
+//fg  if(!mUseVpdStart) {
+//fg    LOG_INFO << " Run BTOF tray self calibration without VPD!!! " << endm;
+//fg  }
+
+  initEvent();
   resetVpd();
-  loadVpdData();
+  if(mUseVpdStart) {
+    loadVpdData();
+  }
 
   if(!mMuDstIn) processStEvent();
   else          processMuDst();
@@ -485,74 +529,90 @@ void StBTofCalibMaker::processStEvent()
   Int_t nhits = tofHits.size();
   LOG_INFO << " Fired TOF cells + upVPD tubes : " << nhits << endm;
 
-  mEvtVtxZ = -9999.;
-  mProjVtxZ = -9999.;
-  float dcaRmin = 9999.;   
-  float rankHmax = -1.e9;
+  if(mUseVpdStart) {
 
-  if(mUseEventVertex) {
-    ///
-    /// select the vertex with highest rank within the VPDVtxZ cut range
-    ///
-    int nVtx = mEvent->numberOfPrimaryVertices();
-    for(int i=0;i<nVtx;i++) {
-      StPrimaryVertex *pVtx = mEvent->primaryVertex(i);
-      if(!pVtx) continue;
-//      if(pVtx->ranking()<0) continue;               //! select positive ranking vertex
-      if(fabs(pVtx->position().z())>200.) continue;   //! within 200 cm
-      if(fabs(pVtx->position().z()-mVPDVtxZ)>VZDIFFCUT) continue;  //! VPDVtxZ cut
-      if(pVtx->ranking()<rankHmax) continue;
-      mEvtVtxZ = pVtx->position().z();
-      rankHmax = pVtx->ranking();
+    mEvtVtxZ = -9999.;
+    mProjVtxZ = -9999.;
+    float dcaRmin = 9999.;   
+    float rankHmax = -1.e9;
+
+    if(mUseEventVertex) {
+      ///
+      /// select the vertex with highest positive rank within the VPDVtxZ cut range
+      ///
+      int nVtx = mEvent->numberOfPrimaryVertices();
+      for(int i=0;i<nVtx;i++) {
+        StPrimaryVertex *pVtx = mEvent->primaryVertex(i);
+        if(!pVtx) continue;
+//        if(pVtx->ranking()<0) continue;               //! select positive ranking vertex
+        if(fabs(pVtx->position().z())>200.) continue;   //! within 200 cm
+        if(fabs(pVtx->position().z()-mVPDVtxZ)>VZDIFFCUT) continue;  //! VPDVtxZ cut
+        if(pVtx->ranking()<rankHmax) continue;
+        mEvtVtxZ = pVtx->position().z();
+        rankHmax = pVtx->ranking();
+      }
+
+//      if(rankHmax<0.) mEvtVtxZ = -9999.;
+      tstart(mEvtVtxZ, &mTStart, &mTDiff);
+
+    } else {
+      ///
+      /// select the projection position with smallest dcaR within the VPDVtxZ cut range
+      ///
+      for(int i=0;i<nhits;i++) {
+        StBTofHit *aHit = dynamic_cast<StBTofHit*>(tofHits[i]);
+        if(!aHit) continue;
+        int trayId = aHit->tray();
+        if(trayId>0&&trayId<=mNTray) {
+          StGlobalTrack *gTrack = dynamic_cast<StGlobalTrack*>(aHit->associatedTrack());
+          if(!gTrack) continue;
+          StTrackGeometry *theTrackGeometry = gTrack->geometry();
+ 
+          StThreeVectorD tofPos =  theTrackGeometry->helix().at(theTrackGeometry->helix().pathLengths(*mBeamHelix).first);
+          StThreeVectorD beamPos = mBeamHelix->at(theTrackGeometry->helix().pathLengths(*mBeamHelix).second);
+          StThreeVectorD dcatof = tofPos - beamPos;
+
+	  LOG_DEBUG<<" tofPos(x,y,z) = "<<tofPos.x()<<","<<tofPos.y()<<","<<tofPos.z()<<endm;
+	  LOG_DEBUG<<"beamPos(x,y,z) = "<<beamPos.x()<<","<<beamPos.y()<<","<<beamPos.z()<<endm;
+	  LOG_DEBUG<<"  dca  (x,y,z) = "<<dcatof.x()<<","<<dcatof.y()<<","<<dcatof.z()<<endm;
+	  LOG_DEBUG<<" 2D dca        = "<<sqrt(pow(dcatof.x(),2)+pow(dcatof.y(),2))<<endm;
+	  LOG_DEBUG<<" 2D signed dca = "<<theTrackGeometry->helix().geometricSignedDistance(beamPos.x(),beamPos.y())<<endm;
+
+          /// track projection z should be close to vzvpd
+          if(fabs(tofPos.z()-mVPDVtxZ)>VZDIFFCUT) continue;
+
+          if(dcaRmin>dcatof.perp()) {
+            mProjVtxZ = tofPos.z();
+            dcaRmin = dcatof.perp();
+          }
+        } // end if
+      } // end loop tofhits
+
+      if(dcaRmin>DCARCUT)  mProjVtxZ = -9999.;  // beam line contrain
+      tstart(mProjVtxZ, &mTStart, &mTDiff);
+
+    } // end if (mUseEventVertex)
+
+  } else {   // Don't use VPD as the start time
+
+    StPrimaryVertex *pVtx = mEvent->primaryVertex();
+    if(!pVtx) {
+      LOG_WARN << " No primary vertex ... bye-bye" << endm;
+      return;
     }
+    mEvtVtxZ = pVtx->position().z();
 
-//    if(rankHmax<0.) mEvtVtxZ = -9999.;
-    tstart(mEvtVtxZ, &mTStart, &mTDiff);
+    tstart_NoVpd(theTof, pVtx, &mTStart);
 
-  } else {
-    ///
-    /// select the projection position with smallest dcaR within the VPDVtxZ cut range
-    ///
-    for(int i=0;i<nhits;i++) {
-      StBTofHit *aHit = dynamic_cast<StBTofHit*>(tofHits[i]);
-      if(!aHit) continue;
-      int trayId = aHit->tray();
-      if(trayId>0&&trayId<=mNTray) {
-        StGlobalTrack *gTrack = dynamic_cast<StGlobalTrack*>(aHit->associatedTrack());
-        if(!gTrack) continue;
-        StTrackGeometry *theTrackGeometry = gTrack->geometry();
-
-        StThreeVectorD tofPos =  theTrackGeometry->helix().at(theTrackGeometry->helix().pathLengths(*mBeamHelix).first);
-        StThreeVectorD beamPos = mBeamHelix->at(theTrackGeometry->helix().pathLengths(*mBeamHelix).second);
-        StThreeVectorD dcatof = tofPos - beamPos;
-        if(Debug()) {
-          LOG_INFO<<" tofPos(x,y,z) = "<<tofPos.x()<<","<<tofPos.y()<<","<<tofPos.z()<<endm;
-          LOG_INFO<<"beamPos(x,y,z) = "<<beamPos.x()<<","<<beamPos.y()<<","<<beamPos.z()<<endm;
-          LOG_INFO<<"  dca  (x,y,z) = "<<dcatof.x()<<","<<dcatof.y()<<","<<dcatof.z()<<endm;
-          LOG_INFO<<" 2D dca        = "<<sqrt(pow(dcatof.x(),2)+pow(dcatof.y(),2))<<endm;
-          LOG_INFO<<" 2D signed dca = "<<theTrackGeometry->helix().geometricSignedDistance(beamPos.x(),beamPos.y())<<endm;
-        }
-
-        /// track projection z should be close to vzvpd
-        if(fabs(tofPos.z()-mVPDVtxZ)>VZDIFFCUT) continue;
-
-        if(dcaRmin>dcatof.perp()) {
-          mProjVtxZ = tofPos.z();
-          dcaRmin = dcatof.perp();
-        }
-      } // end if
-    } // end loop tofhits
-
-    if(dcaRmin>DCARCUT)  mProjVtxZ = -9999.;  // beam line contrain
-    tstart(mProjVtxZ, &mTStart, &mTDiff);
-
-  } // end if (mUseEventVertex)
-
+  }  // end if(mUseVpdStart)
+  
   LOG_INFO << " projected Vertex Z = " << mProjVtxZ << endm;
   LOG_INFO << " Tstart = " << mTStart << " Tdiff = " << mTDiff << endm;
-  LOG_INFO << " NWest = " << mNWest << " NEast = " << mNEast << " TdcSum West = " << mTSumWest << " East = " << mTSumEast << endm; 
+  LOG_INFO << " NWest = " << mNWest << " NEast = " << mNEast << " TdcSum West = " << mTSumWest << " East = " << mTSumEast << endm;
+  LOG_INFO << " NTzero = " << mNTzero << endm;
   LOG_INFO << " mValidCalibPar = " << mValidCalibPar << " mValidStartTime = " << mValidStartTime << endm;
   LOG_INFO << " mVpdVz = " << mVPDVtxZ << endm;
+  
 
   if(mTStart<-1000.) {
     LOG_INFO << " No valid start time for this event. Skip ..." << endm;
@@ -725,70 +785,81 @@ void StBTofCalibMaker::processMuDst()
   Int_t nhits = mMuDst->numberOfBTofHit();
   LOG_INFO << " Fired TOF cells + upVPD tubes : " << nhits << endm;
 
-  mEvtVtxZ  = -9999.;
-  mProjVtxZ = -9999.;
-  float dcaRmin = 9999.;
-  float rankHmax = -1.e9;
+  if(mUseVpdStart) {
 
-  if(mUseEventVertex) {
-    ///
-    /// select the vertex with highest rank within the VPDVtxZ cut range
-    ///
-    int nVtx = mMuDst->numberOfPrimaryVertices();
-    for(int i=0;i<nVtx;i++) {
-      StMuPrimaryVertex* pVtx = mMuDst->primaryVertex(i);
-      if(!pVtx) continue;
-//      if(pVtx->ranking()<0) continue;               //! select positive ranking vertex
-      if(fabs(pVtx->position().z())>200.) continue;   //! within 200 cm
-      if(fabs(pVtx->position().z()-mVPDVtxZ)>VZDIFFCUT) continue;  //! VPDVtxZ cut
-      if(pVtx->ranking()<rankHmax) continue;
-      mEvtVtxZ = pVtx->position().z();
-      rankHmax = pVtx->ranking();
+    mEvtVtxZ  = -9999.;
+    mProjVtxZ = -9999.;
+    float dcaRmin = 9999.;
+    float rankHmax = -1.e9;
+
+    if(mUseEventVertex) {
+      ///
+      /// select the vertex with highest positive rank within the VPDVtxZ cut range
+      ///
+      int nVtx = mMuDst->numberOfPrimaryVertices();
+      for(int i=0;i<nVtx;i++) {
+        StMuPrimaryVertex* pVtx = mMuDst->primaryVertex(i);
+        if(!pVtx) continue;
+//        if(pVtx->ranking()<0) continue;               //! select positive ranking vertex
+        if(fabs(pVtx->position().z())>200.) continue;   //! within 200 cm
+        if(fabs(pVtx->position().z()-mVPDVtxZ)>VZDIFFCUT) continue;  //! VPDVtxZ cut
+        if(pVtx->ranking()<rankHmax) continue;
+        mEvtVtxZ = pVtx->position().z();
+        rankHmax = pVtx->ranking();
+      }
+
+//      if(rankHmax<0.) mEvtVtxZ = -9999.;
+      tstart(mEvtVtxZ, &mTStart, &mTDiff);
+
+    } else {
+      ///
+      /// select the projection position with smallest dcaR within the VPDVtxZ cut range
+      ///
+      for(int i=0;i<nhits;i++) {
+        StMuBTofHit *aHit = (StMuBTofHit*)mMuDst->btofHit(i);
+        if(!aHit) continue;
+        int trayId = aHit->tray();
+        if(trayId>0&&trayId<=mNTray) {
+          StMuTrack *gTrack = aHit->globalTrack();
+          if(!gTrack) continue;
+
+          StPhysicalHelixD thisHelix = gTrack->helix();
+
+          StThreeVectorD tofPos =  thisHelix.at(thisHelix.pathLengths(*mBeamHelix).first);
+          StThreeVectorD dcatof = tofPos - mBeamHelix->at(thisHelix.pathLengths(*mBeamHelix).second);
+
+          /// track projection z should be close to vzvpd
+          if(fabs(tofPos.z()-mVPDVtxZ)>VZDIFFCUT) continue;
+
+          if(dcaRmin>dcatof.perp()) {
+            mProjVtxZ = tofPos.z();
+            dcaRmin = dcatof.perp();
+          }
+        } // end if
+      } // end loop tofhits
+
+      if(dcaRmin>DCARCUT)  mProjVtxZ = -9999.;  // beam line contrain
+      tstart(mProjVtxZ, &mTStart, &mTDiff);
+
+    } // end if(mUseEventVertex)
+  } else { // don't use vpd as the start time
+
+    StMuPrimaryVertex *pVtx = mMuDst->primaryVertex();
+    if(!pVtx) {
+      LOG_WARN << " No primary vertex ... bye-bye" << endm;
+      return;
     }
+    mEvtVtxZ = pVtx->position().z();
 
-//    if(rankHmax<0.) mEvtVtxZ = -9999.;
-    tstart(mEvtVtxZ, &mTStart, &mTDiff);
-
-  } else {
-    ///
-    /// select the projection position with smallest dcaR within the VPDVtxZ cut range
-    ///
-    for(int i=0;i<nhits;i++) {
-      StMuBTofHit *aHit = (StMuBTofHit*)mMuDst->btofHit(i);
-      if(!aHit) continue;
-      int trayId = aHit->tray();
-      if(trayId>0&&trayId<=mNTray) {
-        StMuTrack *gTrack = aHit->globalTrack();
-        if(!gTrack) continue;
-
-        StPhysicalHelixD thisHelix = gTrack->helix();
-
-        StThreeVectorD tofPos =  thisHelix.at(thisHelix.pathLengths(*mBeamHelix).first);
-        StThreeVectorD dcatof = tofPos - mBeamHelix->at(thisHelix.pathLengths(*mBeamHelix).second);
-
-        /// track projection z should be close to vzvpd
-        if(fabs(tofPos.z()-mVPDVtxZ)>VZDIFFCUT) continue;
-
-        if(dcaRmin>dcatof.perp()) {
-          mProjVtxZ = tofPos.z();
-          dcaRmin = dcatof.perp();
-        }
-      } // end if
-    } // end loop tofhits
-
-    if(dcaRmin>DCARCUT)  mProjVtxZ = -9999.;  // beam line contrain
-    tstart(mProjVtxZ, &mTStart, &mTDiff);
-
+    tstart_NoVpd(mMuDst, pVtx, &mTStart);
   }
 
-//  if(Debug()) {  
-  if(1) {
-    LOG_INFO << " projected Vertex Z = " << mProjVtxZ << endm;
-    LOG_INFO << " Tstart = " << mTStart << " Tdiff = " << mTDiff << endm;
-    LOG_INFO << " NWest = " << mNWest << " NEast = " << mNEast << " TdcSum West = " << mTSumWest << " East = " << mTSumEast << endm;
-    LOG_INFO << " mValidCalibPar = " << mValidCalibPar << " mValidStartTime = " << mValidStartTime << endm;
-    LOG_INFO << " mVpdVz = " << mVPDVtxZ << endm;
-  }
+  LOG_INFO << " projected Vertex Z = " << mProjVtxZ << endm;
+  LOG_INFO << " Tstart = " << mTStart << " Tdiff = " << mTDiff << endm;
+  LOG_INFO << " NWest = " << mNWest << " NEast = " << mNEast << " TdcSum West = " << mTSumWest << " East = " << mTSumEast << endm;
+  LOG_INFO << " NTzero = " << mNTzero << endm;
+  LOG_INFO << " mValidCalibPar = " << mValidCalibPar << " mValidStartTime = " << mValidStartTime << endm;
+  LOG_INFO << " mVpdVz = " << mVPDVtxZ << endm;
 
   if(mTStart<-1000.) {
     LOG_INFO << " No valid start time for this event. Skip ..." << endm;
@@ -973,7 +1044,7 @@ void StBTofCalibMaker::cleanCalib(StMuBTofPidTraits& pid)
 }
 
 //_____________________________________________________________________________
-void StBTofCalibMaker::loadVpdData()
+void StBTofCalibMaker::initEvent()
 {
   if(mMuDstIn) {
     StMuDstMaker *mMuDstMaker = (StMuDstMaker *)GetMaker("MuDst");
@@ -997,6 +1068,12 @@ void StBTofCalibMaker::loadVpdData()
     mBTofHeader = btofColl->tofHeader();
   }
 
+  return;
+}
+
+//_____________________________________________________________________________
+void StBTofCalibMaker::loadVpdData()
+{
    if(!mBTofHeader) return;
 
    mTSumWest = 0;
@@ -1032,6 +1109,7 @@ void StBTofCalibMaker::writeStartTime()
   if(mBTofHeader) {
     mBTofHeader->setTStart(mTStart);
     mBTofHeader->setTDiff(mTDiff);
+    mBTofHeader->setNTzero(mNTzero);
   }
 
   return;
@@ -1044,8 +1122,8 @@ Double_t StBTofCalibMaker::tofAllCorr(const Double_t tof, const Double_t tot, co
   int module = iModuleChan/6 + 1;
   int cell = iModuleChan%6 + 1;
   int board = iModuleChan/24 + 1;
-//  if(Debug()) {
-  if(1) {
+  if(Debug()) {
+//  if(1) {
     LOG_INFO << "\nStBTofCalibMaker::btofAllCorr: BTof calibrating...\n" 
   	     << "\tDoing Calibration in BTOF Tray " << tray << " Module " << module << " Cell " << cell
 	     << "\n\tinput tof = " << tof
@@ -1124,6 +1202,172 @@ void StBTofCalibMaker::tstart(const Double_t vz, Double_t *tstart, Double_t *tdi
   if ( mNEast>=mVPDEastHitsCut && mNWest>=mVPDWestHitsCut ) {
     *tdiff = (mTSumEast/mNEast - mTSumWest/mNWest)/2. - vz/(C_C_LIGHT/1.e9);
   }
+
+  return;
+}
+
+//_____________________________________________________________________________
+void StBTofCalibMaker::tstart_NoVpd(const StBTofCollection *btofColl, const StPrimaryVertex *pVtx, Double_t *tstart)
+{
+  *tstart = -9999.;
+  if(!btofColl) return;
+
+  const StSPtrVecBTofHit &tofHits = btofColl->tofHits();
+  Int_t nCan = 0;
+  Double_t tSum = 0.;
+  Double_t t0[5000];
+  memset(t0, 0., sizeof(t0));
+  for(size_t i=0;i<tofHits.size();i++) {
+    StBTofHit *aHit = dynamic_cast<StBTofHit*>(tofHits[i]);
+    if(!aHit) continue;
+    int trayId = aHit->tray();
+    if(trayId>0&&trayId<=mNTray) {
+      StGlobalTrack *gTrack = dynamic_cast<StGlobalTrack*>(aHit->associatedTrack());
+      if(!gTrack) continue;
+      StPrimaryTrack *pTrack = dynamic_cast<StPrimaryTrack*>(gTrack->node()->track(primary));
+      if(!pTrack) continue;
+      if(pTrack->vertex() != pVtx) continue;
+      StThreeVectorF mom = pTrack->geometry()->momentum();
+      double ptot = mom.mag();
+
+      // use lose cut for low energies to improve the efficiency - resolution is not a big issue
+      if(ptot<0.2 || ptot>0.6) continue;
+
+      static StTpcDedxPidAlgorithm PidAlgorithm;
+      static StPionPlus* Pion = StPionPlus::instance();
+      const StParticleDefinition* pd = pTrack->pidTraits(PidAlgorithm);
+      double nSigPi = -999.;
+      if(pd) {
+        nSigPi = PidAlgorithm.numberOfSigma(Pion);
+      }
+
+      if( fabs(nSigPi)>2.0 ) continue;
+
+      const StPtrVecTrackPidTraits& theTofPidTraits = pTrack->pidTraits(kTofId);
+      if(!theTofPidTraits.size()) continue;
+
+      StTrackPidTraits *theSelectedTrait = theTofPidTraits[theTofPidTraits.size()-1];
+      if(!theSelectedTrait) continue;
+
+      StBTofPidTraits *pidTof = dynamic_cast<StBTofPidTraits *>(theSelectedTrait);
+      if(!pidTof) continue;
+
+      double tot = aHit->tot(); // ns
+      double tof = aHit->leadingEdgeTime();
+      double zhit = pidTof->zLocal();
+
+      int moduleChan = (aHit->module()-1)*6 + (aHit->cell()-1);
+      Double_t tofcorr = tofAllCorr(tof, tot, zhit, trayId, moduleChan);
+      if(tofcorr<0.) continue;
+
+      StThreeVectorF primPos = pVtx->position();
+      StPhysicalHelixD helix = pTrack->geometry()->helix();
+      double L = tofPathLength(&primPos, &pidTof->position(), helix.curvature());
+      double tofPi = L*sqrt(M_PION_PLUS*M_PION_PLUS+ptot*ptot)/(ptot*(C_C_LIGHT/1.e9));
+
+      tSum += tofcorr - tofPi;
+      t0[nCan] = tofcorr - tofPi;
+      nCan++;
+      
+    }
+
+  }
+
+  if(nCan<=0) {
+    *tstart = -9999.;
+    return;
+  }
+
+  Int_t nTzero = nCan;
+  if(nCan>1) { // remove hits too far from others
+    for(int i=0;i<nCan;i++) {
+      double tdiff = t0[i] - (tSum-t0[i])/(nTzero-1);
+      if(fabs(tdiff)>5.0) {
+        tSum -= t0[i];
+        nTzero--;
+      }
+    }
+  }
+
+  mNTzero = nTzero;
+
+  *tstart = nTzero>0 ? tSum / nTzero : -9999.;
+
+  return;
+}
+
+//_____________________________________________________________________________
+void StBTofCalibMaker::tstart_NoVpd(const StMuDst *muDst, const StMuPrimaryVertex *pVtx, Double_t *tstart)
+{
+  *tstart = -9999.;
+  if(!muDst) return;
+
+  Int_t nBTofHits = muDst->numberOfBTofHit();
+  Int_t nCan = 0;
+  Double_t tSum = 0.;
+  Double_t t0[5000];
+  memset(t0, 0., sizeof(t0));
+  for(int i=0;i<nBTofHits;i++) {
+    StMuBTofHit *aHit = (StMuBTofHit*)muDst->btofHit(i);
+    if(!aHit) continue;
+    int trayId = aHit->tray();
+    if(trayId>0&&trayId<=mNTray) {
+      StMuTrack *gTrack = aHit->globalTrack();
+      if(!gTrack) continue;
+      StMuTrack *pTrack = aHit->primaryTrack();
+      if(!pTrack) continue;
+      StMuPrimaryVertex *aVtx = muDst->primaryVertex(pTrack->vertexIndex());
+      if(aVtx != pVtx) continue;
+      StThreeVectorF mom = pTrack->momentum();
+      double ptot = mom.mag();
+
+      // For low energies, lose cut to improve the efficiency in peripheral collisions - resolution should be not a big issue
+      if(ptot<0.2 || ptot>0.6) continue;
+      double nSigPi = pTrack->nSigmaPion();
+      if( fabs(nSigPi)>2. ) continue;
+
+      StMuBTofPidTraits pidTof = pTrack->btofPidTraits();
+
+      double tot = aHit->tot(); // ns
+      double tof = aHit->leadingEdgeTime();
+      double zhit = pidTof.zLocal();
+
+      int moduleChan = (aHit->module()-1)*6 + (aHit->cell()-1);
+      Double_t tofcorr = tofAllCorr(tof, tot, zhit, trayId, moduleChan);
+      if(tofcorr<0.) continue;
+
+      StThreeVectorF primPos = pVtx->position();
+      StPhysicalHelixD helix = pTrack->helix();
+      double L = tofPathLength(&primPos, &pidTof.position(), helix.curvature());
+      double tofPi = L*sqrt(M_PION_PLUS*M_PION_PLUS+ptot*ptot)/(ptot*(C_C_LIGHT/1.e9));
+
+      tSum += tofcorr - tofPi;
+      t0[nCan] = tofcorr - tofPi;
+      nCan++;
+      
+    }
+
+  }
+
+  if(nCan<=0) {
+    *tstart = -9999.;
+    return;
+  }
+
+  Int_t nTzero = nCan;
+  if(nCan>1) { // remove hits too far from others
+    for(int i=0;i<nCan;i++) {
+      double tdiff = t0[i] - (tSum-t0[i])/(nTzero-1);
+      if(fabs(tdiff)>5.0) {
+        tSum -= t0[i];
+        nTzero--;
+      }
+    }
+  }
+
+  mNTzero = nTzero;
+
+  *tstart = nTzero>0 ? tSum / nTzero : -9999.;
 
   return;
 }
