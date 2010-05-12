@@ -1,4 +1,4 @@
-// $Id: St2009W_trigger.cxx,v 1.2 2010/01/13 03:34:20 stevens4 Exp $
+// $Id: St2009W_trigger.cxx,v 1.3 2010/05/12 19:04:05 rcorliss Exp $
 //
 //*-- Author : Ross Corliss, MIT
 
@@ -14,10 +14,10 @@ St2009WMaker::passes_L0(){
     threshold, but can be set from the macro if a different value is
     needed.
   */
-  if (!wEve.bemc.tileIn[0]) return false;//zero means bad
-  for (int i=0;i<mxBtow;i++)
-    if (wEve.bemc.statTile[0][i]==0)//zero means good
-      if (wEve.bemc.adcTile[0][i]>par_l0emulAdcThresh) return true;
+
+  StMuEvent* muEve = mMuDstMaker->muDst()->event();
+  for (int m=0;m<300;m++)
+    if(muEve->emcTriggerDetector().highTower(m)>par_l0emulAdcThresh) return true;
   return false;
 }
 
@@ -45,6 +45,9 @@ St2009WMaker::passes_L2(){
 }
 
 //$Log: St2009W_trigger.cxx,v $
+//Revision 1.3  2010/05/12 19:04:05  rcorliss
+//Corrected passes_L0() to use trigger patches instead of wEvent tiles.
+//
 //Revision 1.2  2010/01/13 03:34:20  stevens4
 //give trig emulator access to barrel hits
 //
