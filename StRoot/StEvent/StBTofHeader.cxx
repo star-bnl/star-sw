@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHeader.cxx,v 2.4 2009/11/23 22:45:51 ullrich Exp $
+ * $Id: StBTofHeader.cxx,v 2.5 2010/05/12 15:12:03 ullrich Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHeader.cxx,v $
+ * Revision 2.5  2010/05/12 15:12:03  ullrich
+ * Added member mNTzero and access methods.
+ *
  * Revision 2.4  2009/11/23 22:45:51  ullrich
  * Fixed order of operator precedence in removeVpdHit().
  *
@@ -43,9 +46,10 @@ StBTofHeader::StBTofHeader()
     for(int i=0; i<2; i++)
         for(int j=0; j<MAXVPD; j++)
             mVpdTime[i][j] = 0.;
+    mNTzero = 0;
 }
 
-StBTofHeader::~StBTofHeader() {/* noop */}
+StBTofHeader::~StBTofHeader() {/* no op */}
 
 short
 StBTofHeader::fiberHeader(int fiberId) const { return mFiberHeader[fiberId]; }
@@ -100,6 +104,9 @@ StBTofHeader::vpdTime(StBeamDirection eastwest, int tubeId) const
 unsigned int
 StBTofHeader::triggerTime(int fiberId) const { return mTriggerTime[fiberId]; }
 
+int
+StBTofHeader::nTzero() const { return mNTzero; }
+
 void
 StBTofHeader::setFiberHeader(int fiberId, short val)
 {
@@ -153,3 +160,6 @@ StBTofHeader::setVpdTime(StBeamDirection eastwest, int tubeId, double t)
 
 void
 StBTofHeader::setTriggerTime(unsigned int tdc, int fiberId) { mTriggerTime[fiberId] = tdc; }
+
+void
+StBTofHeader::setNTzero(short n) { mNTzero = n; }

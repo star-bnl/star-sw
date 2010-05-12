@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBTofHeader.h,v 2.2 2009/01/15 00:45:27 ullrich Exp $
+ * $Id: StBTofHeader.h,v 2.3 2010/05/12 15:12:03 ullrich Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHeader.h,v $
+ * Revision 2.3  2010/05/12 15:12:03  ullrich
+ * Added member mNTzero and access methods.
+ *
  * Revision 2.2  2009/01/15 00:45:27  ullrich
  * mTriggerTime becomes array, setVpdVz() gets default argument.
  *
@@ -49,6 +52,7 @@ public:
     double         tDiff() const;
     double         vpdTime(StBeamDirection eastwest, int tubeId) const;
     unsigned int   triggerTime(int fiberId) const;
+    int            nTzero() const;
     
     void         setFiberHeader(int fiberId, short val);
     void         setFiberTriggerWord(int fiberId, unsigned int val);
@@ -61,6 +65,7 @@ public:
     void         setTDiff(double tdiff);
     void         setVpdTime(StBeamDirection eastwest, int tubeId, double t);
     void         setTriggerTime(unsigned int tdc, int fiberId);
+    void         setNTzero(short n);
 
 protected:
     Short_t      mFiberHeader[MAXFIBER];
@@ -72,6 +77,7 @@ protected:
     Double_t     mTDiff;
     Double_t     mVpdTime[2][MAXVPD];
     UInt_t       mTriggerTime[MAXFIBER];
+    Short_t      mNTzero;
 
     ClassDef(StBTofHeader,1)
 };
