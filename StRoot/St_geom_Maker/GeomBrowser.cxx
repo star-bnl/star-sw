@@ -1,6 +1,6 @@
 // Author: Valeri Fine   2/02/2009
 // ****************************************************************************
-// ** $Id: GeomBrowser.cxx,v 1.22 2010/03/31 19:16:00 fine Exp $
+// ** $Id: GeomBrowser.cxx,v 1.23 2010/05/12 23:12:21 fine Exp $
 #include "GeomBrowser.h"
 #include "StarGeomTreeWidget.h"
 #ifndef  NO_GEANT_MAKER
@@ -339,11 +339,12 @@ void GeomBrowser::Init()
    // comboBox1->setValidator(fTabCompValidator);
 
    // Predefine some ROOT commands
-   fRootCommand->addItem("gGeometry->SetBomb(1.7);");
-   fRootCommand->addItem("gPad->SetFillColor(kBlack);");
-   fRootCommand->addItem("gPad->SetFillColor(kWhite);");
-   fRootCommand->addItem(".qqqqqq");
-   fRootCommand->addItem(".q");
+   fRootCommand->insertItem(0,".qqqqqq");
+   fRootCommand->insertItem(0,".q");
+   fRootCommand->insertItem(0,"gGeometry->SetBomb(1.7);");
+   fRootCommand->insertItem(0,"gPad->SetFillColor(kBlack);");
+   fRootCommand->insertItem(0,"gPad->SetFillColor(kWhite);");
+
 //   spinBox1->setValue(3);
    fComplexVolumeCanvas->GetCanvas()->SetFillColor(kBlack); 
    // do we have the QGLViewer?
