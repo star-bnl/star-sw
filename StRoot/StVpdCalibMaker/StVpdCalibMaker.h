@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.h,v 1.3 2010/05/06 22:37:41 geurts Exp $
+ * $Id: StVpdCalibMaker.h,v 1.4 2010/05/12 22:46:51 geurts Exp $
  *
  *******************************************************************/
 /*!
@@ -14,6 +14,9 @@
 /*****************************************************************
  *
  * $Log: StVpdCalibMaker.h,v $
+ * Revision 1.4  2010/05/12 22:46:51  geurts
+ * Startless BTOF self-calibration method (Xin)
+ *
  * Revision 1.3  2010/05/06 22:37:41  geurts
  * Remove slower hits (outliers) in VPD timing calculations (Xin Dong)
  *
@@ -67,6 +70,11 @@ public:
   void setVPDHitsCut(const Int_t eastVpdCut, const Int_t westVpdCut);
   /// switch to read in StEvent/MuDst
   void setMuDstIn();
+  /// switch to use the vpd as the start time
+  void setUseVpdStart(const Bool_t val=kTRUE);
+  
+  /// function for tofCalibMaker to know whether to use VPD as the start or not
+  Bool_t useVpdStart() const;
 
 private:
   /// Reset the calibration parameters
@@ -147,9 +155,10 @@ private:
 
   Bool_t mInitFromFile;  //! switch for reading from files
   string mCalibFilePvpd; //! filename for pvpd calibration parameters
+  Bool_t mUseVpdStart;   //! switch for using Vpd as the start time (true by default)
 
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StVpdCalibMaker.h,v 1.3 2010/05/06 22:37:41 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StVpdCalibMaker.h,v 1.4 2010/05/12 22:46:51 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
   ClassDef(StVpdCalibMaker,1)
 };
@@ -160,4 +169,6 @@ inline void StVpdCalibMaker::setHistoFileName(const Char_t* filename){mHistoFile
 inline void StVpdCalibMaker::setCreateHistoFlag(const Bool_t histos){mHisto = histos;}
 inline void StVpdCalibMaker::setInitFromFile(const Bool_t val)  {mInitFromFile = val; }
 inline void StVpdCalibMaker::setCalibFilePvpd(const Char_t* filename) {mCalibFilePvpd = filename;}
+inline void StVpdCalibMaker::setUseVpdStart(const Bool_t val) {mUseVpdStart = val;}
+inline Bool_t StVpdCalibMaker::useVpdStart() const { return mUseVpdStart; }
 #endif

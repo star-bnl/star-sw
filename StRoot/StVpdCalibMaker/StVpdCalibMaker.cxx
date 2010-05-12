@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.4 2010/05/06 22:37:41 geurts Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.5 2010/05/12 22:46:51 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.5  2010/05/12 22:46:51  geurts
+ * Startless BTOF self-calibration method (Xin)
+ *
  * Revision 1.4  2010/05/06 22:37:41  geurts
  * Remove slower hits (outliers) in VPD timing calculations (Xin Dong)
  *
@@ -93,6 +96,8 @@ StVpdCalibMaker::StVpdCalibMaker(const Char_t *name) : StMaker(name)
   mInitFromFile = kFALSE;
   // assign default locations and names to the calibration files 
   setCalibFilePvpd("/star/institutions/rice/calib/default/pvpdCali_4DB.dat");
+  // use vpd as start by default;
+  setUseVpdStart(kTRUE);
 }
 
 //_____________________________________________________________________________
@@ -222,6 +227,28 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
     LOG_DEBUG << " Number of rows read in: " << numRows << " for Vpd ToT correction" << endm;
 
     for (Int_t i=0;i<numRows;i++) {
+      if(i==0) {  // identify once only, for the first tube
+        short flag = totCorr[i].corralgo;
+        if(flag==0) {
+	  setUseVpdStart(kTRUE);
+	  LOG_INFO << "Selected VPD for TOF start-timing" << endm;
+	}
+	else if(flag==1) {
+	  setUseVpdStart(kFALSE);
+	  LOG_INFO << "VPD NOT used for TOF start-timing" << endm;
+	}
+	else {
+	  LOG_WARN << "Unknown calibration option " << flag << endm;
+	}
+      }
+      else { // verify that all other entries agree
+	if (mUseVpdStart && (totCorr[i].corralgo!=0))
+	  {LOG_WARN << "corralgo dbase inconsistency: " << totCorr[i].corralgo << endm;}
+	if (!mUseVpdStart && (totCorr[i].corralgo!=1))
+	  {LOG_WARN << "corralgo dbase inconsistency: " << totCorr[i].corralgo << endm;}
+      }
+
+
       short tubeId = totCorr[i].tubeId;
       // check index range
       if (tubeId>2*NVPD) {
@@ -511,13 +538,6 @@ void StVpdCalibMaker::vzVpdFinder()
     Int_t hitIndex[2*NVPD];
     Int_t nTube = NVPD;
     TMath::Sort(nTube, &mVPDLeTime[0], &hitIndex[0]);
-    for(int i=0;i<NVPD;i++) {
-      cout << " i = " << i << " west time = " << mVPDLeTime[i] << endl;
-    }
-    for(int i=0;i<NVPD;i++) {
-      cout << hitIndex[i] << " ";
-    }
-    cout << endl;
     int nRejectedWest = (int)(FracTruncated*mNWest+0.5);
     cout << " NWest before = " << mNWest << " rejected = " << nRejectedWest << endl;
     for(int i=0;i<nRejectedWest;i++) {
@@ -530,13 +550,6 @@ void StVpdCalibMaker::vzVpdFinder()
     }
 
     TMath::Sort(nTube, &mVPDLeTime[NVPD], &hitIndex[NVPD]);
-    for(int i=0;i<NVPD;i++) {
-      cout << " i = " << i << " east time = " << mVPDLeTime[i+NVPD] << endl;
-    }
-    for(int i=0;i<NVPD;i++) {
-      cout << hitIndex[i+NVPD] << " ";
-    }
-    cout << endl;
     int nRejectedEast = (int)(FracTruncated*mNEast+0.5);
     cout << " NEast before = " << mNEast << " rejected = " << nRejectedEast << endl;
     for(int i=0;i<nRejectedEast;i++) {
