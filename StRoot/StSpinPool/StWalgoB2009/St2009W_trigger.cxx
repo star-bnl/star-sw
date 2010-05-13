@@ -1,8 +1,9 @@
-// $Id: St2009W_trigger.cxx,v 1.3 2010/05/12 19:04:05 rcorliss Exp $
+// $Id: St2009W_trigger.cxx,v 1.4 2010/05/13 00:53:52 rcorliss Exp $
 //
 //*-- Author : Ross Corliss, MIT
 
 #include "St2009WMaker.h"
+#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
 
 //________________________________________________
 //________________________________________________
@@ -45,6 +46,9 @@ St2009WMaker::passes_L2(){
 }
 
 //$Log: St2009W_trigger.cxx,v $
+//Revision 1.4  2010/05/13 00:53:52  rcorliss
+//fixed missing #include
+//
 //Revision 1.3  2010/05/12 19:04:05  rcorliss
 //Corrected passes_L0() to use trigger patches instead of wEvent tiles.
 //
