@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.cxx,v 1.9 2010/04/24 20:20:15 hmasui Exp $
+ * $Id: StEmbeddingQATrack.cxx,v 1.10 2010/05/14 19:49:09 hmasui Exp $
  * $Log: StEmbeddingQATrack.cxx,v $
+ * Revision 1.10  2010/05/14 19:49:09  hmasui
+ * Add rapidity cut
+ *
  * Revision 1.9  2010/04/24 20:20:15  hmasui
  * Add geant process, and modift the type of parent, parent-parent geantid to match the data members in minimc tree
  *
@@ -145,6 +148,16 @@ Bool_t StEmbeddingQATrack::isPtAndEtaOk() const
   const Bool_t isEtaOk = TMath::Abs(eta) < kEtaCut ;
 
   return (StEmbeddingQAUtilities::instance()->isMc(mName)) ? isPtOk : (isPtOk && isEtaOk) ;
+}
+
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQATrack::isRapidityOk(const Double_t ycut) const
+{
+  /// Rapidity cut (mainly for real data)
+  /// No cut on the MC tracks
+  const Float_t y = (StEmbeddingQAUtilities::instance()->isReal(mName)) ? getRapidityRc() : getRapidityMc() ;
+
+  return (StEmbeddingQAUtilities::instance()->isMc(mName)) ? kTRUE : (TMath::Abs(y)<ycut) ;
 }
 
 //__________________________________________________________________________________________
