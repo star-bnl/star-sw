@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.11 2010/04/24 20:21:21 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.12 2010/05/14 19:50:12 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.12  2010/05/14 19:50:12  hmasui
+ * Add rapidity and trigger cuts.
+ *
  * Revision 1.11  2010/04/24 20:21:21  hmasui
  * Add geant process check for contaminated pairs
  *
@@ -152,6 +155,12 @@ void StEmbeddingQA::init()
   /// default z-vertex cut
   mVertexCut = 30.0;
 
+  /// default is no trigger selections
+  mTriggerId.clear() ;
+
+  /// default rapidity cut
+  mRapidityCut = 10.0 ;
+
   mOutput = 0;
   mVz = -9999. ;
 
@@ -176,10 +185,47 @@ void StEmbeddingQA::init()
 }
 
 //__________________________________________________________________________________________
+void StEmbeddingQA::addTriggerIdCut(const UInt_t id)
+{
+  /// Add trigger id in the array (NOTE: will be used for real data only)
+
+  mTriggerId.push_back(id);
+  LOG_INFO << "StEmbeddingQA::addTriggerIdCut()  add trigger id = " << id
+    << endm;
+}
+
+//__________________________________________________________________________________________
+void StEmbeddingQA::setRapidityCut(const Float_t ycut)
+{
+  /// Set rapidity cut
+
+  mRapidityCut = ycut ;
+  LOG_INFO << "StEmbeddingQA::setRapidityCut()  set rapidity cut, |y| < " << mRapidityCut
+    << endm;
+}
+
+//__________________________________________________________________________________________
 Bool_t StEmbeddingQA::isZVertexOk(const StMiniMcEvent& mcevent) const
 {
   /// Apply z-vertex cut for embedding track nodes
   return TMath::Abs(mcevent.vertexZ()) < mVertexCut ;
+}
+
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQA::isTriggerOk(StMuEvent* event) const
+{
+  /// return true if no trigger is found
+  if( mTriggerId.empty() ) return kTRUE ;
+
+  /// Assume one trigger per event. Need to be revised if we have multiple triggers per event
+  for(UInt_t i=0; i<mTriggerId.size(); i++){
+    if( event->triggerIdCollection().nominal().isTrigger( mTriggerId[i] ) ){
+      LOG_DEBUG << "StEmbeddingQA::isTriggerOk  Trigger found: " << mTriggerId[i] << endm ;
+      return kTRUE ;
+    }
+  }
+
+  return kFALSE ;
 }
 
 //__________________________________________________________________________________________
@@ -436,6 +482,9 @@ Bool_t StEmbeddingQA::fillRealData(const TString inputFileName)
       ;
     if( isVertexBad ) continue ;
 
+    /// Trigger id cut
+    if( !isTriggerOk(muEvent) ) continue ;
+
     mhVz->Fill(vz);
     mhVyVx->Fill(vx, vy);
 
@@ -445,7 +494,7 @@ Bool_t StEmbeddingQA::fillRealData(const TString inputFileName)
     for(UInt_t ic=0; ic<StEmbeddingQAConst::mNReal; ic++){
       const Int_t categoryid = ic + StEmbeddingQAConst::mNEmbedding ;
 
-      if( ievent % 100 == 0 ){
+      if( ieventAccept % 100 == 0 ){
         LOG_INFO << Form("%85s ####  accept/throw=%10d/%10d, category=%10s",
             mMuDstMaker->GetFileName(), ieventAccept, ievent, StEmbeddingQAUtilities::instance()->getCategoryName(categoryid).Data())
           << endm;
@@ -678,10 +727,10 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
 
   /// Use MC momentum for the embedding tracks, reconstructed momentum for the real tracks
   StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
-  const Double_t pt    = (utility->isReal(track.getName())) ? track.getPtRc()                : track.getPtMc() ;
-  const Double_t mom   = (utility->isReal(track.getName())) ? track.getPRc()                 : track.getPMc() ;
-  const Double_t eta   = (utility->isReal(track.getName())) ? track.getEtaRc()               : track.getEtaMc() ;
-  const Double_t y     = (utility->isReal(track.getName())) ? track.getVectorRc().rapidity() : track.getVectorMc().rapidity() ;
+  const Double_t pt    = (utility->isReal(track.getName())) ? track.getPtRc()       : track.getPtMc() ;
+  const Double_t mom   = (utility->isReal(track.getName())) ? track.getPRc()        : track.getPMc() ;
+  const Double_t eta   = (utility->isReal(track.getName())) ? track.getEtaRc()      : track.getEtaMc() ;
+  const Double_t y     = (utility->isReal(track.getName())) ? track.getRapidityRc() : track.getRapidityMc() ;
 
   // Reconstructed momentum
   const Double_t momRc = track.getPRc() ;
@@ -694,6 +743,9 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
 
   // Fill geant id
   mhGeantId[categoryid]->Fill(track.getGeantId());
+
+  // Rapidity cut, default rapidity cut is 10 (Use setRapidityCut(const Float_t ycut) to restrict y window)
+  if(!track.isRapidityOk(mRapidityCut)) return ;
 
   // dE/dx (no PID cut)
   //  - Add NHit cut (Nov/13/2009)

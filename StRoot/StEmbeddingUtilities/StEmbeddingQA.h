@@ -5,8 +5,11 @@
 //  for instructions
 //****************************************************************************************************
 /****************************************************************************************************
- * $Id: StEmbeddingQA.h,v 1.5 2010/04/24 20:21:18 hmasui Exp $
+ * $Id: StEmbeddingQA.h,v 1.6 2010/05/14 19:50:11 hmasui Exp $
  * $Log: StEmbeddingQA.h,v $
+ * Revision 1.6  2010/05/14 19:50:11  hmasui
+ * Add rapidity and trigger cuts.
+ *
  * Revision 1.5  2010/04/24 20:21:18  hmasui
  * Add geant process check for contaminated pairs
  *
@@ -28,6 +31,7 @@
 #define __StEmbeddingQA_h__
 
 #include <map>
+#include <vector>
 
 #include "TMath.h"
 #include "TString.h"
@@ -41,10 +45,11 @@ class TH3 ;
 class TObject ;
 
 class StContamPair ;
-class StMiniMcEvent ;
 class StEmbeddingQAPair ;
 class StEmbeddingQATrack ;
+class StMiniMcEvent ;
 class StMuDstMaker ;
+class StMuEvent ;
 class StMuTrack ;
 class StTinyMcTrack ;
 
@@ -85,6 +90,12 @@ class StEmbeddingQA {
     /// set z-vertex cut (default is |vz|<30cm unless otherwise specified)
     void setZVertexCut(const Float_t vz) ;
 
+    /// Add trigger id cut (default is no trigger id selections). Multiple trigger can be added
+    void addTriggerIdCut(const UInt_t id) ;
+
+    /// Set rapidity cut (default is |y|<10, i.e. no rapidity cut)
+    void setRapidityCut(const Float_t ycut) ;
+
   private:
     const Int_t mYear ;               /// Year
     const TString mProduction ;       /// Production
@@ -120,6 +131,9 @@ class StEmbeddingQA {
     /// Z-vertex cut
     Bool_t isZVertexOk(const StMiniMcEvent& mcevent) const ;
 
+    /// Trigger id cut for real data. Return true if no trigger id is found
+    Bool_t isTriggerOk(StMuEvent* event) const ;
+
     /// Number of tracks
     Int_t getNtrack(const Int_t categoryid, const StMiniMcEvent& mcevent) const ;
 
@@ -128,6 +142,8 @@ class StEmbeddingQA {
 
     StMuDstMaker* mMuDstMaker ; /// Pointer to the StMuDstMaker
     Float_t mVertexCut ; /// z-vertex cut (Default is 30 cm)
+    std::vector<UInt_t> mTriggerId ; /// Trigger id cut (can be multiple trigger id's)
+    Float_t mRapidityCut ; /// rapidity cut (Default is 10)
 
     TFile* mOutput ; /// Output histograms
 
