@@ -11,10 +11,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.36 2010/05/12 23:42:11 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.37 2010/05/14 16:36:49 jeromel Exp $
 
 // MySQL C API
-#include <mysql/mysql.h>
+#include "mysql.h"
 
 // DSM crates
 #include "RTS/trg/include/trgConfNum.h"
@@ -423,6 +423,9 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.37  2010/05/14 16:36:49  jeromel
+ * Wrong include path for mysql
+ *
  * Revision 1.36  2010/05/12 23:42:11  pibero
  * Changed absolute path for mysql.h to relative path
  *
