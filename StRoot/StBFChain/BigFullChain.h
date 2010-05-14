@@ -704,6 +704,11 @@ Bfc_st BFC[] = { // standard chains
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","libMinuit,StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
+  // final TOF combo
+  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker",
+                                                                             "StChain","BTOF Chain",kFALSE}, 
+  {"btofSim"    ,"","BTofChain","BTofUtil","StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker",
+                                                                                   "BTOF Simulator",kFALSE},
   // Options in need to be done after the tracker
   // second wave of BTOF options needed after Sti
   {"btofMatch"  ,"","BTofChain","db,BTofUtil","StBTofMatchMaker","StBTofMatchMaker",
@@ -736,11 +741,6 @@ Bfc_st BFC[] = { // standard chains
   {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker",
                                                   "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
 
-  // final TOF combo
-  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker",
-                                                                             "StChain","BTOF Chain",kFALSE}, 
-  {"btofSim"    ,"","BTofChain","BTofUtil","StBTofSimMaker","StEvent,StBTofHitMaker,StBTofSimMaker",
-                                                                                   "BTOF Simulator",kFALSE},
 
 
   {"Kink2"       ,"kink2","","db,MuDST,-kink","StKinkMaker","StSecondaryVertexMaker"
