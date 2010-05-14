@@ -3,8 +3,11 @@
 //    Store relevant track informations for the embedding/real data QA
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.h,v 1.7 2010/04/24 20:20:11 hmasui Exp $
+ * $Id: StEmbeddingQATrack.h,v 1.8 2010/05/14 19:49:07 hmasui Exp $
  * $Log: StEmbeddingQATrack.h,v $
+ * Revision 1.8  2010/05/14 19:49:07  hmasui
+ * Add rapidity cut
+ *
  * Revision 1.7  2010/04/24 20:20:11  hmasui
  * Add geant process, and modift the type of parent, parent-parent geantid to match the data members in minimc tree
  *
@@ -51,6 +54,7 @@ class StEmbeddingQATrack {
     virtual ~StEmbeddingQATrack();
 
     Bool_t isPtAndEtaOk() const ;  /// Pt and eta cuts
+    Bool_t isRapidityOk(const Double_t ycut) const ; /// Rapidity cut
 
     Bool_t isNHitOk() const ;      /// Nhits cut
     Bool_t isDcaOk() const ;       /// Dca cut
@@ -80,6 +84,7 @@ class StEmbeddingQATrack {
     Float_t getPzMc()            const ; /// Get MC pz
     Float_t getPMc()             const ; /// Get MC momentum
     Float_t getEtaMc()           const ; /// Get MC pseudorapidity
+    Float_t getRapidityMc()      const ; /// Get MC rapidity
     Double_t getMassRc()         const ; /// Get reconstructed particle mass
     Float_t getPtRc()            const ; /// Get reconstructed transverse momentum
     Float_t getPxRc()            const ; /// Get reconstructed px
@@ -87,6 +92,7 @@ class StEmbeddingQATrack {
     Float_t getPzRc()            const ; /// Get reconstructed pz
     Float_t getPRc()             const ; /// Get reconstructed momentum
     Float_t getEtaRc()           const ; /// Get reconstructed pseudorapidity
+    Float_t getRapidityRc()      const ; /// Get reconstructed rapidity
 
     Float_t getPhi()           const ; /// Get azimuthal angle
     Float_t getdEdx()          const ; /// Get dE/dx
@@ -152,6 +158,7 @@ inline Float_t StEmbeddingQATrack::getPxMc()          const { return mVectorMc.x
 inline Float_t StEmbeddingQATrack::getPyMc()          const { return mVectorMc.y() ; }
 inline Float_t StEmbeddingQATrack::getPzMc()          const { return mVectorMc.z() ; }
 inline Float_t StEmbeddingQATrack::getEtaMc()         const { return mVectorMc.pseudoRapidity() ; }
+inline Float_t StEmbeddingQATrack::getRapidityMc()    const { return mVectorMc.rapidity() ; }
 inline Double_t StEmbeddingQATrack::getMassRc()       const { return mVectorRc.m() ; }
 inline Float_t StEmbeddingQATrack::getPRc()           const { return mVectorRc.vect().mag() ; }
 inline Float_t StEmbeddingQATrack::getPtRc()          const { return mVectorRc.perp() ; }
@@ -159,6 +166,7 @@ inline Float_t StEmbeddingQATrack::getPxRc()          const { return mVectorRc.x
 inline Float_t StEmbeddingQATrack::getPyRc()          const { return mVectorRc.y() ; }
 inline Float_t StEmbeddingQATrack::getPzRc()          const { return mVectorRc.z() ; }
 inline Float_t StEmbeddingQATrack::getEtaRc()         const { return mVectorRc.pseudoRapidity() ; }
+inline Float_t StEmbeddingQATrack::getRapidityRc()    const { return mVectorRc.rapidity() ; }
 
 inline Float_t StEmbeddingQATrack::getPhi()           const { return mPhi ; }
 inline Float_t StEmbeddingQATrack::getdEdx()          const { return mdEdx ; }
