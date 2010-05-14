@@ -29,7 +29,7 @@
 #include <windows.h>
 #endif
 
-#include <mysql/mysql.h>
+#include "mysql.h"
 namespace log4cxx
 {
 	namespace db
