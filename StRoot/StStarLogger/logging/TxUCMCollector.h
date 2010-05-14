@@ -8,7 +8,7 @@
  * @file TxUCMCollector.h
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.h,v 1.5 2010/04/09 16:28:19 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.h,v 1.6 2010/05/14 16:47:31 jeromel Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -16,7 +16,7 @@
 
 #include <map>
 #include <string>
-#include <mysql/mysql.h>
+#include "mysql.h"
 #include <log4cxx/logger.h>
 
 #include "StDbFieldI.h"
