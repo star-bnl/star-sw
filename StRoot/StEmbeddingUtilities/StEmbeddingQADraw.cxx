@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.16 2010/04/24 19:50:56 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.17 2010/05/14 19:51:45 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.17  2010/05/14 19:51:45  hmasui
+ * Modify the text size for Nevts, MC particle name etc to fit the window
+ *
  * Revision 1.16  2010/04/24 19:50:56  hmasui
  * Optimize to draw run number list, and fix bugs for maximum of y-axis in several histograms
  *
@@ -232,7 +235,7 @@ void StEmbeddingQADraw::init()
   info->SetFillColor(kBlack);
   info->SetTextFont(42);
   info->SetTextColor(10);
-  info->SetTextSize(0.035);
+  info->SetTextSize(0.030);
 
   const Int_t nevents = getEntries() ;
   TString neventsName(Form("%d", getEntries())) ;
