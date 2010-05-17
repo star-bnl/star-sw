@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBTofHeader.h,v 2.3 2010/05/12 15:12:03 ullrich Exp $
+ * $Id: StBTofHeader.h,v 2.4 2010/05/17 17:47:16 ullrich Exp $
  *
  * Author: Xin Dong, Nov 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StBTofHeader.h,v $
+ * Revision 2.4  2010/05/17 17:47:16  ullrich
+ * Increase version number to 2.
+ *
  * Revision 2.3  2010/05/12 15:12:03  ullrich
  * Added member mNTzero and access methods.
  *
@@ -79,7 +82,7 @@ protected:
     UInt_t       mTriggerTime[MAXFIBER];
     Short_t      mNTzero;
 
-    ClassDef(StBTofHeader,1)
+    ClassDef(StBTofHeader,2)
 };
 
 #endif
