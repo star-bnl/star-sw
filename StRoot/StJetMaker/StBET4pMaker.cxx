@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.13 2010/04/24 04:15:27 pibero Exp $
+// $Id: StBET4pMaker.cxx,v 1.14 2010/05/19 13:46:59 pibero Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
@@ -75,6 +75,9 @@ Int_t StBET4pMaker::Make()
 
   if (_bemcEnergySumCalculator->sumEmcEt() > 500.) return kStOk;
 
+  // Save current vertex index
+  int currentVertexIndex = StMuDst::currentVertexIndex();
+
   // Loop over primary vertices and get those with positive rank
   for (unsigned int vertexIndex = 0; vertexIndex < StMuDst::numberOfPrimaryVertices(); ++vertexIndex) {
     StMuDst::setVertexIndex(vertexIndex);
@@ -93,6 +96,9 @@ Int_t StBET4pMaker::Make()
       node.tracks.insert(node.tracks.end(),energy4pList.begin(),energy4pList.end());
     }
   }
+
+  // Restore current vertex index
+  if (StMuDst::currentVertexIndex() != currentVertexIndex) StMuDst::setVertexIndex(currentVertexIndex);
 
   return kStOk;
 }
