@@ -17,9 +17,10 @@ void makeBkgdFiles(int charge, int two_or_four) {
   // ******************************************************
 
   gStyle->SetOptDate(0);
-  //TFile *f1 = new TFile("run9setP1234.wana.hist.root");
+  TFile *f1 = new TFile("run9setP1234.wana.hist.root");
  
-  TFile *f1 = new TFile("hybrid2/run9setP1234.wana.hist.root");
+  // hybrid2
+  //TFile *f1 = new TFile("run9setP1234.wana.hist.root");
   //TFile *f1 = new TFile("noZTag/run9setP1234.wana.hist.root");
 
   // get the signal and missing endcap backgrounds
@@ -48,11 +49,19 @@ void makeBkgdFiles(int charge, int two_or_four) {
   MC_fs[4] = new TFile("rcf10015.wana.hist.root"); // Z -> any
 */
 
-  MC_fs[0] = new TFile("hybrid2/rck10010.wana.hist.root"); // W+ -> e++nu
-  MC_fs[1] = new TFile("hybrid2/rck10011.wana.hist.root"); // W- -> e-+nu
-  MC_fs[2] = new TFile("hybrid2/rck10012.wana.hist.root"); // W -> tau+nu
-  MC_fs[3] = new TFile("hybrid2/rck10017.wana.hist.root"); // W -> any
-  MC_fs[4] = new TFile("hybrid2/rck10018.wana.hist.root"); // Z -> any
+
+  /*MC_fs[0] = new TFile("rck10010.wana.hist.root"); // W+ -> e++nu
+  MC_fs[1] = new TFile("rck10011.wana.hist.root"); // W- -> e-+nu
+  MC_fs[2] = new TFile("rck10012.wana.hist.root"); // W -> tau+nu
+  MC_fs[3] = new TFile("rck10017.wana.hist.root"); // W -> any
+  MC_fs[4] = new TFile("rck10018.wana.hist.root"); // Z -> any
+*/
+
+  MC_fs[0] = new TFile("rcn10010.wana.hist.root"); // W+ -> e++nu
+  MC_fs[1] = new TFile("rcn10011.wana.hist.root"); // W- -> e-+nu
+  MC_fs[2] = new TFile("rcn10012.wana.hist.root"); // W -> tau+nu
+  MC_fs[3] = new TFile("rcn10017.wana.hist.root"); // W -> any
+  MC_fs[4] = new TFile("rcn10018.wana.hist.root"); // Z -> any
 
 
 /*
@@ -67,11 +76,11 @@ void makeBkgdFiles(int charge, int two_or_four) {
   // and reconstruction the charge sign of the MC needs to be inverted
   TH1F *MC_dists_raw[5][3];
   for (int i=0; i<5; i++) {
-    if (charge == -1) {
+    if (charge == 1) {
       MC_dists_raw[i][0] = (TH1F*)MC_fs[i]->Get("pos_muclustpTbal_wE");
       MC_dists_raw[i][1] = (TH1F*)MC_fs[i]->Get("pos_muclustpTbal_noE");
       //MC_dists_raw[i][2] = (TH1F*)MC_fs[i]->Get("pos_muclustpTbal_bckgrd");
-    } else if (charge == 1) {
+    } else if (charge == -1) {
       MC_dists_raw[i][0] = (TH1F*)MC_fs[i]->Get("neg_muclustpTbal_wE");
       MC_dists_raw[i][1] = (TH1F*)MC_fs[i]->Get("neg_muclustpTbal_noE");
       ///MC_dists_raw[i][2] = (TH1F*)MC_fs[i]->Get("neg_muclustpTbal_bckgrd");
@@ -84,8 +93,16 @@ void makeBkgdFiles(int charge, int two_or_four) {
 
   }
 
+  // Old lumi estimates
   //float lumi[5] = {116.5,318.5,76.9,1220.,45.6}; // old MC
-  float lumi[5] = {30.,63.,61.,14.7.,33.};
+  //float lumi[5] = {30.,63.,61.,14.7,33.};
+
+  // w/ Z and W xsec scaled to RHICBOS from PYTHiA
+  //float lumi[5] = {30./(124./98.7),63./(41./32.9),61./((124.+41.)/(98.7+32.9)),14.7/((124+41)/(98.7+32.9)),33./(10./8.23)};
+
+  // w/ Z and W xsec scaled to RHICBOS from PYTHiA - new MC
+  float lumi[5] = {30.4/(124./98.7),31.4/(41./32.9),30.3/((124.+41.)/(98.7+32.9)),30.8/((124+41)/(98.7+32.9)),33.4/(10./8.23)};
+
   float lumi_fact[6];
   for (int i=0; i<5; i++) {lumi_fact[i] = 12.0/lumi[i];}
 
@@ -186,8 +203,8 @@ void makeBkgdFiles(int charge, int two_or_four) {
   TCanvas *can2 = new TCanvas("can2","can2",0,0,600,400);
   signal2->Draw();
   signal_final2->Draw("same");
-  can2->Print("signal_w_eemc.eps");
-  can2->Print("signal_w_eemc.png");
+  //can2->Print("signal_w_eemc.eps");
+  //can2->Print("signal_w_eemc.png");
 
 
   // **********************************************
@@ -203,7 +220,7 @@ void makeBkgdFiles(int charge, int two_or_four) {
   for (int i=0; i<5; i++) {
     for (int j=0; j<3; j++) {
       can8->cd(5*(j)+i+1);
-      cout << 5*(j)+i+1 << endl;
+      //cout << 5*(j)+i+1 << endl;
       gPad->SetGridx(0);
       gPad->SetGridy(0);
       if (j == 0) {
@@ -218,8 +235,8 @@ void makeBkgdFiles(int charge, int two_or_four) {
       MC_dists_repack[i][j]->Draw("same");
     }
   }
-  can8->Print("phys_bkgds.eps");
-  can8->Print("phys_bkgds.png");
+  //can8->Print("phys_bkgds.eps");
+  //can8->Print("phys_bkgds.png");
 
   for (int i=0; i<5; i++) {
     float signal_sum = 0.;
@@ -307,8 +324,8 @@ void makeBkgdFiles(int charge, int two_or_four) {
     signal_for_new[i]->Add(bkgd_shape_unnorm[i],-1.); 
     signal_for_new[i]->Fit(func1,"RQ");
   }
-  can4->Print("new_norm.eps");
-  can4->Print("new_norm.png");
+  //can4->Print("new_norm.eps");
+  //can4->Print("new_norm.png");
 
   TH1F *signal_in_norm_region = new TH1F("signal_in_norm_region","signal_in_norm_region",49,1.,99.);
   
@@ -323,8 +340,8 @@ void makeBkgdFiles(int charge, int two_or_four) {
   signal_final2->Draw();
   new_bkgd->Draw("same");
   signal_in_norm_region->Draw("same");
-  can5->Print("signal_new.eps"); 
-  can5->Print("signal_new.png");
+  //can5->Print("signal_new.eps"); 
+  //can5->Print("signal_new.png");
 
   // ******************************************************
   // Calculate all the 1200 shapes for the background
@@ -531,11 +548,11 @@ void makeBkgdFiles(int charge, int two_or_four) {
   //new_bkgd->SetLineWidth(4.*new_bkgd->GetLineWidth());
   new_bkgd->Draw("same");
   if (charge == 1) {
-    can6->Print("Wplus_bkgd_shapes.eps");
-    can6->Print("Wplus_bkgd_shapes.png");
+    //can6->Print("Wplus_bkgd_shapes.eps");
+    //can6->Print("Wplus_bkgd_shapes.png");
   } else if (charge == -1) {
-    can6->Print("Wminus_bkgd_shapes.eps");
-    can6->Print("Wminus_bkgd_shapes.png");
+    //can6->Print("Wminus_bkgd_shapes.eps");
+    //can6->Print("Wminus_bkgd_shapes.png");
   }
  
   TH1F *chi2s = new TH1F("chi2s","chi2s",50,0.,10.);
@@ -548,8 +565,8 @@ void makeBkgdFiles(int charge, int two_or_four) {
  
   TCanvas *can7 = new TCanvas("can7","can7",0,0,600,400);
   chi2s->Draw();
-  can7->Print("chi2s.eps"); 
-  can7->Print("chi2s.png");
+  //can7->Print("chi2s.eps"); 
+  //can7->Print("chi2s.png");
 
   // ************************************************
   // Now calculate the all background numbers and their 
@@ -575,9 +592,9 @@ void makeBkgdFiles(int charge, int two_or_four) {
   float zsig_sum = 0., zeemc_sum = 0.,zback_sum = 0.;
   float wanysig_sum = 0., wanyeemc_sum = 0.,wanyback_sum = 0.;
   for (int i=13; i<=26; i++) {
-    cout << i << " " << new_bkgd->GetBinCenter(i) << " " << new_bkgd->GetBinContent(i) << " " << tauhist->GetBinContent(i) << " " << eemc_bkgd2->GetBinContent(i) << endl;
+    //cout << i << " " << new_bkgd->GetBinCenter(i) << " " << new_bkgd->GetBinContent(i) << " " << tauhist->GetBinContent(i) << " " << eemc_bkgd2->GetBinContent(i) << endl;
     bkgd_sum += new_bkgd->GetBinContent(i);
-    bkgd_sum += tauhist->GetBinContent(i);
+    //bkgd_sum += tauhist->GetBinContent(i);
     bkgd_sum += eemc_bkgd2->GetBinContent(i);
     QCD_raw_sum += bkgd_shape_nom->GetBinContent(i);
     QCD_sum += new_bkgd->GetBinContent(i);
@@ -593,10 +610,10 @@ void makeBkgdFiles(int charge, int two_or_four) {
     wanyback_sum += wanyback_bkgd2->GetBinContent(i);
  
   }
-  cout << "The total background for ET>25 is " << bkgd_sum << endl;
+  cout << "The total background for ET>25 is " << bkgd_sum+zsig_sum << endl;
   cout << "QCD = " << QCD_sum << ", tau = " << tau_sum << ", eemc = " << eemc_sum << ", and Z = " << zsig_sum << endl;
   cout << "Raw = " << raw_sum << endl;
-  cout << "Signal = " << signal_sum-QCD_sum << endl;
+  cout << "W Signal (w/o tau) = " << signal_sum-QCD_sum << endl;
   cout << "Z in sig = " << zsig_sum << endl;
   cout << "Z in eemc = " << zeemc_sum << endl;
   cout << "Z in back = " << zback_sum << endl;
@@ -605,9 +622,14 @@ void makeBkgdFiles(int charge, int two_or_four) {
   cout << "Wany in back = " << wanyback_sum << endl;
   cout << "QCD raw in back = " << QCD_raw_sum << endl; 
   cout << "The QCD stat unc. is " << norm*sqrt(QCD_sum/norm) << endl;
-  cout << "The tau stat unc. is " << tau_norm*taufrac*sqrt(tau_sum/(tau_norm*taufrac)) << endl;
-  cout << "The eemc stat unc. is " << sqrt(eemc_sum) << endl;
-  cout << "The Z stat unc. is " << Z_norm*sqrt(zsig_sum/Z_norm) << endl;
+  float tau_stat = tau_norm*taufrac*sqrt(tau_sum/(tau_norm*taufrac));
+  cout << "The tau stat unc. is " << tau_stat << endl;
+  float eemc_stat = sqrt(eemc_sum);
+  cout << "The eemc stat unc. is " << eemc_stat << endl;
+  float Z_stat = Z_norm*sqrt(zsig_sum/Z_norm);
+  cout << "The Z stat unc. is " << Z_stat << endl;
+  float tot_stat = sqrt(tau_stat*tau_stat+eemc_stat*eemc_stat+Z_stat*Z_stat);
+  cout << "tau+eemc+Z stat unc. is " << sqrt(tau_stat*tau_stat+eemc_stat*eemc_stat+Z_stat*Z_stat) << endl;
   
   cout << "f_tau = " << tau_sum/raw_sum << endl;
   cout << "f_QCD = " << QCD_sum/raw_sum << endl;
@@ -699,11 +721,14 @@ void makeBkgdFiles(int charge, int two_or_four) {
   } // end of i=loop 
 
   cout << "QCD shape sys. unc. calc************" << endl;
-  cout << "The low sum = " << low_sum << endl;
-  cout << "The high sum = " << high_sum << endl; 
+  cout << "The QCD low sum = " << low_sum << endl;
+  cout << "The QCD high sum = " << high_sum << endl; 
 
-  cout << "The low error = " << QCD_sum-low_sum << endl;
-  cout << "The high error = " << high_sum-QCD_sum << endl; 
+  cout << "The QCD low error = " << QCD_sum-low_sum << endl;
+  cout << "The QCD high error = " << high_sum-QCD_sum << endl; 
+
+  cout << "Total low error = " << sqrt((QCD_sum-low_sum)*(QCD_sum-low_sum)+tot_stat*tot_stat) << endl;
+  cout << "Total high error = " << sqrt((high_sum-QCD_sum)*(high_sum-QCD_sum)+tot_stat*tot_stat) << endl;
 
   // ******************************************************
   // Write out the histograms of interest to a
