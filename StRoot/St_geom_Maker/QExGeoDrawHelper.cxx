@@ -1,6 +1,6 @@
 // Author: Valeri Fine   19/01/2004
 /****************************************************************************
-** $Id: QExGeoDrawHelper.cxx,v 1.8 2010/01/17 21:17:38 fine Exp $
+** $Id: QExGeoDrawHelper.cxx,v 1.9 2010/05/19 16:16:10 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine. Brookhaven National Laboratory.
 **                                    All rights reserved.
@@ -261,7 +261,9 @@ TVolume *TGeoDrawHelper::MakeVolume( TGeoVolume *top, std::map<TGeoVolume *,TVol
       TString title = top->GetTitle();
       if (title.IsNull() && ( top->Class() != TGeoVolume::Class()) ) title = top->ClassName();
       // extract the material if any
-      TGeoMaterial *matter = top->GetMaterial();
+      TGeoMedium   *media  = top->GetMedium();
+      TGeoMaterial *matter = 0;
+      if (media) matter  = top->GetMaterial();
       title +=  matter ? Form("(%s)",matter->GetName())
                        : Form("(unknown material)");
 
