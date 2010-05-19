@@ -46,7 +46,7 @@ class Sensor {
     // Set the user area
     bool SetArea();
     bool SetArea(const double xmin, const double ymin, const double zmin,
-		         const double xmax, const double ymax, const double zmax);
+                 const double xmax, const double ymax, const double zmax);
     // Return the current user area
     bool GetArea(double& xmin, double& ymin, double& zmin,
 		         double& xmax, double& ymax, double& zmax);

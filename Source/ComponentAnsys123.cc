@@ -42,7 +42,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   fmplist.open(mplist.c_str(), std::ios::in);
   if (fmplist.fail()) {
     printf("ComponentAnsys123::Initialise:\n");
-    printf("    Could not open material file %s for reading.\n", mplist.c_str());
+    printf("    Could not open material file %s for reading.\n", 
+           mplist.c_str());
     printf("    The file perhaps does not exist.\n");
     return false;
   }
@@ -93,8 +94,9 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
         itype = 2;
       } else {
         printf("ComponentAnsys123::Initialise:\n");
-        printf("    Found unknown material property flag %s on material properties file %s (line %d).\n",
-               token, mplist.c_str(), il);
+        printf("    Found unknown material property flag %s\n", token);
+        printf("    on material properties file %s (line %d).\n",
+               mplist.c_str(), il);
         ok = false;
       }
       token = strtok(NULL, " ");
@@ -108,8 +110,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
         return false;
       } else if (imat < 1 || imat > nMaterials) {
         printf("ComponentAnsys123::Initialise:\n");
-        printf("    Found out-of-range material index %d in material properties file %s.\n", 
-	       imat, mplist.c_str());
+        printf("    Found out-of-range material index %d \n", imat);
+        printf("    in material properties file %s.\n", mplist.c_str());
         ok = false;
       } else {
         fmplist.getline(line, size, '\n'); il++;
@@ -142,8 +144,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
     if (materials[imat].eps < 0) continue;
     if (materials[imat].eps == 0) {
       printf("ComponentAnsys123::Initialise:\n");
-      printf("    Material %d has been assigned a permittivity equal to zero in %s.\n", 
-             imat, mplist.c_str());
+      printf("    Material %d has been assigned a permittivity\n", imat);
+      printf("    equal to zero in %s.\n", mplist.c_str());
       ok = false;
     } else if (iepsmin < 0 || epsmin > materials[imat].eps) {
       epsmin = materials[imat].eps;
@@ -153,8 +155,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   
   if (iepsmin < 0) {
     printf("ComponentAnsys123::Initialise:\n");
-    printf("    No material with positive permittivity found in material list %s.\n", 
-           mplist.c_str());
+    printf("    No material with positive permittivity found \n");
+    printf("    in material list %s.\n", mplist.c_str());
     ok = false;
   } else {
     for (int imat = 0; imat < nMaterials; ++imat) {
@@ -233,23 +235,29 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
     } else if (ielem - 1 != nElements + nbackground) {
       printf("ComponentAnsys123:\n");
       printf("    Synchronisation lost on file %s (line %d).\n", elist.c_str(), il);
-      printf("    Element: %d (expected %d), material: %d, nodes: (%d %d %d %d %d %d %d %d %d %d)\n",
-             ielem, nElements, imat, in0, in1, in2, in3, in4, in5, in6, in7, in8, in9);
+      printf("    Element: %d (expected %d), material: %d,\n", 
+             ielem, nElements, imat);
+      printf("    nodes: (%d %d %d %d %d %d %d %d %d %d)\n",
+             in0, in1, in2, in3, in4, in5, in6, in7, in8, in9);
       ok = false;
     }
     
     // Check the material number and ensure that epsilon is non-negative
     if (imat < 1 || imat > nMaterials) {
-	  printf("ComponentAnsys123::Initialise:\n");
-          printf("    Out-of-range material number on file %s (line %d).\n", elist.c_str(), il);
-	  printf("    Element: %d, material: %d, nodes: (%d %d %d %d %d %d %d %d %d %d)\n",
-             ielem, imat, in0, in1, in2, in3, in4, in5, in6, in7, in8, in9);
+       printf("ComponentAnsys123::Initialise:\n");
+       printf("    Out-of-range material number on file %s (line %d).\n", 
+              elist.c_str(), il);
+      printf("    Element: %d, material: %d,\n", ielem, imat);
+      printf("    nodes: (%d %d %d %d %d %d %d %d %d %d)\n",
+             in0, in1, in2, in3, in4, in5, in6, in7, in8, in9);
       ok = false;
     }
     if (materials[imat - 1].eps < 0) {
       printf("ComponentAnsys123::Initialise:\n");
-      printf("    Element %d in element list %s uses material %d which has not\n    been assigned a positive permittivity in material list %s.\n",
-             ielem, elist.c_str(), imat, mplist.c_str());
+      printf("    Element %d in element list %s \n", ielem, elist.c_str());
+      printf("    uses material %d which has not been assigned\n", imat);
+      printf("    a positive permittivity in material list %s.\n", 
+             mplist.c_str());
       ok = false;
     }
 
@@ -257,9 +265,11 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
     if (in0 < 1 || in1 < 1 || in2 < 1 || in3 < 1 || in4 < 1 || 
         in5 < 1 || in6 < 1 || in7 < 1 || in8 < 1 || in9 < 1) {
       printf("ComponentAnsys123::Initialise:\n");
-      printf("    Found a node number < 1 on file %s (line %d).\n", elist.c_str(), il);
-       printf("   Element: %d, material: %d, nodes: (%d %d %d %d %d %d %d %d %d %d).\n",
-             ielem, imat, in0, in1, in2, in3, in4, in5, in6, in7, in8, in9);
+      printf("    Found a node number < 1 on file %s (line %d).\n",
+             elist.c_str(), il);
+      printf("    Element: %d, material: %d,\n", ielem, imat);
+      printf("    nodes: (%d %d %d %d %d %d %d %d %d %d).\n",
+             in0, in1, in2, in3, in4, in5, in6, in7, in8, in9);
       ok = false;
     }
     if (in0 > highestnode) highestnode = in0;
@@ -294,7 +304,9 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
         in7 == in8 || in7 == in9 || 
         in8 == in9) {
       printf("ComponentAnsys123::Initialise:\n");
-      printf("    Element %d of file %s is degenerate, no such elements allowed in this type of map.\n", ielem, elist.c_str());
+      printf("    Element %d of file %s is degenerate,\n", 
+             ielem, elist.c_str());
+      printf("    no such elements allowed in this type of map.\n");
       ok = false;
     }
     
@@ -330,11 +342,14 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   if (strcmp(unit.c_str(),"mum") == 0 || strcmp(unit.c_str(),"micron") == 0 || 
       strcmp(unit.c_str(),"micrometer") == 0) {
     funit = 0.0001;
-  } else if (strcmp(unit.c_str(),"mm") == 0 || strcmp(unit.c_str(),"millimeter") == 0) {
+  } else if (strcmp(unit.c_str(),"mm") == 0 || 
+             strcmp(unit.c_str(),"millimeter") == 0) {
     funit = 0.1;
-  } else if (strcmp(unit.c_str(),"cm") == 0 || strcmp(unit.c_str(),"centimeter") == 0) {
+  } else if (strcmp(unit.c_str(),"cm") == 0 || 
+            strcmp(unit.c_str(),"centimeter") == 0) {
     funit = 1.0;
-  } else if (strcmp(unit.c_str(),"m") == 0 || strcmp(unit.c_str(),"meter") == 0) {
+  } else if (strcmp(unit.c_str(),"m") == 0 || 
+             strcmp(unit.c_str(),"meter") == 0) {
     funit = 100.0;
   } else {
     printf("ComponentAnsys123::Initialise:\n");
@@ -387,7 +402,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
     // Check synchronisation
     if (inode - 1 != nNodes) {
       printf("ComponentAnsys123::Initialise:\n");
-      printf("    Synchronisation lost on file %s (line %d).\n", nlist.c_str(), il);
+      printf("    Synchronisation lost on file %s (line %d).\n", 
+             nlist.c_str(), il);
       printf("    Node: %d (expected %d), (x,y,z) = (%g,%g,%g)\n", 
              inode, nNodes, xnode, ynode, znode);
       ok = false;
@@ -407,8 +423,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   // Check number of nodes
   if (nNodes != highestnode) {
     printf("ComponentAnsys123::Initialise:\n");
-    printf("    Number of nodes read (%d) on %s does not match element list (%d).\n",
-           nNodes, nlist.c_str(), highestnode);
+    printf("    Number of nodes read (%d) on %s \n", nNodes, nlist.c_str());
+    printf("    does not match element list (%d).\n", highestnode);
     ok = false;
   }
 
@@ -417,7 +433,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   fprnsol.open(prnsol.c_str(), std::ios::in);
   if (fprnsol.fail()) {
     printf("ComponentAnsys123::Initialise:\n");
-    printf("    Could not open potential file %s for reading.\n", prnsol.c_str());
+    printf("    Could not open potential file %s for reading.\n", 
+           prnsol.c_str());
     printf("    The file perhaps does not exist.\n");
     return false;
   }
@@ -451,8 +468,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
     // Check node number and store if OK
     if (inode < 1 || inode > highestnode) {
       printf("ComponentAnsys123::Initialise:\n");
-      printf("    Node number %d out of range on potential file %s (line %d).\n", 
-             inode, prnsol.c_str(), il);
+      printf("    Node number %d out of range\n", inode);
+      printf("    on potential file %s (line %d).\n", prnsol.c_str(), il); 
       ok = false;
     } else {
       nodes[inode - 1].vmap = volt;
@@ -467,8 +484,9 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   // Check number of nodes
   if (nread != nNodes) {
     printf("ComponentAnsys123::Initialise:\n");
-    printf("    Number of nodes read (%d) on potential file %s does not match the node list (%d).\n",
-           nread, prnsol.c_str(), nNodes);
+    printf("    Number of nodes read (%d) on potential file %s \n", 
+           nread, prnsol.c_str());
+    printf("    does not match the node list (%d).\n", nNodes);
     ok = false;
   }
 
@@ -544,8 +562,8 @@ ComponentAnsys123::SetWeightingField(std::string prnsol, std::string label) {
     // Check node number and store if OK
     if (inode < 1 || inode > nNodes) {
       printf("ComponentAnsys123::SetWeightingField:\n");
-      printf("    Node number %d out of range on potential file %s (line %d).\n", 
-             inode, prnsol.c_str(), il);
+      printf("    Node number %d out of range\n", inode);
+      printf("     on potential file %s (line %d).\n", prnsol.c_str(), il);
       ok = false;
     } else {
       nodes[inode - 1].wmap = volt;
@@ -561,8 +579,9 @@ ComponentAnsys123::SetWeightingField(std::string prnsol, std::string label) {
   // Check number of nodes
   if (nread != nNodes) {
     printf("ComponentAnsys123::SetWeightingField:\n");
-    printf("    Number of nodes read (%d) on potential file %s does not match the node list (%d).\n",
-           nread, prnsol.c_str(), nNodes);
+    printf("    Number of nodes read (%d) on potential file %s \n", 
+           nread, prnsol.c_str());
+    printf("    does not match the node list (%d).\n", nNodes);
     ok = false;
   }
 
@@ -590,9 +609,10 @@ ComponentAnsys123::ElectricField(const double x, const double y, const double z,
 }
 
 void 
-ComponentAnsys123::ElectricField(const double xin, const double yin, const double zin,
-                                 double& ex, double& ey, double& ez, double& volt, 
-                                 Medium*& m, int& status) {
+ComponentAnsys123::ElectricField(
+                   const double xin, const double yin, const double zin,
+                   double& ex, double& ey, double& ez, double& volt, 
+                   Medium*& m, int& status) {
 
   // Copy the coordinates
   double x = xin, y = yin, z = zin;

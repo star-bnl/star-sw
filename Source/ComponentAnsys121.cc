@@ -94,8 +94,9 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
         itype = 2;
       } else {
         printf("ComponentAnsys121::Initialise:\n");
-        printf("    Found unknown material property flag %s on material properties file %s (line %d).\n",
-	        token, mplist.c_str(), il);
+        printf("    Found unknown material property flag %s \n", token);
+        printf("     on material properties file %s (line %d).\n",
+	       mplist.c_str(), il);
         ok = false;
       }
       token = strtok(NULL, " ");
@@ -109,7 +110,8 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
         return false;
       } else if (imat < 1 || imat > nMaterials) {
         printf("ComponentAnsys121::Initialise\n");
-        printf("    Found out-of-range material index %d in material properties file %s.\n", imat, mplist.c_str());
+        printf("    Found out-of-range material index %d in\n", imat);
+        printf("     material properties file %s.\n", mplist.c_str());
         ok = false;
       } else {
         fmplist.getline(line, size, '\n'); il++;
@@ -140,7 +142,8 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
     if (materials[imat].eps < 0) continue;
     if (materials[imat].eps == 0) {
       printf("ComponentAnsys121::Initialise:\n");
-      printf("    Material %d has been assigned a permittivity equal to zero in %s.\n", imat, mplist.c_str());
+      printf("    Material %d has been assigned a permittivity\n", imat);
+      printf("    equal to zero in %s.\n", mplist.c_str());
       ok = false;
     } else if (iepsmin < 0 || epsmin > materials[imat].eps) {
       epsmin = materials[imat].eps;
@@ -149,7 +152,8 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
   }
   if (iepsmin < 0) {
     printf("ComponentAnsys121::Initialise:\n");
-    printf("     No material with positive permittivity found in material list %s.\n", mplist.c_str());
+    printf("     No material with positive permittivity found in\n");
+    printf("     material list %s.\n", mplist.c_str());
     ok = false;
   } else {
     for (int imat = 0; imat < nMaterials; ++imat) {
@@ -162,8 +166,8 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
   }
   // Tell how many lines read
   printf("ComponentAnsys121::Initialise:\n");
-  printf("    Read properties of %d materials from file %s.\n", 
-         nMaterials, mplist.c_str());
+  printf("    Read properties of %d materials\n", nMaterials);
+  printf("    from file %s.\n", mplist.c_str());
   if (debug) PrintMaterials();
   
   // Open the element list
@@ -238,7 +242,7 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
       printf("    Element %d in element list %s uses material %d which\n", 
              ielem, elist.c_str(), imat);
       printf("    has not been assigned a positive permittivity\n");
-      printf("     in material list %s.\n", mplist.c_str());
+      printf("    in material list %s.\n", mplist.c_str());
       ok = false;
     }
      // Check the node numbers
@@ -247,8 +251,9 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
       printf("ComponentAnsys121::Initialise:\n");
       printf("    Found a node number < 1 on file %s (line %d).\n", 
              elist.c_str(), il);
-      printf("    Element: %d, material: %d, nodes: (%d %d %d %d %d %d %d %d).\n",
-             ielem, imat, in0, in1, in2, in3, in4, in5, in6, in7);
+      printf("    Element: %d, material: %d,\n", ielem, imat);
+      printf("    nodes: (%d %d %d %d %d %d %d %d).\n",
+             in0, in1, in2, in3, in4, in5, in6, in7);
       ok = false;
     }
     if (in0 > highestnode) highestnode = in0;
@@ -390,8 +395,8 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
   // Check number of nodes
   if (nNodes != highestnode) {
     printf("ComponentAnsys121::Initialise:\n");
-    printf("    Number of nodes read (%d) on %s does not match element list (%d).\n",
-           nNodes, nlist.c_str(), highestnode);
+    printf("    Number of nodes read (%d) on %s \n", nNodes, nlist.c_str());
+    printf("    does not match element list (%d).\n", highestnode);
     ok = false;
   }
 
@@ -435,7 +440,8 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
     // Check node number and store if OK
     if (inode < 1 || inode > nNodes) {
       printf("ComponentAnsys121::Initialise:\n");
-      printf("    Node number %d out of range on potential file %s (line %d).\n", inode, prnsol.c_str(), il);
+      printf("    Node number %d out of range\n", inode);
+      printf("    on potential file %s (line %d).\n", prnsol.c_str(), il);
       ok = false;
     } else {
       nodes[inode - 1].vmap = volt;
@@ -527,7 +533,8 @@ ComponentAnsys121::SetWeightingField(std::string prnsol, std::string label) {
     // Check node number and store if OK
     if (inode < 1 || inode > nNodes) {
       printf("ComponentAnsys121::SetWeightingField:\n");
-      printf("    Node number %d out of range on potential file %s (line %d).\n", inode, prnsol.c_str(), il);
+      printf("    Node number %d out of range\n", inode);
+      printf("    on potential file %s (line %d).\n", prnsol.c_str(), il);
       ok = false;
     } else {
       nodes[inode - 1].wmap = volt;
@@ -542,8 +549,9 @@ ComponentAnsys121::SetWeightingField(std::string prnsol, std::string label) {
   // Check number of nodes
   if (nread != nNodes) {
     printf("ComponentAnsys121::SetWeightingField:\n");
-    printf("    Number of nodes read (%d) on potential file %s does not match the node list (%d).\n",
-           nread, prnsol.c_str(), nNodes);
+    printf("    Number of nodes read (%d) on potential file %s\n", 
+           nread, prnsol.c_str());
+    printf("     does not match the node list (%d).\n", nNodes);
     ok = false;
   }
 

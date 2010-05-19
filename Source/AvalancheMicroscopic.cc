@@ -14,7 +14,8 @@ double AvalancheMicroscopic::c2 = c1 * c1 / 4.;
 
 AvalancheMicroscopic::AvalancheMicroscopic() :
   sensor(0), 
-  nPhotons(0), nElectrons(0), nIons(0),  
+  nPhotons(0), nElectrons(0), nIons(0), 
+  usePlotting(false), viewer(0), 
   histEnergy(0), hasEnergyHistogram(false),
   histDistance(0), hasDistanceHistogram(false), distanceOption('z'),
   histSecondary(0), hasSecondaryHistogram(false),
@@ -40,6 +41,34 @@ AvalancheMicroscopic::SetSensor(Sensor* s) {
     return;
   }
   sensor = s;
+
+}
+
+void
+AvalancheMicroscopic::EnablePlotting(DriftView* view) {
+
+  if (view == 0) {
+    std::cerr << "AvalancheMicroscopic::EnablePlotting:" << std::endl;
+    std::cerr << "    Viewer is not defined." << std::endl;
+    return;
+  }
+  
+  viewer = view;
+  usePlotting = true;
+  if (!useDriftLines) {
+    std::cout << "AvalancheMicroscopic::EnablePlotting:" << std::endl;
+    std::cout << "    Enabling storage of drift line." << std::endl;
+    EnableDriftLines();
+  }
+
+}
+
+void
+AvalancheMicroscopic::DisablePlotting() {
+ 
+  viewer = 0;
+  usePlotting = false;
+
 }
 
 void 
@@ -162,7 +191,8 @@ int
 AvalancheMicroscopic::GetNumberOfDriftLinePoints(const int i) const {
 
   if (i < 0 || i >= nEndpoints) {
-    std::cerr << "AvalancheMicroscopic::GetNumberOfDriftLinePoints:" << std::endl;
+    std::cerr << "AvalancheMicroscopic::GetNumberOfDriftLinePoints:" 
+              << std::endl;
     std::cerr << "    Endpoint " << i << " does not exist." << std::endl;
     return 0;
   }
@@ -781,11 +811,22 @@ AvalancheMicroscopic::AvalancheElectron(
   }
   nEndpoints = endpoints.size();
 
-  if (!useInducedCharge) return true;
-  for (int i = nEndpoints; i--;) {
-    sensor->AddInducedCharge(-1, 
-                         endpoints[i].x0, endpoints[i].y0, endpoints[i].z0,
-                         endpoints[i].x,  endpoints[i].y,  endpoints[i].z);
+  if (useInducedCharge) {
+    for (int i = nEndpoints; i--;) {
+      sensor->AddInducedCharge(-1, 
+                           endpoints[i].x0, endpoints[i].y0, endpoints[i].z0,
+                           endpoints[i].x,  endpoints[i].y,  endpoints[i].z);
+    }
+  }
+  if (usePlotting) {
+    for (int i = nEndpoints; i--;) {
+      const int np = GetNumberOfDriftLinePoints(i);
+      viewer->NewElectronDriftLine(np);
+      for (int j = np; j--;) {
+        GetDriftLinePoint(x, y, z, t, j, i);
+        viewer->SetPoint(j, x, y, z);
+      }
+    }
   }
   return true;
     

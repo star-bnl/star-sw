@@ -8,6 +8,7 @@
 #include <TH1F.h>
 
 #include "Sensor.hh"
+#include "DriftView.hh"
 
 namespace Garfield {
 
@@ -20,6 +21,10 @@ class AvalancheMicroscopic {
     ~AvalancheMicroscopic() {}
 
     void SetSensor(Sensor* sensor);
+
+    // Switch on/off drift line plotting
+    void EnablePlotting(DriftView* view);
+    void DisablePlotting();
 
     // Switch on/off calculation of induced currents
     void EnableSignalCalculation()  {useSignal = true;}
@@ -154,6 +159,9 @@ class AvalancheMicroscopic {
     // Number of electron trajectories (including captured electrons)
     int nEndpoints;
 
+    bool usePlotting;
+    DriftView* viewer;
+
     TH1F* histEnergy;
     bool hasEnergyHistogram; 
     TH1F* histDistance;
@@ -161,6 +169,7 @@ class AvalancheMicroscopic {
     char distanceOption;
     TH1F* histSecondary;
     bool hasSecondaryHistogram;
+
     bool useSignal;
     bool useInducedCharge;
     bool useDriftLines;

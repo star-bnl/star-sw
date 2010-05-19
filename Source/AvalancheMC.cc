@@ -15,6 +15,7 @@ AvalancheMC::AvalancheMC() :
   sensor(0),
   nDrift(0), nAval(0),
   stepModel(2), tMc(0.02), dMc(0.001), nMc(100),
+  usePlotting(false), viewer(0), 
   useSignal(false), useInducedCharge(false), useEquilibration(true), 
   useDiffusion(true), useIons(true), 
   withElectrons(true), withHoles(true),
@@ -32,6 +33,28 @@ AvalancheMC::SetSensor(Sensor* s) {
   }
   
   sensor = s;
+
+}
+
+void
+AvalancheMC::EnablePlotting(DriftView* view) {
+  
+  if (view == 0) {
+    std::cerr << "AvalancheMC::EnablePlotting:" << std::endl;
+    std::cerr << "    Viewer is not defined." << std::endl;
+    return;
+  }
+
+  usePlotting = true;
+  viewer = view;
+
+}
+
+void
+AvalancheMC::DisablePlotting() {
+
+  viewer = 0;
+  usePlotting = false;
 
 }
 
@@ -288,10 +311,10 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
 
     // Compute the electric field at the new point
     sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
-    
+   
+    // Check if the new position is inside a drift medium 
     if (status != 0) {
-      // If the new point is not inside a drift medium,
-      // bring it back to the drift medium and terminate the drift line
+      // Try to terminate the drift line
       // close to the boundary 
       dx = x - point.x; dy = y - point.y; dz = z - point.z;
       d = sqrt(dx * dx + dy * dy + dz * dz);
@@ -313,6 +336,29 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
       break;   
     }
     
+    // Check if the new position is inside the drift area
+    if (!sensor->IsInArea(x, y, z)) {
+      // Try to terminate the drift line
+      // close to the boundary 
+      dx = x - point.x; dy = y - point.y; dz = z - point.z;
+      d = sqrt(dx * dx + dy * dy + dz * dz);
+      if (d > 0.) {
+        dx /= d; dy /= d; dz /= d;
+      }
+      while (d > BoundaryDistance) {
+        delta *= 0.5;
+        d *= 0.5;
+        x = point.x + dx * d; y = point.y + dy * d; z = point.z + dz * d;
+        // Check if the mid-point is inside the drift area
+        if (sensor->IsInArea(x, y, z)) {
+          point.x = x; point.y = y; point.z = z; point.t += delta;
+        }
+      }
+      drift.push_back(point);
+      ++nDrift;
+      break;
+    }
+
     e = Max(sqrt(ex * ex + ey * ey + ez * ez), Small);
     // Add the new point to drift line
     point.x = x; point.y = y; point.z = z; point.t += delta;
@@ -325,6 +371,16 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     std::cerr << "AvalancheMC::DriftLine:" << std::endl;
     std::cerr << "    Error calculating the transport parameters." << std::endl;
     return false;
+  }
+  if (usePlotting) {
+    if (q < 0) {
+      viewer->NewElectronDriftLine(nDrift);
+    } else {
+      viewer->NewIonDriftLine(nDrift);
+    }
+    for (int i = 0; i < nDrift; ++i) {
+      viewer->SetPoint(i, drift[i].x, drift[i].y, drift[i].z);
+    }
   }
   return true;
 

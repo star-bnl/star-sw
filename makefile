@@ -24,6 +24,7 @@ OBJS = \
 	$(OBJECT)/ComponentTcad2d.o \
 	$(OBJECT)/ComponentNeBem2d.o \
 	$(OBJECT)/FieldView.o \
+	$(OBJECT)/DriftView.o \
 	$(OBJECT)/Input.o \
 	$(OBJECT)/Medium.o \
 	$(OBJECT)/MediumMagboltz86.o \
@@ -68,6 +69,8 @@ $(OBJECT)/ComponentAnsys123.o: $(SOURCE)/ComponentAnsys123.cc $(INCLUDE)/Compone
 $(OBJECT)/ComponentTcad2d.o: $(SOURCE)/ComponentTcad2d.cc $(INCLUDE)/ComponentTcad2d.hh $(INCLUDE)/ComponentBase.hh
 	$(CC) $(CFLAGS) $< -o $@    
 $(OBJECT)/FieldView.o: $(SOURCE)/FieldView.cc $(INCLUDE)/FieldView.hh $(INCLUDE)/Sensor.hh
+	$(CC) $(CFLAGS) $< -o $@
+$(OBJECT)/DriftView.o: $(SOURCE)/DriftView.cc $(INCLUDE)/DriftView.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/Input.o: $(SOURCE)/Input.cc $(INCLUDE)/Input.hh
 	$(CC) $(CFLAGS) $< -o $@

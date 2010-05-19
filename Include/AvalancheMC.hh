@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Sensor.hh"
+#include "DriftView.hh"
 
 namespace Garfield {
 
@@ -16,6 +17,10 @@ class AvalancheMC {
     ~AvalancheMC();
   
     void SetSensor(Sensor* s);
+
+    // Switch on/off drift line plotting
+    void EnablePlotting(DriftView* view);
+    void DisablePlotting();
 
     // Switch on/off calculation of induced currents
     void EnableSignalCalculation()  {useSignal = true;}
@@ -113,6 +118,9 @@ class AvalancheMC {
     // Number of endpoints (including captured electrons)
     int nEndpoints;
 
+    bool usePlotting;
+    DriftView* viewer;
+
     bool useSignal;
     bool useInducedCharge;
     bool useEquilibration;
@@ -123,9 +131,11 @@ class AvalancheMC {
     bool debug;
     
     // Compute a drift line with starting point (x0, y0, z0)
-    bool DriftLine(const double x0, const double y0, const double z0, const double t0, const int q);
+    bool DriftLine(const double x0, const double y0, const double z0, 
+                   const double t0, const int q);
     bool Avalanche();
-    // Compute effective multiplication and ionisation for the current drift line
+    // Compute effective multiplication and ionisation 
+    // for the current drift line
     bool ComputeAlphaEta(const int q);
     // Compute the induced signal for the current drift line
     void ComputeSignal(const int q);
