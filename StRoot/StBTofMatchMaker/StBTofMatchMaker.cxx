@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.11 2010/03/22 19:40:28 dongx Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.12 2010/05/20 22:58:47 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.12  2010/05/20 22:58:47  geurts
+ * Keep BTofMatchMaker from crashing ungracefully when no mEvent or BTOF Collection is found
+ *
  * Revision 1.11  2010/03/22 19:40:28  dongx
  * Fixed a bug in setting index2Primary in processMuDst
  *
@@ -258,9 +261,11 @@ void StBTofMatchMaker::processStEvent(){
   // event selection ...
   mEvent = (StEvent *) GetInputDS("StEvent");
   if(!mEvent || !(mEvent->btofCollection()) || !(mEvent->btofCollection()->hitsPresent()) ) {
-    if (!mEvent) cout << "no mevent" << endl;
-    if (!(mEvent->btofCollection())) cout << "no btofcollection" << endl;
-    if (!(mEvent->btofCollection()->hitsPresent()) ) cout << "no hitspresent" << endl;
+    if (!mEvent) {LOG_INFO << "no StEvent" << endm;}
+    else
+      if (!(mEvent->btofCollection())) {LOG_INFO << "no BTof Collection" << endm;}
+    else
+      if (!(mEvent->btofCollection()->hitsPresent()) ) LOG_INFO << "no BTOF hits present" << endm;
     LOG_INFO << "StBTofMatchMaker -- nothing to do ... bye-bye" << endm;
     return;
   }
