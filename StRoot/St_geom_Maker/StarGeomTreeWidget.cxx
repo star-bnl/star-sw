@@ -599,7 +599,7 @@ void StarGeomTreeWidget::contextMenuRequestedCB(const QPoint &pos)
          fContextMenu->Popup(QCursor::pos().x(),QCursor::pos().y(), obj,(TBrowser *)0);
    } else {
       QAction *response = 0; //QMessageBox::question(listView1,"Change the volume visibility","Visible","Both","Child","none");
-      static vector<QAction *> menus;
+      static std::vector<QAction *> menus;
       if (!fPopupContextMenu) {
          menus.clear();
          fPopupContextMenu = new QMenu(this);
