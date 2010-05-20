@@ -48,10 +48,9 @@ TBrowser *brow=0;
 // The acual file to be used is passed as an argument to the macro, or a default can be set
 
 void simM2Maker (
-		const char *MainFile="/star/institutions/lbl/dongx/tof/fulltof/event/StEvent/pythia_7.geant.root",
+		const char *MainFile="/star/institutions/rice/geurts/sim/tof/pythia_7.geant.root",
 		Int_t nevents=5000000
-		//                const char *MainFile="/star/u/debasish/hijing/hijingnew/hijtest/Au200GeVhijing10events.geant.root",
-		//	const char *outFileName="test0_6.root"
+		//	const char *outFileName="test.root"
 		)
 {
 	// Load all the System libraries
