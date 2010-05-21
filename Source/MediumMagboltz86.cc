@@ -390,6 +390,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
       esec = RndmUniform() * (energyLoss[level] * rgas[level] - minIonPot);
       if (esec <= 0) esec = 1.e-20;
       type = 1;
+      ++nPenning;
     }
   }
 
@@ -1541,11 +1542,11 @@ MediumMagboltz86::ComputeDeexcitationTable() {
         // 3p54p levels
         // Average lifetime assumed to be 30 ns
         if (level == "2P10   " || level == "2P9    " ||
-                   level == "2P8    " || level == "2P7    " ||
-                   level == "2P6    " || level == "2P5    " ||
-                   level == "2P4    " || level == "2P3    " ||
-                   level == "2P2    " || level == "2P1    ") {
-          fCollIon[j] = fB / 30.;
+            level == "2P8    " || level == "2P7    " ||
+            level == "2P6    " || level == "2P5    " ||
+            level == "2P4    " || level == "2P3    " ||
+            level == "2P2    " || level == "2P1    ") {
+          // fCollIon[j] = fB / 2.;
         // 3p53d levels
         // Average lifetime assumed to be 40 ns
         } else if (level == "3D6    " || level == "3D5    " ||
@@ -1554,10 +1555,10 @@ MediumMagboltz86::ComputeDeexcitationTable() {
                    level == "3D1!!  " || level == "3D1!   " ||
                    level == "3S1!!!!" || level == "3S1!!! " ||
                    level == "3S1!!  " || level == "3S1!   ") { 
-          fCollIon[j] = fB / 40.;
+          // fCollIon[j] = fB / 40.;
         // Higher levels
         } else {
-          fCollIon[j] = fB * fRadiative[j];
+          // fCollIon[j] = fB * fRadiative[j];
         }
       }
     }    
@@ -1583,6 +1584,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
                     << fRadiative[i] / fDeexcitation[i] << std::endl;
           std::cout << "    Penning transfer probability: "
                     << fCollIon[i] / fDeexcitation[i] << std::endl;
+          std::cout << "    Loss probability: "
+                    << fCollLoss[i] / fDeexcitation[i] << std::endl;
           std::cout << "    Photon energy: " << wSplit[i] << " eV" 
                     << std::endl;
         }
