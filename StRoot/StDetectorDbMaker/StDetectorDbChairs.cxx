@@ -172,6 +172,8 @@ MakeChairInstance(tpcPadrowT0,Calibrations/tpc/tpcPadrowT0);
 MakeChairInstance(tpcSectorT0offset,Calibrations/tpc/tpcSectorT0offset);
 #include "St_TpcAltroParametersC.h"
 MakeChairInstance(TpcAltroParameters,Calibrations/tpc/TpcAltroParameters);
+#include "St_tpcAltroParamsC.h"
+MakeChairInstance(tpcAltroParams,Calibrations/tpc/tpcAltroParams);
 #include "St_asic_thresholdsC.h"
 MakeChairInstance(asic_thresholds,Calibrations/tpc/asic_thresholds);
 #include "St_asic_thresholds_tpxC.h"
@@ -276,6 +278,8 @@ MakeChairInstance(tpcPadGainT0,Calibrations/tpc/tpcPadGainT0);
 MakeChairInstance(tpcSlewing,Calibrations/tpc/tpcSlewing);
 #include "St_tpcAcChargeC.h"
 MakeChairInstance(tpcAcCharge,Calibrations/tpc/tpcAcCharge);
+#include "St_tpcAvCurrentC.h"
+MakeChairInstance(tpcAvCurrent,Calibrations/tpc/tpcAvCurrent);
 #include "St_TpcResponseSimulatorC.h"
 MakeChairInstance(TpcResponseSimulator,Calibrations/tpc/TpcResponseSimulator);
 //__________________Calibrations/trg______________________________________________________________
@@ -525,11 +529,14 @@ St_tpcSectorPositionC *St_tpcSectorPositionC::fgInstance = 0;
 St_tpcSectorPosition  *St_tpcSectorPositionC::fgTables[24] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 St_tpcSectorPositionC *St_tpcSectorPositionC::instance() { 
   if (fgInstance) return fgInstance;					
+  TDataSet *tpc = StMaker::GetChain()->GetDataBase("Geometry/tpc");
+  assert(tpc);
   for (Int_t sec = 1; sec <= 24; sec++) {
-    TString path = Form("Geometry/tpc/Sector_%02i/tpcSectorPosition",sec);
-    fgTables[sec-1] = (St_tpcSectorPosition  *) StMaker::GetChain()->GetDataBase(path.Data()); 
+    TString path = Form("Sector_%02i/tpcSectorPosition",sec);
+    fgTables[sec-1] = (St_tpcSectorPosition  *) tpc->Find(path.Data()); 
     if (! fgTables[sec-1]) {							
-      LOG_WARN << "St_tpcSectorPositionC::instance " << path.Data() << "\twas not found" << endm; 
+      LOG_WARN << "St_tpcSectorPositionC::instance " << tpc->GetTitle() << "/" << path.Data() 
+	       << "\twas not found" << endm; 
       assert(fgTables[sec-1]);							
     }						
     {						
