@@ -1,4 +1,4 @@
-// $Id: St2009W_accessMuDst.cxx,v 1.12 2010/03/23 15:33:55 seelej Exp $
+// $Id: St2009W_accessMuDst.cxx,v 1.13 2010/05/21 19:57:59 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -29,7 +29,11 @@ St2009WMaker::accessTrig(){ // return non-zero on abort
       instead of the two functions used below.  For now, check that is passes both
       L0 and L2, and set the l2bitET flag to true if so.
     */
+    
+#if 0  //remove L0 emulator for now //JS
     if (!passes_L0()) return -1;
+#endif
+    
     hA[0]->Fill("BHT3Id",1.);
     if(!passes_L2()) return -2;
     hA[0]->Fill("L2wId",1.);
@@ -681,6 +685,9 @@ St2009WMaker::rejectMcTr(float effic){ //reject track in MC to match TPC efficie
 
 
 //$Log: St2009W_accessMuDst.cxx,v $
+//Revision 1.13  2010/05/21 19:57:59  stevens4
+//remove L0 check for MC until passes_L0() is fixed
+//
 //Revision 1.12  2010/03/23 15:33:55  seelej
 //Edit to files to allow the use of a text file for the gains instead of using the DB.
 //
