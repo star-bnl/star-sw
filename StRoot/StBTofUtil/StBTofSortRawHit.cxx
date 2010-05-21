@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofSortRawHit.cxx,v 1.6 2009/10/22 19:06:00 dongx Exp $
+ * $Id: StBTofSortRawHit.cxx,v 1.7 2010/05/21 05:41:33 geurts Exp $
  *  
  * Author: Xin Dong   
  *****************************************************************    
@@ -84,6 +84,13 @@ void StBTofSortRawHit::setVpdDelay(Int_t runnumber) {
     0,-0.564753,-4.62291,-4.84402,-4.05943,6.32389,-9.4035,-10.3113,-17.0374,-17.3734,-6.04608,-11.9614,-12.7579,8.79609,3.8467,-17.2994,-17.6424,-21.4749,-22.9736,
     0,-2.1707,  -4.8195, -6.5161, -4.3109, 6.3116, -8.8655,-10.1037,-16.5970,-17.9588,-5.2079, -12.1249,-12.2412,8.4001, 5.5702,-16.5936,-16.4152,-21.3076,-21.1452
   };
+  // default delays for Run-10 (valid for all energies, based on 39GeV)
+  float delayRun10[2*mNVPD]={
+    0.0,       1.201867,  0.531776,  5.477558,  6.167743,  5.575552,  9.801250, 10.958965, 10.591384,  4.773926,
+   10.268874, 14.588154,  4.931171,  4.488882,  9.838172, 10.241304,  9.646428, 19.994028, 14.213135,
+    0.0,       0.668213,  0.479492,  4.870962,  6.054838,  5.567796, 10.370061, 10.805627, 11.034330,  3.716928,
+   10.197979, 15.191838,  5.421011,  5.035720, 10.611328, 10.291655, 10.088323, 20.136475, 14.605093
+  };
 
   if (runnumber<10107025) {         // VpdDelay not used before Run-9 500 GeV finished
     memset(mVpdDelay,0,sizeof(mVpdDelay));
@@ -102,9 +109,14 @@ void StBTofSortRawHit::setVpdDelay(Int_t runnumber) {
     mVpdDelay[36] -= 25.0;
     mVpdDelay[37] -= 25.0;
   } 
-  else {                          // default delays
+  else if (runnumber<10314000){ // consider all run#s below day 314 Run-9 200GeV
     for(int i=0;i<2*mNVPD;i++) {
       mVpdDelay[i] = delay[i];
+    }
+  }
+  else {                          // default delays for Run10 (ALL MUST GO TO DATABASE!)
+    for(int i=0;i<2*mNVPD;i++) {
+      mVpdDelay[i] = delayRun10[i];
     }
   }
 
