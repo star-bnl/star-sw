@@ -17,16 +17,24 @@ chomp($date);
 # Default parameters
 my $staroflDir    = "/home/starofl";
 
-my $force         = 0;                                     # Default is false (do not overwrite existing xml file)
-my $production    = "P08ic";                               # Default production
-my $library       = getLibrary($production);               # Default library
-my $outputXml     = getXmlFileName($production);           # Default xml file name
-my $requestNumber = 9999999999 ;                           # Default request number
-my $daqsDirectory = "$staroflDir/embedding/$production";   # Default daq files directory
-my $tagsDirectory = "$staroflDir/embedding/$production";   # Default tag files directory
-my $trgsetupName  = "2007ProductionMinBias";               # Default trigger setup name
-my $bfcMixer      = "bfcMixer_TpcSvtSsd.C";                # Default bfcMixer
-$verbose          = 0 ;                                    # verbose flag (defalt is false)
+my $force         = 0;                                              # Default is false (do not overwrite existing xml file)
+my $production    = "P08ic";                                        # Default production
+my $library       = getLibrary($production);                        # Default library
+my $outputXml     = getXmlFileName($production);                    # Default xml file name
+my $requestNumber = 9999999999 ;                                    # Default request number
+my $daqsDirectory = "$staroflDir/embedding/$production";            # Default daq files directory
+my $tagsDirectory = "$staroflDir/embedding/$production";            # Default tag files directory
+my $trgsetupName  = "2007ProductionMinBias";                        # Default trigger setup name
+my $bfcMixer      = "StRoot/macros/embedding/bfcMixer_TpcSvtSsd.C"; # Default bfcMixer
+my $zvertexCut    = 200 ;                                           # Default z-vertex cut
+my $ptmin         = 0.0 ;                                           # Default pt lower cut off
+my $ptmax         = 10.0 ;                                          # Default pt higher cut off
+my $ymin          = -1.5 ;                                          # Default rapidity lower cut off
+my $ymax          = 1.5 ;                                           # Default rapidity higher cut off
+my $pid           = 8 ;                                             # Default geant id (is pi+)
+my $multiplicity  = 1 ;                                             # Default multiplicity (is 1)
+my $particleName  = "PiPlus" ;                                      # Default particle name (is pi+)
+$verbose          = 0 ;                                             # verbose flag (defalt is false)
 
 my $maxFilesPerProcess = 1 ;       # 1 file per job
 my $fileListSyntax     = "paths" ; # Read local file on disk
@@ -43,16 +51,23 @@ my $getDayFromFile  = "$staroflDir/aarose/getDayFromFile.pl";
 GetOptions (
     'daq=s' => \$daqsDirectory,            # Daq file directory
     'force' => \$force,                    # Flag for overwrite
+    'geantid=s' => \$pid,                  # Geantid
     'help' => \$help,
     'library=s' => \$library,              # Library
     'log=s' => \$logDirectory,             # Log file directory
     'mixer=s' => \$bfcMixer,               # bfcMixer
+    'mode=s' => \$ptOption,                # pt option
+    'mult=s' => \$multiplicity,            # Number of MC tracks per event
+    'particlename=s' => \$particleName,    # Particle name
     'production=s' => \$production,        # Production
-    'pt=s' => \$ptOption,                  # pt option
+    'ptmin=s' => \$ptmin,                  # Minimum pt cut
+    'ptmax=s' => \$ptmax,                  # Maximum pt cut
     'requestnumber=n' => \$requestNumber,  # Request number
     'tag=s' => \$tagsDirectory,            # Set tags file directory
     'trg=s' => \$trgsetupName,             # Set trigger setup name
     'triggerid=s' => \$triggerId,          # Set trigger id cut
+    'ymin=s' => \$ymin,                    # Minimum rapidity cut
+    'ymax=s' => \$ymax,                    # Maximum rapidity cut
     'zvertex=s' => \$zvertexCut,           # Set z-vertex cut
     'verbose' => \$verbose
 );
@@ -69,23 +84,37 @@ my $usage = q(
   -daq [daq file directory]    Set daq file directory (default is /home/starofl/embedding/$production)
 
   -f                           Overwrite the existing xml file (default is false)
+  -g (or --geantid) [GEANT id] GEANT3 id for input MC particle
   -h or --help                 Show this messages and exit
 
   -lib [library]               Set library. ex. -l SL08f (default will be detemined by $production)
   -log [log file directory]    Set log file directory (default is /project/projectdirs/star/embedding/$production/LOG/)
-  -m (or --mixer) [bfcMixer]   Set bfcMixer macro (default is bfcMixer_TpcSvtSSd.C)
-  -pro [production]            Set production. ex. -p P08ie (default is P08ic)
-  -pt [pt option]              Set pt option (default is FlatPt)
-                               
-      ***  Current available pt options are
+  -mixer [bfcMixer]            Set bfcMixer macro (default is StRoot/macros/embeding/bfcMixer_TpcSvtSSd.C)
+  -mode                        Set pt mode (default is FlatPt)
+
+      ***  Current available modes are
       option               description
       FlatPt               Generate flat (pt,y) by 'phasespace' command
-      strange              Generate sloped pt. Slope is defined by temperature (default is 300MeV)
+      strange              Generate flat (pt,y) with vertex smearing (Need appropriate chain option for vertex finder)
+      Spectrum             Generate sloped pt. Slope is defined by temperature (default is 300MeV)
 
+  -mult [Multiplicity]     Set multiplicity (default is 1 per event)
+
+  -particle (or --particlename) [Particle name]   Set particle name (default is PiPlus)
+
+  -pro [production]            Set production. ex. -p P08ie (default is P08ic)
+
+  -ptmin [Minimum pt cut]      Set minimum pt cut off (default is 0 GeV/c)
+  -ptmax [Maximum pt cut]      Set maximum pt cut off (default is 10 GeV/c)
+                               
   -r [request number]                   Set request number (default is 9999999999)
   -tag [tags file directory]            Set tag file directory (default is /home/starofl/embedding/$production)
   -trg [trigger setup name]             Set trigger setup name (default is 2007ProductionMinBias)
-  -trig (or --triggerid) [trigger id]   Set trigger id cut
+  -trig (or --triggerid) [trigger id]   Set trigger id cut (disabled)
+
+  -ymin [Minimum rapidity cut]          Set minimum rapidity cut off (default is -1.5)
+  -ymax [Maximum rapidity cut]          Set maximum rapidity cut off (default is 1.5)
+
   -z (or --zvertex) [max. z-vertex cut] Set z-vertex cut. The cut will be |vz| < cut
 
   -v or --verbose              Verbose flag to show debug messages
@@ -105,6 +134,13 @@ if( $help )
 # Debugging messages
 #----------------------------------------------------------------------------------------------------
 printDebug("Verbose mode. Print debugging messages ...");
+
+#----------------------------------------------------------------------------------------------------
+# Trigger id option is disabled
+#----------------------------------------------------------------------------------------------------
+if ( $triggerId ) {
+  print "Warning:    -trig option is current disabled, do not affect your output xml\n";
+}
 
 #----------------------------------------------------------------------------------------------------
 # Set generator/directory from production name
@@ -190,9 +226,10 @@ print OUT "setenv EMYEAR `$getYearFromFile \${FILEBASENAME}`\n";
 print OUT "setenv EMDAY `$getDayFromFile \${FILEBASENAME}`\n";
 print OUT "\n";
 
-printDebug("Set trigger setup name: $trgsetupName ...");
-print OUT "<!-- Set trigger setup name -->\n";
-print OUT "setenv TRG $trgsetupName\n";
+#printDebug("Set trigger setup name: $trgsetupName ...");
+#print OUT "<!-- Set trigger setup name -->\n";
+#print OUT "setenv TRG $trgsetupName\n";
+
 print OUT "\n";
 print OUT "<!-- Print out EMYEAR and EMDAY -->\n";
 print OUT "echo \$EMYEAR\n";
@@ -206,7 +243,15 @@ print OUT "<!-- Start job -->\n";
 $tagFile = "\$EMBEDTAGDIR/\${FILEBASENAME}.tags.root"; #Define tag file
 printDebug("Set tags file: $tagFile, bfcMixer: $bfcMixer ...");
 
-print OUT "root4star -b -q $bfcMixer\\($nevents,\\\"\$INPUTFILE0\\\",\\\"$tagFile\\\",&PTLOW;,&PTHIGH;,&ETALOW;,&ETAHIGH;,-$zvertexCut,$zvertexCut,&PID;,&MULT;,\\\"$production\\\",\\\"$ptOption\\\"\\\)\n";
+# bfcMixer_TpcSvtSsd.C needs two additional switches
+if ( $bfcMixer =~ /.*SvtSsd.C/ ){
+  #  Both SVT and SSD are ON (default)
+  print OUT "root4star -b -q $bfcMixer\\($nevents,1,1,\\\"\$INPUTFILE0\\\",\\\"$tagFile\\\",$ptmin,$ptmax,$ymin,$ymax,-$zvertexCut,$zvertexCut,$pid,$multiplicity,\\\"$production\\\",\\\"$ptOption\\\"\\\)\n";
+}
+else{
+  # bfcMixer_Tpx.C
+  print OUT "root4star -b -q $bfcMixer\\($nevents,\\\"\$INPUTFILE0\\\",\\\"$tagFile\\\",$ptmin,$ptmax,$ymin,$ymax,-$zvertexCut,$zvertexCut,$pid,$multiplicity,\\\"$production\\\",\\\"$ptOption\\\"\\\)\n";
+}
 print OUT "ls -la .\n";
 
 #----------------------------------------------------------------------------------------------------
@@ -225,7 +270,7 @@ print OUT "\n";
 #----------------------------------------------------------------------------------------------------
 # put log file in HPSS
 #----------------------------------------------------------------------------------------------------
-my $hpssLogDir = "/nersc/projects/starofl/embedding/\$TRG/&PNAME;_&FSET;_$requestNumber/$production.$library/\${EMYEAR}/\${EMDAY}";
+my $hpssLogDir = "/nersc/projects/starofl/embedding/$trgsetupName/$particleName\_&FSET;_$requestNumber/$production.$library/\${EMYEAR}/\${EMDAY}";
 printDebug("Set archive log/root files in HPSS: $hpssLogDir ...");
 print OUT "<!-- Archive in HPSS -->\n";
 print OUT "hsi \"mkdir -p $hpssLogDir; prompt; cd $hpssLogDir; mput *.root; mput $logFileName; mput $errFileName\"\n";
@@ -255,7 +300,7 @@ print OUT "<SandBox installer=\"ZIP\">\n";
 print OUT "  <Package name=\"Localmakerlibs\">\n";
 print OUT "    <File>file:./$libraryPath/</File>\n";
 print OUT "    <File>file:./StRoot/</File>\n";
-print OUT "    <File>file:./asps/</File>\n";
+print OUT "    <File>file:./pams/</File>\n";
 print OUT "  </Package>\n";
 print OUT "</SandBox>\n";
 print OUT "</job>\n";
