@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StFourPMaker.h,v 1.8 2010/04/24 04:15:27 pibero Exp $
+// $Id: StFourPMaker.h,v 1.9 2010/05/22 13:43:20 pibero Exp $
 #ifndef STFOURPMAKER_H
 #define STFOURPMAKER_H
 
@@ -23,12 +23,13 @@ public:
 
   StFourPMaker(const char *name) : StMaker(name) { }
 
-  virtual const vector<VertexNode>& getVertexNodes() const = 0;
+  virtual const vector<VertexNode>& getVertexNodes() const { return _vertexNodes; }
   virtual bool bemcCorrupt() const { return false; }
 
-private:
+protected:
+  vector<VertexNode> _vertexNodes;
 
-  ClassDef(StFourPMaker,1)
+  ClassDef(StFourPMaker,0)
 };
 
 #endif // STFOURPMAKER_H
