@@ -132,6 +132,7 @@ void RunJetSimuSkimFinder(const int nevents = 2000,
   
   // Instantiate the JetMaker
   StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker",muDstMaker,jetfile);
+  emcJetMaker->SetTreeWriter(new StjeJetEventTreeWriter(jetfile));
 
   // Setup 3 jet analyses that use the same track/jet cuts  
   // Set the analysis cuts: (See StJetMaker/StppJetAnalyzer.h -> class StppAnaPars)

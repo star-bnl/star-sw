@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.15 2010/04/24 04:15:27 pibero Exp $
+// $Id: StBET4pMaker.h,v 1.16 2010/05/22 13:43:20 pibero Exp $
 #ifndef STBET4PMAKER_H
 #define STBET4PMAKER_H
 
@@ -52,7 +52,7 @@ public:
   StBET4pMakerImp* GetImp() { return _imp; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.15 2010/04/24 04:15:27 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.16 2010/05/22 13:43:20 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -77,11 +77,10 @@ private:
   StjeBemcEnergySumCalculator* _bemcEnergySumCalculator;
   StjeTrackListToStMuTrackFourVecList& _track2four;
   StjeTowerEnergyListToStMuTrackFourVecList& _energy2four;
-  vector<VertexNode> _vertexNodes;
 
   bool isBemcCorrupted() const;
 
-  ClassDef(StBET4pMaker,1)
+  ClassDef(StBET4pMaker,0)
 };
 
 #endif // STBET4PMAKER_H

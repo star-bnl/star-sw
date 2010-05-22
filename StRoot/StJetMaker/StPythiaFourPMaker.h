@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StPythiaFourPMaker.h,v 1.12 2009/12/16 01:54:17 pibero Exp $
+// $Id: StPythiaFourPMaker.h,v 1.13 2010/05/22 13:43:20 pibero Exp $
 #ifndef STPYTHIAFOURPMAKER_H
 #define STPYTHIAFOURPMAKER_H
 
@@ -19,7 +19,7 @@ class StPythiaFourPMaker : public StFourPMaker {
 public:
     
   StPythiaFourPMaker(const char *name = "StPythiaFourPMaker") : StFourPMaker(name) { }
-  virtual ~StPythiaFourPMaker() { };
+  virtual ~StPythiaFourPMaker() { }
 
   const StThreeVectorF& getVertex() const { return vertex; }
   FourList &getTracks() { return tracks; };
@@ -38,7 +38,7 @@ private:
   StjMC* _mc;
   StjMCParticleListCut* _cut;
 
-  ClassDef(StPythiaFourPMaker,2)
+  ClassDef(StPythiaFourPMaker,0)
 };
 
 
