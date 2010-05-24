@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.231 2010/04/30 17:13:20 fine Exp $
+// $Id: StMaker.cxx,v 1.232 2010/05/24 14:25:54 fisyak Exp $
 //
 //
 /*!
@@ -251,7 +251,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   // 
   {"y2009",       20081215,     0, "y2009",    "based on TGeomanager of YF"},
   {"y2009a",      20081215,     1, "y2009a",   "y2009+ecalgeo6(JW)"},
-  {"y2010",       20091214,     0, "y2010",    "y2009+full BTOF"},
+  {"y2010",       20091215,     0, "y2010",    "y2009+full BTOF"},
 
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
@@ -1955,6 +1955,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.232  2010/05/24 14:25:54  fisyak
+// move alias time stamp for y2010 from 20091214 to 20091215 (back, as it was before 2010/04/06)
+//
 // Revision 1.231  2010/04/30 17:13:20  fine
 // RT #1911. Protect against of the died pointer
 //
