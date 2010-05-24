@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.128 2010/04/28 15:57:06 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.129 2010/05/24 15:46:58 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -779,27 +779,49 @@
     # chomp($os_name);
     #
     # *** Standard package first, then OPTSTAR ***
-    #
-    my ($MYSQLINCDIR,$mysqlheader) =
-	script::find_lib( $MYSQL . " " .
-			 "/sw/include/mysql ".
-			 "/include /usr/include ".
-			 "/usr/include/mysql  ".
-			 "/usr/mysql/include  ".
-			 "/usr/mysql  ".
-			 $OPTSTAR . "/include " .  $OPTSTAR . "/include/mysql " ,
-			 "mysql.h");
+    #	
+    my ($MYSQLINCDIR,$mysqlheader);
+    if ( defined($ENV{USE_LOCAL_MYSQL}) ){
+	($MYSQLINCDIR,$mysqlheader) =
+	    script::find_lib( $OPTSTAR . "/include " .  $OPTSTAR . "/include/mysql ".
+			      $MYSQL . " " .
+			      "/sw/include/mysql ".
+			      "/include /usr/include ".
+			      "/usr/include/mysql  ".
+			      "/usr/mysql/include  ".
+			      "/usr/mysql  ",
+			      "mysql.h");
+    } else { 
+	($MYSQLINCDIR,$mysqlheader) =
+	    script::find_lib( $MYSQL . " " .
+			      "/sw/include/mysql ".
+			      "/include /usr/include ".
+			      "/usr/include/mysql  ".
+			      "/usr/mysql/include  ".
+			      "/usr/mysql  ".
+			      $OPTSTAR . "/include " .  $OPTSTAR . "/include/mysql " ,
+			      "mysql.h");
+    }
 
     if (! $MYSQLINCDIR) {
 	die "Can't find mysql.h in standard path and $OPTSTAR/include  $OPTSTAR/include/mysql\n";
     }
 
-    # search for the config
-    my ($MYSQLCONFIG,$mysqlconf) =
-	script::find_lib($MYSQL . " ".
-	                 "/usr/bin /usr/bin/mysql ".
-			 $OPTSTAR . "/bin " .  $OPTSTAR . "/bin/mysql ",
-			 "mysql_config");
+    # search for the config    
+    my ($MYSQLCONFIG,$mysqlconf);
+    if ( defined($ENV{USE_LOCAL_MYSQL}) ){
+	($MYSQLCONFIG,$mysqlconf) =
+	    script::find_lib($OPTSTAR . "/bin " .  $OPTSTAR . "/bin/mysql ".
+			     $MYSQL . " ".
+			     "/usr/bin /usr/bin/mysql ",
+			     "mysql_config");
+    } else {
+	($MYSQLCONFIG,$mysqlconf) =
+	    script::find_lib($MYSQL . " ".
+			     "/usr/bin /usr/bin/mysql ".
+			     $OPTSTAR . "/bin " .  $OPTSTAR . "/bin/mysql ",
+			     "mysql_config");
+    }
 
 
     # Associate the proper lib with where the inc was found
