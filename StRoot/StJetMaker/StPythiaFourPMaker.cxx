@@ -1,4 +1,4 @@
-// $Id: StPythiaFourPMaker.cxx,v 1.15 2009/12/16 01:54:17 pibero Exp $
+// $Id: StPythiaFourPMaker.cxx,v 1.16 2010/05/24 23:11:35 pibero Exp $
 #include "StPythiaFourPMaker.h"
 
 #include "StMuTrackFourVec.h"
@@ -10,6 +10,8 @@
 #include "StjMCParticleCut.h"
 #include "StjMCParticleCutEta.h"
 #include "StjMCParticleCutStatus.h"
+
+#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 
 #include <TLorentzVector.h>
 
@@ -29,17 +31,31 @@ Int_t StPythiaFourPMaker::Init()
 
 void StPythiaFourPMaker::Clear(Option_t* opt)
 {
-  for (FourList::iterator it = tracks.begin(); it != tracks.end(); ++it) {
-    delete *it;
-    *it = 0;
+  for (size_t iNode = 0; iNode < _vertexNodes.size(); ++iNode) {
+    VertexNode& node = _vertexNodes[iNode];
+    if (node.vertex) {
+      delete node.vertex;
+      node.vertex = 0;
+    }
+    FourList& tracks = node.tracks;
+    for (FourList::iterator it = tracks.begin(); it != tracks.end(); ++it) {
+      delete *it;
+      *it = 0;
+    }
+    tracks.clear();
   }
-
-  tracks.clear();
+  _vertexNodes.clear();
 }
 
 Int_t StPythiaFourPMaker::Make()
 {
-  vertex = _mc->getMCVertex();
+  StMuPrimaryVertex* pv = new StMuPrimaryVertex;
+  pv->setPosition(_mc->getMCVertex());
+
+  _vertexNodes.push_back(VertexNode());
+  _vertexNodes[0].vertex = pv;
+  FourList& tracks = _vertexNodes[0].tracks;
+
   StjMCParticleList theList = _mc->getMCParticleList();
   theList = (*_cut)(theList);
 
@@ -61,10 +77,3 @@ Int_t StPythiaFourPMaker::Make()
 
   return kStOK;
 }
-
-
-
-
-
-
-
