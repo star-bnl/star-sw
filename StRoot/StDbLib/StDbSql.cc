@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.34 2009/12/10 03:47:07 dmitry Exp $
+ * $Id: StDbSql.cc,v 1.35 2010/05/24 20:44:09 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.35  2010/05/24 20:44:09  dmitry
+ * suppressed excessive output for indexed tables
+ *
  * Revision 1.34  2009/12/10 03:47:07  dmitry
  * BETWEEN operator was not constructed properly from elementID array => potential origin of several mysterious problems
  *
@@ -428,7 +431,7 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
      StString tp;
      tp<<" Not all rows filled from DB, Requested="<<numRows;
      tp<<" Returned="<<numRows-rowsLeft<<" for Table="<<tName;
-     mgr->printInfo((tp.str()).c_str(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+     mgr->printInfo((tp.str()).c_str(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
      //     numRows-=rowsLeft;
      //     table->resizeNumRows(numRows);
    }
@@ -438,7 +441,7 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
     if (rowsLeft > 0) {
         StString tp;
         tp<<"Fixing row size, setting it to " << (numRows-rowsLeft) << " for Table = " << tName;
-        mgr->printInfo((tp.str()).c_str(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
+        mgr->printInfo((tp.str()).c_str(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
         table->resizeNumRows(numRows-rowsLeft);
     }
     table->setTimeValues(timeValues);
