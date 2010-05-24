@@ -1,4 +1,4 @@
-// $Id: StBET4pMaker.cxx,v 1.14 2010/05/19 13:46:59 pibero Exp $
+// $Id: StBET4pMaker.cxx,v 1.15 2010/05/24 17:42:26 pibero Exp $
 #include "StBET4pMaker.h"
 #include "StBET4pMakerImp.h"
 #include "StBET4pMakerImpBuilder.h"
@@ -27,17 +27,20 @@ StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTow
   , _useTPC(true), _useBEMC(true), _useEEMC(false)
   , _use2003Cuts(false), _use2005Cuts(false), _use2006Cuts(false), _use2009Cuts(false)
   , _useBEMCEnergySum(true)
+  , _useRandomSelector(false)
   , _useBEMCEnergyVariation(false), _bemcEnergyVariationRatio(0.05)
   , _imp(0)
   , _bemcEnergySumCalculator(0)
   , _track2four(*(new StjeTrackListToStMuTrackFourVecList))
   , _energy2four(*(new StjeTowerEnergyListToStMuTrackFourVecList))
+  , _randomSelectorProb(1.0), _randomSelectorAt(false)
+  , _randomSelectorSeed(0)
 { }
 
 Int_t StBET4pMaker::Init()
 {
   StBET4pMakerImpBuilder impBuilder;
-  _imp = impBuilder.build(_useTPC, _useBEMC, _useEEMC, _use2003Cuts, _use2005Cuts, _use2006Cuts, _use2009Cuts, _useBEMCEnergyVariation, _bemcEnergyVariationRatio, _uDstMaker, _doTowerSwapFix, _correctTowerEnergyForTracks);
+  _imp = impBuilder.build(_useTPC, _useBEMC, _useEEMC, _use2003Cuts, _use2005Cuts, _use2006Cuts, _use2009Cuts, _useBEMCEnergyVariation, _bemcEnergyVariationRatio, _useRandomSelector, _uDstMaker, _doTowerSwapFix, _correctTowerEnergyForTracks, _randomSelectorProb, _randomSelectorAt, _randomSelectorSeed);
   _imp->Init();
 
   StjeBemcEnergySumCalculatorBuilder bemcEnergySumCalculatorBuilder;
