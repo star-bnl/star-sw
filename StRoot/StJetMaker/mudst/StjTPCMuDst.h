@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTPCMuDst.h,v 1.5 2010/04/24 04:15:39 pibero Exp $
+// $Id: StjTPCMuDst.h,v 1.6 2010/05/24 17:42:39 pibero Exp $
 #ifndef STJTPCMUDST_H
 #define STJTPCMUDST_H
 
@@ -16,7 +16,7 @@ public:
 
   StjTrackList getTrackList();
 
-private:
+protected:
 
   StjTrack createTrack(const StMuTrack* mutrack, int i, double magneticField);
 };

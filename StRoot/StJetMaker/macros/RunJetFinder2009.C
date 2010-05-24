@@ -35,6 +35,7 @@ void RunJetFinder2009(int nevents = 1e6,
   gSystem->Load("StEmcTriggerMaker");
   gSystem->Load("StTriggerUtilities");
   gSystem->Load("StMCAsymMaker");
+  gSystem->Load("StRandomSelector");
   gSystem->Load("StJetFinder");
   gSystem->Load("StJetSkimEvent");
   gSystem->Load("StJets");

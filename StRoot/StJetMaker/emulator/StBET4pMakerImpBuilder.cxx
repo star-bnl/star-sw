@@ -1,9 +1,10 @@
-// $Id: StBET4pMakerImpBuilder.cxx,v 1.10 2010/04/27 16:31:46 pibero Exp $
+// $Id: StBET4pMakerImpBuilder.cxx,v 1.11 2010/05/24 17:42:32 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImpBuilder.h"
 #include "StBET4pMakerImp.h"
 
 #include "StjTPCMuDst.h"
+#include "StjTPCRandomMuDst.h"
 #include "StjBEMCMuDst.h"
 #include "StjEEMCMuDst.h"
 #include "StjTPCNull.h"
@@ -40,15 +41,24 @@
 StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool useEEMC,
 					       bool use2003Cuts, bool use2005Cuts, bool use2006Cuts, bool use2009Cuts,
 					       bool useBEMCEnergyVariation, double bemcEnergyVariationRatio,
+					       bool useRandomSelector,
 					       StMuDstMaker* uDstMaker, bool doTowerSwapFix,
-					       StjAbstractTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks)
+					       StjAbstractTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks,
+					       double randomSelectorProb, bool randomSelectorAt, unsigned int randomSelectorSeed)
 {
   StjTPC*  tpc;
   StjTrackListCut* tpcCut  = new StjTrackListCut();
   if( !useTPC ) {
     tpc  = new StjTPCNull();
   } else {
-    tpc  = new StjTPCMuDst(uDstMaker);
+    if ( !useRandomSelector )
+      {
+        tpc  = new StjTPCMuDst(uDstMaker);
+      }
+    else
+      {
+        tpc  = new StjTPCRandomMuDst(uDstMaker, randomSelectorProb, randomSelectorAt, randomSelectorSeed);
+      }
     tpcCut->addCut(new StjTrackCutDca());
     if(use2006Cuts)  tpcCut->addCut(new StjTrackCutDcaPtDependent());
     if(use2009Cuts)  tpcCut->addCut(new StjTrackCutChi2);
