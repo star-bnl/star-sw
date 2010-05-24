@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.17 2010/05/24 17:42:26 pibero Exp $
+// $Id: StBET4pMaker.h,v 1.18 2010/05/24 17:58:33 pibero Exp $
 #ifndef STBET4PMAKER_H
 #define STBET4PMAKER_H
 
@@ -83,7 +83,7 @@ public:
   StBET4pMakerImp* GetImp() { return _imp; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.17 2010/05/24 17:42:26 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.18 2010/05/24 17:58:33 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -102,9 +102,6 @@ private:
   bool _use2009Cuts;
   bool _useBEMCEnergySum;
   bool _useRandomSelector;
-  double _randomSelectorProb;
-  bool _randomSelectorAt;
-  unsigned int _randomSelectorSeed;
   bool _useBEMCEnergyVariation;
   double _bemcEnergyVariationRatio;
 
@@ -112,6 +109,10 @@ private:
   StjeBemcEnergySumCalculator* _bemcEnergySumCalculator;
   StjeTrackListToStMuTrackFourVecList& _track2four;
   StjeTowerEnergyListToStMuTrackFourVecList& _energy2four;
+
+  double _randomSelectorProb;
+  bool _randomSelectorAt;
+  unsigned int _randomSelectorSeed;
 
   bool isBemcCorrupted() const;
 
