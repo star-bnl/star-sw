@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2010.C,v 1.5 2010/05/24 16:07:20 fisyak Exp $
+// $Id: TpcResponseSimulator.y2010.C,v 1.6 2010/05/24 21:39:53 fisyak Exp $
 // $Log: TpcResponseSimulator.y2010.C,v $
+// Revision 1.6  2010/05/24 21:39:53  fisyak
+// Fix bracket
+//
 // Revision 1.5  2010/05/24 16:07:20  fisyak
 // Add default dE/dx calibration tables, replace TpcAltroParameters and asic_thresholds_tpx by tpcAltroParams
 //
@@ -59,7 +62,7 @@ TDataSet *CreateTable() {
 /* 	SecRow3CGFy2010_Q.root */
 /* WE */	0.326678,	-0.00249766,	0.0617192,	-0.000377025,
 /* W  */	0.32259,	-0.0025717,	0.0582606,	-0.000529371,
-/* E  */	0.335552,	-0.00149708,	0.0672868,	-0.000257523,
+/* E  */	0.335552,	-0.00149708,	0.0672868,	-0.000257523};
   Float_t *a = &row.SecRowCorIW[0];
   for (Int_t i = 0; i < 8; i++) {
     a[i] += SecRowTpcRS[i+4];
