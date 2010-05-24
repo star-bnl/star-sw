@@ -28,6 +28,7 @@ StJetEvent::~StJetEvent()
   mJets->Delete(); delete mJets; mJets = 0;
   mTracks->Delete(); delete mTracks; mTracks = 0;
   mTowers->Delete(); delete mTowers; mTowers = 0;
+  mParticles->Delete(); delete mParticles; mParticles = 0;
 }
 
 void StJetEvent::Clear(Option_t* option)
@@ -36,6 +37,7 @@ void StJetEvent::Clear(Option_t* option)
   mJets->Clear(option);
   mTracks->Clear(option);
   mTowers->Clear(option);
+  mParticles->Clear(option);
 }
 
 int StJetEvent::numberOfVertices () const { return mVertices->GetEntriesFast(); }
