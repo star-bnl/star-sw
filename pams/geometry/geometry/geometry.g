@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.214 2010/04/19 16:16:03 jwebb Exp $
+* $Id: geometry.g,v 1.215 2010/05/25 21:21:50 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.215  2010/05/25 21:21:50  jwebb
+* y2010a geometry tag commit.  Tag is identical to y2010, except dependency
+* on y2009a is removed.
+*
 * Revision 1.214  2010/04/19 16:16:03  jwebb
 * Restored code to save geometry tag and field setting in the FZD file.
 *
@@ -1559,11 +1563,33 @@ replace [exe y2009a;] with [;
 
 !//______________________________________________________________________________
 *********   y2010   ***
+
 replace [exe y2010;] with [;
 { "y2010 baseline: y2009a+full tof+phmd, blessed 04/13 jcw"
   exe y2009a; 
   exe BTOF66;
   exe PHMD02;
+};]
+
+replace [exe y2010a;] with [;
+{ "y2010a: production tag A"
+    exe SCON13;      "support cone without SVT and new cable weight estimates";
+    exe TPCE04;      "agstar version of yf model";
+    exe BTOF66;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "";
+    exe VPDD07;      "";
+    exe FTPC01;      "";
+    exe SVTTof;      "";
+    exe PHMD02;      "Photon mult detector";
+    exe SISDof;
+    exe FTRO01;
+    exe MUTD03;
+    exe CAVE04;
+    exe PIPE12;
 };]
 
 
@@ -2212,9 +2238,14 @@ If LL>0
                 exe y2009a;}
 
 ****************************************************************************************
-  Case Y2010   { y2010 
-                  Geom = 'Y2010   ';
-                exe y2010;}
+  Case Y2010   { y2010: baseline
+                 Geom = 'Y2010   ';
+                 exe y2010;         }
+
+  Case Y2010A  { Y2010a: production tag A
+                 Geom = 'Y2010A  ';
+                 exe y2010a;       }
+
 ****************************************************************************************
   Case DUMM01   { R and D geometry: TPC+DUMM
 
