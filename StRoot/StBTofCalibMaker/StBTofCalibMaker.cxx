@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.8 2010/05/12 22:46:21 geurts Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.9 2010/05/25 22:09:18 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.9  2010/05/25 22:09:18  geurts
+ * improved database handling and reduced log output
+ *
  * Revision 1.8  2010/05/12 22:46:21  geurts
  * Startless BTOF self-calibration method (Xin)
  *
@@ -200,21 +203,21 @@ Int_t StBTofCalibMaker::InitRun(int runnumber)
   Int_t val = initParameters(runnumber);
   if(val==kStOK) {
     mValidCalibPar = kTRUE;
-    LOG_INFO << " ==> Initialized valid calibration parameters." << endm;
+    LOG_DEBUG << "Initialized valid calibration parameters." << endm;
   } else {
     mValidCalibPar = kFALSE;
-    LOG_WARN << " ==> No valid calibration parameters! " << endm;
+    LOG_WARN << "No valid calibration parameters! " << endm;
   }
 
   /// Look for StVpCalibMaker and decide on its setting (based on its dbase entry) to use VPD for TOF start-timing
   StVpdCalibMaker *vpdCalib = (StVpdCalibMaker *)GetMaker("vpdCalib");
   if(vpdCalib) {
     mUseVpdStart = vpdCalib->useVpdStart();
-    if (mUseVpdStart) {LOG_INFO << "Found VPD Calibration Maker: use VPD for start timing" << endm;}
-    else         {LOG_INFO << "Found VPD Calibration Maker: VPD NOT used for start timing" << endm;}
+    if (mUseVpdStart) {LOG_INFO << "Found VPD Calibration Maker: use vpd for start timing" << endm;}
+    else         {LOG_INFO << "Found VPD Calibration Maker: vpd **NOT** used for start timing" << endm;}
   } else {
     mUseVpdStart = kFALSE;  // no vpdCalibMaker, do tray self calibration
-    LOG_INFO << "NO VPD Calibration Maker found:  VPD NOT used for start timing" << endm;
+    LOG_INFO << "NO VPD Calibration Maker found:  vpd **NOT** used for start timing" << endm;
   }
 
   /// If no VPD is used then one should have selected to use the EventVertex from the TPC, and warn if not.
@@ -222,10 +225,6 @@ Int_t StBTofCalibMaker::InitRun(int runnumber)
     LOG_WARN << " Try to run calibration without VPD as the start time and DON'T use the event vertex! Wrong command! Exit!" << endm;
     return kStOK;
   }
-
-//fg    if(!mUseVpdStart) {
-//fg    LOG_INFO << " Run BTOF tray self calibration without VPD!!! " << endm;
-//fg  }
 
 
   return kStOK;
@@ -239,7 +238,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
   /// read in and check the size
 
   if (mInitFromFile){
-    LOG_INFO << "Retrieving calibration parameters from files" << endm;
+    LOG_INFO << "Initializing calibration parameters from files" << endm;
     ifstream inData;
 
     /// open file and read Time-over-Threshold calibration parameters
@@ -255,7 +254,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
 	for(int k=0;k<=nbin;k++) {
 	  inData>>mTofTotCorr[trayId-1][boardId-1][k];
 	  if(k%10==0&&Debug()) {
-	    LOG_INFO << " ijk= " << i << " " << j << " " << k << " tot " << mTofTotEdge[trayId-1][boardId-1][k] << " corr " << mTofTotCorr[trayId-1][boardId-1][k] << endm; 
+	    LOG_DEBUG << " ijk= " << i << " " << j << " " << k << " tot " << mTofTotEdge[trayId-1][boardId-1][k] << " corr " << mTofTotCorr[trayId-1][boardId-1][k] << endm; 
 	  }
 	}
       }
@@ -264,7 +263,6 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
 
     /// open file and read local Zhit calibration parameters
     LOG_INFO << " - Zhit : " << mCalibFileZhit << endm;  
-    //inData.open("/star/institutions/lbl/dongx/tof/NewEvent/calibmaker/test_calib/CalibPar/zCali_4DB.dat");
     inData.open(mCalibFileZhit.c_str());
     for(int i=0;i<mNTray;i++) {
       for(int j=0;j<mNTDIG;j++) {
@@ -283,7 +281,6 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
 
     /// open file and read T0 calibration parameters
     LOG_INFO << " - T0 : " << mCalibFileT0 << endm;  
-    //inData.open("/star/institutions/lbl/dongx/tof/NewEvent/calibmaker/test_calib/CalibPar/t0_4DB.dat");
     inData.open(mCalibFileT0.c_str());
     int moduleId, cellId;
     for(int i=0;i<mNTray;i++) {
@@ -303,17 +300,10 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
   else {
 
     /// Get all calibration parameters from the database
-    LOG_INFO << " Retrieving calibration parameters from Calibrations_tof" << endm;
-
-    /// read in and check the size
-    TDataSet *mDbDataSet = GetDataBase("Calibrations/tof");
-    if (!mDbDataSet){
-      LOG_ERROR  << "unable to get TOF run parameters" << endm;
-      return kStErr;
-    }
+    LOG_INFO << "Initializing calibration parameters from database" << endm;
   
-    LOG_INFO << "     loading calibration parameters ..." << endm;
-    // read tofTotbCorr table
+  // read tofTotbCorr table
+    TDataSet *mDbDataSet = GetDataBase("Calibrations/tof/tofTotbCorr");
     St_tofTotbCorr* tofTotCorr = static_cast<St_tofTotbCorr*>(mDbDataSet->Find("tofTotbCorr"));
     if(!tofTotCorr) {
       LOG_ERROR << "unable to get tof TotbCorr table parameters" << endm;
@@ -346,6 +336,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
     } // end i 0->numRows
 
     // read tofZbCorr table
+    mDbDataSet = GetDataBase("Calibrations/tof/tofZbCorr");
     St_tofZbCorr* tofZCorr = static_cast<St_tofZbCorr*>(mDbDataSet->Find("tofZbCorr"));
     if(!tofZCorr) {
       LOG_ERROR << "unable to get tof ZbCorr table parameters" << endm;
@@ -378,6 +369,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
     } // end i 0->numRows
 
     // read tofTOffset table
+    mDbDataSet = GetDataBase("Calibrations/tof/tofTOffset");
     St_tofTOffset* tofTOffset = static_cast<St_tofTOffset*>(mDbDataSet->Find("tofTOffset"));
     if(!tofTOffset) {
       LOG_ERROR << "unable to get tof TOffset table parameters" << endm;
@@ -415,7 +407,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
     double dydz = 0.;
 
     // Get Current Beam Line Constraint from database
-    TDataSet* dbDataSet = this->GetDataBase("Calibrations/rhic");
+    TDataSet* dbDataSet = this->GetDataBase("Calibrations/rhic/vertexSeed");
 
     if (dbDataSet) {
       vertexSeed_st* vSeed = ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
@@ -426,7 +418,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
       dydz = vSeed->dydz;
     }
     else {
-      LOG_WARN << "StBTofCalibMaker -- No Database for beamline" << endm;
+      LOG_WARN << "No database for beamline (Calibrations/rhic/vertexSeed)" << endm;
     }
 
     LOG_INFO << "BeamLine Constraint: " << endm;
@@ -442,7 +434,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
     double pt = 88889999;
     double nxy=::sqrt(dxdz*dxdz +  dydz*dydz);
     if(nxy<1.e-5){ // beam line _MUST_ be tilted
-      LOG_WARN << "StBTofCalibMaker:: Beam line must be tilted!" << endm;
+      LOG_WARN << "Beam line must be tilted!" << endm;
       nxy=dxdz=1.e-5;
     }
     double p0=pt/nxy;
@@ -476,28 +468,11 @@ Int_t StBTofCalibMaker::Finish()
 //_____________________________________________________________________________
 Int_t StBTofCalibMaker::Make()
 {
-  LOG_INFO << " StBTofCalibMaker::Maker: starting ..." << endm;
+  LOG_DEBUG << "StBTofCalibMaker::Maker: starting ..." << endm;
   if(!mValidCalibPar) {
-    LOG_WARN << " No valid calibration parameters. Skip ... " << endm;
+    LOG_WARN << "No valid calibration parameters. Skip ... " << endm;
     return kStOK;
   }
-
-  //fg moved to InitRun()
-//fg  StVpdCalibMaker *vpdCalib = (StVpdCalibMaker *)GetMaker("vpdCalib");
-//fg  if(vpdCalib) {
-//fg    mUseVpdStart = vpdCalib->useVpdStart();
-//fg  } else {
-//fg    mUseVpdStart = kFALSE;  // no vpdCalibMaker, do tray self calibration
-//fg  }
-//fg
-//fg  if(!mUseVpdStart && !mUseEventVertex) {
-//fg    LOG_WARN << " Try to run calibration without VPD as the start time and DON'T use the event vertex! Wrong command! Exit!" << endm;
-//fg    return kStOK;
-//fg  }
-//fg
-//fg  if(!mUseVpdStart) {
-//fg    LOG_INFO << " Run BTOF tray self calibration without VPD!!! " << endm;
-//fg  }
 
   initEvent();
   resetVpd();
@@ -517,12 +492,9 @@ Int_t StBTofCalibMaker::Make()
 void StBTofCalibMaker::processStEvent()
 {
   // event selection  // no primary vertex required
-  if( !mEvent ||
-      !mEvent->btofCollection() ||
-      !mEvent->btofCollection()->hitsPresent() ) {
-    LOG_WARN << "StBTofCalibMaker -- nothing to do ... bye-bye" << endm;
-    return;
-  }
+  if( !mEvent ) {LOG_WARN << "No StEvent" << endm; return;}
+  if (!mEvent->btofCollection()) {LOG_WARN << "No BTOFCollection" << endm; return;}
+  if (!mEvent->btofCollection()->hitsPresent()) {LOG_WARN << "No hits present" << endm; return;}
 
   StBTofCollection *theTof = mEvent->btofCollection();
   StSPtrVecBTofHit &tofHits = theTof->tofHits();
@@ -606,16 +578,13 @@ void StBTofCalibMaker::processStEvent()
 
   }  // end if(mUseVpdStart)
   
-  LOG_INFO << " projected Vertex Z = " << mProjVtxZ << endm;
-  LOG_INFO << " Tstart = " << mTStart << " Tdiff = " << mTDiff << endm;
-  LOG_INFO << " NWest = " << mNWest << " NEast = " << mNEast << " TdcSum West = " << mTSumWest << " East = " << mTSumEast << endm;
-  LOG_INFO << " NTzero = " << mNTzero << endm;
-  LOG_INFO << " mValidCalibPar = " << mValidCalibPar << " mValidStartTime = " << mValidStartTime << endm;
-  LOG_INFO << " mVpdVz = " << mVPDVtxZ << endm;
+  LOG_INFO << "proj Vertex Z = " << mProjVtxZ << "  mVpdVz = " << mVPDVtxZ << "  NTzero = " << mNTzero << endm;
+  LOG_INFO << "Tstart = " << mTStart << " Tdiff = " << mTDiff << endm;
+  LOG_INFO << "NWest = " << mNWest << " NEast = " << mNEast << " TdcSum West = " << mTSumWest << " East = " << mTSumEast << endm;
   
 
   if(mTStart<-1000.) {
-    LOG_INFO << " No valid start time for this event. Skip ..." << endm;
+    LOG_INFO << "No valid start time for this event. Skip ..." << endm;
     mValidStartTime = kFALSE;
     return;
   } else {
@@ -634,7 +603,7 @@ void StBTofCalibMaker::processStEvent()
 
     StGlobalTrack *gTrack = dynamic_cast<StGlobalTrack*>(aHit->associatedTrack());
     if(!gTrack) {
-      if(Debug()) { LOG_INFO << " No associated Track with this hit." << endm;}
+      LOG_DEBUG << " No associated Track with this hit." << endm;
       continue;
     }
 
@@ -655,7 +624,7 @@ void StBTofCalibMaker::processStEvent()
     int moduleChan = (aHit->module()-1)*6 + (aHit->cell()-1);
     Double_t tofcorr = tofAllCorr(tof, tot, zhit, trayId, moduleChan);
     if(tofcorr<0.) {
-      if(Debug()) { LOG_INFO << " Calibration failed! ... " << endm; }
+      LOG_DEBUG << " Calibration failed! ... " << endm;
       continue;
     }
 
@@ -684,12 +653,12 @@ void StBTofCalibMaker::processStEvent()
     Bool_t doPID = kFALSE;     //! switch indicating to calculate PID or not
     if(mUseEventVertex) {
       if(!pTrack) {
-        if(Debug()) { LOG_INFO << " The associated track is not a primary one. Skip PID calculation! " << endm; }
+        LOG_DEBUG << " The associated track is not a primary one. Skip PID calculation! " << endm;
       } else {
         StTrackGeometry *theTrackGeometry = pTrack->geometry();
         const StVertex *thisVertex = pTrack->vertex();
         if(!thisVertex) {
-          if(Debug()) { LOG_INFO << " The associated track is not coming from any vertex. Skip PID calculation! " << endm; }
+          LOG_DEBUG << " The associated track is not coming from any vertex. Skip PID calculation! " << endm;
         } else {
           StThreeVectorF primPos = thisVertex->position();
           L = tofPathLength(&primPos, &pidTof->position(), theTrackGeometry->helix().curvature());
@@ -704,9 +673,9 @@ void StBTofCalibMaker::processStEvent()
       StThreeVectorD tofPos =  theTrackGeometry->helix().at(theTrackGeometry->helix().pathLengths(*mBeamHelix).first);
       StThreeVectorD dcatof = tofPos - mBeamHelix->at(theTrackGeometry->helix().pathLengths(*mBeamHelix).second);
       if(dcatof.perp()>DCARCUT) {
-        if(Debug()) { LOG_INFO << " The projected position is far from beam line. Skip PID calculation! " << endm; }
+        LOG_DEBUG << " The projected position is far from beam line. Skip PID calculation! " << endm;
       } else if(fabs(tofPos.z()-mVPDVtxZ)>VZDIFFCUT) {
-        if(Debug()) { LOG_INFO << " This track is not coming from the same VPD vertex! Skip PID calculation! " << endm; }
+        LOG_DEBUG << " This track is not coming from the same VPD vertex! Skip PID calculation! " << endm; 
       } else {
         L = tofPathLength(&tofPos, &pidTof->position(), theTrackGeometry->helix().curvature());
         ptot = gTrack->geometry()->momentum().mag();
@@ -746,9 +715,7 @@ void StBTofCalibMaker::processStEvent()
     pidTof->setSigmaKaon(sigmak);
     pidTof->setSigmaProton(sigmap);
 
-    if(Debug()) {
-      LOG_INFO << " storing BTofPidTraits for the global track" << endm;
-    }
+    LOG_DEBUG << " storing BTofPidTraits for the global track" << endm;
 
     if(mUseEventVertex) {
 
@@ -761,9 +728,7 @@ void StBTofCalibMaker::processStEvent()
         ppidTof->setSigmaKaon(sigmak);
         ppidTof->setSigmaProton(sigmap);
 
-        if(Debug()) { 
-          LOG_INFO << " storing BTofPidTraits for the primary track" << endm;
-        }
+        LOG_DEBUG << " storing BTofPidTraits for the primary track" << endm;
       } // end if ppidTof
     }  // end if mUseEventVertex
 
@@ -854,12 +819,10 @@ void StBTofCalibMaker::processMuDst()
     tstart_NoVpd(mMuDst, pVtx, &mTStart);
   }
 
-  LOG_INFO << " projected Vertex Z = " << mProjVtxZ << endm;
-  LOG_INFO << " Tstart = " << mTStart << " Tdiff = " << mTDiff << endm;
-  LOG_INFO << " NWest = " << mNWest << " NEast = " << mNEast << " TdcSum West = " << mTSumWest << " East = " << mTSumEast << endm;
-  LOG_INFO << " NTzero = " << mNTzero << endm;
-  LOG_INFO << " mValidCalibPar = " << mValidCalibPar << " mValidStartTime = " << mValidStartTime << endm;
-  LOG_INFO << " mVpdVz = " << mVPDVtxZ << endm;
+  LOG_INFO << "proj Vertex Z = " << mProjVtxZ << "  mVpdVz = " << mVPDVtxZ << "  NTzero = " << mNTzero<< endm;
+  LOG_INFO << "Tstart = " << mTStart << " Tdiff = " << mTDiff << endm;
+  LOG_INFO << "NWest = " << mNWest << " NEast = " << mNEast << " TdcSum West = " << mTSumWest << " East = " << mTSumEast << endm;
+
 
   if(mTStart<-1000.) {
     LOG_INFO << " No valid start time for this event. Skip ..." << endm;
@@ -881,7 +844,7 @@ void StBTofCalibMaker::processMuDst()
 
     StMuTrack *gTrack = aHit->globalTrack();
     if(!gTrack) {
-      if(Debug()) { LOG_INFO << " No associated Track with this hit." << endm; }
+      LOG_DEBUG << " No associated Track with this hit." << endm;
       continue;
     }
 
@@ -896,7 +859,7 @@ void StBTofCalibMaker::processMuDst()
     int moduleChan = (aHit->module()-1)*6 + (aHit->cell()-1);
     Double_t tofcorr = tofAllCorr(tof, tot, zhit, trayId, moduleChan);
     if(tofcorr<0.) {
-      if(Debug()) { LOG_INFO << " Calibration failed! ... " << endm; }
+      LOG_DEBUG << " Calibration failed! ... " << endm;
       continue;
     }
 
@@ -917,12 +880,12 @@ void StBTofCalibMaker::processMuDst()
     Bool_t doPID = kFALSE;
     if(mUseEventVertex) {
       if(!pTrack) {
-        if(Debug()) { LOG_INFO << " The associated track is not a primary one. Skip PID calculation! " << endm; }
+        LOG_DEBUG << " The associated track is not a primary one. Skip PID calculation! " << endm;
       } else {
         int iv = pTrack->vertexIndex();
         StMuPrimaryVertex *thisVertex = mMuDst->primaryVertex(iv);
         if(!thisVertex) {
-          if(Debug()) { LOG_INFO << " The associated track is not coming from any vertex. Skip PID calculation! " << endm; }
+          LOG_DEBUG << " The associated track is not coming from any vertex. Skip PID calculation! " << endm;
         } else {
           StThreeVectorF primPos = thisVertex->position();
           StPhysicalHelixD thisHelix = pTrack->helix();
@@ -938,9 +901,9 @@ void StBTofCalibMaker::processMuDst()
       StThreeVectorD tofPos =  gHelix.at(gHelix.pathLengths(*mBeamHelix).first);
       StThreeVectorD dcatof = tofPos - mBeamHelix->at(gHelix.pathLengths(*mBeamHelix).second);
       if(dcatof.perp()>DCARCUT) {
-        if(Debug()) { LOG_INFO << " The projected position is far from beam line. Skip PID calculation! " << endm; }
+        LOG_DEBUG << " The projected position is far from beam line. Skip PID calculation! " << endm;
       } else if(fabs(tofPos.z()-mVPDVtxZ)>VZDIFFCUT) {
-        if(Debug()) { LOG_INFO << " This track is not coming from the same VPD vertex! Skip PID calculation! " << endm; }
+        LOG_DEBUG << " This track is not coming from the same VPD vertex! Skip PID calculation! " << endm;
       } else {
         L = tofPathLength(&tofPos, &pidTof.position(), gHelix.curvature());
         ptot = gTrack->momentum().mag();
@@ -987,15 +950,11 @@ void StBTofCalibMaker::processMuDst()
     }
 
     gTrack->setBTofPidTraits(pidTof);
-    if(Debug()) {
-        LOG_INFO << " storing BTofPidTraits for the global track" << endm;
-    }
+    LOG_DEBUG << " storing BTofPidTraits for the global track" << endm;
 
     if(mUseEventVertex && pTrack) {
       pTrack->setBTofPidTraits(ppidTof);
-      if(Debug()) {
-        LOG_INFO << " storing BTofPidTraits for the primary track" << endm;
-      }
+      LOG_DEBUG << " storing BTofPidTraits for the primary track" << endm;
     }
   }  // end tof hits
 
@@ -1122,13 +1081,11 @@ Double_t StBTofCalibMaker::tofAllCorr(const Double_t tof, const Double_t tot, co
   int module = iModuleChan/6 + 1;
   int cell = iModuleChan%6 + 1;
   int board = iModuleChan/24 + 1;
-  if(Debug()) {
-//  if(1) {
-    LOG_INFO << "\nStBTofCalibMaker::btofAllCorr: BTof calibrating...\n" 
+  LOG_DEBUG << "\nStBTofCalibMaker::btofAllCorr: BTof calibrating...\n" 
   	     << "\tDoing Calibration in BTOF Tray " << tray << " Module " << module << " Cell " << cell
 	     << "\n\tinput tof = " << tof
 	     << "  TOT = " << tot << "  Zlocal = " << z << endm;
-  }
+
   
   Double_t tofcorr = tof;
 
@@ -1154,7 +1111,7 @@ Double_t StBTofCalibMaker::tofAllCorr(const Double_t tof, const Double_t tot, co
 
       tofcorr -= dcorr;
     } else {
-      LOG_WARN << " TOT out of range! EXIT! " << endm;
+      LOG_DEBUG << " TOT out of range! EXIT! " << endm;
       return -9999.;
     }
 
@@ -1176,13 +1133,13 @@ Double_t StBTofCalibMaker::tofAllCorr(const Double_t tof, const Double_t tot, co
       LOG_DEBUG << "zHit correction: "<<dcorr<<endm;
 
     } else {
-      LOG_WARN << " Z out of range! EXIT! " << endm;
+      LOG_DEBUG << " Z out of range! EXIT! " << endm;
       return -9999.;
     }
     
   }
 
-  LOG_INFO << "  Corrected tof: tofcorr = " << tofcorr << endm;
+  LOG_DEBUG << "  Corrected tof: tofcorr = " << tofcorr << endm;
   return tofcorr;
 }
 

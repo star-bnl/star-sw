@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofDaqMap.cxx,v 1.3 2009/03/17 18:32:26 fine Exp $
+ * $Id: StBTofDaqMap.cxx,v 1.4 2010/05/25 22:09:44 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofDaqMap.cxx,v $
+ * Revision 1.4  2010/05/25 22:09:44  geurts
+ * improved database handling and reduced log output
+ *
  * Revision 1.3  2009/03/17 18:32:26  fine
  * make the print outs usefull
  *
@@ -44,19 +47,20 @@ StBTofDaqMap::~StBTofDaqMap()
  */
 void StBTofDaqMap::Init(StMaker *maker) {
 
-  LOG_INFO << "StBTofDaqMap -- retrieving the tof8++ channel mapping" << endm;
+  LOG_INFO << "[StBTofDaqMap] retrieving BTOF DAQ map and tray config ..." << endm;
   ///////////////////////////////////////////////////////
   // Load configuration parameters from dbase
   //    need "[shell] setenv Calibrations_tof reconV0"
   ///////////////////////////////////////////////////////
 
-  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
-  if(!mDbTOFDataSet) {
-    LOG_ERROR << "unable to access Calibrations TOF parameters" << endm;
-    //    assert(mDbTOFDataSet);
-    return; // kStErr;
-  }
+//   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
+//   if(!mDbTOFDataSet) {
+//     LOG_ERROR << "unable to access Calibrations TOF parameters" << endm;
+//     //    assert(mDbTOFDataSet);
+//     return; // kStErr;
+//   }
 
+  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofDaqMap");
   St_tofDaqMap* tofDaqMap = static_cast<St_tofDaqMap*>(mDbTOFDataSet->Find("tofDaqMap"));
   if(!tofDaqMap) {
     LOG_ERROR << "unable to get tof Module map table" << endm;
@@ -67,14 +71,14 @@ void StBTofDaqMap::Init(StMaker *maker) {
     mMRPC2TDIGChan[i] = (Int_t)(daqmap[0].MRPC2TDIGChanMap[i]);
     mTDIG2MRPCChan[mMRPC2TDIGChan[i]] = i;
     if(maker->Debug()) {
-      LOG_INFO << " MRPC = " << i << "  TDC chan = " << mMRPC2TDIGChan[i] << endm;
+      LOG_DEBUG << " MRPC = " << i << "  TDC chan = " << mMRPC2TDIGChan[i] << endm;
     }
   }
   for (Int_t i=0;i<mNVPD;i++) {
     mWestPMT2TDIGLeChan[i] = (Int_t)(daqmap[0].PMT2TDIGLeChanMap[i]);
     mWestPMT2TDIGTeChan[i] = (Int_t)(daqmap[0].PMT2TDIGTeChanMap[i]);
     if(maker->Debug()) {
-      LOG_INFO << " VPD = " << i << "  TDC Lechan = " << mWestPMT2TDIGLeChan[i] << "  TDC TeChan = " << mWestPMT2TDIGTeChan[i] << endm;
+      LOG_DEBUG << " VPD = " << i << "  TDC Lechan = " << mWestPMT2TDIGLeChan[i] << "  TDC TeChan = " << mWestPMT2TDIGTeChan[i] << endm;
     }
     mTDIGLe2WestPMTChan[mWestPMT2TDIGLeChan[i]] = i;
     mTDIGTe2WestPMTChan[mWestPMT2TDIGTeChan[i]] = i;
@@ -84,13 +88,14 @@ void StBTofDaqMap::Init(StMaker *maker) {
     mEastPMT2TDIGLeChan[i] = (Int_t)(daqmap[0].PMT2TDIGLeChanMap[j]);
     mEastPMT2TDIGTeChan[i] = (Int_t)(daqmap[0].PMT2TDIGTeChanMap[j]);
     if(maker->Debug()) {
-      LOG_INFO << " VPD = " << i << "  TDC Lechan = " << mEastPMT2TDIGLeChan[i] << "  TDC TeChan = " << mEastPMT2TDIGTeChan[i] << endm;
+      LOG_DEBUG << " VPD = " << i << "  TDC Lechan = " << mEastPMT2TDIGLeChan[i] << "  TDC TeChan = " << mEastPMT2TDIGTeChan[i] << endm;
     }
     mTDIGLe2EastPMTChan[mEastPMT2TDIGLeChan[i]] = i;
     mTDIGTe2EastPMTChan[mEastPMT2TDIGTeChan[i]] = i;
   }
 
   // valid tray Id
+  mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTrayConfig");
   St_tofTrayConfig* trayConfig = static_cast<St_tofTrayConfig*>(mDbTOFDataSet->Find("tofTrayConfig"));
   if(!trayConfig) {
     LOG_ERROR << "unable to get tof tray configuration" << endm;
@@ -107,6 +112,7 @@ void StBTofDaqMap::Init(StMaker *maker) {
   }
   if(maker->Debug()) { LOG_DEBUG << endm; }
 
+  LOG_DEBUG << "[StBTofDaqMap] ... done." << endm;
   return;
 }
 
@@ -137,7 +143,7 @@ IntVec StBTofDaqMap::TDIGChan2Cell( const Int_t iTdc)
   map.clear();
 
   if ( iTdc<0 || iTdc>=mNTOF ) {
-    LOG_INFO << " ERROR! Uncorrected TDC Channel number for Tof! " << endm;
+    LOG_ERROR << "[TDIGChan2Cell] Uncorrected TDC Channel number for Tof! " << endm;
     return map;
   }
 
@@ -154,11 +160,11 @@ Int_t StBTofDaqMap::Cell2TDIGChan( const Int_t iModule, const Int_t iCell )
 {
 
   if(iModule<1 || iModule>mNModule ) {
-    LOG_INFO<<"ERROR!!! Wrong module number !"<<endm;
+    LOG_ERROR<<"[Cell2TDIGChan] Wrong module number !"<<endm;
     return -1;
   }
   if(iCell <1 || iCell > mNCell) {
-    LOG_INFO<<"ERROR!!! Wrong cell number ! "<<endm; 
+    LOG_ERROR<<"[Cell2TDIGChan] Wrong cell number ! "<<endm; 
     return -1;
   }
 
@@ -166,7 +172,7 @@ Int_t StBTofDaqMap::Cell2TDIGChan( const Int_t iModule, const Int_t iCell )
 
 //  if (modulechan<1 || modulechan>=mNTOF) {
   if (modulechan<0 || modulechan>=mNTOF) {
-    LOG_INFO<<"ERROR!!! Wrong Module Cell channel number!"<<endm;
+    LOG_ERROR<<"[Cell2TDIGChan] Wrong Module-Cell channel number!"<<endm;
     return -1;
   }
 
@@ -176,7 +182,7 @@ Int_t StBTofDaqMap::Cell2TDIGChan( const Int_t iModule, const Int_t iCell )
 Int_t StBTofDaqMap::WestPMT2TDIGLeChan( const Int_t iTube )
 {
   if ( iTube<1 || iTube>mNVPD ) {
-    LOG_INFO<<"ERROR!!! Wrong vpd tube number ! "<<endm; 
+    LOG_ERROR<<"[WestPMT2TDIGLeChan] Wrong vpd tube number ! "<<endm; 
     return -1;
   }
 
@@ -186,7 +192,7 @@ Int_t StBTofDaqMap::WestPMT2TDIGLeChan( const Int_t iTube )
 Int_t StBTofDaqMap::WestPMT2TDIGTeChan( const Int_t iTube )
 {
   if ( iTube<1 || iTube>mNVPD ) {
-    LOG_ERROR<<"StBTofDaqMap::WestPMT2TDIGTeChan:  Wrong vpd tube number ! "<< iTube<<endm; 
+    LOG_ERROR<<"[WestPMT2TDIGTeChan]  Wrong vpd tube number ! "<< iTube<<endm; 
     return -1;
   }
 
@@ -196,7 +202,7 @@ Int_t StBTofDaqMap::WestPMT2TDIGTeChan( const Int_t iTube )
 Int_t StBTofDaqMap::TDIGLeChan2WestPMT( const Int_t iTdc )
 {
   if ( iTdc<0 || iTdc>=mNTOF ) {
-    LOG_ERROR<<"StBTofDaqMap::TDIGLeChan2WestPMT: Wrong tdc channel number ! "<< iTdc<<endm; 
+    LOG_ERROR<<"[TDIGLeChan2WestPMT] Wrong tdc channel number ! "<< iTdc<<endm; 
     return -1;
   }
 
@@ -206,7 +212,7 @@ Int_t StBTofDaqMap::TDIGLeChan2WestPMT( const Int_t iTdc )
 Int_t StBTofDaqMap::TDIGTeChan2WestPMT( const Int_t iTdc )
 {
   if ( iTdc<0 || iTdc>=mNTOF ) {
-    LOG_ERROR<<"StBTofDaqMap::TDIGTeChan2WestPMT: Wrong tdc channel number ! "<< iTdc <<endm; 
+    LOG_ERROR<<"[TDIGTeChan2WestPMT] Wrong tdc channel number ! "<< iTdc <<endm; 
     return -1;
   }
 
@@ -216,7 +222,7 @@ Int_t StBTofDaqMap::TDIGTeChan2WestPMT( const Int_t iTdc )
 Int_t StBTofDaqMap::EastPMT2TDIGLeChan( const Int_t iTube )
 {
   if ( iTube<1 || iTube>mNVPD ) {
-    LOG_INFO<<"ERROR!!! Wrong vpd tube number ! "<<iTube<< endm; 
+    LOG_ERROR<<"[EastPMT2TDIGLeChan] Wrong vpd tube number ! "<<iTube<< endm; 
     return -1;
   }
 
@@ -226,7 +232,7 @@ Int_t StBTofDaqMap::EastPMT2TDIGLeChan( const Int_t iTube )
 Int_t StBTofDaqMap::EastPMT2TDIGTeChan( const Int_t iTube )
 {
   if ( iTube<1 || iTube>mNVPD ) {
-    LOG_INFO<<"ERROR!!! Wrong vpd tube number ! "<<iTube<< endm; 
+    LOG_ERROR<<"[EastPMT2TDIGTeChan] Wrong vpd tube number ! "<<iTube<< endm; 
     return -1;
   }
 

@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.5 2010/05/12 22:46:51 geurts Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.6 2010/05/25 22:09:48 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.6  2010/05/25 22:09:48  geurts
+ * improved database handling and reduced log output
+ *
  * Revision 1.5  2010/05/12 22:46:51  geurts
  * Startless BTOF self-calibration method (Xin)
  *
@@ -177,10 +180,8 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
   /// initialize the calibrations parameters from dbase
   /// read in and check the size
   if (mInitFromFile){
-    LOG_INFO << "Retrieving calibration parameters from files" << endm;
-
-    /// open file and read VPD calibration parameters
-    LOG_INFO << " - pvpd : " << mCalibFilePvpd << endm;  
+    LOG_INFO << "Initializing VPD calibration parameters from file"
+    		 << "(" << mCalibFilePvpd << ")" << endm;  
     ifstream inData;
     inData.open(mCalibFilePvpd.c_str());
     int nchl, nbin;
@@ -188,10 +189,10 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
       inData>>nchl;
       inData>>nbin;
       if (nbin>NBinMax) {
-	LOG_ERROR << "nummer of bins (" << nbin << ") out of range ("
-		  << NBinMax << ") for vpd channel " << i << endm;
-	return kStErr;
-      }
+		LOG_ERROR << "nummer of bins (" << nbin << ") out of range ("
+			  << NBinMax << ") for vpd channel " << i << endm;
+		return kStErr;
+      }	
       for(int j=0;j<=nbin;j++) inData>>mVPDTotEdge[i][j];
       for(int j=0;j<=nbin;j++) inData>>mVPDTotCorr[i][j];
     }
@@ -199,17 +200,17 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
   }
   else {
     /// Get all calibration parameters from the database
-    LOG_INFO << " Retrieving calibration parameters from Calibrations_tof" << endm;
+    LOG_INFO << "Initializing VPD calibration parameters from database" << endm;
 
-    /// read in and check the size
-    TDataSet *dbDataSet = GetDataBase("Calibrations/tof");
-    if (!dbDataSet){
-      LOG_ERROR  << "unable to get VPD/TOF run parameters" << endm;
-      return kStErr;
-    }
+// read in and check the size
+//     TDataSet *dbDataSet = GetDataBase("Calibrations/tof");
+//     if (!dbDataSet){
+//       LOG_ERROR  << "unable to get VPD/TOF run parameters" << endm;
+//       return kStErr;
+//     }
   
-    LOG_INFO << "     loading calibration parameters ..." << endm;
     // read vpdTotCorr table
+    TDataSet *dbDataSet = GetDataBase("Calibrations/tof/vpdTotCorr");
     St_vpdTotCorr* vpdTotCorr = static_cast<St_vpdTotCorr*>(dbDataSet->Find("vpdTotCorr"));
     if(!vpdTotCorr) {
       LOG_ERROR << "unable to get vpdTotCorr table parameters" << endm;
@@ -231,11 +232,11 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
         short flag = totCorr[i].corralgo;
         if(flag==0) {
 	  setUseVpdStart(kTRUE);
-	  LOG_INFO << "Selected VPD for TOF start-timing" << endm;
+	  LOG_INFO << "Selected VPD for TOF start-timing (corralgo=1)" << endm;
 	}
 	else if(flag==1) {
 	  setUseVpdStart(kFALSE);
-	  LOG_INFO << "VPD NOT used for TOF start-timing" << endm;
+	  LOG_INFO << "VPD NOT used for TOF start-timing (corralgo=0)" << endm;
 	}
 	else {
 	  LOG_WARN << "Unknown calibration option " << flag << endm;
@@ -252,15 +253,15 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
       short tubeId = totCorr[i].tubeId;
       // check index range
       if (tubeId>2*NVPD) {
-	LOG_ERROR << "tubeId (" << tubeId << ") out of range ("
-		  << 2*NVPD << ")" << endm;
-	return kStErr;
+      	LOG_ERROR << "tubeId (" << tubeId << ") out of range ("
+			      << 2*NVPD << ")" << endm;
+         return kStErr;
       }
 
       for(Int_t j=0;j<NBinMax;j++) {
-	mVPDTotEdge[tubeId-1][j] = totCorr[i].tot[j];
-	mVPDTotCorr[tubeId-1][j] = totCorr[i].corr[j];
-	LOG_DEBUG << " east/west: " << (tubeId-1)/NVPD << " tubeId: " << tubeId << endm;
+		mVPDTotEdge[tubeId-1][j] = totCorr[i].tot[j];
+		mVPDTotCorr[tubeId-1][j] = totCorr[i].corr[j];
+		LOG_DEBUG << " east/west: " << (tubeId-1)/NVPD << " tubeId: " << tubeId << endm;
       } // end j 0->NBinMax
     } // end i 0->numRows
   }
@@ -281,7 +282,7 @@ Int_t StVpdCalibMaker::Finish()
 //_____________________________________________________________________________
 Int_t StVpdCalibMaker::Make()
 {
-  LOG_INFO << " StVpdCalibMaker::Make: starting ..." << endm;
+  LOG_DEBUG << " StVpdCalibMaker::Make: starting ..." << endm;
   if(mHisto&&mhEventCounter) mhEventCounter->Fill(0);
   if(!mValidCalibPar) {
     LOG_WARN << " No valid calibration parameters. Skip ... " << endm;
@@ -319,7 +320,6 @@ Bool_t StVpdCalibMaker::writeVpdData() const
     }
     tofHeader = (StBTofHeader *) mMuDst->btofHeader();
   } else {
-    //    if(!mEvent || !mBTofColl) {
     if(!mBTofColl) {
       LOG_WARN << " No StEvent/btofCollection to write ... " << endm;
       return kFALSE;
@@ -340,15 +340,14 @@ Bool_t StVpdCalibMaker::writeVpdData() const
   }
 
 
-    LOG_INFO << " TofCollection: NWest = " << tofHeader->numberOfVpdHits(west) 
+    LOG_INFO << "BTofHeader: NWest = " << tofHeader->numberOfVpdHits(west) 
 	     << " NEast = " << tofHeader->numberOfVpdHits(east) << endm;
     if(tofHeader->numberOfVpdHits(west)!=mNWest ||
        tofHeader->numberOfVpdHits(east)!=mNEast) {
-      LOG_WARN << " Local nWest = " << mNWest << " nEast = " << mNEast << endm;
+      LOG_WARN << "BTofHeader inconsistency: Local nWest = " << mNWest << " nEast = " << mNEast << endm;
     }
-    LOG_INFO <<" vpd vz = " << mVPDVtxZ[0] <<endm;
-// added
-    LOG_INFO << " TSum West " << mTSumWest << " East " << mTSumEast << endm;
+    LOG_INFO <<"summary:  VPD-VtxZ = " << mVPDVtxZ[0] 
+             << "; TSum West = " << mTSumWest << "  East = " << mTSumEast << endm;
 
   return kTRUE;
 }
@@ -360,12 +359,12 @@ Bool_t StVpdCalibMaker::loadVpdData()
   if(mMuDstIn) {
     StMuDstMaker *mMuDstMaker = (StMuDstMaker *)GetMaker("MuDst");
     if(!mMuDstMaker) {
-      LOG_WARN << " No MuDstMaker ... bye-bye" << endm;
+      LOG_WARN << "No MuDstMaker ... bye-bye" << endm;
       return kFALSE;
     }
     mMuDst = mMuDstMaker->muDst();
     if(!mMuDst) {
-      LOG_WARN << " No MuDst ... bye-bye" << endm;
+      LOG_WARN << "No MuDst ... bye-bye" << endm;
       return kFALSE;
     }
 
@@ -400,10 +399,16 @@ Bool_t StVpdCalibMaker::loadVpdData()
     StEvent *thisEvent = (StEvent *) GetInputDS("StEvent");
   
     // event selection  // no primary vertex required
-    if( !thisEvent ||
-        !thisEvent->btofCollection() ||
-        !thisEvent->btofCollection()->hitsPresent() ) {
-      LOG_WARN << " Nothing to do ... bye-bye" << endm;
+    if( !thisEvent )  {
+      LOG_WARN << "No StEvent present" << endl;
+      return kFALSE;
+     }
+    if (!thisEvent->btofCollection() ) {
+       LOG_WARN << "No BTOFCollection present" << endm;
+       return kFALSE;
+    }
+    if (!thisEvent->btofCollection()->hitsPresent() ) {
+      LOG_WARN << "No hits present" << endm;
       return kFALSE;
     }
 
@@ -416,7 +421,7 @@ Bool_t StVpdCalibMaker::loadVpdData()
     mBTofColl = thisEvent->btofCollection();
     StSPtrVecBTofHit &tofHits = mBTofColl->tofHits();
     Int_t nhits = tofHits.size();
-    LOG_INFO << " Fired TOF cells + upVPD tubes : " << nhits << endm;
+    LOG_INFO << "Total number of TOF cells + VPD tubes : " << nhits << endm;
   
     for(int i=0;i<nhits;i++) {
       StBTofHit *aHit = dynamic_cast<StBTofHit*>(tofHits[i]);
@@ -534,12 +539,11 @@ void StVpdCalibMaker::vzVpdFinder()
 
   // remove slower hit in low energy runs.
   if(mTruncation) {
-//  if(0) {
     Int_t hitIndex[2*NVPD];
     Int_t nTube = NVPD;
     TMath::Sort(nTube, &mVPDLeTime[0], &hitIndex[0]);
     int nRejectedWest = (int)(FracTruncated*mNWest+0.5);
-    cout << " NWest before = " << mNWest << " rejected = " << nRejectedWest << endl;
+    LOG_INFO << " NWest before = " << mNWest << " rejected = " << nRejectedWest << endm;
     for(int i=0;i<nRejectedWest;i++) {
       int index = hitIndex[i];
       mTSumWest -= mVPDLeTime[index];
@@ -551,7 +555,7 @@ void StVpdCalibMaker::vzVpdFinder()
 
     TMath::Sort(nTube, &mVPDLeTime[NVPD], &hitIndex[NVPD]);
     int nRejectedEast = (int)(FracTruncated*mNEast+0.5);
-    cout << " NEast before = " << mNEast << " rejected = " << nRejectedEast << endl;
+    LOG_INFO << " NEast before = " << mNEast << " rejected = " << nRejectedEast << endm;
     for(int i=0;i<nRejectedEast;i++) {
       int index = hitIndex[i+NVPD] + NVPD;
       mTSumEast -= mVPDLeTime[index];
