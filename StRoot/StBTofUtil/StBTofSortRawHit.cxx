@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofSortRawHit.cxx,v 1.7 2010/05/21 05:41:33 geurts Exp $
+ * $Id: StBTofSortRawHit.cxx,v 1.8 2010/05/25 22:09:44 geurts Exp $
  *  
  * Author: Xin Dong   
  *****************************************************************    
@@ -47,15 +47,9 @@ void StBTofSortRawHit::Init(StMaker *maker, StBTofDaqMap *daqMap) {
 
   // for test set by hand now
   ///initial time windows
-  LOG_INFO << "StBTofSortRawHit -- retrieving the tof trigger time window cuts" << endm;
-
-  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
-  if(!mDbTOFDataSet) {
-    LOG_ERROR << "unable to access Calibrations TOF parameters" << endm;
-    //    assert(mDbTOFDataSet);
-    return; // kStErr;
-  }
+  LOG_INFO << "[StBTofSortRawHit] retrieving BTOF trigger time window cuts" << endm;
  
+  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTrgWindow");
   St_tofTrgWindow* tofTrgWindow = static_cast<St_tofTrgWindow*>(mDbTOFDataSet->Find("tofTrgWindow"));
   if(!tofTrgWindow) {
     LOG_ERROR << "unable to get tof Module map table" << endm;
@@ -66,7 +60,7 @@ void StBTofSortRawHit::Init(StMaker *maker, StBTofDaqMap *daqMap) {
     mTriggerTimeWindow[i][0] = (Float_t)trgWin[i].trgWindow_Min;
     mTriggerTimeWindow[i][1] = (Float_t)trgWin[i].trgWindow_Max;
     if(maker->Debug()) {
-      LOG_INFO << " Tray = " << i+1 << " Trigger Window = " << mTriggerTimeWindow[i][0] << " " << mTriggerTimeWindow[i][1] << endm;
+      LOG_DEBUG << " Tray = " << i+1 << " Trigger Window = " << mTriggerTimeWindow[i][0] << " " << mTriggerTimeWindow[i][1] << endm;
     }
   }
 
@@ -86,10 +80,10 @@ void StBTofSortRawHit::setVpdDelay(Int_t runnumber) {
   };
   // default delays for Run-10 (valid for all energies, based on 39GeV)
   float delayRun10[2*mNVPD]={
-    0.0,       1.201867,  0.531776,  5.477558,  6.167743,  5.575552,  9.801250, 10.958965, 10.591384,  4.773926,
-   10.268874, 14.588154,  4.931171,  4.488882,  9.838172, 10.241304,  9.646428, 19.994028, 14.213135,
-    0.0,       0.668213,  0.479492,  4.870962,  6.054838,  5.567796, 10.370061, 10.805627, 11.034330,  3.716928,
-   10.197979, 15.191838,  5.421011,  5.035720, 10.611328, 10.291655, 10.088323, 20.136475, 14.605093
+    0.0,       -1.201867,  -0.531776,  -5.477558,  -6.167743,  -5.575552,  -9.801250, -10.958965, -10.591384,  -4.773926,
+   -10.268874, -14.588154,  -4.931171,  -4.488882,  -9.838172, -10.241304,  -9.646428, -19.994028, -14.213135,
+    0.0,       -0.668213,  -0.479492,  -4.870962,  -6.054838,  -5.567796, -10.370061, -10.805627, -11.034330,  -3.716928,
+   -10.197979, -15.191838,  -5.421011,  -5.035720, -10.611328, -10.291655, -10.088323, -20.136475, -14.605093
   };
 
   if (runnumber<10107025) {         // VpdDelay not used before Run-9 500 GeV finished

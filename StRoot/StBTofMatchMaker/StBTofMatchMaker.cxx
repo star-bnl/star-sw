@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.12 2010/05/20 22:58:47 geurts Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.13 2010/05/25 22:09:38 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.13  2010/05/25 22:09:38  geurts
+ * improved database handling and reduced log output
+ *
  * Revision 1.12  2010/05/20 22:58:47  geurts
  * Keep BTofMatchMaker from crashing ungracefully when no mEvent or BTOF Collection is found
  *
@@ -146,12 +149,10 @@ StBTofMatchMaker::~StBTofMatchMaker(){ /* nope */}
 
 //---------------------------------------------------------------------------
 Int_t StBTofMatchMaker::Init(){
-  LOG_INFO << "StBTofMatchMaker -- initializing ..." << endm;
-  if(Debug()) {
-    LOG_INFO << "Minimum hits per track (obsolete): " << mMinHitsPerTrack << endm;
-    LOG_INFO << "Minimum fitpoints per track: " << mMinFitPointsPerTrack << endm;
-    LOG_INFO << "Maximum DCA: " << mMaxDCA << endm;
-  }
+  LOG_INFO << "Initializing match settings:" << endm;
+  LOG_INFO << "  Minimum fitpoints per track: " << mMinFitPointsPerTrack << endm;
+  LOG_INFO << "  Maximum DCA: " << mMaxDCA << endm;
+  
   if (!mOuterTrackGeometry) {
     LOG_WARN << "using standard trackgeometry()" << endm;
   }
@@ -186,7 +187,7 @@ Int_t StBTofMatchMaker::Init(){
 Int_t StBTofMatchMaker::InitRun(Int_t runnumber){
 
   // determine TOF configuration from run#
-  LOG_INFO << "StBTofMatchMaker -- Initializing TofGeometry (Init)" << endm;
+  LOG_INFO << "Initializing BTOF Geometry:" << endm;
   /////////////////////////////////////////////////////////////////////
   // TOF geometry initializtion -- from GEANT geometry directly
   //                               need St_geant_Maker be loaded before
@@ -229,7 +230,7 @@ Int_t StBTofMatchMaker::FinishRun(Int_t runnumber){
 //---------------------------------------------------------------------------
 Int_t StBTofMatchMaker::Finish(){
 
-  LOG_INFO << "StBTofMatchMaker -----  RUN SUMMARY ----- (Finish)\n"
+  LOG_DEBUG << "StBTofMatchMaker -----  RUN SUMMARY ----- (Finish)\n"
        << "\tProcessed "  << mEventCounter << " events."
        << " Accepted  "   << mAcceptedEventCounter << " events."
        << " Rejected  "   << mEventCounter - mAcceptedEventCounter << " events\n"
@@ -246,7 +247,6 @@ Int_t StBTofMatchMaker::Finish(){
 //---------------------------------------------------------------------------
 Int_t StBTofMatchMaker::Make(){
   LOG_INFO << "StBTofMatchMaker -- welcome" << endm;
-  LOG_DEBUG << " processing event ... " << endm;
 
   if(mMuDstIn) processMuDst();
   else         processStEvent();
@@ -886,12 +886,12 @@ void StBTofMatchMaker::processStEvent(){
     timer.start();
   }
 
-  LOG_INFO << " #(daq hits): " << daqCellsHitVec.size()
-       << "\t#(proj hits): " << allCellsHitVec.size()
-       << "\t#(prim proj hits): " << nPrimaryHits
-       << "\n#(matched hits): " << FinalMatchedCellsVec.size() 
-       << "\n#(single valid hits): " << nValidSingleHitCells
-       << "\t#(single prim valid hits): " << nValidSinglePrimHitCells
+  LOG_INFO << "#(daq): " << daqCellsHitVec.size()
+       << " #(proj): " << allCellsHitVec.size()
+       << " #(prim proj): " << nPrimaryHits
+       << " #(matched): " << FinalMatchedCellsVec.size() 
+       << " #(single valid): " << nValidSingleHitCells
+       << " #(single prim valid): " << nValidSinglePrimHitCells
        << endm;
 
   //check StEvent collections --
@@ -919,7 +919,7 @@ void StBTofMatchMaker::processStEvent(){
 	 << timer.elapsedTime() << " sec" << endm;
   }
 
-  LOG_INFO << "StBTofMatchMaker -- bye-bye" << endm;
+  LOG_DEBUG << "StBTofMatchMaker -- bye-bye" << endm;
 
   return;
 }

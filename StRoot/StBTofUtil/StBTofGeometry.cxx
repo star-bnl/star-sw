@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.7 2010/04/03 02:00:53 dongx Exp $
+ * $Id: StBTofGeometry.cxx,v 1.8 2010/05/25 22:09:44 geurts Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.8  2010/05/25 22:09:44  geurts
+ * improved database handling and reduced log output
+ *
  * Revision 1.7  2010/04/03 02:00:53  dongx
  * X0 (radial offset) included in the tray alignment
  *
@@ -701,22 +704,14 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
      mTrayZ0[i] = 0.0;
    }
 
-   LOG_INFO << "StBTofGeometry -- retrieving the geometry alignment parameters" << endm;
-   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
-   if(!mDbTOFDataSet) {
-     LOG_ERROR << "unable to access Calibrations TOF parameters" << endm;
-     //    assert(mDbTOFDataSet);
-     return; // kStErr;
-   }
-  
+   LOG_INFO << "[StBTofGeometry] retrieving geometry alignment parameters" << endm;
+   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofGeomAlign");
    St_tofGeomAlign* tofGeomAlign = static_cast<St_tofGeomAlign*>(mDbTOFDataSet->Find("tofGeomAlign"));
    if(!tofGeomAlign) {
      LOG_WARN << "Unable to get tof geometry align parameter! Use ideal geometry!" << endm;
    }
    tofGeomAlign_st* geomAlign = static_cast<tofGeomAlign_st*>(tofGeomAlign->GetArray());
 
-//   Int_t numRows = tofGeomAlign->GetNRows();
-//   LOG_INFO << "number of rows = " << numRows << endm;
    for (Int_t i=0;i<mNTrays;i++) {
 
      double phi0 = geomAlign[i].phi0;
@@ -738,7 +733,7 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
      mTrayZ0[i] = geomAlign[i].z0;
 
      if(maker->Debug()) {
-       LOG_INFO << " Tray # = " << i+1 << " Align parameters " << mTrayX0[i] << " " << mTrayY0[i] << " " << mTrayZ0[i] << endm;
+       LOG_DEBUG << " Tray # = " << i+1 << " Align parameters " << mTrayX0[i] << " " << mTrayY0[i] << " " << mTrayZ0[i] << endm;
      }
    }
 
@@ -788,7 +783,7 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
     LOG_WARN << " No Top Node for Tof Geometry! " << endm;
     return;
   }
-  LOG_INFO << " # of sectors = " << mTopNode->GetListSize() << endm;
+  LOG_INFO << "[StBTofGeometry] # of sectors = " << mTopNode->GetListSize() << endm;
 
   TVolumePosition *transPos = 0;
 
@@ -813,7 +808,7 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
       if ( isec>60 ) ibtoh = 1;
       int sectorsInBTOH = mTopNode->GetListSize()/2;
       int trayIndex = ibtoh * sectorsInBTOH + secVolume->GetPosition()->GetId(); // secVolume
-      LOG_INFO << " Tray # " << trayIndex << " has # of modules = " << detVolume->GetListSize() << endm;
+      LOG_DEBUG << " Tray # " << trayIndex << " has # of modules = " << detVolume->GetListSize() << endm;
       isensor = 0;   // clear for this tray
       if(detVolume->GetListSize()) {   // valid tray
 
@@ -831,8 +826,8 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
         delete transPos;  transPos = 0;
 
         if(mDebug) {
-          LOG_INFO << "   Initialize and save tray # " << mBTofTray[mNValidTrays-1]->Index() << " with " << detVolume->GetListSize() << " modules" << endm;
-          LOG_INFO << "   alignment parameters \t" << mTrayX0[itray] << " " <<  mTrayY0[itray] << " " <<  mTrayZ0[itray] << endm;
+          LOG_DEBUG << "   Initialize and save tray # " << mBTofTray[mNValidTrays-1]->Index() << " with " << detVolume->GetListSize() << " modules" << endm;
+          LOG_DEBUG << "   alignment parameters \t" << mTrayX0[itray] << " " <<  mTrayY0[itray] << " " <<  mTrayZ0[itray] << endm;
           mBTofTray[mNValidTrays-1]->Print();
         }
 
@@ -855,10 +850,7 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
   mBTofConf = 0;
   if (mNValidTrays==120) mBTofConf = 1;
 
-  LOG_INFO << "\n-------------------------------------------\n"
-           << " Summary of initialization: "
-           << "    NValidTrays = " << mNValidTrays << "   NModulesInTray = " << mModulesInTray << endm;
-  LOG_INFO << "\n-------------------------------------------\n" << endm;
+  LOG_INFO << "[StBTofGeometry] Done. NValidTrays = " << mNValidTrays << "  NModulesInTray = " << mModulesInTray << endm;
 
   if(mDebug) Print();
 

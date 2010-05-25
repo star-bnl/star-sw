@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofINLCorr.cxx,v 1.7 2009/12/14 19:38:30 dongx Exp $
+ * $Id: StBTofINLCorr.cxx,v 1.8 2010/05/25 22:09:44 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StBTofINLCorr.cxx,v $
+ * Revision 1.8  2010/05/25 22:09:44  geurts
+ * improved database handling and reduced log output
+ *
  * Revision 1.7  2009/12/14 19:38:30  dongx
  * - mNValidBoards set by the read-in database entrie instead of a hard-coded number
  * - clean up mNValidTrays and related functions (not needed since previous versions)
@@ -62,28 +65,26 @@ void StBTofINLCorr::init(StMaker *maker) {
 
 void StBTofINLCorr::initFromDbase(StMaker *maker) {
 
-  LOG_INFO << "StBTofINLCorr -- rertieving the INL correction table" << endm;
+  LOG_INFO << "[StBTofINLCorr] retrieving TDIGOnTray and INL correction tables ..." << endm;
   ///////////////////////////////////////////////////////
   // Load configuration parameters from dbase
   ///////////////////////////////////////////////////////
 
-  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
-  if(!mDbTOFDataSet) {
-    LOG_ERROR << "unable to access Calibrations TOF parameters" << endm;
-    //    assert(mDbTOFDataSet);
-    return; // kStErr;
-  }
+//   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
+//   if(!mDbTOFDataSet) {
+//     LOG_ERROR << "unable to access Calibrations TOF parameters" << endm;
+//     return;
+//   }
 
+  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTDIGOnTray");
   St_tofTDIGOnTray* tofTDIGOnTray = static_cast<St_tofTDIGOnTray*>(mDbTOFDataSet->Find("tofTDIGOnTray"));
   if(!tofTDIGOnTray) {
-    LOG_ERROR << "unable to get tof INL correction parameters" << endm;
-    //    assert(tofTDIGOnTray);
-    return; // kStErr;
+    LOG_ERROR << "unable to get tofTDIGOnTray table" << endm;
+    return;
   }
   tofTDIGOnTray_st* tdigOnTray = static_cast<tofTDIGOnTray_st*>(tofTDIGOnTray->GetArray());
 
   Int_t numRows = tofTDIGOnTray->GetNRows();
-//  LOG_INFO << "number of rows = " << numRows << endm;
   for (Int_t i=0;i<mNTray+2;i++) {
     Int_t trayId = (Int_t)tdigOnTray[i].trayId;
 
@@ -97,35 +98,24 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
       for(Int_t j=0;j<mNTDIGOnTray;j++)
 	mTdigOnTray[trayId-1][j] = (Int_t)tdigOnTray[i].tdigId[j];
     }
-
-    if(maker->Debug()) {
-      LOG_INFO << " tray id=" << trayId;
-      for(int j=0;j<mNTDIGOnTray;j++) {
-	LOG_INFO << "  " << tdigOnTray[i].tdigId[j];
-      }
-      LOG_INFO << endm;
-    }
-
   }
 
+  mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofINLSCorr");
   St_tofINLSCorr* tofINLCorr = static_cast<St_tofINLSCorr*>(mDbTOFDataSet->Find("tofINLSCorr"));
   if(!tofINLCorr) {
-    LOG_ERROR << "unable to get tof INL correction parameters" << endm;
-    //    assert(tofINLCorr);
-    return; // kStErr;
+    LOG_ERROR << "unable to get tofINLSCorr table" << endm;
+    return;
   }
   tofINLSCorr_st* inlcorr = static_cast<tofINLSCorr_st*>(tofINLCorr->GetArray());
-
   numRows = tofINLCorr->GetNRows();
   if(numRows>mNTDIGMAX*mNChanOnTDIG) {
-    { LOG_INFO << " !!! # of Rows in tofINLCorr table exceed the array limit in this function !!! Trancated !!! " << endm; }
+    { LOG_WARN << "number of rows in tofINLSCorr table exceed the array limit in this function! Entries truncated !!!" << endm; }
   }
   Int_t NTdig = 0;
   Int_t tdigId_old = 0;
-//  for (Int_t i=0;i<mNValidBoards*mNChanOnTDIG;i++) {
   for (Int_t i=0;i<numRows;i++) {
     if(NTdig>=mNTDIGMAX) {
-      { LOG_INFO << " !!! # of boards read-in exceeds the array limit in this function !!! Trancated !!! " << endm; }
+      { LOG_WARN << " number of boards read-in exceeds the array limit in this function! NTDIG Truncated !!! " << endm; }
       NTdig = mNTDIGMAX;
       break;
     }
@@ -139,19 +129,19 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
         
     tdigId_old = tdigId;
 
-    if(maker->Debug()) { LOG_INFO << " tdigId=" << tdigId << "  tdcChanId=" << tdcChanId << endm; }
+    LOG_DEBUG << " tdigId=" << tdigId << "  tdcChanId=" << tdcChanId << endm;
     for(Int_t j=0;j<mNChanMAX;j++) {
       Short_t corr = (Short_t)(inlcorr[i].INLCorr[j]);
       mINLCorr[NTdig-1][tdcChanId][j] = corr;
       
       if(maker->Debug()&&(j%200==0)) {
-	LOG_INFO << " " << corr;
+	LOG_DEBUG << " " << corr;
       }
     }
-    if(maker->Debug()) { LOG_INFO << endm; }
+    if(maker->Debug()) { LOG_DEBUG << endm; }
   }
 
-  LOG_INFO << " Total # of boards read in : " << NTdig << endm;
+  LOG_INFO << "[StBTofINLCorr] Total number of boards: " << NTdig << endm;
   mNValidBoards = NTdig;
 
   // re-organize
@@ -160,11 +150,11 @@ void StBTofINLCorr::initFromDbase(StMaker *maker) {
     if(boardId>0 && boardId<=mNBoardIdMAX) {
       mBoardId2Index[boardId] = i;
     } else {
-      { LOG_INFO << " Warning! boardId " << boardId << " out of range!" << endm; }
+      { LOG_WARN<< " Warning! boardId " << boardId << " out of range!" << endm; }
     }
   }
 
-
+  LOG_DEBUG << "[StBTofINLCorr] ... done" << endm;
 }
 
 void StBTofINLCorr::Reset() {

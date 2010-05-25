@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.15 2010/01/20 06:33:57 geurts Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.16 2010/05/25 22:09:29 geurts Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -42,7 +42,7 @@ StBTofHitMaker::StBTofHitMaker(const char *name):StRTSBaseMaker("tof",name)
    , mBTofINLCorr(0)           //! INL corretion;
    , mBTofSortRawHit(0)        //! to sort the TOF hits
 {
-  LOG_INFO << "StBTofHitMaker::ctor"  << endm;
+  LOG_DEBUG << "StBTofHitMaker::ctor"  << endm;
 }
 
 //_____________________________________________________________
@@ -61,6 +61,8 @@ void StBTofHitMaker::Clear(Option_t* option)
 //_____________________________________________________________
 Int_t StBTofHitMaker::Init()
 {
+  LOG_INFO << "Initialized conversion parameter VHRBIN2PS = " 
+  	       << VHRBIN2PS << "ps/ch" << endm;  
   Clear("");
   return kStOK;
 }
@@ -71,20 +73,20 @@ Int_t StBTofHitMaker::InitRun(Int_t runnumber)
   ///////////////////////////////////////////////////////////////
   // TOF Daq map and INL initialization -- load from StBTofUtil
   ///////////////////////////////////////////////////////////////
+  LOG_DEBUG << "Initializing DAQ map:" << endm;
   mBTofDaqMap = new StBTofDaqMap();
   mBTofDaqMap->Init(this);
-  LOG_INFO << " Initialize Daq map ... " << endm;
 
   mNValidTrays = mBTofDaqMap->numberOfValidTrays();
 
+  LOG_DEBUG << "Initializing INL table:" << endm;
   mBTofINLCorr = new StBTofINLCorr();
   mBTofINLCorr->initFromDbase(this);
-  LOG_INFO << " Initialize INL table ... " << endm;
 
+  LOG_DEBUG << "Initializing StBTofSortRawHit:" << endm;
   mBTofSortRawHit = new StBTofSortRawHit();
   mBTofSortRawHit->Init(this, mBTofDaqMap);
   mBTofSortRawHit->setVpdDelay(runnumber);
-  LOG_INFO << " Initialize StBTofSortRawHit() ... " << endm;
 
   return kStOK;
 }
@@ -119,8 +121,6 @@ StBTofCollection *StBTofHitMaker::GetBTofCollection()
   /// Get StEvent if any at once
   StBTofCollection *btofCollection = 0;
   mStEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
-  LOG_INFO << "StBTofHitMaker::Make : StEvent has been retrieved " 
-        <<mStEvent<< endm;
 
   if (mStEvent) {
      btofCollection = mStEvent->btofCollection();
@@ -132,6 +132,8 @@ StBTofCollection *StBTofHitMaker::GetBTofCollection()
         mStEvent->setBTofCollection(btofCollection);
      }
   }
+  else {LOG_WARN << "No StEvent found" << endm; }
+
   return btofCollection;
 }
 
@@ -139,7 +141,7 @@ StBTofCollection *StBTofHitMaker::GetBTofCollection()
 StRtsTable *StBTofHitMaker::GetNextRaw() 
 {
   /// Query  RTS/tof/raw cluster data from DAQ system
-  LOG_INFO  << " StBTofHitMaker::GetNextRaw()" << endm;
+  LOG_DEBUG  << "GetNextRaw()" << endm;
 
   StRtsTable *daqTofTable = GetNextLegacy();
   if (daqTofTable) {
@@ -151,7 +153,7 @@ StRtsTable *StBTofHitMaker::GetNextRaw()
 Int_t StBTofHitMaker::Make()
 {
    mBTofCollection = GetBTofCollection();
-   LOG_INFO << " getting the tof collection " << mBTofCollection << endm;
+   LOG_DEBUG << " getting the tof collection " << mBTofCollection << endm;
    if (mBTofCollection) {
       if ( GetNextRaw() ) {
         /// Unpack TOF raw data from daq structure
@@ -389,10 +391,11 @@ void StBTofHitMaker::fillBTofHitCollection()
  */
 void StBTofHitMaker::fillStEvent() {
 
-  LOG_INFO << "StBTofHitMaker::fillStEvent() Starting..." << endm;
+  LOG_DEBUG << "fillStEvent() Starting..." << endm;
 
   /// make sure we have a tofcollection
   if(!mBTofCollection){
+    LOG_WARN << "No BTofCollection ... creating one in StEvent" << endm;
     mBTofCollection = new StBTofCollection();
     mStEvent->setBTofCollection(mBTofCollection);
   }
@@ -400,11 +403,9 @@ void StBTofHitMaker::fillStEvent() {
   ///
   StBTofCollection* btofCollection = mStEvent->btofCollection();
   if(btofCollection){
-    ///LOG_INFO << " + StEvent BTofCollection Exists" << endm;
     if(btofCollection->rawHitsPresent()) {
-      ///LOG_INFO << " + StEvent BTofRawHitCollection Exists" << endm;
       StSPtrVecBTofRawHit& rawTofVec = btofCollection->tofRawHits();
-      LOG_INFO << "   StEvent BTofRawHitCollection has " << rawTofVec.size() << " entries..." << endm;
+      LOG_INFO << "BTofRawHitCollection: " << rawTofVec.size() << " entries" << endm;
       if(Debug()) {
         for(size_t i=0;i<rawTofVec.size();i++) {
           LOG_DEBUG << (*rawTofVec[i]) << endm;
@@ -412,13 +413,12 @@ void StBTofHitMaker::fillStEvent() {
       }
     }
     else {
-      LOG_INFO << " - StEvent BTofRawHitCollection does not Exist" << endm;
+      LOG_INFO << "No BTofRawHitCollection" << endm;
     }
 
     if(btofCollection->hitsPresent()) {
-      ///LOG_INFO << " + StEvent BTofHitCollection Exists" << endm;
       StSPtrVecBTofHit& tofVec = btofCollection->tofHits();  
-      LOG_INFO << "   StEvent BTofHitCollection has " << tofVec.size() << " entries..." << endm;
+      LOG_INFO << "BTofHitCollection: " << tofVec.size() << " entries..." << endm;
       if(Debug()) {
         for(size_t i=0;i<tofVec.size();i++) {
           LOG_DEBUG << (*tofVec[i]) << endm; 
@@ -426,13 +426,13 @@ void StBTofHitMaker::fillStEvent() {
       }  
     }    
     else {
-      LOG_INFO << " - StEvent BTofHitCollection does not Exist" << endm;
+      LOG_INFO << "No BTofHitCollection" << endm;
     }
 
   }
   else {
-    LOG_INFO << " - StEvent BTofCollection does not Exist" << endm;
-    LOG_INFO << " - StEvent BTofRawHitCollection does not Exist" << endm;
-    LOG_INFO << " - StEvent BTofHitCollection does not Exist" << endm;
+    LOG_WARN << "No BTofCollection" << endm;
+    LOG_INFO << "No BTofRawHitCollection" << endm;
+    LOG_INFO << "No BTofHitCollection" << endm;
   }
 }
