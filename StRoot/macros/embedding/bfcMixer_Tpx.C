@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.10 2010/04/07 18:31:01 hmasui Exp $
+// $Id: bfcMixer_Tpx.C,v 1.11 2010/05/25 01:51:17 hmasui Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -24,6 +24,7 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
                   const Double_t vzhigh = 150.0,
 		  const Int_t pid=9,
 		  const Double_t mult=100,
+                  const std::vector<Int_t> triggers = 0,
                   const Char_t *prodName = "P08iepp",
                   const Char_t* type = "FlatPt"){
   // production chains for P08ic - p+p, Au+Au 9 GeV and d+Au
@@ -163,7 +164,11 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   // Make trigger and z-vertex cuts (only if SkipMode is true)
   // Trigger cut
   //   Can put multiple trigger id's 
-//  embMk->SetTrgOpt(210020) ;
+  if ( !triggers.empty() ){
+    for(std::vector<Int_t>::iterator iter = triggers.begin(); iter != triggers.end(); iter++){
+      embMk->SetTrgOpt((*iter)) ;
+    }
+  }
 
   // z-vertex cuts
   embMk->SetZVertexCut(vzlow, vzhigh) ;
