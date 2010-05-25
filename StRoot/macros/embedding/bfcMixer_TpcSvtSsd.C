@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcSvtSsd.C,v 1.9 2010/02/18 23:55:30 fisyak Exp $
+// $Id: bfcMixer_TpcSvtSsd.C,v 1.10 2010/05/25 01:52:13 hmasui Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -20,23 +20,52 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
 		    const Double_t pt_high=5.0,
 		    const Double_t eta_low=-1.1,
 		    const Double_t eta_high=1.1,
+	            const Double_t vzlow=-175.0,
+		    const Double_t vzhigh=175.0,
 		    const Int_t pid=8,
-		    const Double_t mult = 100.) {
-
-  // Get number of events from tags file
-//  gROOT->ProcessLine(".L /star/institutions/lbl/hmasui/embedding/SVT/getNumberOfEvents.C");
-//  const Int_t neventsTag = getNumberOfEvents(tagfile);
+		    const Double_t mult = 100.,
+                    const std::vector<Int_t> triggers = 0,
+                    const Char_t* prodName = "P08if",
+                    const Char_t* mode="flatpt"
+) {
+  // production chains for P06id - p+p 200 GeV (Run6)
+  TString prodP06idpp("DbV20060729 pp2006b ITTF OSpaceZ2 OGridLeak3D VFMCE -VFPPVnoCTB -hitfilt");
 
   // production chain for P07ib
   TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF Iana ToF spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2 ssd_daq");// KeepSvtHit hitfilt skip1row");
-  TString prodP08if("B2007g DbV20080418 MakeEvent ITTF Iana ToF spt SsdIt SvtIt pmdRaw SCEbyE  OShortR trgd Corr5 OSpaceZ2 ssd_daq KeepSvtHit -hitfilt VFMCE");// KeepSvtHit hitfilt skip1row");
+  TString prodP07ic("P2005b DbV20070518 MakeEvent ITTF ToF ssddat spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2 KeepSvtHit skip1row VFMCE -VFMinuit -hitfilt"); // production chain for P07ic
+  TString prodP08if("B2007g DbV20080418 adcOnly MakeEvent ITTF Iana ToF spt SsdIt SvtIt pmdRaw SCEbyE  OShortR trgd Corr5 OSpaceZ2 ssd_daq KeepSvtHit -hitfilt VFMCE");// KeepSvtHit hitfilt skip1row");
+  TString geomP06id("ry2006");
   TString geomP07ib("ry2007g");
-  TString chain1Opt("in magF tpcDb adcOnly NoDefault -ittf NoOutput");
+  TString geomP07ic("ry2005f");
+//  TString chain1Opt("in magF tpcDb adcOnly NoDefault -ittf NoOutput");
+  TString chain1Opt("in magF tpcDb NoDefault -ittf NoOutput");
   TString chain2Opt("NoInput PrepEmbed gen_T geomT sim_T trs -ittf -tpc_daq nodefault");
-  chain2Opt += " "; chain2Opt += geomP07ib;
-  TString chain3Opt = prodP08if;
+
+  TString chain3Opt("");
+  if( prodName == "P06idpp") {
+    chain2Opt += " "; chain2Opt += geomP06id;
+    chain3Opt = prodP06idpp ;
+  }
+  else if ( prodName == "P07ib" ){
+    chain2Opt += " "; chain2Opt += geomP07ib;
+    chain3Opt = prodP07ib ;
+  }
+  else if( prodName == "P07ic" ){
+    chain2Opt += " "; chain2Opt += geomP07ic;
+    chain3Opt = prodP07ic;
+  }
+  else if ( prodName == "P08if" ){
+    chain2Opt += " "; chain2Opt += geomP07ib;
+    chain3Opt = prodP08if ;
+  }
+  else{
+    cout << "Choice prodName does not correspond to known chain. Processing impossible. " << endl;
+    return;
+  }
   //  chain3Opt += " Embedding onlraw GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker EmbeddingShortCut"; 
   chain3Opt += " Embedding onlraw McEvent McEvOut GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker -hitfilt EmbeddingShortCut"; 
+//  chain3Opt += " Embedding onlraw McEvent McEvOut GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker -hitfilt -TrsPileUp -TrsToF";
   //  chain3Opt += " Embedding onlraw McEvent McEvOut GeantOut IdTruth -in NoInput -hitfilt EmbeddingShortCut"; 
 
   if (isSvtIn) chain3Opt += " SvtEmbed";
@@ -45,7 +74,24 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
     chain2Opt += ",ssd,McEvent,-spt";
     chain3Opt += ",SsdEmbed";
   }
-  chain3Opt += " "; chain3Opt += geomP07ib;
+
+  if( prodName == "P06idpp") {
+    chain3Opt += " "; chain3Opt += geomP06id;
+  }
+  else if ( prodName == "P07ib" ){
+    chain3Opt += " "; chain3Opt += geomP07ib;
+  }
+  else if( prodName == "P07ic" ){
+    chain3Opt += " "; chain3Opt += geomP07ic;
+  }
+  else if ( prodName == "P08if" ){
+    chain3Opt += " "; chain3Opt += geomP07ib;
+  }
+  else{
+    cout << "Choice prodName does not correspond to known chain. Processing impossible. " << endl;
+    return;
+  }
+
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");
   if (gClassTable->GetID("StBFChain") < 0) Load();
@@ -111,6 +157,22 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
   embMk->SetOpt(  pt_low,    pt_high,  eta_low,    eta_high,    0.,   6.283185); 
   //                pid, mult
   embMk->SetPartOpt(  pid,mult);
+
+  // Set Skip mode (default is OFF)
+  embMk->SetSkipMode(kFALSE) ;
+
+  // Make trigger and z-vertex cuts (only if SkipMode is true)
+  // Trigger cut
+  //   Can put multiple trigger id's 
+  if ( !triggers.empty() ){
+    for(std::vector<Int_t>::iterator iter = triggers.begin(); iter != triggers.end(); iter++){
+      embMk->SetTrgOpt((*iter)) ;
+    }
+  }
+
+  // z-vertex cuts
+  embMk->SetZVertexCut(vzlow, vzhigh) ;
+
   TAttr::SetDebug(0);
   Chain->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
   Chain->SetAttr(".Privilege",1,"StBFChain::*" ); 	//StBFChain is priviliged
@@ -133,12 +195,6 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
   Int_t iInit = Chain->Init();
   if (iInit >=  kStEOF) {Chain->FatalErr(iInit,"on init"); return;}
   StMaker *treeMk = Chain->GetMaker("outputStream");
-
-  // Use input Nevents if Nevents < neventsTag
-//  const Int_t nevents = (Nevents<neventsTag) ? Nevents : neventsTag ;
-//  cout << endl;
-//  cout << Form("bfcMixer_TpcSvtSsd.C : Process %10d events ...", nevents) << endl;
-//  cout << endl;
 
   Chain->EventLoop(Nevents,treeMk);
   gMessMgr->QAInfo() << "Run completed " << endm;
