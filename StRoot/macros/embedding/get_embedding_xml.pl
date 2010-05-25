@@ -15,7 +15,7 @@ chomp($date);
 # Available options
 #----------------------------------------------------------------------------------------------------
 # Default parameters
-my $staroflDir    = "/home/starofl";
+my $staroflDir    = "/home/starofl"; # starofl home
 
 my $force         = 0;                                              # Default is false (do not overwrite existing xml file)
 my $production    = "P08ic";                                        # Default production
@@ -45,13 +45,14 @@ my $logDirectory       = getLogDirectory($production);
 my $libraryPath        = ".sl44_gcc346";      # Default library path
 
 # Scripts
-my $getYearFromFile = "$staroflDir/aarose/getYearFromFile.pl";
-my $getDayFromFile  = "$staroflDir/aarose/getDayFromFile.pl";
+#my $getYearFromFile = "$staroflDir/aarose/getYearFromFile.pl";
+#my $getDayFromFile  = "$staroflDir/aarose/getDayFromFile.pl";
+my $getYearDayFromFile = "StRoot/macros/embedding/getYearDayFromFile.pl";
 
 GetOptions (
     'daq=s' => \$daqsDirectory,            # Daq file directory
     'force' => \$force,                    # Flag for overwrite
-    'geantid=s' => \$pid,                  # Geantid
+    'geantid=i' => \$pid,                  # Geantid
     'help' => \$help,
     'library=s' => \$library,              # Library
     'log=s' => \$logDirectory,             # Log file directory
@@ -60,15 +61,15 @@ GetOptions (
     'mult=s' => \$multiplicity,            # Number of MC tracks per event
     'particlename=s' => \$particleName,    # Particle name
     'production=s' => \$production,        # Production
-    'ptmin=s' => \$ptmin,                  # Minimum pt cut
-    'ptmax=s' => \$ptmax,                  # Maximum pt cut
-    'requestnumber=n' => \$requestNumber,  # Request number
+    'ptmin=f' => \$ptmin,                  # Minimum pt cut
+    'ptmax=f' => \$ptmax,                  # Maximum pt cut
+    'requestnumber=i' => \$requestNumber,  # Request number
     'tag=s' => \$tagsDirectory,            # Set tags file directory
     'trg=s' => \$trgsetupName,             # Set trigger setup name
-    'triggerid=s' => \$triggerId,          # Set trigger id cut
-    'ymin=s' => \$ymin,                    # Minimum rapidity cut
-    'ymax=s' => \$ymax,                    # Maximum rapidity cut
-    'zvertex=s' => \$zvertexCut,           # Set z-vertex cut
+    'triggerid=i' => \@triggerId,       # Set trigger id cut
+    'ymin=f' => \$ymin,                    # Minimum rapidity cut
+    'ymax=f' => \$ymax,                    # Maximum rapidity cut
+    'zvertex=f' => \$zvertexCut,           # Set z-vertex cut
     'verbose' => \$verbose
 );
 
@@ -110,7 +111,8 @@ my $usage = q(
   -r [request number]                   Set request number (default is 9999999999)
   -tag [tags file directory]            Set tag file directory (default is /home/starofl/embedding/$production)
   -trg [trigger setup name]             Set trigger setup name (default is 2007ProductionMinBias)
-  -trig (or --triggerid) [trigger id]   Set trigger id cut (disabled)
+  -trig (or --triggerid) [trigger id's] Set trigger id cut (accept multiple trigger id's, see below)
+      > get_embedding_xml.pl -trig 280001 -trig 290001
 
   -ymin [Minimum rapidity cut]          Set minimum rapidity cut off (default is -1.5)
   -ymax [Maximum rapidity cut]          Set maximum rapidity cut off (default is 1.5)
@@ -136,13 +138,6 @@ if( $help )
 printDebug("Verbose mode. Print debugging messages ...");
 
 #----------------------------------------------------------------------------------------------------
-# Trigger id option is disabled
-#----------------------------------------------------------------------------------------------------
-if ( $triggerId ) {
-  print "Warning:    -trig option is current disabled, do not affect your output xml\n";
-}
-
-#----------------------------------------------------------------------------------------------------
 # Set generator/directory from production name
 #----------------------------------------------------------------------------------------------------
 $generatorDir = getGeneratorDirectory($production);
@@ -151,8 +146,7 @@ $logDirectory = getLogDirectory($production);
 #----------------------------------------------------------------------------------------------------
 # Make sure perl scripts exist
 #----------------------------------------------------------------------------------------------------
-checkFile($getYearFromFile);
-checkFile($getDayFromFile);
+checkFile($getYearDayFromFile);
 
 #----------------------------------------------------------------------------------------------------
 # Make sure tag/daq file and log file directory exists. If not, stop.
@@ -222,8 +216,8 @@ print OUT "\n";
 
 printDebug("Set year and day ...");
 print OUT "<!-- Set year and day from filename -->\n";
-print OUT "setenv EMYEAR `$getYearFromFile \${FILEBASENAME}`\n";
-print OUT "setenv EMDAY `$getDayFromFile \${FILEBASENAME}`\n";
+print OUT "setenv EMYEAR `$getYearDayFromFile -y \${FILEBASENAME}`\n";
+print OUT "setenv EMDAY `$getYearDayFromFile -d \${FILEBASENAME}`\n";
 print OUT "\n";
 
 #printDebug("Set trigger setup name: $trgsetupName ...");
@@ -238,20 +232,58 @@ print OUT "\n";
 print OUT "<!-- Start job -->\n";
 
 #----------------------------------------------------------------------------------------------------
-# Second last argument should be revisited. Currently, just put $production (Hiroshi)
+# Set tags file
 #----------------------------------------------------------------------------------------------------
-$tagFile = "\$EMBEDTAGDIR/\${FILEBASENAME}.tags.root"; #Define tag file
-printDebug("Set tags file: $tagFile, bfcMixer: $bfcMixer ...");
+my $tagFile = "\$EMBEDTAGDIR/\${FILEBASENAME}.tags.root"; #Define tag file
+printDebug("Set tags file: $tagFile");
 
-# bfcMixer_TpcSvtSsd.C needs two additional switches
+#----------------------------------------------------------------------------------------------------
+# Set bfcMixer
+#----------------------------------------------------------------------------------------------------
+printDebug("Set bfcMixer: $bfcMixer ...");
+
+# Remove '.C' from macro
+my $bfcMixerFunction = `basename $bfcMixer`;
+chomp($bfcMixerFunction);
+$bfcMixerFunction =~ s/.C//g; # Remove .C
+printDebug("Prepare function: $bfcMixerFunction to execute in root4star");
+
+# Second last argument should be revisited. Currently, just put $production (Hiroshi)
+# Set executing bfcMixer's
+my $execute_bfcMixer = "" ;
 if ( $bfcMixer =~ /.*SvtSsd.C/ ){
-  #  Both SVT and SSD are ON (default)
-  print OUT "root4star -b -q $bfcMixer\\($nevents,1,1,\\\"\$INPUTFILE0\\\",\\\"$tagFile\\\",$ptmin,$ptmax,$ymin,$ymax,-$zvertexCut,$zvertexCut,$pid,$multiplicity,\\\"$production\\\",\\\"$ptOption\\\"\\\)\n";
+  # bfcMixer_TpcSvtSsd.C needs two additional switches
+  printDebug("SVT/SSD flags are added in the 2nd/3rd arguments");
+
+  $execute_bfcMixer = "$bfcMixerFunction($nevents, 1, 1, \"\$INPUTFILE0\", \"$tagFile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexCut, $zvertexCut, $pid, $multiplicity, triggers, \"$production\", \"$ptOption\");";
 }
 else{
-  # bfcMixer_Tpx.C
-  print OUT "root4star -b -q $bfcMixer\\($nevents,\\\"\$INPUTFILE0\\\",\\\"$tagFile\\\",$ptmin,$ptmax,$ymin,$ymax,-$zvertexCut,$zvertexCut,$pid,$multiplicity,\\\"$production\\\",\\\"$ptOption\\\"\\\)\n";
+  # Other bfcMixers (TpcOnly or Tpx)
+  printDebug("Starndard (without SVT/SSD) bfcMixer");
+
+  $execute_bfcMixer = "$bfcMixerFunction($nevents, \"\$INPUTFILE0\", \"$tagFile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexCut, $zvertexCut, $pid, $multiplicity, triggers, \"$production\", \"$ptOption\");";
 }
+printDebug("Executing bfcMixer looks: $execute_bfcMixer");
+
+print OUT "echo \"Executing $execute_bfcMixer ...\"\n";
+print OUT "\n";
+print OUT "root4star -b &lt;&lt;EOF\n";
+
+# Put Trigger id's 
+if ( @triggerId ) {
+  printDebug("Trigger id(s) requested");
+  print OUT "  std::vector&lt;Int_t&gt; triggers;\n";
+  while ( @triggerId ){
+    $trigger = shift @triggerId ;
+    print OUT "  triggers.push_back($trigger);\n";
+    printDebug("Push back trigger id = $trigger");
+  }
+}
+
+print OUT "  .L $bfcMixer\n";
+print OUT "  $execute_bfcMixer\n";
+print OUT "  .q\n";
+print OUT "EOF\n";
 print OUT "ls -la .\n";
 
 #----------------------------------------------------------------------------------------------------
