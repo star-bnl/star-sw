@@ -104,6 +104,7 @@ int rdMuWana(
     gSystem->Load("StEmcTriggerMaker");
     gSystem->Load("StTriggerUtilities");
     gSystem->Load("StMCAsymMaker");
+    gSystem->Load("StRandomSelector");
     gSystem->Load("StJetEvent");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetMaker");
@@ -431,6 +432,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.38  2010/05/25 14:42:57  stevens4
+// add new library for jet maker (StRandomSelector)
+//
 // Revision 1.37  2010/05/04 12:14:36  balewski
 // runs now w/o jet tree
 //
