@@ -607,7 +607,7 @@ void PresenterGui::MakeConnectionFrame()
   //
   
   QBoxLayout *topLayout = dynamic_cast<QBoxLayout *>(centralWidget()->layout());
-  QVBoxLayout *leftPane = new QVBoxLayout(this);
+  QVBoxLayout *leftPane = new QVBoxLayout;
   topLayout->addLayout(leftPane);
   //l eftPane->setSizeConstraint ( QLayout::SetMaximumSize);
   // leftPane->setMaximumSize(230);
