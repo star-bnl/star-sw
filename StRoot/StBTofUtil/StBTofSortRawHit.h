@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofSortRawHit.h,v 1.5 2010/01/20 06:34:13 geurts Exp $
+ * $Id: StBTofSortRawHit.h,v 1.6 2010/05/26 23:12:27 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -89,7 +89,7 @@ class StBTofSortRawHit : public StObject {
   void Init(StMaker *maker, StBTofDaqMap *daqMap);
   void Reset();
   /// set to use the VPD delays
-  void setVpdDelay(Int_t runnumber);
+  //void setVpdDelay(Int_t runnumber);
   
   void setBTofCollection(StBTofCollection* tofColl);
 

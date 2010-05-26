@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofSortRawHit.cxx,v 1.8 2010/05/25 22:09:44 geurts Exp $
+ * $Id: StBTofSortRawHit.cxx,v 1.9 2010/05/26 23:12:27 geurts Exp $
  *  
  * Author: Xin Dong   
  *****************************************************************    
@@ -19,6 +19,7 @@
 #include "StBTofRawHit.h"
 #include "StBTofDaqMap.h"
 #include "tables/St_tofTrgWindow_Table.h"
+#include "tables/St_vpdDelay_Table.h"
 
 StBTofSortRawHit::StBTofSortRawHit() {
   mDaqMap = 0;
@@ -48,7 +49,6 @@ void StBTofSortRawHit::Init(StMaker *maker, StBTofDaqMap *daqMap) {
   // for test set by hand now
   ///initial time windows
   LOG_INFO << "[StBTofSortRawHit] retrieving BTOF trigger time window cuts" << endm;
- 
   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofTrgWindow");
   St_tofTrgWindow* tofTrgWindow = static_cast<St_tofTrgWindow*>(mDbTOFDataSet->Find("tofTrgWindow"));
   if(!tofTrgWindow) {
@@ -68,50 +68,20 @@ void StBTofSortRawHit::Init(StMaker *maker, StBTofDaqMap *daqMap) {
 
   if(maker->Debug()) mDebug = kTRUE;
 
-  return;
-}
-
-void StBTofSortRawHit::setVpdDelay(Int_t runnumber) {
-
-  // default delays after run9 200 GeV
-  float delay[2*mNVPD]={
-    0,-0.564753,-4.62291,-4.84402,-4.05943,6.32389,-9.4035,-10.3113,-17.0374,-17.3734,-6.04608,-11.9614,-12.7579,8.79609,3.8467,-17.2994,-17.6424,-21.4749,-22.9736,
-    0,-2.1707,  -4.8195, -6.5161, -4.3109, 6.3116, -8.8655,-10.1037,-16.5970,-17.9588,-5.2079, -12.1249,-12.2412,8.4001, 5.5702,-16.5936,-16.4152,-21.3076,-21.1452
-  };
-  // default delays for Run-10 (valid for all energies, based on 39GeV)
-  float delayRun10[2*mNVPD]={
-    0.0,       -1.201867,  -0.531776,  -5.477558,  -6.167743,  -5.575552,  -9.801250, -10.958965, -10.591384,  -4.773926,
-   -10.268874, -14.588154,  -4.931171,  -4.488882,  -9.838172, -10.241304,  -9.646428, -19.994028, -14.213135,
-    0.0,       -0.668213,  -0.479492,  -4.870962,  -6.054838,  -5.567796, -10.370061, -10.805627, -11.034330,  -3.716928,
-   -10.197979, -15.191838,  -5.421011,  -5.035720, -10.611328, -10.291655, -10.088323, -20.136475, -14.605093
-  };
-
-  if (runnumber<10107025) {         // VpdDelay not used before Run-9 500 GeV finished
-    memset(mVpdDelay,0,sizeof(mVpdDelay));
-  } 
-  else if (runnumber<10154045) {  // Run-9 200 GeV till run 10154045
-    for(int i=0;i<2*mNVPD;i++) {
-      mVpdDelay[i] = delay[i];
-    }
-    // additional delay due to trigger time drift in some boards
-    mVpdDelay[6]  -= 25.0;
-    mVpdDelay[7]  -= 25.0;
-    mVpdDelay[17] -= 25.0;
-    mVpdDelay[18] -= 25.0;
-    mVpdDelay[25] -= 25.0;
-    mVpdDelay[26] -= 25.0;
-    mVpdDelay[36] -= 25.0;
-    mVpdDelay[37] -= 25.0;
-  } 
-  else if (runnumber<10314000){ // consider all run#s below day 314 Run-9 200GeV
-    for(int i=0;i<2*mNVPD;i++) {
-      mVpdDelay[i] = delay[i];
-    }
+  LOG_INFO << "[StBTofSortRawHit] retrieving VPD delay settings" << endm;
+  mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/vpdDelay");
+  St_vpdDelay *vpdDelayTable = static_cast<St_vpdDelay*>(mDbTOFDataSet->Find("vpdDelay"));
+  if (!vpdDelayTable) {
+    LOG_ERROR << "unable to find vpdDelay table" << endm;
+    return;
   }
-  else {                          // default delays for Run10 (ALL MUST GO TO DATABASE!)
-    for(int i=0;i<2*mNVPD;i++) {
-      mVpdDelay[i] = delayRun10[i];
-    }
+  vpdDelay_st* vpdDelay = static_cast<vpdDelay_st*>(vpdDelayTable->GetArray());
+  if (!vpdDelay) {
+    LOG_ERROR << "unable to get vpdDelay data" << endm;
+    return;
+  }
+  for (int i=0;i<2*mNVPD;i++){
+    mVpdDelay[i] = vpdDelay->delay[i]; 
   }
 
   return;
