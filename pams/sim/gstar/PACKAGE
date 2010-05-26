@@ -1,4 +1,0 @@
-# $Id $
-# package gstar
-# author: 
-#Library:libgstar.so:LIBS +=   -lgeant3  -lminicern
