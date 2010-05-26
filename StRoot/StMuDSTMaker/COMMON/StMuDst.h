@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.39 2010/03/08 19:06:51 tone421 Exp $
+ * $Id: StMuDst.h,v 1.40 2010/05/26 04:25:50 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -34,6 +34,7 @@ class StMuFmsCollection;
 class StMuPmdCollection;
 
 class StEvent;
+class StTriggerData;
 class StTrack;
 class StTrackGeometry;
 class StEmcCollection;
@@ -222,7 +223,6 @@ public:
   static StL3AlgorithmInfo* l3AlgoReject(int i) { return (StL3AlgorithmInfo*)arrays[muReject]->UncheckedAt(i); }
   //returns pp2pp infomation
   static StMuRpsCollection* RpsCollection() { return (StMuRpsCollection*)arrays[mupp2pp]->UncheckedAt(0); }
-
   static StDcaGeometry* covGlobTracks(int i) { return (StDcaGeometry*)arrays[muCovGlobTrack]->UncheckedAt(i); }
   static StMuPrimaryTrackCovariance* covPrimTracks(int i) { return (StMuPrimaryTrackCovariance*)arrays[muCovPrimTrack]->UncheckedAt(i); }
  
@@ -382,6 +382,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.40  2010/05/26 04:25:50  tone421
+ * Added StTriggerData arrays in muevent and fixed an issue with PMD arrays being read....
+ *
  * Revision 1.39  2010/03/08 19:06:51  tone421
  * Two things. Global tracks how are filled with an index to primary at birth. Added StMuDst::fixTrackIndicesG(), which is used for matching the primary track indices to global tracks. Previously, this was quite slow -  see this post:
  *

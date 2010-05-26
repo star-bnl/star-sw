@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.52 2010/03/10 15:03:06 tone421 Exp $
+ * $Id: StMuDst.cxx,v 1.53 2010/05/26 04:25:50 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -11,6 +11,13 @@
 
 #include "StContainers.h"
 #include "StEvent/StEventTypes.h"
+#include "StEvent/StTriggerData.h"
+#include "StEvent/StTriggerData2003.h"
+#include "StEvent/StTriggerData2004.h"
+#include "StEvent/StTriggerData2005.h"
+#include "StEvent/StTriggerData2007.h"
+#include "StEvent/StTriggerData2008.h"
+#include "StEvent/StTriggerData2009.h"
 
 #include "StarClassLibrary/StTimer.hh"
 #include "StMuDstMaker.h"
@@ -711,6 +718,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.53  2010/05/26 04:25:50  tone421
+ * Added StTriggerData arrays in muevent and fixed an issue with PMD arrays being read....
+ *
  * Revision 1.52  2010/03/10 15:03:06  tone421
  * Added more pointer protection in StMuDst::fixTrackIndicesG()
  *

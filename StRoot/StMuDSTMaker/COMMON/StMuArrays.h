@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.19 2010/01/25 03:57:39 tone421 Exp $
+ * $Id: StMuArrays.h,v 1.20 2010/05/26 04:25:50 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -42,8 +42,8 @@ enum NARRAYS {
 __NARRAYS__        =13,	///< size of the 'regular stuff' arrays, i.e. number of TClonesArrays  (add two more for global and primary track covariance matrices)
 __NSTRANGEARRAYS__ =12,	///< size of the strangeness arrays, i.e. number of TClonesArrays  
 __NEMCARRAYS__     =7 ,	///< size of the emc arrays, i.e. number of TClonesArrays  
- __NFMSARRAYS__     =1 ,	///< size of the fms arrays, i.e. number of TClonesArrays  
 __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArrays  
+ __NFMSARRAYS__     =1 ,	///< size of the fms arrays, i.e. number of TClonesArrays  
 // run 5 - dongx
 __NTOFARRAYS__     =3 ,  ///< size of the tof arrays >
 __NBTOFARRAYS__    =3 ,  /// dongx
@@ -58,8 +58,8 @@ class StMuArrays {
     static const char*         arrayNames    [__NALLARRAYS__    ];
     static const char** strangeArrayNames; //[__NSTRANGEARRAYS__]
     static const char**      emcArrayNames;//[__NEMCARRAYS__    ]
-	static const char**      fmsArrayNames;//[__NFMSARRAYS__    ]
     static const char**      pmdArrayNames;//[__NPMDARRAYS__    ]
+	static const char**      fmsArrayNames;//[__NFMSARRAYS__    ]
     static const char**      tofArrayNames;//[__NTOFARRAYS__    ]
     static const char**     btofArrayNames;//[__NBTOFARRAYS__   ] // dongx
     static const char**      eztArrayNames;//[__NEZARRAYS__    ]
@@ -68,8 +68,8 @@ class StMuArrays {
     static const char*   arrayTypes          [__NALLARRAYS__    ];
     static const char**  strangeArrayTypes;//[__NSTRANGEARRAYS__]
     static const char**  emcArrayTypes;//    [__NEMCARRAYS__    ]
-    static const char**  fmsArrayTypes;//    [__NFMSARRAYS__    ]
     static const char**  pmdArrayTypes;//    [__NPMDARRAYS__    ]
+    static const char**  fmsArrayTypes;//    [__NFMSARRAYS__    ]
     static const char**  tofArrayTypes;//    [__NTOFARRAYS__    ]
     static const char**  btofArrayTypes;//   [__NBTOFARRAYS__   ]  // dongx
     static const char**  eztArrayTypes;//    [__NEZARRAYS__    ]
@@ -78,8 +78,8 @@ class StMuArrays {
     static int           arraySizes    [__NALLARRAYS__    ];
     static int*   strangeArraySizes;// [__NSTRANGEARRAYS__]
     static int*       emcArraySizes;// [__NEMCARRAYS__    ]
-	static int*       fmsArraySizes;// [__NFMSARRAYS__    ]
 	static int*       pmdArraySizes;// [__NPMDARRAYS__    ]
+	static int*       fmsArraySizes;// [__NFMSARRAYS__    ]
     static int*       tofArraySizes;// [__NTOFARRAYS__    ]
     static int*      btofArraySizes;// [__NBTOFARRAYS__   ]  // dongx
     static int*       eztArraySizes;// [__NEZARRAYS__    ]
@@ -88,8 +88,8 @@ class StMuArrays {
     static int        arrayCounters    [__NALLARRAYS__    ];
     static int*strangeArrayCounters;// [__NSTRANGEARRAYS__]
     static int*    emcArrayCounters;// [__NEMCARRAYS__    ]
-	static int*    fmsArrayCounters;// [__NFMSARRAYS__    ]
     static int*    pmdArrayCounters;// [__NPMDARRAYS__    ]
+	static int*    fmsArrayCounters;// [__NFMSARRAYS__    ]
     static int*    tofArrayCounters;// [__NTOFARRAYS__    ]
     static int*   btofArrayCounters;// [__NBTOFARRAYS__   ]  // dongx
     static int*    eztArrayCounters;// [__NEZARRAYS__    ]
@@ -100,6 +100,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.20  2010/05/26 04:25:50  tone421
+ * Added StTriggerData arrays in muevent and fixed an issue with PMD arrays being read....
+ *
  * Revision 1.19  2010/01/25 03:57:39  tone421
  * Added FMS and Roman pot arrays
  *

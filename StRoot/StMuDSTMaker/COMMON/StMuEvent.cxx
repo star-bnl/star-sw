@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.22 2010/02/03 17:16:22 tone421 Exp $
+ * $Id: StMuEvent.cxx,v 1.23 2010/05/26 04:25:50 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -38,7 +38,7 @@ ClassImp(StMuEvent)
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-StMuEvent::StMuEvent() : mPrimaryVertexError(-999.,-999.,-999) { 
+  StMuEvent::StMuEvent() : mTriggerData(0), mPrimaryVertexError(-999.,-999.,-999) { 
   DEBUGMESSAGE("");
   int n = (char*)mReactionPlanePtWgt - (char*)&mRefMultPos+sizeof(mReactionPlanePtWgt);
   memset(&mRefMultPos,0,n);
@@ -131,7 +131,8 @@ void StMuEvent::fill(const StEvent* event){
     mVpdTdiff = event->tofCollection()->tdiff();
     mVpdVz = event->tofCollection()->vzVpd();
   }
-  //
+  // trigger data
+  mTriggerData = const_cast<StTriggerData*>(event->triggerData());
 } 
 
 unsigned short StMuEvent::refMultPos(int vtx_id) {
@@ -266,6 +267,9 @@ float StMuEvent::nearestVertexZ(int vtx_id){
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.23  2010/05/26 04:25:50  tone421
+ * Added StTriggerData arrays in muevent and fixed an issue with PMD arrays being read....
+ *
  * Revision 1.22  2010/02/03 17:16:22  tone421
  * Added function StMuEvent::nearestVertexZ(int vtx_id) which returns the z distance of the nearest vertex in relation to vertex vtx_id
  *
