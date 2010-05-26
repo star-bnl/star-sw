@@ -14,7 +14,7 @@ class StChain;
 StChain *chain=0;
 int useEtow=3;// 0=don't use; 1=only in event-display, 2=in away sum,3=in away&near sum
 
-int  spinSort=false;
+int  spinSort=true;
 bool isJanWjj=false; 
 int  isJustin=false;
 bool isRoss=true; 
@@ -432,6 +432,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.39  2010/05/26 18:14:34  balewski
+// make spin sorting the default
+//
 // Revision 1.38  2010/05/25 14:42:57  stevens4
 // add new library for jet maker (StRandomSelector)
 //
