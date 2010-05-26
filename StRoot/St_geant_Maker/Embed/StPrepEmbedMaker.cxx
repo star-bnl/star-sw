@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.1 2010/04/05 20:18:55 jeromel Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.2 2010/05/26 03:23:09 hmasui Exp $
  *
  */
 
@@ -55,6 +55,7 @@ struct embedSettings{
 };
 
 static embedSettings  *mSettings = 0;
+const Double_t StPrepEmbedMaker::mRapidityMaximumCut = 10.0 ; // Maximum rapidity range for 'spectrum' option
 
 //____________________________________________________________________________________________________
 StPrepEmbedMaker::StPrepEmbedMaker(const Char_t *name) : StMaker(name) 
@@ -75,7 +76,7 @@ StPrepEmbedMaker::StPrepEmbedMaker(const Char_t *name) : StMaker(name)
     mSettings->mult=0.;
 
     /// Default temperature is 300 MeV
-    mSettings->temperature=300.0 ; // MeV ???
+    mSettings->temperature=0.3; // GeV
 
     /// Default is no trigger selection
     mSettings->NReqTrg = 0 ;
@@ -170,6 +171,8 @@ Int_t StPrepEmbedMaker::InitRun(const int runnum)
   }//end spreadMode setup
 
 
+  // Obsolete methods
+#if 0
   if(mSettings->mode.CompareTo("Spectrum", TString::kIgnoreCase) == 0)
   { 
     // Call the old gentx binary for this request. 
@@ -189,9 +192,10 @@ Int_t StPrepEmbedMaker::InitRun(const int runnum)
 
     Do("gfile p temp.fz"); 
   }//end if Spectrum
+#endif
 
   // Common geant settings
-//  Do("make gstar"); // Make user-defined particles available
+  Do("make gstar"); // Make user-defined particles available
   gSystem->Load("libgstar");
    
   Do("detp  hadr_on");
@@ -337,23 +341,13 @@ Int_t StPrepEmbedMaker::Make()
      vfinder->SetVertexPosition(xyz[0],xyz[1],xyz[2]);
   }
 
+  // gkine is needed to set the z-vertex
+  gkine(npart, xyz[2], xyz[2]);
 
-  TString cmd;
-#if 1 
-   cmd = Form("gkine %i %i %f %f %f %f %f %f %f %f;",
-            npart, mSettings->pid,
-            mSettings->ptlow, mSettings->pthigh,
-            mSettings->etalow, mSettings->etahigh,
-            mSettings->philow, mSettings->phihigh, xyz[2], xyz[2]);
-            //mSettings->philow, mSettings->phihigh, vzlow, vzhigh);
-   Do(cmd.Data());
-#endif
-  cmd = Form("phasespace %i %i %f %f %f %f;",
-	     npart, mSettings->pid,
-	     mSettings->ptlow, mSettings->pthigh,
-	     mSettings->etalow, mSettings->etahigh);
+  // Flat (pt, y)
+  phasespace(npart);
   
-  Do(cmd.Data());
+  
   Do(Form("gvertex %f %f %f",xyz[0],xyz[1],xyz[2]));
   if( mSettings->mode.CompareTo("strange", TString::kIgnoreCase) == 0 )
     {
@@ -363,6 +357,33 @@ Int_t StPrepEmbedMaker::Make()
     { 
  	Do("vsig 0 0;");
     }
+
+  // Sloped momentum distribution
+  if( mSettings->mode.CompareTo("Spectrum", TString::kIgnoreCase) == 0 ){
+    // Make sure temperature > 0
+    if ( mSettings->temperature > 0.0 ){
+      // np:    Number of particle type
+      // code:  Particle geant id
+      // mult:  Numbe of particles per event (negative multiplicity means exact input number of particles per event)
+      // slope: Inverse slope parameter (c/GeV)
+      // dy:    Rapidity width, from etahigh (negative sign means flat rapidity)
+      LOG_INFO << "StPrepEmbedMaker::Make  Generate sloped momentum distribution with T=" 
+        << mSettings->temperature << " GeV !"
+        << endm;
+
+      Do("subevent 0");
+      Do(Form("detp mick miky.np=%d code=%d mult=%d slope=%f dy=%f", 
+            1, mSettings->pid, -npart, 1.0/mSettings->temperature, -mSettings->etahigh));
+ 
+      Do(Form("user/input please my.micky"));
+//      Do(Form("gfile u my.micky"));
+    }
+    else{
+      LOG_ERROR << "StPrepEmbedMaker::Make  Input temperature <= 0, T=" << mSettings->temperature
+        << ",    skip to generate sloped momentum distribution"
+        << endm ;
+    }
+  }
 
   Do("trig 1");
 
@@ -514,10 +535,52 @@ void StPrepEmbedMaker::SetZVertexCut(const Double_t vzlow, const Double_t vzhigh
     << " (cm)" << endm;
 }
 
+//________________________________________________________________________________
+void StPrepEmbedMaker::phasespace(const Int_t mult)
+{
+  Double_t rapidityMin = mSettings->etalow ;
+  Double_t rapidityMax = mSettings->etahigh ;
+
+  /// Set wider rapidity range in order NOT to cut out the eta 
+  if( mSettings->mode.CompareTo("Spectrum", TString::kIgnoreCase) == 0 ){
+    rapidityMin = -mRapidityMaximumCut ;
+    rapidityMax =  mRapidityMaximumCut ;
+  }
+
+  Do( Form("phasespace %i %i %f %f %f %f;",
+      mult, mSettings->pid,
+      mSettings->ptlow, mSettings->pthigh,
+      rapidityMin, rapidityMax)
+  );
+}
+
+//________________________________________________________________________________
+void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Double_t vzmax)
+{
+  Double_t rapidityMin = mSettings->etalow ;
+  Double_t rapidityMax = mSettings->etahigh ;
+
+  /// Set wider rapidity range in order NOT to cut out the eta 
+  if( mSettings->mode.CompareTo("Spectrum", TString::kIgnoreCase) == 0 ){
+    rapidityMin = -mRapidityMaximumCut ;
+    rapidityMax =  mRapidityMaximumCut ;
+  }
+
+  Do( Form("gkine %i %i %f %f %f %f %f %f %f %f;",
+      mult, mSettings->pid,
+      mSettings->ptlow, mSettings->pthigh,
+      rapidityMin, rapidityMax,
+      mSettings->philow, mSettings->phihigh, 
+      vzmin, vzmax)
+  );
+}
 
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.2  2010/05/26 03:23:09  hmasui
+ * Implement spectrum option by gstar_micky
+ *
  * Revision 1.1  2010/04/05 20:18:55  jeromel
  * Moved from one level up
  *
