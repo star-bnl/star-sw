@@ -4,11 +4,14 @@
  * \author A. Rose LBL, Y. Fisyak BNL, L. Barnby U. Birmingham
  * \date   May 2007
  *
- * $Id: StPrepEmbedMaker.h,v 1.1 2010/04/05 20:18:55 jeromel Exp $
+ * $Id: StPrepEmbedMaker.h,v 1.2 2010/05/26 03:22:52 hmasui Exp $
  *
  *
  * -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.h,v $
+ * Revision 1.2  2010/05/26 03:22:52  hmasui
+ * Set rapidity +/-10 in gkine/phasespace for spectrum option in order to avoid acceptance cuts
+ *
  * Revision 1.1  2010/04/05 20:18:55  jeromel
  * Moved from one level up
  *
@@ -64,7 +67,7 @@ class StPrepEmbedMaker : public StMaker {
   Int_t  InitRun(const int runnum);
   virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.1 2010/04/05 20:18:55 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPrepEmbedMaker.h,v 1.2 2010/05/26 03:22:52 hmasui Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -86,7 +89,18 @@ class StPrepEmbedMaker : public StMaker {
   void SetSpreadMode(const Bool_t flag=kFALSE) ;
   void SetTrgOpt(const Int_t TrgId); // Set trigger id cut
   void SetZVertexCut(const Double_t vzlow, const Double_t vzhigh); // Set z-vertex cut
+
+  /// Do phasespace command from input pt, y
+  ///   Force to make rapidity distribute within +/- mRapidityMaximumCut for 'spectrum' option
+  void phasespace(const Int_t mult) ;
+
+  /// Do gkine command from input p, eta, phi
+  ///   Force to make rapidity distribute within +/- mRapidityMaximumCut for 'spectrum' option
+  void gkine(const Int_t mult, const Double_t vzmin, const Double_t vzmax) ;
+
  private:
+  static const Double_t mRapidityMaximumCut ; /// Maximum rapidity cut for 'spectrum' option
+
   /// Get multiplicity used in the embedding
   ///  if input mult = 1  ---> generate 1 particle / event
   ///  if input mult < 1  ---> generate nprimarytracks * mult particle / event (typically 5%)
