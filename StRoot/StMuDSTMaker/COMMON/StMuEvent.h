@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.28 2010/05/26 04:25:50 tone421 Exp $
+ * $Id: StMuEvent.h,v 1.29 2010/05/26 17:34:59 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -71,7 +71,7 @@ class StMuEvent : public TObject {
   // Special classes for the muDst
   StMuL3EventSummary& l3EventSummary();
   StMuTriggerIdCollection& triggerIdCollection();
-  StTriggerData* triggerData();
+  const StTriggerData* triggerData() const;
 
   /// Reference multiplicity of positive particles as defined in StEventUtilities/StuRefMult.hh for vertex vtx_id (-1 is default index from StMuDst)
   unsigned short refMultPos(int vtx_id = -1);
@@ -179,7 +179,7 @@ inline StL0Trigger& StMuEvent::l0Trigger() {return mL0Trigger;}
 // special classes for muDst
 inline StMuL3EventSummary& StMuEvent::l3EventSummary() {return mL3EventSummary;}
 inline StMuTriggerIdCollection& StMuEvent::triggerIdCollection(){return mTriggerIdCollection;}
-inline StTriggerData* StMuEvent::triggerData() { return mTriggerData; }
+inline const StTriggerData* StMuEvent::triggerData() const { return mTriggerData; }
 inline double StMuEvent::reactionPlane(unsigned short s) {return (s==0) ? mReactionPlane[0] : mReactionPlane[1];}
 inline void StMuEvent::setReactionPlane(unsigned short s, double v) {(s==0) ? mReactionPlane[0]=v : mReactionPlane[1]=v;}
 inline double StMuEvent::reactionPlanePtWgt(unsigned short s) {return (s==0) ? mReactionPlanePtWgt[0] : mReactionPlanePtWgt[1];}
@@ -218,8 +218,8 @@ inline float StMuEvent::vpdVz() { return mVpdVz; }
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
- * Revision 1.28  2010/05/26 04:25:50  tone421
- * Added StTriggerData arrays in muevent and fixed an issue with PMD arrays being read....
+ * Revision 1.29  2010/05/26 17:34:59  tone421
+ * Added const protection to StTriggerData* StMuEvent::triggerData()
  *
  * Revision 1.27  2010/02/03 17:16:22  tone421
  * Added function StMuEvent::nearestVertexZ(int vtx_id) which returns the z distance of the nearest vertex in relation to vertex vtx_id
