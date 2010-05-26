@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcSvtSsd.C,v 1.10 2010/05/25 01:52:13 hmasui Exp $
+// $Id: bfcMixer_TpcSvtSsd.C,v 1.11 2010/05/26 23:33:24 hmasui Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -154,7 +154,7 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
   if (! embMk) return;
   embMk->SetTagFile(tagfile);
   //            pTlow,ptHigh,etaLow,etaHigh,phiLow,phiHigh
-  embMk->SetOpt(  pt_low,    pt_high,  eta_low,    eta_high,    0.,   6.283185); 
+  embMk->SetOpt(  pt_low,    pt_high,  eta_low,    eta_high,    0.,   6.283185, mode); 
   //                pid, mult
   embMk->SetPartOpt(  pid,mult);
 
