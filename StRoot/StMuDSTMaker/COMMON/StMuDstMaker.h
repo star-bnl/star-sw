@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.50 2010/01/25 03:57:39 tone421 Exp $
+ * $Id: StMuDstMaker.h,v 1.51 2010/05/26 04:25:50 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -107,7 +107,8 @@ class StMuDstMaker : public StIOInterFace {
     StMuDstMaker(const char* name="MuDst");
     /// Constructor
     StMuDstMaker(int mode, int nameMode, const char* dirName="./", const char* fileName="", const char* filter=".", int maxfiles=10,
-		 const char* name="MuDst" );
+		 const char* name="MuDst");
+  
     ~StMuDstMaker();
 
   virtual int Init();
@@ -162,13 +163,16 @@ class StMuDstMaker : public StIOInterFace {
   /// Sets the compression level for the file and all branches. 0 means no compression, 9 is the higher compression level.
   void setCompression(int comp=9);
 
+  //Set for StTriggerData. Default is 2009.
+  void setStTriggerYear(int);
+
   StMuEmcUtil* muEmcUtil() { return mEmcUtil; } ///< return pointer to StMuEmcUtil;
   StMuFmsUtil* muFmsUtil() { return mFmsUtil; } ///< return pointer to StMuFmsUtil;
   StMuPmdUtil* muPmdUtil() { return mPmdUtil; } ///< return pointer to StMuPmdUtil;
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.50 2010/01/25 03:57:39 tone421 Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.51 2010/05/26 04:25:50 tone421 Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -266,6 +270,7 @@ virtual   void closeRead();
   void fillEvent(StEvent* ev, StMuCut* cut=0);
   void fillVertices(StEvent* ev);
   void fillpp2pp(StEvent* ev);
+  void fillsttrigger(StEvent* ev);	
   void fillPmd(StEvent* ev);
   void fillEmc(StEvent* ev);
   void fillFms(StEvent* ev);
@@ -358,6 +363,7 @@ inline void StMuDstMaker::setReadV0s(bool b) { mReadV0s=b;}
 inline void StMuDstMaker::setReadXis(bool b) { mReadXis=b;}
 inline void StMuDstMaker::setReadKinks(bool b) { mReadKinks=b;}
 
+
 inline void StMuDstMaker::setSplit(int split) { mSplit = split;}
 inline void StMuDstMaker::setCompression(int comp) { mCompression = comp;}
 inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
@@ -368,6 +374,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.51  2010/05/26 04:25:50  tone421
+ * Added StTriggerData arrays in muevent and fixed an issue with PMD arrays being read....
+ *
  * Revision 1.50  2010/01/25 03:57:39  tone421
  * Added FMS and Roman pot arrays
  *

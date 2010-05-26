@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.98 2010/03/08 19:06:51 tone421 Exp $
+ * $Id: StMuDstMaker.cxx,v 1.99 2010/05/26 04:25:50 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -93,6 +93,8 @@ ClassImp(StMuDstMaker)
   using namespace units;
 #endif
 
+TStopwatch n;
+
 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -165,9 +167,9 @@ void StMuDstMaker::assignArrays()
   mArrays         = mAArrays       + 0;       
   mStrangeArrays  = mArrays        + __NARRAYS__;
   mEmcArrays      = mStrangeArrays + __NSTRANGEARRAYS__;    
-  mFmsArrays      = mEmcArrays     + __NEMCARRAYS__;      
-  mPmdArrays      = mFmsArrays     + __NFMSARRAYS__;    
-  mTofArrays      = mPmdArrays     + __NPMDARRAYS__;    
+  mPmdArrays      = mEmcArrays     + __NEMCARRAYS__;    
+  mFmsArrays      = mPmdArrays     + __NPMDARRAYS__;      
+  mTofArrays      = mFmsArrays     + __NFMSARRAYS__;    
   mBTofArrays     = mTofArrays     + __NTOFARRAYS__;  /// dongx
   mEztArrays      = mBTofArrays    + __NBTOFARRAYS__; /// dongx
 }
@@ -175,7 +177,7 @@ void StMuDstMaker::assignArrays()
 void StMuDstMaker::clearArrays()
 {
   const int ezIndex=__NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+
-    __NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__;  /// dongx
+    __NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__;  /// dongx
   for ( int i=0; i<ezIndex; i++) {
     mAArrays[i]->Clear();
     StMuArrays::arrayCounters[i]=0;
@@ -193,7 +195,7 @@ void StMuDstMaker::zeroArrays()
   memset(mStatusArrays,(char)1,sizeof(mStatusArrays) ); //default all ON
   // ezt arrays switched off
   memset(&mStatusArrays[__NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+
-			__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__],(char)0,__NEZTARRAYS__);  /// dongx
+			__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__],(char)0,__NEZTARRAYS__);  /// dongx
   
 }
 //-----------------------------------------------------------------------
@@ -225,17 +227,17 @@ void StMuDstMaker::zeroArrays()
 */
 void StMuDstMaker::SetStatus(const char *arrType,int status)
 {
-  static const char *specNames[]={"MuEventAll","StrangeAll","EmcAll","FMSAll","PmdAll","TofAll","BTofAll","EztAll",0};  /// dongx
+  static const char *specNames[]={"MuEventAll","StrangeAll","EmcAll","PmdAll","FMSAll","TofAll","BTofAll","EztAll",0};  /// dongx
   static const int   specIndex[]={
     0, 
     __NARRAYS__,
     __NARRAYS__+__NSTRANGEARRAYS__,
     __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__,                  /// dongx
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__,   /// dongx
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__,                  /// dongx
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__,   /// dongx
     -1};
 
   if (strncmp(arrType,"St",2)==0) arrType+=2;  //Ignore first "St"
@@ -297,6 +299,40 @@ mFmsCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/*StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, int year) : StIOInterFace("MuDst"),
+  mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
+  mIOMaker(0), mTreeMaker(0),
+  mIoMode(mode), mIoNameMode(nameMode), 
+  mDirName(dirName), mFileName(""), mFilter("."), 
+  mMaxFiles(10), mEventList(0),
+  mTrackType(256), mReadTracks(1),
+  mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
+  mTrackFilter(0), mL3TrackFilter(0), mCurrentFile(0),
+  mSplit(99), mCompression(9), mBufferSize(65536*4),mStTriggerYear(year),
+  mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
+mFmsCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
+{
+  assignArrays();
+  streamerOff();
+  zeroArrays();
+  createArrays();
+  if (mIoMode==ioRead) openRead();
+  if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
+
+  setProbabilityPidFile();
+
+  mEventCounter=0;
+  mStMuDst = new StMuDst();
+  mEmcUtil = new StMuEmcUtil();
+  mFmsUtil = new StMuFmsUtil();
+  mPmdUtil = new StMuPmdUtil();
+  mTofUtil = new StMuTofUtil();
+  mBTofUtil= new StMuBTofUtil();  /// dongx
+  mEzTree  = new StMuEzTree();
+}*/
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 StMuDstMaker::~StMuDstMaker() {
   DEBUGMESSAGE1("");
   //clear(999);
@@ -316,6 +352,7 @@ StMuDstMaker::~StMuDstMaker() {
   delete mEmcCollectionArray;
   delete mPmdCollectionArray;
   DEBUGMESSAGE3("out");
+  cout<<"TStopwatch time is "<<n.RealTime()<<endl;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -358,7 +395,7 @@ void StMuDstMaker::createArrays() {
   for ( int i=0; i<__NALLARRAYS__; i++) {
     DEBUGVALUE2(mAArrays[i]);
 	clonesArray(mAArrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],StMuArrays::arrayCounters[i]);
-    DEBUGVALUE2(mAArrays[i]);
+	DEBUGVALUE2(mAArrays[i]);
   }
   mStMuDst->set(this);
   // commented to include tof again (subhasis) 
@@ -801,6 +838,7 @@ void StMuDstMaker::closeWrite(){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
+
   DEBUGMESSAGE2("");
 
  try {
@@ -808,8 +846,8 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
 	fillL3AlgorithmInfo(ev);
     fillDetectorStates(ev);
     fillEmc(ev);
-	fillFms(ev);
     fillPmd(ev);
+	fillFms(ev);
     fillTof(ev);
     fillBTof(ev);  /// dongx
     fillEzt(ev);
@@ -1016,7 +1054,7 @@ void StMuDstMaker::fillEzt(StEvent* ev) {
   if (ev==0)
     return;
   char *eztArrayStatus=&mStatusArrays[__NARRAYS__+__NSTRANGEARRAYS__+
-				      __NEMCARRAYS__+__NPMDARRAYS__+
+				      __NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+
 				      __NTOFARRAYS__+__NBTOFARRAYS__]; /// dongx
   if(eztArrayStatus[muEztHead]){
     EztEventHeader* header = mEzTree->copyHeader(ev);
@@ -1108,7 +1146,6 @@ void StMuDstMaker::fillpp2pp(StEvent* ev) {
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
-
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1484,6 +1521,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.99  2010/05/26 04:25:50  tone421
+ * Added StTriggerData arrays in muevent and fixed an issue with PMD arrays being read....
+ *
  * Revision 1.98  2010/03/08 19:06:51  tone421
  * Two things. Global tracks how are filled with an index to primary at birth. Added StMuDst::fixTrackIndicesG(), which is used for matching the primary track indices to global tracks. Previously, this was quite slow -  see this post:
  *
