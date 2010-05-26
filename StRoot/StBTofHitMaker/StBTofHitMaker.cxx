@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.16 2010/05/25 22:09:29 geurts Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.17 2010/05/26 23:10:25 geurts Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -86,7 +86,6 @@ Int_t StBTofHitMaker::InitRun(Int_t runnumber)
   LOG_DEBUG << "Initializing StBTofSortRawHit:" << endm;
   mBTofSortRawHit = new StBTofSortRawHit();
   mBTofSortRawHit->Init(this, mBTofDaqMap);
-  mBTofSortRawHit->setVpdDelay(runnumber);
 
   return kStOK;
 }
