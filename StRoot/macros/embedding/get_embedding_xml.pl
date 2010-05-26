@@ -34,6 +34,7 @@ my $ymax          = 1.5 ;                                           # Default ra
 my $pid           = 8 ;                                             # Default geant id (is pi+)
 my $multiplicity  = 1 ;                                             # Default multiplicity (is 1)
 my $particleName  = "PiPlus" ;                                      # Default particle name (is pi+)
+my $prodName      = $production ;                                   # Default prodName (second last argument in the bfcMixer)
 $verbose          = 0 ;                                             # verbose flag (defalt is false)
 
 my $maxFilesPerProcess = 1 ;       # 1 file per job
@@ -48,6 +49,11 @@ my $libraryPath        = ".sl44_gcc346";      # Default library path
 #my $getYearFromFile = "$staroflDir/aarose/getYearFromFile.pl";
 #my $getDayFromFile  = "$staroflDir/aarose/getDayFromFile.pl";
 my $getYearDayFromFile = "StRoot/macros/embedding/getYearDayFromFile.pl";
+my $localTestScript    = "test.csh" ;  # Local test script for one input daq/tags file
+
+# Some fixed strings in the xml file
+my $fileBaseNameXml = "\${FILEBASENAME}";
+my $jobIdXml        = "\$JOBID";
 
 GetOptions (
     'daq=s' => \$daqsDirectory,            # Daq file directory
@@ -55,11 +61,13 @@ GetOptions (
     'geantid=i' => \$pid,                  # Geantid
     'help' => \$help,
     'library=s' => \$library,              # Library
+    'local' => \$local,                    # Make local test script
     'log=s' => \$logDirectory,             # Log file directory
     'mixer=s' => \$bfcMixer,               # bfcMixer
     'mode=s' => \$ptOption,                # pt option
     'mult=s' => \$multiplicity,            # Number of MC tracks per event
     'particlename=s' => \$particleName,    # Particle name
+    'prodname=s' => \$prodName,            # prodName
     'production=s' => \$production,        # Production
     'ptmin=f' => \$ptmin,                  # Minimum pt cut
     'ptmax=f' => \$ptmax,                  # Maximum pt cut
@@ -89,6 +97,9 @@ my $usage = q(
   -h or --help                 Show this messages and exit
 
   -lib [library]               Set library. ex. -l SL08f (default will be detemined by $production)
+  -local                       Make local test script to read one input daq/tag file. Output shell script is test.csh,
+                               which will be not overwrited by default (use -f option to force overwriting)
+
   -log [log file directory]    Set log file directory (default is /project/projectdirs/star/embedding/$production/LOG/)
   -mixer [bfcMixer]            Set bfcMixer macro (default is StRoot/macros/embeding/bfcMixer_TpcSvtSSd.C)
   -mode                        Set pt mode (default is FlatPt)
@@ -103,7 +114,8 @@ my $usage = q(
 
   -particle (or --particlename) [Particle name]   Set particle name (default is PiPlus)
 
-  -pro [production]            Set production. ex. -p P08ie (default is P08ic)
+  -prodname [prod. name]       Set prodName (the second last argument in the bfcMixer, default is P08ic)
+  -production [production]     Set production. ex. -p P08ie (default is P08ic)
 
   -ptmin [Minimum pt cut]      Set minimum pt cut off (default is 0 GeV/c)
   -ptmax [Maximum pt cut]      Set maximum pt cut off (default is 10 GeV/c)
@@ -216,8 +228,8 @@ print OUT "\n";
 
 printDebug("Set year and day ...");
 print OUT "<!-- Set year and day from filename -->\n";
-print OUT "setenv EMYEAR `$getYearDayFromFile -y \${FILEBASENAME}`\n";
-print OUT "setenv EMDAY `$getYearDayFromFile -d \${FILEBASENAME}`\n";
+print OUT "setenv EMYEAR `$getYearDayFromFile -y $fileBaseNameXml`\n";
+print OUT "setenv EMDAY `$getYearDayFromFile -d $fileBaseNameXml`\n";
 print OUT "\n";
 
 #printDebug("Set trigger setup name: $trgsetupName ...");
@@ -234,7 +246,7 @@ print OUT "<!-- Start job -->\n";
 #----------------------------------------------------------------------------------------------------
 # Set tags file
 #----------------------------------------------------------------------------------------------------
-my $tagFile = "\$EMBEDTAGDIR/\${FILEBASENAME}.tags.root"; #Define tag file
+my $tagFile = "\$EMBEDTAGDIR/$fileBaseNameXml.tags.root"; #Define tag file
 printDebug("Set tags file: $tagFile");
 
 #----------------------------------------------------------------------------------------------------
@@ -242,43 +254,22 @@ printDebug("Set tags file: $tagFile");
 #----------------------------------------------------------------------------------------------------
 printDebug("Set bfcMixer: $bfcMixer ...");
 
-# Remove '.C' from macro
-my $bfcMixerFunction = `basename $bfcMixer`;
-chomp($bfcMixerFunction);
-$bfcMixerFunction =~ s/.C//g; # Remove .C
-printDebug("Prepare function: $bfcMixerFunction to execute in root4star");
-
-# Second last argument should be revisited. Currently, just put $production (Hiroshi)
-# Set executing bfcMixer's
-my $execute_bfcMixer = "" ;
-if ( $bfcMixer =~ /.*SvtSsd.C/ ){
-  # bfcMixer_TpcSvtSsd.C needs two additional switches
-  printDebug("SVT/SSD flags are added in the 2nd/3rd arguments");
-
-  $execute_bfcMixer = "$bfcMixerFunction($nevents, 1, 1, \"\$INPUTFILE0\", \"$tagFile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexCut, $zvertexCut, $pid, $multiplicity, triggers, \"$production\", \"$ptOption\");";
+# Determine trigger string
+my $triggerString = "0";
+if ( @triggerId ){
+  $triggerString = "triggers";
 }
-else{
-  # Other bfcMixers (TpcOnly or Tpx)
-  printDebug("Starndard (without SVT/SSD) bfcMixer");
 
-  $execute_bfcMixer = "$bfcMixerFunction($nevents, \"\$INPUTFILE0\", \"$tagFile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexCut, $zvertexCut, $pid, $multiplicity, triggers, \"$production\", \"$ptOption\");";
-}
-printDebug("Executing bfcMixer looks: $execute_bfcMixer");
+# Get bfcMixer
+$execute_bfcMixer = get_bfcMixer($bfcMixer, $nevents, "\$INPUTFILE0", $tagFile, $ptmin, $ptmax, $ymin, $ymax, $zvertexCut, 
+    $pid, $multiplicity, $triggerString, $prodName, $ptOption) ;
 
-print OUT "echo \"Executing $execute_bfcMixer ...\"\n";
+print OUT "echo 'Executing $execute_bfcMixer ...'\n";
 print OUT "\n";
 print OUT "root4star -b &lt;&lt;EOF\n";
 
 # Put Trigger id's 
-if ( @triggerId ) {
-  printDebug("Trigger id(s) requested");
-  print OUT "  std::vector&lt;Int_t&gt; triggers;\n";
-  while ( @triggerId ){
-    $trigger = shift @triggerId ;
-    print OUT "  triggers.push_back($trigger);\n";
-    printDebug("Push back trigger id = $trigger");
-  }
-}
+print OUT getTriggerVector($triggerString, @triggerId) ;
 
 print OUT "  .L $bfcMixer\n";
 print OUT "  $execute_bfcMixer\n";
@@ -289,14 +280,14 @@ print OUT "ls -la .\n";
 #----------------------------------------------------------------------------------------------------
 # Copy log/error files in the working directory
 #----------------------------------------------------------------------------------------------------
-my $logFileName = "\${FILEBASENAME}.\$JOBID.log";
+my $logFileName = "$fileBaseNameXml.$jobIdXml.log";
 printDebug("Set logfilename: $logFileName ...");
 
-my $errFileName = "\${FILEBASENAME}.\$JOBID.elog";
+my $errFileName = "$fileBaseNameXml.$jobIdXml.elog";
 printDebug("Set errfilename: $errFileName ...");
 
-print OUT "cp $logDirectory/\$JOBID.log $logFileName\n";
-print OUT "cp $logDirectory/\$JOBID.elog $errFileName\n";
+print OUT "cp $logDirectory/$jobIdXml.log $logFileName\n";
+print OUT "cp $logDirectory/$jobIdXml.elog $errFileName\n";
 print OUT "\n";
 
 #----------------------------------------------------------------------------------------------------
@@ -316,8 +307,8 @@ print OUT "\n";
 #----------------------------------------------------------------------------------------------------
 printDebug("Locations of log/elog, daq files, csh/list and local sand-box ...");
 print OUT "<!-- Define locations of log/elog files -->\n";
-print OUT "<stdout URL=\"file:$logDirectory/\$JOBID.log\"/>\n";
-print OUT "<stderr URL=\"file:$logDirectory/\$JOBID.elog\"/>\n";
+print OUT "<stdout URL=\"file:$logDirectory/$jobIdXml.log\"/>\n";
+print OUT "<stderr URL=\"file:$logDirectory/$jobIdXml.elog\"/>\n";
 print OUT "\n";
 print OUT "<!-- Input daq files -->\n";
 print OUT "<input URL=\"file:$daqsDirectory/st*\"/>\n";
@@ -342,10 +333,144 @@ print OUT "\n";
 # Close xml file
 #----------------------------------------------------------------------------------------------------
 close(OUT);
-printDebug("Close $outputXml ... (ok)");
+printDebug("Close $outputXml ... (ok)\n\n");
+
+#----------------------------------------------------------------------------------------------------
+# Make local test shell script if "-local" is ON
+#----------------------------------------------------------------------------------------------------
+if($local){
+  if ( -f $localTestScript ){
+    if ( $force ){
+      printDebug("Overwrite $localTestScript ...");
+    }
+    else{
+      print "$localTestScript already existed. Don't overwrite current file. \n";
+      print "Use -f option to force overwriting the file.\n";
+      exit(0);
+    }
+  }
+
+  # Find one daq file from the path, and also find the corredponding tags file
+  my $daqOneFile  = `find $daqsDirectory -type f -iname "*daq" | head -n1`;
+  chomp($daqOneFile);
+
+  # Make sure daq file exists
+  if ( ! -f $daqOneFile ){
+    print "Can't find $daqOneFile. Stop\n";
+    exit(0);
+  }
+  printDebug("Found one daq file: $daqOneFile");
+
+  my $tagsBaseName = `basename $daqOneFile | sed 's/\\.daq/\\.tags\\.root/g'`;
+  chomp($tagsBaseName);
+  my $tagsOneFile  = "$tagsDirectory/$tagsBaseName";
+
+  # Make sure tags file exists
+  if ( ! -f $tagsOneFile ){
+    print "Can't find $tagsOneFile. Stop\n";
+    exit(0);
+  }
+  printDebug("Found one tags file: $tagsOneFile");
+  
+  open (LOCAL, ">$localTestScript") || die "can't open $localTestScript\n"; 
+  print LOCAL "#!/bin/csh\n";
+  print LOCAL "\n";
+  print LOCAL "starver $library\n";
+  print LOCAL "set daq  = \"$daqOneFile\"\n";
+  print LOCAL "set tags = \"$tagsOneFile\"\n";
+  print LOCAL "\n";
+
+  # Get bfcMixer
+  $execute_bfcMixer = get_bfcMixer($bfcMixer, 10, $daqOneFile, $tagsOneFile, $ptmin, $ptmax, $ymin, $ymax, $zvertexCut, 
+      $pid, $multiplicity, $triggerString, $prodName, $ptOption) ;
+
+  print LOCAL "echo 'Executing $execute_bfcMixer ...'\n";
+  print LOCAL "\n";
+  print LOCAL "root4star -b <<EOF\n";
+
+  # Put Trigger id's (Need to fix &lt; and &gt; by hand)
+  print LOCAL getTriggerVector($triggerString, @triggerId) ;
+
+  print LOCAL "  .L $bfcMixer\n";
+  print LOCAL "  $execute_bfcMixer\n";
+  print LOCAL "  .q\n";
+  print LOCAL "EOF\n";
+  close(LOCAL);
+
+  # Make executable
+  system("chmod u+x $localTestScript");
+
+  printDebug("Close local test script $localTestScript ... (ok)\n\n");
+}
 
 # enf of script
 #====================================================================================================
+
+#----------------------------------------------------------------------------------------------------
+# Get bfcMixer (either bfcMixer_TpcSvtSsd or bfcMixer_Tpx)
+#----------------------------------------------------------------------------------------------------
+sub get_bfcMixer {
+  my $bfcMixer     = shift @_ ;
+  my $nevents      = shift @_ ;
+  my $daqfile      = shift @_ ;
+  my $tagsfile     = shift @_ ;
+  my $ptmin        = shift @_ ;
+  my $ptmax        = shift @_ ;
+  my $ymin         = shift @_ ;
+  my $ymax         = shift @_ ;
+  my $zvertexcut   = shift @_ ;
+  my $pid          = shift @_ ;
+  my $multiplicity = shift @_ ;
+  my $trigger      = shift @_ ;
+  my $prodname     = shift @_ ;
+  my $ptOption     = shift @_ ;
+
+  # Remove '.C' from macro
+  my $bfcMixerFunction = `basename $bfcMixer`;
+  chomp($bfcMixerFunction);
+  $bfcMixerFunction =~ s/.C//g; # Remove .C
+  printDebug("Prepare function: $bfcMixerFunction to execute in root4star");
+
+  # Second last argument should be revisited. Currently, just put $production (Hiroshi)
+  # Set executing bfcMixer's
+  my $execute_bfcMixer = "" ;
+  if ( $bfcMixer =~ /.*SvtSsd.C/ ){
+    # bfcMixer_TpcSvtSsd.C needs two additional switches
+    printDebug("SVT/SSD flags are added in the 2nd/3rd arguments");
+
+    $execute_bfcMixer = "$bfcMixerFunction($nevents, 1, 1, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\");";
+  }
+  else{
+    # Other bfcMixers (TpcOnly or Tpx)
+    printDebug("Starndard (without SVT/SSD) bfcMixer");
+
+    $execute_bfcMixer = "$bfcMixerFunction($nevents, \"$daqfile\", \"$tagsfile\", $ptmin, $ptmax, $ymin, $ymax, -$zvertexcut, $zvertexcut, $pid, $multiplicity, $trigger, \"$prodname\", \"$ptOption\");";
+  }
+  printDebug("Executing bfcMixer looks: $execute_bfcMixer");
+
+  return $execute_bfcMixer ;
+}
+
+#----------------------------------------------------------------------------------------------------
+# Get trigger vectors
+#----------------------------------------------------------------------------------------------------
+sub getTriggerVector {
+  my $triggerString = shift @_ ;
+  my @triggerArray = @_ ;
+
+  $val = "";
+  if ( @triggerArray ) {
+    printDebug("Trigger id(s) requested");
+    $val = $val . "  std::vector&lt;Int_t&gt; $triggerString;\n";
+    while ( @triggerArray ){
+      $trigger = shift @triggerArray ;
+      $val = $val . "  $triggerString.push_back($trigger);\n";
+      printDebug("Push back trigger id = $trigger");
+    }
+  }
+
+  return $val ;
+}
 
 #----------------------------------------------------------------------------------------------------
 # Output filename (xml)
