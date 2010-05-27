@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.cxx,v 1.17 2010/05/26 23:10:25 geurts Exp $
+ * $Id: StBTofHitMaker.cxx,v 1.18 2010/05/27 17:03:18 geurts Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -108,7 +108,6 @@ Int_t StBTofHitMaker::Finish()
   Clear("");
   return kStOK;
 }
-
 //_____________________________________________________________
 /*!
  * This method is to obtain the btofCollection from StEvent.
@@ -135,7 +134,16 @@ StBTofCollection *StBTofHitMaker::GetBTofCollection()
 
   return btofCollection;
 }
-
+//_____________________________________________________________
+StRtsTable *StBTofHitMaker::GetNextRaw(int sec)
+{
+  assert(0 && "RTS doesn't provide sector by sector legacy tof banks yet");
+  StRtsTable *daqTofTable = GetNextLegacy(sec);
+  if (daqTofTable) {
+     fTof = (tof_t*)*DaqDta()->begin();
+  }
+  return daqTofTable;
+}
 //_____________________________________________________________
 StRtsTable *StBTofHitMaker::GetNextRaw() 
 {

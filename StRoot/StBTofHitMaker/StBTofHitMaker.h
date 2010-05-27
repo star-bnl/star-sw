@@ -3,7 +3,7 @@
 
 /***************************************************************************
  *
- * $Id: StBTofHitMaker.h,v 1.8 2009/10/27 16:17:54 fine Exp $
+ * $Id: StBTofHitMaker.h,v 1.9 2010/05/27 17:03:19 geurts Exp $
  * StBTofHitMaker - class to fille the StEvent from DAQ reader
  *--------------------------------------------------------------------------
  *
@@ -86,6 +86,7 @@ class StBTofHitMaker:public StRTSBaseMaker
 
    protected:
       StRtsTable *GetNextRaw();
+      StRtsTable *GetNextRaw(int sec);
       
       StBTofCollection *GetBTofCollection();
 
