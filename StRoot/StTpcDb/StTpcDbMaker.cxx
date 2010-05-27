@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.54 2010/03/18 14:40:47 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.55 2010/05/27 19:14:26 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.55  2010/05/27 19:14:26  fisyak
+ * Take out flavoring by 'sim' for tpcGlobalPosition,tpcSectorPosition and starClockOnl tables. remove usage tpcISTimeOffsets and tpcOSTimeOffsets tables
+ *
  * Revision 1.54  2010/03/18 14:40:47  fisyak
  * back to 3 parameter constration of StMagUtilities
  *
@@ -202,14 +205,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
   // Create Needed Tables:    
   Float_t gFactor = StarMagField::Instance()->GetFactor();
   // Set Table Flavors
-  if (IAttr("Simu")){
-    const Char_t *tabNames[5] = {"tpcGlobalPosition","tpcSectorPosition", "tpcISTimeOffsets", 
-				 "tpcOSTimeOffsets","starClockOnl"};
-    for (Int_t i = 0; i < 5; i++) {
-      SetFlavor("sim",tabNames[i]); 
-      gMessMgr->Info()  << "StTpcDbMaker::Setting Sim Flavor tag for table " << "\t" << tabNames[i] << endm;
-    }
-  } else {
+  if (! IAttr("Simu")){
     if (gFactor<-0.8) {
       gMessMgr->Info() << "StTpcDbMaker::Full Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
       SetFlavor("FullMagFNegative","tpcGlobalPosition");
@@ -278,7 +274,11 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     LOG_QA << "Instantiate ExB The option passed will be " << Form("%d 0x%X\n",mask,mask) << endm;
     // option handling needs some clean up, but right now we stay compatible
     Int_t option = (mask & 0x7FFFFFFE) >> 1;
+#ifndef __NEW_MagUtilities__
     StMagUtilities *magU = new StMagUtilities(gStTpcDb, GetDataBase("RunLog"), option);
+#else
+    StMagUtilities *magU = new StMagUtilities(gStTpcDb, option);
+#endif
     m_TpcDb->SetExB(magU);
   }
   m_tpg_pad_plane = new St_tpg_pad_plane("tpg_pad_plane",1);
