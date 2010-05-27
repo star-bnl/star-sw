@@ -59,9 +59,6 @@ class ComponentConstant : public ComponentBase {
     // Weighting potential at this point
     double w0;
 
-    // Geometry checks
-    bool CheckSolidType(Solid* s);
-    void CheckBoundaryConditionType(int& bctype, double& bcval);
     // Reset the component
     void Reset();
     // Verify periodicities

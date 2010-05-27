@@ -896,7 +896,8 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
   dt = - log(RndmUniformPos()) / f;
   t += dt;
   dt *= SpeedOfLight;
-  x += dt * dx; y += dt * dy; z += dt * dz;
+  // Temporarily: absorb photon on the spot
+  // x += dt * dx; y += dt * dy; z += dt * dz;
 
   // Check if the photon is still inside a medium
   if (!sensor->GetMedium(x, y, z, medium)) { 

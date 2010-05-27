@@ -927,22 +927,6 @@ ComponentNeBem2d::WireFlux(const double r0, const double x, const double y,
 
 }
 
-bool
-ComponentNeBem2d::CheckSolidType(Solid* s) {
-
-  if (!s->IsBox()) return false;
-  return true;
-
-}
-
-void
-ComponentNeBem2d::CheckBoundaryConditionType(int& bctype, double& bcval) {
-
-  bctype = 0;
-  bcval = 0.;
-
-}
-
 void
 ComponentNeBem2d::Reset() {
 

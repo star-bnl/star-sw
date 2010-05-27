@@ -117,6 +117,11 @@ class ComponentFieldMap: public ComponentBase {
     bool hasWeightingField;
     std::string wfield;
 
+    // Bounding box
+    bool hasBoundingBox;
+    double xMinBoundingBox, yMinBoundingBox, zMinBoundingBox;
+    double xMaxBoundingBox, yMaxBoundingBox, zMaxBoundingBox;
+
     // Ranges and periodicities
     double mapxmin, mapymin, mapzmin;
     double mapxmax, mapymax, mapzmax;
@@ -139,9 +144,6 @@ class ComponentFieldMap: public ComponentBase {
     // Warnings flag
     bool warning;
 
-    // Geometry checks
-    bool CheckSolidType(Solid* s);
-    void CheckBoundaryConditionType(int& bctype, double& bcval);
     // Reset the component
     void Reset() {};
 

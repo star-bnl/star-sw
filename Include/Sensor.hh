@@ -119,7 +119,7 @@ class Sensor {
 
     // Return the current sensor size
     bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
-			            double& xmax, double& ymax, double& zmax);
+                         double& xmax, double& ymax, double& zmax);
 
 };
 

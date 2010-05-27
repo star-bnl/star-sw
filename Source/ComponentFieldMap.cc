@@ -14,7 +14,8 @@ namespace Garfield {
 ComponentFieldMap::ComponentFieldMap() :
   nElements(-1), lastElement(-1), 
   nNodes(-1), nMaterials(-1),
-  hasWeightingField(false), 
+  hasWeightingField(false),
+  hasBoundingBox(false), 
   deleteBackground(true), checkMultipleElement(false),
   warning(false) {
   
@@ -1838,25 +1839,6 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
   ifail = 0;
   return ifail;
 
-}
-
-bool 
-ComponentFieldMap::CheckSolidType(Solid* s) {
-
-  printf("ComponentFieldMap::CheckSolidType:\n");
-  printf("    Warning: Solids are not used for field calculation in this component.\n");
-  return true;
-
-}
-
-void 
-ComponentFieldMap::CheckBoundaryConditionType(int& bctype, double& bcval) {
-
-  printf("ComponentFieldMap::CheckBoundaryConditionType:\n");
-  printf("    Warning: Boundary conditions are ignored in this component.\n");
-  bctype = 0;
-  bcval = 0.;
-  
 }
 
 void 

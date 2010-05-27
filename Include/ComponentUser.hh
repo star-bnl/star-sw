@@ -50,9 +50,6 @@ class ComponentUser : public ComponentBase {
     };
     std::vector<wfield> wfields;
 
-    // Geometry checks
-    bool CheckSolidType(Solid* s);
-    void CheckBoundaryConditionType(int& bctype, double& bcval);
     // Reset the component
     void Reset();
     // Verify periodicities

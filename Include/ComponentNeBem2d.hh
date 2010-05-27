@@ -175,9 +175,6 @@ class ComponentNeBem2d : public ComponentBase {
                   const double x, const double y, 
                   double& ex, double& ey);
 
-    // Geometry checks
-    bool CheckSolidType(Solid* s);
-    void CheckBoundaryConditionType(int& bctype, double& bcval);
     void Reset();
     void UpdatePeriodicity();
 

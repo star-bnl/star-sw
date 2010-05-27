@@ -14,7 +14,6 @@ ComponentConstant::ComponentConstant() :
   fwx(0.), fwy(0.), fwz(0.),
   hasWeightingPotential(false),
   wx0(0.), wy0(0.), wz0(0.), w0(0.)  {
-  
       
 }
 
@@ -86,14 +85,26 @@ bool
 ComponentConstant::GetVoltageRange(double& vmin, double& vmax) {
 
   if (!hasPotential) return false;
-  
+ 
+  if (theGeometry == 0) {
+    std::cerr << "ComponentConstant::GetVoltageRange:" << std::endl;
+    std::cerr << "    Geometry is not defined." << std::endl;
+    return false;
+  }
+  double xmin, ymin, zmin;
+  double xmax, ymax, zmax;
+  if (!GetBoundingBox(xmin, ymin, zmin, xmax, ymax, zmax)) {
+    std::cerr << "ComponentConstant::GetVoltageRange:" << std::endl;
+    std::cerr << "    Could not determine bounding box." << std::endl;
+    return false;
+  }
   // Calculate potentials at each corner
-  const double pxmin = v0 - (xMinBoundingBox - x0) * fx;
-  const double pxmax = v0 - (xMaxBoundingBox - x0) * fx;
-  const double pymin = - (yMinBoundingBox - y0) * fy;
-  const double pymax = - (yMaxBoundingBox - y0) * fy;
-  const double pzmin = - (zMinBoundingBox - z0) * fz;
-  const double pzmax = - (zMaxBoundingBox - z0) * fz;
+  const double pxmin = v0 - (xmin - x0) * fx;
+  const double pxmax = v0 - (xmax - x0) * fx;
+  const double pymin = - (ymin - y0) * fy;
+  const double pymax = - (ymax - y0) * fy;
+  const double pzmin = - (zmin - z0) * fz;
+  const double pzmax = - (zmax - z0) * fz;
   double p[8];
   p[0] = pxmin + pymin + pzmin;
   p[1] = pxmin + pymin + pzmax;
@@ -183,31 +194,6 @@ ComponentConstant::SetWeightingPotential(
   wx0 = x; wy0 = y; wz0 = z;
   w0 = v;
   hasWeightingPotential = true;
-
-}
-
-bool 
-ComponentConstant::CheckSolidType(Solid* s) {
-
-  if (s == 0) {
-    std::cerr << "ComponentConstant::CheckSolidType:" << std::endl;
-    std::cerr << "    Solid is not defined." << std::endl;
-    return false;
-  }
-  return true;
-  
-}
-
-void 
-ComponentConstant::CheckBoundaryConditionType(int& bctype, double& bcval) {
-
-  if (debug) {
-    std::cerr << "ComponentConstant::CheckBoundaryConditionType:" << std::endl;
-    std::cerr << "    Boundary conditions are ignored." << std::endl;
-  }
-  
-  bctype = 0;
-  bcval = 0.;
 
 }
 

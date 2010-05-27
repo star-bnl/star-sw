@@ -152,31 +152,6 @@ ComponentUser::AddWeightingField(void (*f)(const double, const double, const dou
 
 }
 
-bool 
-ComponentUser::CheckSolidType(Solid* s) {
-
-  if (s == 0) {
-    std::cerr << "ComponentUser::CheckSolidType:" << std::endl;
-    std::cerr << "    Solid is not defined." << std::endl;
-    return false;
-  }
-  return true;
-
-}
-
-void 
-ComponentUser::CheckBoundaryConditionType(int& bctype, double& bcval) {
-
-  if (debug) {
-    std::cerr << "ComponentUser::CheckBoundaryConditionType:" << std::endl;
-    std::cerr << "    Boundary conditions are ignored." << std::endl;
-  }
-  
-  bctype = 0;
-  bcval = 0.;
-
-}
-
 void
 ComponentUser::Reset() {
 
@@ -191,8 +166,10 @@ ComponentUser::Reset() {
 void
 ComponentUser::UpdatePeriodicity() {
 
-  std::cerr << "ComponentUser::UpdatePeriodicity:" << std::endl;
-  std::cerr << "    Periodicities are not supported." << std::endl;
+  if (debug) {
+    std::cerr << "ComponentUser::UpdatePeriodicity:" << std::endl;
+    std::cerr << "    Periodicities are not supported." << std::endl;
+  }
 
 }
 

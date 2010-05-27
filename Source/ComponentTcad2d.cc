@@ -9,7 +9,8 @@ namespace Garfield {
 
 ComponentTcad2d::ComponentTcad2d() : 
   ComponentBase(), 
-  nRegions(0), nVertices(0), nElements(0), 
+  nRegions(0), nVertices(0), nElements(0),
+  hasBoundingBox(false), 
   lastElement(0), a(0.), b(0.), c(0.), d(0.) {
   
   regions.clear();
@@ -33,7 +34,8 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
   }  
   
   // Check if point is inside the bounding box
-  if (x < xMinBoundingBox || x > xMaxBoundingBox || x < yMinBoundingBox || y > yMaxBoundingBox) {
+  if (x < xMinBoundingBox || x > xMaxBoundingBox ||
+      y < yMinBoundingBox || y > yMaxBoundingBox) {
     status = -11;
     m = 0;
     return;
@@ -93,7 +95,8 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
       break;
     default: 
       std::cerr << "ComponentTcad2d::ElectricField:" << std::endl;
-      std::cerr << "    Invalid element type (" << elements[i].type << ")." << std::endl;
+      std::cerr << "    Invalid element type (" 
+                << elements[i].type << ")." << std::endl;
       status = -11;
       return;
       break;
@@ -154,7 +157,8 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
         break;
       default:
         std::cerr << "ComponentTcad2d::ElectricField:" << std::endl;
-        std::cerr << "    Invalid element type (" << elements[i].type << ")." << std::endl;
+        std::cerr << "    Invalid element type (" 
+                  << elements[i].type << ")." << std::endl;
         status = -11;
         return;
         break;
@@ -163,7 +167,8 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
   // Point is outside the mesh
   if (debug) {
     std::cerr << "ComponentTcad2d::ElectricField:" << std::endl;
-    std::cerr << "    Point (" << x << ", " << y << ") is outside the mesh." << std::endl;
+    std::cerr << "    Point (" << x << ", " << y 
+              << ") is outside the mesh." << std::endl;
   }
   status = -6;
   return;
@@ -193,7 +198,8 @@ ComponentTcad2d::GetMedium(const double x, const double y, const double z,
   }  
   
   // Check if point is inside the bounding box
-  if (x < xMinBoundingBox || x > xMaxBoundingBox || x < yMinBoundingBox || y > yMaxBoundingBox) {
+  if (x < xMinBoundingBox || x > xMaxBoundingBox || 
+      y < yMinBoundingBox || y > yMaxBoundingBox) {
     return false;
   }
   
@@ -223,7 +229,8 @@ ComponentTcad2d::GetMedium(const double x, const double y, const double z,
       break;
     default: 
       std::cerr << "ComponentTcad2d::GetMedium:" << std::endl;
-      std::cerr << "    Invalid element type (" << elements[i].type << ")." << std::endl;
+      std::cerr << "    Invalid element type (" 
+                << elements[i].type << ")." << std::endl;
       return false;
       break;
   }
@@ -259,7 +266,8 @@ ComponentTcad2d::GetMedium(const double x, const double y, const double z,
         break;
       default:
         std::cerr << "ComponentTcad2d::GetMedium:" << std::endl;
-        std::cerr << "    Invalid element type (" << elements[i].type << ")." << std::endl;
+        std::cerr << "    Invalid element type (" 
+                  << elements[i].type << ")." << std::endl;
         return false;
         break;
     }
@@ -270,7 +278,8 @@ ComponentTcad2d::GetMedium(const double x, const double y, const double z,
 }
  
 bool 
-ComponentTcad2d::Initialise(const std::string gridfilename, const std::string datafilename) {
+ComponentTcad2d::Initialise(const std::string gridfilename, 
+                            const std::string datafilename) {
   
   ready = false;
   // Import mesh data
@@ -283,7 +292,8 @@ ComponentTcad2d::Initialise(const std::string gridfilename, const std::string da
   // Import electric field and potential 
   if (!LoadData(datafilename)) {
     std::cerr << "ComponentTcad2d::Initialise:" << std::endl;
-    std::cerr << "    Error importing electric field and potential values." << std::endl;
+    std::cerr << "    Error importing electric field and potential values." 
+              << std::endl;
     return false;
   }
   
@@ -293,12 +303,21 @@ ComponentTcad2d::Initialise(const std::string gridfilename, const std::string da
   pMax = pMin = vertices[elements[0].vertex[0]].p;
   for (int i = nElements; i--;) {
     for (int j = 0; j <= elements[i].type; ++j) {
-      if (vertices[elements[i].vertex[j]].x < xMinBoundingBox) xMinBoundingBox = vertices[elements[i].vertex[j]].x;
-      if (vertices[elements[i].vertex[j]].x > xMaxBoundingBox) xMaxBoundingBox = vertices[elements[i].vertex[j]].x;
-      if (vertices[elements[i].vertex[j]].y < yMinBoundingBox) yMinBoundingBox = vertices[elements[i].vertex[j]].y;
-      if (vertices[elements[i].vertex[j]].y > yMaxBoundingBox) yMaxBoundingBox = vertices[elements[i].vertex[j]].y;
-      if (vertices[elements[i].vertex[j]].p < pMin) pMin = vertices[elements[i].vertex[j]].p;
-      if (vertices[elements[i].vertex[j]].p > pMax) pMax = vertices[elements[i].vertex[j]].p;
+      if (vertices[elements[i].vertex[j]].x < xMinBoundingBox) {
+        xMinBoundingBox = vertices[elements[i].vertex[j]].x;
+      } else if (vertices[elements[i].vertex[j]].x > xMaxBoundingBox) {
+        xMaxBoundingBox = vertices[elements[i].vertex[j]].x;
+      }
+      if (vertices[elements[i].vertex[j]].y < yMinBoundingBox) {
+        yMinBoundingBox = vertices[elements[i].vertex[j]].y;
+      } else if (vertices[elements[i].vertex[j]].y > yMaxBoundingBox) {
+        yMaxBoundingBox = vertices[elements[i].vertex[j]].y;
+      }
+      if (vertices[elements[i].vertex[j]].p < pMin) {
+        pMin = vertices[elements[i].vertex[j]].p;
+      } else if (vertices[elements[i].vertex[j]].p > pMax) {
+        pMax = vertices[elements[i].vertex[j]].p;
+      }
     }
   }
   
@@ -312,7 +331,8 @@ ComponentTcad2d::GetBoundingBox(double& xmin, double& ymin, double& zmin,
                                 double& xmax, double& ymax, double& zmax) {
 
   if (!ready) return false;
-  xmin = xMinBoundingBox; ymin = yMinBoundingBox; xmax = xMaxBoundingBox; ymax = yMaxBoundingBox;
+  xmin = xMinBoundingBox; ymin = yMinBoundingBox; 
+  xmax = xMaxBoundingBox; ymax = yMaxBoundingBox;
   return true;
 
 }
@@ -847,7 +867,8 @@ ComponentTcad2d::LoadGrid(const std::string gridfilename) {
           elements[j].vertex[1] = edgeP2[-edge2 - 1];
         }
         if (type < 2) {
-          while (vertices[elements[j].vertex[0]].x > vertices[elements[j].vertex[1]].x) {
+          while (vertices[elements[j].vertex[0]].x > 
+                 vertices[elements[j].vertex[1]].x) {
             // Rearrange vertices such that point 0 is on the left
             edge1 = elements[j].vertex[0]; 
             elements[j].vertex[0] = elements[j].vertex[1]; 
@@ -861,8 +882,10 @@ ComponentTcad2d::LoadGrid(const std::string gridfilename) {
           elements[j].vertex[2] = edgeP2[-edge3 - 1];
         }
         if (type < 3) {
-          while (vertices[elements[j].vertex[0]].x > vertices[elements[j].vertex[1]].x || 
-                 vertices[elements[j].vertex[0]].x > vertices[elements[j].vertex[2]].x) {
+          while (vertices[elements[j].vertex[0]].x > 
+                 vertices[elements[j].vertex[1]].x || 
+                 vertices[elements[j].vertex[0]].x > 
+                 vertices[elements[j].vertex[2]].x) {
             // Rearrange vertices such that point 0 is on the left
             edge1 = elements[j].vertex[0];
             elements[j].vertex[0] = elements[j].vertex[1];
@@ -871,10 +894,17 @@ ComponentTcad2d::LoadGrid(const std::string gridfilename) {
           }
           continue;
        }
-        if (edge4 >= 0) elements[j].vertex[3] = edgeP1[edge4]; else elements[j].vertex[3] = edgeP2[-edge4 - 1];
-        while (vertices[elements[j].vertex[0]].x > vertices[elements[j].vertex[1]].x || 
-               vertices[elements[j].vertex[0]].x > vertices[elements[j].vertex[2]].x ||
-               vertices[elements[j].vertex[0]].x > vertices[elements[j].vertex[3]].x ) {
+        if (edge4 >= 0) {
+          elements[j].vertex[3] = edgeP1[edge4];
+        } else {
+          elements[j].vertex[3] = edgeP2[-edge4 - 1];
+        }
+        while (vertices[elements[j].vertex[0]].x > 
+               vertices[elements[j].vertex[1]].x || 
+               vertices[elements[j].vertex[0]].x > 
+               vertices[elements[j].vertex[2]].x ||
+               vertices[elements[j].vertex[0]].x > 
+               vertices[elements[j].vertex[3]].x ) {
           // Rearrange vertices such that point 0 is on the left               
           edge1 = elements[j].vertex[0];
           elements[j].vertex[0] = elements[j].vertex[1];
@@ -913,7 +943,8 @@ ComponentTcad2d::LoadGrid(const std::string gridfilename) {
     if (line.substr(0, 6) == "Region") {
       // Get region name (given in brackets)
       pBra = line.find('('); pKet = line.find(')');
-      if (pKet < pBra || pBra == std::string::npos || pKet == std::string::npos) {
+      if (pKet < pBra || 
+          pBra == std::string::npos || pKet == std::string::npos) {
         std::cerr << "ComponentTcad2d::LoadGrid:" << std::endl;
         std::cerr << "    Could not read region name." << std::endl;
         Cleanup();
@@ -932,16 +963,19 @@ ComponentTcad2d::LoadGrid(const std::string gridfilename) {
       if (index == -1) {
         // Specified region name is not in the list
         std::cerr << "ComponentTcad2d::LoadGrid:" << std::endl;
-        std::cerr << "    Error reading file " << gridfilename << "." << std::endl;
+        std::cerr << "    Error reading file " 
+                  << gridfilename << "." << std::endl;
         std::cerr << "    Unknown region " << name << "." << std::endl;
         continue;
       }
       std::getline(gridfile, line); std::getline(gridfile, line);
       pBra = line.find('('); pKet = line.find(')');
-      if (pKet < pBra || pBra == std::string::npos || pKet == std::string::npos) {
+      if (pKet < pBra || 
+          pBra == std::string::npos || pKet == std::string::npos) {
         // No closed brackets ()
         std::cerr << "ComponentTcad2d::LoadGrid:" << std::endl;
-        std::cerr << "    Error reading file " << gridfilename << "." << std::endl;
+        std::cerr << "    Error reading file " 
+                  << gridfilename << "." << std::endl;
         std::cerr << "    Could not read number of elements in region " 
                   << name << "." << std::endl;
         Cleanup();
@@ -996,9 +1030,11 @@ ComponentTcad2d::CheckRectangle(const double x, const double y, const int i) {
   if (y > vertices[elements[i].vertex[1]].y) return false;
   
   // Map (x, y) onto local variables (u, v) in [-1, 1]
-  const double u = (x - 0.5 * (vertices[elements[i].vertex[0]].x + vertices[elements[i].vertex[3]].x)) / 
+  const double u = (x - 0.5 * (vertices[elements[i].vertex[0]].x + 
+                               vertices[elements[i].vertex[3]].x)) / 
       (vertices[elements[i].vertex[3]].x - vertices[elements[i].vertex[0]].x);
-  const double v = (y - 0.5 * (vertices[elements[i].vertex[0]].y + vertices[elements[i].vertex[1]].y)) / 
+  const double v = (y - 0.5 * (vertices[elements[i].vertex[0]].y + 
+                               vertices[elements[i].vertex[1]].y)) / 
       (vertices[elements[i].vertex[1]].y - vertices[elements[i].vertex[0]].y);
   // Compute weighting factors for each corner
   a = (0.5 - u) * (0.5 - v);
@@ -1026,17 +1062,21 @@ ComponentTcad2d::CheckTriangle(const double x, const double y, const int i) {
   // P = A + b * (B - A) + c * (C - A)
   // A point P is inside the triangle ABC if b, c > 0 and b + c < 1
   // b, c are also weighting factors for points B, C
-  const double v1x = vertices[elements[i].vertex[1]].x - vertices[elements[i].vertex[0]].x;
-  const double v1y = vertices[elements[i].vertex[1]].y - vertices[elements[i].vertex[0]].y;
-  const double v2x = vertices[elements[i].vertex[2]].x - vertices[elements[i].vertex[0]].x;
-  const double v2y = vertices[elements[i].vertex[2]].y - vertices[elements[i].vertex[0]].y;
+  const double v1x = vertices[elements[i].vertex[1]].x - 
+                     vertices[elements[i].vertex[0]].x;
+  const double v1y = vertices[elements[i].vertex[1]].y - 
+                     vertices[elements[i].vertex[0]].y;
+  const double v2x = vertices[elements[i].vertex[2]].x - 
+                     vertices[elements[i].vertex[0]].x;
+  const double v2y = vertices[elements[i].vertex[2]].y - 
+                     vertices[elements[i].vertex[0]].y;
   
-  b = ((x - vertices[elements[i].vertex[0]].x)* v2y + (vertices[elements[i].vertex[0]].y- y) * v2x) / 
-      (v1x * v2y - v1y * v2x);
+  b = ((x - vertices[elements[i].vertex[0]].x) * v2y + 
+       (vertices[elements[i].vertex[0]].y - y) * v2x) / (v1x * v2y - v1y * v2x);
   if (b < 0. || b > 1.) return false;
   
-  c = ((vertices[elements[i].vertex[0]].x- x) * v1y + (y - vertices[elements[i].vertex[0]].y) * v1x) / 
-      (v1x * v2y - v1y * v2x);
+  c = ((vertices[elements[i].vertex[0]].x - x) * v1y + 
+       (y - vertices[elements[i].vertex[0]].y) * v1x) / (v1x * v2y - v1y * v2x);
   if (c < 0. || b + c > 1.) return false;
   
   // Weighting factor for point A
@@ -1065,25 +1105,6 @@ ComponentTcad2d::CheckLine(const double x, const double y, const int i) {
   }
   return false;
 
-}
-
-bool 
-ComponentTcad2d::CheckSolidType(Solid* s) {
-
-  std::cerr << "ComponentTcad2d::CheckSolidType:" << std::endl;
-  std::cerr << "    Warning: Solids are not used for field calculation in this component." << std::endl;
-  return true;
-
-}
-
-void 
-ComponentTcad2d::CheckBoundaryConditionType(int& bctype, double& bcval) {
-
-  std::cerr << "ComponentTcad2d::CheckBoundaryConditionType:" << std::endl;
-  std::cerr << "    Warning: Boundary conditions are ignored in this component." << std::endl;
-  bctype = 0;
-  bcval = 0.;
-  
 }
 
 void 

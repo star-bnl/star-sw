@@ -5,8 +5,7 @@
 
 #include <vector>
 
-#include "Medium.hh"
-#include "Solid.hh"
+#include "GeometryBase.hh"
 
 namespace Garfield {
 
@@ -17,28 +16,19 @@ class ComponentBase {
     ComponentBase();
     virtual ~ComponentBase() {}
 
-    // Add a solid to the geometry
-    void AddSolid(Solid* s, Medium* m, int bctype, double bcval);
-    // Get the solid at a given location (x, y, z)
-    bool GetSolid(const double x, const double y, const double z, Solid*& s);
+    virtual
+    void SetGeometry(GeometryBase* geo);
+    virtual
+    void Clear();
+
     // Get the medium at a given location (x, y, z)
     virtual
     bool GetMedium(const double x, const double y, const double z, Medium*& m);
-    // Number of solids/media in the component
-    int GetNumberOfSolids() const {return nSolids;}
-    int GetNumberOfMedia() const  {return nMedia; }
-    // Get a solid/medium from the list
-    bool GetSolid(const int i, Solid*& s) const;
-    virtual
-    bool GetMedium(const int i, Medium*& m) const;
-    // Reset the geometry
-    void Clear();
 
     // Electric field
     //
-    // Flags:
+    // Status flags:
     //
-    //   - Status
     //             0: Inside an active medium
     //           > 0: Inside a wire of type X
     //     -4 ... -1: On the side of a plane where no wires are
@@ -46,10 +36,6 @@ class ComponentBase {
     //            -6: Outside the mesh
     //           -10: Unknown potential type (should not occur)
     //         other: Other cases (should not occur)
-    //
-    //   - Medium
-    //          >= 0: Id number of the medium at this location
-    //           < 0: No medium associated to this point
     //
     // Calculate the drift field [V/cm] at (x, y, z)
     virtual 
@@ -81,17 +67,13 @@ class ComponentBase {
     // Set a constant magnetic field 
     void SetMagneticField(const double bx, const double by, const double bz);
 
-    // Bounding box (envelope of geometry)
-    bool IsInBoundingBox(const double x, const double y, const double z);
-    bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
-                        double& xmax, double& ymax, double& zmax) {
-      xmin = xMinBoundingBox; ymin = yMinBoundingBox; zmin = zMinBoundingBox; 
-      xmax = xMaxBoundingBox; ymax = yMaxBoundingBox; zmax = zMaxBoundingBox;
-      return true;
-    }
-
     // Ready for use?
     bool IsReady() {return ready;}
+
+    // Get the bounding box coordinates
+    virtual
+    bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
+                        double& xmax, double& ymax, double& zmax);
 
     // Periodicities
     void XPeriodic()         {xPeriodic = true;         UpdatePeriodicity();}
@@ -112,29 +94,9 @@ class ComponentBase {
     void DisableDebugging() {debug = false;}
 
   protected:
-    
-    // List of media
-    int nMedia;
-    struct medium {
-      Medium* medium;
-    };
-    std::vector<medium> media;
-    
-    // List of solids
-    int nSolids;
-    struct solid {
-      Solid* solid;
-      int medium;
-      int bctype;
-      double bcval;
-    };
-    std::vector<solid> solids;
-
-    // Bounding box ranges
-    bool hasBoundingBox;
-    double xMinBoundingBox, yMinBoundingBox, zMinBoundingBox;
-    double xMaxBoundingBox, yMaxBoundingBox, zMaxBoundingBox;
-
+   
+    GeometryBase* theGeometry;
+ 
     // Ready for use?
     bool ready;
 
@@ -154,9 +116,6 @@ class ComponentBase {
     bool debug;  
     
     // Geometry checks
-    virtual bool CheckSolidType(Solid* s) = 0;
-    virtual void CheckBoundaryConditionType(int& bctype, double& bcval) = 0;
-    // Reset the component
     virtual void Reset() = 0;
     // Verify periodicities
     virtual void UpdatePeriodicity() = 0;

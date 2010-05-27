@@ -82,14 +82,16 @@ class ComponentTcad2d : public ComponentBase {
     // Voltage range
     double pMin, pMax;
 
+    // Bounding box
+    bool hasBoundingBox;
+    double xMinBoundingBox, yMinBoundingBox, zMinBoundingBox;
+    double xMaxBoundingBox, yMaxBoundingBox, zMaxBoundingBox;
+
     // Element from the previous call
     int lastElement;
     // Weighting factors for node points used for interpolation
     double a, b, c, d;
     
-    // Geometry checks
-    bool CheckSolidType(Solid* s);
-    void CheckBoundaryConditionType(int& bctype, double& bcval);
     // Reset the component
     void Reset() {Cleanup();}
     // Periodicities

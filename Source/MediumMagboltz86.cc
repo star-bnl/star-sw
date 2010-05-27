@@ -1525,13 +1525,25 @@ MediumMagboltz86::ComputeDeexcitationTable() {
   } else if ((gas[0] == 2 && gas [1] == 8) || (gas[0] == 8 && gas[1] == 2)) {
     // Ar-CH4
     int ar = 0;
-    double fB = (3.842488 / 22.121274);
-    fB *= pressure / 760.;
+    const double b1 = 0.2;
+    const double b3 = 22.121274;
+    const double b4 = 3.842488;
+    double fB = b4 / b3;
+    double fA = b1 / b3;
+    double gA = (1. - b1) / b3;
+    double p = pressure / 760.;
+    fB *= p;
+    fA *= p;
+    gA *= p;
     if (gas[0] == 2) {
       fB *= fraction[1];
+      fA *= fraction[0];
+      gA *= fraction[0];
       ar = 0;
     } else {
       fB *= fraction[0];
+      fA *= fraction[1];
+      gA *= fraction[1];
       ar = 1;
     }
     for (int j = nTerms; j--;) {
@@ -1546,7 +1558,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
             level == "2P6    " || level == "2P5    " ||
             level == "2P4    " || level == "2P3    " ||
             level == "2P2    " || level == "2P1    ") {
-          // fCollIon[j] = fB / 2.;
+          fCollIon[j] = fB / 30. + fA / 30.;
+          fCollLoss[j] = gA / 30.;
         // 3p53d levels
         // Average lifetime assumed to be 40 ns
         } else if (level == "3D6    " || level == "3D5    " ||
@@ -1555,10 +1568,12 @@ MediumMagboltz86::ComputeDeexcitationTable() {
                    level == "3D1!!  " || level == "3D1!   " ||
                    level == "3S1!!!!" || level == "3S1!!! " ||
                    level == "3S1!!  " || level == "3S1!   ") { 
-          // fCollIon[j] = fB / 40.;
+          fCollIon[j] = fB / 40. + fA / 40.;
+          fCollLoss[j] = gA / 40.;
         // Higher levels
         } else {
-          // fCollIon[j] = fB * fRadiative[j];
+          fCollIon[j] = fB * fRadiative[j] + fA * fRadiative[j];
+          fCollLoss[j] = gA * fRadiative[j];
         }
       }
     }    

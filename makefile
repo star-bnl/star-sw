@@ -23,6 +23,8 @@ OBJS = \
 	$(OBJECT)/ComponentAnsys123.o \
 	$(OBJECT)/ComponentTcad2d.o \
 	$(OBJECT)/ComponentNeBem2d.o \
+	$(OBJECT)/GeometrySimple.o \
+	$(OBJECT)/GeometryRoot.o \
 	$(OBJECT)/FieldView.o \
 	$(OBJECT)/DriftView.o \
 	$(OBJECT)/Input.o \
@@ -67,6 +69,10 @@ $(OBJECT)/ComponentAnsys121.o: $(SOURCE)/ComponentAnsys121.cc $(INCLUDE)/Compone
 $(OBJECT)/ComponentAnsys123.o: $(SOURCE)/ComponentAnsys123.cc $(INCLUDE)/ComponentAnsys123.hh $(INCLUDE)/ComponentFieldMap.hh $(INCLUDE)/Input.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/ComponentTcad2d.o: $(SOURCE)/ComponentTcad2d.cc $(INCLUDE)/ComponentTcad2d.hh $(INCLUDE)/ComponentBase.hh
+	$(CC) $(CFLAGS) $< -o $@   
+$(OBJECT)/GeometrySimple.o: $(SOURCE)/GeometrySimple.cc $(INCLUDE)/GeometrySimple.hh
+	$(CC) $(CFLAGS) $< -o $@   
+$(OBJECT)/GeometryRoot.o: $(SOURCE)/GeometryRoot.cc $(INCLUDE)/GeometryRoot.hh
 	$(CC) $(CFLAGS) $< -o $@    
 $(OBJECT)/FieldView.o: $(SOURCE)/FieldView.cc $(INCLUDE)/FieldView.hh $(INCLUDE)/Sensor.hh
 	$(CC) $(CFLAGS) $< -o $@
