@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.17 2010/05/14 19:51:45 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.18 2010/05/27 16:29:00 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.18  2010/05/27 16:29:00  hmasui
+ * Remove / character from particle name
+ *
  * Revision 1.17  2010/05/14 19:51:45  hmasui
  * Modify the text size for Nevts, MC particle name etc to fit the window
  *
@@ -652,8 +655,18 @@ const Char_t* StEmbeddingQADraw::getParticleName(const Int_t geantid) const
   const StParticleDefinition* particle = (geantid<0)
     ? table->findParticleByGeantId(mGeantId)
     : table->findParticleByGeantId(geantid) ;
+
+  /// Remove "/" from particle name (ex. J/Psi --> JPsi)
+  /// Since particle name will be used for pdf filename, and "/" will be 
+  /// recognized as directory so that output will be disappeared if "/"
+  /// is included in the filename
+  TString name(particle->name().c_str());
+  while( name.Contains("/") ){
+    // Remove "/" from particle name
+    name.Remove(name.Index("/"), 1);
+  }
     
-  return particle->name().c_str() ;
+  return name.Data() ;
 }
 
 
