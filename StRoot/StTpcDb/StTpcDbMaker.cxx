@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.55 2010/05/27 19:14:26 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.56 2010/05/27 20:46:25 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.56  2010/05/27 20:46:25  genevb
+ * Allow discontinued use of FullMagF geometry flavors, now just use ofl with appropriate timestamp
+ *
  * Revision 1.55  2010/05/27 19:14:26  fisyak
  * Take out flavoring by 'sim' for tpcGlobalPosition,tpcSectorPosition and starClockOnl tables. remove usage tpcISTimeOffsets and tpcOSTimeOffsets tables
  *
@@ -208,23 +211,23 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
   if (! IAttr("Simu")){
     if (gFactor<-0.8) {
       gMessMgr->Info() << "StTpcDbMaker::Full Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("FullMagFNegative","tpcGlobalPosition");
+      SetFlavor("ofl+FullMagFNegative","tpcGlobalPosition");
     }
     else if (gFactor<-0.2) {
       gMessMgr->Info() << "StTpcDbMaker::Half Reverse Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("HalfMagFNegative","tpcGlobalPosition");
+      SetFlavor("ofl+HalfMagFNegative","tpcGlobalPosition");
     }
     else if (gFactor<0.2) {
       gMessMgr->Info() << "StTpcDbMaker::Zero Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("ZeroMagF","tpcGlobalPosition");
+      SetFlavor("ofl+ZeroMagF","tpcGlobalPosition");
     }
     else if (gFactor<0.8) {
       gMessMgr->Info() << "StTpcDbMaker::Half Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("HalfMagFPositive","tpcGlobalPosition");
+      SetFlavor("ofl+HalfMagFPositive","tpcGlobalPosition");
     }
     else if (gFactor<1.2) {
       gMessMgr->Info() << "StTpcDbMaker::Full Forward Field Twist Parameters.  If this is an embedding run, you should not use it." << endm;
-      SetFlavor("FullMagFPositive","tpcGlobalPosition");
+      SetFlavor("ofl+FullMagFPositive","tpcGlobalPosition");
     }
   }
   if         (IAttr("useLDV")) {
