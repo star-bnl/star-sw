@@ -1,5 +1,8 @@
-/* $Id: StTpcFastSimMaker.cxx,v 1.1 2009/11/10 21:15:33 fisyak Exp $
+/* $Id: StTpcFastSimMaker.cxx,v 1.2 2010/05/28 16:28:44 fisyak Exp $
     $Log: StTpcFastSimMaker.cxx,v $
+    Revision 1.2  2010/05/28 16:28:44  fisyak
+    Adjust for new TpcDb interface, remove pseudo pad rows
+
     Revision 1.1  2009/11/10 21:15:33  fisyak
     pams clean up
  
@@ -25,11 +28,7 @@
 ClassImp(StTpcFastSimMaker);
 //____________________________________________________________
 Int_t StTpcFastSimMaker::Make() {
-  Int_t option = (TMath::Abs(m_Mode) & 0x7FFFFFFE) >> 1;
-  if (! mExB ) {
-    TDataSet *RunLog = GetDataBase("RunLog");
-    mExB = new StMagUtilities(gStTpcDb, RunLog, option);
-  }
+  mExB = gStTpcDb->ExB();
   if (! gRandom) gRandom = new TRandom();
   // Get the input data structures from StEvent
   StEvent *rEvent =  (StEvent*) GetInputDS("StEvent");
@@ -50,6 +49,7 @@ Int_t StTpcFastSimMaker::Make() {
   StTpcCoordinateTransform transform(gStTpcDb);
   
   for (Int_t i = 0; i < Nhits; i++)    {
+    if (g2t[i].volume_id > 100000) continue; // skip pseudo pad rows
     Int_t sector = (g2t[i].volume_id%10000)/100;
     Int_t row    =  g2t[i].volume_id%100;
     StGlobalDirection     dirG(g2t[i].p[0],g2t[i].p[1],g2t[i].p[2]);
@@ -78,7 +78,7 @@ Int_t StTpcFastSimMaker::Make() {
 	   << "\tdR :" << xyzL[1]-transform.yFromRow(row) << endl;
     }
     Double_t Z = xyzL[2];
-    Double_t eta = TMath::PiOver2() - dirL.position().phi();
+    Double_t eta = TMath::PiOver2() - TMath::Abs(dirL.position().phi());
     Double_t tanl = dirL.position().z()/dirL.position().perp();
     Double_t sigmaY2, sigmaZ2;
     if (row <= 13)  StiTpcInnerHitErrorCalculator::instance()->calculateError(Z,eta,tanl,sigmaY2, sigmaZ2);
@@ -100,7 +100,7 @@ Int_t StTpcFastSimMaker::Make() {
     hw += sector << 4;     // (row/100 << 4);   // sector
     hw += row    << 9;     // (row%100 << 9);   // row
     StTpcHit *tpcHit = new StTpcHit(p,e, 
-				    hw,g2t[i].de, i+1,                // hw, q, c
+				    hw,TMath::Abs(g2t[i].de), i+1,   // hw, q, c
 				    g2t[i].track_p, 100,             // idTruth, quality
 				    0,                               // id
 				    0,  0, 0,                        // mnpad, mxpad, mntmbk
