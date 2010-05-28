@@ -19,9 +19,14 @@ def main():
    parser = OptionParser()
    parser.add_option( "-b", "--base",   dest="baseline", help="Set the baseline geometry [required]",     metavar="BASE",   default="NONE" )
    parser.add_option( "-g", "--geom",   dest="geometry", help="Set the comparison geometry [required]",   metavar="GEOM",   default="NONE" )
+
+   parser.add_option( "--basename", dest="basename",help="Set the name of the baseline geometry if different from base [optional]", metavar="BASENAME", default="same" )
+   parser.add_option( "--geomname", dest="geomname",help="Set the name of the comparsion geometry if different from geom [optional]", metavar="GEOMNAME", default="same" )
+
    parser.add_option( "-v", "--volume", dest="volume",   help="Set the top level volume [required]",      metavar="VOLUME", default="CAVE" )
    parser.add_option( "--basepath",     dest="basepath", default="NONE" )
    parser.add_option( "--geompath",     dest="geompath", default="NONE" )
+
    
    parser.add_option( "--thumbnail",    dest="thumbnail", default=False, action="store_true",
                       help="Creates thumbnails of the front page of the PDF file." )
@@ -71,11 +76,16 @@ def main():
                           thumbnail=opts.thumbnail
                           )
 
+
    differ = Differential( base=opts.baseline, 
                           comp=opts.geometry,
                           top=opts.volume,
+                          basegeo=opts.basename,
+                          compgeo=opts.geomname,
                           canvas=canvas
                           )
+
+      
 
    # Remove temporary symbolic links to the root files
    if ( opts.basepath != "NONE" ):
