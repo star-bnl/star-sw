@@ -1,6 +1,6 @@
 /*******************************************************
  *
- * $Id: StPmdDetector.cxx,v 1.5 2004/09/22 19:24:56 perev Exp $
+ * $Id: StPmdDetector.cxx,v 1.6 2010/05/28 17:24:27 rashmi Exp $
  *
  * Author:  Subhasis Chattopadhyay, July 2002
  *******************************************************
@@ -9,6 +9,9 @@
  *
  *********************************************************
  * $Log: StPmdDetector.cxx,v $
+ * Revision 1.6  2010/05/28 17:24:27  rashmi
+ * Returns cirrect number of Hits in a module now
+ *
  * Revision 1.5  2004/09/22 19:24:56  perev
  * Leak fixed + mess with i,j indexes
  *
@@ -90,6 +93,10 @@ unsigned int
 StPmdDetector::numberOfHits() const
 {
     unsigned int sum = 0;
+    for(Int_t i=0;i<12;i++){
+      //      cout<<" Module number "<<i+1<<" has "<<mModules_NHit[i]<<" hits."<<endl;
+      sum=sum+mModules_NHit[i];
+    }
     return sum;
 }
 
