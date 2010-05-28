@@ -158,6 +158,7 @@ void RunJetFinder2009(int nevents = 1e6,
 
   // Jet maker
   StJetMaker* jetMaker = new StJetMaker("jetMaker",muDstMaker,jetfile);
+  // Use StJetEvent format. Comment out the line below to use old StJets format.
   jetMaker->SetTreeWriter(new StjeJetEventTreeWriter(jetfile));
 
   // Skim event maker
