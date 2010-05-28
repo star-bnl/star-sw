@@ -3,7 +3,7 @@
  *\author
 */
 /*************************************************
- * $Id: StPmdHit.h,v 1.4 2007/11/02 11:04:52 rashmi Exp $
+ * $Id: StPmdHit.h,v 1.5 2010/05/28 17:23:45 rashmi Exp $
  * 
  * Author: Subhasis Chattopadhyay
  * Revision: Prem Ghosh
@@ -15,8 +15,11 @@
  *
  **************************************************
  * $Log: StPmdHit.h,v $
+ * Revision 1.5  2010/05/28 17:23:45  rashmi
+ * Added sorting routine
+ *
  * Revision 1.4  2007/11/02 11:04:52  rashmi
- * members and setters cellgain,smchaingain,cellstatus added
+ *  members and setters cellgain,smchaingain,cellstatus added
  *
  * Revision 1.3  2003/09/02 17:58:49  perev
  * gcc 3.2 updates + WarnOff
@@ -74,8 +77,10 @@ public:
   void            setGainCell(Float_t);
   void            setGainSmChain(Float_t);
   void            setCellStatus(Float_t);
-
-
+  // sorting related
+  Int_t         Compare(const TObject*) const;
+  Bool_t        IsSortable() const { return kTRUE; }
+  
   virtual void      print(ostream *os);
   virtual void      Browse(TBrowser *b);
   ClassDef(StPmdHit,1)
