@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.23 2010/05/26 04:25:50 tone421 Exp $
+ * $Id: StMuEvent.cxx,v 1.24 2010/05/28 19:47:51 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -133,6 +133,7 @@ void StMuEvent::fill(const StEvent* event){
   }
   // trigger data
   mTriggerData = const_cast<StTriggerData*>(event->triggerData());
+  mTriggerData->setDebug(0);
 } 
 
 unsigned short StMuEvent::refMultPos(int vtx_id) {
@@ -267,6 +268,9 @@ float StMuEvent::nearestVertexZ(int vtx_id){
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.24  2010/05/28 19:47:51  tone421
+ * Removed a cout needed for test purposes in StMuDstMaker. Made sure StTriggerData objects copied into the MuDst have a debug value of 0..
+ *
  * Revision 1.23  2010/05/26 04:25:50  tone421
  * Added StTriggerData arrays in muevent and fixed an issue with PMD arrays being read....
  *

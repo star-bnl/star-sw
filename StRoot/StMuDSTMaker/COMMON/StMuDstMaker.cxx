@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.99 2010/05/26 04:25:50 tone421 Exp $
+ * $Id: StMuDstMaker.cxx,v 1.100 2010/05/28 19:47:51 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -92,9 +92,6 @@ ClassImp(StMuDstMaker)
 #if !(ST_NO_NAMESPACES)
   using namespace units;
 #endif
-
-TStopwatch n;
-
 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -352,7 +349,6 @@ StMuDstMaker::~StMuDstMaker() {
   delete mEmcCollectionArray;
   delete mPmdCollectionArray;
   DEBUGMESSAGE3("out");
-  cout<<"TStopwatch time is "<<n.RealTime()<<endl;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1521,6 +1517,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.100  2010/05/28 19:47:51  tone421
+ * Removed a cout needed for test purposes in StMuDstMaker. Made sure StTriggerData objects copied into the MuDst have a debug value of 0..
+ *
  * Revision 1.99  2010/05/26 04:25:50  tone421
  * Added StTriggerData arrays in muevent and fixed an issue with PMD arrays being read....
  *
