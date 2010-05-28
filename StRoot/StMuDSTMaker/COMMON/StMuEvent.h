@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.29 2010/05/26 17:34:59 tone421 Exp $
+ * $Id: StMuEvent.h,v 1.30 2010/05/28 19:47:51 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -179,6 +179,7 @@ inline StL0Trigger& StMuEvent::l0Trigger() {return mL0Trigger;}
 // special classes for muDst
 inline StMuL3EventSummary& StMuEvent::l3EventSummary() {return mL3EventSummary;}
 inline StMuTriggerIdCollection& StMuEvent::triggerIdCollection(){return mTriggerIdCollection;}
+//inline const StTriggerData* StMuEvent::triggerData() const { if(mTriggerData!=0) {mTriggerData->setDebug(0); return mTriggerData; } else return 0; }
 inline const StTriggerData* StMuEvent::triggerData() const { return mTriggerData; }
 inline double StMuEvent::reactionPlane(unsigned short s) {return (s==0) ? mReactionPlane[0] : mReactionPlane[1];}
 inline void StMuEvent::setReactionPlane(unsigned short s, double v) {(s==0) ? mReactionPlane[0]=v : mReactionPlane[1]=v;}
@@ -218,6 +219,9 @@ inline float StMuEvent::vpdVz() { return mVpdVz; }
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.30  2010/05/28 19:47:51  tone421
+ * Removed a cout needed for test purposes in StMuDstMaker. Made sure StTriggerData objects copied into the MuDst have a debug value of 0..
+ *
  * Revision 1.29  2010/05/26 17:34:59  tone421
  * Added const protection to StTriggerData* StMuEvent::triggerData()
  *
