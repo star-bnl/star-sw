@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.21 2010/04/15 06:52:20 rashmi Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.22 2010/05/29 00:47:10 rashmi Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,8 +9,8 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
- * Revision 1.21  2010/04/15 06:52:20  rashmi
- * Clustering with option to turn calibration refineclustering on/off
+ * Revision 1.22  2010/05/29 00:47:10  rashmi
+ * Added a call to new clustering routines in StPmdClustering
  *
  * Revision 1.20  2007/11/02 10:59:30  rashmi
  * Applying hitcalibration; eta,phi wrt primary vertex
@@ -210,6 +210,19 @@ Int_t StPmdClusterMaker::Make()
     {
       StPmdDetector * cpv_det = cluster_hit->detector(Int_t(0)); //CPV = 0 in PmdCollection
       StPmdDetector * pmd_det = cluster_hit->detector(Int_t(1)); //PMD = 1 in PmdCollection
+
+      // Get the multiplicity of hits on cpv and pmd plane
+      
+      Int_t cpv_hits = cpv_det->numberOfHits();
+      Int_t pre_hits = pmd_det->numberOfHits();
+      cout<<" Number of hits on CPV = "<<cpv_hits<<endl;
+      cout<<" Number of hits on PMD = "<<pre_hits<<endl;
+      if((cpv_hits + pre_hits)>15000){
+	cout<<" The number of hits on PMD are too large"<<endl;
+	cout<<" The existing limit is 15000 hit on CPV+Pre"<<endl;
+	return kStWarn;
+      }
+
      // StPmdClustering *clust1; // added for getting pointer to StPmdClustering
       Int_t choice=1; // Enter choice (it is put as 1, but variable was kept to adopt differt
                       // choice of algo.
@@ -256,7 +269,10 @@ Int_t StPmdClusterMaker::Make()
 	    for(Int_t d=0;d<2;d++)  // Loop over detectors
 	      {
 		StPmdDetector *det = cluster_hit->detector(d); //PMD = 1 and 0 for CPV in PmdCollection
-		clust1->findPmdClusters(det); //! find Clustering 
+		// This uses the new clustering routine
+		clust1->findPmdClusters2(det); //! find Clustering 
+		// This uses the old clustering routine
+		//clust1->findPmdClusters(det); //! find Clustering 
 	      } //for loop 'd'
 	  }
 	else
@@ -265,8 +281,8 @@ Int_t StPmdClusterMaker::Make()
 	    return kStOK;
 	  }
 	FillStEvent(pmd_det,cpv_det);
-	cout<<" NUmber of pmd clusters="<<((StPmdClusterCollection*)pmd_det->cluster())->Nclusters()<<endl;
-	cout<<" NUmber of cpv clusters="<<((StPmdClusterCollection*)cpv_det->cluster())->Nclusters()<<endl;
+	cout<<" Number of pmd clusters="<<((StPmdClusterCollection*)pmd_det->cluster())->Nclusters()<<endl;
+	cout<<" Number of cpv clusters="<<((StPmdClusterCollection*)cpv_det->cluster())->Nclusters()<<endl;
 	
 	//      cout<<"stevent filled , to go hist "<<endl;
 	if(mOptHist)FillHistograms(pmd_det,cpv_det);

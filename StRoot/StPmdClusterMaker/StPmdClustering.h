@@ -4,7 +4,7 @@
  */
 /******************************************************
  *
- * $Id: StPmdClustering.h,v 1.10 2010/04/15 06:52:32 rashmi Exp $
+ * $Id: StPmdClustering.h,v 1.11 2010/05/29 00:47:10 rashmi Exp $
  *
  * Author: Dr. S.C. Phatak
  *         Dipak Mishra
@@ -13,6 +13,9 @@
  * Description: Base class for PMD clusters
  *
  * $Log: StPmdClustering.h,v $
+ * Revision 1.11  2010/05/29 00:47:10  rashmi
+ * Added a call to new clustering routines in StPmdClustering
+ *
  * Revision 1.10  2010/04/15 06:52:32  rashmi
  * Clustering with option to turn calibration refineclustering on/off
  *
@@ -45,6 +48,7 @@
 #include "StThreeVectorF.hh"
 class StPmdHit;
 class StPmdCluster;
+class StPmdModule;
 class StPmdDetector;
 class StPmdClusterCollection;
 class StPmdClustering:public StPmdAbsClustering
@@ -59,6 +63,29 @@ class StPmdClustering:public StPmdAbsClustering
   Double_t cutoff;
   StThreeVectorF mVertexPos;
 
+  StPmdClusterCollection * pmdclus;
+
+ //Made static so that I to declare this only once and not for each module
+  static const Int_t NColumnMax = 96;; //Maximum number of cell along x axis
+  static const Int_t NRowMax = 72; //Maximum number of cells along y axis
+  // static StPmdHit* hitmap[NRowMax][NColumnMax];//stores addresses of hits  
+  static const Int_t CutOff = 7;  
+  static const Int_t MaxHits = 15000; // max hits in an event
+  static const Int_t MaxSuperSize = 2000;
+  static const Int_t MaxLocalPeaks = 700;
+  static const Int_t MaxClusterSize = 2000;
+  static const Int_t MaxNeighLP = 35;
+  //  static const Float_t logweight = 4.5;
+  //  Float_t logweight;
+  static const Int_t debug = 0; // 0 for no cout; 1 for cout;
+
+  //  TClonesArray * mPmdSuperClusters;
+  void CellXY(Int_t, Int_t, Float_t&, Float_t&);
+
+  //checks whether the hit position in  question is within the SM boundary
+  Int_t CheckBoundary(Int_t, Int_t, Int_t); 
+
+
  protected:
   
   
@@ -69,6 +96,27 @@ class StPmdClustering:public StPmdAbsClustering
   //!destructor
   virtual ~StPmdClustering();
   
+  // These are the new cluster maker functions
+
+  //! for Pmd clusters                     
+  //  void findPmdClusters();  // new method
+  Bool_t findPmdClusters2(StPmdDetector *);
+  // Make clusters our of superclusters => refclust
+  Int_t MakeClusters(TClonesArray *);
+  //Int_t MakeClusters(TClonesArray *, StPmdClusterCollection*);
+  // Make SuperClusters => crclust
+  Int_t MakeSuperClusters(Int_t, StPmdModule*,TClonesArray*);
+  // Helping BreakSuperClusters
+  Int_t GetLocalPeaks(Int_t*,TList *);
+  // Breaks the supercluster by associating cells with each localPeak
+  Bool_t BreakSuperCluster(Int_t, Int_t*, TList * );
+  //Bool_t BreakSuperCluster(Int_t, Int_t*, TList * , StPmdClusterCollection *);
+  Float_t BuildCluster(StPmdCluster*, Float_t*);
+  // GetCluster Properties from hits =>CentroidCal
+  void Cell_eta_phi(Float_t, Float_t, Float_t &, Float_t &);
+
+  // These are the old cluster maker functions
+
   //! for Pmd clusters                     
   //  void findPmdClusters(); // old method
   void findPmdClusters(StPmdDetector *);
@@ -97,8 +145,9 @@ class StPmdClustering:public StPmdAbsClustering
 
   void SetOptCalibrate(Bool_t a=kTRUE){mOptCalibrate = a;}  // Default is on; YES Calibrate
   void SetOptSimulate(Bool_t a=kFALSE){mOptSimulate = a;}    // Default is off; No Simulation
-  void SetOptRefineCluster(Bool_t a=kTRUE){mOptRefineCluster = a;} // Default is on; Yes Refine Clustering
-
+  void SetOptRefineCluster(Bool_t a=kFALSE){mOptRefineCluster = a;} // Default is off; NO Refine Clustering
+  
+  
   //! for getting hits of each cluster
   //  StPmdHit* GetHit(StPmdDetector*, Int_t, Int_t, Int_t);
   StPmdHit* GetHit(StPmdDetector*, Int_t, Double_t, Double_t);
