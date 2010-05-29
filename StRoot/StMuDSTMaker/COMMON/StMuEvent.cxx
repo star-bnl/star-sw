@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.24 2010/05/28 19:47:51 tone421 Exp $
+ * $Id: StMuEvent.cxx,v 1.25 2010/05/29 16:36:52 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -132,8 +132,8 @@ void StMuEvent::fill(const StEvent* event){
     mVpdVz = event->tofCollection()->vzVpd();
   }
   // trigger data
-  mTriggerData = const_cast<StTriggerData*>(event->triggerData());
-  mTriggerData->setDebug(0);
+  mTriggerData = const_cast<StTriggerData*>(event->triggerData());  
+  if(mTriggerData!=0) mTriggerData->setDebug(0);
 } 
 
 unsigned short StMuEvent::refMultPos(int vtx_id) {
@@ -268,6 +268,9 @@ float StMuEvent::nearestVertexZ(int vtx_id){
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.25  2010/05/29 16:36:52  tone421
+ * Added pointer protection to StTriggerData member
+ *
  * Revision 1.24  2010/05/28 19:47:51  tone421
  * Removed a cout needed for test purposes in StMuDstMaker. Made sure StTriggerData objects copied into the MuDst have a debug value of 0..
  *
