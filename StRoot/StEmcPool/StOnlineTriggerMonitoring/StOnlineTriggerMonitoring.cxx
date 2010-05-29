@@ -2,7 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
-#include <stdio.h>
 using namespace std;
 
 #include <TROOT.h>
@@ -20,12 +19,14 @@ using namespace std;
 #include "tables/St_emcTriggerStatus_Table.h"
 #include "tables/St_emcTriggerPed_Table.h"
 #include "tables/St_emcTriggerLUT_Table.h"
+#include "tables/St_emcStatus_Table.h"
+#include "tables/St_emcPed_Table.h"
 
 #include "StEmcUtil/database/StEmcDecoder.h"
 #include "StEmcUtil/database/StBemcTablesWriter.h"
 
 char BITMASK[15][130];
-int PATCH[300], DSM[300], BIT[300], PA[300], HT[300], TOWER[30][160], PED[30][160], BITCONV[30][10];
+int PATCH[300], DSM[300], BIT[300], PA[300], HT[300], TOWER[30][160], PED[30][160], PEDRMS[30][160], BITCONV[30][10];
 int FORMULATAG[30][10],FORMULAPARAMETER[30][10][6];
 int PEDSHIFT;
 
@@ -182,11 +183,16 @@ void StOnlineTriggerMonitoring::saveTrigger(
 			{
 			  in>>towerid>>ped>>rms;
 				PED[crate-1][towerid] = (int)(ped*100);
+				PEDRMS[crate-1][towerid] = (int)(rms*100);
 				//cout <<" Crate = "<<crate<<"  index = "<<towerid<<"  ped (x100) = "<<PED[crate-1][towerid]<<endl;
 			}
 			in.close();
+		} else {
+		    for(int i=0;i<160;i++) {
+			PED[crate-1][i]=0;
+			PEDRMS[crate-1][i]=0;
+		    }
 		}
-		else for(int i=0;i<160;i++) PED[crate-1][i]=0;		
 	}
 	
 	// reading BemcConfig.dat
@@ -339,6 +345,12 @@ void StOnlineTriggerMonitoring::saveTrigger(
   timestamp+=TSp(first+14,2);
 	cout <<"TS = "<<TS<<"  TimeStamp = "<<timestamp<<endl;
 
+    int towerData[4800][8];
+    for (int i = 0;i < 4800;i++) {
+	for (int j = 0;j < 8;j++) {
+	    towerData[i][j] = 0;
+	}
+    }
     {
     cout << "Start writing " << bemcStatusCopy << endl;
     ofstream bemcStatusStream(bemcStatusCopy);
@@ -351,18 +363,13 @@ void StOnlineTriggerMonitoring::saveTrigger(
     StEmcDecoder *decoder = new StEmcDecoder();
     cout << "Decoder created " << decoder << endl;
     
-    int towerData[4800][7];
-    for (int i = 0;i < 4800;i++) {
-	for (int j = 0;j < 7;j++) {
-	    towerData[i][j] = 0;
-	}
-    }
     for(int crate = 1;crate <= 30;crate++) {
 	for(int tower = 0;tower < 160;tower++) {
 	    int softId;
 	    if (decoder && decoder->GetTowerIdFromCrate(crate, tower, softId)) {
 		towerData[softId - 1][0] = TOWER[crate - 1][tower];
 		towerData[softId - 1][3] = PED[crate - 1][tower];
+		towerData[softId - 1][7] = PEDRMS[crate - 1][tower];
 		towerData[softId - 1][4] = crate;
 		towerData[softId - 1][5] = tower;
 	    }
@@ -419,9 +426,13 @@ void StOnlineTriggerMonitoring::saveTrigger(
 	St_emcTriggerPed *pedestals_t = new St_emcTriggerPed("bemcTriggerPed",1);
 	St_emcTriggerStatus *status_t = new St_emcTriggerStatus("bemcTriggerStatus",1);
 	St_emcTriggerLUT *lut_t = new St_emcTriggerLUT("bemcTriggerLUT",1);
+	St_emcPed *ped_t = new St_emcPed("bemcPed",1);
+	St_emcStatus *stat_t = new St_emcStatus("bemcStatus",1);
 	emcTriggerPed_st* pedestals_st = pedestals_t ? pedestals_t->GetTable() : 0;
 	emcTriggerStatus_st* status_st = status_t ? status_t->GetTable() : 0;
 	emcTriggerLUT_st* lut_st = lut_t ? lut_t->GetTable() : 0;
+	emcPed_st* ped_st = ped_t ? ped_t->GetTable() : 0;
+	emcStatus_st* stat_st = stat_t ? stat_t->GetTable() : 0;
 	cout << "Finished creating tables" << endl;
 	
 	cout << "Started filling tables" << endl;
@@ -451,6 +462,13 @@ void StOnlineTriggerMonitoring::saveTrigger(
 		status_st->HighTowerStatus[patch]=HT[patch];
 	    }
 	}
+	cout << "... filling aux tables" << endl;
+	for (int i = 0;i < 4800;i++) {
+	    ped_st->AdcPedestal[i] = towerData[i][3]; // ped*100
+	    ped_st->AdcPedestalRMS[i] = towerData[i][7]; // ped rms*100
+	    ped_st->Status[i] = towerData[i][0]; // ped status
+	    stat_st->Status[i] = towerData[i][0]; // status
+	}
 	cout << "Finished filling tables" << endl;
 
     cout << "Creating StBemcTablesWriter ..." << endl;
@@ -463,6 +481,8 @@ void StOnlineTriggerMonitoring::saveTrigger(
     if(status && status_st) {
 	cout << "Setting bemcTriggerStatus table " << status_st << endl;
         writer.setTable("bemcTriggerStatus", status_st);
+	cout << "Setting bemcStatus table " << stat_st << endl;
+        writer.setTable("bemcStatus", stat_st);
         if(saveDB) {
             LOG_INFO << "Start uploading table bemcTriggerStatus" << endm;
             writer.writeToDb("bemcTriggerStatus", timestamp.Data());
@@ -474,11 +494,19 @@ void StOnlineTriggerMonitoring::saveTrigger(
             writer.writeToFile(FILENAME.Data());
             LOG_INFO << "Finished saving table " << FILENAME << endm;
         }
+        if(saveTables) {
+            FILENAME = tables_dir; FILENAME += "/bemcStatus."; FILENAME+=TS; FILENAME+=".root";
+            LOG_INFO << "Start saving table " << FILENAME << endm;
+            writer.writeToFile(FILENAME.Data());
+            LOG_INFO << "Finished saving table " << FILENAME << endm;
+        }
     }
     
     if(pedestal && pedestals_st) {
 	cout << "Setting bemcTriggerPed table " << pedestals_st << endl;
         writer.setTable("bemcTriggerPed", pedestals_st);
+	cout << "Setting bemcPed table " << ped_st << endl;
+        writer.setTable("bemcPed", ped_st);
         if(saveDB) {
             LOG_INFO << "Start uploading table bemcTriggerPed" << endm;
             writer.writeToDb("bemcTriggerPed", timestamp.Data());
@@ -486,6 +514,12 @@ void StOnlineTriggerMonitoring::saveTrigger(
         }
         if(saveTables) {
             FILENAME = tables_dir; FILENAME += "/bemcTriggerPed."; FILENAME+=TS; FILENAME+=".root";
+            LOG_INFO << "Start saving table " << FILENAME << endm;
+            writer.writeToFile(FILENAME.Data());
+            LOG_INFO << "Finished saving table " << FILENAME << endm;
+        }
+        if(saveTables) {
+            FILENAME = tables_dir; FILENAME += "/bemcPed."; FILENAME+=TS; FILENAME+=".root";
             LOG_INFO << "Start saving table " << FILENAME << endm;
             writer.writeToFile(FILENAME.Data());
             LOG_INFO << "Finished saving table " << FILENAME << endm;
