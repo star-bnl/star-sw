@@ -29,6 +29,7 @@ class Solid {
     void DisableDebugging() {debug = false;}
     
   protected:
+
     bool debug;
     
 };

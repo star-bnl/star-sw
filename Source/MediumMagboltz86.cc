@@ -1510,7 +1510,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
           fRadiative[i] = 1. / 300; continue;
         } else if (level == "HIGH   ") {
           // Fantasy value
-          fRadiative[i] = 1. / 500.; continue;
+          fRadiative[i] = 1. / 300.; continue;
         } 
         break;
     }

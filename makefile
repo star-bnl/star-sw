@@ -34,6 +34,7 @@ OBJS = \
 	$(OBJECT)/MediumSilicon.o \
 	$(OBJECT)/OpticalData.o \
 	$(OBJECT)/SolidBox.o \
+	$(OBJECT)/SolidTube.o \
 	$(OBJECT)/RandomEngineGSL.o \
 	$(OBJECT)/PlottingEngineRoot.o \
 	$(OBJECT)/Sensor.o
@@ -91,6 +92,8 @@ $(OBJECT)/MediumSilicon.o: $(SOURCE)/MediumSilicon.cc $(INCLUDE)/MediumSilicon.h
 $(OBJECT)/OpticalData.o: $(SOURCE)/OpticalData.cc $(INCLUDE)/OpticalData.hh $(INCLUDE)/FundamentalConstants.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/SolidBox.o: $(SOURCE)/SolidBox.cc $(INCLUDE)/SolidBox.hh
+	$(CC) $(CFLAGS) $< -o $@
+$(OBJECT)/SolidTube.o: $(SOURCE)/SolidTube.cc $(INCLUDE)/SolidTube.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/RandomEngineGSL.o: $(SOURCE)/RandomEngineGSL.cc $(INCLUDE)/RandomEngineGSL.hh
 	$(CC) $(CFLAGS) $< -o $@
