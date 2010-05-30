@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.82 2010/02/25 21:49:05 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.83 2010/05/30 21:12:44 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.83  2010/05/30 21:12:44  genevb
+ * For GridLeak studies: more knobs to adjust GL and SC in Predict() functions
+ *
  * Revision 1.82  2010/02/25 21:49:05  genevb
  * Using sector number to better handle post-membrane hits, prep for sector-by-sector GL, and GGVoltage errors
  *
@@ -375,6 +378,7 @@ StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
   GetShortedRing()      ;    // Get the parameters that describe the shorted ring on the field cage
   GetGridLeak()         ;    // Get the parameters that describe the gating grid leaks
   CommonStart( mode )   ;    // Read the Magnetic and Electric Field Data Files, set constants
+  UseManualSCForPredict(kFALSE) ; // Initialize use of Predict() functions;
 }
 
 
@@ -397,6 +401,7 @@ StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t 
   ManualShortedRing(0,0,0,0,0) ; // No shorted rings
   fGridLeak      =  0   ;        // Do not get Grid Leak data from the DB  - use defaults in CommonStart
   CommonStart( mode )   ;        // Read the Magnetic and Electric Field Data Files, set constants
+  UseManualSCForPredict(kFALSE) ; // Initialize use of Predict() functions;
 }
 
 
@@ -552,6 +557,28 @@ void StMagUtilities::GetGridLeak ()
    OuterGridLeakWidth     =  fGridLeak -> getGridLeakWidth    ( kGLouter )  ;  // Half-width of the Outer grid leak.  
 }
 
+void StMagUtilities::ManualGridLeakStrength (Double_t inner, Double_t middle, Double_t outer)
+{
+  InnerGridLeakStrength  =  inner  ;  // Relative strength of the Inner grid leak
+  MiddlGridLeakStrength  =  middle ;  // Relative strength of the Middle grid leak
+  OuterGridLeakStrength  =  outer  ;  // Relative strength of the Outer grid leak
+  // InnerGridLeakStrength  =  1.0   ;  // JT test (Note that GainRatio is taken into account, below.)
+  // OuterGridLeakStrength  =  1.0   ;  // JT test (keep these the same unless you really know what you are doing.) 
+}
+
+void StMagUtilities::ManualGridLeakRadius (Double_t inner, Double_t middle, Double_t outer)
+{
+  InnerGridLeakRadius    =  inner  ;  // Location (in local Y coordinates) of the Inner grid leak 
+  MiddlGridLeakRadius    =  middle ;  // Location (in local Y coordinates) of the Middle grid leak 
+  OuterGridLeakRadius    =  outer  ;  // Location (in local Y coordinates) of the Outer grid leak 
+}
+
+void StMagUtilities::ManualGridLeakWidth (Double_t inner, Double_t middle, Double_t outer)
+{
+  InnerGridLeakWidth     =  inner  ;  // Half-width of the Inner grid leak.  
+  MiddlGridLeakWidth     =  middle ;  // Half-width of the Middle grid leak.  Must oversized for numerical reasons.
+  OuterGridLeakWidth     =  outer  ;  // Half-width of the Outer grid leak.  
+}
 
 //________________________________________
 
@@ -657,17 +684,9 @@ void StMagUtilities::CommonStart ( Int_t mode )
   
   if ( fGridLeak == 0 ) 
     {
-      InnerGridLeakStrength  =  0.0   ;  // Relative strength of the Inner grid leak
-      InnerGridLeakRadius    =  53.0  ;  // Location (in local Y coordinates) of the Inner grid leak 
-      InnerGridLeakWidth     =  0.0   ;  // Half-width of the Inner grid leak.  
-      MiddlGridLeakStrength  =  15.0  ;  // Relative strength of the Middle grid leak
-      MiddlGridLeakRadius    =  GAPRADIUS ;  // Location (in local Y coordinates) of the Middle grid leak 
-      MiddlGridLeakWidth     =  3.0   ;  // Half-width of the Middle grid leak.  Must oversized for numerical reasons.
-      OuterGridLeakStrength  =  0.0   ;  // Relative strength of the Outer grid leak
-      OuterGridLeakRadius    =  195.0 ;  // Location (in local Y coordinates) of the Outer grid leak 
-      OuterGridLeakWidth     =  0.0   ;  // Half-width of the Outer grid leak.  
-      // InnerGridLeakStrength  =  1.0   ;  // JT test (Note that GainRatio is taken into account, below.)
-      // OuterGridLeakStrength  =  1.0   ;  // JT test (keep these the same unless you really know what you are doing.) 
+      ManualGridLeakStrength(0.0,15.0,0.0);
+      ManualGridLeakRadius(53.0,GAPRADIUS,195.0);
+      ManualGridLeakWidth(0.0,3.0,0.0);
       cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected GridLeak parameters. " << endl ; 
     }
   else  cout << "StMagUtilities::CommonSta  Using GridLeak parameters from the DB."   << endl ; 
@@ -3567,7 +3586,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    // Temporarily overide settings for space charge data (only)
    StDetectorDbSpaceChargeR2* tempfSpaceChargeR2 = fSpaceChargeR2 ;
    Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
-   ManualSpaceChargeR2(0.01,SpaceChargeEWRatio); // Set "medium to large" value of the spacecharge parameter for tests, not critical.
+   if (!useManualSCForPredict) ManualSpaceChargeR2(0.01,SpaceChargeEWRatio); // Set "medium to large" value of the spacecharge parameter for tests, not critical.
                                                  // but keep EWRatio that was previously defined
    Float_t x[3] = { 0, 0, 0 } ;
    BField(x,B) ;
@@ -3787,7 +3806,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    // Temporarily overide settings for space charge data (only)
    StDetectorDbSpaceChargeR2* tempfSpaceChargeR2 = fSpaceChargeR2 ;
    Double_t tempSpaceChargeR2 = SpaceChargeR2 ;
-   ManualSpaceChargeR2(0.01,SpaceChargeEWRatio);   // Set "medium to large" value of the spacecharge parameter for tests, not critical.
+   if (!useManualSCForPredict) ManualSpaceChargeR2(0.01,SpaceChargeEWRatio); // Set "medium to large" value of the spacecharge parameter for tests, not critical.
                                                    // but keep EWRatio that was previously defined 
    Float_t x[3] = { 0, 0, 0 } ;  // Get the B field at the vertex 
    BField(x,B) ;
