@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.45 2010/02/25 21:49:05 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.46 2010/05/30 21:12:44 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.46  2010/05/30 21:12:44  genevb
+ * For GridLeak studies: more knobs to adjust GL and SC in Predict() functions
+ *
  * Revision 1.45  2010/02/25 21:49:05  genevb
  * Using sector number to better handle post-membrane hits, prep for sector-by-sector GL, and GGVoltage errors
  *
@@ -280,6 +283,7 @@ class StMagUtilities {
   Float_t  Resistor[10]               ; // Amount of compensating resistance added for this short
   Float_t  deltaVGGEast               ; // Voltage error on the East Gated Grid
   Float_t  deltaVGGWest               ; // Voltage error on the West Gated Grid
+  Bool_t   useManualSCForPredict      ; // Flag on using fixed SC value or manually set one for Predict()
 
 
   Float_t  Bz[BMap_nZ][BMap_nR], Br[BMap_nZ][BMap_nR] ;         
@@ -372,12 +376,16 @@ class StMagUtilities {
   virtual void     ManualSpaceCharge(Double_t SpcChg)   { SpaceCharge   = SpcChg ; fSpaceCharge   = 0 ; }
   virtual void     ManualSpaceChargeR2(Double_t SpcChg, Float_t EWRatio = 1.0 ) { SpaceChargeR2 = SpcChg ; fSpaceChargeR2 = 0 ; 
                                                                                   SpaceChargeEWRatio = EWRatio ; }
+  virtual void     ManualGridLeakStrength(Double_t inner, Double_t middle, Double_t outer);
+  virtual void     ManualGridLeakRadius  (Double_t inner, Double_t middle, Double_t outer);
+  virtual void     ManualGridLeakWidth   (Double_t inner, Double_t middle, Double_t outer);
   virtual void     AutoSpaceCharge()   {GetSpaceCharge()  ; } // use DB
   virtual void     AutoSpaceChargeR2() {GetSpaceChargeR2(); } // use DB
   virtual Double_t CurrentSpaceCharge()   {return SpaceCharge  ;}
   virtual Double_t CurrentSpaceChargeR2() {return SpaceChargeR2;}
   virtual Float_t  CurrentSpaceChargeEWRatio() { return SpaceChargeEWRatio ; }
   virtual Bool_t   UpdateShortedRing();
+  virtual void     UseManualSCForPredict(Bool_t flag=kTRUE) { useManualSCForPredict=flag; };
 
   ClassDef(StMagUtilities,1)    // Base class for all STAR MagField
 
