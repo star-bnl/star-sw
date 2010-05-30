@@ -23,7 +23,6 @@ public:
   StjTowerEnergyCorrectionForTracksMip() {}
   virtual ~StjTowerEnergyCorrectionForTracksMip() {}
 
-  StjTowerEnergyList operator()(const StjTowerEnergyList& energyDepositList, const StjTrackList& trackList);
   StjTowerEnergyList Do(const StjTowerEnergyList& energyDepositList, const StjTrackList& trackList);
 
 private:

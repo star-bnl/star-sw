@@ -1,4 +1,4 @@
-// $Id: StBET4pMakerImpBuilder.cxx,v 1.11 2010/05/24 17:42:32 pibero Exp $
+// $Id: StBET4pMakerImpBuilder.cxx,v 1.12 2010/05/30 07:10:04 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StBET4pMakerImpBuilder.h"
 #include "StBET4pMakerImp.h"
@@ -53,7 +53,7 @@ StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool u
   } else {
     if ( !useRandomSelector )
       {
-        tpc  = new StjTPCMuDst(uDstMaker);
+        tpc  = new StjTPCMuDst();
       }
     else
       {
@@ -72,7 +72,7 @@ StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool u
   if( !useBEMC ) {
     bemc = new StjBEMCNull();
   } else {
-    bemc = new StjBEMCMuDst(uDstMaker, doTowerSwapFix);
+    bemc = new StjBEMCMuDst(doTowerSwapFix);
 
     if(use2003Cuts) bemcCut->addCut(new StjTowerEnergyCut2003BemcTower());
     if(use2005Cuts) bemcCut->addCut(new StjTowerEnergyCutBemcWestOnly());
@@ -91,7 +91,7 @@ StBET4pMakerImp* StBET4pMakerImpBuilder::build(bool useTPC, bool useBEMC, bool u
   if( !useEEMC ) {
     eemc = new StjEEMCNull();
   } else {
-    eemc = new StjEEMCMuDst(uDstMaker);
+    eemc = new StjEEMCMuDst();
   }
 
   StBET4pMakerImp* ret = new StBET4pMakerImp(tpc, tpcCut, bemc, bemcCut, correctTowerEnergyForTracks, eemc);

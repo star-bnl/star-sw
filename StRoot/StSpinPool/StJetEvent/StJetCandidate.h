@@ -88,6 +88,7 @@ public:
 
 private:
   friend class StjeJetEventTreeWriter;
+  friend class StJetMaker2009;
 
   float mPt;
   float mEta;

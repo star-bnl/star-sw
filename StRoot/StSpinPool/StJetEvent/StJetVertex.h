@@ -66,6 +66,7 @@ public:
   StJetCandidate* addJet(StJetCandidate* jet) { mJets.Add((TObject*)jet); return (StJetCandidate*)mJets.Last(); }
 
   friend class StjeJetEventTreeWriter;
+  friend class StJetMaker2009;
 
 private:
   TVector3 mPosition;

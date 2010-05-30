@@ -21,10 +21,14 @@ public:
   StjAbstractTowerEnergyCorrectionForTracks() {}
   virtual ~StjAbstractTowerEnergyCorrectionForTracks() {}
 
-  virtual StjTowerEnergyList operator()(const StjTowerEnergyList& energyDepositList, const StjTrackList& trackList) = 0;
+  StjTowerEnergyList operator()(const StjTowerEnergyList& energyDepositList, const StjTrackList& trackList)
+  {
+    return Do(energyDepositList,trackList);
+  }
+
   virtual StjTowerEnergyList Do(const StjTowerEnergyList& energyDepositList, const StjTrackList& trackList) = 0;
 
-  ClassDef(StjAbstractTowerEnergyCorrectionForTracks,1);
+  ClassDef(StjAbstractTowerEnergyCorrectionForTracks,0);
 };
 
 #endif // STJ_ABSTRACT_TOWER_ENERGY_CORRECTION_FOR_TRACKS_H

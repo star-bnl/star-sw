@@ -1,4 +1,4 @@
-// $Id: StjTPCTrackMaker.cxx,v 1.3 2008/08/03 00:26:18 tai Exp $
+// $Id: StjTPCTrackMaker.cxx,v 1.4 2010/05/30 07:10:00 pibero Exp $
 #include "StjTPCTrackMaker.h"
 
 #include "StjTPCMuDst.h"
@@ -21,7 +21,7 @@ StjTPCTrackMaker::StjTPCTrackMaker(const Char_t *name, TDirectory* file, StMuDst
 
 Int_t StjTPCTrackMaker::Init()
 {
-  _tpc  = new StjTPCMuDst(_uDstMaker);
+  _tpc  = new StjTPCMuDst;
 
   _writer = new StjTrackListWriter("tpcTracks", _file);
 

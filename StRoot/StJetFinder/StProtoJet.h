@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StProtoJet.h,v 1.14 2008/05/02 18:45:06 tai Exp $
+// $Id: StProtoJet.h,v 1.15 2010/05/30 07:07:44 pibero Exp $
 #ifndef StProtoJet_HH
 #define StProtoJet_HH
 
@@ -29,7 +29,7 @@ public:
 	
   unsigned int numberOfParticles() const {return _particleList.size();}
   unsigned int size() const {return _particleList.size();}
-  FourVecList& list() {return _particleList;}
+  const FourVecList& list() const {return _particleList;}
 	
   ///The d=et^2 of the protojet
   double d() const {return eT()*eT();}

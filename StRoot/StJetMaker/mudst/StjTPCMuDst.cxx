@@ -1,4 +1,4 @@
-// $Id: StjTPCMuDst.cxx,v 1.8 2010/04/27 16:31:48 pibero Exp $
+// $Id: StjTPCMuDst.cxx,v 1.9 2010/05/30 07:10:06 pibero Exp $
 #include "StjTPCMuDst.h"
 
 #include "StEventTypes.h"
@@ -9,6 +9,48 @@
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
 #include <TVector3.h>
+
+int StjTPCMuDst::currentVertexIndex() const
+{
+  return StMuDst::currentVertexIndex();
+}
+
+void StjTPCMuDst::setVertexIndex(int i)
+{
+  StMuDst::setVertexIndex(i);
+}
+
+int StjTPCMuDst::numberOfVertices() const
+{
+  return StMuDst::numberOfPrimaryVertices();
+}
+
+StjPrimaryVertex StjTPCMuDst::getVertex() const
+{
+  StjPrimaryVertex vertex;
+
+  if (StMuPrimaryVertex* muVertex = StMuDst::primaryVertex()) {
+    vertex.mPosition              = muVertex->position().xyz();
+    vertex.mPosError              = muVertex->posError().xyz();
+    vertex.mVertexFinderId        = muVertex->vertexFinderId();
+    vertex.mRanking               = muVertex->ranking();
+    vertex.mNTracksUsed           = muVertex->nTracksUsed();
+    vertex.mNBTOFMatch            = muVertex->nBTOFMatch();
+    vertex.mNCTBMatch             = muVertex->nCTBMatch();
+    vertex.mNBEMCMatch            = muVertex->nBEMCMatch();
+    vertex.mNEEMCMatch            = muVertex->nEEMCMatch();
+    vertex.mNCrossCentralMembrane = muVertex->nCrossCentralMembrane();
+    vertex.mSumTrackPt            = muVertex->sumTrackPt();
+    vertex.mMeanDip               = muVertex->meanDip();
+    vertex.mChiSquared            = muVertex->chiSquared();
+    vertex.mRefMultPos            = muVertex->refMultPos();
+    vertex.mRefMultNeg            = muVertex->refMultNeg();
+    vertex.mRefMultFtpcEast       = muVertex->refMultFtpcEast();
+    vertex.mRefMultFtpcWest       = muVertex->refMultFtpcWest();
+  }
+
+  return vertex;
+}
 
 StjTrackList StjTPCMuDst::getTrackList()
 {
