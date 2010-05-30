@@ -56,6 +56,7 @@ public:
 
 private:
   friend class StjeJetEventTreeWriter;
+  friend class StJetMaker2009;
 
   int mRunId;
   int mEventId;

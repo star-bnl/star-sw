@@ -1,4 +1,4 @@
-// $Id: StjBEMCTowerMaker.cxx,v 1.3 2008/08/03 00:26:18 tai Exp $
+// $Id: StjBEMCTowerMaker.cxx,v 1.4 2010/05/30 07:10:00 pibero Exp $
 #include "StjBEMCTowerMaker.h"
 
 
@@ -31,7 +31,7 @@ StjBEMCTowerMaker::StjBEMCTowerMaker(const Char_t *name, TDirectory* file, StMuD
 
 Int_t StjBEMCTowerMaker::Init()
 {
-  _bemc = new StjBEMCMuDst(_uDstMaker, true);
+  _bemc = new StjBEMCMuDst;
   // _bemc = new StjBEMCNull();
   // _bemc = new StjBEMCTxt("./testStJetMaker/bemcenergy.txt");
 

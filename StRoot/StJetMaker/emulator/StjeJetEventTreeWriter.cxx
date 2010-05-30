@@ -121,7 +121,7 @@ StJetCandidate* StjeJetEventTreeWriter::fillJet(StJetEvent* jetEvent, StJetVerte
   StJetCandidate* jet = jetEvent->newJet(jetVertex->position(),TLorentzVector(protojet.px(),protojet.py(),protojet.pz(),protojet.e()));
 
   // Loop over jet particles
-  StProtoJet::FourVecList& particleList = protojet.list();
+  const StProtoJet::FourVecList& particleList = protojet.list();
   for (StProtoJet::FourVecList::const_iterator iParticle = particleList.begin(); iParticle != particleList.end(); ++iParticle) {
     const StMuTrackFourVec* particle = dynamic_cast<const StMuTrackFourVec*>(*iParticle);
 

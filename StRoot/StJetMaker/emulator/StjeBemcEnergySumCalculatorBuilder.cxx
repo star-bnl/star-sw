@@ -1,4 +1,4 @@
-// $Id: StjeBemcEnergySumCalculatorBuilder.cxx,v 1.3 2008/08/03 00:26:51 tai Exp $
+// $Id: StjeBemcEnergySumCalculatorBuilder.cxx,v 1.4 2010/05/30 07:10:04 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeBemcEnergySumCalculatorBuilder.h"
 #include "StjeBemcEnergySumCalculator.h"
@@ -16,7 +16,7 @@ StjeBemcEnergySumCalculator* StjeBemcEnergySumCalculatorBuilder::build(bool useB
 {
   if(!useBEMC) return new StjeBemcEnergySumCalculatorNull;
 
-  StjBEMCMuDst* bemc = new StjBEMCMuDst(uDstMaker, doTowerSwapFix);
+  StjBEMCMuDst* bemc = new StjBEMCMuDst(doTowerSwapFix);
   StjTowerEnergyListCut* bemcCut = new StjTowerEnergyListCut();
   if(use2003Cuts) bemcCut->addCut(new StjTowerEnergyCut2003BemcTower());
   if(use2005Cuts) bemcCut->addCut(new StjTowerEnergyCutBemcWestOnly());

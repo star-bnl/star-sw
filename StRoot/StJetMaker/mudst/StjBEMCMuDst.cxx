@@ -1,7 +1,6 @@
-// $Id: StjBEMCMuDst.cxx,v 1.7 2009/08/14 20:07:31 pibero Exp $
+// $Id: StjBEMCMuDst.cxx,v 1.8 2010/05/30 07:10:06 pibero Exp $
 #include "StjBEMCMuDst.h"
 
-#include <StMuDSTMaker/COMMON/StMuDstMaker.h>
 #include <StMuDSTMaker/COMMON/StMuDst.h>
 #include <StMuDSTMaker/COMMON/StMuEvent.h>
 
@@ -17,6 +16,8 @@
 #include <StEmcRawMaker/defines.h>
 #include <StEmcRawMaker/StBemcTables.h>
 
+#include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
+
 #include <TVector3.h>
 
 #include <iostream>
@@ -27,13 +28,11 @@ int StjBEMCMuDst::_runNumber = -1;
 int StjBEMCMuDst::_eventId = -1;
 StjTowerEnergyList StjBEMCMuDst::_list;
 
-StjBEMCMuDst::StjBEMCMuDst(StMuDstMaker* uDstMaker, bool doTowerSwapFix)
-  : _uDstMaker(uDstMaker)
-  , _bemcTables(new StBemcTables(doTowerSwapFix))
- {
-
- }
-
+StjBEMCMuDst::StjBEMCMuDst(bool doTowerSwapFix)
+  : _adc2e((StEmcADCtoEMaker*)StMaker::GetChain()->GetMakerInheritsFrom("StEmcADCtoEMaker"))
+  , _bemcTables(_adc2e->getBemcData()->getTables())
+{
+}
 
 StjTowerEnergyList StjBEMCMuDst::getEnergyList()
 {
@@ -43,28 +42,33 @@ StjTowerEnergyList StjBEMCMuDst::getEnergyList()
 
 bool StjBEMCMuDst::isNewEvent()
 {
-  if(_runNumber != _uDstMaker->muDst()->event()->runId()) return true;
-  if(_eventId != _uDstMaker->muDst()->event()->eventId()) return true;
+  if(_runNumber != StMuDst::event()->runId()) return true;
+  if(_eventId != StMuDst::event()->eventId()) return true;
   return false;
+}
+
+bool StjBEMCMuDst::isCorrupted() const
+{
+  return _adc2e->isCorrupted();
 }
 
 StjTowerEnergyList StjBEMCMuDst::getlist()
 {
-  _runNumber = _uDstMaker->muDst()->event()->runId();
-  _eventId = _uDstMaker->muDst()->event()->eventId();
-
-  _bemcTables->loadTables((StMaker*)_uDstMaker);
+  _runNumber = StMuDst::event()->runId();
+  _eventId = StMuDst::event()->eventId();
 
   StjTowerEnergyList ret;
 
-  StEmcCollection* emcCollection = findEmcCollection();
-  if (emcCollection) {
-    StEmcDetector* detector = emcCollection->detector(kBarrelEmcTowerId);
-    if (detector) {
-      for(unsigned int m = 1; m <= detector->numberOfModules(); ++m) {
-	StSPtrVecEmcRawHit& rawHits = detector->module(m)->hits();
-	for(size_t k = 0; k < rawHits.size(); ++k) {
-	  ret.push_back(readTowerHit(*rawHits[k]));
+  if (!isCorrupted()) {
+    StEmcCollection* emcCollection = findEmcCollection();
+    if (emcCollection) {
+      StEmcDetector* detector = emcCollection->detector(kBarrelEmcTowerId);
+      if (detector) {
+	for(unsigned int m = 1; m <= detector->numberOfModules(); ++m) {
+	  StSPtrVecEmcRawHit& rawHits = detector->module(m)->hits();
+	  for(size_t k = 0; k < rawHits.size(); ++k) {
+	    ret.push_back(readTowerHit(*rawHits[k]));
+	  }
 	}
       }
     }
@@ -75,16 +79,16 @@ StjTowerEnergyList StjBEMCMuDst::getlist()
 
 StEmcCollection* StjBEMCMuDst::findEmcCollection()
 {
-  StEvent* event = dynamic_cast<StEvent*>( _uDstMaker->GetInputDS("StEvent") );
-  return (event) ? event->emcCollection() : _uDstMaker->muDst()->emcCollection();
+  StEvent* event = dynamic_cast<StEvent*>( _adc2e->GetInputDS("StEvent") );
+  return (event) ? event->emcCollection() : StMuDst::emcCollection();
 }
 
 StjTowerEnergy StjBEMCMuDst::readTowerHit(const StEmcRawHit& hit)
 {
   StjTowerEnergy ret;
 
-  ret.runNumber = _uDstMaker->muDst()->event()->runId();
-  ret.eventId = _uDstMaker->muDst()->event()->eventId();
+  ret.runNumber = StMuDst::event()->runId();
+  ret.eventId = StMuDst::event()->eventId();
 
   ret.detectorId = 9;
 
@@ -101,7 +105,7 @@ StjTowerEnergy StjBEMCMuDst::readTowerHit(const StEmcRawHit& hit)
   ret.towerEta = tower.Eta();
   ret.towerPhi = tower.Phi();
 
-  StThreeVectorF vertex = _uDstMaker->muDst()->event()->primaryVertexPosition();
+  StThreeVectorF vertex = StMuDst::event()->primaryVertexPosition();
 
   ret.vertexX = vertex.x();
   ret.vertexY = vertex.y();

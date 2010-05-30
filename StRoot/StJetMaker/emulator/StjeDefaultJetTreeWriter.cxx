@@ -1,4 +1,4 @@
-// $Id: StjeDefaultJetTreeWriter.cxx,v 1.10 2010/04/27 13:44:35 pibero Exp $
+// $Id: StjeDefaultJetTreeWriter.cxx,v 1.11 2010/05/30 07:10:04 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeDefaultJetTreeWriter.h"
 
@@ -112,8 +112,8 @@ void StjeDefaultJetTreeWriter::fillJet(StJets &stjets, StProtoJet& pj)
   StJet* jet = (StJet*)jets->Last();
   jet->zVertex = _uDstMaker.muDst()->event()->primaryVertexPosition().z();
 
-  StProtoJet::FourVecList &particleList = pj.list();
-  for(StProtoJet::FourVecList::iterator it2 = particleList.begin(); it2 != particleList.end(); ++it2)  {
+  const StProtoJet::FourVecList &particleList = pj.list();
+  for(StProtoJet::FourVecList::const_iterator it2 = particleList.begin(); it2 != particleList.end(); ++it2)  {
     const StMuTrackFourVec *particle = dynamic_cast<const StMuTrackFourVec*>(*it2);
     if (!particle) {
       cout <<"StJets::addProtoJet(). ERROR:\tcast to StMuTrackFourVecFailed.  no action"<<endl;

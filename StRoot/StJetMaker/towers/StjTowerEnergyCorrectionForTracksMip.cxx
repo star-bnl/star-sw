@@ -10,11 +10,6 @@
 
 ClassImp(StjTowerEnergyCorrectionForTracksMip);
 
-StjTowerEnergyList StjTowerEnergyCorrectionForTracksMip::operator()(const StjTowerEnergyList& energyDepositList, const StjTrackList& trackList)
-{
-  return Do(energyDepositList, trackList);
-}
-
 StjTowerEnergyList StjTowerEnergyCorrectionForTracksMip::Do(const StjTowerEnergyList& energyDepositList, const StjTrackList& trackList)
 {
   StjTowerEnergyList elist;

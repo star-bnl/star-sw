@@ -1,9 +1,9 @@
-// $Id: StjEEMCMuDst.cxx,v 1.6 2010/04/30 05:20:27 pibero Exp $
+// $Id: StjEEMCMuDst.cxx,v 1.7 2010/05/30 07:10:06 pibero Exp $
 #include "StjEEMCMuDst.h"
 
+#include "StMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
-#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuEmcCollection.h"
 
 #include "StEEmcUtil/database/StEEmcDb.h"
@@ -11,22 +11,18 @@
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
 
-StjEEMCMuDst::StjEEMCMuDst(StMuDstMaker* uDstMaker)
- : _uDstMaker(uDstMaker)
- , mEeDb(0)
+StjEEMCMuDst::StjEEMCMuDst() : mEeDb((StEEmcDb*)StMaker::GetChain()->GetDataSet("StEEmcDb"))
 {
-
 }
 
 void StjEEMCMuDst::Init()
 {
-    if (_uDstMaker) mEeDb = (StEEmcDb*)_uDstMaker->GetDataSet("StEEmcDb");
-    if(mEeDb) mEeDb->setThreshold(3);
+  if (mEeDb) mEeDb->setThreshold(3);
 }
 
 StjTowerEnergyList StjEEMCMuDst::getEnergyList()
 {
-  StMuEmcCollection* muEmc = _uDstMaker->muDst()->muEmcCollection();
+  StMuEmcCollection* muEmc = StMuDst::muEmcCollection();
 
   StjTowerEnergyList ret;
 
@@ -78,8 +74,8 @@ StjTowerEnergyList StjEEMCMuDst::getEnergyList()
     double energy = adc/(dbItem->gain);
 	    
     StjTowerEnergy energyDeposit;
-    energyDeposit.runNumber = _uDstMaker->muDst()->event()->runId();
-    energyDeposit.eventId = _uDstMaker->muDst()->event()->eventId();
+    energyDeposit.runNumber = StMuDst::event()->runId();
+    energyDeposit.eventId = StMuDst::event()->eventId();
     energyDeposit.detectorId = kEndcapEmcTowerId;
     energyDeposit.towerId = (sec-1)*60+(sub-1)*12+(etabin-1);
 
@@ -90,7 +86,7 @@ StjTowerEnergyList StjEEMCMuDst::getEnergyList()
     energyDeposit.towerEta = towerLocation.Eta();
     energyDeposit.towerPhi = towerLocation.Phi();
 
-    StThreeVectorF vertex = _uDstMaker->muDst()->event()->primaryVertexPosition();
+    StThreeVectorF vertex = StMuDst::event()->primaryVertexPosition();
 
     energyDeposit.vertexX = vertex.x();
     energyDeposit.vertexY = vertex.y();

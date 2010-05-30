@@ -1,4 +1,4 @@
-// $Id: StjTPCRandomMuDst.cxx,v 1.1 2010/05/24 17:42:39 pibero Exp $
+// $Id: StjTPCRandomMuDst.cxx,v 1.2 2010/05/30 07:10:06 pibero Exp $
 #include "StjTPCRandomMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuTrack.h>
@@ -13,7 +13,7 @@
 #include <stdio.h>
 
 StjTPCRandomMuDst::StjTPCRandomMuDst(StMuDstMaker* uDstMaker, Double_t randomSelectorProb, bool randomSelectorAt, UInt_t randomSelectorSeed)
-  : StjTPCMuDst(uDstMaker),
+  : StjTPCMuDst(),
     _randomSelector( randomSelectorProb, randomSelectorAt, randomSelectorSeed )
 {
 }
