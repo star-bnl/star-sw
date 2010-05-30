@@ -48,8 +48,8 @@ void RunJetFinder2009pro(int nevents = 1e6,
   // MuDst reader
   StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,"",mudstfile,"",100000,"MuDst");
 
-  // StMuDbReader...
-  StMuDbReader* db = StMuDbReader::instance();
+  // MuDst DB
+  StMuDbReader* muDstDb = StMuDbReader::instance();
 
   // Trigger filter
   StTriggerFilterMaker* filterMaker = new StTriggerFilterMaker;
@@ -68,11 +68,21 @@ void RunJetFinder2009pro(int nevents = 1e6,
   // JP1
   filterMaker->addTrigger(240410);
   filterMaker->addTrigger(240411);
+  // L2BGamma
+  filterMaker->addTrigger(240620);
+  // L2EGamma
+  filterMaker->addTrigger(240630);
+  filterMaker->addTrigger(240631);
   // BBCMB-Cat2
   filterMaker->addTrigger(240013);
   filterMaker->addTrigger(240113);
   filterMaker->addTrigger(240123);
   filterMaker->addTrigger(240223);
+  // BBCMB-Cat3
+  filterMaker->addTrigger(240014);
+  filterMaker->addTrigger(240114);
+  filterMaker->addTrigger(240124);
+  filterMaker->addTrigger(240224);
 
   // star database
   St_db_Maker* starDb = new St_db_Maker("StarDb","MySQL:StarDb");
@@ -179,7 +189,7 @@ void RunJetFinder2009pro(int nevents = 1e6,
 
   // Jet cuts
   anapars5->addJetCut(new StProtoJetCutPt(5,200));
-  anapars5->addJetCut(new StProtoJetCutEta(-100,100));
+  anapars5->addJetCut(new StProtoJetCutEta(0.95,2.5));
 
   // Set analysis cuts for EMC branch
   StAnaPars* anaparsEMC = new StAnaPars;
