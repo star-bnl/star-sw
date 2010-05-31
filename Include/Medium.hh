@@ -97,6 +97,12 @@ class Medium {
     virtual 
     bool GetElectronCollision(const double e, int& type, int& level, double& e1,
                       double& ctheta, double& s, double& esec);
+    // Get de-excitation products
+    virtual
+    int GetNumberOfDeexcitationProducts() {return 0;}
+    virtual
+    bool GetDeexcitationProduct(const int i, double& t, 
+                                int& type, double& energy) {return false;}
     virtual 
     int GetNumberOfLevels();
 

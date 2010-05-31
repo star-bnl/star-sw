@@ -143,26 +143,26 @@ class MediumMagboltz86 : public Medium {
 
     // Switch on/off automatic adjustment of max. energy when an
     // energy exceeding the present range is requested
-    void EnableEnergyRangeAdjustment()  {adjust = true;}
-    void DisableEnergyRangeAdjustment() {adjust = false;}
+    void EnableEnergyRangeAdjustment()  {useAutoAdjust = true;}
+    void DisableEnergyRangeAdjustment() {useAutoAdjust = false;}
 
     // Switch on/off anisotropic scattering (enabled by default)
-    void EnableAnisotropicScattering()  {anisotropic = true;}
-    void DisableAnisotropicScattering() {anisotropic = false;}
+    void EnableAnisotropicScattering()  {useAnisotropic = true;}
+    void DisableAnisotropicScattering() {useAnisotropic = false;}
     
     // Switch on/off de-excitation handling
     void EnableDeexcitation();
-    void DisableDeexcitation() {deexcitation = false;}
+    void DisableDeexcitation() {useDeexcitation = false;}
 
     // Switch on/off simplified simulation of Penning transfers by means of 
     // transfer probabilities (not compatible with de-excitation handling)
     void EnablePenningTransfer(const double r);
-    void DisablePenningTransfer() {penning = false;}
+    void DisablePenningTransfer() {usePenning = false;}
 
     // When enabled, the gas cross-section table is written to file
     // when loaded into memory
-    void EnableCrossSectionOutput()  {csoutput = true;}
-    void DisableCrossSectionOutput() {csoutput = false;}
+    void EnableCrossSectionOutput()  {useCsOutput = true;}
+    void DisableCrossSectionOutput() {useCsOutput = false;}
     
     // Get the overall null-collision rate [ns-1]
     double GetElectronNullCollisionRate();
@@ -172,6 +172,9 @@ class MediumMagboltz86 : public Medium {
     bool   GetElectronCollision(const double e, int& type, int& level, 
                         double& e1, double& ctheta, 
                         double& s, double& esec);
+    int  GetNumberOfDeexcitationProducts() {return nDeexcitationProducts;}
+    bool GetDeexcitationProduct(const int i, 
+                                double& t, int& type, double& energy); 
 
     double GetPhotonCollisionRate(const double e);
     bool   GetPhotonCollision(const double e, int& type, int& level,
@@ -207,12 +210,12 @@ class MediumMagboltz86 : public Medium {
                      double& vx, double& vy, double& vz, 
                      double& dl, double& dt,
                      double& eta, double& alpha);
-    
+ 
     void SetIonMobility(const double mu);
     bool IonVelocity(const double ex, const double ey, const double ez,
                      const double bx, const double by, const double bz,
                      double& vx, double& vy, double& vz);
-                                                                   
+
   private:
 
     static const int nEnergySteps = 4000;
@@ -228,26 +231,25 @@ class MediumMagboltz86 : public Medium {
    
     // Energy spacing of collision rate tables
     double eFinal, eStep;
-    bool adjust; 
+    bool useAutoAdjust;
   
     // Flag enabling/disabling output of cross-section table to file
-    bool csoutput;
+    bool useCsOutput;
     // Number of different cross-section types in the current gas mixture
     int nTerms;
     // Recoil energy parameter
     double rgas[nMaxLevels];
     // For ionisation: Opal-Beaty-Peterson splitting parameter [eV]
-    // For excitation: Photon energy
     double wSplit[nMaxLevels];
     // Energy loss
     double energyLoss[nMaxLevels];
     // Cross-section type
     int csType[nMaxLevels];
     // Parameters for calculation of scattering angles
-    bool anisotropic;
+    bool useAnisotropic;
     double scatParameter[nEnergySteps][nMaxLevels];
     int    scatModel[nMaxLevels];
-    float  scatCut[nEnergySteps][nMaxLevels];
+    double scatCut[nEnergySteps][nMaxLevels];
     
     // Level description
     char description[nMaxLevels][30]; 
@@ -270,17 +272,46 @@ class MediumMagboltz86 : public Medium {
     // Number of collisions for each cross-section term
     std::vector<int> nCollisionsDetailed;
 
-    // Penning transfer probabilities
-    bool penning;
+    // Penning transfer
+    // Flag enabling/disabling Penning transfer
+    bool usePenning;
+    // Penning transfer probability
     double rPenning;
+    // Number of Penning ionisations
     int nPenning;
-    // Deexcitation rates
-    bool deexcitation;
-    double fDeexcitation[nMaxLevels];
-    double fRadiative[nMaxLevels];
-    double fCollIon[nMaxLevels];
-    double fCollLoss[nMaxLevels];
-    // Ionisation thresholds
+
+    // Deexcitation 
+    // Flag enabling/disabling detailed simulation of de-excitation process
+    bool useDeexcitation;
+    int nDeexcitations;
+    struct deexcitation {
+      // Level description
+      std::string label;
+      // Energy
+      double energy;
+      // Number of de-excitation channels
+      int nChannels;
+      // Branching ratio
+      std::vector<double> p;
+      // Final level
+      std::vector<int> final;
+      // Total rate
+      double rate; 
+    };
+    std::vector<deexcitation> deexcitations;
+    int iDeexcitation[nMaxLevels];
+    int nDeexcitationProducts;
+    // List of de-excitation products
+    struct dxcProd {
+      double t;
+      // Type of deexcitation product
+      // 1: photon, -1: electron (from Penning ionization)
+      int type;
+      double energy;
+    };
+    std::vector<dxcProd> dxcProducts;
+
+    // Ionisation potentials
     double ionPot[nMaxGases];
     // Minimum ionisation potential
     double minIonPot;
@@ -303,8 +334,9 @@ class MediumMagboltz86 : public Medium {
     bool GetGasNumber(std::string gasname, int& number) const;
     bool GetGasName(const int number, std::string& gasname) const;
     bool Mixer();
-    void ComputeAngularCut(double parIn, float& cut, double &parOut);
+    void ComputeAngularCut(double parIn, double& cut, double &parOut);
     void ComputeDeexcitationTable();
+    void ComputeDeexcitation(int iLevel);
     bool ComputePhotonCollisionTable();
 
 };

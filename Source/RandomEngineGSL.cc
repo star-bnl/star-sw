@@ -3,6 +3,8 @@
 
 namespace Garfield {
 
+RandomEngineGSL randomEngine;
+
 RandomEngineGSL::RandomEngineGSL() {
 
   // Setup the random generator

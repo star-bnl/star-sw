@@ -9,13 +9,13 @@
 namespace Garfield {
 
   // Random number generator
-  static RandomEngineGSL* randomEngine = new RandomEngineGSL();
+  extern RandomEngineGSL randomEngine;
 
   // Draw a random number uniformly distributed in the range [0, 1)
   inline
   double RndmUniform() {
 
-    return randomEngine->Draw();
+    return randomEngine.Draw();
   
   }
 
@@ -23,8 +23,8 @@ namespace Garfield {
   inline
   double RndmUniformPos() {
 
-    double r = randomEngine->Draw();
-    while (r <= 0.) r = randomEngine->Draw();
+    double r = randomEngine.Draw();
+    while (r <= 0.) r = randomEngine.Draw();
     return r;
 
   }
@@ -34,12 +34,12 @@ namespace Garfield {
   double RndmGaussian() {
 
     // Box-Muller algorithm
-    double v1 = 2. * randomEngine->Draw() - 1.;
-    double v2 = 2. * randomEngine->Draw() - 1.;
+    double v1 = 2. * randomEngine.Draw() - 1.;
+    double v2 = 2. * randomEngine.Draw() - 1.;
     double r2 = v1 * v1 + v2 * v2;
     while (r2 > 1.) {
-      v1 = 2. * randomEngine->Draw() - 1.;
-      v2 = 2. * randomEngine->Draw() - 1.;
+      v1 = 2. * randomEngine.Draw() - 1.;
+      v2 = 2. * randomEngine.Draw() - 1.;
       r2 = v1 * v1 + v2 * v2;
     }
     return v1 * sqrt(-2. * log(r2) / r2);

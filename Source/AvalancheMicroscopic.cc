@@ -728,11 +728,40 @@ AvalancheMicroscopic::AvalancheElectron(
             if (hasUserHandleInelastic) {
               userHandleInelastic(x, y, z, t, cstype, level, medium);
             }
-            if (esec < 0.) {
-              esec = -esec;
-              // Radiative de-excitation
-              if (usePhotons && esec > gammaCut) {
-                TransportPhoton(x, y, z, t + d, esec);
+            if (esec < 0. && d < 0.) {
+              // Detailed modelling of de-excitation cascade
+              double tDxc = 0.;
+              int typeDxc = 0;
+              const int nDxc = medium->GetNumberOfDeexcitationProducts();
+              for (int j = nDxc; j--;) {
+                if (medium->GetDeexcitationProduct(j, tDxc, typeDxc, esec)) {
+                  if (typeDxc == -1) {
+                    // Additional electron (Penning ionisation)
+                    phi = TwoPi * RndmUniform();
+                    double ctheta0 = 1. - 2 * RndmUniform();
+                    double stheta0 = sqrt(1. - ctheta0 * ctheta0);
+                    // Add the secondary electro to the stack
+                    newElectron = stack[iEl];
+                    newElectron.x0 = x; newElectron.x = x;
+                    newElectron.y0 = y; newElectron.y = y;
+                    newElectron.z0 = z; newElectron.z = z;
+                    newElectron.t0 = t + tDxc; newElectron.t = t + tDxc; 
+                    newElectron.energy = Max(esec, Small);
+                    newElectron.e0 = newElectron.energy;
+                    newElectron.dx = cos(phi) * stheta0;
+                    newElectron.dy = sin(phi) * stheta0;
+                    newElectron.dz = ctheta0;
+                    newElectron.driftLine.clear();
+                    stack.push_back(newElectron);
+                    // Increment the electron and ion counters         
+                    ++nElectrons; ++nIons;
+                  } else if (typeDxc == 1) {
+                    // Radiative de-excitation
+                    if (usePhotons && esec > gammaCut) {
+                      TransportPhoton(x, y, z, t + tDxc, esec);
+                    }
+                  }
+                }
               }
             } else if (esec > 0.) {
               // Penning ionisation     

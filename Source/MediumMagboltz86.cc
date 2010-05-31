@@ -3,6 +3,8 @@
 #include <fstream>
 #include <cmath>
 
+#include <map>
+
 #include "MediumMagboltz86.hh"
 #include "Random.hh"
 #include "FundamentalConstants.hh"
@@ -12,9 +14,11 @@ namespace Garfield {
 
 MediumMagboltz86::MediumMagboltz86() :
   Medium(), 
-  eFinal(40.), eStep(eFinal / nEnergySteps), adjust(true), csoutput(false), 
-  nTerms(0), anisotropic(true), 
-  penning(false), rPenning(0.), nPenning(0), deexcitation(false),
+  eFinal(40.), eStep(eFinal / nEnergySteps), useAutoAdjust(true), 
+  useCsOutput(false), 
+  nTerms(0), useAnisotropic(true), 
+  usePenning(false), rPenning(0.), nPenning(0), 
+  useDeexcitation(false), nDeexcitations(0), nDeexcitationProducts(0),
   eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma),
   hasIonMobility(false), muIon(1.e-9) {
   
@@ -222,13 +226,14 @@ MediumMagboltz86::SetMaxPhotonEnergy(const double e) {
 void
 MediumMagboltz86::EnableDeexcitation() {
 
-  if (penning) {
+  if (usePenning) {
     std::cerr << "MediumMagboltz86::EnableDeexcitation:" << std::endl;
     std::cerr << "    Penning transfer will be switched off." << std::endl;
   }
-  penning = false;
-  deexcitation = true;
+  usePenning = false;
+  useDeexcitation = true;
   isChanged = true;
+  nDeexcitationProducts = 0;
 
 }
 
@@ -243,12 +248,12 @@ MediumMagboltz86::EnablePenningTransfer(const double r) {
   }
   
   rPenning = r;
-  if (deexcitation) {
-    std::cerr << "MediumMagboltz86::EnablePenningTransfer:" << std::endl;
-    std::cerr << "    Deexcitation handling will be switched off." 
+  if (useDeexcitation) {
+    std::cout << "MediumMagboltz86::EnablePenningTransfer:" << std::endl;
+    std::cout << "    Deexcitation handling will be switched off." 
               << std::endl;
   }
-  penning = true;
+  usePenning = true;
   
 }
 
@@ -276,7 +281,7 @@ MediumMagboltz86::GetElectronCollisionRate(const double e) {
               << std::endl;
     return cfTot[0];
   }
-  if (e > eFinal && adjust) {    
+  if (e > eFinal && useAutoAdjust) {    
     std::cerr << "MediumMagboltz86::GetElectronCollisionRate:" << std::endl;
     std::cerr << "    Collision rate at " << e 
               << " eV is not included in the current table." << std::endl;
@@ -287,7 +292,8 @@ MediumMagboltz86::GetElectronCollisionRate(const double e) {
     
   if (isChanged) {
     if (!Mixer()) {
-      std::cerr << "MediumMagboltz86: Error calculating the collision rates table."
+      std::cerr << "MediumMagboltz86:" << std::endl;
+      std::cerr << "    Error calculating the collision rates table."
                 << std::endl;
       return 0.;
     }
@@ -303,7 +309,7 @@ bool
 MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level, 
                 double& e1, double& ctheta, double& s, double& esec) {
 
-  if (e > eFinal && adjust) {
+  if (e > eFinal && useAutoAdjust) {
     std::cerr << "MediumMagboltz86::GetElectronCollision:" << std::endl;
     std::cerr << "    Provided electron energy  (" << e 
               << " eV) exceeds current energy range  (" << eFinal 
@@ -319,8 +325,9 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
   
   if (isChanged) {
     if (!Mixer()) {
-      std::cerr << "MediumMagboltz86: Error calculating" 
-                << " the collision rates table." << std::endl;
+      std::cerr << "MediumMagboltz86: " << std::endl;
+      std::cerr << "    Error calculating the collision rates table." 
+                << std::endl;
       return false;
     }
     isChanged = false;
@@ -359,7 +366,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
   // Energy loss
   double loss = energyLoss[level];
   // Secondary electron energy (none by default)
-  esec = 0.;
+  esec = 0.; s = 0.;
   // Ionising collision
   if (type == 1) {
     // Splitting parameter
@@ -370,21 +377,11 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
     if (esec <= 0) esec = 1.e-20;
     loss += esec;
   // Excitation
-  } else if (type == 4 && deexcitation && fDeexcitation[level] > 0.) {
-    // Determine the de-excitation time
-    s = -log(RndmUniformPos()) / fDeexcitation[level];
-    // Sample the de-excitation process
-    r = RndmUniform();
-    if (r < fRadiative[level]) {
-      // Photon emission
-      esec = - wSplit[level];
-    } else if (r < fCollIon[level]) {
-      // Penning ionisation
-      esec = RndmUniform() * (energyLoss[level] * rgas[level] - minIonPot);
-      if (esec <= 0) esec = 1.e-20;
-      ++nPenning;
-    }
-  } else if (type == 4 && penning) {
+  } else if (type == 4 && useDeexcitation && iDeexcitation[level] >= 0) {
+    ComputeDeexcitation(iDeexcitation[level]);
+    esec = -1.;
+    if (nDeexcitationProducts > 0) s = -1.;
+  } else if (type == 4 && usePenning) {
     if (energyLoss[level] * rgas[level] > minIonPot && 
         RndmUniform() < rPenning) {
       esec = RndmUniform() * (energyLoss[level] * rgas[level] - minIonPot);
@@ -399,7 +396,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
   
   // Determine the scattering angle
   double ctheta0;
-  if (anisotropic) {
+  if (useAnisotropic) {
     switch (scatModel[level]) {
       case 0:
         ctheta0 = 1. - 2. * RndmUniform();
@@ -443,13 +440,18 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
     double u = (s1 - 1.) * (s1 - 1.) / arg;
     if (ctheta0 * ctheta0 > u) ctheta *= -1.;
   }
+  return true;
 
-  if (debug && type == 4 && level < 47) {
-    std::cout << "MediumMagboltz86::GetElectronCollision:" << std::endl;
-    std::cout << "    Energy:      " << e << std::endl;
-    std::cout << "    Level:       " << level << std::endl;
-    std::cout << "    Type:        " << type << std::endl;
-  }
+}
+
+bool
+MediumMagboltz86::GetDeexcitationProduct(const int i, double& t, 
+                                         int& type, double& energy) {
+
+  if (i < 0 || i >= nDeexcitationProducts || !useDeexcitation) return false;
+  t = dxcProducts[i].t;
+  type = dxcProducts[i].type;
+  energy = dxcProducts[i].energy;
   return true;
 
 }
@@ -462,7 +464,7 @@ MediumMagboltz86::GetPhotonCollisionRate(const double e) {
               << std::endl;
     return cfTotGamma[0];
   }
-  if (e > eFinalGamma && adjust) {
+  if (e > eFinalGamma && useAutoAdjust) {
     std::cerr << "MediumMagboltz86::GetPhotonCollisionRate:" << std::endl;
     std::cerr << "    Collision rate at " << e 
               << " eV is not included in the current table." << std::endl;
@@ -491,7 +493,7 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
                                      double& e1, double& ctheta, double& s,
                                      double& esec) {
 
-  if (e > eFinalGamma && adjust) {
+  if (e > eFinalGamma && useAutoAdjust) {
     std::cerr << "MediumMagboltz86::GetPhotonCollision:" << std::endl;
     std::cerr << "    Provided electron energy  (" << e 
               << " eV) exceeds current energy range  (" << eFinalGamma
@@ -711,286 +713,271 @@ MediumMagboltz86::IonVelocity(const double ex, const double ey, const double ez,
 }
 
 bool 
-MediumMagboltz86::GetGasNumber(std::string gasname, int& number) const {
+MediumMagboltz86::GetGasNumber(std::string name, int& number) const {
 
   // Convert to upper-case
-  for (unsigned int i = 0; i < gasname.length(); ++i) {
-    gasname[i] = toupper(gasname[i]);
+  for (unsigned int i = 0; i < name.length(); ++i) {
+    name[i] = toupper(name[i]);
   }
   
-  if (gasname == "") {
+  if (name == "") {
     number = 0; return false;
   }
   
   // CF4
-  if (gasname == "CF4" || gasname == "FREON" || 
-      gasname == "FREON-14" || gasname == "TETRAFLUOROMETHANE") {
+  if (name == "CF4" || name == "FREON" || 
+      name == "FREON-14" || name == "TETRAFLUOROMETHANE") {
     number = 1; return true;
   }
   // Argon
-  if (gasname == "AR" || gasname == "ARGON") {
+  if (name == "AR" || name == "ARGON") {
     number = 2; return true;
   }
   // Helium 4
-  if (gasname == "HE" || gasname == "HELIUM" || gasname == "HE-4" || 
-      gasname == "HELIUM-4") {
+  if (name == "HE" || name == "HELIUM" || name == "HE-4" || 
+      name == "HELIUM-4" || name == "HE4" || name == "HELIUM4") {
     number = 3; return true;
   }
   // Helium 3
-  if (gasname == "HE-3" || gasname == "HELIUM-3") {
+  if (name == "HE-3" || name == "HELIUM-3" || name == "HE3" || 
+      name == "HELIUM3") {
     number = 4; return true;
   }
   // Neon
-  if (gasname == "NE" || gasname == "NEON") {
+  if (name == "NE" || name == "NEON") {
     number = 5; return true;
   }
   // Krypton
-  if (gasname == "KR" || gasname == "KRYPTON") {
+  if (name == "KR" || name == "KRYPTON") {
     number = 6; return true;
   }
   // Xenon
-  if (gasname == "XE" || gasname == "XENON") {
+  if (name == "XE" || name == "XENON") {
     number = 7; return true;
   }
   // Methane
-  if (gasname == "CH4" || gasname == "METHANE" ) {
+  if (name == "CH4" || name == "METHANE" ) {
     number = 8; return true;
   }
   // Ethane
-  if (gasname == "C2H6" || gasname == "ETHANE") {
+  if (name == "C2H6" || name == "ETHANE") {
     number = 9; return true;
   }
   // Propane
-  if (gasname == "C3H8" || gasname == "PROPANE") {
+  if (name == "C3H8" || name == "PROPANE") {
     number = 10; return true;
   }
   // Isobutane
-  if (gasname == "C4H10" || gasname == "ISOBUTANE" || gasname == "ISO" || 
-      gasname == "IC4H10" || gasname == "ISO-C4H10" || gasname == "ISOC4H10") {
+  if (name == "C4H10" || name == "ISOBUTANE" || name == "ISO" || 
+      name == "IC4H10" || name == "ISO-C4H10" || name == "ISOC4H10") {
     number = 11; return true;
   }
   // CO2 (isotropic)
-  if (gasname == "CO2" || gasname == "CARBON-DIOXIDE") {
+  if (name == "CO2" || name == "CARBON-DIOXIDE") {
     number = 12; return true;
   }
   // Neopentane
-  if (gasname == "NEOPENTANE" || gasname == "NEO-PENTANE" || 
-      gasname == "NEO-C5H12" || gasname == "NEOC5H12" || gasname == "C5H12") {
+  if (name == "NEOPENTANE" || name == "NEO-PENTANE" || 
+      name == "NEO-C5H12" || name == "NEOC5H12" || name == "C5H12") {
     number = 13; return true;
   }
   // Water
-  if (gasname == "H2O" || gasname == "WATER" || gasname == "WATER-VAPOUR") {
+  if (name == "H2O" || name == "WATER" || name == "WATER-VAPOUR") {
     number = 14; return true;
   }
   // Oxygen
-  if (gasname == "O2" || gasname == "OXYGEN") {
+  if (name == "O2" || name == "OXYGEN") {
     number = 15; return true;
   }
   // Nitrogen
-  if (gasname == "N2" || gasname == "NITROGEN" || 
-      gasname == "NITROGEN-ISOTROPIC" || gasname == "N2-ISOTROPIC") {
+  if (name == "N2" || name == "NITROGEN" || 
+      name == "NITROGEN-ISOTROPIC" || name == "N2-ISOTROPIC") {
     number = 16; return true;
   }
   // Nitric oxide (NO)
-  if (gasname == "NO" || gasname == "NITRIC-OXIDE" || 
-      gasname == "NITROGEN-MONOXIDE") {
+  if (name == "NO" || name == "NITRIC-OXIDE" || name == "NITROGEN-MONOXIDE") {
     number = 17; return true;
   }
   // Nitrous oxide (N2O)
-  if (gasname == "N2O" || gasname == "NITROUS-OXIDE" || 
-      gasname == "DINITROGEN-MONOXIDE" || gasname == "LAUGHING-GAS") {
+  if (name == "N2O" || name == "NITROUS-OXIDE" || 
+      name == "DINITROGEN-MONOXIDE" || name == "LAUGHING-GAS") {
     number = 18; return true;
   }
   // Ethene (C2H4)
-  if (gasname == "C2H4" || gasname == "ETHENE" || gasname == "ETHYLENE") {
+  if (name == "C2H4" || name == "ETHENE" || name == "ETHYLENE") {
     number = 19; return true;
   }
   // Acetylene (C2H2)
-  if (gasname == "C2H2" || gasname == "ACETYL" || 
-      gasname == "ACETYLENE" || gasname == "ETHYNE") {
+  if (name == "C2H2" || name == "ACETYL" || 
+      name == "ACETYLENE" || name == "ETHYNE") {
     number = 20; return true;
   }
   // Hydrogen
-  if (gasname == "H2" || gasname == "HYDROGEN") {
+  if (name == "H2" || name == "HYDROGEN") {
     number = 21; return true;
   }
   // Deuterium
-  if (gasname == "D2" || gasname == "DEUTERIUM") {
+  if (name == "D2" || name == "DEUTERIUM") {
     number = 22; return true;
   }
   // Carbon monoxide (CO)
-  if (gasname == "CO" || gasname == "CARBON-MONOXIDE") {
+  if (name == "CO" || name == "CARBON-MONOXIDE") {
     number = 23; return true;
   }
   // Methylal (dimethoxymethane, CH3-O-CH2-O-CH3, "hot" version)
-  if (gasname == "METHYLAL" || gasname == "METHYLAL-HOT" || 
-      gasname == "DIMETHOXYMETHANE" || gasname == "DMM" || 
-      gasname == "C3H8O2") {
+  if (name == "METHYLAL" || name == "METHYLAL-HOT" || name == "DMM" ||
+      name == "DIMETHOXYMETHANE" || name == "C3H8O2") {
     number = 24; return true;
   }
   // DME
-  if (gasname == "DME" || gasname == "DIMETHYL-ETHER" || 
-      gasname == "METHOXYMETHANE" || 
-      gasname == "METHYL-ETHER" || gasname == "WOOD-ETHER" || 
-      gasname == "C2H6O") {
+  if (name == "DME" || name == "DIMETHYL-ETHER" || name == "WOOD-ETHER" || 
+      name == "METHOXYMETHANE" || name == "METHYL-ETHER" || name == "C2H60") {
     number = 25; return true;
   }
   // Reid step
-  if (gasname == "REID-STEP") {
+  if (name == "REID-STEP") {
     number = 26; return true;
   }
   // Maxwell model
-  if (gasname == "MAXWELL-MODEL") {
+  if (name == "MAXWELL-MODEL") {
     number = 27; return true;
   }
   // Reid ramp
-  if (gasname == "REID-RAMP") {
+  if (name == "REID-RAMP") {
     number = 28; return true;
   }
   // C2F6
-  if (gasname == "C2F6" || gasname == "FREON-116" || gasname == "ZYRON-116" || 
-      gasname == "ZYRON-116-N5" || gasname == "HEXAFLUOROETHANE") {
+  if (name == "C2F6" || name == "FREON-116" || name == "ZYRON-116" || 
+      name == "ZYRON-116-N5" || name == "HEXAFLUOROETHANE") {
     number = 29; return true;
   }
   // SF6
-  if (gasname == "SF6" || gasname == "SULPHUR-HEXAFLUORIDE" || 
-      gasname == "SULFUR-HEXAFLUORIDE") {
+  if (name == "SF6" || name == "SULPHUR-HEXAFLUORIDE" || 
+      name == "SULFUR-HEXAFLUORIDE") {
     number = 30; return true;
   }
   // NH3
-  if (gasname == "NH3" || gasname == "AMMONIA") {
+  if (name == "NH3" || name == "AMMONIA") {
     number = 31; return true;
   }
   // Propene
-  if (gasname == "C3H6" || gasname == "PROPENE" || gasname == "PROPYLENE") {
+  if (name == "C3H6" || name == "PROPENE" || name == "PROPYLENE") {
     number = 32; return true;
   }
   // Cyclopropane
-  if (gasname == "C-PROPANE" || gasname == "CYCLO-PROPANE" || 
-      gasname == "CYCLOPROPANE" || gasname == "C-C3H6" || 
-      gasname == "CYCLO-C3H6") {
+  if (name == "C-PROPANE" || name == "CYCLO-PROPANE" || 
+      name == "CYCLOPROPANE" || name == "C-C3H6" || name == "CYCLO-C3H6") {
     number = 33; return true;
   }
   // Methanol
-  if (gasname == "METHANOL" || gasname == "METHYL-ALCOHOL" || 
-      gasname == "WOOD-ALCOHOL" || gasname == "CH3OH") {
+  if (name == "METHANOL" || name == "METHYL-ALCOHOL" || 
+      name == "WOOD-ALCOHOL" || name == "CH3OH") {
     number = 34; return true;
   }
   // Ethanol
-  if (gasname == "ETHANOL" || gasname == "ETHYL-ALCOHOL" || 
-      gasname == "GRAIN-ALCOHOL" || gasname == "C2H5OH") {
+  if (name == "ETHANOL" || name == "ETHYL-ALCOHOL" || 
+      name == "GRAIN-ALCOHOL" || name == "C2H5OH") {
     number = 35; return true;
   }
   // Propanol
-  if (gasname == "PROPANOL" || gasname == "2-PROPANOL" || 
-      gasname == "ISO-PROPANOL" || gasname == "ISOPROPANOL" || 
-      gasname == "ISOPROPYL" || 
-      gasname == "ISOPROPYL-ALCOHOL" || gasname == "C3H7OH") {
+  if (name == "PROPANOL" || name == "2-PROPANOL" || name == "ISOPROPYL" || 
+      name == "ISO-PROPANOL" || name == "ISOPROPANOL" || 
+      name == "ISOPROPYL-ALCOHOL" || name == "C3H7OH") {
     number = 36; return true;
   }
   // Cesium / Caesium.
-  if (gasname == "CS" || gasname == "CESIUM" || gasname == "CAESIUM") {
+  if (name == "CS" || name == "CESIUM" || name == "CAESIUM") {
     number = 37; return true;
   }
   // Fluorine
-  if (gasname == "F2" || gasname == "FLUOR" || gasname == "FLUORINE") {
+  if (name == "F2" || name == "FLUOR" || name == "FLUORINE") {
     number = 38; return true;
   }
-  if (gasname == "CS2" || gasname == "CARBON-DISULPHIDE" || 
-      gasname == "CARBON-DISULFIDE") {
+  if (name == "CS2" || name == "CARBON-DISULPHIDE" || 
+      name == "CARBON-DISULFIDE") {
     number = 39; return true;
   }
   // COS
-  if (gasname == "COS" || gasname == "CARBONYL-SULPHIDE" || 
-      gasname == "CARBONYL-SULFIDE") {
+  if (name == "COS" || name == "CARBONYL-SULPHIDE" || 
+      name == "CARBONYL-SULFIDE") {
     number = 40; return true;
   }
   // Deuterated methane
-  if (gasname == "DEUT-METHANE" || gasname == "DEUTERIUM-METHANE" || 
-      gasname == "DEUTERATED-METHANE" || gasname == "CD4") {
+  if (name == "DEUT-METHANE" || name == "DEUTERIUM-METHANE" || 
+      name == "DEUTERATED-METHANE" || name == "CD4") {
     number = 41; return true;
   }
   // BF3
-  if (gasname == "BF3" || gasname == "BORON-TRIFLUORIDE") {
+  if (name == "BF3" || name == "BORON-TRIFLUORIDE") {
     number = 42; return true;
   }
   // C2HF5 and C2H2F4.
-  if (gasname == "C2HF5" || gasname == "C2H2F4" || gasname == "C2F5H" || 
-      gasname == "C2F4H2" || gasname == "FREON-134" || 
-      gasname == "FREON-134-A" || gasname == "FREON-125" ||
-      gasname == "ZYRON-125" || gasname == "TETRAFLUOROETHANE" || 
-      gasname == "PENTAFLUOROETHANE") {
+  if (name == "C2HF5" || name == "C2H2F4" || name == "C2F5H" || 
+      name == "C2F4H2" || name == "FREON-134" || name == "FREON-134-A" || 
+      name == "FREON-125" || name == "ZYRON-125" || 
+      name == "TETRAFLUOROETHANE" || name == "PENTAFLUOROETHANE") {
     number = 43; return true;
   }
   // CHF3
-  if (gasname == "CHF3" || gasname == "FREON-23" || 
-      gasname == "TRIFLUOROMETHANE") {
+  if (name == "CHF3" || name == "FREON-23" || name == "TRIFLUOROMETHANE") {
     number = 50; return true;
   }
   // CF3Br
-  if (gasname == "CF3BR" || gasname == "TRIFLUOROBROMOMETHANE" || 
-      gasname == "HALON-1301" || gasname == "FREON-13B1") {
+  if (name == "CF3BR" || name == "TRIFLUOROBROMOMETHANE" || 
+      name == "HALON-1301" || name == "FREON-13B1") {
     number = 51; return true;
   }
   // C3F8
-  if (gasname == "C3F8" || gasname == "OCTAFLUOROPROPANE" || 
-      gasname == "R218" || gasname == "FREON-218" || 
-      gasname == "PERFLUOROPROPANE" || 
-      gasname == "RC-218" || gasname == "PFC-218") {
+  if (name == "C3F8" || name == "OCTAFLUOROPROPANE" || name == "R218" || 
+      name == "FREON-218" || name == "PERFLUOROPROPANE" || 
+      name == "RC-218" || name == "PFC-218") {
     number = 52; return true;
   }
   // Ozone
-  if (gasname == "OZONE" || gasname == "O3") {
+  if (name == "OZONE" || name == "O3") {
     number = 53; return true;
   }
   // Mercury
-  if (gasname == "MERCURY" || gasname == "HG" || gasname == "HG2") {
+  if (name == "MERCURY" || name == "HG" || name == "HG2") {
     number = 54; return true;
   }
   // H2S
-  if (gasname == "H2S" || gasname == "HYDROGEN-SULPHIDE" || 
-      gasname == "HYDROGEN-SULFIDE" ||
-      gasname == "HEPATIC-ACID" || gasname == "SEWER-GAS" || 
-      gasname == "SULFUR-HYDRIDE" ||
-      gasname == "DIHYDROGEN-MONOSULFIDE" || 
-      gasname == "DIHYDROGEN-MONOSULPHIDE" ||
-      gasname == "SULPHUR-HYDRIDE" || gasname == "STINK-DAMP" || 
-      gasname == "SULFURETED-HYDROGEN") {
+  if (name == "H2S" || name == "HYDROGEN-SULPHIDE" || name == "SEWER-GAS" ||
+      name == "HYDROGEN-SULFIDE" || name == "HEPATIC-ACID" ||
+      name == "SULFUR-HYDRIDE" || name == "DIHYDROGEN-MONOSULFIDE" || 
+      name == "DIHYDROGEN-MONOSULPHIDE" || name == "SULPHUR-HYDRIDE" || 
+      name == "STINK-DAMP" || name == "SULFURATED-HYDROGEN") {
     number = 55; return true;
   }
   // n-butane
-  if (gasname == "N-BUTANE" || gasname == "N-C4H10") {
+  if (name == "N-BUTANE" || name == "N-C4H10") {
     number = 56; return true;
   }
   // n-pentane
-  if (gasname == "N-PENTANE" || gasname == "N-C5H12") {
+  if (name == "N-PENTANE" || name == "N-C5H12") {
     number = 57; return true;
   }
   // Nitrogen
-  if (gasname == "NI" || gasname == "NITROGEN" || 
-      gasname == "NI-ANISOTROPIC" || 
-      gasname == "NITROGEN-ANISOTROPIC" ||
-      gasname == "N2" || gasname == "N2-ANISOTROPIC") {
+  if (name == "NI" || name == "NITROGEN" || name == "NI-ANISOTROPIC" || 
+      name == "NITROGEN-ANISOTROPIC" || name == "N2" || 
+      name == "N2-ANISOTROPIC") {
     number = 58; return true;
   }
   // Germane, GeH4
-  if (gasname == "GERMANE" || gasname == "GERM" || 
-      gasname == "GERMANIUM-HYDRIDE" || 
-      gasname == "GERMANIUM-TETRAHYDRIDE" ||
-      gasname == "GERMANOMETHANE" || gasname == "MONOGERMANE" || 
-      gasname == "GEH4") {
+  if (name == "GERMANE" || name == "GERM" || name == "GERMANIUM-HYDRIDE" || 
+      name == "GERMANIUM-TETRAHYDRIDE" || name == "GERMANOMETHANE" || 
+      name == "MONOGERMANE" || name == "GEH4") {
     number = 59; return true;
   }
   // Silane, SiH4
-  if (gasname == "SILANE" || gasname == "SIL" || 
-      gasname == "SILICON-HYDRIDE" || 
-      gasname == "SILICON-TETRAHYDRIDE" ||
-      gasname == "SILICANE" || gasname == "MONOSILANE" || gasname == "SIH4") {
+  if (name == "SILANE" || name == "SIL" || name == "SILICON-HYDRIDE" ||
+      name == "SILICON-TETRAHYDRIDE" || name == "SILICANE" || 
+      name == "MONOSILANE" || name == "SIH4") {
     number = 60; return true;
   }
   
   std::cerr << "MediumMagboltz86::GetGasNumber():" << std::endl;
-  std::cerr << "    Gas " << gasname << " is not defined." << std::endl;
+  std::cerr << "    Gas " << name << " is not defined." << std::endl;
   return false;
   
 }
@@ -1055,8 +1042,8 @@ MediumMagboltz86::GetGasName(const int number, std::string& gasname) const {
     case 59: gasname = "GeH4";    break;
     case 60: gasname = "SiH4";    break;
     default: gasname = ""; return false; break;
-    }
-    return true;
+  }
+  return true;
 
 }
 
@@ -1095,12 +1082,9 @@ MediumMagboltz86::Mixer() {
       scatCut[i][j] = 1.;
     }
   }
-  for (int i = nMaxLevels; i--;) {
-    fDeexcitation[i] = 0.;
-    fRadiative[i] = 0.;
-    fCollIon[i] = 0.;
-    fCollLoss[i] = 0.;
-  }
+  for (int i = nMaxLevels; i--;) iDeexcitation[i] = -1;
+  nDeexcitations = 0;
+  deexcitations.clear();
 
   for (int i = nMaxGases; i--;) ionPot[i] = -1.;
   minIonPot = -1.;
@@ -1142,7 +1126,7 @@ MediumMagboltz86::Mixer() {
   nTerms = 0;
   
   std::ofstream outfile;
-  if (csoutput) outfile.open("cs.txt", std::ios::out);
+  if (useCsOutput) outfile.open("cs.txt", std::ios::out);
   outfile << "# " << std::endl;
 
   // Loop over the gases in the mixture.  
@@ -1217,8 +1201,8 @@ MediumMagboltz86::Mixer() {
       for (int k = 0; k < 30; ++k) {
         description[np][k] = scrpt[6 + j][k];
       }
-      if (description[np][1] == 'E' &&
-          description[np][2] == 'X') {
+      if ((description[np][1] == 'E' && description[np][2] == 'X') ||
+          (description[np][0] == 'E' && description[np][1] == 'X')) {
         // Excitation
         csType[np] = 6 * iGas + 4;     
       } else if (eIn[j] < 0.) {
@@ -1233,7 +1217,7 @@ MediumMagboltz86::Mixer() {
     // Loop over the energy table
     for (int iE = 0; iE < nEnergySteps; ++iE) {
       np = np0;
-      if (csoutput) {
+      if (useCsOutput) {
         outfile << iE * eStep << "  " << q[iE][1] << "  " << q[iE][2] 
                 << "  " << q[iE][3] << "  ";
       }
@@ -1263,7 +1247,7 @@ MediumMagboltz86::Mixer() {
       // Inelastic terms
       for (int j = 0; j < nIn; ++j) {
         ++np;
-        if (csoutput) outfile << qIn[iE][j] << "  ";
+        if (useCsOutput) outfile << qIn[iE][j] << "  ";
         cf[iE][np] = qIn[iE][j] * van;
         if (cf[iE][np] < 0.) {
           std::cerr << "MediumMagboltz86::Mixer:" << std::endl;
@@ -1279,10 +1263,10 @@ MediumMagboltz86::Mixer() {
           scatParameter[iE][np] = pEqIn[iE][j];
         }
       }
-      if (csoutput) outfile << std::endl;
+      if (useCsOutput) outfile << std::endl;
     }
   }
-  if (csoutput) outfile.close();
+  if (useCsOutput) outfile.close();
 
   // Find the min. ionisation threshold
   for (int i = nMaxGases; i--;) {
@@ -1355,12 +1339,12 @@ MediumMagboltz86::Mixer() {
     }
   }
 
-  if (deexcitation) ComputeDeexcitationTable();
+  if (useDeexcitation) ComputeDeexcitationTable();
   if (!ComputePhotonCollisionTable()) {
      std::cerr << "MediumMagboltz86: " << std::endl;
      std::cerr << "    Photon collision rates could not be calculated." 
                << std::endl;
-     if (deexcitation)return false;
+     if (useDeexcitation)return false;
   }
 
   return true;
@@ -1368,18 +1352,21 @@ MediumMagboltz86::Mixer() {
 }
 
 void 
-MediumMagboltz86::ComputeAngularCut(double parIn, float& cut, double &parOut) {
+MediumMagboltz86::ComputeAngularCut(double parIn, double& cut, double &parOut) {
 
   // Set cuts on angular distribution and
   // renormalise forward scattering probability
 
-  cut = 1.;
-  parOut = parIn;
-  if (parIn <= 1.) return;
+  if (parIn <= 1.) {
+    cut = 1.;
+    parOut = parIn;
+    return;
+  }
+
   const double rads = 2. / Pi;
   const double cns = parIn - 0.5;
   const double thetac = asin(2. * sqrt(cns - cns * cns));
-  const double fac = (1 - cos(thetac)) / (sin(thetac) * sin(thetac));
+  const double fac = (1. - cos(thetac)) / pow(sin(thetac), 2.); 
   parOut = cns * fac + 0.5;
   cut = thetac * rads;
   
@@ -1388,132 +1375,387 @@ MediumMagboltz86::ComputeAngularCut(double parIn, float& cut, double &parOut) {
 void
 MediumMagboltz86::ComputeDeexcitationTable() {
 
-  // Fill radiative deexcitation rates
+  for (int i = nMaxLevels; i--;) iDeexcitation[i] = -1;
+  deexcitations.clear();
+
+  std::map<std::string, int> mapLevels;
+  // Make a mapping of all excitation levels 
   for (int i = 0; i < nTerms; ++i) {
-    fRadiative[i] = fCollIon[i] = fCollLoss[i] = 0.;
     if (csType[i] % 6 != 4) continue;
-    wSplit[i] = energyLoss[i] * rgas[i];
     switch (gas[int(csType[i] / 6)]) {
       case 2:
         // Argon
         std::string level = "       ";
         for (int j = 0; j < 7; ++j) level[j] = description[i][5 + j];
-        // Metastable 3p54s levels
-        if (level == "1S5    ") {
-          // Katori, Shimizu (1993)
-          fRadiative[i] = 1. / 38.e9; continue;
-        } else if (level == "1S3    ") {
-          // Small-Warren (1975)
-          fRadiative[i] = 1. / 45.e9;
-        // Radiative 3p54s levels
-        } else if (level == "1S4    ") {
-          fRadiative[i] = 1. / 8.6; continue;
-        } else if (level == "1S2    ") {
-          fRadiative[i] = 1. / 2.2; continue;
-        // 3p54p levels
-        // Lifetimes from Wiese et al. (1989)
-        // These levels decay to the 4s state
-        // Photon energies from NIST database
-        } else if (level == "2P10   ") {
-          fRadiative[i] = 1. / 40.5; wSplit[i] = 1.359; continue;
-        } else if (level == "2P9    ") {
-          fRadiative[i] = 1. / 30.7; wSplit[i] = 1.527; continue;
-        } else if (level == "2P8    ") {
-          fRadiative[i] = 1. / 30.6; wSplit[i] = 1.547; continue;
-        } else if (level == "2P7    ") {
-          fRadiative[i] = 1. / 30.2; wSplit[i] = 1.530; continue;
-        } else if (level == "2P6    ") {
-          fRadiative[i] = 1. / 29.4; wSplit[i] = 1.623; continue;
-        } else if (level == "2P5    ") {
-          fRadiative[i] = 1. / 24.4; wSplit[i] = 1.649; continue;
-        } else if (level == "2P4    ") {
-          fRadiative[i] = 1. / 29.3; wSplit[i] = 1.559; continue;
-        } else if (level == "2P3    ") {
-          fRadiative[i] = 1. / 29.0; wSplit[i] = 1.754; continue;
-        } else if (level == "2P2    ") {
-          fRadiative[i] = 1. / 28.3; wSplit[i] = 1.780; continue;
-        } else if (level == "2P1    ") {
-          fRadiative[i] = 1. / 21.7; wSplit[i] = 1.652; continue;
-        // 3p53d levels
-        // Lifetimes from Gruzdev, Loginov (1975)
-        // Most levels decay to 4p
-        // Photon energies from NIST database
-        } else if (level == "3D6    ") {
-          fRadiative[i] = 1. / 54.2; wSplit[i] = 0.938; continue;
-        } else if (level == "3D5    ") {
-          fRadiative[i] = 1. / 40.8; continue;
-        } else if (level == "3D4!   ") {
-          // No line found, assume equal to 3d4
-          fRadiative[i] = 1. / 52.0; wSplit[i] = 0.918; continue;
-        } else if (level == "3D4    ") {
-          fRadiative[i] = 1. / 50.8; wSplit[i] = 0.918; continue;
-        } else if (level == "3D3    ") {
-          fRadiative[i] = 1. / 3.5; wSplit[i] = 0.732; continue;
-        } else if (level == "3D2    ") {
-          fRadiative[i] = 1. / 9.0; continue;
-        } else if (level == "3D1!!  ") {
-          fRadiative[i] = 1. / 49.9; wSplit[i] = 0.910;  continue;
-        } else if (level == "3D1!   ") {
-          fRadiative[i] = 1. / 49.0; wSplit[i] = 1.023; continue;
-        } else if (level == "3S1!!!!") {
-          fRadiative[i] = 1. / 49.9; wSplit[i] = 0.931; continue;
-        } else if (level == "3S1!!! ") {
-          fRadiative[i] = 1. / 49.7; wSplit[i] = 0.934; continue;
-        } else if (level == "3S1!!  ") {
-          fRadiative[i] = 1. / 48.3; wSplit[i] = 1.062; continue;
-        } else if (level == "3S1!   ") {
-          fRadiative[i] = 1. / 3.36; continue;
-        // 3p55s levels
-        // Lifetimes from Gruzdev, Loginov (1975)
-        // Photon energies from NIST database
-        } else if (level == "2S5    ") {
-          fRadiative[i] = 1. / 42.1; wSplit[i] = 1.161; continue;
-        } else if (level == "2S4    ") {
-          fRadiative[i] = 1. / 4.74; continue;
-        } else if (level == "2S3    ") {
-          fRadiative[i] = 1. / 43.9; wSplit[i] = 1.334; continue;
-        } else if (level == "2S2    ") {
-          fRadiative[i] = 1. / 3.2; continue;       
-        // 3p54d levels
-        } else if (level == "4D5    ") {
-          fRadiative[i] = 1. / 113.; continue;
-        } else if (level == "4D2    ") {
-          fRadiative[i] = 1. / 10.; continue;
-        } else if (level == "4S1!   ") {
-          fRadiative[i] = 1. / 3.78; continue;
-        // 3p56s levels
-        } else if (level == "3S4    ") {
-          fRadiative[i] = 1. / 5.73; continue;
-        } else if (level == "3S2    ") {
-          fRadiative[i] = 1. / 32.6; continue;
-        // 3p55d levels
-        } else if (level == "5D5    ") {
-          fRadiative[i] = 1. / 111.; continue;
-        } else if (level == "5D2    ") {
-          fRadiative[i] = 1. / 5.42; continue;
-        } else if (level == "5S1!   ") {
-          fRadiative[i] = 1. / 3.69; continue;
-        // 3p57s levels
-        } else if (level == "4S4    ") {
-          fRadiative[i] = 1. / 15.1; continue;
-        } else if (level == "4S2    ") {
-          fRadiative[i] = 1. / 15.7; continue;
-        // Other levels
-        } else if (level == "6D5    ") {
-          // Zurro et al. (1973)
-          fRadiative[i] = 1. / 104.0; continue;
-        } else if (level == "5S4    ") {
-          // Afanaseva, Gruzdev (1975)
-          fRadiative[i] = 1. / 221.6; continue;
-        } else if (level == "6D2    ") {
-          // Zurro et al. (1973)
-          fRadiative[i] = 1. / 300; continue;
-        } else if (level == "HIGH   ") {
-          // Fantasy value
-          fRadiative[i] = 1. / 300.; continue;
-        } 
+        if      (level == "1S5    ") mapLevels["Ar_1S5"] = i;
+        else if (level == "1S4    ") mapLevels["Ar_1S4"] = i;
+        else if (level == "1S3    ") mapLevels["Ar_1S3"] = i;
+        else if (level == "1S2    ") mapLevels["Ar_1S2"] = i;
+        else if (level == "2P10   ") mapLevels["Ar_2P10"] = i;
+        else if (level == "2P9    ") mapLevels["Ar_2P9"] = i;
+        else if (level == "2P8    ") mapLevels["Ar_2P8"] = i;
+        else if (level == "2P7    ") mapLevels["Ar_2P7"] = i;
+        else if (level == "2P6    ") mapLevels["Ar_2P6"] = i;
+        else if (level == "2P5    ") mapLevels["Ar_2P5"] = i;
+        else if (level == "2P4    ") mapLevels["Ar_2P4"] = i;
+        else if (level == "2P3    ") mapLevels["Ar_2P3"] = i;
+        else if (level == "2P2    ") mapLevels["Ar_2P2"] = i;
+        else if (level == "2P1    ") mapLevels["Ar_2P1"] = i;
+        else if (level == "3D6    ") mapLevels["Ar_3D6"] = i;
+        else if (level == "3D5    ") mapLevels["Ar_3D5"] = i;
+        else if (level == "3D3    ") mapLevels["Ar_3D3"] = i;
+        else if (level == "3D4!   ") mapLevels["Ar_3D4!"] = i;
+        else if (level == "3D4    ") mapLevels["Ar_3D4"] = i;
+        else if (level == "3D1!!  ") mapLevels["Ar_3D1!!"] = i;
+        else if (level == "2S5    ") mapLevels["Ar_2S5"] = i;
+        else if (level == "2S4    ") mapLevels["Ar_2S4"] = i;
+        else if (level == "3D1!   ") mapLevels["Ar_3D1!"] = i;
+        else if (level == "3D2    ") mapLevels["Ar_3D2"] = i;
+        else if (level == "3S1!!!!") mapLevels["Ar_3S1!!!!"] = i;
+        else if (level == "3S1!!  ") mapLevels["Ar_3S1!!"] = i;
+        else if (level == "3S1!!! ") mapLevels["Ar_3S1!!!"] = i;
+        else if (level == "2S3    ") mapLevels["Ar_2S3"] = i;
+        else if (level == "2S2    ") mapLevels["Ar_2S2"] = i;
+        else if (level == "3S1!   ") mapLevels["Ar_3S1!"] = i;
+        else if (level == "4D5    ") mapLevels["Ar_4D5"] = i;
+        else if (level == "3S4    ") mapLevels["Ar_3S4"] = i;
+        else if (level == "4D2    ") mapLevels["Ar_4D2"] = i;
+        else if (level == "4S1!   ") mapLevels["Ar_4S1!"] = i;
+        else if (level == "3S2    ") mapLevels["Ar_3S2"] = i;
+        else if (level == "5D5    ") mapLevels["Ar_5D5"] = i;
+        else if (level == "4S4    ") mapLevels["Ar_4S4"] = i;
+        else if (level == "5D2    ") mapLevels["Ar_5D2"] = i;
+        else if (level == "6D5    ") mapLevels["Ar_6D5"] = i;
+        else if (level == "5S1!   ") mapLevels["Ar_5S1!"] = i;
+        else if (level == "4S2    ") mapLevels["Ar_4S2"] = i;
+        else if (level == "5S4    ") mapLevels["Ar_5S4"] = i;
+        else if (level == "6D2    ") mapLevels["Ar_6D2"] = i;
+        else if (level == "HIGH   ") mapLevels["Ar_High"] = i;
         break;
     }
+  }
+
+  std::map<std::string, int> mapDxc;
+  std::map<std::string, int>::iterator itMap;
+  nDeexcitations = 0;
+  for (itMap = mapLevels.begin(); itMap != mapLevels.end(); itMap++) {
+    std::string level = (*itMap).first;
+    mapDxc[level] = nDeexcitations;
+    iDeexcitation[(*itMap).second] = nDeexcitations;
+    ++nDeexcitations;
+  }
+ 
+  deexcitation newDxc;
+  for (itMap = mapLevels.begin(); itMap != mapLevels.end(); itMap++) {
+    std::string level = (*itMap).first;
+    newDxc.label = level;
+    newDxc.energy = energyLoss[(*itMap).second] * rgas[(*itMap).second];
+    if (level == "Ar_1S5" || level == "Ar_1S3") {
+      // Metastable 4s levels
+      newDxc.p.clear(); newDxc.final.clear(); newDxc.nChannels = 0;
+    } else if (level == "Ar_1S4") {
+      int nc = 1;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 0.119; newDxc.final[0] = -1;
+    } else if (level == "Ar_1S2") {
+      int nc = 1;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 0.51; newDxc.final[0] = -1;
+    } else if (level == "Ar_2P10") {
+      int nc = 4;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 0.0189;  newDxc.final[0] = mapDxc["Ar_1S5"];
+      newDxc.p[1] = 5.43e-3; newDxc.final[1] = mapDxc["Ar_1S4"];
+      newDxc.p[2] = 9.8e-4;  newDxc.final[2] = mapDxc["Ar_1S3"];
+      newDxc.p[3] = 1.9e-4;  newDxc.final[3] = mapDxc["Ar_1S2"];
+    } else if (level == "Ar_2P9") {
+      int nc = 1;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 0.0331; newDxc.final[0] = mapDxc["Ar_1S5"];
+    } else if (level == "Ar_2P8") {
+      int nc = 3;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 9.28e-3; newDxc.final[0] = mapDxc["Ar_1S5"];
+      newDxc.p[1] = 0.0215;  newDxc.final[1] = mapDxc["Ar_1S4"];
+      newDxc.p[2] = 1.47e-3; newDxc.final[2] = mapDxc["Ar_1S2"];
+    } else if (level == "Ar_2P7") {
+      int nc = 4; 
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 5.18e-3; newDxc.final[0] = mapDxc["Ar_1S5"];
+      newDxc.p[1] = 0.025;   newDxc.final[1] = mapDxc["Ar_1S4"];
+      newDxc.p[2] = 2.43e-3; newDxc.final[2] = mapDxc["Ar_1S3"];
+      newDxc.p[3] = 1.06e-3; newDxc.final[3] = mapDxc["Ar_1S2"];
+    } else if (level == "Ar_2P6") {
+      int nc = 3;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 0.0245;  newDxc.final[0] = mapDxc["Ar_1S5"];
+      newDxc.p[1] = 4.9e-3;  newDxc.final[1] = mapDxc["Ar_1S4"];
+      newDxc.p[2] = 5.03e-3; newDxc.final[2] = mapDxc["Ar_1S2"];
+    } else if (level == "Ar_2P5") {
+      int nc = 1;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels =nc;
+      newDxc.p[0] = 0.0402; newDxc.final[0] = mapDxc["Ar_1S4"];
+    } else if (level == "Ar_2P4") {
+      int nc = 4;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 6.25e-4; newDxc.final[0] = mapDxc["Ar_1S5"];
+      newDxc.p[1] = 2.2e-5;  newDxc.final[1] = mapDxc["Ar_1S4"];
+      newDxc.p[2] = 0.0186;  newDxc.final[2] = mapDxc["Ar_1S3"];
+      newDxc.p[3] = 0.0139;  newDxc.final[3] = mapDxc["Ar_1S2"];
+    } else if (level == "Ar_2P3") {
+      int nc = 3;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 3.8e-3;  newDxc.final[0] = mapDxc["Ar_1S5"];
+      newDxc.p[1] = 8.47e-3; newDxc.final[1] = mapDxc["Ar_1S4"];
+      newDxc.p[2] = 0.0223;  newDxc.final[2] = mapDxc["Ar_1S3"];
+    } else if (level == "Ar_2P2") {
+      int nc = 4;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 6.39e-3; newDxc.final[0] = mapDxc["Ar_1S5"];
+      newDxc.p[1] = 1.83e-3; newDxc.final[1] = mapDxc["Ar_1S4"];
+      newDxc.p[2] = 0.0117;  newDxc.final[2] = mapDxc["Ar_1S3"];
+      newDxc.p[3] = 0.0153;  newDxc.final[3] = mapDxc["Ar_1S2"];
+    } else if (level == "Ar_2P1") {
+      int nc = 2;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 2.36e-4; newDxc.final[0] = mapDxc["Ar_1S4"];
+      newDxc.p[1] = 0.0445;  newDxc.final[1] = mapDxc["Ar_1S2"];
+    } else if (level == "Ar_3D6") {
+      int nc = 3;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 8.1e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 1.2e-4; newDxc.final[1] = mapDxc["Ar_2P4"];
+      newDxc.p[2] = 3.6e-4; newDxc.final[2] = mapDxc["Ar_2P2"];
+    } else if (level == "Ar_3D5") {
+      int nc = 5;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 7.4e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 3.9e-5; newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 3.2e-5; newDxc.final[2] = mapDxc["Ar_2P4"];
+      newDxc.p[3] = 1.4e-4; newDxc.final[3] = mapDxc["Ar_2P3"];
+      newDxc.p[4] = 1.7e-4; newDxc.final[4] = mapDxc["Ar_2P2"];
+    } else if (level == "Ar_3D3") {
+      int nc = 6;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 4.9e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 1.2e-4; newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 2.6e-4; newDxc.final[2] = mapDxc["Ar_2P7"];
+      newDxc.p[3] = 2.5e-3; newDxc.final[3] = mapDxc["Ar_2P6"];
+      newDxc.p[4] = 3.9e-4; newDxc.final[4] = mapDxc["Ar_2P3"];
+      newDxc.p[5] = 1.1e-4; newDxc.final[5] = mapDxc["Ar_2P2"];
+    } else if (level == "Ar_3D4!") {
+      newDxc.p.clear(); newDxc.final.clear(); newDxc.nChannels = 0;
+    } else if (level == "Ar_3D4") {
+      int nc = 2;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 0.011;  newDxc.final[0] = mapDxc["Ar_2P8"];
+      newDxc.p[1] = 8.8e-5; newDxc.final[1] = mapDxc["Ar_2P6"];
+    } else if (level == "Ar_3D1!!") {
+      int nc = 3;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 1.2e-4; newDxc.final[0] = mapDxc["Ar_2P9"];
+      newDxc.p[1] = 5.7e-3; newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 7.3e-3; newDxc.final[2] = mapDxc["Ar_2P7"];
+    } else if (level == "Ar_2S5") {
+      int nc = 8;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 4.9e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 0.011;  newDxc.final[1] = mapDxc["Ar_2P9"];
+      newDxc.p[2] = 1.1e-3; newDxc.final[2] = mapDxc["Ar_2P8"];
+      newDxc.p[3] = 4.6e-4; newDxc.final[3] = mapDxc["Ar_2P7"];
+      newDxc.p[4] = 3.3e-3; newDxc.final[4] = mapDxc["Ar_2P6"];
+      newDxc.p[5] = 5.9e-5; newDxc.final[5] = mapDxc["Ar_2P4"];
+      newDxc.p[6] = 1.2e-4; newDxc.final[6] = mapDxc["Ar_2P3"];
+      newDxc.p[7] = 3.1e-4; newDxc.final[7] = mapDxc["Ar_2P2"];
+    } else if (level == "Ar_2S4") {
+      int nc = 10;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 0.077;   newDxc.final[0] = -1;
+      newDxc.p[1] = 2.44e-3; newDxc.final[1] = mapDxc["Ar_2P10"];
+      newDxc.p[2] = 8.9e-3;  newDxc.final[2] = mapDxc["Ar_2P8"];
+      newDxc.p[3] = 4.6e-3;  newDxc.final[3] = mapDxc["Ar_2P7"];
+      newDxc.p[4] = 2.7e-3;  newDxc.final[4] = mapDxc["Ar_2P6"];
+      newDxc.p[5] = 1.3e-3;  newDxc.final[5] = mapDxc["Ar_2P5"];
+      newDxc.p[6] = 4.5e-4;  newDxc.final[6] = mapDxc["Ar_2P4"];
+      newDxc.p[7] = 2.9e-5;  newDxc.final[7] = mapDxc["Ar_2P3"];
+      newDxc.p[8] = 3.e-5;   newDxc.final[8] = mapDxc["Ar_2P2"];
+      newDxc.p[9] = 1.6e-4;  newDxc.final[9] = mapDxc["Ar_2P1"];
+    } else if (level == "Ar_3D1!") {
+      int nc = 3;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 3.1e-3; newDxc.final[0] = mapDxc["Ar_2P9"];
+      newDxc.p[1] = 2.e-3;  newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 9.8e-6; newDxc.final[2] = mapDxc["Ar_2P3"];
+    } else if (level == "Ar_3D2") {
+      int nc = 4;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 0.27;    newDxc.final[0] = -1;
+      newDxc.p[1] = 9.52e-4; newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 0.011;   newDxc.final[2] = mapDxc["Ar_2P7"];
+      newDxc.p[3] = 4.3e-3;  newDxc.final[3] = mapDxc["Ar_2P6"];
+    } else if (level == "Ar_3S1!!!!") {
+      int nc = 3;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 8.3e-4; newDxc.final[0] = mapDxc["Ar_2P8"];
+      newDxc.p[1] = 0.013;  newDxc.final[1] = mapDxc["Ar_2P4"];
+      newDxc.p[2] = 2.2e-3; newDxc.final[2] = mapDxc["Ar_2P3"];
+    } else if (level == "Ar_3S1!!") {
+      int nc = 3;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 3.69e-4; newDxc.final[0] = mapDxc["Ar_2P7"];
+      newDxc.p[1] = 3.76e-3; newDxc.final[1] = mapDxc["Ar_2P6"];
+      newDxc.p[2] = 6.2e-3;  newDxc.final[2] = mapDxc["Ar_2P2"];
+    } else if (level == "Ar_3S1!!!") {
+      int nc = 1;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 0.015; newDxc.final[0] = mapDxc["Ar_2P3"];
+    } else if (level == "Ar_2S3") {
+      int nc = 4;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 3.26e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 2.22e-3; newDxc.final[1] = mapDxc["Ar_2P7"];
+      newDxc.p[2] = 0.01;    newDxc.final[2] = mapDxc["Ar_2P4"];
+      newDxc.p[3] = 5.1e-3;  newDxc.final[3] = mapDxc["Ar_2P2"];
+    } else if (level == "Ar_2S2") {
+      int nc = 4;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 0.035;  newDxc.final[0] = -1;
+      newDxc.p[1] = 8.9e-3; newDxc.final[1] = mapDxc["Ar_2P3"];
+      newDxc.p[2] = 3.4e-3; newDxc.final[2] = mapDxc["Ar_2P2"];
+      newDxc.p[3] = 1.9e-3; newDxc.final[3] = mapDxc["Ar_2P1"];
+    } else if (level == "Ar_3S1!") {
+      int nc = 6;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 0.318;   newDxc.final[0] = -1;
+      newDxc.p[1] = 3.96e-4; newDxc.final[1] = mapDxc["Ar_2P6"];
+      newDxc.p[2] = 4.2e-4;  newDxc.final[2] = mapDxc["Ar_2P5"];
+      newDxc.p[3] = 4.5e-3;  newDxc.final[3] = mapDxc["Ar_2P4"];
+      newDxc.p[4] = 7.1e-3;  newDxc.final[4] = mapDxc["Ar_2P2"];
+      newDxc.p[5] = 5.2e-3;  newDxc.final[5] = mapDxc["Ar_2P1"];
+    } else if (level == "Ar_4D5") {
+      int nc = 6;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 2.78e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 2.8e-4;  newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 8.6e-4;  newDxc.final[2] = mapDxc["Ar_2P6"];
+      newDxc.p[3] = 9.2e-4;  newDxc.final[3] = mapDxc["Ar_2P5"];
+      newDxc.p[4] = 4.6e-4;  newDxc.final[4] = mapDxc["Ar_2P3"];
+      newDxc.p[5] = 1.6e-4;  newDxc.final[5] = mapDxc["Ar_2P2"];
+    } else if (level == "Ar_3S4") {
+      int nc = 9;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 4.21e-4; newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 2.e-3;   newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 1.7e-3;  newDxc.final[2] = mapDxc["Ar_2P7"];
+      newDxc.p[3] = 7.2e-4;  newDxc.final[3] = mapDxc["Ar_2P6"];
+      newDxc.p[4] = 3.5e-4;  newDxc.final[4] = mapDxc["Ar_2P5"];
+      newDxc.p[5] = 1.2e-4;  newDxc.final[5] = mapDxc["Ar_2P4"];
+      newDxc.p[6] = 4.2e-6;  newDxc.final[6] = mapDxc["Ar_2P3"];
+      newDxc.p[7] = 3.3e-5;  newDxc.final[7] = mapDxc["Ar_2P2"];
+      newDxc.p[8] = 9.7e-5;  newDxc.final[8] = mapDxc["Ar_2P1"];
+    } else if (level == "Ar_4D2") {
+      int nc = 1;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 1.7e-4; newDxc.final[0] = mapDxc["Ar_2P7"];
+    } else if (level == "Ar_4S1!") {
+      int nc = 6;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 1.05e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 3.1e-5;  newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 2.5e-5;  newDxc.final[2] = mapDxc["Ar_2P7"];
+      newDxc.p[3] = 4.e-4;   newDxc.final[3] = mapDxc["Ar_2P6"];
+      newDxc.p[4] = 5.8e-5;  newDxc.final[4] = mapDxc["Ar_2P5"];
+      newDxc.p[5] = 1.2e-4;  newDxc.final[5] = mapDxc["Ar_2P3"];
+    } else if (level == "Ar_3S2") {
+      int nc = 9;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 2.85e-4; newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 5.1e-5;  newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 5.3e-5;  newDxc.final[2] = mapDxc["Ar_2P7"];
+      newDxc.p[3] = 1.6e-4;  newDxc.final[3] = mapDxc["Ar_2P6"];
+      newDxc.p[4] = 1.5e-4;  newDxc.final[4] = mapDxc["Ar_2P5"];
+      newDxc.p[5] = 6.e-4;   newDxc.final[5] = mapDxc["Ar_2P4"];
+      newDxc.p[6] = 2.48e-3; newDxc.final[6] = mapDxc["Ar_2P3"];
+      newDxc.p[7] = 9.6e-4;  newDxc.final[7] = mapDxc["Ar_2P2"];
+      newDxc.p[8] = 3.59e-4; newDxc.final[8] = mapDxc["Ar_2P1"];
+    } else if (level == "Ar_5D5") {
+      int nc = 8;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 2.2e-3;  newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 1.1e-4;  newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 7.6e-5;  newDxc.final[2] = mapDxc["Ar_2P7"];
+      newDxc.p[3] = 4.2e-4;  newDxc.final[3] = mapDxc["Ar_2P6"];
+      newDxc.p[4] = 2.4e-4;  newDxc.final[4] = mapDxc["Ar_2P5"];
+      newDxc.p[5] = 2.1e-4;  newDxc.final[5] = mapDxc["Ar_2P4"];
+      newDxc.p[6] = 2.4e-4;  newDxc.final[6] = mapDxc["Ar_2P3"];
+      newDxc.p[7] = 1.2e-4;  newDxc.final[7] = mapDxc["Ar_2P2"];
+    } else if (level == "Ar_4S4") {
+      int nc = 6;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 1.9e-4; newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 1.1e-3; newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 5.2e-4; newDxc.final[2] = mapDxc["Ar_2P7"];
+      newDxc.p[3] = 5.1e-4; newDxc.final[3] = mapDxc["Ar_2P6"];
+      newDxc.p[4] = 9.4e-5; newDxc.final[4] = mapDxc["Ar_2P5"];
+      newDxc.p[5] = 5.4e-5; newDxc.final[5] = mapDxc["Ar_2P4"];
+    } else if (level == "Ar_5D2") {
+      int nc = 4;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 5.9e-5; newDxc.final[0] = mapDxc["Ar_2P8"];
+      newDxc.p[1] = 9.e-6;  newDxc.final[1] = mapDxc["Ar_2P7"];
+      newDxc.p[2] = 1.5e-4; newDxc.final[2] = mapDxc["Ar_2P5"];
+      newDxc.p[3] = 3.1e-5; newDxc.final[3] = mapDxc["Ar_2P2"];
+    } else if (level == "Ar_6D5") {
+      int nc = 6;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 1.9e-3;  newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 4.2e-4;  newDxc.final[1] = mapDxc["Ar_2P6"];
+      newDxc.p[2] = 3.e-4;   newDxc.final[2] = mapDxc["Ar_2P5"];
+      newDxc.p[3] = 5.1e-5;  newDxc.final[3] = mapDxc["Ar_2P4"];
+      newDxc.p[4] = 6.6e-5;  newDxc.final[4] = mapDxc["Ar_2P3"];
+      newDxc.p[5] = 1.21e-4; newDxc.final[5] = mapDxc["Ar_2P1"];
+    } else if (level == "Ar_5S1!") {
+      int nc = 1;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 7.7e-5; newDxc.final[0] = mapDxc["Ar_2P5"];
+    } else if (level == "Ar_4S2") {
+      int nc = 7;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 4.5e-4; newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 2.e-4;  newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 2.1e-4; newDxc.final[2] = mapDxc["Ar_2P7"];
+      newDxc.p[3] = 1.2e-4; newDxc.final[3] = mapDxc["Ar_2P5"];
+      newDxc.p[4] = 1.8e-4; newDxc.final[4] = mapDxc["Ar_2P4"];
+      newDxc.p[5] = 9.e-4;  newDxc.final[5] = mapDxc["Ar_2P3"];
+      newDxc.p[6] = 3.3e-4; newDxc.final[6] = mapDxc["Ar_2P2"];
+    } else if (level == "Ar_5S4") {
+      int nc = 5;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 3.6e-4; newDxc.final[0] = mapDxc["Ar_2P8"];
+      newDxc.p[1] = 1.2e-4; newDxc.final[1] = mapDxc["Ar_2P6"];
+      newDxc.p[2] = 1.5e-4; newDxc.final[2] = mapDxc["Ar_2P4"];
+      newDxc.p[3] = 1.4e-4; newDxc.final[3] = mapDxc["Ar_2P2"];
+    } else if (level == "Ar_6D2") {
+      int nc = 0;
+      newDxc.p.clear(); newDxc.final.clear(); newDxc.nChannels = nc;
+    } else if (level == "Ar_High") {
+      int nc = 1;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.p[0] = 1.e-2; newDxc.final[0] = -1;
+    } else {
+      std::cerr << "MediumMagboltz86::ComputeDeexcitationTable:" << std::endl;
+      std::cerr << "    Missing de-excitation data for level " 
+                << level << "." << std::endl;
+      std::cerr << "    Program bug!" << std::endl;
+      return;
+    }
+    deexcitations.push_back(newDxc);
+  }
+  
+  if (debug) {
+    std::cout << "MediumMagboltz86::ComputeDeexcitationTable:" << std::endl; 
+    std::cout << "    Found " << nDeexcitations
+              << " levels with available de-excitation data." << std::endl;
   }
 
   if (nComponents != 2) {
@@ -1546,73 +1788,142 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       gA *= fraction[1];
       ar = 1;
     }
-    for (int j = nTerms; j--;) {
-      if (int(csType[j] / 6) == ar && csType[j] % 6 == 4) {
-        if (energyLoss[j] * rgas[j] < minIonPot) continue;
-        std::string level = "       ";
-        for (int k = 0; k < 7; ++k) level[k] = description[j][5 + k];
-        // 3p54p levels
-        // Average lifetime assumed to be 30 ns
-        if (level == "2P10   " || level == "2P9    " ||
-            level == "2P8    " || level == "2P7    " ||
-            level == "2P6    " || level == "2P5    " ||
-            level == "2P4    " || level == "2P3    " ||
-            level == "2P2    " || level == "2P1    ") {
-          fCollIon[j] = fB / 30. + fA / 30.;
-          fCollLoss[j] = gA / 30.;
-        // 3p53d levels
-        // Average lifetime assumed to be 40 ns
-        } else if (level == "3D6    " || level == "3D5    " ||
-                   level == "3D4!   " || level == "3D4    " ||
-                   level == "3D3    " || level == "3D2    " ||
-                   level == "3D1!!  " || level == "3D1!   " ||
-                   level == "3S1!!!!" || level == "3S1!!! " ||
-                   level == "3S1!!  " || level == "3S1!   ") { 
-          fCollIon[j] = fB / 40. + fA / 40.;
-          fCollLoss[j] = gA / 40.;
-        // Higher levels
-        } else {
-          fCollIon[j] = fB * fRadiative[j] + fA * fRadiative[j];
-          fCollLoss[j] = gA * fRadiative[j];
-        }
+    for (int j = nDeexcitations; j--;) {
+      std::string level = deexcitations[j].label;
+      if (level == "Ar_1S5" || level == "Ar_1S4" || 
+          level == "Ar_1S3" || level == "Ar_1S2") {
+        deexcitations[j].p.push_back(gA / 500.);
+        deexcitations[j].final.push_back(-3);
+        deexcitations[j].nChannels += 1;
+      } else if (level == "Ar_2P10" || level == "Ar_2P9" || level == "Ar_2P8" ||
+          level == "Ar_2P7"  || level == "Ar_2P6" || level == "Ar_2P5" ||
+          level == "Ar_2P4"  || level == "Ar_2P3" || level == "Ar_2P2" ||
+          level == "Ar_2P1") {
+        deexcitations[j].p.push_back(fB / 30. + fA / 30.);
+        deexcitations[j].final.push_back(-2);
+        deexcitations[j].p.push_back(gA / 30.);
+        deexcitations[j].final.push_back(-3);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_3D6"     || level == "Ar_3D5"   ||
+                 level == "Ar_3D3"     || level == "Ar_3D4!"  ||
+                 level == "Ar_3D4"     || level == "Ar_3D1!!" ||
+                 level == "Ar_2S5"     || level == "Ar_2S4"   ||
+                 level == "Ar_3D1!"    || level == "Ar_3D2"   ||
+                 level == "Ar_3S1!!!!" || level == "Ar_3S1!!" ||
+                 level == "Ar_3S1!!!"  || level == "Ar_2S3"   ||
+                 level == "Ar_2S2"     || level == "Ar_3S1!") {
+        deexcitations[j].p.push_back(fB / 40. + fA / 40.);
+        deexcitations[j].final.push_back(-2);
+        deexcitations[j].p.push_back(gA / 40.);
+        deexcitations[j].final.push_back(-3);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_4D5" || level == "Ar_3S4"  || 
+                 level == "Ar_4D2" || level == "Ar_4S1!" ||
+                 level == "Ar_3S2" || level == "Ar_5D5"  || 
+                 level == "Ar_4S4" || level == "Ar_5D2"  ||
+                 level == "Ar_6D5" || level == "Ar_5S1!" ||
+                 level == "Ar_4S2" || level == "Ar_5S4"  ||
+                 level == "Ar_6D2" || level == "Ar_High") {
+        deexcitations[j].p.push_back(fB / 100. + fA / 100.);
+        deexcitations[j].final.push_back(-2);
+        deexcitations[j].p.push_back(gA / 40.);
+        deexcitations[j].final.push_back(-3);
+        deexcitations[j].nChannels += 2;
       }
-    }    
-  } else {
-    std::cout << "MediumMagboltz86::ComputeDeexcitationTable:" << std::endl;
-    std::cout << "    No data on collisional deexcitation present."
-              << std::endl;
+    }
   }
 
-  if (debug) std::cout << "MediumMagboltz86::ComputeDeexcitationTable:" 
-                       << std::endl; 
-  for (int i = 0; i < nTerms; ++i) {
-    fDeexcitation[i] = fRadiative[i] + fCollIon[i] + fCollLoss[i];
-    if (fDeexcitation[i] > 0.) {
+  if (debug) {
+    std::cout << "MediumMagboltz86::ComputeDeexcitationTable:" << std::endl;
+    std::cout << "    Level             Lifetimes [ns]" << std::endl;
+    std::cout << "                Total      Radiative      Collisional"
+              << std::endl;
+  }
+  for (int i = 0; i < nDeexcitations; ++i) {
+    deexcitations[i].rate = 0.;
+    double fRad = 0.;
+    double fPenn = 0.; 
+    double fLoss = 0.;
+    for (int j = deexcitations[i].nChannels; j--;) {
+      deexcitations[i].rate += deexcitations[i].p[j];
+      if (deexcitations[i].final[j] >= -1) fRad += deexcitations[i].p[j];
+      else if (deexcitations[i].final[j] == -2) fPenn += deexcitations[i].p[j];
+      else if (deexcitations[i].final[j] == -3) fLoss += deexcitations[i].p[j];
+    }
+    if (deexcitations[i].rate > 0.) {
       if (debug) {
-        std::string descr = "                              ";
-        for (int j = 30; j--;) descr[j] = description[i][j];
-        std::cout << descr << std::endl;
-        std::cout << "    Deexcitation rate:     " 
-                  << fDeexcitation[i] << " ns-1" << std::endl;
-        if (fDeexcitation[i] > 0.) {
-          std::cout << "    Radiative decay probability:  "
-                    << fRadiative[i] / fDeexcitation[i] << std::endl;
-          std::cout << "    Penning transfer probability: "
-                    << fCollIon[i] / fDeexcitation[i] << std::endl;
-          std::cout << "    Loss probability: "
-                    << fCollLoss[i] / fDeexcitation[i] << std::endl;
-          std::cout << "    Photon energy: " << wSplit[i] << " eV" 
-                    << std::endl;
+        std::cout << std::setw(15) << deexcitations[i].label << "  " 
+                  << std::setw(10) << 1. / deexcitations[i].rate << "  ";
+        if (fRad > 0.) {
+          std::cout << std::setw(10) <<  1. / fRad << "  ";
+        } else {
+          std::cout << "----------  ";
         }
-      } 
-      fRadiative[i] /= fDeexcitation[i];
-      fCollIon[i] /= fDeexcitation[i];
-      fCollLoss[i] /= fDeexcitation[i];
-      fCollIon[i] += fRadiative[i];
-      fCollLoss[i] += fCollIon[i];
+        if (fPenn + fLoss > 0.) {
+          std::cout << std::setw(10) << 1. / (fPenn + fLoss) << std::endl;
+        } else {
+          std::cout << "----------   " << std::endl;
+        }
+      }
+      for (int j = 0; j < deexcitations[i].nChannels; ++j) {
+        deexcitations[i].p[j] /= deexcitations[i].rate;
+        if (j > 0) deexcitations[i].p[j] += deexcitations[i].p[j - 1];
+      }
     }
   }
   
+}
+
+void
+MediumMagboltz86::ComputeDeexcitation(int iLevel) {
+  
+  nDeexcitationProducts = 0;
+  dxcProducts.clear();
+
+  dxcProd newDxcProd;
+  newDxcProd.t = 0.;
+
+  while (iLevel >= 0 && iLevel < nDeexcitations) {
+    if (deexcitations[iLevel].rate <= 0.) return;
+    // Determine the de-excitation time
+    newDxcProd.t += -log(RndmUniformPos()) / deexcitations[iLevel].rate;
+    // Select the transition
+    int fLevel = -3;
+    const double r = RndmUniform();
+    for (int j = 0; j < deexcitations[iLevel].nChannels; ++j) {
+      if (r <= deexcitations[iLevel].p[j]) {
+        fLevel = deexcitations[iLevel].final[j];
+        break;
+      }
+    }
+    if (fLevel < -2) {
+      // Loss, end of cascade
+      return;
+    } else if (fLevel == -2) {
+      // Penning ionisation
+      newDxcProd.energy = deexcitations[iLevel].energy - minIonPot;
+      newDxcProd.type = -1;
+      ++nPenning;
+    } else if (fLevel == -1) {
+      // Radiative decay to ground state
+      newDxcProd.energy = deexcitations[iLevel].energy;
+      newDxcProd.type = 1;
+    } else {
+      // Transition to energetically higher level (e. g. excimer)
+      if (deexcitations[iLevel].energy < deexcitations[fLevel].energy) {
+        iLevel = fLevel;
+        continue;
+      }
+      // Radiative transition 
+      newDxcProd.energy = deexcitations[iLevel].energy - 
+                          deexcitations[fLevel].energy;
+      newDxcProd.type = 1;
+    }
+    dxcProducts.push_back(newDxcProd);
+    ++nDeexcitationProducts;
+    iLevel = fLevel;
+  }
+
 }
 
 bool
@@ -1653,7 +1964,7 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
     nPhotonTerms += 2;
   }
   
-  if (csoutput) {
+  if (useCsOutput) {
     std::ofstream csfile;
     csfile.open("csgamma.txt", std::ios::out);
     for (int j = 0; j < nEnergyStepsGamma; ++j) {
