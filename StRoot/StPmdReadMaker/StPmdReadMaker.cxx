@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.32 2010/04/16 12:09:40 rashmi Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.33 2010/05/31 22:11:09 rashmi Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.33  2010/05/31 22:11:09  rashmi
+ *Edep of Pmdhit now hold calibrated ADC
+ *
  *Revision 1.32  2010/04/16 12:09:40  rashmi
  *Modifcation for new DAQ
  *
@@ -675,7 +678,13 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 	    
 	    // Converting ADC to Edep
 	    Float_t edep=0;
-	    mPmdGeom-> ADC2Edep(DaqADC, edep);
+	    //	    mPmdGeom-> ADC2Edep(DaqADC, edep);
+	    // The old edep was a function of ADC itself available in StPmdGeom.
+	    // cell_status = 0 for cells for which calibration is not available
+	    // cell_status = 1 for cells for which calibration is available
+	    // final factor is the cellGNF*SMChainGNF for all cleaned cells
+	    //	    cout<<"DaqADC="<<DaqADC<<" cellgain  = "<<cellgain<<" smchaingain = "<<smchaingain<<" cellstatus="<<cellstatus<<endl;
+	    edep = DaqADC *cellstatus/(cellgain*smchaingain);
 	    if(edep<0) edep=0;
 	    
 	    if(DaqADC>0){
@@ -1058,10 +1067,13 @@ Bool_t StPmdReadMaker::ReadCalibrationsConst(){
 
 Int_t StPmdReadMaker::GetCalib(int sm,int row,int col,float& calib)
 {
-if(sm>0) if(m_PmdCalibConst)calib=m_PmdCalibConst[sm-1].CellGain[row-1][col-1];
-     //cout<<"sm,row,col,calib"<<sm<<" "<<row<<" "<<col<<" "<<calib<<endl;
+  if(sm>0 && row>0 && col>0)
+    if(m_PmdCalibConst)calib=m_PmdCalibConst[sm-1].CellGain[row-1][col-1];
+  
+  //cout<<"sm,row,col,calib"<<sm<<" "<<row<<" "<<col<<" "<<calib<<endl;
   //  if(Debug() && calib>0)fout<<"sm,row,col,calib "<<sm<<" "<<row<<" "<<col<<" "<<calib<<endl;
   return kStOK;
+  
 }
 
 //------------------------------------------------------------------------------
