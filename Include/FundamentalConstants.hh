@@ -18,23 +18,40 @@ static const double MuonMass     = 105.658367e6;
 static const double ProtonMass   = 938.27203e6;
 static const double NeutronMass  = 939.56536e6;
 
-static const double FineStructureConstant   =   7.2973525376e-3;
-static const double Hbar                    =   6.58211899e-7;    // eV ns
-static const double HbarC                   = 197.3269631e-7;     // eV cm
-static const double ElectronMassGramme      =   9.10938215e-28;   // g
-static const double AtomicMassUnit          =   1.660538782e-24;  // g
-static const double BohrRadius              =   0.52917720859e-8; // cm
-static const double RydbergEnergy           =  13.60569193;       // eV
-static const double SpeedOfLight            =  29.9792458;        // cm / ns
-static const double ClassicalElectronRadius =   2.8179402894e-13; // cm
-static const double ElementaryCharge        =   1.602176487e-19;  // C
-static const double BoltzmannConstant       =   8.617343e-5;      // eV / K
-static const double VacuumPermittivity      =   8.854187817e-14;  // F / cm
-static const double LoschmidtNumber         =   2.6867774e19;     // cm-3
-static const double AvogadroConstant        =   6.02214179e23;    // mol-1
-static const double AtmosphericPressure     = 760.;               // Torr
-static const double FourPiEpsilon0          = 4. * Pi * VacuumPermittivity;
-static const double TwoPiEpsilon0           = TwoPi * VacuumPermittivity;
+// Fine structure constant
+static const double FineStructureConstant = 7.2973525376e-3;
+// Reduced Planck constant [eV ns]
+static const double Hbar = 6.58211899e-7;
+// Conversion constant [eV cm]
+static const double HbarC = 197.3269631e-7;
+// Electron mass [g]
+static const double ElectronMassGramme = 9.10938215e-28;
+// Unified atomic mass unit (mass 12C atom / 12) [g]
+static const double AtomicMassUnit = 1.660538782e-24;
+// Bohr radius [cm]
+static const double BohrRadius = 0.52917720859e-8;
+// Rydberg energy [eV]
+static const double RydbergEnergy =  13.60569193;
+// Speed of light in vacuum [cm / ns]
+static const double SpeedOfLight =  29.9792458;
+// Classical electron radius [cm]
+static const double ClassicalElectronRadius = 2.8179402894e-13;
+// Electron charge magnitude [C]
+static const double ElementaryCharge = 1.602176487e-19;
+// Electron cyclotron frequency / field [rad / (ns * 10-5 T)]
+static const double OmegaCyclotronOverB = 1.578820150e-3;
+// Boltzmann constant [eV / K]
+static const double BoltzmannConstant = 8.617343e-5;
+// Permittivity of free space [F / cm]
+static const double VacuumPermittivity = 8.854187817e-14;
+static const double FourPiEpsilon0     = 4. * Pi * VacuumPermittivity;
+static const double TwoPiEpsilon0      = TwoPi * VacuumPermittivity;
+// Loschmidt number [cm-3]
+static const double LoschmidtNumber = 2.6867774e19;
+// AvogadroConstant [mol-1]
+static const double AvogadroConstant = 6.02214179e23;
+// Atmospheric pressure [Torr]
+static const double AtmosphericPressure = 760.;
 
 static const double Small = 1.e-20;
 // Max. permitted distance to boundary (for drift line termination)

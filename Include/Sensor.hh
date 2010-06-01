@@ -36,7 +36,7 @@ class Sensor {
 
     // Get the magnetic field at (x, y, z)
     void MagneticField(const double x, const double y, const double z,
-		               double& bx, double& by, double& bz,
+                       double& bx, double& by, double& bz,
                        int& status);
 
     // Get the medium at (x, y, z)
@@ -49,7 +49,7 @@ class Sensor {
                  const double xmax, const double ymax, const double zmax);
     // Return the current user area
     bool GetArea(double& xmin, double& ymin, double& zmin,
-		         double& xmax, double& ymax, double& zmax);
+                 double& xmax, double& ymax, double& zmax);
     // Check if a point is inside the user area
     bool IsInArea(const double x, const double y, const double z);
 

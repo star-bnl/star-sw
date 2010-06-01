@@ -60,8 +60,10 @@ MediumSilicon::SetDoping(const char type, const double c) {
       dopingConcentration = c;
     } else {
       std::cerr << "MediumSilicon::SetDoping:" << std::endl;
-      std::cerr << "    Doping concentration must be greater than zero." << std::endl
-                << "    Using default value for n-type silicon (10^12 cm-3) instead." << std::endl;
+      std::cerr << "    Doping concentration must be greater than zero." 
+                << std::endl;
+      std::cerr << "    Using default value for n-type silicon "
+                << "(10^12 cm-3) instead." << std::endl;
       dopingConcentration = 1.e12;
     }
   } else if (toupper(type) == 'P') {
@@ -70,8 +72,10 @@ MediumSilicon::SetDoping(const char type, const double c) {
       dopingConcentration = c;
     } else {
       std::cerr << "MediumSilicon::SetDoping:" << std::endl;
-      std::cerr << "    Doping concentration must be greater than zero." << std::endl;
-      std::cerr << "    Using default value for p-type silicon (10^18 cm-3) instead." << std::endl;
+      std::cerr << "    Doping concentration must be greater than zero." 
+                << std::endl;
+      std::cerr << "    Using default value for p-type silicon "
+                << "(10^18 cm-3) instead." << std::endl;
       dopingConcentration = 1.e18;
     }
   } else if (toupper(type) == 'I') {
@@ -100,14 +104,16 @@ MediumSilicon::SetTrapCrossSection(const double ecs, const double hcs) {
 
   if (ecs < 0.) {
     std::cerr << "MediumSilicon::SetTrapCrossSection:" << std::endl;
-    std::cerr << "    Capture cross-section [cm2] must be greater than zero." << std::endl;
+    std::cerr << "    Capture cross-section [cm2] must be greater than zero." 
+              << std::endl;
   } else {
     eTrapCs = ecs;
   }
   
   if (hcs < 0.) {
     std::cerr << "MediumSilicon::SetTrapCrossSection:" << std::endl;
-    std::cerr << "    Capture cross-section [cm2] must be greater than zero." << std::endl;
+    std::cerr << "    Capture cross-section [cm2] must be greater than zero." 
+              << std::endl;
   } else {
     hTrapCs = hcs;
   }
@@ -121,7 +127,8 @@ MediumSilicon::SetTrapDensity(const double n) {
 
   if (n < 0.) {
     std::cerr << "MediumSilicon::SetTrapDensity:" << std::endl;
-    std::cerr << "    Trap density [cm-3] must be greater than zero." << std::endl;
+    std::cerr << "    Trap density [cm-3] must be greater than zero." 
+              << std::endl;
   } else {
     eTrapDensity = n;
     hTrapDensity = n;
@@ -136,14 +143,16 @@ MediumSilicon::SetTrappingTime(const double etau, const double htau) {
 
   if (etau <= 0.) {
     std::cerr << "MediumSilicon::SetTrappingTime:" << std::endl;
-    std::cerr << "    Trapping time [ns-1] must be greater than zero." << std::endl;
+    std::cerr << "    Trapping time [ns-1] must be greater than zero." 
+              << std::endl;
   } else {
     eTrapTime = etau;
   }
   
   if (htau <= 0.) {
     std::cerr << "MediumSilicon::SetTrappingTime:" << std::endl;
-    std::cerr << "    Trapping time [ns-1] must be greater than zero." << std::endl;
+    std::cerr << "    Trapping time [ns-1] must be greater than zero." 
+              << std::endl;
   } else {
     hTrapTime = htau;
   }

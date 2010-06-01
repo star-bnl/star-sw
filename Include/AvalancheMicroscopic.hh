@@ -61,6 +61,10 @@ class AvalancheMicroscopic {
     // Set/get energy threshold for photon transport
     void   SetPhotonTransportCut(const double cut) {gammaCut = cut;}
     double GetPhotonTransportCut() const {return gammaCut;}
+
+    // Enable/disable magnetic field in stepping algorithm
+    void EnableMagneticField()  {useBfield = true;}
+    void DisableMagneticField() {useBfield = false;}
     
     // Set number of collisions to be skipped
     void SetCollisionSteps(const int n = 100);
@@ -174,6 +178,7 @@ class AvalancheMicroscopic {
     bool useInducedCharge;
     bool useDriftLines;
     bool usePhotons;
+    bool useBfield;
     
     // Transport cuts
     double deltaCut;

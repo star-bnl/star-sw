@@ -141,7 +141,8 @@ Medium::ElectronVelocity(const double ex, const double ey, const double ez,
                          double& vx, double& vy, double& vz) {
   if (debug) {
     std::cerr << "Medium::ElectronVelocity:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   vx = vy = vz = 0.;
   return false;
@@ -171,7 +172,8 @@ Medium::ElectronDiffusion(const double ex, const double ey, const double ez,
 
   if (debug) {
     std::cerr << "Medium::ElectronDiffusionTensor:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   cov[0][0] = 0.; cov[0][1] = 0.; cov[0][2] = 0.;
   cov[1][0] = 0.; cov[1][1] = 0.; cov[1][2] = 0.;
@@ -187,7 +189,8 @@ Medium::ElectronTownsend(const double ex, const double ey, const double ez,
 
   if (debug) {
     std::cerr << "Medium::ElectronTownsend:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   alpha = 0.;
   return false;
@@ -201,7 +204,8 @@ Medium::ElectronAttachment(const double ex, const double ey, const double ez,
 
   if (debug) {
     std::cerr << "Medium::ElectronAttachment:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   eta = 0.;
   return false;
@@ -213,7 +217,8 @@ Medium::GetElectronNullCollisionRate() {
 
   if (debug) {
     std::cerr << "Medium::GetElectronNullCollisionRate:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   return 0.;
   
@@ -224,7 +229,8 @@ Medium::GetElectronCollisionRate(const double e) {
 
   if (debug) {
     std::cerr << "Medium::GetElectronCollisionRate:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   return 0.;
 
@@ -236,7 +242,8 @@ Medium::GetElectronCollision(const double e, int& type, int& level,
   
   if (debug) {
     std::cerr << "Medium::GetElectronCollision:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   return 0.;
                             
@@ -247,7 +254,8 @@ Medium::GetNumberOfLevels() {
 
   if (debug) {
     std::cerr << "Medium::GetNumberOfLevels:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   return 0;
 
@@ -260,7 +268,8 @@ Medium::HoleVelocity(const double ex, const double ey, const double ez,
             
   if (debug) {
     std::cerr << "Medium::HoleVelocity:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   vx = vy = vz = 0.;
   return false;            
@@ -290,7 +299,8 @@ Medium::HoleDiffusion(const double ex, const double ey, const double ez,
 
   if (debug) {
     std::cerr << "Medium::HoleDiffusionTensor:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   cov[0][0] = 0.; cov[0][1] = 0.; cov[0][2] = 0.;
   cov[1][0] = 0.; cov[1][1] = 0.; cov[1][2] = 0.;
@@ -306,7 +316,8 @@ Medium::HoleTownsend(const double ex, const double ey, const double ez,
 
   if (debug) {
     std::cerr << "Medium::HoleTownsend:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   alpha = 0.;
   return false;
@@ -320,7 +331,8 @@ Medium::HoleAttachment(const double ex, const double ey, const double ez,
             
   if (debug) {
     std::cerr << "Medium::HoleAttachment:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   eta = 0.;
   return false;
@@ -334,7 +346,8 @@ Medium::IonVelocity(const double ex, const double ey, const double ez,
 
   if (debug) {
     std::cerr << "Medium::IonVelocity:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   vx = vy = vz = 0.;
   return false;
@@ -364,7 +377,8 @@ Medium::IonDissociation(const double ex, const double ey, const double ez,
 
   if (debug) {
     std::cerr << "Medium::IonDissociation:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   diss = 0.;
   return false;
@@ -376,7 +390,8 @@ Medium::GetOpticalDataRange(double& emin, double& emax, const int i) {
 
   if (debug) {
     std::cerr << "Medium::GetOpticalDataRange:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   return false;
 
@@ -388,7 +403,8 @@ Medium::GetDielectricFunction(const double e,
 
   if (debug) {
     std::cerr << "Medium::GetDielectricFunction:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." << std::endl;
+    std::cerr << "    " << name << ": Function is not implemented." 
+              << std::endl;
   }
   eps1 = 1.; eps2 = 0.;
   return false;

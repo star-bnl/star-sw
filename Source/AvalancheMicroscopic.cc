@@ -20,7 +20,7 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   histDistance(0), hasDistanceHistogram(false), distanceOption('z'),
   histSecondary(0), hasSecondaryHistogram(false),
   useSignal(false), useInducedCharge(false),
-  useDriftLines(false), usePhotons(false),
+  useDriftLines(false), usePhotons(false), useBfield(false),
   deltaCut(0.), gammaCut(0.),
   nCollSkip(100),
   hasUserHandleAttachment(false),
@@ -385,18 +385,30 @@ AvalancheMicroscopic::AvalancheElectron(
   int nCollTemp = 0;  
   
   // Electric field
-  double ex, ey, ez;
-  int status;
+  double ex = 0., ey = 0., ez = 0., emag = 0.;
+  int status = 0;
+  // Magnetic field
+  double bx = 0., by = 0., bz = 0., bmag = 0., bt = 0.;
+  double cbtheta = 1., sbtheta = 0.;
+  double cwt = 1., swt = 0.;
+  double wb = 0.;
+  // Rotation matrices
+  double rb11 = 1., rb12 = 0., rb13 = 0.;
+  double rb21 = 0., rb22 = 1., rb23 = 0.;
+  double rb31 = 0., rb32 = 0., rb33 = 1.;
+  double rx22 = 1., rx23 = 0.;
+  double rx32 = 0., rx33 = 1.;
+  bool bOk = true;
          
   // Current position, direction, velocity and energy
   double x, y, z, t;
   double dx, dy, dz, d;
-  double vx, vy, vz;
+  double vx, vy, vz, v;
   double energy;
   // Timestep (squared)
-  double dt, dt2;
+  double dt;
   // Direction and energy after a step
-  double newDx, newDy, newDz, newEnergy;
+  double newDx = 0., newDy = 0., newDz = 0., newEnergy = 0.;
   
   // Collision type (elastic, ionisation, attachment, inelastic)
   int cstype;
@@ -413,7 +425,7 @@ AvalancheMicroscopic::AvalancheElectron(
   // Random number
   double r;
   // Prefactors
-  double a, b;
+  double a1 = 0., a2 = 0., a3 = 0., a4 = 0.;
     
   // Add the first electron
   electron newElectron;
@@ -466,9 +478,9 @@ AvalancheMicroscopic::AvalancheElectron(
       sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
       // Sign change
       ex = -ex; ey = -ey; ez = -ez;
- 
+
       if (status != 0) {
-        // Electron has left all drift media
+        // Electron is not inside a drift medium
         stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
         stack[iEl].t = t; stack[iEl].energy = energy;
         stack[iEl].dx = dx; stack[iEl].dy = dy; stack[iEl].dz = dz;
@@ -477,6 +489,55 @@ AvalancheMicroscopic::AvalancheElectron(
         continue;
       }
 
+      if (useBfield) {
+        // Get the magnetic field
+        sensor->MagneticField(x, y, z, bx, by, bz, status);
+        // Following the Magboltz algorithm, the stepping is performed
+        // in a coordinate system with the B field aligned along the x axis
+        // and the electric field at an angle btheta in the x-z plane
+
+        // First, make sure that neither E nor B are zero
+        bmag = sqrt(bx * bx + by * by + bz * bz);
+        emag = sqrt(ex * ex + ey * ey + ez * ez);
+        if (bmag > Small && emag > Small) {
+          // Calculate the first rotation matrix (to align B with x axis)
+          bt = by * by + bz * bz;
+          if (bt < Small) {
+            rb11 = rb22 = rb33 = 1.;
+            rb12 = rb13 = rb21 = rb23 = rb31 = rb32 = 0.;
+          } else {
+            rb11 = bx / bmag; 
+            rb22 = rb11 + (1. - rb11) * bz * bz / bt;
+            rb33 = rb11 + (1. - rb11) * by * by / bt;
+            rb12 = by / bmag; rb21 = -rb12;
+            rb13 = bz / bmag; rb31 = -rb13;
+            rb23 = rb32 = (1. - rb11) * by * bz / bt;
+          }
+          // Calculate the second rotation matrix (rotation around x axis)
+          vy = rb21 * ex + rb22 * ey + rb23 * ez;
+          vz = rb31 * ex + rb32 * ey + rb33 * ez;
+          v = sqrt(vy * vy + vz * vz);
+          if (v < Small) {
+            rx22 = rx33 = 1.;
+            rx23 = rx32 = 0.;
+          } else {
+            rx22 = rx33 = vz / d;
+            rx23 = - vy / d; rx32 = -rx23;
+          }
+          // Calculate the angle between E and B vector
+          cbtheta = (ex * bx + ey * by + ez * bz) / (emag * bmag);
+          sbtheta = sqrt(1. - cbtheta * cbtheta);
+          // Calculate the rotation frequency
+          wb = OmegaCyclotronOverB * bmag;
+          // Calculate the components of electric field in the rotated system
+          ex = emag * cbtheta; ey = 0.; ez = emag * sbtheta / wb;
+          bOk = true;
+        } else {
+          // E or B are zero
+          bOk = false;
+        }
+        
+      }
 
       while (1) {
 
@@ -490,9 +551,7 @@ AvalancheMicroscopic::AvalancheElectron(
           break;
         }
 
-        if (hasEnergyHistogram) {
-          histEnergy->Fill(energy);
-        }
+        if (hasEnergyHistogram) histEnergy->Fill(energy);
 
         if (medium->GetId() != id) {
           // Medium has changed
@@ -517,8 +576,27 @@ AvalancheMicroscopic::AvalancheElectron(
           }          
         }
 
-        a = c1 * (dx * ex + dy * ey + dz * ez) * sqrt(energy);
-        b = c2 * (ex * ex + ey * ey + ez * ez);
+        if (useBfield && bOk) {
+          v = c1 * sqrt(energy);
+          // Perform the rotation of the direction vector
+          vx = rb11 * dx + rb12 * dy + rb13 * dz;
+          vy = rb21 * dx + rb22 * dy + rb23 * dz;
+          vz = rb31 * dx + rb32 * dy + rb33 * dz;
+          dx = vx;
+          dy = rx22 * vy + rx23 * vz;
+          dz = rx32 * vy + rx33 * vz;   
+          v = c1 * sqrt(energy);
+          vx = v * dx; vy = v * dy; vz = v * dz;
+          a1 = vx * ex;
+          a2 = c2 * ex * ex;
+          a3 = ez * (2 * c2 * ez - vy);
+          a4 = ez * vz;
+        } else {
+          v = c1 * sqrt(energy);
+          vx = v * dx; vy = v * dy; vz = v * dz;
+          a1 = vx * ex + vy * ey + vz * ez;
+          a2 = c2 * (ex * ex + ey * ey + ez * ez);
+        }
 
         // Determine the timestep
         dt = 0.;
@@ -527,7 +605,13 @@ AvalancheMicroscopic::AvalancheElectron(
           r = RndmUniformPos();
           dt += - log(r) / fLim;
           // Update the energy
-          newEnergy = Max(energy + (a + b * dt) * dt, Small);
+          if (useBfield && bOk) {
+            cwt = cos(wb * dt); swt = sqrt(1. - cwt * cwt);
+            newEnergy = Max(energy + (a1 + a2 * dt) * dt + 
+                            a3 * (1. - cwt) + a4 * swt, Small);
+          } else {
+            newEnergy = Max(energy + (a1 + a2 * dt) * dt, Small);
+          }
           // Get the real collision rate at the updated energy
           fReal = medium->GetElectronCollisionRate(newEnergy);
           if (fReal > fLim) {
@@ -549,20 +633,52 @@ AvalancheMicroscopic::AvalancheElectron(
         ++nCollTemp;
 
         // Update the directions (at instant before collision)
-        dt2 = dt * dt;
-        a = sqrt(energy / newEnergy);
-        b = 0.5 * c1 * dt / sqrt(newEnergy);
-        newDx = dx * a + ex * b; 
-        newDy = dy * a + ey * b; 
-        newDz = dz * a + ez * b;
+        // and calculate the proposed new position
+        if (useBfield && bOk) {
+          // Calculate the new velocity
+          a1 = 2. * c2 * ez;
+          a2 = (vy - a1);
+          a3 = vx;
+          a4 = vz;
+          vx += 2. * c2 * ex * dt;
+          vy = a2 * cwt + vz * swt + a1;
+          vz = vz * cwt - a2 * swt;
+          // Rotate back to the lab frame of reference
+          dx = vx;
+          dy =  rx22 * vy - rx23 * vz;
+          dz = -rx23 * vy + rx33 * vz;
+          d = sqrt(dx * dx + dy * dy + dz * dz);
+          dx /= d; dy /= d; dz /= d;
+          newDx =  rb11 * dx - rb12 * dy - rb13 * dz;
+          newDy = -rb21 * dx + rb22 * dy + rb23 * dz;
+          newDz = -rb31 * dx + rb32 * dy + rb33 * dz;
 
-        // Calculate the step length
-        a = c1 * sqrt(energy);
-        b = dt * c2; 
-        vx = dx * a + ex * b;
-        vy = dy * a + ey * b;
-        vz = dz * a + ez * b;
-      
+          // Calculate the step to the next point
+          vx = a3 + c2 * ex * dt;
+          vy = (a2 * swt + a4 * (1. - cwt)) / (wb * dt) + a1;
+          vz = (a4 * swt - a2 * (1. - cwt)) / (wb * dt);
+          // Rotate back to the lab frame of reference
+          dx = vx;
+          dy =  rx22 * vy - rx23 * vz;
+          dz = -rx23 * vy + rx33 * vz;
+          vx =  rb11 * dx - rb12 * dy - rb13 * dz;
+          vy = -rb21 * dx + rb22 * dy + rb23 * dz;
+          vz = -rb31 * dx + rb32 * dy + rb33 * dz;
+        } else {
+          a1 = sqrt(energy / newEnergy);
+          a2 = 0.5 * c1 * dt / sqrt(newEnergy);
+          newDx = dx * a1 + ex * a2; 
+          newDy = dy * a1 + ey * a2; 
+          newDz = dz * a1 + ez * a2;
+
+          // Calculate the step length
+          a1 = c1 * sqrt(energy);
+          a2 = dt * c2; 
+          vx = dx * a1 + ex * a2;
+          vy = dy * a1 + ey * a2;
+          vz = dz * a1 + ez * a2;
+        }
+ 
         // Get the local electric field and medium at the proposed new position
         sensor->ElectricField(x + vx * dt, y + vy * dt, z + vz * dt, 
                               ex, ey, ez, medium, status);
@@ -626,7 +742,7 @@ AvalancheMicroscopic::AvalancheElectron(
             // Check if the mid-point is inside the drift area
             if (sensor->IsInArea(x, y, z)) {
               x = xM; y = yM; z = zM; t += dt;
-            } 
+            }
           }
           if (useSignal) sensor->AddSignal(-1, stack[iEl].t, t - stack[iEl].t, 
                                            0.5 * (x - stack[iEl].x), 
@@ -649,6 +765,9 @@ AvalancheMicroscopic::AvalancheElectron(
                                          z + 0.5 * vy * dt, vx, vy, vz);
         // Update the coordinates
         x += vx * dt; y += vy * dt; z += vz * dt; t += dt;
+
+        // If requested, get the magnetic field at the new location
+        if (useBfield) sensor->MagneticField(x, y, z, bx, by, bz, status);
 
         // Get the collision type and parameters
         medium->GetElectronCollision(newEnergy, cstype, level, energy, ctheta, 
@@ -810,10 +929,10 @@ AvalancheMicroscopic::AvalancheElectron(
           dx = cphi * stheta;
           dy = sphi * stheta;
         } else {
-          a = stheta / arg;
+          a1 = stheta / arg;
           dz = newDz * ctheta + arg * stheta * sphi;
-          dy = newDy * ctheta + a * (newDx * cphi - newDy * newDz * sphi);
-          dx = newDx * ctheta - a * (newDy * cphi + newDx * newDz * sphi);
+          dy = newDy * ctheta + a1 * (newDx * cphi - newDy * newDz * sphi);
+          dx = newDx * ctheta - a1 * (newDy * cphi + newDx * newDz * sphi);
         }
 
         // Continue with the next electron in the stack?
