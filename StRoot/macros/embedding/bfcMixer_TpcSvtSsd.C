@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcSvtSsd.C,v 1.11 2010/05/26 23:33:24 hmasui Exp $
+// $Id: bfcMixer_TpcSvtSsd.C,v 1.12 2010/06/01 18:22:55 hmasui Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -25,19 +25,24 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
 		    const Int_t pid=8,
 		    const Double_t mult = 100.,
                     const std::vector<Int_t> triggers = 0,
-                    const Char_t* prodName = "P08if",
+                    const Char_t* prodName = "P08icAuAu",
                     const Char_t* mode="flatpt"
 ) {
   // production chains for P06id - p+p 200 GeV (Run6)
   TString prodP06idpp("DbV20060729 pp2006b ITTF OSpaceZ2 OGridLeak3D VFMCE -VFPPVnoCTB -hitfilt");
 
   // production chain for P07ib
-  TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF Iana ToF spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2 ssd_daq");// KeepSvtHit hitfilt skip1row");
-  TString prodP07ic("P2005b DbV20070518 MakeEvent ITTF ToF ssddat spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2 KeepSvtHit skip1row VFMCE -VFMinuit -hitfilt"); // production chain for P07ic
-  TString prodP08if("B2007g DbV20080418 adcOnly MakeEvent ITTF Iana ToF spt SsdIt SvtIt pmdRaw SCEbyE  OShortR trgd Corr5 OSpaceZ2 ssd_daq KeepSvtHit -hitfilt VFMCE");// KeepSvtHit hitfilt skip1row");
+//  TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF Iana ToF spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2 ssd_daq");// KeepSvtHit hitfilt skip1row");
+
+  // production chain for P07ic - Cu+Cu 200 GeV (Run5)
+  TString prodP07ic("P2005b DbV20070518 MakeEvent ITTF ToF ssddat spt SsdIt SvtIt pmdRaw OGridLeak OShortR OSpaceZ2 KeepSvtHit skip1row VFMCE -VFMinuit -hitfilt");
+
+  // Production chain for P08ic Au+Au 200 GeV (Run7)
+  TString prodP08icAuAu("DbV20080418 B2007g ITTF adcOnly IAna KeepSvtHit VFMCE -hitfilt l3onl emcDY2 fpd ftpc trgd ZDCvtx svtIT ssdIT Corr5 -dstout");
+
   TString geomP06id("ry2006");
-  TString geomP07ib("ry2007g");
   TString geomP07ic("ry2005f");
+  TString geomP08ic("ry2007g");
 //  TString chain1Opt("in magF tpcDb adcOnly NoDefault -ittf NoOutput");
   TString chain1Opt("in magF tpcDb NoDefault -ittf NoOutput");
   TString chain2Opt("NoInput PrepEmbed gen_T geomT sim_T trs -ittf -tpc_daq nodefault");
@@ -47,17 +52,13 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
     chain2Opt += " "; chain2Opt += geomP06id;
     chain3Opt = prodP06idpp ;
   }
-  else if ( prodName == "P07ib" ){
-    chain2Opt += " "; chain2Opt += geomP07ib;
-    chain3Opt = prodP07ib ;
-  }
   else if( prodName == "P07ic" ){
     chain2Opt += " "; chain2Opt += geomP07ic;
     chain3Opt = prodP07ic;
   }
-  else if ( prodName == "P08if" ){
-    chain2Opt += " "; chain2Opt += geomP07ib;
-    chain3Opt = prodP08if ;
+  else if ( prodName == "P08icAuAu" ){
+    chain2Opt += " "; chain2Opt += geomP08ic;
+    chain3Opt = prodP08icAuAu ;
   }
   else{
     cout << "Choice prodName does not correspond to known chain. Processing impossible. " << endl;
@@ -78,14 +79,11 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
   if( prodName == "P06idpp") {
     chain3Opt += " "; chain3Opt += geomP06id;
   }
-  else if ( prodName == "P07ib" ){
-    chain3Opt += " "; chain3Opt += geomP07ib;
-  }
   else if( prodName == "P07ic" ){
     chain3Opt += " "; chain3Opt += geomP07ic;
   }
-  else if ( prodName == "P08if" ){
-    chain3Opt += " "; chain3Opt += geomP07ib;
+  else if ( prodName == "P08icAuAu" ){
+    chain3Opt += " "; chain3Opt += geomP08ic;
   }
   else{
     cout << "Choice prodName does not correspond to known chain. Processing impossible. " << endl;
