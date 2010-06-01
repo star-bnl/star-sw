@@ -298,7 +298,7 @@ void THelixTrack::GetSpot(const double axis[3][3],double emx[3]) const
    }
    TCL::vlinco(T[0],1.,T[2],-T[0][2]/T[2][2],t[0],2);
    TCL::vlinco(T[1],1.,T[2],-T[1][2]/T[2][2],t[1],2);
-   double myerr[3]={fEmx->mHH,0,fEmx->mZZ};
+   double myerr[3]={fEmx->mHH,fEmx->mHZ,fEmx->mZZ};
    TCL::trasat(t[0],myerr,emx,2,2);
    return;
 }
@@ -2698,7 +2698,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.45 2010/04/23 22:51:27 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.46 2010/06/01 20:54:54 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2714,6 +2714,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.46  2010/06/01 20:54:54  perev
+ * Correlation HZ accounted now
+ *
  * Revision 1.45  2010/04/23 22:51:27  perev
  * Method Move with derivatives adde
  *
