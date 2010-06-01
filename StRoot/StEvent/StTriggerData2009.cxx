@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.25 2010/04/07 14:43:00 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.26 2010/06/01 22:21:23 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.26  2010/06/01 22:21:23  ullrich
+ * Reduce print-out for case when muDst is read.
+ *
  * Revision 2.25  2010/04/07 14:43:00  ullrich
  * Added streamer and added new access function for BBC large tile earliest TAC and difference
  *
@@ -98,36 +101,37 @@ ClassImp(StTriggerData2009)
 
 StTriggerData2009::StTriggerData2009():mData()
 {
-    printf("StTriggerData2009 Default Constructor\n");    
+    mDebug = 0;
+    //    printf("StTriggerData2009 Default Constructor\n");    
 }
 
 StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run):mData()
 {
     //printf("StTriggerData2009 Constructor with trigger data block\n");    
-    mYear=2009; mRun = run; debug = 0;
+    mYear=2009; mRun = run; mDebug = 0;
     mData = new TriggerDataBlk2009;
     readData(data,1);
 }
 
 StTriggerData2009::StTriggerData2009(const TriggerDataBlk2009* data, int run, int bs, int dbg):mData()
 {
-    mYear=2009; mRun = run; debug = dbg;
-    if(debug) printf("StTriggerData2009 Constructor with trigger data block and byteswap option=%d\n",bs);    
+    mYear=2009; mRun = run; mDebug = dbg;
+    if(mDebug==1) printf("StTriggerData2009 Constructor with trigger data block and byteswap option=%d\n",bs);    
     mData = new TriggerDataBlk2009; 
     readData(data,bs);
 }
 
 void StTriggerData2009::readData(const TriggerDataBlk2009* data, int bs){
     int copyflag=1;
-    if (data==0) {copyflag=0;}
-    if(debug) printf("StTriggerData2009::readData copyflag=%d byteswap=%d data=%p mData=%p\n",copyflag,bs,data,mData);
+	  if (data==0) {copyflag=0;}
+    if(mDebug==1) printf("StTriggerData2009::readData copyflag=%d byteswap=%d data=%p mData=%p\n",copyflag,bs,data,mData);
     
     if (copyflag==1){
         unsigned int ver = data->FormatVersion; 
         if (bs) swapI(&ver);
         
         if (ver == y9FORMAT_VERSION  || ver == 0x08121140) {
-            if (debug>1) printf("StTriggerData2009: version = 0x%x (0x%x or 0x08121140)\n",ver,y9FORMAT_VERSION);
+            if (mDebug==1) printf("StTriggerData2009: version = 0x%x (0x%x or 0x08121140)\n",ver,y9FORMAT_VERSION);
         }
         else {
 	    mErrorFlag = mErrorFlag | 0x1;
@@ -143,13 +147,13 @@ void StTriggerData2009::readData(const TriggerDataBlk2009* data, int bs){
                                 << endm;
             assert(0);
         }
-        if (debug>0) printf("StTriggerData2009: size = %d, maxsize = %d\n",size,y9MAX_TRG_BLK_SIZE);
+        if (mDebug==1) printf("StTriggerData2009: size = %d, maxsize = %d\n",size,y9MAX_TRG_BLK_SIZE);
         memcpy(mData,data,size); 
         memset((char*)mData+size,0,sizeof(TriggerDataBlk2009)-size);      
     }
     
     if (bs) swapDataBlk(mData);
-    if (debug>0){
+    if (mDebug==1){
         printf("StTriggerData2009: version = 0x%x (0x%x or 0x08121140)\n",mData->FormatVersion,y9FORMAT_VERSION);
         printf("StTriggerData2009: size = %d, maxsize = %d\n",mData->totalTriggerLength,y9MAX_TRG_BLK_SIZE);
         printf("EventDesc  length=%10d   offset=%10d\n",mData->EventDesc_ofl.length,mData->EventDesc_ofl.offset);
@@ -179,7 +183,7 @@ void StTriggerData2009::readData(const TriggerDataBlk2009* data, int bs){
         gMessMgr->Warning() << "StTriggerData2009: Invalid npre/post  = "<< npre << " / " << npost
 			    <<" mErrorFlag="<<mErrorFlag<<endm;
     }
-    if (debug>0) printf("StTriggerData2009: pre=%d post=%d\n",npre,npost);
+    if (mDebug==1) printf("StTriggerData2009: pre=%d post=%d\n",npre,npost);
     
     memset(mBC1,0,sizeof(mBC1));
     memset(mMXQ,0,sizeof(mMXQ));
@@ -243,7 +247,7 @@ void StTriggerData2009::readData(const TriggerDataBlk2009* data, int bs){
         if (mQT3[i]) decodeQT(mQT3[i]->length/4, mQT3[i]->data, qt3[i], tqt3[i]); 
         if (mQT4[i]) decodeQT(mQT4[i]->length/4, mQT4[i]->data, qt4[i], tqt4[i]); 
     }
-    if (debug>0) dump();
+    if (mDebug==1) dump();
 }
 
 StTriggerData2009::~StTriggerData2009() {delete mData;}
@@ -1190,7 +1194,7 @@ unsigned short StTriggerData2009::tofMultiplicity(int prepost) const
 void StTriggerData2009::dump() const
 {
     printf("***** StTriggerData Dump *****\n");
-    printf(" debug=%d mData=%p\n",debug,mData);
+    printf(" mDebug=%d mData=%p\n",mDebug,mData);
     printf(" Year=%d  Version=%x\n",year(),version());
     printf(" Run#=%d Event#=%d\n",mRun,eventNumber());
     printf(" %d pre and %d post crossing data available\n",numberOfPreXing(),numberOfPostXing());
@@ -1297,7 +1301,7 @@ void StTriggerData2009::Streamer(TBuffer &R__b)
     
     if (R__b.IsReading()) {
         R__b.ReadClassBuffer(StTriggerData2009::Class(),this);
-        cout << "StTriggerData2009::Streamer read trigger data!!!"<<endl;
+   //     cout << "StTriggerData2009::Streamer read trigger data!!!"<<endl;
         if(mData) readData();
     }
     else {
