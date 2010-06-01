@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.14 2010/04/07 14:43:19 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.15 2010/06/01 22:18:44 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.15  2010/06/01 22:18:44  ullrich
+ * Change member debug to mDebug.
+ *
  * Revision 2.14  2010/04/07 14:43:19  ullrich
  * Added new access function for BBC large tile earliest TAC and difference
  *
@@ -55,13 +58,18 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.14 2010/04/07 14:43:19 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.15 2010/06/01 22:18:44 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
-StTriggerData::StTriggerData() : mYear(0), mZdcVertexZ(-999), mRun(0), mErrorFlag(0) { /* noop */ }
+StTriggerData::StTriggerData() : mYear(0), mZdcVertexZ(-999), mRun(0), mErrorFlag(0) 
+{ 
+    mDebug = 0; 
+}
 
 StTriggerData::~StTriggerData() { /* noop */}
+
+void StTriggerData::setDebug(unsigned int val) { mDebug=val; }  
 
 int StTriggerData::prepostAddress(int prepost) const
 { 
