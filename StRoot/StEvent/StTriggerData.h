@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.34 2010/04/07 14:43:19 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.35 2010/06/01 22:18:44 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.35  2010/06/01 22:18:44  ullrich
+ * Change member debug to mDebug.
+ *
  * Revision 2.34  2010/04/07 14:43:19  ullrich
  * Added new access function for BBC large tile earliest TAC and difference
  *
@@ -134,7 +137,7 @@ public:
     
     virtual void readData() {};
     virtual void dump() const = 0;   //dump data into text
-    virtual void setDebug(unsigned int v) {debug=v;};     
+    virtual void setDebug(unsigned int); 
        
     // version and data type information   
     virtual int year() const;                          // year of the data
@@ -330,9 +333,9 @@ protected:
     int   mRun;
     unsigned int mErrorFlag;
 
-    unsigned int debug; //!
+    unsigned int mDebug; //!
 
-    ClassDef(StTriggerData,4) 
+    ClassDef(StTriggerData,5) 
 };
 
 inline void StTriggerData::swapI(unsigned int *var){
