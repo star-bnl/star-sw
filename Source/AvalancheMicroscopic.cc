@@ -489,54 +489,14 @@ AvalancheMicroscopic::AvalancheElectron(
         continue;
       }
 
+      // If activated, get the local magnetic field
       if (useBfield) {
-        // Get the magnetic field
         sensor->MagneticField(x, y, z, bx, by, bz, status);
-        // Following the Magboltz algorithm, the stepping is performed
-        // in a coordinate system with the B field aligned along the x axis
-        // and the electric field at an angle btheta in the x-z plane
-
-        // First, make sure that neither E nor B are zero
+        // Make sure that neither E nor B are zero
         bmag = sqrt(bx * bx + by * by + bz * bz);
         emag = sqrt(ex * ex + ey * ey + ez * ez);
-        if (bmag > Small && emag > Small) {
-          // Calculate the first rotation matrix (to align B with x axis)
-          bt = by * by + bz * bz;
-          if (bt < Small) {
-            rb11 = rb22 = rb33 = 1.;
-            rb12 = rb13 = rb21 = rb23 = rb31 = rb32 = 0.;
-          } else {
-            rb11 = bx / bmag; 
-            rb22 = rb11 + (1. - rb11) * bz * bz / bt;
-            rb33 = rb11 + (1. - rb11) * by * by / bt;
-            rb12 = by / bmag; rb21 = -rb12;
-            rb13 = bz / bmag; rb31 = -rb13;
-            rb23 = rb32 = (1. - rb11) * by * bz / bt;
-          }
-          // Calculate the second rotation matrix (rotation around x axis)
-          vy = rb21 * ex + rb22 * ey + rb23 * ez;
-          vz = rb31 * ex + rb32 * ey + rb33 * ez;
-          v = sqrt(vy * vy + vz * vz);
-          if (v < Small) {
-            rx22 = rx33 = 1.;
-            rx23 = rx32 = 0.;
-          } else {
-            rx22 = rx33 = vz / d;
-            rx23 = - vy / d; rx32 = -rx23;
-          }
-          // Calculate the angle between E and B vector
-          cbtheta = (ex * bx + ey * by + ez * bz) / (emag * bmag);
-          sbtheta = sqrt(1. - cbtheta * cbtheta);
-          // Calculate the rotation frequency
-          wb = OmegaCyclotronOverB * bmag;
-          // Calculate the components of electric field in the rotated system
-          ex = emag * cbtheta; ey = 0.; ez = emag * sbtheta / wb;
-          bOk = true;
-        } else {
-          // E or B are zero
-          bOk = false;
-        }
-        
+        if (bmag > Small && emag > Small) bOk = true;
+        else bOk = false;
       }
 
       while (1) {
@@ -577,6 +537,43 @@ AvalancheMicroscopic::AvalancheElectron(
         }
 
         if (useBfield && bOk) {
+
+          // Following the Magboltz algorithm, the stepping is performed
+          // in a coordinate system with the B field aligned along the x axis
+          // and the electric field at an angle btheta in the x-z plane
+
+          // Calculate the first rotation matrix (to align B with x axis)
+          bt = by * by + bz * bz;
+          if (bt < Small) {
+            rb11 = rb22 = rb33 = 1.;
+            rb12 = rb13 = rb21 = rb23 = rb31 = rb32 = 0.;
+          } else {
+            rb11 = bx / bmag; 
+            rb22 = rb11 + (1. - rb11) * bz * bz / bt;
+            rb33 = rb11 + (1. - rb11) * by * by / bt;
+            rb12 = by / bmag; rb21 = -rb12;
+            rb13 = bz / bmag; rb31 = -rb13;
+            rb23 = rb32 = (1. - rb11) * by * bz / bt;
+          }
+          // Calculate the second rotation matrix (rotation around x axis)
+          vy = rb21 * ex + rb22 * ey + rb23 * ez;
+          vz = rb31 * ex + rb32 * ey + rb33 * ez;
+          v = sqrt(vy * vy + vz * vz);
+          if (v < Small) {
+            rx22 = rx33 = 1.;
+            rx23 = rx32 = 0.;
+          } else {
+            rx22 = rx33 = vz / v;
+            rx23 = - vy / v; rx32 = -rx23;
+          }
+          // Calculate the angle between E and B vector
+          cbtheta = (ex * bx + ey * by + ez * bz) / (emag * bmag);
+          sbtheta = sqrt(1. - cbtheta * cbtheta);
+          // Calculate the rotation frequency
+          wb = OmegaCyclotronOverB * bmag;
+          // Calculate the components of electric field in the rotated system
+          ex = emag * cbtheta; ey = 0.; ez = emag * sbtheta / wb;
+
           v = c1 * sqrt(energy);
           // Perform the rotation of the direction vector
           vx = rb11 * dx + rb12 * dy + rb13 * dz;
@@ -766,8 +763,15 @@ AvalancheMicroscopic::AvalancheElectron(
         // Update the coordinates
         x += vx * dt; y += vy * dt; z += vz * dt; t += dt;
 
-        // If requested, get the magnetic field at the new location
-        if (useBfield) sensor->MagneticField(x, y, z, bx, by, bz, status);
+        // If activated, get the magnetic field at the new location
+        if (useBfield) {
+          sensor->MagneticField(x, y, z, bx, by, bz, status);
+          // Make sure that neither E nor B are zero
+          bmag = sqrt(bx * bx + by * by + bz * bz);
+          emag = sqrt(ex * ex + ey * ey + ez * ez);
+          if (bmag > Small && emag > Small) bOk = true;
+          else bOk = false;
+        }
 
         // Get the collision type and parameters
         medium->GetElectronCollision(newEnergy, cstype, level, energy, ctheta, 
