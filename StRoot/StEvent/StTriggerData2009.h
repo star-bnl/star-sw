@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.15 2010/04/07 14:43:00 ullrich Exp $
+ * $Id: StTriggerData2009.h,v 2.16 2010/06/01 22:27:30 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.16  2010/06/01 22:27:30  ullrich
+ * Reduce print-out for case when muDst is read.
+ *
  * Revision 2.15  2010/04/07 14:43:00  ullrich
  * Added streamer and added new access function for BBC large tile earliest TAC and difference
  *
@@ -310,7 +313,7 @@ inline void StTriggerData2009::swapRawDetOfflen(TrgOfflen2009* offlen)
     int i;
     for (i=0; i<y9MAX_OFFLEN; i++) { 
         swapOfflen(&offlen[i]); 
-        if (debug>0) printf("Offlen id=%2d offset=%d length=%d\n", i, offlen[i].offset, offlen[i].length);
+        if (mDebug>0) printf("Offlen id=%2d offset=%d length=%d\n", i, offlen[i].offset, offlen[i].length);
     }
 }
 
@@ -375,7 +378,7 @@ inline void StTriggerData2009::swapRawDet(DataBlock2009* data, int name, int hle
             break;
         }
     }
-    if(debug>0) 
+    if(mDebug>0) 
         printf("Read id=%2d name=%1c%1c%1c%1c length=%d\n",
 	     name,data->name[0],data->name[1],data->name[2],data->name[3],data->length);
 }
