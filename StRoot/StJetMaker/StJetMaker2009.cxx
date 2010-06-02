@@ -7,7 +7,6 @@
 #include <list>
 #include "TFile.h"
 #include "TTree.h"
-#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StAnaPars.h"
 #include "StjTPCMuDst.h"
 #include "StjBEMCMuDst.h"
@@ -68,13 +67,8 @@ int StJetMaker2009::Init()
   return StMaker::Init();
 }
 
-#include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
-
 int StJetMaker2009::Make()
 {
-  StMuDstMaker* mudstMaker = (StMuDstMaker*)GetMakerInheritsFrom("StMuDstMaker");
-  assert(mudstMaker);
-
   // Loop over jet branches
   for (size_t iBranch = 0; iBranch < mJetBranches.size(); ++iBranch) {
     StJetBranch* jetbranch = mJetBranches[iBranch];
