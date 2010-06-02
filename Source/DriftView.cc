@@ -7,7 +7,6 @@ namespace Garfield {
 
 DriftView::DriftView():
   debug(false),
-  canvas("DriftView", "Drift View"), 
   xMin(-1.), yMin(-1.), zMin(-1.), 
   xMax(1.),  yMax(1.),  zMax(1.),
   frame("frame", "", 10, xMin, xMax, 10, yMin, yMax, 10, zMin, zMax),
@@ -17,7 +16,15 @@ DriftView::DriftView():
   frame.SetXTitle("x");
   frame.SetYTitle("y");
   frame.SetZTitle("z");
+
+  canvas = new TCanvas("DriftView", "Drift View");
   
+}
+
+DriftView::~DriftView() {
+
+  if (canvas != 0) delete canvas;
+
 }
 
 void 
@@ -30,12 +37,12 @@ DriftView::SetArea(double xmin, double ymin, double zmin,
     std::cout << "    Null area range not permitted." << std::endl;
     return;
   }
-  xMin = std::min(xmin,xmax);
-  yMin = std::min(ymin,ymax);
-  zMin = std::min(zmin,zmax);
-  xMax = std::max(xmin,xmax);
-  yMax = std::max(ymin,ymax);
-  zMax = std::max(zmin,zmax);
+  xMin = std::min(xmin, xmax);
+  yMin = std::min(ymin, ymax);
+  zMin = std::min(zmin, zmax);
+  xMax = std::max(xmin, xmax);
+  yMax = std::max(ymin, ymax);
+  zMax = std::max(zmin, zmax);
   frame.SetBins(10, xMin, xMax, 10, yMin, yMax, 10, zMin, zMax);
   
 }
@@ -76,7 +83,21 @@ DriftView::NewIonDriftLine(const int n) {
   driftLines.push_back(p);
   ++nDriftLines;
 
-} 
+}
+
+void
+DriftView::NewPhotonTrack(const double x0, const double y0, const double z0,
+                          const double x1, const double y1, const double z1) {
+
+  TPolyLine3D p(2);
+  p.SetLineColor(kBlue);
+  p.SetLineStyle(7);
+  p.SetPoint(0, x0, y0, z0);
+  p.SetPoint(1, x1, y1, z1);
+  driftLines.push_back(p);
+  ++nDriftLines;
+
+}
 
 void
 DriftView::SetPoint(const int i, 
@@ -95,12 +116,15 @@ DriftView::SetPoint(const int i,
 
 void
 DriftView::Plot() {
+  
+  if (canvas == 0) canvas = new TCanvas("DriftView", "Drift View");
+  canvas->cd();
 
   frame.Draw();
   for (int i = nDriftLines; i--;) {
     driftLines[i].Draw();
   }
-  canvas.Update();
+  canvas->Update();
 
 }
 

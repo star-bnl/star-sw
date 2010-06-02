@@ -492,6 +492,7 @@ AvalancheMicroscopic::AvalancheElectron(
       // If activated, get the local magnetic field
       if (useBfield) {
         sensor->MagneticField(x, y, z, bx, by, bz, status);
+        bx = -bx; by = -by; bz = -bz;
         // Make sure that neither E nor B are zero
         bmag = sqrt(bx * bx + by * by + bz * bz);
         emag = sqrt(ex * ex + ey * ey + ez * ez);
@@ -766,6 +767,7 @@ AvalancheMicroscopic::AvalancheElectron(
         // If activated, get the magnetic field at the new location
         if (useBfield) {
           sensor->MagneticField(x, y, z, bx, by, bz, status);
+          bx = -bx; by = -by; bz = -bz;
           // Make sure that neither E nor B are zero
           bmag = sqrt(bx * bx + by * by + bz * bz);
           emag = sqrt(ex * ex + ey * ey + ez * ez);
@@ -979,6 +981,10 @@ AvalancheMicroscopic::AvalancheElectron(
         viewer->SetPoint(j, x, y, z);
       }
     }
+    for (int i = nPhotons; i--;) {
+      viewer->NewPhotonTrack(photons[i].x0, photons[i].y0, photons[i].z0,
+                             photons[i].x1, photons[i].y1, photons[i].z1);
+    } 
   }
   return true;
     
@@ -1019,8 +1025,6 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
   
   // Get the id number of the drift medium
   int id = medium->GetId();
-  // Get the density of the drift medium
-  double rho = medium->GetNumberDensity();
 
   // Position 
   double x = x0, y = y0, z = z0;
@@ -1049,7 +1053,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
   t += dt;
   dt *= SpeedOfLight;
   // Temporarily: absorb photon on the spot
-  // x += dt * dx; y += dt * dy; z += dt * dz;
+  x += dt * dx; y += dt * dy; z += dt * dz;
 
   // Check if the photon is still inside a medium
   if (!sensor->GetMedium(x, y, z, medium)) { 

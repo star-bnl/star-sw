@@ -1068,7 +1068,7 @@ MediumMagboltz86::Mixer() {
   inpt_.estep = eStep;
   
   // Correct for density
-  const double density = LoschmidtNumber * (pressure / 760.) * 
+  const double density = LoschmidtNumber * (pressure / AtmosphericPressure) * 
                          (273.15 / temperature);
   const double prefactor = density * SpeedOfLight * sqrt(2. / ElectronMass);
 
@@ -1934,7 +1934,7 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
   double eta;
   std::string gasname;
 
-  const double density = LoschmidtNumber * (pressure / 760.) * 
+  const double density = LoschmidtNumber * (pressure / AtmosphericPressure) * 
                          (273.15 / temperature);
 
   // Reset the collision rate arrays

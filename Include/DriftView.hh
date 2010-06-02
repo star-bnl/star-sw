@@ -8,8 +8,6 @@
 
 namespace Garfield {
 
-// -------------------------------------------------------------------------------------------------------------------------------------
-
 class DriftView { 
 
   RQ_OBJECT("DriftView")
@@ -18,7 +16,7 @@ class DriftView {
     // Constructor
     DriftView();
     // Destructor
-    ~DriftView() {}
+    ~DriftView();
     
     // Set area to be plotted
     void SetArea(double xmin, double ymin, double zmin, 
@@ -26,6 +24,8 @@ class DriftView {
     void Clear();
     void NewElectronDriftLine(const int n);
     void NewIonDriftLine(const int n);
+    void NewPhotonTrack(const double x0, const double y0, const double z0,
+                        const double x1, const double y1, const double z1);
     void SetPoint(const int i, const double x, const double y, const double z);
     void Plot();
 
@@ -35,7 +35,7 @@ class DriftView {
     bool debug;
 
     // Canvas
-    TCanvas canvas;
+    TCanvas* canvas;
     
     // Box dimensions
     double xMin, yMin, zMin, xMax, yMax, zMax;
