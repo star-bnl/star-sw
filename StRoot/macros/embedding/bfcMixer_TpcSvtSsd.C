@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcSvtSsd.C,v 1.12 2010/06/01 18:22:55 hmasui Exp $
+// $Id: bfcMixer_TpcSvtSsd.C,v 1.13 2010/06/02 16:42:39 hmasui Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -35,7 +35,10 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
 //  TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF Iana ToF spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2 ssd_daq");// KeepSvtHit hitfilt skip1row");
 
   // production chain for P07ic - Cu+Cu 200 GeV (Run5)
-  TString prodP07ic("P2005b DbV20070518 MakeEvent ITTF ToF ssddat spt SsdIt SvtIt pmdRaw OGridLeak OShortR OSpaceZ2 KeepSvtHit skip1row VFMCE -VFMinuit -hitfilt");
+  TString prodP07icCuCu("P2005b DbV20070518 MakeEvent ITTF ToF ssddat spt SsdIt SvtIt pmdRaw OGridLeak OShortR OSpaceZ2 KeepSvtHit skip1row VFMCE -VFMinuit -hitfilt");
+
+  // production chain for P08if
+//    TString prodP08if("B2007g DbV20080418 adcOnly MakeEvent ITTF Iana ToF spt SsdIt SvtIt pmdRaw SCEbyE  OShortR trgd Corr5 OSpaceZ2 ssd_daq KeepSvtHit -hitfilt VFMCE");// KeepSvtHit hitfilt skip1row");
 
   // Production chain for P08ic Au+Au 200 GeV (Run7)
   TString prodP08icAuAu("DbV20080418 B2007g ITTF adcOnly IAna KeepSvtHit VFMCE -hitfilt l3onl emcDY2 fpd ftpc trgd ZDCvtx svtIT ssdIT Corr5 -dstout");
@@ -54,7 +57,7 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
   }
   else if( prodName == "P07ic" ){
     chain2Opt += " "; chain2Opt += geomP07ic;
-    chain3Opt = prodP07ic;
+    chain3Opt = prodP07icCuCu;
   }
   else if ( prodName == "P08icAuAu" ){
     chain2Opt += " "; chain2Opt += geomP08ic;
@@ -112,6 +115,7 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
       return;
     }
     trsMk->setNormalFactor(1.05);
+    trsMk->SetMode(0);
   }
   //________________________________________________________________________________
   gSystem->Load("StMixerMaker");
