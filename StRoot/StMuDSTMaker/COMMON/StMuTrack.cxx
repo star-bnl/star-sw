@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.44 2010/04/27 20:47:17 tone421 Exp $
+ * $Id: StMuTrack.cxx,v 1.45 2010/06/02 18:53:13 tone421 Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -199,9 +199,22 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
       mVertexIndex = -1;
       mDCA = StThreeVectorF(-999,-999,-999);
       mDCAGlobal = StThreeVectorF(-999,-999,-999);
-    }
+      if (globalTrack) {
+        if (globalTrack->dcaGeometry()) {
+          const StDcaGeometry *dcaGeometry = globalTrack->dcaGeometry();
+          THelixTrack     thelix =  dcaGeometry->thelix();
+          const Double_t *mom = thelix.Dir();
+          if (track->type() == global) {
+            mP   = StThreeVectorF(mom[0],mom[1],mom[2]);
+            mP  *= dcaGeometry->momentum().mag();
+          }
+        }
+	  }
+	  mPt = mP.perp();
+	  mPhi = mP.phi();
+	  mEta = mP.pseudoRapidity();
+	}
   }
-
   fillMuProbPidTraits(event,track);
  /// dongx
   mIndex2BTofHit = -1;   // filled later
@@ -630,6 +643,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.45  2010/06/02 18:53:13  tone421
+ * Fixed a bug. Previously, only events where a vertex was found had global tracks with pt and eta filled properly...
+ *
  * Revision 1.44  2010/04/27 20:47:17  tone421
  * Added extra functions for BEMC matching. See this post for more details:
  *
