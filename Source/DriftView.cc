@@ -5,20 +5,44 @@
 
 namespace Garfield {
 
-DriftView::DriftView():
+DriftView::DriftView() :
   debug(false),
+  label("Drift View"),
   xMin(-1.), yMin(-1.), zMin(-1.), 
-  xMax(1.),  yMax(1.),  zMax(1.),
-  frame("frame", "", 10, xMin, xMax, 10, yMin, yMax, 10, zMin, zMax),
+  xMax( 1.), yMax( 1.), zMax( 1.),
+  frame(),
   nDriftLines(0) {
 
   frame.SetStats(kFALSE);
   frame.SetXTitle("x");
   frame.SetYTitle("y");
   frame.SetZTitle("z");
+  frame.SetBins(10, xMin, xMax, 10, yMin, yMax, 10, zMin, zMax);
+  frame.SetTitle(label.c_str());
 
-  canvas = new TCanvas("DriftView", "Drift View");
+  canvas = new TCanvas();
+  canvas->SetTitle(label.c_str());
   
+}
+
+DriftView::DriftView(std::string title) :
+  debug(false),
+  label(title),
+  xMin(-1.), yMin(-1.), zMin(-1.), 
+  xMax( 1.), yMax( 1.), zMax( 1.),
+  frame(),
+  nDriftLines(0) {
+
+  frame.SetStats(kFALSE);
+  frame.SetXTitle("x");
+  frame.SetYTitle("y");
+  frame.SetZTitle("z");
+  frame.SetBins(10, xMin, xMax, 10, yMin, yMax, 10, zMin, zMax);
+  frame.SetTitle(label.c_str());
+
+  canvas = new TCanvas();
+  canvas->SetTitle(label.c_str());
+
 }
 
 DriftView::~DriftView() {
@@ -117,7 +141,10 @@ DriftView::SetPoint(const int i,
 void
 DriftView::Plot() {
   
-  if (canvas == 0) canvas = new TCanvas("DriftView", "Drift View");
+  if (canvas == 0) {
+    canvas = new TCanvas();
+    canvas->SetTitle(label.c_str());
+  }
   canvas->cd();
 
   frame.Draw();

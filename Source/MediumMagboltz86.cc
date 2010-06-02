@@ -556,13 +556,6 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
   // Determine the scattering angle
   ctheta = 1. - 2. * RndmUniform();
   
-  if (debug) {
-    std::cout << "MediumMagboltz86::GetPhotonCollision:" << std::endl;
-    std::cout << "    Energy:      " << e << std::endl;
-    std::cout << "    Gas:         " << ngas << std::endl;
-    std::cout << "    Level:       " << level << std::endl;
-    std::cout << "    Type:        " << type << std::endl;
-  }
   return true;
 
 }

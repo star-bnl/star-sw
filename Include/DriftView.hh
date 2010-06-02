@@ -1,6 +1,8 @@
 #ifndef G_DRIFT_VIEW
 #define G_DRIFT_VIEW
 
+#include <string>
+
 #include <RQ_OBJECT.h>
 #include <TCanvas.h>
 #include <TH3F.h>
@@ -15,6 +17,7 @@ class DriftView {
   public:
     // Constructor
     DriftView();
+    DriftView(std::string title);
     // Destructor
     ~DriftView();
     
@@ -30,9 +33,11 @@ class DriftView {
     void Plot();
 
   private:
-  
+ 
     // Options
     bool debug;
+
+    std::string label;
 
     // Canvas
     TCanvas* canvas;

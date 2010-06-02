@@ -9,34 +9,47 @@
 
 namespace Garfield {
 
-// -------------------------------------------------------------------------------------------------------------------------------------
-
 class FieldView { 
 
   RQ_OBJECT("FieldView")
   
   public:
-    // Constructor
+    // Constructors
+    FieldView();
     FieldView(Sensor* s);
     // Destructor
-    ~FieldView() {}
-    
+    ~FieldView();
+   
+    void SetSensor(Sensor* s);
+ 
     // Establish area, normal vector, in-plane vector ...
-    void Area(double xmin, double ymin, double zmin, 
-              double xmax, double ymax, double zmax);
-    void Contour(char* function, TCanvas* c);
-    void Default();
-    void NContour(const int n) {nContours = n;}
-    void Plane(double fx, double fy, double fz, double x0, double y0, double z0);
-    void Range(const double minval, const double maxval);
+    void SetArea(double xmin, double ymin, double zmin, 
+                 double xmax, double ymax, double zmax);
+    void SetVoltageRange(const double minval, const double maxval);
+    void SetNumberOfContours(const int n);
+    void SetDefaultProjection();
+    void SetPlane(double fx, double fy, double fz, 
+                  double x0, double y0, double z0);
     // Rotate the viewing plane
     void Rotate(double angle);
 
+    void PlotContour();
+
+    double EvaluatePotential(double* pos, double* par);
+
+    void EnableDebugging()  {debug = true;}
+    void DisableDebugging() {debug = false;}
+
   private:
-  
+ 
+    static const int nMaxContours = 20;
+ 
     // Options
     bool debug;
     
+    // Sensor
+    Sensor* sensor;
+
     // Projection for viewing
     double project[3][3];
     double plane[4];
@@ -50,8 +63,11 @@ class FieldView {
     // Number of contours
     int nContours;
     
+    // Canvas
+    TCanvas* canvas;
+
     // Contour function
-    TF2* fcont;
+    TF2 fCont;
     
     void Labels();    
 
