@@ -58,6 +58,7 @@ void RunJetFinder2009pro(int nevents = 1e6,
   filterMaker->addTrigger(230410); // JP1
   filterMaker->addTrigger(230411); // JP2
   filterMaker->addTrigger(230420); // AJP
+  filterMaker->addTrigger(230531); // BHT3
 
   // 2009 pp200
   // http://www.star.bnl.gov/protected/common/common2009/trigger2009/triggers2009.html
@@ -73,6 +74,8 @@ void RunJetFinder2009pro(int nevents = 1e6,
   // L2EGamma
   filterMaker->addTrigger(240630);
   filterMaker->addTrigger(240631);
+  // BHT3
+  filterMaker->addTrigger(240530);
   // BBCMB-Cat2
   filterMaker->addTrigger(240013);
   filterMaker->addTrigger(240113);
