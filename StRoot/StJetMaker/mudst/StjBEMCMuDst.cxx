@@ -1,4 +1,4 @@
-// $Id: StjBEMCMuDst.cxx,v 1.9 2010/06/03 21:30:34 pibero Exp $
+// $Id: StjBEMCMuDst.cxx,v 1.10 2010/06/03 22:06:54 pibero Exp $
 #include "StjBEMCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuDst.h>
@@ -29,7 +29,7 @@ int StjBEMCMuDst::_runNumber = -1;
 int StjBEMCMuDst::_eventId = -1;
 StjTowerEnergyList StjBEMCMuDst::_list;
 
-StjBEMCMuDst::StjBEMCMuDst(bool doTowerSwapFix)
+StjBEMCMuDst::StjBEMCMuDst(bool doTowerSwapFix) : _bemcTables(0)
 {
   // If data, StEmcADCtoEMaker will be in the chain
   if (StEmcADCtoEMaker* adc2e = (StEmcADCtoEMaker*)StMaker::GetChain()->GetMakerInheritsFrom("StEmcADCtoEMaker")) {
