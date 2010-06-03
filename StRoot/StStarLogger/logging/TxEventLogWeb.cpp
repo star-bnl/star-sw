@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.9 2010/04/21 22:27:41 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.10 2010/06/03 22:32:28 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -22,6 +22,7 @@ TxEventLogWeb::TxEventLogWeb() : TxEventLogFile() { }
 
 void TxEventLogWeb::writeDown(const std::string& message)
 {
+  bool delay = false;
   std::string httpstring="wget -q -o /dev/null ";
   httpstring+= "-O /dev/null ";
  
@@ -37,13 +38,15 @@ void TxEventLogWeb::writeDown(const std::string& message)
         pos++;
   }
   httpstring+=qmessage;
+  httpstring+="\' "; // allow log to test the cybersecurity issue
+#if 0
   httpstring+="\' \'>&/dev/null";
-  bool delay = false;
   if (message.find(TxUCMConstants::newTask)== std::string::npos) {
       httpstring+="&";
       delay = true;
   }
   httpstring+="\'";
+#endif  
   system( httpstring.c_str());
   if (delay) {
     // Sleep milliSec milliseconds.
