@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.11 2010/05/25 01:51:17 hmasui Exp $
+// $Id: bfcMixer_Tpx.C,v 1.12 2010/06/03 20:42:58 hmasui Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -33,18 +33,22 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   TString prodP08icAuAu9("DbV20080709 P2008 ITTF VFMCE -hitfilt");
   TString prodP08icAuAu200("DbV20070101 P2008 ITTF VFMCE -hitfilt");  
   TString prodP08icdAu("DbV20080712 P2008 ITTF OSpaceZ2 OGridLeak3D beamLine, VFMCE TpxClu -VFMinuit -hitfilt");
+  TString prodP08iedAu("DbV20090213 P2008 ITTF OSpaceZ2 OGridLeak3D beamLine VFMCE TpxClu -VFMinuit -hitfilt");
   TString prodP10iapp("DbV20091001 pp2009c TpcRS ITTF OSpaceZ2 OGridLeak3D beamLine, VFMCE TpcRS -VFMinuit -hitfilt");
   TString geomP08ic("ry2008");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
 //  TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
   chain2Opt += " "; chain2Opt += geomP08ic;
-  if (prodName == "P08icpp") {   TString chain3Opt = prodP08icpp; }
-  else if (prodName == "P08iepp") { TString chain3Opt = prodP08iepp; }
-  else if (prodName == "P08icAuAu9") {   TString chain3Opt = prodP08icAuAu9; }
-  else if (prodName == "P08icdAu") {   TString chain3Opt = prodP08icdAu; }
-  else if (prodName == "P08icAuAu200") { TString chain3Opt = prodP08icAuAu200;}
-  else if (prodName == "P10iapp") { TString chain3opt = prodP10iapp;}
+
+  TString chain3Opt("");
+  if (prodName == "P08icpp") {   chain3Opt = prodP08icpp; }
+  else if (prodName == "P08iepp") { chain3Opt = prodP08iepp; }
+  else if (prodName == "P08icAuAu9") {   chain3Opt = prodP08icAuAu9; }
+  else if (prodName == "P08icdAu") {   chain3Opt = prodP08icdAu; }
+  else if (prodName == "P08iedAu") {   chain3Opt = prodP08iedAu; }
+  else if (prodName == "P08icAuAu200") { chain3Opt = prodP08icAuAu200;}
+  else if (prodName == "P10iapp") { chain3opt = prodP10iapp;}
   else {
     cout << "Choice prodName does not correspond to known chain. Processing impossible. " << endl;
     return;
@@ -74,6 +78,7 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
       return;
     }
     trsMk->setNormalFactor(1.32);
+    trsMk->SetMode(0);
   }
 #endif
   //________________________________________________________________________________
