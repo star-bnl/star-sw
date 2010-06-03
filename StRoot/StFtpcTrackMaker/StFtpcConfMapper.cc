@@ -1,5 +1,9 @@
-// $Id: StFtpcConfMapper.cc,v 1.36 2010/06/02 12:12:01 jcs Exp $
+// $Id: StFtpcConfMapper.cc,v 1.37 2010/06/03 11:09:39 jcs Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.37  2010/06/03 11:09:39  jcs
+// correction for Bug #1939 - TObjArray track was still used after it was removed
+// removed inactive code
+//
 // Revision 1.36  2010/06/02 12:12:01  jcs
 // undo correction for Bug#1939 since it was incorrect
 //
@@ -1363,6 +1367,7 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
       track->AddPoint(closest_hit);
       hit = closest_hit;
 
+
       if (GetLaser() && track->GetNumberOfPoints() == mTrackletLength[mVertexConstraint]) {
 	tracks++;
 	CompleteTrack(track);
@@ -1375,14 +1380,14 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
       
       if (!GetLaser()) { // this is not a laser event
 	RemoveTrack(track);
-	point = mTrackletLength[mVertexConstraint];  // continue with next hit in segment
+        return;             // continue with next hit in segment
       }
 
       else { // this is a laser event
 	
 	if (track->GetNumberOfPoints() < mMinPoints[mVertexConstraint]) { // not enough points
 	  RemoveTrack(track);
-	  point = mTrackletLength[mVertexConstraint];  // continue with next hit in segment
+          return;           // continue with next hit in segment
 	}
 	
 	else { // enough points
@@ -1416,37 +1421,12 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
 	closest_hit = GetNextNeighbor((StFtpcConfMapPoint *)trackpoint->Last(), coeff, (Bool_t)kTRUE);
 	
 	if (closest_hit) {
-	  
-	  /*
-	    CalcChiSquared(track, closest_hit, chi2);
-	    
-	    if (coeff[4]-chi2[0]>1.) {
-	    //LOG_DEBUG << coeff[4] << " - " << chi2[0] << " = " << coeff[4]-chi2[0] << endm;
-	    //LOG_DEBUG << coeff[5] << " - " << chi2[1] << " = " << coeff[5]-chi2[1] << endm << endm;
-	    point = mMaxFtpcRow;
-	    }
-	    
-	    else {
-	  */
-	  
-	  // add closest hit to track
+        // add closest hit to track
 	  track->AddPoint(closest_hit);
-
-	  // }
 	}
 	
 	else { 
-	  // closest hit does not exist
-	  
-	  /*
-	    probably switch off vertexconstraint!
-	    
-	    if (point.PadRow() > limit) {
-	    
-	    }
-	    
-	    else
-	  */
+        // closest hit does not exist
 	  point = mMaxFtpcRow; // continue with next hit in segment
 	}
       }
