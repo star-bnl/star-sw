@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMCMuDst.h,v 1.9 2010/06/03 21:30:44 pibero Exp $
+// $Id: StjBEMCMuDst.h,v 1.10 2010/06/03 21:50:45 pibero Exp $
 #ifndef STJBEMCMUDST_H
 #define STJBEMCMUDST_H
 
@@ -8,7 +8,6 @@
 class StEmcCollection;
 
 class StEmcRawHit;
-class StEmcADCtoEMaker;
 class StBemcTables;
 
 class StjBEMCMuDst : public StjBEMC {
