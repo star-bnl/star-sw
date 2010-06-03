@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMCMuDst.h,v 1.8 2010/05/30 07:10:06 pibero Exp $
+// $Id: StjBEMCMuDst.h,v 1.9 2010/06/03 21:30:44 pibero Exp $
 #ifndef STJBEMCMUDST_H
 #define STJBEMCMUDST_H
 
@@ -26,8 +26,6 @@ private:
 
   StEmcCollection* findEmcCollection();
 
-  StEmcADCtoEMaker* _adc2e;
-
   StBemcTables* _bemcTables;
 
   static StjTowerEnergyList _list;
@@ -37,7 +35,6 @@ private:
 
   StjTowerEnergyList getlist();
   bool isNewEvent();
-  bool isCorrupted() const;
 
 };
 
