@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.11 2010/06/04 16:11:28 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.12 2010/06/04 16:12:19 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -57,7 +57,7 @@ void TxEventLogWeb::writeDown(const std::string& message)
     select(0, 0, 0, 0, &tv);
   }
 #if 1  
-  printf("%s <<%s>> \n", "--------------- - - - - - - - ------------------",httpstring.c_str());
+  printf("%s <<%s>> \n", "--------------- - - ucmlogging - - - - - ------------------",httpstring.c_str());
 #endif
 }
 	// --- 
