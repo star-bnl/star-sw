@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.20 2010/04/15 20:23:05 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.21 2010/06/04 18:24:05 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -1380,6 +1380,7 @@ int  TxUCMCollector::queryTableSize(const char *tableName, const char *where)
 {
    int size = 0;
    string whichTask;
+   bool countSelectedEvents = false;
    if ( !where ) { 
       if ((string(tableName) == "Tasks" ) && (msgHashMap.find(fgRequester) != msgHashMap.end())) {
          whichTask=string("requesterID='")+ msgHashMap[fgRequester]+"' ";
@@ -1388,11 +1389,14 @@ int  TxUCMCollector::queryTableSize(const char *tableName, const char *where)
          tableName = jobTableName().c_str();
       } else if (string(tableName) == "Events" ) {
          tableName = eventTableName().c_str();
+         countSelectedEvents =  (fDbJobID >= 0 );
       }
    }
    string query = string("select count(*) from `")+ tableName + "`";
    if (where &&where[0]) {
        query += string(" WHERE ") + where;
+   } else if (countSelectedEvents) {
+       query += string(" WHERE ") + string("jobID='")+ itoa(fDbJobID)+"' ";
    }
    execute (query);
    if (fResult) {
