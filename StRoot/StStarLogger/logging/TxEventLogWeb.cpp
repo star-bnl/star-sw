@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.10 2010/06/03 22:32:28 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.11 2010/06/04 16:11:28 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -56,7 +56,9 @@ void TxEventLogWeb::writeDown(const std::string& message)
     tv.tv_usec = (milliSec % 1000) * 1000;
     select(0, 0, 0, 0, &tv);
   }
-//  printf("%s %s \n", "----------------------------------------",httpstring.c_str());
+#if 1  
+  printf("%s <<%s>> \n", "--------------- - - - - - - - ------------------",httpstring.c_str());
+#endif
 }
 	// --- 
 TXEVENT_DEFAULT_IMPLEMENTAION(TxEventLogWeb)	
