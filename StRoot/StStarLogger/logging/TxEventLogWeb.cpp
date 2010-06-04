@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.12 2010/06/04 16:12:19 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.13 2010/06/04 16:20:39 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -10,6 +10,7 @@
 #include "TxEventLogWeb.h"
 
 #include <string>
+#include <ctime>
 #include <cassert>
 
 using namespace TxLogging;
@@ -56,8 +57,14 @@ void TxEventLogWeb::writeDown(const std::string& message)
     tv.tv_usec = (milliSec % 1000) * 1000;
     select(0, 0, 0, 0, &tv);
   }
-#if 1  
-  printf("%s <<%s>> \n", "--------------- - - ucmlogging - - - - - ------------------",httpstring.c_str());
+#if 1 
+  time_t rawtime;
+  struct tm * timeinfo;
+
+  time ( &rawtime );
+  timeinfo = localtime ( &rawtime );
+ 
+  printf("%s: %s <<%s>> \n", asctime (timeinfo),"--------------- - - ucmlogging - - - - - ------------------",httpstring.c_str());
 #endif
 }
 	// --- 
