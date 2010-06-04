@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.12 2010/06/03 20:42:58 hmasui Exp $
+// $Id: bfcMixer_Tpx.C,v 1.13 2010/06/04 16:58:59 hmasui Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -29,10 +29,10 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
                   const Char_t* type = "FlatPt"){
   // production chains for P08ic - p+p, Au+Au 9 GeV and d+Au
   TString prodP08iepp("DbV20081117 B2008a ITTF IAna ppOpt l3onl emcDY2 fpd ftpc trgd ZDCvtx NosvtIT NossdIT Corr4 OSpaceZ2 OGridLeak3D VFMCE -hitfilt");
-  TString prodP08icpp("DbV20080712,pp2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine,VFMCE,TpxClu -VFPPV -hitfilt");
-  TString prodP08icAuAu9("DbV20080709 P2008 ITTF VFMCE -hitfilt");
-  TString prodP08icAuAu200("DbV20070101 P2008 ITTF VFMCE -hitfilt");  
-  TString prodP08icdAu("DbV20080712 P2008 ITTF OSpaceZ2 OGridLeak3D beamLine, VFMCE TpxClu -VFMinuit -hitfilt");
+//  TString prodP08icpp("DbV20080712,pp2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine,VFMCE,TpxClu -VFPPV -hitfilt");
+//  TString prodP08icAuAu9("DbV20080709 P2008 ITTF VFMCE -hitfilt");
+//  TString prodP08icAuAu200("DbV20070101 P2008 ITTF VFMCE -hitfilt");  
+//  TString prodP08icdAu("DbV20080712 P2008 ITTF OSpaceZ2 OGridLeak3D beamLine, VFMCE TpxClu -VFMinuit -hitfilt");
   TString prodP08iedAu("DbV20090213 P2008 ITTF OSpaceZ2 OGridLeak3D beamLine VFMCE TpxClu -VFMinuit -hitfilt");
   TString prodP10iapp("DbV20091001 pp2009c TpcRS ITTF OSpaceZ2 OGridLeak3D beamLine, VFMCE TpcRS -VFMinuit -hitfilt");
   TString geomP08ic("ry2008");
