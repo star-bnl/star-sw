@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.13 2010/06/04 16:20:39 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogWeb.cpp,v 1.14 2010/06/04 19:18:25 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -57,7 +57,7 @@ void TxEventLogWeb::writeDown(const std::string& message)
     tv.tv_usec = (milliSec % 1000) * 1000;
     select(0, 0, 0, 0, &tv);
   }
-#if 1 
+#if 0
   time_t rawtime;
   struct tm * timeinfo;
 
