@@ -25,7 +25,8 @@ STAR_USM_BASE_DIR = StRoot/logging
 INCDIRS   = . $(STAR_USM_BASE_DIR)          \
               $(STAR)/StRoot                \
               $(OPTSTAR)/include            \
-              $(OPTSTAR)/include/mysql
+              /usr/include/mysql
+#              $(OPTSTAR)/include/mysql
 
 CFLAGS    = -Wall -c  $(INCDIRS:%=-I%) 
 CXXFLAGS  = $(CFLAGS)
