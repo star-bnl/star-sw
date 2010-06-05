@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJetMaker.h,v 1.57 2010/04/24 04:15:27 pibero Exp $
+// $Id: StJetMaker.h,v 1.58 2010/06/05 03:13:13 pibero Exp $
 #ifndef STJETMAKER_H
 #define STJETMAKER_H
 
@@ -12,6 +12,7 @@ class StFourPMaker;
 class StJetPars;
 class StppAnaPars;
 class StJets;
+class StJetEvent;
 class StjeParticleCollector;
 class StjeJetFinderRunner;
 class StjeJetCuts;
@@ -44,11 +45,12 @@ public:
   void addAnalyzer(const StppAnaPars* anapars, StJetPars* jetpars, StFourPMaker* fourPMaker, const char* name);
 
   StJets* getStJets(const char* branchName = "ConeJets12") const;
+  StJetEvent* getStJetEvent(const char* branchname = "ConeJets12") const;
 
   StjeTreeWriter* getTreeWriter() { return _treeWriter; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.57 2010/04/24 04:15:27 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StJetMaker.h,v 1.58 2010/06/05 03:13:13 pibero Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
   struct StJetBranch {
