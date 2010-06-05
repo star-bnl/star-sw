@@ -1,4 +1,4 @@
-// $Id: StJetMaker.cxx,v 1.74 2010/04/24 04:15:27 pibero Exp $
+// $Id: StJetMaker.cxx,v 1.75 2010/06/05 03:13:13 pibero Exp $
 
 // ROOT
 #include "TTree.h"
@@ -6,6 +6,7 @@
 // STAR
 #include "StJetFinder/StProtoJet.h"
 #include "StSpinPool/StJets/StJets.h"
+#include "StSpinPool/StJetEvent/StJetEvent.h"
 
 // Local
 #include "StjeParticleCollector.h"
@@ -96,6 +97,16 @@ StJets* StJetMaker::getStJets(const char* branchName) const
   if (jetTree) {
     TBranch* branch = jetTree->GetBranch(branchName);
     if (branch) return *(StJets**)branch->GetAddress();
+  }
+  return 0;
+}
+
+StJetEvent* StJetMaker::getStJetEvent(const char* branchName) const
+{
+  TTree* jetTree = _treeWriter->jetTree();
+  if (jetTree) {
+    TBranch* branch = jetTree->GetBranch(branchName);
+    if (branch) return *(StJetEvent**)branch->GetAddress();
   }
   return 0;
 }
