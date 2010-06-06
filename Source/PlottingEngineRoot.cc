@@ -291,6 +291,7 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetPaperSize(26, 20);
   garfieldStyle->SetFuncWidth(2);
   garfieldStyle->SetHistLineColor(kOrange);
+  garfieldStyle->SetPalette(1, 0);
   
   garfieldStyle->cd();  
     

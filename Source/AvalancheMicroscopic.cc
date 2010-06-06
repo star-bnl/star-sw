@@ -417,6 +417,7 @@ AvalancheMicroscopic::AvalancheElectron(
   // Scattering angles
   double phi, cphi, sphi;
   double ctheta, stheta;
+  double ctheta0, stheta0;
   double arg;
 
   // Secondary electron energy
@@ -811,8 +812,8 @@ AvalancheMicroscopic::AvalancheElectron(
             if (hasSecondaryHistogram) histSecondary->Fill(esec);
             // Randomise secondary electron direction
             phi = TwoPi * RndmUniform();
-            double ctheta0 = 1. - 2. * RndmUniform();
-            double stheta0 = sqrt(1. - ctheta0 * ctheta0);
+            ctheta0 = 1. - 2. * RndmUniform();
+            stheta0 = sqrt(1. - ctheta0 * ctheta0);
             // Add the secondary electron to the stack
             newElectron = stack[iEl];
             newElectron.x0 = x; newElectron.x = x;
@@ -863,8 +864,8 @@ AvalancheMicroscopic::AvalancheElectron(
                   if (typeDxc == -1) {
                     // Additional electron (Penning ionisation)
                     phi = TwoPi * RndmUniform();
-                    double ctheta0 = 1. - 2 * RndmUniform();
-                    double stheta0 = sqrt(1. - ctheta0 * ctheta0);
+                    ctheta0 = 1. - 2 * RndmUniform();
+                    stheta0 = sqrt(1. - ctheta0 * ctheta0);
                     // Add the secondary electro to the stack
                     newElectron = stack[iEl];
                     newElectron.x0 = x; newElectron.x = x;
@@ -892,8 +893,8 @@ AvalancheMicroscopic::AvalancheElectron(
               // Penning ionisation     
               // Randomise secondary electron direction
               phi = TwoPi * RndmUniform();
-              double ctheta0 = 1. - 2. * RndmUniform();
-              double stheta0 = sqrt(1. - ctheta0 * ctheta0);
+              ctheta0 = 1. - 2. * RndmUniform();
+              stheta0 = sqrt(1. - ctheta0 * ctheta0);
               // Add the secondary electron to the stack
               newElectron = stack[iEl];
               newElectron.x0 = x; newElectron.x = x;

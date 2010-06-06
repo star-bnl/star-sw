@@ -145,7 +145,7 @@ FieldView::PlotContour() {
   fCont.GetXaxis()->SetTitle(xLabel);
   fCont.GetYaxis()->SetTitle(yLabel);
   fCont.SetTitle("Contours of V");
-  fCont.Draw("cont1");
+  fCont.Draw("contz");
 
 }
 
