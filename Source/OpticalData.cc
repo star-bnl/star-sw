@@ -1,5 +1,8 @@
 #include <iostream>
+#include <iomanip>
+
 #include "OpticalData.hh"
+#include "FundamentalConstants.hh"
 
 namespace Garfield {
 
@@ -10,6 +13,8 @@ OpticalData::SetMaterial(std::string material) {
     Argon();
   } else if (material == "CH4") {
     Methane();
+  } else if (material == "C2H2") {
+    Acetylene();
   } else if (material == "iC4H10") {
     Isobutane();
   } else {
@@ -19,6 +24,14 @@ OpticalData::SetMaterial(std::string material) {
     return false;
   }
 
+  if (debug) {
+    std::cout << "OpticalData::SetMaterial:" << std::endl;
+    std::cout << "    Energy [eV]    PACS [cm2]" << std::endl;
+    const int nEntries = energy.size();
+    for (int j = 0; j < nEntries; ++j) {
+      std::cout << energy[j] << "    " << pacs[j] << std::endl;
+    }
+  }
   hasData = true;
   return true;
 
@@ -207,6 +220,9 @@ OpticalData::Methane() {
   emin = energy[0];
   emax = energy.back(); 
 
+  // Photoionization yield
+  // Source: 
+  // K. Kameta et al., J. El. Spectr. Rel. Phen. 123 (2002), 225-238
   const int nYieldEntries = 11;
   double xion[nYieldEntries] = {12.65,
     12.87, 13.02, 13.24, 13.88, 14.66, 
@@ -215,6 +231,90 @@ OpticalData::Methane() {
   double yion[nYieldEntries] = {0.,
     0.01226, 0.02900, 0.08853, 0.3693, 0.7024, 
     0.8190,  0.9262,  0.9715,  0.9883, 1.};
+
+  energyIon.clear(); energyIon.resize(nYieldEntries);
+  yieldIon.clear();  yieldIon.resize(nYieldEntries);
+  for (int i = nYieldEntries; i--;) {
+    energyIon[i] = xion[i];
+    yieldIon[i] = yion[i];
+  }
+  ionmin = energyIon[0];
+  ionmax = energyIon.back();
+
+}
+
+void 
+OpticalData::Acetylene() {
+
+  const int nEntriesA = 27;
+
+  const double xc2h2A[nEntriesA] = {
+    446, 437, 434, 428, 425, 419, 418, 408, 400, 394,
+    388, 380, 372, 366, 358, 352, 346, 309, 230, 160,
+    118, 108,  99,  88,  79,  69,  59
+  };    
+
+  const double yc2h2A[nEntriesA] = {
+    103, 383, 288, 314, 212, 312, 170, 293, 243, 239,
+    252, 266, 230, 239, 245, 251, 345, 202, 175, 115,
+     77,  60,  58,  55,  59,  66,  89
+  };
+ 
+  const int nEntriesB = 41;
+
+  const double xc2h2B[nEntriesB] = {
+    371, 364, 361, 359, 356, 355, 353, 351, 349, 347,
+    343, 339, 331, 325, 321, 319, 316, 314, 311, 308,
+    305, 303, 301, 299, 296, 293, 291, 286, 281, 277,
+    273, 269, 256, 248, 231, 203, 175, 150, 134, 126,
+    101
+  };
+
+  const double yc2h2B[nEntriesB] = {
+    241, 253, 256, 252, 243, 236, 242, 253, 267, 261,
+    253, 257, 247, 229, 208, 191, 191, 186, 178, 177,
+    173, 179, 186, 179, 171, 179, 187, 188, 184, 199,
+    195, 203, 219, 229, 235, 241, 256, 264, 266, 269,
+    286
+  };
+
+  energy.clear(); energy.resize(nEntriesA + nEntriesB);
+  eps1.clear(); eps1.resize(nEntriesA + nEntriesB);
+  eps2.clear(); eps2.resize(nEntriesA + nEntriesB);
+  pacs.clear(); pacs.resize(nEntriesA + nEntriesB);
+
+  for (int i = 0; i < nEntriesA; ++i) {
+    energy[i] = TwoPi * HbarC / 
+                ((90. + (xc2h2A[i] - 46.) * 10. / (239. - 84.)) * 1.e-7);
+    pacs[i] = 1.e-18 * 50. * (514. - yc2h2A[i]) / (514. - 23.);
+  }
+
+  for (int i = 0; i < nEntriesB; ++i) { 
+    energy[nEntriesA + i] = TwoPi * HbarC / 
+                ((50. + (xc2h2B[i] - 84.) * 30. / (298. - 84.)) * 1.e-7);
+    pacs[nEntriesA + i] = 1.e-18 * 50. * (389. - yc2h2B[i]) / (389. - 207.);
+  }
+
+  emin = energy[0];
+  emax = energy.back(); 
+
+  // Photoionization yield
+  // Source:
+  // M. Ukai et al., J. Chem. Phys. 95 (1991), 4142-4153
+  const int nYieldEntries = 40;
+  double xion[nYieldEntries] = {
+    11.05, 11.06, 11.38, 11.56, 11.99, 12.56, 12.88, 13.23, 13.65, 13.82,
+    14.13, 14.35, 14.49, 14.63, 14.84, 15.06, 15.23, 15.37, 15.48, 15.51,
+    15.72, 15.83, 16.00, 16.21, 16.56, 16.67, 16.74, 16.95, 17.13, 17.27,
+    17.41, 17.62, 17.87, 18.33, 18.68, 19.00, 19.35, 19.67, 19.98, 20.16
+  };
+                 
+  double yion[nYieldEntries] = {
+    0.009, 0.153, 0.290, 0.486, 0.700, 0.794, 0.794, 0.780, 0.716, 0.678, 
+    0.632, 0.662, 0.702, 0.750, 0.783, 0.826, 0.817, 0.814, 0.799, 0.789,
+    0.796, 0.780, 0.769, 0.751, 0.766, 0.787, 0.812, 0.841, 0.883, 0.896,
+    0.910, 0.924, 0.940, 0.940, 0.949, 0.967, 0.981, 0.988, 0.997, 1.
+  };
 
   energyIon.clear(); energyIon.resize(nYieldEntries);
   yieldIon.clear();  yieldIon.resize(nYieldEntries);
@@ -262,7 +362,7 @@ OpticalData::Isobutane() {
   energyIon.clear();
   yieldIon.clear();
   ionmin = 10.67;
-  ionmax = 10.67;
+  ionmax = 10.66;
 
 
 }

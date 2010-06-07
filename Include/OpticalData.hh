@@ -21,6 +21,9 @@ class OpticalData {
     bool GetPhotoabsorptionCrossSection(const double e, double& cs);
     bool GetPhotoionisationYield(const double e, double& eta);
 
+    void EnableDebugging()  {debug = true;}
+    void DisableDebugging() {debug = false;}
+
   private:
 
     bool hasData;
@@ -40,6 +43,7 @@ class OpticalData {
 
     void Argon();
     void Methane();
+    void Acetylene();
     void Isobutane();
  
 };
