@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.100 2010/05/04 21:33:31 fine Exp $
+// $Id: StDraw3D.cxx,v 1.101 2010/06/08 21:14:13 fine Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -407,7 +407,7 @@ void  StDraw3D::Clear(Option_t *opt)
    // Clear the view
    TVirtualPad *pad = Pad();
    if (pad) {
-      pad->Clear(opt);
+      pad->Clear();
       fTopVolume = 0;
       if ( !strcmp(opt,"update") ) Update();
    } else if ( TVirtualViewer3D *viewer = Viewer() ) {
