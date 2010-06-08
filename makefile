@@ -15,6 +15,7 @@ OBJS = \
 	$(OBJECT)/Track.o \
 	$(OBJECT)/TrackHeed.o \
 	$(OBJECT)/TrackBichsel.o \
+	$(OBJECT)/TrackSimple.o \
 	$(OBJECT)/ComponentBase.o \
 	$(OBJECT)/ComponentConstant.o \
 	$(OBJECT)/ComponentUser.o \
@@ -54,6 +55,8 @@ $(OBJECT)/Track.o: $(SOURCE)/Track.cc $(INCLUDE)/Track.hh
 $(OBJECT)/TrackHeed.o: $(SOURCE)/TrackHeed.cc $(INCLUDE)/TrackHeed.hh $(INCLUDE)/Track.hh $(SOURCE)/Track.cc
 	$(CC) $(CFLAGS) $< -o $@       
 $(OBJECT)/TrackBichsel.o: $(SOURCE)/TrackBichsel.cc $(INCLUDE)/TrackBichsel.hh $(INCLUDE)/Track.hh $(SOURCE)/Track.cc
+	$(CC) $(CFLAGS) $< -o $@       
+$(OBJECT)/TrackSimple.o: $(SOURCE)/TrackSimple.cc $(INCLUDE)/TrackSimple.hh $(INCLUDE)/Track.hh $(SOURCE)/Track.cc
 	$(CC) $(CFLAGS) $< -o $@        
 $(OBJECT)/ComponentBase.o: $(SOURCE)/ComponentBase.cc $(INCLUDE)/ComponentBase.hh $(INCLUDE)/Medium.hh
 	$(CC) $(CFLAGS) $< -o $@
