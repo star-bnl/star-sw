@@ -43,8 +43,16 @@ public:
           void   DoCalib() { Calibmode = kTRUE; DoQAmode(); DoNtuple(); }
           float  EvalCalib(TDirectory* hdir=0);
 
+          void   setVtxEmcMatch(UInt_t x) { vtxEmcMatch = x; }
+          void   setVtxTofMatch(UInt_t x) { vtxTofMatch = x; }
+          void   setVtxMinTrks(UInt_t x) { vtxMinTrks = x; }
+
+          void   setMinTpcHits(UInt_t x) { minTpcHits = x; }
+          void   setReqEmcMatch(Bool_t match = kTRUE) { reqEmcMatch = match; }
+          void   setReqTofMatch(Bool_t match = kTRUE) { reqTofMatch = match; }
+
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.11 2010/01/28 18:53:30 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.12 2010/06/09 20:24:53 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
@@ -68,6 +76,12 @@ protected:
   Bool_t doReset;
   Bool_t doGaps;
   UInt_t inGapRow;
+  UInt_t vtxEmcMatch;
+  UInt_t vtxTofMatch;
+  UInt_t vtxMinTrks;
+  UInt_t minTpcHits;
+  Bool_t reqEmcMatch;
+  Bool_t reqTofMatch;
 
   int HN;
   float MINTRACKS;
@@ -156,8 +170,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.11 2010/01/28 18:53:30 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.12 2010/06/09 20:24:53 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.12  2010/06/09 20:24:53  genevb
+// Modify interface to allow EMC and TOF matching requirements (needs implementation)
+//
 // Revision 1.11  2010/01/28 18:53:30  genevb
 // Remove unneeded members
 //

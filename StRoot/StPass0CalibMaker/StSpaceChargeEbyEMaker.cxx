@@ -61,6 +61,8 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
     event(0), Calibmode(kFALSE),
     PrePassmode(kFALSE), PrePassdone(kFALSE), QAmode(kFALSE), doNtuple(kFALSE),
     doReset(kTRUE), doGaps(kFALSE), inGapRow(0),
+    vtxEmcMatch(1), vtxTofMatch(0), vtxMinTrks(5),
+    minTpcHits(25), reqEmcMatch(kFALSE), reqTofMatch(kFALSE),
     m_ExB(0),
     scehist(0), timehist(0), myhist(0), myhistN(0), myhistP(0),
     myhistE(0), myhistW(0), dczhist(0), dcehist(0), dcphist(0),
@@ -180,7 +182,10 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 
   // Select the highest ranked vertex + some quality cuts
   StPrimaryVertex* pvtx = event->primaryVertex();
-  if (!pvtx || pvtx->numberOfDaughters()<5 || pvtx->numMatchesWithBEMC()<1) return kStOk;
+  if (!pvtx ||
+      (pvtx->numberOfDaughters()  < vtxMinTrks)   ||
+      (pvtx->numMatchesWithBEMC() < vtxEmcMatch)  ||
+      (pvtx->numMatchesWithBTOF() < vtxTofMatch)) return kStOk;
   StVertexFinderId vid = pvtx->vertexFinderId();
   float min_rank = -1e6;
   switch (vid) {
@@ -261,7 +266,11 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           // Multiple silicon hits destroy sDCA <-> SpaceCharge correlation,
           // and single hit in SVT is unreliable. Only good config is NO SVT!
           if (map.hasHitInDetector(kSvtId)) continue;
-          if (map.numberOfHits(kTpcId) < 25) continue;
+          if (map.numberOfHits(kTpcId) < minTpcHits) continue;
+
+          if (reqEmcMatch) {} // to be defined
+          if (reqTofMatch) {} // to be defined
+
           StTrackGeometry* triGeom = tri->geometry();
 
           StThreeVectorF xvec = triGeom->origin();
@@ -1010,8 +1019,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.29 2010/02/25 21:50:18 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.30 2010/06/09 20:24:53 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.30  2010/06/09 20:24:53  genevb
+// Modify interface to allow EMC and TOF matching requirements (needs implementation)
+//
 // Revision 1.29  2010/02/25 21:50:18  genevb
 // Pass sector number to StMagUtilities, correct unsigned int usage
 //
