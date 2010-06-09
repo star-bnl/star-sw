@@ -34,6 +34,7 @@ class FieldView {
     void Rotate(double angle);
 
     void PlotContour();
+    void PlotSurface();
 
     double EvaluatePotential(double* pos, double* par);
 

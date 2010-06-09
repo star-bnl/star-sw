@@ -1270,8 +1270,9 @@ MediumMagboltz86::Mixer() {
     }
   }
   if (debug) {
-    std::cout << "Lowest ionisation threshold in the mixture: " << minIonPot
-              << " eV" << std::endl;
+    std::cout << "MediumMagboltz86::Mixer:" << std::endl;
+    std::cout << "    Lowest ionisation threshold in the mixture: " 
+              << minIonPot << " eV" << std::endl;
   }
 
   for (int iE = nEnergySteps; iE--;) {
@@ -1321,12 +1322,12 @@ MediumMagboltz86::Mixer() {
   for (int j = nTerms; j--;) nCollisionsDetailed[j] = 0;
   
   if (debug) {
-    std::cout << "Magboltz86::Mixer:" << std::endl;
+    std::cout << "MediumMagboltz86::Mixer:" << std::endl;
     std::cout << "    Energy [eV]    Collision Rate [ns-1]" << std::endl;
     for (int i = 0; i < 8; ++i) { 
       std::cout << "    " << std::setw(10) 
                 << (2 * i + 1) * eFinal / 16
-                << "    " << std::setw(18)
+                << "    " << std::setw(18) << std::setprecision(2)
                 << cfTot[(i + 1) * nEnergySteps / 16] << std::endl;
     }
   }

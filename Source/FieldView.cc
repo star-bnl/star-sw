@@ -15,6 +15,7 @@ FieldView::FieldView() :
   pxmin(-1.), pymin(-1.), pxmax(1.), pymax(1.),
   fmin(0.), fmax(100.),
   nContours(nMaxContours),
+  canvas(0),
   fCont("fCont", this, &FieldView::EvaluatePotential, 
         pxmin, pxmax, pymin, pymax, 0, "FieldView", "EvaluatePotential") {
 
@@ -22,20 +23,16 @@ FieldView::FieldView() :
 
 }
 
-FieldView::FieldView(Sensor* s):
+FieldView::FieldView(Sensor* s) :
   debug(false), sensor(s),
   pxmin(-1.), pymin(-1.), pxmax(1.), pymax(1.),
   fmin(0.), fmax(100.),
   nContours(nMaxContours),
+  canvas(0),
   fCont("fCont", this, &FieldView::EvaluatePotential, 
         pxmin, pxmax, pymin, pymax, 0, "FieldView", "EvaluatePotential") {
-  
-  canvas = new TCanvas();
-  canvas->SetTitle("Field View");
- 
-  // Set default projection
-  SetDefaultProjection();
 
+  SetDefaultProjection();
   if (sensor != 0) {
     // Get default range
     bool ok = sensor->GetArea(pxmin, pymin, pzmin, pxmax, pymax, pzmax);
@@ -140,12 +137,33 @@ FieldView::PlotContour() {
       printf("                Level %d = %g\n", i, level[i]);
     }
   }
-  fCont.SetNpx(50);
-  fCont.SetNpy(50);
+  fCont.SetNpx(100);
+  fCont.SetNpy(100);
   fCont.GetXaxis()->SetTitle(xLabel);
   fCont.GetYaxis()->SetTitle(yLabel);
   fCont.SetTitle("Contours of V");
-  fCont.Draw("contz");
+  fCont.Draw("CONT4Z");
+  canvas->Update();
+
+}
+
+void 
+FieldView::PlotSurface() {
+
+  // Setup the canvas
+  if (canvas == 0) {
+    canvas = new TCanvas();
+    canvas->SetTitle("Field View");
+  }
+  canvas->cd();
+  canvas->Range(pxmin, pymin, pxmax, pymax);
+
+  fCont.SetRange(pxmin, pymin, pxmax, pymax);
+  fCont.GetXaxis()->SetTitle(xLabel);
+  fCont.GetYaxis()->SetTitle(yLabel);
+  fCont.SetTitle("Surface plot of V");
+  fCont.Draw("SURF7");
+  canvas->Update();
 
 }
 
@@ -174,8 +192,8 @@ FieldView::EvaluatePotential(double* pos, double* par) {
   if (sensor == 0) return 0.;
 
   // Compute the field
-  double ex, ey, ez, volt;
-  int status;
+  double ex = 0., ey = 0., ez = 0., volt = 0.;
+  int status = 0;
   Medium* medium;
   const double xpos = project[0][0] * pos[0] + project[1][0] * pos[1] + 
                       project[2][0];
@@ -192,7 +210,7 @@ FieldView::EvaluatePotential(double* pos, double* par) {
     printf("    E = (%g, %g, %g), V = %g, status = %d\n",
            ex, ey, ez, volt, status);
   }
-    
+  
   // Return the potential
   return volt;
     

@@ -603,7 +603,7 @@ ComponentAnsys123::ElectricField(const double x, const double y, const double z,
                                  double& ex, double& ey, double& ez,
                                  Medium*& m, int& status) {
 
-  double v;
+  double v = 0.;
   ElectricField(x, y, z, ex, ey, ez, v, m, status);
 
 }
@@ -625,7 +625,7 @@ ComponentAnsys123::ElectricField(
                  rcoordinate, rotation);
 
   // Initial values
-  ex = ey = ez = volt = 0;
+  ex = ey = ez = volt = 0.;
   status = 0;
   m = 0;
   
