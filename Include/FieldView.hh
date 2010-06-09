@@ -68,9 +68,10 @@ class FieldView {
     TCanvas* canvas;
 
     // Contour function
-    TF2 fCont;
+    TF2* fCont;
     
-    void Labels();    
+    void Labels();
+    void CreateFunction(); 
 
 };
 

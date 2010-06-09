@@ -1,7 +1,10 @@
+#include <iostream>
+#include <sstream>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 
+#include <TROOT.h>
 #include <TAxis.h> 
 #include <TCanvas.h>
 #include <TF2.h> 
@@ -15,9 +18,7 @@ FieldView::FieldView() :
   pxmin(-1.), pymin(-1.), pxmax(1.), pymax(1.),
   fmin(0.), fmax(100.),
   nContours(nMaxContours),
-  canvas(0),
-  fCont("fCont", this, &FieldView::EvaluatePotential, 
-        pxmin, pxmax, pymin, pymax, 0, "FieldView", "EvaluatePotential") {
+  canvas(0), fCont(0) {
 
   SetDefaultProjection();
 
@@ -28,9 +29,7 @@ FieldView::FieldView(Sensor* s) :
   pxmin(-1.), pymin(-1.), pxmax(1.), pymax(1.),
   fmin(0.), fmax(100.),
   nContours(nMaxContours),
-  canvas(0),
-  fCont("fCont", this, &FieldView::EvaluatePotential, 
-        pxmin, pxmax, pymin, pymax, 0, "FieldView", "EvaluatePotential") {
+  canvas(0), fCont(0) {
 
   SetDefaultProjection();
   if (sensor != 0) {
@@ -45,7 +44,7 @@ FieldView::FieldView(Sensor* s) :
 FieldView::~FieldView() {
 
   if (canvas != 0) delete canvas;
-
+  if (fCont != 0) delete fCont;
 }
 
 void
@@ -118,7 +117,9 @@ FieldView::PlotContour() {
   canvas->cd();
   canvas->Range(pxmin, pymin, pxmax, pymax);
 
-  fCont.SetRange(pxmin, pymin, pxmax, pymax);
+  if (fCont == 0) CreateFunction();
+
+  fCont->SetRange(pxmin, pymin, pxmax, pymax);
 
   double level[nMaxContours];
   for (int i = 0; i < nContours; ++i) {
@@ -128,7 +129,7 @@ FieldView::PlotContour() {
       level[i] = (fmax + fmin) / 2.;
     }
   }
-  fCont.SetContour(nContours, level);
+  fCont->SetContour(nContours, level);
   
   if (debug) {
     printf("FieldView::PlotContour:\n");
@@ -137,12 +138,12 @@ FieldView::PlotContour() {
       printf("                Level %d = %g\n", i, level[i]);
     }
   }
-  fCont.SetNpx(100);
-  fCont.SetNpy(100);
-  fCont.GetXaxis()->SetTitle(xLabel);
-  fCont.GetYaxis()->SetTitle(yLabel);
-  fCont.SetTitle("Contours of V");
-  fCont.Draw("CONT4Z");
+  fCont->SetNpx(100);
+  fCont->SetNpy(100);
+  fCont->GetXaxis()->SetTitle(xLabel);
+  fCont->GetYaxis()->SetTitle(yLabel);
+  fCont->SetTitle("Contours of V");
+  fCont->Draw("CONT4Z");
   canvas->Update();
 
 }
@@ -157,14 +158,34 @@ FieldView::PlotSurface() {
   }
   canvas->cd();
   canvas->Range(pxmin, pymin, pxmax, pymax);
+  
+  if (fCont == 0) CreateFunction();
 
-  fCont.SetRange(pxmin, pymin, pxmax, pymax);
-  fCont.GetXaxis()->SetTitle(xLabel);
-  fCont.GetYaxis()->SetTitle(yLabel);
-  fCont.SetTitle("Surface plot of V");
-  fCont.Draw("SURF7");
+  fCont->SetRange(pxmin, pymin, pxmax, pymax);
+  fCont->GetXaxis()->SetTitle(xLabel);
+  fCont->GetYaxis()->SetTitle(yLabel);
+  fCont->SetTitle("Surface plot of V");
+  fCont->Draw("SURF7");
   canvas->Update();
 
+}
+
+void
+FieldView::CreateFunction() {
+
+  int idx = 0;
+  std::string fname = "fCont_0";
+  while (gROOT->GetListOfFunctions()->FindObject(fname.c_str())) {
+    ++idx;
+    std::stringstream ss;
+    ss << "fCont_";
+    ss  << idx;
+    fname = ss.str();
+  }
+
+  fCont = new TF2(fname.c_str(), this, &FieldView::EvaluatePotential, 
+        pxmin, pxmax, pymin, pymax, 0, "FieldView", "EvaluatePotential");
+ 
 }
 
 void 
