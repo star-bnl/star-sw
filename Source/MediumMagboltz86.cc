@@ -1327,7 +1327,7 @@ MediumMagboltz86::Mixer() {
     for (int i = 0; i < 8; ++i) { 
       std::cout << "    " << std::setw(10) 
                 << (2 * i + 1) * eFinal / 16
-                << "    " << std::setw(18) << std::setprecision(2)
+                << "    " << std::setw(18) 
                 << cfTot[(i + 1) * nEnergySteps / 16] << std::endl;
     }
   }
