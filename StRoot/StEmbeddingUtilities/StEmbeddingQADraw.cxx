@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.18 2010/05/27 16:29:00 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.19 2010/06/10 14:51:25 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.19  2010/06/10 14:51:25  hmasui
+ * Added legend for each page
+ *
  * Revision 1.18  2010/05/27 16:29:00  hmasui
  * Remove / character from particle name
  *
@@ -646,15 +649,35 @@ TPaveText* StEmbeddingQADraw::drawHeader(const TString description,
 }
 
 //____________________________________________________________________________________________________
+void StEmbeddingQADraw::drawLegend(const UInt_t id, const TH1& hembed, const TH1& hreal, 
+    const Option_t* option, const Bool_t doSplit) const
+{
+  TLegend* leg = new TLegend(0, 0.2, 1, 0.8);
+  leg->SetFillColor(10);
+
+  // Use fixed font size
+  leg->SetTextFont(43);
+  leg->SetTextSize(15);
+
+  leg->AddEntry(&hembed, getEmbeddingParticleName(id, doSplit), option) ;
+  if(&hreal) leg->AddEntry(&hreal, getRealParticleName(id, doSplit), option) ;
+  leg->Draw();
+}
+
+//____________________________________________________________________________________________________
 const Char_t* StEmbeddingQADraw::getParticleName(const Int_t geantid) const
 {
   /// Get particle name
 
   /// Default input geantid = -1 --> return particle name for mGeantid
   const StParticleTable* table = StParticleTable::instance() ;
-  const StParticleDefinition* particle = (geantid<0)
-    ? table->findParticleByGeantId(mGeantId)
-    : table->findParticleByGeantId(geantid) ;
+  const Int_t id = (geantid<0) ? mGeantId : geantid ;
+  const StParticleDefinition* particle = table->findParticleByGeantId(id) ;
+
+  if(!particle){
+    Error("StEmbeddingQADraw::getParticleName", "Can't find particle geantid=%d in StParticleDefinition", id);
+    assert(0);
+  }
 
   /// Remove "/" from particle name (ex. J/Psi --> JPsi)
   /// Since particle name will be used for pdf filename, and "/" will be 
@@ -669,6 +692,52 @@ const Char_t* StEmbeddingQADraw::getParticleName(const Int_t geantid) const
   return name.Data() ;
 }
 
+//____________________________________________________________________________________________________
+const Char_t* StEmbeddingQADraw::getMcParticleName() const
+{
+  const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
+  const Int_t categoryId = getCategoryId() ;
+  const TString name(utility->getCategoryName(categoryId));
+  const TString parent( (utility->isContaminated(name)) ? "Parent " : "" ); 
+
+  return Form("%s%s (MC, geantid=%d)", parent.Data(), getParticleName(mGeantId), mGeantId);
+}
+
+//____________________________________________________________________________________________________
+const Char_t* StEmbeddingQADraw::getEmbeddingParticleName(const UInt_t id, const Bool_t doSplit) const
+{
+  if(id>=mDaughterGeantId.size()){
+    Error("StEmbeddingQADraw::getEmbeddingParticleName", "Unknown daughter particle index, id=%3d", id);
+    return "";
+  }
+
+  const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
+  const Int_t categoryId = getCategoryId() ;
+  const TString name(utility->getCategoryName(categoryId));
+
+  const TString daughter( (utility->isContaminated(name)) ? "Daughter " : "" ); 
+  const Int_t daughterId = mDaughterGeantId[id] ;
+
+  return (doSplit) ? Form("#splitline{%s%s}{(%s, geantid=%d)}", daughter.Data(), getParticleName(daughterId),
+      utility->getCategoryName(categoryId).Data(), daughterId)
+    : Form("%s%s (%s, geantid=%d)", daughter.Data(), getParticleName(daughterId),
+      utility->getCategoryName(categoryId).Data(), daughterId);
+}
+
+//____________________________________________________________________________________________________
+const Char_t* StEmbeddingQADraw::getRealParticleName(const UInt_t id, const Bool_t doSplit) const
+{
+  if(id>=mDaughterGeantId.size()){
+    Error("StEmbeddingQADraw::getRealParticleName", "Unknown daughter particle index, id=%3d", id);
+    return "";
+  }
+
+  const Int_t geantid = getGeantIdReal(id) ;
+  return (doSplit) ?  Form("#splitline{%s}{(%s, geantid=%d)}", getParticleName(geantid),
+      StEmbeddingQAUtilities::instance()->getCategoryName(getCategoryId(kFALSE)).Data(), geantid)
+    : Form("%s (%s, geantid=%d)", getParticleName(geantid),
+      StEmbeddingQAUtilities::instance()->getCategoryName(getCategoryId(kFALSE)).Data(), geantid);
+}
 
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQADraw::drawEvent() const
@@ -773,8 +842,6 @@ Bool_t StEmbeddingQADraw::drawVertices() const
   mCanvas->Update();
   mPDF->NewPage() ;
 
-  /// Print figures
-//  print(*mCanvas, "eventqa_vertices");
   //----------------------------------------------------------------------------------------------------
 
   delete header ;
@@ -847,9 +914,6 @@ Bool_t StEmbeddingQADraw::drawRunEventId() const
   mCanvas->Update();
 
   mPDF->NewPage() ;
-
-  /// Print figures
-//  print(*mCanvas, "eventqa_run_event_id");
   //----------------------------------------------------------------------------------------------------
 
   delete header ;
@@ -892,9 +956,6 @@ Bool_t StEmbeddingQADraw::drawNumberOfParticles() const
   mCanvas->Update();
 
   mPDF->NewPage() ;
-
-  /// Print figures
-//  print(*mCanvas, "eventqa_nparticles");
 
   delete header ;
 
@@ -999,9 +1060,6 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
   mCanvas->Update();
 
   mPDF->NewPage() ;
-
-  /// Print figures for 1D histograms
-//  print(*mCanvas, "mctrack");
 
   delete header ;
 
@@ -1116,15 +1174,10 @@ Bool_t StEmbeddingQADraw::drawGeantId() const
   leg->SetFillColor(10);
   leg->SetHeader("Particle informations");
 
-  const TString parent   = (isDecay()) ? "Parent " : "";
-  const TString daughter = (isDecay()) ? "Daughter " : "";
-
-  leg->AddEntry(hGeantIdMcExpected, Form("%s%s (%s, geantid=%d)", parent.Data(), getParticleName(), "MC", mGeantId), "L");
+  leg->AddEntry(hGeantIdMcExpected, getMcParticleName(), "L");
 
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
-    const Int_t daughterId = mDaughterGeantId[id];
-    leg->AddEntry( hGeantIdRecoExpected[id], Form("%s%s (%s, geantid=%d)", daughter.Data(),
-          getParticleName(daughterId), StEmbeddingQAUtilities::instance()->getCategoryName(getCategoryId()).Data(), daughterId), "L");
+    leg->AddEntry( hGeantIdRecoExpected[id], getEmbeddingParticleName(id), "L");
   }
   leg->Draw();
 
@@ -1132,9 +1185,6 @@ Bool_t StEmbeddingQADraw::drawGeantId() const
   mCanvas->Update();
 
   mPDF->NewPage() ;
-
-  /// Print figures
-//  print(*mCanvas, "geantid");
 
   delete header ;
 
@@ -1198,8 +1248,6 @@ Bool_t StEmbeddingQADraw::drawMomentum() const
     mPDF->NewPage() ;
 
     delete header ;
-
-//    print(*canvas, Form("recop_vs_momp_daughter%d", id));
   }
 
   return drawProjection2D("momentum");
@@ -1300,44 +1348,26 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name, const Bool_t isMC
   TH2* h2DMc = (TH2D*) getHistogram(Form("%s_0_%d", histoName.Data(), mGeantId));
 
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
-    TString headerTitle("");
-    if ( mIsEmbeddingOnly ){
-      headerTitle = Form("Projection of %s for each %s bin (Embedding:%s)", 
-            yTitle.Data(), xTitle.Data(), getParticleName(mDaughterGeantId[id]));
-
-      if(isMC && !isDecay()){
-        headerTitle = Form("Projection of %s for each %s bin (Embedding:%s, MC:%s)", 
-            yTitle.Data(), xTitle.Data(), getParticleName(mDaughterGeantId[id]), getParticleName(mGeantId));
-      }
-    }
-    else{
-      TString data("Real");
-      Int_t geantid = getGeantIdReal(id) ;
-      if(isMC && !isDecay()){
-        data    = "MC";
-        geantid = mGeantId ;
-      }
-
-      headerTitle = Form("Projection of %s for each %s bin (Embedding:%s, %s:%s)", 
-          yTitle.Data(), xTitle.Data(), getParticleName(mDaughterGeantId[id]), data.Data(), getParticleName(geantid));
-    }
-    TPaveText* header = initCanvas(headerTitle);
-
     TH2* h2DEmbed = (TH2D*) getHistogram(histoName, id, kTRUE);
     if(!h2DEmbed) return kFALSE ;
 
     TH2* h2DReal  = (TH2D*) getHistogram(histoName, id, kFALSE);
-//    if(!h2DReal) return kFALSE ;
 
     /// Define canvas Ndivisions
+    TString headerTitle(Form("Projection of %s for each %s bin", yTitle.Data(), xTitle.Data()));
+    TPaveText* header = initCanvas(headerTitle);
+
     Int_t npad = 0 ;
+    Int_t npadMax = 0 ;
     if( isProjectionX ){
-      mMainPad->Divide(2, 5);
-      npad = 10 ;
+      mMainPad->Divide(2, 3);
+      npad = 5 ;
+      npadMax = 6 ;
     }
     else{
-      mMainPad->Divide(2, 3);
+      mMainPad->Divide(2, 4);
       npad = 6 ;
+      npadMax = 8 ;
     }
 
     /// Get bins
@@ -1347,7 +1377,21 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name, const Bool_t isMC
     const Double_t binStep = 0.5 ;
     const Double_t binMin  = (isProjectionX) ? 0.0 : -1.5 ;
 
+    Int_t ipad = 1 ;
     for(Int_t ibin=0; ibin<nbins; ibin++){
+      if( ipad%(npad+1) == 0 ){
+        mCanvas->cd();
+        mCanvas->Update();
+        mPDF->NewPage();
+
+        if(header) delete header ;
+        header = initCanvas(headerTitle);
+ 
+        if( isProjectionX ) mMainPad->Divide(2, 3);
+        else                mMainPad->Divide(2, 4);
+        ipad = 1 ;
+      }
+
       const Double_t xMin = (isProjectionX && ibin==0) ? 0.2 : binMin + binStep * ibin ;
       const Double_t xMax = (isProjectionX && ibin==0) ? 0.5 : binMin + binStep * (ibin+1.0) ;
       const Int_t xMinBin = (isProjectionX) ? h2DEmbed->GetYaxis()->FindBin(xMin)     : h2DEmbed->GetXaxis()->FindBin(xMin) ;
@@ -1383,15 +1427,7 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name, const Bool_t isMC
         hMc->Scale( getNormalization(*hMc) );
       }
 
-//      Double_t yMax = 0.0 ;
-//      if ( hEmbed->Integral() < 100 ){
-//        yMax = (hReal) ? hReal->GetMaximum() : hEmbed->GetMaximum() ;
-//      }
-//      else{
-//        yMax = (hReal) ? TMath::Max(hEmbed->GetMaximum(), hReal->GetMaximum()) : hEmbed->GetMaximum() ;
-//      }
       hEmbed->SetMinimum(0.0);
-//      hEmbed->SetMaximum( yMax * 1.2 );
 
       if( isProjectionX ){
         hEmbed->SetTitle(Form("%1.1f < p_{T} < %1.1f (GeV/c)", xMin, xMax));
@@ -1402,7 +1438,7 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name, const Bool_t isMC
       }
       hEmbed->SetYTitle(Form("(1/N_{trk})dN/d%s", yTitle.Data()));
 
-      mMainPad->cd(ibin+1);
+      mMainPad->cd(ipad) ;
       hEmbed->Draw();
 
       /// Check if MC particle have decay daughters
@@ -1422,6 +1458,26 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name, const Bool_t isMC
         if(hReal) hReal->Draw("hsame");
       }
       hEmbed->Draw("same");
+
+      // Draw legend in the last pad in each Canvas
+      if ( ipad == 1 ){
+        mMainPad->cd(npadMax);
+        TLegend* leg = new TLegend(0.0, 0.2, 1.0, 0.8);
+        leg->SetFillColor(10);
+        leg->SetTextFont(43);
+        leg->SetTextSize(15);
+
+        leg->AddEntry(hEmbed, getEmbeddingParticleName(id, kTRUE), "L");
+        if(isMC && !isDecay()){
+          leg->AddEntry(hMc, getMcParticleName(), "L");
+        }
+        else{
+          if(hReal) leg->AddEntry(hReal, getRealParticleName(id, kTRUE), "L");
+        }
+        leg->Draw();
+      }
+
+      ipad++;
     }
 
     mCanvas->cd();
@@ -1429,14 +1485,7 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name, const Bool_t isMC
 
     mPDF->NewPage();
 
-    delete header ;
-
-//    if( mDaughterGeantId.size() == 1 ){
-//      print(*canvas, Form("%s", nameLower.Data()));
-//    }
-//    else{
-//      print(*canvas, Form("%s_daughter%d", nameLower.Data(), id));
-//    }
+    if(header) delete header ;
   }
 
   gStyle->SetPadRightMargin(0.15);
@@ -1535,7 +1584,7 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
     TLegend* leg = new TLegend(0.1, 0.25, 0.9, 0.9);
     leg->SetFillColor(10);
     leg->SetTextSize(0.05);
-    leg->AddEntry( hdEdxVsMomEmbed, Form("Embedding (%s)", getParticleName(mDaughterGeantId[id])), "L");
+    leg->AddEntry( hdEdxVsMomEmbed, getEmbeddingParticleName(id), "L");
     if( hdEdxVsMomReal )    leg->AddEntry( hdEdxVsMomReal, "Real data", "L");
     if( hdEdxVsMomPidReal ) leg->AddEntry( hdEdxVsMomPidReal, "Real data with PID cut (#sigma<2)", "L");
     leg->Draw();
@@ -1547,26 +1596,15 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
 
     delete header ;
 
-//    if( mDaughterGeantId.size() == 1 ){
-//      print(*canvas2D, Form("dedx_vs_mom%s_", momName.Data()));
-//    }
-//    else{
-//      print(*canvas2D, Form("dedx_vs_mom%s_daughter%d", momName.Data(), id));
-//    }
-
     //----------------------------------------------------------------------------------------------------
     /// 1D projections for each momentum bin
     ///  From 0.2 GeV/c to 5.0 GeV/c (5*5)
     //----------------------------------------------------------------------------------------------------
-    headerTitle = "";
-    if( mIsEmbeddingOnly ){
-      headerTitle = Form("Projection of dE/dx for each p bin (Embedding:%s)", getParticleName(mDaughterGeantId[id]) );
-    }
-    else{
-      headerTitle = Form("Projection of dE/dx for each p bin (Embedding:%s, Real:%s)", 
-            getParticleName(mDaughterGeantId[id]), getParticleName(getGeantIdReal(id)) );
-    }
-    header = initCanvas(headerTitle, 4, 6);
+    headerTitle = "Projection of dE/dx for each p bin";
+    header = initCanvas(headerTitle, 3, 3);
+    Int_t ipad = 1 ;
+    const Int_t npad = 8 ;
+    const Int_t npadMax = 9;
 
     TGraphErrors* gMeanVsMom[2];  // 0:embedding, 1:real data
     TGraphErrors* gSigmaVsMom[2]; // 0:embedding, 1:real data
@@ -1585,6 +1623,17 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
     const Int_t npt      = 24 ;
     const Double_t ptBin = 0.2 ;
     for(Int_t ipt=0; ipt<npt; ipt++){
+      if( ipad % (npad+1) == 0 ){
+        mCanvas->cd();
+        mCanvas->Update();
+ 
+        mPDF->NewPage();
+ 
+        if(header) delete header ;
+        header = initCanvas(headerTitle, 3, 3);
+        ipad = 1 ;
+      }
+
       const Double_t ptMin = 0.2 + ipt*ptBin ;
       const Double_t ptMax = ptMin + ptBin ;
       const Int_t ptMinBin = hdEdxVsMomEmbed->GetXaxis()->FindBin(ptMin);
@@ -1621,7 +1670,7 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
       hdEdxEmbed->SetTitle(Form("%1.1f < %s p < %1.1f GeV/c", ptMin, momName.Data(), ptMax));
       hdEdxEmbed->SetYTitle("(1/N_{trk})dN/d(dE/dx)");
 
-      mMainPad->cd(ipt+1);
+      mMainPad->cd(ipad);
       hdEdxEmbed->Draw("h");
       if( hdEdxReal ) hdEdxReal->Draw("hsame");
       hdEdxEmbed->Draw("hsame");
@@ -1661,6 +1710,21 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
         gSigmaVsMom[1]->SetPoint(ipt, pt, -9999.);
         gSigmaVsMom[1]->SetPointError(ipt, 0.0, 0.0);
       }
+
+      // Draw legend in the last pad in each Canvas
+      if( ipad == 1 ){
+        mMainPad->cd(npadMax);
+        drawLegend(id, *hdEdxEmbed, *hdEdxReal, "L", kTRUE) ;
+//        TLegend* leg = new TLegend(0, 0.2, 1, 0.8);
+//        leg->SetFillColor(10);
+//        leg->SetTextFont(43);
+//        leg->SetTextSize(15);
+//        leg->AddEntry( hdEdxEmbed, getEmbeddingParticleName(id, kTRUE), "L");
+//        if( hdEdxReal ) leg->AddEntry( hdEdxReal, getRealParticleName(id, kTRUE), "L");
+//        leg->Draw();
+      }
+
+      ipad++;
     }// pt loop
 
     mCanvas->cd();
@@ -1670,54 +1734,42 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
 
     delete header ;
 
-//    if( mDaughterGeantId.size() == 1 ){
-//      print(*canvas0, Form("dedx_1Dprojection_mom%s", momName.Data()));
-//    }
-//    else{
-//      print(*canvas0, Form("dedx_1Dprojection_mom%s_daughter%d", momName.Data(), id));
-//    }
-
     //----------------------------------------------------------------------------------------------------
     /// Mean/Sigma vs momentum (real vs embed)
     //----------------------------------------------------------------------------------------------------
-    headerTitle = "";
-    if( mIsEmbeddingOnly ){
-      headerTitle = Form("Mean/#sigma of dE/dx vs momentum (Embedding:%s)", getParticleName(mDaughterGeantId[id]) );
-    }
-    else{
-      headerTitle = Form("Mean/#sigma of dE/dx vs momentum (Embedding:%s, Real:%s)", 
-            getParticleName(mDaughterGeantId[id]), getParticleName(getGeantIdReal(id)) );
-    }
+    headerTitle = "Mean/#sigma of dE/dx vs momentum";
     header = initCanvas(headerTitle, 1, 2);
 
     for(Int_t i=0; i<2; i++){
       mMainPad->cd(i+1);
 
-      const Double_t ymax = (i==0) ? 5.2 : 1.4 ;
+      const Double_t ymax = (i==0) ? 7.2 : 1.4 ;
       TH1* frame = mMainPad->GetPad(i+1)->DrawFrame(0, 0.0, 5.0, ymax);
       frame->SetXTitle(Form("%s momentum (GeV/c)", momName.Data()));
       if( i == 0 ) frame->SetYTitle("Mean (keV/cm)");
       if( i == 1 ) frame->SetYTitle("#sigma (keV/cm)");
 
-//      TLegend* leg = new TLegend(0.48, 0.7, 0.88, 0.86);
-//      leg->SetTextSize(0.05);
-//      leg->SetFillColor(10);
+      TLegend* leg = new TLegend(0.38, 0.7, 0.91, 0.86);
+      leg->SetBorderSize(1);
+      leg->SetTextFont(43);
+      leg->SetTextSize(15);
+      leg->SetFillColor(10);
 
       if( i == 0 ){
         gMeanVsMom[0]->Draw("P");
         gMeanVsMom[1]->Draw("P");
 
-//        leg->AddEntry( gMeanVsMom[0], Form("Embedding (%s)", getParticleName(mDaughterGeantId[id])), "P");
-//        leg->AddEntry( gMeanVsMom[1], Form("Real data (%s)", getParticleName(getGeantIdReal(id))), "P");
+        leg->AddEntry( gMeanVsMom[0], getEmbeddingParticleName(id), "P");
+        leg->AddEntry( gMeanVsMom[1], getRealParticleName(id), "P");
       }
       if( i == 1 ){
         gSigmaVsMom[0]->Draw("P");
         gSigmaVsMom[1]->Draw("P");
 
-//        leg->AddEntry( gSigmaVsMom[0], Form("Embedding (%s)", getParticleName(mDaughterGeantId[id])), "P");
-//        leg->AddEntry( gSigmaVsMom[1], Form("Real data (%s)", getParticleName(getGeantIdReal(id))), "P");
+        leg->AddEntry( gSigmaVsMom[0], getEmbeddingParticleName(id), "P");
+        leg->AddEntry( gSigmaVsMom[1], getRealParticleName(id), "P");
       }
-//      leg->Draw();
+      leg->Draw();
     }
 
     mCanvas->cd();
@@ -1726,13 +1778,6 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
     mPDF->NewPage() ;
 
     delete header ;
-
-//    if( mDaughterGeantId.size() == 1 ){
-//      print(*canvas1, Form("mean_sigma_dedx_mom%s", momName.Data()));
-//    }
-//    else{
-//      print(*canvas1, Form("mean_sigma_dedx_mom%s_daughter%d", momName.Data(), id));
-//    }
   }
 
   return kTRUE ;
@@ -1782,8 +1827,6 @@ Bool_t StEmbeddingQADraw::drawNHit() const
     mPDF->NewPage() ;
 
     delete header ;
-
-//    print(*canvas, Form("ncommonhit_vs_nhit_daughter%d", id));
   }
 
   return drawProjection3D("NHit") ;
@@ -1807,23 +1850,13 @@ Bool_t StEmbeddingQADraw::drawProjection3D(const TString name) const
   TString nameLower(name);
   nameLower.ToLower();
 
+  TString headerTitle(Form("%s distribution for (p_{T}, #eta) slices", name.Data()));
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
-    TString headerTitle("");
-    if( mIsEmbeddingOnly ){
-      headerTitle = Form("%s distribution for (p_{T}, #eta) slices (Embedding:%s)", name.Data(), getParticleName(mDaughterGeantId[id]) );
-    }
-    else{
-      headerTitle = Form("%s distribution for (p_{T}, #eta) slices (Embedding:%s, Real:%s)", 
-            name.Data(), getParticleName(mDaughterGeantId[id]), getParticleName(getGeantIdReal(id)) );
-    }
-    TPaveText* header = initCanvas(headerTitle, 2, 5);
-
     /// Get 3D histograms
     TH3* h3DEmbed = (TH3D*) getHistogram(Form("h%s", name.Data()), id, kTRUE);
     if(!h3DEmbed) return kFALSE ;
 
     TH3* h3DReal  = (TH3D*) getHistogram(Form("h%s", name.Data()), id, kFALSE);
-//    if(!h3DReal) return kFALSE ;
 
     const Int_t nPt       = h3DEmbed->GetNbinsX() ;
     const Int_t nEta      = h3DEmbed->GetNbinsY() ;
@@ -1838,14 +1871,22 @@ Bool_t StEmbeddingQADraw::drawProjection3D(const TString name) const
       TString pt(Form("%1.1f < p_{T} < %1.1f (GeV/c)", ptMin+ipt*ptBin, ptMin+(ipt+1)*ptBin));
       if( ipt == 0 ) pt = Form("%1.1f < p_{T} < %1.1f (GeV/c)", 0.1, ptMin+(ipt+1)*ptBin);
 
-//      Int_t ipad = 1 ;
+      TPaveText* header = initCanvas(headerTitle, 2, 3);
+
+      const Int_t npad = 5 ;
+      const Int_t npadMax = 6 ;
+      Int_t ipad = 1 ;
       for(Int_t ieta=0; ieta<nEta; ieta++){
-//        if( ipad != 1 && ipad % (npad+1) == 0 ){
-//          mCanvas->cd();
-//          mCanvas->Update();
-//          mPDF->NewPage();
-//          ipad = 1 ;
-//        }
+        if( ipad % (npad+1) == 0 ){
+          mCanvas->cd();
+          mCanvas->Update();
+          mPDF->NewPage();
+
+          if(header) delete header ;
+          header = initCanvas(headerTitle, 2, 3);
+
+          ipad = 1 ;
+        }
 
         TString eta(Form("%1.1f < #eta < %1.1f", etaMin+ieta*etaBin, etaMin+(ieta+1)*etaBin));
 
@@ -1875,18 +1916,25 @@ Bool_t StEmbeddingQADraw::drawProjection3D(const TString name) const
         hEmbed->SetTitle(eta + ", " + pt);
         hEmbed->SetYTitle(Form("(1/N_{trk})dN/d%s", name.Data())) ;
 
-//        mMainPad->cd(ipad++);
-        mMainPad->cd(ieta+1);
+        mMainPad->cd(ipad);
         hEmbed->Draw();
         if(hReal) hReal->Draw("hsame");
         hEmbed->Draw("same");
+
+        // Draw legend in the last pad for each Canvas
+        if( ipad == 1 ){
+          mMainPad->cd(npadMax);
+          drawLegend(id, *hEmbed, *hReal, "L", kTRUE);
+        }
+
+        ipad++;
       }// eta loop
       mCanvas->cd();
       mCanvas->Update();
       mPDF->NewPage();
-    }// pt loop
 
-    delete header ;
+      delete header ;
+    }// pt loop
   }// daughter particle loop
 
 //  mCanvas->cd();
