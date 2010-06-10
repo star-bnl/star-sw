@@ -42,8 +42,11 @@
 //
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.h,v 1.11 2010/04/07 19:45:11 hmasui Exp $
+ * $Id: StEmbeddingQADraw.h,v 1.12 2010/06/10 14:51:01 hmasui Exp $
  * $Log: StEmbeddingQADraw.h,v $
+ * Revision 1.12  2010/06/10 14:51:01  hmasui
+ * Added particle name functions
+ *
  * Revision 1.11  2010/04/07 19:45:11  hmasui
  * Use box option for dE/dx vs p to reduce the pdf file size
  *
@@ -196,6 +199,10 @@ class StEmbeddingQADraw {
         const Double_t x1=0.0, const Double_t y1=0.9, const Double_t x2=1.0, const Double_t y2=0.95, 
         const Double_t textSize = 0.032) const;
 
+    /// Draw legend
+    void drawLegend(const UInt_t id, const TH1& hembed, const TH1& hreal, const Option_t* option="L",
+        const Bool_t doSplit=kFALSE) const ;
+
     /// Event-wise informations
     Bool_t drawVertices() const;          /// Draw vertices
     Bool_t drawRunEventId() const;        /// Draw run and event id
@@ -217,6 +224,15 @@ class StEmbeddingQADraw {
     /// Get accepted minimum/maximum vz from histogram
     Double_t getVzAcceptedMinimum() const ; /// Minimum vz
     Double_t getVzAcceptedMaximum() const ; /// Maximum vz
+
+    /// Get input MC particle name
+    const Char_t* getMcParticleName() const ; 
+
+    /// Get reconstructed embedding particle name
+    const Char_t* getEmbeddingParticleName(const UInt_t id, const Bool_t doSplit=kFALSE) const ; 
+
+    /// Get real data particle name
+    const Char_t* getRealParticleName(const UInt_t id, const Bool_t doSplit=kFALSE) const ; 
 
     // Data members
     static UInt_t mCanvasId ; /// Canvas id
