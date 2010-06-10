@@ -535,6 +535,12 @@ static int tpc_doer(daqReader *rdr, const char  *do_print)
 
 			if(do_print) {
 				printf("TPC sector %d: pixels %d\n",dd->sec,tpc->channels_sector) ;
+				for(int r=0;r<45;r++) {
+					for(int c=0;c<tpc->cl_counts[r];c++) {
+						printf("row %2d: pad %1.f, tb %.1f, charge %d\n",r+1,
+						       tpc->cl[r][c].p,tpc->cl[r][c].t,tpc->cl[r][c].charge) ;
+					}
+				}
 			}
 			
 			// one can rerun the afterburner as well with:
