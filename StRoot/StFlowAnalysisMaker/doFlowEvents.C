@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.2 2010/03/08 16:54:49 posk Exp $
+// $Id: doFlowEvents.C,v 1.3 2010/06/10 16:33:59 posk Exp $
 // Put a link to this at /StRoot/macros/analysis/doFlowEvents.C
 //
 // Description: 
@@ -207,11 +207,11 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
   } else {
     reCentMaker = kFALSE;
     phiWgtMaker = kFALSE;
-    anaMaker    = kTRUE;
+    anaMaker    = kFALSE;
     cumuMaker   = kFALSE;
-    spMaker     = kFALSE;
+    spMaker     = kTRUE;
     lyzMaker    = kFALSE;
-    dirCumuMaker= kTRUE;
+    dirCumuMaker= kFALSE;
   }
   Bool_t includeTpcTracks  = kTRUE;
   Bool_t includeFtpcTracks = kTRUE; // must be kTRUE if sel 1 is FTPC EP
@@ -642,6 +642,9 @@ void doFlowEvents(Int_t nEvents, Bool_t firstPass) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.3  2010/06/10 16:33:59  posk
+// Correction to macro directCumulants_v2.C .
+//
 // Revision 1.2  2010/03/08 16:54:49  posk
 // Added StFlowDirectCumulantMaker written by Dhevan Gangadharan.
 //

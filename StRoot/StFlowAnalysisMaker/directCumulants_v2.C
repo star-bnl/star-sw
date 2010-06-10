@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: directCumulants_v2.C,v 1.2 2010/04/12 21:49:47 posk Exp $
+// $Id: directCumulants_v2.C,v 1.3 2010/06/10 16:33:57 posk Exp $
 //
 // Authors: Dhevan Gangadharan, UCLA, Jan 2010
 //
@@ -34,23 +34,11 @@ void directCumulants_v2(){
 
   bool ptGraphs = kFALSE;
 
-  bool y7all = kFALSE; // Dhevan's file for all year 7
-  float SF = 1.0; // scale factor was 0.01 in old files
-  if (y7all) {
-    TFile *myfile = new TFile("~/Dhevan/output/Y7_alldata_final.root","READ");
-    //TFile *myfile = new TFile("../output/Y7_alldata_final.root","READ");
-    const int CENTBINS= 3; // cent 0,1,2 = 10-20%,20-30%,30-40%
-    float x[CENTBINS] = {15., 25., 35.};
-    float SF = 0.01;
-  } else {
-    TFile *myfile = new TFile("Y4_test1.root","READ");
-    //TFile *myfile = new TFile("flow.dirCumulant.root","READ");
-    //TFile *myfile = new TFile("~dhevang/test.root","READ");
-    //TFile *myfile = new TFile("test.root","READ");
-    //TFile *myfile = new TFile("flow.dirCumulant1000.root","READ");
-    const int CENTBINS= 9;
-    float x[CENTBINS] = {2.5, 7.5, 15., 25., 35., 45., 55., 65., 75.};
-  }
+  //TFile *myfile = new TFile("Y4_test4.root","READ");
+  TFile *myfile = new TFile("flow.dirCumulant.root","READ");
+  //TFile *myfile = new TFile("~dhevang/test.root","READ");
+  const int CENTBINS= 9;
+  float x[CENTBINS] = {2.5, 7.5, 15., 25., 35., 45., 55., 65., 75.};
   
   gROOT->SetStyle("Plain");                              // set style
   //gStyle->SetOptDate(0);
@@ -124,10 +112,8 @@ void directCumulants_v2(){
       for(int phase=0; phase<PHASES; phase++){
 
 	name3 = new TString();
-	if(!y7all || (y7all && term!=0)) { // for the older convention
-	  if(phase==0) name3->Append("cos_");
-	  else name3->Append("sin_");
-	}
+	if(phase==0) name3->Append("cos_");
+	else name3->Append("sin_");
        	for(int species=0; species<SPECIES; species++){
 
 	  name4 = new TString();
@@ -145,10 +131,10 @@ void directCumulants_v2(){
 	      name->Append(name3->Data());
 	      name->Append(name4->Data());
 
-	      Terms[term][type][phase][species][cent][ptbin] = SF*((TH2D*)myfile->Get(name->Data()))->GetBinContent(cent+1,ptbin+1)/cent_yields[species][cent][ptbin];
+	      Terms[term][type][phase][species][cent][ptbin] = ((TH2D*)myfile->Get(name->Data()))->GetBinContent(cent+1,ptbin+1)/cent_yields[species][cent][ptbin];
 
 	      name->Append("_Sq");	      
-	      Terms_e[term][type][phase][species][cent][ptbin] = SF*((TH2D*)myfile->Get(name->Data()))->GetBinContent(cent+1,ptbin+1)/cent_yields[species][cent][ptbin];
+	      Terms_e[term][type][phase][species][cent][ptbin] = ((TH2D*)myfile->Get(name->Data()))->GetBinContent(cent+1,ptbin+1)/cent_yields[species][cent][ptbin];
 	      Terms_e[term][type][phase][species][cent][ptbin] -= pow(Terms[term][type][phase][species][cent][ptbin],2);
 	      Terms_e[term][type][phase][species][cent][ptbin] /= cent_yields[species][cent][ptbin];
 	      Terms_e[term][type][phase][species][cent][ptbin] = sqrt(Terms_e[term][type][phase][species][cent][ptbin]);
@@ -203,13 +189,13 @@ void directCumulants_v2(){
 	  Cumulant_term[5][type][species][cent][ptbin] = Terms[9][type][COS][species][cent][ptbin]*Terms[9][I][COS][species][cent][ptbin];
           Cumulant_term[5][type][species][cent][ptbin] -= Terms[9][type][SIN][species][cent][ptbin]*Terms[9][I][SIN][species][cent][ptbin];
 
-	  Cumulant_term[6][type][species][cent][ptbin] = Terms[3][type][COS][species][cent][ptbin]*Terms[5][type][COS][species][cent][ptbin]*Terms[2][I][COS][species][cent][ptbin];
-	  Cumulant_term[6][type][species][cent][ptbin] -= Terms[3][type][SIN][species][cent][ptbin]*Terms[5][type][SIN][species][cent][ptbin]*Terms[2][I][COS][species][cent][ptbin];
-	  Cumulant_term[6][type][species][cent][ptbin] -= Terms[3][type][SIN][species][cent][ptbin]*Terms[5][type][COS][species][cent][ptbin]*Terms[2][I][SIN][species][cent][ptbin];
-	  Cumulant_term[6][type][species][cent][ptbin] -= Terms[3][type][COS][species][cent][ptbin]*Terms[5][type][SIN][species][cent][ptbin]*Terms[2][I][SIN][species][cent][ptbin];
+	  Cumulant_term[6][type][species][cent][ptbin] = Terms[3][type][COS][species][cent][ptbin]*Terms[7][I][COS][species][cent][ptbin]*Terms[2][I][COS][species][cent][ptbin];
+	  Cumulant_term[6][type][species][cent][ptbin] -= Terms[3][type][SIN][species][cent][ptbin]*Terms[7][I][SIN][species][cent][ptbin]*Terms[2][I][COS][species][cent][ptbin];
+	  Cumulant_term[6][type][species][cent][ptbin] -= Terms[3][type][SIN][species][cent][ptbin]*Terms[7][I][COS][species][cent][ptbin]*Terms[2][I][SIN][species][cent][ptbin];
+	  Cumulant_term[6][type][species][cent][ptbin] -= Terms[3][type][COS][species][cent][ptbin]*Terms[7][I][SIN][species][cent][ptbin]*Terms[2][I][SIN][species][cent][ptbin];
 
-	  Cumulant_term_e[6][type][species][cent][ptbin] = pow(Terms[3][type][SIN][species][cent][ptbin]*Terms[5][type][SIN][species][cent][ptbin]*Terms_e[2][I][COS][species][cent][ptbin],2);
-	  Cumulant_term_e[6][type][species][cent][ptbin] = sqrt(Cumulant_term_e[6][type][species][cent][ptbin]);
+	  Cumulant_term_e[6][type][species][cent][ptbin] = pow(Terms[3][type][SIN][species][cent][ptbin]*Terms[7][I][SIN][species][cent][ptbin]*Terms_e[2][I][COS][species][cent][ptbin],2);
+	  Cumulant_term_e[6][type][species][cent][ptbin] = sqrt(Cumulant_term_e[6][I][species][cent][ptbin]);
 
 
 	  Cumulant_term[7][type][species][cent][ptbin] = Terms[3][I][COS][species][cent][ptbin]*Terms[7][I][COS][species][cent][ptbin]*Terms[1][type][COS][species][cent][ptbin];
@@ -249,8 +235,30 @@ void directCumulants_v2(){
 	  Cumulant_4[type][species][cent][ptbin] += 4*Cumulant_term[7][type][species][cent][ptbin];
 	  Cumulant_4[type][species][cent][ptbin] += 2*Cumulant_term[8][type][species][cent][ptbin];
 	  Cumulant_4[type][species][cent][ptbin] += 2*Cumulant_term[9][type][species][cent][ptbin];
-	  Cumulant_4[type][species][cent][ptbin] += -6*Cumulant_term[10][type][species][cent][ptbin];
+	  Cumulant_4[type][species][cent][ptbin] -= 6*Cumulant_term[10][type][species][cent][ptbin];
 	  
+	  //////////// Print Cumulant Terms ////////////////////////////
+// 	  if (ptbin==ptCu && type==1) { // integrated cumulants
+// 	    cout << endl << "centrality= " << cent+1 << endl;
+// 	    double noAcc = Cumulant_term[0][type][species][cent][ptbin] -2*Cumulant_term[1][type][species][cent][ptbin];
+// 	    cout << "noAcc: " << setprecision(4) << noAcc << endl;
+// 	    cout << " 2: " << -Cumulant_term[2][type][species][cent][ptbin] << endl;
+// 	    cout << " 3: " << -Cumulant_term[3][type][species][cent][ptbin] << endl;
+// 	    cout << " 4: " << -2*Cumulant_term[4][type][species][cent][ptbin] << endl;
+// 	    cout << " 5: " << -Cumulant_term[5][type][species][cent][ptbin] << endl;
+// 	    cout << " 6: " <<  4*Cumulant_term[6][type][species][cent][ptbin] << endl;
+// 	    cout << " 7: " <<  4*Cumulant_term[7][type][species][cent][ptbin] << endl;
+// 	    cout << " 8: " <<  2*Cumulant_term[8][type][species][cent][ptbin] << endl;
+// 	    cout << " 9: " <<  2*Cumulant_term[9][type][species][cent][ptbin] << endl;
+// 	    cout << "10: " << -6*Cumulant_term[10][type][species][cent][ptbin] << endl;
+// 	    cout << "Acc/noAcc: " << Cumulant_4[type][species][cent][ptbin] / noAcc << endl;
+// 	    if(Cumulant_4[1][0][cent][ptCu]<0 && noAcc<0) {
+// 	      cout << "v2NoAcc: " << pow(-noAcc,0.25) << endl;
+// 	      cout << "v2Acc: " << pow(-Cumulant_4[1][0][cent][ptCu],0.25) << endl;
+// 	      cout << "v2Acc/noAcc: " << pow(-Cumulant_4[1][0][cent][ptCu],0.25) / pow(-noAcc,0.25) << endl;
+// 	    }
+// 	  }
+	  //////////////////////////
 	  
 	  Cumulant_4_e[type][species][cent][ptbin] = Cumulant_term_e[0][type][species][cent][ptbin]**2;
 	  Cumulant_4_e[type][species][cent][ptbin] += 2*(Cumulant_term_e[1][type][species][cent][ptbin])**2;
@@ -299,7 +307,7 @@ void directCumulants_v2(){
       used_pt_yields2[0] = 0.;
       
       for(int cent=0; cent<CENTBINS; cent++){
-	if (ptbin==ptCu && !y7all) { // integrated cumulants
+	if (ptbin==ptCu) { // integrated cumulants
 	  if(Cumulant_2[1][0][cent][ptCu]>0) {
 	    v2IntCu_2[cent]    = pow(Cumulant_2[1][0][cent][ptCu],0.5);
 	    v2IntCu_2Err[cent] = pow((.5/(Cumulant_2[1][0][cent][ptCu])),0.5)*Cumulant_2_e[1][0][cent][ptCu];
@@ -430,7 +438,7 @@ void directCumulants_v2(){
 
   double middle_pt_points[PTBINS]={0};
   for(int i=0; i<PTBINS; i++){
-    middle_pt_points[i]=double((i)/10.); // GeV = bin/10.
+    middle_pt_points[i]=double((i)/10. + 0.1); // GeV = bin/10.
   }
   double middle_pt_points_e[PTBINS]={0}; // no errors
   
