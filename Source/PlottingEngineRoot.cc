@@ -86,6 +86,8 @@ namespace PlotSpace {
 }
 
 
+PlottingEngineRoot plottingEngine;
+
 PlottingEngineRoot::PlottingEngineRoot() {
 
   garfieldStyle = new TStyle("Garfield","Garfield Style");

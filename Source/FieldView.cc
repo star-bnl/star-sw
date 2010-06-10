@@ -18,7 +18,8 @@ FieldView::FieldView() :
   pxmin(-1.), pymin(-1.), pxmax(1.), pymax(1.),
   fmin(0.), fmax(100.),
   nContours(nMaxContours),
-  canvas(0), fCont(0) {
+  canvas(0), hasExternalCanvas(false),
+  fPot(0) {
 
   SetDefaultProjection();
 
@@ -29,7 +30,8 @@ FieldView::FieldView(Sensor* s) :
   pxmin(-1.), pymin(-1.), pxmax(1.), pymax(1.),
   fmin(0.), fmax(100.),
   nContours(nMaxContours),
-  canvas(0), fCont(0) {
+  canvas(0), hasExternalCanvas(false),
+  fPot(0) {
 
   SetDefaultProjection();
   if (sensor != 0) {
@@ -43,8 +45,8 @@ FieldView::FieldView(Sensor* s) :
 
 FieldView::~FieldView() {
 
-  if (canvas != 0) delete canvas;
-  if (fCont != 0) delete fCont;
+  if (!hasExternalCanvas && canvas != 0) delete canvas;
+  if (fPot != 0) delete fPot;
 }
 
 void
@@ -61,6 +63,19 @@ FieldView::SetSensor(Sensor* s) {
   bool ok = sensor->GetArea(pxmin, pymin, pzmin, pxmax, pymax, pzmax);
   // Get voltage range
   ok = sensor->GetVoltageRange(fmin, fmax);
+
+}
+
+void
+FieldView::SetCanvas(TCanvas* c) {
+
+  if (c == 0) return;
+  if (!hasExternalCanvas && canvas != 0) {
+    delete canvas;
+    canvas = 0;
+  }
+  canvas = c;
+  hasExternalCanvas = true;
 
 }
 
@@ -113,13 +128,14 @@ FieldView::PlotContour() {
   if (canvas == 0) {
     canvas = new TCanvas();
     canvas->SetTitle("Field View");
+    if (hasExternalCanvas) hasExternalCanvas = false;
   }
   canvas->cd();
   canvas->Range(pxmin, pymin, pxmax, pymax);
 
-  if (fCont == 0) CreateFunction();
+  if (fPot == 0) CreateFunction();
 
-  fCont->SetRange(pxmin, pymin, pxmax, pymax);
+  fPot->SetRange(pxmin, pymin, pxmax, pymax);
 
   double level[nMaxContours];
   for (int i = 0; i < nContours; ++i) {
@@ -129,7 +145,7 @@ FieldView::PlotContour() {
       level[i] = (fmax + fmin) / 2.;
     }
   }
-  fCont->SetContour(nContours, level);
+  fPot->SetContour(nContours, level);
   
   if (debug) {
     printf("FieldView::PlotContour:\n");
@@ -138,12 +154,12 @@ FieldView::PlotContour() {
       printf("                Level %d = %g\n", i, level[i]);
     }
   }
-  fCont->SetNpx(100);
-  fCont->SetNpy(100);
-  fCont->GetXaxis()->SetTitle(xLabel);
-  fCont->GetYaxis()->SetTitle(yLabel);
-  fCont->SetTitle("Contours of V");
-  fCont->Draw("CONT4Z");
+  fPot->SetNpx(100);
+  fPot->SetNpy(100);
+  fPot->GetXaxis()->SetTitle(xLabel);
+  fPot->GetYaxis()->SetTitle(yLabel);
+  fPot->SetTitle("Contours of the potential");
+  fPot->Draw("CONT4Z");
   canvas->Update();
 
 }
@@ -155,17 +171,18 @@ FieldView::PlotSurface() {
   if (canvas == 0) {
     canvas = new TCanvas();
     canvas->SetTitle("Field View");
+    if (hasExternalCanvas) hasExternalCanvas = false;
   }
   canvas->cd();
   canvas->Range(pxmin, pymin, pxmax, pymax);
   
-  if (fCont == 0) CreateFunction();
+  if (fPot == 0) CreateFunction();
 
-  fCont->SetRange(pxmin, pymin, pxmax, pymax);
-  fCont->GetXaxis()->SetTitle(xLabel);
-  fCont->GetYaxis()->SetTitle(yLabel);
-  fCont->SetTitle("Surface plot of V");
-  fCont->Draw("SURF7");
+  fPot->SetRange(pxmin, pymin, pxmax, pymax);
+  fPot->GetXaxis()->SetTitle(xLabel);
+  fPot->GetYaxis()->SetTitle(yLabel);
+  fPot->SetTitle("Surface plot of the potential");
+  fPot->Draw("SURF7");
   canvas->Update();
 
 }
@@ -174,16 +191,16 @@ void
 FieldView::CreateFunction() {
 
   int idx = 0;
-  std::string fname = "fCont_0";
+  std::string fname = "fPot_0";
   while (gROOT->GetListOfFunctions()->FindObject(fname.c_str())) {
     ++idx;
     std::stringstream ss;
-    ss << "fCont_";
+    ss << "fPot_";
     ss  << idx;
     fname = ss.str();
   }
 
-  fCont = new TF2(fname.c_str(), this, &FieldView::EvaluatePotential, 
+  fPot = new TF2(fname.c_str(), this, &FieldView::EvaluatePotential, 
         pxmin, pxmax, pymin, pymax, 0, "FieldView", "EvaluatePotential");
  
 }

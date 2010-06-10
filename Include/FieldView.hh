@@ -21,6 +21,7 @@ class FieldView {
     ~FieldView();
    
     void SetSensor(Sensor* s);
+    void SetCanvas(TCanvas* c);
  
     // Establish area, normal vector, in-plane vector ...
     void SetArea(double xmin, double ymin, double zmin, 
@@ -66,9 +67,10 @@ class FieldView {
     
     // Canvas
     TCanvas* canvas;
+    bool hasExternalCanvas;
 
-    // Contour function
-    TF2* fCont;
+    // Potential function
+    TF2* fPot;
     
     void Labels();
     void CreateFunction(); 

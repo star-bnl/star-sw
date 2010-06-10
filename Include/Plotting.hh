@@ -6,7 +6,7 @@
 
 namespace Garfield {
 
-  static PlottingEngineRoot* plottingEngine = new PlottingEngineRoot();
+  extern PlottingEngineRoot plottingEngine;
   
 }
 

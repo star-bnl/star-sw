@@ -484,7 +484,7 @@ Sensor::GetInducedCharge(const std::string label) {
 void 
 Sensor::PlotSignal(const std::string label) {
 
-  plottingEngine->PlotSignal(this, label);
+  plottingEngine.PlotSignal(this, label);
 
 }
 

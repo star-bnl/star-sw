@@ -37,6 +37,7 @@ OBJS = \
 	$(OBJECT)/SolidBox.o \
 	$(OBJECT)/SolidTube.o \
 	$(OBJECT)/RandomEngineGSL.o \
+	$(OBJECT)/RandomEngineRoot.o \
 	$(OBJECT)/PlottingEngineRoot.o \
 	$(OBJECT)/Sensor.o
 
@@ -99,6 +100,8 @@ $(OBJECT)/SolidBox.o: $(SOURCE)/SolidBox.cc $(INCLUDE)/SolidBox.hh
 $(OBJECT)/SolidTube.o: $(SOURCE)/SolidTube.cc $(INCLUDE)/SolidTube.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/RandomEngineGSL.o: $(SOURCE)/RandomEngineGSL.cc $(INCLUDE)/RandomEngineGSL.hh
+	$(CC) $(CFLAGS) $< -o $@
+$(OBJECT)/RandomEngineRoot.o: $(SOURCE)/RandomEngineRoot.cc $(INCLUDE)/RandomEngineRoot.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/PlottingEngineRoot.o: $(SOURCE)/PlottingEngineRoot.cc $(INCLUDE)/PlottingEngineRoot.hh
 	$(CC) $(CFLAGS) $< -o $@        

@@ -5,11 +5,13 @@
 
 #include <cmath>
 #include "RandomEngineGSL.hh"
+#include "RandomEngineRoot.hh"
 
 namespace Garfield {
 
   // Random number generator
   extern RandomEngineGSL randomEngine;
+  // extern RandomEngineRoot randomEngine;
 
   // Draw a random number uniformly distributed in the range [0, 1)
   inline
