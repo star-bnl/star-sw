@@ -229,7 +229,7 @@ TrackBichsel::LoadCrossSectionTable(const std::string filename) {
   while (!infile.eof() && !infile.fail()) {
     std::getline(infile, line);
     // Strip white space from beginning of line
-    line.erase(line.begin(), find_if(line.begin(), line.end(),
+    line.erase(line.begin(), std::find_if(line.begin(), line.end(),
                not1(std::ptr_fun<int, int>(isspace))));
     // Skip comments
     if (line[0] == '#') continue;

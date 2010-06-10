@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <algorithm>
 
 #include "ComponentTcad2d.hh"
 
@@ -431,7 +432,7 @@ ComponentTcad2d::LoadData(const std::string datafilename) {
     // Read one line
     std::getline(datafile, line);
     // Strip white space from beginning of line
-    line.erase(line.begin(), find_if(line.begin(), line.end(), 
+    line.erase(line.begin(), std::find_if(line.begin(), line.end(), 
                not1(std::ptr_fun<int, int>(isspace))));
     //Find data section
     if (line.substr(0, 8) == "function") {
