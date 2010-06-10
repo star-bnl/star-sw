@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.cxx,v 1.6 2010/02/16 02:10:46 hmasui Exp $
+ * $Id: StEmbeddingQAUtilities.cxx,v 1.7 2010/06/10 14:50:28 hmasui Exp $
  * $Log: StEmbeddingQAUtilities.cxx,v $
+ * Revision 1.7  2010/06/10 14:50:28  hmasui
+ * Use TString::KIgnoreCase
+ *
  * Revision 1.6  2010/02/16 02:10:46  hmasui
  * Add TStyle date attributes
  *
@@ -126,15 +129,8 @@ Bool_t StEmbeddingQAUtilities::CompareString(const TString s0, const TString s1,
   /// Utility function to compare two TString
   ///   - Comparison is case insensitive by default
   ///   - You can do the exact match by setting isExact = true
-  TString s0lower(s0);
-  TString s1lower(s1);
 
-  if( !isExact ){
-    s0lower.ToLower();
-    s1lower.ToLower();
-  }
-
-  return s0lower.Contains(s1lower);
+  return (isExact) ? s0.CompareTo(s1)==0 : s0.CompareTo(s1, TString::kIgnoreCase)==0 ; 
 }
   
 //____________________________________________________________________________________________________
