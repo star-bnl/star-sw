@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowDirectCumulantMaker.cxx,v 1.1 2010/03/08 16:54:43 posk Exp $
+// $Id: StFlowDirectCumulantMaker.cxx,v 1.2 2010/06/10 16:33:53 posk Exp $
 //
 // Authors: Dhevan Gangadharan, UCLA, Dec 2009
 //
@@ -161,7 +161,7 @@ Int_t StFlowDirectCumulantMaker::Init() {
   Event_counterWeighted->Sumw2();
 
   gMessMgr->SetLimit("##### FlowDirCumu", 2);
-  gMessMgr->Info("##### FlowDirCumu: $Id: StFlowDirectCumulantMaker.cxx,v 1.1 2010/03/08 16:54:43 posk Exp $");
+  gMessMgr->Info("##### FlowDirCumu: $Id: StFlowDirectCumulantMaker.cxx,v 1.2 2010/06/10 16:33:53 posk Exp $");
 
   return StMaker::Init();
 }
@@ -677,7 +677,7 @@ Int_t StFlowDirectCumulantMaker::Finish() {
   cout << endl << "##### Direct Cumulant Maker:" << endl;
      
   // Write all terms
-  char *flowname = "flow.dirCumulant.root";
+  const char *flowname = "flow.dirCumulant.root";
   TFile histFile(flowname, "RECREATE");
   
   GetHistList()->Write();
