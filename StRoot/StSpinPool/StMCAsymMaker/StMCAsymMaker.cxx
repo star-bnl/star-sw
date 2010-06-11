@@ -202,319 +202,326 @@ Int_t StMCAsymMaker::Make() {
     //GET PYTHIA RECORD from particleTable
     TDataSetIter geantDstI(Event);
     particleTabPtr = (St_particle  *) geantDstI("particle");
-    particle_st* particleTable = particleTabPtr->GetTable();//particleTabPtr->Print();
 
-    //GET EVTID and SUBPROCESS ID from struct g2t_event
-    Pg2t_event=(St_g2t_event *) geantDstI("g2t_event"); //Pg2t_event->Print();
-    g2t_event_st *g2t_event1=Pg2t_event->GetTable();
-    geantID= g2t_event1->n_event; 
-    geantPID= g2t_event1->subprocess_id;
-    pid=geantPID;
-    //TEST that geantID==eventID to ensure .geant and .MuDst file are synchronized
-    assert(evtid==geantID);
-
-    //GET PARTONIC KINEMATICS from struct Pg2t_pythia
-    Pg2t_pythia=(St_g2t_pythia *) geantDstI("g2t_pythia");// Pg2t_pythia->Print();
-    g2t_pythia_st *g2t_pythia1=Pg2t_pythia->GetTable();
-    s= g2t_pythia1-> mand_s;
-    t= g2t_pythia1-> mand_t;
-    u= g2t_pythia1-> mand_u;
-    hard_p= g2t_pythia1->hard_p;
-    cos_th= g2t_pythia1->cos_th;
-    x1= g2t_pythia1->bjor_1;
-    x2= g2t_pythia1->bjor_2;
-
-    //GET FLAVOR AFTER INTIAL RADIATION BEFORE and AFTER SCATTERING
-    flavor1=particleTable[4].idhep;
-    flavor2=particleTable[5].idhep;
-    flavor3=particleTable[6].idhep;
-    flavor4=particleTable[7].idhep;
-
-    //GET SCATTERED PARTON RECORD
-    parton1[0]=particleTable[6].idhep;// particle id
-    parton1[1]=particleTable[6].phep[0];//px
-    parton1[2]=particleTable[6].phep[1];//py
-    parton1[3]=particleTable[6].phep[2];//pz
-    parton1[4]=particleTable[6].phep[3];//E
-    parton1[5]=particleTable[6].phep[4];//m
-    parton1[6]=particleTable[6].isthep;//status
-    parton1[7]=particleTable[6].jmohep[0];//moth1
-    parton1[8]=particleTable[6].jmohep[1];//moth2
-    parton1[9]=particleTable[6].jdahep[0];//daughter1
-    parton1[10]=particleTable[6].jdahep[1];//daughter2
-    parton2[0]=particleTable[7].idhep;// particle id
-    parton2[1]=particleTable[7].phep[0];//px
-    parton2[2]=particleTable[7].phep[1];//py
-    parton2[3]=particleTable[7].phep[2];//pz
-    parton2[4]=particleTable[7].phep[3];//E
-    parton2[5]=particleTable[7].phep[4];//m
-    parton2[6]=particleTable[7].isthep;//status
-    parton2[7]=particleTable[7].jmohep[0];//moth1
-    parton2[8]=particleTable[7].jmohep[1];//moth2
-    parton2[9]=particleTable[7].jdahep[0];//daughter1
-    parton2[10]=particleTable[7].jdahep[1];//daughter2
-
-    if (0){//PRINT OUT PYTHIA RECORD
+    // if no particle table in the file just skip it
+    if (particleTabPtr!=0){
+      
+      particle_st* particleTable = particleTabPtr->GetTable();//particleTabPtr->Print();
+      
+      //GET EVTID and SUBPROCESS ID from struct g2t_event
+      Pg2t_event=(St_g2t_event *) geantDstI("g2t_event"); //Pg2t_event->Print();
+      g2t_event_st *g2t_event1=Pg2t_event->GetTable();
+      geantID= g2t_event1->n_event; 
+      geantPID= g2t_event1->subprocess_id;
+      pid=geantPID;
+      //TEST that geantID==eventID to ensure .geant and .MuDst file are synchronized
+      assert(evtid==geantID);
+      
+      //GET PARTONIC KINEMATICS from struct Pg2t_pythia
+      Pg2t_pythia=(St_g2t_pythia *) geantDstI("g2t_pythia");// Pg2t_pythia->Print();
+      g2t_pythia_st *g2t_pythia1=Pg2t_pythia->GetTable();
+      s= g2t_pythia1-> mand_s;
+      t= g2t_pythia1-> mand_t;
+      u= g2t_pythia1-> mand_u;
+      hard_p= g2t_pythia1->hard_p;
+      cos_th= g2t_pythia1->cos_th;
+      x1= g2t_pythia1->bjor_1;
+      x2= g2t_pythia1->bjor_2;
+      
+      //GET FLAVOR AFTER INTIAL RADIATION BEFORE and AFTER SCATTERING
+      flavor1=particleTable[4].idhep;
+      flavor2=particleTable[5].idhep;
+      flavor3=particleTable[6].idhep;
+      flavor4=particleTable[7].idhep;
+      
+      //GET SCATTERED PARTON RECORD
+      parton1[0]=particleTable[6].idhep;// particle id
+      parton1[1]=particleTable[6].phep[0];//px
+      parton1[2]=particleTable[6].phep[1];//py
+      parton1[3]=particleTable[6].phep[2];//pz
+      parton1[4]=particleTable[6].phep[3];//E
+      parton1[5]=particleTable[6].phep[4];//m
+      parton1[6]=particleTable[6].isthep;//status
+      parton1[7]=particleTable[6].jmohep[0];//moth1
+      parton1[8]=particleTable[6].jmohep[1];//moth2
+      parton1[9]=particleTable[6].jdahep[0];//daughter1
+      parton1[10]=particleTable[6].jdahep[1];//daughter2
+      parton2[0]=particleTable[7].idhep;// particle id
+      parton2[1]=particleTable[7].phep[0];//px
+      parton2[2]=particleTable[7].phep[1];//py
+      parton2[3]=particleTable[7].phep[2];//pz
+      parton2[4]=particleTable[7].phep[3];//E
+      parton2[5]=particleTable[7].phep[4];//m
+      parton2[6]=particleTable[7].isthep;//status
+      parton2[7]=particleTable[7].jmohep[0];//moth1
+      parton2[8]=particleTable[7].jmohep[1];//moth2
+      parton2[9]=particleTable[7].jdahep[0];//daughter1
+      parton2[10]=particleTable[7].jdahep[1];//daughter2
+      
+      if (0){//PRINT OUT PYTHIA RECORD
         printf("PID/evtid from McEvent = %d,%d; PID/evtid from Table = %d,%d:\n",pid,evtid,geantPID,geantID);
         printf("row |   id   |   px   |   py   |   pz   |   E   |   m   | status | moth1 | moth2 | daught1 | daught2 |\n");
         for (int i=0; i<particleTabPtr->GetNRows();++i) {
-        printf("  %d,  %d,  %f,   %f,   %f,   %f,   %f,   %d,   %d,   %d,   %d,   %d\n",i,particleTable[i].idhep, particleTable[i].phep[0],
-            particleTable[i].phep[1], particleTable[i].phep[2] , particleTable[i].phep[3], particleTable[i].phep[4], particleTable[i].isthep,
-            particleTable[i].jmohep[0], particleTable[i].jmohep[1], particleTable[i].jdahep[0], particleTable[i].jdahep[1]);}
+	  printf("  %d,  %d,  %f,   %f,   %f,   %f,   %f,   %d,   %d,   %d,   %d,   %d\n",i,particleTable[i].idhep, particleTable[i].phep[0],
+		 particleTable[i].phep[1], particleTable[i].phep[2] , particleTable[i].phep[3], particleTable[i].phep[4], particleTable[i].isthep,
+		 particleTable[i].jmohep[0], particleTable[i].jmohep[1], particleTable[i].jdahep[0], particleTable[i].jdahep[1]);}
 	cout << endl;
 	cout << "flavor1: " << flavor1 << "  flavor2: " << flavor2 << "  flavor3: " << flavor3 << "  flavor4: " << flavor4 << endl << endl;
-    }
-
-    //Get partonic a_LL, polarized/unpolarized pdfs using Q2 = partonic_pT^2
-    partonic_all=getPartonicALL(s,t,u,pid,flavor1,flavor2,flavor3,flavor4);
-    Q2=hard_p*hard_p;
-
-    //NLO GS SCENARIO A
-    df1_NLO_GSA=get_polPDF_NLO_GSA(flavor1,x1,Q2);
-    df2_NLO_GSA=get_polPDF_NLO_GSA(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_GSA=(df1_NLO_GSA*df2_NLO_GSA*partonic_all)/(f1_NLO*f2_NLO);
+      }
+      
+      //Get partonic a_LL, polarized/unpolarized pdfs using Q2 = partonic_pT^2
+      partonic_all=getPartonicALL(s,t,u,pid,flavor1,flavor2,flavor3,flavor4);
+      Q2=hard_p*hard_p;
+      
+      //NLO GS SCENARIO A
+      df1_NLO_GSA=get_polPDF_NLO_GSA(flavor1,x1,Q2);
+      df2_NLO_GSA=get_polPDF_NLO_GSA(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_GSA=(df1_NLO_GSA*df2_NLO_GSA*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO GS SCENARIO B
+      df1_NLO_GSB=get_polPDF_NLO_GSB(flavor1,x1,Q2);
+      df2_NLO_GSB=get_polPDF_NLO_GSB(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_GSB=(df1_NLO_GSB*df2_NLO_GSB*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO GS SCENARIO C
+      df1_NLO_GSC=get_polPDF_NLO_GSC(flavor1,x1,Q2);
+      df2_NLO_GSC=get_polPDF_NLO_GSC(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_GSC=(df1_NLO_GSC*df2_NLO_GSC*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //LO GRSV
+      df1_LO=get_polPDF_LO(flavor1,x1,Q2);
+      df2_LO=get_polPDF_LO(flavor2,x2,Q2);
+      f1_LO=get_unpolPDF_LO(flavor1,x1,Q2);
+      f2_LO=get_unpolPDF_LO(flavor2,x2,Q2);
+      weight_LO=(df1_LO*df2_LO*partonic_all)/(f1_LO*f2_LO);
+      
+      //NLO GRSV
+      df1_NLO=get_polPDF_NLO(flavor1,x1,Q2);
+      df2_NLO=get_polPDF_NLO(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO=(df1_NLO*df2_NLO*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO_g0 GRSV
+      df1_NLO_g0=get_polPDF_NLO_g0(flavor1,x1,Q2);
+      df2_NLO_g0=get_polPDF_NLO_g0(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_g0=(df1_NLO_g0*df2_NLO_g0*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO_gmax  GRSV
+      df1_NLO_gmax=get_polPDF_NLO_gmax(flavor1,x1,Q2);
+      df2_NLO_gmax=get_polPDF_NLO_gmax(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_gmax=(df1_NLO_gmax*df2_NLO_gmax*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO_gmin  GRSV
+      df1_NLO_gmin=get_polPDF_NLO_gmin(flavor1,x1,Q2);
+      df2_NLO_gmin=get_polPDF_NLO_gmin(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_gmin=(df1_NLO_gmin*df2_NLO_gmin*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO_m015 GRSV
+      df1_NLO_m015=get_polPDF_NLO_m015(flavor1,x1,Q2);
+      df2_NLO_m015=get_polPDF_NLO_m015(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_m015=(df1_NLO_m015*df2_NLO_m015*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO_m030 GRSV
+      df1_NLO_m030=get_polPDF_NLO_m030(flavor1,x1,Q2);
+      df2_NLO_m030=get_polPDF_NLO_m030(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_m030=(df1_NLO_m030*df2_NLO_m030*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO_m045 GRSV
+      df1_NLO_m045=get_polPDF_NLO_m045(flavor1,x1,Q2);
+      df2_NLO_m045=get_polPDF_NLO_m045(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_m045=(df1_NLO_m045*df2_NLO_m045*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO_m060 GRSV
+      df1_NLO_m060=get_polPDF_NLO_m060(flavor1,x1,Q2);
+      df2_NLO_m060=get_polPDF_NLO_m060(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_m060=(df1_NLO_m060*df2_NLO_m060*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO_m075 GRSV
+      df1_NLO_m075=get_polPDF_NLO_m075(flavor1,x1,Q2);
+      df2_NLO_m075=get_polPDF_NLO_m075(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_m075=(df1_NLO_m075*df2_NLO_m075*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO_m090 GRSV
+      df1_NLO_m090=get_polPDF_NLO_m090(flavor1,x1,Q2);
+      df2_NLO_m090=get_polPDF_NLO_m090(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_m090=(df1_NLO_m090*df2_NLO_m090*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO_m105 GRSV
+      df1_NLO_m105=get_polPDF_NLO_m105(flavor1,x1,Q2);
+      df2_NLO_m105=get_polPDF_NLO_m105(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_m105=(df1_NLO_m105*df2_NLO_m105*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO_p030 GRSV
+      df1_NLO_p030=get_polPDF_NLO_p030(flavor1,x1,Q2);
+      df2_NLO_p030=get_polPDF_NLO_p030(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_p030=(df1_NLO_p030*df2_NLO_p030*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO_p045 GRSV
+      df1_NLO_p045=get_polPDF_NLO_p045(flavor1,x1,Q2);
+      df2_NLO_p045=get_polPDF_NLO_p045(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_p045=(df1_NLO_p045*df2_NLO_p045*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO_p060 GRSV
+      df1_NLO_p060=get_polPDF_NLO_p060(flavor1,x1,Q2);
+      df2_NLO_p060=get_polPDF_NLO_p060(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_p060=(df1_NLO_p060*df2_NLO_p060*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO_p070 GRSV
+      df1_NLO_p070=get_polPDF_NLO_p070(flavor1,x1,Q2);
+      df2_NLO_p070=get_polPDF_NLO_p070(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_p070=(df1_NLO_p070*df2_NLO_p070*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO DSSV
+      df1_NLO_DSSV=get_polPDF_NLO_DSSV(flavor1,x1,Q2);
+      df2_NLO_DSSV=get_polPDF_NLO_DSSV(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_DSSV=(df1_NLO_DSSV*df2_NLO_DSSV*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO LSS SCENARIO 1
+      df1_NLO_LSS1=get_polPDF_NLO_LSS1(flavor1,x1,Q2);
+      df2_NLO_LSS1=get_polPDF_NLO_LSS1(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_LSS1=(df1_NLO_LSS1*df2_NLO_LSS1*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO LSS SCENARIO 2
+      df1_NLO_LSS2=get_polPDF_NLO_LSS2(flavor1,x1,Q2);
+      df2_NLO_LSS2=get_polPDF_NLO_LSS2(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_LSS2=(df1_NLO_LSS2*df2_NLO_LSS2*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO LSS SCENARIO 3
+      df1_NLO_LSS3=get_polPDF_NLO_LSS3(flavor1,x1,Q2);
+      df2_NLO_LSS3=get_polPDF_NLO_LSS3(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_LSS3=(df1_NLO_LSS3*df2_NLO_LSS3*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO AAC SCENARIO 1
+      df1_NLO_AAC1=get_polPDF_NLO_AAC1(flavor1,x1,Q2);
+      df2_NLO_AAC1=get_polPDF_NLO_AAC1(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_AAC1=(df1_NLO_AAC1*df2_NLO_AAC1*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO AAC SCENARIO 2
+      df1_NLO_AAC2=get_polPDF_NLO_AAC2(flavor1,x1,Q2);
+      df2_NLO_AAC2=get_polPDF_NLO_AAC2(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_AAC2=(df1_NLO_AAC2*df2_NLO_AAC2*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO AAC SCENARIO 3
+      df1_NLO_AAC3=get_polPDF_NLO_AAC3(flavor1,x1,Q2);
+      df2_NLO_AAC3=get_polPDF_NLO_AAC3(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_AAC3=(df1_NLO_AAC3*df2_NLO_AAC3*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO BB SCENARIO 1
+      df1_NLO_BB1=get_polPDF_NLO_BB1(flavor1,x1,Q2);
+      df2_NLO_BB1=get_polPDF_NLO_BB1(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_BB1=(df1_NLO_BB1*df2_NLO_BB1*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO BB SCENARIO 2
+      df1_NLO_BB2=get_polPDF_NLO_BB2(flavor1,x1,Q2);
+      df2_NLO_BB2=get_polPDF_NLO_BB2(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_BB2=(df1_NLO_BB2*df2_NLO_BB2*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO DNS SCENARIO 1
+      df1_NLO_DNS1=get_polPDF_NLO_DNS1(flavor1,x1,Q2);
+      df2_NLO_DNS1=get_polPDF_NLO_DNS1(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_DNS1=(df1_NLO_DNS1*df2_NLO_DNS1*partonic_all)/(f1_NLO*f2_NLO);
+      
+      //NLO DNS SCENARIO 2
+      df1_NLO_DNS2=get_polPDF_NLO_DNS2(flavor1,x1,Q2);
+      df2_NLO_DNS2=get_polPDF_NLO_DNS2(flavor2,x2,Q2);
+      f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
+      f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
+      weight_NLO_DNS2=(df1_NLO_DNS2*df2_NLO_DNS2*partonic_all)/(f1_NLO*f2_NLO);
+      
+      if (0) {
+	printf("LO:  df1_LO=%f, df2_LO=%f, f1_LO=%f, f2_LO=%f, weight_LO=%f\n",df1_LO,df2_LO,f1_LO,f2_LO,weight_LO);
+	printf("NLO:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO,df2_NLO,f1_NLO,f2_NLO,weight_NLO);
+	printf("NLO_gmin:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_gmin,df2_NLO_gmin,f1_NLO,f2_NLO,weight_NLO_gmin);
+	printf("NLO_g0:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_g0,df2_NLO_g0,f1_NLO,f2_NLO,weight_NLO_g0);
+	printf("NLO_gmax:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_gmax,df2_NLO_gmax,f1_NLO,f2_NLO,weight_NLO_gmax);
+	
+	printf("NLO_m015:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m015,df2_NLO_m015,f1_NLO,f2_NLO,weight_NLO_m015);
+	printf("NLO_m030:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m030,df2_NLO_m030,f1_NLO,f2_NLO,weight_NLO_m030);
+	printf("NLO_m045:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m045,df2_NLO_m045,f1_NLO,f2_NLO,weight_NLO_m045);
+	printf("NLO_m060:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m060,df2_NLO_m060,f1_NLO,f2_NLO,weight_NLO_m060);
+	printf("NLO_m075:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m075,df2_NLO_m075,f1_NLO,f2_NLO,weight_NLO_m075);
+	printf("NLO_m090:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m090,df2_NLO_m090,f1_NLO,f2_NLO,weight_NLO_m090);
+	printf("NLO_m105:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m105,df2_NLO_m105,f1_NLO,f2_NLO,weight_NLO_m105);
+	
+	printf("NLO_p030:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p030,df2_NLO_p030,f1_NLO,f2_NLO,weight_NLO_p030);
+	printf("NLO_p045:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p045,df2_NLO_p045,f1_NLO,f2_NLO,weight_NLO_p045);
+	printf("NLO_p060:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p060,df2_NLO_p060,f1_NLO,f2_NLO,weight_NLO_p060);
+	printf("NLO_p070:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p070,df2_NLO_p070,f1_NLO,f2_NLO,weight_NLO_p070);
+	
+	
+	printf("DSSV:  df1_DSSV=%f, df2_DSSV=%f, f1_DSSV=%f, f2_DSSV=%f, weight_DSSV=%f\n",df1_NLO_DSSV,df2_NLO_DSSV,f1_NLO,f2_NLO,weight_NLO_DSSV);
+	printf("LSS1:  df1_LSS1=%f, df2_LSS1=%f, f1_LSS1=%f, f2_LSS1=%f, weight_LSS1=%f\n",df1_NLO_LSS1,df2_NLO_LSS1,f1_NLO,f2_NLO,weight_NLO_LSS1);
+	printf("LSS2:  df1_LSS2=%f, df2_LSS2=%f, f1_LSS2=%f, f2_LSS2=%f, weight_LSS2=%f\n",df1_NLO_LSS2,df2_NLO_LSS2,f1_NLO,f2_NLO,weight_NLO_LSS2);
+	printf("LSS3:  df1_LSS3=%f, df2_LSS3=%f, f1_LSS3=%f, f2_LSS3=%f, weight_LSS3=%f\n",df1_NLO_LSS3,df2_NLO_LSS3,f1_NLO,f2_NLO,weight_NLO_LSS3);
+	printf("AAC1:  df1_AAC1=%f, df2_AAC1=%f, f1_AAC1=%f, f2_AAC1=%f, weight_AAC1=%f\n",df1_NLO_AAC1,df2_NLO_AAC1,f1_NLO,f2_NLO,weight_NLO_AAC1);
+	printf("AAC2:  df1_AAC2=%f, df2_AAC2=%f, f1_AAC2=%f, f2_AAC2=%f, weight_AAC2=%f\n",df1_NLO_AAC2,df2_NLO_AAC2,f1_NLO,f2_NLO,weight_NLO_AAC2);
+	printf("AAC3:  df1_AAC3=%f, df2_AAC3=%f, f1_AAC3=%f, f2_AAC3=%f, weight_AAC3=%f\n",df1_NLO_AAC3,df2_NLO_AAC3,f1_NLO,f2_NLO,weight_NLO_AAC3);
+	
+	printf("BB1:  df1_BB1=%f, df2_BB1=%f, f1_BB1=%f, f2_BB1=%f, weight_BB1=%f\n",df1_NLO_BB1,df2_NLO_BB1,f1_NLO,f2_NLO,weight_NLO_BB1);
+	printf("BB2:  df1_BB2=%f, df2_BB2=%f, f1_BB2=%f, f2_BB2=%f, weight_BB2=%f\n",df1_NLO_BB2,df2_NLO_BB2,f1_NLO,f2_NLO,weight_NLO_BB2);
+	printf("DNS1:  df1_DNS1=%f, df2_DNS1=%f, f1_DNS1=%f, f2_DNS1=%f, weight_DNS1=%f\n",df1_NLO_DNS1,df2_NLO_DNS1,f1_NLO,f2_NLO,weight_NLO_DNS1);
+	printf("DNS2:  df1_DNS2=%f, df2_DNS2=%f, f1_DNS2=%f, f2_DNS2=%f, weight_DNS2=%f\n",df1_NLO_DNS2,df2_NLO_DNS2,f1_NLO,f2_NLO,weight_NLO_DNS2);
+      }
     
-    //NLO GS SCENARIO B
-    df1_NLO_GSB=get_polPDF_NLO_GSB(flavor1,x1,Q2);
-    df2_NLO_GSB=get_polPDF_NLO_GSB(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_GSB=(df1_NLO_GSB*df2_NLO_GSB*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO GS SCENARIO C
-    df1_NLO_GSC=get_polPDF_NLO_GSC(flavor1,x1,Q2);
-    df2_NLO_GSC=get_polPDF_NLO_GSC(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_GSC=(df1_NLO_GSC*df2_NLO_GSC*partonic_all)/(f1_NLO*f2_NLO);
-    
-    //LO GRSV
-    df1_LO=get_polPDF_LO(flavor1,x1,Q2);
-    df2_LO=get_polPDF_LO(flavor2,x2,Q2);
-    f1_LO=get_unpolPDF_LO(flavor1,x1,Q2);
-    f2_LO=get_unpolPDF_LO(flavor2,x2,Q2);
-    weight_LO=(df1_LO*df2_LO*partonic_all)/(f1_LO*f2_LO);
-
-    //NLO GRSV
-    df1_NLO=get_polPDF_NLO(flavor1,x1,Q2);
-    df2_NLO=get_polPDF_NLO(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO=(df1_NLO*df2_NLO*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO_g0 GRSV
-    df1_NLO_g0=get_polPDF_NLO_g0(flavor1,x1,Q2);
-    df2_NLO_g0=get_polPDF_NLO_g0(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_g0=(df1_NLO_g0*df2_NLO_g0*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO_gmax  GRSV
-    df1_NLO_gmax=get_polPDF_NLO_gmax(flavor1,x1,Q2);
-    df2_NLO_gmax=get_polPDF_NLO_gmax(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_gmax=(df1_NLO_gmax*df2_NLO_gmax*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO_gmin  GRSV
-    df1_NLO_gmin=get_polPDF_NLO_gmin(flavor1,x1,Q2);
-    df2_NLO_gmin=get_polPDF_NLO_gmin(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_gmin=(df1_NLO_gmin*df2_NLO_gmin*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO_m015 GRSV
-    df1_NLO_m015=get_polPDF_NLO_m015(flavor1,x1,Q2);
-    df2_NLO_m015=get_polPDF_NLO_m015(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_m015=(df1_NLO_m015*df2_NLO_m015*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO_m030 GRSV
-    df1_NLO_m030=get_polPDF_NLO_m030(flavor1,x1,Q2);
-    df2_NLO_m030=get_polPDF_NLO_m030(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_m030=(df1_NLO_m030*df2_NLO_m030*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO_m045 GRSV
-    df1_NLO_m045=get_polPDF_NLO_m045(flavor1,x1,Q2);
-    df2_NLO_m045=get_polPDF_NLO_m045(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_m045=(df1_NLO_m045*df2_NLO_m045*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO_m060 GRSV
-    df1_NLO_m060=get_polPDF_NLO_m060(flavor1,x1,Q2);
-    df2_NLO_m060=get_polPDF_NLO_m060(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_m060=(df1_NLO_m060*df2_NLO_m060*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO_m075 GRSV
-    df1_NLO_m075=get_polPDF_NLO_m075(flavor1,x1,Q2);
-    df2_NLO_m075=get_polPDF_NLO_m075(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_m075=(df1_NLO_m075*df2_NLO_m075*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO_m090 GRSV
-    df1_NLO_m090=get_polPDF_NLO_m090(flavor1,x1,Q2);
-    df2_NLO_m090=get_polPDF_NLO_m090(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_m090=(df1_NLO_m090*df2_NLO_m090*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO_m105 GRSV
-    df1_NLO_m105=get_polPDF_NLO_m105(flavor1,x1,Q2);
-    df2_NLO_m105=get_polPDF_NLO_m105(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_m105=(df1_NLO_m105*df2_NLO_m105*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO_p030 GRSV
-    df1_NLO_p030=get_polPDF_NLO_p030(flavor1,x1,Q2);
-    df2_NLO_p030=get_polPDF_NLO_p030(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_p030=(df1_NLO_p030*df2_NLO_p030*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO_p045 GRSV
-    df1_NLO_p045=get_polPDF_NLO_p045(flavor1,x1,Q2);
-    df2_NLO_p045=get_polPDF_NLO_p045(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_p045=(df1_NLO_p045*df2_NLO_p045*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO_p060 GRSV
-    df1_NLO_p060=get_polPDF_NLO_p060(flavor1,x1,Q2);
-    df2_NLO_p060=get_polPDF_NLO_p060(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_p060=(df1_NLO_p060*df2_NLO_p060*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO_p070 GRSV
-    df1_NLO_p070=get_polPDF_NLO_p070(flavor1,x1,Q2);
-    df2_NLO_p070=get_polPDF_NLO_p070(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_p070=(df1_NLO_p070*df2_NLO_p070*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO DSSV
-    df1_NLO_DSSV=get_polPDF_NLO_DSSV(flavor1,x1,Q2);
-    df2_NLO_DSSV=get_polPDF_NLO_DSSV(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_DSSV=(df1_NLO_DSSV*df2_NLO_DSSV*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO LSS SCENARIO 1
-    df1_NLO_LSS1=get_polPDF_NLO_LSS1(flavor1,x1,Q2);
-    df2_NLO_LSS1=get_polPDF_NLO_LSS1(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_LSS1=(df1_NLO_LSS1*df2_NLO_LSS1*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO LSS SCENARIO 2
-    df1_NLO_LSS2=get_polPDF_NLO_LSS2(flavor1,x1,Q2);
-    df2_NLO_LSS2=get_polPDF_NLO_LSS2(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_LSS2=(df1_NLO_LSS2*df2_NLO_LSS2*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO LSS SCENARIO 3
-    df1_NLO_LSS3=get_polPDF_NLO_LSS3(flavor1,x1,Q2);
-    df2_NLO_LSS3=get_polPDF_NLO_LSS3(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_LSS3=(df1_NLO_LSS3*df2_NLO_LSS3*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO AAC SCENARIO 1
-    df1_NLO_AAC1=get_polPDF_NLO_AAC1(flavor1,x1,Q2);
-    df2_NLO_AAC1=get_polPDF_NLO_AAC1(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_AAC1=(df1_NLO_AAC1*df2_NLO_AAC1*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO AAC SCENARIO 2
-    df1_NLO_AAC2=get_polPDF_NLO_AAC2(flavor1,x1,Q2);
-    df2_NLO_AAC2=get_polPDF_NLO_AAC2(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_AAC2=(df1_NLO_AAC2*df2_NLO_AAC2*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO AAC SCENARIO 3
-    df1_NLO_AAC3=get_polPDF_NLO_AAC3(flavor1,x1,Q2);
-    df2_NLO_AAC3=get_polPDF_NLO_AAC3(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_AAC3=(df1_NLO_AAC3*df2_NLO_AAC3*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO BB SCENARIO 1
-    df1_NLO_BB1=get_polPDF_NLO_BB1(flavor1,x1,Q2);
-    df2_NLO_BB1=get_polPDF_NLO_BB1(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_BB1=(df1_NLO_BB1*df2_NLO_BB1*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO BB SCENARIO 2
-    df1_NLO_BB2=get_polPDF_NLO_BB2(flavor1,x1,Q2);
-    df2_NLO_BB2=get_polPDF_NLO_BB2(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_BB2=(df1_NLO_BB2*df2_NLO_BB2*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO DNS SCENARIO 1
-    df1_NLO_DNS1=get_polPDF_NLO_DNS1(flavor1,x1,Q2);
-    df2_NLO_DNS1=get_polPDF_NLO_DNS1(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_DNS1=(df1_NLO_DNS1*df2_NLO_DNS1*partonic_all)/(f1_NLO*f2_NLO);
-
-    //NLO DNS SCENARIO 2
-    df1_NLO_DNS2=get_polPDF_NLO_DNS2(flavor1,x1,Q2);
-    df2_NLO_DNS2=get_polPDF_NLO_DNS2(flavor2,x2,Q2);
-    f1_NLO=get_unpolPDF_NLO(flavor1,x1,Q2);
-    f2_NLO=get_unpolPDF_NLO(flavor2,x2,Q2);
-    weight_NLO_DNS2=(df1_NLO_DNS2*df2_NLO_DNS2*partonic_all)/(f1_NLO*f2_NLO);
-
-    if (0) {
-      printf("LO:  df1_LO=%f, df2_LO=%f, f1_LO=%f, f2_LO=%f, weight_LO=%f\n",df1_LO,df2_LO,f1_LO,f2_LO,weight_LO);
-      printf("NLO:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO,df2_NLO,f1_NLO,f2_NLO,weight_NLO);
-      printf("NLO_gmin:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_gmin,df2_NLO_gmin,f1_NLO,f2_NLO,weight_NLO_gmin);
-      printf("NLO_g0:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_g0,df2_NLO_g0,f1_NLO,f2_NLO,weight_NLO_g0);
-      printf("NLO_gmax:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_gmax,df2_NLO_gmax,f1_NLO,f2_NLO,weight_NLO_gmax);
-      
-      printf("NLO_m015:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m015,df2_NLO_m015,f1_NLO,f2_NLO,weight_NLO_m015);
-      printf("NLO_m030:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m030,df2_NLO_m030,f1_NLO,f2_NLO,weight_NLO_m030);
-      printf("NLO_m045:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m045,df2_NLO_m045,f1_NLO,f2_NLO,weight_NLO_m045);
-      printf("NLO_m060:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m060,df2_NLO_m060,f1_NLO,f2_NLO,weight_NLO_m060);
-      printf("NLO_m075:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m075,df2_NLO_m075,f1_NLO,f2_NLO,weight_NLO_m075);
-      printf("NLO_m090:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m090,df2_NLO_m090,f1_NLO,f2_NLO,weight_NLO_m090);
-      printf("NLO_m105:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_m105,df2_NLO_m105,f1_NLO,f2_NLO,weight_NLO_m105);
-      
-      printf("NLO_p030:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p030,df2_NLO_p030,f1_NLO,f2_NLO,weight_NLO_p030);
-      printf("NLO_p045:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p045,df2_NLO_p045,f1_NLO,f2_NLO,weight_NLO_p045);
-      printf("NLO_p060:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p060,df2_NLO_p060,f1_NLO,f2_NLO,weight_NLO_p060);
-      printf("NLO_p070:  df1_NLO=%f, df2_NLO=%f, f1_NLO=%f, f2_NLO=%f, weight_NLO=%f\n",df1_NLO_p070,df2_NLO_p070,f1_NLO,f2_NLO,weight_NLO_p070);
-      
-      
-      printf("DSSV:  df1_DSSV=%f, df2_DSSV=%f, f1_DSSV=%f, f2_DSSV=%f, weight_DSSV=%f\n",df1_NLO_DSSV,df2_NLO_DSSV,f1_NLO,f2_NLO,weight_NLO_DSSV);
-      printf("LSS1:  df1_LSS1=%f, df2_LSS1=%f, f1_LSS1=%f, f2_LSS1=%f, weight_LSS1=%f\n",df1_NLO_LSS1,df2_NLO_LSS1,f1_NLO,f2_NLO,weight_NLO_LSS1);
-      printf("LSS2:  df1_LSS2=%f, df2_LSS2=%f, f1_LSS2=%f, f2_LSS2=%f, weight_LSS2=%f\n",df1_NLO_LSS2,df2_NLO_LSS2,f1_NLO,f2_NLO,weight_NLO_LSS2);
-      printf("LSS3:  df1_LSS3=%f, df2_LSS3=%f, f1_LSS3=%f, f2_LSS3=%f, weight_LSS3=%f\n",df1_NLO_LSS3,df2_NLO_LSS3,f1_NLO,f2_NLO,weight_NLO_LSS3);
-      printf("AAC1:  df1_AAC1=%f, df2_AAC1=%f, f1_AAC1=%f, f2_AAC1=%f, weight_AAC1=%f\n",df1_NLO_AAC1,df2_NLO_AAC1,f1_NLO,f2_NLO,weight_NLO_AAC1);
-      printf("AAC2:  df1_AAC2=%f, df2_AAC2=%f, f1_AAC2=%f, f2_AAC2=%f, weight_AAC2=%f\n",df1_NLO_AAC2,df2_NLO_AAC2,f1_NLO,f2_NLO,weight_NLO_AAC2);
-      printf("AAC3:  df1_AAC3=%f, df2_AAC3=%f, f1_AAC3=%f, f2_AAC3=%f, weight_AAC3=%f\n",df1_NLO_AAC3,df2_NLO_AAC3,f1_NLO,f2_NLO,weight_NLO_AAC3);
-      
-      printf("BB1:  df1_BB1=%f, df2_BB1=%f, f1_BB1=%f, f2_BB1=%f, weight_BB1=%f\n",df1_NLO_BB1,df2_NLO_BB1,f1_NLO,f2_NLO,weight_NLO_BB1);
-      printf("BB2:  df1_BB2=%f, df2_BB2=%f, f1_BB2=%f, f2_BB2=%f, weight_BB2=%f\n",df1_NLO_BB2,df2_NLO_BB2,f1_NLO,f2_NLO,weight_NLO_BB2);
-      printf("DNS1:  df1_DNS1=%f, df2_DNS1=%f, f1_DNS1=%f, f2_DNS1=%f, weight_DNS1=%f\n",df1_NLO_DNS1,df2_NLO_DNS1,f1_NLO,f2_NLO,weight_NLO_DNS1);
-      printf("DNS2:  df1_DNS2=%f, df2_DNS2=%f, f1_DNS2=%f, f2_DNS2=%f, weight_DNS2=%f\n",df1_NLO_DNS2,df2_NLO_DNS2,f1_NLO,f2_NLO,weight_NLO_DNS2);
-    }
-
+ 
     fillPythiaEvent(mEvent);
+
+    }
 
     return kStOK;
 }
