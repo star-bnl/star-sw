@@ -1,9 +1,4 @@
 MACRO minbias nevent=100  run=1  file=minbias
-****************************************************
-*
-* OBSOLETED MACRO - WON'T WORK
-*
-****************************************************
 * trace on   
 * -----------------------PYTHIA datacards-------------------------------
 application data pythia.data

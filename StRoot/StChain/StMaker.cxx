@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.232 2010/05/24 14:25:54 fisyak Exp $
+// $Id: StMaker.cxx,v 1.233 2010/06/01 20:18:30 perev Exp $
 //
 //
 /*!
@@ -250,8 +250,11 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2008a",      20071101,     1, "y2008a",   "base for y2008: SVT/SSD out, cone in separate SCON"},
   // 
   {"y2009",       20081215,     0, "y2009",    "based on TGeomanager of YF"},
+
   {"y2009a",      20081215,     1, "y2009a",   "y2009+ecalgeo6(JW)"},
+  {"y2009b",      20081215,     2, "y2009b",   "y2009+ecalgeo6(JW) w/ old tracking cuts in eemc."},
   {"y2010",       20091215,     0, "y2010",    "y2009+full BTOF"},
+  {"y2010a",      20091215,     1, "y2010a",   "y2010 production tag"},
 
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
@@ -1955,6 +1958,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.233  2010/06/01 20:18:30  perev
+// Added y2009b and y2010a geometry tags to support simulation requests
+//
 // Revision 1.232  2010/05/24 14:25:54  fisyak
 // move alias time stamp for y2010 from 20091214 to 20091215 (back, as it was before 2010/04/06)
 //
