@@ -1,8 +1,11 @@
 /*****************************************
  *
- * $Id: StTrackPairInfo.hh,v 1.6 2005/11/22 21:44:16 fisyak Exp $
+ * $Id: StTrackPairInfo.hh,v 1.7 2010/06/18 20:17:22 fine Exp $
  *
  * $Log: StTrackPairInfo.hh,v $
+ * Revision 1.7  2010/06/18 20:17:22  fine
+ * add const qualifier to remove the compilation warnings
+ *
  * Revision 1.6  2005/11/22 21:44:16  fisyak
  * Add Ssd to Associator, add IdTruth options for Svt and Ssd
  *
@@ -41,14 +44,14 @@ class StTrackPairInfo {
 
 public:
   StTrackPairInfo(StGlobalTrack* rcTrk,
-		  StMcTrack*     mcTrk,
+		  const StMcTrack*     mcTrk,
 		  unsigned int tpcPings,
 		  unsigned int svtPings,
 		  unsigned int ssdPings,
 		  unsigned int ftpcPings);
     virtual ~StTrackPairInfo();    
 
-    StMcTrack* partnerMcTrack() const;
+    const StMcTrack* partnerMcTrack() const;
     StGlobalTrack* partnerTrack() const;
 
     unsigned int commonTpcHits() const;
@@ -61,7 +64,7 @@ public:
     float percentOfPairedSsdHits() const;
     float percentOfPairedFtpcHits() const;
     
-    void setPartnerMcTrack(StMcTrack*);
+    void setPartnerMcTrack(const StMcTrack*);
     void setPartnerTrack(StGlobalTrack*);
     
     void setCommonTpcHits(unsigned int);
@@ -70,7 +73,7 @@ public:
     void setCommonFtpcHits(unsigned int);
 private:
     StGlobalTrack*  mPartnerTrack;
-    StMcTrack*      mPartnerMcTrack;
+    const StMcTrack* mPartnerMcTrack;
     unsigned int    mCommonTpcHits;
     unsigned int    mCommonSvtHits;
     unsigned int    mCommonSsdHits;
@@ -81,7 +84,7 @@ private:
     float           mRatioCommonToTotalHitsFtpc;
 };
 
-inline StMcTrack* StTrackPairInfo::partnerMcTrack() const { return mPartnerMcTrack; }
+inline const StMcTrack* StTrackPairInfo::partnerMcTrack() const { return mPartnerMcTrack; }
 
 inline StGlobalTrack* StTrackPairInfo::partnerTrack() const { return mPartnerTrack; }
 
