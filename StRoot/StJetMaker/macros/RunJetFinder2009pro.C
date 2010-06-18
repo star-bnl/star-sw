@@ -192,7 +192,7 @@ void RunJetFinder2009pro(int nevents = 1e6,
 
   // Jet cuts
   anapars5->addJetCut(new StProtoJetCutPt(5,200));
-  anapars5->addJetCut(new StProtoJetCutEta(0.95,2.5));
+  anapars5->addJetCut(new StProtoJetCutEta(0.8,2.5));
 
   // Set analysis cuts for EMC branch
   StAnaPars* anaparsEMC = new StAnaPars;
