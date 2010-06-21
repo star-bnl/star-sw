@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: ParityEventCut.h,v 1.3 2000/01/25 17:35:02 laue Exp $
+ * $Id: ParityEventCut.h,v 1.4 2010/06/21 12:57:00 fine Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -26,7 +26,7 @@ class ParityEventCut : public StHbtEventCut {
 
 public:
 
-  ParityEventCut(char* title = "Parity Cut", const int& nbins =50 , const float& Lo =-100, const float& Hi =100);
+  ParityEventCut(const char* title = "Parity Cut", const int& nbins =50 , const float& Lo =-100, const float& Hi =100);
   ~ParityEventCut();
 
   void SetEventMult(const int& lo,const int& hi);

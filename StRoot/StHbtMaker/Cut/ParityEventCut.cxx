@@ -23,7 +23,7 @@
 ClassImp(ParityEventCut)
 #endif
 
-ParityEventCut::ParityEventCut(char* title, const int& nbins, const float& Lo, const float& Hi){
+ParityEventCut::ParityEventCut(const char* title, const int& nbins, const float& Lo, const float& Hi){
   mNEventsPassed =  mNEventsFailed = 0;
 
   RealQuantity = MixedQuantity = 0.0;
