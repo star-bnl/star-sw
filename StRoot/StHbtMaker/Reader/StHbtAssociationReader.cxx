@@ -315,7 +315,7 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     // **********************
     // get associated mctrack
     // **********************
-    StMcTrack* mTrack = (*tIter).second->partnerMcTrack();
+    const StMcTrack* mTrack = (*tIter).second->partnerMcTrack();
 
     // check Pdg Id of the StMcTrack and its mc-mother and mc-daughters
     int pdgCode = 0;
