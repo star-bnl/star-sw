@@ -1,9 +1,10 @@
+export EMCONLINE_TRG_DIR=/ldaphome/onlmon/bemctrgdb2010
 # main directory
 export EMCONLINE_TRG_DIR=/ldaphome/onlmon/bemctrgdb2010
 
 # web output directory
-#export EMCONLINE_TRG_WEBDIR=/onlineweb/www/test2009/ogrebeny
-export EMCONLINE_TRG_WEBDIR=/afs/rhic.bnl.gov/star/doc_protected/www/spin/ogrebeny/bemctrgdb2010
+export EMCONLINE_TRG_WEBDIR=/onlineweb/www/test2009/ogrebeny
+#export EMCONLINE_TRG_WEBDIR=/afs/rhic.bnl.gov/star/doc_protected/www/spin/ogrebeny/bemctrgdb2010
 
 # ROOT script
 export EMCONLINE_TRG_SCRIPT=${EMCONLINE_TRG_DIR}/saveTriggerLoad.C
@@ -48,6 +49,12 @@ export EMCONLINE_TRG_WEBTEMPLATE_LINE=${EMCONLINE_TRG_DIR}/index_template_line.h
 export EMCONLINE_TRG_WEBTEMPLATE_END=${EMCONLINE_TRG_DIR}/index_template_end.html
 export EMCONLINE_TRG_WEBPAGE=${EMCONLINE_TRG_WEBDIR}/index.html
 export EMCONLINE_TRG_WEBPAGE_BODY=${EMCONLINE_TRG_WEBDIR}/index_body.html
+
+# EPICS monitoring
+export EPICS_CAPUT_CMD=/ldaphome/onlmon/slowcontrolinterface/base-3.14.10/bin/linux-x86/caput
+export EMCONLINE_TRG_EPICS_CHANNEL=monit_bemctrgdb
+export EMCONLINE_TRG_EPICS_HEARTBEAT=${EMCONLINE_TRG_DIR}/heartbeat.emconline_trg
+export EMCONLINE_TRG_EPICS_STOPPED=${EMCONLINE_TRG_DIR}/stopped.emconline_trg
 
 # STAR library version
 export EMCONLINE_TRG_STARVER=dev
@@ -114,10 +121,10 @@ if [[ "${EMCONLINE_SLOWCTRL_DSMMASK_DIR}" == "" ]] ; then export EMCONLINE_SLOWC
 # Directory that contains pedestal monitoring installation
 #if [[ "${EMCONLINE_PED_DIR}" == "" ]] ; then export EMCONLINE_PED_DIR='/home/emc/online/emc/pedestal' ; fi
 
-#if [[ "${EMCONLINE_TRG_BEMCSTATUS_CONSUMERS}" == "" ]] ; then export EMCONLINE_TRG_BEMCSTATUS_CONSUMERS="\
-#operator@startrg2.starp.bnl.gov:/home/startrg/trg/cfg/Tier1/DSM_LUT \
-#bemc@evp.starp.bnl.gov:/a/pplot/files/bemc \
-#" ; fi
+if [[ "${EMCONLINE_TRG_BEMCSTATUS_CONSUMERS}" == "" ]] ; then export EMCONLINE_TRG_BEMCSTATUS_CONSUMERS="\
+operator@startrg2.starp.bnl.gov:/home/startrg/trg/cfg/Tier1/DSM_LUT \
+operator@evp.starp.bnl.gov:/a/pplot/files/bemc \
+" ; fi
 
 if [[ "${SCP}" == "" ]] ; then export SCP="${EMCONLINE_TRG_DIR}/scp" ; fi
 
