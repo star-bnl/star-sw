@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.19 2010/06/10 14:51:25 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.20 2010/06/22 16:31:21 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.20  2010/06/22 16:31:21  hmasui
+ * Separate 2D and 1D QA for MC tracks. Add pol0 fit for MC eta, y and phi distributions.
+ *
  * Revision 1.19  2010/06/10 14:51:25  hmasui
  * Added legend for each page
  *
@@ -649,7 +652,7 @@ TPaveText* StEmbeddingQADraw::drawHeader(const TString description,
 }
 
 //____________________________________________________________________________________________________
-void StEmbeddingQADraw::drawLegend(const UInt_t id, const TH1& hembed, const TH1& hreal, 
+void StEmbeddingQADraw::drawLegend(const UInt_t id, TH1* hembed, TH1* hreal, 
     const Option_t* option, const Bool_t doSplit) const
 {
   TLegend* leg = new TLegend(0, 0.2, 1, 0.8);
@@ -659,8 +662,8 @@ void StEmbeddingQADraw::drawLegend(const UInt_t id, const TH1& hembed, const TH1
   leg->SetTextFont(43);
   leg->SetTextSize(15);
 
-  leg->AddEntry(&hembed, getEmbeddingParticleName(id, doSplit), option) ;
-  if(&hreal) leg->AddEntry(&hreal, getRealParticleName(id, doSplit), option) ;
+  leg->AddEntry(hembed, getEmbeddingParticleName(id, doSplit), option) ;
+  if(hreal) leg->AddEntry(hreal, getRealParticleName(id, doSplit), option) ;
   leg->Draw();
 }
 
@@ -974,13 +977,14 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
 
   //----------------------------------------------------------------------------------------------------
   // Track-wise informations
-  TPaveText* header = initCanvas("MC track QA", 2, 3);
+  TPaveText* header = initCanvas("MC track QA (2D)", 2, 2);
 
   /// pT vs eta
   mMainPad->cd(1);
   TH2* hPtVsEta = (TH2D*) getHistogram(Form("hPtVsEta_0_%d", mGeantId));
   if(!hPtVsEta) return kFALSE;
 
+  hPtVsEta->SetTitle("");
   hPtVsEta->Draw("colz");
   hPtVsEta->SetAxisRange(0, mPtMax, "Y");
 
@@ -989,6 +993,7 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
   TH2* hPtVsY = (TH2D*) getHistogram(Form("hPtVsY_0_%d", mGeantId));
   if(!hPtVsY) return kFALSE ;
 
+  hPtVsY->SetTitle("");
   hPtVsY->Draw("colz");
   hPtVsY->SetAxisRange(0, mPtMax, "Y");
 
@@ -997,17 +1002,29 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
   TH2* hPtVsPhi = (TH2D*) getHistogram(Form("hPtVsPhi_0_%d", mGeantId));
   if(!hPtVsPhi) return kFALSE ;
 
+  hPtVsPhi->SetTitle("");
   hPtVsPhi->Draw("colz");
   hPtVsPhi->SetAxisRange(0, mPtMax, "Y");
 
+  mCanvas->cd();
+  mCanvas->Update();
+
+  mPDF->NewPage() ;
+
+  delete header ;
+
   // 1D projections
+  header = initCanvas("MC track QA (1D)", 2, 2);
 
   /// Projections (pt, eta, y, phi)
   TH1* hPt  = (TH1D*) hPtVsPhi->ProjectionY("hPtMc");
   TH1* hEta = (TH1D*) hPtVsEta->ProjectionX("hEtaMc");
   TH1* hY   = (TH1D*) hPtVsY->ProjectionX("hYMc");
   TH1* hPhi = (TH1D*) hPtVsPhi->ProjectionX("hPhiMc");
-  hEta->SetXTitle("#eta, y");
+  hPt->SetTitleOffset(1.0, "X");
+  hPt->SetXTitle("p_{T} (GeV/c)");
+  hEta->SetXTitle("#eta");
+  hY->SetXTitle("rapidity");
 
   hPt ->SetTitle("");
   hEta->SetTitle("");
@@ -1019,42 +1036,46 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
   hY  ->Sumw2() ;
   hPhi->Sumw2() ;
 
-  hY->SetMarkerStyle(20);
-  hEta->SetMarkerStyle(24);
+  hPt->SetMinimum(0.0);
   hPt->SetMaximum(hPt->GetMaximum()*1.2);
+  hPt->SetAxisRange(0, mPtMax, "X");
   hEta->SetMinimum(0.0);
-  hEta->SetMaximum(TMath::Max(hEta->GetMaximum(), hY->GetMaximum())*1.6);
+  hEta->SetMaximum(hEta->GetMaximum()*1.2);
+  hY->SetMinimum(0.0);
+  hY->SetMaximum(hEta->GetMaximum()*1.2);
   hPhi->SetMinimum(0.0);
   hPhi->SetMaximum(hPhi->GetMaximum()*1.2);
 
-  mMainPad->cd(4);
-  hPt->SetAxisRange(0, mPtMax, "X");
-  hPt->Draw();
-
-  // Fitting by pol0
+  // 1. pT
+  // 3. y
+  // 3. phi
+  // 4. eta
   gStyle->SetOptFit(1);
-  TF1* ptFit = new TF1("ptFit", "pol0", 0.0, mPtMax);
-  ptFit->SetLineColor(kRed);
-  ptFit->SetLineWidth(1);
-  ptFit->SetLineStyle(2);
-  ptFit->SetParameter(0, hPt->GetMean(2));
-  hPt->Fit(ptFit, "rq0");
-  ptFit->Draw("same");
+  for(Int_t ipad=0; ipad<4; ipad++){
+    mMainPad->cd(ipad+1);
+    TH1* hdraw = 0 ;
+    if( ipad == 0 ) hdraw = hPt ;
+    if( ipad == 1 ) hdraw = hEta ;
+    if( ipad == 2 ) hdraw = hY ;
+    if( ipad == 3 ) hdraw = hPhi ;
 
-  mMainPad->cd(5);
-  hEta->Draw("h");
-  hY->Draw("hsame");
+    hdraw->Draw();
 
-  TLegend* leg = new TLegend(0.25, 0.72, 0.51, 0.86);
-  leg->SetTextSize(0.07);
-  leg->SetBorderSize(1);
-  leg->SetFillColor(10);
-  leg->AddEntry( hEta, "#eta", "P");
-  leg->AddEntry( hY, "y", "P");
-  leg->Draw();
-
-  mMainPad->cd(6);
-  hPhi->Draw();
+    if( ipad != 0 ){
+      // Fitting by pol0
+      Double_t min = -1.0 ;
+      Double_t max =  1.0 ;
+      if( ipad == 3 ){ min = -TMath::Pi() ; max = TMath::Pi() ; } // phi
+ 
+      TF1* pol0Fit = new TF1(Form("pol0Fit_%d", ipad), "pol0", min, max);
+      pol0Fit->SetLineColor(kRed);
+      pol0Fit->SetLineWidth(1);
+      pol0Fit->SetLineStyle(2);
+      pol0Fit->SetParameter(0, hdraw->GetMean(2));
+      hdraw->Fit(pol0Fit, "rq0");
+      pol0Fit->Draw("same");
+    }
+  }
 
   mCanvas->cd();
   mCanvas->Update();
@@ -1714,7 +1735,7 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
       // Draw legend in the last pad in each Canvas
       if( ipad == 1 ){
         mMainPad->cd(npadMax);
-        drawLegend(id, *hdEdxEmbed, *hdEdxReal, "L", kTRUE) ;
+        drawLegend(id, hdEdxEmbed, hdEdxReal, "L", kTRUE) ;
 //        TLegend* leg = new TLegend(0, 0.2, 1, 0.8);
 //        leg->SetFillColor(10);
 //        leg->SetTextFont(43);
@@ -1924,7 +1945,7 @@ Bool_t StEmbeddingQADraw::drawProjection3D(const TString name) const
         // Draw legend in the last pad for each Canvas
         if( ipad == 1 ){
           mMainPad->cd(npadMax);
-          drawLegend(id, *hEmbed, *hReal, "L", kTRUE);
+          drawLegend(id, hEmbed, hReal, "L", kTRUE);
         }
 
         ipad++;
