@@ -42,8 +42,11 @@
 //
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.h,v 1.12 2010/06/10 14:51:01 hmasui Exp $
+ * $Id: StEmbeddingQADraw.h,v 1.13 2010/06/22 16:31:17 hmasui Exp $
  * $Log: StEmbeddingQADraw.h,v $
+ * Revision 1.13  2010/06/22 16:31:17  hmasui
+ * Separate 2D and 1D QA for MC tracks. Add pol0 fit for MC eta, y and phi distributions.
+ *
  * Revision 1.12  2010/06/10 14:51:01  hmasui
  * Added particle name functions
  *
@@ -200,7 +203,7 @@ class StEmbeddingQADraw {
         const Double_t textSize = 0.032) const;
 
     /// Draw legend
-    void drawLegend(const UInt_t id, const TH1& hembed, const TH1& hreal, const Option_t* option="L",
+    void drawLegend(const UInt_t id, TH1* hembed, TH1* hreal, const Option_t* option="L",
         const Bool_t doSplit=kFALSE) const ;
 
     /// Event-wise informations
