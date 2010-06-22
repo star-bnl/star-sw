@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.36 2010/05/10 17:15:34 fine Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.37 2010/06/22 16:23:25 fine Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.37  2010/06/22 16:23:25  fine
+ * introduce the correct const StMcTarck * pointer cast
+ *
  * Revision 1.36  2010/05/10 17:15:34  fine
  * RT # 1932 Remove the redundant correction. Restore 1.34 rev
  *
@@ -758,7 +761,7 @@ Int_t StMcAnalysisMaker::Make()
   else
     recMom = firstTrack->geometry()->momentum();
   for (rcTrackMapIter trkIt=trackBounds.first; trkIt!=trackBounds.second; ++trkIt) { 
-    StMcTrack*   origTrk = (*trkIt).second->partnerMcTrack();
+    const StMcTrack*   origTrk = (*trkIt).second->partnerMcTrack();
     cout << "[" << abs(recMom) << ", ";
     cout << abs((*trkIt).second->partnerMcTrack()->momentum()) << "]" << endl;
     cout << "These tracks have : \n";
@@ -770,7 +773,7 @@ Int_t StMcAnalysisMaker::Make()
   //          Make an Ntuple with rec & monte carlo mom, mean hit difference, and # of common hits
   StGlobalTrack* recTrack;
   StPrimaryTrack* primTrk;
-  StMcTrack*     mcTrack;
+  const StMcTrack*     mcTrack;
   StThreeVectorD p(0,0,0);
   StThreeVectorD pmc(0,0,0);
   float diff =0;
@@ -867,7 +870,7 @@ Int_t StMcAnalysisMaker::Make()
   // - x and y positions of the hits from the  Monte Carlo  track.
   
   unsigned int maxCommonTpcHits = 0;
-  StMcTrack* partner = 0;
+  const StMcTrack* partner = 0;
   trackBounds = theTrackMap->equal_range(firstTrack);
   for (rcTrackMapIter rcIt = trackBounds.first;
        rcIt != trackBounds.second;
@@ -885,10 +888,10 @@ Int_t StMcAnalysisMaker::Make()
        rcHitIt != theHits.end();
        rcHitIt++) coordRec->Fill((*rcHitIt)->position().x(),(*rcHitIt)->position().y());
   if (partner) {
-    for (mcHitIt  = partner->tpcHits().begin();
+    for (mcHitIt  = ((std::vector<StMcTpcHit*> *)&partner->tpcHits() )->begin();
 	 mcHitIt != partner->tpcHits().end();
 	 mcHitIt++) coordMcPartner->Fill((*mcHitIt)->position().x(),(*mcHitIt)->position().y());
-    for (mcSitIt  = partner->svtHits().begin();
+    for (mcSitIt  = ((std::vector<StMcSvtHit*> *)&partner->svtHits())->begin();
 	 mcSitIt != partner->svtHits().end();
 	 mcSitIt++) coordMcPartner->Fill((*mcSitIt)->position().x(),(*mcSitIt)->position().y());
     
