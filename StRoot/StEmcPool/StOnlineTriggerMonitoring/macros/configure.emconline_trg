@@ -42,6 +42,8 @@
         chmod a+x $SRC_PATH/macros/job.emconline_trg
         chmod a+x $SRC_PATH/macros/status.emconline_trg
         chmod a+x $SRC_PATH/macros/update.emconline_trg
+        chmod a+x $SRC_PATH/macros/heartbeat.emconline_trg
+        chmod a+x $SRC_PATH/macros/stopped.emconline_trg
 
 	export CFG_FILE=$DST_PATH/.emconline_trg.cfg.sh
 	rm -f $CFG_FILE
@@ -80,6 +82,9 @@
         ln -sf $SRC_PATH/macros/index_template_begin.html $DST_PATH
         ln -sf $SRC_PATH/macros/index_template_line.html $DST_PATH
         ln -sf $SRC_PATH/macros/index_template_end.html $DST_PATH
+
+        ln -sf $SRC_PATH/macros/heartbeat.emconline_trg $DST_PATH
+        ln -sf $SRC_PATH/macros/stopped.emconline_trg $DST_PATH
 
 	source $DST_PATH/.emconline_trg.cfg.sh
 	update_desktop_icon_trg
