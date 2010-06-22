@@ -1,9 +1,9 @@
 /***************************************************************************
  *
- * $Id: StTrackPairInfo.cc,v 1.7 2010/06/18 20:17:22 fine Exp $
+ * $Id: StTrackPairInfo.cc,v 1.8 2010/06/22 22:06:33 fine Exp $
  * $Log: StTrackPairInfo.cc,v $
- * Revision 1.7  2010/06/18 20:17:22  fine
- * add const qualifier to remove the compilation warnings
+ * Revision 1.8  2010/06/22 22:06:33  fine
+ * roll back the previous version to restore the nightly builds
  *
  * Revision 1.6  2005/11/22 21:44:16  fisyak
  * Add Ssd to Associator, add IdTruth options for Svt and Ssd
@@ -33,10 +33,10 @@
 #include "StMcTrack.hh"
 #include "StGlobalTrack.h"
 #include "StTrackDetectorInfo.h"
-static const char rcsid[] = "$Id: StTrackPairInfo.cc,v 1.7 2010/06/18 20:17:22 fine Exp $";
+static const char rcsid[] = "$Id: StTrackPairInfo.cc,v 1.8 2010/06/22 22:06:33 fine Exp $";
 
 StTrackPairInfo::StTrackPairInfo(StGlobalTrack* rcTrk,
-				 const StMcTrack*     mcTrk,
+				 StMcTrack*     mcTrk,
 				 unsigned int tpcPings,
 				 unsigned int svtPings,
 				 unsigned int ssdPings,
@@ -81,7 +81,7 @@ StTrackPairInfo::StTrackPairInfo(StGlobalTrack* rcTrk,
 
 StTrackPairInfo::~StTrackPairInfo() { /* noop */ }
 
-void StTrackPairInfo::setPartnerMcTrack(const StMcTrack* val) { mPartnerMcTrack = val; }
+void StTrackPairInfo::setPartnerMcTrack(StMcTrack* val) { mPartnerMcTrack = val; }
 
 void StTrackPairInfo::setPartnerTrack(StGlobalTrack* val) { mPartnerTrack = val; }
 
