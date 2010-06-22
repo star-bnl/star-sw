@@ -7,6 +7,7 @@
 #include <TCanvas.h>
 #include <TH3F.h>
 #include <TPolyLine3D.h>
+#include <TView.h>
 
 namespace Garfield {
 
@@ -17,9 +18,10 @@ class DriftView {
   public:
     // Constructor
     DriftView();
-    DriftView(std::string title);
     // Destructor
     ~DriftView();
+    
+    void SetCanvas(TCanvas* c);
     
     // Set area to be plotted
     void SetArea(double xmin, double ymin, double zmin, 
@@ -41,11 +43,12 @@ class DriftView {
 
     // Canvas
     TCanvas* canvas;
+    bool hasExternalCanvas;
     
     // Box dimensions
     double xMin, yMin, zMin, xMax, yMax, zMax;
-    // Frame    
-    TH3F frame;
+    // View
+    TView* view;
 
     int nDriftLines;
     std::vector<TPolyLine3D> driftLines;

@@ -223,7 +223,6 @@ class MediumMagboltz86 : public Medium {
     static const int nMaxGases = 6;
     static const int nMaxInelasticTerms = 220;
     static const int nMaxLevels = 512;
-    static const int nMaxPhotonLevels = 12;
     
     // Gas mixture
     int gas[nMaxGases];
@@ -295,6 +294,10 @@ class MediumMagboltz86 : public Medium {
       std::vector<double> p;
       // Final level
       std::vector<int> final;
+      // Type of transition
+      std::vector<int> type;
+      // Oscillator strength
+      double osc;
       // Total rate
       double rate; 
     };
@@ -323,9 +326,14 @@ class MediumMagboltz86 : public Medium {
     // Total photon collision frequencies
     std::vector<double> cfTotGamma;
     // Photon collision frequencies
-    double cfGamma[nEnergySteps][nMaxPhotonLevels];
-    int csTypeGamma[nMaxPhotonLevels];
-    int nPhotonCollisions[3];
+    std::vector<std::vector<double> > cfGamma;
+    std::vector<int> csTypeGamma;
+    // Photon collision counters
+    // 0: elastic
+    // 1: ionisation
+    // 2: inelastic
+    // 3: excitation
+    int nPhotonCollisions[4];
 
     // Ion transport properties
     bool hasIonMobility;

@@ -537,20 +537,25 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
     }
     level = iUp;
   }
-  
-  // Collision type
-  type = csTypeGamma[level] % 3;
-  int ngas = int(csTypeGamma[level] / 3);
-  ++nPhotonCollisions[type];
-
-  // Secondary electron energy
+ 
+  // Secondary electron energy 
   esec = 0.;
-  // Ionising collision
-  if (type == 1) {
-    esec = e - ionPot[ngas];
-    if (esec < 1.e-20) esec = 1.e-20;
-    e1 = 0.;
-  }
+  // Collision type
+  if (type < 0) {
+    // Excitation
+    ++nPhotonCollisions[3];
+    type = 3;
+  } else {
+    type = csTypeGamma[level] % 3;
+    int ngas = int(csTypeGamma[level] / 3);
+    ++nPhotonCollisions[type];
+    // Ionising collision
+    if (type == 1) {
+      esec = e - ionPot[ngas];
+      if (esec < Small) esec = Small;
+      e1 = 0.;
+    }
+  } 
 
   // Determine the scattering angle
   ctheta = 1. - 2. * RndmUniform();
@@ -1059,7 +1064,7 @@ MediumMagboltz86::Mixer() {
   inpt_.efinal = eFinal;
   inpt_.estep = eStep;
   
-  // Correct for density
+  // Atomic density
   const double density = LoschmidtNumber * (pressure / AtmosphericPressure) * 
                          (273.15 / temperature);
   const double prefactor = density * SpeedOfLight * sqrt(2. / ElectronMass);
@@ -1241,6 +1246,8 @@ MediumMagboltz86::Mixer() {
         ++np;
         if (useCsOutput) outfile << qIn[iE][j] << "  ";
         cf[iE][np] = qIn[iE][j] * van;
+        // Scale the excitation cross-sections (for error estimates)
+        // if (csType[np] == 4) cf[iE][np] *= 1.3;
         if (cf[iE][np] < 0.) {
           std::cerr << "MediumMagboltz86::Mixer:" << std::endl;
           std::cerr << "    Negative inelastic cross-section at " 
@@ -1332,12 +1339,14 @@ MediumMagboltz86::Mixer() {
     }
   }
 
+  // If requested, make a table of de-excitation channels
   if (useDeexcitation) ComputeDeexcitationTable();
+  // Fill the photon collision rates table
   if (!ComputePhotonCollisionTable()) {
      std::cerr << "MediumMagboltz86: " << std::endl;
      std::cerr << "    Photon collision rates could not be calculated." 
                << std::endl;
-     if (useDeexcitation)return false;
+     if (useDeexcitation) return false;
   }
 
   return true;
@@ -1371,6 +1380,9 @@ MediumMagboltz86::ComputeDeexcitationTable() {
   for (int i = nMaxLevels; i--;) iDeexcitation[i] = -1;
   deexcitations.clear();
 
+  // Concentrations of "de-excitable" gases
+  bool withAr = false;
+  double cAr = 0.;
   std::map<std::string, int> mapLevels;
   // Make a mapping of all excitation levels 
   for (int i = 0; i < nTerms; ++i) {
@@ -1378,6 +1390,10 @@ MediumMagboltz86::ComputeDeexcitationTable() {
     switch (gas[int(csType[i] / 6)]) {
       case 2:
         // Argon
+        if (!withAr) {
+          withAr = true;
+          cAr = fraction[int(csType[i] / 6)];
+        }
         std::string level = "       ";
         for (int j = 0; j < 7; ++j) level[j] = description[i][5 + j];
         if      (level == "1S5    ") mapLevels["Ar_1S5"] = i;
@@ -1437,99 +1453,112 @@ MediumMagboltz86::ComputeDeexcitationTable() {
     iDeexcitation[(*itMap).second] = nDeexcitations;
     ++nDeexcitations;
   }
- 
+
+  // Radiative de-excitation channels
+  // Transition probabilities from NIST Atomic Spectra Database 
+  // Oscillator strengths from Berkowitz
+  // Conversion from oscillator strength to transition probability
+  const double f2A = 2. * SpeedOfLight * FineStructureConstant / 
+                    (3. * ElectronMass * HbarC);
   deexcitation newDxc;
   for (itMap = mapLevels.begin(); itMap != mapLevels.end(); itMap++) {
     std::string level = (*itMap).first;
     newDxc.label = level;
     newDxc.energy = energyLoss[(*itMap).second] * rgas[(*itMap).second];
-    if (level == "Ar_1S5" || level == "Ar_1S3") {
-      // Metastable 4s levels
-      newDxc.p.clear(); newDxc.final.clear(); newDxc.nChannels = 0;
+    newDxc.osc = 0.;
+    newDxc.p.clear(); newDxc.final.clear(); newDxc.type.clear();
+    newDxc.nChannels = 0;
+    if (level == "Ar_1S3" || level == "Ar_1S5") {
+      newDxc.p.clear(); newDxc.final.clear(); newDxc.type.clear(); 
     } else if (level == "Ar_1S4") {
-      int nc = 1;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.058;
+      int nc = 1; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.119; newDxc.final[0] = -1;
     } else if (level == "Ar_1S2") {
-      int nc = 1;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.2214;
+      int nc = 1; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.51; newDxc.final[0] = -1;
     } else if (level == "Ar_2P10") {
-      int nc = 4;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 4; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.0189;  newDxc.final[0] = mapDxc["Ar_1S5"];
       newDxc.p[1] = 5.43e-3; newDxc.final[1] = mapDxc["Ar_1S4"];
       newDxc.p[2] = 9.8e-4;  newDxc.final[2] = mapDxc["Ar_1S3"];
       newDxc.p[3] = 1.9e-4;  newDxc.final[3] = mapDxc["Ar_1S2"];
     } else if (level == "Ar_2P9") {
-      int nc = 1;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 1; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.0331; newDxc.final[0] = mapDxc["Ar_1S5"];
     } else if (level == "Ar_2P8") {
-      int nc = 3;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 3; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 9.28e-3; newDxc.final[0] = mapDxc["Ar_1S5"];
       newDxc.p[1] = 0.0215;  newDxc.final[1] = mapDxc["Ar_1S4"];
       newDxc.p[2] = 1.47e-3; newDxc.final[2] = mapDxc["Ar_1S2"];
     } else if (level == "Ar_2P7") {
-      int nc = 4; 
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 4; newDxc.nChannels = nc; 
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 5.18e-3; newDxc.final[0] = mapDxc["Ar_1S5"];
       newDxc.p[1] = 0.025;   newDxc.final[1] = mapDxc["Ar_1S4"];
       newDxc.p[2] = 2.43e-3; newDxc.final[2] = mapDxc["Ar_1S3"];
       newDxc.p[3] = 1.06e-3; newDxc.final[3] = mapDxc["Ar_1S2"];
     } else if (level == "Ar_2P6") {
-      int nc = 3;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 3; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.0245;  newDxc.final[0] = mapDxc["Ar_1S5"];
       newDxc.p[1] = 4.9e-3;  newDxc.final[1] = mapDxc["Ar_1S4"];
       newDxc.p[2] = 5.03e-3; newDxc.final[2] = mapDxc["Ar_1S2"];
     } else if (level == "Ar_2P5") {
-      int nc = 1;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels =nc;
+      int nc = 1; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.0402; newDxc.final[0] = mapDxc["Ar_1S4"];
     } else if (level == "Ar_2P4") {
-      int nc = 4;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 4; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 6.25e-4; newDxc.final[0] = mapDxc["Ar_1S5"];
       newDxc.p[1] = 2.2e-5;  newDxc.final[1] = mapDxc["Ar_1S4"];
       newDxc.p[2] = 0.0186;  newDxc.final[2] = mapDxc["Ar_1S3"];
       newDxc.p[3] = 0.0139;  newDxc.final[3] = mapDxc["Ar_1S2"];
     } else if (level == "Ar_2P3") {
-      int nc = 3;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 3; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 3.8e-3;  newDxc.final[0] = mapDxc["Ar_1S5"];
       newDxc.p[1] = 8.47e-3; newDxc.final[1] = mapDxc["Ar_1S4"];
       newDxc.p[2] = 0.0223;  newDxc.final[2] = mapDxc["Ar_1S3"];
     } else if (level == "Ar_2P2") {
-      int nc = 4;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 4; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 6.39e-3; newDxc.final[0] = mapDxc["Ar_1S5"];
       newDxc.p[1] = 1.83e-3; newDxc.final[1] = mapDxc["Ar_1S4"];
       newDxc.p[2] = 0.0117;  newDxc.final[2] = mapDxc["Ar_1S3"];
       newDxc.p[3] = 0.0153;  newDxc.final[3] = mapDxc["Ar_1S2"];
     } else if (level == "Ar_2P1") {
-      int nc = 2;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 2; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 2.36e-4; newDxc.final[0] = mapDxc["Ar_1S4"];
       newDxc.p[1] = 0.0445;  newDxc.final[1] = mapDxc["Ar_1S2"];
     } else if (level == "Ar_3D6") {
-      int nc = 3;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 3; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 8.1e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
       newDxc.p[1] = 1.2e-4; newDxc.final[1] = mapDxc["Ar_2P4"];
       newDxc.p[2] = 3.6e-4; newDxc.final[2] = mapDxc["Ar_2P2"];
     } else if (level == "Ar_3D5") {
-      int nc = 5;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.0011;
+      int nc = 6; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 7.4e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
       newDxc.p[1] = 3.9e-5; newDxc.final[1] = mapDxc["Ar_2P8"];
       newDxc.p[2] = 3.2e-5; newDxc.final[2] = mapDxc["Ar_2P4"];
       newDxc.p[3] = 1.4e-4; newDxc.final[3] = mapDxc["Ar_2P3"];
       newDxc.p[4] = 1.7e-4; newDxc.final[4] = mapDxc["Ar_2P2"];
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[5] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[5] = -1;
     } else if (level == "Ar_3D3") {
-      int nc = 6;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 6; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 4.9e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
       newDxc.p[1] = 1.2e-4; newDxc.final[1] = mapDxc["Ar_2P8"];
       newDxc.p[2] = 2.6e-4; newDxc.final[2] = mapDxc["Ar_2P7"];
@@ -1537,21 +1566,21 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[4] = 3.9e-4; newDxc.final[4] = mapDxc["Ar_2P3"];
       newDxc.p[5] = 1.1e-4; newDxc.final[5] = mapDxc["Ar_2P2"];
     } else if (level == "Ar_3D4!") {
-      newDxc.p.clear(); newDxc.final.clear(); newDxc.nChannels = 0;
+      newDxc.p.clear(); newDxc.final.clear();  newDxc.type.clear();
     } else if (level == "Ar_3D4") {
-      int nc = 2;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 2; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.011;  newDxc.final[0] = mapDxc["Ar_2P8"];
       newDxc.p[1] = 8.8e-5; newDxc.final[1] = mapDxc["Ar_2P6"];
     } else if (level == "Ar_3D1!!") {
-      int nc = 3;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 3; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 1.2e-4; newDxc.final[0] = mapDxc["Ar_2P9"];
       newDxc.p[1] = 5.7e-3; newDxc.final[1] = mapDxc["Ar_2P8"];
       newDxc.p[2] = 7.3e-3; newDxc.final[2] = mapDxc["Ar_2P7"];
     } else if (level == "Ar_2S5") {
-      int nc = 8;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 8; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 4.9e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
       newDxc.p[1] = 0.011;  newDxc.final[1] = mapDxc["Ar_2P9"];
       newDxc.p[2] = 1.1e-3; newDxc.final[2] = mapDxc["Ar_2P8"];
@@ -1561,8 +1590,9 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[6] = 1.2e-4; newDxc.final[6] = mapDxc["Ar_2P3"];
       newDxc.p[7] = 3.1e-4; newDxc.final[7] = mapDxc["Ar_2P2"];
     } else if (level == "Ar_2S4") {
-      int nc = 10;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.026;
+      int nc = 10; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.077;   newDxc.final[0] = -1;
       newDxc.p[1] = 2.44e-3; newDxc.final[1] = mapDxc["Ar_2P10"];
       newDxc.p[2] = 8.9e-3;  newDxc.final[2] = mapDxc["Ar_2P8"];
@@ -1574,69 +1604,80 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[8] = 3.e-5;   newDxc.final[8] = mapDxc["Ar_2P2"];
       newDxc.p[9] = 1.6e-4;  newDxc.final[9] = mapDxc["Ar_2P1"];
     } else if (level == "Ar_3D1!") {
-      int nc = 3;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 3; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 3.1e-3; newDxc.final[0] = mapDxc["Ar_2P9"];
       newDxc.p[1] = 2.e-3;  newDxc.final[1] = mapDxc["Ar_2P8"];
       newDxc.p[2] = 9.8e-6; newDxc.final[2] = mapDxc["Ar_2P3"];
     } else if (level == "Ar_3D2") {
-      int nc = 4;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.09;
+      int nc = 5; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.27;    newDxc.final[0] = -1;
       newDxc.p[1] = 9.52e-4; newDxc.final[1] = mapDxc["Ar_2P8"];
       newDxc.p[2] = 0.011;   newDxc.final[2] = mapDxc["Ar_2P7"];
       newDxc.p[3] = 4.3e-3;  newDxc.final[3] = mapDxc["Ar_2P6"];
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[4] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[4] = -1;
     } else if (level == "Ar_3S1!!!!") {
-      int nc = 3;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 3; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 8.3e-4; newDxc.final[0] = mapDxc["Ar_2P8"];
       newDxc.p[1] = 0.013;  newDxc.final[1] = mapDxc["Ar_2P4"];
       newDxc.p[2] = 2.2e-3; newDxc.final[2] = mapDxc["Ar_2P3"];
     } else if (level == "Ar_3S1!!") {
-      int nc = 3;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 3; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 3.69e-4; newDxc.final[0] = mapDxc["Ar_2P7"];
       newDxc.p[1] = 3.76e-3; newDxc.final[1] = mapDxc["Ar_2P6"];
       newDxc.p[2] = 6.2e-3;  newDxc.final[2] = mapDxc["Ar_2P2"];
     } else if (level == "Ar_3S1!!!") {
-      int nc = 1;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 1; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.015; newDxc.final[0] = mapDxc["Ar_2P3"];
     } else if (level == "Ar_2S3") {
-      int nc = 4;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      int nc = 4; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 3.26e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
       newDxc.p[1] = 2.22e-3; newDxc.final[1] = mapDxc["Ar_2P7"];
       newDxc.p[2] = 0.01;    newDxc.final[2] = mapDxc["Ar_2P4"];
       newDxc.p[3] = 5.1e-3;  newDxc.final[3] = mapDxc["Ar_2P2"];
     } else if (level == "Ar_2S2") {
-      int nc = 4;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.012;
+      int nc = 4; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.035;  newDxc.final[0] = -1;
       newDxc.p[1] = 8.9e-3; newDxc.final[1] = mapDxc["Ar_2P3"];
       newDxc.p[2] = 3.4e-3; newDxc.final[2] = mapDxc["Ar_2P2"];
       newDxc.p[3] = 1.9e-3; newDxc.final[3] = mapDxc["Ar_2P1"];
     } else if (level == "Ar_3S1!") {
-      int nc = 6;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.106;
+      int nc = 7; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.318;   newDxc.final[0] = -1;
       newDxc.p[1] = 3.96e-4; newDxc.final[1] = mapDxc["Ar_2P6"];
       newDxc.p[2] = 4.2e-4;  newDxc.final[2] = mapDxc["Ar_2P5"];
       newDxc.p[3] = 4.5e-3;  newDxc.final[3] = mapDxc["Ar_2P4"];
       newDxc.p[4] = 7.1e-3;  newDxc.final[4] = mapDxc["Ar_2P2"];
       newDxc.p[5] = 5.2e-3;  newDxc.final[5] = mapDxc["Ar_2P1"];
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[6] = -1;
     } else if (level == "Ar_4D5") {
-      int nc = 6;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.0019;
+      int nc = 7; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 2.78e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
       newDxc.p[1] = 2.8e-4;  newDxc.final[1] = mapDxc["Ar_2P8"];
       newDxc.p[2] = 8.6e-4;  newDxc.final[2] = mapDxc["Ar_2P6"];
       newDxc.p[3] = 9.2e-4;  newDxc.final[3] = mapDxc["Ar_2P5"];
       newDxc.p[4] = 4.6e-4;  newDxc.final[4] = mapDxc["Ar_2P3"];
       newDxc.p[5] = 1.6e-4;  newDxc.final[5] = mapDxc["Ar_2P2"];
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[6] = -1;
     } else if (level == "Ar_3S4") {
-      int nc = 9;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.0144;
+      int nc = 10; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 4.21e-4; newDxc.final[0] = mapDxc["Ar_2P10"];
       newDxc.p[1] = 2.e-3;   newDxc.final[1] = mapDxc["Ar_2P8"];
       newDxc.p[2] = 1.7e-3;  newDxc.final[2] = mapDxc["Ar_2P7"];
@@ -1646,22 +1687,31 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[6] = 4.2e-6;  newDxc.final[6] = mapDxc["Ar_2P3"];
       newDxc.p[7] = 3.3e-5;  newDxc.final[7] = mapDxc["Ar_2P2"];
       newDxc.p[8] = 9.7e-5;  newDxc.final[8] = mapDxc["Ar_2P1"];
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[9] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[9] = -1;
     } else if (level == "Ar_4D2") {
-      int nc = 1;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.048;
+      int nc = 2; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 1.7e-4; newDxc.final[0] = mapDxc["Ar_2P7"];
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[1] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[1] = -1;
     } else if (level == "Ar_4S1!") {
-      int nc = 6;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.0209;
+      int nc = 7; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 1.05e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
       newDxc.p[1] = 3.1e-5;  newDxc.final[1] = mapDxc["Ar_2P8"];
       newDxc.p[2] = 2.5e-5;  newDxc.final[2] = mapDxc["Ar_2P7"];
       newDxc.p[3] = 4.e-4;   newDxc.final[3] = mapDxc["Ar_2P6"];
       newDxc.p[4] = 5.8e-5;  newDxc.final[4] = mapDxc["Ar_2P5"];
       newDxc.p[5] = 1.2e-4;  newDxc.final[5] = mapDxc["Ar_2P3"];
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[6] = -1;
     } else if (level == "Ar_3S2") {
-      int nc = 9;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.0221;
+      int nc = 10; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 2.85e-4; newDxc.final[0] = mapDxc["Ar_2P10"];
       newDxc.p[1] = 5.1e-5;  newDxc.final[1] = mapDxc["Ar_2P8"];
       newDxc.p[2] = 5.3e-5;  newDxc.final[2] = mapDxc["Ar_2P7"];
@@ -1671,9 +1721,12 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[6] = 2.48e-3; newDxc.final[6] = mapDxc["Ar_2P3"];
       newDxc.p[7] = 9.6e-4;  newDxc.final[7] = mapDxc["Ar_2P2"];
       newDxc.p[8] = 3.59e-4; newDxc.final[8] = mapDxc["Ar_2P1"];
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[9] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[9] = -1;
     } else if (level == "Ar_5D5") {
-      int nc = 8;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.0041;
+      int nc = 9; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 2.2e-3;  newDxc.final[0] = mapDxc["Ar_2P10"];
       newDxc.p[1] = 1.1e-4;  newDxc.final[1] = mapDxc["Ar_2P8"];
       newDxc.p[2] = 7.6e-5;  newDxc.final[2] = mapDxc["Ar_2P7"];
@@ -1682,38 +1735,53 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[5] = 2.1e-4;  newDxc.final[5] = mapDxc["Ar_2P4"];
       newDxc.p[6] = 2.4e-4;  newDxc.final[6] = mapDxc["Ar_2P3"];
       newDxc.p[7] = 1.2e-4;  newDxc.final[7] = mapDxc["Ar_2P2"];
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[8] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[8] = -1;
     } else if (level == "Ar_4S4") {
-      int nc = 6;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.0139;
+      int nc = 7; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 1.9e-4; newDxc.final[0] = mapDxc["Ar_2P10"];
       newDxc.p[1] = 1.1e-3; newDxc.final[1] = mapDxc["Ar_2P8"];
       newDxc.p[2] = 5.2e-4; newDxc.final[2] = mapDxc["Ar_2P7"];
       newDxc.p[3] = 5.1e-4; newDxc.final[3] = mapDxc["Ar_2P6"];
       newDxc.p[4] = 9.4e-5; newDxc.final[4] = mapDxc["Ar_2P5"];
       newDxc.p[5] = 5.4e-5; newDxc.final[5] = mapDxc["Ar_2P4"];
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[6] = -1;
     } else if (level == "Ar_5D2") {
-      int nc = 4;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.0426;
+      int nc = 5; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 5.9e-5; newDxc.final[0] = mapDxc["Ar_2P8"];
       newDxc.p[1] = 9.e-6;  newDxc.final[1] = mapDxc["Ar_2P7"];
       newDxc.p[2] = 1.5e-4; newDxc.final[2] = mapDxc["Ar_2P5"];
       newDxc.p[3] = 3.1e-5; newDxc.final[3] = mapDxc["Ar_2P2"];
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[4] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[4] = -1;
     } else if (level == "Ar_6D5") {
-      int nc = 6;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.0062;
+      int nc = 7; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 1.9e-3;  newDxc.final[0] = mapDxc["Ar_2P10"];
       newDxc.p[1] = 4.2e-4;  newDxc.final[1] = mapDxc["Ar_2P6"];
       newDxc.p[2] = 3.e-4;   newDxc.final[2] = mapDxc["Ar_2P5"];
       newDxc.p[3] = 5.1e-5;  newDxc.final[3] = mapDxc["Ar_2P4"];
       newDxc.p[4] = 6.6e-5;  newDxc.final[4] = mapDxc["Ar_2P3"];
       newDxc.p[5] = 1.21e-4; newDxc.final[5] = mapDxc["Ar_2P1"];
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[6] = -1;
     } else if (level == "Ar_5S1!") {
-      int nc = 1;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.0562;
+      int nc = 2; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 7.7e-5; newDxc.final[0] = mapDxc["Ar_2P5"];
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[1] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[1] = -1;
     } else if (level == "Ar_4S2") {
-      int nc = 7;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.0069;
+      int nc = 8; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 4.5e-4; newDxc.final[0] = mapDxc["Ar_2P10"];
       newDxc.p[1] = 2.e-4;  newDxc.final[1] = mapDxc["Ar_2P8"];
       newDxc.p[2] = 2.1e-4; newDxc.final[2] = mapDxc["Ar_2P7"];
@@ -1721,20 +1789,30 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[4] = 1.8e-4; newDxc.final[4] = mapDxc["Ar_2P4"];
       newDxc.p[5] = 9.e-4;  newDxc.final[5] = mapDxc["Ar_2P3"];
       newDxc.p[6] = 3.3e-4; newDxc.final[6] = mapDxc["Ar_2P2"];
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[7] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[7] = -1;
     } else if (level == "Ar_5S4") {
-      int nc = 5;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
+      newDxc.osc = 0.0211;
+      int nc = 5; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 3.6e-4; newDxc.final[0] = mapDxc["Ar_2P8"];
       newDxc.p[1] = 1.2e-4; newDxc.final[1] = mapDxc["Ar_2P6"];
       newDxc.p[2] = 1.5e-4; newDxc.final[2] = mapDxc["Ar_2P4"];
       newDxc.p[3] = 1.4e-4; newDxc.final[3] = mapDxc["Ar_2P2"];
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[4] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[4] = -1;
     } else if (level == "Ar_6D2") {
-      int nc = 0;
-      newDxc.p.clear(); newDxc.final.clear(); newDxc.nChannels = nc;
+      newDxc.osc = 0.0574;
+      int nc = 1; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[0] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[0] = -1;
     } else if (level == "Ar_High") {
-      int nc = 1;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.nChannels = nc;
-      newDxc.p[0] = 1.e-2; newDxc.final[0] = -1;
+      newDxc.osc = 0.0335;
+      int nc = 1; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
+      // Transition probability to ground state calculated from osc. strength
+      newDxc.p[0] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[0] = -1;
     } else {
       std::cerr << "MediumMagboltz86::ComputeDeexcitationTable:" << std::endl;
       std::cerr << "    Missing de-excitation data for level " 
@@ -1751,52 +1829,114 @@ MediumMagboltz86::ComputeDeexcitationTable() {
               << " levels with available de-excitation data." << std::endl;
   }
 
+  // Collisional de-excitation channels
+  const double density = LoschmidtNumber * (pressure / AtmosphericPressure) * 
+                         (273.15 / temperature);
+  if (withAr) {
+    // Add the Ar dimer ground state
+    newDxc.label = "Ar_Dimer";
+    newDxc.energy = 14.71;
+    newDxc.osc = 0.;
+    newDxc.p.clear(); newDxc.final.clear(); newDxc.type.clear();
+    newDxc.nChannels = 0;
+    mapDxc["Ar_Dimer"] = nDeexcitations;
+    deexcitations.push_back(newDxc);
+    ++nDeexcitations;
+    // Add an Ar excimer level
+    newDxc.label = "Ar_Excimer";
+    newDxc.energy = 14.71;
+    newDxc.osc = 0.;
+    newDxc.p.clear(); newDxc.final.clear(); newDxc.type.clear();
+    newDxc.nChannels = 0;
+    deexcitations.push_back(newDxc);
+    ++nDeexcitations;
+    // Calculate the transition rates
+    //   References:
+    //     A. Bogaerts and R. Gijbels, J. Appl. Phys. 86 (1999), 4124-4133
+    //     A. Bogaerts and R. Gijbels, Phys. Rev. A 52 (1995), 3743-3751
+    // Hornbeck-Molnar ionisation
+    const double fHM = 2.e-18 * density * cAr;
+    // Fraction of metastable atoms (just a wild guess)
+    const double cMeta = 1.e-4;
+    // Metastable-metastable (associative) ionisation
+    const double fMetaIon = (6.3e-19  + 5.7e-19) * density * cAr * cMeta;
+    // Collisional losses
+    // Two-body collision
+    const double fLoss2b = 2.3e-24 * density * cAr;
+    // Three-body collision
+    const double fLoss3b = 1.4e-41 * pow(density * cAr, 2.);
+    for (int j = nDeexcitations; j--;) {
+      std::string level = deexcitations[j].label;
+      // Collisional losses
+      if (level == "Ar_1S5" || level == "Ar_1S4" || 
+          level == "Ar_1S3" || level == "Ar_1S2" ||
+          level == "Ar_2P10" || level == "Ar_2P9" || level == "Ar_2P8" ||
+          level == "Ar_2P7" || level == "Ar_2P6" || level == "Ar_2P5" ||
+          level == "Ar_2P4" || level == "Ar_2P3" || level == "Ar_2P2" ||
+          level == "Ar_2P1" ||
+          level == "Ar_3D6" || level == "Ar_3D5" || level == "Ar_3D3" ||
+          level == "Ar_3D4!" || level == "Ar_3D4" || level == "Ar_3D1!!" ||
+          level == "Ar_2S5" || level == "Ar_2S4" || level == "Ar_3D1!" ||
+          level == "Ar_3D2" || level == "Ar_3S1!!!!" || level == "Ar_3S1!!" ||
+          level == "Ar_3S1!!!" || level == "Ar_2S3" || level == "Ar_2S2" ||
+          level == "Ar_3S1!" ||
+          level == "Ar_4D5" || level == "Ar_3S4" || level == "Ar_4D2" || 
+          level == "Ar_4S1!" || level == "Ar_3S2" || level == "Ar_5D5" || 
+          level == "Ar_4S4" || level == "Ar_5D2" || level == "Ar_6D5" ||
+          level == "Ar_5S1!" || level == "Ar_4S2" || level == "Ar_5S4" ||
+          level == "Ar_6D2" || level == "Ar_High") {
+        deexcitations[j].final.push_back(mapDxc["Ar_Dimer"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_Excimer"]);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].p.push_back(fLoss2b);
+        deexcitations[j].p.push_back(fLoss3b);
+        deexcitations[j].nChannels += 2;
+      }
+      // Metastable-metastable ionisation
+      if (level == "Ar_1S5" || level == "Ar_1S3") {
+        deexcitations[j].final.push_back(mapDxc["Ar_Dimer"]);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].p.push_back(fMetaIon);
+        deexcitations[j].nChannels += 1;
+      } 
+      // Hornbeck-Molnar ionisation
+      if (level == "Ar_4D5"  || level == "Ar_3S4" || level == "Ar_4D2" ||
+          level == "Ar_4S1!" || level == "Ar_3S2" || level == "Ar_5D5" ||
+          level == "Ar_4S4"  || level == "Ar_5D2" || level == "Ar_6D5" ||
+          level == "Ar_5S1!" || level == "Ar_4S2" || level == "Ar_5S4" ||
+          level == "Ar_6D2"  || level == "Ar_High") {
+        deexcitations[j].final.push_back(mapDxc["Ar_Dimer"]);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].p.push_back(fHM);
+        deexcitations[j].nChannels += 1;
+      }
+    }
+  }
+
   if (nComponents != 2) {
     std::cout << "MediumMagboltz86::ComputeDeexcitationTable:" << std::endl;
     std::cout << "    Gas mixture has " << nComponents 
               << " components." << std::endl;
-    std::cout << "    Collisional deexcitation is implemented only for" 
+    std::cout << "    Collisional deexcitation is implemented only for"
               << " binary mixtures." << std::endl;
   } else if ((gas[0] == 2 && gas [1] == 8) || (gas[0] == 8 && gas[1] == 2)) {
     // Ar-CH4
-    int ar = 0;
-    const double b1 = 0.2;
     const double b3 = 22.121274;
     const double b4 = 3.842488;
     double fB = b4 / b3;
-    double fA = b1 / b3;
-    double gA = (1. - b1) / b3;
-    double p = pressure / 760.;
-    fB *= p;
-    fA *= p;
-    gA *= p;
-    if (gas[0] == 2) {
-      fB *= fraction[1];
-      fA *= fraction[0];
-      gA *= fraction[0];
-      ar = 0;
-    } else {
-      fB *= fraction[0];
-      fA *= fraction[1];
-      gA *= fraction[1];
-      ar = 1;
-    }
+    double p = pressure / AtmosphericPressure;
+    fB *= p * (1. - cAr);
     for (int j = nDeexcitations; j--;) {
       std::string level = deexcitations[j].label;
-      if (level == "Ar_1S5" || level == "Ar_1S4" || 
-          level == "Ar_1S3" || level == "Ar_1S2") {
-        deexcitations[j].p.push_back(gA / 500.);
-        deexcitations[j].final.push_back(-3);
-        deexcitations[j].nChannels += 1;
-      } else if (level == "Ar_2P10" || level == "Ar_2P9" || level == "Ar_2P8" ||
+      if (level == "Ar_2P10" || level == "Ar_2P9" || level == "Ar_2P8" ||
           level == "Ar_2P7"  || level == "Ar_2P6" || level == "Ar_2P5" ||
           level == "Ar_2P4"  || level == "Ar_2P3" || level == "Ar_2P2" ||
           level == "Ar_2P1") {
-        deexcitations[j].p.push_back(fB / 30. + fA / 30.);
-        deexcitations[j].final.push_back(-2);
-        deexcitations[j].p.push_back(gA / 30.);
-        deexcitations[j].final.push_back(-3);
-        deexcitations[j].nChannels += 2;
+        deexcitations[j].p.push_back(fB / 30.);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].nChannels += 1;
       } else if (level == "Ar_3D6"     || level == "Ar_3D5"   ||
                  level == "Ar_3D3"     || level == "Ar_3D4!"  ||
                  level == "Ar_3D4"     || level == "Ar_3D1!!" ||
@@ -1805,11 +1945,10 @@ MediumMagboltz86::ComputeDeexcitationTable() {
                  level == "Ar_3S1!!!!" || level == "Ar_3S1!!" ||
                  level == "Ar_3S1!!!"  || level == "Ar_2S3"   ||
                  level == "Ar_2S2"     || level == "Ar_3S1!") {
-        deexcitations[j].p.push_back(fB / 40. + fA / 40.);
-        deexcitations[j].final.push_back(-2);
-        deexcitations[j].p.push_back(gA / 40.);
-        deexcitations[j].final.push_back(-3);
-        deexcitations[j].nChannels += 2;
+        deexcitations[j].p.push_back(fB / 40.);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].nChannels += 1;
       } else if (level == "Ar_4D5" || level == "Ar_3S4"  || 
                  level == "Ar_4D2" || level == "Ar_4S1!" ||
                  level == "Ar_3S2" || level == "Ar_5D5"  || 
@@ -1817,31 +1956,30 @@ MediumMagboltz86::ComputeDeexcitationTable() {
                  level == "Ar_6D5" || level == "Ar_5S1!" ||
                  level == "Ar_4S2" || level == "Ar_5S4"  ||
                  level == "Ar_6D2" || level == "Ar_High") {
-        deexcitations[j].p.push_back(fB / 100. + fA / 100.);
-        deexcitations[j].final.push_back(-2);
-        deexcitations[j].p.push_back(gA / 40.);
-        deexcitations[j].final.push_back(-3);
-        deexcitations[j].nChannels += 2;
+        deexcitations[j].p.push_back(fB / 100.);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].nChannels += 1;
       }
     }
   }
 
   if (debug) {
     std::cout << "MediumMagboltz86::ComputeDeexcitationTable:" << std::endl;
-    std::cout << "    Level             Lifetimes [ns]" << std::endl;
-    std::cout << "                Total      Radiative      Collisional"
+    std::cout << "        Level                 Lifetimes [ns]" << std::endl;
+    std::cout << "                    Total      Radiative          Collisional"
+              << std::endl;
+    std::cout << "                                          Ionisation      Loss"
               << std::endl;
   }
   for (int i = 0; i < nDeexcitations; ++i) {
     deexcitations[i].rate = 0.;
-    double fRad = 0.;
-    double fPenn = 0.; 
-    double fLoss = 0.;
+    double fRad = 0., fCollIon = 0., fCollLoss = 0.;
     for (int j = deexcitations[i].nChannels; j--;) {
       deexcitations[i].rate += deexcitations[i].p[j];
-      if (deexcitations[i].final[j] >= -1) fRad += deexcitations[i].p[j];
-      else if (deexcitations[i].final[j] == -2) fPenn += deexcitations[i].p[j];
-      else if (deexcitations[i].final[j] == -3) fLoss += deexcitations[i].p[j];
+      if (deexcitations[i].type[j] == 0) fRad += deexcitations[i].p[j];
+      else if (deexcitations[i].type[j] == 1) fCollIon += deexcitations[i].p[j];
+      else if (deexcitations[i].type[j] == -1) fCollLoss += deexcitations[i].p[j];
     }
     if (deexcitations[i].rate > 0.) {
       if (debug) {
@@ -1852,10 +1990,15 @@ MediumMagboltz86::ComputeDeexcitationTable() {
         } else {
           std::cout << "----------  ";
         }
-        if (fPenn + fLoss > 0.) {
-          std::cout << std::setw(10) << 1. / (fPenn + fLoss) << std::endl;
+        if (fCollIon > 0.) {
+          std::cout << std::setw(10) << 1. / fCollIon << "  ";
         } else {
-          std::cout << "----------   " << std::endl;
+          std::cout << "----------  ";
+        }
+        if (fCollLoss > 0.) {
+          std::cout << std::setw(10) << 1. / fCollLoss << std::endl;
+        } else {
+          std::cout << "----------  " << std::endl;
         }
       }
       for (int j = 0; j < deexcitations[i].nChannels; ++j) {
@@ -1869,7 +2012,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
 
 void
 MediumMagboltz86::ComputeDeexcitation(int iLevel) {
-  
+
   nDeexcitationProducts = 0;
   dxcProducts.clear();
 
@@ -1877,43 +2020,43 @@ MediumMagboltz86::ComputeDeexcitation(int iLevel) {
   newDxcProd.t = 0.;
 
   while (iLevel >= 0 && iLevel < nDeexcitations) {
-    if (deexcitations[iLevel].rate <= 0.) return;
+    if (deexcitations[iLevel].rate <= 0. || 
+        deexcitations[iLevel].nChannels <= 0) return;
     // Determine the de-excitation time
     newDxcProd.t += -log(RndmUniformPos()) / deexcitations[iLevel].rate;
     // Select the transition
-    int fLevel = -3;
+    int fLevel = -1;
+    int type = 0;
     const double r = RndmUniform();
     for (int j = 0; j < deexcitations[iLevel].nChannels; ++j) {
       if (r <= deexcitations[iLevel].p[j]) {
         fLevel = deexcitations[iLevel].final[j];
+        type = deexcitations[iLevel].type[j];
         break;
       }
     }
-    if (fLevel < -2) {
-      // Loss, end of cascade
-      return;
-    } else if (fLevel == -2) {
-      // Penning ionisation
-      newDxcProd.energy = deexcitations[iLevel].energy - minIonPot;
-      newDxcProd.type = -1;
-      ++nPenning;
-    } else if (fLevel == -1) {
-      // Radiative decay to ground state
+    if (type == 0) {
+      // Radiative decay
+      newDxcProd.type = 1;
       newDxcProd.energy = deexcitations[iLevel].energy;
-      newDxcProd.type = 1;
-    } else {
-      // Transition to energetically higher level (e. g. excimer)
-      if (deexcitations[iLevel].energy < deexcitations[fLevel].energy) {
-        iLevel = fLevel;
-        continue;
+      if (fLevel >= 0) newDxcProd.energy -= deexcitations[fLevel].energy;
+      dxcProducts.push_back(newDxcProd);
+      ++nDeexcitationProducts;
+    } else if (type == 1) {
+      // Ionisation
+      newDxcProd.type = -1;
+      newDxcProd.energy = deexcitations[iLevel].energy;
+      if (fLevel >= 0) {
+        newDxcProd.energy -= deexcitations[fLevel].energy;
+      } else {
+        // Penning transfer
+        newDxcProd.energy -= minIonPot;
       }
-      // Radiative transition 
-      newDxcProd.energy = deexcitations[iLevel].energy - 
-                          deexcitations[fLevel].energy;
-      newDxcProd.type = 1;
-    }
-    dxcProducts.push_back(newDxcProd);
-    ++nDeexcitationProducts;
+      if (newDxcProd.energy < Small) newDxcProd.energy = Small;
+      ++nPenning;
+      dxcProducts.push_back(newDxcProd);
+      ++nDeexcitationProducts;
+    } 
     iLevel = fLevel;
   }
 
@@ -1927,36 +2070,62 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
   double eta;
   std::string gasname;
 
+  // Atomic density
   const double density = LoschmidtNumber * (pressure / AtmosphericPressure) * 
                          (273.15 / temperature);
+  // Conversion factor from oscillator strength to cross-section
+  const double f2cs = FineStructureConstant * 2 * Pi2 * HbarC * HbarC / ElectronMass;
 
   // Reset the collision rate arrays
-  cfTotGamma.resize(nEnergyStepsGamma);
-  for (int j = nEnergyStepsGamma; j--;) {
-    cfTotGamma[j] = 0.;
-    for (int i = nMaxPhotonLevels; i--;) cfGamma[j][i] = 0.;
-  }
+  cfTotGamma.clear(); cfTotGamma.resize(nEnergyStepsGamma, 0.);
+  cfGamma.clear(); cfGamma.resize(nEnergyStepsGamma);
+  for (int j = nEnergyStepsGamma; j--;) cfGamma[j].clear();
 
   nPhotonTerms = 0;
   for (int i = 0; i < nComponents; ++i) {
     const double prefactor = density * SpeedOfLight * fraction[i];
+    // Continuum
     GetGasName(gas[i], gasname);
     if (!data.SetMaterial(gasname)) return false;
+    csTypeGamma.push_back(i * 4 + 1);
+    csTypeGamma.push_back(i * 4 + 2);
+    nPhotonTerms += 2;
     for (int j = 0; j < nEnergyStepsGamma; ++j) {
       // Retrieve total photoabsorption cross-section and ionisation yield
       data.GetPhotoabsorptionCrossSection(j * eStepGamma, cs);
       data.GetPhotoionisationYield(j * eStepGamma, eta);
       cfTotGamma[j] += cs * prefactor;
       // Ionisation
-      cfGamma[j][nPhotonTerms] = cs * prefactor * eta;
-      csTypeGamma[nPhotonTerms] = i * 3 + 1;
-      // "Neutral" absorption
-      cfGamma[j][nPhotonTerms + 1] = cs * prefactor * (1. - eta);
-      csTypeGamma[nPhotonTerms + 1] = i * 3 + 2;
+      cfGamma[j].push_back(cs * prefactor * eta);
+      // Inelastic absorption
+      cfGamma[j].push_back(cs * prefactor * (1. - eta));
     }
-    nPhotonTerms += 2;
+    if (!useDeexcitation) continue;
+    // Discrete excitations
+    if (gasname == "Ar") {
+      for (int k = 0; k < nDeexcitations; ++k) {
+        if (deexcitations[k].osc < Small) continue;
+        std::string label = deexcitations[k].label;
+        if (deexcitations[k].energy < 0 || 
+            deexcitations[i].energy > eFinalGamma) {
+          std::cerr << "MediumMagboltz86::ComputePhotonCollisionTable:" 
+                    << std::endl;
+          std::cerr << "    Warning: excitation energy of level " 
+                    << label << "  "
+                    << " is outside the currently set photon energy range." 
+                    << std::endl;
+          continue;
+        }
+        csTypeGamma.push_back(-k - 1);
+        for (int j = 0; j < nEnergyStepsGamma; ++j) cfGamma[j].push_back(0.);
+        int ie = int(deexcitations[k].energy / eStepGamma);
+        if (ie >= nEnergyStepsGamma) ie = nEnergyStepsGamma -1;
+        cfGamma[ie][nPhotonTerms] = prefactor * f2cs * deexcitations[k].osc;
+        ++nPhotonTerms;
+      } 
+    } 
   }
-  
+
   if (useCsOutput) {
     std::ofstream csfile;
     csfile.open("csgamma.txt", std::ios::out);

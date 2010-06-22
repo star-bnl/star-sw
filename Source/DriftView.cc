@@ -8,46 +8,30 @@ namespace Garfield {
 DriftView::DriftView() :
   debug(false),
   label("Drift View"),
+  canvas(0), hasExternalCanvas(false),
   xMin(-1.), yMin(-1.), zMin(-1.), 
   xMax( 1.), yMax( 1.), zMax( 1.),
-  frame(),
+  view(0),
   nDriftLines(0) {
-
-  frame.SetStats(kFALSE);
-  frame.SetXTitle("x");
-  frame.SetYTitle("y");
-  frame.SetZTitle("z");
-  frame.SetBins(10, xMin, xMax, 10, yMin, yMax, 10, zMin, zMax);
-  frame.SetTitle(label.c_str());
-
-  canvas = new TCanvas();
-  canvas->SetTitle(label.c_str());
-  
-}
-
-DriftView::DriftView(std::string title) :
-  debug(false),
-  label(title),
-  xMin(-1.), yMin(-1.), zMin(-1.), 
-  xMax( 1.), yMax( 1.), zMax( 1.),
-  frame(),
-  nDriftLines(0) {
-
-  frame.SetStats(kFALSE);
-  frame.SetXTitle("x");
-  frame.SetYTitle("y");
-  frame.SetZTitle("z");
-  frame.SetBins(10, xMin, xMax, 10, yMin, yMax, 10, zMin, zMax);
-  frame.SetTitle(label.c_str());
-
-  canvas = new TCanvas();
-  canvas->SetTitle(label.c_str());
 
 }
 
 DriftView::~DriftView() {
 
-  if (canvas != 0) delete canvas;
+  if (!hasExternalCanvas && canvas != 0) delete canvas;
+
+}
+
+void
+DriftView::SetCanvas(TCanvas* c) {
+
+  if (c == 0) return;
+  if (!hasExternalCanvas && canvas != 0) {
+    delete canvas;
+    canvas = 0;
+  }
+  canvas = c;
+  hasExternalCanvas = true;
 
 }
 
@@ -67,7 +51,6 @@ DriftView::SetArea(double xmin, double ymin, double zmin,
   xMax = std::max(xmin, xmax);
   yMax = std::max(ymin, ymax);
   zMax = std::max(zmin, zmax);
-  frame.SetBins(10, xMin, xMax, 10, yMin, yMax, 10, zMin, zMax);
   
 }
 
@@ -144,12 +127,15 @@ DriftView::Plot() {
   if (canvas == 0) {
     canvas = new TCanvas();
     canvas->SetTitle(label.c_str());
+    if (hasExternalCanvas) hasExternalCanvas = false;
   }
   canvas->cd();
 
-  frame.Draw();
+  if (view == 0) view = TView::CreateView(1, 0, 0);
+  view->SetRange(xMin, yMin, zMin, xMax, yMax, zMax);
+
   for (int i = nDriftLines; i--;) {
-    driftLines[i].Draw();
+    driftLines[i].Draw("same");
   }
   canvas->Update();
 

@@ -73,8 +73,10 @@ class MediumSilicon : public Medium {
 
     // Set/get the highest electron energy to be included
     // in the scattering rates table
-    bool   SetMaxEnergy(const double e);
-    double GetMaxEnergy() const {return eFinal;}
+    bool   SetMaxElectronEnergy(const double e);
+    double GetMaxElectronEnergy() const {return eFinal;}
+    // Get the electron effective mass
+    double GetElectronEffectiveMass(const int band = 0) {return eEffMass;}
     // Get the null-collision rate [ns-1]
     double GetElectronNullCollisionRate();
     // Get the (real) collision rate [ns-1] at a given electron energy

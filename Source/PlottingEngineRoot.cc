@@ -271,6 +271,7 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->Reset();  
   garfieldStyle->SetCanvasBorderMode(0);
   garfieldStyle->SetCanvasColor(0);
+  garfieldStyle->SetCanvasPreferGL(kTRUE);
   garfieldStyle->SetPadBorderMode(0);
   garfieldStyle->SetPadColor(0);
   garfieldStyle->SetFrameBorderMode(0);

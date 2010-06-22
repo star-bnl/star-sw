@@ -52,6 +52,8 @@ static const double LoschmidtNumber = 2.6867774e19;
 static const double AvogadroConstant = 6.02214179e23;
 // Atmospheric pressure [Torr]
 static const double AtmosphericPressure = 760.;
+// Zero degree Celsius [K]
+static const double ZeroCelsius = 273.15;
 
 static const double Small = 1.e-20;
 // Max. permitted distance to boundary (for drift line termination)

@@ -57,7 +57,7 @@ MediumSilicon::SetDoping(const char type, const double c) {
 
   if (toupper(type) == 'N') {
     dopingType = 'n';
-    if (c > 1.e-20) {
+    if (c > Small) {
       dopingConcentration = c;
     } else {
       std::cerr << "MediumSilicon::SetDoping:" << std::endl;
@@ -69,7 +69,7 @@ MediumSilicon::SetDoping(const char type, const double c) {
     }
   } else if (toupper(type) == 'P') {
     dopingType = 'p';
-    if (c > 1.e-20) {
+    if (c > Small) {
       dopingConcentration = c;
     } else {
       std::cerr << "MediumSilicon::SetDoping:" << std::endl;
@@ -529,10 +529,10 @@ MediumSilicon::SetImpactIonisationModelGrant() {
 }
 
 bool
-MediumSilicon::SetMaxEnergy(const double e) {
+MediumSilicon::SetMaxElectronEnergy(const double e) {
 
-  if (e <= 1.e-20) {
-    std::cerr << "MediumSilicon::SetMaxEnergy:" << std::endl;
+  if (e <= Small) {
+    std::cerr << "MediumSilicon::SetMaxElectronEnergy:" << std::endl;
     std::cerr << "    Provided upper electron energy limit (" << e
               << " eV) is too small." << std::endl;
     return false;
@@ -579,7 +579,7 @@ MediumSilicon::GetElectronCollisionRate(const double e) {
               << " eV is not included in the current table." << std::endl;
     std::cerr << "    Increasing energy range to " << 1.05 * e
               << " eV." << std::endl;
-    SetMaxEnergy(1.05 * e);
+    SetMaxElectronEnergy(1.05 * e);
   }
 
   if (isChanged) {
@@ -606,7 +606,7 @@ MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
     std::cerr << " eV)." << std::endl;
     std::cerr << "    Increasing energy range to " << 1.05 * e
               << " eV." << std::endl;
-    SetMaxEnergy(1.05 * e);
+    SetMaxElectronEnergy(1.05 * e);
   } else if (e <= 0.) {
     std::cerr << "MediumSilicon::GetElectronCollision:" << std::endl;
     std::cerr << "    Electron energy must be greater than zero." << std::endl;
@@ -659,13 +659,13 @@ MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
   if (type == 1) {
     esec = RndmUniform() * (e - loss);
     loss += esec;
-    if (esec < Small) esec = 1.e-20;
+    if (esec < Small) esec = Small;
   }
 
   if (e < loss) loss = e - 0.0001;
   // Update the energy
   e1 = e - loss;
-  if (e1 < 1.e-20) e1 = 1.e-20;
+  if (e1 < Small) e1 = Small;
   
   return true;
 
@@ -1130,7 +1130,7 @@ MediumSilicon::ElectronMobilityMinimos(const double e, double& mu) const {
   // Reference:
   // - Minimos User's Guide (1999)
   
-  if (e < 1.e-20) {
+  if (e < Small) {
     mu = 0.;
   } else {
     mu = 2. * eMobility / 
@@ -1146,7 +1146,7 @@ MediumSilicon::ElectronMobilityCanali(const double e, double& mu) const {
   // Reference:
   // - Sentaurus Device User Guide (2007)
   
-  if (e < 1.e-20) {
+  if (e < Small) {
     mu = 0.;
   } else {
     mu = eMobility / 
@@ -1163,7 +1163,7 @@ MediumSilicon::ElectronMobilityReggiani(const double e, double& mu) const {
   // - M. A. Omar, L. Reggiani
   //   Solid State Electronics 30 (1987), 693-697
 
-  if (e < 1.e-20) {
+  if (e < Small) {
     mu = 0.;
   } else {
     mu = eMobility / pow(1 + pow(eMobility * e / eSatVel, 1.5), 1. / 1.5);
@@ -1182,7 +1182,7 @@ MediumSilicon::ElectronImpactIonisationVanOverstraetenDeMan(const double e,
   //  - W. Maes, K. de Meyer and R. van Overstraeten, 
   //    Solid State Electronics 33 (1990), 705-718
 
-  if (e < 1.e-20) {
+  if (e < Small) {
     alpha = 0.;
   } else if (e < 1.2786e5) {
     alpha = eImpactA0 * exp(-eImpactB0 / e);
@@ -1200,7 +1200,7 @@ MediumSilicon::ElectronImpactIonisationGrant(const double e,
   // Reference:
   //  - W. N. Grant, Solid State Electronics 16 (1973), 1189 - 1203
 
-  if (e < 1.e-20) {
+  if (e < Small) {
     alpha = 0.;
   } else if (e < 2.4e5) {
     alpha = eImpactA0 * exp(-eImpactB0 / e);
@@ -1219,7 +1219,7 @@ MediumSilicon::HoleMobilityMinimos(const double e, double& mu) const {
   // Reference:
   // - Minimos User's Guide (1999)
 
-  if (e < 1.e-20) {
+  if (e < Small) {
     mu = 0.;
   } else {
     mu = hMobility / (1. + hMobility * e / eSatVel);
@@ -1234,7 +1234,7 @@ MediumSilicon::HoleMobilityCanali(const double e, double& mu) const {
   // Reference:
   // - Sentaurus Device User Guide (2007)
   
-  if (e < 1.e-20) {
+  if (e < Small) {
     mu = 0.;
   } else {
     mu = hMobility / 
@@ -1251,7 +1251,7 @@ MediumSilicon::HoleMobilityReggiani(const double e, double& mu) const {
   // - M. A. Omar, L. Reggiani
   //   Solid State Electronics 30 (1987), 693-697
 
-  if (e < 1.e-20) {
+  if (e < Small) {
     mu = 0.;
   } else {
     mu = hMobility / 
@@ -1269,7 +1269,7 @@ MediumSilicon::HoleImpactIonisationVanOverstraetenDeMan(const double e,
   //  - R. van Overstraeten and H. de Man, 
   //    Solid State Electronics 13 (1970), 583-608
 
-  if (e < 1.e-20) {
+  if (e < Small) {
     alpha = 0.;
   } else {
     alpha = hImpactA1 * exp(-hImpactB1 / e);
@@ -1284,7 +1284,7 @@ MediumSilicon::HoleImpactIonisationGrant(const double e, double& alpha) const {
   // Reference:
   //  - W. N. Grant, Solid State Electronics 16 (1973), 1189 - 1203
 
-  if (e < 1.e-20) {
+  if (e < Small) {
     alpha = 0.;
   } else if (e < 5.3e5) {
     alpha = hImpactA0 * exp(-hImpactB0 / e);
@@ -1531,7 +1531,7 @@ MediumSilicon::ElectronIntervalleyScatteringRates(int& iLevel) {
       ++k;
       // Emission
       ef = en - eph[j];
-      if (ef > 1.e-20) {
+      if (ef > Small) {
         cfElectrons[i][k] = c[j] * (nocc[j] + 1) * 
                             sqrt(ef * (1. + alpha * ef)) * 
                             (1. + 2. * alpha * ef);
@@ -1611,7 +1611,7 @@ MediumSilicon::ElectronImpurityScatteringRates(int& iLevel) {
   const double eps = GetDielectricConstant();
   // Impurity concentration
   const double impurityConcentration = dopingConcentration;
-  if (impurityConcentration < 1.e-20) return true;
+  if (impurityConcentration < Small) return true;
 
   // Screening length
   const double ls = sqrt(eps * kbt / (4 * Pi * FineStructureConstant * HbarC * 
