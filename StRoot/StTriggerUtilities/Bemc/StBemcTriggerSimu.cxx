@@ -1247,7 +1247,69 @@ void StBemcTriggerSimu::get2006_DSMLayer2()
     mFiredTriggers.push_back(137221);
     mFiredTriggers.push_back(137222);
   }
-  
+
+  // J/psi topology trigger
+  //
+  // See http://www.star.bnl.gov/public/trg/TSL/Software/EMC_2006.pdf
+  //
+  // The J/psi trigger uses just the high tower threshold bits of the Barrel,
+  // not the Endcap. R2 selects ONE of the high-tower thresholds for this trigger.
+  // The J/psi trigger fires if two opposite jet patches have high towers
+  // above the selected threshold.
+  //
+  // +-----------+----------+-----+-----+
+  // | DSM index | DSM name | j0  | j1  |
+  // +-----------+----------+-----+-----+
+  // | 0         | BE101    | 10' | 12' |
+  // | 1         | BE102    | 2'  | 4'  |
+  // | 2         | BE103    | 6'  | 8'  |
+  // | 3         | BW101    | 10' | 12' |
+  // | 4         | BW102    | 2'  | 4'  |
+  // | 5         | BW103    | 6'  | 8'  |
+  // +-----------+----------+-----+-----+
+
+  // Vector bits correspond to positions 2,4,6,8,10,12 o'clock.
+  // The J/psi topology trigger uses register R2 to select the
+  // high tower threshold used for each decay electron of the J/psi.
+  // In Run 6, R2 was always set to th0. So it is hardcoded to 1
+  // in the code below. Possible values are:
+  // 0 - th0; 1 - th1; 2 - th2; 3 - J/psi logic OFF.
+
+  int barrel_east_ht_jpsi[6];
+
+  barrel_east_ht_jpsi[0] = DSM1_HTj0_Bit[1] >= 1; // 2 o'clock
+  barrel_east_ht_jpsi[1] = DSM1_HTj1_Bit[1] >= 1; // 4 o'clock
+  barrel_east_ht_jpsi[2] = DSM1_HTj0_Bit[2] >= 1; // 6 o'clock
+  barrel_east_ht_jpsi[3] = DSM1_HTj1_Bit[2] >= 1; // 8 o'clock
+  barrel_east_ht_jpsi[4] = DSM1_HTj0_Bit[0] >= 1; // 10 o'clock
+  barrel_east_ht_jpsi[5] = DSM1_HTj1_Bit[0] >= 1; // 12 o'clock
+
+  int barrel_west_ht_jpsi[6];
+
+  barrel_west_ht_jpsi[0] = DSM1_HTj0_Bit[4] >= 1; // 2 o'clock
+  barrel_west_ht_jpsi[1] = DSM1_HTj1_Bit[4] >= 1; // 4 o'clock
+  barrel_west_ht_jpsi[2] = DSM1_HTj0_Bit[5] >= 1; // 6 o'clock
+  barrel_west_ht_jpsi[3] = DSM1_HTj1_Bit[5] >= 1; // 8 o'clock
+  barrel_west_ht_jpsi[4] = DSM1_HTj0_Bit[3] >= 1; // 10 o'clock
+  barrel_west_ht_jpsi[5] = DSM1_HTj1_Bit[3] >= 1; // 12 o'clock
+
+  int ht_jpsi[6];
+
+  for (int dsm = 0; dsm < kL1DsmModule; ++dsm) {
+    ht_jpsi[dsm] = barrel_east_ht_jpsi[dsm] || barrel_west_ht_jpsi[dsm];
+  }
+
+  int jpsiTrigger = ((ht_jpsi[0] && (ht_jpsi[2] || ht_jpsi[3] || ht_jpsi[4])) ||
+		     (ht_jpsi[1] && (ht_jpsi[3] || ht_jpsi[4] || ht_jpsi[5])) ||
+		     (ht_jpsi[2] && (ht_jpsi[4] || ht_jpsi[5])) ||
+		     (ht_jpsi[3] && ht_jpsi[5]));
+
+  // jpsi-mb trigger
+  if (jpsiTrigger) {
+    mFiredTriggers.push_back(117705);
+    mFiredTriggers.push_back(137705);
+  }
+
 }
 
 
