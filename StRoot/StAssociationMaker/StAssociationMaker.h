@@ -1,9 +1,9 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.23 2010/06/18 20:17:22 fine Exp $
+ * $Id: StAssociationMaker.h,v 1.24 2010/06/22 22:06:33 fine Exp $
  * $Log: StAssociationMaker.h,v $
- * Revision 1.23  2010/06/18 20:17:22  fine
- * add const qualifier to remove the compilation warnings
+ * Revision 1.24  2010/06/22 22:06:33  fine
+ * roll back the previous version to restore the nightly builds
  *
  * Revision 1.22  2009/11/10 20:19:36  fisyak
  * Change default to ITTF
@@ -136,7 +136,7 @@ class StTrackPairInfo;
 class TH2F;
     
 struct trackPing {
-    const StMcTrack* mcTrack;
+    StMcTrack* mcTrack;
     unsigned int nPingsTpc;
     unsigned int nPingsSvt;
     unsigned int nPingsSsd;
@@ -153,6 +153,7 @@ struct trackPing {
 using std::multimap;
 using std::pair;
 #endif
+
 #include "StMcHitComparisons.hh"
 // // Define the comparisons to be used in the multimaps
 // struct compTpcHit{
@@ -237,22 +238,22 @@ typedef  multimap<const StMcFtpcHit*, const StFtpcHit*, compMcFtpcHit> mcFtpcHit
 // Tracks
 //
 typedef  multimap<StGlobalTrack*, StTrackPairInfo*, compTrack>   rcTrackMapType;//!
-typedef  multimap<const StMcTrack*,     StTrackPairInfo*, compMcTrack> mcTrackMapType;//!
+typedef  multimap<StMcTrack*,     StTrackPairInfo*, compMcTrack> mcTrackMapType;//!
 //
 // Kink Vertices
 //
-typedef  multimap<StKinkVertex*, const StMcVertex*, compKinkVertex>   rcKinkMapType;//!
-typedef  multimap<const StMcVertex*, StKinkVertex*, compMcVertex> mcKinkMapType;//!
+typedef  multimap<StKinkVertex*, StMcVertex*, compKinkVertex>   rcKinkMapType;//!
+typedef  multimap<StMcVertex*, StKinkVertex*, compMcVertex> mcKinkMapType;//!
 //
 // V0 Vertices
 //
-typedef  multimap<StV0Vertex*, const StMcVertex*, compV0Vertex>   rcV0MapType;//!
-typedef  multimap<const StMcVertex*, StV0Vertex*, compMcVertex> mcV0MapType;//!
+typedef  multimap<StV0Vertex*, StMcVertex*, compV0Vertex>   rcV0MapType;//!
+typedef  multimap<StMcVertex*, StV0Vertex*, compMcVertex> mcV0MapType;//!
 //
 // Xi Vertices
 //
-typedef  multimap<StXiVertex*, const StMcVertex*, compXiVertex>   rcXiMapType;//!
-typedef  multimap<const StMcVertex*, StXiVertex*, compMcVertex> mcXiMapType;//!
+typedef  multimap<StXiVertex*, StMcVertex*, compXiVertex>   rcXiMapType;//!
+typedef  multimap<StMcVertex*, StXiVertex*, compMcVertex> mcXiMapType;//!
 
 #else
 // This type of definition is really criptic, but this is what ObjectSpace wants...
@@ -314,7 +315,7 @@ typedef  multimap<mcFtpcHitMapKey, mcFtpcHitMapValue, compMcFtpcHit,
 // Tracks
 //
 typedef  StGlobalTrack*    rcTrackMapKey;
-typedef  const StMcTrack*  mcTrackMapKey;
+typedef  StMcTrack*        mcTrackMapKey;
 typedef  StTrackPairInfo*  trackMapValue;
 
 typedef  multimap<rcTrackMapKey, trackMapValue, compTrack,
@@ -326,8 +327,8 @@ typedef  multimap<mcTrackMapKey, trackMapValue, compMcTrack,
 //
 typedef  StKinkVertex*    rcKinkMapKey;
 typedef  StKinkVertex*    mcKinkMapValue;
-typedef  const StMcVertex*  rcKinkMapValue;
-typedef  const StMcVertex*  mcKinkMapKey;
+typedef  StMcVertex*      rcKinkMapValue;
+typedef  StMcVertex*      mcKinkMapKey;
 
 typedef  multimap<rcKinkMapKey, rcKinkMapValue, compKinkVertex,
     allocator< OS_PAIR(rcKinkMapKey, rcKinkMapValue) > > rcKinkMapType;//!
@@ -338,8 +339,8 @@ typedef  multimap<mcKinkMapKey, mcKinkMapValue, compMcVertex,
 //
 typedef  StV0Vertex*    rcV0MapKey;
 typedef  StV0Vertex*    mcV0MapValue;
-typedef  const StMcVertex*  rcV0MapValue;
-typedef  const StMcVertex*  mcV0MapKey;
+typedef  StMcVertex*    rcV0MapValue;
+typedef  StMcVertex*    mcV0MapKey;
 
 typedef  multimap<rcV0MapKey, rcV0MapValue, compV0Vertex,
     allocator< OS_PAIR(rcV0MapKey, rcV0MapValue) > > rcV0MapType;//!
@@ -350,8 +351,8 @@ typedef  multimap<mcV0MapKey, mcV0MapValue, compMcVertex,
 //
 typedef  StXiVertex*    rcXiMapKey;
 typedef  StXiVertex*    mcXiMapValue;
-typedef  const StMcVertex*    rcXiMapValue;
-typedef  const StMcVertex*    mcXiMapKey;
+typedef  StMcVertex*    rcXiMapValue;
+typedef  StMcVertex*    mcXiMapKey;
 
 typedef  multimap<rcXiMapKey, rcXiMapValue, compXiVertex,
     allocator< OS_PAIR(rcXiMapKey, rcXiMapValue) > > rcXiMapType;//!
@@ -536,7 +537,7 @@ private:
     bool              mEstTracksOn; //!
     bool              mDistanceAssoc; //!
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.23 2010/06/18 20:17:22 fine Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.24 2010/06/22 22:06:33 fine Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker,0)
 
@@ -545,7 +546,7 @@ private:
 ostream& operator<<(ostream& out,
 		    const pair<StGlobalTrack* const, StTrackPairInfo*>& );
 ostream& operator<<(ostream& out,
-		    const pair<const StMcTrack* const, StTrackPairInfo*>& );
+		    const pair<StMcTrack* const, StTrackPairInfo*>& );
 
 ostream& operator<<(ostream& out, const rcTrackMapType& );
 ostream& operator<<(ostream& out, const mcTrackMapType& );

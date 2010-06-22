@@ -1,9 +1,9 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.52 2010/06/18 20:17:22 fine Exp $
+ * $Id: StAssociationMaker.cxx,v 1.53 2010/06/22 22:06:33 fine Exp $
  * $Log: StAssociationMaker.cxx,v $
- * Revision 1.52  2010/06/18 20:17:22  fine
- * add const qualifier to remove the compilation warnings
+ * Revision 1.53  2010/06/22 22:06:33  fine
+ * roll back the previous version to restore the nightly builds
  *
  * Revision 1.51  2009/11/10 20:19:36  fisyak
  * Change default to ITTF
@@ -1317,7 +1317,7 @@ Int_t StAssociationMaker::Make()
   const StMcSsdHit* mcValueSsdHit;
   const StMcFtpcHit* mcValueFtpcHit;
   
-  const StMcTrack* trackCand;
+  StMcTrack* trackCand;
   StTrackPairInfo* trkPair;
   
   trackPing initializedTrackPing;
@@ -1737,9 +1737,9 @@ Int_t StAssociationMaker::Make()
       kinkBoundsDaughter = mRcTrackMap->equal_range(gKinkDaughter);
       // Loop over associated tracks of the daughter
       for (rcTrackMapIter trkIter = kinkBoundsDaughter.first; trkIter!=kinkBoundsDaughter.second; trkIter++) {
-	const StMcTrack* mcDaughter = (*trkIter).second->partnerMcTrack(); // Get associated daughter
+	StMcTrack* mcDaughter = (*trkIter).second->partnerMcTrack(); // Get associated daughter
 	
-	const StMcVertex* mcKink = mcDaughter->startVertex(); // Get Kink candidate 
+	StMcVertex* mcKink = mcDaughter->startVertex(); // Get Kink candidate 
 	if (mcKink == primary || mcKink == 0) continue;  // Check that it's not primary
 	const StMcTrack* mcParent = mcKink->parent();
 	
@@ -1788,9 +1788,9 @@ Int_t StAssociationMaker::Make()
       pair<rcTrackMapIter, rcTrackMapIter> v0Bounds1 = mRcTrackMap->equal_range(gV0Daughter1);
       pair<rcTrackMapIter, rcTrackMapIter> v0Bounds2 = mRcTrackMap->equal_range(gV0Daughter2);
       for (rcTrackMapIter trkIter1 = v0Bounds1.first; trkIter1!=v0Bounds1.second; trkIter1++) {
-	const StMcTrack* mcDaughter1 = (*trkIter1).second->partnerMcTrack();
+	StMcTrack* mcDaughter1 = (*trkIter1).second->partnerMcTrack();
 	for (rcTrackMapIter trkIter2 = v0Bounds2.first; trkIter2!=v0Bounds2.second; trkIter2++) {
-	  const StMcTrack* mcDaughter2 = (*trkIter2).second->partnerMcTrack();
+	  StMcTrack* mcDaughter2 = (*trkIter2).second->partnerMcTrack();
 	  if (mcDaughter1->startVertex() == mcDaughter2->startVertex() &&
 	      mcDaughter1->startVertex() != primary &&
 	      mcDaughter1->startVertex() != 0) {
@@ -1827,12 +1827,12 @@ Int_t StAssociationMaker::Make()
       if (!gRcBachelor) continue;
       pair<rcTrackMapIter, rcTrackMapIter> xiBounds = mRcTrackMap->equal_range(gRcBachelor);
       for (rcTrackMapIter trkIter3 = xiBounds.first; trkIter3!= xiBounds.second; trkIter3++){
-	const StMcTrack*  mcBachelor = (*trkIter3).second->partnerMcTrack();
-	const StMcVertex* mcXi = mcBachelor->startVertex();
+	StMcTrack*  mcBachelor = (*trkIter3).second->partnerMcTrack();
+	StMcVertex* mcXi = mcBachelor->startVertex();
 	if (mcXi == primary || mcXi == 0) continue;
 	pair<rcV0MapIter, rcV0MapIter> xiBoundsV0 = mRcV0Map->equal_range(rcV0ofXi);
 	for (rcV0MapIter v0Iter = xiBoundsV0.first; v0Iter!= xiBoundsV0.second; v0Iter++){
-	  const StMcVertex* mcV0 = (*v0Iter).second;
+	  StMcVertex* mcV0 = (*v0Iter).second;
 	  if (mcV0->parent() != 0 && mcXi == mcV0->parent()->startVertex()) {
 	    // Got a Xi candidate
 	    mRcXiMap->insert(rcXiMapValType (rcXi, mcXi));
