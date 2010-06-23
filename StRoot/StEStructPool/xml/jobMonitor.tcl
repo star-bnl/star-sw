@@ -116,6 +116,8 @@ proc ::jobMonitor::createWindow {{scriptDir ""} {logDir ""}} {
     $edit add command     -label "Editor..."            -command [namespace code chooseEditor]
     $edit add command     -label "log file type..."     -command [namespace code setFileType] -accelerator "Alt-L"
     $edit add command     -label "Number of matches..." -command [namespace code matchingNumber]
+    $edit add command     -label "Find Big Jobs"        -command [namespace code findBigJobs]
+    $edit add command     -label "Split selected Jobs"  -command [namespace code splitSelectedJobs]
     #
     bind $::jobMonitor::bWindow <Alt-L>     [namespace code setFileType]
 
@@ -640,9 +642,6 @@ proc ::jobMonitor::countTypes {m action} {
     set all 0
     foreach job $::jobMonitor::jobList {
         set val [set ::jobMonitor::var$job]
-        if {$val eq ""} {
-            set val none
-        }
         if {[info exists count($val)]} {
             incr count($val)
         } else {
@@ -652,7 +651,9 @@ proc ::jobMonitor::countTypes {m action} {
     }
     $m entryconfigure 1 -label "all ($all)" -command [namespace code [list $action all]]
     foreach el [lsort [array names count]] {
-        $m add command -label "$el ($count($el))" -command [namespace code [list $action $el]]
+        if {$el ne ""} {
+            $m add command -label "$el ($count($el))" -command [namespace code [list $action $el]]
+        }
     }
 }
 
@@ -668,7 +669,7 @@ proc ::jobMonitor::countTypes {m action} {
 #    a job selection with the mouse is done.)
 #
 proc ::jobMonitor::selectJobs {type} {
-    if {$::jobMonitor::anchorJob ne ""} {
+    if {$::jobMonitor::anchorJob ne "" && [winfo exists $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob]} {
         $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob configure -relief flat
         set ::jobMonitor::anchorJob ""
     }
@@ -692,7 +693,7 @@ proc ::jobMonitor::selectJobs {type} {
 #    a job selection with the mouse is done.)
 #
 proc ::jobMonitor::deselectJobs {type} {
-    if {$::jobMonitor::anchorJob ne ""} {
+    if {$::jobMonitor::anchorJob ne "" && [winfo exists $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob]} {
         $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob configure -relief flat
         set ::jobMonitor::anchorJob ""
     }
@@ -716,7 +717,7 @@ proc ::jobMonitor::deselectJobs {type} {
 #    a job selection with the mouse is done.)
 #
 proc ::jobMonitor::toggleSelect {type} {
-    if {$::jobMonitor::anchorJob ne ""} {
+    if {$::jobMonitor::anchorJob ne "" && [winfo exists $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob]} {
         $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob configure -relief flat
         set ::jobMonitor::anchorJob ""
     }
@@ -745,7 +746,7 @@ proc ::jobMonitor::toggleSelect {type} {
 # Question: do we want to give a visual indication to the anchor button?
 #
 proc ::jobMonitor::selectJob {jobName} {
-    if {$::jobMonitor::anchorJob ne ""} {
+    if {$::jobMonitor::anchorJob ne "" && [winfo exists $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob]} {
         $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob configure -relief flat
     }
     foreach job $::jobMonitor::jobList {
@@ -835,7 +836,7 @@ proc ::jobMonitor::addSelectJobRange {jobName} {
 #   wi
 #
 proc ::jobMonitor::toggleJob {jobName} {
-    if {$::jobMonitor::anchorJob ne ""} {
+    if {$::jobMonitor::anchorJob ne "" && [winfo exists $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob]} {
         $::jobMonitor::bWindow.f2.text.cb$::jobMonitor::anchorJob configure -relief flat
         set ::jobMonitor::anchorJob ""
     }
@@ -1426,6 +1427,7 @@ proc ::jobMonitor::releaseJobs {} {
 # Side effects:
 #    Check all jobs to see if they are in the batch system.
 #    If so extract the status and display that in the status box.
+#    If not we look for existance job ran. If it has not we mark it.
 #
 proc ::jobMonitor::updateStatusIndicators {{job ""}} {
     global env
@@ -1506,6 +1508,15 @@ proc ::jobMonitor::updateStatusIndicators {{job ""}} {
                     colorStatusIndicator $::jobMonitor::bWindow.f2.text.stat$job $val
                 }
             }
+        # check for non-existance of log file
+        # Only do this if condClustList is not empty list.
+        if {[llength $condClustList] > 0} {
+            set logFile [file join $::jobMonitor::logDir ${job}$::jobMonitor::LOGTYPE]
+            if {![file exists $logFile]} {
+                set ::jobMonitor::var$job "----"
+                colorStatusIndicator $::jobMonitor::bWindow.f2.text.stat$job "----"
+            }
+        }
 #        }
     }
 }
@@ -1525,7 +1536,7 @@ proc ::jobMonitor::updateStatusIndicators {{job ""}} {
 #    identification of state.
 #
 proc ::jobMonitor::colorStatusIndicator {b v} {
-    switch $v {
+    switch -- $v {
         UNKN {$b configure -fg yellow}
         SUBM {$b configure -fg orange}
         PEND {$b configure -fg blue}
@@ -1539,6 +1550,7 @@ proc ::jobMonitor::colorStatusIndicator {b v} {
         I    {$b configure -fg blue}
         R    {$b configure -fg red}
         H    {$b configure -fg yellow}
+        ---- {$b configure -fg pink}
         default {$b configure -fg gray}
     }
 }
@@ -1723,6 +1735,127 @@ proc ::jobMonitor::setMatchSpinBoxState {sb} {
     } else {
         set ::jobMonitor::matchNumber $::jobMonitor::lastMatchNumber
         $sb configure -state normal
+    }
+}
+
+# findBigJobs --
+#
+# Arguments:
+#    none
+# Result:
+#    Set indicator for jobs which were killed for running too long.
+#    Parsing condor.log file for information. Not sure how robust this is.
+# Side effects:
+#
+proc ::jobMonitor::findBigJobs {} {
+    set path $::jobMonitor::scriptDir
+    foreach cLog [glob [file join $path *.condor.log]] {
+        if {![regexp {sched(.+).condor.log} $cLog m X]} {
+            continue
+        }
+        set f [open $cLog]
+        set t [read $f]
+        close $f
+        set lastEvict [string last "Job was evicted" $t]
+        set lastTerm  [string last "Job terminated" $t]
+        if {$lastEvict > $lastTerm} {
+            set ::jobMonitor::cbVar$X 1
+            lappend ::jobMonitor::actionList $X
+        }
+    }
+}
+# splitSelectedJobs --
+#
+# Arguments:
+#    none
+# Result:
+#    For jobs in actionList we make two copies of csh, list and condor files,
+#    appending _n to the jobs number.
+#    Each list file contains half the files of the original.
+#    Replace job name information inside csh and condor files by appending _n
+# Side effects:
+#    Leave original files, appending _BIG to name.
+proc ::jobMonitor::splitSelectedJobs {} {
+    set path $::jobMonitor::scriptDir
+    foreach job $::jobMonitor::actionList {
+        set inList [file join $path sched${job}.list]
+        set bigList [file join $path sched${job}.list.BIG]
+        set outList0 [file join $path sched${job}_0.list]
+        set outList1 [file join $path sched${job}_1.list]
+
+        set inCondor [file join $path sched${job}.condor]
+        set bigCondor [file join $path sched${job}.condor.BIG]
+        set outCondor0 [file join $path sched${job}_0.condor]
+        set outCondor1 [file join $path sched${job}_1.condor]
+
+        set inCsh [file join $path sched${job}.csh]
+        set bigCsh [file join $path sched${job}.csh.BIG]
+        set outCsh0 [file join $path sched${job}_0.csh]
+        set outCsh1 [file join $path sched${job}_1.csh]
+
+        set inCondorLog [file join $path sched${job}.condor.log]
+        set bigCondorLog [file join $path sched${job}.condor.log.BIG]
+
+        set f [open $inCondor]
+        set t [read $f]
+        close $f
+
+        set mL0 [list $job ${job}_0]
+        set t0 [string map $mL0 $t]
+        set f0 [open $outCondor0 a]
+        puts $f0 $t0
+        close $f0
+
+        set mL1 [list $job ${job}_1]
+        set t1 [string map $mL1 $t]
+        set f1 [open $outCondor1 a]
+        puts $f1 $t1
+        close $f1
+
+
+
+        set f [open $inCsh]
+        set t [read $f]
+        close $f
+
+        set mL0 [list $job ${job}_0]
+        set t0 [string map $mL0 $t]
+        set f0 [open $outCsh0 a]
+        puts $f0 $t0
+        close $f0
+        file attributes $outCsh0 -permissions +x
+
+        set mL1 [list $job ${job}_1]
+        set t1 [string map $mL1 $t]
+        set f1 [open $outCsh1 a]
+        puts $f1 $t1
+        close $f1
+        file attributes $outCsh1 -permissions +x
+
+
+        set f [open $inList]
+        set t [read $f]
+        close $f
+
+        set tL [split $t \n]
+        set half [expr int([llength $tL]/2)]
+        set f0 [open $outList0 a]
+        foreach l [lrange $tL 0 $half] {
+            puts $f0 $l
+        }
+        close $f0
+
+        incr half
+        set f1 [open $outList1 a]
+        foreach l [lrange $tL $half end] {
+            puts $f1 $l
+        }
+        close $f1
+
+        file rename $inList $bigList
+        file rename $inCondor $bigCondor
+        file rename $inCondorLog $bigCondorLog
+        file rename $inCsh $bigCsh
     }
 }
 
