@@ -126,6 +126,9 @@ private:
   Int_t TP6bit_adc_holder[kNPatches];
   Int_t JP_adc_holder[kNJet];
 
+  // J/psi topology trigger candidate pair of towers
+  vector< pair<int,int> > mJpsiCandidates;
+
   // DSM layers for 2009
   DSMLayer_B001_2009* mB001;
   DSMLayer_B101_2009* mB101;
@@ -143,6 +146,7 @@ private:
   void get2006_DSMLayer0();
   void get2006_DSMLayer1();
   void get2006_DSMLayer2();
+  void get2006_JpsiCandidates(const vector<int>& towerIds1, const vector<int>& towerIds2);
   void get2007_DSMLayer0();
   void get2007_DSMLayer1();
   void get2007_DSMLayer2();
@@ -260,6 +264,7 @@ public:
   const vector< pair<int, int> > getTowersAboveThreshold(int trigId) const;
   const vector< pair<int, int> > getTriggerPatchesAboveThreshold(int trigId) const;
   const vector< pair<int, int> > getJetPatchesAboveThreshold(int trigId) const;
+  const vector< pair<int,int> > getJpsiCandidates() const { return mJpsiCandidates; }
 
   //access to HT,TP,JP thresholds
   int getTowerThreshold(int trigId, int dsmid) const;

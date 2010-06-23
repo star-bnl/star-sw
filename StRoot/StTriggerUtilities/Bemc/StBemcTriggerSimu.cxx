@@ -313,6 +313,7 @@ void StBemcTriggerSimu::Clear(){
   }
   
   mFiredTriggers.clear();
+  mJpsiCandidates.clear();
 }
 //==================================================
 //==================================================
@@ -1257,23 +1258,24 @@ void StBemcTriggerSimu::get2006_DSMLayer2()
   // The J/psi trigger fires if two opposite jet patches have high towers
   // above the selected threshold.
   //
-  // +-----------+----------+-----+-----+
-  // | DSM index | DSM name | j0  | j1  |
-  // +-----------+----------+-----+-----+
-  // | 0         | BE101    | 10' | 12' |
-  // | 1         | BE102    | 2'  | 4'  |
-  // | 2         | BE103    | 6'  | 8'  |
-  // | 3         | BW101    | 10' | 12' |
-  // | 4         | BW102    | 2'  | 4'  |
-  // | 5         | BW103    | 6'  | 8'  |
-  // +-----------+----------+-----+-----+
-
-  // Vector bits correspond to positions 2,4,6,8,10,12 o'clock.
+  // +-----------+----------+------------+------------+
+  // | DSM index | DSM name | j0         | j1         |
+  // +-----------+----------+------------+------------+
+  // | 0         | BE101    | 10' (JP6)  | 12' (JP7)  |
+  // | 1         | BE102    | 2'  (JP8)  | 4'  (JP9)  |
+  // | 2         | BE103    | 6'  (JP10) | 8'  (JP11) |
+  // | 3         | BW101    | 10' (JP0)  | 12' (JP1)  |
+  // | 4         | BW102    | 2'  (JP2)  | 4'  (JP3)  |
+  // | 5         | BW103    | 6'  (JP4)  | 8'  (JP5)  |
+  // +-----------+----------+------------+------------+
+  //
   // The J/psi topology trigger uses register R2 to select the
   // high tower threshold used for each decay electron of the J/psi.
   // In Run 6, R2 was always set to th0. So it is hardcoded to 1
   // in the code below. Possible values are:
   // 0 - th0; 1 - th1; 2 - th2; 3 - J/psi logic OFF.
+  //
+  // Vector bits (0-5) correspond to positions 2,4,6,8,10,12 o'clock.
 
   int barrel_east_ht_jpsi[6];
 
@@ -1295,9 +1297,7 @@ void StBemcTriggerSimu::get2006_DSMLayer2()
 
   int ht_jpsi[6];
 
-  for (int dsm = 0; dsm < kL1DsmModule; ++dsm) {
-    ht_jpsi[dsm] = barrel_east_ht_jpsi[dsm] || barrel_west_ht_jpsi[dsm];
-  }
+  for (int i = 0; i < 6; ++i) ht_jpsi[i] = barrel_east_ht_jpsi[i] || barrel_west_ht_jpsi[i];
 
   int jpsiTrigger = ((ht_jpsi[0] && (ht_jpsi[2] || ht_jpsi[3] || ht_jpsi[4])) ||
 		     (ht_jpsi[1] && (ht_jpsi[3] || ht_jpsi[4] || ht_jpsi[5])) ||
@@ -1308,10 +1308,52 @@ void StBemcTriggerSimu::get2006_DSMLayer2()
   if (jpsiTrigger) {
     mFiredTriggers.push_back(117705);
     mFiredTriggers.push_back(137705);
-  }
 
+    // Collect all towers above threshold and group them
+    // by phi position, i.e. 2, 4, ..., 12 o'clock.
+    const int phipos[] = { 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3 }; // JP0-JP11
+    vector<int> ht_jpsi_ids[6];
+
+    for (int towerId = 1; towerId <= kNTowers; ++towerId) {
+      int triggerPatch, dsm;
+      mDecoder->GetTriggerPatchFromTowerId(towerId,triggerPatch);
+      mDecoder->GetDSMFromTriggerPatch(triggerPatch,dsm);
+
+      if (HT6bit_adc_holder[towerId-1] > mDbThres->GetHT_DSM0_threshold(dsm,timestamp,0)) {
+	int jetPatch;
+	mDecoder->GetJetPatchFromTowerId(towerId,jetPatch);
+	ht_jpsi_ids[phipos[jetPatch]].push_back(towerId);
+      }
+    }
+
+    // Make J/psi candidates
+    get2006_JpsiCandidates(ht_jpsi_ids[0],ht_jpsi_ids[2]); // 2 o'clock and 6 o'clock
+    get2006_JpsiCandidates(ht_jpsi_ids[0],ht_jpsi_ids[3]); // 2 o'clock and 8 o'clock
+    get2006_JpsiCandidates(ht_jpsi_ids[0],ht_jpsi_ids[4]); // 2 o'clock and 10 o'clock
+    get2006_JpsiCandidates(ht_jpsi_ids[1],ht_jpsi_ids[3]); // 4 o'clock and 8 o'clock
+    get2006_JpsiCandidates(ht_jpsi_ids[1],ht_jpsi_ids[4]); // 4 o'clock and 10 o'clock
+    get2006_JpsiCandidates(ht_jpsi_ids[1],ht_jpsi_ids[5]); // 4 o'clock and 12 o'clock
+    get2006_JpsiCandidates(ht_jpsi_ids[2],ht_jpsi_ids[4]); // 6 o'clock and 10 o'clock
+    get2006_JpsiCandidates(ht_jpsi_ids[2],ht_jpsi_ids[5]); // 6 o'clock and 12 o'clock
+    get2006_JpsiCandidates(ht_jpsi_ids[3],ht_jpsi_ids[5]); // 8 o'clock and 12 o'clock
+
+#if 0
+    LOG_INFO << "nJpsiCandidates = " << mJpsiCandidates.size() << endm;
+
+    for (size_t i = 0; i < mJpsiCandidates.size(); ++i) {
+      const pair<int,int>& towers = mJpsiCandidates[i];
+      LOG_INFO << towers.first << " " << towers.second << endm;
+    }
+#endif
+  }
 }
 
+void StBemcTriggerSimu::get2006_JpsiCandidates(const vector<int>& towerIds1, const vector<int>& towerIds2)
+{
+  for (size_t i = 0; i < towerIds1.size(); ++i)
+    for (size_t j = 0; j < towerIds2.size(); ++j)
+      mJpsiCandidates.push_back(make_pair(towerIds1[i],towerIds2[j]));
+}
 
 //==================================================
 //==================================================
