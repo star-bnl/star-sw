@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQAHists.cxx,v 1.7 2010/03/02 21:43:38 prindle Exp $
+ * $Id: StEStructQAHists.cxx,v 1.8 2010/06/23 22:29:47 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -209,6 +209,7 @@ void StEStructQAHists::initTrackHistograms(int numBins, int aIndex){
   mHPt       = new TH1F*[qbins];
   mHYt       = new TH1F*[qbins];
   mHdEdxPtot = new TH2F*[qbins];
+  mHEtaPt    = new TH2F*[qbins];
 
   int nall = 100;
   float xetamin = -2.0;
@@ -277,6 +278,13 @@ void StEStructQAHists::initTrackHistograms(int numBins, int aIndex){
     TString hmdedxP("Qm"); hmdedxP+=hdedxP.Data();
     mHdEdxPtot[i+numBins] = new TH2F(hmdedxP.Data(),hmdedxP.Data(),nx,xpmin,xpmax,ny,ydmin,ydmax);
 
+    TString hetapt("EtaPt"); 
+    if(mhasAIndex)hetapt+=haIndex.Data();
+    if(numBins>1)hetapt+=i;
+    TString hpetapt("Qp"); hpetapt+=hetapt.Data();
+    mHEtaPt[i]=new TH2F(hpetapt.Data(),hpetapt.Data(),20,-1.0,1.0,30,0.1,3.1);
+    TString hmetapt("Qm"); hmetapt+=hetapt.Data();
+    mHEtaPt[i+numBins]=new TH2F(hmetapt.Data(),hmetapt.Data(),20,-1.0,1.0,30,0.1,3.1);
   }
 
 };
@@ -293,6 +301,7 @@ void StEStructQAHists::fillTrackHistograms(StEStructTrack* t, int ib){
   mHPt[i]->Fill(t->Pt());
   mHYt[i]->Fill(t->Yt());
   mHdEdxPtot[i]->Fill(t->Ptot(),t->Dedx());
+  mHEtaPt[i]->Fill(t->Eta(),t->Pt());
 
 };
 
@@ -308,6 +317,7 @@ void StEStructQAHists::writeTrackHistograms(TFile* tf){
     mHPt[i]->Write();
     mHYt[i]->Write();
     mHdEdxPtot[i]->Write();
+    mHEtaPt[i]->Write();
   }
 
 };
@@ -323,8 +333,12 @@ void StEStructQAHists::writeTrackHistograms(TFile* tf){
 /**********************************************************************
  *
  * $Log: StEStructQAHists.cxx,v $
+ * Revision 1.8  2010/06/23 22:29:47  prindle
+ * Hadd typo of 2004B instead of B2004 in EventCuts.cxx
+ *   Added a couple of histograms in QAHists.
+ *
  * Revision 1.7  2010/03/02 21:43:38  prindle
- * Use outerHelix() for global tracks
+ *   Use outerHelix() for global tracks
  *   Add sensible triggerId histograms
  *   Starting to add support to sort events (available for Hijing)
  *
