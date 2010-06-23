@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.25 2010/03/02 21:48:30 prindle Exp $
+ * $Id: StEStructSupport.cxx,v 1.26 2010/06/23 22:33:50 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -342,6 +342,30 @@ double *StEStructSupport::getScaleFactors() {
 double *StEStructSupport::getScaleFactors(int zBin) {
     double* retVal = new double[5];
     retVal = getd2NdEtadPhi(zBin);
+    return retVal;
+}
+//---------------------------------------------------------
+double *StEStructSupport::getptHat() {
+    double* retVal = new double[4];
+    double d2N_Tot = 0;
+    double *d2NdEtadPhi;
+    for (int iType=0;iType<4;iType++) {
+        retVal[iType] = 0;
+    }
+    double *ptHat;
+    for (int iz=0;iz<mNumZBins;iz++) {
+        ptHat = getptHat(iz);
+        d2NdEtadPhi = getd2NdEtadPhi(iz);
+        for (int iType=0;iType<4;iType++) {
+            retVal[iType] += ptHat[iType] * d2NdEtadPhi[5];
+        }
+        d2N_Tot += d2NdEtadPhi[5];
+        delete [] d2NdEtadPhi;
+        delete [] ptHat;
+    }
+    for (int iType=0;iType<4;iType++) {
+        retVal[iType] /= d2N_Tot;
+    }
     return retVal;
 }
 //---------------------------------------------------------
@@ -748,7 +772,9 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf) {
         // Have weighted \Delta\rho / \rho_{ref}.
         // Scale by some power of d^2N/d\eta d\phi (always using CI for this to be able to compare different charge combinations correctly).
         double sqrtRho = getCIdNdEtadPhi();
-        cout << "@@@@@ Using d^2N/detadphi = " << sqrtRho << endl;
+        if (!msilent) {
+            cout << "@@@@@ In buildCommon: using d^2N/detadphi = " << sqrtRho << endl;
+        }
         for (int iType=0;iType<4;iType++) {
             // >>>>>
             retVal[iType]->Scale(1./4.);
@@ -870,24 +896,17 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf, int z
     return retVal;
 }
 //---------------------------------------------------------
-// When we have imposed some type of pt cuts we may have introduced
-// a covariance which will show up here. Subtract mixed pairs
-// to reduce this contribution.
+// We should not need to subtract mixed pairs in calculation of pt correlations.
+// It turns out to make a surprisingly big difference.
+
+// Combine zBuffers as we do for number correlations.
 
 // opt: 0 = delta-rho/rho_mix;  1 = delta-rho;  2 = delta-rho/sqrt(rho_mix);
 TH2D** StEStructSupport::buildPtCommon(const char* name, int opt, int subtract) {
-    double *d2NdEtadPhi = getd2NdEtadPhi(0);
-    double dNdEtadPhi = d2NdEtadPhi[4];
     TH2D** retVal= buildPtCommon(name, opt, subtract, 0);
     if (!retVal) {
         return retVal;
     }
-
-    for (int iType=0;iType<4;iType++) {
-        retVal[iType]->Scale(d2NdEtadPhi[iType]);
-    }
-    delete [] d2NdEtadPhi;
-
     // Fix up name and title of histograms we return
     for (int iType=0;iType<4;iType++) {
         if (strstr(retVal[iType]->GetName(),"_zBuf_0")) {
@@ -904,33 +923,76 @@ TH2D** StEStructSupport::buildPtCommon(const char* name, int opt, int subtract) 
     for (int i=0;i<4;i++) {
         retVal[i]->SetName(swapIn(retVal[i]->GetName(),oldName[i],newName[i]));
         retVal[i]->SetTitle(swapIn(retVal[i]->GetTitle(),oldTitle[i],newTitle[i]));
+        retVal[i]->Reset();
     }
 
-    for (int iz=1;iz<mNumZBins;iz++) {
-        d2NdEtadPhi = getd2NdEtadPhi(iz);
-        dNdEtadPhi += d2NdEtadPhi[4];
+    double wIdentical[4] = {1, 1, 1, 1};
+    if (mIdenticalPair) {
+        wIdentical[1] = 2;
+        wIdentical[2] = 0;
+    }
+    // In the final scaling to \Delta\rho/\sqrt(\rho_{ref}) or \Delta\rho/\rho_{ref}
+    // one might want to use a {d^2N\over d\eta d\phi} for that specific
+    // charge combination. I always use the value appropriate for CI.
+
+    // Note on combining centralites:
+    //    Here we are taking ratios of sib/mix to cancel acceptance/efficiency before averaging.
+    //    Combining centralities in this way will not give the same result as using a larger
+    //    centrality bin to begin with, but may remove some of the systematic problems.
+
+    // We weight each zBin by the total number of sibling pairs (integrated over (\eta_\Delta,\phi_\Delta)).
+    // First sum over zBins to get total number of pairs.
+    TH2D** temp;
+    double *wScale[4];
+    wScale[0] = new double[mNumZBins];
+    wScale[1] = new double[mNumZBins];
+    wScale[2] = new double[mNumZBins];
+    wScale[3] = new double[mNumZBins];
+    double wTotal[4]  = {0, 0, 0, 0};
+    for (int iz=0;iz<mNumZBins;iz++) {
+        temp = getLocalClones(name, iz);
+        for (int iType=0;iType<4;iType++) {
+            wScale[iType][iz] = temp[iType]->Integral();
+            wTotal[iType]    += wScale[iType][iz];
+            delete temp[iType];
+        }
+        delete [] temp;
+    }
+
+    // Now sum \Delta\rho / \rho_{ref} weighting by number of pairs in each zBin.
+    for (int iz=0;iz<mNumZBins;iz++) {
         TH2D** tmpVal= buildPtCommon(name, opt, subtract, iz);
         for (int iType=0;iType<4;iType++) {
-            retVal[iType]->Add(tmpVal[iType],d2NdEtadPhi[iType]);
+            if (0 != wTotal[iType]) {
+                retVal[iType]->Add(tmpVal[iType], wIdentical[iType]*wScale[iType][iz]/wTotal[iType]);
+            }
             delete tmpVal[iType];
         }
         delete [] tmpVal;
-        delete [] d2NdEtadPhi;
     }
 
-    double sqrtRho = dNdEtadPhi/mNumZBins;
+    // Have weighted \Delta\rho / \rho_{ref}.
+    // Scale by some power of d^2N/d\eta d\phi (always using CI for this to be able to compare different charge combinations correctly).
+    double sqrtRho = getCIdNdEtadPhi();
+    if (!msilent) {
+        cout << "@@@@@ In buildPtCommon: using d^2N/detadphi = " << sqrtRho << endl;
+    }
     for (int iType=0;iType<4;iType++) {
+        // >>>>>
+        retVal[iType]->Scale(1./4.);
         if (0 < sqrtRho) {
-            retVal[iType]->Scale(1.0/mNumZBins);
             if (0 == opt) {
-                retVal[iType]->Scale(1.0/pow(sqrtRho,2));
+                // Do nothing
+            } else if (1 == opt) {
+                retVal[iType]->Scale(sqrtRho*sqrtRho);
             } else if (2 == opt) {
-                retVal[iType]->Scale(1.0/sqrtRho);
+                retVal[iType]->Scale(sqrtRho);
             }
         } else {
             retVal[iType]->Scale(0.0);
         }
     }
+
     return retVal;
 }
 //---------------------------------------------------------
@@ -981,25 +1043,22 @@ TH2D** StEStructSupport::buildPtCommon(const char* name, int opt, int subtract, 
     delete [] ptHat;
     for (int i=0;i<4;i++) {  // Note that i=0->3 is ++, +-, -+, --
         retVal[i]->Add(hlocal[i+ 8]);
-        retVal[i]->Add(hlocal[i+16],-ptHatB[i]);
-        retVal[i]->Add(hlocal[i+24],-ptHatA[i]);
+        retVal[i]->Add(hlocal[i+16],-ptHatA[i]);
+        retVal[i]->Add(hlocal[i+24],-ptHatB[i]);
         retVal[i]->Add(hlocal[i   ],ptHatA[i]*ptHatB[i]);
 
         mixVal[i]->Add(hlocal[i+12]);
-        mixVal[i]->Add(hlocal[i+20],-ptHatB[i]);
-        mixVal[i]->Add(hlocal[i+28],-ptHatA[i]);
+        mixVal[i]->Add(hlocal[i+20],-ptHatA[i]);
+        mixVal[i]->Add(hlocal[i+28],-ptHatB[i]);
         mixVal[i]->Add(hlocal[i+ 4],ptHatA[i]*ptHatB[i]);
     }
 
     for (int i=0;i<4;i++) {
-        retVal[i]->Divide(hlocal[i]);
-        mixVal[i]->Divide(hlocal[i+4]);
         if (subtract) {
             retVal[i]->Add(mixVal[i],-1);  // Subtract mixed event artifacts
         }
+        retVal[i]->Divide(hlocal[i+4]);
     }
-
-
 
     // Free local histograms.
     for (int i=1;i<4;i++) {
@@ -1580,8 +1639,13 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.26  2010/06/23 22:33:50  prindle
+ * In HAdd we distinguish between the parent distributions of the
+ *    two particles.
+ *   In Support I fixed a number of problems in the Pt correlation section.
+ *
  * Revision 1.25  2010/03/02 21:48:30  prindle
- * Fix addDensities (for checking pair cuts)
+ *   Fix addDensities (for checking pair cuts)
  *   Lots of small changes
  *
  * Revision 1.24  2009/11/09 21:32:59  prindle

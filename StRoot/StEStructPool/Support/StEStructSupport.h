@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.16 2010/03/02 21:48:30 prindle Exp $
+ * $Id: StEStructSupport.h,v 1.17 2010/06/23 22:33:56 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -74,6 +74,7 @@ public:
   double *getd2NdEtadPhi(int zBin, bool include2s=true);
   double *getScaleFactors();
   double *getScaleFactors(int zBin);
+  double *getptHat();
   double *getptHat(int zBin);
   int    histogramExists(const char* name, int zBin);
   TH2D** getHists(const char* name, int zBin);
@@ -137,8 +138,13 @@ inline bool StEStructSupport::silent() { return msilent; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.17  2010/06/23 22:33:56  prindle
+ * In HAdd we distinguish between the parent distributions of the
+ *    two particles.
+ *   In Support I fixed a number of problems in the Pt correlation section.
+ *
  * Revision 1.16  2010/03/02 21:48:30  prindle
- * Fix addDensities (for checking pair cuts)
+ *   Fix addDensities (for checking pair cuts)
  *   Lots of small changes
  *
  * Revision 1.15  2009/07/29 21:47:47  dkettler
