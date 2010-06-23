@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQAHists.h,v 1.4 2008/03/19 22:02:00 prindle Exp $
+ * $Id: StEStructQAHists.h,v 1.5 2010/06/23 22:29:50 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -56,6 +56,7 @@ class StEStructQAHists : public TObject {
   TH1F ** mHPt;
   TH1F ** mHYt;
   TH2F ** mHdEdxPtot;
+  TH2F ** mHEtaPt;
 
   void initBaseHistograms();
   void fillBaseHistograms(StEStructEvent* event, StEStructEventReader* reader);
@@ -86,6 +87,10 @@ class StEStructQAHists : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructQAHists.h,v $
+ * Revision 1.5  2010/06/23 22:29:50  prindle
+ * Hadd typo of 2004B instead of B2004 in EventCuts.cxx
+ *   Added a couple of histograms in QAHists.
+ *
  * Revision 1.4  2008/03/19 22:02:00  prindle
  * Updated some dataset definitions.
  *

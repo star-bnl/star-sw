@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.15 2010/03/02 21:43:38 prindle Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.16 2010/06/23 22:29:41 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -317,7 +317,7 @@ bool StEStructEventCuts::goodTrigger(StMuDst* muDst) {
                     return true;
                 }
             }
-        } else if (!strcmp("AuAu200GeVProductionMinBias2004B",mRunPeriod)) {
+        } else if (!strcmp("AuAu200GeVProductionMinBiasB2004",mRunPeriod)) {
             if (muEvent->runNumber() > 503098) {
                 if (muEvent->triggerIdCollection().nominal().isTrigger(15007)) {
                     return true;
@@ -434,8 +434,12 @@ void StEStructEventCuts::printCutStats(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.16  2010/06/23 22:29:41  prindle
+ * Hadd typo of 2004B instead of B2004 in EventCuts.cxx
+ *   Added a couple of histograms in QAHists.
+ *
  * Revision 1.15  2010/03/02 21:43:38  prindle
- * Use outerHelix() for global tracks
+ *   Use outerHelix() for global tracks
  *   Add sensible triggerId histograms
  *   Starting to add support to sort events (available for Hijing)
  *
