@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.26 2009/07/27 18:22:40 perev Exp $
+ * $Id: StMcEvent.hh,v 2.27 2010/06/23 20:18:30 jwebb Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.27  2010/06/23 20:18:30  jwebb
+ * Fixed typo.  Bug had eprsCollection returning btow hits if called using
+ * the const version.
+ *
  * Revision 2.26  2009/07/27 18:22:40  perev
  * Supress I/O for serice words
  *
@@ -216,7 +220,7 @@ class StMcEvent : public TDataSet {
   StMcEmcHitCollection*         eemcHitCollection()       {return emcHitCollection("EemcHits");}
   const StMcEmcHitCollection*   eemcHitCollection() const {return emcHitCollection("EemcHits");}
   StMcEmcHitCollection*         eprsHitCollection()       {return emcHitCollection("EprsHits");}
-  const StMcEmcHitCollection*   eprsHitCollection() const {return emcHitCollection("BemcHits");}
+  const StMcEmcHitCollection*   eprsHitCollection() const {return emcHitCollection("EprsHits");}
   StMcEmcHitCollection*        esmduHitCollection()       {return emcHitCollection("EsmduHits");}
   const StMcEmcHitCollection*  esmduHitCollection() const {return emcHitCollection("EsmduHits");}
   StMcEmcHitCollection*        esmdvHitCollection()       {return emcHitCollection("EsmdvHits");}
