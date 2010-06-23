@@ -102,6 +102,18 @@
     // EventType is for qaHistograms. Depends on type of reader though.
     int EventType = 2;
             </declareReader>
+            <preLoop id='preLoop' widget = 'text'>
+    // Put special processing that needs to be done before the event loop here.
+            </preLoop>
+            <preEvent id='preEvent' widget = 'text'>
+        // Special processing before each event can go here.
+            </preEvent>
+            <postEvent id='postEvent' widget = 'text'>
+        // Special processing after each event can go here.
+            </postEvent>
+            <postLoop id='postLoop' widget = 'text'>
+    // If special processing needs clean up code put it here.
+            </postLoop>
         </doEStructMacro>
 
     </standardElements>

@@ -12,11 +12,11 @@
         </jobControl>
 
         <starSubmit simulateSubmission='true'>
-            <input URL="catalog:star.bnl.gov?production=P05ic,trgsetupname=ProductionMinBias,filetype=daq_reco_MuDst,tpc=1,sanity=1,filename~physics,runnumber<5023099,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
+            <input URL="catalog:star.bnl.gov?production=P05ic,trgsetupname=ProductionMinBias,filetype=daq_reco_MuDst,tpc=1,sanity=1,filename~physics,runnumber&lt;5023099,storage!=HPSS" singleCopy="true" preferStorage="local" nFiles="all" />
         </starSubmit>
 
         <eventCuts>
-            <triggerTag Comment = 'Trigger tag for 2004 ProductionMinBias, runnumber < 5023099, AuAu data at 200GeV'>AuAu200GeVProductionMinBiasA2004</triggerTag>
+            <triggerTag Comment = 'Trigger tag for 2004 ProductionMinBias, runnumber &lt; 5023099, AuAu data at 200GeV'>AuAu200GeVProductionMinBiasA2004</triggerTag>
             <eventCut Comment = 'cut on position of primary vertex'>
                 <cutName>primaryVertexZ</cutName>
                 <Value widget = 'entry'>-10</Value>
