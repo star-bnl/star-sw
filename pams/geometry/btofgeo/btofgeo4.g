@@ -1,7 +1,14 @@
-* $Id: btofgeo4.g,v 1.4 2005/08/04 23:37:37 potekhin Exp $
+* $Id: btofgeo4.g,v 1.5 2010/06/23 19:09:49 jwebb Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo4.g,v $
+* Revision 1.5  2010/06/23 19:09:49  jwebb
+* Resolved minor bug in the cooling tubes for the tof.  The inner radii of
+* the cooling tubes are passed to the block creating the water volume, but
+* the shape operator indicated that it should inherit its parameters from
+* the mother volume.  This resulted in the outer radius of the water volume
+* being set equal to the outer radius of the cooling tube.
+*
 * Revision 1.4  2005/08/04 23:37:37  potekhin
 * Jing must have forgotten to define a non-zero
 * size for the volume "BLEM", which was already fixed
@@ -1035,8 +1042,7 @@ Block BWAT  is  TPC cooling water
       Component H2     A=1   Z=1   W=2
       Component O      A=16  Z=8   W=1
       Mixture   Water  Dens=1.0
-      Shape     TUBE
-**   Rmin=0  Rmax=0
+      Shape     TUBE   Rmin=0  Rmax=0
 EndBlock
 
 *------------------------------------------------------------------------------
