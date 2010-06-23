@@ -47,7 +47,7 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
     // For axial space near/away side is not useful.
     int axialBins[] = {0, 3, 6, 9, 12};
     for (int ic=0;ic<nCent;ic++) {
-        printf("Scale factors for centrality %2i,    ++       +-       -+       --       CI   \n",ic);
+        printf("Centrality %2i:  d2N/dEdP    pHat_{A+}   pHat_{A-}   pHat_{B+}   pHat_{B-}\n",ic);
         for (int ibin=0;ibin<5;ibin++) {
             sprintf(inFileName,"%s/%s%s.root",dirName,inNames[ic],binName[axialBins[ibin]]);
             tf        = new TFile(inFileName);
@@ -203,9 +203,11 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
                 }
             }
             // Calculate and print scale factors
-            double *scale = ehelp->getScaleFactors();
-            printf("  bin %8s                    %7.2f  %7.2f  %7.2f  %7.2f  %7.2f\n",binName[axialBins[ibin]],scale[0],scale[1],scale[2],scale[3],scale[4]);
-            delete [] scale;
+            double scale = ehelp->getCIdNdEtadPhi();
+            double *ptHat = ehelp->getptHat();
+            printf("  bin %8s  %7.3f   %7.3f     %7.3f     %7.3f     %7.3f\n",binName[axialBins[ibin]],scale,ptHat[0],ptHat[1],ptHat[2],ptHat[3]);
+            delete [] ptHat;
+
             delete tf;
             delete ehelp;
         }

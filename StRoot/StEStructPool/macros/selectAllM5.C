@@ -35,7 +35,7 @@ void selectAllM5(const char* dirName, const char* inFile){
   for (int k=0;k<10;k++) {
       nList[k] = k;
   }
-  int nParentDist = 4;
+  int nParentDist[] = {4,4};
   int parentSum[4][2] = { 0,0, 1,1, 2,2, 3,3 };
   TString fname(dirName);
   fname+="/";
@@ -50,8 +50,9 @@ void selectAllM5(const char* dirName, const char* inFile){
   tfComb->Close();
 
   tf->cd();
-  nParentDist = 1;
-  int parentD[1][2];
+  nParentDist[0] = 1;
+  nParentDist[1] = 1;
+ int parentD[1][2];
   for(int k=0;k<10;k++){
     TString fname(dirName);
     fname+="/";
