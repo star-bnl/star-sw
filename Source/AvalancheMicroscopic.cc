@@ -1071,7 +1071,26 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
   x += dt * dx; y += dt * dy; z += dt * dz;
 
   // Check if the photon is still inside a medium
-  if (!sensor->GetMedium(x, y, z, medium)) { 
+  if (!sensor->GetMedium(x, y, z, medium) || medium->GetId() != id) {
+    // Try to terminate the photon track close to the boundary
+    // by means of iterative bisection
+    dx *= dt; dy *= dt; dz *= dt;
+    x -= dx; y -= dy; z -= dz;
+    double delta = sqrt(dx * dx + dy * dy + dz * dz);
+    if (delta > 0) {
+      dx /= delta; dy /= delta; dz /= delta;
+    }
+    // Mid-point
+    double xM = x, yM = y, zM = z;
+    while (delta > BoundaryDistance) {
+      delta *= 0.5;
+      dt *= 0.5;
+      xM = x + delta * dx; yM = y + delta * dy; zM = z + delta * dz; 
+      // Check if the mid-point is inside the drift medium
+      if (sensor->GetMedium(xM, yM, zM, medium) && medium->GetId() == id) {
+        x = xM; y = yM; z = zM; t += dt;
+      }
+    }
     photon newPhoton;
     newPhoton.x0 = x0; newPhoton.y0 = y0; newPhoton.z0 = z0;
     newPhoton.x1 = x;  newPhoton.y1 = y;  newPhoton.z1 = z;

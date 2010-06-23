@@ -153,6 +153,9 @@ class MediumMagboltz86 : public Medium {
     // Switch on/off de-excitation handling
     void EnableDeexcitation();
     void DisableDeexcitation() {useDeexcitation = false;}
+    // Switch on/off discrete photoabsorption levels
+    void EnableRadiationTrapping();
+    void DisableRadiationTrapping() {useRadTrap = false;}
 
     // Switch on/off simplified simulation of Penning transfers by means of 
     // transfer probabilities (not compatible with de-excitation handling)
@@ -282,8 +285,14 @@ class MediumMagboltz86 : public Medium {
     // Deexcitation 
     // Flag enabling/disabling detailed simulation of de-excitation process
     bool useDeexcitation;
+    // Flag enabling/disable radiation trapping (re-absorption of 
+    // photons produced in the de-excitation cascade)
+    bool useRadTrap;
+
     int nDeexcitations;
     struct deexcitation {
+      // Gas component
+      int gas;
       // Level description
       std::string label;
       // Energy

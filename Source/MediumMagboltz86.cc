@@ -18,7 +18,8 @@ MediumMagboltz86::MediumMagboltz86() :
   useCsOutput(false), 
   nTerms(0), useAnisotropic(true), 
   usePenning(false), rPenning(0.), nPenning(0), 
-  useDeexcitation(false), nDeexcitations(0), nDeexcitationProducts(0),
+  useDeexcitation(false), useRadTrap(true),
+  nDeexcitations(0), nDeexcitationProducts(0),
   eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma),
   hasIonMobility(false), muIon(1.e-9) {
   
@@ -216,9 +217,9 @@ MediumMagboltz86::SetMaxPhotonEnergy(const double e) {
   
   // Determine the energy interval size
   eStepGamma = eFinalGamma / nEnergyStepsGamma;
-  
-  isChanged = true;
 
+  isChanged = true;
+ 
   return true;
   
 }
@@ -226,14 +227,33 @@ MediumMagboltz86::SetMaxPhotonEnergy(const double e) {
 void
 MediumMagboltz86::EnableDeexcitation() {
 
+  std::cout << "MediumMagboltz86::EnableDeexcitation:" << std::endl;
   if (usePenning) {
-    std::cerr << "MediumMagboltz86::EnableDeexcitation:" << std::endl;
-    std::cerr << "    Penning transfer will be switched off." << std::endl;
+    std::cout << "    Penning transfer will be switched off." << std::endl;
+  }
+  if (useRadTrap) {
+    std::cout << "    Radiation trapping is switched on." << std::endl;
+  } else {
+    std::cout << "    Radiation trapping is switched off." << std::endl;
   }
   usePenning = false;
   useDeexcitation = true;
   isChanged = true;
   nDeexcitationProducts = 0;
+
+}
+
+void
+MediumMagboltz86::EnableRadiationTrapping() {
+
+  useRadTrap = true;
+  if (!useDeexcitation) {
+    std::cout << "MediumMagboltz86::EnableRadiationTrapping:" << std::endl;
+    std::cout << "    Radiation trapping is enabled but de-excitation is not."
+              << std::endl;
+  } else {
+    isChanged = true;
+  }
 
 }
 
@@ -540,13 +560,23 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
  
   // Secondary electron energy 
   esec = 0.;
+  type = csTypeGamma[level];
   // Collision type
   if (type < 0) {
     // Excitation
-    ++nPhotonCollisions[3];
-    type = 3;
+    if (useRadTrap && useDeexcitation) {
+      ++nPhotonCollisions[3];
+      ComputeDeexcitation(-type - 1);
+      // std::cout << "Photon with energy " << e << " reabsorbed by "
+      //          << "level " << -type - 1 << " with energy " 
+      //          << deexcitations[-type-1].energy
+      //          << std::endl;
+      type = 3;
+    } else {
+      type = 2;
+    }
   } else {
-    type = csTypeGamma[level] % 3;
+    type = type % 3;
     int ngas = int(csTypeGamma[level] / 3);
     ++nPhotonCollisions[type];
     // Ionising collision
@@ -1343,10 +1373,13 @@ MediumMagboltz86::Mixer() {
   if (useDeexcitation) ComputeDeexcitationTable();
   // Fill the photon collision rates table
   if (!ComputePhotonCollisionTable()) {
-     std::cerr << "MediumMagboltz86: " << std::endl;
-     std::cerr << "    Photon collision rates could not be calculated." 
-               << std::endl;
-     if (useDeexcitation) return false;
+    std::cerr << "MediumMagboltz86: " << std::endl;
+    std::cerr << "    Photon collision rates could not be calculated." 
+              << std::endl;
+    if (useDeexcitation) {
+      std::cerr << "    Deexcitation handling is switched off." << std::endl;
+      useDeexcitation = false;
+    }
   }
 
   return true;
@@ -1383,6 +1416,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
   // Concentrations of "de-excitable" gases
   bool withAr = false;
   double cAr = 0.;
+  int iAr = 0;
   std::map<std::string, int> mapLevels;
   // Make a mapping of all excitation levels 
   for (int i = 0; i < nTerms; ++i) {
@@ -1392,7 +1426,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
         // Argon
         if (!withAr) {
           withAr = true;
-          cAr = fraction[int(csType[i] / 6)];
+          iAr = int(csType[i] / 6);
+          cAr = fraction[iAr];
         }
         std::string level = "       ";
         for (int j = 0; j < 7; ++j) level[j] = description[i][5 + j];
@@ -1455,14 +1490,16 @@ MediumMagboltz86::ComputeDeexcitationTable() {
   }
 
   // Radiative de-excitation channels
-  // Transition probabilities from NIST Atomic Spectra Database 
-  // Oscillator strengths from Berkowitz
+  // Transition probabilities taken from NIST Atomic Spectra Database 
+  // Oscillator strengths taken from 
+  // J. Berkowitz, Atomic and Molecular Photoabsorption (2002)
   // Conversion from oscillator strength to transition probability
   const double f2A = 2. * SpeedOfLight * FineStructureConstant / 
                     (3. * ElectronMass * HbarC);
   deexcitation newDxc;
   for (itMap = mapLevels.begin(); itMap != mapLevels.end(); itMap++) {
     std::string level = (*itMap).first;
+    newDxc.gas = int(csType[(*itMap).second] / 6);
     newDxc.label = level;
     newDxc.energy = energyLoss[(*itMap).second] * rgas[(*itMap).second];
     newDxc.osc = 0.;
@@ -1555,7 +1592,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[3] = 1.4e-4; newDxc.final[3] = mapDxc["Ar_2P3"];
       newDxc.p[4] = 1.7e-4; newDxc.final[4] = mapDxc["Ar_2P2"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[5] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[5] = -1;
+      newDxc.p[5] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[5] = -1;
     } else if (level == "Ar_3D3") {
       int nc = 6; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -1618,7 +1656,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[2] = 0.011;   newDxc.final[2] = mapDxc["Ar_2P7"];
       newDxc.p[3] = 4.3e-3;  newDxc.final[3] = mapDxc["Ar_2P6"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[4] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[4] = -1;
+      newDxc.p[4] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[4] = -1;
     } else if (level == "Ar_3S1!!!!") {
       int nc = 3; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -1661,7 +1700,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[4] = 7.1e-3;  newDxc.final[4] = mapDxc["Ar_2P2"];
       newDxc.p[5] = 5.2e-3;  newDxc.final[5] = mapDxc["Ar_2P1"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[6] = -1;
+      newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[6] = -1;
     } else if (level == "Ar_4D5") {
       newDxc.osc = 0.0019;
       int nc = 7; newDxc.nChannels = nc;
@@ -1673,7 +1713,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[4] = 4.6e-4;  newDxc.final[4] = mapDxc["Ar_2P3"];
       newDxc.p[5] = 1.6e-4;  newDxc.final[5] = mapDxc["Ar_2P2"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[6] = -1;
+      newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[6] = -1;
     } else if (level == "Ar_3S4") {
       newDxc.osc = 0.0144;
       int nc = 10; newDxc.nChannels = nc;
@@ -1688,14 +1729,16 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[7] = 3.3e-5;  newDxc.final[7] = mapDxc["Ar_2P2"];
       newDxc.p[8] = 9.7e-5;  newDxc.final[8] = mapDxc["Ar_2P1"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[9] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[9] = -1;
+      newDxc.p[9] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[9] = -1;
     } else if (level == "Ar_4D2") {
       newDxc.osc = 0.048;
       int nc = 2; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 1.7e-4; newDxc.final[0] = mapDxc["Ar_2P7"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[1] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[1] = -1;
+      newDxc.p[1] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[1] = -1;
     } else if (level == "Ar_4S1!") {
       newDxc.osc = 0.0209;
       int nc = 7; newDxc.nChannels = nc;
@@ -1707,7 +1750,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[4] = 5.8e-5;  newDxc.final[4] = mapDxc["Ar_2P5"];
       newDxc.p[5] = 1.2e-4;  newDxc.final[5] = mapDxc["Ar_2P3"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[6] = -1;
+      newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[6] = -1;
     } else if (level == "Ar_3S2") {
       newDxc.osc = 0.0221;
       int nc = 10; newDxc.nChannels = nc;
@@ -1722,7 +1766,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[7] = 9.6e-4;  newDxc.final[7] = mapDxc["Ar_2P2"];
       newDxc.p[8] = 3.59e-4; newDxc.final[8] = mapDxc["Ar_2P1"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[9] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[9] = -1;
+      newDxc.p[9] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[9] = -1;
     } else if (level == "Ar_5D5") {
       newDxc.osc = 0.0041;
       int nc = 9; newDxc.nChannels = nc;
@@ -1736,7 +1781,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[6] = 2.4e-4;  newDxc.final[6] = mapDxc["Ar_2P3"];
       newDxc.p[7] = 1.2e-4;  newDxc.final[7] = mapDxc["Ar_2P2"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[8] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[8] = -1;
+      newDxc.p[8] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[8] = -1;
     } else if (level == "Ar_4S4") {
       newDxc.osc = 0.0139;
       int nc = 7; newDxc.nChannels = nc;
@@ -1748,7 +1794,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[4] = 9.4e-5; newDxc.final[4] = mapDxc["Ar_2P5"];
       newDxc.p[5] = 5.4e-5; newDxc.final[5] = mapDxc["Ar_2P4"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[6] = -1;
+      newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[6] = -1;
     } else if (level == "Ar_5D2") {
       newDxc.osc = 0.0426;
       int nc = 5; newDxc.nChannels = nc;
@@ -1758,7 +1805,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[2] = 1.5e-4; newDxc.final[2] = mapDxc["Ar_2P5"];
       newDxc.p[3] = 3.1e-5; newDxc.final[3] = mapDxc["Ar_2P2"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[4] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[4] = -1;
+      newDxc.p[4] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[4] = -1;
     } else if (level == "Ar_6D5") {
       newDxc.osc = 0.0062;
       int nc = 7; newDxc.nChannels = nc;
@@ -1770,14 +1818,16 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[4] = 6.6e-5;  newDxc.final[4] = mapDxc["Ar_2P3"];
       newDxc.p[5] = 1.21e-4; newDxc.final[5] = mapDxc["Ar_2P1"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[6] = -1;
+      newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[6] = -1;
     } else if (level == "Ar_5S1!") {
       newDxc.osc = 0.0562;
       int nc = 2; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 7.7e-5; newDxc.final[0] = mapDxc["Ar_2P5"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[1] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[1] = -1;
+      newDxc.p[1] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[1] = -1;
     } else if (level == "Ar_4S2") {
       newDxc.osc = 0.0069;
       int nc = 8; newDxc.nChannels = nc;
@@ -1790,7 +1840,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[5] = 9.e-4;  newDxc.final[5] = mapDxc["Ar_2P3"];
       newDxc.p[6] = 3.3e-4; newDxc.final[6] = mapDxc["Ar_2P2"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[7] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[7] = -1;
+      newDxc.p[7] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[7] = -1;
     } else if (level == "Ar_5S4") {
       newDxc.osc = 0.0211;
       int nc = 5; newDxc.nChannels = nc;
@@ -1800,19 +1851,22 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[2] = 1.5e-4; newDxc.final[2] = mapDxc["Ar_2P4"];
       newDxc.p[3] = 1.4e-4; newDxc.final[3] = mapDxc["Ar_2P2"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[4] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[4] = -1;
+      newDxc.p[4] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[4] = -1;
     } else if (level == "Ar_6D2") {
       newDxc.osc = 0.0574;
       int nc = 1; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[0] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[0] = -1;
+      newDxc.p[0] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[0] = -1;
     } else if (level == "Ar_High") {
       newDxc.osc = 0.0335;
       int nc = 1; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[0] = f2A * pow(newDxc.energy, 2) * newDxc.osc; newDxc.final[0] = -1;
+      newDxc.p[0] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[0] = -1;
     } else {
       std::cerr << "MediumMagboltz86::ComputeDeexcitationTable:" << std::endl;
       std::cerr << "    Missing de-excitation data for level " 
@@ -1825,8 +1879,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
   
   if (debug) {
     std::cout << "MediumMagboltz86::ComputeDeexcitationTable:" << std::endl; 
-    std::cout << "    Found " << nDeexcitations
-              << " levels with available de-excitation data." << std::endl;
+    std::cout << "    Found " << nDeexcitations << " levels "
+              << "with available radiative de-excitation data." << std::endl;
   }
 
   // Collisional de-excitation channels
@@ -1835,6 +1889,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
   if (withAr) {
     // Add the Ar dimer ground state
     newDxc.label = "Ar_Dimer";
+    newDxc.gas = iAr;
     newDxc.energy = 14.71;
     newDxc.osc = 0.;
     newDxc.p.clear(); newDxc.final.clear(); newDxc.type.clear();
@@ -1844,20 +1899,22 @@ MediumMagboltz86::ComputeDeexcitationTable() {
     ++nDeexcitations;
     // Add an Ar excimer level
     newDxc.label = "Ar_Excimer";
+    newDxc.gas = iAr;
     newDxc.energy = 14.71;
     newDxc.osc = 0.;
     newDxc.p.clear(); newDxc.final.clear(); newDxc.type.clear();
     newDxc.nChannels = 0;
+    mapDxc["Ar_Excimer"] = nDeexcitations;
     deexcitations.push_back(newDxc);
     ++nDeexcitations;
-    // Calculate the transition rates
+    // Calculate the collisional transition rates
     //   References:
     //     A. Bogaerts and R. Gijbels, J. Appl. Phys. 86 (1999), 4124-4133
     //     A. Bogaerts and R. Gijbels, Phys. Rev. A 52 (1995), 3743-3751
     // Hornbeck-Molnar ionisation
     const double fHM = 2.e-18 * density * cAr;
     // Fraction of metastable atoms (just a wild guess)
-    const double cMeta = 1.e-4;
+    const double cMeta = 1.e-5;
     // Metastable-metastable (associative) ionisation
     const double fMetaIon = (6.3e-19  + 5.7e-19) * density * cAr * cMeta;
     // Collisional losses
@@ -1868,24 +1925,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
     for (int j = nDeexcitations; j--;) {
       std::string level = deexcitations[j].label;
       // Collisional losses
-      if (level == "Ar_1S5" || level == "Ar_1S4" || 
-          level == "Ar_1S3" || level == "Ar_1S2" ||
-          level == "Ar_2P10" || level == "Ar_2P9" || level == "Ar_2P8" ||
-          level == "Ar_2P7" || level == "Ar_2P6" || level == "Ar_2P5" ||
-          level == "Ar_2P4" || level == "Ar_2P3" || level == "Ar_2P2" ||
-          level == "Ar_2P1" ||
-          level == "Ar_3D6" || level == "Ar_3D5" || level == "Ar_3D3" ||
-          level == "Ar_3D4!" || level == "Ar_3D4" || level == "Ar_3D1!!" ||
-          level == "Ar_2S5" || level == "Ar_2S4" || level == "Ar_3D1!" ||
-          level == "Ar_3D2" || level == "Ar_3S1!!!!" || level == "Ar_3S1!!" ||
-          level == "Ar_3S1!!!" || level == "Ar_2S3" || level == "Ar_2S2" ||
-          level == "Ar_3S1!" ||
-          level == "Ar_4D5" || level == "Ar_3S4" || level == "Ar_4D2" || 
-          level == "Ar_4S1!" || level == "Ar_3S2" || level == "Ar_5D5" || 
-          level == "Ar_4S4" || level == "Ar_5D2" || level == "Ar_6D5" ||
-          level == "Ar_5S1!" || level == "Ar_4S2" || level == "Ar_5S4" ||
-          level == "Ar_6D2" || level == "Ar_High") {
-        deexcitations[j].final.push_back(mapDxc["Ar_Dimer"]);
+      if (deexcitations[j].gas == iAr) {
+        deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(mapDxc["Ar_Excimer"]);
         deexcitations[j].type.push_back(-1);
         deexcitations[j].type.push_back(-1);
@@ -1918,7 +1959,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
     std::cout << "MediumMagboltz86::ComputeDeexcitationTable:" << std::endl;
     std::cout << "    Gas mixture has " << nComponents 
               << " components." << std::endl;
-    std::cout << "    Collisional deexcitation is implemented only for"
+    std::cout << "    Penning effects are only implemented for "
               << " binary mixtures." << std::endl;
   } else if ((gas[0] == 2 && gas [1] == 8) || (gas[0] == 8 && gas[1] == 2)) {
     // Ar-CH4
@@ -1962,6 +2003,9 @@ MediumMagboltz86::ComputeDeexcitationTable() {
         deexcitations[j].nChannels += 1;
       }
     }
+  } else {
+    std::cout << "MediumMagboltz86::ComputeDeexcitationTable:" << std::endl;
+    std::cout << "    No data on Penning effects found." << std::endl;
   }
 
   if (debug) {
@@ -1969,17 +2013,21 @@ MediumMagboltz86::ComputeDeexcitationTable() {
     std::cout << "        Level                 Lifetimes [ns]" << std::endl;
     std::cout << "                    Total      Radiative          Collisional"
               << std::endl;
-    std::cout << "                                          Ionisation      Loss"
-              << std::endl;
+    std::cout << "                                         "
+              << " Ionisation      Loss" << std::endl;
   }
   for (int i = 0; i < nDeexcitations; ++i) {
     deexcitations[i].rate = 0.;
     double fRad = 0., fCollIon = 0., fCollLoss = 0.;
     for (int j = deexcitations[i].nChannels; j--;) {
       deexcitations[i].rate += deexcitations[i].p[j];
-      if (deexcitations[i].type[j] == 0) fRad += deexcitations[i].p[j];
-      else if (deexcitations[i].type[j] == 1) fCollIon += deexcitations[i].p[j];
-      else if (deexcitations[i].type[j] == -1) fCollLoss += deexcitations[i].p[j];
+      if (deexcitations[i].type[j] == 0) {
+        fRad += deexcitations[i].p[j];
+      } else if (deexcitations[i].type[j] == 1) {
+        fCollIon += deexcitations[i].p[j];
+      } else if (deexcitations[i].type[j] == -1) {
+        fCollLoss += deexcitations[i].p[j];
+      }
     }
     if (deexcitations[i].rate > 0.) {
       if (debug) {
@@ -2074,19 +2122,21 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
   const double density = LoschmidtNumber * (pressure / AtmosphericPressure) * 
                          (273.15 / temperature);
   // Conversion factor from oscillator strength to cross-section
-  const double f2cs = FineStructureConstant * 2 * Pi2 * HbarC * HbarC / ElectronMass;
+  const double f2cs = FineStructureConstant * 2 * Pi2 * HbarC * HbarC / 
+                      ElectronMass;
 
   // Reset the collision rate arrays
   cfTotGamma.clear(); cfTotGamma.resize(nEnergyStepsGamma, 0.);
   cfGamma.clear(); cfGamma.resize(nEnergyStepsGamma);
   for (int j = nEnergyStepsGamma; j--;) cfGamma[j].clear();
+  csTypeGamma.clear();
 
   nPhotonTerms = 0;
   for (int i = 0; i < nComponents; ++i) {
     const double prefactor = density * SpeedOfLight * fraction[i];
-    // Continuum
     GetGasName(gas[i], gasname);
     if (!data.SetMaterial(gasname)) return false;
+    // Continuum
     csTypeGamma.push_back(i * 4 + 1);
     csTypeGamma.push_back(i * 4 + 2);
     nPhotonTerms += 2;
@@ -2100,14 +2150,14 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
       // Inelastic absorption
       cfGamma[j].push_back(cs * prefactor * (1. - eta));
     }
-    if (!useDeexcitation) continue;
     // Discrete excitations
-    if (gasname == "Ar") {
+    if (useDeexcitation && useRadTrap) {
       for (int k = 0; k < nDeexcitations; ++k) {
+        if (deexcitations[k].gas != i) continue;
         if (deexcitations[k].osc < Small) continue;
         std::string label = deexcitations[k].label;
         if (deexcitations[k].energy < 0 || 
-            deexcitations[i].energy > eFinalGamma) {
+            deexcitations[k].energy > eFinalGamma) {
           std::cerr << "MediumMagboltz86::ComputePhotonCollisionTable:" 
                     << std::endl;
           std::cerr << "    Warning: excitation energy of level " 
@@ -2119,11 +2169,26 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
         csTypeGamma.push_back(-k - 1);
         for (int j = 0; j < nEnergyStepsGamma; ++j) cfGamma[j].push_back(0.);
         int ie = int(deexcitations[k].energy / eStepGamma);
-        if (ie >= nEnergyStepsGamma) ie = nEnergyStepsGamma -1;
+        if (ie >= nEnergyStepsGamma) ie = nEnergyStepsGamma - 1;
         cfGamma[ie][nPhotonTerms] = prefactor * f2cs * deexcitations[k].osc;
         ++nPhotonTerms;
       } 
-    } 
+    }
+  }
+
+  if (debug && useRadTrap && useDeexcitation) {
+    std::cout << "MediumMagboltz::ComputePhotonCollisionTable:" << std::endl;
+    std::cout << "   Discrete absorption levels:" << std::endl;
+    for (int i = 0; i < nPhotonTerms; ++i) {
+      if (csTypeGamma[i] < 0) {
+        int level = -csTypeGamma[i] - 1;
+        std::cout << "    " << std::setw(12) << deexcitations[level].label
+                  << std::setw(10) << deexcitations[level].energy  
+                  << " eV  " << std::setw(10)
+                  << cfGamma[int(deexcitations[level].energy / eStepGamma)][i]
+                  << " ns-1" << std::endl;
+      }
+    }
   }
 
   if (useCsOutput) {
