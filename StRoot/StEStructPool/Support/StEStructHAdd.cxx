@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.cxx,v 1.15 2010/03/02 21:48:30 prindle Exp $
+ * $Id: StEStructHAdd.cxx,v 1.16 2010/06/23 22:33:41 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -38,7 +38,7 @@ ClassImp(StEStructHAdd)
    */
   //------------------------------------------------------------------------
 void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
-                            int* nlist, int ntot, int parentDist[][2], int nParentDist, int symmXX) {
+                            int* nlist, int ntot, int parentDist[][2], int* nParentDist, int symmXX) {
 
     const char* base[]={"Sib","Mix"};
     const char* tpe[]={"pp","pm","mp","mm"};
@@ -336,7 +336,7 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
             TH1 *tmp, *ptP, *ptM, *etaP, *etaM;
             for (int iSpecies=0;iSpecies<2;iSpecies++) {
                 inFile->cd();
-                for (int iPar=0;iPar<nParentDist;iPar++) {
+                for (int iPar=0;iPar<nParentDist[iSpecies];iPar++) {
                     int jPar = parentDist[iPar][iSpecies];
                     ptPName  = "meanPtP_parentBin"; ptPName  += jPar; ptPName  += "_zBuf_"; ptPName  += zBin;
                     ptMName  = "meanPtM_parentBin"; ptMName  += jPar; ptMName  += "_zBuf_"; ptMName  += zBin;
@@ -384,7 +384,7 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
 };
 //--------------------------------------------------------------------------
 void StEStructHAdd::addCuts(const char* outfile, const char* infile,
-                            int* nlist, int ntot, int parentDist[][2], int nParentDist, int symmXX) {
+                            int* nlist, int ntot, int parentDist[][2], int* nParentDist, int symmXX) {
 
     TFile* tf=new TFile(infile);
     if (tf) {
@@ -992,8 +992,13 @@ void StEStructHAdd::combineUS(TFile * modFile) {
 /***********************************************************************
  *
  * $Log: StEStructHAdd.cxx,v $
+ * Revision 1.16  2010/06/23 22:33:41  prindle
+ * In HAdd we distinguish between the parent distributions of the
+ *    two particles.
+ *   In Support I fixed a number of problems in the Pt correlation section.
+ *
  * Revision 1.15  2010/03/02 21:48:30  prindle
- * Fix addDensities (for checking pair cuts)
+ *   Fix addDensities (for checking pair cuts)
  *   Lots of small changes
  *
  * Revision 1.14  2009/11/09 21:32:59  prindle

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.h,v 1.5 2010/03/02 21:48:30 prindle Exp $
+ * $Id: StEStructHAdd.h,v 1.6 2010/06/23 22:33:45 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -27,9 +27,9 @@ class StEStructHAdd : public TObject {
   ~StEStructHAdd(){};
 
   void addCuts(const char* outfile, TFile * inFile,
-               int* nlist, int num, int parentDist[][2], int nParentDist, int symmXX=0);
+               int* nlist, int num, int parentDist[][2], int* nParentDist, int symmXX=0);
   void addCuts(const char* outfile, const char* infile,
-               int* nlist, int num, int parentDist[][2], int nParentDist, int symmXX=0);
+               int* nlist, int num, int parentDist[][2], int* nParentDist, int symmXX=0);
   void symmetrizeXX(TH2 *hist);
   void old_addDensities(const char* outfile, TFile* inFile);
   void addDensities(const char* outfile, TFile* inFile);
@@ -45,8 +45,13 @@ class StEStructHAdd : public TObject {
 /***********************************************************************
  *
  * $Log: StEStructHAdd.h,v $
+ * Revision 1.6  2010/06/23 22:33:45  prindle
+ * In HAdd we distinguish between the parent distributions of the
+ *    two particles.
+ *   In Support I fixed a number of problems in the Pt correlation section.
+ *
  * Revision 1.5  2010/03/02 21:48:30  prindle
- * Fix addDensities (for checking pair cuts)
+ *   Fix addDensities (for checking pair cuts)
  *   Lots of small changes
  *
  * Revision 1.4  2008/05/01 23:46:40  prindle
