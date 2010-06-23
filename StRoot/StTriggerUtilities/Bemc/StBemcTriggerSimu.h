@@ -264,7 +264,11 @@ public:
   const vector< pair<int, int> > getTowersAboveThreshold(int trigId) const;
   const vector< pair<int, int> > getTriggerPatchesAboveThreshold(int trigId) const;
   const vector< pair<int, int> > getJetPatchesAboveThreshold(int trigId) const;
-  const vector< pair<int,int> > getJpsiCandidates() const { return mJpsiCandidates; }
+  const vector< pair<int,int> >& getJpsiCandidates() const { return mJpsiCandidates; }
+  int numberOfJpsiCandidates() const { return mJpsiCandidates.size(); }
+  const pair<int,int>& jpsiCandidate(int i) const { return mJpsiCandidates[i]; }
+  int jpsiCandidateFirstTowerId(int i) const { return mJpsiCandidates[i].first; }
+  int jpsiCandidateSecondTowerId(int i) const { return mJpsiCandidates[i].second; }
 
   //access to HT,TP,JP thresholds
   int getTowerThreshold(int trigId, int dsmid) const;
