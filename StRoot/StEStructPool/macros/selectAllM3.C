@@ -47,7 +47,7 @@ void selectAllM3(const char* dirname, const char *fileBase ){
   int num[15]={16,8,8,4,2,2,4,2,2,4,2,2,4,2,2};
 
 
-  int nParentDist;
+  int nParentSum[2];
   int parentSum[3][2]  = { 0,0, 1,1, 2,2 };
   for(int k=0;k<15;k++){
     int nin = num[k];
@@ -61,17 +61,21 @@ void selectAllM3(const char* dirname, const char *fileBase ){
     fname+=oname[k];
     fname+=".root";
     if (k < 3) {
-        nParentDist = 3;
+        nParentSum[0] = 3;
+        nParentSum[1] = 3;
     } else if (k < 12) {
-        nParentDist = 1;
+        nParentSum[0] = 1;
+        nParentSum[1] = 1;
         parentSum[0][0] = k/3 - 1;
         parentSum[0][1] = k/3 - 1;
     } else {
-        // parent pt distributionsis not actually a simple region in this cut scheme.
-        // (For number correlations we don't care.)
-        nParentDist = 3;
+        nParentSum[0] = 1;
+        nParentSum[1] = 2;
+        parentSum[0][0]  = 2;
+        parentSum[0][1]  = 0;
+        parentSum[1][1]  = 1;
     }
-    adder.addCuts(fname.Data(),tf,ndata,nin,parentSum,nParentDist,1);
+    adder.addCuts(fname.Data(),tf,ndata,nin,parentSum,nParentSum,1);
   }
 
   TString fname(dirname);
