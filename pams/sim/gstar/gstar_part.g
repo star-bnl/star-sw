@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.25 2010/06/24 18:05:12 jwebb Exp $
+* $Id: gstar_part.g,v 1.26 2010/06/24 18:35:20 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.26  2010/06/24 18:35:20  jwebb
+* Corrected mistake in Omega+- definition and forced daughter lamda to decay to specific channel.
+*
 * Revision 1.25  2010/06/24 18:05:12  jwebb
 * Update of gstar_part.g for embedding (ticket 1928).  Added test macro.
 *
@@ -268,8 +271,16 @@ MODULE gstar_part Is the STAR Particle Database
                   charge=-1                ,
                   trktyp=3                 ,
                   bratio={1.0,}            ,
-                  mode={1812,}
-                                         
+                  mode={9811,}
+ 
+        PARTICLE _lam_to_p_piminus_ code=98 ,
+             pdg     = +3122                ,
+             mass    = 1.116                ,  
+             tlife   = 0.26320E-9           ,
+             charge  = 0                    ,
+             bratio  = {1.000,}             ,
+             mode    = {1409,}              ,
+             trktyp  = kGtNEUT
 
   PARTICLE Omega_minus code=40002 pdg=-3334 ,
                   mass=1.67245              ,
@@ -277,8 +288,16 @@ MODULE gstar_part Is the STAR Particle Database
                   charge=-1                 ,
                   trktyp=3                  ,
                   bratio={1.0,}             ,
-                  mode={2611,} 
+                  mode={9712,} 
 
+        PARTICLE _lmb_to_pb_piplus_ code=97 ,
+             pdg     = -3122                ,
+             mass    = 1.116                ,  
+             tlife   = 0.26320E-9           ,
+             charge  = 0                    ,
+             bratio  = {1.000,}             ,
+             mode    = {1508,}              ,
+             trktyp  = kGtNEUT
 
   ! phi --> K+ K- 100%
   PARTICLE phi    code=10151 trktyp=3 mass=1.0194 charge=0  tlife=1.482e-22,
@@ -344,15 +363,15 @@ MODULE gstar_part Is the STAR Particle Database
                       trktyp  = kGtHADR
 
 
-           PARTICLE phi code      = 99               ,
-                        trktyp    = 3                ,
-                        mass      = 1.0194           ,
-                        charge    = 0                ,
-                        tlife     = 1.482e-22        ,
-                        pdg       = 333              ,
-                        bratio    = {1.00,}          ,     
-                        mode      = {1112,}          ,
-                        trktyp    = kGtNEUT   
+           PARTICLE _phi_to_KK_ code      = 99             ,
+                                trktyp    = 3              ,
+                                mass      = 1.0194         ,
+                                charge    = 0              ,
+                                tlife     = 1.482e-22      ,
+                                pdg       = 333            ,
+                                bratio    = {1.00,}        ,     
+                                mode      = {1112,}        ,
+                                trktyp    = kGtNEUT   
 
   ! Some nice anti-nuclei defined w/ offset 50000
 
