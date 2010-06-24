@@ -567,10 +567,6 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
     if (useRadTrap && useDeexcitation) {
       ++nPhotonCollisions[3];
       ComputeDeexcitation(-type - 1);
-      // std::cout << "Photon with energy " << e << " reabsorbed by "
-      //          << "level " << -type - 1 << " with energy " 
-      //          << deexcitations[-type-1].energy
-      //          << std::endl;
       type = 3;
     } else {
       type = 2;
@@ -2171,6 +2167,7 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
         int ie = int(deexcitations[k].energy / eStepGamma);
         if (ie >= nEnergyStepsGamma) ie = nEnergyStepsGamma - 1;
         cfGamma[ie][nPhotonTerms] = prefactor * f2cs * deexcitations[k].osc;
+        cfTotGamma[ie] += prefactor * f2cs * deexcitations[k].osc;
         ++nPhotonTerms;
       } 
     }
