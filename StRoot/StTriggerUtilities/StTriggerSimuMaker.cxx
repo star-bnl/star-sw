@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.37 2010/05/14 16:36:49 jeromel Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.38 2010/06/24 07:51:14 pibero Exp $
 
 // MySQL C API
 #include "mysql.h"
@@ -73,6 +73,16 @@ StTriggerSimuMaker::StTriggerSimuMaker(const char *name):StMaker(name) {
     for (int a=0; a<numSimulators; a++){
       mSimulators[a]=0;
     }
+
+    fill(mBarrelJetPatchTh,mBarrelJetPatchTh+3,-1);
+    fill(mBarrelHighTowerTh,mBarrelHighTowerTh+4,-1);
+
+    fill(mEndcapJetPatchTh,mEndcapJetPatchTh+3,-1);
+    fill(mEndcapHighTowerTh,mEndcapHighTowerTh+2,-1);
+
+    fill(mOverlapJetPatchTh,mOverlapJetPatchTh+3,-1);
+
+    mChangeJPThresh = 0;
 }
 
 StTriggerSimuMaker::~StTriggerSimuMaker() { /* no-op */ }
@@ -374,6 +384,97 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
     mysql_free_result(result);
   }
 
+  LOG_INFO << "The following registers have new values:" << endm;
+
+  // Shift all JP thresholds by mChangeJPThresh
+  if (mChangeJPThresh) {
+    for (int reg = 0; reg < 3; ++reg) {
+      int value = bemc->get2009_DSMLayer1_Result()->getRegister(reg);
+      value += mChangeJPThresh;
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "BEMC-JP-th" << reg
+	       << setw(20) << value
+	       << endm;
+      bemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
+    }
+
+    for (int reg = 0; reg < 3; ++reg) {
+      int value = eemc->get2009_DSMLayer1_Result()->getRegister(reg);
+      value += mChangeJPThresh;
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "EEMC-JP-th" << reg
+	       << setw(20) << value
+	       << endm;
+      eemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
+    }
+
+    for (int reg = 0; reg < 3; ++reg) {
+      int value = emc->get2009_DSMLayer2_Result()->getRegister(reg);
+      value += mChangeJPThresh;
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "BEMC-EEMC-overlap-JP-th" << reg
+	       << setw(20) << value
+	       << endm;
+      emc->get2009_DSMLayer2_Result()->setRegister(reg,value);
+    }
+  }
+
+  // Overwrite thresholds from database if set explicitly
+  for (int reg = 0; reg < 3; ++reg) {
+    int value = mBarrelJetPatchTh[reg];
+    if (value != -1) {
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "BEMC-JP-th" << reg
+	       << setw(20) << value
+	       << endm;
+      bemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
+    }
+  }
+
+  for (int reg = 0; reg < 4; ++reg) {
+    int value = mBarrelHighTowerTh[reg];
+    if (value != -1) {
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "BEMC-HT-th" << reg
+	       << setw(20) << value
+	       << endm;
+      bemc->get2009_DSMLayer0_Result()->setRegister(reg,value);
+    }
+  }
+
+  for (int reg = 0; reg < 3; ++reg) {
+    int value = mEndcapJetPatchTh[reg];
+    if (value != -1) {
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "EEMC-JP-th" << reg
+	       << setw(20) << value
+	       << endm;
+      eemc->get2009_DSMLayer1_Result()->setRegister(reg,value);
+    }
+  }
+
+  for (int reg = 0; reg < 2; ++reg) {
+    int value = mEndcapHighTowerTh[reg];
+    if (value != -1) {
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "EEMC-HT-th" << reg
+	       << setw(20) << value
+	       << endm;
+      eemc->get2009_DSMLayer0_Result()->setRegister(reg,value);
+    }
+  }
+
+  for (int reg = 0; reg < 3; ++reg) {
+    int value = mOverlapJetPatchTh[reg];
+    if (value != -1) {
+      LOG_INFO << setw(20) << reg
+	       << setw(30) << "BEMC-EEMC-overlap-JP-th" << reg
+	       << setw(20) << value
+	       << endm;
+      emc->get2009_DSMLayer2_Result()->setRegister(reg,value);
+    }
+  }
+
   // Trigger definitions
 
   TriggerDefinition triggers[32];
@@ -423,6 +524,9 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.38  2010/06/24 07:51:14  pibero
+ * Added hooks to overwrite DSM thresholds from the database.
+ *
  * Revision 1.37  2010/05/14 16:36:49  jeromel
  * Wrong include path for mysql
  *

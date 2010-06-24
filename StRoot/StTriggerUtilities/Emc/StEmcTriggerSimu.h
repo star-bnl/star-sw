@@ -61,21 +61,16 @@ public:
 
   void defineTrigger(const TriggerDefinition& trigdef);
 
-  // Use these setters to overwrite thresholds from the database (2009)
-  void setOverlapJetPatchTh(int i, int value);
   int  overlapJetPatchTh(int i) const;
   void getOverlapJetPatchAdc(int i, int& jp, int& adc) const;
 
 private:
-  int get2009_DSMRegisters(int runNumber);
-
   TDatime mDBTime;
   StBemcTriggerSimu* mBemc;
   StEemcTriggerSimu* mEemc;
   DSMLayer_EM201_2009* mEM201;
   DSMLayer_LD301_2009* mLD301;
   TCU* mTcu;
-  int mOverlapJetPatchTh[3];
 
   ClassDef(StEmcTriggerSimu,1);
 };
@@ -94,7 +89,5 @@ inline int StEmcTriggerSimu::EJP2() const { return EM201output() >> 11 & 0x1; }
 inline int  StEmcTriggerSimu::AJP() const { return EM201output() >> 12 & 0x1; }
 inline int StEmcTriggerSimu::BAJP() const { return EM201output() >> 13 & 0x1; }
 inline int StEmcTriggerSimu::EAJP() const { return EM201output() >> 14 & 0x1; }
-
-inline void StEmcTriggerSimu::setOverlapJetPatchTh(int i, int value) { mOverlapJetPatchTh[i] = value; }
 
 #endif // ST_EMC_TRIGGER_SIMU_H

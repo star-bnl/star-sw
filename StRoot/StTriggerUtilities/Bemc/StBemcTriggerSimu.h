@@ -133,10 +133,6 @@ private:
   DSMLayer_B001_2009* mB001;
   DSMLayer_B101_2009* mB101;
 
-  // Used to overwrite thresholds from the database
-  int mBarrelJetPatchTh[3];
-  int mBarrelHighTowerTh[4];
-  
   void getTowerStatus();
   void getDSM_TPStatus();
   void getDSM_HTStatus();
@@ -158,8 +154,6 @@ private:
   void get2008pp_DSMLayer2();
   void get2009_DSMLayer0();
   void get2009_DSMLayer1();
-  int  get2009_DSMRegisters(int runNumber);
-
 
   //#define DEBUG			// Comment out to switch off debugging
 
@@ -213,10 +207,6 @@ public:
   void setHeadMaker(StTriggerSimuMaker *maker) { mHeadMaker = maker; }
   
   void setHList(TObjArray * x){mHList=x;}
-
-  // Use these setters to overwrite thresholds from the database (2009)
-  void setBarrelJetPatchTh(int i, int value) { mBarrelJetPatchTh[i] = value; }
-  void setBarrelHighTowerTh(int i, int value) { mBarrelHighTowerTh[i] = value; }
 
   int barrelJetPatchTh(int i) const;
   int barrelHighTowerTh(int i) const;
