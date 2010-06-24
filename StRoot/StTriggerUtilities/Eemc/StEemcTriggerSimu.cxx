@@ -80,9 +80,6 @@ StEemcTriggerSimu::StEemcTriggerSimu() {
   mE001 = new DSMLayer_E001_2009;
   mE101 = new DSMLayer_E101_2009;
 
-  fill(mEndcapJetPatchTh,mEndcapJetPatchTh+3,-1);
-  fill(mEndcapHighTowerTh,mEndcapHighTowerTh+2,-1);
-
   LOG_INFO <<"Eemc::constructor"<<endm;
 }
 
@@ -239,8 +236,6 @@ StEemcTriggerSimu::InitRun(int runnumber){
     for (int i = 0; i < 2; ++i) mE001->setRegister(i,thresholds.HT[i]);
     for (int i = 0; i < 3; ++i) mE101->setRegister(i,thresholds.JP[i]);
 #endif
-
-    //get2009_DSMRegisters(runnumber);
 
   }
   // #### modified end ####
@@ -644,99 +639,6 @@ StEemcTriggerSimu::get2009_DSMLayer1(){
 //==================================================
 //==================================================
 
-int StEemcTriggerSimu::get2009_DSMRegisters(int runNumber)
-{
-  // Get chain
-  StMaker* chain = StMaker::GetChain();
-  if (!chain) {
-    LOG_WARN << "Can't get chain" << endm;
-    return kStWarn;
-  }
-
-  // Retrieve DSM threshold table from offline DB
-  TDataSet* db = chain->GetDataBase("RunLog/onl/trgDsmReg");
-
-  if (!db) {
-    LOG_WARN << "Can't get DB table RunLog/onl/trgDsmReg" << endm;
-    return kStWarn;
-  }
-
-  // Fetch ROOT descriptor of DB table
-  St_trgDsmReg* des = (St_trgDsmReg*)db->Find("trgDsmReg");
-
-  if (!des) {
-    LOG_WARN << "Can't get DB table descriptor trgDsmReg" << endm;
-    return kStWarn;
-  }
-
-  trgDsmReg_st* table = des->GetTable();
-  int nrows = des->GetNRows();
-
-  LOG_INFO << "Found " << nrows << " rows in table trgDsmReg for run " << chain->GetRunNumber() << endm;
-
-  // Loop over rows and set DSM thresholds in registers
-
-  LOG_INFO << setw(20) << "register"
-           << setw(30) << "label"
-           << setw(20) << "value"
-           << endm;
-
-  for (int i = 0; i < nrows; ++i) {
-    int object = table[i].dcObject;
-    int index  = table[i].dcIndex;
-    int reg    = table[i].dcRegister;
-    TString label = table[i].dcLabel;
-    int value  = table[i].dcValue != -1 ? table[i].dcValue : table[i].dcDefaultvalue;
-
-    // E001
-    if (object == 2 && index == 23) {
-      LOG_INFO << setw(20) << reg
-               << setw(30) << label
-               << setw(20) << value
-               << endm;
-
-      mE001->setRegister(reg, value);
-    }
-
-    // E101
-    if (object == 2 && index == 21) {
-      LOG_INFO << setw(20) << reg
-               << setw(30) << label
-               << setw(20) << value
-               << endm;
-
-      mE101->setRegister(reg, value);
-    }
-  } // End loop over rows
-
-  // Overwrite thresholds from database if set explicitly
-  LOG_INFO << "The following registers have new values:" << endm;
-
-  for (int reg = 0; reg < 3; ++reg) {
-    int value = mEndcapJetPatchTh[reg];
-    if (value != -1) {
-      LOG_INFO << setw(20) << reg
-	       << setw(30) << "EEMC-JP-th" << reg
-	       << setw(20) << value
-	       << endm;
-      mE101->setRegister(reg,value);
-    }
-  }
-
-  for (int reg = 0; reg < 2; ++reg) {
-    int value = mEndcapHighTowerTh[reg];
-    if (value != -1) {
-      LOG_INFO << setw(20) << reg
-	       << setw(30) << "EEMC-HT-th" << reg
-	       << setw(20) << value
-	       << endm;
-      mE001->setRegister(reg,value);
-    }
-  }
-
-  return kStOk;
-}
-
 int StEemcTriggerSimu::endcapJetPatchTh(int i) const { return mE101->getRegister(i); }
 int StEemcTriggerSimu::endcapHighTowerTh(int i) const { return mE001->getRegister(i); }
 
@@ -748,6 +650,9 @@ int StEemcTriggerSimu::getEndcapPatchSum(int tp) const { return feeTPTreeADC->TP
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.32  2010/06/24 07:51:21  pibero
+// Added hooks to overwrite DSM thresholds from the database.
+//
 // Revision 1.31  2010/04/16 01:47:46  pibero
 // Oops, forgot to include triggers before 2009. Thanks, Liaoyuan.
 //

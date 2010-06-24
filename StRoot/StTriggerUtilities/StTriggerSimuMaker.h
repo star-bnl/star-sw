@@ -52,7 +52,14 @@ private:
   //vector<StVirtualTriggerSimu*> mSimulators;
   StVirtualTriggerSimu* mSimulators[numSimulators];
 
-  
+  /// Used to overwrite thresholds from the database
+  int mBarrelJetPatchTh[3];
+  int mBarrelHighTowerTh[4];
+  int mEndcapJetPatchTh[3];
+  int mEndcapHighTowerTh[2];
+  int mOverlapJetPatchTh[3];
+  int mChangeJPThresh;
+
   /// detailed results for individual trigger simulations
   map<int,StTriggerSimuResult> mResults;
 
@@ -93,14 +100,28 @@ public:
   StEmcTriggerSimu  *emc;
   StL2TriggerSimu   *lTwo;
   
+  /// Use these setters to overwrite thresholds from the database (2009)
+  void setBarrelJetPatchTh(int i, int value) { mBarrelJetPatchTh[i] = value; }
+  void setBarrelHighTowerTh(int i, int value) { mBarrelHighTowerTh[i] = value; }
+
+  void setEndcapJetPatchTh(int i, int value) { mEndcapJetPatchTh[i] = value; }
+  void setEndcapHighTowerTh(int i, int value) { mEndcapHighTowerTh[i] = value; }
+
+  void setOverlapJetPatchTh(int i, int value) { mOverlapJetPatchTh[i] = value; }
+
+  void changeJPThresh(int value) { mChangeJPThresh = value; }
+
   ClassDef(StTriggerSimuMaker,0)
 };
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.24 2010/04/17 17:43:40 pibero Exp $
+// $Id: StTriggerSimuMaker.h,v 1.25 2010/06/24 07:51:14 pibero Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.25  2010/06/24 07:51:14  pibero
+// Added hooks to overwrite DSM thresholds from the database.
+//
 // Revision 1.24  2010/04/17 17:43:40  pibero
 // *** empty log message ***
 //

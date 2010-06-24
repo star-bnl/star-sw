@@ -79,11 +79,6 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
   void get2009_DSMLayer0();	// Reads output from feeTPTreeADC & process
   void get2009_DSMLayer1();     // Reads output from mE101 & process
-  int  get2009_DSMRegisters(int runNumber);
-
-  // Used to overwrite thresholds from the database
-  int mEndcapJetPatchTh[3];
-  int mEndcapHighTowerTh[2];
 
   // Access to 2009 EEMC Layer 0 + 1
  public:
@@ -132,10 +127,6 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   void connectBemcL0(int  *x) { mBemcEsum5bit=x;};
   bool getHttpInfo(int tpId, EemcHttpInfo &httpInfo);
 
-  // Use these setters to overwrite thresholds from the database (2009)
-  void setEndcapJetPatchTh(int i, int value) { mEndcapJetPatchTh[i] = value; }
-  void setEndcapHighTowerTh(int i, int value) { mEndcapHighTowerTh[i] = value; }
-
   int endcapJetPatchTh(int i) const;
   int endcapHighTowerTh(int i) const;
 
@@ -153,6 +144,9 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.20  2010/06/24 07:51:21  pibero
+// Added hooks to overwrite DSM thresholds from the database.
+//
 // Revision 1.19  2010/04/16 01:47:46  pibero
 // Oops, forgot to include triggers before 2009. Thanks, Liaoyuan.
 //

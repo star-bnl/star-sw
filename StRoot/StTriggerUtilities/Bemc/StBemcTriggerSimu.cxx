@@ -47,9 +47,6 @@ StBemcTriggerSimu::StBemcTriggerSimu()
   mConfig   = 0;
   mB001     = new DSMLayer_B001_2009;
   mB101     = new DSMLayer_B101_2009;
-
-  fill(mBarrelJetPatchTh,mBarrelJetPatchTh+3,-1);
-  fill(mBarrelHighTowerTh,mBarrelHighTowerTh+4,-1);
 }
 //==================================================
 //==================================================
@@ -289,7 +286,6 @@ void StBemcTriggerSimu::InitRun(int runnumber){
 
   if (year >= 2009) {
     mAllTriggers.clear();
-    //get2009_DSMRegisters(runnumber);
   }
 }
 //==================================================
@@ -2806,110 +2802,6 @@ int StBemcTriggerSimu::getJetPatchThreshold(int trigId, int dsmid) const {
 }
 
 
-int StBemcTriggerSimu::get2009_DSMRegisters(int runNumber)
-{
-  // Get chain
-  StMaker* chain = StMaker::GetChain();
-  if (!chain) {
-    LOG_WARN << "Can't get chain" << endm;
-    return kStWarn;
-  }
-
-  // Retrieve DSM threshold table from offline DB
-  TDataSet* db = chain->GetDataBase("RunLog/onl/trgDsmReg");
-
-  if (!db) {
-    LOG_WARN << "Can't get DB table RunLog/onl/trgDsmReg" << endm;
-    return kStWarn;
-  }
-
-  // Fetch ROOT descriptor of DB table
-  St_trgDsmReg* des = (St_trgDsmReg*)db->Find("trgDsmReg");
-
-  if (!des) {
-    LOG_WARN << "Can't get DB table descriptor trgDsmReg" << endm;
-    return kStWarn;
-  }
-
-  trgDsmReg_st* table = des->GetTable();
-  int nrows = des->GetNRows();
-
-  LOG_INFO << "Found " << nrows << " rows in table trgDsmReg for run " << chain->GetRunNumber() << endm;
-
-  // Loop over rows and set DSM thresholds in registers
-
-  LOG_INFO << setw(20) << "register"
-	   << setw(30) << "label"
-	   << setw(20) << "value"
-	   << endm;
-
-  for (int i = 0; i < nrows; ++i) {
-    int object = table[i].dcObject;
-    int index  = table[i].dcIndex;
-    int reg    = table[i].dcRegister;
-    TString label = table[i].dcLabel;
-    int value  = table[i].dcValue != -1 ? table[i].dcValue : table[i].dcDefaultvalue;
-
-    // BCW crate
-    if (object == 5 && index == 16) {
-      LOG_INFO << setw(20) << reg
-	       << setw(30) << label
-	       << setw(20) << value
-	       << endm;
-
-      for (int dsm = 0; dsm < 15; ++dsm) (*mB001)[dsm].registers[reg] = value;
-    }
-
-    // BCE crate
-    if (object == 6 && index == 16) {
-      LOG_INFO << setw(20) << reg
-               << setw(30) << label
-               << setw(20) << value
-               << endm;
-
-      for (int dsm = 15; dsm < 30; ++dsm) (*mB001)[dsm].registers[reg] = value;
-    }
-
-    // B101
-    if (object == 2 && index == 33) {
-      LOG_INFO << setw(20) << reg
-               << setw(30) << label
-               << setw(20) << value
-               << endm;
-
-      mB101->setRegister(reg, value);
-    }
-  } // End loop over rows
-
-  // Overwrite thresholds from database if set explicitly
-  LOG_INFO << "The following registers have new values:" << endm;
-
-  for (int reg = 0; reg < 3; ++reg) {
-    int value = mBarrelJetPatchTh[reg];
-    if (value != -1) {
-      LOG_INFO << setw(20) << reg
-	       << setw(30) << "BEMC-JP-th" << reg
-	       << setw(20) << value
-	       << endm;
-      mB101->setRegister(reg,value);
-    }
-  }
-
-  for (int reg = 0; reg < 4; ++reg) {
-    int value = mBarrelHighTowerTh[reg];
-    if (value != -1) {
-      LOG_INFO << setw(20) << reg
-	       << setw(30) << "BEMC-HT-th" << reg
-	       << setw(20) << value
-	       << endm;
-      mB001->setRegister(reg,value);
-    }
-  }
-
-  return kStOk;
-}
-
 int StBemcTriggerSimu::barrelJetPatchTh(int i) const { return mB101->getRegister(i); }
 int StBemcTriggerSimu::barrelHighTowerTh(int i) const { return mB001->getRegister(i); }
-
 int StBemcTriggerSimu::barrelJetPatchAdc(int jp) const { return (*mB101)[jp%6].info[(jp/6+2)%3]; }

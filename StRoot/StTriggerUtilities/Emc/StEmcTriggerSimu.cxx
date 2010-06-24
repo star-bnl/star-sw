@@ -24,7 +24,6 @@ StEmcTriggerSimu::StEmcTriggerSimu()
   , mLD301(new DSMLayer_LD301_2009)
   , mTcu(new TCU)
 {
-  fill(mOverlapJetPatchTh,mOverlapJetPatchTh+3,-1);
 }
 
 StEmcTriggerSimu::~StEmcTriggerSimu()
@@ -51,9 +50,6 @@ void StEmcTriggerSimu::InitRun(int runNumber)
   assert(chain);
   mDBTime = chain->GetDBTime();
   mYear = mDBTime.GetYear();
-
-  //get2009_DSMRegisters(runNumber);
-  //defineTriggers(runNumber);
 }
 
 void StEmcTriggerSimu::Make()
@@ -96,88 +92,6 @@ set<int> StEmcTriggerSimu::triggerIds() const
 StTriggerSimuDecision StEmcTriggerSimu::triggerDecision(int trigId)
 {
   return isTrigger(trigId) ? kYes : kNo;
-}
-
-int StEmcTriggerSimu::get2009_DSMRegisters(int runNumber)
-{
-  // Get chain
-  StMaker* chain = StMaker::GetChain();
-  if (!chain) {
-    LOG_WARN << "Can't get chain" << endm;
-    return kStWarn;
-  }
-
-  // Retrieve DSM threshold table from offline DB
-  TDataSet* db = chain->GetDataBase("RunLog/onl/trgDsmReg");
-
-  if (!db) {
-    LOG_WARN << "Can't get DB table RunLog/onl/trgDsmReg" << endm;
-    return kStWarn;
-  }
-
-  // Fetch ROOT descriptor of DB table
-  St_trgDsmReg* des = (St_trgDsmReg*)db->Find("trgDsmReg");
-
-  if (!des) {
-    LOG_WARN << "Can't get DB table descriptor trgDsmReg" << endm;
-    return kStWarn;
-  }
-
-  trgDsmReg_st* table = des->GetTable();
-  int nrows = des->GetNRows();
-
-  LOG_INFO << "Found " << nrows << " rows in table trgDsmReg for run " << chain->GetRunNumber() << endm;
-
-  // Loop over rows and set DSM thresholds in registers
-
-  LOG_INFO << setw(20) << "register"
-           << setw(30) << "label"
-           << setw(20) << "value"
-           << endm;
-
-  for (int i = 0; i < nrows; ++i) {
-    int object = table[i].dcObject;
-    int index  = table[i].dcIndex;
-    int reg    = table[i].dcRegister;
-    TString label = table[i].dcLabel;
-    int value  = table[i].dcValue != -1 ? table[i].dcValue : table[i].dcDefaultvalue;
-
-    // EM201
-    if (object == 1 && index == 20) {
-      LOG_INFO << setw(20) << reg
-               << setw(30) << label
-               << setw(20) << value
-               << endm;
-
-      mEM201->setRegister(reg, value);
-    }
-
-    // LD301
-    if (object == 1 && index == 30) {
-      LOG_INFO << setw(20) << reg
-               << setw(30) << label
-               << setw(20) << value
-               << endm;
-
-      mLD301->setRegister(reg, value);
-    }
-  } // End loop over rows
-
-  // Overwrite thresholds from the database if set explicitly
-  LOG_INFO << "The following registers have new values:" << endm;
-
-  for (int reg = 0; reg < 3; ++reg) {
-    int value = mOverlapJetPatchTh[reg];
-    if (value != -1) {
-      LOG_INFO << setw(20) << reg
-	       << setw(30) << "BEMC-EEMC-overlap-JP-th" << reg
-	       << setw(20) << value
-	       << endm;
-      mEM201->setRegister(reg,value);
-    }
-  }
-
-  return kStOk;
 }
 
 void StEmcTriggerSimu::defineTrigger(const TriggerDefinition& trigdef)
