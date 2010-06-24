@@ -1,8 +1,12 @@
 *
-* $Id: gppart.F,v 1.1.1.1 2004/01/15 00:12:03 potekhin Exp $
+* $Id: gppart.F,v 1.2 2010/06/24 14:17:22 jwebb Exp $
 *
 * $Log: gppart.F,v $
+* Revision 1.2  2010/06/24 14:17:22  jwebb
+* Minor tweak to allow geant IDs > 9999 will be displayed
+*
 * Revision 1.1.1.1  2004/01/15 00:12:03  potekhin
+*
 *
 * Revision 1.1.1.1  1997/11/03 15:29:37  atlascvs
 * Importing CERNLIB version 08.21.
@@ -68,10 +72,10 @@ C
          ENDIF
    10 CONTINUE
 C
- 1000 FORMAT ('0',51('='),3X,'Particle Types',3X,50('='))
- 1001 FORMAT ('0','Part',25X,'Options',8X,'Mass',4X,'Charge'
+ 1000 FORMAT (' ',51('='),3X,'Particle Types',3X,50('='))
+ 1001 FORMAT (' ','Part',27X,'Options',8X,'Mass',4X,'Charge'
      +,'    Life time                  User words')
- 1002 FORMAT (' ',I4,1X,5A4,I8,6X,E11.4,F7.0,3X,5(E12.5,2X))
+ 1002 FORMAT (' ',I6,1X,5A4,I8,6X,E11.4,F7.0,3X,5(E12.5,2X))
  1003 FORMAT (61X,5(E12.5,2X))
   99  RETURN
       END
