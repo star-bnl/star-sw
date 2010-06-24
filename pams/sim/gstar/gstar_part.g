@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.26 2010/06/24 18:35:20 jwebb Exp $
+* $Id: gstar_part.g,v 1.27 2010/06/24 22:37:39 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.27  2010/06/24 22:37:39  jwebb
+* Say no to Mortran90.
+*
 * Revision 1.26  2010/06/24 18:35:20  jwebb
 * Corrected mistake in Omega+- definition and forced daughter lamda to decay to specific channel.
 *
@@ -98,19 +101,18 @@ MODULE gstar_part Is the STAR Particle Database
    
 +CDE,agecom,gconst,gcunit.
 
-
-   Integer, Parameter :: UNDEFINED = 0
-   Real,    Parameter :: STABLE    = 1.0E+15
+   Integer UNDEFINED / 0       /
+   Real    STABLE    / 1.0E+15 /
 
    !-- Flags which specify the propagator used for the particle
-   Integer, Parameter :: kGtGAMA = 1  ! A photon
-   Integer, Parameter :: kGtELEC = 2  ! An electron or positron
-   Integer, Parameter :: kGtNEUT = 3  ! A neutral hadron
-   Integer, Parameter :: kGtHADR = 4  ! A charged hadron
-   Integer, Parameter :: kGtMUON = 5  ! A muon
-   Integer, Parameter :: kGtNINO = 6  ! A geantino
-   Integer, Parameter :: kGtHION = 8  ! A heavy ion
-   Integer, Parameter :: kGtCKOV = 7  ! A cherenkov photon (note mistake in geant manual)
+   Integer kGtGAMA / 1 /! A photon
+   Integer kGtELEC / 2 /! An electron or positron
+   Integer kGtNEUT / 3 /! A neutral hadron
+   Integer kGtHADR / 4 /! A charged hadron
+   Integer kGtMUON / 5 /! A muon
+   Integer kGtNINO / 6 /! A geantino
+   Integer kGtHION / 8 /! A heavy ion
+   Integer kGtCKOV / 7 /! A cherenkov photon (note mistake in geant manual)
 
 
 * --------------------------------------------------------------------------
@@ -255,6 +257,9 @@ MODULE gstar_part Is the STAR Particle Database
 *  requested by Hiroshi
   Particle StLambda1520  code=995  TrkTyp=3  mass=1.5195  charge=0   tlife=4.22e-23,
                          pdg=0     bratio= {1,}           mode= {1412,}
+
+  Particle StLambdaBar1520  code=996  TrkTyp=3  mass=1.5195  charge=0   tlife=4.22e-23,
+                         pdg=0     bratio= {1,}           mode= {1511,}
 
   Particle StK0s         code=707  TrkTyp=3  mass= 0.497671 charge=0 tlife=8.922E-11,
                          pdg=0     bratio= {1,}           mode= {809,}
