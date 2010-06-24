@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.24 2010/05/05 21:54:17 perev Exp $
+* $Id: gstar_part.g,v 1.25 2010/06/24 18:05:12 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.25  2010/06/24 18:05:12  jwebb
+* Update of gstar_part.g for embedding (ticket 1928).  Added test macro.
+*
 * Revision 1.24  2010/05/05 21:54:17  perev
 * K0S->Pi+ Pi- only added
 *
@@ -71,8 +74,6 @@
 *
 ***********************************************************************
 *
-                      real function gstar_PART(dummy)
-*
 * Remark: the particle ID numbers used by the original STAR Geant v3.15 
 * can no longer be used in v3.21 because of a significant expansion of 
 * idenitfied particles in the core Geant (CONS300-1). 
@@ -85,12 +86,30 @@
 *
 * Branching ratios taken from Particle Data Book of July '94. pmj 15/2/95
 ***********************************************************************
-+CDE,agecom,gconst.
-	real dummy
-	star_PART = 0
-   print *,' *             omega,phi,rho(0,+,-) and laserino defined. *'
-   print *,' *             Read program comments for more information *'
 *
+
+MODULE gstar_part Is the STAR Particle Database
+
+   CREATED A long time ago
+   AUTHOR  Several
+   
++CDE,agecom,gconst,gcunit.
+
+
+   Integer, Parameter :: UNDEFINED = 0
+   Real,    Parameter :: STABLE    = 1.0E+15
+
+   !-- Flags which specify the propagator used for the particle
+   Integer, Parameter :: kGtGAMA = 1  ! A photon
+   Integer, Parameter :: kGtELEC = 2  ! An electron or positron
+   Integer, Parameter :: kGtNEUT = 3  ! A neutral hadron
+   Integer, Parameter :: kGtHADR = 4  ! A charged hadron
+   Integer, Parameter :: kGtMUON = 5  ! A muon
+   Integer, Parameter :: kGtNINO = 6  ! A geantino
+   Integer, Parameter :: kGtHION = 8  ! A heavy ion
+   Integer, Parameter :: kGtCKOV = 7  ! A cherenkov photon (note mistake in geant manual)
+
+
 * --------------------------------------------------------------------------
 *
 * redefinition of pre-coded D's with the desired branchings
@@ -236,8 +255,141 @@
 
   Particle StK0s         code=707  TrkTyp=3  mass= 0.497671 charge=0 tlife=8.922E-11,
                          pdg=0     bratio= {1,}           mode= {809,}
- End
-*
+
+
+
+*************************************************************************************
+* Definition of 'nonstandard' particles are assigned GID 40000+
+* Redefinition of 'standard' particles are assigned GID 10000+
+
+  PARTICLE Omega_plus code=40001 pdg=+3334 ,
+                  mass=1.67245             ,
+                  tlife=0.0821E-9          ,
+                  charge=-1                ,
+                  trktyp=3                 ,
+                  bratio={1.0,}            ,
+                  mode={1812,}
+                                         
+
+  PARTICLE Omega_minus code=40002 pdg=-3334 ,
+                  mass=1.67245              ,
+                  tlife=0.0821E-9           ,
+                  charge=-1                 ,
+                  trktyp=3                  ,
+                  bratio={1.0,}             ,
+                  mode={2611,} 
+
+
+  ! phi --> K+ K- 100%
+  PARTICLE phi    code=10151 trktyp=3 mass=1.0194 charge=0  tlife=1.482e-22,
+                  pdg=333  bratio = { 1.00, },
+                  mode   = { 1112, }  
+
+  ! phi --> e+e- 100%
+  PARTICLE phi    code=11151 trktyp=3 mass=1.0194 charge=0  tlife=1.482e-22,
+                  pdg=333  bratio = { 1.00, } mode   = { 0203, }  
+
+
+
+  PARTICLE Lambda     code    = 10018                ,
+                      pdg     = +3122                ,
+                      mass    = 1.116                ,  
+                      tlife   = 0.26320E-9           ,
+                      charge  = 0                    ,
+                      bratio  = {1.000,}             ,
+                      mode    = {1409,}              ,
+                      trktyp  = kGtNEUT
+ 
+  PARTICLE LambdaBar  code    = 10026                ,
+                      pdg     = -3122                ,
+                      mass    = 1.116                ,  
+                      tlife   = 0.26320E-9           ,
+                      charge  = 0                    ,
+                      bratio  = {1.000,}             ,
+                      mode    = {1508,}              ,
+                      trktyp  = kGtNEUT
+
+  ! The eta dalitz decay
+  PARTICLE eta_dalitz code    = 10017                ,
+                      pdg     = +221                 ,
+                      mass    = 0.5475               ,
+                      tlife   = 0.54850E-18          ,
+                      charge  = 0                    , 
+                      bratio  = {1.0,}               ,
+                      mode    = {010203,}            ,
+                      trktyp  = kGtNEUT
+ 
+  ! Ds+ --> phi pi+          100%
+  !          |
+  !          +--> K+K-       100%
+  PARTICLE D_s_plus   code    = 10039                ,
+                      pdg     = +431                 ,
+                      mass    = 1.969                ,
+                      tlife   = 0.43600E-12          ,
+                      charge  = +1                   ,
+                      bratio  = {1.0,}               ,
+                      mode    = {9908,}              ,
+                      trktyp  = kGtHADR
+
+  ! Ds- --> phi pi+          100%
+  !          |
+  !          +--> K+K-       100%
+  PARTICLE D_s_minus  code    = 10040                ,
+                      pdg     = -431                 ,
+                      mass    = 1.969                ,
+                      tlife   = 0.43600E-12          ,
+                      charge  = -1                   ,
+                      bratio  = {1.0,}               ,
+                      mode    = {9909,}              ,
+                      trktyp  = kGtHADR
+
+
+           PARTICLE phi code      = 99               ,
+                        trktyp    = 3                ,
+                        mass      = 1.0194           ,
+                        charge    = 0                ,
+                        tlife     = 1.482e-22        ,
+                        pdg       = 333              ,
+                        bratio    = {1.00,}          ,     
+                        mode      = {1112,}          ,
+                        trktyp    = kGtNEUT   
+
+  ! Some nice anti-nuclei defined w/ offset 50000
+
+  PARTICLE antiDeuteron code      = 50045            , 
+                        mass      = 1.876            ,
+                        charge    = -1.0             ,
+                        tlife     = STABLE           ,
+                        pdg       = UNDEFINED        ,
+                        trktyp    = kGtHION
+
+  PARTICLE antiTriton   code      = 50046            ,
+                        mass      = 2.809            ,
+                        charge    = -1.0             ,
+                        tlife     = STABLE           ,
+                        pdg       = UNDEFINED        ,
+                        trktyp    = kGtHION                
+
+  PARTICLE antiAlpha    code      = 50047            ,
+                        mass      = 3.727            ,
+                        charge    = -2.0             ,
+                        tlife     = STABLE           ,
+                        pdg       = UNDEFINED        ,
+                        trktyp    = kGtHION
+
+  PARTICLE antiHelium3  code      = 50049            ,
+                        mass      = 2.809            ,
+                        charge    = -2.0             ,
+                        tlife     = STABLE           ,
+                        pdg       = UNDEFINED        ,
+                        trktyp    = kGtHION
+
+                        
+
+
+ End! Module gstar_part
+
+
 * --------------------------------------------------------------------------
 *
 * Subroutine aGuTRACK
