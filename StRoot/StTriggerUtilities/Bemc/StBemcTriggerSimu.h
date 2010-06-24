@@ -225,7 +225,7 @@ public:
   Int_t* getBEMC_FEE_HT_ADC() {return L0_HT_ADC;}
   Int_t* getBEMC_FEE_TP_ADC() {return L0_TP_ADC;}
   int getHT6bitAdc(int towerId) const { return HT6bit_adc_holder[towerId-1]; }
-  int getTP6bitAdc(int triggerPatch) const { return HT6bit_adc_holder[triggerPatch]; }
+  int getTP6bitAdc(int triggerPatch) const { return TP6bit_adc_holder[triggerPatch]; }
 
   //out of DSM layer0 to DSM layer1 
   Int_t* getBEMC_L0_OUT() {return L0_16bit_Out;}
