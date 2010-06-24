@@ -24,6 +24,8 @@ OBJS = \
 	$(OBJECT)/ComponentAnsys123.o \
 	$(OBJECT)/ComponentTcad2d.o \
 	$(OBJECT)/ComponentNeBem2d.o \
+	$(OBJECT)/ComponentAnalyticField.o \
+	$(OBJECT)/efieldCalc.o \
 	$(OBJECT)/GeometrySimple.o \
 	$(OBJECT)/GeometryRoot.o \
 	$(OBJECT)/FieldView.o \
@@ -85,6 +87,14 @@ $(OBJECT)/ComponentUser.o: \
 	$(SOURCE)/ComponentUser.cc $(INCLUDE)/ComponentUser.hh \
 	$(INCLUDE)/ComponentBase.hh
 	$(CC) $(CFLAGS) $< -o $@       
+$(OBJECT)/ComponentAnalyticField.o: \
+	$(SOURCE)/ComponentAnalyticField.cc \
+	$(INCLUDE)/ComponentAnalyticField.hh \
+	$(INCLUDE)/ComponentBase.hh
+	$(CC) $(CFLAGS) $< -o $@
+$(OBJECT)/efieldCalc.o: \
+	$(SOURCE)/efieldCalc.f
+	$(FF) $(CFLAGS) $< -o $@
 $(OBJECT)/ComponentNeBem2d.o: \
 	$(SOURCE)/ComponentNeBem2d.cc $(INCLUDE)/ComponentNeBem2d.hh \
 	$(INCLUDE)/ComponentBase.hh
