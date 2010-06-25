@@ -1,15 +1,16 @@
 TCanvas *can=0;
+TString ver='B';
 
 //=================================================
 plWjj(  int page=2,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
   iPath="./";
-  //iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-a3/data/";
-  core0="run9setP1234";
-  core0="R10102105";
-  //core0="rck10017_1_2000evts";
-  //core0="mcSetD1_ppWprod";
-  //core0="mcSetD2_ppQCD10_inf_filter";
-  //core0="mcSetD1_ppZprod";
+  //iPath="/star/data05/scratch/balewski/2009-Wana-SL09g-s1/data/";
+  core0="sumRun9_may1";
+  //  core0="sumW";
+  core0="rcn10017_10_500evts";// Z->any
+  //core0="rcm10019_65_1000evts";// QCD ^^^10
+  //core0="rcn10020_13_300evts";// QCD ^^^5
+  //core0="rcn10017_35_500evts";// W->any
 
   if(page==0) {
     doAll();
@@ -18,9 +19,12 @@ plWjj(  int page=2,int pl=0, char *core0="R10096140", char *iPath="", char *oPat
   
 
   char *nameA[]={"WjjStatEve"}; //pg 1
-  char *nameB[]={"Wjj_J1","Wjj_J2","Wjj_DJ","Wjj_K1","Wjj_K2","Wjj_K3"};//pg2
-  char *nameC[]={"Wjj_K4","Wjj_C0","Wjj_C1","Wjj_C2","Wjj_xK2","Wjj_xK3"};//pg3
+  char *nameB[]={"Wjj_J1","Wjj_J2","Wjj_K1","Wjj_K6","Wjj_K5","Wjj_K3"};//pg2
+  char *nameC[]={"Wjj_3J","Wjj_K4","Wjj_K2","Wjjphi12"};//pg3
+  char *nameD[]={"Wjj_K1","Wjj_P1","Wjj_P2","Wjj_P4","Wjj_P3"};//pg4
   
+  
+  //C2??
 
 
   gStyle->SetOptFit(1);
@@ -35,7 +39,7 @@ plWjj(  int page=2,int pl=0, char *core0="R10096140", char *iPath="", char *oPat
   }
   if(page==1){ 
    fd->ls(); 
-   h0=(TH1*)fd->Get("WjjStatEve"); assert(h0);
+   h0=(TH1*)fd->Get(ver+"WjjStatEve"); assert(h0);
    printf("%s: ",h0->GetName());
    for(int k=1;k<=h0->GetXaxis()->GetNbins();k++) printf("%.0f, ",h0->GetBinContent(k));
    printf("\n");
@@ -43,19 +47,18 @@ plWjj(  int page=2,int pl=0, char *core0="R10096140", char *iPath="", char *oPat
  gStyle->SetPalette(1,0);
  gStyle->SetOptStat(0);
  char padTit[1000];
- sprintf(padTit,"%s",core0);
+ sprintf(padTit,"%s %s",ver.Data(),core0);
 
  switch (page) {
 
  case 1:{   
-    can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
+    can=new TCanvas("aa","aa",800,400);    TPad *c=makeTitle(can,padTit,page);
     c->Divide(1,1);gStyle->SetOptStat(0);
     char **nameX=nameA;
     for(int i=0;i<1;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
-      c->cd(i+1); h->Draw();
+      h=(TH1*)fd->Get(ver+nameX[i]);  assert(h);
+      c->cd(i+1); h->Draw(); gPad->SetTopMargin(0.2);
       if(i==0) h->Draw("h text");
     }
     c->GetPad(1)->SetLogy();
@@ -63,35 +66,51 @@ plWjj(  int page=2,int pl=0, char *core0="R10096140", char *iPath="", char *oPat
  } break;//--------------------------------------
 
  case 2:{   
-    can=new TCanvas("aa","aa",600,500);    TPad *c=makeTitle(can,padTit,page);
+    can=new TCanvas("aa","aa",900,600);    TPad *c=makeTitle(can,padTit,page);
     c->Divide(3,2);gStyle->SetOptStat(1110);
     char **nameX=nameB;
     for(int i=0;i<6;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)fd->Get(ver+nameX[i]);  assert(h);
       c->cd(i+1); h->Draw("colz");
-      if(i==3) h->Draw();
+      if(i==2) h->Draw();
+      if(i==2){  h->SetAxisRange(0,180); h->SetMinimum(0.9);}// h->Fit("gaus","","RH",60,110);}
+      if(i>=4) ((TH2F*)h)->Rebin2D();
+      c->GetPad(i+1)->SetRightMargin(0.15);
     }
-    //   c->GetPad(2)->SetLogy();
+
+    if(strstr(core0,"sumR")) c->GetPad(3)->SetLogy();
    
  } break;//--------------------------------------
+
 
  case 3:{   
-    can=new TCanvas("aa","aa",600,500);    TPad *c=makeTitle(can,padTit,page);
-    c->Divide(2,2);gStyle->SetOptStat(1110);
+    can=new TCanvas("aa","aa",700,500);    TPad *c=makeTitle(can,padTit,page);
+    c->Divide(3,2);gStyle->SetOptStat(1110);
     char **nameX=nameC;
     for(int i=0;i<4;i++) {
-      char txt[100];
       printf("->%s<\n",nameX[i]);
-      h=(TH1*)fd->Get(nameX[i]);  assert(h);
+      h=(TH1*)fd->Get(ver+nameX[i]);  assert(h);
       c->cd(i+1);
       h->Draw("colz");
-      //if(i==3) h->Draw();
+      if(i==3) h->Draw();
     }
-
-   
  } break;//--------------------------------------
+
+   case 4:{   
+     can=new TCanvas("aa","aa",700,500);    TPad *c=makeTitle(can,padTit,page);
+     c->Divide(3,2);gStyle->SetOptStat(1110);
+     char **nameX=nameD;
+     for(int i=0;i<5;i++) {
+       printf("->%s<\n",nameX[i]);
+       h=(TH1*)fd->Get(ver+nameX[i]);  assert(h);
+       c->cd(i+1);
+       h->Draw();
+       if(i==3) h->Draw("colz");
+     }
+   } break;//--------------------------------------
+   
+
 
 
  default:
@@ -100,7 +119,7 @@ plWjj(  int page=2,int pl=0, char *core0="R10096140", char *iPath="", char *oPat
  }
 
  char text[100];
- sprintf(text,"%s%s_page%03d",oPath,core0,page);
+ sprintf(text,"%s%s_page%03d_%s",oPath,core0,page,ver.Data());
  TString tit=text;
  can->SetTitle(tit);
  can->SetName(tit);
@@ -109,14 +128,6 @@ plWjj(  int page=2,int pl=0, char *core0="R10096140", char *iPath="", char *oPat
  if(pl&1) can->Print(tit+".gif");
  if(pl&2) can->Print(tit+".ps");
  
-}
-
-//------------------------
-void splitPadX(float x, TPad **cL, TPad **cR) {
-  (*cL) = new TPad("padL", "apdL",0.0,0.,x,0.95);
-  (*cL)->Draw();    
-  (*cR) = new TPad("padL", "apdL",x+0.005,0.,1.0,0.95);
-  (*cR)->Draw();
 }
 
 //------------------------
@@ -155,6 +166,9 @@ void doAll(){
 
 
 // $Log: plWjj.C,v $
+// Revision 1.2  2010/06/25 15:42:22  balewski
+// *** empty log message ***
+//
 // Revision 1.1  2010/04/16 01:20:18  balewski
 // start
 //
