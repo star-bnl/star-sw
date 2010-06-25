@@ -1,4 +1,4 @@
-// $Id: St2009WjjMaker.cxx,v 1.4 2010/05/04 12:14:35 balewski Exp $
+// $Id: St2009WjjMaker.cxx,v 1.5 2010/06/25 15:42:09 balewski Exp $
 //
 //*-- Author : Jan Balewski, MIT
 // 
@@ -270,7 +270,6 @@ St2009WjjMaker::bXingSort(){
   hA[13]->Fill(phiCDdeg); 
 
   
-
   TLorentzVector diJet=jet[0]+jet[1];
   float invM=sqrt(diJet*diJet);
  
@@ -278,6 +277,14 @@ St2009WjjMaker::bXingSort(){
   hA[16]->Fill(invM, diJet.Pt());
   hA[15]->Fill( diJet.Z(),diJet.Pt());
  
+
+  // for Pavel N.
+  if(invM<60) {
+      hA[21]->Fill(diJet.Pt());
+      hA[22]->Fill(fabs(jet[0].DeltaPhi(jet[1])));
+      hA[23]->Fill(jet[0].Eta()-jet[1].Eta());
+      hA[24]->Fill(jet[0].Eta(),jet[1].Eta());
+  }
 
   if(par_spinSort) {//........ do spin sorting
     
@@ -372,6 +379,9 @@ St2009WjjMaker::bXingSort(){
 
 
 // $Log: St2009WjjMaker.cxx,v $
+// Revision 1.5  2010/06/25 15:42:09  balewski
+// more plots for Pavel
+//
 // Revision 1.4  2010/05/04 12:14:35  balewski
 // runs now w/o jet tree
 //
