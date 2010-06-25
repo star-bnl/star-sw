@@ -261,6 +261,7 @@ Int_t StJetSkimEventMaker::Make()
         StJetSkimVert skimVert;
         copyVertex(*muVert, skimVert);
 
+#if 0
         // ATTENTION!!! Hack to get nBTOFMatch in Run 9. Should be removed once implemented in MuDst.
 	if (GetDBTime().GetYear() >= 2009) {
 	  int currentVertexIndex = StMuDst::currentVertexIndex();
@@ -273,6 +274,7 @@ Int_t StJetSkimEventMaker::Make()
 	  StMuDst::setVertexIndex(currentVertexIndex);
 	  skimVert.setNBTOFMatch(nmatches);
 	}
+#endif
 
         mEvent->setVert(skimVert);
     }
@@ -426,7 +428,7 @@ void StJetSkimEventMaker::fillThresholds(StJetSkimTrigHeader &header) {
   StTriggerSimuMaker* trigSimu = dynamic_cast<StTriggerSimuMaker*>(GetMaker("StarTrigSimu"));
   StEmcTriggerMaker *emcTrigMaker = dynamic_cast<StEmcTriggerMaker*>(GetMaker("bemctrigger")); 
 
-  if (trigSimu) { 
+  if (trigSimu && trigSimu->bemc) { 
     header.eastBarrelTowerThreshold         = (trigSimu->bemc)->getTowerThreshold(header.trigId,15);
     header.eastBarrelTriggerPatchThreshold  = (trigSimu->bemc)->getTriggerPatchThreshold(header.trigId,15);
     header.eastBarrelJetPatchThreshold      = (trigSimu->bemc)->getJetPatchThreshold(header.trigId,15);
@@ -462,20 +464,3 @@ Int_t StJetSkimEventMaker::Finish()
 void StJetSkimEventMaker::Clear(const Option_t* c)
 {
 }
-
-
-
-//extra:
-/*
-//check the TClonesArray:
-const TClonesArray* array = mEvent->triggers();
-int ntotal = array->GetLast()+1;
-for (int i=0; i<ntotal; ++i) {
-    TObject* temp = (*array)[i];
-    StJetSkimTrig& skimTrig = *(static_cast<StJetSkimTrig*>(temp));
-    cout <<"retrieved with:\t"<<skimTrig.trigId<<"\t"<<skimTrig.prescale<<"\t"<<skimTrig.isSatisfied<<endl;
-}
-*/
-
-
-
