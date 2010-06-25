@@ -45,8 +45,6 @@ Int_t StGammaEventMaker::Init()
         mGammaEvent->SetPythia(mPythia);
     }
 
-//    AddObj(mGammaEvent,".const"); // ok, but what can I do with this?
-
     // Retrieve StMuDstMaker from the chain
     muDstMaker  = dynamic_cast<StMuDstMaker*>(GetMakerInheritsFrom("StMuDstMaker"));
     assert(muDstMaker);
@@ -83,11 +81,13 @@ Int_t StGammaEventMaker::Make()
     if(pv)
     {
         mGammaEvent->SetVertex(TVector3(pv->position().xyz()));
+        mGammaEvent->SetVertexRank(pv->ranking());
         mGammaEvent->mFlags |= TPC_VERTEX;
     }
     else
     {
         mGammaEvent->SetVertex(TVector3(0.,0.,0.));
+        mGammaEvent->SetVertexRank(-100);
         mGammaEvent->mFlags |= !(TPC_VERTEX);
     }
 
