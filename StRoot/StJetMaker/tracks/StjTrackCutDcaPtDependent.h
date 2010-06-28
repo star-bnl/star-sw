@@ -1,9 +1,10 @@
 // -*- mode: c++;-*-
-// $Id: StjTrackCutDcaPtDependent.h,v 1.1 2008/11/27 07:09:33 tai Exp $
+// $Id: StjTrackCutDcaPtDependent.h,v 1.1.2.1 2010/06/28 19:58:56 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRACKCUTDCAPTDEPENDENT_H
 #define STJTRACKCUTDCAPTDEPENDENT_H
 
+#include <cmath>
 #include "StjTrackCut.h"
 
 class StjTrackCutDcaPtDependent : public StjTrackCut {
@@ -38,16 +39,10 @@ public:
 
   bool operator()(const StjTrack& track)
   {
-    if(track.pt < _pt1) {
-      if(track.dcaD > _dcaMax1) return true;
-    } else if(track.pt < _pt2) {
-      if(track.dcaD*(_pt2 - _pt1) > (_pt2*_dcaMax1 - _pt1*_dcaMax2) + (_dcaMax2 - _dcaMax1)*track.pt) return true;
-    } else {
-       if(track.dcaD > _dcaMax2) return true;
-    }
-
-    return false;
-  }
+     if (track.pt < _pt1) return fabs(track.dcaD) > _dcaMax1;
+     if (track.pt < _pt2) return fabs(track.dcaD) > fabs(_dcaMax1 + (_dcaMax2 - _dcaMax1) / (_pt2 - _pt1) * (track.pt - _pt1));
+     return fabs(track.dcaD) > _dcaMax2;
+   }
 
 private:
 
