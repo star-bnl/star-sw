@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.20 2010/06/22 16:31:21 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.21 2010/06/28 21:29:41 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.21  2010/06/28 21:29:41  hmasui
+ * Fixed the multiplicity x-axis range for all branches
+ *
  * Revision 1.20  2010/06/22 16:31:21  hmasui
  * Separate 2D and 1D QA for MC tracks. Add pol0 fit for MC eta, y and phi distributions.
  *
@@ -944,12 +947,40 @@ Bool_t StEmbeddingQADraw::drawNumberOfParticles() const
     hNParticles->SetTitle(title);
 
     // Set x-axis range
-    StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
-    if( utility->isGhost(utility->getCategoryName(ic)) ){
-      hNParticles->SetAxisRange(0, 800, "X");
+    if( hNParticles->GetMean() == 0 && hNParticles->GetRMS() == 0 ){
+      // If no particles in the branch
+      hNParticles->SetAxisRange(0, 10, "X");
+
+      LOG_DEBUG << "StEmbeddingQADraw::drawNumberOfParticles  no particles for " << title << endm ;
+    }
+    else if( hNParticles->GetRMS() == 0 ){
+      // Fixed multiplicity should have RMS = 0
+      const Double_t mean = hNParticles->GetMean() ;
+      const Double_t xmin = (mean-10.0<0.0) ? 0.0 : mean-10.0 ;
+      const Double_t xmax = mean + 10.0 ;
+      hNParticles->SetAxisRange(xmin, xmax, "X");
+
+      LOG_DEBUG << "StEmbeddingQADraw::drawNumberOfParticles  constant number of particles = " << mean
+               << " for " << title
+               << endm;
     }
     else{
-      hNParticles->SetAxisRange(0, 50, "X");
+      // Varied multiplicity (like 5% of refmult)
+
+      // Try to find the maximum multiplicity
+      Double_t xmax = 0.0 ;
+      for(Int_t i=hNParticles->GetNbinsX()-1; i!=0; i--){
+        if( hNParticles->GetBinContent(i+1) != 0.0 ){
+          // Find first bin, contains finite bin content
+          xmax = hNParticles->GetBinCenter(i+1) ;
+          break ;
+        }
+      }
+      hNParticles->SetAxisRange(0, xmax+10, "X");
+
+      LOG_DEBUG << "StEmbeddingQADraw::drawNumberOfParticles  varied multiplicity, max range = " << xmax
+               << " for " << title
+               << endm;
     }
 
     hNParticles->Draw();
