@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.12 2010/05/14 19:50:12 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.13 2010/06/28 17:33:47 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.13  2010/06/28 17:33:47  hmasui
+ * Added geant process = 6 (photon pair production) in contaminated pairs
+ *
  * Revision 1.12  2010/05/14 19:50:12  hmasui
  * Add rapidity and trigger cuts.
  *
@@ -682,8 +685,10 @@ StEmbeddingQATrack* StEmbeddingQA::getEmbeddingQATrack(const StMiniMcEvent& mcev
       return 0;
     }
 
-    /// Make sure geantprocess = 5 (DECAY)
-    if ( track->mGeantProcess != 5 ){
+    /// Make sure geantprocess = 5 (DECAY) for nomal decay daughters
+    ///     or    geantprocess = 6 (PAIR) for photon conversion
+    const Bool_t isGeantProcessOk = ( track->mGeantProcess == 5 || (track->parentGeantId() == 1 && track->mGeantProcess == 6) );
+    if ( !isGeantProcessOk ){
       LOG_DEBUG << Form("StEmbeddingQA::getEmbeddingTrack()  geantprocess = %3d. Skip the track", track->mGeantProcess) << endm;
       return 0;
     }
