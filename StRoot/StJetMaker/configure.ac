@@ -1,6 +1,6 @@
 # Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 
-AC_INIT(StJetMakerTree, 2.0.3)
+AC_INIT(StJetMakerTree, 2.0.4)
 AM_INIT_AUTOMAKE
 
 #AC_DISABLE_SHARED
