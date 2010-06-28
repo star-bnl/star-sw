@@ -30,6 +30,10 @@
 #pragma link C++ class StjTowerEnergyVariation+;
 #pragma link C++ class StjTowerEnergyVariationEnergy+;
 #pragma link C++ class StjTowerEnergyCutEnergy+;
+#pragma link C++ class StjAbstractTowerEnergyCorrectionForTracks+;
+#pragma link C++ class StjTowerEnergyCorrectionForTracksNull+;
+#pragma link C++ class StjTowerEnergyCorrectionForTracksMip+;
+#pragma link C++ class StjTowerEnergyCorrectionForTracksFraction+;
 
 #pragma link C++ class vector<StjTowerEnergy>+; 
 

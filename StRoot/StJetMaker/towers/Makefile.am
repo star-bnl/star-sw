@@ -24,7 +24,9 @@ sources	= \
 	StjTowerEnergyToFourVec.cxx \
 	StjTowerEnergyToTLorentzVector.cxx \
 	StjTowerEnergyVariation.cxx \
-	StjTowerEnergyVariationEnergy.cxx
+	StjTowerEnergyVariationEnergy.cxx \
+	StjTowerEnergyCorrectionForTracksMip.cxx \
+	StjTowerEnergyCorrectionForTracksFraction.cxx
 
 headers	= \
 	StjBEMC.h \
@@ -50,7 +52,11 @@ headers	= \
 	StjTowerEnergyToFourVec.h \
 	StjTowerEnergyToTLorentzVector.h \
 	StjTowerEnergyVariation.h \
-	StjTowerEnergyVariationEnergy.h
+	StjTowerEnergyVariationEnergy.h \
+	StjAbstractTowerEnergyCorrectionForTracks.h \
+	StjTowerEnergyCorrectionForTracksNull.h \
+	StjTowerEnergyCorrectionForTracksMip.h \
+	StjTowerEnergyCorrectionForTracksFraction.h
 
 
 library_includedir=$(includedir)/StJetMaker
