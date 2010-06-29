@@ -136,6 +136,9 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
   int getEndcapHighTower(int tp) const;
   int getEndcapPatchSum(int tp) const;
 
+  // Fill StEmcTriggerDetector in MuDst for MC
+  void fillStEmcTriggerDetector();
+
   ClassDef(StEemcTriggerSimu, 1)
  };
 
@@ -144,6 +147,10 @@ class StEemcTriggerSimu : public StVirtualTriggerSimu {
 
 //
 // $Log: StEemcTriggerSimu.h,v $
+// Revision 1.21  2010/06/29 16:53:27  pibero
+// Now, the trigger simulator fills in the StEmcTriggerDetector structure
+// same as data for MC.
+//
 // Revision 1.20  2010/06/24 07:51:21  pibero
 // Added hooks to overwrite DSM thresholds from the database.
 //

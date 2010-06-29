@@ -364,6 +364,8 @@ StEemcTriggerSimu::Make(){
     get2009_DSMLayer1();
   }
   // #### modified end ####  
+
+  if (mMCflag) fillStEmcTriggerDetector();
 }
 
 //==================================================
@@ -647,9 +649,29 @@ int StEemcTriggerSimu::endcapJetPatchAdc(int jp) const { return (*mE101)[1-jp/3]
 int StEemcTriggerSimu::getEndcapHighTower(int tp) const { return feeTPTreeADC->TP(tp)->getOutHT(); }
 int StEemcTriggerSimu::getEndcapPatchSum(int tp) const { return feeTPTreeADC->TP(tp)->getOutTPsum(); }
 
+//==================================================
+//==================================================
+
+void StEemcTriggerSimu::fillStEmcTriggerDetector()
+{
+  if (StMuDst::event()) {
+    StEmcTriggerDetector& emc = StMuDst::event()->emcTriggerDetector();
+    for (int triggerPatch = 0; triggerPatch < 90; ++triggerPatch) {
+      emc.setHighTowerEndcap(triggerPatch,feeTPTreeADC->TP(triggerPatch)->getOutHT());
+      emc.setPatchEndcap(triggerPatch,feeTPTreeADC->TP(triggerPatch)->getOutTPsum());
+    }
+  }
+}
+
+//==================================================
+//==================================================
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.33  2010/06/29 16:53:27  pibero
+// Now, the trigger simulator fills in the StEmcTriggerDetector structure
+// same as data for MC.
+//
 // Revision 1.32  2010/06/24 07:51:21  pibero
 // Added hooks to overwrite DSM thresholds from the database.
 //
