@@ -261,7 +261,8 @@ namespace Garfield {
     const double e2z = e2zw;
 
     //now check to see if these points are contained in the geometry
-    if(!theGeometry->IsInside(e1x,e1y,e1z)){
+    /* 
+    if(!theGeometry->IsInside(e1x,e1y,e1z)) {
       isOkay = false;
       std::cerr <<"Unable to place wire at ("<< x <<", "<<y <<") local frame.\n";
       std::cerr <<"End point (" << e1x <<", "<<e1y<<", " << e1z <<") outside.\n";
@@ -279,7 +280,7 @@ namespace Garfield {
       std::cerr << "y: " << ymin <<"\t" << ymax <<"\n";
       std::cerr << "z: " << zmin <<"\t" << zmax <<"\n";
     }
-    
+    //*/
     
     if(isOkay){
       
@@ -353,8 +354,7 @@ ComponentAnalyticField::AddTube(float radius, float voltage, int numEdges, char 
     std::cerr <<"Unable to place tube.\n";
     
     isOkay = false; 
-  }
-  else{
+  } else {
     theGeometry->GetBoundingBox(xmin, ymin, zmin, xmax, ymax, zmax);
   }
 
@@ -363,7 +363,7 @@ ComponentAnalyticField::AddTube(float radius, float voltage, int numEdges, char 
   Internal2Global(p2xl,0.0,0.0,p2xw,p2yw,p2zw);  
   Internal2Global(0.0,p3yl,0.0,p3xw,p3yw,p3zw);
   Internal2Global(0.0,p4yl,0.0,p4xw,p4yw,p4zw);
-
+  /*
   if(fabs(p1xw) > xmax || fabs(p1yw) > ymax || fabs(p1zw) > zmax){
     std::cerr <<"Tube point 1 is out of bounds.\n";
     std::cerr <<"(" <<p1xw<<", "<<p1yw<<", "<<p1zw <<")\n";
@@ -380,6 +380,7 @@ ComponentAnalyticField::AddTube(float radius, float voltage, int numEdges, char 
     std::cerr <<"Tube point 4 is out of bounds.\n";
     std::cerr <<"(" <<p4xw<<", "<<p4yw<<", "<<p4zw <<")\n"; 
   }
+  //*/
 
   if(isOkay){
     //Setting Garfield Coordinate system flags

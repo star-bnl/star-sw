@@ -23,14 +23,14 @@ ComponentTcad2d::ComponentTcad2d() :
 void 
 ComponentTcad2d::ElectricField(const double x, const double y, const double z,
                                double& ex, double& ey, double& ez, double& p,
-                               Medium* m, int& status) {
-  
+                               Medium*& m, int& status) {
+ 
+  m = 0; 
   // Make sure the field map has been loaded properly
   if (!ready) {
     std::cerr << "ComponentTcad2d::ElectricField:" << std::endl;
     std::cerr << "    Field map not available for interpolation." << std::endl;
     status = -10;
-    m = 0;
     return;
   }  
   
@@ -38,7 +38,6 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
   if (x < xMinBoundingBox || x > xMaxBoundingBox ||
       y < yMinBoundingBox || y > yMaxBoundingBox) {
     status = -11;
-    m = 0;
     return;
   }
   
@@ -57,7 +56,8 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
              b * vertices[elements[i].vertex[1]].ey;
         p  = a * vertices[elements[i].vertex[0]].p + 
              b * vertices[elements[i].vertex[1]].p;
-        if (!regions[elements[i].region].drift) status = -5;
+        m = regions[elements[i].region].medium;
+        if (!regions[elements[i].region].drift || m == 0) status = -5;
         return;
       } 
       break;
@@ -71,8 +71,9 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
              c * vertices[elements[i].vertex[2]].ey;
         p  = a * vertices[elements[i].vertex[0]].p + 
              b * vertices[elements[i].vertex[1]].p + 
-             c * vertices[elements[i].vertex[2]].p;                        
-        if (!regions[elements[i].region].drift) status = -5;
+             c * vertices[elements[i].vertex[2]].p;
+        m = regions[elements[i].region].medium;
+        if (!regions[elements[i].region].drift || m == 0) status = -5;
         return;
       }
       break;  
@@ -89,8 +90,9 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
         p  = a * vertices[elements[i].vertex[0]].p + 
              b * vertices[elements[i].vertex[1]].p + 
              c * vertices[elements[i].vertex[2]].p + 
-             d * vertices[elements[i].vertex[3]].p;             
-        if (!regions[elements[i].region].drift) status = -5;
+             d * vertices[elements[i].vertex[3]].p;
+        m = regions[elements[i].region].medium;
+        if (!regions[elements[i].region].drift || m == 0) status = -5;
         return;
       }
       break;
@@ -117,7 +119,8 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
           p  = a * vertices[elements[i].vertex[0]].p + 
                b * vertices[elements[i].vertex[1]].p;
           lastElement = i;
-          if (!regions[elements[i].region].drift) status = -5; 
+          m = regions[elements[i].region].medium;
+          if (!regions[elements[i].region].drift || m == 0) status = -5; 
           return;
         }
         break;
@@ -133,7 +136,8 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
                b * vertices[elements[i].vertex[1]].p + 
                c * vertices[elements[i].vertex[2]].p;               
           lastElement = i;
-          if (!regions[elements[i].region].drift) status =  -5; 
+          m = regions[elements[i].region].medium;
+          if (!regions[elements[i].region].drift || m == 0) status =  -5; 
           return;
         }
         break;    
@@ -152,7 +156,8 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
                c * vertices[elements[i].vertex[2]].p + 
                d * vertices[elements[i].vertex[3]].p;               
           lastElement = i;
-          if (!regions[elements[i].region].drift) status = -5;
+          m = regions[elements[i].region].medium;
+          if (!regions[elements[i].region].drift || m == 0) status = -5;
           return;
         }
         break;
@@ -179,7 +184,7 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
 void 
 ComponentTcad2d::ElectricField(const double x, const double y, const double z,
                                double& ex, double& ey, double& ez,
-                               Medium* m, int& status) {
+                               Medium*& m, int& status) {
 
   double v = 0.;
   ElectricField(x, y, z, ex, ey, ez, v, m, status);
@@ -453,7 +458,8 @@ ComponentTcad2d::LoadData(const std::string datafilename) {
         std::getline(datafile, line); std::getline(datafile, line);
         std::getline(datafile, line); std::getline(datafile, line);
         pBra = line.find('['); pKet = line.find(']');
-        if (pKet < pBra || pBra == std::string::npos || pKet == std::string::npos) {
+        if (pKet < pBra || 
+            pBra == std::string::npos || pKet == std::string::npos) {
           std::cerr << "ComponentTcad2d::LoadData:" << std::endl;
           std::cerr << "    Error reading file " << datafilename << std::endl;
           datafile.close();
@@ -506,7 +512,8 @@ ComponentTcad2d::LoadData(const std::string datafilename) {
           if (ivertex >= nVertices) {
             std::cerr << "ComponentTcad2d::LoadData:" << std::endl;
             std::cerr << "    Error reading file " << datafilename << std::endl;
-            std::cerr << "    Dataset contains more values than there are vertices in region " 
+            std::cerr << "    Dataset contains more values than "
+                      << "there are vertices in region " 
                       << name << std::endl;
           }
           vertices[ivertex].p = val;
@@ -545,7 +552,8 @@ ComponentTcad2d::LoadData(const std::string datafilename) {
         if (pKet < pBra || 
             pBra == std::string::npos || pKet == std::string::npos) {
           std::cerr << "ComponentTcad2d::LoadData:" << std::endl;
-          std::cerr << "    Error reading file " << datafilename << "." << std::endl;
+          std::cerr << "    Error reading file " << datafilename << "." 
+                    << std::endl;
           datafile.close(); Cleanup();
           return false;
         }
@@ -571,7 +579,7 @@ ComponentTcad2d::LoadData(const std::string datafilename) {
           if (ivertex >= nVertices) {
             std::cerr << "ComponentTcad2d::LoadData:" << std::endl
                       << "    Error reading file " << datafilename << std::endl
-                      << "    Dataset contains more values than " 
+                      << "    Dataset contains more values than" 
                       << " there are vertices in region " 
                       << name << "." << std::endl;
           }
@@ -681,6 +689,7 @@ ComponentTcad2d::LoadGrid(const std::string gridfilename) {
         data.clear();
         // Assume by default that all regions are active
         regions[j].drift = true;
+        regions[j].medium = 0;
       }
       break;
     }
@@ -1095,11 +1104,15 @@ ComponentTcad2d::CheckLine(const double x, const double y, const int i) {
       y < vertices[elements[i].vertex[1]].y) return false;
   if (y > vertices[elements[i].vertex[0]].y &&
       y > vertices[elements[i].vertex[1]].y) return false;
-  const double v1x = vertices[elements[i].vertex[1]].x - vertices[elements[i].vertex[0]].x;
-  const double v1y = vertices[elements[i].vertex[1]].y - vertices[elements[i].vertex[0]].y;
-  if (y - vertices[elements[i].vertex[0]].y == (x - vertices[elements[i].vertex[0]].x) * v1x / v1y) {
+  const double v1x = vertices[elements[i].vertex[1]].x - 
+                     vertices[elements[i].vertex[0]].x;
+  const double v1y = vertices[elements[i].vertex[1]].y - 
+                     vertices[elements[i].vertex[0]].y;
+  if (v1y * (y - vertices[elements[i].vertex[0]].y) == 
+      v1x * (x - vertices[elements[i].vertex[0]].x)) {
     // Compute weighting factors for endpoints A, B
-    b = ((x - vertices[elements[i].vertex[0]].x) * v1x + (y - vertices[elements[i].vertex[0]].y) * v1y) / 
+    b = ((x - vertices[elements[i].vertex[0]].x) * v1x + 
+         (y - vertices[elements[i].vertex[0]].y) * v1y) / 
         (v1x * v1x + v1y * v1y);
     a = 1. - b;
     return true;
@@ -1112,7 +1125,7 @@ void
 ComponentTcad2d::UpdatePeriodicity() {
 
   std::cerr << "ComponentTcad2d::UpdatePeriodicity:" << std::endl;
-  std::cerr << "    Periodicities are not supported at the moment." << std::endl;
+  std::cerr << "    Periodicities are not supported at present." << std::endl;
 
 }
 
