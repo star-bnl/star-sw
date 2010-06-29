@@ -269,6 +269,9 @@ public:
   DSMLayer_B001_2009* get2009_DSMLayer0_Result() { return mB001; }
   DSMLayer_B101_2009* get2009_DSMLayer1_Result() { return mB101; }
 
+  // Fill StEmcTriggerDetector in MuDst for MC
+  void fillStEmcTriggerDetector();
+
   ClassDef(StBemcTriggerSimu, 1);
 };
 #endif

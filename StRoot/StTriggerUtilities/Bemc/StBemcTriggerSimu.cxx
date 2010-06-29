@@ -523,6 +523,7 @@ void StBemcTriggerSimu::Make(){
     get2009_DSMLayer1();
   }
 
+  if (mMCflag) fillStEmcTriggerDetector();
 }
 //==================================================
 //==================================================
@@ -2805,3 +2806,14 @@ int StBemcTriggerSimu::getJetPatchThreshold(int trigId, int dsmid) const {
 int StBemcTriggerSimu::barrelJetPatchTh(int i) const { return mB101->getRegister(i); }
 int StBemcTriggerSimu::barrelHighTowerTh(int i) const { return mB001->getRegister(i); }
 int StBemcTriggerSimu::barrelJetPatchAdc(int jp) const { return (*mB101)[jp%6].info[(jp/6+2)%3]; }
+
+void StBemcTriggerSimu::fillStEmcTriggerDetector()
+{
+  if (StMuDst::event()) {
+    StEmcTriggerDetector& emc = StMuDst::event()->emcTriggerDetector();
+    for (int triggerPatch = 0; triggerPatch < kNPatches; ++triggerPatch) {
+      emc.setHighTower(triggerPatch,getBEMC_FEE_HT_ADC()[triggerPatch]);
+      emc.setPatch(triggerPatch,getBEMC_FEE_TP_ADC()[triggerPatch]);
+    }
+  }
+}
