@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StJets.h,v 1.3 2009/09/05 18:18:05 pibero Exp $
+// $Id: StJets.h,v 1.4 2010/06/30 17:51:58 pibero Exp $
 #ifndef StJets_h
 #define StJets_h
 
@@ -53,7 +53,7 @@ public:
   ///Here's how you get the 4-momenta of a track/tower in a given jet.  This contains tracks and energy-corrected-towers.  Use this for Frag. Function
   TObjArray tracks(int jetIndex) const;
   TObjArray towers(int jetIndex) const;
-  vector<TrackToJetIndex*> particles(int jetIndex) const; // for backward compatibility
+  vector<TLorentzVector*> particles(int jetIndex) const; // for backward compatibility
 
   ///access to event numbers, used to synchronize with StMuDstMaker for simultaneous reading
   int eventId    () const { return mEventId    ; }
