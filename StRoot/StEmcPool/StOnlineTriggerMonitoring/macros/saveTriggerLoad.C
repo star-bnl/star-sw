@@ -3,6 +3,8 @@ char *timestamp = "",
 bool status = true,
 bool pedestal = true,
 bool lut = true,
+bool statusOffline = true,
+bool pedestalOffline = true,
 bool saveDB = true,
 bool saveTables = true,
 char *tables_dir = "tables.emconline_trg",
@@ -16,5 +18,5 @@ char *bcwTable = "bcw_table.txt"
     gSystem->Load("St_db_Maker");
     gSystem->Load("StDaqLib");
     gSystem->Load("StOnlineTriggerMonitoring");
-    StOnlineTriggerMonitoring::saveTrigger(timestamp, status, pedestal, lut, saveDB, saveTables, tables_dir, saved_dir, bemcStatusCopy, bceTable, bcwTable);
+    StOnlineTriggerMonitoring::saveTrigger(timestamp, status, pedestal, lut, statusOffline, pedestalOffline, saveDB, saveTables, tables_dir, saved_dir, bemcStatusCopy, bceTable, bcwTable);
 }
