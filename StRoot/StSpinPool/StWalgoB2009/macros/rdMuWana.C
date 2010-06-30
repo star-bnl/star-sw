@@ -5,7 +5,7 @@ Jan: physic files, jet read:
 root4star -b -q 'rdMuWana.C(2e3,"","/star/u/balewski/2009-Wana-pp500/fillListPhys/F10535/R10102105a_230531_230601.lis",5000,0,2)'
 
 Jan: new M-C files, jet read:
-root4star -b -q 'rdMuWana.C(2000,"","/star/institutions/mit/balewski/2010-Walgo-simu/2010setB10016a/rcm10016_4_300evts.MuDst.root",1,100,2)'
+root4star -b -q 'rdMuWana.C(2000,"","/star/data01/pwg/balewski/2010-Wsimu-setC/data/rcn10010_1_500evts.MuDst.root",1,107,2)'
 */
 
 
@@ -18,7 +18,7 @@ int  spinSort=true;
 bool isJanWjj=false; 
 int  isJustin=false;
 bool isRoss=true; 
-int  geant=false;
+int  geant=true;
  
 int rdMuWana(
 	     int nEve=2e3,
@@ -28,6 +28,7 @@ int rdMuWana(
 	     int isMC=0, // 0=run9-data, 1=Weve, 2=QCDeve, 3=Zeve, 20=rcf10010,... 26=rcf10016
 	     int useJetFinder = 2 // 0 - no jets=badWalgo; 1 generate jet trees; 2 read jet trees 
  ) { 
+char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSetup/";
 
   TString jetTreeDir = "/star/institutions/mit/balewski/2009-pp500-jets/4.15.2010/"; //default location of jet trees for run 9 data
 
@@ -84,14 +85,18 @@ int rdMuWana(
   assert( !gSystem->Load("StDaqLib"));
 
   // libraries below are needed for DB interface
+  assert( !gSystem->Load("StDetectorDbMaker")); // for St_tpcGasC
+  assert( !gSystem->Load("StDbUtilities")); //for trigger simu
   assert( !gSystem->Load("StDbBroker"));
   assert( !gSystem->Load("St_db_Maker"));
-  assert( !gSystem->Load("StDetectorDbMaker")); // for St_tpcGasC
   assert( !gSystem->Load("StEEmcUtil"));
   assert( !gSystem->Load("StEEmcDbMaker"));
-
   assert( !gSystem->Load("StTriggerFilterMaker"));
   assert( !gSystem->Load("StWalgoB2009"));
+
+  assert( !gSystem->Load("StTriggerUtilities"));
+
+
   if(spinSort)  assert( !gSystem->Load("StSpinDbMaker"));
   
   if (useJetFinder ==1 || useJetFinder == 2){ // jetfinder/jetreader libraries
@@ -118,13 +123,24 @@ int rdMuWana(
   if(geant){                                  
     assert( !gSystem->Load("StMcEvent"));      
     assert( !gSystem->Load("StMcEventMaker")); 
+
+    //following three are for trigger simulator
+    assert( !gSystem->Load("StEmcSimulatorMaker"));
+    assert( !gSystem->Load("StEEmcSimulatorMaker"));
+    assert( !gSystem->Load("StEpcMaker"));
+
   }
   
   cout << " loading done " << endl;
 
   // create chain    
   chain = new StChain("StChain"); 
-  
+  // create histogram storage array  (everybody needs it):
+  TObjArray* HList=new TObjArray;
+
+
+
+
   if(geant){                          
     // get geant file                    
     StIOMaker* ioMaker = new StIOMaker();
@@ -148,7 +164,9 @@ int rdMuWana(
   muMk->SetStatus("GlobalTracks",1);
   muMk->SetStatus("PrimaryTracks",1);
 
-  St_db_Maker   *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
+  //St_db_Maker   *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
+  //for EEMC, need full db access:
+  St_db_Maker   *dbMk = new St_db_Maker("StarDb","MySQL:StarDb","MySQL:StarDb","$STAR/StarDb");
 
   if (isMC==0) { // run 9 data
     dbMk->SetFlavor("Wbose","bsmdeCalib"); // Willie's relative gains E-plane
@@ -182,6 +200,38 @@ int rdMuWana(
     mcEventMaker->doPrintMemoryInfo = false;              
   }
   
+  if (geant){
+    //BEMC simulator:
+    StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
+    emcSim->setCalibSpread(kBarrelEmcTowerId,0.15);//spread gains by 15%
+    StEmcADCtoEMaker *bemcAdc = new StEmcADCtoEMaker();//for real data this sets calibration and status
+
+
+    //EEMC simulator:
+    new StEEmcDbMaker("eemcDb");
+    StEEmcSlowMaker *slowSim = new StEEmcSlowMaker("slowSim");
+    slowSim->setSamplingFraction(0.0384); // effectively scales all Tower energies with a factor of 1.3 (added by: Ilya Selyuzhenkov; April 11, 2008)
+    slowSim->setAddPed(true);
+    slowSim->setSmearPed(true);
+
+
+  }
+  //Get TriggerMaker
+  StTriggerSimuMaker *simuTrig = new StTriggerSimuMaker("StarTrigSimu");
+  simuTrig->setHList(HList);
+  simuTrig->setMC(isMC); // must be before individual detectors, to be passed
+  simuTrig->useBbc();
+  simuTrig->useEemc(0);//default=0:just process ADC, 1,2:comp w/trgData,see .
+  simuTrig->eemc->setSetupPath(eemcSetupPath);
+  simuTrig->useBemc();
+  simuTrig->bemc->setConfig(2);
+
+
+
+
+
+
+
   //.... Jet finder code ....
   if (useJetFinder > 0)  {
     TString outFile = "jets_"+outF+".root";
@@ -310,7 +360,7 @@ int rdMuWana(
   WpubMk->attachWalgoMaker(WmuMk); // 
 
   //Collect all output histograms   
-  TObjArray* HList=new TObjArray;
+  //already defined this above:  TObjArray* HList=new TObjArray;
   WmuMk->setHList(HList);
   WpubMk->setHList(HList);
 
@@ -432,6 +482,9 @@ int rdMuWana(
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.40  2010/06/30 19:00:19  rcorliss
+// passes_L0() now works for simulation, using trigger simu in new macro
+//
 // Revision 1.39  2010/05/26 18:14:34  balewski
 // make spin sorting the default
 //
