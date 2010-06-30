@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.33 2010/05/31 22:11:09 rashmi Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.34 2010/06/30 04:47:23 subhasis Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.34  2010/06/30 04:47:23  subhasis
+ *reader fixed for reading daq files earlier than 2009 runs
+ *
  *Revision 1.33  2010/05/31 22:11:09  rashmi
  *Edep of Pmdhit now hold calibrated ADC
  *
@@ -320,7 +323,6 @@ Int_t StPmdReadMaker::Make() {
   if(Debug())cout<<"runNo="<<mRunNumber<<" year="<<year<<endl;
   
   // The new daq was used after 2010
-  if(year>9){
     
     Int_t adcChCount=0;
   //  Float_t Pmdhit[50]={0.};
@@ -362,9 +364,8 @@ Int_t StPmdReadMaker::Make() {
 		  chain_mean[nChain]->Fill(ch,ped_mean);
 		  chain_rms[nChain]->Fill(ch,ped_rms);
 		  
-		  //printf("CRAM %2d: side %d: ch %4d: adc %4d [ped %4.1f, rms %4.2f, thr %4.1f]\n", c,s,ch, adc_ch, ped_mean, ped_rms, ped_thr) ;
+		//  printf("CRAM %2d: side %d: ch %4d: adc %4d [ped %4.1f, rms %4.2f, thr %4.1f]\n", c,s,ch, adc_ch, ped_mean, ped_rms, ped_thr) ;
 		}
-		//		if(adc_ch>0)cout<<"Channel="<<ch<<" adc="<<adc_ch<<endl;
 	      }
 	      //	      cout<<"crate = "<<crate<<" c="<<c<<" s = "<<s<<" chmax="<<chmax<<" chain = "<<chain<<" boards = "<<(chmax*1.0)/64<<endl;
 	    }
@@ -374,7 +375,6 @@ Int_t StPmdReadMaker::Make() {
 	// int ret=mThePmdReader->getAllPmdCpvData(&adc[0]);
 	// if(ret){/*nothing*/}
 	//   cout<<" I am calling applymapping"<<endl;
-	
 	Int_t result=ApplyMapping(&adc[0]);  
 	//   cout<<" applymapping called"<<endl;
 	if(result!=kStOK){gMessMgr->Info("Problem in getting PMD data:ApplyMap");
@@ -382,7 +382,7 @@ Int_t StPmdReadMaker::Make() {
 	} 
       }
       //getting tofmultiplicity
-      
+  /*    
       
       StEvent *currevent = (StEvent*)GetInputDS("StEvent");
       // cout<<"+++++++++++++++++++++++================+++++++++++++++++"<<endl;
@@ -414,6 +414,7 @@ Int_t StPmdReadMaker::Make() {
       }
       Int_t CtbMult = ctb;
       if(Debug()){cout<<"ZdcAdc="<<ZdcAdc<<" BbcAdc="<<BbcAdc<<" CtbMult="<<CtbMult<<endl;}
+*/
 /*      
       if(pmdHIT>0){fout<<theZdcTrg.adcSum()<<" "<<theData->tofMultiplicity()<<" "<<pmdHIT<<" "<<pmdADC<<endl;
 	for(Int_t ich=24;ich<48;ich++){
@@ -434,78 +435,6 @@ Int_t StPmdReadMaker::Make() {
       //cout<<"------------------------------------------------------------   multiplicity :  tof   "<<tofm<<endl;
       
     }
-  }else{
-    //#else
-    
-    mThePmdData   = GetDataSet("StDAQReader");
-    
-    if(!mThePmdData) {
-      gMessMgr->Info("StPmdReadMaker::Make()");
-      gMessMgr->Info("DataSet: StDAQReader not there()");
-      gMessMgr->Info("Skip this event");
-      return kStWarn;
-    }
-    else{gMessMgr->Info("GOT DaqReader dataset");}
-    
-    mTheDataReader = (StDAQReader*)(mThePmdData->GetObject());
-    if(!mTheDataReader) {
-      gMessMgr->Info("StPmdReadMaker::Make()");
-      gMessMgr->Info("DataSet: PMDData not there()");
-      gMessMgr->Info("Skip this event");
-      return kStWarn;
-    }
-    else{gMessMgr->Info("GOT DaqReader object, look for PMD**");}
-    
-    if ( !(mTheDataReader->PMDPresent())) {
-      cout << "StPmdreaderMaker::Maker()\n";
-      cout << "\tPMD  not in datastream\n";
-      cout << "\tSkip this event\n" << endl;
-      return kStWarn;
-    }
-    else{cout<<"PMD present seen from datareader"<<endl;}
-  
-    mThePmdReader = mTheDataReader->getPMDReader();
-    
-    if(mThePmdReader) {
-      //printf("**********NPMDHITS==%d\n", mThePmdReader->NPMDHits() );
-    }
-    else {
-      gMessMgr->Info("StPmdReaderMaker::Make()");
-      gMessMgr->Info("Could not get PMD Reader");
-      gMessMgr->Info("Skip this event");
-      return kStWarn;
-    }
-    if(Debug())cout<<"In StPmdReadMaker::Make"<<endl;
-    //  fout<<"In StPmdReadMaker::Make"<<endl;
-    
-    Int_t adc[2*PMD_CRAMS_MAX*2*(PMD_CRAMS_CH_MAX)];
-    
-    
-    Int_t ret=mThePmdReader->getAllPmdCpvData(&adc[0]);
-    if(ret){/*nothing*/}
-    Int_t result=ApplyMapping(&adc[0]);
-    if(result!=kStOK){gMessMgr->Info("Problem in getting PMD data:ApplyMap");
-      return kStWarn;
-    } 
-    
-    /*
-      for(int is=1;is<=2*PMD_CRAMS_MAX;is++){
-      for(int ir=1;ir<=PMD_ROW_MAX;ir++){
-      for(int ic=1;ic<=PMD_COL_MAX;ic++){
-      float calib=0;
-      Int_t stCalib = GetCalib(is,ir,ic,calib);
-      if(calib>0) fout<<"is,ir,ic "<<is<<" "<<ir<<" "<<ic<<" "<<calib<<endl;
-      }
-      }
-      }
-    */
-    
-    
-    //	if(mThePmdReader) {
-    //	    delete mThePmdReader;
-    //	}
-    //	mThePmdReader = 0;
-  }
   //#endif
     
   return kStOK;
@@ -534,6 +463,10 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
   if(Debug())cout<<"runNo="<<mRunNumber<<" year="<<year<<endl;
   //  cout<<"Applymapping:: runNo="<<mRunNumber<<" year="<<year<<" day="<<rn<<endl;
   ////////////////////////////////////
+ if(mRunNumber<1){
+   gMessMgr->Info("Run number >11 , returning from applymapping ");
+   return kStWarn;
+ }
   mPmdGeom->readBoardDetail(mRunNumber); //!Read status of the FEE boards to apply proper mapping 
   
   mPmdCollection = new StPmdCollection("PmdCollection");
@@ -726,8 +659,11 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
   }
   if(mPmdPrint)gMessMgr->Info("StEvent to be called **");
   Int_t testevt=fillStEvent(det0,det1);  //called as (cpv_det,pmd_det)
-  if(testevt!=kStOK)gMessMgr->Info("Problem in fillStEvent");
-  
+  if(testevt!=kStOK){
+	gMessMgr->Info("Problem in fillStEvent");
+        return kStWarn;
+  }
+//
   return kStOK;
 }
 //-------------------------------------------------------------------------
@@ -735,17 +671,15 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det){
   // Look for StEvent
   StEvent *currevent = (StEvent*)GetInputDS("StEvent");
-  Int_t ctbm=currevent->triggerData()->ctbSum(0);
-  Int_t tofm=currevent->triggerData()->tofMultiplicity(0);
   //
-  if(Debug())cout<<"------------------------------------------------------------   multiplicity : ctb, tof  "<<ctbm<<" "<<tofm<<endl;
-  
   if(!currevent){
     gMessMgr->Info("NO STEVENT**");
     //	   StEvent *currevent=new StEvent();
     
     return kStWarn;
   }
+//  Int_t ctbm=currevent->triggerData()->ctbSum(0);
+//  Int_t tofm=currevent->triggerData()->tofMultiplicity(0);
   // Create PhmdCollection, first Maker in Chain, so here it is created
   mEvtPmdCollection = new StPhmdCollection();
   currevent->setPhmdCollection(mEvtPmdCollection);
