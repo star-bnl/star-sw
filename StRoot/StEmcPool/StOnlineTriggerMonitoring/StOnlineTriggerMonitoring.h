@@ -9,6 +9,8 @@ public:
 		    , Bool_t status = true
 		    , Bool_t pedestal = true
 		    , Bool_t lut = true
+		    , Bool_t statusOffline = true
+		    , Bool_t pedestalOffline = true
 		    , Bool_t saveDB = true
 		    , Bool_t saveTables = true
 		    , const Char_t *tables_dir = "tables.emconline_trg"

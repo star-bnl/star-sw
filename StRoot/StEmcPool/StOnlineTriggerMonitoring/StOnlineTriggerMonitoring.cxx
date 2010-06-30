@@ -106,6 +106,8 @@ void StOnlineTriggerMonitoring::saveTrigger(
     , Bool_t status
     , Bool_t pedestal
     , Bool_t lut
+    , Bool_t statusOffline
+    , Bool_t pedestalOffline
     , Bool_t saveDB
     , Bool_t saveTables
     , const Char_t *tables_dir
@@ -481,8 +483,6 @@ void StOnlineTriggerMonitoring::saveTrigger(
     if(status && status_st) {
 	cout << "Setting bemcTriggerStatus table " << status_st << endl;
         writer.setTable("bemcTriggerStatus", status_st);
-	cout << "Setting bemcStatus table " << stat_st << endl;
-        writer.setTable("bemcStatus", stat_st);
         if(saveDB) {
             LOG_INFO << "Start uploading table bemcTriggerStatus" << endm;
             writer.writeToDb("bemcTriggerStatus", timestamp.Data());
@@ -494,19 +494,11 @@ void StOnlineTriggerMonitoring::saveTrigger(
             writer.writeToFile(FILENAME.Data());
             LOG_INFO << "Finished saving table " << FILENAME << endm;
         }
-        if(saveTables) {
-            FILENAME = tables_dir; FILENAME += "/bemcStatus."; FILENAME+=TS; FILENAME+=".root";
-            LOG_INFO << "Start saving table " << FILENAME << endm;
-            writer.writeToFile(FILENAME.Data());
-            LOG_INFO << "Finished saving table " << FILENAME << endm;
-        }
     }
     
     if(pedestal && pedestals_st) {
 	cout << "Setting bemcTriggerPed table " << pedestals_st << endl;
         writer.setTable("bemcTriggerPed", pedestals_st);
-	cout << "Setting bemcPed table " << ped_st << endl;
-        writer.setTable("bemcPed", ped_st);
         if(saveDB) {
             LOG_INFO << "Start uploading table bemcTriggerPed" << endm;
             writer.writeToDb("bemcTriggerPed", timestamp.Data());
@@ -514,12 +506,6 @@ void StOnlineTriggerMonitoring::saveTrigger(
         }
         if(saveTables) {
             FILENAME = tables_dir; FILENAME += "/bemcTriggerPed."; FILENAME+=TS; FILENAME+=".root";
-            LOG_INFO << "Start saving table " << FILENAME << endm;
-            writer.writeToFile(FILENAME.Data());
-            LOG_INFO << "Finished saving table " << FILENAME << endm;
-        }
-        if(saveTables) {
-            FILENAME = tables_dir; FILENAME += "/bemcPed."; FILENAME+=TS; FILENAME+=".root";
             LOG_INFO << "Start saving table " << FILENAME << endm;
             writer.writeToFile(FILENAME.Data());
             LOG_INFO << "Finished saving table " << FILENAME << endm;
@@ -536,6 +522,38 @@ void StOnlineTriggerMonitoring::saveTrigger(
         }
         if(saveTables) {
             FILENAME = tables_dir; FILENAME += "/bemcTriggerLUT."; FILENAME+=TS; FILENAME+=".root";
+            LOG_INFO << "Start saving table " << FILENAME << endm;
+            writer.writeToFile(FILENAME.Data());
+            LOG_INFO << "Finished saving table " << FILENAME << endm;
+        }
+    }
+    
+    if(statusOffline && stat_st) {
+	cout << "Setting bemcStatus table " << stat_st << endl;
+        writer.setTable("bemcStatus", stat_st);
+        if(saveDB) {
+            LOG_INFO << "Start uploading table bemcStatus" << endm;
+            writer.writeToDb("bemcStatus", timestamp.Data());
+            LOG_INFO << "Finished uploading table bemcStatus" << endm;
+        }
+        if(saveTables) {
+            FILENAME = tables_dir; FILENAME += "/bemcStatus."; FILENAME+=TS; FILENAME+=".root";
+            LOG_INFO << "Start saving table " << FILENAME << endm;
+            writer.writeToFile(FILENAME.Data());
+            LOG_INFO << "Finished saving table " << FILENAME << endm;
+        }
+    }
+    
+    if(pedestalOffline && ped_st) {
+	cout << "Setting bemcPed table " << ped_st << endl;
+        writer.setTable("bemcPed", ped_st);
+        if(saveDB) {
+            LOG_INFO << "Start uploading table bemcPed" << endm;
+            writer.writeToDb("bemcPed", timestamp.Data());
+            LOG_INFO << "Finished uploading table bemcPed" << endm;
+        }
+        if(saveTables) {
+            FILENAME = tables_dir; FILENAME += "/bemcPed."; FILENAME+=TS; FILENAME+=".root";
             LOG_INFO << "Start saving table " << FILENAME << endm;
             writer.writeToFile(FILENAME.Data());
             LOG_INFO << "Finished saving table " << FILENAME << endm;
