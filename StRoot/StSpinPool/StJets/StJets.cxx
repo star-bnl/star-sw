@@ -1,4 +1,4 @@
-// $Id: StJets.cxx,v 1.3 2009/09/05 18:18:05 pibero Exp $
+// $Id: StJets.cxx,v 1.4 2010/06/30 17:51:58 pibero Exp $
 #include "StJet.h"
 #include "StJets.h"
 
@@ -80,12 +80,16 @@ TObjArray StJets::towers(int jetIndex) const
   return a;
 }
 
-vector<TrackToJetIndex*> StJets::particles(int jetIndex) const
+vector<TLorentzVector*> StJets::particles(int jetIndex) const
 {
-  vector<TrackToJetIndex*> v;
+  vector<TLorentzVector*> v;
   for (int i = 0; i < mTrackToJetIndices->GetEntriesFast(); ++i) {
     TrackToJetIndex* track = (TrackToJetIndex*)mTrackToJetIndices->At(i);
     if (track->jetIndex() == jetIndex) v.push_back(track);
+  }
+  for (int i = 0; i < mTowerToJetIndices->GetEntriesFast(); ++i) {
+    TowerToJetIndex* tower = (TowerToJetIndex*)mTowerToJetIndices->At(i);
+    if (tower->jetIndex() == jetIndex) v.push_back(tower);
   }
   return v;
 }
