@@ -1,4 +1,4 @@
-// $Id: St2009W_accessMuDst.cxx,v 1.13 2010/05/21 19:57:59 stevens4 Exp $
+// $Id: St2009W_accessMuDst.cxx,v 1.14 2010/06/30 19:00:03 rcorliss Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -30,9 +30,9 @@ St2009WMaker::accessTrig(){ // return non-zero on abort
       L0 and L2, and set the l2bitET flag to true if so.
     */
     
-#if 0  //remove L0 emulator for now //JS
+    //#if 0  //remove L0 emulator for now //JS
     if (!passes_L0()) return -1;
-#endif
+    //#endif
     
     hA[0]->Fill("BHT3Id",1.);
     if(!passes_L2()) return -2;
@@ -685,6 +685,9 @@ St2009WMaker::rejectMcTr(float effic){ //reject track in MC to match TPC efficie
 
 
 //$Log: St2009W_accessMuDst.cxx,v $
+//Revision 1.14  2010/06/30 19:00:03  rcorliss
+//passes_L0() now works for simulation, using trigger simu in new macro
+//
 //Revision 1.13  2010/05/21 19:57:59  stevens4
 //remove L0 check for MC until passes_L0() is fixed
 //
