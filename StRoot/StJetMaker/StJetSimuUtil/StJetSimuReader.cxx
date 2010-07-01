@@ -332,13 +332,13 @@ void StJetSimuReader::exampleSimuAna()
       LOG_DEBUG <<"jet:\t"<<ijet<<"\tEjet:\t"<<j->E()<<"\tEta:\t"<<j->Eta()<<"\tPhi:\t"<<j->Phi()<<endm;
       
       //look at 4-momenta in the jet:
-      typedef vector<TrackToJetIndex*> TrackToJetVec;
+      typedef vector<TLorentzVector*> TrackToJetVec;
       TrackToJetVec particles = stjets->particles(ijet);
       for (TrackToJetVec::iterator it=particles.begin(); it!=particles.end(); ++it) {
-	TrackToJetIndex* t2j = (*it); 
+	TLorentzVector* t2j = (*it); 
 	assert(t2j);
-	if (idString(t2j)=="kTpcId") {LOG_DEBUG<<"TPC track pT ="<<t2j->Pt()<<endm;}
-	if (idString(t2j)=="kBarrelEmcTowerId") {LOG_DEBUG<<"TOWER track eT="<<t2j->Et()<<endm;}
+	if (dynamic_cast<TrackToJetIndex*>(t2j)) {LOG_DEBUG<<"TPC track pT="<<t2j->Pt()<<endm;}
+	if (dynamic_cast<TowerToJetIndex*>(t2j)) {LOG_DEBUG<<"TOWER track eT="<<t2j->Et()<<endm;}
       }
     }
   }

@@ -266,7 +266,7 @@ bool verifyJet(StJets* stjets, int ijet)
 	
   StLorentzVectorD jetMom(0., 0., 0., 0.);
     
-  typedef vector<TrackToJetIndex*> FourpList;
+  typedef vector<TLorentzVector*> FourpList;
   FourpList particles = stjets->particles(ijet);
     
   for (FourpList::iterator it=particles.begin(); it!=particles.end(); ++it) {
@@ -369,12 +369,12 @@ void StJetReader::exampleFastAna()
       LOG_INFO <<"jet:\t"<<ijet<<"\tEjet:\t"<<j->E()<<"\tEta:\t"<<j->Eta()<<"\tPhi:\t"<<j->Phi()<<"\tdetEta:\t"<<j->detEta()<<endm;
 			
       //look at 4-momenta in the jet:
-      typedef vector<TrackToJetIndex*> TrackToJetVec;
+      typedef vector<TLorentzVector*> TrackToJetVec;
       TrackToJetVec particles = stjets->particles(ijet);
 			
       for (TrackToJetVec::iterator partIt=particles.begin(); partIt!=particles.end(); ++partIt) {
-	const TrackToJetIndex* theParticle = *partIt;
-	LOG_INFO <<"\tparticle \t pt:\t"<<theParticle->Pt()<<"\tnHitsFit:\t"<<theParticle->nHitsFit()<<endm;
+	const TLorentzVector* theParticle = *partIt;
+	LOG_INFO <<"\tparticle \t pt:\t"<<theParticle->Pt()<<"\teta:\t"<<theParticle->Eta()<<"\tphi:\t"<<theParticle->Phi()<<endm;
       }
     }
   }	
@@ -410,7 +410,7 @@ void StJetReader::exampleEventAna()
       LOG_INFO <<"jet:\t"<<ijet<<"\tEjet:\t"<<j->E()<<"\tEta:\t"<<j->Eta()<<"\tPhi:\t"<<j->Phi()<<endm;
 			
       //look at 4-momenta in the jet:
-      typedef vector<TrackToJetIndex*> TrackToJetVec;
+      typedef vector<TLorentzVector*> TrackToJetVec;
       TrackToJetVec particles = stjets->particles(ijet);
     }
   }
