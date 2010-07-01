@@ -1,4 +1,4 @@
-// $Id: StChargedPionHelpers.cxx,v 1.5 2009/12/02 21:17:31 fine Exp $
+// $Id: StChargedPionHelpers.cxx,v 1.6 2010/07/01 08:41:47 pibero Exp $
 
 #include "StChargedPionHelpers.h"
 
@@ -94,7 +94,7 @@ translateEvent(StJetSkimEvent *skimEvent, StChargedPionBaseEv *ev) {
 }
 
 void StChargedPionHelpers::
-translateJet(StJet* oldJet, vector<TrackToJetIndex*> particles, StChargedPionJet* jet) {
+translateJet(StJet* oldJet, vector<TLorentzVector*> particles, StChargedPionJet* jet) {
     *static_cast<TLorentzVector*>(jet) = *static_cast<TLorentzVector*>(oldJet);
     
     jet->setCharge(oldJet->charge);
@@ -111,24 +111,42 @@ translateJet(StJet* oldJet, vector<TrackToJetIndex*> particles, StChargedPionJet
     }
     
     StChargedPionJetParticle particle;
-    StThreeVectorF dca;
     for(unsigned i=0; i<particles.size(); i++) {
         particle.SetPt ( particles[i]->Pt()  );
         particle.SetEta( particles[i]->Eta() );
         particle.SetPhi( particles[i]->Phi() );
         particle.SetE( particles[i]->E() );
-        particle.setIndex( particles[i]->trackIndex() );
-        particle.setDetectorId( particles[i]->detectorId() );
-        particle.setCharge( particles[i]->charge());
-        particle.setNHits( particles[i]->nHits() );
-        particle.setNHitsFit( particles[i]->nHitsFit() );
-        particle.setNHitsPoss( particles[i]->nHitsPoss() );
-        particle.setNHitsDEdx( particles[i]->nHitsDedx() );
-        particle.setNSigmaPion( particles[i]->nSigmaPion() );
+
+	if (TrackToJetIndex* track = dynamic_cast<TrackToJetIndex*>(particles[i])) {
+	  particle.setDetectorId( static_cast<StDetectorId>(track->detectorId()) );
+	  particle.setIndex( track->trackIndex() );
+	  particle.setCharge( track->charge());
+	  particle.setNHits( track->nHits() );
+	  particle.setNHitsFit( track->nHitsFit() );
+	  particle.setNHitsPoss( track->nHitsPoss() );
+	  particle.setNHitsDEdx( track->nHitsDedx() );
+	  particle.setNSigmaPion( track->nSigmaPion() );
         
-        dca.setY( float(particles[i]->Tdcaxy()) );
-        dca.setZ( float(particles[i]->Tdcaz()) );
-        particle.setGlobalDca( dca );
+	  StThreeVectorF dca;
+	  dca.setY( float(track->Tdcaxy()) );
+	  dca.setZ( float(track->Tdcaz()) );
+	  particle.setGlobalDca( dca );
+	}
+
+	if (TowerToJetIndex* tower = dynamic_cast<TowerToJetIndex*>(particles[i])) {
+	  particle.setDetectorId( static_cast<StDetectorId>(tower->detectorId()) );
+	  particle.setIndex( tower->towerId() );
+	  particle.setCharge( 0 );
+	  particle.setNHits( 0 );
+	  particle.setNHitsFit( 0 );
+	  particle.setNHitsPoss( 0 );
+	  particle.setNHitsDEdx( 0 );
+	  particle.setNSigmaPion( -999 );
+
+	  StThreeVectorF dca(0,0,0);
+	  particle.setGlobalDca( dca );
+	}
+
         jet->addParticle(&particle);
     }
 }
@@ -364,6 +382,9 @@ translateTrack(const StMuTrack *mu, StChargedPionTrack *cp) {
 
 /*****************************************************************************
  * $Log: StChargedPionHelpers.cxx,v $
+ * Revision 1.6  2010/07/01 08:41:47  pibero
+ * Fix AutoBuild
+ *
  * Revision 1.5  2009/12/02 21:17:31  fine
  * Fix StMuTrack interface
  *
