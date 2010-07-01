@@ -1,7 +1,7 @@
 #ifndef STAR_StChargedPionHelpers
 #define STAR_StChargedPionHelpers
 
-// $Id: StChargedPionHelpers.h,v 1.1 2008/07/17 17:06:30 kocolosk Exp $
+// $Id: StChargedPionHelpers.h,v 1.2 2010/07/01 08:41:47 pibero Exp $
 
 /*****************************************************************************
  * @class StChargedPionHelpers
@@ -25,7 +25,7 @@ class StJetSkimEvent;
 class StMiniMcEvent;
 class StMuTrack;
 class StPythiaEvent;
-class TrackToJetIndex;
+class TLorentzVector;
 
 #include "TObject.h"
 
@@ -35,7 +35,7 @@ public:
     virtual ~StChargedPionHelpers();
 
     static void translateEvent(StJetSkimEvent*, StChargedPionBaseEv*);
-    static void translateJet(StJet*, vector<TrackToJetIndex*>, StChargedPionJet*);
+    static void translateJet(StJet*, vector<TLorentzVector*>, StChargedPionJet*);
     static void translateJets(StJets*, StChargedPionBaseEv*);
     static void translateJets(StJets*, StChargedPionMcEvent*);
     static void translatePythia(const StPythiaEvent*, StChargedPionMcEvent*);
@@ -54,6 +54,9 @@ private:
 
 /*****************************************************************************
  * $Log: StChargedPionHelpers.h,v $
+ * Revision 1.2  2010/07/01 08:41:47  pibero
+ * Fix AutoBuild
+ *
  * Revision 1.1  2008/07/17 17:06:30  kocolosk
  * big-bang integration StChargedPionMcEvent framework
  *
