@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.13 2009/11/23 21:38:56 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.14 2010/07/02 22:36:10 genevb Exp $
  *
  * calculates mean primary vertex positions from
  * suitable events to use as seeds in finding better       
@@ -40,6 +40,7 @@ class StVertexSeedMaker : public StMaker {
    virtual int GetValidityTime();
    virtual void UseEventDateTime();
    virtual void UseFillDateTime();
+   virtual void UseAllTriggers();
    virtual St_vertexSeed* VertexSeedTable();
    virtual void WriteTableToFile();     //Write drift velocity table (assumes correct trigger offset)
    virtual void SetMinEntries(int entries);  //minimum number of valid events for seed
@@ -52,7 +53,7 @@ class StVertexSeedMaker : public StMaker {
    virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual void SetDefDir(const char* dir) {defDir = dir;}
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.13 2009/11/23 21:38:56 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.14 2010/07/02 22:36:10 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
@@ -105,6 +106,7 @@ class StVertexSeedMaker : public StMaker {
   Bool_t   mHistOut;
   TFile*   mTempOut;
   Bool_t   useEventDateTime;
+  Bool_t   useAllTriggers;
   double p[4];  // calculated params
   double ep[4]; // calculated errs
   double a[4];  // database params
@@ -119,6 +121,7 @@ class StVertexSeedMaker : public StMaker {
 
 inline void StVertexSeedMaker::UseEventDateTime() {useEventDateTime = kTRUE;}
 inline void StVertexSeedMaker::UseFillDateTime() {useEventDateTime = kFALSE;}
+inline void StVertexSeedMaker::UseAllTriggers() {useAllTriggers = kTRUE;}
 inline void StVertexSeedMaker::SetMinEntries(int entries){minEntries = entries; }
 inline void StVertexSeedMaker::SetMaxX0Err(float err){maxX0Err = err;}
 inline void StVertexSeedMaker::SetMaxY0Err(float err){maxY0Err = err;}
@@ -131,8 +134,11 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.13 2009/11/23 21:38:56 genevb Exp $
+// $Id: StVertexSeedMaker.h,v 1.14 2010/07/02 22:36:10 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.14  2010/07/02 22:36:10  genevb
+// Option for using all triggers
+//
 // Revision 1.13  2009/11/23 21:38:56  genevb
 // Fix problems with memory-resident TNtuple by using a temporary disk file
 //

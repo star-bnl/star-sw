@@ -112,6 +112,7 @@ StVertexSeedMaker::StVertexSeedMaker(const char *name,
   nsize = 0;
   setArraySize(512);
   UseEventDateTime(); // By default, use the data & time from the first event
+  useAllTriggers = kFALSE;
   dbTriggersTable = 0;
   Reset();
 }
@@ -242,7 +243,7 @@ Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
   Int_t nTrigs = (Int_t) dbTriggersTable->GetNRows();
   for (Int_t i = 0; i < nTrigs; i++, trigsTable++) {
     unsigned int dbTid = trigsTable->trigid;
-    if (dbTid > 0 && tid == dbTid) {
+    if (useAllTriggers || dbTid == 9999999 || (dbTid > 0 && tid == dbTid)) {
       trig = (float) tid;
       return kTRUE;
     }
@@ -290,7 +291,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   LOG_INFO << "\n**************************************************************"
-           << "\n* $Id: StVertexSeedMaker.cxx,v 1.43 2009/11/23 21:38:56 genevb Exp $"
+           << "\n* $Id: StVertexSeedMaker.cxx,v 1.44 2010/07/02 22:36:10 genevb Exp $"
            << "\n**************************************************************" << endm;
 
   if (Debug()) StMaker::PrintInfo();
@@ -621,8 +622,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir, const Char_t* cuts) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.43 2009/11/23 21:38:56 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.44 2010/07/02 22:36:10 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.44  2010/07/02 22:36:10  genevb
+// Option for using all triggers
+//
 // Revision 1.43  2009/11/23 21:38:56  genevb
 // Fix problems with memory-resident TNtuple by using a temporary disk file
 //
