@@ -33,7 +33,8 @@ class ComponentTcad2d : public ComponentBase {
                         double& xmax, double& ymax, double& zmax); 
                         
     // Import mesh and field map from files
-    bool Initialise(const std::string gridfilename, const std::string datafilename);
+    bool Initialise(const std::string gridfilename, 
+                    const std::string datafilename);
 
     int  GetNumberOfRegions() const {return nRegions;}
     void GetRegion(const int i, std::string& name, bool& active);

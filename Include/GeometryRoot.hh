@@ -31,7 +31,7 @@ class GeometryRoot : public GeometryBase {
     // Get pointer to ROOT material with given index/name
     TGeoMaterial* GetMaterial(const int i);
     TGeoMaterial* GetMaterial(const char* name);
-    // Associate ROOT material to Garfield medium
+    // Associate ROOT material with Garfield medium
     void SetMedium(const int imat, Medium* med);
     void SetMedium(const char* mat, Medium* med);
 

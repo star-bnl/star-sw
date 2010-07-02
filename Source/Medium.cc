@@ -139,13 +139,14 @@ bool
 Medium::ElectronVelocity(const double ex, const double ey, const double ez, 
                          const double bx, const double by, const double bz, 
                          double& vx, double& vy, double& vz) {
-  if (debug) {
-    std::cerr << "Medium::ElectronVelocity:" << std::endl;
-    std::cerr << "    " << name << ": Function is not implemented." 
-              << std::endl;
-  }
+
   vx = vy = vz = 0.;
-  return false;
+  // Magnitude of the electric field
+  const double e = sqrt(ex * ex + ey * ey + ez * ez);
+  if (e <= 0.) return false;
+  // Magnitude of the magnetic field
+  const double b = sqrt(bx * bx + by * by + bz * bz);
+  return true;
             
 }
 
@@ -558,6 +559,184 @@ Medium::PlotAttachmentCommon(const double emin, const double emax) {
   plottingEngine.SetLabelX("electric field [V/cm]");
   plottingEngine.SetLabelY("attachment coefficient [1/cm]");
   plottingEngine.SetTitle(name);
+
+}
+
+bool
+Medium::BoxInterpolation3d(std::vector<std::vector<std::vector<double> > >& value,
+                    std::vector<double>& xAxis, std::vector<double>& yAxis, std::vector<double>& zAxis, 
+                    double x, double y, double z, double& f, const int ip) {
+
+
+  // Shape functions
+  double fX[4] = {0., 0., 0., 0.};
+  double fY[4] = {0., 0., 0., 0.};
+  double fZ[4] = {0., 0., 0., 0.};
+
+  int iX0, iX1;
+  int iY0, iY1;
+  int iZ0, iZ1;
+
+  f = 0.;
+
+  // Check the interpolation order
+  if (ip < 0 || ip > 2) {
+    std::cerr << "Medium::BoxInterpolation3d:" << std::endl;
+    std::cerr << "    Incorrect interpolation order. No interpolation." << std::endl;
+    return false;
+  }
+
+  // Compute the shape functions and ranges
+  if (!ComputeShapeFunctions(xAxis, x, ip, fX[0], fX[1], fX[2], fX[3], iX0, iX1)) {
+    std::cerr << "Medium::BoxInterpolation3d:" << std::endl;
+    std::cerr << "    Incorrect grid in x direction. No interpolation." << std::endl;
+    return false;
+  }
+  if (!ComputeShapeFunctions(yAxis, y, ip, fY[0], fY[1], fY[2], fY[3], iY0, iY1)) {
+    std::cerr << "Medium::BoxInterpolation3d:" << std::endl;
+    std::cerr << "    Incorrect grid in y direction. No interpolation." << std::endl;
+    return false;
+  }
+  if (!ComputeShapeFunctions(zAxis, z, ip, fZ[0], fZ[1], fZ[2], fZ[3], iZ0, iZ1)) {
+    std::cerr << "Medium::BoxInterpolation3d:" << std::endl;
+    std::cerr << "    Incorrect grid in z direction. No interpolation." << std::endl;
+    return false;
+  }
+
+  for (int iX = iX0; iX <= iX1; ++iX) {
+    for (int iY = iY0; iY <= iY1; ++iY) {
+      for (int iZ = iZ0; iZ <= iZ1; ++iZ) {
+        f += value[iX][iY][iZ] * fX[iX - iX0] * fY[iY - iY0] * fZ[iZ - iZ0];
+      }
+    }
+  }
+
+  return true;
+
+}
+
+bool
+Medium::ComputeShapeFunctions(std::vector<double>& axis, const double x, const int ip, 
+                              double& f1, double& f2, double& f3, double& f4, int& i0, int& i1) {
+
+  
+  const int n = axis.size();
+                              
+  // Make sure we have enough points
+  if (n < 1) {
+    std::cerr << "Medium::ComputeShapeFunctions:" << std::endl;
+    std::cerr << "    Incorrect number of points." << std::endl;
+    return false;
+  }
+ 
+  // Zeroth order interpolation
+  if (ip == 0 || n <= 1) {
+    // Find the nearest node
+    double d = fabs(x - axis[0]);
+    double d1 = d;
+    int iNode = 0;
+    for (int i = 1; i < n; ++i) {
+      d1 = fabs(x - axis[i]);
+      if (d1 < d) {
+        d = d1;
+        iNode = i;
+      }
+    }
+    // Set the summing range
+    i0 = i1 = iNode;
+    // Set the shape functions
+    f1 = 1.; f2 = 0.; f3 = 0.; f4 = 0.;
+    return true;
+  }
+
+  // First order interpolation
+  if (ip == 1 || n <= 2) {
+    // Find the grid segment containing this point
+    int iGrid = 0;
+    for (int i = 1; i < n; ++i) {
+      if ((axis[i - 1] - x) * (x - axis[i]) >= 0.) iGrid = i;
+    }
+    // Ensure there won't be any divisions by zero
+    if (axis[iGrid] == axis[iGrid - 1]) return false;
+    // Compute local coordinates
+    const double xLocal = (x - axis[iGrid - 1]) / (axis[iGrid] - axis[iGrid - 1]);
+    // Set the summing range
+    i0 = iGrid - 1;
+    i1 = iGrid;
+    // Set the shape functions
+    f1 = 1. - xLocal;
+    f2 = xLocal;
+    f3 = 0.;
+    f4 = 0.;
+    return true;
+  }
+
+  // Second order interpolation
+  if (ip == 2) {
+    // Find the grid segment containing this point
+    int iGrid = 0;
+    for (int i = 1; i < n; ++i) {
+      if ((axis[i - 1] - x) * (x - axis[i]) >= 0.) iGrid = i;
+    }
+    // Compute the local coordinate for this grid segment
+    const double xLocal = (x - axis[iGrid - 1]) / (axis[iGrid] - axis[iGrid - 1]);
+    // Set the summing range and shape functions
+    if (iGrid == 1) {
+      i0 = iGrid - 1; i1 = iGrid + 1;
+      if (axis[i0] == axis[i0 + 1] || axis[i0] == axis[i0 + 2] || axis[i0 + 1] == axis[i0 + 2]) {
+        std::cerr << "Medium::ComputeShapeFunctions:" << std::endl;
+        std::cerr << "    One or more grid points coincide. No interpolation" << std::endl;
+        return false;
+      }
+      f1 =  (x - axis[i0 + 1]) * (x - axis[i0 + 2]) / 
+           ((axis[i0] - axis[i0 + 1]) * (axis[i0]     - axis[i0 + 2]));
+      f2 =  (x - axis[i0])     * (x - axis[i0 + 2]) / 
+           ((axis[i0 + 1] - axis[i0]) * (axis[i0 + 1] - axis[i0 + 2]));
+      f3 =  (x - axis[i0])     * (x - axis[i0 + 1]) / 
+           ((axis[i0 + 2] - axis[i0]) * (axis[i0 + 2] - axis[i0 + 1]));
+      f4 = 0.;
+      return true;
+    } else if (iGrid == n - 1) {
+      i0 = iGrid - 2; i1 = iGrid;
+      if (axis[i0] == axis[i0 + 1] || axis[i0] == axis[i0 + 2] || axis[i0 + 1] == axis[i0 + 2]) {
+        std::cerr << "Medium::ComputeShapeFunctions:" << std::endl;
+        std::cerr << "    One or more grid points coincide. No interpolation." << std::endl;
+        return false;
+      }
+      f1 =  (x - axis[i0 + 1]) * (x - axis[i0 + 2]) /
+           ((axis[i0] - axis[i0 + 1]) * (axis[i0] - axis[i0 + 2]));
+      f2 =  (x - axis[i0]) * (x - axis[i0 + 2]) /
+           ((axis[i0 + 1] - axis[i0]) * (axis[i0 + 1] - axis[i0 + 2]));
+      f3 =  (x - axis[i0])     * (x - axis[i0 + 1]) /
+           ((axis[i0 + 2] - axis[i0]) * (axis[i0 + 2] - axis[i0 + 1]));
+      f4 = 0.;
+      return true;
+    } else {
+      i0 = iGrid - 2; i1 = iGrid + 1;
+      if (axis[i0] == axis[i0 + 1] || axis[i0] == axis[i0 + 2] || axis[i0] == axis[i0 + 3] || 
+          axis[i0 + 1] == axis[i0 + 2] || axis[i0 + 1] == axis[i0 + 2] || 
+          axis[i0 + 1] == axis[i0 + 3] || axis[i0 + 2] == axis[i0 + 3]) {
+        std::cerr << "Medium::ComputeShapeFunctions:" << std::endl;
+        std::cerr << "    One or more grid points coincide. No interpolation." << std::endl;
+        return false;
+      }
+      f1 =  (1. - xLocal) * (x - axis[i0 + 1]) * (x - axis[i0 + 2]) / 
+                           ((axis[i0] - axis[i0 + 1]) * (axis[i0] - axis[i0 + 2]));
+      f2 =  (1. - xLocal) * (x - axis[i0]) * (x - axis[i0 + 2]) / 
+                           ((axis[i0 + 1] - axis[i0]) * (axis[i0 + 1] - axis[i0 + 2])) + 
+                  xLocal  * (x - axis[i0 + 1]) * (x - axis[i0 + 3]) /
+                           ((axis[i0 + 1] - axis[i0 + 2]) * (axis[i0 + 1] - axis[i0 + 3]));
+      f3 =  (1. - xLocal) * (x - axis[i0]) * (x - axis[i0 + 1]) / 
+                           ((axis[i0 + 2] - axis[i0]) * (axis[i0 + 2] - axis[i0 + 1])) + 
+                  xLocal  * (x - axis[i0 + 1]) * (x - axis[i0 + 3]) /
+                           ((axis[i0 + 2] - axis[i0 + 1]) * (axis[i0 + 2] - axis[i0 + 3]));
+      f4 =        xLocal  * (x - axis[i0 + 1]) * (x - axis[i0 + 2]) / 
+                           ((axis[i0 + 3] - axis[i0 + 1]) * (axis[i0 + 3] - axis[i0 + 2]));
+      return true;
+    }
+  }  
+
+  return false;
 
 }
 

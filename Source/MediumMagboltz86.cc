@@ -1273,7 +1273,7 @@ MediumMagboltz86::Mixer() {
         if (useCsOutput) outfile << qIn[iE][j] << "  ";
         cf[iE][np] = qIn[iE][j] * van;
         // Scale the excitation cross-sections (for error estimates)
-        // if (csType[np] == 4) cf[iE][np] *= 1.3;
+        if (csType[np] == 4) cf[iE][np] *= 1.2;
         if (cf[iE][np] < 0.) {
           std::cerr << "MediumMagboltz86::Mixer:" << std::endl;
           std::cerr << "    Negative inelastic cross-section at " 

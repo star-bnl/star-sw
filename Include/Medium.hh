@@ -4,6 +4,7 @@
 #define G_MEDIUM_H
 
 #include <string>
+#include <vector>
 
 namespace Garfield {
 
@@ -223,6 +224,12 @@ class Medium {
     void PlotVelocityCommon(const double emin, const double emax);
     void PlotTownsendCommon(const double emin, const double emax);
     void PlotAttachmentCommon(const double emin, const double emax);
+
+    bool BoxInterpolation3d(std::vector<std::vector<std::vector<double> > >& value, 
+                      std::vector<double>& xAxis, std::vector<double>& yAxis, std::vector<double>& zAxis, 
+                      double x, double y, double z, double& f, int ip);
+    bool ComputeShapeFunctions(std::vector<double>& axis, const double x, const int ip, 
+                               double& f1, double& f2, double& f3, double& f4, int& i0, int& i1);
 
 };
 
