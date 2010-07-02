@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StEtaPhiGrid.cxx,v 1.7 2008/09/15 03:53:49 tai Exp $
+// $Id: StEtaPhiGrid.cxx,v 1.8 2010/07/02 21:47:56 pibero Exp $
 #include "StEtaPhiGrid.h"
 
 #include "StConePars.h"
@@ -10,6 +10,12 @@
 using namespace std;
 
 namespace StSpinJet {
+
+StEtaPhiGrid::~StEtaPhiGrid()
+{
+  for (CellList::iterator cell = _EtCellList.begin(); cell != _EtCellList.end(); ++cell)
+    delete *cell;
+}
 
 void StEtaPhiGrid::buildGrid(StJetEtCellFactory* cellFactory)
 {
