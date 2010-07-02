@@ -1,4 +1,4 @@
-// $Id: StConeJetFinder.cxx,v 1.52 2008/08/23 20:47:40 tai Exp $
+// $Id: StConeJetFinder.cxx,v 1.53 2010/07/02 21:47:56 pibero Exp $
 #include "StConeJetFinder.h"
 
 #include "StJetSpliterMerger.h"
@@ -17,7 +17,7 @@ StConeJetFinder::StConeJetFinder(const StConePars& pars)
 
 StConeJetFinder::~StConeJetFinder()
 {
-
+  delete mMerger;
 }
 
 StJetEtCellFactory* StConeJetFinder::makeCellFactory()

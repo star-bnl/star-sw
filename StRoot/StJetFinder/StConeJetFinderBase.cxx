@@ -1,4 +1,4 @@
-// $Id: StConeJetFinderBase.cxx,v 1.10 2008/06/03 23:21:34 tai Exp $
+// $Id: StConeJetFinderBase.cxx,v 1.11 2010/07/02 21:47:56 pibero Exp $
 #include "StConeJetFinderBase.h"
 
 #include "TObject.h"
@@ -27,7 +27,7 @@ StConeJetFinderBase::StConeJetFinderBase(const StConePars& pars)
 
 StConeJetFinderBase::~StConeJetFinderBase()
 {
-
+  delete mWorkCell;
 }
 
 void StConeJetFinderBase::Init()

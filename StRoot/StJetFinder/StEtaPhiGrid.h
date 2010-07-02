@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StEtaPhiGrid.h,v 1.6 2008/05/08 04:07:23 tai Exp $
+// $Id: StEtaPhiGrid.h,v 1.7 2010/07/02 21:47:56 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@mit.edu>
 #ifndef STETAPHIGRID_H
 #define STETAPHIGRID_H
@@ -25,6 +25,8 @@ public:
   typedef StEtaPhiCell::CellList CellList;
 
   StEtaPhiGrid(StConePars& pars) : _pars(pars) { }
+
+  ~StEtaPhiGrid();
 
   void buildGrid(StJetEtCellFactory* cellFactory);
 
