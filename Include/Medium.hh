@@ -221,6 +221,11 @@ class Medium {
     // Switch on/off debugging messages
     bool debug;
 
+    // Tables of transport coefficients
+    std::vector<double> efields;
+    std::vector<double> bfields;
+    std::vector<double> bangles;
+
     void PlotVelocityCommon(const double emin, const double emax);
     void PlotTownsendCommon(const double emin, const double emax);
     void PlotAttachmentCommon(const double emin, const double emax);

@@ -17,6 +17,10 @@ Medium::Medium() :
   driftable(false), microscopic(false), ionisable(false),
   isChanged(true),
   debug(false) {
+
+  efields.clear();
+  bfields.clear();
+  bangles.clear();
   
 }
 
@@ -141,13 +145,37 @@ Medium::ElectronVelocity(const double ex, const double ey, const double ez,
                          double& vx, double& vy, double& vz) {
 
   vx = vy = vz = 0.;
-  // Magnitude of the electric field
+  // Compute the magnitude of the electric field
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   if (e <= 0.) return false;
-  // Magnitude of the magnetic field
+  // Compute the magnitude of the magnetic field
   const double b = sqrt(bx * bx + by * by + bz * bz);
-  return true;
-            
+
+  // Compute unit vectors along E, E x B and Btrans
+  double ue[3] = {ex / e, ey / e, ez / e};
+  double uexb[3] = {ey * bz - ez * by, ez * bx - ex * bz, ex * by - ey * bx};
+  const double exb = sqrt(uexb[0] * uexb[0] + uexb[1] * uexb[1] + uexb[2] * uexb[2]);
+
+  double ubt[3] = {
+    uexb[1] * ez - uexb[2] * ey, 
+    uexb[2] * ex - uexb[0] * ez, 
+    uexb[0] * ey - uexb[1] * ex
+  };
+  const double bt = sqrt(ubt[0] * ubt[0] + ubt[1] * ubt[1] + ubt[2] * ubt[2]);
+
+  if (b > 0.) {
+    uexb[0] /= exb; uexb[1] /= exb; uexb[2] /= exb;
+    ubt[0] /= bt; ubt[1] /= bt; ubt[2] /= bt;
+  } else {
+    uexb[0] = ubt[0] = ue[0];
+    uexb[1] = ubt[1] = ue[1];
+    uexb[2] = ubt[2] = ue[2];
+  }
+
+  // Compute the angle between B field and E field
+  const double eb = fabs(ex * bx + ey * by + ez * bz);
+  
+
 }
 
 bool 

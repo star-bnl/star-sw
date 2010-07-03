@@ -4,14 +4,14 @@
 #define G_RANDOM_H
 
 #include <cmath>
-#include "RandomEngineGSL.hh"
+// #include "RandomEngineGSL.hh"
 #include "RandomEngineRoot.hh"
 
 namespace Garfield {
 
   // Random number generator
-  extern RandomEngineGSL randomEngine;
-  // extern RandomEngineRoot randomEngine;
+  // extern RandomEngineGSL randomEngine;
+  extern RandomEngineRoot randomEngine;
 
   // Draw a random number uniformly distributed in the range [0, 1)
   inline

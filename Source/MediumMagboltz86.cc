@@ -20,6 +20,7 @@ MediumMagboltz86::MediumMagboltz86() :
   usePenning(false), rPenning(0.), nPenning(0), 
   useDeexcitation(false), useRadTrap(true),
   nDeexcitations(0), nDeexcitationProducts(0),
+  scaleExc(1.),
   eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma),
   hasIonMobility(false), muIon(1.e-9) {
   
@@ -277,6 +278,20 @@ MediumMagboltz86::EnablePenningTransfer(const double r) {
   
 }
 
+void
+MediumMagboltz86::SetExcitationScalingFactor(const double r) {
+
+  if (r <= 0.) {
+    std::cerr << "MediumMagboltz86::SetScalingFactor:" << std::endl;
+    std::cerr << "    Incorrect value for scaling factor: " << r << std::endl;
+    return;
+  }
+
+  scaleExc = r;
+  isChanged = true;
+
+}
+
 double 
 MediumMagboltz86::GetElectronNullCollisionRate() {
 
@@ -443,7 +458,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
   const double s1 = rgas[level];
   const double s2 = (s1 * s1) / (s1 - 1.);
   const double stheta0 = sin(acos(ctheta0));
-  double arg = 1. - s1 * loss / e,;
+  double arg = 1. - s1 * loss / e;
   if (arg < Small) arg = Small;
   const double d = 1. - ctheta0 * sqrt(arg);
 
@@ -1273,7 +1288,7 @@ MediumMagboltz86::Mixer() {
         if (useCsOutput) outfile << qIn[iE][j] << "  ";
         cf[iE][np] = qIn[iE][j] * van;
         // Scale the excitation cross-sections (for error estimates)
-        if (csType[np] == 4) cf[iE][np] *= 1.2;
+        cf[iE][np] *= scaleExc;
         if (cf[iE][np] < 0.) {
           std::cerr << "MediumMagboltz86::Mixer:" << std::endl;
           std::cerr << "    Negative inelastic cross-section at " 

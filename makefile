@@ -5,7 +5,7 @@ INCLUDE = $(HOME)/Include
 
 CC = g++ -c -O3 `root-config --cflags` -I$(INCLUDE)
 LC = g++ `root-config --glibs` -lMinuit -lgsl -lgslcblas -lg2c -lm 
-FF = f77 -c -O3
+FF = gfortran -c -O3
 # Compiler flags
 CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long -g `root-config --cflags`
 
@@ -38,7 +38,6 @@ OBJS = \
 	$(OBJECT)/OpticalData.o \
 	$(OBJECT)/SolidBox.o \
 	$(OBJECT)/SolidTube.o \
-	$(OBJECT)/RandomEngineGSL.o \
 	$(OBJECT)/RandomEngineRoot.o \
 	$(OBJECT)/PlottingEngineRoot.o \
 	$(OBJECT)/Sensor.o

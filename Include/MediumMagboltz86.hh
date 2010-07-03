@@ -166,6 +166,9 @@ class MediumMagboltz86 : public Medium {
     // when loaded into memory
     void EnableCrossSectionOutput()  {useCsOutput = true;}
     void DisableCrossSectionOutput() {useCsOutput = false;}
+
+    // Multiply excitation cross-sections by a uniform scaling factor
+    void SetExcitationScalingFactor(const double r);
     
     // Get the overall null-collision rate [ns-1]
     double GetElectronNullCollisionRate();
@@ -327,6 +330,9 @@ class MediumMagboltz86 : public Medium {
     double ionPot[nMaxGases];
     // Minimum ionisation potential
     double minIonPot;
+
+    // Scaling factor for excitation cross-sections
+    double scaleExc;
 
     // Energy spacing of photon collision rates table
     double eFinalGamma, eStepGamma;
