@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.34 2010/06/30 04:47:23 subhasis Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.35 2010/07/06 16:30:45 rashmi Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.35  2010/07/06 16:30:45  rashmi
+ *Calibration updates for run10
+ *
  *Revision 1.34  2010/06/30 04:47:23  subhasis
  *reader fixed for reading daq files earlier than 2009 runs
  *
@@ -252,6 +255,21 @@ void StPmdReadMaker::ReadBadChains(Int_t runNo){
   mPmdGeom->GetRunYear(runNo,rn,year);
   if(Debug())cout<<"runNo="<<runNo<<" year="<<year<<endl;
   
+  if(year==11){
+    if(runNo>11148001){
+      BadChain = PmdClean::BadChain_y10d148;
+    }else if(runNo>11105000){
+      BadChain = PmdClean::BadChain_y10d105;
+    }else if(runNo>11100000){
+      BadChain = PmdClean::BadChain_y10d100;
+    }else if(runNo>11091000){
+      BadChain = PmdClean::BadChain_y10d91;
+    }else if(runNo>11001000){
+      BadChain = PmdClean::BadChain_y10d0;
+    }
+  }
+
+
   if(year==8){
     if(runNo>8342000){
       BadChain = PmdClean::BadChain_y8d342;
