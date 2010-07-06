@@ -1,5 +1,20 @@
-* $Id: geometry.g,v 1.215 2010/05/25 21:21:50 jwebb Exp $
+* $Id: geometry.g,v 1.216 2010/06/01 18:57:41 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.216  2010/06/01 18:57:41  jwebb
+* Modified geometry.g so that seperate particle transport cuts can be
+* used in the BEMC and EEMC.  This is needed for the spin/dijet simulation
+* request summarized here:
+*
+* http://drupal.star.bnl.gov/STAR/starsimrequests/2010/may/26/filtered-dijet-simulation
+*
+* The simulation request applies filters which select out barrel- and
+* adjacent-jetpatch triggers.  Thus, the endcap is only important for
+* trigger response.  Requestors have noted a x2 increase in speed when
+* EEMC is run with higher tracking cuts than in the BEMC.
+*
+* We define the Y2009b tag to apply the 10keV default tracking cuts in
+* the BEMC, and revert the EEMC to the 80kev/1MeV (photon/electron) cuts.
+*
 * Revision 1.215  2010/05/25 21:21:50  jwebb
 * y2010a geometry tag commit.  Tag is identical to y2010, except dependency
 * on y2009a is removed.
@@ -977,8 +992,8 @@ replace [exe ECALv6;] with[;"ECAL version 6.1 (or higher)"
                            ;EcalGeometry=6; "Version 6.1 and higher";
                            ]
 
-replace [exe EMCUTS(#);] with [ "Set eemc / bemc cuts to #1";
-                                EmCutConfig=#1;
+replace [exe EMCUTS(#,#);] with [ "Set eemc / bemc cuts to #1";
+                                #1CutConfig=#2;
                               ]
 
 
@@ -1360,7 +1375,8 @@ replace [exe y2005e;] with [
 replace [exe y2005f;] with [ 
          exe y2005e; 
          exe CALB02;      
-         exe EMCUTS(0); "disable 10 keV cuts";
+         exe EMCUTS(bemc,0); "disable 10 keV cuts";
+         exe EMCUTS(eemc,0); "disable 10 keV cuts";
          exe SISD55;
          ]
 
@@ -1412,7 +1428,8 @@ replace [exe y2006a;] with ["Y2006 baseline which is Y2005D+fixed TPC backplane+
 replace [exe y2006b;] with ["Y2006A + improved SSD with dead area + improved CALB"
          exe y2006; 
          exe CALB02; 
-         exe EMCUTS(0);   "disable 10 keV calorimeter cuts";
+         exe EMCUTS(bemc,0); "disable 10 keV cuts";
+         exe EMCUTS(eemc,0); "disable 10 keV cuts";
          exe FPDM02;
          exe SISD55;
          ]
@@ -1442,7 +1459,8 @@ replace [exe y2006h;] with ["y2006g + new BEMC, new EEMC";
         exe TPCe04;    "Latest model of the TPC, with additional mass";  
         exe CALB02;    "Latest model of the BEMC, with additional volumes";
         exe ECALv6;    "Latest model of the EEMC, with additional volumes and bug fixes";
-        exe EMCUTS(1); "10 keV cuts in b/emc calorimeter volumes";
+        exe EMCUTS(eemc,1); "10 keV cuts in b/emc calorimeter volumes";
+        exe EMCUTS(bemc,1); "10 keV cuts in b/emc calorimeter volumes";
         ]
 
 !//______________________________________________________________________________
@@ -1453,7 +1471,8 @@ replace [exe y2007;] with ["y2006 baseline which is Y2006+FMS"
                 exe BTOFa5; 
                 exe CALB02; 
                 exe ECAL31;
-                exe EMCUTS(0);   "disable 10 keV calorimeter cuts";
+                exe EMCUTS(eemc,0);   "disable 10 keV calorimeter cuts";
+                exe EMCUTS(bemc,0);   "disable 10 keV calorimeter cuts";
                 exe BBCMon; 
                 exe FPDM03; 
                 exe VPDD07; 
@@ -1497,7 +1516,8 @@ replace [exe y2008;] with [;
     exe BTOFb6;
     exe CALB02;
     exe ECAL31;
-    exe EMCUTS(0);   "disable 10 keV calorimeter cuts";
+    exe EMCUTS(eemc,0);   "disable 10 keV calorimeter cuts";
+    exe EMCUTS(bemc,0);   "disable 10 keV calorimeter cuts";
     exe BBCMon;
     exe FPDM03;
     exe VPDD07;
@@ -1524,7 +1544,8 @@ replace [exe y2009;] with [;
     exe BTOFc6;
     exe CALB02;
     exe ECAL31;   
-    exe EMCUTS(0); "disable 10 keV cuts";
+    exe EMCUTS(eemc,0); "disable 10 keV cuts";
+    exe EMCUTS(bemc,0); "disable 10 keV cuts";
     exe BBCMon;
     exe FPDM03;
     exe VPDD07;
@@ -1545,7 +1566,8 @@ replace [exe y2009a;] with [;
     exe BTOFc6;      "time of flight";
     exe CALB02;      "updated bemc model";
     exe ECALv6;      "several bugfixes in eemc geometry";
-    exe EMCUTS(1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
     exe BBCMon;      "beam beam counters";
     exe FPDM03;      "";
     exe VPDD07;      "";
@@ -1557,6 +1579,14 @@ replace [exe y2009a;] with [;
     exe MUTD03;
     exe CAVE04;
     exe PIPE12;
+};]
+
+replace [exe y2009b;] with [;
+{   "y2009b production tag B: Y2009A tag with the old tracking cuts in the EEMC.";
+    "This tag is not appropriate for EEMC simulations.";
+    exe Y2009A;           "Y2009A configugration";
+    exe EMCUTS(eemc,0);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
 };]
 
 
@@ -1578,7 +1608,8 @@ replace [exe y2010a;] with [;
     exe BTOF66;      "time of flight";
     exe CALB02;      "updated bemc model";
     exe ECALv6;      "several bugfixes in eemc geometry";
-    exe EMCUTS(1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
     exe BBCMon;      "beam beam counters";
     exe FPDM03;      "";
     exe VPDD07;      "";
@@ -1753,7 +1784,8 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
 *   3 = 100 keV cuts
 *   4 =   1 MeV cuts
 
-   Integer    EmCutConfig / 1 /             ! defaults to 10 keV cuts
+   Integer    BEmcCutConfig / 1 /             ! defaults to 10 keV cuts
+   Integer    EEmcCutConfig / 1 /
 
 
 
@@ -2230,12 +2262,16 @@ If LL>0
 
 ****************************************************************************************
   Case Y2009   { y2009 initial geometry: more detailed TPC
-                  Geom = 'Y2009   ';
-                exe y2009;}
+                 Geom = 'Y2009   ';
+                 exe y2009;}
 
   Case Y2009a   { y2009a baseline: more detailed TPC, version 6.1 of the endcap geometry
                   Geom = 'Y2009a  ';
-                exe y2009a;}
+                  exe y2009a;}
+
+  Case Y2009b   { "2009b production: y2009a geometry with 'old' tracking thresholds in the EEMC.  Not suitable for EEMC simulations.";
+                  Geom = 'Y2009b  ';
+                  exe y2009b;}
 
 ****************************************************************************************
   Case Y2010   { y2010: baseline
@@ -2287,7 +2323,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR01   { "R and D geometry: TPC+SSD+HFT-SVT"
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2342,7 +2379,8 @@ If LL>0
   Case UPGR02    { R and D geometry: TPC+IST+HFT-SVT
                   "svt: 3 layers ";
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
                      nSvtVafer=0  " numbering is in the code   ";
@@ -2419,7 +2457,8 @@ If LL>0
 *************************************************************************************************************
   Case UPGR03   { New Tracking: IST+IGT+HFT-SVT
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2473,7 +2512,8 @@ If LL>0
 *************************************************************************************************************
   Case UPGR04   { New Tracking: HPD
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2514,7 +2554,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR05   { New Tracking: HFT+HPD+IST+TPC-SVT
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2573,7 +2614,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR06   { New Tracking: HFT+HPD+SSD
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2626,7 +2668,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR07   { New Tracking: HFT+IST+TPC+SSD-SVT
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2675,7 +2718,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR08   { New Tracking: HFT+HPD+IST+TPC-SVT-SSD
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2734,7 +2778,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR09   { New Tracking: HFT+HPD+IST*outer+TPC-SVT-SSD
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2793,7 +2838,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR10   { New Tracking: HFT+innerLayerIST+TPC-SVT+SSD
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2853,7 +2899,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR11   { New Tracking: HFT+2LayerIST+TPC-SVT+SSD
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2910,7 +2957,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR12   { New Tracking: HFT+HPD+IST+TPC+IGT*newRadii
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -2970,7 +3018,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR13   { New Tracking: HFT+IST+TPC+SSD-SVT
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -3022,7 +3071,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR14   { TUP sans IST: HFT+TPC+SSD-SVT
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
@@ -3081,19 +3131,25 @@ If LL>0
 
   Case UPGR15   { New Tracking: HFT+IST+TPC+SSD-SVT
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
+
                 exe UPGR15; }
 ****************************************************************************************
   Case UPGR16   { New Tracking: HFT+IST+TPC+SSD-SVT
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
                   exe  UPGR16; }
 ****************************************************************************************
   Case UPGR16a   { upgr16 + tpc2009
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
                   exe  UPGR16a; }
 ****************************************************************************************
   Case UPGR17   { UPGR16 - FGTD + FTPC  request Wei-Ming-Zhang
-                  exe EMCUTS(0);
+
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
                      SVTT=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                      SCON=on;
@@ -3292,7 +3348,9 @@ If LL>0
 ****************************************************************************************
   Case UPGR21    { Year UPGR20 + full tof;
 
-                  exe EMCUTS(0);
+
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                      nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
                      nSvtVafer=0  " numbering is in the code   ";
@@ -3361,7 +3419,9 @@ If LL>0
 ****************************************************************************************
   Case UPGR20    { y2007 + one TOF
 
-                  exe EMCUTS(0);
+
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                   "svt: 3 layers ";
                      nSvtLayer=6  " 3 bi-plane layers, nSvtLayer<=7 ";
@@ -3431,7 +3491,8 @@ If LL>0
 ****************************************************************************************
   Case UPGR22    { first FHMC version;
 
-                  exe EMCUTS(0);
+                  exe EMCUTS(eemc,0);
+                  exe EMCUTS(bemc,0);
 
                  exe UPGR22;
                }
@@ -3460,16 +3521,20 @@ If LL>0
                 }
 
   Case EMC_10keV    { 10 keV cuts on Electromagnetic processes in the barrel and endcap;
-                    EmCutConfig = 1;
+                    BEmcCutConfig = 1;
+                    EEmcCutConfig = 1;
                     }
   Case EMC_30keV    { 30 keV cuts on Electromagnetic processes in the barrel and endcap;
-                    EmCutConfig = 2;
+                    BEmcCutConfig = 2;
+                    EEmcCutConfig = 2;
                     }
   Case EMC_100keV   { 100 keV cuts on Electromagnetic processes in the barrel and endcap;
-                    EmCutConfig = 3;
+                    BEmcCutConfig = 3;
+                    EEmcCutConfig = 3;
                     }
   Case EMC_1MeV     { 1 MeV cuts on Electromagnetic processes in the barrel and endcap;
-                    EmCutConfig = 4;
+                    BEmcCutConfig = 4;
+                    EEmcCutConfig = 4;
                     }
 
   Case TPC_ONLY   { Minimal geometry - only TPC;
@@ -3776,8 +3841,8 @@ If LL>0
 
        if(CalbConfig==2) then
            write(*,*) '************** Creating the 2007-     version of the Barrel Calorimeter'
-           Call AgDetp add ('ccut.absorber=',  emcutconfig, 1)
-           Call AgDetp add ('ccut.sensitive=', emcutconfig, 1)
+           Call AgDetp add ('ccut.absorber=',  BEmcCutConfig, 1)
+           Call AgDetp add ('ccut.sensitive=', BEmcCutConfig, 1)
            Call calbgeo2
        endif
 
@@ -3801,8 +3866,8 @@ If LL>0
       call AgDETP add ('emcg.FillMode=',ecalFill,1)
       IF ( EcalGeometry .lt. 6 ) Call ecalgeo            ! version 5
       IF ( EcalGeometry .eq. 6 ) THEN 
-                                 Call AgDetp add ('ecut.absorber=',  emcutconfig, 1)
-                                 Call AgDetp add ('ecut.sensitive=', emcutconfig, 1)
+                                 Call AgDetp add ('ecut.absorber=',  EEmcCutConfig, 1)
+                                 Call AgDetp add ('ecut.sensitive=', EEmcCutConfig, 1)
                                  Call ecalgeo6           ! version 6
       ENDIF
    endif
