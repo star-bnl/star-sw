@@ -87,6 +87,8 @@ void StBbcTriggerSimu::Make(StEvent* event)
 
 void StBbcTriggerSimu::Make(StBbcTriggerDetector& bbc)
 {
+  bbc.setYear(StMaker::GetChain()->GetDBTime().GetYear());
+
   for (UInt_t pmt=0; pmt<bbc.numberOfPMTs(); pmt++) {
 
     BBCadc[pmt]=bbc.adc(pmt);
@@ -103,6 +105,9 @@ void StBbcTriggerSimu::Make(StBbcTriggerDetector& bbc)
 
 //
 // $Log: StBbcTriggerSimu.cxx,v $
+// Revision 1.9  2010/07/07 16:48:21  pibero
+// StBbcTriggerSimu sets year from DB maker to StBbcTrigggerDetector container
+//
 // Revision 1.8  2010/01/08 15:18:37  pibero
 // Default input source is "MuDst" for all subdetectors.
 //
