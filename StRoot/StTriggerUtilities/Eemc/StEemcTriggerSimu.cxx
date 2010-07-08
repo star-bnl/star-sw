@@ -136,7 +136,22 @@ void
 StEemcTriggerSimu::addTriggerList(vector<int>& trgList){
   if(mYear==2006) {
     //fix it if(   yymmdd<20060408  || yymmdd>20060414) return; 
-    if(dsm2TreeADC->getOutEndcapHTTP1bit())   trgList.push_back(127580);//
+    if(dsm2TreeADC->getOutEndcapHTTP1bit())  {
+      // pp 200 GeV running
+      trgList.push_back(117580); // eemc-http
+      trgList.push_back(127580); // eemc-http
+      trgList.push_back(137581); // eemc-http
+      trgList.push_back(117641); // eemc-http-mb-L2gamma
+      trgList.push_back(127641); // eemc-http-mb-L2gamma
+      trgList.push_back(137641); // eemc-http-mb-L2gamma
+      trgList.push_back(117831); // eemc-http-mb-fast
+      trgList.push_back(127831); // eemc-http-mb-fast
+      trgList.push_back(137831); // eemc-http-mb-fast
+      trgList.push_back(137832); // eemc-http-mb-fast
+      // pp 62 GeV running 
+      trgList.push_back(147580); // eemc-http
+      trgList.push_back(147641); // eemc-http-mb-l2gamma
+    }
     if(dsm2TreeADC->getOutEndcapJP2bit()>=1)  trgList.push_back(127551);//EJP0,add mising mb
     if(dsm2TreeADC->getOutEndcapJP2bit()>=2)  trgList.push_back(127271);
     if(dsm2TreeADC->getOutEndcapJP2bit()>=1 && dsm2TreeADC->getOutEtot1bit()) trgList.push_back(127652);
@@ -668,6 +683,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.34  2010/07/08 20:56:17  pibero
+// Added a bunch of eemc-http triggers
+//
 // Revision 1.33  2010/06/29 16:53:27  pibero
 // Now, the trigger simulator fills in the StEmcTriggerDetector structure
 // same as data for MC.
