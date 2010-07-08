@@ -155,10 +155,6 @@ StEemcTriggerSimu::addTriggerList(vector<int>& trgList){
     if(dsm2TreeADC->getOutEndcapJP2bit()>=1)  trgList.push_back(127551);//EJP0,add mising mb
     if(dsm2TreeADC->getOutEndcapJP2bit()>=2)  trgList.push_back(127271);
     if(dsm2TreeADC->getOutEndcapJP2bit()>=1 && dsm2TreeADC->getOutEtot1bit()) trgList.push_back(127652);
-    if(dsm2TreeADC->getOutEndcapHTTP1bit()){
-      trgList.push_back(127831);
-      trgList.push_back(127611);
-    }
   }
   // #### modified by Liaoyuan ####
   else if( mYear == 2009 ){
@@ -683,6 +679,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.35  2010/07/08 21:00:08  pibero
+// Removed redundant eemc-http triggers
+//
 // Revision 1.34  2010/07/08 20:56:17  pibero
 // Added a bunch of eemc-http triggers
 //
