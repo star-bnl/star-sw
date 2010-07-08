@@ -169,8 +169,7 @@ StEemcTriggerSimu::addTriggerList(vector<int>& trgList){
 
 StTriggerSimuDecision
 StEemcTriggerSimu::triggerDecision(int trigId) {
-  if (find(mTriggerIds.begin(),mTriggerIds.end(),trigId) == mTriggerIds.end()) return kDoNotCare;
-  return kYes;
+  return (find(mTriggerIds.begin(),mTriggerIds.end(),trigId) == mTriggerIds.end()) ? kNo : kYes;
 }
  
 //==================================================
@@ -679,6 +678,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.36  2010/07/08 21:21:05  pibero
+// Changed triggerDecision from kDoNotCare to kNo
+//
 // Revision 1.35  2010/07/08 21:00:08  pibero
 // Removed redundant eemc-http triggers
 //
