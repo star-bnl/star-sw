@@ -15,8 +15,13 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "tables/St_spaceChargeCor_Table.h"
 #include "StEvent/StDcaGeometry.h"
-#include "TUnixTime.h"
+#include "StBTofCollection.h"
+#include "StBTofHit.h"
+#include "StBTofHeader.h"
+#include "StBTofPidTraits.h"
+#include "StTrackPidTraits.h"
 
+#include "TUnixTime.h"
 #include "TFile.h"
 #include "TH2.h"
 #include "TH3.h"
@@ -62,7 +67,7 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
     PrePassmode(kFALSE), PrePassdone(kFALSE), QAmode(kFALSE), doNtuple(kFALSE),
     doReset(kTRUE), doGaps(kFALSE), inGapRow(0),
     vtxEmcMatch(1), vtxTofMatch(0), vtxMinTrks(5),
-    minTpcHits(25), reqEmcMatch(kFALSE), reqTofMatch(kFALSE),
+    minTpcHits(25), reqEmcMatch(kFALSE), reqTofMatch(kTRUE),
     m_ExB(0),
     scehist(0), timehist(0), myhist(0), myhistN(0), myhistP(0),
     myhistE(0), myhistW(0), dczhist(0), dcehist(0), dcphist(0),
@@ -250,7 +255,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     else if (runinfo->runId() > 0) inGapRow = 12; // Run exists
     // else undefined
   }
-
+ 
   // Track loop
   unsigned int i,j,k;
   StThreeVectorD ooo = pvtx->position();
@@ -269,7 +274,24 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           if (map.numberOfHits(kTpcId) < minTpcHits) continue;
 
           if (reqEmcMatch) {} // to be defined
-          if (reqTofMatch) {} // to be defined
+          if (reqTofMatch) {
+
+            const StPtrVecTrackPidTraits& theTofPidTraits = tri->pidTraits(kTofId);
+            if (!theTofPidTraits.size()) continue;
+
+            StTrackPidTraits* theSelectedTrait = theTofPidTraits[theTofPidTraits.size()-1];
+            if (!theSelectedTrait) continue;
+            StBTofPidTraits *pidTof = dynamic_cast<StBTofPidTraits *>(theSelectedTrait);
+            if (!pidTof) continue;
+
+            int Mflag=pidTof->matchFlag();
+            //  0: no matching
+            //  1: 1-1 matching
+            //  2: 1-2 matching, pick up the one with higher ToT vaule (<25ns) 
+            //  3: 1-2 matching, pick up the one with closest projection position along local y
+            if (Mflag <= 0) continue;
+
+          }
 
           StTrackGeometry* triGeom = tri->geometry();
 
@@ -1019,8 +1041,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.30 2010/06/09 20:24:53 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.31 2010/07/09 19:01:54 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.31  2010/07/09 19:01:54  genevb
+// Add TOF matching
+//
 // Revision 1.30  2010/06/09 20:24:53  genevb
 // Modify interface to allow EMC and TOF matching requirements (needs implementation)
 //
