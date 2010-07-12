@@ -5,8 +5,11 @@
 //  for instructions
 //****************************************************************************************************
 /****************************************************************************************************
- * $Id: StEmbeddingQA.h,v 1.6 2010/05/14 19:50:11 hmasui Exp $
+ * $Id: StEmbeddingQA.h,v 1.7 2010/07/12 21:29:40 hmasui Exp $
  * $Log: StEmbeddingQA.h,v $
+ * Revision 1.7  2010/07/12 21:29:40  hmasui
+ * Move isGeantIdOk() function into StEmbeddingQAUtilities
+ *
  * Revision 1.6  2010/05/14 19:50:11  hmasui
  * Add rapidity and trigger cuts.
  *
@@ -136,9 +139,6 @@ class StEmbeddingQA {
 
     /// Number of tracks
     Int_t getNtrack(const Int_t categoryid, const StMiniMcEvent& mcevent) const ;
-
-    /// Check geant id in StParticleTable
-    Bool_t isGeantIdOk(const StTinyMcTrack& track) const ;
 
     StMuDstMaker* mMuDstMaker ; /// Pointer to the StMuDstMaker
     Float_t mVertexCut ; /// z-vertex cut (Default is 30 cm)
