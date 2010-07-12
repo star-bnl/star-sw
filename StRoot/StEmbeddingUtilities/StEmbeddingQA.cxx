@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.13 2010/06/28 17:33:47 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.14 2010/07/12 21:30:23 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.14  2010/07/12 21:30:23  hmasui
+ * Use StEmbeddingQAUtilities::getParticleDefinition(). Increase bin size, maximum for geantid histogram in order to cover geantid > 10k
+ *
  * Revision 1.13  2010/06/28 17:33:47  hmasui
  * Added geant process = 6 (photon pair production) in contaminated pairs
  *
@@ -62,7 +65,6 @@
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StParticleDefinition.hh"
-#include "StParticleTable.hh"
 
 #include "StEmbeddingQA.h"
 #include "StEmbeddingQATrack.h"
@@ -318,8 +320,8 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
 
     utility->setStyle(mhNParticles[ic]);
 
-    // Initialize geantid histogram
-    mhGeantId[ic] = new TH1D(Form("hGeantId_%d", ic), Form("Geantid, %s", utility->getCategoryTitle(ic).Data()), 1000, 0, 1000) ;
+    // Initialize geantid histogram. Increase the bin and maximum in order to cover id > 10k
+    mhGeantId[ic] = new TH1D(Form("hGeantId_%d", ic), Form("Geantid, %s", utility->getCategoryTitle(ic).Data()), 20000, 0, 20000) ;
     mhGeantId[ic]->SetXTitle("Geantid");
 
     utility->setStyle(mhGeantId[ic]);
@@ -558,7 +560,7 @@ Bool_t StEmbeddingQA::runRealData(const TString inputFileList)
     for(vector<Short_t>::iterator iter = mGeantId[categoryid].begin(); iter != mGeantId[categoryid].end(); iter++){
       const Short_t geantid = (*iter) ;
       LOG_DEBUG << Form("  Input geant id = %10d,  name = %10s", geantid,
-          StParticleTable::instance()->findParticleByGeantId(geantid)->name().c_str()) << endm ;
+          StEmbeddingQAUtilities::instance()->getParticleDefinition(geantid)->name().c_str()) << endm ;
     }
   }
 
@@ -656,7 +658,7 @@ StEmbeddingQATrack* StEmbeddingQA::getEmbeddingQATrack(const StMiniMcEvent& mcev
     const StTinyMcTrack* track = (StTinyMcTrack*) mcevent.tracks(category)->At(itrk) ;
 
     /// Make sure that the input geantid exists in StParticleTable
-    if ( !isGeantIdOk(*track) ){
+    if ( !utility->isGeantIdOk(track->geantId()) ){
       LOG_DEBUG << Form("StEmbeddingQA::getEmbeddingQATrack", "No geantid = %3d exists in StParticleTable", track->geantId()) << endm ;
       return 0;
     }
@@ -668,7 +670,7 @@ StEmbeddingQATrack* StEmbeddingQA::getEmbeddingQATrack(const StMiniMcEvent& mcev
     StMiniMcPair* track = (StMiniMcPair*) mcevent.tracks(category)->At(itrk) ;
 
     /// Make sure that the input geantid exists in StParticleTable
-    if ( !isGeantIdOk(*track) ){
+    if ( !utility->isGeantIdOk(track->geantId()) ){
       LOG_DEBUG << Form("StEmbeddingQA::getEmbeddingQATrack", "No geantid = %3d exists in StParticleTable", track->geantId()) << endm ;
       return 0;
     }
@@ -680,7 +682,7 @@ StEmbeddingQATrack* StEmbeddingQA::getEmbeddingQATrack(const StMiniMcEvent& mcev
     StContamPair* track = (StContamPair*) mcevent.tracks(category)->At(itrk) ;
 
     /// Make sure that the input geantid exists in StParticleTable
-    if ( !isGeantIdOk(*track) ){
+    if ( !utility->isGeantIdOk(track->geantId()) ){
       LOG_DEBUG << Form("StEmbeddingQA::getEmbeddingQATrack", "No geantid = %3d exists in StParticleTable", track->geantId()) << endm ;
       return 0;
     }
@@ -926,8 +928,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   const Float_t etaMax =  2.5 ;
 
   /// Add parent geantid information if the particle is decay daughters
-  StParticleTable* table = StParticleTable::instance() ;
-  StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
+  const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
   const Char_t* categoryTitle(utility->getCategoryTitle(categoryid).Data());
 
   /// Suffix for each histogram. Put parent-parentid and parentid if we have decay daughters
@@ -936,14 +937,14 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
 
   /// Category title and particle name put in the histogram title
   TString CategoryAndGeantId = (parentid>0) ?  Form("%s (%s #rightarrow %s)", categoryTitle, 
-      table->findParticleByGeantId(parentid)->name().c_str(), table->findParticleByGeantId(geantid)->name().c_str())
-    : Form("%s (%s)", categoryTitle, table->findParticleByGeantId(geantid)->name().c_str());
+      utility->getParticleDefinition(parentid)->name().c_str(), utility->getParticleDefinition(geantid)->name().c_str())
+    : Form("%s (%s)", categoryTitle, utility->getParticleDefinition(geantid)->name().c_str());
 
   if ( parentparentid > 0 ){
     CategoryAndGeantId = Form("%s (%s #rightarrow %s #rightarrow %s)", categoryTitle,
-        table->findParticleByGeantId(parentparentid)->name().c_str(),
-        table->findParticleByGeantId(parentid)->name().c_str(),
-        table->findParticleByGeantId(geantid)->name().c_str());
+        utility->getParticleDefinition(parentparentid)->name().c_str(),
+        utility->getParticleDefinition(parentid)->name().c_str(),
+        utility->getParticleDefinition(geantid)->name().c_str());
   }
 
 
@@ -1137,15 +1138,5 @@ Int_t StEmbeddingQA::getNtrack(const Int_t categoryid, const StMiniMcEvent& mcev
   }
 
   return 0 ;
-}
-
-//__________________________________________________________________________________________
-Bool_t StEmbeddingQA::isGeantIdOk(const StTinyMcTrack& track) const
-{
-  /// Check geant id in StTinyMcTrack
-  ///  can be used for the StMiniMcPair and StContamPair
-  ///  since both of them inherit from StTinyMcTrack
-
-  return StParticleTable::instance()->containsGeantId(track.geantId()) ;
 }
 
