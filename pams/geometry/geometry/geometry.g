@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.216 2010/06/01 18:57:41 jwebb Exp $
+* $Id: geometry.g,v 1.217 2010/07/12 18:47:20 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.217  2010/07/12 18:47:20  jwebb
+* Added y2005i tag to provide up-to-date version of ecal in y2005 geometry
+* and to provide 10 keV transport cuts in calorimeters.
+*
 * Revision 1.216  2010/06/01 18:57:41  jwebb
 * Modified geometry.g so that seperate particle transport cuts can be
 * used in the BEMC and EEMC.  This is needed for the spin/dijet simulation
@@ -1391,7 +1395,12 @@ replace [exe y2005h;] with [
         exe TPCE04;
         ]
 
-
+replace [exe y2005i;] with [
+        exe y2005h; 
+        exe ECALv6;         "Latest version of the EEMC geometry";
+        exe EMCUTS(bemc,1); "10 keV transport cuts in the BEMC";
+        exe EMCUTS(eemc,1); "10 keV transport cuts in the EEMC";
+        ]
 
 
 
@@ -2194,6 +2203,11 @@ If LL>0
                   Geom = 'Y2005h  ';
                  exe y2005h;
                }
+
+  Case y2005i { Y2005h + updated endcap and lowered thresholds in E/BEMC
+                Geom = 'Y2005i  ';
+                exe y2005i;
+              }
 ****************************************************************************************
 ****************************************************************************************
   Case Y2006    { y2006 baseline which is Y2005D+fixed TPC backplane+New SSD
