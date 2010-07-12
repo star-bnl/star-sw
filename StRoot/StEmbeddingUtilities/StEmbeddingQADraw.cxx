@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.21 2010/06/28 21:29:41 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.22 2010/07/12 21:31:49 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.22  2010/07/12 21:31:49  hmasui
+ * Use StEmbeddingQAUtilities::getParticleDefinition() instead of StParticleTable
+ *
  * Revision 1.21  2010/06/28 21:29:41  hmasui
  * Fixed the multiplicity x-axis range for all branches
  *
@@ -73,7 +76,6 @@
 #include "StEmbeddingQAUtilities.h"
 #include "StMessMgr.h"
 #include "StParticleDefinition.hh"
-#include "StParticleTable.hh"
 
 using namespace std ;
 
@@ -362,6 +364,8 @@ void StEmbeddingQADraw::checkInputGeantId()
     mMcGeantId.push_back(geantid);
   }
 
+  const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
+
   if( mMcGeantId.size() == 1 ){
     /// For single particle embedding
     ///   Check if the input geantid = geantid found in the histogram
@@ -372,7 +376,7 @@ void StEmbeddingQADraw::checkInputGeantId()
       LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
       LOG_INFO << "  Input geant id doesn't correspond to the geant id in the MC histogram" << endm ;
       LOG_INFO << "  Geantid in the MC histogram, geantid = " << mMcGeantId[0]
-               << ",  particle name = " << StParticleTable::instance()->findParticleByGeantId(mMcGeantId[0])->name().c_str() << endm;
+               << ",  particle name = " << utility->getParticleDefinition(mMcGeantId[0])->name().c_str() << endm;
       LOG_INFO << "  Do you want to proceed to the QA for geantid = " << mMcGeantId[0] << " ?" << endm;
       LOG_INFO << "  [yes=true or kTRUE or 1/no=false or kFALSE or 0]:" << endm;
       Bool_t proceedQA = kFALSE ;
@@ -404,7 +408,7 @@ void StEmbeddingQADraw::checkInputGeantId()
     for(vector<Int_t>::iterator iter = mMcGeantId.begin(); iter != mMcGeantId.end(); iter++){
       const Int_t geantidFound = (*iter) ;
       LOG_INFO << Form("    %5d            %10s", geantidFound, 
-          StParticleTable::instance()->findParticleByGeantId(geantidFound)->name().c_str()) << endm;
+          utility->getParticleDefinition(geantidFound)->name().c_str()) << endm;
     }
     LOG_INFO << "  Which geantid you want to do the QA ?" << endm;
     LOG_INFO << "  [Put the one geantid listed above. If you want to stop the program, please put 0]:" << endm;
@@ -414,7 +418,7 @@ void StEmbeddingQADraw::checkInputGeantId()
     assert(mGeantId);
 
     LOG_INFO << "  QA for geantid = " << mGeantId
-             << ",  particle name = " << StParticleTable::instance()->findParticleByGeantId(mGeantId)->name().c_str() << endm;
+             << ",  particle name = " << utility->getParticleDefinition(mGeantId)->name().c_str() << endm;
     LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
   }
 
@@ -463,15 +467,14 @@ void StEmbeddingQADraw::setDaughterGeantId()
   }
 
   /// Try to find out the daughter geantid from the histogram
-  const StParticleTable* table = StParticleTable::instance() ;
-
   for(UInt_t id=0; id<1000; id++){
-    const Int_t contamCategoryId = StEmbeddingQAUtilities::instance()->getCategoryId("CONTAM") ;
+    const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
+    const Int_t contamCategoryId = utility->getCategoryId("CONTAM") ;
     TH3* hDca = (TH3D*) mInputEmbedding->Get(Form("hDca_%d_%d_%d_%d", contamCategoryId, 0, mGeantId, id));
 
     if ( hDca ){
-      const Char_t* daughterName = table->findParticleByGeantId(id)->name().c_str() ;
-      const Char_t* parentName   = table->findParticleByGeantId(mGeantId)->name().c_str() ; 
+      const Char_t* daughterName = utility->getParticleDefinition(id)->name().c_str() ;
+      const Char_t* parentName   = utility->getParticleDefinition(mGeantId)->name().c_str() ; 
 
       LOG_INFO << Form("Find daughter %10s from parent %10s", daughterName, parentName) << endm;
 
@@ -676,9 +679,8 @@ const Char_t* StEmbeddingQADraw::getParticleName(const Int_t geantid) const
   /// Get particle name
 
   /// Default input geantid = -1 --> return particle name for mGeantid
-  const StParticleTable* table = StParticleTable::instance() ;
   const Int_t id = (geantid<0) ? mGeantId : geantid ;
-  const StParticleDefinition* particle = table->findParticleByGeantId(id) ;
+  const StParticleDefinition* particle = StEmbeddingQAUtilities::instance()->getParticleDefinition(id) ;
 
   if(!particle){
     Error("StEmbeddingQADraw::getParticleName", "Can't find particle geantid=%d in StParticleDefinition", id);

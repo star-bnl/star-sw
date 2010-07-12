@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.cxx,v 1.10 2010/05/14 19:49:09 hmasui Exp $
+ * $Id: StEmbeddingQATrack.cxx,v 1.11 2010/07/12 21:28:55 hmasui Exp $
  * $Log: StEmbeddingQATrack.cxx,v $
+ * Revision 1.11  2010/07/12 21:28:55  hmasui
+ * Use StEmbeddingQAUtilities::getParticleDefinition() instead of StParticleTable
+ *
  * Revision 1.10  2010/05/14 19:49:09  hmasui
  * Add rapidity cut
  *
@@ -27,7 +30,6 @@
 #include "StMiniMcEvent/StMiniMcPair.h"
 #include "StMiniMcEvent/StContamPair.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
-#include "StParticleTable.hh"
 #include "StParticleDefinition.hh"
 
 #include "StEmbeddingQATrack.h"
@@ -64,7 +66,7 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StTinyMcTrack& 
   mParentParentGeantId(-10), mParentGeantId(track.parentGeantId()), mGeantId(track.geantId()), mGeantProcess(-10),
   mNHit(track.nHitMc()), mNHitPoss(-10), mCharge(track.chargeMc()),
   mVectorMc(track.pxMc(), track.pyMc(), track.pzMc(), 
-      TMath::Sqrt(track.pMc()*track.pMc() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track.geantId())->mass(),2.0))),
+      TMath::Sqrt(track.pMc()*track.pMc() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track.geantId())->mass(),2.0))),
   mVectorRc(-9999., -9999., -9999., -9999.), // No reconstructed momentum for MC tracks
   mPhi(track.phiMc()), mdEdx(-9999.), mDcaGl(-9999.), 
   mNSigmaElectron(-9999.), mNSigmaPion(-9999.), mNSigmaKaon(-9999.), mNSigmaProton(-9999.),
@@ -80,9 +82,9 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StMiniMcPair* track)
   mParentParentGeantId(-10), mParentGeantId(track->parentGeantId()), mGeantId(track->geantId()), mGeantProcess(-10),
   mNHit(track->fitPts()), mNHitPoss(track->nPossiblePts()), mCharge(track->charge()),
   mVectorMc(track->pxMc(), track->pyMc(), track->pzMc(), 
-      TMath::Sqrt(track->pMc()*track->pMc() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track->geantId())->mass(),2.0))),
+      TMath::Sqrt(track->pMc()*track->pMc() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track->geantId())->mass(),2.0))),
   mVectorRc(track->pxPr(), track->pyPr(), track->pzPr(), 
-      TMath::Sqrt(track->pPr()*track->pPr() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track->geantId())->mass(),2.0))),
+      TMath::Sqrt(track->pPr()*track->pPr() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track->geantId())->mass(),2.0))),
   mPhi(track->phiPr()), mdEdx(track->dedx()), mDcaGl(track->dcaGl()), 
   mNSigmaElectron(-9999.), mNSigmaPion(-9999.), mNSigmaKaon(-9999.), mNSigmaProton(-9999.),
   mName(name)
@@ -98,9 +100,9 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StContamPair* track)
   mGeantProcess(track->mGeantProcess),
   mNHit(track->fitPts()), mNHitPoss(track->nPossiblePts()), mCharge(track->charge()),
   mVectorMc(track->pxMc(), track->pyMc(), track->pzMc(), 
-      TMath::Sqrt(track->pMc()*track->pMc() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track->geantId())->mass(),2.0))),
+      TMath::Sqrt(track->pMc()*track->pMc() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track->geantId())->mass(),2.0))),
   mVectorRc(track->pxPr(), track->pyPr(), track->pzPr(), 
-      TMath::Sqrt(track->pPr()*track->pPr() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(track->geantId())->mass(),2.0))),
+      TMath::Sqrt(track->pPr()*track->pPr() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track->geantId())->mass(),2.0))),
   mPhi(track->phiGl()), mdEdx(track->dedx()), mDcaGl(track->dcaGl()), 
   mNSigmaElectron(-9999.), mNSigmaPion(-9999.), mNSigmaKaon(-9999.), mNSigmaProton(-9999.),
   mName(name)
@@ -116,7 +118,7 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StMuTrack& trac
   mNHit(track.nHitsFit(kTpcId)), mNHitPoss(track.nHitsPoss(kTpcId)), mCharge(track.charge()),
   mVectorMc(-9999., -9999., -9999., -9999.), // No MC momentum for real tracks
   mVectorRc(track.p().x(), track.p().y(), track.p().z(), 
-      TMath::Sqrt(track.p().mag2() + TMath::Power(StParticleTable::instance()->findParticleByGeantId(geantid)->mass(),2.0))),
+      TMath::Sqrt(track.p().mag2() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(geantid)->mass(),2.0))),
   mPhi(track.phi()), mdEdx(track.dEdx()), mDcaGl(track.dcaGlobal().mag()), 
   mNSigmaElectron(track.nSigmaElectron()), mNSigmaPion(track.nSigmaPion()), mNSigmaKaon(track.nSigmaKaon()), mNSigmaProton(track.nSigmaProton()),
   mName(name)
