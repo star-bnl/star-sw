@@ -3,8 +3,11 @@
 //    - Provide category id, such as 'MC' track in the minimc tree
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.h,v 1.6 2010/01/26 17:45:06 hmasui Exp $
+ * $Id: StEmbeddingQAUtilities.h,v 1.7 2010/07/12 21:27:29 hmasui Exp $
  * $Log: StEmbeddingQAUtilities.h,v $
+ * Revision 1.7  2010/07/12 21:27:29  hmasui
+ * Added StParticleTable & StParticleDefinition utilities
+ *
  * Revision 1.6  2010/01/26 17:45:06  hmasui
  * Add runid functions
  *
@@ -16,6 +19,7 @@
 #ifndef __StEmbeddingQAUtilities_h__
 #define __StEmbeddingQAUtilities_h__
 
+class StParticleDefinition ;
 class TH1 ;
 #include <map>
 #include "TString.h"
@@ -84,6 +88,12 @@ class StEmbeddingQAUtilities {
     // Run id
     Int_t getRunId(const Int_t runnumber, const Int_t year) const ; /// get runid from runnumber
     Int_t getRunNumber(const Int_t runid, const Int_t year) const ; /// runnumber = runid - (year - 2000 + 1) * 10^6
+
+    /// Get StParticleDefinition from geantid
+    StParticleDefinition* getParticleDefinition(const UInt_t geantid) const ;
+
+    /// Check geant id is defined in StParticleTable or not
+    Bool_t isGeantIdOk(const UInt_t geantid) const ;
 
   private:
     /// Default constructor

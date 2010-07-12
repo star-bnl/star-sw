@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.cxx,v 1.7 2010/06/10 14:50:28 hmasui Exp $
+ * $Id: StEmbeddingQAUtilities.cxx,v 1.8 2010/07/12 21:27:32 hmasui Exp $
  * $Log: StEmbeddingQAUtilities.cxx,v $
+ * Revision 1.8  2010/07/12 21:27:32  hmasui
+ * Added StParticleTable & StParticleDefinition utilities
+ *
  * Revision 1.7  2010/06/10 14:50:28  hmasui
  * Use TString::KIgnoreCase
  *
@@ -15,8 +18,11 @@
 #include "TError.h"
 #include "TH1.h"
 #include "TStyle.h"
+
 #include "StEmbeddingQAUtilities.h"
 #include "StMessMgr.h"
+#include "StParticleDefinition.hh"
+#include "StParticleTable.hh"
 
 using namespace std ;
 
@@ -350,5 +356,21 @@ void StEmbeddingQAUtilities::setStyle(TH1* h) const
 
   /// Set line width (=2)
   h->SetLineWidth(2);
+}
+
+//____________________________________________________________________________________________________
+StParticleDefinition* StEmbeddingQAUtilities::getParticleDefinition(const UInt_t geantid) const
+{
+  /// Take into account the modulus of geant id by 10k
+  return StParticleTable::instance()->findParticleByGeantId(geantid%10000) ;
+}
+
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isGeantIdOk(const UInt_t geantid) const
+{
+  /// Check geant id in StParticleTable
+  ///  Take into account the modulus of geantid by 10k
+
+  return StParticleTable::instance()->containsGeantId(geantid%10000) ;
 }
 
