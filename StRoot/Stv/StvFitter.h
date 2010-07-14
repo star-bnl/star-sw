@@ -19,6 +19,7 @@ public:
 StvFitter(const char *name="DefaultFitter");
   void Set(const StvNodePars *inPars, const StvFitErrs *inErrs
           ,      StvNodePars *otPars,       StvFitErrs *otErrs);
+const StvHitErrs  &GetHitErrs() const {return mHitErrs;}        
   void Prep();
 
 double Xi2(const StvHit *hit);

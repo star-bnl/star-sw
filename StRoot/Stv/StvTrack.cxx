@@ -240,6 +240,7 @@ int StvHitCount::Reject()
 //_____________________________________________________________________________
 void StvTrack::Print(const char *opt) const
 {
+  if (!opt) opt = "";
   printf("Track %p",(void*)this);
 
   int n=0;

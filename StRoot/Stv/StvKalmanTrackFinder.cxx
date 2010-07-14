@@ -154,10 +154,15 @@ if (DoShow()) {
       double myXi2 = fitt->Xi2(minHit);
       assert(fabs(minXi2-myXi2)<1e-5);
       int iuerr = fitt->Update();if (iuerr){}; 
+      assert(err[0].mHH>err[1].mHH || err[0].mZZ>err[1].mZZ);
+      assert(err[0].mHH*err[0].mZZ > err[1].mHH*err[1].mZZ);
+
+
       fShowTrak+=&par[1]._x;
 
       node->SetHit(minHit);
       node->SetXi2(myXi2);
+      node->GetHE() = fitt->GetHitErrs();
       assert(!par[1].check("AfterFitter"));
       assert(!err[1].Check("AfterFitter"));
       node->SetFit(par[1],err[1],idir);

@@ -71,6 +71,8 @@ TObject *StvDraw::Trak(const std::vector<float> &pnts, EDraw3DStyle sty)
   int n = pnts.size(); if (!n) return 0;
   if (n<9) { return Line(pnts,sty);}
   std::vector<float> myTrak;  
+  myTrak=pnts;
+#if 0
   for (int j=0;j+6<n;j+=3) {
     const float *d0 = &pnts[j+0];
     const float *d1 = &pnts[j+3];
@@ -88,6 +90,7 @@ TObject *StvDraw::Trak(const std::vector<float> &pnts, EDraw3DStyle sty)
       for (int i=0;i<3;i++) {myTrak.push_back(w0*d0[i]+w1*d1[i]+w2*d2[i]);}
     }
   }
+#endif //0
   TObject *to = Line(myTrak,sty);
   DoIt();
   return to;
@@ -107,6 +110,8 @@ void  StvDraw::Trak(const StvTrack *tk, EDraw3DStyle sty)
   Trak(myPoits,sty);
 
 }
+//_____________________________________________________________________________
+void StvDraw::Show(const StvTrack *tk){Inst()->Trak(tk);}
 //_____________________________________________________________________________
 void StvDraw::DoIt()
 {

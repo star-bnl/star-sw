@@ -96,8 +96,8 @@ double StvFitter::Xi2(const StvHit *hit)
   mDcaL=VDOT(mDcaFrame[2],dca);
 
   double G[3] = {mHitErrs.hYY+mInErrs->mHH
-                ,mHitErrs.hYZ+mInErrs->mHZ*mCosL
-                ,mHitErrs.hZZ+mInErrs->mZZ*mCos2L};
+                ,mHitErrs.hYZ+mInErrs->mHZ
+                ,mHitErrs.hZZ+mInErrs->mZZ};
   double Gdet = G[0]*G[2]-G[1]*G[1];
 //  (BB*dX*dX-2*BA*dX*dY+AAdY*dY)/det 
    
@@ -121,7 +121,6 @@ static const StvFitErrs &Q = mTkErrs;
 static const int idx[]={&Q.mHZ-&Q.mHH,&Q.mZZ-&Q.mHH,&Q.mZZ-&Q.mHH
                        ,&Q.mZA-&Q.mHH,&Q.mZL-&Q.mHH,&Q.mZC-&Q.mHH,-1};
   double *d = mTkErrs.Arr();
-  for (int j=0;idx[j]>=0;j++) {*(d+idx[j]) *= mCosL;}
   StvFitPars myHitPars(mDcaP, mDcaL );
   StvFitErrs myHitErrs(mHitErrs.hYY,mHitErrs.hYZ,mHitErrs.hZZ);
   StvFitPars myTrkPars;
@@ -133,7 +132,6 @@ static const int idx[]={&Q.mHZ-&Q.mHH,&Q.mZZ-&Q.mHH,&Q.mZZ-&Q.mHH
   assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2));
 
   d = mOtErrs->Arr();
-  for (int j=0;idx[j]>=0;j++) {*(d+idx[j]) /= mCosL;}
 
   *mOtPars = mTkPars;
   for (int i=0;i<3;i++) {
@@ -144,7 +142,7 @@ static const int idx[]={&Q.mHZ-&Q.mHH,&Q.mZZ-&Q.mHH,&Q.mZZ-&Q.mHH
 //   mOtPars->_cosCA -= mOtPars->_sinCA*dA;
 //   mOtPars->_sinCA += mOtPars->_cosCA*dA;
   mOtPars->ready();
-  if (mOtPars->_tanl < 1) { mOtPars->_tanl+= dL/mCos2L;}
+  if (mOtPars->_tanl < 1) { mOtPars->_tanl = (mSinL+mCosL*dL)/(mCosL-mSinL*dL);}
   else 		  	  { mOtPars->_tanl = tan(atan(mOtPars->_tanl)+dL);}
 
   mOtPars->_curv   = mOtPars->_hz * mOtPars->_ptin;
