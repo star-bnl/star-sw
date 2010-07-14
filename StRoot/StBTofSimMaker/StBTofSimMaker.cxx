@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.1 2009/12/09 21:56:41 dthein Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.2 2010/07/14 20:32:57 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.cxx,v $
+ * Revision 1.2  2010/07/14 20:32:57  geurts
+ * remove geometry initialization (not used)
+ *
  * Revision 1.1  2009/12/09 21:56:41  dthein
  * First version of StBTofSimMaker
  * 
@@ -66,7 +69,6 @@ StBTofSimMaker::StBTofSimMaker(const char *name):StMaker(name)
 	mBookHisto=kFALSE;// histograms 
 	mSlow=kTRUE;
 	mCellXtalk=kTRUE;
-	mGeomDb=0;
 	mDaqMap=0;
 	Reset();
 
@@ -102,7 +104,6 @@ void StBTofSimMaker::Reset()
 	delete mMcBTofHitCollection;
 	mSimDb  = 0;
 
-	if(mGeomDb){delete mGeomDb; mGeomDb = 0;}
 	if(mDaqMap){delete mDaqMap; mDaqMap = 0;}
 
 	ResetFlags();
@@ -120,15 +121,7 @@ Int_t StBTofSimMaker::ResetFlags()
 //_____________________________________________________________________________
 Int_t StBTofSimMaker::InitRun(Int_t runnumber)
 {
-	LOG_INFO << "StBTofSimMaker::InitRun  -- initializing TofGeometry --" << endm;
-
-	/// BTOF geometry
-	mGeomDb = new StBTofGeometry("tofrGeom","tofrGeom in MatchMaker");
-	if(!mGeomDb->IsInitDone()) {
-		LOG_DEBUG << "BTofGeometry initialization..." << endm;
-		TVolume *starHall = (TVolume *)GetDataSet("HALL");
-		mGeomDb->Init(this,starHall);
-	}
+	LOG_INFO << "StBTofSimMaker::InitRun  -- initializing BTOF DAQ map --" << endm;
 
 	/// MRPC-TOF DAQ map
 	mDaqMap = new StBTofDaqMap();
@@ -140,8 +133,7 @@ Int_t StBTofSimMaker::InitRun(Int_t runnumber)
 //_____________________________________________________________________________
 Int_t StBTofSimMaker::FinishRun(Int_t runnumber)
 {
-	LOG_INFO << "StBTofSimMaker::FinishRun -- cleaning up BTofGeometry --" << endm;
-	if (mGeomDb){delete mGeomDb; mGeomDb = 0;}
+	LOG_INFO << "StBTofSimMaker::FinishRun -- cleaning up BTOF DAQ map --" << endm;
 	if (mDaqMap){delete mDaqMap; mDaqMap = 0;}
 	return kStOk;
 }
