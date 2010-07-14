@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.5 2009/08/25 15:41:29 fine Exp $
+ * $Id: StBTofGeometry.h,v 1.6 2010/07/14 20:35:28 geurts Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.6  2010/07/14 20:35:28  geurts
+ * introduce switch to enable ideal MC geometry, without alignment updates. Default: disabled
+ *
  * Revision 1.5  2009/08/25 15:41:29  fine
  * fix the compilation issues under SL5_64_bits  gcc 4.3.2
  *
@@ -291,6 +294,7 @@ class StBTofGeometry : public TNamed {
    StBTofGeomTray* mBTofTray[mNTrays];
    StBTofGeomSensor* mBTofSensor[mNTrays][mNModules];
 
+   Bool_t          mIsMC;      //!Control MC input (ignore alignment corrections)
    static Bool_t   mDebug;     //!Control message printing of this class
 
    static const char* sectorPref ;//= "BSEC";
@@ -321,6 +325,9 @@ class StBTofGeometry : public TNamed {
    static void   DebugOn()   { mDebug = kTRUE; }     
    static void   DebugOff()  { mDebug = kFALSE; }
    static Bool_t IsDebugOn() { return mDebug; }
+   void          SetMCOn()   { mIsMC = kTRUE; }
+   void          SetMCOff()  { mIsMC = kFALSE; }
+
 
    void          Init(StMaker *maker, TVolume *starHall);
    void          InitFromStar(TVolume *starHall);

@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.13 2010/05/25 22:09:38 geurts Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.14 2010/07/14 20:35:21 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.14  2010/07/14 20:35:21  geurts
+ * introduce switch to enable ideal MC geometry, without alignment updates. Default: disabled
+ *
  * Revision 1.13  2010/05/25 22:09:38  geurts
  * improved database handling and reduced log output
  *
@@ -205,6 +208,9 @@ Int_t StBTofMatchMaker::InitRun(Int_t runnumber){
   } 
   if(mBTofGeom && !mBTofGeom->IsInitDone()) {
     LOG_INFO << " BTofGeometry initialization ... " << endm;
+    //fg if(runnumber<1000000) mBTofGeom->SetMCOn();
+    if (mUseIdealGeometry) mBTofGeom->SetMCOn();
+    else                   mBTofGeom->SetMCOff();
     TVolume *starHall = (TVolume *)GetDataSet("HALL");
     mBTofGeom->Init(this, starHall);
 //    AddConst(new TObjectSet("btofGeometry",mBTofGeom));
