@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.h,v 1.1 2009/12/09 21:56:41 dthein Exp $
+ * $Id: StBTofSimMaker.h,v 1.2 2010/07/14 20:32:58 geurts Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.h,v $
+ * Revision 1.2  2010/07/14 20:32:58  geurts
+ * remove geometry initialization (not used)
+ *
  * Revision 1.1  2009/12/09 21:56:41  dthein
  * First version of StBTofSimMaker
  * 
@@ -29,7 +32,6 @@ class TProfile;
 class StEvent;
 class StBTofCollection;
 class StTofSimParam;
-class StBTofGeometry;
 class StBTofDaqMap;
 struct g2t_ctf_hit_st;
 
@@ -52,7 +54,6 @@ class StBTofSimMaker : public StMaker{
 	protected:
 
 
-		StBTofGeometry*      mGeomDb;         //! 
 		StTofSimParam*      mSimDb;          //!
 		StBTofDaqMap*       mDaqMap;         //! Tof Daq map
 		StMcBTofHitCollection *mMcBTofHitCollection; //! barrel tof hit
@@ -187,17 +188,17 @@ class StBTofSimMaker : public StMaker{
 		virtual Int_t  Make();
 		virtual Int_t  Finish();
 
-		StBTofGeometry*    GetGeometry()       const { return mGeomDb; }
 		StTofSimParam*    GetSimParam()       const { return mSimDb; }
 		StBTofCollection*  GetBTofCollection()  const { return mBTofCollection; }
 		StMcBTofHitCollection* GetMcBTofHitCollection() const { return mMcBTofHitCollection; }
 
 		void   setCellXtalk(Bool_t val) { mCellXtalk = val; }
 		void   setHistFileName(string s);
+		void   setBookHist(Bool_t val) { mBookHisto = val; }
 
 		virtual const char *GetCVS() const
-		{static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.1 2009/12/09 21:56:41 dthein Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+		{static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.2 2010/07/14 20:32:58 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-		ClassDef(StBTofSimMaker,0)
+		ClassDef(StBTofSimMaker,1)
 };
 #endif
