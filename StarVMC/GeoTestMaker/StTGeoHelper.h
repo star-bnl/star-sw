@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.9 2010/04/29 03:05:28 perev Exp $
+// $Id: StTGeoHelper.h,v 1.10 2010/07/14 18:19:23 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -93,15 +93,18 @@ public:
       StHitPlaneInfo(int volId);
 virtual ~StHitPlaneInfo(){;}
 void  operator=(const StVoluInfo& ext){*((StVoluInfo*)this)=ext;}
-      int Kind() const          {return kHitPlaneInfo;}
-      int Axis() const          {return fAxi;}
-const Mtx33F_t &GetDir() const   {return fDir;}
-const float   *GetOrg() const   {return fOrg;}
+      int Kind() const          	{return kHitPlaneInfo;}
+      int Axis() const          	{return fAxi;}
+const Mtx33F_t &GetDir() const   	{return fDir;}
+const float   *GetOrg() const   	{return fOrg;}
       StHitPlane *MakeHitPlane(const StTGeoIter &it);
       StHitPlane *GetHitPlane (const TString &path) const;
-      void SetAxis(int axi)     {fAxi=axi;}
+      void SetAxis(int axi)     	{fAxi=axi;}
+      void SetDetId(StDetectorId id)	{ fDetId=id;}    
+      StDetectorId GetDetId() const 	{ return fDetId;}    
 void  Print(const char* opt="") const;
 protected:
+StDetectorId fDetId;
 int   fAxi;
 float fOrg[3];
 float fDir[3][3];
@@ -123,22 +126,26 @@ void  SetHitErrCalc(TNamed *hitErrCalc)	{fHitErrCalc = hitErrCalc;}
 TNamed *GetHitErrCalc()	const 		{return (TNamed*)fHitErrCalc;}
 
 virtual const Mtx33F_t &GetDir(const float *) const {return fDir;}
-virtual const float   *GetOrg(const float *) const {return fOrg;}
-virtual const float   *GetPnt()        const {return fOrg;}
+virtual const float    *GetOrg(const float *) const {return fOrg;}
+virtual const float    *GetPnt()        const {return fOrg;}
 virtual       void  AddHit(void *hit,const float xyz[3]);
-virtual       int   Kind() const {return 0;}
-              int   GetNumber()  { return GetUniqueID(); }
+virtual       int   Kind() const 	{return 0;}
+              int   GetNumber()  	{return GetUniqueID(); }
              void   ToLocal(const float xyz[3],float uv[3]) const;
+     StDetectorId   GetDetId() const 	{ return fDetId;}    
+             void   SetDetId(StDetectorId id){ fDetId=id;}    
 int   GetNHits() const;
 const StMultiKeyMap *GetHitMap() const {return fHitMap;}
 
 protected:
 char  fBeg[1];
+StDetectorId fDetId;
 float fOrg[3];
 float fDir[3][3];
 TNamed *fHitErrCalc;
 StMultiKeyMap *fHitMap;
 char  fEnd[1];
+
 ClassDef(StHitPlane,0) //
 };
 // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
@@ -210,9 +217,9 @@ public:
          int  IsActive  (const TGeoVolume *volu=0)      const;                  
          int  IsActive  (StDetectorId did)              const;
 static   int  IsSensitive(const TGeoVolume *volu);
-static   int  DetId(const char *detName);
-static  const char *DetName(int detId);
-static  const char *ModName(int detId);
+static   StDetectorId  DetId(const char *detName);
+static  const char *DetName(StDetectorId detId);
+static  const char *ModName(StDetectorId detId);
 
 
 
@@ -229,10 +236,11 @@ StHitPlaneInfo* IsHitPlane(const TGeoNode   *node) const;
 StHitPlane   *GetCurrentHitPlane ();
 
              int  MayHitPlane     (const TGeoVolume *volu) const;
-             int  MakeHitPlaneInfo(const StTGeoIter &iter);
+  StHitPlaneInfo *MakeHitPlaneInfo(const StTGeoIter &iter);
         void  AddHitPlane(StHitPlane *pla);
 
 const StHitPlane *AddHit(void *hit,const float xyz[3],unsigned int hardw,int seed);
+      StHitPlane *FindHitPlane(const float xyz[3]);
 
         void  ShootZR(double z,double rxy);
 
