@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.129 2010/04/03 04:02:29 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.130 2010/07/14 18:45:10 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.130  2010/07/14 18:45:10  perev
+ * MoreComments
+ *
  * Revision 2.129  2010/04/03 04:02:29  perev
  * Account field=0
  *
@@ -724,7 +727,11 @@ void StiKalmanTrackNode::getGlobalRadial(double  x[6],double  e[15])
                                  q/pt = icharge*invpt; (This is what the 
                                         radius of curvature actually
                                         determines)
-
+PhiPhi PhiZ PhiTan PhiPsi PhiPt
+       ZZ   ZTan   ZPsi     ZPt
+            TanTan TanPsi TanPt
+                   PsiPsi PsiPt
+		           PtPt
 */
 //______________________________________________________________________________
 void StiKalmanTrackNode::getGlobalTpt(float  x[6],float  e[15])
