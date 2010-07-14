@@ -1,4 +1,4 @@
-// $Id: StMCStepping.cxx,v 1.4 2010/04/29 03:05:28 perev Exp $
+// $Id: StMCStepping.cxx,v 1.5 2010/07/14 18:16:51 perev Exp $
 //
 //
 // Class StMCStepping
@@ -140,7 +140,7 @@ static int nCall = 0; nCall++;
   if(          fCase&kTrackDisappeared) fKaze = kENDEDtrack;
   if(          fCase&kTrackOut) 	fKaze = kOUTtrack;
   int kaze = fKaze;
-  if(fKazePrev==fKaze && fKaze !=kCONTINUEtrack) fKaze= kIgnore;
+//  if(fKazePrev==fKaze && fKaze !=kCONTINUEtrack) fKaze= kIgnore;
   fKazePrev=kaze;
 //vp  fCasName = CaseAsString(fCase);
 //vp  fKazName = KazeAsString(fKaze);
@@ -181,8 +181,11 @@ static int nCall = 0; nCall++;
       fCurrentLength     = myMC->TrackLength();
     break;
 
+    case kIgnore:;
+    break;
+
     default:
-     Error("Case","Unexpected case %x == %s",fCase,fCasName.Data());
+     Error("Case","Unexpected case %x == %s",fKaze,fCasName.Data());
      assert(0);
   }
 }		
