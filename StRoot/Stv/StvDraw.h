@@ -25,7 +25,7 @@ static int ProcessEvents();
 static StvDraw *Inst() {if (!fgStvDraw) fgStvDraw=new StvDraw(); return fgStvDraw;}
 static StvDraw *Jnst() {return fgStvDraw;}
 static void Wait();
-static void Show(const StvTrack *tk){Inst()->Trak(tk);}
+static void Show(const StvTrack *tk);
 private:
 int mNDoIt;
 int mNPow2;

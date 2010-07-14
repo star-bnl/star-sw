@@ -13,6 +13,23 @@ class StvImpact;
 typedef double Mtx55D_t[5][5];
 void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B);
 inline void Copy(Mtx55D_t &to,const Mtx55D_t &fr){memcpy(to[0],fr[0],5*5*sizeof(to[0][0]));}
+//------------------------------------------------------------------------------
+class StvFitPars
+{
+public:	
+  StvFitPars():mH(0),mZ(0),mA(0),mL(0),mC(0){}
+  StvFitPars(double h,double z):mH(h),mZ(z),mA(0),mL(0),mC(0){}
+  StvFitPars(const double *arr){memcpy(&mH,arr,5*sizeof(mH));}
+      double *Arr() 		{return &mH;}
+const double *Arr()  const 	{return &mH;}
+public:	
+double mH;	// direction perpendicular movement and Z
+double mZ;	// Z position
+double mA;	// Angle in XY. cos(A),sin(A),T moving direction
+double mL;	// Angle lambda in Rxy/Z
+double mC;	// Curvature
+};
+
 
 //------------------------------------------------------------------------------
 class StvNodePars {
@@ -39,6 +56,7 @@ double &operator[](int idx)       {return P[idx];}
     int getCharge() const {return (_ptin > 0) ? -1 : 1;}
     int     check(const char *pri=0) const;
 void  operator+=(const StvFitPars &add);
+StvFitPars operator-(const StvNodePars& sub) const;
 void    print() const;
   void GetRadial(double radPar[6],double *radErr=0,const StvFitErrs *fE=0)  const;
   void GetImpact(StvImpact *imp,const StvFitErrs *fE=0)  const;
@@ -71,23 +89,6 @@ union{double A[1];double _cXX;};
   double _cPX,_cPY, _cPZ, _cPE, _cPP;     
   double _cTX,_cTY, _cTZ, _cTE, _cTP, _cTT;
 };  
-//------------------------------------------------------------------------------
-class StvFitPars
-{
-public:	
-  StvFitPars():mH(0),mZ(0),mA(0),mL(0),mC(0){}
-  StvFitPars(double h,double z):mH(h),mZ(z),mA(0),mL(0),mC(0){}
-  StvFitPars(const double *arr){memcpy(&mH,arr,5*sizeof(mH));}
-      double *Arr() 		{return &mH;}
-const double *Arr()  const 	{return &mH;}
-public:	
-double mH;	// direction perpendicular movement and Z
-double mZ;	// Z position
-double mA;	// Angle in XY. cos(A),sin(A),T moving direction
-double mL;	// Angle lambda in Rxy/Z
-double mC;	// Curvature
-};
-
 
 //------------------------------------------------------------------------------
 class StvFitErrs
@@ -97,8 +98,8 @@ public:
   StvFitErrs(double hh=0,double hz=0,double zz=0):mHH(hh),mHZ(hz),mZZ(zz){}
   void Trans(const StvFitErrs &whom,const Mtx55D_t &how);
   void Reset();
-  void Set(const THEmx_t *he,double hz);
-  void Get(      THEmx_t *he)     const;
+  void Set(const THelixTrack *he,double hz);
+  void Get(      THelixTrack *he)     const;
   void Get(const StvNodePars *np,  StvNodeErrs *ne)     const;
 double GetHz() const 		{ return mHz ;}
   void SetHz(double hz)  	{ mHz=hz     ;}
@@ -164,8 +165,14 @@ class StvNodeParsTest
 public:
 static void Test();
 static void TestGetRadial(int nEv=10000);
+static void TestErrProp  (int nEv=10000);
 ClassDef(StvNodeParsTest,0)
 };
+
+
+
+
+
 //------------------------------------------------------------------------------
 // 		StvNodePars::inlines
 inline void StvNodePars::reset(){memset(this,0,sizeof(StvNodePars));_cosCA=1;}

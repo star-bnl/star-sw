@@ -56,8 +56,7 @@ int  StvDiver::Dive()
 {
 
   mInpPars->fill(mHelix);
-  mHelix->SetEmx(0);
-  mInpErrs->Get(mHelix->Emx());
+  mInpErrs->Get(mHelix);
   if (!mDir) mHelix->Backward();
 
   TVirtualMC::GetMC()->ProcessEvent();
@@ -73,7 +72,7 @@ int  StvDiver::Dive()
   mOutPars->_hz   = mFld->GetHz();
   mOutPars->ready(); 
 
-  mOutErrs->Set(mHelix->Emx(),mOutPars->_hz);
+  mOutErrs->Set(mHelix,mOutPars->_hz);
   assert(mOutErrs->mCC>0);
   if (!mDir) {
     mOutPars->reverse();

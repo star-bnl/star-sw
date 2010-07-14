@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.1 2010/07/06 20:27:43 perev Exp $
+ * $Id: StvNode.cxx,v 1.2 2010/07/14 18:28:09 perev Exp $
  *
  * /author Victor Perev
  */
@@ -28,7 +28,7 @@ void StvNode::SetPre(StvNodePars &par,StvFitErrs &err,int dir)
 {
   mPP[dir]=par;mPE[dir]=err;
   if (mIsFit[2]) return;
-  mFP[2]=par;mPE[2]=err;mIsFit[2]=1;
+  mFP[2]=par;mFE[2]=err;mIsFit[2]=1;
 }
 //______________________________________________________________________________
 void StvNode::SetFit(StvNodePars &par,StvFitErrs &err,int dir) 	
@@ -51,34 +51,44 @@ double StvNode::GetTime() const
 //________________________________________________________________________________
 void StvNode::Print(const char *opt) const
 {
-static const char *txt = "XYZEPTCHR";
-static const char *hhh = "UVWR";
-static const char *HHH = "XYZR";
-  if (!opt || !opt[0]) opt = "2RZ";
-  double val;
+static const char *txt = "XYZAPTCHRE";
+static const char *hhh = "xyzre";
+  if (!opt || !opt[0]) opt = "2RZErze";
+  double val,err[2];
   const StvNodePars &fp= GetFP();
+  const StvFitErrs  &fe= GetFE();
   StvHit *hit = GetHit();
   TString ts;
   if (hit) {ts+=(GetXi2()>1e3)? "h":"H";}
   printf("%p(%s)",(void*)this,ts.Data());
   if (strchr(opt,'2')) printf("\t%s=%g","Xi2",GetXi2());
-
   for (int i=0;txt[i];i++) {
+    err[0]=-999;val=-999;
     if (!strchr(opt,txt[i])) continue;
     if (txt[i]=='R') 		{val = fp.getRxy();}
     else if (txt[i]=='P')	{val = fp.getPt() ;}
+    else if (txt[i]=='E')	{err[0] = sqrt(fe.mHH); err[1] = sqrt(fe.mZZ);}
     else 			{val = fp[i]      ;}
-    printf("\t%c=%g",txt[i],val);
-//    if (err) printf("(%6.1g)",err);
+    if (abs(val+999)>1e-6) 	{ printf("\t%c=%g",txt[i],val);}
+    if (err[0]>-999)  		{ printf("\tHH=%7.2g ZZ=%7.2g",err[0],err[1]);}
   }//end for i
 
   if (hit) {
     for (int i=0;hit && hhh[i];i++) {
+       err[0]=-999;val=-999;
       if (!strchr(opt,hhh[i])) continue;
-      if (HHH[i]=='R') 		{val = hit->getRxy();}
+      if (hhh[i]=='r') 		{val = hit->getRxy();}
+      else if (hhh[i]=='e')	{err[0] = sqrt(mHrr.hYY); err[1] = sqrt(mHrr.hZZ);}
       else 			{val = hit->x_g()[i];} 
-      printf("\th%c=%g",HHH[i],val);
-  } }
+      if (abs(val+999)>1e-6) 	{printf("\th%c=%g",hhh[i],val);}
+      if (err[0]>-999)  	{ printf("\thh=%7.2g zz=%7.2g",err[0],err[1]);}
+    } 
+    
+  
+  
+  
+  
+  }
   printf("\n");
   return;
 }    

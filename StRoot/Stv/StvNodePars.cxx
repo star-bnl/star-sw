@@ -174,6 +174,24 @@ void StvNodePars::moveToR(double R)
 }
 
 //______________________________________________________________________________
+StvFitPars StvNodePars::operator-(const StvNodePars& sub) const
+{
+  double cos2L = 1./(1+_tanl*_tanl); 
+  double cosL  = sqrt(cos2L);
+  double sinL  = _tanl*cosL;
+  StvFitPars fp;
+  double dx = _x-sub._x;
+  double dy = _y-sub._y;
+  double dz = _z-sub._z;
+  
+  fp.mH = dx*(-_sinCA)     + dy*(_cosCA);
+  fp.mZ = dx*(-sinL*_cosCA)+ dy*(-sinL*_sinCA) +dz*cosL;
+  fp.mA = (_psi -sub._psi );
+  fp.mC = (_ptin-sub._ptin);
+  fp.mL = (_tanl-sub._tanl)*cos2L;
+  return fp;
+}
+//______________________________________________________________________________
 void StvNodePars::print() const
 {
 static const char* tit[]={"cosCA","sinCA","X","Y","Z","Eta","Ptin","TanL","Curv",0};
@@ -208,44 +226,50 @@ void StvFitErrs::Reset()
 }
 
 //______________________________________________________________________________
-void StvFitErrs::Set(const THEmx_t *he, double hz)
+void StvFitErrs::Set(const THelixTrack *he, double hz)
 {
 mHz = hz;
-mHH = he->mHH ;
-mHZ = he->mHZ ;
-mZZ = he->mZZ ;
-mHA = he->mHA ;
-mZA = he->mAZ ;
-mAA = he->mAA ;
-mHL = he->mHL ;
-mZL = he->mZL ;
-mAL = he->mAL ;
-mLL = he->mLL ;
-mHC = he->mHC/mHz ;
-mZC = he->mCZ/mHz ;
-mAC = he->mAC/mHz ;
-mLC = he->mCL/mHz ;
-mCC = he->mCC/mHz/mHz ;
+const THEmx_t *emx = he->Emx();
+double  cosL = he->GetCos();
+
+mHH = emx->mHH ;
+mHZ = emx->mHZ*cosL ;
+mZZ = emx->mZZ*cosL*cosL ;
+mHA = emx->mHA ;
+mZA = emx->mAZ*cosL ;
+mAA = emx->mAA ;
+mHL = emx->mHL ;
+mZL = emx->mZL*cosL ;
+mAL = emx->mAL ;
+mLL = emx->mLL ;
+mHC = emx->mHC/mHz ;
+mZC = emx->mCZ/mHz*cosL ;
+mAC = emx->mAC/mHz ;
+mLC = emx->mCL/mHz ;
+mCC = emx->mCC/mHz/mHz ;
 }  
 //______________________________________________________________________________
-void StvFitErrs::Get(THEmx_t *he) const
+void StvFitErrs::Get(THelixTrack *he) const
 {
   assert(mHz);
-  he->mHH = mHH ;
-  he->mHZ = mHZ ;
-  he->mZZ = mZZ ;
-  he->mHA = mHA ;
-  he->mAZ = mZA ;
-  he->mAA = mAA ;
-  he->mHL = mHL ;
-  he->mZL = mZL ;
-  he->mAL = mAL ;
-  he->mLL = mLL ;
-  he->mHC = mHC*mHz ;
-  he->mCZ = mZC*mHz ;
-  he->mAC = mAC*mHz ;
-  he->mCL = mLC*mHz ;
-  he->mCC = mCC*mHz*mHz ;
+  he->SetEmx(0);
+  THEmx_t *emx = he->Emx();
+  double  cosL = he->GetCos();
+  emx->mHH = mHH ;
+  emx->mHZ = mHZ/cosL ;
+  emx->mZZ = mZZ/cosL/cosL ;
+  emx->mHA = mHA ;
+  emx->mAZ = mZA/cosL ;
+  emx->mAA = mAA ;
+  emx->mHL = mHL ;
+  emx->mZL = mZL/cosL ;
+  emx->mAL = mAL ;
+  emx->mLL = mLL ;
+  emx->mHC = mHC*mHz ;
+  emx->mCZ = mZC*mHz/cosL ;
+  emx->mAC = mAC*mHz ;
+  emx->mCL = mLC*mHz ;
+  emx->mCC = mCC*mHz*mHz ;
 }  
 //_____________________________________________________________________________
 void StvFitErrs::Backward()
@@ -261,7 +285,7 @@ int StvFitErrs::Check(const char *tit)
   for (int i=0,li=0;i< 5;li+=++i) {
     dia[i]=e[li+i];
     if (dia[i]< 1e-8*MAXFITERR[i]*MAXFITERR[i]) {ierr = i+1; goto ERR;}
-    if (dia[i]> 9.9 *MAXFITERR[i]*MAXFITERR[i]) {ierr = i+6; goto ERR;}
+    if (dia[i]> 99.9*MAXFITERR[i]*MAXFITERR[i]) {ierr = i+6; goto ERR;}
     for (int j=0;j<i;j++) {
        if (e[li+j]*e[li+j]>=dia[i]*dia[j]){ierr = 100+10*i+j;goto ERR;}
     } }
@@ -400,12 +424,14 @@ void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
 //_____________________________________________________________________________
 void StvFitErrs::Get(const StvNodePars *np,  StvNodeErrs *ne) const
 {
-  double dTdL = np->_tanl*np->_tanl+1;
+  double cos2L = 1./(np->_tanl*np->_tanl+1);
+  double dTdL = 1./cos2L;
+  double cosL = sqrt(cos2L);
 
 //                       d/dH     d/dZ       d/dA     d/dLam d/dPti
   double T[6][5] = {{ np->_cosCA,   0,         0,         0,  0}   //dX
   		   ,{ np->_sinCA,   0,         0,         0,  0}   //dY
-  		   ,{         0,    1,         0,         0,  0}   //dZ
+  		   ,{         0,    1/cosL,    0,         0,  0}   //dZ
   		   ,{         0,    0,         1,         0,  0}   //dEta
   		   ,{         0,    0,         0,         0,  1}   //dPti
   		   ,{         0,    0,         0,      dTdL,  0}}; //dTan
@@ -433,12 +459,11 @@ void StvNodeParsTest::Test()
   StvNodePars pars;
   StvFitErrs  errs;
   pars.set(&th,Hz);
-  errs.Set(th.Emx(),Hz);
+  errs.Set(&th,Hz);
   pars.reverse();
   errs.Backward();
   pars.fill(&thh);
-  thh.SetEmx(0);
-  errs.Get(thh.Emx());
+  errs.Get(&thh);
   thh.Backward();
 
   double thhPars[7+15];
@@ -530,3 +555,88 @@ StvFitErrs fE;
   printf("Quality %g < %g < 1\n",qA,qAmax);
 
 }
+//_____________________________________________________________________________
+void StvNodeParsTest::TestErrProp(int nEv)
+{
+
+StvNodePars iP,iPR,oP,oPR;
+double dia[5],*e,*er,vtx[3];
+
+  iP._cosCA = 0.051522195951218416; iP._sinCA = -0.99867184876021664;  iP._x   = 56.80456301948584; 
+  iP._y     = -179.95090442478528;  iP._z     = 16.833129146428401;    iP._psi = -1.5192513089402997; iP._ptin = -4.286089548109465; 
+  iP._tanl  = -0.71077992742240803; iP._curv  = -0.0063779138641975935;iP._hz=(0.0014880496061989194);
+  
+StvFitErrs iE,oE,oER;
+  iE.mHH = 0.0025928369042255385; iE.mHZ = -4.9934860023454386e-11; iE.mZZ = 0.014598355970801268; iE.mHA = -0.00059887440419442305; 
+  iE.mZA = 1.0958739205478152e-11; iE.mAA = 0.00026524379894739812; iE.mHL = 3.463001237863329e-12; iE.mZL = -0.0016525557966380938; 
+  iE.mAL = 8.3669926017237923e-13; iE.mLL = 0.00041855110437868546; iE.mHC = 0.0043962440767417576; iE.mZC = -2.904206508909407e-11; 
+  iE.mAC = -0.0041320793241820105; iE.mLC = -2.5031139398137018e-12; iE.mCC = 0.78568815092933286; iE.SetHz(0.0014880496061989194);
+
+  e = iE.Arr();
+  for (int i=0,li=0;i< 5;li+=++i) {
+    dia[i]=e[li+i];
+    for (int j=0;j<i;j++) {
+      e[li+j] = sqrt(dia[i]*dia[j])*0.001*((j&2)-1);
+  } }
+
+
+  TMatrixTSym<double> S(5);
+  e = &iE.mHH;
+  for (int i=0,li=0;i< 5;li+=++i) {
+    for (int j=0;j<=i;j++    ) {
+       S[i][j]=e[li+j]; S[j][i]=e[li+j];
+    } }
+  TRandomVector RV(S);
+  memset(&oER,0,sizeof(oER));
+  THelixTrack ht;
+  for (int ev=0;ev <= nEv;ev++) {
+    iPR = iP;
+    if (ev) {
+      const TVectorT<double> &res = RV.Gaus();
+      StvFitPars fp(res.GetMatrixArray());
+      iPR+=fp;
+    }
+    iPR.fill(&ht);
+    ht.SetEmx(0);
+    if (!ev) {iE.Get(&ht);}
+//??     ht.Backward();
+    if (!ev) {
+      ht.Move(100.);
+      memcpy(vtx,ht.Pos(),sizeof(vtx));
+    } else {
+      double my100 = ht.Path(vtx);
+      ht.Move(my100);
+    }
+
+    oPR.set(&ht,iP._hz);
+
+    if (!ev) {
+      oP=oPR;
+      oE.Set(&ht,iP._hz);
+    } else {
+      StvFitPars fp = (oPR-oP);
+      double *e = oER.Arr();
+      for (int i=0,li=0;i< 5;li+=++i) {
+         for (int j=0;j<=i;j++    ) {
+         e[li+j]+=fp.Arr()[i]*fp.Arr()[j];
+    } } }
+  }//EndEvts
+  for (int j=0;j<15;j++) { oER.Arr()[j] /=nEv;}
+
+
+  e = oE.Arr();
+  er = oER.Arr();
+  double qA=0,qAmax=0;
+  for (int i=0,li=0;i< 5;li+=++i) {
+    dia[i]=e[li+i];
+    for (int j=0;j<=i;j++) {
+    double dif = (er[li+j]-e[li+j])/sqrt(dia[i]*dia[j]);
+    printf("(%d %d) \t%g = \t%g \t%g\n",i,j,er[li+j],e[li+j],dif);
+    dif = fabs(dif);
+    qA+= (dif); if (dif>qAmax) qAmax=dif;
+  } }
+  qA/=15;
+  printf("Quality %g < %g < 1\n",qA,qAmax);
+
+}
+ 
