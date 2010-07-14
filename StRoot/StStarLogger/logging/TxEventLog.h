@@ -2,7 +2,7 @@
  * @file TxEventLog.h
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLog.h,v 1.4 2010/04/09 16:28:19 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLog.h,v 1.5 2010/07/14 22:12:51 fine Exp $
  *
  * TxEventLog provides an interface for applications so that they can write
  * event information into a CEDPS formated file.
@@ -26,7 +26,7 @@ class StRecord;
      *
      */    
   class TxEventLog {
-    
+
   public:
     enum Stage {
       START  = 1,
@@ -44,7 +44,8 @@ class StRecord;
       LEVEL_ERROR    = 6,
       LEVEL_CRITICAL = 7,
       LEVEL_ALERT    = 8,
-      LEVEL_FATAL    = 9
+      LEVEL_FATAL    = 9,
+      TOTAL_LEVELS
     };
 
     enum State {
@@ -57,8 +58,10 @@ class StRecord;
       STAGEOUT       = 6,
       CLEANUP        = 7,
       DONE           = 8,
-      FAILED         = 9
+      FAILED         = 9,
+      TOTAL_STATES
     };
+
 protected:
     /**
      * Constructor

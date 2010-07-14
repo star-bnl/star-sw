@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.21 2010/06/04 18:24:05 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.22 2010/07/14 22:12:51 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -18,6 +18,7 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <sstream>
 #include <log4cxx/logger.h>
 #include <log4cxx/consoleappender.h>
 #include <log4cxx/patternlayout.h>
@@ -908,11 +909,27 @@ void TxUCMCollector::addEvent () {
                   
    insertRecord (string("(") + newEventKeys + ") VALUES (" + newEventVals + ")", 
                     eventTableName());
+   static string  FAILED_JOB_ATTRIBUTE; 
+   if  ( FAILED_JOB_ATTRIBUTE.empty() ) {
+      stringstream oss(FAILED_JOB_ATTRIBUTE);
+      oss <<  TxEventLog::FAILED;
    }
+   static string  DONE_JOB_ATTRIBUTE;
+   if  ( DONE_JOB_ATTRIBUTE.empty() ) {
+      stringstream oss(DONE_JOB_ATTRIBUTE);
+      oss <<  TxEventLog::DONE;
+   }
+   if (msgHashMap[fgStage] == FAILED_JOB_ATTRIBUTE  || msgHashMap[fgStage] == DONE_JOB_ATTRIBUTE ) {
+       updateRecord ("taskRemainSize=taskRemainSize-1"
+                     , "Task"
+                     , string("brokerTaskID=") + "'" + msgHashMap[fgBTaskID] + "'" );
+   }
+}
 
  /**
    * Create Jobs table
-  */
+   */
+//________________________________________________
 void TxUCMCollector::createJobsTable () {
        // create new jobs table if it does not exist
     std::string tableName = "`" + jobTableName() + "` ";
