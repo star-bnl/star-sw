@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.9 2010/04/29 03:05:28 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.10 2010/07/14 18:19:05 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -329,31 +329,38 @@ void StTGeoHelper::InitHitPlane()
   fSeedHits =        new StVoidArr();
   
   StTGeoIter it;
+  StDetectorId detId=kUnknownId;
   const TGeoVolume *vol=0;
   for (;(vol=*it);++it) {
     if (!it.IsFirst()) {continue;}		//First visit only
     if (IsModule(vol)) {
       if (!IsMODULE(vol)) {it.Skip();continue;}
       if (!IsActive(vol)) {it.Skip();continue;}
+      detId = DetId(vol->GetName());
+      assert(detId);
     }
     vol->GetShape()->ComputeBBox();
 //		First visit
 //			try to make HitPlaneInfo  
     if(!IsSensitive(vol)) continue;
-    MakeHitPlaneInfo(it);
-
+    StHitPlaneInfo *hpi = MakeHitPlaneInfo(it);
+    if (hpi) hpi->SetDetId(detId);
   }
 
   it.Reset();
+  detId=kUnknownId;
   for (;(vol=*it);++it) {
     if (!it.IsFirst()) {continue;}		//First visit only
     if (IsModule(vol)) {
       if (!IsMODULE(vol)) {it.Skip();continue;}
       if (!IsActive(vol)) {it.Skip();continue;}
+      detId = DetId(vol->GetName());
+      assert(detId);
     }
-    StHitPlaneInfo *ghp = IsHitPlane(vol);
-    if (!ghp) 		continue;
-    StHitPlane *hp = ghp->MakeHitPlane(it); if(hp){;}
+    StHitPlaneInfo *hpi = IsHitPlane(vol);
+    if (!hpi) 		continue;
+    StHitPlane *hp = hpi->MakeHitPlane(it);
+    if(hp) hp->SetDetId(detId);
     
   }
 
@@ -489,7 +496,7 @@ int StTGeoHelper::MayHitPlane(const TGeoVolume *volu)  const
   return 0;
 }
 //_____________________________________________________________________________
-int StTGeoHelper::MakeHitPlaneInfo(const StTGeoIter &it) 
+StHitPlaneInfo *StTGeoHelper::MakeHitPlaneInfo(const StTGeoIter &it) 
 {
 static int nCall=0; nCall++;   
 
@@ -535,7 +542,7 @@ static int nCall=0; nCall++;
      }
      break;
   }
-  if (bhp) return 0;
+  if (bhp) return bhp;
   printf(" ***Warning: HitPlane not found for:"); it.Print(0);
   return 0;
 }
@@ -672,14 +679,10 @@ static int nCall = 0;  nCall++;
   } 
   StHitPlaneHardMapIter it(fHitPlaneHardMap->find(hardw));
   StHitPlane *hp=0;
-  TGeoNode   *node;
   if (it !=  fHitPlaneHardMap->end()) { //HitPlane found
      hp = (*it).second;
   } else {   
-     node = gGeoManager->FindNode(double(xyz[0]),double(xyz[1]),double(xyz[2]));
-     assert(node);
-     hp = GetCurrentHitPlane();     
-//     assert(hp);
+     hp = FindHitPlane(xyz);
      if (!hp) {
        Warning("AddHit","Hit in %s Not Found",GetPath());
        return 0;
@@ -694,6 +697,39 @@ static int nCall = 0;  nCall++;
 
   return hp;
 }
+//_____________________________________________________________________________
+StHitPlane *StTGeoHelper::FindHitPlane(const float xyz[3])
+{
+  double pnt[3]={xyz[0],xyz[1],xyz[2]};
+  TGeoNode *node = gGeoManager->FindNode(pnt[0],pnt[1],pnt[2]);
+  assert(node);
+  StHitPlane *hp = GetCurrentHitPlane();     
+//     assert(hp);
+  if (hp  && hp->GetHitErrCalc()) return hp;
+  double Rxy = sqrt(pnt[0]*pnt[0]+pnt[1]*pnt[1]);
+  double myDirs[6][3] = {{pnt[0]/Rxy   ,pnt[1]/Rxy   , 0}
+                        ,{-myDirs[0][0],-myDirs[0][1], 0}
+                        ,{-myDirs[0][1], myDirs[0][0], 0}
+                        ,{ myDirs[0][1],-myDirs[0][0], 0}
+                        ,{            0,            0, 1}
+                        ,{            0,            0,-1}};
+  double minDist=10;
+  StHitPlane *minHitPlane=0;
+  for (int idx=0;idx<6; idx++) {//		   
+    gGeoManager->SetCurrentPoint(pnt);
+    gGeoManager->FindNode();
+    gGeoManager->SetCurrentDirection(myDirs[idx]);
+    node = gGeoManager->FindNextBoundaryAndStep();
+    if (!node) continue;
+    if (gGeoManager->GetStep()>minDist) 	continue;
+    hp = GetCurrentHitPlane();     
+    if (!hp || !hp->GetHitErrCalc()) 	continue;
+    minDist = gGeoManager->GetStep();
+    minHitPlane = hp;
+  }
+  return minHitPlane;  
+}       
+       
 //_____________________________________________________________________________
 StHitPlane *StTGeoHelper::GetCurrentHitPlane ()
 {
@@ -735,22 +771,24 @@ void StTGeoHelper::InitHits()
   }
 }    
 //_____________________________________________________________________________
-int StTGeoHelper::DetId(const char *detName) 
+StDetectorId StTGeoHelper::DetId(const char *detName) 
 {
    for (int i = 0;gDetName[i]; i++) 
-   { if (strcmp(detName,gDetName[i])==0) return i;}
-   return 0;
+   { if (strcmp(detName,gDetName[i])==0) return (StDetectorId)i;}
+   for (int i = 0;gModName[i]; i++) 
+   { if (strcmp(detName,gModName[i])==0) return (StDetectorId)i;}
+   return (StDetectorId)0;
 }
 //_____________________________________________________________________________
-const char *StTGeoHelper::DetName(int detId)
+const char *StTGeoHelper::DetName(StDetectorId detId)
 {
- if (detId >= int(sizeof(gDetName)/sizeof(char*))) detId=0;
+ if (detId >= StDetectorId(sizeof(gDetName)/sizeof(char*))) detId=(StDetectorId)0;
  return gDetName[detId];
 }
 //_____________________________________________________________________________
-const char *StTGeoHelper::ModName(int detId)
+const char *StTGeoHelper::ModName(StDetectorId detId)
 {
- if (detId >= int(sizeof(gModName)/sizeof(char*))) detId=0;
+ if (detId >= StDetectorId(sizeof(gModName)/sizeof(char*))) detId=StDetectorId(0);
  return gModName[detId];
 }
 
