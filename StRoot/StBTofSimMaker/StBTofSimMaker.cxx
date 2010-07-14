@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.2 2010/07/14 20:32:57 geurts Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.3 2010/07/14 20:44:10 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.cxx,v $
+ * Revision 1.3  2010/07/14 20:44:10  geurts
+ * Correct application of vpd resolution smearing: The original values in the db (or ParSim) are in ps [Xin]
+ *
  * Revision 1.2  2010/07/14 20:32:57  geurts
  * remove geometry initialization (not used)
  *
@@ -238,8 +241,8 @@ Int_t StBTofSimMaker::VpdResponse(g2t_vpd_hit_st* vpd_hit)
 	Int_t itray = vId/1000 + 120;    //! 121: west, 122: east
 	Int_t itube = vId%100;           //! 1-19
 
-	Double_t tof = vpd_hit->tof + ranGauss.shoot()*mSimDb->timeres_vpd();   //! 140 ps per channel
-	Double_t t0 = vpd_hit->tof;
+	Double_t tof = (vpd_hit->tof + ranGauss.shoot()*mSimDb->timeres_vpd())*1000./nanosecond; //! 140 ps per channel
+	Double_t t0 = vpd_hit->tof*1000./nanosecond;
 	Double_t de = vpd_hit->de;
 	Double_t pathL = -9999.; //! NA for vpd
 	Double_t q = 0.;
