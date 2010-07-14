@@ -6,11 +6,14 @@
  *
  * The Barrel TOF MatchMaker matches STAR tracks to the BTOF cells.
  * 
- * $Id: StBTofMatchMaker.h,v 1.7 2010/03/19 22:25:39 dongx Exp $
+ * $Id: StBTofMatchMaker.h,v 1.8 2010/07/14 20:35:21 geurts Exp $
  */
 /*****************************************************************
  *
  * $Log: StBTofMatchMaker.h,v $
+ * Revision 1.8  2010/07/14 20:35:21  geurts
+ * introduce switch to enable ideal MC geometry, without alignment updates. Default: disabled
+ *
  * Revision 1.7  2010/03/19 22:25:39  dongx
  * - Added getBTofGeom() function for outside use
  * - Remove AddConst(btofGeometry) to avoid crash due to duplication
@@ -130,6 +133,8 @@ public:
     void setNtupleFileName(const Char_t*);
     /// save geometry if it will be used by following makers in the chain
     void setSaveGeometry(Bool_t geomSave=kFALSE);
+    /// switch between standard and ideal MC geometry
+    void setIdealGeometry(Bool_t useIdealGeometry=kTRUE);
 
     /// switch to read in StEvent/MuDst
     void setMuDstIn(Bool_t muDstIn=kTRUE);
@@ -186,6 +191,7 @@ private:
     
     Bool_t mHisto;    //! create, fill and write out histograms
     Bool_t mSaveTree; //! create, fill and write out trees for tpc tracks
+    Bool_t mUseIdealGeometry; //! ignore alignment corrections and use the ideal MC geometry
     
     Bool_t mOuterTrackGeometry; //! use outer track geometry (true) for extrapolation
     Bool_t mGeometrySave;    //! flag to save the geometry for others
@@ -302,7 +308,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.7 2010/03/19 22:25:39 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.8 2010/07/14 20:35:21 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StBTofMatchMaker,1)
 };
@@ -328,6 +334,7 @@ inline void StBTofMatchMaker::setCreateTreeFlag(Bool_t tree){mSaveTree = tree;}
 
 inline void StBTofMatchMaker::setSaveGeometry(Bool_t geomSave){mGeometrySave = geomSave; }
 
+inline void StBTofMatchMaker::setIdealGeometry(Bool_t useIdealGeometry){mUseIdealGeometry = useIdealGeometry;}
 inline void StBTofMatchMaker::setMuDstIn(Bool_t val) { mMuDstIn = val; }
 
 inline StBTofGeometry* StBTofMatchMaker::getBTofGeom() { return mBTofGeom; }
