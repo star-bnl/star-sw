@@ -20,7 +20,7 @@ MediumMagboltz86::MediumMagboltz86() :
   usePenning(false), rPenning(0.), nPenning(0), 
   useDeexcitation(false), useRadTrap(true),
   nDeexcitations(0), nDeexcitationProducts(0),
-  scaleExc(1.),
+  scaleExc(1.), useSplittingFunction(true),
   eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma),
   hasIonMobility(false), muIon(1.e-9) {
   
@@ -406,9 +406,14 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
   if (type == 1) {
     // Splitting parameter
     const double w = wSplit[level];
+    // const double w = 3.0;
     // Sample the secondary electron energy according to 
-    // the Opal-Beaty-Peterson parametrisation  
-    esec = w * tan(RndmUniform() * atan(0.5 * (e - loss) / w));
+    // the Opal-Beaty-Peterson parametrisation 
+    if (useSplittingFunction) { 
+      esec = w * tan(RndmUniform() * atan(0.5 * (e - loss) / w));
+    } else {
+      esec = RndmUniform() * (e - loss);
+    }
     if (esec <= 0) esec = 1.e-20;
     loss += esec;
   // Excitation
@@ -1101,7 +1106,11 @@ MediumMagboltz86::Mixer() {
 
   inpt_.nGas = nComponents;
   inpt_.nStep = nEnergySteps;
-  inpt_.nAniso = 2;
+  if (useAnisotropic) {
+    inpt_.nAniso = 2;
+  } else {
+    inpt_.nAniso = 0;
+  }
   inpt_.efinal = eFinal;
   inpt_.estep = eStep;
   

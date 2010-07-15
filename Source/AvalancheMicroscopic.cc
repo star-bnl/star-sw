@@ -431,7 +431,7 @@ AvalancheMicroscopic::AvalancheElectron(
   
   // Random number
   double r;
-  // Prefactors
+  // Numerical factors
   double a1 = 0., a2 = 0., a3 = 0., a4 = 0.;
     
   // Add the first electron

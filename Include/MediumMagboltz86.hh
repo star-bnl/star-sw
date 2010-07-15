@@ -147,8 +147,20 @@ class MediumMagboltz86 : public Medium {
     void DisableEnergyRangeAdjustment() {useAutoAdjust = false;}
 
     // Switch on/off anisotropic scattering (enabled by default)
-    void EnableAnisotropicScattering()  {useAnisotropic = true;}
-    void DisableAnisotropicScattering() {useAnisotropic = false;}
+    void EnableAnisotropicScattering()  {
+      useAnisotropic = true; 
+      isChanged = true;
+    }
+    void DisableAnisotropicScattering() {
+      useAnisotropic = false; 
+      isChanged = true;
+    }
+
+    // Switch on/off secondary electron energy distribution 
+    // according to Opal et al. (enabled by default) 
+    // If switched off, a flat distribution is used (for test purposes)
+    void EnableSplittingFunction()  {useSplittingFunction = true;}
+    void DisableSplittingFunction() {useSplittingFunction = false;}
     
     // Switch on/off de-excitation handling
     void EnableDeexcitation();
@@ -333,6 +345,8 @@ class MediumMagboltz86 : public Medium {
 
     // Scaling factor for excitation cross-sections
     double scaleExc;
+    // Flag switching on/off secondary electron energy distribution
+    bool useSplittingFunction;
 
     // Energy spacing of photon collision rates table
     double eFinalGamma, eStepGamma;

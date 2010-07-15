@@ -12,6 +12,7 @@ CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long -g `root-config --cflags`
 OBJS = \
 	$(OBJECT)/AvalancheMicroscopic.o \
 	$(OBJECT)/AvalancheMC.o \
+	$(OBJECT)/DriftLineRKF.o \
 	$(OBJECT)/Track.o \
 	$(OBJECT)/TrackHeed.o \
 	$(OBJECT)/TrackBichsel.o \
@@ -58,13 +59,18 @@ $(OBJECT)/AvalancheMC.o: \
 	$(INCLUDE)/FundamentalConstants.hh $(INCLUDE)/Random.hh \
 	$(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh
 	$(CC) $(CFLAGS) $< -o $@      
-
+$(OBJECT)/DriftLineRKF.o: \
+	$(SOURCE)/DriftLineRKF.cc $(INCLUDE)/DriftLineRKF.hh \
+	$(INCLUDE)/FundamentalConstants.hh \
+	$(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh
+	$(CC) $(CFLAGS) $< -o $@
+ 
 $(OBJECT)/Track.o: $(SOURCE)/Track.cc $(INCLUDE)/Track.hh
 	$(CC) $(CFLAGS) $< -o $@        
 $(OBJECT)/TrackHeed.o: \
 	$(SOURCE)/TrackHeed.cc $(INCLUDE)/TrackHeed.hh \
 	$(INCLUDE)/Track.hh $(SOURCE)/Track.cc
-	$(CC) $(CFLAGS) $< -o $@       
+	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/TrackBichsel.o: \
 	$(SOURCE)/TrackBichsel.cc $(INCLUDE)/TrackBichsel.hh \
  	$(INCLUDE)/Track.hh $(SOURCE)/Track.cc
