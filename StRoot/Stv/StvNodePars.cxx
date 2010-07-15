@@ -119,7 +119,7 @@ void StvNodePars::set(const THelixTrack *th, double Hz)
 }
 
 //______________________________________________________________________________
-void StvNodePars::fill(THelixTrack *th) const
+void StvNodePars::get(THelixTrack *th) const
 {
   double dir[3]={_cosCA,_sinCA,_tanl};
   th->Set(&_x,dir,_curv);
@@ -231,20 +231,22 @@ void StvFitErrs::Set(const THelixTrack *he, double hz)
 mHz = hz;
 const THEmx_t *emx = he->Emx();
 double  cosL = he->GetCos();
-
+double  sinL = he->GetSin();
+double  curv = he->GetRho();
+double dSdZbyCur= -sinL*curv;
 mHH = emx->mHH ;
 mHZ = emx->mHZ*cosL ;
 mZZ = emx->mZZ*cosL*cosL ;
-mHA = emx->mHA ;
-mZA = emx->mAZ*cosL ;
-mAA = emx->mAA ;
+mHA = emx->mHA + emx->mHZ*dSdZbyCur;
+mZA = (emx->mAZ +emx->mZZ*dSdZbyCur)*cosL;
+mAA = emx->mAA +2*emx->mAZ*dSdZbyCur + emx->mZZ*dSdZbyCur*dSdZbyCur;
 mHL = emx->mHL ;
 mZL = emx->mZL*cosL ;
-mAL = emx->mAL ;
+mAL = emx->mAL + emx->mZL*dSdZbyCur;
 mLL = emx->mLL ;
 mHC = emx->mHC/mHz ;
 mZC = emx->mCZ/mHz*cosL ;
-mAC = emx->mAC/mHz ;
+mAC = (emx->mAC+emx->mCZ*dSdZbyCur)/mHz ;
 mLC = emx->mCL/mHz ;
 mCC = emx->mCC/mHz/mHz ;
 }  
@@ -255,19 +257,22 @@ void StvFitErrs::Get(THelixTrack *he) const
   he->SetEmx(0);
   THEmx_t *emx = he->Emx();
   double  cosL = he->GetCos();
+  double  sinL = he->GetSin();
+  double  curv = he->GetRho();
+  double dSdZbyCur= sinL/cosL*curv;
   emx->mHH = mHH ;
   emx->mHZ = mHZ/cosL ;
   emx->mZZ = mZZ/cosL/cosL ;
-  emx->mHA = mHA ;
-  emx->mAZ = mZA/cosL ;
-  emx->mAA = mAA ;
+  emx->mHA = (mHA +mHZ*dSdZbyCur);
+  emx->mAZ = (mZA+mZZ*dSdZbyCur)/cosL ;
+  emx->mAA = (mAA +2*mZA*dSdZbyCur+mZZ*dSdZbyCur*dSdZbyCur);
   emx->mHL = mHL ;
   emx->mZL = mZL/cosL ;
-  emx->mAL = mAL ;
+  emx->mAL = (mAL + mZL*dSdZbyCur);
   emx->mLL = mLL ;
   emx->mHC = mHC*mHz ;
   emx->mCZ = mZC*mHz/cosL ;
-  emx->mAC = mAC*mHz ;
+  emx->mAC = (mAC+mZC*dSdZbyCur)*mHz ;
   emx->mCL = mLC*mHz ;
   emx->mCC = mCC*mHz*mHz ;
 }  
@@ -462,7 +467,7 @@ void StvNodeParsTest::Test()
   errs.Set(&th,Hz);
   pars.reverse();
   errs.Backward();
-  pars.fill(&thh);
+  pars.get(&thh);
   errs.Get(&thh);
   thh.Backward();
 
@@ -596,7 +601,7 @@ StvFitErrs iE,oE,oER;
       StvFitPars fp(res.GetMatrixArray());
       iPR+=fp;
     }
-    iPR.fill(&ht);
+    iPR.get(&ht);
     ht.SetEmx(0);
     if (!ev) {iE.Get(&ht);}
 //??     ht.Backward();
