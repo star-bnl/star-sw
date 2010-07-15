@@ -55,6 +55,7 @@ public:
  TCircle();
  TCircle(const double *x,const double *dir,double rho);
  TCircle(const TCircle& fr);
+ TCircle(const TCircle* fr);	//special ctr without errors
 ~TCircle();
 TCircle &operator=(const TCircle& fr);
  void Set(const double *x=0,const double *dir=0,const double rho=0);
@@ -191,6 +192,7 @@ public:
 	THelixTrack();
 	THelixTrack(const double *xyz,const double *dir,double rho,double drho=0);
 	THelixTrack(const THelixTrack &from);
+	THelixTrack(const THelixTrack *from);	//Special ctr without errs
 virtual ~THelixTrack();
 THelixTrack &operator=(const THelixTrack &from);
 	void Set   (const double *xyz,const double *dir,double rho,double drho=0);
@@ -206,8 +208,6 @@ THelixTrack &operator=(const THelixTrack &from);
 ///		Move along helix
 	double Move(double step);
 	double Move(double step,double F[5][5]);
-///     	Make transformatiom matrix to transform errors
-	void MakeMtx(double step,double F[5][5]);
 ///		Evaluate params with given step along helix
 	double Eval(double step, double *xyz, double *dir,double &rho) const;
 	double Step(double step, double *xyz, double *dir,double &rho) const
@@ -280,7 +280,11 @@ static  void Test2();
 static  void Test3();
 static  void Test4();
 static  void Test5();
+static	void TestMtx();
 private:
+///     	Make transformatiom matrix to transform errors
+///		called only after Eval()
+	void MakeMtx(double step,double F[5][5]);
 protected:
         double Step(double stmin,double stmax, const double *surf, int nsurf
 	           ,double *x=0, double *dir=0,int nearest=0) const;

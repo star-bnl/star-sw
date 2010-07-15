@@ -20,12 +20,12 @@
 #include <cassert>
 
 // Complex numbers
-//const TComplex Im(0,1);
+const TComplex Im(0,1);
 //_____________________________________________________________________________
 inline static double dot(const TComplex &a,const TComplex &b)
 {return a.Re()*b.Re()+a.Im()*b.Im();}
 //_____________________________________________________________________________
-TComplex expOne(TComplex x)
+inline static TComplex expOne(TComplex x)
 {
   double a = TComplex::Abs(x);
   if (a<0.01) {
@@ -35,7 +35,7 @@ TComplex expOne(TComplex x)
   }
 }
 //_____________________________________________________________________________
-TComplex expOneD(TComplex x)
+inline static TComplex expOneD(TComplex x)
 {
   double a = TComplex::Abs(x);
   if (a<0.01) {
@@ -52,6 +52,7 @@ void TCEmx_t::Set(const double *err)
 //______________________________________________________________________________
 void TCEmx_t::Move(const double F[3][3])
 {
+  assert(mHH);
   double oErr[6];
   memcpy(oErr,Arr(),sizeof(oErr));
   TCL::trasat(F[0],oErr,Arr(),3,3); 
@@ -80,6 +81,7 @@ void THEmx_t::Backward()
 //______________________________________________________________________________
 void THEmx_t::Move(const double F[5][5])
 {
+  assert(mHH);
   double oErr[15];
   memcpy(oErr,Arr(),sizeof(oErr));
   TCL::trasat(F[0],oErr,Arr(),5,5); 
@@ -198,9 +200,12 @@ THelixTrack::THelixTrack(const THelixTrack &from)
   fEmx=0;
   *this = from;
 }
-
-
-
+//_____________________________________________________________________________
+THelixTrack::THelixTrack(const THelixTrack *fr)
+{
+  fEmx=0;
+  Set(fr->fX,fr->fP,fr->fRho);
+}
 //_____________________________________________________________________________
 THelixTrack::~THelixTrack()
 { delete fEmx;fEmx=0;}
@@ -318,17 +323,129 @@ void THelixTrack::Build()
 void THelixTrack::MakeMtx(double step,double F[5][5])
 {
 //  H,A,C,Z,L
-  double ztep = step*fCosL;
+  enum {kH=0,kA,kC,kZ,kL};
+
+  double S = step*fCosL;
   memset(F[0],0,sizeof(F[0][0])*5*5);
-  F[0][0] = sgCf1.Re()+1.;
-  F[0][1] = ztep*sgCOne.Re();
-  F[0][2] = ztep*ztep*expOneD(-sgImTet).Re();
-  F[1][1] = 1;
-  F[1][2] = ztep;
-  F[2][2] = 1;
-  F[3][3] = 1;
-  F[3][4] = ztep/(fCosL*fCosL);
-  F[4][4] = 1;
+
+  F[kH][kH]   = sgCf1.Re()+1.;
+  double dSdH = sgCf1.Im();
+
+  F[kH][kA]   = S*sgCOne.Re();
+  double dSdA = S*sgCOne.Im();
+
+  TComplex llCOneD = S*S*expOneD(-sgImTet);
+  F[kH][kC]   = llCOneD.Re();
+  double dSdC = llCOneD.Im();
+
+  F[kA][kH] =  -dSdH*fRho;
+  F[kA][kA] = 1-dSdA*fRho;
+  F[kA][kC] = S+dSdC*fRho;
+  F[kC][kC] = 1;
+
+  double tanL = fP[2]/fCosL;
+
+  F[kZ][kH] = -dSdH*tanL;
+  F[kZ][kA] = -dSdA*tanL;
+  F[kZ][kC] =  dSdC*tanL;
+  F[kZ][kZ] = 1;
+  F[kZ][kL] = S/(fCosL*fCosL);
+  F[kL][kL] = 1;
+}
+//______________________________________________________________________________
+void THelixTrack::TestMtx() 
+{
+  enum {kH=0,kA,kC,kZ,kL};
+const static char* T="HACZL";
+  double Dir[4][3],X[4][3]={{0}},Rho[2],step,F[5][5],Del,Dif;
+  double maxEps = 0;  
+  step = 20;
+  int nErr=0;
+  int iR = 10+ gRandom->Rndm()*100;
+  int iAlf=30+ gRandom->Rndm()*100;
+  int iLam=10+ gRandom->Rndm()*60;
+//??iLam=0;
+    Rho[0] = 1./iR;
+    double alf = iAlf/180.*M_PI;
+    double lam = iLam/180.*M_PI;
+    Dir[0][0] = cos(lam)*cos(iAlf/180.*M_PI);
+    Dir[0][1] = cos(lam)*sin(iAlf/180.*M_PI);
+    Dir[0][2] = sin(lam);
+    THelixTrack tc(X[0],Dir[0],Rho[0]);
+    tc.Eval(step,X[1],Dir[1]);
+    tc.MakeMtx(step,F);
+    printf("TestMtx: Angle=%d Lam=%d \tRad=%d \n",iAlf,iLam,iR);
+
+    for (int iHAR=0;iHAR<5;iHAR++) {
+      memcpy(X[2]  ,X[0]  ,sizeof(X[0][0])  *3);
+      memcpy(Dir[2],Dir[0],sizeof(Dir[0][0])*3);
+      Del = 0;
+      Rho[1]=Rho[0];
+      switch (iHAR) {
+	case kH: { 
+	  Del = 0.001*iR;
+          X[2][0] += -Dir[0][1]*Del/cos(lam);
+          X[2][1] +=  Dir[0][0]*Del/cos(lam);
+          break;}
+	  
+	case kA: {
+	  Del = M_PI/180*0.01;
+          Dir[2][0] = cos(lam)*cos(alf+Del);
+          Dir[2][1] = cos(lam)*sin(alf+Del);
+          Dir[2][2] = sin(lam);
+          break;}
+
+	case kC: {
+          Del = Rho[0]*0.005;
+          Rho[1] = Rho[0]+Del;
+          break;}
+	case kZ: {
+          Del = 0.02;
+          X[2][2] += Del;
+          break;}
+	case kL: {
+          Del = M_PI/180*0.1;
+          Dir[2][0] = cos(lam+Del)*cos(alf);
+          Dir[2][1] = cos(lam+Del)*sin(alf);
+          Dir[2][2] = sin(lam+Del);
+          break;}
+        }//end switch
+      
+        THelixTrack tcc(X[2],Dir[2],Rho[1]);
+        double myStep = tcc.Path(X[1][0],X[1][1]);
+        tcc.Eval(myStep,X[3],Dir[3]);
+
+        for (int jHAR=0;jHAR<5; jHAR++) {
+          if (jHAR==kC) continue;
+          if (jHAR==kL) continue;
+	  switch(jHAR) {
+	  case kH: {
+	    Dif = (X[3][0]-X[1][0])*(-Dir[1][1])
+	        + (X[3][1]-X[1][1])*( Dir[1][0]);
+            Dif/=cos(lam);
+            break;}
+	  case kA: {
+	    Dif = atan2(Dir[3][1],Dir[3][0])
+	         -atan2(Dir[1][1],Dir[1][0]); 
+            if (Dif>  M_PI) Dif-=2*M_PI;
+            if (Dif< -M_PI) Dif+=2*M_PI;
+            break;}
+	  case kZ: {
+	    Dif = X[3][2]-X[1][2];
+            break;}
+          }
+          double est = Dif/Del;
+	  double eps = fabs(est-F[jHAR][iHAR])*2
+	             /(fabs(est)+fabs(F[jHAR][iHAR]+1e-6));
+          if (eps>maxEps) maxEps=eps;
+          if (eps < 1e-2) continue;
+          nErr++;
+          printf(" m%c%c \t%g \t%g \t%g\n",
+	         T[jHAR],T[iHAR],F[jHAR][iHAR],est,eps);
+	
+    } }  
+    printf("TestMtx: %d errors maxEps=%g\n",nErr,maxEps);
+
 }
 
 //_____________________________________________________________________________
@@ -337,7 +454,7 @@ double THelixTrack::Move(double step)
   double xyz[3],dir[3],rho,F[5][5];
   Eval(step,xyz,dir,rho);
   Set(xyz,dir,rho,fDRho);
-  if (fEmx) {
+  if (fEmx && fEmx->mHH>0) {
     MakeMtx(step,F);
     fEmx->Move(F);
   } 
@@ -350,7 +467,7 @@ double THelixTrack::Move(double step,double F[5][5])
   Eval(step,xyz,dir,rho);
   Set(xyz,dir,rho,fDRho);
   MakeMtx(step,F);
-  if (fEmx) fEmx->Move(F); 
+  if (fEmx && fEmx->mHH>0) fEmx->Move(F); 
   return step;
 }
 
@@ -516,7 +633,7 @@ double THelixTrack::Path(const THelixTrack &th,double *s2) const
    Fill(tcMe);th.Fill(tcHe);
    SxyMe = tcMe.Path(tcHe,&SxyHe);
    if (SxyMe>1e33) return 3e33;
-   THelixTrack thMe(*this),thHe(th);
+   THelixTrack thMe(fX,fP,fRho),thHe(th.fX,th.fP,th.fRho);
 
    SMe = SxyMe/thMe.GetCos(); thMe.Move(SMe);
    SHe = SxyHe/thHe.GetCos(); thHe.Move(SHe);
@@ -542,7 +659,7 @@ double THelixTrack::PathX(const THelixTrack &th,double *s2, double *dst, double 
   double xx[9];
   int jkBest=-1;
   for (int jk=0;jk<4;jk++) {
-    THelixTrack th1(*this),th2(th);
+    THelixTrack th1(this),th2(&th);
     if (jk&1) th1.Backward();
     if (jk&2) th2.Backward();
     ss1 = th1.Path(th2,&ss2);
@@ -634,7 +751,7 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
       lMax = (step[1]>step[2])? step[1]:step[2];
       lMin = (step[1]>step[2])? step[2]:step[1];}
     int iter=99,icut=1;
-    THelixTrack local(*this);
+    THelixTrack local(this);
     local.Move(step[0]);
     lMax-=step[0];lMin-=step[0];
     local.Step(0.,xnear,pnear);
@@ -684,7 +801,7 @@ double THelixTrack::Dca(const double *point,double *dcaErr) const
    T[1][1]=T[0][2]*T[2][0]-T[2][2]*T[0][0];
    T[1][2]=T[0][0]*T[2][1]-T[2][0]*T[0][1];
    
-   THelixTrack th(*this);
+   THelixTrack th(this);
    th.Move(s);
    th.GetSpot(T,emx);
    *dcaErr=emx[0];
@@ -718,7 +835,7 @@ double THelixTrack::Dca(const double point[3]
    if (kind==3) s = Path(point);
    else         s = Path(point[0],point[1]);
 
-   THelixTrack th(*this);
+   THelixTrack th(this);
    th.Move(s);
    const double *x=th.Pos();
    const double *d=th.Dir();
@@ -846,7 +963,7 @@ double THelixTrack::Eval(double step, double *xyz, double *dir) const
   sgCX1   = TComplex(fX[0]  ,fX[1]);
   sgCD1   = TComplex(fP[0],fP[1])/fCosL;
   sgImTet = TComplex(0,teta);
-  sgCOne  = expOne(sgImTet);
+  sgCOne  = expOne(sgImTet);			//(exp(I*Rho*L)-1)/(I*Rho*L)
   sgCf1   = sgImTet*sgCOne;
   sgCD2   = sgCD1*sgCf1+sgCD1; 			// exp(I*Fi0+I*Rho*L)
   sgCX2   = sgCD1*sgCOne*ztep;			// exp(I*Fi0)*(exp(I*Rho*L)-1)/(I*Rho)
@@ -974,10 +1091,16 @@ void THelixTrack::Test5()
     printf("s1=%g s2=%g dist=%g\n",s1,s2,dist);
 
   }  
-
-
-
 }
+// //_____________________________________________________________________________
+// void THelixTrack::TestErr()
+// {
+//    double hpar[7];
+//    for (int i=0;i<7;i++) { hpar[i] = (gRandom->Rndm()-0.5)*100;
+//    hpar[6] = 1./hpar[6];
+//    
+// }   
+
 //______________________________________________________________________________
 void THelixTrack::Show(double len, const THelixTrack *other) const
 {
@@ -1081,6 +1204,12 @@ TCircle::TCircle(const TCircle& fr)
 {
   fEmx = 0;
   *this = fr;
+}
+//______________________________________________________________________________
+TCircle::TCircle(const TCircle* fr)
+{
+  fEmx = 0;
+  Set(fr->fX,fr->fD,fr->fRho);
 }
 //______________________________________________________________________________
 TCircle &TCircle::operator=(const TCircle& fr)
@@ -1260,8 +1389,8 @@ double TCircle::Eval(double step,double *X, double *D) const
   sgCX1		=TComplex(fX[0],fX[1]);
   sgCD1		=TComplex(fD[0],fD[1]);		//  exp(I*Fi0)
   sgImTet	=TComplex(0,step*fRho);		//  I*Rho*L
-  sgCOne        =expOne(sgImTet);
-  sgCf1 	=sgImTet*sgCOne;
+  sgCOne        =expOne(sgImTet);		// (Exp(I*Rho*L)-1)/(I*Rho*L)
+  sgCf1 	=sgImTet*sgCOne;		// (Exp(I*Rho*L)-1)
   
   sgCD2 = sgCD1*sgCf1+sgCD1; 			// exp(I*Fi0+I*Rho*L)
   sgCX2 = sgCD1*sgCOne*step;			// exp(I*Fi0)*(exp(I*Rho*L)-1)/(I*Rho)
@@ -1280,22 +1409,29 @@ double TCircle::Eval(double step,double *X, double *D) const
 double TCircle::Move(double step)
 {
   Eval(step,fX,fD);
-  if (fEmx) MoveErrs(step);
+  if (fEmx && fEmx->mHH>0) MoveErrs(step);
   if (fabs(fD[0])>1) fD[0]=(fD[0]<0)? -1:1;
   if (fabs(fD[1])>1) fD[1]=(fD[1]<0)? -1:1;
   return step;
 }
 //______________________________________________________________________________
-void TCircle::MakeMtx(double l,double F[3][3])
+void TCircle::MakeMtx(double S,double F[3][3])
 {
+  enum {kH=0,kA,kC};
   memset(F[0],0,sizeof(F[0][0])*3*3);
-  F[0][0] = sgCf1.Re()+1.;
-  F[0][1] = l*sgCOne.Re();
-  F[0][2] = l*l*expOneD(-sgImTet).Re();
-  
-  F[1][1] = 1;
-  F[1][2] = l;
-  F[2][2] = 1;
+  F[kH][kH]   = sgCf1.Re()+1.;
+  double dSdH = sgCf1.Im();
+
+  F[kH][kA]   = S*sgCOne.Re();
+  double dSdA = S*sgCOne.Im();
+  TComplex llCOneD = S*S*expOneD(-sgImTet);
+  F[kH][kC]   = llCOneD.Re();
+  double dSdC = llCOneD.Im();
+
+  F[kA][kH] =  -dSdH*fRho;
+  F[kA][kA] = 1-dSdA*fRho;
+  F[kA][kC] = S+dSdC*fRho;
+  F[kC][kC] = 1;
 }
 //______________________________________________________________________________
 void TCircle::MoveErrs(double l)
@@ -1381,13 +1517,13 @@ void TCircle::Test3()
 //______________________________________________________________________________
 void TCircle::TestMtx() 
 {
-  double Dir[8],X[8]={0},Rho[2],step,F[3][3],f[3][3],Del[3],Dif[3]={0};
-    
+  double Dir[8],X[8]={0},Rho[2],step,F[3][3],Del[3],Dif[3]={0};
+  double maxEps = 0;  
   step = 20;
   int nErr=0;
   for (int iR = 10;iR<100;iR+=10) {
     Rho[0] = 1./iR;
-    for (int iAlf=0;iAlf<360;iAlf+=10){  
+    for (int iAlf=30;iAlf<=30;iAlf+=10){  
       Dir[0] = cos(iAlf/180.*M_PI);
       Dir[1] = sin(iAlf/180.*M_PI);
       TCircle tc(X,Dir,Rho[0]);
@@ -1397,6 +1533,7 @@ void TCircle::TestMtx()
       for (int iHAR=0;iHAR<3;iHAR++) {
         memcpy(X  +4,X  ,sizeof(X[0]  )*2);
         memcpy(Dir+4,Dir,sizeof(Dir[0])*2);
+        memset(Del,0,sizeof(Del));
         Rho[1]=Rho[0];
         switch (iHAR) {
 	case 0: { 
@@ -1412,15 +1549,14 @@ void TCircle::TestMtx()
           break;}
 
 	case 2: {
-          Del[2] = Rho[0]*0.001;
+          Del[2] = Rho[0]*0.005;
           Rho[1] = Rho[0]+Del[2];
           break;}
         }//end switch
       
         TCircle tcc(X+4,Dir+4,Rho[1]);
-        tcc.Eval(step,X+6,Dir+6);
-        tcc.MakeMtx(step,f);
-        TCL::vlinco(F[0],0.5,f[0],0.5,f[0],3*3);
+        double myStep = tcc.Path(X+2);
+        tcc.Eval(myStep,X+6,Dir+6);
         for (int jHAR=0;jHAR<2; jHAR++) {
 	  switch(jHAR) {
 	  case 0: {
@@ -1435,15 +1571,17 @@ void TCircle::TestMtx()
             break;}
           }
           double est = Dif[jHAR]/Del[iHAR];
-	  double eps = fabs(est-f[jHAR][iHAR])*2
-	             /(fabs(est)+fabs(f[jHAR][iHAR]+1e-12));
+	  double eps = fabs(est-F[jHAR][iHAR])*2
+	             /(fabs(est)+fabs(F[jHAR][iHAR]+1e-12));
+          if (eps>maxEps) maxEps=eps;
           if (eps < 1e-2) continue;
           nErr++;
-          printf(" Mtx[%d][%d] %g %g Angle=%g\n",
-	         jHAR,iHAR,f[jHAR][iHAR],est, step/iR/M_PI*180);
+          printf(" Mtx[%d][%d] %g %g Angle=%d Rad=%d Len=%g\n",
+	         jHAR,iHAR,F[jHAR][iHAR],est,
+		 iAlf,iR,myStep);
 	
     } } } } 
-    printf("TestMtx: %d errors\n",nErr);
+    printf("TestMtx: %d errors maxEps=%g\n",nErr,maxEps);
 
 }
 
@@ -1788,7 +1926,7 @@ void TCircleFitter::MakeErrs()
 double TCircleFitter::EvalChi2() 
 {
   if (!fNuse) return 0;
-  TCircle M = *this;
+  TCircle M(this);
   double sum = 0,wtot=0,wt;
   TCircleFitterAux *aux = GetAux(0);
   const double *p = M.Pos();
@@ -1911,7 +2049,7 @@ void TCircleFitter::Print(const char* txt) const
       printf("\n");
   }}
   if (iF) { //Print fit
-    TCircle circ(*this);
+    TCircle circ(this);
     const double *xy = GetX(0);
     double ds=circ.Path(xy);
     circ.Move(ds);
@@ -2245,7 +2383,7 @@ static TGraph  *ciGraph  = 0;
   ptGraph->SetMarkerColor(kRed);
   ptGraph->Draw("A*");
 
-  TCircle tc(*this);
+  TCircle tc(this);
   double xy[2];
   xy[0] = x[0];
   xy[1] = y[0];
@@ -2659,7 +2797,7 @@ static TGraph  *ciGraph[2]  = {0,0};
   int nPts = Size();
   if (nPts>100) nPts=100;
   TCircleFitterAux* aux=GetAux(0);
-  THelixTrack tc(*this);
+  THelixTrack tc(this);
   double s = tc.Path(aux[0].x,aux[0].y); tc.Move(s);
   s = tc.Path(aux[nPts-1].x,aux[nPts-1].y);
   if (s<0) { tc.Backward();}
@@ -2698,7 +2836,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.46 2010/06/01 20:54:54 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.47 2010/07/15 18:08:43 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2714,6 +2852,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.47  2010/07/15 18:08:43  perev
+ * TestMtx added
+ *
  * Revision 1.46  2010/06/01 20:54:54  perev
  * Correlation HZ accounted now
  *
