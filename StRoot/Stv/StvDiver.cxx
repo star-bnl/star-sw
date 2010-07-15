@@ -55,7 +55,7 @@ void StvDiver::Reset()
 int  StvDiver::Dive()
 {
 
-  mInpPars->fill(mHelix);
+  mInpPars->get(mHelix);
   mInpErrs->Get(mHelix);
   if (!mDir) mHelix->Backward();
 

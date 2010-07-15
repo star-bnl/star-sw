@@ -38,7 +38,7 @@ public:
   void reset();
   void ready();
   void set(const THelixTrack *ht, double Hz);
-  void fill(     THelixTrack *ht) const;
+  void get(      THelixTrack *ht) const;
 double getPt() const			{ return 1./fabs(_ptin); }
   void getMom(double p[3]) const; 
   void getDir(double d[3]) const; 
