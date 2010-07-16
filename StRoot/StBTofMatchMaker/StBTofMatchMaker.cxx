@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.14 2010/07/14 20:35:21 geurts Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.15 2010/07/16 04:25:16 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.15  2010/07/16 04:25:16  geurts
+ * initialize mUseIdealGeometry to be kFALSE in ctor
+ *
  * Revision 1.14  2010/07/14 20:35:21  geurts
  * introduce switch to enable ideal MC geometry, without alignment updates. Default: disabled
  *
@@ -138,6 +141,7 @@ StBTofMatchMaker::StBTofMatchMaker(const Char_t *name): StMaker(name){
   setCreateTreeFlag(kFALSE);
   setSaveGeometry(kFALSE);
   mInitFromOther = kFALSE;
+  mUseIdealGeometry = kFALSE;
   doPrintMemoryInfo = kFALSE;
   doPrintCpuInfo    = kFALSE;
 
