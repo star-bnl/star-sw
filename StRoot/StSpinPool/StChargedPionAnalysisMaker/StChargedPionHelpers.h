@@ -1,7 +1,7 @@
 #ifndef STAR_StChargedPionHelpers
 #define STAR_StChargedPionHelpers
 
-// $Id: StChargedPionHelpers.h,v 1.2 2010/07/01 08:41:47 pibero Exp $
+// $Id: StChargedPionHelpers.h,v 1.3 2010/07/16 20:23:38 rfatemi Exp $
 
 /*****************************************************************************
  * @class StChargedPionHelpers
@@ -13,6 +13,8 @@
 #include <vector>
 using std::vector;
  
+class TLorentzVector;
+
 class StChargedPionBaseEv;
 class StChargedPionEvent;
 class StChargedPionJet;
@@ -25,7 +27,7 @@ class StJetSkimEvent;
 class StMiniMcEvent;
 class StMuTrack;
 class StPythiaEvent;
-class TLorentzVector;
+class TrackToJetIndex;
 
 #include "TObject.h"
 
@@ -54,8 +56,8 @@ private:
 
 /*****************************************************************************
  * $Log: StChargedPionHelpers.h,v $
- * Revision 1.2  2010/07/01 08:41:47  pibero
- * Fix AutoBuild
+ * Revision 1.3  2010/07/16 20:23:38  rfatemi
+ * Changes in PionAnalysisMaker code to ensure backward compatibility with updates in the Jet code.  Affects how to access particles in the jets.
  *
  * Revision 1.1  2008/07/17 17:06:30  kocolosk
  * big-bang integration StChargedPionMcEvent framework
