@@ -801,7 +801,7 @@ double THelixTrack::Dca(const double *point,double *dcaErr) const
    T[1][1]=T[0][2]*T[2][0]-T[2][2]*T[0][0];
    T[1][2]=T[0][0]*T[2][1]-T[2][0]*T[0][1];
    
-   THelixTrack th(this);
+   THelixTrack th(*this);
    th.Move(s);
    th.GetSpot(T,emx);
    *dcaErr=emx[0];
@@ -835,7 +835,7 @@ double THelixTrack::Dca(const double point[3]
    if (kind==3) s = Path(point);
    else         s = Path(point[0],point[1]);
 
-   THelixTrack th(this);
+   THelixTrack th(*this);
    th.Move(s);
    const double *x=th.Pos();
    const double *d=th.Dir();
@@ -2083,7 +2083,7 @@ void TCircleFitter::Test()
   double RERR = 0.1;
 TRandom ran;
 static TCanvas* myCanvas=0;
-static TH1F *hh[6]={0,0,0,0,0,0};
+static TH1F *hh[10]={0};
 static const char *hNams[]={"dH","pH","dA","pA","dC","pC","Xi2",0};
 static const char *hTits[]=
 {"delta H","pull H","delta Psi","pull Psi","delta Curv","pull Curv","Xi2",0};
@@ -2836,7 +2836,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.47 2010/07/15 18:08:43 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.48 2010/07/16 20:31:38 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2852,6 +2852,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.48  2010/07/16 20:31:38  perev
+ * Put back some ctr(this) to ctr(*this)
+ *
  * Revision 1.47  2010/07/15 18:08:43  perev
  * TestMtx added
  *
