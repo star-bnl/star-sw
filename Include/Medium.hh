@@ -192,6 +192,8 @@ class Medium {
 
   protected:
 
+    std::string className;
+
     static int idCounter;
 
     // Id number

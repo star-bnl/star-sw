@@ -4,60 +4,15 @@
 *     (Last changed on 19/ 9/07.)
 *-----------------------------------------------------------------------
       implicit none
-      INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -     MXPSTR,
-     -     MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -     MXLINE,MXEQUT,
-     -     MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -     MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -     MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -     MXHLEV,MXHLRL,MXSUBT,
-     -     MXDLVL,MXILVL,MXDLIN,
-     -     MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -     MXEXG,MXIOG,MXCSG,
-     -     MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -     MXSHOT,MXZPAR,
-     -     MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -     MXPLAN,MXPOIN,MXEDGE,
-     -     MXMCA
-      PARAMETER (MXWIRE=  2000,MXSW  =  200)
+      INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -     MXPSTR
+       PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -198,60 +153,15 @@ CDECK  ID>, SETNEW.
 *   (Last changed on 10/ 9/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -301,7 +211,7 @@ CDECK  ID>, SETNEW.
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
        REAL VNEW(MXWIRE),VPLNEW(5)
-       INTEGER IFAIL,IFAIL1,I,J
+       INTEGER IFAIL,I,J
        CHARACTER*10 USER
 *** Identify the routine, if requested.
        IF(LIDENT)PRINT *,' /// ROUTINE SETNEW ///'
@@ -313,7 +223,7 @@ CDECK  ID>, SETNEW.
             CALL SETUP(IFAIL)
             IF(IFAIL.NE.0)THEN
                  PRINT *,' ###### SETNEW ERROR   : Error computing'//
-     -                ' the charges; further cell computations useless.'
+     -               ' the charges; further cell computations useless.'
                  NWIRE=0
                  RETURN
             ENDIF
@@ -386,60 +296,15 @@ CDECK  ID>, SETA00.
 *            The potential used is log(r).
 *   Variables : No local variables.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -519,60 +384,15 @@ CDECK  ID>, SETB1X.
 *                            image of another * factor.
 *               R2PLAN     : Periodic length of (XX,YYMIRR)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -664,60 +484,15 @@ CDECK  ID>, SETB1Y.
 *                            image of another * factor.
 *               R2PLAN     : Periodic length of (XXMIRR,YY).
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -811,60 +586,15 @@ CDECK  ID>, SETB2X.
 *               YYMIRR     : Difference in y of one wire and the mirror
 *                            image of another * factor.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -964,60 +694,15 @@ CDECK  ID>, SETB2Y.
 *               YYNEG      : Difference in y of one wire and the mirror
 *                            image in period direction of another * fac.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -1117,60 +802,15 @@ CDECK  ID>, SETC10.
 *  (Written by G.A.Erskine/DD, 14.8.1984 modified to some extent)
 *-----------------------------------------------------------------------
        IMPLICIT COMPLEX (W,Z)
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -1274,60 +914,15 @@ CDECK  ID>, SETC2X.
 *            j=1(1)n, lx=-infinity(1)infinity, ly=-infinity(1)infinity.
 *            but the signs of the charges alternate in the x-direction
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -1451,60 +1046,15 @@ CDECK  ID>, SETC2Y.
 *            j=1(1)n, lx=-infinity(1)infinity, ly=-infinity(1)infinity.
 *            but the signs of the charges alternate in the y-direction
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -1627,60 +1177,15 @@ CDECK  ID>, SETC30.
 *            j=1(1)n, lx=-infinity(1)infinity, ly=-infinity(1)infinity.
 *            but the signs of the charges alternate in both directions.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -1793,60 +1298,15 @@ CDECK  ID>, SETD10.
 *   VARIABLES :
 *   (Last changed on  4/ 9/95.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -1914,60 +1374,15 @@ CDECK  ID>, SETD20.
 *   VARIABLES :
 *   (Last changed on 18/ 2/93.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -2059,60 +1474,15 @@ CDECK  ID>, SETD30.
 *   Variables : No local variables.
 *   (Last changed on 21/ 2/94.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -2180,60 +1550,15 @@ CDECK  ID>, CHARGE.
 *            the SET... routines thereby providing the charges.
 *   (Last changed on 30/ 1/93.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -2396,60 +1721,15 @@ CDECK  ID>, SETDIP.
 *   (Last changed on 19/ 9/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -2783,60 +2063,15 @@ CDECK  ID>, EFIELD.
 *   (Last changed on 28/ 9/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        DOUBLE PRECISION WGT,FPRMAT,
      -      FPROJ,FPROJA,FPROJB,FPROJC,FPROJD,FPROJN,
      -      EPSGX,EPSGY,EPSGZ,
@@ -2875,11 +2110,6 @@ CDECK  ID>, EFIELD.
      -      LTRMS,LTRDEL,LTRINT,LTREXB,LTRCUT,TRFLAG(10),LINCAL,
      -      LFULLB,LFULLP,LFULLT,LSPLIT,LSORT,LOUTL,LEPSG,LGSTEP,
      -      LDLSRM,LDTSRM,LTRVVL
-       CHARACTER*80 PARTID,PXLAB,PYLAB,PROLAB
-       CHARACTER*10 PNAME
-       CHARACTER*5  PRVIEW
-       CHARACTER*(MXCHAR) FCNTRW
-       COMMON /PARCHR/ PARTID,FCNTRW,PNAME,PXLAB,PYLAB,PROLAB,PRVIEW
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -2938,7 +2168,7 @@ CDECK  ID>, EFIELD.
      -      CLIGHT=2.99792458E4,
      -      BOLTZ=1.380658E-23)
        REAL XIN,YIN,ZIN,EX,EY,EZ,ETOT,VOLT,XPOS,YPOS,ZPOS,DXWIR,DYWIR,
-     -      AROT,EX3D,EY3D,EZ3D,V3D,EXBGF,EYBGF,EZBGF,VBGF,XAUX,YAUX,
+     -      AROT,EX3D,EY3D,EZ3D,V3D,XAUX,YAUX,
      -      EXD,EYD,VOLTD
        INTEGER IOUT,ILOC,IOPT,I
 *** Initialise the field for returns without actual calculations.
@@ -3134,60 +2364,15 @@ CDECK  ID>, EFCA00SC.
 *               (XPOS,YPOS): The position where the field is calculated.
 *   (Last changed on 25/ 1/96.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -3277,60 +2462,15 @@ CDECK  ID>, E3DA00.
 *               (XPOS,YPOS): The position where the field is calculated.
 *   (Last changed on  5/12/94.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -3427,60 +2567,15 @@ CDECK  ID>, EMCA00.
 *   (Last changed on 10/ 9/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -3584,60 +2679,15 @@ CDECK  ID>, EFCB1XSC.
 *               Z,ZZMIRR   : X + I*Y , XXMIRR + I*YYMIRR ; I**2=-1
 *               ECOMPL     : EX + I*EY                   ; I**2=-1
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -3733,60 +2783,15 @@ CDECK  ID>, EMCB1X.
 *   (Last changed on 24/ 9/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -3884,60 +2889,15 @@ CDECK  ID>, EFCB1YSC.
 *               Z,ZZMIRR   : X + I*Y , XXMIRR + I*YYMIRR ; I**2=-1
 *               ECOMPL     : EX + I*EY                   ; I**2=-1
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -4032,60 +2992,15 @@ CDECK  ID>, EMCB1Y.
 *   (Last changed on 24/ 9/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -4184,60 +3099,15 @@ CDECK  ID>, EFCB2X.
 *               ECOMPL     : EX + i*EY                   ; i**2=-1
 *   (Cray vectorisable)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -4334,60 +3204,15 @@ CDECK  ID>, E3DB2X.
 *   VARIABLES : See routine E3DA00 for most of the variables.
 *   (Last changed on  5/12/94.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -4647,60 +3472,15 @@ CDECK  ID>, EMCB2X.
 *   (Last changed on 17/10/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -4825,60 +3605,15 @@ CDECK  ID>, EFCB2Y.
 *               ECOMPL     : EX + i*EY                   ; i**2=-1
 *   (Cray vectorisable)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -4976,60 +3711,15 @@ CDECK  ID>, E3DB2Y.
 *   VARIABLES : See routine E3DA00 for most of the variables.
 *   (Last changed on  5/12/94.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -5289,60 +3979,15 @@ CDECK  ID>, EMCB2Y.
 *   (Last changed on 20/10/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -5481,60 +4126,15 @@ CDECK  ID>, EFCC10.
 *            calls the routines PH2 and E2SUM written by G.A.Erskine.
 *   VARIABLES : No local variables.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -5592,60 +4192,15 @@ CDECK  ID>, EFCC2X.
 *            configuration with 2 x planes and y periodicity.
 *   VARIABLES : see the writeup
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -5760,60 +4315,15 @@ CDECK  ID>, EFCC2Y.
 *            configuration with 2 y planes and x periodicity.
 *   VARIABLES : see the writeup
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -5928,60 +4438,15 @@ CDECK  ID>, EFCC30.
 *            configuration with 2 y and 2 x planes.
 *   VARIABLES : see the writeup
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -6140,60 +4605,15 @@ CDECK  ID>, EFCD10.
 *               ZI, ZPOS   : Shorthand complex notations.
 *   (Last changed on  4/ 9/95.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -6261,60 +4681,15 @@ CDECK  ID>, E3DD10.
 *   VARIABLES : See routine E3DA00 for most of the variables.
 *   (Last changed on 25/11/95.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -6534,60 +4909,15 @@ CDECK  ID>, EFCD20.
 *               ZI, ZPOS   : Shorthand complex notations.
 *   (Last changed on 10/ 2/93.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -6673,60 +5003,15 @@ CDECK  ID>, EFCD30.
 *               ZI, ZPOS   : Shorthand complex notations.
 *   (Last changed on 19/ 2/94.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -6795,60 +5080,15 @@ CDECK  ID>, EFCMAP.
 *              CC2   - coefficients for expansion around cornre
 *   (Last changed on 19/ 2/94.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -7045,60 +5285,15 @@ CDECK  ID>, PH2.
 *  (G.A.Erskine/DD, 14.8.1984; some minor modifications (i) common block
 *   /EV2COM/ incorporated in /CELDAT/ (ii) large AIMAG(ZETA) corrected)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -7178,60 +5373,15 @@ CDECK  ID>, E2SUM.
 *                            field is to be computed.
 *  (Essentially by G.A.Erskine/DD, 14.8.1984)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -7309,60 +5459,15 @@ CDECK  ID>, EFCMAT.
 *   EFCMAT - Computes the effective distance between points taking the
 *            effects of dielectrica into account.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -7425,60 +5530,15 @@ CDECK  ID>, EFCBGF.
 *   (Last changed on  6/ 4/98.)
 *-----------------------------------------------------------------------
 *       implicit none
-*       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-*    -         MXPSTR,
-*    -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-*    -         MXLINE,MXEQUT,
-*     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-*     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-*     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-*     -         MXHLEV,MXHLRL,MXSUBT,
-*     -         MXDLVL,MXILVL,MXDLIN,
-*     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-*     -         MXEXG,MXIOG,MXCSG,
-*     -         MXORIA,
-*     -         MXMAT,MXEMAT,MXMDIM,
-C     -         MXSHOT,MXZPAR,
-C     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-C     -         MXPLAN,MXPOIN,MXEDGE,
-c     -         MXMCA
+*       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+*    -         MXPSTR
 c       PARAMETER (MXWIRE=  2000,MXSW  =  200)
 c      PARAMETER (MXMATT=    10)
 c     PARAMETER (MX3D  =   100)
 c    PARAMETER (MXPOLE=    10)
 c       PARAMETER (MXPSTR=   100)
 c       PARAMETER (MXLIST=  1000)
-c       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
 c       PARAMETER (MXGRID=    50)
-c       PARAMETER (MXNAME=   200, MXLUN =    30)
-c       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-c       PARAMETER (MXLINE=   150, MXEQUT=    50)
-c       PARAMETER (MXFOUR=    16)
-c       PARAMETER (MXRECL= 10000)
-c       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-c       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-c     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-c       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-c       PARAMETER (MXZERO=MXWIRE)
-c       PARAMETER (MXSTCK=     5)
-c       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-c       PARAMETER (MXWKLS=    10)
-c       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-c       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-c       PARAMETER (MXFRAC=    13)
-c       PARAMETER (MXBANG=    20, MXBTAB=    25)
-c       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-c       PARAMETER (MXORIA=  1000)
-c       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-c       PARAMETER (MXMAP =150000,MXEPS =   10)
-c       PARAMETER (MXWMAP=     5)
-c       PARAMETER (MXSOLI=   500)
-c       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-c       PARAMETER (MXSBUF= 10000)
-c       PARAMETER (MXMCA = 50000)
-c*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-c       INTEGER MXNBMC
-c       PARAMETER(MXNBMC=60)
 c       CHARACTER*80 CELLID
 c       CHARACTER*3 TYPE
 c       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -7595,60 +5655,15 @@ CDECK  ID>, FFDBG.
 *            than one dielectricum in total.
 *   VARIABLES : No local variables.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -7822,60 +5837,15 @@ CDECK  ID>, EFDA00.
 *               EXHELP etc : One term in the series to be summed.
 *               (XPOS,YPOS): The position where the field is calculated.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -8010,67 +5980,6 @@ CDECK  ID>, CFMPTC.
        Y(I)=YI
 10     CONTINUE
        END
-CDECK  ID>, CFMPTR.
-       SUBROUTINE CFMPTR(R,THETA,RHO,PHI,N,IFAIL)
-*-----------------------------------------------------------------------
-*   CFMPTR - Routine transforming (r,theta) to (rho,phi) via the map
-*            (r,theta)=(exp(rho),180*phi/pi). It makes entering cells
-*            in polar coordinates somewhat easier.
-*   (Last changed on 14/ 2/97.)
-*-----------------------------------------------------------------------
-       implicit none
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
-       REAL R(*),THETA(*),RHO(*),PHI(*),RHOI,PHII
-       INTEGER N,IFAIL,I
-*** Preset error flag.
-       IFAIL=0
-*** Loop over the points.
-       DO 10 I=1,N
-       IF(R(I).EQ.0)THEN
-            RHOI=-25.0
-       ELSEIF(R(I).GT.0.0)THEN
-            RHOI=LOG(R(I))
-       ELSE
-            IFAIL=1
-            RHO(I)=1
-            RETURN
-       ENDIF
-       PHII=PI*THETA(I)/180.0
-       RHO(I)=RHOI
-       PHI(I)=PHII
-10     CONTINUE
-       END
-CDECK  ID>, CFMRTC.
-       SUBROUTINE CFMRTC(RHO,PHI,X,Y,N)
-*-----------------------------------------------------------------------
-*   CFMRTC - Routine transforming (rho,phi) to (x,y) via the conformal
-*            map (x,y)=exp(rho,phi). This routine may in principle be
-*            replaced by any conformal mapping routine.
-*   (Last changed on 14/ 2/97.)
-*-----------------------------------------------------------------------
-       implicit none
-       REAL X(*),Y(*),RHO(*),PHI(*),XI,YI
-       INTEGER N,I
-       COMPLEX Z
-*** Loop over the points.
-       DO 10 I=1,N
-       Z=EXP(CMPLX(RHO(I),PHI(I)))
-       XI=REAL(Z)
-       YI=AIMAG(Z)
-       X(I)=XI
-       Y(I)=YI
-10     CONTINUE
-       END
 CDECK  ID>, CFMRTP.
        SUBROUTINE CFMRTP(RHO,PHI,R,THETA,N)
 *-----------------------------------------------------------------------
@@ -8119,33 +6028,7 @@ CDECK  ID>, CF2RTC.
        Y(I)=YI
 10     CONTINUE
        END
-CDECK  ID>, CF2RTP.
-       SUBROUTINE CF2RTP(RHO,PHI,R,THETA,N)
-*-----------------------------------------------------------------------
-*   CF2RTP - Routine transforming (r,theta) to (rho,phi) via the map
-*            (r,theta)=(exp(rho),180*phi/pi).
-*-----------------------------------------------------------------------
-       implicit none
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
-       DOUBLE PRECISION R(*),THETA(*),RHO(*),PHI(*),RI,THETAI
-       INTEGER I,N
-       DO 10 I=1,N
-       RI=EXP(RHO(I))
-       THETAI=180.0*PHI(I)/PI
-       R(I)=RI
-       THETA(I)=THETAI
-10     CONTINUE
-       END
+
 CDECK  ID>, CLIP.
        SUBROUTINE CLIP(X0,Y0,X1,Y1,XLL,YLL,XUR,YUR,IFAIL)
 *-----------------------------------------------------------------------
@@ -8310,60 +6193,15 @@ CDECK  ID>, INTUBE.
 *   (Last changed on 16/ 2/05.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -8401,31 +6239,7 @@ CDECK  ID>, INTUBE.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       REAL EXMAP,EYMAP,EZMAP,VMAP,EWXMAP,EWYMAP,EWZMAP,VWMAP,
-     -      BXMAP,BYMAP,BZMAP,
-     -      XMAP,YMAP,ZMAP,XMMIN,XMMAX,YMMIN,YMMAX,ZMMIN,ZMMAX,
-     -      XAMIN,XAMAX,YAMIN,YAMAX,ZAMIN,ZAMAX,
-     -      VMMIN,VMMAX,EPSMAT,EPSSUR,XFMOFF,YFMOFF,ZFMOFF
-       INTEGER MATMAP,NMAP,NEPS,MAPORD,MAPTYP,IDRMAT,INDEWS,
-     -      NWMAP
-       LOGICAL MAPFLG,LMAPPL,SETAX,SETAY,SETAZ,ELMDGN,LSFDER
-       CHARACTER EWSTYP
-       CHARACTER*10 MATSRC
-       COMMON /FLDMAP/ VMAP(MXMAP,10),VWMAP(MXMAP,10,MXWMAP),
-     -      EXMAP(MXMAP,10),EYMAP(MXMAP,10),EZMAP(MXMAP,10),
-     -      EWXMAP(MXMAP,10,MXWMAP),EWYMAP(MXMAP,10,MXWMAP),
-     -      EWZMAP(MXMAP,10,MXWMAP),
-     -      BXMAP(MXMAP,10),BYMAP(MXMAP,10),BZMAP(MXMAP,10),
-     -      XMAP(MXMAP,10),YMAP(MXMAP,10),ZMAP(MXMAP,10),
-     -      XMMIN,XMMAX,YMMIN,YMMAX,ZMMIN,ZMMAX,
-     -      XAMIN,XAMAX,YAMIN,YAMAX,ZAMIN,ZAMAX,VMMIN,VMMAX,
-     -      XFMOFF,YFMOFF,ZFMOFF,
-     -      EPSMAT(MXEPS),EPSSUR(MXEPS),MATMAP(MXMAP),
-     -      NMAP,NEPS,MAPORD,MAPTYP,IDRMAT,INDEWS(MXWMAP),NWMAP,
-     -      MAPFLG(10+4*MXWMAP),ELMDGN(MXMAP),
-     -      LMAPPL,SETAX,SETAY,SETAZ,LSFDER
-       COMMON /FLDCHR/ EWSTYP(MXWMAP),MATSRC
-       LOGICAL         LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH
@@ -8472,11 +6286,6 @@ CDECK  ID>, INTUBE.
      -      LTRMS,LTRDEL,LTRINT,LTREXB,LTRCUT,TRFLAG(10),LINCAL,
      -      LFULLB,LFULLP,LFULLT,LSPLIT,LSORT,LOUTL,LEPSG,LGSTEP,
      -      LDLSRM,LDTSRM,LTRVVL
-       CHARACTER*80 PARTID,PXLAB,PYLAB,PROLAB
-       CHARACTER*10 PNAME
-       CHARACTER*5  PRVIEW
-       CHARACTER*(MXCHAR) FCNTRW
-       COMMON /PARCHR/ PARTID,FCNTRW,PNAME,PXLAB,PYLAB,PROLAB,PRVIEW
        COMPLEX ICONS
        REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
        PARAMETER (PI=3.141592653589793238,
@@ -8494,11 +6303,8 @@ CDECK  ID>, INTUBE.
      -      XPRT,YPRT,XPRTI,YPRTI,XPRTJ,YPRTJ,XSEPAR,YSEPAR,
      -      XAUX1,YAUX1,XAUX2,YAUX2,SMIN,SMAX,GAP
        INTEGER IFAIL,I,J,IPLAN1,IPLAN2,IPLAN3,IPLAN4,IWIRE,NXOLD,NYOLD,
-     -      IOUT,NC1,NC2,NC3,NC4,IFAIL1,NELEM,NHLP
-       CHARACTER*10 USER
-       CHARACTER*20 STR1,STR2,STR3,STR4
+     -      IOUT,NELEM,NHLP
        CHARACTER LABHLP
-       INTEGER K
 *** Checks on the planes, first move the x planes to the basic cell.
        IF(PERX)THEN
             CONEW1=COPLAN(1)-SX*ANINT(COPLAN(1)/SX)
@@ -9256,8 +7062,6 @@ CDECK  ID>, INTUBE.
             OK=.FALSE.
             RETURN
        ENDIF
-*** Resume here for maps.
-3000   CONTINUE
 *** Take action on the warnings if requested.
        IF(JFAIL.EQ.2.AND..NOT.OK)THEN
             PRINT *,' ###### CELCHK ERROR   : Cell declared to be'//
@@ -9275,63 +7079,18 @@ CDECK  ID>, INTUBE.
 
       SUBROUTINE DISPLAYCELDAT(IFAIL)
 *-----------------------------------------------------------------------
-*     displayCelDat - Debuggins subroutine
+*     displayCelDat - Debugging subroutine
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR,
-     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-     -         MXLINE,MXEQUT,
-     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-     -         MXHLEV,MXHLRL,MXSUBT,
-     -         MXDLVL,MXILVL,MXDLIN,
-     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-     -         MXEXG,MXIOG,MXCSG,
-     -         MXORIA,
-     -         MXMAT,MXEMAT,MXMDIM,
-     -         MXSHOT,MXZPAR,
-     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-     -         MXPLAN,MXPOIN,MXEDGE,
-     -         MXMCA
+       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+     -         MXPSTR
        PARAMETER (MXWIRE=  2000,MXSW  =  200)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
        PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
        PARAMETER (MXGRID=    50)
-       PARAMETER (MXNAME=   200, MXLUN =    30)
-       PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-       PARAMETER (MXLINE=   150, MXEQUT=    50)
-       PARAMETER (MXFOUR=    16)
-       PARAMETER (MXRECL= 10000)
-       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-       PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-       PARAMETER (MXZERO=MXWIRE)
-       PARAMETER (MXSTCK=     5)
-       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-       PARAMETER (MXWKLS=    10)
-       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-       PARAMETER (MXFRAC=    13)
-       PARAMETER (MXBANG=    20, MXBTAB=    25)
-       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-       PARAMETER (MXORIA=  1000)
-       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-       PARAMETER (MXMAP =150000,MXEPS =   10)
-       PARAMETER (MXWMAP=     5)
-       PARAMETER (MXSOLI=   500)
-       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-       PARAMETER (MXSBUF= 10000)
-       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-       INTEGER MXNBMC
-       PARAMETER(MXNBMC=60)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -9369,31 +7128,7 @@ CDECK  ID>, INTUBE.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       REAL EXMAP,EYMAP,EZMAP,VMAP,EWXMAP,EWYMAP,EWZMAP,VWMAP,
-     -      BXMAP,BYMAP,BZMAP,
-     -      XMAP,YMAP,ZMAP,XMMIN,XMMAX,YMMIN,YMMAX,ZMMIN,ZMMAX,
-     -      XAMIN,XAMAX,YAMIN,YAMAX,ZAMIN,ZAMAX,
-     -      VMMIN,VMMAX,EPSMAT,EPSSUR,XFMOFF,YFMOFF,ZFMOFF
-       INTEGER MATMAP,NMAP,NEPS,MAPORD,MAPTYP,IDRMAT,INDEWS,
-     -      NWMAP
-       LOGICAL MAPFLG,LMAPPL,SETAX,SETAY,SETAZ,ELMDGN,LSFDER
-       CHARACTER EWSTYP
-       CHARACTER*10 MATSRC
-       COMMON /FLDMAP/ VMAP(MXMAP,10),VWMAP(MXMAP,10,MXWMAP),
-     -      EXMAP(MXMAP,10),EYMAP(MXMAP,10),EZMAP(MXMAP,10),
-     -      EWXMAP(MXMAP,10,MXWMAP),EWYMAP(MXMAP,10,MXWMAP),
-     -      EWZMAP(MXMAP,10,MXWMAP),
-     -      BXMAP(MXMAP,10),BYMAP(MXMAP,10),BZMAP(MXMAP,10),
-     -      XMAP(MXMAP,10),YMAP(MXMAP,10),ZMAP(MXMAP,10),
-     -      XMMIN,XMMAX,YMMIN,YMMAX,ZMMIN,ZMMAX,
-     -      XAMIN,XAMAX,YAMIN,YAMAX,ZAMIN,ZAMAX,VMMIN,VMMAX,
-     -      XFMOFF,YFMOFF,ZFMOFF,
-     -      EPSMAT(MXEPS),EPSSUR(MXEPS),MATMAP(MXMAP),
-     -      NMAP,NEPS,MAPORD,MAPTYP,IDRMAT,INDEWS(MXWMAP),NWMAP,
-     -      MAPFLG(10+4*MXWMAP),ELMDGN(MXMAP),
-     -      LMAPPL,SETAX,SETAY,SETAZ,LSFDER
-       COMMON /FLDCHR/ EWSTYP(MXWMAP),MATSRC
-       LOGICAL         LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH
@@ -9440,11 +7175,6 @@ CDECK  ID>, INTUBE.
      -      LTRMS,LTRDEL,LTRINT,LTREXB,LTRCUT,TRFLAG(10),LINCAL,
      -      LFULLB,LFULLP,LFULLT,LSPLIT,LSORT,LOUTL,LEPSG,LGSTEP,
      -      LDLSRM,LDTSRM,LTRVVL
-       CHARACTER*80 PARTID,PXLAB,PYLAB,PROLAB
-       CHARACTER*10 PNAME
-       CHARACTER*5  PRVIEW
-       CHARACTER*(MXCHAR) FCNTRW
-       COMMON /PARCHR/ PARTID,FCNTRW,PNAME,PXLAB,PYLAB,PROLAB,PRVIEW
        COMPLEX ICONS
        REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
        PARAMETER (PI=3.141592653589793238,
@@ -9456,272 +7186,623 @@ CDECK  ID>, INTUBE.
      -      GRAV=9.80665,
      -      CLIGHT=2.99792458E4,
      -      BOLTZ=1.380658E-23)
-       LOGICAL WRONG(MXWIRE),WRMATX(MXMATT),WRMATY(MXMATT),OK,
-     -      SETX,SETY,SETZ,SETV
-       REAL CONEW1,CONEW2,CONEW3,CONEW4,COHLP,VTHLP,XNEW,YNEW,
-     -      XPRT,YPRT,XPRTI,YPRTI,XPRTJ,YPRTJ,XSEPAR,YSEPAR,
-     -      XAUX1,YAUX1,XAUX2,YAUX2,SMIN,SMAX,GAP
-       INTEGER IFAIL,I,J,IPLAN1,IPLAN2,IPLAN3,IPLAN4,IWIRE,NXOLD,NYOLD,
-     -      IOUT,NC1,NC2,NC3,NC4,IFAIL1,NELEM,NHLP
-       CHARACTER*10 USER
-       CHARACTER*20 STR1,STR2,STR3,STR4
-       CHARACTER LABHLP
+       INTEGER IFAIL,I,J
        INTEGER K
        WRITE(*,*) ZMULT
        IF(YNPLAN(1)) THEN 
           WRITE(*,*) 'YNPLAN(1) TRUE'
-      ELSE 
-         WRITE(*,*) 'YNPLAN(1) FALSE' 
-      ENDIF
-      IF(YNPLAN(2)) THEN 
-         WRITE(*,*) 'YNPLAN(2) TRUE'
-      ELSE 
-         WRITE(*,*) 'YNPLAN(2) FALSE' 
-      ENDIF
-      IF(YNPLAN(3)) THEN 
-         WRITE(*,*) 'YNPLAN(3) TRUE'
-      ELSE 
-         WRITE(*,*) 'YNPLAN(3) FALSE' 
-      ENDIF
-      IF(YNPLAN(4)) THEN 
-         WRITE(*,*) 'YNPLAN(4) TRUE'
-      ELSE 
-         WRITE(*,*) 'YNPLAN(4) FALSE' 
-      ENDIF
+       ELSE 
+          WRITE(*,*) 'YNPLAN(1) FALSE' 
+       ENDIF
+       IF(YNPLAN(2)) THEN 
+          WRITE(*,*) 'YNPLAN(2) TRUE'
+       ELSE 
+          WRITE(*,*) 'YNPLAN(2) FALSE' 
+       ENDIF
+       IF(YNPLAN(3)) THEN 
+          WRITE(*,*) 'YNPLAN(3) TRUE'
+       ELSE 
+          WRITE(*,*) 'YNPLAN(3) FALSE' 
+       ENDIF
+       IF(YNPLAN(4)) THEN 
+          WRITE(*,*) 'YNPLAN(4) TRUE'
+       ELSE 
+          WRITE(*,*) 'YNPLAN(4) FALSE' 
+       ENDIF
       
-      IF(PERX) THEN 
-         WRITE(*,*) 'PERX TRUE'
-      ELSE 
-         WRITE(*,*) 'PERX FALSE' 
-      ENDIF
-      
-      IF(PERY) THEN 
-         WRITE(*,*) 'PERY TRUE'
-      ELSE 
-         WRITE(*,*) 'PERY FALSE' 
-      ENDIF
-      
-      IF(PERZ) THEN 
-         WRITE(*,*)'PERZ TRUE'
-      ELSE 
-         WRITE(*,*) 'PERZ FALSE' 
-      ENDIF
-      
-      IF(YNPLAX) THEN 
-         WRITE(*,*)'YNPLAX TRUE'
-      ELSE 
-         WRITE(*,*) 'YNPLAX FALSE' 
-      ENDIF
-      
-      IF(YNPLAY) THEN 
-         WRITE(*,*)'YNPLAY TRUE'
-      ELSE 
-         WRITE(*,*) 'YNPLAY FALSE' 
-      ENDIF
-      
-      IF(YNMATX) THEN 
-         WRITE(*,*)'YNMATX TRUE'
-      ELSE 
-         WRITE(*,*) 'YNMATX FALSE' 
-      ENDIF
-      
-      IF(YNMATY) THEN 
-         WRITE(*,*)'YNMATY TRUE'
-      ELSE 
-         WRITE(*,*) 'YNMATY FALSE' 
-      ENDIF
-      
-      IF(POLAR) THEN 
-         WRITE(*,*)'POLAR TRUE'
-      ELSE 
-         WRITE(*,*) 'POLAR FALSE' 
-      ENDIF
-      
-      IF(TUBE) THEN 
-         WRITE(*,*)'TUBE TRUE'
-      ELSE 
-         WRITE(*,*) 'TUBE FALSE' 
-      ENDIF
-      
-      IF(PERMX) THEN 
-         WRITE(*,*)'PERMX TRUE'
-      ELSE 
-         WRITE(*,*) 'PERMX FALSE' 
-      ENDIF
-      
-      IF(PERMY) THEN 
-         WRITE(*,*)'PERMY TRUE'
-      ELSE 
-         WRITE(*,*) 'PERMY FALSE' 
-      ENDIF
-      
-      IF(PERMZ) THEN 
-         WRITE(*,*)'PERMZ TRUE'
-      ELSE 
-         WRITE(*,*) 'PERMZ FALSE' 
-      ENDIF
-      
-      IF(PERAX) THEN 
-         WRITE(*,*)'PERAX TRUE'
-      ELSE 
-         WRITE(*,*) 'PERAX FALSE' 
-      ENDIF
-      
-      IF(PERAY) THEN 
-         WRITE(*,*)'PERAY TRUE'
-      ELSE 
-         WRITE(*,*) 'PERAY FALSE' 
-      ENDIF
+       IF(PERX) THEN 
+          WRITE(*,*) 'PERX TRUE'
+       ELSE 
+          WRITE(*,*) 'PERX FALSE' 
+       ENDIF
 
-      IF(PERAZ) THEN 
-         WRITE(*,*)'PERAZ TRUE'
-      ELSE 
-         WRITE(*,*) 'PERAZ FALSE' 
-      ENDIF
+       IF(PERY) THEN 
+          WRITE(*,*) 'PERY TRUE'
+       ELSE 
+          WRITE(*,*) 'PERY FALSE' 
+       ENDIF
+       
+       IF(PERZ) THEN 
+          WRITE(*,*)'PERZ TRUE'
+       ELSE 
+          WRITE(*,*) 'PERZ FALSE' 
+       ENDIF
+       
+       IF(YNPLAX) THEN 
+          WRITE(*,*)'YNPLAX TRUE'
+       ELSE 
+          WRITE(*,*) 'YNPLAX FALSE' 
+       ENDIF
+       
+       IF(YNPLAY) THEN 
+          WRITE(*,*)'YNPLAY TRUE'
+       ELSE 
+          WRITE(*,*) 'YNPLAY FALSE' 
+       ENDIF
+       
+       IF(YNMATX) THEN 
+          WRITE(*,*)'YNMATX TRUE'
+       ELSE 
+          WRITE(*,*) 'YNMATX FALSE' 
+       ENDIF
+       
+       IF(YNMATY) THEN 
+          WRITE(*,*)'YNMATY TRUE'
+       ELSE 
+          WRITE(*,*) 'YNMATY FALSE' 
+       ENDIF
+       
+       IF(POLAR) THEN 
+          WRITE(*,*)'POLAR TRUE'
+       ELSE 
+          WRITE(*,*) 'POLAR FALSE' 
+       ENDIF
       
-      IF(PERRX) THEN 
-         WRITE(*,*)'PERRX TRUE'
-      ELSE 
-         WRITE(*,*) 'PERRX FALSE' 
-      ENDIF
+       IF(TUBE) THEN 
+          WRITE(*,*)'TUBE TRUE'
+       ELSE 
+          WRITE(*,*) 'TUBE FALSE' 
+       ENDIF
       
-      IF(PERRY) THEN 
-         WRITE(*,*)'PERRY TRUE'
-      ELSE 
-         WRITE(*,*) 'PERRY FALSE' 
-      ENDIF
+       IF(PERMX) THEN 
+          WRITE(*,*)'PERMX TRUE'
+       ELSE 
+          WRITE(*,*) 'PERMX FALSE' 
+       ENDIF
       
-      IF(PERRZ) THEN 
-         WRITE(*,*)'PERRZ TRUE'
-      ELSE 
-         WRITE(*,*) 'PERRZ FALSE' 
-      ENDIF
+       IF(PERMY) THEN 
+          WRITE(*,*)'PERMY TRUE'
+       ELSE 
+          WRITE(*,*) 'PERMY FALSE' 
+       ENDIF
       
-      DO 17 I=1,MXWIRE
-         IF(CNALSO(I))THEN 
-            WRITE(*,*) 'CNALSO (', I,') TRUE'
-      ELSE 
-         WRITE(*,*) 'CNALSO (', I,') FALSE' 
-      ENDIF
-
- 17   CONTINUE
+       IF(PERMZ) THEN 
+          WRITE(*,*)'PERMZ TRUE'
+       ELSE 
+          WRITE(*,*) 'PERMZ FALSE' 
+       ENDIF
       
-      IF(LBGFMP) THEN 
-         WRITE(*,*)'LBGFMP TRUE'
-      ELSE 
-         WRITE(*,*) 'LBGFMP FALSE' 
-      ENDIF
-
-      DO 18 J=1, MXWIRE
-         WRITE(*,*)INDSW(J)
- 18   CONTINUE
-
-      WRITE(*,*) NWIRE
-      WRITE(*,*) NSW
-      WRITE(*,*) ICTYPE
-      WRITE(*,*) MODE
-      WRITE(*,*) NTUBE
-      WRITE(*,*) MTUBE
-      WRITE(*,*) NXMATT
-      WRITE(*,*) NYMATT
-      WRITE(*,*) N3D
-      WRITE(*,*) NTERMB
-      WRITE(*,*) NTERMP
-      WRITE(*,*) IENBGF
-
-      DO 19 J=1, 5
-         WRITE(*,*) INDPLA(J)
-         WRITE(*,*) NPSTR1(J)
-         WRITE(*,*) NPSTR2(J)
- 19   CONTINUE
+       IF(PERAX) THEN 
+          WRITE(*,*)'PERAX TRUE'
+       ELSE 
+          WRITE(*,*) 'PERAX FALSE' 
+       ENDIF
       
-      DO 21 I=1, 5
-         DO 33 J=1, MXPSTR
-            WRITE(*,*) INDST1(I,J)
-            WRITE(*,*) INDST2(I,J)
- 33         CONTINUE
- 21   CONTINUE
+       IF(PERAY) THEN 
+          WRITE(*,*)'PERAY TRUE'
+       ELSE 
+          WRITE(*,*) 'PERAY FALSE' 
+       ENDIF
+ 
+       IF(PERAZ) THEN 
+          WRITE(*,*)'PERAZ TRUE'
+       ELSE 
+          WRITE(*,*) 'PERAZ FALSE' 
+       ENDIF
+      
+       IF(PERRX) THEN 
+          WRITE(*,*)'PERRX TRUE'
+       ELSE 
+          WRITE(*,*) 'PERRX FALSE' 
+       ENDIF
+      
+       IF(PERRY) THEN 
+          WRITE(*,*)'PERRY TRUE'
+       ELSE 
+          WRITE(*,*) 'PERRY FALSE' 
+       ENDIF
+      
+       IF(PERRZ) THEN 
+          WRITE(*,*)'PERRZ TRUE'
+       ELSE 
+          WRITE(*,*) 'PERRZ FALSE' 
+       ENDIF
+       
+       DO 17 I=1,MXWIRE
+          IF(CNALSO(I))THEN 
+             WRITE(*,*) 'CNALSO (', I,') TRUE'
+       ELSE 
+          WRITE(*,*) 'CNALSO (', I,') FALSE' 
+       ENDIF
 
-      DO 22 J=1, MXWIRE 
-         WRITE(*,*) X(J)
-         WRITE(*,*) Y(J)
-         WRITE(*,*) V(J)
-         WRITE(*,*) E(J)
-         WRITE(*,*) D(J)
-         WRITE(*,*) W(J)
-         WRITE(*,*) U(J)
-         WRITE(*,*) DENS(J)
-         WRITE(*,*) COSPH2(J)
-         WRITE(*,*) SINPH2(J)
-         WRITE(*,*) AMP2(J)
- 22   CONTINUE
+ 17    CONTINUE
+      
+       IF(LBGFMP) THEN 
+          WRITE(*,*)'LBGFMP TRUE'
+       ELSE 
+          WRITE(*,*) 'LBGFMP FALSE' 
+       ENDIF
 
-      DO 23 I=1, 4
-         WRITE(*,*) COPLAN(I)
-         WRITE(*,*) VTPLAN(I)
- 23   CONTINUE
+       DO 18 J=1, MXWIRE
+          WRITE(*,*)INDSW(J)
+ 18    CONTINUE
+
+       WRITE(*,*) NWIRE
+       WRITE(*,*) NSW
+       WRITE(*,*) ICTYPE
+       WRITE(*,*) MODE
+       WRITE(*,*) NTUBE
+       WRITE(*,*) MTUBE
+       WRITE(*,*) NXMATT
+       WRITE(*,*) NYMATT
+       WRITE(*,*) N3D
+       WRITE(*,*) NTERMB
+       WRITE(*,*) NTERMP
+       WRITE(*,*) IENBGF
+
+       DO 19 J=1, 5
+          WRITE(*,*) INDPLA(J)
+          WRITE(*,*) NPSTR1(J)
+          WRITE(*,*) NPSTR2(J)
+ 19    CONTINUE
+      
+       DO 21 I=1, 5
+          DO 33 J=1, MXPSTR
+             WRITE(*,*) INDST1(I,J)
+             WRITE(*,*) INDST2(I,J)
+ 33          CONTINUE
+ 21    CONTINUE
+
+       DO 22 J=1, MXWIRE 
+          WRITE(*,*) X(J)
+          WRITE(*,*) Y(J)
+          WRITE(*,*) V(J)
+          WRITE(*,*) E(J)
+          WRITE(*,*) D(J)
+          WRITE(*,*) W(J)
+          WRITE(*,*) U(J)
+          WRITE(*,*) DENS(J)
+          WRITE(*,*) COSPH2(J)
+          WRITE(*,*) SINPH2(J)
+          WRITE(*,*) AMP2(J)
+ 22    CONTINUE
+
+       DO 23 I=1, 4
+          WRITE(*,*) COPLAN(I)
+          WRITE(*,*) VTPLAN(I)
+ 23    CONTINUE
      
-      DO 24 J=1, MXMATT
-         DO 25 I=1, 5
-            WRITE(*,*) XMATT(J,I)
-            WRITE(*,*) YMATT(J,I)
- 25      CONTINUE
- 24   CONTINUE
-      DO 26, I=1, MX3D     
-         WRITE(*,*) X3D(I)
-         WRITE(*,*) Y3D(I)
-         WRITE(*,*) Z3D(I)
-         WRITE(*,*) E3D(I)
- 26   CONTINUE
+       DO 24 J=1, MXMATT
+          DO 25 I=1, 5
+             WRITE(*,*) XMATT(J,I)
+             WRITE(*,*) YMATT(J,I)
+ 25       CONTINUE
+ 24    CONTINUE
+       DO 26, I=1, MX3D     
+          WRITE(*,*) X3D(I)
+          WRITE(*,*) Y3D(I)
+          WRITE(*,*) Z3D(I)
+          WRITE(*,*) E3D(I)
+ 26    CONTINUE
            
-      WRITE(*,*) DOWN(1)
-      WRITE(*,*) DOWN(2)
-      WRITE(*,*) DOWN(3)
+       WRITE(*,*) DOWN(1)
+       WRITE(*,*) DOWN(2)
+       WRITE(*,*) DOWN(3)
       
-      DO 27 I=1,5
-         DO 28 J=1,MXPSTR
-            DO 29 K=1,3
-               WRITE(*,*) PLSTR1(I,J,K)
-               WRITE(*,*) PLSTR2(I,J,K)
- 29         CONTINUE
- 28      CONTINUE
- 27   CONTINUE
+       DO 27 I=1,5
+          DO 28 J=1,MXPSTR
+             DO 29 K=1,3
+                WRITE(*,*) PLSTR1(I,J,K)
+                WRITE(*,*) PLSTR2(I,J,K)
+ 29          CONTINUE
+ 28       CONTINUE
+ 27    CONTINUE
            
-      WRITE(*,*) COTUBE
-      WRITE(*,*) VTTUBE
-      DO 34 I=1, MXWIRE
-         WRITE(*,*) B2SIN(I)
- 34   CONTINUE
+       WRITE(*,*) COTUBE
+       WRITE(*,*) VTTUBE
+       DO 34 I=1, MXWIRE
+          WRITE(*,*) B2SIN(I)
+ 34    CONTINUE
 
-      WRITE(*,*) P1
-      WRITE(*,*) P2
-      WRITE(*,*) C1
-      WRITE(*,*) XMIN
-      WRITE(*,*) YMIN
-      WRITE(*,*) ZMIN
-      WRITE(*,*) XMAX
-      WRITE(*,*) YMAX
-      WRITE(*,*) ZMAX
-      WRITE(*,*) VMIN
-      WRITE(*,*) VMAX
-      WRITE(*,*) COPLAX
-      WRITE(*,*) COPLAY
-      WRITE(*,*) COMATX 
-      WRITE(*,*) COMATY
-      WRITE(*,*) CORVTA
-      WRITE(*,*) CORVTB
-      WRITE(*,*) CORVTC
-      WRITE(*,*) V0
-      WRITE(*,*) SX
-      WRITE(*,*) SY
-      WRITE(*,*) SZ
-      WRITE(*,*) KAPPA
-      WRITE(*,*) ZMULT
+       WRITE(*,*) P1
+       WRITE(*,*) P2
+       WRITE(*,*) C1
+       WRITE(*,*) XMIN
+       WRITE(*,*) YMIN
+       WRITE(*,*) ZMIN
+       WRITE(*,*) XMAX
+       WRITE(*,*) YMAX
+       WRITE(*,*) ZMAX
+       WRITE(*,*) VMIN
+       WRITE(*,*) VMAX
+       WRITE(*,*) COPLAX
+       WRITE(*,*) COPLAY
+       WRITE(*,*) COMATX 
+       WRITE(*,*) COMATY
+       WRITE(*,*) CORVTA
+       WRITE(*,*) CORVTB
+       WRITE(*,*) CORVTC
+       WRITE(*,*) V0
+       WRITE(*,*) SX
+       WRITE(*,*) SY
+       WRITE(*,*) SZ
+       WRITE(*,*) KAPPA
+       WRITE(*,*) ZMULT
       
-      DO 31 J=1,MXWIRE
-         WRITE(*,*) WMAP(J)
- 31   CONTINUE
-      end
+       DO 31 J=1,MXWIRE
+          WRITE(*,*) WMAP(J)
+ 31    CONTINUE
+       end      
+      
+*-----------------------------------------------------------------------
+*     Routines from Cernlib
+*-----------------------------------------------------------------------
+
+       SUBROUTINE DEQINV(N,A,IDIM,R,IFAIL,K,B)
+*-----------------------------------------------------------------------
+* DEQINV - Replaces B by the solution of X of A*X=B,
+*          and replaces A by its inverse.
+* CALLS    DFACT, DFEQN, DFINV
+*-----------------------------------------------------------------------
+       REAL R(N),T1,T2,T3
+       DOUBLE PRECISION A(IDIM,N),B(IDIM,K),DET,TEMP,S,
+     -                  B1,B2,C11,C12,C13,C21,C22,C23,C31,C32,C33
+
+*** Test for parameter errors
+       IF((N.LT.1).OR.(N.GT.IDIM).OR.(K.LT.1)) GO TO 10
+*** Test for N.LE.3
+       IF(N.GT.3) GO TO 9
+       IFAIL=0
+       IF(N.LT.3) GO TO 5
+*** N=3 case
+*** Compute cofactors
+       C11=A(2,2)*A(3,3)-A(2,3)*A(3,2)
+       C12=A(2,3)*A(3,1)-A(2,1)*A(3,3)
+       C13=A(2,1)*A(3,2)-A(2,2)*A(3,1)
+       C21=A(3,2)*A(1,3)-A(3,3)*A(1,2)
+       C22=A(3,3)*A(1,1)-A(3,1)*A(1,3)
+       C23=A(3,1)*A(1,2)-A(3,2)*A(1,1)
+       C31=A(1,2)*A(2,3)-A(1,3)*A(2,2)
+       C32=A(1,3)*A(2,1)-A(1,1)*A(2,3)
+       C33=A(1,1)*A(2,2)-A(1,2)*A(2,1)
+       T1=ABS(SNGL(A(1,1)))
+       T2=ABS(SNGL(A(2,1)))
+       T3=ABS(SNGL(A(3,1)))
+*** Set TEMP=pivot and DET=pivot*DET
+       IF(T1.GE.T2) GO TO 1
+          IF(T3.GE.T2) GO TO 2
+*** Pivot is A21
+             TEMP=A(2,1)
+             DET=C13*C32-C12*C33
+             GO TO 3
+    1  IF(T3.GE.T1) GO TO 2
+*** Pivot is A11
+          TEMP=A(1,1)
+          DET=C22*C33-C23*C32
+          GO TO 3
+*** Pivot is A31
+    2     TEMP=A(3,1)
+          DET=C23*C12-C22*C13
+*** Set elements of inverse in A
+    3  IF(DET.EQ.0D0) GO TO 11
+       S=TEMP/DET
+       A(1,1)=S*C11
+       A(1,2)=S*C21
+       A(1,3)=S*C31
+       A(2,1)=S*C12
+       A(2,2)=S*C22
+       A(2,3)=S*C32
+       A(3,1)=S*C13
+       A(3,2)=S*C23
+       A(3,3)=S*C33
+*** Replace B by AINV*B
+       DO 4 J=1,K
+          B1=B(1,J)
+          B2=B(2,J)
+          B(1,J)=A(1,1)*B1+A(1,2)*B2+A(1,3)*B(3,J)
+          B(2,J)=A(2,1)*B1+A(2,2)*B2+A(2,3)*B(3,J)
+          B(3,J)=A(3,1)*B1+A(3,2)*B2+A(3,3)*B(3,J)
+    4  CONTINUE
+       RETURN
+    5  IF(N.LT.2) GO TO 7
+*** N=2 case by Cramers rule
+       DET=A(1,1)*A(2,2)-A(1,2)*A(2,1)
+       IF(DET.EQ.0D0) GO TO 11
+       S=1D0/DET
+       C11   =S*A(2,2)
+       A(1,2)=-S*A(1,2)
+       A(2,1)=-S*A(2,1)
+       A(2,2)=S*A(1,1)
+       A(1,1)=C11
+       DO 6 J=1,K
+          B1=B(1,J)
+          B(1,J)=C11*B1+A(1,2)*B(2,J)
+          B(2,J)=A(2,1)*B1+A(2,2)*B(2,J)
+    6  CONTINUE
+       RETURN
+*** N=1 case
+    7  IF(A(1,1).EQ.0D0) GO TO 11
+       A(1,1)=1D0/A(1,1)
+       DO 8 J=1,K
+          B(1,J)=A(1,1)*B(1,J)
+    8  CONTINUE
+       RETURN
+*** N.GT.3 cases. Factorize matrix, invert and solve system
+    9  CALL DFACT(N,A,IDIM,R,IFAIL,DET,JFAIL)
+       IF(IFAIL.NE.0) RETURN
+       CALL DFEQN(N,A,IDIM,R,K,B)
+       CALL DFINV(N,A,IDIM,R)
+       RETURN
+*** Error exits
+   10  IFAIL=+1
+       RETURN
+   11  IFAIL=-1
+       RETURN
+       END
+       
+       SUBROUTINE DFACT(N,A,IDIM,IR,IFAIL,DET,JFAIL)
+*-----------------------------------------------------------------------
+* DFACT
+*-----------------------------------------------------------------------       
+       INTEGER             IR(*),    IPAIRF
+       DOUBLE PRECISION    A(IDIM,*),DET,      ZERO,     ONE,X,Y,TF
+       REAL                G1,       G2
+       REAL                PIVOTF,   P,        Q,        SIZEF,  T
+       DOUBLE PRECISION    S11, S12, DOTF
+       IPAIRF(J,K)  =  J*2**12 + K
+       PIVOTF(X)    =  ABS(SNGL(X))
+       SIZEF(X)     =  ABS(SNGL(X))
+       DOTF(X,Y,S11)  =  X * Y + S11
+* CERNLIB_NUME2465
+*       DATA      G1, G2              /  1.E-1232, 1.E1232  /
+* CERNLIB_NUME279
+*       DATA      G1, G2              /  1.E-139, 1.E139  /
+* CERNLIB_NUME75
+*       DATA      G1, G2              /  1.E-37,  1.E37  /
+* CERNLIB_NUME38
+       DATA      G1, G2              /  1.E-19,  1.E19  /
+       DATA      ZERO, ONE           /  0.D0, 1.D0  /
+       DATA      NORMAL, IMPOSS      /  0, -1  /
+       DATA      JRANGE, JOVER, JUNDER  /  0, +1, -1  /
+       IF(IDIM .GE. N  .AND.  N .GT. 0)  GOTO 110
+       RETURN
+ 110   IFAIL  =  NORMAL
+       JFAIL  =  JRANGE
+       NXCH   =  0
+       DET    =  ONE
+       DO 144    J  =  1, N
+ 120      K  =  J
+          P  =  PIVOTF(A(J,J))
+          IF(J .EQ. N)  GOTO 122
+          JP1  =  J+1
+          DO 121    I  =  JP1, N
+             Q  =  PIVOTF(A(I,J))
+             IF(Q .LE. P)  GOTO 121
+                K  =  I
+                P  =  Q
+ 121         CONTINUE
+          IF(K .NE. J)  GOTO 123
+ 122      IF(P .GT. 0.)  GOTO 130
+             DET    =  ZERO
+             IFAIL  =  IMPOSS
+             JFAIL  =  JRANGE
+             RETURN
+ 123      DO 124    L  =  1, N
+             TF      =  A(J,L)
+             A(J,L)  =  A(K,L)
+             A(K,L)  =  TF
+ 124         CONTINUE
+          NXCH      =  NXCH + 1
+          IR(NXCH)  =  IPAIRF(J,K)
+ 130      DET     =  DET * A(J,J)
+          A(J,J)  =  ONE / A(J,J)
+          T  =  SIZEF(DET)
+          IF(T .LT. G1)  THEN
+             DET    =  ZERO
+             IF(JFAIL .EQ. JRANGE)  JFAIL  =  JUNDER
+          ELSEIF(T .GT. G2)  THEN
+             DET    =  ONE
+             IF(JFAIL .EQ. JRANGE)  JFAIL  =  JOVER
+          ENDIF
+          IF(J .EQ. N)  GOTO 144
+          JM1  =  J-1
+          JP1  =  J+1
+          DO 143   K  =  JP1, N
+             S11  =  -A(J,K)
+             S12  =  -A(K,J+1)
+             IF(J .EQ. 1)  GOTO 142
+             DO 141  I  =  1, JM1
+                S11  =  DOTF(A(I,K),A(J,I),S11)
+                S12  =  DOTF(A(I,J+1),A(K,I),S12)
+ 141            CONTINUE
+ 142         A(J,K)    =  -S11 * A(J,J)
+             A(K,J+1)  =  -DOTF(A(J,J+1),A(K,J),S12)
+ 143         CONTINUE
+ 144      CONTINUE
+ 150   IF(MOD(NXCH,2) .NE. 0)  DET  =  -DET
+       IF(JFAIL .NE. JRANGE)   DET  =  ZERO
+       IR(N)  =  NXCH
+       RETURN
+       END
+
+       SUBROUTINE DFEQN(N,A,IDIM,IR,K,B)
+*-----------------------------------------------------------------------
+* DFEQN 
+*-----------------------------------------------------------------------
+       INTEGER             IR(*)
+       DOUBLE PRECISION    A(IDIM,*),B(IDIM,*),X,Y,TE
+       DOUBLE PRECISION    S21, S22, DOTF
+       DOTF(X,Y,S21)  =  X*Y + S21
+       IF(IDIM .GE. N  .AND.  N .GT. 0  .AND.  K .GT. 0)  GOTO 210
+       RETURN
+ 210   NXCH  =  IR(N)
+       IF(NXCH .EQ. 0)  GOTO 220
+       DO 212    M  =  1, NXCH
+          IJ  =  IR(M)
+          I   =  IJ / 4096
+          J   =  MOD(IJ,4096)
+          DO 211   L  =  1, K
+             TE      =  B(I,L)
+             B(I,L)  =  B(J,L)
+             B(J,L)  =  TE
+ 211         CONTINUE
+ 212      CONTINUE
+ 220   DO 221    L  =  1, K
+          B(1,L)  =  A(1,1)*B(1,L)
+ 221      CONTINUE
+       IF(N .EQ. 1)  GOTO 299
+       DO 243    L  =  1, K
+          DO 232   I  =  2, N
+             IM1  =  I-1
+             S21  =  - B(I,L)
+             DO 231   J  =  1, IM1
+                S21  =  DOTF(A(I,J),B(J,L),S21)
+ 231            CONTINUE
+             B(I,L)  =  - A(I,I)*S21
+ 232         CONTINUE
+          NM1  =  N-1
+          DO 242   I  =  1, NM1
+             NMI  =  N-I
+             S22  =  - B(NMI,L)
+             DO 241   J  =  1, I
+                NMJP1  =  N - J+1
+                S22    =  DOTF(A(NMI,NMJP1),B(NMJP1,L),S22)
+ 241            CONTINUE
+             B(NMI,L)  =  - S22
+ 242         CONTINUE
+ 243      CONTINUE
+ 299   CONTINUE
+       RETURN
+       END
+       
+       SUBROUTINE DFINV(N,A,IDIM,IR)
+*-----------------------------------------------------------------------
+* DFINV 
+*-----------------------------------------------------------------------
+       INTEGER             IR(*)
+       DOUBLE PRECISION    A(IDIM,*),ZERO,     X, Y, TI
+       DOUBLE PRECISION    S31, S32, S33, S34, DOTF
+       DOTF(X,Y,S31)  =  X*Y + S31
+       DATA      ZERO      /  0.D0  /
+       IF(IDIM .GE. N  .AND.  N .GT. 0)  GOTO 310
+       RETURN
+ 310   IF(N .EQ. 1)  RETURN
+       A(2,1)  =  -A(2,2) * DOTF(A(1,1),A(2,1),ZERO)
+       A(1,2)  =  -A(1,2)
+       IF(N .EQ. 2)  GOTO 330
+       DO 314    I  =  3, N
+          IM2  =  I-2
+          DO 312 J  =  1, IM2
+             S31  =  ZERO
+             S32  =  A(J,I)
+             DO 311  K  =  J, IM2
+                S31  =  DOTF(A(K,J),A(I,K),S31)
+                S32  =  DOTF(A(J,K+1),A(K+1,I),S32)
+ 311            CONTINUE
+             A(I,J)  =  -A(I,I) * DOTF(A(I-1,J),A(I,I-1),S31)
+             A(J,I)  =  -S32
+ 312         CONTINUE
+          A(I,I-1)  =  -A(I,I) * DOTF(A(I-1,I-1),A(I,I-1),ZERO)
+          A(I-1,I)  =  -A(I-1,I)
+ 314      CONTINUE
+ 330   NM1  =  N-1
+       DO 335   I  =  1, NM1
+          NMI  =  N-I
+          DO 332   J  =  1, I
+             S33  =  A(I,J)
+             DO 331   K  =  1, NMI
+                S33  =  DOTF(A(I+K,J),A(I,I+K),S33)
+ 331            CONTINUE
+             A(I,J)  =  S33
+ 332         CONTINUE
+          DO 334   J  =  1, NMI
+             S34  =  ZERO
+             DO 333   K  =  J, NMI
+                S34  =  DOTF(A(I+K,I+J),A(I,I+K),S34)
+ 333            CONTINUE
+             A(I,I+J)  =  S34
+ 334         CONTINUE
+ 335      CONTINUE
+       NXCH  =  IR(N)
+       IF(NXCH .EQ. 0)  RETURN
+         DO 342 M  =  1, NXCH
+          K   =  NXCH - M+1
+          IJ  =  IR(K)
+          I   =  IJ / 4096
+          J   =  MOD(IJ,4096)
+          DO 341  K  =  1, N
+             TI      =  A(K,I)
+             A(K,I)  =  A(K,J)
+             A(K,J)  =  TI
+ 341         CONTINUE
+ 342      CONTINUE
+       RETURN
+       END
+       
+       FUNCTION GAMMA(X)
+*-----------------------------------------------------------------------
+* GAMMA 
+*-----------------------------------------------------------------------
+       REAL X
+       DOUBLE PRECISION C, U, F, H, ALFA, B1, B2
+       INTEGER I
+       DIMENSION C(0:15)
+
+       DATA C( 0) /3.65738 77250 83382 44D0/
+       DATA C( 1) /1.95754 34566 61268 27D0/
+       DATA C( 2) /0.33829 71138 26160 39D0/
+       DATA C( 3) /0.04208 95127 65575 49D0/
+       DATA C( 4) /0.00428 76504 82129 09D0/
+       DATA C( 5) /0.00036 52121 69294 62D0/
+       DATA C( 6) /0.00002 74006 42226 42D0/
+       DATA C( 7) /0.00000 18124 02333 65D0/
+       DATA C( 8) /0.00000 01096 57758 66D0/
+       DATA C( 9) /0.00000 00059 87184 05D0/
+       DATA C(10) /0.00000 00003 07690 81D0/
+       DATA C(11) /0.00000 00000 14317 93D0/
+       DATA C(12) /0.00000 00000 00651 09D0/
+       DATA C(13) /0.00000 00000 00025 96D0/
+       DATA C(14) /0.00000 00000 00001 11D0/
+       DATA C(15) /0.00000 00000 00000 04D0/
+       
+       U=DBLE(X)
+       IF(U .LE. 0) THEN
+         PRINT *,' GAMMA: Argument is negative'
+         H=0
+         GO TO 9
+       ENDIF
+    8  F=1
+       IF(U .LT. 3) THEN
+         DO 1 I = 1,INT(4-U)
+           F=F/U
+    1      U=U+1
+       ELSE
+         DO 2 I = 1,INT(U-3)
+           U=U-1
+    2      F=F*U
+       END IF
+       H=U+U-7
+       ALFA=H+H
+       B1=0
+       B2=0
+       DO 3 I = 15,0,-1
+         B0=C(I)+ALFA*B1-B2
+         B2=B1
+    3    B1=B0
+    9  GAMMA =F*(B0-H*B2)
+       RETURN
+       END       
+      
 *       SUBROUTINE DEQINV(N,A,IDIM,R,IFAIL,K,B)
 *-----------------------------------------------------------------------
 * DEQINV - Replacement for the DEQINV (F010) routine from the KERNLIB
@@ -9730,60 +7811,15 @@ CDECK  ID>, INTUBE.
 *          symmetric. If it's also positive definite, Choleski's method
 *          is used; if a more approximate implementation of Crout's.
 *-----------------------------------------------------------------------
-c       INTEGER MXWIRE,MXSW,MXLIST,MXCHA,MXGRID,MXMATT,MXPOLE,MX3D,
-c     -         MXPSTR,
-c     -         MXPAIR,MXPART,MXFOUR,MXCLUS,
-c     -         MXLINE,MXEQUT,
-c     -         MXRECL,MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN,
-c     -         MXINS,MXREG,MXARG,MXCONS,MXVAR,MXALGE,
-c     -         MXZERO,MXSTCK,MXFPNT,MXFPAR,MXWKLS,
-c     -         MXHLEV,MXHLRL,MXSUBT,
-c     -         MXDLVL,MXILVL,MXDLIN,
-c     -         MXHIST,MXFRAC,MXBANG,MXBTAB,
-c     -         MXEXG,MXIOG,MXCSG,
-c     -         MXORIA,
-c     -         MXMAT,MXEMAT,MXMDIM,
-c     -         MXSHOT,MXZPAR,
-c     -         MXMAP,MXEPS,MXWMAP,MXSOLI,MXSBUF,
-c    -         MXPLAN,MXPOIN,MXEDGE,
-c     -         MXMCA
+c       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+c     -         MXPSTR
 c       PARAMETER (MXWIRE=  2000,MXSW  =  200)
 c       PARAMETER (MXMATT=    10)
 c       PARAMETER (MX3D  =   100)
 c       PARAMETER (MXPOLE=    10)
 c       PARAMETER (MXPSTR=   100)
 c       PARAMETER (MXLIST=  1000)
-c       PARAMETER (MXHIST=   200, MXCHA = MXLIST/2)
 c       PARAMETER (MXGRID=    50)
-c      PARAMETER (MXNAME=   200, MXLUN =    30)
-c      PARAMETER (MXCLUS=   500, MXPAIR=  2000, MXPART= 10000)
-c      PARAMETER (MXLINE=   150, MXEQUT=    50)
-c      PARAMETER (MXFOUR=    16)
-c      PARAMETER (MXRECL= 10000)
-c      PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
-c      PARAMETER (MXINS =  1000, MXREG =   500, MXCONS=  -500,
-c     -            MXVAR =   500, MXALGE=   500, MXARG =   100)
-c       PARAMETER (MXMAT =   500, MXEMAT=100000, MXMDIM=   10)
-c       PARAMETER (MXZERO=MXWIRE)
-c       PARAMETER (MXSTCK=     5)
-c       PARAMETER (MXFPNT=  1000, MXFPAR=    10)
-c       PARAMETER (MXWKLS=    10)
-c       PARAMETER (MXHLEV=     9, MXSUBT=   200, MXHLRL=  860)
-c       PARAMETER (MXDLVL=    10, MXILVL=    20, MXDLIN=  500)
-c       PARAMETER (MXFRAC=    13)
-c       PARAMETER (MXBANG=    20, MXBTAB=    25)
-c       PARAMETER (MXEXG =    50, MXIOG =    10, MXCSG =  200)
-c       PARAMETER (MXORIA=  1000)
-c       PARAMETER (MXSHOT=    10, MXZPAR=4*MXSHOT+2)
-c       PARAMETER (MXMAP =150000,MXEPS =   10)
-c       PARAMETER (MXWMAP=     5)
-c       PARAMETER (MXSOLI=   500)
-c       PARAMETER (MXPLAN= 50000, MXPOIN=100000,MXEDGE=100)
-c       PARAMETER (MXSBUF= 10000)
-c       PARAMETER (MXMCA = 50000)
-*   The parameter MXNBMC must equal MXGNAM (sequence MAGBPARM) !
-c       INTEGER MXNBMC
-c       PARAMETER(MXNBMC=60)
 
 c       DOUBLE PRECISION A(IDIM,*),R(IDIM),B(IDIM)
 c       DOUBLE PRECISION C(MXWIRE+1,MXWIRE+1),EPS,X(MXWIRE+1)

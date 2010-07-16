@@ -17,68 +17,15 @@
 #define mxpole 10
 #define mxpstr 100
 #define mxlist 1000
-#define mxhist 200
-#define mxcha mxlist/2
 #define mxgrid 50
-#define mxname 200
-#define mxlun 30
-#define mxclus 500
-#define mxpair 2000
-#define mxpart 10000
-#define mxline 150
-#define mxequt 50
-#define mxfour 16 
-#define mxrecl 10000
-#define mxinch 2000
-#define mxword 200
-#define mxchar mxinch
-#define mxins 1000
-#define mxreg 500
-#define mxcons -500
-#define mxvar 500
-#define mxalge 500
-#define mxarg 100
-#define mxmat 500
-#define mxemat 100000
-#define mxmdim 10
 #define mxzero mxwire
-#define mxstck 5
-#define mxfpnt 1000
-#define mxfpar 10
-#define mxwkls 10
-#define mxhlev 9
-#define mxsubt 200
-#define mxhlrl 860
-#define mxdlvl 10
-#define mxilvl 20 
-#define mxdlin 500
-#define mxfrac 13
-#define mxbang 20 
-#define mxbtab 25
-#define mxexg 50 
-#define mxiog 10 
-#define mxcsg 200
-#define mxoria 1000
-#define mxshot 10
-#define mxzpar 4*mxshot+2
-#define mxmap 150000
-#define mxeps 10 
-#define mxwmap 5
-#define mxsoli 5000
-#define mxplan 50000
-#define mxpoin 100000
-#define mxedge 100
-#define mxsbuf 10000
-#define mxmca 50000
-#define mxnbmc 60
 
 /*Structure defining a complex number*/
 
-
- struct complex_{
-    float real;
-    float imag;
-  } ;
+struct complex_{
+  float real;
+  float imag;
+};
 
 
 extern "C" {
@@ -104,7 +51,7 @@ extern "C" {
 
   } celdat_;
 
-  extern struct{
+  extern struct {
     char cellid[80];
     char wirtyp[mxwire];
     char platyp[5];
@@ -116,15 +63,14 @@ extern "C" {
 
   //FORTRAN SUBROUTINES REQUIRED TO ACCESS THE ELECTRIC FIELD
   void efield_(float* , float* , float* , float* , float* , float* ,
-	       float* , float* , int* , int* );
+               float* , float* , int* , int* );
 
 
   void setupanalyticfield_(int* ifail);
 
   void celchk_(int* ifail);
+
 }
-
-
 
 namespace Garfield {
   
@@ -133,21 +79,21 @@ namespace Garfield {
     
     RQ_OBJECT("ComponentAnalyticField")
  
-      public:
-    // Constructor
-    ComponentAnalyticField(std::string cellName, float xl, float xm,float yl,float ym,float zl,float zm);  
+    public:
+      // Constructor
+      ComponentAnalyticField(std::string cellName, 
+                             float xl, float xm, float yl, float ym, 
+                             float zl, float zm);
     ComponentAnalyticField(std::string cellName);
     ComponentAnalyticField();
     
     // Destructor
-    ~ComponentAnalyticField();
+    ~ComponentAnalyticField() {}
  
-
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Reqired methods
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   
-    
+      
     void ElectricField(const double x, const double y, const double z,
                        double& ex, double& ey, double& ez, 
                        Medium*& m, int& status);
@@ -158,15 +104,11 @@ namespace Garfield {
     // Calculate the voltage range [V]
     bool GetVoltageRange(double& vmin, double& vmax);
     
-    // Magnetic field
-    // Calculate the magnetic field [hGauss] at (x, y, z)
-    void MagneticField(const double x, const double y, const double z,
-		       double& bx, double& by, double& bz, int& status);
     // Reset the component
     void Reset();
      
      // Verify periodicities
-    void UpdatePeriodicity();
+    void UpdatePeriodicity() {};
     
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //  Other Virtual Methods
@@ -258,7 +200,9 @@ namespace Garfield {
     bool isRotated;
     bool isTranslated;
 
-    double theta, phi, gamma;
+    double cosTheta, sinTheta, cosPhi,sinPhi, cosGamma, sinGamma;
+    double cosMinusTheta, sinMinusTheta, cosMinusPhi,sinMinusPhi, 
+      cosMinusGamma, sinMinusGamma;
     double xTran, yTran, zTran;
 
     

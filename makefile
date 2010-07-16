@@ -3,8 +3,8 @@ OBJECT = $(HOME)/Object
 SOURCE = $(HOME)/Source
 INCLUDE = $(HOME)/Include
 
-CC = g++ -c -O3 `root-config --cflags` -I$(INCLUDE)
-LC = g++ `root-config --glibs` -lMinuit -lgsl -lgslcblas -lg2c -lm 
+CC = g++ -c -O3 `root-config --cflags` -I$(INCLUDE) 
+LC = g++ `root-config --glibs` -lgfortran -lm  
 FF = gfortran -c -O3
 # Compiler flags
 CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long -g `root-config --cflags`

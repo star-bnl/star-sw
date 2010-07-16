@@ -13,7 +13,11 @@ TrackHeed::NewTrack(
   if (debug) {
     std::cout << "TrackHeed::NewTrack:" << std::endl;
     std::cout << "    Starting point at (" 
-              << x0 << ", " << y0 << ", " << z0 << ")" << std::endl;
+              << x0 << ", " << y0 << ", " << z0 << ") at time " 
+              << t0 << std::endl;
+    std::cout << "    Initial direction: ("
+              << dx0 << ", " << dy0 << ", " << dz0 << ")" << std::endl;
+    
   }
 
 }
@@ -22,6 +26,8 @@ bool
 TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
                       int& n, double& e, double& extra) {
 
+  xcls = ycls = zcls = tcls = 0.;
+  extra = 0.;
   n = 1;
   e = 1000.;
   return true;

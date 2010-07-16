@@ -106,7 +106,7 @@ TrackBichsel::GetCluster(
   t += d / speed;
 
   xcls = x; ycls = y; zcls = z; tcls = t;
-  n = 0; e = 0.;
+  n = 0; e = 0.; extra = 0.;
 
   Medium* medium;
   if (!sensor->GetMedium(x, y, z, medium)) {
@@ -127,7 +127,7 @@ TrackBichsel::GetCluster(
     return false;
   }
 
-  int j = RndmUniform() * nCdfEntries;
+  int j = int(RndmUniform() * nCdfEntries);
   if (j >= nCdfEntries) j = nCdfEntries - 1;
   if (j <= 0) j = 0;
 
