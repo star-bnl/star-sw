@@ -17,9 +17,9 @@ class Medium {
     virtual ~Medium() {}
 
     // Return the id number of the class instance
-    int    GetId() const {return id;}
+    int GetId() const {return id;}
     // Medium name/identifier
-    void   SetName(const std::string s) {name = s;}
+    void SetName(const std::string s) {name = s;}
     std::string GetName() const {return name;}
 
     // Temperature [K]
@@ -91,11 +91,10 @@ class Medium {
     // Microscopic electron transport properties
     // Effective mass (for electrons in semiconductors) 
     virtual
-    double GetElectronEffectiveMass(const int band = 0) {return 1.;}
+    double GetElectronEffectiveMass(const int band = 0);
     // Non-parabolicity parameter for conduction band
     virtual
-    double GetElectronNonParabolicity(const double energy, 
-                                      const int band = 0) {return 0.;}
+    double GetElectronNonParabolicity(const double energy, const int band = 0);
     // Null-collision rate [ns-1]
     virtual 
     double GetElectronNullCollisionRate();
@@ -171,21 +170,6 @@ class Medium {
     bool GetPhotonCollision(const double e, int& type, int& level, double& e1,
                             double& ctheta, double& s, double& esec);
 
-    // Plotting
-    void PlotElectronVelocity(const double emin, const double emax);
-    void PlotHoleVelocity(const double emin, const double emax);
-    void PlotIonVelocity(const double emin, const double emax);
-    void PlotElectronHoleVelocity(const double emin, const double emax);
-    void PlotElectronIonVelocity(const double emin, const double emax);
-
-    void PlotElectronTownsend(const double emin, const double emax);
-    void PlotHoleTownsend(const double emin, const double emax);
-    void PlotElectronHoleTownsend(const double emin, const double emax);
-
-    void PlotElectronAttachment(const double emin, const double emax);
-    void PlotHoleAttachment(const double emin, const double emax);
-    void PlotElectronHoleAttachment(const double emin, const double emax);
-
     // Switch on/off debugging  messages
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
@@ -227,10 +211,6 @@ class Medium {
     std::vector<double> efields;
     std::vector<double> bfields;
     std::vector<double> bangles;
-
-    void PlotVelocityCommon(const double emin, const double emax);
-    void PlotTownsendCommon(const double emin, const double emax);
-    void PlotAttachmentCommon(const double emin, const double emax);
 
     bool BoxInterpolation3d(std::vector<std::vector<std::vector<double> > >& value, 
                       std::vector<double>& xAxis, std::vector<double>& yAxis, std::vector<double>& zAxis, 

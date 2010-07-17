@@ -3,7 +3,6 @@
 
 #include "Medium.hh"
 #include "FundamentalConstants.hh"
-#include "Plotting.hh"
 
 namespace Garfield {
 
@@ -241,6 +240,20 @@ Medium::ElectronAttachment(const double ex, const double ey, const double ez,
 }
 
 double 
+Medium::GetElectronEffectiveMass(const int band) {
+
+  return 1.;
+  
+}
+
+double
+Medium::GetElectronNonParabolicity(const double energy, const int band) {
+
+  return 0.;
+
+}
+
+double 
 Medium::GetElectronNullCollisionRate() {
 
   if (debug) {
@@ -455,124 +468,6 @@ Medium::GetPhotonCollision(const double e, int& type, int& level, double& e1,
                            double& ctheta, double& s, double& esec) {
 
   return false;
-
-}
-
-void 
-Medium::PlotElectronVelocity(const double emin, const double emax) {
-
-  PlotVelocityCommon(emin, emax);
-  plottingEngine.PlotVelocity(this, true, false, false);
-  
-}
-
-void 
-Medium::PlotHoleVelocity(const double emin, const double emax) {
-
-  PlotVelocityCommon(emin, emax);
-  plottingEngine.PlotVelocity(this, false, true, false);
-
-}
-
-void 
-Medium::PlotIonVelocity(const double emin, const double emax) {
-
-  PlotVelocityCommon(emin, emax);
-  plottingEngine.PlotVelocity(this, false, false, true);
-
-}
-
-void 
-Medium::PlotElectronHoleVelocity(const double emin, const double emax) {
-
-  PlotVelocityCommon(emin, emax);
-  plottingEngine.PlotVelocity(this, true, true, false);
-
-}
-
-void 
-Medium::PlotElectronIonVelocity(const double emin, const double emax) {
-
-  PlotVelocityCommon(emin, emax);
-  plottingEngine.PlotVelocity(this, false, false, true);
-
-}
-
-void 
-Medium::PlotElectronTownsend(const double emin, const double emax) {
-
-  PlotTownsendCommon(emin, emax);
-  plottingEngine.PlotTownsend(this, true, false);
-
-}
-
-void 
-Medium::PlotHoleTownsend(const double emin, const double emax) {
-
-  PlotTownsendCommon(emin, emax);
-  plottingEngine.PlotTownsend(this, false, true);
-
-}
-
-void 
-Medium::PlotElectronHoleTownsend(const double emin, const double emax) {
-
-  PlotTownsendCommon(emin, emax);
-  plottingEngine.PlotTownsend(this, true, true);
-
-}
-
-void 
-Medium::PlotElectronAttachment(const double emin, const double emax) {
-
-  PlotAttachmentCommon(emin, emax);
-  plottingEngine.PlotAttachment(this, true, false);
-
-}
-
-void 
-Medium::PlotHoleAttachment(const double emin, const double emax) {
-
-  PlotAttachmentCommon(emin, emax);
-  plottingEngine.PlotAttachment(this, false, true);
-  
-}
-
-void 
-Medium::PlotElectronHoleAttachment(const double emin, const double emax) {
-
-  PlotAttachmentCommon(emin, emax);
-  plottingEngine.PlotAttachment(this, true, true);
-  
-}
-
-void
-Medium::PlotVelocityCommon(const double emin, const double emax) {
-
-  plottingEngine.SetRangeX(emin, emax);
-  plottingEngine.SetLabelX("electric field [V/cm]");
-  plottingEngine.SetLabelY("drift velocity [V/cm]");    
-  plottingEngine.SetTitle(name);
-
-}
-
-void
-Medium::PlotTownsendCommon(const double emin, const double emax) {
-
-  plottingEngine.SetRangeX(emin, emax);
-  plottingEngine.SetLabelX("electric field [V/cm]");
-  plottingEngine.SetLabelY("Townsend coefficient [1/cm]");    
-  plottingEngine.SetTitle(name);  
-
-}
-
-void
-Medium::PlotAttachmentCommon(const double emin, const double emax) {
-
-  plottingEngine.SetRangeX(emin, emax);
-  plottingEngine.SetLabelX("electric field [V/cm]");
-  plottingEngine.SetLabelY("attachment coefficient [1/cm]");
-  plottingEngine.SetTitle(name);
 
 }
 

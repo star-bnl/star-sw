@@ -31,6 +31,7 @@ OBJS = \
 	$(OBJECT)/GeometryRoot.o \
 	$(OBJECT)/FieldView.o \
 	$(OBJECT)/DriftView.o \
+	$(OBJECT)/MediumView.o \
 	$(OBJECT)/Input.o \
 	$(OBJECT)/Medium.o \
 	$(OBJECT)/MediumMagboltz86.o \
@@ -135,9 +136,14 @@ $(OBJECT)/FieldView.o: \
 $(OBJECT)/DriftView.o: \
 	$(SOURCE)/DriftView.cc $(INCLUDE)/DriftView.hh
 	$(CC) $(CFLAGS) $< -o $@
+$(OBJECT)/MediumView.o: \
+	$(SOURCE)/MediumView.cc $(INCLUDE)/MediumView.hh
+	$(CC) $(CFLAGS) $< -o $@
+
 $(OBJECT)/Input.o: \
 	$(SOURCE)/Input.cc $(INCLUDE)/Input.hh
 	$(CC) $(CFLAGS) $< -o $@
+
 $(OBJECT)/Medium.o: \
 	$(SOURCE)/Medium.cc $(INCLUDE)/Medium.hh \
 	$(INCLUDE)/FundamentalConstants.hh

@@ -34,23 +34,6 @@ class PlottingEngine {
     void SetLineColor1(const std::string col) {color1 = col;}
     void SetLineColor2(const std::string col) {color2 = col;}
     
-    virtual 
-    void PlotVelocity(Medium* m, 
-                      const bool electron = true, 
-                      const bool hole = false,
-                      const bool ion = false) = 0;
-    virtual 
-    void PlotTownsend(Medium* m, 
-                      const bool electrons = true, 
-                      const bool holes = false) = 0;
-    virtual
-    void PlotAttachment(Medium* m,
-                        const bool electrons = true,
-                        const bool holes = false) = 0;
-                        
-    virtual 
-    void PlotSignal(Sensor* s, const std::string label) = 0;
-
     // Switch on/off debugging messages
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}

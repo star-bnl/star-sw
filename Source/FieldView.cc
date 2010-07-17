@@ -59,7 +59,7 @@ FieldView::SetSensor(Sensor* s) {
   }
 
   sensor = s; 
-  // Get default range
+  // Get bounding box
   bool ok = sensor->GetArea(pxmin, pymin, pzmin, pxmax, pymax, pzmax);
   // Get voltage range
   ok = sensor->GetVoltageRange(fmin, fmax);
@@ -191,11 +191,11 @@ void
 FieldView::CreateFunction() {
 
   int idx = 0;
-  std::string fname = "fPot_0";
+  std::string fname = "fPotential_0";
   while (gROOT->GetListOfFunctions()->FindObject(fname.c_str())) {
     ++idx;
     std::stringstream ss;
-    ss << "fPot_";
+    ss << "fPotential_";
     ss  << idx;
     fname = ss.str();
   }
@@ -242,7 +242,7 @@ FieldView::EvaluatePotential(double* pos, double* par) {
  
   sensor->ElectricField(xpos, ypos, zpos, ex, ey, ez, volt, medium, status);
   if (debug) {
-    printf("FieldView::EvaluatePotentia:\n");
+    printf("FieldView::EvaluatePotential:\n");
     printf("    At (u, v) = (%g, %g), (x,y,z) = (%g, %g, %g)\n", 
            pos[0], pos[1], xpos, ypos, zpos);
     printf("    E = (%g, %g, %g), V = %g, status = %d\n",

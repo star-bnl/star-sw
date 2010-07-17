@@ -18,17 +18,6 @@ class PlottingEngineRoot : public PlottingEngine {
     // Destructor
     ~PlottingEngineRoot();
     
-    void PlotVelocity(Medium* m, 
-                      const bool electron = true, 
-                      const bool hole = false,
-                      const bool ion = false);
-    void PlotTownsend(Medium* m, 
-                      const bool electron = true, 
-                      const bool hole = false);
-    void PlotAttachment(Medium* m,
-                        const bool electron = true,
-                        const bool hole = false);
-
     void PlotSignal(Sensor* s, const std::string label);
 
   private:

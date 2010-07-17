@@ -767,12 +767,13 @@ void ComponentAnalyticField::Prepare() {
   celchk_(&ifail);
   if (ifail == 0){
     std::cout << "ComponentAnalyticField::Prepare:\n";
-    std::cout << "    Field check completed.\n";
+    std::cout << "    Cell check ok.\n";
     cellok = true;
   } else {
     std::cerr << "ComponentAnalyticField:Prepare:\n";
     std::cerr << "    Error while checking field.\n";
     cellok = false;
+    return;
   }
 
   CellType();
