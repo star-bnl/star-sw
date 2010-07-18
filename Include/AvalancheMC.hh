@@ -22,22 +22,28 @@ class AvalancheMC {
     void EnablePlotting(DriftView* view);
     void DisablePlotting();
 
-    // Switch on/off calculation of induced currents
+    // Switch on/off calculation of induced currents (default: disabled)
     void EnableSignalCalculation()  {useSignal = true;}
     void DisableSignalCalculation() {useSignal = false;}
 
-    // Switch on/off calculation of induced charge
+    // Switch on/off calculation of induced charge (default: disabled)
     void EnableInducedChargeCalculation()  {useInducedCharge = true;}
     void DisableInducedChargeCalculation() {useInducedCharge = false;}
     
     // Switch on/off equilibration of multiplication and attachment 
-    // over the drift line
+    // over the drift line (default: enabled)
     void EnableProjectedPathIntegration()  {useEquilibration = true;}
     void DisableProjectedPathIntegration() {useEquilibration = false;}
     
-    // Switch on/off diffusion (for debugging)
+    // Switch on/off diffusion (default: enabled)
     void EnableDiffusion()  {useDiffusion = true;}
     void DisableDiffusion() {useDiffusion = false;}
+
+    // Switch on/off attachment (and multiplication) for
+    // drift line calculation (default: enabled)
+    // For avalanches the flag is ignored
+    void EnableAttachment()  {useAttachment = true;}
+    void DisableAttachment() {useAttachment = false;}
     
     // Stepping model
     // Fixed time step (default 20 ps)
@@ -45,10 +51,10 @@ class AvalancheMC {
     // Fixed distance step (default 10 um)
     void SetDistanceSteps(const double d = 0.001);
     // Exponentially distributed time step with mean equal 
-    // to the specified multiple of the collision time
+    // to the specified multiple of the collision time (default model)
     void SetCollisionSteps(const int n = 100);
     
-    // Treat positive charge carriers as holes or ions
+    // Treat positive charge carriers as holes or ions (default: ions)
     void SetHoles() {useIons = false;}
     void SetIons()  {useIons = true;}
 
@@ -90,8 +96,9 @@ class AvalancheMC {
                            const double t0, const bool hole = false);
     bool AvalancheHole(const double x0, const double y0, const double z0, 
                        const double t0, const bool electron = false);
-    bool AvalancheElectronHole(const double x0, const double y0, const double z0, 
-                               const double t0);
+    bool AvalancheElectronHole(
+                       const double x0, const double y0, const double z0, 
+                       const double t0);
 
     // Switch on/off debugging messages
     void EnableDebugging()  {debug = true;}
@@ -155,6 +162,7 @@ class AvalancheMC {
     bool useInducedCharge;
     bool useEquilibration;
     bool useDiffusion;
+    bool useAttachment;
     bool useIons;
     bool withElectrons;
     bool withHoles;
@@ -162,7 +170,7 @@ class AvalancheMC {
     
     // Compute a drift line with starting point (x0, y0, z0)
     bool DriftLine(const double x0, const double y0, const double z0, 
-                   const double t0, const int q);
+                   const double t0, const int q, const bool aval = false);
     bool Avalanche();
     // Compute effective multiplication and ionisation 
     // for the current drift line

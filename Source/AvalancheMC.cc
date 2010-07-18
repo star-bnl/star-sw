@@ -19,7 +19,7 @@ AvalancheMC::AvalancheMC() :
   nEndpointsElectrons(0), nEndpointsHoles(0), nEndpointsIons(0),
   usePlotting(false), viewer(0), 
   useSignal(false), useInducedCharge(false), useEquilibration(true), 
-  useDiffusion(true), useIons(true), 
+  useDiffusion(true), useAttachment(true), useIons(true), 
   withElectrons(true), withHoles(true),
   debug(false) {
    
@@ -274,7 +274,7 @@ AvalancheMC::DriftIon(
 
 bool 
 AvalancheMC::DriftLine(const double x0, const double y0, const double z0, 
-                       const double t0, const int q) {
+                       const double t0, const int q, const bool aval) {
 
   // Current position
   double x = x0, y = y0, z = z0;
@@ -454,7 +454,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   }
   
   // Compute Townsend and attachment coefficients for each drift step
-  if (q == -1 || q == 1) {
+  if ((q == -1 || q == 1) && (aval || useAttachment)) {
     ComputeAlphaEta(q);
 
     // Gain and loss over a step
@@ -672,7 +672,7 @@ AvalancheMC::Avalanche() {
 
   if (!withHoles && !withElectrons) {
     std::cerr << "AvalancheMC::Avalanche:" << std::endl;
-    std::cerr << "    Neither electron nor hole component are activated." 
+    std::cerr << "    Neither electron nor hole/ion component are activated." 
               << std::endl;
   }
 
@@ -686,7 +686,7 @@ AvalancheMC::Avalanche() {
         }
         // Compute an electron drift line
         if (!DriftLine(aval[iAval].x, aval[iAval].y, aval[iAval].z, 
-                  aval[iAval].t, -1)) continue;
+                  aval[iAval].t, -1, true)) continue;
         // Loop over the drift line
         for (int iDrift = 0; iDrift < nDrift; ++iDrift) {
           if (drift[iDrift].ne > 0 || drift[iDrift].ni > 0) {
@@ -711,12 +711,17 @@ AvalancheMC::Avalanche() {
       }
     }
 
-    if (withHoles && !useIons) { 
+    if (withHoles) { 
       // Loop over the holes at this location
       for (int iH = 0; iH < aval[iAval].ni; ++iH) {
         // Compute a hole drift line
+        if (useIons) {
+          DriftLine(aval[iAval].x, aval[iAval].y, aval[iAval].z,
+                    aval[iAval].t, 2, false);
+          continue;
+        }
         if (!DriftLine(aval[iAval].x, aval[iAval].y, aval[iAval].z,
-                  aval[iAval].t, +1)) continue;
+                  aval[iAval].t, +1, true)) continue;
         // Loop over the drift line
         for (int iDrift = 0; iDrift < nDrift; ++iDrift) {
           if (drift[iDrift].ne > 0 || drift[iDrift].ni > 0) {
