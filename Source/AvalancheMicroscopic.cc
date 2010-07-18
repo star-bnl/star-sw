@@ -310,13 +310,32 @@ AvalancheMicroscopic::UnsetUserHandleIonisation() {
 }
 
 bool 
+AvalancheMicroscopic::DriftElectron(
+    const double x0, const double y0, const double z0, const double t0, 
+    const double e0, const double dx0, const double dy0, const double dz0) {
+
+  return TransportElectron(x0, y0, z0, t0, e0, dx0, dy0, dz0, false);
+
+}
+
+bool 
 AvalancheMicroscopic::AvalancheElectron(
     const double x0, const double y0, const double z0, const double t0, 
     const double e0, const double dx0, const double dy0, const double dz0) {
+
+  return TransportElectron(x0, y0, z0, t0, e0, dx0, dy0, dz0, true);
+
+}
+
+bool 
+AvalancheMicroscopic::TransportElectron(
+    const double x0, const double y0, const double z0, const double t0, 
+    const double e0, const double dx0, const double dy0, const double dz0,
+    const bool aval) {
   
   // Make sure that the sensor is defined
   if (sensor == 0) {
-    std::cerr << "AvalancheMicroscopic::AvalancheElectron:" << std::endl;
+    std::cerr << "AvalancheMicroscopic::TransportElectron:" << std::endl;
     std::cerr << "    Sensor is not defined." << std::endl;
     return false;
   }
@@ -324,21 +343,21 @@ AvalancheMicroscopic::AvalancheElectron(
   // Make sure that the starting point is inside a medium
   Medium* medium;
   if (!sensor->GetMedium(x0, y0, z0, medium)) {
-    std::cerr << "AvalancheMicroscopic::AvalancheElectron:" << std::endl;
+    std::cerr << "AvalancheMicroscopic::TransportElectron:" << std::endl;
     std::cerr << "    No medium at initial position." << std::endl;
     return false;
   }
   
   // Make sure that the medium is "driftable" and microscopic
   if (!medium->IsDriftable() || !medium->IsMicroscopic()) {
-    std::cerr << "AvalancheMicroscopic::AvalancheElectron:" << std::endl;
+    std::cerr << "AvalancheMicroscopic::TransportElectron:" << std::endl;
     std::cerr << "    Medium at initial position does not provide " 
               << " microscopic tracking data." << std::endl;
     return false;
   }
   
   if (debug) {
-    std::cout << "AvalancheMicroscopic::AvalancheElectron:" << std::endl;
+    std::cout << "AvalancheMicroscopic::TransportElectron:" << std::endl;
     std::cout << "    Starting to drift in medium " 
               << medium->GetName() << "." << std::endl;
   }
@@ -366,7 +385,7 @@ AvalancheMicroscopic::AvalancheElectron(
   // Null-collision rate
   double fLim = medium->GetElectronNullCollisionRate();
   if (fLim <= 0.) {
-    std::cerr << "AvalancheMicroscopic::AvalancheElectron:" << std::endl;
+    std::cerr << "AvalancheMicroscopic::TransportElectron:" << std::endl;
     std::cerr << "    Got null-collision rate <= 0." << std::endl;
     return false;
   }
@@ -529,7 +548,7 @@ AvalancheMicroscopic::AvalancheElectron(
           // Update the null-collision rate
           fLim = medium->GetElectronNullCollisionRate();
           if (fLim <= 0.) {
-            std::cerr << "AvalancheMicroscopic::AvalancheElectron:" 
+            std::cerr << "AvalancheMicroscopic::TransportElectron:" 
                       << std::endl;
             std::cerr << "    Got null-collision rate <= 0." << std::endl;
             return false;
@@ -615,7 +634,7 @@ AvalancheMicroscopic::AvalancheElectron(
             // Real collision rate is higher than null-collision rate
             dt += log(r) / fLim;
             // Increase the null collision rate and try again
-            std::cerr << "AvalancheMicroscopic::AvalancheElectron:" 
+            std::cerr << "AvalancheMicroscopic::TransportElectron:"
                       << std::endl;
             std::cerr << "    Increasing the null-collision rate by 5%." 
                       << std::endl;
@@ -819,25 +838,25 @@ AvalancheMicroscopic::AvalancheElectron(
             newElectron.x0 = x; newElectron.x = x;
             newElectron.y0 = y; newElectron.y = y;
             newElectron.z0 = z; newElectron.z = z;
-            newElectron.t0 = t; newElectron.t = t; 
+            newElectron.t0 = t; newElectron.t = t;
             newElectron.energy = Max(esec, Small);
             newElectron.e0 = newElectron.energy;
             newElectron.dx = cos(phi) * stheta0;
             newElectron.dy = sin(phi) * stheta0;
             newElectron.dz = ctheta0;
             newElectron.driftLine.clear();
-            stack.push_back(newElectron);
-            // Increment the electron and ion counters         
+            if (aval) stack.push_back(newElectron);
+            // Increment the electron and ion counters
             ++nElectrons; ++nIons;
-            break;          
+            break;
           // Attachment
-          case 2:          
+          case 2:
             if (hasUserHandleAttachment) {
               userHandleAttachment(x, y, z, t, cstype, level, medium);
             }
             // Decrement the electron counter
             --nElectrons;
-            stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z; 
+            stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
             stack[iEl].t = t; stack[iEl].energy = energy;
             stack[iEl].status = -7;
             endpoints.push_back(stack[iEl]);
@@ -848,7 +867,7 @@ AvalancheMicroscopic::AvalancheElectron(
           case 3:
             if (hasUserHandleInelastic) {
               userHandleInelastic(x, y, z, t, cstype, level, medium);
-            }          
+            }
             break;
           // Excitation
           case 4:
@@ -873,15 +892,15 @@ AvalancheMicroscopic::AvalancheElectron(
                     newElectron.x0 = x; newElectron.x = x;
                     newElectron.y0 = y; newElectron.y = y;
                     newElectron.z0 = z; newElectron.z = z;
-                    newElectron.t0 = t + tDxc; newElectron.t = t + tDxc; 
+                    newElectron.t0 = t + tDxc; newElectron.t = t + tDxc;
                     newElectron.energy = Max(esec, Small);
                     newElectron.e0 = newElectron.energy;
                     newElectron.dx = cos(phi) * stheta0;
                     newElectron.dy = sin(phi) * stheta0;
                     newElectron.dz = ctheta0;
                     newElectron.driftLine.clear();
-                    stack.push_back(newElectron);
-                    // Increment the electron and ion counters         
+                    if (aval) stack.push_back(newElectron);
+                    // Increment the electron and ion counters
                     ++nElectrons; ++nIons;
                   } else if (typeDxc == 1 && usePhotons && esec > gammaCut) {
                     // Radiative de-excitation
@@ -891,14 +910,14 @@ AvalancheMicroscopic::AvalancheElectron(
                   // Transport the photons (if any)
                   const int nSizePhotons = stackPhotonsTime.size();
                   for (int k = nSizePhotons; k--;) {
-                    TransportPhoton(x, y, z, 
+                    if (aval) TransportPhoton(x, y, z, 
                                     stackPhotonsTime[k], 
                                     stackPhotonsEnergy[k]);
                   }
                 }
               }
             } else if (esec > 0.) {
-              // Penning ionisation     
+              // Penning ionisation
               // Randomise secondary electron direction
               phi = TwoPi * RndmUniform();
               ctheta0 = 1. - 2. * RndmUniform();
@@ -915,16 +934,16 @@ AvalancheMicroscopic::AvalancheElectron(
               newElectron.dy = sin(phi) * stheta0;
               newElectron.dz = ctheta0;
               newElectron.driftLine.clear();
-              stack.push_back(newElectron);
-              // Increment the electron and ion counters         
+              if (aval) stack.push_back(newElectron);
+              // Increment the electron and ion counters
               ++nElectrons; ++nIons;
             }
-            break; 
+            break;
           // Super-elastic collision
           case 5:
             break;
           default:
-            std::cerr << "AvalancheMicroscopic::AvalancheElectron:" 
+            std::cerr << "AvalancheMicroscopic::TransportElectron:" 
                       << std::endl;
             std::cerr << "    Unknown collision type." << std::endl;
             ok = false;
@@ -981,6 +1000,7 @@ AvalancheMicroscopic::AvalancheElectron(
                            endpoints[i].x,  endpoints[i].y,  endpoints[i].z);
     }
   }
+
   if (usePlotting) {
     for (int i = nEndpoints; i--;) {
       const int np = GetNumberOfDriftLinePoints(i);

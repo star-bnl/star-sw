@@ -94,14 +94,19 @@ class AvalancheMicroscopic {
                    double& x1, double& y1, double& z1, double& t1,
                    int& status) const;
 
-    // Run an avalanche calculation for an electron with given
+    // Calculate an electron drift line for an electron with given
     // initial coordinates, energy and direction (random if not specified)
-    bool AvalancheElectron(const double x0, const double y0, const double z0, 
-                           const double t0, const double e0, 
-                           const double dx0 = 0., 
-                           const double dy0 = 0., 
-                           const double dz0 = 0.);
-                   
+    // Secondary electrons are not transported
+    bool DriftElectron(const double x0, const double y0, const double z0,
+                       const double t0, const double e0,
+           const double dx0 = 0., const double dy0 = 0., const double z0 = 0.);
+
+    // Calculate an avalanche initiated by an electron with given
+    // initial coordinates, energy and direction (random if not specified)
+    bool AvalancheElectron(const double x0, const double y0, const double z0,
+                           const double t0, const double e0,
+          const double dx0 = 0., const double dy0 = 0., const double dz0 = 0.);
+
     // Set user handling procedures
     void SetUserHandleAttachment(void (*f)(double x, double y, double z, 
                                            double t, 
@@ -211,6 +216,10 @@ class AvalancheMicroscopic {
     // Switch on/off debugging messages
     bool debug;
 
+    // Electron transport
+    bool TransportElectron(const double x0, const double y0, const double z0,
+                           const double t0, const double e0,
+        const double dx0, const double dy0, const double dz0, const bool aval);
     // Photon transport
     void TransportPhoton(const double x, const double y, const double z,
                          const double t, const double e);
