@@ -178,12 +178,7 @@ AvalancheMicroscopic::GetEndpoint(const int i,
   t0 = endpoints[i].t0; e0 = endpoints[i].e0;
   x1 = endpoints[i].x;  y1 = endpoints[i].y;  z1 = endpoints[i].z;
   t1 = endpoints[i].t;  e1 = endpoints[i].energy;  
-  status = -1;  
-  if (e1 < 0) {
-    // Electron stopped because of attachment
-    e1 = -e1;
-    status = -7;
-  }
+  status = endpoints[i].status; 
 
 }
 
@@ -368,15 +363,6 @@ AvalancheMicroscopic::AvalancheElectron(
   nIons = 0;
   nEndpoints = 0;
   
-  // Check if the initial energy is higher than the transport cut
-  if (e0 <= deltaCut) {
-    std::cerr << "AvalancheMicroscopic::AvalancheElectron:" << std::endl;
-    std::cerr << "    Initial electron energy (" << e0 << " eV)"
-              << " is lower than the transport threshold" 
-              << " (" << deltaCut << " eV)." << std::endl;
-    return false;
-  }
-    
   // Null-collision rate
   double fLim = medium->GetElectronNullCollisionRate();
   if (fLim <= 0.) {
@@ -436,6 +422,7 @@ AvalancheMicroscopic::AvalancheElectron(
     
   // Add the first electron
   electron newElectron;
+  newElectron.status = 0;
   newElectron.x0 = x0;  newElectron.y0 = y0;  newElectron.z0 = z0;  
   newElectron.x  = x0;  newElectron.y  = y0;  newElectron.z = z0;  
   newElectron.t0 = t0;  newElectron.t  = t0;
@@ -491,6 +478,7 @@ AvalancheMicroscopic::AvalancheElectron(
         stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
         stack[iEl].t = t; stack[iEl].energy = energy;
         stack[iEl].dx = dx; stack[iEl].dy = dy; stack[iEl].dz = dz;
+        stack[iEl].status = -1;
         endpoints.push_back(stack[iEl]);
         stack.erase(stack.begin() + iEl);
         continue;
@@ -513,6 +501,7 @@ AvalancheMicroscopic::AvalancheElectron(
           stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
           stack[iEl].t = t; stack[iEl].energy = energy;
           stack[iEl].dx = dx; stack[iEl].dy = dy; stack[iEl].dz = dz;
+          stack[iEl].status = -16;
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
           ok = false;
@@ -528,6 +517,7 @@ AvalancheMicroscopic::AvalancheElectron(
             stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
             stack[iEl].t = t; stack[iEl].energy = energy;
             stack[iEl].dx = dx; stack[iEl].dy = dy; stack[iEl].dz = dz;
+            stack[iEl].status = -5;
             endpoints.push_back(stack[iEl]);
             stack.erase(stack.begin() + iEl);
             ok = false;
@@ -723,6 +713,7 @@ AvalancheMicroscopic::AvalancheElectron(
           stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
           stack[iEl].t = t;
           stack[iEl].dx = newDx; stack[iEl].dy = newDy; stack[iEl].dz = newDz;
+          stack[iEl].status = -1;
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
           ok = false;
@@ -759,6 +750,7 @@ AvalancheMicroscopic::AvalancheElectron(
           stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
           stack[iEl].t = t;
           stack[iEl].dx = newDx; stack[iEl].dy = newDy; stack[iEl].dz = newDz;
+          stack[iEl].status = -1;
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
           ok = false;
@@ -846,7 +838,8 @@ AvalancheMicroscopic::AvalancheElectron(
             // Decrement the electron counter
             --nElectrons;
             stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z; 
-            stack[iEl].t = t; stack[iEl].energy = - energy;
+            stack[iEl].t = t; stack[iEl].energy = energy;
+            stack[iEl].status = -7;
             endpoints.push_back(stack[iEl]);
             stack.erase(stack.begin() + iEl);
             ok = false;
@@ -1095,6 +1088,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
     newPhoton.x0 = x0; newPhoton.y0 = y0; newPhoton.z0 = z0;
     newPhoton.x1 = x;  newPhoton.y1 = y;  newPhoton.z1 = z;
     newPhoton.energy = e0;
+    newPhoton.status = -1;
     photons.push_back(newPhoton);
     ++nPhotons;
     return;
@@ -1169,6 +1163,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
   newPhoton.x0 = x0; newPhoton.y0 = y0; newPhoton.z0 = z0;
   newPhoton.x1 = x;  newPhoton.y1 = y;  newPhoton.z1 = z;
   newPhoton.energy = e0;
+  newPhoton.energy = -2;
   photons.push_back(newPhoton);
   ++nPhotons;
 

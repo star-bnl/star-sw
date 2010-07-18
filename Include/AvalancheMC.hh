@@ -57,13 +57,28 @@ class AvalancheMC {
     }
     
     int  GetNumberOfDriftLinePoints() const {return nDrift;}
-    void GetDriftLinePoint(const int i, double& x, double& y, double& z, double& t);
+    void GetDriftLinePoint(const int i, 
+                           double& x, double& y, double& z, double& t);
     
-    int  GetNumberOfEndpoints() const {return nEndpoints;}
-    void GetEndpoint(const int i,
-                     double& x0, double& y0, double& z0, double& t0,
-                     double& x1, double& y1, double& z1, double& t1,
-                     int& status) const;
+    int  GetNumberOfElectronEndpoints() const {return nEndpointsElectrons;}
+    int  GetNumberOfHoleEndpoints() const     {return nEndpointsHoles;}
+    int  GetNumberOfIonEndpoints() const      {return nEndpointsIons;}
+    // Status codes
+    //   -1: particle left the drift area
+    //   -3: calculation abandoned (e.g. error retrieving transport parameters)
+    //   -7: trapped/attached by gas molecule
+    void GetElectronEndpoint(const int i,
+                             double& x0, double& y0, double& z0, double& t0,
+                             double& x1, double& y1, double& z1, double& t1,
+                             int& status) const;
+    void GetHoleEndpoint(const int i,
+                         double& x0, double& y0, double& z0, double& t0,
+                         double& x1, double& y1, double& z1, double& t1,
+                         int& status) const;
+    void GetIonEndpoint(const int i,
+                        double& x0, double& y0, double& z0, double& t0,
+                        double& x1, double& y1, double& z1, double& t1,
+                        int& status) const;
 
     bool DriftElectron(const double x0, const double y0, const double z0,
                        const double t0);
@@ -91,8 +106,12 @@ class AvalancheMC {
 
     int nDrift;
     struct driftPoint {
+      // Position
       double x, y, z, t;
+      // Townsend and attachment coefficient
       double alpha, eta;
+      // Number of secondaries produced at this point
+      int ne, ni;
     };
     std::vector<driftPoint> drift;
 
@@ -115,8 +134,19 @@ class AvalancheMC {
     // Number of electrons and ions produced
     int nElectrons;
     int nIons;
+
     // Number of endpoints (including captured electrons)
-    int nEndpoints;
+    int nEndpointsElectrons;
+    int nEndpointsHoles;
+    int nEndpointsIons;
+    struct endpoint {
+      double x0, y0, z0, t0;
+      double x1, y1, z1, t1;
+      int status;
+    };
+    std::vector<endpoint> endpointsElectrons;
+    std::vector<endpoint> endpointsHoles;
+    std::vector<endpoint> endpointsIons;
 
     bool usePlotting;
     DriftView* viewer;
