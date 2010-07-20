@@ -40,6 +40,7 @@ void RunFastJetReader(
     gSystem->Load("StTriggerUtilities");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetEvent");
+    gSystem->Load("StRandomSelector");
     gSystem->Load("StJetMaker");
     
     cout << " loading done " << endl;
