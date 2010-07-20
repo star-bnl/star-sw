@@ -1,4 +1,14 @@
-void ReadPythia(int nevents = 10, const char* pythiafile = "*.pythia.root")
+//
+// Pibero Djawotho <pibero@tamu.edu>
+// Texas A&M University
+// 20 July 2010
+//
+// Simple macro to read Pythia record saved in .pythia.root files
+// by the BFC trigger filter. The Pythia tree simply contains
+// a StPythiaEvent object for each event.
+//
+
+void ReadPythia(int nevents = 10, const char* pythiafile = "jet_pp200_pythia_6422_perugia_0_pt2_3gev_2000evts_185.pythia.root")
 {
   // Load shared library for StythiaEvent
   gSystem->Load("StJetSkimEvent");
