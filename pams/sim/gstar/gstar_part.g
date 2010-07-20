@@ -1,6 +1,15 @@
-* $Id: gstar_part.g,v 1.27 2010/06/24 22:37:39 jwebb Exp $
+* $Id: gstar_part.g,v 1.28 2010/07/20 15:32:43 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.28  2010/07/20 15:32:43  jwebb
+* Correcting gstar_part.g for problems discussed here:
+* http://www.star.bnl.gov/HyperNews-star/protected/get/heavy/2819/1/2.html
+*
+* 1) Corrected the D*- decay
+* 2) Did not change branching ratios, as this would adversly impact standard
+*    simulations.
+* 3) The mass of the D*+/- and D0 now have full precision quoted in PDG (2009).
+*
 * Revision 1.27  2010/06/24 22:37:39  jwebb
 * Say no to Mortran90.
 *
@@ -129,22 +138,22 @@ MODULE gstar_part Is the STAR Particle Database
 
  
 * (K-)+(pi+) decay
-  Particle D0        code=37  TrkTyp=3 mass=1.865  charge=0 tlife=0.415e-12,
+  Particle D0        code=37  TrkTyp=3 mass=1.86484  charge=0 tlife=0.415e-12,
                      pdg=421  bratio= { 1, }       mode= { 1208, }
 
 * (K+)+(pi-) decay
-  Particle D0_bar    code=38  TrkTyp=3 mass=1.865  charge=0 tlife=0.415e-12,
+  Particle D0_bar    code=38  TrkTyp=3 mass=1.86484  charge=0 tlife=0.415e-12,
                      pdg=-421  bratio= { 1, }      mode= { 1109, }
 
 ************************************************************************************ 
 * D0 and pi+, D+ and pi0
-  Particle D_star_plus   code=60  TrkTyp=4 mass=2.010  charge=1  tlife=6.86e-21,
+  Particle D_star_plus   code=60  TrkTyp=4 mass=2.01027  charge=1  tlife=6.86e-21,
                      pdg=413  bratio= { 0.69, 0.31}       mode= { 3708, 3507 }
 
 * decay into D0 and pi-, D- and pi0
 *
-  Particle D_star_minus  code=61  TrkTyp=4 mass=2.010  charge=-1 tlife=6.86e-21,
-                     pdg=-413 bratio= { 0.69, 0.31}       mode= { 3709, 3607 }
+  Particle D_star_minus  code=61  TrkTyp=4 mass=2.01027  charge=-1 tlife=6.86e-21,
+                     pdg=-413 bratio= { 0.69, 0.31}       mode= { 3809, 3607 }
 
 * decay into D0 and pi0, D0 and gamma
   Particle D_star_0       code=62  TrkTyp=4 mass=2.007  charge=0 tlife=3.13e-22,
