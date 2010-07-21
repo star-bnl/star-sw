@@ -46,13 +46,8 @@ namespace SSE
 
     // cacheline 3
     V_ALIGN(16) const double c_general::oneDouble[2] = { 1., 1. };
-//     V_ALIGN(16) const long long c_general::absMaskDouble[2] = { 0x7fffffffffffffff, 0x7fffffffffffffff };
-//     V_ALIGN(16) const unsigned long long c_general::signMaskDouble[2] = { 0x8000000000000000, 0x8000000000000000 }; // IKu
-    //     V_ALIGN(16) const long long c_general::absMaskDouble[2] = { 0x7fffffffffffffffull, 0x7fffffffffffffffull };
-//     V_ALIGN(16) const unsigned long long c_general::signMaskDouble[2] = { 0x8000000000000000ull, 0x8000000000000000ull };
-    V_ALIGN(16) const int c_general::absMaskDouble[4] = { 0x7fffffff, 0xffffffff, 0x7fffffff, 0xffffffff };
-    V_ALIGN(16) const unsigned int c_general::signMaskDouble[4] = { 0x80000000, 0x00000000, 0x80000000, 0x00000000 };
-
+    V_ALIGN(16) const long long c_general::absMaskDouble[2] = { 0x7fffffffffffffff, 0x7fffffffffffffff };
+    V_ALIGN(16) const unsigned long long c_general::signMaskDouble[2] = { 0x8000000000000000, 0x8000000000000000 };
     V_ALIGN(16) const int _padding00[4] = { 0, 0, 0, 0 };
 
     template<> const float c_sin<float>::_data[4 * 8] = {

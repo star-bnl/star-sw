@@ -20,8 +20,6 @@
 #include "casts.h"
 #include <cstdlib>
 
-#define VC_NO_BSF_LOOPS
-
 #ifndef VC_NO_BSF_LOOPS
 # ifdef VC_NO_GATHER_TRICKS
 #  define VC_NO_BSF_LOOPS
@@ -46,14 +44,14 @@ namespace SSE
         y = _mm_shufflelo_epi16(_mm_shufflehi_epi16(x, _MM_SHUFFLE(2, 3, 0, 1)), _MM_SHUFFLE(2, 3, 0, 1));
         lo = _mm_min_epi16(x, y);
         hi = _mm_max_epi16(x, y);
-        x = _mm_blend_epi16(lo, hi, 0xaa); // a = 1010
+        x = _mm_blend_epi16(lo, hi, 0xaa);
 
         // merge left and right quads
         y = _mm_shufflelo_epi16(_mm_shufflehi_epi16(x, _MM_SHUFFLE(0, 1, 2, 3)), _MM_SHUFFLE(0, 1, 2, 3));
         lo = _mm_min_epi16(x, y);
         hi = _mm_max_epi16(x, y);
-        x = _mm_blend_epi16(lo, hi, 0xcc); // c = 1100
-        y = _mm_srli_si128(x, 2); // iklm. ?? 4 op. down
+        x = _mm_blend_epi16(lo, hi, 0xcc);
+        y = _mm_srli_si128(x, 2);
         lo = _mm_min_epi16(x, y);
         hi = _mm_max_epi16(x, y);
         x = _mm_blend_epi16(lo, _mm_slli_si128(hi, 2), 0xaa);

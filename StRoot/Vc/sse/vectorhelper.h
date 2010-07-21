@@ -69,14 +69,12 @@ namespace SSE
         template<typename S1, typename S2> static void gather(Base &v, const IndexType &indexes,
                 const S1 *baseAddr, const S2 S1::* member1, const EntryType S2::* member2);
     };
- // GatherHelper
-    
+
     template<typename VectorType, unsigned int Size> struct SortHelper
     {
         static VectorType sort(VectorType);
     };
- // SortHelper
-    
+
     template<typename T> struct ScatterHelper
     {
         typedef VectorBase<T> Base;
@@ -102,8 +100,7 @@ namespace SSE
         template<typename S1, typename S2>
         static void scatter(const Base &v, const IndexType &indexes, int mask, S1 *baseAddr, S2 S1::* member1, EntryType S2::* member2);
     };
- // ScatterHelper
-    
+
 #undef OP_DECL
 #undef PARENT_DATA
 #undef PARENT_DATA_CONST
@@ -333,14 +330,10 @@ namespace SSE
                 e = add(e, one);
 
                 // keep only the fractional part
-//                 const union {
-//                     unsigned long long int i;
-//                     double d;
-//                 } mantissa_mask = { 0x800fffffffffffffull }; // IKu
                 const union {
-                  unsigned int i[2];
-                  double d;
-                } mantissa_mask = { {0x800fffff, 0xffffffff} };
+                    unsigned long long int i;
+                    double d;
+                } mantissa_mask = { 0x800fffffffffffffull };
                 x = _mm_and_pd(x, set(mantissa_mask.d));
                 x = _mm_or_pd(x, set(0.5));
 
@@ -428,8 +421,7 @@ namespace SSE
 #endif
             }
         };
-         // VectorHelper<double>
-             
+
         template<> struct VectorHelper<float> {
             typedef float EntryType;
             typedef _M128 VectorType;
@@ -742,7 +734,7 @@ namespace SSE
 #endif
             }
         };
- // VectorHelper<float>
+
         template<> struct VectorHelper<float8> {
             typedef float EntryType;
             typedef M256 VectorType;

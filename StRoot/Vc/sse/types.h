@@ -77,7 +77,7 @@ namespace SSE
 
         private:
             VectorType data;
-    }; // class VectorMemoryUnion
+    };
 
     template<typename T> struct VectorHelperSize;
 
