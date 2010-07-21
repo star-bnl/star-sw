@@ -35,11 +35,9 @@ namespace SSE
         ALIGN(16) static const float oneFloat[4];
         ALIGN(16) static const double oneDouble[2];
         ALIGN(16) static const int absMaskFloat[4];
-//         ALIGN(16) static const long long absMaskDouble[2]; // IKu
-//         ALIGN(16) static const unsigned long long signMaskDouble[2];
-        ALIGN(16) static const int absMaskDouble[4];
-        ALIGN(16) static const unsigned int signMaskDouble[4];
+        ALIGN(16) static const long long absMaskDouble[2];
         ALIGN(16) static const unsigned int signMaskFloat[4];
+        ALIGN(16) static const unsigned long long signMaskDouble[2];
         ALIGN(16) static const short minShort[8];
     } ALIGN(64);
     template<typename T> struct c_sin

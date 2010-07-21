@@ -102,7 +102,7 @@ class WriteMaskedVector
         WriteMaskedVector(Vector<T> *v, const Mask &k) : vec(v), mask(k) {}
         Vector<T> *vec;
         Mask mask;
-}; // class WriteMaskedVector
+};
 
 template<typename T>
 class Vector : public VectorBase<T>
@@ -184,7 +184,7 @@ class Vector : public VectorBase<T>
          * Set all entries to zero where the mask is set. I.e. a 4-vector with a mask of 0111 would
          * set the last three entries to 0.
          */
-        inline void makeZero(const Mask &k) { data() = VectorHelper<VectorType>::andnot_( mm128_reinterpret_cast<VectorType>(k.data()), data() ); }
+        inline void makeZero(const Mask &k) { data() = VectorHelper<VectorType>::andnot_(mm128_reinterpret_cast<VectorType>(k.data()), data()); }
 
         /**
          * Store the vector data to the given memory. The memory must be 64 byte aligned and of 512
@@ -399,8 +399,7 @@ class Vector : public VectorBase<T>
             }
         }
 };
- // class Vector : public VectorBase<T>
- 
+
 template<> inline Vector<float8> Vector<float8>::broadcast4(const float *x) {
     const _M128 &v = VectorHelper<_M128>::load(x);
     return Vector<float8>(M256(v, v));
