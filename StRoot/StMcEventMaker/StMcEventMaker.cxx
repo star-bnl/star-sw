@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.68 2010/01/28 18:12:26 perev Exp $
+ * $Id: StMcEventMaker.cxx,v 1.69 2010/07/21 17:31:23 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.69  2010/07/21 17:31:23  perev
+ * useBtof cancelled useTof is ON instead (F.Geurt)
+ *
  * Revision 1.68  2010/01/28 18:12:26  perev
  * WarnOff
  *
@@ -298,7 +301,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.68 2010/01/28 18:12:26 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.69 2010/07/21 17:31:23 perev Exp $";
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
@@ -336,8 +339,7 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doUseBsmd        (kTRUE),
     doUseCtb         (kTRUE),
     doUseTofp        (kFALSE),
-    doUseTof         (kFALSE),
-    doUseBtof        (kTRUE),
+    doUseTof         (kTRUE),
     doUseEemc        (kTRUE),
     doUsePixel       (kTRUE),
     doUseIst         (kTRUE),
@@ -903,7 +905,7 @@ Int_t StMcEventMaker::Make()
 		// Track from GEANT, use next_parent_p to get to the parent
 		// track.  Use the same scheme as for the particle table.
 		motherIndex = trackTable[itrk].next_parent_p;
-		if ((motherIndex > 0) && (motherIndex < NTracks))
+		if ((motherIndex > 0) && (motherIndex < NTracks)) {
 		    if (motherIndex > itrk) { 
 			if (Debug()) {
 			    gMessMgr->Warning()
@@ -913,7 +915,7 @@ Int_t StMcEventMaker::Make()
 			}
 		    }
 		    else {t->setParent(ttemp[motherIndex-1]);}
-	    }
+	    } }
 	    
 	}} // Track loop
 	{for (long gtrk=0; gtrk<NGeneratorTracks; gtrk++) {
