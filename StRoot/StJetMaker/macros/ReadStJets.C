@@ -45,16 +45,34 @@ void ReadStJets(int nevents = 10, const char* jetfile = "blah.jets.root", const 
       cout << "runId = " << stjets->runId() << endl;
       cout << "eventId = " << stjets->eventId() << endl;
 
-      const float* pos = skimevent->bestVert()->position();
-      cout << "vx = " << pos[0] << ", vy = " << pos[1] << ", vz = " << pos[2] << endl;
-      cout << "nJets = " << stjets->nJets() << endl;
+      TVector3 vertex(skimevent->bestVert()->position());
+      cout << "vx = " << vertex.x() << ", vy = " << vertex.y() << ", vz = " << vertex.z() << endl;
 
       // Loop over jets
+      cout << "nJets = " << stjets->nJets() << endl;
       for (int iJet = 0; iJet < stjets->nJets(); ++iJet) {
 	StJet* jet = (StJet*)stjets->jets()->At(iJet);
 	cout << "Jet #" << iJet << ": jetPt = " << jet->jetPt << ", jetEta = " << jet->jetEta << ", jetPhi = " << jet->jetPhi
 	     << ", nTracks = " << jet->nTracks << ", nBtowers = " << jet->nBtowers << ", nEtowers = " << jet->nEtowers
 	     << endl;
+
+	// Loop over tracks
+	TObjArray tracks = stjets->tracks(iJet);
+	for (int iTrack = 0; iTrack < tracks.GetEntriesFast(); ++iTrack) {
+	  TrackToJetIndex* track = (TrackToJetIndex*)tracks.At(iTrack);
+	  cout << "Track #" << iTrack << ": id = " << track->trackId() << ", detId = " << track->detectorId()
+	       << ", pt = " << track->Pt() << ", eta = " << track->Eta() << ", phi = " << track->Phi()
+	       << endl;
+	} // End loop over tracks
+
+	// Loop over towers
+	TObjArray towers = stjets->towers(iJet);
+	for (int iTower = 0; iTower < towers.GetEntriesFast(); ++iTower) {
+	  TowerToJetIndex* tower = (TowerToJetIndex*)towers.At(iTower);
+	  cout << "Tower #" << iTower << ": id = " << tower->towerId() << ", detId = " << tower->detectorId()
+	       << ", pt = " << tower->Pt() << ", eta = " << tower->Eta() << ", phi = " << tower->Phi()
+	       << endl;
+	} // End loop over towers
       }	// End loop over jets
     } // End loop over branches
 
