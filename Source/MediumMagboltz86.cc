@@ -2242,7 +2242,10 @@ MediumMagboltz86::RunMagboltz(const double e,
                               const int ncoll, bool verbose,
                               double& vx, double& vy, double& vz,
                               double& dl, double& dt,
-                              double& alpha, double& eta) {
+                              double& alpha, double& eta,
+                              double& vxerr, double& vyerr, double& vzerr,
+                              double& dlerr, double& dterr, 
+                              double& alphaerr, double& etaerr) {
 
   // Set input parameters in Magboltz common blocks
   inpt_.nGas = nComponents;
@@ -2267,18 +2270,18 @@ MediumMagboltz86::RunMagboltz(const double e,
   // Call Magboltz internal setup routine
   setup1_();
 
-  // Calculate final energy
-  inpt_.efinal = 0.5;
-  // If E/p > 15 start at 8 eV 
+  // Calculate the max. energy in the table
   if (e * temperature / (293.15 * pressure) > 15) {
+    // If E/p > 15 start with 8 eV 
     inpt_.efinal = 8.;
+  } else {
+    inpt_.efinal = 0.5;
   }
   setp_.estart = inpt_.efinal / 50.;
 
   long long ielow = 1;
   while (ielow == 1) {
     mixer_();
-    // Loop to calculate final energy
     if (bmag == 0. || btheta == 0. || fabs(btheta) == 180.) {
       elimit_(&ielow);
     } else if (btheta == 90.) {
@@ -2287,6 +2290,7 @@ MediumMagboltz86::RunMagboltz(const double e,
       elimitc_(&ielow);
     }
     if (ielow == 1) {
+      // Increase the max. energy
       inpt_.efinal *= sqrt(2.);
       setp_.estart = inpt_.efinal / 50.;
     }
@@ -2294,6 +2298,7 @@ MediumMagboltz86::RunMagboltz(const double e,
 
   if (verbose) prnter_();
   
+  // Run the Monte Carlo calculation
   if (bmag == 0.) {
     monte_();
   } else if (btheta == 0. || btheta == 180.) {
@@ -2306,7 +2311,7 @@ MediumMagboltz86::RunMagboltz(const double e,
   if (verbose) output_();
 
   // If attachment or ionisation rate is greater than sstmin,
-  // then include spatial gradients in the solution.
+  // include spatial gradients in the solution
   const double sstmin = 30.;
   double alpp = ctowns_.alpha * 760. * temperature / (pressure * 293.15);
   double attp = ctowns_.att   * 760. * temperature / (pressure * 293.15);
@@ -2323,15 +2328,30 @@ MediumMagboltz86::RunMagboltz(const double e,
   }
   if (verbose) output2_();
 
-  vx = vel_.wx * 1.e-9;
-  vy = vel_.wy * 1.e-9;
-  vz = vel_.wz * 1.e-9;
+  vx = vel_.wx * 1.e-9; vxerr = velerr_.dwx;
+  vy = vel_.wy * 1.e-9; vyerr = velerr_.dwy;
+  vz = vel_.wz * 1.e-9; vzerr = velerr_.dwz;
 
-  dt = sqrt(0.2 * difvel_.diftr / vz) * 1.e-4;
-  dl = sqrt(0.2 * difvel_.difln / vz) * 1.e-4;
+  dt = sqrt(0.2 * difvel_.diftr / vz) * 1.e-4; dterr = diferl_.dfter;
+  dl = sqrt(0.2 * difvel_.difln / vz) * 1.e-4; dlerr = diferl_.dfler;
  
-  alpha = ctowns_.alpha;
-  eta   = ctowns_.att;
+  alpha = ctowns_.alpha; alphaerr = ctwner_.alper;
+  eta   = ctowns_.att;   etaerr = ctwner_.atter;
+  
+  if (verbose) {
+    std::cout << "MediumMagboltz86::RunMagboltz:" << std::endl;
+    std::cout << "    Results: " << std::endl;
+    std::cout << "      Drift velocity along E:   " << vz << " cm/ns "
+              << " +/- " << vzerr << "%" << std::endl;
+    std::cout << "      Drift velocity along Bt:  " << vx << " cm/ns "
+              << " +/- " << vxerr << "%" << std::endl;
+    std::cout << "      Drift velocity along ExB: " << vy << " cm/ns "
+              << " +/- " << vyerr << "%" << std::endl;
+    std::cout << "      Longitudinal diffusion:   " << dl << " sqrt(cm) "
+              << " +/- " << dlerr << "%" << std::endl;
+    std::cout << "      Transverse diffusion:     " << dt << " sqrt(cm) "
+              << " +/- " << dterr << "%" << std::endl;
+  }
 
 }
 

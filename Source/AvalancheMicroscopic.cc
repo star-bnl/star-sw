@@ -20,7 +20,8 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   histDistance(0), hasDistanceHistogram(false), distanceOption('z'),
   histSecondary(0), hasSecondaryHistogram(false),
   useSignal(false), useInducedCharge(false),
-  useDriftLines(false), usePhotons(false), useBfield(false),
+  useDriftLines(false), usePhotons(false), 
+  useNullCollisionSteps(false), useBfield(false),
   deltaCut(0.), gammaCut(0.),
   nCollSkip(100),
   hasUserHandleAttachment(false),
@@ -389,6 +390,8 @@ AvalancheMicroscopic::TransportElectron(
     std::cerr << "    Got null-collision rate <= 0." << std::endl;
     return false;
   }
+  // Null-collision flag
+  bool isNullCollision = false;
   // Real collision rate
   double fReal;
    
@@ -516,6 +519,8 @@ AvalancheMicroscopic::TransportElectron(
 
       while (1) {
 
+        isNullCollision = false;
+
         if (energy < deltaCut) {
           stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
           stack[iEl].t = t; stack[iEl].energy = energy;
@@ -642,8 +647,11 @@ AvalancheMicroscopic::TransportElectron(
             continue;
           }
           // Check for real or null collision
-          if (RndmUniform() > fReal / fLim) continue;
-          break;
+          if (RndmUniform() <= fReal / fLim) break;
+          if (useNullCollisionSteps) {
+            isNullCollision = true;
+            break;
+          }
         }
       
         ++nCollTemp;
@@ -793,6 +801,12 @@ AvalancheMicroscopic::TransportElectron(
           emag = sqrt(ex * ex + ey * ey + ez * ez);
           if (bmag > Small && emag > Small) bOk = true;
           else bOk = false;
+        }
+
+        if (isNullCollision) {
+          energy = newEnergy;
+          dx = newDx; dy = newDy; dz = newDz;
+          continue;
         }
 
         // Get the collision type and parameters

@@ -53,6 +53,10 @@ class AvalancheMicroscopic {
     void EnablePhotonTransport()  {usePhotons = true;}
     void DisablePhotonTransport() {usePhotons = false;}
 
+    // Switch on/off update of coordinates for null-collision steps
+    void EnableNullCollisionSteps()  {useNullCollisionSteps = true;}
+    void DisableNullCollisionSteps() {useNullCollisionSteps = false;}
+
     // Set/get energy threshold for electron transport
     // (useful for delta electrons)
     void   SetElectronTransportCut(const double cut) {deltaCut = cut;}
@@ -191,6 +195,7 @@ class AvalancheMicroscopic {
     bool useInducedCharge;
     bool useDriftLines;
     bool usePhotons;
+    bool useNullCollisionSteps;
     bool useBfield;
     
     // Transport cuts

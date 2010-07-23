@@ -11,8 +11,9 @@ namespace Garfield {
 
 extern "C" {
   
-  // COMMON blocks
+  // Magboltz COMMON blocks
 
+  // Magnetic field
   extern struct {
     double eovb;
     double wb;
@@ -44,6 +45,7 @@ extern "C" {
     long long nmax;
   } setp_;
   
+  // Physical constants
   extern struct {
     double echarg;
     double emass;
@@ -51,7 +53,7 @@ extern "C" {
     double pir2;
   } cnsts_;  
 
-  // Gas mixture   
+  // Definition of the gas mixture   
   extern struct {
     long long ngasn[6];
   } gasn_; 
@@ -60,24 +62,38 @@ extern "C" {
     double frac[6];
   } ratio_;
    
-  // Output
+  // Calculation results
+  // Drift velocity
   extern struct {
-    double wx;
-    double wy;
-    double wz;
+    double wx, wy, wz;
   } vel_;  
+  extern struct {
+    double dwx, dwy, dwz;
+  } velerr_;
+
+  // Diffusion
   extern struct {
     double difxx, difyy, difzz;
     double difyz, difxy, difxz;
   } diflab_;
   extern struct {
-    double difln;
-    double diftr;
+    double dxxer, dyyer, dzzer;
+    double dyzer, dxyer, dxzer;
+  } diferb_;
+  extern struct {
+    double difln, diftr;
   } difvel_;
   extern struct {
-    double alpha;
-    double att;
+    double dfler, dfter;
+  } diferl_;
+
+  // Townsend and attachment coefficient
+  extern struct {
+    double alpha, att;
   } ctowns_; 
+  extern struct {
+    double alper, atter;
+  } ctwner_;
 
   void gasmix_(long long* ngs, double* q, 
         double* qin, long long* nin, double* e, double* ei, char* name, 
@@ -148,12 +164,10 @@ class MediumMagboltz86 : public Medium {
 
     // Switch on/off anisotropic scattering (enabled by default)
     void EnableAnisotropicScattering()  {
-      useAnisotropic = true; 
-      isChanged = true;
+      useAnisotropic = true;  isChanged = true;
     }
     void DisableAnisotropicScattering() {
-      useAnisotropic = false; 
-      isChanged = true;
+      useAnisotropic = false; isChanged = true;
     }
 
     // Switch on/off secondary electron energy distribution 
@@ -227,7 +241,10 @@ class MediumMagboltz86 : public Medium {
                      const int ncoll, bool verbose,
                      double& vx, double& vy, double& vz, 
                      double& dl, double& dt,
-                     double& eta, double& alpha);
+                     double& alpha, double& eta,
+                     double& vxerr, double& vyerr, double& vzerr,
+                     double& dlerr, double& dterr,
+                     double& alphaerr, double& etaerr);
  
     void SetIonMobility(const double mu);
     bool IonVelocity(const double ex, const double ey, const double ez,
