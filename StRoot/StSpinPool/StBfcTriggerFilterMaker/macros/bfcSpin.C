@@ -3,6 +3,16 @@
 // Texas A&M University
 // 5 December 2009
 //
+// Example macro to use the BFC trigger filter maker.
+// Takes as input fzd file, then processes EMC response.
+// If event fires selected bits from EMC layer 2 DSM
+// (which corresponds to selecting triggers), then
+// BFC reconstruction continues. Otherwise, event
+// is skipped. Substantial savings in processing
+// time and disk space can be achieved when
+// reconstruction of complex detectors like the
+// TPC is skipped for uninteresting events.
+//
 
 class StBFChain;
 StBFChain* chain = 0;
@@ -45,11 +55,11 @@ void bfcSpin(int nevents = 2000,
   pythia->SetPythiaFile(pyfile);
   chain->AddAfter("geant",pythia);
 
-
   // Place trigger simulator after EMC makers
   gSystem->Load("StTriggerUtilities");
   StTriggerSimuMaker* trgsim = new StTriggerSimuMaker;
   trgsim->setMC(1);
+  // BBC was not used in Run 9 jet triggers
   //trgsim->useBbc();
   //trgsim->bbc->setSource("StEvent");
   trgsim->useBemc();
@@ -58,37 +68,15 @@ void bfcSpin(int nevents = 2000,
   trgsim->eemc->setSource("StEvent");
 
   StBfcTriggerFilterMaker* trgfilt = new StBfcTriggerFilterMaker;
+  // The BFC trigger filter will select only JP1, AJP and BHT3 events
   trgfilt->SetJP1();
   trgfilt->SetAJP();
   trgfilt->SetBHT3();
+  // Lower all jet patch thresholds by one unit from
+  // their values obtained from the database using
+  // the current timestamp.
   trgfilt->changeJPThresh(-1);
   chain->AddAfter("eefs",trgfilt);
-
-#if 0
-  // Lower all JP thresholds by 5% (-1 DSM ADC)
-  trgsim->setOverlapJetPatchTh(0,18);
-  trgsim->setOverlapJetPatchTh(1,25);
-  trgsim->setOverlapJetPatchTh(2,33);
-  trgsim->setBarrelJetPatchTh(0,19);
-  trgsim->setBarrelJetPatchTh(1,27);
-  trgsim->setBarrelJetPatchTh(2,35);
-  trgsim->setEndcapJetPatchTh(0,17);
-  trgsim->setEndcapJetPatchTh(1,24);
-  trgsim->setEndcapJetPatchTh(2,31);
-#endif
-
-#if 0
-  // Lower all JP thresholds by 10% (-2 DSM ADC)
-  trgsim->setOverlapJetPatchTh(0,17);
-  trgsim->setOverlapJetPatchTh(1,24);
-  trgsim->setOverlapJetPatchTh(2,32);
-  trgsim->setBarrelJetPatchTh(0,18);
-  trgsim->setBarrelJetPatchTh(1,26);
-  trgsim->setBarrelJetPatchTh(2,34);
-  trgsim->setEndcapJetPatchTh(0,16);
-  trgsim->setEndcapJetPatchTh(1,23);
-  trgsim->setEndcapJetPatchTh(2,30);
-#endif
 
   chain->AddAfter("eefs",trgsim);
 
@@ -105,6 +93,7 @@ void bfcSpin(int nevents = 2000,
     cout << "Chain initialization failed" << endl;
     chain->Fatal(istat,"during Init()");
   }
+  // Detailed listing of makers in the chain
   //chain->ls(0);
   cout << "Order of makers in BFC:" << endl;
   StMaker::lsMakers(chain);
