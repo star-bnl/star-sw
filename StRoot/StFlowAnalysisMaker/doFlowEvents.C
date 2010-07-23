@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.3 2010/06/10 16:33:59 posk Exp $
+// $Id: doFlowEvents.C,v 1.4 2010/07/23 21:01:46 posk Exp $
 // Put a link to this at /StRoot/macros/analysis/doFlowEvents.C
 //
 // Description: 
@@ -207,9 +207,9 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
   } else {
     reCentMaker = kFALSE;
     phiWgtMaker = kFALSE;
-    anaMaker    = kFALSE;
+    anaMaker    = kTRUE;
     cumuMaker   = kFALSE;
-    spMaker     = kTRUE;
+    spMaker     = kFALSE;
     lyzMaker    = kFALSE;
     dirCumuMaker= kFALSE;
   }
@@ -416,10 +416,13 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
     // These correlate each particle with the other subevent plane.
     // With neither flag set the standard method is used, which
     // corelates each particle with the event plane from the full event
-    // minus the particle of interest. Subevents are made according to eta.
+    // minus the particle of interest, and subevents are made according to eta.
     // Don't set both of these at the same time.
 //     StFlowEvent::SetEtaSubs();
 //     StFlowEvent::SetRanSubs();
+   // With either of these set the higher harmonics are done with respect to the event planes
+   // of the higher harmonic. This is not a good idea as the second harmonic full event plane
+   // would be better.
 
   // Disable weights for the event plane and integrated flow for LYZ
     if (reCent && lyzMaker) {
@@ -642,6 +645,9 @@ void doFlowEvents(Int_t nEvents, Bool_t firstPass) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.4  2010/07/23 21:01:46  posk
+// Added a comment about higher harmonics with the subevent method.
+//
 // Revision 1.3  2010/06/10 16:33:59  posk
 // Correction to macro directCumulants_v2.C .
 //
