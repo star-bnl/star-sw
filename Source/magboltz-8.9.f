@@ -284,7 +284,8 @@ C GAS60 :  SIH4  (2005)    SILANE ANISOTROPIC                      4*
 C  GAS61-80 :DUMMY ROUTINES
 C------------------------------------------------------------------
 C
-      PROGRAM MAGBOLTZ 2                                                
+C      PROGRAM MAGBOLTZ 2                                                
+      SUBROUTINE MAGBOLTZ2s    
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)
       COMMON/BFLD/EOVB,WB,BTHETA,BMAG                                  

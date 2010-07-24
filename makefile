@@ -1,4 +1,4 @@
-HOME = /afs/cern.ch/user/h/hschindl/Garfield
+HOME = /Users/hschindl/garfield
 OBJECT = $(HOME)/Object
 SOURCE = $(HOME)/Source
 INCLUDE = $(HOME)/Include
