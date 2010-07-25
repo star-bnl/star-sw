@@ -1,4 +1,4 @@
-HOME = /Users/hschindl/garfield
+HOME = $(GARFIELD_HOME)
 OBJECT = $(HOME)/Object
 SOURCE = $(HOME)/Source
 INCLUDE = $(HOME)/Include
