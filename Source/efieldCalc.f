@@ -153,15 +153,11 @@ CDECK  ID>, SETNEW.
 *   (Last changed on 10/ 9/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -296,15 +292,11 @@ CDECK  ID>, SETA00.
 *            The potential used is log(r).
 *   Variables : No local variables.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -384,15 +376,11 @@ CDECK  ID>, SETB1X.
 *                            image of another * factor.
 *               R2PLAN     : Periodic length of (XX,YYMIRR)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -429,18 +417,10 @@ CDECK  ID>, SETB1X.
      -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
-       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2s
+       REAL PI,CLOG2
        PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+     -      CLOG2=0.693147180559945309417)
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
 *** Loop over all wires and calculate the diagonal elements first.
@@ -484,15 +464,11 @@ CDECK  ID>, SETB1Y.
 *                            image of another * factor.
 *               R2PLAN     : Periodic length of (XXMIRR,YY).
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -530,17 +506,9 @@ CDECK  ID>, SETB1Y.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
+       REAL PI,CLOG2
        PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+     -      CLOG2=0.693147180559945309417)
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
 *** Loop over all wires and calculate the diagonal elements first.
@@ -586,15 +554,11 @@ CDECK  ID>, SETB2X.
 *               YYMIRR     : Difference in y of one wire and the mirror
 *                            image of another * factor.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -632,17 +596,8 @@ CDECK  ID>, SETB2X.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
 *** Loop over all wires and calculate the diagonal elements first.
@@ -694,15 +649,11 @@ CDECK  ID>, SETB2Y.
 *               YYNEG      : Difference in y of one wire and the mirror
 *                            image in period direction of another * fac.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -740,17 +691,8 @@ CDECK  ID>, SETB2Y.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
 *** Loop over all wires and calculate the diagonal elements first.
@@ -802,15 +744,11 @@ CDECK  ID>, SETC10.
 *  (Written by G.A.Erskine/DD, 14.8.1984 modified to some extent)
 *-----------------------------------------------------------------------
        IMPLICIT COMPLEX (W,Z)
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -850,17 +788,8 @@ CDECK  ID>, SETC10.
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
 *** Statement function returning XX if mode is 0, YY else.
        UTYPE(XX,YY)=(1-MODE)*XX+MODE*YY
 *** Set some of the constants used by PH2 and E2SUM.
@@ -914,15 +843,11 @@ CDECK  ID>, SETC2X.
 *            j=1(1)n, lx=-infinity(1)infinity, ly=-infinity(1)infinity.
 *            but the signs of the charges alternate in the x-direction
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -962,17 +887,8 @@ CDECK  ID>, SETC2X.
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        LOGICAL         LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
@@ -1046,15 +962,11 @@ CDECK  ID>, SETC2Y.
 *            j=1(1)n, lx=-infinity(1)infinity, ly=-infinity(1)infinity.
 *            but the signs of the charges alternate in the y-direction
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -1094,17 +1006,8 @@ CDECK  ID>, SETC2Y.
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        LOGICAL         LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
@@ -1177,15 +1080,11 @@ CDECK  ID>, SETC30.
 *            j=1(1)n, lx=-infinity(1)infinity, ly=-infinity(1)infinity.
 *            but the signs of the charges alternate in both directions.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -1234,17 +1133,8 @@ CDECK  ID>, SETC30.
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
 *** Initialise the constants.
        P=0.0
        P1=0.0
@@ -1298,15 +1188,11 @@ CDECK  ID>, SETD10.
 *   VARIABLES :
 *   (Last changed on  4/ 9/95.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -1374,15 +1260,11 @@ CDECK  ID>, SETD20.
 *   VARIABLES :
 *   (Last changed on 18/ 2/93.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -1474,15 +1356,11 @@ CDECK  ID>, SETD30.
 *   Variables : No local variables.
 *   (Last changed on 21/ 2/94.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -1550,15 +1428,11 @@ CDECK  ID>, CHARGE.
 *            the SET... routines thereby providing the charges.
 *   (Last changed on 30/ 1/93.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -1721,15 +1595,11 @@ CDECK  ID>, SETDIP.
 *   (Last changed on 19/ 9/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -1776,17 +1646,8 @@ CDECK  ID>, SETDIP.
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        INTEGER IFAIL,IW,I,N,ILOC,ITER,NITMAX
        PARAMETER(N=20)
        REAL ANGLE(N),VOLT(N),DRES,RMULT,EX,EY,EZ,ETOT,
@@ -1888,17 +1749,8 @@ CDECK  ID>, DIPFIT.
 *   (Last changed on 26/10/07.)
 *-----------------------------------------------------------------------
        implicit none
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        LOGICAL         LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
@@ -2063,15 +1915,13 @@ CDECK  ID>, EFIELD.
 *   (Last changed on 28/ 9/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
+       INTEGER MXWIRE,MXLIST,MXMATT,MX3D,
      -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        DOUBLE PRECISION WGT,FPRMAT,
      -      FPROJ,FPROJA,FPROJB,FPROJC,FPROJD,FPROJN,
      -      EPSGX,EPSGY,EPSGZ,
@@ -2156,17 +2006,8 @@ CDECK  ID>, EFIELD.
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        REAL XIN,YIN,ZIN,EX,EY,EZ,ETOT,VOLT,XPOS,YPOS,ZPOS,DXWIR,DYWIR,
      -      AROT,EX3D,EY3D,EZ3D,V3D,XAUX,YAUX,
      -      EXD,EYD,VOLTD
@@ -2364,15 +2205,11 @@ CDECK  ID>, EFCA00SC.
 *               (XPOS,YPOS): The position where the field is calculated.
 *   (Last changed on 25/ 1/96.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -2462,15 +2299,11 @@ CDECK  ID>, E3DA00.
 *               (XPOS,YPOS): The position where the field is calculated.
 *   (Last changed on  5/12/94.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -2567,15 +2400,11 @@ CDECK  ID>, EMCA00.
 *   (Last changed on 10/ 9/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -2679,15 +2508,11 @@ CDECK  ID>, EFCB1XSC.
 *               Z,ZZMIRR   : X + I*Y , XXMIRR + I*YYMIRR ; I**2=-1
 *               ECOMPL     : EX + I*EY                   ; I**2=-1
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -2726,16 +2551,10 @@ CDECK  ID>, EFCB1XSC.
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
+       REAL PI,CLOG2
        PARAMETER (PI=3.141592653589793238,
      -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+     -      ICONS=(0.0,1.0))
        COMPLEX ZZ,ECOMPL,ZZMIRR
 *** Initialise EX, EY and VOLT.
        EX=0.0
@@ -2783,15 +2602,11 @@ CDECK  ID>, EMCB1X.
 *   (Last changed on 24/ 9/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -2829,17 +2644,8 @@ CDECK  ID>, EMCB1X.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        REAL XPOS,YPOS,EX,EY,VOLT,DX,DY,EXHELP,EYHELP,VHELP
        INTEGER IOPT,I
 *** Initialise the potential and the electric field.
@@ -2889,15 +2695,11 @@ CDECK  ID>, EFCB1YSC.
 *               Z,ZZMIRR   : X + I*Y , XXMIRR + I*YYMIRR ; I**2=-1
 *               ECOMPL     : EX + I*EY                   ; I**2=-1
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -2935,17 +2737,9 @@ CDECK  ID>, EFCB1YSC.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
+       REAL PI,CLOG2
        PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+     -      CLOG2=0.693147180559945309417)
        COMPLEX ZZ,ECOMPL,ZZMIRR
 *** Initialise EX, EY and VOLT.
        EX=0.0
@@ -2992,15 +2786,11 @@ CDECK  ID>, EMCB1Y.
 *   (Last changed on 24/ 9/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -3038,17 +2828,8 @@ CDECK  ID>, EMCB1Y.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        REAL XPOS,YPOS,EX,EY,VOLT,DX,DY,EXHELP,EYHELP,VHELP
        INTEGER IOPT,I
 *** Initialise the potential and the electric field.
@@ -3099,15 +2880,11 @@ CDECK  ID>, EFCB2X.
 *               ECOMPL     : EX + i*EY                   ; i**2=-1
 *   (Cray vectorisable)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -3145,17 +2922,8 @@ CDECK  ID>, EFCB2X.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        COMPLEX ZZ,ECOMPL,ZZMIRR,ZZNEG,ZZNMIR
 *** Initialise EX, EY and VOLT.
        EX=0.0
@@ -3204,15 +2972,11 @@ CDECK  ID>, E3DB2X.
 *   VARIABLES : See routine E3DA00 for most of the variables.
 *   (Last changed on  5/12/94.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -3250,17 +3014,8 @@ CDECK  ID>, E3DB2X.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        DOUBLE PRECISION EXSUM,EYSUM,EZSUM,VSUM,
      -      I0S,I1S,K0S,K0L,K1S,K1L,K0R,K1R,K0RM,K1RM,
      -      XX,RR,RRM,ZZP,ZZN,RR1,RR2,RM1,RM2,ERR,EZZ
@@ -3472,15 +3227,11 @@ CDECK  ID>, EMCB2X.
 *   (Last changed on 17/10/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -3518,17 +3269,8 @@ CDECK  ID>, EMCB2X.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        REAL XPOS,YPOS,EX,EY,VOLT,DX,DY,DXNEG,EXHELP,EYHELP,VHELP
        INTEGER IOPT,I
 *** Initialise the potential and the electric field.
@@ -3605,17 +3347,14 @@ CDECK  ID>, EFCB2Y.
 *               ECOMPL     : EX + i*EY                   ; i**2=-1
 *   (Cray vectorisable)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
+       INTEGER I
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
      -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
        LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
@@ -3652,16 +3391,9 @@ CDECK  ID>, EFCB2Y.
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
+       PARAMETER (ICONS=(0.0,1.0))
        COMPLEX ZZ,ECOMPL,ZZMIRR,ZZNEG,ZZNMIR
 *** Initialise EX, EY and VOLT.
        EX=0.0
@@ -3711,17 +3443,15 @@ CDECK  ID>, E3DB2Y.
 *   VARIABLES : See routine E3DA00 for most of the variables.
 *   (Last changed on  5/12/94.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
+       INTEGER I, J
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
      -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
        LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
@@ -3757,17 +3487,8 @@ CDECK  ID>, E3DB2Y.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        DOUBLE PRECISION EXSUM,EYSUM,EZSUM,VSUM,
      -      I0S,I1S,K0S,K0L,K1S,K1L,K0R,K1R,K0RM,K1RM,
      -      XX,RR,RRM,ZZP,ZZN,RR1,RR2,RM1,RM2,ERR,EZZ
@@ -3979,15 +3700,11 @@ CDECK  ID>, EMCB2Y.
 *   (Last changed on 20/10/07.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -4025,17 +3742,8 @@ CDECK  ID>, EMCB2Y.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        REAL XPOS,YPOS,EX,EY,VOLT,DX,DY,DYNEG,EXHELP,EYHELP,VHELP
        INTEGER IOPT,I
 *** Initialise the potential and the electric field.
@@ -4126,15 +3834,11 @@ CDECK  ID>, EFCC10.
 *            calls the routines PH2 and E2SUM written by G.A.Erskine.
 *   VARIABLES : No local variables.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -4192,15 +3896,11 @@ CDECK  ID>, EFCC2X.
 *            configuration with 2 x planes and y periodicity.
 *   VARIABLES : see the writeup
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -4239,16 +3939,10 @@ CDECK  ID>, EFCC2X.
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
+       REAL PI,CLOG2
        PARAMETER (PI=3.141592653589793238,
      -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+     -      ICONS=(0.0,1.0))
        COMPLEX WSUM1,WSUM2,ZSIN,ZCOF,ZU,ZUNEW,ZTERM1,ZTERM2,ZETA
 *** Initial values.
        WSUM1=0
@@ -4315,15 +4009,11 @@ CDECK  ID>, EFCC2Y.
 *            configuration with 2 y planes and x periodicity.
 *   VARIABLES : see the writeup
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -4362,16 +4052,10 @@ CDECK  ID>, EFCC2Y.
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
+       REAL PI,CLOG2
        PARAMETER (PI=3.141592653589793238,
      -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+     -      ICONS=(0.0,1.0))
        COMPLEX WSUM1,WSUM2,ZSIN,ZCOF,ZU,ZUNEW,ZTERM1,ZTERM2,ZETA
 *** Initial values.
        WSUM1=0
@@ -4438,15 +4122,11 @@ CDECK  ID>, EFCC30.
 *            configuration with 2 y and 2 x planes.
 *   VARIABLES : see the writeup
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -4485,16 +4165,9 @@ CDECK  ID>, EFCC30.
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL CLOG2
+       PARAMETER (CLOG2=0.693147180559945309417,
+     -      ICONS=(0.0,1.0))
        COMPLEX WSUM1,WSUM2,WSUM3,WSUM4,ZSIN,ZCOF,ZU,ZUNEW,
      -      ZTERM1,ZTERM2,ZETA
 *** Initial values.
@@ -4605,15 +4278,11 @@ CDECK  ID>, EFCD10.
 *               ZI, ZPOS   : Shorthand complex notations.
 *   (Last changed on  4/ 9/95.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -4681,15 +4350,11 @@ CDECK  ID>, E3DD10.
 *   VARIABLES : See routine E3DA00 for most of the variables.
 *   (Last changed on 25/11/95.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -4727,17 +4392,8 @@ CDECK  ID>, E3DD10.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        DOUBLE PRECISION EXSUM,EYSUM,EZSUM,VSUM,
      -      I0S,I1S,K0S,K0L,K1S,K1L,K0R,K1R,
      -      XX,RR,ZZP,ZZN,RR1,RR2,RM1,RM2,ERR,EZZ
@@ -4909,15 +4565,11 @@ CDECK  ID>, EFCD20.
 *               ZI, ZPOS   : Shorthand complex notations.
 *   (Last changed on 10/ 2/93.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -5003,15 +4655,11 @@ CDECK  ID>, EFCD30.
 *               ZI, ZPOS   : Shorthand complex notations.
 *   (Last changed on 19/ 2/94.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -5080,15 +4728,11 @@ CDECK  ID>, EFCMAP.
 *              CC2   - coefficients for expansion around cornre
 *   (Last changed on 19/ 2/94.)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -5126,17 +4770,8 @@ CDECK  ID>, EFCMAP.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        COMPLEX Z,ZZ,WW,WSUM,WD,WDSUM,ZTERM
        REAL CC1(0:15,3:8),CC2(0:15,3:8)
        INTEGER NTERM1(3:8),NTERM2(3:8)
@@ -5285,15 +4920,11 @@ CDECK  ID>, PH2.
 *  (G.A.Erskine/DD, 14.8.1984; some minor modifications (i) common block
 *   /EV2COM/ incorporated in /CELDAT/ (ii) large AIMAG(ZETA) corrected)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -5331,17 +4962,8 @@ CDECK  ID>, PH2.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL CLOG2
+       PARAMETER (CLOG2=0.693147180559945309417)
        COMPLEX ZETA,ZSIN,ZCOF,ZU,ZUNEW,ZTERM
        REAL PH2LIM,RADIUS
 *** Start of the main subroutine, off diagonal elements.
@@ -5373,15 +4995,11 @@ CDECK  ID>, E2SUM.
 *                            field is to be computed.
 *  (Essentially by G.A.Erskine/DD, 14.8.1984)
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -5420,16 +5038,7 @@ CDECK  ID>, E2SUM.
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       PARAMETER (ICONS=(0.0,1.0))
        COMPLEX WSUM,ZSIN,ZCOF,ZU,ZUNEW,ZTERM1,ZTERM2,ZETA
        WSUM=0
        DO 10 J=1,NWIRE
@@ -5459,15 +5068,11 @@ CDECK  ID>, EFCMAT.
 *   EFCMAT - Computes the effective distance between points taking the
 *            effects of dielectrica into account.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -5655,15 +5260,11 @@ CDECK  ID>, FFDBG.
 *            than one dielectricum in total.
 *   VARIABLES : No local variables.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -5837,15 +5438,11 @@ CDECK  ID>, EFDA00.
 *               EXHELP etc : One term in the series to be summed.
 *               (XPOS,YPOS): The position where the field is calculated.
 *-----------------------------------------------------------------------
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -5959,17 +5556,8 @@ CDECK  ID>, CFMPTC.
 *   (Last changed on 14/ 2/97.)
 *-----------------------------------------------------------------------
        implicit none
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        REAL R(*),THETA(*),X(*),Y(*),XI,YI
        INTEGER N,I
 *** Loop over the points.
@@ -5988,17 +5576,8 @@ CDECK  ID>, CFMRTP.
 *   (Last changed on 14/ 2/97.)
 *-----------------------------------------------------------------------
        implicit none
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        REAL R(*),THETA(*),RHO(*),PHI(*),RI,THETAI
        INTEGER N,I
 *** Loop over the points.
@@ -6102,17 +5681,8 @@ CDECK  ID>, CFMCTP.
 *   (Last changed on 14/ 2/97.)
 *-----------------------------------------------------------------------
        implicit none
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        REAL R(*),THETA(*),X(*),Y(*),RI,THETAI
        INTEGER N,I
 *** Loop over the points.
@@ -6137,17 +5707,8 @@ CDECK  ID>, INTUBE.
 *   (Last changed on 18/ 3/01.)
 *-----------------------------------------------------------------------
        implicit none
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        REAL X,Y,A,PHI
        INTEGER N,ILOC
 *** Special case: x=y=0
@@ -6193,15 +5754,12 @@ CDECK  ID>, INTUBE.
 *   (Last changed on 16/ 2/05.)
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXLIST,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -6286,17 +5844,8 @@ CDECK  ID>, INTUBE.
      -      LTRMS,LTRDEL,LTRINT,LTREXB,LTRCUT,TRFLAG(10),LINCAL,
      -      LFULLB,LFULLP,LFULLT,LSPLIT,LSORT,LOUTL,LEPSG,LGSTEP,
      -      LDLSRM,LDTSRM,LTRVVL
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
        LOGICAL WRONG(MXWIRE),WRMATX(MXMATT),WRMATY(MXMATT),OK,
      -      SETX,SETY,SETZ,SETV
        REAL CONEW1,CONEW2,CONEW3,CONEW4,COHLP,VTHLP,XNEW,YNEW,
@@ -6718,7 +6267,7 @@ CDECK  ID>, INTUBE.
        IF(YNPLAN(3))NELEM=NELEM+1
        IF(YNPLAN(4))NELEM=NELEM+1
        IF(TUBE) THEN
-	NELEM=NELEM+1
+         NELEM=NELEM+1
        ENDIF
        IF(NELEM.LT.2)THEN
             PRINT *,' ###### CELCHK ERROR   : Neither a field map,'//
@@ -7082,15 +6631,12 @@ CDECK  ID>, INTUBE.
 *     displayCelDat - Debugging subroutine
 *-----------------------------------------------------------------------
        implicit none
-       INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -         MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       INTEGER MXWIRE,MXLIST,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
        PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -7175,17 +6721,6 @@ CDECK  ID>, INTUBE.
      -      LTRMS,LTRDEL,LTRINT,LTREXB,LTRCUT,TRFLAG(10),LINCAL,
      -      LFULLB,LFULLP,LFULLT,LSPLIT,LSORT,LOUTL,LEPSG,LGSTEP,
      -      LDLSRM,LDTSRM,LTRVVL
-       COMPLEX ICONS
-       REAL PI,CLOG2,EPS0,ECHARG,EMASS,CLIGHT,BOLTZ,GRAV
-       PARAMETER (PI=3.141592653589793238,
-     -      CLOG2=0.693147180559945309417,
-     -      ICONS=(0.0,1.0),
-     -      EPS0=8.854187817E-14,
-     -      ECHARG=1.60217733E-19,
-     -      EMASS=9.1093897E-31,
-     -      GRAV=9.80665,
-     -      CLIGHT=2.99792458E4,
-     -      BOLTZ=1.380658E-23)
        INTEGER IFAIL,I,J
        INTEGER K
        WRITE(*,*) ZMULT
@@ -7581,7 +7116,7 @@ CDECK  ID>, INTUBE.
        NXCH   =  0
        DET    =  ONE
        DO 144    J  =  1, N
- 120      K  =  J
+          K  =  J
           P  =  PIVOTF(A(J,J))
           IF(J .EQ. N)  GOTO 122
           JP1  =  J+1
@@ -7629,7 +7164,7 @@ CDECK  ID>, INTUBE.
              A(K,J+1)  =  -DOTF(A(J,J+1),A(K,J),S12)
  143         CONTINUE
  144      CONTINUE
- 150   IF(MOD(NXCH,2) .NE. 0)  DET  =  -DET
+       IF(MOD(NXCH,2) .NE. 0)  DET  =  -DET
        IF(JFAIL .NE. JRANGE)   DET  =  ZERO
        IR(N)  =  NXCH
        RETURN
@@ -7753,8 +7288,10 @@ CDECK  ID>, INTUBE.
 *-----------------------------------------------------------------------
 * GAMMA 
 *-----------------------------------------------------------------------
+       implicit none
+       DOUBLE PRECISION gamma
        REAL X
-       DOUBLE PRECISION C, U, F, H, ALFA, B1, B2
+       DOUBLE PRECISION C, U, F, H, ALFA, B0, B1, B2
        INTEGER I
        DIMENSION C(0:15)
 
@@ -7781,7 +7318,7 @@ CDECK  ID>, INTUBE.
          H=0
          GO TO 9
        ENDIF
-    8  F=1
+       F=1
        IF(U .LT. 3) THEN
          DO 1 I = 1,INT(4-U)
            F=F/U
