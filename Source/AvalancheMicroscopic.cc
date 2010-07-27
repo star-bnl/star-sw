@@ -654,7 +654,7 @@ AvalancheMicroscopic::TransportElectron(
           }
         }
       
-        ++nCollTemp;
+        ++nCollTemp;        
 
         // Update the directions (at instant before collision)
         // and calculate the proposed new position
@@ -732,6 +732,8 @@ AvalancheMicroscopic::TransportElectron(
               x = xM; y = yM; z = zM; t += dt;
             } 
           }
+          // Place the electron OUTSIDE the drift medium
+          x += delta * dX; y += delta * dY; z += delta * dZ; 
           if (useSignal) sensor->AddSignal(-1, stack[iEl].t, t - stack[iEl].t, 
                                            0.5 * (x - stack[iEl].x), 
                                            0.5 * (y - stack[iEl].y),
@@ -765,10 +767,13 @@ AvalancheMicroscopic::TransportElectron(
             dt *= 0.5;
             xM = x + delta * dX; yM = y + delta * dY; zM = z + delta * dZ; 
             // Check if the mid-point is inside the drift area
-            if (sensor->IsInArea(x, y, z)) {
+            if (sensor->IsInArea(xM, yM, zM)) {
               x = xM; y = yM; z = zM; t += dt;
             }
           }
+          // Place the electron OUTSIDE the drift area
+          x += delta * dX; y += delta * dY; z += delta * dZ;
+
           if (useSignal) sensor->AddSignal(-1, stack[iEl].t, t - stack[iEl].t, 
                                            0.5 * (x - stack[iEl].x), 
                                            0.5 * (y - stack[iEl].y),

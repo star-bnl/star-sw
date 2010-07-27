@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstdlib>
 
 #include "TrackBichsel.hh"
 #include "FundamentalConstants.hh"
@@ -13,6 +14,19 @@ TrackBichsel::TrackBichsel() :
   x(0.), y(0.), z(0.), t(0.), dx(0.), dy(0.), dz(1.),
   imfp(4.05090e4), datafile("SiM0invw.inv"), iCdf(2), nCdfEntries(-1),
   isInitialised(false), isInMedium(false) {
+  
+  char* pPath = getenv("GARFIELD_HOME");
+  if (pPath == 0) {
+    std::cerr << "TrackBichsel:" << std::endl;
+    std::cerr << "    Environment variable GARFIELD_HOME is not set." 
+              << std::endl;
+    std::cerr << "    Assuming that file " << datafile 
+              << " is located in the current work directory." << std::endl;
+  } else {
+    std::string filepath = pPath;
+    datafile = filepath + "/Data/" + datafile;
+  }
+  
 
 }
 

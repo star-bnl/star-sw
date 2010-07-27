@@ -11,7 +11,10 @@ class MediumPlastic : public Medium {
     
   public:
     // Constructor
-    MediumPlastic() : Medium() {name = "Plastic";}
+    MediumPlastic() : Medium() {
+      className = "MediumPlastic";
+      name = "Plastic";
+    }
     // Destructor
     ~MediumPlastic() {}
     

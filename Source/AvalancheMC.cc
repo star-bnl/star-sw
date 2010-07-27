@@ -417,6 +417,8 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
           point.x = x; point.y = y; point.z = z; point.t += delta;
         }
       }
+      // Place the particle OUTSIDE the drift medium
+      point.x += dx * d; point.y += dy * d; point.z += dz * d;
       drift.push_back(point);
       ++nDrift;
       break;   
@@ -440,6 +442,8 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
           point.x = x; point.y = y; point.z = z; point.t += delta;
         }
       }
+      // Place the particle OUTSIDE the drift area
+      point.x += dx * d; point.y += dy * d; point.z += dz * d;      
       drift.push_back(point);
       ++nDrift;
       break;

@@ -11,7 +11,10 @@ class MediumConductor : public Medium {
     
   public:
     // Constructor  
-    MediumConductor() : Medium() {name = "Conductor";}    
+    MediumConductor() : Medium() {
+      className = "MediumConductor;
+      name = "Conductor";
+    }    
     // Destructor
     ~MediumConductor() {}
     

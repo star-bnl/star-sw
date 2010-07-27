@@ -18,10 +18,6 @@ Medium::Medium() :
   isChanged(true),
   debug(false) {
 
-  efields.clear();
-  bfields.clear();
-  bangles.clear();
-  
 }
 
 void 
