@@ -133,15 +133,13 @@ class MediumSilicon : public Medium {
     // Scattering rates
     double eFinal, eStep;
     static const int nEnergySteps = 2000;
-    static const int nMaxLevels = 15;
     int nLevels;
     double cfNullElectrons;
-    double cfTotElectrons[nEnergySteps];
-    double cfElectrons[nEnergySteps][nMaxLevels];
-    // Energy loss
-    double energyLossElectrons[nMaxLevels];
+    std::vector<double> cfTotElectrons;
+    std::vector<std::vector<double> > cfElectrons;
+    std::vector<double> energyLossElectrons;
     // Cross-section type
-    int scatTypeElectrons[nMaxLevels];
+    std::vector<int> scatTypeElectrons;
 
     bool UpdateTransportParameters();
     void UpdateLatticeMobilityMinimos();
@@ -187,10 +185,10 @@ class MediumSilicon : public Medium {
     bool LoadOpticalData(const std::string filename);
 
     bool ElectronScatteringRates();
-    bool ElectronAcousticScatteringRates(int& iLevel);
-    bool ElectronIntervalleyScatteringRates(int& iLevel);
-    bool ElectronIonisationRates(int& iLevel);
-    bool ElectronImpurityScatteringRates(int& iLevel);
+    bool ElectronAcousticScatteringRates();
+    bool ElectronIntervalleyScatteringRates();
+    bool ElectronIonisationRates();
+    bool ElectronImpurityScatteringRates();
     bool HoleScatteringRates();
     void ComputeHoleIntegrals(const double x, double& f3, double& f4, 
                                               double& g3, double& g4);

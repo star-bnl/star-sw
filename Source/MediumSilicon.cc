@@ -50,6 +50,11 @@ MediumSilicon::MediumSilicon() :
   EnableDrift();
   EnablePrimaryIonisation();
   microscopic = true;
+  
+  cfTotElectrons.clear();
+  cfElectrons.clear();
+  energyLossElectrons.clear();
+  scatTypeElectrons.clear();
 
 }
 
@@ -1372,21 +1377,23 @@ MediumSilicon::LoadOpticalData(const std::string filename) {
 bool
 MediumSilicon::ElectronScatteringRates() {
 
-  // Reset the scattering rates to zero
+  // Reset the scattering rates
+  cfTotElectrons.resize(nEnergySteps);
+  cfElectrons.resize(nEnergySteps);
   for (int i = nEnergySteps; i--;) {
     cfTotElectrons[i] = 0.;
-    for (int j = nMaxLevels; j--;) {
-      cfElectrons[i][j] = 0.;
-    }
+    cfElectrons[i].clear();
   }
+  energyLossElectrons.clear();
+  scatTypeElectrons.clear();
   cfNullElectrons = 0.;
   
   nLevels = 0;
   // Fill the scattering rates table
-  ElectronAcousticScatteringRates(nLevels);
-  ElectronImpurityScatteringRates(nLevels);
-  ElectronIntervalleyScatteringRates(nLevels);
-  ElectronIonisationRates(nLevels);
+  ElectronAcousticScatteringRates();
+  ElectronImpurityScatteringRates();
+  ElectronIntervalleyScatteringRates();
+  ElectronIonisationRates();
 
   std::ofstream outfile;  
   if (debug) outfile.open("rates.txt", std::ios::out);
@@ -1427,7 +1434,7 @@ MediumSilicon::ElectronScatteringRates() {
 }
 
 bool 
-MediumSilicon::ElectronAcousticScatteringRates(int& iLevel) {
+MediumSilicon::ElectronAcousticScatteringRates() {
 
   // Reference:
   //  - C. Jacoboni and L. Reggiani,
@@ -1463,21 +1470,21 @@ MediumSilicon::ElectronAcousticScatteringRates(int& iLevel) {
 
   double en = 0.;
   for (int i = 0; i < nEnergySteps; ++i) {
-    cfElectrons[i][iLevel] = cIntra * sqrt(en * (1. + alpha * en)) * 
-                             (1. + 2. * alpha * en);
+    cfElectrons[i].push_back(cIntra * sqrt(en * (1. + alpha * en)) * 
+                             (1. + 2. * alpha * en));
     en += eStep;
   }  
   
-  energyLossElectrons[iLevel] = 0.;
-  scatTypeElectrons[iLevel] = 0;
-  ++iLevel;
+  energyLossElectrons.push_back(0.);
+  scatTypeElectrons.push_back(0);
+  ++nLevels;
 
   return true;
 
 }
 
 bool 
-MediumSilicon::ElectronIntervalleyScatteringRates(int& iLevel) {
+MediumSilicon::ElectronIntervalleyScatteringRates() {
 
   // Reference:
   //  - C. Jacoboni and L. Reggiani,
@@ -1521,44 +1528,40 @@ MediumSilicon::ElectronIntervalleyScatteringRates(int& iLevel) {
   double en = 0.;
   double ef = 0.;
   for (int i = 0; i < nEnergySteps; ++i) {
-    int k = iLevel;
     for (int j = 0; j < nPhonons; ++j) {
      // Absorption
       ef = en + eph[j];
-      cfElectrons[i][k] = c[j] * nocc[j] * 
+      cfElectrons[i].push_back(c[j] * nocc[j] * 
                           sqrt(ef * (1. + alpha * ef)) * 
-                           (1. + 2. * alpha * ef);
-      
-      ++k;
+                           (1. + 2. * alpha * ef));      
       // Emission
       ef = en - eph[j];
       if (ef > Small) {
-        cfElectrons[i][k] = c[j] * (nocc[j] + 1) * 
+        cfElectrons[i].push_back(c[j] * (nocc[j] + 1) * 
                             sqrt(ef * (1. + alpha * ef)) * 
-                            (1. + 2. * alpha * ef);
+                            (1. + 2. * alpha * ef));
       }
-      ++k;
     }
     en += eStep;
   }
 
   for (int j = 0; j < nPhonons; ++j) {
     // Absorption
-    energyLossElectrons[iLevel + 2 * j] = - eph[j];
-    scatTypeElectrons[iLevel + 2 * j] = 5;
+    energyLossElectrons.push_back(-eph[j]);
+    scatTypeElectrons.push_back(5);
     // Emission
-    energyLossElectrons[iLevel + 2 * j + 1] = eph[j];
-    scatTypeElectrons[iLevel + 2 * j + 1] = 4;
+    energyLossElectrons.push_back(eph[j]);
+    scatTypeElectrons.push_back(4);
   }
 
-  iLevel += nPhonons;
+  nLevels += 2 * nPhonons;
 
   return true;
 
 }
 
 bool
-MediumSilicon::ElectronIonisationRates(int& iLevel) {
+MediumSilicon::ElectronIonisationRates() {
 
   // Reference:
   // - E. Cartier, M. V. Fischetti, E. A. Eklund and F. R. McFeely,
@@ -1570,30 +1573,32 @@ MediumSilicon::ElectronIonisationRates(int& iLevel) {
   const double eth[3] = {1.1, 1.8, 3.45};
 
   double en = 0.;
+  double fIon = 0.;
   for (int i = 0; i < nEnergySteps; ++i) {
-    cfElectrons[i][iLevel] = 0.;
+    fIon = 0.;
     if (en > eth[0]) {
-      cfElectrons[i][iLevel] += p[0] * (en - eth[0]) * (en - eth[0]);
+      fIon += p[0] * (en - eth[0]) * (en - eth[0]);
     }
     if (en > eth[1]) {
-      cfElectrons[i][iLevel] += p[1] * (en - eth[1]) * (en - eth[1]);
+      fIon += p[1] * (en - eth[1]) * (en - eth[1]);
     }
     if (en > eth[2]) {
-      cfElectrons[i][iLevel] += p[2] * (en - eth[2]) * (en - eth[2]);
+      fIon += p[2] * (en - eth[2]) * (en - eth[2]);
     }
+    cfElectrons[i].push_back(fIon);
     en += eStep;
   }
 
-  energyLossElectrons[iLevel] = eth[0];
-  scatTypeElectrons[iLevel] = 1;
-  ++iLevel;
+  energyLossElectrons.push_back(eth[0]);
+  scatTypeElectrons.push_back(1);
+  ++nLevels;
 
   return true;
 
 }
 
 bool
-MediumSilicon::ElectronImpurityScatteringRates(int& iLevel) {
+MediumSilicon::ElectronImpurityScatteringRates() {
 
   // Lattice temperature [eV]
   const double kbt = BoltzmannConstant * temperature;
@@ -1636,18 +1641,18 @@ MediumSilicon::ElectronImpurityScatteringRates(int& iLevel) {
     // cfElectrons[i][iLevel] = c * sqrt(gamma) * (1. + 2 * alpha * en) /
     //                         (1. + 4. * gamma / eb);
     if (gamma <= 0.) {
-      cfElectrons[i][iLevel] = 0.;
+      cfElectrons[i].push_back(0.);
     } else {
       b = 4 * gamma / eb;
-      cfElectrons[i][iLevel] = (c / pow(gamma, 1.5)) * 
-                               (log(1. + b) - b / (1. + b));
+      cfElectrons[i].push_back((c / pow(gamma, 1.5)) * 
+                               (log(1. + b) - b / (1. + b)));
     }
     en += eStep;
   }
 
-  energyLossElectrons[iLevel] = 0.;
-  scatTypeElectrons[iLevel] = 0; 
-  ++iLevel;
+  energyLossElectrons.push_back(0.);
+  scatTypeElectrons.push_back(0); 
+  ++nLevels;
 
   return true;
 
