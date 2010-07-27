@@ -1540,6 +1540,8 @@ MediumSilicon::ElectronIntervalleyScatteringRates() {
         cfElectrons[i].push_back(c[j] * (nocc[j] + 1) * 
                             sqrt(ef * (1. + alpha * ef)) * 
                             (1. + 2. * alpha * ef));
+      } else {
+        cfElectrons[i].push_back(0.);
       }
     }
     en += eStep;
