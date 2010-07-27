@@ -14,7 +14,7 @@ MediumSilicon::MediumSilicon() :
   Medium(), 
   bandGap(1.12), 
   dopingType('i'), dopingConcentration(0.),
-  eEffMass(1.18), hEffMass(0.81),
+  eEffMass(0.32), hEffMass(0.81),
   eLatticeMobility(1.35e-6), hLatticeMobility(0.48e-6),
   eMobility(1.43e-6), hMobility(0.46e-6),
   eBetaCanali(1.109), hBetaCanali(1.213),
@@ -742,7 +742,8 @@ MediumSilicon::GetDielectricFunction(const double e,
     }
   }
   
-  // Real part of dielectric function: use linear interpolation if crossing zero, log-log otherwise
+  // Real part of dielectric function: use linear interpolation if crossing zero, 
+  // log-log otherwise
   const double logX0 = log(opticalDataTable[iLow].energy);
   const double logX1 = log(opticalDataTable[iUp].energy);
   const double logX = log(e);
@@ -1440,20 +1441,11 @@ MediumSilicon::ElectronAcousticScatteringRates() {
   //  - C. Jacoboni and L. Reggiani,
   //    Rev. Mod. Phys. 55, 645-705
 
-  // Mass density [g/cm3]
-  const double rho = GetMassDensity();
+  // Mass density [(eV/c2)/cm3]
+  const double rho = density * atomicWeight * AtomicMassUnitElectronVolt;
   // Lattice temperature [eV]
   const double kbt = BoltzmannConstant * temperature;  
 
-  // Band parameters
-  // Longitudinal and transverse effective electron masses
-  const double ml = 0.98; 
-  const double mt = 0.19;
-  // Density of states effective mass
-  const double md = pow(ml * mt * mt, 1. / 3.);
-  // Non-parabolicity coefficient [eV-1]
-  const double alpha = 0.5;
-   
   // Acoustic phonon intraband scattering  
   // Acoustic deformation potential [eV]
   const double defpot = 9.;
@@ -1463,15 +1455,13 @@ MediumSilicon::ElectronAcousticScatteringRates() {
   // Average velocity of sound [cm/ns]
   const double u = (ul + 2. * ut) / 3.;    
   // Prefactor for acoustic deformation potential scattering
-  const double cIntra = 
-    sqrt(2. * md * ElectronMass) * md * ElectronMassGramme * 
-    kbt * defpot * defpot /
-    (Pi * HbarC * pow(Hbar, 3.) * u * u * rho);
-
-  double en = 0.;
+  const double cIntra = TwoPi * SpeedOfLight * SpeedOfLight * 
+                        kbt * defpot * defpot /
+                        (Hbar * u * u * rho); 
+  
+  double en = Small;
   for (int i = 0; i < nEnergySteps; ++i) {
-    cfElectrons[i].push_back(cIntra * sqrt(en * (1. + alpha * en)) * 
-                             (1. + 2. * alpha * en));
+    cfElectrons[i].push_back(cIntra * GetConductionBandDensityOfStates(en));
     en += eStep;
   }  
   
@@ -1490,33 +1480,26 @@ MediumSilicon::ElectronIntervalleyScatteringRates() {
   //  - C. Jacoboni and L. Reggiani,
   //    Rev. Mod. Phys. 55, 645-705
 
-  // Mass density [g/cm3]
-  const double rho = GetMassDensity();
+  // Mass density [(eV/c)/cm3]
+  const double rho = density * atomicWeight * AtomicMassUnitElectronVolt;
   // Lattice temperature [eV]
   const double kbt = BoltzmannConstant * temperature;  
 
-  // Band parameters
-  // Longitudinal and transverse effective electron masses
-  const double ml = 0.98; 
-  const double mt = 0.19;
-  // Density of states effective mass
-  const double md = pow(ml * mt * mt, 1. / 3.);
-  // Non-parabolicity coefficient [eV-1]
-  const double alpha = 0.5;
-
   const int nPhonons = 6;
+  // f-type scattering: transition between orthogonal axes (multiplicity 4)
+  // g-type scattering: transition between opposite axes (multiplicity 1)
+  // Sequence of transitions in the table:
+  // TA (g) - LA (g) - LO (g) - TA (f) - LA (f) - TO (f)
   // Coupling constants [eV/cm]
-  const double dtk[nPhonons] = {0.5e8, 0.8e8, 11.0e8, 
-                                0.3e8, 2.0e8,  2.0e8};
+  const double dtk[nPhonons] = {0.5e8, 0.8e8, 1.1e9, 
+                                0.3e8, 2.0e8, 2.0e8};
   // Phonon energies [eV]
-  const double eph[nPhonons] = {12.1e-3, 18.5e-3, 62.0e-3, 
-                                19.0e-3, 47.4e-3, 59.0e-3};
-  // Occupation numbers
+  const double eph[nPhonons] = {12.06e-3, 18.53e-3, 62.04e-3, 
+                                18.86e-3, 47.39e-3, 59.03e-3};
+  // Phonon cccupation numbers
   double nocc[nPhonons];
   // Prefactors
-  const double c0 = 
-    sqrt(md * ElectronMass) * md * ElectronMassGramme /
-    (sqrt(2.) * Pi * HbarC * Hbar * rho);
+  const double c0 = HbarC * SpeedOfLight * Pi / rho;
   double c[nPhonons];
 
   for (int j = 0; j < 6; ++j) {
@@ -1526,20 +1509,16 @@ MediumSilicon::ElectronIntervalleyScatteringRates() {
   }
 
   double en = 0.;
-  double ef = 0.;
+  double dos = 0.;
   for (int i = 0; i < nEnergySteps; ++i) {
     for (int j = 0; j < nPhonons; ++j) {
      // Absorption
-      ef = en + eph[j];
-      cfElectrons[i].push_back(c[j] * nocc[j] * 
-                          sqrt(ef * (1. + alpha * ef)) * 
-                           (1. + 2. * alpha * ef));      
+      dos = GetConductionBandDensityOfStates(en + eph[j]);
+      cfElectrons[i].push_back(c[j] * nocc[j] * dos);      
       // Emission
-      ef = en - eph[j];
-      if (ef > Small) {
-        cfElectrons[i].push_back(c[j] * (nocc[j] + 1) * 
-                            sqrt(ef * (1. + alpha * ef)) * 
-                            (1. + 2. * alpha * ef));
+      if (en > eph[j]) {
+        dos = GetConductionBandDensityOfStates(en - eph[j]);
+        cfElectrons[i].push_back(c[j] * (nocc[j] + 1) * dos);
       } else {
         cfElectrons[i].push_back(0.);
       }
@@ -1660,78 +1639,21 @@ MediumSilicon::ElectronImpurityScatteringRates() {
 
 }
 
-bool
-MediumSilicon::HoleScatteringRates() {
+double
+MediumSilicon::GetConductionBandDensityOfStates(const double e) {
 
-  // Mass density [g/cm3]
-  const double rho = GetMassDensity();
-  // Lattice temperature [eV]
-  const double kbt = BoltzmannConstant * temperature;  
-
-  // Acoustic phonon interband scattering
-  // Acoustic deformation potential [eV]
-  const double defpot = 5.0;
-  // Longitudinal and transverse velocity of sound [cm/ns]
-  const double ut = 9.0e-4;
-  const double ul = 5.3e-4;
-  // Average velocity of sound [cm/ns]
-  const double u = (ul + 2. * ut) / 3.;
-  // Prefactor
-  const double cAc = defpot * defpot * pow(kbt, 3.) /
-                     (pow(2., 4.5) * Pi * rho * pow(u, 4.));
-
-  // Impact ionisation
-  // Reference:
-  // - DAMOCLES web page
-  const double p[2] = {2., 1.e3};
-  const double eth[2] = {1.1, 1.45};
-  const double b[2] = {6., 4.};
+  // Longitudinal and transverse effective electron masses
+  const double ml = 0.98; 
+  const double mt = 0.19;
+  // Density-of-states effective mass (cube)
+  const double md3 = ml * mt * mt;
   
-  double en = 1.e-4;
-  const double estep = 0.005;
-  double f;
-  int nSteps = 2000;
-  for (int i = 0; i < nSteps; ++i) {
-    en += estep;    
-    // Impact ionisation
-    f = 0.;
-    if (en > eth[0]) f += p[0] * pow(en - eth[0], b[0]);
-    if (en > eth[1]) f += p[1] * pow(en - eth[1], b[1]);
-  }
-
-  return true;
-
+  // Non-parabolicity parameter
+  const double alpha = 0.5;
+  
+  return ElectronMass * sqrt(ElectronMass * md3 * e * (1. + alpha * e) / 2.) * 
+         (1. + 2. * alpha * e) / (Pi2 * pow(HbarC, 3.));
+         
 }
-
-void 
-MediumSilicon::ComputeHoleIntegrals(const double x, double& f3, double& f4, 
-                                    double& g3, double& g4) {
-
-  const double x2 = x * x;
-  const double x3 = x2 * x;
-  const double x4 = x2 * x2;
-  const double sq2 = sqrt(2);
   
-  if (x <= 3. / sq2) {
-    f3 = 2. * x2 * (1. - 34. * sq2 * x / 105. + x2 / 12.);
-    g3 = 2. * x2 * (1. + 34. * sq2 * x / 105. + x2 / 12.);
-    f4 = x3 * (136. * sq2 / 105. - x + 44. * sq2 * x2 / 315.);
-    g4 = x3 * (136. * sq2 / 105. + x + 44. * sq2 * x2 / 315.);
-    return;
-  }
-  
-  f3 = 1017. / 280. + (68. - 2358. / x2 + 41931. / x4) * exp(-3.) - 
-       8. * exp(-sq2 * x) * 
-       (x2 + 4. * sq2 * x * 28. + 72. * sq2 / x + 252. / x2 + 270. * sq2 / x3 
-       + 270. / x4);
-  f4 = 801. / 140. + exp(-3.) * (312. - 13248. / x2 + 300078. / x4) - 
-       exp(sq2 * x) * 
-       (8. * sq2 * x3 + 72. * x2 + 288. * sq2 * x + 1824. + 4320. * sq2 / x + 
-       14400. / x2 + 15120. * sq2 / x3 + 15120. / x4);
-  g3 = 5913. / 280. + 136. * sq2 / (105. * x3) - 9. * (4. - 162. / (5. * x2) + 
-       729. / (7. * x4));       
-  g4 = 6371. / 140. + 2. * x4 - 81. + 729. / x2 - 19683. / (8. * x4);
-  
-}
-
 }

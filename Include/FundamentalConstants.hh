@@ -28,6 +28,7 @@ static const double HbarC = 197.3269631e-7;
 static const double ElectronMassGramme = 9.10938215e-28;
 // Unified atomic mass unit (mass 12C atom / 12) [g]
 static const double AtomicMassUnit = 1.660538782e-24;
+static const double AtomicMassUnitElectronVolt = 931.494028e6;
 // Bohr radius [cm]
 static const double BohrRadius = 0.52917720859e-8;
 // Rydberg energy [eV]

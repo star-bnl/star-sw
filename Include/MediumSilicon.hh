@@ -85,6 +85,7 @@ class MediumSilicon : public Medium {
     bool   GetElectronCollision(const double e, int& type, int& level,
                         double& e1, double& ctheta,
                         double& s, double& esec);
+    double GetConductionBandDensityOfStates(const double e);
 
     bool GetOpticalDataRange(double& emin, double& emax, const int i = 0);
     bool GetDielectricFunction(const double e, double& eps1, double& eps2, const int i = 0);
@@ -189,9 +190,6 @@ class MediumSilicon : public Medium {
     bool ElectronIntervalleyScatteringRates();
     bool ElectronIonisationRates();
     bool ElectronImpurityScatteringRates();
-    bool HoleScatteringRates();
-    void ComputeHoleIntegrals(const double x, double& f3, double& f4, 
-                                              double& g3, double& g4);
 
 };
 
