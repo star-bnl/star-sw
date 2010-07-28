@@ -5,9 +5,7 @@
 //
 
 // STAR
-#include "St_db_Maker/St_db_Maker.h"
-#include "tables/St_trgDsmReg_Table.h"
-#include "tables/St_triggerInfo_Table.h"
+#include "StMaker.h"
 
 // Local
 #include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
