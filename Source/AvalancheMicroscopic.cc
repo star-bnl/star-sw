@@ -8,10 +8,6 @@
 
 namespace Garfield {
 
-// Numerical prefactors
-double AvalancheMicroscopic::c1 = SpeedOfLight * sqrt(2. / ElectronMass);
-double AvalancheMicroscopic::c2 = c1 * c1 / 4.;
-
 AvalancheMicroscopic::AvalancheMicroscopic() :
   sensor(0), 
   nPhotons(0), nElectrons(0), nIons(0), 
@@ -366,7 +362,12 @@ AvalancheMicroscopic::TransportElectron(
   // Get the id number of the drift medium
   int id = medium->GetId();    
   // Get the effective mass for electrons in the medium
-  double meff = 1.;
+  double meff = medium->GetElectronEffectiveMass();
+  
+  // Numerical prefactors
+  double c1 = SpeedOfLight * sqrt(2. / (meff * ElectronMass));
+  double c2 = c1 * c1 / 4.;
+
 
   // Clear the lists of electrons and photons
   stack.clear();
@@ -550,6 +551,9 @@ AvalancheMicroscopic::TransportElectron(
           id = medium->GetId();
           // Get the effective mass of electrons in the medium
           meff = medium->GetElectronEffectiveMass();
+          // Update the numerical prefactors accordingly
+          c1 = SpeedOfLight * sqrt(2. / (meff * ElectronMass));
+          c2 = c1 * c1 / 4.;
           // Update the null-collision rate
           fLim = medium->GetElectronNullCollisionRate();
           if (fLim <= 0.) {
@@ -594,7 +598,7 @@ AvalancheMicroscopic::TransportElectron(
           cbtheta = (ex * bx + ey * by + ez * bz) / (emag * bmag);
           sbtheta = sqrt(1. - cbtheta * cbtheta);
           // Calculate the rotation frequency
-          wb = OmegaCyclotronOverB * bmag / meff;
+          wb = OmegaCyclotronOverB * bmag;
           // Calculate the components of electric field in the rotated system
           ex = emag * cbtheta; ey = 0.; ez = emag * sbtheta / wb;
 
@@ -606,17 +610,17 @@ AvalancheMicroscopic::TransportElectron(
           dy = rx22 * vy + rx23 * vz;
           dz = rx32 * vy + rx33 * vz;
  
-          v = c1 * sqrt(energy / meff);
+          v = c1 * sqrt(energy);
           vx = v * dx; vy = v * dy; vz = v * dz;
           a1 = vx * ex;
-          a2 = c2 * ex * ex / meff;
-          a3 = ez * (2 * c2 * ez / meff - vy);
+          a2 = c2 * ex * ex;
+          a3 = ez * (2 * c2 * ez - vy);
           a4 = ez * vz;
         } else {
-          v = c1 * sqrt(energy / meff);
+          v = c1 * sqrt(energy);
           vx = v * dx; vy = v * dy; vz = v * dz;
           a1 = vx * ex + vy * ey + vz * ez;
-          a2 = c2 * (ex * ex + ey * ey + ez * ez) / meff;
+          a2 = c2 * (ex * ex + ey * ey + ez * ez);
         }
 
         // Determine the timestep
@@ -660,11 +664,11 @@ AvalancheMicroscopic::TransportElectron(
         // and calculate the proposed new position
         if (useBfield && bOk) {
           // Calculate the new velocity
-          a1 = 2. * c2 * ez / meff;
+          a1 = 2. * c2 * ez;
           a2 = (vy - a1);
           a3 = vx;
           a4 = vz;
-          vx += 2. * c2 * ex * dt / meff;
+          vx += 2. * c2 * ex * dt;
           vy = a2 * cwt + vz * swt + a1;
           vz = vz * cwt - a2 * swt;
           // Rotate back to the lab frame of reference
@@ -678,7 +682,7 @@ AvalancheMicroscopic::TransportElectron(
           newDz = -rb31 * dx + rb32 * dy + rb33 * dz;
 
           // Calculate the step to the next point
-          vx = a3 + c2 * ex * dt / meff;
+          vx = a3 + c2 * ex * dt;
           vy = (a2 * swt + a4 * (1. - cwt)) / (wb * dt) + a1;
           vz = (a4 * swt - a2 * (1. - cwt)) / (wb * dt);
           // Rotate back to the lab frame of reference
@@ -690,14 +694,14 @@ AvalancheMicroscopic::TransportElectron(
           vz = -rb31 * dx + rb32 * dy + rb33 * dz;
         } else {
           a1 = sqrt(energy / newEnergy);
-          a2 = 0.5 * c1 * dt * sqrt(meff / newEnergy);
+          a2 = 0.5 * c1 * dt / sqrt(newEnergy);
           newDx = dx * a1 + ex * a2; 
           newDy = dy * a1 + ey * a2; 
           newDz = dz * a1 + ez * a2;
 
           // Calculate the step length
-          a1 = c1 * sqrt(energy / meff);
-          a2 = dt * c2 / meff; 
+          a1 = c1 * sqrt(energy);
+          a2 = dt * c2; 
           vx = dx * a1 + ex * a2;
           vy = dy * a1 + ey * a2;
           vz = dz * a1 + ez * a2;

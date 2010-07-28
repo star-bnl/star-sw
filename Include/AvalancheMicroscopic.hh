@@ -131,10 +131,6 @@ class AvalancheMicroscopic {
 
   private:
 
-    // Numerical prefactors
-    static double c1;
-    static double c2;
-
     Sensor* sensor;
 
     struct point {

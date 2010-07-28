@@ -14,7 +14,7 @@ MediumSilicon::MediumSilicon() :
   Medium(), 
   bandGap(1.12), 
   dopingType('i'), dopingConcentration(0.),
-  eEffMass(0.32), hEffMass(0.81),
+  eEffMass(0.26), hEffMass(0.81),
   eLatticeMobility(1.35e-6), hLatticeMobility(0.48e-6),
   eMobility(1.43e-6), hMobility(0.46e-6),
   eBetaCanali(1.109), hBetaCanali(1.213),
