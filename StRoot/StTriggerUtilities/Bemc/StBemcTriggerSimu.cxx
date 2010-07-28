@@ -28,9 +28,6 @@
 // DSM 2009 Utilities
 #include "StTriggerUtilities/StDSMUtilities/StDSM2009Utilities.hh"
 
-// DSM threshold tables
-#include "tables/St_trgDsmReg_Table.h"
-
 ClassImp(StBemcTriggerSimu)
 //==================================================
 //==================================================
@@ -182,7 +179,23 @@ void StBemcTriggerSimu::Init(){
   mAllTriggers.insert(220510);//BEMC-HT1-mb
   mAllTriggers.insert(220520);//BEMC-HT2-mb-slow
 
-  //2009pp - filled in setDsmRegisters()
+  //2009pp
+  //
+  // All the registers are now retrieved from the database in StTriggerSimuMaker.cxx
+  // (look for the function get2009DsmRegistersFromOnlineDatabase).
+  // This way, only one call to the database is made to get
+  // thresholds for bemc, eemc, and emc. The old way, each
+  // subdetector made a separate call to the database to
+  // get its thresholds via the noew-defunct function setDsmRegisters().
+  // This, of course, puts a lot of unecessary strain on the database.
+  // Hence, all the register retrievals are now done in one shot
+  // in StTriggerSimuMaker.cxx.
+  //
+  // The 2009 trigger IDs are handled by emc which has a TCU
+  // emulator. Basically, trigger definitions are retrieved
+  // from the database. Those definitions include which bits
+  // must be on at the output of the last DSM. Triggers are
+  // then satisfied accordingly.
 
   Clear();
 
