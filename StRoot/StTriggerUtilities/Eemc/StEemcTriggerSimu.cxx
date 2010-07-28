@@ -42,9 +42,6 @@
 #include "EEdsm3.h"
 #include "EemcTrigUtil.h"
 
-// DSM threshold tables
-#include "tables/St_trgDsmReg_Table.h"
-
 // #### modified by Liaoyuan ####
 // DSM 2009 Utilities
 #include "StTriggerUtilities/StDSMUtilities/StDSM2009Utilities.hh"
@@ -678,6 +675,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.37  2010/07/28 15:58:06  pibero
+// Code cleanup
+//
 // Revision 1.36  2010/07/08 21:21:05  pibero
 // Changed triggerDecision from kDoNotCare to kNo
 //
