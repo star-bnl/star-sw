@@ -555,6 +555,14 @@ MediumSilicon::SetMaxElectronEnergy(const double e) {
 }
 
 double
+MediumSilicon::GetElectronEffectiveMass(const double e, const int band) {
+
+  if (e < Small) return eEffMass;
+  return eEffMass * (1. + e);
+
+}
+
+double
 MediumSilicon::GetElectronNullCollisionRate() {
 
   if (isChanged) {

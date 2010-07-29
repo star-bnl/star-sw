@@ -236,7 +236,7 @@ Medium::ElectronAttachment(const double ex, const double ey, const double ez,
 }
 
 double 
-Medium::GetElectronEffectiveMass(const int band) {
+Medium::GetElectronEffectiveMass(const double e, const int band) {
 
   return 1.;
   

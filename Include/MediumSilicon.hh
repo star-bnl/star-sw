@@ -76,7 +76,7 @@ class MediumSilicon : public Medium {
     bool   SetMaxElectronEnergy(const double e);
     double GetMaxElectronEnergy() const {return eFinal;}
     // Get the electron effective mass
-    double GetElectronEffectiveMass(const int band = 0) {return eEffMass;}
+    double GetElectronEffectiveMass(const double e, const int band = 0);
     // Get the null-collision rate [ns-1]
     double GetElectronNullCollisionRate();
     // Get the (real) collision rate [ns-1] at a given electron energy

@@ -362,9 +362,9 @@ AvalancheMicroscopic::TransportElectron(
   // Get the id number of the drift medium
   int id = medium->GetId();    
   // Get the effective mass for electrons in the medium
-  double meff = medium->GetElectronEffectiveMass();
+  double meff = medium->GetElectronEffectiveMass(e0);
   
-  // Numerical prefactors
+  // Numerical prefactors in equation of motion
   double c1 = SpeedOfLight * sqrt(2. / (meff * ElectronMass));
   double c2 = c1 * c1 / 4.;
 
@@ -549,11 +549,6 @@ AvalancheMicroscopic::TransportElectron(
             break;
           }
           id = medium->GetId();
-          // Get the effective mass of electrons in the medium
-          meff = medium->GetElectronEffectiveMass();
-          // Update the numerical prefactors accordingly
-          c1 = SpeedOfLight * sqrt(2. / (meff * ElectronMass));
-          c2 = c1 * c1 / 4.;
           // Update the null-collision rate
           fLim = medium->GetElectronNullCollisionRate();
           if (fLim <= 0.) {
@@ -563,6 +558,12 @@ AvalancheMicroscopic::TransportElectron(
             return false;
           }          
         }
+
+        // Get the effective mass of electrons in the medium
+        meff = medium->GetElectronEffectiveMass(energy);
+        // Update the numerical prefactors accordingly
+        c1 = SpeedOfLight * sqrt(2. / (meff * ElectronMass));
+        c2 = c1 * c1 / 4.;
 
         if (useBfield && bOk) {
 
@@ -817,7 +818,7 @@ AvalancheMicroscopic::TransportElectron(
           dx = newDx; dy = newDy; dz = newDz;
           continue;
         }
-
+        
         // Get the collision type and parameters
         medium->GetElectronCollision(newEnergy, cstype, level, energy, ctheta, 
                                      d, esec);

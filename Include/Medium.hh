@@ -91,7 +91,7 @@ class Medium {
     // Microscopic electron transport properties
     // Effective mass (for electrons in semiconductors) 
     virtual
-    double GetElectronEffectiveMass(const int band = 0);
+    double GetElectronEffectiveMass(const double e, const int band = 0);
     // Non-parabolicity parameter for conduction band
     virtual
     double GetElectronNonParabolicity(const double energy, const int band = 0);
