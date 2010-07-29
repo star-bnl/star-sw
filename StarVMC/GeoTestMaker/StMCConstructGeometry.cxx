@@ -1,4 +1,4 @@
-// $Id: StMCConstructGeometry.cxx,v 1.3 2010/01/27 23:02:57 perev Exp $
+// $Id: StMCConstructGeometry.cxx,v 1.4 2010/07/29 03:13:13 perev Exp $
 //
 //
 // Class StMCConstructGeometry
@@ -73,7 +73,7 @@ void StMCConstructGeometry::SetTop(const char *topName)
   assert(vol);
   if (strcmp(topName,"CAVE")==0) {gGeoManager->SetTopVolume(vol);return;}
 
-  const TGeoMedium *meVac = gGeoManager->GetMedium("Vacuum");
+  TGeoMedium *meVac = gGeoManager->GetMedium("Vacuum");
   if(!meVac) {
     const TGeoMaterial *maVac = gGeoManager->GetMaterial("Vacuum");
     if (!maVac)         maVac = new TGeoMaterial("Vacuum", 0,0,0);
