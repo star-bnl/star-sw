@@ -82,6 +82,18 @@ class AliHLTTPCCALocalMCPoint
     int    IRow()      const { return fIRow; }
     int    TrackI()     const { return fTrackI; }
     int    TrackID()     const { return fTrackID; }
+
+    void SetX( float v )           { fX = v; }
+    void SetY( float v )           { fY = v; }
+    void SetZ( float v )           { fZ = v; }
+    void SetPx( float v )          { fPx = v; }
+    void SetPy( float v )          { fPy = v; }
+    void SetPz( float v )          { fPz = v; }
+    void SetQP( float v )        { fQP = v; }
+    void SetISlice( int v )      { fISlice = v; }
+    void SetIRow( int v )        { fIRow = v; }
+    void SetTrackI( int v )     { fTrackI = v; }
+    void SetTrackID( int v )     { fTrackID = v; }
     
     static bool Compare( const AliHLTTPCCALocalMCPoint &p1, const AliHLTTPCCALocalMCPoint &p2 ) {
       return ( p1.fTrackID < p2.fTrackID );

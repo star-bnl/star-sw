@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.2 2010/07/29 16:35:58 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -300,7 +300,7 @@ short_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, int
   active = static_cast<short_m>( activeF );
   if ( row.NHits() < 1 || active.isEmpty() ) {
     ++r.fStage( r.fRemainingGap == 0 && active ); // go to WaitingForExtrapolateDown or DoneStage if the gap got too big
-#ifndef NDEBUG
+#ifndef NODEBUG
     debugF() << "r.fStage: " << r.fStage << " after ExtrapolateTracklet found empty row and fRemainingGap == " << r.fRemainingGap << endl;
 #endif
     // no hits in this row, skip (don't do this before TransportToX)

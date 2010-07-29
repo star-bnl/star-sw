@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformance.h,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.h,v 1.2 2010/07/29 16:35:58 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -59,10 +59,15 @@ class AliHLTTPCCAPerformance
 
 
      /// functional is needed by DRAW option. TODO: clean up
-    void SetTracker( AliHLTTPCCAGBTracker* const Tracker ){ fTracker = Tracker; };
     const AliHLTTPCCAMCTrack &MCTrack(int i) const { return fMCTracks[i]; }
     const AliHLTTPCCAHitLabel &HitLabel(int i) const { return fHitLabels[i]; }
     
+
+  /// funcional needed by StRoot
+  void SetTracker( AliHLTTPCCAGBTracker* const Tracker ){ fTracker = Tracker; };
+  void SetMCTracks(vector<AliHLTTPCCAMCTrack>& mcTracks);
+  void SetMCPoints(vector<AliHLTTPCCALocalMCPoint>& mcPoints);
+  void SetHitLabels(vector<AliHLTTPCCAHitLabel>& hitLabels);
   protected:
 
           /// Histograms

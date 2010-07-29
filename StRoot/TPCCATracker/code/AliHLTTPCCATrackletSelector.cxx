@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletSelector.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCATrackletSelector.cxx,v 1.2 2010/07/29 16:35:58 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -106,7 +106,7 @@ void AliHLTTPCCATrackletSelector::run()
       const ushort_m &outHit = validHits && ( own || sharedOK );
       VALGRIND_CHECK_VALUE_IS_DEFINED( own );
       VALGRIND_CHECK_VALUE_IS_DEFINED( sharedOK );
-#ifndef NDEBUG
+#ifndef NODEBUG
       const ushort_m &invalidTrack = !( own || sharedOK );
       if ( !invalidTrack.isEmpty() ) {
         debugTS() << "invalidTrack at row " << rowIndex << ": " << invalidTrack

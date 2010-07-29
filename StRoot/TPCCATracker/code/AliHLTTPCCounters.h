@@ -6,8 +6,8 @@
 #ifndef AliHLTTPCCounters_H
 #define AliHLTTPCCounters_H
 
-#include <Counters.h>
-#include <AliHLTTPCCAParameters.h>
+#include "Counters.h"
+#include "AliHLTTPCCAParameters.h"
 
 #include <iostream>
 using std::cout;
