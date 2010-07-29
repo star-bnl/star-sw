@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformance.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.cxx,v 1.2 2010/07/29 16:35:58 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -226,5 +226,32 @@ void AliHLTTPCCAPerformance::ReadLocalMCPoints( FILE *file )
   read = std::fread( fLocalMCPoints.Data(), sizeof( AliHLTTPCCALocalMCPoint ), fLocalMCPoints.Size(), file );
   assert( read == fLocalMCPoints.Size() );
 
+} // void AliHLTTPCCAPerformance::ReadLocalMCPoints( FILE *file )
+
+
+void AliHLTTPCCAPerformance::SetMCTracks(vector<AliHLTTPCCAMCTrack>& mcTracks)
+{
+  const int N = mcTracks.size();
+  fMCTracks.Resize(N);
+  for(int i = 0; i < N; i++){
+    fMCTracks[i] = mcTracks[i];
+  }
 }
 
+void AliHLTTPCCAPerformance::SetMCPoints(vector<AliHLTTPCCALocalMCPoint>& mcPoints)
+{
+  const int N = mcPoints.size();
+  fLocalMCPoints.Resize(N);
+  for(int i = 0; i < N; i++){
+    fLocalMCPoints[i] = mcPoints[i];
+  }
+}
+
+void AliHLTTPCCAPerformance::SetHitLabels(vector<AliHLTTPCCAHitLabel>& hitLabels)
+{
+  const int N = hitLabels.size();
+  fHitLabels.Resize(N);
+  for(int i = 0; i < N; i++){
+    fHitLabels[i] = hitLabels[i];
+  }					   
+}

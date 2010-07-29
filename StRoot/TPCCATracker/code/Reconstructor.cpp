@@ -18,7 +18,6 @@
 
 */
 
-#define NDEBUG
 
 #include "Reconstructor.h"
 

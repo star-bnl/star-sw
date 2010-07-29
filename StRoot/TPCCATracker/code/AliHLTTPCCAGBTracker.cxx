@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGBTracker.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCAGBTracker.cxx,v 1.2 2010/07/29 16:35:58 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -863,3 +863,23 @@ void AliHLTTPCCAGBTracker::RestoreFromFile( FILE *f )
   std::cout << "Merge clusters hits done: " <<  nHitsOld << " hits -> " << iHitNew << " hits." << std::endl;
 } // EO: AliHLTTPCCAGBTracker::GroupHits()
 */
+
+void AliHLTTPCCAGBTracker::SetHits( vector<AliHLTTPCCAGBHit> &hits)
+{
+  const int NHits = hits.size();
+
+  SetNHits(NHits);
+
+  fHits.Resize(NHits);
+  for (int iH = 0; iH < NHits; iH++){
+    fHits[iH] = hits[iH];
+  }
+}; // need for StRoot
+
+void AliHLTTPCCAGBTracker::SetSettings( vector<AliHLTTPCCAParam>& settings )
+{
+  SetNSlices( settings.size() );
+  for ( int iSlice = 0; iSlice < NSlices(); iSlice++ ) {
+    fSlices[iSlice].Initialize( settings[iSlice] );
+  }
+}

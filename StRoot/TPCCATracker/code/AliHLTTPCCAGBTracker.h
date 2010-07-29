@@ -18,6 +18,7 @@
 
 #include <cstdio>
 #include <iostream>
+#include <vector>
 
 class AliHLTTPCCAMerger;
 
@@ -86,6 +87,9 @@ class AliHLTTPCCAGBTracker
     void StoreToFile( const char *filename ) const;
     void RestoreFromFile( FILE *f );
     
+  void SetHits( std::vector<AliHLTTPCCAGBHit> &hits);     // need for StRoot
+  void SetSettings( std::vector<AliHLTTPCCAParam>& settings ); // need for StRoot
+
       /// Try to group close hits in row formed by one track. After sort hits.
 //     void GroupHits(); // iklm
   protected:

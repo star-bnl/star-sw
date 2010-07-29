@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCATrackParamVector.h,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCATrackParamVector.h,v 1.2 2010/07/29 16:35:58 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -327,7 +327,7 @@ inline sfloat_m AliHLTTPCCATrackParamVector::FilterDelta( const sfloat_m &mask, 
 
   err2Y += c00;
   err2Z += c11;
-#ifndef NDEBUG
+#ifndef NODEBUG
   if ( !( err2Y > 0.f || !mask ).isFull() ) {
     std::cerr << err2Y << mask << ( err2Y > 0.f || !mask ) << c00 << std::endl;
   }
@@ -443,7 +443,7 @@ inline sfloat_m AliHLTTPCCATrackParamVector::Filter( const sfloat_m &mask, const
 
   err2Y += c00;
   err2Z += c11;
-#ifndef NDEBUG
+#ifndef NODEBUG
   if ( !( err2Y > 0.f || !mask ).isFull() ) {
     std::cerr << err2Y << mask << ( err2Y > 0.f || !mask ) << c00 << std::endl;
   }
