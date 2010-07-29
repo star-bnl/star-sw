@@ -53,17 +53,17 @@ clean:
 $(OBJECT)/AvalancheMicroscopic.o: \
 	$(SOURCE)/AvalancheMicroscopic.cc $(INCLUDE)/AvalancheMicroscopic.hh \
 	$(INCLUDE)/FundamentalConstants.hh $(INCLUDE)/Random.hh \
-	$(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh
+	$(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh $(INCLUDE)/DriftView.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/AvalancheMC.o: \
 	$(SOURCE)/AvalancheMC.cc $(INCLUDE)/AvalancheMC.hh \
 	$(INCLUDE)/FundamentalConstants.hh $(INCLUDE)/Random.hh \
-	$(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh
+	$(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh $(INCLUDE)/DriftView.hh
 	$(CC) $(CFLAGS) $< -o $@      
 $(OBJECT)/DriftLineRKF.o: \
 	$(SOURCE)/DriftLineRKF.cc $(INCLUDE)/DriftLineRKF.hh \
 	$(INCLUDE)/FundamentalConstants.hh \
-	$(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh
+	$(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh $(INCLUDE)/DriftView.hh
 	$(CC) $(CFLAGS) $< -o $@
  
 $(OBJECT)/Track.o: $(SOURCE)/Track.cc $(INCLUDE)/Track.hh
@@ -87,39 +87,42 @@ $(OBJECT)/ComponentBase.o: \
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/ComponentConstant.o: \
 	$(SOURCE)/ComponentConstant.cc $(INCLUDE)/ComponentConstant.hh \
-	$(INCLUDE)/ComponentBase.hh
+	$(SOURCE)/ComponentBase.cc $(INCLUDE)/ComponentBase.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/ComponentUser.o: \
 	$(SOURCE)/ComponentUser.cc $(INCLUDE)/ComponentUser.hh \
-	$(INCLUDE)/ComponentBase.hh
+	$(SOURCE)/ComponentBase.cc $(INCLUDE)/ComponentBase.hh
 	$(CC) $(CFLAGS) $< -o $@       
 $(OBJECT)/ComponentAnalyticField.o: \
 	$(SOURCE)/ComponentAnalyticField.cc \
 	$(INCLUDE)/ComponentAnalyticField.hh \
-	$(INCLUDE)/ComponentBase.hh
+	$(SOURCE)/efieldCalc.f \
+	$(SOURCE)/ComponentBase.cc $(INCLUDE)/ComponentBase.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/efieldCalc.o: \
 	$(SOURCE)/efieldCalc.f
 	$(FF) $(CFLAGS) $< -o $@
 $(OBJECT)/ComponentNeBem2d.o: \
 	$(SOURCE)/ComponentNeBem2d.cc $(INCLUDE)/ComponentNeBem2d.hh \
-	$(INCLUDE)/ComponentBase.hh
+	$(SOURCE)/ComponentBase.cc $(INCLUDE)/ComponentBase.hh
 	$(CC) $(CFLAGS) $< -o $@        
 $(OBJECT)/ComponentFieldMap.o: \
 	$(SOURCE)/ComponentFieldMap.cc $(INCLUDE)/ComponentFieldMap.hh \
-	$(INCLUDE)/ComponentBase.hh
+	$(SOURCE)/ComponentBase.cc $(INCLUDE)/ComponentBase.hh
 	$(CC) $(cFLAGS) $< -o $@
 $(OBJECT)/ComponentAnsys121.o: \
 	$(SOURCE)/ComponentAnsys121.cc $(INCLUDE)/ComponentAnsys121.hh \
-	$(INCLUDE)/ComponentFieldMap.hh $(INCLUDE)/Input.hh
+	$(SOURCE)/ComponentFieldMap.cc $(INCLUDE)/ComponentFieldMap.hh \
+	$(INCLUDE)/Input.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/ComponentAnsys123.o: \
 	$(SOURCE)/ComponentAnsys123.cc $(INCLUDE)/ComponentAnsys123.hh \
-	$(INCLUDE)/ComponentFieldMap.hh $(INCLUDE)/Input.hh
+	$(SOURCE)/ComponentFieldMap.cc $(INCLUDE)/ComponentFieldMap.hh \
+	$(INCLUDE)/Input.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/ComponentTcad2d.o: \
 	$(SOURCE)/ComponentTcad2d.cc $(INCLUDE)/ComponentTcad2d.hh \
-	$(INCLUDE)/ComponentBase.hh
+	$(SOURCE)/ComponentBase.cc $(INCLUDE)/ComponentBase.hh
 	$(CC) $(CFLAGS) $< -o $@   
 
 $(OBJECT)/GeometrySimple.o: \
@@ -150,7 +153,7 @@ $(OBJECT)/Medium.o: \
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/MediumMagboltz86.o: \
 	$(SOURCE)/MediumMagboltz86.cc $(INCLUDE)/MediumMagboltz86.hh \
-	$(SOURCE)/OpticalData.cc \
+	$(SOURCE)/Medium.cc $(INCLUDE)/Medium.hh $(SOURCE)/OpticalData.cc \
 	$(INCLUDE)/FundamentalConstants.hh $(INCLUDE)/Random.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/magboltz.o: \
@@ -158,7 +161,8 @@ $(OBJECT)/magboltz.o: \
 	$(FF) $< -o $@
 $(OBJECT)/MediumSilicon.o: \
 	$(SOURCE)/MediumSilicon.cc $(INCLUDE)/MediumSilicon.hh \
-	$(INCLUDE)/FundamentalConstants.hh $(INCLUDE)/Medium.hh
+	$(SOURCE)/Medium.cc $(INCLUDE)/Medium.hh \
+	$(INCLUDE)/FundamentalConstants.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/OpticalData.o: \
 	$(SOURCE)/OpticalData.cc $(INCLUDE)/OpticalData.hh \
