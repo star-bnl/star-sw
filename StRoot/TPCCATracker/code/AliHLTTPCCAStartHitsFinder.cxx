@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCAStartHitsFinder.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCAStartHitsFinder.cxx,v 1.2 2010/07/29 21:45:27 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -21,7 +21,10 @@
 #include "AliHLTTPCCATracker.h"
 #include "AliHLTArray.h"
 #include "AliHLTTPCCAMath.h"
+
+#ifdef USE_TBB
 #include <tbb/parallel_sort.h>
+#endif //USE_TBB
 
 //////////////////////////////////////////////////////////////////////////////
 // depends on:
@@ -69,7 +72,11 @@
 
 void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, const SliceData &data )
 {
+#ifdef USE_TBB
   CAMath::AtomicExch( tracker.NTracklets(), 0 ); // initialize the slice tracker's number of tracklets to 0
+#else //USE_TBB
+  *tracker.NTracklets() = 0;
+#endif //USE_TBB
 
   enum {
     kArraySize = 10240,
@@ -111,8 +118,12 @@ void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, const SliceDa
         }
       }
     }
+#ifdef USE_TBB
     const int hitsStartOffset = CAMath::AtomicAdd( tracker.NTracklets(), startHitsCount ); // number of start hits from other jobs
-
+#else //USE_TBB
+    const int hitsStartOffset = *tracker.NTracklets(); // number of start hits from other jobs
+    *tracker.NTracklets() += startHitsCount;
+#endif //USE_TBB
     // write all start Hit IDs to the tracker object
     for ( int i = 0; i < startHitsCount; ++i ) {
       startHits[hitsStartOffset + i] = rowStartHits[i];
@@ -120,5 +131,9 @@ void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, const SliceDa
   }
 
 //   std::cout << *tracker.NTracklets() << " start hits have been found." << std::endl;
+#ifdef USE_TBB
   tbb::parallel_sort( startHits, startHits + *tracker.NTracklets() );
+#else //USE_TBB
+  std::sort( startHits, startHits + *tracker.NTracklets() );
+#endif //USE_TBB
 }

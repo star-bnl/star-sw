@@ -20,6 +20,31 @@
 #ifndef SSE_INTRINSICS_H
 #define SSE_INTRINSICS_H
 
+#if defined(_MSC_VER) && !defined(__midl)
+// MSVC sucks. If you include intrin.h you get all SSE intrinsics
+// declared. Something always includes intrin.h even if you don't
+// do it explicitly. Therefore we try to be the first to include it
+// but with __midl defined -- therefore not actually doing anything
+#ifdef __INTRIN_H_
+#error "intrin.h was already included, polluting the namespace. Please fix your code to include the Vc headers before anything that includes intrin.h. If you need any of the intrinsics from intrin.h declare the functions manually instead (you can copy them out of the intrin.h header."
+#endif
+#define __midl
+#include <intrin.h>
+#undef __midl
+extern "C" {
+#ifdef _WIN64
+unsigned char _BitScanForward64(unsigned long* Index, unsigned __int64 Mask);
+unsigned char _bittestandreset64(__int64 *a, __int64 b);
+#pragma intrinsic(_BitScanForward64)
+#pragma intrinsic(_bittestandreset64)
+#endif
+unsigned char _BitScanForward(unsigned long* Index, unsigned long Mask);
+unsigned char _bittestandreset(long *a, long b);
+#pragma intrinsic(_BitScanForward)
+#pragma intrinsic(_bittestandreset)
+}
+#endif
+
 // MMX
 #include <mmintrin.h>
 // SSE
@@ -60,12 +85,30 @@ namespace SSE
     static inline __m128i _mm_setmin_epi16() CONST;
     static inline __m128i _mm_setmin_epi32() CONST;
 
+    // not overriding _mm_set1_epi8 because this one should only be used for non-constants
+    static inline __m128i set1_epi8(int a) CONST;
+
     //X         static inline __m128i _mm_cmplt_epu8 (__m128i a, __m128i b) CONST;
     //X         static inline __m128i _mm_cmpgt_epu8 (__m128i a, __m128i b) CONST;
     static inline __m128i _mm_cmplt_epu16(__m128i a, __m128i b) CONST;
     static inline __m128i _mm_cmpgt_epu16(__m128i a, __m128i b) CONST;
     static inline __m128i _mm_cmplt_epu32(__m128i a, __m128i b) CONST;
     static inline __m128i _mm_cmpgt_epu32(__m128i a, __m128i b) CONST;
+
+#if defined(__GNUC__) && __GNUC__ == 4 && __GNUC_MINOR__ < 6 && !defined(VC_DONT_FIX_SSE_SHIFT)
+    static inline __m128i _mm_sll_epi16(__m128i a, __m128i count) CONST;
+    static inline __m128i _mm_sll_epi16(__m128i a, __m128i count) { __asm__("psllw %1,%0" : "+x"(a) : "x"(count)); return a; }
+    static inline __m128i _mm_sll_epi32(__m128i a, __m128i count) CONST;
+    static inline __m128i _mm_sll_epi32(__m128i a, __m128i count) { __asm__("pslld %1,%0" : "+x"(a) : "x"(count)); return a; }
+    static inline __m128i _mm_sll_epi64(__m128i a, __m128i count) CONST;
+    static inline __m128i _mm_sll_epi64(__m128i a, __m128i count) { __asm__("psllq %1,%0" : "+x"(a) : "x"(count)); return a; }
+    static inline __m128i _mm_srl_epi16(__m128i a, __m128i count) CONST;
+    static inline __m128i _mm_srl_epi16(__m128i a, __m128i count) { __asm__("psrlw %1,%0" : "+x"(a) : "x"(count)); return a; }
+    static inline __m128i _mm_srl_epi32(__m128i a, __m128i count) CONST;
+    static inline __m128i _mm_srl_epi32(__m128i a, __m128i count) { __asm__("psrld %1,%0" : "+x"(a) : "x"(count)); return a; }
+    static inline __m128i _mm_srl_epi64(__m128i a, __m128i count) CONST;
+    static inline __m128i _mm_srl_epi64(__m128i a, __m128i count) { __asm__("psrlq %1,%0" : "+x"(a) : "x"(count)); return a; }
+#endif
 
 #if defined(__GNUC__) && !defined(NVALGRIND)
     static inline __m128i _mm_setallone() { __m128i r; __asm__("pcmpeqb %0,%0":"=x"(r)); return r; }
@@ -117,6 +160,22 @@ namespace SSE
 // SSSE3
 #ifdef VC_IMPL_SSSE3
 #include <tmmintrin.h>
+namespace Vc
+{
+namespace SSE
+{
+
+    static inline __m128i set1_epi8(int a) {
+#if defined(__GNUC__) && __GNUC__ == 4 && __GNUC_MINOR__ < 5
+        return _mm_shuffle_epi8(_mm_cvtsi32_si128(a), _mm_setzero_si128());
+#else
+        // GCC 4.5 nows about the pshufb improvement
+        return _mm_set1_epi8(a);
+#endif
+    }
+
+} // namespace SSE
+} // namespace Vc
 #else
 namespace Vc
 {
@@ -125,6 +184,8 @@ namespace SSE
     static inline __m128i _mm_abs_epi8 (__m128i a) CONST;
     static inline __m128i _mm_abs_epi16(__m128i a) CONST;
     static inline __m128i _mm_abs_epi32(__m128i a) CONST;
+    static inline __m128i _mm_alignr_epi8(__m128i a, __m128i b, const int s) CONST;
+
     static inline __m128i _mm_abs_epi8 (__m128i a) {
         __m128i negative = _mm_cmplt_epi8 (a, _mm_setzero_si128());
         return _mm_add_epi8 (_mm_xor_si128(a, negative), _mm_and_si128(negative,  _mm_setone_epi8()));
@@ -147,6 +208,47 @@ namespace SSE
         __m128i negative = _mm_cmplt_epi32(a, _mm_setzero_si128());
         return _mm_add_epi32(_mm_xor_si128(a, negative), _mm_srli_epi32(negative, 31));
     }
+    static inline __m128i set1_epi8(int a) {
+        return _mm_set1_epi8(a);
+    }
+    static inline __m128i _mm_alignr_epi8(__m128i a, __m128i b, const int s) {
+        switch (s) {
+            case  0: return b;
+            case  1: return _mm_or_si128(_mm_slli_si128(a, 15), _mm_srli_si128(b,  1));
+            case  2: return _mm_or_si128(_mm_slli_si128(a, 14), _mm_srli_si128(b,  2));
+            case  3: return _mm_or_si128(_mm_slli_si128(a, 13), _mm_srli_si128(b,  3));
+            case  4: return _mm_or_si128(_mm_slli_si128(a, 12), _mm_srli_si128(b,  4));
+            case  5: return _mm_or_si128(_mm_slli_si128(a, 11), _mm_srli_si128(b,  5));
+            case  6: return _mm_or_si128(_mm_slli_si128(a, 10), _mm_srli_si128(b,  6));
+            case  7: return _mm_or_si128(_mm_slli_si128(a,  9), _mm_srli_si128(b,  7));
+            case  8: return _mm_or_si128(_mm_slli_si128(a,  8), _mm_srli_si128(b,  8));
+            case  9: return _mm_or_si128(_mm_slli_si128(a,  7), _mm_srli_si128(b,  9));
+            case 10: return _mm_or_si128(_mm_slli_si128(a,  6), _mm_srli_si128(b, 10));
+            case 11: return _mm_or_si128(_mm_slli_si128(a,  5), _mm_srli_si128(b, 11));
+            case 12: return _mm_or_si128(_mm_slli_si128(a,  4), _mm_srli_si128(b, 12));
+            case 13: return _mm_or_si128(_mm_slli_si128(a,  3), _mm_srli_si128(b, 13));
+            case 14: return _mm_or_si128(_mm_slli_si128(a,  2), _mm_srli_si128(b, 14));
+            case 15: return _mm_or_si128(_mm_slli_si128(a,  1), _mm_srli_si128(b, 15));
+            case 16: return a;
+            case 17: return _mm_srli_si128(a,  1);
+            case 18: return _mm_srli_si128(a,  2);
+            case 19: return _mm_srli_si128(a,  3);
+            case 20: return _mm_srli_si128(a,  4);
+            case 21: return _mm_srli_si128(a,  5);
+            case 22: return _mm_srli_si128(a,  6);
+            case 23: return _mm_srli_si128(a,  7);
+            case 24: return _mm_srli_si128(a,  8);
+            case 25: return _mm_srli_si128(a,  9);
+            case 26: return _mm_srli_si128(a, 10);
+            case 27: return _mm_srli_si128(a, 11);
+            case 28: return _mm_srli_si128(a, 12);
+            case 29: return _mm_srli_si128(a, 13);
+            case 30: return _mm_srli_si128(a, 14);
+            case 31: return _mm_srli_si128(a, 15);
+        }
+        return _mm_setzero_si128();
+    }
+
 } // namespace SSE
 } // namespace Vc
 
@@ -168,10 +270,10 @@ namespace SSE
     static inline __m128i _mm_blend_epi16(__m128i a, __m128i b, const int mask) CONST ALWAYS_INLINE;
     static inline __m128i _mm_max_epi8 (__m128i a, __m128i b) CONST;
     static inline __m128i _mm_max_epi32(__m128i a, __m128i b) CONST;
-    static inline __m128i _mm_max_epu8 (__m128i a, __m128i b) CONST;
+    //static inline __m128i _mm_max_epu8 (__m128i a, __m128i b) CONST;
     static inline __m128i _mm_max_epu16(__m128i a, __m128i b) CONST;
     static inline __m128i _mm_max_epu32(__m128i a, __m128i b) CONST;
-    static inline __m128i _mm_min_epu8 (__m128i a, __m128i b) CONST;
+    //static inline __m128i _mm_min_epu8 (__m128i a, __m128i b) CONST;
     static inline __m128i _mm_min_epu16(__m128i a, __m128i b) CONST;
     static inline __m128i _mm_min_epu32(__m128i a, __m128i b) CONST;
     static inline __m128i _mm_min_epi8 (__m128i a, __m128i b) CONST;

@@ -36,6 +36,7 @@
 
 namespace Vc
 {
+    template<typename V, unsigned int Size> class Memory;
 namespace Simple
 {
     enum { VectorAlignment = 4 };
@@ -48,7 +49,7 @@ class Vector : public VectorBase<T, Vector<T> >
     protected:
         T m_data;
     public:
-        typedef _Memory<T> Memory;
+        typedef Vc::Memory<Vector<T>, 1> Memory;
         typedef T EntryType;
         typedef Vector<unsigned int> IndexType;
         typedef Simple::Mask<1u> Mask;
@@ -63,11 +64,16 @@ class Vector : public VectorBase<T, Vector<T> >
         inline Vector(VectorSpecialInitializerRandom::REnum) { makeRandom(); }
         inline Vector(VectorSpecialInitializerIndexesFromZero::IEnum) : m_data(0) {}
 
+        static inline Vector Zero() { Vector r; r.m_data = 0; return r; }
+        static inline Vector IndexesFromZero() { return Zero(); }
+
         template<typename OtherT> explicit inline Vector(const Vector<OtherT> *a) : m_data(static_cast<T>(a->data())) {}
         template<typename OtherT> explicit inline Vector(const Vector<OtherT> &x) : m_data(static_cast<T>(x.data())) {}
         inline Vector(T x) : m_data(x) {}
         inline Vector(const T *x) : m_data(x[0]) {}
+        template<typename A> inline Vector(const T *x, A) : m_data(x[0]) {}
         template<typename Other> inline Vector(const Other *x) : m_data(x[0]) {}
+        template<typename Other, typename A> inline Vector(const Other *x, A) : m_data(x[0]) {}
 
         template<typename OtherT> inline void expand(Vector<OtherT> *x) const { x->data() = static_cast<OtherT>(m_data); }
 
@@ -77,21 +83,26 @@ class Vector : public VectorBase<T, Vector<T> >
         inline void makeRandom(Mask k) { if (k) m_data = std::rand(); }
 
         template<typename Other> inline void load(const Other *mem) { m_data = mem[0]; }
+        template<typename Other, typename A> inline void load(const Other *mem, A) { m_data = mem[0]; }
         template<typename Other> inline void load(const Other *mem, Mask m) { if (m.data()) m_data = mem[0]; }
-        static inline Vector loadUnaligned(const T *mem) { return Vector(mem[0]); }
 
         inline void load(const T *mem) { m_data = mem[0]; }
+        template<typename A> inline void load(const T *mem, A) { m_data = mem[0]; }
         inline void load(const T *mem, Mask m) { if (m.data()) m_data = mem[0]; }
 
         template<typename Other> inline void store(Other *mem) const { mem[0] = m_data; }
         template<typename Other> inline void store(Other *mem, Mask m) const { if (m.data()) mem[0] = m_data; }
+        template<typename Other> inline void storeUnaligned(Other *mem) const { store(mem); }
+        template<typename Other> inline void storeUnaligned(Other *mem, Mask m) const { store(mem, m); }
         template<typename Other> inline void storeStreaming(Other *mem) const { mem[0] = m_data; }
         template<typename Other> inline void storeStreaming(Other *mem, Mask m) const { if (m.data()) mem[0] = m_data; }
 
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // stores
         inline void store(T *mem) const { mem[0] = m_data; }
         inline void store(T *mem, Mask m) const { if (m.data()) mem[0] = m_data; }
-        inline void storeStreaming(T *mem) const { mem[0] = m_data; }
-        inline void storeStreaming(T *mem, Mask m) const { if (m.data()) mem[0] = m_data; }
+        template<typename A> inline void store(T *mem, A) const { store(mem); }
+        template<typename A> inline void store(T *mem, Mask m, A) const { store(mem, m); }
 
         inline const Vector<T> &dcba() const { return *this; }
         inline const Vector<T> cdab() const { return *this; }
@@ -102,6 +113,10 @@ class Vector : public VectorBase<T, Vector<T> >
         inline const Vector<T> dddd() const { return *this; }
         inline const Vector<T> dbac() const { return *this; }
 
+        inline Vector(const T *array, const unsigned char  *indexes) : m_data(array[indexes[0]]) {}
+        inline Vector(const T *array, const unsigned short *indexes) : m_data(array[indexes[0]]) {}
+        inline Vector(const T *array, const unsigned int   *indexes) : m_data(array[indexes[0]]) {}
+        inline Vector(const T *array, const unsigned long  *indexes) : m_data(array[indexes[0]]) {}
         inline Vector(const T *array, const Vector<unsigned int> &indexes) : m_data(array[indexes[0]]) {}
         inline Vector(const T *array, const Vector<unsigned int> &indexes, Mask m) : m_data(m.data() ? array[indexes[0]] : 0) {}
         inline Vector(const T *array, const Vector<unsigned int> &indexes, Mask m, VectorSpecialInitializerZero::ZEnum) : m_data(m.data() ? array[indexes[0]] : 0) {}
@@ -184,6 +199,11 @@ class Vector : public VectorBase<T, Vector<T> >
         inline void increment(Mask mask) { if (mask.data()) ++m_data; }
         inline void decrement(Mask mask) { if (mask.data()) --m_data; }
 
+        inline T &operator[](int index) {
+            assert(index == 0); if(index) {}
+            return m_data;
+        }
+
         inline T operator[](int index) const {
             assert(index == 0); if(index) {}
             return m_data;
@@ -246,8 +266,8 @@ class Vector : public VectorBase<T, Vector<T> >
           if (m.data()) m_data = v.m_data;
         }
 
-        template<typename T2> inline Vector<T2> staticCast() const { return static_cast<T2>(m_data); }
-        template<typename T2> inline Vector<T2> reinterpretCast() const { return reinterpret_cast<T2>(m_data); }
+        template<typename V2> inline V2 staticCast() const { return static_cast<typename V2::EntryType>(m_data); }
+        template<typename V2> inline V2 reinterpretCast() const { return reinterpret_cast<typename V2::EntryType>(m_data); }
 
         inline WriteMaskedVector<T> operator()(Mask m) { return WriteMaskedVector<T>(this, m); }
 
@@ -324,6 +344,10 @@ template<typename T1, typename T2> inline Mask<1u>   operator!=(T1 x, const Vect
 #undef PARENT_DATA_CONST
 #undef PARENT_DATA
 
+#ifdef _MSC_VER
+  template<typename T> static inline void forceToRegisters(const Vector<T> &) {
+  }
+#else
   template<typename T> static inline void forceToRegisters(const Vector<T> &x01) {
       __asm__ __volatile__(""::"r"(x01.data()));
   }
@@ -333,9 +357,11 @@ template<typename T1, typename T2> inline Mask<1u>   operator!=(T1 x, const Vect
   template<> inline void forceToRegisters(const Vector<double> &x01) {
       __asm__ __volatile__(""::"x"(x01.data()));
   }
+#endif
   template<typename T1, typename T2> static inline void forceToRegisters(
       const Vector<T1> &x01, const Vector<T2> &x02) {
-      __asm__ __volatile__(""::"r"(x01.data()), "r"(x02.data()));
+      forceToRegisters(x01);
+      forceToRegisters(x02);
   }
   template<typename T1, typename T2, typename T3> static inline void forceToRegisters(
         const Vector<T1>  &,  const Vector<T2>  &, const Vector<T3>  &) {}

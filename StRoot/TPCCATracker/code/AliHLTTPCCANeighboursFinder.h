@@ -9,6 +9,7 @@
 
 #include "AliHLTTPCCATracker.h"
 
+#ifdef USE_TBB
 namespace tbb
 {
   template<typename T> class blocked_range;
@@ -32,5 +33,20 @@ class AliHLTTPCCATracker::NeighboursFinder
     AliHLTTPCCATracker *fTracker;
     SliceData &fData;
 };
+#else //USE_TBB
+class AliHLTTPCCATracker::NeighboursFinder
+{
+  public:
+    class ExecuteOnRow;
+    NeighboursFinder( AliHLTTPCCATracker *tracker, SliceData &sliceData ) : fTracker( tracker ), fData( sliceData ) {}
+    void execute();
+
+  private:
+    void executeOnRow( int rowIndex ) const;
+
+    AliHLTTPCCATracker *fTracker;
+    SliceData &fData;
+};
+#endif //USE_TBB
 
 #endif

@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.2 2010/07/29 16:35:58 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.3 2010/07/29 21:45:27 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -326,8 +326,12 @@ short_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, int
     {
       const int end = fData.FirstHitInBin( row, indYmin + 2 );
       for ( int hitIndex = fData.FirstHitInBin( row, indYmin ); hitIndex < end; hitIndex += float_v::Size ) {
-        const float_v dy = float_v::loadUnaligned( fData.HitDataY( row ) + hitIndex ) - y;
-        const float_v dz = float_v::loadUnaligned( fData.HitDataZ( row ) + hitIndex ) - z;
+        float_v yz; 
+	yz.load( fData.HitDataY( row ) + hitIndex, Vc::Unaligned);
+        const float_v dy = yz - y;
+	yz.load( fData.HitDataZ( row ) + hitIndex, Vc::Unaligned);
+//        const float_v dz = float_v::loadUnaligned( fData.HitDataZ( row ) + hitIndex ) - z;
+        const float_v dz = yz - z;
         float_v radius2 = std::numeric_limits<float_v>::max();
         radius2( uint_v( Vc::IndexesFromZero ) + hitIndex < end ) = dy * dy + dz * dz; // XXX Manhattan distance
 //         std::cout << y << " dy = "  << dy << std::endl  <<
@@ -348,8 +352,13 @@ short_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, int
       const int nY = row.Grid().Ny();
       const int end = fData.FirstHitInBin( row, indYmin + nY + 2 );
       for ( int hitIndex = fData.FirstHitInBin( row, indYmin + nY ); hitIndex < end; hitIndex += float_v::Size ) {
-        const float_v dy = float_v::loadUnaligned( fData.HitDataY( row ) + hitIndex ) - y;
-        const float_v dz = float_v::loadUnaligned( fData.HitDataZ( row ) + hitIndex ) - z;
+        float_v yz; 
+	yz.load( fData.HitDataY( row ) + hitIndex, Vc::Unaligned );
+        const float_v dy = yz - y;
+	yz.load( fData.HitDataZ( row ) + hitIndex, Vc::Unaligned );
+        const float_v dz = yz - z;
+//        const float_v dy = float_v::loadUnaligned( fData.HitDataY( row ) + hitIndex ) - y;
+//        const float_v dz = float_v::loadUnaligned( fData.HitDataZ( row ) + hitIndex ) - z;
         float_v radius2 = std::numeric_limits<float_v>::max();
         radius2( uint_v( Vc::IndexesFromZero ) + hitIndex < end ) = dy * dy + dz * dz; // XXX Manhattan distance
         const float min = radius2.min();
@@ -810,6 +819,7 @@ void InitTracklets::operator()( int rowIndex )
     return;
   }
   debugF() << "InitTracklets(" << rowIndex << ")" << endl;
+//std::cout<< "InitTracklets(" << rowIndex << ")" << std::endl;
   const int rowStep = AliHLTTPCCAParameters::RowStep;
   assert( rowIndex < Parameters::NumberOfRows - rowStep );
   // the first hit is a special case (easy)

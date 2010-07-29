@@ -80,11 +80,13 @@ namespace CAMath
   SPECIALIZATION( double_v )
 #undef SPECIALIZATION
 
+#ifdef USE_TBB
   static void AtomicMax( unsigned int volatile *addr, uint_v val ) {
     for ( int i = 0; i < uint_v::Size; ++i ) {
       AtomicMax( &addr[i], val[i] );
     }
   }
+#endif //USE_TBB
 } // namespace CAMath
 
 #else

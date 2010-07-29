@@ -25,8 +25,11 @@
 # endif
 #endif
 
-#include <cmath> // for M_PI
 #include "sse/const.h"
+
+#ifndef M_PI
+# define M_PI 3.14159265358979323846
+#endif
 
 namespace Vc
 {
@@ -46,8 +49,8 @@ namespace SSE
 
     // cacheline 3
     V_ALIGN(16) const double c_general::oneDouble[2] = { 1., 1. };
-    V_ALIGN(16) const long long c_general::absMaskDouble[2] = { 0x7fffffffffffffff, 0x7fffffffffffffff };
-    V_ALIGN(16) const unsigned long long c_general::signMaskDouble[2] = { 0x8000000000000000, 0x8000000000000000 };
+    V_ALIGN(16) const long long c_general::absMaskDouble[2] = { 0x7fffffffffffffffll, 0x7fffffffffffffffll };
+    V_ALIGN(16) const unsigned long long c_general::signMaskDouble[2] = { 0x8000000000000000ull, 0x8000000000000000ull };
     V_ALIGN(16) const int _padding00[4] = { 0, 0, 0, 0 };
 
     template<> const float c_sin<float>::_data[4 * 8] = {
@@ -93,6 +96,9 @@ namespace SSE
         // 1 over 9!
         2.755731922398589251095059327045788677423843182623386383056640625e-06, 2.755731922398589251095059327045788677423843182623386383056640625e-06
     };
+
+    // cacheline 8
+    V_ALIGN(16) extern const unsigned char _IndexesFromZero16[16] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 } // namespace SSE
 
 namespace LRBni

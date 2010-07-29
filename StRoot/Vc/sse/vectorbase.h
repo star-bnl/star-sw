@@ -23,14 +23,12 @@
 #include "intrinsics.h"
 #include "types.h"
 #include "casts.h"
+#include "const.h"
 
 namespace Vc
 {
 namespace SSE
 {
-    ALIGN(16) extern const unsigned int   _IndexesFromZero4[4];
-    ALIGN(16) extern const unsigned short _IndexesFromZero8[8];
-
     template<typename T> class VectorBase {
         friend struct VectorHelperSize<float>;
         friend struct VectorHelperSize<double>;
@@ -56,27 +54,27 @@ namespace SSE
         friend struct GeneralHelpers;
         public:
             enum { Size = 16 / sizeof(T) };
-            typedef _M128I VectorType ALIGN(16);
+            typedef _M128I VectorType;
             typedef T EntryType;
             typedef VectorBase<typename IndexTypeHelper<Size>::Type> IndexType;
             typedef Mask<Size> MaskType;
             typedef MaskType GatherMaskType;
 
-            inline Vector<EntryType> &operator|= (const Vector<EntryType> &x) ALWAYS_INLINE;
-            inline Vector<EntryType> &operator&= (const Vector<EntryType> &x) ALWAYS_INLINE;
-            inline Vector<EntryType> &operator^= (const Vector<EntryType> &x) ALWAYS_INLINE;
-            inline Vector<EntryType> &operator>>=(const Vector<EntryType> &x) ALWAYS_INLINE;
-            inline Vector<EntryType> &operator<<=(const Vector<EntryType> &x) ALWAYS_INLINE;
+            inline Vector<EntryType> &operator|= (const VectorBase<EntryType> &x) ALWAYS_INLINE;
+            inline Vector<EntryType> &operator&= (const VectorBase<EntryType> &x) ALWAYS_INLINE;
+            inline Vector<EntryType> &operator^= (const VectorBase<EntryType> &x) ALWAYS_INLINE;
+            inline Vector<EntryType> &operator>>=(const VectorBase<EntryType> &x) ALWAYS_INLINE;
+            inline Vector<EntryType> &operator<<=(const VectorBase<EntryType> &x) ALWAYS_INLINE;
             inline Vector<EntryType> &operator>>=(int x) ALWAYS_INLINE;
             inline Vector<EntryType> &operator<<=(int x) ALWAYS_INLINE;
 
-            inline Vector<EntryType> operator| (const Vector<EntryType> &x) const ALWAYS_INLINE;
-            inline Vector<EntryType> operator& (const Vector<EntryType> &x) const ALWAYS_INLINE;
-            inline Vector<EntryType> operator^ (const Vector<EntryType> &x) const ALWAYS_INLINE;
-            inline Vector<EntryType> operator>>(const Vector<EntryType> &x) const ALWAYS_INLINE;
-            inline Vector<EntryType> operator<<(const Vector<EntryType> &x) const ALWAYS_INLINE;
-            inline Vector<EntryType> operator>>(int x) const ALWAYS_INLINE;
-            inline Vector<EntryType> operator<<(int x) const ALWAYS_INLINE;
+            inline Vector<EntryType> operator| (const VectorBase<EntryType> &x) const ALWAYS_INLINE;
+            inline Vector<EntryType> operator& (const VectorBase<EntryType> &x) const ALWAYS_INLINE;
+            inline Vector<EntryType> operator^ (const VectorBase<EntryType> &x) const ALWAYS_INLINE;
+            inline Vector<EntryType> operator>>(const VectorBase<EntryType> &x) const ALWAYS_INLINE;
+            inline Vector<EntryType> operator<<(const VectorBase<EntryType> &x) const ALWAYS_INLINE;
+            inline Vector<EntryType> operator>>(int x) const ALWAYS_INLINE_X;
+            inline Vector<EntryType> operator<<(int x) const ALWAYS_INLINE_X;
 
             VectorType &data() { return d.v(); }
             const VectorType &data() const { return d.v(); }
@@ -85,13 +83,16 @@ namespace SSE
         protected:
             inline VectorBase() {}
 
-            VectorMemoryUnion<VectorType, EntryType> d;
+            typedef Common::VectorMemoryUnion<VectorType, EntryType> StorageType;
+            StorageType d;
 
             static const T *_IndexesFromZero() {
                 if (Size == 4) {
                     return reinterpret_cast<const T *>(_IndexesFromZero4);
                 } else if (Size == 8) {
                     return reinterpret_cast<const T *>(_IndexesFromZero8);
+                } else if (Size == 16) {
+                    return reinterpret_cast<const T *>(_IndexesFromZero16);
                 }
                 return 0;
             }
@@ -105,7 +106,7 @@ namespace SSE
         friend struct GeneralHelpers;
         public:
             enum { Size = 8 };
-            typedef M256 VectorType ALIGN(16);
+            typedef M256 VectorType;
             typedef float EntryType;
             typedef VectorBase<IndexTypeHelper<Size>::Type> IndexType;
             typedef Float8Mask MaskType;
@@ -118,7 +119,8 @@ namespace SSE
             inline VectorBase() {}
             inline VectorBase(const VectorType &x) : d(x) {}
 
-            VectorMemoryUnion<VectorType, EntryType> d;
+            typedef Common::VectorMemoryUnion<VectorType, EntryType> StorageType;
+            StorageType d;
     };
 
     template<> class VectorBase<float> {
@@ -128,7 +130,7 @@ namespace SSE
         friend struct GeneralHelpers;
         public:
             enum { Size = 16 / sizeof(float) };
-            typedef _M128 VectorType ALIGN(16);
+            typedef _M128 VectorType;
             typedef float EntryType;
             typedef VectorBase<IndexTypeHelper<Size>::Type> IndexType;
             typedef Mask<Size> MaskType;
@@ -141,7 +143,8 @@ namespace SSE
             inline VectorBase() {}
             inline VectorBase(VectorType x) : d(x) {}
 
-            VectorMemoryUnion<VectorType, EntryType> d;
+            typedef Common::VectorMemoryUnion<VectorType, EntryType> StorageType;
+            StorageType d;
     };
 
     template<> class VectorBase<double> {
@@ -151,7 +154,7 @@ namespace SSE
         friend struct GeneralHelpers;
         public:
             enum { Size = 16 / sizeof(double) };
-            typedef _M128D VectorType ALIGN(16);
+            typedef _M128D VectorType;
             typedef double EntryType;
             typedef VectorBase<IndexTypeHelper<Size>::Type> IndexType;
             typedef Mask<Size> MaskType;
@@ -164,7 +167,8 @@ namespace SSE
             inline VectorBase() {}
             inline VectorBase(VectorType x) : d(x) {}
 
-            VectorMemoryUnion<VectorType, EntryType> d;
+            typedef Common::VectorMemoryUnion<VectorType, EntryType> StorageType;
+            StorageType d;
     };
 
 } // namespace SSE

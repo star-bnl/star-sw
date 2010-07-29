@@ -94,21 +94,21 @@ template<unsigned int VectorSize> class Mask
         inline Mask &operator|=(const Mask &rhs) { k = _mm_or_ps (k, rhs.k); return *this; }
 
         inline bool isFull () const { return
-#ifdef VC_IMPL_SSE4_1
+#ifdef VC_USE_PTEST
             _mm_testc_si128(dataI(), _mm_setallone_si128()); // return 1 if (0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff) == (~0 & k)
 #else
             _mm_movemask_epi8(dataI()) == 0xffff;
 #endif
         }
         inline bool isEmpty() const { return
-#ifdef VC_IMPL_SSE4_1
+#ifdef VC_USE_PTEST
             _mm_testz_si128(dataI(), dataI()); // return 1 if (0, 0, 0, 0) == (k & k)
 #else
             _mm_movemask_epi8(dataI()) == 0x0000;
 #endif
         }
         inline bool isMix() const {
-#ifdef VC_IMPL_SSE4_1
+#ifdef VC_USE_PTEST
             return _mm_test_mix_ones_zeros(dataI(), _mm_setallone_si128());
 #else
             const int tmp = _mm_movemask_epi8(dataI());
@@ -123,6 +123,9 @@ template<unsigned int VectorSize> class Mask
         int toInt() const CONST;
 
         inline _M128  data () const { return k; }
+#ifdef VC_GATHER_SET
+        inline _M128  dataIndex() const { return k; }
+#endif
         inline _M128I dataI() const { return _mm_castps_si128(k); }
         inline _M128D dataD() const { return _mm_castps_pd(k); }
 
@@ -145,14 +148,24 @@ template<unsigned int VectorSize> class Mask
 
 struct ForeachHelper
 {
-    unsigned long mask;
+    _long mask;
     bool brk;
-    inline ForeachHelper(unsigned long _mask) : mask(_mask), brk(false) {}
+    inline ForeachHelper(_long _mask) : mask(_mask), brk(false) {}
     inline bool outer() const { return mask != 0; }
     inline bool inner() { return (brk = !brk); }
-    inline unsigned long next() {
-        const unsigned long bit = __builtin_ctzl(mask);
+    inline _long next() {
+#ifdef _WIN64
+       unsigned long bit;
+       _BitScanForward64(&bit, mask);
+       _bittestandreset64(&mask, bit);
+#elif defined(_WIN32)
+       unsigned long bit;
+       _BitScanForward(&bit, mask);
+       _bittestandreset(&mask, bit);
+#else
+        const _long bit = __builtin_ctzl(mask);
         __asm__("btr %1,%0" : "+r"(mask) : "r"(bit));
+#endif
         return bit;
     }
 };
@@ -350,7 +363,7 @@ class Float8Mask
 
         inline bool isFull () const {
             const _M128 tmp = _mm_and_ps(k[0], k[1]);
-#ifdef VC_IMPL_SSE4_1
+#ifdef VC_USE_PTEST
             return _mm_testc_si128(_mm_castps_si128(tmp), _mm_setallone_si128());
 #else
             return _mm_movemask_ps(tmp) == 0xf;
@@ -360,7 +373,7 @@ class Float8Mask
         }
         inline bool isEmpty() const {
             const _M128 tmp = _mm_or_ps(k[0], k[1]);
-#ifdef VC_IMPL_SSE4_1
+#ifdef VC_USE_PTEST
             return _mm_testz_si128(_mm_castps_si128(tmp), _mm_castps_si128(tmp));
 #else
             return _mm_movemask_ps(tmp) == 0x0;
@@ -369,7 +382,7 @@ class Float8Mask
 #endif
         }
         inline bool isMix() const {
-#ifdef VC_IMPL_SSE4_1
+#ifdef VC_USE_PTEST
             return _mm_test_mix_ones_zeros(_mm_castps_si128(k[0]), _mm_castps_si128(k[0])) &&
             _mm_test_mix_ones_zeros(_mm_castps_si128(k[1]), _mm_castps_si128(k[1]));
 #else
@@ -413,15 +426,25 @@ class Float8Mask
 template<unsigned int Size> inline int Mask<Size>::firstOne() const
 {
     const int mask = toInt();
+#ifdef _MSC_VER
+    unsigned long bit;
+    _BitScanForward(&bit, mask);
+#else
     int bit;
     __asm__("bsf %1,%0" : "=&r"(bit) : "r"(mask));
+#endif
     return bit;
 }
 inline int Float8Mask::firstOne() const
 {
     const int mask = toInt();
+#ifdef _MSC_VER
+    unsigned long bit;
+    _BitScanForward(&bit, mask);
+#else
     int bit;
     __asm__("bsf %1,%0" : "=&r"(bit) : "r"(mask));
+#endif
     return bit;
 }
 
@@ -432,10 +455,21 @@ inline Mask<VectorSize>::Mask(const Float8Mask &m)
 class Float8GatherMask
 {
     public:
+#ifdef VC_GATHER_SET
+        Float8GatherMask(const Mask<8u> &k)   : smallMask(k), bigMask(k), mask(k.toInt()) {}
+        Float8GatherMask(const Float8Mask &k) : smallMask(k), bigMask(k), mask(k.toInt()) {}
+        const __m128 dataIndex() const { return smallMask.data(); }
+        const M256 data() const { return bigMask.data(); }
+#else
         Float8GatherMask(const Mask<8u> &k)   : mask(k.toInt()) {}
         Float8GatherMask(const Float8Mask &k) : mask(k.toInt()) {}
+#endif
         int toInt() const { return mask; }
     private:
+#ifdef VC_GATHER_SET
+        const Mask<8u> smallMask;
+        const Float8Mask bigMask;
+#endif
         const int mask;
 };
 

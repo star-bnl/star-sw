@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.2 2010/07/29 21:45:27 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -28,8 +28,10 @@
 #include "AliHLTTPCCADisplay.h"
 #endif
 
+#ifdef USE_TBB
 #include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
+#endif //USE_TBB
 
 // #ifdef DRAW
 // #include "AliHLTTPCCADisplay.h"
@@ -42,12 +44,14 @@ using namespace Vc;
 
 bool DRAW_EVERY_LINK = false;
 
+#ifdef USE_TBB
 inline void AliHLTTPCCATracker::NeighboursFinder::operator()( const tbb::blocked_range<int> &r ) const
 {
   for ( int i = r.begin(); i < r.end(); ++i ) {
     executeOnRow( i );
   }
 }
+#endif //USE_TBB
 
 inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) const
 {
@@ -276,7 +280,13 @@ void AliHLTTPCCATracker::NeighboursFinder::execute()
 #endif
   //tbb::affinity_partitioner partitioner;
   const int rowStep = AliHLTTPCCAParameters::RowStep;
+#ifdef USE_TBB  
   tbb::parallel_for( tbb::blocked_range<int>( rowStep, numberOfRows - rowStep, 1000 ), *this );//, partitioner );
+#else  //USE_TBB  
+  for ( int iRow = rowStep; iRow < numberOfRows - rowStep; ++iRow ) {
+    executeOnRow( iRow );
+  }
+#endif //USE_TBB  
 
 //   for ( int i = 0; i < AliHLTTPCCAParameters::NumberOfRows; ++i ) {
 //     const AliHLTTPCCARow &row = fData.Row( i );

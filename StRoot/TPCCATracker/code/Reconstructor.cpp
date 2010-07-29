@@ -76,7 +76,12 @@ extern void dumpTrackletconstructionFile( std::fstream &file, int sliceNumber );
 #endif
 
 // reconstruct tracks in slice
+
+#ifdef USE_TBB
 tbb::task *AliHLTTPCCATracker::Reconstructor::execute()
+#else //USE_TBB
+int AliHLTTPCCATracker::Reconstructor::execute()
+#endif //USE_TBB
 {
 //   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() " << std::endl; // dbg 0
   d->fTimers[0] = 0; // NeighboursFinder

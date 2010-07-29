@@ -211,7 +211,19 @@ inline uint_v AliHLTTPCCASliceData::CalculateHitWeight( uint_v numberOfHits, uin
 inline void AliHLTTPCCASliceData::MaximizeHitWeight( const AliHLTTPCCARow &row, uint_v hitIndex, uint_v numberOfHits, uint_v unique )
 {
   const uint_v weight = CalculateHitWeight( numberOfHits, unique );
+#ifdef USE_TBB
   CAMath::AtomicMax( &fHitWeights[row.fHitNumberOffset + hitIndex], weight );
+#else //USE_TBB
+  //CAMath::AtomicMax( &fHitWeights[row.fHitNumberOffset + hitIndex], weight );
+
+//  uint_m less = 
+
+  for(int i = 0; i < uint_v::Size; i++){
+    unsigned int &elem = fHitWeights[row.fHitNumberOffset + hitIndex + i];
+    elem = (elem > weight[i]) ? elem : weight[i];
+  }
+  
+#endif //USE_TBB
 }
 
 inline uint_v AliHLTTPCCASliceData::HitWeight( const AliHLTTPCCARow &row, uint_v hitIndex ) const

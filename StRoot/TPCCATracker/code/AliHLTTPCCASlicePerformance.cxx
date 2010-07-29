@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.2 2010/07/29 21:45:27 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -45,6 +45,8 @@
 #include "TH2.h"
 #include "TProfile.h"
 #include "TStyle.h"
+
+//#define IsOutTrack1 //to use reffited with materials track parameters
 
 void AliHLTTPCCASlicePerformance::SetNewEvent(const AliHLTTPCCAGBTracker * const Tracker,
                             AliHLTResizableArray<AliHLTTPCCAHitLabel> *hitLabels,
@@ -288,14 +290,14 @@ void AliHLTTPCCASlicePerformance::EfficiencyPerformance( )
 
 void AliHLTTPCCASlicePerformance::FillHistos()
 {
-  for(int i=0; i<sliceTracker->NOutTracks1(); i++){
+/*  for(int i=0; i<sliceTracker->NOutTracks1(); i++){
     AliHLTTPCCAOutTrack t = sliceTracker->fOutTracks1[i];
     AliHLTTPCCATrackParam param = t.EndPoint();
     double p = 1. / param.QPt() * sqrt(1. + param.DzDs()*param.DzDs());
 //     fNVsMom->Fill( param.GetY());
 //     fNVsLength->Fill( t.NHits());        // TODO: Histo
 //     fLengthVsMom->Fill( param.GetY(), t.NHits());
-  }
+  }*/
   
   ///mvz start 27.01.2010
   const int nMCTr = nMCTracks;
