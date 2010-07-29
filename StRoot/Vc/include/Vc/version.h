@@ -1,6 +1,6 @@
 /*  This file is part of the Vc library.
 
-    Copyright (C) 2009 Matthias Kretz <kretz@kde.org>
+    Copyright (C) 2010 Matthias Kretz <kretz@kde.org>
 
     Vc is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as
@@ -17,16 +17,22 @@
 
 */
 
-#ifndef VC_VC
-#define VC_VC
-#include "double_v"
-#include "float_v"
-#include "int_v"
-#include "sfloat_v"
-#include "short_v"
-#include "uint_v"
-#include "ushort_v"
-#include "IO"
-#include "Memory"
-#include "Utils"
-#endif // VC_VC
+#ifndef VC_VERSION_H
+#define VC_VERSION_H
+
+#define VC_VERSION_STRING "0.3.90-dev"
+#define VC_VERSION_NUMBER 0x0003b5
+#define VC_VERSION_CHECK(major, minor, patch) ((major << 16) | (minor << 8) | (patch << 1))
+
+namespace Vc
+{
+    static inline const char *versionString() {
+        return VC_VERSION_STRING;
+    }
+
+    static inline unsigned int versionNumber() {
+        return VC_VERSION_NUMBER;
+    }
+} // namespace Vc
+
+#endif // VC_VERSION_H

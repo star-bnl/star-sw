@@ -64,7 +64,9 @@ inline void AliHLTTPCCASliceData::createGrid( AliHLTTPCCARow *row, const AliHLTT
     float_v max = yMax;
     for ( int i = clusterDataOffset; i < clusterDataOffset + row->fNHits; ++i ) {
       float tmp[4] = { data.Y( i ), data.Z( i ), 0.f, 0.f };
-      const float_v r = float_v::loadUnaligned( tmp );
+      float_v r;
+      r.load( tmp, Vc::Unaligned);
+//      const float_v r = float_v::loadUnaligned( tmp );
       //std::cout << r << std::endl;
       min = CAMath::Min( min, r );
       max = CAMath::Max( max, r );

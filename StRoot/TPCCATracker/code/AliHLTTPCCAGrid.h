@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAGrid.h,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCAGrid.h,v 1.2 2010/07/29 21:45:27 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -72,14 +72,14 @@ inline ushort_v AliHLTTPCCAGrid::GetBinBounded( const AliHLTTPCCAGrid *array, co
   const sfloat_v fZMinOverStep( array, &AliHLTTPCCAGrid::fZMinOverStep, indexes );
   const sfloat_v fStepZInv( array, &AliHLTTPCCAGrid::fStepZInv, indexes );
   const ushort_v fNz( array, &AliHLTTPCCAGrid::fNz, indexes );
-  short_v zBin = ( Z * fStepZInv - fZMinOverStep ).staticCast<signed short>();
-  ushort_v zBin2 = CAMath::Max( short_v( Vc::Zero ), CAMath::Min( short_v( fNz - 1 ), zBin ) ).staticCast<unsigned short>();
+  short_v zBin = ( Z * fStepZInv - fZMinOverStep ).staticCast<short_v>();
+  ushort_v zBin2 = CAMath::Max( short_v( Vc::Zero ), CAMath::Min( short_v( fNz - 1 ), zBin ) ).staticCast<ushort_v>();
 
   const sfloat_v fYMinOverStep( array, &AliHLTTPCCAGrid::fYMinOverStep, indexes );
   const sfloat_v fStepYInv( array, &AliHLTTPCCAGrid::fStepYInv, indexes );
   const ushort_v fNy( array, &AliHLTTPCCAGrid::fNy, indexes );
-  short_v yBin = ( Y * fStepYInv - fYMinOverStep ).staticCast<signed short>();
-  ushort_v yBin2 = CAMath::Max( short_v( Vc::Zero ), CAMath::Min( short_v( fNy - 1 ), yBin ) ).staticCast<unsigned short>();
+  short_v yBin = ( Y * fStepYInv - fYMinOverStep ).staticCast<short_v>();
+  ushort_v yBin2 = CAMath::Max( short_v( Vc::Zero ), CAMath::Min( short_v( fNy - 1 ), yBin ) ).staticCast<ushort_v>();
   return zBin2 * fNy + yBin2;
 }
 
@@ -100,16 +100,16 @@ inline void AliHLTTPCCAGrid::GetBinBounded( const AliHLTTPCCAGrid *array, const 
   const sfloat_v fYMinOverStep( array, &AliHLTTPCCAGrid::fYMinOverStep, indexes );
   const sfloat_v fStepYInv( array, &AliHLTTPCCAGrid::fStepYInv, indexes );
   const ushort_v fNy( array, &AliHLTTPCCAGrid::fNy, indexes );
-  const short_v fNy2 = fNy.staticCast<signed short>();
-  const short_v &yBin = ( Y * fStepYInv - fYMinOverStep ).staticCast<signed short>();
-  *bY = CAMath::Max( short_v( Vc::Zero ), CAMath::Min( fNy2 - 1, yBin ) ).staticCast<unsigned short>();
+  const short_v fNy2 = fNy.staticCast<short_v>();
+  const short_v &yBin = ( Y * fStepYInv - fYMinOverStep ).staticCast<short_v>();
+  *bY = CAMath::Max( short_v( Vc::Zero ), CAMath::Min( fNy2 - 1, yBin ) ).staticCast<ushort_v>();
 
   const sfloat_v fZMinOverStep( array, &AliHLTTPCCAGrid::fZMinOverStep, indexes );
   const sfloat_v fStepZInv( array, &AliHLTTPCCAGrid::fStepZInv, indexes );
   const ushort_v fNz( array, &AliHLTTPCCAGrid::fNz, indexes );
-  const short_v fNz2 = fNz.staticCast<signed short>();
-  const short_v &zBin = ( Z * fStepZInv - fZMinOverStep ).staticCast<signed short>();
-  *bZ = CAMath::Max( short_v( Vc::Zero ), CAMath::Min( fNz2 - 1, zBin ) ).staticCast<unsigned short>();
+  const short_v fNz2 = fNz.staticCast<short_v>();
+  const short_v &zBin = ( Z * fStepZInv - fZMinOverStep ).staticCast<short_v>();
+  *bZ = CAMath::Max( short_v( Vc::Zero ), CAMath::Min( fNz2 - 1, zBin ) ).staticCast<ushort_v>();
 }
 
 inline ushort_v AliHLTTPCCAGrid::GetBinBounded( const sfloat_v &Y, const sfloat_v &Z ) const
@@ -140,11 +140,11 @@ inline void AliHLTTPCCAGrid::GetBinBounded( const sfloat_v &Y, const sfloat_v &Z
 //   *bZ = CAMath::Max( ushort_v( Vc::Zero ), CAMath::Min( ushort_v( fNz - 1 ), zBin ) );
 // IKu bag was here   :  -1 = 65000 > 0  !
 
-  const short_v &yBin = ( Y * fStepYInv - fYMinOverStep ).staticCast<signed short>();
-  const short_v &zBin = ( Z * fStepZInv - fZMinOverStep ).staticCast<signed short>();
+  const short_v &yBin = ( Y * fStepYInv - fYMinOverStep ).staticCast<short_v>();
+  const short_v &zBin = ( Z * fStepZInv - fZMinOverStep ).staticCast<short_v>();
 
-  *bY = CAMath::Max( short_v( Vc::Zero ), CAMath::Min( short_v( fNy - 1 ), yBin ) ).staticCast<unsigned short>();
-  *bZ = CAMath::Max( short_v( Vc::Zero ), CAMath::Min( short_v( fNz - 1 ), zBin ) ).staticCast<unsigned short>();
+  *bY = CAMath::Max( short_v( Vc::Zero ), CAMath::Min( short_v( fNy - 1 ), yBin ) ).staticCast<ushort_v>();
+  *bZ = CAMath::Max( short_v( Vc::Zero ), CAMath::Min( short_v( fNz - 1 ), zBin ) ).staticCast<ushort_v>();
 
 }
 

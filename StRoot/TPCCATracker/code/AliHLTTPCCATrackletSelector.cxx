@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletSelector.cxx,v 1.2 2010/07/29 16:35:58 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCATrackletSelector.cxx,v 1.3 2010/07/29 21:45:27 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -26,7 +26,10 @@
 #include "AliHLTTPCCAMath.h"
 #include "AliHLTTPCCAParameters.h"
 #include <stack>
+#undef USE_TBB
+#ifdef USE_TBB
 #include <tbb/atomic.h>
+#endif //USE_TBB
 
 #include <valgrind/memcheck.h>
 
@@ -37,10 +40,17 @@ using std::endl;
 void AliHLTTPCCATrackletSelector::run()
 {
   fTracks.resize( fTrackletVectors.Size() * ushort_v::Size * 2 ); // should be less, x2 is for safety
+#ifdef USE_TBB
   tbb::atomic<int> numberOfTracks;
+  tbb::atomic<int> numberOfHits;
+#else //USE_TBB
+  int numberOfTracks;
+  int numberOfHits;
+#endif //USE_TBB
+
   numberOfTracks = -1;
   std::stack<AliHLTTPCCATrack *> recycleBin;
-  tbb::atomic<int> numberOfHits;
+
   numberOfHits = 0;
 
   const int fNTracklets = fTracker.NTracklets();

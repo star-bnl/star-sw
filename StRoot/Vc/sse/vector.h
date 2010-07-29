@@ -24,7 +24,6 @@
 #include "vectorbase.h"
 #include "vectorhelper.h"
 #include "mask.h"
-#include "memory.h"
 #include <algorithm>
 #include <cmath>
 
@@ -37,6 +36,8 @@
 
 namespace Vc
 {
+    template<typename V, unsigned int Size> class Memory;
+
 namespace SSE
 {
     enum { VectorAlignment = 16 };
@@ -111,6 +112,7 @@ class Vector : public VectorBase<T>
         typedef VectorBase<T> Base;
         using Base::d;
         typedef typename Base::GatherMaskType GatherMask;
+        typedef typename Base::StorageType::AliasingEntryType AliasingEntryType;
     public:
         FREE_STORE_OPERATORS_ALIGNED(16)
 
@@ -119,88 +121,64 @@ class Vector : public VectorBase<T>
         typedef typename Base::EntryType  EntryType;
         typedef Vector<typename IndexTypeHelper<Size>::Type> IndexType;
         typedef typename Base::MaskType Mask;
-        typedef _Memory<T> Memory;
+        typedef Vc::Memory<Vector<T>, Size> Memory;
 
-        /**
-         * uninitialized
-         */
+        typedef T _T;
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // uninitialized
         inline Vector() {}
 
-        /**
-         * initialized to 0 in all 128 bits
-         */
-        inline explicit Vector(VectorSpecialInitializerZero::ZEnum) : Base(VectorHelper<VectorType>::zero()) {}
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // constants
+        explicit Vector(VectorSpecialInitializerZero::ZEnum);
+        explicit Vector(VectorSpecialInitializerOne::OEnum);
+        explicit Vector(VectorSpecialInitializerIndexesFromZero::IEnum);
+        static Vector Zero();
+        static Vector IndexesFromZero();
 
-        /**
-         * initialized to 1 for all entries in the vector
-         */
-        inline explicit Vector(VectorSpecialInitializerOne::OEnum) : Base(VectorHelper<T>::one()) {}
-
-        /**
-         * initialized to 0, 1 (, 2, 3 (, 4, 5, 6, 7))
-         */
-        inline explicit Vector(VectorSpecialInitializerIndexesFromZero::IEnum) : Base(VectorHelper<VectorType>::load(Base::_IndexesFromZero())) {}
-
-        /**
-         * initialize with given _M128 vector
-         */
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // internal: required to enable returning objects of VectorType
         inline Vector(const VectorType &x) : Base(x) {}
 
-        template<typename OtherT>
-        explicit inline Vector(const Vector<OtherT> &x) : Base(StaticCastHelper<OtherT, T>::cast(x.data())) {}
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // static_cast / copy ctor
+        template<typename OtherT> explicit Vector(const Vector<OtherT> &x);
 
-        /**
-         * initialize all values with the given value
-         */
-        inline Vector(EntryType a) : Base(VectorHelper<T>::set(a)) {}
-
-        /**
-         * Initialize the vector with the given data. \param x must point to 64 byte aligned 512
-         * byte data.
-         */
-        inline explicit Vector(const EntryType *x) : Base(VectorHelper<VectorType>::load(x)) {}
-
-        inline explicit Vector(const Vector<typename CtorTypeHelper<T>::Type> *a)
-            : Base(VectorHelper<T>::concat(a[0].data(), a[1].data()))
-        {}
-
-        inline void expand(Vector<typename ExpandTypeHelper<T>::Type> *x) const
-        {
-            if (Size == 8u) {
-                x[0].data() = VectorHelper<T>::expand0(data());
-                x[1].data() = VectorHelper<T>::expand1(data());
-            }
-        }
-
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // broadcast
+        Vector(EntryType a);
         static inline Vector broadcast4(const EntryType *x) { return Vector<T>(x); }
 
-        inline void load(const EntryType *mem) { data() = VectorHelper<VectorType>::load(mem); }
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // load ctors
+        explicit Vector(const EntryType *x);
+        template<typename Alignment> Vector(const EntryType *x, Alignment align);
+        explicit Vector(const Vector<typename CtorTypeHelper<T>::Type> *a);
 
-        static inline Vector loadUnaligned(const EntryType *mem) { return VectorHelper<VectorType>::loadUnaligned(mem); }
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // expand 1 short_v to 2 int_v                    XXX rationale? remove it for release? XXX
+        void expand(Vector<typename ExpandTypeHelper<T>::Type> *x) const;
 
-        inline void makeZero() { data() = VectorHelper<VectorType>::zero(); }
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // load member functions
+        void load(const EntryType *mem);
+        template<typename Alignment> void load(const EntryType *mem, Alignment align);
 
-        /**
-         * Set all entries to zero where the mask is set. I.e. a 4-vector with a mask of 0111 would
-         * set the last three entries to 0.
-         */
-        inline void makeZero(const Mask &k) { data() = VectorHelper<VectorType>::andnot_(mm128_reinterpret_cast<VectorType>(k.data()), data()); }
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // zeroing
+        void makeZero();
+        void makeZero(const Mask &k);
 
-        /**
-         * Store the vector data to the given memory. The memory must be 64 byte aligned and of 512
-         * bytes size.
-         */
-        inline void store(EntryType *mem) const { VectorHelper<VectorType>::store(mem, data()); }
-        inline void store(EntryType *mem, const Mask &mask) const {
-            const VectorType &old = VectorHelper<VectorType>::load(mem);
-            VectorHelper<VectorType>::store(mem, VectorHelper<VectorType>::blend(old, data(), mm128_reinterpret_cast<VectorType>(mask.data())));
-        }
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // stores
+        void store(EntryType *mem) const;
+        void store(EntryType *mem, const Mask &mask) const;
+        template<typename A> void store(EntryType *mem, A align) const;
+        template<typename A> void store(EntryType *mem, const Mask &mask, A align) const;
 
-        /**
-         * Non-temporal store variant. Writes to the memory without polluting the cache.
-         */
-        inline void storeStreaming(EntryType *mem) const { VectorHelper<VectorType>::storeStreaming(mem, data()); }
-
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        // swizzles
         inline const Vector<T> &dcba() const { return *this; }
         inline const Vector<T> cdab() const { return reinterpret_cast<VectorType>(_mm_shuffle_epi32(data(), _MM_SHUFFLE(2, 3, 0, 1))); }
         inline const Vector<T> badc() const { return reinterpret_cast<VectorType>(_mm_shuffle_epi32(data(), _MM_SHUFFLE(1, 0, 3, 2))); }
@@ -210,28 +188,62 @@ class Vector : public VectorBase<T>
         inline const Vector<T> dddd() const { return reinterpret_cast<VectorType>(_mm_shuffle_epi32(data(), _MM_SHUFFLE(3, 3, 3, 3))); }
         inline const Vector<T> dacb() const { return reinterpret_cast<VectorType>(_mm_shuffle_epi32(data(), _MM_SHUFFLE(3, 0, 2, 1))); }
 
+        inline Vector(const EntryType *array, const unsigned int *indexes) {
+            GatherHelper<T>::gather(*this, indexes, array);
+        }
         inline Vector(const EntryType *array, const IndexType &indexes) {
             GatherHelper<T>::gather(*this, indexes, array);
         }
         inline Vector(const EntryType *array, const IndexType &indexes, const GatherMask &mask) {
+#ifdef VC_GATHER_SET
+            typedef typename IndexType::VectorType IType;
+            const IType k = mm128_reinterpret_cast<IType>(mask.dataIndex());
+            GatherHelper<T>::gather(*this, VectorHelper<IType>::and_(k, indexes.data()), array);
+#else
             GeneralHelpers::maskedGatherHelper(*this, indexes, mask.toInt(), array);
+#endif
         }
         inline Vector(const EntryType *array, const IndexType &indexes, const GatherMask &mask, VectorSpecialInitializerZero::ZEnum)
+#ifndef VC_GATHER_SET
             : Base(VectorHelper<VectorType>::zero())
+#endif
         {
+#ifdef VC_GATHER_SET
+            typedef typename IndexType::VectorType IType;
+            const IType k = mm128_reinterpret_cast<IType>(mask.dataIndex());
+            GatherHelper<T>::gather(*this, VectorHelper<IType>::and_(k, indexes.data()), array);
+            data() = VectorHelper<VectorType>::and_(mm128_reinterpret_cast<VectorType>(mask.data()), data());
+#else
             GeneralHelpers::maskedGatherHelper(*this, indexes, mask.toInt(), array);
+#endif
         }
         inline Vector(const EntryType *array, const IndexType &indexes, const GatherMask &mask, EntryType def)
             : Base(VectorHelper<T>::set(def))
         {
+#ifdef VC_GATHER_SET
+            typedef typename IndexType::VectorType IType;
+            const IType k = mm128_reinterpret_cast<IType>(mask.dataIndex());
+            Vector<T> tmp;
+            GatherHelper<T>::gather(tmp, VectorHelper<IType>::and_(indexes.data(), k), array);
+            assign(tmp, mask.data());
+#else
             GeneralHelpers::maskedGatherHelper(*this, indexes, mask.toInt(), array);
+#endif
         }
 
         inline void gather(const EntryType *array, const IndexType &indexes) {
             GatherHelper<T>::gather(*this, indexes, array);
         }
         inline void gather(const EntryType *array, const IndexType &indexes, const GatherMask &mask) {
+#ifdef VC_GATHER_SET
+            typedef typename IndexType::VectorType IType;
+            const IType k = mm128_reinterpret_cast<IType>(mask.dataIndex());
+            Vector<T> tmp;
+            GatherHelper<T>::gather(tmp, VectorHelper<IType>::and_(k, indexes.data()), array);
+            assign(tmp, mask.data());
+#else
             GeneralHelpers::maskedGatherHelper(*this, indexes, mask.toInt(), array);
+#endif
         }
 
         inline void scatter(EntryType *array, const IndexType &indexes) const {
@@ -312,6 +324,9 @@ class Vector : public VectorBase<T>
         //postfix
         inline Vector operator++(int) ALWAYS_INLINE { const Vector<T> r = *this; data() = VectorHelper<T>::add(data(), VectorHelper<T>::one()); return r; }
 
+        inline AliasingEntryType &operator[](int index) ALWAYS_INLINE {
+            return Base::d.m(index);
+        }
         inline EntryType operator[](int index) const ALWAYS_INLINE {
             return Base::d.m(index);
         }
@@ -364,8 +379,8 @@ class Vector : public VectorBase<T>
             data() = VectorHelper<VectorType>::blend(data(), v.data(), k);
         }
 
-        template<typename T2> inline Vector<T2> staticCast() const { return StaticCastHelper<T, T2>::cast(data()); }
-        template<typename T2> inline Vector<T2> reinterpretCast() const { return ReinterpretCastHelper<T, T2>::cast(data()); }
+        template<typename V2> inline V2 staticCast() const { return StaticCastHelper<T, typename V2::_T>::cast(data()); }
+        template<typename V2> inline V2 reinterpretCast() const { return mm128_reinterpret_cast<typename V2::VectorType>(data()); }
 
         inline WriteMaskedVector<T> operator()(const Mask &k) ALWAYS_INLINE { return WriteMaskedVector<T>(this, k); }
 
@@ -401,8 +416,8 @@ class Vector : public VectorBase<T>
 };
 
 template<> inline Vector<float8> Vector<float8>::broadcast4(const float *x) {
-    const _M128 &v = VectorHelper<_M128>::load(x);
-    return Vector<float8>(M256(v, v));
+    const _M128 &v = VectorHelper<_M128>::load(x, Aligned);
+    return Vector<float8>(M256::create(v, v));
 }
 
 template<typename T> class SwizzledVector : public Vector<T> {};
@@ -429,8 +444,8 @@ template<typename T> inline typename Vector<T>::Mask  operator==(const typename 
 template<typename T> inline typename Vector<T>::Mask  operator!=(const typename Vector<T>::EntryType &x, const Vector<T> &v) { return Vector<T>(x) != v; }
 
 #define OP_IMPL(T, symbol, fun) \
-  template<> inline Vector<T> &VectorBase<T>::operator symbol##=(const Vector<T> &x) { d.v() = VectorHelper<T>::fun(d.v(), x.d.v()); return *static_cast<Vector<T> *>(this); } \
-  template<> inline Vector<T>  VectorBase<T>::operator symbol(const Vector<T> &x) const { return Vector<T>(VectorHelper<T>::fun(d.v(), x.d.v())); }
+  template<> inline Vector<T> &VectorBase<T>::operator symbol##=(const VectorBase<T> &x) { d.v() = VectorHelper<T>::fun(d.v(), x.d.v()); return *static_cast<Vector<T> *>(this); } \
+  template<> inline Vector<T>  VectorBase<T>::operator symbol(const VectorBase<T> &x) const { return Vector<T>(VectorHelper<T>::fun(d.v(), x.d.v())); }
   OP_IMPL(int, &, and_)
   OP_IMPL(int, |, or_)
   OP_IMPL(int, ^, xor_)
@@ -497,5 +512,5 @@ template<> inline void forceToRegisters(const Vector<float8> &x) { __asm__ __vol
 
 #include "math.h"
 #include "undomacros.h"
-
+#include "vector.tcc"
 #endif // SSE_VECTOR_H

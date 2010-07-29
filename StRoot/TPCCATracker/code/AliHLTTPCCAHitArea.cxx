@@ -125,7 +125,7 @@ bool AliHLTTPCCAHitArea::GetNext( NeighbourData *data )
   data->fZ.makeZero();
   data->fZ.gather( fSlice.HitDataZ( fRow ), fIh, valid );
 
-  data->fLinks = fIh.staticCast<short>();
+  data->fLinks = fIh.staticCast<short_v>();
 
   ++fIh;
 

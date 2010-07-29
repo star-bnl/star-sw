@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.2 2010/07/29 21:45:27 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -189,7 +189,12 @@ void AliHLTTPCCATracker::ReadEvent( AliHLTTPCCAClusterData *clusterData )
 
 void AliHLTTPCCATracker::Reconstruct()
 {
+#ifdef USE_TBB
   tbb::task::spawn_root_and_wait( *new( tbb::task::allocate_root() ) Reconstructor( this ) );
+#else //USE_TBB
+  Reconstructor R(this);
+  R.execute();
+#endif //USE_TBB
 }
 
 void AliHLTTPCCATracker::WriteOutput()

@@ -43,7 +43,9 @@ namespace CAMath
   template<typename T> static inline T Cos  ( const T &x ) { return std::cos( x ); }
   template<typename T> static T Reciprocal( const T &x );
   template<typename T> static T ApproxSqrt( const T &x );
+#ifdef USE_TBB
   template<typename T> static T AtomicMax( T volatile *addr, T val );
+#endif //USE_TBB
 
   template<typename T> struct FiniteReturnTypeHelper { typedef bool R; };
   template<typename T> static typename FiniteReturnTypeHelper<T>::R Finite( const T &x );
@@ -60,9 +62,11 @@ namespace CAMath
   static inline float Pi() { return 3.1415926535897f; }
   int Nint( float x );
 
+#ifdef USE_TBB
   int AtomicExch( int volatile *addr, int val );
   int AtomicAdd ( int volatile *addr, int val );
   int AtomicMin ( int volatile *addr, int val );
+#endif //USE_TBB
 }
 
 #if defined( HLTCA_STANDALONE )
@@ -163,6 +167,8 @@ inline float CAMath::Tan( float x )
   return choice( tanf( x ), tan( x ), TMath::Tan( x ) );
 }
 
+#ifdef USE_TBB
+
 #include <tbb/atomic.h>
 
 inline int CAMath::AtomicExch( int volatile *addr, int val )
@@ -224,6 +230,7 @@ inline int CAMath::AtomicMin ( int volatile *addr, int val )
   }
   return old;
 }
+#endif //USE_TBB
 
 #undef choice
 

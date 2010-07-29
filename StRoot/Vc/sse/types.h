@@ -21,12 +21,28 @@
 #define SSE_TYPES_H
 
 #include "intrinsics.h"
+#include "../common/storage.h"
+#include "macros.h"
 
 namespace Vc
 {
 namespace SSE
 {
     template<typename T> class Vector;
+
+    // define our own long because on Windows long == int while on Linux long == max. register width
+    // since we want to have a type that depends on 32 vs. 64 bit we need to do some special casing on Windows
+#ifdef _WIN64
+    typedef __int64 _long;
+    typedef unsigned __int64 _ulong;
+#elif defined(_WIN32)
+    typedef int _long;
+    typedef unsigned int _ulong;
+#else
+    typedef long _long;
+    typedef unsigned long _ulong;
+#endif
+
 
     class Float8Mask;
     class Float8GatherMask;
@@ -39,8 +55,9 @@ namespace SSE
 
     class M256 {
         public:
-            inline M256() {}
-            inline M256(_M128 a, _M128 b) { d[0] = a; d[1] = b; }
+            //inline M256() {}
+            //inline M256(_M128 a, _M128 b) { d[0] = a; d[1] = b; }
+            static inline M256 create(_M128 a, _M128 b) { M256 r; r.d[0] = a; r.d[1] = b; return r; }
             inline _M128 &operator[](int i) { return d[i]; }
             inline const _M128 &operator[](int i) const { return d[i]; }
         private:
@@ -56,28 +73,6 @@ namespace SSE
     template<> struct IndexTypeHelper<4u> { typedef unsigned int   Type; };
     template<> struct IndexTypeHelper<8u> { typedef unsigned short Type; };
     template<> struct IndexTypeHelper<16u>{ typedef unsigned char  Type; };
-
-    template<typename VectorType, typename EntryType> class VectorMemoryUnion
-    {
-        public:
-            typedef EntryType AliasingEntryType MAY_ALIAS;
-            inline VectorMemoryUnion() {}
-            inline VectorMemoryUnion(const VectorType &x) : data(x) {}
-
-            VectorType &v() { return data; }
-            const VectorType &v() const { return data; }
-
-            AliasingEntryType &m(int index) {
-                return reinterpret_cast<AliasingEntryType *>(&data)[index];
-            }
-
-            EntryType m(int index) const {
-                return reinterpret_cast<const AliasingEntryType *>(&data)[index];
-            }
-
-        private:
-            VectorType data;
-    };
 
     template<typename T> struct VectorHelperSize;
 

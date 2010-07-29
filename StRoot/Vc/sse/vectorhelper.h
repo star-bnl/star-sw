@@ -61,8 +61,9 @@ namespace SSE
         typedef typename Base::VectorType VectorType;
         typedef typename Base::EntryType  EntryType;
         typedef typename Base::IndexType  IndexType;
-        typedef VectorMemoryUnion<VectorType, EntryType> UnionType;
+        typedef Common::VectorMemoryUnion<VectorType, EntryType> UnionType;
         enum { Size = Base::Size, Shift = sizeof(EntryType) };
+        static void gather(Base &v, const unsigned int *indexes, const EntryType *baseAddr);
         static void gather(Base &v, const IndexType &indexes, const EntryType *baseAddr);
         template<typename S1> static void gather(Base &v, const IndexType &indexes, const S1 *baseAddr,
                 const EntryType S1::* member1);
@@ -81,7 +82,7 @@ namespace SSE
         typedef typename Base::VectorType VectorType;
         typedef typename Base::EntryType  EntryType;
         typedef typename Base::IndexType  IndexType;
-        typedef VectorMemoryUnion<VectorType, EntryType> UnionType;
+        typedef Common::VectorMemoryUnion<VectorType, EntryType> UnionType;
         enum { Size = Base::Size, Shift = sizeof(EntryType) };
 
         static void scatter(const Base &v, const IndexType &indexes, EntryType *baseAddr);
@@ -123,10 +124,9 @@ namespace SSE
         template<> struct VectorHelper<_M128>
         {
             typedef _M128 VectorType;
-            static inline VectorType load(const float *x) { return _mm_load_ps(x); }
-            static inline VectorType loadUnaligned(const float *x) { return _mm_loadu_ps(x); }
-            static inline void store(float *mem, const VectorType &x) { _mm_store_ps(mem, x); }
-            static inline void storeStreaming(float *mem, const VectorType &x) { _mm_stream_ps(mem, x); }
+            template<typename A> static VectorType load(const float *x, A);
+            template<typename A> static void store(float *mem, const VectorType &x, A);
+
             OP0(allone, _mm_setallone_ps())
             OP0(zero, _mm_setzero_ps())
             OP2(or_, _mm_or_ps(a, b))
@@ -136,39 +136,28 @@ namespace SSE
             OP3(blend, _mm_blendv_ps(a, b, c))
         };
 
+
         template<> struct VectorHelper<M256>
         {
             typedef M256 VectorType;
-            static inline VectorType load(const float *x) {
-                return VectorType(_mm_load_ps(x), _mm_load_ps(x + 4));
-            }
-            static inline VectorType loadUnaligned(const float *x) {
-                return VectorType(_mm_loadu_ps(x), _mm_loadu_ps(x + 4));
-            }
-            static inline void store(float *mem, const VectorType &x) {
-                _mm_store_ps(mem, x[0]);
-                _mm_store_ps(mem + 4, x[1]);
-            }
-            static inline void storeStreaming(float *mem, const VectorType &x) {
-                _mm_stream_ps(mem, x[0]);
-                _mm_stream_ps(mem + 4, x[1]);
-            }
-            OP0(allone, VectorType(_mm_setallone_ps(), _mm_setallone_ps()))
-            OP0(zero, VectorType(_mm_setzero_ps(), _mm_setzero_ps()))
-            OP2(or_, VectorType(_mm_or_ps(a[0], b[0]), _mm_or_ps(a[1], b[1])))
-            OP2(xor_, VectorType(_mm_xor_ps(a[0], b[0]), _mm_xor_ps(a[1], b[1])))
-            OP2(and_, VectorType(_mm_and_ps(a[0], b[0]), _mm_and_ps(a[1], b[1])))
-            OP2(andnot_, VectorType(_mm_andnot_ps(a[0], b[0]), _mm_andnot_ps(a[1], b[1])))
-            OP3(blend, VectorType(_mm_blendv_ps(a[0], b[0], c[0]), _mm_blendv_ps(a[1], b[1], c[1])))
+            template<typename A> static VectorType load(const float *x, A);
+            template<typename A> static void store(float *mem, const VectorType &x, A);
+
+            OP0(allone, VectorType::create(_mm_setallone_ps(), _mm_setallone_ps()))
+            OP0(zero, VectorType::create(_mm_setzero_ps(), _mm_setzero_ps()))
+            OP2(or_, VectorType::create(_mm_or_ps(a[0], b[0]), _mm_or_ps(a[1], b[1])))
+            OP2(xor_, VectorType::create(_mm_xor_ps(a[0], b[0]), _mm_xor_ps(a[1], b[1])))
+            OP2(and_, VectorType::create(_mm_and_ps(a[0], b[0]), _mm_and_ps(a[1], b[1])))
+            OP2(andnot_, VectorType::create(_mm_andnot_ps(a[0], b[0]), _mm_andnot_ps(a[1], b[1])))
+            OP3(blend, VectorType::create(_mm_blendv_ps(a[0], b[0], c[0]), _mm_blendv_ps(a[1], b[1], c[1])))
         };
 
         template<> struct VectorHelper<_M128D>
         {
             typedef _M128D VectorType;
-            static inline VectorType load(const double *x) { return _mm_load_pd(x); }
-            static inline VectorType loadUnaligned(const double *x) { return _mm_loadu_pd(x); }
-            static inline void store(double *mem, const VectorType &x) { _mm_store_pd(mem, x); }
-            static inline void storeStreaming(double *mem, const VectorType &x) { _mm_stream_pd(mem, x); }
+            template<typename A> static VectorType load(const double *x, A);
+            template<typename A> static void store(double *mem, const VectorType &x, A);
+
             OP0(allone, _mm_setallone_pd())
             OP0(zero, _mm_setzero_pd())
             OP2(or_, _mm_or_pd(a, b))
@@ -181,10 +170,16 @@ namespace SSE
         template<> struct VectorHelper<_M128I>
         {
             typedef _M128I VectorType;
-            template<typename T> static inline VectorType load(const T *x) { return _mm_load_si128(reinterpret_cast<const VectorType *>(x)); }
-            template<typename T> static inline VectorType loadUnaligned(const T *x) { return _mm_loadu_si128(reinterpret_cast<const VectorType *>(x)); }
-            template<typename T> static inline void store(T *mem, const VectorType &x) { _mm_store_si128(reinterpret_cast<VectorType *>(mem), x); }
-            template<typename T> static inline void storeStreaming(T *mem, const VectorType &x) { _mm_stream_si128(reinterpret_cast<VectorType *>(mem), x); }
+            template<typename T> static VectorType load(const T *x, AlignedFlag);
+            template<typename T> static VectorType load(const T *x, UnalignedFlag);
+            template<typename T> static VectorType load(const T *x, StreamingAndAlignedFlag);
+            template<typename T> static VectorType load(const T *x, StreamingAndUnalignedFlag);
+            template<typename T> static void store(T *mem, const VectorType &x, AlignedFlag);
+            template<typename T> static void store(T *mem, const VectorType &x, UnalignedFlag);
+            template<typename T> static void store(T *mem, const VectorType &x, StreamingAndAlignedFlag);
+            template<typename T> static void store(T *mem, const VectorType &x, StreamingAndUnalignedFlag);
+            template<typename T> static void store(T *mem, const VectorType &x, const VectorType &m);
+
             OP0(allone, _mm_setallone_si128())
             OP0(zero, _mm_setzero_si128())
             OP2(or_, _mm_or_si128(a, b))
@@ -193,6 +188,7 @@ namespace SSE
             OP2(andnot_, _mm_andnot_si128(a, b))
             OP3(blend, _mm_blendv_epi8(a, b, c))
         };
+
 #undef OP1
 #undef OP2
 #undef OP3
@@ -434,181 +430,6 @@ namespace SSE
             static inline VectorType one()  { return CAT(_mm_setone_, SUFFIX)(); }// set(1.f); }
             static inline _M128 concat(_M128D a, _M128D b) { return _mm_movelh_ps(_mm_cvtpd_ps(a), _mm_cvtpd_ps(b)); }
 
-            static bool pack(VectorType &v1, _M128I &_m1, VectorType &v2, _M128I &_m2) {
-                {
-                    VectorType &m1 = reinterpret_cast<VectorType &>(_m1);
-                    VectorType &m2 = reinterpret_cast<VectorType &>(_m2);
-                    const int m1Mask = _mm_movemask_ps(m1);
-                    const int m2Mask = _mm_movemask_ps(m2);
-                    if (0 == (m1Mask & 8)) {
-                        if (0 == (m1Mask & 4)) {
-                            if (0 == (m1Mask & 2)) {
-                                if (0 == m1Mask) {
-                                    m1 = m2;
-                                    v1 = v2;
-                                    m2 = zero();
-                                    return _mm_movemask_ps(m1) == 15;
-                                }
-                                if (0 == (m2Mask & 8)) {
-#ifdef __SSSE3__
-                                    v1 = _mm_castsi128_ps(_mm_alignr_epi8(_mm_castps_si128(v1), _mm_castps_si128(v2), sizeof(float)));
-#else
-                                    v1 = _mm_shuffle_ps(v1, v2, _MM_SHUFFLE(3, 3, 1, 2));
-                                    v1 = _mm_shuffle_ps(v1, v2, _MM_SHUFFLE(0, 2, 2, 3));
-#endif
-                                }
-                            }
-                        }
-                    }
-                }
-
-
-
-                // there are 256 different m1.m2 combinations
-                VectorType &m1 = reinterpret_cast<VectorType &>(_m1);
-                VectorType &m2 = reinterpret_cast<VectorType &>(_m2);
-                const int m1Mask = _mm_movemask_ps(m1);
-                switch (m1Mask) {
-                case 15: // v1 is full, nothing to do
-                    return true;
-                // 240 left
-                case 0:  // v1 is empty, take v2
-                    m1 = m2;
-                    v1 = v2;
-                    m2 = zero();
-                    return _mm_movemask_ps(m1) == 15;
-                // 224 left
-                default:
-                    {
-                        VectorType tmp;
-                        const int m2Mask = _mm_movemask_ps(m2);
-                        switch (m2Mask) {
-                        case 15: // v2 is full, just swap
-                            tmp = v1;
-                            v1 = v2;
-                            v2 = tmp;
-                            tmp = m1;
-                            m1 = m2;
-                            m2 = tmp;
-                            return true;
-                // 210 left
-                        case 0: // v2 is empty, nothing to be gained from packing
-                            return false;
-                // 196 left
-                        }
-                        // m1 and m2 are neither full nor empty
-                        tmp = _mm_or_ps(m1, m2);
-                        const int m3Mask = _mm_movemask_ps(tmp);
-                        // m3Mask tells use where both vectors have no entries
-                        const int m4Mask = _mm_movemask_ps(_mm_and_ps(m1, m2));
-                        // m3Mask tells use where both vectors have entries
-                        if (m4Mask == 0 || m3Mask == 15) {
-                            // m4Mask == 0: No overlap, simply move all we can from v2 into v1.
-                            //              Empties v2.
-                            // m3Mask == 15: Simply merge the parts from v2 into v1 where v1 is
-                            //               empty.
-                            const VectorType m2Move = _mm_andnot_ps(m1, m2); // the part to be moved into v1
-                            v1 = _mm_add_ps(
-                                    _mm_and_ps(v1, m1),
-                                    _mm_and_ps(v2, m2Move)
-                                    );
-                            m1 = tmp;
-                            m2 = _mm_andnot_ps(m2Move, m2);
-                            return m3Mask == 15;
-                // 
-                        }
-                        if ((m4Mask & 3) == 3) {
-                            // the high values are available
-                            tmp = _mm_unpackhi_ps(v1, v2);
-                            v2  = _mm_unpacklo_ps(v1, v2);
-                            v1  = tmp;
-                            tmp = _mm_unpackhi_ps(m1, m2);
-                            m2  = _mm_unpacklo_ps(m1, m2);
-                            m1  = tmp;
-                            return true;
-                        }
-                        if ((m4Mask & 12) == 12) {
-                            // the low values are available
-                            tmp = _mm_unpacklo_ps(v1, v2);
-                            v2  = _mm_unpackhi_ps(v1, v2);
-                            v1  = tmp;
-                            tmp = _mm_unpacklo_ps(m1, m2);
-                            m2  = _mm_unpackhi_ps(m1, m2);
-                            m1  = tmp;
-                            return true;
-                        }
-                        if ((m4Mask & 5) == 5) {
-                            tmp = _mm_shuffle_ps(v1, v2, _MM_SHUFFLE(0, 2, 0, 2));
-                            v2  = _mm_shuffle_ps(v1, v2, _MM_SHUFFLE(1, 3, 1, 3));
-                            v1  = tmp;
-                            tmp = _mm_shuffle_ps(m1, m2, _MM_SHUFFLE(0, 2, 0, 2));
-                            m2  = _mm_shuffle_ps(m1, m2, _MM_SHUFFLE(1, 3, 1, 3));
-                            m1  = tmp;
-                            return true;
-                        }
-                        if ((m4Mask & 6) == 6) {
-                            tmp = _mm_shuffle_ps(v1, v2, _MM_SHUFFLE(1, 2, 1, 2));
-                            v2  = _mm_shuffle_ps(v1, v2, _MM_SHUFFLE(0, 3, 0, 3));
-                            v1  = tmp;
-                            tmp = _mm_shuffle_ps(m1, m2, _MM_SHUFFLE(1, 2, 1, 2));
-                            m2  = _mm_shuffle_ps(m1, m2, _MM_SHUFFLE(0, 3, 0, 3));
-                            m1  = tmp;
-                            return true;
-                        }
-                        if ((m4Mask & 9) == 9) {
-                            tmp = _mm_shuffle_ps(v1, v2, _MM_SHUFFLE(0, 3, 0, 3));
-                            v2  = _mm_shuffle_ps(v1, v2, _MM_SHUFFLE(1, 2, 1, 2));
-                            v1  = tmp;
-                            tmp = _mm_shuffle_ps(m1, m2, _MM_SHUFFLE(0, 3, 0, 3));
-                            m2  = _mm_shuffle_ps(m1, m2, _MM_SHUFFLE(1, 2, 1, 2));
-                            m1  = tmp;
-                            return true;
-                        }
-                        if ((m4Mask & 10) == 10) {
-                            tmp = _mm_shuffle_ps(v1, v2, _MM_SHUFFLE(1, 3, 1, 3));
-                            v2  = _mm_shuffle_ps(v1, v2, _MM_SHUFFLE(0, 2, 0, 2));
-                            v1  = tmp;
-                            tmp = _mm_shuffle_ps(m1, m2, _MM_SHUFFLE(1, 3, 1, 3));
-                            m2  = _mm_shuffle_ps(m1, m2, _MM_SHUFFLE(0, 2, 0, 2));
-                            m1  = tmp;
-                            return true;
-                        }
-                        float *const vv1 = reinterpret_cast<float *>(&v1);
-                        float *const vv2 = reinterpret_cast<float *>(&v2);
-                        unsigned int *const mm1 = reinterpret_cast<unsigned int *>(&_m1);
-                        unsigned int *const mm2 = reinterpret_cast<unsigned int *>(&_m2);
-                        int j = 0;
-                        for (int i = 0; i < 4; ++i) {
-                            if (!(m1Mask & (1 << i))) { // v1 entry not set, take the first from v2
-                                while (j < 4 && !(m2Mask & (1 << j))) {
-                                    ++j;
-                                }
-                                if (j < 4) {
-                                    vv1[i] = vv2[j];
-                                    mm1[i] = 0xffffffff;
-                                    mm2[j] = 0;
-                                    ++j;
-                                }
-                            }
-                        }
-                        return _mm_movemask_ps(m1) == 15;
-//X                         // m4Mask has exactly one bit set
-//X                         switch (m4Mask) {
-//X                         case 1:
-//X                             // x___    xx__    xx__    xx__    xxx_    x_x_    x_x_    x_xx    x__x  + mirrored horizontally
-//X                             // x___    x___    x_x_    x__x    x___    x___    x__x    x___    x___
-//X                             break;
-//X                         case 2:
-//X                             break;
-//X                         case 4:
-//X                             break;
-//X                         case 8:
-//X                             break;
-//X                         }
-                    }
-                }
-            }
-
             static inline void multiplyAndAdd(VectorType &v1, VectorType v2, VectorType v3) { v1 = add(mul(v1, v2), v3); }
             static inline VectorType mul(VectorType a, VectorType b, _M128 mask) {
                 return _mm_or_ps(
@@ -741,30 +562,30 @@ namespace SSE
 
             static inline VectorType set(const float a) {
                 const _M128 x = _mm_set1_ps(a);
-                return VectorType(x, x);
+                return VectorType::create(x, x);
             }
             static inline VectorType set(const float a, const float b, const float c, const float d) {
                 const _M128 x = _mm_set_ps(a, b, c, d);
-                return VectorType(x, x);
+                return VectorType::create(x, x);
             }
             static inline VectorType set(const float a, const float b, const float c, const float d,
                     const float e, const float f, const float g, const float h) {
-                return VectorType(_mm_set_ps(a, b, c, d), _mm_set_ps(e, f, g, h));
+                return VectorType::create(_mm_set_ps(a, b, c, d), _mm_set_ps(e, f, g, h));
             }
-            static inline VectorType zero() { return VectorType(_mm_setzero_ps(), _mm_setzero_ps()); }
+            static inline VectorType zero() { return VectorType::create(_mm_setzero_ps(), _mm_setzero_ps()); }
             static inline VectorType one()  { return set(1.f); }
 
 #define REUSE_FLOAT_IMPL1(fun) \
             static inline VectorType fun(const VectorType &x) { \
-                return VectorType(VectorHelper<float>::fun(x[0]), VectorHelper<float>::fun(x[1])); \
+                return VectorType::create(VectorHelper<float>::fun(x[0]), VectorHelper<float>::fun(x[1])); \
             }
 #define REUSE_FLOAT_IMPL2(fun) \
             static inline VectorType fun(const VectorType &x, const VectorType &y) { \
-                return VectorType(VectorHelper<float>::fun(x[0], y[0]), VectorHelper<float>::fun(x[1], y[1])); \
+                return VectorType::create(VectorHelper<float>::fun(x[0], y[0]), VectorHelper<float>::fun(x[1], y[1])); \
             }
 #define REUSE_FLOAT_IMPL3(fun) \
             static inline VectorType fun(const VectorType &x, const VectorType &y, const VectorType &z) { \
-                return VectorType(VectorHelper<float>::fun(x[0], y[0], z[0]), VectorHelper<float>::fun(x[1], y[1], z[1])); \
+                return VectorType::create(VectorHelper<float>::fun(x[0], y[0], z[0]), VectorHelper<float>::fun(x[1], y[1], z[1])); \
             }
             REUSE_FLOAT_IMPL1(negate)
             REUSE_FLOAT_IMPL1(reciprocal)

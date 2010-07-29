@@ -23,6 +23,7 @@
 
 #include "AliHLTTPCCATracker.h"
 
+#ifdef USE_TBB
 #include <tbb/task.h>
 
 class AliHLTTPCCATracker::Reconstructor : public tbb::task
@@ -34,5 +35,16 @@ class AliHLTTPCCATracker::Reconstructor : public tbb::task
   private:
     AliHLTTPCCATracker *const d;
 };
+#else //USE_TBB
+class AliHLTTPCCATracker::Reconstructor
+{
+  public:
+    Reconstructor( AliHLTTPCCATracker *tracker ) : d( tracker ) {}
+    int execute();
+
+  private:
+    AliHLTTPCCATracker *const d;
+};
+#endif //USE_TBB
 
 #endif // RECONSTRUCTOR_H

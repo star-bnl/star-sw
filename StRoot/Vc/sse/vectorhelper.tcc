@@ -33,10 +33,242 @@
 # endif
 #endif
 
+#ifdef VC_SLOWDOWN_GATHER
+#define SLOWDOWN_ASM "ror $9,%1\n\trol $1,%1\n\t" \
+                     "rol $1,%1\n\trol $1,%1\n\t" \
+                     "rol $1,%1\n\trol $1,%1\n\t" \
+                     "rol $1,%1\n\trol $1,%1\n\t" \
+                     "rol $1,%1\n\trol $1,%1\n\t"
+#else //VC_SLOWDOWN_GATHER
+#define SLOWDOWN_ASM
+#endif //VC_SLOWDOWN_GATHER
+
+#define ALIGN_16 "\n.align 16\n\t"
+
 namespace Vc
 {
 namespace SSE
 {
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// float_v
+template<> inline _M128 VectorHelper<_M128>::load(const float *x, AlignedFlag)
+{
+    return _mm_load_ps(x);
+}
+
+template<> inline _M128 VectorHelper<_M128>::load(const float *x, UnalignedFlag)
+{
+    return _mm_loadu_ps(x);
+}
+
+template<> inline _M128 VectorHelper<_M128>::load(const float *x, StreamingAndAlignedFlag)
+{
+#ifdef VC_IMPL_SSE41
+    return _mm_castsi128_ps(_mm_stream_load_si128(reinterpret_cast<_M128I *>(const_cast<float *>(x))));
+#else
+    return load(x, Aligned);
+#endif
+}
+
+template<> inline _M128 VectorHelper<_M128>::load(const float *x, StreamingAndUnalignedFlag)
+{
+    return load(x, Unaligned);
+}
+
+template<> inline void VectorHelper<_M128>::store(float *mem, const VectorType &x, AlignedFlag)
+{
+    _mm_store_ps(mem, x);
+}
+
+template<> inline void VectorHelper<_M128>::store(float *mem, const VectorType &x, UnalignedFlag)
+{
+    _mm_storeu_ps(mem, x);
+}
+
+template<> inline void VectorHelper<_M128>::store(float *mem, const VectorType &x, StreamingAndAlignedFlag)
+{
+    _mm_stream_ps(mem, x);
+}
+
+template<> inline void VectorHelper<_M128>::store(float *mem, const VectorType &x, StreamingAndUnalignedFlag)
+{
+    // SSE does not support unaligned streaming stores. Since unaligned memory access is more
+    // important we ignore the streaming part
+    _mm_storeu_ps(mem, x);
+}
+
+template<> inline void VectorHelper<_M128>::store(float *mem, const VectorType &x, const VectorType m)
+{
+    _mm_maskmoveu_si128(_mm_castps_si128(x), _mm_castps_si128(m), reinterpret_cast<char *>(mem));
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// sfloat_v
+template<> inline M256 VectorHelper<M256>::load(const float *x, AlignedFlag)
+{
+    return VectorType::create(_mm_load_ps(x), _mm_load_ps(x + 4));
+}
+
+template<> inline M256 VectorHelper<M256>::load(const float *x, UnalignedFlag)
+{
+    return VectorType::create(_mm_loadu_ps(x), _mm_loadu_ps(x + 4));
+}
+
+template<> inline M256 VectorHelper<M256>::load(const float *x, StreamingAndAlignedFlag)
+{
+#ifdef VC_IMPL_SSE41
+    return VectorType::create(
+            _mm_castsi128_ps(_mm_stream_load_si128(reinterpret_cast<_M128I *>(const_cast<float *>(x)))),
+            _mm_castsi128_ps(_mm_stream_load_si128(reinterpret_cast<_M128I *>(const_cast<float *>(x + 4)))));
+#else
+    return load(x, Aligned);
+#endif
+}
+
+template<> inline M256 VectorHelper<M256>::load(const float *x, StreamingAndUnalignedFlag)
+{
+    return load(x, Unaligned);
+}
+
+template<> inline void VectorHelper<M256>::store(float *mem, const VectorType &x, AlignedFlag)
+{
+    _mm_store_ps(mem, x[0]);
+    _mm_store_ps(mem + 4, x[1]);
+}
+
+template<> inline void VectorHelper<M256>::store(float *mem, const VectorType &x, UnalignedFlag)
+{
+    _mm_storeu_ps(mem, x[0]);
+    _mm_storeu_ps(mem + 4, x[1]);
+}
+
+template<> inline void VectorHelper<M256>::store(float *mem, const VectorType &x, StreamingAndAlignedFlag)
+{
+    _mm_stream_ps(mem, x[0]);
+    _mm_stream_ps(mem + 4, x[1]);
+}
+
+template<> inline void VectorHelper<M256>::store(float *mem, const VectorType &x, StreamingAndUnalignedFlag)
+{
+    // SSE does not support unaligned streaming stores. Since unaligned memory access is more
+    // important we ignore the streaming part
+    _mm_storeu_ps(mem, x[0]);
+    _mm_storeu_ps(mem + 4, x[1]);
+}
+
+template<> inline void VectorHelper<M256>::store(float *mem, const VectorType &x, const VectorType m)
+{
+    _mm_maskmoveu_si128(_mm_castps_si128(x[0]), _mm_castps_si128(m[0]), reinterpret_cast<char *>(mem));
+    _mm_maskmoveu_si128(_mm_castps_si128(x[1]), _mm_castps_si128(m[1]), reinterpret_cast<char *>(mem + 4));
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// double_v
+template<> inline _M128D VectorHelper<_M128D>::load(const double *x, AlignedFlag)
+{
+    return _mm_load_pd(x);
+}
+
+template<> inline _M128D VectorHelper<_M128D>::load(const double *x, UnalignedFlag)
+{
+    return _mm_loadu_pd(x);
+}
+
+template<> inline _M128D VectorHelper<_M128D>::load(const double *x, StreamingAndAlignedFlag)
+{
+#ifdef VC_IMPL_SSE41
+    return _mm_castsi128_pd(_mm_stream_load_si128(reinterpret_cast<_M128I *>(const_cast<double *>(x))));
+#else
+    return load(x, Aligned);
+#endif
+}
+
+template<> inline _M128D VectorHelper<_M128D>::load(const double *x, StreamingAndUnalignedFlag)
+{
+    return load(x, Unaligned);
+}
+
+template<> inline void VectorHelper<_M128D>::store(double *mem, const VectorType &x, AlignedFlag)
+{
+    _mm_store_pd(mem, x);
+}
+
+template<> inline void VectorHelper<_M128D>::store(double *mem, const VectorType &x, UnalignedFlag)
+{
+    _mm_storeu_pd(mem, x);
+}
+
+template<> inline void VectorHelper<_M128D>::store(double *mem, const VectorType &x, StreamingAndAlignedFlag)
+{
+    _mm_stream_pd(mem, x);
+}
+
+template<> inline void VectorHelper<_M128D>::store(double *mem, const VectorType &x, StreamingAndUnalignedFlag)
+{
+    // SSE does not support unaligned streaming stores. Since unaligned memory access is more
+    // important we ignore the streaming part
+    _mm_storeu_pd(mem, x);
+}
+
+template<> inline void VectorHelper<_M128D>::store(double *mem, const VectorType &x, const VectorType m)
+{
+    _mm_maskmoveu_si128(_mm_castpd_si128(x), _mm_castpd_si128(m), reinterpret_cast<char *>(mem));
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// int_v, uint_v, short_v, ushort_v
+template<typename T> inline _M128I VectorHelper<_M128I>::load(const T *x, AlignedFlag)
+{
+    return _mm_load_si128(reinterpret_cast<const VectorType *>(x));
+}
+
+template<typename T> inline _M128I VectorHelper<_M128I>::load(const T *x, UnalignedFlag)
+{
+    return _mm_loadu_si128(reinterpret_cast<const VectorType *>(x));
+}
+
+template<typename T> inline _M128I VectorHelper<_M128I>::load(const T *x, StreamingAndAlignedFlag)
+{
+#ifdef VC_IMPL_SSE41
+    return _mm_stream_load_si128(reinterpret_cast<_M128I *>(const_cast<T *>(x)));
+#else
+    return load(x, Aligned);
+#endif
+}
+
+template<typename T> inline _M128I VectorHelper<_M128I>::load(const T *x, StreamingAndUnalignedFlag)
+{
+    return load(x, Unaligned);
+}
+
+template<typename T> inline void VectorHelper<_M128I>::store(T *mem, const VectorType &x, AlignedFlag)
+{
+    _mm_store_si128(reinterpret_cast<VectorType *>(mem), x);
+}
+
+template<typename T> inline void VectorHelper<_M128I>::store(T *mem, const VectorType &x, UnalignedFlag)
+{
+    _mm_storeu_si128(reinterpret_cast<VectorType *>(mem), x);
+}
+
+template<typename T> inline void VectorHelper<_M128I>::store(T *mem, const VectorType &x, StreamingAndAlignedFlag)
+{
+    _mm_stream_si128(reinterpret_cast<VectorType *>(mem), x);
+}
+
+template<typename T> inline void VectorHelper<_M128I>::store(T *mem, const VectorType &x, StreamingAndUnalignedFlag)
+{
+    // SSE does not support unaligned streaming stores. Since unaligned memory access is more
+    // important we ignore the streaming part
+    _mm_storeu_si128(reinterpret_cast<VectorType *>(mem), x);
+}
+
+template<typename T> inline void VectorHelper<_M128I>::store(T *mem, const VectorType &x, const VectorType &m)
+{
+    _mm_maskmoveu_si128(x, m, reinterpret_cast<char *>(mem));
+}
+
     template<> inline _M128I SortHelper<_M128I, 8>::sort(_M128I x)
     {
         _M128I lo, hi, y;
@@ -76,6 +308,20 @@ namespace SSE
     }
     template<> inline _M128I SortHelper<_M128I, 4>::sort(_M128I x)
     {
+        /*
+        // in 16,67% of the cases the merge can be replaced by an append
+
+        // x = [a b c d]
+        // y = [c d a b]
+        _M128I y = _mm_shuffle_epi32(x, _MM_SHUFFLE(1, 0, 3, 2));
+        _M128I l = _mm_min_epi32(x, y); // min[ac bd ac bd]
+        _M128I h = _mm_max_epi32(x, y); // max[ac bd ac bd]
+        if (IS_UNLIKELY(_mm_cvtsi128_si32(h) <= l[1])) { // l[0] < h[0] < l[1] < h[1]
+            return _mm_unpacklo_epi32(l, h);
+        }
+        // h[0] > l[1]
+        */
+
         // sort pairs
         _M128I y = _mm_shuffle_epi32(x, _MM_SHUFFLE(2, 3, 0, 1));
         _M128I l = _mm_min_epi32(x, y);
@@ -156,9 +402,32 @@ namespace SSE
 
     struct GeneralHelpers
     {
+        /**
+         * There are several possible aproaches to masked gather implementations. Which one is the
+         * fastest depends on many factors and is hard to benchmark. Still, finding a perfect gather
+         * is an important speed issue.
+         *
+         * in principle there are two ways to move the data into a 128 bit register
+         *
+         * 1. move each value to a GPR, then to a memory location; if all values are done, move
+         *    128 bit from the memory location to the XMM register
+         * 2. move each value directly to an XMM register, shift and or to get result
+         *
+         * then there are different ways to gather the source values
+         *
+         * 1. iteration from 0 to Size using branching to conditionally execute one value move
+         * 2. iteration from 0 to Size using conditional moves with some trickery (the cmov always
+         *    accesses the source memory, thus possibly leading to invalid memory accesses if the
+         *    condition is false; this can be solved by another cmov that sets the index to 0 on the
+         *    inverted condition)
+         * 3. extract the bit positions from the mask using bsf and btr and loop while bsf does not
+         *    set the zero flag, moving one value in the loop body
+         * 4. calculate the population count of the mask to use it (Size - popcnt) as a jump offset
+         *    into an unrolled bsf loop
+         */
         template<unsigned int scale, typename Base, typename IndexType, typename EntryType>
         static inline void maskedDoubleGatherHelper(
-                Base &v, const IndexType &outer, const IndexType &inner, unsigned long mask, const EntryType *const *const baseAddr
+                Base &v, const IndexType &outer, const IndexType &inner, _ulong mask, const EntryType *const *const baseAddr
                 ) {
 #ifdef VC_NO_BSF_LOOPS
 # ifdef VC_NO_GATHER_TRICKS
@@ -174,13 +443,15 @@ namespace SSE
 # endif // VC_NO_GATHER_TRICKS
 #else // VC_NO_BSF_LOOPS
             if (sizeof(EntryType) == 2) {
-                register unsigned long int bit;
-                register unsigned long int outerIndex;
-                register unsigned long int innerIndex;
+                register _ulong bit;
+                register _ulong outerIndex;
+                register _ulong innerIndex;
                 register const EntryType *array;
                 register EntryType value;
                 asm volatile(
-                          "\t"  "jmp 1f"
+                          "\t"  "bsf %1,%0"// %0 contains the index to use for outer and inner
+                        "\n\t"  "jz 1f"
+                        ALIGN_16
                         "\n\t"  "0:"
                         "\n\t"  "movzwq (%7,%0,2),%4" // outer index in ecx
                         "\n\t"  "movzwq (%11,%0,2),%5"// inner index in ecx
@@ -189,19 +460,22 @@ namespace SSE
                         "\n\t"  "mov (%8,%4,1),%6"    // rdx = baseAddr[outer[%0] * scale / sizeof(void*)]
                         "\n\t"  "movw (%6,%5,2),%2"   // value = rdx[inner[%0]]
                         "\n\t"  "movw %2,(%9,%0,2)"   // v[%0] = value
-                        "\n\t"  "1:"
                         "\n\t"  "bsf %1,%0"           // %0 contains the index to use for outer and inner
                         "\n\t"  "jnz 0b"
+                        ALIGN_16
+                        "\n\t"  "1:"
                         : "=&r"(bit), "+r"(mask), "=&r"(value), "+m"(v.d),
                           "=&r"(outerIndex), "=&r"(innerIndex), "=&r"(array)
                         : "r"(&outer.d.v()), "r"(baseAddr), "r"(&v.d), "n"(scale), "r"(&inner.d.v()), "m"(outer.d.v()), "m"(inner.d.v()));
             } else if (sizeof(EntryType) == 4 && sizeof(typename IndexType::EntryType) == 4) {
-                register unsigned long int bit;
-                register unsigned long int innerIndex;
+                register _ulong bit;
+                register _ulong innerIndex;
                 register const EntryType *array;
                 register EntryType value;
                 asm volatile(
-                          "\t"  "jmp 1f"
+                          "\t"  "bsf %1,%0"// %0 contains the index to use for outer and inner
+                        "\n\t"  "jz 1f"
+                        ALIGN_16
                         "\n\t"  "0:"
                         "\n\t"  "imul %9,(%6,%0,4),%%ecx" // outer index * scale => byte offset
                         "\n\t"  "movslq (%10,%0,4),%4"     // inner index in ecx
@@ -209,21 +483,24 @@ namespace SSE
                         "\n\t"  "mov (%7,%%rcx,1),%5"  // rdx = baseAddr[outer[%0] * scale / sizeof(void*)]
                         "\n\t"  "mov (%5,%4,4),%2"  // value = rdx[inner[%0]]
                         "\n\t"  "mov %2,(%8,%0,4)"        // v[%0] = value
-                        "\n\t"  "1:"
                         "\n\t"  "bsf %1,%0"           // %0 contains the index to use for outer and inner
                         "\n\t"  "jnz 0b"
+                        ALIGN_16
+                        "\n\t"  "1:"
                         : "=&r"(bit), "+r"(mask), "=&r"(value), "+m"(v.d),
                           "=&r"(innerIndex), "=&r"(array)
                         : "r"(&outer.d.v()), "r"(baseAddr), "r"(&v.d), "n"(scale), "r"(&inner.d.v()), "m"(outer.d.v()), "m"(inner.d.v())
                         : "rcx" );
             } else if (sizeof(EntryType) == 4 && sizeof(typename IndexType::EntryType) == 2) {
-                register unsigned long int bit;
-                register unsigned long int outerIndex;
-                register unsigned long int innerIndex;
+                register _ulong bit;
+                register _ulong outerIndex;
+                register _ulong innerIndex;
                 register const EntryType *array;
                 register EntryType value;
                 asm volatile(
-                          "\t"  "jmp 1f"
+                          "\t"  "bsf %1,%0"// %0 contains the index to use for outer and inner
+                        "\n\t"  "jz 1f"
+                        ALIGN_16
                         "\n\t"  "0:"
                         "\n\t"  "movzwq (%7,%0,2),%4"  // outer index in ecx
                         "\n\t"  "movzwq (%11,%0,2),%5"  // inner index in ecx
@@ -232,19 +509,22 @@ namespace SSE
                         "\n\t"  "mov (%8,%4,1),%6"  // rdx = baseAddr[outer[%0] * scale / sizeof(void*)]
                         "\n\t"  "mov (%6,%5,4),%2"  // value = rdx[inner[%0]]
                         "\n\t"  "mov %2,(%9,%0,4)"        // v[%0] = value
-                        "\n\t"  "1:"
                         "\n\t"  "bsf %1,%0"// %0 contains the index to use for outer and inner
                         "\n\t"  "jnz 0b"
+                        ALIGN_16
+                        "\n\t"  "1:"
                         : "=&r"(bit), "+r"(mask), "=&r"(value), "+m"(v.d),
                           "=&r"(outerIndex), "=&r"(innerIndex), "=&r"(array)
                         : "r"(&outer.d.v()), "r"(baseAddr), "r"(&v.d), "n"(scale), "r"(&inner.d.v()), "m"(outer.d.v()), "m"(inner.d.v()));
             } else if (sizeof(EntryType) == 8 && sizeof(typename IndexType::EntryType) == 4) {
-                register unsigned long int bit;
-                register unsigned long int innerIndex;
+                register _ulong bit;
+                register _ulong innerIndex;
                 register const EntryType *array;
                 register EntryType value;
                 asm volatile(
-                          "\t"  "jmp 1f"
+                          "\t"  "bsf %1,%0"               // %0 contains the index to use for outer and inner
+                        "\n\t"  "jz 1f"
+                        ALIGN_16
                         "\n\t"  "0:"
                         "\n\t"  "imul %9,(%6,%0,4),%%ecx" // outer index * scale => byte offset
                         "\n\t"  "movslq (%10,%0,4),%4"     // inner index in ecx
@@ -252,9 +532,10 @@ namespace SSE
                         "\n\t"  "mov (%7,%%rcx,1),%5"  // rdx = baseAddr[outer[%0] * scale / sizeof(void*)]
                         "\n\t"  "mov (%5,%4,8),%2"  // value = rdx[inner[%0]]
                         "\n\t"  "mov %2,(%8,%0,8)"        // v[%0] = value
-                        "\n\t"  "1:"
                         "\n\t"  "bsf %1,%0"               // %0 contains the index to use for outer and inner
                         "\n\t"  "jnz 0b"
+                        ALIGN_16
+                        "\n\t"  "1:"
                         : "=&r"(bit), "+r"(mask), "=&r"(value), "+m"(v.d),
                           "=&r"(innerIndex), "=&r"(array)
                         : "r"(&outer.d.v()), "r"(baseAddr), "r"(&v.d), "n"(scale), "r"(&inner.d.v()), "m"(outer.d.v()), "m"(inner.d.v())
@@ -268,99 +549,155 @@ namespace SSE
         static inline void maskedGatherStructHelper(
                 Base &v, const IndexType &indexes, int mask, const EntryType *baseAddr
                 ) {
+
 #ifndef VC_NO_BSF_LOOPS
             asm volatile(""::"m"(indexes.d.v()));
             if (sizeof(EntryType) == 2) {
-                register unsigned long int bit;
-                register unsigned long int index;
+                register _ulong index;
                 register EntryType value;
                 asm volatile(
-                        "jmp 1f"               "\n\t"
+                        SLOWDOWN_ASM
+                        "jmp 1f"                "\n\t"
+                        ALIGN_16
                         "0:"                   "\n\t"
-                        "movzwq (%5,%0,2),%2"  "\n\t"
-                        "imul %8,%2"           "\n\t"
-                        "btr %0,%1"            "\n\t"
-                        "movw (%6,%2,1),%3"    "\n\t"
-                        "movw %3,(%7,%0,2)"    "\n\t"
+                        "movzwq (%[indexes],%%rdi,2),%[index]"  "\n\t"
+                        "imul %[scale],%[index]"           "\n\t"
+                        "btr %%edi,%[mask]"            "\n\t"
+                        "movw (%[base],%[index],1),%[value]"     "\n\t"
+                        "movw %[value],(%[vec],%%rdi,2)"     "\n\t"
+                        ALIGN_16
                         "1:"                   "\n\t"
-                        "bsf %1,%0"            "\n\t"
+                        "bsf %[mask],%%edi"            "\n\t"
                         "jnz 0b"               "\n\t"
-                        : "=&r"(bit), "+r"(mask), "=&r"(index), "=&r"(value), "+m"(v.d)
-                        : "r"(&indexes.d.v()), "r"(baseAddr), "r"(&v.d), "n"(scale)
-                        );
+                        : [mask]"+r"(mask), [value]"=&r"(value), "+m"(v.d), [index]"=&r"(index)
+                        : [indexes]"r"(&indexes.d.v()), [base]"r"(baseAddr), [vec]"r"(&v.d), [scale]"n"(scale)
+                        : "rdi");
             } else if (sizeof(EntryType) == 4) {
                 if (sizeof(typename IndexType::EntryType) == 4) {
-                    register unsigned long int bit;
                     register EntryType value;
                     asm volatile(
-                            "jmp 1f"               "\n\t"
+                            SLOWDOWN_ASM
+                            "jmp 1f"                "\n\t"
+                            ALIGN_16
                             "0:"                   "\n\t"
-                            "imul %7,(%4,%0,4),%%ecx""\n\t"
-                            "btr %0,%1"            "\n\t"
-                            "mov (%5,%%rcx,1),%2"  "\n\t"
-                            "mov %2,(%6,%0,4)"     "\n\t"
+                            "imul %[scale],(%[indexes],%%rdi,4),%%ecx""\n\t"
+                            "btr %%edi,%[mask]"            "\n\t"
+                            "mov (%[base],%%rcx,1),%[value]"  "\n\t"
+                            "mov %[value],(%[vec],%%rdi,4)"     "\n\t"
+                            ALIGN_16
                             "1:"                   "\n\t"
-                            "bsf %1,%0"            "\n\t"
+                            "bsf %[mask],%%edi"            "\n\t"
                             "jnz 0b"               "\n\t"
-                            : "=&r"(bit), "+r"(mask), "=&r"(value), "+m"(v.d)
-                            : "r"(&indexes.d.v()), "r"(baseAddr), "r"(&v.d), "n"(scale)
-                            : "rcx"   );
+                            : [mask]"+r"(mask), [value]"=&r"(value), "+m"(v.d)
+                            : [indexes]"r"(&indexes.d.v()), [base]"r"(baseAddr), [vec]"r"(&v.d), [scale]"n"(scale)
+                            : "rcx", "rdi"   );
                 } else if (sizeof(typename IndexType::EntryType) == 2) {
-                    register unsigned long int bit;
-                    register unsigned long int index;
+                    register _ulong index;
                     register EntryType value;
                     asm volatile(
-                            "jmp 1f"               "\n\t"
+                            SLOWDOWN_ASM
+                            "jmp 1f"                "\n\t"
+                            ALIGN_16
                             "0:"                   "\n\t"
-                            "movzwq (%5,%0,2),%2"  "\n\t"
-                            "imul %8,%2"           "\n\t"
-                            "btr %0,%1"            "\n\t"
-                            "mov (%6,%2,1),%3"     "\n\t"
-                            "mov %3,(%7,%0,4)"     "\n\t"
+                            "movzwq (%[indexes],%%rdi,2),%[index]"  "\n\t"
+                            "imul %[scale],%[index]"           "\n\t"
+                            "btr %%edi,%[mask]"            "\n\t"
+                            "mov (%[base],%[index],1),%[value]"     "\n\t"
+                            "mov %[value],(%[vec],%%rdi,4)"     "\n\t"
+                            ALIGN_16
                             "1:"                   "\n\t"
-                            "bsf %1,%0"            "\n\t"
+                            "bsf %[mask],%%edi"            "\n\t"
                             "jnz 0b"               "\n\t"
-                            : "=&r"(bit), "+r"(mask), "=&r"(index), "=&r"(value), "+m"(v.d)
-                            : "r"(&indexes.d.v()), "r"(baseAddr), "r"(&v.d), "n"(scale)
-                            );
+                            : [mask]"+r"(mask), [value]"=&r"(value), "+m"(v.d), [index]"=&r"(index)
+                            : [indexes]"r"(&indexes.d.v()), [base]"r"(baseAddr), [vec]"r"(&v.d), [scale]"n"(scale)
+                            : "rdi");
                 } else {
                     abort();
                 }
             } else if (sizeof(EntryType) == 8) {
-                register unsigned long int bit;
                 register EntryType value;
                 asm volatile(
-                        "jmp 1f"               "\n\t"
+                        SLOWDOWN_ASM
+                        "jmp 1f"                "\n\t"
+                        ALIGN_16
                         "0:"                   "\n\t"
-                        "imul %7,(%4,%0,4),%%ecx""\n\t"
-                        "btr %0,%1"            "\n\t"
-                        "mov (%5,%%rcx,1),%2"  "\n\t"
-                        "mov %2,(%6,%0,8)"     "\n\t"
+                        "imul %[scale],(%[indexes],%%rdi,4),%%ecx""\n\t"
+                        "btr %%edi,%[mask]"            "\n\t"
+                        "mov (%[base],%%rcx,1),%[value]"  "\n\t"
+                        "mov %[value],(%[vec],%%rdi,8)"     "\n\t"
+                        ALIGN_16
                         "1:"                   "\n\t"
-                        "bsf %1,%0"            "\n\t"
+                        "bsf %[mask],%%edi"            "\n\t"
                         "jnz 0b"               "\n\t"
-                        : "=&r"(bit), "+r"(mask), "=&r"(value), "+m"(v.d)
-                        : "r"(&indexes.d.v()), "r"(baseAddr), "r"(&v.d), "n"(scale)
-                        : "rcx"   );
+                        : [mask]"+r"(mask), [value]"=&r"(value), "+m"(v.d)
+                        : [indexes]"r"(&indexes.d.v()), [base]"r"(baseAddr), [vec]"r"(&v.d), [scale]"n"(scale)
+                        : "rcx", "rdi"   );
             } else {
                 abort();
             }
 #else
+# ifdef VC_NO_GATHER_TRICKS
             typedef const char * Memory MAY_ALIAS;
             Memory const baseAddr2 = reinterpret_cast<Memory>(baseAddr);
-# ifdef VC_NO_GATHER_TRICKS
             for (int i = 0; i < Base::Size; ++i) {
                 if (mask & (1 << i)) {
-                    v.d.m(i) = baseAddr2[scale * indexes.d.m(i)];
+                    v.d.m(i) = *reinterpret_cast<const EntryType *>(&baseAddr2[scale * indexes.d.m(i)]);
                 }
             }
 # else
+            if (sizeof(EntryType) <= 4) {
+                unrolled_loop16(i, 0, Base::Size,
+                        register EntryType tmp = v.d.m(i);
+                        register _long j = scale * indexes.d.m(i);
+                        asm volatile("test %[i],%[mask]\n\t"
+                            "cmove %[zero],%[j]\n\t"
+                            "cmovne (%[mem],%[j],1),%[tmp]"
+                            : [tmp]"+r"(tmp),
+                            [j]"+r"(j)
+                            : [i]"i"(1 << i),
+                            [mask]"r"(mask),
+                            [mem]"r"(baseAddr),
+                            [zero]"r"(0)
+                            );
+                        v.d.m(i) = tmp;
+                        );
+                return;
+            }
+#  ifdef __x86_64__
             unrolled_loop16(i, 0, Base::Size,
-                    EntryType entry = *reinterpret_cast<const EntryType *>(&baseAddr2[scale * indexes.d.m(i)]);
                     register EntryType tmp = v.d.m(i);
-                    if (mask & (1 << i)) tmp = entry;
+                    register _long j = scale * indexes.d.m(i);
+                    asm volatile("test %[i],%[mask]\n\t"
+                        "cmove %[zero],%[j]\n\t"
+                        "cmovne (%[mem],%[j],1),%[tmp]"
+                        : [tmp]"+r"(tmp),
+                        [j]"+r"(j)
+                        : [i]"i"(1 << i),
+                        [mask]"r"(mask),
+                        [mem]"r"(baseAddr),
+                        [zero]"r"(0)
+                        );
                     v.d.m(i) = tmp;
                     );
+#  else
+            // on 32 bit archs, 64 bit copies require two 32 bit registers
+            unrolled_loop16(i, 0, Base::Size,
+                    register EntryType tmp = v.d.m(i);
+                    register _long j = scale * indexes.d.m(i);
+                    asm volatile("test %[i],%[mask]\n\t"
+                        "cmove %[zero],%[j]\n\t"
+                        "cmovne (%[mem],%[j],1),%%eax\n\t"
+                        "cmovne 4(%[mem],%[j],1),%%edx"
+                        : "+A"(tmp),
+                          [j]"+r"(j)
+                        : [i]"i"(1 << i),
+                          [mask]"r"(mask),
+                          [mem]"r"(baseAddr),
+                          [zero]"r"(0)
+                          );
+                    v.d.m(i) = tmp;
+                    );
+#  endif
 # endif
 #endif
         }
@@ -372,106 +709,190 @@ namespace SSE
 #ifndef VC_NO_BSF_LOOPS
             asm volatile(""::"m"(indexes.d.v()));
             if (sizeof(EntryType) == 2) {
-                register unsigned long int bit;
-                register unsigned long int index;
+                register _ulong index;
                 register EntryType value;
                 asm volatile(
-                        "jmp 1f"               "\n\t"
-                        "0:"                   "\n\t"
-                        "movzwq (%5,%0,2),%2"  "\n\t"
-                        "btr %0,%1"            "\n\t"
-                        "movw (%6,%2,2),%3"    "\n\t"
-                        "movw %3,(%7,%0,2)"    "\n\t"
-                        "1:"                   "\n\t"
-                        "bsf %1,%0"            "\n\t"
-                        "jnz 0b"               "\n\t"
-                        : "=&r"(bit), "+r"(mask), "=&r"(index), "=&r"(value), "+m"(v.d)
-                        : "r"(&indexes.d.v()), "r"(baseAddr), "r"(&v.d)
+                        SLOWDOWN_ASM
+                        "jmp 1f"                                 "\n\t"
+                        ALIGN_16
+                        "0:"                                    "\n\t"
+                        "movzwq (%[indexes],%%rdi,2),%[index]"  "\n\t"
+                        "movw (%[base],%[index],2),%[value]"     "\n\t"
+                        "btr %%edi,%[mask]"                     "\n\t"
+                        "movw %[value],(%[vec],%%rdi,2)"         "\n\t"
+                        ALIGN_16
+                        "1:"                                    "\n\t"
+                        "bsf %[mask],%%edi"                     "\n\t"
+                        "jnz 0b"                                "\n\t"
+                        : [mask]"+r"(mask), [index]"=&r"(index), [value]"=&r"(value), "+m"(v.d)
+                        : [indexes]"r"(&indexes.d.v()), [base]"r"(baseAddr), [vec]"r"(&v.d)
+                        : "rdi"
                         );
             } else if (sizeof(EntryType) == 4) {
                 if (sizeof(typename IndexType::EntryType) == 4) {
-                    register unsigned long int bit;
-                    register unsigned long int index;
+                    register _ulong index;
                     register EntryType value;
                     asm volatile(
-                            "jmp 1f"               "\n\t"
-                            "0:"                   "\n\t"
-                            "movslq (%5,%0,4),%2"  "\n\t"
-                            "btr %0,%1"            "\n\t"
-                            "mov (%6,%2,4),%3"     "\n\t"
-                            "mov %3,(%7,%0,4)"     "\n\t"
-                            "1:"                   "\n\t"
-                            "bsf %1,%0"            "\n\t"
-                            "jnz 0b"               "\n\t"
-                            : "=&r"(bit), "+r"(mask), "=&r"(index), "=&r"(value), "+m"(v.d)
-                            : "r"(&indexes.d.v()), "r"(baseAddr), "r"(&v.d)
+                            SLOWDOWN_ASM
+                            "jmp 1f"                                 "\n\t"
+                            ALIGN_16
+                            "0:"                                    "\n\t"
+                            "movslq (%[indexes],%%rdi,4),%[index]"  "\n\t"
+                            "mov (%[base],%[index],4),%[value]"     "\n\t"
+                            "btr %%edi,%[mask]"                     "\n\t"
+                            "mov %[value],(%[vec],%%rdi,4)"         "\n\t"
+                            ALIGN_16
+                            "1:"                                    "\n\t"
+                            "bsf %[mask],%%edi"                     "\n\t"
+                            "jnz 0b"                                "\n\t"
+                            : [mask]"+r"(mask), [index]"=&r"(index), [value]"=&r"(value), "+m"(v.d)
+                            : [indexes]"r"(&indexes.d.v()), [base]"r"(baseAddr), [vec]"r"(&v.d)
+                            : "rdi"
                             );
                 } else if (sizeof(typename IndexType::EntryType) == 2) {
-                    register unsigned long int bit;
-                    register unsigned long int index;
+                    register _ulong index;
                     register EntryType value;
                     asm volatile(
-                            "jmp 1f"               "\n\t"
-                            "0:"                   "\n\t"
-                            "movzwq (%5,%0,2),%2"  "\n\t"
-                            "btr %0,%1"            "\n\t"
-                            "mov (%6,%2,4),%3"     "\n\t"
-                            "mov %3,(%7,%0,4)"     "\n\t"
-                            "1:"                   "\n\t"
-                            "bsf %1,%0"            "\n\t"
-                            "jnz 0b"               "\n\t"
-                            : "=&r"(bit), "+r"(mask), "=&r"(index), "=&r"(value), "+m"(v.d)
-                            : "r"(&indexes.d.v()), "r"(baseAddr), "r"(&v.d)
+                            SLOWDOWN_ASM
+                            "jmp 1f"                                 "\n\t"
+                            ALIGN_16
+                            "0:"                                    "\n\t"
+                            "movzwq (%[indexes],%%rdi,2),%[index]"  "\n\t"
+                            "mov (%[base],%[index],4),%[value]"     "\n\t"
+                            "btr %%edi,%[mask]"                     "\n\t"
+                            "mov %[value],(%[vec],%%rdi,4)"         "\n\t"
+                            ALIGN_16
+                            "1:"                                    "\n\t"
+                            "bsf %[mask],%%edi"                     "\n\t"
+                            "jnz 0b"                                "\n\t"
+                            : [mask]"+r"(mask), [index]"=&r"(index), [value]"=&r"(value), "+m"(v.d)
+                            : [indexes]"r"(&indexes.d.v()), [base]"r"(baseAddr), [vec]"r"(&v.d)
+                            : "rdi"
                             );
                 } else {
                     abort();
                 }
             } else if (sizeof(EntryType) == 8) {
-                register unsigned long int bit;
-                register unsigned long int index;
+                register _ulong index;
                 register EntryType value;
                 asm volatile(
-                        "jmp 1f"               "\n\t"
-                        "0:"                   "\n\t"
-                        "movslq (%5,%0,4),%2"  "\n\t"
-                        "btr %0,%1"            "\n\t"
-                        "mov (%6,%2,8),%3"     "\n\t"
-                        "mov %3,(%7,%0,8)"     "\n\t"
-                        "1:"                   "\n\t"
-                        "bsf %1,%0"            "\n\t"
-                        "jnz 0b"               "\n\t"
-                        : "=&r"(bit), "+r"(mask), "=&r"(index), "=&r"(value), "+m"(v.d)
-                        : "r"(&indexes.d.v()), "r"(baseAddr), "r"(&v.d)
+                        SLOWDOWN_ASM
+                        "jmp 1f"                                 "\n\t"
+                        ALIGN_16
+                        "0:"                                    "\n\t"
+                        "movslq (%[indexes],%%rdi,4),%[index]"  "\n\t"
+                        "mov (%[base],%[index],8),%[value]"     "\n\t"
+                        "btr %%edi,%[mask]"                     "\n\t"
+                        "mov %[value],(%[vec],%%rdi,8)"         "\n\t"
+                        ALIGN_16
+                        "1:"                                    "\n\t"
+                        "bsf %[mask],%%edi"                     "\n\t"
+                        "jnz 0b"                                "\n\t"
+                        : [mask]"+r"(mask), [index]"=&r"(index), [value]"=&r"(value), "+m"(v.d)
+                        : [indexes]"r"(&indexes.d.v()), [base]"r"(baseAddr), [vec]"r"(&v.d)
+                        : "rdi"
                         );
             } else {
                 abort();
             }
 #else
-            unrolled_loop16(i, 0, Base::Size,
-                    if (mask & (1 << i)) v.d.m(i) = baseAddr[indexes.d.m(i)];
-                    );
-            /* The following code can make invalid reads!
-            unrolled_loop16(i, 0, Base::Size,
-                    EntryType entry = baseAddr[indexes.d.m(i)];
+# ifdef VC_NO_GATHER_TRICKS
+            for (int i = 0; i < Base::Size; ++i) {
+                if (mask & (1 << i)) {
+                    v.d.m(i) = baseAddr[indexes.d.m(i)];
+                }
+            }
+//            unrolled_loop16(i, 0, Base::Size,
+//                   if (mask & (1 << i)) v.d.m(i) = baseAddr[indexes.d.m(i)];
+//                  );
+# else
+            if (sizeof(EntryType) == 8) {
+#ifdef __x86_64__
+                unrolled_loop16(i, 0, Base::Size,
+                    register _long j = indexes.d.m(i);
+                    register _long zero = 0;
                     register EntryType tmp = v.d.m(i);
-                    if (mask & (1 << i)) tmp = entry;
+                    asm volatile(
+                        "test %[i],%[mask]\n\t"
+                        "cmove %[zero],%[j]\n\t"
+                        "cmovne (%[mem],%[j],8),%[tmp]"
+                        : [tmp]"+r"(tmp),
+                          [j]"+r"(j)
+                        : [i]"i"(1 << i),
+                          [mask]"r"(mask),
+                          [mem]"r"(baseAddr),
+                          [zero]"r"(zero)
+                        );
                     v.d.m(i) = tmp;
                     );
-                    */
+#else
+                unrolled_loop16(i, 0, Base::Size,
+                    register _long j = indexes.d.m(i);
+                    register _long zero = 0;
+                    register EntryType tmp = v.d.m(i);
+                    asm volatile(
+                        "test %[i],%[mask]\n\t"
+                        "cmove %[zero],%[j]\n\t"
+                        "cmovne (%[mem],%[j],8),%%eax\n\t"
+                        "cmovne 4(%[mem],%[j],8),%%edx"
+                        : "+A"(tmp),
+                          [j]"+r"(j)
+                        : [i]"i"(1 << i),
+                          [mask]"r"(mask),
+                          [mem]"r"(baseAddr),
+                          [zero]"r"(zero)
+                        );
+                    v.d.m(i) = tmp;
+                    );
+#endif
+                    return;
+            }
+
+            unrolled_loop16(i, 0, Base::Size,
+                    register _long j = indexes.d.m(i);
+                    register _long zero = 0;
+                    register EntryType tmp = v.d.m(i);
+                    if (sizeof(EntryType) == 2) asm volatile(
+                        "test %[i],%[mask]\n\t"
+                        "cmove %[zero],%[j]\n\t"
+                        "cmovne (%[mem],%[j],2),%[tmp]"
+                        : [tmp]"+r"(tmp),
+                          [j]"+r"(j)
+                        : [i]"i"(1 << i),
+                          [mask]"r"(mask),
+                          [mem]"r"(baseAddr),
+                          [zero]"r"(zero)
+                        );
+                    else if (sizeof(EntryType) == 4) asm volatile(
+                        "test %[i],%[mask]\n\t"
+                        "cmove %[zero],%[j]\n\t"
+                        "cmovne (%[mem],%[j],4),%[tmp]"
+                        : [tmp]"+r"(tmp),
+                          [j]"+r"(j)
+                        : [i]"i"(1 << i),
+                          [mask]"r"(mask),
+                          [mem]"r"(baseAddr),
+                          [zero]"r"(zero)
+                        );
+                    v.d.m(i) = tmp;
+                    );
+# endif
 #endif
         }
 
         template<typename Base, typename IndexType, typename EntryType>
         static inline void maskedScatterHelper(
-                const Base &v, const IndexType &indexes, int mask, EntryType *baseAddr
+                const Base &v, const IndexType &indexes, _long mask, EntryType *baseAddr
                 ) {
 #ifndef VC_NO_BSF_LOOPS
             if (sizeof(EntryType) == 2) {
-                register unsigned long int bit;
-                register unsigned long int index;
+                register _ulong bit;
+                register _ulong index;
                 register EntryType value;
                 asm volatile(
+                        SLOWDOWN_ASM
                         "jmp 1f"                "\n\t"
+                        ALIGN_16
                         "0:"                   "\n\t"
                         "movzwl (%5,%0,2),%%ecx""\n\t" // ecx contains the index
                         "btr %0,%1"            "\n\t"
@@ -485,11 +906,13 @@ namespace SSE
                         : "rcx"   );
             } else if (sizeof(EntryType) == 4) {
                 if (sizeof(typename IndexType::EntryType) == 4) {
-                    register unsigned long int bit;
-                    register unsigned long int index;
+                    register _ulong bit;
+                    register _ulong index;
                     register EntryType value;
                     asm volatile(
+                            SLOWDOWN_ASM
                             "jmp 1f"                "\n\t"
+                            ALIGN_16
                             "0:"                   "\n\t"
                             "mov (%5,%0,4),%%ecx"  "\n\t" // ecx contains the index
                             "btr %0,%1"            "\n\t"
@@ -502,11 +925,13 @@ namespace SSE
                             : "r"(&indexes.d.v()), "r"(baseAddr), "r"(&v.d), "m"(indexes.d.v())
                             : "rcx"   );
                 } else if (sizeof(typename IndexType::EntryType) == 2) { // sfloat_v[ushort_v]
-                    register unsigned long int bit;
-                    register unsigned long int index;
+                    register _ulong bit;
+                    register _ulong index;
                     register EntryType value;
                     asm volatile(
+                            SLOWDOWN_ASM
                             "jmp 1f"                "\n\t"
+                            ALIGN_16
                             "0:"                   "\n\t"
                             "movzwl (%5,%0,2),%%ecx""\n\t" // ecx contains the index
                             "btr %0,%1"            "\n\t"
@@ -522,11 +947,13 @@ namespace SSE
                     abort();
                 }
             } else if (sizeof(EntryType) == 8) {
-                register unsigned long int bit;
-                register unsigned long int index;
+                register _ulong bit;
+                register _ulong index;
                 register EntryType value;
                 asm volatile(
+                        SLOWDOWN_ASM
                         "jmp 1f"                "\n\t"
+                        ALIGN_16
                         "0:"                   "\n\t"
                         "mov (%5,%0,4),%%ecx"  "\n\t" // ecx contains the index
                         "btr %0,%1"            "\n\t"
@@ -551,6 +978,67 @@ namespace SSE
 
     ////////////////////////////////////////////////////////
     // Array gathers
+    template<typename T> inline void GatherHelper<T>::gather(
+            Base &v, const unsigned int *indexes, const EntryType *baseAddr)
+    {
+        for_all_vector_entries(i,
+                v.d.m(i) = baseAddr[indexes[i]];
+                );
+    }
+    template<> inline void GatherHelper<double>::gather(
+            Base &v, const unsigned int *indexes, const EntryType *baseAddr)
+    {
+        v.d.v() = _mm_set_pd(baseAddr[indexes[1]], baseAddr[indexes[0]]);
+    }
+    template<> inline void GatherHelper<float>::gather(
+            Base &v, const unsigned int *indexes, const EntryType *baseAddr)
+    {
+        v.d.v() = _mm_set_ps(
+                baseAddr[indexes[3]], baseAddr[indexes[2]],
+                baseAddr[indexes[1]], baseAddr[indexes[0]]);
+    }
+    template<> inline void GatherHelper<float8>::gather(
+            Base &v, const unsigned int *indexes, const EntryType *baseAddr)
+    {
+        v.d.v()[1] = _mm_set_ps(
+                baseAddr[indexes[7]], baseAddr[indexes[6]],
+                baseAddr[indexes[5]], baseAddr[indexes[4]]);
+        v.d.v()[0] = _mm_set_ps(
+                baseAddr[indexes[3]], baseAddr[indexes[2]],
+                baseAddr[indexes[1]], baseAddr[indexes[0]]);
+    }
+    template<> inline void GatherHelper<int>::gather(
+            Base &v, const unsigned int *indexes, const EntryType *baseAddr)
+    {
+        v.d.v() = _mm_set_epi32(
+                baseAddr[indexes[3]], baseAddr[indexes[2]],
+                baseAddr[indexes[1]], baseAddr[indexes[0]]);
+    }
+    template<> inline void GatherHelper<unsigned int>::gather(
+            Base &v, const unsigned int *indexes, const EntryType *baseAddr)
+    {
+        v.d.v() = _mm_set_epi32(
+                baseAddr[indexes[3]], baseAddr[indexes[2]],
+                baseAddr[indexes[1]], baseAddr[indexes[0]]);
+    }
+    template<> inline void GatherHelper<short>::gather(
+            Base &v, const unsigned int *indexes, const EntryType *baseAddr)
+    {
+        v.d.v() = _mm_set_epi16(
+                baseAddr[indexes[7]], baseAddr[indexes[6]],
+                baseAddr[indexes[5]], baseAddr[indexes[4]],
+                baseAddr[indexes[3]], baseAddr[indexes[2]],
+                baseAddr[indexes[1]], baseAddr[indexes[0]]);
+    }
+    template<> inline void GatherHelper<unsigned short>::gather(
+            Base &v, const unsigned int *indexes, const EntryType *baseAddr)
+    {
+        v.d.v() = _mm_set_epi16(
+                baseAddr[indexes[7]], baseAddr[indexes[6]],
+                baseAddr[indexes[5]], baseAddr[indexes[4]],
+                baseAddr[indexes[3]], baseAddr[indexes[2]],
+                baseAddr[indexes[1]], baseAddr[indexes[0]]);
+    }
     template<typename T> inline void GatherHelper<T>::gather(
             Base &v, const IndexType &indexes, const EntryType *baseAddr)
     {
@@ -893,3 +1381,6 @@ namespace SSE
     }
 } // namespace SSE
 } // namespace Vc
+
+#undef SLOWDOWN_ASM
+#undef ALIGN_16

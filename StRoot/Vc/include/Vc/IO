@@ -21,6 +21,7 @@
 #define VECIO_H
 
 #include "vector.h"
+#include "Memory"
 #include <iostream>
 
 #if VC_IMPL_LRBni
@@ -60,6 +61,32 @@ inline std::ostream &operator<<(std::ostream &out, const VECTOR_NAMESPACE::Vecto
     out << "]" << AnsiColor::normal;
     return out;
 }
+
+#ifndef VC_IMPL_LRBni
+// LRBni only supports 32bit ints
+template<>
+inline std::ostream &operator<<(std::ostream &out, const VECTOR_NAMESPACE::Vector<char> &v)
+{
+    out << AnsiColor::green << "[";
+    out << int(v[0]);
+    for (int i = 1; i < v.Size; ++i) {
+        out << ", " << int(v[i]);
+    }
+    out << "]" << AnsiColor::normal;
+    return out;
+}
+template<>
+inline std::ostream &operator<<(std::ostream &out, const VECTOR_NAMESPACE::Vector<unsigned char> &v)
+{
+    out << AnsiColor::green << "[";
+    out << int(v[0]);
+    for (int i = 1; i < v.Size; ++i) {
+        out << ", " << int(v[i]);
+    }
+    out << "]" << AnsiColor::normal;
+    return out;
+}
+#endif
 
 #ifdef VC_HAVE_FMA
 template<typename T>
@@ -104,6 +131,18 @@ inline std::ostream &operator<<(std::ostream &out, const VECTOR_NAMESPACE::Float
     return out;
 }
 #endif
+
+template<typename V, typename Parent>
+inline std::ostream &operator<<(std::ostream &out, const Vc::MemoryBase<V, Parent> &m )
+{
+    out << AnsiColor::blue << "{" << AnsiColor::normal;
+    for (unsigned int i = 0; i < m.vectorsCount(); ++i) {
+        out << V(m(i));
+    }
+    out << AnsiColor::blue << "}" << AnsiColor::normal;
+    return out;
+}
+
 
 #undef VECTOR_NAMESPACE
 
