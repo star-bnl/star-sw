@@ -24,7 +24,7 @@ public:
 const double *Arr()  const 	{return &mH;}
 public:	
 double mH;	// direction perpendicular movement and Z
-double mZ;	// Z position
+double mZ;	// Pseudo Z, direction perpendicular movement & H
 double mA;	// Angle in XY. cos(A),sin(A),T moving direction
 double mL;	// Angle lambda in Rxy/Z
 double mC;	// Curvature
@@ -80,7 +80,6 @@ void    print() const;
 class StvNodeErrs {
 public:	
 void reset()				{memset(this,0,sizeof(StvNodeErrs));}
-
 public:	
 union{double A[1];double _cXX;};
   double _cYX,_cYY;                       
@@ -107,8 +106,9 @@ double GetHz() const 		{ return mHz ;}
         double *Arr()       	{ return &mHH;}
   StvFitErrs &operator*=(double f) {for (int i=0;i<kNErrs;i++){Arr()[i]*=f;}; return *this;}
   void Backward();
-  int Check(const char *tit=0);
- void Print(const char *tit=0);
+double Sign() const;
+   int Check(const char *tit=0);
+  void Print(const char *tit=0);
 public:	
 double
 mHH,
