@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.10 2010/07/14 18:19:05 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.11 2010/07/29 03:12:20 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -524,7 +524,10 @@ static int nCall=0; nCall++;
 	 bhp->SetHitPlane();
          bhp->SetAxis(ax);
          if (ax<=3) {
-           for (int jk=0;jk<3;jk++){bhp->fDir[jk][(ax+jk-1)%3]=1;}
+static const float myDir[3][3][3]={{{1,0,0},{ 0,1,0},{ 0,0,1}} 
+                                  ,{{0,1,0},{-1,0,0},{ 0,0,1}}
+                                  ,{{0,0,1},{ 0,1,0},{-1,0,0}}};
+           TCL::ucopy(myDir[ax-1][0],bhp->fDir[0],3*3);
 	   TCL::ucopy(bb->GetOrigin(),bhp->fOrg,3);
            assert(bhp->fDir[0][0]+bhp->fDir[0][1]+bhp->fDir[0][2]>0.99);
 	 }else if(ax==4) {
