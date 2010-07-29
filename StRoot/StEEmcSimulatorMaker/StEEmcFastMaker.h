@@ -1,4 +1,4 @@
-// $Id: StEEmcFastMaker.h,v 1.12 2009/12/09 20:38:00 ogrebeny Exp $
+// $Id: StEEmcFastMaker.h,v 1.13 2010/07/29 16:12:03 ogrebeny Exp $
 
 
 /* \class StEEmcFastMaker        
@@ -58,7 +58,7 @@ usage in bfc.C
  chain->AddAfter(after,myMk);
 
 </pre>
-Exampl how to read back E-EMC data from StEvent:
+Example how to read back E-EMC data from StEvent:
 www.star.bnl.gov/STAR/eemc -->How To
 
 */
@@ -99,9 +99,6 @@ class StEEmcFastMaker : public StMaker {
 
   void mEE2ST(EEeventDst*, StEmcCollection* emcC); ///< TTree-->StEvent
 
-
-  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.12 2009/12/09 20:38:00 ogrebeny Exp $";
-  
  protected:
  public: 
   StEEmcFastMaker(const char *name="EEmcFastSim");
@@ -120,7 +117,7 @@ class StEEmcFastMaker : public StMaker {
   StEmcCollection * GetLocalEmcCollection() { return mLocalStEmcCollection;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.12 2009/12/09 20:38:00 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.13 2010/07/29 16:12:03 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
  private:
@@ -143,6 +140,9 @@ class StEEmcFastMaker : public StMaker {
 
 
 // $Log: StEEmcFastMaker.h,v $
+// Revision 1.13  2010/07/29 16:12:03  ogrebeny
+// Update after the peer review
+//
 // Revision 1.12  2009/12/09 20:38:00  ogrebeny
 // User-switchable function added to always create all hits, even if ADC=0. Requested by Pibero for the trigger simulator.
 //
