@@ -1,4 +1,4 @@
-// $Id: StMCStack.cxx,v 1.3 2010/04/29 03:05:28 perev Exp $
+// $Id: StMCStack.cxx,v 1.4 2010/07/29 03:14:40 perev Exp $
 #include <iostream>
 #include <assert.h>
 #include "StMCStack.h"
@@ -16,6 +16,9 @@ myTParticle(Int_t pdg, Int_t  status, Int_t  mother1, Int_t  mother2
  :TParticle(pdg,status,mother1,mother2,daughter1, daughter2
            ,px,py,pz,etot,vx,vy,vz,time)
   { fId=0;}
+
+~myTParticle();
+
   int  GetId() const {return fId;}
   void SetId(int id) {fId = id  ;}
   void SetMother(myTParticle* particle)     { fMother=particle;}
@@ -40,6 +43,13 @@ myTParticle* myTParticle::GetDaughter(Int_t i) const
   return fDaughters[i];
 }  
 
+//_____________________________________________________________________________
+myTParticle::~myTParticle()  
+{
+  int n = fDaughters.size();
+  for (int i=0;i<n;i++) { delete fDaughters[i];}
+  fDaughters.clear();
+}  
 
 ClassImp(StMCStack)
 //_____________________________________________________________________________
