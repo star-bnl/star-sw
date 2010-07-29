@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.21 2009/12/09 20:38:00 ogrebeny Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.22 2010/07/29 16:12:03 ogrebeny Exp $
 
 #include "St_DataSetIter.h"
 #include "StEventTypes.h"
@@ -36,7 +36,7 @@ StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name){
   /// Class Constructor.  
   SetEmcCollectionLocal(false);
   mLocalStEmcCollection=0;
-  mUseFullTower = false;
+  mUseFullTower = true; // default value for BFC, for consumption by the EEMC slow simulator
   mUseFullPreShower = false;
   mUseFullSmdu = false;
   mUseFullSmdv = false;
@@ -340,6 +340,9 @@ Float_t StEEmcFastMaker::getPreshowerGain()
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.22  2010/07/29 16:12:03  ogrebeny
+// Update after the peer review
+//
 // Revision 1.21  2009/12/09 20:38:00  ogrebeny
 // User-switchable function added to always create all hits, even if ADC=0. Requested by Pibero for the trigger simulator.
 //
