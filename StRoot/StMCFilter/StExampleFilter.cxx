@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StExampleFilter.cxx,v 1.6 2009/06/26 22:57:26 perev Exp $
+// @(#)root/eg:$Id: StExampleFilter.cxx,v 1.7 2010/07/29 19:19:41 jwebb Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -13,6 +13,11 @@
 /// class during the loading of library. Afterward GEANT could select 
 /// the needed filter by name. 
 /// more info in http://www.star.bnl.gov/~perev/SIM/mcFilter.pdf
+///
+/// The libraries in loadlibs.kumac must be loaded prior to 
+/// setting up the filter in the kumac.
+///
+/// See filt.kumac for details.
 
 static StExampleFilter qwerty;
 
