@@ -294,16 +294,17 @@ static int nCall=0; nCall++;
 
   THEmx_t *emx = fHelix->Emx();
   assert(emx->mCC>0);
+#if 1//??????
   double theta2 = fELossTrak->GetTheta2();
   emx->mAA+=theta2; emx->mLL+=theta2;
   double ort2 = fELossTrak->GetOrt2();
   assert(ort2>0);
-  emx->mHH+=ort2; emx->mZZ+= ort2/pow(fHelix->GetCos(),2);
+  emx->mHH+=ort2; emx->mZZ+= ort2*pow(fHelix->GetCos(),2);
   double eerr2= fELossTrak->ELossErr2();
   double dC2 =  -mom[3]/(mom[0]*mom[0]+mom[1]*mom[1]+mom[2]*mom[2])*curva;
   dC2 = dC2*eerr2;
   emx->mAA+=dC2;
-
+#endif //0 ????
   Multiply(R,T,*fDeriv);
   fHelix->Set(pos,mom,curva);
   memcpy((*fDeriv)[0],R[0],sizeof(R));
@@ -424,6 +425,7 @@ static  const double tof = 0.;
  // Add particle to stack 
  assert(e>1e-6);
  int ntr=1;
+ TVirtualMC::GetMC()->GetStack()->Clear();
  TVirtualMC::GetMC()->GetStack()->PushTrack(
   	 toBeDone,-1,pdg,p[0],  p[1],  p[2],e 
 	,mPars->_x,  mPars->_y, mPars->_z,tof
