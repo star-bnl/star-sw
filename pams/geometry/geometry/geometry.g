@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.217 2010/07/12 18:47:20 jwebb Exp $
+* $Id: geometry.g,v 1.218 2010/07/30 18:31:29 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.218  2010/07/30 18:31:29  jwebb
+* Added development / baseline y2011 geometry tag and reduced the number
+* of write statements.
+*
 * Revision 1.217  2010/07/12 18:47:20  jwebb
 * Added y2005i tag to provide up-to-date version of ecal in y2005 geometry
 * and to provide 10 keV transport cuts in calorimeters.
@@ -964,6 +968,7 @@ replace [exe CALB02;] with [;CALB=on;
 
 replace [exe CAVE03;] with [ "We need an even bigger Cave";   CaveConfig = 3;]
 replace [exe CAVE04;] with [ "We need an even bigger Cave";   CaveConfig = 4;]
+replace [exe CAVE05;] with [ "How about we just get the dimensions right and be done with it"; CaveConfig=5;]
 
 *                                                                                   Endcap Calorimeter 
 replace [exe ECALof;] with [;ECAL=off;]
@@ -1027,6 +1032,9 @@ replace [exe MFLD54;] with [ MFLD=on; magField = 5.0; MfldConfig=4;]
 
 replace [exe MUTD01;] with [ "Muon Trigger System"; MUTD = on; MutdConfig = 1;]
 replace [exe MUTD03;] with [ "Muon Trigger System"; MUTD = on; MutdConfig = 3;]
+replace [exe MUTD04;] with [ "MTD Run 11: single backleg  /  3 trays"; MUTD = on; MutdConfig = 4;]
+replace [exe MUTD05;] with [ "MTD Run 13:     27 backlegs /117 trays"; MUTD = on; MutdConfig = 5;]
+
 
 *                                                                         Photon Multiplicity Detector   
 
@@ -1632,6 +1640,30 @@ replace [exe y2010a;] with [;
     exe PIPE12;
 };]
 
+c ======================================================================= y2011 =
+REPLACE [exe y2011;] with [;
+{ "y2011 baseline: Base on y2010a with PMD off"
+    exe SCON13;      "support cone without SVT and new cable weight estimates";
+    exe TPCE04;      "agstar version of yf model";
+    exe BTOF66;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPC01;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMDof;      "Photon mult detector off (pp run)";
+    exe SISDof;      "No sisd";
+    exe FTRO01;      "FTPC readout";
+    exe MUTD04;      "Muon telescope detector";
+    exe CAVE05;      "Reasonable model of the cave geometry";
+    exe PIPE12;      "The beam pipe";
+};]
+c ===============================================================================
+
 
 !//______________________________________________________________________________
 replace [exe UPGR15;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
@@ -1751,7 +1783,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
    Logical    emsEdit,svtWater,
               on/.true./,off/.false./
 
-
+   Logical    verbose/.false./
 
 
 *  Codes:
@@ -2295,7 +2327,11 @@ If LL>0
   Case Y2010A  { Y2010a: production tag A
                  Geom = 'Y2010A  ';
                  exe y2010a;       }
-
+****************************************************************************************
+  Case y2011   { Y2011: baseline y2011 geometry, placeholder added 07/30/2010
+                 Geom = 'Y2011   ';
+                 exe y2011; }
+          
 ****************************************************************************************
   Case DUMM01   { R and D geometry: TPC+DUMM
 
@@ -3628,7 +3664,7 @@ If LL>0
 
    If LL>0 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
 
-
+   if ( verbose ) {
    write(*,*) '****** ATTENTION ACHTUNG ATTENZIONE VNIMANIE UVAGA WEI ******'
    write(*,*) '******* THESE FLAGS ARE USED TO GENERATE THE GEOMETRY *******'
    write(*,*) '                 BtofConfig: ',BtofConfig
@@ -3655,20 +3691,22 @@ If LL>0
    write(*,*) '                 TpceConfig: ',TpceConfig
    write(*,*) '                 VpddConfig: ',VpddConfig
    write(*,*) '***** FOR EXPERTS ONLY: LOOK UP GEOMETRY.G FOR DETAIL *******'
+   }
 
 
    if (RICH) ItCKOV = 1
 
    if (CAVE) {
-      write(*,*) 'CAVE'
+c     write(*,*) 'CAVE'
       call AgDETP new ('CAVE')
       call AgDETP add ('CVCF.config=',CaveConfig,1)
       call cavegeo
+      if ( CaveConfig == 5 ) { Call wallgeo; "another brick..." }
    }
 
 * Pipe:
    If (PIPE)   {
-     write(*,*) 'PIPE'
+c    write(*,*) 'PIPE'
      call AgDETP new ('PIPE')
      call AgDETP add ('pipv.PipeConfig=',PipeConfig,1);
      call AgDETP add ('pipv.PipeFlag=',PipeFlag,1);
@@ -3677,23 +3715,32 @@ If LL>0
    }
 
 * Upstream (DX), shield, and D0+Q1+Q2+Q3
-   if (UPST)        {write(*,*) 'UPST'; Call upstgeo;}
-   if (SHLD)        {write(*,*) 'SHLD'; Call shldgeo;}
-   if (QUAD)        {write(*,*) 'QUAD'; Call quadgeo;}
+   if (UPST)        {
+c     write(*,*) 'UPST'; 
+      Call upstgeo;
+   }
+   if (SHLD)        {
+c     write(*,*) 'SHLD'; 
+      Call shldgeo;
+   }
+   if (QUAD)        {
+c     write(*,*) 'QUAD'; 
+      Call quadgeo;
+   }
 
 * ---
    Call AGSFLAG('SIMU',2)
 
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6
    if (SCON) {
-     write(*,*) 'SCON'
+c    write(*,*) 'SCON'
      call AgDETP new ('SCON')
      call AgDETP add ('svtg.ConeVer=',ConeConfig ,1) ! could have more copper on the cone
      call scongeo
    }
 
    If (SVTT) { 
-     write(*,*) 'SVT'
+c    write(*,*) 'SVT'
      call AgDETP new ('SVTT')
      if (nSvtLayer < 7)     call AgDETP add ('svtg.nlayer=',   nSvtLayer,1)
      if (nSvt1stLayer > 1)  call AgDETP add ('svtg.nmin=',     nSvt1stLayer,1)
@@ -3738,7 +3785,7 @@ If LL>0
 * cut, as opposed to configuration of the detector:
 
   if(SISD) {
-       write(*,*) 'SVT' 
+c      write(*,*) 'SVT' 
        sisd_level=0
        call AgDETP new ('SISD')
 
@@ -3784,7 +3831,7 @@ If LL>0
 
 
    if (TPCE)  {
-      write(*,*) 'TPC';
+c     write(*,*) 'TPC';
 * Back in July 2003 Yuri has discovered the discrepancy
 * in the gas density. The patch for this is activated here: (was: if(CorrNum>=3) )
      if(DensConfig>0) { call AgDETP new('TPCE');  call AgDETP add ('tpcg.gasCorr=',2 ,1);}
@@ -3794,7 +3841,7 @@ If LL>0
      if (TpceConfig==4) Call tpcegeo3
    }
    if (ftpc) then
-        write(*,*) 'FTPC'
+c       write(*,*) 'FTPC'
         if(FtpcConfig==0) Call ftpcgeo
         if(FtpcConfig==1) Call ftpcgeo1
 *       and look at the support pieces, was: if(CorrNum==0)
@@ -3807,7 +3854,7 @@ If LL>0
 
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
    If (BTOF) { 
-     write(*,*) 'BTOF'
+c    write(*,*) 'BTOF'
      call AgDETP new ('BTOF')
      call AgDETP add ('btog.choice=',BtofConfig,1)
 * X.Dong
@@ -3838,23 +3885,23 @@ If LL>0
 ********************** BARREL CALORIMETER ************************
 *  - Set up the parameters for the barrel calorimeter
    If (CALB) {
-     write(*,*) 'CALB'
+c    write(*,*) 'CALB'
      call AgDETP new ('CALB')
      if (emsEdit)  call AgDETP add ('calg.nmodule=',Nmod, 2)
      if (emsEdit)  call AgDETP add ('calg.shift=',  shift,2)
 
        if(CalbConfig==0) then
-           write(*,*) '************** Creating the 1996-2003 version of the Barrel Calorimeter'
+c          write(*,*) '************** Creating the 1996-2003 version of the Barrel Calorimeter'
            Call calbgeo
        endif
 
        if(CalbConfig==1) then
-           write(*,*) '************** Creating the 2004-2006 version of the Barrel Calorimeter'
+c          write(*,*) '************** Creating the 2004-2006 version of the Barrel Calorimeter'
            Call calbgeo1
        endif
 
        if(CalbConfig==2) then
-           write(*,*) '************** Creating the 2007-     version of the Barrel Calorimeter'
+c          write(*,*) '************** Creating the 2007-     version of the Barrel Calorimeter'
            Call AgDetp add ('ccut.absorber=',  BEmcCutConfig, 1)
            Call AgDetp add ('ccut.sensitive=', BEmcCutConfig, 1)
            Call calbgeo2
@@ -3874,7 +3921,7 @@ If LL>0
 ******************************************************************
 *  - Set up the parameters for the endcap calorimeter
    If (ECAL) then
-      write(*,*) 'ECAL'
+c     write(*,*) 'ECAL'
       call AgDETP new ('ECAL')
       call AgDETP add ('emcg.OnOff='   ,EcalConfig,1)
       call AgDETP add ('emcg.FillMode=',ecalFill,1)
@@ -3889,10 +3936,13 @@ If LL>0
 ******************************************************************
 * The rest of steering:
 
-   if (BBCM)                   { write(*,*) 'CALB';Call bbcmgeo}
+   if (BBCM)                   { 
+c     write(*,*) 'CALB';
+      Call bbcmgeo
+   }
 
    if (FPDM){
-     write(*,*) 'FPDM'
+c    write(*,*) 'FPDM'
      if (FpdmConfig==0) Call fpdmgeo
      if (FpdmConfig==1) Call fpdmgeo1
      if (FpdmConfig==2) Call fpdmgeo2
@@ -3903,13 +3953,18 @@ If LL>0
 
 
    if (MUTD) {
-     write(*,*) 'MUTD'
-     if (MutdConfig==1) Call mutdgeo
-     if (MutdConfig==2) Call mutdgeo2
-     if (MutdConfig==3) Call mutdgeo3
+c    write(*,*) 'MUTD'
+     if (MutdConfig==1) Call mutdgeo;
+     if (MutdConfig==2) Call mutdgeo2;
+     if (MutdConfig==3) Call mutdgeo3;
+     if (MutdConfig>=4) { 
+         Call AgDETP new ('MUTD')        
+         Call AgDETP add ( 'MTDG.Config=', MutdConfig, 1 ); 
+         Call mutdgeo4;
+     } 
    }
    if (PIXL){
-     write(*,*) 'CALB'
+c    write(*,*) 'CALB'
      if (PixlConfig==-1)Call pixlgeo00
      if (PixlConfig==1) Call pixlgeo
      if (PixlConfig==2) Call pixlgeo1
@@ -3923,7 +3978,7 @@ If LL>0
    }
 
    if (ISTB){
-     write(*,*) 'ISTB'
+c    write(*,*) 'ISTB'
      if (IstbConfig==-1) Call istbgeo00
      if (IstbConfig== 1) Call istbgeo
      if (IstbConfig== 2) Call istbgeo1
@@ -3934,15 +3989,18 @@ If LL>0
      if (IstbConfig== 7) Call istbgeo6
    }
 
-   if (GEMB.and.GembConfig>0)  {write(*,*) 'GEMB'; Call gembgeo;}
+   if (GEMB.and.GembConfig>0)  {
+c     write(*,*) 'GEMB'; 
+      Call gembgeo;
+   }
 
    if (FSTD.and.FstdConfig>0)  then
-      write(*,*) 'FSTD'
+c     write(*,*) 'FSTD'
       if(FstdConfig==2) then
          call AgDETP new ('FSTD')
          call AgDETP add ('fstg.Rmax=',22.3,1)
       endif
-        Call fstdgeo
+      Call fstdgeo
    endif
 
    if (FGTD) then
@@ -3953,7 +4011,7 @@ If LL>0
    endif
 
    if (IGTD) then
-     write(*,*) 'IGTD'
+c    write(*,*) 'IGTD'
      if(IgtdConfig==2) then
          call AgDETP new ('IGTD')
          call AgDETP add ('igtv.Config=',IgtdConfig ,1)
@@ -3962,15 +4020,15 @@ If LL>0
    endif
 
    if (HPDT.and.HpdtConfig>0) { write(*,*) 'HPDT';Call hpdtgeo;}
-
    if (ITSP)                  { write(*,*) 'ITSP';Call itspgeo;}
+
 ******************************************************************
 * If PHMD is present and a non-zero version of the Photon Multiplicity Detector
 * is defined, pass the version number to its constructor
 * and create it:
 
    if  (PHMD.and.PhmdConfig>0) then
-     write(*,*) 'PHMD'
+c     write(*,*) 'PHMD'
       call AgDETP new ('PHMD')
       call AgDETP add ('PMVR.Config=', PhmdConfig,1)
       call phmdgeo
@@ -3983,7 +4041,7 @@ If LL>0
    endif
 ********************************************************************
    If (FhcmConfig .ne.0) then
-     write(*,*) 'FHCM'
+c     write(*,*) 'FHCM'
       call AgDETP new ('FHCM')
       call AgDETP add ('fhcg.Version='   ,FhcmConfig,1)
       Call fhcmgeo
@@ -3999,7 +4057,6 @@ If LL>0
       Call mfldgeo(magField);
       call gufld(magX,magB);
       write(*,*) 'MFLD magField,Bz = ',magField,magB(3)
-
    }
 *
    if JVOLUM>0
