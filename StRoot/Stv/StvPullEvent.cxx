@@ -58,17 +58,14 @@ void StvPullHit::Print(const char* option) const
   if (!option) option="";
   printf("StvPullHit::Print(%s)\n",option);
 
-  printf("lYHit %g(%g)\tlZHit %g(%g)\n"
+  printf("lYHit %g(%g)\tlZHit %g(%g) lLen=$g\n"
 	,lYHit,lYHitErr
-	,lZHit,lZHitErr);
+	,lZHit,lZHitErr,lLen);
 
-  printf("tlYFit %g(%g)\tlZFit %g(%g)\n"
-	,lYFit,lYFitErr
-	,lZFit,lZFitErr);
 
   printf("lYPul %g(%g)\tlZPul %g(%g)\n"
-	,lYPul,lYPulErr
-	,lZPul,lZPulErr);
+	,lYPul,lYHitErr
+	,lZPul,lZHitErr);
 
 
   printf("gRHit=%g \tgPHit %g(%g)\tgZHit %g(%g)\n"
