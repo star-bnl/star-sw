@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StvPullEvent.h,v 1.1 2010/07/06 20:27:43 perev Exp $
+ * $Id: StvPullEvent.h,v 1.2 2010/07/30 02:54:30 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StvPullEvent.h,v $
+ * Revision 1.2  2010/07/30 02:54:30  perev
+ * Length fr hit added
+ *
  * Revision 1.1  2010/07/06 20:27:43  perev
  * Alpha version of Stv (Star Tracker Virtual)
  *
@@ -106,23 +109,15 @@ float mCurv;        		//curvature
 float mPt;        		//pt
 float mCharge;                  //charge (Q)
 //		locals
+//		local Stv frame is a StvTrtack frame
 float lYHit;			// y of  Hit  in local  Stv frame
 float lZHit;			// z of  Hit  in local  Stv frame
 float lYHitErr;			// y Hit Err in local  Stv frame
 float lZHitErr;			// z Hit Err in local  Stv frame
+float lLen;			// length of Hit
 
-float lYFit;			// y of  Fit  in local  Stv frame
-float lZFit;			// z of  Fit  in local  Stv frame
-float lYFitErr;			// y Fit Err in local  Stv frame
-float lZFitErr;			// z Fit Err in local  Stv frame
-
-float lYPul;			// dy of  Pul  in local  Stv frame
-float lZPul;			// dz of  Pul  in local  Stv frame
-float lYPulErr;			// dy Pul Err in local  Stv frame
-float lZPulErr;			// dz Pul Err in local  Stv frame
-
-float lPsi;			//  track Psi in local  Stv frame
-float lDip;			//  track Dip in local  Stv frame
+float lYPul;			// lYHit/lYHitErr
+float lZPul;			// lZHit/lZHitErr
 
 //		Globals
 float gRHit;			//  Rxy of Hit  in global Stv frame
