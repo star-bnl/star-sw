@@ -566,7 +566,7 @@
       Material Iron isvol=0
   ENDIF
       Medium    Standard
-*
+      Attribute WALL seen=0
       Shape BOX dz=wall_dz dx=wall_dx dy=wall_dy
 *
   EndBlock ! WALL  
