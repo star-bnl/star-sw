@@ -77,8 +77,9 @@ StvToolkit *kit = StvToolkit::Inst();
 StvTrack *myTrak = kit->GetTrack();
 StvNodePars par[2];
 StvFitErrs  err[2];
+int mySkip=0;
 StvHitCount hitCount;
-
+   
 
   double Hz = kit->GetHz(mSeedHelx->Pos());
   par[1].set(mSeedHelx,Hz);
@@ -105,14 +106,19 @@ Mtx55D_t deriv;
   mDive->Set(par+0,err+0,idir);
   mDive->Set(par+1,err+1,&deriv);
   while(idive==0) {
+
+    if (!mySkip) { 
+      mySkip = hitCount.Skip();
+      if (mySkip) mDive->SetSkip();
+    }
     par[0]=par[1]; err[0]=err[1];
 
     idive = mDive->Dive();
     totLen+=mDive->GetLength();
     nNode++; 
     par[0]=par[1]; err[0]=err[1];
-    assert(!err[0].Check("AfterDive"));
-    assert(!par[0].check("AfterDive"));
+    assert(idive || !err[0].Check("AfterDive"));
+//    assert(         !par[0].check("AfterDive"));
     float gate[2]={3,3};   
     const StvHits *localHits = mHitter->GetHits(par,gate); 
 
@@ -126,7 +132,7 @@ if (DoShow()) {
     StvNode *node = kit->GetNode();      
     myTrak->push_front(node);
     node->SetDer(deriv,idir);
-    assert(!par[1].check("FindTrack.1"));
+//    assert(!idive || !par[1].check("FindTrack.1"));
     node->SetPre(par[1],err[1],idir);
     if (idive) node->SetType(StvNode::kDcaNode);
 
@@ -146,7 +152,6 @@ if (DoShow()) {
 
     if (! minHit) {
       hitCount.AddNit();
-      continue;
     } else {
       hitCount.AddHit();
 
@@ -162,7 +167,7 @@ if (DoShow()) {
 
       node->SetHit(minHit);
       node->SetXi2(myXi2);
-      node->GetHE() = fitt->GetHitErrs();
+      node->SetHE(fitt->GetHitErrs());
       assert(!par[1].check("AfterFitter"));
       assert(!err[1].Check("AfterFitter"));
       node->SetFit(par[1],err[1],idir);
