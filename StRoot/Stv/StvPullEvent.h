@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StvPullEvent.h,v 1.2 2010/07/30 02:54:30 perev Exp $
+ * $Id: StvPullEvent.h,v 1.3 2010/08/01 00:13:19 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StvPullEvent.h,v $
+ * Revision 1.3  2010/08/01 00:13:19  perev
+ * Pull errors added
+ *
  * Revision 1.2  2010/07/30 02:54:30  perev
  * Length fr hit added
  *
@@ -118,6 +121,8 @@ float lLen;			// length of Hit
 
 float lYPul;			// lYHit/lYHitErr
 float lZPul;			// lZHit/lZHitErr
+float lYPulErr;			// y pull Err in local  Stv frame
+float lZPulErr;			// z pull Err in local  Stv frame
 
 //		Globals
 float gRHit;			//  Rxy of Hit  in global Stv frame
