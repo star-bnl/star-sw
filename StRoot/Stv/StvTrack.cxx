@@ -238,6 +238,11 @@ int StvHitCount::Reject()
   return nGoodHits<kGoodHits && nTotHits<kTotHits;
 }
 //_____________________________________________________________________________
+int StvHitCount::Skip() const
+{
+  return (nContNits>kContNits) ;
+}
+//_____________________________________________________________________________
 void StvTrack::Print(const char *opt) const
 {
   if (!opt) opt = "";

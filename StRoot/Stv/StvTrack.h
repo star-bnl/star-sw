@@ -78,6 +78,7 @@ void Clear()		{memset(mBeg,0,mEnd-mBeg+1);}
 void AddHit();
 void AddNit();
 int  Reject();
+int  Skip() const;
 public:
 char mBeg[1] ;
 int nPossHits;	// Number of possible hits;
