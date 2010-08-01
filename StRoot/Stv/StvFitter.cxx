@@ -89,8 +89,11 @@ double StvFitter::Xi2(const StvHit *hit)
 
 //		DCA track position
   VADD(tP,mDeltaL*tD);
-
-  mHitErrCalc->CalcDCAErrs(mHit, &mTkPars,&mHitErrs);
+  double tkDir[3]={mTkPars._cosCA,mTkPars._sinCA,mTkPars._tanl};
+  mHitErrCalc->SetTrack(tkDir);
+  const StHitPlane *hp = hit->detector(); 
+  const Mtx33F_t &hD = hp->GetDir(hit->x_g());
+  mHitErrCalc->CalcDcaErrs(hit->x_g(),hD,mHitErrs);
 
 
 //		Hit position wrt track 
@@ -100,9 +103,9 @@ double StvFitter::Xi2(const StvHit *hit)
   mDcaP=VDOT(mDcaFrame[1],dca);
   mDcaL=VDOT(mDcaFrame[2],dca);
 
-  double G[3] = {mHitErrs.hYY+mInErrs->mHH
-                ,mHitErrs.hYZ+mInErrs->mHZ
-                ,mHitErrs.hZZ+mInErrs->mZZ};
+  double G[3] = {mHitErrs[0]+mInErrs->mHH
+                ,mHitErrs[1]+mInErrs->mHZ
+                ,mHitErrs[2]+mInErrs->mZZ};
 //  (BB*dX*dX-2*BA*dX*dY+AAdY*dY)/det 
   mXi2 = MyXi2(G,mDcaP,mDcaL);
   return mXi2 ; 
@@ -122,7 +125,7 @@ static int nCall=0; nCall++;
 
 //		New Z ortogonal to X (track direction)
   StvFitPars myHitPars(mDcaP, mDcaL );
-  StvFitErrs myHitErrs(mHitErrs.hYY,mHitErrs.hYZ,mHitErrs.hZZ);
+  StvFitErrs myHitErrs(mHitErrs[0],mHitErrs[1],mHitErrs[2]);
   StvFitPars myTrkPars;
   StvFitPars myJrkPars;
   assert(mTkErrs.Sign()>0);

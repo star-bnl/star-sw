@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.2 2010/07/14 18:28:09 perev Exp $
+ * $Id: StvNode.cxx,v 1.3 2010/08/01 00:10:48 perev Exp $
  *
  * /author Victor Perev
  */
@@ -78,7 +78,7 @@ static const char *hhh = "xyzre";
        err[0]=-999;val=-999;
       if (!strchr(opt,hhh[i])) continue;
       if (hhh[i]=='r') 		{val = hit->getRxy();}
-      else if (hhh[i]=='e')	{err[0] = sqrt(mHrr.hYY); err[1] = sqrt(mHrr.hZZ);}
+      else if (hhh[i]=='e')	{err[0] = sqrt(mHrr[0]); err[1] = sqrt(mHrr[2]);}
       else 			{val = hit->x_g()[i];} 
       if (abs(val+999)>1e-6) 	{printf("\th%c=%g",hhh[i],val);}
       if (err[0]>-999)  	{ printf("\thh=%7.2g zz=%7.2g",err[0],err[1]);}

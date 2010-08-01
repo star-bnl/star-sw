@@ -17,9 +17,9 @@ class StvFitter : public TNamed {
 public:	
 
 StvFitter(const char *name="DefaultFitter");
-  void Set(const StvNodePars *inPars, const StvFitErrs *inErrs
-          ,      StvNodePars *otPars,       StvFitErrs *otErrs);
-const StvHitErrs  &GetHitErrs() const {return mHitErrs;}        
+      void    Set(const StvNodePars *inPars, const StvFitErrs *inErrs
+          ,             StvNodePars *otPars,       StvFitErrs *otErrs);
+const double *GetHitErrs() const {return mHitErrs;}        
   void Prep();
 
 double Xi2(const StvHit *hit);
@@ -42,7 +42,7 @@ const StHitPlane  *mHitPlane;
       StvHitErrCalculator *mHitErrCalc;
       StvNodePars  mTkPars;
       StvFitErrs   mTkErrs;
-      StvHitErrs   mHitErrs;
+      double       mHitErrs[3];
       double	   mCos2L,mCosL,mSinL,mCosP,mSinP,mXi2,mDeltaL;
       double       mDcaP,mDcaL,mDist;
       double       mDcaFrame[3][3];

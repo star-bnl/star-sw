@@ -43,7 +43,9 @@ public:
   StvFitErrs  &GetPE(int dir) 	{return mPE[dir];}
   StvNodePars &GetFP(int dir) 	{return mFP[dir];}
   StvFitErrs  &GetFE(int dir) 	{return mFE[dir];}
-  StvHitErrs  &GetHE() 		{return mHrr;}
+  const double *GetHE() const	{return mHrr    ;}
+        void  SetHE(const double he[3]) 	
+	                        {mHrr[0]=he[0]; mHrr[1]=he[1];mHrr[2]=he[2];}
 
   /// Extract state information from this node in TPT representation.
   void GetGlobalTpt   (float   x[6],float   e[15]);
@@ -89,7 +91,7 @@ StvHit *mHit;
   StvNodePars mFP[3];   // Fitted    Parameters
   StvFitErrs  mFE[3];	// Fitted    errors
   Mtx55D_t    mDer[2];
-  StvHitErrs  mHrr;    	// Hit errors in DCA frame
+  double      mHrr[3];  // Hit errors in DCA frame
   double      mXi2; 	// Xi2 of fit to hit
   char   mEnd[1];
 public:
