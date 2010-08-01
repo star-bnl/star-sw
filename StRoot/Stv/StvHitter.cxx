@@ -55,7 +55,6 @@ const StvHits *StvHitter::GetHits(const StvNodePars *pars, const float gate[2])
 //??????    if (nexHit->timesUsed()) continue;
     mHits.push_back(nexHit);
   }
-  if (!mHits.size()) return 0;
   return &mHits;
 }
 //_____________________________________________________________________________
