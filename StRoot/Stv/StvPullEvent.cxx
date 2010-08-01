@@ -64,8 +64,8 @@ void StvPullHit::Print(const char* option) const
 
 
   printf("lYPul %g(%g)\tlZPul %g(%g)\n"
-	,lYPul,lYHitErr
-	,lZPul,lZHitErr);
+	,lYPul,lYPulErr
+	,lZPul,lZPulErr);
 
 
   printf("gRHit=%g \tgPHit %g(%g)\tgZHit %g(%g)\n"
