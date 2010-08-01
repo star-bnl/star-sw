@@ -89,12 +89,16 @@ class Medium {
                             double& eta);    
 
     // Microscopic electron transport properties
-    // Effective mass (for electrons in semiconductors) 
+    
+    // Dispersion relation (Energy vs. wave vector)
     virtual
-    double GetElectronEffectiveMass(const double e, const int band = 0);
-    // Non-parabolicity parameter for conduction band
+    double GetElectronEnergy(const double px, const double py, const double pz,
+                        double& vx, double& vy, double& vz, const int band = 0);
     virtual
-    double GetElectronNonParabolicity(const double energy, const int band = 0);
+    void GetElectronMomentum(const double e, 
+                             double& px, double& py, double& pz, 
+                             const int band = 0);
+
     // Null-collision rate [ns-1]
     virtual 
     double GetElectronNullCollisionRate();
@@ -104,14 +108,12 @@ class Medium {
     virtual 
     bool GetElectronCollision(const double e, int& type, int& level, double& e1,
                       double& ctheta, double& s, double& esec);
-    // Get de-excitation products
+
     virtual
     int GetNumberOfDeexcitationProducts() {return 0;}
     virtual
     bool GetDeexcitationProduct(const int i, double& t, 
-                                int& type, double& energy) {return false;}
-    virtual 
-    int GetNumberOfLevels();
+                                int& type, double& energy);
 
     // Transport parameters for holes
     virtual 
@@ -136,12 +138,10 @@ class Medium {
                         double& eta);                
 
     // Transport parameters for ions
-    // Drift velocity [cm / ns]
     virtual 
     bool IonVelocity(const double ex, const double ey, const double ez, 
                      const double bx, const double by, const double bz, 
                      double& vx, double& vy, double& vz);
-    // Longitudinal and transverse diffusion coefficients  [cm1/2]
     virtual 
     bool IonDiffusion(const double ex, const double ey, const double ez,
                       const double bx, const double by, const double bz,
@@ -179,6 +179,8 @@ class Medium {
     std::string className;
 
     static int idCounter;
+    
+    static double inverseElectronMass;
 
     // Id number
     int id;

@@ -75,8 +75,9 @@ class MediumSilicon : public Medium {
     // in the scattering rates table
     bool   SetMaxElectronEnergy(const double e);
     double GetMaxElectronEnergy() const {return eFinal;}
-    // Get the electron effective mass
-    double GetElectronEffectiveMass(const double e, const int band = 0);
+    // Get the electron energy (and its gradient) for a given (crystal) momentum
+    double GetElectronEnergy(const double px, const double py, const double pz,
+                        double& vx, double& vy, double& vz, const int band = 0);
     // Get the null-collision rate [ns-1]
     double GetElectronNullCollisionRate();
     // Get the (real) collision rate [ns-1] at a given electron energy
@@ -85,7 +86,7 @@ class MediumSilicon : public Medium {
     bool   GetElectronCollision(const double e, int& type, int& level,
                         double& e1, double& ctheta,
                         double& s, double& esec);
-    double GetConductionBandDensityOfStates(const double e);
+    double GetConductionBandDensityOfStates(const double e, const int band = 0);
 
     bool GetOpticalDataRange(double& emin, double& emax, const int i = 0);
     bool GetDielectricFunction(const double e, double& eps1, double& eps2, const int i = 0);
@@ -98,7 +99,8 @@ class MediumSilicon : public Medium {
     double dopingConcentration;
 
     // Effective masses
-    double eEffMass, hEffMass;
+    // X valleys
+    double mLongX, mTransX;
     // Lattice mobility
     double eLatticeMobility, hLatticeMobility;
     // Low-field mobility
@@ -134,13 +136,13 @@ class MediumSilicon : public Medium {
     // Scattering rates
     double eFinal, eStep;
     static const int nEnergySteps = 2000;
-    int nLevels;
+    int nLevelsX;
     double cfNullElectrons;
-    std::vector<double> cfTotElectrons;
-    std::vector<std::vector<double> > cfElectrons;
-    std::vector<double> energyLossElectrons;
+    std::vector<double> cfTotElectronsX;
+    std::vector<std::vector<double> > cfElectronsX;
+    std::vector<double> energyLossElectronsX;
     // Cross-section type
-    std::vector<int> scatTypeElectrons;
+    std::vector<int> scatTypeElectronsX;
 
     bool UpdateTransportParameters();
     void UpdateLatticeMobilityMinimos();
@@ -186,8 +188,8 @@ class MediumSilicon : public Medium {
     bool LoadOpticalData(const std::string filename);
 
     bool ElectronScatteringRates();
-    bool ElectronAcousticScatteringRates();
-    bool ElectronIntervalleyScatteringRates();
+    bool ElectronAcousticScatteringRatesX();
+    bool ElectronIntervalleyScatteringRatesXX();
     bool ElectronIonisationRates();
     bool ElectronImpurityScatteringRates();
 

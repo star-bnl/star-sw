@@ -14,7 +14,7 @@ MediumSilicon::MediumSilicon() :
   Medium(), 
   bandGap(1.12), 
   dopingType('i'), dopingConcentration(0.),
-  eEffMass(0.26), hEffMass(0.81),
+  mLongX(0.916), mTransX(0.191),
   eLatticeMobility(1.35e-6), hLatticeMobility(0.48e-6),
   eMobility(1.43e-6), hMobility(0.46e-6),
   eBetaCanali(1.109), hBetaCanali(1.213),
@@ -35,7 +35,7 @@ MediumSilicon::MediumSilicon() :
   highFieldMobilityModel(0),
   impactIonisationModel(0),
   eFinal(2.), eStep(0.001),
-  nLevels(0),
+  nLevelsX(0),
   cfNullElectrons(0.),
   hasOpticalData(false), opticalDataFile("OpticalData_Si.txt") {
 
@@ -51,10 +51,10 @@ MediumSilicon::MediumSilicon() :
   EnablePrimaryIonisation();
   microscopic = true;
   
-  cfTotElectrons.clear();
-  cfElectrons.clear();
-  energyLossElectrons.clear();
-  scatTypeElectrons.clear();
+  cfTotElectronsX.clear();
+  cfElectronsX.clear();
+  energyLossElectronsX.clear();
+  scatTypeElectronsX.clear();
 
 }
 
@@ -555,10 +555,71 @@ MediumSilicon::SetMaxElectronEnergy(const double e) {
 }
 
 double
-MediumSilicon::GetElectronEffectiveMass(const double e, const int band) {
+MediumSilicon::GetElectronEnergy(
+               const double px, const double py, const double pz, 
+               double& vx, double& vy, double& vz, const int band) {
 
-  if (e < Small) return eEffMass;
-  return eEffMass * (1. + e);
+  double e = 0.;
+  double a = 0.;
+  switch (band) {
+    case 0:
+      // X 100    
+      e = 0.5 * inverseElectronMass * (px * px / mLongX + 
+                                      (py * py + pz * pz) / mTransX);
+      a = inverseElectronMass / (1. + e); 
+      vx = a * px / mLongX; vy = a * py / mTransX; vz = a * pz / mTransX;
+      return e;
+      break;
+    case 1:
+      // X -100
+      e = 0.5 * inverseElectronMass * (px * px / mLongX + 
+                                      (py * py + pz * pz) / mTransX);
+      a = inverseElectronMass / (1. + e); 
+      vx = a * px / mLongX; vy = a * py / mTransX; vz = a * pz / mTransX;
+      return e;
+      break;
+    case 2:
+      // X 010
+      e = 0.5 * inverseElectronMass * (py * py / mLongX + 
+                                      (px * px + pz * pz) / mTransX);
+      a = inverseElectronMass / (1. + e); 
+      vx = a * px / mTransX; vy = a * py / mLongX; vz = a * pz / mTransX;
+      return e;
+      break;
+    case 3:
+      // X -010
+      e = 0.5 * inverseElectronMass * (py * py / mLongX + 
+                                      (px * px + pz * pz) / mTransX);
+      a = inverseElectronMass / (1. + e); 
+      vx = a * px / mTransX; vy = a * py / mLongX; vz = a * pz / mTransX;
+      return e;
+      break;
+    case 4:
+      // X 001
+      e = 0.5 * inverseElectronMass * (pz * pz / mLongX + 
+                                      (px * px + py * py) / mTransX);
+      a = inverseElectronMass / (1. + e); 
+      vx = a * px / mTransX; vy = a * py / mTransX; vz = a * pz / mLongX;
+      return e;
+      break;
+    case 5:
+      // X -001
+      e = 0.5 * inverseElectronMass * (pz * pz / mLongX + 
+                                      (px * px + py * py) / mTransX);
+      a = inverseElectronMass / (1. + e); 
+      vx = a * px / mTransX; vy = a * py / mTransX; vz = a * pz / mLongX;
+      return e;
+      break;          
+    default:
+      std::cerr << className << "::GetElectronEnergy:" << std::endl;
+      std::cerr << "    Unknown band: " << band << std::endl;
+      break;
+  }
+  
+  vx = inverseElectronMass * px;
+  vy = inverseElectronMass * py;
+  vz = inverseElectronMass * pz;
+  return 0.5 * inverseElectronMass * (px * px + py * py + pz * pz);
 
 }
 
@@ -584,7 +645,7 @@ MediumSilicon::GetElectronCollisionRate(const double e) {
   if (e <= 0.) {
     std::cerr << "MediumSilicon: Electron energy must be greater than zero."
               << std::endl;
-    return cfTotElectrons[0];
+    return cfTotElectronsX[0];
   }
 
   if (e > eFinal) {
@@ -605,7 +666,7 @@ MediumSilicon::GetElectronCollisionRate(const double e) {
     isChanged = false;
   }
 
-  return cfTotElectrons[int(e / eStep)];
+  return cfTotElectronsX[int(e / eStep)];
 
 }
 
@@ -639,47 +700,50 @@ MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
   // Energy interval
   const int iE = int(e / eStep);
 
-  const double r = RndmUniform();
-  int iLow = 0; 
-  int iUp = nLevels - 1;
-  if (r <= cfElectrons[iE][iLow]) {
-    level = iLow;
-  } else if (r >= cfElectrons[iE][nLevels - 1]) {
-    level = nLevels - 1;
-  } else {
-    int iMid;
-    while (iUp - iLow > 1) {
-      iMid = (iLow + iUp) >> 1;
-      if (r < cfElectrons[iE][iMid]) {
-        iUp = iMid;
-      } else {
-        iLow = iMid;
+  int band = 0;
+  if (band >= 0 && band < 6) {
+    const double r = RndmUniform();
+    int iLow = 0; 
+    int iUp = nLevelsX - 1;
+    if (r <= cfElectronsX[iE][iLow]) {
+      level = iLow;
+    } else if (r >= cfElectronsX[iE][nLevelsX - 1]) {
+      level = nLevelsX - 1;
+    } else {
+      int iMid;
+      while (iUp - iLow > 1) {
+        iMid = (iLow + iUp) >> 1;
+        if (r < cfElectronsX[iE][iMid]) {
+          iUp = iMid;
+        } else {
+          iLow = iMid;
+        }
       }
+      level = iUp;
     }
-    level = iUp;
-  }
 
-  // Collision type
-  type = scatTypeElectrons[level];
+    // Collision type
+    type = scatTypeElectronsX[level];
   
-  // Scattering angle
-  ctheta = 1. - 2. * RndmUniform();
+    // Scattering angle
+    ctheta = 1. - 2. * RndmUniform();
 
-  // Energy loss
-  double loss = energyLossElectrons[level];
-  // Secondary electron energy (none by default)
-  esec = 0.;
-  // Ionising collision
-  if (type == 1) {
-    esec = RndmUniform() * (e - loss);
-    loss += esec;
-    if (esec < Small) esec = Small;
+    // Energy loss
+    double loss = energyLossElectronsX[level];
+    // Secondary electron energy (none by default)
+    esec = 0.;
+    // Ionising collision
+    if (type == 1) {
+      esec = RndmUniform() * (e - loss);
+      loss += esec;
+      if (esec < Small) esec = Small;
+    }
+
+    if (e < loss) loss = e - 0.0001;
+    // Update the energy
+    e1 = e - loss;
+    if (e1 < Small) e1 = Small;
   }
-
-  if (e < loss) loss = e - 0.0001;
-  // Update the energy
-  e1 = e - loss;
-  if (e1 < Small) e1 = Small;
   
   return true;
 
@@ -998,7 +1062,7 @@ MediumSilicon::UpdateDopingMobilityMasetti() {
     return;
   }
   
-  // Parameters taken from Minimos NT User Guide
+  // Parameters adopted from Minimos NT User Guide
   const double eMuMin1 = 0.0522e-6;
   const double eMuMin2 = 0.0522e-6;
   const double eMu1    = 0.0434e-6;
@@ -1092,21 +1156,17 @@ MediumSilicon::UpdateImpactIonisationVanOverstraetenDeMan() {
 
   // Temperature dependence as in Sentaurus Device
   // Optical phonon energy
-  double hbarOmega = 0.063;
+  const double hbarOmega = 0.063;
   // Temperature scaling coefficient
-  double gamma = tanh(hbarOmega / (2. * BoltzmannConstant * 300.)) /
-                 tanh(hbarOmega / (2. * BoltzmannConstant * temperature));
+  const double gamma = tanh(hbarOmega / (2. * BoltzmannConstant * 300.)) /
+                       tanh(hbarOmega / (2. * BoltzmannConstant * temperature));
   
   // Low field coefficients taken from Maes, de Meyer, van Overstraeten
-  eImpactA0 = gamma * 3.318e5; 
-  eImpactB0 = gamma * 1.135e6;
-  eImpactA1 = gamma * 7.03e5;
-  eImpactB1 = gamma * 1.231e6;
+  eImpactA0 = gamma * 3.318e5; eImpactB0 = gamma * 1.135e6;
+  eImpactA1 = gamma * 7.03e5;  eImpactB1 = gamma * 1.231e6;
   
-  hImpactA0 = gamma * 1.582e6;
-  hImpactB0 = gamma * 2.036e6;
-  hImpactA1 = gamma * 6.71e5;
-  hImpactB1 = gamma * 1.693e6;
+  hImpactA0 = gamma * 1.582e6; hImpactB0 = gamma * 2.036e6;
+  hImpactA1 = gamma * 6.71e5;  hImpactB1 = gamma * 1.693e6;
 
 }
 
@@ -1125,17 +1185,12 @@ MediumSilicon::UpdateImpactIonisationGrant() {
   double gamma = tanh(hbarOmega / (2. * BoltzmannConstant * 300.)) /
                  tanh(hbarOmega / (2. * BoltzmannConstant * temperature));
                  
-  eImpactA0 = 2.60e6 * gamma;
-  eImpactB0 = 1.43e6 * gamma;
-  eImpactA1 = 6.20e5 * gamma;
-  eImpactB1 = 1.08e6 * gamma;
-  eImpactA2 = 5.05e5 * gamma;
-  eImpactB2 = 9.90e5 * gamma;
+  eImpactA0 = 2.60e6 * gamma; eImpactB0 = 1.43e6 * gamma;
+  eImpactA1 = 6.20e5 * gamma; eImpactB1 = 1.08e6 * gamma;
+  eImpactA2 = 5.05e5 * gamma; eImpactB2 = 9.90e5 * gamma;
   
-  hImpactA0 = 2.00e6 * gamma;
-  hImpactB0 = 1.97e6 * gamma;
-  hImpactA1 = 5.60e5 * gamma;
-  hImpactB1 = 1.32e6 * gamma;
+  hImpactA0 = 2.00e6 * gamma; hImpactB0 = 1.97e6 * gamma;
+  hImpactA1 = 5.60e5 * gamma; hImpactB1 = 1.32e6 * gamma;
   
 }
 
@@ -1387,21 +1442,21 @@ bool
 MediumSilicon::ElectronScatteringRates() {
 
   // Reset the scattering rates
-  cfTotElectrons.resize(nEnergySteps);
-  cfElectrons.resize(nEnergySteps);
+  cfTotElectronsX.resize(nEnergySteps);
+  cfElectronsX.resize(nEnergySteps);
   for (int i = nEnergySteps; i--;) {
-    cfTotElectrons[i] = 0.;
-    cfElectrons[i].clear();
+    cfTotElectronsX[i] = 0.;
+    cfElectronsX[i].clear();
   }
-  energyLossElectrons.clear();
-  scatTypeElectrons.clear();
+  energyLossElectronsX.clear();
+  scatTypeElectronsX.clear();
   cfNullElectrons = 0.;
   
-  nLevels = 0;
+  nLevelsX = 0;
   // Fill the scattering rates table
-  ElectronAcousticScatteringRates();
-  ElectronImpurityScatteringRates();
-  ElectronIntervalleyScatteringRates();
+  ElectronAcousticScatteringRatesX();
+  //ElectronImpurityScatteringRates();
+  ElectronIntervalleyScatteringRatesXX();
   ElectronIonisationRates();
 
   std::ofstream outfile;  
@@ -1409,20 +1464,20 @@ MediumSilicon::ElectronScatteringRates() {
 
   for (int i = 0; i < nEnergySteps; ++i) {
     // Sum up the scattering rates of all processes 
-    for (int j = nLevels; j--;) cfTotElectrons[i] += cfElectrons[i][j];
+    for (int j = nLevelsX; j--;) cfTotElectronsX[i] += cfElectronsX[i][j];
     
     if (debug) {
-      outfile << i * eStep << " " << cfTotElectrons[i] << " ";
-      for (int j = 0; j < nLevels; ++j) outfile << cfElectrons[i][j] << " ";
+      outfile << i * eStep << " " << cfTotElectronsX[i] << " ";
+      for (int j = 0; j < nLevelsX; ++j) outfile << cfElectronsX[i][j] << " ";
       outfile << std::endl;
     }
 
-    if (cfTotElectrons[i] > cfNullElectrons) {
-      cfNullElectrons = cfTotElectrons[i];
+    if (cfTotElectronsX[i] > cfNullElectrons) {
+      cfNullElectrons = cfTotElectronsX[i];
     }
    
     // Make sure the total scattering rate is positive
-    if (cfTotElectrons[i] <= 0.) { 
+    if (cfTotElectronsX[i] <= 0.) { 
       std::cerr << className << "::ElectronScatteringRates:" << std::endl;
       std::cerr << "    Scattering rate at " << i * eStep << " <= 0." 
                 << std::endl;
@@ -1430,9 +1485,9 @@ MediumSilicon::ElectronScatteringRates() {
     }
 
     // Normalise the rates
-    for (int j = 0; j < nLevels; ++j) {
-      cfElectrons[i][j] /= cfTotElectrons[i];
-      if (j > 0) cfElectrons[i][j] += cfElectrons[i][j - 1];
+    for (int j = 0; j < nLevelsX; ++j) {
+      cfElectronsX[i][j] /= cfTotElectronsX[i];
+      if (j > 0) cfElectronsX[i][j] += cfElectronsX[i][j - 1];
     }  
 
   }
@@ -1443,7 +1498,7 @@ MediumSilicon::ElectronScatteringRates() {
 }
 
 bool 
-MediumSilicon::ElectronAcousticScatteringRates() {
+MediumSilicon::ElectronAcousticScatteringRatesX() {
 
   // Reference:
   //  - C. Jacoboni and L. Reggiani,
@@ -1469,20 +1524,20 @@ MediumSilicon::ElectronAcousticScatteringRates() {
   
   double en = Small;
   for (int i = 0; i < nEnergySteps; ++i) {
-    cfElectrons[i].push_back(cIntra * GetConductionBandDensityOfStates(en));
+    cfElectronsX[i].push_back(cIntra * GetConductionBandDensityOfStates(en, 0));
     en += eStep;
   }  
   
-  energyLossElectrons.push_back(0.);
-  scatTypeElectrons.push_back(0);
-  ++nLevels;
+  energyLossElectronsX.push_back(0.);
+  scatTypeElectronsX.push_back(0);
+  ++nLevelsX;
 
   return true;
 
 }
 
 bool 
-MediumSilicon::ElectronIntervalleyScatteringRates() {
+MediumSilicon::ElectronIntervalleyScatteringRatesXX() {
 
   // Reference:
   //  - C. Jacoboni and L. Reggiani,
@@ -1521,14 +1576,14 @@ MediumSilicon::ElectronIntervalleyScatteringRates() {
   for (int i = 0; i < nEnergySteps; ++i) {
     for (int j = 0; j < nPhonons; ++j) {
      // Absorption
-      dos = GetConductionBandDensityOfStates(en + eph[j]);
-      cfElectrons[i].push_back(c[j] * nocc[j] * dos);      
+      dos = GetConductionBandDensityOfStates(en + eph[j], 0);
+      cfElectronsX[i].push_back(c[j] * nocc[j] * dos);      
       // Emission
       if (en > eph[j]) {
-        dos = GetConductionBandDensityOfStates(en - eph[j]);
-        cfElectrons[i].push_back(c[j] * (nocc[j] + 1) * dos);
+        dos = GetConductionBandDensityOfStates(en - eph[j], 0);
+        cfElectronsX[i].push_back(c[j] * (nocc[j] + 1) * dos);
       } else {
-        cfElectrons[i].push_back(0.);
+        cfElectronsX[i].push_back(0.);
       }
     }
     en += eStep;
@@ -1536,14 +1591,14 @@ MediumSilicon::ElectronIntervalleyScatteringRates() {
 
   for (int j = 0; j < nPhonons; ++j) {
     // Absorption
-    energyLossElectrons.push_back(-eph[j]);
-    scatTypeElectrons.push_back(5);
+    energyLossElectronsX.push_back(-eph[j]);
+    scatTypeElectronsX.push_back(5);
     // Emission
-    energyLossElectrons.push_back(eph[j]);
-    scatTypeElectrons.push_back(4);
+    energyLossElectronsX.push_back(eph[j]);
+    scatTypeElectronsX.push_back(4);
   }
 
-  nLevels += 2 * nPhonons;
+  nLevelsX += 2 * nPhonons;
 
   return true;
 
@@ -1574,13 +1629,13 @@ MediumSilicon::ElectronIonisationRates() {
     if (en > eth[2]) {
       fIon += p[2] * (en - eth[2]) * (en - eth[2]);
     }
-    cfElectrons[i].push_back(fIon);
+    cfElectronsX[i].push_back(fIon);
     en += eStep;
   }
 
-  energyLossElectrons.push_back(eth[0]);
-  scatTypeElectrons.push_back(1);
-  ++nLevels;
+  energyLossElectronsX.push_back(eth[0]);
+  scatTypeElectronsX.push_back(1);
+  ++nLevelsX;
 
   return true;
 
@@ -1593,11 +1648,8 @@ MediumSilicon::ElectronImpurityScatteringRates() {
   const double kbt = BoltzmannConstant * temperature;
 
   // Band parameters
-  // Longitudinal and transverse effective electron masses
-  const double ml = 0.98; 
-  const double mt = 0.19;
   // Density of states effective mass
-  const double md = pow(ml * mt * mt, 1. / 3.) * ElectronMass;
+  const double md = pow(mLongX * mTransX * mTransX, 1. / 3.) * ElectronMass;
   // Non-parabolicity coefficient [eV-1]
   const double alpha = 0.5;
 
@@ -1630,38 +1682,43 @@ MediumSilicon::ElectronImpurityScatteringRates() {
     // cfElectrons[i][iLevel] = c * sqrt(gamma) * (1. + 2 * alpha * en) /
     //                         (1. + 4. * gamma / eb);
     if (gamma <= 0.) {
-      cfElectrons[i].push_back(0.);
+      cfElectronsX[i].push_back(0.);
     } else {
       b = 4 * gamma / eb;
-      cfElectrons[i].push_back((c / pow(gamma, 1.5)) * 
+      cfElectronsX[i].push_back((c / pow(gamma, 1.5)) * 
                                (log(1. + b) - b / (1. + b)));
     }
     en += eStep;
   }
 
-  energyLossElectrons.push_back(0.);
-  scatTypeElectrons.push_back(0); 
-  ++nLevels;
+  energyLossElectronsX.push_back(0.);
+  scatTypeElectronsX.push_back(0); 
+  ++nLevelsX;
 
   return true;
 
 }
 
 double
-MediumSilicon::GetConductionBandDensityOfStates(const double e) {
+MediumSilicon::GetConductionBandDensityOfStates(const double e, 
+                                                const int band) {
 
-  // Longitudinal and transverse effective electron masses
-  const double ml = 0.98; 
-  const double mt = 0.19;
-  // Density-of-states effective mass (cube)
-  const double md3 = ml * mt * mt;
+  if (band >= 0 && band < 6) {
+    // X valleys
+    // Density-of-states effective mass (cube)
+    const double md3 = mLongX * mTransX * mTransX;
   
-  // Non-parabolicity parameter
-  const double alpha = 0.5;
+    // Non-parabolicity parameter
+    const double alpha = 0.5;
   
-  return ElectronMass * sqrt(ElectronMass * md3 * e * (1. + alpha * e) / 2.) * 
-         (1. + 2. * alpha * e) / (Pi2 * pow(HbarC, 3.));
-         
+    return ElectronMass * 
+           sqrt(ElectronMass * md3 * e * (1. + alpha * e) / 2.) * 
+           (1. + 2. * alpha * e) / (Pi2 * pow(HbarC, 3.));
+  }
+  
+  return ElectronMass * sqrt(ElectronMass * e / 2.) / 
+         (Pi2 * pow(HbarC, 3.));
+
 }
   
 }

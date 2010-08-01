@@ -52,6 +52,10 @@ class AvalancheMicroscopic {
     // Switch on/off photon transport
     void EnablePhotonTransport()  {usePhotons = true;}
     void DisablePhotonTransport() {usePhotons = false;}
+    
+    // Switch on/off stepping according to band structure E(k)
+    void EnableBandStructure()  {useBandStructure = true;}
+    void DisableBandStructure() {useBandStructure = false;}
 
     // Switch on/off update of coordinates for null-collision steps
     void EnableNullCollisionSteps()  {useNullCollisionSteps = true;}
@@ -144,10 +148,12 @@ class AvalancheMicroscopic {
       double x0, y0, z0, t0;
       // Initial energy
       double e0;
+      // Band
+      int band;
       // Current position
       double x, y, z, t;    
-      // Current direction
-      double dx, dy, dz;
+      // Current direction/wavevector
+      double kx, ky, kz;
       // Current energy
       double energy;
       // Drift line
@@ -191,8 +197,15 @@ class AvalancheMicroscopic {
     bool useInducedCharge;
     bool useDriftLines;
     bool usePhotons;
+    bool useBandStructure;
     bool useNullCollisionSteps;
     bool useBfield;
+    
+    // Rotation matrices
+    double rb11, rb12, rb13;
+    double rb21, rb22, rb23;
+    double rb31, rb32, rb33;
+    double rx22, rx23, rx32, rx33;
     
     // Transport cuts
     double deltaCut;
@@ -218,13 +231,21 @@ class AvalancheMicroscopic {
     bool debug;
 
     // Electron transport
-    bool TransportElectron(const double x0, const double y0, const double z0,
-                           const double t0, const double e0,
+    bool TransportElectron(
+        const double x0, const double y0, const double z0, 
+        const double t0, const double e0,
         const double dx0, const double dy0, const double dz0, const bool aval);
     // Photon transport
     void TransportPhoton(const double x, const double y, const double z,
                          const double t, const double e);
+                         
+    void ComputeRotationMatrix(
+        const double bx, const double by, const double bz, const double bmag,
+        const double ex, const double ey, const double ex);       
 
+    void RotateGlobal2Local(double& dx, double& dy, double& dz);
+    void RotateLocal2Global(double& dx, double& dy, double& dz);
+        
     double Min(const double x1, const double x2) const {
       return x1 > x2 ? x2 : x1;
     }

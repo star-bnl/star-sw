@@ -3,10 +3,13 @@
 
 #include "Medium.hh"
 #include "FundamentalConstants.hh"
+#include "Random.hh"
 
 namespace Garfield {
 
 int Medium::idCounter = -1;
+
+double Medium::inverseElectronMass = SpeedOfLight * SpeedOfLight / ElectronMass;
 
 Medium::Medium() :
   className("Medium"), 
@@ -171,7 +174,8 @@ Medium::ElectronVelocity(const double ex, const double ey, const double ez,
   // Compute the angle between B field and E field
   const double eb = fabs(ex * bx + ey * by + ez * bz);
   
-
+  return false;
+  
 }
 
 bool 
@@ -236,17 +240,31 @@ Medium::ElectronAttachment(const double ex, const double ey, const double ez,
 }
 
 double 
-Medium::GetElectronEffectiveMass(const double e, const int band) {
+Medium::GetElectronEnergy(const double px, const double py, const double pz,
+                          double& vx, double& vy, double& vz, const int band) {
 
-  return 1.;
+  vx = inverseElectronMass * px;
+  vy = inverseElectronMass * py;
+  vz = inverseElectronMass * pz;
+  
+  return 0.5 * inverseElectronMass * (px * px + py * py + pz * pz);
   
 }
 
-double
-Medium::GetElectronNonParabolicity(const double energy, const int band) {
+void
+Medium::GetElectronMomentum(const double e, 
+                            double& px, double& py, double& pz, 
+                            const int band) {
 
-  return 0.;
-
+  const double p = sqrt(2. * ElectronMass * e) / SpeedOfLight;
+  const double ctheta = 1. - 2. * RndmUniform();
+  const double stheta = sqrt(1. - ctheta * ctheta);
+  const double phi = TwoPi * RndmUniform();
+  
+  px = p * stheta * cos(phi);
+  py = p * stheta * sin(phi);
+  pz = p * ctheta;
+  
 }
 
 double 
@@ -283,14 +301,11 @@ Medium::GetElectronCollision(const double e, int& type, int& level,
                             
 }
 
-int 
-Medium::GetNumberOfLevels() {
+bool 
+Medium::GetDeexcitationProduct(const int i, double& t, 
+                               int& type, double& energy) {
 
-  if (debug) {
-    std::cerr << className << "::GetNumberOfLevels:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
-  }
-  return 0;
+   return false;
 
 }
                 
