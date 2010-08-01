@@ -52,6 +52,11 @@ void StvDiver::Reset()
  mSteps->Reset();
 }
 //_____________________________________________________________________________
+void StvDiver::SetSkip(int skip) 
+{
+ mSteps->SetSkip(skip);
+}
+//_____________________________________________________________________________
 int  StvDiver::Dive()
 {
 
@@ -238,6 +243,7 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
     {
       fExit = EndVolume();
       if (!fExit) {
+        if (fSkip) 			break;
         StTGeoHelper *tgh = StTGeoHelper::Instance();
         if (!tgh->IsSensitive(fVolume)) break;
         if (!tgh->IsActive(0)) 		break;

@@ -28,6 +28,7 @@ void Reset();
 int  Dive();
 void Set(const StvNodePars *inpar,const StvFitErrs *inerr,int idir);
 void Set(      StvNodePars *otpar,      StvFitErrs *oterr,Mtx55D_t *deriv);
+void SetSkip(int skip=1);
 double GetLength() const;
 protected:
 char mBeg[1];
@@ -38,7 +39,7 @@ StvNodePars    *mOutPars;
 StvFitErrs     *mOutErrs;
 Mtx55D_t       *mOutDeri;
 THelixTrack    *mHelix;
-StvELossTrak    *mELoss;
+StvELossTrak   *mELoss;
 
 StvMCStepping  *mSteps;
 StvMCField     *mFld;
@@ -78,6 +79,7 @@ void Set(StvELossTrak *eLoss)	{fELossTrak = eLoss;}
 void Set(THelixTrack *helx )	{fHelix    = helx ;}
 void Set(Mtx55D_t    *deriv)	{fDeriv    = deriv;}
 void Set(StvMCField  *field)	{fField    = field;}
+void SetSkip(int skip=1)	{fSkip     = skip ;}
  int BegVolume();
  int EndVolume();
  int IsDca00(int begEnd);
@@ -91,6 +93,7 @@ protected:
 char fFist[1];
 int    fKount;
 int    fExit;
+int    fSkip;
 float  fStartSign;
 float  fCurrentSign;
 char fMidl[1];
