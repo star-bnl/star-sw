@@ -19,7 +19,8 @@ void StTinyRcTrack::Print(Option_t *option) const {
     cout << Form("  V pT      pZ      eta     phi     Dca     DcaXY   DcaZ    Flag  Tpc Svt Ssd Ftpc All Ass Pos") << endl;
   else {
     if (mIsValidGl) 
-      cout << Form("Gl%2i%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%5i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%8.3f", 
+//    cout <<Form("Gl%2i%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%5i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%8.3f", 
+      cout <<Form("Gl%2i%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%5i%4i%4i%4i%4i%4i%4i%4i%7i%7i%8.3f",
 		   (int) mIsValidGl, mPtGl,  mPzGl,  mEtaGl,  mPhiGl, mDcaGl, mDcaXYGl,mDcaZGl, 
 		   mFlag,  mFitPts, mFitSvt, mFitSsd, mFitFtpc, mAllPts, mNAssocMc, mNPossible, mEmcSoftIdHiTowerRc[0],mEmcTowerAdc[0], mEmcEnergyRcHit[0] ) << endl;
     if (mIsValidPr)
@@ -30,6 +31,9 @@ void StTinyRcTrack::Print(Option_t *option) const {
 //________________________________________________________________________________
 //
 // $Log: StTinyRcTrack.cxx,v $
+// Revision 1.5  2010/08/02 20:14:16  perev
+// Format fix, thanks to Hiroshi
+//
 // Revision 1.4  2007/12/22 20:37:53  calderon
 // Added EMC information to tracks.  MC info obtained from StMcTrack, Rec Info
 // obtained from track extrapolation to BEMC of rec track.
@@ -39,6 +43,9 @@ void StTinyRcTrack::Print(Option_t *option) const {
 //
 // Revision 1.2  2002/06/06 18:58:29  calderon
 // Added $Log: StTinyRcTrack.cxx,v $
+// Added Revision 1.5  2010/08/02 20:14:16  perev
+// Added Format fix, thanks to Hiroshi
+// Added
 // Added Revision 1.4  2007/12/22 20:37:53  calderon
 // Added Added EMC information to tracks.  MC info obtained from StMcTrack, Rec Info
 // Added obtained from track extrapolation to BEMC of rec track.

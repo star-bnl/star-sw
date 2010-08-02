@@ -23,7 +23,8 @@ void StTinyMcTrack::Print(Option_t *option) const {
       Double_t R = mStopR;
       if (R < 0) R = 0;
       if (R > 999.99) R = 999.99;
-      cout << Form("Mc%2i%8.3f%8.3f%8.3f%8.3f%5i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%8.3f%4i%8.3f%8.3f%4i%4i%4i%4i%2i", 
+//    cout << Form("Mc%2i%8.3f%8.3f%8.3f%8.3f%5i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%8.3f%4i%8.3f%8.3f%4i%4i%4i%4i%2i", 
+      cout << Form("Mc%2i%8.3f%8.3f%8.3f%8.3f%5i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%4i%6i%8.3f%4i%4i%8.3f%8.3f%4i%4i%2i",
 		   (int) mIsValid, mPtMc,  mPzMc,  mEtaMc,  mPhiMc,  
 		   mNHitMc,  mNSvtHitMc,  mNSsdHitMc,  mNFtpcHitMc,
 		   mNBemcHitMc, mNBprsHitMc, mNBsmdeHitMc, mNBsmdpHitMc,
@@ -34,6 +35,9 @@ void StTinyMcTrack::Print(Option_t *option) const {
 }
 //
 // $Log: StTinyMcTrack.cxx,v $
+// Revision 1.4  2010/08/02 20:14:16  perev
+// Format fix, thanks to Hiroshi
+//
 // Revision 1.3  2007/12/22 20:37:53  calderon
 // Added EMC information to tracks.  MC info obtained from StMcTrack, Rec Info
 // obtained from track extrapolation to BEMC of rec track.
