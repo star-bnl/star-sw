@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGBTrack.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCAGBTrack.cxx,v 1.2 2010/08/02 16:45:28 ikulakov Exp $
 //***************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -25,7 +25,8 @@ std::ostream &operator<<( std::ostream &out, const AliHLTTPCCAGBTrack &t )
   out << t.fFirstHitRef;
   out << t.fAlpha;
   out << t.fDeDx;
-  out << t.fParam;
+  out << t.fInnerParam;
+  out << t.fOuterParam;
 
   return out;
 }
@@ -36,7 +37,8 @@ std::istream &operator>>( std::istream &in, AliHLTTPCCAGBTrack &t )
   in >> t.fFirstHitRef;
   in >> t.fAlpha;
   in >> t.fDeDx;
-  in >> t.fParam;
+  in >> t.fInnerParam;
+  in >> t.fOuterParam;
 
   return in;
 }
