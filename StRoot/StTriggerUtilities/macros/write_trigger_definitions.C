@@ -81,7 +81,7 @@ void write_trigger_definitions(int runNumber = 10180030)
 
   for (int triggerIndex = 0; triggerIndex < a.GetEntriesFast(); ++triggerIndex) {
     StTriggerDefinition* def = (StTriggerDefinition*)a.At(triggerIndex);
-    def->print();
+    if (def) def->print();
   }
 
   TBufferFile buf(TBuffer::kWrite);
