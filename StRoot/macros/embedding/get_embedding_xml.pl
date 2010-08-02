@@ -17,6 +17,9 @@ chomp($date);
 # Default parameters
 my $staroflDir    = "/home/starofl"; # starofl home
 
+# Common log/generator area under /project directory at PDSF
+$EMLOGS = "/project/projectdirs/star/embedding";
+
 my $force         = 0;                                              # Default is false (do not overwrite existing xml file)
 my $production    = "P08ic";                                        # Default production
 my $library       = getLibrary($production);                        # Default library
@@ -41,13 +44,13 @@ my $maxFilesPerProcess = 1 ;       # 1 file per job
 my $fileListSyntax     = "paths" ; # Read local file on disk
 my $nevents            = 1000 ;    # Number of maximum events
 my $ptOption           = "FlatPt"; # Default pt option
-my $generatorDir       = getGeneratorDirectory($production);
-my $logDirectory       = getLogDirectory($production);
+#my $generatorDir       = getGeneratorDirectory($production);
+#my $logDirectory       = getLogDirectory($production);
+my $generatorDir       = "" ;  # will be determined later by (production, particle name, request number)
+my $logDirectory       = "" ;  # will be determined later by (production, particle name, request number)
 my $libraryPath        = ".sl44_gcc346";      # Default library path
 
 # Scripts
-#my $getYearFromFile = "$staroflDir/aarose/getYearFromFile.pl";
-#my $getDayFromFile  = "$staroflDir/aarose/getDayFromFile.pl";
 my $getYearDayFromFile = "StRoot/macros/embedding/getYearDayFromFile.pl";
 my $localTestScript    = "test.csh" ;  # Local test script for one input daq/tags file
 
@@ -62,7 +65,6 @@ GetOptions (
     'help' => \$help,
     'library=s' => \$library,              # Library
     'local' => \$local,                    # Make local test script
-    'log=s' => \$logDirectory,             # Log file directory
     'mixer=s' => \$bfcMixer,               # bfcMixer
     'mode=s' => \$ptOption,                # pt option
     'mult=s' => \$multiplicity,            # Number of MC tracks per event
@@ -100,7 +102,6 @@ my $usage = q(
   -local                       Make local test script to read one input daq/tag file. Output shell script is test.csh,
                                which will be not overwrited by default (use -f option to force overwriting)
 
-  -log [log file directory]    Set log file directory (default is /project/projectdirs/star/embedding/$production/LOG/)
   -mixer [bfcMixer]            Set bfcMixer macro (default is StRoot/macros/embeding/bfcMixer_TpcSvtSSd.C)
   -mode                        Set pt mode (default is FlatPt)
 
@@ -150,10 +151,11 @@ if( $help )
 printDebug("Verbose mode. Print debugging messages ...");
 
 #----------------------------------------------------------------------------------------------------
-# Set generator/directory from production name
+# Set generator/directory from production name, particle name and request number
 #----------------------------------------------------------------------------------------------------
-$generatorDir = getGeneratorDirectory($production);
-$logDirectory = getLogDirectory($production);
+$generatorDir        = getGeneratorDirectory($production, $particleName, $requestNumber);
+$logDirectory        = getLogDirectory($production, $particleName, $requestNumber);
+my $tempLogDirectory = getTempLogDirectory($production, 1) ;
 
 #----------------------------------------------------------------------------------------------------
 # Make sure perl scripts exist
@@ -166,7 +168,10 @@ checkFile($getYearDayFromFile);
 checkDirectory($tagsDirectory, "tag");
 checkDirectory($daqsDirectory, "daq");
 checkDirectory($generatorDir,  "generator");
-checkDirectory($logDirectory,  "log");
+checkDirectory($tempLogDirectory,  "temporary log");
+
+# No checks for logs anymore. will be created dynamically in the xml file
+#checkDirectory($logDirectory,  "log");
 
 $outputXml = getXmlFileName($production);
 
@@ -232,14 +237,21 @@ print OUT "setenv EMYEAR `$getYearDayFromFile -y $fileBaseNameXml`\n";
 print OUT "setenv EMDAY `$getYearDayFromFile -d $fileBaseNameXml`\n";
 print OUT "\n";
 
-#printDebug("Set trigger setup name: $trgsetupName ...");
-#print OUT "<!-- Set trigger setup name -->\n";
-#print OUT "setenv TRG $trgsetupName\n";
+printDebug("Set log files area ...");
+print OUT "<!-- Set log files area -->\n";
+print OUT "setenv EMLOGS $EMLOGS\n";
+
+printDebug("Set HPSS outputs/LOG path ...");
+my $hpssLogDir = "/nersc/projects/starofl/embedding/$trgsetupName/$particleName\_&FSET;_$requestNumber/$production.$library/\${EMYEAR}/\${EMDAY}";
+print OUT "<!-- Set HPSS outputs/LOG path -->\n";
+print OUT "setenv EMHPSS $hpssLogDir\n";
 
 print OUT "\n";
-print OUT "<!-- Print out EMYEAR and EMDAY -->\n";
-print OUT "echo \$EMYEAR\n";
-print OUT "echo \$EMDAY\n";
+print OUT "<!-- Print out EMYEAR and EMDAY and EMLOGS -->\n";
+print OUT "echo EMYEAR : \$EMYEAR\n";
+print OUT "echo EMDAY  : \$EMDAY\n";
+print OUT "echo EMLOGS : \$EMLOGS\n";
+print OUT "echo EMHPSS : \$EMHPSS\n";
 print OUT "\n";
 print OUT "<!-- Start job -->\n";
 
@@ -286,17 +298,20 @@ printDebug("Set logfilename: $logFileName ...");
 my $errFileName = "$fileBaseNameXml.$jobIdXml.elog";
 printDebug("Set errfilename: $errFileName ...");
 
-print OUT "cp $logDirectory/$jobIdXml.log $logFileName\n";
-print OUT "cp $logDirectory/$jobIdXml.elog $errFileName\n";
+print OUT "cp " . getTempLogDirectory($production, 0) . "/$jobIdXml.log $logFileName\n";
+print OUT "cp " . getTempLogDirectory($production, 0) . "/$jobIdXml.elog $errFileName\n";
+print OUT "\n";
+print OUT "<!-- New command to organize log files -->\n";
+print OUT "mkdir -p $logDirectory\n";
+print OUT "mv " . getTempLogDirectory($production, 0) . "/$jobIdXml.* $logDirectory/\n";
 print OUT "\n";
 
 #----------------------------------------------------------------------------------------------------
 # put log file in HPSS
 #----------------------------------------------------------------------------------------------------
-my $hpssLogDir = "/nersc/projects/starofl/embedding/$trgsetupName/$particleName\_&FSET;_$requestNumber/$production.$library/\${EMYEAR}/\${EMDAY}";
 printDebug("Set archive log/root files in HPSS: $hpssLogDir ...");
 print OUT "<!-- Archive in HPSS -->\n";
-print OUT "hsi \"mkdir -p $hpssLogDir; prompt; cd $hpssLogDir; mput *.root; mput $logFileName; mput $errFileName\"\n";
+print OUT "hsi \"mkdir -p \$EMHPSS; prompt; cd \$EMHPSS; mput *.root; mput $logFileName; mput $errFileName\"\n";
 print OUT "\n";
 print OUT "</command>\n";
 print OUT "\n";
@@ -306,9 +321,12 @@ print OUT "\n";
 # Locations, log/elog, daq files, output csh/list files and local sand-box
 #----------------------------------------------------------------------------------------------------
 printDebug("Locations of log/elog, daq files, csh/list and local sand-box ...");
+
+# Now, the directory for LOG files here is the temporary path to store the files.
+# Files will be moved a new path determined by production, particle name, request number and FSET
 print OUT "<!-- Define locations of log/elog files -->\n";
-print OUT "<stdout URL=\"file:$logDirectory/$jobIdXml.log\"/>\n";
-print OUT "<stderr URL=\"file:$logDirectory/$jobIdXml.elog\"/>\n";
+print OUT "<stdout URL=\"file:$tempLogDirectory/$jobIdXml.log\"/>\n";
+print OUT "<stderr URL=\"file:$tempLogDirectory/$jobIdXml.elog\"/>\n";
 print OUT "\n";
 print OUT "<!-- Input daq files -->\n";
 print OUT "<input URL=\"file:$daqsDirectory/st*\"/>\n";
@@ -495,26 +513,70 @@ sub getLibrary {
 # Get production directory
 #----------------------------------------------------------------------------------------------------
 sub getProductionDirectory {
+  # flag controls to return
+  # Enviromental variable "$EMLOGS" when flag == 0
+  # Expanded strings of "$EMLOGS" when flag != 0
   my $production = shift @_ ;
-  return "/project/projectdirs/star/embedding/$production";
+  my $flag       = shift @_ ;
+
+  if ( $flag == 0 ){
+    return "\$EMLOGS/$production";
+  }
+  else{
+    return "$EMLOGS/$production";
+  }
+}
+
+#----------------------------------------------------------------------------------------------------
+# Get common LOG/Generator path
+#----------------------------------------------------------------------------------------------------
+sub getEmbeddingProjectDirectory {
+  # Make common directory for LOG/Generator from the production, particle name and request number
+  # The directory structure will be : $EMLOGS/${production}/${particleName}_${requestNumber}
+  my $production    = shift @_ ;
+  my $particleName  = shift @_ ;
+  my $requestNumber = shift @_ ;
+  my $flag          = shift @_ ;
+  my $productionDir = getProductionDirectory($production, $flag);
+  return "$productionDir/$particleName\_$requestNumber";
+
 }
 
 #----------------------------------------------------------------------------------------------------
 # Get generator directory
 #----------------------------------------------------------------------------------------------------
 sub getGeneratorDirectory {
+  # Make generator directory from the production, particle name and request number
+  # The directory structure will be : $EMLOGS/${production}/${particleName}_${requestNumber}/LIST
+  # Do not use emvironmental variable here. Generator tag cannot recognize it.
+  my $production    = shift @_ ;
+  my $particleName  = shift @_ ;
+  my $requestNumber = shift @_ ;
+  my $dir           = getEmbeddingProjectDirectory($production, $particleName, $requestNumber, 1);
+  return "$dir/LIST";
+}
+
+#----------------------------------------------------------------------------------------------------
+# Get temporary LOG directory
+#----------------------------------------------------------------------------------------------------
+sub getTempLogDirectory {
+  # Make temporary LOG directory
   my $production = shift @_ ;
-  my $productionDir = getProductionDirectory($production);
-  return "$productionDir/LIST";
+  my $flag       = shift @_ ;
+  return getProductionDirectory($production, $flag) . "/LOG";
 }
 
 #----------------------------------------------------------------------------------------------------
 # Get LOG directory
 #----------------------------------------------------------------------------------------------------
 sub getLogDirectory {
-  my $production = shift @_ ;
-  my $productionDir = getProductionDirectory($production);
-  return "$productionDir/LOG";
+  # Make log directory from the production, particle name, request number and FSET
+  # The directory structure will be : $EMLOGS/${production}/${particleName}_${requestNumber}/LOG/&FSET;
+  my $production    = shift @_ ;
+  my $particleName  = shift @_ ;
+  my $requestNumber = shift @_ ;
+  my $dir           = getEmbeddingProjectDirectory($production, $particleName, $requestNumber, 0);
+  return "$dir/LOG/&FSET;";
 };
 
 #----------------------------------------------------------------------------------------------------
