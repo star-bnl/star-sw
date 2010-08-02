@@ -8,12 +8,12 @@
 #include "TString.h"
 
 struct StTriggerThreshold : public TObject {
-  int     object;		// crate
-  int     index;		// board
-  int     reg;			// register number
+  Int_t   object;		// crate
+  Int_t   index;		// board
+  Int_t   reg;			// register number
   TString label;		// register label
-  int     value;		// register value
-  int     defaultvalue;		// register default value
+  Int_t   value;		// register value
+  Int_t   defaultvalue;		// register default value
 
   void print();
 
