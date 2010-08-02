@@ -1,8 +1,8 @@
 MACRO loadlibs
 
- gexec $STAR_LIB/geometry.so
- gexec $STAR_LIB/libpythia_6410t.so
- gexec $STAR_LIB/bpythia.so
+*gexec $STAR_LIB/geometry.so
+*gexec $STAR_LIB/libpythia_6410t.so
+*gexec $STAR_LIB/bpythia.so
  gexec $ROOTSYS/lib/libCint.so
  gexec $ROOTSYS/lib/libCore.so
  gexec $ROOTSYS/lib/libMathCore.so
