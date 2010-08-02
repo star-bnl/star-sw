@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.23 2010/03/25 15:05:54 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.24 2010/08/02 23:06:15 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.24  2010/08/02 23:06:15  fisyak
+ * Fix format
+ *
  * Revision 1.23  2010/03/25 15:05:54  fisyak
  * Add AfterBurner
  *
@@ -294,7 +297,7 @@ void StTpcHitMaker::UpdateHitCollection(Int_t sector) {
     }
     for (Int_t l = 0; l < NRows; l++, cld++) {
       if (Debug() > 1) {
-	LOG_INFO << Form("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X, Id %d, Q %d ",
+	LOG_INFO << Form("    pad %f[%d:%d], tb %f[%d:%d], cha %d, fla 0x%X",//, Id %d, Q %d ",
 			 cld->pad,
 			 cld->p1,
 			 cld->p2,
