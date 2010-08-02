@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.2 2010/08/02 16:45:28 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -189,12 +189,30 @@ void AliHLTTPCCAGlobalPerformance::FillHistos()
       const AliHLTTPCCAGBTrack &tCA = fTracker->Track( itr );
       AliHLTTPCCAMCTrack &mc = (*fMCTracks)[iMC];
 
+      int nFirstMC = mc.FirstMCPointID();
+      int nMCPoints = mc.NMCPoints();
+
+      AliHLTTPCCALocalMCPoint *points = &((*fLocalMCPoints).Data()[nFirstMC]);
+
+      const AliHLTTPCCAGBTrack &t = fTracker->Track( itr );
+      AliHLTTPCCATrackParam p = t.Param();
+      int MCindex=-1;
+      for(int iMCPoint=0; iMCPoint<nMCPoints; iMCPoint++)
+      {
+        if(fabs(points[iMCPoint].X() - p.X())< 2.f)
+        {
+          if(fabs(p.Y() - points[iMCPoint].Y())<2 && fabs(p.Z() - points[iMCPoint].Z())<2)
+            MCindex = iMCPoint;
+        }
+      }
+      if(MCindex == -1)
+      {
+        break;
+      }
+
       // track resolutions
       while ( 1/*mc.Set() == 2 && TMath::Abs( mc.TPCPar()[0] ) + TMath::Abs( mc.TPCPar()[1] ) > 1*/ ) {
-
-        const AliHLTTPCCAGBTrack &t = fTracker->Track( itr );
-        AliHLTTPCCATrackParam p = t.Param();
-        double cosA = TMath::Cos( t.Alpha() );
+/*        double cosA = TMath::Cos( t.Alpha() );
         double sinA = TMath::Sin( t.Alpha() );
         double mcX =  mc.TPCPar()[0] * cosA + mc.TPCPar()[1] * sinA;
         double mcY = -mc.TPCPar()[0] * sinA + mc.TPCPar()[1] * cosA;
@@ -211,7 +229,27 @@ void AliHLTTPCCAGlobalPerformance::FillHistos()
         double mcPt = 1. / TMath::Abs( mcQPt );
         if ( mcPt < Parameters::RefThreshold ) break;
         if ( t.NHits() <  PParameters::MinimumHitsForMCTrack ) break;
-        double bz = fTracker->Slice( 0 ).Param().Bz();
+        double bz = fTracker->Slice( 0 ).Param().Bz();*/
+	
+	
+        double mcX =  points[MCindex].X();
+        double mcY =  points[MCindex].Y();
+        double mcZ =  points[MCindex].Z();
+        double mcQP = points[MCindex].QP();
+        double mcEx = points[MCindex].Px()*mcQP;
+        double mcEy = points[MCindex].Py()*mcQP;
+        double mcEz = points[MCindex].Pz()*mcQP;
+        double mcEt = TMath::Sqrt( mcEx * mcEx + mcEy * mcEy );
+        if ( TMath::Abs( mcEt ) < 1.e-4 ) break;
+        double mcSinPhi = mcEy / mcEt;
+        double mcDzDs   = mcEz / mcEt;
+        double mcQPt =  mcQP / mcEt;
+        if ( TMath::Abs( mcQPt ) < 1.e-6 ) break;
+        double mcPt = 1. / TMath::Abs( mcQPt );
+//        if ( mcPt < Parameters::RefThreshold ) break;
+//	if ( t.NHits() <  PParameters::MinimumHitsForMCTrack ) break;
+        double bz = fTracker->Slice( 0 ).Param().cBz();
+	
         if ( !p.TransportToXWithMaterial( mcX, bz ) ) break;
         if ( p.GetCosPhi()*mcEx < 0 ) { // change direction
           mcSinPhi = -mcSinPhi;
@@ -221,20 +259,27 @@ void AliHLTTPCCAGlobalPerformance::FillHistos()
         const double kCLight = 0.000299792458;
         double k2QPt = 100;
         if ( TMath::Abs( bz ) > 1.e-4 ) k2QPt = 1. / ( bz * kCLight );
-        double qPt = p.GetKappa( bz ) * k2QPt;
-        double pt = 100;
-        if ( TMath::Abs( qPt ) > 1.e-4 ) pt = 1. / TMath::Abs( qPt );
+/*        double qPt = p.GetKappa( bz ) * k2QPt;
+        double pt = 100;*/
+	double qPt = p.GetQPt();
+        double pt = 1. / TMath::Abs( qPt );
+	
+        if ( mcPt < 0.010 ) break;
+//        if ( TMath::Abs( qPt ) > 1.e-4 ) pt = 1. / TMath::Abs( qPt );
 
         GetHisto("resY")->Fill( p.GetY() - mcY );
         GetHisto("resZ")->Fill( p.GetZ() - mcZ );
         GetHisto("resSinPhi")->Fill( p.GetSinPhi() - mcSinPhi );
         GetHisto("resDzDs")->Fill( p.GetDzDs() - mcDzDs );
-        GetHisto("resPt")->Fill( ( pt - mcPt ) / mcPt );
+        if(CAMath::Abs(qPt) > 1.e-8){
+          GetHisto("resPt")->Fill( (pt - mcPt)/mcPt );
+        }
         if ( p.GetErr2Y() > 0 ) GetHisto("pullY")->Fill( ( p.GetY() - mcY ) / TMath::Sqrt( p.GetErr2Y() ) );
         if ( p.GetErr2Z() > 0 ) GetHisto("pullZ")->Fill( ( p.GetZ() - mcZ ) / TMath::Sqrt( p.GetErr2Z() ) );
 
         if ( p.GetErr2SinPhi() > 0 ) GetHisto("pullSinPhi")->Fill( ( p.GetSinPhi() - mcSinPhi ) / TMath::Sqrt( p.GetErr2SinPhi() ) );
         if ( p.GetErr2DzDs() > 0 ) GetHisto("pullDzDs")->Fill( ( p.DzDs() - mcDzDs ) / TMath::Sqrt( p.GetErr2DzDs() ) );
+        if(CAMath::Abs(qPt) > 1.e-7 && p.GetErr2QPt()>0 ) GetHisto("pullQPt")->Fill( (qPt - mcQPt)/TMath::Sqrt(p.GetErr2QPt()) );
 
         break;
       }

@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGBTracker.cxx,v 1.2 2010/07/29 16:35:58 ikulakov Exp $
+// $Id: AliHLTTPCCAGBTracker.cxx,v 1.3 2010/08/02 16:45:28 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -373,7 +373,8 @@ void AliHLTTPCCAGBTracker::Merge()
     AliHLTTPCCAGBTrack &trackGB = fTracks[fNTracks];
     trackGB.SetFirstHitRef( nTrackHits );
     trackGB.SetNHits( track.NClusters() );
-    trackGB.SetParam( track.InnerParam() );
+    trackGB.SetInnerParam( track.InnerParam() );
+    trackGB.SetOuterParam( track.OuterParam() );
     trackGB.SetAlpha( track.InnerAlpha() );
     trackGB.SetDeDx( 0 );
 

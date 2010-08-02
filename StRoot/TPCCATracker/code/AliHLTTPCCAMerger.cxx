@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMerger.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCAMerger.cxx,v 1.2 2010/08/02 16:45:28 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -1612,7 +1612,7 @@ void AliHLTTPCCAMerger::Merging(int number)
 
       // need best t0!!!SG
 
-      endPoint = startPoint;
+//      endPoint = startPoint;
   ///    if ( !FitTrack( endPoint, endAlpha, startPoint, startAlpha, hits + firstHit, nHits, 0 ) ) continue;
   ///    if ( !FitTrack( startPoint, startAlpha, endPoint, endAlpha, hits + firstHit, nHits, 1 ) ) continue;
 
@@ -1702,6 +1702,12 @@ void AliHLTTPCCAMerger::Merging(int number)
       }
 
 
+      if ( endPoint.X() < startPoint.X() ) {
+        AliHLTTPCCATrackParam helpPoint = endPoint;
+        endPoint = startPoint;
+        startPoint = helpPoint;
+      }
+
       if(number == 0)
       {
         AliHLTTPCCAMergedTrack &mergedTrack = outTracks[nOutTracks];
@@ -1725,11 +1731,6 @@ void AliHLTTPCCAMerger::Merging(int number)
       }
 
 //std::cout << track.NClusters();
-      if ( endPoint.X() < startPoint.X() ) {
-        AliHLTTPCCATrackParam helpPoint = endPoint;
-        endPoint = startPoint;
-        startPoint = helpPoint;
-      }
 
       nTrNew[iSlice]++;
       track.SetFirstClusterRef(nH);
