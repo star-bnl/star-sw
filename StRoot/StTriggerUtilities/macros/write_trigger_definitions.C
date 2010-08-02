@@ -33,7 +33,7 @@ void write_trigger_definitions(int runNumber = 10180030)
 
   TString query;
   TMySQLResult* result;
-  StTriggerDefinition trgdefs[32];
+  TObjArray a;
 
   query = Form("select idx_trigger,name,offlineBit from `Conditions_rts`.`triggers` where idx_rn = %d",runNumber);
 
@@ -42,10 +42,11 @@ void write_trigger_definitions(int runNumber = 10180030)
     TMySQLRow* row;
     while (row = (TMySQLRow*)result->Next()) {
       int triggerIndex = atoi(row->GetField(0));
-      assert(0 <= triggerIndex && triggerIndex < 32);
-      trgdefs[triggerIndex].triggerIndex = triggerIndex;
-      trgdefs[triggerIndex].name = row->GetField(1);
-      trgdefs[triggerIndex].triggerId = atoi(row->GetField(2));
+      StTriggerDefinition* def = new StTriggerDefinition;
+      def->triggerIndex = triggerIndex;
+      def->name = row->GetField(1);
+      def->triggerId = atoi(row->GetField(2));
+      a.AddAtAndExpand(def,triggerIndex);
       delete row;
     }
     result->Close();
@@ -58,15 +59,17 @@ void write_trigger_definitions(int runNumber = 10180030)
     TMySQLRow* row;
     while (row = (TMySQLRow*)result->Next()) {
       int triggerIndex = atoi(row->GetField(0));
-      assert(0 <= triggerIndex && triggerIndex < 32);
-      trgdefs[triggerIndex].onbits   = atoi(row->GetField(1));
-      trgdefs[triggerIndex].offbits  = atoi(row->GetField(2));
-      trgdefs[triggerIndex].onbits1  = atoi(row->GetField(3));
-      trgdefs[triggerIndex].onbits2  = atoi(row->GetField(4));
-      trgdefs[triggerIndex].onbits3  = atoi(row->GetField(5));
-      trgdefs[triggerIndex].offbits1 = atoi(row->GetField(6));
-      trgdefs[triggerIndex].offbits2 = atoi(row->GetField(7));
-      trgdefs[triggerIndex].offbits3 = atoi(row->GetField(8));
+      StTriggerDefinition* def = (StTriggerDefinition*)a.At(triggerIndex);
+      if (def) {
+	def->onbits   = atoi(row->GetField(1));
+	def->offbits  = atoi(row->GetField(2));
+	def->onbits1  = atoi(row->GetField(3));
+	def->onbits2  = atoi(row->GetField(4));
+	def->onbits3  = atoi(row->GetField(5));
+	def->offbits1 = atoi(row->GetField(6));
+	def->offbits2 = atoi(row->GetField(7));
+	def->offbits3 = atoi(row->GetField(8));
+      }
       delete row;
     }
     result->Close();
@@ -74,17 +77,16 @@ void write_trigger_definitions(int runNumber = 10180030)
 
   mysql->Close();
 
-  TObjArray a;
+  a.Compress();
 
-  for (int triggerIndex = 0; triggerIndex < 32; ++triggerIndex) {
-    if (!trgdefs[triggerIndex].name.IsNull()) {
-      trgdefs[triggerIndex].print();
-      a.Add(&trgdefs[triggerIndex]);
-    }
+  for (int triggerIndex = 0; triggerIndex < a.GetEntriesFast(); ++triggerIndex) {
+    StTriggerDefinition* def = (StTriggerDefinition*)a.At(triggerIndex);
+    def->print();
   }
 
   TBufferFile buf(TBuffer::kWrite);
   buf << &a;
+  a.Delete();
 
   cout << "Serialized array of " << buf.BufferSize() << " : " << buf.Buffer() << endl;
 
