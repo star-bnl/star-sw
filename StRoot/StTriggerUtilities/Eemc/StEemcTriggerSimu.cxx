@@ -166,7 +166,8 @@ StEemcTriggerSimu::addTriggerList(vector<int>& trgList){
 
 StTriggerSimuDecision
 StEemcTriggerSimu::triggerDecision(int trigId) {
-  return (find(mTriggerIds.begin(),mTriggerIds.end(),trigId) == mTriggerIds.end()) ? kNo : kYes;
+  if (find(mTriggerIds.begin(),mTriggerIds.end(),trigId) == mTriggerIds.end()) return kDoNotCare; 
+  return kYes;
 }
  
 //==================================================
@@ -675,6 +676,9 @@ void StEemcTriggerSimu::fillStEmcTriggerDetector()
 
 //
 // $Log: StEemcTriggerSimu.cxx,v $
+// Revision 1.38  2010/08/03 15:00:56  rfatemi
+// revert to kDontCare
+//
 // Revision 1.37  2010/07/28 15:58:06  pibero
 // Code cleanup
 //
