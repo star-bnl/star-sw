@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGBTracker.cxx,v 1.3 2010/08/02 16:45:28 ikulakov Exp $
+// $Id: AliHLTTPCCAGBTracker.cxx,v 1.4 2010/08/03 13:50:16 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -50,13 +50,14 @@
 #define MAIN_DRAW
 #endif //DRAW
 
-
+#ifdef USE_TBB
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_sort.h>
 #include <tbb/partitioner.h>
 #include <tbb/spin_mutex.h>
 #include <tbb/task_scheduler_init.h>
+#endif //USE_TBB
 
 bool SINGLE_THREADED = false;
 
@@ -137,6 +138,7 @@ void AliHLTTPCCAGBTracker::SetNHits( int nHits )
   fExt2IntHitID = new int[ nHits ];
 }
 
+#ifdef USE_TBB
 class Initializer
 {
     AliHLTArray<int> &sliceNHits;
@@ -184,6 +186,7 @@ class ReconstructSliceTracks
       }
     }
 };
+#endif //USE_TBB
 
 void AliHLTTPCCAGBTracker::FindTracks()
 {
@@ -208,16 +211,22 @@ void AliHLTTPCCAGBTracker::FindTracks()
 
   if ( fNHits <= 0 ) return;
 
+#ifdef USE_TBB
 #ifndef NUM_THREADS
 #define NUM_THREADS SINGLE_THREADED ? 1 : tbb::task_scheduler_init::automatic
 #endif
   tbb::task_scheduler_init *taskScheduler = new tbb::task_scheduler_init( NUM_THREADS );
 #undef NUM_THREADS
+#endif //USE_TBB
 
   TStopwatch timer1;
   TStopwatch timer2;
 
+#ifdef USE_TBB
   tbb::parallel_sort( fHits.Data(), fHits.Data() + fNHits, AliHLTTPCCAGBHit::Compare );
+#else //USE_TBB
+  std::sort( fHits.Data(), fHits.Data() + fNHits, AliHLTTPCCAGBHit::Compare );
+#endif //USE_TBB
 
 //  GroupHits();
 
@@ -253,13 +262,45 @@ void AliHLTTPCCAGBTracker::FindTracks()
 
   // Read hits, row by row
 
+#ifdef USE_TBB
   tbb::spin_mutex mutex;
+#endif //USE_TBB
 
   // Run the slice trackers in parallel. The mutex is only necessary for storing the timings after
   // the reconstruction.
   timer2.Start();
+#ifdef USE_TBB
   tbb::parallel_for( tbb::blocked_range<int>( 0, fNSlices, 1 ),
       ReconstructSliceTracks( fSlices, fStatTime, mutex ) );
+#else //USE_TBB
+std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
+std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
+std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
+std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
+std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
+std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
+std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
+std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
+std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
+std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
+std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
+
+  for ( int iSlice = 0; iSlice < fSlices.Size(); ++iSlice ) {
+    TStopwatch timer;
+    AliHLTTPCCATracker &slice = fSlices[iSlice];
+    slice.Reconstruct();
+    timer.Stop();
+    fStatTime[0] += timer.RealTime();
+    fStatTime[1] += slice.Timer( 0 );
+    fStatTime[2] += slice.Timer( 1 );
+    fStatTime[3] += slice.Timer( 2 );
+    fStatTime[4] += slice.Timer( 3 );
+    fStatTime[5] += slice.Timer( 4 );
+    fStatTime[6] += slice.Timer( 5 );
+    fStatTime[7] += slice.Timer( 6 );
+    fStatTime[8] += slice.Timer( 7 );
+  }
+#endif //USE_TBB
   timer2.Stop();
   fSliceTrackerTime = timer2.RealTime();
   fSliceTrackerCpuTime = timer2.CpuTime();
@@ -277,7 +318,9 @@ void AliHLTTPCCAGBTracker::FindTracks()
 #ifdef DRAW
   AliHLTTPCCADisplay::Instance().Ask();
 #endif //DRAW
+#ifdef USE_TBB
   delete taskScheduler;
+#endif //USE_TBB
 }
 
 void AliHLTTPCCAGBTracker::Merge()
