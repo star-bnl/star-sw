@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.9 2010/05/07 15:37:11 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.10 2010/08/03 13:51:31 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.10  2010/08/03 13:51:31  jwebb
+ * LambdaBar(1520) provided in particle table with Geant ID=996.
+ *
  * Revision 1.9  2010/05/07 15:37:11  jwebb
  * Added StKaonZeroMode0809 to represent the k0 --> pi+ pi- w/ 100% br in
  * gstar_part.g.
@@ -68,7 +71,7 @@ StParticleTable::StParticleTable()
     //
     typedef mGeantPdgMapType::value_type geantPdgPairType;
 
-#define Geant2Pdg(X,Y) mGeantPdgMap.insert(geantPdgPairType(X,Y))
+#define Geant2Pdg(X,Y) { mGeantPdgMap.insert(geantPdgPairType(X,Y)); }
     
     Geant2Pdg(1, 22);      // gamma
     Geant2Pdg(2, -11);     // e+
@@ -153,7 +156,7 @@ StParticleTable::StParticleTable()
     Geant2Pdg( 707, 100311 ); // K0 --> pi+ pi- 
 
     Geant2Pdg( +995, +20003122 ); // Lambda 1520 
-    Geant2Pdg( -995, -20003122 ); // Lambda 1520 
+    Geant2Pdg( +996, -20003122 ); // Lambda 1520 
 
 #undef Geant2Pdg
 
