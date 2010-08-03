@@ -1,6 +1,6 @@
 // *-- Author : Hal Spinka
 // 
-// $Id: StEEmcSlowMaker.cxx,v 2.9 2010/07/29 16:12:03 ogrebeny Exp $
+// $Id: StEEmcSlowMaker.cxx,v 2.10 2010/08/03 02:20:40 stevens4 Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -352,7 +352,8 @@ Int_t StEEmcSlowMaker::MakeTower(StMuEmcCollection *emc) {
       // range check on returned values
       if (!( sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12) || !(pre >= 1 && pre <= 3)) {
 	LOG_ERROR << "Indexing errors detected: EPRS hit " << i << ", sec = " << sec << ", sub = " << sub << ", eta = " << eta << ", pre = " << pre << endm;
-	return kStFatal;
+	setZeroAdc(emc);
+	return kStErr;
       }
       /// for pre/postshower, geant energy deposit gets propagated
       /// from StEvent into the MuDst as StMuEmcHit::energy().
@@ -382,10 +383,13 @@ Int_t StEEmcSlowMaker::MakeTower(StMuEmcCollection *emc) {
       Int_t sec,sub,eta,adc;
       /// Get the ADC value stored for this tower
       emc->getEndcapTowerADC(i,adc,sec,sub,eta);
+      // range check on returned values
       if (!(sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12)) {
 	LOG_ERROR << "Indexing errors detected: ETOW hit " << i << ", sec = " << sec << ", sub = " << sub << ", eta = " << eta << endm;
-	return kStFatal;
+	setZeroAdc(emc);
+	return kStErr;
       }
+      
       const Int_t old = adc;
       if (mHist[4]) mHist[4]->Fill( old );
 
@@ -449,13 +453,20 @@ Int_t StEEmcSlowMaker::MakePrePost(StMuEmcCollection *emc) {
     StMuEmcHit *hit = emc->getEndcapPrsHit(i,sec,sub,eta,pre);
     if (!hit) continue;
     
+    // range check on returned values
+    if (!( sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12) || !(pre >= 1 && pre <= 3)) {
+      LOG_ERROR << "Indexing errors detected: EPRS hit " << i << ", sec = " << sec << ", sub = " << sub << ", eta = " << eta << ", pre = " << pre << endm;
+      setZeroAdc(emc);
+      return kStErr;
+    }
+
     /// tmp, for fasted analysis use only hits from sectors init in DB
     if (mEeDb && (sec < mEeDb->getFirstSector() || sec > mEeDb->getLastSector())) continue;
      
     /// Db ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
     const EEmcDbItem *x = mEeDb ? mEeDb->getTile(sec,sub-1+'A', eta, pre-1+'P') : 0; 
     if (!x) {
-	LOG_ERROR << "Cannot find DB entry for EPSD: sec = " << sec << ", sub = " << sub << ", eta = " << eta << ", pre = " << pre << endm;
+	LOG_ERROR << "Cannot find DB entry for EPRS: sec = " << sec << ", sub = " << sub << ", eta = " << eta << ", pre = " << pre << endm;
 	continue;
     }
 
@@ -517,10 +528,13 @@ Int_t StEEmcSlowMaker::MakeSMD(StMuEmcCollection *emc) {
     Int_t sec,strip;
     for (Int_t i = 0;i < emc->getNEndcapSmdHits(uv);i++) {
       StMuEmcHit *hit=emc->getEndcapSmdHit(uv,i,sec,strip);
-      if (!(strip-1 >= 0) || !(sec-1 >= 0) || !(iuv-1 >= 0 && iuv-1 < 2) || !(sec > 0 && sec <= MaxSectors)) {
+      // range check on returned values
+      if (!(strip-1 >= 0) || !(strip <= 288) || !(iuv-1 >= 0 && iuv-1 < 2) || !(sec > 0 && sec <= MaxSectors)) {
 	LOG_ERROR << "Bad index for ESMD: sec = " << sec << ", iuv = " << iuv << ", strip = " << strip << endm;
-	return kStFatal;
-      } 
+	setZeroAdc(emc); 
+	return kStErr;
+      }
+      
       // tmp, for fasted analysis use only hits from sectors init in DB
       if (mEeDb && (sec < mEeDb->getFirstSector() || sec > mEeDb->getLastSector())) continue;
       const EEmcDbItem *x = mEeDb ? mEeDb->getByStrip(sec,uv,strip) : 0;
@@ -620,11 +634,14 @@ Int_t StEEmcSlowMaker::MakeTower(StEmcCollection* emc) {
           const UInt_t sub = (hit->sub()-1)%5+1;
           const UInt_t eta = hit->eta();
           const UInt_t pre = (hit->sub()-1)/5+1;
-          if (!(sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12) || !(pre >= 1 && pre <= 3)) {
-	    LOG_ERROR << "Indexing errors detected for ETOW: sec = " << sec << ", sub = " << sub << ", eta = " << eta << ", pre = " << pre << endm;
-    	    return kStFatal;
+          // range check on returned values
+	  if (!(sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12) || !(pre >= 1 && pre <= 3)) {
+	    LOG_ERROR << "Indexing errors detected for EPRS: sec = " << sec << ", sub = " << sub << ", eta = " << eta << ", pre = " << pre << endm;
+    	    setZeroAdc(emc); 
+	    return kStErr;
 	  }
-          // energy deposit in GeV
+	  	  
+	  // energy deposit in GeV
           const Float_t edeposit = hit->energy();
           // divide by sampling fraction, multiply by _tower_ gain
           // and brightness factor, and add to the adc sum for 
@@ -647,10 +664,13 @@ Int_t StEEmcSlowMaker::MakeTower(StEmcCollection* emc) {
           StEmcRawHit *hit = tower_hits[ihit];
           const UInt_t sub = hit->sub();
           const UInt_t eta = hit->eta();
-          if (!(sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12)) {
+          // range check on returned values
+	  if (!(sec >= 1 && sec <= 12) || !(sub >= 1 && sub <= 5) || !(eta >= 1 && eta <= 12)) {
 	    LOG_ERROR << "Indexing errors detected for ETOW: sec = " << sec << ", sub = " << sub << ", eta = " << eta << endm;
-    	    return kStFatal;
+    	    setZeroAdc(emc); 
+	    return kStErr;
 	  }
+
           // get DB entry for this tower
           const EEmcDbItem *tower = mEeDb ? mEeDb->getTile(sec,sub-1+'A', eta, 'T') : 0;
           if (!tower) {
@@ -669,7 +689,9 @@ Int_t StEEmcSlowMaker::MakeTower(StEmcCollection* emc) {
             Float_t myadc = edeposit / mSamplingFraction * tower->gain;
             // add in brightness correction for the pre and postshower layers
             myadc += prepost_adc[sec-1][sub-1][eta-1];
-            /// Add pedestal offset
+	    /// Adjust for spread in tower gains (represents an uncertainty in measured gains)
+	    myadc *= ( mTowerGainFact[sec-1][sub-1][eta-1] );
+	    /// Add pedestal offset
             Float_t ped = tower->ped;
             if (mAddPed) {
 		if ( mSmearPed ) ped += getPedSmear( tower->sigPed );
@@ -689,7 +711,7 @@ Int_t StEEmcSlowMaker::MakeTower(StEmcCollection* emc) {
 	  if (mOverwrite) {
 	    if ((Int_t)hit->adc() != adc) nTchange++;
             LOG_DEBUG <<"overwriting tower=" << tower->name << " old adc=" << hit->adc() << " new adc=" << adc << endm;
-            hit->setAdc( adc );
+	    hit->setAdc( adc );
 	  }
       }
       LOG_DEBUG << " Etow changed " << nTchange << " ADC values for sector=" << sec << endm;
@@ -710,14 +732,27 @@ Int_t StEEmcSlowMaker::MakePrePost(StEmcCollection* emc) {
     for(UInt_t i = 0; i < hits.size(); ++i) {
       StEmcRawHit* hit = hits[i];
       Char_t sub = 'A'+(hit->sub()-1)%5;
-
+      
       // Layer: 'P'=preshower1, 'Q'=preshower2, 'R'=postshower
       Char_t layer = 'P'+(hit->sub()-1)/5;
       Int_t layerP = (hit->sub()-1)/5;
 
+      const UInt_t isub = (hit->sub()-1)%5+1;
+      const UInt_t ieta = hit->eta();
+      const UInt_t ipre = (hit->sub()-1)/5+1;
+      // range check on returned values
+      if (!(sector >= 1 && sector <= 12) || !(isub >= 1 && isub <= 5) || !(ieta >= 1 && ieta <= 12) || !(ipre >= 1 && ipre <= 3)) {
+	LOG_ERROR << "Indexing errors detected for EPRS: sec = " << sector << ", sub = " << isub << ", eta = " << ieta << ", pre = " << ipre << endm;
+	setZeroAdc(emc); 
+	return kStErr;
+      }
+      
       // Database ranges: sector=1-12, sub=A-E, eta=1-12, type=T,P-R; Slow method
       const EEmcDbItem* x = mEeDb ? mEeDb->getTile(sector, sub, hit->eta(), layer) : 0;
-      if (!x) continue;
+      if (!x) {
+        LOG_ERROR << "Cannot find DB entry for EPRS: sec = " << sector << ", sub = " << sub << ", eta = " << hit->eta() << ", pre = " << layer << endm;
+	continue;
+      }
 
       Int_t NUadc;
       // Zero out values if tower is marked as bad
@@ -772,7 +807,9 @@ Int_t StEEmcSlowMaker::MakePrePost(StEmcCollection* emc) {
 
 //________________________________________________
 Int_t StEEmcSlowMaker::MakeSMD(StEmcCollection* emc) {
+  Int_t iuv = 0;
   for (Char_t plane = 'U'; plane <= 'V'; ++plane) {
+    iuv++;
     StEmcDetector* det = 0;
     switch (plane) {
     case 'U':
@@ -798,9 +835,20 @@ Int_t StEEmcSlowMaker::MakeSMD(StEmcCollection* emc) {
       for (UInt_t i = 0; i < hits.size(); ++i) {
 	StEmcRawHit* hit = hits[i];
 	Int_t strip = hit->eta();
+	
+	// range check on returned values
+	if (!(strip-1 >= 0) || !(strip <= 288) || !(iuv-1 >= 0 && iuv-1 < 2) || !(sector > 0 && sector <= MaxSectors)) {
+	  LOG_ERROR << "Bad index for ESMD: sec = " << sector << ", iuv = " << iuv << ", strip = " << strip << endm;
+	  setZeroAdc(emc); 
+	  return kStErr;
+	}
+
 	// Database ranges: sector=1-12, plane=U-V, strip=1-288
 	const EEmcDbItem* x = mEeDb ? mEeDb->getByStrip(sector, plane, strip) : 0;
-	if (!x) continue;
+	if (!x) {
+	  LOG_ERROR << "Cannot find DB entry for ESMD: sec = " << sector << ", uv = " << iuv-1+'U' << ", strip = " << strip << endm;
+	  continue;
+	}
 
 	Int_t NUadc;
 	// Zero out values if tower is marked as bad
@@ -828,6 +876,8 @@ Int_t StEEmcSlowMaker::MakeSMD(StEmcCollection* emc) {
 		    newadc = smearedpe * mMip2ene * x->gain / mMip2pe[strip];
 		}
 	    }
+	    // Add in factor from gain smearing
+	    newadc *= mSmdGainFact[sector-1][iuv-1][strip-1];
 	    /// Lookup pedestal in database (possibly zero)
 	    Float_t ped = mAddPed ? x->ped : 0;
 	    /// Smear the pedestal
@@ -892,8 +942,8 @@ void StEEmcSlowMaker::setSmdGainSpread(Float_t s, Int_t sec, Int_t uv, Int_t str
 
 //________________________________________________
 Bool_t StEEmcSlowMaker::checkDBped(const EEmcDbItem *x) {
-  //check that channels ped and pedSigma are all > 0
-  return (x && (x->ped > 0) && (x->sigPed > 0));
+  //check that channels ped and pedSigma are all >= 0
+  return (x && (x->ped >= 0) && (x->sigPed >= 0));
 }
 
 //________________________________________________
@@ -908,7 +958,49 @@ Float_t StEEmcSlowMaker::getPedSmear(Float_t sigPed) {
   return smear * sigPed;
 }
 
+//________________________________________________
+void StEEmcSlowMaker::setZeroAdc(StEmcCollection* emc) {
+  StDetectorId detId[4]={kEndcapEmcTowerId,kEndcapEmcPreShowerId,kEndcapSmdUStripId,kEndcapSmdVStripId};
+  StEmcDetector *det=0;
+
+  for(int i=0; i<4; i++) {
+    det = emc->detector(detId[i]);
+    if (!det) continue;
+    for (UInt_t sec = 1;sec <= det->numberOfModules();sec++) {
+      StSPtrVecEmcRawHit &det_hits = det->module(sec)->hits();
+      for (UInt_t ihit = 0;ihit < det_hits.size();ihit++) {
+	StEmcRawHit *hit = det_hits[ihit];
+	hit->setAdc(0);
+      }
+    }
+  }
+}
+
+//________________________________________________
+void StEEmcSlowMaker::setZeroAdc(StMuEmcCollection *emc) {
+  
+  for (Int_t i = 0;i < emc->getNEndcapTowerADC();i++) 
+    emc->setTowerADC( i+1, 0, eemc );
+
+  for (Int_t i = 0;i < emc->getNEndcapPrsHits();i++) {
+    Int_t pre,sec,eta,sub;
+    StMuEmcHit *hit = emc->getEndcapPrsHit(i,sec,sub,eta,pre);
+    if (hit) hit->setAdc(0);
+  }
+
+  for (Char_t uv = 'U';uv <= 'V';uv++) {
+    Int_t sec,strip;
+    for (Int_t i = 0;i < emc->getNEndcapSmdHits(uv);i++) {
+      StMuEmcHit *hit=emc->getEndcapSmdHit(uv,i,sec,strip);
+      if (hit) hit->setAdc(0);
+    }
+  }
+}
+
 // $Log: StEEmcSlowMaker.cxx,v $
+// Revision 2.10  2010/08/03 02:20:40  stevens4
+// final update from peer review
+//
 // Revision 2.9  2010/07/29 16:12:03  ogrebeny
 // Update after the peer review
 //
