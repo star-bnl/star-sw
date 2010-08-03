@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.22 2010/07/12 21:31:49 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.23 2010/08/03 23:39:35 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.23  2010/08/03 23:39:35  hmasui
+ * Fix a bug in SetMaximum() function for MC rapidity distribution
+ *
  * Revision 1.22  2010/07/12 21:31:49  hmasui
  * Use StEmbeddingQAUtilities::getParticleDefinition() instead of StParticleTable
  *
@@ -1075,7 +1078,7 @@ Bool_t StEmbeddingQADraw::drawMcTrack() const
   hEta->SetMinimum(0.0);
   hEta->SetMaximum(hEta->GetMaximum()*1.2);
   hY->SetMinimum(0.0);
-  hY->SetMaximum(hEta->GetMaximum()*1.2);
+  hY->SetMaximum(hY->GetMaximum()*1.2);
   hPhi->SetMinimum(0.0);
   hPhi->SetMaximum(hPhi->GetMaximum()*1.2);
 
