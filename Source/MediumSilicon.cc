@@ -1537,7 +1537,7 @@ MediumSilicon::ElectronScatteringRates() {
   nLevelsX = 0;
   // Fill the scattering rates table
   ElectronAcousticScatteringRatesX();
-  //ElectronImpurityScatteringRates();
+  ElectronImpurityScatteringRates();
   ElectronIntervalleyScatteringRatesXX();
   ElectronIonisationRates();
 
@@ -1762,19 +1762,18 @@ MediumSilicon::ElectronImpurityScatteringRates() {
                    (sqrt(2 * md) * eps * eps);
   
   double en = 0.;
-  double gamma = 0.;
-  double b = 0.;
   for (int i = 0; i < nEnergySteps; ++i) {
-    gamma = en * (1 + alpha * en);
+    const double gamma = en * (1 + alpha * en);
     // cfElectrons[i][iLevel] = c * sqrt(gamma) * (1. + 2 * alpha * en) /
     //                         (1. + 4. * gamma / eb);
     if (gamma <= 0.) {
       cfElectronsX[i].push_back(0.);
-    } else {
-      b = 4 * gamma / eb;
-      cfElectronsX[i].push_back((c / pow(gamma, 1.5)) * 
-                               (log(1. + b) - b / (1. + b)));
+      en += eStep;
+      continue;
     }
+    const double b = 4 * gamma / eb;
+    cfElectronsX[i].push_back((c / pow(gamma, 1.5)) * 
+                              (log(1. + b) - b / (1. + b)));
     en += eStep;
   }
 
