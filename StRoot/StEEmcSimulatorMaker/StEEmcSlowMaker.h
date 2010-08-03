@@ -1,4 +1,4 @@
-// $Id: StEEmcSlowMaker.h,v 2.6 2010/07/29 16:12:03 ogrebeny Exp $
+// $Id: StEEmcSlowMaker.h,v 2.7 2010/08/03 02:20:40 stevens4 Exp $
 
 #ifndef STAR_StEEmcSlowMaker
 #define STAR_StEEmcSlowMaker
@@ -109,7 +109,7 @@
  * is already accounted for by the GEANT model, and hence should be 
  * factored out of the brightness correction.
  *
- * \section VERSION_3_0 version 3.0
+ * \section VERSION_2_10 version 2.10
  *
  * -# A flag was added to set specific defaults for use in BFC production.
  * -# Default behavior in MuDst analysis chain was changed to _disable_ the tower
@@ -186,6 +186,12 @@ private:
 
   /// Get pedestal smearing from gaussian distribution truncated at N*sigma
   Float_t getPedSmear(Float_t sigPed);
+
+  /// Zero out all ADC
+  void setZeroAdc(StMuEmcCollection *emc);
+
+  /// Zero out all ADC (StEvent version)
+  void setZeroAdc(StEmcCollection* emc);
   
   Bool_t mEnableSMD;
   Bool_t mEnablePrePost;
@@ -309,7 +315,7 @@ public:
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.6 2010/07/29 16:12:03 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.7 2010/08/03 02:20:40 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -319,6 +325,9 @@ public:
 #endif
 
 // $Log: StEEmcSlowMaker.h,v $
+// Revision 2.7  2010/08/03 02:20:40  stevens4
+// final update from peer review
+//
 // Revision 2.6  2010/07/29 16:12:03  ogrebeny
 // Update after the peer review
 //
