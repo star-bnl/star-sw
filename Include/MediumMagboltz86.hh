@@ -199,11 +199,11 @@ class MediumMagboltz86 : public Medium {
     // Get the overall null-collision rate [ns-1]
     double GetElectronNullCollisionRate();
     // Get the (real) collision rate [ns-1] at a given electron energy e [eV]
-    double GetElectronCollisionRate(const double e);
+    double GetElectronCollisionRate(const double e, const int band);
     // Sample the collision type
     bool   GetElectronCollision(const double e, int& type, int& level, 
                         double& e1, double& ctheta, 
-                        double& s, double& esec);
+                        double& s, double& esec, int& band);
     int  GetNumberOfDeexcitationProducts() {return nDeexcitationProducts;}
     bool GetDeexcitationProduct(const int i, 
                                 double& t, int& type, double& energy); 

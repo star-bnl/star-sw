@@ -311,7 +311,7 @@ MediumMagboltz86::GetElectronNullCollisionRate() {
 }
 
 double 
-MediumMagboltz86::GetElectronCollisionRate(const double e) {
+MediumMagboltz86::GetElectronCollisionRate(const double e, const int band) {
 
   if (e <= 0.) {
     std::cerr << "MediumMagboltz86: Electron energy must be greater than zero."
@@ -344,7 +344,8 @@ MediumMagboltz86::GetElectronCollisionRate(const double e) {
 
 bool 
 MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level, 
-                double& e1, double& ctheta, double& s, double& esec) {
+                double& e1, double& ctheta, double& s, double& esec, 
+                int& band) {
 
   if (e > eFinal && useAutoAdjust) {
     std::cerr << className << "::GetElectronCollision:" << std::endl;
@@ -1935,10 +1936,6 @@ MediumMagboltz86::ComputeDeexcitationTable() {
     //     A. Bogaerts and R. Gijbels, Phys. Rev. A 52 (1995), 3743-3751
     // Hornbeck-Molnar ionisation
     const double fHM = 2.e-18 * density * cAr;
-    // Fraction of metastable atoms (just a wild guess)
-    const double cMeta = 1.e-5;
-    // Metastable-metastable (associative) ionisation
-    const double fMetaIon = (6.3e-19  + 5.7e-19) * density * cAr * cMeta;
     // Collisional losses
     // Two-body collision
     const double fLoss2b = 2.3e-24 * density * cAr;
@@ -1956,13 +1953,6 @@ MediumMagboltz86::ComputeDeexcitationTable() {
         deexcitations[j].p.push_back(fLoss3b);
         deexcitations[j].nChannels += 2;
       }
-      // Metastable-metastable ionisation
-      if (level == "Ar_1S5" || level == "Ar_1S3") {
-        deexcitations[j].final.push_back(mapDxc["Ar_Dimer"]);
-        deexcitations[j].type.push_back(1);
-        deexcitations[j].p.push_back(fMetaIon);
-        deexcitations[j].nChannels += 1;
-      } 
       // Hornbeck-Molnar ionisation
       if (level == "Ar_4D5"  || level == "Ar_3S4" || level == "Ar_4D2" ||
           level == "Ar_4S1!" || level == "Ar_3S2" || level == "Ar_5D5" ||

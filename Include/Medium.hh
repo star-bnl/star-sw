@@ -104,10 +104,10 @@ class Medium {
     double GetElectronNullCollisionRate();
     // Collision rate [ns-1] for given electron energy
     virtual 
-    double GetElectronCollisionRate(const double e);
+    double GetElectronCollisionRate(const double e, const int band = 0);
     virtual 
     bool GetElectronCollision(const double e, int& type, int& level, double& e1,
-                      double& ctheta, double& s, double& esec);
+                      double& ctheta, double& s, double& esec, int& band);
 
     virtual
     int GetNumberOfDeexcitationProducts() {return 0;}

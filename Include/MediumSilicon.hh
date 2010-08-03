@@ -78,14 +78,19 @@ class MediumSilicon : public Medium {
     // Get the electron energy (and its gradient) for a given (crystal) momentum
     double GetElectronEnergy(const double px, const double py, const double pz,
                         double& vx, double& vy, double& vz, const int band = 0);
+    // Get the electron (crystal) momentum for a given kinetic energy
+    void GetElectronMomentum(const double e, 
+                             double& px, double& py, double& pz, 
+                             const int band = 0);
+    
     // Get the null-collision rate [ns-1]
     double GetElectronNullCollisionRate();
     // Get the (real) collision rate [ns-1] at a given electron energy
-    double GetElectronCollisionRate(const double e);
+    double GetElectronCollisionRate(const double e, const int band);
     // Sample the collision type
     bool   GetElectronCollision(const double e, int& type, int& level,
                         double& e1, double& ctheta,
-                        double& s, double& esec);
+                        double& s, double& esec, int& band);
     double GetConductionBandDensityOfStates(const double e, const int band = 0);
 
     bool GetOpticalDataRange(double& emin, double& emax, const int i = 0);

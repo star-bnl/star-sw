@@ -451,8 +451,11 @@ AvalancheMicroscopic::TransportElectron(
   // Check the given initial direction
   k = sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0);
   if (useBandStructure) {
-  
-  }else if (fabs(k) < Small) {
+    medium->GetElectronMomentum(Max(e0, Small), kx, ky, kz, band);
+    stack[0].kx = kx;
+    stack[0].ky = ky;
+    stack[0].kz = kz;
+  } else if (fabs(k) < Small) {
     // Direction has zero norm, draw a random direction
     phi = TwoPi * RndmUniform();
     ctheta = 1. - 2. * RndmUniform();
@@ -606,8 +609,9 @@ AvalancheMicroscopic::TransportElectron(
             newEnergy = Max(energy + (a1 + a2 * dt) * dt, Small);
           }
           // Get the real collision rate at the updated energy
-          fReal = medium->GetElectronCollisionRate(newEnergy);
+          fReal = medium->GetElectronCollisionRate(newEnergy, band);
           if (fReal > fLim) {
+            std::cin >> d;
             // Real collision rate is higher than null-collision rate
             dt += log(r) / fLim;
             // Increase the null collision rate and try again
@@ -650,7 +654,6 @@ AvalancheMicroscopic::TransportElectron(
           vz = (a4 * swt - a2 * (1. - cwt)) / (wb * dt);
           // Rotate back to the lab frame
           RotateLocal2Global(vx, vy, vz);
- 
         } else if (useBandStructure) {
           // Update the wave-vector
           newKx = kx + ex * dt;
@@ -789,7 +792,7 @@ AvalancheMicroscopic::TransportElectron(
         
         // Get the collision type and parameters
         medium->GetElectronCollision(newEnergy, cstype, level, energy, ctheta, 
-                                     k, esec);
+                                     k, esec, band);
 
         switch (cstype) {
           // Elastic collision
@@ -821,10 +824,6 @@ AvalancheMicroscopic::TransportElectron(
               stack[iEl].xLast = x; stack[iEl].yLast = y; stack[iEl].zLast = z;  
             }
             if (hasSecondaryHistogram) histSecondary->Fill(esec);
-            // Randomise secondary electron direction
-            phi = TwoPi * RndmUniform();
-            ctheta0 = 1. - 2. * RndmUniform();
-            stheta0 = sqrt(1. - ctheta0 * ctheta0);
             // Add the secondary electron to the stack
             newElectron = stack[iEl];
             newElectron.x0 = x; newElectron.x = x;
@@ -833,10 +832,20 @@ AvalancheMicroscopic::TransportElectron(
             newElectron.t0 = t; newElectron.t = t;
             newElectron.energy = Max(esec, Small);
             newElectron.e0 = newElectron.energy;
-            newElectron.kx = cos(phi) * stheta0;
-            newElectron.ky = sin(phi) * stheta0;
-            newElectron.kz = ctheta0;
-            newElectron.driftLine.clear();
+            if (useBandStructure) {
+              medium->GetElectronMomentum(Max(esec, Small), 
+                                          newElectron.kx, newElectron.ky,
+                                          newElectron.kz, band);
+            } else {
+              // Randomise secondary electron direction
+              phi = TwoPi * RndmUniform();
+              ctheta0 = 1. - 2. * RndmUniform();
+              stheta0 = sqrt(1. - ctheta0 * ctheta0);
+              newElectron.kx = cos(phi) * stheta0;
+              newElectron.ky = sin(phi) * stheta0;
+              newElectron.kz = ctheta0;
+              newElectron.driftLine.clear();
+            }
             if (aval) stack.push_back(newElectron);
             // Increment the electron and ion counters
             ++nElectrons; ++nIons;
@@ -934,6 +943,18 @@ AvalancheMicroscopic::TransportElectron(
           // Super-elastic collision
           case 5:
             break;
+          case 10:
+            // Acoustic intravalley phonon
+            break;
+          case 11:
+          case 12:
+          case 13:
+          case 14:
+            // Intervalley phonons
+            break;
+          case 15:
+            // Impurity scattering
+            break;
           default:
             std::cerr << "AvalancheMicroscopic::TransportElectron:" 
                       << std::endl;
@@ -943,6 +964,11 @@ AvalancheMicroscopic::TransportElectron(
         }
 
         if (!ok) break;
+        
+        if (useBandStructure) {
+          medium->GetElectronMomentum(energy, kx, ky, kz, band);
+          continue;
+        }
 
         newKz = Min(newKz, 1.); 
         arg = sqrt(newKx * newKx + newKy * newKy);

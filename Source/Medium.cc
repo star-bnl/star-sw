@@ -279,7 +279,7 @@ Medium::GetElectronNullCollisionRate() {
 }
 
 double 
-Medium::GetElectronCollisionRate(const double e) {
+Medium::GetElectronCollisionRate(const double e, const int band) {
 
   if (debug) {
     std::cerr << className << "::GetElectronCollisionRate:" << std::endl;
@@ -291,7 +291,8 @@ Medium::GetElectronCollisionRate(const double e) {
 
 bool 
 Medium::GetElectronCollision(const double e, int& type, int& level,
-                     double& e1, double& ctheta, double& s, double& esec) {
+                     double& e1, double& ctheta, double& s, double& esec,
+                     int& band) {
   
   if (debug) {
     std::cerr << className << "::GetElectronCollision:" << std::endl;
