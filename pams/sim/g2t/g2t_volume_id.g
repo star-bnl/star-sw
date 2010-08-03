@@ -1,5 +1,9 @@
-* $Id: g2t_volume_id.g,v 1.62 2009/11/10 19:54:54 fisyak Exp $
+* $Id: g2t_volume_id.g,v 1.63 2010/08/03 22:14:49 geurts Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.63  2010/08/03 22:14:49  geurts
+* Fix unknown TOFr choice for year2007 (btog_choice=10)  [bug ticket #1715]
+* Fix wrong TOFr tray position ID for run 5 (btog_choice=8)
+*
 * Revision 1.62  2009/11/10 19:54:54  fisyak
 * pams Cleanup
 *
@@ -166,7 +170,7 @@
       Structure  SVTG  {version}
       Structure  TPCG  {version}
       Structure  VPDG  {version}
-      Structure  BTOG  {version, int choice, posit1(2), posit2 }
+      Structure  BTOG  {version, int choice, posit1(2), posit2, posit3}
       Structure  CALG  {version, int Nmodule(2), int NetaT, int MaxModule, 
                                  int Nsub, int NetaSMDp, int NPhistr,
       	                         int Netfirst, int Netsecon}
@@ -375,11 +379,16 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 * ------- TOFr detector (single tray) --------------
       else If (Csys=='tfr') then   ! TOFr
-         if (btog_choice==5 .or. btog_choice==7 .or. btog_choice==8) then      !  single tray
+         if (btog_choice==5 .or. btog_choice==7) then      !  single tray
             rileft     = 2               !  east (pre-set)
             sector     = btog_posit2     !  tray (pre-set)
             module     = numbv(1)        !  module (eta)
             layer      = numbv(2)        !  layer (1-6, gap in module)
+	 else if (btog_choice==8 .or. btog_choice==9 .or. btog_choice==10) then  !  single tray (different location)
+           rileft     = 2               !  east (pre-set)
+           sector     = btog_posit3     !  tray (pre-set)
+           module     = numbv(1)        !  module (eta)
+           layer      = numbv(2)        !  layer (1-6, gap in module)
          else if (btog_choice==11) then                     ! Run 8
             rileft     = 2               !  east (pre-set)
             sector     = numbv(1)        !  tray(1-60)
