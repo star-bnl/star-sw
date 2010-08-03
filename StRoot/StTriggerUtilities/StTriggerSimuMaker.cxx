@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.38 2010/06/24 07:51:14 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.39 2010/08/03 16:53:30 pibero Exp $
 
 // MySQL C API
 #include "mysql.h"
@@ -198,11 +198,14 @@ Int_t StTriggerSimuMaker::Make() {
 
 bool StTriggerSimuMaker::isTrigger(int trigId) {
 
-  for(Int_t i=0; i<numSimulators; i++) {
-    if (mSimulators[i] && mSimulators[i]->triggerDecision(trigId) == kNo) return false;
-  }
+//   for(Int_t i=0; i<numSimulators; i++) {
+//     if (mSimulators[i] && mSimulators[i]->triggerDecision(trigId) == kNo) return false;
+//   }
   
-  return true;
+//   return true;
+
+  vector<int> trigIds = triggerIds();
+  return find(trigIds.begin(),trigIds.end(),trigId) != trigIds.end();
 }
 
 vector<int> StTriggerSimuMaker::triggerIds() const
@@ -524,6 +527,10 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.39  2010/08/03 16:53:30  pibero
+ * Function isTrigger() checks vector of trigger IDs instead
+ * of querying individual detectors.
+ *
  * Revision 1.38  2010/06/24 07:51:14  pibero
  * Added hooks to overwrite DSM thresholds from the database.
  *
