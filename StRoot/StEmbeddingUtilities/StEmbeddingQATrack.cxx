@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.cxx,v 1.11 2010/07/12 21:28:55 hmasui Exp $
+ * $Id: StEmbeddingQATrack.cxx,v 1.12 2010/08/04 21:16:50 hmasui Exp $
  * $Log: StEmbeddingQATrack.cxx,v $
+ * Revision 1.12  2010/08/04 21:16:50  hmasui
+ * Use MC phi angle for reconstructed embedding tracks
+ *
  * Revision 1.11  2010/07/12 21:28:55  hmasui
  * Use StEmbeddingQAUtilities::getParticleDefinition() instead of StParticleTable
  *
@@ -85,7 +88,7 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StMiniMcPair* track)
       TMath::Sqrt(track->pMc()*track->pMc() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track->geantId())->mass(),2.0))),
   mVectorRc(track->pxPr(), track->pyPr(), track->pzPr(), 
       TMath::Sqrt(track->pPr()*track->pPr() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track->geantId())->mass(),2.0))),
-  mPhi(track->phiPr()), mdEdx(track->dedx()), mDcaGl(track->dcaGl()), 
+  mPhi(track->phiMc()), mdEdx(track->dedx()), mDcaGl(track->dcaGl()), 
   mNSigmaElectron(-9999.), mNSigmaPion(-9999.), mNSigmaKaon(-9999.), mNSigmaProton(-9999.),
   mName(name)
 {
@@ -103,7 +106,7 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StContamPair* track)
       TMath::Sqrt(track->pMc()*track->pMc() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track->geantId())->mass(),2.0))),
   mVectorRc(track->pxPr(), track->pyPr(), track->pzPr(), 
       TMath::Sqrt(track->pPr()*track->pPr() + TMath::Power(StEmbeddingQAUtilities::instance()->getParticleDefinition(track->geantId())->mass(),2.0))),
-  mPhi(track->phiGl()), mdEdx(track->dedx()), mDcaGl(track->dcaGl()), 
+  mPhi(track->phiMc()), mdEdx(track->dedx()), mDcaGl(track->dcaGl()), 
   mNSigmaElectron(-9999.), mNSigmaPion(-9999.), mNSigmaKaon(-9999.), mNSigmaProton(-9999.),
   mName(name)
 {
