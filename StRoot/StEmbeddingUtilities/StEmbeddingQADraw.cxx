@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.23 2010/08/03 23:39:35 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.24 2010/08/04 21:16:06 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.24  2010/08/04 21:16:06  hmasui
+ * Replace geantid to nsigma cut for real tracks in legend
+ *
  * Revision 1.23  2010/08/03 23:39:35  hmasui
  * Fix a bug in SetMaximum() function for MC rapidity distribution
  *
@@ -738,16 +741,18 @@ const Char_t* StEmbeddingQADraw::getEmbeddingParticleName(const UInt_t id, const
 //____________________________________________________________________________________________________
 const Char_t* StEmbeddingQADraw::getRealParticleName(const UInt_t id, const Bool_t doSplit) const
 {
+  // nsigma < 2 is hard-coded (2 sigma cut is implemented in StEmbeddingQATrack.cxx).
+
   if(id>=mDaughterGeantId.size()){
     Error("StEmbeddingQADraw::getRealParticleName", "Unknown daughter particle index, id=%3d", id);
     return "";
   }
 
   const Int_t geantid = getGeantIdReal(id) ;
-  return (doSplit) ?  Form("#splitline{%s}{(%s, geantid=%d)}", getParticleName(geantid),
-      StEmbeddingQAUtilities::instance()->getCategoryName(getCategoryId(kFALSE)).Data(), geantid)
-    : Form("%s (%s, geantid=%d)", getParticleName(geantid),
-      StEmbeddingQAUtilities::instance()->getCategoryName(getCategoryId(kFALSE)).Data(), geantid);
+  return (doSplit) ?  Form("#splitline{%s}{(%s, |n #sigma_{%s}|<2)}", getParticleName(geantid), 
+      StEmbeddingQAUtilities::instance()->getCategoryName(getCategoryId(kFALSE)).Data(), getParticleName(geantid))
+    : Form("%s (%s, |n #sigma_{%s}|<2)", getParticleName(geantid),
+      StEmbeddingQAUtilities::instance()->getCategoryName(getCategoryId(kFALSE)).Data(), getParticleName(geantid));
 }
 
 //____________________________________________________________________________________________________
