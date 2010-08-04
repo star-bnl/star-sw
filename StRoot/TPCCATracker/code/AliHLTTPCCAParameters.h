@@ -67,7 +67,7 @@ namespace AliHLTTPCCAParameters
     /**
      * The number of rows that a slice in the TPC can have at maximum.
      */
-    NumberOfRows = 44, // TODO: !!! read from file
+    NumberOfRows = 45, // TODO: !!! read from file
     NumberOfRows2 = 48, // 160  // this should be divided by sfloat_v::Size = 8
     NumberOfInnerRows = 13-1, // delete iRow = 12
     /**
