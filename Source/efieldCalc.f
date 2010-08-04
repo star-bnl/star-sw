@@ -292,6 +292,8 @@ CDECK  ID>, SETA00.
 *            The potential used is log(r).
 *   Variables : No local variables.
 *-----------------------------------------------------------------------
+       implicit none
+       INTEGER IFAIL
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -336,6 +338,7 @@ CDECK  ID>, SETA00.
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
+       INTEGER I,J
 *** Loop over all wire combinations.
        DO 10 I=1,NWIRE
        A(I,I)=0.25*D(I)**2
@@ -376,6 +379,9 @@ CDECK  ID>, SETB1X.
 *                            image of another * factor.
 *               R2PLAN     : Periodic length of (XX,YYMIRR)
 *-----------------------------------------------------------------------
+       implicit none
+       INTEGER IFAIL
+       REAL XX,YY,YYMIRR,R2PLAN
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -417,12 +423,13 @@ CDECK  ID>, SETB1X.
      -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
-       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2s
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        REAL PI,CLOG2
        PARAMETER (PI=3.141592653589793238,
      -      CLOG2=0.693147180559945309417)
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
+       INTEGER I,J
 *** Loop over all wires and calculate the diagonal elements first.
        DO 10 I=1,NWIRE
        A(I,I)=-LOG(0.5*D(I)*PI/SX)
@@ -464,6 +471,9 @@ CDECK  ID>, SETB1Y.
 *                            image of another * factor.
 *               R2PLAN     : Periodic length of (XXMIRR,YY).
 *-----------------------------------------------------------------------
+       implicit none
+       INTEGER IFAIL
+       REAL XX,YY,XXMIRR,R2PLAN
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -511,6 +521,7 @@ CDECK  ID>, SETB1Y.
      -      CLOG2=0.693147180559945309417)
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
+       INTEGER I,J
 *** Loop over all wires and calculate the diagonal elements first.
        DO 10 I=1,NWIRE
        A(I,I)=-LOG(0.5*D(I)*PI/SY)
@@ -554,6 +565,9 @@ CDECK  ID>, SETB2X.
 *               YYMIRR     : Difference in y of one wire and the mirror
 *                            image of another * factor.
 *-----------------------------------------------------------------------
+       implicit none
+       INTEGER IFAIL
+       REAL XX,YY,XXNEG,YYMIRR
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -600,6 +614,7 @@ CDECK  ID>, SETB2X.
        PARAMETER (PI=3.141592653589793238)
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
+       INTEGER I,J
 *** Loop over all wires and calculate the diagonal elements first.
        DO 10 I=1,NWIRE
        XX=(PI/SX)*(X(I)-COPLAX)
@@ -649,6 +664,9 @@ CDECK  ID>, SETB2Y.
 *               YYNEG      : Difference in y of one wire and the mirror
 *                            image in period direction of another * fac.
 *-----------------------------------------------------------------------
+       implicit none
+       INTEGER IFAIL
+       REAL XX,YY,XXMIRR,YYNEG
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -695,6 +713,7 @@ CDECK  ID>, SETB2Y.
        PARAMETER (PI=3.141592653589793238)
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
+       INTEGER I,J
 *** Loop over all wires and calculate the diagonal elements first.
        DO 10 I=1,NWIRE
        YY=(PI/SY)*(Y(I)-COPLAY)
@@ -743,7 +762,9 @@ CDECK  ID>, SETC10.
 *
 *  (Written by G.A.Erskine/DD, 14.8.1984 modified to some extent)
 *-----------------------------------------------------------------------
-       IMPLICIT COMPLEX (W,Z)
+*       IMPLICIT COMPLEX (W,Z)
+       implicit none
+       INTEGER IFAIL
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -790,6 +811,11 @@ CDECK  ID>, SETC10.
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
        REAL PI
        PARAMETER (PI=3.141592653589793238)
+       INTEGER I,J
+       REAL CONST,P,S,TEMP
+       REAL XX,YY
+       REAL UTYPE
+       REAL PH2,PH2LIM
 *** Statement function returning XX if mode is 0, YY else.
        UTYPE(XX,YY)=(1-MODE)*XX+MODE*YY
 *** Set some of the constants used by PH2 and E2SUM.
@@ -843,6 +869,8 @@ CDECK  ID>, SETC2X.
 *            j=1(1)n, lx=-infinity(1)infinity, ly=-infinity(1)infinity.
 *            but the signs of the charges alternate in the x-direction
 *-----------------------------------------------------------------------
+       implicit none
+       INTEGER IFAIL
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -889,7 +917,7 @@ CDECK  ID>, SETC2X.
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
        REAL PI
        PARAMETER (PI=3.141592653589793238)
-       LOGICAL         LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH
@@ -898,6 +926,9 @@ CDECK  ID>, SETC2X.
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+       INTEGER I,J
+       REAL P,S,CX,TEMP
+       REAL PH2,PH2LIM
 *** Initialise the constants.
        P=0.0
        P1=0.0
@@ -962,6 +993,8 @@ CDECK  ID>, SETC2Y.
 *            j=1(1)n, lx=-infinity(1)infinity, ly=-infinity(1)infinity.
 *            but the signs of the charges alternate in the y-direction
 *-----------------------------------------------------------------------
+       implicit none
+       INTEGER IFAIL
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -1008,7 +1041,7 @@ CDECK  ID>, SETC2Y.
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
        REAL PI
        PARAMETER (PI=3.141592653589793238)
-       LOGICAL         LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH
@@ -1017,6 +1050,9 @@ CDECK  ID>, SETC2Y.
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+       INTEGER I,J
+       REAL P,S,CY,TEMP
+       REAL PH2,PH2LIM
 *** Initialise the constants.
        P=0
        P1=0
@@ -1080,6 +1116,8 @@ CDECK  ID>, SETC30.
 *            j=1(1)n, lx=-infinity(1)infinity, ly=-infinity(1)infinity.
 *            but the signs of the charges alternate in both directions.
 *-----------------------------------------------------------------------
+       implicit none
+       INTEGER IFAIL
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -1135,6 +1173,9 @@ CDECK  ID>, SETC30.
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
        REAL PI
        PARAMETER (PI=3.141592653589793238)
+       INTEGER I,J
+       REAL P,CX,CY
+       REAL PH2,PH2LIM
 *** Initialise the constants.
        P=0.0
        P1=0.0
@@ -1188,6 +1229,8 @@ CDECK  ID>, SETD10.
 *   VARIABLES :
 *   (Last changed on  4/ 9/95.)
 *-----------------------------------------------------------------------
+       implicit none
+       INTEGER IFAIL
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -1233,6 +1276,7 @@ CDECK  ID>, SETD10.
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
        COMPLEX ZI,ZJ
+       INTEGER I,J
 *** Loop over all wires.
        DO 10 I=1,NWIRE
 *   Set the diagonal terms.
@@ -1260,6 +1304,8 @@ CDECK  ID>, SETD20.
 *   VARIABLES :
 *   (Last changed on 18/ 2/93.)
 *-----------------------------------------------------------------------
+       implicit none
+       INTEGER IFAIL
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -1305,6 +1351,7 @@ CDECK  ID>, SETD20.
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
        COMPLEX ZI,ZJ
+       INTEGER I,J
 *** Loop over all wires.
        DO 10 I=1,NWIRE
 *   Set a complex wire-coordinate to make things a little easier.
@@ -1356,6 +1403,8 @@ CDECK  ID>, SETD30.
 *   Variables : No local variables.
 *   (Last changed on 21/ 2/94.)
 *-----------------------------------------------------------------------
+       implicit none
+       INTEGER IFAIL
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -1401,6 +1450,7 @@ CDECK  ID>, SETD30.
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
        COMPLEX WD
+       INTEGER I,J
 *** Evaluate kappa, a constant needed by EFCMAP.
        KAPPA=GAMMA(REAL(NTUBE+1)/REAL(NTUBE))*
      -      GAMMA(REAL(NTUBE-2)/REAL(NTUBE))/
@@ -1428,6 +1478,8 @@ CDECK  ID>, CHARGE.
 *            the SET... routines thereby providing the charges.
 *   (Last changed on 30/ 1/93.)
 *-----------------------------------------------------------------------
+       implicit none
+       INTEGER IFAIL
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -1482,6 +1534,7 @@ CDECK  ID>, CHARGE.
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
        DOUBLE PRECISION T
+       INTEGER I,II,J,JJ
 *** Identify the routine, if requested.
        IF(LIDENT)PRINT *,' /// ROUTINE CHARGE ///'
 *** Dump the capacitance matrix before inversion, if DEBUG is requested.
@@ -1637,7 +1690,7 @@ CDECK  ID>, SETDIP.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       LOGICAL         LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH
@@ -1751,7 +1804,7 @@ CDECK  ID>, DIPFIT.
        implicit none
        REAL PI
        PARAMETER (PI=3.141592653589793238)
-       LOGICAL         LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH
@@ -2205,6 +2258,9 @@ CDECK  ID>, EFCA00SC.
 *               (XPOS,YPOS): The position where the field is calculated.
 *   (Last changed on 25/ 1/96.)
 *-----------------------------------------------------------------------
+       implicit none
+       REAL XPOS,YPOS,EX,EY,VOLT
+       INTEGER IOPT
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -2247,6 +2303,8 @@ CDECK  ID>, EFCA00SC.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+       REAL R2,R2PLAN,EXHELP,EYHELP,XXMIRR,YYMIRR
+       INTEGER I
 *** Initialise the potential and the electric field.
        EX=0.0
        EY=0.0
@@ -2299,6 +2357,8 @@ CDECK  ID>, E3DA00.
 *               (XPOS,YPOS): The position where the field is calculated.
 *   (Last changed on  5/12/94.)
 *-----------------------------------------------------------------------
+       implicit none
+       REAL XPOS,YPOS,ZPOS,EX,EY,EZ,VOLT
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -2341,6 +2401,9 @@ CDECK  ID>, E3DA00.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+       INTEGER I
+       REAL R,EXHELP,EYHELP,EZHELP,VHELP
+       REAL XXMIRR,YYMIRR,RPLAN
 *** Initialise the potential and the electric field.
        EX=0.0
        EY=0.0
@@ -2508,6 +2571,9 @@ CDECK  ID>, EFCB1XSC.
 *               Z,ZZMIRR   : X + I*Y , XXMIRR + I*YYMIRR ; I**2=-1
 *               ECOMPL     : EX + I*EY                   ; I**2=-1
 *-----------------------------------------------------------------------
+       implicit none
+       REAL XPOS,YPOS,EX,EY,VOLT
+       INTEGER IOPT
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -2556,6 +2622,8 @@ CDECK  ID>, EFCB1XSC.
      -      CLOG2=0.693147180559945309417,
      -      ICONS=(0.0,1.0))
        COMPLEX ZZ,ECOMPL,ZZMIRR
+       INTEGER I
+       REAL R2,XX,YY,YYMIRR
 *** Initialise EX, EY and VOLT.
        EX=0.0
        EY=0.0
@@ -2695,6 +2763,9 @@ CDECK  ID>, EFCB1YSC.
 *               Z,ZZMIRR   : X + I*Y , XXMIRR + I*YYMIRR ; I**2=-1
 *               ECOMPL     : EX + I*EY                   ; I**2=-1
 *-----------------------------------------------------------------------
+       implicit none
+       REAL XPOS,YPOS,EX,EY,VOLT
+       INTEGER IOPT
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -2741,6 +2812,8 @@ CDECK  ID>, EFCB1YSC.
        PARAMETER (PI=3.141592653589793238,
      -      CLOG2=0.693147180559945309417)
        COMPLEX ZZ,ECOMPL,ZZMIRR
+       INTEGER I
+       REAL R2,XX,YY,XXMIRR
 *** Initialise EX, EY and VOLT.
        EX=0.0
        EY=0.0
@@ -2880,6 +2953,9 @@ CDECK  ID>, EFCB2X.
 *               ECOMPL     : EX + i*EY                   ; i**2=-1
 *   (Cray vectorisable)
 *-----------------------------------------------------------------------
+       implicit none
+       REAL XPOS,YPOS,EX,EY,VOLT
+       INTEGER IOPT
        INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
        PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
@@ -2925,6 +3001,9 @@ CDECK  ID>, EFCB2X.
        REAL PI
        PARAMETER (PI=3.141592653589793238)
        COMPLEX ZZ,ECOMPL,ZZMIRR,ZZNEG,ZZNMIR
+       INTEGER I
+       REAL XX,YY,XXNEG,YYMIRR
+       REAL R2,R2PLAN
 *** Initialise EX, EY and VOLT.
        EX=0.0
        EY=0.0

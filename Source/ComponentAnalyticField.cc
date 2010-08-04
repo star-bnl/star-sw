@@ -1,14 +1,16 @@
 #include <iostream>
-#include <string>
-#include <math.h>
+#include <cmath>
+
 #include "ComponentAnalyticField.hh"
+#include "FundamentalConstants.hh"
 
 namespace Garfield {
   
 //**************************************************************************/
-//                               CONSTRUCTOR
+//                               Constructor
 //**************************************************************************/
-ComponentAnalyticField::ComponentAnalyticField(std::string cellName, float xl, float xm,float yl,float ym,float zl,float zm) {
+ComponentAnalyticField::ComponentAnalyticField(std::string cellName, 
+        float xl, float xm,float yl,float ym,float zl,float zm) {
 
   CellInit();
   strcpy(celchr_.cellid, cellName.c_str());
@@ -20,6 +22,7 @@ ComponentAnalyticField::ComponentAnalyticField(std::string cellName, float xl, f
   celdat_.zmax = zm;
   cellok = false;
   isRotated = false;
+  isTranslated = false;
   xTran = yTran = zTran = 0.0;
 
 }
@@ -30,6 +33,7 @@ ComponentAnalyticField::ComponentAnalyticField(std::string cellName) {
   strcpy(celchr_.cellid, cellName.c_str());
   cellok = false;
   isRotated = false;
+  isTranslated = false;
   xTran = yTran = zTran = 0.0;  
 
 }
@@ -57,7 +61,10 @@ ComponentAnalyticField::ComponentAnalyticField() {
 void 
 ComponentAnalyticField::CellInit() {
 
-  // SETTING BOOLEANS
+  cellok = false;
+  sx = sy = 0.;
+  
+  // Set booleans
   for (int i = 0; i < 4; i++) celdat_.ynplan[i] = false;
   
   celdat_.perx = false; celdat_.pery = false; celdat_.perz = false;
@@ -75,7 +82,7 @@ ComponentAnalyticField::CellInit() {
   celdat_.celset = false;
   celdat_.ldipol = false;
   
-  //SETTING INTEGERS
+  // Set integers
   for (int i = 0; i < mxwire; i++) celdat_.indsw[i]=0;
     
   for (int i = 0; i < mxpstr; i++) {
@@ -103,7 +110,7 @@ ComponentAnalyticField::CellInit() {
     celdat_.npstr2[i] = 0;
   }
     
-  //SETTING FLOATS
+  // Set floats
   for (int i = 0; i < mxwire; i++) {
     celdat_.x[i] = 0.0; celdat_.y[i] = 0.0;
     celdat_.v[i] = 0.0; celdat_.e[i] = 0.0;
@@ -155,13 +162,13 @@ ComponentAnalyticField::CellInit() {
   celdat_.sx = 0.0; celdat_.sy = 0.0; celdat_.sz = 0.0;    
   celdat_.kappa = 0.0;
     
-  //SETTING CHARS IN CELCHR_
+  // Set chars in CELCHR_
   for (int i = 0; i < 80; i++) celchr_.cellid[i] = ' ';
   for (int i = 0; i < 3; i++) celchr_.type[i] = ' ';
   for (int i = 0; i < mxwire; i++) celchr_.wirtyp[i] = ' ';
   for (int i = 0; i < 5; i++) celchr_.platyp[i] = ' ';
   for (int i = 0; i < mxpstr; i++) {
-    for(int j = 0;j < 5;j++) {
+    for(int j = 0;j < 5; j++) {
       celchr_.pslab1[i][j] = ' ';
       celchr_.pslab2[i][j] = ' ';
     }
@@ -177,110 +184,104 @@ ComponentAnalyticField::CellInit() {
 //**************************************************************************/
 void 
 ComponentAnalyticField::AddWire(float x, float y, float diameter, 
-                                float voltage,float tension, float rho, 
-                                float length, char label) {
+                                float voltage, char label,
+                                float tension, float length, float rho) {
     
   bool isOkay = true;
   // Bounding points in global coordinates
   double xmin, ymin, zmin, xmax, ymax, zmax;
-  // Locations of wire end points in local coordinates
-  double e1xl, e1yl, e1zl, e2xl, e2yl, e2zl;
-  // Locations of wire end points in global coordinates
-  double e1xw, e1yw, e1zw, e2xw, e2yw, e2zw;
     
-  if (theGeometry == 0) {
-    std::cerr << "ComponentAnalyticField::AddWire:\n";
-    std::cerr << "    Geometry not yet set.\n";
-    std::cerr << "    Unable to place wire at ("<< x <<", "<<y <<") .\n";
-    return;
-  }
-
-  theGeometry->GetBoundingBox(xmin, ymin, zmin, xmax, ymax, zmax);
+  if (theGeometry != 0) {
+    theGeometry->GetBoundingBox(xmin, ymin, zmin, xmax, ymax, zmax);
     
-  e1xl = double(x);
-  e1yl = double(y);
-  e1zl = double(length / 2.0);
+    // Locations of wire end points in local coordinates
+    double e1xl = double(x);
+    double e1yl = double(y);
+    double e1zl = double(length / 2.0);
   
-  e2xl = double(x);
-  e2yl = double(y);
-  e2zl = double(-length / 2.0);
-  
-  // Transform local coordinates into global
-  Internal2Global(e1xl, e1yl, e1zl, e1xw, e1yw, e1zw);
-  Internal2Global(e2xl, e2yl, e2zl, e2xw, e2yw, e2zw);
-    
-  /*std::cerr <<"End point 1 in local:\n";
-  std::cerr <<e1xl << "\t" << e1yl << "\t" << e1zl <<"\n";
-  std::cerr <<"End point 1 in global:\n";
-  std::cerr <<e1xw << "\t" << e1yw << "\t" << e1zw <<"\n";*/
-      
-  const double e1x = e1xw;
-  const double e1y = e1yw; 
-  const double e1z = e1zw;
-  const double e2x = e2xw; 
-  const double e2y = e2yw;
-  const double e2z = e2zw;
+    double e2xl = double(x);
+    double e2yl = double(y);
+    double e2zl = double(-length / 2.0);
 
-  // Now check to see if these points are contained in the geometry
-  if (!theGeometry->IsInside(e1x, e1y, e1z)) {
-    isOkay = false;
-    std::cerr << "Unable to place wire at (" << x << ", " << y 
+    // Locations of wire end points in global coordinates
+    double e1xw, e1yw, e1zw, e2xw, e2yw, e2zw;
+
+    // Transform local coordinates into global
+    Internal2Global(e1xl, e1yl, e1zl, e1xw, e1yw, e1zw);
+    Internal2Global(e2xl, e2yl, e2zl, e2xw, e2yw, e2zw);
+        
+    const double e1x = e1xw;
+    const double e1y = e1yw; 
+    const double e1z = e1zw;
+    const double e2x = e2xw; 
+    const double e2y = e2yw;
+    const double e2z = e2zw;
+
+    // Now check to see if these points are contained in the geometry
+    if (!theGeometry->IsInside(e1x, e1y, e1z)) {
+      std::cerr << "Unable to place wire at (" << x << ", " << y 
               << ") local frame.\n";
-    std::cerr << "End point (" << e1x << ", " << e1y << ", " << e1z 
+      std::cerr << "End point (" << e1x << ", " << e1y << ", " << e1z 
               << ") outside.\n";
-    std::cerr << "Boundaries are:\n";
-    std::cerr << "x: " << xmin << "\t" << xmax << "\n";
-    std::cerr << "y: " << ymin << "\t" << ymax << "\n";
-    std::cerr << "z: " << zmin << "\t" << zmax << "\n";
-  }
-  if (!theGeometry->IsInside(e2x, e2y, e2z)) {
-    isOkay = false;
-    std::cerr << "Unable to place wire at (" << x << ", " << y 
-              << ") local frame.\n";
-    std::cerr << "End point (" << e2x << ", " << e2y << ", " << e2z 
+      std::cerr << "Boundaries are:\n";
+      std::cerr << "x: " << xmin << "\t" << xmax << "\n";
+      std::cerr << "y: " << ymin << "\t" << ymax << "\n";
+      std::cerr << "z: " << zmin << "\t" << zmax << "\n";
+    }
+    if (!theGeometry->IsInside(e2x, e2y, e2z)) {
+      std::cerr << "Unable to place wire at (" << x << ", " << y 
+                << ") local frame.\n";
+      std::cerr << "End point (" << e2x << ", " << e2y << ", " << e2z 
               << ") outside.\n";
-    std::cerr << "Boundaries are:\n";
-    std::cerr << "x: " << xmin << "\t" << xmax << "\n";
-    std::cerr << "y: " << ymin << "\t" << ymax << "\n";
-    std::cerr << "z: " << zmin << "\t" << zmax << "\n";
+      std::cerr << "Boundaries are:\n";
+      std::cerr << "x: " << xmin << "\t" << xmax << "\n";
+      std::cerr << "y: " << ymin << "\t" << ymax << "\n";
+      std::cerr << "z: " << zmin << "\t" << zmax << "\n";
+    } 
   }
    
-  // if (!isOkay) return;
+  // Check if the provided parameters make sense
+  if (diameter <= 0.0) {
+    std::cerr << "ComponentAnalyticField::AddWire:\n";
+    std::cerr << "    Unphysical wire diameter.\n";
+    return;
+  }
+  if (tension <= 0.0) {
+    std::cerr << "ComponentAnalyticField::AddWire:\n";
+    std::cerr << "    Unphysical wire tension.\n";
+    return;
+  }
+  if (rho <= 0.0) {
+    std::cerr << "ComponentAnalyticField::AddWire:\n";
+    std::cerr << "    Unphysical wire density.\n";
+    return;
+  } 
+  if (length <= 0.0) {
+    std::cerr << "ComponentAnalyticField::AddWire:\n";
+    std::cerr << "    Unphysical wire length.\n";
+    return;
+  }
     
+  cellok = false;
+  
+  // Add the wire to the list
   celdat_.x[celdat_.nwire] = x;
   celdat_.y[celdat_.nwire] = y;
-  if (diameter <= 0.0) {
-    std::cerr << "Unphysical wire diameter.\n";
-  } else {
-    celdat_.d[celdat_.nwire] = diameter;
-  }
-      
+  celdat_.d[celdat_.nwire] = diameter;    
   celdat_.v[celdat_.nwire] = voltage;
-  if (tension <= 0.0) {
-    std::cerr << "Unphysical wire tension.\n";
-  } else {
-    celdat_.w[celdat_.nwire] = tension;
-  }
-      
-  if (rho <= 0.0) {
-    std::cerr << "Unphysical wire density.\n";
-  } else {
-    celdat_.dens[celdat_.nwire] = rho;
-  }
-
-  if (length <= 0.0) {
-    std::cerr << "Unphysical wire length.\n";
-  } else {
-    celdat_.u[celdat_.nwire] = length;
-  }
+  celdat_.w[celdat_.nwire] = tension;
+  celdat_.dens[celdat_.nwire] = rho;
+  celdat_.u[celdat_.nwire] = length;
       
   celchr_.wirtyp[celdat_.nwire] = label;
-  if (celdat_.nwire + 1 > mxwire){
-    std::cerr << "Maximum number of wires reached.\n";
+  
+  if (celdat_.nwire + 1 > mxwire) {
+    std::cerr << "ComponentAnalyticField::AddWire:\n";
+    std::cerr << "    Maximum number of wires reached.\n";
   } else {
     celdat_.nwire = celdat_.nwire + 1;  
   }
-
+  
 }
 
 //**************************************************************************/
@@ -309,52 +310,56 @@ ComponentAnalyticField::AddTube(float radius, float voltage, int numEdges,
 
   if (theGeometry == 0) {    
     std::cerr << "Geometry not yet set for ComponentAnalyticField.\n";
-    std::cerr << "Unable to place tube.\n";
+  } else {
+    theGeometry->GetBoundingBox(xmin, ymin, zmin, xmax, ymax, zmax);
+
+    // Transform local coordinates into global
+    Internal2Global(p1xl, 0.0, 0.0, p1xw, p1yw, p1zw);
+    Internal2Global(p2xl, 0.0, 0.0, p2xw, p2yw, p2zw);  
+    Internal2Global(0.0, p3yl, 0.0, p3xw, p3yw, p3zw);
+    Internal2Global(0.0, p4yl, 0.0, p4xw, p4yw, p4zw);
+
+    if (fabs(p1xw) > xmax || fabs(p1yw) > ymax || fabs(p1zw) > zmax) {
+      std::cerr << "Tube point 1 is out of bounds.\n";
+      std::cerr << "(" << p1xw << ", "<< p1yw << ", " << p1zw << ")\n";
+    }
+    if (fabs(p2xw) > xmax || fabs(p2yw) > ymax || fabs(p2zw) > zmax) {
+      std::cerr << "Tube point 2 is out of bounds.\n";
+      std::cerr << "(" << p2xw << ", " << p2yw << ", " << p2zw << ")\n";
+    }
+    if (fabs(p3xw) > xmax || fabs(p3yw) > ymax || fabs(p3zw) > zmax) {
+      std::cerr << "Tube point 3 is out of bounds.\n";
+      std::cerr << "(" << p3xw << ", " << p3yw << ", " << p3zw << ")\n";
+    }
+    if (fabs(p4xw) > xmax || fabs(p4yw) > ymax || fabs(p4zw) > zmax) {
+      std::cerr << "Tube point 4 is out of bounds.\n";
+      std::cerr << "(" << p4xw << ", " << p4yw << ", " << p4zw << ")\n"; 
+    }
+  }
+  
+  // Check if the provided parameters make sense
+  if (radius <= 0.0) {
+    std::cerr << "ComponentAnalyticField::AddTube:\n";
+    std::cerr << "    Unphysical tube radius.\n";
+    return;
+  }
+  if (numEdges < 3 && numEdges != 0) {
+    std::cerr << "ComponentAnalyticField::AddTube:\n";
+    std::cerr << "    Unphysical number of tube edges (" << numEdges << ")\n";
     return;
   }
 
-  theGeometry->GetBoundingBox(xmin, ymin, zmin, xmax, ymax, zmax);
-
-  // Transform local coordinates into global
-  Internal2Global(p1xl, 0.0, 0.0, p1xw, p1yw, p1zw);
-  Internal2Global(p2xl, 0.0, 0.0, p2xw, p2yw, p2zw);  
-  Internal2Global(0.0, p3yl, 0.0, p3xw, p3yw, p3zw);
-  Internal2Global(0.0, p4yl, 0.0, p4xw, p4yw, p4zw);
-
-  if (fabs(p1xw) > xmax || fabs(p1yw) > ymax || fabs(p1zw) > zmax) {
-    std::cerr << "Tube point 1 is out of bounds.\n";
-    std::cerr << "(" << p1xw << ", "<< p1yw << ", " << p1zw << ")\n";
-  }
-  if (fabs(p2xw) > xmax || fabs(p2yw) > ymax || fabs(p2zw) > zmax) {
-    std::cerr << "Tube point 2 is out of bounds.\n";
-    std::cerr << "(" << p2xw << ", " << p2yw << ", " << p2zw << ")\n";
-  }
-  if (fabs(p3xw) > xmax || fabs(p3yw) > ymax || fabs(p3zw) > zmax) {
-    std::cerr << "Tube point 3 is out of bounds.\n";
-    std::cerr << "(" << p3xw << ", " << p3yw << ", " << p3zw << ")\n";
-  }
-  if (fabs(p4xw) > xmax || fabs(p4yw) > ymax || fabs(p4zw) > zmax) {
-    std::cerr << "Tube point 4 is out of bounds.\n";
-    std::cerr << "(" << p4xw << ", " << p4yw << ", " << p4zw << ")\n"; 
-  }
-
-  // Setting Garfield Coordinate system flags
+  cellok = false;
+  
+  // Set Garfield coordinate system flags
   celdat_.tube = true;
   celdat_.polar = false;
     
-  if (radius <= 0.0) {
-    std::cerr << "Unphysical tube radius.\n";
-  } else {
-    celdat_.cotube = radius;
-  }
+  celdat_.cotube = radius;
   celdat_.vttube = voltage;
     
-  if (numEdges < 3 && numEdges > 0) {
-    std::cerr << "Unphysical number of tube edges (cant be 1 or 2).\n";
-  } else {
-    celdat_.ntube = numEdges;
-  }
-    
+  celdat_.ntube = numEdges;
+  
   celchr_.platyp[4] = label;
   celdat_.indpla[4] = -1;
   celdat_.npstr1[4] = -1;
@@ -383,52 +388,52 @@ ComponentAnalyticField::AddPlanes(bool plane1, float c1, float v1, char lab1,
   double p4xw = 0., p4yw = 0., p4zw = 0.;
  
   if (theGeometry == 0) {
-    std::cerr <<"Geometry not yet set for ComponentAnalyticField.\n";
-    std::cerr <<"Unable to place planes.\n";
+    std::cerr << "Geometry not yet set for ComponentAnalyticField.\n";
+    std::cerr << "Unable to place planes.\n";
     isOkay = false; 
-    return;
-  }
-
-  theGeometry->GetBoundingBox(xmin, ymin, zmin, xmax, ymax, zmax);
+  } else {
+    theGeometry->GetBoundingBox(xmin, ymin, zmin, xmax, ymax, zmax);
+    p1xl = double(c1);
+    p2xl = double(c2);
+    p3yl = double(c3);
+    p4yl = double(c4);
   
-  p1xl = double(c1);
-  p2xl = double(c2);
-  p3yl = double(c3);
-  p4yl = double(c4);
+    // Transform local coordinates into global
+    Internal2Global(p1xl, 0.0, 0.0, p1xw, p1yw, p1zw);
+    Internal2Global(p2xl, 0.0, 0.0, p2xw, p2yw, p2zw);  
+    Internal2Global(0.0, p3yl, 0.0, p3xw, p3yw, p3zw);
+    Internal2Global(0.0, p4yl, 0.0, p4xw, p4yw, p4zw);
   
-  // Transform local coordinates into global
-  Internal2Global(p1xl, 0.0, 0.0, p1xw, p1yw, p1zw);
-  Internal2Global(p2xl, 0.0, 0.0, p2xw, p2yw, p2zw);  
-  Internal2Global(0.0, p3yl, 0.0, p3xw, p3yw, p3zw);
-  Internal2Global(0.0, p4yl, 0.0, p4xw, p4yw, p4zw);
+    // Now check to see if these points are contained in the geometry
+    // Cant use theGeometry->IsInside because it doesnt allow for the planes 
+    // to be on the walls of the container.
+    if (fabs(p1xw) > xmax || fabs(p1yw) > ymax || fabs(p1zw) > zmax) {
+      std::cerr << "Plane 1 is out of bounds.\n";
+      std::cerr << "(" << p1xw << ", " << p1yw << ", " << p1zw << ")\n";
+      std::cerr << "Bounds are:\n";
+      std::cerr << xmin << "\t" << xmax << "\n";
+    }
+    if (fabs(p2xw) > xmax || fabs(p2yw) > ymax || fabs(p2zw) > zmax) {
+      std::cerr << "Plane 2 is out of bounds.\n";
+      std::cerr << "(" << p2xw << ", " << p2yw << ", " << p2zw << ")\n";
+      std::cerr << "Bounds are:\n";
+      std::cerr << xmin << "\t" << xmax << "\n";
+    }
+    if (fabs(p3xw) > xmax || fabs(p3yw) > ymax || fabs(p3zw) > zmax) {
+      std::cerr << "Plane 3 is out of bounds.\n";
+      std::cerr << "(" << p3xw << ", " << p3yw << ", " << p3zw << ")\n";
+      std::cerr << "Bounds are:\n";
+      std::cerr << ymin << "\t" << ymax << "\n";
+    }
+    if (fabs(p4xw) > xmax || fabs(p4yw) > ymax || fabs(p4zw) > zmax) {
+      std::cerr << "Plane 4 is out of bounds.\n";
+      std::cerr << "(" << p4xw << ", " << p4yw << ", " << p4zw << ")\n"; 
+      std::cerr << "Bounds are:\n";
+      std::cerr << ymin << "\t" << ymax << "\n";
+    }
+  }
   
-  // Now check to see if these points are contained in the geometry
-  // Cant use theGeometry->IsInside because it doesnt allow for the planes 
-  // to be on the walls of the container.
-  if (fabs(p1xw) > xmax || fabs(p1yw) > ymax || fabs(p1zw) > zmax) {
-    std::cerr << "Plane 1 is out of bounds.\n";
-    std::cerr << "(" << p1xw << ", " << p1yw << ", " << p1zw << ")\n";
-    std::cerr << "Bounds are:\n";
-    std::cerr << xmin << "\t" << xmax << "\n";
-  }
-  if (fabs(p2xw) > xmax || fabs(p2yw) > ymax || fabs(p2zw) > zmax) {
-    std::cerr << "Plane 2 is out of bounds.\n";
-    std::cerr << "(" << p2xw << ", " << p2yw << ", " << p2zw << ")\n";
-    std::cerr << "Bounds are:\n";
-    std::cerr << xmin << "\t" << xmax << "\n";
-  }
-  if (fabs(p3xw) > xmax || fabs(p3yw) > ymax || fabs(p3zw) > zmax) {
-    std::cerr << "Plane 3 is out of bounds.\n";
-    std::cerr << "(" << p3xw << ", " << p3yw << ", " << p3zw << ")\n";
-    std::cerr << "Bounds are:\n";
-    std::cerr << ymin << "\t" << ymax << "\n";
-  }
-  if(fabs(p4xw) > xmax || fabs(p4yw) > ymax || fabs(p4zw) > zmax) {
-    std::cerr << "Plane 4 is out of bounds.\n";
-    std::cerr << "(" << p4xw << ", " << p4yw << ", " << p4zw << ")\n"; 
-    std::cerr << "Bounds are:\n";
-    std::cerr << ymin << "\t" << ymax << "\n";
-  }
+  cellok = false;
   
   // SETUP FOR PLANE 1
   celdat_.ynplan[0] = plane1;
@@ -460,166 +465,174 @@ ComponentAnalyticField::AddPlanes(bool plane1, float c1, float v1, char lab1,
 //                     Check the Cell type
 //                     this is used in E-field calculations 
 //**************************************************************************/
-
-void
+bool
 ComponentAnalyticField::CellType(){
 
-  // DEAL WITH TUBE GEOMETRIES
+  // Tube geometries
   if (celdat_.tube) {
     if (celdat_.ntube == 0) {
       if (celdat_.pery) {
         strcpy(celchr_.type, "D2 ");
+        celdat_.ictype = 11;
       } else {
         strcpy(celchr_.type, "D1 ");
+        celdat_.ictype = 10;
       }
     } else if (celdat_.ntube >= 3 && celdat_.ntube <= 8) {
       if (celdat_.pery) {
         strcpy(celchr_.type, "D4 ");
+        celdat_.ictype = 13;
       } else {
         strcpy(celchr_.type, "D3 ");
+        celdat_.ictype = 12;
       }
     } else {
-      std::cout <<"!!!!!! CELTYP WARNING : Potentials not yet available, using a round tube.\n";
+      std::cerr << "ComponentAnalyticField::CellType:\n";
+      std::cerr << "    Potentials for tube with " 
+                << celdat_.ntube << " edges are not yet available.\n";
+      std::cerr << "    Using a round tube instead.\n";
       strcpy(celchr_.type, "D3 ");
       celdat_.ntube = 0;
+      celdat_.ictype = 12;
     }
-  } else {
-    // FIND 'A' TYPE cell
-    if (!(celdat_.perx || celdat_.pery) && 
-        !(celdat_.ynplan[0] && celdat_.ynplan[1]) && 
-        !(celdat_.ynplan[2] && celdat_.ynplan[3])) {
-      strcpy(celchr_.type, "A  ");
-    }
-
-    //FIND 'B1X' type cell
-    if (celdat_.perx && !celdat_.pery && 
-        !(celdat_.ynplan[0] || celdat_.ynplan[1]) && 
-        !(celdat_.ynplan[2] && celdat_.ynplan[3])) {
-      strcpy(celchr_.type, "B1X");
-    }
-
-    //FIND 'B1Y' TYPE CELLS
-    if (celdat_.pery && !celdat_.perx && 
-        !(celdat_.ynplan[0] && celdat_.ynplan[1]) && 
-        !(celdat_.ynplan[2] || celdat_.ynplan[3])) {
-      strcpy(celchr_.type, "B1Y");
-    }
-
-    // Find the 'B2X' type cell.
-    if (celdat_.perx && !celdat_.pery && 
-        !(celdat_.ynplan[2] && celdat_.ynplan[3])) {
-      strcpy(celchr_.type, "B2X");
-    }
-
-    if (!(celdat_.perx || celdat_.pery) && 
-        !(celdat_.ynplan[2] && celdat_.ynplan[3]) &&
-         (celdat_.ynplan[0] && celdat_.ynplan[1])) {
-      celdat_.sx = fabs(celdat_.coplan[1] - celdat_.coplan[0]);      
-      strcpy(celchr_.type, "B2X");
-    }
-
-    // Find the 'B2Y' type cell.
-    if (celdat_.pery && !celdat_.perx && 
-        !(celdat_.ynplan[0] && celdat_.ynplan[1])) {
-      strcpy(celchr_.type, "B2Y");
-    }
-	
-    if (!(celdat_.perx || celdat_.pery) &&
-        !(celdat_.ynplan[0] && celdat_.ynplan[1]) && 
-         (celdat_.ynplan[2] && celdat_.ynplan[3])) {
-      celdat_.sy = fabs(celdat_.coplan[3] - celdat_.coplan[2]);
-      strcpy(celchr_.type, "B2Y");  
-    }
-
-    // Find the 'C1 ' type cell.
-    if (!(celdat_.ynplan[0] || celdat_.ynplan[1] || 
-          celdat_.ynplan[2] || celdat_.ynplan[3]) && 
-        celdat_.perx && celdat_.pery) {
-      strcpy(celchr_.type, "C1 ");
-    }
-
-    //Find the 'C2X' type cell.
-    if (!((celdat_.ynplan[2] && celdat_.pery) || 
-          (celdat_.ynplan[2] && celdat_.ynplan[3]))) {
-      if (celdat_.ynplan[0] && celdat_.ynplan[1]) {
-        celdat_.sx = fabs(celdat_.coplan[1] - celdat_.coplan[0]);
-        strcpy(celchr_.type, "C2X");
-      }
-      if (celdat_.perx && celdat_.ynplan[0]) {
-        strcpy(celchr_.type, "C2X");
-      }
-    }
-
-    // Find the 'C2Y' type cell.
-    if (!((celdat_.ynplan[0] && celdat_.perx) || 
-          (celdat_.ynplan[0] && celdat_.ynplan[1]))) {
-      if (celdat_.ynplan[2] && celdat_.ynplan[3]) {
-        celdat_.sy= fabs(celdat_.coplan[3] - celdat_.coplan[2]);
-        strcpy(celchr_.type, "C2Y");
-      }
-      if (celdat_.pery && celdat_.ynplan[2]) {
-        strcpy(celchr_.type, "C2Y");
-      }
-    }
-    // Find the 'C3 ' type cell.
-    if (celdat_.perx && celdat_.pery) {
-      strcpy(celchr_.type, "C3 ");
-    }
-    if (celdat_.perx) {
-      strcpy(celchr_.type, "C3 ");
-      celdat_.sy = fabs(celdat_.coplan[3] - celdat_.coplan[2]);
-    }
-    if (celdat_.pery){
-      celdat_.sx = fabs(celdat_.coplan[1] - celdat_.coplan[0]);
-      strcpy(celchr_.type, "C3 ");
-    }
-    if (celdat_.ynplan[0] && celdat_.ynplan[1] && 
-        celdat_.ynplan[2] && celdat_.ynplan[3]) {
-      strcpy(celchr_.type, "C3 "); 
-      celdat_.sx = fabs(celdat_.coplan[1] - celdat_.coplan[0]);
-      celdat_.sy = fabs(celdat_.coplan[3] - celdat_.coplan[2]);
-    }
-  }
-
-  celdat_.sx = fabs(celdat_.sx);
-  celdat_.sy = fabs(celdat_.sy);
-
-  // Store a numerical code for the cell type for greater efficiency.
-  if (strcmp(celchr_.type, "A  ") == 0) {
+    return true;
+  } 
+  
+  
+  // FIND 'A' TYPE cell
+  if (!(celdat_.perx || celdat_.pery) && 
+      !(celdat_.ynplan[0] && celdat_.ynplan[1]) && 
+      !(celdat_.ynplan[2] && celdat_.ynplan[3])) {
+    strcpy(celchr_.type, "A  ");
     celdat_.ictype = 1;
-  } else if (strcmp(celchr_.type, "B1X") == 0) {
+    return true;
+  }
+  
+  // 'B1X' type cell
+  if (celdat_.perx && !celdat_.pery && 
+      !(celdat_.ynplan[0] || celdat_.ynplan[1]) && 
+      !(celdat_.ynplan[2] && celdat_.ynplan[3])) {
+    strcpy(celchr_.type, "B1X");
     celdat_.ictype = 2;
-  } else if (strcmp(celchr_.type, "B1Y") == 0) {
+    return true;
+  }
+  
+  // 'B1Y' type cell
+  if (celdat_.pery && !celdat_.perx && 
+      !(celdat_.ynplan[0] && celdat_.ynplan[1]) && 
+      !(celdat_.ynplan[2] || celdat_.ynplan[3])) {
+    strcpy(celchr_.type, "B1Y");
     celdat_.ictype = 3;
-  } else if (strcmp(celchr_.type, "B2X") == 0) {
+    return true;
+  } 
+  
+  // 'B2X' type cell
+  if (celdat_.perx && !celdat_.pery && 
+      !(celdat_.ynplan[2] && celdat_.ynplan[3])) {
+    strcpy(celchr_.type, "B2X");
     celdat_.ictype = 4;
-  } else if (strcmp(celchr_.type, "B2Y") == 0) {
-    celdat_.ictype = 5;
-  } else if (strcmp(celchr_.type, "C1 ") == 0) {
-    celdat_.ictype = 6;
-  } else if (strcmp(celchr_.type, "C2X") == 0) {
-    celdat_.ictype = 7;
-  } else if (strcmp(celchr_.type, "C2Y") == 0) {
-    celdat_.ictype = 8;
-  } else if (strcmp(celchr_.type, "C3 ") == 0) {
-    celdat_.ictype = 9;
-  } else if (strcmp(celchr_.type, "D1 ") == 0) {
-    celdat_.ictype = 10;
-  } else if (strcmp(celchr_.type, "D2 ") == 0) {
-    celdat_.ictype = 11;
-  } else if (strcmp(celchr_.type, "D3 ") == 0) {
-    celdat_.ictype = 12;
-  } else if (strcmp(celchr_.type, "D4 ") == 0) {
-     celdat_.ictype = 13;
-  } else {
-    std::cerr << "ComponentAnalyticField::CellType:\n";
-    std::cerr << "    Unknown cell type.\n";
-    return;
+    return true;
   }
 
-  std::cout << "ComponentAnalyticField::CellType:\n";
-  std::cout << "    Cell is of type " << celchr_.type << "\n";
+  if (!(celdat_.perx || celdat_.pery) && 
+      !(celdat_.ynplan[2] && celdat_.ynplan[3]) &&
+      (celdat_.ynplan[0] && celdat_.ynplan[1])) {
+    celdat_.sx = fabs(celdat_.coplan[1] - celdat_.coplan[0]);      
+    strcpy(celchr_.type, "B2X");
+    celdat_.ictype = 4;
+    return true;
+  }
 
+  // Find the 'B2Y' type cell.
+  if (celdat_.pery && !celdat_.perx && 
+      !(celdat_.ynplan[0] && celdat_.ynplan[1])) {
+    strcpy(celchr_.type, "B2Y");
+    celdat_.ictype = 5;
+    return true;
+  }
+	
+  if (!(celdat_.perx || celdat_.pery) &&
+      !(celdat_.ynplan[0] && celdat_.ynplan[1]) && 
+      (celdat_.ynplan[2] && celdat_.ynplan[3])) {
+    celdat_.sy = fabs(celdat_.coplan[3] - celdat_.coplan[2]);
+    strcpy(celchr_.type, "B2Y");
+    celdat_.ictype = 5;
+    return true;
+  }
+
+  // Find the 'C1 ' type cell.
+  if (!(celdat_.ynplan[0] || celdat_.ynplan[1] || 
+        celdat_.ynplan[2] || celdat_.ynplan[3]) && 
+        celdat_.perx && celdat_.pery) {
+    strcpy(celchr_.type, "C1 ");
+    celdat_.ictype = 6;
+    return true;
+  }
+
+  // Find the 'C2X' type cell.
+  if (!((celdat_.ynplan[2] && celdat_.pery) || 
+        (celdat_.ynplan[2] && celdat_.ynplan[3]))) {
+    if (celdat_.ynplan[0] && celdat_.ynplan[1]) {
+      celdat_.sx = fabs(celdat_.coplan[1] - celdat_.coplan[0]);
+      strcpy(celchr_.type, "C2X");
+      celdat_.ictype = 7;
+      return true;
+    }
+    if (celdat_.perx && celdat_.ynplan[0]) {
+      strcpy(celchr_.type, "C2X");
+      celdat_.ictype = 7;
+      return true;
+    }
+  }
+
+  // Find the 'C2Y' type cell.
+  if (!((celdat_.ynplan[0] && celdat_.perx) || 
+        (celdat_.ynplan[0] && celdat_.ynplan[1]))) {
+    if (celdat_.ynplan[2] && celdat_.ynplan[3]) {
+      celdat_.sy= fabs(celdat_.coplan[3] - celdat_.coplan[2]);
+      strcpy(celchr_.type, "C2Y");
+      celdat_.ictype = 8;
+      return true;
+    }
+    if (celdat_.pery && celdat_.ynplan[2]) {
+      strcpy(celchr_.type, "C2Y");
+      celdat_.ictype = 8;
+      return true;
+    }
+  }
+  
+  // Find the 'C3 ' type cell.
+  if (celdat_.perx && celdat_.pery) {
+    strcpy(celchr_.type, "C3 ");
+    celdat_.ictype = 9;
+    return true;
+  }
+      
+  if (celdat_.perx) {
+    celdat_.sy = fabs(celdat_.coplan[3] - celdat_.coplan[2]);
+    strcpy(celchr_.type, "C3 ");
+    celdat_.ictype = 9;
+    return true;
+  }
+  
+  if (celdat_.pery) {
+    celdat_.sx = fabs(celdat_.coplan[1] - celdat_.coplan[0]);
+    strcpy(celchr_.type, "C3 ");
+    celdat_.ictype = 9;
+    return true;
+  }
+      
+  if (celdat_.ynplan[0] && celdat_.ynplan[1] && 
+      celdat_.ynplan[2] && celdat_.ynplan[3]) {
+    strcpy(celchr_.type, "C3 "); 
+    celdat_.sx = fabs(celdat_.coplan[1] - celdat_.coplan[0]);
+    celdat_.sy = fabs(celdat_.coplan[3] - celdat_.coplan[2]);
+    celdat_.ictype = 9;
+    return true;
+  }
+
+  return false;
+      
 }
 
 //**************************************************************************/
@@ -650,46 +663,32 @@ ComponentAnalyticField::ElectricField (
                               double& ex, double& ey, double& ez, 
                               Medium*& m, int& status) {
 
+  if (!cellok) {
+    if (!Prepare()) {
+      status = -11;
+      return;
+    }
+  }
+  
   int opt = 0;
   int state;
-  // FORTRAN CODE REQUIRES FLOATS
-  float xpos, ypos, zpos;
-  float exf, eyf, ezf;
-  float etot, volt;
  
   // Global (or world) coordinates
   double xw = x, yw = y, zw = z;
   // Internal (or local) coordinates
-  double xl,yl,zl;
+  double xl, yl, zl;
      
   Global2Internal(xl, yl, zl, xw, yw, zw);
 
-  xpos = float(xl);
-  ypos = float(yl);
-  zpos = float(zl);
+  // Fortran code requires floats
+  float xpos = float(xl);
+  float ypos = float(yl);
+  float zpos = float(zl);
 
+  float exf = 0., eyf = 0., ezf = 0.;
+  float etot = 0., volt = 0.;
+  
   efield_(&xpos, &ypos, &zpos, &exf, &eyf, &ezf, &etot, &volt, &opt, &state);
-
-  /*
-  if (isRotated) {
-    if (theta != 0.0) {
-      exf = exf;
-      eyf = eyf * cos(theta) - ezf * sin(theta);
-      ezf = eyf * sin(theta) + ezf * cos(theta);
-    }
-    if (phi != 0.0) {
-      exf =  exf * cos(phi) + ezf * sin(phi);
-      eyf =  eyf;
-      ezf = -exf * sin(phi) + ezf * cos(phi);
-    }
-    if(gamma != 0.0){
-      exf = exf * cos(gamma) - eyf * sin(gamma);
-      eyf = exf * sin(gamma) + eyf * cos(gamma);
-      ezf = ezf;
-    }
-
-  }
-  //*/
 
   if (isRotated) Rotate(ex, ey, ez, ex, ey, ez, false);
 
@@ -699,8 +698,13 @@ ComponentAnalyticField::ElectricField (
 
   status = state;
 
-  GetMedium(x, y, z, m);
-
+  if (!GetMedium(x, y, z, m)) {
+    status = -6;
+    m = 0;
+  } else if (!m->IsDriftable()) {
+    status = -5;
+  }
+  
 }
 
 // Calculate the drift field [V/cm] and potential [V] at (x, y, z)
@@ -708,25 +712,31 @@ void ComponentAnalyticField::ElectricField (
                                const double x, const double y, const double z, 
                                double& ex, double& ey, double& ez, double& v, 
                                Medium*& m, int& status) {
+
+  if (!cellok) {
+    if (!Prepare()) {
+      status = -11;
+      return;
+    }
+  }
+                               
   int opt = 1;
   int state;
-  // FORTRAN CODE REQUIRES FLOATS
-  float xpos, ypos, zpos;
-  float exf, eyf, ezf;
-  float etot, vf;
 
   // Global (or world) coordinates
   double xw = x, yw = y, zw = z;
-
   // Internal (or local) coordinates
   double xl = 0., yl = 0., zl = 0.;
     
   Global2Internal(xl, yl, zl, xw, yw, zw);
    
-  xpos = float(xl);
-  ypos = float(yl);
-  zpos = float(zl);
+  // Fortran code requires floats
+  float xpos = float(xl);
+  float ypos = float(yl);
+  float zpos = float(zl);
 
+  float exf = 0., eyf = 0., ezf = 0.;
+  float etot = 0., vf = 0.;   
   efield_(&xpos, &ypos, &zpos, &exf, &eyf, &ezf, &etot, &vf, &opt, &state);
 
   if (isRotated) Rotate(ex, ey, ez, ex, ey, ez, false);
@@ -735,60 +745,181 @@ void ComponentAnalyticField::ElectricField (
   ey = double(eyf);
   ez = double(ezf);
   v = double(vf);
+  
   status = state;
 
-  GetMedium(x, y, z, m);
+  if (!GetMedium(x, y, z, m)) {
+    status = -6;
+    m = 0;
+  } else if (!m->IsDriftable()) {
+    status = -5;
+  }
    
 }
 
 // Calculate the voltage range [V]
-bool ComponentAnalyticField::GetVoltageRange(double& vmin, double& vmax) {
+bool 
+ComponentAnalyticField::GetVoltageRange(double& vmin, double& vmax) {
 
-  if (cellok) {
-    vmin = double(celdat_.vmin); 
-    vmax = double(celdat_.vmax);
-    return true;
+  if (!cellok) {
+    if (!Prepare()) {
+      std::cerr << "ComponentAnalyticField::GetVoltageRange:\n";
+      std::cerr <<"    Unable to return voltage range.\n";
+      std::cerr << "   Cell could not be setup.\n";
+      return false;
+    }
+  }
+    
+  vmin = double(celdat_.vmin); 
+  vmax = double(celdat_.vmax);
+  return true;
+
+}
+  
+void
+ComponentAnalyticField::Reset() {
+
+  CellInit();
+
+}                        
+
+void
+ComponentAnalyticField::SetPeriodicityX(const double s) {
+
+  if (s < Small) {
+    std::cerr << "ComponentAnalyticField::SetPeriodicityX:\n";
+    std::cerr << "    Periodic length must be greater than zero.\n";
+    return;
   }
   
-  std::cerr << "ComponentAnalyticField::GetVoltageRange:\n";
-  std::cerr <<"    Unable to return voltage range since cell not setup yet.\n";
-  return false;
+  xPeriodic = true;
+  sx = s;
+  UpdatePeriodicity();
+  
+}
+
+void
+ComponentAnalyticField::SetPeriodicityY(const double s) {
+
+  if (s < Small) {
+    std::cerr << "ComponentAnalyticField::SetPeriodicityY:\n";
+    std::cerr << "    Periodic length must be greater than zero.\n";
+    return;
+  }
+  
+  yPeriodic = true;
+  sy = s;
+  UpdatePeriodicity();
 
 }
 
-// Reset the component
-void ComponentAnalyticField::Reset() {}
+void 
+ComponentAnalyticField::UpdatePeriodicity() {
+  
+  celdat_.perx  = false; celdat_.pery  = false; celdat_.perz  = false;
+  celdat_.permx = false; celdat_.permy = false; celdat_.permz = false;
+  celdat_.perax = false; celdat_.peray = false; celdat_.peraz = false;
+  celdat_.perrx = false; celdat_.perry = false; celdat_.perrz = false;
 
+  cellok = false;
+    
+  if (xPeriodic) {
+    if (sx < Small) {
+      std::cerr << "ComponentAnalyticField::UpdatePeriodicity:\n";
+      std::cerr << "    Periodicity in x direction is enabled"
+                << " but periodic length is not set.\n";
+    } else {
+      celdat_.perx = true;
+      celdat_.sx = sx;
+    }
+  }
+  
+  if (yPeriodic) {
+    if (sy < Small) {
+      std::cerr << "ComponentAnalyticField::UpdatePeriodicity:\n";
+      std::cerr << "    Periodicity in y direction is enabled"
+                << " but periodic length is not set.\n";
+    } else {
+      celdat_.pery = true;
+      celdat_.sy = sy;
+    }
+  }
+  
+  if (zPeriodic) {
+    std::cerr << "ComponentAnalyticField::UpdatePeriodicity:\n";
+    std::cerr << "    Periodicity in z is not possible.\n";
+  }
+  
+  if (xMirrorPeriodic || yMirrorPeriodic || zMirrorPeriodic) {
+    std::cerr << "ComponentAnalyticField::UpdatePeriodicity:\n";
+    std::cerr << "    Mirror periodicity is not possible.\n";
+  }
+    
+  if (xAxiallyPeriodic || yAxiallyPeriodic || zAxiallyPeriodic) {
+    std::cerr << "ComponentAnalyticField::UpdatePeriodicity:\n";
+    std::cerr << "    Axial periodicity is not possible.\n";
+  }
+  
+  if (xRotationSymmetry || yRotationSymmetry || zRotationSymmetry) {
+    std::cerr << "ComponentAnalyticField::UpdatePeriodicity:\n";
+    std::cerr << "    Rotation symmetry is not possible.\n";
+  }
+  
+}
 
-void ComponentAnalyticField::Prepare() {
+bool 
+ComponentAnalyticField::Prepare() {
 
   int ifail = 0;
 
-  celchk_(&ifail);
-  if (ifail == 0){
+  if (debug && celdat_.nwire > 0) {
     std::cout << "ComponentAnalyticField::Prepare:\n";
-    std::cout << "    Cell check ok.\n";
-    cellok = true;
-  } else {
-    std::cerr << "ComponentAnalyticField:Prepare:\n";
-    std::cerr << "    Error while checking field.\n";
-    cellok = false;
-    return;
+    std::cout << "    List of wires:\n";
+    std::cout << "      x [cm]   y [cm]   diameter [um]   potential \n";
+    for (int i = 0; i < celdat_.nwire; ++i) {
+      std::cout << "      " << celdat_.x[i] 
+                << "      " << celdat_.y[i] << "      "
+                << 1.e4 * celdat_.d[i] << "      " << celdat_.v[i] << "\n";
+    }
   }
+    
+  celchk_(&ifail);
+  if (ifail != 0) {
+    std::cerr << "ComponentAnalyticField::Prepare:\n";
+    std::cerr << "    Cell check failed.\n";
+    cellok = false;
+    return false;
+  }
+  
+  std::cout << "ComponentAnalyticField::Prepare:\n";
+  std::cout << "    Cell check ok.\n";  
 
-  CellType();
+  if (!CellType()) {
+    cellok = false;
+    std::cerr << "ComponentAnalyticField::Prepare:\n";
+    std::cerr << "    Unknown cell type.\n";
+    return false;
+  }
+  celdat_.sx = fabs(celdat_.sx);
+  celdat_.sy = fabs(celdat_.sy);
+  std::cout << "ComponentAnalyticField::Prepare:\n";
+  std::cout << "    Cell is of type " << celchr_.type << "\n";
+  
   ifail = 0;
 
   setupanalyticfield_(&ifail);
-  if (ifail == 0) {
-    std::cout << "ComponentAnalyticField::Prepare:\n";
-    std::cout << "    Field setup completed.\n";
-    cellok = true;
-  } else {
+  if (ifail != 0) {
     std::cerr << "ComponentAnalyticField::Prepare:\n";
-    std::cerr << "    Error while setting up field.\n";
+    std::cerr << "    Field setup failed.\n";
     cellok = false;
+    return false;
   }
+
+  std::cout << "ComponentAnalyticField::Prepare:\n";
+  std::cout << "    Field setup completed.\n";
+  
+  cellok = true;
+  return true;
 
 }
   
@@ -797,15 +928,14 @@ ComponentAnalyticField::WeightingField(
                               const double x, const double y, const double z,
                               double& wx, double& wy, double& wz,
                               const std::string label) {
- 
-  std::cerr << "Method ComponentAnalyticField::WeightingField not yet implemented.\n";
-   
+    
 }
   
 double 
 ComponentAnalyticField::WeightingPotential(
                              const double x, const double y, const double z,
                              const std::string label) {
+                             
   std::cerr << "Method ComponentAnalyticField::WeightingPotential not yet implemented.\n";
   return 0.0;
 
@@ -847,6 +977,7 @@ void
 ComponentAnalyticField::Rotate(double x, double y, double z,
                                double& xp, double& yp, double& zp,
                                bool isInverse) {
+
   // Rotation matrices
   double Rx[3][3], Ry[3][3], Rz[3][3];
   // Rotated and nonrotated vectors
@@ -960,67 +1091,17 @@ ComponentAnalyticField::Rotate(double x, double y, double z,
   
 // Sets the translation vector
 void 
-ComponentAnalyticField::SetTranslation(double xtrans, double ytrans, double ztrans) {
+ComponentAnalyticField::SetTranslation(
+  double xtrans, double ytrans, double ztrans) {
 
   xTran = xtrans;
   yTran = ytrans;
   zTran = ztrans;
     
-  if (xTran == 0.0 && yTran == 0.0 && zTran == 0.0) {
+  if (fabs(xTran) < 1.e-8 && fabs(yTran) < 1.e-8 && fabs(zTran) < 1.e-8) {
     isTranslated = false;
   } else {
     isTranslated = true;
-  }
-
-}
-  
-// Calculates the translation of a vector
-void 
-ComponentAnalyticField::Translate(double x, double y, double z,
-                                  double& xp, double& yp, double& zp,
-                                  bool isInverse) {
-  if (isInverse) {
-    xTran = -xTran;
-    yTran = -yTran;
-    zTran = -zTran;
-  }
-    
-  xp = xp - xTran;
-  yp = yp - yTran;
-  zp = zp - zTran;
-
-}
-
-// These methods are used to translate incoming coordinates into local the
-// local coordinate frame and out going coordinates into the global coordinate
-// frame.
-  
-void 
-ComponentAnalyticField::Global2Internal(double& xl, double& yl, double& zl, 
-                                        double xw, double yw, double zw) {
-
-  if (isRotated || isTranslated) {
-    Translate(xl, yl, zl, xl, yl, zl, false);
-    Rotate(xw, yw, zw, xl, yl, zl, false);
-  } else {
-    xl = xw;
-    yl = yw;
-    zl = zw;
-  }
-
-}
-
-void 
-ComponentAnalyticField::Internal2Global(double xl, double yl, double zl, 
-                                        double& xw, double& yw, double& zw) {
-
-  if (isRotated || isTranslated) {
-    Rotate(xl, yl, zl, xw, yw, zw, true);
-    Translate(xw, yw, zw, xw, yw, zw, true);
-  } else {
-    xw = xl;
-    yw = yl;
-    zw = zl;
   }
 
 }
@@ -1048,13 +1129,7 @@ ComponentAnalyticField::SetGeometry(GeometryBase* geo) {
     std::cerr << "    Could not set translation.\n";
     std::cerr << "    No solids attached to geometry.";
   } else {
-    SetxTran( (xmin+xmax) / 2.0);
-    SetyTran( (ymin+ymax) / 2.0);
-    SetzTran( (zmin+zmax) / 2.0);
-  }
-
-  if (fabs(xTran) > 1.e-8 || fabs(yTran) > 1.e-8 || fabs(zTran) > 1.e-8) {
-    isTranslated = true;
+    SetTranslation((xmin+xmax) / 2., (ymin+ymax) / 2., (zmin+zmax) / 2.);
   }
 
 }

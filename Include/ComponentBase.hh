@@ -76,18 +76,69 @@ class ComponentBase {
                         double& xmax, double& ymax, double& zmax);
 
     // Periodicities
-    void XPeriodic()         {xPeriodic = true;         UpdatePeriodicity();}
-    void YPeriodic()         {yPeriodic = true;         UpdatePeriodicity();}
-    void ZPeriodic()         {zPeriodic = true;         UpdatePeriodicity();}
-    void XMirrorPeriodic()   {xMirrorPeriodic = true;   UpdatePeriodicity();}
-    void YMirrorPeriodic()   {yMirrorPeriodic = true;   UpdatePeriodicity();}
-    void ZMirrorPeriodic()   {zMirrorPeriodic = true;   UpdatePeriodicity();}
-    void XAxiallyPeriodic()  {xAxiallyPeriodic = true;  UpdatePeriodicity();}
-    void YAxiallyPeriodic()  {yAxiallyPeriodic = true;  UpdatePeriodicity();}
-    void ZAxiallyPeriodic()  {zAxiallyPeriodic = true;  UpdatePeriodicity();}
-    void XRotationSymmetry() {xRotationSymmetry = true; UpdatePeriodicity();}
-    void YRotationSymmetry() {yRotationSymmetry = true; UpdatePeriodicity();}
-    void ZRotationSymmetry() {zRotationSymmetry = true; UpdatePeriodicity();}
+    void EnablePeriodicityX()  {xPeriodic = true;  UpdatePeriodicity();}
+    void DisablePeriodicityX() {xPeriodic = false; UpdatePeriodicity();}
+    void EnablePeriodicityY()  {yPeriodic = true;  UpdatePeriodicity();}
+    void DisablePeriodicityY() {yPeriodic = false; UpdatePeriodicity();}
+    void EnablePeriodicityZ()  {zPeriodic = true;  UpdatePeriodicity();}
+    void DisablePeriodicityZ() {zPeriodic = false; UpdatePeriodicity();}
+
+    void EnableMirrorPeriodicityX() {
+      xMirrorPeriodic = true;  UpdatePeriodicity();
+    }
+    void DisableMirrorPeriodicityX() {
+      xMirrorPeriodic = false; UpdatePeriodicity();
+    }
+    void EnableMirrorPeriodicityY() {
+      yMirrorPeriodic = true;  UpdatePeriodicity();
+    }
+    void DisableMirrorPeriodicityY() {
+      yMirrorPeriodic = false; UpdatePeriodicity();
+    }
+    void EnableMirrorPeriodicityZ() {
+      zMirrorPeriodic = true;  UpdatePeriodicity();
+    }
+    void DisableMirrorPeriodicityZ() {
+      zMirrorPeriodic = false; UpdatePeriodicity();
+    }
+
+    void EnableAxialPeriodicityX() {
+      xAxiallyPeriodic = true;  UpdatePeriodicity();
+    }
+    void DisableAxialPeriodicityX() {
+      xAxiallyPeriodic = false; UpdatePeriodicity();
+    }
+    void EnableAxialPeriodicityY() {
+      yAxiallyPeriodic = true;  UpdatePeriodicity();
+    }
+    void DisableAxialPeriodicityY() {
+      yAxiallyPeriodic = false; UpdatePeriodicity();
+    }
+    void EnableAxialPeriodicityZ() {
+      zAxiallyPeriodic = true;  UpdatePeriodicity();
+    }
+    void DisableAxialPeriodicityZ() {
+      zAxiallyPeriodic = false; UpdatePeriodicity();
+    }
+
+    void EnableRotationSymmetryX() {
+      xRotationSymmetry = true;  UpdatePeriodicity();
+    }
+    void DisableRotationSymmetryX() {
+      xRotationSymmetry = false; UpdatePeriodicity();
+    }
+    void EnableRotationSymmetryY() {
+      yRotationSymmetry = true;  UpdatePeriodicity();
+    }
+    void DisableRotationSymmetryY() {
+      yRotationSymmetry = false; UpdatePeriodicity();
+    }
+    void EnableRotationSymmetryZ() {
+      zRotationSymmetry = true;  UpdatePeriodicity();
+    }
+    void DisableRotationSymmetryZ() {
+      zRotationSymmetry = false; UpdatePeriodicity();
+    }
 
     // Switch on/off debugging and warning messages
     void EnableDebugging()  {debug = true;}
