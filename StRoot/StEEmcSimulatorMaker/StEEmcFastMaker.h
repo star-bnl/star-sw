@@ -1,4 +1,4 @@
-// $Id: StEEmcFastMaker.h,v 1.13 2010/07/29 16:12:03 ogrebeny Exp $
+// $Id: StEEmcFastMaker.h,v 1.14 2010/08/05 21:23:45 stevens4 Exp $
 
 
 /* \class StEEmcFastMaker        
@@ -9,7 +9,7 @@
    <li> energy deposit in any tail is equal to the sum of contribution from all particles passing its volume. Number of fibers within the tail and type of scintillator is ignored.
    <li> all fibers transport to PMT 100% of energy deposited, except tails with a total deposit below 100 keV.
    <li> total Geant energy deposit is recorded as in StEvent
-   <li> ADC=4095 * geantEnergy /0.05 /60GeV / cosh(eta) is recorded as in StEvent 
+   <li> ADC=4095 * geantEnergy / samplingFrac / 60GeV / cosh(eta) is recorded as in StEvent 
 
 <pre>
  Details of the code
@@ -117,7 +117,7 @@ class StEEmcFastMaker : public StMaker {
   StEmcCollection * GetLocalEmcCollection() { return mLocalStEmcCollection;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.13 2010/07/29 16:12:03 ogrebeny Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.14 2010/08/05 21:23:45 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
  private:
@@ -140,6 +140,9 @@ class StEEmcFastMaker : public StMaker {
 
 
 // $Log: StEEmcFastMaker.h,v $
+// Revision 1.14  2010/08/05 21:23:45  stevens4
+// Update sampling fraction to 4.8%
+//
 // Revision 1.13  2010/07/29 16:12:03  ogrebeny
 // Update after the peer review
 //
