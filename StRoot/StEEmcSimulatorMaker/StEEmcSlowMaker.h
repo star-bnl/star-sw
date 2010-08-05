@@ -1,4 +1,4 @@
-// $Id: StEEmcSlowMaker.h,v 2.7 2010/08/03 02:20:40 stevens4 Exp $
+// $Id: StEEmcSlowMaker.h,v 2.8 2010/08/05 21:23:45 stevens4 Exp $
 
 #ifndef STAR_StEEmcSlowMaker
 #define STAR_StEEmcSlowMaker
@@ -84,7 +84,7 @@
  * gain to obtain the ADC response of the tower.  The ideal gain is set
  * such that a ET=60 GeV photon corresponds to ADC=4096.
  *
- * ADC = E * gain / sampling fraction = E * gain / 0.05
+ * ADC = E * gain / sampling fraction = E * gain / 0.048
  *
  * But because the preshower (postshower) layers yield more (less)
  * light per unit energy deposit, they are under (over) represented
@@ -302,7 +302,7 @@ public:
   /// set false, no light yield correction is made.
   void setDoLightYield(Bool_t ly) {mDoLightYield = ly;}
 
-  /// Changes the sampling fraction from the default 5% in the fast simulator
+  /// Changes the sampling fraction from the default in the fast simulator
   void setSamplingFraction(Float_t f) {mSamplingFractionUser = f;}
 
   /// Defines a spread in the tower gains, generated gains will be between zero and mean + 1.0
@@ -315,7 +315,7 @@ public:
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.7 2010/08/03 02:20:40 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.8 2010/08/05 21:23:45 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -325,6 +325,9 @@ public:
 #endif
 
 // $Log: StEEmcSlowMaker.h,v $
+// Revision 2.8  2010/08/05 21:23:45  stevens4
+// Update sampling fraction to 4.8%
+//
 // Revision 2.7  2010/08/03 02:20:40  stevens4
 // final update from peer review
 //
