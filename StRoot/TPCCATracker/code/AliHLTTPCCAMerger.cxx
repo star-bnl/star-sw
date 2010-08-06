@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMerger.cxx,v 1.2 2010/08/02 16:45:28 ikulakov Exp $
+// $Id: AliHLTTPCCAMerger.cxx,v 1.3 2010/08/06 21:04:33 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -40,6 +40,10 @@
 #ifdef DRAW3
 #include "AliHLTTPCCADisplay.h"
 #define MAIN_DRAW
+#endif //DRAW
+
+#ifdef DRAW
+#include "AliHLTTPCCADisplay.h"
 #endif //DRAW
 
 #include <vector>
@@ -431,7 +435,6 @@ void AliHLTTPCCAMerger::UnpackSlices()
 ///mvz end 03.02.2010
 
       int nCluNew = 0;
-
       for ( int iTrClu = 0; iTrClu < sTrack.NClusters(); iTrClu++ ) {
 
         // unpack cluster information
@@ -449,7 +452,7 @@ void AliHLTTPCCAMerger::UnpackSlices()
         clu.SetZ( yz.y );
 
 //        if ( !t0.TransportToX( fSliceParam.RowX( clu.IRow() ), fSliceParam.GetBz( t0 ), .999 ) ) continue;
-        if ( !t0.TransportToX( fSliceParam.RowX( clu.IRow() ), fSliceParam.cBz(), .999 ) ) continue;
+        if ( !t0.TransportToX( fSliceParam.RowX( clu.IRow() ), fSliceParam.cBz(), .999 ) )  continue;
 
         float err2Y, err2Z;
 ///mvz start 20.01.2010
@@ -462,7 +465,6 @@ void AliHLTTPCCAMerger::UnpackSlices()
       }
 
       if ( nCluNew < AliHLTTPCCAParameters::MinTrackPurity*sTrack.NClusters() ) continue;
-
       // refit the track
 
       int hits[1000];
@@ -478,11 +480,26 @@ void AliHLTTPCCAMerger::UnpackSlices()
       float endAlpha = startAlpha;
 
 //std::cout<<"Inner->Outer"<<std::endl;
-      if ( !FitTrack( endPoint, endAlpha, startPoint, startAlpha, hits, nHits, 0 ) ) continue;
-      startPoint = endPoint;
-      startAlpha = endAlpha;
-//std::cout<<"Outer->Inner"<<std::endl;
+//
+//when we turn off the extrapolation step in the tracklet constructor, we have parameters in the last point, not in the first!
+//that's why the fitting direction should be changed
+//      if ( !FitTrack( endPoint, endAlpha, startPoint, startAlpha, hits, nHits, 0 ) ) continue;
+//      startPoint.ResetCovMatrix(); 
+//      endPoint.ResetCovMatrix();
       if ( !FitTrack( startPoint, startAlpha, endPoint, endAlpha, hits, nHits, 1 ) ) continue;
+//      startPoint = endPoint;
+//      startAlpha = endAlpha;
+      endPoint = startPoint;
+      endAlpha = startAlpha;
+//std::cout<<"Outer->Inner"<<std::endl;
+//      if ( !FitTrack( startPoint, startAlpha, endPoint, endAlpha, hits, nHits, 1 ) ) continue;
+      if ( !FitTrack( endPoint, endAlpha, startPoint, startAlpha, hits, nHits, 0 ) ) continue;
+      
+//      if ( !FitTrack( startPoint, startAlpha, endPoint, endAlpha, hits, nHits, 1 ) ) continue;
+//      if ( !FitTrack( endPoint, endAlpha, startPoint, startAlpha, hits, nHits, 0 ) ) continue;
+//      if ( !FitTrack( startPoint, startAlpha, endPoint, endAlpha, hits, nHits, 1 ) ) continue;
+//      if ( !FitTrack( endPoint, endAlpha, startPoint, startAlpha, hits, nHits, 0 ) ) continue;
+
 
       if ( nHits < AliHLTTPCCAParameters::MinTrackPurity*sTrack.NClusters() ) continue;
 
@@ -530,7 +547,15 @@ void AliHLTTPCCAMerger::UnpackSlices()
       AliHLTTPCCADisplay::Instance().SaveCanvasToFile( "Track.png");
       AliHLTTPCCADisplay::Instance().Ask();
 #endif*/
-
+/*#ifdef DRAW
+        AliHLTTPCCADisplay::Instance().SetSliceView();
+        AliHLTTPCCADisplay::Instance().SetCurrentSlice(slices[iSlice]);
+        AliHLTTPCCADisplay::Instance().ClearView();
+        AliHLTTPCCADisplay::Instance().DrawSlice( slices[iSlice], 0 );
+        AliHLTTPCCADisplay::Instance().DrawSliceHits();
+        AliHLTTPCCADisplay::Instance().DrawTrackParam( startPoint, 4 );
+        AliHLTTPCCADisplay::Instance().Ask();
+#endif*/
     }
 
 ///mvz start
@@ -555,6 +580,11 @@ bool AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParam &T, float &Alpha,
                                     int hits[], int &NTrackHits, bool dir )
 {
   // Fit the track
+/*#ifdef MAIN_DRAW
+      AliHLTTPCCADisplay::Instance().ClearView();
+      AliHLTTPCCADisplay::Instance().SetTPCView();
+      AliHLTTPCCADisplay::Instance().DrawTPC();
+#endif*/
 
   AliHLTTPCCATrackParam::AliHLTTPCCATrackFitParam fitPar;
   AliHLTTPCCATrackParam t = t0;
@@ -568,7 +598,7 @@ bool AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParam &T, float &Alpha,
   int nHitsNew = 0;
 
   for ( int ihit = 0; ihit < NTrackHits; ihit++ ) {
-
+//    AliHLTTPCCATrackLinearisation l( t );
     int jhit = dir ? ( NTrackHits - 1 - ihit ) : ihit;
     AliHLTTPCCAClusterInfo &h = fClusterInfos[hits[jhit]];
 
@@ -588,7 +618,16 @@ bool AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParam &T, float &Alpha,
     float x = h.X();
 
 //    if ( !t.TransportToXWithMaterial( x, l, fitPar, fSliceParam.GetBz( t ) ) ) continue;
+//    t.CalculateFitParameters( fitPar );
     if ( !t.TransportToXWithMaterial( x, l, fitPar, fSliceParam.cBz( ) ) ) continue;
+
+/*#ifdef MAIN_DRAW
+      AliHLTTPCCADisplay::Instance().SetCurrentSlice( slices[h.ISlice()] );
+      AliHLTTPCCADisplay::Instance().DrawPoint(h.X(), h.Y(), h.Z(), 1, 1 );
+
+      AliHLTTPCCADisplay::Instance().DrawPoint(t.X(), t.Y(), t.Z(), 0,0.5 );
+#endif*/
+
 
     if ( first ) {
       t.SetCov( 0, 10 );
@@ -652,7 +691,9 @@ bool AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParam &T, float &Alpha,
       hits[dir ?( NTrackHits-1-i ) :i] = hitsNew[i];
     }
   }
-
+/*#ifdef MAIN_DRAW
+      AliHLTTPCCADisplay::Instance().Ask();
+#endif*/
   return ok;
 }
 

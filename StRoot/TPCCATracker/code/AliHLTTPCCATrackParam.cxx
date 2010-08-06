@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCATrackParam.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCATrackParam.cxx,v 1.2 2010/08/06 21:04:33 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -168,10 +168,34 @@ bool  AliHLTTPCCATrackParam::TransportToX( float x, AliHLTTPCCATrackLinearisatio
   t0.SetCosPhi( ex1 );
   t0.SetSinPhi( ey1 );
 
+  float DSin = dx*Bz*fP[4];
+  float sin = fP[2] + DSin;
+  if(sin>0.999) sin = 0.999;
+  if(sin<-0.999) sin = -0.999;
+  float cos = sqrt(1-sin*sin);
+  float cos0 = sqrt(1-fP[2]*fP[2]);
+  float Ds = dx/cos0;    //(asin(sin) - asin(fP[2]))/(Bz*fP[4]);
+  float yy = Y() + 1.f/(Bz*fP[4])*(cos0 - cos);
+  float zz = Z() + fP[3] * Ds;
+
+  float y_f = 1.f/(Bz*fP[4])*(sin/cos - fP[2]/sqrt(1-fP[2]*fP[2]));
+  float y_p = 1.f/(Bz*fP[4])*(1/fP[4]*(sqrt(1-sin*sin) - sqrt(1-fP[2]*fP[2])) + dx*Bz*sin/cos);
+  float z_f = fP[3]*dx*fP[2]/(cos0*cos0*cos0); //fP[3]*dx*sin/(cos*cos*cos);
+  float z_t = Ds;
+  float z_p = 0.f;  //fP[3]*dx*dx*Bz*sin/(cos*cos*cos);
+  float s_p = dx*Bz;
+
+  float rrr = (asin(t0.SinPhi() + d[2] + dxBz * d[4]));
+  rrr = CAMath::Cos(rrr);
+//  std::cout << cos <<"  "<< rrr << "     "<< fP[2] <<"  "<<dx<<"  "<<Bz <<"  "<<1-sin*sin<<"  "<< std::endl;
+
   fX    = X() + dx;
   fP[0] = Y() + dy     + h2 * d[2]           +   h4 * d[4];
   fP[1] = Z() + dz               + dS * d[3];
   fP[2] = t0.SinPhi() +     d[2]           + dxBz * d[4];
+//  fP[0] = yy;
+//  fP[1] = zz;
+//  fP[2] = sin;
 
   float c00 = fC[0];
   float c10 = fC[1];
@@ -188,6 +212,24 @@ bool  AliHLTTPCCATrackParam::TransportToX( float x, AliHLTTPCCATrackLinearisatio
   float c42 = fC[12];
   float c43 = fC[13];
   float c44 = fC[14];
+
+//  float fC1[15];
+/*  fC[0] = c00 + y_f*c20 + y_p*c40 + (c20+y_f*c22+y_p*c42)*y_f + (c40+y_f*c42+y_p*c44)*y_p;
+  fC[1] = c10 + z_f*c20 + z_t*c30 + z_p*c40 + (c21+z_f*c22+z_t*c32+z_p*c42)*y_f + (c41+z_f*c42+z_t*c43+z_p*c44)*y_p;
+  fC[2] = c11 + z_f*c21 + z_t*c31 + z_p*c41 + (c21+z_f*c22+z_t*c32+z_p*c42)*z_f + (c31+z_f*c32+z_t*c33+z_p*c43)*z_t + (c41+z_f*c42+z_t*c43+z_p*c44)*z_p;
+  fC[3] = c20 + y_f*c22 + y_p*c42 + (c40+y_f*c42+y_p*c44)*s_p;
+  fC[4] = c21 + z_f*c22 + z_t*c32 + z_p*c42 + (c41+z_f*c42+z_t*c43+z_p*c44)*s_p;
+  fC[5] = c22 + s_p*c42 + (c42 + s_p*c44)*s_p;
+  fC[6] = c30 + y_f*c32 + y_p*c43;
+  fC[7] = c31 + z_f*c32 + z_t*c33 + z_p*c43;
+  fC[8] = c32 + s_p*c43;
+  fC[9] = c33;
+  fC[10]= c40 + y_f*c42 + y_p*c44;
+  fC[11]= c41 + z_f*c42 + z_t*c43 + z_p*c44;
+  fC[12]= c42 + s_p*c44;
+  fC[13]= c43;
+  fC[14]= c44;*/
+
 
   fC[0] = ( c00  + h2 * h2 * c22 + h4 * h4 * c44
             + 2 * ( h2 * c20 + h4 * c40 + h2 * h4 * c42 )  );
@@ -210,6 +252,7 @@ bool  AliHLTTPCCATrackParam::TransportToX( float x, AliHLTTPCCATrackLinearisatio
   fC[13] = c43;
   fC[14] = c44;
 
+//std::cout << fC[0] << "  "<<fC1[0]<<"       "<<fC[2] << "  "<<fC1[2]<<"       "<<fC[5] << "  "<<fC1[5]<<"       "<<fC[9] << "  "<<fC1[9]<<"       "<<fC[14] << "  "<<fC1[14]<<std::endl;
   return 1;
 }
 
@@ -248,7 +291,6 @@ bool  AliHLTTPCCATrackParam::TransportToX( float x, float sinPhi0, float cosPhi0
   fP[0] += dS * ey + h2 * ( SinPhi() - ey )  +   h4 * QPt();
   fP[1] += dS * DzDs();
   fP[2] = sinPhi;
-
 
   float c00 = fC[0];
   float c10 = fC[1];
@@ -311,9 +353,10 @@ bool  AliHLTTPCCATrackParam::TransportToXWithMaterial( float x,  AliHLTTPCCATrac
 {
   //* Transport the track parameters to X=x  taking into account material budget
 
-  const float kRho = 1.025e-3 ;//0.9e-3;
+  const float kRho = 1.54e-3;//1.025e-3 ;//0.9e-3;
   const float kRadLen = 29.532;//28.94;
-  const float kRhoOverRadLen = kRho / kRadLen;
+  //const float kRhoOverRadLen = kRho / kRadLen;
+  const float kRhoOverRadLen = 7.68e-5;
   float dl;
 
   if ( !TransportToX( x, t0, Bz,  maxSinPhi, &dl ) ) return 0;
@@ -499,6 +542,7 @@ bool AliHLTTPCCATrackParam::CorrectForMeanMaterial( float xOverX0,  float xTimes
   fC43 *= corr;
   fC44 *= corr * corr;
   fC44 += par.fSigmadE2 * CAMath::Abs( dE );
+//  std::cout << "dE "<<dE<<"    corr "<<corr<<"  fBethe  " <<par.fBethe<<"  XxRo  "<<xTimesRho<<std::endl;
 
   //Multiple scattering******************
 
@@ -604,25 +648,105 @@ bool AliHLTTPCCATrackParam::Rotate( float alpha, AliHLTTPCCATrackLinearisation &
   return 1;
 }
 
-
 bool AliHLTTPCCATrackParam::Filter( float y, float z, float err2Y, float err2Z, float maxSinPhi )
+{
+  assert( maxSinPhi > 0.f );
+  //* Add the y,z measurement with the Kalman filter
+
+  float c00 = fC[0];
+  float c10 = fC[1];
+  float c11 = fC[2];
+  float c20 = fC[3];
+  float c21 = fC[4];
+//  float c22 = fC[5];
+  float c30 = fC[6];
+  float c31 = fC[7];
+//  float c32 = fC[8];
+//  float c33 = fC[9];
+  float c40 = fC[10];
+  float c41 = fC[11];
+//  float c42 = fC[12];
+//  float c43 = fC[13];
+//  float c44 = fC[14];
+  
+  float d = err2Y*err2Z + err2Y*c11 + err2Z*c00 + c00*c11 - c10*c10;
+  d = 1.f/d;
+  err2Y += c00;
+  err2Z += c11;
+
+  float
+  z0 = y - fP[0],
+  z1 = z - fP[1];
+
+  if ( ISUNLIKELY( err2Y < 1.e-8f ) || ISUNLIKELY( err2Z < 1.e-8f ) ) return 0;
+
+  float mS0 = err2Z*d;
+  float mS1 = -c10*d;
+  float mS2 = err2Y*d;
+
+  // K = CHtS
+
+  float 
+  k00 = c00 * mS0 + c10*mS1,   k01 = c00 * mS1 + c10*mS2,
+  k10 = c10 * mS0 + c11*mS1,   k11 = c10 * mS1 + c11*mS2,
+  k20 = c20 * mS0 + c21*mS1,   k21 = c20 * mS1 + c21*mS2,
+  k30 = c30 * mS0 + c31*mS1,   k31 = c30 * mS1 + c31*mS2,
+  k40 = c40 * mS0 + c41*mS1,   k41 = c40 * mS1 + c41*mS2; 
+
+  float sinPhi = fP[2] + k20 * z0 + k21 * z1;
+
+  if ( ISUNLIKELY( CAMath::Abs( sinPhi ) >= maxSinPhi ) ) return 0;
+
+  fNDF  += 2;
+  fChi2 += mS0 * z0 * z0 + mS2 * z1 * z1 + 2 * z0 * z1 * mS1;
+
+  fP[ 0] += k00 * z0 + k01 * z1;
+  fP[ 1] += k10 * z0 + k11 * z1;
+  fP[ 2] = sinPhi ;
+  fP[ 3] += k30 * z0 + k31 * z1;
+  fP[ 4] += k40 * z0 + k41 * z1;
+
+  fC[ 0] -= (k00 * c00 + k01 * c10); //c00
+  
+  fC[ 1] -= (k10 * c00 + k11 * c10); //c10
+  fC[ 2] -= (k10 * c10 + k11 * c11); //c11
+  
+  fC[ 3] -= (k20 * c00 + k21 * c10); //c20
+  fC[ 4] -= (k20 * c10 + k21 * c11); //c21
+  fC[ 5] -= (k20 * c20 + k21 * c21); //c22
+  
+  fC[ 6] -= (k30 * c00 + k31 * c10); //c30
+  fC[ 7] -= (k30 * c10 + k31 * c11); //c31
+  fC[ 8] -= (k30 * c20 + k31 * c21); //c32
+  fC[ 9] -= (k30 * c30 + k31 * c31); //c33
+
+  fC[10] -= (k40 * c00 + k41 * c10); //c40
+  fC[11] -= (k40 * c10 + k41 * c11); //c41
+  fC[12] -= (k40 * c20 + k41 * c21); //c42
+  fC[13] -= (k40 * c30 + k41 * c31); //c43
+  fC[14] -= (k40 * c40 + k41 * c41); //c44
+  
+  return 1;
+}
+
+/*bool AliHLTTPCCATrackParam::Filter( float y, float z, float err2Y, float err2Z, float maxSinPhi )
 {
   assert( maxSinPhi > 0.f );
   //* Add the y,z measurement with the Kalman filter
 
   float
   c00 = fC[ 0],
-        c11 = fC[ 2],
-              c20 = fC[ 3],
-                    c31 = fC[ 7],
-                          c40 = fC[10];
+  c11 = fC[ 2],
+  c20 = fC[ 3],
+  c31 = fC[ 7],
+  c40 = fC[10];
 
   err2Y += c00;
   err2Z += c11;
 
   float
   z0 = y - fP[0],
-       z1 = z - fP[1];
+  z1 = z - fP[1];
 
   if ( ISUNLIKELY( err2Y < 1.e-8f ) || ISUNLIKELY( err2Z < 1.e-8f ) ) return 0;
 
@@ -665,7 +789,7 @@ bool AliHLTTPCCATrackParam::Filter( float y, float z, float err2Y, float err2Z, 
   fC[ 9] -= k31 * c31 ;
 
   return 1;
-}
+}*/
 
 
 

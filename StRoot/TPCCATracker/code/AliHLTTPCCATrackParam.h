@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCATrackParam.h,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCATrackParam.h,v 1.2 2010/08/06 21:04:33 mzyzak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -171,6 +171,15 @@ class AliHLTTPCCATrackParam
 
 
     void Print() const;
+    
+    void ResetCovMatrix()
+    {
+      fC[0] = 10; 
+      fC[1] = 0.f;   fC[2]=10;
+      fC[3] = 0.f;   fC[4] = 0.f;  fC[5]*=1;
+      fC[6] = 0.f;   fC[7] = 0.f;  fC[8] = 0.f;  fC[9] *=1;
+      fC[10] = 0.f;  fC[11] = 0.f; fC[12] = 0.f; fC[13] = 0.f;  fC[14]=10.f;
+    }
 
   private:
 
