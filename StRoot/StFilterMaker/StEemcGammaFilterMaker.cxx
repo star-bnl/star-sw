@@ -1,3 +1,5 @@
+// $Id: StEemcGammaFilterMaker.cxx,v 1.3 2010/08/09 21:51:22 seluzhen Exp $
+
 // STL
 #include <vector>
 
@@ -447,3 +449,7 @@ Int_t StEemcGammaFilterMaker::Finish()
   return kStOK;
 }
 
+// $Log: StEemcGammaFilterMaker.cxx,v $
+// Revision 1.3  2010/08/09 21:51:22  seluzhen
+// updated comment field
+//
