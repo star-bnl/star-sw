@@ -1,6 +1,7 @@
+
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.9 2010/07/14 20:35:28 geurts Exp $
+ * $Id: StBTofGeometry.cxx,v 1.10 2010/08/09 18:45:36 geurts Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +11,9 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.10  2010/08/09 18:45:36  geurts
+ * Include methods in StBTofNode and StBTofGeometry that calculate local theta [Masa]
+ *
  * Revision 1.9  2010/07/14 20:35:28  geurts
  * introduce switch to enable ideal MC geometry, without alignment updates. Default: disabled
  *
@@ -426,6 +430,45 @@ Bool_t StBTofNode::HelixCross(const StHelixD &helix, Double_t &pathLen,
    pathLen = helix.pathLength(centerPos,planeNormal);
    if ( pathLen>0 && pathLen<MaxPathLength ) {
       cross = helix.at(pathLen);
+      //
+      // Check if the intersected point is really in the cell
+      //
+      ret = IsGlobalPointIn(cross);
+   }
+   return ret;
+}
+
+//_____________________________________________________________________________
+Bool_t StBTofNode::HelixCross(const StHelixD &helix, Double_t &pathLen,
+                                  StThreeVectorD &cross, Double_t &theta)
+{
+   //
+   // check if helix go through this node(TBRIK)
+   //  and return the path length of helix before crossing this node
+   //
+   //   static const Float_t MaxPathLength = 1000.; //Maximum path length
+   Float_t MaxPathLength = 1000.;
+
+   Bool_t ret = kFALSE;
+   pathLen = 0;
+
+   //
+   // Get the normal to the YZ-plane
+   //
+   StThreeVectorD planeNormal = YZPlaneNormal();
+
+   //
+   // Get the center position
+   //
+   StThreeVectorD centerPos = GetCenterPosition();
+
+   //
+   // Find the intersection point between the helix and the cell plane
+   //
+   pathLen = helix.pathLength(centerPos,planeNormal);
+   if ( pathLen>0 && pathLen<MaxPathLength ) {
+	   cross = helix.at(pathLen);
+	   theta = planeNormal.angle(helix.cat(pathLen));
       //
       // Check if the intersected point is really in the cell
       //
@@ -1378,6 +1421,74 @@ const
    }
 }
 
+//_____________________________________________________________________________
+Bool_t StBTofGeometry::HelixCrossCellIds(const StHelixD &helix,
+                       IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec, DoubleVec &thetaVec)
+const
+{
+   //
+   // return "kTRUE" if any cell is crossed by this helix
+   //  and also fill the cellIds which are crossed by the helix
+   //  and the path length of the helix before crossing the cell
+   //
+
+   IntVec projTrayVec;
+   if( !projTrayVector(helix, projTrayVec) ) return kFALSE;
+
+   Double_t pathLen,theta;
+   Int_t cellId;
+   StThreeVectorD cross;
+   idVec.clear();
+   pathVec.clear();
+   crossVec.clear();
+
+   for(int i=0;i<mNValidTrays;i++) {
+     if(!mBTofTray[i]) continue;
+     int trayId = mBTofTray[i]->Index();
+
+     /// first justify if the tray is within the projection range
+
+     bool itrayFind = kFALSE;
+     for(size_t it=0;it<projTrayVec.size();it++) {
+       int validtrayId = projTrayVec[it];
+       if(validtrayId==trayId) {
+         itrayFind = kTRUE;
+         break;
+       }
+     }
+     if(!itrayFind) continue;
+
+     for(int j=0;j<mModulesInTray;j++) {
+       if(!mBTofSensor[i][j]) continue;
+       int moduleId = mBTofSensor[i][j]->Index();
+       if ( mBTofSensor[i][j]->HelixCross(helix,pathLen,cross,theta) ) {
+	 Double_t global[3], local[3];
+	 global[0] = cross.x();
+	 global[1] = cross.y();
+	 global[2] = cross.z();
+	 mBTofSensor[i][j]->Master2Local(global,local);
+	 Int_t icell = mBTofSensor[i][j]->FindCellIndex(local);
+	 cellId = CalcCellId(icell, moduleId, trayId);
+	 if (cellId>=0) {    // a bug before // reject hit in the edge of module;
+	   pathVec.push_back(pathLen);
+	   idVec.push_back(cellId);
+	   crossVec.push_back(cross);
+	   thetaVec.push_back(theta);
+
+	 }
+       }
+     } // end for (j)
+   } // end for (i)
+
+   if (idVec.size()>0) {
+     //     mleak1.PrintMem(" normal return true");
+     return kTRUE;
+   }
+   else {
+     //     mleak1.PrintMem(" normal return false");
+     return kFALSE;
+   }
+}
 
 //_____________________________________________________________________________
 Bool_t StBTofGeometry::HelixCross(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec)

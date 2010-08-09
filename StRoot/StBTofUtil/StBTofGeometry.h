@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.6 2010/07/14 20:35:28 geurts Exp $
+ * $Id: StBTofGeometry.h,v 1.7 2010/08/09 18:45:36 geurts Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.7  2010/08/09 18:45:36  geurts
+ * Include methods in StBTofNode and StBTofGeometry that calculate local theta [Masa]
+ *
  * Revision 1.6  2010/07/14 20:35:28  geurts
  * introduce switch to enable ideal MC geometry, without alignment updates. Default: disabled
  *
@@ -147,8 +150,8 @@ class StBTofNode : public TObject {
    Bool_t          IsLocalPointIn(const Double_t x, const Double_t y,
                                   const Double_t z);
    Bool_t          IsGlobalPointIn(const StThreeVectorD &global);
-   Bool_t          HelixCross(const StHelixD &helix,
-                              Double_t &pathLen, StThreeVectorD &cross);
+   Bool_t          HelixCross(const StHelixD &helix, Double_t &pathLen, StThreeVectorD &cross);
+   Bool_t          HelixCross(const StHelixD &helix, Double_t &pathLen, StThreeVectorD &cross, Double_t &theta);
    StThreeVectorD* Align() const {return new StThreeVectorD(mAlign[0], mAlign[1], mAlign[2]); }
    virtual void    Print(const Option_t *opt="") const;
 
@@ -372,8 +375,8 @@ class StBTofGeometry : public TNamed {
 
    Int_t             CellIdPointIn(const StThreeVectorD& point) const;
 #ifndef __CINT__
-   Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec &idVec,
-				       DoubleVec &pathVec, PointVec &crossVec) const;
+   Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec) const;
+   Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec, DoubleVec &thetaVec) const;
    Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec) const;
    Bool_t            HelixCross(const StHelixD &helix) const;
    Bool_t            HelixCross(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec) const;
