@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformance.cxx,v 1.3 2010/08/09 17:51:15 mzyzak Exp $
+// $Id: AliHLTTPCCAPerformance.cxx,v 1.4 2010/08/09 21:29:08 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -104,8 +104,8 @@ void AliHLTTPCCAPerformance::InitSubPerformances()
       /// TSP(new __ClassName__               , __Name__      ),
     const int NSPerfo = 4;
     const TSP perfos[NSPerfo] = {
-      TSP(new AliHLTTPCCASlicesPerformance, "SliceTracker"),
-      TSP(new AliHLTTPCCAGlobalSlicesPerformance, "GlobalSliceTracker"),
+      TSP(new AliHLTTPCCASlicesPerformance, "SectorTracker"),
+      TSP(new AliHLTTPCCAGlobalSlicesPerformance, "GlobalSectorTracker"),
       TSP(new AliHLTTPCCAGlobalPerformance, "GlobalTracker"),
       TSP(new AliHLTTPCCAStiPerformance, "StiTracker")
     };
