@@ -1,3 +1,5 @@
+// $Id: StEemcGammaFilterMaker.h,v 1.3 2010/08/09 21:51:22 seluzhen Exp $
+
 #ifndef STAR_StEemcGammaFilterMaker
 #define STAR_StEemcGammaFilterMaker
 
@@ -6,7 +8,7 @@
 * \class  StEemcGammaFilterMaker
 * \author Michael Betancourt, MIT 
 * \author Alice Bridgeman, Argonne Lab
-* \author Ilya Selyuzhenkov, Indina U. CEEM
+* \author Ilya Selyuzhenkov, Indiana U. CEEM
 * \date   2010/07/21
 * \brief  BFC level Endcap EMC gamma filter
 *
@@ -46,7 +48,7 @@ class StEemcGammaFilterMaker: public StMaker
     
     virtual const char *GetCVS() const
     {
-      static const char cvs[]="Tag $Name:  $ $Id: StEemcGammaFilterMaker.h,v 1.2 2010/08/09 21:38:21 seluzhen Exp $ built "__DATE__" "__TIME__ ; 
+      static const char cvs[]="Tag $Name:  $ $Id: StEemcGammaFilterMaker.h,v 1.3 2010/08/09 21:51:22 seluzhen Exp $ built "__DATE__" "__TIME__ ; 
       return cvs;
     }
     
@@ -84,6 +86,9 @@ class StEemcGammaFilterMaker: public StMaker
 #endif
 
 // $Log: StEemcGammaFilterMaker.h,v $
+// Revision 1.3  2010/08/09 21:51:22  seluzhen
+// updated comment field
+//
 // Revision 1.2  2010/08/09 21:38:21  seluzhen
-// Gets sampling fraction from Fast simulator, db settings movied to Init
+// Gets sampling fraction from Fast simulator, db settings moved to Init
 //

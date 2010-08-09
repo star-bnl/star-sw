@@ -1,3 +1,5 @@
+// $Id: StEemcGammaFilter.cxx,v 1.2 2010/08/09 21:52:21 seluzhen Exp $
+
 #include <cstdlib>
 #include <cmath>
 #include <iostream>
@@ -369,4 +371,8 @@ int StEemcGammaFilter::RejectGT(const StGenParticleMaster &ptl) const
   return mFilterMode;
 }
 
+// $Log: StEemcGammaFilter.cxx,v $
+// Revision 1.2  2010/08/09 21:52:21  seluzhen
+// updated comment field
+//
 
