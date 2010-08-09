@@ -3590,7 +3590,7 @@ ComponentAnalyticField::PrepareSignals() {
       if (w[j].type == readout[i]) w[j].ind = i;
     }
     for (int j = 0; j < 5; ++j) {
-      if (planes[j].type == readout[j]) planes[j].ind = i;
+      if (planes[j].type == readout[i]) planes[j].ind = i;
       for (int k = 0; k < planes[j].nStrips1; ++k) {
         if (planes[j].strips1[k].type == readout[i]) {
           planes[j].strips1[i].ind = i;
