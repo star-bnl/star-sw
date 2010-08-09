@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGBTracker.cxx,v 1.6 2010/08/09 17:51:15 mzyzak Exp $
+// $Id: AliHLTTPCCAGBTracker.cxx,v 1.7 2010/08/09 21:29:08 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -327,7 +327,7 @@ void AliHLTTPCCAGBTracker::Merge()
       AliHLTTPCCADisplay::Instance().DrawSliceOutTrack( itr, 2, 1 );
     }
   }
-  AliHLTTPCCADisplay::Instance().SaveCanvasToFile( "SliceTracks.pdf" );
+  AliHLTTPCCADisplay::Instance().SaveCanvasToFile( "SectorTracks.pdf" );
   AliHLTTPCCADisplay::Instance().Ask();
   
 /*  AliHLTTPCCADisplay::Instance().ClearView();
