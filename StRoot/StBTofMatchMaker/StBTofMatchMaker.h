@@ -6,11 +6,14 @@
  *
  * The Barrel TOF MatchMaker matches STAR tracks to the BTOF cells.
  * 
- * $Id: StBTofMatchMaker.h,v 1.8 2010/07/14 20:35:21 geurts Exp $
+ * $Id: StBTofMatchMaker.h,v 1.9 2010/08/09 19:18:45 geurts Exp $
  */
 /*****************************************************************
  *
  * $Log: StBTofMatchMaker.h,v $
+ * Revision 1.9  2010/08/09 19:18:45  geurts
+ * Include local theta calculation in CellHit structure. Pass LocalTheta info on to TOF PID traits. [Masa]
+ *
  * Revision 1.8  2010/07/14 20:35:21  geurts
  * introduce switch to enable ideal MC geometry, without alignment updates. Default: disabled
  *
@@ -282,6 +285,7 @@ private:
       Float_t yhit;
       Double_t tot;
       Int_t index2BTofHit;
+      Double_t theta;
     };
     
     struct TRACKTREE{
@@ -308,7 +312,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.8 2010/07/14 20:35:21 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.9 2010/08/09 19:18:45 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StBTofMatchMaker,1)
 };

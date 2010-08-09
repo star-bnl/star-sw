@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.15 2010/07/16 04:25:16 geurts Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.16 2010/08/09 19:18:45 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.16  2010/08/09 19:18:45  geurts
+ * Include local theta calculation in CellHit structure. Pass LocalTheta info on to TOF PID traits. [Masa]
+ *
  * Revision 1.15  2010/07/16 04:25:16  geurts
  * initialize mUseIdealGeometry to be kFALSE in ctor
  *
@@ -430,7 +433,7 @@ void StBTofMatchMaker::processStEvent(){
 //      if(!mBTofGeom->projTrayVector(theHelix, projTrayVec)) continue;
 
       IntVec idVec;
-      DoubleVec pathVec;
+      DoubleVec pathVec, thetaVec;
       PointVec  crossVec;
 
 //       idVec.clear();
@@ -438,7 +441,7 @@ void StBTofMatchMaker::processStEvent(){
 //       crossVec.clear();
 
       Int_t ncells = 0;
-      if(mBTofGeom->HelixCrossCellIds(theHelix,idVec,pathVec,crossVec) ) {
+      if(mBTofGeom->HelixCrossCellIds(theHelix,idVec,pathVec,crossVec,thetaVec) ) {
 //      if(mBTofGeom->HelixCrossCellIds(theHelix, validModuleVec, projTrayVec, idVec, pathVec, crossVec)) {
 	Int_t cells = idVec.size();
 	for (Int_t i=0; i<cells; i++) {
@@ -475,6 +478,7 @@ void StBTofMatchMaker::processStEvent(){
 	      cellHit.hitPosition = glo;        // global position
 	      cellHit.zhit = (Float_t)hitPos.z();
 	      cellHit.yhit = (Float_t)hitPos.y();
+	      cellHit.theta = (Double_t)thetaVec[i];
 	      cellHitVec.push_back(cellHit);
 	      allCellsHitVec.push_back(cellHit);
 
@@ -564,6 +568,7 @@ void StBTofMatchMaker::processStEvent(){
 	cellHit.yhit = proIter->yhit;
         cellHit.tot = daqIter->tot;
         cellHit.index2BTofHit = daqIter->index2BTofHit;
+	cellHit.theta = proIter->theta;
 	matchHitCellsVec.push_back(cellHit);
       }
     }
@@ -615,6 +620,7 @@ void StBTofMatchMaker::processStEvent(){
     cellHit.yhit = tempIter->yhit;
     cellHit.tot = tempIter->tot;
     cellHit.index2BTofHit = tempIter->index2BTofHit;
+    cellHit.theta = tempIter->theta;
 
     Float_t ycenter = (tempIter->cell-1-2.5)*mWidthPad;
     Float_t dy = tempIter->yhit - ycenter;
@@ -687,7 +693,7 @@ void StBTofMatchMaker::processStEvent(){
     vector<StThreeVectorD> vPosition;
     vector<Int_t> vchannel, vtray, vmodule, vcell;
     vector<Float_t> vzhit, vyhit;
-    vector<Double_t> vtot;
+    vector<Double_t> vtot, vtheta;
     vector<Int_t> vindex2BTofHit;
 
     tofCellHitVectorIter tempIter=tempVec.begin();
@@ -704,6 +710,7 @@ void StBTofMatchMaker::processStEvent(){
 	vyhit.push_back(erasedIter->yhit);
         vtot.push_back(erasedIter->tot);
         vindex2BTofHit.push_back(erasedIter->index2BTofHit);
+	vtheta.push_back(erasedIter->theta);
 
 	erasedVec.erase(erasedIter);
 	erasedIter--;
@@ -723,6 +730,7 @@ void StBTofMatchMaker::processStEvent(){
       cellHit.yhit = vyhit[0];
       cellHit.tot = vtot[0];
       cellHit.index2BTofHit = vindex2BTofHit[0];
+      cellHit.theta = vtheta[0];
 
       FinalMatchedCellsVec.push_back(cellHit);
 
@@ -786,6 +794,7 @@ void StBTofMatchMaker::processStEvent(){
 	cellHit.yhit = vyhit[thiscandidate];
         cellHit.tot = vtot[thiscandidate];
         cellHit.index2BTofHit = vindex2BTofHit[thiscandidate];
+	cellHit.theta = vtheta[thiscandidate];
 
 	FinalMatchedCellsVec.push_back(cellHit);
 	
@@ -865,7 +874,7 @@ void StBTofMatchMaker::processStEvent(){
     pidTof->setYLocal(dy);
     pidTof->setZLocal(FinalMatchedCellsVec[ii].zhit);
     pidTof->setPosition(FinalMatchedCellsVec[ii].hitPosition);
-
+    pidTof->setThetaLocal(FinalMatchedCellsVec[ii].theta);
     globalTrack->addPidTraits(pidTof);
 
     StPrimaryTrack *pTrack = dynamic_cast<StPrimaryTrack*>(nodes[trackNode]->track(primary));
@@ -877,7 +886,7 @@ void StBTofMatchMaker::processStEvent(){
       ppidTof->setYLocal(dy);
       ppidTof->setZLocal(FinalMatchedCellsVec[ii].zhit);
       ppidTof->setPosition(FinalMatchedCellsVec[ii].hitPosition);
-
+      ppidTof->setThetaLocal(FinalMatchedCellsVec[ii].theta);
       pTrack->addPidTraits(ppidTof);
     }
 
@@ -1112,7 +1121,7 @@ void StBTofMatchMaker::processMuDst(){
 //      if(!mBTofGeom->projTrayVector(theHelix, projTrayVec)) continue;
 
       IntVec idVec;
-      DoubleVec pathVec;
+      DoubleVec pathVec, thetaVec;
       PointVec  crossVec;
 
 //       idVec.clear();
@@ -1120,7 +1129,7 @@ void StBTofMatchMaker::processMuDst(){
 //       crossVec.clear();
 
       Int_t ncells = 0;
-      if(mBTofGeom->HelixCrossCellIds(theHelix,idVec,pathVec,crossVec) ) {
+      if(mBTofGeom->HelixCrossCellIds(theHelix,idVec,pathVec,crossVec,thetaVec) ) {
 //      if(mBTofGeom->HelixCrossCellIds(theHelix, validModuleVec, projTrayVec, idVec, pathVec, crossVec)) {
 	Int_t cells = idVec.size();
 	for (Int_t i=0; i<cells; i++) {
@@ -1157,6 +1166,7 @@ void StBTofMatchMaker::processMuDst(){
 	      cellHit.hitPosition = glo;        // global position
 	      cellHit.zhit = (Float_t)hitPos.z();
 	      cellHit.yhit = (Float_t)hitPos.y();
+	      cellHit.theta = (Double_t)thetaVec[i];
 	      cellHitVec.push_back(cellHit);
 	      allCellsHitVec.push_back(cellHit);
 
@@ -1244,8 +1254,9 @@ void StBTofMatchMaker::processMuDst(){
 	cellHit.trackIdVec = proIter->trackIdVec;
 	cellHit.zhit = proIter->zhit;
 	cellHit.yhit = proIter->yhit;
-        cellHit.tot = daqIter->tot;
-        cellHit.index2BTofHit = daqIter->index2BTofHit;
+    cellHit.tot = daqIter->tot;
+    cellHit.index2BTofHit = daqIter->index2BTofHit;
+    cellHit.theta = proIter->theta;
 	matchHitCellsVec.push_back(cellHit);
       }
     }
@@ -1297,6 +1308,7 @@ void StBTofMatchMaker::processMuDst(){
     cellHit.yhit = tempIter->yhit;
     cellHit.tot = tempIter->tot;
     cellHit.index2BTofHit = tempIter->index2BTofHit;
+    cellHit.theta = tempIter->theta;
 
     Float_t ycenter = (tempIter->cell-1-2.5)*mWidthPad;
     Float_t dy = tempIter->yhit - ycenter;
@@ -1369,7 +1381,7 @@ void StBTofMatchMaker::processMuDst(){
     vector<StThreeVectorD> vPosition;
     vector<Int_t> vchannel, vtray, vmodule, vcell;
     vector<Float_t> vzhit, vyhit;
-    vector<Double_t> vtot;
+    vector<Double_t> vtot, vtheta;
     vector<Int_t> vindex2BTofHit;
 
     tofCellHitVectorIter tempIter=tempVec.begin();
@@ -1384,8 +1396,9 @@ void StBTofMatchMaker::processMuDst(){
 	vTrackId.push_back(erasedIter->trackIdVec.back());
 	vzhit.push_back(erasedIter->zhit);
 	vyhit.push_back(erasedIter->yhit);
-        vtot.push_back(erasedIter->tot);
-        vindex2BTofHit.push_back(erasedIter->index2BTofHit);
+    vtot.push_back(erasedIter->tot);
+    vindex2BTofHit.push_back(erasedIter->index2BTofHit);
+    vtheta.push_back(erasedIter->theta);
 
 	erasedVec.erase(erasedIter);
 	erasedIter--;
@@ -1405,6 +1418,7 @@ void StBTofMatchMaker::processMuDst(){
       cellHit.yhit = vyhit[0];
       cellHit.tot = vtot[0];
       cellHit.index2BTofHit = vindex2BTofHit[0];
+      cellHit.theta = vtheta[0];
 
       FinalMatchedCellsVec.push_back(cellHit);
 
@@ -1466,8 +1480,9 @@ void StBTofMatchMaker::processMuDst(){
 	cellHit.matchFlag = thisMatchFlag;
 	cellHit.zhit = vzhit[thiscandidate];
 	cellHit.yhit = vyhit[thiscandidate];
-        cellHit.tot = vtot[thiscandidate];
-        cellHit.index2BTofHit = vindex2BTofHit[thiscandidate];
+    cellHit.tot = vtot[thiscandidate];
+    cellHit.index2BTofHit = vindex2BTofHit[thiscandidate];
+    cellHit.theta = vtheta[thiscandidate];
 
 	FinalMatchedCellsVec.push_back(cellHit);
 	
@@ -1558,6 +1573,7 @@ void StBTofMatchMaker::processMuDst(){
     pidTof.setYLocal(dy);
     pidTof.setZLocal(FinalMatchedCellsVec[ii].zhit);
     pidTof.setPosition(FinalMatchedCellsVec[ii].hitPosition);
+    pidTof.setThetaLocal(FinalMatchedCellsVec[ii].theta);
     globalTrack->setBTofPidTraits(pidTof);
 
     if(primaryTrack) {
@@ -1566,6 +1582,7 @@ void StBTofMatchMaker::processMuDst(){
       ppidTof.setYLocal(dy);
       ppidTof.setZLocal(FinalMatchedCellsVec[ii].zhit);
       ppidTof.setPosition(FinalMatchedCellsVec[ii].hitPosition);
+      ppidTof.setThetaLocal(FinalMatchedCellsVec[ii].theta);
       primaryTrack->setBTofPidTraits(ppidTof);
     }
 
