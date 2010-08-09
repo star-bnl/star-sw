@@ -66,7 +66,7 @@ class AliHLTTPCCATrackletVector
     ushort_v fFirstRow;   // first TPC row
     ushort_v fLastRow;    // last TPC row
     TrackParamVector fParam;   // tracklet parameters
-    AliHLTFixedArray<ushort_v::Memory, AliHLTArraySize<Parameters::NumberOfRows> > fRowHits; // hit index for each TPC row
+    AliHLTFixedArray<ushort_v::Memory, AliHLTArraySize<AliHLTTPCCAParameters::NumberOfRows> > fRowHits; // hit index for each TPC row
 };
 
 inline void AliHLTTPCCATrackletVector::SetRowHits( int rowIndex, const ushort_v &trackIndex,

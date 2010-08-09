@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletSelector.cxx,v 1.3 2010/07/29 21:45:27 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCATrackletSelector.cxx,v 1.4 2010/08/09 17:51:15 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -35,6 +35,10 @@
 
 #include "debug.h"
 
+#ifdef DRAW3
+#include "AliHLTTPCCADisplay.h"
+#endif //DRAW
+
 using std::endl;
 
 void AliHLTTPCCATrackletSelector::run()
@@ -67,7 +71,7 @@ void AliHLTTPCCATrackletSelector::run()
     // useless Tracklet...
     const ushort_m &valid = trackIndexes < fNTracklets && tNHits > 0;
 
-    const sfloat_v kMaximumSharedPerHits = 1.f / Parameters::MinimumHitsPerShared;
+    const sfloat_v kMaximumSharedPerHits = 1.f / AliHLTTPCCAParameters::MinimumHitsPerShared;
 
     const ushort_v &firstRow = tracklet.FirstRow();
     const ushort_v &lastRow  = tracklet.LastRow();
@@ -118,6 +122,7 @@ void AliHLTTPCCATrackletSelector::run()
       VALGRIND_CHECK_VALUE_IS_DEFINED( sharedOK );
 #ifndef NODEBUG
       const ushort_m &invalidTrack = !( own || sharedOK );
+//      std::cout << invalidTrack << "       "<< outHit <<"            "<<firstRow.min()<<"  "<<lastRow.max()<<"         "<< firstRow<<"  "<<lastRow<<std::endl;
       if ( !invalidTrack.isEmpty() ) {
         debugTS() << "invalidTrack at row " << rowIndex << ": " << invalidTrack
           << ", own: " << own
@@ -130,8 +135,8 @@ void AliHLTTPCCATrackletSelector::run()
         if ( outHit[i] ) {
           assert( hitIndexes[i] < fData.Row( rowIndex ).NHits() );
           tracks[i]->fHitIdArray[tracks[i]->fNumberOfHits++].Set( rowIndex, hitIndexes[i] );
-        } else if ( gap[i] > Parameters::MaximumRowGap ) {
-          if ( tracks[i]->fNumberOfHits >= Parameters::MinimumHitsForTrack ) {
+        } else if ( gap[i] > AliHLTTPCCAParameters::MaximumRowGap ) {
+          if ( tracks[i]->fNumberOfHits >= AliHLTTPCCAParameters::MinimumHitsForTrack ) {
             numberOfHits += tracks[i]->fNumberOfHits;
             tracks[i] = new Track;
             fTracks[++numberOfTracks] = tracks[i];
@@ -142,11 +147,12 @@ void AliHLTTPCCATrackletSelector::run()
       }
       gap.makeZero( outHit );
       ++tNHitsNew( outHit );
-      tNHitsNew.makeZero( gap > Parameters::MaximumRowGap );
+      tNHitsNew.makeZero( gap > AliHLTTPCCAParameters::MaximumRowGap );
       ++nShared( !own && outHit );
     }
+
     for ( int i = 0; i < short_v::Size; ++i ) {
-      if ( tracks[i]->fNumberOfHits < Parameters::MinimumHitsForTrack ) {
+      if ( tracks[i]->fNumberOfHits < AliHLTTPCCAParameters::MinimumHitsForTrack ) {
         tracks[i]->fNumberOfHits = 0;
         // XXX lock
         recycleBin.push( tracks[i] );

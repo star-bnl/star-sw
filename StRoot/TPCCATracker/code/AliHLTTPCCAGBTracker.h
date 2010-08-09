@@ -89,6 +89,7 @@ class AliHLTTPCCAGBTracker
     
   void SetHits( std::vector<AliHLTTPCCAGBHit> &hits);     // need for StRoot
   void SetSettings( std::vector<AliHLTTPCCAParam>& settings ); // need for StRoot
+  int  GetHitsSize() const {return fHits.Size();}
 
       /// Try to group close hits in row formed by one track. After sort hits.
 //     void GroupHits(); // iklm

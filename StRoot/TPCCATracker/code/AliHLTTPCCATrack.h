@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// @(#) $Id: AliHLTTPCCATrack.h,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCATrack.h,v 1.2 2010/08/09 17:51:15 mzyzak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -33,7 +33,7 @@ class AliHLTTPCCATrack
 
   private:
     AliHLTTPCCATrackParam fParam; // track parameters
-    AliHLTFixedArray<AliHLTTPCCAHitId, AliHLTArraySize<Parameters::NumberOfRows> > fHitIdArray;
+    AliHLTFixedArray<AliHLTTPCCAHitId, AliHLTArraySize<AliHLTTPCCAParameters::NumberOfRows> > fHitIdArray;
     short fNumberOfHits;      // number of hits in the track
 
     // disallow copy

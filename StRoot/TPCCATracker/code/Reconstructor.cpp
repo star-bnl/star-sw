@@ -303,7 +303,7 @@ int AliHLTTPCCATracker::Reconstructor::execute()
       for ( TrackletList::const_iterator it = sortedTracklets.begin(); it != end; ++it ) {
         file << it->FirstRow() << "\t" << it->NHits() << "\t" << it->LastRow() << '\n';
         file << it->Param();
-        for ( int row = 0; row < Parameters::NumberOfRows; ++row ) {
+        for ( int row = 0; row < AliHLTTPCCAParameters::NumberOfRows; ++row ) {
           file << std::setw( 3 ) << row << ": " << it->RowHit( row ) << '\n';
         }
         file << "-----------------------------------------------------------------------\n";

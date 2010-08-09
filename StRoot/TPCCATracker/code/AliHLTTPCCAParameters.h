@@ -129,13 +129,13 @@ namespace AliHLTTPCCAParameters
   ///mvz end
 
 } // namespace AliHLTTPCCAParameters
-namespace Parameters{  using namespace AliHLTTPCCAParameters; }
+//namespace Parameters{  using namespace AliHLTTPCCAParameters; }
 
 namespace AliHLTTPCCAPParameters{ /// parameters for global Performance
   /** 
    *   MC track is reconstructable if:
    *   - it have at least MinimumHitsForMCTrack hits
-   *   - momentum of it is not lower than Parameters::ExtraThreshold
+   *   - momentum of it is not lower than AliHLTTPCCAParameters::ExtraThreshold
    */
 
   enum{
@@ -182,7 +182,7 @@ namespace AliHLTTPCCASTPParameters{ /// parameters for Slice Tracklet Performanc
       /**
      * The minimum number of hits for a track must have to not be discarded.
        */
-    MinimumHitsForRecoTrack = Parameters::MinimumHitsForTracklet
+    MinimumHitsForRecoTrack = AliHLTTPCCAParameters::MinimumHitsForTracklet
     
   }; // enum
 
@@ -204,7 +204,7 @@ namespace AliHLTTPCCASTCPParameters{ /// parameters for Slice Track Candidat Per
       /**
      * The minimum number of hits for a track must have to not be discarded.
        */
-    MinimumHitsForRecoTrack = Parameters::MinimumHitsForTrack
+    MinimumHitsForRecoTrack = AliHLTTPCCAParameters::MinimumHitsForTrack
 
   }; // enum
 

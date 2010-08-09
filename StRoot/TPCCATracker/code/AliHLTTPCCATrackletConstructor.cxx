@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.3 2010/07/29 21:45:27 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.4 2010/08/09 17:51:15 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -90,7 +90,7 @@ struct AliHLTTPCCATrackletConstructor::TrackMemory {
     fCurrentHitIndex( -1 ),
     fStage( Vc::Zero ),
     fNHits( 2 ), // the first two hits are certain
-    fRemainingGap( Parameters::MaximumExtrapolationRowGap ),
+    fRemainingGap( AliHLTTPCCAParameters::MaximumExtrapolationRowGap ),
     fLastY( Vc::Zero ),
     fLastZ( Vc::Zero )
   {}
@@ -417,7 +417,7 @@ short_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, int
 
   trackletVector.SetRowHits( rowIndex, trackIndex, best, active );
   ++r.fNHits( active );
-  r.fRemainingGap( active ) = Parameters::MaximumExtrapolationRowGap;
+  r.fRemainingGap( active ) = AliHLTTPCCAParameters::MaximumExtrapolationRowGap;
   ++r.fStage( r.fRemainingGap == 0 && mask ); // go to WaitingForExtrapolateDown or DoneStage if the gap got too big
   return active;
 }
@@ -605,7 +605,7 @@ void AliHLTTPCCATrackletConstructor::run()
       debugF() << "============================================= Start Fitting Upwards =============================================" << endl;
 #define DISABLE_HIT_SEARCH
 #ifdef DISABLE_HIT_SEARCH // iklm
-      while ( rowIndex < Parameters::NumberOfRows && !( r.fStage <= FitLinkedHits ).isEmpty() ) {
+      while ( rowIndex < AliHLTTPCCAParameters::NumberOfRows && !( r.fStage <= FitLinkedHits ).isEmpty() ) {
         ++r.fStage( rowIndex == activationRow ); // goes to FitLinkedHits on activation row
         FitTracklet( r, rowIndex, trackIndex, fTrackletVectors[trackIteration] );
         ++rowIndex;
@@ -635,14 +635,14 @@ void AliHLTTPCCATrackletConstructor::run()
 #endif
     } // END: fit and extrapolate upwards
 #else // DISABLE_HIT_SEARCH
-    while ( rowIndex < Parameters::NumberOfRows && ( r.fStage == ExtrapolateUp ).isEmpty() ) {
+    while ( rowIndex < AliHLTTPCCAParameters::NumberOfRows && ( r.fStage == ExtrapolateUp ).isEmpty() ) {
       ++r.fStage( rowIndex == activationRow ); // goes to FitLinkedHits on activation row
       FitTracklet( r, rowIndex, trackIndex, fTrackletVectors[trackIteration] );
       ++rowIndex;
     }
 
     debugF() << "========================================== Start Extrapolating Upwards ==========================================" << endl;
-    while ( rowIndex < Parameters::NumberOfRows && !( r.fStage <= FitLinkedHits ).isEmpty() ) {
+    while ( rowIndex < AliHLTTPCCAParameters::NumberOfRows && !( r.fStage <= FitLinkedHits ).isEmpty() ) {
       ++r.fStage( rowIndex == activationRow ); // goes to FitLinkedHits on activation row
       const short_m toExtrapolate = (r.fStage == ExtrapolateUp);
       const short_m &extrapolated = ExtrapolateTracklet( r, rowIndex, trackIndex, fTrackletVectors[trackIteration], toExtrapolate );
@@ -666,7 +666,7 @@ void AliHLTTPCCATrackletConstructor::run()
     }
 #endif
     short_m mask;
-    while ( rowIndex < Parameters::NumberOfRows && !( mask = r.fStage == ExtrapolateUp ).isEmpty() ) {
+    while ( rowIndex < AliHLTTPCCAParameters::NumberOfRows && !( mask = r.fStage == ExtrapolateUp ).isEmpty() ) {
       const short_m &extrapolated = ExtrapolateTracklet( r, rowIndex, trackIndex, fTrackletVectors[trackIteration], mask );
       r.fLastRow( extrapolated ) = rowIndex;
 // #ifdef LOSE_DEBUG
@@ -678,7 +678,7 @@ void AliHLTTPCCATrackletConstructor::run()
     debugF() << "=========================================== Stop Extrapolating Upwards ==========================================" << endl;
   }
   { // extrapolate downwards
-    r.fRemainingGap = Parameters::MaximumExtrapolationRowGap; // allow full gaps again
+    r.fRemainingGap = AliHLTTPCCAParameters::MaximumExtrapolationRowGap; // allow full gaps again
     ++r.fStage( r.fStage == ExtrapolateUp ); // FitLinkedHits/ExtrapolateUp went so high that no gap put the tracklet into WaitingForExtrapolateDown
     const short_m ready = r.fStage == WaitingForExtrapolateDown;
     debugF() << "ready to extrapolate downwards: " << ready << endl;
@@ -787,16 +787,26 @@ void AliHLTTPCCATrackletConstructor::run()
     tracklet.SetNHits( r.fNHits );
 
     if ( !( r.fNHits > 0 ).isEmpty() ) {
+#ifdef DRAW
+      foreach_bit( int ii, r.fStage < DoneStage ) {
+        TrackParam t( r.fParam, ii );
+        AliHLTTPCCADisplay::Instance().ClearView();
+        AliHLTTPCCADisplay::Instance().DrawSlice( &fTracker, 0 );
+        AliHLTTPCCADisplay::Instance().DrawSliceHits();
+        AliHLTTPCCADisplay::Instance().DrawTrackParam( t, 2 );
+        AliHLTTPCCADisplay::Instance().Ask();
+      }
+#endif
       // start and end rows of the tracklet
       tracklet.SetFirstRow( static_cast<ushort_v>( r.fFirstRow ) );
       tracklet.SetLastRow( r.fLastRow );
 
 ///mvz start 25.01.2010
-      sfloat_m MinQPt = CAMath::Abs(r.fParam.QPt()) < Parameters::MinimumQPt;
+      sfloat_m MinQPt = CAMath::Abs(r.fParam.QPt()) < AliHLTTPCCAParameters::MinimumQPt;
       sfloat_v NewQPt = r.fParam.QPt();
-      NewQPt(MinQPt) = Parameters::MinimumQPt;
+      NewQPt(MinQPt) = AliHLTTPCCAParameters::MinimumQPt;
       r.fParam.SetQPt(NewQPt);
-//      r.fParam.SetQPt( CAMath::Max( Parameters::MinimumQPt, r.fParam.QPt() ) );
+//      r.fParam.SetQPt( CAMath::Max( AliHLTTPCCAParameters::MinimumQPt, r.fParam.QPt() ) );
 ///mvz end 25.01.2010
       tracklet.SetParam( r.fParam );
 
@@ -815,13 +825,13 @@ void AliHLTTPCCATrackletConstructor::run()
 
 void InitTracklets::operator()( int rowIndex )
 {
-  if ( ISUNLIKELY( rowIndex >= Parameters::NumberOfRows ) ) {
+  if ( ISUNLIKELY( rowIndex >= AliHLTTPCCAParameters::NumberOfRows ) ) {
     return;
   }
   debugF() << "InitTracklets(" << rowIndex << ")" << endl;
 //std::cout<< "InitTracklets(" << rowIndex << ")" << std::endl;
   const int rowStep = AliHLTTPCCAParameters::RowStep;
-  assert( rowIndex < Parameters::NumberOfRows - rowStep );
+  assert( rowIndex < AliHLTTPCCAParameters::NumberOfRows - rowStep );
   // the first hit is a special case (easy)
   const ushort_m &mask = rowIndex == r.fStartRow;
   const sfloat_m maskF( mask );

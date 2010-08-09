@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.2 2010/07/29 21:45:27 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.3 2010/08/09 17:51:15 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -113,7 +113,7 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
    */
 
 //   static const float kAreaSize = 1.f;
-  static const float kAreaSize = Parameters::NeighbourAreaSizeTg;
+  static const float kAreaSize = AliHLTTPCCAParameters::NeighbourAreaSizeTg;
   static const int kMaxN = 20;
   const float chi2Cut = 3.f * 3.f * 4.f * ( UpDx * UpDx + DnDx * DnDx );
 

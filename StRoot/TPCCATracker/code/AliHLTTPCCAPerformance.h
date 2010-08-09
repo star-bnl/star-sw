@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformance.h,v 1.2 2010/07/29 16:35:58 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.h,v 1.3 2010/08/09 17:51:15 mzyzak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -50,29 +50,31 @@ class AliHLTTPCCAPerformance
       /// initialization before the new event
     bool SetNewEvent(AliHLTTPCCAGBTracker* const Tracker, string mcTracksFile, string mcPointsFile); // set info for new event
     void InitSubPerformances();
+    void InitSubPerformances(int iPerf);
 
       /// Instance
     static AliHLTTPCCAPerformance &Instance();
     
       /// Efficiencies
     void ExecPerformance();
-
+    void ExecPerformance(int iPerf);
 
      /// functional is needed by DRAW option. TODO: clean up
     const AliHLTTPCCAMCTrack &MCTrack(int i) const { return fMCTracks[i]; }
     const AliHLTTPCCAHitLabel &HitLabel(int i) const { return fHitLabels[i]; }
     
+    void WriteHistos();
 
   /// funcional needed by StRoot
   void SetTracker( AliHLTTPCCAGBTracker* const Tracker ){ fTracker = Tracker; };
   void SetMCTracks(vector<AliHLTTPCCAMCTrack>& mcTracks);
   void SetMCPoints(vector<AliHLTTPCCALocalMCPoint>& mcPoints);
   void SetHitLabels(vector<AliHLTTPCCAHitLabel>& hitLabels);
+  
   protected:
 
           /// Histograms
     void CreateHistos();
-    void WriteHistos();
     
           /// Read\write MC information
     void ReadMCEvent( FILE *in );
@@ -98,18 +100,21 @@ class AliHLTTPCCAPerformance
     vector<TSubPerformance> subPerformances;
 //     vector<AliHLTTPCCAPerformanceBase*> subPerformances;
     
-    const AliHLTTPCCAGBTracker *fTracker; //* pointer to the tracker
+    const AliHLTTPCCAGBTracker *fTracker; // pointer to the tracker
 
       /// MC information
-    AliHLTResizableArray<AliHLTTPCCAHitLabel> fHitLabels; //* array of hit MC labels
-    AliHLTResizableArray<AliHLTTPCCAMCTrack> fMCTracks;   //* array of MC tracks
-    AliHLTResizableArray<AliHLTTPCCALocalMCPoint> fLocalMCPoints;   //* array of MC points in slices CS
+    AliHLTResizableArray<AliHLTTPCCAHitLabel> fHitLabels; // array of hit MC labels
+    AliHLTResizableArray<AliHLTTPCCAMCTrack> fMCTracks;   // array of MC tracks
+    AliHLTResizableArray<AliHLTTPCCALocalMCPoint> fLocalMCPoints;   // array of MC points in slices CS
 
 
-    int fStatNEvents; //* n of events proceed
+    int fStatNEvents; // n of events proceed
 
-    TDirectory *fHistoDir; //* ROOT directory with histogramms
-
+    TDirectory *fHistoDir; // ROOT directory with histogramms
+    
+  public:
+    TSubPerformance GetSubPerformance(int iPerf) {return subPerformances[iPerf];}
+  
   private:
     AliHLTTPCCAPerformance( const AliHLTTPCCAPerformance& );
     AliHLTTPCCAPerformance &operator=( const AliHLTTPCCAPerformance& );

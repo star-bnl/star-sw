@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCAParam.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCAParam.cxx,v 1.2 2010/08/09 17:51:15 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -25,7 +25,7 @@
 #include "debug.h"
 
 AliHLTTPCCAParam::AliHLTTPCCAParam()
-  : fISlice( 0 ), fNRows( Parameters::NumberOfInnerRows ), fAlpha( 0.174533 ), fDAlpha( 0.349066 ),
+  : fISlice( 0 ), fNRows( AliHLTTPCCAParameters::NumberOfInnerRows ), fAlpha( 0.174533 ), fDAlpha( 0.349066 ),
     fCosAlpha( 0 ), fSinAlpha( 0 ), fAngleMin( 0 ), fAngleMax( 0 ), fRMin( 83.65 ), fRMax( 133.3 ),
     fZMin( 0.0529937 ), fZMax( 249.778 ), fErrX( 0 ), fErrY( 0 ), fErrZ( 0.228808 ), fPadPitch( 0.4 ), fBz( -5. ),
     fHitPickUpFactor( 1. ),
@@ -306,7 +306,7 @@ std::istream &operator>>( std::istream &in, AliHLTTPCCAParam &p )
   in >> p.fPadPitch;
   in >> p.fBz;
   in >> p.fHitPickUpFactor;
-  p.fHitPickUpFactor = Parameters::HitPickUpFactor;
+  p.fHitPickUpFactor = AliHLTTPCCAParameters::HitPickUpFactor;
 //   in >> p.fMaxTrackMatchDRow;
 //   in >> p.fTrackConnectionFactor;
 //   in >> p.fTrackChiCut;

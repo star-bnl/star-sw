@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.2 2010/07/29 21:45:27 ikulakov Exp $
+// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.3 2010/08/09 17:51:15 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -46,7 +46,7 @@
 #include "TProfile.h"
 #include "TStyle.h"
 
-//#define IsOutTrack1 //to use reffited with materials track parameters
+#define IsOutTrack1 //to use reffited with materials track parameters
 
 void AliHLTTPCCASlicePerformance::SetNewEvent(const AliHLTTPCCAGBTracker * const Tracker,
                             AliHLTResizableArray<AliHLTTPCCAHitLabel> *hitLabels,
@@ -124,8 +124,8 @@ void AliHLTTPCCASlicePerformance::CheckMCTracks()
       mcTrackData.SetAsReconstructable();
     } // recoable
     
-    if ( mc.P() >= Parameters::ExtraThreshold ) {
-      if ( mc.P() >= Parameters::RefThreshold ) {
+    if ( mc.P() >= AliHLTTPCCAParameters::ExtraThreshold ) {
+      if ( mc.P() >= AliHLTTPCCAParameters::RefThreshold ) {
         mc.SetSet( 2 );
         mcTrackData.SetSet( 2 );
       } // ref
@@ -325,6 +325,7 @@ void AliHLTTPCCASlicePerformance::FillHistos()
       const AliHLTTPCCAOutTrack &t = sliceTracker->OutTrack( itr );
 #endif
       AliHLTTPCCATrackParam p = t.StartPoint();
+
 ///mvz start 27.01.2010
       if( mc.NReconstructed() == 1 ) NHitsRecoTrack[iMC] = t.NHits();
       if( mc.NReconstructed() > 1 && NHitsRecoTrack[iMC] > t.NHits()) NHitsRecoTrack[iMC] = t.NHits();
