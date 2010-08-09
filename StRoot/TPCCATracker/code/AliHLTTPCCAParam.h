@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// @(#) $Id: AliHLTTPCCAParam.h,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCAParam.h,v 1.2 2010/08/09 17:51:15 mzyzak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -158,7 +158,7 @@ class AliHLTTPCCAParam
     float fTrackChiCut; // cut for track Sqrt(Chi2/NDF);
     float fTrackChi2Cut;// cut for track Chi^2/NDF
 
-    float fRowX[Parameters::NumberOfRows];// X-coordinate of rows 
+    float fRowX[AliHLTTPCCAParameters::NumberOfRows];// X-coordinate of rows 
     float fParamS0Par[2][3][7];    // cluster error parameterization coeficients
     float fPolinomialFieldBz[6];   // field coefficients
 
@@ -168,26 +168,26 @@ class AliHLTTPCCAParam
     inline int errorType( int row ) const {
       int type = 0;
 //       const int numberOfRows = AliHLTTPCCAParameters::NumberOfRows;
-    if ( ISLIKELY( row >= Parameters::NumberOfInnerRows ) ) {
+    if ( ISLIKELY( row >= AliHLTTPCCAParameters::NumberOfInnerRows ) ) {
         type = ( row > 126 ? 1 : 2 );
       }
       return type;
     }
     inline ushort_v errorType( short_v row ) const {
       ushort_v type( 14 );
-    type.makeZero( row < Parameters::NumberOfInnerRows );
+    type.makeZero( row < AliHLTTPCCAParameters::NumberOfInnerRows );
       type( row > 126 ) = 7;
       return type;
     }
 */
     inline int errorType( int row ) const {
       int type = 0;
-      type = ( row < Parameters::NumberOfInnerRows ? 0 : 1 );
+      type = ( row < AliHLTTPCCAParameters::NumberOfInnerRows ? 0 : 1 );
       return type;
     }
     inline ushort_v errorType( short_v row ) const {
       ushort_v type( 7 );
-      type.makeZero( row < Parameters::NumberOfInnerRows );
+      type.makeZero( row < AliHLTTPCCAParameters::NumberOfInnerRows );
       //type( row > 126 ) = 7;
       return type;
     }
@@ -340,7 +340,6 @@ inline void AliHLTTPCCAParam::GetClusterErrors2( int iRow, const TrackParamVecto
   const float *c = fParamS0Par[0][type];
   sfloat_v v = c[0] + c[1]*z/cos2Phi + c[2]*tg2Phi;
   sfloat_v w = c[3] + c[4]*z*(one + tg2Lambda) + c[5]*tg2Lambda;
-
   v(v>one) = one;
   w(w>one) = one;
 

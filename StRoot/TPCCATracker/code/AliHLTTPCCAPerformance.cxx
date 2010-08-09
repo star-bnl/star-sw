@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformance.cxx,v 1.2 2010/07/29 16:35:58 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.cxx,v 1.3 2010/08/09 17:51:15 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -21,6 +21,7 @@
 #include "AliHLTTPCCounters.h"
 #include "AliHLTTPCCAPerformanceBase.h"
 #include "AliHLTTPCCASlicesPerformance.h"
+#include "AliHLTTPCCAStiPerformance.h"
 #include "AliHLTTPCCAGlobalSlicesPerformance.h"
 #include "AliHLTTPCCAGlobalPerformance.h"
 
@@ -101,11 +102,12 @@ void AliHLTTPCCAPerformance::InitSubPerformances()
     
       /// Just define here all sub-performances
       /// TSP(new __ClassName__               , __Name__      ),
-    const int NSPerfo = 3;
+    const int NSPerfo = 4;
     const TSP perfos[NSPerfo] = {
       TSP(new AliHLTTPCCASlicesPerformance, "SliceTracker"),
       TSP(new AliHLTTPCCAGlobalSlicesPerformance, "GlobalSliceTracker"),
-      TSP(new AliHLTTPCCAGlobalPerformance, "GlobalTracker")
+      TSP(new AliHLTTPCCAGlobalPerformance, "GlobalTracker"),
+      TSP(new AliHLTTPCCAStiPerformance, "StiTracker")
     };
     
     subPerformances.resize(NSPerfo);
@@ -121,6 +123,41 @@ void AliHLTTPCCAPerformance::InitSubPerformances()
   if (first_call) CreateHistos();
   
   first_call = false;
+} // void AliHLTTPCCAPerformance::InitSubPerformances
+
+void AliHLTTPCCAPerformance::InitSubPerformances(int iPerf)
+{
+    // Init subperformances
+  static const int NSPerfo = 4; 
+    
+  static bool first_call = true;
+  static bool first_call_sub[NSPerfo];
+
+  if (first_call){
+    typedef TSubPerformance TSP;
+    
+      /// Just define here all sub-performances
+      /// TSP(new __ClassName__               , __Name__      ),
+    const TSP perfos[NSPerfo] = {
+      TSP(new AliHLTTPCCASlicesPerformance, "SliceTracker"),
+      TSP(new AliHLTTPCCAGlobalSlicesPerformance, "GlobalSliceTracker"),
+      TSP(new AliHLTTPCCAGlobalPerformance, "GlobalTracker"),
+      TSP(new AliHLTTPCCAStiPerformance, "StiTracker")
+    };
+    
+    subPerformances.resize(NSPerfo);
+    for (int iP = 0; iP < NSPerfo; iP++){
+      subPerformances[iP] = perfos[iP];
+      first_call_sub[iP] = true;
+    }
+  }
+  
+  subPerformances[iPerf]->SetNewEvent(fTracker, &fHitLabels, &fMCTracks, &fLocalMCPoints);
+
+  if (first_call_sub[iPerf]) subPerformances[iPerf]->CreateHistos(subPerformances[iPerf].name);
+    
+  first_call = false;
+  first_call_sub[iPerf] = false;
 } // void AliHLTTPCCAPerformance::InitSubPerformances
 
 void AliHLTTPCCAPerformance::CreateHistos()
@@ -155,6 +192,14 @@ void AliHLTTPCCAPerformance::ExecPerformance()
   };
 
   WriteHistos();
+}
+
+void AliHLTTPCCAPerformance::ExecPerformance(int iPerf)
+{
+    subPerformances[iPerf]->Exec(0);
+    cout << endl
+        << " ---- " << subPerformances[iPerf].name << " Statistic ---- " << endl;
+    subPerformances[iPerf]->PrintEfficiencyStatistic();
 }
 
   /// -------------------- Read\write MC information ---------------------

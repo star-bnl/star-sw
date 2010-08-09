@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.2 2010/08/09 17:51:15 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -66,15 +66,15 @@ void AliHLTTPCCAPerformanceBase::SetNewEvent( const AliHLTTPCCAGBTracker * const
   const THistoInfo tmp[NHisto]=
   {
     { "resY",       "track Y resolution [cm]",  30, -0.25,  0.25 },
-    { "resZ",       "track Z resolution [cm]",  30, -0.5,   0.5 },
-    { "resSinPhi",  "track SinPhi resolution ", 30, -0.04,  0.04 },
-    { "resDzDs",    "track DzDs resolution ",   30, -0.015, 0.015 },
-    { "resPt",      "track Pt resolution",      30, -0.5,   0.5 },
-    { "pullY",      "track Y pull",             30, -10.,   10. },
-    { "pullZ",      "track Z pull",             30, -10.,   10. },
-    { "pullSinPhi", "track SinPhi pull",        30, -10.,   10. },
-    { "pullDzDs",   "track DzDs pull",          30, -10.,   10. },
-    { "pullQPt",    "track Q/Pt pull",          30, -10.,   10. }
+    { "resZ",       "track Z resolution [cm]",  30, -0.7,   0.7 },
+    { "resSinPhi",  "track SinPhi resolution ", 30, -0.03,  0.03 },
+    { "resDzDs",    "track DzDs resolution ",   30, -0.02, 0.02 },
+    { "resPt",      "track Pt resolution",      30, -0.3,   0.3 },
+    { "pullY",      "track Y pull",             30, -7.,   7. },
+    { "pullZ",      "track Z pull",             30, -7.,   7. },
+    { "pullSinPhi", "track SinPhi pull",        30, -7.,   7. },
+    { "pullDzDs",   "track DzDs pull",          30, -7.,   7. },
+    { "pullQPt",    "track Q/Pt pull",          30, -7.,   7. }
   };
   for (int iHisto = 0; iHisto < NHisto; iHisto++){
     fHistosInfo[iHisto] = tmp[iHisto];

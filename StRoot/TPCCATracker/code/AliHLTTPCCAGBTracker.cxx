@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGBTracker.cxx,v 1.5 2010/08/03 13:53:44 mzyzak Exp $
+// $Id: AliHLTTPCCAGBTracker.cxx,v 1.6 2010/08/09 17:51:15 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -906,7 +906,7 @@ void AliHLTTPCCAGBTracker::SetHits( vector<AliHLTTPCCAGBHit> &hits)
   for (int iH = 0; iH < NHits; iH++){
     fHits[iH] = hits[iH];
   }
-}; // need for StRoot
+} // need for StRoot
 
 void AliHLTTPCCAGBTracker::SetSettings( vector<AliHLTTPCCAParam>& settings )
 {
