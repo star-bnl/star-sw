@@ -10,7 +10,7 @@ namespace Garfield {
 
 AvalancheMicroscopic::AvalancheMicroscopic() :
   sensor(0), 
-  nPhotons(0), nElectrons(0), nIons(0), 
+  nPhotons(0), nElectrons(0), nIons(0), nEndpoints(0),
   usePlotting(false), viewer(0), 
   histEnergy(0), hasEnergyHistogram(false),
   histDistance(0), hasDistanceHistogram(false), distanceOption('z'),
@@ -170,6 +170,9 @@ AvalancheMicroscopic::GetEndpoint(const int i,
   if (i < 0 || i >= nEndpoints) {
     std::cerr << "AvalancheMicroscopic::GetEndpoint:" << std::endl;
     std::cerr << "    Endpoint " << i << " does not exist." << std::endl;
+    x0 = y0 = z0 = t0 = e0 = 0.;
+    x1 = y1 = t1 = t1 = e1 = 0.;
+    status = 0;
     return;
   }
 

@@ -1,18 +1,11 @@
-      SUBROUTINE SETUPANALYTICFIELD(IFAIL)
-*-----------------------------------------------------------------------
-*     SETUP  - Routine calling the appropriate setup routine.
-*     (Last changed on 19/ 9/07.)
-*-----------------------------------------------------------------------
-      implicit none
-      INTEGER MXWIRE,MXSW,MXLIST,MXGRID,MXMATT,MXPOLE,MX3D,
-     -     MXPSTR
-       PARAMETER (MXWIRE=  2000,MXSW  =  200)
+       subroutine test(ifail)
+       implicit none
+       INTEGER IFAIL
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
        PARAMETER (MXMATT=    10)
        PARAMETER (MX3D  =   100)
-       PARAMETER (MXPOLE=    10)
        PARAMETER (MXPSTR=   100)
-       PARAMETER (MXLIST=  1000)
-       PARAMETER (MXGRID=    50)
        CHARACTER*80 CELLID
        CHARACTER*3 TYPE
        CHARACTER WIRTYP(MXWIRE),PLATYP(5),
@@ -50,7 +43,7 @@
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       LOGICAL         LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH
@@ -59,6 +52,185 @@
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+       DOUBLE PRECISION A
+       COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
+       corvta=0.
+       corvtb=0.
+       corvtc=0.
+       v0=0.
+       nwire=3
+       x(1)=-1
+       y(1)=0
+       d(1)=0.005
+       v(1)=-100.0
+       x(2)=+1
+       y(2)=0
+       d(2)=0.005
+       v(2)=+100.0
+       x(3)=0
+       y(3)=+1
+       d(3)=0.005
+       v(3)=0.0
+       sx=4
+       sy=4
+       cotube=2;
+       ntube=0;
+       mtube=1;
+*** Periodicities and planes
+       perx=.false.
+       pery=.false.
+       ynplax=.true.
+       ynplay=.true.
+       coplax=-2.0
+       coplay=-2.0
+       tube=.false.
+       ynplan(1)=.false.
+       ynplan(2)=.false.
+       ynplan(3)=.false.
+       ynplan(4)=.false.
+*       call SETA00(ifail)
+*       print *,'----- A00'
+*       print *, a(1,1),a(1,2),a(1,3)
+*       print *, a(2,1),a(2,2),a(2,3)
+*       print *, a(3,1),a(3,2),a(3,3)
+*       print *, '->',e(1),e(2),e(3)
+***
+*       call SETB1X(ifail)
+*       print *,'----- B1X'
+*       print *, a(1,1),a(1,2),a(1,3)
+*       print *, a(2,1),a(2,2),a(2,3)
+*       print *, a(3,1),a(3,2),a(3,3)
+*       print *, '->',e(1),e(2),e(3)
+       call SETB1Y(ifail)
+       print *,'----- B1Y'
+       print *, a(1,1),a(1,2),a(1,3)
+       print *, a(2,1),a(2,2),a(2,3)
+       print *, a(3,1),a(3,2),a(3,3)
+       print *, '->',e(1),e(2),e(3)
+***
+*       call SETB2X(ifail)
+*       print *,'----- B2X'
+*       print *, a(1,1),a(1,2),a(1,3)
+*       print *, a(2,1),a(2,2),a(2,3)
+*       print *, a(3,1),a(3,2),a(3,3)
+*       print *, '->',e(1),e(2),e(3)
+*       call SETB2Y(ifail)
+*       print *,'----- B2Y'
+*       print *, a(1,1),a(1,2),a(1,3)
+*       print *, a(2,1),a(2,2),a(2,3)
+*       print *, a(3,1),a(3,2),a(3,3)
+*       print *, '->',e(1),e(2),e(3)
+***
+*       ldebug=.false.
+*       call SETC10(ifail)
+*       print *,'----- C10'
+*       print *, a(1,1),a(1,2),a(1,3)
+*       print *, a(2,1),a(2,2),a(2,3)
+*       print *, a(3,1),a(3,2),a(3,3)
+*       print *, '->',e(1),e(2),e(3)
+*       call SETC2X(ifail)
+*       print *,'----- C2X'
+*       print *, a(1,1),a(1,2),a(1,3)
+*       print *, a(2,1),a(2,2),a(2,3)
+*       print *, a(3,1),a(3,2),a(3,3)
+*       print *, '->',e(1),e(2),e(3)
+*       call SETC2Y(ifail)
+*       print *,'----- C2Y'
+*       print *, a(1,1),a(1,2),a(1,3)
+*       print *, a(2,1),a(2,2),a(2,3)
+*       print *, a(3,1),a(3,2),a(3,3)
+*       print *, '->',e(1),e(2),e(3)
+*       call SETC30(ifail)
+*       print *,'----- C30'
+*       print *, a(1,1),a(1,2),a(1,3)
+*       print *, a(2,1),a(2,2),a(2,3)
+*       print *, a(3,1),a(3,2),a(3,3)
+*       print *, '->',e(1),e(2),e(3)
+***
+*       call SETD10(ifail)
+*       print *,'----- D10'
+*       print *, a(1,1),a(1,2),a(1,3)
+*       print *, a(2,1),a(2,2),a(2,3)
+*       print *, a(3,1),a(3,2),a(3,3)
+*       print *, '->',e(1),e(2),e(3)
+*       call SETD20(ifail)
+*       print *,'----- D20'
+*       print *, a(1,1),a(1,2),a(1,3)
+*       print *, a(2,1),a(2,2),a(2,3)
+*       print *, a(3,1),a(3,2),a(3,3)
+*       print *, '->',e(1),e(2),e(3)
+***
+       ntube=6;
+       call SETD30(ifail)
+       print *,'----- D30 Hexagon'
+       print *, a(1,1),a(1,2),a(1,3)
+       print *, a(2,1),a(2,2),a(2,3)
+       print *, a(3,1),a(3,2),a(3,3)
+       print *, kappa
+       print *, wmap(1), wmap(2), wmap(3)
+       print *, '->',e(1),e(2),e(3)
+
+       end
+      
+      SUBROUTINE SETUPANALYTICFIELD(IFAIL)
+*-----------------------------------------------------------------------
+*     SETUP  - Routine calling the appropriate setup routine.
+*     (Last changed on 19/ 9/07.)
+*-----------------------------------------------------------------------
+      implicit none
+      INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Print/Plot
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH
+       INTEGER LUNOUT,JFAIL,JEXMEM
+       COMMON /PRTPLT/ LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Local variables
        INTEGER IFAIL,IFAIL1
 
        IF(IFAIL.NE.0)THEN
@@ -197,6 +369,7 @@ CDECK  ID>, SETNEW.
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
+*** Print/Plot
        LOGICAL         LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
@@ -206,6 +379,7 @@ CDECK  ID>, SETNEW.
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Local variables
        REAL VNEW(MXWIRE),VPLNEW(5)
        INTEGER IFAIL,I,J
        CHARACTER*10 USER
@@ -809,13 +983,16 @@ CDECK  ID>, SETC10.
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
+*** Constants
        REAL PI
        PARAMETER (PI=3.141592653589793238)
+*** Local variables
        INTEGER I,J
        REAL CONST,P,S,TEMP
        REAL XX,YY
-       REAL UTYPE
        REAL PH2,PH2LIM
+       EXTERNAL PH2,PH2LIM
+       REAL UTYPE
 *** Statement function returning XX if mode is 0, YY else.
        UTYPE(XX,YY)=(1-MODE)*XX+MODE*YY
 *** Set some of the constants used by PH2 and E2SUM.
@@ -915,8 +1092,10 @@ CDECK  ID>, SETC2X.
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
+*** Constants
        REAL PI
        PARAMETER (PI=3.141592653589793238)
+*** Print/Plot
        LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
@@ -926,9 +1105,12 @@ CDECK  ID>, SETC2X.
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Local variables
        INTEGER I,J
        REAL P,S,CX,TEMP
        REAL PH2,PH2LIM
+       EXTERNAL PH2,PH2LIM
+       
 *** Initialise the constants.
        P=0.0
        P1=0.0
@@ -1039,8 +1221,10 @@ CDECK  ID>, SETC2Y.
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
+*** Constants
        REAL PI
        PARAMETER (PI=3.141592653589793238)
+*** Print/Plot
        LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
@@ -1050,9 +1234,12 @@ CDECK  ID>, SETC2Y.
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Local variables
        INTEGER I,J
        REAL P,S,CY,TEMP
        REAL PH2,PH2LIM
+       EXTERNAL PH2,PH2LIM
+
 *** Initialise the constants.
        P=0
        P1=0
@@ -1162,6 +1349,7 @@ CDECK  ID>, SETC30.
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
+*** Print/Plot
        LOGICAL         LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
@@ -1171,11 +1359,14 @@ CDECK  ID>, SETC30.
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Constants
        REAL PI
        PARAMETER (PI=3.141592653589793238)
+*** Local variables
        INTEGER I,J
        REAL P,CX,CY
        REAL PH2,PH2LIM
+       
 *** Initialise the constants.
        P=0.0
        P1=0.0
@@ -1451,10 +1642,11 @@ CDECK  ID>, SETD30.
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
        COMPLEX WD
        INTEGER I,J
+       REAL RGAMMA
 *** Evaluate kappa, a constant needed by EFCMAP.
-       KAPPA=GAMMA(REAL(NTUBE+1)/REAL(NTUBE))*
-     -      GAMMA(REAL(NTUBE-2)/REAL(NTUBE))/
-     -      GAMMA(REAL(NTUBE-1)/REAL(NTUBE))
+       KAPPA=RGAMMA(REAL(NTUBE+1)/REAL(NTUBE))*
+     -      RGAMMA(REAL(NTUBE-2)/REAL(NTUBE))/
+     -      RGAMMA(REAL(NTUBE-1)/REAL(NTUBE))
 *** Loop over all wire combinations.
        DO 10 I=1,NWIRE
 *** Compute wire mappings only once.
@@ -1524,6 +1716,7 @@ CDECK  ID>, CHARGE.
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
        DOUBLE PRECISION A
        COMMON /MATRIX/ A(MXWIRE+1,MXWIRE+3)
+*** Print/Plot
        LOGICAL         LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
@@ -1533,6 +1726,7 @@ CDECK  ID>, CHARGE.
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Local variables
        DOUBLE PRECISION T
        INTEGER I,II,J,JJ
 *** Identify the routine, if requested.
@@ -1593,6 +1787,7 @@ CDECK  ID>, CHARGE.
      -           A(1,MXWIRE+3))
 *   Reference potential chosen to be zero.
             V0=0.0
+            print*,'auto'
        ENDIF
 *** Check the error condition flag.
        IF(IFAIL.NE.0)THEN
@@ -1690,6 +1885,7 @@ CDECK  ID>, SETDIP.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Print/Plot
        LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
@@ -1699,8 +1895,10 @@ CDECK  ID>, SETDIP.
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Constants
        REAL PI
        PARAMETER (PI=3.141592653589793238)
+*** Local variables
        INTEGER IFAIL,IW,I,N,ILOC,ITER,NITMAX
        PARAMETER(N=20)
        REAL ANGLE(N),VOLT(N),DRES,RMULT,EX,EY,EZ,ETOT,
@@ -1802,8 +2000,10 @@ CDECK  ID>, DIPFIT.
 *   (Last changed on 26/10/07.)
 *-----------------------------------------------------------------------
        implicit none
+*** Constants
        REAL PI
        PARAMETER (PI=3.141592653589793238)
+*** Print/Plot
        LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
@@ -1813,6 +2013,7 @@ CDECK  ID>, DIPFIT.
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Local variables
        INTEGER IFAIL,N,NTRY,ITRY,I,J,NITMAX
        PARAMETER(NTRY=100)
        REAL ANGLE(N),VOLT(N),AMPDIP,PHIDIP,X1,X2,X3,F1,F2,F3,
@@ -2050,7 +2251,8 @@ CDECK  ID>, EFIELD.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
-       LOGICAL         LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+*** Print/Plot
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH
@@ -2059,8 +2261,10 @@ CDECK  ID>, EFIELD.
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Constants
        REAL PI
        PARAMETER (PI=3.141592653589793238)
+*** Local variables
        REAL XIN,YIN,ZIN,EX,EY,EZ,ETOT,VOLT,XPOS,YPOS,ZPOS,DXWIR,DYWIR,
      -      AROT,EX3D,EY3D,EZ3D,V3D,XAUX,YAUX,
      -      EXD,EYD,VOLTD
@@ -4985,7 +5189,7 @@ CDECK  ID>, EFCMAP.
      -           (WSUM+ZTERM*WDSUM)/REAL(NTUBE-2)
        ENDIF
        END
-CDECK  ID>, PH2.
+
        REAL FUNCTION PH2(XPOS,YPOS)
 *-----------------------------------------------------------------------
 *   PH2    - Logarithmic contribution to real single-wire potential,
@@ -5062,7 +5266,7 @@ CDECK  ID>, PH2.
        ENTRY PH2LIM(RADIUS)
        PH2LIM=-LOG(ABS(ZMULT)*RADIUS*(1.0-3.0*P1+5.0*P2))
        END
-CDECK  ID>, E2SUM.
+
        SUBROUTINE E2SUM(XPOS,YPOS,EX,EY)
 *-----------------------------------------------------------------------
 *   E2SUM  - Components of the elecrostatic field intensity in a doubly
@@ -5141,7 +5345,7 @@ CDECK  ID>, E2SUM.
        EX=-REAL(-ZMULT*WSUM)
        EY=AIMAG(-ZMULT*WSUM)
        END
-CDECK  ID>, EFCMAT.
+
        SUBROUTINE EFCMAT(X0,Y0,X1,Y1,DX,DY)
 *-----------------------------------------------------------------------
 *   EFCMAT - Computes the effective distance between points taking the
@@ -5876,6 +6080,7 @@ CDECK  ID>, INTUBE.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Print/Plot
        LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
@@ -5885,6 +6090,7 @@ CDECK  ID>, INTUBE.
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** 
        DOUBLE PRECISION WGT,FPRMAT,
      -      FPROJ,FPROJA,FPROJB,FPROJC,FPROJD,FPROJN,
      -      EPSGX,EPSGY,EPSGZ,
@@ -5923,8 +6129,10 @@ CDECK  ID>, INTUBE.
      -      LTRMS,LTRDEL,LTRINT,LTREXB,LTRCUT,TRFLAG(10),LINCAL,
      -      LFULLB,LFULLP,LFULLT,LSPLIT,LSORT,LOUTL,LEPSG,LGSTEP,
      -      LDLSRM,LDTSRM,LTRVVL
+*** Constants
        REAL PI
        PARAMETER (PI=3.141592653589793238)
+*** Local variables
        LOGICAL WRONG(MXWIRE),WRMATX(MXMATT),WRMATY(MXMATT),OK,
      -      SETX,SETY,SETZ,SETV
        REAL CONEW1,CONEW2,CONEW3,CONEW4,COHLP,VTHLP,XNEW,YNEW,
@@ -6705,7 +6913,7 @@ CDECK  ID>, INTUBE.
 *** Print the amount of CPU time used.
        END
 
-      SUBROUTINE DISPLAYCELDAT(IFAIL)
+      SUBROUTINE DISPLAYCELDAT
 *-----------------------------------------------------------------------
 *     displayCelDat - Debugging subroutine
 *-----------------------------------------------------------------------
@@ -6753,6 +6961,7 @@ CDECK  ID>, INTUBE.
      -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
      -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
        COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Print/Plot
        LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
@@ -6762,6 +6971,7 @@ CDECK  ID>, INTUBE.
      -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
      -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
      -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** 
        DOUBLE PRECISION WGT,FPRMAT,
      -      FPROJ,FPROJA,FPROJB,FPROJC,FPROJD,FPROJN,
      -      EPSGX,EPSGY,EPSGZ,
@@ -6800,8 +7010,9 @@ CDECK  ID>, INTUBE.
      -      LTRMS,LTRDEL,LTRINT,LTREXB,LTRCUT,TRFLAG(10),LINCAL,
      -      LFULLB,LFULLP,LFULLT,LSPLIT,LSORT,LOUTL,LEPSG,LGSTEP,
      -      LDLSRM,LDTSRM,LTRVVL
-       INTEGER IFAIL,I,J
-       INTEGER K
+*** Local variables
+       INTEGER I,J,K
+
        WRITE(*,*) ZMULT
        IF(YNPLAN(1)) THEN 
           WRITE(*,*) 'YNPLAN(1) TRUE'
@@ -7059,8 +7270,5111 @@ CDECK  ID>, INTUBE.
        end      
       
 *-----------------------------------------------------------------------
+*     Routines related to calculation of weighting fields
+*-----------------------------------------------------------------------
+
+       SUBROUTINE SIGINI(IFAIL)
+*-----------------------------------------------------------------------
+*   SIGINI - Initialises signal calculations.
+*   (Last changed on 11/10/06.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+***       
+       INTEGER MXSW,MXLIST
+       PARAMETER (MXSW  =  200)
+       PARAMETER (MXLIST=  1000)
+***
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal data
+       INTEGER MXCHAR
+       PARAMETER (MXCHAR=2000)
+       LOGICAL FPERX,FPERY,LCROSS,TRASET,TRAFLG,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       INTEGER NPAIR,ICLUST,NFOUR,MFEXP,MXMIN,MXMAX,
+     -      MYMIN,MYMAX,NTRBNK,ITRMAJ,NTIME,NORIA,
+     -      NASIMP,JIORD,NISIMP,NMQUAD,NCANG,IENANG
+       REAL TIMSIG,SIGNAL,TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,
+     -      AVALAN,TSTART,TDEV,PRSTHR,
+     -      TRABNK,TRAVEC
+       CHARACTER*(MXCHAR) FCNANG
+       CHARACTER*12 AVATYP
+       CHARACTER*3 FCELTP
+       COMMON /SIGDAT/ TIMSIG(MXLIST),SIGNAL(MXLIST,MXSW,2),
+     -      AVALAN(2),TRAVEC(MXLIST),
+     -      TRABNK(MXLIST,9),TSTART,TDEV,PRSTHR,
+     -      TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,ICLUST,NPAIR,
+     -      NFOUR,ITRMAJ,JIORD,NISIMP,NMQUAD,IENANG,NTIME,NORIA,
+     -      MFEXP,MXMIN,MXMAX,MYMIN,MYMAX,NTRBNK,NASIMP,NCANG,
+     -      TRASET,TRAFLG(9),FPERX,FPERY,LCROSS,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       COMMON /SIGCHR/ FCELTP,AVATYP,FCNANG
+*** Print/Plot
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH
+       INTEGER LUNOUT,JFAIL,JEXMEM
+       COMMON /PRTPLT/ LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Local variables
+       INTEGER IFAIL,IFAIL1
+       DOUBLE PRECISION DUMMY(1)
+       
+*** Assume that the routine will fail.
+       IFAIL=1
+*** If using natural periodicity, copy the cell type.
+       IF(NFOUR.EQ.0)THEN
+            FCELTP=TYPE
+*   Otherwise, eliminate true periodicities.
+       ELSEIF(TYPE.EQ.'A  '.OR.TYPE.EQ.'B1X'.OR.
+     -      TYPE.EQ.'B1Y'.OR.TYPE.EQ.'C1 ')THEN
+            FCELTP='A  '
+       ELSEIF(TYPE.EQ.'B2X'.OR.TYPE.EQ.'C2X')THEN
+            FCELTP='B2X'
+       ELSEIF(TYPE.EQ.'B2Y'.OR.TYPE.EQ.'C2Y')THEN
+            FCELTP='B2Y'
+       ELSEIF(TYPE.EQ.'C3 ')THEN
+            FCELTP='C3 '
+       ELSEIF(TYPE.EQ.'D1 ')THEN
+            FCELTP='D1 '
+       ELSEIF(TYPE.EQ.'D3 ')THEN
+            FCELTP='D3 '
+*   Other cases.
+       ELSE
+            PRINT *,' !!!!!! SIGINI WARNING : No potentials available'//
+     -           ' to handle cell type '//TYPE//'; no signals.'
+            RETURN
+       ENDIF
+*** Establish the directions in which convolutions occur.
+       FPERX=.FALSE.
+       FPERY=.FALSE.
+       IF(NFOUR.EQ.0)THEN
+            MFEXP=0
+       ELSE
+            IF(TYPE.EQ.'B1X'.OR.TYPE.EQ.'C1 '.OR.TYPE.EQ.'C2Y')
+     -           FPERX=.TRUE.
+            IF(TYPE.EQ.'B1Y'.OR.TYPE.EQ.'C1 '.OR.TYPE.EQ.'C2X')
+     -           FPERY=.TRUE.
+            MFEXP=INT(0.1+LOG(1.0*NFOUR)/LOG(2.0))
+            IF(MFEXP.EQ.0)FPERX=.FALSE.
+            IF(MFEXP.EQ.0)FPERY=.FALSE.
+       ENDIF
+*** Set maximum and minimum Fourier terms.
+       MXMIN=0
+       MYMIN=0
+       MXMAX=0
+       MYMAX=0
+       IF(FPERX)MXMIN=MIN(0,-NFOUR/2+1)
+       IF(FPERX)MXMAX=+NFOUR/2
+       IF(FPERY)MYMIN=MIN(0,-NFOUR/2+1)
+       IF(FPERY)MYMAX=+NFOUR/2
+*** Print some debugging output if requested.
+       IF(LDEBUG)WRITE(LUNOUT,'(
+     -        ''  ++++++ SIGINI DEBUG   : Cell type           = '',A3/
+     -        26X,''Fourier cell type   = '',A3/
+     -        26X,''x convolutions      = '',L1/
+     -        26X,''y convolutions      = '',L1/
+     -        26X,''No of Fourier terms = '',I3,'' (= 2**'',I3,'')'')')
+     -        TYPE,FCELTP,FPERX,FPERY,NFOUR,MFEXP
+*** Prepare the signal matrices.
+       IF(TYPE.NE.'MAP')THEN
+            CALL SIGIPR(IFAIL1)
+            IF(IFAIL1.NE.0)THEN
+                 PRINT *,' !!!!!! SIGINI WARNING : Preparing'//
+     -                ' wire signal capacitance matrices failed;'//
+     -                ' no signals.'
+                 RETURN
+            ENDIF
+            CALL SIGPLP(IFAIL1)
+            IF(IFAIL1.NE.0)THEN
+                 PRINT *,' !!!!!! SIGINI WARNING : Preparing'//
+     -                ' plane charges failed; no signals.'
+                 RETURN
+            ENDIF
+       ENDIF
+*** And open the signal file.
+       CALL SIGIST('OPEN',0,DUMMY,DUMMY,0,0,0,0,IFAIL1)
+       IF(IFAIL1.NE.0)THEN
+            PRINT *,' !!!!!! SIGINI WARNING : Unable to'//
+     -           ' open a signal storage file; no signals.'
+            RETURN
+       ENDIF
+*** Set the angular spread entry point to 0 (i.e. absent).
+       IENANG=0
+*** Seems to have worked.
+       IFAIL=0
+       SIGSET=.TRUE.
+       END
+       
+       SUBROUTINE SIGIPR(IFAIL)
+*-----------------------------------------------------------------------
+*   SIGIPR - Prepares the ion tail calculation by filling the signal
+*            matrices (ie non-periodic capacitance matrices),
+*            Fourier transforming them if necessary, inverting them and
+*            Fourier transforming them back. Because of the large number
+*            of terms involved, a (scratch) external file on unit 13 is
+*            used to store the intermediate and final results. This file
+*            is handled by the routines IONBGN and IONIO.
+*   VARIABLES : FFTMAT      : Matrix used for Fourier transforms.
+*   (Last changed on  4/10/06.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+***       
+       INTEGER MXSW,MXLIST
+       PARAMETER (MXSW  =  200)
+       PARAMETER (MXLIST=  1000)
+***
+       INTEGER MXFOUR
+       PARAMETER (MXFOUR=    16)
+***
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal data
+       INTEGER MXCHAR
+       PARAMETER (MXCHAR=2000)
+       LOGICAL FPERX,FPERY,LCROSS,TRASET,TRAFLG,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       INTEGER NPAIR,ICLUST,NFOUR,MFEXP,MXMIN,MXMAX,
+     -      MYMIN,MYMAX,NTRBNK,ITRMAJ,NTIME,NORIA,
+     -      NASIMP,JIORD,NISIMP,NMQUAD,NCANG,IENANG
+       REAL TIMSIG,SIGNAL,TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,
+     -      AVALAN,TSTART,TDEV,PRSTHR,
+     -      TRABNK,TRAVEC
+       CHARACTER*(MXCHAR) FCNANG
+       CHARACTER*12 AVATYP
+       CHARACTER*3 FCELTP
+       COMMON /SIGDAT/ TIMSIG(MXLIST),SIGNAL(MXLIST,MXSW,2),
+     -      AVALAN(2),TRAVEC(MXLIST),
+     -      TRABNK(MXLIST,9),TSTART,TDEV,PRSTHR,
+     -      TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,ICLUST,NPAIR,
+     -      NFOUR,ITRMAJ,JIORD,NISIMP,NMQUAD,IENANG,NTIME,NORIA,
+     -      MFEXP,MXMIN,MXMAX,MYMIN,MYMAX,NTRBNK,NASIMP,NCANG,
+     -      TRASET,TRAFLG(9),FPERX,FPERY,LCROSS,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       COMMON /SIGCHR/ FCELTP,AVATYP,FCNANG
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Print/Plot
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH
+       INTEGER LUNOUT,JFAIL,JEXMEM
+       COMMON /PRTPLT/ LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Local variables
+       COMPLEX FFTMAT(MXFOUR,MXWIRE)
+       INTEGER IFAIL,MX,MY,I,J,II,JJ,M,IOS
+       
+*** Identify the routine.
+       IF(LIDENT)PRINT *,' /// ROUTINE SIGIPR ///'
+*** Set some parameters.
+       IFAIL=0
+*** Book the signal matrices.
+C       CALL BOOK('BOOK','MATRIX','SIGNAL',IFAIL)
+       IF(IFAIL.NE.0)THEN
+            PRINT *,' !!!!!! SIGIPR WARNING : Unable to obtain'//
+     -           ' signal matrix storage; no induced currents.'
+            RETURN
+       ENDIF
+*** Open unit 13 for writing of matrices if Fourier transf. are needed.
+       IF(FPERX.OR.FPERY)THEN
+            CALL IONBGN(IFAIL)
+            IF(IFAIL.EQ.1)THEN
+                 PRINT *,' !!!!!! SIGIPR WARNING : No storage'//
+     -                ' available for the signal matrices; no'//
+     -                ' induced currents.'
+                 RETURN
+            ENDIF
+       ENDIF
+*** Have the matrix/matrices filled (and stored).
+       DO 10 MX=MXMIN,MXMAX
+       DO 20 MY=MYMIN,MYMAX
+*   Select layer to be produced.
+       IF(FCELTP.EQ.'A  ')THEN
+            CALL IPRA00(MX,MY)
+       ELSEIF(FCELTP.EQ.'B2X')THEN
+            CALL IPRB2X(MY)
+       ELSEIF(FCELTP.EQ.'B2Y')THEN
+            CALL IPRB2Y(MX)
+       ELSEIF(FCELTP.EQ.'C2X')THEN
+            CALL IPRC2X
+       ELSEIF(FCELTP.EQ.'C2Y')THEN
+            CALL IPRC2Y
+       ELSEIF(FCELTP.EQ.'C3 ')THEN
+            CALL IPRC30
+       ELSEIF(FCELTP.EQ.'D1 ')THEN
+            CALL IPRD10
+       ELSEIF(FCELTP.EQ.'D3 ')THEN
+            CALL IPRD30
+       ELSE
+            PRINT *,' !!!!!! SIGIPR WARNING : Unknown signal cell'//
+     -           ' type ',FCELTP,' see; abandoned.'
+            RETURN
+       ENDIF
+       IF(LDEBUG)PRINT *,' ++++++ SIGIPR DEBUG   : Signal matrix MX=',
+     -      MX,' MY=',MY,' has been calculated.'
+*   Store the matrix.
+       IF(FPERX.OR.FPERY)CALL IONIO(MX,MY,1,0,IFAIL)
+*   Quit if storing failed.
+       IF(IFAIL.NE.0)GOTO 2010
+*   Dump the signal matrix before inversion, if DEBUG is requested.
+       IF(LDEBUG)THEN
+            WRITE(LUNOUT,'(/''  ++++++ SIGIPR DEBUG   : Dump of'',
+     -           '' signal matrix ('',I2,'','',I2,'') before'',
+     -           '' inversion follows:''/)') MX,MY
+            DO 710 I=0,NWIRE-1,10
+            DO 720 J=0,NWIRE-1,10
+            WRITE(LUNOUT,'(''  Re-Block '',I2,''.'',I2/)') I/10,J/10
+            DO 730 II=1,10
+            IF(I+II.GT.NWIRE)GOTO 730
+            WRITE(LUNOUT,'(2X,10(E12.5,1X:))')
+     -           (REAL(SIGMAT(I+II,J+JJ)),JJ=1,MIN(NWIRE-J,10))
+730         CONTINUE
+            WRITE(LUNOUT,'(''  Im-Block '',I2,''.'',I2/)') I/10,J/10
+            DO 740 II=1,10
+            IF(I+II.GT.NWIRE)GOTO 740
+            WRITE(LUNOUT,'(2X,10(E12.5,1X:))')
+     -           (AIMAG(SIGMAT(I+II,J+JJ)),JJ=1,MIN(NWIRE-J,10))
+740         CONTINUE
+720         CONTINUE
+710         CONTINUE
+            WRITE(LUNOUT,'(/''  ++++++ SIGIPR DEBUG   : End of the'',
+     -           '' uninverted capacitance matrix dump.''/)')
+       ENDIF
+*   Next layer.
+20     CONTINUE
+10     CONTINUE
+*** Have them fourier transformed (singly periodic case).
+       IF((FPERX.AND..NOT.FPERY).OR.(FPERY.AND..NOT.FPERX))THEN
+            DO 30 I=1,NWIRE
+            DO 40 M=-NFOUR/2+1,NFOUR/2
+            CALL IONIO(M,M,2,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+            DO 50 J=1,NWIRE
+            FFTMAT(M+NFOUR/2,J)=SIGMAT(I,J)
+50          CONTINUE
+40          CONTINUE
+            DO 60 J=1,NWIRE
+            CALL CFFT(FFTMAT(1,J),MFEXP)
+60          CONTINUE
+            DO 70 M=-NFOUR/2+1,NFOUR/2
+            CALL IONIO(M,M,2,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+            DO 80 J=1,NWIRE
+            SIGMAT(I,J)=FFTMAT(M+NFOUR/2,J)
+80          CONTINUE
+            CALL IONIO(M,M,1,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+70          CONTINUE
+30          CONTINUE
+       ENDIF
+*   have them fourier transformed (doubly periodic case).
+       IF(FPERX.AND.FPERY)THEN
+            DO 100 I=1,NWIRE
+            DO 110 MX=MXMIN,MXMAX
+            DO 120 MY=MYMIN,MYMAX
+            CALL IONIO(MX,MY,2,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+            DO 130 J=1,NWIRE
+            FFTMAT(MY+NFOUR/2,J)=SIGMAT(I,J)
+130         CONTINUE
+120         CONTINUE
+            DO 140 J=1,NWIRE
+            CALL CFFT(FFTMAT(1,J),MFEXP)
+140         CONTINUE
+            DO 150 MY=MYMIN,MYMAX
+            CALL IONIO(MX,MY,2,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+            DO 160 J=1,NWIRE
+            SIGMAT(I,J)=FFTMAT(MY+NFOUR/2,J)
+160         CONTINUE
+            CALL IONIO(MX,MY,1,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+150         CONTINUE
+110         CONTINUE
+            DO 170 MY=MYMIN,MYMAX
+            DO 180 MX=MXMIN,MXMAX
+            CALL IONIO(MX,MY,2,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+            DO 190 J=1,NWIRE
+            FFTMAT(MX+NFOUR/2,J)=SIGMAT(I,J)
+190         CONTINUE
+180         CONTINUE
+            DO 200 J=1,NWIRE
+            CALL CFFT(FFTMAT(1,J),MFEXP)
+200         CONTINUE
+            DO 210 MX=MXMIN,MXMAX
+            CALL IONIO(MX,MY,2,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+            DO 220 J=1,NWIRE
+            SIGMAT(I,J)=FFTMAT(MX+NFOUR/2,J)
+220         CONTINUE
+            CALL IONIO(MX,MY,1,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+210         CONTINUE
+170         CONTINUE
+100         CONTINUE
+       ENDIF
+*** Invert the matrices.
+       DO 300 MX=MXMIN,MXMAX
+       DO 310 MY=MYMIN,MYMAX
+*   Retrieve the layer.
+       IF(FPERX.OR.FPERY)THEN
+            CALL IONIO(MX,MY,2,0,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+       ENDIF
+*   Invert.
+       IF(NWIRE.GE.1)CALL CINV(NWIRE,SIGMAT,MXWIRE,IWORK,IFAIL)
+       IF(IFAIL.NE.0)THEN
+            PRINT *,' !!!!!! SIGIPR WARNING : Inversion of signal',
+     -           ' matrix (',MX,',',MY,') failed; no reliable',
+     -           ' results; ion tail preparation is abandoned.'
+            IFAIL=1
+            RETURN
+       ENDIF
+*   Store the matrix back.
+       IF(FPERX.OR.FPERY)THEN
+            CALL IONIO(MX,MY,1,0,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+       ENDIF
+*   Next layer.
+310    CONTINUE
+300    CONTINUE
+*** And transform the matrices back to the original domain.
+       IF((FPERX.AND..NOT.FPERY).OR.(FPERY.AND..NOT.FPERX))THEN
+            DO 410 I=1,NWIRE
+            DO 420 M=-NFOUR/2+1,NFOUR/2
+            CALL IONIO(M,M,2,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+            DO 430 J=1,NWIRE
+            FFTMAT(M+NFOUR/2,J)=SIGMAT(I,J)
+430         CONTINUE
+420         CONTINUE
+            DO 440 J=1,NWIRE
+            CALL CFFT(FFTMAT(1,J),-MFEXP)
+440         CONTINUE
+            DO 450 M=-NFOUR/2+1,NFOUR/2
+            CALL IONIO(M,M,2,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+            DO 460 J=1,NWIRE
+            SIGMAT(I,J)=FFTMAT(M+NFOUR/2,J)/NFOUR
+460         CONTINUE
+            CALL IONIO(M,M,1,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+450         CONTINUE
+410         CONTINUE
+       ENDIF
+*   have them transformed to the original domain (doubly periodic).
+       IF(FPERX.AND.FPERY)THEN
+            DO 500 I=1,NWIRE
+            DO 510 MX=MXMIN,MXMAX
+            DO 520 MY=MYMIN,MYMAX
+            CALL IONIO(MX,MY,2,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+            DO 530 J=1,NWIRE
+            FFTMAT(MY+NFOUR/2,J)=SIGMAT(I,J)
+530         CONTINUE
+520         CONTINUE
+            DO 540 J=1,NWIRE
+            CALL CFFT(FFTMAT(1,J),-MFEXP)
+540         CONTINUE
+            DO 550 MY=MYMIN,MYMAX
+            CALL IONIO(MX,MY,2,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+            DO 560 J=1,NWIRE
+            SIGMAT(I,J)=FFTMAT(MY+NFOUR/2,J)/NFOUR
+560         CONTINUE
+            CALL IONIO(MX,MY,1,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+550         CONTINUE
+510         CONTINUE
+            DO 570 MY=MYMIN,MYMAX
+            DO 580 MX=MXMIN,MXMAX
+            CALL IONIO(MX,MY,2,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+            DO 590 J=1,NWIRE
+            FFTMAT(MX+NFOUR/2,J)=SIGMAT(I,J)
+590         CONTINUE
+580         CONTINUE
+            DO 600 J=1,NWIRE
+            CALL CFFT(FFTMAT(1,J),-MFEXP)
+600         CONTINUE
+            DO 610 MX=MXMIN,MXMAX
+            CALL IONIO(MX,MY,2,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+            DO 620 J=1,NWIRE
+            SIGMAT(I,J)=FFTMAT(MX+NFOUR/2,J)/NFOUR
+620         CONTINUE
+            CALL IONIO(MX,MY,1,I,IFAIL)
+            IF(IFAIL.NE.0)GOTO 2010
+610         CONTINUE
+570         CONTINUE
+500         CONTINUE
+       ENDIF
+*** Dump the signal matrix after inversion, if DEBUG is requested.
+       IF(LDEBUG)THEN
+            DO 750 MX=MXMIN,MXMAX
+            DO 760 MY=MYMIN,MYMAX
+            WRITE(LUNOUT,'(/''  ++++++ SIGIPR DEBUG   : Dump of'',
+     -           '' signal matrix ('',I2,'','',I2,'') after'',
+     -           '' inversion follows:''/)') MX,MY
+            DO 770 I=0,NWIRE-1,10
+            DO 780 J=0,NWIRE-1,10
+            WRITE(LUNOUT,'(''  Re-Block '',I2,''.'',I2/)') I/10,J/10
+            DO 790 II=1,10
+            IF(I+II.GT.NWIRE)GOTO 790
+            WRITE(LUNOUT,'(2X,10(E12.5,1X:))')
+     -           (REAL(SIGMAT(I+II,J+JJ)),JJ=1,MIN(NWIRE-J,10))
+790         CONTINUE
+            WRITE(LUNOUT,'(''  Im-Block '',I2,''.'',I2/)') I/10,J/10
+            DO 800 II=1,10
+            IF(I+II.GT.NWIRE)GOTO 800
+            WRITE(LUNOUT,'(2X,10(E12.5,1X:))')
+     -           (AIMAG(SIGMAT(I+II,J+JJ)),JJ=1,MIN(NWIRE-J,10))
+800         CONTINUE
+780         CONTINUE
+770         CONTINUE
+            WRITE(LUNOUT,'(/''  ++++++ SIGIPR DEBUG   : End of the'',
+     -           '' inverted capacitance matrix dump.''/)')
+760         CONTINUE
+750         CONTINUE
+       ENDIF
+       RETURN
+*** Handle error conditions.
+2010   CONTINUE
+       PRINT *,' !!!!!! SIGIPR WARNING : Ion tail preparation stopped'//
+     -      ' because of an I/O error; resubmit or set'//
+     -      ' fourier to 1 (see writeup)'
+       CALL INPIOS(IOS)
+       CLOSE(UNIT=13,IOSTAT=IOS,ERR=2030)
+       IFAIL=1
+       RETURN
+2030   CONTINUE
+       PRINT *,' ###### SIGIPR ERROR   : Problems closing scratch'//
+     -      ' data set on unit 13 (used for intermediate'//
+     -      ' results)'
+       PRINT *,'                         CLOSE was attempted because'//
+     -      ' of a previous error condition'
+       CALL INPIOS(IOS)
+       IFAIL=1
+       END
+
+       SUBROUTINE SIGFLS(XPOS,YPOS,ZPOS,EXSUM,EYSUM,EZSUM,ISW)
+*-----------------------------------------------------------------------
+*   SIGFLS - Sums the weighting field components at (XPOS,YPOS,ZPOS).
+*   (Last changed on 11/10/06.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+***       
+       INTEGER MXSW,MXLIST
+       PARAMETER (MXSW  =  200)
+       PARAMETER (MXLIST=  1000)
+***
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal data
+       INTEGER MXCHAR
+       PARAMETER (MXCHAR=2000)
+       LOGICAL FPERX,FPERY,LCROSS,TRASET,TRAFLG,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       INTEGER NPAIR,ICLUST,NFOUR,MFEXP,MXMIN,MXMAX,
+     -      MYMIN,MYMAX,NTRBNK,ITRMAJ,NTIME,NORIA,
+     -      NASIMP,JIORD,NISIMP,NMQUAD,NCANG,IENANG
+       REAL TIMSIG,SIGNAL,TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,
+     -      AVALAN,TSTART,TDEV,PRSTHR,
+     -      TRABNK,TRAVEC
+       CHARACTER*(MXCHAR) FCNANG
+       CHARACTER*12 AVATYP
+       CHARACTER*3 FCELTP
+       COMMON /SIGDAT/ TIMSIG(MXLIST),SIGNAL(MXLIST,MXSW,2),
+     -      AVALAN(2),TRAVEC(MXLIST),
+     -      TRABNK(MXLIST,9),TSTART,TDEV,PRSTHR,
+     -      TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,ICLUST,NPAIR,
+     -      NFOUR,ITRMAJ,JIORD,NISIMP,NMQUAD,IENANG,NTIME,NORIA,
+     -      MFEXP,MXMIN,MXMAX,MYMIN,MYMAX,NTRBNK,NASIMP,NCANG,
+     -      TRASET,TRAFLG(9),FPERX,FPERY,LCROSS,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       COMMON /SIGCHR/ FCELTP,AVATYP,FCNANG
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Local variables
+       REAL XPOS,YPOS,ZPOS,EX,EY,EZ,EXSUM,EYSUM,EZSUM
+       INTEGER MX,MY,IFAIL,IW,ISW,IPLANE,ISTRIP
+*** Preset the sums.
+       EXSUM=0
+       EYSUM=0
+       EZSUM=0
+*** Make sure that the signal matrices are present.
+       IF(.NOT.SIGSET)THEN
+            PRINT *,' !!!!!! SIGFLS WARNING : Initialisation of'//
+     -           ' signal calculation not yet done; no field.'
+            RETURN
+       ENDIF
+*** Loop over the signal layers.
+       DO 10 MX=MXMIN,MXMAX
+       DO 20 MY=MYMIN,MYMAX
+*** Load the layers of the wire matrices.
+       CALL IONIO(MX,MY,2,0,IFAIL)
+       IF(IFAIL.NE.0)THEN
+            PRINT *,' !!!!!! SIGFLS WARNING : Wire matrix'//
+     -           ' store error; no weighting field returned.'
+            EXSUM=0
+            EYSUM=0
+            EZSUM=0
+            RETURN
+       ENDIF
+*** Loop over all wires.
+       DO 30 IW=1,NWIRE
+*   Pick out those wires that are part of this read out group.
+       IF(INDSW(IW).EQ.ISW)THEN
+            EX=0
+            EY=0
+            EZ=0
+            IF(FCELTP.EQ.'A  ')THEN
+                 CALL IONA00(XPOS,YPOS,EX,EY,MX,MY,IW)
+            ELSEIF(FCELTP.EQ.'B2X')THEN
+                 CALL IONB2X(XPOS,YPOS,EX,EY   ,MY,IW)
+            ELSEIF(FCELTP.EQ.'B2Y')THEN
+                 CALL IONB2Y(XPOS,YPOS,EX,EY,MX   ,IW)
+            ELSEIF(FCELTP.EQ.'C2X')THEN
+                 CALL IONC2X(XPOS,YPOS,EX,EY      ,IW)
+            ELSEIF(FCELTP.EQ.'C2Y')THEN
+                 CALL IONC2Y(XPOS,YPOS,EX,EY      ,IW)
+            ELSEIF(FCELTP.EQ.'C3 ')THEN
+                 CALL IONC30(XPOS,YPOS,EX,EY      ,IW)
+            ELSEIF(FCELTP.EQ.'D1 ')THEN
+                 CALL IOND10(XPOS,YPOS,EX,EY      ,IW)
+            ELSEIF(FCELTP.EQ.'D3 ')THEN
+                 CALL IOND30(XPOS,YPOS,EX,EY      ,IW)
+            ELSE
+                 PRINT *,' ###### SIGFLS ERROR   : Unknown signal'//
+     -                ' field type ',FCELTP,' received; program error.'
+                 PRINT *,'                         Encountered for'//
+     -                ' Wire ',IW,' indsw=',INDSW(IW)
+                 EXSUM=0
+                 EYSUM=0
+                 EZSUM=0
+                 RETURN
+            ENDIF
+            EXSUM=EXSUM+EX
+            EYSUM=EYSUM+EY
+            EZSUM=EZSUM+EZ
+       ENDIF
+30     CONTINUE
+*** Load the layers of the plane matrices.
+       CALL IPLIO(MX,MY,2,IFAIL)
+       IF(IFAIL.NE.0)THEN
+            PRINT *,' !!!!!! SIGFLS WARNING : Plane matrix'//
+     -           ' store error; no weighting field returned.'
+            EXSUM=0
+            EYSUM=0
+            EZSUM=0
+            RETURN
+       ENDIF
+*** Loop over all planes.
+       DO 40 IPLANE=1,5
+*   Pick out those wires that are part of this read out group.
+       IF(INDPLA(IPLANE).EQ.ISW)THEN
+            EX=0
+            EY=0
+            EZ=0
+            IF(FCELTP.EQ.'A  ')THEN
+                 CALL IPLA00(XPOS,YPOS,EX,EY,MX,MY,IPLANE)
+            ELSEIF(FCELTP.EQ.'B2X')THEN
+                 CALL IPLB2X(XPOS,YPOS,EX,EY   ,MY,IPLANE)
+            ELSEIF(FCELTP.EQ.'B2Y')THEN
+                 CALL IPLB2Y(XPOS,YPOS,EX,EY,MX   ,IPLANE)
+            ELSEIF(FCELTP.EQ.'C2X')THEN
+                 CALL IPLC2X(XPOS,YPOS,EX,EY      ,IPLANE)
+            ELSEIF(FCELTP.EQ.'C2Y')THEN
+                 CALL IPLC2Y(XPOS,YPOS,EX,EY      ,IPLANE)
+            ELSEIF(FCELTP.EQ.'C3 ')THEN
+                 CALL IPLC30(XPOS,YPOS,EX,EY      ,IPLANE)
+            ELSEIF(FCELTP.EQ.'D1 ')THEN
+                 CALL IPLD10(XPOS,YPOS,EX,EY      ,IPLANE)
+            ELSEIF(FCELTP.EQ.'D3 ')THEN
+                 CALL IPLD30(XPOS,YPOS,EX,EY      ,IPLANE)
+            ELSE
+                 PRINT *,' ###### SIGFLS ERROR   : Unknown signal'//
+     -                ' field type ',FCELTP,' received; program error.'
+                 PRINT *,'                         Encountered for'//
+     -                ' Plane ',IPLANE,' indpla=',INDPLA(IPLANE)
+                 EXSUM=0
+                 EYSUM=0
+                 EZSUM=0
+                 RETURN
+            ENDIF
+            EXSUM=EXSUM+EX
+            EYSUM=EYSUM+EY
+            EZSUM=EZSUM+EZ
+       ENDIF
+40     CONTINUE
+*** Next signal layer.
+20     CONTINUE
+10     CONTINUE
+*** Add the field due to the planes themselves.
+       DO 50 IPLANE=1,5
+       IF(INDPLA(IPLANE).EQ.ISW)THEN
+            EXSUM=EXSUM+EWXCOR(IPLANE)
+            EYSUM=EYSUM+EWYCOR(IPLANE)
+       ENDIF
+50     CONTINUE
+
+*** Add strips, if there are any.
+       DO 70 IPLANE=1,5
+       DO 80 ISTRIP=1,NPSTR1(IPLANE)
+       IF(INDST1(IPLANE,ISTRIP).EQ.ISW)THEN
+            CALL IONEST(XPOS,YPOS,ZPOS,EX,EY,EZ,IPLANE,ISTRIP,1)
+            EXSUM=EXSUM+EX
+            EYSUM=EYSUM+EY
+            EZSUM=EZSUM+EZ
+       ENDIF
+80     CONTINUE
+       DO 90 ISTRIP=1,NPSTR2(IPLANE)
+       IF(INDST2(IPLANE,ISTRIP).EQ.ISW)THEN
+            CALL IONEST(XPOS,YPOS,ZPOS,EX,EY,EZ,IPLANE,ISTRIP,2)
+            EXSUM=EXSUM+EX
+            EYSUM=EYSUM+EY
+            EZSUM=EZSUM+EZ
+       ENDIF
+90     CONTINUE
+70     CONTINUE
+       END
+
+       SUBROUTINE IONA00(XPOS,YPOS,EX,EY,MX,MY,ISW)
+*-----------------------------------------------------------------------
+*   IONA00 - Routine returning the A I,J [MX,MY] * E terms for A cells.
+*   VARIABLES : R2         : Potential before taking -Log(Sqrt(...))
+*               EX,EY      : x,y-Component of the electric field.
+*               ETOT       : Magnitude of the electric field.
+*               VOLT       : Potential.
+*               EXHELP ETC : One term in the summing series.
+*               (XPOS,YPOS): Position where the field is needed.
+*   (Last changed on 14/ 8/98.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Local variables
+       REAL XPOS,YPOS,EX,EY,XX,XXMIRR,YY,YYMIRR,R2,R2PLAN,EXHELP,EYHELP
+       INTEGER MX,MY,ISW,I
+*** Initialise the potential and the electric field.
+       EX=0.0
+       EY=0.0
+*** Loop over all wires.
+       DO 10 I=1,NWIRE
+*** Define a few reduced variables.
+       XX=XPOS-X(I)-MX*SX
+       YY=YPOS-Y(I)-MY*SY
+*** Calculate the field in case there are no planes.
+       R2=XX**2+YY**2
+       IF(R2.LE.0)GOTO 10
+       EXHELP=XX/R2
+       EYHELP=YY/R2
+*** Take care of a planes at constant x.
+       IF(YNPLAX)THEN
+            XXMIRR=XPOS+X(I)-2.0*COPLAX
+            R2PLAN=XXMIRR**2+YY**2
+            IF(R2PLAN.LE.0)GOTO 10
+            EXHELP=EXHELP-XXMIRR/R2PLAN
+            EYHELP=EYHELP-YY/R2PLAN
+       ENDIF
+*** Take care of a plane at constant y.
+       IF(YNPLAY)THEN
+            YYMIRR=YPOS+Y(I)-2.0*COPLAY
+            R2PLAN=XX**2+YYMIRR**2
+            IF(R2PLAN.LE.0)GOTO 10
+            EXHELP=EXHELP-XX/R2PLAN
+            EYHELP=EYHELP-YYMIRR/R2PLAN
+       ENDIF
+*** Take care of pairs of planes.
+       IF(YNPLAX.AND.YNPLAY)THEN
+            R2PLAN=XXMIRR**2+YYMIRR**2
+            IF(R2PLAN.LE.0)GOTO 10
+            EXHELP=EXHELP+XXMIRR/R2PLAN
+            EYHELP=EYHELP+YYMIRR/R2PLAN
+       ENDIF
+*** Calculate the electric field and the potential.
+       EX=EX+REAL(SIGMAT(ISW,I))*EXHELP
+       EY=EY+REAL(SIGMAT(ISW,I))*EYHELP
+*** Finish the loop over the wires.
+10     CONTINUE
+       END
+
+       SUBROUTINE IONB2X(XPOS,YPOS,EX,EY,MY,ISW)
+*-----------------------------------------------------------------------
+*   IONB2X - Routine calculating the MY contribution to the signal on
+*            wire ISW due to a charge at (XPOS,YPOS) for F-B2Y cells.
+*   VARIABLES : See routine EFCA00 for most of the variables.
+*               Z,ZZMIRR   : X + I*Y , XXMIRR + I*YYMIRR ; I**2=-1
+*               ECOMPL     : EX + I*EY                   ; I**2=-1
+*   (Last changed on 20/ 2/90.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Constants
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
+*** Local variables
+       REAL XPOS, YPOS, EX, EY
+       REAL XX,YY,XXNEG,YYMIRR
+       INTEGER MY, ISW, I
+       COMPLEX ZZ,ECOMPL,ZZMIRR,ZZNEG,ZZNMIR
+*** Initialise EX and EY.
+       EX=0.0
+       EY=0.0
+*** Loop over all wires.
+       DO 10 I=1,NWIRE
+       XX=0.5*PI*(XPOS-X(I))/SX
+       YY=0.5*PI*(YPOS-Y(I)-MY*SY)/SX
+       XXNEG=0.5*PI*(XPOS+X(I)-2.0*COPLAN(1))/SX
+       ZZ=CMPLX(XX,YY)
+       ZZNEG=CMPLX(XXNEG,YY)
+*** Calculate the field in case there are no equipotential planes.
+       ECOMPL=0.0
+       IF(ABS(YY).LE.20)ECOMPL=-B2SIN(I)/(SIN(ZZ)*SIN(ZZNEG))
+*** Take care of a plane at constant y.
+       IF(YNPLAY)THEN
+            YYMIRR=(0.5*PI/SX)*(YPOS+Y(I)-2.0*COPLAY)
+            ZZMIRR=CMPLX(XX,YYMIRR)
+            ZZNMIR=CMPLX(XXNEG,YYMIRR)
+            IF(ABS(YYMIRR).LE.20.0)
+     -           ECOMPL=ECOMPL+B2SIN(I)/(SIN(ZZMIRR)*SIN(ZZNMIR))
+       ENDIF
+*** Calculate the electric field and the potential.
+       EX=EX+REAL(SIGMAT(ISW,I))*(0.5*PI/SX)*REAL(ECOMPL)
+       EY=EY-REAL(SIGMAT(ISW,I))*(0.5*PI/SX)*AIMAG(ECOMPL)
+*** Finish the wire loop
+10     CONTINUE
+       END
+       
+       SUBROUTINE IONB2Y(XPOS,YPOS,EX,EY,MX,ISW)
+*-----------------------------------------------------------------------
+*   IONB2Y - Routine calculating the MX contribution to the signal on
+*            wire ISW due to a charge at (XPOS,YPOS) for F-B2X cells.
+*   VARIABLES : See routine EFCA00 for most of the variables.
+*               Z,ZZMIRR   : X + I*Y , XXMIRR + I*YYMIRR ; I**2=-1
+*               ECOMPL     : EX + I*EY                   ; I**2=-1
+*   (Last changed on 20/ 2/90.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Constants
+       COMPLEX ICONS
+       REAL PI
+       PARAMETER (PI=3.141592653589793238,ICONS=(0.0,1.0))
+*** Local variables
+       COMPLEX ZZ,ECOMPL,ZZMIRR,ZZNEG,ZZNMIR
+       REAL XPOS,YPOS,EX,EY,XX,YY,YYNEG,XXMIRR
+       INTEGER MX,ISW,I
+*** Initialise EX and EY.
+       EX=0.0
+       EY=0.0
+*** Loop over all wires.
+       DO 10 I=1,NWIRE
+       XX=0.5*PI*(XPOS-X(I)-MX*SX)/SY
+       YY=0.5*PI*(YPOS-Y(I))/SY
+       YYNEG=0.5*PI*(YPOS+Y(I)-2.0*COPLAN(3))/SY
+       ZZ=CMPLX(XX,YY)
+       ZZNEG=CMPLX(XX,YYNEG)
+*** Calculate the field in case there are no equipotential planes.
+       ECOMPL=0.0
+       IF(ABS(XX).LE.20.0)
+     -      ECOMPL=ICONS*B2SIN(I)/(SIN(ICONS*ZZ)*SIN(ICONS*ZZNEG))
+*** Take care of a plane at constant y.
+       IF(YNPLAX)THEN
+            XXMIRR=(0.5*PI/SY)*(XPOS+X(I)-2.0*COPLAX)
+            ZZMIRR=CMPLX(XXMIRR,YY)
+            ZZNMIR=CMPLX(XXMIRR,YYNEG)
+            IF(ABS(XXMIRR).LE.20.0)ECOMPL=ECOMPL-
+     -           ICONS*B2SIN(I)/(SIN(ICONS*ZZMIRR)*SIN(ICONS*ZZNMIR))
+       ENDIF
+*** Calculate the electric field and the potential..
+       EX=EX+REAL(SIGMAT(ISW,I))*(0.5*PI/SY)*REAL(ECOMPL)
+       EY=EY-REAL(SIGMAT(ISW,I))*(0.5*PI/SY)*AIMAG(ECOMPL)
+*** Finish the wire loop.
+10     CONTINUE
+       END
+       
+       SUBROUTINE IONC2X(XPOS,YPOS,EX,EY,ISW)
+*-----------------------------------------------------------------------
+*   IONC2X - Routine returning the potential and electric field in a
+*            configuration with 2 x planes and y periodicity.
+*   VARIABLES : see the writeup
+*   (Last changed on 12/10/06.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Constants
+       COMPLEX ICONS
+       REAL PI
+       PARAMETER (PI=3.141592653589793238,ICONS=(0.0,1.0))
+*** Local variables
+       COMPLEX WSUM1,WSUM2,ZSIN,ZCOF,ZU,ZUNEW,ZTERM1,ZTERM2,ZETA
+       REAL XPOS,YPOS,EX,EY,CX,S
+       INTEGER ISW,I
+*** Initial values.
+       WSUM1=0
+       WSUM2=0
+       S=0.0
+*** Wire loop.
+       DO 10 I=1,NWIRE
+*   Compute the direct contribution.
+       ZETA=ZMULT*CMPLX(XPOS-X(I),YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15.0)THEN
+            WSUM1=WSUM1-REAL(SIGMAT(ISW,I))*ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15.0)THEN
+            WSUM1=WSUM1+REAL(SIGMAT(ISW,I))*ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4.0*ZSIN**2-2.0
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1.0-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3.0*P1-ZCOF*5.0*P2
+            ZUNEW=1.0-ZCOF*ZU-5.0*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM1=WSUM1+REAL(SIGMAT(ISW,I))*(ZTERM2/ZTERM1)
+       ENDIF
+*   Find the plane nearest to the wire.
+       CX=COPLAX-SX*ANINT((COPLAX-X(I))/SX)
+*   Constant terms sum
+       S=S+REAL(SIGMAT(ISW,I))*(X(I)-CX)
+*   Mirror contribution.
+       ZETA=ZMULT*CMPLX(2*CX-XPOS-X(I),YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15.0)THEN
+            WSUM2=WSUM2-REAL(SIGMAT(ISW,I))*ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15.0)THEN
+            WSUM2=WSUM2+REAL(SIGMAT(ISW,I))*ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4.0*ZSIN**2-2.0
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1.0-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3.0*P1-ZCOF*5.0*P2
+            ZUNEW=1.0-ZCOF*ZU-5.0*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM2=WSUM2+REAL(SIGMAT(ISW,I))*(ZTERM2/ZTERM1)
+       ENDIF
+10     CONTINUE
+*** Convert the two contributions to a real field.
+       EX=REAL(ZMULT*(WSUM1+WSUM2))
+       EY=-AIMAG(ZMULT*(WSUM1-WSUM2))
+*** Constant correction terms.
+       IF(MODE.EQ.0)EX=EX+S*2.0*PI/(SX*SY)
+       END
+
+       SUBROUTINE IONC2Y(XPOS,YPOS,EX,EY,ISW)
+*-----------------------------------------------------------------------
+*   IONC2Y - Routine returning the potential and electric field in a
+*            configuration with 2 y planes and x periodicity.
+*   VARIABLES : see the writeup
+*   (Last changed on 12/10/06.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Constants
+       COMPLEX ICONS
+       REAL PI
+       PARAMETER (PI=3.141592653589793238,ICONS=(0.0,1.0))
+*** Local variables
+       COMPLEX WSUM1,WSUM2,ZSIN,ZCOF,ZU,ZUNEW,ZTERM1,ZTERM2,ZETA
+       REAL XPOS,YPOS,EX,EY,CY,S
+       INTEGER I,ISW
+*** Initial values.
+       WSUM1=0
+       WSUM2=0
+       S=0.0
+*** Wire loop.
+       DO 10 I=1,NWIRE
+*   Compute the direct contribution.
+       ZETA=ZMULT*CMPLX(XPOS-X(I),YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15.0)THEN
+            WSUM1=WSUM1-REAL(SIGMAT(ISW,I))*ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15.0)THEN
+            WSUM1=WSUM1+REAL(SIGMAT(ISW,I))*ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4.0*ZSIN**2-2.0
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1.0-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3.0*P1-ZCOF*5.0*P2
+            ZUNEW=1.0-ZCOF*ZU-5.0*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM1=WSUM1+REAL(SIGMAT(ISW,I))*(ZTERM2/ZTERM1)
+       ENDIF
+*   Find the plane nearest to the wire.
+       CY=COPLAY-SY*ANINT((COPLAY-Y(I))/SY)
+*   Constant terms sum
+       S=S+REAL(SIGMAT(ISW,I))*(Y(I)-CY)
+*   Mirror contribution from the y plane.
+       ZETA=ZMULT*CMPLX(XPOS-X(I),2.0*CY-YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15.0)THEN
+            WSUM2=WSUM2-REAL(SIGMAT(ISW,I))*ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15.0)THEN
+            WSUM2=WSUM2+REAL(SIGMAT(ISW,I))*ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4.0*ZSIN**2-2.0
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1.0-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3.0*P1-ZCOF*5.0*P2
+            ZUNEW=1.0-ZCOF*ZU-5.0*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM2=WSUM2+REAL(SIGMAT(ISW,I))*(ZTERM2/ZTERM1)
+       ENDIF
+10     CONTINUE
+*** Convert the two contributions to a real field.
+       EX=REAL(ZMULT*(WSUM1-WSUM2))
+       EY=-AIMAG(ZMULT*(WSUM1+WSUM2))
+*** Constant correction terms.
+       IF(MODE.EQ.1)EY=EY+S*2.0*PI/(SX*SY)
+       END
+
+       SUBROUTINE IONC30(XPOS,YPOS,EX,EY,ISW)
+*-----------------------------------------------------------------------
+*   IONC30 - Routine returning the weighting field field in a
+*            configuration with 2 y and 2 x planes. This routine is
+*            basically the same as EFCC30.
+*   (Last changed on 11/11/97.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Constants
+       COMPLEX ICONS
+       PARAMETER (ICONS=(0.0,1.0))
+*** Local variables
+       COMPLEX WSUM1,WSUM2,WSUM3,WSUM4,ZSIN,ZCOF,ZU,ZUNEW,
+     -      ZTERM1,ZTERM2,ZETA
+       REAL XPOS,YPOS,EX,EY,CX,CY
+       INTEGER I,ISW
+*** Initial values.
+       WSUM1=0
+       WSUM2=0
+       WSUM3=0
+       WSUM4=0
+*** Wire loop.
+       DO 10 I=1,NWIRE
+*   Compute the direct contribution.
+       ZETA=ZMULT*CMPLX(XPOS-X(I),YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15)THEN
+            WSUM1=WSUM1-REAL(SIGMAT(ISW,I))*ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15)THEN
+            WSUM1=WSUM1+REAL(SIGMAT(ISW,I))*ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4*ZSIN**2-2
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3*P1-ZCOF*5*P2
+            ZUNEW=1-ZCOF*ZU-5*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM1=WSUM1+REAL(SIGMAT(ISW,I))*(ZTERM2/ZTERM1)
+       ENDIF
+*   Find the plane nearest to the wire.
+       CX=COPLAX-SX*ANINT((COPLAX-X(I))/SX)
+*   Mirror contribution from the x plane.
+       ZETA=ZMULT*CMPLX(2*CX-XPOS-X(I),YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15)THEN
+            WSUM2=WSUM2-REAL(SIGMAT(ISW,I))*ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15)THEN
+            WSUM2=WSUM2+REAL(SIGMAT(ISW,I))*ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4*ZSIN**2-2
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3*P1-ZCOF*5*P2
+            ZUNEW=1-ZCOF*ZU-5*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM2=WSUM2+REAL(SIGMAT(ISW,I))*(ZTERM2/ZTERM1)
+       ENDIF
+*   Find the plane nearest to the wire.
+       CY=COPLAY-SY*ANINT((COPLAY-Y(I))/SY)
+*   Mirror contribution from the y plane.
+       ZETA=ZMULT*CMPLX(XPOS-X(I),2*CY-YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15)THEN
+            WSUM3=WSUM3-REAL(SIGMAT(ISW,I))*ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15)THEN
+            WSUM3=WSUM3+REAL(SIGMAT(ISW,I))*ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4*ZSIN**2-2
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3*P1-ZCOF*5*P2
+            ZUNEW=1-ZCOF*ZU-5*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM3=WSUM3+REAL(SIGMAT(ISW,I))*(ZTERM2/ZTERM1)
+       ENDIF
+*   Mirror contribution from both the x and the y plane.
+       ZETA=ZMULT*CMPLX(2*CX-XPOS-X(I),2*CY-YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15)THEN
+            WSUM4=WSUM4-REAL(SIGMAT(ISW,I))*ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15)THEN
+            WSUM4=WSUM4+REAL(SIGMAT(ISW,I))*ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4*ZSIN**2-2
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3*P1-ZCOF*5*P2
+            ZUNEW=1-ZCOF*ZU-5*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM4=WSUM4+REAL(SIGMAT(ISW,I))*(ZTERM2/ZTERM1)
+       ENDIF
+10     CONTINUE
+*** Convert the two contributions to a real field.
+       EX=+REAL(ZMULT*(WSUM1+WSUM2-WSUM3-WSUM4))
+       EY=-AIMAG(ZMULT*(WSUM1-WSUM2+WSUM3-WSUM4))
+       END
+
+       SUBROUTINE IOND10(XPOS,YPOS,EX,EY,ISW)
+*-----------------------------------------------------------------------
+*   IOND10 - Subroutine computing the signal on wire ISW due to a charge
+*            at (XPOS,YPOS). This is effectively routine EFCD10.
+*   VARIABLES : EX, EY, VOLT:Electric field and potential.
+*               ETOT, VOLT : Magnitude of electric field, potential.
+*               (XPOS,YPOS): The position where the field is calculated.
+*               ZI, ZPOS   : Shorthand complex notations.
+*   (Last changed on  2/ 2/93.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Local variables
+       REAL XPOS,YPOS,EX,EY
+       COMPLEX ZI,ZPOS
+       INTEGER ISW,I
+*** Initialise the potential and the electric field.
+       EX=0.0
+       EY=0.0
+*   Set the complex position coordinates.
+       ZPOS=CMPLX(XPOS,YPOS)
+*** Loop over all wires.
+       DO 10 I=1,NWIRE
+*   Set the complex version of the wire-coordinate for simplicity.
+       ZI=CMPLX(X(I),Y(I))
+*   Compute the contribution to the electric field, always.
+       EX=EX+REAL(SIGMAT(ISW,I))*REAL(1/CONJG(ZPOS-ZI)+
+     -      ZI/(COTUBE**2-CONJG(ZPOS)*ZI))
+       EY=EY+REAL(SIGMAT(ISW,I))*AIMAG(1/CONJG(ZPOS-ZI)+
+     -      ZI/(COTUBE**2-CONJG(ZPOS)*ZI))
+*** Finish the loop over the wires.
+10     CONTINUE
+       END
+
+       SUBROUTINE IOND30(XPOS,YPOS,EX,EY,ISW)
+*-----------------------------------------------------------------------
+*   IOND30 - Subroutine computing the weighting field for a polygonal
+*            cells without periodicities, type D3.
+*   VARIABLES : EX, EY     :Electric field
+*               (XPOS,YPOS): The position where the field is calculated.
+*               ZI, ZPOS   : Shorthand complex notations.
+*   (Last changed on 19/ 6/97.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Local variables
+       REAL EX,EY,XPOS,YPOS
+       INTEGER I,ISW
+       COMPLEX WPOS,WDPOS
+*** Initialise electric field.
+       EX=0.0
+       EY=0.0
+*   Get the mapping of the position.
+       CALL EFCMAP(CMPLX(XPOS,YPOS)/COTUBE,WPOS,WDPOS)
+*** Loop over all wires.
+       DO 10 I=1,NWIRE
+*   Compute the contribution to the electric field.
+       EX=EX+(SIGMAT(ISW,I)/COTUBE)*REAL(WDPOS*(1-ABS(WMAP(I))**2)/
+     -      ((WPOS-WMAP(I))*(1-CONJG(WMAP(I))*WPOS)))
+       EY=EY-(SIGMAT(ISW,I)/COTUBE)*AIMAG(WDPOS*(1-ABS(WMAP(I))**2)/
+     -      ((WPOS-WMAP(I))*(1-CONJG(WMAP(I))*WPOS)))
+*** Finish the loop over the wires.
+10     CONTINUE
+       END
+
+       SUBROUTINE IPLA00(XPOS,YPOS,EX,EY,MX,MY,IPLANE)
+*-----------------------------------------------------------------------
+*   IPLA00 - Routine returning the A I,J [MX,MY] * E terms for A cells.
+*   VARIABLES : R2         : Potential before taking -Log(Sqrt(...))
+*               EX,EY      : x,y-Component of the electric field.
+*               EXHELP ETC : One term in the summing series.
+*               (XPOS,YPOS): Position where the field is needed.
+*   (Last changed on  9/11/98.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Local variables
+       REAL XPOS,YPOS,EX,EY,XX,XXMIRR,YY,YYMIRR,R2,R2PLAN,EXHELP,EYHELP
+       INTEGER MX,MY,IPLANE,I
+*** Initialise the electric field.
+       EX=0
+       EY=0
+*** Loop over all wires.
+       DO 10 I=1,NWIRE
+*** Define a few reduced variables.
+       XX=XPOS-X(I)-MX*SX
+       YY=YPOS-Y(I)-MY*SY
+*** Calculate the field in case there are no planes.
+       R2=XX**2+YY**2
+       IF(R2.LE.0)GOTO 10
+       EXHELP=XX/R2
+       EYHELP=YY/R2
+*** Take care of a planes at constant x.
+       IF(YNPLAX)THEN
+            XXMIRR=XPOS+X(I)-2.0*COPLAX
+            R2PLAN=XXMIRR**2+YY**2
+            IF(R2PLAN.LE.0)GOTO 10
+            EXHELP=EXHELP-XXMIRR/R2PLAN
+            EYHELP=EYHELP-YY/R2PLAN
+       ENDIF
+*** Take care of a plane at constant y.
+       IF(YNPLAY)THEN
+            YYMIRR=YPOS+Y(I)-2.0*COPLAY
+            R2PLAN=XX**2+YYMIRR**2
+            IF(R2PLAN.LE.0)GOTO 10
+            EXHELP=EXHELP-XX/R2PLAN
+            EYHELP=EYHELP-YYMIRR/R2PLAN
+       ENDIF
+*** Take care of pairs of planes.
+       IF(YNPLAX.AND.YNPLAY)THEN
+            R2PLAN=XXMIRR**2+YYMIRR**2
+            IF(R2PLAN.LE.0)GOTO 10
+            EXHELP=EXHELP+XXMIRR/R2PLAN
+            EYHELP=EYHELP+YYMIRR/R2PLAN
+       ENDIF
+*** Calculate the electric field.
+       EX=EX+QPLANE(IPLANE,I)*EXHELP
+       EY=EY+QPLANE(IPLANE,I)*EYHELP
+*** Finish the loop over the wires.
+10     CONTINUE
+       END
+
+       SUBROUTINE IPLB2X(XPOS,YPOS,EX,EY,MY,IPLANE)
+*-----------------------------------------------------------------------
+*   IPLB2X - Routine calculating the MY contribution to the signal on
+*            wire IPLANE due to a charge at (XPOS,YPOS) for F-B2Y cells.
+*   VARIABLES : See routine EFCA00 for most of the variables.
+*               Z,ZZMIRR   : X + I*Y , XXMIRR + I*YYMIRR ; I**2=-1
+*               ECOMPL     : EX + I*EY                   ; I**2=-1
+*   (Last changed on 12/11/98.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Constants
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
+*** Local variables
+       REAL XPOS,YPOS,EX,EY,XX,YY,XXNEG,YYMIRR
+       INTEGER I,MY,IPLANE
+       COMPLEX ZZ,ECOMPL,ZZMIRR,ZZNEG,ZZNMIR
+*** Initialise EX and EY.
+       EX=0
+       EY=0
+*** Loop over all wires.
+       DO 10 I=1,NWIRE
+       XX=0.5*PI*(XPOS-X(I))/SX
+       YY=0.5*PI*(YPOS-Y(I)-MY*SY)/SX
+       XXNEG=0.5*PI*(XPOS+X(I)-2*COPLAN(1))/SX
+       ZZ=CMPLX(XX,YY)
+       ZZNEG=CMPLX(XXNEG,YY)
+*** Calculate the field in case there are no equipotential planes.
+       IF(ABS(YY).LE.20)THEN
+            ECOMPL=-B2SIN(I)/(SIN(ZZ)*SIN(ZZNEG))
+       ELSE
+            ECOMPL=0
+       ENDIF
+*** Take care of a plane at constant y.
+       IF(YNPLAY)THEN
+            YYMIRR=(0.5*PI/SX)*(YPOS+Y(I)-2.0*COPLAY)
+            ZZMIRR=CMPLX(XX,YYMIRR)
+            ZZNMIR=CMPLX(XXNEG,YYMIRR)
+            IF(ABS(YYMIRR).LE.20)
+     -           ECOMPL=ECOMPL+B2SIN(I)/(SIN(ZZMIRR)*SIN(ZZNMIR))
+       ENDIF
+*** Calculate the electric field.
+       EX=EX+QPLANE(IPLANE,I)*(0.5*PI/SX)*REAL(ECOMPL)
+       EY=EY-QPLANE(IPLANE,I)*(0.5*PI/SX)*AIMAG(ECOMPL)
+*** Finish the wire loop
+10     CONTINUE
+       END
+
+       SUBROUTINE IPLB2Y(XPOS,YPOS,EX,EY,MX,IPLANE)
+*-----------------------------------------------------------------------
+*   IPLB2Y - Routine calculating the MX contribution to the signal on
+*            wire IPLANE due to a charge at (XPOS,YPOS) for F-B2X cells.
+*   VARIABLES : See routine EFCA00 for most of the variables.
+*               Z,ZZMIRR   : X + I*Y , XXMIRR + I*YYMIRR ; I**2=-1
+*               ECOMPL     : EX + I*EY                   ; I**2=-1
+*   (Last changed on 12/11/98.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Constants
+       COMPLEX ICONS
+       REAL PI
+       PARAMETER (PI=3.141592653589793238,ICONS=(0.0,1.0))
+*** Local variables
+       REAL XPOS,YPOS,EX,EY,XX,YY,YYNEG,XXMIRR
+       INTEGER I,MX,IPLANE
+       COMPLEX ZZ,ECOMPL,ZZMIRR,ZZNEG,ZZNMIR
+*** Initialise EX and EY.
+       EX=0
+       EY=0
+*** Loop over all wires.
+       DO 10 I=1,NWIRE
+       XX=0.5*PI*(XPOS-X(I)-MX*SX)/SY
+       YY=0.5*PI*(YPOS-Y(I))/SY
+       YYNEG=0.5*PI*(YPOS+Y(I)-2*COPLAN(3))/SY
+       ZZ=CMPLX(XX,YY)
+       ZZNEG=CMPLX(XX,YYNEG)
+*** Calculate the field in case there are no equipotential planes.
+       IF(ABS(XX).LE.20)THEN
+            ECOMPL=ICONS*B2SIN(I)/(SIN(ICONS*ZZ)*SIN(ICONS*ZZNEG))
+       ELSE
+            ECOMPL=0
+       ENDIF
+*** Take care of a plane at constant y.
+       IF(YNPLAX)THEN
+            XXMIRR=(0.5*PI/SY)*(XPOS+X(I)-2.0*COPLAX)
+            ZZMIRR=CMPLX(XXMIRR,YY)
+            ZZNMIR=CMPLX(XXMIRR,YYNEG)
+            IF(ABS(XXMIRR).LE.20)ECOMPL=ECOMPL-
+     -           ICONS*B2SIN(I)/(SIN(ICONS*ZZMIRR)*SIN(ICONS*ZZNMIR))
+       ENDIF
+*** Calculate the electric field.
+       EX=EX+QPLANE(IPLANE,I)*(0.5*PI/SY)*REAL(ECOMPL)
+       EY=EY-QPLANE(IPLANE,I)*(0.5*PI/SY)*AIMAG(ECOMPL)
+*** Finish the wire loop.
+10     CONTINUE
+       END
+
+       SUBROUTINE IPLC2X(XPOS,YPOS,EX,EY,IPLANE)
+*-----------------------------------------------------------------------
+*   IPLC2X - Routine returning the potential and electric field in a
+*            configuration with 2 x planes and y periodicity.
+*   VARIABLES : see the writeup
+*   (Last changed on 12/10/06.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Constants
+       COMPLEX ICONS
+       REAL PI
+       PARAMETER (PI=3.141592653589793238,ICONS=(0.0,1.0))
+*** Local variables
+       COMPLEX WSUM1,WSUM2,ZSIN,ZCOF,ZU,ZUNEW,ZTERM1,ZTERM2,ZETA
+       REAL XPOS,YPOS,EX,EY,CX,S
+       INTEGER IPLANE,I
+*** Initial values.
+       WSUM1=0
+       WSUM2=0
+       S=0.0
+*** Wire loop.
+       DO 10 I=1,NWIRE
+*   Compute the direct contribution.
+       ZETA=ZMULT*CMPLX(XPOS-X(I),YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15.0)THEN
+            WSUM1=WSUM1-QPLANE(IPLANE,I)*ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15.0)THEN
+            WSUM1=WSUM1+QPLANE(IPLANE,I)*ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4.0*ZSIN**2-2.0
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1.0-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3.0*P1-ZCOF*5.0*P2
+            ZUNEW=1.0-ZCOF*ZU-5.0*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM1=WSUM1+QPLANE(IPLANE,I)*(ZTERM2/ZTERM1)
+       ENDIF
+*   Find the plane nearest to the wire.
+       CX=COPLAX-SX*ANINT((COPLAX-X(I))/SX)
+*   Constant terms sum
+       S=S+QPLANE(IPLANE,I)*(X(I)-CX)
+*   Mirror contribution.
+       ZETA=ZMULT*CMPLX(2*CX-XPOS-X(I),YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15.0)THEN
+            WSUM2=WSUM2-QPLANE(IPLANE,I)*ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15.0)THEN
+            WSUM2=WSUM2+QPLANE(IPLANE,I)*ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4.0*ZSIN**2-2.0
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1.0-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3.0*P1-ZCOF*5.0*P2
+            ZUNEW=1.0-ZCOF*ZU-5.0*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM2=WSUM2+QPLANE(IPLANE,I)*(ZTERM2/ZTERM1)
+       ENDIF
+10     CONTINUE
+*** Convert the two contributions to a real field.
+       EX=REAL(ZMULT*(WSUM1+WSUM2))
+       EY=-AIMAG(ZMULT*(WSUM1-WSUM2))
+*** Constant correction terms.
+       IF(MODE.EQ.0)EX=EX+S*2.0*PI/(SX*SY)
+       END
+
+       SUBROUTINE IPLC2Y(XPOS,YPOS,EX,EY,IPLANE)
+*-----------------------------------------------------------------------
+*   IPLC2Y - Routine returning the potential and electric field in a
+*            configuration with 2 y planes and x periodicity.
+*   VARIABLES : see the writeup
+*   (Last changed on 12/10/06.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Constants
+       COMPLEX ICONS
+       REAL PI
+       PARAMETER (PI=3.141592653589793238,ICONS=(0.0,1.0))
+*** Local variables
+       COMPLEX WSUM1,WSUM2,ZSIN,ZCOF,ZU,ZUNEW,ZTERM1,ZTERM2,ZETA
+       REAL XPOS,YPOS,EX,EY,CY,S
+       INTEGER I,IPLANE
+*** Initial values.
+       WSUM1=0
+       WSUM2=0
+       S=0.0
+*** Wire loop.
+       DO 10 I=1,NWIRE
+*   Compute the direct contribution.
+       ZETA=ZMULT*CMPLX(XPOS-X(I),YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15.0)THEN
+            WSUM1=WSUM1-QPLANE(IPLANE,I)*ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15.0)THEN
+            WSUM1=WSUM1+QPLANE(IPLANE,I)*ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4.0*ZSIN**2-2.0
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1.0-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3.0*P1-ZCOF*5.0*P2
+            ZUNEW=1.0-ZCOF*ZU-5.0*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM1=WSUM1+QPLANE(IPLANE,I)*(ZTERM2/ZTERM1)
+       ENDIF
+*   Find the plane nearest to the wire.
+       CY=COPLAY-SY*ANINT((COPLAY-Y(I))/SY)
+*   Constant terms sum
+       S=S+QPLANE(IPLANE,I)*(Y(I)-CY)
+*   Mirror contribution from the y plane.
+       ZETA=ZMULT*CMPLX(XPOS-X(I),2.0*CY-YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15.0)THEN
+            WSUM2=WSUM2-QPLANE(IPLANE,I)*ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15.0)THEN
+            WSUM2=WSUM2+QPLANE(IPLANE,I)*ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4.0*ZSIN**2-2.0
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1.0-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3.0*P1-ZCOF*5.0*P2
+            ZUNEW=1.0-ZCOF*ZU-5.0*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM2=WSUM2+QPLANE(IPLANE,I)*(ZTERM2/ZTERM1)
+       ENDIF
+10     CONTINUE
+*** Convert the two contributions to a real field.
+       EX=REAL(ZMULT*(WSUM1-WSUM2))
+       EY=-AIMAG(ZMULT*(WSUM1+WSUM2))
+*** Constant correction terms.
+       IF(MODE.EQ.1)EY=EY+S*2.0*PI/(SX*SY)
+       END
+
+       SUBROUTINE IPLC30(XPOS,YPOS,EX,EY,IPLANE)
+*-----------------------------------------------------------------------
+*   IPLC30 - Routine returning the weighting field field in a
+*            configuration with 2 y and 2 x planes. This routine is
+*            basically the same as EFCC30.
+*   (Last changed on  9/11/98.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Constants
+       COMPLEX ICONS
+       PARAMETER (ICONS=(0.0,1.0))
+*** Local variables
+       COMPLEX WSUM1,WSUM2,WSUM3,WSUM4,ZSIN,ZCOF,ZU,ZUNEW,
+     -      ZTERM1,ZTERM2,ZETA
+       REAL XPOS,YPOS,EX,EY,CX,CY
+       INTEGER I,IPLANE
+*** Initial values.
+       WSUM1=0
+       WSUM2=0
+       WSUM3=0
+       WSUM4=0
+*** Wire loop.
+       DO 10 I=1,NWIRE
+*   Compute the direct contribution.
+       ZETA=ZMULT*CMPLX(XPOS-X(I),YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15)THEN
+            WSUM1=WSUM1-ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15)THEN
+            WSUM1=WSUM1+ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4*ZSIN**2-2
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3*P1-ZCOF*5*P2
+            ZUNEW=1-ZCOF*ZU-5*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM1=WSUM1+ZTERM2/ZTERM1
+       ENDIF
+*   Find the plane nearest to the wire.
+       CX=COPLAX-SX*ANINT((COPLAX-X(I))/SX)
+*   Mirror contribution from the x plane.
+       ZETA=ZMULT*CMPLX(2*CX-XPOS-X(I),YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15)THEN
+            WSUM2=WSUM2-ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15)THEN
+            WSUM2=WSUM2+ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4*ZSIN**2-2
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3*P1-ZCOF*5*P2
+            ZUNEW=1-ZCOF*ZU-5*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM2=WSUM2+ZTERM2/ZTERM1
+       ENDIF
+*   Find the plane nearest to the wire.
+       CY=COPLAY-SY*ANINT((COPLAY-Y(I))/SY)
+*   Mirror contribution from the y plane.
+       ZETA=ZMULT*CMPLX(XPOS-X(I),2*CY-YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15)THEN
+            WSUM3=WSUM3-ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15)THEN
+            WSUM3=WSUM3+ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4*ZSIN**2-2
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3*P1-ZCOF*5*P2
+            ZUNEW=1-ZCOF*ZU-5*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM3=WSUM3+ZTERM2/ZTERM1
+       ENDIF
+*   Mirror contribution from both the x and the y plane.
+       ZETA=ZMULT*CMPLX(2*CX-XPOS-X(I),2*CY-YPOS-Y(I))
+       IF(AIMAG(ZETA).GT.+15)THEN
+            WSUM4=WSUM4-ICONS
+       ELSEIF(AIMAG(ZETA).LT.-15)THEN
+            WSUM4=WSUM4+ICONS
+       ELSE
+            ZSIN=SIN(ZETA)
+            ZCOF=4*ZSIN**2-2
+            ZU=-P1-ZCOF*P2
+            ZUNEW=1-ZCOF*ZU-P2
+            ZTERM1=(ZUNEW+ZU)*ZSIN
+            ZU=-3*P1-ZCOF*5*P2
+            ZUNEW=1-ZCOF*ZU-5*P2
+            ZTERM2=(ZUNEW-ZU)*COS(ZETA)
+            WSUM4=WSUM4+ZTERM2/ZTERM1
+       ENDIF
+10     CONTINUE
+*** Convert the two contributions to a real field.
+       EX=+QPLANE(IPLANE,I)*REAL(ZMULT*(WSUM1+WSUM2-WSUM3-WSUM4))
+       EY=-QPLANE(IPLANE,I)*AIMAG(ZMULT*(WSUM1-WSUM2+WSUM3-WSUM4))
+       END
+
+       SUBROUTINE IPLD10(XPOS,YPOS,EX,EY,IPLANE)
+*-----------------------------------------------------------------------
+*   IPLD10 - Subroutine computing the signal on wire IPLANE due to a 
+*            charge at (XPOS,YPOS). This is effectively routine EFCD10.
+*   VARIABLES : EX, EY     : Electric field.
+*               (XPOS,YPOS): The position where the field is calculated.
+*               ZI, ZPOS   : Shorthand complex notations.
+*   (Last changed on  9/11/98.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Local variables
+       REAL XPOS,YPOS,EX,EY
+       INTEGER IPLANE,I
+       COMPLEX ZI,ZPOS
+*** Initialise the electric field.
+       EX=0
+       EY=0
+*   Set the complex position coordinates.
+       ZPOS=CMPLX(XPOS,YPOS)
+*** Loop over all wires.
+       DO 10 I=1,NWIRE
+*   Set the complex version of the wire-coordinate for simplicity.
+       ZI=CMPLX(X(I),Y(I))
+*   Compute the contribution to the electric field, always.
+       EX=EX+QPLANE(IPLANE,I)*REAL(1/CONJG(ZPOS-ZI)+
+     -      ZI/(COTUBE**2-CONJG(ZPOS)*ZI))
+       EY=EY+QPLANE(IPLANE,I)*AIMAG(1/CONJG(ZPOS-ZI)+
+     -      ZI/(COTUBE**2-CONJG(ZPOS)*ZI))
+*** Finish the loop over the wires.
+10     CONTINUE
+       END
+
+       SUBROUTINE IPLD30(XPOS,YPOS,EX,EY,IPLANE)
+*-----------------------------------------------------------------------
+*   IPLD30 - Subroutine computing the weighting field for a polygonal
+*            cells without periodicities, type D3.
+*   VARIABLES : EX, EY     : Electric field
+*               (XPOS,YPOS): The position where the field is calculated.
+*               ZI, ZPOS   : Shorthand complex notations.
+*   (Last changed on  9/11/98.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Local variables
+       REAL EX,EY,XPOS,YPOS
+       INTEGER I,IPLANE
+       COMPLEX WPOS,WDPOS
+*** Initialise weighting field.
+       EX=0.0
+       EY=0.0
+*   Get the mapping of the position.
+       CALL EFCMAP(CMPLX(XPOS,YPOS)/COTUBE,WPOS,WDPOS)
+*** Loop over all wires.
+       DO 10 I=1,NWIRE
+*   Compute the contribution to the electric field.
+       EX=EX+QPLANE(IPLANE,I)*REAL(WDPOS*(1-ABS(WMAP(I))**2)/
+     -      ((WPOS-WMAP(I))*(1-CONJG(WMAP(I))*WPOS)))/COTUBE
+       EY=EY-QPLANE(IPLANE,I)*AIMAG(WDPOS*(1-ABS(WMAP(I))**2)/
+     -      ((WPOS-WMAP(I))*(1-CONJG(WMAP(I))*WPOS)))/COTUBE
+*** Finish the loop over the wires.
+10     CONTINUE
+       END
+
+       SUBROUTINE IONEST(XPOS,YPOS,ZPOS,EX,EY,EZ,IP,IS,IT)
+*-----------------------------------------------------------------------
+*   IONEST - Weighting field for strips.
+*   (Last changed on  6/12/00.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Constants
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
+*** Local variables
+       REAL XPOS,YPOS,ZPOS,EX,EY,EZ,GAP,WIDTH,S,C,E1,E2,XW,YW,EWX,EWY
+       INTEGER IP,IS,IT
+*** Initialise weighting field.
+       EX=0.0
+       EY=0.0
+       EZ=0.0
+*** Transform to normalised coordinates.
+       IF(IP.EQ.1)THEN
+            IF(IT.EQ.1)THEN
+                 XW=-YPOS+(PLSTR1(IP,IS,1)+PLSTR1(IP,IS,2))/2
+                 YW=XPOS-COPLAN(IP)
+            ELSE
+                 XW=-ZPOS+(PLSTR2(IP,IS,1)+PLSTR2(IP,IS,2))/2
+                 YW=XPOS-COPLAN(IP)
+            ENDIF
+       ELSEIF(IP.EQ.2)THEN
+            IF(IT.EQ.1)THEN
+                 XW=YPOS-(PLSTR1(IP,IS,1)+PLSTR1(IP,IS,2))/2
+                 YW=COPLAN(IP)-XPOS
+            ELSE
+                 XW=ZPOS-(PLSTR2(IP,IS,1)+PLSTR2(IP,IS,2))/2
+                 YW=COPLAN(IP)-XPOS
+            ENDIF
+       ELSEIF(IP.EQ.3)THEN
+            IF(IT.EQ.1)THEN
+                 XW=XPOS-(PLSTR1(IP,IS,1)+PLSTR1(IP,IS,2))/2
+                 YW=YPOS-COPLAN(IP)
+            ELSE
+                 XW=ZPOS-(PLSTR2(IP,IS,1)+PLSTR2(IP,IS,2))/2
+                 YW=YPOS-COPLAN(IP)
+            ENDIF
+       ELSEIF(IP.EQ.4)THEN
+            IF(IT.EQ.1)THEN
+                 XW=-XPOS+(PLSTR1(IP,IS,1)+PLSTR1(IP,IS,2))/2
+                 YW=COPLAN(IP)-YPOS
+            ELSE
+                 XW=-ZPOS+(PLSTR2(IP,IS,1)+PLSTR2(IP,IS,2))/2
+                 YW=COPLAN(IP)-YPOS
+            ENDIF
+       ELSE
+            RETURN
+       ENDIF
+*** Store the gap and strip width.
+       IF(IT.EQ.1)THEN
+            WIDTH=ABS(PLSTR1(IP,IS,2)-PLSTR1(IP,IS,1))
+            GAP=PLSTR1(IP,IS,3)
+       ELSE
+            WIDTH=ABS(PLSTR2(IP,IS,2)-PLSTR2(IP,IS,1))
+            GAP=PLSTR2(IP,IS,3)
+       ENDIF
+*** Make sure we're in the fiducial part of the weighting map.
+       IF(YW.LE.0.OR.YW.GT.GAP)THEN
+            EX=0
+            EY=0
+            EZ=0
+            RETURN
+       ENDIF
+*** Evaluate the weighting field, define shorthand notations.
+       S=SIN(PI*YW/GAP)
+       C=COS(PI*YW/GAP)
+       E1=EXP( PI*(WIDTH/2-XW)/GAP)
+       E2=EXP(-PI*(WIDTH/2+XW)/GAP)
+*   Check for singularities.
+       IF(C.EQ.E1.OR.C.EQ.E2)THEN
+            EWX=0
+            EWY=0
+*   Evaluate the field.
+       ELSE
+            EWX=E1*S/(GAP*(C-E1)**2*(1+S**2/(C-E1)**2))-
+     -          E2*S/(GAP*(C-E2)**2*(1+S**2/(C-E2)**2))
+            EWY=((C/(C-E2)+S**2/(C-E2)**2)/(1+S**2/(C-E2)**2)-
+     -           (C/(C-E1)+S**2/(C-E1)**2)/(1+S**2/(C-E1)**2))/GAP
+       ENDIF
+*** Rotate the field back to the original coordinates.
+       IF(IP.EQ.1)THEN
+            IF(IT.EQ.1)THEN
+                 EX=EWY
+                 EY=-EWX
+                 EZ=0
+            ELSE
+                 EX=EWY
+                 EY=0
+                 EZ=-EWX
+            ENDIF
+       ELSEIF(IP.EQ.2)THEN
+            IF(IT.EQ.1)THEN
+                 EX=-EWY
+                 EY=EWX
+                 EZ=0
+            ELSE
+                 EX=-EWY
+                 EY=0
+                 EZ=EWX
+            ENDIF
+       ELSEIF(IP.EQ.3)THEN
+            IF(IT.EQ.1)THEN
+                 EX=EWX
+                 EY=EWY
+                 EZ=0
+            ELSE
+                 EX=0
+                 EY=EWY
+                 EZ=EWX
+            ENDIF
+       ELSEIF(IP.EQ.4)THEN
+            IF(IT.EQ.1)THEN
+                 EX=-EWX
+                 EY=-EWY
+                 EZ=0
+            ELSE
+                 EX=0
+                 EY=-EWY
+                 EZ=-EWX
+            ENDIF
+       ELSE
+            EX=0
+            EY=0
+            EZ=0
+       ENDIF
+       END
+
+       SUBROUTINE IPRA00(MX,MY)
+*-----------------------------------------------------------------------
+*   IPRA00 - Routine filling the (MX,MY) th layer of the signal matrix
+*            for cells with non-periodic type A (see SIGIPR).
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Local variables
+       INTEGER MX,MY,I,J
+       REAL DX,DY,AA
+       
+       DX=MX*SX
+       DY=MY*SY
+       DO 10 I=1,NWIRE
+*** DIAGONAL TERMS
+       IF(DX.NE.0.0.OR.DY.NE.0.0)THEN
+            AA=DX**2+DY**2
+       ELSE
+            AA=0.25*D(I)**2
+       ENDIF
+*   Take care of single equipotential planes.
+       IF(YNPLAX)AA=AA/((2.0*(X(I)-COPLAX))**2+DY**2)
+       IF(YNPLAY)AA=AA/((2.0*(Y(I)-COPLAY))**2+DX**2)
+*   Take care of pairs of equipotential planes.
+       IF(YNPLAX.AND.YNPLAY)AA=AA*4.*((X(I)-COPLAX)**2+(Y(I)-COPLAY)**2)
+*** Define the final version of A(I,I).
+       SIGMAT(I,I)=-0.5*LOG(AA)
+       DO 20 J=I+1,NWIRE
+       AA=(X(I)+DX-X(J))**2+(Y(I)+DY-Y(J))**2
+*   Take care of single planes.
+       IF(YNPLAX)AA=AA/((2.0*COPLAX-X(I)-DX-X(J))**2+(Y(I)+DY-Y(J))**2)
+       IF(YNPLAY)AA=AA/((X(I)+DX-X(J))**2+(2.0*COPLAY-Y(I)-DY-Y(J))**2)
+*   Take care of pairs of planes.
+       IF(YNPLAX.AND.YNPLAY)AA=AA*((2.*COPLAX-X(I)-DX-X(J))**2+
+     -                             (2.*COPLAY-Y(I)-DY-Y(J))**2)
+*   Store the true versions after taking LOGs and SQRT's.
+       SIGMAT(I,J)=-0.5*LOG(AA)
+       SIGMAT(J,I)=SIGMAT(I,J)
+20     CONTINUE
+10     CONTINUE
+       END
+
+       SUBROUTINE IPRB2X(MY)
+*-----------------------------------------------------------------------
+*   IPRB2X - Routine filling the MY th layer of the signal matrix
+*            for cells with non-periodic type B2X (see SIGIPR).
+*   (Last changed on 26/ 4/92.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Constants
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
+*** Local variables
+       INTEGER MY,I,J
+       REAL DY,XX,YY,AA,XXNEG,YYMIRR
+       
+       DY=MY*SY
+*** Loop over all wires and calculate the diagonal elements first.
+       DO 10 I=1,NWIRE
+       XX=(PI/SX)*(X(I)-COPLAN(1))
+       IF(DY.NE.0.0)THEN
+            AA=(SINH(PI*DY/SX)/SIN(XX))**2
+       ELSE
+            AA=((0.25*D(I)*PI/SX)/SIN(XX))**2
+       ENDIF
+*   Take care of a planes at constant y (no dy in this case).
+       IF(YNPLAY)THEN
+            YYMIRR=(PI/SX)*(Y(I)-COPLAY)
+            IF(ABS(YYMIRR).LE.20.0) AA=AA*
+     -           (SINH(YYMIRR)**2+SIN(XX)**2)/SINH(YYMIRR)**2
+       ENDIF
+*   Store the true value of A(I,I).
+       SIGMAT(I,I)=-0.5*LOG(AA)
+*** Loop over all other wires to obtain off-diagonal elements.
+       DO 20 J=I+1,NWIRE
+       YY=0.5*PI*(Y(I)+DY-Y(J))/SX
+       XX=0.5*PI*(X(I)-X(J))/SX
+       XXNEG=0.5*PI*(X(I)+X(J)-2.0*COPLAN(1))/SX
+       IF(ABS(YY).LT.20.0)THEN
+            AA=(SINH(YY)**2+SIN(XX)**2)/(SINH(YY)**2+SIN(XXNEG)**2)
+       ELSE
+            AA=1.0
+       ENDIF
+*   Take equipotential planes into account (no dy anyhow).
+       IF(YNPLAY)THEN
+            YYMIRR=0.5*PI*(Y(I)+Y(J)-2.0*COPLAY)/SX
+            IF(ABS(YYMIRR).LE.20.0) AA=AA*
+     -      (SINH(YYMIRR)**2+SIN(XXNEG)**2)/(SINH(YYMIRR)**2+SIN(XX)**2)
+       ENDIF
+*** Store the true value of A(I,J) in both A(I,J) and A(J,I).
+       SIGMAT(I,J)=-0.5*LOG(AA)
+       SIGMAT(J,I)=SIGMAT(I,J)
+*** Finish the wire loops.
+20     CONTINUE
+*** Fill the B2SIN vector.
+       B2SIN(I)=SIN(PI*(COPLAN(1)-X(I))/SX)
+10     CONTINUE
+       END
+
+       SUBROUTINE IPRB2Y(MX)
+*-----------------------------------------------------------------------
+*   IPRB2Y - Routine filling the MX th layer of the signal matrix
+*            for cells with non-periodic type B2Y (see SIGIPR).
+*   (Last changed on 26/ 4/92.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Constants
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
+*** Local variables
+       INTEGER MX,I,J
+       REAL DX,XX,YY,AA,XXMIRR,YYNEG
+       
+       DX=MX*SX
+*** Loop over all wires and calculate the diagonal elements first.
+       DO 10 I=1,NWIRE
+       YY=(PI/SY)*(Y(I)-COPLAN(3))
+       IF(DX.NE.0.0)THEN
+            AA=(SINH(PI*DX/SY)/SIN(YY))**2
+       ELSE
+            AA=((0.25*D(I)*PI/SY)/SIN(YY))**2
+       ENDIF
+*   Take care of a plane at constant x (no dx in this case).
+       IF(YNPLAX)THEN
+            XXMIRR=(PI/SY)*(X(I)-COPLAX)
+            IF(ABS(XXMIRR).LE.20.0) AA=AA*
+     -           (SINH(XXMIRR)**2+SIN(YY)**2)/SINH(XXMIRR)**2
+       ENDIF
+*   Store the true value of A(I,I).
+       SIGMAT(I,I)=-0.5*LOG(AA)
+*** Loop over all other wires to obtain off-diagonal elements.
+       DO 20 J=I+1,NWIRE
+       XX=0.5*PI*(X(I)+DX-X(J))/SY
+       YY=0.5*PI*(Y(I)-Y(J))/SY
+       YYNEG=0.5*PI*(Y(I)+Y(J)-2.0*COPLAN(3))/SY
+       IF(ABS(XX).LE.20.0)THEN
+            AA=(SINH(XX)**2+SIN(YY)**2)/(SINH(XX)**2+SIN(YYNEG)**2)
+       ELSE
+            AA=1.0
+       ENDIF
+*   Take equipotential planes into account (dx=0 anyhow).
+       IF(YNPLAX)THEN
+            XXMIRR=0.5*PI*(X(I)+X(J)-2.0*COPLAX)/SX
+            IF(ABS(XXMIRR).LE.20.0) AA=AA*
+     -      (SINH(XXMIRR)**2+SIN(YYNEG)**2)/(SINH(XXMIRR)**2+SIN(YY)**2)
+       ENDIF
+*** Store the true value of A(I,J) in both A(I,J) and A(J,I).
+       SIGMAT(I,J)=-0.5*LOG(AA)
+       SIGMAT(J,I)=SIGMAT(I,J)
+*** Finish the wire loops.
+20     CONTINUE
+*** Fill the B2SIN vector.
+       B2SIN(I)=SIN(PI*(COPLAN(3)-Y(I))/SY)
+10     CONTINUE
+       END
+
+       SUBROUTINE IPRC2X
+*-----------------------------------------------------------------------
+*   IPRC2X - This initializing subroutine stores the capacitance matrix
+*            for the configuration:
+*            wires at zw(j)+cmplx(lx*2*sx,ly*sy),
+*            j=1(1)n, lx=-infinity(1)infinity, ly=-infinity(1)infinity.
+*            but the signs of the charges alternate in the x-direction
+*   (Last changed on  4/10/06.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Constants
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
+*** Local variables
+       INTEGER I,J
+       REAL PH2,PH2LIM,CX,TEMP
+       EXTERNAL PH2,PH2LIM
+*** Fill the capacitance matrix.
+       DO 10 I=1,NWIRE
+       CX=COPLAX-SX*ANINT((COPLAX-X(I))/SX)
+       DO 20 J=1,NWIRE
+       IF(MODE.EQ.0)THEN
+            TEMP=(X(I)-CX)*(X(J)-CX)*2.0*PI/(SX*SY)
+       ELSE
+            TEMP=0.0
+       ENDIF
+       IF(I.EQ.J)THEN
+            SIGMAT(I,I)=PH2LIM(0.5*D(I))-
+     -            PH2(2.0*(X(I)-CX),0.0)-TEMP
+       ELSE
+            SIGMAT(I,J)=PH2(X(I)-X(J),Y(I)-Y(J))-
+     -            PH2(X(I)+X(J)-2.0*CX,Y(I)-Y(J))-TEMP
+       ENDIF
+20     CONTINUE
+10     CONTINUE
+       END
+
+       SUBROUTINE IPRC2Y
+*-----------------------------------------------------------------------
+*   IPRC2Y - This initializing subroutine stores the capacitance matrix
+*            for the configuration:
+*            wires at zw(j)+cmplx(lx*sx,ly*2*sy),
+*            j=1(1)n, lx=-infinity(1)infinity, ly=-infinity(1)infinity.
+*            but the signs of the charges alternate in the y-direction
+*   (Last changed on  4/10/06.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Constants
+       REAL PI
+       PARAMETER (PI=3.141592653589793238)
+*** Local variables
+       INTEGER I,J
+       REAL PH2,PH2LIM,CY,TEMP
+       EXTERNAL PH2,PH2LIM
+*** Fill the capacitance matrix.
+       DO 10 I=1,NWIRE
+       CY=COPLAY-SY*ANINT((COPLAY-Y(I))/SY)
+       DO 20 J=1,NWIRE
+       IF(MODE.EQ.0)THEN
+            TEMP=0.0
+       ELSE
+            TEMP=(Y(I)-CY)*(Y(J)-CY)*2.0*PI/(SX*SY)
+       ENDIF
+       IF(I.EQ.J)THEN
+            SIGMAT(I,I)=PH2LIM(0.5*D(I))-
+     -            PH2(0.0,2.0*(Y(J)-CY))-TEMP
+       ELSE
+            SIGMAT(I,J)=PH2(X(I)-X(J),Y(I)-Y(J))-
+     -            PH2(X(I)-X(J),Y(I)+Y(J)-2.0*CY)-TEMP
+       ENDIF
+20     CONTINUE
+10     CONTINUE
+       END
+
+       SUBROUTINE IPRC30
+*-----------------------------------------------------------------------
+*   IPRC30 - Routine filling the signal matrix for cells of type C30.
+*            Since the signal matrix equals the capacitance matrix for
+*            this potential, the routine is identical to SETC30 except
+*            for the C and P parameters.
+*   (Last changed on 11/11/97.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Local variables
+       INTEGER I,J
+       REAL CX,CY,PH2,PH2LIM
+       EXTERNAL PH2,PH2LIM
+       
+*** Fill the capacitance matrix.
+       DO 10 I=1,NWIRE
+       CX=COPLAX-SX*ANINT((COPLAX-X(I))/SX)
+       CY=COPLAY-SY*ANINT((COPLAY-Y(I))/SY)
+       DO 20 J=1,NWIRE
+       IF(I.EQ.J)THEN
+            SIGMAT(I,I)=PH2LIM(0.5*D(I))-
+     -           PH2(0.0,2*(Y(I)-CY))-
+     -           PH2(2*(X(I)-CX),0.0)+
+     -           PH2(2*(X(I)-CX),2*(Y(I)-CY))
+       ELSE
+            SIGMAT(I,J)=PH2(X(I)-X(J),Y(I)-Y(J))-
+     -           PH2(X(I)-X(J),Y(I)+Y(J)-2*CY)-
+     -           PH2(X(I)+X(J)-2*CX,Y(I)-Y(J))+
+     -           PH2(X(I)+X(J)-2*CX,Y(I)+Y(J)-2*CY)
+       ENDIF
+20     CONTINUE
+10     CONTINUE
+       END
+
+       SUBROUTINE IPRD10
+*-----------------------------------------------------------------------
+*   IPRD10 - Signal matrix preparation for D1 cells.
+*   VARIABLES :
+*   (Last changed on  2/ 2/93.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Local variables
+       COMPLEX ZI,ZJ
+       INTEGER I,J
+       
+*** Loop over all wires.
+       DO 10 I=1,NWIRE
+*   Set the diagonal terms.
+       SIGMAT(I,I)=-LOG(0.5*D(I)/(COTUBE-(X(I)**2+Y(I)**2)/COTUBE))
+*   Set a complex wire-coordinate to make things a little easier.
+       ZI=CMPLX(X(I),Y(I))
+*** Loop over all other wires for the off-diagonal elements.
+       DO 20 J=I+1,NWIRE
+*   Set a complex wire-coordinate to make things a little easier.
+       ZJ=CMPLX(X(J),Y(J))
+       SIGMAT(I,J)=-LOG(ABS((1/COTUBE)*(ZI-ZJ)/
+     -      (1-CONJG(ZI)*ZJ/COTUBE**2)))
+*** Copy this to A(J,I) since the capacitance matrix is symmetric.
+       SIGMAT(J,I)=SIGMAT(I,J)
+20     CONTINUE
+10     CONTINUE
+       END
+
+       SUBROUTINE IPRD30
+*-----------------------------------------------------------------------
+*   IPRD30 - Signal matrix preparation for polygonal cells (type D3).
+*   Variables : 
+*   (Last changed on 19/ 6/97.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Local variables
+       INTEGER I,J
+       COMPLEX WD
+       
+*** Loop over all wire combinations.
+       DO 10 I=1,NWIRE
+*   We need to compute the wire mapping again to obtain WD.
+       CALL EFCMAP(CMPLX(X(I),Y(I))/COTUBE,WMAP(I),WD)
+*   Diagonal elements.
+       SIGMAT(I,I)=-LOG(ABS((0.5*D(I)/COTUBE)*WD/(1-ABS(WMAP(I))**2)))
+*** Loop over all other wires for the off-diagonal elements.
+       DO 20 J=1,I-1
+       SIGMAT(I,J)=-LOG(ABS((WMAP(I)-WMAP(J))/
+     -      (1-CONJG(WMAP(I))*WMAP(J))))
+*** Copy this to A(J,I) since the capacitance matrix is symmetric.
+       SIGMAT(J,I)=SIGMAT(I,J)
+20     CONTINUE
+10     CONTINUE
+       END
+
+       SUBROUTINE SIGPLP(IFAIL)
+*-----------------------------------------------------------------------
+*   SIGPLP - Computes the weighting field charges for the planes and
+*            the tube.
+*   (Last changed on 14/10/99.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+***       
+       INTEGER MXSW,MXLIST
+       PARAMETER (MXSW  =  200)
+       PARAMETER (MXLIST=  1000)
+***
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal data
+       INTEGER MXCHAR
+       PARAMETER (MXCHAR=2000)
+       LOGICAL FPERX,FPERY,LCROSS,TRASET,TRAFLG,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       INTEGER NPAIR,ICLUST,NFOUR,MFEXP,MXMIN,MXMAX,
+     -      MYMIN,MYMAX,NTRBNK,ITRMAJ,NTIME,NORIA,
+     -      NASIMP,JIORD,NISIMP,NMQUAD,NCANG,IENANG
+       REAL TIMSIG,SIGNAL,TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,
+     -      AVALAN,TSTART,TDEV,PRSTHR,
+     -      TRABNK,TRAVEC
+       CHARACTER*(MXCHAR) FCNANG
+       CHARACTER*12 AVATYP
+       CHARACTER*3 FCELTP
+       COMMON /SIGDAT/ TIMSIG(MXLIST),SIGNAL(MXLIST,MXSW,2),
+     -      AVALAN(2),TRAVEC(MXLIST),
+     -      TRABNK(MXLIST,9),TSTART,TDEV,PRSTHR,
+     -      TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,ICLUST,NPAIR,
+     -      NFOUR,ITRMAJ,JIORD,NISIMP,NMQUAD,IENANG,NTIME,NORIA,
+     -      MFEXP,MXMIN,MXMAX,MYMIN,MYMAX,NTRBNK,NASIMP,NCANG,
+     -      TRASET,TRAFLG(9),FPERX,FPERY,LCROSS,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       COMMON /SIGCHR/ FCELTP,AVATYP,FCNANG
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Print/Plot
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH
+       INTEGER LUNOUT,JFAIL,JEXMEM
+       COMMON /PRTPLT/ LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Local variables     
+       REAL VW
+       INTEGER MX,MY,IFAIL,IFAIL1,I,J
+       
+*** Identify the routine if requested.
+       IF(LIDENT)PRINT *,' /// ROUTINE SIGPLP ///'
+*** Assume this will fail.
+       IFAIL=1
+*** Loop over the signal layers.
+       DO 100 MX=MXMIN,MXMAX
+       DO 110 MY=MYMIN,MYMAX
+*** Load the layers of the signal matrices.
+       CALL IONIO(MX,MY,2,0,IFAIL1)
+       IF(IFAIL1.NE.0)THEN
+            PRINT *,' !!!!!! SIGPLP WARNING : Signal matrix'//
+     -           ' store error; field for planes not prepared.'
+            RETURN
+       ENDIF
+*** Initialise the plane matrices.
+       DO 120 I=1,5
+       DO 130 J=1,NWIRE
+       QPLANE(I,J)=0
+130    CONTINUE
+120    CONTINUE
+*** Charges for plane 1, if present.
+       IF(YNPLAN(1))THEN
+*   Set the weighting field voltages.
+            DO 10 I=1,NWIRE
+            IF(YNPLAN(2))THEN
+                 VW=-(COPLAN(2)-X(I))/(COPLAN(2)-COPLAN(1))
+            ELSEIF(PERX)THEN
+                 VW=-(COPLAN(1)+SX-X(I))/SX
+            ELSE
+                 VW=-1
+            ENDIF
+*   Multiply with the matrix.
+            DO 20 J=1,NWIRE
+            QPLANE(1,I)=QPLANE(1,I)+SIGMAT(I,J)*VW
+20          CONTINUE
+10          CONTINUE
+       ENDIF
+*** Charges for plane 2, if present.
+       IF(YNPLAN(2))THEN
+*   Set the weighting field voltages.
+            DO 30 I=1,NWIRE
+            IF(YNPLAN(1))THEN
+                 VW=-(COPLAN(1)-X(I))/(COPLAN(1)-COPLAN(2))
+            ELSEIF(PERX)THEN
+                 VW=-(X(I)-COPLAN(2)+SX)/SX
+            ELSE
+                 VW=-1
+            ENDIF
+*   Multiply with the matrix.
+            DO 40 J=1,NWIRE
+            QPLANE(2,I)=QPLANE(2,I)+SIGMAT(I,J)*VW
+40          CONTINUE
+30          CONTINUE
+       ENDIF
+*** Charges for plane 3, if present.
+       IF(YNPLAN(3))THEN
+*   Set the weighting field voltages.
+            DO 50 I=1,NWIRE
+            IF(YNPLAN(4))THEN
+                 VW=-(COPLAN(4)-Y(I))/(COPLAN(4)-COPLAN(3))
+            ELSEIF(PERY)THEN
+                 VW=-(COPLAN(3)+SY-Y(I))/SY
+            ELSE
+                 VW=-1
+            ENDIF
+*   Multiply with the matrix.
+            DO 60 J=1,NWIRE
+            QPLANE(3,I)=QPLANE(3,I)+SIGMAT(I,J)*VW
+60          CONTINUE
+50          CONTINUE
+       ENDIF
+*** Charges for plane 4, if present.
+       IF(YNPLAN(4))THEN
+*   Set the weighting field voltages.
+            DO 70 I=1,NWIRE
+            IF(YNPLAN(3))THEN
+                 VW=-(COPLAN(3)-Y(I))/(COPLAN(3)-COPLAN(4))
+            ELSEIF(PERY)THEN
+                 VW=-(Y(I)-COPLAN(4)+SY)/SY
+            ELSE
+                 VW=-1
+            ENDIF
+*   Multiply with the matrix.
+            DO 80 J=1,NWIRE
+            QPLANE(4,I)=QPLANE(4,I)+SIGMAT(I,J)*VW
+80          CONTINUE
+70          CONTINUE
+       ENDIF
+*** Charges for the tube, if present.
+       IF(TUBE)THEN
+            DO 160 I=1,NWIRE
+            DO 90 J=1,NWIRE
+            QPLANE(5,I)=QPLANE(5,I)-SIGMAT(I,J)
+90          CONTINUE
+160         CONTINUE
+       ENDIF
+*** Store the plane charges.
+       CALL IPLIO(MX,MY,1,IFAIL1)
+       IF(IFAIL1.NE.0)THEN
+            PRINT *,' !!!!!! SIGPLP WARNING : Plane matrix'//
+     -           ' store error; field for planes not prepared.'
+            RETURN
+       ENDIF
+*** Next set of periodicities.
+110    CONTINUE
+100    CONTINUE
+*** Compute the background weighting fields, first in x.
+       IF(YNPLAN(1).AND.YNPLAN(2))THEN
+            EWXCOR(1)=1/(COPLAN(2)-COPLAN(1))
+            EWXCOR(2)=1/(COPLAN(1)-COPLAN(2))
+       ELSEIF(YNPLAN(1).AND.PERX)THEN
+            EWXCOR(1)=1/SX
+            EWXCOR(2)=0
+       ELSEIF(YNPLAN(2).AND.PERX)THEN
+            EWXCOR(1)=0
+            EWXCOR(2)=-1/SX
+       ELSE
+            EWXCOR(1)=0
+            EWXCOR(2)=0
+       ENDIF
+       EWXCOR(3)=0
+       EWXCOR(4)=0
+       EWXCOR(5)=0
+*   Next also in y.
+       EWYCOR(1)=0
+       EWYCOR(2)=0
+       IF(YNPLAN(3).AND.YNPLAN(4))THEN
+            EWYCOR(3)=1/(COPLAN(4)-COPLAN(3))
+            EWYCOR(4)=1/(COPLAN(3)-COPLAN(4))
+       ELSEIF(YNPLAN(3).AND.PERY)THEN
+            EWYCOR(3)=1/SY
+            EWYCOR(4)=0
+       ELSEIF(YNPLAN(4).AND.PERY)THEN
+            EWYCOR(3)=0
+            EWYCOR(4)=-1/SY
+       ELSE
+            EWYCOR(3)=0
+            EWYCOR(4)=0
+       ENDIF
+*   The tube has no correction field.
+       EWYCOR(5)=0
+*** Debugging output.
+       IF(LDEBUG)THEN
+            WRITE(LUNOUT,'(''  ++++++ SIGPLP DEBUG   : Charges for'',
+     -           '' currents induced in the planes:''/26X,
+     -           '' Wire        x-Plane 1        x-Plane 2'',
+     -           ''        y-Plane 1        y-Plane 2'',
+     -           ''             Tube'')')
+            DO 140 I=1,NWIRE
+            WRITE(LUNOUT,'(26X,I5,5(2X,E15.8))') I,(QPLANE(J,I),J=1,5)
+140         CONTINUE
+            WRITE(LUNOUT,'(''  ++++++ SIGPLP DEBUG   : Bias fields:''/
+     -           26X,''Plane    x-Bias [1/cm]    y-Bias [1/cm]'')')
+            DO 150 I=1,5
+            WRITE(LUNOUT,'(26X,I5,2(2X,E15.8))') I,EWXCOR(I),EWYCOR(I)
+150         CONTINUE
+       ENDIF
+*** Seems to have worked.
+       IFAIL=0
+       END
+
+* ----------------------------------------------------------------------
+*   Input/output routines for signal calculations
+* ----------------------------------------------------------------------
+
+       SUBROUTINE SIGIST(ACTION,NSIG,TIME,SIG,ISW,IW,IA,IQ,IFAIL)
+*-----------------------------------------------------------------------
+*   SIGIST - Routine keeping the various ion signals in a scratch file.
+*   (Last changed on 24/ 2/97.)
+*-----------------------------------------------------------------------
+       INTEGER MXSW,MXLIST
+       PARAMETER (MXSW  =  200)
+       PARAMETER (MXLIST=  1000)
+*** Signal data
+       INTEGER MXCHAR
+       PARAMETER (MXCHAR=2000)
+       LOGICAL FPERX,FPERY,LCROSS,TRASET,TRAFLG,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       INTEGER NPAIR,ICLUST,NFOUR,MFEXP,MXMIN,MXMAX,
+     -      MYMIN,MYMAX,NTRBNK,ITRMAJ,NTIME,NORIA,
+     -      NASIMP,JIORD,NISIMP,NMQUAD,NCANG,IENANG
+       REAL TIMSIG,SIGNAL,TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,
+     -      AVALAN,TSTART,TDEV,PRSTHR,
+     -      TRABNK,TRAVEC
+       CHARACTER*(MXCHAR) FCNANG
+       CHARACTER*12 AVATYP
+       CHARACTER*3 FCELTP
+       COMMON /SIGDAT/ TIMSIG(MXLIST),SIGNAL(MXLIST,MXSW,2),
+     -      AVALAN(2),TRAVEC(MXLIST),
+     -      TRABNK(MXLIST,9),TSTART,TDEV,PRSTHR,
+     -      TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,ICLUST,NPAIR,
+     -      NFOUR,ITRMAJ,JIORD,NISIMP,NMQUAD,IENANG,NTIME,NORIA,
+     -      MFEXP,MXMIN,MXMAX,MYMIN,MYMAX,NTRBNK,NASIMP,NCANG,
+     -      TRASET,TRAFLG(9),FPERX,FPERY,LCROSS,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       COMMON /SIGCHR/ FCELTP,AVATYP,FCNANG
+*** Print/Plot
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH
+       INTEGER LUNOUT,JFAIL,JEXMEM
+       COMMON /PRTPLT/ LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Local variables
+       INTEGER LUNIST,MXIREC
+       PARAMETER(MXIREC=1000,LUNIST=14)
+       DOUBLE PRECISION SIG(*),TIME(*)
+       INTEGER IADREF(MXIREC),NREF,ISTATE,IFAIL,NSIG,NVEC(MXIREC),
+     -    ISW,IW,IA,IQ,NUSED(MXIREC),ILEAST,IREC,I,
+     -    ISTORE,IAGE(MXIREC),IADDR,IOS
+       LOGICAL OPEN
+       CHARACTER*(*) ACTION
+       DATA NREF/0/, ISTATE/0/, ISTORE/0/
+*** Identify the routine if required.
+       IF(LIDENT)PRINT *,' /// ROUTINE SIGIST (File) ///'
+*** Assume the operation will fail.
+       IFAIL=1
+*** Open the scratch file.
+       IF(ACTION.EQ.'OPEN')THEN
+*   Check that the file is not already open.
+            INQUIRE(UNIT=LUNIST,OPENED=OPEN)
+*   Close if it is.
+            IF(OPEN)THEN
+                 PRINT *,' !!!!!! SIGIST WARNING : Ion signal unit'//
+     -                ' unexpectedly open; closed.'
+                 CLOSE(UNIT=LUNIST,ERR=2030,IOSTAT=IOS)
+            ENDIF
+*   Open the file.
+            OPEN(UNIT=LUNIST,STATUS='SCRATCH',ACCESS='DIRECT',
+     -           FORM='UNFORMATTED',ERR=2020,RECL=16*MXLIST,
+     -           IOSTAT=IOS)
+            IF(LDEBUG)WRITE(LUNOUT,'(''  ++++++ SIGIST DEBUG   :'',
+     -           '' Signal file opened on unit '',I6)') LUNIST
+*   Keep track of this.
+            ISTATE=1
+            NREF=0
+*   Reset the number of stores.
+            ISTORE=0
+*   Seems to have worked.
+            IFAIL=0
+*** Reset the file.
+       ELSEIF(ACTION.EQ.'RESET')THEN
+            IF(ISTATE.EQ.0)THEN
+                 PRINT *,' !!!!!! SIGIST WARNING : No signal file'//
+     -                ' currently active; not reset.'
+            ELSE
+                 NREF=0
+                 IFAIL=0
+                 ISTORE=0
+                 IF(LDEBUG)WRITE(LUNOUT,'(''  ++++++ SIGIST DEBUG   :'',
+     -                '' Signal file reset on unit '',I6)') LUNIST
+            ENDIF
+*** Store a record.
+       ELSEIF(ACTION.EQ.'STORE')THEN
+*   Check the state of the file.
+            IF(ISTATE.NE.1)THEN
+                 PRINT *,' !!!!!! SIGIST WARNING : Request to store'//
+     -                ' but signal file not open; not stored.'
+                 RETURN
+            ENDIF
+*   Check address range validity.
+            IF((IA.LT.1.OR.IA.GT.NORIA).OR.
+     -           (ISW.LT.1.OR.ISW.GT.MXSW).OR.
+     -           (IW.LT.1.OR.IW.GT.MXWIRE).OR.
+     -           ABS(IQ).NE.1)THEN
+                 PRINT *,' !!!!!! SIGIST WARNING : Signal address'//
+     -                ' out of range; not stored.'
+                 RETURN
+            ENDIF
+*   Compute reference address.
+            IADDR=IQ*(IA+MXORIA*(ISW-1+MXSW*(IW-1)))
+*   Locate the reference in the tables and also the least used record.
+            ILEAST=1
+            DO 10 I=1,NREF
+            IF(NUSED(I).LT.NUSED(ILEAST).OR.
+     -           (NUSED(I).EQ.NUSED(ILEAST).AND.
+     -           IAGE(I).LT.IAGE(ILEAST)))ILEAST=I
+            IF(IADREF(I).EQ.IADDR)THEN
+                 IREC=I
+                 GOTO 20
+            ENDIF
+10          CONTINUE
+*   New record, allocate space.
+            IF(NREF.LT.MXIREC)THEN
+                 NREF=NREF+1
+                 IADREF(NREF)=IADDR
+                 IREC=NREF
+*   Or reuse the least used record sofar.
+            ELSE
+                 IREC=ILEAST
+                 IADREF(IREC)=IADDR
+            ENDIF
+*   In either case set the usage counter to 0.
+            NUSED(IREC)=0
+*   Write the record.
+20          CONTINUE
+            NVEC(IREC)=NSIG
+            WRITE(UNIT=LUNIST,REC=IREC,ERR=2010,IOSTAT=IOS)
+     -           (TIME(I),I=1,NSIG),(SIG(I),I=1,NSIG)
+            IF(LDEBUG)WRITE(LUNOUT,'(''  ++++++ SIGIST DEBUG   :'',
+     -           '' Stored record '',I6,'' for reference '',I6)')
+     -           IREC,IADDR
+*   And keep track of the age.
+            ISTORE=ISTORE+1
+            IAGE(IREC)=ISTORE
+*   Seems to have worked.
+            IFAIL=0
+*** Retrieve a record.
+       ELSEIF(ACTION.EQ.'READ')THEN
+*   Check the state of the file.
+            IF(ISTATE.NE.1)THEN
+                 PRINT *,' !!!!!! SIGIST WARNING : Request to read'//
+     -                ' but signal file not open; not read.'
+                 RETURN
+            ENDIF
+*   Check address range validity.
+            IF((IA.LT.1.OR.IA.GT.NORIA).OR.
+     -           (ISW.LT.1.OR.ISW.GT.MXSW).OR.
+     -           (IW.LT.1.OR.IW.GT.MXWIRE).OR.
+     -           ABS(IQ).NE.1)THEN
+                 PRINT *,' !!!!!! SIGIST WARNING : Signal address'//
+     -                ' out of range; not read.'
+                 RETURN
+            ENDIF
+*   Compute reference address.
+            IADDR=IQ*(IA+MXORIA*(ISW-1+MXSW*(IW-1)))
+*   Locate the reference in the tables.
+            DO 30 I=1,NREF
+            IF(IADREF(I).EQ.IADDR)THEN
+                 IREC=I
+                 GOTO 40
+            ENDIF
+30          CONTINUE
+*   Unknown record, signal this via NSIG.
+            IF(LDEBUG)WRITE(LUNOUT,'(''  ++++++ SIGIST DEBUG   :'',
+     -           '' Record '',4I4,'' not known.'')') ISW,IW,IA,IQ
+            NSIG=-1
+            IFAIL=0
+            RETURN
+*   Read the record.
+40          CONTINUE
+            NSIG=NVEC(IREC)
+            READ(UNIT=LUNIST,REC=IREC,ERR=2010,IOSTAT=IOS)
+     -           (TIME(I),I=1,NSIG),(SIG(I),I=1,NSIG)
+            IF(LDEBUG)WRITE(LUNOUT,'(''  ++++++ SIGIST DEBUG   :'',
+     -           '' Read record '',I6,'' for reference '',I6)')
+     -           IREC,IADDR
+*   Increment the usage counter.
+            NUSED(IREC)=NUSED(IREC)+1
+*   Seems to have worked.
+            IFAIL=0
+*** List currently known records.
+       ELSEIF(ACTION.EQ.'LIST')THEN
+*   Print a header.
+            WRITE(LUNOUT,'(''  ++++++ SIGIST DEBUG   : Overview of'',
+     -           '' currently known records:''//''  Record   Angle'',
+     -           ''    Wire   Sense  Charge   Usage   Birth''/)')
+*   Loop over the records.
+            DO 50 I=1,NREF
+            IADDR=IADREF(I)
+            IQ=SIGN(1,IADDR)
+            IADDR=ABS(IADDR)
+            IA=MOD(IADDR,MXORIA)
+            IF(IA.EQ.0)IA=MXORIA
+            IADDR=(IADDR-IA)/MXORIA
+            ISW=MOD(IADDR,MXSW)+1
+            IF(ISW.EQ.0)ISW=MXSW
+            IW=(IADDR-ISW+1)/MXSW+1
+            WRITE(LUNOUT,'(5(2X,I6))') I,IA,IW,ISW,IQ,NUSED(I),IAGE(I)
+50          CONTINUE
+*   Overview.
+            WRITE(LUNOUT,'(/''  Total of '',I6,'' records.'')') NREF
+*   This can not fail.
+            IFAIL=0
+*** Close the file.
+       ELSEIF(ACTION.EQ.'CLOSE')THEN
+*   Check that the file is indeed open.
+            INQUIRE(UNIT=LUNIST,OPENED=OPEN)
+*   Close if open.
+            IF(.NOT.OPEN)THEN
+                 PRINT *,' !!!!!! SIGIST WARNING : Ion signal unit'//
+     -                ' is already closed; not closed again.'
+            ELSE
+                 CLOSE(UNIT=LUNIST,ERR=2030,IOSTAT=IOS)
+            ENDIF
+*   Keep track of the state.
+            ISTATE=0
+            NREF=0
+*   Seems to have worked.
+            IFAIL=0
+            IF(LDEBUG)WRITE(LUNOUT,'(''  ++++++ SIGIST DEBUG   :'',
+     -           '' Closed signal unit '',I6)') LUNIST
+*** Other actions are not known.
+       ELSE
+            PRINT *,' !!!!!! SIGIST WARNING : Action not known;'//
+     -           ' nothing done.'
+       ENDIF
+*** I/O error handling.
+       RETURN
+2010   CONTINUE
+       PRINT *,' !!!!!! SIGIST WARNING : Read/write error to'//
+     -      ' signal file ; action not completed.'
+       CALL INPIOS(IOS)
+       RETURN
+2020   CONTINUE
+       PRINT *,' !!!!!! SIGIST WARNING : Open error on'//
+     -      ' signal file ; action not completed.'
+       CALL INPIOS(IOS)
+       RETURN
+2030   CONTINUE
+       PRINT *,' !!!!!! SIGIST WARNING : Close error on'//
+     -      ' signal file ; action not completed.'
+       CALL INPIOS(IOS)
+       END
+
+       SUBROUTINE BOOK(ACTION,REFER,MYNAME,IFAIL)
+*-----------------------------------------------------------------------
+*   BOOK   - Book keeping of various items.
+*   (Last changed on 12/10/00.)
+*-----------------------------------------------------------------------
+       implicit none
+*** Print/Plot
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH
+       INTEGER LUNOUT,JFAIL,JEXMEM
+       COMMON /PRTPLT/ LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+     
+       INTEGER MXBOOK
+       PARAMETER(MXBOOK=50)
+       CHARACTER*(*) ACTION,REFER,MYNAME
+       CHARACTER*10 NAME(MXBOOK),USER(MXBOOK)
+       INTEGER STATE(MXBOOK),IFAIL,INPCMX,NBOOK,IREF,I
+       EXTERNAL INPCMX
+       DATA NBOOK/0/
+*** Allocate a new class.
+       IF(INPCMX(ACTION,'INIT#IALISE').NE.0)THEN
+*   Check there is space left.
+            IF(NBOOK.GE.MXBOOK)THEN
+                 PRINT *,' ###### BOOK   ERROR   : No room to for'//
+     -                ' the new object ',REFER,'.'
+                 IFAIL=1
+                 RETURN
+            ENDIF
+*   Add the item to the list.
+            NBOOK=NBOOK+1
+            NAME(NBOOK)=REFER
+            STATE(NBOOK)=0
+            USER(NBOOK)=' '
+*   Debugging output.
+            IF(LDEBUG)PRINT *,' ++++++ BOOK   DEBUG   : New object ',
+     -           REFER,' declared as item ',NBOOK,'.'
+*   Successful completion.
+            IFAIL=0
+*** Book an object.
+       ELSEIF(INPCMX(ACTION,'BOOK').NE.0)THEN
+*   Locate the object.
+            IREF=0
+            DO 10 I=1,NBOOK
+            IF(INPCMX(REFER,NAME(I)).NE.0)IREF=I
+10          CONTINUE
+*   Object not known.
+            IF(IREF.EQ.0)THEN
+                 PRINT *,' !!!!!! BOOK   WARNING : The object ',
+     -                REFER,' is not known ; not booked.'
+                 IFAIL=1
+                 RETURN
+            ENDIF
+*   First check the object has not yet been booked.
+            IF(STATE(IREF).EQ.1.AND.USER(IREF).EQ.MYNAME)THEN
+                 PRINT *,' ------ BOOK   MESSAGE : Object ',
+     -                REFER,' is already booked by same user;'//
+     -                ' not booked again.'
+                 IFAIL=0
+                 RETURN
+            ELSEIF(STATE(IREF).EQ.1)THEN
+                 PRINT *,' !!!!!! BOOK   WARNING : Object ',
+     -                REFER,' is already booked by user '//
+     -                USER(IREF)//'; not booked again.'
+                 IFAIL=1
+                 RETURN
+            ENDIF
+*   Book the object.
+            STATE(IREF)=1
+            USER(IREF)=MYNAME
+*   Debugging output.
+            IF(LDEBUG)PRINT *,' ++++++ BOOK   DEBUG   : Object ',
+     -           REFER,' booked by ',MYNAME,'.'
+*   Successful completion.
+            IFAIL=0
+*** Release an object.
+       ELSEIF(INPCMX(ACTION,'REL#EASE').NE.0)THEN
+*   Locate the object.
+            IREF=0
+            DO 20 I=1,NBOOK
+            IF(INPCMX(REFER,NAME(I)).NE.0)IREF=I
+20          CONTINUE
+*   Object not known.
+            IF(IREF.EQ.0)THEN
+                 PRINT *,' !!!!!! BOOK   WARNING : The object ',
+     -                REFER,' is not known ; not released.'
+                 IFAIL=1
+                 RETURN
+            ENDIF
+*   Don't release an object booked by someone else.
+            IF(STATE(IREF).EQ.1.AND.USER(IREF).NE.MYNAME)THEN
+                 PRINT *,' !!!!!! BOOK   WARNING : The object ',
+     -                REFER,' was booked by ',USER(IREF)
+                 PRINT *,'                         Permission'//
+     -                ' to release denied ; not released.'
+                 IFAIL=1
+                 RETURN
+            ENDIF
+*   Debugging output.
+            IF(LDEBUG)PRINT *,' ++++++ BOOK   DEBUG   : Object ',
+     -           REFER,' released, previous state ',STATE(IREF),
+     -           ', previous user ',USER(IREF)
+*   Release the object.
+C            IF(INPCMX(ACTION,'CL#EAR').NE.0)THEN
+                 STATE(IREF)=0
+                 USER(IREF)=' '
+C            ELSE
+C                 STATE(IREF)=2
+C            ENDIF
+*   Successful completion.
+            IFAIL=0
+*** Inquiry.
+       ELSEIF(INPCMX(ACTION,'INQ#UIRE').NE.0)THEN
+*   Locate the object.
+            IREF=0
+            DO 30 I=1,NBOOK
+            IF(INPCMX(REFER,NAME(I)).NE.0)IREF=I
+30          CONTINUE
+*   Object not known.
+            IF(IREF.EQ.0)THEN
+                 PRINT *,' !!!!!! BOOK   WARNING : The object ',
+     -                REFER,' is not known ; no information.'
+                 IFAIL=1
+                 RETURN
+            ENDIF
+*   Return the user name.
+            IF(STATE(IREF).EQ.0)THEN
+                 MYNAME=' '
+            ELSE
+                 MYNAME=USER(IREF)
+            ENDIF
+*   Successful completion.
+            IFAIL=0
+*** List of states.
+       ELSEIF(INPCMX(ACTION,'L#IST').NE.0)THEN
+*   Header, depending on the number of objects.
+            IF(NBOOK.EQ.0)THEN
+                 WRITE(LUNOUT,'(/''  No objects defined sofar.''/)')
+                 IFAIL=0
+                 RETURN
+            ELSE
+                 WRITE(LUNOUT,'(/''  CURRENTLY KNOWN OBJECTS:''//
+     -                ''  Name      '',5X,'' Status'')')
+            ENDIF
+*   List of objects.
+            DO 40 I=1,NBOOK
+            IF(STATE(I).EQ.0)THEN
+                 WRITE(LUNOUT,'(2X,A10,5X,'' Declared, not in use'')')
+     -                NAME(I)
+            ELSEIF(STATE(I).EQ.1)THEN
+                 WRITE(LUNOUT,'(2X,A10,5X,'' Booked by '',A10)')
+     -                NAME(I),USER(I)
+            ELSEIF(STATE(I).EQ.2)THEN
+                 WRITE(LUNOUT,'(2X,A10,5X,'' Free, last used by '',
+     -                A10)') NAME(I),USER(I)
+            ELSE
+                 WRITE(LUNOUT,'(2X,A10,5X,'' Declared, state code '',
+     -                I5,'', user '',A10)') STATE(I),NAME(I),USER(I)
+            ENDIF
+40          CONTINUE
+            WRITE(LUNOUT,'('' '')')
+*   Always successful.
+            IFAIL=0
+*** Unknown action.
+       ELSE
+            PRINT *,' !!!!!! BOOK   WARNING : Unknown request ',ACTION,
+     -           ' received; nothing done.'
+            IFAIL=1
+       ENDIF
+       END
+       
+       INTEGER FUNCTION INPCMX(STR1,STR2)
+*-----------------------------------------------------------------------
+*   INPCMX - Compares strings STR1 and STR2 where STR1 is the word and
+*            STR2 the pattern string.
+*   (Last changed on 26/10/07.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN
+       PARAMETER (MXNAME=   200, MXLUN =    30)
+       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
+***
+       CHARACTER*(MXINCH+1) STRING
+       CHARACTER*(MXINCH)   ARGSTR
+       CHARACTER*30         ERRCDE(MXWORD)
+       CHARACTER*(MXCHAR)   WORD(MXWORD)
+       CHARACTER*80         PROMPT,EOFSTR,SHELL
+       CHARACTER            ESCAPE
+       CHARACTER*(MXNAME)   FNINP,FNOUT
+       INTEGER NCHAR(MXWORD),INDWRD(MXWORD),ICHSET,LUNSTR(5:MXLUN,3),
+     -      NWORD,LUN,NCPROM,NCEOF,NCSH,NCARG,NCFNI,NCFNO
+       LOGICAL ERRPRT(MXWORD),LPROM,DOEXEC,DOREAD,LINREC
+       COMMON /INPCOM/ NCHAR,INDWRD,LUNSTR,NWORD,LUN,ICHSET,NCPROM,
+     -      ERRPRT,LPROM,DOEXEC,DOREAD,NCEOF,LINREC,NCSH,NCARG,
+     -      NCFNI,NCFNO
+       COMMON /INPCHR/ ERRCDE,STRING,WORD,PROMPT,EOFSTR,ESCAPE,SHELL,
+     -      ARGSTR,FNINP,FNOUT
+***
+       CHARACTER*(*)      STR1,STR2
+       CHARACTER*(MXWORD) WRDRES
+       CHARACTER*30       ECDRES
+       LOGICAL            ERRRES
+       INTEGER            INPCMP,NWRRES,NCHRES
+       EXTERNAL           INPCMP
+*** First store all data on word 1 and remember 
+*** the number of words.
+       WRDRES=WORD(1)
+       ECDRES=ERRCDE(1)
+       ERRRES=ERRPRT(1)
+       NCHRES=NCHAR(1)
+       NWRRES=NWORD
+*** Store the word to be checked in word 1 and check it.
+       NWORD=1
+       IF(LEN(STR1).GT.MXWORD)THEN
+            INPCMX=0
+       ELSE
+            WORD(1)=STR1
+            NCHAR(1)=LEN(STR1)
+            INPCMX=INPCMP(1,STR2)
+       ENDIF
+*** Restore the old word 1 in its place.
+       WORD(1)  =WRDRES
+       ERRCDE(1)=ECDRES
+       ERRPRT(1)=ERRRES
+       NCHAR(1) =NCHRES
+       NWORD    =NWRRES
+       END
+
+       INTEGER FUNCTION INPCMP(IWRD,REF)
+*-----------------------------------------------------------------------
+*   INPCMP - Integer function returning 1 if word IWRD matches with
+*            REF in all segments (delimited by - signs).
+*   VARIABLES : REF         : Reference string, the hash (#) signs
+*                             indicate the abbreviation points.
+*               IWRD        : The word to be matched with REF.
+*               NMIN        : Minimum of characters required to match.
+*   (Last changed on 26/10/07.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXINCH,MXWORD,MXCHAR,MXNAME,MXLUN
+       PARAMETER (MXNAME=   200, MXLUN =    30)
+       PARAMETER (MXINCH=  2000, MXWORD=   200, MXCHAR=MXINCH)
+***
+       CHARACTER*(MXINCH+1) STRING
+       CHARACTER*(MXINCH)   ARGSTR
+       CHARACTER*30         ERRCDE(MXWORD)
+       CHARACTER*(MXCHAR)   WORD(MXWORD)
+       CHARACTER*80         PROMPT,EOFSTR,SHELL
+       CHARACTER            ESCAPE
+       CHARACTER*(MXNAME)   FNINP,FNOUT
+       INTEGER NCHAR(MXWORD),INDWRD(MXWORD),ICHSET,LUNSTR(5:MXLUN,3),
+     -      NWORD,LUN,NCPROM,NCEOF,NCSH,NCARG,NCFNI,NCFNO
+       LOGICAL ERRPRT(MXWORD),LPROM,DOEXEC,DOREAD,LINREC
+       COMMON /INPCOM/ NCHAR,INDWRD,LUNSTR,NWORD,LUN,ICHSET,NCPROM,
+     -      ERRPRT,LPROM,DOEXEC,DOREAD,NCEOF,LINREC,NCSH,NCARG,
+     -      NCFNI,NCFNO
+       COMMON /INPCHR/ ERRCDE,STRING,WORD,PROMPT,EOFSTR,ESCAPE,SHELL,
+     -      ARGSTR,FNINP,FNOUT
+
+       CHARACTER*(*) REF
+       CHARACTER*80  REFSTR
+       INTEGER IWRD,IFREF,IFCMP,ILREF,ILCMP,NMIN,NCREF,IHASH,NCOMP
+*** Initialise some parameters.
+       INPCMP=0
+       IFREF=1
+       IFCMP=1
+*** Return right away if the string to be compared with does not exist.
+       IF(IWRD.LE.0.OR.IWRD.GT.NWORD)RETURN
+       IF(NCHAR(IWRD).EQ.0)RETURN
+*** Return to this point if further segments are to be searched for.
+10     CONTINUE
+*** Find the next part of the reference string.
+       ILREF=INDEX(REF(IFREF:LEN(REF)),'-')
+       IF(ILREF.EQ.0)THEN
+            ILREF=LEN(REF)
+       ELSE
+            ILREF=IFREF+ILREF-2
+       ENDIF
+*   Remove the # sign from the string and store NMIN.
+       REFSTR=' '
+       IF(ILREF.LT.IFREF)THEN
+            REFSTR=' '
+            NMIN=0
+            NCREF=0
+       ELSE
+            IHASH=INDEX(REF(IFREF:ILREF),'#')
+            IF(IHASH.EQ.0)THEN
+                 REFSTR(1:ILREF-IFREF+1)=REF(IFREF:ILREF)
+                 NMIN=ILREF-IFREF+1
+                 NCREF=ILREF-IFREF+1
+            ELSE
+                 IF(IHASH.GE.2)
+     -                REFSTR(1:IHASH-1)=REF(IFREF:IFREF+IHASH-2)
+                 IF(IHASH.LT.ILREF-IFREF+1)REFSTR(IHASH:ILREF-IFREF)=
+     -                REF(IFREF+IHASH:ILREF)
+                 NMIN=IHASH-1
+                 NCREF=ILREF-IFREF
+            ENDIF
+       ENDIF
+**  Do similar things with the string to be compared.
+       ILCMP=INDEX(WORD(IWRD)(IFCMP:NCHAR(IWRD)),'-')
+       IF(ILCMP.EQ.0)THEN
+            ILCMP=NCHAR(IWRD)
+       ELSE
+            ILCMP=IFCMP+ILCMP-2
+       ENDIF
+**  And compare the two strings.
+       IF(NCREF.LT.ILCMP-IFCMP+1)RETURN
+       NCOMP=MIN(NCREF,MAX(NMIN,ILCMP-IFCMP+1))
+       IF(NCOMP.GT.0)THEN
+            IF(REFSTR(1:NCOMP).NE.WORD(IWRD)(IFCMP:IFCMP+NCOMP-1))RETURN
+       ENDIF
+*** Return for a further cycle if there is more to compare.
+       IFREF=ILREF+2
+       IFCMP=ILCMP+2
+       IF(IFREF.GT.LEN(REF))THEN
+            IF(IFCMP.GT.NCHAR(IWRD))INPCMP=1
+            RETURN
+       ELSEIF(IFCMP.GT.NCHAR(IWRD))THEN
+            IF(REF(IFREF:IFREF).EQ.'#')INPCMP=1
+            RETURN
+       ENDIF
+       GOTO 10
+       END
+
+       SUBROUTINE IONBGN(IFAIL)
+*-----------------------------------------------------------------------
+*   IONBGN - Routine initialising the data set for the signal matrices.
+*   VARIABLES : NPEREC       : Number of columns per wire record.
+*               NRECMT       : Number of records per wire matrix.
+*               IRECP0       : First plane record.
+*               NRECS        : Total number of records on unit 13.
+*               OPEN         : Used for checking the status of unit 13.
+*   (Last changed on  9/11/98.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+***       
+       INTEGER MXSW,MXLIST,MXRECL
+       INTEGER MXNAME
+       PARAMETER (MXSW  =  200)
+       PARAMETER (MXLIST=  1000)
+       PARAMETER (MXRECL= 10000)
+       PARAMETER (MXNAME=   200)
+***
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal data
+       INTEGER MXCHAR
+       PARAMETER (MXCHAR=2000)
+       LOGICAL FPERX,FPERY,LCROSS,TRASET,TRAFLG,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       INTEGER NPAIR,ICLUST,NFOUR,MFEXP,MXMIN,MXMAX,
+     -      MYMIN,MYMAX,NTRBNK,ITRMAJ,NTIME,NORIA,
+     -      NASIMP,JIORD,NISIMP,NMQUAD,NCANG,IENANG
+       REAL TIMSIG,SIGNAL,TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,
+     -      AVALAN,TSTART,TDEV,PRSTHR,
+     -      TRABNK,TRAVEC
+       CHARACTER*(MXCHAR) FCNANG
+       CHARACTER*12 AVATYP
+       CHARACTER*3 FCELTP
+       COMMON /SIGDAT/ TIMSIG(MXLIST),SIGNAL(MXLIST,MXSW,2),
+     -      AVALAN(2),TRAVEC(MXLIST),
+     -      TRABNK(MXLIST,9),TSTART,TDEV,PRSTHR,
+     -      TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,ICLUST,NPAIR,
+     -      NFOUR,ITRMAJ,JIORD,NISIMP,NMQUAD,IENANG,NTIME,NORIA,
+     -      MFEXP,MXMIN,MXMAX,MYMIN,MYMAX,NTRBNK,NASIMP,NCANG,
+     -      TRASET,TRAFLG(9),FPERX,FPERY,LCROSS,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       COMMON /SIGCHR/ FCELTP,AVATYP,FCNANG
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Print/Plot
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH
+       INTEGER LUNOUT,JFAIL,JEXMEM
+       COMMON /PRTPLT/ LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Local variables
+       INTEGER IFAIL,NPEREC,NRECMT,NRECS,IOS,IRECP0
+       LOGICAL OPEN
+       CHARACTER*(MXNAME) FILE
+C      CHARACTER*80 FILDEF
+       COMMON /FILE13/ NPEREC,NRECMT,IRECP0,NRECS
+       
+       IFAIL=0
+*** Identify the routine.
+       IF(LIDENT)PRINT *,' /// ROUTINE IONBGN ///'
+*** Return if no file is needed.
+       IF(.NOT.(FPERX.OR.FPERY))RETURN
+       IFAIL=1
+*** Determine the number of wire columns fitting in a record.
+       NPEREC=INT((MXRECL-4)/(8*NWIRE))
+*   Stop in case MXRECL is unacceptably small.
+       IF(NPEREC.LE.0)THEN
+            PRINT *,' ###### IONBGN ERROR   : Unable to allocate',
+     -           ' storage space for the wire matrices, a MXRECL',
+     -           ' of at least ',8*NWIRE+4,' is needed;'
+            PRINT *,'                         Increase MXRECL if',
+     -           ' possible or specify FOURIER 1.'
+            RETURN
+       ENDIF
+*   Set NPEREC to NWIRE if the wire matrix fits in single record.
+       IF(NPEREC.GT.NWIRE)NPEREC=NWIRE
+*** Ensure that the plane matrix fits in a single record.
+       IF(20*NWIRE+4.GT.MXRECL)THEN
+            PRINT *,' ###### IONBGN ERROR   : Unable to allocate'//
+     -           ' storage space for the plane matrices, a MXRECL'//
+     -           ' of at least ',20*NWIRE+4,' is needed;'
+            PRINT *,'                         Increase MXRECL if'//
+     -           ' possible or specify FOURIER 1.'
+            RETURN
+       ENDIF
+*** Determine number of records, first records per wire matrix.
+       NRECMT=NWIRE/NPEREC
+       IF(NPEREC*NRECMT.LT.NWIRE)NRECMT=NRECMT+1
+*   Multiply by the number of Fourier copies of the matrix.
+       IF(FPERX.AND.FPERY)THEN
+            NRECS=NFOUR**2*NRECMT
+       ELSEIF(FPERX.OR.FPERY)THEN
+            NRECS=NFOUR*NRECMT
+       ELSE
+            NRECS=1
+       ENDIF
+*   Record the start of the plane records.
+       IRECP0=NRECS+1
+*   Add the plane records, each Fourier copy takes 1 record.
+       IF(FPERX.AND.FPERY)THEN
+            NRECS=NRECS+NFOUR**2
+       ELSEIF(FPERX.OR.FPERY)THEN
+            NRECS=NRECS+NFOUR
+       ELSE
+            NRECS=NRECS+1
+       ENDIF
+*   Check that it does not exceed 1000.
+       IF(NRECS.GT.1000)THEN
+            PRINT *,' ###### IONBGN ERROR   : Unable to allocate'//
+     -           ' storage space for the plane matrices, maximum'//
+     -           ' number of records in a direct access'
+            PRINT *,'                         file would be exceeded;'//
+     -           ' decrease the value of FOURIER or increase'//
+     -           ' MXRECL if the disks allow.'
+            RETURN
+       ENDIF
+*** Open the dataset, if it is not yet open.
+       INQUIRE(UNIT=13,OPENED=OPEN)
+       IF(OPEN)THEN
+            PRINT *,' !!!!!! IONBGN WARNING : Unit 13 was still open'//
+     -           ' and is now being closed (program bug)'
+            CLOSE(UNIT=13,IOSTAT=IOS,ERR=2030)
+       ENDIF
+
+       OPEN(UNIT=13,STATUS='SCRATCH',FORM='UNFORMATTED',
+     -       ACCESS='DIRECT',RECL=NPEREC*8*NWIRE+4,IOSTAT=IOS,ERR=2020)
+       FILE='<Signal matrices>'
+C       CALL DSNLOG(FILE,'Scratch   ','Direct    ','Read/Write')
+*   and set IFAIL to 0, since it apparently worked.
+       IFAIL=0
+       IF(LDEBUG)PRINT *,' ++++++ IONBGN DEBUG   : Unit 13 opened',
+     -       ' with columns/rec=',NPEREC,',  rec/matrix=',NRECMT,
+     -       ',  recl=',NPEREC*8*NWIRE+4,' byte,   records=',NRECS
+       RETURN
+*** Handle the error conditions.
+2020   CONTINUE
+       PRINT *,' ###### IONBGN ERROR   : Unable to open scratch'//
+     -      ' data set on unit 13 (used for signal matrices);'//
+     -      ' ion tails cannot be calculated.'
+       CALL INPIOS(IOS)
+       CLOSE(UNIT=13,IOSTAT=IOS,ERR=2030)
+       RETURN
+2030   CONTINUE
+       PRINT *,' ###### IONBGN ERROR   : Unable to close scratch'//
+     -      ' data set on unit 13 (attempted because of previous'//
+     -      ' error condition).'
+       CALL INPIOS(IOS)
+       END
+
+       SUBROUTINE IONIO(MX,MY,IMODE,NCOL,IFAIL)
+*-----------------------------------------------------------------------
+*   IONIO  - Performs the external I/O operations for the routine SIGIPR
+*   VARIABLES : MX, MY      : Fourier indices of the layers
+*               IMODE       : operation mode, 1=write, 2=read
+*               NCOL        : columns to be written/read (0 = all)
+*               (see also routine IONBGN)
+*   (Last changed on 12/11/98.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+***       
+       INTEGER MXSW,MXLIST
+       PARAMETER (MXSW  =  200)
+       PARAMETER (MXLIST=  1000)
+***
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal data
+       INTEGER MXCHAR
+       PARAMETER (MXCHAR=2000)
+       LOGICAL FPERX,FPERY,LCROSS,TRASET,TRAFLG,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       INTEGER NPAIR,ICLUST,NFOUR,MFEXP,MXMIN,MXMAX,
+     -      MYMIN,MYMAX,NTRBNK,ITRMAJ,NTIME,NORIA,
+     -      NASIMP,JIORD,NISIMP,NMQUAD,NCANG,IENANG
+       REAL TIMSIG,SIGNAL,TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,
+     -      AVALAN,TSTART,TDEV,PRSTHR,
+     -      TRABNK,TRAVEC
+       CHARACTER*(MXCHAR) FCNANG
+       CHARACTER*12 AVATYP
+       CHARACTER*3 FCELTP
+       COMMON /SIGDAT/ TIMSIG(MXLIST),SIGNAL(MXLIST,MXSW,2),
+     -      AVALAN(2),TRAVEC(MXLIST),
+     -      TRABNK(MXLIST,9),TSTART,TDEV,PRSTHR,
+     -      TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,ICLUST,NPAIR,
+     -      NFOUR,ITRMAJ,JIORD,NISIMP,NMQUAD,IENANG,NTIME,NORIA,
+     -      MFEXP,MXMIN,MXMAX,MYMIN,MYMAX,NTRBNK,NASIMP,NCANG,
+     -      TRASET,TRAFLG(9),FPERX,FPERY,LCROSS,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       COMMON /SIGCHR/ FCELTP,AVATYP,FCNANG
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Print/Plot
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH
+       INTEGER LUNOUT,JFAIL,JEXMEM
+       COMMON /PRTPLT/ LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Local variables
+       INTEGER MX,MY,IMODE,NCOL,IFAIL,NPEREC,NRECMT,IRECP0,NRECS,NREC1,
+     -      I,II,JJ,JMIN,JMAX,IOS
+       COMMON /FILE13/ NPEREC,NRECMT,IRECP0,NRECS
+*** Assume the routine will fail.
+       IFAIL=0
+*** Find the location of the first record.
+       IF(FPERX.AND.FPERY)THEN
+            NREC1=1+((MX+NFOUR/2-1)*NFOUR+(MY+NFOUR/2-1))*NRECMT
+       ELSEIF(FPERX)THEN
+            NREC1=1+(MX+NFOUR/2-1)*NRECMT
+       ELSEIF(FPERY)THEN
+            NREC1=1+(MY+NFOUR/2-1)*NRECMT
+       ELSE
+            RETURN
+       ENDIF
+*** Find the relevant columns.
+       DO 10 I=0,NRECMT-1
+       JMIN=I*NPEREC+1
+       JMAX=MIN((I+1)*NPEREC,NWIRE)
+       IF(NCOL.NE.0.AND.(NCOL.LT.JMIN.OR.NCOL.GT.JMAX))GOTO 10
+       IF(NREC1+I.LE.0.OR.NREC1+I.GT.NRECS)THEN
+            PRINT *,' ###### IONIO  ERROR   : I/O request references',
+     -           ' a non existing record on unit 13 (program bug).'
+            IFAIL=1
+            RETURN
+       ENDIF
+       IF(IMODE.EQ.1)THEN
+            WRITE(UNIT=13,REC=NREC1+I,IOSTAT=IOS,ERR=2010)
+     -           ((SIGMAT(II,JJ),II=1,NWIRE),JJ=JMIN,JMAX)
+       ELSEIF(IMODE.EQ.2)THEN
+            READ(UNIT=13,REC=NREC1+I,IOSTAT=IOS,ERR=2010)
+     -           ((SIGMAT(II,JJ),II=1,NWIRE),JJ=JMIN,JMAX)
+       ENDIF
+10     CONTINUE
+       RETURN
+*** Handle the error condition.
+2010   CONTINUE
+       PRINT *,' ###### IONIO  ERROR   : Error during I/O'//
+     -      ' to scratch data set on unit 13 (signal matrices).'
+       CALL INPIOS(IOS)
+       IF(LDEBUG)PRINT *,' ++++++ IONIO  DEBUG   : Error occurred at'//
+     -      ' block ',I,' of matrix (',MX,',',MY,') REC=',NREC1+I
+       IFAIL=1
+       END
+
+       SUBROUTINE IPLIO(MX,MY,IMODE,IFAIL)
+*-----------------------------------------------------------------------
+*   IPLIO  - Performs the I/O operations for the routine SIGIPR
+*            storing and retrieving plane weighting charges.
+*   VARIABLES : MX, MY      : Fourier indices of the layers
+*               IMODE       : operation mode, 1=write, 2=read
+*               (see also routine IONBGN)
+*   (Last changed on  9/11/98.)
+*-----------------------------------------------------------------------
+       implicit none
+       INTEGER MXWIRE,MXMATT,MX3D,MXPSTR
+***       
+       INTEGER MXSW,MXLIST
+       PARAMETER (MXSW  =  200)
+       PARAMETER (MXLIST=  1000)
+***
+       PARAMETER (MXWIRE=  2000)
+       PARAMETER (MXMATT=    10)
+       PARAMETER (MX3D  =   100)
+       PARAMETER (MXPSTR=   100)
+       CHARACTER*80 CELLID
+       CHARACTER*3 TYPE
+       CHARACTER WIRTYP(MXWIRE),PLATYP(5),
+     -      PSLAB1(5,MXPSTR),PSLAB2(5,MXPSTR)
+       LOGICAL YNPLAN(4),PERX,PERY,PERZ,YNPLAX,YNPLAY,YNMATX,YNMATY,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,
+     -      PERRX,PERRY,PERRZ,CNALSO(MXWIRE),LBGFMP,CELSET,LDIPOL
+       INTEGER INDSW(MXWIRE),NWIRE,NSW,ICTYPE,MODE,NTUBE,MTUBE,
+     -      NXMATT,NYMATT,N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA(5),NPSTR1(5),NPSTR2(5),
+     -      INDST1(5,MXPSTR),INDST2(5,MXPSTR)
+       REAL X(MXWIRE),Y(MXWIRE),V(MXWIRE),E(MXWIRE),D(MXWIRE),W(MXWIRE),
+     -      U(MXWIRE),DENS(MXWIRE),
+     -      COSPH2(MXWIRE),SINPH2(MXWIRE),AMP2(MXWIRE),
+     -      COPLAN(4),VTPLAN(4),XMATT(MXMATT,5),YMATT(MXMATT,5),
+     -      X3D(MX3D),Y3D(MX3D),Z3D(MX3D),E3D(MX3D),
+     -      DOWN(3),PLSTR1(5,MXPSTR,3),PLSTR2(5,MXPSTR,3),
+     -      COTUBE,VTTUBE,B2SIN(MXWIRE),P1,P2,C1,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,
+     -      KAPPA
+       COMPLEX ZMULT,WMAP(MXWIRE)
+       COMMON /CELDAT/ ZMULT,WMAP,X,Y,V,E,D,W,U,DENS,
+     -      COSPH2,SINPH2,AMP2,
+     -      B2SIN,COPLAN,VTPLAN,XMATT,YMATT,X3D,Y3D,Z3D,E3D,DOWN,
+     -      PLSTR1,PLSTR2,
+     -      XMIN,YMIN,ZMIN,XMAX,YMAX,ZMAX,VMIN,VMAX,
+     -      COPLAX,COPLAY,COMATX,COMATY,COTUBE,VTTUBE,
+     -      CORVTA,CORVTB,CORVTC,V0,SX,SY,SZ,P1,P2,C1,KAPPA,
+     -      INDSW,NWIRE,NSW,ICTYPE,MODE,NXMATT,NYMATT,NTUBE,MTUBE,
+     -      N3D,NTERMB,NTERMP,IENBGF,
+     -      INDPLA,NPSTR1,NPSTR2,INDST1,INDST2,
+     -      YNPLAN,YNPLAX,YNPLAY,YNMATX,YNMATY,PERX,PERY,PERZ,
+     -      POLAR,TUBE,PERMX,PERMY,PERMZ,PERAX,PERAY,PERAZ,CNALSO,
+     -      PERRX,PERRY,PERRZ,LBGFMP,CELSET,LDIPOL
+       COMMON /CELCHR/ CELLID,WIRTYP,PLATYP,TYPE,PSLAB1,PSLAB2
+*** Signal data
+       INTEGER MXCHAR
+       PARAMETER (MXCHAR=2000)
+       LOGICAL FPERX,FPERY,LCROSS,TRASET,TRAFLG,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       INTEGER NPAIR,ICLUST,NFOUR,MFEXP,MXMIN,MXMAX,
+     -      MYMIN,MYMAX,NTRBNK,ITRMAJ,NTIME,NORIA,
+     -      NASIMP,JIORD,NISIMP,NMQUAD,NCANG,IENANG
+       REAL TIMSIG,SIGNAL,TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,
+     -      AVALAN,TSTART,TDEV,PRSTHR,
+     -      TRABNK,TRAVEC
+       CHARACTER*(MXCHAR) FCNANG
+       CHARACTER*12 AVATYP
+       CHARACTER*3 FCELTP
+       COMMON /SIGDAT/ TIMSIG(MXLIST),SIGNAL(MXLIST,MXSW,2),
+     -      AVALAN(2),TRAVEC(MXLIST),
+     -      TRABNK(MXLIST,9),TSTART,TDEV,PRSTHR,
+     -      TCLUST,SCLUST,ACLUST,BCLUST,FCLUST,ICLUST,NPAIR,
+     -      NFOUR,ITRMAJ,JIORD,NISIMP,NMQUAD,IENANG,NTIME,NORIA,
+     -      MFEXP,MXMIN,MXMAX,MYMIN,MYMAX,NTRBNK,NASIMP,NCANG,
+     -      TRASET,TRAFLG(9),FPERX,FPERY,LCROSS,LITAIL,LDTAIL,LRTAIL,
+     -      LEPULS,LIPULS,SIGSET,RESSET
+       COMMON /SIGCHR/ FCELTP,AVATYP,FCNANG
+*** Signal matrix
+       COMPLEX SIGMAT
+       REAL QPLANE,EWXCOR,EWYCOR
+       INTEGER IWORK,DUMMY
+       COMMON /MATRIX/ SIGMAT(MXWIRE,MXWIRE),QPLANE(5,MXWIRE),
+     -      IWORK(MXWIRE),DUMMY(2*MXWIRE+6)
+       COMMON /SPLDAT/ EWXCOR(5),EWYCOR(5)
+*** Print/Plot
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH
+       INTEGER LUNOUT,JFAIL,JEXMEM
+       COMMON /PRTPLT/ LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Local variables
+       INTEGER MX,MY,IMODE,IFAIL,NPEREC,NRECMT,NRECS,I,J,IOS,NREC1,
+     -      IRECP0
+       COMMON /FILE13/ NPEREC,NRECMT,IRECP0,NRECS
+*** Assume this will work.
+       IFAIL=0
+*** Find the location of the first record.
+       IF(FPERX.AND.FPERY)THEN
+            NREC1=IRECP0+(MX+NFOUR/2-1)*NFOUR+MY+NFOUR/2-1
+       ELSEIF(FPERX)THEN
+            NREC1=IRECP0+MX+NFOUR/2-1
+       ELSEIF(FPERY)THEN
+            NREC1=IRECP0+MY+NFOUR/2-1
+       ELSE
+            RETURN
+       ENDIF
+*** Read or write the matrix.
+       IF(NREC1.LT.IRECP0.OR.NREC1.GT.NRECS)THEN
+            PRINT *,' ###### IPLIO  ERROR   : I/O request references'//
+     -           ' an invalid record on unit 13 (program bug).'
+            IFAIL=1
+            RETURN
+       ENDIF
+       IF(IMODE.EQ.1)THEN
+            WRITE(UNIT=13,REC=NREC1,IOSTAT=IOS,ERR=2010)
+     -           ((QPLANE(I,J),I=1,5),J=1,NWIRE)
+       ELSEIF(IMODE.EQ.2)THEN
+            READ(UNIT=13,REC=NREC1+I,IOSTAT=IOS,ERR=2010)
+     -           ((QPLANE(I,J),I=1,5),J=1,NWIRE)
+       ENDIF
+       CONTINUE
+       RETURN
+*** Handle the error condition.
+2010   CONTINUE
+       PRINT *,' ###### IPLIO  ERROR   : Error during I/O to scratch'//
+     -      ' data set on unit 13 (signal plane matrices).'
+       CALL INPIOS(IOS)
+       IF(LDEBUG)PRINT *,' ++++++ IPLIO  DEBUG   : Error occurred at'//
+     -      ' matrix (',MX,',',MY,') REC=',NREC1
+       IFAIL=1
+       END
+
+       SUBROUTINE INPIOS(IOS)
+*-----------------------------------------------------------------------
+*   INPIOS - Prints details about the most recent Fortran error message.
+*            Version for IBM RT and SP2 computers, error messages from
+*            XL Fortran for AIX Language Reference Version 3 Release 2.
+*   (Last changed on 12/ 9/95.)
+*-----------------------------------------------------------------------
+       implicit none
+       CHARACTER*60 MESS
+       INTEGER IOS
+*** Print/Plot
+       LOGICAL LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH
+       INTEGER LUNOUT,JFAIL,JEXMEM
+       COMMON /PRTPLT/ LINPUT,LCELPR,LCELPL,LWRMRK,LISOCL,LCHGCH,
+     -         LDRPLT,LDRPRT,LCLPRT,LCLPLT,LMAPCH,LCNTAM,
+     -         LDEBUG,LIDENT,LKEYPL,LRNDMI,LPROPR,LPROF,LGSTOP,LGSIG,
+     -         LSYNCH,LUNOUT,JFAIL,JEXMEM
+*** Print an message according to the IOS value.
+       IF(IOS.EQ.-4)THEN
+            MESS='(EOR) End of record encountered, external READ.'
+       ELSEIF(IOS.EQ.-2)THEN
+            MESS='(EOF) End of file encountered for an internal READ.'
+       ELSEIF(IOS.EQ.-1)THEN
+            MESS='(EOF) End of file encountered during external READ.'
+       ELSEIF(IOS.EQ.0)THEN
+            MESS='(OK) I/O operation successfully completed.'
+       ELSEIF(IOS.EQ.1)THEN
+            MESS='(S) Non-existing record specified for a direct READ.'
+       ELSEIF(IOS.EQ.2)THEN
+            MESS='(S) End of file encountered during external WRITE.'
+       ELSEIF(IOS.EQ.3)THEN
+            MESS='(CNV) End of record on an unformatted file.'
+       ELSEIF(IOS.EQ.4)THEN
+            MESS='(CNV) End of record on a formatted external file.'
+       ELSEIF(IOS.EQ.5)THEN
+            MESS='(CNV) End of record on an internal file.'
+       ELSEIF(IOS.EQ.6)THEN
+            MESS='(S) OPEN with STATUS=OLD, but file not found.'
+       ELSEIF(IOS.EQ.7)THEN
+            MESS='(CNV) Format error in external list-directed input.'
+       ELSEIF(IOS.EQ.8)THEN
+            MESS='(CNV) Format error in internal list-directed input.'
+       ELSEIF(IOS.EQ.9)THEN
+            MESS='(CNV) List-directed or NAMELIST item too long.'
+       ELSEIF(IOS.EQ.10)THEN
+            MESS='(S) READ error on a direct access file.'
+       ELSEIF(IOS.EQ.11)THEN
+            MESS='(S) WRITE error on a direct access file.'
+       ELSEIF(IOS.EQ.12)THEN
+            MESS='(S) READ error on a sequential access file.'
+       ELSEIF(IOS.EQ.13)THEN
+            MESS='(S) WRITE error on a sequential access file.'
+       ELSEIF(IOS.EQ.14)THEN
+            MESS='(S) Error opening a file.'
+       ELSEIF(IOS.EQ.15)THEN
+            MESS='(S) Permanent I/O error encountered on a file.'
+       ELSEIF(IOS.EQ.16)THEN
+            MESS='(E) Invalid record specified for a direct I/O.'
+       ELSEIF(IOS.EQ.17)THEN
+            MESS='(E) I/O statement not allowed on direct file.'
+       ELSEIF(IOS.EQ.18)THEN
+            MESS='(E) Direct I/O attempted on an unconnected unit.'
+       ELSEIF(IOS.EQ.19)THEN
+            MESS='(E) Unformatted I/O attempted on a formatted file.'
+       ELSEIF(IOS.EQ.20)THEN
+            MESS='(E) Formatted I/O attempted on an unformatted file.'
+       ELSEIF(IOS.EQ.21)THEN
+            MESS='(E) Sequential I/O attempted on a direct file.'
+       ELSEIF(IOS.EQ.22)THEN
+            MESS='(E) Direct I/O attempted on a sequential file.'
+       ELSEIF(IOS.EQ.23)THEN
+            MESS='(E) Attempt to connect an already connected file.'
+       ELSEIF(IOS.EQ.24)THEN
+            MESS='(E) Specifiers of OPEN do not match file attributes.'
+       ELSEIF(IOS.EQ.25)THEN
+            MESS='(E) RECL specifier missing on OPEN for a direct file.'
+       ELSEIF(IOS.EQ.26)THEN
+            MESS='(E) RECL specified on an OPEN is negative.'
+       ELSEIF(IOS.EQ.27)THEN
+            MESS='(E) ACCESS specifier on an OPEN statement is invalid.'
+       ELSEIF(IOS.EQ.28)THEN
+            MESS='(E) FORM specifier on an OPEN statement is invalid.'
+       ELSEIF(IOS.EQ.29)THEN
+            MESS='(E) STATUS specifier on an OPEN statement is invalid.'
+       ELSEIF(IOS.EQ.30)THEN
+            MESS='(E) BLANK specifier on an OPEN statement is invalid.'
+       ELSEIF(IOS.EQ.31)THEN
+            MESS='(E) FILE specifier on an OPEN or INQUIRE is invalid.'
+       ELSEIF(IOS.EQ.32)THEN
+            MESS='(E) STATUS=SCRATCH and file name specified on OPEN.'
+       ELSEIF(IOS.EQ.33)THEN
+            MESS='(E) STATUS=KEEP on CLOSE for a scratch file.'
+       ELSEIF(IOS.EQ.34)THEN
+            MESS='(E) Value of STATUS not valid on CLOSE.'
+       ELSEIF(IOS.EQ.36)THEN
+            MESS='(E) Invalid unit number specified in I/O statement.'
+       ELSEIF(IOS.EQ.37)THEN
+            MESS='(S) Dynamic memory allocation failure.'
+       ELSEIF(IOS.EQ.38)THEN
+            MESS='(S) REWIND error.'
+       ELSEIF(IOS.EQ.39)THEN
+            MESS='(S) ENDFILE error.'
+       ELSEIF(IOS.EQ.40)THEN
+            MESS='(S) BACKSPACE error.'
+       ELSEIF(IOS.EQ.41)THEN
+            MESS='(CNV) Valid logical input not found in external file.'
+       ELSEIF(IOS.EQ.42)THEN
+            MESS='(CNV) Valid logical input not found in internal file.'
+       ELSEIF(IOS.EQ.43)THEN
+            MESS='(CNV) Complex value not found in external READ.'
+       ELSEIF(IOS.EQ.44)THEN
+            MESS='(CNV) Complex value not found in internal READ.'
+       ELSEIF(IOS.EQ.45)THEN
+            MESS='(CNV) NAMELIST item of unknown or invalid type.'
+       ELSEIF(IOS.EQ.46)THEN
+            MESS='(CNV) NAMELIST item with invalid substring range.'
+       ELSEIF(IOS.EQ.47)THEN
+            MESS='(E) NAMELIST input has items of non-zero rank.'
+       ELSEIF(IOS.EQ.48)THEN
+            MESS='(E) NAMELIST input item with zero-sized array.'
+       ELSEIF(IOS.EQ.49)THEN
+            MESS='(CNV) Invalid delimited character string in input.'
+       ELSEIF(IOS.EQ.53)THEN
+            MESS='(F90) Mismatch between edit descriptor and item.'
+       ELSEIF(IOS.EQ.56)THEN
+            MESS='(CNV) Invalid digit in B, O or Z format input.'
+       ELSEIF(IOS.EQ.58)THEN
+            MESS='(E/F90) Format specification error.'
+       ELSEIF(IOS.EQ.84)THEN
+            MESS='(CNV) NAMELIST group header not found, external file.'
+       ELSEIF(IOS.EQ.85)THEN
+            MESS='(CNV) NAMELIST group header not found, internal file.'
+       ELSEIF(IOS.EQ.86)THEN
+            MESS='(CNV) Invalid NAMELIST input found in external file.'
+       ELSEIF(IOS.EQ.87)THEN
+            MESS='(CNV) Invalid NAMELIST input found in internal file.'
+       ELSEIF(IOS.EQ.88)THEN
+            MESS='(CNV) Invalid name found in NAMELIST input.'
+       ELSEIF(IOS.EQ.90)THEN
+            MESS='(CNV) Invalid character in NAMELIST group or item.'
+       ELSEIF(IOS.EQ.91)THEN
+            MESS='(CNV) Invalid NAMELIST input syntax.'
+       ELSEIF(IOS.EQ.92)THEN
+            MESS='(CNV) Invalid subscript list for NAMELIST input item.'
+       ELSEIF(IOS.EQ.93)THEN
+            MESS='(E) I/O statement not allowed on the error unit (0).'
+       ELSEIF(IOS.EQ.94)THEN
+            MESS='(CNV) Invalid repeat counter found in external input.'
+       ELSEIF(IOS.EQ.95)THEN
+            MESS='(CNV) Invalid repeat counter found in internal input.'
+       ELSEIF(IOS.EQ.96)THEN
+            MESS='(CNV) Integer overflow in input.'
+       ELSEIF(IOS.EQ.97)THEN
+            MESS='(CNV) Invalid decimal digit found in input.'
+       ELSEIF(IOS.EQ.98)THEN
+            MESS='(CNV) Input too long for B, Z or O formats.'
+       ELSEIF(IOS.EQ.107)THEN
+            MESS='(S) OPEN with STATUS=NEW and file exists already.'
+       ELSEIF(IOS.EQ.110)THEN
+            MESS='(E) Illegal edit descriptor in formatted I/O'
+       ELSEIF(IOS.EQ.119)THEN
+            MESS='(S) BACKSPACE attempted on a tape device.'
+       ELSEIF(IOS.EQ.120)THEN
+            MESS='(E) The NLWIDTH setting exceeds the record length.'
+       ELSEIF(IOS.EQ.121)THEN
+            MESS='(CNV) Output length of NAMELIST too long.'
+       ELSEIF(IOS.EQ.122)THEN
+            MESS='(S) Incomplete record encountered during direct READ.'
+       ELSEIF(IOS.EQ.125)THEN
+            MESS='(E) BLANK given on an OPEN for an unformatted file.'
+       ELSEIF(IOS.EQ.127)THEN
+            MESS='(E) POSITION given on an OPEN for a direct file.'
+       ELSEIF(IOS.EQ.128)THEN
+            MESS='(E) POSITION value given on an OPEN is not valid.'
+       ELSEIF(IOS.EQ.129)THEN
+            MESS='(E) ACTION value given on an OPEN is not valid.'
+       ELSEIF(IOS.EQ.130)THEN
+            MESS='(S) ACTION=READWRITE for an OPEN on a pipe.'
+       ELSEIF(IOS.EQ.131)THEN
+            MESS='(E) DELIM given on an OPEN for an unformatted file.'
+       ELSEIF(IOS.EQ.132)THEN
+            MESS='(E) DELIM value given on an OPEN is not valid.'
+       ELSEIF(IOS.EQ.133)THEN
+            MESS='(E) PAD given on an OPEN for an unformatted file.'
+       ELSEIF(IOS.EQ.134)THEN
+            MESS='(E) PAD value given on an OPEN is not valid.'
+       ELSEIF(IOS.EQ.135)THEN
+            MESS='(S) Call to an unsupported version of the XLF RTL.'
+       ELSEIF(IOS.EQ.136)THEN
+            MESS='(E) ADVANCE value given on a READ is not valid.'
+       ELSEIF(IOS.EQ.137)THEN
+            MESS='(E) SIZE present but ADVANCE=NO missing in a READ.'
+       ELSEIF(IOS.EQ.138)THEN
+            MESS='(E) EOR present but ADVANCE=NO missing in a READ.'
+       ELSEIF(IOS.EQ.139)THEN
+            MESS='(S) Operation not compatible with ACTION specifier.'
+       ELSEIF(IOS.EQ.140)THEN
+            MESS='(F90) I/O attempted for an unconnected unit.'
+       ELSEIF(IOS.EQ.141)THEN
+            MESS='(F90) Two consecutive ENDFILEs.'
+       ELSEIF(IOS.EQ.142)THEN
+            MESS='(S) CLOSE error.'
+       ELSEIF(IOS.EQ.144)THEN
+            MESS='(S) INQUIRE error.'
+       ELSEIF(IOS.EQ.145)THEN
+            MESS='(E) READ or WRITE attempted after the end-of-file.'
+       ELSEIF(IOS.EQ.151)THEN
+            MESS='(F90) FILE missing nor STATUS=SCRATCH in OPEN.'
+       ELSEIF(IOS.EQ.152)THEN
+            MESS='(S) OPEN with ACCESS=DIRECT for a sequential file.'
+       ELSEIF(IOS.EQ.153)THEN
+            MESS='(S) REWIND or APPEND on an OPEN for a pipe.'
+       ELSEIF(IOS.EQ.156)THEN
+            MESS='(S) Invalid record length on an OPEN statement.'
+       ELSEIF(IOS.EQ.159)THEN
+            MESS='(S) External input not flushed - seek not possible.'
+       ELSE
+            MESS='(?) Error message with unknown IOSTAT code.'
+       ENDIF
+*** Dump the data in DEBUG mode.
+       IF(LDEBUG)WRITE(LUNOUT,'(''  ++++++ INPIOS DEBUG   : IOSTAT'',
+     -      '' error code received is '',I8)') IOS
+*** Interpret the error message.
+       WRITE(LUNOUT,'(''  ------ INPIOS MESSAGE : Supplementary data'',
+     -      '' for the above error message:''/26X,A)') MESS
+       END
+
+*-----------------------------------------------------------------------
 *     Routines from Cernlib
 *-----------------------------------------------------------------------
+
+      SUBROUTINE CFFT(A,MSIGN)
+*-----------------------------------------------------------------------
+*   Complex Fast Fourier Transform
+*-----------------------------------------------------------------------
+      COMPLEX A(1),U,W,T
+      IF(MSIGN.EQ.0) RETURN
+      M=IABS(MSIGN)
+      N=2**M
+      NV2=N/2
+      NM1=N-1
+      J=1
+      DO 7 I=1,NM1
+      IF(I.GE.J) GO TO 5
+      T=A(J)
+      A(J)=A(I)
+      A(I)=T
+ 5    K=NV2
+ 6    IF(K.GE.J) GO TO 7
+      J=J-K
+      K=K/2
+      GO TO 6
+ 7    J=J+K
+      DO 8 I=1,N,2
+      T=A(I+1)
+      A(I+1)=A(I)-T
+ 8    A(I )=A(I)+T
+      IF(M.EQ.1) RETURN
+      C=0.
+      S=ISIGN(1,MSIGN)
+      LE=2
+      DO 20 L=2,M
+      W=CMPLX(C,S)
+      U=W
+      C=SQRT(C*.5+.5)
+      S=AIMAG(W)/(C+C)
+      LE1=LE
+      LE=LE1+LE1
+      DO 9 I=1,N,LE
+      IP=I+LE1
+      T=A(IP)
+      A(IP)=A(I)-T
+ 9    A(I) =A(I)+T
+      DO 20 J=2,LE1
+      DO 10 I=J,N,LE
+      IP=I+LE1
+      T=A(IP)*U
+      A(IP)=A(I)-T
+ 10   A(I) =A(I)+T
+ 20   U=U*W
+      RETURN
+      END
+
+
+      SUBROUTINE CINV(N,A,IDIM,R,IFAIL)
+*-----------------------------------------------------------------------
+*
+*     Replaces A by its inverse.
+*
+*     CALLS ... CFACT, CFINV
+*
+*-----------------------------------------------------------------------
+      REAL R(N),T1,T2,T3
+      COMPLEX A(IDIM,N),ONE,DET,TEMP,S,
+     $        C11,C12,C13,C21,C22,C23,C31,C32,C33
+      DATA ONE/(1.0,0.0)/
+
+C
+C  TEST FOR PARAMETER ERRORS.
+C
+      IF((N.LT.1).OR.(N.GT.IDIM)) GO TO 7
+C
+C  TEST FOR N.LE.3.
+C
+      IF(N.GT.3) GO TO 6
+      IFAIL=0
+      IF(N.LT.3) GO TO 4
+C
+C  N=3 CASE.
+C
+C     COMPUTE COFACTORS.
+      C11=A(2,2)*A(3,3)-A(2,3)*A(3,2)
+      C12=A(2,3)*A(3,1)-A(2,1)*A(3,3)
+      C13=A(2,1)*A(3,2)-A(2,2)*A(3,1)
+      C21=A(3,2)*A(1,3)-A(3,3)*A(1,2)
+      C22=A(3,3)*A(1,1)-A(3,1)*A(1,3)
+      C23=A(3,1)*A(1,2)-A(3,2)*A(1,1)
+      C31=A(1,2)*A(2,3)-A(1,3)*A(2,2)
+      C32=A(1,3)*A(2,1)-A(1,1)*A(2,3)
+      C33=A(1,1)*A(2,2)-A(1,2)*A(2,1)
+      T1=ABS(REAL(A(1,1)))+ABS(AIMAG(A(1,1)))
+      T2=ABS(REAL(A(2,1)))+ABS(AIMAG(A(2,1)))
+      T3=ABS(REAL(A(3,1)))+ABS(AIMAG(A(3,1)))
+C
+C     (SET TEMP=PIVOT AND DET=PIVOT*DET.)
+      IF(T1.GE.T2) GO TO 1
+         IF(T3.GE.T2) GO TO 2
+C        (PIVOT IS A21)
+            TEMP=A(2,1)
+            DET=C13*C32-C12*C33
+            GO TO 3
+    1 IF(T3.GE.T1) GO TO 2
+C     (PIVOT IS A11)
+         TEMP=A(1,1)
+         DET=C22*C33-C23*C32
+         GO TO 3
+C     (PIVOT IS A31)
+    2    TEMP=A(3,1)
+         DET=C23*C12-C22*C13
+C
+C     SET ELEMENTS OF INVERSE IN A.
+    3 IF( REAL(DET).EQ.0. .AND. AIMAG(DET).EQ.0. ) GO TO 8
+      S=TEMP/DET
+      A(1,1)=S*C11
+      A(1,2)=S*C21
+      A(1,3)=S*C31
+      A(2,1)=S*C12
+      A(2,2)=S*C22
+      A(2,3)=S*C32
+      A(3,1)=S*C13
+      A(3,2)=S*C23
+      A(3,3)=S*C33
+      RETURN
+C
+    4 IF(N.LT.2) GO TO 5
+C
+C  N=2 CASE BY CRAMERS RULE.
+C
+      DET=A(1,1)*A(2,2)-A(1,2)*A(2,1)
+      IF( REAL(DET).EQ.0. .AND. AIMAG(DET).EQ.0. ) GO TO 8
+      S=ONE/DET
+      C11   =S*A(2,2)
+      A(1,2)=-S*A(1,2)
+      A(2,1)=-S*A(2,1)
+      A(2,2)=S*A(1,1)
+      A(1,1)=C11
+      RETURN
+C
+C  N=1 CASE.
+C
+    5 IF( REAL(A(1,1)).EQ.0. .AND. AIMAG(A(1,1)).EQ.0. ) GO TO 8
+      A(1,1)=ONE/A(1,1)
+      RETURN
+C
+C  N.GT.3 CASES.  FACTORIZE MATRIX AND INVERT.
+C
+    6 CALL CFACT(N,A,IDIM,R,IFAIL,DET,JFAIL)
+      IF(IFAIL.NE.0) RETURN
+      CALL CFINV(N,A,IDIM,R)
+      RETURN
+C
+C  ERROR EXITS.
+C
+    7 IFAIL=+1
+      RETURN
+C
+    8 IFAIL=-1
+      RETURN
+C
+      END
 
        SUBROUTINE DEQINV(N,A,IDIM,R,IFAIL,K,B)
 *-----------------------------------------------------------------------
@@ -7248,6 +12562,93 @@ CDECK  ID>, INTUBE.
        IR(N)  =  NXCH
        RETURN
        END
+       
+       SUBROUTINE CFACT(N,A,IDIM,IR,IFAIL,DET,JFAIL)
+*-----------------------------------------------------------------------
+* CFACT
+*-----------------------------------------------------------------------    
+       INTEGER             IR(*),    IPAIRF
+       COMPLEX             A(IDIM,*),DET,      ZERO,     ONE,X,Y,TF
+       REAL                G1,       G2
+       REAL                PIVOTF,   P,        Q,        SIZEF,  T
+       COMPLEX             S11, S12, DOTF
+       DOTF(X,Y,S11)  =  X*Y + S11
+
+       IPAIRF(J,K)  =  J*2**12 + K
+       PIVOTF(X)    =  MAX(ABS(REAL(X)),ABS(AIMAG(X)))
+       SIZEF(X)     =  MAX(ABS(REAL(X)),ABS(AIMAG(X)))
+* CERNLIB_NUME2465
+*      DATA      G1, G2              /  1.E-1232, 1.E1232  /
+* CERNLIB_NUME293
+*      DATA      G1, G2              /  1.E-146, 1.E146  /
+* CERNLIB_NUME75
+*      DATA      G1, G2              /  1.E-37,  1.E37  /
+       DATA      G1, G2              /  1.E-19,  1.E19  /
+       DATA      ZERO, ONE           /  (0., 0.), (1., 0.)  /
+       DATA      NORMAL, IMPOSS      /  0, -1  /
+       DATA      JRANGE, JOVER, JUNDER  /  0, +1, -1  /
+
+       IF(IDIM .GE. N  .AND.  N .GT. 0)  GOTO 110
+       RETURN
+ 110   IFAIL  =  NORMAL
+       JFAIL  =  JRANGE
+       NXCH   =  0
+       DET    =  ONE
+       DO 144    J  =  1, N
+          K  =  J
+          P  =  PIVOTF(A(J,J))
+          IF(J .EQ. N)  GOTO 122
+          JP1  =  J+1
+          DO 121    I  =  JP1, N
+             Q  =  PIVOTF(A(I,J))
+             IF(Q .LE. P)  GOTO 121
+                K  =  I
+                P  =  Q
+ 121         CONTINUE
+          IF(K .NE. J)  GOTO 123
+ 122      IF(P .GT. 0.)  GOTO 130
+             DET    =  ZERO
+             IFAIL  =  IMPOSS
+             JFAIL  =  JRANGE
+             RETURN
+ 123      DO 124    L  =  1, N
+             TF      =  A(J,L)
+             A(J,L)  =  A(K,L)
+             A(K,L)  =  TF
+ 124         CONTINUE
+          NXCH      =  NXCH + 1
+          IR(NXCH)  =  IPAIRF(J,K)
+ 130      DET     =  DET * A(J,J)
+          A(J,J)  =  ONE / A(J,J)
+          T  =  SIZEF(DET)
+          IF(T .LT. G1)  THEN
+             DET    =  ZERO
+             IF(JFAIL .EQ. JRANGE)  JFAIL  =  JUNDER
+          ELSEIF(T .GT. G2)  THEN
+             DET    =  ONE
+             IF(JFAIL .EQ. JRANGE)  JFAIL  =  JOVER
+          ENDIF
+          IF(J .EQ. N)  GOTO 144
+          JM1  =  J-1
+          JP1  =  J+1
+          DO 143   K  =  JP1, N
+             S11  =  -A(J,K)
+             S12  =  -A(K,J+1)
+             IF(J .EQ. 1)  GOTO 142
+             DO 141  I  =  1, JM1
+                S11  =  DOTF(A(I,K),A(J,I),S11)
+                S12  =  DOTF(A(I,J+1),A(K,I),S12)
+ 141            CONTINUE
+ 142         A(J,K)    =  -S11 * A(J,J)
+             A(K,J+1)  =  -DOTF(A(J,J+1),A(K,J),S12)
+ 143         CONTINUE
+ 144      CONTINUE
+       IF(MOD(NXCH,2) .NE. 0)  DET  =  -DET
+       IF(JFAIL .NE. JRANGE)   DET  =  ZERO
+       IR(N)  =  NXCH
+       RETURN
+       END
+       
 
        SUBROUTINE DFEQN(N,A,IDIM,IR,K,B)
 *-----------------------------------------------------------------------
@@ -7272,6 +12673,7 @@ CDECK  ID>, INTUBE.
  211         CONTINUE
  212      CONTINUE
  220   DO 221    L  =  1, K
+
           B(1,L)  =  A(1,1)*B(1,L)
  221      CONTINUE
        IF(N .EQ. 1)  GOTO 299
@@ -7296,6 +12698,7 @@ CDECK  ID>, INTUBE.
  242         CONTINUE
  243      CONTINUE
  299   CONTINUE
+
        RETURN
        END
        
@@ -7363,12 +12766,78 @@ CDECK  ID>, INTUBE.
        RETURN
        END
        
-       FUNCTION GAMMA(X)
+       SUBROUTINE CFINV(N,A,IDIM,IR)
 *-----------------------------------------------------------------------
-* GAMMA 
+* CFINV 
+*-----------------------------------------------------------------------
+       INTEGER             IR(*)
+       COMPLEX             A(IDIM,*),     X, Y, TI
+       COMPLEX             ZERO, S31, S32, S33, S34, DOTF
+       DOTF(X,Y,S31)  =  X*Y + S31
+       DATA      ZERO      /  (0.,0.)  /
+
+       IF(IDIM .GE. N  .AND.  N .GT. 0)  GOTO 310
+       RETURN
+ 310   IF(N .EQ. 1)  RETURN
+       A(2,1)  =  -A(2,2) * DOTF(A(1,1),A(2,1),ZERO)
+       A(1,2)  =  -A(1,2)
+       IF(N .EQ. 2)  GOTO 330
+       DO 314    I  =  3, N
+          IM2  =  I-2
+          DO 312 J  =  1, IM2
+             S31  =  ZERO
+             S32  =  A(J,I)
+             DO 311  K  =  J, IM2
+                S31  =  DOTF(A(K,J),A(I,K),S31)
+                S32  =  DOTF(A(J,K+1),A(K+1,I),S32)
+ 311            CONTINUE
+             A(I,J)  =  -A(I,I) * DOTF(A(I-1,J),A(I,I-1),S31)
+             A(J,I)  =  -S32
+ 312         CONTINUE
+          A(I,I-1)  =  -A(I,I) * DOTF(A(I-1,I-1),A(I,I-1),ZERO)
+          A(I-1,I)  =  -A(I-1,I)
+ 314      CONTINUE
+ 330   NM1  =  N-1
+       DO 335   I  =  1, NM1
+          NMI  =  N-I
+          DO 332   J  =  1, I
+             S33  =  A(I,J)
+             DO 331   K  =  1, NMI
+                S33  =  DOTF(A(I+K,J),A(I,I+K),S33)
+ 331            CONTINUE
+             A(I,J)  =  S33
+ 332         CONTINUE
+          DO 334   J  =  1, NMI
+             S34  =  ZERO
+             DO 333   K  =  J, NMI
+                S34  =  DOTF(A(I+K,I+J),A(I,I+K),S34)
+ 333            CONTINUE
+             A(I,I+J)  =  S34
+ 334         CONTINUE
+ 335      CONTINUE
+       NXCH  =  IR(N)
+       IF(NXCH .EQ. 0)  RETURN
+         DO 342 M  =  1, NXCH
+          K   =  NXCH - M+1
+          IJ  =  IR(K)
+          I   =  IJ / 4096
+          J   =  MOD(IJ,4096)
+          DO 341  K  =  1, N
+             TI      =  A(K,I)
+             A(K,I)  =  A(K,J)
+             A(K,J)  =  TI
+ 341         CONTINUE
+ 342      CONTINUE
+       RETURN
+       END
+
+       
+       FUNCTION RGAMMA(X)
+*-----------------------------------------------------------------------
+* Gamma function
 *-----------------------------------------------------------------------
        implicit none
-       DOUBLE PRECISION gamma
+       REAL RGAMMA
        REAL X
        DOUBLE PRECISION C, U, F, H, ALFA, B0, B1, B2
        INTEGER I
@@ -7392,8 +12861,12 @@ CDECK  ID>, INTUBE.
        DATA C(15) /0.00000 00000 00000 04D0/
        
        U=DBLE(X)
+       F=0
+       B0=0
+       B1=0
+       B2=0
        IF(U .LE. 0) THEN
-         PRINT *,' GAMMA: Argument is negative'
+         PRINT *,' RGAMMA: Argument is negative'
          H=0
          GO TO 9
        ENDIF
@@ -7409,13 +12882,11 @@ CDECK  ID>, INTUBE.
        END IF
        H=U+U-7
        ALFA=H+H
-       B1=0
-       B2=0
        DO 3 I = 15,0,-1
          B0=C(I)+ALFA*B1-B2
          B2=B1
     3    B1=B0
-    9  GAMMA =F*(B0-H*B2)
+    9  RGAMMA =REAL(F*(B0-H*B2))
        RETURN
        END       
       

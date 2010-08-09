@@ -1,203 +1,373 @@
 #ifndef G_COMPONENT_ANALYTIC_FIELD_H
 #define G_COMPONENT_ANALYTIC_FIELD_H
 
-#include <string>
+#include <cmath>
 
-#include <RQ_OBJECT.h>
+#include <string>
+#include <vector>
+#include <complex>
 
 #include "ComponentBase.hh"
-#include "GeometryBase.hh"
+#include "FundamentalConstants.hh"
 
-// Parameters in Fortran subroutines
-static const int mxwire = 2000;
-static const int mxmatt = 10;
-static const int mx3d = 100;
-static const int mxpstr = 100;
-
-// Structure defining a complex number
-
-struct complex_{
-  float real;
-  float imag;
-};
-
-extern "C" {
-  // COMMON BLOCKS CONTAINING INFORMATION DEFINING THE CELL
-  extern struct {
-    struct complex_ zmult, wmap[mxwire];
-    float x[mxwire], y[mxwire], v[mxwire], e[mxwire], d[mxwire], w[mxwire],
-      u[mxwire], dens[mxwire],
-      cosph2[mxwire], sinph2[mxwire], amp2[mxwire], b2sin[mxwire],
-      coplan[4], vtplan[4], 
-      xmatt[5][mxmatt], ymatt[5][mxmatt],
-      x3d[mx3d], y3d[mx3d], z3d[mx3d], e3d[mx3d],
-      down[3], plstr1[3][mxpstr][5], plstr2[3][mxpstr][5],
-      xmin, ymin, zmin, xmax, ymax, zmax, vmin, vmax,
-      coplax, coplay, comatx, comaty,
-      cotube, vttube, corvta, corvtb, corvtc,
-      v0, sx, sy, sz, p1, p2, c1, kappa;
-    
-    int indsw[mxwire], nwire, nsw, ictype, mode, nxmatt, nymatt, ntube, mtube,
-      n3d, ntermb, ntermp, ienbgf,
-      indpla[5], npstr1[5], npstr2[5],
-      indst1[mxpstr][5], indst2[mxpstr][5];
-    
-    int ynplan[4], ynplax, ynplay, ynmatx, ynmaty, 
-      perx, pery, perz, polar, tube, 
-      permx, permy, permz, perax, peray, peraz, cnalso[mxwire],
-      perrx, perry, perrz, lbgfmp, celset, ldipol;
-
-  } celdat_;
-
-  extern struct {
-    char cellid[80];
-    char wirtyp[mxwire];
-    char platyp[5];
-    char type[3];
-    char pslab1[mxpstr][5];
-    char pslab2[mxpstr][5];
-  } celchr_;
-
-
-  // Fortran subroutines required to access the electric field
-  void efield_(float* , float* , float* , float* , float* , float* ,
-               float* , float* , int* , int* );
-
-  void setupanalyticfield_(int* ifail);
-
-  void celchk_(int* ifail);
-
-}
 
 namespace Garfield {
   
-// ----------------------------------------------------------------
-class ComponentAnalyticField: public ComponentBase {
-    
-  RQ_OBJECT("ComponentAnalyticField")
- 
+class ComponentAnalyticField : public ComponentBase {
+     
   public:
-    // Constructors
-    ComponentAnalyticField(std::string cellName, 
-                             float xl, float xm, float yl, float ym, 
-                             float zl, float zm);
-    ComponentAnalyticField(std::string cellName);
+    // Constructor
     ComponentAnalyticField();
     
     // Destructor
     ~ComponentAnalyticField() {}
- 
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Reqired methods
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      
+    
     void ElectricField(const double x, const double y, const double z,
                        double& ex, double& ey, double& ez, 
                        Medium*& m, int& status);
-    // Calculate the drift field [V/cm] and potential [V] at (x, y, z)
     void ElectricField(const double x, const double y, const double z, 
 		       double& ex, double& ey, double& ez, double& v, 
 		       Medium*& m, int& status);
-    // Calculate the voltage range [V]
-    bool GetVoltageRange(double& vmin, double& vmax);
     
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    //  Other Virtual Methods
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    bool GetVoltageRange(double& pmin, double& pmax);
     
-     void WeightingField(const double x, const double y, const double z,
+    void WeightingField(const double x, const double y, const double z,
                         double& wx, double& wy, double& wz,
                         const std::string label);
+    
+    bool GetBoundingBox(double& x0, double& y0, double& z0,
+                        double& x1, double& y1, double& z1);
 
-    double WeightingPotential(const double x, const double y, const double z,
-                              const std::string label);
-
-    void SetGeometry(GeometryBase* geo);
-
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Methods unique to ComponentAnalyticField
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    void AddWire(float x, float y, float diameter, float voltage, char label,
-                 float tension = 50., float length = 100., float rho = 19.3);
-    void AddTube(float radius, float voltage, int numEdges, char label);
-    void AddPlanes(bool plane1, float c1, float v1, char lab1,   
-		   bool plane2, float c2, float v2, char lab2,
-		   bool plane3, float c3, float v3, char lab3,
-		   bool plane4, float c4, float v4, char lab4);
-
+    void AddWire(const double x, const double y, const double diameter, 
+                 const double voltage, const char label,
+                 const double length = 100., 
+                 const double tension = 50., const double rho = 19.3);    
+    void AddTube(const double radius, const double voltage, 
+                 const int nEdges, const char label);
+    void AddPlaneX(const double x, const double voltage, const char label);    
+    void AddPlaneY(const double y, const double voltage, const char label);
+    
     // Set the periodic length [cm] in x/y direction
     void SetPeriodicityX(const double s);
     void SetPeriodicityY(const double s);
-       
-    bool Prepare();
-
-    //Rotates the cell. Originally the plane, wires and tubes are placed 
-    //perpendicular to the xy-plane.
-    //theta rotates y -> z 
-    //phi  rotates z -> x
-    //gamma rotates x -> y
-    void SetRotation(double aTheta, double aPhi, double aGamma);
-    // Sets the translation vector
-    void SetTranslation(double xtrans, double ytrans, double ztrans);
-
-  private:
     
-    bool cellok;
-    bool isRotated;
-    bool isTranslated;
+    std::string GetCellType() {return cellType;}
+    
+    void AddReadout(const char label);
+    
+    void EnableChargeCheck()  {chargeCheck = true;}
+    void DisableChargeCheck() {chargeCheck = false;}
+    void Test();
+ 
+  private:
+  
+    bool chargeCheck;
+        
+    bool cellset;
+    bool sigset;
+    
+    bool polar;
 
-    // Periodic lengths
+    // Cell type (as string and number)
+    std::string cellType;
+    int iCellType;
+        
+    // Bounding box
+    double xmin, xmax;
+    double ymin, ymax;
+    double zmin, zmax;
+    
+    // Voltage range
+    double vmin, vmax;
+    
+    // Periodicities
+    bool perx, pery;
     double sx, sy;
+    
+    // Signals
+    int nFourier;
+    std::string cellTypeFourier;
+    bool fperx, fpery;
+    int mxmin, mxmax, mymin, mymax;
+    int mfexp;
+    
+    int nReadout;
+    std::vector<char> readout;
+    
+    // Wires
+    int nWires;
+    struct wire {
+      // Location
+      double x;
+      double y;
+      // Diameter
+      double d;
+      // Potential
+      double v;
+      // Charge
+      double e;
+      // Label
+      char type;
+      // Length
+      double u;
+      // Readout group
+      int ind;
+    };
+    std::vector<wire> w;
+      
+    // Stretching weight
+    std::vector<double> weight;
+    // Density
+    std::vector<double> dens;
+    // Mirror charges for force calculations
+    std::vector<double> cnalso;
+    
+    // Option for computation of dipole terms
+    bool dipole;
+    // Dipole angle and amplitude
+    std::vector<double> cosph2;
+    std::vector<double> sinph2;
+    std::vector<double> amp2;
+    
+    // Parameters for B2 type cells
+    std::vector<double> b2sin;
+    // Parameters for C type cells
+    int mode;
+    std::complex<double> zmult;
+    double p1, p2, c1;
+    // Parameters for D3 type cells
+    // Conformal mapping in polygons
+    std::vector<std::complex<double> > wmap;
+    double kappa;
+    // Tables of coefficients
+    std::vector<std::vector<double> > cc1;
+    std::vector<std::vector<double> > cc2;
+ 
+    // Reference potential
+    double v0;
+    double corvta, corvtb, corvtc;
+    
+    // Planes
+    // Existence
+    bool ynplan[4];
+    bool ynplax, ynplay;
+    // Coordinates
+    double coplan[4];
+    double coplax, coplay;
+    // Voltages
+    double vtplan[4];
+    
+    struct strip {
+      // Label
+      char type;
+      // Readout group
+      int ind;
+      // Coordinates
+      double min, max;
+      double gap;
+    };
+    
+    struct plane {
+      // Labels
+      char type;
+      // Readout group
+      int ind;
+      // Background weighting fields
+      double ewxcor;
+      double ewycor;
+      // x/y strips
+      int nStrips1;
+      std::vector<strip> strips1;
+      // z strips
+      int nStrips2;
+      std::vector<strip> strips2;
+    };
+    
+    std::vector<plane> planes;
+      
+    // Tube
+    bool tube;
+    int mtube, ntube;
+    double cotube;
+    double vttube;
 
-    double cosTheta, sinTheta, cosPhi,sinPhi, cosGamma, sinGamma;
-    double cosMinusTheta, sinMinusTheta, cosMinusPhi,sinMinusPhi, 
-           cosMinusGamma, sinMinusGamma;
-    double xTran, yTran, zTran;
-
-    // Reset the component
-    void Reset();     
-     // Verify periodicities
+    // Capacitance matrix
+    std::vector<std::vector<double> > a;
+    // Signal matrix
+    std::vector<std::vector<std::complex<double> > > sigmat;
+    // Induced charges on planes
+    std::vector<std::vector<double> > qplane;
+    
+    // Point charges
+    int n3d;
+    
+    // Gravity
+    double down[3];
+    
     void UpdatePeriodicity();
-
+    void Reset() {CellInit();}
+    
     void CellInit();
+    bool Prepare();
+    bool CellCheck();
     bool CellType();
     
-    // These methods are used to translate incoming coordinates into the
-    // local coordinate frame and out going coordinates into the 
-    // global coordinate frame.
-
-    void Translate(double& x, double& y, double& z,
-		   const bool isInverse) const {
-
-      if (isInverse) {
-        x += xTran; y += yTran; z += zTran;
-        return;
-      } 
-      x -= xTran; y -= yTran; z -= zTran;
-        
-    }
-    void Rotate(double x, double y, double z,
-                double& xp, double& yp, double& zp, bool isInverse);    
-
-    void Global2Internal(double& xl, double& yl, double& zl, 
-			 double xw, double yw, double zw) {
-                         
-      xl = xw; yl = yw; zl = zw;
-      if (isTranslated) Translate(xl, yl, zl, false);
-      if (isRotated) Rotate(xl, yl, zl, xl, yl, zl, false);
+    bool PrepareSignals();
+    bool SetupWireSignals();
+    bool SetupPlaneSignals();
     
-    } 
-                         
-    void Internal2Global(double xl, double yl, double zl, 
-			 double& xw, double& yw, double& zw) {
+    // Calculation of charges
+    bool Setup();
+    bool SetupA00();
+    bool SetupB1X();
+    bool SetupB1Y();
+    bool SetupB2X();
+    bool SetupB2Y();
+    bool SetupC10();
+    bool SetupC2X();
+    bool SetupC2Y();
+    bool SetupC30();
+    bool SetupD10();
+    bool SetupD20();
+    bool SetupD30();
+    
+    bool IprA00(const int mx, const int my);
+    bool IprB2X(const int my);
+    bool IprB2Y(const int mx);
+    bool IprC2X();
+    bool IprC2Y();
+    bool IprC30();
+    bool IprD10();
+    bool IprD30();
+    
+    bool SetupDipole() {return true;}
+    
+    // Inversion of capacitance matrix
+    bool Charge();
+    
+    // Evaluation of the electric field
+    int Field(const double xin, const double yin, const double zin,
+              double& ex, double& ey, double& ez, double& volt, const bool opt);
+    void FieldA00(const double xpos, const double ypos,
+                  double& ex, double& ey, double& volt, const bool opt);
+    void FieldB1X(const double xpos, const double ypos,
+                  double& ex, double& ey, double& volt, const bool opt);
+    void FieldB1Y(const double xpos, const double ypos,
+                  double& ex, double& ey, double& volt, const bool opt);
+    void FieldB2X(const double xpos, const double ypos,
+                  double& ex, double& ey, double& volt, const bool opt);
+    void FieldB2Y(const double xpos, const double ypos,
+                  double& ex, double& ey, double& volt, const bool opt);
+    void FieldC10(const double xpos, const double ypos,
+                  double& ex, double& ey, double& volt, const bool opt);
+    void FieldC2X(const double xpos, const double ypos,
+                  double& ex, double& ey, double& volt, const bool opt);
+    void FieldC2Y(const double xpos, const double ypos,
+                  double& ex, double& ey, double& volt, const bool opt);
+    void FieldC30(const double xpos, const double ypos,
+                  double& ex, double& ey, double& volt, const bool opt);
+    void FieldD10(const double xpos, const double ypos,
+                  double& ex, double& ey, double& volt, const bool opt);
+    void FieldD20(const double xpos, const double ypos,
+                  double& ex, double& ey, double& volt, const bool opt);
+    void FieldD30(const double xpos, const double ypos,
+                  double& ex, double& ey, double& volt, const bool opt);
+
+    // Evaluation of the weighting field
+    bool Wfield(const double xpos, const double ypos, const double zpos,
+                double& ex, double& ey, double& ez, const int isw);
+    void WfieldWireA00(const double xpos, const double ypos,
+                       double& ex, double& ey, 
+                       const int mx, const int my, 
+                       const int sw);
+    void WfieldWireB2X(const double xpos, const double ypos,
+                       double& ex, double& ey,
+                       const int my, const int sw);
+    void WfieldWireB2Y(const double xpos, const double ypos,
+                       double& ex, double& ey,
+                       const int mx, const int sw);
+    void WfieldWireC2X(const double xpos, const double ypos,
+                       double& ex, double& ey, const int sw);
+    void WfieldWireC2Y(const double xpos, const double ypos,
+                       double& ex, double& ey, const int sw);
+    void WfieldWireC30(const double xpos, const double ypos,
+                       double& ex, double& ey, const int sw);
+    void WfieldWireD10(const double xpos, const double ypos,
+                       double& ex, double& ey, const int sw);
+    void WfieldWireD30(const double xpos, const double ypos,
+                       double& ex, double& ey, const int sw);
+    void WfieldPlaneA00(const double xpos, const double ypos,
+                        double& ex, double& ey, 
+                        const int mx, const int my, 
+                        const int iplane);
+    void WfieldPlaneB2X(const double xpos, const double ypos,
+                        double& ex, double& ey, 
+                        const int my, const int iplane);
+    void WfieldPlaneB2Y(const double xpos, const double ypos,
+                        double& ex, double& ey, 
+                        const int mx, const int iplane);
+    void WfieldPlaneC2X(const double xpos, const double ypos,
+                        double& ex, double& ey, const int iplane);
+    void WfieldPlaneC2Y(const double xpos, const double ypos,
+                        double& ex, double& ey, const int iplane);
+    void WfieldPlaneC30(const double xpos, const double ypos,
+                        double& ex, double& ey, const int iplane);
+    void WfieldPlaneD10(const double xpos, const double ypos,
+                        double& ex, double& ey, const int iplane);
+    void WfieldPlaneD30(const double xpos, const double ypos,
+                        double& ex, double& ey, const int iplane);
+    void WfieldStripXy(const double xpos, const double ypos,
+                       double& ex, double& ey,
+                       const int ip, const int is);
+    void WfieldStripZ(const double xpos, const double ypos, const double zpos,
+                      double& ex, double& ey, double& ez,
+                      const int ip, const int is);
+
+    // Auxiliary functions for C type cells
+    double Ph2(const double xpos, const double ypos);
+    double Ph2Lim(const double radius) {
+      return -log(abs(zmult) * radius * (1. - 3. * p1 + 5. * p2));
+    }
+    void E2Sum(const double xpos, const double ypos, double& ex, double& ey);
+    
+    // Mapping function for D30 type cells
+    void ConformalMap(std::complex<double> z, 
+                      std::complex<double>& ww, std::complex<double>& wd);
+    void InitializeCoefficientTables();
+
+
+    bool InTube(const double x0, const double y0, const double a, const int n);
+    
+    // Transformation between cartesian and polar coordinates
+    void Cartesian2Polar(const double x0, const double y0, 
+                         double& r, double& theta) {
       
-      xw = xl; yw = yl; zw = zl;
-      if (isRotated) Rotate(xw, yw, zw, xw, yw, zw, true);
-      if (isTranslated) Translate(xw, yw, zw, true);
+      if (x0 == 0. && y0 == 0.) {
+        r = theta = 0.;
+        return;
+      }
+      r = sqrt(x0 * x0 + y0 * y0);
+      theta = 180. * atan2(y0, x0) / Pi;
+    }
+    
+    void Polar2Cartesian(const double r, const double theta,
+                         double& x0, double& y0) {
       
+      x0 = r * cos(Pi * theta / 180.);
+      y0 = r * sin(Pi * theta / 180.);
+    
     }
 
+    // Transformation (r, theta) to (rho, phi) via the map 
+    // (r, theta) = (exp(rho), 180 * phi / Pi).
+    void RTheta2RhoPhi(const double rho, const double phi,
+                       double& r, double& theta) {
+                       
+      r = exp(rho);
+      theta = 180. * phi / Pi;
+      
+    }
+    
 };
 
 }

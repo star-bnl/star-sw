@@ -26,6 +26,7 @@ OBJS = \
 	$(OBJECT)/ComponentTcad2d.o \
 	$(OBJECT)/ComponentNeBem2d.o \
 	$(OBJECT)/ComponentAnalyticField.o \
+	$(OBJECT)/ComponentAnalyticFieldWrap.o \
 	$(OBJECT)/efieldCalc.o \
 	$(OBJECT)/GeometrySimple.o \
 	$(OBJECT)/GeometryRoot.o \
@@ -42,6 +43,7 @@ OBJS = \
 	$(OBJECT)/SolidTube.o \
 	$(OBJECT)/RandomEngineRoot.o \
 	$(OBJECT)/PlottingEngineRoot.o \
+	$(OBJECT)/Numerics.o \
 	$(OBJECT)/Sensor.o
 
 all:	$(OBJS)
@@ -96,6 +98,11 @@ $(OBJECT)/ComponentUser.o: \
 $(OBJECT)/ComponentAnalyticField.o: \
 	$(SOURCE)/ComponentAnalyticField.cc \
 	$(INCLUDE)/ComponentAnalyticField.hh \
+	$(SOURCE)/ComponentBase.cc $(INCLUDE)/ComponentBase.hh
+	$(CC) $(CFLAGS) $< -o $@
+$(OBJECT)/ComponentAnalyticFieldWrap.o: \
+	$(SOURCE)/ComponentAnalyticFieldWrap.cc \
+	$(INCLUDE)/ComponentAnalyticFieldWrap.hh \
 	$(SOURCE)/efieldCalc.f \
 	$(SOURCE)/ComponentBase.cc $(INCLUDE)/ComponentBase.hh
 	$(CC) $(CFLAGS) $< -o $@
@@ -186,6 +193,10 @@ $(OBJECT)/RandomEngineRoot.o: \
 $(OBJECT)/PlottingEngineRoot.o: \
 	$(SOURCE)/PlottingEngineRoot.cc $(INCLUDE)/PlottingEngineRoot.hh
 	$(CC) $(CFLAGS) $< -o $@        
+
+$(OBJECT)/Numerics.o: \
+	$(SOURCE)/Numerics.cc $(INCLUDE)/Numerics.hh
+	$(CC) $(CFLAGS) $< -o $@  
 
 $(OBJECT)/Sensor.o: \
 	$(SOURCE)/Sensor.cc $(INCLUDE)/Sensor.hh \

@@ -68,6 +68,7 @@ class ComponentBase {
     void SetMagneticField(const double bx, const double by, const double bz);
 
     // Ready for use?
+    virtual
     bool IsReady() {return ready;}
 
     // Get the bounding box coordinates

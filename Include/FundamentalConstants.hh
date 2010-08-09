@@ -12,6 +12,8 @@ static const double  TwoPi = 2. * Pi;
 static const double HalfPi = 0.5 * Pi;
 static const double    Pi2 = Pi * Pi;
 
+static const double CLog2 = 0.693147180559945309417;
+
 // Elementary particle masses [eV / c2]
 static const double ElectronMass =   0.510998910e6;
 static const double MuonMass     = 105.658367e6;
