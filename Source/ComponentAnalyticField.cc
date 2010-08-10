@@ -2497,7 +2497,7 @@ ComponentAnalyticField::Ph2(const double xpos, const double ypos) {
     return -log(abs(zterm));
   }
   
-  return -abs(imag(zeta)) + CLog2;
+  return -fabs(imag(zeta)) + CLog2;
 
 }
 
@@ -3102,10 +3102,10 @@ ComponentAnalyticField::FieldC30(const double xpos, const double ypos,
     zeta = zmult * std::complex<double>(xpos - w[i].x, ypos - w[i].y);
     if (imag(zeta) > 15.) {
       wsum1 -= w[i].e * icons;
-      if (opt) volt -= w[i].e * (abs(imag(zeta)) - CLog2);
+      if (opt) volt -= w[i].e * (fabs(imag(zeta)) - CLog2);
     } else if (imag(zeta) < -15.) {
       wsum1 += w[i].e * icons;
-      if (opt) volt -= w[i].e * (abs(imag(zeta)) - CLog2);
+      if (opt) volt -= w[i].e * (fabs(imag(zeta)) - CLog2);
     } else {
       zsin = sin(zeta);
       zcof = 4. *zsin * zsin - 2.;
