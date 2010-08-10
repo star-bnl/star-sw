@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.49 2010/05/27 13:36:14 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.50 2010/08/10 16:35:33 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.50  2010/08/10 16:35:33  fisyak
+// Add initialization of starsim parameter tables after opening zebra-file
+//
 // Revision 1.49  2010/05/27 13:36:14  fisyak
 // 3rd attemp to synchronize mag.field. Now take care that the maker can be not Active and do InitRun in Work
 //
@@ -121,10 +124,10 @@ protected:
  private:
 
   St_geom_gdat *m_geom_gdat;
-
+#if 0
   virtual void   BookHist();
   virtual void   FillHist();
-
+#endif
 public: 
                   St_geant_Maker(const char *name="geant",
 				 Int_t nwgeant=20,Int_t nwpaw=0, Int_t iwtype=0);
@@ -215,7 +218,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.49 2010/05/27 13:36:14 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.50 2010/08/10 16:35:33 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 

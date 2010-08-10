@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.134 2010/05/27 13:36:14 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.135 2010/08/10 16:35:33 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.135  2010/08/10 16:35:33  fisyak
+// Add initialization of starsim parameter tables after opening zebra-file
+//
 // Revision 1.134  2010/05/27 13:36:14  fisyak
 // 3rd attemp to synchronize mag.field. Now take care that the maker can be not Active and do InitRun in Work
 //
@@ -738,43 +741,40 @@ Int_t St_geant_Maker::Init(){
       if (InputFile != "") Do(InputFile.Data());
       InputFile = "";
     }
-  }
-#if 0
-  BookHist();   // Create Histograms    
-#endif
-  // Kinematics
-  if (fInputFile == "" && IsActive()) {// default
-    Do("subevent 0;");
-    // gkine #particles partid ptrange yrange phirange vertexrange
-    Do("gkine        80      6    1. 1. -4. 4. 0 6.28      0. 0.;");
-    Do("mode g2tm prin 1;");
-    //  Do("next;");
-    //  Do("dcut cave z 1 10 10 0.03 0.03;");
-    if ((m_Mode/1000)%10 == 1) {// phys_off
-      gMessMgr->Info() << "St_geant_Maker::Init switch off physics" << endm;
-      Do("DCAY 0");
-      Do("ANNI 0");
-      Do("BREM 0");
-      Do("COMP 0");
-      Do("HADR 0");
-      Do("MUNU 0");
-      Do("PAIR 0");
-      Do("PFIS 0");
-      Do("PHOT 0");
-      Do("RAYL 0");
-      Do("LOSS 4"); // no fluctuations 
-      //  Do("LOSS 1"); // with delta electron above dcute
-      Do("DRAY 0");
-      Do("MULS 0");
-      Do("STRA 0");
-      //                                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
-      Do("CUTS     1e-3   1e-3   .001   .001   .001  .001  .001  1e-3  .001   .001 50.e-6");
-      Do("gclose all");
-      Do("physi");
-    }	
-    if (Debug() > 1) {
-      Do("debug on;");
-      Do("swit 2 2;");
+  } else {  
+    if (IsActive()) {// default
+      Do("subevent 0;");
+      // gkine #particles partid ptrange yrange phirange vertexrange
+      Do("gkine        80      6    1. 1. -4. 4. 0 6.28      0. 0.;");
+      Do("mode g2tm prin 1;");
+      //  Do("next;");
+      //  Do("dcut cave z 1 10 10 0.03 0.03;");
+      if ((m_Mode/1000)%10 == 1) {// phys_off
+	gMessMgr->Info() << "St_geant_Maker::Init switch off physics" << endm;
+	Do("DCAY 0");
+	Do("ANNI 0");
+	Do("BREM 0");
+	Do("COMP 0");
+	Do("HADR 0");
+	Do("MUNU 0");
+	Do("PAIR 0");
+	Do("PFIS 0");
+	Do("PHOT 0");
+	Do("RAYL 0");
+	Do("LOSS 4"); // no fluctuations 
+	//  Do("LOSS 1"); // with delta electron above dcute
+	Do("DRAY 0");
+	Do("MULS 0");
+	Do("STRA 0");
+	//                                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
+	Do("CUTS     1e-3   1e-3   .001   .001   .001  .001  .001  1e-3  .001   .001 50.e-6");
+	Do("gclose all");
+	Do("physi");
+      }	
+      if (Debug() > 1) {
+	Do("debug on;");
+	Do("swit 2 2;");
+      }
     }
   }
   return kStOK;
@@ -782,12 +782,14 @@ Int_t St_geant_Maker::Init(){
 //________________________________________________________________________________
 Int_t St_geant_Maker::InitRun(Int_t run){
   if (mInitialization != "") {
+    gMessMgr->Info() << "St_geant_Maker::InitRun -- Do geometry initialization" << endm;
     Do(mInitialization.Data()); 
     Geometry();
     mInitialization = "";
     Do("gclose all");
-    Agstroot();
   }
+  Agstroot();
+  gMessMgr->Info() << "St_geant_Maker::InitRun -- Do mag.field initialization" << endm;
   m_geom_gdat = (St_geom_gdat *) Find(".const/geom/geom_gdat");
   if (m_geom_gdat)  {
     AddRunco(new St_geom_gdat(*m_geom_gdat));
@@ -1235,9 +1237,6 @@ Int_t St_geant_Maker::Make()
   addrfun address  = (addrfun ) csaddr(g2t);
   if (address) csjcal(&address,&narg);
 #endif
-  
-  // Fill Histograms    
-  FillHist();
   
   if (cflag->ieorun) return kStEOF; 
   if (cflag->ieotri) return kStErr; 
@@ -1832,7 +1831,7 @@ void St_geant_Maker::Dzddiv(Int_t& idiv ,Int_t &Ldummy,const Char_t* path,const 
 }
 
 //_____________________________________________________________________________
-
+#if 0
 void St_geant_Maker::BookHist(){
   
   gMessMgr->Info() << "St_geant_Maker::***********  St_geant_Maker - bookhist!!!! *********" << endm;
@@ -1881,7 +1880,6 @@ void St_geant_Maker::FillHist(){
   m_histvz->Fill(gvt->ge_x[2]);
 #endif
 }
-#if 0
 //________________________________________________________________________________
 TGeoVolume* St_geant_Maker::Ag2Geom() { 
   typedef enum {BOX=1,TRD1,TRD2,TRAP,TUBE,TUBS,CONE,CONS,SPHE,PARA,
