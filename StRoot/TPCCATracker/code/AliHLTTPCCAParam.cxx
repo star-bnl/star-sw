@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCAParam.cxx,v 1.2 2010/08/09 17:51:15 mzyzak Exp $
+// @(#) $Id: AliHLTTPCCAParam.cxx,v 1.3 2010/08/10 22:44:47 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -221,18 +221,16 @@ void AliHLTTPCCAParam::GetClusterErrors2( int iRow, const AliHLTTPCCATrackParam 
   z = (200. - CAMath::Abs(z)) * 0.01;
   if(z<0.) z=0;
 
-  float tg2Phi = t.Y()/t.X();
-  tg2Phi = tg2Phi*tg2Phi;
-  float cos2Phi = 1./(1.+tg2Phi);
+  float sin2Phi = t.GetSinPhi()*t.GetSinPhi();
+  float cos2Phi = (1.f - sin2Phi);
   if (cos2Phi<0.0001) cos2Phi=0.0001;
+  float tg2Phi = sin2Phi/cos2Phi;
 
-  float s2 = t.X()*t.X()+t.Y()*t.Y();
-  float tg2Lambda = s2/(t.Z()*t.Z());
-//  float tg2Lambda = 1./t.DzDs();
+  float tg2Lambda = t.DzDs()*t.DzDs();
 
   const float *c = fParamS0Par[0][type];
   Err2Y = c[0] + c[1]*z/cos2Phi + c[2]*tg2Phi;
-  Err2Z = c[3] + c[4]*z*(1+tg2Lambda) + c[5]*tg2Lambda;
+  Err2Z = c[3] + c[4]*z*(1.f+tg2Lambda) + c[5]*tg2Lambda;
 
   if(Err2Y<1e-6) Err2Y = 1e-6;
   if(Err2Z<1e-6) Err2Z = 1e-6;

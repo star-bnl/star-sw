@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCATrackParam.cxx,v 1.2 2010/08/06 21:04:33 mzyzak Exp $
+// $Id: AliHLTTPCCATrackParam.cxx,v 1.3 2010/08/10 22:44:47 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -134,6 +134,88 @@ bool  AliHLTTPCCATrackParam::TransportToX( float x, AliHLTTPCCATrackLinearisatio
 
   float dy = dx * tg;
   float dl = dx * CAMath::Sqrt( 1 + tg * tg );
+
+
+/*  float dS;
+  float dl = dx * ex + dy * ey;
+  float dSin = dl * k;
+  float dCos = ex*ex1 + ey*ey1;
+  if(fabs(dSin)<0.02f) 
+  {
+    dS = dl*(1.f+dSin*dSin/6.f);
+  }
+  else    
+  {
+    dS = CAMath::ATan2(dSin,dCos)/k;
+  }
+  float dz = dS * t0.DzDs();
+
+  float cci = 1. / cc;
+  float exi = 1. / ex;
+  float ex1i = 1. / ex1;
+
+  float s_p = dx*Bz;
+  float y_f = dx * ( 1 + dCos ) * exi * ex1i * cci;;
+  float y_p = (1+dCos)*dx*dx*Bz * cci * cci * ex1i;
+  
+  float dl0_p = ey * y_p;
+  float dSin_p = k * dl0_p + dl*Bz;
+  float dSdsin;
+  if(fabs(dSin)<0.02f) 
+  {
+    dSdsin = dl0_p*(1+dSin*dSin/6.f) + dl/3.f*dSin*dSin_p;
+  }
+  else    
+  {
+    float dCos_p = dx*Bz*(ey - ey1 * ex * ex1i);
+    float tgd = dSin/dCos;
+    dSdsin = 1.f/(1.f + tgd*tgd) * (dSin_p/dCos - tgd/dCos * dCos_p) / k;
+    dSdsin -= dS/t0.QPt() ;
+  }  
+  
+  float z_f = fP[3]*dy*ex1i;
+  float z_p = fP[3]*dSdsin;
+  float z_t = dS;
+
+  t0.SetCosPhi( ex1 );
+  t0.SetSinPhi( ey1 );
+
+  fX    = X() + dx;
+  fP[0] = Y() + dy;
+  fP[1] = Z() + dz;
+  fP[2] = t0.SinPhi();
+
+  float c00 = fC[0];
+  float c10 = fC[1];
+  float c11 = fC[2];
+  float c20 = fC[3];
+  float c21 = fC[4];
+  float c22 = fC[5];
+  float c30 = fC[6];
+  float c31 = fC[7];
+  float c32 = fC[8];
+  float c33 = fC[9];
+  float c40 = fC[10];
+  float c41 = fC[11];
+  float c42 = fC[12];
+  float c43 = fC[13];
+  float c44 = fC[14];
+
+  fC[0] = c00 + y_f*c20 + y_p*c40 + (c20+y_f*c22+y_p*c42)*y_f + (c40+y_f*c42+y_p*c44)*y_p;
+  fC[1] = c10 + z_f*c20 + z_t*c30 + z_p*c40 + (c21+z_f*c22+z_t*c32+z_p*c42)*y_f + (c41+z_f*c42+z_t*c43+z_p*c44)*y_p;
+  fC[2] = c11 + z_f*c21 + z_t*c31 + z_p*c41 + (c21+z_f*c22+z_t*c32+z_p*c42)*z_f + (c31+z_f*c32+z_t*c33+z_p*c43)*z_t + (c41+z_f*c42+z_t*c43+z_p*c44)*z_p;
+  fC[3] = c20 + y_f*c22 + y_p*c42 + (c40+y_f*c42+y_p*c44)*s_p;
+  fC[4] = c21 + z_f*c22 + z_t*c32 + z_p*c42 + (c41+z_f*c42+z_t*c43+z_p*c44)*s_p;
+  fC[5] = c22 + s_p*c42 + (c42 + s_p*c44)*s_p;
+  fC[6] = c30 + y_f*c32 + y_p*c43;
+  fC[7] = c31 + z_f*c32 + z_t*c33 + z_p*c43;
+  fC[8] = c32 + s_p*c43;
+  fC[9] = c33;
+  fC[10]= c40 + y_f*c42 + y_p*c44;
+  fC[11]= c41 + z_f*c42 + z_t*c43 + z_p*c44;
+  fC[12]= c42 + s_p*c44;
+  fC[13]= c43;
+  fC[14]= c44;*/
 
   if ( cc < 0 ) dl = -dl;
   float dSin = dl * k / 2;
