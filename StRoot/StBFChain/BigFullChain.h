@@ -666,7 +666,9 @@ Bfc_st BFC[] = { // standard chains
 
   // Filtering - all filters will have the pattern "FiltXXX"
   {"FiltGamma" ,"","","StEvent,StMcEvent,EmcUtil",
-                                           "StGammaFilterMaker","StFilterMaker",  "Gamma filtering",kFALSE},
+                                      "StGammaFilterMaker","StFilterMaker",  "BEmc Gamma filtering",kFALSE},
+  {"FiltEemcGamma" ,"","","StEvent,StMcEvent,EmcUtil",
+                                  "StEemcGammaFilterMaker","StFilterMaker",  "EEmc Gamma filtering",kFALSE},
 
 
   // fms
