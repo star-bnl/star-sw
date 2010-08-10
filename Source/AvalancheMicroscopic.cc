@@ -494,6 +494,15 @@ AvalancheMicroscopic::TransportElectron(
       sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
       // Sign change
       ex = -ex; ey = -ey; ez = -ez;
+      
+      if (debug) {
+        std::cout << "AvalancheMicroscopic::TransportElectron:" << std::endl;
+        std::cout << "    Drifting electron " << iEl << "." << std::endl;
+        std::cout << "    Field at " << x << ", " << y << ", " << z << ": "
+                  << ex << ", " << ey << ", " << ez << std::endl;
+        std::cout << "    Status: " << status << std::endl;
+        std::cout << "    Medium: " << medium->GetName() << std::endl;
+      }
 
       if (status != 0) {
         // Electron is not inside a drift medium
@@ -503,6 +512,12 @@ AvalancheMicroscopic::TransportElectron(
         stack[iEl].status = -1;
         endpoints.push_back(stack[iEl]);
         stack.erase(stack.begin() + iEl);
+        if (debug) {
+          std::cout << "AvalancheMicroscopic::TransportElectron:" << std::endl;
+          std::cout << "    Electron left the drift medium." << std::endl;
+          std::cout << "    At " << x << ", " << ", " << y << ", " << z 
+                    << std::endl;
+        }
         continue;
       }
 
@@ -614,7 +629,6 @@ AvalancheMicroscopic::TransportElectron(
           // Get the real collision rate at the updated energy
           fReal = medium->GetElectronCollisionRate(newEnergy, band);
           if (fReal > fLim) {
-            std::cin >> d;
             // Real collision rate is higher than null-collision rate
             dt += log(r) / fLim;
             // Increase the null collision rate and try again
@@ -852,6 +866,12 @@ AvalancheMicroscopic::TransportElectron(
             if (aval) stack.push_back(newElectron);
             // Increment the electron and ion counters
             ++nElectrons; ++nIons;
+            if (debug) {
+              std::cout << "AvalancheMicroscopic::TransportElectron:\n";
+              std::cout << "    Ionisation." << std::endl;
+              std::cout << "    At " << x << ", " << y << ", " << z 
+                        << std::endl;
+            }
             break;
           // Attachment
           case 2:

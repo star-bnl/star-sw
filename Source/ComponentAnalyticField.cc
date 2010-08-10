@@ -560,7 +560,7 @@ ComponentAnalyticField::Field(
     // Check the actual position.
     if (dxwir * dxwir + dywir * dywir < 0.25 * w[i].d * w[i].d) {
       volt = w[i].v;
-      return i;
+      return i + 1;
     }
   }
 
