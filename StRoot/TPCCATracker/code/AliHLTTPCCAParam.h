@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// @(#) $Id: AliHLTTPCCAParam.h,v 1.2 2010/08/09 17:51:15 mzyzak Exp $
+// @(#) $Id: AliHLTTPCCAParam.h,v 1.3 2010/08/10 22:44:47 mzyzak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -328,14 +328,12 @@ inline void AliHLTTPCCAParam::GetClusterErrors2( int iRow, const TrackParamVecto
   z = (200. - CAMath::Abs(z)) * 0.01;
   z(z < zero) = zero;
 
-  sfloat_v tg2Phi = t.Y()/t.X();
-  tg2Phi = tg2Phi*tg2Phi;
-  sfloat_v cos2Phi = one/(one + tg2Phi);
-  if (cos2Phi < 0.0001) cos2Phi = 0.0001;
+  sfloat_v sin2Phi = t.GetSinPhi()*t.GetSinPhi();
+  sfloat_v cos2Phi = (one - sin2Phi);
+  cos2Phi(cos2Phi < 0.0001f) = 0.0001f;
+  sfloat_v tg2Phi = sin2Phi/cos2Phi;
 
-  sfloat_v s2 = t.X()*t.X() + t.Y()*t.Y();
-  sfloat_v tg2Lambda = s2/(t.Z()*t.Z());
-//  sfloat_v tg2Lambda = one/t.DzDs();
+  sfloat_v tg2Lambda = t.DzDs()*t.DzDs();
 
   const float *c = fParamS0Par[0][type];
   sfloat_v v = c[0] + c[1]*z/cos2Phi + c[2]*tg2Phi;
@@ -361,14 +359,12 @@ inline void AliHLTTPCCAParam::GetClusterErrors2( ushort_v rowIndexes, const Trac
 
   const ushort_v type = errorType( static_cast<short_v>( rowIndexes ) );
 
-  sfloat_v tg2Phi = t.Y()/t.X();
-  tg2Phi = tg2Phi*tg2Phi;
-  sfloat_v cos2Phi = one / (one + tg2Phi);
-  if (cos2Phi<0.0001) cos2Phi=0.0001;
+  sfloat_v sin2Phi = t.GetSinPhi()*t.GetSinPhi();
+  sfloat_v cos2Phi = (one - sin2Phi);
+  cos2Phi(cos2Phi < 0.0001f) = 0.0001f;
+  sfloat_v tg2Phi = sin2Phi/cos2Phi;
 
-  sfloat_v s2 = t.X()*t.X()+t.Y()*t.Y();
-  sfloat_v tg2Lambda = s2/(t.Z()*t.Z());
-//  sfloat_v tg2Lambda = one/t.DzDs();
+  sfloat_v tg2Lambda = t.DzDs()*t.DzDs();
 
   const float *c = &fParamS0Par[0][0][0];
   const sfloat_v errmin=1e-6;
