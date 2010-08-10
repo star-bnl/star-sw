@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.16 2010/05/27 14:52:02 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.17 2010/08/10 19:46:18 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.17  2010/08/10 19:46:18  fisyak
+ * Lock mag.field if it was initialized from GEANT
+ *
  * Revision 1.16  2010/05/27 14:52:02  fisyak
  * Clean up, set assert when mag. field is not initialized
  *
@@ -150,7 +153,7 @@ R__EXTERN  "C" {
       printf("StarMagField  mfldgeo: The field has been already instantiated.\n");
     } else {
       printf("StarMagField  instantiate starsim field=%g\n",factor);
-      new StarMagField(StarMagField::kMapped,factor/5.);
+      (new StarMagField(StarMagField::kMapped,factor/5.))->SetLock();
     }
     float x[3]={0},b[3];
     gufld(x,b);
