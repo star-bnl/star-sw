@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Sensor.hh"
-#include "DriftView.hh"
+#include "ViewDrift.hh"
 
 namespace Garfield {
 
@@ -19,7 +19,7 @@ class AvalancheMC {
     void SetSensor(Sensor* s);
 
     // Switch on/off drift line plotting
-    void EnablePlotting(DriftView* view);
+    void EnablePlotting(ViewDrift* view);
     void DisablePlotting();
 
     // Switch on/off calculation of induced currents (default: disabled)
@@ -156,7 +156,7 @@ class AvalancheMC {
     std::vector<endpoint> endpointsIons;
 
     bool usePlotting;
-    DriftView* viewer;
+    ViewDrift* viewer;
 
     bool useSignal;
     bool useInducedCharge;

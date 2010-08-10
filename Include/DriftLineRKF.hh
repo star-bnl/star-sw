@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Sensor.hh"
-#include "DriftView.hh"
+#include "ViewDrift.hh"
 
 namespace Garfield {
   
@@ -20,7 +20,7 @@ namespace Garfield {
     void SetErrorBounds(const double min, const double max);
     void SetTimeStep(const double dt);
 
-    void EnablePlotting(DriftView* view);
+    void EnablePlotting(ViewDrift* view);
     void DisablePlotting();
 
     void DriftLine(double x0, double y0, double z0, double t0, double e0, 
@@ -39,7 +39,7 @@ namespace Garfield {
     double timeStep;
 
     bool usePlotting;
-    DriftView* viewer;
+    ViewDrift* viewer;
 
     bool debug;
 

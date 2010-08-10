@@ -3,12 +3,14 @@
 #include <sstream>
 #include <cmath>
 
-#include "MediumView.hh"
+#include <TAxis.h>
+
+#include "ViewMedium.hh"
 #include "Plotting.hh"
 
 namespace Garfield {
 
-MediumView::MediumView() :
+ViewMedium::ViewMedium() :
   debug(false),
   canvas(0), hasExternalCanvas(false),
   medium(0),
@@ -18,14 +20,14 @@ MediumView::MediumView() :
 
 }
 
-MediumView::~MediumView() {
+ViewMedium::~ViewMedium() {
 
   if (!hasExternalCanvas && canvas != 0) delete canvas;
 
 }
 
 void
-MediumView::SetCanvas(TCanvas* c) {
+ViewMedium::SetCanvas(TCanvas* c) {
 
   if (c == 0) return;
   if (!hasExternalCanvas && canvas != 0) {
@@ -38,10 +40,10 @@ MediumView::SetCanvas(TCanvas* c) {
 }
 
 void
-MediumView::SetMedium(Medium* m) {
+ViewMedium::SetMedium(Medium* m) {
 
   if (m == 0) {
-    std::cerr << "MediumView::SetMedium:" << std::endl;
+    std::cerr << "ViewMedium::SetMedium:" << std::endl;
     std::cerr << "    Medium is not defined." << std::endl;
     return;
   }
@@ -51,10 +53,10 @@ MediumView::SetMedium(Medium* m) {
 }
 
 void
-MediumView::SetElectricFieldRange(const double emin, const double emax) {
+ViewMedium::SetElectricFieldRange(const double emin, const double emax) {
 
   if (emin >= emax || emin < 0.) {
-    std::cerr << "MediumView::SetElectricFieldRange:" << std::endl;
+    std::cerr << "ViewMedium::SetElectricFieldRange:" << std::endl;
     std::cerr << "    Incorrect field range." << std::endl;
     return;
   }
@@ -64,10 +66,10 @@ MediumView::SetElectricFieldRange(const double emin, const double emax) {
 }
 
 void
-MediumView::SetMagneticFieldRange(const double bmin, const double bmax) {
+ViewMedium::SetMagneticFieldRange(const double bmin, const double bmax) {
 
   if (bmin >= bmax || bmin < 0.) { 
-    std::cerr << "MediumView::SetMagneticFieldRange:" << std::endl;
+    std::cerr << "ViewMedium::SetMagneticFieldRange:" << std::endl;
     std::cerr << "    Incorrect field range." << std::endl;
     return;
   }
@@ -77,7 +79,7 @@ MediumView::SetMagneticFieldRange(const double bmin, const double bmax) {
 }
 
 void 
-MediumView::PlotElectronVelocity(const bool keep) {
+ViewMedium::PlotElectronVelocity(const bool keep) {
 
   SetupCanvas();
   AddFunction(eMin, eMax, keep,
@@ -87,7 +89,7 @@ MediumView::PlotElectronVelocity(const bool keep) {
 }
 
 void 
-MediumView::PlotHoleVelocity(const bool keep) {
+ViewMedium::PlotHoleVelocity(const bool keep) {
 
   SetupCanvas();
   AddFunction(eMin, eMax, keep,
@@ -97,7 +99,7 @@ MediumView::PlotHoleVelocity(const bool keep) {
 }
 
 void 
-MediumView::PlotIonVelocity(const bool keep) {
+ViewMedium::PlotIonVelocity(const bool keep) {
 
   SetupCanvas();
   AddFunction(eMin, eMax, keep,
@@ -107,7 +109,7 @@ MediumView::PlotIonVelocity(const bool keep) {
 }
 
 void 
-MediumView::PlotElectronTownsend(const bool keep) {
+ViewMedium::PlotElectronTownsend(const bool keep) {
 
   SetupCanvas();
   AddFunction(eMin, eMax, keep,
@@ -117,7 +119,7 @@ MediumView::PlotElectronTownsend(const bool keep) {
 }
 
 void 
-MediumView::PlotHoleTownsend(const bool keep) {
+ViewMedium::PlotHoleTownsend(const bool keep) {
 
   SetupCanvas();
   AddFunction(eMin, eMax, keep,
@@ -127,7 +129,7 @@ MediumView::PlotHoleTownsend(const bool keep) {
 }
 
 void 
-MediumView::PlotElectronAttachment(const bool keep) {
+ViewMedium::PlotElectronAttachment(const bool keep) {
 
   SetupCanvas();
   AddFunction(eMin, eMax, keep,
@@ -137,7 +139,7 @@ MediumView::PlotElectronAttachment(const bool keep) {
 }
 
 void 
-MediumView::PlotHoleAttachment(const bool keep) {
+ViewMedium::PlotHoleAttachment(const bool keep) {
 
   SetupCanvas();
   AddFunction(eMin, eMax, keep,
@@ -147,7 +149,7 @@ MediumView::PlotHoleAttachment(const bool keep) {
 }
 
 void
-MediumView::SetupCanvas() {
+ViewMedium::SetupCanvas() {
 
   if (canvas == 0) {
     canvas = new TCanvas();
@@ -159,12 +161,12 @@ MediumView::SetupCanvas() {
 }
 
 void
-MediumView::AddFunction(const double xmin, const double xmax, const bool keep,
+ViewMedium::AddFunction(const double xmin, const double xmax, const bool keep,
                         const std::string xlabel, const std::string ylabel,
                         const int type) {
 
   if (medium == 0) {
-    std::cerr << "MediumView::AddFunction:" << std::endl;
+    std::cerr << "ViewMedium::AddFunction:" << std::endl;
     std::cerr << "    Medium is not defined." << std::endl;
     return;
   }
@@ -181,8 +183,8 @@ MediumView::AddFunction(const double xmin, const double xmax, const bool keep,
 
   if (!keep) functions.clear();
 
-  TF1 fNew(fname.c_str(), this, &MediumView::EvaluateFunction, 
-            xmin, xmax, 1, "MediumView", "EvaluateFunction");
+  TF1 fNew(fname.c_str(), this, &ViewMedium::EvaluateFunction, 
+            xmin, xmax, 1, "ViewMedium", "EvaluateFunction");
   functions.push_back(fNew);
 
   const std::string title = medium->GetName() + ";" + 
@@ -208,7 +210,7 @@ MediumView::AddFunction(const double xmin, const double xmax, const bool keep,
 }
 
 double
-MediumView::EvaluateFunction(double* pos, double* par) {
+ViewMedium::EvaluateFunction(double* pos, double* par) {
 
   if (medium == 0) return 0.;
   
@@ -286,7 +288,7 @@ MediumView::EvaluateFunction(double* pos, double* par) {
       y = a;
       break;
     default:
-      std::cerr << "MediumView::EvaluateFunction:" << std::endl;
+      std::cerr << "ViewMedium::EvaluateFunction:" << std::endl;
       std::cerr << "    Unknown type of transport coefficient requested." 
                 << std::endl;
       std::cerr << "    Program bug!" << std::endl;

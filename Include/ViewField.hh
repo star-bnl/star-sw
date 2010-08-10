@@ -1,24 +1,24 @@
-#ifndef G_FIELD_VIEW
-#define G_FIELD_VIEW
+#ifndef G_VIEW_FIELD
+#define G_VIEW_FIELD
 
 #include <RQ_OBJECT.h>
 #include <TCanvas.h>
 #include <TF2.h>
 
+#include "Plotting.hh"
 #include "Sensor.hh"
 
 namespace Garfield {
 
-class FieldView { 
+class ViewField { 
 
-  RQ_OBJECT("FieldView")
+  RQ_OBJECT("ViewField")
   
   public:
-    // Constructors
-    FieldView();
-    FieldView(Sensor* s);
+    // Constructor
+    ViewField();
     // Destructor
-    ~FieldView();
+    ~ViewField();
    
     void SetSensor(Sensor* s);
     void SetCanvas(TCanvas* c);

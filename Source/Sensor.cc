@@ -481,13 +481,6 @@ Sensor::GetInducedCharge(const std::string label) {
 
 }
 
-void 
-Sensor::PlotSignal(const std::string label) {
-
-  plottingEngine.PlotSignal(this, label);
-
-}
-
 bool 
 Sensor::GetBoundingBox(double& xmin, double& ymin, double& zmin,
                        double& xmax, double& ymax, double& zmax) {

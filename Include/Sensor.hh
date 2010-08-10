@@ -74,7 +74,6 @@ class Sensor {
     }
     double GetSignal(const std::string label, const int bin);
     double GetInducedCharge(const std::string label);
-    void PlotSignal(const std::string label);
 
     // Switch on/off debugging messages
     void EnableDebugging()  {debug = true;}

@@ -1,13 +1,12 @@
 #include <iostream>
-#include <string>
 
-#include "DriftView.hh"
+#include "ViewDrift.hh"
 
 namespace Garfield {
 
-DriftView::DriftView() :
+ViewDrift::ViewDrift() :
   debug(false),
-  label("Drift View"),
+  label("Drift Lines"),
   canvas(0), hasExternalCanvas(false),
   xMin(-1.), yMin(-1.), zMin(-1.), 
   xMax( 1.), yMax( 1.), zMax( 1.),
@@ -16,14 +15,15 @@ DriftView::DriftView() :
 
 }
 
-DriftView::~DriftView() {
+ViewDrift::~ViewDrift() {
 
   if (!hasExternalCanvas && canvas != 0) delete canvas;
+  if (view != 0) delete view;
 
 }
 
 void
-DriftView::SetCanvas(TCanvas* c) {
+ViewDrift::SetCanvas(TCanvas* c) {
 
   if (c == 0) return;
   if (!hasExternalCanvas && canvas != 0) {
@@ -36,12 +36,12 @@ DriftView::SetCanvas(TCanvas* c) {
 }
 
 void 
-DriftView::SetArea(double xmin, double ymin, double zmin, 
+ViewDrift::SetArea(double xmin, double ymin, double zmin, 
                    double xmax, double ymax, double zmax) {
 
   // Check range, assign if non-null
   if (xmin == xmax || ymin == ymax || zmin == zmax) {
-    std::cout << "DriftView::SetArea:" << std::endl;
+    std::cout << "ViewDrift::SetArea:" << std::endl;
     std::cout << "    Null area range not permitted." << std::endl;
     return;
   }
@@ -55,7 +55,7 @@ DriftView::SetArea(double xmin, double ymin, double zmin,
 }
 
 void
-DriftView::Clear() {
+ViewDrift::Clear() {
 
   driftLines.clear();
   nDriftLines = 0;
@@ -63,10 +63,10 @@ DriftView::Clear() {
 }
 
 void
-DriftView::NewElectronDriftLine(const int n) {
+ViewDrift::NewElectronDriftLine(const int n) {
 
   if (n <= 0) {
-    std::cerr << "DriftView::NewElectronDriftLine:" << std::endl;
+    std::cerr << "ViewDrift::NewElectronDriftLine:" << std::endl;
     std::cerr << "    Drift line size must be greater than zero." << std::endl;
     return;
   }
@@ -78,10 +78,10 @@ DriftView::NewElectronDriftLine(const int n) {
 } 
 
 void
-DriftView::NewIonDriftLine(const int n) {
+ViewDrift::NewIonDriftLine(const int n) {
 
   if (n <= 0) {
-    std::cerr << "DriftView::NewIonDriftLine:" << std::endl;
+    std::cerr << "ViewDrift::NewIonDriftLine:" << std::endl;
     std::cerr << "    Drift line size must be greater than zero." << std::endl;
     return;
   }
@@ -93,7 +93,7 @@ DriftView::NewIonDriftLine(const int n) {
 }
 
 void
-DriftView::NewPhotonTrack(const double x0, const double y0, const double z0,
+ViewDrift::NewPhotonTrack(const double x0, const double y0, const double z0,
                           const double x1, const double y1, const double z1) {
 
   TPolyLine3D p(2);
@@ -107,12 +107,12 @@ DriftView::NewPhotonTrack(const double x0, const double y0, const double z0,
 }
 
 void
-DriftView::SetPoint(const int i, 
+ViewDrift::SetPoint(const int i, 
                     const double x, const double y, const double z) {
   
   if (i < 0) return;
   if (nDriftLines <= 0) {
-    std::cerr << "DriftView::SetPoint:" << std::endl;
+    std::cerr << "ViewDrift::SetPoint:" << std::endl;
     std::cerr << "    No drift lines present." << std::endl;
     return;
   }
@@ -122,7 +122,7 @@ DriftView::SetPoint(const int i,
 }
 
 void
-DriftView::Plot() {
+ViewDrift::Plot() {
   
   if (canvas == 0) {
     canvas = new TCanvas();

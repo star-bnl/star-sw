@@ -39,7 +39,7 @@ AvalancheMC::SetSensor(Sensor* s) {
 }
 
 void
-AvalancheMC::EnablePlotting(DriftView* view) {
+AvalancheMC::EnablePlotting(ViewDrift* view) {
   
   if (view == 0) {
     std::cerr << "AvalancheMC::EnablePlotting:" << std::endl;

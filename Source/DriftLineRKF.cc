@@ -1,5 +1,5 @@
-#include <math.h>
 #include <iostream>
+#include <math.h>
 
 #include "DriftLineRKF.hh"
 #include "FundamentalConstants.hh"
@@ -59,7 +59,7 @@ DriftLineRKF::SetTimeStep(const double dt) {
 }
 
 void
-DriftLineRKF::EnablePlotting(DriftView* view) {
+DriftLineRKF::EnablePlotting(ViewDrift* view) {
 
   if (view == 0) {
     std::cerr << "DriftLineRKF::EnablePlotting:\n";

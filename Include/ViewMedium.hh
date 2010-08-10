@@ -1,5 +1,5 @@
-#ifndef G_MEDIUM_VIEW
-#define G_MEDIUM_VIEW
+#ifndef G_VIEW_MEDIUM
+#define G_VIEW_MEDIUM
 
 #include <string>
 #include <vector>
@@ -12,15 +12,15 @@
 
 namespace Garfield {
 
-class MediumView { 
+class ViewMedium { 
 
-  RQ_OBJECT("MediumView")
+  RQ_OBJECT("ViewMedium")
   
   public:
     // Constructor
-    MediumView();
+    ViewMedium();
     // Destructor
-    ~MediumView();
+    ~ViewMedium();
     
     void SetCanvas(TCanvas* c);
     

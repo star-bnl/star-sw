@@ -5,7 +5,6 @@
 #include <math.h>
 
 #include "ComponentAnsys121.hh"
-#include "Input.hh"
 
 namespace Garfield {
 

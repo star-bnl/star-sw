@@ -2385,4 +2385,28 @@ ComponentFieldMap::UnmapFields(double& ex, double& ey, double& ez,
   
 }
 
+int 
+ComponentFieldMap::ReadInteger(char* token, int def, bool& error) {
+  
+  if (!token) {
+    error = true;
+    return def;
+  } 
+  
+  return atoi(token);
+
+}
+  
+double 
+ComponentFieldMap::ReadDouble(char* token, double def, bool& error) {
+  
+  if (!token) {
+    error = true;
+    return def;
+  }
+  return atof(token);
+    
+}
+
+
 }

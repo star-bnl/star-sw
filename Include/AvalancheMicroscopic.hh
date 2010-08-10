@@ -8,7 +8,7 @@
 #include <TH1F.h>
 
 #include "Sensor.hh"
-#include "DriftView.hh"
+#include "ViewDrift.hh"
 
 namespace Garfield {
 
@@ -23,7 +23,7 @@ class AvalancheMicroscopic {
     void SetSensor(Sensor* sensor);
 
     // Switch on/off drift line plotting
-    void EnablePlotting(DriftView* view);
+    void EnablePlotting(ViewDrift* view);
     void DisablePlotting();
 
     // Switch on/off calculation of induced currents
@@ -183,7 +183,7 @@ class AvalancheMicroscopic {
     int nEndpoints;
 
     bool usePlotting;
-    DriftView* viewer;
+    ViewDrift* viewer;
 
     TH1F* histEnergy;
     bool hasEnergyHistogram; 

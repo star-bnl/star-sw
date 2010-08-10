@@ -6,14 +6,12 @@
 
 #include <TROOT.h>
 #include <TAxis.h> 
-#include <TCanvas.h>
-#include <TF2.h> 
 
-#include "FieldView.hh"
+#include "ViewField.hh"
 
 namespace Garfield {
 
-FieldView::FieldView() :
+ViewField::ViewField() :
   debug(false), sensor(0),
   pxmin(-1.), pymin(-1.), pxmax(1.), pymax(1.),
   fmin(0.), fmax(100.),
@@ -25,36 +23,18 @@ FieldView::FieldView() :
 
 }
 
-FieldView::FieldView(Sensor* s) :
-  debug(false), sensor(s),
-  pxmin(-1.), pymin(-1.), pxmax(1.), pymax(1.),
-  fmin(0.), fmax(100.),
-  nContours(nMaxContours),
-  canvas(0), hasExternalCanvas(false),
-  fPot(0) {
-
-  SetDefaultProjection();
-  if (sensor != 0) {
-    // Get default range
-    bool ok = sensor->GetArea(pxmin, pymin, pzmin, pxmax, pymax, pzmax);
-    // Get voltage range
-    ok = sensor->GetVoltageRange(fmin, fmax);
-  }
-
-}
-
-FieldView::~FieldView() {
+ViewField::~ViewField() {
 
   if (!hasExternalCanvas && canvas != 0) delete canvas;
   if (fPot != 0) delete fPot;
 }
 
 void
-FieldView::SetSensor(Sensor* s) {
+ViewField::SetSensor(Sensor* s) {
 
   if (s == 0) {
-    printf("FieldView::SetSensor:\n");
-    printf("    Sensor is not defined.\n");
+    std::cout << "ViewField::SetSensor:\n";
+    std::cout << "    Sensor is not defined.\n";
     return;
   }
 
@@ -67,7 +47,7 @@ FieldView::SetSensor(Sensor* s) {
 }
 
 void
-FieldView::SetCanvas(TCanvas* c) {
+ViewField::SetCanvas(TCanvas* c) {
 
   if (c == 0) return;
   if (!hasExternalCanvas && canvas != 0) {
@@ -80,16 +60,16 @@ FieldView::SetCanvas(TCanvas* c) {
 }
 
 void 
-FieldView::SetArea(double xmin, double ymin, double zmin, 
+ViewField::SetArea(double xmin, double ymin, double zmin, 
                    double xmax, double ymax, double zmax) {
 
   // Check range, assign if non-null
   if (xmin == xmax || ymin == ymax || zmin == zmax) {
-    printf("FieldView::SetArea:\n");
-    printf("    Null area range not permitted.\n");
-    printf("                 %g < x < %g\n", xmin, xmax);
-    printf("                 %g < y < %g\n", ymin, ymax);
-    printf("                 %g < z < %g\n", zmin, zmax);
+    std::cerr << "ViewField::SetArea:\n";
+    std::cerr << "    Null area range not permitted.\n";
+    std::cerr << "      " << xmin << " < x < " << xmax << "\n";
+    std::cerr << "      " << ymin << " < y < " << ymax << "\n";
+    std::cerr << "      " << zmin << " < z < " << zmax << "\n";
     return;
   } 
   pxmin = std::min(xmin,xmax);
@@ -102,7 +82,7 @@ FieldView::SetArea(double xmin, double ymin, double zmin,
 }
 
 void 
-FieldView::SetVoltageRange(const double minval, const double maxval) {
+ViewField::SetVoltageRange(const double minval, const double maxval) {
 
   fmin = std::min(minval, maxval);
   fmax = std::max(minval, maxval);
@@ -110,19 +90,19 @@ FieldView::SetVoltageRange(const double minval, const double maxval) {
 }
 
 void
-FieldView::SetNumberOfContours(const int n) {
+ViewField::SetNumberOfContours(const int n) {
 
   if (n <= nMaxContours) {
     nContours = n;
   } else {
-    printf("FieldView::SetNumberOfContours:\n");
-    printf("    Max. number of contours is %d.\n", nMaxContours);
+    std::cerr << "ViewField::SetNumberOfContours:\n";
+    std::cerr << "    Max. number of contours is " << nMaxContours << ".\n";
   }
   
 }
 
 void 
-FieldView::PlotContour() {
+ViewField::PlotContour() {
 
   // Setup the canvas
   if (canvas == 0) {
@@ -148,10 +128,10 @@ FieldView::PlotContour() {
   fPot->SetContour(nContours, level);
   
   if (debug) {
-    printf("FieldView::PlotContour:\n");
-    printf("    Number of contours: %d\n", nContours);
+    std::cout << "ViewField::PlotContour:\n";
+    std::cout << "    Number of contours: " << nContours << "\n";
     for (int i = 0; i < nContours; ++i) {
-      printf("                Level %d = %g\n", i, level[i]);
+      std::cout << "        Level " << i << " = " << level[i] << "\n";
     }
   }
   fPot->SetNpx(100);
@@ -165,7 +145,7 @@ FieldView::PlotContour() {
 }
 
 void 
-FieldView::PlotSurface() {
+ViewField::PlotSurface() {
 
   // Setup the canvas
   if (canvas == 0) {
@@ -182,13 +162,13 @@ FieldView::PlotSurface() {
   fPot->GetXaxis()->SetTitle(xLabel);
   fPot->GetYaxis()->SetTitle(yLabel);
   fPot->SetTitle("Surface plot of the potential");
-  fPot->Draw("SURF7");
+  fPot->Draw("SURF4");
   canvas->Update();
 
 }
 
 void
-FieldView::CreateFunction() {
+ViewField::CreateFunction() {
 
   int idx = 0;
   std::string fname = "fPotential_0";
@@ -200,13 +180,13 @@ FieldView::CreateFunction() {
     fname = ss.str();
   }
 
-  fPot = new TF2(fname.c_str(), this, &FieldView::EvaluatePotential, 
-        pxmin, pxmax, pymin, pymax, 0, "FieldView", "EvaluatePotential");
+  fPot = new TF2(fname.c_str(), this, &ViewField::EvaluatePotential, 
+        pxmin, pxmax, pymin, pymax, 0, "ViewField", "EvaluatePotential");
  
 }
 
 void 
-FieldView::SetDefaultProjection() {
+ViewField::SetDefaultProjection() {
 
   // Default projection: x-y at z=0
   project[0][0] = 1;  project[1][0] = 0;  project[2][0] = 0;
@@ -225,7 +205,7 @@ FieldView::SetDefaultProjection() {
 }
 
 double
-FieldView::EvaluatePotential(double* pos, double* par) {
+ViewField::EvaluatePotential(double* pos, double* par) {
 
   if (sensor == 0) return 0.;
 
@@ -242,11 +222,11 @@ FieldView::EvaluatePotential(double* pos, double* par) {
  
   sensor->ElectricField(xpos, ypos, zpos, ex, ey, ez, volt, medium, status);
   if (debug) {
-    printf("FieldView::EvaluatePotential:\n");
-    printf("    At (u, v) = (%g, %g), (x,y,z) = (%g, %g, %g)\n", 
-           pos[0], pos[1], xpos, ypos, zpos);
-    printf("    E = (%g, %g, %g), V = %g, status = %d\n",
-           ex, ey, ez, volt, status);
+    std::cout << "ViewField::EvaluatePotential:\n";
+    std::cout << "    At (u, v) = (" << pos[0] << ", " << pos[1] << "), "
+              << " (x,y,z) = (" << xpos << "," << ypos << "," << zpos << ")\n";
+    std::cout << "    E = " << ex << ", " << ey << ", " << ez << "), V = "
+              << volt << ", status = " << status << "\n";
   }
   
   // Return the potential
@@ -254,7 +234,7 @@ FieldView::EvaluatePotential(double* pos, double* par) {
     
 }
 
-void FieldView::Labels() {
+void ViewField::Labels() {
 
   // Initialisation of the x-axis label
   strcpy(xLabel,"\0");
@@ -484,15 +464,16 @@ void FieldView::Labels() {
   strcat(description, buf);
 
   if (debug) {
-    printf("FieldView::Labels: x label: |%s|\n", xLabel);
-    printf("                   y label: |%s|\n", yLabel);
-    printf("                   plane:   |%s|\n", description);
+    std::cout << "ViewField::Labels:\n";
+    std::cout << "    x label: |" << xLabel << "|\n";
+    std::cout << "    y label: |" << yLabel << "|\n";
+    std::cout << "    plane:   |" << description << "|\n";
   }
 
 }
 
 void 
-FieldView::SetPlane(const double fx, const double fy, const double fz,
+ViewField::SetPlane(const double fx, const double fy, const double fz,
                     const double x0, const double y0, const double z0) {
 
   // Calculate 2 in-plane vectors for the normal vector
@@ -518,8 +499,8 @@ FieldView::SetPlane(const double fx, const double fy, const double fz,
     project[2][1] =  y0;
     project[2][2] =  z0;
   } else {
-    printf("FieldView::SetPlane:\n");
-    printf("    Normal vector has zero norm. No new projection set.\n");
+    std::cout << "ViewField::SetPlane:\n";
+    std::cout << "    Normal vector has zero norm. No new projection set.\n";
   }
 
   // Store the plane description
@@ -534,7 +515,7 @@ FieldView::SetPlane(const double fx, const double fy, const double fz,
 }
 
 void 
-FieldView::Rotate(const double angle) {
+ViewField::Rotate(const double angle) {
 
   // Rotate the axes
   double auxu[3], auxv[3];

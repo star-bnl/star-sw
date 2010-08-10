@@ -44,7 +44,7 @@ AvalancheMicroscopic::SetSensor(Sensor* s) {
 }
 
 void
-AvalancheMicroscopic::EnablePlotting(DriftView* view) {
+AvalancheMicroscopic::EnablePlotting(ViewDrift* view) {
 
   if (view == 0) {
     std::cerr << "AvalancheMicroscopic::EnablePlotting:" << std::endl;

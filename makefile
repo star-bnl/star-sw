@@ -30,10 +30,10 @@ OBJS = \
 	$(OBJECT)/efieldCalc.o \
 	$(OBJECT)/GeometrySimple.o \
 	$(OBJECT)/GeometryRoot.o \
-	$(OBJECT)/FieldView.o \
-	$(OBJECT)/DriftView.o \
-	$(OBJECT)/MediumView.o \
-	$(OBJECT)/Input.o \
+	$(OBJECT)/ViewField.o \
+	$(OBJECT)/ViewDrift.o \
+	$(OBJECT)/ViewMedium.o \
+	$(OBJECT)/ViewSignal.o \
 	$(OBJECT)/Medium.o \
 	$(OBJECT)/MediumMagboltz86.o \
 	$(OBJECT)/magboltz.o \
@@ -55,17 +55,17 @@ clean:
 $(OBJECT)/AvalancheMicroscopic.o: \
 	$(SOURCE)/AvalancheMicroscopic.cc $(INCLUDE)/AvalancheMicroscopic.hh \
 	$(INCLUDE)/FundamentalConstants.hh $(INCLUDE)/Random.hh \
-	$(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh $(INCLUDE)/DriftView.hh
+	$(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh $(INCLUDE)/ViewDrift.hh
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/AvalancheMC.o: \
 	$(SOURCE)/AvalancheMC.cc $(INCLUDE)/AvalancheMC.hh \
 	$(INCLUDE)/FundamentalConstants.hh $(INCLUDE)/Random.hh \
-	$(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh $(INCLUDE)/DriftView.hh
+	$(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh $(INCLUDE)/ViewDrift.hh
 	$(CC) $(CFLAGS) $< -o $@      
 $(OBJECT)/DriftLineRKF.o: \
 	$(SOURCE)/DriftLineRKF.cc $(INCLUDE)/DriftLineRKF.hh \
 	$(INCLUDE)/FundamentalConstants.hh \
-	$(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh $(INCLUDE)/DriftView.hh
+	$(INCLUDE)/Sensor.hh $(INCLUDE)/Medium.hh $(INCLUDE)/ViewDrift.hh
 	$(CC) $(CFLAGS) $< -o $@
  
 $(OBJECT)/Track.o: $(SOURCE)/Track.cc $(INCLUDE)/Track.hh
@@ -139,19 +139,18 @@ $(OBJECT)/GeometryRoot.o: \
 	$(SOURCE)/GeometryRoot.cc $(INCLUDE)/GeometryRoot.hh
 	$(CC) $(CFLAGS) $< -o $@    
 
-$(OBJECT)/FieldView.o: \
-	$(SOURCE)/FieldView.cc $(INCLUDE)/FieldView.hh \
+$(OBJECT)/ViewField.o: \
+	$(SOURCE)/ViewField.cc $(INCLUDE)/ViewField.hh \
 	$(INCLUDE)/Sensor.hh
 	$(CC) $(CFLAGS) $< -o $@
-$(OBJECT)/DriftView.o: \
-	$(SOURCE)/DriftView.cc $(INCLUDE)/DriftView.hh
+$(OBJECT)/ViewDrift.o: \
+	$(SOURCE)/ViewDrift.cc $(INCLUDE)/ViewDrift.hh
 	$(CC) $(CFLAGS) $< -o $@
-$(OBJECT)/MediumView.o: \
-	$(SOURCE)/MediumView.cc $(INCLUDE)/MediumView.hh
+$(OBJECT)/ViewMedium.o: \
+	$(SOURCE)/ViewMedium.cc $(INCLUDE)/ViewMedium.hh
 	$(CC) $(CFLAGS) $< -o $@
-
-$(OBJECT)/Input.o: \
-	$(SOURCE)/Input.cc $(INCLUDE)/Input.hh
+$(OBJECT)/ViewSignal.o: \
+	$(SOURCE)/ViewSignal.cc $(INCLUDE)/ViewSignal.hh
 	$(CC) $(CFLAGS) $< -o $@
 
 $(OBJECT)/Medium.o: \

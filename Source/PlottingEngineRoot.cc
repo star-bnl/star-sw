@@ -1,6 +1,5 @@
 #include <iostream>
 #include <iomanip>
-#include <cmath>
 
 #include <TCanvas.h>
 #include <TAxis.h> 
@@ -24,37 +23,6 @@ PlottingEngineRoot::PlottingEngineRoot() {
 PlottingEngineRoot::~PlottingEngineRoot() {
 
   delete garfieldStyle;
-  
-}
-
-void 
-PlottingEngineRoot::PlotSignal(Sensor* s, const std::string label) {
-
-  if (s == 0) {
-    std::cerr << "PlottingEngineRoot::PlotSignal:" << std::endl;
-    std::cerr << "    Sensor is not defined." << std::endl;
-    return;
-  }
-  
-  int nBins;
-  double t0;
-  double dt;
-  s->GetTimeWindow(t0, dt, nBins);
-    
-  if (hSignal != 0) {
-    delete hSignal;
-    hSignal = 0;
-  }
-  hSignal = new TH1F("hSignal", label.c_str(), nBins, t0, t0 + nBins * dt);
-  hSignal->GetXaxis()->SetTitle("time [ns]");
-  hSignal->GetYaxis()->SetTitle("signal");
-  
-  double sig = 0.;  
-  for (int i = nBins; i--;) {
-    sig = s->GetSignal(label, i);
-    hSignal->SetBinContent(i, sig);
-  }
-  hSignal->Draw();
   
 }
 

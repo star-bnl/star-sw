@@ -5,7 +5,6 @@
 #include <math.h>
 
 #include "ComponentAnsys123.hh"
-#include "Input.hh"
 
 namespace Garfield {
 
@@ -214,8 +213,7 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
     token = strtok(NULL, " "); int in5 = ReadInteger(token, -1, readerror);
     token = strtok(NULL, " "); int in6 = ReadInteger(token, -1, readerror);
     token = strtok(NULL, " "); int in7 = ReadInteger(token, -1, readerror);
-    felist.getline(line, size, '\n');
-    if (!line) {
+    if (!felist.getline(line, size, '\n')) {
       printf("ComponentAnsys123::Initialise:\n");
       printf("    Error reading element %d.\n", ielem);
       ok = false;

@@ -1,25 +1,26 @@
-#ifndef G_DRIFT_VIEW
-#define G_DRIFT_VIEW
+#ifndef G_VIEW_DRIFT
+#define G_VIEW_DRIFT
 
 #include <string>
 
 #include <RQ_OBJECT.h>
 #include <TCanvas.h>
-#include <TH3F.h>
 #include <TPolyLine3D.h>
 #include <TView.h>
 
+#include "Plotting.hh"
+
 namespace Garfield {
 
-class DriftView { 
+class ViewDrift { 
 
-  RQ_OBJECT("DriftView")
+  RQ_OBJECT("ViewDrift")
   
   public:
     // Constructor
-    DriftView();
+    ViewDrift();
     // Destructor
-    ~DriftView();
+    ~ViewDrift();
     
     void SetCanvas(TCanvas* c);
     

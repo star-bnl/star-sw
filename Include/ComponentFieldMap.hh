@@ -7,10 +7,9 @@
 
 namespace Garfield {
 
-// -------------------------------------------------------------------------------------------------------------------------------------
-class ComponentFieldMap: public ComponentBase {
+class ComponentFieldMap : public ComponentBase {
 
-    RQ_OBJECT("ComponentFieldMap")
+  RQ_OBJECT("ComponentFieldMap")
     
   public:
     // Constructor
@@ -73,8 +72,10 @@ class ComponentFieldMap: public ComponentBase {
                               const std::string label) = 0;
 
     // Options
-    void CheckMapIndices()   {checkMultipleElement = true; lastElement = -1;}
-    void NoCheckMapIndices() {checkMultipleElement = false;}
+    void EnableCheckMapIndices() {
+      checkMultipleElement = true; lastElement = -1;
+    }
+    void DisableCheckMapIndices() {checkMultipleElement = false;}
     
   protected:
   
@@ -203,6 +204,9 @@ class ComponentFieldMap: public ComponentBase {
             double& xpos, double& ypos, double& zpos,
             bool& xmirrored, bool& ymirrored, bool& zmirrored,
             double& rcoordinate, double& rotation);
+    
+    int    ReadInteger(char* token, int def, bool& error);
+    double ReadDouble(char* token, double def, bool& error);
 
 };
 
