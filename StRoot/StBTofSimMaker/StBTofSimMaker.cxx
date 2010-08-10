@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.cxx,v 1.3 2010/07/14 20:44:10 geurts Exp $
+ * $Id: StBTofSimMaker.cxx,v 1.4 2010/08/10 19:18:31 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.cxx,v $
+ * Revision 1.4  2010/08/10 19:18:31  geurts
+ * Look for geant data in bfc ("geant") or geant.root ("geantBranch"); Protect storing BTofMcHitCollection in case McEvent is NULL.  [Xin]
+ *
  * Revision 1.3  2010/07/14 20:44:10  geurts
  * Correct application of vpd resolution smearing: The original values in the db (or ParSim) are in ps [Xin]
  *
@@ -100,6 +103,7 @@ Int_t StBTofSimMaker::Init()
 //_____________________________________________________________________________
 void StBTofSimMaker::Reset()
 {
+	mGeantData = 0;
 	mEvent  = 0;
 	mMcEvent = 0;
 	//mBTofCollection = 0;
@@ -167,8 +171,11 @@ Int_t StBTofSimMaker::Make()
 	mMcBTofHitCollection = new StMcBTofHitCollection();
 
 	// Check to see that there are GEANT hits
-	St_DataSet* geantData = GetInputDS("geantBranch");
-	if(!geantData) {
+	mGeantData = GetInputDS("geant"); // in bfc chain
+	if(!mGeantData) { // when reading the geant.root file
+		mGeantData = GetInputDS("geantBranch");
+	}
+	if(!mGeantData) {
 		LOG_WARN << " No GEANT data loaded. Exit! " << endm;
 		return kStWarn;
 	}
@@ -176,7 +183,7 @@ Int_t StBTofSimMaker::Make()
 
 	// Look for VPD hits
 	St_g2t_vpd_hit* g2t_vpd_hits = 0;
-	g2t_vpd_hits = dynamic_cast<St_g2t_vpd_hit*>(geantData->Find("g2t_vpd_hit"));
+	g2t_vpd_hits = dynamic_cast<St_g2t_vpd_hit*>(mGeantData->Find("g2t_vpd_hit"));
 	if(!g2t_vpd_hits){
 		LOG_WARN << " No VPD hits in GEANT" << endm; }
 	else {
@@ -192,7 +199,7 @@ Int_t StBTofSimMaker::Make()
 
 	// Look for TOF hits
 	St_g2t_ctf_hit* g2t_tfr_hits = 0;
-	g2t_tfr_hits = dynamic_cast<St_g2t_ctf_hit*> (geantData->Find("g2t_tfr_hit"));
+	g2t_tfr_hits = dynamic_cast<St_g2t_ctf_hit*> (mGeantData->Find("g2t_tfr_hit"));
 	if(!g2t_tfr_hits) {
 		LOG_WARN << " No TOF hits in GEANT" << endm; }
 	else {
@@ -290,8 +297,7 @@ Int_t StBTofSimMaker::CellResponse(g2t_ctf_hit_st* tofHitsFromGeant,
 	}
 
 
-	St_DataSetIter geant(GetDataSet("geantBranch"));
-	St_g2t_track *g2t_track = static_cast<St_g2t_track *>(geant("g2t_track"));
+	St_g2t_track *g2t_track = static_cast<St_g2t_track *>(mGeantData->Find("g2t_track"));
 	if (!g2t_track) {
 		LOG_WARN << " No G2T track table!" << endm;
 		return kStWarn;
@@ -482,8 +488,7 @@ Int_t StBTofSimMaker::CellTimePassTh(TrackVec& tofResponseVec)
 
 
 	/// store to McBTofHitCollection
-	St_DataSetIter geant(GetDataSet("geantBranch"));
-	St_g2t_track *g2t_track = static_cast<St_g2t_track *>(geant("g2t_track"));
+	St_g2t_track *g2t_track = static_cast<St_g2t_track *>(mGeantData->Find("g2t_track"));
 	if (!g2t_track) {
 		LOG_WARN << " No g2t track table !!! " << endm;
 		return kStWarn;
@@ -573,9 +578,10 @@ Int_t StBTofSimMaker::fillEvent()
 	mMcEvent = (StMcEvent*)GetInputDS("StMcEvent");
 	if (!mMcEvent) {
 		LOG_ERROR << "No StMcEvent! Bailing out ..." << endm;
+	} else {
+		mMcEvent->setBTofHitCollection(mMcBTofHitCollection);
+		LOG_INFO << " ... StMcTofCollection stored in StMcEvent" << endm;
 	}
-	mMcEvent->setBTofHitCollection(mMcBTofHitCollection);
-	LOG_INFO << " ... StMcTofCollection stored in StMcEvent" << endm;
 
 	/// send off to StEvent
 	mBTofCollection= new StBTofCollection();
@@ -819,8 +825,7 @@ Int_t StBTofSimMaker::FastCellResponse(g2t_ctf_hit_st* tofHitsFromGeant)
 
 	StThreeVectorF local(tofHitsFromGeant->x[0], tofHitsFromGeant->x[1], tofHitsFromGeant->x[2]);
 
-	St_DataSetIter geant(GetDataSet("geantBranch"));
-	St_g2t_track *g2t_track = static_cast<St_g2t_track *>(geant("g2t_track"));
+	St_g2t_track *g2t_track = static_cast<St_g2t_track *>(mGeantData->Find("g2t_track"));
 	if (!g2t_track) {
 		LOG_WARN << " No g2t track table !!! " << endm;
 		return kStWarn;

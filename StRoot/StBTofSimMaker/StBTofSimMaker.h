@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBTofSimMaker.h,v 1.2 2010/07/14 20:32:58 geurts Exp $
+ * $Id: StBTofSimMaker.h,v 1.3 2010/08/10 19:18:32 geurts Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StBTofSimMaker.h,v $
+ * Revision 1.3  2010/08/10 19:18:32  geurts
+ * Look for geant data in bfc ("geant") or geant.root ("geantBranch"); Protect storing BTofMcHitCollection in case McEvent is NULL.  [Xin]
+ *
  * Revision 1.2  2010/07/14 20:32:58  geurts
  * remove geometry initialization (not used)
  *
@@ -58,6 +61,7 @@ class StBTofSimMaker : public StMaker{
 		StBTofDaqMap*       mDaqMap;         //! Tof Daq map
 		StMcBTofHitCollection *mMcBTofHitCollection; //! barrel tof hit
 
+		St_DataSet        *mGeantData;        //! geant table
 		StEvent           *mEvent;            //!
 		StMcEvent         *mMcEvent;
 		StBTofCollection   *mBTofCollection;   
@@ -197,7 +201,7 @@ class StBTofSimMaker : public StMaker{
 		void   setBookHist(Bool_t val) { mBookHisto = val; }
 
 		virtual const char *GetCVS() const
-		{static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.2 2010/07/14 20:32:58 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+		{static const char cvs[]="Tag $Name:  $ $Id: StBTofSimMaker.h,v 1.3 2010/08/10 19:18:32 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 		ClassDef(StBTofSimMaker,1)
 };
