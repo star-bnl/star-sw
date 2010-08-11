@@ -9,6 +9,7 @@ struct triggerDefinition {
  
   char comments[200];    /* comments */
   octet trigdef[131072];  /* serialized TObjArray of trigger definitions */
+  long  size; /* true size of serialized blob */
 
  };
 
