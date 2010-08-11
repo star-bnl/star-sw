@@ -74,7 +74,7 @@ struct TTracksCatCounters // counters for different tracks categories
 
 struct TEfficiencies
 {
-  TEfficiencies():ratio_ghosts(0),ratio_clones(0),ghosts(0),clones(0){
+  TEfficiencies():ratio_ghosts(0),ratio_clones(0),ghosts(0),clones(0),nEvents(0){
     // you should add counter with shortname="total" !!
   };
 
@@ -83,7 +83,7 @@ struct TEfficiencies
   TEfficiencies& operator+=(TEfficiencies& a);
   void CalcEff();
   void Inc(bool isReco, string name); // increment counters according to parameters
-
+  void IncNEvents(){ nEvents++; };
   void Print();
 
   
@@ -98,6 +98,7 @@ struct TEfficiencies
   TTracksCatCounters<int> reco;
   int ghosts;
   int clones;
+  int nEvents;
 };
 
 inline void TEfficiencies::AddCounter(string shortname, string name)
@@ -131,7 +132,8 @@ inline TEfficiencies& TEfficiencies::operator+=(TEfficiencies& a)
 {
   mc += a.mc; reco += a.reco;
   ghosts += a.ghosts; clones += a.clones;
-
+  nEvents += a.nEvents;
+  
   return *this;
 }
 

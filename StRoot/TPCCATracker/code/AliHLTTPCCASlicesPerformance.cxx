@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASlicesPerformance.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCASlicesPerformance.cxx,v 1.2 2010/08/11 14:23:50 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -91,7 +91,8 @@ void AliHLTTPCCASlicesPerformance::EfficiencyPerformance()
   for (unsigned int iPerf = 0; iPerf < slicePerformances.size(); iPerf++){
     fEff += slicePerformances[iPerf]->GetEff();
   }
-  fEffStat += fEff;
+
+  AliHLTTPCCAPerformanceBase::EfficiencyPerformance();
 } // void AliHLTTPCCASlicesPerformance::EfficiencyPerformance()
 
 void AliHLTTPCCASlicesPerformance::FillHistos()

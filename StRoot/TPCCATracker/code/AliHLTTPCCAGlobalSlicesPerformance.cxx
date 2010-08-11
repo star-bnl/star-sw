@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGlobalSlicesPerformance.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCAGlobalSlicesPerformance.cxx,v 1.2 2010/08/11 14:23:50 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -124,7 +124,7 @@ void AliHLTTPCCAGlobalSlicesPerformance::EfficiencyPerformance()
     }
   } // for iMCTr
 
-  fEffStat += fEff;
+  AliHLTTPCCAPerformanceBase::EfficiencyPerformance();
 } // void AliHLTTPCCAGlobalSlicesPerformance::EfficiencyPerformance()
 
 
