@@ -81,7 +81,7 @@ struct AliHLTTPCEfficiencies: public TEfficiencies
           << "      | " << mc.counters[iC]  << endl;
     }
     cout << "Ghost     probability  : " << ratio_ghosts <<" | "<< ghosts << endl;
-    cout << "All reco tracks/ev : " << reco.counters[indices["total"]]/nEvents  << endl;
+    cout << "All reco tracks/ev : " << double(reco.counters[indices["total"]])/double(nEvents)  << endl;
   };
 
   TTracksCatCounters<double> ratio_clone;
