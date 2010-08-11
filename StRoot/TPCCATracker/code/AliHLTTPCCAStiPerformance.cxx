@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAStiPerformance.cxx,v 1.1 2010/08/09 21:09:28 mzyzak Exp $
+// $Id: AliHLTTPCCAStiPerformance.cxx,v 1.2 2010/08/11 13:43:26 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -78,7 +78,7 @@ void AliHLTTPCCAStiPerformance::CheckMCTracks()
 //    if ( mc.NHits() >= PParameters::MinimumHitsForMCTrack ){
 //      mcTrackData.SetAsReconstructable();
 //    }
-    if ( mc.NMCPoints() >= PParameters::MinimumHitsForMCTrack ){
+    if ( mc.NMCPoints() >= PParameters::MinimumMCPointsForMCTrack ){
       mcTrackData.SetAsReconstructable();
     }
     if ( mc.P() >= AliHLTTPCCAParameters::ExtraThreshold ) {

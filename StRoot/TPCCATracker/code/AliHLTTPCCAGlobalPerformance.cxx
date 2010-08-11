@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.3 2010/08/09 17:51:15 mzyzak Exp $
+// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.4 2010/08/11 13:43:26 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -78,7 +78,10 @@ void AliHLTTPCCAGlobalPerformance::CheckMCTracks()
     mc.SetSet( 0 );
     mc.SetNReconstructed( 0 );
     mc.SetNTurns( 1 );
-    if ( mc.NHits() >= PParameters::MinimumHitsForMCTrack ){
+//    if ( mc.NHits() >= PParameters::MinimumHitsForMCTrack ){
+//      mcTrackData.SetAsReconstructable();
+//    }
+    if ( mc.NMCPoints() >= PParameters::MinimumMCPointsForMCTrack ){
       mcTrackData.SetAsReconstructable();
     }
     if ( mc.P() >= AliHLTTPCCAParameters::ExtraThreshold ) {
