@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformance.cxx,v 1.4 2010/08/09 21:29:08 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.cxx,v 1.5 2010/08/11 14:23:50 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -184,10 +184,12 @@ void AliHLTTPCCAPerformance::WriteHistos()
 
 void AliHLTTPCCAPerformance::ExecPerformance()
 {
+  fStatNEvents++;
+  
   for (unsigned int iPerf = 0; iPerf < subPerformances.size(); iPerf++){
     subPerformances[iPerf]->Exec(0);
     cout << endl
-        << " ---- " << subPerformances[iPerf].name << " Statistic ---- " << endl;
+        << " ---- " << subPerformances[iPerf].name << " " << fStatNEvents << " events Statistic ---- " << endl;
     subPerformances[iPerf]->PrintEfficiencyStatistic();
   };
 
@@ -196,10 +198,15 @@ void AliHLTTPCCAPerformance::ExecPerformance()
 
 void AliHLTTPCCAPerformance::ExecPerformance(int iPerf)
 {
+  fStatNEvents++; // TODO  make normal exec!
+  
     subPerformances[iPerf]->Exec(0);
+    // cout << endl
+    //     << " ---- " << subPerformances[iPerf].name << " event " << (fStatNEvents+3)/4 /*TODO*/ << " ---- "<< endl;
+    // subPerformances[iPerf]->PrintEfficiency();
     cout << endl
-        << " ---- " << subPerformances[iPerf].name << " Statistic ---- " << endl;
-    subPerformances[iPerf]->PrintEfficiencyStatistic();
+        << " ---- " << subPerformances[iPerf].name << " " << (fStatNEvents+3)/4 /*TODO*/ << " events Statistic ---- " << endl;
+    subPerformances[iPerf]->PrintEfficiencyStatistic();  
 }
 
   /// -------------------- Read\write MC information ---------------------

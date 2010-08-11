@@ -62,20 +62,26 @@ struct AliHLTTPCEfficiencies: public TEfficiencies
   };
 
   void Print(){
+    if (nEvents == 0) {
+      cout << "Warning: nEvents = 0. " << endl;
+      return;
+    }
+    
     cout.setf(ios::fixed);
     cout.setf(ios::showpoint);
     cout.precision(3);
-    cout << "Track category         : " << " Eff  "       <<" / "<< "Clones" <<" | "<< "All MC"  << endl;
+    cout << "Track category         : " << " Eff  "       <<" / "<< "Clones" <<" | "<< "All Reco" <<" | "<< "All MC"  << endl;
     
     int NCounters = mc.NCounters;
     for (int iC = 0; iC < NCounters; iC++){
       cout << names[iC]  << "   : "
           << ratio_reco.counters[iC]
           << "  / " << ratio_clone.counters[iC]
-          << "  | " << mc.counters[iC]  << endl;
+          << "  | " << reco.counters[iC]
+          << "      | " << mc.counters[iC]  << endl;
     }
     cout << "Ghost     probability  : " << ratio_ghosts <<" | "<< ghosts << endl;
-    cout << "All reconstructed tracks : " << reco.counters[indices["total"]]  << endl;
+    cout << "All reco tracks/ev : " << reco.counters[indices["total"]]/nEvents  << endl;
   };
 
   TTracksCatCounters<double> ratio_clone;

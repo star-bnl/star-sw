@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAStiPerformance.cxx,v 1.2 2010/08/11 13:43:26 mzyzak Exp $
+// $Id: AliHLTTPCCAStiPerformance.cxx,v 1.3 2010/08/11 14:23:50 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -172,7 +172,7 @@ void AliHLTTPCCAStiPerformance::EfficiencyPerformance( )
     }
   } // for iMCTr
 
-  fEffStat += fEff;
+  AliHLTTPCCAPerformanceBase::EfficiencyPerformance();
 } // void AliHLTTPCCAStiPerformance::EfficiencyPerformance( )
 
 void AliHLTTPCCAStiPerformance::FillHistos()
