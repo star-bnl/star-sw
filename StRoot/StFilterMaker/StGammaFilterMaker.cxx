@@ -3,6 +3,8 @@
 
 // ROOT Libraries
 #include "TVector3.h"
+#include "TFile.h"
+#include "TTree.h"
 
 // StEvent Libraries
 #include "StEvent.h"
@@ -24,8 +26,16 @@
 #include "StEmcUtil/projection/StEmcPosition.h"
 #include "StEmcUtil/others/emcDetectorName.h"
 
-// Endcap Libraries
-#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
+// StMuDst Libraries
+#include "StBFChain/StBFChain.h"
+#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+
+// St_g2t Libraries
+#include "tables/St_g2t_event_Table.h"
+#include "tables/St_g2t_pythia_Table.h"
+#include "tables/St_g2t_vertex_Table.h"
+#include "tables/St_particle_Table.h"
+#include "StSpinPool/StJetSkimEvent/StPythiaEvent.h"
 
 // Class Header
 #include "StGammaFilterMaker.h"
@@ -35,37 +45,33 @@ ClassImp(StGammaFilterMaker)
 ////////////////////////////////////////////////////////////
 //                      Constructor                       //
 ////////////////////////////////////////////////////////////
-StGammaFilterMaker::StGammaFilterMaker(const char *name):
-StMaker(name)
+StGammaFilterMaker::StGammaFilterMaker(const char *name): 
+StMaker(name), mPythiaFile(0), mPythiaTree(0), mPythiaEvent(0)
 {
 
     LOG_DEBUG << "StGammaFilterMaker()" << endm;
 
-    // Set reasonable defaults
-    mUseBemc = 1;
+    mFirst = true;
+    mPythiaName = "pythia.root";
+
+    // 2009 Defaults
+    mSeedEnergyThreshold = 5.0;
+    mClusterEtThreshold = 6.55;
+
+    // Zero counters
+    mTotal = 0;
+    mAccepted = 0;
     
-    mMaxVertex = 80;
-    mSeedEnergyThreshold = 3.06;
-    mClusterEtThreshold = 4.335;
+    // Calorimeter Geometries
     
     mMomentum = new TVector3();
-    
-    ////////////////////////////////////////
-    //       Calorimeter Geometries       //
-    ////////////////////////////////////////
-    
+        
     // BEMC Geometry   
     mBemcGeom = StEmcGeom::instance("bemc");
     assert(mBemcGeom);
     
     mPosition = new StEmcPosition();
     assert(mPosition);
-    
-    // Zero counters
-    mTotal = 0;
-    mAccepted = 0;
-    mVertexRejected = 0;
-    mFilterRejected = 0;
     
 }
 
@@ -93,25 +99,26 @@ Int_t StGammaFilterMaker::Init()
     // Force the BFC to listen to the filter
     SetAttr(".Privilege", 1);
     
-    // If using the EEMC ensure that a sampling 
-    // fraction has been entered by the user 
-    if(!mUseBemc) assert(mEemcSamplingFraction > 0);
-    
-    // Display maker information
-    if(mUseBemc)
-    {
-        LOG_INFO  << "Init() - Using gamma filter on the BEMC" << endm;
-    }
-    else
-    {
-        LOG_INFO << "Init() : Using gamma filter on the EEMC" << endm;
-        LOG_INFO << "Init() : EEMC Sampling Fraction = " << mEemcSamplingFraction << endm;
-    }
+    LOG_INFO  << "Init() - Using gamma filter on the BEMC" << endm;
     
     LOG_INFO << "Init() : Seed energy threshold = " << mSeedEnergyThreshold << " GeV " << endm;
     LOG_INFO << "Init() : Cluster eT threshold = " << mClusterEtThreshold << " GeV " << endm;
-    LOG_INFO << "Init() : Maximum vertex = +/- " << mMaxVertex << " cm" << endm;
     
+    // Create pythia output file
+    StBFChain *bfChain = dynamic_cast<StBFChain*>(GetMakerInheritsFrom("StBFChain"));
+    if(bfChain)
+    {
+        TString name(bfChain->GetFileOut());
+        name.ReplaceAll(".root",".pythia.root");
+        mPythiaName = name;
+    }    
+
+    LOG_INFO << "Init() : Storing pythia event information in " << mPythiaName << endm;
+    mPythiaEvent = new StPythiaEvent;
+    mPythiaFile = new TFile(mPythiaName, "recreate");
+    mPythiaTree = new TTree("pythiaTree", "Pythia Tree");
+    mPythiaTree->Branch("PythiaEvents", "StPythiaEvent", &mPythiaEvent);
+
     return kStOK;
     
 }
@@ -130,34 +137,9 @@ void StGammaFilterMaker::Clear(const Option_t*)
         *point1 = NULL;
         ++point1;
     }
+
+    mPythiaEvent->Clear();
     
-}
-
-////////////////////////////////////////////////////////////
-//               Apply filter to the BEMC                 //
-////////////////////////////////////////////////////////////
-void StGammaFilterMaker::useBEMC()
-{
-    LOG_DEBUG << "useBEMC()" << endm;
-    mUseBemc = 1;
-}
-
-////////////////////////////////////////////////////////////
-//               Apply filter to the EEMC                 //
-////////////////////////////////////////////////////////////
-void StGammaFilterMaker::useEEMC()
-{
-    LOG_DEBUG << "useEEMC()" << endm;
-    mUseBemc = 0;
-}
-
-////////////////////////////////////////////////////////////
-//       Set maximum vertex allowed by the filter         //
-////////////////////////////////////////////////////////////
-void StGammaFilterMaker::setMaxVertex(double maxVertex)
-{
-    LOG_DEBUG << "setMaxVertex()" << endm;
-    mMaxVertex = maxVertex;
 }
 
 ////////////////////////////////////////////////////////////
@@ -174,29 +156,22 @@ void StGammaFilterMaker::setThresholds(double seed, double cluster)
 }
 
 ////////////////////////////////////////////////////////////
-//               Set EEMC sampling fraction               //
-////////////////////////////////////////////////////////////
-void StGammaFilterMaker::setEEMCSamplingFraction(double f)
-{
-    mEemcSamplingFraction = f;
-}
-
-////////////////////////////////////////////////////////////
 //  Calculate multiplier between energy deposited in the  //
 //    BEMC sampling calorimeter and the true particle     //
 //   energy, i.e. the inverse of the sampling fraction,   //  
 //          as a function of tower pseudorapidity         //
 //                                                        //
-//                Coeffiecients taken from                //
-//   StEmcSimulatorMaker/StEmcSimpleSimulator.cxx v1.14   //
+//        LOW_EM compatible coeffiecients taken from      //
+//   StEmcSimulatorMaker/StEmcSimpleSimulator.cxx v1.16   //
 ////////////////////////////////////////////////////////////
+
 double StGammaFilterMaker::BEMCSamplingMultiplier(double eta)
 {
 
     double x = fabs(eta);
-    double c0 = 14.69;
-    double c1 = -0.1022;
-    double c2 = 0.7484;
+    double c0 = 14.365;
+    double c1 = -0.512;
+    double c2 = 0.668;
     
     return c0 + c1 * x + c2 * x * x;
 
@@ -211,44 +186,44 @@ Int_t StGammaFilterMaker::Make()
     
     // Acquire StEvent from the chain
     StEvent *mEvent = dynamic_cast<StEvent*>(GetDataSet("StEvent"));
-    assert(mEvent);
+    if(!mEvent)
+    {
+     	LOG_WARN << "Make() - StEvent not found!" << endm;
+        return kStWarn;
+    }
     
     // Acquire StMcEvent from the chain
     StMcEvent *mMcEvent = dynamic_cast<StMcEvent*>(GetDataSet("StMcEvent"));
-    assert(mMcEvent);
     
     ++mTotal;
-    
+
+    // Store the pythia event record
+    fStorePythia();
+
     // Store the first event to ensure that a MuDst is created
     // in the case of no events passing the filter
-    if(mEvent->id() == 1)
+    if(mFirst)
     {
+
         LOG_INFO << "Make() : Storing first event without applying filter" << endm;   
         
         ++mAccepted;
+        mFirst = false;
+
         return kStOK;
-    }
-    
+    }    
+
     // Check for functional StMcEvent
     if(!mMcEvent)
     {
-     	LOG_WARN << "Reject() : Bad StMcEvent!" << endm;
-        return kStOK;
+     	LOG_WARN << "Make() - Bad StMcEvent!" << endm;
+        return kStWarn;
     }
 
     // Acquire vertex information from the geant record
     // and abort the event if the vertex is too extreme
     double zVertex = mMcEvent->primaryVertex()->position().z();
 
-    if(fabs(zVertex) > mMaxVertex)
-    {
-     	LOG_INFO << "Reject() : Aborting Event " << mEvent->id()
-                 << " due to extreme geant vertex of " << zVertex << " cm " << endm;
-
-        ++mVertexRejected;
-        return kStSKIP;
-    }
-    
     // Look for clusters in the chosen calorimeter
     Int_t status = 0;
     
@@ -259,9 +234,7 @@ Int_t StGammaFilterMaker::Make()
     
     if(status == kStSKIP)
     {
-        ++mFilterRejected;
         LOG_INFO << "Make() : Aborting Event " << mEvent->id() << " due to gamma filter rejection" << endm;
-        LOG_DEBUG << "Make() : Vertex = " << zVertex << " (cm)" << endm;
     }
     
     if(status == kStOK)
@@ -271,7 +244,7 @@ Int_t StGammaFilterMaker::Make()
     }
     
     return status;
-
+ 
 }
 
 ////////////////////////////////////////////////////////////
@@ -279,6 +252,7 @@ Int_t StGammaFilterMaker::Make()
 //        returning kStOK if a satisifactory cluster      // 
 //             is found and kStSKIP otherwise             //
 ////////////////////////////////////////////////////////////
+
 Int_t StGammaFilterMaker::makeBEMC(StMcEmcHitCollection *mcEmcCollection, double zVertex)
 {
 
@@ -412,13 +386,106 @@ Int_t StGammaFilterMaker::makeBEMC(StMcEmcHitCollection *mcEmcCollection, double
 ////////////////////////////////////////////////////////////
 Int_t StGammaFilterMaker::Finish()
 {
+
     LOG_DEBUG << "::Finish()" << endm;
+
+    mPythiaFile->Write();
+    mPythiaFile->Close();
     
     LOG_INFO << "Finish() : " << GetName() << " finishing with " << endm;
     LOG_INFO << "Finish() : \t" << mAccepted << " of " << mTotal << " events passing the filter" << endm;
-    LOG_INFO << "Finish() : \t" << mVertexRejected << " rejected for bad vertex" << endm;
-    LOG_INFO << "Finish() : \t" << mFilterRejected << " rejected for no clusters" << endm;
     
     return kStOK;
+
 }
   
+////////////////////////////////////////////////////////////
+//                Store Pythia Event Record               //
+////////////////////////////////////////////////////////////
+void StGammaFilterMaker::fStorePythia()
+{
+
+    TDataSet* geant = GetDataSet("geant");
+    
+    if(geant) 
+    {
+    
+        TDataSetIter iter(geant);
+    
+        // Global event information
+        St_g2t_event* g2tEvent = (St_g2t_event*)iter("g2t_event");
+        if(g2tEvent)
+        {
+
+            g2t_event_st* eventTable = (g2t_event_st*)g2tEvent->GetTable();
+            if(eventTable) 
+            {
+                mPythiaEvent->setRunId(eventTable->n_run);
+                mPythiaEvent->setEventId(eventTable->n_event);
+            }
+    
+        }
+
+        // Pythia event information
+        St_g2t_pythia* pythiaEvent = (St_g2t_pythia*)iter("g2t_pythia");
+        if(pythiaEvent) 
+        {
+        
+            g2t_pythia_st* pythiaTable = (g2t_pythia_st*)pythiaEvent->GetTable();
+            if(pythiaTable) 
+            {
+
+                mPythiaEvent->setProcessId(pythiaTable->subprocess_id);
+                mPythiaEvent->setS(pythiaTable->mand_s);
+                mPythiaEvent->setT(pythiaTable->mand_t);
+ 	        mPythiaEvent->setU(pythiaTable->mand_u);
+                mPythiaEvent->setPt(pythiaTable->hard_p);
+                mPythiaEvent->setCosTheta(pythiaTable->cos_th);
+        	mPythiaEvent->setX1(pythiaTable->bjor_1);
+                mPythiaEvent->setX2(pythiaTable->bjor_2);
+           
+            }
+    
+        }
+
+        // Vertex information
+        St_g2t_vertex* vertexEvent = (St_g2t_vertex*)iter("g2t_vertex");
+        if(vertexEvent) 
+        {
+     
+            g2t_vertex_st* vertexTable = (g2t_vertex_st*)vertexEvent->GetTable();
+            if(vertexTable) mPythiaEvent->setVertex(TVector3(vertexTable[0].ge_x));
+        }
+
+        // Pythia particle record
+        St_particle* particleEvent = (St_particle*)iter("particle");
+        if(particleEvent) 
+        {
+
+            particle_st* particleTable = (particle_st*)particleEvent->GetTable();
+            if(particleTable) 
+            {
+
+                for(int i = 0; i < particleEvent->GetNRows(); ++i) 
+                {
+                    mPythiaEvent->addParticle(TParticle(particleTable[i].idhep,                  // pdg
+                                                        particleTable[i].isthep,                 // status
+                                                        particleTable[i].jmohep[0],              // mother1
+                                                        particleTable[i].jmohep[1],              // mother2
+                                                        particleTable[i].jdahep[0],              // daughter1
+                                                        particleTable[i].jdahep[1],              // daughter2
+                                                        TLorentzVector(particleTable[i].phep),   // momentum and energy
+                                                        TLorentzVector(particleTable[i].vhep))); // production vertex and time
+                }
+
+           }
+
+       }
+
+    }
+
+    mPythiaTree->Fill();
+
+    return;
+
+}
