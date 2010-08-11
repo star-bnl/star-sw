@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCASlicesPerformance.h,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCASlicesPerformance.h,v 1.2 2010/08/11 13:43:26 mzyzak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -32,8 +32,6 @@ class TProfile;
 
 class TFile;
 class AliHLTTPCCATracker;
-
-#define IsOutTrack1
 
 /**
  * @class AliHLTTPCCASlicesPerformance

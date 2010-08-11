@@ -142,7 +142,11 @@ namespace AliHLTTPCCAPParameters{ /// parameters for global Performance
       /**
      * The minimum number of hits for a MCtrack to be reconstructable
        */
-    MinimumHitsForMCTrack = 10 // 50
+    MinimumHitsForMCTrack = 10, // 50
+     /**
+    * The minimum number of hits for a MCtrack to be reconstructable
+       */
+    MinimumMCPointsForMCTrack = 10
   }; // enum
 
   /**

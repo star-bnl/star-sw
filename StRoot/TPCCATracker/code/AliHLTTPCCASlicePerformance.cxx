@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.3 2010/08/09 17:51:15 mzyzak Exp $
+// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.4 2010/08/11 13:43:26 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -46,7 +46,7 @@
 #include "TProfile.h"
 #include "TStyle.h"
 
-#define IsOutTrack1 //to use reffited with materials track parameters
+//#define IsOutTrack1 //to use reffited with materials track parameters
 
 void AliHLTTPCCASlicePerformance::SetNewEvent(const AliHLTTPCCAGBTracker * const Tracker,
                             AliHLTResizableArray<AliHLTTPCCAHitLabel> *hitLabels,
