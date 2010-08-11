@@ -5,7 +5,7 @@ INCLUDE = $(HOME)/Include
 
 CC = g++ -c -I$(INCLUDE) -I$(ROOTSYS)/include 
 LC = g++ `root-config --glibs` -lGeom -lgfortran -lm  
-FF = gfortran -c -O3
+FF = gfortran -c -O -fpic
 # Compiler flags
 CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long \
         `root-config --cflags` \
@@ -121,7 +121,7 @@ $(OBJECT)/ComponentNeBem2d.o: \
 $(OBJECT)/ComponentFieldMap.o: \
 	$(SOURCE)/ComponentFieldMap.cc $(INCLUDE)/ComponentFieldMap.hh \
 	$(SOURCE)/ComponentBase.cc $(INCLUDE)/ComponentBase.hh
-	$(CC) $(cFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/ComponentAnsys121.o: \
 	$(SOURCE)/ComponentAnsys121.cc $(INCLUDE)/ComponentAnsys121.hh \
 	$(SOURCE)/ComponentFieldMap.cc $(INCLUDE)/ComponentFieldMap.hh 
