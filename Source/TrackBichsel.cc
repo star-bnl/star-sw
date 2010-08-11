@@ -17,16 +17,14 @@ TrackBichsel::TrackBichsel() :
   
   char* pPath = getenv("GARFIELD_HOME");
   if (pPath == 0) {
-    std::cerr << "TrackBichsel:" << std::endl;
-    std::cerr << "    Environment variable GARFIELD_HOME is not set." 
-              << std::endl;
-    std::cerr << "    Assuming that file " << datafile 
-              << " is located in the current work directory." << std::endl;
+    std::cerr << "TrackBichsel:\n";
+    std::cerr << "    Environment variable GARFIELD_HOME is not set.\n"; 
+    std::cerr << "    Will look for file " << datafile 
+              << " in the current work directory.\n";
   } else {
     std::string filepath = pPath;
     datafile = filepath + "/Data/" + datafile;
   }
-  
 
 }
 
@@ -37,8 +35,8 @@ TrackBichsel::NewTrack(
 
   // Check if a sensor has been defined
   if (sensor == 0) {
-    std::cerr << "TrackBichsel::NewTrack:" << std::endl;
-    std::cerr << "    Sensor is not defined." << std::endl;
+    std::cerr << "TrackBichsel::NewTrack:\n";
+    std::cerr << "    Sensor is not defined.\n";
     isInMedium = false;
     return;
   }
@@ -46,8 +44,8 @@ TrackBichsel::NewTrack(
   // If not yet done, load the cross-section table from file
   if (!isInitialised) {
     if (!LoadCrossSectionTable(datafile)) {
-      std::cerr << "TrackBichsel::NewTrack:" << std::endl;
-      std::cerr << "    Cross-section table could not be loaded." << std::endl;
+      std::cerr << "TrackBichsel::NewTrack:\n";
+      std::cerr << "    Cross-section table could not be loaded.\n";
       return;
     }
     isInitialised = true;
@@ -56,8 +54,8 @@ TrackBichsel::NewTrack(
   // Make sure we are inside a medium
   Medium* medium;
   if (!sensor->GetMedium(x0, y0, z0, medium)) {
-    std::cerr << "TrackBichsel::NewTrack:" << std::endl;
-    std::cerr << "    No medium at initial position." << std::endl;
+    std::cerr << "TrackBichsel::NewTrack:\n";
+    std::cerr << "    No medium at initial position.\n";
     isInMedium = false;
     return;
   }
@@ -65,16 +63,15 @@ TrackBichsel::NewTrack(
   // Check if the medium is silicon
   if (medium->GetName() != "Si") {
     std::cerr << "TrackBichsel::NewTrack:" << std::endl;
-    std::cerr << "    Medium at initial position is not silicon." << std::endl;
+    std::cerr << "    Medium at initial position is not silicon.\n";
     isInMedium = false;
     return;
   }
 
   // Check if primary ionisation has been enabled for this medium
   if (!medium->IsIonisable()) {
-    std::cerr << "TrackBichsel::NewTrack:" << std::endl;
-    std::cerr << "    Medium at initial position is not ionisable." 
-              << std::endl;
+    std::cerr << "TrackBichsel::NewTrack:\n";
+    std::cerr << "    Medium at initial position is not ionisable.\n"; 
     isInMedium = false;
     return;
   }
@@ -126,8 +123,8 @@ TrackBichsel::GetCluster(
   if (!sensor->GetMedium(x, y, z, medium)) {
     isInMedium = false;
     if (debug) {
-      std::cout << "TrackBichsel::GetCluster:" << std::endl;
-      std::cout << "    Particle left the medium." << std::endl;
+      std::cout << "TrackBichsel::GetCluster:\n";
+      std::cout << "    Particle left the medium.\n";
     }
     return false;
   }
@@ -135,8 +132,8 @@ TrackBichsel::GetCluster(
   if (medium->GetName() != "Si" || !medium->IsIonisable()) {
     isInMedium = false;
     if (debug) {
-      std::cout << "TrackBichsel::GetCluster:" << std::endl;
-      std::cout << "    Particle left the medium." << std::endl;
+      std::cout << "TrackBichsel::GetCluster:\n";
+      std::cout << "    Particle left the medium.\n";
     }
     return false;
   }
@@ -177,9 +174,8 @@ TrackBichsel::GetInverseMeanFreePath(const double bg) {
 
   if (bg < tabBg[0]) {
     if (debug) {
-      std::cerr << "TrackBichsel::GetInverseMeanFreePath:" << std::endl;
-      std::cerr << "    Requested value for bg is below the tabulated range."
-                << std::endl;
+      std::cerr << "TrackBichsel::GetInverseMeanFreePath:\n";
+      std::cerr << "    Bg is below the tabulated range.\n";
     }
     return tabImfp[0] * 1.e4;
   } else if (bg > tabBg[nEntries - 1]) {
@@ -221,8 +217,8 @@ TrackBichsel::LoadCrossSectionTable(const std::string filename) {
   infile.open(filename.c_str(), std::ios::in);
   // Check if the file could be opened
   if (!infile) {
-    std::cerr << "TrackBichsel::LoadCrossSectionTable:" << std::endl;
-    std::cerr << "    Error opening file " << filename << "." << std::endl;
+    std::cerr << "TrackBichsel::LoadCrossSectionTable:\n";
+    std::cerr << "    Error opening file " << filename << ".\n";
     return false;
   }
 
@@ -259,17 +255,17 @@ TrackBichsel::LoadCrossSectionTable(const std::string filename) {
       iRow = 0;
       continue;
     } else if (dummy1 != iRow + 1) {
-      std::cerr << "TrackBichsel::LoadCrossSectionTable:" << std::endl;
-      std::cerr << "    Error reading file " << filename << "." << std::endl;
+      std::cerr << "TrackBichsel::LoadCrossSectionTable:\n";
+      std::cerr << "    Error reading file " << filename << ".\n";
       std::cerr << "    Expected entry " << iRow + 1 
-                << ", got entry " << dummy1 << "." << std::endl;
+                << ", got entry " << dummy1 << ".\n";
       infile.close();
       cdf.clear();
       return false;
     }
     if (iRow >= nRows) {
-      std::cerr << "TrackBichsel::LoadCrossSectionTable:" << std::endl;
-      std::cerr << "    Table in file is longer than expected." << std::endl;
+      std::cerr << "TrackBichsel::LoadCrossSectionTable:\n";
+      std::cerr << "    Table in file is longer than expected.\n";
       infile.close();
       cdf.clear();
       return false;
@@ -279,18 +275,17 @@ TrackBichsel::LoadCrossSectionTable(const std::string filename) {
   }
 
   if (infile.fail()) {
-    std::cerr << "TrackBichsel::LoadCrossSectionTable:" << std::endl;
-    std::cerr << "    Error reading file " << filename << "." << std::endl;
+    std::cerr << "TrackBichsel::LoadCrossSectionTable:\n";
+    std::cerr << "    Error reading file " << filename << ".\n";
     infile.close(),
     cdf.clear();
     return false;
   }
   infile.close();
   if (debug) {
-    std::cout << "TrackBichsel::LoadCrossSectionTable:" << std::endl;
+    std::cout << "TrackBichsel::LoadCrossSectionTable:\n";
     std::cout << "    Input file: " << filename << std::endl;
-    std::cout << "    Successfully loaded cross-section table from file."
-              << std::endl;
+    std::cout << "    Successfully loaded cross-section table from file.\n";
   }
   nCdfEntries = nRows;
   return true;
@@ -317,9 +312,9 @@ TrackBichsel::SelectCrossSectionTable() {
   if (!gotValue) iCdf = nTables - 1;
 
   if (debug) {
-    std::cout << "TrackBichsel::SelectCrossSectionTable:" << std::endl;
-    std::cout << "    Present value: bg =  " << bg << std::endl;
-    std::cout << "    Select table for bg = " << tabBg[iCdf] << std::endl;
+    std::cout << "TrackBichsel::SelectCrossSectionTable:\n";
+    std::cout << "    Requested value: bg = " << bg << "\n";
+    std::cout << "    Select table for bg = " << tabBg[iCdf] << "\n";
   }
 
 }

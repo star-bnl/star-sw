@@ -14,9 +14,6 @@ PlottingEngineRoot::PlottingEngineRoot() {
 
   garfieldStyle = new TStyle("Garfield","Garfield Style");
   SetDefaultStyle();
- 
-  f1 = new TF1("f1", "sin(x)", 0., 1.);
-  f2 = new TF1("f2", "cos(x)", 0., 1.);
    
 }
 

@@ -66,11 +66,10 @@ MediumSilicon::SetDoping(const char type, const double c) {
     if (c > Small) {
       dopingConcentration = c;
     } else {
-      std::cerr << className << "::SetDoping:" << std::endl;
-      std::cerr << "    Doping concentration must be greater than zero." 
-                << std::endl;
+      std::cerr << className << "::SetDoping:\n";
+      std::cerr << "    Doping concentration must be greater than zero.\n"; 
       std::cerr << "    Using default value for n-type silicon "
-                << "(10^12 cm-3) instead." << std::endl;
+                << "(10^12 cm-3) instead.\n";
       dopingConcentration = 1.e12;
     }
   } else if (toupper(type) == 'P') {
@@ -78,20 +77,19 @@ MediumSilicon::SetDoping(const char type, const double c) {
     if (c > Small) {
       dopingConcentration = c;
     } else {
-      std::cerr << className << "::SetDoping:" << std::endl;
-      std::cerr << "    Doping concentration must be greater than zero." 
-                << std::endl;
+      std::cerr << className << "::SetDoping:\n";
+      std::cerr << "    Doping concentration must be greater than zero.\n"; 
       std::cerr << "    Using default value for p-type silicon "
-                << "(10^18 cm-3) instead." << std::endl;
+                << "(10^18 cm-3) instead.\n";
       dopingConcentration = 1.e18;
     }
   } else if (toupper(type) == 'I') {
     dopingType = 'i';
     dopingConcentration = 0.;
   } else {
-    std::cerr << className << "::SetDoping:" << std::endl;
-    std::cerr << "    Unknown dopant type (" << type << ")." << std::endl;
-    std::cerr << "    Available types are n, p and i (intrinsic)." << std::endl;
+    std::cerr << className << "::SetDoping:\n";
+    std::cerr << "    Unknown dopant type (" << type << ").\n";
+    std::cerr << "    Available types are n, p and i (intrinsic).\n";
     return;
   }
   
@@ -110,17 +108,15 @@ void
 MediumSilicon::SetTrapCrossSection(const double ecs, const double hcs) {
 
   if (ecs < 0.) {
-    std::cerr << className << "::SetTrapCrossSection:" << std::endl;
-    std::cerr << "    Capture cross-section [cm2] must be greater than zero." 
-              << std::endl;
+    std::cerr << className << "::SetTrapCrossSection:\n";
+    std::cerr << "    Capture cross-section [cm2] must positive.\n"; 
   } else {
     eTrapCs = ecs;
   }
   
   if (hcs < 0.) {
-    std::cerr << className << "::SetTrapCrossSection:" << std::endl;
-    std::cerr << "    Capture cross-section [cm2] must be greater than zero." 
-              << std::endl;
+    std::cerr << className << "::SetTrapCrossSection:\n";
+    std::cerr << "    Capture cross-section [cm2] must be positive.n"; 
   } else {
     hTrapCs = hcs;
   }
@@ -133,9 +129,8 @@ void
 MediumSilicon::SetTrapDensity(const double n) {
 
   if (n < 0.) {
-    std::cerr << className << "::SetTrapDensity:" << std::endl;
-    std::cerr << "    Trap density [cm-3] must be greater than zero." 
-              << std::endl;
+    std::cerr << className << "::SetTrapDensity:\n";
+    std::cerr << "    Trap density [cm-3] must be greater than zero.\n"; 
   } else {
     eTrapDensity = n;
     hTrapDensity = n;
@@ -149,17 +144,15 @@ void
 MediumSilicon::SetTrappingTime(const double etau, const double htau) {
 
   if (etau <= 0.) {
-    std::cerr << className << "::SetTrappingTime:" << std::endl;
-    std::cerr << "    Trapping time [ns-1] must be greater than zero." 
-              << std::endl;
+    std::cerr << className << "::SetTrappingTime:\n";
+    std::cerr << "    Trapping time [ns-1] must be positive.\n"; 
   } else {
     eTrapTime = etau;
   }
   
   if (htau <= 0.) {
-    std::cerr << className << "::SetTrappingTime:" << std::endl;
-    std::cerr << "    Trapping time [ns-1] must be greater than zero." 
-              << std::endl;
+    std::cerr << className << "::SetTrappingTime:\n";
+    std::cerr << "    Trapping time [ns-1] must be positive.\n"; 
   } else {
     hTrapTime = htau;
   }
@@ -232,8 +225,8 @@ MediumSilicon::ElectronTownsend(
       return ElectronImpactIonisationGrant(e, alpha);
       break;
     default:
-      std::cerr << className << "::ElectronTownsend:" << std::endl;
-      std::cerr << "    Unknown model activated. Program bug!" << std::endl;    
+      std::cerr << className << "::ElectronTownsend:\n";
+      std::cerr << "    Unknown model activated. Program bug!\n";    
       break;
   }  
   return false;
@@ -262,8 +255,8 @@ MediumSilicon::ElectronAttachment(
       if (eta > 0.) eta = 1. / eta;
       break;
     default:
-      std::cerr << className << "::ElectronAttachment:" << std::endl;
-      std::cerr << "    Unknown model activated. Program bug!" << std::endl;
+      std::cerr << className << "::ElectronAttachment:\n";
+      std::cerr << "    Unknown model activated. Program bug!\n";
       return false;
       break;      
   }
@@ -334,8 +327,8 @@ MediumSilicon::HoleTownsend(
       return HoleImpactIonisationGrant(e, alpha);
       break;
     default:
-      std::cerr << className << "::HoleTownsend:" << std::endl;
-      std::cerr << "    Unknown model activated. Program bug!" << std::endl;      
+      std::cerr << className << "::HoleTownsend:\n";
+      std::cerr << "    Unknown model activated. Program bug!\n";      
       break;
   }  
   return false;
@@ -364,8 +357,8 @@ MediumSilicon::HoleAttachment(
       if (eta > 0.) eta = 1. / eta;
       break;
     default:
-      std::cerr << className << "::HoleAttachment:" << std::endl;
-      std::cerr << "    Unknown model activated. Program bug!" << std::endl;
+      std::cerr << className << "::HoleAttachment:\n";
+      std::cerr << "    Unknown model activated. Program bug!\n";
       return false;
       break;      
   }
@@ -378,8 +371,8 @@ void
 MediumSilicon::SetLowFieldMobility(const double mue, const double muh) {
 
   if (mue <= 0. || muh <= 0.) {
-    std::cerr << className << "::SetLowFieldMobility:" << std::endl;
-    std::cerr << "    Mobility must be greater than zero." << std::endl;
+    std::cerr << className << "::SetLowFieldMobility:\n";
+    std::cerr << "    Mobility must be greater than zero.\n";
     return;
   }
   
@@ -448,8 +441,8 @@ void
 MediumSilicon::SetSaturationVelocity(const double vsate, const double vsath) {
 
   if (vsate <= 0. || vsath <= 0.) {
-    std::cout << className << "::SetSaturationVelocity:" << std::endl;
-    std::cout << "    Restoring default values." << std::endl;
+    std::cout << className << "::SetSaturationVelocity:\n";
+    std::cout << "    Restoring default values.\n";
     userSaturationVelocity = false;
   } else {
     eSatVel = vsate; hSatVel = vsath;
@@ -538,9 +531,9 @@ bool
 MediumSilicon::SetMaxElectronEnergy(const double e) {
 
   if (e <= Small) {
-    std::cerr << className << "::SetMaxElectronEnergy:" << std::endl;
+    std::cerr << className << "::SetMaxElectronEnergy:\n";
     std::cerr << "    Provided upper electron energy limit (" << e
-              << " eV) is too small." << std::endl;
+              << " eV) is too small.\n";
     return false;
   }
 
@@ -593,8 +586,8 @@ MediumSilicon::GetElectronEnergy(
       return e;
       break;     
     default:
-      std::cerr << className << "::GetElectronEnergy:" << std::endl;
-      std::cerr << "    Unknown band index " << band << "!" << std::endl;
+      std::cerr << className << "::GetElectronEnergy:\n";
+      std::cerr << "    Unknown band index " << band << "!\n";
       break;
   }
   
@@ -650,8 +643,8 @@ MediumSilicon::GetElectronMomentum(const double e,
     }
   } 
   
-  std::cerr << className << "::GetElectronMomentum:" << std::endl;
-  std::cerr << "    Unknown band index " << band << "!" << std::endl;
+  std::cerr << className << "::GetElectronMomentum:\n";
+  std::cerr << "    Unknown band index " << band << "!\n";
   
   px = pstar * stheta * cos(phi);
   py = pstar * stheta * sin(phi);
@@ -664,8 +657,8 @@ MediumSilicon::GetElectronNullCollisionRate() {
 
   if (isChanged) {
     if (!UpdateTransportParameters()) {
-      std::cerr << "MediumSilicon: Error calculating the"
-                << " collision rates table." << std::endl;
+      std::cerr << className << "::GetElectronNullCollisionRate:\n";
+      std::cerr << "    Error calculating the collision rates table.\n";
       return 0.;
     }
     isChanged = false;
@@ -679,24 +672,24 @@ double
 MediumSilicon::GetElectronCollisionRate(const double e, const int band) {
 
   if (e <= 0.) {
-    std::cerr << "MediumSilicon: Electron energy must be greater than zero."
-              << std::endl;
+    std::cerr << className << "::GetElectronCollisionRate:\n";
+    std::cerr << "    Electron energy must be positive.\n";
     return cfTotElectronsX[0];
   }
 
   if (e > eFinal) {
-    std::cerr << className << "::GetElectronCollisionRate:" << std::endl;
+    std::cerr << className << "::GetElectronCollisionRate:\n";
     std::cerr << "    Collision rate at " << e
-              << " eV is not included in the current table." << std::endl;
+              << " eV is not included in the current table.\n";
     std::cerr << "    Increasing energy range to " << 1.05 * e
-              << " eV." << std::endl;
+              << " eV.\n";
     SetMaxElectronEnergy(1.05 * e);
   }
 
   if (isChanged) {
     if (!UpdateTransportParameters()) {
-      std::cerr << "MediumSilicon: Error calculating the"
-                << "  collision rates table." << std::endl;
+      std::cerr << className << "::GetElectronCollisionRate:\n";
+      std::cerr << "    Error calculating the collision rates table.\n";
       return 0.;
     }
     isChanged = false;
@@ -706,8 +699,8 @@ MediumSilicon::GetElectronCollisionRate(const double e, const int band) {
     return cfTotElectronsX[int(e / eStep)];
   }
   
-  std::cerr << className << "::GetElectronCollisionRate:" << std::endl;
-  std::cerr << "    Unknown band!" << std::endl;
+  std::cerr << className << "::GetElectronCollisionRate:\n";
+  std::cerr << "    Unknown band!\n";
   return 0.;
   
 }
@@ -718,23 +711,23 @@ MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
                      int& band) {
 
   if (e > eFinal) {
-    std::cerr << className << "::GetElectronCollision:" << std::endl;
+    std::cerr << className << "::GetElectronCollision:\n";
     std::cerr << "    Provided electron energ (" << e;
     std::cerr << " eV) exceeds current energy range (" << eFinal;
-    std::cerr << " eV)." << std::endl;
+    std::cerr << " eV).\n";
     std::cerr << "    Increasing energy range to " << 1.05 * e
-              << " eV." << std::endl;
+              << " eV.\n";
     SetMaxElectronEnergy(1.05 * e);
   } else if (e <= 0.) {
-    std::cerr << className << "::GetElectronCollision:" << std::endl;
-    std::cerr << "    Electron energy must be greater than zero." << std::endl;
+    std::cerr << className << "::GetElectronCollision:\n";
+    std::cerr << "    Electron energy must be greater than zero.\n";
     return false;
   }
 
   if (isChanged) {
     if (!UpdateTransportParameters()) {
-      std::cerr << "MediumSilicon: Error calculating"
-                << " the collision rates table." << std::endl;
+      std::cerr << className << "::GetElectronCollision:\n";
+      std::cerr << "    Error calculating the collision rates table.\n";
       return false;
     }
     isChanged = false;
@@ -823,8 +816,8 @@ MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
     
   } 
   
-  std::cerr << className << "::GetElectronCollision:" << std::endl;
-  std::cerr << "   Unknown band!" << std::endl;
+  std::cerr << className << "::GetElectronCollision:\n";
+  std::cerr << "   Unknown band!\n";
   e1 = e;
   type = 0;
   return false;
@@ -835,14 +828,14 @@ bool
 MediumSilicon::GetOpticalDataRange(double& emin, double& emax, const int i) {
 
   if (i != 0) {
-    std::cerr << className << "::GetOpticalDataRange:" << std::endl;
-    std::cerr << "    Only one component available." << std::endl;
+    std::cerr << className << "::GetOpticalDataRange:\n";
+    std::cerr << "    Only one component available.\n";
   }
 
   if (!hasOpticalData) {
     if (!LoadOpticalData(opticalDataFile)) {
-      std::cerr << className << "::GetOpticalDataRange:" << std::endl;
-      std::cerr << "    Error loading the optical data table." << std::endl;
+      std::cerr << className << "::GetOpticalDataRange:\n";
+      std::cerr << "    Error loading the optical data table.\n";
       return false;
     }
     hasOpticalData = true;
@@ -859,14 +852,14 @@ MediumSilicon::GetDielectricFunction(const double e,
                                     double& eps1, double& eps2, const int i) {
                         
   if (i != 0) {
-    std::cerr << className << "::GetDielectricFunction:" << std::endl;
-    std::cerr << "    Only one component available." << std::endl;
+    std::cerr << className << "::GetDielectricFunction:\n";
+    std::cerr << "    Only one component available.\n";
   }
                         
   if (!hasOpticalData) {
     if (!LoadOpticalData(opticalDataFile)) {
-      std::cerr << className << "::GetDielectricFunction:" << std::endl;
-      std::cerr << "    Error loading the optical data table." << std::endl;
+      std::cerr << className << "::GetDielectricFunction:\n";
+      std::cerr << "    Error loading the optical data table.\n";
       return false;
     }
     hasOpticalData = true;
@@ -875,10 +868,10 @@ MediumSilicon::GetDielectricFunction(const double e,
   const double emin = opticalDataTable[0].energy;
   const double emax = opticalDataTable.back().energy;    
   if (e < emin || e > emax) {
-    std::cerr << className << "::GetDielectricFunction:" << std::endl;
+    std::cerr << className << "::GetDielectricFunction:\n";
     std::cerr << "    Requested energy (" << e << " eV) " 
               << " is outside the range of the optical data table "
-              << "(" << emin << " eV < E < " << emax << " eV)." << std::endl;
+              << "(" << emin << " eV < E < " << emax << " eV).\n";
     eps1 = eps2 = 0.;
     return false;
   }
@@ -934,8 +927,8 @@ MediumSilicon::UpdateTransportParameters() {
       UpdateImpactIonisationGrant();
       break;
     default:
-      std::cerr << className << "::UpdateTransportParameters:" << std::endl;
-      std::cerr << "    Unknown impact ionisation model. Bug!" << std::endl;
+      std::cerr << className << "::UpdateTransportParameters:\n";
+      std::cerr << "    Unknown impact ionisation model. Bug!\n";
       break;
   }
   
@@ -955,10 +948,9 @@ MediumSilicon::UpdateTransportParameters() {
         UpdateLatticeMobilityReggiani();
         break; 
       default:
-        std::cerr << className << "::UpdateTransportParameters:" 
-                  << std::endl;
-        std::cerr << "    Unknown lattice mobility model. Program bug!" 
-                  << std::endl;
+        std::cerr << className << "::UpdateTransportParameters:\n"; 
+        std::cerr << "    Unknown lattice mobility model.\n";
+        std::cerr << "    Program bug!\n"; 
         break;
     }
 
@@ -972,10 +964,9 @@ MediumSilicon::UpdateTransportParameters() {
         UpdateDopingMobilityMasetti();
         break;
       default:
-        std::cerr << className << "::UpdateTransportParameters:" 
-                  << std::endl;
-        std::cerr << "    Unknown doping mobility model. Program bug!" 
-                  << std::endl;
+        std::cerr << className << "::UpdateTransportParameters:\n"; 
+        std::cerr << "    Unknown doping mobility model.\n";
+        std::cerr << "    Program bug!\n"; 
         break;
     }
   }
@@ -1003,16 +994,16 @@ MediumSilicon::UpdateTransportParameters() {
   }
   
   if (debug) {
-    std::cout << className << "::UpdateTransportParameters:" << std::endl;
-    std::cout << "    Low-field mobility [cm2 V-1 ns-1]" << std::endl;
-    std::cout << "      Electrons: " << eMobility << std::endl;
-    std::cout << "      Holes:     " << hMobility << std::endl;
+    std::cout << className << "::UpdateTransportParameters:\n";
+    std::cout << "    Low-field mobility [cm2 V-1 ns-1]\n";
+    std::cout << "      Electrons: " << eMobility << "\n";
+    std::cout << "      Holes:     " << hMobility << "\n";
     if (highFieldMobilityModel > 2) {
-      std::cout << "    Mobility is not field-dependent." << std::endl;
+      std::cout << "    Mobility is not field-dependent.\n";
     } else {
-      std::cout << "    Saturation velocity [cm / ns]" << std::endl;
-      std::cout << "      Electrons: " << eSatVel << std::endl;
-      std::cout << "      Holes:     " << hSatVel << std::endl;
+      std::cout << "    Saturation velocity [cm / ns]\n";
+      std::cout << "      Electrons: " << eSatVel << "\n";
+      std::cout << "      Holes:     " << hSatVel << "\n";
     }
   }
 
@@ -1456,9 +1447,8 @@ MediumSilicon::LoadOpticalData(const std::string filename) {
   infile.open(filename.c_str(), std::ios::in);
   // Check if the file could be opened
   if (!infile) {
-    std::cerr << className << "::LoadOpticalData:" << std::endl;
-    std::cerr << "    Error opening file " << filename 
-              << "." << std::endl;
+    std::cerr << className << "::LoadOpticalData:\n";
+    std::cerr << "    Error opening file " << filename << ".\n";
     return false;
   }
   
@@ -1486,22 +1476,22 @@ MediumSilicon::LoadOpticalData(const std::string filename) {
     dataStream.clear();
     // Check if the data has been read correctly
     if (infile.fail()) {
-      std::cerr << className << "::LoadOpticalData:" << std::endl;
+      std::cerr << className << "::LoadOpticalData:\n";
       std::cerr << "    Error reading file "
-                << filename << " (line " << i << ")." << std::endl;
+                << filename << " (line " << i << ").\n";
       return false;
     }
     // Check if the provided values make sense
     if (energy <= lastEnergy) {
-      std::cerr << className << "::LoadOpticalData:" << std::endl;
+      std::cerr << className << "::LoadOpticalData:\n";
       std::cerr << "    Optical data table is not in monotonically " 
-                << "increasing order (line " << i << ")." << std::endl;
+                << "increasing order (line " << i << ").\n";
       return false;
     }
     if (eps2 <= 0.) {
-      std::cerr << className << "::LoadOpticalData:" << std::endl;
+      std::cerr << className << "::LoadOpticalData:\n";
       std::cerr << "    Negative value of loss function "
-                << "(line " << i << ")." << std::endl;
+                << "(line " << i << ").\n";
       return false;
     }
     if (energy <= 0.) continue;
@@ -1551,7 +1541,7 @@ MediumSilicon::ElectronScatteringRates() {
     if (debug) {
       outfile << i * eStep << " " << cfTotElectronsX[i] << " ";
       for (int j = 0; j < nLevelsX; ++j) outfile << cfElectronsX[i][j] << " ";
-      outfile << std::endl;
+      outfile << "\n";
     }
 
     if (cfTotElectronsX[i] > cfNullElectrons) {
@@ -1560,9 +1550,8 @@ MediumSilicon::ElectronScatteringRates() {
    
     // Make sure the total scattering rate is positive
     if (cfTotElectronsX[i] <= 0.) { 
-      std::cerr << className << "::ElectronScatteringRates:" << std::endl;
-      std::cerr << "    Scattering rate at " << i * eStep << " <= 0." 
-                << std::endl;
+      std::cerr << className << "::ElectronScatteringRates:\n";
+      std::cerr << "    Scattering rate at " << i * eStep << " <= 0.\n"; 
       return false;
     }
 

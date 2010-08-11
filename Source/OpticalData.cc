@@ -18,18 +18,18 @@ OpticalData::SetMaterial(std::string material) {
   } else if (material == "iC4H10") {
     Isobutane();
   } else {
-    std::cerr << "OpticalData::SetMaterial:" << std::endl;
+    std::cerr << "OpticalData::SetMaterial:\n";
     std::cerr << "    No data for material " << material 
-              << " available." << std::endl;
+              << " available.\n";
     return false;
   }
 
   if (debug) {
-    std::cout << "OpticalData::SetMaterial:" << std::endl;
-    std::cout << "    Energy [eV]    PACS [cm2]" << std::endl;
+    std::cout << "OpticalData::SetMaterial:\n";
+    std::cout << "    Energy [eV]    PACS [cm2]\n";
     const int nEntries = energy.size();
     for (int j = 0; j < nEntries; ++j) {
-      std::cout << energy[j] << "    " << pacs[j] << std::endl;
+      std::cout << energy[j] << "    " << pacs[j] << "\n";
     }
   }
   hasData = true;
@@ -41,17 +41,17 @@ bool
 OpticalData::GetPhotoabsorptionCrossSection(const double e, double& cs) {
 
   if (!hasData) {
-    std::cerr << "OpticalData::GetPhotoabsorptionCrossSection:" << std::endl;
-    std::cerr << "    No material set." << std::endl;
+    std::cerr << "OpticalData::GetPhotoabsorptionCrossSection:\n";
+    std::cerr << "    No material set.\n";
     cs = 0.;
     return false;
   }
 
   if (e < emin || e > emax) {
     if (debug) {
-      std::cerr << "OpticalData::GetPhotoabsorptionCrossSection:" << std::endl;
-      std::cerr << "    Requested energy is outside the range." << std::endl;
-      std::cerr << "    " << emin << " < E [eV] < " << emax << std::endl;
+      std::cerr << "OpticalData::GetPhotoabsorptionCrossSection:\n";
+      std::cerr << "    Requested energy is outside the range.\n";
+      std::cerr << "    " << emin << " < E [eV] < " << emax << "\n";
     }
     cs = 0.;
     return false;

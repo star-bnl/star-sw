@@ -2,7 +2,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
+#include <cmath>
 
 #include <TROOT.h>
 #include <TAxis.h> 
@@ -34,7 +34,7 @@ ViewField::SetSensor(Sensor* s) {
 
   if (s == 0) {
     std::cout << "ViewField::SetSensor:\n";
-    std::cout << "    Sensor is not defined.\n";
+    std::cout << "    Sensor pointer is null.\n";
     return;
   }
 
@@ -500,7 +500,8 @@ ViewField::SetPlane(const double fx, const double fy, const double fz,
     project[2][2] =  z0;
   } else {
     std::cout << "ViewField::SetPlane:\n";
-    std::cout << "    Normal vector has zero norm. No new projection set.\n";
+    std::cout << "    Normal vector has zero norm.\n";
+    std::cout << "    No new projection set.\n";
   }
 
   // Store the plane description

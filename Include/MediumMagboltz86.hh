@@ -195,15 +195,15 @@ class MediumMagboltz86 : public Medium {
 
     // Multiply excitation cross-sections by a uniform scaling factor
     void SetExcitationScalingFactor(const double r);
-    
+ 
     // Get the overall null-collision rate [ns-1]
     double GetElectronNullCollisionRate();
     // Get the (real) collision rate [ns-1] at a given electron energy e [eV]
     double GetElectronCollisionRate(const double e, const int band);
     // Sample the collision type
     bool   GetElectronCollision(const double e, int& type, int& level, 
-                        double& e1, double& ctheta, 
-                        double& s, double& esec, int& band);
+                                double& e1, double& ctheta, 
+                                double& s, double& esec, int& band);
     int  GetNumberOfDeexcitationProducts() {return nDeexcitationProducts;}
     bool GetDeexcitationProduct(const int i, 
                                 double& t, int& type, double& energy); 
@@ -246,7 +246,7 @@ class MediumMagboltz86 : public Medium {
                      double& dlerr, double& dterr,
                      double& alphaerr, double& etaerr);
  
-    void SetIonMobility(const double mu);
+    void SetIonMobility(const double e, const double mu);
     bool IonVelocity(const double ex, const double ey, const double ez,
                      const double bx, const double by, const double bz,
                      double& vx, double& vy, double& vz);
@@ -382,8 +382,9 @@ class MediumMagboltz86 : public Medium {
     int nPhotonCollisions[4];
 
     // Ion transport properties
-    bool hasIonMobility;
-    double muIon;
+    int nIonMobilities;
+    std::vector<double> ionMobilityGrid;
+    std::vector<double> ionMobilityValues;
 
     bool GetGasNumber(std::string gasname, int& number) const;
     bool GetGasName(const int number, std::string& gasname) const;

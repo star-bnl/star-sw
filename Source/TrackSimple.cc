@@ -18,8 +18,9 @@ void
 TrackSimple::SetClusterDensity(const double d) {
 
   if (d < Small) {
-    std::cerr << "TrackSimple::SetClusterDensity:" << std::endl;
-    std::cerr << "    Cluster density (number of clusters per cm) must be positive."
+    std::cerr << "TrackSimple::SetClusterDensity:\n";
+    std::cerr << "    Cluster density (number of clusters per cm)"
+              << " must be positive.\n"
               << std::endl;
     return;
   }
@@ -32,9 +33,9 @@ void
 TrackSimple::SetStoppingPower(const double dedx) {
 
   if (dedx < Small) {
-    std::cerr << "TrackSimple::SetStoppingPower:" << std::endl;
-    std::cerr << "    Stopping power (average energy loss [eV] per cm) "
-              << "must be positive." << std::endl;
+    std::cerr << "TrackSimple::SetStoppingPower:\n";
+    std::cerr << "    Stopping power (average energy loss [eV] per cm)"
+              << " must be positive.\n";
     return;
   }
 
@@ -49,8 +50,8 @@ TrackSimple::NewTrack(
 
   // Check if a sensor has been defined
   if (sensor == 0) {
-    std::cerr << "TrackSimple::NewTrack:" << std::endl;
-    std::cerr << "    Sensor is not defined." << std::endl;
+    std::cerr << "TrackSimple::NewTrack:\n";
+    std::cerr << "    Sensor is not defined.\n";
     isReady = false;
     return;
   }
@@ -58,8 +59,8 @@ TrackSimple::NewTrack(
   // Make sure we are inside a medium
   Medium* medium;
   if (!sensor->GetMedium(x0, y0, z0, medium)) {
-    std::cerr << "TrackSimple::NewTrack:" << std::endl;
-    std::cerr << "    No medium at initial position." << std::endl;
+    std::cerr << "TrackSimple::NewTrack:\n";
+    std::cerr << "    No medium at initial position.\n";
     isReady = false;
     return;
   }
@@ -110,8 +111,8 @@ TrackSimple::GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
   if (!sensor->GetMedium(x, y, z, medium)) {
     isReady = false;
     if (debug) {
-      std::cout << "TrackSimple::GetCluster:" << std::endl;
-      std::cout << "    Particle left the medium." << std::endl;
+      std::cout << "TrackSimple::GetCluster:\n";
+      std::cout << "    Particle left the medium.\n";
     }
     return false;
   }

@@ -159,7 +159,8 @@ Dfinv(const int n, std::vector<std::vector<double> >& a,
           s31 += a[k - 1][j - 1] * a[i - 1][k - 1];
           s32 += a[j - 1][k]     * a[k][i - 1];
         }
-        a[i - 1][j - 1] = -a[i - 1][i - 1] * (s31 + a[i - 2][j - 1] * a[i - 1][i - 2]);
+        a[i - 1][j - 1] = -a[i - 1][i - 1] * 
+                          (s31 + a[i - 2][j - 1] * a[i - 1][i - 2]);
         a[j - 1][i - 1] = -s32;
       }
       a[i - 1][i - 2] = -a[i - 1][i - 1] * a[i - 2][i - 2] * a[i - 1][i - 2];
@@ -460,7 +461,8 @@ Cfinv(const int n, std::vector<std::vector<std::complex<double> > >& a,
           s31 += a[k - 1][j - 1] * a[i - 1][k - 1];
           s32 += a[j - 1][k]     * a[k][i - 1];
         }
-        a[i - 1][j - 1] = -a[i - 1][i - 1] * (s31 + a[i - 2][j - 1] * a[i - 1][i - 2]);
+        a[i - 1][j - 1] = -a[i - 1][i - 1] * 
+                          (s31 + a[i - 2][j - 1] * a[i - 1][i - 2]);
         a[j - 1][i - 1] = -s32;
       }
       a[i - 1][i - 2] = -a[i - 1][i - 1] * a[i - 2][i - 2] * a[i - 1][i - 2];

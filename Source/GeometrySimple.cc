@@ -16,39 +16,43 @@ GeometrySimple::GeometrySimple() :
 void 
 GeometrySimple::AddSolid(Solid* s, Medium* m) {
 
-  // Make sure the solid is defined
+  // Make sure the solid and the medium are defined.
   if (s == 0) {
-    std::cerr << "GeometrySimple::AddSolid:" << std::endl;
-    std::cerr << "    Solid is not defined." << std::endl;
+    std::cerr << "GeometrySimple::AddSolid:\n";
+    std::cerr << "    Solid pointer is null.\n";
+    return;
+  }
+
+  if (m == 0) {
+    std::cerr << "GeometrySimple::AddSolid:\n";
+    std::cerr << "    Medium pointer is null.\n";
     return;
   }
  
   int n = -1;
-  if (m != 0) {
-    int id = m->GetId();
-    // Check if this medium is already in the list
-    for (int i = nMedia; i--;) {      
-      if (id == media[i].medium->GetId()) {
-        n = i;
-        break;
-      }
+  int id = m->GetId();
+  // Check if this medium is already in the list
+  for (int i = nMedia; i--;) {      
+    if (id == media[i].medium->GetId()) {
+      n = i;
+      break;
     }
-    // If the medium does not exist yet, add it to the list
-    if (n < 0) {
-      medium newMedium;
-      newMedium.medium = m;
-      media.push_back(newMedium);
-      n = nMedia;
-      ++nMedia;      
-    }
+  }
+  // If the medium does not exist yet, add it to the list
+  if (n < 0) {
+    medium newMedium;
+    newMedium.medium = m;
+    media.push_back(newMedium);
+    n = nMedia;
+    ++nMedia;      
   }
   
   // Update the bounding box ranges
   double xmin, ymin, zmin;
   double xmax, ymax, zmax;
   if (!s->GetBoundingBox(xmin, ymin, zmin, xmax, ymax, zmax)) {
-    std::cerr << "GeometrySimple::AddSolid:" << std::endl;
-    std::cerr << "    Solid has no bounding box." << std::endl;
+    std::cerr << "GeometrySimple::AddSolid:\n";
+    std::cerr << "    Solid has no bounding box.\n";
     return;
   }
   
@@ -107,8 +111,8 @@ bool
 GeometrySimple::GetSolid(const int i, Solid*& s) const {
 
   if (i < 0 || i >= nSolids) {
-    std::cerr << "GeometrySimple::GetSolid:" << std::endl;
-    std::cerr << "    Requested solid " << i << " does not exist." << std::endl;
+    std::cerr << "GeometrySimple::GetSolid:\n";
+    std::cerr << "    Requested solid " << i << " does not exist.\n";
     return false;
   }
   
@@ -121,9 +125,8 @@ bool
 GeometrySimple::GetMedium(const int i, Medium*& m) const {
 
   if (i < 0 || i >= nMedia) {
-    std::cerr << "GeometrySimple::GetMedium:" << std::endl;
-    std::cerr << "    Requested medium " << i 
-              << " does not exist." << std::endl;
+    std::cerr << "GeometrySimple::GetMedium:\n";
+    std::cerr << "    Requested medium " << i << " does not exist.\n";
     return false;
   }
   
@@ -160,8 +163,8 @@ GeometrySimple::IsInBoundingBox(
 
   if (!hasBoundingBox) {
     if (debug) {
-      std::cerr << "GeometrySimple::IsInBoundingBox:" << std::endl;
-      std::cerr << "    Bounding box is not defined." << std::endl;
+      std::cerr << "GeometrySimple::IsInBoundingBox:\n";
+      std::cerr << "    Bounding box is not defined.\n";
     }
     return true;
   }

@@ -4,6 +4,7 @@
 #define G_AVALANCHE_MICROSCOPIC_H
 
 #include <vector>
+#include <string>
 
 #include <TH1F.h>
 
@@ -134,6 +135,8 @@ class AvalancheMicroscopic {
     void DisableDebugging() {debug = false;}
 
   private:
+
+    std::string className;
 
     Sensor* sensor;
 

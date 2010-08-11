@@ -11,12 +11,12 @@ TrackHeed::NewTrack(
             const double dx0, const double dy0, const double dz0) {
 
   if (debug) {
-    std::cout << "TrackHeed::NewTrack:" << std::endl;
+    std::cout << "TrackHeed::NewTrack:\n";
     std::cout << "    Starting point at (" 
               << x0 << ", " << y0 << ", " << z0 << ") at time " 
-              << t0 << std::endl;
+              << t0 << "\n";
     std::cout << "    Initial direction: ("
-              << dx0 << ", " << dy0 << ", " << dz0 << ")" << std::endl;
+              << dx0 << ", " << dy0 << ", " << dz0 << ")\n";
     
   }
 

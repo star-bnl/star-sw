@@ -13,9 +13,9 @@ RandomEngineGSL::RandomEngineGSL() {
   t = gsl_rng_default;
   rng = gsl_rng_alloc(t);
 
-  std::cout << "RandomEngineGSL:" << std::endl;
-  std::cout << "    Generator type: " << gsl_rng_name(rng) << std::endl;
-  std::cout << "    Seed: " << gsl_rng_default_seed << std::endl;
+  std::cout << "RandomEngineGSL:\n";
+  std::cout << "    Generator type: " << gsl_rng_name(rng) << "\n";
+  std::cout << "    Seed: " << gsl_rng_default_seed << "\n";
 
 }
 

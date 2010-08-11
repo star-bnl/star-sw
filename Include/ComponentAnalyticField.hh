@@ -10,7 +10,6 @@
 #include "ComponentBase.hh"
 #include "FundamentalConstants.hh"
 
-
 namespace Garfield {
   
 class ComponentAnalyticField : public ComponentBase {
@@ -57,7 +56,6 @@ class ComponentAnalyticField : public ComponentBase {
     
     void EnableChargeCheck()  {chargeCheck = true;}
     void DisableChargeCheck() {chargeCheck = false;}
-    void Test();
  
   private:
   

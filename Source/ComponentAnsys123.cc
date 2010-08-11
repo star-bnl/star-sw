@@ -16,7 +16,7 @@ ComponentAnsys123::ComponentAnsys123() : ComponentFieldMap() {
 
 ComponentAnsys123::ComponentAnsys123(std::string elist,  std::string nlist,
                                      std::string mplist, std::string prnsol, 
-				     std::string unit) :
+                                     std::string unit) :
   ComponentFieldMap() {
 
   Initialise(elist, nlist, mplist, prnsol, unit);

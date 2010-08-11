@@ -37,8 +37,8 @@ Track::SetParticle(std::string part) {
   } else if (part == "anti-proton" || part == "p-bar") {
     q = -1; mass = ProtonMass;
   } else {
-    std::cerr << "Track::SetParticle:" << std::endl;
-    std::cerr << "    Particle " << part << " is not defined." << std::endl;
+    std::cerr << "Track::SetParticle:\n";
+    std::cerr << "    Particle " << part << " is not defined.\n";
   }
 
 }
@@ -47,9 +47,8 @@ void
 Track::SetEnergy(const double e) {
   
   if (energy <= mass) {
-    std::cerr << "Track::SetEnergy:" << std::endl;
-    std::cerr << "    Particle energy must be greater than the mass." 
-              << std::endl;
+    std::cerr << "Track::SetEnergy:\n";
+    std::cerr << "    Particle energy must be greater than the mass.\n"; 
     return;
   }
 
@@ -64,8 +63,8 @@ void
 Track::SetBetaGamma(const double bg) {
 
   if (bg <= 0.) {
-    std::cerr << "Track::SetBetaGamma:" << std::endl;
-    std::cerr << "    Particle speed must be greater than zero." << std::endl;
+    std::cerr << "Track::SetBetaGamma:\n";
+    std::cerr << "    Particle speed must be greater than zero.\n";
     return;
   }
 
@@ -80,9 +79,9 @@ void
 Track::SetBeta(const double beta) {
 
   if (beta <= 0. && beta >= 1.) {
-    std::cerr << "Track::SetBeta:" << std::endl;
-    std::cerr << "    Particle speed must be between zero and speed of light." 
-              << std::endl;
+    std::cerr << "Track::SetBeta:\n";
+    std::cerr << "    Particle speed must be between zero" 
+              << " and speed of light.\n"; 
     return;
   }
 
@@ -96,8 +95,8 @@ void
 Track::SetGamma(const double gamma) {
 
   if (gamma <= 1.) {
-    std::cerr << "Track::SetGamma:" << std::endl;
-    std::cerr << "    Particle speed must be greater than zero." << std::endl;
+    std::cerr << "Track::SetGamma:\n";
+    std::cerr << "    Particle speed must be greater than zero.\n";
     return;
   }
   
@@ -111,9 +110,8 @@ void
 Track::SetMomentum(const double p) {
 
   if (p <= 0.) {
-    std::cerr << "Track::SetMomentum:" << std::endl;
-    std::cerr << "    Particle momentum must be greater than zero." 
-              << std::endl;
+    std::cerr << "Track::SetMomentum:\n";
+    std::cerr << "    Particle momentum must be greater than zero.\n"; 
     return;
   }
 
@@ -128,8 +126,8 @@ void
 Track::SetKineticEnergy(const double ekin) {
 
   if (ekin <= 0.) {
-    std::cerr << "Track::SetKineticEnergy:" << std::endl;
-    std::cerr << "    Kinetic energy must be greater than zero." << std::endl;
+    std::cerr << "Track::SetKineticEnergy:\n";
+    std::cerr << "    Kinetic energy must be greater than zero.\n";
     return;
   }
 
@@ -144,8 +142,8 @@ void
 Track::SetSensor(Sensor* s) {
 
   if (s == 0) {
-    std::cerr << "Track::SetSensor:" << std::endl;
-    std::cerr << "    Sensor is not defined." << std::endl;
+    std::cerr << "Track::SetSensor:\n";
+    std::cerr << "    Sensor pointer is null.\n";
     return;
   }
 

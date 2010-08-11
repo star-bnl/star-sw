@@ -41,8 +41,8 @@ ViewDrift::SetArea(double xmin, double ymin, double zmin,
 
   // Check range, assign if non-null
   if (xmin == xmax || ymin == ymax || zmin == zmax) {
-    std::cout << "ViewDrift::SetArea:" << std::endl;
-    std::cout << "    Null area range not permitted." << std::endl;
+    std::cout << "ViewDrift::SetArea:\n";
+    std::cout << "    Null area range not permitted.\n";
     return;
   }
   xMin = std::min(xmin, xmax);
@@ -66,13 +66,14 @@ void
 ViewDrift::NewElectronDriftLine(const int n) {
 
   if (n <= 0) {
-    std::cerr << "ViewDrift::NewElectronDriftLine:" << std::endl;
-    std::cerr << "    Drift line size must be greater than zero." << std::endl;
-    return;
+    TPolyLine3D p(1);
+    p.SetLineColor(kOrange);
+    driftLines.push_back(p);
+  } else {
+    TPolyLine3D p(n);
+    p.SetLineColor(kOrange);
+    driftLines.push_back(p);
   }
-  TPolyLine3D p(n);
-  p.SetLineColor(kOrange);
-  driftLines.push_back(p);
   ++nDriftLines;
 
 } 
@@ -81,13 +82,14 @@ void
 ViewDrift::NewIonDriftLine(const int n) {
 
   if (n <= 0) {
-    std::cerr << "ViewDrift::NewIonDriftLine:" << std::endl;
-    std::cerr << "    Drift line size must be greater than zero." << std::endl;
-    return;
+    TPolyLine3D p(1);
+    p.SetLineColor(kRed);
+    driftLines.push_back(p);
+  } else {
+    TPolyLine3D p(n);
+    p.SetLineColor(kRed);
+    driftLines.push_back(p);
   }
-  TPolyLine3D p(n);
-  p.SetLineColor(kRed);
-  driftLines.push_back(p);
   ++nDriftLines;
 
 }
@@ -112,8 +114,8 @@ ViewDrift::SetPoint(const int i,
   
   if (i < 0) return;
   if (nDriftLines <= 0) {
-    std::cerr << "ViewDrift::SetPoint:" << std::endl;
-    std::cerr << "    No drift lines present." << std::endl;
+    std::cerr << "ViewDrift::SetPoint:\n";
+    std::cerr << "    No drift lines present.\n";
     return;
   }
 

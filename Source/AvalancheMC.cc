@@ -22,6 +22,8 @@ AvalancheMC::AvalancheMC() :
   useDiffusion(true), useAttachment(true), useIons(true), 
   withElectrons(true), withHoles(true),
   debug(false) {
+  
+  className = "AvalancheMC";
    
 }
 
@@ -29,8 +31,8 @@ void
 AvalancheMC::SetSensor(Sensor* s) {
 
   if (s == 0) {
-    std::cerr << "AvalancheMC::SetSensor:" << std::endl;
-    std::cerr << "    Sensor is not defined." << std::endl;
+    std::cerr << className << "::SetSensor:\n";
+    std::cerr << "    Sensor pointer is null.\n";
     return;
   }
   
@@ -42,8 +44,8 @@ void
 AvalancheMC::EnablePlotting(ViewDrift* view) {
   
   if (view == 0) {
-    std::cerr << "AvalancheMC::EnablePlotting:" << std::endl;
-    std::cerr << "    Viewer is not defined." << std::endl;
+    std::cerr << className << "::EnablePlotting:\n";
+    std::cerr << "    Viewer pointer is null.\n";
     return;
   }
 
@@ -65,14 +67,14 @@ AvalancheMC::SetTimeSteps(const double d) {
 
   stepModel = 0;
   if (d < Small) {
-    std::cerr << "AvalancheMC::SetTimeSteps:" << std::endl;
-    std::cerr << "    Specified step size is too small." << std::endl;
-    std::cerr << "    Using default (20 ps) instead." << std::endl;
+    std::cerr << className << "::SetTimeSteps:\n";
+    std::cerr << "    Specified step size is too small.\n";
+    std::cerr << "    Using default (20 ps) instead.\n";
     tMc = 0.02;
   } else {
     if (debug) {
-      std::cout << "AvalancheMC::SetTimeSteps:" << std::endl;
-      std::cout << "    Step size set to " << d << " ns." << std::endl;
+      std::cout << className << "::SetTimeSteps:\n";
+      std::cout << "    Step size set to " << d << " ns.\n";
     }
     tMc = d;
   }
@@ -84,14 +86,14 @@ AvalancheMC::SetDistanceSteps(const double d) {
 
   stepModel = 1;
   if (d < Small) {
-    std::cerr << "AvalancheMC::SetDistanceSteps:" << std::endl;
-    std::cerr << "    Specified step size is too small." << std::endl;
-    std::cerr << "    Using default (10 um) instead." << std::endl;
+    std::cerr << className << "::SetDistanceSteps:\n";
+    std::cerr << "    Specified step size is too small.\n";
+    std::cerr << "    Using default (10 um) instead.\n";
     dMc = 0.001;
   } else {
     if (debug) {
-      std::cout << "AvalancheMC::SetDistanceSteps:" << std::endl;
-      std::cout << "    Step size set to " << d << " cm." << std::endl;
+      std::cout << className << "::SetDistanceSteps:\n";
+      std::cout << "    Step size set to " << d << " cm.\n";
     }
     dMc = d;
   }
@@ -103,15 +105,15 @@ AvalancheMC::SetCollisionSteps(const int n) {
 
   stepModel = 2;
   if (n < 1) {
-    std::cerr << "AvalancheMC::SetCollisionSteps:" << std::endl;
+    std::cerr << className << "::SetCollisionSteps:\n";
     std::cerr << "    Number of collisions to be skipped set to "
-              << " default value (100)." << std::endl;
+              << " default value (100).\n";
     nMc = 100;
   } else {
     if (debug) {
-      std::cout << "AvalancheMC::SetCollisionSteps:" << std::endl;
+      std::cout << className << "::SetCollisionSteps:\n";
       std::cout << "    Number of collisions to be skipped set to " 
-                << n << "." << std::endl;
+                << n << ".\n";
     }
     nMc = n;
   }
@@ -122,8 +124,8 @@ void
 AvalancheMC::GetDriftLinePoint(const int i, double& x, double& y, double& z, double& t) {
 
   if (i < 0 || i >= nDrift) {
-    std::cerr << "AvalancheMC::GetDriftLinePoint:" << std::endl;
-    std::cerr << "    Index is outside the range." << std::endl;
+    std::cerr << className << "::GetDriftLinePoint:\n";
+    std::cerr << "    Index is outside the range.\n";
     return;
   }
   
@@ -141,8 +143,8 @@ AvalancheMC::GetHoleEndpoint(const int i,
                              int& status) const {
 
   if (i < 0 || i >= nEndpointsHoles) {
-    std::cerr << "AvalancheMC::GetHoleEndpoint:" << std::endl;
-    std::cerr << "    Endpoint " << i << " does not exist." << std::endl;
+    std::cerr << className << "::GetHoleEndpoint:\n";
+    std::cerr << "    Endpoint " << i << " does not exist.\n";
     return;
   }
 
@@ -161,8 +163,8 @@ AvalancheMC::GetIonEndpoint(const int i,
                              int& status) const {
 
   if (i < 0 || i >= nEndpointsIons) {
-    std::cerr << "AvalancheMC::GetIonEndpoint:" << std::endl;
-    std::cerr << "    Endpoint " << i << " does not exist." << std::endl;
+    std::cerr << className << "::GetIonEndpoint:\n";
+    std::cerr << "    Endpoint " << i << " does not exist.\n";
     return;
   }
 
@@ -181,8 +183,8 @@ AvalancheMC::GetElectronEndpoint(const int i,
                              int& status) const {
 
   if (i < 0 || i >= nEndpointsElectrons) {
-    std::cerr << "AvalancheMC::GetElectronEndpoint:" << std::endl;
-    std::cerr << "    Endpoint " << i << " does not exist." << std::endl;
+    std::cerr << className << "::GetElectronEndpoint:\n";
+    std::cerr << "    Endpoint " << i << " does not exist.\n";
     return;
   }
 
@@ -199,8 +201,8 @@ AvalancheMC::DriftElectron(
     const double x0, const double y0, const double z0, const double t0) {
   
   if (sensor == 0) {
-    std::cerr << "AvalancheMC::DriftElectron:" << std::endl;
-    std::cerr << "    Sensor is not defined." << std::endl;
+    std::cerr << className << "::DriftElectron:\n";
+    std::cerr << "    Sensor is not defined.\n";
     return false;
   }
 
@@ -225,8 +227,8 @@ AvalancheMC::DriftHole(
     const double x0, const double y0, const double z0, const double t0) {
     
   if (sensor == 0) {
-    std::cerr << "AvalancheMC::DriftHole:" << std::endl;
-    std::cerr << "    Sensor is not defined." << std::endl;
+    std::cerr << className << "::DriftHole:\n";
+    std::cerr << "    Sensor is not defined.\n";
     return false;
   }
 
@@ -251,8 +253,8 @@ AvalancheMC::DriftIon(
     const double x0, const double y0, const double z0, const double t0) {
     
   if (sensor == 0) {
-    std::cerr << "AvalancheMC::DriftIon:" << std::endl;
-    std::cerr << "    Sensor is not defined." << std::endl;
+    std::cerr << className << "::DriftIon:\n";
+    std::cerr << "    Sensor is not defined.\n";
     return false;
   } 
 
@@ -313,8 +315,8 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
   // Make sure the starting point is inside a drift medium
   if (status != 0) {
-    std::cerr << "AvalancheMC::DriftLine:" << std::endl;
-    std::cerr << "    No drift medium at initial position." << std::endl;
+    std::cerr << className << "::DriftLine:\n";
+    std::cerr << "    No drift medium at initial position.\n";
     ok = false;
   }
 
@@ -342,9 +344,9 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         break;
       }
     } else {
-      std::cerr << "AvalancheMC::DriftLine:" << std::endl;
-      std::cerr << "    Unknown drift line type (" << q << "). Program bug!" 
-                << std::endl;
+      std::cerr << className << "::DriftLine:\n";
+      std::cerr << "    Unknown drift line type (" << q << ").\n";
+      std::cerr << "    Program bug!\n"; 
       return false;
     }    
     v = Max(sqrt(vx * vx + vy * vy + vz * vz), Small);
@@ -365,8 +367,8 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         delta = - nMc * tau * log(RndmUniformPos());
         break;
       default:
-        std::cerr << "AvalancheMC::DriftLine:" << std::endl;
-        std::cerr << "    Unknown stepping model." << std::endl;
+        std::cerr << className << "::DriftLine:\n";
+        std::cerr << "    Unknown stepping model.\n";
         return false;
     }
         
@@ -571,8 +573,8 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   }
 
   if (!ok) {
-    std::cerr << "AvalancheMC::DriftLine:" << std::endl;
-    std::cerr << "    Error calculating the transport parameters." << std::endl;
+    std::cerr << className << "::DriftLine:\n";
+    std::cerr << "    Error calculating the transport parameters.\n";
     return false;
   }
 
@@ -667,17 +669,17 @@ AvalancheMC::Avalanche() {
 
   // Make sure that the sensor is defined
   if (sensor == 0) {
-    std::cerr << "AvalancheMC::Avalanche:" << std::endl;
-    std::cerr << "    Sensor is not defined." << std::endl;
+    std::cerr << className << "::Avalanche:\n";
+    std::cerr << "    Sensor is not defined.\n";
     return false;
   }
   
   avalPoint point;
 
   if (!withHoles && !withElectrons) {
-    std::cerr << "AvalancheMC::Avalanche:" << std::endl;
-    std::cerr << "    Neither electron nor hole/ion component are activated." 
-              << std::endl;
+    std::cerr << className << "::Avalanche:\n";
+    std::cerr << "    Neither electron nor hole/ion component"
+              << " are activated.\n"; 
   }
 
   for (int iAval = 0; iAval < nAval; ++iAval) {
@@ -686,7 +688,7 @@ AvalancheMC::Avalanche() {
       // Loop over the electrons at this location
       for (int iE = aval[iAval].ne; iE--;) {
         if (debug) { 
-          std::cout << "      Electron drift line " << iE << std::endl;
+          std::cout << "      Electron drift line " << iE << "\n";
         }
         // Compute an electron drift line
         if (!DriftLine(aval[iAval].x, aval[iAval].y, aval[iAval].z, 
@@ -806,10 +808,10 @@ AvalancheMC::ComputeAlphaEta(const int q) {
       if (status != 0) {
         // Check if this point is the last but one
         if (i < nDrift - 2) {
-          std::cerr << "AvalancheMC::ComputeAlphaEta:" << std::endl;
+          std::cerr << className << "::ComputeAlphaEta:\n";
           std::cerr << "    Got status value != 0 at segment " << j + 1
                     << "/6, drift point " << i + 1 << "/" << nDrift 
-                    << "." << std::endl;
+                    << ".\n";
           return false;
         }
         continue;
@@ -919,11 +921,9 @@ AvalancheMC::ComputeAlphaEta(const int q) {
       }
       // See whether we succeeded
       if (!done) {
-        std::cerr << "AvalancheMC::ComputeAlphaEta:" << std::endl;
-        std::cerr << "    Unable to even out backwards alpha steps." 
-                  << std::endl;
-        std::cerr << "    Avalanche calculation is probably inaccurate." 
-                  << std::endl;
+        std::cerr << className << "::ComputeAlphaEta:\n";
+        std::cerr << "    Unable to even out backwards alpha steps.\n"; 
+        std::cerr << "    Avalanche calculation is probably inaccurate.\n"; 
         return false;
       }
     }
@@ -1001,10 +1001,9 @@ AvalancheMC::ComputeAlphaEta(const int q) {
         }
       }
       if (!done) {
-        std::cerr << "AvalancheMC::ComputeAlphaEta:" << std::endl;
-        std::cerr << "    Unable to even out backwards eta steps." << std::endl;
-        std::cerr << "    Avalanche calculation is probably inaccurate." 
-                  << std::endl;
+        std::cerr << className << "::ComputeAlphaEta:\n";
+        std::cerr << "    Unable to even out backwards eta steps.\n";
+        std::cerr << "    Avalanche calculation is probably inaccurate.\n"; 
         return false;
       }
     }

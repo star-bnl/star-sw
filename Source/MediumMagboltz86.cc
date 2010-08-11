@@ -22,7 +22,7 @@ MediumMagboltz86::MediumMagboltz86() :
   nDeexcitations(0), nDeexcitationProducts(0),
   scaleExc(1.), useSplittingFunction(true),
   eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma),
-  hasIonMobility(false), muIon(1.e-9) {
+  nIonMobilities(false) {
  
   className = "MediumMagboltz86";
  
@@ -70,6 +70,9 @@ MediumMagboltz86::MediumMagboltz86() :
   nCollisions[3] = 0; nCollisions[4] = 0;
   nPhotonCollisions[0] = 0; nPhotonCollisions[1] = 0; nPhotonCollisions[2] = 0;
   
+  ionMobilityGrid.clear();
+  ionMobilityValues.clear();
+
 }
 
 bool 
@@ -105,8 +108,9 @@ MediumMagboltz86::SetComposition(const std::string gas1, const double f1,
   
   // Check if at least one valid ingredient was specified. 
   if (i <= 0) {
-    std::cerr << "MediumMagboltz86: Error setting the composition. "
-              << "    No valid ingredients were specified." << std::endl;
+    std::cerr << className << "::SetComposition:\n";
+    std::cerr << "    Error setting the composition.\n";
+    std::cerr << "    No valid ingredients were specified.\n";
     return false;
   }
   
@@ -129,7 +133,7 @@ MediumMagboltz86::SetComposition(const std::string gas1, const double f1,
     }
   }
   
-  std::cout << className << "::SetComposition:" << std::endl;
+  std::cout << className << "::SetComposition:\n";
   std::cout << "    " << name;
   if (nComponents > 1) {
     std::cout << " (" << fraction[0] * 100;
@@ -138,7 +142,7 @@ MediumMagboltz86::SetComposition(const std::string gas1, const double f1,
     }
     std::cout << ")";
   }
-  std::cout << std::endl;
+  std::cout << "\n";
   
   // Set parameters in Magboltz common blocks
   inpt_.nGas = nComponents;  
@@ -171,8 +175,8 @@ void
 MediumMagboltz86::GetComponent(const int i, std::string& label, double& f) {
 
   if (i < 0 || i >= nComponents) {
-    std::cerr << className << "::GetComponent:" << std::endl;
-    std::cerr << "    Index out of range." << std::endl;
+    std::cerr << className << "::GetComponent:\n";
+    std::cerr << "    Index out of range.\n";
     label = "";
     f = 0.;
     return;
@@ -187,9 +191,9 @@ bool
 MediumMagboltz86::SetMaxElectronEnergy(const double e) {
 
   if (e <= 1.e-20) {
-    std::cerr << className << "::SetMaxElectronEnergy:" << std::endl;
+    std::cerr << className << "::SetMaxElectronEnergy:\n";
     std::cerr << "    Provided upper electron energy limit (" << e
-              <<  " eV) is too small." << std::endl;
+              <<  " eV) is too small.\n";
     return false;
   }
   eFinal = e;
@@ -211,9 +215,9 @@ bool
 MediumMagboltz86::SetMaxPhotonEnergy(const double e) {
 
   if (e <= 1.e-20) {
-    std::cerr << className << "::SetMaxPhotonEnergy:" << std::endl;
+    std::cerr << className << "::SetMaxPhotonEnergy:\n";
     std::cerr << "    Provided upper photon energy limit (" << e
-              <<  " eV) is too small." << std::endl;
+              <<  " eV) is too small.\n";
     return false;
   }
   eFinalGamma = e;
@@ -230,14 +234,14 @@ MediumMagboltz86::SetMaxPhotonEnergy(const double e) {
 void
 MediumMagboltz86::EnableDeexcitation() {
 
-  std::cout << className << "::EnableDeexcitation:" << std::endl;
+  std::cout << className << "::EnableDeexcitation:\n";
   if (usePenning) {
-    std::cout << "    Penning transfer will be switched off." << std::endl;
+    std::cout << "    Penning transfer will be switched off.\n";
   }
   if (useRadTrap) {
-    std::cout << "    Radiation trapping is switched on." << std::endl;
+    std::cout << "    Radiation trapping is switched on.\n";
   } else {
-    std::cout << "    Radiation trapping is switched off." << std::endl;
+    std::cout << "    Radiation trapping is switched off.\n";
   }
   usePenning = false;
   useDeexcitation = true;
@@ -251,9 +255,9 @@ MediumMagboltz86::EnableRadiationTrapping() {
 
   useRadTrap = true;
   if (!useDeexcitation) {
-    std::cout << className << "::EnableRadiationTrapping:" << std::endl;
-    std::cout << "    Radiation trapping is enabled but de-excitation is not."
-              << std::endl;
+    std::cout << className << "::EnableRadiationTrapping:\n";
+    std::cout << "    Radiation trapping is enabled"
+              << " but de-excitation is not.\n";
   } else {
     isChanged = true;
   }
@@ -264,17 +268,16 @@ void
 MediumMagboltz86::EnablePenningTransfer(const double r) {
 
   if (r < 0. || r > 1.) {
-    std::cerr << className << "::EnablePenningTransfer:" << std::endl;
+    std::cerr << className << "::EnablePenningTransfer:\n";
     std::cerr << "    Penning transfer probability must be " 
-              << " in the range [0, 1]." << std::endl;
+              << " in the range [0, 1].\n";
     return;
   }
   
   rPenning = r;
   if (useDeexcitation) {
-    std::cout << className << "::EnablePenningTransfer:" << std::endl;
-    std::cout << "    Deexcitation handling will be switched off." 
-              << std::endl;
+    std::cout << className << "::EnablePenningTransfer:\n";
+    std::cout << "    Deexcitation handling will be switched off.\n"; 
   }
   usePenning = true;
   
@@ -284,8 +287,8 @@ void
 MediumMagboltz86::SetExcitationScalingFactor(const double r) {
 
   if (r <= 0.) {
-    std::cerr << className << "::SetScalingFactor:" << std::endl;
-    std::cerr << "    Incorrect value for scaling factor: " << r << std::endl;
+    std::cerr << className << "::SetScalingFactor:\n";
+    std::cerr << "    Incorrect value for scaling factor: " << r << "\n";
     return;
   }
 
@@ -300,7 +303,7 @@ MediumMagboltz86::GetElectronNullCollisionRate() {
   if (isChanged) {
     if (!Mixer()) {
       std::cerr << "MediumMagboltz86: Error calculating the "
-                << " collision rates table." << std::endl;
+                << " collision rates table.\n";
       return 0.;
     }
     isChanged = false;
@@ -314,24 +317,23 @@ double
 MediumMagboltz86::GetElectronCollisionRate(const double e, const int band) {
 
   if (e <= 0.) {
-    std::cerr << "MediumMagboltz86: Electron energy must be greater than zero."
-              << std::endl;
+    std::cerr << className << "::GetElectronCollisionRate:\n";
+    std::cerr << "    Electron energy must be greater than zero.\n";
     return cfTot[0];
   }
   if (e > eFinal && useAutoAdjust) {    
-    std::cerr << className << "::GetElectronCollisionRate:" << std::endl;
+    std::cerr << className << "::GetElectronCollisionRate:\n";
     std::cerr << "    Collision rate at " << e 
-              << " eV is not included in the current table." << std::endl;
+              << " eV is not included in the current table.\n";
     std::cerr << "    Increasing energy range to " << 1.05 * e
-              << " eV." << std::endl;
+              << " eV.\n";
     SetMaxElectronEnergy(1.05 * e);    
   }
     
   if (isChanged) {
     if (!Mixer()) {
-      std::cerr << "MediumMagboltz86:" << std::endl;
-      std::cerr << "    Error calculating the collision rates table."
-                << std::endl;
+      std::cerr << className << "::GetElectronCollisionRate:\n";
+      std::cerr << "    Error calculating the collision rates table.\n";
       return 0.;
     }
     isChanged = false;
@@ -348,24 +350,23 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
                 int& band) {
 
   if (e > eFinal && useAutoAdjust) {
-    std::cerr << className << "::GetElectronCollision:" << std::endl;
+    std::cerr << className << "::GetElectronCollision:\n";
     std::cerr << "    Provided electron energy  (" << e 
               << " eV) exceeds current energy range  (" << eFinal 
-              << " eV)." << std::endl;
+              << " eV).\n";
     std::cerr << "    Increasing energy range to " << 1.05 * e
-              << " eV." << std::endl;
+              << " eV.\n";
     SetMaxElectronEnergy(1.05 * e);
   } else if (e <= 0.) {
-    std::cerr << className << "::GetElectronCollision:" << std::endl;
-    std::cerr << "    Electron energy must be greater than zero." << std::endl;
+    std::cerr << className << "::GetElectronCollision:\n";
+    std::cerr << "    Electron energy must be greater than zero.\n";
     return false;
   }
   
   if (isChanged) {
     if (!Mixer()) {
-      std::cerr << "MediumMagboltz86: " << std::endl;
-      std::cerr << "    Error calculating the collision rates table." 
-                << std::endl;
+      std::cerr << className << "::GetElectronCollision:\n";
+      std::cerr << "    Error calculating the collision rates table.\n"; 
       return false;
     }
     isChanged = false;
@@ -453,9 +454,9 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
                   (1. + scatParameter[iE][level] * ctheta0);
         break;
       default:
-        std::cerr << className << "::GetElectronCollision:" << std::endl;
-        std::cerr << "    Unknown scattering model. " << std::endl;
-        std::cerr << "    Using isotropic distribution instead." << std::endl;
+        std::cerr << className << "::GetElectronCollision:\n";
+        std::cerr << "    Unknown scattering model. \n";
+        std::cerr << "    Using isotropic distribution instead.\n";
         ctheta0 = 1. - 2. * RndmUniform();
         break;
     }
@@ -502,24 +503,23 @@ double
 MediumMagboltz86::GetPhotonCollisionRate(const double e) {
 
   if (e <= 0.) {
-    std::cerr << "MediumMagboltz86: Photon energy must be greater than zero."
-              << std::endl;
+    std::cerr << className << "::GetPhotonCollisionRate:\n";
+    std::cerr << "    Photon energy must be greater than zero.\n";
     return cfTotGamma[0];
   }
   if (e > eFinalGamma && useAutoAdjust) {
-    std::cerr << className << "::GetPhotonCollisionRate:" << std::endl;
+    std::cerr << className << "::GetPhotonCollisionRate:\n";
     std::cerr << "    Collision rate at " << e 
-              << " eV is not included in the current table." << std::endl;
+              << " eV is not included in the current table.\n";
     std::cerr << "    Increasing energy range to " << 1.05 * e
-              << " eV." << std::endl;
+              << " eV.\n";
     SetMaxPhotonEnergy(1.05 * e);
   }
     
   if (isChanged) {
     if (!Mixer()) {
-      std::cerr << "MediumMagboltz86:" << std::endl;
-      std::cerr << "     Error calculating the collision rates table."
-                << std::endl;
+      std::cerr << className << "::GetPhotonCollisionRate:\n";
+      std::cerr << "     Error calculating the collision rates table.\n";
       return 0.;
     }
     isChanged = false;
@@ -536,23 +536,23 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
                                      double& esec) {
 
   if (e > eFinalGamma && useAutoAdjust) {
-    std::cerr << className << "::GetPhotonCollision:" << std::endl;
+    std::cerr << className << "::GetPhotonCollision:\n";
     std::cerr << "    Provided electron energy  (" << e 
               << " eV) exceeds current energy range  (" << eFinalGamma
-              << " eV)." << std::endl;
+              << " eV).\n";
     std::cerr << "    Increasing energy range to " << 1.05 * e
-              << " eV." << std::endl;
+              << " eV.\n";
     SetMaxPhotonEnergy(1.05 * e);
   } else if (e <= 0.) {
-    std::cerr << className << "::GetPhotonCollision:" << std::endl;
-    std::cerr << "    Photon energy must be greater than zero." << std::endl;
+    std::cerr << className << "::GetPhotonCollision:\n";
+    std::cerr << "    Photon energy must be greater than zero.\n";
     return false;
   }
   
   if (isChanged) {
     if (!Mixer()) {
       std::cerr << "MediumMagboltz86: Error calculating" 
-                << " the collision rates table." << std::endl;
+                << " the collision rates table.\n";
       return false;
     }
     isChanged = false;
@@ -651,7 +651,7 @@ MediumMagboltz86::GetNumberOfLevels() {
   if (isChanged) {
     if (!Mixer()) {
       std::cerr << "MediumMagboltz86: Error calculating the"
-                << " collision rates table." << std::endl;
+                << " collision rates table.\n";
       return 0;
     }
     isChanged = false;
@@ -668,16 +668,16 @@ MediumMagboltz86::GetLevel(const int i, int& gas, int& type,
   if (isChanged) {
     if (!Mixer()) {
       std::cerr << "MediumMagboltz86: Error calculating the " 
-                << " collision rates table." << std::endl;
+                << " collision rates table.\n";
       return false;
     }
     isChanged = false;
   }
 
   if (i < 0 || i >= nTerms) {
-    std::cerr << className << "::GetLevel:" << std::endl;
+    std::cerr << className << "::GetLevel:\n";
     std::cerr << "    Requested level (" << i
-              << " does not exist." << std::endl;
+              << " does not exist.\n";
     return false;
   }  
   
@@ -697,10 +697,9 @@ int
 MediumMagboltz86::GetNumberOfElectronCollisions(const int level) const {
 
   if (level < 0 || level >= nTerms) {
-    std::cerr << className << "::GetNumberOfElectronCollisions:" 
-              << std::endl;
+    std::cerr << className << "::GetNumberOfElectronCollisions:\n"; 
     std::cerr << "    Requested cross-section term (" 
-              << level << ") does not exist." << std::endl;
+              << level << ") does not exist.\n";
     return 0;
   }
   return nCollisionsDetailed[level];
@@ -726,34 +725,105 @@ MediumMagboltz86::GetNumberOfPhotonCollisions(
 }
 
 void
-MediumMagboltz86::SetIonMobility(const double mu) {
+MediumMagboltz86::SetIonMobility(const double e, const double mu) {
 
-  if (fabs(mu) < Small) {
-    std::cerr << className << "::SetIonMobility:" << std::endl;
-    std::cerr << "    Ion mobility must be greater than zero." << std::endl;
+  if (mu < Small) {
+    std::cerr << className << "::SetIonMobility:\n";
+    std::cerr << "    Ion mobility must be greater than zero.\n";
     return;
   }
 
-  muIon = mu;
-  hasIonMobility = true;
-  std::cout << className << "::SetIonMobility:" << std::endl;
-  std::cout << "    Ion mobility set to " << mu << " cm2 / (V ns)." 
-            << std::endl;
-  if (mu < 0.)  std::cout << "    Warning: Mobility is negative!" << std::endl;
+  if (e < 0.) {
+    std::cerr << className << "::SetIonMobility:\n";
+    std::cerr << "    Energy must be greater than zero.\n";
+    return;
+  }
+
+  if (nIonMobilities == 0) {
+    ionMobilityGrid.push_back(e);
+    ionMobilityValues.push_back(mu);
+    ++nIonMobilities;
+    return;
+  }
+
+  if (e > ionMobilityGrid.back()) {
+    ionMobilityGrid.push_back(e);
+    ionMobilityValues.push_back(mu);
+    ++nIonMobilities;
+    return;
+  }
+
+  ionMobilityGrid.resize(nIonMobilities + 1);
+  for (int i = nIonMobilities; i--;) {
+    if (ionMobilityGrid[i] > e) {
+      ionMobilityGrid[i + 1] = ionMobilityGrid[i];
+      ionMobilityValues[i + 1] = ionMobilityValues[i];
+      if (i == 0) {
+        ionMobilityGrid[i] = e;
+        ionMobilityValues[i] = mu;
+      }
+    } else if (ionMobilityGrid[i] < e) {
+      ionMobilityGrid[i + 1] = e;
+      ionMobilityValues[i + 1] = mu;
+      break;
+    } else {
+      // Replace the previous value
+      std::cout << className << "::SetIonMobility:\n";
+      std::cout << "    Ion mobility at E = " << e << " was " 
+                << ionMobilityValues[i] << ",\n";
+      std::cout << "    Replaced by " << mu << ".\n";
+      ionMobilityValues[i] = mu;
+      break;
+    }
+  }
+  ++nIonMobilities;
 
 }
 
 bool
 MediumMagboltz86::IonVelocity(const double ex, const double ey, const double ez,
-                            const double bx, const double by, const double bz,
-                            double& vx, double& vy, double& vz) {
+                              const double bx, const double by, const double bz,
+                              double& vx, double& vy, double& vz) {
 
-  if (!hasIonMobility) {
+  if (nIonMobilities <= 0) {
     vx = vy = vz = 0.;
     return false;
   }
 
-  vx = muIon * ex; vy = muIon * ey; vz = muIon * ez;
+  const double e = sqrt(ex * ex + ey * ey + ez * ez);
+  if (nIonMobilities == 1 || e <= ionMobilityGrid[0]) {
+    vx = ionMobilityValues[0] * ex;
+    vy = ionMobilityValues[0] * ey;
+    vz = ionMobilityValues[0] * ez;
+    return true;
+  }
+
+  if (e >= ionMobilityGrid[nIonMobilities - 1]) {
+    const double a2 = log(ionMobilityValues[nIonMobilities - 1] / 
+                          ionMobilityValues[nIonMobilities - 2]) /
+                      (ionMobilityGrid[nIonMobilities - 1] - 
+                       ionMobilityGrid[nIonMobilities - 2]);
+    const double a1 = log(ionMobilityValues[nIonMobilities - 1]) - 
+                      a2 * ionMobilityGrid[nIonMobilities - 1];
+    return exp(a1 + a2 * e);
+  }
+
+  int iLow = 0;
+  int iUp  = nIonMobilities - 1;
+  int iMid;
+  while (iUp - iLow > 1) {
+    iMid = (iLow + iUp) >> 1;
+    if (e < ionMobilityGrid[iMid]) {
+      iUp = iMid;
+    } else {
+      iLow = iMid;
+    }
+  }
+
+  double mu = ionMobilityValues[iLow] + (e - ionMobilityGrid[iLow]) * 
+              (ionMobilityValues[iUp] - ionMobilityValues[iLow]) / 
+              (ionMobilityGrid[iUp] - ionMobilityGrid[iLow]);
+  vx = mu * ex; vy = mu * ey; vz = mu * ez;
   return true;
 
 }
@@ -769,7 +839,7 @@ MediumMagboltz86::GetGasNumber(std::string name, int& number) const {
   if (name == "") {
     number = 0; return false;
   }
-  
+ 
   // CF4
   if (name == "CF4" || name == "FREON" || 
       name == "FREON-14" || name == "TETRAFLUOROMETHANE") {
@@ -1022,8 +1092,8 @@ MediumMagboltz86::GetGasNumber(std::string name, int& number) const {
     number = 60; return true;
   }
   
-  std::cerr << className << "::GetGasNumber():" << std::endl;
-  std::cerr << "    Gas " << name << " is not defined." << std::endl;
+  std::cerr << className << "::GetGasNumber():\n";
+  std::cerr << "    Gas " << name << " is not defined.\n";
   return false;
   
 }
@@ -1168,16 +1238,16 @@ MediumMagboltz86::Mixer() {
   char name[15];  
           
   if (debug) {
-    std::cout << className << "::Mixer:" << std::endl;
+    std::cout << className << "::Mixer:\n";
     std::cout << "    Creating table of collision rates with " 
-              << nEnergySteps << " energy steps " << std::endl;
-    std::cout << "    between 0 and " << eFinal << " eV." << std::endl;
+              << nEnergySteps << " energy steps \n";
+    std::cout << "    between 0 and " << eFinal << " eV.\n";
   }
   nTerms = 0;
   
   std::ofstream outfile;
   if (useCsOutput) outfile.open("cs.txt", std::ios::out);
-  outfile << "# " << std::endl;
+  outfile << "# \n";
 
   // Loop over the gases in the mixture.  
   for (int iGas = 0; iGas < nComponents; ++iGas) {
@@ -1186,19 +1256,19 @@ MediumMagboltz86::Mixer() {
     gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, &w, 
             pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, scrpt);
     if (debug) {
-      std::cout << "    " << name << std::endl;
-      std::cout << "      m / M:                " << 0.5 * e[1] << std::endl;
-      std::cout << "      Ionisation threshold: " << e[2] << " eV" << std::endl;
-      std::cout << "      Attachment threshold: " << e[3] << " eV" << std::endl;
-      std::cout << "      Splitting parameter:  " << w << " eV" << std::endl;
+      std::cout << "    " << name << "\n";
+      std::cout << "      m / M:                " << 0.5 * e[1] << "\n";
+      std::cout << "      Ionisation threshold: " << e[2] << " eV\n";
+      std::cout << "      Attachment threshold: " << e[3] << " eV\n";
+      std::cout << "      Splitting parameter:  " << w << " eV\n";
     }
     int np0 = nTerms;
     
     // Check if there is still sufficient space.
     if (np0 + nIn + 2 >= nMaxLevels) {
-      std::cerr << className << "::Mixer:" << std::endl;
+      std::cerr << className << "::Mixer:\n";
       std::cerr << "    Max. number of levels (" << nMaxLevels 
-                << ") exceeded." << std::endl;
+                << ") exceeded.\n";
       return false;
     }
     
@@ -1302,10 +1372,10 @@ MediumMagboltz86::Mixer() {
         // Scale the excitation cross-sections (for error estimates)
         cf[iE][np] *= scaleExc;
         if (cf[iE][np] < 0.) {
-          std::cerr << className << "::Mixer:" << std::endl;
+          std::cerr << className << "::Mixer:\n";
           std::cerr << "    Negative inelastic cross-section at " 
-                    << iE * eStep << " eV." << std::endl; 
-          std::cerr << "    Set to zero." << std::endl;
+                    << iE * eStep << " eV.\n"; 
+          std::cerr << "    Set to zero.\n";
           cf[iE][np] = 0.;
         }
         if (scatModel[np] == 1) {
@@ -1315,7 +1385,7 @@ MediumMagboltz86::Mixer() {
           scatParameter[iE][np] = pEqIn[iE][j];
         }
       }
-      if (useCsOutput) outfile << std::endl;
+      if (useCsOutput) outfile << "\n";
     }
   }
   if (useCsOutput) outfile.close();
@@ -1330,19 +1400,19 @@ MediumMagboltz86::Mixer() {
     }
   }
   if (debug) {
-    std::cout << className << "::Mixer:" << std::endl;
+    std::cout << className << "::Mixer:\n";
     std::cout << "    Lowest ionisation threshold in the mixture: " 
-              << minIonPot << " eV" << std::endl;
+              << minIonPot << " eV\n";
   }
 
   for (int iE = nEnergySteps; iE--;) {
     // Calculate the total collision frequency
     for (int k = nTerms; k--;) {
       if (cf[iE][k] < 0.) {
-          std::cerr << className << "::Mixer:" << std::endl;
+          std::cerr << className << "::Mixer:\n";
           std::cerr << "    Negative collision rate at " 
-                    << iE * eStep << " eV. " << std::endl;
-          std::cerr << "    Set to zero." << std::endl;
+                    << iE * eStep << " eV. \n";
+          std::cerr << "    Set to zero.\n";
           cf[iE][k] = 0.;
       }
       cfTot[iE] += cf[iE][k];
@@ -1382,13 +1452,13 @@ MediumMagboltz86::Mixer() {
   for (int j = nTerms; j--;) nCollisionsDetailed[j] = 0;
   
   if (debug) {
-    std::cout << className << "::Mixer:" << std::endl;
-    std::cout << "    Energy [eV]    Collision Rate [ns-1]" << std::endl;
+    std::cout << className << "::Mixer:\n";
+    std::cout << "    Energy [eV]    Collision Rate [ns-1]\n";
     for (int i = 0; i < 8; ++i) { 
       std::cout << "    " << std::setw(10) 
                 << (2 * i + 1) * eFinal / 16
                 << "    " << std::setw(18) 
-                << cfTot[(i + 1) * nEnergySteps / 16] << std::endl;
+                << cfTot[(i + 1) * nEnergySteps / 16] << "\n";
     }
   }
 
@@ -1396,11 +1466,10 @@ MediumMagboltz86::Mixer() {
   if (useDeexcitation) ComputeDeexcitationTable();
   // Fill the photon collision rates table
   if (!ComputePhotonCollisionTable()) {
-    std::cerr << "MediumMagboltz86: " << std::endl;
-    std::cerr << "    Photon collision rates could not be calculated." 
-              << std::endl;
+    std::cerr << "MediumMagboltz86: \n";
+    std::cerr << "    Photon collision rates could not be calculated.\n"; 
     if (useDeexcitation) {
-      std::cerr << "    Deexcitation handling is switched off." << std::endl;
+      std::cerr << "    Deexcitation handling is switched off.\n";
       useDeexcitation = false;
     }
   }
@@ -1891,19 +1960,19 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[0] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
       newDxc.final[0] = -1;
     } else {
-      std::cerr << className << "::ComputeDeexcitationTable:" << std::endl;
+      std::cerr << className << "::ComputeDeexcitationTable:\n";
       std::cerr << "    Missing de-excitation data for level " 
-                << level << "." << std::endl;
-      std::cerr << "    Program bug!" << std::endl;
+                << level << ".\n";
+      std::cerr << "    Program bug!\n";
       return;
     }
     deexcitations.push_back(newDxc);
   }
   
   if (debug) {
-    std::cout << className << "::ComputeDeexcitationTable:" << std::endl; 
+    std::cout << className << "::ComputeDeexcitationTable:\n"; 
     std::cout << "    Found " << nDeexcitations << " levels "
-              << "with available radiative de-excitation data." << std::endl;
+              << "with available radiative de-excitation data.\n";
   }
 
   // Collisional de-excitation channels
@@ -1968,11 +2037,11 @@ MediumMagboltz86::ComputeDeexcitationTable() {
   }
 
   if (nComponents != 2) {
-    std::cout << className << "::ComputeDeexcitationTable:" << std::endl;
+    std::cout << className << "::ComputeDeexcitationTable:\n";
     std::cout << "    Gas mixture has " << nComponents 
-              << " components." << std::endl;
+              << " components.\n";
     std::cout << "    Penning effects are only implemented for "
-              << " binary mixtures." << std::endl;
+              << " binary mixtures.\n";
   } else if ((gas[0] == 2 && gas [1] == 8) || (gas[0] == 8 && gas[1] == 2)) {
     // Ar-CH4
     const double b3 = 22.121274;
@@ -2016,17 +2085,16 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       }
     }
   } else {
-    std::cout << className << "::ComputeDeexcitationTable:" << std::endl;
-    std::cout << "    No data on Penning effects found." << std::endl;
+    std::cout << className << "::ComputeDeexcitationTable:\n";
+    std::cout << "    No data on Penning effects found.\n";
   }
 
   if (debug) {
-    std::cout << className << "::ComputeDeexcitationTable:" << std::endl;
-    std::cout << "        Level                 Lifetimes [ns]" << std::endl;
-    std::cout << "                    Total      Radiative          Collisional"
-              << std::endl;
+    std::cout << className << "::ComputeDeexcitationTable:\n";
+    std::cout << "        Level                 Lifetimes [ns]\n";
+    std::cout << "                   Total      Radiative         Collisional\n";
     std::cout << "                                         "
-              << " Ionisation      Loss" << std::endl;
+              << " Ionisation      Loss\n";
   }
   for (int i = 0; i < nDeexcitations; ++i) {
     deexcitations[i].rate = 0.;
@@ -2056,9 +2124,9 @@ MediumMagboltz86::ComputeDeexcitationTable() {
           std::cout << "----------  ";
         }
         if (fCollLoss > 0.) {
-          std::cout << std::setw(10) << 1. / fCollLoss << std::endl;
+          std::cout << std::setw(10) << 1. / fCollLoss << "\n";
         } else {
-          std::cout << "----------  " << std::endl;
+          std::cout << "----------  \n";
         }
       }
       for (int j = 0; j < deexcitations[i].nChannels; ++j) {
@@ -2170,12 +2238,10 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
         std::string label = deexcitations[k].label;
         if (deexcitations[k].energy < 0 || 
             deexcitations[k].energy > eFinalGamma) {
-          std::cerr << className << "::ComputePhotonCollisionTable:" 
-                    << std::endl;
+          std::cerr << className << "::ComputePhotonCollisionTable:\n"; 
           std::cerr << "    Warning: excitation energy of level " 
                     << label << "  "
-                    << " is outside the currently set photon energy range." 
-                    << std::endl;
+                    << " is outside the currently set photon energy range.\n"; 
           continue;
         }
         csTypeGamma.push_back(-k - 1);
@@ -2190,8 +2256,8 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
   }
 
   if (debug && useRadTrap && useDeexcitation) {
-    std::cout << "MediumMagboltz::ComputePhotonCollisionTable:" << std::endl;
-    std::cout << "   Discrete absorption levels:" << std::endl;
+    std::cout << "MediumMagboltz::ComputePhotonCollisionTable:\n";
+    std::cout << "   Discrete absorption levels:\n";
     for (int i = 0; i < nPhotonTerms; ++i) {
       if (csTypeGamma[i] < 0) {
         int level = -csTypeGamma[i] - 1;
@@ -2199,7 +2265,7 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
                   << std::setw(10) << deexcitations[level].energy  
                   << " eV  " << std::setw(10)
                   << cfGamma[int(deexcitations[level].energy / eStepGamma)][i]
-                  << " ns-1" << std::endl;
+                  << " ns-1\n";
       }
     }
   }
@@ -2210,7 +2276,7 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
     for (int j = 0; j < nEnergyStepsGamma; ++j) {
       csfile << j * eStepGamma << "  ";
       for (int i = 0; i < nPhotonTerms; ++i) csfile << cfGamma[j][i] << "  ";
-      csfile << std::endl;
+      csfile << "\n";
     }
     csfile.close();
   }
@@ -2331,18 +2397,18 @@ MediumMagboltz86::RunMagboltz(const double e,
   eta   = ctowns_.att;   etaerr = ctwner_.atter;
   
   if (verbose) {
-    std::cout << className << "::RunMagboltz:" << std::endl;
-    std::cout << "    Results: " << std::endl;
+    std::cout << className << "::RunMagboltz:\n";
+    std::cout << "    Results: \n";
     std::cout << "      Drift velocity along E:   " << vz << " cm/ns "
-              << " +/- " << vzerr << "%" << std::endl;
+              << " +/- " << vzerr << "%\n";
     std::cout << "      Drift velocity along Bt:  " << vx << " cm/ns "
-              << " +/- " << vxerr << "%" << std::endl;
+              << " +/- " << vxerr << "%\n";
     std::cout << "      Drift velocity along ExB: " << vy << " cm/ns "
-              << " +/- " << vyerr << "%" << std::endl;
+              << " +/- " << vyerr << "%\n";
     std::cout << "      Longitudinal diffusion:   " << dl << " sqrt(cm) "
-              << " +/- " << dlerr << "%" << std::endl;
+              << " +/- " << dlerr << "%\n";
     std::cout << "      Transverse diffusion:     " << dt << " sqrt(cm) "
-              << " +/- " << dterr << "%" << std::endl;
+              << " +/- " << dterr << "%\n";
   }
 
 }

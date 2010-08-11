@@ -4,6 +4,7 @@
 namespace Garfield {
 
 ComponentBase::ComponentBase() :
+  className("ComponentBase"),
   theGeometry(0),
   ready(false), 
   xPeriodic(false),         yPeriodic(false),         zPeriodic(false),
@@ -20,8 +21,8 @@ ComponentBase::SetGeometry(GeometryBase* geo) {
 
   // Make sure the geometry is defined
   if (geo == 0) {
-    std::cerr << "ComponentBase::SetGeometry:" << std::endl;
-    std::cerr << "    Geometry pointer is null." << std::endl;
+    std::cerr << "ComponentBase::SetGeometry:\n";
+    std::cerr << "    Geometry pointer is null.\n";
     return;
   }
  
@@ -52,10 +53,10 @@ ComponentBase::WeightingField(const double x, const double y, const double z,
                               double& wx, double& wy, double& wz,
                               const std::string label) {
                               
-  std::cerr << "ComponentBase: WeightingField:" << std::endl;
-  std::cerr << "    This function is not implemented." << std::endl;
+  std::cerr << className << "::WeightingField:\n";
+  std::cerr << "    This function is not implemented.\n";
   wx = wy = wz = 0.;
-  
+
 }
 
 double
@@ -63,8 +64,8 @@ ComponentBase::WeightingPotential(
                     const double x, const double y, const double z,
                     const std::string label) {
 
-  std::cerr << "ComponentBase::WeightingField:" << std::endl;
-  std::cerr << "    This function is not implemented." << std::endl;
+  std::cerr << className << "::WeightingPotential:\n";
+  std::cerr << "    This function is not implemented.\n";
   return 0.;
 
 }
@@ -79,7 +80,8 @@ ComponentBase::MagneticField(const double x, const double y, const double z,
 }
 
 void 
-ComponentBase::SetMagneticField(const double bx, const double by, const double bz) {
+ComponentBase::SetMagneticField(const double bx, 
+                                const double by, const double bz) {
 
   bx0 = bx; by0 = by; bz0 = bz;
 

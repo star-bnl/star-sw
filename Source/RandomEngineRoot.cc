@@ -7,9 +7,9 @@ RandomEngineRoot randomEngine;
 
 RandomEngineRoot::RandomEngineRoot() : rng(0) {
 
-  std::cout << "RandomEngineRoot:" << std::endl;
-  std::cout << "    Generator type: TRandom3" << std::endl;
-  std::cout << "    Seed: " << rng.GetSeed() << std::endl;
+  std::cout << "RandomEngineRoot:\n";
+  std::cout << "    Generator type: TRandom3\n";
+  std::cout << "    Seed: " << rng.GetSeed() << "\n";
 
 }
 

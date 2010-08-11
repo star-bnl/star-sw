@@ -4,6 +4,7 @@
 #define G_COMPONENT_BASE_H
 
 #include <vector>
+#include <string>
 
 #include "GeometryBase.hh"
 
@@ -14,6 +15,7 @@ class ComponentBase {
   public:
     // Constructor
     ComponentBase();
+    // Destructor
     virtual ~ComponentBase() {}
 
     virtual
@@ -23,7 +25,8 @@ class ComponentBase {
 
     // Get the medium at a given location (x, y, z)
     virtual
-    bool GetMedium(const double x, const double y, const double z, Medium*& m);
+    bool GetMedium(const double x, const double y, const double z, 
+                   Medium*& m);
 
     // Electric field
     //
@@ -51,6 +54,8 @@ class ComponentBase {
     virtual
     bool GetVoltageRange(double& vmin, double& vmax) = 0;
     
+    // Calculate the weighting field [1/cm] at (x,y,z)
+    // for an electrode (specified by its label)
     virtual
     void WeightingField(const double x, const double y, const double z,
                         double& wx, double& wy, double& wz,
@@ -60,12 +65,13 @@ class ComponentBase {
                               const std::string label);
 
     // Magnetic field
-    // Calculate the magnetic field [hGauss] at (x, y, z)
+    // Calculate the magnetic field at (x, y, z)
     virtual 
     void MagneticField(const double x, const double y, const double z,
     	               double& bx, double& by, double& bz, int& status);
     // Set a constant magnetic field 
-    void SetMagneticField(const double bx, const double by, const double bz);
+    void SetMagneticField(const double bx, 
+                          const double by, const double bz);
 
     // Ready for use?
     virtual
@@ -76,7 +82,7 @@ class ComponentBase {
     bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
                         double& xmax, double& ymax, double& zmax);
 
-    // Periodicities
+    // Enable and disable periodicities
     void EnablePeriodicityX()  {xPeriodic = true;  UpdatePeriodicity();}
     void DisablePeriodicityX() {xPeriodic = false; UpdatePeriodicity();}
     void EnablePeriodicityY()  {yPeriodic = true;  UpdatePeriodicity();}
@@ -141,12 +147,14 @@ class ComponentBase {
       zRotationSymmetry = false; UpdatePeriodicity();
     }
 
-    // Switch on/off debugging and warning messages
+    // Switch on/off debugging messages
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
 
   protected:
    
+    std::string className;
+
     GeometryBase* theGeometry;
  
     // Ready for use?

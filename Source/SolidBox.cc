@@ -15,10 +15,10 @@ SolidBox::SolidBox(const double cx, const double cy, const double cz,
   cPhi(1.),   sPhi(0.),
   cTheta(1.), sTheta(0.) {
   
-  std::cout << "SolidBox:" << std::endl;
-  std::cout << "    " << cx - lx << " < x [cm] < " << cx + lx << std::endl;
-  std::cout << "    " << cy - ly << " < y [cm] < " << cy + ly << std::endl;
-  std::cout << "    " << cz - lz << " < z [cm] < " << cz + lz << std::endl;
+  std::cout << "SolidBox:\n";
+  std::cout << "    " << cx - lx << " < x [cm] < " << cx + lx << "\n";
+  std::cout << "    " << cy - ly << " < y [cm] < " << cy + ly << "\n";
+  std::cout << "    " << cz - lz << " < z [cm] < " << cz + lz << "\n";
   
 }
 
@@ -34,7 +34,7 @@ SolidBox::SolidBox(const double cx, const double cy, const double cz,
   
   const double d = sqrt(dx * dx + dy * dy + dz * dz);  
   if (d < Small) {
-    std::cerr << "SolidBox: Direction vector is not defined." << std::endl;
+    std::cerr << "SolidBox: Direction vector has zero norm.\n";
   } else {
     dX = dx / Small; dY = dy / Small; dZ = dz / Small;
     double phi, theta;
@@ -72,17 +72,17 @@ SolidBox::IsInside(const double x, const double y, const double z) {
   // See whether the point is inside
   if (fabs(u) > lX || fabs(v) > lY || fabs(w) > lZ) {
     if (debug) {
-      std::cerr << "SolidBox::IsInside:" << std::endl;
-      std::cerr << "    (" << x << ", " << y << ", " << z << ") " 
-                << " is outside." << std::endl;
+      std::cout << "SolidBox::IsInside:\n";
+      std::cout << "    (" << x << ", " << y << ", " << z << ") " 
+                << " is outside.\n";
     }
     return false;
   }
   
   if (debug) {
-    std::cerr << "SolidBox::IsInside:" << std::endl;
-    std::cerr << "    (" << x << ", " << y << ", " << z << ") " 
-              << " is inside." << std::endl;
+    std::cout << "SolidBox::IsInside:\n";
+    std::cout << "    (" << x << ", " << y << ", " << z << ") " 
+              << " is inside.\n";
   }
   
   return true;

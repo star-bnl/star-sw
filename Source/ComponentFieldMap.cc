@@ -19,6 +19,8 @@ ComponentFieldMap::ComponentFieldMap() :
   deleteBackground(true), checkMultipleElement(false),
   warning(false) {
   
+  className = "ComponentFieldMap";
+  
   materials.clear();
   elements.clear();
   nodes.clear();

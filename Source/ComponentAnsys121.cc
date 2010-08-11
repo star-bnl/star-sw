@@ -10,6 +10,7 @@ namespace Garfield {
 
 ComponentAnsys121::ComponentAnsys121() : ComponentFieldMap() {
 
+  className = "ComponentAnsys121";
   ready = false;
 
 }

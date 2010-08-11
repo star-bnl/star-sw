@@ -3,11 +3,13 @@ OBJECT = $(HOME)/Object
 SOURCE = $(HOME)/Source
 INCLUDE = $(HOME)/Include
 
-CC = g++ -c -O3 `root-config --cflags` -I$(INCLUDE) 
-LC = g++ `root-config --glibs` -lgfortran -lm  
+CC = g++ -c -I$(INCLUDE) -I$(ROOTSYS)/include 
+LC = g++ `root-config --glibs` -lGeom -lgfortran -lm  
 FF = gfortran -c -O3
 # Compiler flags
-CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long -g `root-config --cflags`
+CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long \
+        `root-config --cflags` \
+        -g -fpic -O3
 
 OBJS = \
 	$(OBJECT)/AvalancheMicroscopic.o \
@@ -48,6 +50,9 @@ OBJS = \
 
 all:	$(OBJS)
 	touch $(OBJECT)/last_updated_on
+
+lib:	all
+	$(LC) -shared -o libGarfield.so $(OBJS)
 
 clean:
 	rm -f $(OBJECT)/*.o
@@ -108,7 +113,7 @@ $(OBJECT)/ComponentAnalyticFieldWrap.o: \
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/efieldCalc.o: \
 	$(SOURCE)/efieldCalc.f
-	$(FF) $(CFLAGS) $< -o $@
+	$(FF) -Wall $< -o $@
 $(OBJECT)/ComponentNeBem2d.o: \
 	$(SOURCE)/ComponentNeBem2d.cc $(INCLUDE)/ComponentNeBem2d.hh \
 	$(SOURCE)/ComponentBase.cc $(INCLUDE)/ComponentBase.hh
@@ -119,13 +124,11 @@ $(OBJECT)/ComponentFieldMap.o: \
 	$(CC) $(cFLAGS) $< -o $@
 $(OBJECT)/ComponentAnsys121.o: \
 	$(SOURCE)/ComponentAnsys121.cc $(INCLUDE)/ComponentAnsys121.hh \
-	$(SOURCE)/ComponentFieldMap.cc $(INCLUDE)/ComponentFieldMap.hh \
-	$(INCLUDE)/Input.hh
+	$(SOURCE)/ComponentFieldMap.cc $(INCLUDE)/ComponentFieldMap.hh 
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/ComponentAnsys123.o: \
 	$(SOURCE)/ComponentAnsys123.cc $(INCLUDE)/ComponentAnsys123.hh \
-	$(SOURCE)/ComponentFieldMap.cc $(INCLUDE)/ComponentFieldMap.hh \
-	$(INCLUDE)/Input.hh
+	$(SOURCE)/ComponentFieldMap.cc $(INCLUDE)/ComponentFieldMap.hh 
 	$(CC) $(CFLAGS) $< -o $@
 $(OBJECT)/ComponentTcad2d.o: \
 	$(SOURCE)/ComponentTcad2d.cc $(INCLUDE)/ComponentTcad2d.hh \

@@ -15,6 +15,8 @@ ComponentNeBem2d::ComponentNeBem2d() :
   nPanels(0), nWires(0), nElements(0), 
   matrixInversionFlag(false) {
 
+  className = "ComponentNeBem2d";
+  
   influenceMatrix.clear();
   inverseMatrix.clear(); 
   
@@ -22,9 +24,9 @@ ComponentNeBem2d::ComponentNeBem2d() :
 
 void 
 ComponentNeBem2d::ElectricField(
-                            const double x, const double y, const double z,
-                            double& ex, double& ey, double& ez, double& v,
-                            Medium*& m, int& status) {
+      const double x, const double y, const double z,
+      double& ex, double& ey, double& ez, double& v,
+      Medium*& m, int& status) {
   
   ex = ey = ez = v = 0.;
   status = 0;
@@ -35,8 +37,8 @@ ComponentNeBem2d::ElectricField(
 
   if (!ready) {
     if (!Initialise()) {
-      std::cerr << "ComponentNeBem2d::ElectricField:" << std::endl;
-      std::cerr << "    Initialisation failed." << std::endl;
+      std::cerr << className << "::ElectricField:\n";
+      std::cerr << "    Initialisation failed.\n";
       status = -11; return;
     }
     ready = true;
@@ -54,17 +56,17 @@ ComponentNeBem2d::ElectricField(
     // Compute the potential
     if (!ComputePotential(elements[i].geoType, 
                           elements[i].len, xLoc, yLoc, u)) {
-      std::cerr << "ComponentNeBem2d::ElectricField:" << std::endl;
+      std::cerr << className << "::ElectricField:\n";
       std::cerr << "    Potential contribution from element " << i
-                 << " could not be calculated." << std::endl;
+                 << " could not be calculated.\n";
       status = -11; return;
     }
     // Compute the field
     if (!ComputeFlux(elements[i].geoType, elements[i].len, elements[i].phi, 
                      xLoc, yLoc, fx, fy)) {
-      std::cerr << "ComponentNeBem2d::ElectricField:" << std::endl;
+      std::cerr << className << "::ElectricField:\n";
       std::cerr << "    Field contribution from element " << i
-                << " could not be calculated." << std::endl;
+                << " could not be calculated.\n";
       status = -11; return;
     }
     v  += u  * elements[i].solution;
@@ -76,9 +78,9 @@ ComponentNeBem2d::ElectricField(
 
 void 
 ComponentNeBem2d::ElectricField(
-                            const double x, const double y, const double z,
-                            double& ex, double& ey, double& ez,
-                            Medium*& m, int& status) {
+      const double x, const double y, const double z,
+      double& ex, double& ey, double& ez,
+      Medium*& m, int& status) {
                             
   double v = 0.;
   ElectricField(x, y, z, ex, ey, ez, v, m, status);
@@ -125,8 +127,8 @@ ComponentNeBem2d::AddPanel(const double x0, const double y0,
   const double dx = x1 - x0;
   const double dy = y1 - y0;
   if (dx * dx + dy * dy <= Small) {
-    std::cerr << "ComponentNeBem2d::AddPanel:" << std::endl;
-    std::cerr << "    Panel length must be greater than zero." << std::endl;
+    std::cerr << className << "::AddPanel:\n";
+    std::cerr << "    Panel length must be greater than zero.\n";
     return;
   }
 
@@ -134,9 +136,9 @@ ComponentNeBem2d::AddPanel(const double x0, const double y0,
   newPanel.x0 = x0; newPanel.y0 = y0;
   newPanel.x1 = x1; newPanel.y1 = y1;
   if (bctype < 0 || bctype > 3) {
-    std::cerr << "ComponentNeBem2d::AddPanel:" << std::endl;
+    std::cerr << className << "::AddPanel:\n";
     std::cerr << "    Unknown boundary condition type: " 
-              << bctype << std::endl;
+              << bctype << "\n";
     return;
   }
   newPanel.bcType = bctype;
@@ -146,27 +148,26 @@ ComponentNeBem2d::AddPanel(const double x0, const double y0,
   ++nPanels;
 
   if (debug) {
-    std::cout << "ComponentNeBem2d::AddPanel:" << std::endl;
-    std::cout << "    From: (" << x0 << ", " << y0 << ")" << std::endl;
-    std::cout << "    To:   (" << x1 << ", " << y1 << ")" << std::endl;
+    std::cout << className << "::AddPanel:\n";
+    std::cout << "    From: (" << x0 << ", " << y0 << ")\n";
+    std::cout << "    To:   (" << x1 << ", " << y1 << ")\n";
     switch (bctype) {
       case 0: 
-        std::cout << "    Type: Conductor" << std::endl;
-        std::cout << "    Potential: " << bcval << " V" << std::endl;
+        std::cout << "    Type: Conductor\n";
+        std::cout << "    Potential: " << bcval << " V\n";
         break;
       case 1: 
-        std::cout << "    Floating conductor" << std::endl;
+        std::cout << "    Floating conductor\n";
         break;
       case 2: 
-        std::cout << "    Dielectric-dielectric interface" << std::endl; 
-        std::cout << "    Lambda: " << lambda << std::endl;
+        std::cout << "    Dielectric-dielectric interface\n"; 
+        std::cout << "    Lambda: " << lambda << "\n";
         break;
       case 3: 
-        std::cout << "    Surface charge" << std::endl; 
+        std::cout << "    Surface charge\n"; 
         break;
       default: 
-        std::cout << "    Unknown boundary condition (program bug!) " 
-                  << std::endl;
+        std::cout << "    Unknown boundary condition (program bug!)\n"; 
     }
   }
       
@@ -180,8 +181,8 @@ ComponentNeBem2d::AddWire(const double x0, const double y0,
                           const double d, const double bcval) {
 
   if (d < Small) {
-    std::cerr << "ComponentNeBem2d::AddWire:" << std::endl;
-    std::cerr << "    Wire diameter must be greater than zero." << std::endl;
+    std::cerr << className << "::AddWire:\n";
+    std::cerr << "    Wire diameter must be greater than zero.\n";
     return;
   }
 
@@ -194,10 +195,10 @@ ComponentNeBem2d::AddWire(const double x0, const double y0,
   ++nWires;
 
   if (debug) {
-    std::cout << "ComponentNeBem2d::AddWire:" << std::endl;
-    std::cout << "    Center: (" << x0 << ", " << y0 << ")" << std::endl;
-    std::cout << "    Diameter: " << d << " cm" << std::endl;
-    std::cout << "    Potential: " << bcval << " V" << std::endl;
+    std::cout << className << "::AddWire:\n";
+    std::cout << "    Center: (" << x0 << ", " << y0 << ")\n";
+    std::cout << "    Diameter: " << d << " cm\n";
+    std::cout << "    Potential: " << bcval << " V\n";
   }
 
   ready = false;
@@ -209,9 +210,8 @@ void
 ComponentNeBem2d::SetNumberOfDivisions(const int ndiv) {
 
   if (ndiv <= 0) {
-    std::cerr << "ComponentNeBem2d::SetNumberOfDivisions:" << std::endl;
-    std::cerr << "    Number of divisions must be greater than zero." 
-              << std::endl;
+    std::cerr << className << "::SetNumberOfDivisions:\n";
+    std::cerr << "    Number of divisions must be greater than zero.\n";
     return;
   }
 
@@ -225,10 +225,8 @@ void
 ComponentNeBem2d::SetNumberOfCollocationPoints(const int ncoll) {
 
   if (ncoll <= 0) {
-    std::cerr << "ComponentNeBem2d::SetNumberOfCollocationPoints:" 
-              << std::endl;
-    std::cerr << "    Number of coll. points must be greater than zero."
-              << std::endl;
+    std::cerr << className << "::SetNumberOfCollocationPoints:\n";
+    std::cerr << "    Number of coll. points must be greater than zero.\n";
     return;
   }
   
@@ -242,8 +240,8 @@ void
 ComponentNeBem2d::SetMinimumElementSize(const double min) {
 
   if (min < Small) {
-    std::cerr << "ComponentNeBem2d::SetMinimumElementSize:" << std::endl;
-    std::cerr << "    Provided element size is too small." << std::endl;
+    std::cerr << className << "::SetMinimumElementSize:\n";
+    std::cerr << "    Provided element size is too small.\n";
     return;
   }
 
@@ -257,9 +255,8 @@ void
 ComponentNeBem2d::SetMaxNumberOfIterations(const int niter) {
   
   if (niter <= 0) {
-    std::cerr << "ComponentNeBem2d::SetMaxNumberOfIterations:" << std::endl;
-    std::cerr << "    Number of iterations must be greater than zero." 
-              << std::endl;
+    std::cerr << className << "::SetMaxNumberOfIterations:\n";
+    std::cerr << "    Number of iterations must be greater than zero.\n";
     return;
   }
 
@@ -272,13 +269,13 @@ ComponentNeBem2d::Initialise() {
 
   // Break up panels into elements
   if (!Discretise()) {
-    std::cerr << "ComponentNeBem2d::Initialise:" << std::endl;
-    std::cerr << "    Discretisation failed." << std::endl;
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Discretisation failed.\n";
     return false;
   }
   if (debug) {
-    std::cout << "ComponentNeBem2d::Initialise:" << std::endl;
-    std::cout << "    Discretisation ok" << std::endl;
+    std::cout << className << "::Initialise:\n";
+    std::cout << "    Discretisation ok.\n";
   }
 
   bool converged = false;
@@ -286,44 +283,44 @@ ComponentNeBem2d::Initialise() {
   while (!converged) {
     ++nIter;
     if (autoSize) {
-      std::cout << "ComponentNeBem2d::Initialise:" << std::endl;
-      std::cout << "    Iteration " << nIter << std::endl;
+      std::cout << className << "::Initialise:\n";
+      std::cout << "    Iteration " << nIter << "\n";
     }
     // Compute the influence matrix
     if (!ComputeInfluenceMatrix()) {
-      std::cerr << "ComponentNeBem2d::Initialise:" << std::endl;
-      std::cerr << "     Error computing the influence matrix." << std::endl;
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "     Error computing the influence matrix.\n";
       return false;
     }
     
     // Invert the influence matrix
     if (!InvertMatrix()) {
-      std::cerr << "ComponentNeBem2d::Initialise:" << std::endl;
-      std::cerr << "     Error inverting the influence matrix." << std::endl;
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "     Error inverting the influence matrix.\n";
       return false;
     }
 
     if (debug) {
-      std::cout << "ComponentNeBem2d::Initialise:" << std::endl;
-      std::cout << "    Matrix inversion ok" << std::endl;
+      std::cout << className << "::Initialise:\n";
+      std::cout << "    Matrix inversion ok.\n";
     }
   
     // Compute the right hand side vector
     if (!GetBoundaryConditions()) {
-      std::cerr << "ComponentNeBem2d::Initialise:" << std::endl;
-      std::cerr << "     Error computing the potential vector." << std::endl;
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "     Error computing the potential vector.\n";
       return false;
     }
 
     // Solve for the charge distribution
     if (!Solve()) {
-      std::cerr << "ComponentNeBem2d::Initialise:" << std::endl;
-      std::cerr << "    Error in Solve function." << std::endl;
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Error in Solve function.\n";
       return false;
     }
     if (debug) {
-      std::cout << "ComponentNeBem2d::Initialise:" << std::endl;
-      std::cout << "    Solution ok" << std::endl;
+      std::cout << className << "::Initialise:\n";
+      std::cout << "    Solution ok.\n";
     }
 
     converged = CheckConvergence();
@@ -343,8 +340,8 @@ ComponentNeBem2d::Discretise() {
   element newElement;
 
   if (debug) {
-    std::cout << "ComponentNeBem2d::Discretise:" << std::endl;
-    std::cout << "  Panel  BC Type  Bc Value  Rotation  Length" << std::endl;
+    std::cout << className << "::Discretise:\n";
+    std::cout << "  Panel  BC Type  Bc Value  Rotation  Length\n";
   }
   newElement.geoType = 0;
   double dx = 0., dy = 0.;
@@ -368,7 +365,7 @@ ComponentNeBem2d::Discretise() {
       if (debug) {
         std::cout << "  " << j << "  " 
                   << newElement.bcType << "  " << newElement.bcValue << "  "
-                  << newElement.phi << "  " << newElement.len << std::endl;
+                  << newElement.phi << "  " << newElement.len << "\n";
       }
     }  
   }
@@ -475,9 +472,8 @@ ComponentNeBem2d::ComputeInfluenceMatrix() {
           }
           break;
         default:
-          std::cerr << "ComponentNeBem2d::ComputeInfluenceMatrix:" 
-                    << std::endl;
-          std::cerr << "    Unknown boundary type: " << etF << std::endl;
+          std::cerr << className << "::ComputeInfluenceMatrix:\n";
+          std::cerr << "    Unknown boundary type: " << etF << ".\n";
           return false;
           break;
       }
@@ -547,7 +543,8 @@ ComponentNeBem2d::InvertMatrix() {
 
   // Decompose the influence matrix
   if (!LUDecomposition()) {
-    std::cerr << "ComponentNeBem2d: LU Decomposition failed." << std::endl;
+    std::cerr << className << "::InvertMatrix:\n";
+    std::cerr << "    LU Decomposition failed.\n";
     return false;
   }
   
@@ -720,10 +717,10 @@ ComponentNeBem2d::Solve() {
   }
 
   if (debug) {
-    std::cout << "ComponentNeBem2d::Solve:" << std::endl;
-    std::cout << "  Element  Solution" << std::endl;
+    std::cout << className << "::Solve:\n";
+    std::cout << "  Element  Solution\n";
     for (i = 0; i < nElements; ++i) {
-      std::cout << "  " << i << "  " << elements[i].solution << std::endl;;
+      std::cout << "  " << i << "  " << elements[i].solution << "\n";
     }
   }
   
@@ -750,9 +747,8 @@ ComponentNeBem2d::CheckConvergence() {
   double xLoc, yLoc;
 
   if (debug) {
-    std::cout << "ComponentNeBem2d::CheckConvergence:" << std::endl;
-    std::cout << "element #  type      LHS      RHS" 
-              << std::endl;
+    std::cout << className << "::CheckConvergence:\n";
+    std::cout << "element #  type      LHS      RHS\n";
   }
   for (int i = nElements; i--;) {
     for (int k = nCollocationPoints; k--;) v[k] = ne[k] = 0.;
@@ -808,11 +804,11 @@ ComponentNeBem2d::CheckConvergence() {
       if (elements[i].bcType == 0) {
         std::cout << std::setw(5) << i << "  cond.   " 
                   << std::setw(10) << v0 << "  " 
-                  << std::setw(10) << elements[i].bcValue << std::endl;
+                  << std::setw(10) << elements[i].bcValue << "\n";
       } else if (elements[i].bcType == 2) {
         std::cout << std::setw(5) << i << "  diel.   "
                   << std::setw(10) << ne0 << "  " << ne1
-                  << "         0" << std::endl;
+                  << "         0\n";
       }
     }
   }
@@ -944,8 +940,8 @@ ComponentNeBem2d::Reset() {
 void
 ComponentNeBem2d::UpdatePeriodicity() {
 
-  std::cerr << "ComponentNeBem2d::UpdatePeriodicity:" << std::endl;
-  std::cerr << "    Periodicities are currently not supported." << std::endl;
+  std::cerr << className << "::UpdatePeriodicity:\n";
+  std::cerr << "    Periodicities are not supported.\n";
 
 }
 

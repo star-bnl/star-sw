@@ -18,6 +18,7 @@ ViewSignal::~ViewSignal() {
 
   if (!hasExternalCanvas && canvas != 0) delete canvas;
   if (hSignal != 0) delete hSignal;
+
 }
 
 void
@@ -25,7 +26,7 @@ ViewSignal::SetSensor(Sensor* s) {
 
   if (s == 0) {
     printf("ViewSignal::SetSensor:\n");
-    printf("    Sensor is not defined.\n");
+    printf("    Sensor pointer is null.\n");
     return;
   }
 
@@ -50,8 +51,8 @@ void
 ViewSignal::PlotSignal(const std::string label) {
 
   if (sensor == 0) {
-    std::cerr << "ViewSignal::PlotSignal:" << std::endl;
-    std::cerr << "    Sensor is not defined." << std::endl;
+    std::cerr << "ViewSignal::PlotSignal:\n";
+    std::cerr << "    Sensor is not defined.\n";
     return;
   }
   
@@ -78,7 +79,7 @@ ViewSignal::PlotSignal(const std::string label) {
   double sig = 0.;  
   for (int i = nBins; i--;) {
     sig = sensor->GetSignal(label, i);
-    hSignal->SetBinContent(i, sig);
+    hSignal->SetBinContent(i, sig * 1.e15);
   }
   
   hSignal->Draw();

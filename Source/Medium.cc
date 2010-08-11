@@ -27,8 +27,8 @@ void
 Medium::SetTemperature(const double t) {
 
   if (t <= 0.) {
-    std::cerr << className << "::SetTemperature:" << std::endl;
-    std::cerr << "    Temperature [K] must be greater than zero." << std::endl;
+    std::cerr << className << "::SetTemperature:\n";
+    std::cerr << "    Temperature [K] must be greater than zero.\n";
     return;
   }
   temperature = t;
@@ -40,8 +40,8 @@ void
 Medium::SetPressure(const double p) {
 
   if (p <= 0.) {
-    std::cerr << className << "::SetPressure:" << std::endl;
-    std::cerr << "    Pressure [Torr] must be greater than zero." << std::endl;
+    std::cerr << className << "::SetPressure:\n";
+    std::cerr << "    Pressure [Torr] must be greater than zero.\n";
     return;
   }
   pressure = p;
@@ -53,8 +53,8 @@ void
 Medium::SetDielectricConstant(const double eps) {
 
   if (eps < 1.) {
-    std::cerr << className << "::SetDielectricConstant: " << std::endl;
-    std::cerr << "    Dielectric constant must be >= 1." << std::endl;
+    std::cerr << className << "::SetDielectricConstant: \n";
+    std::cerr << "    Dielectric constant must be >= 1.\n";
     return;
   }
   epsilon = eps;
@@ -73,7 +73,7 @@ void
 Medium::GetComponent(const int i, std::string& label, double& f) {
 
   if (i < 0 || i >= nComponents) {
-    std::cerr << className << "::GetComponent: Index out of range" << std::endl;
+    std::cerr << className << "::GetComponent: Index out of range\n";
   }
   
   label = name; f = 1.;
@@ -84,8 +84,8 @@ void
 Medium::SetAtomicNumber(const double z) {
 
   if (z < 1.) {
-    std::cerr << className << "::SetAtomicNumber:" << std::endl;
-    std::cerr << "    Atomic number must be >= 1." << std::endl;
+    std::cerr << className << "::SetAtomicNumber:\n";
+    std::cerr << "    Atomic number must be >= 1.\n";
     return;
   }
   atomicNumber = z;
@@ -97,8 +97,8 @@ void
 Medium::SetAtomicWeight(const double a) {
 
   if (a <= 0.) {
-    std::cerr << className << "::SetAtomicWeight:" << std::endl;
-    std::cerr << "    Atomic weight must be greater than zero." << std::endl;
+    std::cerr << className << "::SetAtomicWeight:\n";
+    std::cerr << "    Atomic weight must be greater than zero.\n";
     return;
   }
   atomicWeight = a;
@@ -110,8 +110,8 @@ void
 Medium::SetNumberDensity(const double n) {
 
   if (n <= 0.) {
-    std::cerr << className << "::SetNumberDensity:" << std::endl;
-    std::cerr << "    Density [cm-3] must be greater than zero." << std::endl;
+    std::cerr << className << "::SetNumberDensity:\n";
+    std::cerr << "    Density [cm-3] must be greater than zero.\n";
     return;
   }
   density = n;
@@ -123,14 +123,14 @@ void
 Medium::SetMassDensity(const double rho) {
 
   if (rho <= 0.) {
-    std::cerr << className << "::SetMassDensity:" << std::endl;
-    std::cerr << "    Density [g/cm3] must be greater than zero." << std::endl;
+    std::cerr << className << "::SetMassDensity:\n";
+    std::cerr << "    Density [g/cm3] must be greater than zero.\n";
     return;
   }
 
   if (atomicWeight <= 0.) {
-    std::cerr << className << "::SetMassDensity:" << std::endl;
-    std::cerr << "    Atomic weight is not defined." << std::endl;
+    std::cerr << className << "::SetMassDensity:\n";
+    std::cerr << "    Atomic weight is not defined.\n";
     return;
   }
   density = rho / (AtomicMassUnit * atomicWeight);
@@ -201,8 +201,8 @@ Medium::ElectronDiffusion(const double ex, const double ey, const double ez,
                           double cov[3][3]) {
 
   if (debug) {
-    std::cerr << className << "::ElectronDiffusionTensor:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
+    std::cerr << className << "::ElectronDiffusionTensor:\n";
+    std::cerr << "    Function is not implemented.\n";
   }
   cov[0][0] = 0.; cov[0][1] = 0.; cov[0][2] = 0.;
   cov[1][0] = 0.; cov[1][1] = 0.; cov[1][2] = 0.;
@@ -217,8 +217,8 @@ Medium::ElectronTownsend(const double ex, const double ey, const double ez,
                          double& alpha) {
 
   if (debug) {
-    std::cerr << className << "::ElectronTownsend:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
+    std::cerr << className << "::ElectronTownsend:\n";
+    std::cerr << "    Function is not implemented.\n";
   }
   alpha = 0.;
   return false;
@@ -231,8 +231,8 @@ Medium::ElectronAttachment(const double ex, const double ey, const double ez,
                            double& eta) {
 
   if (debug) {
-    std::cerr << className << "::ElectronAttachment:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
+    std::cerr << className << "::ElectronAttachment:\n";
+    std::cerr << "    Function is not implemented.\n";
   }
   eta = 0.;
   return false;
@@ -271,8 +271,8 @@ double
 Medium::GetElectronNullCollisionRate() {
 
   if (debug) {
-    std::cerr << className << "::GetElectronNullCollisionRate:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
+    std::cerr << className << "::GetElectronNullCollisionRate:\n";
+    std::cerr << "    Function is not implemented.\n";
   }
   return 0.;
   
@@ -282,8 +282,8 @@ double
 Medium::GetElectronCollisionRate(const double e, const int band) {
 
   if (debug) {
-    std::cerr << className << "::GetElectronCollisionRate:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
+    std::cerr << className << "::GetElectronCollisionRate:\n";
+    std::cerr << "    Function is not implemented.\n";
   }
   return 0.;
 
@@ -295,8 +295,8 @@ Medium::GetElectronCollision(const double e, int& type, int& level,
                      int& band) {
   
   if (debug) {
-    std::cerr << className << "::GetElectronCollision:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
+    std::cerr << className << "::GetElectronCollision:\n";
+    std::cerr << "    Function is not implemented.\n";
   }
   return 0.;
                             
@@ -316,8 +316,8 @@ Medium::HoleVelocity(const double ex, const double ey, const double ez,
                      double& vx, double& vy, double& vz) {
             
   if (debug) {
-    std::cerr << className << "::HoleVelocity:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
+    std::cerr << className << "::HoleVelocity:\n";
+    std::cerr << "    Function is not implemented.\n";
   }
   vx = vy = vz = 0.;
   return false;            
@@ -346,8 +346,8 @@ Medium::HoleDiffusion(const double ex, const double ey, const double ez,
                       double cov[3][3]) {
 
   if (debug) {
-    std::cerr << className << "::HoleDiffusionTensor:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
+    std::cerr << className << "::HoleDiffusionTensor:\n";
+    std::cerr << "    Function is not implemented.\n";
   }
   cov[0][0] = 0.; cov[0][1] = 0.; cov[0][2] = 0.;
   cov[1][0] = 0.; cov[1][1] = 0.; cov[1][2] = 0.;
@@ -362,8 +362,8 @@ Medium::HoleTownsend(const double ex, const double ey, const double ez,
                      double& alpha) {
 
   if (debug) {
-    std::cerr << className << "::HoleTownsend:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
+    std::cerr << className << "::HoleTownsend:\n";
+    std::cerr << "    Function is not implemented.\n";
   }
   alpha = 0.;
   return false;
@@ -376,8 +376,8 @@ Medium::HoleAttachment(const double ex, const double ey, const double ez,
                        double& eta) {
             
   if (debug) {
-    std::cerr << className << "::HoleAttachment:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
+    std::cerr << className << "::HoleAttachment:\n";
+    std::cerr << "    Function is not implemented.\n";
   }
   eta = 0.;
   return false;
@@ -390,8 +390,8 @@ Medium::IonVelocity(const double ex, const double ey, const double ez,
                     double& vx, double& vy, double& vz) {
 
   if (debug) {
-    std::cerr << className << "::IonVelocity:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
+    std::cerr << className << "::IonVelocity:\n";
+    std::cerr << "    Function is not implemented.\n";
   }
   vx = vy = vz = 0.;
   return false;
@@ -420,8 +420,8 @@ Medium::IonDissociation(const double ex, const double ey, const double ez,
                         double& diss) {
 
   if (debug) {
-    std::cerr << className << "::IonDissociation:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
+    std::cerr << className << "::IonDissociation:\n";
+    std::cerr << "    Function is not implemented.\n";
   }
   diss = 0.;
   return false;
@@ -432,8 +432,8 @@ bool
 Medium::GetOpticalDataRange(double& emin, double& emax, const int i) {
 
   if (debug) {
-    std::cerr << className << "::GetOpticalDataRange:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
+    std::cerr << className << "::GetOpticalDataRange:\n";
+    std::cerr << "    Function is not implemented.\n";
   }
   return false;
 
@@ -444,8 +444,8 @@ Medium::GetDielectricFunction(const double e,
                               double& eps1, double& eps2, const int i) {
 
   if (debug) {
-    std::cerr << className << "::GetDielectricFunction:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
+    std::cerr << className << "::GetDielectricFunction:\n";
+    std::cerr << "    Function is not implemented.\n";
   }
   eps1 = 1.; eps2 = 0.;
   return false;
@@ -457,8 +457,8 @@ Medium::GetPhotoAbsorptionCrossSection(const double e,
                                        double& sigma, const int i) {
 
   if (debug) {
-    std::cerr << className << "::GetPhotoAbsorptionCrossSection:" << std::endl;
-    std::cerr << "    Function is not implemented." << std::endl;
+    std::cerr << className << "::GetPhotoAbsorptionCrossSection:\n";
+    std::cerr << "    Function is not implemented.\n";
   }
   sigma = 0.;
   return false;
@@ -502,29 +502,29 @@ Medium::BoxInterpolation3d(std::vector<std::vector<std::vector<double> > >& valu
 
   // Check the interpolation order
   if (ip < 0 || ip > 2) {
-    std::cerr << className << "::BoxInterpolation3d:" << std::endl;
-    std::cerr << "    Incorrect interpolation order. No interpolation." 
-              << std::endl;
+    std::cerr << className << "::BoxInterpolation3d:\n";
+    std::cerr << "    Incorrect interpolation order.\n";
+    std::cerr << "    No interpolation.\n"; 
     return false;
   }
 
   // Compute the shape functions and ranges
   if (!ComputeShapeFunctions(xAxis, x, ip, fX[0], fX[1], fX[2], fX[3], iX0, iX1)) {
-    std::cerr << className << "::BoxInterpolation3d:" << std::endl;
-    std::cerr << "    Incorrect grid in x direction. No interpolation." 
-              << std::endl;
+    std::cerr << className << "::BoxInterpolation3d:\n";
+    std::cerr << "    Incorrect grid in x direction.\n";
+    std::cerr << "    No interpolation.\n"; 
     return false;
   }
   if (!ComputeShapeFunctions(yAxis, y, ip, fY[0], fY[1], fY[2], fY[3], iY0, iY1)) {
-    std::cerr << className << "::BoxInterpolation3d:" << std::endl;
-    std::cerr << "    Incorrect grid in y direction. No interpolation." 
-              << std::endl;
+    std::cerr << className << "::BoxInterpolation3d:\n";
+    std::cerr << "    Incorrect grid in y direction.\n"; 
+    std::cerr << "    No interpolation.\n"; 
     return false;
   }
   if (!ComputeShapeFunctions(zAxis, z, ip, fZ[0], fZ[1], fZ[2], fZ[3], iZ0, iZ1)) {
-    std::cerr << className << "::BoxInterpolation3d:" << std::endl;
-    std::cerr << "    Incorrect grid in z direction. No interpolation." 
-              << std::endl;
+    std::cerr << className << "::BoxInterpolation3d:\n";
+    std::cerr << "    Incorrect grid in z direction.\n";
+    std::cerr << "    No interpolation.\n"; 
     return false;
   }
 
@@ -550,8 +550,8 @@ Medium::ComputeShapeFunctions(std::vector<double>& axis, const double x,
                               
   // Make sure we have enough points
   if (n < 1) {
-    std::cerr << className << "::ComputeShapeFunctions:" << std::endl;
-    std::cerr << "    Incorrect number of points." << std::endl;
+    std::cerr << className << "::ComputeShapeFunctions:\n";
+    std::cerr << "    Incorrect number of points.\n";
     return false;
   }
  
@@ -614,9 +614,9 @@ Medium::ComputeShapeFunctions(std::vector<double>& axis, const double x,
       if (axis[i0] == axis[i0 + 1] || 
           axis[i0] == axis[i0 + 2] || 
           axis[i0 + 1] == axis[i0 + 2]) {
-        std::cerr << className << "::ComputeShapeFunctions:" << std::endl;
-        std::cerr << "    One or more grid points coincide. No interpolation." 
-                  << std::endl;
+        std::cerr << className << "::ComputeShapeFunctions:\n";
+        std::cerr << "    One or more grid points coincide.\n";
+        std::cerr << "    No interpolation.\n"; 
         return false;
       }
       f1 =  (x - axis[i0 + 1]) * (x - axis[i0 + 2]) / 
@@ -632,9 +632,9 @@ Medium::ComputeShapeFunctions(std::vector<double>& axis, const double x,
       if (axis[i0] == axis[i0 + 1] || 
           axis[i0] == axis[i0 + 2] || 
           axis[i0 + 1] == axis[i0 + 2]) {
-        std::cerr << className << "::ComputeShapeFunctions:" << std::endl;
-        std::cerr << "    One or more grid points coincide. No interpolation." 
-                  << std::endl;
+        std::cerr << className << "::ComputeShapeFunctions:\n";
+        std::cerr << "    One or more grid points coincide.\n";
+        std::cerr << "    No interpolation.\n"; 
         return false;
       }
       f1 =  (x - axis[i0 + 1]) * (x - axis[i0 + 2]) /
@@ -652,9 +652,9 @@ Medium::ComputeShapeFunctions(std::vector<double>& axis, const double x,
           axis[i0] == axis[i0 + 3] || 
           axis[i0 + 1] == axis[i0 + 2] || axis[i0 + 1] == axis[i0 + 2] || 
           axis[i0 + 1] == axis[i0 + 3] || axis[i0 + 2] == axis[i0 + 3]) {
-        std::cerr << className << "::ComputeShapeFunctions:" << std::endl;
-        std::cerr << "    One or more grid points coincide. No interpolation." 
-                  << std::endl;
+        std::cerr << className << "::ComputeShapeFunctions:\n";
+        std::cerr << "    One or more grid points coincide.\n";
+        std::cerr << "    No interpolation.\n"; 
         return false;
       }
       f1 = (1 - xLocal) * (x - axis[i0 + 1]) * (x - axis[i0 + 2]) / 

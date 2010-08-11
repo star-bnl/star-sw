@@ -29,7 +29,7 @@ SolidTube::SolidTube(const double cx, const double cy, const double cz,
   
   const double d = sqrt(dx * dx + dy * dy + dz * dz);  
   if (d < Small) {
-    std::cerr << "SolidTube: Direction vector is not defined." << std::endl;
+    std::cerr << "SolidTube: Direction vector has zero norm.\n";
   } else {
     dX = dx / Small; dY = dy / Small; dZ = dz / Small;
     double phi, theta;
@@ -66,9 +66,9 @@ SolidTube::IsInside(const double x, const double y, const double z) {
  
   if (fabs(w) > lZ) {
     if (debug) {
-      std::cerr << "SolidTube::IsInside:" << std::endl;
-      std::cerr << "    (" << x << ", " << y << ", " << z << ")"
-                << " is outside." << std::endl;
+      std::cout << "SolidTube::IsInside:\n";
+      std::cout << "    (" << x << ", " << y << ", " << z << ")"
+                << " is outside.\n";
     }
     return false;
   }
@@ -76,17 +76,17 @@ SolidTube::IsInside(const double x, const double y, const double z) {
   const double r = sqrt(u * u + v * v);
   if (r >= rMin && r <= rMax) {
     if (debug) {
-      std::cerr << "SolidTube::IsInside:" << std::endl;
-      std::cerr << "    (" << x << ", " << y << ", " << z << ")"
-                << " is inside." << std::endl;
+      std::cout << "SolidTube::IsInside:\n";
+      std::cout << "    (" << x << ", " << y << ", " << z << ")"
+                << " is inside.\n";
     }
     return true;
   }
 
   if (debug) {
-    std::cerr << "SolidTube::IsInside:" << std::endl;
-    std::cerr << "    (" << x << ", " << y << ", " << z << ") " 
-              << " is outside." << std::endl;
+    std::cout << "SolidTube::IsInside:\n";
+    std::cout << "    (" << x << ", " << y << ", " << z << ") " 
+              << " is outside.\n";
   }  
   return false;
   

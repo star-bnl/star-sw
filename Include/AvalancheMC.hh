@@ -2,6 +2,7 @@
 #define G_AVALANCHE_MC_H
 
 #include <vector>
+#include <string>
 
 #include "Sensor.hh"
 #include "ViewDrift.hh"
@@ -105,6 +106,8 @@ class AvalancheMC {
     void DisableDebugging() {debug = false;}
 
   private:
+
+    std::string className;
 
     // Numerical prefactors
     static double c1;

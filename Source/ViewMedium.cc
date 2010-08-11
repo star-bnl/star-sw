@@ -43,8 +43,8 @@ void
 ViewMedium::SetMedium(Medium* m) {
 
   if (m == 0) {
-    std::cerr << "ViewMedium::SetMedium:" << std::endl;
-    std::cerr << "    Medium is not defined." << std::endl;
+    std::cerr << "ViewMedium::SetMedium:\n";
+    std::cerr << "    Medium pointer is null.\n";
     return;
   }
 
@@ -56,8 +56,8 @@ void
 ViewMedium::SetElectricFieldRange(const double emin, const double emax) {
 
   if (emin >= emax || emin < 0.) {
-    std::cerr << "ViewMedium::SetElectricFieldRange:" << std::endl;
-    std::cerr << "    Incorrect field range." << std::endl;
+    std::cerr << "ViewMedium::SetElectricFieldRange:\n";
+    std::cerr << "    Incorrect field range.\n";
     return;
   }
 
@@ -69,8 +69,8 @@ void
 ViewMedium::SetMagneticFieldRange(const double bmin, const double bmax) {
 
   if (bmin >= bmax || bmin < 0.) { 
-    std::cerr << "ViewMedium::SetMagneticFieldRange:" << std::endl;
-    std::cerr << "    Incorrect field range." << std::endl;
+    std::cerr << "ViewMedium::SetMagneticFieldRange:\n";
+    std::cerr << "    Incorrect field range.\n";
     return;
   }
 
@@ -166,8 +166,8 @@ ViewMedium::AddFunction(const double xmin, const double xmax, const bool keep,
                         const int type) {
 
   if (medium == 0) {
-    std::cerr << "ViewMedium::AddFunction:" << std::endl;
-    std::cerr << "    Medium is not defined." << std::endl;
+    std::cerr << "ViewMedium::AddFunction:\n";
+    std::cerr << "    Medium is not defined.\n";
     return;
   }
 
@@ -288,10 +288,9 @@ ViewMedium::EvaluateFunction(double* pos, double* par) {
       y = a;
       break;
     default:
-      std::cerr << "ViewMedium::EvaluateFunction:" << std::endl;
-      std::cerr << "    Unknown type of transport coefficient requested." 
-                << std::endl;
-      std::cerr << "    Program bug!" << std::endl;
+      std::cerr << "ViewMedium::EvaluateFunction:\n";
+      std::cerr << "    Unknown type of transport coefficient requested.\n"; 
+      std::cerr << "    Program bug!\n";
       return 0.;
   }
 

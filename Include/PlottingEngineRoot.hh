@@ -19,8 +19,6 @@ class PlottingEngineRoot : public PlottingEngine {
     
   private:
     TStyle* garfieldStyle;
-    TF1* f1;
-    TF1* f2;
     void SetDefaultStyle();
     int  GetRootColor(std::string color);
 

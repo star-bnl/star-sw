@@ -28,6 +28,8 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   userHandleAttachment(0), userHandleInelastic(0),
   userHandleIonisation(0),
   debug(false) {
+  
+  className = "AvalancheMicroscopic";
 
 }
 
@@ -35,8 +37,8 @@ void
 AvalancheMicroscopic::SetSensor(Sensor* s) {
 
   if (s == 0) {
-    std::cerr << "AvalancheMicroscopic::SetSensor:" << std::endl;
-    std::cerr << "    Sensor is not defined." << std::endl;
+    std::cerr << className << "::SetSensor:\n";
+    std::cerr << "    Sensor pointer is null.\n";
     return;
   }
   sensor = s;
@@ -47,16 +49,16 @@ void
 AvalancheMicroscopic::EnablePlotting(ViewDrift* view) {
 
   if (view == 0) {
-    std::cerr << "AvalancheMicroscopic::EnablePlotting:" << std::endl;
-    std::cerr << "    Viewer is not defined." << std::endl;
+    std::cerr << className << "::EnablePlotting:\n";
+    std::cerr << "    Viewer pointer is null.\n";
     return;
   }
   
   viewer = view;
   usePlotting = true;
   if (!useDriftLines) {
-    std::cout << "AvalancheMicroscopic::EnablePlotting:" << std::endl;
-    std::cout << "    Enabling storage of drift line." << std::endl;
+    std::cout << className << "::EnablePlotting:\n";
+    std::cout << "    Enabling storage of drift line.\n";
     EnableDriftLines();
   }
 
@@ -74,9 +76,8 @@ void
 AvalancheMicroscopic::EnableEnergyHistogramming(TH1F* histo) {
 
   if (histo == 0) {
-    std::cerr << "AvalancheMicroscopic::EnableEnergyHistogramming:" 
-              << std::endl;
-    std::cerr << "    Histogram is not defined." << std::endl;
+    std::cerr << className << "::EnableEnergyHistogramming:\n"; 
+    std::cerr << "    Histogram pointer is null.\n";
     return;
   }
   
@@ -96,9 +97,8 @@ void
 AvalancheMicroscopic::EnableDistanceHistogramming(TH1F* histo, const char opt) {
 
   if (histo == 0) {
-    std::cerr << "AvalancheMicroscopic::EnableDistanceHistogramming:" 
-              << std::endl;
-    std::cerr << "    Histogram is not defined." << std::endl;
+    std::cerr << className << "::EnableDistanceHistogramming:\n"; 
+    std::cerr << "    Histogram pointer is null.\n";
     return;
   }
   
@@ -108,10 +108,10 @@ AvalancheMicroscopic::EnableDistanceHistogramming(TH1F* histo, const char opt) {
   if (opt == 'x' || opt == 'y' || opt == 'z' || opt == 'r') {
     distanceOption = opt;
   } else {
-    std::cerr << "AvalancheMicroscopic::EnableDistanceHistogramming:";
-    std::cerr << "    Unknown option " << opt << "." << std::endl;
-    std::cerr << "    Valid options are x, y, z, r." << std::endl;
-    std::cerr << "    Using default value (r)." << std::endl;
+    std::cerr << className << "::EnableDistanceHistogramming:";
+    std::cerr << "    Unknown option " << opt << ".\n";
+    std::cerr << "    Valid options are x, y, z, r.\n";
+    std::cerr << "    Using default value (r).\n";
     distanceOption = 'r';
   }
   
@@ -128,9 +128,8 @@ void
 AvalancheMicroscopic::EnableSecondaryEnergyHistogramming(TH1F* histo) {
 
   if (histo == 0) {
-    std::cerr << "AvalancheMicroscopic::EnableSecondaryEnergyHistogramming:" 
-              << std::endl;
-    std::cerr << "    Histogram is not defined." << std::endl;
+    std::cerr << className << "::EnableSecondaryEnergyHistogramming:\n"; 
+    std::cerr << "    Histogram pointer is null.\n";
     return;
   }
   
@@ -150,9 +149,9 @@ void
 AvalancheMicroscopic::SetCollisionSteps(const int n) {
 
   if (n <= 0) {
-    std::cerr << "AvalancheMicroscopic::SetCollisionSteps:" << std::endl;
+    std::cerr << className << "::SetCollisionSteps:\n";
     std::cerr << "    Number of collisions to be skipped set to" 
-              << " default value (100)." << std::endl;
+              << " default value (100).\n";
     nCollSkip = 100;
     return;
   }
@@ -168,8 +167,8 @@ AvalancheMicroscopic::GetEndpoint(const int i,
   int& status) const {
   
   if (i < 0 || i >= nEndpoints) {
-    std::cerr << "AvalancheMicroscopic::GetEndpoint:" << std::endl;
-    std::cerr << "    Endpoint " << i << " does not exist." << std::endl;
+    std::cerr << className << "::GetEndpoint:\n";
+    std::cerr << "    Endpoint " << i << " does not exist.\n";
     x0 = y0 = z0 = t0 = e0 = 0.;
     x1 = y1 = t1 = t1 = e1 = 0.;
     status = 0;
@@ -188,9 +187,8 @@ int
 AvalancheMicroscopic::GetNumberOfDriftLinePoints(const int i) const {
 
   if (i < 0 || i >= nEndpoints) {
-    std::cerr << "AvalancheMicroscopic::GetNumberOfDriftLinePoints:" 
-              << std::endl;
-    std::cerr << "    Endpoint " << i << " does not exist." << std::endl;
+    std::cerr << className << "::GetNumberOfDriftLinePoints:\n"; 
+    std::cerr << "    Endpoint " << i << " does not exist.\n";
     return 0;
   }
   
@@ -206,8 +204,8 @@ AvalancheMicroscopic::GetDriftLinePoint(
   const int ip, const int iel) const {
   
   if (iel < 0 || iel >= nEndpoints) {
-    std::cerr << "AvalancheMicroscopic::GetDriftLinePoint:" << std::endl;
-    std::cerr << "    Endpoint " << iel << " does not exist." << std::endl;
+    std::cerr << className << "::GetDriftLinePoint:\n";
+    std::cerr << "    Endpoint " << iel << " does not exist.\n";
     return;
   }
 
@@ -238,8 +236,8 @@ AvalancheMicroscopic::GetPhoton(const int i, double& e,
   int& status) const {
  
   if (i < 0 || i >= nPhotons) {
-    std::cerr << "AvalancheMicroscopic::GetPhoton:" << std::endl;
-    std::cerr << "    Photon " << i << " does not exist." << std::endl;
+    std::cerr << className << "::GetPhoton:\n";
+    std::cerr << "    Photon " << i << " does not exist.\n";
     return;
   }
 
@@ -333,31 +331,31 @@ AvalancheMicroscopic::TransportElectron(
   
   // Make sure that the sensor is defined
   if (sensor == 0) {
-    std::cerr << "AvalancheMicroscopic::TransportElectron:" << std::endl;
-    std::cerr << "    Sensor is not defined." << std::endl;
+    std::cerr << className << "::TransportElectron:\n";
+    std::cerr << "    Sensor is not defined.\n";
     return false;
   }
 
   // Make sure that the starting point is inside a medium
   Medium* medium;
   if (!sensor->GetMedium(x0, y0, z0, medium)) {
-    std::cerr << "AvalancheMicroscopic::TransportElectron:" << std::endl;
-    std::cerr << "    No medium at initial position." << std::endl;
+    std::cerr << className << "::TransportElectron:\n";
+    std::cerr << "    No medium at initial position.\n";
     return false;
   }
   
   // Make sure that the medium is "driftable" and microscopic
   if (!medium->IsDriftable() || !medium->IsMicroscopic()) {
-    std::cerr << "AvalancheMicroscopic::TransportElectron:" << std::endl;
+    std::cerr << className << "::TransportElectron:\n";
     std::cerr << "    Medium at initial position does not provide " 
-              << " microscopic tracking data." << std::endl;
+              << " microscopic tracking data.\n";
     return false;
   }
   
   if (debug) {
-    std::cout << "AvalancheMicroscopic::TransportElectron:" << std::endl;
+    std::cout << className << "::TransportElectron:\n";
     std::cout << "    Starting to drift in medium " 
-              << medium->GetName() << "." << std::endl;
+              << medium->GetName() << ".\n";
   }
   
   // Get the id number of the drift medium
@@ -381,8 +379,8 @@ AvalancheMicroscopic::TransportElectron(
   // Null-collision rate
   double fLim = medium->GetElectronNullCollisionRate();
   if (fLim <= 0.) {
-    std::cerr << "AvalancheMicroscopic::TransportElectron:" << std::endl;
-    std::cerr << "    Got null-collision rate <= 0." << std::endl;
+    std::cerr << className << "::TransportElectron:\n";
+    std::cerr << "    Got null-collision rate <= 0.\n";
     return false;
   }
   // Null-collision flag
@@ -496,12 +494,12 @@ AvalancheMicroscopic::TransportElectron(
       ex = -ex; ey = -ey; ez = -ez;
       
       if (debug) {
-        std::cout << "AvalancheMicroscopic::TransportElectron:" << std::endl;
-        std::cout << "    Drifting electron " << iEl << "." << std::endl;
+        std::cout << className << "::TransportElectron:\n";
+        std::cout << "    Drifting electron " << iEl << ".\n";
         std::cout << "    Field at " << x << ", " << y << ", " << z << ": "
-                  << ex << ", " << ey << ", " << ez << std::endl;
-        std::cout << "    Status: " << status << std::endl;
-        std::cout << "    Medium: " << medium->GetName() << std::endl;
+                  << ex << ", " << ey << ", " << ez << "\n";
+        std::cout << "    Status: " << status << "\n";
+        std::cout << "    Medium: " << medium->GetName() << "\n";
       }
 
       if (status != 0) {
@@ -513,10 +511,9 @@ AvalancheMicroscopic::TransportElectron(
         endpoints.push_back(stack[iEl]);
         stack.erase(stack.begin() + iEl);
         if (debug) {
-          std::cout << "AvalancheMicroscopic::TransportElectron:" << std::endl;
-          std::cout << "    Electron left the drift medium." << std::endl;
-          std::cout << "    At " << x << ", " << ", " << y << ", " << z 
-                    << std::endl;
+          std::cout << className << "::TransportElectron:\n";
+          std::cout << "    Electron left the drift medium.\n";
+          std::cout << "    At " << x << "," << ", " << y << "," << z << "\n";
         }
         continue;
       }
@@ -566,9 +563,8 @@ AvalancheMicroscopic::TransportElectron(
           // Update the null-collision rate
           fLim = medium->GetElectronNullCollisionRate();
           if (fLim <= 0.) {
-            std::cerr << "AvalancheMicroscopic::TransportElectron:" 
-                      << std::endl;
-            std::cerr << "    Got null-collision rate <= 0." << std::endl;
+            std::cerr << className << "::TransportElectron:\n"; 
+            std::cerr << "    Got null-collision rate <= 0.\n";
             return false;
           }          
         }
@@ -632,10 +628,8 @@ AvalancheMicroscopic::TransportElectron(
             // Real collision rate is higher than null-collision rate
             dt += log(r) / fLim;
             // Increase the null collision rate and try again
-            std::cerr << "AvalancheMicroscopic::TransportElectron:"
-                      << std::endl;
-            std::cerr << "    Increasing the null-collision rate by 5%." 
-                      << std::endl;
+            std::cerr << className << "::TransportElectron:\n";
+            std::cerr << "    Increasing the null-collision rate by 5%.\n"; 
             fLim *= 1.05;
             continue;
           }
@@ -867,10 +861,9 @@ AvalancheMicroscopic::TransportElectron(
             // Increment the electron and ion counters
             ++nElectrons; ++nIons;
             if (debug) {
-              std::cout << "AvalancheMicroscopic::TransportElectron:\n";
-              std::cout << "    Ionisation." << std::endl;
-              std::cout << "    At " << x << ", " << y << ", " << z 
-                        << std::endl;
+              std::cout << className << "::TransportElectron:\n";
+              std::cout << "    Ionisation.\n";
+              std::cout << "    At " << x << "," << y << "," << z << "\n"; 
             }
             break;
           // Attachment
@@ -979,9 +972,8 @@ AvalancheMicroscopic::TransportElectron(
             // Impurity scattering
             break;
           default:
-            std::cerr << "AvalancheMicroscopic::TransportElectron:" 
-                      << std::endl;
-            std::cerr << "    Unknown collision type." << std::endl;
+            std::cerr << className << "::TransportElectron:\n"; 
+            std::cerr << "    Unknown collision type.\n";
             ok = false;
             break;
         }
@@ -1068,31 +1060,31 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
 
   // Make sure that the sensor is defined
   if (sensor == 0) {
-    std::cerr << "AvalancheMicroscopic::TransportPhoton:" << std::endl;
-    std::cerr << "    Sensor is not defined." << std::endl;
+    std::cerr << className << "::TransportPhoton:\n";
+    std::cerr << "    Sensor is not defined.\n";
     return;
   }
 
   // Make sure that the starting point is inside a medium
   Medium* medium;
   if (!sensor->GetMedium(x0, y0, z0, medium)) {
-    std::cerr << "AvalancheMicroscopic::TransportPhoton:" << std::endl;
-    std::cerr << "    No medium at initial position." << std::endl;
+    std::cerr << className << "::TransportPhoton:\n";
+    std::cerr << "    No medium at initial position.\n";
     return;
   }
   
   // Make sure that the medium is "driftable" and microscopic
   if (!medium->IsDriftable() || !medium->IsMicroscopic()) {
-    std::cerr << "AvalancheMicroscopic::TransportPhoton:" << std::endl;
+    std::cerr << className << "::TransportPhoton:\n";
     std::cerr << "    Medium at initial position does not provide " 
-              << " microscopic tracking data." << std::endl;
+              << " microscopic tracking data.\n";
     return;
   }
   
   if (debug) {
-    std::cout << "AvalancheMicroscopic::TransportPhoton:" << std::endl;
+    std::cout << className << "::TransportPhoton:\n";
     std::cout << "    Starting photon transport in medium " 
-              << medium->GetName() << "." << std::endl;
+              << medium->GetName() << ".\n";
   }
   
   // Get the id number of the drift medium
