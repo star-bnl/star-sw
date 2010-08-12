@@ -25,7 +25,7 @@ struct StTriggerDefinition : public TObject {
   ClassDef(StTriggerDefinition,1)
 };
 
-void StTriggerDefinition::print()
+inline void StTriggerDefinition::print()
 {
   printf("triggerIndex=%d name=%s triggerId=%d onbits=0x%04x offbits=0x%04x\n",
 	 triggerIndex,name.Data(),triggerId,onbits,offbits);
