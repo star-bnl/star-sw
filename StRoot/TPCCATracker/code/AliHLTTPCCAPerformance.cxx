@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformance.cxx,v 1.5 2010/08/11 14:23:50 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.cxx,v 1.6 2010/08/12 17:46:48 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -169,16 +169,21 @@ void AliHLTTPCCAPerformance::CreateHistos()
 
 void AliHLTTPCCAPerformance::WriteHistos()
 {
+  if (!fOutputFile) {
+    cout << "W AliHLTTPCCAPerformance:Warning: Output file has NOT been set." << endl;
+    return;
+  }
 //   //* write histograms to the file
   TDirectory *curr = gDirectory;
 //   // Open output file and write histograms
-  TFile* outfile = new TFile( "HLTTPCCATrackerPerformance.root", "RECREATE" );
-  outfile->cd();
+  fOutputFile->cd();
 
   for (unsigned int iPerf = 0; iPerf < subPerformances.size(); iPerf++)
     subPerformances[iPerf]->WriteHistos();
 
-  outfile->Close();
+#ifdef STAR_STANDALONE // TODO use it!!
+  fOutputFile->Close();
+#endif //
   curr->cd();
 }
 

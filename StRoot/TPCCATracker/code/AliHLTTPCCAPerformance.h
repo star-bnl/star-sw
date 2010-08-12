@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformance.h,v 1.3 2010/08/09 17:51:15 mzyzak Exp $
+// $Id: AliHLTTPCCAPerformance.h,v 1.4 2010/08/12 17:46:48 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -70,6 +70,8 @@ class AliHLTTPCCAPerformance
   void SetMCTracks(vector<AliHLTTPCCAMCTrack>& mcTracks);
   void SetMCPoints(vector<AliHLTTPCCALocalMCPoint>& mcPoints);
   void SetHitLabels(vector<AliHLTTPCCAHitLabel>& hitLabels);
+
+  void SetOutputFile(TFile *oF) { fOutputFile = oF; }
   
   protected:
 
@@ -110,6 +112,7 @@ class AliHLTTPCCAPerformance
 
     int fStatNEvents; // n of events proceed
 
+    TFile *fOutputFile;
     TDirectory *fHistoDir; // ROOT directory with histogramms
     
   public:
