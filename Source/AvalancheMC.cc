@@ -27,6 +27,10 @@ AvalancheMC::AvalancheMC() :
    
 }
 
+AvalancheMC::~AvalancheMC() {
+
+}
+
 void 
 AvalancheMC::SetSensor(Sensor* s) {
 

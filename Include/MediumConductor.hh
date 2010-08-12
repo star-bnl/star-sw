@@ -12,7 +12,7 @@ class MediumConductor : public Medium {
   public:
     // Constructor  
     MediumConductor() : Medium() {
-      className = "MediumConductor;
+      className = "MediumConductor";
       name = "Conductor";
     }    
     // Destructor

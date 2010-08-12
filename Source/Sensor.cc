@@ -353,7 +353,7 @@ Sensor::AddSignal(const int q, const double t, const double dt,
     electrodes[i].comp->WeightingField(x, y, z, wx, wy, wz, 
                                        electrodes[i].label);
     // Calculate the induced current
-    cur = q * (wx * vx + wy * vy + wz * vz);
+    cur = -q * (wx * vx + wy * vy + wz * vz);
     if (debug) {
       std::cout << "    Electrode " << electrodes[i].label << ":\n";
       std::cout << "      Weighting field: (" 
