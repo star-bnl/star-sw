@@ -20,7 +20,7 @@ struct StTriggerThreshold : public TObject {
   ClassDef(StTriggerThreshold,1)
 };
 
-void StTriggerThreshold::print()
+inline void StTriggerThreshold::print()
 {
   printf("object=%d index=%d reg=%d label=%s value=%d defaultvalue=%d\n",
 	 object,index,reg,label.Data(),value,defaultvalue);
