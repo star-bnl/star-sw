@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMerger.cxx,v 1.4 2010/08/12 19:35:39 mzyzak Exp $
+// $Id: AliHLTTPCCAMerger.cxx,v 1.5 2010/08/12 21:33:39 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -1352,9 +1352,9 @@ void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1
       if ( C[0] <= 0 || C[2] <= 0 || C[5] <= 0 || C[9] <= 0 || C[14] <= 0 ) Ok = 0;
       //if ( C[0] > 5. || C[2] > 5. || C[5] > 2. || C[9] > 2 || C[14] > 2 ) Ok = 0;
       
-      std::cout <<std::endl<< "Parametery horoshye? ";
-      if(Ok) std::cout <<" -Da! "; else std::cout << " -Net! ";
-      std::cout << "  Chi2  " << chi2 << "  Treki soedineny?  ";
+//      std::cout <<std::endl<< "Parametery horoshye? ";
+//      if(Ok) std::cout <<" -Da! "; else std::cout << " -Net! ";
+//      std::cout << "  Chi2  " << chi2 << "  Treki soedineny?  ";
 	
 
       dr_min2_local = dy12*dy12 + dx12*dx12 + dz12*dz12;
@@ -1422,7 +1422,7 @@ void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1
       //if(dqpt2>factor2k *ddqpt2) continue;
       //if(dr2 > factor2k * ddr2) continue;
       if(db2 > factor2k * ddb2) continue;
-      std::cout << " -DA! ";
+//      std::cout << " -DA! ";
       //if(bLong->R() > 150 || bShort->R() < 50)      if(dqpt2>factor2k *ddqpt2) continue;
 //if(bLong->NClusters() > 15 && bShort->NClusters() > 15)      if(dqpt2>factor2k *ddqpt2) continue;
 
