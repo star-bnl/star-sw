@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.2 2010/08/09 17:51:15 mzyzak Exp $
+// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.3 2010/08/12 19:35:39 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -74,7 +74,11 @@ void AliHLTTPCCAPerformanceBase::SetNewEvent( const AliHLTTPCCAGBTracker * const
     { "pullZ",      "track Z pull",             30, -7.,   7. },
     { "pullSinPhi", "track SinPhi pull",        30, -7.,   7. },
     { "pullDzDs",   "track DzDs pull",          30, -7.,   7. },
-    { "pullQPt",    "track Q/Pt pull",          30, -7.,   7. }
+    { "pullQPt",    "track Q/Pt pull",          30, -7.,   7. },
+    { "resYHit",       "track Y resolution [cm]",  30, -0.25,  0.25 },
+    { "resZHit",       "track Z resolution [cm]",  30, -1.,   1. },
+    { "pullYHit",      "track Y pull",             30, -7.,   7. },
+    { "pullZHit",      "track Z pull",             30, -7.,   7. }
   };
   for (int iHisto = 0; iHisto < NHisto; iHisto++){
     fHistosInfo[iHisto] = tmp[iHisto];

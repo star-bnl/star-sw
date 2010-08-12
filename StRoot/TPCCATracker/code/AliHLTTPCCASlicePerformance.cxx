@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.4 2010/08/11 13:43:26 mzyzak Exp $
+// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.5 2010/08/12 19:35:39 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -46,7 +46,7 @@
 #include "TProfile.h"
 #include "TStyle.h"
 
-//#define IsOutTrack1 //to use reffited with materials track parameters
+#define IsOutTrack1 //to use reffited with materials track parameters
 
 void AliHLTTPCCASlicePerformance::SetNewEvent(const AliHLTTPCCAGBTracker * const Tracker,
                             AliHLTResizableArray<AliHLTTPCCAHitLabel> *hitLabels,
@@ -438,10 +438,46 @@ void AliHLTTPCCASlicePerformance::FillHistos()
     ///  mvz end
   }
 
-    for ( int ipart = 0; ipart < nMCTracks; ipart++ ) {
-      AliHLTTPCCAMCTrack &mc = (*fMCTracks)[ipart];
+  {
+    int nHits = fTracker->NHits();
+    for ( int ih = 0; ih < nHits; ih++ ) {
+      const AliHLTTPCCAGBHit &hit = fTracker->Hit( ih );
+      const AliHLTTPCCAHitLabel &l = (*fHitLabels)[hit.ID()];
+//       fhHitErrY->Fill( hit.ErrY() );
+//       fhHitErrZ->Fill( hit.ErrZ() );
+
+      const int iMC = l.fLab[0];
+      AliHLTTPCCAMCTrack &mc = (*fMCTracks)[iMC];
+
+      int MCindex = -1;
+      int nFirstMC = mc.FirstMCPointID();
+      int nMCPoints = mc.NMCPoints();
+
+      AliHLTTPCCALocalMCPoint *points = &((*fLocalMCPoints).Data()[nFirstMC]);
+
+      for(int iMCPoint=0; iMCPoint<nMCPoints; iMCPoint++)
+      {
+        if(points[iMCPoint].ISlice() != fISlice) continue;
+        if(points[iMCPoint].IRow() == hit.IRow())
+        {
+          if(fabs(hit.Y() - points[iMCPoint].Y())<2 && fabs(hit.Z() - points[iMCPoint].Z())<2)
+            MCindex = iMCPoint;
+        }
+      }
+      if(MCindex == -1)
+      {
+        continue;
+      }
+
+      GetHisto("resYHit")->Fill( hit.Y() - points[MCindex].Y() );
+      GetHisto("resZHit")->Fill( hit.Z() - points[MCindex].Z() );
+    }
+  }
+
+  for ( int ipart = 0; ipart < nMCTracks; ipart++ ) {
+    AliHLTTPCCAMCTrack &mc = (*fMCTracks)[ipart];
 // //     if ( mc.Set() > 0 ) fhEffVsP->Fill( mc.P(), ( mc.NReconstructed() > 0 ? 1 : 0 ) );
 // //     if ( mc.Set() > 0 ) fhEffVsNHits->Fill(mc.NHits(), ( mc.NReconstructed() > 0 ? 1 : 0 ));
-    }
+  }
 
 } // void AliHLTTPCCASlicePerformance::FillHistos()

@@ -62,6 +62,12 @@ class AliHLTTPCCAClusterInfo;
                     float &R, float &dR2);*/
 
   private:
+  
+    void InvertCholetsky(float a[15]);
+    void MultiplySS(float const C[15], float const V[15], float K[5][5]);
+    void MultiplyMS(float const C[5][5], float const V[15], float K[15]);
+    void MultiplySR(float const C[15], float const r_in[5], float r_out[5]);
+    void FilterTracks(float const r[5], float const C[15], float const m[5], float const V[15], float R[5], float W[15], float &chi2);
 
     AliHLTTPCCAMerger( const AliHLTTPCCAMerger& );
     const AliHLTTPCCAMerger &operator=( const AliHLTTPCCAMerger& ) const;

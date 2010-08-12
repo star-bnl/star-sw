@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformanceBase.h,v 1.2 2010/08/11 14:23:50 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformanceBase.h,v 1.3 2010/08/12 19:35:39 mzyzak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -92,7 +92,7 @@ class AliHLTTPCCAPerformanceBase
 
 
       /// Histos
-    enum{ NHisto = 10 };
+    enum{ NHisto = 14 };
     struct THistoInfo {
       const char *name;
       const char *title;

@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCASlicePerformance.h,v 1.2 2010/08/09 17:51:15 mzyzak Exp $
+// $Id: AliHLTTPCCASlicePerformance.h,v 1.3 2010/08/12 19:35:39 mzyzak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -61,6 +61,7 @@ class AliHLTTPCCASlicePerformance: public AliHLTTPCCAPerformanceBase
     virtual void FillHistos();
 
     friend class AliHLTTPCCASlicesPerformance;
+    friend class AliHLTTPCCAMergerPerformance;
     friend class AliHLTTPCCAGlobalSlicesPerformance;
   private:
     int fISlice;
