@@ -1,4 +1,4 @@
-// $Id: StTriggerSimuResult.cxx,v 1.6 2010/04/29 10:34:34 pibero Exp $
+// $Id: StTriggerSimuResult.cxx,v 1.7 2010/08/13 00:20:20 rfatemi Exp $
 
 #include <utility>
 using std::make_pair;
@@ -73,16 +73,20 @@ const unsigned int* StTriggerSimuResult::l2Result(L2ResultType algo, int year) c
             if(year==2006) return mL2Result + L2RESULTS_OFFSET_DIJET;
             break;
         case kGammaBemc:
-            if(year==2006) return mL2Result + L2RESULTS_OFFSET_PIG + 2;
+            if(year==2006) return mL2Result + L2RESULTS_OFFSET_PIG;
             break;
         case kGammaEemc:
-            if(year==2006) return mL2Result + L2RESULTS_OFFSET_PIG;
+            if(year==2006) return mL2Result + L2RESULTS_OFFSET_PIG + 2;
             break;
         case kUpsilon:
             if(year==2006) return mL2Result + L2RESULTS_OFFSET_UPS;
             break;
     }
     return 0;
+}
+
+const unsigned int* StTriggerSimuResult::l2Result() const {
+  return mL2Result;
 }
 
 void StTriggerSimuResult::addHighTower(int towerId, int dsmAdc) {
@@ -107,6 +111,9 @@ void StTriggerSimuResult::setL2Result(const unsigned int* result) {
 
 /*****************************************************************************
  * $Log: StTriggerSimuResult.cxx,v $
+ * Revision 1.7  2010/08/13 00:20:20  rfatemi
+ * Changed the PIG+2 address from BEMC to EEMC based on structure in StTriggerData2005::isL2Trigger()
+ *
  * Revision 1.6  2010/04/29 10:34:34  pibero
  * Preserve backward compatibility with reading of Run 6 skim trees
  *
