@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.cxx,v 1.8 2010/07/12 21:27:32 hmasui Exp $
+ * $Id: StEmbeddingQAUtilities.cxx,v 1.9 2010/08/13 21:54:51 hmasui Exp $
  * $Log: StEmbeddingQAUtilities.cxx,v $
+ * Revision 1.9  2010/08/13 21:54:51  hmasui
+ * Separate charge for pi/K/p
+ *
  * Revision 1.8  2010/07/12 21:27:32  hmasui
  * Added StParticleTable & StParticleDefinition utilities
  *
@@ -214,12 +217,36 @@ Bool_t StEmbeddingQAUtilities::isReal(const TString name) const
 }
 
 //____________________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isElectron(const Int_t geantid) const { return geantid==2 ; }
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isPositron(const Int_t geantid) const { return geantid==3 ; }
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isPiPlus(const Int_t geantid) const { return geantid==8 ; }
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isPiMinus(const Int_t geantid) const { return geantid==9 ; }
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isKPlus(const Int_t geantid) const { return geantid==11 ; }
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isKMinus(const Int_t geantid) const { return geantid==12 ; }
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isProton(const Int_t geantid) const { return geantid==14 ; }
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isPBar(const Int_t geantid) const { return geantid==15 ; }
+
+//____________________________________________________________________________________________________
 Bool_t StEmbeddingQAUtilities::isElectrons(const Int_t geantid) const
 {
   /// Check the input string geant id is electron/positron
   /// NOTE: electron/positron id's are currently hard-coded. I'm not sure I can avoid this at this point (H. Masui)
 
-  return (geantid==2 || geantid==3) ;
+  return (isElectron(geantid) || isPositron(geantid));
 }
 
 //____________________________________________________________________________________________________
@@ -228,7 +255,7 @@ Bool_t StEmbeddingQAUtilities::isPions(const Int_t geantid) const
   /// Check the input string geant id is pions
   /// NOTE: pion id's are currently hard-coded. I'm not sure I can avoid this at this point (H. Masui)
 
-  return (geantid==8 || geantid==9) ;
+  return (isPiPlus(geantid) || isPiMinus(geantid));
 }
 
 //____________________________________________________________________________________________________
@@ -237,7 +264,7 @@ Bool_t StEmbeddingQAUtilities::isKaons(const Int_t geantid) const
   /// Check the input string geant id is kaons
   /// NOTE: kaon id's are currently hard-coded. I'm not sure I can avoid this at this point (H. Masui)
 
-  return (geantid==11 || geantid==12) ;
+  return (isKPlus(geantid) || isKMinus(geantid));
 }
 
 //____________________________________________________________________________________________________
@@ -246,7 +273,7 @@ Bool_t StEmbeddingQAUtilities::isProtons(const Int_t geantid) const
   /// Check the input string geant id is protons
   /// NOTE: proton id's are currently hard-coded. I'm not sure I can avoid this at this point (H. Masui)
 
-  return (geantid==14 || geantid==15) ;
+  return (isProton(geantid) || isPBar(geantid)) ;
 }
 
 //____________________________________________________________________________________________________
