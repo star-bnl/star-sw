@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMerger.cxx,v 1.5 2010/08/12 21:33:39 mzyzak Exp $
+// $Id: AliHLTTPCCAMerger.cxx,v 1.6 2010/08/13 15:39:10 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -1697,7 +1697,7 @@ void AliHLTTPCCAMerger::Merging(int number)
   }
 
   AliHLTTPCCAClusterInfo *tmpH = new AliHLTTPCCAClusterInfo[fMaxClusterInfos*10];
-  AliHLTTPCCASliceTrackInfo tmpT[fgkNSlices][fMaxTrackInfos];
+  AliHLTTPCCASliceTrackInfo *tmpT = new AliHLTTPCCASliceTrackInfo[fgkNSlices*fMaxTrackInfos];
 
   int nTrNew[fgkNSlices];
 
@@ -1722,7 +1722,7 @@ void AliHLTTPCCAMerger::Merging(int number)
       if ( trackOld.Used() ) continue;
       if ( trackOld.PrevNeighbour().size() != 0 ) continue;
 
-      AliHLTTPCCASliceTrackInfo &track = tmpT[iSlice][nTrNew[iSlice]];
+      AliHLTTPCCASliceTrackInfo &track = tmpT[fMaxTrackInfos*iSlice + nTrNew[iSlice]];
       track = trackOld;
 
       AliHLTTPCCATrackParam startPoint = track.InnerParam(), endPoint = track.OuterParam();
@@ -1973,15 +1973,15 @@ void AliHLTTPCCAMerger::Merging(int number)
 
   for ( int ih = 0; ih < nH; ih++ ) fClusterInfos[ih] = tmpH[ih];
   if(tmpH) delete[] tmpH;
-
+  
   for(int iSlice=0; iSlice < fgkNSlices; iSlice++ )
   {
     fSliceNTrackInfos[iSlice] = nTrNew[iSlice];
 
     for ( int itr = 0; itr < nTrNew[iSlice]; itr++ ) 
-      fTrackInfos[fSliceTrackInfoStart[iSlice]+itr] = tmpT[iSlice][itr];
+      fTrackInfos[fSliceTrackInfoStart[iSlice]+itr] = tmpT[fMaxTrackInfos*iSlice + itr];
   }
-  //if(tmpT) delete[] tmpT;
+  if(tmpT) delete[] tmpT;
 
 
   if(number == 0)
