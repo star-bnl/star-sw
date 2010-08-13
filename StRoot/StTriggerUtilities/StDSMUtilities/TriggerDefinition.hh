@@ -8,10 +8,17 @@
 #define TRIGGER_DEFINITION_HH
 
 struct TriggerDefinition {
-  int  idx_trigger;
+  int  triggerIndex;
   char name[64];
   int  triggerId;
-  int  physicsBits;
+  int  onbits;
+  int  offbits;
+  int  onbits1;
+  int  onbits2;
+  int  onbits3;
+  int  offbits1;
+  int  offbits2;
+  int  offbits3;
 };
 
 #endif	// TRIGGER_DEFINITION_HH
