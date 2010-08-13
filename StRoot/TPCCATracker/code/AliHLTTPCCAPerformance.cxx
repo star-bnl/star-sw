@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformance.cxx,v 1.6 2010/08/12 17:46:48 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.cxx,v 1.7 2010/08/13 14:39:49 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -154,7 +154,7 @@ void AliHLTTPCCAPerformance::InitSubPerformances(int iPerf)
   
   subPerformances[iPerf]->SetNewEvent(fTracker, &fHitLabels, &fMCTracks, &fLocalMCPoints);
 
-  if (first_call_sub[iPerf]) subPerformances[iPerf]->CreateHistos(subPerformances[iPerf].name);
+  if (first_call_sub[iPerf]) subPerformances[iPerf]->CreateHistos(subPerformances[iPerf].name, fOutputFile);
     
   first_call = false;
   first_call_sub[iPerf] = false;
@@ -163,7 +163,7 @@ void AliHLTTPCCAPerformance::InitSubPerformances(int iPerf)
 void AliHLTTPCCAPerformance::CreateHistos()
 {
   for (unsigned int iPerf = 0; iPerf < subPerformances.size(); iPerf++){
-    subPerformances[iPerf]->CreateHistos(subPerformances[iPerf].name);
+    subPerformances[iPerf]->CreateHistos(subPerformances[iPerf].name, fOutputFile);
   }
 }
 
@@ -198,7 +198,10 @@ void AliHLTTPCCAPerformance::ExecPerformance()
     subPerformances[iPerf]->PrintEfficiencyStatistic();
   };
 
+#ifdef STAR_STANDALONE // TODO use it!!
   WriteHistos();
+#endif //
+
 }
 
 void AliHLTTPCCAPerformance::ExecPerformance(int iPerf)

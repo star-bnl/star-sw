@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.3 2010/08/12 19:35:39 mzyzak Exp $
+// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.4 2010/08/13 14:39:49 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -102,24 +102,30 @@ AliHLTTPCCAPerformanceBase::~AliHLTTPCCAPerformanceBase()
     }
 }
 
-void AliHLTTPCCAPerformanceBase::CreateHistos(string histoDir)
+void AliHLTTPCCAPerformanceBase::CreateHistos(string histoDir, TFile* outFile)
 {
   TDirectory *curdir = gDirectory;
-  if (histoDir != ""){  // create in file
-    fHistoDir = gROOT->mkdir( TString(histoDir) );
+  if ( (histoDir != "") && outFile) {  // create in file
+    if (outFile) outFile->cd();
+    fHistoDir = outFile->mkdir( TString(histoDir) );
     fHistoDir->cd();
     gDirectory->mkdir( "TrackFit" );
     gDirectory->cd( "TrackFit" );
-  }
   
-  for( int i=0; i < NHisto; i++ ){
-    fHistos[i] = new TH1D(fHistosInfo[i].name, fHistosInfo[i].title, fHistosInfo[i].n, fHistosInfo[i].l, fHistosInfo[i].r);
-  }
+    for( int i=0; i < NHisto; i++ ){
+      fHistos[i] = new TH1D(fHistosInfo[i].name, fHistosInfo[i].title, fHistosInfo[i].n, fHistosInfo[i].l, fHistosInfo[i].r);
+    }
 
-  if (histoDir != ""){  // create in file
     gDirectory->cd( ".." );
-    
-    curdir->cd();
+    curdir->cd();    
+  }
+  else{
+    for( int i=0; i < NHisto; i++ ){
+      static int addName = 0; // haven't any subfolders so create different names
+      addName++;
+      fHistos[i] = new TH1D(fHistosInfo[i].name+addName, fHistosInfo[i].title, fHistosInfo[i].n, fHistosInfo[i].l, fHistosInfo[i].r);
+      fHistos[i]->SetDirectory(0);
+    }
   }
 }
 

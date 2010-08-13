@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCASlicesPerformance.h,v 1.2 2010/08/11 13:43:26 mzyzak Exp $
+// $Id: AliHLTTPCCASlicesPerformance.h,v 1.3 2010/08/13 14:39:49 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -53,7 +53,7 @@ class AliHLTTPCCASlicesPerformance: public AliHLTTPCCAPerformanceBase
     virtual void EfficiencyPerformance();
     
       /// Histograms
-    virtual void CreateHistos(string histoDir = "");
+    virtual void CreateHistos(string histoDir = "", TFile* outFile = 0);
     virtual void FillHistos();
     
 

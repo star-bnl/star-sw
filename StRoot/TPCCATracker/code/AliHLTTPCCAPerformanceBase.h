@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformanceBase.h,v 1.3 2010/08/12 19:35:39 mzyzak Exp $
+// $Id: AliHLTTPCCAPerformanceBase.h,v 1.4 2010/08/13 14:39:49 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -54,7 +54,7 @@ class AliHLTTPCCAPerformanceBase
                  AliHLTResizableArray<AliHLTTPCCALocalMCPoint> *localMCPoints);
     
       /// Histograms
-    virtual void CreateHistos(string histoDir = "");
+    virtual void CreateHistos(string histoDir = "", TFile* outFile = 0);
     void WriteHistos();
 
       /// Execute standart chain of procedures

@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASlicesPerformance.cxx,v 1.2 2010/08/11 14:23:50 ikulakov Exp $
+// $Id: AliHLTTPCCASlicesPerformance.cxx,v 1.3 2010/08/13 14:39:49 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -69,13 +69,16 @@ void AliHLTTPCCASlicesPerformance::SetNewEvent(const AliHLTTPCCAGBTracker * cons
 
 } // void AliHLTTPCCASlicesPerformance::SetNewEvent
 
-void AliHLTTPCCASlicesPerformance::CreateHistos(string histoDir)
+void AliHLTTPCCASlicesPerformance::CreateHistos(string histoDir, TFile* outFile)
 {
-  AliHLTTPCCAPerformanceBase::CreateHistos(histoDir);
   
   for (unsigned int iPerf = 0; iPerf < slicePerformances.size(); iPerf++){
-    slicePerformances[iPerf]->CreateHistos( histoDir + (string)TString(char(iPerf)) ); // just set diff names, they anyway won't be written
+    // slicePerformances[iPerf]->CreateHistos( histoDir + (string)TString(char(iPerf)), outFile ); // just set diff names, they anyway won't be written
+    slicePerformances[iPerf]->CreateHistos( "" );
   }
+  
+  AliHLTTPCCAPerformanceBase::CreateHistos(histoDir, outFile);
+
 }
 
 void AliHLTTPCCASlicesPerformance::Exec(bool print)
