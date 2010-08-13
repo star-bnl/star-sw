@@ -3,8 +3,11 @@
 //    - Provide category id, such as 'MC' track in the minimc tree
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.h,v 1.7 2010/07/12 21:27:29 hmasui Exp $
+ * $Id: StEmbeddingQAUtilities.h,v 1.8 2010/08/13 21:54:35 hmasui Exp $
  * $Log: StEmbeddingQAUtilities.h,v $
+ * Revision 1.8  2010/08/13 21:54:35  hmasui
+ * Separate charge for pi/K/p
+ *
  * Revision 1.7  2010/07/12 21:27:29  hmasui
  * Added StParticleTable & StParticleDefinition utilities
  *
@@ -75,6 +78,14 @@ class StEmbeddingQAUtilities {
     Bool_t isReal(const TString name) const ;          /// Check whether the track is real track or not
 
     // Check geantid
+    Bool_t isElectron(const Int_t geantid) const ;     /// Check the input geantid is e-
+    Bool_t isPositron(const Int_t geantid) const ;     /// Check the input geantid is e+
+    Bool_t isPiPlus(const Int_t geantid) const ;       /// Check the input geantid is pi+
+    Bool_t isPiMinus(const Int_t geantid) const ;      /// Check the input geantid is pi-
+    Bool_t isKPlus(const Int_t geantid) const ;        /// Check the input geantid is K+
+    Bool_t isKMinus(const Int_t geantid) const ;       /// Check the input geantid is K-
+    Bool_t isProton(const Int_t geantid) const ;       /// Check the input geantid is p
+    Bool_t isPBar(const Int_t geantid) const ;         /// Check the input geantid is pbar
     Bool_t isElectrons(const Int_t geantid) const ;    /// Check the input geantid is electrons
     Bool_t isPions(const Int_t geantid) const ;        /// Check the input geantid is pions
     Bool_t isKaons(const Int_t geantid) const ;        /// Check the input geantid is kaons
