@@ -1,11 +1,12 @@
-/*Justin:  to generate jetTree for a M-C with real-event time stamp do:
-root4star -b -q 'rdMuWana.C(2000,"","/star/institutions/mit/balewski/2010-Walgo-simu/2010setA/rck10012_1_2000evts.MuDst.root",1,28,1)'
+/* To generate jetTree for a new M-C using BFC w/ EEss, read Mu & write jet-tree locally:
+root4star -b -q 'rdMuWana.C(2000,"","rck10012_1_2000evts.MuDst.root",1,200,1)'
+
+To run W-reco w/  new M-C files, jet read locally:
+root4star -b -q 'rdMuWana.C(2000,"","rck10012_1_2000evts.MuDst.root",1,200,2)'
 
 Jan: physic files, jet read:
 root4star -b -q 'rdMuWana.C(2e3,"","/star/u/balewski/2009-Wana-pp500/fillListPhys/F10535/R10102105a_230531_230601.lis",5000,0,2)'
 
-Jan: new M-C files, jet read:
-root4star -b -q 'rdMuWana.C(2000,"","/star/data01/pwg/balewski/2010-Wsimu-setC/data/rcn10010_1_500evts.MuDst.root",1,107,2)'
 */
 
 
@@ -18,7 +19,7 @@ int  spinSort=true;
 bool isJanWjj=false; 
 int  isJustin=false;
 bool isRoss=true; 
-int  geant=true;
+int  geant=false;
  
 int rdMuWana(
 	     int nEve=2e3,
@@ -38,7 +39,7 @@ char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSe
   if(isJanWjj && isMC &&  useJetFinder==2) geant=true;
 
 
-  if(isMC==100)  jetTreeDir="./";
+  if(isMC==100||isMC==200 )  jetTreeDir="./";
   if(isMC==104)   jetTreeDir ="/star/data05/scratch/balewski/2010-Wsimu-a3/jetR04/";
   if(isMC==105)  jetTreeDir="/star/data01/pwg/balewski/2010-Wsimu-setC/jetR04split05/";
   if(isMC==107)  jetTreeDir="/star/data01/pwg/balewski/2010-Wsimu-setC/jetR07/";
@@ -68,7 +69,8 @@ char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSe
     printf("OutF=%s=\n",outF.Data());
   } 
   else { //  new  MC w/ working time stamp
-    char *file1=strstr(file,"rcn100"); assert(file1);
+    char *file1=strstr(file,"cn100"); assert(file1);
+    file1--;
     printf("file1=%s=\n",file1);
     outF=file1; outF.ReplaceAll(".MuDst.root","");
     TString fileG=file; fileG.ReplaceAll("MuDst","geant");
@@ -119,16 +121,15 @@ char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSe
     cout << "\nWARN: Jet are NOT read in, W-algo will not wrk properly\n " << endl;
   }
 
-  // libraries for access to MC record         
   if(geant){                                  
+    // libraries for access to MC record  
     assert( !gSystem->Load("StMcEvent"));      
     assert( !gSystem->Load("StMcEventMaker")); 
-
-    //following three are for trigger simulator
+  
+    // libraries for trigger simulator
     assert( !gSystem->Load("StEmcSimulatorMaker"));
     assert( !gSystem->Load("StEEmcSimulatorMaker"));
     assert( !gSystem->Load("StEpcMaker"));
-
   }
   
   cout << " loading done " << endl;
@@ -137,9 +138,6 @@ char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSe
   chain = new StChain("StChain"); 
   // create histogram storage array  (everybody needs it):
   TObjArray* HList=new TObjArray;
-
-
-
 
   if(geant){                          
     // get geant file                    
@@ -174,10 +172,12 @@ char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSe
     dbMk->SetFlavor("missetTCD","eemcPMTcal");  // ETOW gains , not-standard
     dbMk->SetFlavor("sim","bemcCalib"); // use ideal gains for 2009 real data as well
   }   
-  else if(isMC>=100) {
+  else if(isMC>=100 && isMC<200) { // to be used w/ M-C generated before EEss was added to BFC
     dbMk->SetMaxEntryTime(20100420,0); // keep the same DB snap-shot as used in BFC
     dbMk->SetFlavor("sim","eemcPMTped"); // to compensate action of fast simu
     dbMk->SetFlavor("sim","eemcPMTcal"); // to compensate action of fast simu
+  }   else if(isMC>=200 ) {  // new M-C w/ EEss in BFC
+    dbMk->SetMaxEntryTime(20100420,0); // keep the same DB snap-shot as used in BFC
   } else {
     printf("???? unforeseen MC flag, ABORT\n"); assert(1==2);
   }
@@ -200,38 +200,30 @@ char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSe
     mcEventMaker->doPrintMemoryInfo = false;              
   }
   
-  if (geant){
+  if(geant && useJetFinder!=1){ //only use trigger simulator in W algo
     //BEMC simulator:
     StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker(); //use this instead to "redo" converstion from geant->adc
     emcSim->setCalibSpread(kBarrelEmcTowerId,0.15);//spread gains by 15%
     StEmcADCtoEMaker *bemcAdc = new StEmcADCtoEMaker();//for real data this sets calibration and status
 
-
     //EEMC simulator:
     new StEEmcDbMaker("eemcDb");
     StEEmcSlowMaker *slowSim = new StEEmcSlowMaker("slowSim");
-    slowSim->setSamplingFraction(0.0384); // effectively scales all Tower energies with a factor of 1.3 (added by: Ilya Selyuzhenkov; April 11, 2008)
+    //slowSim->setSamplingFraction(0.0384); // effectively scales all Tower energies with a factor of 1.3 (for old private filtered simu only!)
     slowSim->setAddPed(true);
     slowSim->setSmearPed(true);
 
-
+    //Get TriggerMaker
+    StTriggerSimuMaker *simuTrig = new StTriggerSimuMaker("StarTrigSimu");
+    simuTrig->setHList(HList);
+    simuTrig->setMC(isMC); // must be before individual detectors, to be passed
+    simuTrig->useBbc();
+    simuTrig->useEemc(0);//default=0:just process ADC, 1,2:comp w/trgData,see .
+    simuTrig->eemc->setSetupPath(eemcSetupPath);
+    simuTrig->useBemc();
+    simuTrig->bemc->setConfig(2);
   }
-  //Get TriggerMaker
-  StTriggerSimuMaker *simuTrig = new StTriggerSimuMaker("StarTrigSimu");
-  simuTrig->setHList(HList);
-  simuTrig->setMC(isMC); // must be before individual detectors, to be passed
-  simuTrig->useBbc();
-  simuTrig->useEemc(0);//default=0:just process ADC, 1,2:comp w/trgData,see .
-  simuTrig->eemc->setSetupPath(eemcSetupPath);
-  simuTrig->useBemc();
-  simuTrig->bemc->setConfig(2);
-
-
-
-
-
-
-
+  
   //.... Jet finder code ....
   if (useJetFinder > 0)  {
     TString outFile = "jets_"+outF+".root";
@@ -482,6 +474,9 @@ char *eemcSetupPath="/afs/rhic.bnl.gov/star/users/kocolosk/public/StarTrigSimuSe
 
 
 // $Log: rdMuWana.C,v $
+// Revision 1.41  2010/08/13 16:29:07  balewski
+// *** empty log message ***
+//
 // Revision 1.40  2010/06/30 19:00:19  rcorliss
 // passes_L0() now works for simulation, using trigger simu in new macro
 //
