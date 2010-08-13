@@ -78,7 +78,7 @@ StL2_2006EmulatorMaker::InitRun(int runNo){
   assert( mYearMonthDay >= 20060406 ); // before ppTrans
   assert( mYearMonthDay <= 20060607 ); // after ppLong2
   
-  mL2algo[2]=mL2gammaEEmc=new L2gammaAlgo("etow_gamma",mL2EmcDb,mL2EmcDb->logPath,L2RESULTS_OFFSET_PIG);
+  mL2algo[2]=mL2gammaEEmc=new L2gammaAlgo("etow_gamma",mL2EmcDb,mL2EmcDb->logPath,L2RESULTS_OFFSET_PIG+2);
   mL2algo[3]=mL2gammaBEmc=new L2gammaAlgo("btow_gamma",mL2EmcDb,mL2EmcDb->logPath,L2RESULTS_OFFSET_PIG);
 
   // ----------- L2 Upsilon algo ----------------  slot 4
@@ -252,7 +252,7 @@ StL2_2006EmulatorMaker::getTriggerData(){
 }
 
 
-// $Id: StL2_2006EmulatorMaker.cxx,v 1.12 2008/01/30 15:09:32 balewski Exp $
+// $Id: StL2_2006EmulatorMaker.cxx,v 1.13 2010/08/13 00:44:16 rfatemi Exp $
 //
 
 
