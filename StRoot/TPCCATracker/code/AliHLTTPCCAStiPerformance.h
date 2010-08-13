@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAStiPerformance.h,v 1.3 2010/08/13 14:39:49 ikulakov Exp $
+// $Id: AliHLTTPCCAStiPerformance.h,v 1.4 2010/08/13 18:17:21 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -39,7 +39,7 @@ class AliHLTTPCCATracker;
 /**
  * @class AliHLTTPCCAStiPerformance
  */
-class AliHLTTPCCAStiPerformance: public AliHLTTPCCAPerformanceBase
+class AliHLTTPCCAStiPerformance: public AliHLTTPCCAPerformanceBase // TODO public GlobalPerfo
 {
   public:
 
@@ -50,7 +50,8 @@ class AliHLTTPCCAStiPerformance: public AliHLTTPCCAPerformanceBase
                              AliHLTResizableArray<AliHLTTPCCAHitLabel> *hitLabels,
                              AliHLTResizableArray<AliHLTTPCCAMCTrack> *mcTracks,
                              AliHLTResizableArray<AliHLTTPCCALocalMCPoint> *localMCPoints);
-    
+  void SetTracker(const AliHLTTPCCAGBTracker * const Tracker) { fTracker = Tracker;};
+  
       /// Efficiency
       // Check if MC track is reconstructable. Calculate set of MC track. Etc.
     virtual void CheckMCTracks(); // fill mcData.
