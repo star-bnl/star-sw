@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.41 2010/08/13 22:21:11 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.42 2010/08/13 22:55:18 pibero Exp $
 
 // MySQL C API
 #include "mysql.h"
@@ -319,6 +319,13 @@ bool StTriggerSimuMaker::getTriggerDefinitions(int runNumber)
 	strcpy(trigDef.name,trigdef->name.Data());
 	trigDef.triggerId = trigdef->triggerId;
 	trigDef.onbits = trigdef->onbits;
+	trigDef.offbits = trigdef->offbits;
+	trigDef.onbits1 = trigdef->onbits1;
+	trigDef.onbits2 = trigdef->onbits2;
+	trigDef.onbits3 = trigdef->onbits3;
+	trigDef.offbits1 = trigdef->offbits1;
+	trigDef.offbits2 = trigdef->offbits2;
+	trigDef.offbits3 = trigdef->offbits3;
 	emc->defineTrigger(trigDef);
       }
       a->Delete();
@@ -676,6 +683,9 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.42  2010/08/13 22:55:18  pibero
+ * Added onbits1-3 and offbits1-3
+ *
  * Revision 1.41  2010/08/13 22:21:11  pibero
  * Move from online to offline DB
  *
