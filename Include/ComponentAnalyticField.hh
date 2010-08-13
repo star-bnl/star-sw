@@ -198,7 +198,14 @@ class ComponentAnalyticField : public ComponentBase {
     
     // Point charges
     int n3d;
-    
+    struct charge3d {
+      double x, y, z;
+      double e;
+    };
+    std::vector<charge3d> ch3d;
+    int nTermBessel;
+    int nTermPoly;
+     
     // Gravity
     double down[3];
     
@@ -245,7 +252,8 @@ class ComponentAnalyticField : public ComponentBase {
     
     // Evaluation of the electric field
     int Field(const double xin, const double yin, const double zin,
-              double& ex, double& ey, double& ez, double& volt, const bool opt);
+              double& ex, double& ey, double& ez, double& volt, 
+              const bool opt);
     void FieldA00(const double xpos, const double ypos,
                   double& ex, double& ey, double& volt, const bool opt);
     void FieldB1X(const double xpos, const double ypos,
@@ -271,6 +279,15 @@ class ComponentAnalyticField : public ComponentBase {
     void FieldD30(const double xpos, const double ypos,
                   double& ex, double& ey, double& volt, const bool opt);
 
+    // Field due to point charges
+    void Field3dA00(const double x, const double y, const double z,
+                    double& ex, double& ey, double& ez, double& volt);
+    void Field3dB2X(const double x, const double y, const double z,
+                    double& ex, double& ey, double& ez, double& volt);
+    void Field3dB2Y(const double x, const double y, const double z,
+                    double& ex, double& ey, double& ez, double& volt);
+    void Field3dD10(const double x, const double y, const double z,
+                    double& ex, double& ey, double& ez, double& volt);
     // Evaluation of the weighting field
     bool Wfield(const double xpos, const double ypos, const double zpos,
                 double& ex, double& ey, double& ez, const int isw);

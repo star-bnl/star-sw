@@ -399,7 +399,7 @@ ComponentAnalyticField::Field(
   // Initialise the field for returns without actual calculations.
   ex = ey = ez = volt = 0.;
   
-  double xpos = xin, ypos = yin, zpos = zin;
+  double xpos = xin, ypos = yin;
   
   // In case of periodicity, move the point into the basic cell.
   if (perx) {
@@ -553,19 +553,19 @@ ComponentAnalyticField::Field(
       case 1:
       case 2:
       case 3:
-        // CALL E3DA00(XIN,YIN,ZIN,EX3D,EY3D,EZ3D,V3D)
+        Field3dA00(xin, yin, zin, ex3d, ey3d, ez3d, volt3d);
         break;
       case 4:
-        // CALL E3DB2X(XIN,YIN,ZIN,EX3D,EY3D,EZ3D,V3D)
+        Field3dB2X(xin, yin, zin, ex3d, ey3d, ez3d, volt3d);
         break;
       case 5:
-        // CALL E3DB2Y(XIN,YIN,ZIN,EX3D,EY3D,EZ3D,V3D)
+        Field3dB2Y(xin, yin, zin, ex3d, ey3d, ez3d, volt3d);
         break;
       case 10:
-        // CALL E3DD10(XIN,YIN,ZIN,EX3D,EY3D,EZ3D,V3D)
+        Field3dD10(xin, yin, zin, ex3d, ey3d, ez3d, volt3d);
         break;
       default:
-        // CALL E3DA00(XIN,YIN,ZIN,EX3D,EY3D,EZ3D,V3D)
+        Field3dA00(xin, yin, zin, ex3d, ey3d, ez3d, volt3d);
         break;
     }
     ex += ex3d;
@@ -675,6 +675,9 @@ ComponentAnalyticField::CellInit() {
   
   // 3D charges.
   n3d = 0;
+  ch3d.clear();
+  nTermBessel = 10;
+  nTermPoly = 100;
   
   // Gravity.
   down[0] = down[1] = 0.;
@@ -3370,6 +3373,581 @@ ComponentAnalyticField::InitializeCoefficientTables() {
   cc1[3].assign(cc16, cc16 + nterms); cc2[3].assign(cc26, cc26 + nterms);
   cc1[4].assign(cc17, cc17 + nterms); cc2[4].assign(cc27, cc27 + nterms);
   cc1[5].assign(cc18, cc18 + nterms); cc2[5].assign(cc28, cc28 + nterms);
+  
+}
+
+void
+ComponentAnalyticField::Field3dA00(
+      const double xpos, const double ypos, const double zpos,
+      double& ex, double& ey, double& ez, double& volt) {
+      
+//-----------------------------------------------------------------------
+//   E3DA00 - Subroutine adding 3-dimensional charges for A cells.
+//            The potential used is 1/2*pi*eps0  1/r
+//   VARIABLES : EX, EY     : x,y-component of the electric field.
+//               ETOT       : Magnitude of electric field.
+//               VOLT       : Potential.
+//               EXHELP etc : One term in the series to be summed.
+//               (XPOS,YPOS): The position where the field is calculated.
+//   (Last changed on  5/12/94.)
+//-----------------------------------------------------------------------
+ 
+  double r, exhelp, eyhelp, ezhelp, vhelp;
+  double xxmirr = 0., yymirr = 0., rplan;
+  
+  // Initialise the potential and the electric field.
+  ex = ey = ez = volt = 0.;
+  
+  // Loop over all charges.
+  for (int i = 0; i < n3d; ++i) {
+    // Calculate the field in case there are no planes.
+    r = sqrt(pow(xpos - ch3d[i].x, 2) + 
+             pow(ypos - ch3d[i].y, 2) + 
+             pow(zpos - ch3d[i].z, 2));
+    if (r == 0.) continue;
+    exhelp = -(xpos - ch3d[i].x) / pow(r, 3);
+    eyhelp = -(ypos - ch3d[i].y) / pow(r, 3);
+    ezhelp = -(zpos - ch3d[i].z) / pow(r, 3);
+    vhelp = 1. / r;
+    // Take care of a plane at constant x.
+    if (ynplax) {
+      xxmirr = ch3d[i].x + xpos - 2 * coplax;
+      rplan = sqrt(xxmirr * xxmirr + pow(ypos -ch3d[i].y, 2));
+      if (rplan == 0.) continue;
+      exhelp += xxmirr / pow(rplan, 3);
+      eyhelp += (ypos - ch3d[i].y) / pow(rplan, 3);
+      ezhelp += (zpos - ch3d[i].z) / pow(rplan, 3);
+      vhelp -= 1. / rplan;
+    }
+    // Take care of a plane at constant y.
+    if (ynplay) {
+      yymirr = ch3d[i].y + ypos - 2. * coplay;
+      rplan = sqrt(pow(xpos - ch3d[i].x, 2) + yymirr * yymirr);
+      if (rplan == 0.) continue;
+      exhelp += (xpos - ch3d[i].x) / pow(rplan, 3);
+      eyhelp += yymirr / pow(rplan, 3);
+      ezhelp += (zpos - ch3d[i].z) / pow(rplan, 3);
+      vhelp -= 1. / rplan;
+    }
+    // Take care of pairs of planes.
+    if (ynplax && ynplay) {
+      rplan = sqrt(xxmirr * xxmirr + yymirr * yymirr);
+      if (rplan == 0.) continue;
+      exhelp -= xxmirr / pow(rplan, 3);
+      eyhelp -= yymirr / pow(rplan, 3);
+      ezhelp -= (zpos - ch3d[i].z) / pow(rplan, 3);
+      vhelp += 1. / rplan;
+    }
+    // Add the terms to the electric field and the potential.
+    ex -= ch3d[i].e * exhelp;
+    ey -= ch3d[i].e * eyhelp;
+    ez -= ch3d[i].e * ezhelp;
+    volt += ch3d[i].e * vhelp;
+  }
+  
+}
+
+void
+ComponentAnalyticField::Field3dB2X(
+      const double xpos, const double ypos, const double zpos,
+      double& ex, double& ey, double& ez, double& volt) {
+      
+//-----------------------------------------------------------------------
+//   E3DB2X - Routine calculating the potential for a 3 dimensional point
+//            charge between two plates at constant x.
+//            The series expansions for the modified Bessel functions
+//            have been taken from Abramowitz and Stegun.
+//   VARIABLES : See routine E3DA00 for most of the variables.
+//   (Last changed on  5/12/94.)
+//-----------------------------------------------------------------------
+
+  const double rcut = 1.;
+  
+  double rr, rrm, zzp, zzn, rr1, rr2, rm1, rm2, err, ezz;
+  double exsum = 0., eysum = 0., ezsum = 0., vsum = 0.;
+  double k0r, k1r, k0rm, k1rm;
+  
+  // Initialise the sums for the field components.
+  ex = ey = ez = volt = 0.;
+  
+  // Loop over all wires.
+  for (int i = 0; i < n3d; ++i) {
+    // Skip wires that are on the charge.
+    if (xpos == ch3d[i].x && 
+        ypos == ch3d[i].y && 
+        zpos == ch3d[i].z) continue;
+    // In the far away zone, sum the modified Bessel function series.
+    if (pow(ypos - ch3d[i].y, 2) + pow(zpos - ch3d[i].z, 2) > 
+        pow(rcut * 2 * sx, 2)) {
+      //Initialise the per-wire sum.
+      exsum = eysum = ezsum = vsum = 0.;
+      // Loop over the terms in the series.
+      for (int j = 1; j <= nTermBessel; ++j) {
+        // Obtain reduced coordinates.
+        rr = Pi * j * sqrt(pow(ypos - ch3d[i].y, 2) + 
+                           pow(zpos - ch3d[i].z, 2)) / sx;
+        zzp = Pi * j * (xpos - ch3d[i].x) / sx;
+        zzn = Pi * j * (xpos + ch3d[i].x - 2 * coplax) / sx;
+        // Evaluate the Bessel functions for this R.
+        if (rr < 2.) {
+          k0r = Numerics::BesselK0S(rr); 
+          k1r = Numerics::BesselK1S(rr);
+        } else {
+          k0r = Numerics::BesselK0L(rr); 
+          k1r = Numerics::BesselK1L(rr);
+        }
+        // Get the field components.
+        vsum += (1. / sx) * k0r * (cos(zzp) - cos(zzn));
+        err = (TwoPi * j / (sx * sx)) * k1r * (cos(zzp) - cos(zzn));
+        ezz = (TwoPi * j / (sx * sx)) * k0r * (sin(zzp) - sin(zzn));
+        exsum += ezz;
+        eysum += err * (ypos - ch3d[i].y) / 
+                 sqrt(pow(ypos - ch3d[i].y, 2) + pow(zpos - ch3d[i].z, 2));
+        ezsum += err * (zpos - ch3d[i].z) /
+                 sqrt(pow(ypos - ch3d[i].y, 2) + pow(zpos - ch3d[i].z, 2));
+        continue;
+      }
+    } else {
+      // Direct polynomial summing, obtain reduced coordinates.
+      // Loop over the terms.
+      for (int j = 0; j <= nTermPoly; ++j) {
+        // Simplify the references to the distances.
+        rr1 = sqrt(pow(xpos - ch3d[i].x + j * 2 * sx, 2) +
+                   pow(ypos - ch3d[i].y, 2) + 
+                   pow(zpos - ch3d[i].z, 2));
+        rr2 = sqrt(pow(xpos - ch3d[i].x - j * 2 * sx, 2) +
+                   pow(ypos - ch3d[i].y, 2) + 
+                   pow(zpos - ch3d[i].z, 2));
+        rm1 = sqrt(pow(xpos + ch3d[i].x - j * 2 * sx - 2. * coplax, 2) +
+                   pow(ypos - ch3d[i].y, 2) + 
+                   pow(zpos - ch3d[i].z, 2));
+        rm2 = sqrt(pow(xpos + ch3d[i].x + j * 2 * sx - 2. * coplax, 2) +
+                   pow(ypos - ch3d[i].y, 2) + 
+                   pow(zpos - ch3d[i].z, 2));
+      
+        // Initialisation of the sum: only a charge and a mirror charge.
+        if (j == 0) {
+          vsum = 1. / rr1 - 1. / rm1;
+          exsum = (xpos - ch3d[i].x) / pow(rr1, 3) -
+                  (xpos + ch3d[i].x - 2. * coplax) / pow(rm1, 3);
+          eysum = (ypos - ch3d[i].y) * (1. / pow(rr1, 3) - 
+                                        1. / pow(rm1, 3));
+          ezsum = (zpos - ch3d[i].z) * (1. / pow(rr1, 3) - 
+                                        1. / pow(rm1, 3));
+          continue;
+        }
+        // Further terms in the series: 2 charges and 2 mirror charges.
+        vsum += 1. / rr1 + 1. / rr2 - 1. / rm1 - 1. / rm2;
+        exsum += (xpos - ch3d[i].x + j * 2 * sx) / pow(rr1, 3) +
+                 (xpos - ch3d[i].x - j * 2 * sx) / pow(rr2, 3) -
+                 (xpos + ch3d[i].x - j * 2 * sx - 2 * coplax) / pow(rm1, 3) - 
+                 (xpos + ch3d[i].x + j * 2 * sx - 2 * coplax) / pow(rm2, 3);
+        eysum += (ypos - ch3d[i].y) * (1. / pow(rr1, 3) + 1. / pow(rr2, 3) -
+                                       1. / pow(rm1, 3) - 1. / pow(rm2, 3));
+        ezsum += (zpos - ch3d[i].z) * (1. / pow(rr1, 3) + 1. / pow(rr2, 3) -
+                                       1. / pow(rm1, 3) - 1. / pow(rm2, 3));
+      }
+    }
+    // Take care of a plane at constant y.
+    if (ynplay) {
+      if (pow(ypos + ch3d[i].y - 2. * coplay, 2) + pow(zpos - ch3d[i].z, 2) >
+          pow(rcut * 2 * sx, 2)) {
+        // Bessel function series.
+        // Loop over the terms in the series.
+        for (int j = 1; j <= nTermBessel; ++j) {
+          // Obtain reduced coordinates.
+          rrm = Pi * j * sqrt(pow(ypos * ch3d[i].y - 2 * coplay, 2) +
+                              pow(zpos - ch3d[i].z, 2)) / sx;
+          zzp = Pi * j * (xpos - ch3d[i].x) / sx;
+          zzn = Pi * j * (xpos + ch3d[i].x - 2 * coplax) / sx;
+          // Evaluate the Bessel functions for this R.
+          if (rrm < 2.) {
+            k0rm = Numerics::BesselK0S(rrm); 
+            k1rm = Numerics::BesselK1S(rrm);
+          } else {
+            k0rm = Numerics::BesselK0L(rrm);
+            k1rm = Numerics::BesselK1L(rrm);
+          }
+          // Get the field components.
+          vsum += (1. / sx) * k0rm * (cos(zzp) - cos(zzn));
+          err = (TwoPi / (sx * sx)) * k1rm * (cos(zzp) - cos(zzn));
+          ezz = (TwoPi / (sx * sx)) * k0rm * (sin(zzp) - sin(zzn));
+          exsum += ezz;
+          eysum += err * (ypos + ch3d[i].y - 2 * coplay) /
+                   sqrt(pow(ypos + ch3d[i].y - 2 * coplay, 2) +
+                        pow(zpos - ch3d[i].z, 2));
+          ezsum += err * (zpos - ch3d[i].z - 2 * coplay) /
+                   sqrt(pow(zpos - ch3d[i].z, 2));
+        }
+      } else {
+        // Polynomial sum.
+        // Loop over the terms.
+        for (int j = 0; j <= nTermPoly; ++j) {
+          // Simplify the references to the distances.
+          rr1 = sqrt(pow(xpos - ch3d[i].x + j * 2 * sx, 2) +
+                     pow(ypos + ch3d[i].y - 2 * coplay, 2) +
+                     pow(zpos - ch3d[i].z, 2));
+          rr2 = sqrt(pow(xpos - ch3d[i].x - j * 2 * sx, 2) +
+                     pow(ypos + ch3d[i].y - 2 * coplay, 2) +
+                     pow(zpos - ch3d[i].z, 2));
+          rm1 = sqrt(pow(xpos + ch3d[i].x - j * 2 * sx - 2 * coplax, 2) +
+                     pow(ypos + ch3d[i].y - 2 * coplay, 2) +
+                     pow(zpos - ch3d[i].z, 2));
+          rm2 = sqrt(pow(xpos + ch3d[i].x + j * 2 * sx - 2 * coplax, 2) +
+                     pow(ypos + ch3d[i].y - 2 * coplay, 2) +
+                     pow(zpos - ch3d[i].z, 2));
+          // Initialisation of the sum: only a charge and a mirror charge.
+          if (j == 0) {
+            vsum += -1. / rr1 + 1. / rm1;
+            exsum += -(xpos - ch3d[i].x) / pow(rr1, 3) +
+                      (xpos + ch3d[i].x - 2 * coplax) / pow(rm1, 3);
+            eysum += -(ypos + ch3d[i].y - 2 * coplay) * (1. / pow(rr1, 3) -
+                                                         1. / pow(rm1, 3));
+            ezsum += -(zpos - ch3d[i].z) * (1. / pow(rr1, 3) - 
+                                            1. / pow(rm1, 3));
+            continue;
+          }
+          // Further terms in the series: 2 charges and 2 mirror charges.
+          vsum += - 1. / rr1 - 1. / rr2 + 1. / rm1 + 1. / rm2;
+          exsum += -(xpos - ch3d[i].x + j * 2 * sx) / pow(rr1, 3) -
+                    (xpos - ch3d[i].x - j * 2 * sx) / pow(rr2, 3) +
+                (xpos + ch3d[i].x - j * 2 * sx - 2 * coplax) / pow(rm1, 3) +
+                (xpos + ch3d[i].x + j * 2 * sx - 2 * coplax) / pow(rm2, 3);
+          eysum += -(ypos + ch3d[i].y - 2 * coplay) * (1. / pow(rr1, 3) +
+                                                       1. / pow(rr2, 3) - 
+                                                       1. / pow(rm1, 3) -
+                                                       1. / pow(rm2, 3));
+          ezsum += -(zpos - ch3d[i].z) * (1. / pow(rr1, 3) + 
+                                          1. / pow(rr2, 3) -
+                                          1. / pow(rm1, 3) - 
+                                          1. / pow(rm2, 3));
+        }
+      }
+    }
+    ex += ch3d[i].e * exsum;
+    ey += ch3d[i].e * eysum;
+    ez += ch3d[i].e * ezsum;
+    volt += ch3d[i].e * vsum;
+  }
+  
+}
+
+void
+ComponentAnalyticField::Field3dB2Y(
+      const double xpos, const double ypos, const double zpos,
+      double& ex, double& ey, double& ez, double& volt) {
+      
+//-----------------------------------------------------------------------
+//   E3DB2Y - Routine calculating the potential for a 3 dimensional point
+//            charge between two plates at constant y.
+//            The series expansions for the modified Bessel functions
+//            have been taken from Abramowitz and Stegun.
+//   VARIABLES : See routine E3DA00 for most of the variables.
+//   (Last changed on  5/12/94.)
+//-----------------------------------------------------------------------
+
+  const double rcut = 1.;
+  
+  double rr, rrm, zzp, zzn, rr1, rr2, rm1, rm2, err, ezz;
+  double exsum = 0., eysum = 0., ezsum = 0., vsum = 0.;
+  double k0r, k1r, k0rm, k1rm;
+  
+  // Initialise the sums for the field components.
+  ex = ey = ez = volt = 0.;
+  
+  // Loop over all wires.
+  for (int i = 0; i < n3d; ++i) {
+    // Skip wires that are on the charge.
+    if (xpos == ch3d[i].x && 
+        ypos == ch3d[i].y && 
+        zpos == ch3d[i].z) continue;
+    // In the far away zone, sum the modified Bessel function series.
+    if (pow(xpos - ch3d[i].x, 2) + pow(zpos - ch3d[i].z, 2) > 
+        pow(rcut * 2 * sx, 2)) {
+      //Initialise the per-wire sum.
+      exsum = eysum = ezsum = vsum = 0.;
+      // Loop over the terms in the series.
+      for (int j = 1; j <= nTermBessel; ++j) {
+        // Obtain reduced coordinates.
+        rr = Pi * j * sqrt(pow(xpos - ch3d[i].x, 2) + 
+                           pow(zpos - ch3d[i].z, 2)) / sy;
+        zzp = Pi * j * (ypos - ch3d[i].y) / sy;
+        zzn = Pi * j * (ypos + ch3d[i].y - 2 * coplay) / sy;
+        // Evaluate the Bessel functions for this R.
+        if (rr < 2.) {
+          k0r = Numerics::BesselK0S(rr); 
+          k1r = Numerics::BesselK1S(rr);
+        } else {
+          k0r = Numerics::BesselK0L(rr); 
+          k1r = Numerics::BesselK1L(rr);
+        }
+        // Get the field components.
+        vsum += (1. / sy) * k0r * (cos(zzp) - cos(zzn));
+        err = (TwoPi * j / (sy * sy)) * k1r * (cos(zzp) - cos(zzn));
+        ezz = (TwoPi * j / (sy * sy)) * k0r * (sin(zzp) - sin(zzn));
+        exsum += err * (xpos - ch3d[i].x) / 
+                 sqrt(pow(xpos - ch3d[i].x, 2) + pow(zpos - ch3d[i].z, 2));
+        eysum += ezz;
+        ezsum += err * (zpos - ch3d[i].z) /
+                 sqrt(pow(xpos - ch3d[i].x, 2) + pow(zpos - ch3d[i].z, 2));
+        continue;
+      }
+    } else {
+      // Direct polynomial summing, obtain reduced coordinates.
+      // Loop over the terms.
+      for (int j = 0; j <= nTermPoly; ++j) {
+        // Simplify the references to the distances.
+        rr1 = sqrt(pow(xpos - ch3d[i].x, 2) +
+                   pow(ypos - ch3d[i].y + j * 2 * sy, 2) + 
+                   pow(zpos - ch3d[i].z, 2));
+        rr2 = sqrt(pow(xpos - ch3d[i].x, 2) + 
+                   pow(ypos - ch3d[i].y - j * 2 * sy, 2) + 
+                   pow(zpos - ch3d[i].z, 2));
+        rm1 = sqrt(pow(xpos - ch3d[i].x, 2) +
+                   pow(ypos + ch3d[i].y - j * 2 * sy - 2 * coplay, 2) + 
+                   pow(zpos - ch3d[i].z, 2));
+        rm2 = sqrt(pow(xpos - ch3d[i].x, 2) + 
+                   pow(ypos + ch3d[i].y + j * 2 * sy - 2 * coplay, 2) + 
+                   pow(zpos - ch3d[i].z, 2));
+      
+        // Initialisation of the sum: only a charge and a mirror charge.
+        if (j == 0) {
+          vsum = 1. / rr1 - 1. / rm1;
+          exsum = (xpos - ch3d[i].x) * (1. / pow(rr1, 3) - 
+                                        1. / pow(rm1, 3));
+          eysum = (ypos - ch3d[i].y) / pow(rr1, 3) -
+                  (ypos + ch3d[i].y - 2. * coplay) / pow(rm1, 3);
+          ezsum = (zpos - ch3d[i].z) * (1. / pow(rr1, 3) - 
+                                        1. / pow(rm1, 3));
+          continue;
+        }
+        // Further terms in the series: 2 charges and 2 mirror charges.
+        vsum += 1. / rr1 + 1. / rr2 - 1. / rm1 - 1. / rm2;
+        exsum += (xpos - ch3d[i].x) * (1. / pow(rr1, 3) + 1. / pow(rr2, 3) -
+                                       1. / pow(rm1, 3) - 1. / pow(rm2, 3));
+        eysum += (ypos - ch3d[i].y + j * 2 * sy) / pow(rr1, 3) +
+                 (ypos - ch3d[i].y - j * 2 * sy) / pow(rr2, 3) -
+                 (ypos + ch3d[i].y - j * 2 * sy - 2 * coplay) / pow(rm1, 3) - 
+                 (ypos + ch3d[i].y + j * 2 * sy - 2 * coplay) / pow(rm2, 3);
+        ezsum += (zpos - ch3d[i].z) * (1. / pow(rr1, 3) + 1. / pow(rr2, 3) -
+                                       1. / pow(rm1, 3) - 1. / pow(rm2, 3));
+      }
+    }
+    // Take care of a plane at constant x.
+    if (ynplax) {
+      if (pow(xpos + ch3d[i].x - 2. * coplax, 2) + pow(zpos - ch3d[i].z, 2) >
+          pow(rcut * 2 * sy, 2)) {
+        // Bessel function series.
+        // Loop over the terms in the series.
+        for (int j = 1; j <= nTermBessel; ++j) {
+          // Obtain reduced coordinates.
+          rrm = Pi * j * sqrt(pow(xpos * ch3d[i].x - 2 * coplax, 2) +
+                              pow(zpos - ch3d[i].z, 2)) / sy;
+          zzp = Pi * j * (ypos - ch3d[i].y) / sy;
+          zzn = Pi * j * (ypos + ch3d[i].y - 2 * coplay) / sy;
+          // Evaluate the Bessel functions for this R.
+          if (rrm < 2.) {
+            k0rm = Numerics::BesselK0S(rrm); 
+            k1rm = Numerics::BesselK1S(rrm);
+          } else {
+            k0rm = Numerics::BesselK0L(rrm);
+            k1rm = Numerics::BesselK1L(rrm);
+          }
+          // Get the field components.
+          vsum += (1. / sy) * k0rm * (cos(zzp) - cos(zzn));
+          err = (TwoPi / (sy * sy)) * k1rm * (cos(zzp) - cos(zzn));
+          ezz = (TwoPi / (sy * sy)) * k0rm * (sin(zzp) - sin(zzn));
+          exsum += err * (xpos + ch3d[i].x - 2 * coplax) /
+                   sqrt(pow(xpos + ch3d[i].x - 2 * coplax, 2) +
+                        pow(zpos - ch3d[i].z, 2));
+          eysum += ezz;
+          ezsum += err * (zpos - ch3d[i].z - 2 * coplax) /
+                   sqrt(pow(zpos - ch3d[i].z, 2));
+        }
+      } else {
+        // Polynomial sum.
+        // Loop over the terms.
+        for (int j = 0; j <= nTermPoly; ++j) {
+          // Simplify the references to the distances.
+          rr1 = sqrt(pow(ypos - ch3d[i].y + j * 2 * sy, 2) +
+                     pow(xpos + ch3d[i].x - 2 * coplax, 2) +
+                     pow(zpos - ch3d[i].z, 2));
+          rr2 = sqrt(pow(ypos - ch3d[i].y - j * 2 * sy, 2) +
+                     pow(xpos + ch3d[i].x - 2 * coplax, 2) +
+                     pow(zpos - ch3d[i].z, 2));
+          rm1 = sqrt(pow(ypos + ch3d[i].y - j * 2 * sy - 2 * coplay, 2) +
+                     pow(xpos + ch3d[i].x - 2 * coplax, 2) +
+                     pow(zpos - ch3d[i].z, 2));
+          rm2 = sqrt(pow(ypos + ch3d[i].y + j * 2 * sy - 2 * coplay, 2) +
+                     pow(xpos + ch3d[i].x - 2 * coplax, 2) +
+                     pow(zpos - ch3d[i].z, 2));
+          // Initialisation of the sum: only a charge and a mirror charge.
+          if (j == 0) {
+            vsum += -1. / rr1 + 1. / rm1;
+            exsum += -(xpos + ch3d[i].x - 2 * coplax) * (1. / pow(rr1, 3) -
+                                                         1. / pow(rm1, 3));
+            eysum += -(ypos - ch3d[i].y) / pow(rr1, 3) +
+                      (ypos + ch3d[i].y - 2 * coplay) / pow(rm1, 3);
+            ezsum += -(zpos - ch3d[i].z) * (1. / pow(rr1, 3) - 
+                                            1. / pow(rm1, 3));
+            continue;
+          }
+          // Further terms in the series: 2 charges and 2 mirror charges.
+          vsum += - 1. / rr1 - 1. / rr2 + 1. / rm1 + 1. / rm2;
+          exsum += -(xpos + ch3d[i].x - 2 * coplax) * (1. / pow(rr1, 3) +
+                                                       1. / pow(rr2, 3) - 
+                                                       1. / pow(rm1, 3) -
+                                                       1. / pow(rm2, 3));
+          eysum += -(ypos - ch3d[i].y + j * 2 * sy) / pow(rr1, 3) -
+                    (ypos - ch3d[i].y - j * 2 * sy) / pow(rr2, 3) +
+                (ypos + ch3d[i].y - j * 2 * sy - 2 * coplay) / pow(rm1, 3) +
+                (ypos + ch3d[i].y + j * 2 * sy - 2 * coplay) / pow(rm2, 3);
+          ezsum += -(zpos - ch3d[i].z) * (1. / pow(rr1, 3) + 
+                                          1. / pow(rr2, 3) -
+                                          1. / pow(rm1, 3) - 
+                                          1. / pow(rm2, 3));
+        }
+      }
+    }
+    ex += ch3d[i].e * exsum;
+    ey += ch3d[i].e * eysum;
+    ez += ch3d[i].e * ezsum;
+    volt += ch3d[i].e * vsum;
+  }
+  
+}
+
+void
+ComponentAnalyticField::Field3dD10(
+      const double xxpos, const double yypos, const double zzpos,
+      double& eex, double& eey, double& eez, double& volt) {
+      
+//-----------------------------------------------------------------------
+//   E3DD10 - Subroutine adding 3-dimensional charges to tubes with one
+//            wire running down the centre.
+//            The series expansions for the modified Bessel functions
+//            have been taken from Abramowitz and Stegun.
+//   VARIABLES : See routine E3DA00 for most of the variables.
+//   (Last changed on 25/11/95.)
+//-----------------------------------------------------------------------
+  
+  const double rcut = 1.;
+
+  double x3d, y3d, z3d;
+  double exsum = 0., eysum = 0., ezsum = 0., vsum = 0.;
+  double rr, zzp, zzn, rr1, rr2, rm1, rm2, err, ezz;
+  double k0r, k1r;
+  
+  // Initialise the sums for the field components.
+  eex = eey = eez = volt = 0.;
+  double ex = 0., ey = 0., ez = 0.;
+  
+  // Ensure that the routine can actually work.
+  if (nWires < 1) {
+    std::cerr << className << "::Field3dD10:\n";
+    std::cerr << "    Inappropriate potential function.\n";
+    return;
+  }
+  
+  // Define a periodicity and one plane in the mapped frame.
+  const double ssx = log(2. * cotube / w[0].d);
+  const double cpl = log(w[0].d / 2.);
+  
+  // Transform the coordinates to the mapped frame.
+  const double xpos = 0.5 * log(xxpos * xxpos + yypos * yypos);
+  const double ypos = atan2(yypos, xxpos);
+  const double zpos = zzpos;
+  
+  // Loop over all point charges.
+  for (int i = 0; i < n3d; ++i) {
+    for (int ii = -1; ii <= 1; ++ii) {
+      x3d = 0.5 * log(ch3d[i].x * ch3d[i].x + ch3d[i].y * ch3d[i].y);
+      y3d = atan2(ch3d[i].y, ch3d[i].x + ii * TwoPi);
+      z3d = ch3d[i].z;
+      // Skip wires that are on the charge.
+      if (xpos == x3d && ypos == y3d && zpos == z3d) continue;
+      // In the far away zone, sum the modified Bessel function series.
+      if (pow(ypos - y3d, 2) + pow(zpos - z3d, 2) > 
+          pow(rcut * 2 * ssx, 2)) {
+        // Initialise the per-wire sum.
+        exsum = eysum = ezsum = vsum = 0.;
+        // Loop over the terms in the series.
+        for (int j = 1; j <= nTermBessel; ++j) {
+          // Obtain reduced coordinates.
+          rr = Pi * j * sqrt(pow(ypos - y3d, 2) + pow(zpos - z3d, 2)) / ssx;
+          zzp = Pi * j * (xpos - x3d) / ssx;
+          zzn = Pi * j * (xpos + x3d - 2 * cpl) / ssx;
+          // Evaluate the Bessel functions for this R.
+          if (rr < 2.) {
+            k0r = Numerics::BesselK0S(rr);
+            k1r = Numerics::BesselK1S(rr);
+          } else {
+            k0r = Numerics::BesselK0L(rr);
+            k1r = Numerics::BesselK1L(rr);
+          }
+          // Get the field components.
+          vsum += (1. / ssx) * k0r * (cos(zzp) - cos(zzn));
+          err = (j * TwoPi / (ssx * ssx)) * k1r * (cos(zzp) - cos(zzn));
+          ezz = (j * TwoPi / (ssx * ssx)) * k0r * (sin(zzp) - sin(zzn));
+          exsum += ezz;
+          eysum += err * (ypos - y3d) /
+                   sqrt(pow(ypos - y3d, 2) + pow(zpos - z3d, 2));
+          ezsum += err * (zpos - z3d) / 
+                   sqrt(pow(ypos - y3d, 2) + pow(zpos - z3d, 2));
+        }
+      } else {
+        // Direct polynomial summing, obtain reduced coordinates.
+        // Loop over the terms.
+        for (int j = 0; j < nTermPoly; ++j) {
+          // Simplify the references to the distances.
+          rr1 = sqrt(pow(xpos - x3d + j * 2 * ssx, 2) +
+                     pow(ypos - y3d, 2) +
+                     pow(zpos - z3d, 2));
+          rr2 = sqrt(pow(xpos - x3d - j * 2 * ssx, 2) +
+                     pow(ypos - y3d, 2) +
+                     pow(zpos - z3d, 2));
+          rm1 = sqrt(pow(xpos + x3d - j * 2 * ssx - 2 * cpl, 2) +
+                     pow(ypos - y3d, 2) + pow(zpos - z3d, 2));
+          rm2 = sqrt(pow(xpos + x3d + j * 2 * ssx - 2 * cpl, 2) +
+                     pow(ypos - y3d, 2) + pow(zpos - z3d, 2));
+          // Initialisation of the sum: only a charge and a mirror charge.
+          if (j == 0) {
+            vsum = 1. / rr1 - 1. / rm1;
+            exsum = (xpos - x3d) / pow(rr1, 3) - 
+                    (xpos + x3d - 2 * cpl) / pow(rm1, 3);
+            eysum = (ypos - y3d) * (1. / pow(rr1, 3) -
+                                    1. / pow(rm1, 3));
+            ezsum = (zpos - z3d) * (1. / pow(rr1, 3) - 
+                                    1. / pow(rm1, 3));
+            continue;
+          }
+          // Further terms in the series: 2 charges and 2 mirror charges.
+          vsum += 1. / rr1 + 1. / rr2 - 1. / rm1 - 1. / rm2;
+          exsum += (xpos - x3d + j * 2 * ssx) / pow(rr1, 3) +
+                   (xpos - x3d - j * 2 * ssx) / pow(rr2, 3) -
+                   (xpos + x3d - j * 2 * ssx - 2 * cpl) / pow(rm1, 3) -
+                   (xpos + x3d + j * 2 * ssx - 2 * cpl) / pow(rm2, 3);
+          eysum += (ypos - y3d) * (1. / pow(rr1, 3) +
+                                   1. / pow(rr2, 3) -
+                                   1. / pow(rm1, 3) -
+                                   1. / pow(rm2, 3));
+          ezsum += (zpos - z3d) * (1. / pow(rr1, 3) +
+                                   1. / pow(rr2, 3) -
+                                   1. / pow(rm1, 3) -
+                                   1. / pow(rm2, 3));
+        }
+      }
+      ex += ch3d[i].e * exsum;
+      ey += ch3d[i].e * eysum;
+      ez += ch3d[i].e * ezsum;
+      // Finish the loop over the charges.
+    }
+  }
+  
+  // Transform the field vectors back to Cartesian coordinates.
+  eex = exp(-xpos) * (ex * cos(ypos) - ey * sin(ypos));
+  eey = exp(-ypos) * (ex * sin(ypos) + ey * cos(ypos));
+  eez = ez;
   
 }
 

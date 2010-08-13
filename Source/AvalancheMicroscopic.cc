@@ -721,14 +721,18 @@ AvalancheMicroscopic::TransportElectron(
           }
           // Place the electron OUTSIDE the drift medium
           x += d * dx; y += d * dy; z += d * dz; 
-          if (useSignal) sensor->AddSignal(-1, stack[iEl].t, t - stack[iEl].t, 
-                                           0.5 * (x - stack[iEl].x), 
-                                           0.5 * (y - stack[iEl].y),
-                                           0.5 * (z - stack[iEl].z), 
-                                           vx, vy, vz);
+          if (useSignal) {
+            sensor->AddSignal(-1, stack[iEl].t, t - stack[iEl].t, 
+                                  0.5 * (x - stack[iEl].x), 
+                                  0.5 * (y - stack[iEl].y),
+                                  0.5 * (z - stack[iEl].z), 
+                                  vx, vy, vz);
+          }
           stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
           stack[iEl].t = t;
-          stack[iEl].kx = newKx; stack[iEl].ky = newKy; stack[iEl].kz = newKz;
+          stack[iEl].kx = newKx; 
+          stack[iEl].ky = newKy; 
+          stack[iEl].kz = newKz;
           stack[iEl].status = -1;
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
@@ -761,14 +765,18 @@ AvalancheMicroscopic::TransportElectron(
           // Place the electron OUTSIDE the drift area
           x += d * dx; y += d * dy; z += d * dz;
 
-          if (useSignal) sensor->AddSignal(-1, stack[iEl].t, t - stack[iEl].t, 
-                                           0.5 * (x - stack[iEl].x), 
-                                           0.5 * (y - stack[iEl].y),
-                                           0.5 * (z - stack[iEl].z), 
-                                           vx, vy, vz);
+          if (useSignal) {
+            sensor->AddSignal(-1, stack[iEl].t, t - stack[iEl].t, 
+                                  0.5 * (x - stack[iEl].x), 
+                                  0.5 * (y - stack[iEl].y),
+                                  0.5 * (z - stack[iEl].z), 
+                                  vx, vy, vz);
+          }
           stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
           stack[iEl].t = t;
-          stack[iEl].kx = newKx; stack[iEl].ky = newKy; stack[iEl].kz = newKz;
+          stack[iEl].kx = newKx; 
+          stack[iEl].ky = newKy; 
+          stack[iEl].kz = newKz;
           stack[iEl].status = -1;
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
@@ -777,10 +785,11 @@ AvalancheMicroscopic::TransportElectron(
         }
 
         // If activated, calculate the induced signal
-        if (useSignal) sensor->AddSignal(-1, t, dt, 
-                                         x + 0.5 * vx * dt, 
-                                         y + 0.5 * vy * dt,
-                                         z + 0.5 * vy * dt, vx, vy, vz);
+        if (useSignal) {
+          sensor->AddSignal(-1, t, dt, x + 0.5 * vx * dt, 
+                                       y + 0.5 * vy * dt,
+                                       z + 0.5 * vy * dt, vx, vy, vz);
+        }
         // Update the coordinates
         x += vx * dt; y += vy * dt; z += vz * dt; t += dt;
 

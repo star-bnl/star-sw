@@ -72,14 +72,14 @@ ViewSignal::PlotSignal(const std::string label) {
     delete hSignal;
     hSignal = 0;
   }
-  hSignal = new TH1F("hSignal", label.c_str(), nBins, t0, t0 + nBins * dt);
+  hSignal = new TH1D("hSignal", label.c_str(), nBins, t0, t0 + nBins * dt);
   hSignal->GetXaxis()->SetTitle("time [ns]");
   hSignal->GetYaxis()->SetTitle("signal");
   
   double sig = 0.;  
   for (int i = nBins; i--;) {
     sig = sensor->GetSignal(label, i);
-    hSignal->SetBinContent(i, sig * 1.e15);
+    hSignal->SetBinContent(i, sig);
   }
   
   hSignal->Draw();

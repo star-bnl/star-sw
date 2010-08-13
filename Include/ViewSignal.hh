@@ -5,7 +5,7 @@
 
 #include <RQ_OBJECT.h>
 #include <TCanvas.h>
-#include <TH1F.h>
+#include <TH1D.h>
 
 #include "Sensor.hh"
 
@@ -45,7 +45,7 @@ class ViewSignal {
     bool hasExternalCanvas;
 
     // Histogram
-    TH1F* hSignal;
+    TH1D* hSignal;
     
 };
 

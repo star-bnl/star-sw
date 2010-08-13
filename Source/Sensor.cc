@@ -8,7 +8,8 @@
 
 namespace Garfield {
 
-double Sensor::signalConversion = ElementaryCharge * 1.e9;
+//double Sensor::signalConversion = ElementaryCharge * 1.e9;
+double Sensor::signalConversion = 1.;
 
 Sensor::Sensor() :
   nComponents(0), lastComponent(-1), 
@@ -330,12 +331,25 @@ void
 Sensor::AddSignal(const int q, const double t, const double dt,
                   const double x,  const double y,  const double z,
                   const double vx, const double vy, const double vz) {
-  
+ 
   // Get the time bin
+  if (t < tStart || dt <= 0.) {
+    if (debug) {
+      std::cerr << "Sensor::AddSignal:\n";
+      if (t < tStart) std::cerr << "    Time " << t << " out of range.\n";
+      if (dt <= 0.) std::cerr << "    Time step < 0.\n";
+    }
+    return;
+  }
   const int bin = int((t - tStart) / tStep);
   // Check if the starting time is outside the range 
-  if (bin < 0 || bin >= nTimeBins) return;
-  if (dt <= 0.) return;
+  if (bin < 0 || bin >= nTimeBins) {
+    if (debug) {
+      std::cerr << "Sensor::AddSignal:\n";
+      std::cerr << "    Bin " << bin << " out of range.\n";
+    }
+    return;
+  }
   if (nEvents <= 0) ++nEvents;
   
   double wx = 0., wy = 0., wz = 0.;

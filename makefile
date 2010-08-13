@@ -182,8 +182,8 @@ $(OBJDIR)/Sensor.o: \
 	$(CXX) $(CFLAGS) $< -o $@
 
 $(OBJDIR)/GarfieldDict.o: \
-	GarfieldDict.cc
+	$(SRCDIR)/GarfieldDict.C
 	$(CXX) $(CFLAGS) $< -o $@
 
-GarfieldDict.cc: $(HEADERS) LinkDef.h
+$(SRCDIR)/GarfieldDict.C: $(HEADERS) $(INCDIR)/LinkDef.h
 	rootcint -f $@ -c $(CFLAGS) -p $^
