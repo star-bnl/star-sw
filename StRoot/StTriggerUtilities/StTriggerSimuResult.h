@@ -3,7 +3,7 @@
 #ifndef STAR_StTriggerSimuResult
 #define STAR_StTriggerSimuResult
 
-// $Id: StTriggerSimuResult.h,v 1.6 2010/04/29 10:34:34 pibero Exp $
+// $Id: StTriggerSimuResult.h,v 1.7 2010/08/13 00:21:27 rfatemi Exp $
 
 /*****************************************************************************
  * @class StTriggerSimuResult
@@ -48,75 +48,77 @@ enum L2ResultType {kPed, kJet, kGammaBemc, kGammaEemc, kUpsilon};
 class StTriggerSimuResult : public TObject
 {
 public:
-    StTriggerSimuResult();
-    
-    unsigned int triggerId() const;
-    StTriggerSimuDecision bbcDecision() const;
-    StTriggerSimuDecision bemcDecision() const;
-    StTriggerSimuDecision eemcDecision() const;
-    StTriggerSimuDecision l2Decision() const;
-    
-    const vector<short>& highTowerIds() const;
-    const vector<short>& triggerPatchIds() const;
-    const vector<short>& jetPatchIds() const;
-
-    /// returns DSM ADC if above trigger threshold, otherwise -1
-    int highTowerAdc(short towerId) const;
-    
-    /// returns DSM ADC if above trigger threshold, otherwise -1    
-    int triggerPatchAdc(short patchId) const;
-    
-    /// returns DSM ADC if above trigger threshold, otherwise -1
-    int jetPatchAdc(short jetPatchId) const;
-    
-    /// returns simple struct encapsulating (id,adc) of HT and TP pair
-    HttpResult httpPair(short towerId) const;
-    
-    /// returns address of specific L2 result struct -- cast it yourself
-    /**
+  StTriggerSimuResult();
+  
+  unsigned int triggerId() const;
+  StTriggerSimuDecision bbcDecision() const;
+  StTriggerSimuDecision bemcDecision() const;
+  StTriggerSimuDecision eemcDecision() const;
+  StTriggerSimuDecision l2Decision() const;
+  
+  const vector<short>& highTowerIds() const;
+  const vector<short>& triggerPatchIds() const;
+  const vector<short>& jetPatchIds() const;
+  
+  /// returns DSM ADC if above trigger threshold, otherwise -1
+  int highTowerAdc(short towerId) const;
+  
+  /// returns DSM ADC if above trigger threshold, otherwise -1    
+  int triggerPatchAdc(short patchId) const;
+  
+  /// returns DSM ADC if above trigger threshold, otherwise -1
+  int jetPatchAdc(short jetPatchId) const;
+  
+  /// returns simple struct encapsulating (id,adc) of HT and TP pair
+  HttpResult httpPair(short towerId) const;
+  
+  /// returns address of specific L2 result struct -- cast it yourself
+  /**
      returns address of a specific L2 result structure.  These structures are
      documented at
      L2ped2006:    StDaqLib/TRG/L2pedResults2006.h
      L2jet2006:    StDaqLib/TRG/L2jetResults2006.h
      L2gamma2006:  StDaqLib/TRG/L2gammaResult2006.h
      along with examples of how to unpack them
-     **/
-    const unsigned int* l2Result(L2ResultType algo, int year=2006) const;
-    
-    void setTriggerId(unsigned int);
-    void setBbcDecision(StTriggerSimuDecision);
-    void setBemcDecision(StTriggerSimuDecision);
-    void setEemcDecision(StTriggerSimuDecision);
-    void setL2Decision(StTriggerSimuDecision);
-    
-    void addHighTower(int towerId, int dsmAdc);
-    void addTriggerPatch(int patchId, int dsmAdc);
-    void addJetPatch(int jetPatchId, int dsmAdc);
+  **/
 
-    // 2009
-    void addBarrelJetPatchAdc(int jp, int adc);
-    void addEndcapJetPatchAdc(int jp, int adc);
-    void addOverlapJetPatchAdc(int jp, int adc);
-
-    const map<int,int>& barrelJetPatches() const;
-    const map<int,int>& endcapJetPatches() const;
-    const map<int,int>& overlapJetPatches() const;
-
-    void setL2Result(const unsigned int* result);
-    
+  const unsigned int* l2Result(L2ResultType algo, int year=2006) const;
+  const unsigned int* l2Result() const;
+  
+  void setTriggerId(unsigned int);
+  void setBbcDecision(StTriggerSimuDecision);
+  void setBemcDecision(StTriggerSimuDecision);
+  void setEemcDecision(StTriggerSimuDecision);
+  void setL2Decision(StTriggerSimuDecision);
+  
+  void addHighTower(int towerId, int dsmAdc);
+  void addTriggerPatch(int patchId, int dsmAdc);
+  void addJetPatch(int jetPatchId, int dsmAdc);
+  
+  // 2009
+  void addBarrelJetPatchAdc(int jp, int adc);
+  void addEndcapJetPatchAdc(int jp, int adc);
+  void addOverlapJetPatchAdc(int jp, int adc);
+  
+  const map<int,int>& barrelJetPatches() const;
+  const map<int,int>& endcapJetPatches() const;
+  const map<int,int>& overlapJetPatches() const;
+  
+  void setL2Result(const unsigned int* result);
+  
 private:
-    UInt_t mTriggerId;
-    UChar_t mBbcDecision;
-    UChar_t mBemcDecision;
-    UChar_t mEemcDecision;
-    UChar_t mL2Decision;
-    
-    vector<short> mHighTowerIds;
-    vector<short> mHighTowerAdcs;
-    
-    vector<short> mTriggerPatchIds;
-    vector<short> mTriggerPatchAdcs;
-    
+  UInt_t mTriggerId;
+  UChar_t mBbcDecision;
+  UChar_t mBemcDecision;
+  UChar_t mEemcDecision;
+  UChar_t mL2Decision;
+  
+  vector<short> mHighTowerIds;
+  vector<short> mHighTowerAdcs;
+  
+  vector<short> mTriggerPatchIds;
+  vector<short> mTriggerPatchAdcs;
+  
     vector<short> mJetPatchIds;
     vector<short> mJetPatchAdcs;
 
@@ -160,6 +162,9 @@ inline const map<int,int>& StTriggerSimuResult::overlapJetPatches() const { retu
 
 /*****************************************************************************
  * $Log: StTriggerSimuResult.h,v $
+ * Revision 1.7  2010/08/13 00:21:27  rfatemi
+ * changed PIG+2 address from BEMC to EEMC based on structure in StTriggerData2005::isL2Trigger()
+ *
  * Revision 1.6  2010/04/29 10:34:34  pibero
  * Preserve backward compatibility with reading of Run 6 skim trees
  *
