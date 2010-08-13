@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.cxx,v 1.12 2010/08/04 21:16:50 hmasui Exp $
+ * $Id: StEmbeddingQATrack.cxx,v 1.13 2010/08/13 21:55:36 hmasui Exp $
  * $Log: StEmbeddingQATrack.cxx,v $
+ * Revision 1.13  2010/08/13 21:55:36  hmasui
+ * Separate charge for pi/K/p in isNSigmaOk() function
+ *
  * Revision 1.12  2010/08/04 21:16:50  hmasui
  * Use MC phi angle for reconstructed embedding tracks
  *
@@ -206,12 +209,26 @@ Bool_t StEmbeddingQATrack::isNSigmaOk(const Short_t geantid) const
   if ( !utility->isEPiKP(geantid) ) return kTRUE ;
 
   /// NSigma cut for e, pi, K and p
-  if ( utility->isElectrons(geantid) )    return TMath::Abs(mNSigmaElectron) < kNSigmaCut ;
-  else if ( utility->isPions(geantid) )   return TMath::Abs(mNSigmaPion) < kNSigmaCut ;
-  else if ( utility->isKaons(geantid) )   return TMath::Abs(mNSigmaKaon) < kNSigmaCut ;
-  else if ( utility->isProtons(geantid) ) return TMath::Abs(mNSigmaProton) < kNSigmaCut ;
+  /// Implement different charge
+  if( mCharge < 0 ){
+    // Negative charged particles
+    if ( utility->isElectron(geantid) )     return TMath::Abs(mNSigmaElectron) < kNSigmaCut ;
+    else if ( utility->isPiMinus(geantid) ) return TMath::Abs(mNSigmaPion) < kNSigmaCut ;
+    else if ( utility->isKMinus(geantid) )  return TMath::Abs(mNSigmaKaon) < kNSigmaCut ;
+    else if ( utility->isPBar(geantid) )    return TMath::Abs(mNSigmaProton) < kNSigmaCut ;
+    else{
+      return kTRUE ;
+    }
+  }
   else{
-    return kTRUE ;
+    // Positive charged particles
+    if ( utility->isPositron(geantid) )    return TMath::Abs(mNSigmaElectron) < kNSigmaCut ;
+    else if ( utility->isPiPlus(geantid) ) return TMath::Abs(mNSigmaPion) < kNSigmaCut ;
+    else if ( utility->isKPlus(geantid) )  return TMath::Abs(mNSigmaKaon) < kNSigmaCut ;
+    else if ( utility->isProton(geantid) ) return TMath::Abs(mNSigmaProton) < kNSigmaCut ;
+    else{
+      return kTRUE ;
+    }
   }
 
   return kTRUE ;
