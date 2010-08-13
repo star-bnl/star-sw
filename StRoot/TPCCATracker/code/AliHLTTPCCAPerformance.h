@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformance.h,v 1.4 2010/08/12 17:46:48 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.h,v 1.5 2010/08/13 18:17:21 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -70,7 +70,8 @@ class AliHLTTPCCAPerformance
   void SetMCTracks(vector<AliHLTTPCCAMCTrack>& mcTracks);
   void SetMCPoints(vector<AliHLTTPCCALocalMCPoint>& mcPoints);
   void SetHitLabels(vector<AliHLTTPCCAHitLabel>& hitLabels);
-
+  AliHLTTPCCAPerformanceBase* GetSubPerformance(string name);
+  
   void SetOutputFile(TFile *oF) { fOutputFile = oF; }
   
   protected:
@@ -114,9 +115,6 @@ class AliHLTTPCCAPerformance
 
     TFile *fOutputFile;
     TDirectory *fHistoDir; // ROOT directory with histogramms
-    
-  public:
-    TSubPerformance GetSubPerformance(int iPerf) {return subPerformances[iPerf];}
   
   private:
     AliHLTTPCCAPerformance( const AliHLTTPCCAPerformance& );

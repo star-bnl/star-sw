@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformance.cxx,v 1.7 2010/08/13 14:39:49 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.cxx,v 1.8 2010/08/13 18:17:21 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -125,40 +125,6 @@ void AliHLTTPCCAPerformance::InitSubPerformances()
   first_call = false;
 } // void AliHLTTPCCAPerformance::InitSubPerformances
 
-void AliHLTTPCCAPerformance::InitSubPerformances(int iPerf)
-{
-    // Init subperformances
-  static const int NSPerfo = 4; 
-    
-  static bool first_call = true;
-  static bool first_call_sub[NSPerfo];
-
-  if (first_call){
-    typedef TSubPerformance TSP;
-    
-      /// Just define here all sub-performances
-      /// TSP(new __ClassName__               , __Name__      ),
-    const TSP perfos[NSPerfo] = {
-      TSP(new AliHLTTPCCASlicesPerformance, "SliceTracker"),
-      TSP(new AliHLTTPCCAGlobalSlicesPerformance, "GlobalSliceTracker"),
-      TSP(new AliHLTTPCCAGlobalPerformance, "GlobalTracker"),
-      TSP(new AliHLTTPCCAStiPerformance, "StiTracker")
-    };
-    
-    subPerformances.resize(NSPerfo);
-    for (int iP = 0; iP < NSPerfo; iP++){
-      subPerformances[iP] = perfos[iP];
-      first_call_sub[iP] = true;
-    }
-  }
-  
-  subPerformances[iPerf]->SetNewEvent(fTracker, &fHitLabels, &fMCTracks, &fLocalMCPoints);
-
-  if (first_call_sub[iPerf]) subPerformances[iPerf]->CreateHistos(subPerformances[iPerf].name, fOutputFile);
-    
-  first_call = false;
-  first_call_sub[iPerf] = false;
-} // void AliHLTTPCCAPerformance::InitSubPerformances
 
 void AliHLTTPCCAPerformance::CreateHistos()
 {
@@ -181,7 +147,7 @@ void AliHLTTPCCAPerformance::WriteHistos()
   for (unsigned int iPerf = 0; iPerf < subPerformances.size(); iPerf++)
     subPerformances[iPerf]->WriteHistos();
 
-#ifdef STAR_STANDALONE // TODO use it!!
+#ifdef STAR_STANDALONE // TODO use it. 
   fOutputFile->Close();
 #endif //
   curr->cd();
@@ -193,6 +159,15 @@ void AliHLTTPCCAPerformance::ExecPerformance()
   
   for (unsigned int iPerf = 0; iPerf < subPerformances.size(); iPerf++){
     subPerformances[iPerf]->Exec(0);
+  }
+#if 0  // current event efficiencies
+  for (unsigned int iPerf = 0; iPerf < subPerformances.size(); iPerf++){    
+    cout << endl
+        << " ---- " << subPerformances[iPerf].name << " event " << fStatNEvents << " ---- "<< endl;
+    subPerformances[iPerf]->PrintEfficiency();
+  }
+#endif //0
+  for (unsigned int iPerf = 0; iPerf < subPerformances.size(); iPerf++){  
     cout << endl
         << " ---- " << subPerformances[iPerf].name << " " << fStatNEvents << " events Statistic ---- " << endl;
     subPerformances[iPerf]->PrintEfficiencyStatistic();
@@ -204,18 +179,14 @@ void AliHLTTPCCAPerformance::ExecPerformance()
 
 }
 
-void AliHLTTPCCAPerformance::ExecPerformance(int iPerf)
+AliHLTTPCCAPerformanceBase* AliHLTTPCCAPerformance::GetSubPerformance(string name)
 {
-  fStatNEvents++; // TODO  make normal exec!
-  
-    subPerformances[iPerf]->Exec(0);
-    // cout << endl
-    //     << " ---- " << subPerformances[iPerf].name << " event " << (fStatNEvents+3)/4 /*TODO*/ << " ---- "<< endl;
-    // subPerformances[iPerf]->PrintEfficiency();
-    cout << endl
-        << " ---- " << subPerformances[iPerf].name << " " << (fStatNEvents+3)/4 /*TODO*/ << " events Statistic ---- " << endl;
-    subPerformances[iPerf]->PrintEfficiencyStatistic();  
-}
+  unsigned i = 0;
+  for( ; i < (subPerformances.size()) && (subPerformances[i].name != name); i++);
+  if ( i == subPerformances.size() ) return 0;
+  return subPerformances[i].perf;
+} // AliHLTTPCCAPerformanceBase* AliHLTTPCCAPerformance::GetSubPerformance(string name)
+
 
   /// -------------------- Read\write MC information ---------------------
 void AliHLTTPCCAPerformance::WriteMCEvent( FILE *file ) const
