@@ -66,6 +66,8 @@ private:
   void buildDetailedResult(int trigId);
   bool get2009DsmRegistersFromOfflineDatabase(int runNumber);
   bool get2009DsmRegistersFromOnlineDatabase(int runNumber);
+  bool getTriggerDefinitions(int runNumber);
+  bool getTriggerThresholds(int runNumber);
 
 public:
   StTriggerSimuMaker(const char *name="StarTrigSimu");
@@ -116,9 +118,12 @@ public:
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.25 2010/06/24 07:51:14 pibero Exp $
+// $Id: StTriggerSimuMaker.h,v 1.26 2010/08/13 22:21:10 pibero Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.26  2010/08/13 22:21:10  pibero
+// Move from online to offline DB
+//
 // Revision 1.25  2010/06/24 07:51:14  pibero
 // Added hooks to overwrite DSM thresholds from the database.
 //

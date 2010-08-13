@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.40 2010/08/08 21:58:53 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.41 2010/08/13 22:21:11 pibero Exp $
 
 // MySQL C API
 #include "mysql.h"
@@ -57,6 +57,15 @@
 //get HEAD Maker
 #include "StTriggerSimuMaker.h"
 #include "StTriggerSimuResult.h"
+
+// Trigger definition
+#include "TBufferFile.h"
+#include "tables/St_triggerDefinition_Table.h"
+#include "StTriggerDefinition.h"
+
+// Trigger threshold
+#include "tables/St_triggerThreshold_Table.h"
+#include "StTriggerThreshold.h"
 
 ClassImp(StTriggerSimuMaker)
 
@@ -265,6 +274,135 @@ Int_t StTriggerSimuMaker::Finish() {
 
 bool StTriggerSimuMaker::get2009DsmRegistersFromOfflineDatabase(int runNumber)
 {
+  return getTriggerDefinitions(runNumber) && getTriggerThresholds(runNumber);
+}
+
+bool StTriggerSimuMaker::getTriggerDefinitions(int runNumber)
+{
+  TDataSet* DB = GetInputDB("Calibrations/trg");
+  if (DB) {
+    St_triggerDefinition* desc = dynamic_cast<St_triggerDefinition*>(DB->Find("triggerDefinition"));
+    if (desc) {
+      triggerDefinition_st* table = desc->GetTable();
+      LOG_INFO << setw(20) << "triggerIndex"
+	       << setw(20) << "name"
+	       << setw(20) << "triggerId"
+	       << setw(20) << "onbits"
+	       << setw(20) << "offbits"
+	       << setw(20) << "onbits1"
+	       << setw(20) << "onbits2"
+	       << setw(20) << "onbits3"
+	       << setw(20) << "offbits1"
+	       << setw(20) << "offbits2"
+	       << setw(20) << "offbits3"
+	       << endm;
+      TBufferFile buf(TBuffer::kRead);
+      buf.SetBuffer(table[0].trigdef,sizeof(table[0].trigdef),false);
+      TObjArray* a = 0;
+      buf >> a;
+      for (int i = 0; i < a->GetEntriesFast(); ++i) {
+	StTriggerDefinition* trigdef = dynamic_cast<StTriggerDefinition*>(a->At(i));
+	LOG_INFO << setw(20) << trigdef->triggerIndex
+		 << setw(20) << trigdef->name
+		 << setw(20) << trigdef->triggerId
+		 << setw(20) << trigdef->onbits
+		 << setw(20) << trigdef->offbits
+		 << setw(20) << trigdef->onbits1
+		 << setw(20) << trigdef->onbits2
+		 << setw(20) << trigdef->onbits3
+		 << setw(20) << trigdef->offbits1
+		 << setw(20) << trigdef->offbits2
+		 << setw(20) << trigdef->offbits3
+		 << endm;
+	TriggerDefinition trigDef;
+	trigDef.triggerIndex = trigdef->triggerIndex;
+	strcpy(trigDef.name,trigdef->name.Data());
+	trigDef.triggerId = trigdef->triggerId;
+	trigDef.onbits = trigdef->onbits;
+	emc->defineTrigger(trigDef);
+      }
+      a->Delete();
+      return true;
+    }
+  }
+  return false;
+}
+
+bool StTriggerSimuMaker::getTriggerThresholds(int runNumber)
+{
+  TDataSet* DB = GetInputDB("Calibrations/trg");
+  if (DB) {
+    St_triggerThreshold* desc = dynamic_cast<St_triggerThreshold*>(DB->Find("triggerThreshold"));
+    if (desc) {
+      triggerThreshold_st* table = desc->GetTable();
+      LOG_INFO << setw(20) << "object"
+	       << setw(20) << "index"
+	       << setw(20) << "reg"
+	       << setw(20) << "label"
+	       << setw(20) << "value"
+	       << setw(20) << "defaultvalue"
+	       << endm;
+      TBufferFile buf(TBuffer::kRead);
+      buf.SetBuffer(table[0].trigthr,sizeof(table[0].trigthr),false);
+      TObjArray* a = 0;
+      buf >> a;
+      for (int i = 0; i < a->GetEntriesFast(); ++i) {
+	StTriggerThreshold* trigthr = dynamic_cast<StTriggerThreshold*>(a->At(i));
+	LOG_INFO << setw(20) << trigthr->object
+		 << setw(20) << trigthr->index
+		 << setw(20) << trigthr->reg
+		 << setw(20) << trigthr->label
+		 << setw(20) << trigthr->value
+		 << setw(20) << trigthr->defaultvalue
+		 << endm;
+	int value = trigthr->value;
+	if (value == -1) value = trigthr->defaultvalue;
+	switch (trigthr->object) {
+	case L1_CONF_NUM:
+	  switch (trigthr->index) {
+	  case 20:                // EM201
+	    emc->get2009_DSMLayer2_Result()->setRegister(trigthr->reg,value);
+	    break;
+	  case 30:                // LD301
+	    emc->get2009_DSMLayer3_Result()->setRegister(trigthr->reg,value);
+	    break;
+	  }
+	  break;
+	case BC1_CONF_NUM:
+	  switch (trigthr->index) {
+	  case 21:                // EE101
+	    eemc->get2009_DSMLayer1_Result()->setRegister(trigthr->reg,value);
+	    break;
+	  case 23:                // EE001
+	    eemc->get2009_DSMLayer0_Result()->setRegister(trigthr->reg,value);
+	    break;
+	  case 33:                // BC101
+	    bemc->get2009_DSMLayer1_Result()->setRegister(trigthr->reg,value);
+	    break;
+	  }
+	  break;
+	case BCW_CONF_NUM:
+	  switch (trigthr->index) {
+	  case 16:                // BW001
+	    for (int dsm = 0; dsm < 15; ++dsm)
+	      (*bemc->get2009_DSMLayer0_Result())[dsm].registers[trigthr->reg] = value;
+	    break;
+	  }
+	  break;
+	case BCE_CONF_NUM:
+	  switch (trigthr->index) {
+	  case 16:                // BE001
+	    for (int dsm = 15; dsm < 30; ++dsm)
+	      (*bemc->get2009_DSMLayer0_Result())[dsm].registers[trigthr->reg] = value;
+	    break;
+	  }
+	  break;
+	}
+      }
+      a->Delete();
+      return true;
+    }
+  }
   return false;
 }
 
@@ -486,14 +624,14 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
   if (MYSQL_RES* result = mysql_store_result(&mysql)) {
     while (MYSQL_ROW row = mysql_fetch_row(result)) {
       int idx_trigger = atoi(row[0]);
-      triggers[idx_trigger].idx_trigger = idx_trigger;
+      triggers[idx_trigger].triggerIndex = idx_trigger;
       strcpy(triggers[idx_trigger].name,row[1]);
       triggers[idx_trigger].triggerId = atoi(row[2]);
     }
     mysql_free_result(result);
   }
 
-  query = Form("select idx_idx,onbits from pwc where idx_rn = %d", runNumber);
+  query = Form("select idx_idx,onbits,offbits,onbits1,onbits2,onbits3,offbits1,offbits2,offbits3 from pwc where idx_rn = %d", runNumber);
   LOG_INFO << query << endm;
   mysql_query(&mysql,query);
 
@@ -501,17 +639,31 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
     LOG_INFO << setw(20) << "idx_trigger"
              << setw(20) << "name"
              << setw(20) << "offlineBit"
-             << setw(20) << "physicsBits"
+             << setw(20) << "onbits"
+             << setw(20) << "offbits"
+             << setw(20) << "onbits1"
+             << setw(20) << "onbits2"
+             << setw(20) << "onbits3"
+             << setw(20) << "offbits1"
+             << setw(20) << "offbits2"
+             << setw(20) << "offbits3"
              << endm;
 
     while (MYSQL_ROW row = mysql_fetch_row(result)) {
       int idx_trigger = atoi(row[0]);
-      triggers[idx_trigger].physicsBits = atoi(row[1]);
+      triggers[idx_trigger].onbits = atoi(row[1]);
       emc->defineTrigger(triggers[idx_trigger]);
       LOG_INFO << setw(20) << idx_trigger
                << setw(20) << triggers[idx_trigger].name
                << setw(20) << triggers[idx_trigger].triggerId
-               << setw(20) << Form("0x%04x", triggers[idx_trigger].physicsBits)
+               << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits)
+               << setw(20) << Form("0x%08x",triggers[idx_trigger].offbits)
+               << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits1)
+               << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits2)
+               << setw(20) << Form("0x%08x",triggers[idx_trigger].onbits3)
+               << setw(20) << Form("0x%08x",triggers[idx_trigger].offbits1)
+               << setw(20) << Form("0x%08x",triggers[idx_trigger].offbits2)
+               << setw(20) << Form("0x%08x",triggers[idx_trigger].offbits3)
                << endm;
     }
     mysql_free_result(result);
@@ -524,6 +676,9 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.41  2010/08/13 22:21:11  pibero
+ * Move from online to offline DB
+ *
  * Revision 1.40  2010/08/08 21:58:53  pibero
  * Back to checking decision of individual simulators.
  *
