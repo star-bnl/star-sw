@@ -12,9 +12,9 @@ void TCU::defineTrigger(const TriggerDefinition& triggerDef)
   mTriggers.insert(make_pair(triggerDef.triggerId, triggerDef));
 }
 
-bool TCU::isPhysicsBits(int physicsBits) const
+bool TCU::isOnBits(int onbits) const
 {
-  return (mInput & physicsBits) == physicsBits;
+  return (mInput & onbits) == onbits;
 }
 
 bool TCU::isTrigger(int triggerId) const
@@ -22,7 +22,7 @@ bool TCU::isTrigger(int triggerId) const
   typedef multimap<int, TriggerDefinition>::const_iterator MI;
   pair<MI, MI> p = mTriggers.equal_range(triggerId);
   for (MI i = p.first; i != p.second; ++i)
-    if (isPhysicsBits(i->second.physicsBits)) return true;
+    if (isOnBits(i->second.onbits)) return true;
   return false;
 }
 
