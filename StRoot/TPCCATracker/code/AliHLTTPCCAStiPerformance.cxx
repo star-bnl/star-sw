@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAStiPerformance.cxx,v 1.4 2010/08/12 13:04:51 ikulakov Exp $
+// $Id: AliHLTTPCCAStiPerformance.cxx,v 1.5 2010/08/14 22:06:58 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -61,12 +61,12 @@ void AliHLTTPCCAStiPerformance::CheckMCTracks()
 
   for ( int imc = 0; imc < nMCTracks; imc++ ) (*fMCTracks)[imc].SetNHits( 0 );
 
-  for ( int ih = 0; ih < (*fHitLabels).Size(); ih++ ) { // TODO: do we need to calculate consequtive hits??
-    const AliHLTTPCCAHitLabel &l = (*fHitLabels)[ih];
-    if ( l.fLab[0] >= 0 ) (*fMCTracks)[l.fLab[0]].SetNHits( (*fMCTracks)[l.fLab[0]].NHits() + 1 );
-    if ( l.fLab[1] >= 0 ) (*fMCTracks)[l.fLab[1]].SetNHits( (*fMCTracks)[l.fLab[1]].NHits() + 1 );
-    if ( l.fLab[2] >= 0 ) (*fMCTracks)[l.fLab[2]].SetNHits( (*fMCTracks)[l.fLab[2]].NHits() + 1 );
-  }
+  // for ( int ih = 0; ih < (*fHitLabels).Size(); ih++ ) { // TODO: do we need to calculate consequtive hits??
+  //   const AliHLTTPCCAHitLabel &l = (*fHitLabels)[ih];
+  //   if ( l.fLab[0] >= 0 ) (*fMCTracks)[l.fLab[0]].SetNHits( (*fMCTracks)[l.fLab[0]].NHits() + 1 );
+  //   if ( l.fLab[1] >= 0 ) (*fMCTracks)[l.fLab[1]].SetNHits( (*fMCTracks)[l.fLab[1]].NHits() + 1 );
+  //   if ( l.fLab[2] >= 0 ) (*fMCTracks)[l.fLab[2]].SetNHits( (*fMCTracks)[l.fLab[2]].NHits() + 1 );
+  // }
 
   mcData.resize(nMCTracks);
   for ( int imc = 0; imc < nMCTracks; imc++ ) {
@@ -75,6 +75,9 @@ void AliHLTTPCCAStiPerformance::CheckMCTracks()
     mc.SetSet( 0 );
     mc.SetNReconstructed( 0 );
     mc.SetNTurns( 1 );
+//    if ( mc.NHits() >= PParameters::MinimumHitsForMCTrack ){
+//      mcTrackData.SetAsReconstructable();
+//    }
     if ( mc.NMCPoints() >= PParameters::MinimumMCPointsForMCTrack ){
       mcTrackData.SetAsReconstructable();
     }

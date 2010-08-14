@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformance.h,v 1.5 2010/08/13 18:17:21 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.h,v 1.6 2010/08/14 22:06:58 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -70,6 +70,7 @@ class AliHLTTPCCAPerformance
   void SetMCTracks(vector<AliHLTTPCCAMCTrack>& mcTracks);
   void SetMCPoints(vector<AliHLTTPCCALocalMCPoint>& mcPoints);
   void SetHitLabels(vector<AliHLTTPCCAHitLabel>& hitLabels);
+  
   AliHLTTPCCAPerformanceBase* GetSubPerformance(string name);
   
   void SetOutputFile(TFile *oF) { fOutputFile = oF; }
