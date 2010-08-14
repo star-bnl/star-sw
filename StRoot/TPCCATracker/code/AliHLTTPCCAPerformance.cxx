@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformance.cxx,v 1.8 2010/08/13 18:17:21 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.cxx,v 1.9 2010/08/14 22:06:58 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -104,10 +104,10 @@ void AliHLTTPCCAPerformance::InitSubPerformances()
       /// TSP(new __ClassName__               , __Name__      ),
     const int NSPerfo = 4;
     const TSP perfos[NSPerfo] = {
-      TSP(new AliHLTTPCCASlicesPerformance, "SectorTracker"),
-      TSP(new AliHLTTPCCAGlobalSlicesPerformance, "GlobalSectorTracker"),
-      TSP(new AliHLTTPCCAGlobalPerformance, "GlobalTracker"),
-      TSP(new AliHLTTPCCAStiPerformance, "StiTracker")
+      TSP(new AliHLTTPCCASlicesPerformance, "Sector Performance"),
+      TSP(new AliHLTTPCCAGlobalSlicesPerformance, "Global Sector Performance"),
+      TSP(new AliHLTTPCCAGlobalPerformance, "Global Performance"),
+      TSP(new AliHLTTPCCAStiPerformance, "Sti Performance")
     };
     
     subPerformances.resize(NSPerfo);
@@ -160,7 +160,7 @@ void AliHLTTPCCAPerformance::ExecPerformance()
   for (unsigned int iPerf = 0; iPerf < subPerformances.size(); iPerf++){
     subPerformances[iPerf]->Exec(0);
   }
-#if 0  // current event efficiencies
+#if 1  // current event efficiencies
   for (unsigned int iPerf = 0; iPerf < subPerformances.size(); iPerf++){    
     cout << endl
         << " ---- " << subPerformances[iPerf].name << " event " << fStatNEvents << " ---- "<< endl;
@@ -183,7 +183,7 @@ AliHLTTPCCAPerformanceBase* AliHLTTPCCAPerformance::GetSubPerformance(string nam
 {
   unsigned i = 0;
   for( ; i < (subPerformances.size()) && (subPerformances[i].name != name); i++);
-  if ( i == subPerformances.size() ) return 0;
+  assert ( i == subPerformances.size() || ("" == " Incorrect name of subPerformance used.") );
   return subPerformances[i].perf;
 } // AliHLTTPCCAPerformanceBase* AliHLTTPCCAPerformance::GetSubPerformance(string name)
 

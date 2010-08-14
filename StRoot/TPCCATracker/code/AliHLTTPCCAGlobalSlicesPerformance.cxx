@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGlobalSlicesPerformance.cxx,v 1.3 2010/08/13 14:39:49 ikulakov Exp $
+// $Id: AliHLTTPCCAGlobalSlicesPerformance.cxx,v 1.4 2010/08/14 22:06:58 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -94,8 +94,9 @@ void AliHLTTPCCAGlobalSlicesPerformance::CheckMCTracks()
   for (unsigned int iPerf = 0; iPerf < slicePerformances.size(); iPerf++){
     vector<AliHLTTPCCAPerformanceMCTrackData> &mcs = slicePerformances[iPerf]->mcData;
     for ( int iMCTrack = 0; iMCTrack < nMCTracks; iMCTrack++ ){
-      if (mcs[iMCTrack].IsReconstructable()) mcData[iMCTrack].SetAsReconstructable();
-      if (mcs[iMCTrack].IsReconstructed()  ) mcData[iMCTrack].AddReconstructed();
+      // if (mcs[iMCTrack].IsReconstructable()) mcData[iMCTrack].SetAsReconstructable(); // reconstructable at least in one slice
+      if ( (*fMCTracks)[iMCTrack].NMCPoints() >= PParameters::MinimumMCPointsForMCTrack ) mcData[iMCTrack].SetAsReconstructable(); // global defition of reconstractable track
+      if (mcs[iMCTrack].IsReconstructed()  ) mcData[iMCTrack].AddReconstructed();  // reconstructed at least in one slice
     } // iMCTrack
   } // iSlice
   
