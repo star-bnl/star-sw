@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAGlobalSlicesPerformance.h,v 1.2 2010/08/13 14:39:49 ikulakov Exp $
+// $Id: AliHLTTPCCAGlobalSlicesPerformance.h,v 1.3 2010/08/15 13:25:25 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -52,9 +52,10 @@ class AliHLTTPCCAGlobalSlicesPerformance: public AliHLTTPCCAPerformanceBase
     
       /// Calculate Efficiencies
     virtual void Exec(bool print = false);
-    virtual void CheckMCTracks(); // fill mcData.
+    virtual void CheckMCTracks(); 
+    virtual void MatchTracks(); 
+  
     virtual void EfficiencyPerformance();
-    virtual void PrintEfficiencyStatistic();
     
       /// Histograms
     virtual void CreateHistos(string histoDir = "", TFile* outFile = 0);

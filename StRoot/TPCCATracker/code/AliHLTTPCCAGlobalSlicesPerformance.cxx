@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGlobalSlicesPerformance.cxx,v 1.4 2010/08/14 22:06:58 ikulakov Exp $
+// $Id: AliHLTTPCCAGlobalSlicesPerformance.cxx,v 1.5 2010/08/15 13:25:25 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -91,27 +91,53 @@ void AliHLTTPCCAGlobalSlicesPerformance::Exec(bool print)
 void AliHLTTPCCAGlobalSlicesPerformance::CheckMCTracks()
 {
   mcData.resize(nMCTracks);
+    // find reconstructable tracks
   for (unsigned int iPerf = 0; iPerf < slicePerformances.size(); iPerf++){
     vector<AliHLTTPCCAPerformanceMCTrackData> &mcs = slicePerformances[iPerf]->mcData;
     for ( int iMCTrack = 0; iMCTrack < nMCTracks; iMCTrack++ ){
       // if (mcs[iMCTrack].IsReconstructable()) mcData[iMCTrack].SetAsReconstructable(); // reconstructable at least in one slice
       if ( (*fMCTracks)[iMCTrack].NMCPoints() >= PParameters::MinimumMCPointsForMCTrack ) mcData[iMCTrack].SetAsReconstructable(); // global defition of reconstractable track
-      if (mcs[iMCTrack].IsReconstructed()  ) mcData[iMCTrack].AddReconstructed();  // reconstructed at least in one slice
     } // iMCTrack
   } // iSlice
   
+    // calc set
   for ( int iMCTrack = 0; iMCTrack < nMCTracks; iMCTrack++ ){
     mcData[iMCTrack].SetSet( slicePerformances[0]->mcData[iMCTrack].GetSet() );
   } // iMCTrack
 } // void AliHLTTPCCAGlobalSlicesPerformance::CheckMCTracks()
 
+void AliHLTTPCCAGlobalSlicesPerformance::MatchTracks()
+{
+    // get all reco tracks
+  nRecoTracks = 0;
+  for (unsigned int iPerf = 0; iPerf < slicePerformances.size(); iPerf++){
+    vector<AliHLTTPCCAPerformanceRecoTrackData> &rTrs = slicePerformances[iPerf]->recoData;
+    int nSectorRecoTracks = rTrs.size();
+    for ( int itr = 0; itr < nSectorRecoTracks; itr++ ) {
+      recoData.push_back(rTrs[itr]);
+    }
+    nRecoTracks += nSectorRecoTracks;
+  } // iSlice
+    // find reconstructed tracks
+  for ( int itr = 0; itr < nRecoTracks; itr++ ) {
+    AliHLTTPCCAPerformanceRecoTrackData &rTr = recoData[itr];
+    if ( !rTr.IsGhost( PParameters::MinTrackPurity ) ) mcData[rTr.GetMCTrackId()].AddReconstructed();
+  }
+}
+
+
 void AliHLTTPCCAGlobalSlicesPerformance::EfficiencyPerformance()
 {
+  for ( int iRTr = 0; iRTr < nRecoTracks; iRTr++ ) {
+    if (  recoData[iRTr].IsGhost( PParameters::MinTrackPurity ) )
+      fEff.ghosts++;
+  }
+
   for ( int iMCTr = 0; iMCTr < nMCTracks; iMCTr++ ) {
     AliHLTTPCCAPerformanceMCTrackData &mc = mcData[iMCTr];
     if ( !mc.IsReconstructable() ) continue;
     const bool reco = mc.IsReconstructed();
-    const int clones = 0;
+    const int clones = mc.GetNClones();
 
     if ( mc.GetSet() == 0){ // rest, out track
       fEff.Inc(reco,clones,"rest");
@@ -130,20 +156,3 @@ void AliHLTTPCCAGlobalSlicesPerformance::EfficiencyPerformance()
   AliHLTTPCCAPerformanceBase::EfficiencyPerformance();
 } // void AliHLTTPCCAGlobalSlicesPerformance::EfficiencyPerformance()
 
-
-void AliHLTTPCCAGlobalSlicesPerformance::PrintEfficiencyStatistic()
-{
-  fEffStat.CalcEff();
-  
-  cout.setf(ios::fixed);
-  cout.setf(ios::showpoint);
-  cout.precision(3);
-  cout << "Track category         : " << " Eff  "       <<" | "<< "All MC"  << endl;
-
-  int NCounters = fEffStat.mc.NCounters;
-  for (int iC = 0; iC < NCounters; iC++){
-    cout << fEffStat.names[iC]  << "   : "
-        << fEffStat.ratio_reco.counters[iC]
-        << "  | " << fEffStat.mc.counters[iC]  << endl;
-  }
-}

@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformanceBase.h,v 1.4 2010/08/13 14:39:49 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformanceBase.h,v 1.5 2010/08/15 13:25:25 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -77,7 +77,7 @@ class AliHLTTPCCAPerformanceBase
       // Find reco-MCTracks correspondence
     virtual void MatchTracks(){};   // fill recoData.
       // Calculate fEfficiencies
-    virtual void EfficiencyPerformance(){ fEff.IncNEvents();  fEffStat += fEff; };
+    virtual void EfficiencyPerformance();
       // Print fEfficiencies
 
     static void WriteDir2Current( TObject *obj );
