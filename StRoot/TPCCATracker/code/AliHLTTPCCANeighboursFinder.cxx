@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.3 2010/08/09 17:51:15 mzyzak Exp $
+// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.4 2010/08/15 22:11:38 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -113,7 +113,8 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
    */
 
 //   static const float kAreaSize = 1.f;
-  static const float kAreaSize = AliHLTTPCCAParameters::NeighbourAreaSizeTg;
+  static const float kAreaSizeY = AliHLTTPCCAParameters::NeighbourAreaSizeTgY;
+  static const float kAreaSizeZ = AliHLTTPCCAParameters::NeighbourAreaSizeTgZ;
   static const int kMaxN = 20;
   const float chi2Cut = 3.f * 3.f * 4.f * ( UpDx * UpDx + DnDx * DnDx );
 
@@ -151,7 +152,7 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
     zDnTx = z * DnTx;
 
     // create and initialize area hit iterators
-    HitArea areaUp( rowUp, fData, yUpTx, zUpTx, UpDx*kAreaSize, UpDx*kAreaSize, validHitsMask );
+    HitArea areaUp( rowUp, fData, yUpTx, zUpTx, UpDx*kAreaSizeY, UpDx*kAreaSizeZ, validHitsMask );
 
     // iterate over hits in upper area (kMaxN at max)
     while ( areaUp.GetNext( &neighUp[upperNeighbourIndex] ) ) {
@@ -172,9 +173,8 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
       VALGRIND_CHECK_VALUE_IS_DEFINED( neighUp[upperNeighbourIndex].fY );
       VALGRIND_CHECK_VALUE_IS_DEFINED( neighUp[upperNeighbourIndex].fZ );
 
-      if ( ++upperNeighbourIndex >= kMaxN ) {
-        break;
-      }
+      //if ( ++upperNeighbourIndex >= kMaxN ) break;
+      assert( (++upperNeighbourIndex < kMaxN) || ("" == " too small array ") );
     }
 
     int nNeighDn = 0;
@@ -185,7 +185,7 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
       NeighbourData neighDn;
 
       // iterate over all hits in lower area
-      HitArea areaDn( rowDn, fData, yDnTx, zDnTx, -DnDx*kAreaSize, -DnDx*kAreaSize, validHitsMask );
+      HitArea areaDn( rowDn, fData, yDnTx, zDnTx, -DnDx*kAreaSizeY, -DnDx*kAreaSizeZ, validHitsMask );
       while ( areaDn.GetNext( &neighDn ) ) {
         assert( neighDn.fLinks < rowDn.NHits() || !neighDn.fValid );
         VALGRIND_CHECK_VALUE_IS_DEFINED( neighDn.fLinks );
