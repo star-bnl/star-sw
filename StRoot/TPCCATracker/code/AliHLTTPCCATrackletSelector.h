@@ -21,7 +21,7 @@ class AliHLTTPCCATrackletSelector {
   public:
     inline AliHLTTPCCATrackletSelector( const Tracker &tracker, std::vector<AliHLTTPCCATrack *> *tracks,
         int *numberOfHits, int *numberOfTracks, const SliceData &data,
-        AliHLTArray<TrackletVector> trackletVectors )
+        AliHLTArray<TrackletVector> &trackletVectors )
       : fTracker( tracker ), fTracks( *tracks ), fNumberOfHits( *numberOfHits ),
       fNumberOfTracks( *numberOfTracks ), fTrackletVectors( trackletVectors ), fData( data )
     {}
