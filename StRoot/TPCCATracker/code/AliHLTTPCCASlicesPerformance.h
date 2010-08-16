@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCASlicesPerformance.h,v 1.3 2010/08/13 14:39:49 ikulakov Exp $
+// $Id: AliHLTTPCCASlicesPerformance.h,v 1.4 2010/08/16 23:40:19 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -40,7 +40,7 @@ class AliHLTTPCCASlicesPerformance: public AliHLTTPCCAPerformanceBase
 {
   public:
 
-    AliHLTTPCCASlicesPerformance():first_call(true){};
+    AliHLTTPCCASlicesPerformance():fFirstCall(true){};
     virtual ~AliHLTTPCCASlicesPerformance(){};
 
     virtual void SetNewEvent(const AliHLTTPCCAGBTracker * const Tracker,
@@ -57,10 +57,10 @@ class AliHLTTPCCASlicesPerformance: public AliHLTTPCCAPerformanceBase
     virtual void FillHistos();
     
 
-  private:
+  protected:
     vector<AliHLTTPCCASlicePerformance*> slicePerformances;
 
-    bool first_call;
+    bool fFirstCall; // isn't initialization done yet?
 };
 
 #endif

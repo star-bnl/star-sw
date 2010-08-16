@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.6 2010/08/13 18:17:21 ikulakov Exp $
+// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.7 2010/08/16 23:40:19 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -100,7 +100,7 @@ void AliHLTTPCCASlicePerformance::CheckMCTracks()
         exit (1);
       }
       if ( iMCTrack >= 0 ){
-        if ( iLastRow[iMCTrack] != iRow ){ // TODO: make same in another parts of performance
+        if ( iLastRow[iMCTrack] != iRow ){
           if ((iLastRow[iMCTrack] == iRow - 1) && (nLastRows[iMCTrack] != -10)){
             nLastRows[iMCTrack] += 1;
             if (nLastRows[iMCTrack] >= SPParameters::MinimumConsHitsForMCTrack) nLastRows[iMCTrack] = -10;
@@ -211,10 +211,11 @@ void AliHLTTPCCASlicePerformance::MatchTracks()
       const AliHLTTPCCAHitLabel &l = (*fHitLabels)[fTracker->Hit( index ).ID()];
       if ( l.fLab[0] == labmax || l.fLab[1] == labmax || l.fLab[2] == labmax
          ) lmax++;
+      // cout << index << " ";
     }
     traLabels = labmax;
     traPurity = ( ( nhits > 0 ) ? double( lmax ) / double( nhits ) : 0 );
-      //cout<<"perf track "<<itr<<": "<<nhits<<" "<<labmax<<" "<<traPurity[itr]<<endl;
+      // cout<<"perf track "<<itr<<": "<<nhits<<" "<<labmax<<" "<<traPurity<<endl;
     if ( lb ) delete[] lb;
 
     recoData[itr].SetMCTrack(traLabels, traPurity);

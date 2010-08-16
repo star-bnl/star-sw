@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformance.cxx,v 1.10 2010/08/16 22:48:24 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.cxx,v 1.11 2010/08/16 23:40:19 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -20,6 +20,7 @@
 
 #include "AliHLTTPCCounters.h"
 #include "AliHLTTPCCAPerformanceBase.h"
+#include "AliHLTTPCCASlicesLinksPerformance.h"
 #include "AliHLTTPCCASlicesPerformance.h"
 #include "AliHLTTPCCAStiPerformance.h"
 #include "AliHLTTPCCAGlobalSlicesPerformance.h"
@@ -102,12 +103,15 @@ void AliHLTTPCCAPerformance::InitSubPerformances()
     
       /// Just define here all sub-performances
       /// TSP(new __ClassName__               , __Name__      ),
-    const int NSPerfo = 4;
+    const int NSPerfo = 5;
     const TSP perfos[NSPerfo] = {
+
+      TSP(new AliHLTTPCCASlicesLinksPerformance, "Chains Performance"),
       TSP(new AliHLTTPCCASlicesPerformance, "Sector Performance"),
       TSP(new AliHLTTPCCAGlobalSlicesPerformance, "Global Sector Performance"),
       TSP(new AliHLTTPCCAGlobalPerformance, "Global Performance"),
       TSP(new AliHLTTPCCAStiPerformance, "Sti Performance")
+
     };
     
     subPerformances.resize(NSPerfo);
@@ -124,7 +128,6 @@ void AliHLTTPCCAPerformance::InitSubPerformances()
   
   first_call = false;
 } // void AliHLTTPCCAPerformance::InitSubPerformances
-
 
 void AliHLTTPCCAPerformance::CreateHistos()
 {
@@ -166,6 +169,7 @@ void AliHLTTPCCAPerformance::ExecPerformance()
         << " ---- " << subPerformances[iPerf].name << " event " << fStatNEvents << " ---- "<< endl;
     subPerformances[iPerf]->PrintEfficiency();
   }
+  cout << endl << " ============================== " << endl;
 #endif //0
   for (unsigned int iPerf = 0; iPerf < subPerformances.size(); iPerf++){  
     cout << endl

@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASlicesPerformance.cxx,v 1.4 2010/08/16 23:40:19 ikulakov Exp $
+// $Id: AliHLTTPCCASlicesLinksPerformance.cxx,v 1.1 2010/08/16 23:40:19 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -17,36 +17,16 @@
 //                                                                          *
 //***************************************************************************
 
-#include "AliHLTTPCCounters.h"
-
 #include "AliHLTTPCCAPerformanceBase.h"
+#include "AliHLTTPCCASliceLinksPerformance.h"
 #include "AliHLTTPCCASlicesPerformance.h"
+#include "AliHLTTPCCASlicesLinksPerformance.h"
 
-
-#include "AliHLTTPCCAGBHit.h"
+#include "AliHLTArray.h"
 #include "AliHLTTPCCAMCTrack.h"
-#ifndef HLTCA_STANDALONE
 #include "AliHLTTPCCAMCPoint.h"
-#endif
-#include "AliHLTTPCCAOutTrack.h"
-#include "AliHLTTPCCAGBTrack.h"
-#include "AliHLTTPCCAGBTracker.h"
 
-#include "AliHLTTPCCATracker.h"
-
-#include "AliHLTTPCCADisplay.h"
-
-
-#include "TMath.h"
-#include "TROOT.h"
-#include "Riostream.h"
-#include "TFile.h"
-#include "TH1.h"
-#include "TH2.h"
-#include "TProfile.h"
-#include "TStyle.h"
-
-void AliHLTTPCCASlicesPerformance::SetNewEvent(const AliHLTTPCCAGBTracker * const Tracker,
+void AliHLTTPCCASlicesLinksPerformance::SetNewEvent(const AliHLTTPCCAGBTracker * const Tracker,
                             AliHLTResizableArray<AliHLTTPCCAHitLabel> *hitLabels,
                             AliHLTResizableArray<AliHLTTPCCAMCTrack> *mcTracks,
                             AliHLTResizableArray<AliHLTTPCCALocalMCPoint> *localMCPoints)
@@ -57,7 +37,7 @@ void AliHLTTPCCASlicesPerformance::SetNewEvent(const AliHLTTPCCAGBTracker * cons
   if (fFirstCall){
     slicePerformances.resize(fTracker->NSlices());
     for (unsigned int iPerf = 0; iPerf < slicePerformances.size(); iPerf++){
-      slicePerformances[iPerf] = new AliHLTTPCCASlicePerformance(iPerf);
+      slicePerformances[iPerf] = new AliHLTTPCCASliceLinksPerformance(iPerf);
     }
   }
   fFirstCall = false;
@@ -67,43 +47,3 @@ void AliHLTTPCCASlicesPerformance::SetNewEvent(const AliHLTTPCCAGBTracker * cons
   }
 
 } // void AliHLTTPCCASlicesPerformance::SetNewEvent
-
-void AliHLTTPCCASlicesPerformance::CreateHistos(string histoDir, TFile* outFile)
-{
-  
-  for (unsigned int iPerf = 0; iPerf < slicePerformances.size(); iPerf++){
-    // slicePerformances[iPerf]->CreateHistos( histoDir + (string)TString(char(iPerf)), outFile ); // just set diff names, they anyway won't be written
-    slicePerformances[iPerf]->CreateHistos( "", 0 );
-  }
-  
-  AliHLTTPCCAPerformanceBase::CreateHistos(histoDir, outFile);
-
-}
-
-void AliHLTTPCCASlicesPerformance::Exec(bool print)
-{
-  for (unsigned int iPerf = 0; iPerf < slicePerformances.size(); iPerf++){
-    slicePerformances[iPerf]->Exec(0);
-  }
-  AliHLTTPCCAPerformanceBase::Exec(print);
-} // void AliHLTTPCCASlicesPerformance::Exec
-
-void AliHLTTPCCASlicesPerformance::EfficiencyPerformance()
-{
-  for (unsigned int iPerf = 0; iPerf < slicePerformances.size(); iPerf++){
-    fEff += slicePerformances[iPerf]->GetEff();
-  }
-
-  AliHLTTPCCAPerformanceBase::EfficiencyPerformance();
-} // void AliHLTTPCCASlicesPerformance::EfficiencyPerformance()
-
-void AliHLTTPCCASlicesPerformance::FillHistos()
-{
-  for (int iH = 0; iH < NHisto; iH++){
-    for (unsigned int iPerf = 0; iPerf < slicePerformances.size(); iPerf++){
-        // move all data
-      fHistos[iH]->Add(slicePerformances[iPerf]->fHistos[iH]);
-      slicePerformances[iPerf]->fHistos[iH]->Reset();
-    }
-  }
-} // void AliHLTTPCCASlicesPerformance::FillHistos()
