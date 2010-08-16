@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGBTracker.cxx,v 1.7 2010/08/09 21:29:08 ikulakov Exp $
+// $Id: AliHLTTPCCAGBTracker.cxx,v 1.8 2010/08/16 21:23:57 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -195,6 +195,7 @@ void AliHLTTPCCAGBTracker::FindTracks()
   fStatNEvents++;
 
 #ifdef MAIN_DRAW
+  AliHLTTPCCAPerformance::Instance().Init();
   AliHLTTPCCAPerformance::Instance().SetTracker( this );
   AliHLTTPCCADisplay::Instance().SetGB( this );
   AliHLTTPCCADisplay::Instance().SetTPC( fSlices[0].Param() );

@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAStiPerformance.cxx,v 1.6 2010/08/16 14:32:23 ikulakov Exp $
+// $Id: AliHLTTPCCAStiPerformance.cxx,v 1.7 2010/08/16 21:23:57 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -309,6 +309,7 @@ void AliHLTTPCCAStiPerformance::FillHistos()
 void AliHLTTPCCAStiPerformance::Draw()
 {
 #ifdef DRAW_STI_DIFF
+  AliHLTTPCCAPerformance::Instance().Init();
   AliHLTTPCCAPerformance& gbPerfo = AliHLTTPCCAPerformance::Instance();
   AliHLTTPCCADisplay::Instance().SetGB( gbPerfo.GetTracker() );
   AliHLTTPCCADisplay::Instance().SetTPC( fTracker->Slices()[0].Param() );

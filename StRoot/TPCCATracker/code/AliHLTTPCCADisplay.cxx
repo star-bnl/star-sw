@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCADisplay.cxx,v 1.2 2010/08/16 14:32:23 ikulakov Exp $
+// $Id: AliHLTTPCCADisplay.cxx,v 1.3 2010/08/16 21:23:57 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -79,12 +79,7 @@ AliHLTTPCCADisplay &AliHLTTPCCADisplay::Instance()
 {
   // reference to static object
   static AliHLTTPCCADisplay gAliHLTTPCCADisplay;
-  static bool firstCall = 1;
-  if ( firstCall ) {
-    if ( !gApplication ) new TApplication( "myapp", 0, 0 );
-    gAliHLTTPCCADisplay.Init();
-    firstCall = 0;
-  }
+
   return gAliHLTTPCCADisplay;
 }
 
@@ -106,20 +101,27 @@ AliHLTTPCCADisplay::~AliHLTTPCCADisplay()
 
 void AliHLTTPCCADisplay::Init()
 {
-  // initialization
-  gStyle->SetCanvasBorderMode( 0 );
-  gStyle->SetCanvasBorderSize( 1 );
-  gStyle->SetCanvasColor( 0 );
-  fCanvas = new TCanvas( "CA", "CA Display", 1280, 645 );
-  fCanvas->Divide( 2, 1 );
-  fYX = static_cast<TPad *>( fCanvas->GetPrimitive( "CA_1" ) ); // ("YX", "YX window", -1, 0, 600, 600);
-  fZX = static_cast<TPad *>( fCanvas->GetPrimitive( "CA_2" ) ); // ("ZX", "ZX window", -610, 0, 590, 600);
-  fYX->SetCanvas( fCanvas );
-  fYX->SetTitle( "YX" );
-  fZX->SetCanvas( fCanvas );
-  fZX->SetTitle( "ZX" );
-  fMarker = TMarker( 0.0, 0.0, 20 );//6);
-  fDrawOnlyRef = 0;
+  static bool firstCall = 1;
+  if ( firstCall ) {
+    if ( !gApplication ) new TApplication( "myapp", 0, 0 );
+
+      // initialization
+    gStyle->SetCanvasBorderMode( 0 );
+    gStyle->SetCanvasBorderSize( 1 );
+    gStyle->SetCanvasColor( 0 );
+    fCanvas = new TCanvas( "CA", "CA Display", 1280, 645 );
+    fCanvas->Divide( 2, 1 );
+    fYX = static_cast<TPad *>( fCanvas->GetPrimitive( "CA_1" ) ); // ("YX", "YX window", -1, 0, 600, 600);
+    fZX = static_cast<TPad *>( fCanvas->GetPrimitive( "CA_2" ) ); // ("ZX", "ZX window", -610, 0, 590, 600);
+    fYX->SetCanvas( fCanvas );
+    fYX->SetTitle( "YX" );
+    fZX->SetCanvas( fCanvas );
+    fZX->SetTitle( "ZX" );
+    fMarker = TMarker( 0.0, 0.0, 20 );//6);
+    fDrawOnlyRef = 0;
+  
+    firstCall = 0;
+  }
 }
 
 void AliHLTTPCCADisplay::Update()
