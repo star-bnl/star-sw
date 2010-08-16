@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCADisplay.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCADisplay.cxx,v 1.2 2010/08/16 14:32:23 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -31,6 +31,8 @@
 #include "AliHLTTPCCAMCTrack.h"
 #include "AliHLTTPCCAOutTrack.h"
 #include "AliHLTTPCCAParam.h"
+
+#include "AliHLTTPCCATrack.h"
 
 #include "TString.h"
 #include "Riostream.h"
@@ -173,7 +175,7 @@ void AliHLTTPCCADisplay::SetTPCView()
 }
 
 
-void AliHLTTPCCADisplay::SetGB( AliHLTTPCCAGBTracker * const GBTracker )
+void AliHLTTPCCADisplay::SetGB( const AliHLTTPCCAGBTracker * GBTracker )
 {
   fGB = GBTracker;
 }
@@ -386,7 +388,7 @@ void  AliHLTTPCCADisplay::DrawPoint(float x, float y, float z, int Start, Size_t
 ///mvz end 20.01.2010
 
 ///mvz start 28.01.2010
-void  AliHLTTPCCADisplay::DrawGBPoint(AliHLTTPCCAGBTracker &tracker, int iSlice, float x, float y, float z, int Start, Size_t width )
+void  AliHLTTPCCADisplay::DrawGBPoint(const AliHLTTPCCAGBTracker &tracker, int iSlice, float x, float y, float z, int Start, Size_t width )
 {
   AliHLTTPCCATracker &slice = tracker.Slices()[iSlice];
   SetSliceTransform( &slice );
@@ -421,7 +423,7 @@ void  AliHLTTPCCADisplay::DrawGBPoint(AliHLTTPCCATracker &slice, float x, float 
 }
 ///mvz end 29.01.2010
 
-void AliHLTTPCCADisplay::Set2Slices( AliHLTTPCCATracker * const slice )
+void AliHLTTPCCADisplay::Set2Slices( AliHLTTPCCATracker * slice )
 {
   //* Set view for two neighbouring slices
 
@@ -530,7 +532,7 @@ void AliHLTTPCCADisplay::Slice2View( double x, double y, double *xv, double *yv 
 }
 
 
-void AliHLTTPCCADisplay::DrawGBHit( AliHLTTPCCAGBTracker &tracker, int iHit, int color, Size_t width  )
+void AliHLTTPCCADisplay::DrawGBHit( const AliHLTTPCCAGBTracker &tracker, int iHit, int color, Size_t width  )
 {
   // draw hit
   const AliHLTTPCCAGBHit &h = tracker.Hits()[iHit];
@@ -560,7 +562,7 @@ void AliHLTTPCCADisplay::DrawGBHit( AliHLTTPCCAGBTracker &tracker, int iHit, int
   fMarker.DrawMarker( h.Z(), vy );
 }
 
-void AliHLTTPCCADisplay::DrawGBHits( AliHLTTPCCAGBTracker &tracker, int color, Size_t width, int hitsType)
+void AliHLTTPCCADisplay::DrawGBHits( const AliHLTTPCCAGBTracker &tracker, int color, Size_t width, int hitsType)
 {
   // draw hits
 
@@ -656,7 +658,7 @@ void AliHLTTPCCADisplay::DrawSliceLink( int iRow, int iHit, int colorUp, int col
   // draw link between clusters
 
   if ( !fPerf || !fGB ) return;
-  AliHLTTPCCAGBTracker &tracker = *fGB;
+  const AliHLTTPCCAGBTracker &tracker = *fGB;
   if ( width < 0 ) width = 1.;
   fLine.SetLineWidth( width );
   const int colUp = colorUp >= 0 ? colorUp : kMagenta;
@@ -731,7 +733,7 @@ int AliHLTTPCCADisplay::GetTrackMC( const AliHLTTPCCADisplayTmpHit *vHits, int N
 {
   // get MC label for the track
 
-  AliHLTTPCCAGBTracker &tracker = *fGB;
+  const AliHLTTPCCAGBTracker &tracker = *fGB;
 
   int label = -1;
   double purity = 0;
@@ -801,7 +803,7 @@ bool AliHLTTPCCADisplay::DrawTrack( AliHLTTPCCATrackParam t, double Alpha, const
 
   if ( NHits < 2 ) return 0;
 
-  AliHLTTPCCAGBTracker &tracker = *fGB;
+  const AliHLTTPCCAGBTracker &tracker = *fGB;
   if ( width < 0 ) width = 2;
 
   if ( fDrawOnlyRef ) {
@@ -962,7 +964,7 @@ bool AliHLTTPCCADisplay::DrawTrack( AliHLTTPCCATrackParam t, double Alpha, const
 bool AliHLTTPCCADisplay::DrawTracklet( AliHLTTPCCATrackParam &track, const int *hitstore, int color, int width, bool pPoint )
 {
   // draw tracklet
-  AliHLTTPCCAGBTracker &tracker = *fGB;
+  const AliHLTTPCCAGBTracker &tracker = *fGB;
   AliHLTTPCCADisplayTmpHit vHits[200];
   int nHits = 0;
   for ( int iRow = 0; iRow < fSlice->Param().NRows(); iRow++ ) {
@@ -988,7 +990,7 @@ void AliHLTTPCCADisplay::DrawSliceOutTrack( AliHLTTPCCATrackParam &t, double alp
   AliHLTTPCCAOutTrack &track = fSlice->OutTracks()[itr];
   if ( track.NHits() < 2 ) return;
 
-  AliHLTTPCCAGBTracker &tracker = *fGB;
+  const AliHLTTPCCAGBTracker &tracker = *fGB;
   AliHLTTPCCADisplayTmpHit vHits[200];
 
   for ( int ih = 0; ih < track.NHits(); ih++ ) {
@@ -1186,7 +1188,7 @@ void AliHLTTPCCADisplay::DrawSliceOutTrack1( int itr, int color, Size_t width )
   AliHLTTPCCAOutTrack &track = fSlice->OutTracks1()[itr];
   if ( track.NHits() < 2 ) return;
 
-  AliHLTTPCCAGBTracker &tracker = *fGB;
+  const AliHLTTPCCAGBTracker &tracker = *fGB;
   AliHLTTPCCADisplayTmpHit vHits[200];
 
   for ( int ih = 0; ih < track.NHits(); ih++ ) {
@@ -1241,7 +1243,7 @@ void AliHLTTPCCADisplay::DrawSliceOutTrack( int itr, int color, Size_t width )
   AliHLTTPCCAOutTrack &track = fSlice->OutTracks()[itr];
   if ( track.NHits() < 2 ) return;
 
-  AliHLTTPCCAGBTracker &tracker = *fGB;
+  const AliHLTTPCCAGBTracker &tracker = *fGB;
   AliHLTTPCCADisplayTmpHit vHits[200];
 
   for ( int ih = 0; ih < track.NHits(); ih++ ) {
@@ -1303,7 +1305,7 @@ void AliHLTTPCCADisplay::DrawGBTrack( int itr, int color, int width )
 }
 
 
-void AliHLTTPCCADisplay::DrawGBTrackFast( AliHLTTPCCAGBTracker &tracker, int itr, int color )
+void AliHLTTPCCADisplay::DrawGBTrackFast( const AliHLTTPCCAGBTracker &tracker, int itr, int color )
 {
   // draw global track
 
@@ -1739,6 +1741,248 @@ void AliHLTTPCCADisplay::SetTPC( const AliHLTTPCCAParam& tpcParam){ // iklm
   fROuterMax = tpcParam.RMax();
 }
 
-// void AliHLTTPCCADisplay::DrawGBLinks( AliHLTTPCCAGBTracker &tracker, int color = -1, Size_t width = -1 ){
+// void AliHLTTPCCADisplay::DrawGBLinks( const AliHLTTPCCAGBTracker &tracker, int color = -1, Size_t width = -1 ){
 //   
 // }; // DrawGBLinks
+
+
+/// IKu some new functional. supposed to be usefull
+
+// ----------- TDrawObject ----------
+
+AliHLTTPCCADisplay& AliHLTTPCCADisplay::TDrawObject::fDisplay = AliHLTTPCCADisplay::Instance();
+
+AliHLTTPCCADisplay::TDrawObject::TDrawObject()
+ :fColor(1),fWidth(0.2)
+{
+}
+
+void AliHLTTPCCADisplay::TDrawObject::SetColor(int c)
+{
+  fColor = c;
+}
+void AliHLTTPCCADisplay::TDrawObject::SetWidth(float w)
+{
+  fWidth = w;
+}
+
+void AliHLTTPCCADisplay::TDrawObject::Global2View( double x, double y, double *xv, double *yv)
+{
+  AliHLTTPCCADisplay &d = AliHLTTPCCADisplay::Instance();
+  d.Global2View( x, y, xv, yv );
+}
+
+void AliHLTTPCCADisplay::TDrawObject::Slice2View( double x, double y, double *xv, double *yv, float alpha)
+{
+  AliHLTTPCCADisplay &d = AliHLTTPCCADisplay::Instance();
+  d.SetSliceTransform( alpha );
+  d.Slice2View( x, y, xv, yv );
+}
+
+void AliHLTTPCCADisplay::TDrawObject::Slice2View( double x, double y, double *xv, double *yv, int iSlice)
+{
+  AliHLTTPCCADisplay &d = AliHLTTPCCADisplay::Instance();
+  float alpha = GetAlpha(d.GetGB(), iSlice);
+  Slice2View(x, y, xv, yv, alpha);
+}
+
+
+float AliHLTTPCCADisplay::TDrawObject::GetAlpha(const AliHLTTPCCAGBTracker *gbTracker, int iSlice)
+{
+  return gbTracker->Slice( iSlice ).Param().Alpha();
+}
+
+
+
+// ----------- TDrawHit ----------
+AliHLTTPCCADisplay::TDrawHit::TDrawHit()
+ :x(NON),y(NON),z(NON),alpha(NON),gx(NON),gy(NON),gz(NON)
+{
+}
+
+bool AliHLTTPCCADisplay::TDrawHit::CheckGlobal()
+{
+  return (gx != NON) && (gy != NON) && (gz != NON);  
+}
+
+bool AliHLTTPCCADisplay::TDrawHit::CheckLocal()
+{
+  return (x != NON) && (y != NON) && (z != NON);
+}
+
+bool AliHLTTPCCADisplay::TDrawHit::CheckAlpha()
+{
+  return alpha != NON;
+}
+
+
+void AliHLTTPCCADisplay::TDrawHit::FillGBCoor()
+{
+  assert( CheckLocal() );
+  assert( CheckAlpha() );
+
+  gx = x * cos(alpha) - y * sin(alpha);
+  gy = y * cos(alpha) + x * sin(alpha);
+  gz = z;
+}
+
+
+TMarker& AliHLTTPCCADisplay::TDrawHit::GetMarker()
+{
+  static TMarker m;
+  m.SetMarkerStyle(20);
+  // int color = (fColor == NON) ? fStatColor : fColor;
+  // int width = (fWidth == NON) ? fStatWidth : fWidth;
+  m.SetMarkerColor( fColor );
+  m.SetMarkerSize ( fWidth );
+  return m;
+}
+
+void AliHLTTPCCADisplay::TDrawHit::DrawLocal()
+{
+  // TODO
+} //
+
+void AliHLTTPCCADisplay::TDrawHit::DrawGlobal()
+{
+  // CHECKME
+  double vx, vy;
+  Global2View( gx, gy, &vx, &vy );
+
+  TMarker& m = GetMarker();
+  
+  fDisplay.CanvasYX()->cd();
+  m.DrawMarker( vx, vy );
+
+  fDisplay.CanvasZX()->cd();
+  m.DrawMarker( gz, vy );
+
+} // 
+
+
+// ----------- TDrawTrack ----------
+
+int AliHLTTPCCADisplay::TDrawTrack::fStatColor = 1;
+float AliHLTTPCCADisplay::TDrawTrack::fStatWidth = 1;
+
+AliHLTTPCCADisplay::TDrawTrack::TDrawTrack()
+{
+  fColor = NON;
+  fWidth = NON;
+}
+
+
+
+void AliHLTTPCCADisplay::TDrawTrack::SetStatColor(int c)
+{
+  fStatColor = c;
+}
+void AliHLTTPCCADisplay::TDrawTrack::SetStatWidth(float w)
+{
+  fStatWidth = w;
+}
+
+TPolyLine& AliHLTTPCCADisplay::TDrawTrack::GetPolyLine()
+{
+  static TPolyLine pl;
+  int color = (fColor == NON) ? fStatColor : fColor;
+  int width = (fWidth == NON) ? fStatWidth : fWidth;
+  pl.SetLineColor( color );
+  pl.SetLineWidth( width );
+  return pl;
+}
+
+void AliHLTTPCCADisplay::TDrawTrack::SetHitsColor(int c)
+{
+  for (unsigned i = 0; i < hits.size(); i++)
+    hits[i].SetColor(c);
+}
+
+void AliHLTTPCCADisplay::TDrawTrack::SetHitsWidth(float w)
+{
+    for (unsigned i = 0; i < hits.size(); i++)
+    hits[i].SetWidth(w);
+}
+
+
+
+void AliHLTTPCCADisplay::TDrawTrack::FillGBHitsCoor()
+{
+  for (unsigned i = 0; i < hits.size(); i++)
+    hits[i].FillGBCoor();
+}
+
+
+void AliHLTTPCCADisplay::TDrawTrack::DrawHitsLocal()
+{
+  for (unsigned i = 0; i < hits.size(); i++)
+    hits[i].DrawLocal();
+}
+
+
+void AliHLTTPCCADisplay::TDrawTrack::DrawHitsGlobal()
+{
+  for (unsigned i = 0; i < hits.size(); i++)
+    hits[i].DrawGlobal();
+}
+
+
+void AliHLTTPCCADisplay::TDrawTrack::DrawLocal()
+{
+  // TODO
+} // void AliHLTTPCCADisplay::SpecDrawTrackLocal
+
+void AliHLTTPCCADisplay::TDrawTrack::DrawGlobal()
+{
+  const int NHits = hits.size();
+  if ( NHits < 2 ) return;
+  if ( ! hits[0].CheckGlobal() ) FillGBHitsCoor();
+
+  vector<double> vx, vy, vz;
+  vx.resize(NHits);
+  vy.resize(NHits);
+  vz.resize(NHits);
+  double *vxa = &(vx[0]),  *vya = &(vy[0]),  *vza = &(vz[0]);
+  double *x = &(vx[0]),  *y = &(vy[0]),  *z = &(vz[0]);
+  for (int ih = 0; ih < NHits; ih++, x++, y++, z++) {
+    TDrawHit &hit = hits[ih];
+    
+    Global2View( hit.gx, hit.gy, x, y );
+    *z = hit.z;
+  } // for ih
+  
+  TPolyLine &pl = GetPolyLine();
+
+  fDisplay.CanvasYX()->cd();
+  pl.DrawPolyLine( NHits, vxa, vya );
+
+  fDisplay.CanvasZX()->cd();
+  pl.DrawPolyLine( NHits, vza, vya );
+} // void AliHLTTPCCADisplay::SpecDrawTrackGlobal
+
+
+  // ----------- SpecDraw ----------
+
+void AliHLTTPCCADisplay::SpecDrawMCTrack(AliHLTTPCCAMCTrack& mcTrack, AliHLTResizableArray<AliHLTTPCCALocalMCPoint>* mcPointsArray)
+{
+  const int NPoints =  mcTrack.NMCPoints();
+  if ( NPoints < 2 ) return;
+  
+  AliHLTTPCCALocalMCPoint *points = &((*mcPointsArray).Data()[mcTrack.FirstMCPointID()]);
+
+  TDrawTrack drawTrack;
+  
+  for ( int ih = 0; ih < NPoints; ih++ ) {
+    TDrawHit hit;
+    hit.x = points[ih].X();
+    hit.y = points[ih].Y();
+    hit.z = points[ih].Z();
+    hit.alpha = TDrawHit::GetAlpha( fGB, points[ih].ISlice() );
+    drawTrack.hits.push_back(hit);
+  }
+  
+  drawTrack.SetStatColor(2);
+  drawTrack.SetStatWidth(0.5);
+  drawTrack.DrawGlobal();
+  drawTrack.DrawHitsGlobal();
+} // void AliHLTTPCCADisplay::SpecDrawMCTrack

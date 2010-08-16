@@ -63,8 +63,10 @@ class AliHLTTPCCAGBTracker
     double StatTime( int iTimer ) const { return fStatTime[iTimer]; }
     int StatNEvents() const { return fStatNEvents; }
     int NTracks() const { return fNTracks; }
+    AliHLTTPCCAGBTrack *Tracks() const { return fTracks; }
     AliHLTTPCCAGBTrack *Tracks() { return fTracks; }
     const AliHLTTPCCAGBTrack &Track( int i ) const { return fTracks[i]; }
+    int *TrackHits() const { return fTrackHits; }
     int *TrackHits() { return fTrackHits; }
     int TrackHit( int i ) const { return fTrackHits[i]; }
 
