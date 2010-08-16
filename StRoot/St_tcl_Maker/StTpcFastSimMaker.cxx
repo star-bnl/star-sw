@@ -1,5 +1,8 @@
-/* $Id: StTpcFastSimMaker.cxx,v 1.2 2010/05/28 16:28:44 fisyak Exp $
+/* $Id: StTpcFastSimMaker.cxx,v 1.3 2010/08/16 21:59:46 fisyak Exp $
     $Log: StTpcFastSimMaker.cxx,v $
+    Revision 1.3  2010/08/16 21:59:46  fisyak
+    leave coordinates in TpcLocalCoordinate because StTpcHitMover expects that
+
     Revision 1.2  2010/05/28 16:28:44  fisyak
     Adjust for new TpcDb interface, remove pseudo pad rows
 
@@ -92,10 +95,9 @@ Int_t StTpcFastSimMaker::Make() {
     coorLS.setPosition(newPosition);
     static StTpcPadCoordinate Pad;
     transform(coorLS,Pad,kFALSE,kTRUE); // don't use T0, use Tau
-    
-    transform(coorLS,coorLSA); // alignment
-    transform(coorLSA,coorG);
-    StThreeVectorF p(coorG.position().x(),coorG.position().y(),coorG.position().z());
+    static StTpcLocalCoordinate global; // leave coordinates in TpcLocalCoordinate because StTpcHitMover expects that.
+    transform(Pad,global,kFALSE); // alignment
+    StThreeVectorF p(global.position().x(),global.position().y(),global.position().z());
     UInt_t hw = 1;   // detid_tpc
     hw += sector << 4;     // (row/100 << 4);   // sector
     hw += row    << 9;     // (row%100 << 9);   // row
