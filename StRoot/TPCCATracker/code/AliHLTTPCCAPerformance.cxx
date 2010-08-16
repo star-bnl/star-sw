@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformance.cxx,v 1.9 2010/08/14 22:06:58 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.cxx,v 1.10 2010/08/16 22:48:24 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -182,8 +182,8 @@ void AliHLTTPCCAPerformance::ExecPerformance()
 AliHLTTPCCAPerformanceBase* AliHLTTPCCAPerformance::GetSubPerformance(string name)
 {
   unsigned i = 0;
-  for( ; i < (subPerformances.size()) && (subPerformances[i].name != name); i++);
-  assert ( i == subPerformances.size() || ("" == " Incorrect name of subPerformance used.") );
+  for( ; (i < subPerformances.size()) && (subPerformances[i].name != name); i++);
+  assert ( i != subPerformances.size() || ("" == " Incorrect name of subPerformance used.") );
   return subPerformances[i].perf;
 } // AliHLTTPCCAPerformanceBase* AliHLTTPCCAPerformance::GetSubPerformance(string name)
 
