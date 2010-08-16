@@ -134,7 +134,7 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
     numberOfHitsWithPadding += NextMultipleOf<VectorAlignment>( data.NumberOfClusters( row ) );
   }
 
-  const int numberOfRows = data.LastRow() - data.FirstRow();
+  const int numberOfRows = data.LastRow() - data.FirstRow() + 1;
   const int memorySize =
     // LinkData
     2 * numberOfHitsWithPadding * sizeof( short ) +

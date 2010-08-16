@@ -241,20 +241,15 @@ int AliHLTTPCCATracker::Reconstructor::execute()
 #endif
 
 #ifndef NDEBUG
+#if 0 // since we connect edge hits into chain don't need this
   const AliHLTTPCCARow &firstRow = d->fData.Row( 0 );
-  const AliHLTTPCCARow &secondRow = d->fData.Row( 1 );
   const int rowStep = AliHLTTPCCAParameters::RowStep;
-  const AliHLTTPCCARow &beforeLastRow  = d->fData.Row( d->fParam.NRows() - rowStep );
   const AliHLTTPCCARow &lastRow  = d->fData.Row( d->fParam.NRows() - 1 );
   for ( int hitIndex = 0; hitIndex < firstRow.NHits(); hitIndex += short_v::Size ) {
     assert( d->fData.HitLinkUpData  ( firstRow, hitIndex ) == -1 );
     assert( d->fData.HitLinkDownData( firstRow, hitIndex ) == -1 );
   }
-  for ( int hitIndex = 0; hitIndex < secondRow.NHits(); hitIndex += short_v::Size ) {
-    assert( d->fData.HitLinkUpData  ( secondRow, hitIndex ) == -1 );
-    assert( d->fData.HitLinkDownData( secondRow, hitIndex ) == -1 );
-  }
-  for ( int rowIndex = 2; rowIndex < d->Param().NRows() - rowStep; ++rowIndex ) {
+  for ( int rowIndex = 1; rowIndex < d->Param().NRows() - rowStep; ++rowIndex ) {
     const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
     const short_v nHitsUp = d->fData.Row( rowIndex + rowStep ).NHits();
     const short_v nHitsDown = d->fData.Row( rowIndex - rowStep ).NHits();
@@ -263,15 +258,12 @@ int AliHLTTPCCATracker::Reconstructor::execute()
       assert( d->fData.HitLinkDownData( row, hitIndex ) < nHitsDown );
     }
   }
-  for ( int hitIndex = 0; hitIndex < beforeLastRow.NHits(); hitIndex += short_v::Size ) {
-    assert( d->fData.HitLinkUpData  ( beforeLastRow, hitIndex ) == -1 );
-    assert( d->fData.HitLinkDownData( beforeLastRow, hitIndex ) == -1 );
-  }
   for ( int hitIndex = 0; hitIndex < lastRow.NHits(); hitIndex += short_v::Size ) {
     assert( d->fData.HitLinkUpData  ( lastRow, hitIndex ) == -1 );
     assert( d->fData.HitLinkDownData( lastRow, hitIndex ) == -1 );
   }
-#endif
+#endif // 0
+#endif // NDEBUG
 //   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() 5.5" << std::endl; // dbg 0
   d->fTrackletVectors.Resize( ( d->fNTracklets + short_v::Size - 1 ) / short_v::Size);
 //   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() 6" << std::endl; // dbg 0
