@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.6 2010/08/14 22:06:58 ikulakov Exp $
+// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.7 2010/08/16 14:32:23 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -181,7 +181,7 @@ void AliHLTTPCCAGlobalPerformance::EfficiencyPerformance( )
 } // void AliHLTTPCCAGlobalPerformance::EfficiencyPerformance( )
 
 void AliHLTTPCCAGlobalPerformance::FillHistos()
-{ // TODO: doesn't fill. Fix.
+{
   // global tracker performance
   {
     for ( int itr = 0; itr < nRecoTracks; itr++ ) {

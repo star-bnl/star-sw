@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAStiPerformance.h,v 1.4 2010/08/13 18:17:21 ikulakov Exp $
+// $Id: AliHLTTPCCAStiPerformance.h,v 1.5 2010/08/16 14:32:23 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -62,6 +62,8 @@ class AliHLTTPCCAStiPerformance: public AliHLTTPCCAPerformanceBase // TODO publi
 
       /// Histograms
     virtual void FillHistos();
+  
+    virtual void Draw(); // draw diff things after performance
     
     int NTracks() {return Tracks.size();}
     void SetRecoTracks(vector<AliHLTTPCCAGBTrack> &Trs_){Tracks.clear(); for (unsigned i = 0; i < Trs_.size(); i++) Tracks.push_back(Trs_[i]); }

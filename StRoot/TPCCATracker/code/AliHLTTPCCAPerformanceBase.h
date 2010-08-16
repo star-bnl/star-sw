@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformanceBase.h,v 1.5 2010/08/15 13:25:25 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformanceBase.h,v 1.6 2010/08/16 14:32:23 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -63,10 +63,15 @@ class AliHLTTPCCAPerformanceBase
     virtual void PrintEfficiencyStatistic(){ fEffStat.CalcEff(); fEffStat.Print(); };
     virtual void PrintEfficiency()         { fEff.CalcEff();     fEff.Print();     };
 
+    virtual void Draw(){}; // draw diff things after performance
+  
       /// Accessors
     AliHLTTPCEfficiencies &GetEff()    { return fEff;     };
     AliHLTTPCEfficiencies &GetEffStat(){ return fEffStat; };
 
+    vector<AliHLTTPCCAPerformanceMCTrackData>   &GetMCData()  { return mcData;   }; 
+    vector<AliHLTTPCCAPerformanceRecoTrackData> &GetRecoData(){ return recoData; };
+  
   protected:
 
     virtual void FillHistos(){};

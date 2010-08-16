@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.5 2010/08/15 13:25:25 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.6 2010/08/16 14:32:23 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -164,6 +164,8 @@ void AliHLTTPCCAPerformanceBase::Exec( bool PrintFlag )
     // Histos
   FillHistos();
 
+  Draw();
+  
   fStatNEvents++;
 } // Exec
 

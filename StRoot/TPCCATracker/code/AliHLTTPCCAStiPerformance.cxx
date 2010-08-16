@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAStiPerformance.cxx,v 1.5 2010/08/14 22:06:58 ikulakov Exp $
+// $Id: AliHLTTPCCAStiPerformance.cxx,v 1.6 2010/08/16 14:32:23 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -34,8 +34,10 @@
 
 #include "AliHLTTPCCATracker.h"
 
+#ifdef DRAW_STI_DIFF
 #include "AliHLTTPCCADisplay.h"
-
+#include "AliHLTTPCCAPerformance.h"
+#endif // DRAW_STI_DIFF
 
 #include "TMath.h"
 #include "TROOT.h"
@@ -176,7 +178,7 @@ void AliHLTTPCCAStiPerformance::EfficiencyPerformance( )
 } // void AliHLTTPCCAStiPerformance::EfficiencyPerformance( )
 
 void AliHLTTPCCAStiPerformance::FillHistos()
-{ // TODO: doesn't fill. Fix.
+{
   // global tracker performance
   {
     for ( int itr = 0; itr < NTracks(); itr++ ) {
@@ -184,7 +186,6 @@ void AliHLTTPCCAStiPerformance::FillHistos()
 
       if ( recoData[itr].IsGhost(PParameters::MinTrackPurity) ) continue;
 
-      const AliHLTTPCCAGBTrack &tCA =  Tracks[itr];
       AliHLTTPCCAMCTrack &mc = (*fMCTracks)[iMC];
 
       int nFirstMC = mc.FirstMCPointID();
@@ -304,3 +305,30 @@ void AliHLTTPCCAStiPerformance::FillHistos()
 
 
 } // void AliHLTTPCCAStiPerformance::FillHistos()
+
+void AliHLTTPCCAStiPerformance::Draw()
+{
+#ifdef DRAW_STI_DIFF
+  AliHLTTPCCAPerformance& gbPerfo = AliHLTTPCCAPerformance::Instance();
+  AliHLTTPCCADisplay::Instance().SetGB( gbPerfo.GetTracker() );
+  AliHLTTPCCADisplay::Instance().SetTPC( fTracker->Slices()[0].Param() );
+  AliHLTTPCCADisplay::Instance().SetTPCView();
+  AliHLTTPCCADisplay::Instance().DrawTPC();
+  AliHLTTPCCADisplay::Instance().DrawGBHits( *gbPerfo.GetTracker(), -1, 0.2, 1  );
+
+  for ( int imc = 0; imc < nMCTracks; imc++ ) {
+    AliHLTTPCCAPerformanceMCTrackData &mc = mcData[imc];
+    bool doDraw = true;
+    doDraw &= (mc.GetSet() >= 2);
+    doDraw &= mc.IsReconstructable();
+    doDraw &= mc.IsReconstructed();
+    doDraw &= !gbPerfo.GetSubPerformance("Global Performance")->GetMCData()[imc].IsReconstructed();
+    if ( doDraw )
+      AliHLTTPCCADisplay::Instance().SpecDrawMCTrack( (*fMCTracks)[imc], fLocalMCPoints );
+  }
+
+  AliHLTTPCCADisplay::Instance().SaveCanvasToFile( "MCTracksDiff.pdf" );
+  AliHLTTPCCADisplay::Instance().Ask();
+  
+#endif // DRAW_STI_DIFF
+} // void AliHLTTPCCAStiPerformance::Draw()
