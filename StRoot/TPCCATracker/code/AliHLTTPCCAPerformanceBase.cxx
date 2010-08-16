@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.6 2010/08/16 14:32:23 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.7 2010/08/16 23:40:19 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -86,8 +86,8 @@ void AliHLTTPCCAPerformanceBase::SetNewEvent( const AliHLTTPCCAGBTracker * const
 
 } // void AliHLTTPCCAPerformanceBase::SetNewEvent
 
-AliHLTTPCCAPerformanceBase::AliHLTTPCCAPerformanceBase()
-  :fStatNEvents(0),fHistoDir(0)
+AliHLTTPCCAPerformanceBase::AliHLTTPCCAPerformanceBase():
+  nRecoTracks(0), nMCTracks(0), fLocalMCPoints(0),fMCTracks(0),fHitLabels(0),fHistoDir(0),fTracker(0),fStatNEvents(0)
 {
   for( int i=0; i < NHisto; i++ ){
     fHistos[i] = 0;
@@ -119,7 +119,7 @@ void AliHLTTPCCAPerformanceBase::CreateHistos(string histoDir, TFile* outFile)
     gDirectory->cd( ".." );
     curdir->cd();    
   }
-  else{
+  else{ // create not in file
     for( int i=0; i < NHisto; i++ ){
       static int addName = 0; // haven't any subfolders so create different names
       addName++;

@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCASlicePerformance.h,v 1.4 2010/08/13 14:39:49 ikulakov Exp $
+// $Id: AliHLTTPCCASlicePerformance.h,v 1.5 2010/08/16 23:40:19 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -40,7 +40,7 @@ class AliHLTTPCCASlicePerformance: public AliHLTTPCCAPerformanceBase
 {
   public:
 
-    AliHLTTPCCASlicePerformance(int iSlice){ fISlice = iSlice; };
+    AliHLTTPCCASlicePerformance(int iSlice):fISlice(iSlice),firstSliceHit(0),endSliceHit(0){};
     virtual ~AliHLTTPCCASlicePerformance(){};
 
     virtual void SetNewEvent(const AliHLTTPCCAGBTracker * const Tracker,
@@ -62,7 +62,7 @@ class AliHLTTPCCASlicePerformance: public AliHLTTPCCAPerformanceBase
     friend class AliHLTTPCCASlicesPerformance;
     friend class AliHLTTPCCAMergerPerformance;
     friend class AliHLTTPCCAGlobalSlicesPerformance;
-  private:
+  protected:
     int fISlice;
     const AliHLTTPCCATracker *sliceTracker;
     int firstSliceHit, endSliceHit;

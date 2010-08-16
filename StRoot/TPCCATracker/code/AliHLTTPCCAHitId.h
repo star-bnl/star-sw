@@ -43,7 +43,7 @@ class AliHLTTPCCAHitId
     }
 
     short fRow;
-    unsigned short fHit;
+    unsigned short fHit; // index of hit in row array. Use data.ClusterDataIndex( row, iHit ) in order to obtain index in the slice array.
 };
 
 typedef AliHLTTPCCAHitId HitId;
