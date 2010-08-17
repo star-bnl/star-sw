@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCASliceLinksPerformance.h,v 1.1 2010/08/16 23:40:19 ikulakov Exp $
+// $Id: AliHLTTPCCASliceLinksPerformance.h,v 1.2 2010/08/17 15:47:14 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -62,8 +62,8 @@ class AliHLTTPCCASliceLinksPerformance: public AliHLTTPCCASlicePerformance
   virtual void MatchTracks();   // fill recoData.
 
     /// Histograms // don't need them, so redefine
-  virtual void CreateHistos(string histoDir = "", TFile *outFile = 0){};
-  virtual void FillHistos(){};
+    //  virtual void CreateHistos(string histoDir = "", TFile *outFile = 0){};
+  virtual void FillHistos();
 
   friend class AliHLTTPCCASlicesLinksPerformance;
  private:

@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.7 2010/08/16 23:40:19 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.8 2010/08/17 15:47:13 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -62,7 +62,9 @@ void AliHLTTPCCAPerformanceBase::SetNewEvent( const AliHLTTPCCAGBTracker * const
   fEff = AliHLTTPCEfficiencies();
   mcData.resize(0);
   recoData.resize(0);
-  
+
+  const int MaxMomentum = 5.;
+  const int MaxNHits    = 50.;
   const THistoInfo tmp[NHisto]=
   {
     { "resY",       "track Y resolution [cm]",  30, -0.25,  0.25 },
@@ -75,10 +77,20 @@ void AliHLTTPCCAPerformanceBase::SetNewEvent( const AliHLTTPCCAGBTracker * const
     { "pullSinPhi", "track SinPhi pull",        30, -7.,   7. },
     { "pullDzDs",   "track DzDs pull",          30, -7.,   7. },
     { "pullQPt",    "track Q/Pt pull",          30, -7.,   7. },
+    
     { "resYHit",       "track Y resolution [cm]",  30, -0.25,  0.25 },
     { "resZHit",       "track Z resolution [cm]",  30, -1.,   1. },
     { "pullYHit",      "track Y pull",             30, -7.,   7. },
-    { "pullZHit",      "track Z pull",             30, -7.,   7. }
+    { "pullZHit",      "track Z pull",             30, -7.,   7. },
+
+    { "ghostsLength",   "N Ghosts vs N Hits",       MaxNHits+1, 0.,   MaxNHits },    // nGhosts vs nHits in reco track
+    { "ghostsMom",      "N Ghosts vs Momentum",     50, 0.,           MaxMomentum }, // nGhosts vs momentum of MC track // TODO? reco Track
+    
+    { "recosLength",   "N Reco Tracks vs N Hits",   MaxNHits+1, 0.,   MaxNHits },    // vs nHits in reco track
+    { "recosMom",      "N Reco Tracks vs Momentum", 50, 0.,           MaxMomentum }, // vs momentum of MC track // TODO? reco Track
+    { "recosEffVsMCNHits", "Reconstruction Efficiency vs N Hits", MaxNHits+1, 0.,   MaxNHits },   // eff vs nHits in MC track
+    { "recosEffVsMCMom", "Reconstruction Efficiency vs Momentum", 50, 0.,           MaxMomentum },// eff vs mom in MC track
+    
   };
   for (int iHisto = 0; iHisto < NHisto; iHisto++){
     fHistosInfo[iHisto] = tmp[iHisto];
@@ -111,19 +123,61 @@ void AliHLTTPCCAPerformanceBase::CreateHistos(string histoDir, TFile* outFile)
     fHistoDir->cd();
     gDirectory->mkdir( "TrackFit" );
     gDirectory->cd( "TrackFit" );
-  
-    for( int i=0; i < NHisto; i++ ){
-      fHistos[i] = new TH1D(fHistosInfo[i].name, fHistosInfo[i].title, fHistosInfo[i].n, fHistosInfo[i].l, fHistosInfo[i].r);
+
+    int ih = 0; // i of Histo
+    for( int i = 0; i < NTracksPulls + NHitsPulls; i++, ih++ ){ // TODO separate Track & Hits pulls
+      fHistos[ih] = new TH1D(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
     }
 
+    gDirectory->cd( ".." );
+    gDirectory->mkdir( "Ghosts" );
+    gDirectory->cd( "Ghosts" );
+    
+    for( int i = 0; i < NGhostsHisto; i++, ih++ ){
+      fHistos[ih] = new TH1D(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
+    }
+    for( int i = 0; i < NGhostsProfiles; i++, ih++ ){
+      fHistos[ih] = new TProfile(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
+      fHistos[ih]->SetMarkerColor(2);
+      fHistos[ih]->SetLineColor(2);
+    }
+    
+    gDirectory->cd( ".." );
+    gDirectory->mkdir( "RecoTracks" );
+    gDirectory->cd( "RecoTracks" );
+    
+    for( int i = 0; i < NRecoTracksHisto; i++, ih++ ){
+      fHistos[ih] = new TH1D(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
+    }
+    for( int i = 0; i < NRecoTracksProfiles; i++, ih++ ){
+      fHistos[ih] = new TProfile(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
+      fHistos[ih]->SetMarkerColor(2);
+      fHistos[ih]->SetLineColor(2);
+    }
+    
     gDirectory->cd( ".." );
     curdir->cd();    
   }
   else{ // create not in file
-    for( int i=0; i < NHisto; i++ ){
-      static int addName = 0; // haven't any subfolders so create different names
-      addName++;
-      fHistos[i] = new TH1D(fHistosInfo[i].name+addName, fHistosInfo[i].title, fHistosInfo[i].n, fHistosInfo[i].l, fHistosInfo[i].r);
+    static int addName = 0; // haven't any subfolders so create with different names
+    int ih = 0; // i of Histo
+    for( int i = 0; i < NTracksPulls + NHitsPulls + NGhostsHisto; i++, ih++, addName++ ){
+      fHistos[ih] = new TH1D(fHistosInfo[ih].name+addName, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
+    }
+    for( int i = 0; i < NGhostsProfiles; i++, ih++, addName++ ){
+      fHistos[ih] = new TProfile(fHistosInfo[ih].name+addName, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
+      fHistos[ih]->SetMarkerColor(2);
+      fHistos[ih]->SetLineColor(2);
+    }
+    for( int i = 0; i < NRecoTracksHisto; i++, ih++, addName++ ){
+      fHistos[ih] = new TH1D(fHistosInfo[ih].name+addName, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
+    }
+    for( int i = 0; i < NRecoTracksProfiles; i++, ih++, addName++ ){
+      fHistos[ih] = new TProfile(fHistosInfo[ih].name+addName, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
+      fHistos[ih]->SetMarkerColor(2);
+      fHistos[ih]->SetLineColor(2);
+    }
+    for( int i = 0; i < NHisto; i++ ){
       fHistos[i]->SetDirectory(0);
     }
   }
@@ -143,6 +197,7 @@ TH1D *AliHLTTPCCAPerformanceBase::GetHisto(string name)
     };
   }
 
+  assert ( (iHisto != NHisto) || ("" == " wrong histo name ") );
   if (iHisto == NHisto){
     cout << "ERROR: wrong histo name: " << name << endl;
     exit(1);
@@ -176,6 +231,17 @@ void AliHLTTPCCAPerformanceBase::EfficiencyPerformance() // TODO add common part
   fEffStat += fEff;
 }
 
+void AliHLTTPCCAPerformanceBase::FillHistos()
+{
+  for ( int iMCTr = 0; iMCTr < nMCTracks; iMCTr++ ) {
+    AliHLTTPCCAPerformanceMCTrackData &mcD = mcData[iMCTr];
+    AliHLTTPCCAMCTrack &mcTr = (*fMCTracks)[iMCTr];
+    if ( mcD.IsReconstructable() ) {
+      GetHisto("recosEffVsMCMom")  ->Fill( mcTr.P(),     mcD.IsReconstructed() );
+      GetHisto("recosEffVsMCNHits")->Fill( mcTr.NHits(), mcD.IsReconstructed() );
+    }
+  }
+} // void AliHLTTPCCAPerformanceBase::FillHistos()
 
 void AliHLTTPCCAPerformanceBase::WriteDir2Current( TObject *obj )
 {
