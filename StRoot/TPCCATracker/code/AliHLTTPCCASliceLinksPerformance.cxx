@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASliceLinksPerformance.cxx,v 1.2 2010/08/17 15:47:13 ikulakov Exp $
+// $Id: AliHLTTPCCASliceLinksPerformance.cxx,v 1.3 2010/08/17 20:54:23 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -168,7 +168,7 @@ void AliHLTTPCCASliceLinksPerformance::MatchTracks()
 
     recoData[itr].SetMCTrack(traLabels, traPurity);
     
-    if ( !recoData[itr].IsGhost(SPParameters::MinTrackPurity) ) mcData[traLabels].AddReconstructed();
+    if ( !recoData[itr].IsGhost(SPParameters::MinTrackPurity) && (nhits >= SPParameters::MinimumHitsForRecoTrack) ) mcData[traLabels].AddReconstructed();
   } // for itr
 } // void AliHLTTPCCASliceLinksPerformance::MatchTracks()
 
@@ -177,12 +177,19 @@ void AliHLTTPCCASliceLinksPerformance::MatchTracks()
 void AliHLTTPCCASliceLinksPerformance::FillHistos()
 {
   AliHLTTPCCAPerformanceBase::FillHistos();
-  
-  for(int iRTr=0; iRTr < nRecoTracks; iRTr++){
+    
+  for(int iRTr=0; iRTr < nRecoTracks; iRTr++){  // TODO: make common
+    AliHLTTPCCAPerformanceRecoTrackData &recoD = recoData[iRTr];
     const int NHits = fRecoTracks[iRTr].hits.size();
-    if (  recoData[iRTr].IsGhost(SPParameters::MinTrackPurity) )
+    AliHLTTPCCAMCTrack &mcTr = (*fMCTracks)[ recoD.GetMCTrackId() ];
+    
+    if (  recoD.IsGhost(SPParameters::MinTrackPurity) ) {
       GetHisto("ghostsLength")->Fill( NHits );
-    else
+      GetHisto("ghostsMom")->Fill( mcTr.P() );
+    }
+    else {
       GetHisto("recosLength")->Fill( NHits );
+      GetHisto("recosMom")->Fill( mcTr.P() );
+    }
   }
 } // void AliHLTTPCCASliceLinksPerformance::FillHistos()
