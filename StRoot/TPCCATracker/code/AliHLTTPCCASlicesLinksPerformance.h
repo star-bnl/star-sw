@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCASlicesLinksPerformance.h,v 1.1 2010/08/16 23:40:19 ikulakov Exp $
+// $Id: AliHLTTPCCASlicesLinksPerformance.h,v 1.2 2010/08/17 15:47:14 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -34,8 +34,8 @@ class AliHLTTPCCASlicesLinksPerformance: public AliHLTTPCCASlicesPerformance
   AliHLTResizableArray<AliHLTTPCCALocalMCPoint> *localMCPoints);
 
     /// Histograms. don't need them
-  virtual void CreateHistos(string histoDir = "", TFile* outFile = 0){};
-  virtual void FillHistos(){};
+//  virtual void CreateHistos(string histoDir = "", TFile* outFile = 0){};
+//  virtual void FillHistos(){};
 };
 
 #endif

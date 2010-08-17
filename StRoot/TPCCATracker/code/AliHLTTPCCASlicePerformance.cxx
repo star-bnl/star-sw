@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.7 2010/08/16 23:40:19 ikulakov Exp $
+// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.8 2010/08/17 15:47:14 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -291,14 +291,30 @@ void AliHLTTPCCASlicePerformance::EfficiencyPerformance( )
 
 void AliHLTTPCCASlicePerformance::FillHistos()
 {
-/*  for(int i=0; i<sliceTracker->NOutTracks1(); i++){
-    AliHLTTPCCAOutTrack t = sliceTracker->fOutTracks1[i];
-    AliHLTTPCCATrackParam param = t.EndPoint();
-    double p = 1. / param.QPt() * sqrt(1. + param.DzDs()*param.DzDs());
-//     fNVsMom->Fill( param.GetY());
-//     fNVsLength->Fill( t.NHits());        // TODO: Histo
-//     fLengthVsMom->Fill( param.GetY(), t.NHits());
-  }*/
+  AliHLTTPCCAPerformanceBase::FillHistos();
+    
+  for(int iRTr=0; iRTr < nRecoTracks; iRTr++){  // TODO: make common
+    AliHLTTPCCAPerformanceRecoTrackData &recoD = recoData[iRTr];
+#ifdef IsOutTrack1
+    const  AliHLTTPCCAOutTrack &recoTr = sliceTracker->OutTrack1( iRTr );  // TODO: make common
+#else
+    const AliHLTTPCCAOutTrack &recoTr = sliceTracker->OutTrack( iRTr );
+#endif
+    AliHLTTPCCAMCTrack &mcTr = (*fMCTracks)[ recoD.GetMCTrackId() ];
+    
+      //    AliHLTTPCCATrackParam param = t.EndPoint();
+      //    double p = 1. / param.QPt() * sqrt(1. + param.DzDs()*param.DzDs());
+      //     fNVsMom->Fill( param.GetY());
+      //     fLengthVsMom->Fill( param.GetY(), t.NHits());
+    if (  recoD.IsGhost(SPParameters::MinTrackPurity) ) {
+      GetHisto("ghostsLength")->Fill( recoTr.NHits() );
+      GetHisto("ghostsMom")->Fill( mcTr.P() );
+    }
+    else {
+      GetHisto("recosLength")->Fill( recoTr.NHits() );
+      GetHisto("recosMom")->Fill( mcTr.P() );
+    }
+  }
   
   ///mvz start 27.01.2010
   const int nMCTr = nMCTracks;
@@ -475,10 +491,5 @@ void AliHLTTPCCASlicePerformance::FillHistos()
     }
   }
 
-  for ( int ipart = 0; ipart < nMCTracks; ipart++ ) {
-    AliHLTTPCCAMCTrack &mc = (*fMCTracks)[ipart];
-// //     if ( mc.Set() > 0 ) fhEffVsP->Fill( mc.P(), ( mc.NReconstructed() > 0 ? 1 : 0 ) );
-// //     if ( mc.Set() > 0 ) fhEffVsNHits->Fill(mc.NHits(), ( mc.NReconstructed() > 0 ? 1 : 0 ));
-  }
 
 } // void AliHLTTPCCASlicePerformance::FillHistos()

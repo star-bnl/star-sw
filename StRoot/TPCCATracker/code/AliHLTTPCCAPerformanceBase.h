@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformanceBase.h,v 1.6 2010/08/16 14:32:23 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformanceBase.h,v 1.7 2010/08/17 15:47:13 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -74,7 +74,7 @@ class AliHLTTPCCAPerformanceBase
   
   protected:
 
-    virtual void FillHistos(){};
+    virtual void FillHistos();
     TH1D *GetHisto(string name);
     
       // Check if MC track is reconstructable. Calculate set of MC track. Etc.
@@ -97,7 +97,15 @@ class AliHLTTPCCAPerformanceBase
 
 
       /// Histos
-    enum{ NHisto = 14 };
+  enum{ 
+        NTracksPulls = 10,
+        NHitsPulls = 4,
+        NGhostsHisto = 2,
+        NGhostsProfiles = 0,
+        NRecoTracksHisto = 2,
+        NRecoTracksProfiles = 2,
+        NHisto = NTracksPulls + NHitsPulls + NGhostsHisto + NGhostsProfiles + NRecoTracksHisto + NRecoTracksProfiles,
+  };
     struct THistoInfo {
       const char *name;
       const char *title;
