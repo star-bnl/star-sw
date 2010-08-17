@@ -307,7 +307,9 @@ long cts_detector_response (
          i_phi = ctg_i_phi ( phi, geo_h, geo, slat_phi_h, slat_phi ) ;
          if(geo->detector==1 && i_phi > 60) { i_phi = i_phi - 60; }  //MDC2 kluge... wjl
          if(geo->detector==2              ) { i_phi = i_phi +  5; }  //MDC2 kluge... wjl
-//#ifdef TEST     //WJL
+#ifdef TEST     //WJL
+                                                                                                              // Consistency check disabled 08/17/2010 
+         	                                                                                              // Jason Webb <jwebb@bnl.gov>
          long i_phi_test, i_eta_test;
          cts_get_ctf_indexes ( geo->detector, mhit[i_hit].volume_id, i_phi_test, i_eta_test ) ;
          if ( i_phi != i_phi_test ){
@@ -318,7 +320,7 @@ long cts_detector_response (
             cout<<"CTS VOLUME_ID ERROR -- volid z ieta ieta_test "<<mhit[i_hit].volume_id<<
                          " "<<mhit[i_hit].x[2]<<" "<<i_eta<<" "<<i_eta_test<<endl ;
          }
-//#endif          //WJL
+#endif          //WJL                   
       }
 //
 //     Check indexes don't go crazy
