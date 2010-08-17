@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.7 2010/08/16 14:32:23 ikulakov Exp $
+// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.8 2010/08/17 15:42:01 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -182,6 +182,28 @@ void AliHLTTPCCAGlobalPerformance::EfficiencyPerformance( )
 
 void AliHLTTPCCAGlobalPerformance::FillHistos()
 {
+  AliHLTTPCCAPerformanceBase::FillHistos();
+  
+  for(int iRTr=0; iRTr < nRecoTracks; iRTr++){  // TODO: make common
+    AliHLTTPCCAPerformanceRecoTrackData &recoD = recoData[iRTr];
+
+    const AliHLTTPCCAGBTrack &recoTr = fTracker->Track( iRTr );  // TODO: make common
+    AliHLTTPCCAMCTrack &mcTr = (*fMCTracks)[ recoD.GetMCTrackId() ];
+    
+      //    AliHLTTPCCATrackParam param = t.EndPoint();
+      //    double p = 1. / param.QPt() * sqrt(1. + param.DzDs()*param.DzDs());
+      //     fNVsMom->Fill( param.GetY());
+      //     fLengthVsMom->Fill( param.GetY(), t.NHits());
+    if (  recoD.IsGhost(SPParameters::MinTrackPurity) ) {
+      GetHisto("ghostsLength")->Fill( recoTr.NHits() );
+      GetHisto("ghostsMom")->Fill( mcTr.P() );
+    }
+    else {
+      GetHisto("recosLength")->Fill( recoTr.NHits() );
+      GetHisto("recosMom")->Fill( mcTr.P() );
+    }
+  }
+  
   // global tracker performance
   {
     for ( int itr = 0; itr < nRecoTracks; itr++ ) {
