@@ -143,11 +143,17 @@ namespace AliHLTTPCCAPParameters{ /// parameters for global Performance
       /**
      * The minimum number of hits for a MCtrack to be reconstructable
        */
-    MinimumHitsForMCTrack = 10, // 50
+    MinimumHitsForMCTrack = 10,
+    
      /**
     * The minimum number of hits for a MCtrack to be reconstructable
        */
-    MinimumMCPointsForMCTrack = 10
+    MinimumMCPointsForMCTrack = 10,
+
+      /**
+       * MCTrack is reconstructed if correspondent recoTrack has NHits >= MinimumHitsForRecoTrack
+       */
+    MinimumHitsForRecoTrack = 4,
   }; // enum
 
   /**
@@ -167,27 +173,12 @@ namespace AliHLTTPCCASPParameters{ /// parameters for Slice Performance
     /**
      * The minimum number of consecutive rows for a MCtrack to be reconstructable
      */
-    MinimumConsHitsForMCTrack = 5
-  }; // enum
-
-  /**
-   *  max percent of one MCTrack MCPoints in current track should be more than this value, then thrack is not ghost.
-   */
-  static const float MinTrackPurity = PParameters::MinTrackPurity;
-} //  namespace AliHLTTPCCASPParameters
-namespace SPParameters{   using namespace AliHLTTPCCASPParameters; }
-
-namespace AliHLTTPCCASTPParameters{ /// parameters for Slice Tracklet Performance
-  enum{
-      /**
-     * The minimum number of hits for a MCtrack to be reconstructable
-       */
-    MinimumHitsForMCTrack = 10, // 30
+    MinimumConsHitsForMCTrack = 5,
 
       /**
-     * The minimum number of hits for a track must have to not be discarded.
+       * MCTrack is reconstructed if correspondent recoTrack has NHits >= MinimumHitsForRecoTrack
        */
-    MinimumHitsForRecoTrack = AliHLTTPCCAParameters::MinimumHitsForTracklet
+    MinimumHitsForRecoTrack = 4,
     
   }; // enum
 
@@ -196,28 +187,6 @@ namespace AliHLTTPCCASTPParameters{ /// parameters for Slice Tracklet Performanc
    */
   static const float MinTrackPurity = PParameters::MinTrackPurity;
 } //  namespace AliHLTTPCCASPParameters
-namespace STPParameters{   using namespace AliHLTTPCCASTPParameters; }
-
-
-namespace AliHLTTPCCASTCPParameters{ /// parameters for Slice Track Candidat Performance
-  enum{
-      /**
-     * The minimum number of hits for a MCtrack to be reconstructable
-       */
-    MinimumHitsForMCTrack = 10, // 30
-
-      /**
-     * The minimum number of hits for a track must have to not be discarded.
-       */
-    MinimumHitsForRecoTrack = AliHLTTPCCAParameters::MinimumHitsForTrack
-
-  }; // enum
-
-  /**
-   *  max percent of one MCTrack MCPoints in current track should be more than this value, then thrack is not ghost.
-   */
-  static const float MinTrackPurity = PParameters::MinTrackPurity;
-} //  namespace AliHLTTPCCASPParameters
-namespace STCPParameters{   using namespace AliHLTTPCCASTCPParameters; }
+namespace SPParameters{   using namespace AliHLTTPCCASPParameters; }
 
 #endif // ALIHLTTPCCAPARAMETERS_H

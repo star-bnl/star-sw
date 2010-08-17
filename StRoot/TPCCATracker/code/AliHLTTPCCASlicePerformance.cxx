@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.8 2010/08/17 15:47:14 ikulakov Exp $
+// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.9 2010/08/17 20:54:23 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -219,7 +219,7 @@ void AliHLTTPCCASlicePerformance::MatchTracks()
     if ( lb ) delete[] lb;
 
     recoData[itr].SetMCTrack(traLabels, traPurity);
-    if ( !recoData[itr].IsGhost(SPParameters::MinTrackPurity) ) mcData[traLabels].AddReconstructed();
+    if ( !recoData[itr].IsGhost(SPParameters::MinTrackPurity) && (nhits >= SPParameters::MinimumHitsForRecoTrack) ) mcData[traLabels].AddReconstructed();
   } // for itr
 
 } // void AliHLTTPCCASlicePerformance::MatchTracks()
