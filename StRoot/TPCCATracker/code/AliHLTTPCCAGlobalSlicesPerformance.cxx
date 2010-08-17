@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGlobalSlicesPerformance.cxx,v 1.5 2010/08/15 13:25:25 ikulakov Exp $
+// $Id: AliHLTTPCCAGlobalSlicesPerformance.cxx,v 1.6 2010/08/17 21:54:03 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -106,6 +106,7 @@ void AliHLTTPCCAGlobalSlicesPerformance::CheckMCTracks()
   } // iMCTrack
 } // void AliHLTTPCCAGlobalSlicesPerformance::CheckMCTracks()
 
+#define IsOutTrack1
 void AliHLTTPCCAGlobalSlicesPerformance::MatchTracks()
 {
     // get all reco tracks
@@ -121,7 +122,7 @@ void AliHLTTPCCAGlobalSlicesPerformance::MatchTracks()
     // find reconstructed tracks
   for ( int itr = 0; itr < nRecoTracks; itr++ ) {
     AliHLTTPCCAPerformanceRecoTrackData &rTr = recoData[itr];
-    if ( !rTr.IsGhost( PParameters::MinTrackPurity ) ) mcData[rTr.GetMCTrackId()].AddReconstructed();
+    if ( rTr.IsReco( SPParameters::MinTrackPurity, SPParameters::MinimumHitsForRecoTrack) ) mcData[rTr.GetMCTrackId()].AddReconstructed();
   }
 }
 

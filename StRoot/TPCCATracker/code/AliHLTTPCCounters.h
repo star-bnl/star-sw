@@ -120,19 +120,22 @@ class AliHLTTPCCAPerformanceRecoTrackData{
       mcTrackId = -1;
     };
 
-    void SetMCTrack(int mcTrackId_, float purity_){
+    void SetMCTrack(int mcTrackId_, float purity_, int nHits_){
       mcTrackId = mcTrackId_;
       purity = purity_;
+      nHits = nHits_;
     }
 
     int GetMCTrackId(){ return mcTrackId; }
     int GetPurity(){ return purity; }
     bool  IsGhost( float minPurity = 0)  { return (mcTrackId == -1) || (purity < minPurity); }
+    bool  IsReco( float minPurity = 0, int minNHits = 0)  { return (mcTrackId != -1) && (purity >= minPurity) && (nHits >= minNHits); }  
 
     void Print(){ cout << "Track: " << mcTrackId << " Purity: " << purity << endl; }
   private:
     int mcTrackId;
     float purity;
+    int nHits;
 };
 
 

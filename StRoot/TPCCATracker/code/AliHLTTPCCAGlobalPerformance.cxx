@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.9 2010/08/17 20:54:23 ikulakov Exp $
+// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.10 2010/08/17 21:54:03 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -144,8 +144,8 @@ void AliHLTTPCCAGlobalPerformance::MatchTracks()
     traPurity = ( ( nhits > 0 ) ? double( lmax ) / double( nhits ) : 0 );
     if ( lb ) delete[] lb;
 
-    recoData[itr].SetMCTrack(traLabels, traPurity);
-    if ( !recoData[itr].IsGhost(PParameters::MinTrackPurity) && (nhits >= PParameters::MinimumHitsForRecoTrack) ) mcData[traLabels].AddReconstructed();
+    recoData[itr].SetMCTrack(traLabels, traPurity, nhits);
+    if ( recoData[itr].IsReco(PParameters::MinTrackPurity, PParameters::MinimumHitsForRecoTrack) ) mcData[traLabels].AddReconstructed();
   } // for iReco
 } // void AliHLTTPCCAGlobalPerformance::MatchTracks()
 
