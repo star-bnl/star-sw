@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.8 2010/08/17 15:47:13 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.9 2010/08/18 20:46:09 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -63,33 +63,44 @@ void AliHLTTPCCAPerformanceBase::SetNewEvent( const AliHLTTPCCAGBTracker * const
   mcData.resize(0);
   recoData.resize(0);
 
-  const int MaxMomentum = 5.;
+  const double MaxMomentum = 5.;
   const int MaxNHits    = 50.;
+  const double MaxChi2 = 10.;
   const THistoInfo tmp[NHisto]=
   {
-    { "resY",       "track Y resolution [cm]",  30, -0.25,  0.25 },
-    { "resZ",       "track Z resolution [cm]",  30, -0.7,   0.7 },
-    { "resSinPhi",  "track SinPhi resolution ", 30, -0.03,  0.03 },
-    { "resDzDs",    "track DzDs resolution ",   30, -0.02, 0.02 },
-    { "resPt",      "track Pt resolution",      30, -0.3,   0.3 },
-    { "pullY",      "track Y pull",             30, -7.,   7. },
-    { "pullZ",      "track Z pull",             30, -7.,   7. },
-    { "pullSinPhi", "track SinPhi pull",        30, -7.,   7. },
-    { "pullDzDs",   "track DzDs pull",          30, -7.,   7. },
-    { "pullQPt",    "track Q/Pt pull",          30, -7.,   7. },
+    THistoInfo( "resY",       "track Y resolution [cm]",  30, -0.25,  0.25 ),
+    THistoInfo( "resZ",       "track Z resolution [cm]",  30, -0.7,   0.7 ),
+    THistoInfo( "resSinPhi",  "track SinPhi resolution ", 30, -0.03,  0.03 ),
+    THistoInfo( "resDzDs",    "track DzDs resolution ",   30, -0.02, 0.02 ),
+    THistoInfo( "resPt",      "track Pt resolution",      30, -0.3,   0.3 ),
+    THistoInfo( "pullY",      "track Y pull",             30, -7.,   7. ),
+    THistoInfo( "pullZ",      "track Z pull",             30, -7.,   7. ),
+    THistoInfo( "pullSinPhi", "track SinPhi pull",        30, -7.,   7. ),
+    THistoInfo( "pullDzDs",   "track DzDs pull",          30, -7.,   7. ),
+    THistoInfo( "pullQPt",    "track Q/Pt pull",          30, -7.,   7. ),
     
-    { "resYHit",       "track Y resolution [cm]",  30, -0.25,  0.25 },
-    { "resZHit",       "track Z resolution [cm]",  30, -1.,   1. },
-    { "pullYHit",      "track Y pull",             30, -7.,   7. },
-    { "pullZHit",      "track Z pull",             30, -7.,   7. },
+    THistoInfo( "resYHit",       "track Y resolution [cm]",  30, -0.25,  0.25 ),
+    THistoInfo( "resZHit",       "track Z resolution [cm]",  30, -1.,   1. ),
+    THistoInfo( "pullYHit",      "track Y pull",             30, -7.,   7. ),
+    THistoInfo( "pullZHit",      "track Z pull",             30, -7.,   7. ),
 
-    { "ghostsLength",   "N Ghosts vs N Hits",       MaxNHits+1, 0.,   MaxNHits },    // nGhosts vs nHits in reco track
-    { "ghostsMom",      "N Ghosts vs Momentum",     50, 0.,           MaxMomentum }, // nGhosts vs momentum of MC track // TODO? reco Track
+    THistoInfo( "ghostsLength",   "N Ghosts vs N Hits",       MaxNHits+1, 0.,   MaxNHits ),    // nGhosts vs nHits in reco track
+    THistoInfo( "ghostsRMom",     "N Ghosts vs Reco Momentum",     50, 0.,           MaxMomentum ), // nGhosts vs momentum of reco track
+    THistoInfo( "ghostsMCMom",    "N Ghosts vs MC Momentum",     50, 0.,           MaxMomentum ), // nGhosts vs momentum of MC track
+    THistoInfo( "ghostsChi2",     "N Ghosts vs Chi-square",   50, 0.,           MaxChi2*10 ),
+    THistoInfo( "ghostsLengthAndRMom",   "N Ghosts vs N Hits and Momentum",       MaxNHits+1, 0.,   MaxNHits, 50, 0.,           MaxMomentum),
+    THistoInfo( "ghostsLengthAndMCMom",   "N Ghosts vs N Hits and Momentum",       MaxNHits+1, 0.,   MaxNHits, 50, 0.,           MaxMomentum),
+    THistoInfo( "ghostsLengthAndChi2",  "N Ghosts vs N Hits and Chi2",           MaxNHits+1, 0.,   MaxNHits, 50, 0.,           MaxChi2*10),
     
-    { "recosLength",   "N Reco Tracks vs N Hits",   MaxNHits+1, 0.,   MaxNHits },    // vs nHits in reco track
-    { "recosMom",      "N Reco Tracks vs Momentum", 50, 0.,           MaxMomentum }, // vs momentum of MC track // TODO? reco Track
-    { "recosEffVsMCNHits", "Reconstruction Efficiency vs N Hits", MaxNHits+1, 0.,   MaxNHits },   // eff vs nHits in MC track
-    { "recosEffVsMCMom", "Reconstruction Efficiency vs Momentum", 50, 0.,           MaxMomentum },// eff vs mom in MC track
+    THistoInfo( "recosLength",   "N Reco Tracks vs N Hits",   MaxNHits+1, 0.,   MaxNHits ),    // vs nHits in reco track
+    THistoInfo( "recosRMom",      "N Reco Tracks vs Momentum", 50, 0.,           MaxMomentum ), // vs momentum of reco track
+    THistoInfo( "recosMCMom",      "N Reco Tracks vs Momentum", 50, 0.,           MaxMomentum ), // vs momentum of reco track
+    THistoInfo( "recosChi2",     "N Reco Tracks vs Chi-square",   50, 0.,       MaxChi2 ),
+    THistoInfo( "recosEffVsMCNHits", "Reconstruction Efficiency vs N Hits",   MaxNHits+1, 0.,   MaxNHits ),   // eff vs nHits in MC track
+    THistoInfo( "recosEffVsMCMom",   "Reconstruction Efficiency vs Momentum", 50, 0.,           MaxMomentum ),// eff vs mom in MC track
+    THistoInfo( "recosLengthAndRMom",   "N Reco Tracks vs N Hits and Momentum",       MaxNHits+1, 0.,   MaxNHits, 50, 0.,           MaxMomentum),
+    THistoInfo( "recosLengthAndMCMom",   "N Reco Tracks vs N Hits and Momentum",       MaxNHits+1, 0.,   MaxNHits, 50, 0.,           MaxMomentum),
+    THistoInfo( "recosLengthAndChi2",  "N Reco Tracks vs N Hits and Chi2",           MaxNHits+1, 0.,   MaxNHits, 50, 0.,           MaxChi2)
     
   };
   for (int iHisto = 0; iHisto < NHisto; iHisto++){
@@ -126,7 +137,7 @@ void AliHLTTPCCAPerformanceBase::CreateHistos(string histoDir, TFile* outFile)
 
     int ih = 0; // i of Histo
     for( int i = 0; i < NTracksPulls + NHitsPulls; i++, ih++ ){ // TODO separate Track & Hits pulls
-      fHistos[ih] = new TH1D(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
+      fHistos[ih] = new TH1D(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].nx, fHistosInfo[ih].left, fHistosInfo[ih].right);
     }
 
     gDirectory->cd( ".." );
@@ -134,12 +145,16 @@ void AliHLTTPCCAPerformanceBase::CreateHistos(string histoDir, TFile* outFile)
     gDirectory->cd( "Ghosts" );
     
     for( int i = 0; i < NGhostsHisto; i++, ih++ ){
-      fHistos[ih] = new TH1D(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
+      fHistos[ih] = new TH1D(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].nx, fHistosInfo[ih].left, fHistosInfo[ih].right);
     }
     for( int i = 0; i < NGhostsProfiles; i++, ih++ ){
-      fHistos[ih] = new TProfile(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
+      fHistos[ih] = new TProfile(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].nx, fHistosInfo[ih].left, fHistosInfo[ih].right);
       fHistos[ih]->SetMarkerColor(2);
       fHistos[ih]->SetLineColor(2);
+    }
+    for( int i = 0; i < NGhosts2DHisto; i++, ih++ ){
+      fHistos[ih] = new TH2D(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].nx, fHistosInfo[ih].left, fHistosInfo[ih].right, fHistosInfo[ih].ny, fHistosInfo[ih].low, fHistosInfo[ih].up);
+        //      fHistos[ih]->SetDrawOption("colz"); doesn't help
     }
     
     gDirectory->cd( ".." );
@@ -147,36 +162,45 @@ void AliHLTTPCCAPerformanceBase::CreateHistos(string histoDir, TFile* outFile)
     gDirectory->cd( "RecoTracks" );
     
     for( int i = 0; i < NRecoTracksHisto; i++, ih++ ){
-      fHistos[ih] = new TH1D(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
+      fHistos[ih] = new TH1D(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].nx, fHistosInfo[ih].left, fHistosInfo[ih].right);
     }
     for( int i = 0; i < NRecoTracksProfiles; i++, ih++ ){
-      fHistos[ih] = new TProfile(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
+      fHistos[ih] = new TProfile(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].nx, fHistosInfo[ih].left, fHistosInfo[ih].right);
       fHistos[ih]->SetMarkerColor(2);
       fHistos[ih]->SetLineColor(2);
+    }
+    for( int i = 0; i < NRecoTracks2DHisto; i++, ih++ ){
+      fHistos[ih] = new TH2D(fHistosInfo[ih].name, fHistosInfo[ih].title, fHistosInfo[ih].nx, fHistosInfo[ih].left, fHistosInfo[ih].right, fHistosInfo[ih].ny, fHistosInfo[ih].low, fHistosInfo[ih].up);
+        //      fHistos[ih]->SetDrawOption("colz"); doesn't help
     }
     
     gDirectory->cd( ".." );
     curdir->cd();    
   }
   else{ // create not in file
-    static int addName = 0; // haven't any subfolders so create with different names
+    static int iaddName = 0; // haven't any subfolders so create with different names
+    TString addName = TString(iaddName);
     int ih = 0; // i of Histo
-    for( int i = 0; i < NTracksPulls + NHitsPulls + NGhostsHisto; i++, ih++, addName++ ){
-      fHistos[ih] = new TH1D(fHistosInfo[ih].name+addName, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
+    for( int i = 0; i < NTracksPulls + NHitsPulls + NGhostsHisto; i++, ih++, addName = TString(iaddName++) ){
+      fHistos[ih] = new TH1D(fHistosInfo[ih].name+addName, fHistosInfo[ih].title, fHistosInfo[ih].nx, fHistosInfo[ih].left, fHistosInfo[ih].right);
     }
-    for( int i = 0; i < NGhostsProfiles; i++, ih++, addName++ ){
-      fHistos[ih] = new TProfile(fHistosInfo[ih].name+addName, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
-      fHistos[ih]->SetMarkerColor(2);
-      fHistos[ih]->SetLineColor(2);
+    for( int i = 0; i < NGhostsProfiles; i++, ih++, addName = TString(iaddName++) ){
+      fHistos[ih] = new TProfile(fHistosInfo[ih].name+addName, fHistosInfo[ih].title, fHistosInfo[ih].nx, fHistosInfo[ih].left, fHistosInfo[ih].right);
     }
-    for( int i = 0; i < NRecoTracksHisto; i++, ih++, addName++ ){
-      fHistos[ih] = new TH1D(fHistosInfo[ih].name+addName, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
+    for( int i = 0; i < NGhosts2DHisto; i++, ih++, addName = TString(iaddName++)  ){
+      fHistos[ih] = new TH2D(fHistosInfo[ih].name+addName, fHistosInfo[ih].title, fHistosInfo[ih].nx, fHistosInfo[ih].left, fHistosInfo[ih].right, fHistosInfo[ih].ny, fHistosInfo[ih].low, fHistosInfo[ih].up);
     }
-    for( int i = 0; i < NRecoTracksProfiles; i++, ih++, addName++ ){
-      fHistos[ih] = new TProfile(fHistosInfo[ih].name+addName, fHistosInfo[ih].title, fHistosInfo[ih].n, fHistosInfo[ih].l, fHistosInfo[ih].r);
-      fHistos[ih]->SetMarkerColor(2);
-      fHistos[ih]->SetLineColor(2);
+        
+    for( int i = 0; i < NRecoTracksHisto; i++, ih++, addName = TString(iaddName++) ){
+      fHistos[ih] = new TH1D(fHistosInfo[ih].name+addName, fHistosInfo[ih].title, fHistosInfo[ih].nx, fHistosInfo[ih].left, fHistosInfo[ih].right);
     }
+    for( int i = 0; i < NRecoTracksProfiles; i++, ih++, addName = TString(iaddName++) ){
+      fHistos[ih] = new TProfile(fHistosInfo[ih].name+addName, fHistosInfo[ih].title, fHistosInfo[ih].nx, fHistosInfo[ih].left, fHistosInfo[ih].right);
+    }
+    for( int i = 0; i < NRecoTracks2DHisto; i++, ih++, addName = TString(iaddName++)  ){
+      fHistos[ih] = new TH2D(fHistosInfo[ih].name+addName, fHistosInfo[ih].title, fHistosInfo[ih].nx, fHistosInfo[ih].left, fHistosInfo[ih].right, fHistosInfo[ih].ny, fHistosInfo[ih].low, fHistosInfo[ih].up);
+    }
+    
     for( int i = 0; i < NHisto; i++ ){
       fHistos[i]->SetDirectory(0);
     }
@@ -188,11 +212,11 @@ void AliHLTTPCCAPerformanceBase::WriteHistos()
   if(fHistoDir) WriteDir2Current( fHistoDir );
 }
 
-TH1D *AliHLTTPCCAPerformanceBase::GetHisto(string name)
+TH1 *AliHLTTPCCAPerformanceBase::GetHisto(const char* name)
 {
   int iHisto;
   for (iHisto = 0; iHisto < NHisto; iHisto++){
-    if (fHistosInfo[iHisto].name == name){
+    if (string(fHistosInfo[iHisto].name) == string(name)){
       break;
     };
   }

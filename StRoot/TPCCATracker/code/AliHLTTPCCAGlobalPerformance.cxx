@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.10 2010/08/17 21:54:03 ikulakov Exp $
+// $Id: AliHLTTPCCAGlobalPerformance.cxx,v 1.11 2010/08/18 20:46:09 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -196,11 +196,11 @@ void AliHLTTPCCAGlobalPerformance::FillHistos()
       //     fLengthVsMom->Fill( param.GetY(), t.NHits());
     if (  recoD.IsGhost(SPParameters::MinTrackPurity) ) {
       GetHisto("ghostsLength")->Fill( recoTr.NHits() );
-      GetHisto("ghostsMom")->Fill( mcTr.P() );
+      GetHisto("ghostsRMom")->Fill( mcTr.P() );
     }
     else {
       GetHisto("recosLength")->Fill( recoTr.NHits() );
-      GetHisto("recosMom")->Fill( mcTr.P() );
+      GetHisto("recosRMom")->Fill( mcTr.P() );
     }
   }
   

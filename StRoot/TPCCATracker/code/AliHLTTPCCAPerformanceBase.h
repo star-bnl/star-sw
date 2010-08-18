@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformanceBase.h,v 1.7 2010/08/17 15:47:13 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformanceBase.h,v 1.8 2010/08/18 20:46:09 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -28,9 +28,7 @@ class TParticle;
 class AliHLTTPCCAMCPoint;
 class AliHLTTPCCAGBTracker;
 class TDirectory;
-class TH1D;
-class TH2D;
-class TProfile;
+class TH1;
 
 class TFile;
 
@@ -75,7 +73,7 @@ class AliHLTTPCCAPerformanceBase
   protected:
 
     virtual void FillHistos();
-    TH1D *GetHisto(string name);
+    TH1 *GetHisto(const char* name);
     
       // Check if MC track is reconstructable. Calculate set of MC track. Etc.
     virtual void CheckMCTracks(){}; // fill mcData.
@@ -100,20 +98,33 @@ class AliHLTTPCCAPerformanceBase
   enum{ 
         NTracksPulls = 10,
         NHitsPulls = 4,
-        NGhostsHisto = 2,
+        
+        NGhostsHisto = 4,
         NGhostsProfiles = 0,
-        NRecoTracksHisto = 2,
+        NGhosts2DHisto = 3,
+        
+        NRecoTracksHisto = 4,
         NRecoTracksProfiles = 2,
-        NHisto = NTracksPulls + NHitsPulls + NGhostsHisto + NGhostsProfiles + NRecoTracksHisto + NRecoTracksProfiles,
+        NRecoTracks2DHisto = 3,
+        
+        NHisto = NTracksPulls + NHitsPulls
+        + NGhostsHisto + NGhostsProfiles + NGhosts2DHisto
+        + NRecoTracksHisto + NRecoTracksProfiles + NRecoTracks2DHisto
   };
-    struct THistoInfo {
-      const char *name;
-      const char *title;
-      Int_t n;
-      Double_t l,r;
-    };
-    TH1D *fHistos[NHisto];
-    THistoInfo fHistosInfo[NHisto];
+  struct THistoInfo {
+    THistoInfo(){};
+    THistoInfo( const char *name_, const char *title_, Int_t nx_, Double_t left_, Double_t right_, Int_t ny_ = 0, Double_t low_ = 0, Double_t up_ = 0)
+      :name(name_),title(title_),nx(nx_),left(left_),right(right_),ny(ny_),low(low_),up(up_){};
+      
+    const char *name;
+    const char *title;
+    Int_t nx;
+    Double_t left,right;
+    Int_t ny;
+    Double_t low,up;
+  };
+  TH1 *fHistos[NHisto];
+  THistoInfo fHistosInfo[NHisto];
 
       /// Track information
     vector<AliHLTTPCCAPerformanceMCTrackData>   mcData;   // iMCTrack to trackInfo map.

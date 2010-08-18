@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.10 2010/08/17 21:54:03 ikulakov Exp $
+// $Id: AliHLTTPCCASlicePerformance.cxx,v 1.11 2010/08/18 20:46:09 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -302,17 +302,31 @@ void AliHLTTPCCASlicePerformance::FillHistos()
 #endif
     AliHLTTPCCAMCTrack &mcTr = (*fMCTracks)[ recoD.GetMCTrackId() ];
     
-      //    AliHLTTPCCATrackParam param = t.EndPoint();
-      //    double p = 1. / param.QPt() * sqrt(1. + param.DzDs()*param.DzDs());
-      //     fNVsMom->Fill( param.GetY());
-      //     fLengthVsMom->Fill( param.GetY(), t.NHits());
+    AliHLTTPCCATrackParam param = recoTr.EndPoint();
+
+    const int nHits = recoTr.NHits();
+    const double p = 1. / param.QPt() * sqrt(1. + param.DzDs()*param.DzDs());
+    const double pMC = mcTr.P();    
+    const double chi2 = param.Chi2() / nHits;
     if (  recoD.IsGhost(SPParameters::MinTrackPurity) ) {
-      GetHisto("ghostsLength")->Fill( recoTr.NHits() );
-      GetHisto("ghostsMom")->Fill( mcTr.P() );
+      GetHisto("ghostsLength")->Fill( nHits );
+      GetHisto("ghostsRMom")->Fill( p );
+      GetHisto("ghostsMCMom")->Fill( pMC );
+      GetHisto("ghostsLengthAndRMom")->Fill( nHits , p ); // TODO add same for other perfs
+      GetHisto("ghostsLengthAndMCMom")->Fill( nHits , pMC );
+      GetHisto("ghostsLengthAndChi2")->Fill( nHits , chi2 );
+
+      GetHisto("ghostsChi2")->Fill( chi2 );
     }
     else {
-      GetHisto("recosLength")->Fill( recoTr.NHits() );
-      GetHisto("recosMom")->Fill( mcTr.P() );
+      GetHisto("recosLength")->Fill( nHits );
+      GetHisto("recosRMom")->Fill( p );
+      GetHisto("recosMCMom")->Fill( pMC );
+      GetHisto("recosLengthAndRMom")->Fill( nHits , p );
+      GetHisto("recosLengthAndMCMom")->Fill( nHits , pMC );
+      GetHisto("recosLengthAndChi2")->Fill( nHits , chi2 );
+      
+      GetHisto("recosChi2")->Fill( chi2 );
     }
   }
   
