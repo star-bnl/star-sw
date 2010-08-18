@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASliceLinksPerformance.cxx,v 1.4 2010/08/17 21:54:03 ikulakov Exp $
+// $Id: AliHLTTPCCASliceLinksPerformance.cxx,v 1.5 2010/08/18 20:46:09 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -185,11 +185,11 @@ void AliHLTTPCCASliceLinksPerformance::FillHistos()
     
     if (  recoD.IsGhost(SPParameters::MinTrackPurity) ) {
       GetHisto("ghostsLength")->Fill( NHits );
-      GetHisto("ghostsMom")->Fill( mcTr.P() );
+      GetHisto("ghostsMCMom")->Fill( mcTr.P() );
     }
     else {
       GetHisto("recosLength")->Fill( NHits );
-      GetHisto("recosMom")->Fill( mcTr.P() );
+      GetHisto("recosMCMom")->Fill( mcTr.P() );
     }
   }
 } // void AliHLTTPCCASliceLinksPerformance::FillHistos()
