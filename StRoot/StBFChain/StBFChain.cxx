@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.564 2010/05/11 17:11:08 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.565 2010/08/18 23:06:34 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1409,12 +1409,12 @@ void StBFChain::SetDbOptions(StMaker *mk){
       gMessMgr->QAInfo() << GetName() << " Chain set time from  " << db->GetName() << endm;
       m_EvtHddr->SetDateTime(db->GetDateTime());
     }
-    // MaxEntry over-write
-    if (Idate) {
-      db->SetMaxEntryTime(Idate,Itime);
-      gMessMgr->Info() << "\tSet DataBase max entry time " << Idate << "/" << Itime
-		       << " for St_db_Maker(\"" << db->GetName() <<"\")" << endm;
-    }
+  }
+  // MaxEntry over-write
+  if (Idate) {
+    db->SetMaxEntryTime(Idate,Itime);
+    gMessMgr->Info() << "\tSet DataBase max entry time " << Idate << "/" << Itime
+		     << " for St_db_Maker(\"" << db->GetName() <<"\")" << endm;
   } // check if maker is St_db_Maker
   if (!GetOption("fzin")) {
     struct Field_t {
