@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGBTracker.cxx,v 1.9 2010/08/17 21:44:17 ikulakov Exp $
+// $Id: AliHLTTPCCAGBTracker.cxx,v 1.10 2010/08/18 23:40:43 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -299,6 +299,7 @@ void AliHLTTPCCAGBTracker::FindTracks()
   timerMerge.Stop();
   timer1.Stop();
   fStatTime[9] += timerMerge.RealTime();
+  fStatTime[10] += timerMerge.CpuTime();
   //fTime+=timerMerge.RealTime();
   //std::cout<<"Merge time = "<<timerMerge.RealTime()*1.e3<<"ms"<<std::endl;
   //std::cout<<"End CA merging"<<std::endl;
