@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCAStartHitsFinder.cxx,v 1.2 2010/07/29 21:45:27 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCAStartHitsFinder.cxx,v 1.3 2010/08/18 14:11:05 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -70,14 +70,8 @@
 //X   }
 //X }
 
-void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, const SliceData &data )
+void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, SliceData &data )
 {
-#ifdef USE_TBB
-  CAMath::AtomicExch( tracker.NTracklets(), 0 ); // initialize the slice tracker's number of tracklets to 0
-#else //USE_TBB
-  *tracker.NTracklets() = 0;
-#endif //USE_TBB
-
   enum {
     kArraySize = 10240,
     kMaxStartHits = kArraySize - 1 - short_v::Size
@@ -98,26 +92,44 @@ void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, const SliceDa
 
 
     // look through all the hits and look for
-    for ( int hitIndex = 0; hitIndex < row.NHits(); hitIndex += short_v::Size ) {
+    const int numberOfHits = row.NHits();
+    for ( int hitIndex = 0; hitIndex < numberOfHits; hitIndex += short_v::Size ) {
+      const short_v hitIndexes = short_v( Vc::IndexesFromZero ) + hitIndex;
+      short_m validHitsMask = hitIndexes < numberOfHits;
+      validHitsMask &= ( short_v(data.HitDataIsUsed( row ), static_cast<ushort_v>(hitIndexes) ) == short_v( Vc::Zero ) ); // not-used hits can be connected only with not-used, so only one check is needed
+      
       // hits that have a link up but none down == the start of a Track
       const short_v &middleHitIndexes = data.HitLinkUpData( row, hitIndex );
-      short_m startHitMask = ( data.HitLinkDownData( row, hitIndex ) < short_v( Vc::Zero ) ) && ( middleHitIndexes >= short_v( Vc::Zero ) );
-      if ( !startHitMask.isEmpty() ) {
-        const short_v upperHitIndexes( data.HitLinkUpData( middleRow ), static_cast<ushort_v>( middleHitIndexes ), startHitMask );
-        startHitMask &= upperHitIndexes >= short_v( Vc::Zero );
-        if ( !startHitMask.isEmpty() ) {
+      validHitsMask &= ( data.HitLinkDownData( row, hitIndex ) < short_v( Vc::Zero ) ) && ( middleHitIndexes >= short_v( Vc::Zero ) );
+      if ( !validHitsMask.isEmpty() ) {
+        short_v upperHitIndexes( data.HitLinkUpData( middleRow ), static_cast<ushort_v>( middleHitIndexes ), validHitsMask );
+        validHitsMask &= upperHitIndexes >= short_v( Vc::Zero ); 
+        if ( !validHitsMask.isEmpty() ) { // check if 3-rd hit in chain exists
           for ( int i = 0; i < short_v::Size; ++i ) {
-            if ( ISUNLIKELY( startHitMask[i] ) ) {
+            if ( ISUNLIKELY( validHitsMask[i] ) ) {
               // remember Hit ID
               rowStartHits[startHitsCount++].Set( rowIndex, hitIndex + i );
             }
           }
+            // set all hits in the chain as used        TODO: run over all hits in the chain will be repeated at TrackletConstructor: think about optimization
+          data.SetHitAsUsed( row, hitIndexes, validHitsMask );
+          data.SetHitAsUsed( middleRow, middleHitIndexes, validHitsMask );
+          int iRow = rowIndex + 2*rowStep;
+          AliHLTTPCCARow curRow;
+          for (;!validHitsMask.isEmpty();) {
+            curRow = data.Row( iRow );
+            data.SetHitAsUsed( curRow, upperHitIndexes, validHitsMask );
+            upperHitIndexes = short_v( data.HitLinkUpData( curRow ), static_cast<ushort_v>( upperHitIndexes ), validHitsMask );
+            validHitsMask &= upperHitIndexes >= short_v( Vc::Zero );
+            iRow += rowStep;
+          }
+            // check free space
           if ( ISUNLIKELY( startHitsCount >= kMaxStartHits ) ) {
             break;
           }
-        }
-      }
-    }
+        } // if upper
+      } // if middle
+    } // for iHit
 #ifdef USE_TBB
     const int hitsStartOffset = CAMath::AtomicAdd( tracker.NTracklets(), startHitsCount ); // number of start hits from other jobs
 #else //USE_TBB

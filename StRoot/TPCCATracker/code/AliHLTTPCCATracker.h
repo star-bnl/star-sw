@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// @(#) $Id: AliHLTTPCCATracker.h,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCATracker.h,v 1.2 2010/08/18 14:11:05 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -95,7 +95,8 @@ class AliHLTTPCCATracker
     const AliHLTTPCCAClusterData &ClusterData() const { return *fClusterData; }
 
     int NTracklets() const { return fNTracklets; }
-    int  *NTracklets() { return &fNTracklets; }
+    int  *NTracklets() { return &fNTracklets; }  
+    void SetNTracklets(int nTrlets) { fNTracklets = nTrlets; }
 
     const AliHLTTPCCAHitId &TrackletStartHit( int i ) const { return fTrackletStartHits[i]; }
     AliHLTTPCCAHitId *TrackletStartHits() const { return fTrackletStartHits; }

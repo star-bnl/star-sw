@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// @(#) $Id: AliHLTTPCCARow.h,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCARow.h,v 1.2 2010/08/18 14:11:04 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -62,6 +62,8 @@ class AliHLTTPCCARow
     StoredFloat *fHitDataY;         // packed y coordinate of the given (global) hit index
     StoredFloat *fHitDataZ;         // packed z coordinate of the given (global) hit index
 
+    short *fHitDataIsUsed;         // packed isUsed-flag of the given (global) hit index. Short because there is no bool_v
+  
     int *fClusterDataIndex;    // see SliceData::ClusterDataIndex()
 
     unsigned short *fHitWeights;          // the weight of the longest tracklet crossed the cluster

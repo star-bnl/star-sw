@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.7 2010/08/16 22:48:24 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.8 2010/08/18 14:11:04 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -146,7 +146,7 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
 #ifdef DRAW_NEIGHBOURSFINDING
     std::cout << " centr y = " << y << " centr z = " << z << std::endl;
 #endif
-    yUpTx = y * UpTx;
+    yUpTx = y * UpTx; // suppose vertex at (0,0,0)
     yDnTx = y * DnTx;
     zUpTx = z * UpTx;
     zDnTx = z * DnTx;
@@ -248,8 +248,10 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
       debugS() << "Set Link Data: Up = " << bestUp << ", Down = " << bestDn << std::endl;
 
       // store the link indexes we found
-      fData.SetHitLinkUpData( row, hitIndex, bestUp );
-      fData.SetHitLinkDownData( row, hitIndex, bestDn );
+      const ushort_v &hitIndexes = ushort_v( Vc::IndexesFromZero ) + hitIndex;
+      short_m nonUsedMask = ( short_v(fData.HitDataIsUsed( row ), hitIndexes) == short_v( Vc::Zero ) );
+      fData.SetHitLinkUpData( row, hitIndexes, bestUp, nonUsedMask);
+      fData.SetHitLinkDownData( row, hitIndexes, bestDn, nonUsedMask);
 
 #ifdef DRAW
       if ( DRAW_EVERY_LINK ) {
@@ -266,15 +268,7 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
 void AliHLTTPCCATracker::NeighboursFinder::execute()
 {
   const int numberOfRows = fTracker->Param().NRows();
-  const short_v minusOne = -1;
-  for ( int rowIndex = 0; rowIndex < fTracker->Param().NRows(); ++rowIndex ) {
-    const AliHLTTPCCARow &row = fData.Row( rowIndex );
-    const int numberOfHits = row.NHits();
-    for ( int i = 0; i < numberOfHits; i += short_v::Size ) {
-      fData.SetHitLinkUpData  ( row, i, minusOne );
-      fData.SetHitLinkDownData( row, i, minusOne );
-    }
-  }
+
 #ifdef DRAW
   AliHLTTPCCADisplay::Instance().SetSliceView();
   AliHLTTPCCADisplay::Instance().ClearView();

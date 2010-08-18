@@ -106,17 +106,38 @@ int AliHLTTPCCATracker::Reconstructor::execute()
     return 0;
   }
 
+
   TStopwatch timer;
   TimeStampCounter tsc;
 
+    // unset all links
+  const short_v minusOne = -1;
+  for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
+    const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
+    const int numberOfHits = row.NHits();
+    for ( int i = 0; i < numberOfHits; i += short_v::Size ) {
+      d->fData.SetHitLinkUpData  ( row, i, minusOne );
+      d->fData.SetHitLinkDownData( row, i, minusOne );
+    }
+  }
+  
+    // initialize the slice tracker's number of tracklets to 0
+#ifdef USE_TBB
+  CAMath::AtomicExch( d->NTracklets(), 0 ); 
+#else //USE_TBB
+  d->SetNTracklets(0);
+#endif //USE_TBB
+  
+
+for (int iter = 0; iter < 2; iter++) {
   timer.Start();
   tsc.Start();
   AliHLTTPCCATracker::NeighboursFinder neighboursFinder( d, d->fData );
   neighboursFinder.execute();
   tsc.Stop();
   timer.Stop();
-  d->fTimers[0] = timer.RealTime();
-  d->fTimers[4] = tsc.Cycles();
+  d->fTimers[0] += timer.RealTime();
+  d->fTimers[4] += tsc.Cycles();
 
   d->fData.ClearHitWeights();
 //   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() 2" << std::endl; // dbg 0
@@ -227,7 +248,8 @@ int AliHLTTPCCATracker::Reconstructor::execute()
   AliHLTTPCCAStartHitsFinder::run( *d, d->fData );
 //   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() 5" << std::endl; // dbg 0
   timer.Stop();
-  d->fTimers[3] = timer.RealTime();
+  d->fTimers[3] += timer.RealTime();
+} // iterations
 #ifdef DUMP_LINKS
   if ( linksFStream.is_open() ) {
     linksFStream << "\nStartHits:\n";
