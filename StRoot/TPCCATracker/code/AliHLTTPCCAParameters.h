@@ -89,9 +89,10 @@ namespace AliHLTTPCCAParameters
   
   /**
    * Coefficient for size of region on neighbour rows for search neghbour hits. Size = coeff*dx. [cm/dx]
+   * different for different iteration of finding
    */
-  static const float NeighbourAreaSizeTgY = 2.; // = 3. is little better.
-  static const float NeighbourAreaSizeTgZ = 2.;
+  static const float NeighbourAreaSizeTgY[3] = {2.,  2., 5.}; // TODO choose appropriate and use > 1 iterations
+  static const float NeighbourAreaSizeTgZ[3] = {2.,  2., 5.};
   
   /**
    * Distance between hits to be merged. [cm]
@@ -153,7 +154,7 @@ namespace AliHLTTPCCAPParameters{ /// parameters for global Performance
       /**
        * MCTrack is reconstructed if correspondent recoTrack has NHits >= MinimumHitsForRecoTrack
        */
-    MinimumHitsForRecoTrack = 4,
+    MinimumHitsForRecoTrack = 4
   }; // enum
 
   /**
@@ -178,7 +179,7 @@ namespace AliHLTTPCCASPParameters{ /// parameters for Slice Performance
       /**
        * MCTrack is reconstructed if correspondent recoTrack has NHits >= MinimumHitsForRecoTrack
        */
-    MinimumHitsForRecoTrack = 4,
+    MinimumHitsForRecoTrack = 4
     
   }; // enum
 
