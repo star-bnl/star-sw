@@ -75,7 +75,8 @@ class MediumSilicon : public Medium {
     // in the scattering rates table
     bool   SetMaxElectronEnergy(const double e);
     double GetMaxElectronEnergy() const {return eFinal;}
-    // Get the electron energy (and its gradient) for a given (crystal) momentum
+    // Get the electron energy (and its gradient) 
+    // for a given (crystal) momentum
     double GetElectronEnergy(const double px, const double py, const double pz,
                         double& vx, double& vy, double& vz, const int band = 0);
     // Get the electron (crystal) momentum for a given kinetic energy

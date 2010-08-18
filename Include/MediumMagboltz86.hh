@@ -1,4 +1,4 @@
-// Interface to Magboltz program (version 8.6)
+// Interface to Magboltz program (version 8)
 
 #ifndef G_MEDIUM_MAGBOLTZ_86
 #define G_MEDIUM_MAGBOLTZ_86
@@ -131,6 +131,8 @@ class MediumMagboltz86 : public Medium {
     MediumMagboltz86();
     // Destructor
     ~MediumMagboltz86() {}    
+
+    bool IsGas() const {return true;}
   
     // Set/get the gas mixture
     bool SetComposition(const std::string gas1, const double f1, 
@@ -145,7 +147,16 @@ class MediumMagboltz86 : public Medium {
                         std::string& gas4, double& f4,
                         std::string& gas5, double& f5,
                         std::string& gas6, double& f6);
-    void   GetComponent(const int i, std::string& label, double& f);
+    void GetComponent(const int i, std::string& label, double& f);
+    
+    void   SetAtomicNumber(const double z);
+    double GetAtomicNumber() const;
+    void   SetAtomicWeight(const double a);
+    double GetAtomicWeight() const;
+    void   SetNumberDensity(const double n);
+    double GetNumberDensity() const;
+    void   SetMassDensity(const double rho);
+    double GetMassDensity() const;
  
     // Set/get the highest electron energy to be included 
     // in the scattering rates table
@@ -262,6 +273,8 @@ class MediumMagboltz86 : public Medium {
     // Gas mixture
     int gas[nMaxGases];
     double fraction[nMaxGases];
+    double atWeight[nMaxGases];
+    double atNum[nMaxGases];
    
     // Energy spacing of collision rate tables
     double eFinal, eStep;
@@ -387,7 +400,8 @@ class MediumMagboltz86 : public Medium {
     std::vector<double> ionMobilityValues;
 
     bool GetGasNumber(std::string gasname, int& number) const;
-    bool GetGasName(const int number, std::string& gasname) const;
+    bool GetGasInfo(const int number, std::string& gasname, 
+                    double& a, double& z) const;
     bool Mixer();
     void ComputeAngularCut(double parIn, double& cut, double &parOut);
     void ComputeDeexcitationTable();

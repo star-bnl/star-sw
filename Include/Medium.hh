@@ -19,8 +19,11 @@ class Medium {
     // Return the id number of the class instance
     int GetId() const {return id;}
     // Medium name/identifier
-    void SetName(const std::string s) {name = s;}
+    virtual
+    void SetName(const std::string s);
     std::string GetName() const {return name;}
+    virtual
+    bool IsGas() const {return false;}
 
     // Temperature [K]
     void   SetTemperature(const double t);
@@ -37,14 +40,22 @@ class Medium {
     virtual
     void   GetComponent(const int i, std::string& label, double& f);
     // Effective atomic number and weight
+    virtual
     void   SetAtomicNumber(const double z);
+    virtual
     double GetAtomicNumber() const       {return atomicNumber;}
+    virtual
     void   SetAtomicWeight(const double a);
+    virtual
     double GetAtomicWeight() const       {return atomicWeight;}
     // Number density [cm-3] and mass density [g/cm3]
+    virtual
     void   SetNumberDensity(const double n);
+    virtual
     double GetNumberDensity() const      {return density;}
+    virtual
     void   SetMassDensity(const double rho);
+    virtual
     double GetMassDensity() const;
 
     // Transport properties
@@ -55,9 +66,15 @@ class Medium {
     void EnablePrimaryIonisation()  {ionisable = true;}
     void DisablePrimaryIonisation() {ionisable = false;}
 
-    bool IsDriftable()   {return driftable;}
-    bool IsMicroscopic() {return microscopic;}
-    bool IsIonisable()   {return ionisable;}
+    bool IsDriftable() const   {return driftable;}
+    bool IsMicroscopic() const {return microscopic;}
+    bool IsIonisable() const   {return ionisable;}
+
+    // W value and Fano factor
+    void   SetW(const double w) {wValue = w;};
+    double GetW() {return wValue;}
+    void   SetFanoFactor(const double f) {fanoFactor = f;}
+    double GetFanoFactor() {return fanoFactor;}
 
     // Transport parameters for electrons    
     // Drift velocity [cm / ns]
@@ -205,6 +222,8 @@ class Medium {
     bool driftable, microscopic, ionisable;
     // Update flag
     bool isChanged;
+
+    double wValue, fanoFactor;
 
     // Switch on/off debugging messages
     bool debug;

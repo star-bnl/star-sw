@@ -1,0 +1,250 @@
+#include <iomanip>
+using std::setw;
+#include "wcpplib/stream/prstream.h"
+#include "wcpplib/math/cubic.h"
+#include "wcpplib/math/parabol.h"
+#include "wcpplib/math/DoubleAc.h"
+#include "wcpplib/util/FunNameStack.h"
+#include "wcpplib/safetl/AbsArr.h"
+#include "wcpplib/matrix/multiply.h"
+#include "wcpplib/matrix/inverse.h"
+
+/*
+Copyright (c) 2005 Igor B. Smirnov
+
+The file can be used, copied, modified, and distributed
+according to the terms of GNU Lesser General Public License version 2.1
+as published by the Free Software Foundation,
+and provided that the above copyright notice, this permission notice, 
+and notices about any modifications of the original text 
+appear in all copies and in supporting documentation.
+The file is provided "as is" without express or implied warranty.
+*/
+
+const double_complex iu(0,1);  
+
+void  Cubic::find_zero(double_complex &z1, 
+		       double_complex &z2, 
+		       double_complex &z3) const 
+//int Cubic::find_zero(complex xzero[3]) const 
+{
+  mfunname("void  Cubic::find_zero(double_complex &z1, double_complex &z2, double_complex &z3) const");
+  //mfunnamep("int Cubic::find_zero(complex xzero[3]) const");
+  convmut(Cubic);
+  if(s_dxzero == 0)
+  {
+    check_econd11a(da , == 0.0 , "this is not cibuc polinomial!", mcerr);
+    double a2 = db / da;
+    double a1 = dc / da;
+    double a0 = dd / da;
+    double Q = (3.0 * a1 - a2 * a2) / 9.0;
+    double R = (9.0 * a2 * a1 - 27.0 * a0 - 2.0 * a2 * a2 * a2) / 54.0;
+    double D = Q * Q * Q + R * R;
+    //Iprint3n(mcout, Q, R, D);
+    //check_econd11( D , < 0.0 , mcerr);
+    double sD = sqrt( fabs(D) );
+    //double_complex sD = sqrt( double_complex(D) );
+    double_complex S;
+    double_complex T;
+    if(D >= 0.0)
+    {
+      double t = R + sD;
+      if(t > 0.0)
+      {
+	S = pow( t  , 1/3.0 );
+      }
+      else if(t < 0.0)
+      {
+	S = -pow( -t  , 1/3.0 );
+      }
+      else
+      {
+	S = 0.0;
+      }
+      t = R - sD;
+      if(t > 0.0)
+      {
+	T = pow( t  , 1/3.0 );
+      }
+      else if(t < 0.0)
+      {
+	T = - pow( -t  , 1/3.0 );
+      }
+      else
+      {
+	T = 0.0;
+      }
+    }
+    else
+    {
+      S = pow( R + iu * sD  , 1/3.0 );
+      T = pow( R - iu * sD  , 1/3.0 );
+    }
+    //Iprint3n(mcout, sD, S, T);
+    z1 = -a2 / 3.0 + (S + T);
+    z2 = -a2 / 3.0 - (S + T)/2.0 + 0.5 * iu * sqrt(3.0) * ( S - T );
+    z3 = -a2 / 3.0 - (S + T)/2.0 - 0.5 * iu * sqrt(3.0) * ( S - T );
+    t.dz1 = z1;
+    t.dz2 = z2;
+    t.dz3 = z3;
+    t.s_dxzero = 3;
+  }
+  else
+  {
+    z1 = dz1;
+    z2 = dz2;
+    z3 = dz3;
+  }
+}
+
+int Cubic::find_real_zero(double z[3]) const 
+{
+  mfunname("int Cubic::find_real_zero(double z[3]) const");
+  double_complex zc1;
+  double_complex zc2; 
+  double_complex zc3;
+  find_zero(zc1, zc2, zc3);
+  double thresh = 10.0 * DBL_MIN;
+  int q = 0;
+  int s[3]={0,0,0};
+  if(fabs(zc1.imag()) < thresh || 
+     (zc1.real() != 0.0 && fabs(zc1.imag()/zc1.real()) < thresh) ) 
+  {
+    s[0] = 1;
+    z[q] = zc1.real();
+    q++;
+  }
+  if(fabs(zc2.imag()) < thresh ||
+     (zc2.real() != 0.0 && fabs(zc2.imag()/zc2.real()) < thresh)  )
+  {
+    s[1] = 1;
+    z[q] = zc2.real();
+    q++;
+  }
+  
+  if(fabs(zc3.imag()) < thresh ||
+     (zc3.real() != 0.0 && fabs(zc3.imag()/zc3.real()) < thresh)  )
+  {
+    s[2] = 1;
+    z[q] = zc3.real();
+    q++;
+  }
+  int n1, n2;
+  for(n1=0; n1<q-1; n1++)
+  {
+    for(n2=n1; n2<q; n2++)
+    {
+      if(z[n1] > z[n2])
+      {
+	double t;
+	t = z[n1];
+	z[n1] = z[n2];
+	z[n2] = t;
+      }
+    }
+  }
+  for(n1=0; n1<q-1; n1++)
+  {
+    //Iprint2n(mcout, n1, q);
+    //Iprintn(mcout, fabs(z[n1]));
+    //Iprintn(mcout, fabs(z[n2]));
+    //Iprintn(mcout, fabs((z[n1] - z[n1+1])/(z[n1] + z[n1+1])) );
+
+    if((fabs(z[n1]) < thresh && fabs(z[n2]) < thresh) ||
+       fabs((z[n1] - z[n1+1])/(z[n1] + z[n1+1])) < thresh)
+    {
+      //mcout<<"used\n";
+      for(n2=n1+1; n2<q-1; n2++)
+      {
+	z[n2] = z[n2+1];
+      }
+      q--;
+      n1--;
+    }
+  }
+      
+  return q;
+}  
+
+int Cubic::find_maxmin(double xmm[2], double ymm[2], 
+		       int s_mm[2]) const
+{
+  mfunname("int Cubic::find_maxmin(double xmm[2], double ymm[2], int s_mm[2]) const");
+  double ap = 3 * da;
+  double bp = 2 * db;
+  double cp = dc;
+  Parabol par(ap, bp, cp);
+  s_mm[0] = 0;
+  s_mm[1] = 0;
+  int qz = par.find_zero(xmm);
+  if(qz == 1)
+  {
+    s_mm[0] = 0;
+  }
+  if(qz == 2)
+  {
+    if(a() > 0)
+    {
+      s_mm[0] = 1;
+      s_mm[1] = -1;
+    }
+    else
+    {
+      s_mm[0] = -1;
+      s_mm[1] = 1;
+    }
+  }
+  int n;
+  for( n=0; n<qz; n++)
+  {
+    ymm[n] = y(xmm[n]);
+  }
+  return qz;
+}
+  
+
+
+
+ostream& operator<<(ostream& file, const Cubic& f)
+{
+  double_complex z1;
+  double_complex z2; 
+  double_complex z3;
+  Ifile<<"Cubic: s_xzero="<< f.s_xzero()<<'\n'; 
+  indn.n+=2;
+    //<<" s_dxmm="<<f.s_dxmm<<'\n'; 
+  f.find_zero(z1, z2, z3);
+  Ifile<<"Cubic: a="<<f.a()<<" b="<<f.b()<<" c="<<f.c()<<" d="<<f.d()<<'\n';
+  file<<" z1,2,3="<<z1;
+  file<<' '<<z2;
+  file<<' '<<z3;
+  file<<'\n';
+  double r[3];
+  int q;
+  q = f.find_real_zero(r);
+  Ifile<<"The number of real zeros ="<<q<<'\n';
+  int n;
+  Ifile<<"Solutions=";
+  for(n=0; n<q; n++)
+    file<<' '<<r[n];
+  file<<'\n';
+  double xmm[2]; 
+  double ymm[2]; 
+  int s_mm[2];
+  q = f.find_maxmin(xmm, ymm, s_mm);
+  Ifile<<"Max/Min, q="<<q<<'\n';
+  indn.n+=2;
+  for(n=0; n<q; n++)
+  {
+    Ifile<<"n="<<n
+	 <<" xmm[n]="<<setw(13)<<xmm[n]
+	 <<" ymm[n]="<<setw(13)<<ymm[n]
+	 <<" s_mm[n]="<<setw(13)<<s_mm[n]<<'\n';
+  }
+  indn.n-=2;
+  indn.n-=2;
+
+
+  return file;
+}
+

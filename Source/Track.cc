@@ -6,18 +6,20 @@
 namespace Garfield {
 
 Track::Track() :
-  mass(MuonMass), energy(1.e9),
+  q(-1.), mass(MuonMass), energy(0.), isElectron(false),
   sensor(0),
   isChanged(true), debug(false) {
 
+  SetBetaGamma(3.);
 
 }
 
 void
 Track::SetParticle(std::string part) {
 
+  isElectron = false;
   if (part == "electron" || part == "e-") {
-    q = -1; mass = ElectronMass;
+    q = -1; mass = ElectronMass; isElectron = true;
   } else if (part == "positron" || part == "e+") {
     q =  1; mass = ElectronMass;
   } else if (part == "muon" || part == "mu" || part == "mu-") {

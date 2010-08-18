@@ -9,7 +9,8 @@ namespace Garfield {
 
 int Medium::idCounter = -1;
 
-double Medium::inverseElectronMass = SpeedOfLight * SpeedOfLight / ElectronMass;
+double Medium::inverseElectronMass = SpeedOfLight * SpeedOfLight / 
+                                     ElectronMass;
 
 Medium::Medium() :
   className("Medium"), 
@@ -18,9 +19,18 @@ Medium::Medium() :
   epsilon(1.), 
   nComponents(1), atomicNumber(1.), atomicWeight(0.), density(0.),
   driftable(false), microscopic(false), ionisable(false),
+  wValue(0.), fanoFactor(0.),
   isChanged(true),
   debug(false) {
 
+}
+
+void
+Medium::SetName(const std::string s) {
+
+  std::cerr << className << "::SetName:\n";
+  std::cerr << "    Name of the medium cannot be changed.\n";
+  
 }
 
 void 

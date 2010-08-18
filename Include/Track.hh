@@ -52,6 +52,7 @@ class Track {
     double mass;
     double energy;
     double beta2;
+    bool isElectron;
 
     Sensor* sensor;
 

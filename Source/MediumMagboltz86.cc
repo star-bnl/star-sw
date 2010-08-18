@@ -37,10 +37,12 @@ MediumMagboltz86::MediumMagboltz86() :
   for (int i = nMaxGases; i--;) {
     fraction[i] = 0.;
     gas[i] = 0;
+    atWeight[i] = 0.;
+    atNum[i] = 0.;
   }
   gas[0] = 2;
   fraction[0] = 1.;
-  GetGasName(gas[0], name);
+  GetGasInfo(gas[0], name, atWeight[0], atNum[0]);
   
   // Set parameters in Magboltz common blocks
   inpt_.nGas = nComponents;  
@@ -61,7 +63,7 @@ MediumMagboltz86::MediumMagboltz86() :
   isChanged = true;
 
   EnableDrift();
-  DisablePrimaryIonisation();
+  EnablePrimaryIonisation();
   microscopic = true;
   
   // Collision counters
@@ -120,7 +122,7 @@ MediumMagboltz86::SetComposition(const std::string gas1, const double f1,
   double sum = 0.;  
   for (i = 0; i < nComponents; ++i) {
     if (i > 0) name += "/";  
-    GetGasName(gas[i], gasname);
+    GetGasInfo(gas[i], gasname, atWeight[i], atNum[i]);
     name += gasname;
     sum += fraction[i];
   }
@@ -162,12 +164,13 @@ MediumMagboltz86::GetComposition(std::string& gas1, double& f1,
                                  std::string& gas5, double& f5,
                                  std::string& gas6, double& f6) {
 
-  GetGasName(gas[0], gas1); f1 = fraction[0];
-  GetGasName(gas[1], gas2); f2 = fraction[1];
-  GetGasName(gas[2], gas3); f3 = fraction[2];
-  GetGasName(gas[3], gas4); f4 = fraction[3];
-  GetGasName(gas[4], gas5); f5 = fraction[4];
-  GetGasName(gas[5], gas6); f6 = fraction[5];
+  double a, z;
+  GetGasInfo(gas[0], gas1, a, z); f1 = fraction[0];
+  GetGasInfo(gas[1], gas2, a, z); f2 = fraction[1];
+  GetGasInfo(gas[2], gas3, a, z); f3 = fraction[2];
+  GetGasInfo(gas[3], gas4, a, z); f4 = fraction[3];
+  GetGasInfo(gas[4], gas5, a, z); f5 = fraction[4];
+  GetGasInfo(gas[5], gas6, a, z); f6 = fraction[5];
 
 }
 
@@ -182,9 +185,84 @@ MediumMagboltz86::GetComponent(const int i, std::string& label, double& f) {
     return;
   }
   
-  GetGasName(gas[i], label);
+  double a, z;
+  GetGasInfo(gas[i], label, a, z);
   f = fraction[i];
 
+}
+
+void
+MediumMagboltz86::SetAtomicNumber(const double z) {
+
+  std::cerr << className << "::SetAtomicNumber:\n";
+  std::cerr << "    This function does not work for " << className << ".\n";
+  std::cerr << "    Use SetComposition to define the gas mixture.\n";
+
+}
+
+void
+MediumMagboltz86::SetAtomicWeight(const double a) {
+
+  std::cerr << className << "::SetAtomicWeight:\n";
+  std::cerr << "    This function does not work for " << className << ".\n";
+  std::cerr << "    Use SetComposition to define the gas mixture.\n";
+
+}
+
+void
+MediumMagboltz86::SetNumberDensity(const double n) {
+
+  std::cerr << className << "::SetNumberDensity:\n";
+  std::cerr << "    This function does not work for " << className << ".\n";
+  std::cerr << "    Use SetTemperature and SetPressure instead.\n";
+  
+}
+
+void
+MediumMagboltz86::SetMassDensity(const double rho) {
+
+  std::cerr << className << "::SetMassDensity:\n";
+  std::cerr << "    This function does not work for " << className << ".\n";
+  std::cerr << "    Use SetTemperature, SetPressure"
+            << " and SetComposition instead.\n";
+            
+}
+
+double
+MediumMagboltz86::GetAtomicWeight() const {
+
+  double a = 0.;
+  for (int i = 0; i < nComponents; ++i) {
+    a += atWeight[i] * fraction[i];
+  }
+  return a;
+  
+}
+
+double
+MediumMagboltz86::GetNumberDensity() const {
+
+  return LoschmidtNumber * (pressure / AtmosphericPressure) * 
+                           (273.15 / temperature);
+                                                         
+}
+
+double
+MediumMagboltz86::GetMassDensity() const {
+
+  return GetNumberDensity() * GetAtomicWeight() * AtomicMassUnit;
+  
+}
+
+double
+MediumMagboltz86::GetAtomicNumber() const {
+
+  double z = 0.;
+  for (int i = 0; i < nComponents; ++i) {
+    z += atNum[i] * fraction[i];
+  }
+  return z;
+  
 }
 
 bool 
@@ -889,12 +967,14 @@ MediumMagboltz86::GetGasNumber(std::string name, int& number) const {
     number = 11; return true;
   }
   // CO2 (isotropic)
-  if (name == "CO2" || name == "CARBON-DIOXIDE") {
+  if (name == "CO2" || name == "CARBON-DIOXIDE" ||
+      name == "CARBONDIOXIDE") {
     number = 12; return true;
   }
   // Neopentane
   if (name == "NEOPENTANE" || name == "NEO-PENTANE" || 
-      name == "NEO-C5H12" || name == "NEOC5H12" || name == "C5H12") {
+      name == "NEO-C5H12" || name == "NEOC5H12" || 
+      name == "DIMETHYLPROPANE" || name == "C5H12") {
     number = 13; return true;
   }
   // Water
@@ -911,7 +991,8 @@ MediumMagboltz86::GetGasNumber(std::string name, int& number) const {
     number = 16; return true;
   }
   // Nitric oxide (NO)
-  if (name == "NO" || name == "NITRIC-OXIDE" || name == "NITROGEN-MONOXIDE") {
+  if (name == "NO" || name == "NITRIC-OXIDE" || 
+      name == "NITROGEN-MONOXIDE") {
     number = 17; return true;
   }
   // Nitrous oxide (N2O)
@@ -942,12 +1023,17 @@ MediumMagboltz86::GetGasNumber(std::string name, int& number) const {
   }
   // Methylal (dimethoxymethane, CH3-O-CH2-O-CH3, "hot" version)
   if (name == "METHYLAL" || name == "METHYLAL-HOT" || name == "DMM" ||
-      name == "DIMETHOXYMETHANE" || name == "C3H8O2") {
+      name == "DIMETHOXYMETHANE" || name == "FORMAL" || 
+      name == "C3H8O2") {
     number = 24; return true;
   }
   // DME
-  if (name == "DME" || name == "DIMETHYL-ETHER" || name == "WOOD-ETHER" || 
-      name == "METHOXYMETHANE" || name == "METHYL-ETHER" || name == "C2H60") {
+  if (name == "DME" || 
+      name == "DIMETHYL-ETHER" || name == "DIMETHYLETHER" || 
+      name == "METHYL-ETHER" || name == "METHYLETHER" ||
+      name == "WOOD-ETHER" || name == "WOODETHER" ||
+      name == "DIMETHYL-OXIDE" || name == "DEMEON" || 
+      name == "METHOXYMETHANE" || name == "C2H6O") {
     number = 25; return true;
   }
   // Reid step
@@ -982,7 +1068,8 @@ MediumMagboltz86::GetGasNumber(std::string name, int& number) const {
   }
   // Cyclopropane
   if (name == "C-PROPANE" || name == "CYCLO-PROPANE" || 
-      name == "CYCLOPROPANE" || name == "C-C3H6" || name == "CYCLO-C3H6") {
+      name == "CYCLOPROPANE" || name == "C-C3H6" || 
+      name == "CC3H6" || name == "CYCLO-C3H6") {
     number = 33; return true;
   }
   // Methanol
@@ -1099,65 +1186,220 @@ MediumMagboltz86::GetGasNumber(std::string name, int& number) const {
 }
 
 bool 
-MediumMagboltz86::GetGasName(const int number, std::string& gasname) const {
+MediumMagboltz86::GetGasInfo(const int number, 
+                             std::string& gasname, 
+                             double& a, double& z) const {
   
   switch (number) {
-    case 0:  gasname = ""; return false; break;
-    case 1:  gasname = "CF4";     break;
-    case 2:  gasname = "Ar";      break;
-    case 3:  gasname = "He";      break;
-    case 4:  gasname = "He-3";    break;
-    case 5:  gasname = "Ne";      break;
-    case 6:  gasname = "Kr";      break;
-    case 7:  gasname = "Xe";      break;
-    case 8:  gasname = "CH4";     break;
-    case 9:  gasname = "C2H6";    break;
-    case 10: gasname = "C3H8";    break;
-    case 11: gasname = "iC4H10";  break;
-    case 12: gasname = "CO2";     break;
-    case 13: gasname = "Neopentane"; break;
-    case 14: gasname = "H2O";     break;
-    case 15: gasname = "O2";      break;
-    case 16: gasname = "N2";      break;
-    case 17: gasname = "NO";      break;
-    case 18: gasname = "N2O";     break;
-    case 19: gasname = "C2H4";    break;
-    case 20: gasname = "C2H2";    break;
-    case 21: gasname = "H2";      break;
-    case 22: gasname = "D2";      break;
-    case 23: gasname = "CO";      break;
-    case 24: gasname = "Methylal"; break;
-    case 25: gasname = "DME";     break;
-    case 26: gasname = "Reid-Step";     break;
-    case 27: gasname = "Maxwell-Model"; break;
-    case 28: gasname = "Reid-Ramp";     break;
-    case 29: gasname = "C2F6";    break;
-    case 30: gasname = "SF6";     break;
-    case 31: gasname = "NH3";     break;
-    case 32: gasname = "C3H6";    break;
-    case 33: gasname = "Cyclopropane"; break;
-    case 34: gasname = "Methanol";     break;
-    case 35: gasname = "Ethanol";      break;
-    case 36: gasname = "Propanol";     break;
-    case 37: gasname = "Cs";      break;
-    case 38: gasname = "F2";      break;
-    case 39: gasname = "CS2";     break;
-    case 40: gasname = "COS";     break;
-    case 41: gasname = "CD4";     break;
-    case 42: gasname = "BF3";     break;
-    case 43: gasname = "C2HF5";   break;
-    case 50: gasname = "CHF3";    break;
-    case 51: gasname = "CF3Br";   break;
-    case 52: gasname = "C3F8";    break;
-    case 53: gasname = "O3";      break;
-    case 54: gasname = "Hg";      break;
-    case 55: gasname = "H2S";     break;
-    case 56: gasname = "n-C4H10"; break;
-    case 57: gasname = "n-C5H12"; break;
-    case 58: gasname = "N2";      break;
-    case 59: gasname = "GeH4";    break;
-    case 60: gasname = "SiH4";    break;
-    default: gasname = ""; return false; break;
+    case 1:  
+      gasname = "CF4";  
+      a = 12.0107 + 4 * 18.9984032; z = 6 + 4 * 9;
+      break;
+    case 2:  
+      gasname = "Ar";   
+      a =  39.948;         z = 18;
+      break;
+    case 3:  
+      gasname = "He";   
+      a =   4.002602;      z =  2;
+      break;
+    case 4:  
+      gasname = "He-3"; 
+      a =   3.01602931914; z =  2;
+      break;
+    case 5:  
+      gasname = "Ne";   
+      a =  20.1797;        z = 10;  
+      break;
+    case 6:  
+      gasname = "Kr";   
+      a =  37.798;         z = 36;
+      break;
+    case 7:  
+      gasname = "Xe";   
+      a = 131.293;         z = 54;
+      break;
+    case 8:  
+      gasname = "CH4";
+      a =     12.0107 +  4 * 1.00794; z =     6 +  4;
+      break;
+    case 9:  
+      gasname = "C2H6";  
+      a = 2 * 12.0107 +  6 * 1.00794; z = 2 * 6 +  6;
+      break;
+    case 10: 
+      gasname = "C3H8";     
+      a = 3 * 12.0107 +  8 * 1.00794; z = 3 * 6 +  8;
+      break;
+    case 11: 
+      gasname = "iC4H10";   
+      a = 4 * 12.0107 + 10 * 1.00794; z = 4 * 6 + 10;
+      break;
+    case 12: 
+      gasname = "CO2";  
+      a = 12.0107 + 2 * 15.9994; z = 6 + 2 * 8;
+      break;
+    case 13: 
+      gasname = "neoC5H12"; 
+      a = 5 * 12.0107 + 12 * 1.00794; z = 5 * 6 + 12;
+      break;
+    case 14: 
+      gasname = "H2O";  
+      a = 2 * 1.00794 + 15.9994; z = 2 + 8;
+      break;
+    case 15: 
+      gasname = "O2";   
+      a = 2 * 15.9994; z = 2 * 8;
+      break;
+    case 16: 
+      gasname = "N2";   
+      a = 2 * 14.0067; z = 2 * 7;
+      break;
+    case 17: 
+      gasname = "NO";   
+      a = 14.0067 + 15.9994; z = 7 + 8;
+      break;
+    case 18: 
+      gasname = "N2O";  
+      a = 2 * 14.0067 + 15.9994; z = 2 * 7 + 8;
+      break;
+    case 19: 
+      gasname = "C2H4"; 
+      a = 2 * 12.0107 + 4 * 1.00794; z = 2 * 6 + 4;
+      break;
+    case 20: 
+      gasname = "C2H2"; 
+      a = 2 * 12.0107 + 2 * 1.00794; z = 2 * 6 + 2;
+      break;
+    case 21: 
+      gasname = "H2";   
+      a = 2 * 1.00794; z = 2;
+      break;
+    case 22: 
+      gasname = "D2";   
+      a = 2 * 2.01410177785; z = 2;
+      break;
+    case 23: 
+      gasname = "CO";   
+      a = 12.0107 + 15.9994; z = 6 + 8;
+      break;
+    case 24: 
+      gasname = "Methylal"; 
+      a = 3 * 12.0107 + 8 * 1.00794 + 2 * 15.9994; 
+      z = 3 * 6 + 8 + 2 * 8;
+      break;
+    case 25: gasname = "DME";      
+      a = 2 * 12.0107 + 6 * 1.00794 +     15.9994; 
+      z = 2 * 6 + 6 + 8;
+      break;
+    case 26: gasname = "Reid-Step";     a = 1.; z = 1.; break;
+    case 27: gasname = "Maxwell-Model"; a = 1.; z = 1.; break;
+    case 28: gasname = "Reid-Ramp";     a = 1.; z = 1.; break;
+    case 29: 
+      gasname = "C2F6";    
+      a = 2 * 12.0107 + 6 * 18.9984032; z = 2 * 6 + 6 * 9;
+      break;
+    case 30: 
+      gasname = "SF6";     
+      a =     32.065  + 6 * 18.9984032; z = 16 + 6 * 9;
+      break;
+    case 31: 
+      gasname = "NH3";     
+      a = 14.0067 + 3 * 1.00794; z = 7 + 3;
+      break;
+    case 32: 
+      gasname = "C3H6";   
+      a = 3 * 12.0107 + 6 * 1.00794; z = 3 * 6 + 6;
+      break;
+    case 33: 
+      gasname = "cC3H6";  
+      a = 3 * 12.0107 + 6 * 1.00794; z = 3 * 6 + 6;
+      break;
+    case 34: 
+      gasname = "CH3OH";  
+      a =     12.0107 + 4 * 1.00794 + 15.9994; z =     6 + 4 + 8;
+      break;
+    case 35: 
+      gasname = "C2H5OH"; 
+      a = 2 * 12.0107 + 6 * 1.00794 + 15.9994; z = 2 * 6 + 6 + 8;
+      break;
+    case 36: 
+      gasname = "C3H7OH"; 
+      a = 3 * 12.0107 + 8 * 1.00794 + 15.9994; z = 3 * 6 + 8 * 8;
+      break;
+    case 37: 
+      gasname = "Cs";      
+      a = 132.9054519; z = 55;
+      break;
+    case 38: 
+      gasname = "F2";      
+      a = 2 * 18.9984032; z = 2 * 9;
+      break;
+    case 39: 
+      gasname = "CS2";     
+      a = 12.0107 + 2 * 32.065; z = 6 + 2 * 16;
+      break;
+    case 40: 
+      gasname = "COS";     
+      a = 12.0107 + 15.9994 + 32.065; z = 6 + 8 + 16;
+      break;
+    case 41: 
+      gasname = "CD4";     
+      a = 12.0107 + 4 * 2.01410177785; z = 6 + 4;
+      break;
+    case 42: 
+      gasname = "BF3";     
+      a = 10.811 + 3 * 18.9984032; z = 5 + 3 * 9;
+      break;
+    case 43: 
+      gasname = "C2HF5";   
+      a = 2 * 12.0107 + 1.00794 + 5 * 18.9984032; z = 2 * 6 + 1 + 5 * 9;
+      break;
+    case 50: 
+      gasname = "CHF3";    
+      a =     12.0107 + 1.00794 + 3 * 18.9984032; z =     6 + 1 + 3 * 9;
+      break;
+    case 51: 
+      gasname = "CF3Br";   
+      a = 12.0107 + 3 * 18.9984032 + 79.904; z = 6 + 3 * 9 + 35;
+      break;
+    case 52: 
+      gasname = "C3F8";    
+      a = 3 * 12.0107 + 8 * 18.9984032; z = 3 * 6 + 8 * 9;
+      break;
+    case 53: 
+      gasname = "O3";      
+      a = 3 * 15.9994; z = 3 * 8;
+      break;
+    case 54: 
+      gasname = "Hg";      
+      a = 2 * 200.59; z = 80;
+      break;
+    case 55: 
+      gasname = "H2S";     
+      a = 2 * 1.00794 + 32.065; z = 2 + 16;
+      break;
+    case 56: 
+      gasname = "nC4H10"; 
+      a = 4 * 12.0107 + 10 * 1.00794; z = 4 * 6 + 10;
+      break;
+    case 57: 
+      gasname = "nC5H12"; 
+      a = 5 * 12.0107 + 12 * 1.00794; z = 5 * 6 + 12;
+      break;
+    case 58: 
+      gasname = "N2";      
+      a = 2 * 14.0067; z = 2 * 7;
+      break;
+    case 59: 
+      gasname = "GeH4"; 
+      a = 72.64   + 4 * 1.00794; z = 32 + 4;
+      break;
+    case 60: 
+      gasname = "SiH4"; 
+      a = 28.0855 + 4 * 1.00794; z = 14 + 4;
+      break;
+    default: gasname = ""; a = 0.; z = 0.; return false; break;
   }
   return true;
 
@@ -1188,9 +1430,9 @@ MediumMagboltz86::Mixer() {
   inpt_.estep = eStep;
   
   // Atomic density
-  const double density = LoschmidtNumber * (pressure / AtmosphericPressure) * 
+  const double dens = LoschmidtNumber * (pressure / AtmosphericPressure) * 
                          (273.15 / temperature);
-  const double prefactor = density * SpeedOfLight * sqrt(2. / ElectronMass);
+  const double prefactor = dens * SpeedOfLight * sqrt(2. / ElectronMass);
 
   // Fill electron energy array, reset collision rates
   for (int i = nEnergySteps; i--;) {
@@ -1976,7 +2218,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
   }
 
   // Collisional de-excitation channels
-  const double density = LoschmidtNumber * (pressure / AtmosphericPressure) * 
+  const double dens = LoschmidtNumber * (pressure / AtmosphericPressure) * 
                          (273.15 / temperature);
   if (withAr) {
     // Add the Ar dimer ground state
@@ -2004,12 +2246,12 @@ MediumMagboltz86::ComputeDeexcitationTable() {
     //     A. Bogaerts and R. Gijbels, J. Appl. Phys. 86 (1999), 4124-4133
     //     A. Bogaerts and R. Gijbels, Phys. Rev. A 52 (1995), 3743-3751
     // Hornbeck-Molnar ionisation
-    const double fHM = 2.e-18 * density * cAr;
+    const double fHM = 2.e-18 * dens * cAr;
     // Collisional losses
     // Two-body collision
-    const double fLoss2b = 2.3e-24 * density * cAr;
+    const double fLoss2b = 2.3e-24 * dens * cAr;
     // Three-body collision
-    const double fLoss3b = 1.4e-41 * pow(density * cAr, 2.);
+    const double fLoss3b = 1.4e-41 * pow(dens * cAr, 2.);
     for (int j = nDeexcitations; j--;) {
       std::string level = deexcitations[j].label;
       // Collisional losses
@@ -2199,8 +2441,8 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
   std::string gasname;
 
   // Atomic density
-  const double density = LoschmidtNumber * (pressure / AtmosphericPressure) * 
-                         (273.15 / temperature);
+  const double dens = LoschmidtNumber * (pressure / AtmosphericPressure) * 
+                                        (273.15 / temperature);
   // Conversion factor from oscillator strength to cross-section
   const double f2cs = FineStructureConstant * 2 * Pi2 * HbarC * HbarC / 
                       ElectronMass;
@@ -2213,8 +2455,9 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
 
   nPhotonTerms = 0;
   for (int i = 0; i < nComponents; ++i) {
-    const double prefactor = density * SpeedOfLight * fraction[i];
-    GetGasName(gas[i], gasname);
+    const double prefactor = dens * SpeedOfLight * fraction[i];
+    double a, z;
+    GetGasInfo(gas[i], gasname, a, z);
     if (!data.SetMaterial(gasname)) return false;
     // Continuum
     csTypeGamma.push_back(i * 4 + 1);

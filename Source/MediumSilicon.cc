@@ -40,7 +40,7 @@ MediumSilicon::MediumSilicon() :
   hasOpticalData(false), opticalDataFile("OpticalData_Si.txt") {
 
   className = "MediumSilicon";
-  SetName("Si");
+  name = "Si";
   SetTemperature(300.);
   SetDielectricConstant(11.9);
   SetAtomicNumber(14.);
@@ -50,6 +50,9 @@ MediumSilicon::MediumSilicon() :
   EnableDrift();
   EnablePrimaryIonisation();
   microscopic = true;
+
+  wValue = 3.6;
+  fanoFactor = 0.11;  
   
   cfTotElectronsX.clear();
   cfElectronsX.clear();
