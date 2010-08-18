@@ -465,7 +465,7 @@ TrackHeed::Setup(Medium* medium) {
     delete transferCs;
     transferCs = 0;
   }
-  transferCs = new EnTransfCS(mass / 1.e6, gamma - 1, sel, matter, q);
+  transferCs = new EnTransfCS(mass / 1.e6, gamma - 1, sel, matter, long(q));
   
   if (!SetupDelta()) return false;  
 

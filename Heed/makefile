@@ -423,7 +423,7 @@ $(OBJDIR)/Heed/HeedParticle.o: \
 
 $(OBJDIR)/Heed/HeedPhoton.o: \
 	$(HEEDDIR)/heed++/code/HeedPhoton.c \
-	$(HEEDDIR)/heed++/code/HeedPHoton.h
+	$(HEEDDIR)/heed++/code/HeedPhoton.h
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
 

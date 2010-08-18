@@ -8,7 +8,7 @@
 #include "heed++/code/EnTransfCS.h"
 #include "heed++/code/HeedCondElectron.h"
 #include "heed++/code/HeedDeltaElectron.h"
-#include "heed++/code/HeedDeltaELectronCS.h"
+#include "heed++/code/HeedDeltaElectronCS.h"
 #include "heed++/code/HeedMatterDef.h"
 #include "heed++/code/HeedParticle.h"
 #include "heed++/code/PhotoAbsCSLib.h"
