@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.2 2010/07/29 21:45:27 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.3 2010/08/18 14:11:04 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -48,7 +48,8 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
     //   the link
     for ( int hitIndex = 0; hitIndex < numberOfHits; hitIndex += short_v::Size ) {
       const short_v hitIndexes = short_v( Vc::IndexesFromZero ) + hitIndex;
-      const short_m &validHitsMask = hitIndexes < numberOfHits;
+      short_m validHitsMask = hitIndexes < numberOfHits;
+      validHitsMask &= ( short_v(data.HitDataIsUsed( row ), static_cast<ushort_v>(hitIndexes) ) == short_v( Vc::Zero ) ); // not-used hits can be connected only with not-used, so only one check is needed
 
         // collect information
         // up part

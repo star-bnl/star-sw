@@ -83,13 +83,14 @@ AliHLTTPCCAHitArea::AliHLTTPCCAHitArea( const AliHLTTPCCARow &row, const AliHLTT
 bool AliHLTTPCCAHitArea::GetNext( NeighbourData *data )
 {
   // get next hit index
-
+  
   VALGRIND_CHECK_VALUE_IS_DEFINED( fIh );
   VALGRIND_CHECK_VALUE_IS_DEFINED( fHitYlst );
   VALGRIND_CHECK_VALUE_IS_DEFINED( fIz );
   VALGRIND_CHECK_VALUE_IS_DEFINED( fBZmax );
   ushort_m yIndexOutOfRange = fIh >= fHitYlst;
   ushort_m zIndexOutOfRange = fIz >= fBZmax;
+  ushort_m isUsed = static_cast<ushort_m>( short_v(fSlice.HitDataIsUsed( fRow ), fIh) != short_v( Vc::Zero ) ); // TODO change rot.fDataIsUsed type on ushort
   VALGRIND_CHECK_VALUE_IS_DEFINED( yIndexOutOfRange );
   VALGRIND_CHECK_VALUE_IS_DEFINED( zIndexOutOfRange );
   if ( yIndexOutOfRange && zIndexOutOfRange ) { // all iterators are over the end
@@ -98,25 +99,31 @@ bool AliHLTTPCCAHitArea::GetNext( NeighbourData *data )
 
   // at least one entry in the vector has (fIh >= fHitYlst && fIz < fBZmax)
   ushort_m needNextZ = yIndexOutOfRange && !zIndexOutOfRange;
+  ushort_m needNextHit = isUsed && !yIndexOutOfRange && !zIndexOutOfRange;
 
   debugS() << "fIh >= fHitYlst: " <<  yIndexOutOfRange << " fIz >= fBZmax: " << zIndexOutOfRange << " -> " << needNextZ << std::endl;
 
   // skip as long as fIh is outside of the interesting bin y-index
-  while ( !needNextZ.isEmpty() ) {
+  while ( !(needNextZ || needNextHit).isEmpty() ) {
     // go to next z and start y from the min again
     ++fIz( needNextZ );
     fIndYmin( needNextZ ) += fNy;
+    ++fIh( needNextHit );
+    
     fIh.gather( fSlice.FirstHitInBin( fRow ), fIndYmin, needNextZ );
     fHitYlst.gather( fSlice.FirstHitInBin( fRow ), fIndYmin + fBDY, needNextZ );
     assert( fHitYlst <= fRow.NHits() || !needNextZ );
 
     yIndexOutOfRange = fIh >= fHitYlst;
     zIndexOutOfRange = fIz >= fBZmax;
+    isUsed = static_cast<ushort_m>( short_v(fSlice.HitDataIsUsed( fRow ), fIh) != short_v( Vc::Zero ) );
+
     needNextZ = yIndexOutOfRange && !zIndexOutOfRange;
+    needNextHit = isUsed && !yIndexOutOfRange && !zIndexOutOfRange;
     debugS() << "fIh >= fHitYlst: " <<  yIndexOutOfRange << " fIz >= fBZmax: " << zIndexOutOfRange << " -> " << needNextZ << std::endl;
   }
 
-  data->fValid = !yIndexOutOfRange;
+  data->fValid = !yIndexOutOfRange && !isUsed;
 
   const sfloat_m valid( data->fValid );
 

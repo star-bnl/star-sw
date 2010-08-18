@@ -99,9 +99,12 @@ class AliHLTTPCCASliceData
     float HitDataZS( const AliHLTTPCCARow &row, short hitIndex ) const;
     const float *HitDataY( const AliHLTTPCCARow &row ) const;
     const float *HitDataZ( const AliHLTTPCCARow &row ) const;
+    const short *HitDataIsUsed( const AliHLTTPCCARow &row ) const;
     sfloat_v HitDataY( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const;
     sfloat_v HitDataZ( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const;
-
+    //short_v  HitDataIsUsed( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const;
+    void SetHitAsUsed( const AliHLTTPCCARow &row, const short_v &hitIndexes, const short_m &mask );
+    
     /**
      * For a given bin index, content tells how many hits there are in the preceding bins. This maps
      * directly to the hit index in the given row.
@@ -293,6 +296,19 @@ inline const float *AliHLTTPCCASliceData::HitDataZ( const AliHLTTPCCARow &row ) 
   return row.fHitDataZ;
 }
 
+inline const short *AliHLTTPCCASliceData::HitDataIsUsed( const AliHLTTPCCARow &row ) const
+{
+  return row.fHitDataIsUsed;
+}
+
+inline void AliHLTTPCCASliceData::SetHitAsUsed( const AliHLTTPCCARow &row, const short_v &hitIndexes, const short_m &mask )
+{ 
+  short *array = row.fHitDataIsUsed;
+  foreach_bit(int i, mask){
+    array[hitIndexes[i]] = 1;
+  }
+}
+
 inline sfloat_v AliHLTTPCCASliceData::HitDataY( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const
 {
   assert( hitIndex * sizeof( sfloat_v::EntryType ) % VectorAlignment == 0 );
@@ -304,6 +320,11 @@ inline sfloat_v AliHLTTPCCASliceData::HitDataZ( const AliHLTTPCCARow &row, const
   assert( hitIndex * sizeof( sfloat_v::EntryType ) % VectorAlignment == 0 );
   return sfloat_v( &row.fHitDataZ[hitIndex] );
 }
+
+// inline short_v AliHLTTPCCASliceData::HitDataIsUsed( const AliHLTTPCCARow &row, const uint_i &hitIndex ) const
+// { // don't really need this
+//   return short_v( &row.fHitDataIsUsed[hitIndex] );
+// }
 
 inline ushort_v AliHLTTPCCASliceData::FirstHitInBin( const AliHLTTPCCARow &row, ushort_v binIndexes ) const
 {

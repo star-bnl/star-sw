@@ -140,6 +140,8 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
     2 * numberOfHitsWithPadding * sizeof( short ) +
     // HitData
     2 * numberOfHitsWithPadding * sizeof( StoredFloat ) +
+    // IsUsedData
+    numberOfHitsWithPadding * sizeof( short ) +
     // FirstHitInBin
     NextMultipleOf<VectorAlignment>( ( 23 * numberOfRows + 4 * fNumberOfHits ) * sizeof( short ) ) +
     // HitWeights, ClusterDataIndex
@@ -156,6 +158,7 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
   short *linkDownData;
   StoredFloat *hitDataY;
   StoredFloat *hitDataZ;
+  short *hitDataIsUsed;
   int *clusterDataIndex;
   unsigned short *hitWeights;
   unsigned short *firstHitInBin;
@@ -165,6 +168,7 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
   AssignMemoryAligned<VectorAlignment>( linkDownData, mem, numberOfHitsWithPadding );
   AssignMemoryAligned<VectorAlignment>( hitDataY,     mem, numberOfHitsWithPadding );
   AssignMemoryAligned<VectorAlignment>( hitDataZ,     mem, numberOfHitsWithPadding );
+  AssignMemoryAligned<VectorAlignment>( hitDataIsUsed,     mem, numberOfHitsWithPadding );
   /*
    * The size of the array is row.Grid.N + row.Grid.Ny + 3. The row.Grid.Ny + 3 is an optimization
    * to remove the need for bounds checking. The last values are the same as the entry at [N - 1].
@@ -183,6 +187,7 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
     for ( int i = 0; i < numberOfHitsWithPadding; i += float_v::Size ) {
       zero.store( &hitDataY[i] );
       zero.store( &hitDataZ[i] );
+      zero.store( &hitDataIsUsed[i] );
     }
   }
 #endif
@@ -199,6 +204,7 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
     row.fLinkDownData = linkDownData;
     row.fHitDataY = hitDataY;
     row.fHitDataZ = hitDataZ;
+    row.fHitDataIsUsed = hitDataIsUsed;
     row.fClusterDataIndex = clusterDataIndex;
     row.fHitWeights = hitWeights;
     row.fFirstHitInBin = firstHitInBin;
@@ -206,7 +212,7 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
 
   AliHLTResizableArray<float> binSortedHitsY( fNumberOfHits );
   AliHLTResizableArray<float> binSortedHitsZ( fNumberOfHits );
-
+  
   int gridContentOffset = 0;
 
   int binCreationMemorySize = 103 * 2 + fNumberOfHits;
@@ -225,6 +231,7 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
     row.fLinkDownData = &linkDownData[hitNumberOffset];
     row.fHitDataY = &hitDataY[hitNumberOffset];
     row.fHitDataZ = &hitDataZ[hitNumberOffset];
+    row.fHitDataIsUsed = &hitDataIsUsed[hitNumberOffset];
     row.fClusterDataIndex = &clusterDataIndex[hitNumberOffset];
     row.fHitWeights = &hitWeights[hitNumberOffset];
     row.fHitNumberOffset = hitNumberOffset;
@@ -277,6 +284,7 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
       row.fClusterDataIndex[ind] = globalHitIndex;
       row.fHitDataY[ind] = data.Y( globalHitIndex );
       row.fHitDataZ[ind] = data.Z( globalHitIndex );
+      row.fHitDataIsUsed[ind] = 0;
     }
 
     for ( int i = 0; i < numberOfBins; ++i ) {
@@ -302,6 +310,7 @@ void AliHLTTPCCASliceData::InitFromClusterData( const AliHLTTPCCAClusterData &da
     row.fLinkDownData = &linkDownData[hitNumberOffset];
     row.fHitDataY = &hitDataY[hitNumberOffset];
     row.fHitDataZ = &hitDataZ[hitNumberOffset];
+    row.fHitDataIsUsed = &hitDataIsUsed[hitNumberOffset];
     row.fClusterDataIndex = &clusterDataIndex[hitNumberOffset];
     row.fHitWeights = &hitWeights[hitNumberOffset];
     row.fFirstHitInBin = &firstHitInBin[gridContentOffset];
