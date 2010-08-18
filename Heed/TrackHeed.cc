@@ -627,8 +627,8 @@ TrackHeed::SetupMaterial(Medium* medium) {
     else if (materialName == "Ge") atPacs[i] = &Germanium_crystal_PACS;
     else {
       std::cerr << "TrackHeed::SetupMaterial:\n";
-      std::cerr << "    Photoabsorption cross-section data for " << materialName 
-                << " are not implemented.\n";
+      std::cerr << "    Photoabsorption cross-section data for " 
+                << materialName << " are not implemented.\n";
       return false;
     }
     notations.increment(materialName);
@@ -687,6 +687,7 @@ TrackHeed::SetupDelta() {
     delete deltaCs; deltaCs = 0;
   }
   deltaCs = new HeedDeltaElectronCS(matter, elScat, lowSigma, pairProd);
+  return true;
 
 }
 
