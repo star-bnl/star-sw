@@ -129,127 +129,127 @@ int AliHLTTPCCATracker::Reconstructor::execute()
 #endif //USE_TBB
   
 
-for (int iter = 0; iter < 2; iter++) {
-  timer.Start();
-  tsc.Start();
-  AliHLTTPCCATracker::NeighboursFinder neighboursFinder( d, d->fData );
-  neighboursFinder.execute();
-  tsc.Stop();
-  timer.Stop();
-  d->fTimers[0] += timer.RealTime();
-  d->fTimers[4] += tsc.Cycles();
+  for (int iter = 0; iter < 2; iter++) {
+    timer.Start();
+    tsc.Start();
+    AliHLTTPCCATracker::NeighboursFinder neighboursFinder( d, d->fData, iter );
+    neighboursFinder.execute();
+    tsc.Stop();
+    timer.Stop();
+    d->fTimers[0] += timer.RealTime();
+    d->fTimers[4] += tsc.Cycles();
 
-  d->fData.ClearHitWeights();
-//   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() 2" << std::endl; // dbg 0
+    d->fData.ClearHitWeights();
+      //   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() 2" << std::endl; // dbg 0
 #ifndef DISABLE_ALL_DRAW
 #ifdef DRAW // iklm
-  {
+    {
 #ifdef IKLMCOUT0
-  std::cout << " Reconstructor 1 " << std::endl;
+      std::cout << " Reconstructor 1 " << std::endl;
 #endif // IKLMCOUT0
-  AliHLTTPCCADisplay &disp = AliHLTTPCCADisplay::Instance();
-  disp.SetSliceView();
-  disp.SetCurrentSlice( d );
-  disp.DrawSlice( d, 1/*DrawRows*/ );
-  disp.DrawSliceHits(1,0.1);
-  disp.DrawSliceLinks(-1,-1,0.03);
-  AliHLTTPCCADisplay::Instance().SaveCanvasToFile("NFinder.pdf");
-  disp.Ask();
-}
+      AliHLTTPCCADisplay &disp = AliHLTTPCCADisplay::Instance();
+      disp.SetSliceView();
+      disp.SetCurrentSlice( d );
+      disp.DrawSlice( d, 1/*DrawRows*/ );
+      disp.DrawSliceHits(1,0.1);
+      disp.DrawSliceLinks(-1,-1,0.03);
+      AliHLTTPCCADisplay::Instance().SaveCanvasToFile("NFinder.pdf");
+      disp.Ask();
+    }
 #endif
 #endif
   
 #ifdef DUMP_LINKS
-  std::fstream linksFStream;
-  dumpLinksFile( linksFStream, d->fParam.ISlice() );
-  if ( linksFStream.is_open() ) {
-    for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
-      linksFStream.width( 3 );
-      linksFStream << rowIndex << ": ";
-      const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
-      for ( int hitIndex = 0; hitIndex < row.NHits(); ++hitIndex ) {
-        const int hitIndexB = hitIndex % short_v::Size;
-        const int hitIndexA = hitIndex - hitIndexB;
-        linksFStream << std::setw( 8 ) << d->fData.HitLinkUpData( row, hitIndexA )[hitIndexB]
-          << std::setw( 4 ) << d->fData.HitLinkDownData( row, hitIndexA )[hitIndexB];
+    std::fstream linksFStream;
+    dumpLinksFile( linksFStream, d->fParam.ISlice() );
+    if ( linksFStream.is_open() ) {
+      for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
+        linksFStream.width( 3 );
+        linksFStream << rowIndex << ": ";
+        const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
+        for ( int hitIndex = 0; hitIndex < row.NHits(); ++hitIndex ) {
+          const int hitIndexB = hitIndex % short_v::Size;
+          const int hitIndexA = hitIndex - hitIndexB;
+          linksFStream << std::setw( 8 ) << d->fData.HitLinkUpData( row, hitIndexA )[hitIndexB]
+                       << std::setw( 4 ) << d->fData.HitLinkDownData( row, hitIndexA )[hitIndexB];
+        }
+        linksFStream << std::endl;
       }
-      linksFStream << std::endl;
+      linksFStream.flush();
     }
-    linksFStream.flush();
-  }
 #endif
 
 #ifndef NDEBUG
-//X   for ( int i = 0; i < d->fData.NumberOfHits(); ++i ) {
-//X     assert( d->fData.fHitWeights[i] == 0 );
-//X   }
+      //X   for ( int i = 0; i < d->fData.NumberOfHits(); ++i ) {
+      //X     assert( d->fData.fHitWeights[i] == 0 );
+      //X   }
 #endif
-  //TStopwatch timer0;
+      //TStopwatch timer0;
 
 #ifdef DRAW
-  {
-    AliHLTTPCCADisplay &disp = AliHLTTPCCADisplay::Instance();
-    disp.SetSliceView();
-    disp.SetCurrentSlice( d );
-    disp.DrawSlice( d, 0 );
-    disp.DrawSliceHits();
-    disp.DrawSliceLinks();
-    disp.Ask();
-  }
+    {
+      AliHLTTPCCADisplay &disp = AliHLTTPCCADisplay::Instance();
+      disp.SetSliceView();
+      disp.SetCurrentSlice( d );
+      disp.DrawSlice( d, 0 );
+      disp.DrawSliceHits();
+      disp.DrawSliceLinks();
+      disp.Ask();
+    }
 #endif
 
-  AliHLTTPCCANeighboursCleaner::run( d->Param().NRows(), d->fData, d->Param() );
+    AliHLTTPCCANeighboursCleaner::run( d->Param().NRows(), d->fData, d->Param() );
 #ifndef DISABLE_ALL_DRAW
 #ifdef DRAW // iklm
-  {
+    {
 #ifdef IKLMCOUT0
-    std::cout << " Reconstructor 1 " << std::endl;
+      std::cout << " Reconstructor 1 " << std::endl;
 #endif // IKLMCOUT0
-    AliHLTTPCCADisplay &disp = AliHLTTPCCADisplay::Instance();
-    disp.SetSliceView();
-    disp.SetCurrentSlice( d );
-    disp.DrawSlice( d, 0/*DrawRows*/ );
-    disp.DrawSliceHits(1,0.1);
-    disp.DrawSliceLinks(-1,-1,0.03);
-    AliHLTTPCCADisplay::Instance().SaveCanvasToFile("NCleaner.pdf");
-    disp.Ask();
-  }
+      AliHLTTPCCADisplay &disp = AliHLTTPCCADisplay::Instance();
+      disp.SetSliceView();
+      disp.SetCurrentSlice( d );
+      disp.DrawSlice( d, 0/*DrawRows*/ );
+      disp.DrawSliceHits(1,0.1);
+      disp.DrawSliceLinks(-1,-1,0.03);
+      AliHLTTPCCADisplay::Instance().SaveCanvasToFile("NCleaner.pdf");
+      disp.Ask();
+    }
 #endif // end iklm
 #endif
-//   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() 3" << std::endl; // dbg 0
+      //   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() 3" << std::endl; // dbg 0
 #ifdef DUMP_LINKS
-  if ( linksFStream.is_open() ) {
-    linksFStream << "\nCleaner:\n";
-    for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
-      linksFStream.width( 3 );
-      linksFStream << rowIndex << ": ";
-      const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
-      for ( int hitIndex = 0; hitIndex < row.NHits(); ++hitIndex ) {
-        const int hitIndexB = hitIndex % short_v::Size;
-        const int hitIndexA = hitIndex - hitIndexB;
-        linksFStream << std::setw( 8 ) << d->fData.HitLinkUpData( row, hitIndexA )[hitIndexB]
-          << std::setw( 4 ) << d->fData.HitLinkDownData( row, hitIndexA )[hitIndexB];
+    if ( linksFStream.is_open() ) {
+      linksFStream << "\nCleaner:\n";
+      for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
+        linksFStream.width( 3 );
+        linksFStream << rowIndex << ": ";
+        const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
+        for ( int hitIndex = 0; hitIndex < row.NHits(); ++hitIndex ) {
+          const int hitIndexB = hitIndex % short_v::Size;
+          const int hitIndexA = hitIndex - hitIndexB;
+          linksFStream << std::setw( 8 ) << d->fData.HitLinkUpData( row, hitIndexA )[hitIndexB]
+                       << std::setw( 4 ) << d->fData.HitLinkDownData( row, hitIndexA )[hitIndexB];
+        }
+        linksFStream << std::endl;
       }
-      linksFStream << std::endl;
+      linksFStream.flush();
     }
-    linksFStream.flush();
-  }
 #endif
 
-//X   sseTimer.Stop();
-//X   static double sseReal = 0.;
-//X   static double sseCpu  = 0.;
-//X   sseReal += sseTimer.RealTime();
-//X   sseCpu  += sseTimer.CpuTime();
-//X   std::cout << "SSE code needed real = " << sseReal << ", CPU = " << sseCpu << std::endl;
+      //X   sseTimer.Stop();
+      //X   static double sseReal = 0.;
+      //X   static double sseCpu  = 0.;
+      //X   sseReal += sseTimer.RealTime();
+      //X   sseCpu  += sseTimer.CpuTime();
+      //X   std::cout << "SSE code needed real = " << sseReal << ", CPU = " << sseCpu << std::endl;
 
-  timer.Start();
-//   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() 4" << std::endl; // dbg 0
-  AliHLTTPCCAStartHitsFinder::run( *d, d->fData );
-//   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() 5" << std::endl; // dbg 0
-  timer.Stop();
-  d->fTimers[3] += timer.RealTime();
-} // iterations
+    timer.Start();
+      //   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() 4" << std::endl; // dbg 0
+    AliHLTTPCCAStartHitsFinder::run( *d, d->fData );
+      //   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() 5" << std::endl; // dbg 0
+    timer.Stop();
+    d->fTimers[3] += timer.RealTime();
+  } // iterations
 #ifdef DUMP_LINKS
   if ( linksFStream.is_open() ) {
     linksFStream << "\nStartHits:\n";
