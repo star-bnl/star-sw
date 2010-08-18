@@ -25,16 +25,17 @@ class TrackHeed : public Track {
     // Destructor
     ~TrackHeed();
 
-    int Test(
-            const double x0, const double y0, const double z0, const double t0,
-            const double dx0, const double dy0, const double dz0);
-
     void NewTrack(
             const double x0, const double y0, const double z0, const double t0,
             const double dx0, const double dy0, const double dz0);
     bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
                     int& n, double& e, double& extra);
     bool GetElectron(const int i, double& x, double& y, double& z);                    
+   
+    void TransportDeltaElectron(const double x0, const double y0, const double z0,
+                                const double dx0, const double dy0, const double dz0,
+                                const double t0, const double e0, int& nel);
+                                
     void SetDatabasePath(const std::string dbpath);
     
     void EnableElectricField();
@@ -45,6 +46,7 @@ class TrackHeed : public Track {
   private:
   
     bool ready;
+    bool hasActiveTrack;
   
     double      mediumDensity;
     std::string mediumName;

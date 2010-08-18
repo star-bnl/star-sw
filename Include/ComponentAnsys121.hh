@@ -7,7 +7,6 @@
 
 namespace Garfield {
 
-  // --------------------------------------------------------------------------
 class ComponentAnsys121: public ComponentFieldMap { 
 
     RQ_OBJECT("ComponentAnsys121")
@@ -16,7 +15,8 @@ class ComponentAnsys121: public ComponentFieldMap {
     // Constructors
     ComponentAnsys121();
     ComponentAnsys121(std::string elist,  std::string nlist,
-                      std::string mplist, std::string prnsol, std::string unit);
+                      std::string mplist, std::string prnsol, 
+                      std::string unit);
     // Destructor 
     ~ComponentAnsys121() {}
     

@@ -178,8 +178,9 @@ ComponentFieldMap::FindElement5(const double x, const double y, double const z,
                                 double jac[4][4], double& det) {
                 
   // Backup
-  double jacbak[4][4], detbak, t1bak, t2bak, t3bak, t4bak;
-  int imapbak;
+  double jacbak[4][4], detbak = 1.;
+  double  t1bak = 0., t2bak = 0., t3bak = 0., t4bak = 0.;
+  int imapbak = -1;
 
   // Initial values.
   t1 = t2 = t3 = t4 = 0;
@@ -310,8 +311,9 @@ ComponentFieldMap::FindElement13(const double x, const double y, const double z,
                                  double jac[4][4], double& det) {
 
   // Backup
-  double jacbak[4][4], detbak, t1bak, t2bak, t3bak, t4bak;
-  int imapbak;
+  double jacbak[4][4], detbak = 1.;
+  double  t1bak = 0., t2bak = 0., t3bak = 0., t4bak = 0.;
+  int imapbak = -1;
 
   // Initial values.
   t1 = t2 = t3 = t4 = 0;
@@ -367,7 +369,8 @@ ComponentFieldMap::FindElement13(const double x, const double y, const double z,
       for (int j = 0; j < 4; ++j) {
         for (int k = 0; k < 4; ++k) jacbak[j][k] = jac[j][k];
       }
-      detbak = det; t1bak = t1; t2bak = t2; t3bak = t3; t4bak = t4; imapbak = imap;
+      detbak = det; t1bak = t1; t2bak = t2; t3bak = t3; t4bak = t4; 
+      imapbak = imap;
       if (debug) {
         printf("ComponentFieldMap::FindElement13:\n");
         printf("    Global = (%g,%g,%g), Local = (%g,%g,%g,%g), Element = %d\n",
@@ -2201,6 +2204,14 @@ ComponentFieldMap::PrintRange() {
   if (!(zPeriodic || zMirrorPeriodic || zAxiallyPeriodic || zRotationSymmetry)) {printf(" none");}
   printf("\n");
   
+}
+
+bool
+ComponentFieldMap::IsInBoundingBox(const double x, 
+                                   const double y, const double z) {
+
+  return false;
+
 }
 
 void 

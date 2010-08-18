@@ -195,7 +195,8 @@ void
 MediumMagboltz86::SetAtomicNumber(const double z) {
 
   std::cerr << className << "::SetAtomicNumber:\n";
-  std::cerr << "    This function does not work for " << className << ".\n";
+  std::cerr << "    Effective Z cannot be changed"
+            << " directly to " << z << ".\n"; 
   std::cerr << "    Use SetComposition to define the gas mixture.\n";
 
 }
@@ -204,7 +205,8 @@ void
 MediumMagboltz86::SetAtomicWeight(const double a) {
 
   std::cerr << className << "::SetAtomicWeight:\n";
-  std::cerr << "    This function does not work for " << className << ".\n";
+  std::cerr << "    Effective A cannot be changed"
+            << " directly to " << a << ".\n";
   std::cerr << "    Use SetComposition to define the gas mixture.\n";
 
 }
@@ -213,8 +215,8 @@ void
 MediumMagboltz86::SetNumberDensity(const double n) {
 
   std::cerr << className << "::SetNumberDensity:\n";
-  std::cerr << "    This function does not work for " << className << ".\n";
-  std::cerr << "    Use SetTemperature and SetPressure instead.\n";
+  std::cerr << "    Density cannot directly be changed to " << n << ".\n";
+  std::cerr << "    Use SetTemperature and SetPressure.\n";
   
 }
 
@@ -222,9 +224,10 @@ void
 MediumMagboltz86::SetMassDensity(const double rho) {
 
   std::cerr << className << "::SetMassDensity:\n";
-  std::cerr << "    This function does not work for " << className << ".\n";
+  std::cerr << "    Density cannot directly be changed to "
+            << rho << ".\n";
   std::cerr << "    Use SetTemperature, SetPressure"
-            << " and SetComposition instead.\n";
+            << " and SetComposition.\n";
             
 }
 
@@ -417,6 +420,11 @@ MediumMagboltz86::GetElectronCollisionRate(const double e, const int band) {
     isChanged = false;
   }
 
+  if (debug && band != 0) {
+    std::cerr << className << "::GetElectronCollisionRate:\n";
+    std::cerr << "    This medium does not have a band structure.\n";
+  }
+
   if (e > eFinal) return cfTot[nEnergySteps - 1];  
   return cfTot[int(e / eStep)];
 
@@ -448,6 +456,11 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
       return false;
     }
     isChanged = false;
+  }
+
+  if (debug && band != 0) {
+    std::cerr << className << "::GetElectronCollision:\n";
+    std::cerr << "    This medium does not have a band structure.\n";
   }
 
   // Energy interval
@@ -660,7 +673,7 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
   }
  
   // Secondary electron energy 
-  esec = 0.;
+  esec = s = 0.;
   type = csTypeGamma[level];
   // Collision type
   if (type < 0) {
@@ -901,6 +914,10 @@ MediumMagboltz86::IonVelocity(const double ex, const double ey, const double ez,
   double mu = ionMobilityValues[iLow] + (e - ionMobilityGrid[iLow]) * 
               (ionMobilityValues[iUp] - ionMobilityValues[iLow]) / 
               (ionMobilityGrid[iUp] - ionMobilityGrid[iLow]);
+  const double b = sqrt(bx * bx + by * by + bz * bz);
+  if (b > Small) {
+    // TODO: Laue-Langevin?
+  }
   vx = mu * ex; vy = mu * ey; vz = mu * ez;
   return true;
 

@@ -10,7 +10,7 @@
 namespace Garfield {
 
 TrackHeed::TrackHeed() : 
-  ready(false), 
+  ready(false), hasActiveTrack(false),
   mediumDensity(-1.), mediumName(""),
   databasePath(""), isPathSet(false),
   particle(), node(0),
@@ -50,6 +50,7 @@ TrackHeed::NewTrack(
             const double dx0, const double dy0, const double dz0) {
 
   node = 0;
+  hasActiveTrack = false;
   
   // Make sure the sensor has been set.
   if (sensor == 0) {
@@ -133,6 +134,7 @@ TrackHeed::NewTrack(
   // Transport the particle.
   particle.fly();
   node = particle_bank.get_first_node();
+  hasActiveTrack = true;
 
 }
 
@@ -147,10 +149,24 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
   e = 0.;
   
   // Make sure NewTrack has successfully been called. 
-  if (!ready) return false;
-
+  if (!ready) {
+    std::cerr << "TrackHeed::GetCluster:\n";
+    std::cerr << "    Track has not been initialized.\n";
+    std::cerr << "    Call NewTrack first.\n";
+    return false;
+  }
+  
+  if (!hasActiveTrack) {
+    std::cerr << "TrackHeed::GetCluster:\n";
+    std::cerr << "    There are no more clusters.\n";
+    return false;
+  }
+  
   // Make sure the particle bank is not empty.
-  if (node == 0) return false;
+  if (node == 0) {
+    hasActiveTrack = false;
+    return false;
+  }
   
   // Convert the particle to a (virtual) photon.
   HeedPhoton* virtualPhoton = dynamic_cast<HeedPhoton*>(node->el.get());
@@ -248,7 +264,13 @@ bool
 TrackHeed::GetElectron(const int i, double& x, double& y, double& z) {
 
   // Make sure NewTrack has successfully been called.
-  if (!ready) return false;
+  if (!ready) {
+    std::cerr << "TrackHeed::GetElectron:\n";
+    std::cerr << "    Track has not been initialized.\n";
+    std::cerr << "    Call NewTrack first.\n";
+    return false;
+  }
+
   // Make sure an electron with this number exists.
   const int n = chamber.conduction_electron_bank.get_qel();
   if (i < 0 || i >= n) {
@@ -265,6 +287,91 @@ TrackHeed::GetElectron(const int i, double& x, double& y, double& z) {
 
 }
 
+void
+TrackHeed::TransportDeltaElectron(
+      const double x0, const double y0, const double z0, 
+      const double t0, const double e0, 
+      const double dx0, const double dy0, const double dz0,
+      int& nel) {
+
+  // Make sure the kinetic energy is positive.
+  if (e0 <= 0.) {
+    std::cerr << "TrackHeed::TransportDeltaElectron:\n";
+    std::cerr << "    Kinetic energy must be positive.\n";
+    return;
+  }
+  
+  // Make sure the sensor has been set.
+  if (sensor == 0) {
+    std::cerr << "TrackHeed::TransportDeltaElectron:\n";
+    std::cerr << "    Sensor is not defined.\n";
+    ready = false;
+    return;
+  }
+  
+  HeedInterface::sensor = sensor;
+  
+  // Make sure the initial position is inside an ionisable medium.
+  Medium* medium;
+  if (!sensor->GetMedium(x0, y0, z0, medium)) {
+    std::cerr << "TrackHeed::TransportDeltaElectron:\n";
+    std::cerr << "    No medium at initial position.\n";
+    return;
+  } else if (!medium->IsIonisable()) {
+    std::cerr << "TrackHeed:TransportDeltaElectron:\n";
+    std::cerr << "    Medium at initial position is not ionisable.\n";
+    ready = false;
+    return;
+  }
+
+  // Check if the medium has changed since the last call.
+  if (medium->GetName()        != mediumName || 
+      medium->GetMassDensity() != mediumDensity) {
+    isChanged = true;
+    ready = false;
+    hasActiveTrack = false;
+    if (!Setup(medium)) return;
+    ready = true;
+    mediumName    = medium->GetName();
+    mediumDensity = medium->GetMassDensity();
+  }
+    
+  chamber.conduction_electron_bank.allocate_block(1000);
+  
+  // Check the direction vector.
+  double dx = dx0, dy = dy0, dz = dz0;
+  const double d = sqrt(dx * dx + dy * dy + dz * dz);
+  if (d <= 0.) {
+    // Null vector. Sample the direction isotropically.
+    const double phi = TwoPi * RndmUniform();
+    const double ctheta = 1. - 2. * RndmUniform();
+    const double stheta = sqrt(1. - ctheta * ctheta);
+    dx = cos(phi) * stheta;
+    dy = sin(phi) * stheta;
+    dz = ctheta;
+  } else {
+    // Normalise the direction vector.
+    dx /= d; dy /= d; dz /= d;
+  }
+  vec velocity(dx, dy, dz);
+  
+  // Calculate the speed for the given kinetic energy.
+  const double gamma = 1. + e0 / ElectronMass;
+  const double beta = sqrt(1. - 1. / (gamma * gamma)); 
+  double speed = mparticle::speed_of_light * beta;
+  velocity = velocity * speed;
+  
+  // Initial position (convert from cm to mm).
+  point p0(x0 * 10., y0 * 10., z0 * 10.);
+ 
+  // Transport the electron.
+  HeedDeltaElectron delta(&chamber, p0, velocity, t0, 0);
+  delta.fly();
+  
+  nel = chamber.conduction_electron_bank.get_qel();
+  
+}
+      
 void
 TrackHeed::SetDatabasePath(const std::string dbpath) {
 

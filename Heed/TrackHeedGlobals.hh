@@ -44,7 +44,8 @@ field_map(const point& pt, vec& efield, vec& bfield, vfloat& mrange) {
     std::cerr << "    Sensor pointer is null.\n";
     return;
   }
-  
+
+  // TODO: check correct dimensions of E and B fields  
   if (Garfield::HeedInterface::useEfield) {
     double ex = 0., ey = 0., ez = 0.;
     int status = 0;

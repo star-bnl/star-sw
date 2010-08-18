@@ -32,9 +32,12 @@ all:	$(TARGETS)
 	@ar rc $(LIBDIR)/libGarfield.a $(OBJECTS)
 	touch $(OBJDIR)/last_updated_on
 
-heed:	$(OBJDIR)/last_updated_on
+.PHONY:	heed
+
+heed:	
 	@echo Compiling Heed...
-	@cd Heed; make
+	@cd Heed; make; cd $(GARFIELD_HOME)
+	touch $(OBJDIR)/last_updated_on
 
 clean:
 	@echo Removing object files...
@@ -228,5 +231,5 @@ $(OBJDIR)/GarfieldDict.o: \
 	@$(CXX) $(CFLAGS) $< -o $@
 
 $(SRCDIR)/GarfieldDict.C: $(HEADERS) $(INCDIR)/LinkDef.h
-	@echo $@
-	rootcint -f $@ -c $(CFLAGS) -p $^
+	@echo Creating dictionary...
+	@rootcint -f $@ -c $(CFLAGS) -p $^

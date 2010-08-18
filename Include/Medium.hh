@@ -220,11 +220,13 @@ class Medium {
 
     // Transport flags
     bool driftable, microscopic, ionisable;
-    // Update flag
-    bool isChanged;
 
+    // W value and Fano factor
     double wValue, fanoFactor;
 
+    // Update flag
+    bool isChanged;
+    
     // Switch on/off debugging messages
     bool debug;
 

@@ -133,6 +133,12 @@ ComponentConstant::WeightingField(
     const std::string label) {
 
   if (!hasWeightingField || label != wfield) return;
+
+  Medium* m;
+  if (!GetMedium(x, y, z, m)) {
+    wx = wy = wz = 0.;
+    return;
+  }
   wx = fwx; wy = fwy; wz = fwz;
 
 }
@@ -143,6 +149,9 @@ ComponentConstant::WeightingPotential(
     const std::string label) {
 
   if (!hasWeightingPotential || label != wfield) return 0.;
+
+  Medium* m;
+  if (!GetMedium(x, y, z, m)) return 0.;
 
   return w0 - (x - wx0) * fwx
             - (y - wy0) * fwy

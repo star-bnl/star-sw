@@ -89,6 +89,7 @@ bool
 TrackSimple::GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
                         int& n, double& e, double& extra) {
 
+  extra = 0.;
   if (!isReady) return false;
 
   if (useEqualSpacing) {

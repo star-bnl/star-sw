@@ -52,9 +52,13 @@ void
 ComponentBase::WeightingField(const double x, const double y, const double z,
                               double& wx, double& wy, double& wz,
                               const std::string label) {
-                              
-  std::cerr << className << "::WeightingField:\n";
-  std::cerr << "    This function is not implemented.\n";
+  if (debug) {
+    std::cerr << className << "::WeightingField:\n";
+    std::cerr << "    This function is not implemented.\n";
+    std::cerr << "    Weighting field at (" 
+              << x << ", " << y << ", " << z << ") for electrode " 
+              << label << " cannot be calculated.\n";
+  }
   wx = wy = wz = 0.;
 
 }
@@ -64,8 +68,13 @@ ComponentBase::WeightingPotential(
                     const double x, const double y, const double z,
                     const std::string label) {
 
-  std::cerr << className << "::WeightingPotential:\n";
-  std::cerr << "    This function is not implemented.\n";
+  if (debug) {
+    std::cerr << className << "::WeightingPotential:\n";
+    std::cerr << "    This function is not implemented.\n";
+    std::cerr << "    Weighting potential at (" 
+              << x << ", " << y << ", " << z << ") for electrode " 
+              << label << " cannot be calculated.\n";
+  }
   return 0.;
 
 }
@@ -74,6 +83,12 @@ void
 ComponentBase::MagneticField(const double x, const double y, const double z,
     	                     double& bx, double& by, double& bz, int& status) {
 
+  if (debug) {
+    std::cout << className << "::MagneticField:\n";
+    std::cout << "    Magnetic field at (" 
+              << x << ", " << y << ", " << z <<") is ("
+              << bx << ", " << by << ", bz )\n";
+  }
   bx = bx0; by = by0; bz = bz0;
   status = 0;
 

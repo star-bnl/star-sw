@@ -18,9 +18,9 @@ HEEDOBJS = \
 	$(OBJDIR)/Heed/eiparticle.o \
 	$(OBJDIR)/Heed/eparticle.o \
 	$(OBJDIR)/Heed/particle_def.o \
+	$(OBJDIR)/Heed/GasLib.o \
 	$(OBJDIR)/Heed/AtomDef.o \
 	$(OBJDIR)/Heed/GasDef.o \
-	$(OBJDIR)/Heed/GasLib.o \
 	$(OBJDIR)/Heed/MatterDef.o \
 	$(OBJDIR)/Heed/MoleculeDef.o \
 	$(OBJDIR)/Heed/inverse.o \
@@ -81,9 +81,8 @@ CFLAGS = \
 LDFLAGS = `root-config --glibs` -lGeom -lgfortran -lm
 
 all:	$(HEEDOBJS) 
-	@echo Creating library...
-	@ar rc $(LIBDIR)/libHeed.a $(HEEDOBJS)
-	@touch $(OBJDIR)/last_updated_on
+	@echo Creating library libHeed...
+	@ar -rcs $(LIBDIR)/libHeed.a $(HEEDOBJS)
 
 clean:
 	@echo Removing Heed object files...

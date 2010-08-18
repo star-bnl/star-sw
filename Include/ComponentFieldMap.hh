@@ -24,9 +24,7 @@ class ComponentFieldMap : public ComponentBase {
     void PrintRange();
     // Returns the current sensor size
     virtual 
-    bool IsInBoundingBox(const double x, const double y, const double z) {
-      return false;
-    }
+    bool IsInBoundingBox(const double x, const double y, const double z);    
     bool GetVoltageRange(double& vmin, double& vmax) {
       vmin = mapvmin; vmax = mapvmax; return true;
     }

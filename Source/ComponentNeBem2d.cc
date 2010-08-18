@@ -794,7 +794,7 @@ ComponentNeBem2d::CheckConvergence() {
       v0 += v[k]; ne0 += ne[k];
     }
     v0 /= nCollocationPoints; ne0 /= nCollocationPoints;
-    double ne1;
+    double ne1 = 0.;
     if (elements[i].bcType == 2) {
       // Dielectric-dielectric interface
       ne1 = ne0 + elements[i].solution / 
