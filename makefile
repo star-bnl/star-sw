@@ -20,9 +20,13 @@ FC = gfortran
 # Compilation flags
 CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long \
         `root-config --cflags` \
-        -g -fpic -fno-common -O3 -c \
+        -fpic -fno-common -Os -c \
 	-I$(INCDIR) -I$(ROOTSYS)/include
-FFLAGS = -g -fpic -O3 -c
+
+FFLAGS = -fpic -Os -c
+
+#CFLAGS += -g
+#FFLAGS += -g
 
 # Linking flags
 LDFLAGS = `root-config --glibs` -lGeom -lgfortran -lm

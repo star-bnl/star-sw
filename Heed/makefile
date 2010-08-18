@@ -72,10 +72,12 @@ HEEDOBJS += \
 # Compilation flags
 CFLAGS = \
         `root-config --cflags` \
-        -g -fpic -O3 -c \
+        -fpic -Os -c \
 	-I$(INCDIR) -I$(HEEDDIR) \
 	-DGARFIELD_HEED_INTERFACE -DUSE_SRANLUX \
 	-DEXCLUDE_FUNCTIONS_WITH_HISTDEF -DNOT_INCLUDE_GASLIB_IN_PACSLIB
+# Debugging flags
+#CFLAGS += -g
 
 # Linking flags
 LDFLAGS = `root-config --glibs` -lGeom -lgfortran -lm
