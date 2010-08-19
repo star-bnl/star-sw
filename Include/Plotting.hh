@@ -2,7 +2,7 @@
 #ifndef G_PLOTTING_H
 #define G_PLOTTING_H
 
-class PlottingEngineRoot;
+#include "PlottingEngineRoot.hh"
 
 namespace Garfield {
 

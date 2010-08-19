@@ -447,7 +447,9 @@ $(OBJDIR)/Heed/PhotoAbsCS.o: \
 
 $(OBJDIR)/Heed/PhotoAbsCSLib.o: \
 	$(HEEDDIR)/heed++/code/PhotoAbsCSLib.c \
-	$(HEEDDIR)/heed++/code/PhotoAbsCSLib.h
+	$(HEEDDIR)/heed++/code/PhotoAbsCSLib.h \
+	$(HEEDDIR)/wcpplib/matter/GasLib.c \
+	$(HEEDDIR)/wcpplib/matter/GasLib.h
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
 
