@@ -32,14 +32,19 @@
 #endif
 
 #if (defined(__MMX__) || defined(__SSE__))
+
 #if defined(__GNUC__)
+
 #if __GNUC__ > 3
 #define USE_MM_MALLOC
-#endif
-#else // not gcc, assume it can use _mm_malloc since it supports MMX/SSE
+#endif // if __GNUC__ > 3
+
+#else // if defined(__GNUC__)  // not gcc, assume it can use _mm_malloc since it supports MMX/SSE
+
 #define USE_MM_MALLOC
-#endif
-#endif
+
+#endif // if defined(__GNUC__)
+#endif // if (defined(__MMX__) || defined(__SSE__))
 
 #ifdef USE_MM_MALLOC
 #include <mm_malloc.h>
@@ -189,7 +194,7 @@ namespace AliHLTInternal
   template<typename T> class Allocator<T, 0>
   {
     public:
-
+#ifdef USE_MM_MALLOC
       static inline T *Alloc( int s ) { T *p = reinterpret_cast<T *>( _mm_malloc( s * sizeof( T ), 128 ) ); return new( p ) T[s]; }
       static inline void Free( T *const p, int size ) {
         for ( int i = 0; i < size; ++i ) {
@@ -197,6 +202,15 @@ namespace AliHLTInternal
         }
         _mm_free( p );
       }
+#else
+      static inline T *Alloc( int s ) { T *p; posix_memalign( &p, 128, s * sizeof( T ) ); return new( p ) T[s]; }
+      static inline void Free( T *const p, int size ) {
+        for ( int i = 0; i < size; ++i ) {
+          p[i].~T();
+        }
+        std::free( p );
+      }
+#endif
 
 //     public:
 //       static inline T *Alloc( int s ) { return new T[s]; }
