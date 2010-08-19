@@ -21,10 +21,10 @@ TARGETS += heed
 FC = gfortran
 
 # Compilation flags
-CFLAGS = `root-config --cflags` \
+CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long \
+	 `root-config --cflags` \
         -fpic -fno-common -Os -c \
 	-I$(INCDIR) -I$(HEEDDIR) 
-#CFLAGS += -WALL -Wextra -pedantic -Wabi -Wno-long-long
 
 FFLAGS = -fpic -Os -c
 
@@ -38,7 +38,7 @@ LDFLAGS = `root-config --glibs` `root-config --ldflags`-lGeom \
 
 all:	$(TARGETS)
 	@echo Creating library libGarfield...
-	@ar rc $(LIBDIR)/libGarfield.a $(OBJECTS)
+	@ar rcs $(LIBDIR)/libGarfield.a $(OBJECTS) $(wildcard $(OBJDIR)/Heed/*.o)
 	@ranlib $(LIBDIR)/libGarfield.a
 	@touch $(OBJDIR)/last_updated_on
 	@echo Finished.

@@ -79,13 +79,10 @@ CFLAGS = \
 LDFLAGS = `root-config --glibs` -lGeom -lgfortran -lm
 
 all:	$(HEEDOBJS) 
-	@echo Creating library libHeed...
-	@ar -rcs $(LIBDIR)/libHeed.a $(HEEDOBJS)
-	@ranlib $(LIBDIR)/libHeed.a
 
 clean:
 	@echo Removing Heed object files...
-	@$(RM) $(HEEDOBJS) $(LIBDIR)/libHeed.a
+	@$(RM) $(HEEDOBJS) 
 
 $(OBJDIR)/Heed/FunNameStack.o: \
 	$(HEEDDIR)/wcpplib/util/FunNameStack.c \
