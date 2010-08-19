@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.9 2010/08/18 21:41:00 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.10 2010/08/19 17:08:45 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -176,7 +176,7 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
       ++upperNeighbourIndex;
       //assert( (upperNeighbourIndex < kMaxN) || ("" == " too small array ") );
       if ( upperNeighbourIndex >= kMaxN ){
-        std::cout << "W AliHLTTPCCANeighboursFinder: Warning: Too many neighbours, some of them won't be considered \ Too small array. " << std::endl;
+        // std::cout << "W AliHLTTPCCANeighboursFinder: Warning: Too many neighbours, some of them won't be considered \ Too small array. " << std::endl;
         break;
       }
     }
