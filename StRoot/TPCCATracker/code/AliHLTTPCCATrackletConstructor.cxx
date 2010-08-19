@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.4 2010/08/09 17:51:15 mzyzak Exp $
+// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.5 2010/08/19 17:08:45 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -876,13 +876,13 @@ void InitTracklets::operator()( int rowIndex )
     r.fParam.SetCov( 2, err2Z, maskF );
 
     const sfloat_m transported = r.fParam.TransportToX( x, sinPhi, fTracker.Param().cBz(), -1.f, maskF );
-    assert( transported == maskF );
+    // assert( transported == maskF );
 ///mvz start 20.01.2010
 //    fTracker.GetErrors2( rowIndex, r.fParam.GetZ(), sinPhi, r.fParam.GetDzDs(), &err2Y, &err2Z );
     fTracker.GetErrors2( rowIndex, r.fParam, &err2Y, &err2Z );
 ///mvz end 20.01.2010
     const short_m hitAdded( r.fParam.Filter( maskF, y, z, err2Y, err2Z, .99f ) );
-    assert( hitAdded == mask );
+    // assert( hitAdded == mask );
     UNUSED_PARAM2( transported, hitAdded );
     fTrackletVector.SetRowHits( rowIndex, trackIndex, hitIndex, mask );
 
