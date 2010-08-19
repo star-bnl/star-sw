@@ -25,8 +25,9 @@ CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long \
 
 FFLAGS = -fpic -Os -c
 
-#CFLAGS += -g
-#FFLAGS += -g
+# Debug flags
+# CFLAGS += -g
+# FFLAGS += -g
 
 # Linking flags
 LDFLAGS = `root-config --glibs` -lGeom -lgfortran -lm
@@ -35,7 +36,8 @@ all:	$(TARGETS)
 	@echo Creating library libGarfield...
 	@ar rc $(LIBDIR)/libGarfield.a $(OBJECTS)
 	@ranlib $(LIBDIR)/libGarfield.a
-	touch $(OBJDIR)/last_updated_on
+	@touch $(OBJDIR)/last_updated_on
+	@echo Finished.
 
 .PHONY:	heed
 

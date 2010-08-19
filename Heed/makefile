@@ -18,7 +18,6 @@ HEEDOBJS = \
 	$(OBJDIR)/Heed/eiparticle.o \
 	$(OBJDIR)/Heed/eparticle.o \
 	$(OBJDIR)/Heed/particle_def.o \
-	$(OBJDIR)/Heed/GasLib.o \
 	$(OBJDIR)/Heed/AtomDef.o \
 	$(OBJDIR)/Heed/GasDef.o \
 	$(OBJDIR)/Heed/MatterDef.o \
@@ -75,7 +74,7 @@ CFLAGS = \
         -fpic -Os -c \
 	-I$(INCDIR) -I$(HEEDDIR) \
 	-DGARFIELD_HEED_INTERFACE -DUSE_SRANLUX \
-	-DEXCLUDE_FUNCTIONS_WITH_HISTDEF -DNOT_INCLUDE_GASLIB_IN_PACSLIB
+	-DEXCLUDE_FUNCTIONS_WITH_HISTDEF 
 # Debugging flags
 #CFLAGS += -g
 
@@ -85,6 +84,7 @@ LDFLAGS = `root-config --glibs` -lGeom -lgfortran -lm
 all:	$(HEEDOBJS) 
 	@echo Creating library libHeed...
 	@ar -rcs $(LIBDIR)/libHeed.a $(HEEDOBJS)
+	@ranlib $(LIBDIR)/libHeed.a
 
 clean:
 	@echo Removing Heed object files...

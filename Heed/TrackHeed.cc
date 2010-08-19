@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "wcpplib/matter/GasLib.h"
+
 #include "heed++/code/HeedPhoton.h"
 
 #include "TrackHeed.hh"
@@ -22,7 +24,7 @@ TrackHeed::TrackHeed() :
   Garfield::HeedInterface::sensor = 0;
   Garfield::HeedInterface::useEfield = false;
   Garfield::HeedInterface::useBfield = false;
-  
+    
 }
 
 TrackHeed::~TrackHeed() {
