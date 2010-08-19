@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.10 2010/08/19 17:08:45 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.11 2010/08/19 20:39:58 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -116,7 +116,7 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
   static const float kAreaSizeY = AliHLTTPCCAParameters::NeighbourAreaSizeTgY[fIter];
   static const float kAreaSizeZ = AliHLTTPCCAParameters::NeighbourAreaSizeTgZ[fIter];
   static const int kMaxN = 20; // TODO minimaze
-  const float chi2Cut = 3.f * 3.f * 4.f * ( UpDx * UpDx + DnDx * DnDx );
+  const float chi2Cut = AliHLTTPCCAParameters::NeighbourChi2Cut[fIter]*AliHLTTPCCAParameters::NeighbourChi2Cut[fIter] * 4.f * ( UpDx * UpDx + DnDx * DnDx );
 
   // some step sizes on the current row. the ushorts in hits multiplied with the step size give
   // the offset on the grid
