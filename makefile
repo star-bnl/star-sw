@@ -2,9 +2,12 @@ OBJDIR = $(GARFIELD_HOME)/Object
 SRCDIR = $(GARFIELD_HOME)/Source
 INCDIR = $(GARFIELD_HOME)/Include
 LIBDIR = $(GARFIELD_HOME)/Library
+HEEDDIR = $(GARFIELD_HOME)/Heed
 
 HEADERS = $(wildcard $(INCDIR)/*.hh)
+
 SOURCES = $(wildcard $(SRCDIR)/*.cc)
+
 OBJECTS = $(subst $(SRCDIR),$(OBJDIR),$(SOURCES:.cc=.o))
 OBJECTS += \
 	$(OBJDIR)/magboltz.o \
@@ -18,10 +21,10 @@ TARGETS += heed
 FC = gfortran
 
 # Compilation flags
-CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long \
-        `root-config --cflags` \
+CFLAGS = `root-config --cflags` \
         -fpic -fno-common -Os -c \
-	-I$(INCDIR) -I$(ROOTSYS)/include
+	-I$(INCDIR) -I$(HEEDDIR) 
+#CFLAGS += -WALL -Wextra -pedantic -Wabi -Wno-long-long
 
 FFLAGS = -fpic -Os -c
 
@@ -30,7 +33,8 @@ FFLAGS = -fpic -Os -c
 # FFLAGS += -g
 
 # Linking flags
-LDFLAGS = `root-config --glibs` -lGeom -lgfortran -lm
+LDFLAGS = `root-config --glibs` `root-config --ldflags`-lGeom \
+	-lgfortran -lm
 
 all:	$(TARGETS)
 	@echo Creating library libGarfield...
@@ -43,7 +47,7 @@ all:	$(TARGETS)
 
 heed:	
 	@echo Compiling Heed...
-	@cd Heed; make; cd $(GARFIELD_HOME)
+	@cd $(HEEDDIR); make; cd $(GARFIELD_HOME)
 	touch $(OBJDIR)/last_updated_on
 
 clean:
@@ -51,7 +55,7 @@ clean:
 	@$(RM) $(OBJDIR)/*.o
 	@echo Removing libraries...
 	@$(RM) $(LIBDIR)/*.a
-	@cd Heed; make clean
+	@cd $(HEEDDIR); make clean
 
 $(OBJDIR)/AvalancheMicroscopic.o: \
 	$(SRCDIR)/AvalancheMicroscopic.cc \
@@ -86,6 +90,11 @@ $(OBJDIR)/TrackSimple.o: \
 	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@        
+$(OBJDIR)/TrackHeed.o: \
+	$(SRCDIR)/TrackHeed.cc $(INCDIR)/TrackHeed.hh \
+	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
 
 $(OBJDIR)/ComponentBase.o: \
 	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh \
@@ -235,8 +244,8 @@ $(OBJDIR)/Sensor.o: \
 $(OBJDIR)/GarfieldDict.o: \
 	$(SRCDIR)/GarfieldDict.C
 	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@
+	@$(CXX) $(CFLAGS) -DDICT_SKIP_HEED $< -o $@
 
 $(SRCDIR)/GarfieldDict.C: $(HEADERS) $(INCDIR)/LinkDef.h
 	@echo Creating dictionary...
-	@rootcint -f $@ -c $(CFLAGS) -p $^
+	rootcint -f $@ -c $(CFLAGS) -p $^ 

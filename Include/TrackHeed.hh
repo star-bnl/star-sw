@@ -3,15 +3,23 @@
 #ifndef G_TRACK_HEED_H
 #define G_TRACK_HEED_H
 
-#include "wcpplib/geometry/box.h"
+#ifdef __MAKECINT__
+#define DICT_SKIP_HEED
+#endif
 
+#ifndef DICT_SKIP_HEED
+#include "wcpplib/geometry/box.h"
+#include "wcpplib/matter/MatterDef.h"
+
+#include "heed++/code/ElElasticScat.h"
 #include "heed++/code/EnTransfCS.h"
 #include "heed++/code/HeedCondElectron.h"
-#include "heed++/code/HeedDeltaElectron.h"
 #include "heed++/code/HeedDeltaElectronCS.h"
 #include "heed++/code/HeedMatterDef.h"
 #include "heed++/code/HeedParticle.h"
 #include "heed++/code/PhotoAbsCSLib.h"
+
+#endif
 
 #include "Track.hh"
 
@@ -44,7 +52,7 @@ class TrackHeed : public Track {
     void DisableMagneticField();
   
   private:
-  
+
     bool ready;
     bool hasActiveTrack;
   
@@ -53,11 +61,12 @@ class TrackHeed : public Track {
     
     std::string databasePath;
     bool isPathSet;
-  
+
+#ifndef DICT_SKIP_HEED 
     // Primary particle
     HeedParticle particle;
     AbsListNode<ActivePtr<gparticle> >* node;
-    
+
     // Material properties
     HeedMatterDef* matter;
     GasDef* gas;
@@ -94,7 +103,8 @@ class TrackHeed : public Track {
     };
     
     Chamber chamber;
-    
+#endif
+
     bool Setup(Medium* medium);
     bool SetupGas(Medium* medium);
     bool SetupMaterial(Medium* medium);
@@ -103,5 +113,9 @@ class TrackHeed : public Track {
 };
 
 }
+
+#ifdef DICT_SKIP_HEED
+#undef DICT_SKIP_HEED
+#endif
 
 #endif

@@ -65,9 +65,6 @@ HEEDOBJS += \
 	$(OBJDIR)/Heed/PhotoAbsCS.o \
 	$(OBJDIR)/Heed/PhotoAbsCSLib.o
 
-HEEDOBJS += \
-	$(OBJDIR)/Heed/TrackHeed.o
-
 # Compilation flags
 CFLAGS = \
         `root-config --cflags` \
@@ -89,12 +86,6 @@ all:	$(HEEDOBJS)
 clean:
 	@echo Removing Heed object files...
 	@$(RM) $(HEEDOBJS) $(LIBDIR)/libHeed.a
-
-$(OBJDIR)/Heed/TrackHeed.o: \
-	$(HEEDDIR)/TrackHeed.cc \
-	$(HEEDDIR)/TrackHeed.hh
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@
 
 $(OBJDIR)/Heed/FunNameStack.o: \
 	$(HEEDDIR)/wcpplib/util/FunNameStack.c \

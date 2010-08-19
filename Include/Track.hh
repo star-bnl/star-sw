@@ -49,6 +49,7 @@ class Track {
   protected:
 
     double q;
+    int spin;
     double mass;
     double energy;
     double beta2;

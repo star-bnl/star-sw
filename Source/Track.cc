@@ -6,7 +6,8 @@
 namespace Garfield {
 
 Track::Track() :
-  q(-1.), mass(MuonMass), energy(0.), isElectron(false),
+  q(-1.), spin(1),
+  mass(MuonMass), energy(0.), isElectron(false),
   sensor(0),
   isChanged(true), debug(false) {
 
@@ -18,26 +19,37 @@ void
 Track::SetParticle(std::string part) {
 
   isElectron = false;
-  if (part == "electron" || part == "e-") {
-    q = -1; mass = ElectronMass; isElectron = true;
-  } else if (part == "positron" || part == "e+") {
-    q =  1; mass = ElectronMass;
-  } else if (part == "muon" || part == "mu" || part == "mu-") {
-    q = -1; mass = MuonMass;
+  if (part == "electron" || part == "Electron" || 
+      part == "e-") {
+    q = -1; mass = ElectronMass; spin = 1; isElectron = true; 
+  } else if (part == "positron" || part == "Positron" ||
+             part == "e+") {
+    q =  1; mass = ElectronMass; spin = 1;
+  } else if (part == "muon" || part == "Muon" ||  
+             part == "mu" || part == "mu-") {
+    q = -1; mass = MuonMass; spin = 1;
   } else if (part == "mu+") {
-    q =  1; mass = MuonMass;
-  } else if (part == "pion" || part == "pi" || part == "pi-") {
-    q = -1; mass = 139.57018e6;
+    q =  1; mass = MuonMass; spin = 1;
+  } else if (part == "pion" || part == "Pion" ||
+             part == "pi" || part == "pi-") {
+    q = -1; mass = 139.57018e6; spin = 0;
   } else if (part == "pi+") {
-    q =  1; mass = 139.57018e6;
-  } else if (part == "kaon" || part == "K" || part == "K-") {
-    q = -1; mass = 493.677e6;
+    q =  1; mass = 139.57018e6; spin = 0;
+  } else if (part == "kaon" || part == "Kaon" ||
+             part == "K" || part == "K-") {
+    q = -1; mass = 493.677e6; spin = 0;
   } else if (part == "K+") {
-    q =  1; mass = 493.677e6;
-  } else if (part == "proton" || part == "p") {
-    q =  1; mass = ProtonMass;
-  } else if (part == "anti-proton" || part == "p-bar") {
-    q = -1; mass = ProtonMass;
+    q =  1; mass = 493.677e6; spin = 0;
+  } else if (part == "proton" || part == "Proton" || 
+             part == "p") {
+    q =  1; mass = ProtonMass; spin = 1;
+  } else if (part == "anti-proton" || part == "Anti-Proton" ||
+             part == "antiproton" || part == "Antiproton" || 
+             part == "p-bar") {
+    q = -1; mass = ProtonMass; spin = 1;
+  } else if (part == "deuteron" || part == "Deuteron" ||
+             part == "d") {
+    q = 2; mass = 1875.612793e6; spin = 2;
   } else {
     std::cerr << "Track::SetParticle:\n";
     std::cerr << "    Particle " << part << " is not defined.\n";

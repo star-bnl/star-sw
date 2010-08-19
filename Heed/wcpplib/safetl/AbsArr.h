@@ -600,7 +600,7 @@ private:
 };
 #ifndef DONT_USE_ABSPTR
 template<class T>
-  macro_copy_body(DynLinArr<T>);
+  macro_copy_body(DynLinArr<T>)
 #endif
 
 template<class T>
