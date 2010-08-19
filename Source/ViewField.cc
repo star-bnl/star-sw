@@ -7,6 +7,8 @@
 #include <TROOT.h>
 #include <TAxis.h> 
 
+#include "Plotting.hh"
+#include "Sensor.hh"
 #include "ViewField.hh"
 
 namespace Garfield {
@@ -20,6 +22,7 @@ ViewField::ViewField() :
   fPot(0) {
 
   SetDefaultProjection();
+  plottingEngine.SetDefaultStyle();
 
 }
 

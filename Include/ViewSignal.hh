@@ -7,9 +7,9 @@
 #include <TCanvas.h>
 #include <TH1D.h>
 
-#include "Sensor.hh"
-
 namespace Garfield {
+
+class Sensor;
 
 class ViewSignal { 
 

@@ -28,6 +28,7 @@ namespace Numerics {
             int& ifail);
             
   // Modified Bessel functions
+  inline
   double BesselI0S(const double xx) {
     return 1. + 3.5156229 * pow(xx / 3.75,  2) +
                 3.0899424 * pow(xx / 3.75,  4) +
@@ -37,6 +38,7 @@ namespace Numerics {
                 0.0045813 * pow(xx / 3.75, 12);
   }
   
+  inline
   double BesselI1S(const double xx) {
     return xx * (0.5 +
                  0.87890594 * pow(xx / 3.75,  2) +
@@ -47,6 +49,7 @@ namespace Numerics {
                  0.00032411 * pow(xx / 3.75, 12));
   }
   
+  inline
   double BesselK0S(const double xx) {
     return -log(xx / 2.) * BesselI0S(xx) - 
            0.57721566 +
@@ -58,6 +61,7 @@ namespace Numerics {
            0.00000740 * pow(xx / 2., 12);
   }
   
+  inline
   double BesselK0L(const double xx) {
     return (exp(-xx) / sqrt(xx)) * (1.25331414 - 
                                     0.07832358 * (2. / xx) +
@@ -68,6 +72,7 @@ namespace Numerics {
                                     0.00053208 * pow(2. / xx, 6));
   }
   
+  inline
   double BesselK1S(const double xx) {
     return log(xx / 2.) * BesselI1S(xx) + 
            (1. / xx) * (1. +
@@ -79,6 +84,7 @@ namespace Numerics {
                         0.00004686 * pow(xx / 2., 12));
   }
   
+  inline
   double BesselK1L(const double xx) {
     return (exp(-xx) / sqrt(xx)) * (1.25331414 + 
                                     0.23498619 * (2./ xx) -

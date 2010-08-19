@@ -8,8 +8,6 @@
 #include <TPolyLine3D.h>
 #include <TView.h>
 
-#include "Plotting.hh"
-
 namespace Garfield {
 
 class ViewDrift { 
@@ -32,7 +30,8 @@ class ViewDrift {
     void NewIonDriftLine(const int n);
     void NewPhotonTrack(const double x0, const double y0, const double z0,
                         const double x1, const double y1, const double z1);
-    void SetPoint(const int i, const double x, const double y, const double z);
+    void SetPoint(const int i, 
+                  const double x, const double y, const double z);
     void Plot();
 
   private:

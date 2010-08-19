@@ -5,8 +5,9 @@
 
 #include <TAxis.h>
 
-#include "ViewMedium.hh"
 #include "Plotting.hh"
+#include "Medium.hh"
+#include "ViewMedium.hh"
 
 namespace Garfield {
 
@@ -17,6 +18,7 @@ ViewMedium::ViewMedium() :
   eMin(0.), eMax(1000.), bMin(0.), bMax(1.e5) {
   
   functions.clear();
+  plottingEngine.SetDefaultStyle();
 
 }
 

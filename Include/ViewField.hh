@@ -5,10 +5,9 @@
 #include <TCanvas.h>
 #include <TF2.h>
 
-#include "Plotting.hh"
-#include "Sensor.hh"
-
 namespace Garfield {
+
+class Sensor;
 
 class ViewField { 
 

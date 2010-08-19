@@ -16,10 +16,11 @@ class PlottingEngineRoot : public PlottingEngine {
     PlottingEngineRoot();
     // Destructor
     ~PlottingEngineRoot();
+
+    void SetDefaultStyle();
     
   private:
     TStyle* garfieldStyle;
-    void SetDefaultStyle();
     int  GetRootColor(std::string color);
 
 };

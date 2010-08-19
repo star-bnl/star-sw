@@ -10,22 +10,29 @@ namespace Garfield {
 
 PlottingEngineRoot plottingEngine;
 
-PlottingEngineRoot::PlottingEngineRoot() {
+PlottingEngineRoot::PlottingEngineRoot() :
+  garfieldStyle(0) {
 
-  garfieldStyle = new TStyle("Garfield","Garfield Style");
-  SetDefaultStyle();
-   
 }
 
 PlottingEngineRoot::~PlottingEngineRoot() {
 
-  delete garfieldStyle;
-  
+  if (garfieldStyle != 0) {
+    delete garfieldStyle;
+    garfieldStyle = 0;
+  }
+
 }
 
 void 
 PlottingEngineRoot::SetDefaultStyle() {
 
+  if (garfieldStyle != 0) {
+    garfieldStyle->cd();
+    return;
+  }
+  garfieldStyle = new TStyle("Garfield","Garfield Style");
+  SetDefaultStyle();
   garfieldStyle->Reset();  
   garfieldStyle->SetCanvasBorderMode(0);
   garfieldStyle->SetCanvasColor(0);

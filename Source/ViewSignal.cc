@@ -2,8 +2,9 @@
 
 #include <TAxis.h> 
 
-#include "ViewSignal.hh"
 #include "Plotting.hh"
+#include "Sensor.hh"
+#include "ViewSignal.hh"
 
 namespace Garfield {
 
@@ -11,6 +12,8 @@ ViewSignal::ViewSignal() :
   debug(false), sensor(0),
   canvas(0), hasExternalCanvas(false),
   hSignal(0) {
+
+  plottingEngine.SetDefaultStyle();
 
 }
 

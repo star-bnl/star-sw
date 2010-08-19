@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "Plotting.hh"
 #include "ViewDrift.hh"
 
 namespace Garfield {
@@ -12,6 +13,8 @@ ViewDrift::ViewDrift() :
   xMax( 1.), yMax( 1.), zMax( 1.),
   view(0),
   nDriftLines(0) {
+
+  plottingEngine.SetDefaultStyle();
 
 }
 

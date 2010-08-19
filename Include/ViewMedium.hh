@@ -8,9 +8,9 @@
 #include <TCanvas.h>
 #include <TF1.h>
 
-#include "Medium.hh"
-
 namespace Garfield {
+
+class Medium;
 
 class ViewMedium { 
 
