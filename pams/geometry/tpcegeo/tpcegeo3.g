@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.24 2010/01/13 22:36:24 perev Exp $
+!// $Id: tpcegeo3.g,v 1.25 2010/08/20 20:32:15 jwebb Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.25  2010/08/20 20:32:15  jwebb
+!// Increased size of array to prevent an out-of-bounds condition.
+!//
 !// Revision 1.24  2010/01/13 22:36:24  perev
 !// Typo is fixed. TPCG was twice as bigger
 !//
@@ -239,7 +242,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
   Real myCos,myRmin,myRmax,myG1,myG2;
 
 !// RDO & cool
-  Real dRDOCooling(0:6) /16.0, 16.0, 16.0, 16.7, 15.0, 3.5, 14.5/;
+  Real dRDOCooling(0:7) /16.0, 16.0, 16.0, 16.7, 15.0, 3.5, 14.5,0.0/;
   Real RCoolingTube/123456789/;
   character *4 mySha;
   integer iCoo,iCab,jCoo,iRib,iTALS,jTALS;
