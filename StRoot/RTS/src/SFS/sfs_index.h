@@ -116,12 +116,20 @@ char *striptodir(char *str);
 char *SFS_getpayload(char *buff);  // takes a pointer to a FILE and gets the payload...
 
 
+struct SfsDirsize {
+  long long int size;
+  long long int dataSize;
+};
+
 class sfs_index : public fs_index {
  public:
 
   int singleDirMount;
   SFS_ittr *singleDirIttr;
 
+  int getInodeSize(fs_inode *inode, SfsDirsize *sz);
+  int getDirSize(char *dir, SfsDirsize *sz);
+  
 #if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
   int mountSingleDir(char *fn, long long int offset=0);
   int getSingleDirSize(char *fn, long long int offset);
@@ -159,11 +167,11 @@ class sfs_index : public fs_index {
   void addnode(SFS_ittr *ittr);
   int _mountNextDir();
 #if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-  fs_inode *add_inode(fs_inode *parent, char *name, long long int offset, int sz);
-  fs_inode *add_inode_from(fs_inode *neighbor, char *name, long long int offset, int sz);
+  fs_inode *add_inode(fs_inode *parent, char *name, long long int offset, int sz, int overhead);
+  fs_inode *add_inode_from(fs_inode *neighbor, char *name, long long int offset, int sz, int overhead=0);
 #else 
-  fs_inode *add_inode(fs_inode *parent, char *name, int offset, int sz);
-  fs_inode *add_inode_from(fs_inode *neighbor, char *name, int offset, int sz);
+  fs_inode *add_inode(fs_inode *parent, char *name, int offset, int sz, int overhead);
+  fs_inode *add_inode_from(fs_inode *neighbor, char *name, int offset, int sz, int overhead=0);
 #endif
 
   fs_inode *find_last_lesser_child(fs_inode *parent, char *name, int &first, int &eq);

@@ -388,6 +388,31 @@ char *SFS_getpayload(char *buff)
   return (buff + f->head_sz);
 }
 
+int sfs_index::getInodeSize(fs_inode *inode, SfsDirsize *sizes)
+{
+  //printf("name: %s   offset: %lld   overhead: %d sz: %d (sz: %lld)\n",
+  //	 inode->name, inode->offset, inode->overhead, inode->sz, sizes->dataSize);
+  
+  sizes->dataSize += inode->sz;
+  sizes->size += inode->sz + inode->overhead;
+
+  if(inode->fchild) getInodeSize(inode->fchild, sizes);
+  if(inode->next) getInodeSize(inode->next, sizes);
+  return 0;
+}
+
+int sfs_index::getDirSize(char *dir, SfsDirsize *sizes)
+{
+  fs_dir *d = opendir(dir);
+  if(!d) return -1;
+  
+  memset(sizes, 0, sizeof(SfsDirsize));
+  sizes->dataSize += d->inode->sz;
+  sizes->size += d->inode->sz + d->inode->overhead;
+
+  if(d->inode->fchild) return getInodeSize(d->inode->fchild,sizes);
+  return 0;
+}
 
 int sfs_index::writeFsHeader()
 {
@@ -881,7 +906,7 @@ int sfs_index::mountSingleDir()   // mounts from current position of wfile...
     singleDirIttr = NULL;
     singleDirMount = 0;
     
-    root = alloc_inode("",0,0);
+    root = alloc_inode("",0,0,0);
     strcpy(cwd, "/");
     index_created = 1;
     return -1;
@@ -889,7 +914,7 @@ int sfs_index::mountSingleDir()   // mounts from current position of wfile...
 
   if(singleDirIttr->next() < 0) {
 
-    root = alloc_inode("",0,0);
+    root = alloc_inode("",0,0,0);
     strcpy(cwd, "/");
     index_created = 1;
     
@@ -926,7 +951,7 @@ int sfs_index::_mountNextDir()
   if(index_created) free_inode(root);
   index_created = 0;
 
-  root = alloc_inode("",0,0);
+  root = alloc_inode("",0,0,0);
   strcpy(cwd, "/");
   cw_inode = root;
   index_created = 1;
@@ -960,7 +985,7 @@ int sfs_index::_mountNextDir()
 
 #if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
     long long int last_offset = singleDirIttr->fileoffset;
-    long long int last_filepos = singleDirIttr->filepos;
+    //    long long int last_filepos = singleDirIttr->filepos;
 #else
     int last_offset = singleDirIttr->fileoffset;
     int last_filepos = singleDirIttr->filepos;
@@ -1003,7 +1028,7 @@ int sfs_index::_mountNextDir()
 
 int sfs_index::_create()
 {
-  root = alloc_inode("",0,0);
+  root = alloc_inode("",0,0,0);
   strcpy(cwd,"/");
   cw_inode = root;
  
@@ -1073,10 +1098,10 @@ void sfs_index::addnode(SFS_ittr *ittr)
   fs_inode *inode = root;
     
   for(int i=0;i<nn-1;i++) {
-    inode = add_inode(inode, next[i], 0, 0);
+    inode = add_inode(inode, next[i], 0, 0, 0);
   }
     
-  inode = add_inode(inode, next[nn-1], ittr->fileoffset + ittr->entry.head_sz, ittr->entry.sz);
+  inode = add_inode(inode, next[nn-1], ittr->fileoffset + ittr->entry.head_sz, ittr->entry.sz, ittr->entry.head_sz);
 }
 
 
@@ -1099,9 +1124,9 @@ void sfs_index::dump(const char *path, fs_inode *inode) {
 }
 
 #if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-fs_inode *sfs_index::add_inode_from(fs_inode *prev, char *name, long long int offset, int sz)
+fs_inode *sfs_index::add_inode_from(fs_inode *prev, char *name, long long int offset, int sz, int overhead)
 #else
-fs_inode *sfs_index::add_inode_from(fs_inode *prev, char *name, int offset, int sz)
+  fs_inode *sfs_index::add_inode_from(fs_inode *prev, char *name, int offset, int sz, int overhead)
 #endif
 {
   int eq=0;
@@ -1112,9 +1137,9 @@ fs_inode *sfs_index::add_inode_from(fs_inode *prev, char *name, int offset, int 
   if(eq == 0) return link;
 
   // if(newn < prev, have to go from start...
-  if(!link) return add_inode(parent,name,offset,sz);
+  if(!link) return add_inode(parent,name,offset,sz,overhead);
   
-  fs_inode *newn = alloc_inode(name,offset,sz);
+  fs_inode *newn = alloc_inode(name,offset,sz,overhead);
   if(!newn) return NULL;
 
   
@@ -1125,9 +1150,9 @@ fs_inode *sfs_index::add_inode_from(fs_inode *prev, char *name, int offset, int 
 }
 
 #if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-fs_inode *sfs_index::add_inode(fs_inode *parent, char *name, long long int offset, int sz)
+fs_inode *sfs_index::add_inode(fs_inode *parent, char *name, long long int offset, int sz, int overhead)
 #else
-fs_inode *sfs_index::add_inode(fs_inode *parent, char *name, int offset, int sz)
+  fs_inode *sfs_index::add_inode(fs_inode *parent, char *name, int offset, int sz, int overhead)
 #endif
 {
   int eq=0;
@@ -1137,7 +1162,7 @@ fs_inode *sfs_index::add_inode(fs_inode *parent, char *name, int offset, int sz)
 
   if(eq == 0) return link;
  
-  fs_inode *newn = alloc_inode(name,offset,sz);
+  fs_inode *newn = alloc_inode(name,offset,sz,overhead);
 
   if(!newn) return NULL;
   newn->parent = parent;
