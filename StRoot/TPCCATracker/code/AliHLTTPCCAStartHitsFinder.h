@@ -18,7 +18,7 @@ class AliHLTTPCCASliceData;
  * find start hits for tracklets
  */
 struct AliHLTTPCCAStartHitsFinder {
-  static void run( AliHLTTPCCATracker &tracker, AliHLTTPCCASliceData &data );
+  static void run( AliHLTTPCCATracker &tracker, AliHLTTPCCASliceData &data, int iter );
 };
 
 #endif

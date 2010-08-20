@@ -96,6 +96,11 @@ namespace AliHLTTPCCAParameters
 
    // TODO describe
   static const float NeighbourChi2Cut[3] = {0.2,  3., 3.};
+
+   /**
+    * Min length of chain to make tracklet.
+    */
+  static const int NeighboursChainMinLength[3] = {3,  3, 3};
   
   /**
    * Distance between hits to be merged. [cm]
