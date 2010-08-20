@@ -144,6 +144,8 @@ class daqReader {
   int event_size;   // size of the current event measured from beginning of memmap
   u_int bytes ;	    // size of the current event measured from beginning of datap
 
+  int getDetectorSize(char *str);   // actually gets the size of any arbitrary file/directory...
+
   long long int evt_offset_in_file;
 
   char *mem;            // a datap pointer if applicable...

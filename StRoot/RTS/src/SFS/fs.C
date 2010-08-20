@@ -372,7 +372,7 @@ int help()
   printf("\tstrings <fn>\n");
   printf("\tod <fn>\n");
   printf("\tsave <fn> <ofn>\n");
-
+  printf("\tsize <dir>\n");
   printf("\n\n");
   return 1;
 }
@@ -416,6 +416,12 @@ int docmd(int argc, char *argv[])
   }
   else if(strcmp(argv[0], "strings") == 0) {
     fs_cat(argc, argv);
+    return 0;
+  }
+  else if(strcmp(argv[0], "size") == 0) {
+    SfsDirsize x;
+    ((sfs_index *)idx)->getDirSize(argv[1], &x);
+    printf("x->size = %lld   x->dataSize = %lld\n",x.size, x.dataSize);
     return 0;
   }
   else {

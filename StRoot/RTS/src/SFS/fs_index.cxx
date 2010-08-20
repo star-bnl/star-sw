@@ -538,9 +538,9 @@ fs_dirent *fs_index::readdir(fs_dir *dir)
 }
 
 #if  defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-fs_inode *fs_index::alloc_inode(char *name, long long int off, int sz)
+fs_inode *fs_index::alloc_inode(char *name, long long int off, int sz, int overhead)
 #else
-fs_inode *fs_index::alloc_inode(char *name, int off, int sz)
+  fs_inode *fs_index::alloc_inode(char *name, int off, int sz, int overhead)
 #endif
 {
   n_inodes++;
@@ -551,6 +551,7 @@ fs_inode *fs_index::alloc_inode(char *name, int off, int sz)
   n->prev = NULL;
   n->next = NULL;
   n->offset = off;
+  n->overhead = overhead;
   n->sz = sz;
   n->name = (char *)malloc(strlen(name)+1);
   if(!n->name) return NULL;
