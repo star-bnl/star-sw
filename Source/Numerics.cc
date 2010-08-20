@@ -6,7 +6,6 @@ namespace Garfield {
 
 namespace Numerics {
 
-
 void
 Dfact(const int n, std::vector<std::vector<double> >& a, std::vector<int>& ir,
       int& ifail, double& det, int& jfail) {
@@ -202,33 +201,23 @@ Dfinv(const int n, std::vector<std::vector<double> >& a,
   
 }
 
-//
 //   ******************************************************************
 //
 //   REPLACES B BY THE SOLUTION X OF A*X=B, AND REPLACES A BY ITS IN-
 //   VERSE.
 //
 //   n            ORDER OF THE SQUARE MATRIX IN ARRAY A.
-//
 //   A            (DOUBLE PRECISION) TWO-DIMENSIONAL ARRAY CONTAINING
 //                AN n BY n MATRIX.
-//
-//   IDIM         FIRST DIMENSION PARAMETER OF ARRAYS A AND B.
-//
-//   R            (REAL) WORKING VECTOR OF LENGTH NOT LESS THAN n.
 //
 //   IFAIL        OUTPUT PARAMETER.   IFAIL= 0 ... NORMAL EXIT.
 //                                    IFAIL=-1 ... SINGULAR MATRIX.
 //
-//   K            NUMBER OF COLUMNS OF THE MATRIX IN ARRAY B.
-//
-//   B            (DOUBLE PRECISION) TWO-DIMENSIONAL ARRAY CONTAINING
-//                AN n BY K MATRIX.
+//   B            (DOUBLE PRECISION) ONE-DIMENSIONAL ARRAY
 //
 //   CALLS ... DFACT, DFINV.
 //
 //   ******************************************************************
-//
 
 void
 Deqinv(const int n, std::vector<std::vector<double> >& a, 
@@ -505,7 +494,6 @@ Cfinv(const int n, std::vector<std::vector<std::complex<double> > >& a,
 }
 
 
-//
 //    ******************************************************************
 //
 //     REPLACES A BY ITS INVERSE.
@@ -618,6 +606,62 @@ Cinv(const int n,
   }
 
 }
+
+// Numerical integration using 15-point Gauss-Kronrod algorithm
+// Origin: QUADPACK
+double 
+GaussKronrod15(double (*f)(const double), 
+               const double a, const double b) {
+
+  // Abscissae of the 15-point Kronrod rule
+  // xGK[1], xGK[3], ... abscissae of the 7-point Gauss rule
+  // xGK[0], xGK[2], ... abscissae which are optimally added 
+  //                     to the 7-point Gauss rule
+  const double xGK[8] = {9.914553711208126e-01, 9.491079123427585e-01, 
+                         8.648644233597691e-01, 7.415311855993944e-01, 
+                         5.860872354676911e-01, 4.058451513773972e-01,
+                         2.077849550078985e-01, 0.0e+00};
+  // Weights of the 15-point Kronrod rule
+  const double wGK[8] = {2.293532201052922e-02, 6.309209262997855e-02,
+                         1.047900103222502e-01, 1.406532597155259e-01, 
+                         1.690047266392679e-01, 1.903505780647854e-01, 
+                         2.044329400752989e-01, 2.094821410847278e-01};                                            
+  // Weights of the 7-point Gauss rule
+  const double wG[4] = {1.294849661688697e-01, 2.797053914892767e-01, 
+                        3.818300505051189e-01, 4.179591836734694e-01};
+  
+  // Mid-point of the interval
+  const double center = 0.5 * (a + b);
+  // Half-length of the interval
+  const double halfLength = 0.5 * (b - a);
+
+  double fC = f(center);
+  // Result of the 7-point Gauss formula
+  double resG = fC * wG[3];
+  // Result of the 15-point Kronrod formula
+  double resK = fC * wGK[7];
+  
+  for (int j = 0; j < 3; ++j) {
+    const int i = j * 2 + 1;
+    // Abscissa
+    const double x = halfLength * xGK[i];
+    // Function value
+    const double fSum = f(center - x) + f(center + x);
+    resG += wG[j] * fSum;
+    resK += wGK[i] * fSum;
+  }
+  
+  for (int j = 0; j < 4; ++j) {
+    const int i = j * 2;
+    const double x = halfLength * xGK[i];
+    const double fSum = f(center - x) + f(center + x);
+    resK += wGK[i]* fSum;
+  }
+
+  return resK * halfLength;
+  
+}
+
 
 }
 

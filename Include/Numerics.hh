@@ -10,6 +10,7 @@ namespace Garfield {
 
 namespace Numerics {
 
+  // Linear algebra routines from CERNLIB
   void Dfact(const int n, std::vector<std::vector<double> >& a,
              std::vector<int>& ir, int& ifail, double& det, int& jfail);
   void Dfeqn(const int n, std::vector<std::vector<double> >& a,
@@ -27,7 +28,12 @@ namespace Numerics {
   void Cinv(const int n, std::vector<std::vector<std::complex<double> > >& a,
             int& ifail);
             
-  // Modified Bessel functions
+  // Numerical integration using 15-point Gauss-Kronrod algorithm
+  double GaussKronrod15(double (*f)(const double), 
+                        const double a, const double b);            
+  
+  // Modified Bessel functions.
+  // Series expansions from Abramowitz and Stegun.
   inline
   double BesselI0S(const double xx) {
     return 1. + 3.5156229 * pow(xx / 3.75,  2) +

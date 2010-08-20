@@ -38,7 +38,8 @@ LDFLAGS = `root-config --glibs` `root-config --ldflags`-lGeom \
 
 all:	$(TARGETS)
 	@echo Creating library libGarfield...
-	@ar rcs $(LIBDIR)/libGarfield.a $(OBJECTS) $(wildcard $(OBJDIR)/Heed/*.o)
+	@ar rcs $(LIBDIR)/libGarfield.a $(OBJECTS) \
+	$(wildcard $(OBJDIR)/Heed/*.o)
 	@ranlib $(LIBDIR)/libGarfield.a
 	@touch $(OBJDIR)/last_updated_on
 	@echo Finished.
@@ -48,7 +49,7 @@ all:	$(TARGETS)
 heed:	
 	@echo Compiling Heed...
 	@cd $(HEEDDIR); make; cd $(GARFIELD_HOME)
-	touch $(OBJDIR)/last_updated_on
+	@touch $(OBJDIR)/last_updated_on
 
 clean:
 	@echo Removing object files...
@@ -85,6 +86,11 @@ $(OBJDIR)/TrackBichsel.o: \
  	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@       
+$(OBJDIR)/TrackPAI.o: \
+	$(SRCDIR)/TrackPAI.cc $(INCDIR)/TrackPAI.hh \
+	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
 $(OBJDIR)/TrackSimple.o: \
 	$(SRCDIR)/TrackSimple.cc $(INCDIR)/TrackSimple.hh \
 	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc
@@ -248,4 +254,4 @@ $(OBJDIR)/GarfieldDict.o: \
 
 $(SRCDIR)/GarfieldDict.C: $(HEADERS) $(INCDIR)/LinkDef.h
 	@echo Creating dictionary...
-	rootcint -f $@ -c $(CFLAGS) -p $^ 
+	@rootcint -f $@ -c $(CFLAGS) -p $^ 

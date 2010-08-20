@@ -1,11 +1,14 @@
 #include <iostream>
 
+
 #include "wcpplib/matter/GasLib.h"
+#include "wcpplib/matter/MatterDef.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
 
 #include "heed++/code/ElElasticScat.h"
 #include "heed++/code/EnTransfCS.h"
 #include "heed++/code/HeedCluster.h"
+#include "heed++/code/HeedCondElectron.h"
 #include "heed++/code/HeedDeltaElectron.h"
 #include "heed++/code/HeedDeltaElectronCS.h"
 #include "heed++/code/HeedMatterDef.h"
@@ -13,9 +16,10 @@
 #include "heed++/code/HeedPhoton.h"
 #include "heed++/code/PhotoAbsCSLib.h"
 
-#include "TrackHeed.hh"
 #include "FundamentalConstants.hh"
 #include "Random.hh"
+#include "HeedChamber.hh"
+#include "TrackHeed.hh"
 
 namespace Garfield {
 
@@ -76,7 +80,7 @@ field_map(const point& pt, vec& efield, vec& bfield, vfloat& mrange) {
 
 }
 
-void 
+void
 check_point(gparticle* gp) { }
 
 long last_particle_number;
@@ -94,11 +98,12 @@ TrackHeed::TrackHeed() :
   ready(false), hasActiveTrack(false),
   mediumDensity(-1.), mediumName(""),
   databasePath(""), isPathSet(false),
-  particle(), node(0),
+  particle(0), 
   matter(0), gas(0), material(0),
   atPacs(0), molPacs(0),
   energyMesh(0), transferCs(0),
-  elScat(0), lowSigma(0), pairProd(0), deltaCs(0) {
+  elScat(0), lowSigma(0), pairProd(0), deltaCs(0),
+  chamber(0) {
   
   Garfield::HeedInterface::sensor = 0;
   Garfield::HeedInterface::useEfield = false;
@@ -108,7 +113,7 @@ TrackHeed::TrackHeed() :
 
 TrackHeed::~TrackHeed() {
 
-  if (node       != 0) delete node;
+  if (particle   != 0) delete particle;
   if (matter     != 0) delete matter;
   if (gas        != 0) delete gas;
   if (material   != 0) delete material;
@@ -120,6 +125,7 @@ TrackHeed::~TrackHeed() {
   if (lowSigma   != 0) delete lowSigma;
   if (pairProd   != 0) delete pairProd;
   if (deltaCs    != 0) delete deltaCs;
+  if (chamber    != 0) delete chamber;
   
   Garfield::HeedInterface::sensor = 0;
 
@@ -130,7 +136,6 @@ TrackHeed::NewTrack(
             const double x0, const double y0, const double z0, const double t0,
             const double dx0, const double dy0, const double dz0) {
 
-  node = 0;
   hasActiveTrack = false;
   
   // Make sure the sensor has been set.
@@ -176,7 +181,7 @@ TrackHeed::NewTrack(
   
   particle_bank.clear();
   cluster_bank.allocate_block(100);
-  chamber.conduction_electron_bank.allocate_block(1000);
+  chamber->conduction_electron_bank.allocate_block(1000);
   
   // Check the direction vector.
   double dx = dx0, dy = dy0, dz = dz0;
@@ -209,12 +214,15 @@ TrackHeed::NewTrack(
   point p0(x0 * 10., y0 * 10., z0 * 10.);
   // Setup the particle.
   last_particle_number = 0;
-  particle = HeedParticle(&chamber, 
-                          p0, velocity, t0, 
-                          &proton_def);
+  if (particle != 0) {
+    delete particle;
+    particle = 0;
+  }
+  particle = new HeedParticle(chamber, 
+                              p0, velocity, t0, 
+                              &proton_def);
   // Transport the particle.
-  particle.fly();
-  node = particle_bank.get_first_node();
+  particle->fly();
   hasActiveTrack = true;
 
 }
@@ -242,6 +250,9 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
     std::cerr << "    There are no more clusters.\n";
     return false;
   }
+  
+  // Get the first element from the particle bank.
+  AbsListNode<ActivePtr<gparticle> >* node = particle_bank.get_first_node();
   
   // Make sure the particle bank is not empty.
   if (node == 0) {
@@ -278,7 +289,7 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
   int nIds = 1;
   
   // Look for daughter particles.
-  chamber.conduction_electron_bank.allocate_block(1000);
+  chamber->conduction_electron_bank.allocate_block(1000);
   bool deleteNode = false;
   HeedDeltaElectron* delta = 0;
   HeedPhoton* photon = 0;
@@ -330,12 +341,10 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
   }
   
   // Get the total number of conduction electrons produced in this step.
-  n = chamber.conduction_electron_bank.get_qel();
+  n = chamber->conduction_electron_bank.get_qel();
   
-  // Next virtual photon.
-  nextNode = node->get_next_node();
+  // Remove the virtual photon from the particle bank.
   particle_bank.erase(node);
-  node = nextNode;
 
   return true;
 
@@ -353,16 +362,16 @@ TrackHeed::GetElectron(const int i, double& x, double& y, double& z) {
   }
 
   // Make sure an electron with this number exists.
-  const int n = chamber.conduction_electron_bank.get_qel();
+  const int n = chamber->conduction_electron_bank.get_qel();
   if (i < 0 || i >= n) {
     std::cerr << "TrackHeed::GetElectron:\n";
     std::cerr << "    Electron number out of range.\n";
     return false;
   }
   
-  x = chamber.conduction_electron_bank[i].ptloc.v.x * 0.1;
-  y = chamber.conduction_electron_bank[i].ptloc.v.y * 0.1;
-  z = chamber.conduction_electron_bank[i].ptloc.v.z * 0.1;
+  x = chamber->conduction_electron_bank[i].ptloc.v.x * 0.1;
+  y = chamber->conduction_electron_bank[i].ptloc.v.y * 0.1;
+  z = chamber->conduction_electron_bank[i].ptloc.v.z * 0.1;
 
   return true;
 
@@ -417,7 +426,7 @@ TrackHeed::TransportDeltaElectron(
     mediumDensity = medium->GetMassDensity();
   }
     
-  chamber.conduction_electron_bank.allocate_block(1000);
+  chamber->conduction_electron_bank.allocate_block(1000);
   
   // Check the direction vector.
   double dx = dx0, dy = dy0, dz = dz0;
@@ -446,10 +455,10 @@ TrackHeed::TransportDeltaElectron(
   point p0(x0 * 10., y0 * 10., z0 * 10.);
  
   // Transport the electron.
-  HeedDeltaElectron delta(&chamber, p0, velocity, t0, 0);
+  HeedDeltaElectron delta(chamber, p0, velocity, t0, 0);
   delta.fly();
   
-  nel = chamber.conduction_electron_bank.get_qel();
+  nel = chamber->conduction_electron_bank.get_qel();
   
 }
       
@@ -563,7 +572,10 @@ TrackHeed::Setup(Medium* medium) {
   }
   
   fixsyscoor primSys(point(0., 0., 0.), basis("primary"), "primary");
-  chamber = Chamber(primSys, transferCs, deltaCs);
+  if (chamber != 0) {
+    delete chamber; chamber = 0;
+  }
+  chamber = new HeedChamber(primSys, transferCs, deltaCs);
 
   return true;
   
@@ -770,15 +782,6 @@ TrackHeed::SetupDelta() {
   deltaCs = new HeedDeltaElectronCS(matter, elScat, lowSigma, pairProd);
   return true;
 
-}
-
-TrackHeed::Chamber::Chamber(const abssyscoor& fcsys,
-                            const EnTransfCSType etcst,
-                            const HeedDeltaElectronCSType hdecst) :
-    sh_manip_absvol(fcsys),
-    box(1000. * mm, 1000. * mm, 15. * mm, "chamber"),
-    EnTransfCSType(etcst), HeedDeltaElectronCSType(hdecst) {
-    
 }
 
 }

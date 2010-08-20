@@ -3,27 +3,24 @@
 #ifndef G_TRACK_HEED_H
 #define G_TRACK_HEED_H
 
-#ifdef __MAKECINT__
-#define DICT_SKIP_HEED
-#endif
-
-#ifndef DICT_SKIP_HEED
-#include "wcpplib/geometry/box.h"
-#include "wcpplib/matter/MatterDef.h"
-
-#include "heed++/code/ElElasticScat.h"
-#include "heed++/code/EnTransfCS.h"
-#include "heed++/code/HeedCondElectron.h"
-#include "heed++/code/HeedDeltaElectronCS.h"
-#include "heed++/code/HeedMatterDef.h"
-#include "heed++/code/HeedParticle.h"
-#include "heed++/code/PhotoAbsCSLib.h"
-
-#endif
-
 #include "Track.hh"
 
+class HeedParticle;
+class HeedMatterDef;
+class GasDef;
+class MatterDef;
+class AtomPhotoAbsCS;
+class MolecPhotoAbsCS;
+class EnergyMesh;
+class EnTransfCS;
+class ElElasticScat;
+class ElElasticScatLowSigma;
+class PairProd;
+class HeedDeltaElectronCS;
+
 namespace Garfield {
+
+class HeedChamber;
 
 class TrackHeed : public Track {
 
@@ -62,10 +59,8 @@ class TrackHeed : public Track {
     std::string databasePath;
     bool isPathSet;
 
-#ifndef DICT_SKIP_HEED 
     // Primary particle
-    HeedParticle particle;
-    AbsListNode<ActivePtr<gparticle> >* node;
+    HeedParticle* particle;
 
     // Material properties
     HeedMatterDef* matter;
@@ -84,27 +79,8 @@ class TrackHeed : public Track {
     PairProd* pairProd;
     HeedDeltaElectronCS* deltaCs;
 
-    class Chamber : public sh_manip_absvol, public box,
-                    public EnTransfCSType, public HeedDeltaElectronCSType,
-                    public SensitiveVolume {
-                    
-      public:
-        Chamber() {};
-        Chamber(const abssyscoor& fcsys, const EnTransfCSType etcst,
-                const HeedDeltaElectronCSType hdecst);
-        macro_copy_total(Chamber);
-        virtual absvol* Gavol() const {return (box*) this;}
-      
-      protected:
-        virtual void get_components(ActivePtr<absref_transmit>& aref_tran) {
-          sh_manip_absvol::get_components(aref_tran);
-        }
-        
-    };
+    HeedChamber* chamber;
     
-    Chamber chamber;
-#endif
-
     bool Setup(Medium* medium);
     bool SetupGas(Medium* medium);
     bool SetupMaterial(Medium* medium);
@@ -113,9 +89,5 @@ class TrackHeed : public Track {
 };
 
 }
-
-#ifdef DICT_SKIP_HEED
-#undef DICT_SKIP_HEED
-#endif
 
 #endif
