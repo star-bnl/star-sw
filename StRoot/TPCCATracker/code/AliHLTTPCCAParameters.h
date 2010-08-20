@@ -91,16 +91,16 @@ namespace AliHLTTPCCAParameters
    * Coefficient for size of region on neighbour rows for search neghbour hits. Size = coeff*dx. [cm/dx]
    * different for different iteration of finding
    */
-  static const float NeighbourAreaSizeTgY[3] = {.5,  .5, 2.}; // TODO choose appropriate and use > 1 iterations
+  static const float NeighbourAreaSizeTgY[3] = {.5,  2., 2.}; // TODO choose appropriate and use > 1 iterations
   static const float NeighbourAreaSizeTgZ[3] = {2.,  2., 2.};
 
    // TODO describe
-  static const float NeighbourChi2Cut[3] = {0.2,  0.2, 3.};
+  static const float NeighbourChi2Cut[3] = {0.2,  3., 3.};
 
    /**
     * Min length of chain to make tracklet.
     */
-  static const int NeighboursChainMinLength[3] = {18,  3, 3};
+  static const int NeighboursChainMinLength[3] = {3,  3, 3};
   
   /**
    * Distance between hits to be merged. [cm]
