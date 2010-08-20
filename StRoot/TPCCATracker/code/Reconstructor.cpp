@@ -110,16 +110,7 @@ int AliHLTTPCCATracker::Reconstructor::execute()
   TStopwatch timer;
   TimeStampCounter tsc;
 
-    // unset all links
-  const short_v minusOne = -1;
-  for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
-    const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
-    const int numberOfHits = row.NHits();
-    for ( int i = 0; i < numberOfHits; i += short_v::Size ) {
-      d->fData.SetHitLinkUpData  ( row, i, minusOne );
-      d->fData.SetHitLinkDownData( row, i, minusOne );
-    }
-  }
+
   
     // initialize the slice tracker's number of tracklets to 0
 #ifdef USE_TBB
@@ -127,11 +118,27 @@ int AliHLTTPCCATracker::Reconstructor::execute()
 #else //USE_TBB
   d->SetNTracklets(0);
 #endif //USE_TBB
-  
 
   for (int iter = 0; iter < 2; iter++) {
     timer.Start();
     tsc.Start();
+
+    // unset all unused links
+  const short_v minusOne = -1;
+  for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
+    const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
+    const unsigned numberOfHits = row.NHits();
+    for ( unsigned int i = 0; i < numberOfHits; i += short_v::Size ) {
+      const ushort_v hitIndexes = ushort_v( Vc::IndexesFromZero ) + i;
+      const short_m validHitsMask = (hitIndexes < numberOfHits)
+        && ( short_v( d->fData.HitDataIsUsed( row ), static_cast<ushort_v>(hitIndexes) ) == short_v( Vc::Zero ) );
+      d->fData.SetHitLinkUpData  ( row, hitIndexes, minusOne, validHitsMask );
+      d->fData.SetHitLinkDownData( row, hitIndexes, minusOne, validHitsMask );
+//      d->fData.SetHitLinkUpData  ( row, i, minusOne );
+//      d->fData.SetHitLinkDownData( row, i, minusOne );
+    }
+  }
+    
     AliHLTTPCCATracker::NeighboursFinder neighboursFinder( d, d->fData, iter );
     neighboursFinder.execute();
     tsc.Stop();
