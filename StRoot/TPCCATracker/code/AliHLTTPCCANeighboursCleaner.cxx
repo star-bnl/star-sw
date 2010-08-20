@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.3 2010/08/18 14:11:04 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.4 2010/08/20 14:53:41 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -74,20 +74,22 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
       upMask &= downFromUp == -1 && upFromDown == hitIndexes;
       dnMask &= upFromDown == -1 && downFromUp0 == hitIndexes;
 
+      dnMask &= short_m(rowIndex + 2*rowStep < numberOfRows); // will use 4-th hit for check
+      upMask &= short_m(rowIndex - 2*rowStep >= 0);
 ///mvz start 14.07.2010
       if(!dnMask.isEmpty() || !upMask.isEmpty())
       {
         X = data.RowX( rowIndex );
-        Y.gather( data.HitDataY( row ), static_cast<ushort_v>(hitIndexes) );//HitDataY( row, hitIndex );
-        Z.gather( data.HitDataZ( row ), static_cast<ushort_v>(hitIndexes) );// data.HitDataZ( row, hitIndex );
+        Y.gather( data.HitDataY( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );//HitDataY( row, hitIndex );
+        Z.gather( data.HitDataZ( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );// data.HitDataZ( row, hitIndex );
 
         Xup = data.RowX( rowIndex + rowStep );
-        Yup.gather( data.HitDataY( rowUp ), static_cast<ushort_v>(upIndexes) );
-        Zup.gather( data.HitDataZ( rowUp ), static_cast<ushort_v>(upIndexes) );
+        Yup.gather( data.HitDataY( rowUp ), static_cast<ushort_v>(upIndexes), validHitsMask );
+        Zup.gather( data.HitDataZ( rowUp ), static_cast<ushort_v>(upIndexes), validHitsMask );
 
         Xdown = data.RowX( rowIndex - rowStep );
-        Ydown.gather( data.HitDataY( rowDown ), static_cast<ushort_v>(downIndexes) );
-        Zdown.gather( data.HitDataZ( rowDown ), static_cast<ushort_v>(downIndexes) );
+        Ydown.gather( data.HitDataY( rowDown ), static_cast<ushort_v>(downIndexes), validHitsMask );
+        Zdown.gather( data.HitDataZ( rowDown ), static_cast<ushort_v>(downIndexes), validHitsMask );
 
 /*        Yx1 = (Yup - Y)/(Xup - X);
         Yx2 = (Y - Ydown)/(X - Xdown);
@@ -107,8 +109,8 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
 //          dnMask &= downFromUpUp != -1; 
 
           X4 = data.RowX( rowIndex + 2*rowStep );
-          Y4.gather( data.HitDataY( rowUpUp ), static_cast<ushort_v>(upupIndexes) );
-          Z4.gather( data.HitDataZ( rowUpUp ), static_cast<ushort_v>(upupIndexes) );
+          Y4.gather( data.HitDataY( rowUpUp ), static_cast<ushort_v>(upupIndexes), validHitsMask );
+          Z4.gather( data.HitDataZ( rowUpUp ), static_cast<ushort_v>(upupIndexes), validHitsMask );
 
           Yx1 = (Y - Y4)/(X - X4);
           Yx2 = Y - X*Yx1;
@@ -131,12 +133,13 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
           short_v downdown = data.HitLinkDownData( rowDown, downIndexes );
           ushort_v downdownIndexes = CAMath::Max( downdown, short_v( Vc::Zero ) ).staticCast<ushort_v>();
           short_v upFromDownDown(Vc::Zero);
+//          std::cout << " row: " << rowIndex - 2*rowStep << " upMask: " << upMask << " downdownIndexes: " << downdownIndexes << std::endl; // dbg
           upFromDownDown(upMask) = data.HitLinkUpData( rowDownDown, downdownIndexes );
 //          upMask &= upFromDownDown != -1; 
 
           X4 = data.RowX( rowIndex - 2*rowStep );
-          Y4.gather( data.HitDataY( rowDownDown ), static_cast<ushort_v>(downdownIndexes) );
-          Z4.gather( data.HitDataZ( rowDownDown ), static_cast<ushort_v>(downdownIndexes) );
+          Y4.gather( data.HitDataY( rowDownDown ), static_cast<ushort_v>(downdownIndexes), validHitsMask );
+          Z4.gather( data.HitDataZ( rowDownDown ), static_cast<ushort_v>(downdownIndexes), validHitsMask );
 
           Yx1 = (Y - Y4)/(X - X4);
           Yx2 = Y - X*Yx1;
@@ -159,7 +162,7 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
           Zx2 = (Z - Zdown)/(X - Xdown);
           Zxx2 = (Zx1 - Zx2)*2/(X - X4);
         }
-      }
+      } // if(!dnMask.isEmpty() || !upMask.isEmpty()) 
 
 ///mvz end 14.07.2010
 
