@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCAStartHitsFinder.cxx,v 1.3 2010/08/18 14:11:05 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCAStartHitsFinder.cxx,v 1.4 2010/08/20 16:23:23 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -70,7 +70,7 @@
 //X   }
 //X }
 
-void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, SliceData &data )
+void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, SliceData &data, int iter )
 {
   enum {
     kArraySize = 10240,
@@ -101,34 +101,53 @@ void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, SliceData &da
       // hits that have a link up but none down == the start of a Track
       const short_v &middleHitIndexes = data.HitLinkUpData( row, hitIndex );
       validHitsMask &= ( data.HitLinkDownData( row, hitIndex ) < short_v( Vc::Zero ) ) && ( middleHitIndexes >= short_v( Vc::Zero ) );
-      if ( !validHitsMask.isEmpty() ) {
-        short_v upperHitIndexes( data.HitLinkUpData( middleRow ), static_cast<ushort_v>( middleHitIndexes ), validHitsMask );
-        validHitsMask &= upperHitIndexes >= short_v( Vc::Zero ); 
-        if ( !validHitsMask.isEmpty() ) { // check if 3-rd hit in chain exists
+      if ( !validHitsMask.isEmpty() ) { // start hit has been found
+
+          // find the length
+        int iRow = rowIndex + 1*rowStep;
+        short_v nHits = 0;
+        nHits(validHitsMask) = 2;
+        AliHLTTPCCARow curRow;
+        short_v upperHitIndexes = middleHitIndexes;
+        for (;!validHitsMask.isEmpty();) {
+          curRow = data.Row( iRow );
+          upperHitIndexes = short_v( data.HitLinkUpData( curRow ), static_cast<ushort_v>( upperHitIndexes ), validHitsMask );
+          validHitsMask &= upperHitIndexes >= short_v( Vc::Zero );
+          nHits(validHitsMask)++;
+//          std::cout << "nHits "<< nHits << std::endl; // dbg
+          iRow += rowStep;
+        }
+          // check if the length is enough
+        short_m goodChains = nHits >= short_v(AliHLTTPCCAParameters::NeighboursChainMinLength[iter]);
+//        std::cout << "goodChains "<< goodChains << std::endl; // dbg
+        if ( !goodChains.isEmpty() ) { 
           for ( int i = 0; i < short_v::Size; ++i ) {
-            if ( ISUNLIKELY( validHitsMask[i] ) ) {
+            if ( ISUNLIKELY( goodChains[i] ) ) {
               // remember Hit ID
               rowStartHits[startHitsCount++].Set( rowIndex, hitIndex + i );
             }
           }
-            // set all hits in the chain as used        TODO: run over all hits in the chain will be repeated at TrackletConstructor: think about optimization
-          data.SetHitAsUsed( row, hitIndexes, validHitsMask );
-          data.SetHitAsUsed( middleRow, middleHitIndexes, validHitsMask );
-          int iRow = rowIndex + 2*rowStep;
+            // set all hits in the chain as used   TODO: run over all hits in the chain will be repeated at TrackletConstructor and above: think about optimization     
+          data.SetHitAsUsed( row, hitIndexes, goodChains );
+//          std::cout << "SetHitAsUsed "<< goodChains << std::endl; // dbg
+          int iRow = rowIndex + 1*rowStep;
           AliHLTTPCCARow curRow;
-          for (;!validHitsMask.isEmpty();) {
+          short_v upperHitIndexes = middleHitIndexes;
+          for (;!goodChains.isEmpty();) {
             curRow = data.Row( iRow );
-            data.SetHitAsUsed( curRow, upperHitIndexes, validHitsMask );
-            upperHitIndexes = short_v( data.HitLinkUpData( curRow ), static_cast<ushort_v>( upperHitIndexes ), validHitsMask );
-            validHitsMask &= upperHitIndexes >= short_v( Vc::Zero );
+//            std::cout << "SetHitAsUsed "<< goodChains << std::endl; // dbg
+            data.SetHitAsUsed( curRow, upperHitIndexes, goodChains );
+            upperHitIndexes = short_v( data.HitLinkUpData( curRow ), static_cast<ushort_v>( upperHitIndexes ), goodChains );
+            goodChains &= upperHitIndexes >= short_v( Vc::Zero );
             iRow += rowStep;
           }
             // check free space
-          if ( ISUNLIKELY( startHitsCount >= kMaxStartHits ) ) {
+          if ( ISUNLIKELY( startHitsCount >= kMaxStartHits ) ) { // TODO take in account stages kMax for one stage should be smaller
             break;
           }
-        } // if upper
-      } // if middle
+        } // if good Chains
+        
+      } // if start hit
     } // for iHit
 #ifdef USE_TBB
     const int hitsStartOffset = CAMath::AtomicAdd( tracker.NTracklets(), startHitsCount ); // number of start hits from other jobs

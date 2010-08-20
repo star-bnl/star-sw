@@ -245,7 +245,7 @@ int AliHLTTPCCATracker::Reconstructor::execute()
 
     timer.Start();
       //   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() 4" << std::endl; // dbg 0
-    AliHLTTPCCAStartHitsFinder::run( *d, d->fData );
+    AliHLTTPCCAStartHitsFinder::run( *d, d->fData, iter );
       //   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() 5" << std::endl; // dbg 0
     timer.Stop();
     d->fTimers[3] += timer.RealTime();
