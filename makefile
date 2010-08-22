@@ -24,7 +24,7 @@ FC = gfortran
 CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long \
 	 `root-config --cflags` \
         -fpic -fno-common -Os -c \
-	-I$(INCDIR) -I$(HEEDDIR) 
+	-I$(INCDIR) -I$(HEEDDIR) -DINS_CRETURN 
 
 FFLAGS = -fpic -Os -c
 
@@ -98,7 +98,8 @@ $(OBJDIR)/TrackSimple.o: \
 	@$(CXX) $(CFLAGS) $< -o $@        
 $(OBJDIR)/TrackHeed.o: \
 	$(SRCDIR)/TrackHeed.cc $(INCDIR)/TrackHeed.hh \
-	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc
+	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc \
+	$(HEEDDIR)/HeedChamber.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
 

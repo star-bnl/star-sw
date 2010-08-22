@@ -51,7 +51,22 @@ class ComponentAnalyticField : public ComponentBase {
     void SetPeriodicityY(const double s);
     
     std::string GetCellType() {return cellType;}
-    
+    // Cells are classified according to the number and orientation of planes,
+    // the presence of periodicities and the location of the wires
+    // as one of the following types:
+    // A    non-periodic cells with at most 1 x- and 1 y-plane
+    // B1X  x-periodic cells without x-planes and at most 1 y-plane
+    // B1Y  y-periodic cells without y-planes and at most 1 x-plane
+    // B2X  cells with 2 x-planes and at most 1 y-plane
+    // B2Y  cells with 2 y-planes and at most 1 x-plane
+    // C1   doubly periodic cells without planes
+    // C2X  doubly periodic cells with x-planes
+    // C2Y  doubly periodic cells with y-planes
+    // C3   double periodic cells with x- and y-planes
+    // D1   round tubes without axial periodicity
+    // D2   round tubes with axial periodicity
+    // D3   polygonal tubes without axial periodicity     
+
     void AddReadout(const char label);
     
     void EnableChargeCheck()  {chargeCheck = true;}

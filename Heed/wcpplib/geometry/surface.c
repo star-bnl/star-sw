@@ -528,7 +528,7 @@ ulsvolume::ulsvolume(const ulsvolume& f): qsurf(f.qsurf), name(f.name)
 //  return *this;
 //}
 
-macro_copy_body(ulsvolume);
+macro_copy_body(ulsvolume)
 
 void ulsvolume::print(ostream& file, int l) const 
 {
@@ -564,7 +564,7 @@ manip_ulsvolume::manip_ulsvolume(const manip_ulsvolume& f):
   //mcout<<"manip_ulsvolume::manip_ulsvolume(const): qsurf="<<qsurf<<'\n';
   //f.print(mcout,5);
 }
-macro_copy_body(manip_ulsvolume);
+macro_copy_body(manip_ulsvolume)
 /*
 ulsvolume* manip_ulsvolume::copy(void) const 
 {

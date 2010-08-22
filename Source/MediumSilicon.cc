@@ -41,6 +41,7 @@ MediumSilicon::MediumSilicon() :
 
   className = "MediumSilicon";
   name = "Si";
+
   SetTemperature(300.);
   SetDielectricConstant(11.9);
   SetAtomicNumber(14.);
@@ -832,54 +833,62 @@ MediumSilicon::GetOpticalDataRange(double& emin, double& emax, const int i) {
 
   if (i != 0) {
     std::cerr << className << "::GetOpticalDataRange:\n";
-    std::cerr << "    Only one component available.\n";
+    std::cerr << "    Medium has only one component.\n";
   }
 
+  // Make sure the optical data table has been loaded.
   if (!hasOpticalData) {
     if (!LoadOpticalData(opticalDataFile)) {
       std::cerr << className << "::GetOpticalDataRange:\n";
-      std::cerr << "    Error loading the optical data table.\n";
+      std::cerr << "    Optical data table could not be loaded.\n";
       return false;
     }
     hasOpticalData = true;
   }
-    
+   
   emin = opticalDataTable[0].energy;
   emax = opticalDataTable.back().energy;
+  if (debug) {
+    std::cout << className << "::GetOpticalDataRange:\n";
+    std::cout << "    " << emin << " < E [eV] < " << emax << "\n";
+  }
   return true;  
   
 }
 
 bool 
 MediumSilicon::GetDielectricFunction(const double e, 
-                                    double& eps1, double& eps2, const int i) {
+                                     double& eps1, double& eps2, const int i) {
                         
   if (i != 0) {
     std::cerr << className << "::GetDielectricFunction:\n";
-    std::cerr << "    Only one component available.\n";
+    std::cerr << "    Medium has only one component.\n";
+    return false;
   }
                         
+  // Make sure the optical data table has been loaded.
   if (!hasOpticalData) {
     if (!LoadOpticalData(opticalDataFile)) {
       std::cerr << className << "::GetDielectricFunction:\n";
-      std::cerr << "    Error loading the optical data table.\n";
+      std::cerr << "    Optical data table could not be loaded.\n";
       return false;
     }
     hasOpticalData = true;
   }
   
+  // Make sure the requested energy is within the range of the table.
   const double emin = opticalDataTable[0].energy;
   const double emax = opticalDataTable.back().energy;    
   if (e < emin || e > emax) {
     std::cerr << className << "::GetDielectricFunction:\n";
     std::cerr << "    Requested energy (" << e << " eV) " 
-              << " is outside the range of the optical data table "
-              << "(" << emin << " eV < E < " << emax << " eV).\n";
+              << " is outside the range of the optical data table.\n";
+    std::cerr << "    " << emin << " < E [eV] < " << emax << "\n";
     eps1 = eps2 = 0.;
     return false;
   }
 
-  // Locate the requested energy in the table
+  // Locate the requested energy in the table.
   int iLow = 0;
   int iUp = opticalDataTable.size() - 1;
   int iM;
@@ -892,26 +901,27 @@ MediumSilicon::GetDielectricFunction(const double e,
     }
   }
   
-  // Real part of dielectric function: use linear interpolation if crossing zero, 
-  // log-log otherwise
+  // Interpolate the real part of dielectric function.
+  // Use linear interpolation if one of the values is negative,
+  // Otherwise use log-log interpolation.
   const double logX0 = log(opticalDataTable[iLow].energy);
   const double logX1 = log(opticalDataTable[iUp].energy);
   const double logX = log(e);
-  double logY0, logY1;
   if (opticalDataTable[iLow].eps1 <= 0. || opticalDataTable[iUp].eps1 <= 0.) {
     eps1 = opticalDataTable[iLow].eps1 + (e - opticalDataTable[iLow].energy) * 
            (opticalDataTable[iUp].eps1 - opticalDataTable[iLow].eps1) / 
           (opticalDataTable[iUp].energy - opticalDataTable[iLow].energy);  
   } else {
-    logY0 = log(opticalDataTable[iLow].eps1);
-    logY1 = log(opticalDataTable[iUp].eps1);
-    eps1 =  logY0 + (logX - logX0) * (logY1 - logY0) / (logX1 - logX0);
+    const double logY0 = log(opticalDataTable[iLow].eps1);
+    const double logY1 = log(opticalDataTable[iUp].eps1);
+    eps1 = logY0 + (logX - logX0) * (logY1 - logY0) / (logX1 - logX0);
     eps1 = exp(eps1);
   }
       
-  // Imaginary part of dielectric function: use log-log interpolation
-  logY0 = log(opticalDataTable[iLow].eps2);
-  logY1 = log(opticalDataTable[iUp].eps2);  
+  // Interpolate the imaginary part of dielectric function,
+  // using log-log interpolation.
+  const double logY0 = log(opticalDataTable[iLow].eps2);
+  const double logY1 = log(opticalDataTable[iUp].eps2);  
   eps2 = logY0 + (log(e) - logX0) * (logY1 - logY0) / (logX1 - logX0);
   eps2 = exp(eps2);
   return true;
@@ -1445,59 +1455,80 @@ MediumSilicon::HoleImpactIonisationGrant(const double e, double& alpha) const {
 bool 
 MediumSilicon::LoadOpticalData(const std::string filename) {
 
-  // Open the file
+  // Get the path to the data directory.
+  char* pPath = getenv("GARFIELD_HOME");
+  if (pPath == 0) {
+    std::cerr << className << "::LoadOpticalData:\n";
+    std::cerr << "    Environment variable GARFIELD_HOME is not set.\n"; 
+    return false;
+  }
+  std::string filepath = pPath;
+  filepath = filepath + "/Data/" + filename;
+
+  // Open the file.
   std::ifstream infile;
-  infile.open(filename.c_str(), std::ios::in);
-  // Check if the file could be opened
+  infile.open(filepath.c_str(), std::ios::in);
+  // Make sure the file could actually be opened.
   if (!infile) {
     std::cerr << className << "::LoadOpticalData:\n";
     std::cerr << "    Error opening file " << filename << ".\n";
     return false;
   }
   
-  // Clear the optical data table
+  // Clear the optical data table.
   opticalDataTable.clear();
   
   double lastEnergy = -1.;
   double energy, eps1, eps2, loss;  
   opticalData data;
-  // Read the file line by line
+  // Read the file line by line.
   std::string line;
   std::istringstream dataStream;  
   int i = 0;
   while (!infile.eof()) {
-    i++;
+    ++i;
+    // Read the next line.
     std::getline(infile, line);
-    // Strip white space from beginning of line
+    // Strip white space from the beginning of the line.
     line.erase(line.begin(), std::find_if(line.begin(), line.end(), 
                not1(std::ptr_fun<int, int>(isspace))));
-    // Skip comments
-    if (line[0] == '#') continue;
-    // Get the values in the line
+    // Skip comments.
+    if (line[0] == '#' ||
+        (line[0] == '/' && line[1] == '/')) continue;
+    // Extract the values.
     dataStream.str(line);
     dataStream >> energy >> eps1 >> eps2 >> loss;
-    dataStream.clear();
-    // Check if the data has been read correctly
+    if (dataStream.eof()) break;
+    // Check if the data has been read correctly.
     if (infile.fail()) {
       std::cerr << className << "::LoadOpticalData:\n";
       std::cerr << "    Error reading file "
                 << filename << " (line " << i << ").\n";
       return false;
     }
-    // Check if the provided values make sense
+    // Reset the stringstream.
+    dataStream.str("");
+    dataStream.clear();
+    // Make sure the values make sense.
+    // The table has to be in ascending order
+    //  with respect to the photon energy.
     if (energy <= lastEnergy) {
       std::cerr << className << "::LoadOpticalData:\n";
-      std::cerr << "    Optical data table is not in monotonically " 
+      std::cerr << "    Table is not in monotonically " 
                 << "increasing order (line " << i << ").\n";
+      std::cerr << "    " << lastEnergy << "  " << energy << "  " << eps1 << "  " << eps2 << "\n";
       return false;
     }
-    if (eps2 <= 0.) {
+    // The imaginary part of the dielectric function has to be positive.
+    if (eps2 < 0.) {
       std::cerr << className << "::LoadOpticalData:\n";
-      std::cerr << "    Negative value of loss function "
+      std::cerr << "    Negative value of the loss function "
                 << "(line " << i << ").\n";
       return false;
     }
+    // Ignore negative photon energies.
     if (energy <= 0.) continue;
+    // Add the values to the list.
     data.energy = energy;
     data.eps1 = eps1;
     data.eps2 = eps2;
@@ -1505,9 +1536,19 @@ MediumSilicon::LoadOpticalData(const std::string filename) {
     lastEnergy = energy;
   }
   
-  int nEntries = opticalDataTable.size();
-  if (nEntries <= 0) return false;
+  const int nEntries = opticalDataTable.size();
+  if (nEntries <= 0) {
+    std::cerr << className << "::LoadOpticalData:\n";
+    std::cerr << "    Import of data from file " << filepath << "failed.\n";
+    std::cerr << "    No valid data found.\n";
+    return false;
+  }
   
+  if (debug) {
+    std::cout << className << "::LoadOpticalData:\n";
+    std::cout << "    Read " << nEntries << " values from file " 
+              << filepath << "\n";
+  }
   return true;
 
 }

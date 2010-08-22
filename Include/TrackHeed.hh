@@ -41,8 +41,6 @@ class TrackHeed : public Track {
                                 const double dx0, const double dy0, const double dz0,
                                 const double t0, const double e0, int& nel);
                                 
-    void SetDatabasePath(const std::string dbpath);
-    
     void EnableElectricField();
     void DisableElectricField();
     void EnableMagneticField();

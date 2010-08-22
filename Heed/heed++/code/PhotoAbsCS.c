@@ -514,7 +514,7 @@ SimpleTablePhotoAbsCS::SimpleTablePhotoAbsCS
       break;
     check_econd11(cs[q] , < 0.0, mcerr);
     q++;
-    if(q == ener.get_qel());
+    if(q == ener.get_qel())
     {                      // increasing the size of arrays
       long q1 = q * 2;
       ener.put_qel(q1);
@@ -1054,7 +1054,7 @@ void AtomicSecondaryProducts::add_channel
     funnw.ehdr(mcerr);
     mcerr<<"s > 1.0, s="<<s<<'\n';
     Iprintn(mcerr, q_new);
-    for( n=0; n<q_new; n++);
+    for( n=0; n<q_new; n++)
     {
       mcerr<<"n="<<n<<" channel_prob_dens[n]="<<channel_prob_dens[n]<<'\n';
     }
@@ -1195,7 +1195,7 @@ double AtomPhotoAbsCS::get_TICS
     return get_ACS(energy);
   else
     return 0.0;
-};
+}
 
 double AtomPhotoAbsCS::get_integral_TICS
 (double energy1, double energy2,
@@ -1212,7 +1212,7 @@ double AtomPhotoAbsCS::get_integral_TICS
   }
   else
     return 0.0;
-};
+}
 
 
 double AtomPhotoAbsCS::get_TICS
@@ -1233,7 +1233,7 @@ double AtomPhotoAbsCS::get_TICS
   }
     else
       return 0.0;
-};
+}
 
 
 
@@ -1259,7 +1259,7 @@ double AtomPhotoAbsCS::get_integral_TICS
   }
   else
     return 0.0;
-};
+}
 
 
 void AtomPhotoAbsCS::remove_shell(int nshell)

@@ -336,7 +336,7 @@ int box::range_ext(trajestep& fts, int s_ext) const
   //mcout<<"box::range_ext: calling ulsv.range_ext\n";
   return ulsv.range_ext(fts, s_ext);
 }
-macro_copy_body(box);
+macro_copy_body(box)
 //absvol* box::copy(void) const 
 //{ return new box(*this); }
 void box::income(gparticle* gp){;}
@@ -356,7 +356,7 @@ absvol*  manip_box::Gavol(void) const {return (box*) this; }
 //{
 
 
-macro_copy_body(manip_box);
+macro_copy_body(manip_box)
 //absvol* manip_box::copy(void) const 
 //{
 //  return new manip_box(*this); 
@@ -403,7 +403,7 @@ void sh_manip_box::get_components
   sh_manip_absvol::get_components(aref_tran);
 }
 
-macro_copy_body(sh_manip_box);
+macro_copy_body(sh_manip_box)
 //absvol* sh_manip_box::copy(void) const 
 //{
 //  return new sh_manip_box(*this); 

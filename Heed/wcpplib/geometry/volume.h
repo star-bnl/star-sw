@@ -32,7 +32,7 @@ class gparticle;
 class manip_absvol;
 class volume;
 #define pqamvol 10
-//define manip_obt(obt_name, cl_name) \
+//define manip_obt(obt_name, cl_name) 
 
 class manip_absvol;
 class absvol;

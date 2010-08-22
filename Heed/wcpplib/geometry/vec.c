@@ -30,7 +30,7 @@ The file is provided "as is" without express or implied warranty.
 */
 int vecerror=0;
 
-macro_copy_body(absref_transmit);
+macro_copy_body(absref_transmit)
 //absref_transmit* absref_transmit::copy(void) const 
 //{return new absref_transmit(*this);}
 

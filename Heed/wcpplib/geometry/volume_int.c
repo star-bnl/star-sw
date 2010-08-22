@@ -97,7 +97,7 @@ absvol_with_internals::get_ptr(long fid)
   }
 }
 
-macro_copy_body_not_defined(absvol_with_internals);
+macro_copy_body_not_defined(absvol_with_internals)
 
 /*
 absvol_with_internals* absvol_with_internals::copy(void) const

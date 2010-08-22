@@ -122,7 +122,7 @@ void mparticle::check_consistency(void) const
   //		curr_gamma_1 * mass * pow( speed_of_light, 2.0) , mcerr);
   //check_econd12(next_kin_energy , != , 
   //		next_gamma_1 * mass * pow( speed_of_light, 2.0) , mcerr);
-};
+}
 
 void mparticle::step(void)
 {          // make step to nextpos and calculate new step to border

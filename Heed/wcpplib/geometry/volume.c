@@ -328,7 +328,7 @@ void absvol::print(ostream& file, int l) const
   }
 }
 
-macro_copy_body_not_defined(absvol);
+macro_copy_body_not_defined(absvol)
   
 
 
@@ -515,7 +515,7 @@ void manip_absvol::m_print(ostream& file, int l) const
   }
 }
 
-macro_copy_body_not_defined(manip_absvol);
+macro_copy_body_not_defined(manip_absvol)
 
 
 //          *********  sh_manip_absvol  *********
@@ -563,7 +563,7 @@ void sh_manip_absvol::m_chname(char *nm) const
   strcpy(nm,"mvol->"); Gavol()->chname(&nm[6]); //}
 }
 
-macro_copy_body_not_defined(sh_manip_absvol);
+macro_copy_body_not_defined(sh_manip_absvol)
 
 void sh_manip_absvol::m_print(ostream& file, int l) const 
 {

@@ -66,12 +66,12 @@ HEEDOBJS += \
 	$(OBJDIR)/Heed/PhotoAbsCSLib.o
 
 # Compilation flags
-CFLAGS = \
+CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long \
         `root-config --cflags` \
         -fpic -Os -c \
 	-I$(INCDIR) -I$(HEEDDIR) \
 	-DGARFIELD_HEED_INTERFACE -DUSE_SRANLUX \
-	-DEXCLUDE_FUNCTIONS_WITH_HISTDEF 
+	-DEXCLUDE_FUNCTIONS_WITH_HISTDEF -DINS_CRETURN 
 # Debugging flags
 #CFLAGS += -g
 

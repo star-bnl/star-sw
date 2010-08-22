@@ -40,7 +40,7 @@ double VanDerVaals::volume_of_mole(double T,
   return res;
 }
 
-macro_copy_body(VanDerVaals);
+macro_copy_body(VanDerVaals)
 
 ostream & operator << (ostream & file, const VanDerVaals& f)
 {

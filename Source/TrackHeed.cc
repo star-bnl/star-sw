@@ -463,26 +463,6 @@ TrackHeed::TransportDeltaElectron(
 }
       
 void
-TrackHeed::SetDatabasePath(const std::string dbpath) {
-
-  if (dbpath == "") {
-    std::cerr << "TrackHeed::SetDatabasePath:\n";
-    std::cerr << "    String is empty.\n";
-    return;
-  }
-  
-  databasePath = dbpath;
-  // Append '/' if necessary.
-  if (dbpath[dbpath.length() - 1] != '/') {
-    databasePath.append("/");
-  }
-  std::cout << "TrackHeed::SetDatabasePath:\n";
-  std::cout << "    Database path set to " << databasePath << ".\n";
-  isPathSet = true;
-     
-}
-
-void
 TrackHeed::EnableElectricField() {
 
   HeedInterface::useEfield = true;
