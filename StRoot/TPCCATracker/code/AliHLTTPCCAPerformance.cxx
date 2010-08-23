@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformance.cxx,v 1.11 2010/08/16 23:40:19 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.cxx,v 1.12 2010/08/23 19:37:02 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -23,6 +23,7 @@
 #include "AliHLTTPCCASlicesLinksPerformance.h"
 #include "AliHLTTPCCASlicesPerformance.h"
 #include "AliHLTTPCCAStiPerformance.h"
+#include "AliHLTTPCCAMergerPerformance.h"
 #include "AliHLTTPCCAGlobalSlicesPerformance.h"
 #include "AliHLTTPCCAGlobalPerformance.h"
 
@@ -51,6 +52,29 @@
 
 AliHLTTPCCAPerformance::AliHLTTPCCAPerformance()
 {
+  static bool first_call = true;
+
+  if (first_call){
+    typedef TSubPerformance TSP;
+    
+      /// Just define here all sub-performances
+      /// TSP(new __ClassName__               , __Name__      ),
+    const int NSPerfo = 6;
+    const TSP perfos[NSPerfo] = {
+      TSP(new AliHLTTPCCASlicesLinksPerformance, "Chains Performance"),
+      TSP(new AliHLTTPCCASlicesPerformance, "Sector Performance"),
+      TSP(new AliHLTTPCCAGlobalSlicesPerformance, "Global Sector Performance"),
+      TSP(new AliHLTTPCCAGlobalPerformance, "Global Performance"),
+      TSP(new AliHLTTPCCAStiPerformance, "Sti Performance"),
+      TSP(new AliHLTTPCCAMergerPerformance, "Merger", 0)
+    };
+    
+    subPerformances.resize(NSPerfo);
+    for (int iP = 0; iP < NSPerfo; iP++){
+      subPerformances[iP] = perfos[iP];
+    }
+  }
+  first_call = false;
   //* constructor
 }
 
@@ -98,7 +122,7 @@ void AliHLTTPCCAPerformance::InitSubPerformances()
     // Init subperformances
   static bool first_call = true;
 
-  if (first_call){
+/*  if (first_call){
     typedef TSubPerformance TSP;
     
       /// Just define here all sub-performances
@@ -106,19 +130,13 @@ void AliHLTTPCCAPerformance::InitSubPerformances()
     const int NSPerfo = 5;
     const TSP perfos[NSPerfo] = {
 
-      TSP(new AliHLTTPCCASlicesLinksPerformance, "Chains Performance"),
-      TSP(new AliHLTTPCCASlicesPerformance, "Sector Performance"),
-      TSP(new AliHLTTPCCAGlobalSlicesPerformance, "Global Sector Performance"),
-      TSP(new AliHLTTPCCAGlobalPerformance, "Global Performance"),
-      TSP(new AliHLTTPCCAStiPerformance, "Sti Performance")
-
     };
     
     subPerformances.resize(NSPerfo);
     for (int iP = 0; iP < NSPerfo; iP++){
       subPerformances[iP] = perfos[iP];
     }
-  }
+  }*/
   
   for (unsigned int iPerf = 0; iPerf < subPerformances.size(); iPerf++){
     subPerformances[iPerf]->SetNewEvent(fTracker, &fHitLabels, &fMCTracks, &fLocalMCPoints);
@@ -132,8 +150,19 @@ void AliHLTTPCCAPerformance::InitSubPerformances()
 void AliHLTTPCCAPerformance::CreateHistos()
 {
   for (unsigned int iPerf = 0; iPerf < subPerformances.size(); iPerf++){
-    subPerformances[iPerf]->CreateHistos(subPerformances[iPerf].name, fOutputFile);
+    if(!(subPerformances[iPerf]->IsHistoCreated())) 
+      subPerformances[iPerf]->CreateHistos(subPerformances[iPerf].name, fOutputFile);
   }
+}
+
+bool AliHLTTPCCAPerformance::CreateHistos(string name)
+{
+  unsigned i = 0;
+  for( ; i < (subPerformances.size()) && (subPerformances[i].name != name); i++);
+  if(!(subPerformances[i]->IsHistoCreated()) && i != subPerformances.size()) 
+    subPerformances[i]->CreateHistos(subPerformances[i].name, fOutputFile);
+  if ( i == subPerformances.size() ) return 0;
+  return 1;
 }
 
 void AliHLTTPCCAPerformance::WriteHistos()
@@ -161,7 +190,7 @@ void AliHLTTPCCAPerformance::ExecPerformance()
   fStatNEvents++;
   
   for (unsigned int iPerf = 0; iPerf < subPerformances.size(); iPerf++){
-    subPerformances[iPerf]->Exec(0);
+    if(subPerformances[iPerf].IsGlobalPerf) subPerformances[iPerf]->Exec(0);
   }
 #if 1  // current event efficiencies
   for (unsigned int iPerf = 0; iPerf < subPerformances.size(); iPerf++){    
@@ -174,7 +203,7 @@ void AliHLTTPCCAPerformance::ExecPerformance()
   for (unsigned int iPerf = 0; iPerf < subPerformances.size(); iPerf++){  
     cout << endl
         << " ---- " << subPerformances[iPerf].name << " " << fStatNEvents << " events Statistic ---- " << endl;
-    subPerformances[iPerf]->PrintEfficiencyStatistic();
+    if(subPerformances[iPerf].IsGlobalPerf) subPerformances[iPerf]->PrintEfficiencyStatistic();
   };
 
 #ifdef STAR_STANDALONE // TODO use it!!

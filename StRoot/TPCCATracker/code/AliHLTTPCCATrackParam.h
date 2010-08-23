@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCATrackParam.h,v 1.2 2010/08/06 21:04:33 mzyzak Exp $
+// $Id: AliHLTTPCCATrackParam.h,v 1.3 2010/08/23 19:37:02 mzyzak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -167,6 +167,8 @@ class AliHLTTPCCATrackParam
 
     bool Rotate( float alpha, float maxSinPhi = .999 );
     bool Rotate( float alpha, AliHLTTPCCATrackLinearisation &t0, float maxSinPhi = .999 );
+
+    void RotateXY( float alpha, float &x, float &y, float &sin, float maxSinPhi = .999 ) const;
     bool Filter( float y, float z, float err2Y, float err2Z, float maxSinPhi = .999 );
 
 

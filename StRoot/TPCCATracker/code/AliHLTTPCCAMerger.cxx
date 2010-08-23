@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMerger.cxx,v 1.6 2010/08/13 15:39:10 ikulakov Exp $
+// $Id: AliHLTTPCCAMerger.cxx,v 1.7 2010/08/23 19:37:02 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -47,6 +47,8 @@
 #endif //DRAW
 
 #include <vector>
+#include "AliHLTTPCCAMergerPerformance.h"
+#include "AliHLTTPCCAPerformance.h"
 
 class AliHLTTPCCAMerger::AliHLTTPCCAClusterInfo
 {
@@ -129,6 +131,8 @@ class AliHLTTPCCAMerger::AliHLTTPCCASliceTrackInfo
     float ChiPrev;
     float ChiNext;
     int fSlice;
+    int rowInner;
+    int rowOuter;
 ///mvz end
   private:
 
@@ -168,123 +172,15 @@ class AliHLTTPCCAMerger::AliHLTTPCCABorderTrackGlobal
     void SetOK        ( bool v )                       { fOK        = v; }
     void SetSlice     ( int v)                         { fSlice     = v; }
 
-    float XStart()      const{ return fxStart; }
-    float YStart()      const{ return fyStart; }
-    float ZStart()      const{ return fzStart; }
-    float XStartErr2()   const{ return fxStartErr2; }
-    float YStartErr2()   const{ return fyStartErr2; }
-    float ZStartErr2()   const{ return fzStartErr2; }
-
-    float XEnd()        const{ return fxEnd; }
-    float YEnd()        const{ return fyEnd; }
-    float ZEnd()        const{ return fzEnd; }
-    float XEndErr2()     const{ return fxEndErr2; }
-    float YEndErr2()     const{ return fyEndErr2; }
-    float ZEndErr2()     const{ return fzEndErr2; }
-
-    float XCentr()      const{ return fxc; }
-    float YCentr()      const{ return fyc; }
-    float XCentrErr2()   const{ return fxcErr2; }
-    float YCentrErr2()   const{ return fycErr2; }
-
-    float R()           const{ return fR;    }
-    float RErr2()        const{ return fRErr2; }
-
     float b()           const{ return fb;    }
-    float a()           const{ return fa;    }
-    float bErr2()        const{ return fbErr2; }
-    float p0()          const{ return fp0;    }
-    float p0Err2()       const{ return fp0Err2; }
-    int   c()           const{ return fc; }
+    float bErr2()           const{ return fbErr2;    }
 
-    int NDF()           const{ return fNDF; }
-
-    void SetXStart(float v)      { fxStart = v; }
-    void SetYStart(float v)      { fyStart = v; }
-    void SetZStart(float v)      { fzStart = v; }
-    void SetXStartErr2(float v)   { fxStartErr2 = v; }
-    void SetYStartErr2(float v)   { fyStartErr2 = v; }
-    void SetZStartErr2(float v)   { fzStartErr2 = v; }
-    void SetXEnd(float v)        { fxEnd = v; }
-    void SetYEnd(float v)        { fyEnd = v; }
-    void SetZEnd(float v)        { fzEnd = v; }
-    void SetXEndErr2(float v)     { fxEndErr2 = v; }
-    void SetYEndErr2(float v)     { fyEndErr2 = v; }
-    void SetZEndErr2(float v)     { fzEndErr2 = v; }
-
-    void SetXCentr(float v)      { fxc = v; }
-    void SetYCentr(float v)      { fyc = v; }
-    void SetXCentrErr2(float v)   { fxcErr2 = v; }
-    void SetYCentrErr2(float v)   { fycErr2 = v; }
-
-    void SetR(float v)           { fR = v;    }
-
-    void SetRErr2(float v)        { fRErr2 = v; }
     void Setb(float v)           { fb = v;    }
-    void Seta(float v)           { fa = v;    }
     void SetbErr2(float v)        { fbErr2 = v; }
 
-    void Setp0(float v)          { fp0 = v;    }
-    void Setp0Err2(float v)       { fp0Err2 = v; }
-
-    void  Setc(int v)            { fc = v; }
-    void  SetNDF(int v)          { fNDF = v; }
-
-    void  SetdRdPhi(float v)     { fdRdPhi = v;    }
-    float dRdPhi()               { return fdRdPhi;    }
-
-    void  SetChiBest(float v)   { fChiBest = v;    }
-    float ChiBest()              { return fChiBest; }
-
-    void  SetQPt(float v)        { fQPt = v;    }
-    float QPt()                  { return fQPt; }
-    void  SetQPtErr2(float v)        { fQPtErr2 = v;    }
-    float QPtErr2()                  { return fQPtErr2; }
-
-    void CalculateCoord(float a, float r, float z, float &x, float &y)
-    {
-      float p = fp0 + fc*(z-fzStart)/(fb*a*r);
-      y = fyc + r*sin(p);
-      x = fxc + fc*r*cos(p);
-    }
-    void CalculateCoord(float z, float &x, float &y)
-    {
-      float p = fp0 + fc*(z-fzStart)/(fb*fa*fR);
-      y = fyc + fR*sin(p);
-      x = fxc + fc*fR*cos(p);
-    }
-    void CalculateCoord(float xc, float yc, float a, float r, float z, float &x, float &y)
-    {
-      float p = fp0 + fc*(z-fzStart)/(fb*a*r);
-      y = yc + r*sin(p);
-      x = xc + fc*r*cos(p);
-    }
-    void CalculateCoord(float a, float r, float p, float &x, float &y, float &z)
-    {
-      z = fzStart + fc*fb*r*a*(p - fp0) ;
-      y = fyc + r*sin(p);
-      x = fxc + fc*r*cos(p);
-    }
-
   private:
-
-    float fxStart, fxEnd;
-    float fyStart, fyEnd;
-    float fzStart, fzEnd;
-    float fxc, fyc;
-    float fR;
     float fb;
-    float fa;
-    float fp0;
-    int   fc;
-
-    float fxStartErr2, fxEndErr2;
-    float fyStartErr2, fyEndErr2;
-    float fzStartErr2, fzEndErr2;
-    float fxcErr2, fycErr2;
-    float fRErr2;
     float fbErr2;
-    float fp0Err2;
 
     int   fTrackID;              // track index
     int   fNClusters;            // n clusters
@@ -293,11 +189,6 @@ class AliHLTTPCCAMerger::AliHLTTPCCABorderTrackGlobal
     bool  fOK;                   // is the track rotated and extrapolated correctly
     int   fSlice;                // slice number
     int fNDF;
-
-    float fChiBest;
-    float fQPt;
-    float fQPtErr2;
-    float fdRdPhi;
 };
 
 
@@ -364,6 +255,15 @@ void AliHLTTPCCAMerger::Reconstruct()
   //* main merging routine
 
   UnpackSlices();
+  
+  AliHLTTPCCAPerformance::Instance().CreateHistos("Merger");
+  ((AliHLTTPCCAMergerPerformance*)(AliHLTTPCCAPerformance::Instance().GetSubPerformance("Merger")))->SetNewEvent(
+                                   AliHLTTPCCAPerformance::Instance().GetTracker(),
+				   AliHLTTPCCAPerformance::Instance().GetHitLabels(),
+				   AliHLTTPCCAPerformance::Instance().GetMCTracks(),
+				   AliHLTTPCCAPerformance::Instance().GetMCPoints());
+  ((AliHLTTPCCAMergerPerformance*)(AliHLTTPCCAPerformance::Instance().GetSubPerformance("Merger")))->FillMC();
+  
   Merging(1);
   Merging(0);
 }
@@ -483,23 +383,15 @@ void AliHLTTPCCAMerger::UnpackSlices()
 //
 //when we turn off the extrapolation step in the tracklet constructor, we have parameters in the last point, not in the first!
 //that's why the fitting direction should be changed
-//      if ( !FitTrack( endPoint, endAlpha, startPoint, startAlpha, hits, nHits, 0 ) ) continue;
-//      startPoint.ResetCovMatrix(); 
-//      endPoint.ResetCovMatrix();
-      if ( !FitTrack( startPoint, startAlpha, endPoint, endAlpha, hits, nHits, 1 ) ) continue;
-//      startPoint = endPoint;
-//      startAlpha = endAlpha;
-      endPoint = startPoint;
-      endAlpha = startAlpha;
-//std::cout<<"Outer->Inner"<<std::endl;
-//      if ( !FitTrack( startPoint, startAlpha, endPoint, endAlpha, hits, nHits, 1 ) ) continue;
       if ( !FitTrack( endPoint, endAlpha, startPoint, startAlpha, hits, nHits, 0 ) ) continue;
-      
 //      if ( !FitTrack( startPoint, startAlpha, endPoint, endAlpha, hits, nHits, 1 ) ) continue;
+      startPoint = endPoint;
+      startAlpha = endAlpha;
+//      endPoint = startPoint;
+//      endAlpha = startAlpha;
+//std::cout<<"Outer->Inner"<<std::endl;
+      if ( !FitTrack( startPoint, startAlpha, endPoint, endAlpha, hits, nHits, 1 ) ) continue;
 //      if ( !FitTrack( endPoint, endAlpha, startPoint, startAlpha, hits, nHits, 0 ) ) continue;
-//      if ( !FitTrack( startPoint, startAlpha, endPoint, endAlpha, hits, nHits, 1 ) ) continue;
-//      if ( !FitTrack( endPoint, endAlpha, startPoint, startAlpha, hits, nHits, 0 ) ) continue;
-
 
       if ( nHits < AliHLTTPCCAParameters::MinTrackPurity*sTrack.NClusters() ) continue;
 
@@ -510,6 +402,8 @@ void AliHLTTPCCAMerger::UnpackSlices()
       track.SetInnerParam( startPoint );
       track.SetInnerAlpha( startAlpha );
       track.SetOuterParam( endPoint );
+      track.rowInner = (fClusterInfos[hits[0]]).IRow();
+      track.rowOuter = (fClusterInfos[hits[nHits-1]]).IRow();
 //      track.SetOuterParam( sTrack.Param() );
       track.SetOuterAlpha( endAlpha );
       track.SetFirstClusterRef( nClustersCurrent );
@@ -523,7 +417,8 @@ void AliHLTTPCCAMerger::UnpackSlices()
       track.SetUsed( 0 );
 ///mvz start
       track.orig_track_id = itr;
-      track.number = nTracksCurrent;
+      track.fSlice = iSlice;
+      track.number = nTracksCurrent - fSliceTrackInfoStart[ iSlice ];
 ///mvz end
       for ( int i = 0; i < nHits; i++ )
         fClusterInfos[nClustersCurrent + i] = fClusterInfos[hits[i]];
@@ -617,8 +512,6 @@ bool AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParam &T, float &Alpha,
     //float x = fSliceParam.RowX( h.IRow() );
     float x = h.X();
 
-//    if ( !t.TransportToXWithMaterial( x, l, fitPar, fSliceParam.GetBz( t ) ) ) continue;
-//    t.CalculateFitParameters( fitPar );
     if ( !t.TransportToXWithMaterial( x, l, fitPar, fSliceParam.cBz( ) ) ) continue;
 
 /*#ifdef MAIN_DRAW
@@ -674,12 +567,12 @@ bool AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParam &T, float &Alpha,
   const float *c = t.Cov();
   for ( int i = 0; i < 15; i++ ) ok = ok && finite( c[i] );
   for ( int i = 0; i < 5; i++ ) ok = ok && finite( t.Par()[i] );
-  ok = ok && ( t.GetX() > 50 );
+///  ok = ok && ( t.GetX() > 50 ); //this check is wrong! X could be < 50, when a sector is rotated!
 
   if ( c[0] <= 0 || c[2] <= 0 || c[5] <= 0 || c[9] <= 0 || c[14] <= 0 ) ok = 0;
 //  if ( c[0] > 5. || c[2] > 5. || c[5] > 2. || c[9] > 2 || c[14] > 2. ) ok = 0;
 
-  if ( CAMath::Abs( t.SinPhi() ) > .99 ) ok = 0;
+  if ( CAMath::Abs( t.SinPhi() ) > .999 ) ok = 0;
   else if ( l.CosPhi() >= 0 ) t.SetSignCosPhi( 1 );
   else t.SetSignCosPhi( -1 );
 
@@ -697,26 +590,6 @@ bool AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParam &T, float &Alpha,
   return ok;
 }
 
-
-float AliHLTTPCCAMerger::GetChi2( float x1, float y1, float a00, float a10, float a11, float x2, float y2, float b00, float b10, float b11)
-{
-  //* Calculate Chi2/ndf deviation
-
-  float d[2] = { x1 - x2, y1 - y2 };
-
-  float mSi[3] = { a00 + b00, a10 + b10, a11 + b11 };
-
-  float s = ( mSi[0] * mSi[2] - mSi[1] * mSi[1] );
-
-  if ( s < 1.E-10 ) return 10000.;
-
-  float mS[3] = { mSi[2], -mSi[1], mSi[0] };
-
-  return CAMath::Abs( ( ( mS[0]*d[0] + mS[1]*d[1] )*d[0]
-                       + ( mS[1]*d[0] + mS[2]*d[1] )*d[1] ) / s *0.5 /*/ (NDF1+NDF2) */);
-}
-
-
 void AliHLTTPCCAMerger::MakeBorderTracksGlobal(AliHLTTPCCABorderTrackGlobal B[], int &nB )
 {
   //* prepare slice tracks for merging with next/previous/same sector
@@ -729,136 +602,14 @@ void AliHLTTPCCAMerger::MakeBorderTracksGlobal(AliHLTTPCCABorderTrackGlobal B[],
     for ( int itr = 0; itr < fSliceNTrackInfos[iSlice]; itr++ ) {
 
       const AliHLTTPCCASliceTrackInfo &track = fTrackInfos[ fSliceTrackInfoStart[iSlice] + itr ];
-      AliHLTTPCCATrackParam t0 = track.InnerParam();
-      AliHLTTPCCATrackParam t1 = track.OuterParam();
 
-      double vxStart = t0.X();
-      double vxEnd   = t1.X();
-  
-      double vyStart = t0.Y();
-      double vyEnd   = t1.Y();
-
-      float alpha = slices[iSlice]->Param().Alpha();
-      float fSliceCos = TMath::Cos( alpha );
-      float fSliceSin = TMath::Sin( alpha );
-
-
-      double xStart = vxStart * fSliceCos - vyStart * fSliceSin;
-      double yStart = vyStart * fSliceCos + vxStart * fSliceSin;
-      double xEnd = vxEnd * fSliceCos - vyEnd * fSliceSin;
-      double yEnd = vyEnd * fSliceCos + vxEnd * fSliceSin;
-
-      double r1 = 1./(t0.QPt() * slices[iSlice]->Param().cBz());
-      double r2 = 1./(t1.QPt() * slices[iSlice]->Param().cBz());
-
-//std::cout << "r1  "<<r1<<"  r2  "<<r2 << endl;
-
-      double R2 = r1*r1;
-      double R = CAMath::Abs(r1);
-
-      double a = r1/CAMath::Abs(r1);
-
-      double xk = (xStart + xEnd)*0.5;
-      double yk = (yStart + yEnd)*0.5;
-      double l2 = (xStart - xEnd)*(xStart - xEnd) + (yStart - yEnd)*(yStart - yEnd);
-      double l  = CAMath::Sqrt(l2);
-      double li = 1./l;
-      double d2 = R2 - l2*0.25;
-      double d  = CAMath::Sqrt(d2);
-      double xc = xk - a*d*li*(yEnd - yStart);
-      double yc = yk + a*d*li*(xEnd - xStart);
-  
-      double fCos2 = fSliceCos*fSliceCos;
-      double fSin2 = fSliceSin*fSliceSin;
-
-      double dxStart2 = fSin2 * t0.GetErr2Y();
-      double dyStart2 = fCos2 * t0.GetErr2Y();
-
-      double dxEnd2 = fSin2 * t1.GetErr2Y();
-      double dyEnd2 = fCos2 * t1.GetErr2Y();
-
-      double ddx2 = dxStart2 + dxEnd2;
-      double ddy2 = dyStart2 + dyEnd2;
-
-      double dR2 = R2/(t0.QPt()*t0.QPt()) * t0.GetErr2QPt();
-
-      double dl22 = ((xStart - xEnd)*(xStart - xEnd)*ddx2 + (yStart - yEnd)*(yStart - yEnd)*ddy2);
-      double dl2  = li*li*dl22;
-      double dd22 = R2*dR2 + 0.25*dl22;
-      double dd2  = dd22/d2;
-
-
-      double dxc2;
-      double dyc2;
-
-      double k = d*li*(yEnd - yStart);
-      double ss = (yEnd - yStart)*(yEnd - yStart);
-      dxc2 = 0.25*ddx2 + k*k*(ddy2/ss + dl2/(l*l) + dd2/d2);
-      k = d*li*(xEnd - xStart);
-      ss = (xEnd - xStart)*(xEnd - xStart);
-      dyc2 = 0.25*ddy2 + k*k*(ddx2/ss + dl2/(l*l) + dd2/d2);
-
-      double b = t0.DzDs();
-      double c = (xStart-xc)/CAMath::Abs((xStart-xc));
-      double sinPhi0 = (yStart-yc)/CAMath::Abs(r1);
-      double p0 = asin(sinPhi0);
-      double bErr2 = t0.Err2DzDs();
- //     double bErr2 = R2*t0.Err2DzDs() + t0.DzDs()*t0.DzDs()*dR2;
-      double ys_yc2 = yStart - yc;
-      ys_yc2 = ys_yc2*ys_yc2;
-      double p0Err2 = (dyStart2 + dyc2 + dR2/R2*ys_yc2)/(R2-ys_yc2);
-
- //   if( 1./(CAMath::Abs(t0.QPt()*fSliceParam.cBz())) < 200. ) continue;
-
-      double r11 = 1./(t1.QPt() * slices[iSlice]->Param().cBz());
-      double R1 = CAMath::Abs(r11);
-
-      double sinPhi1 = (yEnd-yc)/CAMath::Abs(r11);
-      double p1 = asin(sinPhi1);
-
-/*      if(R<R1)
-      {
-        std::cout << "R0 " << R << "   R1 "<< R1 << "   R0/R1  "<<R/R1 << std::endl;
-        std::cout << "dR/dPhi " << fabs((R1 - R)/(p0 - p1)) << std::endl;
-      }
-      else
-      {
-        std::cout << "R0 " << R << "   R1 "<< R1 << "   R0/R1  "<<R1/R << std::endl;
-        std::cout << "dR/dPhi " << fabs((R1 - R)/(p0 - p1)) << std::endl;
-      }
-std::cout << "phi0 "<<p0<<"   phi1 "<<p1<<std::endl;*/
+      double b = track.InnerParam().DzDs();
+      double bErr2 = track.InnerParam().Err2DzDs();
 
       AliHLTTPCCABorderTrackGlobal &bTr = B[nB];
 
-      double px0_0 = t0.GetCosPhi();
-      double py0_0 = t0.GetSinPhi();
 
-      double xc1_0 = t0.X() + py0_0*r1;
-      double yc1_0 = t0.Y() - px0_0*r1;
-
-      double xc1 = xc1_0 * fSliceCos - yc1_0 * fSliceSin;
-      double yc1 = yc1_0 * fSliceCos + xc1_0 * fSliceSin;
-
-      double px1_0 = t1.GetCosPhi();
-      double py1_0 = t1.GetSinPhi();
-
-      double xc2_0 = t1.X() + py1_0*r2;
-      double yc2_0 = t1.Y() - px1_0*r2;
-
-      double xc2 = xc2_0 * fSliceCos - yc2_0 * fSliceSin;
-      double yc2 = yc2_0 * fSliceCos + xc2_0 * fSliceSin;
-
-///      std::cout << "xc " << xc << " +- " << sqrt(dxc2) << "  " << xc1 << "  " << xc2 << std::endl;
-///      std::cout << "yc " << yc << " +- " << sqrt(dyc2) << "  " << yc1 << "  " << yc2 << std::endl;
-
-      float drdp = 1./(R*sqrt(1+b*b)) * (R1 - R)/(p0 - p1);
-///      bTr.SetdRdPhi(fabs((R1 - R)/(p0 - p1)));
-///      bTr.SetdRdPhi(fabs(drdp));
-      bTr.SetdRdPhi(fabs((R1 - R)*b/(sqrt(1.+b*b)*(t0.Z()-t1.Z()))));
-      bTr.SetQPt(t0.QPt());
-      bTr.SetQPtErr2(t0.GetErr2QPt());
-
-      bTr.SetX( t0.GetX() );
+      bTr.SetX( track.InnerParam().GetX() );
       {
         bTr.SetOK( 1 );
         bTr.SetTrackID( itr );
@@ -866,102 +617,13 @@ std::cout << "phi0 "<<p0<<"   phi1 "<<p1<<std::endl;*/
         bTr.SetIRow( fClusterInfos[ track.FirstClusterRef() + 0 ].IRow() );
         bTr.SetSlice(iSlice);
 
-        bTr.SetXStart(xStart);
-        bTr.SetYStart(yStart);
-        bTr.SetZStart(t0.Z());
-        bTr.SetXStartErr2(dxStart2);
-        bTr.SetYStartErr2(dyStart2);
-        bTr.SetZStartErr2(t0.GetErr2Z());
-  
-        bTr.SetXEnd(xEnd);
-        bTr.SetYEnd(yEnd);
-        bTr.SetZEnd(t1.Z());
-        bTr.SetXEndErr2(dxEnd2);
-        bTr.SetYEndErr2(dyEnd2);
-        bTr.SetZEndErr2(t1.GetErr2Z());
-  
-        bTr.SetXCentr(xc);
-        bTr.SetYCentr(yc);
-        bTr.SetXCentrErr2(dxc2);
-        bTr.SetYCentrErr2(dyc2);
-  
-        bTr.SetR(R);
-        bTr.SetRErr2(CAMath::Sqrt(dR2));
-
         bTr.Setb(b);
-        bTr.Seta(a);
         bTr.SetbErr2(bErr2);
 
-        bTr.Setp0(p0);
-        bTr.Setp0Err2(p0Err2);
-
-        bTr.Setc(c);
-        bTr.SetNDF(t0.NDF());
-        bTr.SetChiBest(1000000.);
         nB++;
       }
     }
   }
-}
-
-void AliHLTTPCCAMerger::CalculateHelix( AliHLTTPCCABorderTrackGlobal *bL, float z, float &x, float &y, float &dx2, float &dy2)
-{
-  const float &R = bL->R();
-  const float &b = bL->b();
-  const float &xc = bL->XCentr();
-  const float &yc = bL->YCentr();
-  const float &phi0 = bL->p0();
-  const float &c = bL->c();
-  const float &zStart = bL->ZStart();
-
-  float phi = phi0 + c*bL->a()*(z-zStart)/(b*R);
-  y = yc + R*sin(phi);
-  x = xc + c*R*cos(phi);
-
-  float R2 = R*R;
-  float b2 = b*b;
-  float b2R2i = R2*b2;
-  b2R2i = 1./b2R2i;
-
-  float dphi2 = bL->p0Err2() + b2R2i*(bL->ZStartErr2() + (z-zStart)*(z-zStart)*(bL->bErr2()/b2 + bL->RErr2()/R2));
-
-//  std::cout <<"R    "<< R2*bL->p0Err2()<<"  "<<bL->RErr2() << "  " << bL->XCentrErr2()<<"  "<<dx2/(x*x) <<std::endl;
-
-  dx2 = bL->XCentrErr2() + cos(phi)*cos(phi)*bL->RErr2() + R2*sin(phi)*sin(phi)*dphi2;
-  dy2 = bL->YCentrErr2() + sin(phi)*sin(phi)*bL->RErr2() + R2*cos(phi)*cos(phi)*dphi2;
-}
-
-void AliHLTTPCCAMerger::CalculateR(const float &x1, const float &y1, const float &x2, const float &y2, const float &x3, const float &y3, float &R)
-{
-  float S = 0.5*fabs((x2-x1)*(y3-y1)-(x3-x1)*(y2-y1));
-  float a2 = (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2);
-  float b2 = (x1-x3)*(x1-x3) + (y1-y3)*(y1-y3);
-  float c2 = (x3-x2)*(x3-x2) + (y3-y2)*(y3-y2);
-  R = c2*a2*b2;
-  R = sqrt(R);
-  R = 0.25*R/S;
-
-/*  float dS2 = 0.5*0.5*((y3-y1)*(y3-y1)*(dx2+dx1)+(x2-x1)*(x2-x1)*(dy3+dy1) + (x3-x1)*(x3-x1)*(dy2+dy1)+(y2-y1)*(y2-y1)*(dx3+dx1));
-  float da2 = ((x1-x2)*(x1-x2)*(dx1 + dx2) + (y1-y2)*(y1-y2)*(dy1 + dy2))/a2;
-  float db2 = ((x1-x3)*(x1-x3)*(dx1 + dx3) + (y1-y3)*(y1-y3)*(dy1 + dy3))/b2;
-  float dc2 = ((x3-x2)*(x3-x2)*(dx3 + dx2) + (y3-y2)*(y3-y2)*(dy3 + dy2))/c2;
-
-  dR2 = R*R*(da2/a2 + db2/b2 + dc2/c2 + dS2/(S*S));*/
-}
-
-void AliHLTTPCCAMerger::CalculatedRToPoint(AliHLTTPCCABorderTrackGlobal *b, const float &x, const float &y, const float &dx2, const float &dy2, float &R, float &dR)
-{
-  float Rx = x - b->XCentr();
-  float Ry = y - b->YCentr();
-  float Rx2 = Rx*Rx;
-  float Ry2 = Ry*Ry;
-  float Rr2 = Rx2 + Ry2;
-  R = sqrt(Rr2);
-
-  float dRx2 = dx2 + b->XCentrErr2();
-  float dRy2 = dy2 + b->YCentrErr2();
-  float dRr2 = (Rx2*dRx2 + Ry2*dRy2)/Rr2;
-  dR = sqrt(dRr2);
 }
 
 void AliHLTTPCCAMerger::InvertCholetsky(float a[15])
@@ -1032,34 +694,34 @@ void AliHLTTPCCAMerger::InvertCholetsky(float a[15])
 
 void AliHLTTPCCAMerger::MultiplySS(float const C[15], float const V[15], float K[5][5])
 {
-  K[0][0] = C[0]*V[0] + C[1]*V[1] + C[3]*V[3] + C[6]*V[6] + C[10]*V[10];
-  K[0][1] = C[0]*V[1] + C[1]*V[2] + C[3]*V[4] + C[6]*V[7] + C[10]*V[11];
-  K[0][2] = C[0]*V[3] + C[1]*V[4] + C[3]*V[5] + C[6]*V[8] + C[10]*V[12];
-  K[0][3] = C[0]*V[6] + C[1]*V[7] + C[3]*V[8] + C[6]*V[9] + C[10]*V[13];
+  K[0][0] = C[0]*V[ 0] + C[1]*V[ 1] + C[3]*V[ 3] + C[6]*V[ 6] + C[10]*V[10];
+  K[0][1] = C[0]*V[ 1] + C[1]*V[ 2] + C[3]*V[ 4] + C[6]*V[ 7] + C[10]*V[11];
+  K[0][2] = C[0]*V[ 3] + C[1]*V[ 4] + C[3]*V[ 5] + C[6]*V[ 8] + C[10]*V[12];
+  K[0][3] = C[0]*V[ 6] + C[1]*V[ 7] + C[3]*V[ 8] + C[6]*V[ 9] + C[10]*V[13];
   K[0][4] = C[0]*V[10] + C[1]*V[11] + C[3]*V[12] + C[6]*V[13] + C[10]*V[14];
 
-  K[1][0] = C[1]*V[0] + C[2]*V[1] + C[4]*V[3] + C[7]*V[6] + C[11]*V[10];
-  K[1][1] = C[1]*V[1] + C[2]*V[2] + C[4]*V[4] + C[7]*V[7] + C[11]*V[11];
-  K[1][2] = C[1]*V[3] + C[2]*V[4] + C[4]*V[5] + C[7]*V[8] + C[11]*V[12];
-  K[1][3] = C[1]*V[6] + C[2]*V[7] + C[4]*V[8] + C[7]*V[9] + C[11]*V[13];
+  K[1][0] = C[1]*V[ 0] + C[2]*V[ 1] + C[4]*V[ 3] + C[7]*V[ 6] + C[11]*V[10];
+  K[1][1] = C[1]*V[ 1] + C[2]*V[ 2] + C[4]*V[ 4] + C[7]*V[ 7] + C[11]*V[11];
+  K[1][2] = C[1]*V[ 3] + C[2]*V[ 4] + C[4]*V[ 5] + C[7]*V[ 8] + C[11]*V[12];
+  K[1][3] = C[1]*V[ 6] + C[2]*V[ 7] + C[4]*V[ 8] + C[7]*V[ 9] + C[11]*V[13];
   K[1][4] = C[1]*V[10] + C[2]*V[11] + C[4]*V[12] + C[7]*V[13] + C[11]*V[14];
 
-  K[2][0] = C[3]*V[0] + C[4]*V[1] + C[5]*V[3] + C[8]*V[6] + C[12]*V[10];
-  K[2][1] = C[3]*V[1] + C[4]*V[2] + C[5]*V[4] + C[8]*V[7] + C[12]*V[11];
-  K[2][2] = C[3]*V[3] + C[4]*V[4] + C[5]*V[5] + C[8]*V[8] + C[12]*V[12];
-  K[2][3] = C[3]*V[6] + C[4]*V[7] + C[5]*V[8] + C[8]*V[9] + C[12]*V[13];
+  K[2][0] = C[3]*V[ 0] + C[4]*V[ 1] + C[5]*V[ 3] + C[8]*V[ 6] + C[12]*V[10];
+  K[2][1] = C[3]*V[ 1] + C[4]*V[ 2] + C[5]*V[ 4] + C[8]*V[ 7] + C[12]*V[11];
+  K[2][2] = C[3]*V[ 3] + C[4]*V[ 4] + C[5]*V[ 5] + C[8]*V[ 8] + C[12]*V[12];
+  K[2][3] = C[3]*V[ 6] + C[4]*V[ 7] + C[5]*V[ 8] + C[8]*V[ 9] + C[12]*V[13];
   K[2][4] = C[3]*V[10] + C[4]*V[11] + C[5]*V[12] + C[8]*V[13] + C[12]*V[14];
 
-  K[3][0] = C[6]*V[0] + C[7]*V[1] + C[8]*V[3] + C[9]*V[6] + C[13]*V[10];
-  K[3][1] = C[6]*V[1] + C[7]*V[2] + C[8]*V[4] + C[9]*V[7] + C[13]*V[11];
-  K[3][2] = C[6]*V[3] + C[7]*V[4] + C[8]*V[5] + C[9]*V[8] + C[13]*V[12];
-  K[3][3] = C[6]*V[6] + C[7]*V[7] + C[8]*V[8] + C[9]*V[9] + C[13]*V[13];
+  K[3][0] = C[6]*V[ 0] + C[7]*V[ 1] + C[8]*V[ 3] + C[9]*V[ 6] + C[13]*V[10];
+  K[3][1] = C[6]*V[ 1] + C[7]*V[ 2] + C[8]*V[ 4] + C[9]*V[ 7] + C[13]*V[11];
+  K[3][2] = C[6]*V[ 3] + C[7]*V[ 4] + C[8]*V[ 5] + C[9]*V[ 8] + C[13]*V[12];
+  K[3][3] = C[6]*V[ 6] + C[7]*V[ 7] + C[8]*V[ 8] + C[9]*V[ 9] + C[13]*V[13];
   K[3][4] = C[6]*V[10] + C[7]*V[11] + C[8]*V[12] + C[9]*V[13] + C[13]*V[14];
 
-  K[4][0] = C[10]*V[0] + C[11]*V[1] + C[12]*V[3] + C[13]*V[6] + C[14]*V[10];
-  K[4][1] = C[10]*V[1] + C[11]*V[2] + C[12]*V[4] + C[13]*V[7] + C[14]*V[11];
-  K[4][2] = C[10]*V[3] + C[11]*V[4] + C[12]*V[5] + C[13]*V[8] + C[14]*V[12];
-  K[4][3] = C[10]*V[6] + C[11]*V[7] + C[12]*V[8] + C[13]*V[9] + C[14]*V[13];
+  K[4][0] = C[10]*V[ 0] + C[11]*V[ 1] + C[12]*V[ 3] + C[13]*V[ 6] + C[14]*V[10];
+  K[4][1] = C[10]*V[ 1] + C[11]*V[ 2] + C[12]*V[ 4] + C[13]*V[ 7] + C[14]*V[11];
+  K[4][2] = C[10]*V[ 3] + C[11]*V[ 4] + C[12]*V[ 5] + C[13]*V[ 8] + C[14]*V[12];
+  K[4][3] = C[10]*V[ 6] + C[11]*V[ 7] + C[12]*V[ 8] + C[13]*V[ 9] + C[14]*V[13];
   K[4][4] = C[10]*V[10] + C[11]*V[11] + C[12]*V[12] + C[13]*V[13] + C[14]*V[14];
 }
 
@@ -1079,20 +741,20 @@ void AliHLTTPCCAMerger::MultiplyMS(float const C[5][5], float const V[15], float
   K[8] = C[3][0]*V[3] + C[3][1]*V[4] + C[3][2]*V[5] + C[3][3]*V[8] + C[3][4]*V[12];
   K[9] = C[3][0]*V[6] + C[3][1]*V[7] + C[3][2]*V[8] + C[3][3]*V[9] + C[3][4]*V[13];
 
-  K[10] = C[4][0]*V[0] + C[4][1]*V[1] + C[4][2]*V[3] + C[4][3]*V[6] + C[4][4]*V[10];
-  K[11] = C[4][0]*V[1] + C[4][1]*V[2] + C[4][2]*V[4] + C[4][3]*V[7] + C[4][4]*V[11];
-  K[12] = C[4][0]*V[3] + C[4][1]*V[4] + C[4][2]*V[5] + C[4][3]*V[8] + C[4][4]*V[12];
-  K[13] = C[4][0]*V[6] + C[4][1]*V[7] + C[4][2]*V[8] + C[4][3]*V[9] + C[4][4]*V[13];
+  K[10] = C[4][0]*V[ 0] + C[4][1]*V[ 1] + C[4][2]*V[ 3] + C[4][3]*V[ 6] + C[4][4]*V[10];
+  K[11] = C[4][0]*V[ 1] + C[4][1]*V[ 2] + C[4][2]*V[ 4] + C[4][3]*V[ 7] + C[4][4]*V[11];
+  K[12] = C[4][0]*V[ 3] + C[4][1]*V[ 4] + C[4][2]*V[ 5] + C[4][3]*V[ 8] + C[4][4]*V[12];
+  K[13] = C[4][0]*V[ 6] + C[4][1]*V[ 7] + C[4][2]*V[ 8] + C[4][3]*V[ 9] + C[4][4]*V[13];
   K[14] = C[4][0]*V[10] + C[4][1]*V[11] + C[4][2]*V[12] + C[4][3]*V[13] + C[4][4]*V[14];
 }
 
 void AliHLTTPCCAMerger::MultiplySR(float const C[15], float const r_in[5], float r_out[5])
 {
-  r_out[0] = r_in[0]*C[0] + r_in[1]*C[1] + r_in[2]*C[3] +r_in[3]*C[6] + r_in[4]*C[10];
-  r_out[1] = r_in[1]*C[1] + r_in[1]*C[2] + r_in[2]*C[4] +r_in[3]*C[7] + r_in[4]*C[11];
-  r_out[2] = r_in[2]*C[3] + r_in[1]*C[4] + r_in[2]*C[5] +r_in[3]*C[8] + r_in[4]*C[12];
-  r_out[3] = r_in[3]*C[6] + r_in[1]*C[7] + r_in[2]*C[8] +r_in[3]*C[9] + r_in[4]*C[13];
-  r_out[4] = r_in[4]*C[10] + r_in[1]*C[11] + r_in[2]*C[12] +r_in[3]*C[13] + r_in[4]*C[14];
+  r_out[0] = r_in[0]*C[ 0] + r_in[1]*C[ 1] + r_in[2]*C[ 3] +r_in[3]*C[ 6] + r_in[4]*C[10];
+  r_out[1] = r_in[0]*C[ 1] + r_in[1]*C[ 2] + r_in[2]*C[ 4] +r_in[3]*C[ 7] + r_in[4]*C[11];
+  r_out[2] = r_in[0]*C[ 3] + r_in[1]*C[ 4] + r_in[2]*C[ 5] +r_in[3]*C[ 8] + r_in[4]*C[12];
+  r_out[3] = r_in[0]*C[ 6] + r_in[1]*C[ 7] + r_in[2]*C[ 8] +r_in[3]*C[ 9] + r_in[4]*C[13];
+  r_out[4] = r_in[0]*C[10] + r_in[1]*C[11] + r_in[2]*C[12] +r_in[3]*C[13] + r_in[4]*C[14];
 }
 
 void AliHLTTPCCAMerger::FilterTracks(float const r[5], float const C[15], float const m[5], float const V[15], float R[5], float W[15], float &chi2)
@@ -1134,10 +796,7 @@ void AliHLTTPCCAMerger::FilterTracks(float const r[5], float const C[15], float 
 void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1[], int N1, AliHLTTPCCABorderTrackGlobal B2[], int N2, int number)
 {
   //* split two sets of tracks
-  float factor2k = 2.0;//2.2;
-
-//  factor2k  = 3.5 * 3.5 * factor2k * factor2k;
-  factor2k = 10. * 10.;
+  float factor2k = 100.f;
 
   int iSlice1, iSlice2;
   bool IsNext;
@@ -1188,16 +847,9 @@ void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1
 //    if ( b1.NClusters() < minNPartHits ) continue;
     int iBest2 = -1;
     int iSliceBest2 = -1;
-    int lBest2 = 0;
-    bool IsNext2 = 1;
-    float hiBest2 = 100000.;
-    float hi = 10000000.;
     float chi2;
 
-    float r_min2 = 10000000.;
     float dr_min2_local = 10000000.;
-
-    AliHLTTPCCASliceTrackInfo *Ttt = &fTrackInfos[fSliceTrackInfoStart[iSlice1] + b1.TrackID() ];
 
     //int start2 = ( iSlice1 != iSlice2 ) ? 0 : i1 + 1;
     for ( int i2 = i1+1; i2 < N2; i2++ ) {
@@ -1212,6 +864,7 @@ void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1
       if( iSlice2 == iSlice1) IsNeigh = 1;
       if(!IsNeigh) continue;
 
+//      if(b1.NClusters() < 8 && b2.NClusters() < 8) continue;
 
 /*      if(IsNext)
       {
@@ -1219,327 +872,264 @@ void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1
       }
       else if(b1.ZStart()<b2.ZEnd()) continue;*/
 
-      float xyS1, xyS2,xyE1, xyE2, dxy, dz12, dy12, dx12;
+      float dx;
 
       AliHLTTPCCASliceTrackInfo *Tt1 = &fTrackInfos[fSliceTrackInfoStart[iSlice1] + b1.TrackID() ];
       AliHLTTPCCASliceTrackInfo *Tt2 = &fTrackInfos[fSliceTrackInfoStart[iSlice2] + b2.TrackID() ];
 
-      AliHLTTPCCASliceTrackInfo *trackDraw1, *trackDraw;
+      float xE1 = Tt1->OuterParam().X();
+      float xS1 = Tt1->InnerParam().X();
+      float xE2 = Tt2->OuterParam().X();
+      float xS2 = Tt2->InnerParam().X();
 
-      xyE1 = Tt1->OuterParam().X();
-      xyS1 = Tt1->InnerParam().X();
-      xyE2 = Tt2->OuterParam().X();
-      xyS2 = Tt2->InnerParam().X();
+      float yE1 = Tt1->OuterParam().Y();
+      float yS1 = Tt1->InnerParam().Y();
+      float yE2 = Tt2->OuterParam().Y();
+      float yS2 = Tt2->InnerParam().Y();
+
+      float xE1_E2, xS1_S2, xS1_E2, xS2_E1;
+      float yE1_E2, yS1_S2, yS1_E2, yS2_E1;
+      float sinE1_E2, sinS1_S2, sinS1_E2, sinS2_E1;
+
+      Tt1->OuterParam().RotateXY(Tt2->OuterAlpha() - Tt1->OuterAlpha(),xE1_E2,yE1_E2,sinE1_E2);
+      Tt1->InnerParam().RotateXY(Tt2->InnerAlpha() - Tt1->InnerAlpha(),xS1_S2,yS1_S2,sinS1_S2);
+      Tt1->InnerParam().RotateXY(Tt2->OuterAlpha() - Tt1->InnerAlpha(),xS1_E2,yS1_E2,sinS1_E2);
+      Tt2->InnerParam().RotateXY(Tt1->OuterAlpha() - Tt2->InnerAlpha(),xS2_E1,yS2_E1,sinS2_E1);
+
+      if(xS1_S2 < xS2) IsNext=1; 
+      else             IsNext=0;
 
       AliHLTTPCCATrackParam Thelp, Thelp1;
+      int sh = -1, sh1 = -1, Itr = -1, Itr1 = -1;
 
-      if(xyS1 < xyS2)
-      {
-        dxy = xyS2 - xyE1;
-        dz12 = b2.ZStart() - b1.ZEnd();
-        dy12 = b2.YStart() - b1.YEnd();
-        dx12 = b2.XStart() - b1.XEnd();
-        IsNext=1;
-        //if(b2.ZStart()<b1.ZEnd()) continue;
-        if(dxy > 0)
-        {
-          Thelp = Tt1->OuterParam();
-          Thelp1 = Tt2->InnerParam();
+      float dxArr[4] = {(xE1_E2 - xE2), 
+                        (xS1_S2 - xS2), 
+                        (xS1_E2 - xE2), 
+                        (xS2_E1 - xE1)};
+      float dyArr[4] = {(yE1_E2 - yE2), 
+                        (yS1_S2 - yS2), 
+                        (yS1_E2 - yE2), 
+                        (yS2_E1 - yE1)};
 
-          trackDraw = Tt1;
-          trackDraw1 = Tt2;
+      float k1   = Tt1->InnerParam().QPt() * fSliceParam.cBz();
+      float k2   = Tt2->InnerParam().QPt() * fSliceParam.cBz();
+      float dx_1 = xE2 - xS1_E2;
+      float dx_2 = xE1 - xS2_E1;
+      float t_sin1 = k1 * dx_1 + sinS1_E2;
+      float t_sin2 = k2 * dx_2 + sinS2_E1;
+      if(CAMath::Abs( t_sin1 ) > 0.999 || CAMath::Abs( t_sin2 ) > 0.999) continue;
 
-          float a1 = slices[iSlice1]->Param().Alpha();
-//        std::cout << iSlice1 <<"  "<<a1<< std::endl;
-          float a2 = slices[iSlice2]->Param().Alpha();
-//        std::cout << iSlice2 <<"  "<<a2<< std::endl;
-          Thelp.Rotate( a2 - a1 , 0.999 );
-          Thelp.TransportToXWithMaterial( Tt2->InnerParam().X(), fSliceParam.cBz());
-        }
-        else
-        {
-          Thelp = Tt2->InnerParam();
-          trackDraw = Tt2;
-          float dist1, dist2;
-          dist1 = sqrt(Thelp.X() - Tt1->OuterParam().X())*(Thelp.X() - Tt1->OuterParam().X()) + 
-                  (Thelp.Y() - Tt1->OuterParam().Y())*(Thelp.Y() - Tt1->OuterParam().Y());
-          dist2 = sqrt(Thelp.X() - Tt1->InnerParam().X())*(Thelp.X() - Tt1->InnerParam().X()) + 
-                  (Thelp.Y() - Tt1->InnerParam().Y())*(Thelp.Y() - Tt1->InnerParam().Y());
-
-          float a1 = slices[iSlice1]->Param().Alpha();
-//        std::cout << iSlice1 <<"  "<<a1<< std::endl;
-          float a2 = slices[iSlice2]->Param().Alpha();
-//        std::cout << iSlice2 <<"  "<<a2<< std::endl;
-          float da;
-          if(dist2 > dist1)
-          {
-            Thelp1 = Tt1->OuterParam();
-            trackDraw1 = Tt1;
-            da = a1-a2;
-          }
-          else
-          {
-            Thelp = Tt1->InnerParam();
-            Thelp1 = Tt2->InnerParam();
-            trackDraw = Tt1;
-            trackDraw1 = Tt2;
-            da = a2-a1;
-          }
-          Thelp.Rotate( da , 0.999 );
-          Thelp.TransportToXWithMaterial( Thelp1.X(), fSliceParam.cBz());
-        }
-      }
+      float dxyArr[4] = {dxArr[0]*dxArr[0] + dyArr[0]*dyArr[0],
+                         dxArr[1]*dxArr[1] + dyArr[1]*dyArr[1], 
+                         dxArr[2]*dxArr[2] + dyArr[2]*dyArr[2], 
+                         dxArr[3]*dxArr[3] + dyArr[3]*dyArr[3]};
+      int idx = 0, idx_temp1 = 0, idx_temp2 = 2;
+      dx = fabs(dxyArr[0]);
+      float dx_temp1 = fabs(dxyArr[0]), dx_temp2 = fabs(dxyArr[2]);
+      if(fabs(dxyArr[1]) < dx_temp1) { dx_temp1 = dxyArr[1]; idx_temp1 = 1; }
+      if(fabs(dxyArr[3]) < dx_temp2) { dx_temp2 = dxyArr[3]; idx_temp2 = 3; }
+      if(number == 1) 
+        { dx = dx_temp2; idx = idx_temp2; }
       else
       {
-        dxy = xyS1 - xyE2;
-        dz12 = b1.ZStart() - b2.ZEnd();
-        dy12 = b1.YStart() - b2.YEnd();
-        dx12 = b1.XStart() - b2.XEnd();
-        IsNext=0;
-        //if(b1.ZStart()<b2.ZEnd()) continue;
-        if(dxy > 0)
-        {
-          Thelp = Tt2->OuterParam();
-          Thelp1 = Tt1->InnerParam();
-          trackDraw = Tt2;
-          trackDraw1 = Tt1;
-          float a1 = slices[iSlice1]->Param().Alpha();
-//        std::cout << iSlice1 <<"  "<<a1<< std::endl;
-          float a2 = slices[iSlice2]->Param().Alpha();
-//        std::cout << iSlice2 <<"  "<<a2<< std::endl;
-          Thelp.Rotate( a1 - a2 , 0.999 );
-          Thelp.TransportToXWithMaterial( Tt1->InnerParam().X(), fSliceParam.cBz());
-        }
-        else
-        {
-          Thelp = Tt1->InnerParam();
-          trackDraw = Tt1;
-          float dist1, dist2;
-          dist1 = sqrt(Thelp.X() - Tt2->OuterParam().X())*(Thelp.X() - Tt2->OuterParam().X()) + 
-                  (Thelp.Y() - Tt2->OuterParam().Y())*(Thelp.Y() - Tt2->OuterParam().Y());
-          dist2 = sqrt(Thelp.X() - Tt2->InnerParam().X())*(Thelp.X() - Tt2->InnerParam().X()) + 
-                  (Thelp.Y() - Tt2->InnerParam().Y())*(Thelp.Y() - Tt2->InnerParam().Y());
+        if(dx_temp2 < dx_temp1) { dx = dx_temp2; idx = idx_temp2; }
+        else                    { dx = dx_temp1; idx = idx_temp1; }
+      }
+int row, row1;
+      float a1;
+      float a2;
 
-          float a1 = slices[iSlice1]->Param().Alpha();
-//        std::cout << iSlice1 <<"  "<<a1<< std::endl;
-          float a2 = slices[iSlice2]->Param().Alpha();
-//        std::cout << iSlice2 <<"  "<<a2<< std::endl;
-          float da;
-          if(dist2 > dist1)
+      switch(idx)
+      {
+        case 0:
           {
+            row = Tt1->rowOuter;
+            row1 = Tt2->rowOuter;
+            Thelp  = Tt1->OuterParam();
             Thelp1 = Tt2->OuterParam();
-            trackDraw1 = Tt2;
-            da = a1-a2;
+            a1 = Tt1->OuterAlpha();
+            a2 = Tt2->OuterAlpha();
+            dx = dxArr[0];
           }
-          else
+          break;
+        case 1:
           {
-            Thelp = Tt2->InnerParam();
-            Thelp1 = Tt1->InnerParam();
-            da = a2 - a1;
+            row = Tt1->rowInner;
+            row1 = Tt2->rowInner;
+            Thelp  = Tt1->InnerParam();
+            Thelp1 = Tt2->InnerParam();
+            a1 = Tt1->InnerAlpha();
+            a2 = Tt2->InnerAlpha();
+            dx = dxArr[1];
           }
-          Thelp.Rotate( da , 0.999 );
-          Thelp.TransportToXWithMaterial( Thelp1.X(), fSliceParam.cBz());
-        }
+          break;
+        case 2:
+          {
+            row = Tt1->rowInner;
+            row1 = Tt2->rowOuter;
+            Thelp  = Tt1->InnerParam();
+            Thelp1 = Tt2->OuterParam();
+            a1 = Tt1->InnerAlpha();
+            a2 = Tt2->OuterAlpha();
+            dx = dxArr[2];
+          }
+          break;
+        case 3:
+          {
+            row = Tt1->rowOuter;
+            row1 = Tt2->rowInner;
+            Thelp  = Tt1->OuterParam();
+            Thelp1 = Tt2->InnerParam();
+            a1 = Tt1->OuterAlpha();
+            a2 = Tt2->InnerAlpha();
+            dx = dxArr[3];
+          }
+          break;
       }
 
-      float C[15], r[5], chi2;
+      if(number == 1)  if(dx < 0) continue;
+      if(number == 0)  if(dx > 0) continue;
+
+      sh = Tt1->fSlice;
+      sh1 = Tt2->fSlice;
+      Itr = Tt1->number;
+      Itr1 = Tt2->number;
+
+//std::cout << "sh "<<sh <<"  "<< b1.Slice() << "  sh1 " << sh1 <<"  "<< b2.Slice() 
+//          << "itr "<<Itr <<"  "<< b1.TrackID() << "  itr1 " << Itr1 <<"  "<< b2.TrackID() <<std::endl;
+
+      if(!Thelp.Rotate( a2 - a1 , 0.999 )) continue;
+
+      dr_min2_local = (Thelp.Y()-Thelp1.Y())*(Thelp.Y()-Thelp1.Y()) + (Thelp.Z()-Thelp1.Z())*(Thelp.Z()-Thelp1.Z()) + dx*dx;
+
+      float xc1 = Thelp.X() - Thelp.GetSinPhi()/(fSliceParam.cBz() * Thelp.QPt());
+      float yc1 = Thelp.Y() + Thelp.GetCosPhi()/(fSliceParam.cBz() * Thelp.QPt());
+      float xc2 = Thelp1.X() - Thelp1.GetSinPhi()/(fSliceParam.cBz() * Thelp1.QPt());
+      float yc2 = Thelp1.Y() + Thelp1.GetCosPhi()/(fSliceParam.cBz() * Thelp1.QPt());
+
+      float ToX = 0.5 * (Thelp.X() + Thelp1.X());
+      if(!Thelp.TransportToXWithMaterial( ToX, fSliceParam.cBz()))  continue;
+      if(!Thelp1.TransportToXWithMaterial( ToX, fSliceParam.cBz())) continue;
+
+      float C[15], r[5], chi2, delta2, Si;
       FilterTracks(Thelp.GetPar(), Thelp.GetCov(), Thelp1.GetPar(), Thelp1.GetCov(), r, C, chi2);
 
-      bool Ok = 1;
-
-      for ( int i = 0; i < 15; i++ ) Ok = Ok && finite( C[i] );
-      for ( int i = 0; i < 5; i++ ) Ok = Ok && finite( r[i] );
-      if ( C[0] <= 0 || C[2] <= 0 || C[5] <= 0 || C[9] <= 0 || C[14] <= 0 ) Ok = 0;
-      //if ( C[0] > 5. || C[2] > 5. || C[5] > 2. || C[9] > 2 || C[14] > 2 ) Ok = 0;
-      
-//      std::cout <<std::endl<< "Parametery horoshye? ";
-//      if(Ok) std::cout <<" -Da! "; else std::cout << " -Net! ";
-//      std::cout << "  Chi2  " << chi2 << "  Treki soedineny?  ";
-	
-
-      dr_min2_local = dy12*dy12 + dx12*dx12 + dz12*dz12;
-
-      if(number == 1)  if(dxy < 0) continue;
-///continue;
- //     if(CAMath::Abs(Thelp.X() - Thelp1.X())>10.) continue;
-//std::cout << "x1  " << Thelp.X() << "  x2  "<< Thelp1.X() <<"  y1   "<< Thelp.Y() <<"  y2  "<<Thelp1.Y() << std::endl;
-
-      if((Thelp1.Y() - Thelp.Y())*(Thelp1.Y() - Thelp.Y()) > 100*(Thelp1.Err2Y() + Thelp.Err2Y())) continue;
-      if((Thelp1.Z() - Thelp.Z())*(Thelp1.Z() - Thelp.Z()) > 100*(Thelp1.Err2Z() + Thelp.Err2Z())) continue;
-
-      if(fabs(Thelp1.Y() - Thelp.Y())>10.) continue;
-      if(fabs(Thelp1.Z() - Thelp.Z())>10.) continue;
-
-      if((Thelp1.SinPhi() - Thelp.SinPhi())*(Thelp1.SinPhi() - Thelp.SinPhi()) > 100*(Thelp1.Err2SinPhi() + Thelp.Err2SinPhi())) continue;
-//std::cout << fabs(Thelp1.SinPhi() - Thelp.SinPhi()) << "  "<<sqrt(Thelp1.Err2SinPhi() + Thelp.Err2SinPhi())<<std::endl;
-      if(fabs(Thelp1.SinPhi() - Thelp.SinPhi())>0.15) continue;
-
-      //if(fabs(YsYe1*dz12 - ZsZe1*dy12) > fabs(YsYe1*dz12)) continue;
-      //if(fabs(YsYe2*dz12 - ZsZe2*dy12) > fabs(YsYe2*dz12)) continue;
-
-      AliHLTTPCCABorderTrackGlobal *bLong;
-      AliHLTTPCCABorderTrackGlobal *bShort;
-
-      if (b1.NClusters()>b2.NClusters())
-//      if (b1.NClusters()>b2.NClusters())
-//      if     (b1.NClusters()>1.5*b2.NClusters()) {bLong = &b1; bShort = &b2;}
-//      else if(b2.NClusters()>1.5*b1.NClusters()) {bLong = &b2; bShort = &b1;}
-//      else if(b1.R()<b2.R())
-      { bLong = &b1; bShort = &b2; }
-      else
-      { bLong = &b2; bShort = &b1; }
-
-      float dqpt2 = fabs(b1.QPt()) - fabs(b2.QPt());
-      dqpt2 = dqpt2*dqpt2;
-      float ddqpt2 = b1.QPtErr2() + b2.QPtErr2();
-
-      float dr2 = b1.R() - b2.R();
-      dr2 = dr2*dr2;
-      float ddr2 = b1.RErr2() + b2.RErr2();
-//      if(dr2 > 4*factor2k * ddr2) continue;
-//      if(fabs(b1.R() - b2.R()) > 0.5*(b1.R() + b2.R())) continue;
-
-//      float db2 = CAMath::Abs(b1.b()) - CAMath::Abs(b2.b());
-      float db2 = (b1.b()) - (b2.b());
-      db2 = db2*db2;
-      float ddb2 = b1.bErr2() + b2.bErr2();
-      //if(db2 > factor2k * ddb2) continue;
-
-      float dxc2 = b1.XCentr() - b2.XCentr();
-      dxc2 = dxc2*dxc2;
-      float ddxc2 = b1.XCentrErr2() + b2.XCentrErr2();
-
-//      if(dxc2 > 4*factor2k * ddxc2 ) continue;
-//std::cout << sqrt(dxc2) << "  " << sqrt(ddxc2) << std::endl;
-
-      float dyc2 = b1.YCentr() - b2.YCentr();
-      dyc2 = dyc2*dyc2;
-      float ddyc2 = b1.YCentrErr2() + b2.YCentrErr2();
-//      if(dyc2 > 4*factor2k * ddyc2 ) continue;
-
-      hi=0;
-
-      //if(dqpt2>factor2k *ddqpt2) continue;
-      //if(dr2 > factor2k * ddr2) continue;
-      if(db2 > factor2k * ddb2) continue;
-//      std::cout << " -DA! ";
-      //if(bLong->R() > 150 || bShort->R() < 50)      if(dqpt2>factor2k *ddqpt2) continue;
-//if(bLong->NClusters() > 15 && bShort->NClusters() > 15)      if(dqpt2>factor2k *ddqpt2) continue;
-
-        //if(dxc2 > factor2k * ddxc2 ) continue;
-        //if(dyc2 > factor2k * ddyc2 ) continue
-      hi += db2/(factor2k * ddb2) + dxc2/(factor2k * ddxc2) + dyc2/(factor2k * ddyc2);
-
-if(number == 0 &&0){
 #ifdef MAIN_DRAW
+if(number == 0 && chi2<1000 && fabs(Thelp1.Y() - Thelp.Y())<10.f && fabs(Thelp1.Z() - Thelp.Z())<10.f && fabs(Thelp1.SinPhi() - Thelp.SinPhi())<0.15f){
       AliHLTTPCCADisplay::Instance().ClearView();
       AliHLTTPCCADisplay::Instance().SetTPCView();
       AliHLTTPCCADisplay::Instance().DrawTPC();
 
-      for(int ihit=0; ihit<trackDraw->NClusters(); ihit++)
+      for(int ihit=0; ihit<Tt1->NClusters(); ihit++)
       {
-        AliHLTTPCCAClusterInfo &h = fClusterInfos[trackDraw->FirstClusterRef() + ihit];
+        AliHLTTPCCAClusterInfo &h = fClusterInfos[Tt1->FirstClusterRef() + ihit];
         AliHLTTPCCADisplay::Instance().SetCurrentSlice( slices[h.ISlice()] );
         AliHLTTPCCADisplay::Instance().DrawPoint(h.X(), h.Y(), h.Z(), 1, 1 );
       }
 
-      for(int ihit=0; ihit<trackDraw1->NClusters(); ihit++)
+      for(int ihit=0; ihit<Tt2->NClusters(); ihit++)
       {
-        AliHLTTPCCAClusterInfo &h = fClusterInfos[trackDraw1->FirstClusterRef() + ihit];
+        AliHLTTPCCAClusterInfo &h = fClusterInfos[Tt2->FirstClusterRef() + ihit];
         AliHLTTPCCADisplay::Instance().SetCurrentSlice( slices[h.ISlice()] );
         AliHLTTPCCADisplay::Instance().DrawPoint(h.X(), h.Y(), h.Z(), 2, 1 );
       }
 
-      AliHLTTPCCADisplay::Instance().SetCurrentSlice( slices[fClusterInfos[trackDraw1->FirstClusterRef()].ISlice()] );
+      AliHLTTPCCADisplay::Instance().SetCurrentSlice( slices[iSlice1] );
       AliHLTTPCCADisplay::Instance().DrawPoint(Thelp.X(), Thelp.Y(), Thelp.Z(), 0, 1 );
+      AliHLTTPCCADisplay::Instance().DrawPoint(Thelp1.X(), Thelp1.Y(), Thelp1.Z(), 3, 0.5 );
 
       AliHLTTPCCADisplay::Instance().Ask();
-#endif
 }
+#endif
 
-     if(0)
-     {
-      AliHLTTPCCASliceTrackInfo track = fTrackInfos[fSliceTrackInfoStart[bLong->Slice()] + bLong->TrackID()];
+      bool Ok = 1;
+      bool Ok1 = 1;
 
-      AliHLTTPCCATrackParam startPoint = track.InnerParam(), endPoint = track.OuterParam();
-      float startAlpha = track.InnerAlpha(), endAlpha = track.OuterAlpha();
+      for ( int i = 0; i < 15; i++ ) Ok = Ok && finite( C[i] );
+      for ( int i = 0; i < 5; i++ ) Ok = Ok && finite( r[i] );
+      if ( C[0] <= 0 || C[2] <= 0 || C[5] <= 0 || C[9] <= 0 || C[14] <= 0 ) Ok = 0;
+      if ( C[0] > 5. || C[2] > 5. || C[5] > 2. || C[9] > 2 || C[14] > 2 ) Ok1 = 0;
 
-      int hits[2000];
-      int firstHit = 1000;
-      int nHits = 0;
+      if ( C[1]*C[1] > C[0]*C[2]) Ok1 = 0;
+      if ( C[3]*C[3] > C[0]*C[5]) Ok1 = 0;
+      if ( C[4]*C[4] > C[2]*C[5]) Ok1 = 0;
+      if ( C[6]*C[6] > C[0]*C[9]) Ok1 = 0;
+      if ( C[7]*C[7] > C[2]*C[9]) Ok1 = 0;
+      if ( C[8]*C[8] > C[5]*C[9]) Ok1 = 0;
+      if ( C[10]*C[10] > C[0]*C[14]) Ok1 = 0;
+      if ( C[11]*C[11] > C[2]*C[14]) Ok1 = 0;
+      if ( C[12]*C[12] > C[5]*C[14]) Ok1 = 0;
+      if ( C[13]*C[13] > C[9]*C[14]) Ok1 = 0;
 
+      float dbb2 = (b1.b()) - (b2.b());
+      dbb2 = dbb2*dbb2;
+      float ddbb2 = b1.bErr2() + b2.bErr2();
+      float ady = fabs(Thelp1.Y() - Thelp.Y());
+      float adz = fabs(Thelp1.Z() - Thelp.Z());
+      float adsin = fabs(Thelp1.SinPhi() - Thelp.SinPhi());
+
+      delta2 = fabs(row-row1);
+      Si = (Thelp.X() - xc1)/(Thelp.Y() - yc1) - (Thelp1.X() - xc2)/(Thelp1.Y() - yc2);
+      if(!(sh == -1 || sh1 == -1 || Itr == -1 || Itr1 == -1))
+        ((AliHLTTPCCAMergerPerformance*)(AliHLTTPCCAPerformance::Instance().GetSubPerformance("Merger")))->
+	  AddMergerData(number, sh, Itr, sh1, Itr1, dbb2 <= factor2k * ddbb2, Ok, Ok1, chi2, delta2, Si, ady,adz,adsin,Tt1->NClusters(),Tt2->NClusters());
+//      std::cout <<std::endl<< "Parametery horoshye? ";
+//      if(Ok) std::cout <<" -Da! "; else std::cout << " -Net! ";
+//      std::cout << "  Chi2  " << chi2 << "  Treki soedineny?  ";
+
+      if(number == 0 && 0)
       {
-        track.SetUsed( 1 );
-        for ( int jhit = 0; jhit < track.NClusters(); jhit++ ) {
-          int id = track.FirstClusterRef() + jhit;
-          hits[firstHit+jhit] = id;
-        }
-        nHits = track.NClusters();
+        if((Thelp1.Y() - Thelp.Y())*(Thelp1.Y() - Thelp.Y()) > 100*(Thelp1.Err2Y() + Thelp.Err2Y())) continue;
+        if((Thelp1.Z() - Thelp.Z())*(Thelp1.Z() - Thelp.Z()) > 100*(Thelp1.Err2Z() + Thelp.Err2Z())) continue;
+        if((Thelp1.SinPhi() - Thelp.SinPhi())*(Thelp1.SinPhi() - Thelp.SinPhi()) > 100*(Thelp1.Err2SinPhi() + Thelp.Err2SinPhi())) continue;
       }
 
-      AliHLTTPCCASliceTrackInfo segment = fTrackInfos[fSliceTrackInfoStart[bShort->Slice()] + bShort->TrackID()];
-      bool dir = 0;
-        int startHit = firstHit + nHits;
-        float d00 = startPoint.GetDistXZ2( segment.InnerParam() );
-        float d01 = startPoint.GetDistXZ2( segment.OuterParam() );
-        float d10 = endPoint.GetDistXZ2( segment.InnerParam() );
-        float d11 = endPoint.GetDistXZ2( segment.OuterParam() );
-        if ( d00 <= d01 && d00 <= d10 && d00 <= d11 ) {
-          startPoint = segment.OuterParam();
-          startAlpha = segment.OuterAlpha();
-          dir = 1;
-          firstHit -= segment.NClusters();
-          startHit = firstHit;
-        } else if ( d01 <= d10 && d01 <= d11 ) {
-          startPoint = segment.InnerParam();
-          startAlpha = segment.InnerAlpha();
-          dir = 0;
-          firstHit -= segment.NClusters();
-          startHit = firstHit;
-        } else if ( d10 <= d11 ) {
-          endPoint = segment.OuterParam();
-          endAlpha = segment.OuterAlpha();
-          dir = 0;
-        } else {
-          endPoint = segment.InnerParam();
-          endAlpha = segment.InnerAlpha();
-          dir = 1;
-        }
+      if(fabs(Thelp1.Y() - Thelp.Y())>10.f) continue;
+      if(fabs(Thelp1.Z() - Thelp.Z())>10.f) continue;
+      if(fabs(Thelp1.SinPhi() - Thelp.SinPhi())>0.15f) continue;
 
-        for ( int jhit = 0; jhit < segment.NClusters(); jhit++ ) {
-          int id = segment.FirstClusterRef() + jhit;
-          hits[startHit+( dir ?( segment.NClusters()-1-jhit ) :jhit )] = id;
-        }
-        nHits += segment.NClusters();
+      if(number == 1) if(chi2>100.f) continue;
+      if(number == 0) if(chi2>300.f) continue;
 
-      if ( endPoint.X() < startPoint.X() ) { // swap
-        for ( int i = 0; i < nHits; i++ ) hits[i] = hits[firstHit+nHits-1-i];
-        firstHit = 0;
+      float db2 = (b1.b()) - (b2.b());
+      db2 = db2*db2;
+      float ddb2 = b1.bErr2() + b2.bErr2();
+      if(db2 > factor2k * ddb2) continue;
+//      std::cout << " -DA! ";
+
+#ifdef MAIN_DRAW
+if(number == 0 ){
+      AliHLTTPCCADisplay::Instance().ClearView();
+      AliHLTTPCCADisplay::Instance().SetTPCView();
+      AliHLTTPCCADisplay::Instance().DrawTPC();
+
+      for(int ihit=0; ihit<Tt1->NClusters(); ihit++)
+      {
+        AliHLTTPCCAClusterInfo &h = fClusterInfos[Tt1->FirstClusterRef() + ihit];
+        AliHLTTPCCADisplay::Instance().SetCurrentSlice( slices[h.ISlice()] );
+        AliHLTTPCCADisplay::Instance().DrawPoint(h.X(), h.Y(), h.Z(), 2, 1 );
       }
 
-      endPoint = startPoint;
-  ///mmm    if ( !FitTrack( endPoint, endAlpha, startPoint, startAlpha, hits + firstHit, nHits, 0 ) ) continue;
-  ///mmm    if ( !FitTrack( startPoint, startAlpha, endPoint, endAlpha, hits + firstHit, nHits, 1 ) ) continue;
+      for(int ihit=0; ihit<Tt2->NClusters(); ihit++)
+      {
+        AliHLTTPCCAClusterInfo &h = fClusterInfos[Tt2->FirstClusterRef() + ihit];
+        AliHLTTPCCADisplay::Instance().SetCurrentSlice( slices[h.ISlice()] );
+        AliHLTTPCCADisplay::Instance().DrawPoint(h.X(), h.Y(), h.Z(), 3, 1 );
+      }
 
-      AliHLTTPCCATrackParam &p = startPoint;
-      chi2 = p.Chi2();
-        bool ok = 1;
+      AliHLTTPCCADisplay::Instance().SetCurrentSlice( slices[iSlice1] );
+      AliHLTTPCCADisplay::Instance().DrawPoint(Thelp.X(), Thelp.Y(), Thelp.Z(), 4, 1 );
+      AliHLTTPCCADisplay::Instance().DrawPoint(Thelp1.X(), Thelp1.Y(), Thelp1.Z(), 5, 0.5 );
 
-        const float *c = p.Cov();
-        for ( int i = 0; i < 15; i++ ) ok = ok && finite( c[i] );
-        for ( int i = 0; i < 5; i++ ) ok = ok && finite( p.Par()[i] );
-        //ok = ok && ( p.GetX() > 50 ); // TODO: read from file!!
+      AliHLTTPCCADisplay::Instance().Ask();
+}
+#endif
 
-        if ( c[0] <= 0 || c[2] <= 0 || c[5] <= 0 || c[9] <= 0 || c[14] <= 0 ) ok = 0;
-        if ( c[0] > 5. || c[2] > 5. || c[5] > 2. || c[9] > 2 || c[14] > 2 ) ok = 0;
- ///mmm       if ( !ok ) continue;
-     }
+      if(!(sh == -1 || sh1 == -1 || Itr == -1 || Itr1 == -1))
+        ((AliHLTTPCCAMergerPerformance*)(AliHLTTPCCAPerformance::Instance().GetSubPerformance("Merger")))->SetMerged(number);
 
-//      if (hiBest2 < dr2/ddr2 + db2/ddb2 + dxc2/ddxc2 + dyc2/ddyc2 ) continue;
-//      hiBest2 = dr2/ddr2 + db2/ddb2 + dxc2/ddxc2 + dyc2/ddyc2;
       iBest2 = b2.TrackID();
       iSliceBest2 = iSlice2;
-      IsNext2 = IsNext;
 
       AliHLTTPCCASliceTrackInfo *T1, *T2;
       int NextNew, SliceNextNew, PrevNew, SlicePrevNew;
@@ -1547,16 +1137,7 @@ if(number == 0 &&0){
       {
         T1 = &fTrackInfos[fSliceTrackInfoStart[iSlice1] + b1.TrackID() ];
         T2 = &fTrackInfos[fSliceTrackInfoStart[iSliceBest2] + iBest2 ];
-        /*if(hi < b1.ChiBest())
-        {
-          b1.SetChiBest(hi);
-          T1 -> SetBestNeighbour(fSliceTrackInfoStart[iSliceBest2] + iBest2);
-        }
-        if(hi < b2.ChiBest())
-        {
-          b2.SetChiBest(hi);
-          T2 -> SetBestNeighbour(fSliceTrackInfoStart[iSlice1] + b1.TrackID());
-        }*/
+
         NextNew = iBest2;
         SliceNextNew = iSliceBest2;
         PrevNew = b1.TrackID();
@@ -1615,24 +1196,6 @@ if(number == 0 &&0){
         T2->SetPrevNeighbour( PrevNew );
         T2->SetSlicePrevNeighbour( SlicePrevNew );
       }
-/*#ifdef MAIN_DRAW
-      CalculateHelix(p0, c, b1.ZStart(), z0, xc, yc, R, b, x1,y1);
-      AliHLTTPCCADisplay::Instance().DrawPoint(x1, y1, b1.ZStart(), 1, 1 );
-
-      CalculateHelix(p0, c, b2.ZStart(), z0, xc, yc, R, b, x1,y1);
-      AliHLTTPCCADisplay::Instance().DrawPoint(x1, y1, b2.ZStart(), 1, 1 );
-
-      CalculateHelix(p0, c, b1.ZEnd(), z0, xc, yc, R, b, x1,y1);
-      AliHLTTPCCADisplay::Instance().DrawPoint(x1, y1, b1.ZEnd(), 2, 1 );
-
-      CalculateHelix(p0, c, b2.ZEnd(), z0, xc, yc, R, b, x1,y1);
-      AliHLTTPCCADisplay::Instance().DrawPoint(x1, y1, b2.ZEnd(), 2, 1 );
-
-      if(IsNext2)
-        AliHLTTPCCADisplay::Instance().DrawHelix(p0, c, zMax2, zMin1, z0, xc, yc, R, b, 2, 0.8);
-      else;
-        AliHLTTPCCADisplay::Instance().DrawHelix(p0, c, zMax1, zMin2, z0, xc, yc, R, b, 2, 0.8);
-#endif*/
     }
   }
 }
@@ -1735,6 +1298,9 @@ void AliHLTTPCCAMerger::Merging(int number)
         startPoint = helpPoint;
       }
 
+      track.number = trackOld.number;
+      track.fSlice = trackOld.fSlice;
+
       int hits[2000];
       int firstHit = 1000;
       int nHits = 0;
@@ -1831,7 +1397,7 @@ void AliHLTTPCCAMerger::Merging(int number)
       // refit
 
       // need best t0!!!SG
-
+//TODO: why tracks sometimes are killed after a merging?
       endPoint = startPoint;
       if ( !FitTrack( endPoint, endAlpha, startPoint, startAlpha, hits + firstHit, nHits, 0 ) ) continue;
       if ( !FitTrack( startPoint, startAlpha, endPoint, endAlpha, hits + firstHit, nHits, 1 ) ) continue;
@@ -1867,7 +1433,7 @@ void AliHLTTPCCAMerger::Merging(int number)
         ok = ok && ( p.GetX() > 50 ); // TODO: read from file!!
 
         if ( c[0] <= 0 || c[2] <= 0 || c[5] <= 0 || c[9] <= 0 || c[14] <= 0 ) ok = 0;
-        if ( c[0] > 5. || c[2] > 5. || c[5] > 2. || c[9] > 2 || c[14] > 2 ) ok = 0;
+        if ( c[0] > 5. || c[2] > 10. || c[5] > 2. || c[9] > 2 || c[14] > 2 ) ok = 0;
 ///mvz        if ( !ok ) continue;
       }
 
@@ -1962,8 +1528,12 @@ void AliHLTTPCCAMerger::Merging(int number)
       track.SliceNextNeighbour().clear();
       track.ChiPrev = 10000000;
       track.ChiNext = 10000000;
+      track.SetPrevNeighbourPre( -1 );
+      track.SetNextNeighbourPre( -1 );
       track.SetInnerParam(startPoint);
+      track.SetInnerAlpha( startAlpha );
       track.SetOuterParam(endPoint);
+      track.SetOuterAlpha( endAlpha );
 
       for(int iClu=0; iClu < nHits; iClu++) tmpH[nH + iClu] = fClusterInfos[hits[iClu]];
       nH += nHits;

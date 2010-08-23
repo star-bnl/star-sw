@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMergerPerformance.cxx,v 1.1 2010/08/12 19:35:39 mzyzak Exp $
+// $Id: AliHLTTPCCAMergerPerformance.cxx,v 1.2 2010/08/23 19:37:02 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -48,6 +48,10 @@
 
 #include "TBranch.h"
 
+
+ClassImp(MergerPerfData)
+ClassImp(MergerPerfDataEvent)
+
 void AliHLTTPCCAMergerPerformance::SetNewEvent(const AliHLTTPCCAGBTracker * const Tracker,
                             AliHLTResizableArray<AliHLTTPCCAHitLabel> *hitLabels,
                             AliHLTResizableArray<AliHLTTPCCAMCTrack> *mcTracks,
@@ -64,9 +68,10 @@ void AliHLTTPCCAMergerPerformance::SetNewEvent(const AliHLTTPCCAGBTracker * cons
     }
     
     iData = 0;
-    MPDTree = new TTree("MergerPerfDataTree","MergerPerfDataTree");
-    MergerData = new TClonesArray("MergerPerfData");
-    MPDTree->Branch("MergerPerfData","MergerPerfData",&MergerData);
+    iData2Step = 0;
+//    MPDTree = new TTree("MergerPerfDataTree","MergerPerfDataTree");
+//    MergerData = new TClonesArray("MergerPerfData");
+//    MPDTree->Branch("TClonesArray","TClonesArray",&MergerData);
   }
   first_call = false;
   
@@ -76,20 +81,61 @@ void AliHLTTPCCAMergerPerformance::SetNewEvent(const AliHLTTPCCAGBTracker * cons
 
 } // void AliHLTTPCCAMergerPerformance::SetNewEvent
 
-void AliHLTTPCCAMergerPerformance::CreateHistos(string histoDir)
+void AliHLTTPCCAMergerPerformance::CreateHistos(string histoDir, TFile* outFile)
 {
+  if(fIsHistoCreated) return;
+
+  TDirectory *curdir = gDirectory;
+  if ( (histoDir != "") && outFile) {  // create in file
+    if (outFile) outFile->cd();
+    fHistoDir = outFile->mkdir( TString(histoDir) );
+    fHistoDir->cd();
+    MPDTree = new TTree("MergerPerfDataTree","MergerPerfDataTree");
+    MPDTree2Step = new TTree("MergerPerfDataTree2Step","MergerPerfDataTree2Step");
+  
+    gDirectory->cd( ".." );
+    curdir->cd();    
+  }
+  else
+  {
+    MPDTree = new TTree("MergerPerfDataTree","MergerPerfDataTree");
+    MPDTree2Step = new TTree("MergerPerfDataTree2Step","MergerPerfDataTree2Step");
+  }
+  
+  fMPDE = new MergerPerfDataEvent();
+  fMPDE->MergerData = new TClonesArray("MergerPerfData");
+  fMPDE2Step = new MergerPerfDataEvent();
+  fMPDE2Step->MergerData = new TClonesArray("MergerPerfData");
+
+  MPDTree->Branch("MergerPerfDataEvent","MergerPerfDataEvent",&fMPDE);
+  MPDTree2Step->Branch("MergerPerfDataEvent","MergerPerfDataEvent",&fMPDE2Step);
+
+  SetHistoCreated();
 }
 
-void AliHLTTPCCAMergerPerformance::AddMergerData(int iSlice1, int iTrack1, int iSlice2, int iTrack2, bool IsDzDs, bool IsCovMatrixPositiv, bool IsCovMatrixFinite, float &chi2)
+void AliHLTTPCCAMergerPerformance::AddMergerData(int step, int iSlice1, int iTrack1, int iSlice2, int iTrack2, bool IsDzDs, bool IsCovMatrixPositiv, bool IsCovMatrixFinite, float &chi2, float &delta2, float &Si, float &dy, float &dz, float &dsin, int nClust1, int nClust2)
 {
-  new(MergerData->At(iData)) MergerPerfData();
-  
-  MergerPerfData *mpd = (MergerPerfData*) MergerData->At(iData);
+  MergerPerfDataEvent *event;
+  int i;
+  if(step == 1) { event = fMPDE; i = iData; }
+  if(step == 0) { event = fMPDE2Step; i = iData2Step; }
+
+  TClonesArray &mData = *(event->MergerData);
+  new(mData[i]) MergerPerfData();
+  MergerPerfData *mpd = (MergerPerfData*) event->MergerData->At(i);
   mpd->IsDzDs = IsDzDs;
-  mpd->IsCovMatrixPositiv = IsCovMatrixPositiv;
+  mpd->IsCovMatrixPositive = IsCovMatrixPositiv;
   mpd->IsCovMatrixFinite = IsCovMatrixFinite;
   mpd->chi2 = chi2;
-  
+  mpd->dy = dy;
+  mpd->dz = dz;
+  mpd->dsin = dsin;
+  mpd->IsMerged = 0;
+  mpd->nClust1 = nClust1;
+  mpd->nClust2 = nClust2;
+  mpd->delta2 = delta2;
+  mpd->Si = Si;
+      
   const int iMC1 = slicePerformances[iSlice1]->recoData[iTrack1].GetMCTrackId();
   const int iMC2 = slicePerformances[iSlice2]->recoData[iTrack2].GetMCTrackId();
   
@@ -97,9 +143,39 @@ void AliHLTTPCCAMergerPerformance::AddMergerData(int iSlice1, int iTrack1, int i
     mpd->IsSameTrack = 1;
   else
     mpd->IsSameTrack = 0;
-  
-  std::cout << "DzDs  " << mpd->IsDzDs << " ICP " << mpd->IsCovMatrixPositiv << " ICF " << mpd->IsCovMatrixFinite << " IST " << mpd->IsSameTrack << " chi2 " << mpd->chi2 << std::endl;
-  iData++;
+
+  if(step == 1) iData++;
+  if(step == 0) iData2Step++;
+}
+
+void AliHLTTPCCAMergerPerformance::SetMerged(int step)
+{
+  MergerPerfDataEvent *event;
+  int i;
+  if(step == 1) { event = fMPDE; i = iData; }
+  if(step == 0) { event = fMPDE2Step; i = iData2Step; }
+
+  if(i > 0)
+  {
+    MergerPerfData *mpd = (MergerPerfData*) event->MergerData->At(i - 1);
+    mpd->IsMerged = 1;
+  }
+}
+
+void AliHLTTPCCAMergerPerformance::FillTree()
+{
+  MPDTree->Fill();
+  if(fMPDE->MergerData) delete fMPDE->MergerData;
+  fMPDE->MergerData = 0;
+  fMPDE->MergerData = new TClonesArray("MergerPerfData");
+
+  MPDTree2Step->Fill();
+  if(fMPDE2Step->MergerData) delete fMPDE2Step->MergerData;
+  fMPDE2Step->MergerData = 0;
+  fMPDE2Step->MergerData = new TClonesArray("MergerPerfData");
+
+  iData = 0;
+  iData2Step = 0;
 }
 
 void AliHLTTPCCAMergerPerformance::Exec(bool print)
@@ -111,6 +187,14 @@ void AliHLTTPCCAMergerPerformance::Exec(bool print)
   }
 } // void AliHLTTPCCAMergerPerformance::Exec
 
+void AliHLTTPCCAMergerPerformance::FillMC()
+{
+  for (unsigned int iPerf = 0; iPerf < slicePerformances.size(); iPerf++){
+    if ( !(slicePerformances[iPerf]->fTracker) ) return;
+    slicePerformances[iPerf]->CheckMCTracks();
+    slicePerformances[iPerf]->MatchTracks();
+  }
+}
 
 void AliHLTTPCCAMergerPerformance::FillHistos()
 {
@@ -125,5 +209,5 @@ void AliHLTTPCCAMergerPerformance::FillHistos()
 
 void AliHLTTPCCAMergerPerformance::WriteHistos()
 {
-  WriteDir2Current( MPDTree );
+  //WriteDir2Current( MPDTree );
 }

@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformanceBase.h,v 1.8 2010/08/18 20:46:09 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformanceBase.h,v 1.9 2010/08/23 19:37:02 mzyzak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -66,6 +66,9 @@ class AliHLTTPCCAPerformanceBase
       /// Accessors
     AliHLTTPCEfficiencies &GetEff()    { return fEff;     };
     AliHLTTPCEfficiencies &GetEffStat(){ return fEffStat; };
+    
+    bool IsHistoCreated() { return fIsHistoCreated; }
+    void SetHistoCreated(bool v = 1) { fIsHistoCreated = v; }
 
     vector<AliHLTTPCCAPerformanceMCTrackData>   &GetMCData()  { return mcData;   }; 
     vector<AliHLTTPCCAPerformanceRecoTrackData> &GetRecoData(){ return recoData; };
@@ -141,6 +144,7 @@ class AliHLTTPCCAPerformanceBase
     int nRecoTracks, nMCTracks;
     
     TDirectory *fHistoDir; //* ROOT directory with histogramm
+    bool fIsHistoCreated;
 };
 
 #endif

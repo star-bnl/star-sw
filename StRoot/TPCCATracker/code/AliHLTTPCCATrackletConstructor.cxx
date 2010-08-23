@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.5 2010/08/19 17:08:45 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCATrackletConstructor.cxx,v 1.6 2010/08/23 19:37:02 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -235,7 +235,6 @@ short_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, int
    TrackletVector &trackletVector, const short_m &mask )
 {
   //assert( active == ( active && ( r.fStage == ExtrapolateUp || r.fStage == ExtrapolateDown ) ) );
-
   // reconstruction of tracklets, tracklets update step
 
   const AliHLTTPCCARow &row = fData.Row( rowIndex );
@@ -394,9 +393,9 @@ short_m AliHLTTPCCATrackletConstructor::ExtrapolateTracklet( TrackMemory &r, int
   const sfloat_v dy( fBestY );
   const sfloat_v dz( fBestZ );
 
-  const sfloat_v kFactor = fTracker.Param().HitPickUpFactor() * fTracker.Param().HitPickUpFactor()
-    * 3.5f * 3.5f;
+  const sfloat_v kFactor = AliHLTTPCCAParameters::HitPickUpFactor * AliHLTTPCCAParameters::HitPickUpFactor * 3.5f * 3.5f;
   const sfloat_v two( 2.f );
+
   const sfloat_v sy2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Y() + err2Y ) );
   const sfloat_v sz2 = CAMath::Min( two, kFactor * ( r.fParam.GetErr2Z() + err2Z ) );
 
@@ -603,7 +602,7 @@ void AliHLTTPCCATrackletConstructor::run()
       int rowIndex = r.fStartRow.min() + rowStep*2;
       const short_v activationRow = r.fStartRow + rowStep*2;
       debugF() << "============================================= Start Fitting Upwards =============================================" << endl;
-#define DISABLE_HIT_SEARCH
+//#define DISABLE_HIT_SEARCH
 #ifdef DISABLE_HIT_SEARCH // iklm
       while ( rowIndex < AliHLTTPCCAParameters::NumberOfRows && !( r.fStage <= FitLinkedHits ).isEmpty() ) {
         ++r.fStage( rowIndex == activationRow ); // goes to FitLinkedHits on activation row
@@ -642,6 +641,7 @@ void AliHLTTPCCATrackletConstructor::run()
     }
 
     debugF() << "========================================== Start Extrapolating Upwards ==========================================" << endl;
+
     while ( rowIndex < AliHLTTPCCAParameters::NumberOfRows && !( r.fStage <= FitLinkedHits ).isEmpty() ) {
       ++r.fStage( rowIndex == activationRow ); // goes to FitLinkedHits on activation row
       const short_m toExtrapolate = (r.fStage == ExtrapolateUp);
