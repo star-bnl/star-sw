@@ -101,7 +101,8 @@ TrackHeed::TrackHeed() :
   particle(0), 
   matter(0), gas(0), material(0),
   atPacs(0), molPacs(0),
-  energyMesh(0), transferCs(0),
+  energyMesh(0), emin(2.e-6), emax(2.e-1), nEnergyIntervals(200),
+  transferCs(0),
   elScat(0), lowSigma(0), pairProd(0), deltaCs(0),
   chamber(0) {
   
@@ -490,6 +491,31 @@ TrackHeed::DisableMagneticField() {
 
 }
 
+void
+TrackHeed::SetEnergyMesh(const double e0, const double e1, 
+                         const int nsteps) {
+
+  if (fabs(e1 - e0) < Small) {
+    std::cerr << "TrackHeed::SetEnergyMesh:\n";
+    std::cerr << "    Invalid energy range:\n";
+    std::cerr << "    " << e0 << " < E [eV] < " << e1 << "\n";
+    return;
+  }
+  
+  if (nsteps <= 0) {
+    std::cerr << "TrackHeed::SetEnergyMesh:\n";
+    std::cerr << "    Number of intervals must be > 0.\n";
+    return;
+  }
+  
+  emin = std::min(e0, e1);
+  emax = std::max(e0, e1);
+  emin *= 1.e-6;
+  emax *= 1.e-6;
+  nEnergyIntervals = nsteps;
+
+}
+
 bool
 TrackHeed::Setup(Medium* medium) {
 
@@ -517,7 +543,7 @@ TrackHeed::Setup(Medium* medium) {
   if (energyMesh != 0) {
     delete energyMesh; energyMesh = 0;
   }
-  energyMesh = new EnergyMesh(2.0e-6, 2.0e-1, 200);
+  energyMesh = new EnergyMesh(emin, emax, nEnergyIntervals);
   
   if (medium->IsGas()) {
     if (!SetupGas(medium)) return false;
@@ -541,14 +567,19 @@ TrackHeed::Setup(Medium* medium) {
 
   if (debug) {
     const double nc = transferCs->quanC;
-    const double dedx = transferCs->meanC1 * 1.e3;
+    const double dedx = transferCs->meanC * 1.e3;
+    const double dedxLeft = transferCs->meanCleft * 1.e3;
+    const double dedx1 = transferCs->meanC1 * 1.e3;
     const double w = matter->W * 1.e6;
     const double f = matter->F;
     std::cout << "TrackHeed::Setup:\n";
-    std::cout << "    Cluster density: " << nc << " cm-1\n";
-    std::cout << "    Stopping power:  " << dedx << " keV/cm\n";
-    std::cout << "    W value:         " << w << " eV\n";
-    std::cout << "    Fano factor:     " << f << "\n";
+    std::cout << "    Cluster density:             " << nc << " cm-1\n";
+    std::cout << "    Stopping power (restricted): " << dedxLeft << " - " 
+                                         << dedx << " keV/cm\n";
+    std::cout << "    Stopping power (incl. tail): " << dedx1 
+                                                      << " keV/cm\n";
+    std::cout << "    W value:                     " << w << " eV\n";
+    std::cout << "    Fano factor:                 " << f << "\n";
   }
   
   fixsyscoor primSys(point(0., 0., 0.), basis("primary"), "primary");
@@ -680,7 +711,7 @@ TrackHeed::SetupMaterial(Medium* medium) {
 
   // Get temperature and density.
   double temperature = medium->GetTemperature();
-  double density = medium->GetNumberDensity() / cm3;
+  double density = medium->GetMassDensity() * g / cm3;
   
   const int nComponents = medium->GetNumberOfComponents();
   if (atPacs != 0) {

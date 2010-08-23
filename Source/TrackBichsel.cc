@@ -85,9 +85,10 @@ TrackBichsel::NewTrack(
   // If the particle properties have changed, update the cross-section table.
   if (isChanged) {
     bg = GetBetaGamma();
-    imfp = GetInverseMeanFreePath(bg);
+    imfp = GetInverseMeanFreePath();
     speed = SpeedOfLight * GetBeta();
     SelectCrossSectionTable();
+    isChanged = false;
   }
 
 }
@@ -138,7 +139,7 @@ TrackBichsel::GetCluster(
 }
 
 double
-TrackBichsel::GetInverseMeanFreePath(const double bg) {
+TrackBichsel::GetInverseMeanFreePath() {
 
   const int nEntries = 38;
 
@@ -162,6 +163,8 @@ TrackBichsel::GetInverseMeanFreePath(const double bg) {
      3.84304,  3.84308,  3.84310,  3.84311,  3.84312,
      3.84313,  3.84313,  3.84314};
 
+  if (isChanged) bg = GetBetaGamma();
+  
   if (bg < tabBg[0]) {
     if (debug) {
       std::cerr << "TrackBichsel::GetInverseMeanFreePath:\n";
@@ -189,6 +192,70 @@ TrackBichsel::GetInverseMeanFreePath(const double bg) {
   return (tabImfp[iLow] + 
           exp((log(bg) - log(tabBg[iLow])) * 
               (log(tabImfp[iUp]) - log(tabImfp[iLow])) / 
+              (log(tabBg[iUp]) - log(tabBg[iLow])))) * 1.e4;
+  
+}
+
+double
+TrackBichsel::GetStoppingPower() {
+
+  const int nEntries = 51;
+
+  const double tabBg[nEntries] = {
+       0.316,     0.398,     0.501,     0.631,     0.794,  
+       1.000,     1.259,     1.585,     1.995,     2.512, 
+       3.162,     3.981,     5.012,     6.310,     7.943,  
+      10.000,    12.589,    15.849,    19.953,    25.119,
+      31.623,    39.811,    50.119,    63.096,    79.433,  
+     100.000,   125.893,   158.489,   199.526,   251.189,
+     316.228,   398.107,   501.187,   630.958,   794.329, 
+    1000.000,  1258.926,  1584.894,  1995.263,  2511.888,
+    3162.280,  3981.074,  5011.875,  6309.578,  7943.287,
+   10000.010, 12589.260, 15848.940, 19952.640, 25118.880,
+   31622.800};
+
+  const double tabdEdx[nEntries] = {
+   2443.71800, 1731.65600, 1250.93400,  928.69920,  716.37140,
+    578.28850,  490.83670,  437.33820,  406.58490,  390.95170,
+    385.29000,  386.12000,  391.07730,  398.53930,  407.39420,
+    416.90860,  426.63010,  436.30240,  445.78980,  455.02530,
+    463.97370,  472.61410,  480.92980,  488.90240,  496.51900,
+    503.77130,  510.65970,  517.19570,  523.39830,  529.29120,
+    534.90670,  540.27590,  545.42880,  550.39890,  555.20800,
+    559.88820,  564.45780,  568.93850,  573.34700,  577.69140,
+    581.99010,  586.25090,  590.47720,  594.68660,  598.86880,
+    603.03510,  607.18890,  611.33250,  615.46810,  619.59740,
+    623.72150};
+
+  if (isChanged) bg = GetBetaGamma();
+  
+  if (bg < tabBg[0]) {
+    if (debug) {
+      std::cerr << "TrackBichsel::GetStoppingPower:\n";
+      std::cerr << "    Bg is below the tabulated range.\n";
+    }
+    return tabdEdx[0] * 1.e4;
+  } else if (bg > tabBg[nEntries - 1]) {
+    return tabdEdx[nEntries - 1] * 1.e4;
+  }
+
+  // Locate the requested energy in the table
+  int iLow = 0;
+  int iUp = nEntries - 1;
+  int iM;
+  while (iUp - iLow > 1) {
+    iM = (iUp + iLow) >> 1;
+    if (bg >= tabBg[iM]) {
+      iLow = iM;
+    } else {
+      iUp = iM;
+    }
+  }
+
+  // Log-log interpolation
+  return (tabdEdx[iLow] + 
+          exp((log(bg) - log(tabBg[iLow])) * 
+              (log(tabdEdx[iUp]) - log(tabdEdx[iLow])) / 
               (log(tabBg[iUp]) - log(tabBg[iLow])))) * 1.e4;
   
 }

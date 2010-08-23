@@ -34,6 +34,12 @@ class ViewDrift {
                   const double x, const double y, const double z);
     void Plot();
 
+    void SetElectronColor(const std::string color);
+    void SetIonColor(const std::string color);
+    void SetHoleColor(const std::string color);
+    void SetPhotonColor(const std::string color);
+    void SetTrackColor(const std::string color);
+
   private:
  
     // Options
@@ -52,6 +58,12 @@ class ViewDrift {
 
     int nDriftLines;
     std::vector<TPolyLine3D> driftLines;
+
+    int colorElectron;
+    int colorIon;
+    int colorHole;
+    int colorPhoton;
+    int colorTrack;
 
 };
 

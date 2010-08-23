@@ -56,7 +56,7 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetStatH(0.10);
   garfieldStyle->SetOptStat(111110);
   garfieldStyle->SetLabelFont(132, "xyz");
-  garfieldStyle->SetPaperSize(26, 20);
+  garfieldStyle->SetPaperSize(TStyle::kA4);
   garfieldStyle->SetFuncWidth(2);
   garfieldStyle->SetHistLineColor(kOrange);
   garfieldStyle->SetPalette(1);
@@ -73,13 +73,23 @@ PlottingEngineRoot::GetRootColor(std::string color) {
     color[i] = toupper(color[i]);
   }
 
-  if (color == "ORANGE") {
+  if (color == "RED") {
+    return kRed;
+  } else if (color == "GREEN") {
+    return kGreen;
+  } else if (color == "BLUE") {
+    return kBlue;
+  } else if (color == "ORANGE") {
     return kOrange;
   } else if (color == "DARK-GREEN") {
     return kGreen + 2;
-  } else {
-    return kBlack;
+  } else if (color == "DARK-RED") {
+    return kRed + 2;
+  } else if (color == "DARK-BLUE") {
+    return kBlue + 2;
   }
+
+  return kBlack;
 
 }
 

@@ -40,12 +40,17 @@ class TrackHeed : public Track {
     void TransportDeltaElectron(const double x0, const double y0, const double z0,
                                 const double dx0, const double dy0, const double dz0,
                                 const double t0, const double e0, int& nel);
-                                
+    
+    // Specify whether the electric and magnetic field should be 
+    // taken into account in the stepping algorithm.                            
     void EnableElectricField();
     void DisableElectricField();
     void EnableMagneticField();
     void DisableMagneticField();
-  
+
+    void SetEnergyMesh(const double e0, const double e1,
+                       const int nsteps);
+
   private:
 
     bool ready;
@@ -69,8 +74,12 @@ class TrackHeed : public Track {
     AtomPhotoAbsCS** atPacs;
     MolecPhotoAbsCS** molPacs;
     
-    // Transport properties
+    // Energy mesh
+    double emin, emax;
+    int nEnergyIntervals;
     EnergyMesh* energyMesh;
+    
+    // Cross-sections
     EnTransfCS* transferCs;
     ElElasticScat* elScat;
     ElElasticScatLowSigma* lowSigma;

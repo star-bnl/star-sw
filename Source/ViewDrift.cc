@@ -15,7 +15,12 @@ ViewDrift::ViewDrift() :
   nDriftLines(0) {
 
   plottingEngine.SetDefaultStyle();
-
+  colorElectron = plottingEngine.GetRootColor("orange");
+  colorIon      = plottingEngine.GetRootColor("red");
+  colorHole     = plottingEngine.GetRootColor("red");
+  colorPhoton   = plottingEngine.GetRootColor("blue");
+  colorTrack    = plottingEngine.GetRootColor("dark-green");
+ 
 }
 
 ViewDrift::~ViewDrift() {
@@ -70,11 +75,11 @@ ViewDrift::NewElectronDriftLine(const int n) {
 
   if (n <= 0) {
     TPolyLine3D p(1);
-    p.SetLineColor(kOrange);
+    p.SetLineColor(colorElectron);
     driftLines.push_back(p);
   } else {
     TPolyLine3D p(n);
-    p.SetLineColor(kOrange);
+    p.SetLineColor(colorElectron);
     driftLines.push_back(p);
   }
   ++nDriftLines;
@@ -86,11 +91,11 @@ ViewDrift::NewIonDriftLine(const int n) {
 
   if (n <= 0) {
     TPolyLine3D p(1);
-    p.SetLineColor(kRed);
+    p.SetLineColor(colorIon);
     driftLines.push_back(p);
   } else {
     TPolyLine3D p(n);
-    p.SetLineColor(kRed);
+    p.SetLineColor(colorIon);
     driftLines.push_back(p);
   }
   ++nDriftLines;
@@ -102,7 +107,7 @@ ViewDrift::NewPhotonTrack(const double x0, const double y0, const double z0,
                           const double x1, const double y1, const double z1) {
 
   TPolyLine3D p(2);
-  p.SetLineColor(kBlue);
+  p.SetLineColor(colorPhoton);
   p.SetLineStyle(7);
   p.SetPoint(0, x0, y0, z0);
   p.SetPoint(1, x1, y1, z1);
@@ -145,6 +150,41 @@ ViewDrift::Plot() {
     driftLines[i].Draw("same");
   }
   canvas->Update();
+
+}
+
+void
+ViewDrift::SetElectronColor(const std::string color) {
+
+  colorElectron = plottingEngine.GetRootColor(color);
+
+}
+
+void
+ViewDrift::SetIonColor(const std::string color) {
+  
+  colorIon = plottingEngine.GetRootColor(color);
+
+}
+
+void
+ViewDrift::SetHoleColor(const std::string color) {
+
+  colorHole = plottingEngine.GetRootColor(color);
+
+}
+
+void
+ViewDrift::SetPhotonColor(const std::string color) {
+
+  colorPhoton = plottingEngine.GetRootColor(color);
+
+}
+
+void
+ViewDrift::SetTrackColor(const std::string color) {
+
+  colorTrack = plottingEngine.GetRootColor(color);
 
 }
 

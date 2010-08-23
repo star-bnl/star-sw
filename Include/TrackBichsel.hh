@@ -1,4 +1,7 @@
 // Track generation using differential cross-sections computed by H. Bichsel
+// References:
+//   - H. Bichsel, Rev. Mod. Phys. 60 (1988), 663-699
+//   - https://faculty.washington.edu/hbichsel/
 
 #ifndef G_TRACK_BICHSEL_H
 #define G_TRACK_BICHSEL_H
@@ -16,10 +19,13 @@ class TrackBichsel : public Track {
     ~TrackBichsel() {}
 
     void NewTrack(
-            const double x0, const double y0, const double z0, const double t0,
-            const double dx0, const double dy0, const double dz0);
+        const double x0, const double y0, const double z0, const double t0,
+        const double dx0, const double dy0, const double dz0);
     bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
                     int& n, double& e, double& extra);
+
+    double GetInverseMeanFreePath();
+    double GetStoppingPower();
 
     void SetDataFile(const std::string filename) {datafile = filename;}
 
