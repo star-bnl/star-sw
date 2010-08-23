@@ -53,14 +53,6 @@ class AliHLTTPCCAClusterInfo;
 
     void SetSlices ( int i, AliHLTTPCCATracker *sl );
 
-    void CalculateHelix(AliHLTTPCCABorderTrackGlobal *bLong, float z, float &x, float &y, float &dx2, float &dy2);
-    void CalculateR(const float &x1, const float &y1, const float &x2, const float &y2, const float &x3, const float &y3, float &R);
-    void CalculatedRToPoint(AliHLTTPCCABorderTrackGlobal *b, const float &x, const float &y, const float &dx2, const float &dy2, float &R, float &dR);
-
-/*    void CalculateR(const float &x1, const float &y1, const float &x2, const float &y2, const float &x3, const float &y3, 
-                    const float &dx1, const float &dy1, const float &dx2, const float &dy2, const float &dx3, const float &dy3, 
-                    float &R, float &dR2);*/
-
   private:
   
     void InvertCholetsky(float a[15]);

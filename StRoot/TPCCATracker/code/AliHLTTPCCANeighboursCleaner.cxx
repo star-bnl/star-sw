@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.4 2010/08/20 14:53:41 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.5 2010/08/23 19:37:02 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -91,13 +91,13 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
         Ydown.gather( data.HitDataY( rowDown ), static_cast<ushort_v>(downIndexes), validHitsMask );
         Zdown.gather( data.HitDataZ( rowDown ), static_cast<ushort_v>(downIndexes), validHitsMask );
 
-/*        Yx1 = (Yup - Y)/(Xup - X);
-        Yx2 = (Y - Ydown)/(X - Xdown);
-        Yxx1 = (Yx1 - Yx2)*2/(Xup - Xdown);
+//        Yx1 = (Yup - Y)/(Xup - X);
+//        Yx2 = (Y - Ydown)/(X - Xdown);
+//        Yxx1 = (Yx1 - Yx2)*2/(Xup - Xdown);
 
-        Zx1 = (Zup - Y)/(Xup - X);
-        Zx2 = (Y - Ydown)/(X - Xdown);
-        Zxx1 = (Zx1 - Zx2)*2/(Xup - Xdown);*/
+//        Zx1 = (Zup - Y)/(Xup - X);
+//        Zx2 = (Y - Ydown)/(X - Xdown);
+//        Zxx1 = (Zx1 - Zx2)*2/(Xup - Xdown);
 
         if(!dnMask.isEmpty())
         {

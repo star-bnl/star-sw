@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformance.h,v 1.7 2010/08/16 14:32:23 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformance.h,v 1.8 2010/08/23 19:37:02 mzyzak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -50,14 +50,12 @@ class AliHLTTPCCAPerformance
       /// initialization before the new event
     bool SetNewEvent(AliHLTTPCCAGBTracker* const Tracker, string mcTracksFile, string mcPointsFile); // set info for new event
     void InitSubPerformances();
-    void InitSubPerformances(int iPerf);
 
       /// Instance
     static AliHLTTPCCAPerformance &Instance();
     
       /// Efficiencies
     void ExecPerformance();
-    void ExecPerformance(int iPerf);
 
     /// functional is needed by DRAW option. TODO: clean up
   const AliHLTTPCCAMCTrack &MCTrack(int i) const { return fMCTracks[i]; }
@@ -71,8 +69,13 @@ class AliHLTTPCCAPerformance
   void SetMCTracks(vector<AliHLTTPCCAMCTrack>& mcTracks);
   void SetMCPoints(vector<AliHLTTPCCALocalMCPoint>& mcPoints);
   void SetHitLabels(vector<AliHLTTPCCAHitLabel>& hitLabels);
-  
+
+  AliHLTResizableArray<AliHLTTPCCAHitLabel>     * GetHitLabels() { return &fHitLabels; }      // array of hit MC labels
+  AliHLTResizableArray<AliHLTTPCCAMCTrack>      * GetMCTracks()  { return &fMCTracks;  }      // array of MC tracks
+  AliHLTResizableArray<AliHLTTPCCALocalMCPoint> * GetMCPoints()  { return &fLocalMCPoints;}   // array of MC points in slices CS
+
   AliHLTTPCCAPerformanceBase* GetSubPerformance(string name);
+  bool CreateHistos(string name);
   
   void SetOutputFile(TFile *oF) { fOutputFile = oF; }
   
@@ -91,11 +94,14 @@ class AliHLTTPCCAPerformance
     struct TSubPerformance{
       AliHLTTPCCAPerformanceBase* perf;
       string name;
+      bool IsGlobalPerf;
 
       TSubPerformance(){};
-      TSubPerformance(AliHLTTPCCAPerformanceBase* perf_, string name_){
+      TSubPerformance(AliHLTTPCCAPerformanceBase* perf_, string name_, bool IsGlobalPerf_ = 1){
         perf = perf_;
         name = name_;
+	IsGlobalPerf = IsGlobalPerf_;
+	perf->SetHistoCreated(0);
       };
 //       ~TSubPerformance(){if (perf) delete perf;};
       

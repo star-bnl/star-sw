@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.9 2010/08/18 20:46:09 ikulakov Exp $
+// $Id: AliHLTTPCCAPerformanceBase.cxx,v 1.10 2010/08/23 19:37:02 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -101,7 +101,6 @@ void AliHLTTPCCAPerformanceBase::SetNewEvent( const AliHLTTPCCAGBTracker * const
     THistoInfo( "recosLengthAndRMom",   "N Reco Tracks vs N Hits and Momentum",       MaxNHits+1, 0.,   MaxNHits, 50, 0.,           MaxMomentum),
     THistoInfo( "recosLengthAndMCMom",   "N Reco Tracks vs N Hits and Momentum",       MaxNHits+1, 0.,   MaxNHits, 50, 0.,           MaxMomentum),
     THistoInfo( "recosLengthAndChi2",  "N Reco Tracks vs N Hits and Chi2",           MaxNHits+1, 0.,   MaxNHits, 50, 0.,           MaxChi2)
-    
   };
   for (int iHisto = 0; iHisto < NHisto; iHisto++){
     fHistosInfo[iHisto] = tmp[iHisto];
@@ -205,6 +204,7 @@ void AliHLTTPCCAPerformanceBase::CreateHistos(string histoDir, TFile* outFile)
       fHistos[i]->SetDirectory(0);
     }
   }
+  SetHistoCreated();
 }
 
 void AliHLTTPCCAPerformanceBase::WriteHistos()
