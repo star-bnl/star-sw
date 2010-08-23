@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMerger.cxx,v 1.7 2010/08/23 19:37:02 mzyzak Exp $
+// $Id: AliHLTTPCCAMerger.cxx,v 1.8 2010/08/23 21:06:47 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -49,6 +49,10 @@
 #include <vector>
 #include "AliHLTTPCCAMergerPerformance.h"
 #include "AliHLTTPCCAPerformance.h"
+
+#ifdef DO_TPCCATRACKER_EFF_PERFORMANCE
+#define DO_MERGER_PERF
+#endif //DO_TPCCATRACKER_EFF_PERFORMANCE
 
 class AliHLTTPCCAMerger::AliHLTTPCCAClusterInfo
 {
@@ -255,7 +259,7 @@ void AliHLTTPCCAMerger::Reconstruct()
   //* main merging routine
 
   UnpackSlices();
-  
+#ifdef DO_MERGER_PERF  
   AliHLTTPCCAPerformance::Instance().CreateHistos("Merger");
   ((AliHLTTPCCAMergerPerformance*)(AliHLTTPCCAPerformance::Instance().GetSubPerformance("Merger")))->SetNewEvent(
                                    AliHLTTPCCAPerformance::Instance().GetTracker(),
@@ -263,7 +267,7 @@ void AliHLTTPCCAMerger::Reconstruct()
 				   AliHLTTPCCAPerformance::Instance().GetMCTracks(),
 				   AliHLTTPCCAPerformance::Instance().GetMCPoints());
   ((AliHLTTPCCAMergerPerformance*)(AliHLTTPCCAPerformance::Instance().GetSubPerformance("Merger")))->FillMC();
-  
+#endif //DO_MERGER_PERF  
   Merging(1);
   Merging(0);
 }
@@ -452,7 +456,7 @@ void AliHLTTPCCAMerger::UnpackSlices()
         AliHLTTPCCADisplay::Instance().Ask();
 #endif*/
     }
-
+#ifdef DO_MERGER_PERF
 ///mvz start
     slices[iSlice]->fOutTracks1 = new AliHLTTPCCAOutTrack [nTracksCurrent-NTracksPrev];
     for (int i=0; i<nTracksCurrent-NTracksPrev; i++)
@@ -464,11 +468,10 @@ void AliHLTTPCCAMerger::UnpackSlices()
     }
     NTracksPrev = nTracksCurrent;
 ///mvz end
+#endif //DO_MERGER_PERF
     //std::cout<<"Unpack slice "<<iSlice<<": ntracks "<<slice.NTracks()<<"/"<<fSliceNTrackInfos[iSlice]<<std::endl;
   }
 }
-
-
 
 bool AliHLTTPCCAMerger::FitTrack( AliHLTTPCCATrackParam &T, float &Alpha,
                                     AliHLTTPCCATrackParam t0, float Alpha0,
@@ -843,15 +846,13 @@ void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1
   for ( int i1 = 0; i1 < N1; i1++ ) {
     AliHLTTPCCABorderTrackGlobal &b1 = B1[i1];
     iSlice1 = b1.Slice();
-//    if ( !b1.OK() ) continue;
-//    if ( b1.NClusters() < minNPartHits ) continue;
+
     int iBest2 = -1;
     int iSliceBest2 = -1;
     float chi2;
 
     float dr_min2_local = 10000000.;
 
-    //int start2 = ( iSlice1 != iSlice2 ) ? 0 : i1 + 1;
     for ( int i2 = i1+1; i2 < N2; i2++ ) {
       IsNext = 1;
       if(i1==i2) continue;
@@ -864,13 +865,10 @@ void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1
       if( iSlice2 == iSlice1) IsNeigh = 1;
       if(!IsNeigh) continue;
 
-//      if(b1.NClusters() < 8 && b2.NClusters() < 8) continue;
-
-/*      if(IsNext)
-      {
-        if(b2.ZStart()<b1.ZEnd()) continue;
-      }
-      else if(b1.ZStart()<b2.ZEnd()) continue;*/
+      float db2 = (b1.b()) - (b2.b());
+      db2 = db2*db2;
+      float ddb2 = b1.bErr2() + b2.bErr2();
+      if(db2 > factor2k * ddb2) continue;
 
       float dx;
 
@@ -935,7 +933,7 @@ void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1
         if(dx_temp2 < dx_temp1) { dx = dx_temp2; idx = idx_temp2; }
         else                    { dx = dx_temp1; idx = idx_temp1; }
       }
-int row, row1;
+//int row, row1;
       float a1;
       float a2;
 
@@ -943,8 +941,8 @@ int row, row1;
       {
         case 0:
           {
-            row = Tt1->rowOuter;
-            row1 = Tt2->rowOuter;
+//            row = Tt1->rowOuter;
+//            row1 = Tt2->rowOuter;
             Thelp  = Tt1->OuterParam();
             Thelp1 = Tt2->OuterParam();
             a1 = Tt1->OuterAlpha();
@@ -954,8 +952,8 @@ int row, row1;
           break;
         case 1:
           {
-            row = Tt1->rowInner;
-            row1 = Tt2->rowInner;
+//            row = Tt1->rowInner;
+//            row1 = Tt2->rowInner;
             Thelp  = Tt1->InnerParam();
             Thelp1 = Tt2->InnerParam();
             a1 = Tt1->InnerAlpha();
@@ -965,8 +963,8 @@ int row, row1;
           break;
         case 2:
           {
-            row = Tt1->rowInner;
-            row1 = Tt2->rowOuter;
+//            row = Tt1->rowInner;
+//            row1 = Tt2->rowOuter;
             Thelp  = Tt1->InnerParam();
             Thelp1 = Tt2->OuterParam();
             a1 = Tt1->InnerAlpha();
@@ -976,8 +974,8 @@ int row, row1;
           break;
         case 3:
           {
-            row = Tt1->rowOuter;
-            row1 = Tt2->rowInner;
+//            row = Tt1->rowOuter;
+//            row1 = Tt2->rowInner;
             Thelp  = Tt1->OuterParam();
             Thelp1 = Tt2->InnerParam();
             a1 = Tt1->OuterAlpha();
@@ -990,57 +988,27 @@ int row, row1;
       if(number == 1)  if(dx < 0) continue;
       if(number == 0)  if(dx > 0) continue;
 
+#ifdef DO_MERGER_PERF
       sh = Tt1->fSlice;
       sh1 = Tt2->fSlice;
       Itr = Tt1->number;
       Itr1 = Tt2->number;
-
-//std::cout << "sh "<<sh <<"  "<< b1.Slice() << "  sh1 " << sh1 <<"  "<< b2.Slice() 
-//          << "itr "<<Itr <<"  "<< b1.TrackID() << "  itr1 " << Itr1 <<"  "<< b2.TrackID() <<std::endl;
+#endif //DO_MERGER_PERF
 
       if(!Thelp.Rotate( a2 - a1 , 0.999 )) continue;
 
       dr_min2_local = (Thelp.Y()-Thelp1.Y())*(Thelp.Y()-Thelp1.Y()) + (Thelp.Z()-Thelp1.Z())*(Thelp.Z()-Thelp1.Z()) + dx*dx;
 
-      float xc1 = Thelp.X() - Thelp.GetSinPhi()/(fSliceParam.cBz() * Thelp.QPt());
-      float yc1 = Thelp.Y() + Thelp.GetCosPhi()/(fSliceParam.cBz() * Thelp.QPt());
-      float xc2 = Thelp1.X() - Thelp1.GetSinPhi()/(fSliceParam.cBz() * Thelp1.QPt());
-      float yc2 = Thelp1.Y() + Thelp1.GetCosPhi()/(fSliceParam.cBz() * Thelp1.QPt());
-
       float ToX = 0.5 * (Thelp.X() + Thelp1.X());
       if(!Thelp.TransportToXWithMaterial( ToX, fSliceParam.cBz()))  continue;
       if(!Thelp1.TransportToXWithMaterial( ToX, fSliceParam.cBz())) continue;
 
+      if(fabs(Thelp1.Y() - Thelp.Y())>10.f) continue;
+      if(fabs(Thelp1.Z() - Thelp.Z())>10.f) continue;
+      if(fabs(Thelp1.SinPhi() - Thelp.SinPhi())>0.15f) continue;
+
       float C[15], r[5], chi2, delta2, Si;
       FilterTracks(Thelp.GetPar(), Thelp.GetCov(), Thelp1.GetPar(), Thelp1.GetCov(), r, C, chi2);
-
-#ifdef MAIN_DRAW
-if(number == 0 && chi2<1000 && fabs(Thelp1.Y() - Thelp.Y())<10.f && fabs(Thelp1.Z() - Thelp.Z())<10.f && fabs(Thelp1.SinPhi() - Thelp.SinPhi())<0.15f){
-      AliHLTTPCCADisplay::Instance().ClearView();
-      AliHLTTPCCADisplay::Instance().SetTPCView();
-      AliHLTTPCCADisplay::Instance().DrawTPC();
-
-      for(int ihit=0; ihit<Tt1->NClusters(); ihit++)
-      {
-        AliHLTTPCCAClusterInfo &h = fClusterInfos[Tt1->FirstClusterRef() + ihit];
-        AliHLTTPCCADisplay::Instance().SetCurrentSlice( slices[h.ISlice()] );
-        AliHLTTPCCADisplay::Instance().DrawPoint(h.X(), h.Y(), h.Z(), 1, 1 );
-      }
-
-      for(int ihit=0; ihit<Tt2->NClusters(); ihit++)
-      {
-        AliHLTTPCCAClusterInfo &h = fClusterInfos[Tt2->FirstClusterRef() + ihit];
-        AliHLTTPCCADisplay::Instance().SetCurrentSlice( slices[h.ISlice()] );
-        AliHLTTPCCADisplay::Instance().DrawPoint(h.X(), h.Y(), h.Z(), 2, 1 );
-      }
-
-      AliHLTTPCCADisplay::Instance().SetCurrentSlice( slices[iSlice1] );
-      AliHLTTPCCADisplay::Instance().DrawPoint(Thelp.X(), Thelp.Y(), Thelp.Z(), 0, 1 );
-      AliHLTTPCCADisplay::Instance().DrawPoint(Thelp1.X(), Thelp1.Y(), Thelp1.Z(), 3, 0.5 );
-
-      AliHLTTPCCADisplay::Instance().Ask();
-}
-#endif
 
       bool Ok = 1;
       bool Ok1 = 1;
@@ -1061,6 +1029,10 @@ if(number == 0 && chi2<1000 && fabs(Thelp1.Y() - Thelp.Y())<10.f && fabs(Thelp1.
       if ( C[12]*C[12] > C[5]*C[14]) Ok1 = 0;
       if ( C[13]*C[13] > C[9]*C[14]) Ok1 = 0;
 
+      if(number == 1) if(chi2>100.f) continue;
+      if(number == 0) if(chi2>300.f) continue;
+
+#ifdef DO_MERGER_PERF
       float dbb2 = (b1.b()) - (b2.b());
       dbb2 = dbb2*dbb2;
       float ddbb2 = b1.bErr2() + b2.bErr2();
@@ -1068,34 +1040,12 @@ if(number == 0 && chi2<1000 && fabs(Thelp1.Y() - Thelp.Y())<10.f && fabs(Thelp1.
       float adz = fabs(Thelp1.Z() - Thelp.Z());
       float adsin = fabs(Thelp1.SinPhi() - Thelp.SinPhi());
 
-      delta2 = fabs(row-row1);
-      Si = (Thelp.X() - xc1)/(Thelp.Y() - yc1) - (Thelp1.X() - xc2)/(Thelp1.Y() - yc2);
+//      delta2 = fabs(row-row1);
+//      Si = (Thelp.X() - xc1)/(Thelp.Y() - yc1) - (Thelp1.X() - xc2)/(Thelp1.Y() - yc2);
       if(!(sh == -1 || sh1 == -1 || Itr == -1 || Itr1 == -1))
         ((AliHLTTPCCAMergerPerformance*)(AliHLTTPCCAPerformance::Instance().GetSubPerformance("Merger")))->
 	  AddMergerData(number, sh, Itr, sh1, Itr1, dbb2 <= factor2k * ddbb2, Ok, Ok1, chi2, delta2, Si, ady,adz,adsin,Tt1->NClusters(),Tt2->NClusters());
-//      std::cout <<std::endl<< "Parametery horoshye? ";
-//      if(Ok) std::cout <<" -Da! "; else std::cout << " -Net! ";
-//      std::cout << "  Chi2  " << chi2 << "  Treki soedineny?  ";
-
-      if(number == 0 && 0)
-      {
-        if((Thelp1.Y() - Thelp.Y())*(Thelp1.Y() - Thelp.Y()) > 100*(Thelp1.Err2Y() + Thelp.Err2Y())) continue;
-        if((Thelp1.Z() - Thelp.Z())*(Thelp1.Z() - Thelp.Z()) > 100*(Thelp1.Err2Z() + Thelp.Err2Z())) continue;
-        if((Thelp1.SinPhi() - Thelp.SinPhi())*(Thelp1.SinPhi() - Thelp.SinPhi()) > 100*(Thelp1.Err2SinPhi() + Thelp.Err2SinPhi())) continue;
-      }
-
-      if(fabs(Thelp1.Y() - Thelp.Y())>10.f) continue;
-      if(fabs(Thelp1.Z() - Thelp.Z())>10.f) continue;
-      if(fabs(Thelp1.SinPhi() - Thelp.SinPhi())>0.15f) continue;
-
-      if(number == 1) if(chi2>100.f) continue;
-      if(number == 0) if(chi2>300.f) continue;
-
-      float db2 = (b1.b()) - (b2.b());
-      db2 = db2*db2;
-      float ddb2 = b1.bErr2() + b2.bErr2();
-      if(db2 > factor2k * ddb2) continue;
-//      std::cout << " -DA! ";
+#endif //DO_MERGER_PERF
 
 #ifdef MAIN_DRAW
 if(number == 0 ){
@@ -1125,9 +1075,10 @@ if(number == 0 ){
 }
 #endif
 
+#ifdef DO_MERGER_PERF
       if(!(sh == -1 || sh1 == -1 || Itr == -1 || Itr1 == -1))
         ((AliHLTTPCCAMergerPerformance*)(AliHLTTPCCAPerformance::Instance().GetSubPerformance("Merger")))->SetMerged(number);
-
+#endif //DO_MERGER_PERF
       iBest2 = b2.TrackID();
       iSliceBest2 = iSlice2;
 
@@ -1297,10 +1248,10 @@ void AliHLTTPCCAMerger::Merging(int number)
         endPoint = startPoint;
         startPoint = helpPoint;
       }
-
+#ifdef DO_MERGER_PERF
       track.number = trackOld.number;
       track.fSlice = trackOld.fSlice;
-
+#endif //DO_MERGER_PERF
       int hits[2000];
       int firstHit = 1000;
       int nHits = 0;
