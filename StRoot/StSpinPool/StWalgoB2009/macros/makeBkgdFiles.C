@@ -249,18 +249,21 @@ void makeBkgdFiles(int charge, int two_or_four) {
     }
   }
 
+  //Tau "background" needs no further scaling
+  float taufrac=1.5;
   // calculate a fractional scale factor for the charge separated
   // background due to tau->e
-  float tauplus_xsec = 9.8e-8;
-  float tauminus_xsec = 3.1e-8;
-  float taufrac;
-  if (charge == 1) {
-    taufrac = tauplus_xsec/(tauplus_xsec+tauminus_xsec);
-  } else if (charge == -1) {
-    taufrac = tauminus_xsec/(tauplus_xsec+tauminus_xsec);
-  } else if (charge == 0) {
-    taufrac = 1.;
-  }
+  //float tauplus_xsec = 9.8e-8;
+  //float tauminus_xsec = 3.1e-8;
+  //float taufrac;
+  //if (charge == 1) {
+  //  taufrac = tauplus_xsec/(tauplus_xsec+tauminus_xsec);
+  //} else if (charge == -1) {
+  //  taufrac = tauminus_xsec/(tauplus_xsec+tauminus_xsec);
+  //} else if (charge == 0) {
+  // taufrac = 1.;
+  //}
+
 
   // ******************************************************
   // Do the iterative normalization of the W signal to
@@ -665,7 +668,7 @@ void makeBkgdFiles(int charge, int two_or_four) {
 
   float low_sum = 0.;
   float high_sum = 0.;
-  for (int i=13; i<=26; i++) {
+  for (int i=9; i<=49; i++) {
     float high = 0.;
     float low = 10000.;
     for (int j=0; j<=20; j++) {
@@ -704,10 +707,10 @@ void makeBkgdFiles(int charge, int two_or_four) {
     // calculate the sum
     low_bkgd->SetBinContent(i,0.);
     if ((low != 10000) && (new_bkgd->GetBinContent(i)-low > 0)) {
-      low_sum += low;
+      if (i >= 13) {low_sum += low;}
       low_bkgd->SetBinContent(i,low);
     }
-    high_sum += high; 
+    if (i >= 13) {high_sum += high;} 
     high_bkgd->SetBinContent(i,high);
     //cout << i << " low = " << low << " high = " << high << " nom = " << new_bkgd->GetBinContent(i) << endl;  
     // set the bin-by-bin error too
