@@ -712,11 +712,12 @@ void makeBkgdFiles(int charge, int two_or_four) {
     // calculate the sum
     low_bkgd->SetBinContent(i,0.);
     if ((low != 10000) && (new_bkgd->GetBinContent(i)-low > 0)) {
-      if (i >= 13) {low_sum += low;}
+      if ((i >= 13)&&(i<=26)) {low_sum += low;}
       low_bkgd->SetBinContent(i,low);
     }
-    if (i >= 13) {high_sum += high;} 
+    if ((i >= 13)&&(i<=26)) {high_sum += high;} 
     high_bkgd->SetBinContent(i,high);
+    cout << i << " " << low_sum << " " << high_sum << endl;
     //cout << QCD_syst_low_err->GetBinCenter(i) << " low = " << low << " high = " << high << " nom = " << new_bkgd->GetBinContent(i) << endl;  
     // set the bin-by-bin error too
     if ((low != 10000) && (new_bkgd->GetBinContent(i)-low > 0)) {
@@ -782,8 +783,8 @@ void makeBkgdFiles(int charge, int two_or_four) {
     zback_stat_err2->Write();
 
     for (int i=1; i<=49; i++) {
-      //cout.setf(ios::fixed);
-      //cout.precision(2);
+      cout.setf(ios::fixed);
+      cout.precision(2);
       cout << " " << signal2->GetBinCenter(i) << " & " << signal2->GetBinContent(i) << " & " << signal_final3->GetBinContent(i) << " & " << QCD_stat_err2->GetBinContent(i) << " & " << eemc_stat_err2->GetBinContent(i) << " & " << tau_stat_err2->GetBinContent(i) << " & " << zsig_stat_err2->GetBinContent(i) << " & " << zback_stat_err2->GetBinContent(i) << " & " << QCD_syst_high_err->GetBinContent(i) << " & " << QCD_syst_low_err->GetBinContent(i) << " \\\\" << endl;
       
     }
