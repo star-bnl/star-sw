@@ -10,11 +10,13 @@
 ClassImp(StMuEmcPoint)
 
 StMuEmcPoint::StMuEmcPoint()
+    : TObject()
 {
 mEta=mPhi=mRadius=mDeltaEta=mDeltaPhi=mEnergy=mChiSquare=0;    
 memset(mEmc,0,sizeof(mEmc));
 }
 StMuEmcPoint::StMuEmcPoint(StMuEmcPoint *point)
+    : TObject(*point)
 {
   mEta=point->getEta();
   mPhi=point->getPhi();

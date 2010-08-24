@@ -12,13 +12,13 @@ class StMuEmcHit: public TObject
 {
   public:
                     StMuEmcHit();
-                    StMuEmcHit(StMuEmcHit&);
+                    StMuEmcHit(const StMuEmcHit&);
     virtual         ~StMuEmcHit();
     
-    int             getId()           { return (int)mId; }      ///< Return Module number
-    int             getAdc()          { return (int)mAdc; }         ///< Return ADC value
-    int             getCalType()      { return (int)mCalType; }
-    float           getEnergy()       { return mEnergy; }             ///< Return Hit energy
+    int             getId() const      { return (int)mId; }      ///< Return Module number
+    int             getAdc() const     { return (int)mAdc; }         ///< Return ADC value
+    int             getCalType() const { return (int)mCalType; }
+    float           getEnergy() const  { return mEnergy; }             ///< Return Hit energy
     
     void            setId(int id)     { mId = (short)id;}
     void            setAdc(int a)     { mAdc = (short)a;}

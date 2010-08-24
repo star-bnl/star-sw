@@ -29,38 +29,43 @@ class StMuEmcCollection: public TObject
 {
   public:
                       StMuEmcCollection();
-                      StMuEmcCollection(StMuEmcCollection&);
+                      StMuEmcCollection(const StMuEmcCollection&);
     virtual           ~StMuEmcCollection();
     void              clear(Option_t *option="");     
-    void              Clear(Option_t *option=""){clear();}     
+    virtual void      Clear(Option_t *option=""){clear();}     
     void              DeleteThis();
     
     int               getTowerADC(int id, int detector = bemc) const;    
-    StEmcCrateStatus  getCrateStatus(int crate, int detector = bemc) { if (mTowerData) return mTowerData->crateStatus(crate,detector); else return crateUnknown; }    
-    int               getNSmdHits(int detector);
+    StEmcCrateStatus  getCrateStatus(int crate, int detector = bemc) const { if (mTowerData) return mTowerData->crateStatus(crate,detector); else return crateUnknown; }    
+    int               getNSmdHits(int detector) const;
     StMuEmcHit*       getSmdHit(int hitId, int detector = bsmde);    
+    const StMuEmcHit* getSmdHit(int hitId, int detector = bsmde) const;    
     TClonesArray*     getPrsHits(int detector = bprs) { if (detector==bprs) return mPrsHits; else if (detector==eprs) return mEndcapPrsHits; else return 0; }
-    int               getNPrsHits(int detector = bprs);
+    const TClonesArray* getPrsHits(int detector = bprs) const { if (detector==bprs) return mPrsHits; else if (detector==eprs) return mEndcapPrsHits; else return 0; }
+    int               getNPrsHits(int detector = bprs) const;
     StMuEmcHit*       getPrsHit(int hitId, int detector = bprs);    
-    int               getNClusters(int detector);
+    const StMuEmcHit* getPrsHit(int hitId, int detector = bprs) const;    
+    int               getNClusters(int detector) const;
     StMuEmcCluster*   getCluster(int clusterId,int detector);    
-    int               getNPoints() ;
+    const StMuEmcCluster* getCluster(int clusterId,int detector) const;    
+    int               getNPoints() const;
     StMuEmcPoint*     getPoint(int);
-    int               getNEndcapPoints();
+    const StMuEmcPoint*     getPoint(int) const;
+    int               getNEndcapPoints() const;
     StMuEmcPoint*     getEndcapPoint(int);
+    const StMuEmcPoint* getEndcapPoint(int) const;
 
     // EEMC utility methods
     int   getNEndcapTowerADC() const { return 720;}
-    void  getEndcapTowerADC(int ihit, 
-			    int &adc, int &sec, int &sub, int & eta) const ;
+    void  getEndcapTowerADC(int ihit, int &adc, int &sec, int &sub, int & eta) const ;
 
-    int   getNEndcapPrsHits()  { return getNPrsHits(eprs);}
-    StMuEmcHit *getEndcapPrsHit(int ihit, 
-			  int &sec, int &sub, int & eta, int &pre);
+    int   getNEndcapPrsHits() const { return getNPrsHits(eprs);}
+    StMuEmcHit *getEndcapPrsHit(int ihit, int &sec, int &sub, int & eta, int &pre);
+    const StMuEmcHit *getEndcapPrsHit(int ihit, int &sec, int &sub, int & eta, int &pre) const;
 
-    int   getNEndcapSmdHits(char uv); // set 'U' or 'V'
-    StMuEmcHit * getEndcapSmdHit(char uv, int ihit,
-				 int &sec, int &strip);
+    int   getNEndcapSmdHits(char uv) const; // set 'U' or 'V'
+    StMuEmcHit * getEndcapSmdHit(char uv, int ihit, int &sec, int &strip);
+    const StMuEmcHit * getEndcapSmdHit(char uv, int ihit, int &sec, int &strip) const;
         
     void              setTowerADC(int,int, int detector = bemc);
     void              addSmdHit(int detector);

@@ -10,6 +10,7 @@
 ClassImp(StMuEmcCluster)
 
 StMuEmcCluster::StMuEmcCluster()
+    : TObject()
 {
   Clear();
 }
@@ -21,7 +22,8 @@ void StMuEmcCluster::Clear(Option_t*)
   mEta=0;mPhi=0;mSigmaEta=0;mSigmaPhi=0;mEnergy=0;mNHits=0;
   mHits.Set(0);
 }
-StMuEmcCluster::StMuEmcCluster(StMuEmcCluster* cl)
+StMuEmcCluster::StMuEmcCluster(const StMuEmcCluster* cl)
+    : TObject(*cl)
 {    
   mEta=cl->getEta();
   mPhi=cl->getPhi();

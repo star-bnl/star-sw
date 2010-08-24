@@ -23,15 +23,16 @@ class StMuEmcPoint: public TObject
   public:
     virtual           ~StMuEmcPoint();
     
-    float             getEta()                { return mEta;}            ///< Return Eta of the point
-    float             getPhi()                { return mPhi;}            ///< Return Phi of the point
-    float             getRadius()             { return mRadius;}         ///< return radius of the point
-    float             getDeltaEta()           { return mDeltaEta;}       ///< Return DeltaEta of the point
-    float             getDeltaPhi()           { return mDeltaPhi;}       ///< Return DeltaPhi of the point
-    float             getEnergy()             { return mEnergy;}         ///< Return Energy of the point
-    float             getChiSquare()          { return mChiSquare;}      ///< Return ChiSquare of the point
+    float             getEta() const          { return mEta;}            ///< Return Eta of the point
+    float             getPhi() const          { return mPhi;}            ///< Return Phi of the point
+    float             getRadius() const       { return mRadius;}         ///< return radius of the point
+    float             getDeltaEta() const     { return mDeltaEta;}       ///< Return DeltaEta of the point
+    float             getDeltaPhi() const     { return mDeltaPhi;}       ///< Return DeltaPhi of the point
+    float             getEnergy() const       { return mEnergy;}         ///< Return Energy of the point
+    float             getChiSquare() const    { return mChiSquare;}      ///< Return ChiSquare of the point
     
     StMuEmcCluster*   getCluster(Int_t EmcDet){ return mEmc[EmcDet-1]; } ///< Return one cluster of the point
+    const StMuEmcCluster* getCluster(Int_t EmcDet) const { return mEmc[EmcDet-1]; } ///< Return one cluster of the point
     
     void              setCluster(StMuEmcCluster* cl, Int_t EmcDet) { mEmc[EmcDet-1] = cl;}    
     void              setEta(float e)         { mEta = e;}

@@ -18,14 +18,14 @@ class StMuEmcUtil : public TObject
     StEmcGeom          *mGeo[4];		    
     
   public:
-                       StMuEmcUtil();
-                       ~StMuEmcUtil();
-    StMuEmcCollection* getMuEmc(StEmcCollection*);
-    StEmcCollection*   getEmc(StMuEmcCollection*);
-    void               fillMuEmc(StMuEmcCollection*,StEmcCollection*);
-    void               fillEmc(StEmcCollection*,StMuEmcCollection*);
-    int               getEndcapId(int,int,int,int,int&);
-    int               getEndcapBin(int,int,int&,int&,int&);
+    StMuEmcUtil();
+    virtual ~StMuEmcUtil();
+    StMuEmcCollection* getMuEmc(const StEmcCollection*);
+    StEmcCollection*   getEmc(const StMuEmcCollection*);
+    void               fillMuEmc(StMuEmcCollection*, const StEmcCollection*);
+    void               fillEmc(StEmcCollection*, const StMuEmcCollection*);
+    int               getEndcapId(int,int,int,int,int&) const;
+    int               getEndcapBin(int,int,int&,int&,int&) const;
               
   ClassDef(StMuEmcUtil,1)
 };

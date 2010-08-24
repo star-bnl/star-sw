@@ -19,17 +19,16 @@ class StMuEmcTowerData: public TObject
 {
   public:
                       StMuEmcTowerData();
-                      StMuEmcTowerData(StMuEmcTowerData&);
+                      StMuEmcTowerData(const StMuEmcTowerData&);
     virtual           ~StMuEmcTowerData();
-    int               towerADC(int id, int detector = bemc);    
-    StEmcCrateStatus  crateStatus(int crate, int detector = bemc);
+    int               towerADC(int id, int detector = bemc) const;    
+    StEmcCrateStatus  crateStatus(int crate, int detector = bemc) const;
     void              clearBemc();
     void              clearEemc();
 
     // EEMC utility methods
-    int   getNEndcapTowerADC(){ return nEndcapTowers;}
-    void  getEndcapTowerADC(int ihit, 
-			    int &adc, int &sec, int &sub, int & eta);
+    int   getNEndcapTowerADC() const { return nEndcapTowers;}
+    void  getEndcapTowerADC(int ihit, int &adc, int &sec, int &sub, int & eta) const;
 
     void              setTowerADC(int,int, int detector = bemc);
     void              setCrateStatus(StEmcCrateStatus status, int crate, int detector = bemc);
