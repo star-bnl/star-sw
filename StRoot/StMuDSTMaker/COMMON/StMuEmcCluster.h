@@ -13,18 +13,18 @@ class StMuEmcCluster: public TObject
 {
   public:
                     StMuEmcCluster();
-                    StMuEmcCluster(StMuEmcCluster*);
+                    StMuEmcCluster(const StMuEmcCluster*);
     virtual         ~StMuEmcCluster();
     virtual         void Clear(Option_t* opt="");
    
-    float           getEta()                     { return mEta;}                             ///< Return Eta of the cluster
-    float           getPhi()                     { return mPhi;}                             ///< Return Phi of the cluster
-    float           getSigmaEta()                { return mSigmaEta;}                        ///< Return SigmaEta of the cluster
-    float           getSigmaPhi()                { return mSigmaPhi;}                        ///< Return SigmaPhi of the cluster
-    float           getEnergy()                  { return mEnergy;}
+    float           getEta() const               { return mEta;}                             ///< Return Eta of the cluster
+    float           getPhi() const               { return mPhi;}                             ///< Return Phi of the cluster
+    float           getSigmaEta() const          { return mSigmaEta;}                        ///< Return SigmaEta of the cluster
+    float           getSigmaPhi() const          { return mSigmaPhi;}                        ///< Return SigmaPhi of the cluster
+    float           getEnergy() const            { return mEnergy;}
     
-    int             getNHits()                   { return mNHits;}              ///< Return Number of hits of the cluster
-    int             getHitId(int hitNumber)      { return mHits[hitNumber];}    ///< Return one hit of the cluster
+    int             getNHits() const             { return mNHits;}              ///< Return Number of hits of the cluster
+    int             getHitId(int hitNumber) const { return mHits[hitNumber];}    ///< Return one hit of the cluster
         
     void            setEta(float e)              { mEta = e;}
     void            setPhi(float p)              { mPhi = p;}

@@ -10,12 +10,14 @@
 ClassImp(StMuEmcHit);
 
 StMuEmcHit::StMuEmcHit()
+    : TObject()
 {
 }
 StMuEmcHit::~StMuEmcHit()
 {
 }
-StMuEmcHit::StMuEmcHit(StMuEmcHit &hit)
+StMuEmcHit::StMuEmcHit(const StMuEmcHit &hit)
+    : TObject(hit)
 {
     mId=(short)hit.getId();
     mAdc=(short)hit.getAdc();

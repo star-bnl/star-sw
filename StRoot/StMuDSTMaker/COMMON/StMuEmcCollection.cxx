@@ -14,12 +14,15 @@ static StMuEmcUtil util; // to ease decoding of EEMC hits
 ClassImp(StMuEmcCollection)
 
 StMuEmcCollection::StMuEmcCollection()
+    : TObject()
 {    
   int n = (char*)&mEndcapEmcPoints - (char*)&mTowerADC + sizeof(mEndcapEmcPoints);
   memset(&mTowerADC,0,n);
 } 
 
-StMuEmcCollection::StMuEmcCollection(StMuEmcCollection& o) {
+StMuEmcCollection::StMuEmcCollection(const StMuEmcCollection& o) 
+    : TObject(o)
+{
   memcpy( mTowerADC,  o.mTowerADC,  sizeof(mTowerADC)  );
   memcpy( mEndcapTowerADC,  o.mEndcapTowerADC,  sizeof(mEndcapTowerADC)  );
 
@@ -122,7 +125,7 @@ int StMuEmcCollection::getTowerADC(int id, int detector) const
 }
 
 
-int StMuEmcCollection::getNSmdHits(int detector)
+int StMuEmcCollection::getNSmdHits(int detector) const
 {
   TClonesArray *tca = NULL;
   if (!mPrsHits) return 0;
@@ -131,6 +134,7 @@ int StMuEmcCollection::getNSmdHits(int detector)
   if(tca) return tca->GetEntriesFast();
   else    return 0;
 }
+
 StMuEmcHit* StMuEmcCollection::getSmdHit(int hitId,int detector)
 {
   TClonesArray *tca = NULL;
@@ -145,7 +149,23 @@ StMuEmcHit* StMuEmcCollection::getSmdHit(int hitId,int detector)
   }
   return NULL;
 }
-int StMuEmcCollection::getNPrsHits(int detector)
+
+const StMuEmcHit* StMuEmcCollection::getSmdHit(int hitId,int detector) const
+{
+  const TClonesArray *tca = NULL;
+  if (!mPrsHits) return 0;
+  if(detector==bsmde || detector==bsmdp) tca = mSmdHits[detector-bsmde];
+  if(detector==esmdu || detector==esmdv) tca = mEndcapSmdHits[detector-esmdu];
+  if(tca)
+  {
+    int counter = tca->GetEntriesFast();
+    if(hitId<0 || hitId>counter) return NULL;
+    return (const StMuEmcHit*)tca->UncheckedAt(hitId);
+  }
+  return NULL;
+}
+
+int StMuEmcCollection::getNPrsHits(int detector) const
 {
   if (!mPrsHits) return 0;
   TClonesArray *tca = NULL;
@@ -154,6 +174,7 @@ int StMuEmcCollection::getNPrsHits(int detector)
   if(tca) return tca->GetEntriesFast();
   else    return 0;
 }
+
 StMuEmcHit* StMuEmcCollection::getPrsHit(int hitId, int detector)
 {
   if (!mPrsHits) return 0;
@@ -168,7 +189,23 @@ StMuEmcHit* StMuEmcCollection::getPrsHit(int hitId, int detector)
   }
   return NULL;
 }
-int StMuEmcCollection::getNClusters(int detector)
+
+const StMuEmcHit* StMuEmcCollection::getPrsHit(int hitId, int detector) const
+{
+  if (!mPrsHits) return 0;
+  const TClonesArray *tca = NULL;
+  if(detector == bprs) tca = mPrsHits;
+  if(detector == eprs) tca = mEndcapPrsHits;
+  if(tca)
+  {
+    int counter = tca->GetEntriesFast();
+    if(hitId<0 || hitId>counter) return NULL;
+    return (const StMuEmcHit*)tca->UncheckedAt(hitId);
+  }
+  return NULL;
+}
+
+int StMuEmcCollection::getNClusters(int detector) const
 {
   if (!mPrsHits) return 0;
   if(detector<bemc && detector>esmdv) return 0;
@@ -194,20 +231,35 @@ StMuEmcCluster* StMuEmcCollection::getCluster(int clusterId,int detector)
   if(clusterId<0 || clusterId>counter) return NULL;
   return (StMuEmcCluster*)tca->At(clusterId);
 }
-int StMuEmcCollection::getNPoints()
+
+const StMuEmcCluster* StMuEmcCollection::getCluster(int clusterId,int detector) const
 {
   if (!mPrsHits) return 0;
-  TClonesArray *tca =mEmcPoints;
+  if(detector<bemc && detector>esmdv) return NULL;
+  const TClonesArray *tca = NULL;
+  if(detector>=bemc && detector <= bsmdp) tca = mEmcClusters[detector-bemc];
+  else tca = mEndcapEmcClusters[detector-eemc];
+  int counter = tca->GetEntries();
+  if(clusterId<0 || clusterId>counter) return NULL;
+  return (const StMuEmcCluster*)tca->At(clusterId);
+}
+
+int StMuEmcCollection::getNPoints() const
+{
+  if (!mPrsHits) return 0;
+  const TClonesArray *tca =mEmcPoints;
   if (tca)  return tca->GetEntries();
   else      return 0;
 }
-int StMuEmcCollection::getNEndcapPoints()
+
+int StMuEmcCollection::getNEndcapPoints() const
 {
   if (!mPrsHits) return 0;
-  TClonesArray *tca =mEndcapEmcPoints;
+  const TClonesArray *tca =mEndcapEmcPoints;
   if (tca)  return tca->GetEntries();
   else      return 0;
 }
+
 StMuEmcPoint* StMuEmcCollection::getPoint(int pointId)
 {
   if (!mPrsHits) return 0;
@@ -216,6 +268,16 @@ StMuEmcPoint* StMuEmcCollection::getPoint(int pointId)
   if(pointId<0 || pointId>counter) return NULL;
   return (StMuEmcPoint*)tca->At(pointId);
 }
+
+const StMuEmcPoint* StMuEmcCollection::getPoint(int pointId) const
+{
+  if (!mPrsHits) return 0;
+  const TClonesArray *tca =mEmcPoints;
+  int counter = tca->GetEntries();
+  if(pointId<0 || pointId>counter) return NULL;
+  return (const StMuEmcPoint*)tca->At(pointId);
+}
+
 StMuEmcPoint* StMuEmcCollection::getEndcapPoint(int pointId)
 {
   if (!mPrsHits) return 0;
@@ -225,6 +287,20 @@ StMuEmcPoint* StMuEmcCollection::getEndcapPoint(int pointId)
     int counter = tca->GetEntries();
     if(pointId<0 || pointId>counter) return NULL;
     return (StMuEmcPoint*)tca->At(pointId);
+  } else {
+    return NULL;
+  }
+}
+
+const StMuEmcPoint* StMuEmcCollection::getEndcapPoint(int pointId) const
+{
+  if (!mPrsHits) return 0;
+  const TClonesArray *tca =mEndcapEmcPoints;
+
+  if (tca){
+    int counter = tca->GetEntries();
+    if(pointId<0 || pointId>counter) return NULL;
+    return (const StMuEmcPoint*)tca->At(pointId);
   } else {
     return NULL;
   }
@@ -309,8 +385,7 @@ void StMuEmcCollection::addEndcapPoint()
 }
 
 
-void StMuEmcCollection
-::getEndcapTowerADC(int ihit1, int &adc, int &sec, int &sub, int & eta) const 
+void StMuEmcCollection::getEndcapTowerADC(int ihit1, int &adc, int &sec, int &sub, int & eta) const 
 {
   int ihit=ihit1+1;  // it was not my idea to abort on index=0, JB
   adc=getTowerADC(ihit,eemc);
@@ -319,9 +394,7 @@ void StMuEmcCollection
   return;
 }
 
-
-StMuEmcHit * StMuEmcCollection
-::getEndcapPrsHit(int ihit, int &sec, int &sub, int & eta, int &pre)
+StMuEmcHit * StMuEmcCollection::getEndcapPrsHit(int ihit, int &sec, int &sub, int & eta, int &pre)
 {
   if (!mPrsHits) return 0;
   StMuEmcHit * h =  getPrsHit(ihit,eprs);
@@ -332,8 +405,18 @@ StMuEmcHit * StMuEmcCollection
   return h;
 }
 
+const StMuEmcHit * StMuEmcCollection::getEndcapPrsHit(int ihit, int &sec, int &sub, int & eta, int &pre) const
+{
+  if (!mPrsHits) return 0;
+  const StMuEmcHit * h =  getPrsHit(ihit,eprs);
+  int ssub;
+  if( util.getEndcapBin(eprs,h->getId(),sec,eta,ssub)) return 0;
+  pre=1+(ssub-1)/5;
+  sub=1+(ssub-1)%5;
+  return h;
+}
 
-int StMuEmcCollection::getNEndcapSmdHits(char uv)
+int StMuEmcCollection::getNEndcapSmdHits(char uv) const
 {
   if(uv!='U' &&  uv!='V') return 0;
   return getNSmdHits((int)esmdu+uv-'U');
@@ -346,6 +429,17 @@ StMuEmcHit * StMuEmcCollection::getEndcapSmdHit(char uv, int ihit,int &sec, int 
   if (!mPrsHits) return 0;
   int det=(int)esmdu+uv-'U';
   StMuEmcHit * h =getSmdHit(ihit,det);  
+  int idum;
+  if( util.getEndcapBin(det,h->getId(),sec,strip,idum)) return 0;
+  return h;
+}
+
+const StMuEmcHit * StMuEmcCollection::getEndcapSmdHit(char uv, int ihit,int &sec, int &strip) const
+{
+  if(uv!='U' &&  uv!='V') return 0;
+  if (!mPrsHits) return 0;
+  int det=(int)esmdu+uv-'U';
+  const StMuEmcHit * h =getSmdHit(ihit,det);  
   int idum;
   if( util.getEndcapBin(det,h->getId(),sec,strip,idum)) return 0;
   return h;

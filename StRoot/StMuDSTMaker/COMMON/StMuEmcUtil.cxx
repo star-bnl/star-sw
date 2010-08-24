@@ -13,28 +13,28 @@ ClassImp(StMuEmcUtil)
 
 
 StMuEmcUtil::StMuEmcUtil()
+    : TObject()
 {
   for(Int_t i =0;i<4;i++) mGeo[i]=StEmcGeom::getEmcGeom(i+1);
 }
 StMuEmcUtil::~StMuEmcUtil()
 {
 }
-StMuEmcCollection* StMuEmcUtil::getMuEmc(StEmcCollection *emccol)
+StMuEmcCollection* StMuEmcUtil::getMuEmc(const StEmcCollection *emccol)
 {
   if(!emccol) return NULL;
   StMuEmcCollection* muEmc=new StMuEmcCollection();
   fillMuEmc(muEmc,emccol);
   return muEmc;
 }  
-StEmcCollection* StMuEmcUtil::getEmc(StMuEmcCollection* muEmc)
+StEmcCollection* StMuEmcUtil::getEmc(const StMuEmcCollection* muEmc)
 {
   if(!muEmc) return NULL;
-  
   StEmcCollection *emc=new StEmcCollection();
   fillEmc(emc,muEmc);
   return emc;
 }
-void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
+void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc, const StEmcCollection *emccol)
 {
   if(!emccol) return;
   if(!muEmc) return;
@@ -46,7 +46,7 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
     Int_t EmcDet=d+1;
     
     StDetectorId id = static_cast<StDetectorId>(d+kBarrelEmcTowerId);
-    StEmcDetector* detector=emccol->detector(id);
+    const StEmcDetector* detector=emccol->detector(id);
     if(detector)
     {                          
       Int_t maxMod = 121;
@@ -54,10 +54,10 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
       //cout <<"Filling hits for detetor "<<EmcDet<<endl;
       for(Int_t j=1;j<maxMod;j++)
       {
-        StEmcModule* module = detector->module(j);
+        const StEmcModule* module = detector->module(j);
         if(module)
         {
-          StSPtrVecEmcRawHit& rawHit=module->hits();
+          const StSPtrVecEmcRawHit& rawHit=module->hits();
           Int_t nhits=(Int_t)rawHit.size();
           if(nhits>0)
             for(Int_t k=0;k<nhits;k++)
@@ -139,7 +139,7 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
   return;
 }
 
-void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
+void StMuEmcUtil::fillEmc(StEmcCollection* emc, const StMuEmcCollection* muEmc)
 {
   if(!muEmc) return;
   if(!emc) return;
@@ -180,7 +180,7 @@ void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
       }      
       if(det==2 || det ==6) //prs
       {
-        StMuEmcHit* hit=muEmc->getPrsHit(j,det);
+        const StMuEmcHit* hit=muEmc->getPrsHit(j,det);
         if(hit)
         {
           rid=hit->getId();
@@ -195,7 +195,7 @@ void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
       }
       if(det==3 || det==4 || det==7 || det==8) //smd
       {
-        StMuEmcHit* hit=muEmc->getSmdHit(j,det);
+        const StMuEmcHit* hit=muEmc->getSmdHit(j,det);
         if(hit)
         {
           rid=hit->getId();
@@ -249,7 +249,7 @@ void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
 
 //=================================================
 //=================================================
-int  StMuEmcUtil::getEndcapId(int d,int m, int e, int s,int &rid){
+int  StMuEmcUtil::getEndcapId(int d,int m, int e, int s,int &rid) const {
   rid=1;
   /*  first tower or first strip is default,
       I do not like it, but it is the only safe value,JB
@@ -308,7 +308,7 @@ int  StMuEmcUtil::getEndcapId(int d,int m, int e, int s,int &rid){
 }
 
 
-int StMuEmcUtil::getEndcapBin(int d,int rid0,int &m, int &e, int &s)
+int StMuEmcUtil::getEndcapBin(int d,int rid0,int &m, int &e, int &s) const
 {
   m=e=s=1;
   /*  first tower or first strip is default,

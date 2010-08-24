@@ -14,12 +14,15 @@ static StMuEmcUtil util; // to ease decoding of EEMC hits
 ClassImp(StMuEmcTowerData)
 
 StMuEmcTowerData::StMuEmcTowerData()
+    : TObject()
 {    
   clearBemc();
   clearEemc();
 } 
 
-StMuEmcTowerData::StMuEmcTowerData(StMuEmcTowerData& o) {
+StMuEmcTowerData::StMuEmcTowerData(const StMuEmcTowerData& o) 
+    : TObject(o)
+{
   memcpy(mTowerADC,o.mTowerADC,sizeof(mTowerADC));
   memcpy(mEndcapTowerADC,o.mEndcapTowerADC,sizeof(mEndcapTowerADC));
   memcpy(mBTowCrateFlags,o.mBTowCrateFlags,sizeof(mBTowCrateFlags));
@@ -48,7 +51,7 @@ void StMuEmcTowerData::clearEemc() {
   memset(mEPrsCrateFlags,0,sizeof(mEPrsCrateFlags));
 }
 
-int StMuEmcTowerData::towerADC(int id, int detector)
+int StMuEmcTowerData::towerADC(int id, int detector) const
 {
   if(detector == bemc)
   {
@@ -63,7 +66,7 @@ int StMuEmcTowerData::towerADC(int id, int detector)
   return 0;
 }
 
-StEmcCrateStatus StMuEmcTowerData::crateStatus(int crate, int detector) {
+StEmcCrateStatus StMuEmcTowerData::crateStatus(int crate, int detector) const {
   switch (detector) {
   case bemc:
     if (crate>0 && crate<=nBTowCrates)
@@ -152,8 +155,7 @@ void StMuEmcTowerData::setCrateStatus(StEmcCrateStatus status, int crate, int de
 }
 
 
-void StMuEmcTowerData
-::getEndcapTowerADC(int ihit1, int &adc, int &sec, int &sub, int & eta)
+void StMuEmcTowerData::getEndcapTowerADC(int ihit1, int &adc, int &sec, int &sub, int & eta) const
 {
   int ihit=ihit1+1;  // it was not my idea to abort on index=0, JB
   adc=towerADC(ihit,eemc);
