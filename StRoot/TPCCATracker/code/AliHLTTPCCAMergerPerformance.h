@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAMergerPerformance.h,v 1.2 2010/08/23 19:37:02 mzyzak Exp $
+// $Id: AliHLTTPCCAMergerPerformance.h,v 1.3 2010/08/24 18:52:20 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -14,7 +14,7 @@
 #include "AliHLTTPCCASlicePerformance.h"
 
 #include "AliHLTTPCCADef.h"
-#include "AliHLTArray.h"
+
 #include "AliHLTTPCCAMCTrack.h"
 #include "AliHLTTPCCAMCPoint.h"
 #include <fstream>
