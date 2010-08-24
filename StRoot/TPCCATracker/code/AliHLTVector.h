@@ -55,7 +55,7 @@ namespace CAMath
   template<> inline Vc::short_v Abs  <Vc::short_v >( const Vc::short_v &x ) { return Vc::abs( x ); }
   SPECIALIZATION( short_v )
   SPECIALIZATION( ushort_v )
-#endif
+#endif //  ENABLE_LARRABEE
 #undef SPECIALIZATION
 #define SPECIALIZATION( T ) \
   template<> inline T Min  <T>( const T &x, const T &y ) { return Vc::min( x, y ); } \
@@ -76,7 +76,7 @@ namespace CAMath
   SPECIALIZATION( float_v )
 #if VC_IMPL_SSE
   SPECIALIZATION( sfloat_v )
-#endif
+#endif //  VC_IMPL_SSE
   SPECIALIZATION( double_v )
 #undef SPECIALIZATION
 
@@ -89,9 +89,9 @@ namespace CAMath
 #endif //USE_TBB
 } // namespace CAMath
 
-#else
+#else // ENABLE_VECTORIZATION
 
-#error foo
+#error WarningNoVectorization
 typedef int int_v;
 typedef unsigned int uint_v;
 typedef short short_v;
