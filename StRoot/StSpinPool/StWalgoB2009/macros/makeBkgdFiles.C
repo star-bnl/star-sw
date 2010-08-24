@@ -647,12 +647,17 @@ void makeBkgdFiles(int charge, int two_or_four) {
   TH1F *tau_stat_err2 = new TH1F("tau_stat_err2","tau_stat_err2",49,1.,99.);
   TH1F *QCD_syst_high_err = new TH1F("QCD_syst_high_err","QCD_syst_high_err",49,1.,99.);
   TH1F *QCD_syst_low_err = new TH1F("QCD_syst_low_err","QCD_syst_low_err",49,1.,99.);
-
+  TH1F *zsig_stat_err2 = new TH1F("zsig_stat_err2","zsig_stat_err2",49,1.,99.);
+  TH1F *zback_stat_err2 = new TH1F("zback_stat_err2","zback_stat_err2",49,1.,99.);
+ 
+ 
   for (int i=1; i<=26; i++) {
     raw_stat_err2->SetBinContent(i,signal2->GetBinContent(i));
     QCD_stat_err2->SetBinContent(i,fabs(norm*new_bkgd->GetBinContent(i)));
     eemc_stat_err2->SetBinContent(i,eemc_bkgd2->GetBinContent(i));
     tau_stat_err2->SetBinContent(i,tau_norm*taufrac*tauhist->GetBinContent(i));
+    zsig_stat_err2->SetBinContent(i,Z_norm*zsig_bkgd2->GetBinContent(i));
+    zback_stat_err2->SetBinContent(i,norm*norm*Z_norm*zback_bkgd2->GetBinContent(i));
     //cout << "Error " << i << " " << raw_stat_err2->GetBinCenter(i) << " " << raw_stat_err2->GetBinContent(i) << " " << QCD_stat_err2->GetBinContent(i) << " " << eemc_stat_err2->GetBinContent(i) << " " << tau_stat_err2->GetBinContent(i) << endl;
   }
 
@@ -668,7 +673,7 @@ void makeBkgdFiles(int charge, int two_or_four) {
 
   float low_sum = 0.;
   float high_sum = 0.;
-  for (int i=9; i<=49; i++) {
+  for (int i=7; i<=49; i++) {
     float high = 0.;
     float low = 10000.;
     for (int j=0; j<=20; j++) {
@@ -712,7 +717,7 @@ void makeBkgdFiles(int charge, int two_or_four) {
     }
     if (i >= 13) {high_sum += high;} 
     high_bkgd->SetBinContent(i,high);
-    //cout << i << " low = " << low << " high = " << high << " nom = " << new_bkgd->GetBinContent(i) << endl;  
+    //cout << QCD_syst_low_err->GetBinCenter(i) << " low = " << low << " high = " << high << " nom = " << new_bkgd->GetBinContent(i) << endl;  
     // set the bin-by-bin error too
     if ((low != 10000) && (new_bkgd->GetBinContent(i)-low > 0)) {
       QCD_syst_low_err->SetBinContent(i,new_bkgd->GetBinContent(i)-low);
@@ -773,9 +778,18 @@ void makeBkgdFiles(int charge, int two_or_four) {
     tau_stat_err2->Write();
     QCD_syst_high_err->Write();
     QCD_syst_low_err->Write();
+    zsig_stat_err2->Write();
+    zback_stat_err2->Write();
 
-    f2->Close();
+    for (int i=1; i<=49; i++) {
+      //cout.setf(ios::fixed);
+      //cout.precision(2);
+      cout << " " << signal2->GetBinCenter(i) << " & " << signal2->GetBinContent(i) << " & " << signal_final3->GetBinContent(i) << " & " << QCD_stat_err2->GetBinContent(i) << " & " << eemc_stat_err2->GetBinContent(i) << " & " << tau_stat_err2->GetBinContent(i) << " & " << zsig_stat_err2->GetBinContent(i) << " & " << zback_stat_err2->GetBinContent(i) << " & " << QCD_syst_high_err->GetBinContent(i) << " & " << QCD_syst_low_err->GetBinContent(i) << " \\\\" << endl;
+      
+    }
   
+    f2->Close();
+ 
   } else if (two_or_four == 4) {
 
     TH1F *signal_final3 = new TH1F("signal_final3","signal_final3",49,1.,99.);
@@ -800,6 +814,8 @@ void makeBkgdFiles(int charge, int two_or_four) {
     TH1F *tau_stat_err2_repack = new TH1F("tau_stat_err2_r","tau_stat_err2_r",24,3.,99.);
     TH1F *QCD_syst_high_err_repack = new TH1F("QCD_syst_high_err_r","QCD_syst_high_err_r",24,3.,99.);
     TH1F *QCD_syst_low_err_repack = new TH1F("QCD_syst_low_err_r","QCD_syst_low_err_r",24,3.,99.);
+    TH1F *zsig_stat_err2_repack = new TH1F("zsig_stat_err2_r","zsig_stat_err2_r",24,3.,99.);
+    TH1F *zback_stat_err2_repack = new TH1F("zback_stat_err2_r","zback_stat_err2_r",24,3.,99.);
 
     for (int i=1; i<=24; i++) {
       tauhist_repack->SetBinContent(i,tauhist->GetBinContent(2*i)+
@@ -830,6 +846,10 @@ void makeBkgdFiles(int charge, int two_or_four) {
                                             tau_stat_err2->GetBinContent(2*i+1));
       QCD_syst_high_err_repack->SetBinContent(i,QCD_syst_high_err->GetBinContent(2*i)+QCD_syst_high_err->GetBinContent(2*i+1));
       QCD_syst_low_err_repack->SetBinContent(i,QCD_syst_low_err->GetBinContent(2*i)+QCD_syst_low_err->GetBinContent(2*i+1));
+      zsig_stat_err2_repack->SetBinContent(i,zsig_stat_err2->GetBinContent(2*i)+
+                                             zback_stat_err2->GetBinContent(2*i+1));
+      zback_stat_err2_repack->SetBinContent(i,zback_stat_err2->GetBinContent(2*i)+
+                                             zback_stat_err2->GetBinContent(2*i+1));
     }
 
     tauhist_repack->Write();
@@ -848,6 +868,14 @@ void makeBkgdFiles(int charge, int two_or_four) {
     tau_stat_err2_repack->Write();
     QCD_syst_high_err_repack->Write();
     QCD_syst_low_err_repack->Write();
+    zsig_stat_err2_repack->Write();
+    zback_stat_err2_repack->Write();
+
+    for (int i=1; i<=24; i++) {
+      cout.setf(ios::fixed);
+      cout.precision(2);
+      cout << " " << signal2_repack->GetBinCenter(i) << " & " << signal2_repack->GetBinContent(i) << " & " << signal_final3_repack->GetBinContent(i) << " & " << QCD_stat_err2_repack->GetBinContent(i) << " & " << eemc_stat_err2_repack->GetBinContent(i) << " & " << tau_stat_err2_repack->GetBinContent(i) << " & " << zsig_stat_err2_repack->GetBinContent(i) << " & " << zback_stat_err2_repack->GetBinContent(i) << " & " << QCD_syst_high_err_repack->GetBinContent(i) << " & " << QCD_syst_low_err_repack->GetBinContent(i) << " \\\\" << endl;
+    }
 
     f2->Close();
 
