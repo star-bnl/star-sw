@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.25 2009/03/16 13:51:00 fisyak Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.26 2010/08/25 21:57:41 fisyak Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.26  2010/08/25 21:57:41  fisyak
+ * Get rid off access to specfic detector tracking parameters which usage has been  disable since 2008/06/11
+ *
  * Revision 1.25  2009/03/16 13:51:00  fisyak
  * Move out all Sti Chairs into StDetectorDb
  *
@@ -67,7 +70,6 @@
 #include "StiPixelDetectorBuilder.h" 
 #include "StiPixelIsActiveFunctor.h"
 #include "StDetectorDbMaker/StiPixelHitErrorCalculator.h"
-#include "StDetectorDbMaker/StiPixelTrackingParameters.h"
 #include "TDataSetIter.h"
 #include "tables/St_HitError_Table.h"
 #include "StEvent.h"
@@ -115,7 +117,6 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 								  material->getA(),
 								  material->getZ(),
 								  material->getDensity());
-  _trackingParameters = (StiTrackingParameters *) StiPixelTrackingParameters::instance();
   StiPlanarShape *pShape;
   for (unsigned int row=0; row<nRows; row++) 
     {

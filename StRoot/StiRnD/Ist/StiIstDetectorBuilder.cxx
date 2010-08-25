@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.cxx,v 1.20 2009/03/16 13:51:00 fisyak Exp $
+// $Id: StiIstDetectorBuilder.cxx,v 1.21 2010/08/25 21:57:41 fisyak Exp $
 // 
 // $Log: StiIstDetectorBuilder.cxx,v $
+// Revision 1.21  2010/08/25 21:57:41  fisyak
+// Get rid off access to specfic detector tracking parameters which usage has been  disable since 2008/06/11
+//
 // Revision 1.20  2009/03/16 13:51:00  fisyak
 // Move out all Sti Chairs into StDetectorDb
 //
@@ -64,7 +67,6 @@ StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string & inputFi
     : StiDetectorBuilder("Ist",active,inputFile), _siMat(0), _hybridMat(0)
 {
     // Hit error parameters : it is set to 20 microns, in both x and y coordinates 
-    //_trackingParameters.setName("istTrackingParameters");
     //_hitCalculator1.setName("ist1HitError");
     //_hitCalculator2.setName("ist2HitError");
     //_hitCalculator3.setName("ist3HitError");

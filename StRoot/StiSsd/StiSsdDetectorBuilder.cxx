@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.33 2009/03/16 13:50:15 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.34 2010/08/25 21:57:42 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.34  2010/08/25 21:57:42  fisyak
+// Get rid off access to specfic detector tracking parameters which usage has been  disable since 2008/06/11
+//
 // Revision 1.33  2009/03/16 13:50:15  fisyak
 // Move out all Sti Chairs into StDetectorDb
 //
@@ -75,7 +78,6 @@ using namespace std;
 #include "StiSsd/StiSsdDetectorBuilder.h" 
 #include "StSsdUtil/StSsdBarrel.hh"
 #include "StDetectorDbMaker/StiSsdHitErrorCalculator.h"
-#include "StDetectorDbMaker/StiSsdTrackingParameters.h"
 StiSsdDetectorBuilder::StiSsdDetectorBuilder(bool active, const string & inputFile)
     : StiDetectorBuilder("Ssd",active,inputFile), _siMat(0), _hybridMat(0)
 {
@@ -133,7 +135,6 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
       ----> ladder # 1  ===> module 7101 
       ----> ladder # 20 ===> module 7120
     */
-    _trackingParameters = (StiTrackingParameters *) StiSsdTrackingParameters::instance();
     for (Int_t ladder = 0; ladder < NL; ladder++) {
       Ladder = mySsd->getLadder(ladder);
       if (! Ladder) continue;
