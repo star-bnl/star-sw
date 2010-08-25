@@ -18,7 +18,6 @@
 #include "StiIsSvtActiveFunctor.h"
 #include "Sti/StiElossCalculator.h"
 #include "StDetectorDbMaker/StiSvtHitErrorCalculator.h"
-#include "StDetectorDbMaker/StiSvtTrackingParameters.h"
 #include <stdio.h>
 #include "tables/St_HitError_Table.h"
 #include "StiSvtLayerLadder.h"
@@ -141,7 +140,6 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
   double ionization = _siMat->getIonization();
   StiElossCalculator * siElossCalculator = 
     new StiElossCalculator(_siMat->getZOverA(), ionization*ionization, _siMat->getA(), _siMat->getZ(), _siMat->getDensity());
-  _trackingParameters = (StiTrackingParameters *) StiSvtTrackingParameters::instance();
   for (int layer=0;layer<nRows;layer++)    {
     cout << "  "<<layer<<"     "<<_config->getNumberOfLadders(1+layer/2)/2 << "   " 
 	 << _geometry->getBarrelRadius(layer+1) << endl;
@@ -232,7 +230,7 @@ void StiSvtDetectorBuilder::useVMCGeometry() {
   cout << "StiSvtDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
   SetCurrentDetectorBuilder(this);
   struct Material_t {
-    Char_t *name;
+    const Char_t *name;
     StiMaterial    **p;
   };
   Material_t map[] = {

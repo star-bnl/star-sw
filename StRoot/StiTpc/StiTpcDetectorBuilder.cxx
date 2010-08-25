@@ -20,7 +20,6 @@
 #include "Sti/StiNeverActiveFunctor.h"
 #include "StDetectorDbMaker/StiTpcInnerHitErrorCalculator.h"
 #include "StDetectorDbMaker/StiTpcOuterHitErrorCalculator.h"
-#include "StDetectorDbMaker/StiTpcTrackingParameters.h"
 #include "StiTpcDetectorBuilder.h"
 #include "StiTpcIsActiveFunctor.h"
 #include "Sti/StiElossCalculator.h"
@@ -74,6 +73,7 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     //  {"TPCM","the Central Membrane placed in TPC","HALL_1/CAVE_1/TPCE_1/TPCM_1","",""},
     //  {"TOFC","outer field cage - fill it with insulating gas already","HALL_1/CAVE_1/TPCE_1/TOFC_1/*","",""},
     {"TIFC","Inner Field Cage","HALL_1/CAVE_1/TPCE_1/TIFC_1","",""},
+    {"TIFC","Inner Field Cage","HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TIFC_1","",""},
     //  {"TPGV","the Gas Volume placed in TPC","HALL_1/CAVE_1/TPCE_1/TPGV_1-2/*","",""},
     //  {"TPSS","a division of gas volume corresponding to a supersectors","HALL_1/CAVE_1/TPCE_1/TPGV_1-2/TPSS_1-12/*","",""},
     {"TPAD","inner pad row","HALL_1/CAVE_1/TPCE_1/TPGV_%d/TPSS_%d/TPAD_%d","tpc",""},// <+++
@@ -113,7 +113,6 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
   Double_t ionization = _gasMat->getIonization();
   StiElossCalculator *gasElossCalculator =  new StiElossCalculator(_gasMat->getZOverA(), ionization*ionization,
 								   _gasMat->getA(), _gasMat->getZ(), _gasMat->getDensity());
-  _trackingParameters = (StiTrackingParameters *) StiTpcTrackingParameters::instance();
   StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
   StiPlanarShape *pShape;
   //Active TPC padrows
@@ -242,15 +241,16 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       add(row,sector,pDetector); if (debug>1) cout << *pDetector << endl;
     }// for sector
   }// for row
-  TString pathT("HALL_1/CAVE_1/TPCE_1/TIFC_1");
   TString path("");
-  for (Int_t i = 0; i < 1; i++) {
+  for (Int_t i = 0; i < 2; i++) {
     gGeoManager->RestoreMasterVolume();
     gGeoManager->CdTop();
-    pathT = TpcVolumes[i].path;
-    gGeoManager->cd(pathT); path = pathT;
     TGeoNode *nodeT = gGeoManager->GetCurrentNode();
+    path = TpcVolumes[i].path;
+    if (! gGeoManager->cd(path)) continue;
+    nodeT = gGeoManager->GetCurrentNode();
     if (! nodeT) continue;
+    path = gGeoManager->GetPath();
     StiVMCToolKit::LoopOverNodes(nodeT, path, TpcVolumes[i].name, MakeAverageVolume);
   }
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Done" << endl;
