@@ -431,6 +431,8 @@ inline int StJetSkimEvent::barrelJetPatchAdc(int jp) const { return mBarrelJetPa
 inline int StJetSkimEvent::endcapJetPatchAdc(int jp) const { return mEndcapJetPatchAdc[jp]; }
 inline int StJetSkimEvent::overlapJetPatchAdc(int jp) const { return mOverlapJetPatchAdc[jp]; }
 
+inline int StJetSkimEvent::emcLayer2() const { return mEmcLayer2; }
+
 inline int  StJetSkimEvent::BHT() const { return mEmcLayer2       & 0xf; }
 inline int  StJetSkimEvent::EHT() const { return mEmcLayer2 >>  4 & 0x3; }
 inline int  StJetSkimEvent::JP1() const { return mEmcLayer2 >>  6 & 0x1; }
