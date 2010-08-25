@@ -97,12 +97,12 @@ namespace Garfield {
 TrackHeed::TrackHeed() : 
   ready(false), hasActiveTrack(false),
   mediumDensity(-1.), mediumName(""),
-  databasePath(""), isPathSet(false),
+  useDelta(true),
   particle(0), 
   matter(0), gas(0), material(0),
   atPacs(0), molPacs(0),
-  energyMesh(0), emin(2.e-6), emax(2.e-1), nEnergyIntervals(200),
-  transferCs(0),
+  emin(2.e-6), emax(2.e-1), nEnergyIntervals(200),
+  energyMesh(0), transferCs(0),
   elScat(0), lowSigma(0), pairProd(0), deltaCs(0),
   chamber(0) {
   
@@ -229,7 +229,8 @@ TrackHeed::NewTrack(
 }
 
 bool
-TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
+TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls, 
+                      double& tcls,
                       int& n, double& e, double& extra) {
 
   // Initial settings.
@@ -307,7 +308,7 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
       for (int i = nIds; i--;) {
         if (delta->parent_particle_number == ids[i]) {
           // Transport the delta electron.
-          delta->fly();
+          if (useDelta) delta->fly();
           deleteNode = true;
           break;
         }
@@ -384,6 +385,15 @@ TrackHeed::TransportDeltaElectron(
       const double t0, const double e0, 
       const double dx0, const double dy0, const double dz0,
       int& nel) {
+
+  nel = 0;
+
+  // Check if delta electron transport was disabled.
+  if (!useDelta) {
+    std::cerr << "TrackHeed::TransportDeltaElectron:\n";
+    std::cerr << "    Delta electron transport has been switched off.\n";
+    return;
+  }
 
   // Make sure the kinetic energy is positive.
   if (e0 <= 0.) {
@@ -520,16 +530,18 @@ bool
 TrackHeed::Setup(Medium* medium) {
 
   // Make sure the path to the Heed database is known.
-  if (!isPathSet) {
-    char* dbPath = getenv("HEED_DATABASE");
-    if (dbPath == 0) {
-      std::cerr << "TrackHeed::Setup:\n";
-      std::cerr << "    Database path is not defined.\n";
-      std::cerr << "    Environment variable HEED_DATABASE is not set.\n";
-      std::cerr << "    Cannot proceed with initialization.\n";
-      return false;
-    }
-    databasePath = std::string(dbPath) + "/"; 
+  char* dbPath = getenv("HEED_DATABASE");
+  if (dbPath == 0) {
+    std::cerr << "TrackHeed::Setup:\n";
+    std::cerr << "    Database path is not defined.\n";
+    std::cerr << "    Environment variable HEED_DATABASE is not set.\n";
+    std::cerr << "    Cannot proceed with initialization.\n";
+    return false;
+  }
+  
+  std::string databasePath = dbPath;
+  if (databasePath[databasePath.size() - 1] != '/') {
+    databasePath.append("/");
   }
   
   // Check once more that the medium exists.
@@ -563,7 +575,7 @@ TrackHeed::Setup(Medium* medium) {
   }
   transferCs = new EnTransfCS(mass / 1.e6, gamma - 1, sel, matter, long(q));
   
-  if (!SetupDelta()) return false;  
+  if (!SetupDelta(databasePath)) return false;  
 
   if (debug) {
     const double nc = transferCs->quanC;
@@ -762,7 +774,7 @@ TrackHeed::SetupMaterial(Medium* medium) {
 }
 
 bool
-TrackHeed::SetupDelta() {
+TrackHeed::SetupDelta(const std::string databasePath) {
 
   // Load elastic scattering data.
   std::string filename = databasePath + "cbdel.dat";

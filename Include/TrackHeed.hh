@@ -31,37 +31,45 @@ class TrackHeed : public Track {
     ~TrackHeed();
 
     void NewTrack(
-            const double x0, const double y0, const double z0, const double t0,
-            const double dx0, const double dy0, const double dz0);
+        const double x0, const double y0, const double z0, const double t0,
+        const double dx0, const double dy0, const double dz0);
     bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
                     int& n, double& e, double& extra);
     bool GetElectron(const int i, double& x, double& y, double& z);                    
    
-    void TransportDeltaElectron(const double x0, const double y0, const double z0,
-                                const double dx0, const double dy0, const double dz0,
-                                const double t0, const double e0, int& nel);
+    void TransportDeltaElectron(
+        const double x0, const double y0, const double z0,
+        const double t0, const double e0,
+        const double dx0, const double dy0, const double dz0,
+        int& nel);
     
     // Specify whether the electric and magnetic field should be 
-    // taken into account in the stepping algorithm.                            
+    // taken into account in the stepping algorithm.
     void EnableElectricField();
     void DisableElectricField();
     void EnableMagneticField();
     void DisableMagneticField();
+
+    void EnableDeltaElectronTransport()  {useDelta = true;}
+    void DisableDeltaElectronTransport() {useDelta = false;}
 
     void SetEnergyMesh(const double e0, const double e1,
                        const int nsteps);
 
   private:
 
+    // Prevent usage of copy constructor and assignment operator
+    TrackHeed(const TrackHeed& heed);
+    TrackHeed& operator=(const TrackHeed& heed);
+    
     bool ready;
     bool hasActiveTrack;
   
     double      mediumDensity;
     std::string mediumName;
-    
-    std::string databasePath;
-    bool isPathSet;
-
+   
+    bool useDelta;
+ 
     // Primary particle
     HeedParticle* particle;
 
@@ -91,7 +99,7 @@ class TrackHeed : public Track {
     bool Setup(Medium* medium);
     bool SetupGas(Medium* medium);
     bool SetupMaterial(Medium* medium);
-    bool SetupDelta();
+    bool SetupDelta(const std::string databasePath);
 
 };
 

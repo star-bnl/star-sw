@@ -519,6 +519,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
   } else if (type == 4 && usePenning) {
     if (energyLoss[level] * rgas[level] > minIonPot && 
         RndmUniform() < rPenning) {
+      // esec = 1.;
       esec = RndmUniform() * (energyLoss[level] * rgas[level] - minIonPot);
       if (esec <= 0) esec = 1.e-20;
       ++nPenning;
