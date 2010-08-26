@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCASliceLinksPerformance.cxx,v 1.5 2010/08/18 20:46:09 ikulakov Exp $
+// $Id: AliHLTTPCCASliceLinksPerformance.cxx,v 1.6 2010/08/26 15:05:51 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -80,7 +80,6 @@ void AliHLTTPCCASliceLinksPerformance::CollectTracks()
   nRecoTracks = sliceTracker->NTracklets();
 
   const SliceData &data = sliceTracker->Data();
-  const AliHLTTPCCAClusterData &clusterData =  sliceTracker->ClusterData();
   AliHLTTPCCAHitId *startHits = sliceTracker->TrackletStartHits();
    
   for (int iTr = 0; iTr < nRecoTracks; iTr++) {

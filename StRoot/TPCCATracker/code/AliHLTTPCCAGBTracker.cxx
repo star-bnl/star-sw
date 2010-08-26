@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGBTracker.cxx,v 1.10 2010/08/18 23:40:43 ikulakov Exp $
+// $Id: AliHLTTPCCAGBTracker.cxx,v 1.11 2010/08/26 15:05:49 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -900,12 +900,12 @@ void AliHLTTPCCAGBTracker::RestoreFromFile( FILE *f )
 
 void AliHLTTPCCAGBTracker::SetHits( vector<AliHLTTPCCAGBHit> &hits)
 {
-  const int NHits = hits.size();
+  const int NHits2 = hits.size();
 
-  SetNHits(NHits);
+  SetNHits(NHits2);
 
-  fHits.Resize(NHits);
-  for (int iH = 0; iH < NHits; iH++){
+  fHits.Resize(NHits2);
+  for (int iH = 0; iH < NHits2; iH++){
     fHits[iH] = hits[iH];
   }
 } // need for StRoot

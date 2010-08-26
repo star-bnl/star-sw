@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.3 2010/08/12 15:13:20 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCATracker.cxx,v 1.4 2010/08/26 15:05:52 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -46,6 +46,8 @@ using std::endl;
 
 AliHLTTPCCATracker::AliHLTTPCCATracker()
     :
+    fNOutTracks1( 0 ),
+    fOutTracks1( 0 ),
     fParam(),
     fClusterData( 0 ),
     fHitMemory( 0 ),
@@ -58,8 +60,6 @@ AliHLTTPCCATracker::AliHLTTPCCATracker()
     fOutput( 0 ),
     fNOutTracks( 0 ),
     fOutTracks( 0 ),
-    fNOutTracks1( 0 ),
-    fOutTracks1( 0 ),
     fNOutTrackHits( 0 ),
     fOutTrackHits( 0 )
 {
