@@ -497,8 +497,8 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
   double loss = energyLoss[level];
   // Secondary electron energy (none by default)
   esec = 0.; s = 0.;
-  // Ionising collision
   if (type == 1) {
+    // Ionisation
     // Splitting parameter
     const double w = wSplit[level];
     // const double w = 3.0;
@@ -511,18 +511,31 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
     }
     if (esec <= 0) esec = 1.e-20;
     loss += esec;
-  // Excitation
-  } else if (type == 4 && useDeexcitation && iDeexcitation[level] >= 0) {
-    ComputeDeexcitation(iDeexcitation[level]);
-    esec = -1.;
-    if (nDeexcitationProducts > 0) s = -1.;
-  } else if (type == 4 && usePenning) {
-    if (energyLoss[level] * rgas[level] > minIonPot && 
+  } else if (type == 4) {
+    // Excitation
+    // Dissociative excitation: continous loss distribution
+    if (description[level][5] == 'D' &&
+        description[level][6] == 'I' &&
+        description[level][7] == 'S') {
+      // Temporary patch for methane:
+      if (e > 13.3) {
+        // loss = 8.55 + RndmUniform() * (13.3 - 8.55);
+        // loss /= rgas[level];
+      }
+    }
+    // Follow the de-excitation cascade (if switched on)
+    if (useDeexcitation && iDeexcitation[level] >= 0) {
+      ComputeDeexcitation(iDeexcitation[level]);
+      esec = -1.;
+      if (nDeexcitationProducts > 0) s = -1.;
+    } else if (usePenning) {
+      // Simplified treatment of Penning ionisation
+      if (energyLoss[level] * rgas[level] > minIonPot && 
         RndmUniform() < rPenning) {
-      // esec = 1.;
-      esec = RndmUniform() * (energyLoss[level] * rgas[level] - minIonPot);
-      if (esec <= 0) esec = 1.e-20;
-      ++nPenning;
+        esec = RndmUniform() * (energyLoss[level] * rgas[level] - minIonPot);
+        if (esec <= 0) esec = 1.e-20;
+        ++nPenning;
+      }
     }
   }
 
