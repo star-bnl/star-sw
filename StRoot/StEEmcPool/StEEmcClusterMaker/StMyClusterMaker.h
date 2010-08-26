@@ -87,14 +87,11 @@ class StMyClusterParams
 
 class StMyClusterMaker : public StEEmcGenericClusterMaker, public StMyClusterParams
 {
+public:
+  StMyClusterMaker(const Char_t *name, const StEEmcA2EMaker *a2e, StMuDstMaker * /*mumk*/);
+  virtual ~StMyClusterMaker(){ /* nada */ }
 
- public:
-  StMyClusterMaker(const Char_t *name, StEEmcA2EMaker *a2e, StMuDstMaker *mumk);
-  ~StMyClusterMaker(){ /* nada */ }
-
-  Int_t Init();
-  Int_t Make();
-  void  Clear(Option_t *opts="");
+  virtual Int_t Make();
 
   /// Sets SMD seed threshold
   void setSmdSeedEnergy( Float_t e, Float_t s=0. ) { seed_threshold=e; seed_slope=s; }
@@ -130,14 +127,12 @@ class StMyClusterMaker : public StEEmcGenericClusterMaker, public StMyClusterPar
   void setFloor( Float_t relative_yield, Float_t width ){ mFloorParams[0]=relative_yield; mFloorParams[1]=width; }
 
     virtual const char* GetCVS() const
-	        {static const char cvs[]="Tag $Name:  $ $Id: StMyClusterMaker.h,v 1.4 2008/06/30 21:15:24 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+	        {static const char cvs[]="Tag $Name:  $ $Id: StMyClusterMaker.h,v 1.5 2010/08/26 22:49:25 ogrebeny Exp $ built "__DATE__" "__TIME__; return cvs;}
 
+protected:
 
- private:
- protected:
-
-  StMuDstMaker *mMuDst;
-  TFile *mFile;
+  //StMuDstMaker *mMuDst;
+  //TFile *mFile;
 
   Float_t seed_threshold;
   Float_t seed_slope;
@@ -153,13 +148,13 @@ class StMyClusterMaker : public StEEmcGenericClusterMaker, public StMyClusterPar
   Int_t mPhiCut; /**< Maximum number of phi bins around seed tower */
 
   // builder for tower clusters
-  Int_t buildTowerClusters();
+  virtual Int_t buildTowerClusters();
   // builder for preshower clusters (both layers)
-  Int_t buildPreshowerClusters();
+  virtual Int_t buildPreshowerClusters();
   // builder for postshower clusters
-  Int_t buildPostshowerClusters();
+  virtual Int_t buildPostshowerClusters();
   // builder for smd clusters
-  Int_t buildSmdClusters();
+  virtual Int_t buildSmdClusters();
 
   // builder generic builder for tower, pre and post clusters
   Int_t buildLayer( Int_t layer );

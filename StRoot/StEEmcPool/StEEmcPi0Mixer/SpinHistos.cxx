@@ -47,7 +47,7 @@ SpinHistos::SpinHistos(const Char_t *name, const Char_t *title):TDirectory(name,
 }
 
 // ----------------------------------------------------------------------------
-void SpinHistos::Fill( StEEmcPair &pair )
+void SpinHistos::Fill(const StEEmcPair &pair )
 {
 
   Float_t mass = pair.mass();

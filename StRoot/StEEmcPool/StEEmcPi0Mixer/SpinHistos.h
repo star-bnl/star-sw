@@ -27,7 +27,7 @@ class SpinHistos : public TDirectory
   SpinHistos( const Char_t *name, const Char_t *title="spin sorted pi0" );
   ~SpinHistos(){ /* nada */ };
 
-  void Fill( StEEmcPair &pair );
+  void Fill(const StEEmcPair &pair );
 
   /// Resets all spectra in the event that a spin sorting problem 
   /// is detected.

@@ -15,7 +15,8 @@
 ClassImp(StEEmc2x2ClusterMaker);
 
 // ----------------------------------------------------------------------------
-StEEmc2x2ClusterMaker::StEEmc2x2ClusterMaker(const Char_t *name, StEEmcA2EMaker *a2e, StMuDstMaker *mumk ) : StEEmcGenericClusterMaker(name,a2e)
+StEEmc2x2ClusterMaker::StEEmc2x2ClusterMaker(const Char_t *name, const StEEmcA2EMaker *a2e, StMuDstMaker * /*mumk*/ ) 
+    : StEEmcGenericClusterMaker(name,a2e), StEEmc2x2ClusterParams()
 {
   mSmdSeedEnergy  = 4.0 / 1000.0;
   mSmdMinEnergy   = 0.5 / 1000.0;
@@ -32,7 +33,7 @@ StEEmc2x2ClusterMaker::StEEmc2x2ClusterMaker(const Char_t *name, StEEmcA2EMaker 
   mEtaCut = 999;
   mPhiCut = 999;
 
-  mMuDst=mumk;
+  //mMuDst=mumk;
   //  assert(mumk);
 
   setDoBreakInflection(0);
@@ -43,20 +44,6 @@ StEEmc2x2ClusterMaker::StEEmc2x2ClusterMaker(const Char_t *name, StEEmcA2EMaker 
   mFloorParams[0]=0.;mFloorParams[1]=0.;
   
 }
-// ----------------------------------------------------------------------------
-void StEEmc2x2ClusterMaker::Clear(Option_t *opts)
-{
-
-  StEEmcGenericClusterMaker::Clear(opts);  
-
-}
-
-// ----------------------------------------------------------------------------
-Int_t StEEmc2x2ClusterMaker::Init()
-{
-
-  return StEEmcGenericClusterMaker::Init();
-}
 
 // ----------------------------------------------------------------------------
 Int_t StEEmc2x2ClusterMaker::Make()
@@ -66,11 +53,8 @@ Int_t StEEmc2x2ClusterMaker::Make()
   buildPreshowerClusters();
   //$$$  buildSmdClusters();
   buildPostshowerClusters();
-
-  StEEmcGenericClusterMaker::Make();
-
-  return kStOK;
-  
+  Int_t result = StEEmcGenericClusterMaker::Make();
+  return result;
 }
 
 // ----------------------------------------------------------------------------
@@ -160,7 +144,7 @@ Int_t StEEmc2x2ClusterMaker::buildLayer(Int_t layer )
 	      Int_t myindex = myeta + 12 * ( ( myphi + 60 ) % 60 );
 	      if ( used[myindex] ) continue; // Skip used towers
 	
-	      StEEmcTower t = mEEanalysis->tower(myindex,layer);
+	      const StEEmcTower &t = mEEanalysis->tower(myindex,layer);
 	      if ( t.energy() > mMinEnergy[layer] ) {
 		temp.add(t);
 		ntow++;			      
@@ -199,8 +183,7 @@ Int_t StEEmc2x2ClusterMaker::buildLayer(Int_t layer )
 // ----------------------------------------------------------------------------
 Int_t StEEmc2x2ClusterMaker::buildTowerClusters()
 {
-  buildLayer(0);
-  return kStOK;
+  return buildLayer(0);
 }
 
 // ----------------------------------------------------------------------------
@@ -214,8 +197,7 @@ Int_t StEEmc2x2ClusterMaker::buildPreshowerClusters()
 // ----------------------------------------------------------------------------
 Int_t StEEmc2x2ClusterMaker::buildPostshowerClusters()
 {
-  buildLayer(3);
-  return kStOK;
+  return buildLayer(3);
 }
 
 // ----------------------------------------------------------------------------
@@ -229,7 +211,7 @@ Int_t StEEmc2x2ClusterMaker::buildSmdClusters()
     Float_t etmax = 0.;
     for ( UInt_t ii=0;ii<mTowerClusters[sector][0].size();ii++ )
       {
-	StEEmcCluster c = mTowerClusters[sector][0][ii];
+	const StEEmcCluster &c = mTowerClusters[sector][0][ii];
 	if ( c.momentum().Perp() > etmax ) etmax = c.momentum().Perp();
       }
 
@@ -290,14 +272,11 @@ Int_t StEEmc2x2ClusterMaker::buildSmdClusters()
 	    if ( strips[i].fail() ) continue;
 
 	    // Require signal in adjacent smd strips
-	    StEEmcStrip stripL = mEEanalysis->strip(sector,plane,myindex-1);
-	    StEEmcStrip stripR = mEEanalysis->strip(sector,plane,myindex+1);
-	    if ( stripL.fail() ) 
-	      stripL=mEEanalysis->strip(sector,plane,myindex-2);
-	    if ( stripR.fail() ) 
-	      stripR=mEEanalysis->strip(sector,plane,myindex+2);
-	    if ( stripL.energy() < mSmdMinEnergy ||
-		 stripR.energy() < mSmdMinEnergy ) continue;
+	    const StEEmcStrip *stripL = &mEEanalysis->strip(sector,plane,myindex-1);
+	    const StEEmcStrip *stripR = &mEEanalysis->strip(sector,plane,myindex+1);
+	    if ( stripL->fail() ) stripL=&mEEanalysis->strip(sector,plane,myindex-2);
+	    if ( stripR->fail() ) stripR=&mEEanalysis->strip(sector,plane,myindex+2);
+	    if ( stripL->energy() < mSmdMinEnergy || stripR->energy() < mSmdMinEnergy ) continue;
 	    
 	    // Smd strip passes minimum requirements for a seed
 	    seeds.push_back( strips[i] );
@@ -325,7 +304,7 @@ Int_t StEEmc2x2ClusterMaker::buildSmdClusters()
 	  {
 
 	    // Get the current smd seed
-	    StEEmcStrip seed=seeds[i];
+	    const StEEmcStrip &seed=seeds[i];
 	    Int_t myindex=seed.index();
 
 	    //printf("seed sec=%i plane=%i index=%i energy=%6.3f\n",seed.sector(),seed.plane(),seed.index(),seed.energy());
@@ -360,13 +339,13 @@ Int_t StEEmc2x2ClusterMaker::buildSmdClusters()
 
 		  if ( used[istrip] ) break; /* we ran into another cluster */
 
-		  StEEmcStrip strip=mEEanalysis->strip(sector,plane,istrip);
+		  const StEEmcStrip &strip=mEEanalysis->strip(sector,plane,istrip);
 		  Float_t energy=strip.energy();
 
 		  // break at inflection points
 		  if ( istrip > 1 && istrip < nstrips-1 ) {
-		    StEEmcStrip strip_left=mEEanalysis->strip(sector,plane,istrip-1);
-		    StEEmcStrip strip_right=mEEanalysis->strip(sector,plane,istrip+1);
+		    const StEEmcStrip &strip_left=mEEanalysis->strip(sector,plane,istrip-1);
+		    const StEEmcStrip &strip_right=mEEanalysis->strip(sector,plane,istrip+1);
 		    if ( strip_right.energy() > strip_left.energy() ) break_inflection++;
 		  }
 
@@ -394,13 +373,13 @@ Int_t StEEmc2x2ClusterMaker::buildSmdClusters()
 
 		  if ( used[istrip] ) break; /* we ran into another cluster */
 
-                  StEEmcStrip strip=mEEanalysis->strip(sector,plane,istrip);
+                  const StEEmcStrip &strip=mEEanalysis->strip(sector,plane,istrip);
                   Float_t energy=strip.energy();
 
 		  // break at inflection points
 		  if ( istrip > 1 && istrip < nstrips-1 ) {
-		    StEEmcStrip strip_left=mEEanalysis->strip(sector,plane,istrip-1);
-		    StEEmcStrip strip_right=mEEanalysis->strip(sector,plane,istrip+1);
+		    const StEEmcStrip &strip_left=mEEanalysis->strip(sector,plane,istrip-1);
+		    const StEEmcStrip &strip_right=mEEanalysis->strip(sector,plane,istrip+1);
 		    //if ( strip_right.energy() < strip_left.energy() ) break;
 		    if ( strip_right.energy() < strip_left.energy() ) break_inflection++;
 		    

@@ -18,6 +18,7 @@ ClassImp(StEEmcPoint);
 
 // ----------------------------------------------------------------------------
 StEEmcPoint::StEEmcPoint()
+    : TObject()
 {
   mEmcPoint=0;
   mRelatives=999;
@@ -31,6 +32,7 @@ StEEmcPoint::StEEmcPoint()
 
 // ----------------------------------------------------------------------------
 StEEmcPoint::StEEmcPoint( const StEEmcPoint &p )
+    : TObject(p)
 {
 
   mPosition       = p.mPosition;
@@ -58,20 +60,6 @@ StEEmcPoint::StEEmcPoint( const StEEmcPoint &p )
 }
 
 // ----------------------------------------------------------------------------
-
-/*
-void StEEmcPoint::print()
-{
-  std::cout << " X=" << mPosition.X() 
-	    << " Y=" << mPosition.Y() 
-	    << " energy=" << mEnergy
-	    << " frac=" << mFraction
-	    << std::endl;
-}
-*/
-
-// ----------------------------------------------------------------------------
-
 StEmcPoint *StEEmcPoint::stemc()
 {
 
@@ -98,10 +86,6 @@ StEmcPoint *StEEmcPoint::stemc()
 
 }
 
-
-
-
-
 // --------------------------------------------------------------------------
 Bool_t StEEmcPoint::chiSquare( const StEEmcPoint &other ) const 
 {
@@ -119,21 +103,29 @@ Bool_t StEEmcPoint::chiSquare( const StEEmcPoint &other ) const
 
 }
 
-
 // ----------------------------------------------------------------------------
-
-void StEEmcPoint::print()
+void StEEmcPoint::print() const
 {
 
   std::cout << "---------------------------------" << std::endl;
   std::cout << " X=" << mPosition.X() 
             << " Y=" << mPosition.Y() 
-            << " energy=" << mEnergy[0] 
+            << " energy: T=" << mEnergy[0] << " P=" << mEnergy[1] << " Q=" << mEnergy[2] << " R=" << mEnergy[3]
             << " frac=" << mFraction
             << std::endl;
 
   for ( UInt_t i=0; i<mTowers.size(); i++ ) 
     mTowers[i].print();
+
+  for (UInt_t l = 0;l <= 3;l++) {
+    const StEEmcClusterVec_t &v = clusters(l);
+    std::cout << "layer " << l << ": # clusters " << v.size() << std::endl;
+    for (UInt_t i = 0;i < v.size();i++) {
+	const StEEmcCluster &c = v[i];
+        std::cout << "layer " << l << ", cluster " << i << std::endl;
+        c.print();
+    }
+  }
 
   std::cout << "ucluster:" << std::endl;
   mSmdClusters[0].print();
@@ -141,5 +133,3 @@ void StEEmcPoint::print()
   mSmdClusters[1].print();
 
 }
-
-

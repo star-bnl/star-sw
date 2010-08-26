@@ -15,7 +15,8 @@
 ClassImp(StMyClusterMaker);
 
 // ----------------------------------------------------------------------------
-StMyClusterMaker::StMyClusterMaker(const Char_t *name, StEEmcA2EMaker *a2e, StMuDstMaker *mumk ) : StEEmcGenericClusterMaker(name,a2e)
+StMyClusterMaker::StMyClusterMaker(const Char_t *name, const StEEmcA2EMaker *a2e, StMuDstMaker * /*mumk*/ ) 
+    : StEEmcGenericClusterMaker(name,a2e), StMyClusterParams()
 {
   mSmdSeedEnergy  = 4.0 / 1000.0;
   mSmdMinEnergy   = 0.5 / 1000.0;
@@ -32,7 +33,7 @@ StMyClusterMaker::StMyClusterMaker(const Char_t *name, StEEmcA2EMaker *a2e, StMu
   mEtaCut = 999;
   mPhiCut = 999;
 
-  mMuDst=mumk;
+  //mMuDst=mumk;
   //  assert(mumk);
 
   setDoBreakInflection(0);
@@ -43,20 +44,6 @@ StMyClusterMaker::StMyClusterMaker(const Char_t *name, StEEmcA2EMaker *a2e, StMu
   mFloorParams[0]=0.;mFloorParams[1]=0.;
   
 }
-// ----------------------------------------------------------------------------
-void StMyClusterMaker::Clear(Option_t *opts)
-{
-
-  StEEmcGenericClusterMaker::Clear(opts);  
-
-}
-
-// ----------------------------------------------------------------------------
-Int_t StMyClusterMaker::Init()
-{
-
-  return StEEmcGenericClusterMaker::Init();
-}
 
 // ----------------------------------------------------------------------------
 Int_t StMyClusterMaker::Make()
@@ -66,10 +53,8 @@ Int_t StMyClusterMaker::Make()
   buildPreshowerClusters();
   buildSmdClusters();
   buildPostshowerClusters();
-
-  StEEmcGenericClusterMaker::Make();
-
-  return kStOK;
+  Int_t result = StEEmcGenericClusterMaker::Make();
+  return result;
   
 }
 
@@ -116,7 +101,7 @@ Int_t StMyClusterMaker::buildLayer(Int_t layer )
   for ( UInt_t i=0;i<seeds.size();i++ )
     {
 
-      StEEmcTower tow=seeds[i];      
+      const StEEmcTower &tow=seeds[i];      
       if ( tow.fail() ) continue; // bad hardware
       if ( used[tow.index()] ) continue; // used by another cluster
 
@@ -135,7 +120,7 @@ Int_t StMyClusterMaker::buildLayer(Int_t layer )
       Int_t size_old = c.numberOfTowers();
       for ( UInt_t j=0;j<hits.size();j++ )
 	{
-	  tow=hits[j];
+	  const StEEmcTower &tow=hits[j];
 	  
 	  if ( used[ tow.index() ] ) continue; // next hit
 	  if ( tow.fail()          ) continue; // bad channel
@@ -202,7 +187,7 @@ Int_t StMyClusterMaker::buildSmdClusters()
     Float_t etmax = 0.;
     for ( UInt_t ii=0;ii<mTowerClusters[sector][0].size();ii++ )
       {
-	StEEmcCluster c = mTowerClusters[sector][0][ii];
+	const StEEmcCluster &c = mTowerClusters[sector][0][ii];
 	if ( c.momentum().Perp() > etmax ) etmax = c.momentum().Perp();
       }
 
@@ -263,14 +248,12 @@ Int_t StMyClusterMaker::buildSmdClusters()
 	    if ( strips[i].fail() ) continue;
 
 	    // Require signal in adjacent smd strips
-	    StEEmcStrip stripL = mEEanalysis->strip(sector,plane,myindex-1);
-	    StEEmcStrip stripR = mEEanalysis->strip(sector,plane,myindex+1);
-	    if ( stripL.fail() ) 
-	      stripL=mEEanalysis->strip(sector,plane,myindex-2);
-	    if ( stripR.fail() ) 
-	      stripR=mEEanalysis->strip(sector,plane,myindex+2);
-	    if ( stripL.energy() < mSmdMinEnergy ||
-		 stripR.energy() < mSmdMinEnergy ) continue;
+	    const StEEmcStrip *stripL = &mEEanalysis->strip(sector,plane,myindex-1);
+	    const StEEmcStrip *stripR = &mEEanalysis->strip(sector,plane,myindex+1);
+	    if ( stripL->fail() ) stripL = &mEEanalysis->strip(sector,plane,myindex-2);
+	    if ( stripR->fail() ) stripR = &mEEanalysis->strip(sector,plane,myindex+2);
+	    if ( stripL->energy() < mSmdMinEnergy ||
+		 stripR->energy() < mSmdMinEnergy ) continue;
 	    
 	    // Smd strip passes minimum requirements for a seed
 	    seeds.push_back( strips[i] );
@@ -298,7 +281,7 @@ Int_t StMyClusterMaker::buildSmdClusters()
 	  {
 
 	    // Get the current smd seed
-	    StEEmcStrip seed=seeds[i];
+	    const StEEmcStrip &seed=seeds[i];
 	    Int_t myindex=seed.index();
 
 	    //printf("seed sec=%i plane=%i index=%i energy=%6.3f\n",seed.sector(),seed.plane(),seed.index(),seed.energy());
@@ -333,13 +316,13 @@ Int_t StMyClusterMaker::buildSmdClusters()
 
 		  if ( used[istrip] ) break; /* we ran into another cluster */
 
-		  StEEmcStrip strip=mEEanalysis->strip(sector,plane,istrip);
+		  const StEEmcStrip &strip=mEEanalysis->strip(sector,plane,istrip);
 		  Float_t energy=strip.energy();
 
 		  // break at inflection points
 		  if ( istrip > 1 && istrip < nstrips-1 ) {
-		    StEEmcStrip strip_left=mEEanalysis->strip(sector,plane,istrip-1);
-		    StEEmcStrip strip_right=mEEanalysis->strip(sector,plane,istrip+1);
+		    const StEEmcStrip &strip_left=mEEanalysis->strip(sector,plane,istrip-1);
+		    const StEEmcStrip &strip_right=mEEanalysis->strip(sector,plane,istrip+1);
 		    if ( strip_right.energy() > strip_left.energy() ) break_inflection++;
 		  }
 
@@ -367,13 +350,13 @@ Int_t StMyClusterMaker::buildSmdClusters()
 
 		  if ( used[istrip] ) break; /* we ran into another cluster */
 
-                  StEEmcStrip strip=mEEanalysis->strip(sector,plane,istrip);
+                  const StEEmcStrip &strip=mEEanalysis->strip(sector,plane,istrip);
                   Float_t energy=strip.energy();
 
 		  // break at inflection points
 		  if ( istrip > 1 && istrip < nstrips-1 ) {
-		    StEEmcStrip strip_left=mEEanalysis->strip(sector,plane,istrip-1);
-		    StEEmcStrip strip_right=mEEanalysis->strip(sector,plane,istrip+1);
+		    const StEEmcStrip &strip_left=mEEanalysis->strip(sector,plane,istrip-1);
+		    const StEEmcStrip &strip_right=mEEanalysis->strip(sector,plane,istrip+1);
 		    //if ( strip_right.energy() < strip_left.energy() ) break;
 		    if ( strip_right.energy() < strip_left.energy() ) break_inflection++;
 		    

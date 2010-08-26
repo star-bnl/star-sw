@@ -5,8 +5,8 @@
  * This maker produces some useful QA histograms using StEEmcA2EMaker
  *
  * \author Jason C. Webb
- * $Date: 2005/09/29 16:27:50 $
- * $Revision: 1.3 $
+ * $Date: 2010/08/26 22:49:21 $
+ * $Revision: 1.4 $
  *
  */
  
@@ -41,8 +41,6 @@ StEEmcQAMaker::StEEmcQAMaker( const Char_t *name ) : StMaker(name)
 // ----------------------------------------------------------------------------
 Int_t StEEmcQAMaker::Init()
 {
-
-
   hEventCounter = new TH1F("hEventCounter","Event counts",10,0.,10.);
   hEventCounter -> GetXaxis() -> SetBinLabel(1,"raw event");
   hEventCounter -> GetXaxis() -> SetBinLabel(2,"triggered");
@@ -137,7 +135,6 @@ Int_t StEEmcQAMaker::Init()
 
 
   return StMaker::Init();
-
 }
 
 // ----------------------------------------------------------------------------
@@ -164,31 +161,22 @@ Int_t StEEmcQAMaker::Make()
   hEventCounter -> Fill ( 4 );
 
 
-  return kStOK;
+  return StMaker::Make();
 }
 
-// ----------------------------------------------------------------------------
-void StEEmcQAMaker::Clear(Option_t *opts)
-{
-
-}
 // ----------------------------------------------------------------------------
 void StEEmcQAMaker::analysis(const Char_t *name)
 {
     mEEanalysis=(StEEmcA2EMaker *)GetMaker(name);
     assert(mEEanalysis);
 }
+
 // ----------------------------------------------------------------------------
 void StEEmcQAMaker::mudst(const Char_t *name)
 {
     mMuDst=(StMuDstMaker*)GetMaker(name);
     assert(mMuDst); 
 } 
-
-
-
-
-
 
 // ----------------------------------------------------------------------------
 Bool_t StEEmcQAMaker::CheckTriggers()

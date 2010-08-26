@@ -1,4 +1,4 @@
-// $Id: EEmcGeomSimple.cxx,v 1.25 2009/02/11 20:37:36 ogrebeny Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.26 2010/08/26 22:48:47 ogrebeny Exp $
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   Jan 14, 2003
 /// doxygen info here
@@ -41,6 +41,7 @@ EEmcGeomSimple EEmcGeomSimple::sInstance;
 
 //
 EEmcGeomSimple::EEmcGeomSimple() 
+    : TObject()
 {
   // always initialize
   mEtaBin  = NULL;
@@ -319,6 +320,9 @@ EEmcGeomSimple::getTrackPoint(const StTrack& track, Double_t z) const
 
 
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.26  2010/08/26 22:48:47  ogrebeny
+// Improved constness
+//
 // Revision 1.25  2009/02/11 20:37:36  ogrebeny
 // *** empty log message ***
 //

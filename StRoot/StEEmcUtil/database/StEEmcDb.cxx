@@ -138,7 +138,7 @@ void StEEmcDb::setSectors(int sec1,int sec2)
 //__________________________________________________
 //__________________________________________________
 
-const EEmcDbCrate* StEEmcDb::getFiber(int icr) {
+const EEmcDbCrate* StEEmcDb::getFiber(int icr) const {
   assert(icr>=0);
   assert(icr<nFiber);
   return mDbFiber+icr;
@@ -581,7 +581,7 @@ goto fatal;
 //--------------------------------------------------
 //--------------------------------------------------
 const  EEmcDbItem*  
-StEEmcDb::getByIndex(int i){
+StEEmcDb::getByIndex(int i) const {
   // Gets database entry by absolute index
 
   assert(i>=0);
@@ -594,7 +594,7 @@ StEEmcDb::getByIndex(int i){
 
 //--------------------------------------------------
 //--------------------------------------------------
-const  EEmcDbItem*  StEEmcDb::getByCrate(int crateID, int channel) {
+const  EEmcDbItem*  StEEmcDb::getByCrate(int crateID, int channel) const {
   // crateID counts from 1, channel from 0 
   int type=0;
   int max=0;
@@ -630,7 +630,7 @@ const  EEmcDbItem*  StEEmcDb::getByCrate(int crateID, int channel) {
 //_________________________________________________________
 
 template <class St_T, class T_st> void StEEmcDb 
-::getTable(TDataSet *eedb, int secID, TString tabName, TString mask,  T_st** outTab ){
+::getTable(TDataSet *eedb, int secID, TString tabName, TString mask,  T_st** outTab ) {
 
   //  printf("\n\n%s ::TTT --> %s, size=%d\n",GetName(),tabName.Data(),sizeof(T_st));
 
@@ -676,7 +676,7 @@ template <class St_T, class T_st> void StEEmcDb
 //__________________________________________________
 
 const EEmcDbItem*  
-StEEmcDb::getByStrip0(int isec, int iuv, int istrip){
+StEEmcDb::getByStrip0(int isec, int iuv, int istrip) const {
   //  printf("isec=%d iuv=%d istrip=%d \n",isec,iuv,istrip);
   assert(isec>=0 && isec<MaxSectors);
   assert(iuv>=0 && iuv<MaxSmdPlains);
@@ -691,7 +691,7 @@ StEEmcDb::getByStrip0(int isec, int iuv, int istrip){
 //__________________________________________________
 
 const EEmcDbItem*  
-StEEmcDb::getTile(int sec, char sub, int eta, char type){
+StEEmcDb::getTile(int sec, char sub, int eta, char type) const {
   char name[20];
   sprintf(name,"%2.2d%c%c%2.2d",sec,type,sub,eta);
   int key=EEname2Index(name);
@@ -703,7 +703,7 @@ StEEmcDb::getTile(int sec, char sub, int eta, char type){
 //__________________________________________________
 
 const EEmcDbItem* 
-StEEmcDb::getStrip(int sec, char uv, int strip){
+StEEmcDb::getStrip(int sec, char uv, int strip) const {
   char name[20];
   sprintf(name,"%2.2d%c%3.3d",sec,uv,strip);
   int key=EEname2Index(name);
@@ -935,7 +935,7 @@ INPUT Barrel-like indexes from EmcCollection, decoding must be consistent with
 OUTPUT: all avaliable DB information
 */
 const EEmcDbItem *
-StEEmcDb::StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub) {
+StEEmcDb::StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub) const {
 
   const EEmcDbItem *x=0;
   int sec=Bmod; // range 1-12

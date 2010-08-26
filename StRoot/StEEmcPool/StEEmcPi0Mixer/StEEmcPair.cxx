@@ -27,6 +27,7 @@ ClassImp(StEEmcPair);
 // ----------------------------------------------------------------------------
 
 StEEmcPair::StEEmcPair()
+: TObject()
 {
   mMass=-1.;
   mEnergy=-1;
@@ -38,17 +39,18 @@ StEEmcPair::StEEmcPair()
 }
 
 
-StEEmcPair::StEEmcPair( StEEmcPoint p1, StEEmcPoint p2 )
+StEEmcPair::StEEmcPair(const StEEmcPoint &p1, const StEEmcPoint &p2)
 {
   StEEmcPair(p1,p2,TVector3(0,0,0),TVector3(0,0,0));
 }
 
-StEEmcPair::StEEmcPair( StEEmcPoint p1, StEEmcPoint p2, TVector3 v )
+StEEmcPair::StEEmcPair(const StEEmcPoint &p1, const StEEmcPoint &p2, const TVector3 &v)
 {
   StEEmcPair(p1,p2,v, v);
 }
 
-StEEmcPair::StEEmcPair( StEEmcPoint p1, StEEmcPoint p2, TVector3 v1, TVector3 v2 )
+StEEmcPair::StEEmcPair(const StEEmcPoint &p1, const StEEmcPoint &p2, const TVector3 &v1, const TVector3 &v2)
+: TObject()
 {
   mPoint[0]=p1;
   mPoint[1]=p2;
@@ -107,6 +109,7 @@ void StEEmcPair::Kinematics()
 
 // ----------------------------------------------------------------------------
 StEEmcPair::StEEmcPair( const StEEmcPair &old )
+: TObject(old)
 {
   mVertex1=old.mVertex1;
   mVertex2=old.mVertex2;
@@ -122,7 +125,7 @@ StEEmcPair::StEEmcPair( const StEEmcPair &old )
 }
 
 // ----------------------------------------------------------------------------
-void StEEmcPair::print()
+void StEEmcPair::print() const
 {
   std::cout << "pair mass=" << mass() 
 	    << " e1=" << mPoint[0].energy() 

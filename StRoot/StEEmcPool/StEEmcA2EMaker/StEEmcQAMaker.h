@@ -11,20 +11,14 @@ class TH2F;
 
 class StEEmcQAMaker : public StMaker
 {
-
- public:
-
-  /// Constructor
+public:
   StEEmcQAMaker(const Char_t *name);
-  /// Destructor
-  ~StEEmcQAMaker(){ /* nada */ };
+  virtual ~StEEmcQAMaker(){ /* nada */ };
 
   /// Initialize the maker
-  Int_t Init();
+  virtual Int_t Init();
   /// Process one event
-  Int_t Make();
-  /// Clear the maker
-  void  Clear(Option_t *opts="");
+  virtual Int_t Make();
 
   /// sets pointer to adc-->energy maker 
   void analysis(const Char_t *name);
@@ -40,8 +34,7 @@ class StEEmcQAMaker : public StMaker
 
   void softTrigger( Float_t s ) { mSoftTrig = s; }
 
- private:
- protected:
+protected:
 
   /// Tower sampling fraction
   Float_t mSamplingFractionT;
@@ -56,7 +49,6 @@ class StEEmcQAMaker : public StMaker
   StMuDstMaker *mMuDst; 
   /// List of triggers to process
   std::vector<Int_t> mTriggerList; //!
-
 
   Bool_t CheckTriggers(); /**<- analyse triggers */
   Bool_t CheckVertex();   /**<- analyse vertex */
@@ -143,9 +135,7 @@ class StEEmcQAMaker : public StMaker
   /// Scalar sum of PT of tracks associated with vertex
   std::vector<TH1F *> hPTsumVertex;    //! 
 
-  /// Makes class available to root
   ClassDef(StEEmcQAMaker,1);
-
 };
 
 #endif

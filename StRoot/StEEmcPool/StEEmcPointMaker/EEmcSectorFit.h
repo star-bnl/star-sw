@@ -6,25 +6,22 @@
 class TH1F;
 class EEmcSectorFit : public TMinuit
 {
-
- public:
+public:
   /// Constructor
   /// \param maxGammas: Maximum number of gammas which we will attempt to fit.
   EEmcSectorFit(Int_t maxGammas=10);
 
-
-
   /// Destructor
-  ~EEmcSectorFit();
+  virtual ~EEmcSectorFit();
 
   /// print summary
-  void print(); 
+  void print() const; 
 
   /// Set pointers to histograms which will be fit
   void SetHistograms(TH1F *u, TH1F *v){ mSMD[0]=u; mSMD[1]=v; }  
 
   /// Evaluate the N gamma fit for the specified plane
-  Double_t FitFunc( Double_t x, Int_t plane );
+  Double_t FitFunc( Double_t x, Int_t plane ) const;
 
   /// Overrides TMinuit's chi^2 function
   /// \param np = number of parameters
@@ -32,25 +29,22 @@ class EEmcSectorFit : public TMinuit
   /// \param x2 = the chi^2 value computed
   /// \param p  = array of parameters
   /// \param flg = flag (not used) 
-  Int_t Eval(Int_t np,Double_t* gr,Double_t& x2,Double_t* p,Int_t flg); 
+  virtual Int_t Eval(Int_t np,Double_t* gr,Double_t& x2,Double_t* p,Int_t flg); 
 
   /// Returns the residual (data - fit) for the specified strip index.
   /// \param x: strip index, [0,288)
   /// \param plane: smd plane, 0=u, 1=v
-  Double_t Residual( Int_t x, Int_t plane); 
+  Double_t Residual( Int_t x, Int_t plane) const;
   /// Returns the residual (data - fit) for the specified strip index,
   /// summed over +/- dx strips.
   /// \param x: strip index, [0,288)
   /// \param plane: smd plane, 0=u, 1=v
   /// \param dx: number of strips on either side to sum over
   /// \param side: 0=both, 1=left, 2=right
-  Double_t Residual( Int_t x, Int_t plane, Int_t dx, Int_t side=0); 
-
-
-
+  Double_t Residual( Int_t x, Int_t plane, Int_t dx, Int_t side=0) const; 
 
   /// Find maximum residual strip in specified plane.  Returns strip index.
-  Int_t MaxStrip(Int_t plane);
+  Int_t MaxStrip(Int_t plane) const;
 
   /// Add a candidate to the list of candidate gammas
   void AddCandidate( Double_t yield, Double_t sigma, Double_t u, Double_t v );
@@ -77,11 +71,11 @@ class EEmcSectorFit : public TMinuit
   void  GetLastCandidate( Double_t &nmips, Double_t &width, Double_t &u, Double_t &v ){ nmips=yield.back(); width=sigma.back(); u=umean.back(); v=vmean.back(); }
  
   /// Return the histogram for the specified plane
-  TH1F *histo(Int_t plane){ return mSMD[plane]; }
+  TH1F *histo(Int_t plane) { return mSMD[plane]; }
   /// Return the chisquared of the fit
-  Double_t chi2(){ return mChi2; }
+  Double_t chi2() const { return mChi2; }
   /// Return the number of degrees of freedom
-  Int_t ndf(){ return mNDF; }  
+  Int_t ndf() const { return mNDF; }  
 
   /// Adds TF1 to histogram
   void AddFits(TH1F *u, TH1F *v);
@@ -89,9 +83,7 @@ class EEmcSectorFit : public TMinuit
   /// Flag to determine if we test all permutations or not
   Bool_t doPermutations;
 
-
- private:
- protected:
+protected:
 
   /// The histograms we fit
   TH1F *mSMD[2];

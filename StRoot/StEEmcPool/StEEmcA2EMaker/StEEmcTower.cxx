@@ -8,8 +8,8 @@
  * to its 8 nearest neighbors on the endcap.
  *
  * \author Jason C. Webb
- * $Date: 2009/05/27 21:40:06 $
- * $Revision: 1.2 $
+ * $Date: 2010/08/26 22:49:21 $
+ * $Revision: 1.3 $
  *
  */
 
@@ -22,6 +22,7 @@ ClassImp(StEEmcTower);
 
 // ----------------------------------------------------------------------------
 StEEmcTower::StEEmcTower()
+    : StEEmcElement()
 {
   mIndex=-1;
   mLayer=-1;
@@ -33,6 +34,7 @@ StEEmcTower::StEEmcTower()
 
 // ----------------------------------------------------------------------------
 StEEmcTower::StEEmcTower( const StEEmcTower &other )
+    : StEEmcElement(other)
 {
   mIndex=other.mIndex;
   mLayer=other.mLayer;
@@ -53,7 +55,7 @@ StEEmcTower::StEEmcTower( const StEEmcTower &other )
 }
 
 // ----------------------------------------------------------------------------
-void StEEmcTower::print()
+void StEEmcTower::print() const
 {
 
     std::cout << "--------------------------- StEEmcTower::print()" << std::endl; 
@@ -65,7 +67,7 @@ void StEEmcTower::print()
 
 }
 
-void StEEmcTower::printLine()
+void StEEmcTower::printLine() const
 {
   std::cout << mName << " ADC=" << raw() << " " << adc() << " E=" << energy();
 }
@@ -93,7 +95,7 @@ void StEEmcTower::index( Int_t i )
 }
 
 // ----------------------------------------------------------------------------
-Bool_t StEEmcTower::isNeighbor( StEEmcTower t )
+Bool_t StEEmcTower::isNeighbor( const StEEmcTower &t ) const
 {
 
   /// passed a copy of this tower, return true
@@ -122,10 +124,10 @@ Bool_t StEEmcTower::isNeighbor( StEEmcTower t )
 
 }
 // ----------------------------------------------------------------------------
-TVector3 StEEmcTower::direction( Float_t zvertex )
+TVector3 StEEmcTower::direction( Float_t zvertex ) const 
 {
   TVector3 vertex(0.,0.,zvertex);
-  EEmcGeomSimple &geom=EEmcGeomSimple::Instance();
+  const EEmcGeomSimple &geom=EEmcGeomSimple::Instance();
   TVector3 position=geom.getTowerCenter( (UInt_t)sector(), (UInt_t)subsector(), (UInt_t)etabin() ); 
   position -= vertex;
   return position.Unit();

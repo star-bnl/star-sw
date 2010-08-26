@@ -75,7 +75,7 @@ private:
   
   template <class St_T, class T_st> void getTable(TDataSet *eedb, int secID, TString tabName, TString mask, T_st **outTab);
 
-  const EEmcDbItem* getStrip(int sec, char uv, int strip);  //ranges: sec=1-12, uv=U,V ,strip=1-288; slow method
+  const EEmcDbItem* getStrip(int sec, char uv, int strip) const;  //ranges: sec=1-12, uv=U,V ,strip=1-288; slow method
 
   TString mAsciiDbase; // Ascii database filename (default NONE)
 
@@ -100,30 +100,30 @@ public:
   void setAsciiDatabase ( const Char_t *dbfile );
   void changeGains(char *fname);// Replace gains for  initialized channels
   void changeMask(char *fname);// Replace stat/fail mask for initialized channels 
-  const EEmcDbCrate * getFiber(int icr);
+  const EEmcDbCrate * getFiber(int icr) const;
   void setFiberOff(int icr);
-  const int getNFiber(){return nFiber;}
-  const EEmcDbItem* getByIndex(int ikey); ///< returns full DB info for one pixel
+  const int getNFiber() const {return nFiber;}
+  const EEmcDbItem* getByIndex(int ikey) const; ///< returns full DB info for one pixel
   void exportAscii(const char *fname="eemcDbDump.dat") const; 
-  void print() {exportAscii();}
+  void print() const {exportAscii();}
 
-  const  EEmcDbItem*  getByCrate(int crateID, int channel); // full DB info, crateID counts from 1, channel from 0  
+  const  EEmcDbItem*  getByCrate(int crateID, int channel) const; // full DB info, crateID counts from 1, channel from 0  
 
-  const  EEmcDbItem*  getByStrip0(int isec, int iuv, int istrip);  //ranges: isec=0-11, iuv=0,1 ,istrip=0-287; fast method
+  const  EEmcDbItem*  getByStrip0(int isec, int iuv, int istrip) const;  //ranges: isec=0-11, iuv=0,1 ,istrip=0-287; fast method
 
-  const  EEmcDbItem*  getByStrip(int sec, char uv, int strip) //ranges: sec=1-12, uv=U,V ,strip=1-288; fast method
+  const  EEmcDbItem*  getByStrip(int sec, char uv, int strip) const //ranges: sec=1-12, uv=U,V ,strip=1-288; fast method
     {return getByStrip0(sec-1,uv-'U',strip-1);}
 
-  const EEmcDbItem* getTile(int sec,char sub, int eta, char type); //ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
+  const EEmcDbItem* getTile(int sec,char sub, int eta, char type) const; //ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
 
-  const EEmcDbItem* getT(int sec, char sub, int eta){return getTile(sec,sub,eta,'T');}
+  const EEmcDbItem* getT(int sec, char sub, int eta) const {return getTile(sec,sub,eta,'T');}
 
-  const EEmcDbItem* getP(int sec, char sub, int eta){return getTile(sec,sub,eta,'P');}
-  const EEmcDbItem* getQ(int sec, char sub, int eta){return getTile(sec,sub,eta,'Q');}
-  const EEmcDbItem* getR(int sec, char sub, int eta){return getTile(sec,sub,eta,'R');}
-  const EEmcDbItem* getU(int sec, int strip){return getStrip(sec,'U',strip);}
-  const EEmcDbItem* getV(int sec, int strip){return getStrip(sec,'V',strip);}
-  const EEmcDbItem* StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub);
+  const EEmcDbItem* getP(int sec, char sub, int eta) const {return getTile(sec,sub,eta,'P');}
+  const EEmcDbItem* getQ(int sec, char sub, int eta) const {return getTile(sec,sub,eta,'Q');}
+  const EEmcDbItem* getR(int sec, char sub, int eta) const {return getTile(sec,sub,eta,'R');}
+  const EEmcDbItem* getU(int sec, int strip) const {return getStrip(sec,'U',strip);}
+  const EEmcDbItem* getV(int sec, int strip) const {return getStrip(sec,'V',strip);}
+  const EEmcDbItem* StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub) const;
 
   //
   // Methods to acces DB info for T=tower, P=preshower-1, Q=preshower-2,

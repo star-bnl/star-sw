@@ -9,8 +9,8 @@
  * processing StEvent files.
  *
  * \author Jason C. Webb
- * $Date: 2005/08/23 16:55:31 $
- * $Revision: 1.1 $
+ * $Date: 2010/08/26 22:49:21 $
+ * $Revision: 1.2 $
  *
  */
 
@@ -20,6 +20,7 @@ ClassImp(StEEmcElement);
 
 // ----------------------------------------------------------------------------
 StEEmcElement::StEEmcElement()
+    : TObject()
 {
   stemc(0);
 }

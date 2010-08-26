@@ -9,12 +9,13 @@
 ClassImp(StMyPointMaker);
 
 // ---------------------------------------------------------------------
-StMyPointMaker::StMyPointMaker(const Char_t *name, StEEmcA2EMaker *a2e, StEEmcGenericClusterMaker *cl):
+StMyPointMaker::StMyPointMaker(const Char_t *name, const StEEmcA2EMaker *a2e, const StEEmcGenericClusterMaker *cl):
   StEEmcGenericPointMaker(name,a2e,cl)
 {
   mAllowSplitting=false;
   mSplitMinimumET=0.0;
   setSmdMinFraction(0.0);
+  mMaxClusterId = 0;
 }
 
 // ---------------------------------------------------------------------
@@ -32,6 +33,7 @@ Int_t StMyPointMaker::Make()
 
   typedef StEEmcGenericClusterMaker::EEmatch EEmatch_t;
 
+  if (mEEclusters) mMaxClusterId = mEEclusters->maxClusterId();
 
   ////////////////////////////////////////////////////////////////////
   //
@@ -61,7 +63,7 @@ Int_t StMyPointMaker::Make()
 	{
 
 	  StEEmcCluster cluster=clusters[ic];
-	  LOG_DEBUG<<GetName()<<" tower cluster at"<<cluster.tower(0).name()<<endm;
+	  LOG_DEBUG<<GetName()<<" tower cluster at "<<cluster.tower(0).name()<<endm;
 
 	  EEmatch_t matches = mEEclusters->clusterMatch( cluster );
 
@@ -137,7 +139,7 @@ Int_t StMyPointMaker::Make()
 	       * the tower is out of the acceptance of the endcap, then there is some-
 	       * thing wrong with the smd geometry class or the point maker.
 	       */
-	      StEEmcTower *tower = mEEanalysis->tower( position, 0 );
+	      const StEEmcTower *tower = mEEanalysis->tower( position, 0 );
 	      if ( !tower )
 		{
 		  LOG_WARN<<GetName()<<" attempt to add point which misses the EEMC towers"<<endm;
@@ -161,9 +163,8 @@ Int_t StMyPointMaker::Make()
 	       * is called.  Maybe a problem in the point's copy constructor?  Kludge it
 	       * for now.
 	       */
-	      mSmdPoints.back().cluster( cluster, 0 );
+	      //mSmdPoints.back().cluster( cluster, 0 );
                
-
 	    }
 	  
 	  
@@ -206,12 +207,12 @@ Int_t StMyPointMaker::Make()
       Float_t epoint = 0.;
       Float_t w = sumw[tower.index()];
       if ( !tower.fail() && w>0. ) epoint+=tower.energy() * point.energy()/w;
-     
       for ( Int_t jj=0;jj<tower.numberOfNeighbors();jj++ )
 	{	  
 	  StEEmcTower neighbor=tower.neighbor(jj);
 	  w = sumw[ neighbor.index() ];
 	  if ( !neighbor.fail() && w>0. ) epoint+=neighbor.energy() * point.energy()/w;
+
 	}
 
       point.energy(epoint);
@@ -229,16 +230,14 @@ Int_t StMyPointMaker::Make()
       point.energy(epost,3);
 
       addPoint( point );
-
+      
     }
-
-  
 
   return StEEmcGenericPointMaker::Make();
 }
 
 // ----------------------------------------------------------------------------
-Bool_t StMyPointMaker::AssociateClusters( StEEmcSmdClusterVec_t &list1, StEEmcSmdClusterVec_t &list2 )
+Bool_t StMyPointMaker::AssociateClusters( const StEEmcSmdClusterVec_t &list1, StEEmcSmdClusterVec_t &list2 )
 {
 
   /*
@@ -360,7 +359,7 @@ Bool_t StMyPointMaker::AssociateClusters( StEEmcSmdClusterVec_t &list1, StEEmcSm
 
 // -----------------------------------------------------------------------------
 Bool_t StMyPointMaker::SplitClusters( StEEmcSmdClusterVec_t &list1,
-				      StEEmcSmdClusterVec_t &list2 )
+				      const StEEmcSmdClusterVec_t &list2 )
 {
 
 
@@ -403,15 +402,15 @@ Bool_t StMyPointMaker::SplitClusters( StEEmcSmdClusterVec_t &list1,
   if ( a && b ) 
     {
       if ( chi2_a <= chi2_b ) {
-	tempa.key( mEEclusters->nextClusterId() );
-	mergeda.key( mEEclusters->nextClusterId() );
+	tempa.key( mMaxClusterId++ );
+	mergeda.key( mMaxClusterId++ );
 	list1[0]=mergeda; 
 	list1.push_back( tempa );
 	return true;
       }
       else {
-	tempb.key( mEEclusters->nextClusterId() );
-	mergedb.key( mEEclusters->nextClusterId() );
+	tempb.key( mMaxClusterId++ );
+	mergedb.key( mMaxClusterId++ );
 	list1[0]=mergedb; 
 	list1.push_back( tempb );
 	return true;
@@ -421,8 +420,8 @@ Bool_t StMyPointMaker::SplitClusters( StEEmcSmdClusterVec_t &list1,
   // only first orientation valid
   else if ( a )
     {
-	tempa.key( mEEclusters->nextClusterId() );
-	mergeda.key( mEEclusters->nextClusterId() );
+	tempa.key( mMaxClusterId++ );
+	mergeda.key( mMaxClusterId++ );
 	list1[0]=mergeda; 
 	list1.push_back( tempa );
 	return true;
@@ -430,8 +429,8 @@ Bool_t StMyPointMaker::SplitClusters( StEEmcSmdClusterVec_t &list1,
   // only second orientation valid
   else if ( b )
     {
-	tempb.key( mEEclusters->nextClusterId() );
-	mergedb.key( mEEclusters->nextClusterId() );
+	tempb.key( mMaxClusterId++ );
+	mergedb.key( mMaxClusterId++ );
 	list1[0]=mergedb; 
 	list1.push_back( tempb );
 	return true;
@@ -444,7 +443,7 @@ Bool_t StMyPointMaker::SplitClusters( StEEmcSmdClusterVec_t &list1,
 
 
 // ---------------------------------------------------------------------
-Float_t StMyPointMaker::energyChi2( StEEmcSmdCluster &c1, StEEmcSmdCluster &c2 )
+Float_t StMyPointMaker::energyChi2( const StEEmcSmdCluster &c1, const StEEmcSmdCluster &c2 ) const
 {
   Float_t e1 = c1.energy() * 1000.0;
   Float_t e2 = c2.energy() * 1000.0;
@@ -454,7 +453,7 @@ Float_t StMyPointMaker::energyChi2( StEEmcSmdCluster &c1, StEEmcSmdCluster &c2 )
   if ( esum <= 0. ) return -1.;
   return edif*edif/nmip;
 }
-Float_t StMyPointMaker::energyChi2( StEEmcSmdCluster &c1, StEEmcSmdCluster &c2, StEEmcSmdCluster &c3 )
+Float_t StMyPointMaker::energyChi2( const StEEmcSmdCluster &c1, const StEEmcSmdCluster &c2, const StEEmcSmdCluster &c3 ) const
 {
   Float_t e1 = c1.energy() * 1000.0;
   Float_t e2 = c2.energy() * 1000.0;
@@ -474,8 +473,8 @@ void StMyPointMaker::Clear(Option_t *opts)
 }
 
 // ---------------------------------------------------------------------
-Bool_t StMyPointMaker::split( StEEmcSmdCluster &in1,  // first resolved cluster in view 1
-			      StEEmcSmdCluster &in2,  // second resolved cluster in view 1
+Bool_t StMyPointMaker::split( const StEEmcSmdCluster &in1,  // first resolved cluster in view 1
+			      const StEEmcSmdCluster &in2,  // second resolved cluster in view 1
 			      StEEmcSmdCluster &out1, // merged cluster in view 2, will output first split cluster
 			      StEEmcSmdCluster &out2, // for output of second split cluster
 			      Float_t &chi2out
@@ -591,7 +590,7 @@ Bool_t StMyPointMaker::split( StEEmcSmdCluster &in1,  // first resolved cluster 
   /// split from a cluster later in the chain
   my1.key( out1.key() );
   //my2.key( out1.key() );
-  my2.key( mEEclusters->nextClusterId() );
+  my2.key( mMaxClusterId++ );
 
   
   /// To keep with convention, we need to add the seed strip first
@@ -666,19 +665,3 @@ Bool_t StMyPointMaker::split( StEEmcSmdCluster &in1,  // first resolved cluster 
   return true;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

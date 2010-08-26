@@ -5,8 +5,6 @@
 #ifndef EEmcMCData_h
 #define EEmcMCData_h
 /*********************************************************************
- * $Id: EEmcMCData.h,v 1.6 2010/05/07 18:51:25 fine Exp $
- *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Monte Carlo Data
  *********************************************************************/
@@ -19,6 +17,7 @@ class   St_g2t_emc_hit;
 class   St_g2t_event;
 
 class  EEeventDst;
+class  StMcEventMaker;
 
 const   Float_t kEEmcDefaultEnergyThreshold = 0.0005; // 0.5 MeV
 const   Int_t   kEEmcDefaultMCHitSize       = 0x1000; // 4k hitow
@@ -82,24 +81,24 @@ public:
 
 
   EEmcMCData();                              // default constructor
-  EEmcMCData( EEmcMCData& );                 // copy constructor
+  EEmcMCData(const EEmcMCData& );                 // copy constructor
   virtual ~EEmcMCData();                     // the destructor
 
-  Int_t      readEventFromChain(StMaker *mk); // reads g2t event from chain
+  Int_t      readEventFromChain(const StMaker *mk); // reads g2t event from chain
   
-  Int_t      getSize()            { return mSize;    };
-  Int_t      getLastHit()         { return mLastHit; }; 
-  Int_t      getEventID()         { return mEventID; }; 
+  Int_t      getSize() const      { return mSize;    };
+  Int_t      getLastHit() const   { return mLastHit; }; 
+  Int_t      getEventID() const   { return mEventID; }; 
 
-  Float_t    getEnergyThreshold() { return mEthr; };
+  Float_t    getEnergyThreshold() const { return mEthr; };
   void       setEnergyThreshold(Float_t e) { mEthr = e; };
 
-  Int_t      getHitArray(EEmcMCHit *h, Int_t size);
+  Int_t      getHitArray(EEmcMCHit *h, Int_t size) const;
   Int_t      setHitArray(EEmcMCHit *h, Int_t size);
 
-  void       print();                                      // diagnostic print
+  void       print() const;                                      // diagnostic print
   void unpackGeantHits(St_g2t_emc_hit* g2t_tile, St_g2t_emc_hit* g2t_smd);
-  const struct EEmcMCHit * getGeantHits(int &nHit){ nHit=mLastHit; return mHit;}
+  const struct EEmcMCHit * getGeantHits(int &nHit) const { nHit=mLastHit; return mHit;}
 
   // obsolete functions
   Int_t    read     (void *d, int s);   // reads  in  s bytes of hits 
@@ -124,8 +123,8 @@ private:
 
 /*
  * $Log: EEmcMCData.h,v $
- * Revision 1.6  2010/05/07 18:51:25  fine
- * remove the redundant dependency
+ * Revision 1.7  2010/08/26 22:48:54  ogrebeny
+ * Improved constness
  *
  * Revision 1.5  2005/06/03 19:19:48  balewski
  * for embedding, GEANT unpcker was split on 2 parts

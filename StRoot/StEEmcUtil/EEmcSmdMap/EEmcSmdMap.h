@@ -77,14 +77,12 @@ struct EEmcTowerMapItem  {
 
 
 
-class EEmcSmdMap 
-    : public TObject 
+class EEmcSmdMap : public TObject 
 {
-
- public:
+public:
 
   EEmcSmdMap();
-  ~EEmcSmdMap(){ /* nada */ };
+  virtual ~EEmcSmdMap(){ /* nada */ };
   
   // return the single instance of this class
   static EEmcSmdMap *instance();
@@ -101,7 +99,7 @@ class EEmcSmdMap
 		  Int_t subsector,  
 		  Int_t etabin,  
 		  Int_t &uMin,
-		  Int_t &uMax ) {
+		  Int_t &uMax ) const {
     
     uMin = mSmdMap[sector][subsector][etabin].uMin;
     uMax = mSmdMap[sector][subsector][etabin].uMax;
@@ -111,7 +109,7 @@ class EEmcSmdMap
 		  Int_t subsector,  
 		  Int_t etabin,  
 		  Int_t &vMin,
-		  Int_t &vMax ) {
+		  Int_t &vMax ) const {
 
     vMin = mSmdMap[sector][subsector][etabin].vMin;
     vMax = mSmdMap[sector][subsector][etabin].vMax;
@@ -125,7 +123,7 @@ class EEmcSmdMap
 		  Int_t etabin,  
 		  Int_t iuv,
 		  Int_t &Min,
-		  Int_t &Max ) {
+		  Int_t &Max ) const {
     switch(iuv) {
     case 0: return getRangeU( sector, subsector, etabin, Min, Max);
     case 1: return getRangeV( sector, subsector, etabin, Min, Max);
@@ -139,7 +137,7 @@ class EEmcSmdMap
 		  Int_t etabin,  
 		  Int_t iuv,
 		  Int_t &Min,
-		  Int_t &Max ) {
+		  Int_t &Max ) const {
     getRangeTw2Smd (sector, subsector, etabin, iuv, Min, Max); 
   }
   
@@ -148,7 +146,7 @@ class EEmcSmdMap
   void getMiddleU ( Int_t sector,
 		    Int_t subsector,
 		    Int_t etabin,
-		    Int_t &umid ) {
+		    Int_t &umid ) const {
     umid = (
       mSmdMap[sector][subsector][etabin].uMin +
       mSmdMap[sector][subsector][etabin].uMax ) / 2;
@@ -157,7 +155,7 @@ class EEmcSmdMap
   void getMiddleV ( Int_t sector,
 		    Int_t subsector,
 		    Int_t etabin,
-		    Int_t &vmid ) {
+		    Int_t &vmid ) const {
     vmid = (
       mSmdMap[sector][subsector][etabin].vMin +
       mSmdMap[sector][subsector][etabin].vMax ) / 2;
@@ -176,7 +174,7 @@ class EEmcSmdMap
   // juv, jMin and jMax returned via reference.
   //
   void getRangeSmd2Smd( Int_t isector, Int_t iuv, Int_t istrip,
-			Int_t &juv, Int_t &jMin, Int_t &jMax );
+			Int_t &juv, Int_t &jMin, Int_t &jMax ) const;
 
   //
   //////////////////////////////////////////////////
@@ -189,7 +187,7 @@ class EEmcSmdMap
   //
   Int_t getNTowers( Int_t sec, 
 		    Int_t plane, 
-		    Int_t strip ) { 
+		    Int_t strip ) const { 
     return mTowerMap[sec][plane][strip].nTower; 
   }
 
@@ -197,20 +195,20 @@ class EEmcSmdMap
   // from 0), return the "nth" tower's subsector and
   // eta bin.
   void getTower( Int_t sec, Int_t plane, Int_t strip, 
-		  Int_t ntow, Int_t &sub, Int_t &eta ) {
+		  Int_t ntow, Int_t &sub, Int_t &eta ) const {
     sub = mTowerMap[sec][plane][strip].subsector[ntow];
     eta = mTowerMap[sec][plane][strip].etabin[ntow];
     return;
   }
   void getTower( Int_t sec, Int_t plane, Int_t strip, 
-		  Int_t ntow, Int_t &sub, Int_t &eta, TString &name ) {
+		  Int_t ntow, Int_t &sub, Int_t &eta, TString &name ) const {
     sub  = mTowerMap[sec][plane][strip].subsector[ntow];
     eta  = mTowerMap[sec][plane][strip].etabin[ntow];
     name = mTowerMap[sec][plane][strip].towers[ntow];
     return;
   }
 
- private:
+private:
 
   void InitStrip2Strip();
   static EEmcSmdMap *sInstance;
@@ -219,15 +217,11 @@ class EEmcSmdMap
   EEmcTowerMapItem mTowerMap[ kEEmcNumSectors ][ kEEmcNumSmdUVs ][ kEEmcNumStrips ];
 
   enum { mxS=3,mxI=2};
-  
 
   EEmcStrip2StripMapItem *mSmd2SmdMap[ kEEmcNumSectors][kEEmcNumSmdUVs];
   void Init();
 
- protected:
-
   ClassDef(EEmcSmdMap,1);
- 
 };
 
 #endif

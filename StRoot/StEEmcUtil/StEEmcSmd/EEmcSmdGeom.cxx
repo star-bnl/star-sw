@@ -4,7 +4,7 @@
  * 
  ****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.15 2009/08/25 18:33:11 fine Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.16 2010/08/26 22:48:55 ogrebeny Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -53,7 +53,9 @@ static const double     degree      = (M_PI/180.0)*radian;
 /// defaulty constructor
 ClassImp(EEmcSmdGeom)
 
-EEmcSmdGeom::EEmcSmdGeom(){ 
+EEmcSmdGeom::EEmcSmdGeom()
+    : TObject()
+{ 
   for(int iSec = 0; iSec < kEEmcNumSectors; iSec++) mIsSectorIn[iSec] = true;
 };
 /// default empty destructor
@@ -322,7 +324,7 @@ void EEmcSmdGeom::setSectors(const intVec sectorIdVec) {
 }
 
 // instance and initialize a strip
-StructEEmcStrip EEmcSmdGeom::initStrip() {
+StructEEmcStrip EEmcSmdGeom::initStrip() const {
     TVector3  zero = 0.0;
     StructEEmcStrip strip; 
     strip.stripStructId.stripId = 0;
@@ -370,12 +372,15 @@ Int_t EEmcSmdGeom::getEEmcISec(const Int_t iPlane,
 }
 
 // return a strip pointer from indices   
-StructEEmcStrip* EEmcSmdGeom::getStripPtr(const Int_t iStrip,  
-		               const Int_t iUV, const Int_t iSec) {
-//    StructEEmcStrip *stripPtr = new StructEEmcStrip;
-    int i = iStrip + iUV*kEEmcNumStrips 
-		             + iSec*kEEmcNumStrips*kEEmcNumSmdUVs;
-    return  mStripPtrVector[i];
+StructEEmcStrip* EEmcSmdGeom::getStripPtr(const Int_t iStrip, const Int_t iUV, const Int_t iSec) {
+    int i = iStrip + iUV*kEEmcNumStrips + iSec*kEEmcNumStrips*kEEmcNumSmdUVs;
+    return mStripPtrVector[i];
+}
+
+// return a strip pointer from indices   
+const StructEEmcStrip* EEmcSmdGeom::getStripPtr(const Int_t iStrip, const Int_t iUV, const Int_t iSec) const {
+    int i = iStrip + iUV*kEEmcNumStrips + iSec*kEEmcNumStrips*kEEmcNumSmdUVs;
+    return mStripPtrVector[i];
 }
 
 
@@ -383,7 +388,7 @@ StructEEmcStrip* EEmcSmdGeom::getStripPtr(const Int_t iStrip,
 // get DCA strip pointer from a point  
 // iPlane=[0,1,2] - experts only, changes meaning form sector to sector
 const StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane, 
-               const Int_t iSec, const TVector3& point, Float_t* dca) 
+               const Int_t iSec, const TVector3& point, Float_t* dca) const
 {
   //    StructEEmcStrip* stripPtr;
   //    stripPtr = new StructEEmcStrip;
@@ -439,7 +444,7 @@ const StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
 // get DCA strip pointer from a point  
 // iPlane=[0,1,2] - experts only, changes meaning form sector to sector
 const StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane, 
-		         const TVector3& point, Float_t* dca) {
+		         const TVector3& point, Float_t* dca) const {
   int iSec = getEEmcISec(iPlane, point);
   return  getDcaStripPtr(iPlane, iSec, point, dca); 
 }
@@ -450,7 +455,7 @@ const StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
 // iUV=[0,1] , maps [U,V]
 // Warn, this code does not handle well sector boundaries, it ignores possible tripple overlaps and uses only nominal U or V planes in a given sector
 const StructEEmcStrip* EEmcSmdGeom::getDca2Strip(const Int_t iUV, 
-					   const TVector3& point, Float_t* dca) {
+					   const TVector3& point, Float_t* dca) const {
   assert(iUV>=0 || iUV<kEEmcNumSmdUVs); 
   float phiDeg=atan2(point.y(),point.x())/3.1316*180.;
   //printf("phiDeg=%.1f  \n",phiDeg);
@@ -465,9 +470,9 @@ const StructEEmcStrip* EEmcSmdGeom::getDca2Strip(const Int_t iUV,
 
 //==================================================================
 // match two strips  
-  bool EEmcSmdGeom::matchStrips(const StructEEmcStripId stripStructId1, 
-		                      const StructEEmcStripId stripStructId2,
-			              Int_t nTolerance) {
+  bool EEmcSmdGeom::matchStrips(const StructEEmcStripId &stripStructId1, 
+		                      const StructEEmcStripId &stripStructId2,
+			              Int_t nTolerance) const {
     bool match = false;
     if(stripStructId1.UVId == stripStructId2.UVId &&
        stripStructId1.sectorId == stripStructId2.sectorId) {
@@ -479,8 +484,8 @@ const StructEEmcStrip* EEmcSmdGeom::getDca2Strip(const Int_t iUV,
 
 
 
-TVector3  EEmcSmdGeom::getstripEnd(const StructEEmcStrip strip, 
-		                                    const Int_t endId) {
+TVector3  EEmcSmdGeom::getstripEnd(const StructEEmcStrip &strip, 
+		                                    const Int_t endId) const {
       TVector3 end;
       if(endId == 1) end = strip.end1;
       else end = strip.end2;
@@ -605,7 +610,7 @@ void EEmcSmdGeom::printSectorPhis(const Int_t iPlane, const Int_t iSec,
 
 // Wrapper function when we don't have the actual strips, just sector and
 //   strip ID's.
-TVector3 EEmcSmdGeom::getIntersection ( Int_t sector, Int_t uId, Int_t vId ) {
+TVector3 EEmcSmdGeom::getIntersection ( Int_t sector, Int_t uId, Int_t vId ) const {
 
   Int_t nU = getNStrips( sector, 0 );
   Int_t nV = getNStrips( sector, 1 );
@@ -620,7 +625,7 @@ TVector3 EEmcSmdGeom::getIntersection ( Int_t sector, Int_t uId, Int_t vId ) {
 }
 
 
-TVector3 EEmcSmdGeom::getIntersection ( Int_t sector, Int_t uId, Int_t vId, TVector3 vert ) {
+TVector3 EEmcSmdGeom::getIntersection ( Int_t sector, Int_t uId, Int_t vId, const TVector3 &vert ) const {
 
   Int_t nU = getNStrips( sector, 0 );
   Int_t nV = getNStrips( sector, 1 );
@@ -636,9 +641,9 @@ TVector3 EEmcSmdGeom::getIntersection ( Int_t sector, Int_t uId, Int_t vId, TVec
 
 
 /*********************************************************/ 
-TVector3 EEmcSmdGeom::getIntersection ( StructEEmcStrip *u,
-					StructEEmcStrip *v,
-					TVector3 vertex )
+TVector3 EEmcSmdGeom::getIntersection ( const StructEEmcStrip *u,
+					const StructEEmcStrip *v,
+					const TVector3 &vertex ) const
 {
   // The strips are arranged sensibly, so that the ID's and the
   // widths of the strips basically tell us the position of the
@@ -738,9 +743,9 @@ TVector3 EEmcSmdGeom::getIntersection ( StructEEmcStrip *u,
 /*********************************************************/ 
 
 
-TVector3 EEmcSmdGeom::getIntersection ( StructEEmcStrip *u,
-					StructEEmcStrip *v
-					) {
+TVector3 EEmcSmdGeom::getIntersection ( const StructEEmcStrip *u,
+					const StructEEmcStrip *v
+					) const {
 
   return getIntersection( u, v, TVector3(0,0,0) );
 
@@ -750,7 +755,7 @@ TVector3 EEmcSmdGeom::getIntersection ( StructEEmcStrip *u,
 /****************************************************************************/
 
 // output strip for smd strips
-ostream& operator<<(ostream &os, const StructEEmcStrip strip)
+ostream& operator<<(ostream &os, const StructEEmcStrip &strip)
 {
   const Char_t *nameUV[]={"U","V"};
   TString stripname="";
@@ -767,6 +772,9 @@ ostream& operator<<(ostream &os, const StructEEmcStrip strip)
 /////////////////////////////////////////////////////////////////////////////
 /*
  * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.16  2010/08/26 22:48:55  ogrebeny
+ * Improved constness
+ *
  * Revision 1.15  2009/08/25 18:33:11  fine
  * fix the compilation issues under SL5_64_bits  gcc 4.3.2
  *

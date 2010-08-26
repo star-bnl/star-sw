@@ -14,38 +14,38 @@ class StEEmcPair : public TObject {
   StEEmcPair();
   /// Reconstruct point pairs where vertex doesn't matter or
   /// isn't available (i.e. in production)
-  StEEmcPair( StEEmcPoint p1, StEEmcPoint p2 );
+  StEEmcPair(const StEEmcPoint &p1, const StEEmcPoint &p2);
   /// Reconstruct a pair of real photons with a common vertex
-  StEEmcPair( StEEmcPoint p1, StEEmcPoint p2, TVector3 vertex );
+  StEEmcPair(const StEEmcPoint &p1, const StEEmcPoint &p2, const TVector3 &vertex );
   /// Reconstruct a mixed-event pair with vertex from each event
-  StEEmcPair( StEEmcPoint p1, StEEmcPoint p2, TVector3 vertex1, TVector3 vertex2 );
+  StEEmcPair(const StEEmcPoint &p1, const StEEmcPoint &p2, const TVector3 &vertex1, const TVector3 &vertex2 );
   /// Destructor
-  ~StEEmcPair(){ /* nada */ };
+  virtual ~StEEmcPair(){ /* nada */ };
 
   /// Copy constructor
   StEEmcPair( const StEEmcPair &old );
 
   /// Returns specified point
   /// \param index [0,1]
-  StEEmcPoint point(Int_t index){ return mPoint[index]; } 
+  const StEEmcPoint &point(Int_t index) const { return mPoint[index]; } 
 
   /// Returns invariant mass of pair
-  Float_t mass();
+  Float_t mass() const;
   /// Returns energy of pair
-  Float_t energy();
+  Float_t energy() const;
   /// Returns energy-sharing of pair
-  Float_t zgg();
+  Float_t zgg() const;
   /// Returns opening-angle of pair
-  Float_t phigg();
+  Float_t phigg() const;
   /// Returns pt of pair
-  Float_t pt();
+  Float_t pt() const;
   /// Returns momentum of pair
-  TVector3 momentum();
+  const TVector3 &momentum() const;
   /// Returns vertex of pair
-  TVector3 vertex();
+  const TVector3 &vertex() const;
 
   /// Prints a one-line summary of the pair
-  void print();
+  void print() const;
 
  private:
  protected:
@@ -70,13 +70,13 @@ class StEEmcPair : public TObject {
 
 };
 
-inline Float_t StEEmcPair::mass(){ return mMass; }
-inline Float_t StEEmcPair::energy(){ return mEnergy; }
-inline Float_t StEEmcPair::zgg(){ return mZgg; }
-inline Float_t StEEmcPair::phigg(){ return mPhigg; }
-inline Float_t StEEmcPair::pt(){ return mMomentum.Perp(); }
-inline TVector3 StEEmcPair::momentum(){ return mMomentum; }
-inline TVector3 StEEmcPair::vertex(){ return mVertex; }
+inline Float_t StEEmcPair::mass() const { return mMass; }
+inline Float_t StEEmcPair::energy() const { return mEnergy; }
+inline Float_t StEEmcPair::zgg() const { return mZgg; }
+inline Float_t StEEmcPair::phigg() const { return mPhigg; }
+inline Float_t StEEmcPair::pt() const { return mMomentum.Perp(); }
+inline const TVector3 &StEEmcPair::momentum() const { return mMomentum; }
+inline const TVector3 &StEEmcPair::vertex() const { return mVertex; }
 
 typedef std::vector< StEEmcPair > StEEmcPairVec_t;
 

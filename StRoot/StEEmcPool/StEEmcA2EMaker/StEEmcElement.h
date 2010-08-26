@@ -8,99 +8,56 @@ class StEmcRawHit;
 
 class StEEmcElement : public TObject {
 
- public:
+public:
 
   StEEmcElement();
-  ~StEEmcElement(){ /* nada */ };
+  virtual ~StEEmcElement(){ /* nada */ };
 
   /// Set the raw ADC for this element
-  void raw(Float_t r);
+  void raw(Float_t r) { mRaw=r; }
   /// Set the pedestal-subtracted ADC for this element
-  void adc(Float_t a);
+  void adc(Float_t a) { mAdc=a; }
   /// Set the energy (adc-ped+0.5)/gain for this element
-  void energy(Float_t e);
+  void energy(Float_t e) { mEnergy=e; }
   /// Set a status bit for this element
-  void stat(unsigned s);
+  void stat(unsigned s) { mStat=s; }
   /// Set a fail bit for this element
-  void fail(unsigned f);
+  void fail(unsigned f) { mFail=f; }
   /// Set the name for this element
-  void name(const Char_t *n);
+  void name(const Char_t *n) { mName=n; }
 
   /// Return raw ADC for this element
-  Float_t raw();
-  /// Return raw ADC for this element
-  Float_t raw() const;
-
+  Float_t raw() const { return mRaw; }
   /// Return the pedestal-subtracted ADC for this element
-  Float_t adc();
-  /// Return the pedestal-subtracted ADC for this element
-  Float_t adc() const;
-
+  Float_t adc() const { return mAdc; }
   /// Return the EM energy (towers) or energy deposit for this element (SMD,pre,post).  If a fail bit is set, will return 0.
-  Float_t energy();
-  /// Return the EM energy (towers) or energy deposit for this element (SMD,pre,post).  If a fail bit is set, will return 0.
-  Float_t energy() const;
-
+  Float_t energy() const { return (mFail)?0.:mEnergy; }
   /// Return the status bit for this element
-  unsigned stat();
-  unsigned stat() const; 
-
+  unsigned stat() const { return mStat; }
   /// Return the fail bit for this element
-  unsigned fail();
-  unsigned fail() const; 
-
+  unsigned fail() const { return mFail; }
   /// Return the name of this element
-  const Char_t *name();
+  const Char_t *name() const { return mName.Data(); }
 
   /// Sets pointer to the StEmcRawHit when processing an StEvent file
-  void stemc( StEmcRawHit *h );
+  void stemc( StEmcRawHit *h ) { mstRawHit=h; }
   /// Returns pointer to StEmcRawHit
-  StEmcRawHit *stemc();
+  StEmcRawHit *stemc() { return mstRawHit; }
+  const StEmcRawHit *stemc() const { return mstRawHit; }
 
   /// Clears the element
-  void Clear(Option_t *opts="");
+  virtual void Clear(Option_t *opts="");
 
- private:
- protected:
-
+protected:
   Float_t mRaw;    /**<- Raw ADC */
   Float_t mAdc;    /**<- Ped subtracted ADC */
   Float_t mEnergy; /**<- EM energy/energy deposit */
   unsigned mStat;  /**<- detector problems */ 
   unsigned mFail;  /**<- fatal detector problems */
   TString  mName;  /**<- Name of this element */
- 
-  /// Raw hit from StEvent
-  StEmcRawHit *mstRawHit; //! 
+  StEmcRawHit *mstRawHit; //! Raw hit from StEvent
   
-  /// Makes class available to root
   ClassDef(StEEmcElement,1);
-
 };
-
-inline void StEEmcElement::raw(Float_t r){ mRaw=r; }
-inline void StEEmcElement::adc(Float_t a){ mAdc=a; }
-inline void StEEmcElement::energy(Float_t e){ mEnergy=e; }
-inline void StEEmcElement::stat(unsigned s){ mStat=s; }
-inline void StEEmcElement::fail(unsigned f){ mFail=f; }
-inline void StEEmcElement::name(const Char_t *n){ mName=n; }
-
-inline Float_t StEEmcElement::raw(){ return mRaw; }
-inline Float_t StEEmcElement::raw() const { return mRaw; }
-
-inline Float_t StEEmcElement::adc(){ return mAdc; }
-inline Float_t StEEmcElement::adc() const { return mAdc; }
-
-inline Float_t StEEmcElement::energy(){ return (mFail)?0.:mEnergy; }
-inline Float_t StEEmcElement::energy() const { return (mFail)?0.:mEnergy; }
-
-inline unsigned StEEmcElement::stat(){ return mStat; }
-inline unsigned StEEmcElement::fail(){ return mFail; }
-inline unsigned StEEmcElement::stat() const { return mStat; }
-inline unsigned StEEmcElement::fail() const { return mFail; }
-inline const Char_t *StEEmcElement::name() { return mName.Data(); }
-
-inline void StEEmcElement::stemc( StEmcRawHit *h ){ mstRawHit=h; }
-inline StEmcRawHit *StEEmcElement::stemc(){ return mstRawHit; }
 
 #endif

@@ -21,8 +21,8 @@
 ClassImp(StEEmcGenericClusterMaker);
 
 // ----------------------------------------------------------------------------
-StEEmcGenericClusterMaker::StEEmcGenericClusterMaker( const Char_t *name, StEEmcA2EMaker *a2e ) :
-  StMaker(name)
+StEEmcGenericClusterMaker::StEEmcGenericClusterMaker( const Char_t *name, const StEEmcA2EMaker *a2e ) 
+    : StMaker(name)
 {
 
   mEEanalysis=a2e; /* adc to energy maker */
@@ -92,7 +92,7 @@ Int_t StEEmcGenericClusterMaker::Init()
 // ----------------------------------------------------------------------------
 Int_t StEEmcGenericClusterMaker::Make() // runs after user's Make()
 {
- 
+  Int_t result = StMaker::Make(); 
   makeClusterMap();
   makeTrackMap();
   makeStEvent();
@@ -121,7 +121,7 @@ Int_t StEEmcGenericClusterMaker::Make() // runs after user's Make()
     }
   ***/
     
-  return kStOK;
+  return result;
 
 }
 
@@ -395,7 +395,7 @@ void StEEmcGenericClusterMaker::makeStEvent()
 // ----------------------------------------------------------------------------
 void StEEmcGenericClusterMaker::Clear(Option_t *opts)
 {
-
+  StMaker::Clear();
   // clears storage arrays
   for ( Int_t sector=0; sector<12; sector++ ) {
     for ( Int_t layer=0; layer<4; layer++ )
@@ -420,9 +420,9 @@ void StEEmcGenericClusterMaker::Clear(Option_t *opts)
 }
 
 // ----------------------------------------------------------------------------
-void StEEmcGenericClusterMaker::add( StEEmcCluster &c )
+void StEEmcGenericClusterMaker::add(const StEEmcCluster &cluster)
 {
-
+  StEEmcCluster c = cluster;
   assert( c.towers().size() ); // cluster with no towers?
 
   Int_t key    = nextClusterId();     /* next available cluster id */
@@ -449,12 +449,12 @@ void StEEmcGenericClusterMaker::add( StEEmcCluster &c )
 }
 
 // ----------------------------------------------------------------------------
-Bool_t StEEmcGenericClusterMaker::match( StEEmcCluster &c1, StEEmcCluster &c2 )
+Bool_t StEEmcGenericClusterMaker::match(const StEEmcCluster &c1, const StEEmcCluster &c2) const
 {  
   return c1.tower(0).isNeighbor( c2.tower(0) );
 }
 
-Bool_t StEEmcGenericClusterMaker::match( StEEmcCluster &c1, StEEmcSmdCluster &c2 )
+Bool_t StEEmcGenericClusterMaker::match(const StEEmcCluster &c1, const StEEmcSmdCluster &c2) const
 {
   StEEmcTower seed=c1.tower(0);
   if ( seed.sector() != c2.sector() ) return false;
@@ -471,7 +471,7 @@ Bool_t StEEmcGenericClusterMaker::match( StEEmcCluster &c1, StEEmcSmdCluster &c2
   return TMath::Abs(del)<mSmdMatchRange;
 }
 
-Bool_t StEEmcGenericClusterMaker::match( StEEmcSmdCluster &c1, StEEmcSmdCluster &c2 )
+Bool_t StEEmcGenericClusterMaker::match(const StEEmcSmdCluster &c1, const StEEmcSmdCluster &c2) const
 {
 
   Bool_t myMatch = false;
@@ -486,7 +486,7 @@ Bool_t StEEmcGenericClusterMaker::match( StEEmcSmdCluster &c1, StEEmcSmdCluster 
     for ( UInt_t i=0; i < mTowerClusters[sec][0].size(); i++ )
       {
 
-	StEEmcCluster &c=mTowerClusters[sec][0][i];
+	const StEEmcCluster &c=mTowerClusters[sec][0][i];
 	if ( match ( c, c1 ) && match( c, c2 ) ) return true;
 
       }
@@ -495,7 +495,7 @@ Bool_t StEEmcGenericClusterMaker::match( StEEmcSmdCluster &c1, StEEmcSmdCluster 
 
 }
 
-Bool_t StEEmcGenericClusterMaker::match( StEEmcCluster &cluster, StMuTrack *track )
+Bool_t StEEmcGenericClusterMaker::match(const StEEmcCluster &cluster, const StMuTrack *track) const
 {
 
   const StPhysicalHelixD helix = track -> outerHelix();
@@ -524,7 +524,7 @@ Bool_t StEEmcGenericClusterMaker::match( StEEmcCluster &cluster, StMuTrack *trac
   
 }
 
-Bool_t StEEmcGenericClusterMaker::extrapolateToZ( const StPhysicalHelixD helix, const double   z, TVector3 &r)
+Bool_t StEEmcGenericClusterMaker::extrapolateToZ( const StPhysicalHelixD &helix, const double   z, TVector3 &r) const
 {
   const double kMinDipAngle   = 1.0e-13;
   double             dipAng = helix.dipAngle();
@@ -538,7 +538,7 @@ Bool_t StEEmcGenericClusterMaker::extrapolateToZ( const StPhysicalHelixD helix, 
 }
 
 
-Bool_t StEEmcGenericClusterMaker::matchBackgroundTrack( StEEmcCluster &cluster, StMuTrack *track )
+Bool_t StEEmcGenericClusterMaker::matchBackgroundTrack(const StEEmcCluster &cluster, const StMuTrack *track ) const
 {
 
   //
@@ -591,15 +591,21 @@ Bool_t StEEmcGenericClusterMaker::matchBackgroundTrack( StEEmcCluster &cluster, 
 
 
 // ----------------------------------------------------------------------------
-Int_t StEEmcGenericClusterMaker::numberOfMatchingSmdClusters( StEEmcCluster &cluster, Int_t plane )
+Int_t StEEmcGenericClusterMaker::numberOfMatchingSmdClusters(const StEEmcCluster &cluster, Int_t plane ) const
 {
-  EEmatch matches = clusterMatch( cluster );
+  const EEmatch &matches = clusterMatch( cluster );
   return (plane==0)? (Int_t)matches.smdu.size() : (Int_t)matches.smdv.size();
 }
 
-StEEmcSmdCluster StEEmcGenericClusterMaker::matchingSmdCluster ( StEEmcCluster &cluster, Int_t plane, Int_t index )
+StEEmcSmdCluster &StEEmcGenericClusterMaker::matchingSmdCluster (const StEEmcCluster &cluster, Int_t plane, Int_t index )
 {
-   EEmatch matches = clusterMatch( cluster ); 
+   EEmatch &matches = clusterMatch( cluster ); 
+   return (plane==0)? matches.smdu[index] : matches.smdv[index];
+}
+
+const StEEmcSmdCluster &StEEmcGenericClusterMaker::matchingSmdCluster (const StEEmcCluster &cluster, Int_t plane, Int_t index ) const
+{
+   const EEmatch &matches = clusterMatch( cluster ); 
    return (plane==0)? matches.smdu[index] : matches.smdv[index];
 }
 

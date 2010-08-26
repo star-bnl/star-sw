@@ -51,108 +51,70 @@ class TH1F;
 class StEmcCluster;
 
 class StEEmcSmdCluster : public StEEmcBaseCluster {
-
- public:
-
+public:
   StEEmcSmdCluster();
-  ~StEEmcSmdCluster(){ /* nada */ };
-
-  /// copy constructor
   StEEmcSmdCluster ( const StEEmcSmdCluster &c );
+  virtual ~StEEmcSmdCluster(){ /* nada */ };
 
-  /// Add an SMD strip to this cluster with the
-  /// specified weight
-  void add( StEEmcStrip strip, Float_t weight=1.0 );
+  void add(const StEEmcStrip &strip, Float_t weight=1.0 ); // Add an SMD strip to this cluster with the specified weight
+  void add(const StEEmcStripVec_t &strips );
 
-  void add( StEEmcStripVec_t &strips );
+  Float_t energy()const {return mEnergy;} // Return the energy of this cluster
+  Float_t mean()const {return mMean;} // Return the mean strip number of this cluster
+  Float_t sigma()const {return mSigma;} // Return the sigma -- sqrt(variance) -- of the cluster
 
- 
-  /// Return the energy of this cluster
-  Float_t energy();
-  /// Return the energy of this cluster
-  Float_t energy()const;
-  /// Return the mean strip number of this cluster
-  Float_t mean();
-   /// Return the mean strip number of this cluster
-  Float_t mean()const;
+  void mean(Float_t x){ mMean=x; } // Set the mean of the cluster
+  void sigma(Float_t s){ mSigma=s; } // Set the width of the cluster
+  //void energy( Float_t e){ mEnergy=e; } // Set the energy of the cluster
 
-  /// Return the sigma -- sqrt(variance) -- of the cluster
-  Float_t sigma();
-  /// Return the sigma -- sqrt(variance) -- of the cluster
-  Float_t sigma()const;
+  Float_t energy( Int_t nmax, Option_t *opts="mean" ) const; // Return the energy of this cluster summed over +/- nmax strips about either the mean (opts=="mean") or seed (opts=="seed") smd strip.
+  Float_t sigma( Int_t nmax, Option_t *opts="mean" ) const; // As above, but returns sigma instead of energy
 
-  /// Set the mean of the cluster
-  void mean(Float_t x){ mMean=x; }
-  /// Set the width of the cluster
-  void sigma(Float_t s){ mSigma=s; }
-  /// Set the energy of the cluster
-  void energy( Float_t e){ mEnergy=e; }
+  Int_t size()const {return (Int_t)mSize;} // Return the size (number of strips) of the cluster
 
-  /// Return the energy of this cluster summed over 
-  /// +/- nmax strips about either the mean (opts=="mean")
-  /// or seed (opts=="seed") smd strip.
-  Float_t energy( Int_t nmax, Option_t *opts="mean" );
-  /// As above, but returns sigma instead of energy
-  Float_t sigma( Int_t nmax, Option_t *opts="mean" );
+  StEEmcTowerVec_t &towers() {return mMatchedTowers;} // Return list of towers matching this cluster
+  const StEEmcTowerVec_t &towers() const {return mMatchedTowers;} // Return list of towers matching this cluster
+  Int_t numberOfMatchedTowers() const {return (Int_t)mMatchedTowers.size();} // Return number of towers matching this cluster
+  StEEmcTower &tower(Int_t t) {return mMatchedTowers[t];} // Return a specific tower matching this SMD cluster
+  const StEEmcTower &tower(Int_t t) const {return mMatchedTowers[t];} // Return a specific tower matching this SMD cluster
 
-  /// Return the size (number of strips) of the cluster
-  Int_t size();
-  Int_t size()const;
-
-  /// Return list of towers matching this cluster
-  StEEmcTowerVec_t towers();
-  /// Return number of towers matching this cluster
-  Int_t numberOfMatchedTowers();
-  /// Return a specific tower matching this SMD cluster
-  StEEmcTower tower(Int_t t);
-
-  /// One cluster is greater than another if energy
-  /// is greater than the other.
+  /// One cluster is greater than another if energy is greater than the other.
   Bool_t operator<( const StEEmcSmdCluster &other ) const { return this->energy() < other.energy(); }
   Bool_t operator>( const StEEmcSmdCluster &other ) const { return this->energy() > other.energy(); }
 
-
-  /// Returns the number of SMD strips in the cluster
-  Int_t numberOfStrips(){ return (Int_t)mStrips.size(); }
-  Int_t numberOfStrips()const{ return (Int_t)mStrips.size(); }
+  Int_t numberOfStrips()const{ return (Int_t)mStrips.size(); } // Returns the number of SMD strips in the cluster
 
   /// Returns the specified smd strip w/in the cluster
-  StEEmcStrip strip(Int_t s){ return mStrips[s]; }
-  StEEmcStrip strip(Int_t s)const{ return mStrips[s]; }
+  StEEmcStrip &strip(Int_t s){ return mStrips[s]; }
+  const StEEmcStrip &strip(Int_t s)const{ return mStrips[s]; }
 
-  Float_t weight(Int_t s){ return mWeights[s]; }
   Float_t weight(Int_t s)const{ return mWeights[s]; } 
 
-  /// Returns the seed strip (by convention, the first
-  /// strip added to the cluster).
-  StEEmcStrip seed(){ assert(mStrips.size()>0); return mStrips[0]; } 
+  /// Returns the seed strip (by convention, the first strip added to the cluster).
+  StEEmcStrip &seed(){ assert(mStrips.size()>0); return mStrips[0]; } 
+  const StEEmcStrip &seed() const { assert(mStrips.size()>0); return mStrips[0]; } 
 
-  /// Return the plane of the cluster
-  Int_t plane(){ return mPlane; }
-  /// Return the sector of the cluster
-  Int_t sector(){ return mSector; }
-  /// Set the sector
-  void sector( Int_t s ) { mSector=s; }
-  /// Set the plane
-  void plane( Int_t p ){ mPlane = p; }
+  Int_t plane() const { return mPlane; } // Return the plane of the cluster
+  Int_t sector() const { return mSector; } // Return the sector of the cluster
+  void sector( Int_t s ) { mSector=s; } // Set the sector
+  void plane( Int_t p ){ mPlane = p; } // Set the plane
 
   /// Returns a new StEmcCluster or the corresponding StEmcCluster if
   /// it already exists
   StEmcCluster *stemc();
   /// Set pointer to StEmcCluster
   void stemc( StEmcCluster *c ){ mEmcCluster = c; }
-  /// print
-  void print(Option_t *opts="");
-  void printLine(Bool_t endline=false);
+
+  void print(Option_t *opts="") const;
+  void printLine(Bool_t endline=false) const;
 
   /// return the index of the next strip in the specified direction.
   /// \param: direct, negative is left, positive is right
-  Int_t next(Int_t direct){ if(direct>0) return mRight; else if(direct<0) return mLeft; else return -999; }
+  Int_t next(Int_t direct) const { if(direct>0) return mRight; else if(direct<0) return mLeft; else return -999; }
 
-  void copy( TH1F *h );
+  void copy( TH1F *h ) const;
 
- private:
- protected:
+protected:
   
   /// Vector of strips belonging to this SMD cluster
   StEEmcStripVec_t mStrips;         //!
@@ -187,25 +149,8 @@ class StEEmcSmdCluster : public StEEmcBaseCluster {
   /// POinter to EMC cluster
   StEmcCluster *mEmcCluster;
 
-  /// Makes class available to root
   ClassDef(StEEmcSmdCluster,1);
-
 };
-
-inline Float_t StEEmcSmdCluster::energy(){ return mEnergy; }
-inline Float_t StEEmcSmdCluster::mean(){ return mMean; }
-inline Float_t StEEmcSmdCluster::sigma(){ return mSigma; }
-
-inline Float_t StEEmcSmdCluster::energy()const{ return mEnergy; }
-inline Float_t StEEmcSmdCluster::mean()const{ return mMean; }
-inline Float_t StEEmcSmdCluster::sigma()const{ return mSigma; }
-
-inline Int_t StEEmcSmdCluster::size(){ return (Int_t)mSize; }
-inline Int_t StEEmcSmdCluster::size()const{ return (Int_t)mSize; }
-
-inline StEEmcTowerVec_t StEEmcSmdCluster::towers(){ return mMatchedTowers; }
-inline Int_t            StEEmcSmdCluster::numberOfMatchedTowers(){ return (Int_t)mMatchedTowers.size(); }
-inline StEEmcTower      StEEmcSmdCluster::tower(Int_t t){ return mMatchedTowers[t]; }
 //inline Bool_t           StEEmcSmdCluster::operator>(StEEmcSmdCluster &other){ return (energy() > other.energy()); }
 
 

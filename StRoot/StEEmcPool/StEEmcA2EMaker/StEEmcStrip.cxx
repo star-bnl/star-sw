@@ -15,6 +15,7 @@ ClassImp(StEEmcStrip);
 
 // ----------------------------------------------------------------------------
 StEEmcStrip::StEEmcStrip()
+    : StEEmcElement()
 {
   mIndex=-1;
   mPlane=-1;
@@ -22,7 +23,7 @@ StEEmcStrip::StEEmcStrip()
 }
 
 // ----------------------------------------------------------------------------
-void StEEmcStrip::print()
+void StEEmcStrip::print() const 
 {
    std::cout << name() << " "  << " " << energy()*1000. << " MeV"; 
 }
@@ -43,5 +44,4 @@ void StEEmcStrip::index(Int_t i)
   if ( mIndex+1<100 ) mName += "0";
   if ( mIndex+1<10 ) mName += "0";
   mName+=mIndex+1;
-
 }
