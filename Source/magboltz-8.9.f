@@ -285,7 +285,7 @@ C  GAS61-80 :DUMMY ROUTINES
 C------------------------------------------------------------------
 C
 C      PROGRAM MAGBOLTZ 2                                                
-      SUBROUTINE MAGBOLTZ2s    
+      SUBROUTINE MAGBOLTZ2    
       IMPLICIT REAL*8 (A-H,O-Z)
       IMPLICIT INTEGER*8 (I-N)
       COMMON/BFLD/EOVB,WB,BTHETA,BMAG                                  

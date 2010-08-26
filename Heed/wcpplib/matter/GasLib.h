@@ -170,27 +170,27 @@ extern MoleculeDef SiH4_molec;
 extern double todays_temperature;  // in internal units
 extern double todays_pressure;  // in internal units
 
-extern GasDef GasHelium;
-extern GasDef GasNeon;
-extern GasDef GasArgon;
-extern GasDef GasKrypton;
-extern GasDef GasXenon;
-extern GasDef GasN2;
-extern GasDef GasO2;
-extern GasDef GasNH3;
-extern GasDef GasN2O;
-extern GasDef GasCO2;
-extern GasDef GasCF4;
-extern GasDef GasCH4;
-extern GasDef GasC2H2;
-extern GasDef GasC2H4;
-extern GasDef GasC2H6;
-extern GasDef GasC3H8;
-extern GasDef GasC4H10;
-extern GasDef Air;
-extern GasDef GasHydrogen2;
-//extern GasDef LiquidHydrogen;
+// extern GasDef GasHelium;
+// extern GasDef GasNeon;
+// extern GasDef GasArgon;
+// extern GasDef GasKrypton;
+// extern GasDef GasXenon;
+// extern GasDef GasN2;
+// extern GasDef GasO2;
+// extern GasDef GasNH3;
+// extern GasDef GasN2O;
+// extern GasDef GasCO2;
+// extern GasDef GasCF4;
+// extern GasDef GasCH4;
+// extern GasDef GasC2H2;
+// extern GasDef GasC2H4;
+// extern GasDef GasC2H6;
+// extern GasDef GasC3H8;
+// extern GasDef GasC4H10;
+// extern GasDef Air;
+// extern GasDef GasHydrogen2;
+// extern GasDef LiquidHydrogen;
 
-//extern MatterDef CoverMatterForSpes4pi;
+// extern MatterDef CoverMatterForSpes4pi;
 
 #endif

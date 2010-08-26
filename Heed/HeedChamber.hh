@@ -19,7 +19,7 @@ class HeedChamber :
     HeedChamber(const abssyscoor& fcsys, const EnTransfCSType etcst,
                 const HeedDeltaElectronCSType hdecst) :
         sh_manip_absvol(fcsys),
-        box(1000. * mm, 1000. * mm,  0.01 * mm, "chamber"),
+        box(1000. * mm, 1000. * mm,  10 * mm, "chamber"),
         EnTransfCSType(etcst), HeedDeltaElectronCSType(hdecst) {
 
     }

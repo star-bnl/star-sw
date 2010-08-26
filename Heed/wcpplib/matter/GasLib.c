@@ -195,7 +195,7 @@ double todays_pressure=1.0 * atmosphere;   // sea level
 //double todays_pressure=730.0/760.0 * atmosphere;   
 // level for one experiment (looks like in CERN as well)
 
-
+/*
 GasDef GasHelium("He", "He", "He",  
 		todays_pressure, todays_temperature);
 GasDef GasNeon("Ne", "Ne", "Ne",  
@@ -231,24 +231,27 @@ GasDef GasC3H8("C3H8", "C3H8", "C3H8",
 		todays_pressure, todays_temperature);
 GasDef GasC4H10("C4H10", "C4H10", "C4H10",  
 		todays_pressure, todays_temperature);
+//*/
 
 //GasDef Air("Air", "Air", "N2", 0.7, "O2", 0.3, 
 //	   todays_pressure, todays_temperature);
 //DynLinArr< String > fmolec_not = {
 // according to "short reference book of chemist", B.I.Perelman, Moskow, 1963.
-String  smolec_not[6] = {String("N2"), String("O2"), String("Ar"), 
-				  String("CO2"), String("Ne"), String("He")}; 
-double sweight_quan_molec[6] = 
-{0.7809, 0.2095, 0.009325, 0.0003, 0.000018, 0.000005};
-DynLinArr< String > fmolec_not(6, smolec_not, ArgInterp_Arr()); 
-DynLinArr< double > fweight_quan_molec(6, sweight_quan_molec, 
-				       ArgInterp_Arr()); 
 
-GasDef Air("Air", "Air", 6, fmolec_not, fweight_quan_molec,
-	   todays_pressure, todays_temperature);
+// String  smolec_not[6] = {String("N2"), String("O2"), String("Ar"), 
+// 			  String("CO2"), String("Ne"), String("He")}; 
+// double sweight_quan_molec[6] = 
+// {0.7809, 0.2095, 0.009325, 0.0003, 0.000018, 0.000005};
+// DynLinArr< String > fmolec_not(6, smolec_not, ArgInterp_Arr()); 
+// DynLinArr< double > fweight_quan_molec(6, sweight_quan_molec, 
+// 				       ArgInterp_Arr()); 
 
-GasDef GasHydrogen2("GasHydrogen2", "H2", "H2",  
-		todays_pressure, todays_temperature);
+// GasDef Air("Air", "Air", 6, fmolec_not, fweight_quan_molec,
+// 	   todays_pressure, todays_temperature);
+
+// GasDef GasHydrogen2("GasHydrogen2", "H2", "H2",  
+// 		todays_pressure, todays_temperature);
+
 /*
 GasDef LiquidHydrogen("LiquidHydrogen", "LiqH2", "H2",  
 		      todays_pressure, todays_temperature, 0.0708*gram/cm3);

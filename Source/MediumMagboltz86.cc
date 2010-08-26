@@ -780,7 +780,18 @@ MediumMagboltz86::GetLevel(const int i, int& gas, int& type,
   descr = "                              ";
   for (int j = 30; j--;) descr[j] = description[i][j];
   // Threshold energy
-  e = rgas[i] * energyLoss[i];  
+  e = rgas[i] * energyLoss[i];
+  if (debug) {
+    std::cout << className << "::GetLevel:\n";
+    std::cout << "    Level " << i << ": " << descr << "\n";
+    std::cout << "    Type " << type << "\n",
+    std::cout << "    Threshold energy: " << e << " eV\n";   
+    if (type == 4 && usePenning && 
+        e > minIonPot) {
+      std::cout << "    Penning transfer coefficient: " 
+                << rPenning << "\n";
+    }
+  }
   return true;
 
 }
@@ -1604,7 +1615,8 @@ MediumMagboltz86::Mixer() {
       // Elastic scattering
       cf[iE][np] = q[iE][1] * van;
       if (scatModel[np] == 1) {
-        ComputeAngularCut(pEqEl[iE][1], scatCut[iE][np], scatParameter[iE][np]);
+        ComputeAngularCut(pEqEl[iE][1], scatCut[iE][np], 
+                          scatParameter[iE][np]);
       } else if (scatModel[np] == 2) {
         scatParameter[iE][np] = pEqEl[iE][1];
       }
