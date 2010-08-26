@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCAStartHitsFinder.cxx,v 1.4 2010/08/20 16:23:23 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCAStartHitsFinder.cxx,v 1.5 2010/08/26 15:05:51 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -87,7 +87,7 @@ void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, SliceData &da
     //X   short_m leftMask( Vc::Zero );
     AliHLTTPCCAHitId rowStartHits[kArraySize]; // temp. array for the start hits
     const AliHLTTPCCARow &row = data.Row( rowIndex );
-    const AliHLTTPCCARow &middleRow = data.Row( rowIndex + rowStep );
+//    const AliHLTTPCCARow &middleRow = data.Row( rowIndex + rowStep );
     int startHitsCount = 0;
 
 
@@ -130,16 +130,16 @@ void AliHLTTPCCAStartHitsFinder::run( AliHLTTPCCATracker &tracker, SliceData &da
             // set all hits in the chain as used   TODO: run over all hits in the chain will be repeated at TrackletConstructor and above: think about optimization     
           data.SetHitAsUsed( row, hitIndexes, goodChains );
 //          std::cout << "SetHitAsUsed "<< goodChains << std::endl; // dbg
-          int iRow = rowIndex + 1*rowStep;
-          AliHLTTPCCARow curRow;
-          short_v upperHitIndexes = middleHitIndexes;
+          int iRow2 = rowIndex + 1*rowStep;
+          AliHLTTPCCARow curRow2;
+          short_v upperHitIndexes2 = middleHitIndexes;
           for (;!goodChains.isEmpty();) {
-            curRow = data.Row( iRow );
+            curRow2 = data.Row( iRow2 );
 //            std::cout << "SetHitAsUsed "<< goodChains << std::endl; // dbg
-            data.SetHitAsUsed( curRow, upperHitIndexes, goodChains );
-            upperHitIndexes = short_v( data.HitLinkUpData( curRow ), static_cast<ushort_v>( upperHitIndexes ), goodChains );
-            goodChains &= upperHitIndexes >= short_v( Vc::Zero );
-            iRow += rowStep;
+            data.SetHitAsUsed( curRow2, upperHitIndexes2, goodChains );
+            upperHitIndexes2 = short_v( data.HitLinkUpData( curRow2 ), static_cast<ushort_v>( upperHitIndexes2 ), goodChains );
+            goodChains &= upperHitIndexes2 >= short_v( Vc::Zero );
+            iRow2 += rowStep;
           }
             // check free space
           if ( ISUNLIKELY( startHitsCount >= kMaxStartHits ) ) { // TODO take in account stages kMax for one stage should be smaller

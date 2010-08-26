@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCATrackParam.cxx,v 1.4 2010/08/23 19:37:02 mzyzak Exp $
+// $Id: AliHLTTPCCATrackParam.cxx,v 1.5 2010/08/26 15:05:52 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -254,18 +254,18 @@ bool  AliHLTTPCCATrackParam::TransportToX( float x, AliHLTTPCCATrackLinearisatio
   float sin = fP[2] + DSin;
   if(sin>0.999) sin = 0.999;
   if(sin<-0.999) sin = -0.999;
-  float cos = sqrt(1-sin*sin);
+//  float cos = sqrt(1-sin*sin);
   float cos0 = sqrt(1-fP[2]*fP[2]);
-  float Ds = dx/cos0;    //(asin(sin) - asin(fP[2]))/(Bz*fP[4]);
-  float yy = Y() + 1.f/(Bz*fP[4])*(cos0 - cos);
-  float zz = Z() + fP[3] * Ds;
+//  float Ds = dx/cos0;    //(asin(sin) - asin(fP[2]))/(Bz*fP[4]);
+//  float yy = Y() + 1.f/(Bz*fP[4])*(cos0 - cos);
+//  float zz = Z() + fP[3] * Ds;
 
-  float y_f = 1.f/(Bz*fP[4])*(sin/cos - fP[2]/sqrt(1-fP[2]*fP[2]));
-  float y_p = 1.f/(Bz*fP[4])*(1/fP[4]*(sqrt(1-sin*sin) - sqrt(1-fP[2]*fP[2])) + dx*Bz*sin/cos);
-  float z_f = fP[3]*dx*fP[2]/(cos0*cos0*cos0); //fP[3]*dx*sin/(cos*cos*cos);
-  float z_t = Ds;
-  float z_p = 0.f;  //fP[3]*dx*dx*Bz*sin/(cos*cos*cos);
-  float s_p = dx*Bz;
+//  float y_f = 1.f/(Bz*fP[4])*(sin/cos - fP[2]/sqrt(1-fP[2]*fP[2]));
+//  float y_p = 1.f/(Bz*fP[4])*(1/fP[4]*(sqrt(1-sin*sin) - sqrt(1-fP[2]*fP[2])) + dx*Bz*sin/cos);
+//  float z_f = fP[3]*dx*fP[2]/(cos0*cos0*cos0); //fP[3]*dx*sin/(cos*cos*cos);
+//  float z_t = Ds;
+//  float z_p = 0.f;  //fP[3]*dx*dx*Bz*sin/(cos*cos*cos);
+//  float s_p = dx*Bz;
 
   float rrr = (asin(t0.SinPhi() + d[2] + dxBz * d[4]));
   rrr = CAMath::Cos(rrr);
@@ -437,7 +437,7 @@ bool  AliHLTTPCCATrackParam::TransportToXWithMaterial( float x,  AliHLTTPCCATrac
   //* Transport the track parameters to X=x  taking into account material budget
 
   const float kRho = 1.54e-3;//1.025e-3 ;//0.9e-3;
-  const float kRadLen = 29.532;//28.94;
+//  const float kRadLen = 29.532;//28.94;
   //const float kRhoOverRadLen = kRho / kRadLen;
   const float kRhoOverRadLen = 7.68e-5;
   float dl;
@@ -828,7 +828,7 @@ bool AliHLTTPCCATrackParam::Filter( float y, float z, float err2Y, float err2Z, 
 /*bool AliHLTTPCCATrackParam::Filter( float y, float z, float err2Y, float err2Z, float maxSinPhi )
 {
   assert( maxSinPhi > 0.f );
-  //* Add the y,z measurement with the Kalman filter
+  /// Add the y,z measurement with the Kalman filter
 
   float
   c00 = fC[ 0],

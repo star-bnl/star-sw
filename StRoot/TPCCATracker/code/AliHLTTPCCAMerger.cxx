@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMerger.cxx,v 1.8 2010/08/23 21:06:47 mzyzak Exp $
+// $Id: AliHLTTPCCAMerger.cxx,v 1.9 2010/08/26 15:05:50 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -277,9 +277,9 @@ void AliHLTTPCCAMerger::UnpackSlices()
   //* unpack the cluster information from the slice tracks and initialize track info array
 
   // get N tracks and N clusters in event
-///mvz start
+#ifdef DO_MERGER_PERF
   int NTracksPrev=0;
-///mvz end
+#endif //DO_MERGER_PERF
   int nTracksTotal = 0;
   int nTrackClustersTotal = 0;
   for ( int iSlice = 0; iSlice < fgkNSlices; iSlice++ ) {
@@ -815,7 +815,8 @@ void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1
   int nnn = (kkk - 1)*0.5;
   int MidSlice = fgkNSlices*0.5;
 
-  int NeighSlice[fgkNSlices][nNeighSlices];
+//  int NeighSlice[fgkNSlices][nNeighSlices];
+  int * NeighSlice = new int[fgkNSlices*nNeighSlices];
 
 //nNeighSlices =2;
 //nnn=0;
@@ -825,21 +826,21 @@ void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1
   {
     for(int i=0; i<MidSlice; i++)
     {
-      NeighSlice[i][j] = i + j - nnn;
-      if(NeighSlice[i][j] >= MidSlice) NeighSlice[i][j] -= MidSlice;
-      if(NeighSlice[i][j] < 0) NeighSlice[i][j] += MidSlice;
+      NeighSlice[i*nNeighSlices+j] = i + j - nnn;
+      if(NeighSlice[i*nNeighSlices+j] >= MidSlice) NeighSlice[i*nNeighSlices+j] -= MidSlice;
+      if(NeighSlice[i*nNeighSlices+j] < 0) NeighSlice[i*nNeighSlices+j] += MidSlice;
 
-      NeighSlice[i][j+kkk] = 22 - NeighSlice[i][j]; 
-      if(NeighSlice[i][j+kkk]<MidSlice) NeighSlice[i][j+kkk] += MidSlice;
+      NeighSlice[i*nNeighSlices +j+kkk] = 22 - NeighSlice[i*nNeighSlices+j]; 
+      if(NeighSlice[i*nNeighSlices +j+kkk]<MidSlice) NeighSlice[i*nNeighSlices +j+kkk] += MidSlice;
     }
     for(int i=MidSlice; i<fgkNSlices; i++)
     {
-      NeighSlice[i][j] = i + j - nnn;
-      if(NeighSlice[i][j] >= fgkNSlices) NeighSlice[i][j] -= MidSlice;
-      if(NeighSlice[i][j] < MidSlice) NeighSlice[i][j] += MidSlice;
+      NeighSlice[i*nNeighSlices+j] = i + j - nnn;
+      if(NeighSlice[i*nNeighSlices+j] >= fgkNSlices) NeighSlice[i*nNeighSlices+j] -= MidSlice;
+      if(NeighSlice[i*nNeighSlices+j] < MidSlice) NeighSlice[i*nNeighSlices+j] += MidSlice;
 
-      NeighSlice[i][j+kkk] = 22 - NeighSlice[i][j]; 
-      if(NeighSlice[i][j+kkk]<0) NeighSlice[i][j+kkk] += MidSlice;
+      NeighSlice[i*nNeighSlices +j+kkk] = 22 - NeighSlice[i*nNeighSlices+j]; 
+      if(NeighSlice[i*nNeighSlices +j+kkk]<0) NeighSlice[i*nNeighSlices +j+kkk] += MidSlice;
     }
   }
 
@@ -849,7 +850,7 @@ void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1
 
     int iBest2 = -1;
     int iSliceBest2 = -1;
-    float chi2;
+//    float chi2;
 
     float dr_min2_local = 10000000.;
 
@@ -861,7 +862,7 @@ void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1
 
       bool IsNeigh = 0;
       for(int i=0; i<nNeighSlices; i++)
-        if( iSlice2 == NeighSlice[iSlice1][i]) IsNeigh = 1;
+        if( iSlice2 == NeighSlice[iSlice1*nNeighSlices +i]) IsNeigh = 1;
       if( iSlice2 == iSlice1) IsNeigh = 1;
       if(!IsNeigh) continue;
 
@@ -876,12 +877,12 @@ void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1
       AliHLTTPCCASliceTrackInfo *Tt2 = &fTrackInfos[fSliceTrackInfoStart[iSlice2] + b2.TrackID() ];
 
       float xE1 = Tt1->OuterParam().X();
-      float xS1 = Tt1->InnerParam().X();
+//      float xS1 = Tt1->InnerParam().X();
       float xE2 = Tt2->OuterParam().X();
       float xS2 = Tt2->InnerParam().X();
 
       float yE1 = Tt1->OuterParam().Y();
-      float yS1 = Tt1->InnerParam().Y();
+//      float yS1 = Tt1->InnerParam().Y();
       float yE2 = Tt2->OuterParam().Y();
       float yS2 = Tt2->InnerParam().Y();
 
@@ -898,8 +899,9 @@ void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1
       else             IsNext=0;
 
       AliHLTTPCCATrackParam Thelp, Thelp1;
+#ifdef DO_MERGER_PERF      
       int sh = -1, sh1 = -1, Itr = -1, Itr1 = -1;
-
+#endif // DO_MERGER_PERF
       float dxArr[4] = {(xE1_E2 - xE2), 
                         (xS1_S2 - xS2), 
                         (xS1_E2 - xE2), 
@@ -1007,7 +1009,10 @@ void AliHLTTPCCAMerger::SplitBorderTracksGlobal( AliHLTTPCCABorderTrackGlobal B1
       if(fabs(Thelp1.Z() - Thelp.Z())>10.f) continue;
       if(fabs(Thelp1.SinPhi() - Thelp.SinPhi())>0.15f) continue;
 
-      float C[15], r[5], chi2, delta2, Si;
+      float C[15], r[5], chi2;
+#ifdef DO_MERGER_PERF       
+      float delta2, Si;
+#endif // DO_MERGER_PERF  
       FilterTracks(Thelp.GetPar(), Thelp.GetCov(), Thelp1.GetPar(), Thelp1.GetCov(), r, C, chi2);
 
       bool Ok = 1;
@@ -1388,14 +1393,17 @@ void AliHLTTPCCAMerger::Merging(int number)
 ///mvz        if ( !ok ) continue;
       }
 
-      int   hits2[nHits];
-      float Zhits[nHits];
+      // int   hits2[nHits];
+      // float Zhits[nHits];
+      int *hits2 = new int[nHits];
+      float *Zhits = new float[nHits];
       float Zm = 100000;
       float Zcur;
       int   hitCur=0;
       int   nHits2=0;
 
-      bool  index[nHits];
+      // bool  index[nHits];
+      bool *index = new bool[nHits];
 
       for(int ihit=0; ihit<nHits; ihit++)
       {
