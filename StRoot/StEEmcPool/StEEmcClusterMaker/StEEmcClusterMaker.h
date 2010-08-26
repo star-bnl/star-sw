@@ -14,59 +14,61 @@
 
 #include <map>
 
-class StEEmcClusterMaker : public StMaker { //, public SlowSimUtil {
-
- public:
+class StEEmcClusterMaker : public StMaker {
+public:
 
   StEEmcClusterMaker( const Char_t *name = "mEEclusters" );
-  ~StEEmcClusterMaker(){ /* nada */ };
+  virtual ~StEEmcClusterMaker(){ /* nada */ };
 
   /// Initialize
-  Int_t Init();
+  virtual Int_t Init();
   /// Make clusters for this event
-  Int_t Make();
+  virtual Int_t Make();
   /// Clear clusters for next event
-  void  Clear(Option_t *opts="");
+  virtual void  Clear(Option_t *opts="");
 
   /// Set the name of the ADC-->E maker
-  void analysis ( const Char_t *name );
+  void analysis ( const Char_t *name ) { mAnalysisName=name; }
 
   /// Set the seed energy for the specified layer
   /// where 0=T, 1=P, 2=Q, 3=R, 4=U, 5=V
-  void seedEnergy( Float_t energy, Int_t layer=0 );  
+  void seedEnergy( Float_t energy, Int_t layer=0 ) { mSeedEnergy[layer]=energy; }
 
   /// Maximum distance around seed strip to cluster smd strips  
-  void setMaxExtent( Int_t m );  
+  void setMaxExtent( Int_t m ) { mMaxExtent=m; }
 
   /// Minimum number of strips to form a cluster
   void setMinStrips( Int_t m ){ mMinStrips=m; }
 
   /// Factor above which an smd strip must exceed the minimum
   /// "floor" energy in order to be considered a seed... 
-  void setSeedFloor( Float_t f=2.0 ); 
+  void setSeedFloor( Float_t f=2.0 ) { mSeedFloor=f; } 
 
   /// Return number of clusters for a given sector, layer
-  Int_t numberOfClusters(Int_t sec, Int_t layer);
+  Int_t numberOfClusters(Int_t sec, Int_t layer) const { return (Int_t)mTowerClusters[sec][layer].size(); }
   /// Return number of smd clusters for a given sector, plane
-  Int_t numberOfSmdClusters(Int_t sec, Int_t plane);
+  Int_t numberOfSmdClusters(Int_t sec, Int_t plane) const { return (Int_t)mSmdClusters[sec][plane].size(); }
 
   /// Return a specific cluster from a given sector, layer
-  StEEmcCluster cluster(Int_t sec, Int_t layer, Int_t index);
+  StEEmcCluster &cluster(Int_t sec, Int_t layer, Int_t index) { return mTowerClusters[sec][layer][index]; }
+  const StEEmcCluster &cluster(Int_t sec, Int_t layer, Int_t index) const { return mTowerClusters[sec][layer][index]; }
   /// return a specific cluster from a given sector, plane 
-  StEEmcSmdCluster smdcluster(Int_t sec, Int_t plane, Int_t index);
+  StEEmcSmdCluster &smdcluster(Int_t sec, Int_t plane, Int_t index) { return mSmdClusters[sec][plane][index]; }
+  const StEEmcSmdCluster &smdcluster(Int_t sec, Int_t plane, Int_t index) const { return mSmdClusters[sec][plane][index]; }
 
-
-  /// Given a StEmcCluster, return the StEEmcCluster from whence
-  /// it came.
-  StEEmcCluster cluster( StEmcCluster *cl ){ return mEtoEE[ cl ]; }
-  /// Given a StEmcCluster, return the StEEmcSmdCluster from
-  /// whence it came.
-  StEEmcSmdCluster smdcluster( StEmcCluster *cl ){ return mEtoEEsmd[ cl ]; }
+  /// Given a StEmcCluster, return the StEEmcCluster where it came from
+  StEEmcCluster &cluster(const StEmcCluster *cl ){ return (*(mEtoEE.find(cl))).second; }
+  const StEEmcCluster &cluster(const StEmcCluster *cl ) const { return (*(mEtoEE.find(cl))).second; }
+  /// Given a StEmcCluster, return the StEEmcSmdCluster where it came from
+  StEEmcSmdCluster &smdcluster(const StEmcCluster *cl ){ return (*(mEtoEEsmd.find(cl))).second; }
+  const StEEmcSmdCluster &smdcluster(const StEmcCluster *cl ) const { return (*(mEtoEEsmd.find(cl))).second; }
 
   /// Return a vector of tower clusters
-  StEEmcClusterVec_t clusters( Int_t sec, Int_t layer );
+  StEEmcClusterVec_t &clusters( Int_t sec, Int_t layer ) { return mTowerClusters[sec][layer]; }
+  const StEEmcClusterVec_t &clusters( Int_t sec, Int_t layer ) const { return mTowerClusters[sec][layer]; }
   /// Return a vector of smd clusters
-  StEEmcSmdClusterVec_t smdclusters( Int_t sec, Int_t plane ); 
+  StEEmcSmdClusterVec_t &smdclusters( Int_t sec, Int_t plane ) { return mSmdClusters[sec][plane]; } 
+  const StEEmcSmdClusterVec_t &smdclusters( Int_t sec, Int_t plane ) const { return mSmdClusters[sec][plane]; } 
 
   /// If called, will look for the presence of StEvent and
   /// fill the StEmcCollection.
@@ -83,10 +85,9 @@ class StEEmcClusterMaker : public StMaker { //, public SlowSimUtil {
   void loose(Bool_t l=true){ mLoose=l; }
 
   /// Event summary
-  void print();
+  void print() const;
 
- private:
- protected:
+protected:
 
   /// Keep track of clusters
   Int_t mClusterId;
@@ -123,61 +124,37 @@ class StEEmcClusterMaker : public StMaker { //, public SlowSimUtil {
   Float_t mSeedFloor; 
 
   /// Constructs tower clusters
-  Bool_t buildTowerClusters();
+  virtual Bool_t buildTowerClusters();
 
   /// Constructs smd clusters
-  Bool_t buildSmdClusters();
+  virtual Bool_t buildSmdClusters();
 
   /// Fills StEvent cluster collections if the option is selected
   void fillStEvent();
 
   /// Verify that StEEmcCluster/StEEmcSmdCluster and StEmcCluster
   /// are equivalent
-  Bool_t verifyStEvent();
+  Bool_t verifyStEvent() const;
 
   // Geometry classes
-  EEmcGeomSimple *mEEtow;  /**<- pointer to tower geometry */
-  EEmcSmdGeom    *mEEsmd;  /**<- pointer to smd geometry */
-  EEmcSmdMap     *mEEmap;  /**<- pointer to tower to smd map */
+  const EEmcGeomSimple *mEEtow;  /**<- pointer to tower geometry */
+  const EEmcSmdGeom    *mEEsmd;  /**<- pointer to smd geometry */
+  const EEmcSmdMap     *mEEmap;  /**<- pointer to tower to smd map */
 
   /// ADC-->E maker name
   TString mAnalysisName;
   /// ADC-->E maker
-  StEEmcA2EMaker *mEEanalysis;
+  const StEEmcA2EMaker *mEEanalysis;
 
   /// Option to fill StEvent
   Bool_t mFillStEvent;
 
   /// Map StEEmcClusters to StEmcClusters
-  std::map< StEmcCluster *, StEEmcCluster > mEtoEE;       //!
+  std::map<const StEmcCluster *, StEEmcCluster > mEtoEE;       //!
   /// ... and for smd clusters
-  std::map< StEmcCluster *, StEEmcSmdCluster > mEtoEEsmd; //!
+  std::map<const StEmcCluster *, StEEmcSmdCluster > mEtoEEsmd; //!
 
-  /// Makes class available to root
   ClassDef(StEEmcClusterMaker,1);
-
 };
-
-inline void StEEmcClusterMaker::analysis( const Char_t *name ){ mAnalysisName=name; }
-inline void StEEmcClusterMaker::seedEnergy(Float_t energy, Int_t layer){ mSeedEnergy[layer]=energy; }
-
-inline void StEEmcClusterMaker::setMaxExtent(Int_t m){ mMaxExtent=m; } 
-inline void StEEmcClusterMaker::setSeedFloor(Float_t f){ mSeedFloor=f; } 
-
-inline Int_t StEEmcClusterMaker::numberOfClusters(Int_t s, Int_t l) 
-	{ return (Int_t)mTowerClusters[s][l].size(); }
-inline Int_t StEEmcClusterMaker::numberOfSmdClusters(Int_t s, Int_t p) 
-	{ return (Int_t)mSmdClusters[s][p].size(); }
-
-inline StEEmcCluster StEEmcClusterMaker::cluster(Int_t s, Int_t l, Int_t i)
-	{ return mTowerClusters[s][l][i]; }
-inline StEEmcSmdCluster StEEmcClusterMaker::smdcluster(Int_t s,Int_t p,Int_t i)
-	{ return mSmdClusters[s][p][i]; }
-
-inline StEEmcClusterVec_t StEEmcClusterMaker::clusters(Int_t s, Int_t l)
-    	{ return mTowerClusters[s][l]; }
-
-inline StEEmcSmdClusterVec_t StEEmcClusterMaker::smdclusters(Int_t s, Int_t l)
-    	{ return mSmdClusters[s][l]; } 
 
 #endif

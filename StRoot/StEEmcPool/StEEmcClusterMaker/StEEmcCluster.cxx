@@ -8,8 +8,8 @@
  * elements.
  *
  * \author Jason C. Webb
- * $Date: 2007/05/28 14:48:49 $
- * $Revision: 1.7 $
+ * $Date: 2010/08/26 22:49:25 $
+ * $Revision: 1.8 $
  *
  * \section steemccluster_conventions Conventions
  *
@@ -35,7 +35,8 @@
 ClassImp(StEEmcCluster);
 
 // ----------------------------------------------------------------------------
-StEEmcCluster::StEEmcCluster() : StEEmcBaseCluster()
+StEEmcCluster::StEEmcCluster() 
+    : StEEmcBaseCluster()
 {
   mEmcCluster=0;
   mEnergy=0.;
@@ -48,12 +49,13 @@ StEEmcCluster::StEEmcCluster() : StEEmcBaseCluster()
   mMomentum=TVector3(0,0,0);
 }
 
-// copy constructor
+// ----------------------------------------------------------------------------
 StEEmcCluster::StEEmcCluster( const StEEmcCluster &other )
+    : StEEmcBaseCluster()
 {
   mEmcCluster=other.mEmcCluster;
   mKey=other.mKey;
-  //  printf("copy constructor E=%5.2f\n",other.mEnergy);
+
   mEnergy=other.mEnergy;
   mfPhibin=other.mfPhibin;
   mfEtabin=other.mfEtabin;
@@ -69,15 +71,20 @@ StEEmcCluster::StEEmcCluster( const StEEmcCluster &other )
   mPosition=other.mPosition;
   mMatched=other.mMatched;
 
-  //  printf("copy ctor size=%i\n",other.mTowers.size());
-
   for ( UInt_t ii=0;ii<other.mTowers.size();ii++ )
     mTowers.push_back( other.mTowers[ii] );
-
 }
 
 // ----------------------------------------------------------------------------
-void StEEmcCluster::add( StEEmcTower tower, Float_t weight )
+StEEmcCluster::~StEEmcCluster(){
+  /// If we have created an StEmcCluster, delete it
+  //$$$  if ( mEmcCluster != 0 ) delete mEmcCluster;
+  mTowers.clear();
+  mWeights.clear();
+}
+
+// ----------------------------------------------------------------------------
+void StEEmcCluster::add(const StEEmcTower &tower, Float_t weight)
 {
   
   if ( weight * tower.energy() <= 0. ) return;
@@ -115,22 +122,17 @@ void StEEmcCluster::add( StEEmcTower tower, Float_t weight )
 
 }
 
-Float_t StEEmcCluster::fracEtabin()
+// ----------------------------------------------------------------------------
+Float_t StEEmcCluster::fracEtabin() const
 {
   return mfEtabin/mEnergy;
 }
-Float_t StEEmcCluster::fracPhibin()
+
+// ----------------------------------------------------------------------------
+Float_t StEEmcCluster::fracPhibin() const
 {
   return mfPhibin/mEnergy+mTowers[0].phibin();
 }
-
-StEEmcCluster::~StEEmcCluster(){
-  /// If we have created an StEmcCluster, delete it
-  //$$$  if ( mEmcCluster != 0 ) delete mEmcCluster;
-  mTowers.clear();
-  mWeights.clear();
-}
-
 
 // ----------------------------------------------------------------------------
 StEmcCluster *StEEmcCluster::stemc()
@@ -149,8 +151,7 @@ StEmcCluster *StEEmcCluster::stemc()
   for ( Int_t i=0; i< numberOfTowers(); i++ ) 
     {
       StEmcRawHit *hit=mTowers[i].stemc();
-      assert( hit );         
-      mEmcCluster->addHit( hit );
+      if (hit) mEmcCluster->addHit( hit );
     }
 #endif
   
@@ -158,9 +159,8 @@ StEmcCluster *StEEmcCluster::stemc()
 }
 
 // ----------------------------------------------------------------------------
-void StEEmcCluster::print()
+void StEEmcCluster::print() const
 {
-  
   std::cout << "cluster key: " << mKey << std::endl;
   std::cout << "seed tower:  " << mTowers[0].name() << std::endl;
   //  std::cout << "ntowers:     " << mTowers.size() << std::endl;
@@ -175,17 +175,17 @@ void StEEmcCluster::print()
     {
       mTowers[i].printLine(); std::cout << " W=" << mWeights[i] << std::endl;
     }
-
 }
-//<<<<<<< StEEmcCluster.cxx
 
-void StEEmcCluster::printLine(Bool_t Endl)
+// ----------------------------------------------------------------------------
+void StEEmcCluster::printLine(Bool_t Endl) const
 {
   std::cout << "key="<<mKey<<" seed="<<mTowers[0].name()<<" ntow="<<mTowers.size()<<" pt=" <<mMomentum.Perp()<<" eta="<<mMomentum.Eta()<<" phi="<<mMomentum.Phi();
   if ( Endl ) std::cout << std::endl;
 }
 
-Bool_t StEEmcCluster::isNeighbor( StEEmcTower tower ) 
+// ----------------------------------------------------------------------------
+Bool_t StEEmcCluster::isNeighbor(const StEEmcTower &tower) const
 {
 
   for ( UInt_t i=0;i<mTowers.size();i++ )
@@ -198,7 +198,8 @@ Bool_t StEEmcCluster::isNeighbor( StEEmcTower tower )
 
 }
 
-Bool_t StEEmcCluster::hasTower( StEEmcTower &tower )
+// ----------------------------------------------------------------------------
+Bool_t StEEmcCluster::hasTower(const StEEmcTower &tower) const
 {
 
   for ( UInt_t i=0;i<mTowers.size();i++ )
@@ -208,7 +209,8 @@ Bool_t StEEmcCluster::hasTower( StEEmcTower &tower )
   return false;
 }
 
-Float_t StEEmcCluster::sigmaE()
+// ----------------------------------------------------------------------------
+Float_t StEEmcCluster::sigmaE() const
 {
   Float_t sumE=0.;
   Float_t sumE2=0.;
@@ -226,7 +228,8 @@ Float_t StEEmcCluster::sigmaE()
   return TMath::Sqrt(var);  
 }
 
-Int_t StEEmcCluster::numberOfEtabins()
+// ----------------------------------------------------------------------------
+Int_t StEEmcCluster::numberOfEtabins() const
 {
   Int_t etabins[12];for ( Int_t ii=0;ii<12;ii++ ) etabins[ii]=0;
   for ( UInt_t ii=0;ii<mTowers.size();ii++ ) etabins[ mTowers[ii].etabin() ]++;
@@ -235,7 +238,8 @@ Int_t StEEmcCluster::numberOfEtabins()
   return count;
 }
 
-Int_t StEEmcCluster::numberOfPhibins()
+// ----------------------------------------------------------------------------
+Int_t StEEmcCluster::numberOfPhibins() const
 {
   Int_t phibins[60];for ( Int_t ii=0;ii<12;ii++ ) phibins[ii]=0;
   for ( UInt_t ii=0;ii<mTowers.size();ii++ ) phibins[ mTowers[ii].phibin() ]++;
@@ -243,23 +247,3 @@ Int_t StEEmcCluster::numberOfPhibins()
   for ( Int_t ii=0;ii<12;ii++ ) if ( phibins[ii] ) count++;
   return count;
 }
-
-//=======
-
-
-// ----------------------------------------------------------------------------
-/***
-Bool_t StEEmcCluster::isNeighbor( StEEmcTower tower ) 
-{
-  
-  for ( UInt_t i=0;i<mTowers.size();i++ )
-    {
-      StEEmcTower myTower=mTowers[i];
-      if ( myTower.isNeighbor(tower) ) return true;
-    }
-  
-  return false;
-  
-}
-***/ 
-//>>>>>>> 1.2

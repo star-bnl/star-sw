@@ -91,71 +91,78 @@ class StMuTrack;
 
 class StEEmcGenericClusterMaker : public StMaker
 {
+public:
 
- public:
+  StEEmcGenericClusterMaker( const Char_t *name, const StEEmcA2EMaker *a2e=NULL );
+  virtual ~StEEmcGenericClusterMaker(){ /* nada */ }
 
-  StEEmcGenericClusterMaker( const Char_t *name, StEEmcA2EMaker *a2e=NULL );
-  ~StEEmcGenericClusterMaker(){ /* nada */ }
+  virtual Int_t Init();  
 
-  Int_t Init();  
-
-  Int_t Make();
+  virtual Int_t Make();
 
   void  makeHistograms();
   void  makeClusterMap();
   void  makeStEvent();
   void  makeTrackMap();
 
-  void  Clear(Option_t *opts="");
+  virtual void  Clear(Option_t *opts="");
 
   /// Add a tower (pre/postshower) cluster to the list of clusters
-  void add( StEEmcCluster &cluster );
+  void add(const StEEmcCluster &cluster);
 
   /// Add a smd cluster to the list of clusters
-  void add( StEEmcSmdCluster &cluster );
+  void add(const StEEmcSmdCluster &cluster) { 
+    StEEmcSmdCluster c = cluster;
+    c.key(nextClusterId()); 
+    mSmdClusters[ c.sector() ][ c.plane() ].push_back( c ); 
+    mNumberOfClusters[c.strip(0).plane()+4]++; 
+  }
 
   /// Searches list of tower (pre/postshower) clusters and removes
   /// the matching cluster.
-  void remove( StEEmcCluster &cluster ){ /* needs to be implemented */ }
+  void remove(const StEEmcCluster &cluster){ /* needs to be implemented */ }
 
   /// Searches list of smd clusters and removes the matching cluster.
-  void remove( StEEmcSmdCluster &cluster ){ /* needs to be implemented */ }
+  void remove(const StEEmcSmdCluster &cluster){ /* needs to be implemented */ }
     
   /// Return a vector of tower clusters
-  StEEmcClusterVec_t clusters( Int_t sec, Int_t layer );
+  StEEmcClusterVec_t &clusters( Int_t sec, Int_t layer ) { return mTowerClusters[sec][layer]; }
+  const StEEmcClusterVec_t &clusters( Int_t sec, Int_t layer ) const { return mTowerClusters[sec][layer]; }
 
   /// Return a vector of smd clusters
-  StEEmcSmdClusterVec_t smdclusters( Int_t sec, Int_t plane );
+  StEEmcSmdClusterVec_t &smdclusters( Int_t sec, Int_t plane ) { return mSmdClusters[sec][plane]; }
+  const StEEmcSmdClusterVec_t &smdclusters( Int_t sec, Int_t plane ) const { return mSmdClusters[sec][plane]; }
 
   /// Return a specific cluster from a given sector, layer
   /// @param sector specifies the sector id [0,11]
   /// @param layer specifies which layer 0=T 1=P 2=Q 3=R
   /// @param index specifies which cluster to return
-  StEEmcCluster cluster(Int_t sector, Int_t layer, Int_t index);
+  StEEmcCluster &cluster(Int_t sector, Int_t layer, Int_t index) { return mTowerClusters[sector][layer][index]; }
+  const StEEmcCluster &cluster(Int_t sector, Int_t layer, Int_t index) const { return mTowerClusters[sector][layer][index]; }
 
   /// return a specific cluster from a given sector, plane
   /// @param sector specifies the sector id [0,11]
   /// @param plane specifies which smd plane 0=U 1=V (note difference from "layer" definition)
   /// @param index specifies which cluster to return
-  StEEmcSmdCluster smdcluster(Int_t sector, Int_t plane, Int_t index);
-
+  StEEmcSmdCluster &smdcluster(Int_t sector, Int_t plane, Int_t index) { if ( plane < 2 ) return mSmdClusters[sector][plane][index]; else assert(0); /* please specify an smd plane 0=U or 1=V */}
+  const StEEmcSmdCluster &smdcluster(Int_t sector, Int_t plane, Int_t index) const { if ( plane < 2 ) return mSmdClusters[sector][plane][index]; else assert(0); /* please specify an smd plane 0=U or 1=V */}
 
   /// returns the number of tracks pointing at the specified cluster
   /// @param cluster
-  Int_t numberOfTracks( StEEmcCluster &cluster );
-  Int_t numberOfBackgroundTracks( StEEmcCluster &cluster );
+  Int_t numberOfTracks(const StEEmcCluster &cluster) const { return (Int_t)(*(mClusterTrackMap.find(cluster.key()))).second.size(); }
+  Int_t numberOfBackgroundTracks(const StEEmcCluster &cluster) const { return (Int_t)(*(mBackgroundTrackMap.find(cluster.key()))).second.size(); }
 
   /// return a pointer to a StMuTrack which points at the given
   /// cluster
   /// @param cluster given a cluster, return a pointer to the track which matches it...  yikes this shouldn't be unique...
   /// @param index index of the track pointing to the cluster
-  StMuTrack *track( StEEmcCluster &cluster, Int_t index );//{ return mClusterTrackMap[ cluster.key() ]; }
-  StMuTrack *backgroundTrack( StEEmcCluster &cluster, Int_t index );//{ return mClusterTrackMap[ cluster.key() ]; }
+  StMuTrack *track(const StEEmcCluster &cluster, Int_t index) const { return (*(mClusterTrackMap.find(cluster.key()))).second[index]; }
+  StMuTrack *backgroundTrack(const StEEmcCluster &cluster, Int_t index) const { return (*(mBackgroundTrackMap.find(cluster.key()))).second[index]; }
 
   /// returns the total number of clusters in a given sector, layer 
   /// @param sector specifies the sector id [0,11]
   /// @param layer specifies which layer 0=T 1=P 2=Q 3=R 4=U 5=V
-  Int_t numberOfClusters(Int_t sector, Int_t layer){
+  Int_t numberOfClusters(Int_t sector, Int_t layer) const{
     if ( layer < 4 ) 
       return (Int_t)mTowerClusters[ sector ][ layer ].size();
     else if ( layer < 6 )
@@ -164,9 +171,9 @@ class StEEmcGenericClusterMaker : public StMaker
       return -1;
   }
   /// returns the total number of clusters in a given layer
-  Int_t numberOfClusters(Int_t layer){ return mNumberOfClusters[layer]; }
+  Int_t numberOfClusters(Int_t layer) const{ return mNumberOfClusters[layer]; }
   /// returns the total number of clusters summed over all layers
-  Int_t numberOfClusters(){ return mClusterId; }
+  Int_t numberOfClusters() const { return mClusterId; }
 
   /// structure describing the matching between tower, preshower, 
   /// postshower and smd clusters
@@ -184,55 +191,54 @@ class StEEmcGenericClusterMaker : public StMaker
 
   /// Returns the clusters which match (see ::match()) the specified 
   /// cluster
-  EEmatch clusterMatch( StEEmcCluster &c ) { return mClusterMap[ c.key() ]; }
+  EEmatch &clusterMatch(const StEEmcCluster &c) { return mClusterMap[ c.key() ]; }
+  const EEmatch &clusterMatch(const StEEmcCluster &c) const { return (*(mClusterMap.find(c.key()))).second; }
 
   /// Returns the current largest cluster ID
-  Int_t lastClusterId(){ return mClusterId; }
+  Int_t lastClusterId() const { return mClusterId; }
 
   /// Returns the number of matching SMD clusters for the given tower cluster and plane
   /// @param cluster a tower cluster
   /// @param plane 0=U 1=V  
-  Int_t numberOfMatchingSmdClusters( StEEmcCluster &cluster, Int_t plane );
+  Int_t numberOfMatchingSmdClusters(const StEEmcCluster &cluster, Int_t plane ) const;
 
   /// Returns a specific SMD cluster which matches the tower clster
   /// @param cluster a tower cluster
   /// @param plane 0=U 1=V  
   /// @param index index of the SMD cluster
-  StEEmcSmdCluster matchingSmdCluster ( StEEmcCluster &cluster, Int_t plane, Int_t index );
+  StEEmcSmdCluster &matchingSmdCluster (const StEEmcCluster &cluster, Int_t plane, Int_t index );
+  const StEEmcSmdCluster &matchingSmdCluster (const StEEmcCluster &cluster, Int_t plane, Int_t index ) const;
 
   /// Sets track-cluster matching parameters
   /// @param distance maximum separation in cm from the cluster centroid to the track for a match to be made.
   void setTrackMatching( Float_t distance, Int_t layer ){ mClusterTrackSeparation[layer] = distance; }
 
   /// extrapolates helix to position z (borrowed from StEEmcPool/TTM)
-  Bool_t extrapolateToZ( const StPhysicalHelixD helix, const double z, TVector3 &r);
-
+  Bool_t extrapolateToZ( const StPhysicalHelixD &helix, const double z, TVector3 &r) const;
 
   /// Builds histograms for SMD clusters matching the specified tower cluster.  Histograms
   /// will be stored in the .hist branch of this maker.  Histograms will follow a naming
   /// convention h[TUV]cluster[key]_[event] where [TUV] ...
-  void buildHistograms( StEEmcCluster cluster );
+  void buildHistograms(const StEEmcCluster &cluster);
 
   /// Utility method to provide the "next" cluster id.  It's in public scope to allow 
   /// later makers in the chain (i.e. the point maker) to form new clusters and assign
   /// a unique cluster id (key).
-  Int_t nextClusterId(){ return mClusterId++; }
+  Int_t nextClusterId() { return mClusterId++; }
+  Int_t maxClusterId() const { return mClusterId; }
 
-    virtual const char* GetCVS() const
-	        {static const char cvs[]="Tag $Name:  $ $Id: StEEmcGenericClusterMaker.h,v 1.6 2008/06/30 21:15:23 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+  virtual const char* GetCVS() const
+	        {static const char cvs[]="Tag $Name:  $ $Id: StEEmcGenericClusterMaker.h,v 1.7 2010/08/26 22:49:25 ogrebeny Exp $ built "__DATE__" "__TIME__; return cvs;}
 
-
- private:
- protected:
+protected:
 
   // EEMC adc to energy
-  StEEmcA2EMaker *mEEanalysis;
+  const StEEmcA2EMaker *mEEanalysis;
 
   //  StEEmcClusterCollection *mCollection;
 
   // Keeps track of clusters
   Int_t mClusterId;
-
 
   // mTowerClusters[sec][layer] provides list of tower
   // clusters at specified layer in the given sector,
@@ -247,31 +253,31 @@ class StEEmcGenericClusterMaker : public StMaker
   Int_t mNumberOfClusters[6];
 
   // Pointers to geometry classes
-  EEmcGeomSimple *mEEmcGeom;
-  EEmcSmdGeom    *mESmdGeom;
-  EEmcSmdMap     *mESmdMap;
+  const EEmcGeomSimple *mEEmcGeom;
+  const EEmcSmdGeom    *mESmdGeom;
+  const EEmcSmdMap     *mESmdMap;
 
   /// builder for tower clusters
-  Int_t buildTowerClusters(){ return kStOK; }
+  virtual Int_t buildTowerClusters(){ return kStOK; }
   /// builder for preshower clusters (both layers)
-  Int_t buildPreshowerClusters(){ return kStOK; }
+  virtual Int_t buildPreshowerClusters(){ return kStOK; }
   /// builder for postshower clusters
-  Int_t buildPostshowerClusters(){ return kStOK; }
+  virtual Int_t buildPostshowerClusters(){ return kStOK; }
   /// builder for smd clusters
-  Int_t buildSmdClusters(){ return kStOK; }
+  virtual Int_t buildSmdClusters(){ return kStOK; }
 
   /// Default methods to determine whether clusters in different layers match.
   /// Tower clusters match pre/postshower clusters if the seed towers are
   /// adjacent.  Smd clusters match tower clusters if they fall within 
   /// +/- mSmdMatchRange strips of the center of the seed tower.
-  Bool_t match ( StEEmcCluster &c1, StEEmcCluster &c2 );
-  Bool_t match ( StEEmcCluster &c1, StEEmcSmdCluster &c2 );
-  Bool_t match ( StEEmcSmdCluster &c1, StEEmcSmdCluster &c2 );
+  Bool_t match(const StEEmcCluster &c1, const StEEmcCluster &c2 ) const;
+  Bool_t match(const StEEmcCluster &c1, const StEEmcSmdCluster &c2 ) const;
+  Bool_t match(const StEEmcSmdCluster &c1, const StEEmcSmdCluster &c2 ) const;
 
-  Bool_t match ( StEEmcCluster &c1, StMuTrack *track );
-  Bool_t match ( StEEmcSmdCluster &c1, StMuTrack *track ){ return false; } /* needs to be implemented */  
+  Bool_t match(const StEEmcCluster &c1, const StMuTrack *track ) const;
+  Bool_t match(const StEEmcSmdCluster &c1, const StMuTrack *track ) const { return false; } /* needs to be implemented */  
 
-  Bool_t matchBackgroundTrack ( StEEmcCluster &c1, StMuTrack *track );
+  Bool_t matchBackgroundTrack(const StEEmcCluster &c1, const StMuTrack *track) const;
 
   Int_t mSmdMatchRange;
 
@@ -296,40 +302,6 @@ class StEEmcGenericClusterMaker : public StMaker
   Float_t mClusterTrackSeparation[6];
 
   ClassDef(StEEmcGenericClusterMaker,1);
-  
 };
 
-// returns vector of tower (pre/postshower) clusters
-inline StEEmcClusterVec_t StEEmcGenericClusterMaker::clusters(Int_t s, Int_t l) { return mTowerClusters[s][l]; }
-
-// returns vector of smd clusters
-inline StEEmcSmdClusterVec_t StEEmcGenericClusterMaker::smdclusters(Int_t s, Int_t l) { return mSmdClusters[s][l]; }
-
-// returns an individual tower (pre/postshower) cluster
-inline StEEmcCluster StEEmcGenericClusterMaker::cluster(Int_t s, Int_t l, Int_t i) { return mTowerClusters[s][l][i]; }
-
-// returns an individual smd cluster
-inline StEEmcSmdCluster StEEmcGenericClusterMaker::smdcluster(Int_t s,Int_t p,Int_t i) 
-{ 
-  if ( p < 2 )
-    return mSmdClusters[s][p][i];
-  else
-    assert(0); /* please specify an smd plane 0=U or 1=V */
-}
-
-// adds a tower/pre/postshower cluster
-//$$$inline void StEEmcGenericClusterMaker::add( StEEmcCluster &c ) { c.key(nextClusterId()); mTowerClusters[ c.tower(0).sector() ][ c.tower(0).layer() ].push_back(c); mNumberOfClusters[c.tower(0).layer()]++; }
-
-// adds an smd cluster
-inline void StEEmcGenericClusterMaker::add( StEEmcSmdCluster &c ) { 
-  c.key(nextClusterId()); 
-  mSmdClusters[ c.sector() ][ c.plane() ].push_back( c ); 
-  mNumberOfClusters[c.strip(0).plane()+4]++; 
-}
-
-inline StMuTrack *StEEmcGenericClusterMaker::track( StEEmcCluster &cluster, Int_t index ){ return mClusterTrackMap[ cluster.key() ][index]; }
-inline StMuTrack *StEEmcGenericClusterMaker::backgroundTrack( StEEmcCluster &cluster, Int_t index ){ return mBackgroundTrackMap[ cluster.key() ][index]; }
-
-inline Int_t StEEmcGenericClusterMaker::numberOfTracks( StEEmcCluster &cluster ){ return (Int_t)mClusterTrackMap[ cluster.key() ].size(); }
-inline Int_t StEEmcGenericClusterMaker::numberOfBackgroundTracks( StEEmcCluster &cluster ) { return (Int_t)mBackgroundTrackMap[ cluster.key() ].size(); }
 #endif

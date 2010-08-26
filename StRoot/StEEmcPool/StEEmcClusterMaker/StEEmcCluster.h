@@ -41,61 +41,58 @@
 
 #include <TObject.h>
 #include <TVector3.h>
+#include <TMath.h>
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcTower.h"
 #include "StEEmcBaseCluster.h"
-#include "TMath.h"
 class StEmcCluster;
 
 class StEEmcCluster : public StEEmcBaseCluster {
-
- public:
-
+public:
   StEEmcCluster();
-  ~StEEmcCluster();
   StEEmcCluster ( const StEEmcCluster &other );
+  virtual ~StEEmcCluster();
 
   /// add a tower to this cluster.  The code assumes that
   /// the first tower added is the seed tower, and hence
   /// is the most energetic.
-  void add( StEEmcTower, Float_t weight=1.0 );
+  void add(const StEEmcTower &t, Float_t weight=1.0 );
   
   /// Get energy of this cluster
-  Float_t energy();
-  Float_t energy()const;
+  Float_t energy() const {return mEnergy;}
 
   /// Get the energy of the seed tower
-  Float_t seedEnergy();
+  Float_t seedEnergy() const {return (mTowers.size())?mTowers[0].energy():0.;}
 
   /// Get the momentum of this cluster.  The internally calculated
   /// momentum assumes z=0.
-  TVector3 momentum();
+  TVector3 momentum() const {return mMomentum;}
 
   /// Get the position of this cluster on the endcap.  But see note
   /// for StEEmcCluster::momentum( TVector3 p ).
-  TVector3 position();
+  TVector3 position() const {return mPosition;}
 
   /// Get the number of towers in cluster
-  Int_t numberOfTowers(); 
-  Int_t numberOfTowers()const;
+  Int_t numberOfTowers() const { return (Int_t)mTowers.size(); }
 
   /// Get the specified tower within the cluster
-  StEEmcTower tower(Int_t t); 
-  StEEmcTower tower(Int_t t) const; 
+  StEEmcTower &tower(Int_t t) { return mTowers[t]; }
+  const StEEmcTower &tower(Int_t t) const { return mTowers[t]; }
 
   /// Returns the std. deviation in the energy of the towers
   /// which make up the cluster.
-  Float_t sigmaE();
+  Float_t sigmaE() const;
 
   /// Get the weight associated with tower
-  Float_t weight(Int_t t); 
+  Float_t weight(Int_t t) const { return mWeights[t]; }
   /// Get the vector of towers in this cluster
-  StEEmcTowerVec_t towers();
+  StEEmcTowerVec_t &towers() { return mTowers; }
+  const StEEmcTowerVec_t &towers() const { return mTowers; }
 
   /// Set the momentum of this cluster.  This overrides the momentum
   /// computed internally as towers are added to the cluster.  If the
   /// momentum is changed before all towers are added, the position()
   /// of the cluster will become unreliable.
-  void momentum( TVector3 p);
+  void momentum(const TVector3 &p) {mMomentum=p;}
 
   /// Create and return an StEmcCluster using this cluster's
   /// hits, energy, etc...  The StEmcCluster will be deleted
@@ -105,46 +102,37 @@ class StEEmcCluster : public StEEmcBaseCluster {
   /// Pointer to StEmcCluster for embedding
   void stemc(StEmcCluster *c){ mEmcCluster = c; }
 
-
   /// Tests whether the cluster has the same seed tower as another cluster.
   /// If so, these clusters are considered equal
   Bool_t operator==( const StEEmcCluster &other ) const { return this->tower(0).index() == other.tower(0).index(); }
 
   /// Prints cluster data
-  void print();
+  void print() const;
 
-  void printLine(Bool_t Endl=false);
-
-//<<<<<<< StEEmcCluster.h
+  void printLine(Bool_t Endl=false) const;
 
   /// Returns true if tower is adjacent to any tower in the cluster
-  Bool_t isNeighbor( StEEmcTower tower );
+  Bool_t isNeighbor(const StEEmcTower &tower) const;
 
   /// Returns the fractional mean etabin
-  Float_t fracEtabin();
+  Float_t fracEtabin() const;
   /// Returns the fractional mean phibin
-  Float_t fracPhibin();
-//=======
-
-//  Bool_t isNeighbor( StEEmcTower t );
-//>>>>>>> 1.2
+  Float_t fracPhibin() const;
   
   /// Returns the sigma (sqrt variance) in units of etabins
-  Float_t sigmaEtabin(){ return TMath::Sqrt(mSumEta2W/mEnergy-mSumEtaW*mSumEtaW/mEnergy/mEnergy); }
-  Float_t sigmaPhibin(){ return TMath::Sqrt(mSumPhi2W/mEnergy-mSumPhiW*mSumPhiW/mEnergy/mEnergy); }
+  Float_t sigmaEtabin() const { return TMath::Sqrt(mSumEta2W/mEnergy-mSumEtaW*mSumEtaW/mEnergy/mEnergy); }
+  Float_t sigmaPhibin() const { return TMath::Sqrt(mSumPhi2W/mEnergy-mSumPhiW*mSumPhiW/mEnergy/mEnergy); }
 
   /// Returns true if the specified tower is in the cluster
-  Bool_t hasTower( StEEmcTower &tower );
+  Bool_t hasTower(const StEEmcTower &tower) const;
 
   Bool_t operator<( const StEEmcCluster &other ) const { return this->energy() < other.energy(); }
   Bool_t operator>( const StEEmcCluster &other ) const { return this->energy() > other.energy(); }
 
-  Int_t numberOfEtabins();
-  Int_t numberOfPhibins();
+  Int_t numberOfEtabins() const;
+  Int_t numberOfPhibins() const;
 
- private:
- protected:
-
+protected:
   /// Vector of towers
   StEEmcTowerVec_t mTowers;
   /// Vector of tower weights
@@ -165,24 +153,8 @@ class StEEmcCluster : public StEEmcBaseCluster {
   Float_t mSumPhi2W;
   Float_t mSumPhiW;
   
-  /// Makes class available to root
   ClassDef(StEEmcCluster,1);
-
 };
-
-inline Float_t StEEmcCluster::energy(){ return mEnergy; }
-inline Float_t StEEmcCluster::energy()const{ return mEnergy; }
-inline Float_t StEEmcCluster::seedEnergy(){ return (mTowers.size())?mTowers[0].energy():0.; }
-
-inline void StEEmcCluster::momentum(TVector3 p){mMomentum=p;}
-inline TVector3 StEEmcCluster::momentum(){ return mMomentum;}
-inline TVector3 StEEmcCluster::position(){ return mPosition;}
-inline StEEmcTower StEEmcCluster::tower(Int_t t){ return mTowers[t]; } 
-inline StEEmcTower StEEmcCluster::tower(Int_t t)const{ return mTowers[t]; } 
-inline Int_t StEEmcCluster::numberOfTowers(){ return (Int_t)mTowers.size(); } 
-inline Int_t StEEmcCluster::numberOfTowers()const{ return (Int_t)mTowers.size(); } 
-inline StEEmcTowerVec_t StEEmcCluster::towers(){ return mTowers; } 
-inline Float_t StEEmcCluster::weight( Int_t t ) { return mWeights[t]; } 
 
 typedef std::vector<StEEmcCluster> StEEmcClusterVec_t;
 

@@ -87,14 +87,11 @@ class StEEmc2x2ClusterParams
 
 class StEEmc2x2ClusterMaker : public StEEmcGenericClusterMaker, public StEEmc2x2ClusterParams
 {
+public:
+  StEEmc2x2ClusterMaker(const Char_t *name, const StEEmcA2EMaker *a2e, StMuDstMaker * /*mumk*/);
+  virtual ~StEEmc2x2ClusterMaker(){ /* nada */ }
 
- public:
-  StEEmc2x2ClusterMaker(const Char_t *name, StEEmcA2EMaker *a2e, StMuDstMaker *mumk);
-  ~StEEmc2x2ClusterMaker(){ /* nada */ }
-
-  Int_t Init();
-  Int_t Make();
-  void  Clear(Option_t *opts="");
+  virtual Int_t Make();
 
   /// Sets SMD seed threshold
   void setSmdSeedEnergy( Float_t e, Float_t s=0. ) { seed_threshold=e; seed_slope=s; }
@@ -130,14 +127,13 @@ class StEEmc2x2ClusterMaker : public StEEmcGenericClusterMaker, public StEEmc2x2
   void setFloor( Float_t relative_yield, Float_t width ){ mFloorParams[0]=relative_yield; mFloorParams[1]=width; }
 
     virtual const char* GetCVS() const
-	        {static const char cvs[]="Tag $Name:  $ $Id: StEEmc2x2ClusterMaker.h,v 1.2 2008/06/30 21:15:23 jwebb Exp $ built "__DATE__" "__TIME__; return cvs;}
+	        {static const char cvs[]="Tag $Name:  $ $Id: StEEmc2x2ClusterMaker.h,v 1.3 2010/08/26 22:49:25 ogrebeny Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 
- private:
- protected:
+protected:
 
-  StMuDstMaker *mMuDst;
-  TFile *mFile;
+  //StMuDstMaker *mMuDst;
+  //TFile *mFile;
 
   Float_t seed_threshold;
   Float_t seed_slope;
@@ -153,13 +149,13 @@ class StEEmc2x2ClusterMaker : public StEEmcGenericClusterMaker, public StEEmc2x2
   Int_t mPhiCut; /**< Maximum number of phi bins around seed tower */
 
   // builder for tower clusters
-  Int_t buildTowerClusters();
+  virtual Int_t buildTowerClusters();
   // builder for preshower clusters (both layers)
-  Int_t buildPreshowerClusters();
+  virtual Int_t buildPreshowerClusters();
   // builder for postshower clusters
-  Int_t buildPostshowerClusters();
+  virtual Int_t buildPostshowerClusters();
   // builder for smd clusters
-  Int_t buildSmdClusters();
+  virtual Int_t buildSmdClusters();
 
   // builder generic builder for tower, pre and post clusters
   Int_t buildLayer( Int_t layer );
@@ -174,7 +170,6 @@ class StEEmc2x2ClusterMaker : public StEEmcGenericClusterMaker, public StEEmc2x2
   Float_t mFloorParams[2];
 
   ClassDef(StEEmc2x2ClusterMaker,1);
-
 };
 
 

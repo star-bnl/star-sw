@@ -7,33 +7,30 @@ class EEmcSectorFit;
 
 class StEEmcPointFitMaker : public StEEmcPointMaker
 {
-
-    public:
-
-        /// Constructor
+public:
 	StEEmcPointFitMaker(const Char_t *n);
-	~StEEmcPointFitMaker(){ /*nada*/ }; 
+	virtual ~StEEmcPointFitMaker(){ /*nada*/ }; 
 	/// Initialize
-	Int_t Init();
+	virtual Int_t Init();
 	/// Process event
-	Int_t Make();
+	virtual Int_t Make();
 	/// Fit the specified sector
 	Int_t FitSector(Int_t s); 
 	/// Clear the maker
-	void  Clear(Option_t *opts="");
+	virtual void  Clear(Option_t *opts="");
 	/// Return the sector fit for the specified sector
 	EEmcSectorFit *fit(Int_t sec){ return mSectorFit[sec]; }
+	const EEmcSectorFit *fit(Int_t sec) const { return mSectorFit[sec]; }
 
 	/// \param p: true=try all reco positions, false=no try
 	void doPermutations(Bool_t p){ mPermutations=p; }
 
 	/// Print summary 
-	void print(); 
+	void print() const; 
 
 	void limit(Int_t lim){ mLimitFits = lim; }
 
-    private:
-    protected:
+protected:
 
 	/// Fits
 	EEmcSectorFit *mSectorFit[12]; 
@@ -45,7 +42,6 @@ class StEEmcPointFitMaker : public StEEmcPointMaker
 	/// Maximum number of points to fit per sector
 	Int_t mLimitFits;
 
-	/// Makes available to root
 	ClassDef(StEEmcPointFitMaker,1);
 }; 
 

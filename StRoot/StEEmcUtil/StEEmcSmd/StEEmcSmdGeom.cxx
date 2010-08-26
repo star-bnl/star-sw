@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.cxx,v 1.12 2007/07/12 19:30:15 fisyak Exp $
+ * $Id: StEEmcSmdGeom.cxx,v 1.13 2010/08/26 22:48:55 ogrebeny Exp $
  *
  * Author: Wei-Ming Zhang
  *
@@ -78,7 +78,7 @@ const StructEEmcStrip*
 StEEmcSmdGeom::getDcaStripPtr(const Int_t iPlane, 
 			      const Int_t iSec, 
 			      const StThreeVectorD& point, 
-			      Float_t* dca) {
+			      Float_t* dca) const {
 
   const TVector3 myPoint( point[0], point[1], point[2] );
   return EEmcSmdGeom::getDcaStripPtr( iPlane, iSec, myPoint, dca );
@@ -88,7 +88,7 @@ StEEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
 const StructEEmcStrip* 
 StEEmcSmdGeom::getDcaStripPtr(const Int_t iPlane, 
 			      StThreeVectorD& point, 
-			      Float_t* dca) {
+			      Float_t* dca) const {
 
   TVector3 myPoint( point[0], point[1], point[2] );
   return EEmcSmdGeom::getDcaStripPtr( iPlane, myPoint, dca );
@@ -106,7 +106,7 @@ StEEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
 
 StThreeVectorD StEEmcSmdGeom::getIntersection ( Int_t iSec, 
 						Int_t iUStrip, 
-						Int_t iVStrip ) {
+						Int_t iVStrip ) const {
 
   TVector3 myPoint = EEmcSmdGeom::getIntersection(iSec,iUStrip,iVStrip);
   StThreeVectorD point = StThreeVectorD( myPoint[0], myPoint[1], myPoint[2] );
@@ -114,8 +114,8 @@ StThreeVectorD StEEmcSmdGeom::getIntersection ( Int_t iSec,
 
 }
 
-StThreeVectorD StEEmcSmdGeom::getIntersection ( StructEEmcStrip *u, 
-						StructEEmcStrip *v ) {
+StThreeVectorD StEEmcSmdGeom::getIntersection ( const StructEEmcStrip *u, 
+						const StructEEmcStrip *v ) const {
 
   TVector3 myPoint = EEmcSmdGeom::getIntersection(u,v);
   StThreeVectorD point = StThreeVectorD( myPoint[0], myPoint[1], myPoint[2] );
@@ -125,8 +125,8 @@ StThreeVectorD StEEmcSmdGeom::getIntersection ( StructEEmcStrip *u,
 
 /////////////////////////////////////////////////////////////////////////////
 
-StThreeVectorD StEEmcSmdGeom::getstripEnd( const StructEEmcStrip strip, 
-					   const Int_t endId ) {
+StThreeVectorD StEEmcSmdGeom::getstripEnd( const StructEEmcStrip &strip, 
+					   const Int_t endId ) const {
 
   TVector3 myPoint = EEmcSmdGeom::getstripEnd( strip, endId );
   return StThreeVectorD( myPoint[0], myPoint[1], myPoint[2] );
@@ -138,7 +138,7 @@ StThreeVectorD StEEmcSmdGeom::getstripEnd( const StructEEmcStrip strip,
 // methods for ITTF
 
 // return phiMax and phiMax of a sector including empty sector 
-pairD StEEmcSmdGeom::getEEmcSmdPhiMinMax(const Int_t iPlane, const Int_t iSec) 
+pairD StEEmcSmdGeom::getEEmcSmdPhiMinMax(const Int_t iPlane, const Int_t iSec) const
 {
      pairD phiMinMax;
      float phiMin, phiMax;
@@ -174,7 +174,7 @@ pairD StEEmcSmdGeom::getEEmcSmdPhiMinMax(const Int_t iPlane, const Int_t iSec)
 
 // return delta_phi of a sector including empty sector 
 
-float StEEmcSmdGeom::getEEmcSmdDelPhi(const Int_t iPlane, const Int_t iSec) 
+float StEEmcSmdGeom::getEEmcSmdDelPhi(const Int_t iPlane, const Int_t iSec) const
 {
      float delPhi;
      pairD  phiMinMax = getEEmcSmdPhiMinMax(iPlane, iSec);
@@ -188,7 +188,7 @@ float StEEmcSmdGeom::getEEmcSmdDelPhi(const Int_t iPlane, const Int_t iSec)
 
 // return center phi of a sector including empty sector 
 float StEEmcSmdGeom::getEEmcSmdCenterPhi(const Int_t iPlane, 
-		                               const Int_t iSec)
+		                               const Int_t iSec) const
 {
      float centerPhi;
      pairD phiMinMax = getEEmcSmdPhiMinMax(iPlane, iSec);
@@ -204,7 +204,7 @@ float StEEmcSmdGeom::getEEmcSmdCenterPhi(const Int_t iPlane,
 /////////////////////////////////////////////////////////////////////////////
 
 void StEEmcSmdGeom::printSectorPhis(const Int_t iPlane, const Int_t iSec,
-                                                              ostream& os ) {
+                                                              ostream& os ) const {
   int iUV;
   iUV = kEEmcSmdMapUV[iPlane][iSec];
 

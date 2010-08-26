@@ -5,8 +5,8 @@
  * This class is designed to represent clusters of smd strips in the endcap.
  *
  * \author Jason C. Webb
- * $Date: 2007/05/28 14:49:51 $
- * $Revision: 1.4 $
+ * $Date: 2010/08/26 22:49:25 $
+ * $Revision: 1.5 $
  *
  * \section steemcsmdcluster_conventions
  *
@@ -33,7 +33,26 @@ StEEmcSmdCluster::StEEmcSmdCluster() : StEEmcBaseCluster()
   mRight=-999;
 }
 
-void StEEmcSmdCluster::print(Option_t *opts)
+// ----------------------------------------------------------------------------
+StEEmcSmdCluster::StEEmcSmdCluster( const StEEmcSmdCluster &c ) : StEEmcBaseCluster()
+{
+  mStrips=c.mStrips;
+  mWeights=c.mWeights;
+  mEnergy=c.mEnergy;
+  mSumXW=c.mSumXW;
+  mSumX2W=c.mSumX2W;
+  mMean=c.mMean;
+  mSigma=c.mSigma;
+  mSize=c.mSize;
+  mKey=c.mKey;
+  mMatchedTowers=c.mMatchedTowers;
+  mEmcCluster=c.mEmcCluster;
+  mPlane=c.mPlane;
+  mSector=c.mSector;
+}
+
+// ----------------------------------------------------------------------------
+void StEEmcSmdCluster::print(Option_t *opts) const
 {
   const Char_t *names[]={"u","v"};
   std::cout << "smd cluster plane=" << names[plane()] << std::endl;
@@ -49,7 +68,8 @@ void StEEmcSmdCluster::print(Option_t *opts)
   } 
 }
 
-void StEEmcSmdCluster::printLine(Bool_t endline)
+// ----------------------------------------------------------------------------
+void StEEmcSmdCluster::printLine(Bool_t endline) const
 {
   std::cout << strip(0).name() << " " 
 	    << energy() << " "
@@ -59,36 +79,21 @@ void StEEmcSmdCluster::printLine(Bool_t endline)
   if ( endline ) std::cout << std::endl;
 }
 
-void StEEmcSmdCluster::copy( TH1F *h )
+// ----------------------------------------------------------------------------
+void StEEmcSmdCluster::copy( TH1F *h ) const
 {
   for ( UInt_t ii=0;ii<mStrips.size();ii++ )
     h->AddBinContent( mStrips[ii].index()+1, mStrips[ii].energy()*1000.*mWeights[ii] );
 }
 
-StEEmcSmdCluster::StEEmcSmdCluster( const StEEmcSmdCluster &c )
-{
-
-  mStrips=c.mStrips;
-  mWeights=c.mWeights;
-  mEnergy=c.mEnergy;
-  mSumXW=c.mSumXW;
-  mSumX2W=c.mSumX2W;
-  mMean=c.mMean;
-  mSigma=c.mSigma;
-  mSize=c.mSize;
-  mKey=c.mKey;
-  mMatchedTowers=c.mMatchedTowers;
-  mEmcCluster=c.mEmcCluster;
-  mPlane=c.mPlane;
-  mSector=c.mSector;
-}
 // ----------------------------------------------------------------------------
-void StEEmcSmdCluster::add( StEEmcStripVec_t &strips )
+void StEEmcSmdCluster::add(const StEEmcStripVec_t &strips)
 {
   for ( UInt_t ii=0;ii<strips.size();ii++ ) add( strips[ii] );
 }
 
-void StEEmcSmdCluster::add( StEEmcStrip strip, Float_t weight )
+// ----------------------------------------------------------------------------
+void StEEmcSmdCluster::add(const StEEmcStrip &strip, Float_t weight)
 {
 
   if ( mStrips.size() == 0 ) 
@@ -143,8 +148,7 @@ StEmcCluster *StEEmcSmdCluster::stemc()
   
   for ( Int_t i=0; i<numberOfStrips(); i++ ) {
     StEmcRawHit *hit=mStrips[i].stemc();
-    assert(hit);
-    mEmcCluster->addHit( hit );
+    if (hit) mEmcCluster->addHit( hit );
   }
 
   return mEmcCluster;
@@ -152,7 +156,7 @@ StEmcCluster *StEEmcSmdCluster::stemc()
 }
 
 // ----------------------------------------------------------------------------
-Float_t StEEmcSmdCluster::energy(Int_t nmax, Option_t *opts)
+Float_t StEEmcSmdCluster::energy(Int_t nmax, Option_t *opts) const
 {
 
   Float_t mymean;
@@ -171,7 +175,7 @@ Float_t StEEmcSmdCluster::energy(Int_t nmax, Option_t *opts)
 
   for ( UInt_t i=0;i<mStrips.size();i++ )
     {
-      StEEmcStrip &s=mStrips[i];
+      const StEEmcStrip &s=mStrips[i];
       if ( s.index() >= min && s.index() <= max ) esum+=s.energy();
     }
 
@@ -179,7 +183,8 @@ Float_t StEEmcSmdCluster::energy(Int_t nmax, Option_t *opts)
 
 }
 
-Float_t StEEmcSmdCluster::sigma(Int_t nmax, Option_t *opts)
+// ----------------------------------------------------------------------------
+Float_t StEEmcSmdCluster::sigma(Int_t nmax, Option_t *opts) const
 {
 
   Float_t mymean;
@@ -204,7 +209,7 @@ Float_t StEEmcSmdCluster::sigma(Int_t nmax, Option_t *opts)
 
   for ( UInt_t i=0;i<mStrips.size();i++ )
     {
-      StEEmcStrip &s=mStrips[i];
+      const StEEmcStrip &s=mStrips[i];
       std::cout << i << " " << s.index() << std::endl;
       if ( s.index() >= min && s.index() <= max ) {
 	esum+=s.energy();
@@ -224,7 +229,6 @@ Float_t StEEmcSmdCluster::sigma(Int_t nmax, Option_t *opts)
 }
 
 // ----------------------------------------------------------------------------
-
 ostream& operator<<(ostream &out, const StEEmcSmdCluster &c)
 {
   out << "seed=" 

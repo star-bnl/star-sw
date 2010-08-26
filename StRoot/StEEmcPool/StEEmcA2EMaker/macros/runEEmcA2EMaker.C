@@ -8,7 +8,7 @@
 //--
 
 //-- switch should be commented out when analysing real data
-#define MONTE_CARLO
+//#define MONTE_CARLO
 
 class StChain;
 class St_db_Maker;
@@ -30,8 +30,8 @@ Int_t           stat          = 0;
 
 void runEEmcA2EMaker( Int_t nevents = 50, 
 		      Char_t *name = "mcpi0_5000_06TC05_3.MuDst.root",
-		      Char_t *ofile= "mcpi0_5000_06TC05_3.root",
-		      Char_t *path = "/star/data04/sim/jwebb/MonteCarlo/single_gamma/", 
+		      Char_t *ofile= "test.root",
+		      Char_t *path = "./test/", 
 		      Int_t nfiles = 100
 		      )
 {
@@ -197,12 +197,12 @@ void runEEmcA2EMaker( Int_t nevents = 50,
   //--
   //-- Output the QA histograms to disk
   //--
-  TFile *file=new TFile(ofile,"RECREATE");
-  file->mkdir("QA");
-  file->cd("QA");
-  eemcQA -> GetHistList() -> Write();
-  file -> Close();
-  delete file;
+  //TFile *file=new TFile(ofile,"RECREATE");
+  //file->mkdir("QA");
+  //file->cd("QA");
+  //eemcQA -> GetHistList() -> Write();
+  //file -> Close();
+  //delete file;
 
 
   return;
@@ -211,8 +211,9 @@ void runEEmcA2EMaker( Int_t nevents = 50,
 
 void LoadLibs()
 {
+  gSystem->Load("libMinuit");
   //-- Load muDst shared libraries --
-  gROOT -> LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+  gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
 
   gSystem->Load("StDbLib");

@@ -3,28 +3,24 @@
 
 #include "StEEmcElement.h"
 #include "TVector3.h"
-
 #include <vector>
 
 class StEEmcTower;
-
 typedef std::vector<StEEmcTower*> StEEmcTowerPtrVec_t;
 
 class StEEmcTower : public StEEmcElement {
-
- public:
-
+public:
   /// Constructor
   StEEmcTower();
   /// Destructor
-  ~StEEmcTower(){ /* nada */ };
+  virtual ~StEEmcTower(){ /* nada */ };
 
   /// copy constructor
   StEEmcTower( const StEEmcTower &other );
 
   /// Returns a direction vector pointing from the specified vertex
   /// to the center of the tower
-  TVector3 direction( Float_t zvertex=0.0 ); 
+  TVector3 direction( Float_t zvertex=0.0 ) const; 
 
   /// Sets the index for this tower, pre- or postshower element.
   /// See StEEmcAnalysisMaker.  This single index will define the
@@ -32,61 +28,50 @@ class StEEmcTower : public StEEmcElement {
   /// neighbors.
   void index(Int_t i);
   /// Sets the layer, [0-4]=[TPQR]
-  void layer(Int_t l);
+  void layer(Int_t l) {mLayer=l;}
   /// Sets the equivalent "E_T" response, assuming the particle
   /// originated from the nominal vertex of 0,0,0.
-  void et(Float_t e);
+  void et(Float_t e) {mET=e;}
 
   /// Returns index of this tower, pre- or postshower element
-  Int_t index();
-  Int_t index()const;
+  Int_t index()const {return mIndex;}
   /// Returns layer of this tower element, [0-4]=[TPQR]
-  Int_t layer();
-  Int_t layer()const;
+  Int_t layer()const {return mLayer;}
   /// Returns sector of this tower, pre- or postshower element
-  Int_t sector();
-  Int_t sector()const;
+  Int_t sector()const {return mSector;}
   /// Returns subsector of this tower, pre- or postshower element
-  Int_t subsector();
-  Int_t subsector()const;
+  Int_t subsector()const {return mSubsector;}
   /// Returns the etabin of this tower, pre- or postshower element
-  Int_t etabin();
-  Int_t etabin()const;
+  Int_t etabin()const {return mEtabin;}
   /// Returns the phibin of this tower
-  Int_t phibin();
-  Int_t phibin()const;
+  Int_t phibin()const {return mPhibin;}
   /// Returns the "E_T" response of the tower
-  Float_t et();
-  Float_t et()const;
+  Float_t et()const {return mET;}
 
   /// add a tower to list of neighbors
-  void neighbor(StEEmcTower *n);
+  void neighbor(StEEmcTower *n) {mNeighbors.push_back(n);}
   /// get the number of neighboring towers
-  Int_t numberOfNeighbors();
-  Int_t numberOfNeighbors()const;
+  Int_t numberOfNeighbors()const { return (Int_t)mNeighbors.size();}
   /// returns a specific neighbor [0,numberOfNeighbors)
-  StEEmcTower neighbor(Int_t i);
-  StEEmcTower neighbor(Int_t i)const;
+  StEEmcTower &neighbor(Int_t i) { return *mNeighbors[i]; }
+  const StEEmcTower &neighbor(Int_t i)const { return *mNeighbors[i]; }
 
   /// returns true if the specified tower neighbors this one
   /// or is equal to this tower.
-  Bool_t isNeighbor( StEEmcTower t );
+  Bool_t isNeighbor( const StEEmcTower &t ) const;
   
-
   /// Print a summary of this tower
-  void print();
+  void print() const;
   /// Print a one line summary of this tower
-  void printLine();
+  void printLine() const;
 
   /// A tower is "less than" another tower if its energy is less than it
   Bool_t operator<( const StEEmcTower &other ) const { return (this->energy() < other.energy()); }
 
   /// Clears the tower
-  void Clear(Option_t *opts=""){ mET=0.; StEEmcElement::Clear(opts); } 
+  virtual void Clear(Option_t *opts=""){ mET=0.; StEEmcElement::Clear(opts); } 
 
-
- private:
- protected:
+protected:
 
   Int_t mIndex;      /**<- Index of the tower [0,720) */
   Int_t mLayer;      /**<- Layer of the tower element 0=T,1=P,2=Q,3=R */
@@ -106,41 +91,6 @@ class StEEmcTower : public StEEmcElement {
   ClassDef(StEEmcTower,1);  
 
 };
-
-/* inline set methods */
-inline void StEEmcTower::layer(Int_t l){mLayer=l;}
-inline void StEEmcTower::et(Float_t e){mET=e;}
-inline void StEEmcTower::neighbor(StEEmcTower *t){mNeighbors.push_back(t);}
-
-/* inline get methods*/
-inline Int_t StEEmcTower::index(){return mIndex;}
-inline Int_t StEEmcTower::layer(){return mLayer;}
-inline Int_t StEEmcTower::sector(){return mSector;}
-inline Int_t StEEmcTower::subsector(){return mSubsector;}
-inline Int_t StEEmcTower::etabin(){return mEtabin;}
-inline Int_t StEEmcTower::phibin(){return mPhibin;}
-inline Float_t StEEmcTower::et(){return mET;}
-inline Int_t StEEmcTower::numberOfNeighbors(){ return (Int_t)mNeighbors.size();}
-inline StEEmcTower StEEmcTower::neighbor(Int_t i){ return *mNeighbors[i]; }
-
-inline Int_t StEEmcTower::index()const{return mIndex;}
-inline Int_t StEEmcTower::layer()const{return mLayer;}
-inline Int_t StEEmcTower::sector()const{return mSector;}
-inline Int_t StEEmcTower::subsector()const{return mSubsector;}
-inline Int_t StEEmcTower::etabin()const{return mEtabin;}
-inline Int_t StEEmcTower::phibin()const{return mPhibin;}
-inline Float_t StEEmcTower::et()const{return mET;}
-inline Int_t StEEmcTower::numberOfNeighbors()const{ return (Int_t)mNeighbors.size();}
-inline StEEmcTower StEEmcTower::neighbor(Int_t i)const{ return *mNeighbors[i]; }
-
-
-
-
-
-
-
-
-
 typedef std::vector<StEEmcTower>  StEEmcTowerVec_t;
 
 #endif

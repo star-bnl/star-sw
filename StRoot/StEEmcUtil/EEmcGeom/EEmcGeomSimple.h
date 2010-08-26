@@ -5,7 +5,7 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.26 2009/02/11 20:04:24 ogrebeny Exp $
+ * $Id: EEmcGeomSimple.h,v 1.27 2010/08/26 22:48:47 ogrebeny Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
@@ -67,7 +67,7 @@ public:
     return getTower(r,sec,sub,etabin,dphi,deta);
   };
 
-  const Float_t *getEtaBinRangeArray() { return mEtaBin;}
+  const Float_t *getEtaBinRangeArray() const { return mEtaBin;}
   
   /// gets lower Z edge of EEMC (preshower)
   inline Float_t getZ1()     const { return mZ1;  };
@@ -213,6 +213,9 @@ private:
 
 /*********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.27  2010/08/26 22:48:47  ogrebeny
+ * Improved constness
+ *
  * Revision 1.26  2009/02/11 20:04:24  ogrebeny
  * 1. Fix the sectors initialization.
  * 2. Remove exceptions from the geom code.

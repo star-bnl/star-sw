@@ -60,68 +60,73 @@ class TH2F;
 
 class StEEmcGenericPointMaker : public StMaker
 {
+public:
+  StEEmcGenericPointMaker(const Char_t *name="EEmcPointMaker", const StEEmcA2EMaker *a2e=NULL, const StEEmcGenericClusterMaker *cl=NULL );
+  virtual ~StEEmcGenericPointMaker(){ /* nada */ };
 
- public:
-  StEEmcGenericPointMaker(const Char_t *name="EEmcPointMaker", StEEmcA2EMaker *a2e=NULL, StEEmcGenericClusterMaker *cl=NULL );
-  ~StEEmcGenericPointMaker(){ /* nada */ };
-
-  Int_t Init();
-  Int_t Make();
-  void  Clear(Option_t *opts="");
+  virtual Int_t Init();
+  virtual Int_t Make();
+  virtual void  Clear(Option_t *opts="");
 
   /// Return vector of EEmc points
-  StEEmcPointVec_t points();
+  StEEmcPointVec_t &points() { return mPoints ; }
+  const StEEmcPointVec_t &points() const { return mPoints ; }
   /// Return vector of smd-only points
-  StEEmcPointVec_t smdPoints();
+  StEEmcPointVec_t &smdPoints() { return mSmdPoints; }
+  const StEEmcPointVec_t &smdPoints() const { return mSmdPoints; }
   /// Return vector of tower-only points
-  StEEmcPointVec_t towerPoints();
+  StEEmcPointVec_t &towerPoints() { return mTowerPoints;} 
+  const StEEmcPointVec_t &towerPoints() const { return mTowerPoints;} 
 
   /// Number of points
-  Int_t numberOfPoints();
+  Int_t numberOfPoints() const { return mPoints.size(); }
   /// Number of smd-only points
-  Int_t numberOfSmdPoints();
+  Int_t numberOfSmdPoints() const { return mSmdPoints.size(); }
   /// Number of tower-only points
-  Int_t numberOfTowerPoints();
+  Int_t numberOfTowerPoints() const { return mTowerPoints.size(); }
 
   /// Return specific EEmc point
   /// \param ipoint runs from 0 to numberOfPoints()-1
-  StEEmcPoint point( Int_t ipoint );
+  StEEmcPoint &point( Int_t ipoint ) { return mPoints[ipoint]; }
+  const StEEmcPoint &point( Int_t ipoint ) const { return mPoints[ipoint]; }
   /// Return specific smd-only point
   /// \param ipoint runs from 0 to numberOfSmdPoints()-1
-  StEEmcPoint smdPoint( Int_t ipoint );
+  StEEmcPoint &smdPoint( Int_t ipoint ) { return mSmdPoints[ipoint]; }
+  const StEEmcPoint &smdPoint( Int_t ipoint ) const { return mSmdPoints[ipoint]; }
   /// Return specific tower-only point
   /// \param ipoint runs from 0 to numberOfTowerPoints()-1
-  StEEmcPoint towerPoint( Int_t ipoint );
+  StEEmcPoint &towerPoint( Int_t ipoint ) { return mTowerPoints[ipoint]; }
+  const StEEmcPoint &towerPoint( Int_t ipoint ) const { return mTowerPoints[ipoint]; }
 
-  void addPoint( StEEmcPoint &point );
-  void addSmdPoint( StEEmcPoint &point );
-  void addTowerPoint( StEEmcPoint &point );
+  void addPoint(const StEEmcPoint &point );
+  void addSmdPoint(const StEEmcPoint &point );
+  void addTowerPoint(const StEEmcPoint &point );
 
-  StEEmcPointVec_t points( StEEmcCluster &cluster ) { return mCluster2points[ cluster.key() ]; }
-  Int_t numberOfPoints( StEEmcCluster &c ){ return (Int_t)mCluster2points[ c.key() ].size(); }
+  StEEmcPointVec_t &points(const StEEmcCluster &cluster ) { return (*(mCluster2points.find(cluster.key()))).second; }
+  const StEEmcPointVec_t &points(const StEEmcCluster &cluster ) const { return (*(mCluster2points.find(cluster.key()))).second; }
+  Int_t numberOfPoints(const StEEmcCluster &c ) const { return (Int_t)(*(mCluster2points.find(c.key()))).second.size(); }
 
-  StEEmcCluster    cluster( StEEmcPoint &point ){ return mPoint2cluster[ point.key() ]; }
+  StEEmcCluster &cluster(const StEEmcPoint &point ){ return (*(mPoint2cluster.find(point.key()))).second; }
 
- private:
- protected:
+protected:
 
   Int_t mKey;
   Int_t nextPointId(){ return mKey++; }
 
-  StEEmcA2EMaker            *mEEanalysis;                            /**< adc to energy maker */
-  StEEmcGenericClusterMaker *mEEclusters;                            /**< cluster maker       */
+  const StEEmcA2EMaker            *mEEanalysis;                            /**< adc to energy maker */
+  const StEEmcGenericClusterMaker *mEEclusters;                            /**< cluster maker       */
 
   StEEmcPointVec_t mPoints;                                          /**< vector of final points      */
   StEEmcPointVec_t mSmdPoints;                                       /**< vector of smd-only points   */
   StEEmcPointVec_t mTowerPoints;                                     /**< vector of tower-only points */
 
-  StEEmcPointVec_t buildSmdPoints(Int_t sector, StEEmcSmdClusterVec_t &u, StEEmcSmdClusterVec_t &v); /**< builder for smd points   */
-  StEEmcPointVec_t buildTowerPoints(Int_t sector, StEEmcClusterVec_t &c );                           /**< builder for tower points */
-  StEEmcPointVec_t buildPoints( StEEmcClusterVec_t &towerClusters, StEEmcSmdClusterVec_t &u, StEEmcSmdClusterVec_t &v );   /**< builder for eemc points  */
+  StEEmcPointVec_t buildSmdPoints(Int_t sector, const StEEmcSmdClusterVec_t &u, const StEEmcSmdClusterVec_t &v); /**< builder for smd points   */
+  StEEmcPointVec_t buildTowerPoints(Int_t sector, const StEEmcClusterVec_t &c );                           /**< builder for tower points */
+  StEEmcPointVec_t buildPoints( const StEEmcClusterVec_t &towerClusters, const StEEmcSmdClusterVec_t &u, const StEEmcSmdClusterVec_t &v );   /**< builder for eemc points  */
     
-  EEmcGeomSimple *mEEtow; /**< tower geometry */
-  EEmcSmdGeom    *mEEsmd; /**< smd geometry */
-  EEmcSmdMap     *mEEmap; /**< smd-to-tower map */
+  const EEmcGeomSimple *mEEtow; /**< tower geometry */
+  const EEmcSmdGeom    *mEEsmd; /**< smd geometry */
+  const EEmcSmdMap     *mEEmap; /**< smd-to-tower map */
 
   void fillStEvent();
 
@@ -135,21 +140,7 @@ class StEEmcGenericPointMaker : public StMaker
   std::map< Int_t, StEEmcPointVec_t > mCluster2points;
   std::map< Int_t, StEEmcCluster    > mPoint2cluster;
 
-
   ClassDef(StEEmcGenericPointMaker,1);
-
 };
-
-inline StEEmcPointVec_t StEEmcGenericPointMaker::points(){ return mPoints ; }
-inline Int_t StEEmcGenericPointMaker::numberOfPoints(){ return mPoints.size(); }
-inline StEEmcPoint StEEmcGenericPointMaker::point(Int_t ip){ return mPoints[ip]; }
-
-inline StEEmcPointVec_t StEEmcGenericPointMaker::smdPoints(){ return mSmdPoints; }
-inline Int_t StEEmcGenericPointMaker::numberOfSmdPoints(){ return mSmdPoints.size(); }
-inline StEEmcPoint StEEmcGenericPointMaker::smdPoint(Int_t ip){ return mSmdPoints[ip]; }
-
-inline StEEmcPointVec_t StEEmcGenericPointMaker::towerPoints(){ return mTowerPoints; }
-inline Int_t StEEmcGenericPointMaker::numberOfTowerPoints(){ return mTowerPoints.size(); }
-inline StEEmcPoint StEEmcGenericPointMaker::towerPoint(Int_t ip){ return mTowerPoints[ip]; }
 
 #endif

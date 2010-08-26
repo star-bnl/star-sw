@@ -320,7 +320,7 @@ void StEEmcPointFitMaker::Clear(Option_t *opts)
 }
 
 // ----------------------------------------------------------------------------
-void StEEmcPointFitMaker::print()
+void StEEmcPointFitMaker::print() const
 {
     for ( Int_t i=0;i<12;i++ )
     {

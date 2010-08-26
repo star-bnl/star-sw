@@ -3,6 +3,7 @@
 ClassImp(StEEmcBaseCluster);
 
 StEEmcBaseCluster::StEEmcBaseCluster()
+    : TObject()
 {
   // initialize storage for associated cluster keys
   std::vector<Int_t> temp;

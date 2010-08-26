@@ -6,7 +6,8 @@
 ClassImp(StEEmcGenericPointMaker);
 
 // ----------------------------------------------------------------------------
-StEEmcGenericPointMaker::StEEmcGenericPointMaker( const Char_t *name, StEEmcA2EMaker *a2e, StEEmcGenericClusterMaker *cl ):StMaker(name)
+StEEmcGenericPointMaker::StEEmcGenericPointMaker( const Char_t *name, const StEEmcA2EMaker *a2e, const StEEmcGenericClusterMaker *cl )
+    : StMaker(name)
 {
 
   mEEanalysis=a2e;
@@ -34,13 +35,25 @@ Int_t StEEmcGenericPointMaker::Init()
 Int_t StEEmcGenericPointMaker::Make()
 {
 
-  return kStOK;
+  return StMaker::Make();
 }
 
 // ----------------------------------------------------------------------------
-void StEEmcGenericPointMaker::addPoint( StEEmcPoint &p )
+void StEEmcGenericPointMaker::Clear(Option_t *opts)
 {
+  StMaker::Clear();
+  mKey=0;
+  mPoints.clear();
+  mSmdPoints.clear();
+  mTowerPoints.clear();
+  mPoint2cluster.clear();
+  mCluster2points.clear();
+}
 
+// ----------------------------------------------------------------------------
+void StEEmcGenericPointMaker::addPoint( const StEEmcPoint &point )
+{
+  StEEmcPoint p = point;
   p.key(nextPointId());
   mPoints.push_back(p);
 
@@ -63,8 +76,9 @@ void StEEmcGenericPointMaker::addPoint( StEEmcPoint &p )
 
 }
 
-void StEEmcGenericPointMaker::addSmdPoint( StEEmcPoint &p )
+void StEEmcGenericPointMaker::addSmdPoint( const StEEmcPoint &point )
 {
+  StEEmcPoint p = point;
   p.key(nextPointId());
   mSmdPoints.push_back(p);
 
@@ -89,8 +103,9 @@ void StEEmcGenericPointMaker::addSmdPoint( StEEmcPoint &p )
   
 }
 
-void StEEmcGenericPointMaker::addTowerPoint( StEEmcPoint &p )
+void StEEmcGenericPointMaker::addTowerPoint( const StEEmcPoint &point )
 {
+  StEEmcPoint p = point;
   p.key(nextPointId());
   mTowerPoints.push_back(p);
   mPoint2cluster[ p.key() ] = p.clusters(0)[0];
@@ -110,32 +125,21 @@ void StEEmcGenericPointMaker::addTowerPoint( StEEmcPoint &p )
 }
 
 // ----------------------------------------------------------------------------
-void StEEmcGenericPointMaker::Clear(Option_t *opts)
-{
-  mKey=0;
-  mPoints.clear();
-  mSmdPoints.clear();
-  mTowerPoints.clear();
-  mPoint2cluster.clear();
-  mCluster2points.clear();
-}
-
-// ----------------------------------------------------------------------------
-StEEmcPointVec_t StEEmcGenericPointMaker::buildPoints( StEEmcClusterVec_t &tower, StEEmcSmdClusterVec_t &smdu, StEEmcSmdClusterVec_t &smdv )
+StEEmcPointVec_t StEEmcGenericPointMaker::buildPoints( const StEEmcClusterVec_t &tower, const StEEmcSmdClusterVec_t &smdu, const StEEmcSmdClusterVec_t &smdv )
 {
   StEEmcPointVec_t points;
   return points;
 }
 
 // ----------------------------------------------------------------------------
-StEEmcPointVec_t StEEmcGenericPointMaker::buildSmdPoints( Int_t sector, StEEmcSmdClusterVec_t &u, StEEmcSmdClusterVec_t &v)
+StEEmcPointVec_t StEEmcGenericPointMaker::buildSmdPoints( Int_t sector, const StEEmcSmdClusterVec_t &u, const StEEmcSmdClusterVec_t &v)
 {
   StEEmcPointVec_t points;
   return points;
 }
 
 // ----------------------------------------------------------------------------
-StEEmcPointVec_t StEEmcGenericPointMaker::buildTowerPoints(Int_t sector, StEEmcClusterVec_t &c )
+StEEmcPointVec_t StEEmcGenericPointMaker::buildTowerPoints(Int_t sector, const StEEmcClusterVec_t &c )
 {
   StEEmcPointVec_t points;
   return points;

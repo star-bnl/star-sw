@@ -1,4 +1,4 @@
-// $Id: EEmcMCData.cxx,v 1.17 2009/04/29 22:22:51 ogrebeny Exp $
+// $Id: EEmcMCData.cxx,v 1.18 2010/08/26 22:48:54 ogrebeny Exp $
 
 #include "StEventTypes.h"
 
@@ -26,6 +26,7 @@ ClassImp(EEmcMCData)
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
 EEmcMCData::EEmcMCData()
+    : TObject()
 { 
   mEventID   = -1;  
   mLastHit   = 0;
@@ -36,7 +37,8 @@ EEmcMCData::EEmcMCData()
 
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
-EEmcMCData::EEmcMCData( EEmcMCData &e )
+EEmcMCData::EEmcMCData(const EEmcMCData &e )
+    : TObject(e)
 { 
   mEventID   = e.getEventID();
   mLastHit   = e.getLastHit();
@@ -59,7 +61,7 @@ EEmcMCData::~EEmcMCData() {
 // decode Endcap Emc data
 //-------------------------------------------------------------------------
 Int_t             
-EEmcMCData::readEventFromChain(StMaker *myMk)
+EEmcMCData::readEventFromChain(const StMaker *myMk)
 {
   St_g2t_event   *g2t_event  = NULL; // g2t event
   St_g2t_emc_hit *emc_hit    = NULL; // tower hits
@@ -261,7 +263,7 @@ EEmcMCData::unpackGeantHits(St_g2t_emc_hit* emc_hit, St_g2t_emc_hit* smd_hit ){
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
 Int_t      
-EEmcMCData::getHitArray(EEmcMCHit *h, Int_t size)
+EEmcMCData::getHitArray(EEmcMCHit *h, Int_t size) const
 {
   if(size<=0) {
     LOG_ERROR << "invalid size: " << size << endm;
@@ -289,7 +291,7 @@ EEmcMCData::setHitArray(EEmcMCHit *h, Int_t size)
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
 void
-EEmcMCData::print() 
+EEmcMCData::print() const
 {
   TString detName;
   Int_t   detId;
@@ -419,6 +421,9 @@ Int_t EEmcMCData::write(EEeventDst *EEeve) {
 }
 
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.18  2010/08/26 22:48:54  ogrebeny
+// Improved constness
+//
 // Revision 1.17  2009/04/29 22:22:51  ogrebeny
 // Bug fixed - missing {}, thanks to Pibero.
 //

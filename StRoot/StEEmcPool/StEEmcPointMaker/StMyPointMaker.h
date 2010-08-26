@@ -45,46 +45,45 @@
 
 class StMyPointMaker : public StEEmcGenericPointMaker
 {
-
- public:
+public:
   
-  StMyPointMaker(const Char_t *name="EEmcPointMaker", StEEmcA2EMaker *a2e=NULL, StEEmcGenericClusterMaker *cl=NULL );
-  ~StMyPointMaker(){ /* nada */ };
+  StMyPointMaker(const Char_t *name="EEmcPointMaker", const StEEmcA2EMaker *a2e=NULL, const StEEmcGenericClusterMaker *cl=NULL );
+  virtual ~StMyPointMaker(){ /* nada */ };
 
-  Int_t Init();
-  Int_t Make();
-  void  Clear(Option_t *opts="");
+  virtual Int_t Init();
+  virtual Int_t Make();
+  virtual void  Clear(Option_t *opts="");
 
-  void setSplit(){ mAllowSplitting=true; }
+  void setSplit(Bool_t s = true){ mAllowSplitting=s; }
   void setSplitMinimumET( Float_t et ){ mSplitMinimumET=et; }
   
   void setSmdMinFraction( Float_t f ){ mSmdMinFrac=f; }
 
- private:
- protected:
+protected:
 
   Bool_t mAllowSplitting;
   Float_t mSplitMinimumET;
 
   Float_t mSmdMinFrac; /**< minumum fractional energy for SMD clusters to form points w/in tower clusters (e.g. cut points if (E_u+E_v)/E_towers ) < mSmdMinFrac */
 
+  Int_t mMaxClusterId; // maximal cluster ID assigned by a cluster maker. our new clusters will begin from this.
+
   /// Given three clusters in1, in2 and out1, the code will determine the best possible 
   /// division for out1 and return the split in out1 + out2.
-  Bool_t split( StEEmcSmdCluster &in1, StEEmcSmdCluster &in2, StEEmcSmdCluster &out1, StEEmcSmdCluster &out2, Float_t &chi2 );
+  Bool_t split( const StEEmcSmdCluster &in1, const StEEmcSmdCluster &in2, StEEmcSmdCluster &out1, StEEmcSmdCluster &out2, Float_t &chi2 );
 
   /// Given a vector of clusters in each SMD plane, find the permutation of
   /// c2 such that c1[i], c2[i] forms the best set of candidate points.
   /// @param c1 a list of clusters in the u or v plane, whichever is smaller
   /// @param c2 a list of clusters in the u or v plane, whichever is larger
-  Bool_t AssociateClusters( StEEmcSmdClusterVec_t &c1, StEEmcSmdClusterVec_t &c2 );
+  Bool_t AssociateClusters( const StEEmcSmdClusterVec_t &c1, StEEmcSmdClusterVec_t &c2 );
 
-
-  Bool_t SplitClusters( StEEmcSmdClusterVec_t &c1, StEEmcSmdClusterVec_t &c2 );
+  Bool_t SplitClusters( StEEmcSmdClusterVec_t &c1, const StEEmcSmdClusterVec_t &c2 );
 
   /// Given two clusters, return (e1-e2)^2/nmips
-  Float_t energyChi2( StEEmcSmdCluster &c1, StEEmcSmdCluster &c2 );
+  Float_t energyChi2( const StEEmcSmdCluster &c1, const StEEmcSmdCluster &c2 ) const;
   /// Given three clusters, return (e1-e2-e3)^2/nmips
-  Float_t energyChi2( StEEmcSmdCluster &c1, StEEmcSmdCluster &c2, StEEmcSmdCluster &c3 );
+  Float_t energyChi2( const StEEmcSmdCluster &c1, const StEEmcSmdCluster &c2, const StEEmcSmdCluster &c3 ) const;
 
   ClassDef(StMyPointMaker,1);
 

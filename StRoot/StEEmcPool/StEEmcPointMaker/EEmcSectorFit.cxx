@@ -7,8 +7,8 @@
  * planes.
  *
  * \author Jason C. Webb
- * $Date: 2009/09/08 20:39:11 $
- * $Revision: 1.4 $
+ * $Date: 2010/08/26 22:49:26 $
+ * $Revision: 1.5 $
  *
  */
 
@@ -46,7 +46,7 @@ EEmcSectorFit::~EEmcSectorFit()
 }
 
 // ----------------------------------------------------------------------------
-Double_t EEmcSectorFit::FitFunc( Double_t x, Int_t plane )
+Double_t EEmcSectorFit::FitFunc( Double_t x, Int_t plane ) const
 {
   // loop over all gammas
   Double_t sum = 0.;
@@ -115,7 +115,7 @@ Int_t EEmcSectorFit::Eval(Int_t np,Double_t* gr,Double_t& chi2,Double_t* par,Int
 
 }
 // ----------------------------------------------------------------------------
-Double_t EEmcSectorFit::Residual( Int_t x, Int_t plane )
+Double_t EEmcSectorFit::Residual( Int_t x, Int_t plane ) const
 {
   // zero residual if x is w/in +/- 2 strips of another gamma
   for ( UInt_t i=0;i<yield.size();i++ )
@@ -129,7 +129,7 @@ Double_t EEmcSectorFit::Residual( Int_t x, Int_t plane )
   return r;
 }
 // ----------------------------------------------------------------------------
-Double_t EEmcSectorFit::Residual( Int_t x, Int_t plane, Int_t dx, Int_t side )
+Double_t EEmcSectorFit::Residual( Int_t x, Int_t plane, Int_t dx, Int_t side ) const
 {
 
 
@@ -158,7 +158,7 @@ Double_t EEmcSectorFit::Residual( Int_t x, Int_t plane, Int_t dx, Int_t side )
   return r;
 } 
 // ----------------------------------------------------------------------------
-Int_t EEmcSectorFit::MaxStrip(Int_t plane)
+Int_t EEmcSectorFit::MaxStrip(Int_t plane) const
 {
   Double_t max=0.;
   Int_t imax=-1;
@@ -351,7 +351,7 @@ void EEmcSectorFit::TryPermutations()
     
 }
 // ----------------------------------------------------------------------------
-void EEmcSectorFit::print()
+void EEmcSectorFit::print() const
 {
     std::cout << "doPermutations=" << doPermutations << std::endl;
     std::cout << "chi^2         =" << mChi2 << std::endl; 

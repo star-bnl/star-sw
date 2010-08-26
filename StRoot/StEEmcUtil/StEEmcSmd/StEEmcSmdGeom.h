@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.h,v 1.9 2007/01/25 22:33:22 balewski Exp $
+ * $Id: StEEmcSmdGeom.h,v 1.10 2010/08/26 22:48:55 ogrebeny Exp $
  *
  * Author: Wei-Ming Zhang
  *
@@ -35,20 +35,15 @@
 #include "StPhysicalHelixD.hh"
 
 class StEEmcSmdGeom : public EEmcSmdGeom {
-
- public:
-
-  // Constructor and destructor
+public:
   StEEmcSmdGeom();
   virtual ~StEEmcSmdGeom();
 
- protected:
-
+protected:
   // The single allowed instance of the class
   static StEEmcSmdGeom *sInstance;
 
- public:
-
+public:
   // Method(s) to return the single allowed instance of this class
   static StEEmcSmdGeom *instance();
   static StEEmcSmdGeom *instance(intVec sectorIdVec);
@@ -56,44 +51,42 @@ class StEEmcSmdGeom : public EEmcSmdGeom {
 
   Int_t getEEmcISec(const Int_t iPlane, const StThreeVectorD& point) const;
 
-  const StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, StThreeVectorD& point, Float_t* dca);
-  const StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, const Int_t iSec, const StThreeVectorD& point, Float_t* dca);
+  const StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, StThreeVectorD& point, Float_t* dca) const;
+  const StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, const Int_t iSec, const StThreeVectorD& point, Float_t* dca) const;
 
-  StThreeVectorD getIntersection ( Int_t iSec, Int_t iUStrip, Int_t iVStrip );
-  StThreeVectorD getIntersection ( StructEEmcStrip *u, StructEEmcStrip *v ); 
+  StThreeVectorD getIntersection ( Int_t iSec, Int_t iUStrip, Int_t iVStrip ) const;
+  StThreeVectorD getIntersection ( const StructEEmcStrip *u, const StructEEmcStrip *v ) const; 
 
-  StThreeVectorD getstripEnd(const StructEEmcStrip strip, const Int_t endId);
+  StThreeVectorD getstripEnd(const StructEEmcStrip &strip, const Int_t endId) const;
 
   //
   // three methods for ITTF
   //
 
   // return phiMin and phiMax of a sector including empty sector 
-  pairD getEEmcSmdPhiMinMax(const Int_t iPlane, const Int_t iSec);
+  pairD getEEmcSmdPhiMinMax(const Int_t iPlane, const Int_t iSec) const;
 
   // return delta_phi of a sector including empty sector 
-  float getEEmcSmdDelPhi(const Int_t iPlane, const Int_t iSec);
+  float getEEmcSmdDelPhi(const Int_t iPlane, const Int_t iSec) const;
 
   // return center phi of a sector including empty sector 
-  float getEEmcSmdCenterPhi(const Int_t iPlane, const Int_t iSec);  
+  float getEEmcSmdCenterPhi(const Int_t iPlane, const Int_t iSec) const;  
 
   //
   // Additional ITTF print function
   //
-  void printSectorPhis(const Int_t iPlane, const Int_t iSec,ostream& os = cout);  
-
- private:
-
-
+  void printSectorPhis(const Int_t iPlane, const Int_t iSec,ostream& os = cout) const;  
 
   ClassDef(StEEmcSmdGeom,1);
-
 };
 
 #endif
 
 /********************************************************************
  * $Log: StEEmcSmdGeom.h,v $
+ * Revision 1.10  2010/08/26 22:48:55  ogrebeny
+ * Improved constness
+ *
  * Revision 1.9  2007/01/25 22:33:22  balewski
  * add:
  * - better writeup

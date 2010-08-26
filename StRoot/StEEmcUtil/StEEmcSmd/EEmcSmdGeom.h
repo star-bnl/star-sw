@@ -4,7 +4,7 @@
  * 
  *****************************************************************************
  *
- * $Id: EEmcSmdGeom.h,v 1.9 2007/07/12 19:30:15 fisyak Exp $
+ * $Id: EEmcSmdGeom.h,v 1.10 2010/08/26 22:48:55 ogrebeny Exp $
  *
  * 
  *
@@ -66,7 +66,7 @@ struct StructEEmcStrip{
   float length;                    // length of strip 
 };
 
-ostream& operator<<(ostream &os, const StructEEmcStrip strip);
+ostream& operator<<(ostream &os, const StructEEmcStrip &strip);
 
 // Define vector of strip pointers and its Iterator
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
@@ -90,14 +90,12 @@ struct StructEEmcSmdSector {
 };
 
 class EEmcSmdGeom : public TObject {
-
- public:  
+public:  
 
   EEmcSmdGeom();
   virtual ~EEmcSmdGeom(); 
 
-
- protected:
+protected:
 
   StructEEmcSmdParam     mEEmcSmdParam;  //! general geometry variables
   StructEEmcSmdSector    mEEmcSector[kEEmcNumSmdUVs][kEEmcNumSectors]; //! storage for 2*12 sectors    
@@ -110,11 +108,11 @@ class EEmcSmdGeom : public TObject {
 
   static EEmcSmdGeom* sInstance;
 
- public:
+public:
   /// iPlane=[0,1,2] - experts only, changes meaning form sector to sector
   /// return a DCA strip pointer from a point (float *dca carries sign)  
-  const StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, const TVector3& point, Float_t* dca);
-  const StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, const Int_t iSec, const TVector3& point, Float_t* dca);
+  const StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, const TVector3& point, Float_t* dca) const;
+  const StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, const Int_t iSec, const TVector3& point, Float_t* dca) const;
   
   
   static EEmcSmdGeom* instance();   // handle the only instance
@@ -129,22 +127,25 @@ class EEmcSmdGeom : public TObject {
   void setSectors(const intVec sectorIdVec); 
   
   /// return sector status   
-  bool IsSectorIn(const Int_t iSec) const; 
+  bool IsSectorIn(const Int_t iSec) const {return mIsSectorIn[iSec];}
   
   /// instance and initialize a strip 
-  StructEEmcStrip initStrip();
+  StructEEmcStrip initStrip() const;
 
   /// return SMD geometry parameters  
-  StructEEmcSmdParam getEEmcSmdParam() const; 
+  StructEEmcSmdParam &getEEmcSmdParam() {return mEEmcSmdParam;}
+  const StructEEmcSmdParam &getEEmcSmdParam() const {return mEEmcSmdParam;}
 
   /// return structure-sector from iUV and iSec 
-  StructEEmcSmdSector getEEmcSector(const Int_t iUV, const Int_t iSec) const;
+  StructEEmcSmdSector &getEEmcSector(const Int_t iUV, const Int_t iSec) {return mEEmcSector[iUV][iSec];}
+  const StructEEmcSmdSector &getEEmcSector(const Int_t iUV, const Int_t iSec) const {return mEEmcSector[iUV][iSec];}
 
   /// return index of a sector from a point in a plane 
   Int_t getEEmcISec(const Int_t iPlane, const TVector3& point) const;
   
   /// return a strip pointer from indices   
   StructEEmcStrip* getStripPtr(const Int_t iStrip, const Int_t iUV, const Int_t iSec);
+  const StructEEmcStrip* getStripPtr(const Int_t iStrip, const Int_t iUV, const Int_t iSec) const;
   
   /// Returns a pointer to the eemc smd strip which is closest to the
   /// given point in the specified SMD plane.
@@ -154,7 +155,7 @@ class EEmcSmdGeom : public TObject {
   /// @And priori we do not know if the track is charged or not and how to extrapolate it.
   /// @User must takes care to provide 'point' at the z-location he/she needs the cross point.
   /// @Now I realize it is the chicken and egg problem if we want sub-mm accuracy. May be solved by iterations.
-  const  StructEEmcStrip* getDca2Strip(const Int_t iUV, const TVector3& point, Float_t* dca);
+  const  StructEEmcStrip* getDca2Strip(const Int_t iUV, const TVector3& point, Float_t* dca) const;
 
   
   /// In a given sector, return the vector from the specified vertex
@@ -165,7 +166,7 @@ class EEmcSmdGeom : public TObject {
   /// @param iUStrip index of the U strip [0,nstrips)
   /// @param iVStrip index of the V strip [0,nstrips)
   /// @param vertex the event vertex
-  TVector3 getIntersection ( Int_t iSec, Int_t iUStrip, Int_t iVStrip, TVector3 vertex );
+  TVector3 getIntersection ( Int_t iSec, Int_t iUStrip, Int_t iVStrip, const TVector3 &vertex ) const;
 
   /// Return the vector from the specified vertex
   /// along the line defined by the intersection of the two planes
@@ -174,29 +175,29 @@ class EEmcSmdGeom : public TObject {
   /// @param u a pointer to the structure which defines the smd-u strip
   /// @param v a pointer to the structure which defines the smd-v strip
   /// @param vertex the event vertex
-  TVector3 getIntersection ( StructEEmcStrip *u, StructEEmcStrip *v, TVector3 vertex );
+  TVector3 getIntersection ( const StructEEmcStrip *u, const StructEEmcStrip *v, const TVector3 &vertex ) const;
 
   /// Assumes nominal vertex (0,0,0)
-  TVector3 getIntersection ( Int_t iSec, Int_t iUStrip, Int_t iVStrip );
+  TVector3 getIntersection ( Int_t iSec, Int_t iUStrip, Int_t iVStrip ) const;
   /// Assumes nominal vertex (0,0,0)
-  TVector3 getIntersection ( Int_t iSec, Float_t iUStrip, Float_t iVStrip )
+  TVector3 getIntersection ( Int_t iSec, Float_t iUStrip, Float_t iVStrip ) const
     { return getIntersection( iSec, (Int_t)iUStrip, (Int_t)iVStrip ); }
   /// Assumes nominal vertex (0,0,0)
-  TVector3 getIntersection ( StructEEmcStrip *u, StructEEmcStrip *v );
+  TVector3 getIntersection ( const StructEEmcStrip *u, const StructEEmcStrip *v ) const;
 
 
   /// Returns the number of SMD strips in the specified sector and plane
   /// @param iSec eemc sector number [0,12)
   /// @param iUV eemc smd plane number 0=U 1=V
-  Int_t getNStrips ( Int_t iSec, Int_t iUV ) { return getEEmcSector(iUV,iSec).stripPtrVec.size();  }
+  Int_t getNStrips ( Int_t iSec, Int_t iUV ) const { return getEEmcSector(iUV,iSec).stripPtrVec.size();  }
 
   /// match two strips 
-  bool matchStrips(const StructEEmcStripId stripStructId1, const StructEEmcStripId stripStructId2, Int_t nTolerance);
+  bool matchStrips(const StructEEmcStripId &stripStructId1, const StructEEmcStripId &stripStructId2, Int_t nTolerance) const;
 
   // mehtod for C-scripts
 
   /// return strip-end of 3D-vector   
-  TVector3  getstripEnd(const StructEEmcStrip strip, const Int_t endId);
+  TVector3  getstripEnd(const StructEEmcStrip &strip, const Int_t endId) const;
 
   //
   // methods of printout 
@@ -208,23 +209,8 @@ class EEmcSmdGeom : public TObject {
   void printStripId(const StructEEmcStripId StripId, ostream& os = cout) const;
   //void printSectorPhis(const Int_t iPlane, const Int_t iSec,ostream& os = cout);
 
-  
- protected:  
-
   ClassDef(EEmcSmdGeom,1)  // STAR Endcap Electromagnetic Calorimeter SMD Geometry Class
-
 };
-
-inline bool EEmcSmdGeom::IsSectorIn(const Int_t iSec)
-       const {return mIsSectorIn[iSec];}
-inline StructEEmcSmdParam EEmcSmdGeom::getEEmcSmdParam()
-       const {return mEEmcSmdParam;}
-inline StructEEmcSmdSector EEmcSmdGeom::getEEmcSector(const Int_t iUV, 
-	   	                                        const Int_t iSec) 
-       const {return mEEmcSector[iUV][iSec];}
-
-
-
 
 #endif
  
@@ -232,6 +218,9 @@ inline StructEEmcSmdSector EEmcSmdGeom::getEEmcSector(const Int_t iUV,
  *
  *
  * $Log: EEmcSmdGeom.h,v $
+ * Revision 1.10  2010/08/26 22:48:55  ogrebeny
+ * Improved constness
+ *
  * Revision 1.9  2007/07/12 19:30:15  fisyak
  * Add includes for ROOT 5.16
  *

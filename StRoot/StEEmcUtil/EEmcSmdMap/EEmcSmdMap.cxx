@@ -14,7 +14,9 @@ EEmcSmdMap *EEmcSmdMap::instance() {
 }
 
 // Constructor
-EEmcSmdMap::EEmcSmdMap() {
+EEmcSmdMap::EEmcSmdMap()
+    : TObject()
+{
 
   Init();
 
@@ -23,7 +25,7 @@ EEmcSmdMap::EEmcSmdMap() {
 /////////////////////////////////////////////////////////////////////////////
 
 void EEmcSmdMap::getRangeSmd2Smd( Int_t isector, Int_t iuv, Int_t istrip,
-			Int_t &juv, Int_t &jMin, Int_t &jMax ) {
+			Int_t &juv, Int_t &jMin, Int_t &jMax ) const {
   
   // printf(" asking for isec=%d , plane=%c, istrip=%d\n",isector, 'U'+iuv,istrip);
   //printf("p=%p\n",eemcStrip2StripMapItem[iuv]);

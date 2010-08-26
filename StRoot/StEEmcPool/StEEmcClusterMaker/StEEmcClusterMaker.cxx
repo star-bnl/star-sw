@@ -6,8 +6,8 @@
  * and smd strips.
  *
  * \author Jason C. Webb
- * $Date: 2009/12/03 22:35:00 $
- * $Revision: 1.7 $
+ * $Date: 2010/08/26 22:49:25 $
+ * $Revision: 1.8 $
  *
  * \section steemcclustermaker_towers Tower, pre- and postshower algorithm
  *
@@ -128,7 +128,7 @@ StEEmcClusterMaker::StEEmcClusterMaker(const Char_t *name):StMaker(name)
 // ----------------------------------------------------------------------------
 Int_t StEEmcClusterMaker::Init()
 {
-  mEEanalysis=(StEEmcA2EMaker*)GetMaker(mAnalysisName);
+  mEEanalysis=(const StEEmcA2EMaker*)GetMaker(mAnalysisName);
   assert(mEEanalysis);
 
   return StMaker::Init();
@@ -137,7 +137,7 @@ Int_t StEEmcClusterMaker::Init()
 // ----------------------------------------------------------------------------
 Int_t StEEmcClusterMaker::Make()
 {
-
+  StMaker::Make();
   /// Warn if we couldn't build tower clusters
   if ( !buildTowerClusters() ) return kStWarn;
 
@@ -157,7 +157,7 @@ Int_t StEEmcClusterMaker::Make()
 // ----------------------------------------------------------------------------
 void StEEmcClusterMaker::Clear( Option_t *opts )
 {
-
+  StMaker::Clear();
   /// Clear cluster storage
   for ( Int_t sector=0; sector<12; sector++ ) {
     for ( Int_t layer=0; layer<4; layer++ )
@@ -807,11 +807,11 @@ void StEEmcClusterMaker::fillStEvent()
 
 
 // ----------------------------------------------------------------------------
-Bool_t StEEmcClusterMaker::verifyStEvent()
+Bool_t StEEmcClusterMaker::verifyStEvent() const
   {
 
   /// verify tower clusters
-  StEvent *stevent=(StEvent*)GetInputDS("StEvent");
+  const StEvent *stevent=(const StEvent*)GetInputDS("StEvent");
   if ( !stevent ) {
     Warning("verifyStEvent","No StEvent found.");
     return true;
@@ -820,7 +820,7 @@ Bool_t StEEmcClusterMaker::verifyStEvent()
 
   Bool_t go = true;
  
-  StEmcDetector *detector=stevent->emcCollection()->detector(kEndcapEmcTowerId);
+  const StEmcDetector *detector=stevent->emcCollection()->detector(kEndcapEmcTowerId);
   if ( !detector )
     {
       Warning("verifyStEvent","detector == NULL for towers");
@@ -828,7 +828,7 @@ Bool_t StEEmcClusterMaker::verifyStEvent()
     }
 
   
-  StEmcClusterCollection *cc=detector->cluster();
+  const StEmcClusterCollection *cc=detector->cluster();
   if ( cc )
     {
 
@@ -841,10 +841,10 @@ Bool_t StEEmcClusterMaker::verifyStEvent()
       Float_t emc_sum_towers = 0.;
       Float_t eemc_sum_towers = 0.;
   
-      StSPtrVecEmcCluster &emcClusters=cc->clusters();
+      const StSPtrVecEmcCluster &emcClusters=cc->clusters();
       for ( UInt_t i=0; i<emcClusters.size(); i++ ) 
 	{
-	  StEmcCluster *cl=emcClusters[i];
+	  const StEmcCluster *cl=emcClusters[i];
 	  assert(cl);
 	  emc_sum_towers += cl->energy();
 	}
@@ -891,11 +891,11 @@ Bool_t StEEmcClusterMaker::verifyStEvent()
   if ( cc ) 
     {
 
-      StSPtrVecEmcCluster &smduClusters=cc->clusters();
+      const StSPtrVecEmcCluster &smduClusters=cc->clusters();
 
       for ( UInt_t i=0; i<smduClusters.size(); i++ ) 
 	{
-	  StEmcCluster *cl=smduClusters[i];
+	  const StEmcCluster *cl=smduClusters[i];
 	  assert(cl);
 	  emc_sum_smdu += cl->energy();
 	}
@@ -947,11 +947,11 @@ Bool_t StEEmcClusterMaker::verifyStEvent()
   if ( cc )
     {
 
-      StSPtrVecEmcCluster &smdvClusters=cc->clusters();
+      const StSPtrVecEmcCluster &smdvClusters=cc->clusters();
       
       for ( UInt_t i=0; i<smdvClusters.size(); i++ ) 
 	{
-	  StEmcCluster *cl=smdvClusters[i];
+	  const StEmcCluster *cl=smdvClusters[i];
 	  assert(cl);
 	  emc_sum_smdv += cl->energy();
 	}
@@ -993,7 +993,7 @@ Bool_t StEEmcClusterMaker::verifyStEvent()
 
 
 // ----------------------------------------------------------------------------
-void StEEmcClusterMaker::print()
+void StEEmcClusterMaker::print() const
 {
 
   std::cout << "StEEmcClusterMaker::print()" << std::endl;
@@ -1011,7 +1011,7 @@ void StEEmcClusterMaker::print()
   for ( Int_t sec=0;sec<12;sec++)
   for ( Int_t i=0;i<numberOfClusters(sec,0);i++ )
     {
-      StEEmcCluster clust=cluster(sec,0,i);
+      const StEEmcCluster &clust=cluster(sec,0,i);
       clust.print();
       //      std::cout << "cluster.key()=" << clust.key() << std::endl;
       //      std::cout << "cluster.eta()=" << clust.momentum().Eta() << std::endl;
