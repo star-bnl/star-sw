@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.5 2010/08/23 19:37:02 mzyzak Exp $
+// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.6 2010/08/26 17:58:38 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -57,13 +57,14 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
       VALGRIND_CHECK_VALUE_IS_DEFINED( up );
       ushort_v upIndexes = CAMath::Max( up, short_v( Vc::Zero ) ).staticCast<ushort_v>();
       short_m upMask = validHitsMask && up >= short_v( Vc::Zero );
-      short_v downFromUp = data.HitLinkDownData( rowUp, upIndexes );
+      short_v downFromUp = short_v(data.HitLinkDownData( rowUp ), static_cast<ushort_v>(upIndexes), upMask );      
         // down part
       short_v dn = data.HitLinkDownData( row, hitIndex );
       VALGRIND_CHECK_VALUE_IS_DEFINED( dn );
       ushort_v downIndexes = CAMath::Max( dn, short_v( Vc::Zero ) ).staticCast<ushort_v>();
       short_m dnMask = validHitsMask && dn >= short_v( Vc::Zero );
-      short_v upFromDown = data.HitLinkUpData( rowDown, downIndexes );
+      short_v upFromDown = short_v(data.HitLinkUpData( rowDown ), static_cast<ushort_v>(downIndexes), dnMask );
+        
       
         // make clean
            // check if some one-way links can be good
@@ -102,15 +103,15 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
         if(!dnMask.isEmpty())
         {
           const AliHLTTPCCARow &rowUpUp = data.Row( rowIndex + 2*rowStep );
-          short_v upup = data.HitLinkUpData( rowUp, upIndexes );
-          ushort_v upupIndexes = CAMath::Max( upup, short_v( Vc::Zero ) ).staticCast<ushort_v>();
-          short_v downFromUpUp(Vc::Zero);
-          downFromUpUp(dnMask) = data.HitLinkDownData( rowUpUp, upupIndexes );
+          short_v upup = short_v(data.HitLinkUpData( rowUp ), static_cast<ushort_v>(upIndexes), dnMask );           
+          ushort_v upupIndexes = upup.staticCast<ushort_v>();
+          dnMask &= upupIndexes >= ushort_v( Vc::Zero ); // can't check, so can't save any other link
+          short_v downFromUpUp = short_v(data.HitLinkDownData( rowUpUp ), static_cast<ushort_v>(upupIndexes), dnMask ); 
 //          dnMask &= downFromUpUp != -1; 
 
           X4 = data.RowX( rowIndex + 2*rowStep );
-          Y4.gather( data.HitDataY( rowUpUp ), static_cast<ushort_v>(upupIndexes), validHitsMask );
-          Z4.gather( data.HitDataZ( rowUpUp ), static_cast<ushort_v>(upupIndexes), validHitsMask );
+          Y4.gather( data.HitDataY( rowUpUp ), static_cast<ushort_v>(upupIndexes), dnMask );
+          Z4.gather( data.HitDataZ( rowUpUp ), static_cast<ushort_v>(upupIndexes), dnMask );
 
           Yx1 = (Y - Y4)/(X - X4);
           Yx2 = Y - X*Yx1;
@@ -130,16 +131,15 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
         if(!upMask.isEmpty())
         {
           const AliHLTTPCCARow &rowDownDown = data.Row( rowIndex - 2*rowStep );
-          short_v downdown = data.HitLinkDownData( rowDown, downIndexes );
-          ushort_v downdownIndexes = CAMath::Max( downdown, short_v( Vc::Zero ) ).staticCast<ushort_v>();
-          short_v upFromDownDown(Vc::Zero);
-//          std::cout << " row: " << rowIndex - 2*rowStep << " upMask: " << upMask << " downdownIndexes: " << downdownIndexes << std::endl; // dbg
-          upFromDownDown(upMask) = data.HitLinkUpData( rowDownDown, downdownIndexes );
+          short_v downdown = short_v(data.HitLinkUpData( rowDown ), static_cast<ushort_v>(downIndexes), upMask );   
+          ushort_v downdownIndexes = downdown.staticCast<ushort_v>();
+          upMask &= downdownIndexes >= ushort_v( Vc::Zero ); // can't check, so can't save any other link
+          short_v upFromDownDown = short_v(data.HitLinkUpData( rowDownDown ), static_cast<ushort_v>(downdownIndexes), upMask ); 
 //          upMask &= upFromDownDown != -1; 
 
           X4 = data.RowX( rowIndex - 2*rowStep );
-          Y4.gather( data.HitDataY( rowDownDown ), static_cast<ushort_v>(downdownIndexes), validHitsMask );
-          Z4.gather( data.HitDataZ( rowDownDown ), static_cast<ushort_v>(downdownIndexes), validHitsMask );
+          Y4.gather( data.HitDataY( rowDownDown ), static_cast<ushort_v>(downdownIndexes), upMask );
+          Z4.gather( data.HitDataZ( rowDownDown ), static_cast<ushort_v>(downdownIndexes), upMask );
 
           Yx1 = (Y - Y4)/(X - X4);
           Yx2 = Y - X*Yx1;
@@ -172,9 +172,8 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
       data.SetHitLinkUpData( rowDown, downIndexes, upFromDown, dnMask );
 //       std::cout << " upIndexes " <<  upIndexes << " downIndexes " <<  downIndexes << std::endl;
 //       std::cout << "downFromUp " << downFromUp   << " upFromDown " << upFromDown << std::endl; // IKu debug
-      downFromUp = data.HitLinkDownData( rowUp, upIndexes );
-      upFromDown = data.HitLinkUpData( rowDown, downIndexes );
-
+      downFromUp = short_v(data.HitLinkDownData( rowUp ), static_cast<ushort_v>(upIndexes), upMask );      
+      upFromDown = short_v(data.HitLinkUpData( rowDown ), static_cast<ushort_v>(downIndexes), dnMask );
 
 //       std::cout << " downFromUp " << downFromUp
 //           << " upFromDown " << upFromDown
