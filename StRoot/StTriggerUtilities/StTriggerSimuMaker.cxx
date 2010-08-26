@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.42 2010/08/13 22:55:18 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.43 2010/08/26 15:28:31 pibero Exp $
 
 // MySQL C API
 #include "mysql.h"
@@ -439,7 +439,8 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
   // For simulation, get run number from DB time stamp
 
   if (mMCflag) {
-    query = Form("select idx_rn from triggers where beginTime >= '%s' limit 1",GetDBTime().AsSQLString());
+    //query = Form("select idx_rn from triggers where beginTime >= '%s' limit 1",GetDBTime().AsSQLString());
+    query = Form("select max(idx_rn) from triggers where beginTime <= '%s'",GetDBTime().AsSQLString());
     LOG_INFO << query << endm;
     mysql_query(&mysql,query);
 
@@ -683,6 +684,24 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.43  2010/08/26 15:28:31  pibero
+ * In the newer trigger code, the trigger DB is accessed with the query
+ * "select idx_rn from triggers where beginTime >= '%s' limit 1".  The
+ * problem with this query is that it selects the run following the
+ * current time stamp and, unfortunately, production runs aren't always
+ * followed by production runs.  So often the query can pick up a
+ * following pedestal run and emulators give up.  A more appropriate
+ * query would be "select max(idx_rn) from triggers where beginTime <=
+ * '%s'", which selects the begin time right before the time stamp and
+ * hence the actual current run.  I can validate that this works as
+ * desired.
+ *
+ * Michael Betancourt
+ * PhD Candidate
+ * Hadronic Physics Group
+ * Laboratory for Nuclear Science
+ * Massachusetts Institute of Technology
+ *
  * Revision 1.42  2010/08/13 22:55:18  pibero
  * Added onbits1-3 and offbits1-3
  *
