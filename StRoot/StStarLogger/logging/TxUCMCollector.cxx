@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.22 2010/07/14 22:12:51 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.23 2010/08/27 23:58:37 fisyak Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -25,7 +25,7 @@
 #include <log4cxx/helpers/loglog.h>
 #include <log4cxx/helpers/optionconverter.h>
 #include <log4cxx/helpers/stringhelper.h>
-
+#include <stdio.h>
 using namespace log4cxx;
 using namespace log4cxx::helpers;
 using namespace log4cxx::spi;
