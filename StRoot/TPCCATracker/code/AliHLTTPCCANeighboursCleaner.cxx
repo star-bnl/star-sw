@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.10 2010/08/27 21:58:08 mzyzak Exp $
+// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.11 2010/08/27 22:30:47 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -59,13 +59,13 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
       short_v up = short_v(data.HitLinkUpData( row ), hitIndexes, validHitsMask );
       VALGRIND_CHECK_VALUE_IS_DEFINED( up );
       ushort_v upIndexes = up.staticCast<ushort_v>();
-      // assert ( (validHitsMask && (up >= short_v( -1 )) ) == validHitsMask ); // TODO uncomment - now have a problem with optimized(NODEBUG) mode with gcc451
+      assert ( (validHitsMask && (up >= short_v( -1 )) ) == validHitsMask );
       short_m upMask = validHitsMask && up >= short_v( Vc::Zero );
       assert( ( upMask && ((upIndexes   >= 0 ) && (upIndexes   < rowUp.NHits()   )) ) == upMask );
-      short_v downFromUp = short_v(data.HitLinkDownData( rowUp ), upIndexes, upMask );      
+      short_v downFromUp = short_v(data.HitLinkDownData( rowUp ), upIndexes, upMask );
         // down part
       short_v dn = short_v(data.HitLinkDownData( row ), hitIndexes, validHitsMask );
-      // assert ( ( validHitsMask && (dn >= short_v(-1)) ) == validHitsMask ); // TODO uncomment - now have a problem with optimized(NODEBUG) mode with gcc451
+      assert ( ( validHitsMask && (dn >= short_v(-1)) ) == validHitsMask );
       VALGRIND_CHECK_VALUE_IS_DEFINED( dn );
       ushort_v downIndexes = dn.staticCast<ushort_v>();
       short_m dnMask = validHitsMask && dn >= short_v( Vc::Zero );
@@ -184,30 +184,6 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
       upFromDown( dnMask ) = static_cast<short_v>(hitIndexes);
       data.SetHitLinkDownData( rowUp, upIndexes, downFromUp, upMask );
       data.SetHitLinkUpData( rowDown, downIndexes, upFromDown, dnMask );
-     //  std::cout << "validHitsMask= " << validHitsMask << " hitIndexes=" << hitIndexes << std::endl;
-     //  std::cout << "up >= short_v( Vc::Zero )= " << short_m(up >= short_v( Vc::Zero ))  << "dn >= short_v( Vc::Zero )= " << short_m(dn >= short_v( Vc::Zero ))  <<  std::endl;
-     // std::cout << " upIndexes " <<  upIndexes << " downIndexes " <<  downIndexes << std::endl;
-     // std::cout << "downFromUp " << downFromUp   << " upFromDown " << upFromDown << std::endl; // IKu debug
-      // short_v downFromUp1 =  downFromUp; // dbg
-      // short_v upFromDown1 =  upFromDown;
-
-      assert( ( validHitsMask && (up >= short_v( Vc::Zero )) && (upIndexes   < rowUp.NHits()) )
-               == ( validHitsMask && (up >= short_v( Vc::Zero )) )                );
-      assert( ( validHitsMask && (dn >= short_v( Vc::Zero )) && (downIndexes   < rowDown.NHits()) )
-               == ( validHitsMask && (dn >= short_v( Vc::Zero )) )                );
-      downFromUp = short_v(data.HitLinkDownData( rowUp ), upIndexes,   validHitsMask && (up >= short_v( Vc::Zero )));   // TODO rid of it - now have a problem with optimized(NODEBUG) mode with gcc451
-      upFromDown = short_v(data.HitLinkUpData( rowDown ), downIndexes, validHitsMask && (dn >= short_v( Vc::Zero )));   // TODO rid of it
-            
-      // downFromUp = short_v(data.HitLinkDownData( rowUp ), upIndexes, upMask );      
-      // upFromDown = short_v(data.HitLinkUpData( rowDown ), downIndexes, dnMask );
-     // std::cout << " upIndexes " <<  upIndexes << " downIndexes " <<  downIndexes << std::endl;
-     // std::cout << "downFromUp " << downFromUp   << " upFromDown " << upFromDown << std::endl; // IKu debug
-     // assert( ( ( ((downFromUp1 == downFromUp) && (downFromUp != hitIndexes)) || (downFromUp == hitIndexes) ) && validHitsMask) == validHitsMask );
-     // assert( ( ( ((upFromDown1 == upFromDown) && (upFromDown != hitIndexes)) || (upFromDown == hitIndexes) ) && validHitsMask) == validHitsMask );
-
-//       std::cout << " downFromUp " << downFromUp
-//           << " upFromDown " << upFromDown
-//          << " dnMask " << dnMask << " upMask " << upMask  << std::endl; // IKu debug
 
         // delete one-way links (all other one-way links)
       const short_v minusOne = -1;
