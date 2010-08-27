@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.9 2010/08/27 21:10:32 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.10 2010/08/27 21:58:08 mzyzak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -97,8 +97,8 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
         {
           Xdown = data.RowX( rowIndex - rowStep );
           assert( ( dnMask && ((downIndexes   >= 0 ) && (downIndexes   < rowDown.NHits()   )) ) == dnMask );
-          Ydown.gather( data.HitDataY( rowDown ), downIndexes, dnMask );
-          Zdown.gather( data.HitDataZ( rowDown ), downIndexes, dnMask );
+          Ydown.gather( data.HitDataY( rowDown ), downIndexes, static_cast<sfloat_m>(dnMask) );
+          Zdown.gather( data.HitDataZ( rowDown ), downIndexes, static_cast<sfloat_m>(dnMask) );
           
           const AliHLTTPCCARow &rowUpUp = data.Row( rowIndex + 2*rowStep );
           assert( ( dnMask && ((upIndexes   >= 0 ) && (upIndexes   < rowUp.NHits()   )) ) == dnMask );
@@ -135,8 +135,8 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
         {
           Xup = data.RowX( rowIndex + rowStep );
           assert( ( upMask && ((upIndexes   >= 0 ) && (upIndexes   < rowUp.NHits()   )) ) == upMask );
-          Yup.gather( data.HitDataY( rowUp ), upIndexes, upMask );
-          Zup.gather( data.HitDataZ( rowUp ), upIndexes, upMask );
+          Yup.gather( data.HitDataY( rowUp ), upIndexes, static_cast<sfloat_m>(upMask) );
+          Zup.gather( data.HitDataZ( rowUp ), upIndexes, static_cast<sfloat_m>(upMask) );
           
           const AliHLTTPCCARow &rowDownDown = data.Row( rowIndex - 2*rowStep );
           assert( ( upMask && ((downIndexes   >= 0 ) && (downIndexes   < rowDown.NHits()   )) ) == upMask );
