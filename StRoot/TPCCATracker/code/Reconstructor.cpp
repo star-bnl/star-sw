@@ -205,6 +205,24 @@ int AliHLTTPCCATracker::Reconstructor::execute()
     }
 #endif
 
+//#ifndef NDEBUG
+#if 0
+  for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
+    const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
+    const int numberOfHits = row.NHits();
+    for ( int i = 0; i < numberOfHits; i += short_v::Size ) {
+      const short_v hitIndexes = short_v( Vc::IndexesFromZero ) + i;
+      short_m validHitsMask = hitIndexes < numberOfHits;
+      validHitsMask &= ( short_v(d->fData.HitDataIsUsed( row ), static_cast<ushort_v>(hitIndexes) ) == short_v( Vc::Zero ) );
+
+      short_v up = short_v(d->fData.HitLinkUpData( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );
+      short_v down = short_v(d->fData.HitLinkDownData( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );
+      assert ( (validHitsMask && up >= short_v( -1 )) == validHitsMask );
+      assert ( (validHitsMask && down >= short_v( -1 )) == validHitsMask );
+    }
+  }
+#endif // NDEBUG
+    
     AliHLTTPCCANeighboursCleaner::run( d->Param().NRows(), d->fData, d->Param() );
 #ifndef DISABLE_ALL_DRAW
 #ifdef DRAW // iklm

@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.6 2010/08/26 17:58:38 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCANeighboursCleaner.cxx,v 1.7 2010/08/27 13:25:14 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -53,29 +53,30 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
 
         // collect information
         // up part
-      short_v up = data.HitLinkUpData( row, hitIndex );
+      short_v up = short_v(data.HitLinkUpData( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );
       VALGRIND_CHECK_VALUE_IS_DEFINED( up );
       ushort_v upIndexes = CAMath::Max( up, short_v( Vc::Zero ) ).staticCast<ushort_v>();
+      // assert ( (validHitsMask && (up >= short_v( -1 )) ) == validHitsMask ); // TODO uncomment - now have a problem with optimized(NODEBUG) mode with gcc451
       short_m upMask = validHitsMask && up >= short_v( Vc::Zero );
-      short_v downFromUp = short_v(data.HitLinkDownData( rowUp ), static_cast<ushort_v>(upIndexes), upMask );      
+      short_v downFromUp = short_v(data.HitLinkDownData( rowUp ), upIndexes, upMask );      
         // down part
-      short_v dn = data.HitLinkDownData( row, hitIndex );
+      short_v dn = short_v(data.HitLinkDownData( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );
+      // assert ( ( validHitsMask && (dn >= short_v(-1)) ) == validHitsMask ); // TODO uncomment - now have a problem with optimized(NODEBUG) mode with gcc451
       VALGRIND_CHECK_VALUE_IS_DEFINED( dn );
       ushort_v downIndexes = CAMath::Max( dn, short_v( Vc::Zero ) ).staticCast<ushort_v>();
       short_m dnMask = validHitsMask && dn >= short_v( Vc::Zero );
-      short_v upFromDown = short_v(data.HitLinkUpData( rowDown ), static_cast<ushort_v>(downIndexes), dnMask );
+      short_v upFromDown = short_v(data.HitLinkUpData( rowDown ), downIndexes, dnMask );
         
       
         // make clean
            // check if some one-way links can be good
 
 
-      short_v downFromUp0 = downFromUp;
 //       std::cout << "downFromUp " << downFromUp   << " upFromDown " << upFromDown << " validHitsMask " << validHitsMask << " dnMask " << dnMask << " upMask " << upMask << std::endl; // IKu debug
-      upMask &= downFromUp == -1 && upFromDown == hitIndexes;
-      dnMask &= upFromDown == -1 && downFromUp0 == hitIndexes;
+      upMask &= (downFromUp == -1) && (upFromDown == hitIndexes);  // have mutual link only downwards. is   up-link good?
+      dnMask &= (upFromDown == -1) && (downFromUp == hitIndexes); // have mutual link only upwards.   is down-link good?
 
-      dnMask &= short_m(rowIndex + 2*rowStep < numberOfRows); // will use 4-th hit for check
+      dnMask &= short_m(rowIndex + 2*rowStep < numberOfRows); // will use 4-th hit for check. If no one there then have to delete link
       upMask &= short_m(rowIndex - 2*rowStep >= 0);
 ///mvz start 14.07.2010
       if(!dnMask.isEmpty() || !upMask.isEmpty())
@@ -166,26 +167,40 @@ void AliHLTTPCCANeighboursCleaner::run( const int numberOfRows, SliceData &data,
 
 ///mvz end 14.07.2010
 
+        // make from good one-way links mutual links
       downFromUp( upMask ) = hitIndexes;
       upFromDown( dnMask ) = hitIndexes;
       data.SetHitLinkDownData( rowUp, upIndexes, downFromUp, upMask );
       data.SetHitLinkUpData( rowDown, downIndexes, upFromDown, dnMask );
-//       std::cout << " upIndexes " <<  upIndexes << " downIndexes " <<  downIndexes << std::endl;
-//       std::cout << "downFromUp " << downFromUp   << " upFromDown " << upFromDown << std::endl; // IKu debug
-      downFromUp = short_v(data.HitLinkDownData( rowUp ), static_cast<ushort_v>(upIndexes), upMask );      
-      upFromDown = short_v(data.HitLinkUpData( rowDown ), static_cast<ushort_v>(downIndexes), dnMask );
+     //  std::cout << "validHitsMask= " << validHitsMask << " hitIndexes=" << hitIndexes << std::endl;
+     //  std::cout << "up >= short_v( Vc::Zero )= " << short_m(up >= short_v( Vc::Zero ))  << "dn >= short_v( Vc::Zero )= " << short_m(dn >= short_v( Vc::Zero ))  <<  std::endl;
+     // std::cout << " upIndexes " <<  upIndexes << " downIndexes " <<  downIndexes << std::endl;
+     // std::cout << "downFromUp " << downFromUp   << " upFromDown " << upFromDown << std::endl; // IKu debug
+      // short_v downFromUp1 =  downFromUp; // dbg
+      // short_v upFromDown1 =  upFromDown;
+      
+
+      downFromUp = short_v(data.HitLinkDownData( rowUp ), upIndexes,   validHitsMask && (up >= short_v( Vc::Zero )));   // TODO rid of it - now have a problem with optimized(NODEBUG) mode with gcc451
+      upFromDown = short_v(data.HitLinkUpData( rowDown ), downIndexes, validHitsMask && (dn >= short_v( Vc::Zero )));   // TODO rid of it
+            
+      // downFromUp = short_v(data.HitLinkDownData( rowUp ), static_cast<ushort_v>(upIndexes), upMask );      
+      // upFromDown = short_v(data.HitLinkUpData( rowDown ), static_cast<ushort_v>(downIndexes), dnMask );
+     // std::cout << " upIndexes " <<  upIndexes << " downIndexes " <<  downIndexes << std::endl;
+     // std::cout << "downFromUp " << downFromUp   << " upFromDown " << upFromDown << std::endl; // IKu debug
+     // assert( ( ( ((downFromUp1 == downFromUp) && (downFromUp != hitIndexes)) || (downFromUp == hitIndexes) ) && validHitsMask) == validHitsMask );
+     // assert( ( ( ((upFromDown1 == upFromDown) && (upFromDown != hitIndexes)) || (upFromDown == hitIndexes) ) && validHitsMask) == validHitsMask );
 
 //       std::cout << " downFromUp " << downFromUp
 //           << " upFromDown " << upFromDown
 //          << " dnMask " << dnMask << " upMask " << upMask  << std::endl; // IKu debug
-           // delete else one-way links
-      up( validHitsMask && downFromUp != hitIndexes ) = -1;
+           // delete one-way links (all other one-way links)
+      up( validHitsMask && (downFromUp != hitIndexes) ) = -1;
       VALGRIND_CHECK_VALUE_IS_DEFINED( up );
-      data.SetHitLinkUpData( row, hitIndex, up );
-
-      dn( validHitsMask && upFromDown != hitIndexes ) = -1;
+      data.SetHitLinkUpData( row, static_cast<ushort_v>(hitIndexes), up, validHitsMask && (downFromUp != hitIndexes) );
+      
+      dn( validHitsMask && (upFromDown != hitIndexes) ) = -1;
       VALGRIND_CHECK_VALUE_IS_DEFINED( dn );
-      data.SetHitLinkDownData( row, hitIndex, dn );
-    }
-  }
+      data.SetHitLinkDownData( row, static_cast<ushort_v>(hitIndexes), dn, validHitsMask && (upFromDown != hitIndexes) );
+    } // for iHit
+  } // for iRow
 }
