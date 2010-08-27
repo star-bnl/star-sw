@@ -18,6 +18,19 @@
 #include "Rtypes.h"
 #endif
 
+
+#ifdef NDEBUG
+#define ASSERT(v, msg)
+#else
+#define ASSERT(v, msg) \
+if (v) {} else { \
+  std::cerr << __FILE__ << ":" << __LINE__ << " assertion failed: " \
+            << #v << " = " << (v) << "\n" << msg << std::endl; \
+  abort(); \
+}
+#endif
+
+
 struct float2 { float x; float y; };
 /*
  * Helper for compile-time verification of correct API usage

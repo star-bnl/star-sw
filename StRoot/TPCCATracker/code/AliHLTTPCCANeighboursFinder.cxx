@@ -1,4 +1,4 @@
-// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.11 2010/08/19 20:39:58 ikulakov Exp $
+// @(#) $Id: AliHLTTPCCANeighboursFinder.cxx,v 1.12 2010/08/27 20:01:33 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -238,9 +238,6 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
         debugS() << "best down: " << dnMask << " " << bestDn << std::endl;
       }
 
-      assert( bestUp < rowUp.NHits() || !validHitsMask );
-      assert( bestDn < rowDn.NHits() || !validHitsMask );
-
       //debugS() << "Links for row " << rowIndex << ", hit " << hitIndex << ": " << bestUp << " " << bestDn << std::endl;
 
       assert( bestD < chi2Cut || ( bestUp == -1 && bestDn == -1 ) );
@@ -249,7 +246,9 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
 
       // store the link indexes we found
       const ushort_v &hitIndexes = ushort_v( Vc::IndexesFromZero ) + hitIndex;
-      short_m nonUsedMask = ( short_v(fData.HitDataIsUsed( row ), hitIndexes) == short_v( Vc::Zero ) );
+      short_m nonUsedMask = validHitsMask && ( short_v(fData.HitDataIsUsed( row ), hitIndexes) == short_v( Vc::Zero ) );
+      assert( ((bestUp >= -1) && (bestUp < rowUp.NHits()) && nonUsedMask) == nonUsedMask );
+      assert( ((bestDn >= -1) && (bestDn < rowDn.NHits()) && nonUsedMask) == nonUsedMask );
       fData.SetHitLinkUpData( row, hitIndexes, bestUp, nonUsedMask);
       fData.SetHitLinkDownData( row, hitIndexes, bestDn, nonUsedMask);
 
@@ -262,7 +261,8 @@ inline void AliHLTTPCCATracker::NeighboursFinder::executeOnRow( int rowIndex ) c
       }
 #endif
     }
-  }
+  } // for hitIndex
+
 }
 
 void AliHLTTPCCATracker::NeighboursFinder::execute()

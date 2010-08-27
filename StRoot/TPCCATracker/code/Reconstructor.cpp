@@ -138,7 +138,7 @@ int AliHLTTPCCATracker::Reconstructor::execute()
 //      d->fData.SetHitLinkDownData( row, i, minusOne );
     }
   }
-    
+
     AliHLTTPCCATracker::NeighboursFinder neighboursFinder( d, d->fData, iter );
     neighboursFinder.execute();
     tsc.Stop();
@@ -205,22 +205,35 @@ int AliHLTTPCCATracker::Reconstructor::execute()
     }
 #endif
 
-//#ifndef NDEBUG
-#if 0
-  for ( int rowIndex = 0; rowIndex < d->Param().NRows(); ++rowIndex ) {
-    const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
-    const int numberOfHits = row.NHits();
-    for ( int i = 0; i < numberOfHits; i += short_v::Size ) {
-      const short_v hitIndexes = short_v( Vc::IndexesFromZero ) + i;
-      short_m validHitsMask = hitIndexes < numberOfHits;
-      validHitsMask &= ( short_v(d->fData.HitDataIsUsed( row ), static_cast<ushort_v>(hitIndexes) ) == short_v( Vc::Zero ) );
+#ifndef NDEBUG
+#if 1
+    {
+      const int rowStep = AliHLTTPCCAParameters::RowStep;
+      const int NRows = d->Param().NRows();
+      for ( int rowIndex = 0; rowIndex < NRows; ++rowIndex ) {
+        const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
+        const int NRowHits = row.NHits();
+        int NRowUpHits = 0;
+        if (rowIndex + rowStep < NRows) NRowUpHits = d->fData.Row( rowIndex + rowStep ).NHits();
+        int NRowDnHits = 0;
+        if (rowIndex - rowStep >= 0)    NRowDnHits = d->fData.Row( rowIndex - rowStep ).NHits();
+        for ( int i = 0; i < NRowHits; i += short_v::Size ) {
+          const short_v hitIndexes = short_v( Vc::IndexesFromZero ) + i;
+          short_m validHitsMask = hitIndexes < NRowHits;
+            // validHitsMask &= ( short_v(d->fData.HitDataIsUsed( row ), static_cast<ushort_v>(hitIndexes) ) == short_v( Vc::Zero ) );
 
-      short_v up = short_v(d->fData.HitLinkUpData( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );
-      short_v down = short_v(d->fData.HitLinkDownData( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );
-      assert ( (validHitsMask && up >= short_v( -1 )) == validHitsMask );
-      assert ( (validHitsMask && down >= short_v( -1 )) == validHitsMask );
+          short_v up = short_v(d->fData.HitLinkUpData( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );
+          short_v dn = short_v(d->fData.HitLinkDownData( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );
+          ASSERT ( (validHitsMask && (up >= -1 ) && (up < NRowUpHits )) == validHitsMask,
+          " validHitsMask= " << validHitsMask <<  " up= "  << up
+          << " iter= " << iter << " row= " << rowIndex << " NRowUpHits= " << NRowUpHits );
+          ASSERT ( (validHitsMask && (dn >= -1 ) && (dn < NRowDnHits )) == validHitsMask,
+          " validHitsMask= " << validHitsMask <<  " dn= "  << dn
+          << " iter= " << iter << " row= " << rowIndex << " NRowDnHits= " << NRowDnHits );
+        }
+      }
     }
-  }
+#endif // 0
 #endif // NDEBUG
     
     AliHLTTPCCANeighboursCleaner::run( d->Param().NRows(), d->fData, d->Param() );
@@ -268,6 +281,38 @@ int AliHLTTPCCATracker::Reconstructor::execute()
       //X   sseCpu  += sseTimer.CpuTime();
       //X   std::cout << "SSE code needed real = " << sseReal << ", CPU = " << sseCpu << std::endl;
 
+#ifndef NDEBUG
+#if 1
+    {
+      const int rowStep = AliHLTTPCCAParameters::RowStep;
+      const int NRows = d->Param().NRows();
+      for ( int rowIndex = 0; rowIndex < NRows; ++rowIndex ) {
+        const AliHLTTPCCARow &row = d->fData.Row( rowIndex );
+        const int NRowHits = row.NHits();
+        int NRowUpHits = 0;
+        if (rowIndex + rowStep < NRows) NRowUpHits = d->fData.Row( rowIndex + rowStep ).NHits();
+        int NRowDnHits = 0;
+        if (rowIndex - rowStep >= 0)    NRowDnHits = d->fData.Row( rowIndex - rowStep ).NHits();
+        for ( int i = 0; i < NRowHits; i += short_v::Size ) {
+          const short_v hitIndexes = short_v( Vc::IndexesFromZero ) + i;
+          short_m validHitsMask = hitIndexes < NRowHits;
+            // validHitsMask &= ( short_v(d->fData.HitDataIsUsed( row ), static_cast<ushort_v>(hitIndexes) ) == short_v( Vc::Zero ) );
+
+          short_v up = short_v(d->fData.HitLinkUpData( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );
+          short_v dn = short_v(d->fData.HitLinkDownData( row ), static_cast<ushort_v>(hitIndexes), validHitsMask );
+          ASSERT ( (validHitsMask && (up >= -1 ) && (up < NRowUpHits )) == validHitsMask,
+          " validHitsMask= " << validHitsMask <<  " up= "  << up
+          << " iter= " << iter << " row= " << rowIndex << " NRowUpHits= " << NRowUpHits );
+          ASSERT ( (validHitsMask && (dn >= -1 ) && (dn < NRowDnHits )) == validHitsMask,
+          " validHitsMask= " << validHitsMask <<  " dn= "  << dn
+          << " iter= " << iter << " row= " << rowIndex << " NRowDnHits= " << NRowDnHits );
+        }
+      }
+    }
+#endif // 0
+#endif // NDEBUG
+
+    
     timer.Start();
       //   std::cout << " AliHLTTPCCATracker::Reconstructor::execute() 4" << std::endl; // dbg 0
     AliHLTTPCCAStartHitsFinder::run( *d, d->fData, iter );
