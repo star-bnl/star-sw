@@ -4,7 +4,7 @@
  */
 /************************************************
  *
- * $Id: StPmdCollection.h,v 1.2 2003/05/12 12:07:13 subhasis Exp $
+ * $Id: StPmdCollection.h,v 1.3 2010/08/27 16:54:20 perev Exp $
  *
  *Author: Subhasis Chattopadhyay
  ************************************************
@@ -13,6 +13,9 @@
  *              includes both PMD and CPV
  *
  * $Log: StPmdCollection.h,v $
+ * Revision 1.3  2010/08/27 16:54:20  perev
+ * WarnOff
+ *
  * Revision 1.2  2003/05/12 12:07:13  subhasis
  * Mapping added
  *
@@ -28,7 +31,7 @@ class StPmdDetector;
 
 class StPmdCollection : public TDataSet {
 public:
-  StPmdCollection(Char_t *); //! constructor keeps the information for bothCPV/PMD
+  StPmdCollection(const Char_t *); //! constructor keeps the information for bothCPV/PMD
   ~StPmdCollection(); //!destructor
     
   StPmdDetector*    detector(Int_t); //! detector id
