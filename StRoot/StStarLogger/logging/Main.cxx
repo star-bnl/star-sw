@@ -5,6 +5,7 @@
 
 #include <cstring>
 #include <string>
+#include <stdio.h>
 #include "TxEventLogFactory.h"
 #include "TxEventLog.h"
 #include <regex.h>
