@@ -1,5 +1,5 @@
 //
-// $Id: StEmcRawMaker.cxx,v 1.22 2009/11/17 15:55:48 mattheww Exp $
+// $Id: StEmcRawMaker.cxx,v 1.23 2010/08/27 22:31:34 ogrebeny Exp $
 
 #include <math.h>
 
@@ -195,7 +195,7 @@ Int_t StEmcRawMaker::Make()
       StEmcRawData *bemcRaw = mEvent->emcCollection()->bemcRawData();
       for (i=0; i<bemcRaw->getNBlocks();i++) bemcRaw->deleteBank(i);
     }  else {
-      LOG_INFO<< Form("B+EmcRawData are retained for eve=%d\n",mEvent->id())<endm;
+      LOG_INFO<< Form("B+EmcRawData are retained for eve=%d\n",mEvent->id())<<endm;
     }		      
     return kStOK;
 }
@@ -327,6 +327,9 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.23  2010/08/27 22:31:34  ogrebeny
+// *** empty log message ***
+//
 // Revision 1.22  2009/11/17 15:55:48  mattheww
 // fixed a bunch of warnings
 //
