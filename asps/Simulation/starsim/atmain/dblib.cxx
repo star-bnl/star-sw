@@ -1,8 +1,11 @@
 
 /*
-** $Id: dblib.cxx,v 1.7 2009/11/19 04:58:19 perev Exp $
+** $Id: dblib.cxx,v 1.8 2010/08/27 14:20:11 fisyak Exp $
 **
 ** $Log: dblib.cxx,v $
+** Revision 1.8  2010/08/27 14:20:11  fisyak
+** Add stdio.h for gcc  4??
+**
 ** Revision 1.7  2009/11/19 04:58:19  perev
 ** DUMMY mYSql
 **
@@ -178,6 +181,7 @@
          using namespace std;
 #       if (__GNUC__ >= 4)
 #           include <string.h>
+#           include <stdio.h>
 #       endif
 int my_query(ostringstream *Query);
 #else //.h for gcc-2 and SunOS
