@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.44 2009/06/28 04:04:06 baumgart Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.45 2010/08/27 17:46:28 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.45  2010/08/27 17:46:28  perev
+ * WarnOff
+ *
  * Revision 1.44  2009/06/28 04:04:06  baumgart
  * Increase of trapping constant to compensate for changes in electron cloud shape
  *
@@ -200,10 +203,10 @@ ClassImp(StSvtSimulationMaker)
 //___________________________________________________________________________
 /// the only place where electron cloud expansioin constants are set
 StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
+ , mLifeTime(cLifeTime)          // [us]   //default =1000000.0
  , mTrapConst(cTrapConst)           // [us]   //default =0
  , mDiffusionConst(cDiffusionConst) // [mm**2/micro seconds] default=0.0035 (for silicon)
  , mTimeBinSize(cTimeBinSize)          // [us]   //default =0.04 
- , mLifeTime(cLifeTime)          // [us]   //default =1000000.0
  , mAnodeSize(-1956)
  , mPedOffset(-1956)                //  not absolutely necesary to be already here - could be added in EmbeddingMaker, but it works
  , mSigOption(0)                    // use both PASA codes, mNumOfHybrids(-1956)             //!could be used to override number of simulated hybrids
