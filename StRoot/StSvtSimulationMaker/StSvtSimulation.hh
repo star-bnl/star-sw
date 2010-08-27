@@ -16,7 +16,7 @@ class StSvtHybridPixelsD;
 
 #define SvtSim_MaxBufferSize 20
 
-typedef struct  PasaSignalAttributes
+struct  PasaSignalAttributes
 {
    int anode         [SvtSim_MaxBufferSize];              //actual anode
    double mPeak      [SvtSim_MaxBufferSize];
