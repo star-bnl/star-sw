@@ -15,8 +15,8 @@
 //  -= Copyright &copy ALICE HLT Group =-
 //_________________________________________________________________________________
 
-#ifndef ALIKFPARTICLE_H
-#define ALIKFPARTICLE_H
+#ifndef KFParticle_H
+#define KFParticle_H
 
 #include "KFParticleBase.h"
 #include "TMath.h"
@@ -107,6 +107,7 @@ class KFParticle :public KFParticleBase
   Double_t GetMomentum    () const; //* momentum (same as GetP() )
   Double_t GetMass        () const; //* mass
   Double_t GetDecayLength () const; //* decay length
+  Double_t GetDecayLengthXY () const; //* decay length in XY
   Double_t GetLifeTime    () const; //* life time
   Double_t GetR           () const; //* distance to the origin
 
@@ -127,6 +128,7 @@ class KFParticle :public KFParticleBase
   Double_t GetErrMomentum    () const ; //* momentum
   Double_t GetErrMass        () const ; //* mass
   Double_t GetErrDecayLength () const ; //* decay length
+  Double_t GetErrDecayLengthXY () const ; //* decay length in XY
   Double_t GetErrLifeTime    () const ; //* life time
   Double_t GetErrR           () const ; //* distance to the origin
 
@@ -140,6 +142,7 @@ class KFParticle :public KFParticleBase
   int GetMomentum    ( Double_t &P, Double_t &SigmaP ) const ;   //* momentum
   int GetMass        ( Double_t &M, Double_t &SigmaM ) const ;   //* mass
   int GetDecayLength ( Double_t &L, Double_t &SigmaL ) const ;   //* decay length
+  int GetDecayLengthXY ( Double_t &L, Double_t &SigmaL ) const ;   //* decay length in XY
   int GetLifeTime    ( Double_t &T, Double_t &SigmaT ) const ;   //* life time
   int GetR           ( Double_t &R, Double_t &SigmaR ) const ; //* R
 
@@ -264,6 +267,11 @@ class KFParticle :public KFParticleBase
  
   //* Calculate distance from another object [cm] in XY-plane
 
+  Bool_t GetDistanceFromVertexXY( const Double_t vtx[], Double_t &val, Double_t &err ) const ;
+  Bool_t GetDistanceFromVertexXY( const Double_t vtx[], const Double_t Cv[], Double_t &val, Double_t &err ) const ;
+  Bool_t GetDistanceFromVertexXY( const KFParticle &Vtx, Double_t &val, Double_t &err ) const ;
+  Bool_t GetDistanceFromVertexXY( const MVertex &Vtx, Double_t &val, Double_t &err ) const ;
+
   Double_t GetDistanceFromVertexXY( const Double_t vtx[] ) const ;
   Double_t GetDistanceFromVertexXY( const KFParticle &Vtx ) const ;
   Double_t GetDistanceFromVertexXY( const MVertex &Vtx ) const ;
@@ -286,6 +294,11 @@ class KFParticle :public KFParticleBase
   //* Subtract the particle from the vertex  
 
   void SubtractFromVertex( KFParticle &v ) const ;
+
+  //* Special method for creating gammas
+
+  void ConstructGamma( const KFParticle &daughter1,
+		       const KFParticle &daughter2  );
 
  protected: 
   
@@ -311,6 +324,8 @@ class KFParticle :public KFParticleBase
 
   static Double_t fgBz;  //* Bz compoment of the magnetic field
 
+
+  ClassDef(KFParticle,1)
 };
 
 
@@ -492,6 +507,13 @@ inline Double_t KFParticle::GetDecayLength () const
   else return par;
 }
 
+inline Double_t KFParticle::GetDecayLengthXY () const
+{
+  Double_t par, err;
+  if( KFParticleBase::GetDecayLengthXY( par, err ) ) return 0;
+  else return par;
+}
+
 inline Double_t KFParticle::GetLifeTime    () const
 {
   Double_t par, err;
@@ -595,6 +617,13 @@ inline Double_t KFParticle::GetErrDecayLength () const
   else return err;
 }
 
+inline Double_t KFParticle::GetErrDecayLengthXY () const
+{
+  Double_t par, err;
+  if( KFParticleBase::GetDecayLengthXY( par, err ) ) return 1.e10;
+  else return err;
+}
+
 inline Double_t KFParticle::GetErrLifeTime    () const
 {
   Double_t par, err;
@@ -643,6 +672,11 @@ inline int KFParticle::GetMass( Double_t &M, Double_t &SigmaM ) const
 inline int KFParticle::GetDecayLength( Double_t &L, Double_t &SigmaL ) const 
 {
   return KFParticleBase::GetDecayLength( L, SigmaL );
+}
+
+inline int KFParticle::GetDecayLengthXY( Double_t &L, Double_t &SigmaL ) const 
+{
+  return KFParticleBase::GetDecayLengthXY( L, SigmaL );
 }
 
 inline int KFParticle::GetLifeTime( Double_t &T, Double_t &SigmaT ) const 
@@ -857,7 +891,7 @@ inline Double_t KFParticle::GetDeviationFromParticle( const KFParticle &p ) cons
 
 inline void KFParticle::SubtractFromVertex( KFParticle &v ) const 
 {
-  KFParticleBase::SubtractFromVertex( v.fP, v.fC, v.fChi2, v.fNDF);
+  KFParticleBase::SubtractFromVertex( v );
 }
 
 inline Double_t KFParticle::GetFieldAlice()
@@ -887,6 +921,12 @@ inline void KFParticle::GetDStoParticleXY( const KFParticleBase &p,
 inline void KFParticle::Transport( Double_t dS, Double_t P[], Double_t C[] ) const 
 {
   KFParticleBase::TransportBz( GetFieldAlice(), dS, P, C );
+}
+
+inline void KFParticle::ConstructGamma( const KFParticle &daughter1,
+					   const KFParticle &daughter2  )
+{
+  KFParticleBase::ConstructGammaBz( daughter1, daughter2, GetFieldAlice() );
 }
 
 #endif 
