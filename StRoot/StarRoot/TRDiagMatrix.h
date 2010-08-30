@@ -38,12 +38,12 @@ class TRDiagMatrix : public TRArray {
 ostream& operator<<(ostream& s,const TRDiagMatrix &target);
 inline Double_t &TRDiagMatrix::operator()(Int_t i,Int_t j){
   if (j < 0 || j >= fNrows) {
-    ::Error("TRDiagMatrix::operator()", "index j %d out of bounds (size: %d, this: 0x%08x)", 
+    ::Error("TRDiagMatrix::operator()", "index j %d out of bounds (size: %d, this: %p)", 
 	    j, fNrows, this); 
     j = 0;
   }
   if (i < 0 || i >= fNrows) {
-    ::Error("TRDiagMatrix::operator()", "index i %d out of bounds (size: %d, this: 0x%08x)", 
+    ::Error("TRDiagMatrix::operator()", "index i %d out of bounds (size: %d, this: %p)", 
 	    i, fNrows, this); 
     i = 0;
   }

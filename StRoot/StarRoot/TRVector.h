@@ -3,6 +3,7 @@
 #include "TRMatrix.h"
 #include "TRSymMatrix.h"
 #include "TVector3.h"
+#include "StThreeVectorD.hh"
 class TRVector : public TRMatrix {
  public:
   TRVector(Int_t nrows=0);
@@ -15,7 +16,9 @@ class TRVector : public TRMatrix {
   TRVector(const TRSymMatrix &S, ETRMatrixCreatorsOp kop,const TRVector& A);
   TRVector(const TRVector& A, ETRMatrixCreatorsOp kop,const TRSymMatrix &S);
   TRVector       &operator=(const TVector3 &rhs);
+  TRVector       &operator=(const StThreeVectorD &rhs);
   TRVector(const TVector3 &rhs); 
+  TRVector(const StThreeVectorD &rhs); 
   TRVector       Cross(const TRVector& v) const;
   TRVector       Unit() const;
   friend TRVector operator*(const TRVector &source, Double_t scalar) {TRVector s(source); s *= scalar; return s;}
