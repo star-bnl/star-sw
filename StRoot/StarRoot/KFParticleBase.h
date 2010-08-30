@@ -17,13 +17,12 @@
 
 
 
-#ifndef ALIKFPARTICLEBASE_H
-#define ALIKFPARTICLEBASE_H
+#ifndef KFParticleBASE_H
+#define KFParticleBASE_H
 
-//#include "TObject.h"
-
-//class KFParticleBase :public TObject {
-class KFParticleBase{
+#include "TObject.h"
+class KFParticleBase : public TObject {
+  //class KFParticleBase{
   
  public:
 
@@ -111,6 +110,7 @@ class KFParticleBase{
   int GetPhi         ( double &Phi, double &SigmaPhi ) const ;
   int GetMass        ( double &M, double &SigmaM ) const ;
   int GetDecayLength ( double &L, double &SigmaL ) const ;
+  int GetDecayLengthXY ( double &L, double &SigmaL ) const ;
   int GetLifeTime    ( double &T, double &SigmaT ) const ;
   int GetR           ( double &R, double &SigmaR ) const ;
 
@@ -221,9 +221,13 @@ class KFParticleBase{
 
   //* Subtract the particle from the vertex  
 
-  void SubtractFromVertex( double v[], double Cv[], 
-			   double &vChi2, int vNDF ) const ;
-  
+  void SubtractFromVertex( KFParticleBase &Vtx ) const ;
+
+    //* Special method for creating gammas
+
+  void ConstructGammaBz( const KFParticleBase &daughter1,
+			 const KFParticleBase &daughter2, double Bz  );
+
  protected:
 
   static int IJ( int i, int j ){ 
@@ -235,6 +239,8 @@ class KFParticleBase{
   void Convert( bool ToProduction );
   void TransportLine( double S, double P[], double C[] ) const ;
   double GetDStoPointLine( const double xyz[] ) const;
+
+  static bool InvertSym3( const double A[], double Ainv[] );
 
   static void MultQSQt( const double Q[], const double S[], 
 			double SOut[] );
@@ -258,7 +264,7 @@ class KFParticleBase{
                           //* ( used for linearisation of equations )
 
   bool fIsLinearized;   //* Flag shows that the guess is present
-
+  ClassDef(KFParticleBase,1)			    
 };
 
 #endif 
