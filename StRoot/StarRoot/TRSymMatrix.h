@@ -53,14 +53,14 @@ ostream& operator<<(ostream& s,const TRSymMatrix &target);
 inline Double_t &TRSymMatrix::operator()(Int_t i,Int_t j){
   //  assert(! (j < 0 || j >= fNrows));
   if (j < 0 || j >= fNrows) {
-    ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: 0x%08x)", 
+    ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: %p)", 
 	    j, fNrows, this); 
     j = 0;
     assert(0);
   }
   //  assert(! (i < 0 || i >= fNrows));
   if (i < 0 || i >= fNrows) {
-    ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: 0x%08x)", 
+    ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: %p)", 
 	    i, fNrows, this); 
     i = 0;
     assert(0);
@@ -73,14 +73,14 @@ inline Double_t &TRSymMatrix::operator()(Int_t i,Int_t j){
 inline Double_t TRSymMatrix::operator()(Int_t i,Int_t j) const {
   //  assert(! (j < 0 || j >= fNrows));
   if (j < 0 || j >= fNrows) {
-    ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: 0x%08x)", 
+    ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: %p)", 
 	    j, fNrows, this); 
     j = 0;
     assert(0);
   }
   //  assert(! (i < 0 || i >= fNrows));
   if (i < 0 || i >= fNrows) {
-    ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: 0x%08x)", 
+    ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: %p)", 
 	    i, fNrows, this); 
     i = 0;
     assert(0);
