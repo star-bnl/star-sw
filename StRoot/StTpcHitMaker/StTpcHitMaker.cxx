@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.25 2010/08/30 18:02:01 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.26 2010/08/31 14:16:30 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.26  2010/08/31 14:16:30  genevb
+ * Correct mistake from prev commit of location of TPC cluster check
+ *
  * Revision 1.25  2010/08/30 18:02:01  genevb
  * Introduce hit maxima for tracking
  *
@@ -315,8 +318,8 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
   Int_t row = DaqDta()->Row();
   if (kReaderType == kLegacyTpc || kReaderType == kLegacyTpx) {
     tpc_t *tpc = (tpc_t *) DaqDta()->GetTable();
-    if ( !tpc->has_clusters )  return 0;
     for (Int_t l = 0; l < NRows; tpc++) {
+      if ( !tpc->has_clusters )  return 0;
       for(Int_t padrow=0;padrow<45;padrow++) {
 	tpc_cl *c = &tpc->cl[padrow][0];
 	Int_t ncounts = tpc->cl_counts[padrow];
