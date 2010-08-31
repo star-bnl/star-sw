@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.15 2010/03/26 13:47:29 fisyak Exp $
+ * $Id: StTpcHit.h,v 2.16 2010/08/31 20:01:04 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.16  2010/08/31 20:01:04  fisyak
+ * Fix no. of padsInHit, accounting afterburner
+ *
  * Revision 2.15  2010/03/26 13:47:29  fisyak
  * Add methods to modify hit content
  *
@@ -92,7 +95,7 @@ public:
     void     setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxpad, Short_t mntmbk, Short_t mxtmbk);
     UInt_t   sector() const {return bits(4, 5);}   // bits 4-8  -> 1-24
     UInt_t   padrow() const {return bits(9, 6);}   // bits 9-14 -> 1-45
-    UInt_t   padsInHit()   const {return bits(15, 7);}    // bits 15-21
+    UInt_t   padsInHit()   const {return maxPad() - minPad() + 1;} 
     UInt_t   pixelsInHit() const {return bits(22,10);};   // bits 22-31 obsolete (TCL only, FCF put no. of time buckets)
     UChar_t  minPad()   const {return TMath::Nint(mMcl_x/64.) - mMinpad;}
     UChar_t  maxPad()   const {return TMath::Nint(mMcl_x/64.) + mMaxpad;}
