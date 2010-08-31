@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.21 2009/12/09 20:38:00 ogrebeny Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.23 2010/08/05 21:23:45 stevens4 Exp $
 
 #include "St_DataSetIter.h"
 #include "StEventTypes.h"
@@ -36,7 +36,7 @@ StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name){
   /// Class Constructor.  
   SetEmcCollectionLocal(false);
   mLocalStEmcCollection=0;
-  mUseFullTower = false;
+  mUseFullTower = true; // default value for BFC, for consumption by the EEMC slow simulator
   mUseFullPreShower = false;
   mUseFullSmdu = false;
   mUseFullSmdv = false;
@@ -300,7 +300,8 @@ Float_t StEEmcFastMaker::getSamplingFraction()
 {
   // Returns the sampling fraction used by the fast simulator
   // to simulate ADC response of the towers.
-  return 0.05;
+  // Updated to 4.8% from Ilya's study http://drupal.star.bnl.gov/STAR/node/16426
+  return 0.048;
 }
 
 Float_t *StEEmcFastMaker::getTowerGains()
@@ -340,6 +341,12 @@ Float_t StEEmcFastMaker::getPreshowerGain()
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.23  2010/08/05 21:23:45  stevens4
+// Update sampling fraction to 4.8%
+//
+// Revision 1.22  2010/07/29 16:12:03  ogrebeny
+// Update after the peer review
+//
 // Revision 1.21  2009/12/09 20:38:00  ogrebeny
 // User-switchable function added to always create all hits, even if ADC=0. Requested by Pibero for the trigger simulator.
 //

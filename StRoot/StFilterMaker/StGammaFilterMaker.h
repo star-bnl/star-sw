@@ -10,8 +10,13 @@
 //    produce StGammaCandidates.  The filter can be       //
 //    run on either the BEMC or the EEMC.                 //
 //                                                        //
-//    To use with the BFC place the maker instantiation   //
-//    before the line "#if 0" in bfc() of the bfc.C.      //
+//    IMPORTANT: This code will not run with the default  //
+//    BFC as the BFC does not load the StSpinPool         //
+//    libraries.  The BFC will fail if the "FiltGamma"    //
+//    chain option is selected.  Instead use              //
+//    gammaFilterBfc.C, which wraps the BFC in a macro    //
+//    providing the necessary shared libraries in         //
+//    addition to chain manipulation.                     //
 //                                                        //
 ////////////////////////////////////////////////////////////
 
@@ -29,6 +34,10 @@ class StEmcPosition;
 class StMcEmcHitCollection;
 class StMcCalorimeterHit;
 class TVector3;
+
+class TFile;
+class TTree;
+class StPythiaEvent;
 
 // Calorimeter geometry globals
 const unsigned int nModules = 120;
@@ -53,26 +62,18 @@ class StGammaFilterMaker: public StMaker
             return cvs;
         }
 
-        void useBEMC();
-        void useEEMC();
         void setThresholds(double seed, double cluster);
-        void setMaxVertex(double maxVertex);
-        void setEEMCSamplingFraction(double f);
         double BEMCSamplingMultiplier(double eta);
-        
+
         Int_t makeBEMC(StMcEmcHitCollection *mcEmcCollection, double zVertex);
         
     private:
-        // Flags
-        bool mUseBemc;
-        
+
         TVector3 *mMomentum;
 
         // Filter thresholds
-        double mMaxVertex;
         double mSeedEnergyThreshold;
         double mClusterEtThreshold;
-        double mEemcSamplingFraction;
     
         StMcCalorimeterHit *mBemcTowerHits[nBemcTowers + 1];
         
@@ -80,10 +81,18 @@ class StGammaFilterMaker: public StMaker
         StEmcPosition *mPosition;
         
         // Filter counters
+        bool mFirst;
+
         unsigned int mTotal;
         unsigned int mAccepted;
-        unsigned int mVertexRejected;
-        unsigned int mFilterRejected;
+
+        // Pythia output
+        TString mPythiaName;
+        TFile *mPythiaFile;
+        TTree *mPythiaTree;
+        StPythiaEvent *mPythiaEvent;
+
+        void fStorePythia();
 
     ClassDef(StGammaFilterMaker, 0);
         

@@ -14,10 +14,7 @@ vsig  0.01  30.
 	
  gstat time size mult stak
 *
- gexec $STAR_LIB/geometry.so
- gexec $STAR_LIB/libpythia_6410t.so
- gexec $STAR_LIB/bpythia.so
- gexec $STAR_LIB/StMCFilter.so
+ exec StRoot/StMCFilter/loadlibs.kumac
 
 gfilt example
 * MUST NOT be tabs in the next line(VP???)
