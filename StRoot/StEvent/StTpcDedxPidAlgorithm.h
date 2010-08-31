@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.h,v 2.8 2002/03/26 23:09:17 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.h,v 2.9 2010/08/31 20:15:11 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.h,v $
+ * Revision 2.9  2010/08/31 20:15:11  fisyak
+ * Clean up
+ *
  * Revision 2.8  2002/03/26 23:09:17  ullrich
  * Added destructor.
  *
@@ -46,6 +49,7 @@
 #include <vector>
 #include "StFunctional.h"
 #include "StEnumerations.h"
+#include "Rtypes.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
 #endif
@@ -55,14 +59,12 @@ class StDedxPidTraits;
 class StTpcDedxPidAlgorithm : public StPidAlgorithm {
 public:
     StTpcDedxPidAlgorithm(StDedxMethod = kTruncatedMeanId);
-    ~StTpcDedxPidAlgorithm();
+    ~StTpcDedxPidAlgorithm() {}
     
     StParticleDefinition*  operator() (const StTrack&, const StSPtrVecTrackPidTraits&);
 
-    const  StDedxPidTraits* traits() const;
-    double numberOfSigma(const StParticleDefinition*) const;
-    double meanPidFunction(const StParticleDefinition*) const;
-    double sigmaPidFunction(const StParticleDefinition*) const;
+    const  StDedxPidTraits* traits() const { return mTraits; }
+    Double_t numberOfSigma(const StParticleDefinition*) const;
 
 private:
     const StDedxPidTraits*        mTraits;       //!
