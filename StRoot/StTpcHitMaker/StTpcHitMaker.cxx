@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.26 2010/08/31 14:16:30 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.27 2010/08/31 15:19:36 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.27  2010/08/31 15:19:36  genevb
+ * Lower bound on reduced hit maxima
+ *
  * Revision 1.26  2010/08/31 14:16:30  genevb
  * Correct mistake from prev commit of location of TPC cluster check
  *
@@ -214,7 +217,8 @@ Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
           St_tpcPadGainT0C::instance()->livePadrow(sector,row))
         livePads += numPadsAtRow;
     }
-    Float_t liveFrac = ((Float_t) livePads) / ((Float_t) totalPads);
+    Float_t liveFrac = TMath::Max((Float_t) 0.1,
+                       ((Float_t) livePads) / ((Float_t) totalPads));
     maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
     if (Debug()) {LOG_INFO << "maxHits in sector " << sector
                            << " = " << maxHits[sector-1] << endm;}
