@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.h,v 2.13 2004/09/16 02:24:18 perev Exp $
+ * $Id: StDedxPidTraits.h,v 2.14 2010/08/31 19:51:56 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.h,v $
+ * Revision 2.14  2010/08/31 19:51:56  fisyak
+ * Clean up
+ *
  * Revision 2.13  2004/09/16 02:24:18  perev
  * Small optimization of alignement
  *
@@ -60,29 +63,32 @@
 #include "StTrackPidTraits.h"
 
 class StDedxPidTraits : public StTrackPidTraits {
-public:
-    StDedxPidTraits();
-    StDedxPidTraits(StDetectorId, short,
-                    unsigned short, float , float);
-    StDedxPidTraits(const dst_dedx_st&);
-    // StDedxPidTraits(const StDedxPidTraits&);            use default
-    // StDedxPidTraits& operator=(const StDedxPidTraits&); use default
-    virtual ~StDedxPidTraits();
-    
-    StDedxMethod     method() const;
-    short            encodedMethod() const;
-    unsigned short   numberOfPoints() const;
-    float            length() const;
-    float            mean() const;
-    float            errorOnMean() const;
-    void             Print(Option_t *opt = "") const;
-    
+ public:
+  StDedxPidTraits(StDetectorId det=kUnknownId, Short_t meth=kUndefinedMethodId,
+		  UShort_t n=0, Float_t dedx=0, Float_t sig=0) :
+    StTrackPidTraits(det),
+    mNumberOfPoints(n), mMethod(meth), mDedx(dedx), mSigma(sig) { /* noop */ }
+
+  StDedxPidTraits(const dst_dedx_st& t) :
+    StTrackPidTraits(t),
+    mNumberOfPoints(t.ndedx), mMethod(t.method), mDedx(t.dedx[0]),
+    mSigma(t.dedx[1]) { /* noop */ }
+
+  ~StDedxPidTraits() { /* noop */ }
+
+  UShort_t     numberOfPoints() const { return mNumberOfPoints%100; }
+  Float_t      length()         const { return (mNumberOfPoints/100); }
+  StDedxMethod method() const;
+  Short_t      encodedMethod() const;
+  Float_t      mean() const;
+  Float_t      errorOnMean() const;
+  void         Print(Option_t *opt = "") const;
+  
 protected:
-    UShort_t mNumberOfPoints;
-    Short_t  mMethod;
-    Float_t  mDedx;
-    Float_t  mSigma;
-    
-    ClassDef(StDedxPidTraits,3)
+  UShort_t   mNumberOfPoints;
+  Short_t    mMethod;
+  Float_t    mDedx;
+  Float_t    mSigma;
+  ClassDef(StDedxPidTraits,3)
 };
 #endif

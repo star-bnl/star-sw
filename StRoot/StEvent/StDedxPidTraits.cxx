@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.cxx,v 2.14 2009/11/19 17:08:34 fisyak Exp $
+ * $Id: StDedxPidTraits.cxx,v 2.15 2010/08/31 19:51:56 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.cxx,v $
+ * Revision 2.15  2010/08/31 19:51:56  fisyak
+ * Clean up
+ *
  * Revision 2.14  2009/11/19 17:08:34  fisyak
  * remove St_dst_dedx_Table
  *
@@ -59,30 +62,9 @@
 #include "Stiostream.h"
 ClassImp(StDedxPidTraits)
 
-static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.14 2009/11/19 17:08:34 fisyak Exp $";
+static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.15 2010/08/31 19:51:56 fisyak Exp $";
 
-StDedxPidTraits::StDedxPidTraits() :
-    mNumberOfPoints(0), mMethod(0), mDedx(0), mSigma(0) { /* noop */ }
-
-StDedxPidTraits::StDedxPidTraits(StDetectorId det, short meth,
-                                 unsigned short n, float dedx, float sig) :
-    StTrackPidTraits(det),
-    mNumberOfPoints(n), mMethod(meth), mDedx(dedx), mSigma(sig) { /* noop */ }
-
-StDedxPidTraits::StDedxPidTraits(const dst_dedx_st& t) :
-    StTrackPidTraits(t),
-    mNumberOfPoints(t.ndedx), mMethod(t.method), mDedx(t.dedx[0]),
-    mSigma(t.dedx[1]) { /* noop */ }
-
-StDedxPidTraits::~StDedxPidTraits() { /* noop */ }
-
-unsigned short
-StDedxPidTraits::numberOfPoints() const { return mNumberOfPoints%100; }
-float
-StDedxPidTraits::length() const { return (mNumberOfPoints/100); }
-
-float
-StDedxPidTraits::mean() const { 
+Float_t StDedxPidTraits::mean() const { 
 #ifdef P03ia
   static const Int_t N70 = 6;
   static const Double_t T70[N70] = {
@@ -93,7 +75,7 @@ StDedxPidTraits::mean() const {
     -5.50226e-01,
     3.27863e-02
   };
-  float dEdx = mDedx;
+  Float_t dEdx = mDedx;
   if (method() == kTruncatedMeanId) {
     Double_t x = TMath::Log(length());
     Double_t Corr = T70[N70-1]; for (int i = N70-2; i >= 0; i--) Corr = Corr*x + T70[i];
@@ -119,7 +101,7 @@ StDedxPidTraits::errorOnMean() const {
     3.17727e-01,
     -1.65739e-02,
   };
-  float Sigma;
+  Float_t Sigma;
   if (method() == kTruncatedMeanId) {
     Double_t x = TMath::Log(length());
     Double_t Corr = T70[N70-1]; for (int i = N70-2; i >= 0; i--) Corr = Corr*x + T70[i];
