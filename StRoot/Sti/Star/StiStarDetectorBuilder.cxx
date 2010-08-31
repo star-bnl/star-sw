@@ -14,7 +14,8 @@
 #include "TError.h"
 //________________________________________________________________________________
 void StiStarDetectorBuilder::buildDetectors(StMaker&s) {
-  assert(StiVMCToolKit::GetVMC());
+  TGeoManager *geo = StiVMCToolKit::GetVMC();
+  assert(geo);
   useVMCGeometry(); 
   cout << "StiStarDetectorBuilder::buildDetectors() -I- Done" << endl;
 }
