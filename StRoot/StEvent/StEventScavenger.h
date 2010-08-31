@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEventScavenger.h,v 2.7 2002/02/22 22:56:47 jeromel Exp $
+ * $Id: StEventScavenger.h,v 2.8 2010/08/31 19:55:13 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.h,v $
+ * Revision 2.8  2010/08/31 19:55:13  fisyak
+ * Remove SoftwareMonitors
+ *
  * Revision 2.7  2002/02/22 22:56:47  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -47,7 +50,6 @@ class StTrack;
 class StEventScavenger {
 public:
     static bool removeEventSummary(StEvent*);
-    static bool removeSoftwareMonitor(StEvent*);
     static bool removeTpcHitCollection(StEvent*);
     static bool removeFtpcHitCollection(StEvent*);
     static bool removeSvtHitCollection(StEvent*);

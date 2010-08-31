@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.43 2010/01/08 22:43:44 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.44 2010/08/31 19:53:37 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.44  2010/08/31 19:53:37  fisyak
+ * Remove SoftwareMonitors
+ *
  * Revision 2.43  2010/01/08 22:43:44  ullrich
  * Updates needed to add StFmsCollection and related classes.
  *
@@ -159,7 +162,6 @@
 #include "StEventClusteringHints.h"
 #include "StEventInfo.h"
 #include "StEventSummary.h"
-#include "StSoftwareMonitor.h"
 #include "StTpcHitCollection.h"
 #include "StRnDHitCollection.h"
 #include "StSvtHitCollection.h"
@@ -191,8 +193,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.43 2010/01/08 22:43:44 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.43 2010/01/08 22:43:44 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.44 2010/08/31 19:53:37 fisyak Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.44 2010/08/31 19:53:37 fisyak Exp $";
 
 ClassImp(StEvent)
 
@@ -371,22 +373,6 @@ StEvent::summary() const
 
 const TString&
 StEvent::cvsTag() { return mCvsTag; }
-
-StSoftwareMonitor*
-StEvent::softwareMonitor()
-{
-    StSoftwareMonitor *monitor = 0;
-    _lookup(monitor, mContent);
-    return monitor;
-}
-
-const StSoftwareMonitor*
-StEvent::softwareMonitor() const
-{
-    StSoftwareMonitor *monitor = 0;
-    _lookup(monitor, mContent);
-    return monitor;
-}
 
 StTpcHitCollection*
 StEvent::tpcHitCollection()
@@ -986,12 +972,6 @@ StEvent::setSummary(StEventSummary* val)
 }
 
 void
-StEvent::setSoftwareMonitor(StSoftwareMonitor* val)
-{
-    _lookupAndSet(val, mContent);
-}
-
-void
 StEvent::setTpcHitCollection(StTpcHitCollection* val)
 {
     _lookupAndSet(val, mContent);
@@ -1208,7 +1188,6 @@ void StEvent::statistics()
     cout << "\tbunchCrossingNumber(0):      " << bunchCrossingNumber(0) << endl;
     cout << "\tbunchCrossingNumber(1):      " << bunchCrossingNumber(1) << endl;
     cout << "\tStEventSummary:              " << static_cast<void*>(summary());
-    cout << "\tStSoftwareMonitor:           " << static_cast<void*>(softwareMonitor());
     cout << "\tStTpcHitCollection:          " << static_cast<void*>(tpcHitCollection());
     cout << "\tStRnDHitCollection:          " << static_cast<void*>(rndHitCollection());
     cout << "\tStFtpcHitCollection:         " << static_cast<void*>(ftpcHitCollection());
