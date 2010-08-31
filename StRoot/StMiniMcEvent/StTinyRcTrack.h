@@ -83,7 +83,7 @@ class StTinyRcTrack {
   void setEmcTowerAdc(Short_t val, size_t index) { if (index<3) mEmcTowerAdc[index]=val; }
   void setEmcEnergyRcHit(Float_t val, size_t index) { if (index<3) mEmcEnergyRcHit[index]=val; }
   void setEmcSoftIdHiTowerRc(Short_t val, size_t index) { if (index<3) mEmcSoftIdHiTowerRc[index]=val; }
-  
+  void setSeedQuality(UShort_t qa) {mSeedQA = qa;}
   float ptPr()const { return mPtPr; }
   float pxPr()const { return mPtPr*cos(mPhiPr); }
   float pyPr()const { return mPtPr*sin(mPhiPr); }
@@ -144,6 +144,7 @@ class StTinyRcTrack {
   short emcTowerAdc(size_t index) const { if (index<3) return mEmcTowerAdc[index]; else return -999;}
   float emcEnergyRcHit(size_t index) const {if (index<3) return mEmcEnergyRcHit[index]; else return -999;}
   short emcSoftIdHiTowerRc(size_t index) const { if (index<3) return mEmcSoftIdHiTowerRc[index]; else return -999;}
+  UShort_t seedQuality() {return mSeedQA;}
   
   virtual void Print(Option_t *option="") const;
 private:
@@ -153,11 +154,11 @@ private:
   Float_t    mPzPr;
   Float_t    mEtaPr;
   Float_t    mPhiPr;
-  Float_t    mDcaPr;
-  Float_t    mDcaXYPr;
-  Float_t    mDcaZPr;
-  Float_t    mDcaXYPrMcV;
-  Float_t    mDcaZPrMcV;
+  Float_t    mDcaPr;     // 3D distance to primary vertex from primary track
+  Float_t    mDcaXYPr;   // 2D dca with respect to primary vertex     
+  Float_t    mDcaZPr;	 // Z distance to   -"-		       
+  Float_t    mDcaXYPrMcV;// 2D dca with respect to MC vertex	       
+  Float_t    mDcaZPrMcV; // Z  distance  -"-                          
   Float_t    mCurvPr;
   Float_t    mTanLPr;
 
@@ -172,20 +173,20 @@ private:
   Float_t    mChi2Pr;
   Short_t    mFlag;
   Float_t    mDedx;
-
   // global stuff
   Float_t    mPtGl;
   Float_t    mPzGl;
   Float_t    mEtaGl;
   Float_t    mPhiGl;
-  Float_t    mDcaGl;
-  Float_t    mDcaXYGl;
-  Float_t    mDcaZGl;
-  Float_t    mDcaXYGlMcV;
-  Float_t    mDcaZGlMcV;
+  Float_t    mDcaGl;      // 3D distance to primary vertex from global trazck 
+  Float_t    mDcaXYGl;    // 2D dca with respect to primary vertex     
+  Float_t    mDcaZGl;     // Z distance to   -"-		       
+  Float_t    mDcaXYGlMcV; // 2D dca with respect to MC vertex	       
+  Float_t    mDcaZGlMcV;  // Z  distance  -"-                          
   Float_t    mCurvGl;
   Float_t    mTanLGl;
   Float_t    mErrG[5];
+  UShort_t   mSeedQA;
   
 
   // pid stuff from FlowMaker
@@ -232,6 +233,9 @@ private:
 #endif
 //
 // $Log: StTinyRcTrack.h,v $
+// Revision 1.9  2010/08/31 20:16:48  fisyak
+// Add track seedQuality
+//
 // Revision 1.8  2007/12/22 20:37:53  calderon
 // Added EMC information to tracks.  MC info obtained from StMcTrack, Rec Info
 // obtained from track extrapolation to BEMC of rec track.
@@ -262,6 +266,9 @@ private:
 //
 // Revision 1.2  2002/06/06 18:58:30  calderon
 // Added $Log: StTinyRcTrack.h,v $
+// Added Revision 1.9  2010/08/31 20:16:48  fisyak
+// Added Add track seedQuality
+// Added
 // Added Revision 1.8  2007/12/22 20:37:53  calderon
 // Added Added EMC information to tracks.  MC info obtained from StMcTrack, Rec Info
 // Added obtained from track extrapolation to BEMC of rec track.

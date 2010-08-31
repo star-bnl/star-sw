@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.32 2010/08/05 15:31:11 jwebb Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.33 2010/08/31 20:16:15 fisyak Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,9 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.33  2010/08/31 20:16:15  fisyak
+ * Add track seedQuality
+ *
  * Revision 1.32  2010/08/05 15:31:11  jwebb
  * Changed the check on valid towers during clustering to suppress the non-
  * error issued by StEmcGeom.
@@ -150,6 +153,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.33  2010/08/31 20:16:15  fisyak
+ * Add track seedQuality
+ *
  * Revision 1.32  2010/08/05 15:31:11  jwebb
  * Changed the check on valid towers during clustering to suppress the non-
  * error issued by StEmcGeom.
@@ -288,7 +294,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.32 2010/08/05 15:31:11 jwebb Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.33 2010/08/31 20:16:15 fisyak Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -1493,7 +1499,7 @@ StMiniMcMaker::fillEventInfo(Int_t nGoodTrackEta, Int_t nRcGlobal, Int_t nRcGood
 
 void
 StMiniMcMaker::fillTrackPairInfo(StMiniMcPair* miniMcPair,
-				 const StMcTrack* mcTrack, 
+				 StMcTrack* mcTrack, 
 				 const StTrack* prTrack, 
 				 const StTrack* glTrack,
 				 Int_t commonHits,
@@ -1520,7 +1526,7 @@ StMiniMcMaker::fillTrackPairInfo(StMiniMcPair* miniMcPair,
   //
   StContamPair* contamPair = dynamic_cast<StContamPair*>(miniMcPair);
   if(contamPair){
-    const StMcTrack*    mcTParent = mcTrack->parent();
+    StMcTrack*    mcTParent = mcTrack->parent();
     
     if (mcTParent){
       contamPair->setParentGeantId(mcTrack->parent()->geantId());
@@ -1607,7 +1613,7 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   tinyRcTrack->setCurvGl(glTrack->geometry()->curvature());
   tinyRcTrack->setTanLGl(tan(glTrack->geometry()->dipAngle()));
   tinyRcTrack->setErrGl(errorGl);
-  
+  tinyRcTrack->setSeedQuality(glTrack->seedQuality());
   //
   // reality check
   //
@@ -1829,7 +1835,7 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
 
 void 
 StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
-			       const StMcTrack* mcTrack,
+			       StMcTrack* mcTrack,
 			       Int_t nAssocGl, Int_t nAssocPr)
 {
   if (mcTrack) {
@@ -2172,7 +2178,7 @@ StMiniMcMaker::acceptPt(StTrack* track){
   possible pt cut on mc tracks
 */
 inline Bool_t
-StMiniMcMaker::acceptPt(StMcTrack *track){
+StMiniMcMaker::acceptPt(StMcTrack*track){
   return (track->momentum().perp()>=mMinPt &&
 	  track->momentum().perp()<=mMaxPt);
 }
@@ -2555,6 +2561,9 @@ void StMiniMcMaker::AppendMCDaughterTrack() {
 
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.33  2010/08/31 20:16:15  fisyak
+// Add track seedQuality
+//
 // Revision 1.32  2010/08/05 15:31:11  jwebb
 // Changed the check on valid towers during clustering to suppress the non-
 // error issued by StEmcGeom.
