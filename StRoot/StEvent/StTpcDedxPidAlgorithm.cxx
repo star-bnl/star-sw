@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.26 2008/03/13 16:56:39 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.27 2010/08/31 20:15:11 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.27  2010/08/31 20:15:11  fisyak
+ * Clean up
+ *
  * Revision 2.26  2008/03/13 16:56:39  ullrich
  * Add protection against missing or wrong mTraits->mean()
  *
@@ -114,8 +117,7 @@
 #include "StBichsel/Bichsel.h"
 
 static Bichsel *m_Bichsel = 0;
-static BetheBloch *theBetheBloch = 0;
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.26 2008/03/13 16:56:39 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.27 2010/08/31 20:15:11 fisyak Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -131,12 +133,6 @@ StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     mParticles.push_back(StProton::instance());
 }
 
-StTpcDedxPidAlgorithm::~StTpcDedxPidAlgorithm()
-{
-  delete theBetheBloch;
-  theBetheBloch = 0;
-}
-
 StParticleDefinition*
 StTpcDedxPidAlgorithm::operator() (const StTrack& track, const StSPtrVecTrackPidTraits& vec)
 {
@@ -147,7 +143,7 @@ StTpcDedxPidAlgorithm::operator() (const StTrack& track, const StSPtrVecTrackPid
     //
     mTraits = 0;
     mTrack  = &track;
-    for (unsigned int i=0; i<vec.size(); i++) {
+    for (UInt_t i=0; i<vec.size(); i++) {
         const StDedxPidTraits *p = dynamic_cast<const StDedxPidTraits*>(vec[i]);
         if (p && p->detector() == kTpcId && p->method() == mDedxMethod) mTraits = p;
     }
@@ -157,9 +153,9 @@ StTpcDedxPidAlgorithm::operator() (const StTrack& track, const StSPtrVecTrackPid
     //  Scan the list of particles we want to check and
     //  return the most probable.
     //
-    double       sigma, minSigma = 100000;
-    unsigned int minIndex = mParticles.size();
-    for (unsigned int k=0; k<mParticles.size(); k++) {
+    Double_t       sigma, minSigma = 100000;
+    UInt_t minIndex = mParticles.size();
+    for (UInt_t k=0; k<mParticles.size(); k++) {
         if (mParticles[k]->charge()*mTrack->geometry()->charge() > 0)  { // require same charge sign
             if ((sigma = fabs(numberOfSigma(mParticles[k]))) < minSigma) {
                 minIndex = k;
@@ -170,10 +166,7 @@ StTpcDedxPidAlgorithm::operator() (const StTrack& track, const StSPtrVecTrackPid
     return minIndex < mParticles.size() ? mParticles[minIndex] : 0;
 }
 
-const StDedxPidTraits*
-StTpcDedxPidAlgorithm::traits() const { return mTraits; }
- 
-double
+Double_t
 StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
 {
     if (!mTraits) return DBL_MAX;
@@ -185,50 +178,21 @@ StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
 
     // returns the number of sigma a tracks dedx is away from
     // the expected mean for a track for a particle of this mass
-    double dedx_expected;
-    double dedx_resolution;
-    double momentum;
-    double z = -999;
-    if (mTraits->mean() <= 0) return z;
-    const StGlobalTrack *gTrack = 
-      static_cast<const StGlobalTrack*>( mTrack->node()->track(global));
-    if (gTrack && mTraits->length() > 0 ) {
-      momentum  = abs(gTrack->geometry()->momentum());
-      if (! m_Bichsel) m_Bichsel = Bichsel::Instance();
-      dedx_expected = 1.e-6*m_Bichsel->GetI70M(log10(momentum/particle->mass()),1.0);
-      dedx_resolution = mTraits->errorOnMean();
-      if (dedx_resolution <= 0) dedx_resolution = sigmaPidFunction(particle) ;
+    Double_t dedx_expected;
+    Double_t dedx_resolution;
+    Double_t momentum;
+    Double_t z = -999;
+    if (mTraits->mean() > 0) {
+      const StGlobalTrack *gTrack = 
+	static_cast<const StGlobalTrack*>( mTrack->node()->track(global));
+      if (gTrack && mTraits->length() > 0 ) {
+	momentum  = abs(gTrack->geometry()->momentum());
+	if (! m_Bichsel) m_Bichsel = Bichsel::Instance();
+	dedx_expected = 1.e-6*m_Bichsel->GetI70M(log10(momentum/particle->mass()),1.0);
+	dedx_resolution = mTraits->errorOnMean();
+	if (dedx_resolution > 0)
+	  z = ::log(mTraits->mean()/dedx_expected);
+      }
     }
-    else {
-	dedx_expected   = meanPidFunction(particle) ;
-	dedx_resolution = sigmaPidFunction(particle) ;
-	//     return (mTraits->mean() - dedx_expected)/dedx_resolution ;
-    }
-    z = ::log(mTraits->mean()/dedx_expected);
-    return z/dedx_resolution ;
-}
-
-double
-StTpcDedxPidAlgorithm::meanPidFunction(const StParticleDefinition* particle) const
-{
-    if (!mTrack) return 0;
-
-    double momentum  = abs(mTrack->geometry()->momentum());
-    if (!theBetheBloch) theBetheBloch = new BetheBloch;
-    return (*theBetheBloch)(momentum/particle->mass());
-}
-
-double
-StTpcDedxPidAlgorithm::sigmaPidFunction(const StParticleDefinition* particle) const
-{
-    if (!mTraits) return 0;
-    
-    // calcuates average resolution of tpc dedx
-    // double dedx_expected = meanPidFunction(particle);
-    
-    // resolution depends on the number of points used in truncated mean
-    
-    double nDedxPoints = mTraits->numberOfPoints() ;
-    
-    return nDedxPoints > 0 ? 0.45  /::sqrt(nDedxPoints) : 1000.;
+    return z;
 }
