@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.17 2010/08/30 18:02:02 genevb Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.18 2010/08/31 15:19:37 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -95,7 +95,8 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
           St_tpcPadGainT0C::instance()->livePadrow(sector,row))
         livePads += numPadsAtRow;
     }
-    Float_t liveFrac = ((Float_t) livePads) / ((Float_t) totalPads);
+    Float_t liveFrac = TMath::Max((Float_t) 0.1,
+                       ((Float_t) livePads) / ((Float_t) totalPads));
     maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
     if (Debug()) {LOG_INFO << "maxHits in sector " << sector
                            << " = " << maxHits[sector-1] << endm;}
