@@ -12,7 +12,7 @@ class StiHitErrorCalculator : public TChair {
   Double_t* 	coeff(Int_t i = 0) 	{return Struct(i)->coeff;} /// coeff[6] = 0:intrinsicY  1: driftY   2: crossY 3:intrinsicZ  4: driftZ   5: crossZ
   virtual void  calculateError(Double_t _z,  Double_t _eta, Double_t _tanl, Double_t &ecross, Double_t &edip) const;
   virtual void  calculateError(const StiNodePars *pars,Double_t &ecross,Double_t &edip) const {
-    calculateError(pars->_z,  pars->_eta, pars->_tanl, ecross, edip);
+    calculateError(pars->z(),  pars->eta(), pars->tanl(), ecross, edip);
   }
  protected:
   StiHitErrorCalculator(St_HitError *table=0) : TChair(table) {}
