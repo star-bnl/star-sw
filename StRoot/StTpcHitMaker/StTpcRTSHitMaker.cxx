@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.16 2010/03/25 15:05:54 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.18 2010/08/31 15:19:37 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -24,6 +24,9 @@
 #include "StDbUtilities/StCoordinates.hh"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0C.h"
+#include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
+#include "StDetectorDbMaker/St_tpcMaxHitsC.h"
+#include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StMessMgr.h" 
 
 #ifndef NEW_DAQ_READER
@@ -49,6 +52,7 @@ Int_t StTpcRTSHitMaker::Init() {
   SetAttr("maxSector",24);
   SetAttr("minRow",1);
   SetAttr("maxRow",45);
+  memset(maxHits,0,sizeof(maxHits));
   return kStOK;
 }
 //________________________________________________________________________________
@@ -59,13 +63,18 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   if (GetDate() <= 20090101) fminCharge = 40;
   // do gains example; one loads them from database but I don't know how...
   daq_dta *dta  = fTpx->put("gain");
+  Int_t maxHitsPerSector = St_tpcMaxHitsC::instance()->maxSectorHits();
+  if (maxHitsPerSector>0) SetAttr(".Privilege",1);
   for(Int_t sector=1;sector<=24;sector++) {
+    Int_t livePads = 0;
+    Int_t totalPads = 0;
     for(Int_t row=1;row<=45;row++) {
       daq_det_gain *gain = (daq_det_gain *) dta->request(183);	// max pad+1		
       assert(gain);
       gain[0].gain = 0.0;	// kill pad0 just in case..
       gain[0].t0   = 0.0;
-      for(Int_t pad = 1; pad <= StTpcDigitalSector::numberOfPadsAtRow(row); pad++) {
+      Int_t numPadsAtRow = StTpcDigitalSector::numberOfPadsAtRow(row);
+      for(Int_t pad = 1; pad <= numPadsAtRow; pad++) {
 	if (m_Mode == 2) {
 	  if (St_tpcPadGainT0C::instance()->Gain(sector,row,pad) > 0) 
 	    gain[pad].gain = 1.;
@@ -79,7 +88,18 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	}
       }
       dta->finalize(183,sector,row);
+      totalPads += numPadsAtRow;
+      if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
+          StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
+          St_tpcAnodeHVavgC::instance()->livePadrow(sector,row) &&
+          St_tpcPadGainT0C::instance()->livePadrow(sector,row))
+        livePads += numPadsAtRow;
     }
+    Float_t liveFrac = TMath::Max((Float_t) 0.1,
+                       ((Float_t) livePads) / ((Float_t) totalPads));
+    maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
+    if (Debug()) {LOG_INFO << "maxHits in sector " << sector
+                           << " = " << maxHits[sector-1] << endm;}
   }
   /*
     InitRun will setup the internal representations of gain 
@@ -121,6 +141,7 @@ Int_t StTpcRTSHitMaker::Make() {
     if (! digitalSector) continue;
     UShort_t Id = 0;
     daq_dta *dta = fTpx->put("adc_sim"); // used for any kind of data; transparent pointer
+    Int_t hitsAdded = 0;
     Int_t nup = 0;
     Int_t NoAdcs = 0;
     for (Int_t row = minRow; row <= maxRow; row++) {
@@ -200,6 +221,11 @@ Int_t StTpcRTSHitMaker::Make() {
 			     ) << endm;
 	    iBreak++;
 	  }
+	}
+	if (++hitsAdded > maxHits[sec-1]) {
+	  LOG_ERROR << "Too many hits (" << hitsAdded << ") in one sector ("
+	            << sec << "). Skipping event." << endm;
+	  return kStSkip;
 	}
 	if (! hitCollection )  {
 	  hitCollection = new StTpcHitCollection();

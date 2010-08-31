@@ -31,7 +31,7 @@ use Cwd;
 
 use vars qw( $CVS_id $CVS_ver $ver_num $ver_rev $version );
 
-$CVS_id = '$Id: cons,v 1.105 2010/04/07 13:12:33 jeromel Exp $ ';
+$CVS_id = '$Id: cons,v 1.106 2010/05/26 21:43:09 jeromel Exp $ ';
 $CVS_ver = (split(/\s+/, $CVS_id))[2];
 
 $ver_num = "2.3";
@@ -3007,6 +3007,7 @@ sub iflags {
     my($self, $env) = @_;
     my($iflags) = '';
     my($rflags) = '';
+    my(@flags) = undef;
     my($dir, $dpath);
 
 
@@ -3022,25 +3023,45 @@ sub iflags {
 	$iflags .= " ".$env->{INCDIRPREFIX}.$dpath.$env->{INCDIRSUFFIX}
 		if ! @param::rpath || -d $dpath || $dir->is_linked || $dpath eq $param::defaultInclude;
 
+	#print "zzzz $iflags\n";
 	next if File::Spec->file_name_is_absolute($dpath);
 	if (@param::rpath) {
 	    my $d;
+	    #print "%%%  $dpath $dir::CURDIR\n";
 	    if ($dpath eq $dir::CURDIR) {
 		foreach $d (map($_->path, @param::rpath)) {
-		    #print "Adding ".$env->{INCDIRPREFIX}.$d.$env->{INCDIRSUFFIX}."\n";
-		    $rflags .= " ".$env->{INCDIRPREFIX}.$d.$env->{INCDIRSUFFIX};
+		    #print "<<< Adding ".$env->{INCDIRPREFIX}.$d.$env->{INCDIRSUFFIX}."\n";
+		    $iflags .= " ".$env->{INCDIRPREFIX}.$d.$env->{INCDIRSUFFIX};
 		}
 	    } else {
 		my($rpath);
 		foreach $d (map($_->path, @param::rpath)) {
 		    $rpath = File::Spec->catfile($d, $dpath);
-		    $rflags .= " ".$env->{INCDIRPREFIX}.$rpath.$env->{INCDIRSUFFIX}
+		    #print ">>> Adding ".$env->{INCDIRPREFIX}.$rpath.$env->{INCDIRSUFFIX}."\n";
+		    #$rflags .= " ".$env->{INCDIRPREFIX}.$rpath.$env->{INCDIRSUFFIX}
+		    $iflags .= " ".$env->{INCDIRPREFIX}.$rpath.$env->{INCDIRSUFFIX}
 				if -d $rpath;
 		}
 	    }
 	}
     }
+    #print 
+    #	"*** $iflags\n",
+    #	"+-+ $rflags\n";
+    # reshufle by hand then as the previous logic failed / JL 2010/05
+    @flags = split(' ',$iflags);
+    $iflags= "";
+    foreach my $d (@flags){
+	#print "*** $d - ";
+	if ( substr($d,2,1) eq "/"){
+	    #print "remote\n";
+	    $rflags .= $d." ";
+	} else {
+	    #print "local\n";
+	    $iflags .= $d." ";
+	}
 
+    }
     $iflags." ".$rflags;
 }
 
