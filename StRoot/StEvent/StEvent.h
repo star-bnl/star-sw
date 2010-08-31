@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.38 2010/01/08 22:43:44 ullrich Exp $
+ * $Id: StEvent.h,v 2.39 2010/08/31 19:53:37 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.39  2010/08/31 19:53:37  fisyak
+ * Remove SoftwareMonitors
+ *
  * Revision 2.38  2010/01/08 22:43:44  ullrich
  * Updates needed to add StFmsCollection and related classes.
  *
@@ -148,7 +151,6 @@ class StEventInfo;
 class StEventSummary;
 class StFpdCollection;
 class StPhmdCollection;
-class StSoftwareMonitor;
 class StTpcHitCollection;
 class StFtpcHitCollection;
 class StSvtHitCollection;
@@ -196,9 +198,6 @@ public:
 
     StEventSummary*                     summary();
     const StEventSummary*               summary() const;
-    
-    StSoftwareMonitor*                  softwareMonitor();
-    const StSoftwareMonitor*            softwareMonitor() const;
     
     StTpcHitCollection*                 tpcHitCollection();
     const StTpcHitCollection*           tpcHitCollection() const;
@@ -287,7 +286,6 @@ public:
     void setInfo(StEventInfo*);
     void setRunInfo(StRunInfo*);
     void setSummary(StEventSummary*);
-    void setSoftwareMonitor(StSoftwareMonitor*);
     void setTpcHitCollection(StTpcHitCollection*);
     void setRnDHitCollection(StRnDHitCollection*);
     void setFtpcHitCollection(StFtpcHitCollection*);

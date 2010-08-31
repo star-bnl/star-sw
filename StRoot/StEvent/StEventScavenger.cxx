@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventScavenger.cxx,v 2.8 2002/01/19 00:14:16 ullrich Exp $
+ * $Id: StEventScavenger.cxx,v 2.9 2010/08/31 19:55:13 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.cxx,v $
+ * Revision 2.9  2010/08/31 19:55:13  fisyak
+ * Remove SoftwareMonitors
+ *
  * Revision 2.8  2002/01/19 00:14:16  ullrich
  * Corrected typo.
  *
@@ -42,16 +45,6 @@ bool StEventScavenger::removeEventSummary(StEvent* evt)
 {
     if (evt && evt->summary()) {
         evt->summary()->makeZombie();
-        return true;
-    }
-    else
-        return false;
-}
-
-bool StEventScavenger::removeSoftwareMonitor(StEvent* evt)
-{
-    if (evt && evt->softwareMonitor()) {
-        evt->softwareMonitor()->makeZombie();
         return true;
     }
     else

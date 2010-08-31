@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.32 2010/01/08 22:43:44 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.33 2010/08/31 19:56:04 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.33  2010/08/31 19:56:04  fisyak
+ * Remove SoftwareMonitors
+ *
  * Revision 2.32  2010/01/08 22:43:44  ullrich
  * Updates needed to add StFmsCollection and related classes.
  *
@@ -140,7 +143,6 @@
 #include "StFtpcHitCollection.h"
 #include "StFtpcPlaneHitCollection.h"
 #include "StFtpcSectorHitCollection.h"
-#include "StFtpcSoftwareMonitor.h"
 #include "StFunctional.h"
 #include "StGlobalTrack.h"
 #include "StHelixModel.h"
@@ -173,14 +175,12 @@
 #include "StRichPid.h"
 #include "StRichPidTraits.h"
 #include "StRichSpectra.h"
-#include "StRichSoftwareMonitor.h"
 #include "StRichPixel.h"
 #include "StRpsCluster.h"
 #include "StRpsCollection.h"
 #include "StRpsPlane.h"
 #include "StRpsRomanPot.h"
 #include "StRunInfo.h"
-#include "StSoftwareMonitor.h"
 #include "StSsdHit.h"
 #include "StSsdHitCollection.h"
 #include "StSsdLadderHitCollection.h"
