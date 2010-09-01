@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.38 2008/03/27 00:09:54 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.45 2010/02/25 21:49:05 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,24 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.45  2010/02/25 21:49:05  genevb
+ * Using sector number to better handle post-membrane hits, prep for sector-by-sector GL, and GGVoltage errors
+ *
+ * Revision 1.44  2009/12/11 04:53:58  genevb
+ * Give the enum constants unique names
+ *
+ * Revision 1.43  2009/12/11 03:55:21  genevb
+ * Singleton implementation + no defines in header
+ *
+ * Revision 1.42  2009/11/06 13:38:05  fisyak
+ * Revert the change done 11/03/09
+ *
+ * Revision 1.40  2009/10/19 21:29:01  jhthomas
+ * Improved execution speed for many algorithms: especially GridLeak.
+ *
+ * Revision 1.39  2009/10/01 22:40:11  jhthomas
+ * Update grid spacing for UndoShort, and prepare for other future gridding upgrades to achieve higher resolution results.
+ *
  * Revision 1.38  2008/03/27 00:09:54  jhthomas
  * Modify previous magfield changes and set 'zero' field to ~1 Gauss in a more robust way.
  * Add SpaceChargeEWRatio and appropriate functions that allow us to calibrate d-Au collisions.
@@ -120,13 +138,6 @@
 #include "TROOT.h"        // Stop at this point and put further includes in .cxx file
 #include "TMatrix.h"      // TMatrix keeps changing ... keep it here until proven otherwise.
 
-#define  nZ               57            // Standard STAR B field Map. Number of Z points in table
-#define  nR               28            // Number of R points in table
-#define  nPhi             37            // Number of Phi points in table
-#define  neZ              69            // Standard STAR E field Map. Number of Z points in table
-#define  neR              33            // Number of R points in table
-#define  nePhi            13            // Number of Phi points in table ( add one for 360 == 0 )
-
 enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
 enum   Prime    { IsPrimary = 0 , IsGlobal = 1 } ;
 
@@ -146,7 +157,17 @@ enum   DistortSelect
   kShortedRing       = 0x1000,   // Bit 13
   kFast2DBMap        = 0x2000,   // Bit 14
   kGridLeak          = 0x4000,   // Bit 15
-  k3DGridLeak        = 0x8000    // Bit 16
+  k3DGridLeak        = 0x8000,   // Bit 16
+  kGGVoltError       = 0x10000   // Bit 17
+} ;
+enum   EBMapSizes
+{
+  BMap_nZ    =          57,           // Number of Z points in table. Measured STAR B field Maps from Steve T. 
+  BMap_nR    =          28,           // Number of R points in table.
+  BMap_nPhi  =          37,           // Number of Phi points in table.
+  EMap_nZ    =         224,           // Number of Z points in table. Standard STAR distortion tables for interpolating. 
+  EMap_nR    =          82,           // Number of R points in table
+  EMap_nPhi  =          13            // Number of Phi points in table ( add one for 360 == 0 )
 } ;
 
 // DO NOT change the numbering of these constants. StBFChain depends
@@ -169,7 +190,8 @@ class StMagUtilities {
 
 
  private:
-  
+  static StMagUtilities *fgInstance;
+ 
   StTpcDb*  thedb ;  
   TDataSet* thedb2 ;
   StDetectorDbSpaceCharge*   fSpaceCharge   ;
@@ -192,11 +214,13 @@ class StMagUtilities {
   virtual void    ReadField ( ) ;
   virtual void    Search ( const Int_t N, const Float_t Xarray[], const Float_t x, Int_t &low ) ;
   virtual Int_t   IsPowerOfTwo (Int_t i) ;
+  virtual void    SectorNumber ( Int_t& Sector , const Float_t x[] ) ;
+  virtual Float_t LimitZ (Int_t& Sector, const Float_t x[] ) ;
   virtual Float_t Interpolate ( const Float_t Xarray[], const Float_t Yarray[], 
 				const Int_t ORDER, const Float_t x ) ;
-  virtual Float_t Interpolate2DTable  ( const Float_t x, const Float_t y, const Int_t nx, const Int_t ny, 
+  virtual Float_t Interpolate2DTable  ( const Int_t ORDER, const Float_t x, const Float_t y, const Int_t nx, const Int_t ny, 
  				        const Float_t XV[], const Float_t YV[], const TMatrix &Array ) ;
-  virtual Float_t Interpolate3DTable ( const Float_t x,    const Float_t y,    const Float_t z,
+  virtual Float_t Interpolate3DTable ( const Int_t ORDER, const Float_t x,    const Float_t y,    const Float_t z,
 				       const Int_t  nx,    const Int_t  ny,    const Int_t  nz,
 				       const Float_t XV[], const Float_t YV[], const Float_t ZV[],
 				       TMatrix **ArrayofArrays ) ;
@@ -204,10 +228,10 @@ class StMagUtilities {
 					Float_t &Br_value, Float_t &Bz_value ) ;
   virtual void    Interpolate3DBfield ( const Float_t r, const Float_t z, const Float_t phi, 
 					Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
-  virtual void    Interpolate2DEdistortion ( const Float_t r, const Float_t z, 
-					     const Float_t Er[neZ][neR], Float_t &Er_value ) ;
-  virtual void    Interpolate3DEdistortion ( const Float_t r, const Float_t phi, const Float_t z, 
-					     const Float_t Er[neZ][nePhi][neR], const Float_t Ephi[neZ][nePhi][neR], 
+  virtual void    Interpolate2DEdistortion ( const Int_t ORDER, const Float_t r, const Float_t z, 
+					     const Float_t Er[EMap_nZ][EMap_nR], Float_t &Er_value ) ;
+  virtual void    Interpolate3DEdistortion ( const Int_t ORDER, const Float_t r, const Float_t phi, const Float_t z, 
+					     const Float_t Er[EMap_nZ][EMap_nPhi][EMap_nR], const Float_t Ephi[EMap_nZ][EMap_nPhi][EMap_nR], 
 					     Float_t &Er_value, Float_t &Ephi_value ) ;
   virtual void    PoissonRelaxation  ( TMatrix &ArrayV, const TMatrix &Charge, TMatrix &EroverEz, 
                                        const Int_t ROWS, const Int_t COLUMNS, const Int_t ITERATIONS ) ;
@@ -247,54 +271,64 @@ class StMagUtilities {
   Double_t OuterGridLeakStrength      ; // Relative strength of the Outer grid leak
   Double_t OuterGridLeakRadius        ; // Location (in local Y coordinates) of the Outer grid leak 
   Double_t OuterGridLeakWidth         ; // Half-width of the Outer grid leak.  Must be larger than life for numerical reasons.
+  Float_t  GLWeights[25]              ; // GridLeak weights per sector.  24 sectors. Note: slot 0 is not used!!
   Int_t    ShortTableRows             ; // Number of rows in the Shorted Ring Table
   Int_t    Side[10]                   ; // Location of Short   E=0 /   W=1
   Int_t    Cage[10]                   ; // Location of Short IFC=0 / OFC=1
   Float_t  Ring[10]                   ; // Location of Short counting out from the CM.  CM==0 
   Float_t  MissingResistance[10]      ; // Amount of Missing Resistance due to this short (MOhm)
   Float_t  Resistor[10]               ; // Amount of compensating resistance added for this short
+  Float_t  deltaVGGEast               ; // Voltage error on the East Gated Grid
+  Float_t  deltaVGGWest               ; // Voltage error on the West Gated Grid
 
-  Float_t  Bz[nZ][nR], Br[nZ][nR] ;         
-  Float_t  Radius[nR], ZList[nZ] ;         
-  Float_t  Bz3D[nPhi][nZ][nR], Br3D[nPhi][nZ][nR], Bphi3D[nPhi][nZ][nR] ;         
-  Float_t  R3D[nR], Z3D[nZ], Phi3D[nPhi] ;         
-  Float_t  cmEr[neZ][nePhi][neR],    cmEphi[neZ][nePhi][neR] ;
-  Float_t  endEr[neZ][nePhi][neR],   endEphi[neZ][nePhi][neR] ;
-  Float_t  shiftEr[neZ][neR] ;
-  Float_t  spaceEr[neZ][neR] ;
-  Float_t  spaceR2Er[neZ][neR] ;
-  Float_t  shortEr[neZ][neR] ;
-  Float_t  eRadius[neR], ePhiList[nePhi], eZList[neZ]  ;         
+
+  Float_t  Bz[BMap_nZ][BMap_nR], Br[BMap_nZ][BMap_nR] ;         
+  Float_t  Radius[BMap_nR], ZList[BMap_nZ] ;         
+  Float_t  Bz3D[BMap_nPhi][BMap_nZ][BMap_nR], Br3D[BMap_nPhi][BMap_nZ][BMap_nR], Bphi3D[BMap_nPhi][BMap_nZ][BMap_nR] ;         
+  Float_t  R3D[BMap_nR], Z3D[BMap_nZ], Phi3D[BMap_nPhi] ;         
+//Float_t  cmEr[EMap_nZ][EMap_nPhi][EMap_nR],    cmEphi[EMap_nZ][EMap_nPhi][EMap_nR]  ;
+//Float_t  endEr[EMap_nZ][EMap_nPhi][EMap_nR],   endEphi[EMap_nZ][EMap_nPhi][EMap_nR] ;
+  Float_t  shiftEr[EMap_nZ][EMap_nR] ;
+  Float_t  spaceEr[EMap_nZ][EMap_nR] ;
+  Float_t  spaceR2Er[EMap_nZ][EMap_nR] ;
+  Float_t  shortEr[EMap_nZ][EMap_nR] ;
+  Float_t  GGVoltErrorEr[EMap_nZ][EMap_nR] ;
+
+  static   Float_t ePhiList[EMap_nPhi] ;   // Note: These are initialized near CommonStart() in the .cxx file
+  static   Float_t eRList[EMap_nR]     ;
+  static   Float_t eZList[EMap_nZ]     ;
 
  public:
 
   StMagUtilities () ;
   StMagUtilities ( StTpcDb* dbin,  TDataSet* dbin2, Int_t mode = 0 ) ;
   StMagUtilities ( const EBField map, const Float_t factor, Int_t mode = 0 ) ;
-  virtual ~StMagUtilities () {}
+  virtual ~StMagUtilities () { fgInstance = 0; }
+  static StMagUtilities* Instance() { return fgInstance; }
 
   virtual void    BField ( const Float_t x[], Float_t B[] ) ;
   virtual void    BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) ;
   virtual void    B3DField ( const Float_t x[], Float_t B[] ) ;
   virtual void    BrBz3DField ( const Float_t r, const Float_t z, const Float_t phi,
 				Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
-  virtual void    DoDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoBDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    Undo2DBDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    FastUndoBDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    FastUndo2DBDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoPad13Distortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoTwistDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoClockDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoMembraneDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoEndcapDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoSpaceChargeDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoSpaceChargeR2Distortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoGridLeakDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    Undo3DGridLeakDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoIFCShiftDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoShortedRingDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    DoDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoBDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    Undo2DBDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    FastUndoBDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    FastUndo2DBDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoPad13Distortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoTwistDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoClockDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoMembraneDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoEndcapDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoSpaceChargeDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoSpaceChargeR2Distortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoGridLeakDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    Undo3DGridLeakDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoIFCShiftDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoShortedRingDistortion ( const Float_t x[], Float_t Xprime[] , Int_t Sector = -1 ) ;
+  virtual void    UndoGGVoltErrorDistortion ( const Float_t x[], Float_t Xprime[], Int_t Sector = -1 ) ;
 
   virtual void    FixSpaceChargeDistortion ( const Int_t Charge, const Float_t x[3], const Float_t p[3],
 					     const Prime PrimaryOrGlobal, 

@@ -1,5 +1,8 @@
-// $Id: StBemcRaw.h,v 1.11 2008/07/03 20:58:49 mattheww Exp $
+// $Id: StBemcRaw.h,v 1.12 2008/10/24 18:19:07 mattheww Exp $
 // $Log: StBemcRaw.h,v $
+// Revision 1.12  2008/10/24 18:19:07  mattheww
+// Added option to throw out all hits in an event if any crates are corrupted
+//
 // Revision 1.11  2008/07/03 20:58:49  mattheww
 // Added checking of every status table for each hit. Status table checks can be toggled using an option added to setCheckStatus. Also fixed a small bug.
 //
@@ -101,6 +104,8 @@ protected:
     Int_t                    mCrateStatus[MAXDETBARREL][MAXCRATES];
     Bool_t                   mIsCorrupted[MAXDETBARREL];
     Int_t                    mCheckStatus[MAXDETBARREL][4];
+    Int_t                    mCrateVeto;
+    Bool_t                   mAnyCorrupted;
 public:
 
     StBemcRaw(); ///< StBemcRaw constructor
@@ -128,6 +133,7 @@ public:
     ///accepts options="status","pedestal","calib","gain" to toggle individual tables
     ///default is all tables are checked
     void                      setCheckStatus(Int_t det, Int_t flag, const char* option = "");
+    void                      setCrateVeto(Int_t flag);
     void                      clearStats(Int_t); ///< Clear statistics for detector 'det'
     void                      updateStats(Int_t,Int_t,Int_t, Float_t); ///< Update statistics for detector 'det'
     void                      printStats(Int_t); ///< Print statistics for detector 'det'

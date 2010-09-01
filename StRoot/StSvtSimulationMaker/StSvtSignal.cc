@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.9 2005/07/23 03:37:34 perev Exp $
+ * $Id: StSvtSignal.cc,v 1.10 2008/09/22 16:03:55 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.10  2008/09/22 16:03:55  caines
+ * Changed gain as needed for tuning CuCu data
+ *
  * Revision 1.9  2005/07/23 03:37:34  perev
  * IdTruth + Cleanup
  *
@@ -65,8 +68,9 @@ StSvtSignal::StSvtSignal()
 
  memset(mSignal,0,sizeof(mSignal[0])*128);
 
- mPasaGain = 7.2;      // uV/e
-
+ // mPasaGain = 7.2;      // uV/e Original number
+ mPasaGain = 14.4; // Tune to CuCu data
+ 
  for(int i = 0; i < 4; i++)
     mPasa[i] = 0.0;
 

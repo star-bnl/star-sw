@@ -48,9 +48,10 @@ ClassImp(StGenericVertexMaker)
 //___________________________________________________________
 StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name)
 {
-  use_ITTF=kTRUE;
-  usebeamline = kFALSE;
+  useITTF=kTRUE;
+  useBeamline = kFALSE;
   useCTB = kFALSE;
+  usePCT = kFALSE;
   eval = kFALSE;
   nEvTotal=nEvGood=0;
   externalFindUse=kTRUE; ///Default means that no finding actually done
@@ -142,9 +143,11 @@ Int_t StGenericVertexMaker::Init()
     isMinuit=true;
 
   }
-  
+
+  theFinder->UsePCT(usePCT);
+
   if(isMinuit) { // this is ugly, one should abort at 'else' above, Jan
-    if (use_ITTF)  ((StMinuitVertexFinder*)theFinder)->DoUseITTF();
+    if (useITTF)  ((StMinuitVertexFinder*)theFinder)->DoUseITTF();
     if (useCTB) ((StMinuitVertexFinder*)theFinder)->CTBforSeed();
   } else {
     assert(!eval); // current implementation support only Minuit Vertex finder, JB 
@@ -177,7 +180,7 @@ void StGenericVertexMaker::Clear(const char* opt){
  */
 Int_t StGenericVertexMaker::InitRun(int runnumber){
   theFinder->InitRun(runnumber);
-  if (usebeamline) {
+  if (useBeamline) {
      double x0 = 0.;
      double y0 = 0.;
      double dxdz = 0.;

@@ -1,5 +1,11 @@
-// $Id: StMagFMaker.cxx,v 1.14 2007/03/21 17:12:58 fisyak Exp $
+// $Id: StMagFMaker.cxx,v 1.16 2010/09/01 20:21:21 fisyak Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.16  2010/09/01 20:21:21  fisyak
+// remove dependence on St_geant_Maker
+//
+// Revision 1.15  2009/11/10 20:50:46  fisyak
+// Switch to TChair
+//
 // Revision 1.14  2007/03/21 17:12:58  fisyak
 // Zero Field is 1G
 //
@@ -56,8 +62,7 @@
 #include <assert.h>
 #include <Stiostream.h>
 #include "StMagFMaker.h"
-#include "St_geant_Maker/St_geant_Maker.h"
-#include "tables/St_MagFactor_Table.h"
+#include "StDetectorDbMaker/St_MagFactorC.h"
 #include "StMessMgr.h" 
 #include "StMagF.h"
 #include "StarMagField.h"
@@ -75,8 +80,6 @@ R__EXTERN  "C" {
 ClassImp(StMagFMaker)
 ClassImp(StMagF)
   
-  //_____________________________________________________________________________
-StMagFMaker::StMagFMaker(const char *name):StMaker(name),fMagFactor(0){}
 //_____________________________________________________________________________
 StMagFMaker::~StMagFMaker(){}
 //_____________________________________________________________________________
@@ -86,11 +89,7 @@ Int_t StMagFMaker::InitRun(Int_t RunNo){
     gMessMgr->Info() << "StMagFMaker::InitRun passive mode. Don't update Mag.Field from DB" << endm;
     return kStOK;
   }
-  if (!fMagFactor) {
-    TDataSet *RunLog = GetDataBase("RunLog");
-    fMagFactor = (St_MagFactor *) RunLog->Find("MagFactor"); assert(fMagFactor);
-  }
-  Float_t       fScale = (*fMagFactor)[0].ScaleFactor;
+  Float_t  fScale = St_MagFactorC::instance()->ScaleFactor();
   if (TMath::Abs(fScale) < 1e-3) fScale = 1e-3;
   gMessMgr->Info() << "StMagFMaker::InitRun active mode ";
   if (! StarMagField::Instance()) {

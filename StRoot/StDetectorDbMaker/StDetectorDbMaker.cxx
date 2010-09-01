@@ -3,6 +3,9 @@
 #include "St_trigDetSumsC.h"
 #include "StDetectorDbMaker.h"
 #include "StDetectorDbRichScalers.h"
+
+St_trigDetSums* St_trigDetSumsC::fgTableCopy = 0;
+
 ClassImp(StDetectorDbMaker)
 //_____________________________________________________________________________
 Int_t StDetectorDbMaker::Make(){
