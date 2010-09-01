@@ -7,9 +7,9 @@
 ClassImp(St_svtRDOstrippedC);
 St_svtRDOstrippedC *St_svtRDOstrippedC::fgsvtRDOstrippedC = 0;
 struct RDO_t {
-  Char_t *name;
+  const Char_t *name;
   Int_t ladNum, barNum;
-  Char_t *rdo;
+  const Char_t *rdo;
   Int_t ndet1, ndet2; // wafers range
 };
 static const Int_t NRDOS = 72;
