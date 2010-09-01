@@ -1,6 +1,9 @@
-// $Id: StSsdDbMaker.cxx,v 1.15 2008/08/12 22:45:47 bouchet Exp $
+// $Id: StSsdDbMaker.cxx,v 1.16 2010/09/01 21:04:06 fisyak Exp $
 //
 // $Log: StSsdDbMaker.cxx,v $
+// Revision 1.16  2010/09/01 21:04:06  fisyak
+// Disable sim flavor, now sim parameters is coming via DB associated with simulation time stamp
+//
 // Revision 1.15  2008/08/12 22:45:47  bouchet
 // use of SsdLaddersOnSectors,SsdOnGlobal,SsdSectorsOnGlobal,SsdWafersOnLadders tables to calculate ssdWafersPositions;add Get methods to access the tables
 //
@@ -63,6 +66,7 @@ StSsdDbMaker::~StSsdDbMaker() {SafeDelete(mySsd); gStSsdDbMaker = 0;}
 Int_t StSsdDbMaker::Init()
 {
   LOG_DEBUG << "Init - Start - " << endm;
+#if 0
   if( m_Mode == 1) {
     LOG_INFO << "Init setting WafersPositions to simulation" << endm;
     //SetFlavor("sim","ssdWafersPosition");   
@@ -71,6 +75,7 @@ Int_t StSsdDbMaker::Init()
     SetFlavor("sim","SsdLaddersOnSectors");
     SetFlavor("sim","SsdWafersOnLadders");
   }
+#endif
   LOG_DEBUG << "StSsdDbMaker::Init() - Done - "<<endm;
   return StMaker::Init();
 }
