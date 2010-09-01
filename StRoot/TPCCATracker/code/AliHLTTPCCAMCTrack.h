@@ -11,6 +11,10 @@
 
 #include "AliHLTTPCCADef.h"
 
+#include <iostream>
+using std::ostream;
+using std::istream;
+
 class TParticle;
 
 
@@ -53,6 +57,9 @@ class AliHLTTPCCAMCTrack
     void SetNReconstructed( int v ) { fNReconstructed = v; }
     void SetSet( int v )           { fSet = v; }
     void SetNTurns( int v )        { fNTurns = v; }
+
+    friend ostream& operator<<(ostream& out, const AliHLTTPCCAMCTrack &a);
+    friend istream& operator>>(istream& in, AliHLTTPCCAMCTrack &a);
 
   protected:
 

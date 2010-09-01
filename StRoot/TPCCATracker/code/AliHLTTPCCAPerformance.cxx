@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAPerformance.cxx,v 1.12 2010/08/23 19:37:02 mzyzak Exp $
+// $Id: AliHLTTPCCAPerformance.cxx,v 1.13 2010/09/01 10:38:27 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -272,7 +272,7 @@ void AliHLTTPCCAPerformance::ReadMCEvent( FILE *file )
 //   for (int i = 0; i < fHitLabels.Size(); i++){
 //     AliHLTTPCCAHitLabel& l = fHitLabels[i];
 //     for (int iPar = 0; iPar < 3; iPar++)
-//       std::cout << l.fLab[iPar] << " ";
+//      std::cout << l.fLab[iPar] << " ";
 //     std::cout << std::endl;
 //   };
 }
@@ -319,3 +319,82 @@ void AliHLTTPCCAPerformance::SetHitLabels(vector<AliHLTTPCCAHitLabel>& hitLabels
     fHitLabels[i] = hitLabels[i];
   }					   
 }
+
+void AliHLTTPCCAPerformance::SaveDataInFiles(string prefix) const
+{
+
+  {
+    ofstream ofile((prefix+"hitLabels.data").data(),ios::out|ios::app);
+    const int Size = fHitLabels.Size();
+    ofile << Size << std::endl;
+    for (int i = 0; i < fHitLabels.Size(); i++){
+      const AliHLTTPCCAHitLabel &l = fHitLabels[i];
+      ofile << l;
+    }
+    ofile.close();
+  }
+
+  {
+    ofstream ofile((prefix+"MCTracks.data").data(),ios::out|ios::app);
+    const int Size = fMCTracks.Size();
+    ofile << Size << std::endl;
+    for (int i = 0; i < fMCTracks.Size(); i++){
+      const AliHLTTPCCAMCTrack &l = fMCTracks[i];
+      ofile << l;
+    }
+    ofile.close();
+  }
+
+  {
+    ofstream ofile((prefix+"MCPoints.data").data(),ios::out|ios::app);
+    const int Size = fLocalMCPoints.Size();
+    ofile << Size << std::endl;
+    for (int i = 0; i < fLocalMCPoints.Size(); i++){
+      const AliHLTTPCCALocalMCPoint &l = fLocalMCPoints[i];
+      ofile << l;
+    }
+    ofile.close();
+  }
+}
+
+void AliHLTTPCCAPerformance::ReadDataFromFiles(string prefix)
+{
+
+  {
+    ifstream ifile((prefix+"hitLabels.data").data());
+    int Size;
+    ifile >> Size;
+    fHitLabels.Resize(Size);
+    for (int i = 0; i < Size; i++){
+      AliHLTTPCCAHitLabel &l = fHitLabels[i];
+      ifile >> l;
+    }
+    ifile.close();
+  }
+
+  {
+    ifstream ifile((prefix+"MCTracks.data").data());
+    int Size;
+    ifile >> Size;
+    fMCTracks.Resize(Size);
+    for (int i = 0; i < Size; i++){
+      AliHLTTPCCAMCTrack &l = fMCTracks[i];
+      ifile >> l;
+    }
+    ifile.close();
+  }
+
+
+  {
+    ifstream ifile((prefix+"MCPoints.data").data());
+    int Size;
+    ifile >> Size;
+    fLocalMCPoints.Resize(Size);
+    for (int i = 0; i < Size; i++){
+      AliHLTTPCCALocalMCPoint &l = fLocalMCPoints[i];
+      ifile >> l;
+    }
+    ifile.close();
+  }
+}
+

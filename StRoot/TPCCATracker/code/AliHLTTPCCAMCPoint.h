@@ -12,6 +12,12 @@
 #include "AliHLTTPCCADef.h"
 #include <vector>
 
+#include <iostream>
+using std::ostream;
+using std::istream;
+
+
+
 /**
  * @class AliHLTTPCCAMCPoint
  * store MC point information for AliHLTTPCCAPerformance
@@ -98,6 +104,10 @@ class AliHLTTPCCALocalMCPoint
     static bool Compare( const AliHLTTPCCALocalMCPoint &p1, const AliHLTTPCCALocalMCPoint &p2 ) {
       return ( p1.fTrackID < p2.fTrackID );
     }
+
+    friend ostream& operator<<(ostream& out, const AliHLTTPCCALocalMCPoint &a);
+    friend istream& operator>>(istream& in, AliHLTTPCCALocalMCPoint &a);
+
 
   protected:
 
