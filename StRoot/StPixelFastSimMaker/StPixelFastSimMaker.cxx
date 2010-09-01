@@ -5,6 +5,9 @@
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.43  2010/09/01 20:31:47  fisyak
+ * clean up unused varaibles
+ *
  * Revision 1.42  2009/02/06 20:48:48  wleight
  * UPGR15 Update
  *
@@ -321,21 +324,14 @@ Int_t StPixelFastSimMaker::Make()
 
   //Get MC Pixel hit collection. This contains all pixel hits.
   StMcPixelHitCollection* pixHitCol = mcEvent->pixelHitCollection();
-  int nPixelPerWaferX=640;
-  int nPixelPerWaferZ=640;
-  int nWaferPerLadder=10;
-  double pixelWidth=.003;
-  float pixWaferHalf=.96;
   unsigned int nPixLadders[2]={9,24};
   //int pixels[6400][640];
   vector<int> pixels;
   vector<StMcPixelHit*> pixLadderHits;
   multimap<int,int> pixelToKey;
-  int vid;
   float smearedX,smearedZ;
 
   if (pixHitCol){
-    int layer,ladder;
     int counter_layer1 = 0;
     int counter_layer2 = 0;
     int counter        = 0;
@@ -431,13 +427,6 @@ Int_t StPixelFastSimMaker::Make()
   const StMcIstHitCollection* istHitCol = mcEvent->istHitCollection();
   
   //new simulator for new 1-layer design
-  int nLadders=24;
-  int nWafers=12;
-  unsigned int ladderCount;
-  unsigned int waferCount;
-  double pos[3];
-  double localpos[3];
-  double gpos[3];
   int id=0;
   //float smearedX,smearedZ;
   TString Path("");
