@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.192 2010/01/27 21:43:49 perev Exp $
+// $Id: StiMaker.cxx,v 1.193 2010/09/01 21:25:03 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.193  2010/09/01 21:25:03  fisyak
+// Add comment
+//
 // Revision 1.192  2010/01/27 21:43:49  perev
 // Add _nPrimTracks for case of fiterr
 //
@@ -665,7 +668,7 @@ Int_t StiMaker::Make()
   if (_tracker) {
       if (mTimg[kGloTimg]) mTimg[kGloTimg]->Start(0);
 
-      _tracker->findTracks();
+      _tracker->findTracks();    // get the rest
 
       if (mTimg[kGloTimg]) mTimg[kGloTimg]->Stop();
       const std::vector<StiHit*> *vertexes=0;
