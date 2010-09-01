@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.1 2010/03/17 15:53:17 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.2 2010/09/01 21:24:13 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -9,7 +9,6 @@
 #include "tables/St_TpcSecRowCor_Table.h"
 #include "tables/St_tpcGas_Table.h"
 //#include "tables/St_trigDetSums_Table.h"
-//#include "tables/St_tpcGainMonitor_Table.h"
 #include "StTrackPidTraits.h"
 //class St_trigDetSums;
 //class trigDetSums_st;
@@ -37,31 +36,32 @@ class StTpcdEdxCorrection : public TObject {
  public:
   enum ESector  {kTpcOuter = 0, kTpcInner = 1};
   enum EOptions {
-    kUncorrected   = 0   , //U
-    kEdge          = 1   , //E correction near edge of chamber
-    kAdcCorrection = 2   , //R
-    kTpcdCharge    = 3   , //D
-    kTpcrCharge    = 4   , //D
-    kTpcRowQ       = 5   ,
-    kTpcSecRowB    = 6   ,//S
-    kTpcSecRowC    = 7   , //S
-    ktpcPressure   = 8   , //P
-    ktpcTime       = 9   , //t
-    kDrift         =10   , //O
-    kMultiplicity  =11   , //M
-    kzCorrection   =12   , //Z
-    ktpcMethaneIn  =13   , //m
-    ktpcGasTemperature=14, //T
-    ktpcWaterOut   =15   , //W 
-    kSpaceCharge   =16   , //C space charge near the wire
-    kPhiDirection  =17   , //p correction wrt local interception angle 
-    kdXCorrection  =18   , //X
-    kTpcPadTBins   =19   , //d
-    kTpcZDC        =20   ,
-    kTpcLast       =21   ,
-    kTpcLengthCorrection=22,
-    kTpcdEdxCor    =23   ,
-    kTpcAllCorrections=24
+    kUncorrected   = 0, //U
+    kEdge             , //E correction near edge of chamber
+    kAdcCorrection    , //R
+    kTpcdCharge       , //D
+    kTpcrCharge       , //D
+    kTpcAvCurrent     ,
+    kTpcRowQ          ,
+    kTpcSecRowB       , //S
+    kTpcSecRowC       , //S
+    ktpcPressure      , //P
+    ktpcTime          , //t
+    kDrift            , //O
+    kMultiplicity     , //M
+    kzCorrection      , //Z
+    ktpcMethaneIn     , //m
+    ktpcGasTemperature, //T
+    ktpcWaterOut      , //W 
+    kSpaceCharge      , //C space charge near the wire
+    kPhiDirection     , //p correction wrt local interception angle 
+    kdXCorrection     , //X
+    kTpcPadTBins      , //d
+    kTpcZDC           ,
+    kTpcLast          ,
+    kTpcLengthCorrection,
+    kTpcdEdxCor       ,
+    kTpcAllCorrections
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
@@ -69,7 +69,6 @@ class StTpcdEdxCorrection : public TObject {
   Int_t dEdxTrackCorrection(EOptions k, Int_t type, dst_dedx_st &dedx);
   void SettpcGas               (St_tpcGas          *m = 0);
   //  void SettrigDetSums          (St_trigDetSums     *m = 0);
-  //  void SettpcGainMonitor       (St_tpcGainMonitor  *m = 0);
   void SetTpcSecRowB           (St_TpcSecRowCor    *m = 0);
   void SetTpcSecRowC           (St_TpcSecRowCor    *m = 0);
   void SetCorrection           (Int_t k = 0, St_tpcCorrection   *m = 0);
@@ -92,7 +91,6 @@ class StTpcdEdxCorrection : public TObject {
 
   St_tpcGas         *tpcGas()              {return m_tpcGas;}
   //  St_trigDetSums    *trigDetSums()         {return m_trigDetSums;}
-  //  St_tpcGainMonitor *tpcGainMonitor()      {return m_tpcGainMonitor;}
 
   St_TpcSecRowCor  *TpcSecRowB()           {return m_TpcSecRowB;}
   St_TpcSecRowCor  *TpcSecRowC()           {return m_TpcSecRowC;}
@@ -122,7 +120,6 @@ class StTpcdEdxCorrection : public TObject {
   dEdxY2_t            *mdEdx;
   //  St_trigDetSums      *m_trigDetSums;          //!
   //  trigDetSums_st      *m_trig;                 //!
-  //  St_tpcGainMonitor   *m_tpcGainMonitor;       //!
 
   St_TpcSecRowCor     *m_TpcSecRowB;            //!
   St_TpcSecRowCor     *m_TpcSecRowC;            //!
@@ -165,7 +162,6 @@ class dEdxY2_t : public TObject {
   Double_t PhiR;    // relative phi
   Double_t resXYZ[3]; // track SectorLocal residual wrt local track 
   Double_t Prob; 
-  Double_t SigmaFee;
   Double_t zdev; 
   Double_t zP;      // the most probable value from Bichsel
   Double_t zG;      // global z oh Hit
@@ -174,7 +170,9 @@ class dEdxY2_t : public TObject {
   Double_t rCharge; // d_rounding_Q/Q   = estimated rounding normalized on original charge
   Int_t    lSimulated;
   Double_t Qcm;     // accumulated charge uC/cm
+  Double_t Crow;    // Current per row;
   Double_t Zdc;     // ZDC rate from trigger
+  Double_t Weight; // 1/.sigma^2 of TpcSecRow gas gain correction
   dE_t     C[StTpcdEdxCorrection::kTpcAllCorrections]; //!
   Char_t   last[1];
   void Reset() {memset(first, 0, last - first);}
