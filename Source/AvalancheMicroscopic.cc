@@ -940,12 +940,21 @@ AvalancheMicroscopic::TransportElectron(
                   phi = TwoPi * RndmUniform();
                   ctheta0 = 1. - 2 * RndmUniform();
                   stheta0 = sqrt(1. - ctheta0 * ctheta0);
-                  double xDxc = sDxc * cos(phi) * stheta0;
-                  double yDxc = sDxc * sin(phi) * stheta0;
-                  double zDxc = sDxc * ctheta0;
-                  newElectron.x0 = x + xDxc; newElectron.x = x + xDxc;
-                  newElectron.y0 = y + yDxc; newElectron.y = y + yDxc;
-                  newElectron.z0 = z + zDxc; newElectron.z = z + zDxc;
+                  const double xDxc = x + sDxc * cos(phi) * stheta0;
+                  const double yDxc = y + sDxc * sin(phi) * stheta0;
+                  const double zDxc = z + sDxc * ctheta0;
+                  // Get the electric field and medium at this location.
+                  Medium* dxcMedium;
+                  double fx, fy, fz;
+                  sensor->ElectricField(xDxc, yDxc, zDxc, 
+                                        fx, fy, fz, dxcMedium, status);
+                  // Check if this location is inside a drift medium.
+                  if (status != 0) continue;
+                  // Check if this location is inside the drift area
+                  if (!sensor->IsInArea(xDxc, yDxc, zDxc)) continue;
+                  newElectron.x0 = xDxc; newElectron.x = xDxc;
+                  newElectron.y0 = yDxc; newElectron.y = yDxc;
+                  newElectron.z0 = zDxc; newElectron.z = zDxc;
                   newElectron.t0 = t + tDxc; newElectron.t = t + tDxc;
                   newElectron.energy = std::max(esec, Small);
                   newElectron.e0 = newElectron.energy;
