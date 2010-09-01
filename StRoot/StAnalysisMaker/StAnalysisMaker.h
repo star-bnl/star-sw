@@ -17,11 +17,14 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.h,v 2.7 2009/11/10 20:17:59 fisyak Exp $
+ * $Id: StAnalysisMaker.h,v 2.8 2010/09/01 14:33:57 fisyak Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.h,v $
+ * Revision 2.8  2010/09/01 14:33:57  fisyak
+ * Clean ups
+ *
  * Revision 2.7  2009/11/10 20:17:59  fisyak
  * Add print out for StEvent track and hits
  *
@@ -111,13 +114,13 @@ public:
     Int_t  Init();                      // called once at the beginning of your job
     Int_t  Make();                      // invoked for every event
     Int_t  Finish();                    // called once at the end
-    static void PrintStEvent(Int_t k = 0);
-    static void PrintTpcHits(Int_t sector = 0, Int_t row = 0, Bool_t plot = kFALSE);
+    static void PrintStEvent(Int_t k = 0, Int_t minFitPts = 0);
+    static void PrintTpcHits(Int_t sector = 0, Int_t row = 0, Bool_t plot = kFALSE, Int_t IdTruth=0);
     static void PrintSvtHits();
     static void PrintSsdHits();
     static void PrintRnDHits();
     virtual const char *GetCVS() const {
-      static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.7 2009/11/10 20:17:59 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.8 2010/09/01 14:33:57 fisyak Exp $ built "__DATE__" "__TIME__ ; 
       return cvs;
     }
 

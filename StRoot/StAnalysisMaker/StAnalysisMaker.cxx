@@ -17,7 +17,7 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.cxx,v 2.14 2010/01/26 20:35:51 fisyak Exp $
+ * $Id: StAnalysisMaker.cxx,v 2.15 2010/09/01 14:33:57 fisyak Exp $
  *
  */
 
@@ -221,27 +221,27 @@ StAnalysisMaker::Make()
       const StTriggerId *nominal = trgcol->nominal();
 
       if(l1) {
-	vector<unsigned int> l1Vec = l1->triggerIds();
+	vector<UInt_t> l1Vec = l1->triggerIds();
 	cout << "L1: Mask " <<l1->mask() << " " ;
-	for (vector<unsigned int>::iterator viter = l1Vec.begin();
+	for (vector<UInt_t>::iterator viter = l1Vec.begin();
 	     viter != l1Vec.end(); ++viter) {
 	  cout << (*viter) << "," ;
 	}
 	cout << endl;
       }
       if(l2) {
-	vector<unsigned int> l2Vec = l2->triggerIds();
+	vector<UInt_t> l2Vec = l2->triggerIds();
 	cout << "L2: Mask " <<l2->mask() << " " ;
-	for (vector<unsigned int>::iterator viter = l2Vec.begin();
+	for (vector<UInt_t>::iterator viter = l2Vec.begin();
 	     viter != l2Vec.end(); ++viter) {
 	  cout << (*viter) << "," ;
 	}
 	cout << endl;
       }
       if(l3) {
-	vector<unsigned int> l3Vec = l3->triggerIds();
+	vector<UInt_t> l3Vec = l3->triggerIds();
 	cout << "L3: Mask " <<l3->mask() << " " ;
-	for (vector<unsigned int>::iterator viter = l3Vec.begin();
+	for (vector<UInt_t>::iterator viter = l3Vec.begin();
 	     viter != l3Vec.end(); ++viter) {
 	  cout << (*viter) << "," ;
 	}
@@ -249,9 +249,9 @@ StAnalysisMaker::Make()
       }
       
       if(nominal) {
-	vector<unsigned int> nominalVec = nominal->triggerIds();
+	vector<UInt_t> nominalVec = nominal->triggerIds();
 	cout << "NOMINAL: Mask " <<nominal->mask() << " " ;
-	for (vector<unsigned int>::iterator viter = nominalVec.begin();
+	for (vector<UInt_t>::iterator viter = nominalVec.begin();
 	     viter != nominalVec.end(); ++viter) {
 	  cout << (*viter) << "," ;
 	}
@@ -338,7 +338,7 @@ bool StAnalysisMaker::accept(StTrack* track)
     return track && track->flag() >= 0;
 }
 //________________________________________________________________________________
-void StAnalysisMaker::PrintStEvent(Int_t k) {
+void StAnalysisMaker::PrintStEvent(Int_t k, Int_t minFitPts) {
   static const Char_t *trackType[] = {"global", "primary", "tpt", "secondary", "estGlobal", "estPrimary"};
   StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
   if (!pEvent) return;
@@ -372,19 +372,18 @@ void StAnalysisMaker::PrintStEvent(Int_t k) {
       if (l == global)  track = gTrack;
       if (l == primary) track = pTrack;
       if (track) {
+	if (minFitPts > 0 && track->fitTraits().numberOfFitPoints() < minFitPts) continue;
 	if (dca && l == global) {
 	  if (! line) {
-	    cout << "track# type   flag       z     mom      pT     eta     phi  c   imp  +/-            z    +/-           rho    "
-		 << "NPP length    DCA    NFP   chi2   NP  hit  X        Y        Z" << endl;
+	    cout << "track# type   flag" << endl;
 	    line++;
 	  }
-	  Double_t eta = - TMath::Log(TMath::Tan((TMath::Pi()/2-dca->dipAngle())/2));
-	  cout << Form("%4d%10s%4d",i,trackType[l],track->flag());
 	  cout << *dca;
 	  Double_t length = track->length();
 	  if (length > 9999.) length = 9999.;
-	  cout << Form(" %4d%8.3f%8.3f", track->numberOfPossiblePoints(),length,track->impactParameter());
-	  cout << Form(" %4d%8.3f%4d",track->fitTraits().numberOfFitPoints(), track->fitTraits().chi2(), track->detectorInfo()->numberOfPoints());
+	  cout << Form(" L %8.3f", length);
+	  cout << Form(" NF %4d chi2 %8.3f NP %4d",
+		       track->fitTraits().numberOfFitPoints(), track->fitTraits().chi2(), track->numberOfPossiblePoints());
 	} else 	{
 	  //                      1234567890123456781234567812345678 12345678 12345678 12345678   123 12345678 12345678 123 12345678 
 	  if (! line) {
@@ -405,9 +404,11 @@ void StAnalysisMaker::PrintStEvent(Int_t k) {
 	  if (track->vertex())
 	    cout << Form(" B%3i",((StPrimaryVertex *)track->vertex())->numMatchesWithBEMC());
 	}
+#if 0
       cout << " Svt p/h/f" << track->numberOfPossiblePoints(kSvtId) 
 	   << "/" << track->detectorInfo()->hits(kSvtId).size()
 	   << "/" << track->fitTraits().numberOfFitPoints(kSvtId);
+#endif
       cout << endl;
       }
     } // l
@@ -415,7 +416,7 @@ void StAnalysisMaker::PrintStEvent(Int_t k) {
   }  
 }
 //________________________________________________________________________________
-void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Bool_t plot) {
+void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Bool_t plot, Int_t IdTruth) {
   struct BPoint_t {
     Float_t sector, row, x, y, z, q;
   };
@@ -460,6 +461,7 @@ void StAnalysisMaker::PrintTpcHits(Int_t sector, Int_t row, Bool_t plot) {
 		Int_t l = idx[k];
 		StTpcHit *tpcHit = static_cast<StTpcHit *> (hits[l]);
 		if (! tpcHit) continue;
+		if (IdTruth > 0 && tpcHit->idTruth() != IdTruth) continue;
 		tpcHit->Print();
 	      }
 	    }
@@ -555,7 +557,7 @@ void StAnalysisMaker::PrintSsdHits() {
 }
 //________________________________________________________________________________
 void StAnalysisMaker::PrintRnDHits() {
-  UInt_t i,k,l;
+  UInt_t i=0,k=0,l;
   //  Double_t zPrim = 0;
   StEvent* pEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");
   if (!pEvent) return;
@@ -588,6 +590,9 @@ void StAnalysisMaker::PrintRnDHits() {
 }
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.cxx,v $
+ * Revision 2.15  2010/09/01 14:33:57  fisyak
+ * Clean ups
+ *
  * Revision 2.14  2010/01/26 20:35:51  fisyak
  * use dca print out
  *

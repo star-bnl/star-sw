@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: summarizeEvent.cc,v 2.24 2009/11/23 15:54:28 fisyak Exp $
+* $Id: summarizeEvent.cc,v 2.25 2010/09/01 14:33:57 fisyak Exp $
 *
 * Author: Torre Wenaus, BNL,
 *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
 ***************************************************************************
 *
 * $Log: summarizeEvent.cc,v $
+* Revision 2.25  2010/09/01 14:33:57  fisyak
+* Clean ups
+*
 * Revision 2.24  2009/11/23 15:54:28  fisyak
 * Clean-up est tracks
 *
@@ -95,7 +98,7 @@
 #include "StMessMgr.h"
 #include "TMath.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.24 2009/11/23 15:54:28 fisyak Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.25 2010/09/01 14:33:57 fisyak Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
@@ -116,7 +119,7 @@ summarizeEvent(StEvent& event, const int &nevents)
     UInt_t nBeamBackTracks = 0;
     UInt_t nGoodBeamBackTracks = 0;
     UInt_t nShortTrackForEEmc = 0;
-    for (unsigned int i=0; i < nTracks; i++) {
+    for (UInt_t i=0; i < nTracks; i++) {
         node = trackNode[i]; if (!node) continue;
         StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
         if (! gTrack) continue;
@@ -177,9 +180,9 @@ summarizeEvent(StEvent& event, const int &nevents)
     StPrimaryVertex *pVertex=0;
     for (int ipr=0;(pVertex=event.primaryVertex(ipr));ipr++) {
         StThreeVectorD primPos = pVertex->position();
-        unsigned int nDaughters = pVertex->numberOfDaughters();
+        UInt_t nDaughters = pVertex->numberOfDaughters();
         nGoodTracks = 0;nGoodTpcTracks = 0;nTpcTracks = 0;
-        for (unsigned int i=0; i < nDaughters; i++) {
+        for (UInt_t i=0; i < nDaughters; i++) {
             StPrimaryTrack* pTrack = (StPrimaryTrack*)pVertex->daughter(i);
             int good = (pTrack->fitTraits().numberOfFitPoints() >=  NoFitPointCutForGoodTrack);
             nGoodTracks+=good;
@@ -308,20 +311,20 @@ summarizeEvent(StEvent& event, const int &nevents)
     }
     if (TotalNoOfTpcHits) {
         LOG_QA   << "# TPC hits:          " << TotalNoOfTpcHits 
-        << ":\tdeconvoluted:     " << noBadTpcHits 
+        << ":\tBad ones (! flag):     " << noBadTpcHits 
         << ":\tUsed in Fit:      " << noTpcHitsUsedInFit << endm;
     }
     UInt_t TotalNoOfSvtHits = 0, noBadSvtHits = 0, noSvtHitsUsedInFit = 0;
     StSvtHitCollection* svthits = event.svtHitCollection();
     if (svthits) {
         StSvtHit* hit;
-        for (unsigned int barrel=0; barrel<svthits->numberOfBarrels(); ++barrel) {
+        for (UInt_t barrel=0; barrel<svthits->numberOfBarrels(); ++barrel) {
             StSvtBarrelHitCollection* barrelhits = svthits->barrel(barrel);
             if (!barrelhits) continue;
-            for (unsigned int ladder=0; ladder<barrelhits->numberOfLadders(); ++ladder) {
+            for (UInt_t ladder=0; ladder<barrelhits->numberOfLadders(); ++ladder) {
                 StSvtLadderHitCollection* ladderhits = barrelhits->ladder(ladder);
                 if (!ladderhits) continue;
-                for (unsigned int wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
+                for (UInt_t wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
                     StSvtWaferHitCollection* waferhits = ladderhits->wafer(wafer);
                     if (!waferhits) continue;
                     const StSPtrVecSvtHit& hits = waferhits->hits();
@@ -345,10 +348,10 @@ summarizeEvent(StEvent& event, const int &nevents)
     StSsdHitCollection* ssdhits = event.ssdHitCollection();
     if (ssdhits) {
         StSsdHit* hit;
-        for (unsigned int ladder=0; ladder<ssdhits->numberOfLadders(); ++ladder) {
+        for (UInt_t ladder=0; ladder<ssdhits->numberOfLadders(); ++ladder) {
             StSsdLadderHitCollection* ladderhits = ssdhits->ladder(ladder);
             if (!ladderhits) continue;
-            for (unsigned int wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
+            for (UInt_t wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
                 StSsdWaferHitCollection* waferhits = ladderhits->wafer(wafer);
                 if (!waferhits) continue;
                 const StSPtrVecSsdHit& hits = waferhits->hits();
@@ -371,10 +374,10 @@ summarizeEvent(StEvent& event, const int &nevents)
     StFtpcHitCollection* ftpchits = event.ftpcHitCollection();
     if (ftpchits) {
         StFtpcHit* hit;
-        for (unsigned int plane=0; plane<ftpchits->numberOfPlanes(); ++plane) {
+        for (UInt_t plane=0; plane<ftpchits->numberOfPlanes(); ++plane) {
             StFtpcPlaneHitCollection* planehits = ftpchits->plane(plane);
             if (!planehits) continue;
-            for (unsigned int sector=0; sector<planehits->numberOfSectors(); ++sector) {
+            for (UInt_t sector=0; sector<planehits->numberOfSectors(); ++sector) {
                 StFtpcSectorHitCollection* sectorhits = planehits->sector(sector);
                 if (!sectorhits) continue;
                 const StSPtrVecFtpcHit& hits = sectorhits->hits();
