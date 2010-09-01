@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.27 2010/08/31 15:19:36 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.28 2010/09/01 21:14:33 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.28  2010/09/01 21:14:33  fisyak
+ * Add codes for S-shape correction (disactivated)
+ *
  * Revision 1.27  2010/08/31 15:19:36  genevb
  * Lower bound on reduced hit maxima
  *
@@ -156,6 +159,7 @@
 #include "StDbUtilities/StCoordinates.hh"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcSlewingC.h"
+#include "StDetectorDbMaker/St_TpcPadCorrectionC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0C.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcMaxHitsC.h"
@@ -180,6 +184,7 @@ Float_t StTpcHitMaker::fgDt    = .2;
 Float_t StTpcHitMaker::fgDperp = .1;
 static Int_t _debug = 0;
 //#define __MAKE_NTUPLE__
+//#define __CORRECT_S_SHAPE__
 //_____________________________________________________________
 Int_t StTpcHitMaker::Init() {
   LOG_INFO << "StTpcHitMaker::Init as\t"  << GetName() << endm;
@@ -832,6 +837,9 @@ Bool_t TpcHitLess(const StTpcHit *lhs, const StTpcHit *rhs) {
 //________________________________________________________________________________
 void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
   static Float_t padDiff = 2.5, timeBucketDiff = 5.0;
+  static StTpcCoordinateTransform transform(gStTpcDb);
+  static StTpcLocalSectorCoordinate local;
+  static StTpcLocalCoordinate global;
   if (! TpcHitCollection) return;
 #ifdef __MAKE_NTUPLE__
   if (! tup) {
@@ -932,9 +940,6 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	      kHit->setIdTruth(IdT, TMath::Nint(QA));
 	      kHit->setCharge(q);
 	      kHit->setExtends(pad,timeBucket,minPad,maxPad,minTmbk,maxTmbk);
-	      static StTpcCoordinateTransform transform(gStTpcDb);
-	      static StTpcLocalSectorCoordinate local;
-	      static StTpcLocalCoordinate global;
 	      StTpcPadCoordinate padcoord(sec, row, pad, timeBucket);
 	      transform(padcoord,local,kFALSE);
 	      transform(local,global);
@@ -945,6 +950,23 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	      merged++;
 	    }
 	  }
+#ifdef __CORRECT_S_SHAPE__
+	  // Correct S - shape in pad direction
+	  for (UInt_t k = 0; k < NoHits; k++) {
+	    StTpcHit* kHit = TpcHitCollection->sector(sec-1)->padrow(row-1)->hits().at(k);
+	    if (kHit->flag())                               continue;
+	    Double_t pad        = kHit->pad();
+	    Double_t timeBucket = kHit->timeBucket();
+	    Int_t io = 1;
+	    if (row > 13) io = 2;
+	    Int_t np = kHit->padsInHit();
+	    pad += St_TpcPadCorrectionC::instance()->GetCorrection(pad,io,np,0);
+	    StTpcPadCoordinate padcoord(sec, row, pad, timeBucket);
+	    transform(padcoord,local,kFALSE);
+	    transform(local,global);
+	    kHit->setPosition(global.position());
+	  }
+#endif
 	}
       }
     }
