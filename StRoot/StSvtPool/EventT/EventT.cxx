@@ -450,7 +450,7 @@ void EventT::Print(Option_t *opt) const {
 //________________________________________________________________________________
 HitT *EventT::SetHitT(HitT *h, StHit *hit, TGeoHMatrix *comb, TrackT *track) {
   struct RDO_t {
-    Char_t *name;
+    const Char_t *name;
     Int_t ladder, barrel;
     Int_t rdo;
   };
