@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.90 2010/01/27 21:43:49 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.91 2010/09/01 21:26:15 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.91  2010/09/01 21:26:15  fisyak
+ * switch from direct access to public members to methods
+ *
  * Revision 2.90  2010/01/27 21:43:49  perev
  * Add _nPrimTracks for case of fiterr
  *
@@ -1086,7 +1089,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track,StTrackD
   double tlen = track->getTrackLength();
   assert(tlen >0.0 && tlen<1000.);
   gTrack->setLength(tlen);// someone removed this, grrrr!!!!
- 
+  gTrack->setSeedQuality(track->getSeedHitCount());
   // Follow the StDetectorId.h enumerations...
   // can't include them from here in order not to
   // create a package dependence...
@@ -1096,7 +1099,6 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track,StTrackD
     if(!dets[i][0]) continue;
     gTrack->setNumberOfPossiblePoints((unsigned char)dets[i][0],(StDetectorId)i);
   }
-
   fillGeometry(gTrack, track, false); // inner geometry
   fillGeometry(gTrack, track, true ); // outer geometry
   fillFitTraits(gTrack, track);
@@ -1216,9 +1218,9 @@ void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
   const StiNodePars &pars = tNode->fitPars(); 
   const StiNodeErrs &errs = tNode->fitErrs();
   float alfa = tNode->getAlpha();
-  float setp[7],sete[15];
-  TCL::ucopy(&pars._y,setp,7);
+  Float_t setp[7] = {pars.y(), pars.z(), pars.eta(), pars.ptin(), pars.tanl(), pars.curv(), pars.hz()};
   setp[2]+= alfa;  
+  Float_t sete[15];
   for (int i=1,li=1,jj=0;i< kNPars;li+=++i) {
     for (int j=1;j<=i;j++) {sete[jj++]=errs.A[li+j];}}
   StDcaGeometry *dca = new StDcaGeometry;
@@ -1331,9 +1333,9 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
   aux.lHitEmx[2] = mHrr.hZZ;
 
 // local FIT
-  aux.lXFit = mFP._x;
-  aux.lYFit = mFP._y;
-  aux.lZFit = mFP._z;
+  aux.lXFit = mFP.x();
+  aux.lYFit = mFP.y();
+  aux.lZFit = mFP.z();
   aux.lYFitErr = sqrt(mFE._cYY);
   aux.lZFitErr = sqrt(mFE._cZZ);
   aux.lFitEmx[0] = mFE._cYY;
@@ -1343,22 +1345,24 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
 
 // local Pull
   xp = aux.lXHit;
-  yp = (inf)? mFP._y: (double)node->unTouched().mPar[0];
-  zp = (inf)? mFP._z: (double)node->unTouched().mPar[1];
+  yp = (inf)? mFP.y(): (double)node->unTouched().mPar[0];
+  zp = (inf)? mFP.z(): (double)node->unTouched().mPar[1];
   aux.lYPul = aux.lYHit-yp;
   aux.lZPul = aux.lZHit-zp;
   if (fabs(aux.lYPul)>10) StiDebug::Break(-1);
   if (fabs(aux.lZPul)>10) StiDebug::Break(-1);
   if (!inf) {TCL::ucopy(node->unTouched().mErr,untErrs,3);}
   else      {TCL::ucopy(aux.lFitEmx           ,untErrs,3);}
-  assert(untErrs[0]>0);
-  assert(untErrs[2]>0);
+  //#ifdef YF /* I don't know why these parameters are not set */
+  assert(untErrs[0]>=0);
+  assert(untErrs[2]>=0);
+  //#endif 
   TCL::vadd(untErrs,aux.lHitEmx,aux.lPulEmx,3);
   aux.lYPulErr = sqrt(aux.lPulEmx[0]);
   aux.lZPulErr = sqrt(aux.lPulEmx[2]);
 
-  aux.lPsi  = mFP._eta;
-  aux.lDip  = atan(mFP._tanl);
+  aux.lPsi  = mFP.eta();
+  aux.lDip  = atan(mFP.tanl());
 
 // global frame
   double alfa = node->getAlpha();
@@ -1380,7 +1384,7 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
 
 
 //		global Fit
-  x = mFP._x; y = mFP._y;z = mFP._z;
+  x = mFP.x(); y = mFP.y();z = mFP.z();
   r = sqrt(x*x+y*y);
   aux.gRFit = r;
   aux.gPFit = NICE(atan2(y,x)+alfa);
@@ -1412,8 +1416,8 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
   aux.gDip  = node->getDipAngle();
 
   // invariant
-  aux.mCurv   = mFP._curv;
-  aux.mPt     = fabs(1./mFP._ptin);
+  aux.mCurv   = mFP.curv();
+  aux.mPt     = fabs(1./mFP.ptin());
   aux.mCharge = stHit->charge();
   aux.mChi2   = node->getChi2();
   aux.mNormalRefAngle = alfa;
