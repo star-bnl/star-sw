@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.25 2007/12/24 17:35:39 fisyak Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.26 2010/09/01 21:07:07 fisyak Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.26  2010/09/01 21:07:07  fisyak
+ * Disable simu flavor, now sim parameters is coming via DB associated with simulation time stamp
+ *
  * Revision 1.25  2007/12/24 17:35:39  fisyak
  * spelling error StSvtRmsPedestal => StSvtRMSPedestal
  *
@@ -195,6 +198,7 @@ StSvtDbMaker::~StSvtDbMaker() { gStSvtDbMaker = NULL;}
 Int_t StSvtDbMaker::Init()
 {
   if (Debug()) gMessMgr->Debug() << "StSvtDbMaker::Init" << endm;
+#if 0
   if( m_Mode == 1) {
     const Char_t *tabNames[3] = {"svtWafersPosition","svtDriftCorrection","svtRDOstripped"};
     for (Int_t i = 0; i < 3; i++) {
@@ -203,6 +207,7 @@ Int_t StSvtDbMaker::Init()
       SetFlavor("simu",tabNames[i]);   
     }
   }
+#endif
   return StMaker::Init();
 }
 
