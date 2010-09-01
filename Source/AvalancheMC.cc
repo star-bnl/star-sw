@@ -566,13 +566,14 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
 
   // Plot the drift line if requested
   if (usePlotting) {
+    int jL;
     if (q < 0) {
-      viewer->NewElectronDriftLine(nDrift);
+      viewer->NewElectronDriftLine(nDrift, jL);
     } else {
-      viewer->NewIonDriftLine(nDrift);
+      viewer->NewIonDriftLine(nDrift, jL);
     }
-    for (int i = 0; i < nDrift; ++i) {
-      viewer->SetPoint(i, drift[i].x, drift[i].y, drift[i].z);
+    for (int iP = 0; iP < nDrift; ++iP) {
+      viewer->SetPoint(jL, iP, drift[iP].x, drift[iP].y, drift[iP].z);
     }
   }
 

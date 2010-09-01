@@ -39,6 +39,7 @@ namespace Garfield {
     double timeStep;
 
     bool usePlotting;
+    int iLine;
     ViewDrift* viewer;
 
     bool debug;

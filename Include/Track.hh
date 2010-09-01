@@ -6,9 +6,10 @@
 #include <string>
 #include <cmath>
 
-#include "Sensor.hh"
-
 namespace Garfield {
+
+class Sensor;
+class ViewDrift;
 
 class Track {
 
@@ -43,6 +44,9 @@ class Track {
             double& xcls, double& ycls, double& zcls, double& tcls,
             int& n, double& e, double& extra) = 0;
 
+    void EnablePlotting(ViewDrift* viewer);
+    void DisablePlotting();
+
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
 
@@ -58,6 +62,10 @@ class Track {
     Sensor* sensor;
 
     bool isChanged;
+
+    bool usePlotting;
+    ViewDrift* viewer;
+
     bool debug;
 
 };

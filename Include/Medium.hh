@@ -124,12 +124,12 @@ class Medium {
     double GetElectronCollisionRate(const double e, const int band = 0);
     virtual 
     bool GetElectronCollision(const double e, int& type, int& level, double& e1,
-                      double& ctheta, double& s, double& esec, int& band);
+                      double& ctheta, int& nsec, double& esec, int& band);
 
     virtual
     int GetNumberOfDeexcitationProducts() {return 0;}
     virtual
-    bool GetDeexcitationProduct(const int i, double& t, 
+    bool GetDeexcitationProduct(const int i, double& t, double& s, 
                                 int& type, double& energy);
 
     // Transport parameters for holes
@@ -185,7 +185,7 @@ class Medium {
     double GetPhotonCollisionRate(const double e);
     virtual 
     bool GetPhotonCollision(const double e, int& type, int& level, double& e1,
-                            double& ctheta, double& s, double& esec);
+                            double& ctheta, int& nsec, double& esec);
 
     // Switch on/off debugging  messages
     void EnableDebugging()  {debug = true;}

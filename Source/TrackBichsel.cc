@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cstdlib>
 
+#include "Sensor.hh"
 #include "TrackBichsel.hh"
 #include "FundamentalConstants.hh"
 #include "Random.hh"

@@ -49,7 +49,7 @@ PhenoPhotoAbsCS Hydrogen_for_H2_shell_PACS("Hydrogen_for_H2",
 					   1, 15.43e-6, 3.228);
 //1, 16.4e-6, 3.228);
 PhenoPhotoAbsCS Hydrogen_for_CH4_shell_PACS("Hydrogen_for_CH4", 
-					    1, 12.0e-06, 3.228);
+					    1, 12.65e-06, 3.228);
 PhenoPhotoAbsCS Hydrogen_for_NH4_shell_PACS("Hydrogen_for_NH4", 
 					    1, 10.0e-06, 3.228);
 
@@ -94,7 +94,7 @@ ExAtomPhotoAbsCS Carbon_for_CH4_PACS(6,
 				     shelllist_dir_name + "shelllist.dat", 
 				     pacs_table_dir_name + "C.dat",
 				     "C_for_CH4",
-				     12.0e-06); 
+				     12.65e-06); 
 ExAtomPhotoAbsCS Carbon_for_C2H4_PACS(6, 
 				     shelllist_dir_name + "shelllist.dat", 
 				     pacs_table_dir_name + "C.dat",
@@ -104,7 +104,7 @@ ExAtomPhotoAbsCS Carbon_for_C2H6_PACS(6,
 				     shelllist_dir_name + "shelllist.dat", 
 				     pacs_table_dir_name + "C.dat",
 				     "C_for_C2H6",
-				     11.5e-06); 
+				     11.52e-06); 
 ExAtomPhotoAbsCS Carbon_for_C4H10_PACS(6, 
 				     shelllist_dir_name + "shelllist.dat", 
 				     pacs_table_dir_name + "C.dat",

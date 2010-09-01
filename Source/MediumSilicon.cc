@@ -711,7 +711,7 @@ MediumSilicon::GetElectronCollisionRate(const double e, const int band) {
 
 bool
 MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
-                     double& e1, double& ctheta, double& s, double& esec,
+                     double& e1, double& ctheta, int& nsec, double& esec,
                      int& band) {
 
   if (e > eFinal) {
@@ -804,11 +804,13 @@ MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
     double loss = energyLossElectronsX[level];
     // Secondary electron energy (none by default)
     esec = 0.;
+    nsec = 0;
     // Ionising collision
     if (type == 1) {
       esec = RndmUniform() * (e - loss);
       loss += esec;
       if (esec < Small) esec = Small;
+      nsec = 1;
     }
 
     if (e < loss) loss = e - 0.0001;
@@ -816,6 +818,7 @@ MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
     e1 = e - loss;
     if (e1 < Small) e1 = Small;
     
+    ctheta = 1. - 2. * RndmUniform();
     return true;
     
   } 

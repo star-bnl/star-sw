@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "Sensor.hh"
+#include "ViewDrift.hh"
 #include "Track.hh"
 #include "FundamentalConstants.hh"
 
@@ -9,7 +11,9 @@ Track::Track() :
   q(-1.), spin(1),
   mass(MuonMass), energy(0.), isElectron(false),
   sensor(0),
-  isChanged(true), debug(false) {
+  isChanged(true), 
+  usePlotting(false), viewer(0),
+  debug(false) {
 
   SetBetaGamma(3.);
 
@@ -162,6 +166,28 @@ Track::SetSensor(Sensor* s) {
   }
 
   sensor = s;
+
+}
+
+void
+Track::EnablePlotting(ViewDrift* view) {
+
+  if (view == 0) {
+    std::cerr << "Track::EnablePlotting:\n";
+    std::cerr << "    Pointer is null.\n";
+    return;
+  }
+
+  viewer = view;
+  usePlotting = true;
+
+}
+
+void
+Track::DisablePlotting() {
+
+  usePlotting = false;
+  viewer = 0;
 
 }
 

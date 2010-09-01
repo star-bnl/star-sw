@@ -202,8 +202,8 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
 
   int nPoints = 0;
   if (usePlotting) {
-    viewer->NewElectronDriftLine(1);
-    viewer->SetPoint(nPoints, r[0], r[1], r[2]);
+    viewer->NewElectronDriftLine(1, iLine);
+    viewer->SetPoint(iLine, nPoints, r[0], r[1], r[2]);
     ++nPoints;
   }
  
@@ -378,7 +378,7 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
     }
    
     if (usePlotting) {
-      viewer->SetPoint(nPoints, r[0], r[1], r[2]);
+      viewer->SetPoint(iLine, nPoints, r[0], r[1], r[2]);
       ++nPoints;
     }
 

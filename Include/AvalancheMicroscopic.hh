@@ -248,13 +248,6 @@ class AvalancheMicroscopic {
 
     void RotateGlobal2Local(double& dx, double& dy, double& dz);
     void RotateLocal2Global(double& dx, double& dy, double& dz);
-        
-    double Min(const double x1, const double x2) const {
-      return x1 > x2 ? x2 : x1;
-    }
-    double Max(const double x1, const double x2) const {
-      return x1 < x2 ? x2 : x1;
-    }
     
 };
 

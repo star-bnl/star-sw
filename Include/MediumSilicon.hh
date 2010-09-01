@@ -90,9 +90,10 @@ class MediumSilicon : public Medium {
     double GetElectronCollisionRate(const double e, const int band);
     // Sample the collision type
     bool   GetElectronCollision(const double e, int& type, int& level,
-                        double& e1, double& ctheta,
-                        double& s, double& esec, int& band);
-    double GetConductionBandDensityOfStates(const double e, const int band = 0);
+                                double& e1, double& ctheta,
+                                int& nsec, double& esec, int& band);
+    double GetConductionBandDensityOfStates(const double e, 
+                                            const int band = 0);
 
     bool GetOpticalDataRange(double& emin, double& emax, const int i = 0);
     bool GetDielectricFunction(const double e, double& eps1, double& eps2, const int i = 0);

@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "Sensor.hh"
 #include "TrackSimple.hh"
 #include "FundamentalConstants.hh"
 #include "Random.hh"

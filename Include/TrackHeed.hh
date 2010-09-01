@@ -3,6 +3,8 @@
 #ifndef G_TRACK_HEED_H
 #define G_TRACK_HEED_H
 
+#include <vector>
+
 #include "Track.hh"
 
 class HeedParticle;
@@ -21,6 +23,7 @@ class HeedDeltaElectronCS;
 namespace Garfield {
 
 class HeedChamber;
+class Medium;
 
 class TrackHeed : public Track {
 
@@ -35,14 +38,22 @@ class TrackHeed : public Track {
         const double dx0, const double dy0, const double dz0);
     bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
                     int& n, double& e, double& extra);
-    bool GetElectron(const int i, double& x, double& y, double& z);                    
-   
+    bool GetElectron(const int i, double& x, double& y, double& z,
+                     double& t, double& e,
+                     double& dx, double& dy, double& dz); 
+
     void TransportDeltaElectron(
         const double x0, const double y0, const double z0,
         const double t0, const double e0,
         const double dx0, const double dy0, const double dz0,
         int& nel);
-    
+   
+    void TransportPhoton(
+        const double x0, const double y0, const double z0,
+        const double t0, const double e0,
+        const double dx0, const double dy0, const double dz0,
+        int& nel);
+ 
     // Specify whether the electric and magnetic field should be 
     // taken into account in the stepping algorithm.
     void EnableElectricField();
@@ -69,7 +80,14 @@ class TrackHeed : public Track {
     std::string mediumName;
    
     bool useDelta;
- 
+    int nDeltas;
+    struct deltaElectron {
+      double x, y, z, t;
+      double e;
+      double dx, dy, dz;
+    };
+    std::vector<deltaElectron> deltaElectrons;
+    
     // Primary particle
     HeedParticle* particle;
 

@@ -196,7 +196,7 @@ class MediumMagboltz86 : public Medium {
 
     // Switch on/off simplified simulation of Penning transfers by means of 
     // transfer probabilities (not compatible with de-excitation handling)
-    void EnablePenningTransfer(const double r);
+    void EnablePenningTransfer(const double r, const double lambda);
     void DisablePenningTransfer() {usePenning = false;}
 
     // When enabled, the gas cross-section table is written to file
@@ -214,15 +214,15 @@ class MediumMagboltz86 : public Medium {
     // Sample the collision type
     bool   GetElectronCollision(const double e, int& type, int& level, 
                                 double& e1, double& ctheta, 
-                                double& s, double& esec, int& band);
+                                int& nsec, double& esec, int& band);
     int  GetNumberOfDeexcitationProducts() {return nDeexcitationProducts;}
-    bool GetDeexcitationProduct(const int i, 
-                                double& t, int& type, double& energy); 
+    bool GetDeexcitationProduct(const int i, double& t, double& s, 
+                                int& type, double& energy); 
 
     double GetPhotonCollisionRate(const double e);
     bool   GetPhotonCollision(const double e, int& type, int& level,
                               double& e1, double& ctheta, 
-                              double& s, double& esec);
+                              int& nsec, double& esec);
 
     // Reset the collision counters
     void ResetCollisionCounters();
@@ -264,12 +264,13 @@ class MediumMagboltz86 : public Medium {
 
   private:
 
-    static const int nEnergySteps = 4000;
+    static const int nEnergySteps = 10000;
     static const int nEnergyStepsGamma = 1000;
     static const int nMaxGases = 6;
     static const int nMaxInelasticTerms = 220;
     static const int nMaxLevels = 512;
-    
+    static const int nCsTypes = 6;
+   
     // Gas mixture
     int gas[nMaxGases];
     double fraction[nMaxGases];
@@ -324,6 +325,8 @@ class MediumMagboltz86 : public Medium {
     bool usePenning;
     // Penning transfer probability
     double rPenning;
+    // Mean distance of Penning ionization
+    double lambdaPenning;
     // Number of Penning ionisations
     int nPenning;
 
@@ -360,10 +363,13 @@ class MediumMagboltz86 : public Medium {
     int nDeexcitationProducts;
     // List of de-excitation products
     struct dxcProd {
+      // Radial spread
+      double s;
+      // Time delay
       double t;
       // Type of deexcitation product
-      // 1: photon, -1: electron (from Penning ionization)
       int type;
+      // Energy of the electron or photon
       double energy;
     };
     std::vector<dxcProd> dxcProducts;

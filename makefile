@@ -21,7 +21,7 @@ TARGETS += heed
 FC = gfortran
 
 # Compilation flags
-CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long \
+CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long -Woverloaded-virtual \
 	 `root-config --cflags` \
         -fpic -fno-common -Os -c \
 	-I$(INCDIR) -I$(HEEDDIR) -DINS_CRETURN 

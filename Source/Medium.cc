@@ -29,7 +29,7 @@ void
 Medium::SetName(const std::string s) {
 
   std::cerr << className << "::SetName:\n";
-  std::cerr << "    Name of the medium cannot be changed.\n";
+  std::cerr << "    Name of the medium cannot be changed to " << s << ".\n";
   
 }
 
@@ -251,8 +251,14 @@ Medium::ElectronAttachment(const double ex, const double ey, const double ez,
 
 double 
 Medium::GetElectronEnergy(const double px, const double py, const double pz,
-                          double& vx, double& vy, double& vz, const int band) {
+                          double& vx, double& vy, double& vz, 
+                          const int band) {
 
+  if (band != 0) {
+    std::cerr << className << "::GetElectronEnergy:\n";
+    std::cerr << "    Unknown band index.\n";
+  }
+  
   vx = inverseElectronMass * px;
   vy = inverseElectronMass * py;
   vz = inverseElectronMass * pz;
@@ -265,6 +271,11 @@ void
 Medium::GetElectronMomentum(const double e, 
                             double& px, double& py, double& pz, 
                             const int band) {
+
+  if (band != 0) {
+    std::cerr << className << "::GetElectronMomentum:\n";
+    std::cerr << "    Unknown band index.\n";
+  }
 
   const double p = sqrt(2. * ElectronMass * e) / SpeedOfLight;
   const double ctheta = 1. - 2. * RndmUniform();
@@ -293,6 +304,8 @@ Medium::GetElectronCollisionRate(const double e, const int band) {
 
   if (debug) {
     std::cerr << className << "::GetElectronCollisionRate:\n";
+    std::cerr << "    Electron collision rate at energy "
+              << e << " eV (band " << band << ") not available.\n";
     std::cerr << "    Function is not implemented.\n";
   }
   return 0.;
@@ -301,22 +314,38 @@ Medium::GetElectronCollisionRate(const double e, const int band) {
 
 bool 
 Medium::GetElectronCollision(const double e, int& type, int& level,
-                     double& e1, double& ctheta, double& s, double& esec,
-                     int& band) {
+                             double& e1, double& ctheta, 
+                             int& nsec, double& esec,
+                             int& band) {
   
+  type = level = -1;
+  e1 = e;
+  ctheta = 1;
+  nsec = 0;
+  esec = 0.;
+  band = 0;
+ 
   if (debug) {
     std::cerr << className << "::GetElectronCollision:\n";
     std::cerr << "    Function is not implemented.\n";
   }
-  return 0.;
-                            
+  return false;
+              
 }
 
 bool 
-Medium::GetDeexcitationProduct(const int i, double& t, 
+Medium::GetDeexcitationProduct(const int i, double& t, double& s, 
                                int& type, double& energy) {
 
-   return false;
+  if (debug) {
+    std::cerr << className << "::GetDeexcitationProduct:\n";
+    std::cerr << "    Deexcitation product " << i << " requested.\n";
+    std::cerr << "    This medium does not support de-excitation.\n";
+    std::cerr << "    Program bug!\n";
+  } 
+  t = s = energy = 0.;
+  type = 0;
+  return false;
 
 }
                 
@@ -441,10 +470,17 @@ Medium::IonDissociation(const double ex, const double ey, const double ez,
 bool 
 Medium::GetOpticalDataRange(double& emin, double& emax, const int i) {
 
+  if (i < 0 || i >= nComponents) {
+    std::cerr << className << "::GetOpticalDataRange:\n";
+    std::cerr << "    Component " << i << " does not exist.\n";
+    return false;
+  }
+
   if (debug) {
     std::cerr << className << "::GetOpticalDataRange:\n";
     std::cerr << "    Function is not implemented.\n";
   }
+  emin = emax = 0.;
   return false;
 
 }
@@ -452,6 +488,18 @@ Medium::GetOpticalDataRange(double& emin, double& emax, const int i) {
 bool 
 Medium::GetDielectricFunction(const double e, 
                               double& eps1, double& eps2, const int i) {
+
+  if (i < 0 || i >= nComponents) {
+    std::cerr << className << "::GetDielectricFunction:\n";
+    std::cerr << "    Component " << i << " does not exist.\n";
+    return false;
+  }
+
+  if (e < 0.) {
+    std::cerr << className << "::GetDielectricFunction:\n";
+    std::cerr << "    Energy must be > 0.\n";
+    return false;
+  }
 
   if (debug) {
     std::cerr << className << "::GetDielectricFunction:\n";
@@ -465,6 +513,18 @@ Medium::GetDielectricFunction(const double e,
 bool 
 Medium::GetPhotoAbsorptionCrossSection(const double e, 
                                        double& sigma, const int i) {
+
+  if (i < 0 || i >= nComponents) {
+    std::cerr << className << "::GetPhotoAbsorptionCrossSection:\n";
+    std::cerr << "    Component " << i << " does not exist.\n";
+    return false;
+  }
+
+  if (e < 0.) {
+    std::cerr << className << "::GetPhotoAbsorptionCrossSection:\n";
+    std::cerr << "    Energy must be > 0.\n";
+    return false;
+  }
 
   if (debug) {
     std::cerr << className << "::GetPhotoAbsorptionCrossSection:\n";
@@ -486,9 +546,15 @@ Medium::GetPhotonCollisionRate(const double e) {
 }
 
 bool
-Medium::GetPhotonCollision(const double e, int& type, int& level, double& e1,
-                           double& ctheta, double& s, double& esec) {
+Medium::GetPhotonCollision(const double e, int& type, int& level, 
+                           double& e1, double& ctheta, 
+                           int& nsec, double& esec) {
 
+  type = level = -1;
+  e1 = e;
+  ctheta = 1.;
+  nsec = 0;
+  esec = 0.;
   return false;
 
 }

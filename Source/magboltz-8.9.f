@@ -17026,16 +17026,27 @@ C DISSOCIATION ( HAYASHI ADJUSTED TO GIVE WINTERS TOTAL DISSOCIATION)
      /.633,.602,.608,.625,.643,.625,.608,.530,.483,.406,                
      /.342,.284,.204,.141,.0987,.0756,.0554,.0403,.0292,.0222,
      /.0181/
+C Temporary hack (HS): 
+C diss. cs YDIS4 at 100 eV changed to 1.32 (original value 1.26)
+C diss. cs YDIS4 at  80 eV changed to 1.28 (original value 1.22)
+C diss. cs YDIS4 at  60 eV changed to 1.21 (original value 1.15)
+C diss. cs YDIS4 at  50 eV changed to 1.12 (original value 1.07)
       DATA XDIS4/12.0,13.0,14.0,16.0,18.0,20.0,22.0,25.0,30.0,35.0,     
      /40.0,50.0,60.0,80.0,100.,150.,200.,300.,400.,500.,                
      /700.,1000.,1500.,2000.,3000.,4000.,6000.,8000.,10000./
       DATA YDIS4/0.00,.140,.280,.525,.700,.800,.854,.889,.941,.964,     
-     /.993,1.07,1.13,1.22,1.26,1.15,1.07,.912,.746,.641,                
+     /.993,1.12,1.21,1.28,1.32,1.15,1.07,.912,.746,.641,                
      /.455,.320,.224,.172,.126,.0915,.0663,.0503,.0412/
+C Temporary hack (HS): 
+C diss. cs YDIS5 at 150 eV changed to 0.067 (original value 0.064)
+C diss. cs YDIS5 at 100 eV changed to 0.095 (original value 0.090)
+C diss. cs YDIS5 at  80 eV changed to 0.289 (original value 0.275)
+C diss. cs YDIS5 at  60 eV changed to 0.528 (original value 0.503)
+C diss. cs YDIS5 at  50 eV changed to 0.671 (original value 0.639)
       DATA XDIS5/13.3,14.0,16.0,18.0,20.0,22.0,25.0,30.0,35.0,40.0,
      /50.0,60.0,80.0,100.,150.,200./                                 
       DATA YDIS5/0.00,.0315,.252,.462,.620,.714,.790,.842,.828,.772,
-     /.639,.503,.275,.090,.064,0.00/
+     /.671,.528,.289,.095,.067,0.00/
 C LIGHT EMISSION FROM CH(A2DELTA TO X2PI) 
       DATA XCHD/13.4,13.5,14.5,18.5,20.6,21.6,22.5,23.6,27.7,31.8,
      /33.5,33.9,35.4,37.5,39.2,40.0,44.0,49.1,55.6,58.3,

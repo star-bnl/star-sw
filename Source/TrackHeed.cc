@@ -16,6 +16,8 @@
 #include "heed++/code/HeedPhoton.h"
 #include "heed++/code/PhotoAbsCSLib.h"
 
+#include "Sensor.hh"
+#include "ViewDrift.hh"
 #include "FundamentalConstants.hh"
 #include "Random.hh"
 #include "HeedChamber.hh"
@@ -80,9 +82,11 @@ field_map(const point& pt, vec& efield, vec& bfield, vfloat& mrange) {
 
 }
 
+// This function is called by Heed after each step
 void
 check_point(gparticle* gp) { }
 
+// Particle id number for book-keeping
 long last_particle_number;
 
 extern trajestep_limit gtrajlim;
@@ -97,7 +101,7 @@ namespace Garfield {
 TrackHeed::TrackHeed() : 
   ready(false), hasActiveTrack(false),
   mediumDensity(-1.), mediumName(""),
-  useDelta(true),
+  useDelta(true), nDeltas(0),
   particle(0), 
   matter(0), gas(0), material(0),
   atPacs(0), molPacs(0),
@@ -106,10 +110,12 @@ TrackHeed::TrackHeed() :
   elScat(0), lowSigma(0), pairProd(0), deltaCs(0),
   chamber(0) {
   
-  Garfield::HeedInterface::sensor = 0;
-  Garfield::HeedInterface::useEfield = false;
-  Garfield::HeedInterface::useBfield = false;
-    
+  HeedInterface::sensor = 0;
+  HeedInterface::useEfield = false;
+  HeedInterface::useBfield = false;
+  
+  deltaElectrons.clear();
+  
 }
 
 TrackHeed::~TrackHeed() {
@@ -181,6 +187,7 @@ TrackHeed::NewTrack(
   }
   
   particle_bank.clear();
+  deltaElectrons.clear();
   cluster_bank.allocate_block(100);
   chamber->conduction_electron_bank.allocate_block(1000);
   
@@ -280,17 +287,20 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
   xcls = virtualPhoton->currpos.pt.v.x * 0.1;
   ycls = virtualPhoton->currpos.pt.v.y * 0.1;
   zcls = virtualPhoton->currpos.pt.v.z * 0.1;
+  tcls = virtualPhoton->currpos.time;
   // Get the transferred energy (convert from MeV to eV).
   e = virtualPhoton->energy * 1.e6;
   
   // Make a list of parent particle id numbers. 
   std::vector<int> ids;
   ids.clear();
-  // At the beginning, ther is only the virtual photon.
+  // At the beginning, there is only the virtual photon.
   ids.push_back(virtualPhoton->particle_number);
   int nIds = 1;
   
   // Look for daughter particles.
+  deltaElectrons.clear();
+  nDeltas = 0;
   chamber->conduction_electron_bank.allocate_block(1000);
   bool deleteNode = false;
   HeedDeltaElectron* delta = 0;
@@ -307,8 +317,23 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
       // belonging to this cluster.
       for (int i = nIds; i--;) {
         if (delta->parent_particle_number == ids[i]) {
-          // Transport the delta electron.
-          if (useDelta) delta->fly();
+          if (useDelta) {
+            // Transport the delta electron.
+            delta->fly();
+          } else {
+            // Add the delta electron to the list, for later use.
+            deltaElectron newDeltaElectron;
+            newDeltaElectron.x = delta->currpos.pt.v.x * 0.1;
+            newDeltaElectron.y = delta->currpos.pt.v.y * 0.1;
+            newDeltaElectron.z = delta->currpos.pt.v.z * 0.1;
+            newDeltaElectron.t = delta->currpos.time;
+            newDeltaElectron.e = delta->curr_kin_energy * 1.e6;
+            newDeltaElectron.dx = delta->currpos.dir.x;
+            newDeltaElectron.dy = delta->currpos.dir.y;
+            newDeltaElectron.dz = delta->currpos.dir.z;
+            deltaElectrons.push_back(newDeltaElectron);
+            ++nDeltas;
+          }
           deleteNode = true;
           break;
         }
@@ -342,8 +367,12 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
     }
   }
   
-  // Get the total number of conduction electrons produced in this step.
-  n = chamber->conduction_electron_bank.get_qel();
+  // Get the total number of electrons produced in this step.
+  if (useDelta) {
+    n = chamber->conduction_electron_bank.get_qel();
+  } else {
+    n = nDeltas;
+  }
   
   // Remove the virtual photon from the particle bank.
   particle_bank.erase(node);
@@ -353,7 +382,9 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
 }
 
 bool
-TrackHeed::GetElectron(const int i, double& x, double& y, double& z) {
+TrackHeed::GetElectron(const int i, double& x, double& y, double& z, 
+                       double& t, double& e, 
+                       double& dx, double& dy, double& dz) {
 
   // Make sure NewTrack has successfully been called.
   if (!ready) {
@@ -363,18 +394,40 @@ TrackHeed::GetElectron(const int i, double& x, double& y, double& z) {
     return false;
   }
 
-  // Make sure an electron with this number exists.
-  const int n = chamber->conduction_electron_bank.get_qel();
-  if (i < 0 || i >= n) {
-    std::cerr << "TrackHeed::GetElectron:\n";
-    std::cerr << "    Electron number out of range.\n";
-    return false;
+  if (useDelta) {
+    // Make sure an electron with this number exists.
+    const int n = chamber->conduction_electron_bank.get_qel();
+    if (i < 0 || i >= n) {
+      std::cerr << "TrackHeed::GetElectron:\n";
+      std::cerr << "    Electron number out of range.\n";
+      return false;
+    }
+  
+    x = chamber->conduction_electron_bank[i].ptloc.v.x * 0.1;
+    y = chamber->conduction_electron_bank[i].ptloc.v.y * 0.1;
+    z = chamber->conduction_electron_bank[i].ptloc.v.z * 0.1;
+    
+    e = 0.;
+    dx = dy = dz = 0.;
+    
+  } else {
+    // Make sure a delta electron with this number exists.
+    if (i < 0 || i >= nDeltas) {
+      std::cerr << "TrackHeed::GetElectron:\n";
+      std::cerr << "    Delta electron number out of range.\n";
+      return false;
+    }
+    
+    x = deltaElectrons[i].x;
+    y = deltaElectrons[i].y;
+    z = deltaElectrons[i].z;
+    t = deltaElectrons[i].t;
+    e = deltaElectrons[i].e;
+    dx = deltaElectrons[i].dx;
+    dy = deltaElectrons[i].dy;
+    dz = deltaElectrons[i].dz;
   }
   
-  x = chamber->conduction_electron_bank[i].ptloc.v.x * 0.1;
-  y = chamber->conduction_electron_bank[i].ptloc.v.y * 0.1;
-  z = chamber->conduction_electron_bank[i].ptloc.v.z * 0.1;
-
   return true;
 
 }
@@ -436,7 +489,8 @@ TrackHeed::TransportDeltaElectron(
     mediumName    = medium->GetName();
     mediumDensity = medium->GetMassDensity();
   }
-    
+  
+  deltaElectrons.clear();
   chamber->conduction_electron_bank.allocate_block(1000);
   
   // Check the direction vector.
@@ -471,6 +525,173 @@ TrackHeed::TransportDeltaElectron(
   
   nel = chamber->conduction_electron_bank.get_qel();
   
+}
+
+void
+TrackHeed::TransportPhoton(
+          const double x0, const double y0, const double z0,
+          const double t0, const double e0,
+          const double dx0, const double dy0, const double dz0,
+          int& nel) {
+ 
+  nel = 0;
+
+  // Make sure the energy is positive.
+  if (e0 <= 0.) {
+    std::cerr << "TrackHeed::TransportPhoton:\n";
+    std::cerr << "    Photon energy must be positive.\n";
+    return;
+  }
+  
+  // Make sure the sensor has been set.
+  if (sensor == 0) {
+    std::cerr << "TrackHeed::TransportPhoton:\n";
+    std::cerr << "    Sensor is not defined.\n";
+    ready = false;
+    return;
+  }
+  
+  HeedInterface::sensor = sensor;
+  
+  // Make sure the initial position is inside an ionisable medium.
+  Medium* medium;
+  if (!sensor->GetMedium(x0, y0, z0, medium)) {
+    std::cerr << "TrackHeed::TransportPhoton:\n";
+    std::cerr << "    No medium at initial position.\n";
+    return;
+  } else if (!medium->IsIonisable()) {
+    std::cerr << "TrackHeed:TransportPhoton:\n";
+    std::cerr << "    Medium at initial position is not ionisable.\n";
+    ready = false;
+    return;
+  }
+
+  // Check if the medium has changed since the last call.
+  if (medium->GetName()        != mediumName || 
+      medium->GetMassDensity() != mediumDensity) {
+    isChanged = true;
+    ready = false;
+    if (!Setup(medium)) return;
+    ready = true;
+    mediumName    = medium->GetName();
+    mediumDensity = medium->GetMassDensity();
+  }
+  
+  // Delete the particle bank.
+  // Clusters from the current track will be lost.
+  hasActiveTrack = false;
+  last_particle_number = 0;
+  particle_bank.clear();
+  deltaElectrons.clear();
+  nDeltas = 0;
+  chamber->conduction_electron_bank.allocate_block(1000);
+  
+  // Check the direction vector.
+  double dx = dx0, dy = dy0, dz = dz0;
+  const double d = sqrt(dx * dx + dy * dy + dz * dz);
+  if (d <= 0.) {
+    // Null vector. Sample the direction isotropically.
+    const double phi = TwoPi * RndmUniform();
+    const double ctheta = 1. - 2. * RndmUniform();
+    const double stheta = sqrt(1. - ctheta * ctheta);
+    dx = cos(phi) * stheta;
+    dy = sin(phi) * stheta;
+    dz = ctheta;
+  } else {
+    // Normalise the direction vector.
+    dx /= d; dy /= d; dz /= d;
+  }
+  vec velocity(dx, dy, dz);
+  velocity = velocity * mparticle::speed_of_light;
+  
+  // Initial position (convert from cm to mm).
+  point p0(x0 * 10., y0 * 10., z0 * 10.);
+ 
+  // Create and transport the photon.
+  HeedPhoton photon(chamber, p0, velocity, t0, 0, e0 * 1.e-6, 0);
+  photon.fly();
+  
+  // Make a list of parent particle id numbers. 
+  std::vector<int> ids;
+  ids.clear();
+  // At the beginning, there is only the original photon.
+  ids.push_back(photon.particle_number);
+  int nIds = 1;
+  
+  // Look for daughter particles.
+  HeedDeltaElectron* delta = 0;
+  HeedPhoton* fluorescencePhoton = 0;
+  
+  // Get the first element from the particle bank.
+  AbsListNode<ActivePtr<gparticle> >* nextNode = 
+                                      particle_bank.get_first_node();
+  AbsListNode<ActivePtr<gparticle> >* tempNode = 0;
+  // Loop over the particle bank.
+  while (nextNode != 0) {
+    // Check if it is a delta electron.
+    delta = dynamic_cast<HeedDeltaElectron*>(nextNode->el.get());
+    if (delta != 0) {
+      // Check if the delta electron was produced by one of the photons
+      // belonging to this cluster.
+      bool gotParent = false;
+      for (int i = nIds; i--;) {
+        if (delta->parent_particle_number == ids[i]) {
+          gotParent = true;
+          if (useDelta) {
+            // Transport the delta electron.
+            delta->fly();
+          } else {
+            // Add the delta electron to the list, for later use.
+            deltaElectron newDeltaElectron;
+            newDeltaElectron.x = delta->currpos.pt.v.x * 0.1;
+            newDeltaElectron.y = delta->currpos.pt.v.y * 0.1;
+            newDeltaElectron.z = delta->currpos.pt.v.z * 0.1;
+            newDeltaElectron.t = delta->currpos.time;
+            newDeltaElectron.e = delta->curr_kin_energy * 1.e6;
+            newDeltaElectron.dx = delta->currpos.dir.x;
+            newDeltaElectron.dy = delta->currpos.dir.y;
+            newDeltaElectron.dz = delta->currpos.dir.z;
+            deltaElectrons.push_back(newDeltaElectron);
+            ++nDeltas;
+          }
+          break;
+        }
+      }
+      if (!gotParent) {
+        std::cerr << "TrackHeed::TransportPhoton:\n";
+        std::cerr << "    Delta electron with unknown parent.\n";
+      }
+    } else {
+      // Check if it is a fluorescence photon.
+      fluorescencePhoton = dynamic_cast<HeedPhoton*>(nextNode->el.get());
+      if (fluorescencePhoton == 0) {
+        std::cerr << "TrackHeed::TransportPhoton:\n";
+        std::cerr << "    Unknown secondary particle.\n";
+        return;
+      }
+      for (int i = nIds; i--;) {
+        if (fluorescencePhoton->parent_particle_number == ids[i]) {
+          // Transport the photon and add its number to the list of ids.
+          fluorescencePhoton->fly();
+          ids.push_back(fluorescencePhoton->particle_number);
+          ++nIds;
+          break;
+        }
+      }
+    }
+    // Proceed with the next node in the particle bank.
+    tempNode = nextNode->get_next_node();
+    particle_bank.erase(nextNode);
+    nextNode = tempNode;
+  }
+  
+  // Get the total number of electrons produced in this step.
+  if (useDelta) {
+    nel = chamber->conduction_electron_bank.get_qel();
+  } else {
+    nel = nDeltas;
+  }
+
 }
       
 void

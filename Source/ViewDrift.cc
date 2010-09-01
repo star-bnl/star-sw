@@ -71,33 +71,41 @@ ViewDrift::Clear() {
 }
 
 void
-ViewDrift::NewElectronDriftLine(const int n) {
+ViewDrift::NewElectronDriftLine(const int np, int& id) {
 
-  if (n <= 0) {
+  // Create a new electron drift line and add it to the list.
+  if (np <= 0) {
+    // Number of points is not yet known.
     TPolyLine3D p(1);
     p.SetLineColor(colorElectron);
     driftLines.push_back(p);
   } else {
-    TPolyLine3D p(n);
+    TPolyLine3D p(np);
     p.SetLineColor(colorElectron);
     driftLines.push_back(p);
   }
+  // Return the index of this drift line.
+  id = nDriftLines;
   ++nDriftLines;
 
 } 
 
 void
-ViewDrift::NewIonDriftLine(const int n) {
+ViewDrift::NewIonDriftLine(const int np, int& id) {
 
-  if (n <= 0) {
+  // Create a new ion drift line and add it to the list.
+  if (np <= 0) {
+    // Number of points is not yet known.
     TPolyLine3D p(1);
     p.SetLineColor(colorIon);
     driftLines.push_back(p);
   } else {
-    TPolyLine3D p(n);
+    TPolyLine3D p(np);
     p.SetLineColor(colorIon);
     driftLines.push_back(p);
   }
+  // Return the index of this drift line.
+  id = nDriftLines;
   ++nDriftLines;
 
 }
@@ -106,6 +114,7 @@ void
 ViewDrift::NewPhotonTrack(const double x0, const double y0, const double z0,
                           const double x1, const double y1, const double z1) {
 
+  // Create a new photon track (line between start and end point).
   TPolyLine3D p(2);
   p.SetLineColor(colorPhoton);
   p.SetLineStyle(7);
@@ -117,17 +126,18 @@ ViewDrift::NewPhotonTrack(const double x0, const double y0, const double z0,
 }
 
 void
-ViewDrift::SetPoint(const int i, 
+ViewDrift::SetPoint(const int iL, const int iP, 
                     const double x, const double y, const double z) {
   
-  if (i < 0) return;
-  if (nDriftLines <= 0) {
+  if (iL < 0 || iL >= nDriftLines) {
     std::cerr << "ViewDrift::SetPoint:\n";
-    std::cerr << "    No drift lines present.\n";
+    std::cerr << "    Drift line index " << iL << " is out of range.\n";
     return;
   }
 
-  driftLines.back().SetPoint(i, x, y, z);
+  if (iP < 0) return;
+  
+  driftLines[iL].SetPoint(iP, x, y, z);
 
 }
 

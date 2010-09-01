@@ -10,23 +10,20 @@ class OpticalData {
 
   public:
     // Constructor
-    OpticalData() : hasData(false), 
-                    emin(0.), emax(0.),
-                    ionmin(0.), ionmax(0.), 
-                    debug(false) {}
+    OpticalData();
     // Destructor
-    ~OpticalData() {}
+    ~OpticalData();
 
-    bool SetMaterial(const std::string material);
-    bool GetPhotoabsorptionCrossSection(const double e, double& cs);
-    bool GetPhotoionisationYield(const double e, double& eta);
+    bool IsAvailable(const std::string material) const;
+    
+    bool GetPhotoabsorptionCrossSection(const std::string material,
+                                        const double e, 
+                                        double& cs, double& eta);
 
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
 
   private:
-
-    bool hasData;
 
     std::vector<double> energy;
     std::vector<double> eps1;
@@ -41,9 +38,9 @@ class OpticalData {
 
     bool debug;
 
-    void Argon();
-    void Methane();
-    void Acetylene();
+    bool PhotoAbsorptionCsArgon(const double e, double& cs, double& eta);
+    bool PhotoAbsorptionCsMethane(const double e, double& cs, double& eta);
+    bool PhotoAbsorptionCsAcetylene(const double e, double& cs, double& eta);
     void Isobutane();
  
 };

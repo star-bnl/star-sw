@@ -26,11 +26,11 @@ class ViewDrift {
     void SetArea(double xmin, double ymin, double zmin, 
                  double xmax, double ymax, double zmax);
     void Clear();
-    void NewElectronDriftLine(const int n);
-    void NewIonDriftLine(const int n);
+    void NewElectronDriftLine(const int np, int& id);
+    void NewIonDriftLine(const int np, int& id);
     void NewPhotonTrack(const double x0, const double y0, const double z0,
                         const double x1, const double y1, const double z1);
-    void SetPoint(const int i, 
+    void SetPoint(const int iL, const int iP, 
                   const double x, const double y, const double z);
     void Plot();
 
