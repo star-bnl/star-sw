@@ -29,10 +29,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream.h>
+#include "Stiostream.h"
 #include <math.h>
 #include <string>
-#include <fstream.h>
+#include <fstream>
 #include <TRandom2.h>
 #include "THGlobal.h"
 #include "ReadPar.h"
