@@ -87,12 +87,20 @@ static const  peak_t Peaks[6] = {{0.      ,       0., 0.13956995}, // pion
 				 {2.656584, 0.119078, 1.875613}, // d      - pi
 				 {0.004818, 0.002861, 0.1056584}};// mu     - pi
 #else /* P10 */
-static const  peak_t Peaks[6] = {{0.      ,       0., 0.13956995, "pion"}, // pion
-				 {1.425822, 0.101693, 0.93827231, "proton"}, // proton - pion
-				 {0.565455, 0.061626, 0.493677,   "kaon"  }, // Kaon   - pi
-				 {0.424916, 0.004081, 0.51099907e-3,"e"}, // e      - pi
-				 {2.655586, 0.123754, 1.875613,   "d"}, // d      - pi
-				 {0.004178, 0.002484, 0.105658,   "mu"}};// mu     - pi
+static const  peak_t Peaks[6] = {
+//   {0.      ,       0., 0.13956995, "pion"}, // pion
+//   {1.425822, 0.101693, 0.93827231, "proton"}, // proton - pion
+//   {0.565455, 0.061626, 0.493677,   "kaon"  }, // Kaon   - pi
+//   {0.424916, 0.004081, 0.51099907e-3,"e"}, // e      - pi
+//   {2.655586, 0.123754, 1.875613,   "d"}, // d      - pi
+//   {0.004178, 0.002484, 0.105658,   "mu"}};// mu     - pi
+  // 06/25/10
+  {       0.      ,       0.,           0.13956995,       "pion"}, // pion
+  {       1.42574,        0.101741,       0.938272,       "proton"},
+  {       0.565411,       0.0616611,      0.493677,       "kaon"},
+  {       0.424919,       0.00408318,     0.000510999,    "e"},
+  {       2.65548,        0.123809,       1.87561,        "deuteron"},
+  {       0.000717144,    0.00490783,     0.105658,       "mu"}};
 #endif
 
 Bichsel *gBichsel = 0;
@@ -468,7 +476,7 @@ TH2F *ProjectX(TH3F *hist, const Char_t *Name="_yz",const Int_t binx1=0,const In
   return h;
 } 
 //________________________________________________________________________________
-TF1 *FitGP(TH1D *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3) {
+TF1 *FitGP(TH1 *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3) {
   if (! proj) return 0;
   TString Opt(opt);
   //  Bool_t quet = Opt.Contains("Q",TString::kIgnoreCase);
@@ -598,19 +606,21 @@ Double_t gfFunc(Double_t *x, Double_t *par) {
     frac[i] *= frac[i];
     frac[0] -= frac[i];
   }
+  if (frac[0] < 0.4) return 0;
   Double_t Value = 0;
   Int_t icase = (Int_t) par[8];
   Int_t i1 = 0;
   Int_t i2 = 4;
   if (icase >= 0) {i1 = i2 = icase;}
   for (i = i1; i <= i2; i++) { 
-    Value += frac[i]*TMath::Gaus(x[0],par[1]+Peaks[i].peak,sigma,1);
+    Double_t Sigma = TMath::Sqrt(sigma*sigma + Peaks[i].sigma*Peaks[i].sigma);
+    Value += frac[i]*TMath::Gaus(x[0],par[1]+Peaks[i].peak,Sigma,1);
     //    cout << "i\t" << i << "\tx = " << x[0] << " frac " << frac[i] << "\t" << Value << endl;
   }
   return par[7]*TMath::Exp(par[0])*Value;
 }
 //________________________________________________________________________________
-TF1 *FitGF(TH1D *proj, Option_t *opt="") {
+TF1 *FitGF(TH1 *proj, Option_t *opt="") {
   // fit in momentum range p = 0.45 - 0.50 GeV/c
   if (! proj) return 0;
   TString Opt(opt);
@@ -632,14 +642,22 @@ TF1 *FitGF(TH1D *proj, Option_t *opt="") {
   
   Double_t total = proj->Integral()*proj->GetBinWidth(5);
   g2->SetParameters(0, 1e-3, 0.32, 0.4, 0.1, 0.1, 0.1,0.1,-1.);
+  g2->FixParameter(3,2.86731e-01);
+  g2->FixParameter(4,4.27788e-01);
+  g2->FixParameter(5,1e-6);
+  g2->FixParameter(6,5.77664e-02);
   g2->FixParameter(7,total);
   g2->FixParameter(8,-1);
   proj->Fit(g2,Opt.Data());
+  g2->ReleaseParameter(3); g2->SetParLimits(3,0.0,TMath::Pi()/2);
+  g2->ReleaseParameter(4); g2->SetParLimits(4,0.0,TMath::Pi()/2);
+  g2->ReleaseParameter(5); g2->SetParLimits(5,0.0,TMath::Pi()/2);
+  g2->ReleaseParameter(6); g2->SetParLimits(6,0.0,TMath::Pi()/2);
   Int_t iok = proj->Fit(g2,Opt.Data());
   if ( iok ) {
     cout << g2->GetName() << " fit has failed with " << iok << " for " 
-	 << proj->GetName() << "/" << proj->GetTitle() << endl; 
-    return 0;
+	 << proj->GetName() << "/" << proj->GetTitle() << " Try one again" << endl; 
+    proj->Fit(g2,Opt.Data());
   }
   Opt += "m";
   iok = proj->Fit(g2,Opt.Data());
@@ -742,7 +760,7 @@ Double_t gbFunc(Double_t *x, Double_t *par) {
 #endif
 }
 //________________________________________________________________________________
-TF1 *FitGB(TH1D *proj, Option_t *opt="", Double_t dX = 2.364) {
+TF1 *FitGB(TH1 *proj, Option_t *opt="", Double_t dX = 2.364) {
   if (!gBichsel) {
     gSystem->Load("StBichsel");
     gBichsel = Bichsel::Instance();
@@ -787,8 +805,8 @@ TF1 *FitGB(TH1D *proj, Option_t *opt="", Double_t dX = 2.364) {
   Int_t iok = proj->Fit(g2,Opt.Data());
   if ( iok ) {
     cout << g2->GetName() << " fit has failed with " << iok << " for " 
-	 << proj->GetName() << "/" << proj->GetTitle() << endl; 
-    return 0;
+	 << proj->GetName() << "/" << proj->GetTitle() << " Try one again" << endl; 
+    proj->Fit(g2,Opt.Data());
   }
   Opt += "m";
   iok = proj->Fit(g2,Opt.Data());
@@ -807,7 +825,7 @@ TF1 *FitGB(TH1D *proj, Option_t *opt="", Double_t dX = 2.364) {
   return g2;
 }
 //________________________________________________________________________________
-TF1 *FitG2(TH1D *proj, Option_t *opt="RQ") {
+TF1 *FitG2(TH1 *proj, Option_t *opt="RQ") {
   if (! proj) return 0;
   Double_t params[9];
   TF1 *gaus = new TF1("gaus","gaus",-5.,5.);
@@ -845,7 +863,7 @@ TF1 *FitG2(TH1D *proj, Option_t *opt="RQ") {
   return g;
 }
 //________________________________________________________________________________
-TF1 *FitG3(TH1D *proj, Option_t *opt="RQ") {
+TF1 *FitG3(TH1 *proj, Option_t *opt="RQ") {
   if (! proj) return 0;
   Double_t params[9];
   TF1 *gaus = new TF1("gaus","gaus",-5.,5.);
@@ -1284,7 +1302,7 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
     }
   }
   Double_t params[9];
-  TH1D *proj = 0;
+  TH1 *proj = 0;
   TF1 *g = 0;
   Int_t ix1 = ix, jy1 = jy;
   if (ix > 0) nx = ix;
@@ -1300,7 +1318,11 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
       Int_t jr1 = j+mergeY-1;
       if (j == 0) {jr0 = 1; jr1 = ny;}
       if (dim == 3) {
-	proj = ((TH3 *) hist)->ProjectionZ(Form("f%i_%i",i,j),ir0,ir1,jr0,jr1);
+	if (ir0 == ir1 && jr0 == jr1) 
+	  proj = ((TH3 *) hist)->ProjectionZ(Form("f%i_%i",      ir0,    jr0    ),ir0,ir1,jr0,jr1);
+	else                          
+	  proj = ((TH3 *) hist)->ProjectionZ(Form("f%i_%i_%i_%i",ir0,ir1,jr0,jr1),ir0,ir1,jr0,jr1);
+	if (! proj) continue;
 	TString title(proj->GetTitle());
 	title += Form(" in x [%5.1f,%5.1f] and y [%5.1f,%5.1f] range",
 		      xax->GetBinLowEdge(ir0), xax->GetBinUpEdge(ir1),
@@ -1308,7 +1330,11 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
 	proj->SetTitle(title.Data());
       }
       else {
-	proj = ((TH2 *) hist)->ProjectionY(Form("f%i",i),ir0,ir1);
+	if (ir0 == ir1) 
+	  proj = ((TH2 *) hist)->ProjectionY(Form("f%i",   ir0),    ir0,ir1);
+	else 
+	  proj = ((TH2 *) hist)->ProjectionY(Form("f%i_%i",ir0,ir1),ir0,ir1);
+	if (! proj) continue;
 	TString title(proj->GetTitle());
 	title += Form("in x [%5.1f,%5.1f] range",
 		      xax->GetBinLowEdge(ir0), xax->GetBinUpEdge(ir1));
@@ -1499,7 +1525,7 @@ void FitX(TH2 *hist=0, Double_t range=1, Int_t Ibin = 0) {
   Int_t i1 = 1, i2 = nBins;
   if (Ibin > 0 && Ibin <= nBins) {i1 = Ibin; i2 = Ibin;}
   Double_t XFitP, dXFitP,  MuFitP,dMuFitP,SigmaFitP,dSigmaFitP;
-  TH1D *proj = 0;
+  TH1 *proj = 0;
   for (i=i1; i<=i2; i++) {
     if (proj) delete proj;
     proj = hist->ProjectionY("proj",i,i);
@@ -2105,7 +2131,7 @@ void Func()
 //________________________________________________________________________________
 void SpCfit(TH2F *hist, Int_t i1, Int_t i2)
 {
-   TH1D *h1 = hist->ProjectionY("bin",i1,i2);
+   TH1 *h1 = hist->ProjectionY("bin",i1,i2);
    TF1 *f1= (TF1 *) gROOT->GetFunction("Func");
    f1->SetParameters(0,1);
    h1->Fit("Func");
@@ -2217,7 +2243,7 @@ void MakeTimeGain(TH1 *hist, const Char_t *TabNam = "TpcTimeGain"){
 void FitF(TH2 *hist=0, TF1 *ga=0) {
   if (!hist || !ga) return;
   Int_t nx = hist->GetNbinsX();
-  TH1D *proj = 0;
+  TH1 *proj = 0;
   TCanvas *c = new TCanvas("Fit");
   TString name(hist->GetName());
   name += "MuFG";
@@ -2494,7 +2520,7 @@ void bFitMip(const Int_t iX = 8,const Int_t iY=8) {
     for (Int_t j=j1; j<=j2; j++) {
       newf->cd();
       TString projName(Form("%s_%i_%i",NAMES[hyp],i,j));
-      TH1D *proj = (TH1D *) newf->Get(projName.Data());
+      TH1 *proj = (TH1 *) newf->Get(projName.Data());
       if (! proj) proj = hist->ProjectionZ(projName.Data(),i,i,j,j);
       if (! proj) continue;
       double xx = hist->GetXaxis()->GetBinCenter(i);
@@ -2684,7 +2710,6 @@ void Make2Dproj(TH2D *h, Int_t N = 100, Double_t xlow = -1., Double_t xup = 1.) 
 }
 #endif /* PLUSHIKIN */
 //#define DEBUG
-TCanvas *c1 = 0;
 //________________________________________________________________________________
 TList *ListOfKeys() {
   TList *list = 0;
@@ -2794,7 +2819,7 @@ void DrawSummary0(TFile *f, const Char_t *opt) {
   TString Tag(gSystem->BaseName(f->GetName()));
   Tag.ReplaceAll(".root","");
   Tag += opt;
-  c1 = new TCanvas(Tag,Tag,200,10,700,780);
+  TCanvas *c1 = new TCanvas(Tag,Tag,200,10,700,780);
   Double_t dx = 0.98/nx;
   Double_t dy = 0.98/ny;
   TObjArray pads(N);
