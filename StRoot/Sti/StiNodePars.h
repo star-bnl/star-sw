@@ -41,7 +41,6 @@ class StiNodePars {
   Double_t P[8]; // array of parameters. see below
 #else  /* don't work with gcc451 and optimization, keep for documentation */
   union{Double_t P[1];Double_t _x;}; 
-  Double_t _x;
   Double_t _y;     //  local Y-coordinate of this track (reference plane)           
   Double_t _z;     //  local Z-coordinate of this track (reference plane)
   Double_t _eta;   //  (signed curvature)*(local Xc of helix axis - X current point on track)
