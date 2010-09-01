@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGBTracker.cxx,v 1.12 2010/09/01 10:38:27 ikulakov Exp $
+// $Id: AliHLTTPCCAGBTracker.cxx,v 1.13 2010/09/01 13:45:03 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -922,6 +922,7 @@ void AliHLTTPCCAGBTracker::SaveHitsInFile(string prefix) const
 {
     ofstream ofile((prefix+"hits.data").data(),ios::out|ios::app);
     const int Size = fHits.Size();
+    ofile << Size << std::endl;
     for (int i = 0; i < fHits.Size(); i++){
       const AliHLTTPCCAGBHit &l = fHits[i];
       ofile << l;
@@ -941,6 +942,7 @@ void AliHLTTPCCAGBTracker::ReadHitsFromFile(string prefix)
     ifstream ifile((prefix+"hits.data").data());
     int Size;
     ifile >> Size;
+    SetNHits(Size);
     fHits.Resize(Size);
     for (int i = 0; i < Size; i++){
       AliHLTTPCCAGBHit &l = fHits[i];
