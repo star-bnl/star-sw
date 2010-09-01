@@ -12,12 +12,12 @@
 #include "tables/St_tss_tsspar_Table.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
+#include "StDetectorDbMaker/St_tpcAvCurrentC.h"
 ClassImp(dEdxY2_t);
 ClassImp(StTpcdEdxCorrection)
 //________________________________________________________________________________
 StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) : 
   m_Mask(option), m_tpcGas(0),// m_trigDetSums(0), m_trig(0),
-  //  m_tpcGainMonitor(0),
   m_TpcSecRowB(0),
   m_TpcSecRowC(0),
   m_Debug(debug)
@@ -28,6 +28,7 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   m_Corrections[kEdge                ] = dEdxCorrection_t("TpcEdge"             ,"Dependence of the Gain on distance from Chamber edge");
   m_Corrections[kTpcdCharge          ] = dEdxCorrection_t("TpcdCharge"          ,"ADC/Clustering undershoot correction");
   m_Corrections[kTpcrCharge          ] = dEdxCorrection_t("TpcrCharge"          ,"ADC/Clustering rounding correction");
+  m_Corrections[kTpcAvCurrent        ] = dEdxCorrection_t("TpcAvCurrent"        ,"Correction due to sagg of Voltage due to anode current");
   m_Corrections[kTpcRowQ             ] = dEdxCorrection_t("TpcRowQ"         	,"Gas gain correction for row versus accumulated charge, absolute normalization");
   m_Corrections[kTpcSecRowB          ] = dEdxCorrection_t("TpcSecRowB"         	,"Gas gain correction for sector/row");
   m_Corrections[kTpcSecRowC          ] = dEdxCorrection_t("TpcSecRowC"         	,"Additional Gas gain correction for sector/row");
@@ -181,7 +182,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
 	dE *= 2.116;//  1.75; // 1.25 is in Trs already <<<< !!!!!!
       } else {
 	ADC = dE/mAdc2GeV;
-	dE = Adc2GeVReal*m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,ADC,CdEdx.zG);
+	dE = Adc2GeVReal*m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,ADC,TMath::Abs(CdEdx.zG));
       }
       goto ENDL;
     case kTpcdCharge:
@@ -190,6 +191,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       dE *=  TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(2+kTpcOutIn,CdEdx.dCharge));
       goto ENDL;
     case kTpcZDC: VarX = (CdEdx.Zdc > 0) ? TMath::Log10(CdEdx.Zdc) : 0; break;
+    case kTpcAvCurrent:
+      VarX = CdEdx.Crow;
+      break;
     case kTpcrCharge:
       VarX =  CdEdx.rCharge;
       break;
@@ -197,12 +201,13 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx, Bool_t doIT) {
       VarX = CdEdx.Qcm; break;
     case kTpcSecRowB:
     case kTpcSecRowC:
-      if (k == kTpcSecRowB)  {gain = m_TpcSecRowB->GetTable() + sector - 1;
-  	                      CdEdx.SigmaFee = gain->GainRms[row-1];}
-      else                    gain = m_TpcSecRowC->GetTable() + sector - 1;
+      if (k == kTpcSecRowB)  gain = m_TpcSecRowB->GetTable() + sector - 1;
+      else                   gain = m_TpcSecRowC->GetTable() + sector - 1;
       gc =  gain->GainScale[row-1];
       if (gc <= 0.0) return 1;
       dE *= gc;
+      CdEdx.Weight = 1;
+      if (gain->GainRms[row-1] > 0.1) CdEdx.Weight = 1./(gain->GainRms[row-1]*gain->GainRms[row-1]);
       goto ENDL;
     case kTpcPadTBins:
       VarX = CdEdx.Npads*CdEdx.Ntbins;
@@ -383,8 +388,6 @@ void StTpcdEdxCorrection::SettpcGas      (St_tpcGas       *m) {
     if (Debug()) m_tpcGas->Print(0,m_tpcGas->GetNRows());
   }
 }
-//________________________________________________________________________________
-//void StTpcdEdxCorrection::SettpcGainMonitor (St_tpcGainMonitor *m) {PrPD(SettpcGainMonitor,m); m_tpcGainMonitor = m;
 //________________________________________________________________________________
 void StTpcdEdxCorrection::Print(Option_t *opt) const {
   if (! mdEdx) return;
