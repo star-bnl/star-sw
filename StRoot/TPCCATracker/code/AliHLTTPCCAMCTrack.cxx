@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMCTrack.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCAMCTrack.cxx,v 1.2 2010/09/01 10:38:27 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -83,3 +83,25 @@ void AliHLTTPCCAMCTrack::SetTPCPar( float X, float Y, float Z,
     if ( pPDG ) fTPCPar[6] = pPDG->Charge() / 3.0 * pi;
   }
 }
+
+ostream& operator<<(ostream& out, const AliHLTTPCCAMCTrack &a)
+{
+  out << a.fPDG << std::endl;
+  for (int i = 0; i < 7; i++) out << a.fPar[i] << std::endl;
+  for (int i = 0; i < 7; i++) out << a.fTPCPar[i] << std::endl;
+  out << a.fP << " " << a.fPt << std::endl;
+  out << a.fNHits << " " << a.fNMCPoints << " " << a.fFirstMCPointID << std::endl;
+  out << a.fNReconstructed << " " << a.fSet << " " << a.fNTurns << std::endl;
+}
+
+
+istream& operator>>(istream& in, AliHLTTPCCAMCTrack &a)
+{
+  in >> a.fPDG;
+  for (int i = 0; i < 7; i++) in >> a.fPar[i];
+  for (int i = 0; i < 7; i++) in >> a.fTPCPar[i];
+  in >> a.fP >> a.fPt;
+  in >> a.fNHits >> a.fNMCPoints >> a.fFirstMCPointID;
+  in >> a.fNReconstructed >> a.fSet >> a.fNTurns;
+}
+

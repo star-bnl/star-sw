@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMCPoint.cxx,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCAMCPoint.cxx,v 1.2 2010/09/01 10:38:27 ikulakov Exp $
 //***************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -23,4 +23,19 @@ AliHLTTPCCAMCPoint::AliHLTTPCCAMCPoint()
     : fX( 0 ), fY( 0 ), fZ( 0 ), fSx( 0 ), fSy( 0 ), fSz( 0 ), fTime( 0 ), fISlice( 0 ), fTrackID( 0 )
 {
   //* Default constructor
+}
+
+ostream& operator<<(ostream& out, const AliHLTTPCCALocalMCPoint &a)
+{
+  out << a.fX << " " << a.fY << " " << a.fZ << std::endl;
+  out << a.fPx << " " << a.fPy << " " << a.fPz << " " << a.fQP << std::endl;
+  out << a.fISlice << " " << a.fIRow << " " << a.fTrackI << " " << a.fTrackID << std::endl;
+}
+
+
+istream& operator>>(istream& in, AliHLTTPCCALocalMCPoint &a)
+{
+  in >> a.fX >> a.fY >> a.fZ;
+  in >> a.fPx >> a.fPy >> a.fPz >> a.fQP;
+  in >> a.fISlice >> a.fIRow >> a.fTrackI >> a.fTrackID;
 }

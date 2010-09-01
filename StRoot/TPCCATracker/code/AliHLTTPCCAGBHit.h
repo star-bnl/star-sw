@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAGBHit.h,v 1.1.1.1 2010/07/26 20:55:38 ikulakov Exp $
+// $Id: AliHLTTPCCAGBHit.h,v 1.2 2010/09/01 10:38:27 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -11,6 +11,11 @@
 #define ALIHLTTPCCAGBHIT_H
 
 #include "AliHLTTPCCADef.h"
+
+#include <iostream>
+using std::ostream;
+using std::istream;
+
 
 /**
  * @class AliHLTTPCCAGBHit
@@ -60,6 +65,9 @@ class AliHLTTPCCAGBHit
     static bool ComparePRowDown( const AliHLTTPCCAGBHit *a, const AliHLTTPCCAGBHit *b ) {
       return ( a->fIRow > b->fIRow );
     }
+
+  friend ostream& operator<<(ostream& out, const AliHLTTPCCAGBHit &a);
+  friend istream& operator>>(istream& in, AliHLTTPCCAGBHit &a);
 
   protected:
 

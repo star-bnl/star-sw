@@ -19,6 +19,8 @@
 #include <cstdio>
 #include <iostream>
 #include <vector>
+#include <string>
+using std::string;
 
 class AliHLTTPCCAMerger;
 
@@ -80,6 +82,11 @@ class AliHLTTPCCAGBTracker
     void ReadEvent( FILE *in );
     void WriteTracks( std::ostream &out ) const;
     void ReadTracks( std::istream &in );
+
+    void SaveHitsInFile( string prefix ) const; // Save Hits in txt file. @prefix - prefix for file name. Ex: "./data/ev1"
+    void SaveSettingsInFile( string prefix ) const; // Save geometry in txt file. @prefix - prefix for file name. Ex: "./data/"
+    void ReadHitsFromFile( string prefix );
+    void ReadSettingsFromFile( string prefix );
 
     double SliceTrackerTime() const { return fSliceTrackerTime; }
     double SliceTrackerCpuTime() const { return fSliceTrackerCpuTime; }

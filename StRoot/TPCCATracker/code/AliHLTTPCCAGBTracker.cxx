@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAGBTracker.cxx,v 1.11 2010/08/26 15:05:49 ikulakov Exp $
+// $Id: AliHLTTPCCAGBTracker.cxx,v 1.12 2010/09/01 10:38:27 ikulakov Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -917,3 +917,44 @@ void AliHLTTPCCAGBTracker::SetSettings( vector<AliHLTTPCCAParam>& settings )
     fSlices[iSlice].Initialize( settings[iSlice] );
   }
 }
+
+void AliHLTTPCCAGBTracker::SaveHitsInFile(string prefix) const
+{
+    ofstream ofile((prefix+"hits.data").data(),ios::out|ios::app);
+    const int Size = fHits.Size();
+    for (int i = 0; i < fHits.Size(); i++){
+      const AliHLTTPCCAGBHit &l = fHits[i];
+      ofile << l;
+    }
+    ofile.close();
+
+}
+
+void AliHLTTPCCAGBTracker::SaveSettingsInFile(string prefix) const
+{
+  ofstream ofile((prefix+"settings.data").data(),ios::out|ios::app);
+  WriteSettings(ofile);
+}
+
+void AliHLTTPCCAGBTracker::ReadHitsFromFile(string prefix)
+{
+    ifstream ifile((prefix+"hits.data").data());
+    int Size;
+    ifile >> Size;
+    fHits.Resize(Size);
+    for (int i = 0; i < Size; i++){
+      AliHLTTPCCAGBHit &l = fHits[i];
+      ifile >> l;
+    }
+    ifile.close();
+}
+
+void AliHLTTPCCAGBTracker::ReadSettingsFromFile(string prefix)
+{
+  ifstream ifile((prefix+"settings.data").data());
+  ReadSettings(ifile);
+}
+
+
+
+

@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformance.h,v 1.8 2010/08/23 19:37:02 mzyzak Exp $
+// $Id: AliHLTTPCCAPerformance.h,v 1.9 2010/09/01 10:38:27 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -19,6 +19,8 @@
 #include <fstream>
 #include <cstdio>
 #include <map>
+#include <string>
+using std::string;
 
 class TObject;
 class TParticle;
@@ -78,7 +80,10 @@ class AliHLTTPCCAPerformance
   bool CreateHistos(string name);
   
   void SetOutputFile(TFile *oF) { fOutputFile = oF; }
-  
+
+  void SaveDataInFiles( string prefix ) const; // Save all MC Data in txt files. @prefix - prefix for file name. Ex: "./data/ev1"
+  void ReadDataFromFiles( string prefix ); // @prefix - prefix for file name. Ex: "./data/ev1"
+
   protected:
 
           /// Histograms
@@ -112,8 +117,7 @@ class AliHLTTPCCAPerformance
 //     vector<AliHLTTPCCAPerformanceBase*> subPerformances;
     
     const AliHLTTPCCAGBTracker *fTracker; // pointer to the tracker
-
-      /// MC information
+       /// MC information
     AliHLTResizableArray<AliHLTTPCCAHitLabel> fHitLabels; // array of hit MC labels
     AliHLTResizableArray<AliHLTTPCCAMCTrack> fMCTracks;   // array of MC tracks
     AliHLTResizableArray<AliHLTTPCCALocalMCPoint> fLocalMCPoints;   // array of MC points in slices CS

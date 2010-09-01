@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCAPerformanceBase.h,v 1.9 2010/08/23 19:37:02 mzyzak Exp $
+// $Id: AliHLTTPCCAPerformanceBase.h,v 1.10 2010/09/01 10:38:27 ikulakov Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -23,6 +23,10 @@
 #include <string>
 using std::string;
 
+#include <iostream>
+using std::ostream;
+using std::istream;
+
 class TObject;
 class TParticle;
 class AliHLTTPCCAMCPoint;
@@ -41,6 +45,10 @@ class AliHLTTPCCAPerformanceBase
 
     struct AliHLTTPCCAHitLabel {
       int fLab[3]; //* array of 3 MC labels
+      friend ostream& operator<<(ostream& out, const AliHLTTPCCAHitLabel& hl)
+             { return out << hl.fLab[0] << " " << hl.fLab[1] << " "<< hl.fLab[2] << " " << std::endl;}
+      friend istream& operator>>(istream& in, AliHLTTPCCAHitLabel& hl)
+             { return in >> hl.fLab[0] >> hl.fLab[1] >> hl.fLab[2];}
     };
 
     AliHLTTPCCAPerformanceBase();
