@@ -521,6 +521,8 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
     // the Opal-Beaty-Peterson parameterisation.
     if (useSplittingFunction) { 
       esec = w * tan(RndmUniform() * atan(0.5 * (e - loss) / w));
+      // Rescaling (see MONTEFD subroutine in Magboltz)
+      esec = w * pow(esec / w, 0.9524);
     } else {
       esec = RndmUniform() * (e - loss);
     }
