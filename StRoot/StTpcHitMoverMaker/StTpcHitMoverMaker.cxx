@@ -6,6 +6,12 @@
 #include "StEventTypes.h"
 #include "TMath.h"
 ClassImp(StTpcHitMover)
+//#define __DEBUG__
+#ifdef __DEBUG__
+#define PrPP(A,B) if (Debug()%10 > 1) {LOG_INFO << "StTpcHitMover::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
+#else
+#define PrPP(A,B)
+#endif
 //________________________________________________________________________________
 StTpcHitMover::StTpcHitMover(const Char_t *name) : StMaker(name),
 						   mTpcTransForm(0), mExB(NULL) {
@@ -87,12 +93,16 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
   if (! mTpcTransForm) mTpcTransForm = new StTpcCoordinateTransform(gStTpcDb);
   StTpcCoordinateTransform &transform = *mTpcTransForm;
   static StTpcLocalSectorCoordinate  coorLS;
-  transform(coorL,coorLS);   // to sector 12
+  transform(coorL,coorLS);   PrPP(moveTpcHit,coorL); PrPP(moveTpcHit,coorLS); // to sector 12
+#if 1
+  static StTpcPadCoordinate Pad;
+  transform(coorLS,Pad,kFALSE,kFALSE); PrPP(moveTpcHit,Pad);
+#endif
   static StTpcLocalSectorAlignedCoordinate  coorLSA;
-  transform(coorLS,coorLSA); // alignment
-  static StTpcLocalCoordinate  coorLT;
-  transform(coorLSA,coorLT); //
-  static StTpcLocalCoordinate  coorLTD;
+  transform(coorLS,coorLSA); PrPP(moveTpcHit,coorLSA);// alignment
+  static StTpcLocalCoordinate  coorLT; // before undo distortions
+  transform(coorLSA,coorLT); PrPP(moveTpcHit,coorLT);//
+  static StTpcLocalCoordinate  coorLTD; // after undo distortions
   coorLTD = coorLT;          // distortions
   // ExB corrections
   Float_t pos[3] = {coorLTD.position().x(),coorLTD.position().y(),coorLTD.position().z()};
@@ -100,7 +110,7 @@ void StTpcHitMover::moveTpcHit(StTpcLocalCoordinate  &coorL,StGlobalCoordinate &
     Float_t posMoved[3];
     mExB->UndoDistortion(pos,posMoved,coorL.fromSector());   // input pos[], returns posMoved[]
     StThreeVector<double> newPos(posMoved[0],posMoved[1],posMoved[2]);
-    coorLTD.setPosition(newPos);
+    coorLTD.setPosition(newPos); 
   }
-  transform(coorLTD,coorG);
+  transform(coorLTD,coorG); PrPP(moveTpcHit,coorLTD); PrPP(moveTpcHit,coorG); 
 }
