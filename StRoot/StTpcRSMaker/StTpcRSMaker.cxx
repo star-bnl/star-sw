@@ -47,8 +47,8 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.40 2010/06/14 23:34:26 fisyak Exp $";
-#define __ClusterProfile__
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.41 2010/09/01 23:12:01 fisyak Exp $";
+//#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
 //                                    Inner        Outer
@@ -1471,8 +1471,11 @@ Double_t StTpcRSMaker::polya(Double_t *x, Double_t *par) {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.40 2010/06/14 23:34:26 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.41 2010/09/01 23:12:01 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.41  2010/09/01 23:12:01  fisyak
+// take out __ClusterProfile__
+//
 // Revision 1.40  2010/06/14 23:34:26  fisyak
 // Freeze at Version V
 //
