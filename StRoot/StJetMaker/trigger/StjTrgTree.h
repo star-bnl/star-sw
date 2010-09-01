@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgTree.h,v 1.6 2008/09/21 19:11:47 tai Exp $
+// $Id: StjTrgTree.h,v 1.4 2008/08/18 06:20:53 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGTREE_H
 #define STJTRGTREE_H
@@ -21,7 +21,7 @@ public:
   int eventId();
   bool hard() const;
   bool soft() const;
-  bool passed() const;
+  bool pass();
   double prescale();
   double vertexZ();
   std::vector<int> towers();

@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.28 2008/07/17 22:50:52 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.29 2009/02/02 19:30:50 fisyak Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,9 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.29  2009/02/02 19:30:50  fisyak
+ * Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
+ *
  * Revision 1.28  2008/07/17 22:50:52  calderon
  * Remove a cut in acceptRaw(StMcTrack*) that checked on the pseudorapidity.
  * This cut was affecting heavy particles thrown flat in rapidity for embedding.
@@ -137,6 +140,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.29  2009/02/02 19:30:50  fisyak
+ * Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
+ *
  * Revision 1.28  2008/07/17 22:50:52  calderon
  * Remove a cut in acceptRaw(StMcTrack*) that checked on the pseudorapidity.
  * This cut was affecting heavy particles thrown flat in rapidity for embedding.
@@ -262,7 +268,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.28 2008/07/17 22:50:52 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.29 2009/02/02 19:30:50 fisyak Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -363,7 +369,6 @@ StMiniMcMaker::StMiniMcMaker(const Char_t *name, const Char_t *title)
   mParameterFileName(),
   mRcEvent(0),
   mMcEvent(0),
-  mRun(0),
   mRcHitMap(0),
   mRcTrackMap(0),
   mMcTrackMap(0),
@@ -443,40 +448,6 @@ StMiniMcMaker::InitRun(int runID) {
   cout << "\tpt cut : " << mMinPt << " , " << mMaxPt << endl;
   Int_t stat=0;
 
-#if 0
-  mIOMaker = (StIOInterFace*)GetMaker("IO");
-  if (!mIOMaker) {
-    cout << "No StIOMaker found, trying StTreeMaker" << endl;
-    mIOMaker = (StIOInterFace*) GetMaker("outputStream");
-  }
-  assert(mIOMaker);
-  //
-  // if it's a new file, then close the old one and open a new one
-  //
-  TString curFileName;
-  if(mIOMaker){
-    if( ! strrchr(mIOMaker->GetFile(),'/')){
-      curFileName = mIOMaker->GetFile();
-    }
-    else {
-      curFileName = strrchr(mIOMaker->GetFile(),'/')+1;
-    }
-  }
-  if (Debug()) {
-    cout << "Current File Name (StIO) " << curFileName << endl;
-    cout << "Cached  File Name (MiniMcMk) " << mInFileName << endl;
-  }
-  if(mMiniMcEvent && mInFileName.Contains(curFileName)) return kStOK;
-  
-  if(Debug()) {
-    cout << "\tNew file found : " << curFileName << endl
-	 << "\tReplacing " << mInFileName << endl;
-  }
-  closeFile();
-  int fileBeginIndex = mInFileName.Last('/');
-  mInFileName.Remove(0,fileBeginIndex+1);
-  if (Debug()) cout << "New InFileName = " << mInFileName << endl;
-#endif  
   //
   // instantiate the event object here (embedding or simulation?)
   //
@@ -539,8 +510,6 @@ StMiniMcMaker::Make()
   if(!mRcEvent) return kStOk; // last event apparently
   mMcEvent = (StMcEvent*) GetDataSet("StMcEvent");
   if(!mMcEvent) return kStErr;
-  mRun = (StRun*) GetDataSet("StRun");
-  if(!mRun) cout << "Cannot get StRun" << endl;
 
   //
   // association
@@ -705,9 +674,13 @@ StMiniMcMaker::trackLoop()
 	      
 	      if (find(enteredGlobalTracks.begin(),enteredGlobalTracks.end(),glTrack->key())!=enteredGlobalTracks.end()) continue; //if it's already matched, skip it.
 	      StMiniMcPair* miniMcPair      = new StMiniMcPair;
+	      Int_t commonHits = 
+		candTrackPair->commonTpcHits()%100+
+		((candTrackPair->commonSvtHits()%10)*100)+
+		((candTrackPair->commonSsdHits()%10)*1000);
 	      fillTrackPairInfo(miniMcPair, mcGlobTrack,
 				0, glTrack, 
-				candTrackPair->commonTpcHits()+((candTrackPair->commonSvtHits())*100), mRcTrackMap->count(glTrack),
+				commonHits, mRcTrackMap->count(glTrack),
 				mMcTrackMap->count(mcGlobTrack), 0,
 				kTRUE);
 	      mMiniMcEvent->addTrackPair(miniMcPair,MATGLOB);
@@ -892,9 +865,12 @@ StMiniMcMaker::trackLoop()
 	      // 02/02/02 rc pt cut
 	      if(acceptPt(glTrack) || acceptPt(prTrack)){
 		StMiniMcPair* miniMcPair = new StMiniMcPair;
+		Int_t commonHits = mergedCommonHits%100+
+		  ((mcMergedPair[i]->commonSvtHits()%10)*100)+
+		  ((mcMergedPair[i]->commonSsdHits()%10)*1000);
 		fillTrackPairInfo(miniMcPair, mergedMcTrack, 
 				  prTrack, glTrack, 
-				  mergedCommonHits+((mcMergedPair[i]->commonSvtHits())*100), nAssocMc,
+				  commonHits, nAssocMc,
 				  nAssocGlVec[i], nAssocPrVec[i],
 				  isBestContam);
 		mMiniMcEvent->addTrackPair(miniMcPair,MATCHED);
@@ -908,8 +884,12 @@ StMiniMcMaker::trackLoop()
 	      // 02/02/02 rc pt cut
 	      if(acceptPt(glTrack) || acceptPt(prTrack)){
 		StMiniMcPair* miniMcPair = new StMiniMcPair;
+		Int_t commonHits = 
+		  mergedCommonHits+
+		  ((mcMergedPair[i]->commonSvtHits()%10)*100)+
+		  ((mcMergedPair[i]->commonSsdHits()%10)*1000);
 		fillTrackPairInfo(miniMcPair,mergedMcTrack,prTrack,glTrack,
-				  mergedCommonHits+((mcMergedPair[i]->commonSvtHits())*100), nAssocMc,nAssocGlVec[i], 
+				  commonHits, nAssocMc,nAssocGlVec[i], 
 				  nAssocPrVec[i]);
 		 mMiniMcEvent->addTrackPair(miniMcPair,MERGED);
 		 delete miniMcPair;
@@ -1055,8 +1035,12 @@ StMiniMcMaker::trackLoop()
 	//
 	if(isPrimaryTrack(mcTrack)){
 	  StMiniMcPair* miniMcPair = new StMiniMcPair;
+	  Int_t cHits = 
+	    commonHits%100+
+	    (((*iterBestMatchPair)->commonSvtHits()%10)*100)+
+	    (((*iterBestMatchPair)->commonSsdHits()%10)*1000);
 	  fillTrackPairInfo(miniMcPair,mcTrack,prTrack,glTrack,
-			    commonHits+(((*iterBestMatchPair)->commonSvtHits())*100), nAssocMc, nAssocGl, nAssocPr);
+			    cHits, nAssocMc, nAssocGl, nAssocPr);
 	  mMiniMcEvent->addTrackPair(miniMcPair,SPLIT);
 	  delete miniMcPair;
 	  nSplit++; 
@@ -1068,9 +1052,12 @@ StMiniMcMaker::trackLoop()
 	}
 	else{ // no, it's best matched to a non primary, contamination
 	  StContamPair* contamPair      = new StContamPair;
-	  
+	  Int_t cHits =
+	    commonHits%100+
+	    (((*iterBestMatchPair)->commonSvtHits()%10)*100)+
+	    (((*iterBestMatchPair)->commonSsdHits()%10)*1000);
 	  fillTrackPairInfo(contamPair,mcTrack,
-			    prTrack,glTrack,commonHits+(((*iterBestMatchPair)->commonSvtHits())*100),
+			    prTrack,glTrack,cHits,
 			    nAssocMc,nAssocGl,nAssocPr);
 	  mMiniMcEvent->addContamPair(contamPair);
 	  delete contamPair;
@@ -1282,7 +1269,9 @@ void StMiniMcMaker::buildEmcIndexArray() {
   for (int softIdNum=1; softIdNum<4801; ++softIdNum) mEmcIndex[softIdNum]=0;
 
   StEmcGeom* emcGeom = StEmcGeom::getEmcGeom(1);
+  if (! mRcEvent->emcCollection()) return;
   StEmcDetector* bemcDet = mRcEvent->emcCollection()->detector(kBarrelEmcTowerId);
+  if (! bemcDet) return;
   if (Debug()>1) {
     cout << "emcGeom " << emcGeom << endl;
     cout << "bemcDet " << bemcDet << endl;
@@ -2508,6 +2497,9 @@ size_t StMiniMcMaker::getIndex(size_t mult) {
 }
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.29  2009/02/02 19:30:50  fisyak
+// Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
+//
 // Revision 1.28  2008/07/17 22:50:52  calderon
 // Remove a cut in acceptRaw(StMcTrack*) that checked on the pseudorapidity.
 // This cut was affecting heavy particles thrown flat in rapidity for embedding.

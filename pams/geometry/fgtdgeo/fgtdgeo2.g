@@ -376,8 +376,9 @@ Block FGMO is the mother volume for the whole FGT assembly
 * add one extra FGT sensitive volume in front, requested by Les
       if(  FGTG_ConfigJan.gt.2) then 
         FGSCrmin=FGTG_RinLes ; FGSCrmax=FGTG_gemRO; FGSCdz=FGTG_GGSCthk/2.0;
-        FGSCz = lengthZ/2.0-3.0
-*VP        write(*,*)'########## FGSC rMin,rMax,Z=',FGSCrmin,FGSCrmax,FGSCz
+*JAN        FGSCz = lengthZ/2.0-3.0
+        FGSCz = -lengthZ/2.0+4.0 !Jan change
+ *VP        write(*,*)'########## FGSC rMin,rMax,Z=',FGSCrmin,FGSCrmax,FGSCz
       Create and Position FGSD z=FGSCz alphaZ=-15
       endif
 
@@ -680,6 +681,9 @@ endblock
       END
     
 * $Log: fgtdgeo2.g,v $
+* Revision 1.8  2008/12/01 23:44:03  perev
+* Jan changes the length
+*
 * Revision 1.7  2008/10/28 17:59:24  perev
 * mistype FGSC ==> FGSD
 *

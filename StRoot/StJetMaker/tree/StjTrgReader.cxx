@@ -1,4 +1,4 @@
-// $Id: StjTrgReader.cxx,v 1.5 2008/08/22 16:12:40 tai Exp $
+// $Id: StjTrgReader.cxx,v 1.3 2008/08/18 06:20:50 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgReader.h"
 
@@ -41,7 +41,7 @@ void StjTrgReader::clearEntry()
   __eventId   = 0;
   __hard      = false;
   __soft      = false;
-  __passed    = false;
+  __pass      = false;
   __prescale  = 0;
   __vertexZ   = 0;
 
@@ -68,7 +68,7 @@ void StjTrgReader::readEntry()
   __eventId   = _eventId;
   __hard      = _hard;
   __soft      = _soft;
-  __passed    = _passed;
+  __pass      = _passed;
   __prescale  = _prescale;
   __vertexZ   = _vertexZ;
 

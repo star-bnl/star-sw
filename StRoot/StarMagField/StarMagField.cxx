@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.10 2007/09/21 21:07:08 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.17 2010/08/10 19:46:18 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,27 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.17  2010/08/10 19:46:18  fisyak
+ * Lock mag.field if it was initialized from GEANT
+ *
+ * Revision 1.16  2010/05/27 14:52:02  fisyak
+ * Clean up, set assert when mag. field is not initialized
+ *
+ * Revision 1.15  2009/12/07 23:38:15  fisyak
+ * Move size definition from #define  to enumerations
+ *
+ * Revision 1.14  2009/11/10 21:18:53  fisyak
+ * use local fMap variable
+ *
+ * Revision 1.13  2009/02/03 15:53:30  fisyak
+ * Clean up
+ *
+ * Revision 1.12  2009/01/26 15:15:56  fisyak
+ * Add missing (ROOT Version >= 5.22)include
+ *
+ * Revision 1.11  2009/01/13 03:19:43  perev
+ * Mag field nou controlled from starsim. BugFix
+ *
  * Revision 1.10  2007/09/21 21:07:08  fisyak
  * Remove ClassDef and ClassImp
  *
@@ -101,46 +122,45 @@ To do:  <br>
 #include "StarMagField.h"
 #include "StarCallf77.h"
 #include <string>
-
+#include "TMath.h"
 #define myMax(A,B)  (((A)>(B))? (A):(B))
 #define myMin(A,B)  (((A)<(B))? (A):(B))
 #define mySign(A,B) (((B)>=0)? fabs(A):-fabs(A))
 
 StarMagField *StarMagField::fgInstance = 0;
-//________________________________________
+//________________________________________________________________________________
 
 #define agufld           F77_NAME(agufld,AGUFLD)
+#define  gufld           F77_NAME( gufld, GUFLD)
 #define mfldgeo          F77_NAME(mfldgeo,MFLDGEO)
+//________________________________________________________________________________
 R__EXTERN  "C" {
+  Float_t type_of_call  gufld(Float_t *x, Float_t *bf);
+
   Float_t type_of_call agufld(Float_t *x, Float_t *bf) {
     bf[0] = bf[1] = bf[2] = 0;
-#if 1
-    if (! StarMagField::Instance()) new StarMagField();
-    StarMagField::Instance()->BField(x,bf);
-#else
     if (StarMagField::Instance()) 
       StarMagField::Instance()->BField(x,bf);
     else {
       printf("agufld:: request for non initialized mag.field, return 0\n");
       assert(StarMagField::Instance());
     }
-#endif
     return 0;
   }
-//________________________________________
-  void type_of_call mfldgeo() {
-#if 1
-    printf("Ignore request for StarMagField from mfldgeo\n");
-#else
+//________________________________________________________________________________
+  void type_of_call mfldgeo(float &factor) {
     if (StarMagField::Instance()) {
-      printf("StarMagField  mfldgeo: The field has been already instantiated. Keep it.\n");
+      printf("StarMagField  mfldgeo: The field has been already instantiated.\n");
     } else {
-      printf("StarMagField  instantiate default field\n");
-      new StarMagField();
+      printf("StarMagField  instantiate starsim field=%g\n",factor);
+      (new StarMagField(StarMagField::kMapped,factor/5.))->SetLock();
     }
-#endif
+    float x[3]={0},b[3];
+    gufld(x,b);
+    printf("StarMagField:mfldgeo(%g) Bz=%g\n",factor,b[2]);
   }
 }
+//________________________________________________________________________________
 //ClassImp(StarMagField);
 struct BFLD_t { 
   Int_t version; 
@@ -164,10 +184,12 @@ static const BFLD_t BFLD = {// real field
   200      , // nrp:     number of R nodes in the map
   800        // nzp:     number of Z nodes in the map
 };
+
 struct BDAT_t { 
   Int_t N;
   Float_t Zi, Ri[20], Bzi[20], Bri[20]; 
 };
+
 static const Int_t nZext = 23;
 static const BDAT_t BDAT[nZext] = { // calculated STAR field
   { 15   , // Number of field points 
@@ -334,12 +356,9 @@ StarMagField::StarMagField ( EBField map, Float_t factor,
     assert(0);
   }
   fgInstance = this;
-  if (map == kUndefined) {
+  if (fMap == kUndefined) {
     printf("StarMagField is instantiated with predefined factor %f and map %i\n",fFactor, fMap);
   } else {
-    fFactor = factor ;
-    fMap = map ;                        // Do once & select the requested map (mapped or constant)
-    fLock = lock;
     if (fLock) printf("StarMagField is locked, no modification from DB will be accepted\n");
   }
   ReadField() ;                       // Read the Magnetic
@@ -1039,10 +1058,10 @@ Float_t StarMagField::Interpolate( const Float_t Xarray[], const Float_t Yarray[
 
 /// Search an ordered table by starting at the most recently used point
 
-void StarMagField::Search( Int_t N, Float_t Xarray[], Float_t x, Int_t &low )
+void StarMagField::Search( Int_t N, const Float_t Xarray[], Float_t x, Int_t &low )
 
 {
-
+  assert(! TMath::IsNaN(x));
   Long_t middle, high ;
   Int_t  ascend = 0, increment = 1 ;
 

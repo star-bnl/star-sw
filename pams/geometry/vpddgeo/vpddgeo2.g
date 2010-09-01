@@ -1,7 +1,10 @@
-* $Id: vpddgeo2.g,v 1.3 2008/11/19 04:08:38 perev Exp $
+* $Id: vpddgeo2.g,v 1.4 2008/11/30 01:31:00 perev Exp $
 * $Log: vpddgeo2.g,v $
+* Revision 1.4  2008/11/30 01:31:00  perev
+* modifs for extending alpha,theta,phi,ort commandas
+*
 * Revision 1.3  2008/11/19 04:08:38  perev
-* updates to the corrected(vp) starsim
+*  updates to the corrected(vp) starsim
 *
 * Revision 1.2  2007/02/16 22:54:32  potekhin
 * Code improvements by Xin, aimed at a better code structure,
@@ -966,18 +969,18 @@ Block VPDD  is the whole VPPD assembly
       xloc=(vpdg_FPAwidth+(vpdg_BPwidth-vpdg_FPAwidth-2*vpdg_FPwidth)/2)/2
       yloc=(ytop - (vpdg_FPChght+vpdg_FPAhght)/4)
       zloc=(vpdg_BPlength - vpdg_FPthick)/2
-     Position VPFB  x= xloc y=yloc z= zloc alphaZ=90
-     Position VPFB  x= xloc y=yloc z=-zloc alphaZ=90
-     Position VPFB  x=-xloc y=yloc z= zloc alphaZ=90 alphax=180
-     Position VPFB  x=-xloc y=yloc z=-zloc alphaZ=90 alphax=180
+     Position VPFB  x= xloc y=yloc z= zloc ORT=Y-XZ 
+     Position VPFB  x= xloc y=yloc z=-zloc ORT=Y-XZ
+     Position VPFB  x=-xloc y=yloc z= zloc ORT=YXZ
+     Position VPFB  x=-xloc y=yloc z=-zloc ORT=YXZ
      Create VPFC
       xloc=(vpdg_BPwidth-vpdg_FPwidth)/2
       yloc=(ytop-(vpdg_FPChght+vpdg_FPwidth/2)/2)
       zloc=(vpdg_BPlength - vpdg_FPthick)/2
-     Position VPFC  x= xloc y=yloc z= zloc alphaZ=90
-     Position VPFC  x= xloc y=yloc z=-zloc alphaZ=90
-     Position VPFC  x=-xloc y=yloc z= zloc alphaZ=90 alphax=180
-     Position VPFC  x=-xloc y=yloc z=-zloc alphaZ=90 alphax=180
+     Position VPFC  x= xloc y=yloc z= zloc ORT=Y-XZ
+     Position VPFC  x= xloc y=yloc z=-zloc ORT=Y-XZ
+     Position VPFC  x=-xloc y=yloc z= zloc ORT=YXZ
+     Position VPFC  x=-xloc y=yloc z=-zloc ORT=YXZ
      Create VPFP
       xloc=(vpdg_BPwidth-vpdg_FPwidth)/2
       yloc=(ybase+vpdg_BPthick/2+ vpdg_FPheight/2)

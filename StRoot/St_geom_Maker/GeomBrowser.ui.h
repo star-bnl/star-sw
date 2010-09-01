@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.37 2008/10/03 15:35:12 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.39 2008/12/02 00:36:35 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -660,7 +660,7 @@ void GeomBrowser::init()
                  ||  tag.contains("ONLY") ) ) {
               // add to the combo box
                   comboBox2->insertItem(tag);
-                 // printf(" new tag found --<%s>--\n", (const char*)tag);
+                // printf(" new tag found --<%s>-- current = %d\n", (const char*)tag, comboBox2->currentItem());
              } 
           }         
        }
@@ -1356,7 +1356,8 @@ void GeomBrowser::SelectGeometry( const QString &geomTag )
    // Select the standard geometry from the combobox if any
    // Find the geometry
    QListBox *list = comboBox2->listBox();
-   QListBoxItem *it = list->findItem (geomTag);
+   // printf(" GeomBrowser::SelectGeometry <%s> staring from %d\n", (const char *)geomTag,comboBox2->currentItem());
+   QListBoxItem *it = list->findItem (geomTag,Qt::ExactMatch);
    if (it) {
        comboBox2->setCurrentItem(list->index(it));
        // and load that geometry if found

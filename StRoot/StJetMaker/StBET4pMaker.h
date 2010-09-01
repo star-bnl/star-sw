@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StBET4pMaker.h,v 1.10 2008/11/04 08:08:09 tai Exp $
+// $Id: StBET4pMaker.h,v 1.7 2008/08/11 02:22:11 tai Exp $
 #ifndef STBET4PMAKER_H
 #define STBET4PMAKER_H
 
@@ -47,7 +47,7 @@ public:
   StBET4pMakerImp* GetImp() { return _imp; }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.10 2008/11/04 08:08:09 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBET4pMaker.h,v 1.7 2008/08/11 02:22:11 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 

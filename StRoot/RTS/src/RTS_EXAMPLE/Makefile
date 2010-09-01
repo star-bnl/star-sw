@@ -23,7 +23,7 @@ all:   $(BINS)
 
 
 rts_example: rts_example.o $(VOBJS)
-	$(LINK.o) -o $@ $^ 
+	$(LINK.o) -o $@ $(LDLIBS) -Wl,--whole-archive $^ -Wl,--no-whole-archive
 
 sfs_stuff: sfs_stuff.o $(VOBJS)
 	$(LINK.o) -o $@ $^ 

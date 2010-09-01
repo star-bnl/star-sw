@@ -41,9 +41,7 @@ libStJetMakerTest_la_SOURCES = 	\
 	StjJetCutTest.C StjJetCutTest.hh \
 	StjTrgMock.C StjTrgMock.hh \
 	StjFormDijetTest.C StjFormDijetTest.hh \
-	StjDijetCutTest.C StjDijetCutTest.hh \
-	StjTrgRaiseThresholdEtHTTest.C StjTrgRaiseThresholdEtHTTest.hh \
-	StjTrgRaiseThresholdEtJPTest.C StjTrgRaiseThresholdEtJPTest.hh
+	StjDijetCutTest.C StjDijetCutTest.hh
 
 libStJetMakerTest_la_CXXFLAGS = \
 	-I../.. \
@@ -56,9 +54,6 @@ libStJetMakerTest_la_CXXFLAGS = \
 	-I../mudst \
 	-I../tree \
 	-I../trigger \
-	-I../jets \
-	-I../dijets \
-	-I../mckin \
 	-I../../StSpinPool \
 	-I../../StTriggerUtilities \
 	-I$(STAR)/.$(STAR_HOST_SYS)/include \

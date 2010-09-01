@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.cxx,v 1.18 2008/04/03 20:04:21 fisyak Exp $
+// $Id: StiIstDetectorBuilder.cxx,v 1.19 2009/02/06 21:26:30 wleight Exp $
 // 
 // $Log: StiIstDetectorBuilder.cxx,v $
+// Revision 1.19  2009/02/06 21:26:30  wleight
+// UPGR15 Update
+//
 // Revision 1.18  2008/04/03 20:04:21  fisyak
 // Straighten out DB access via chairs
 //
@@ -49,8 +52,6 @@ using namespace std;
 #include "Sti/StiElossCalculator.h"
 #include "StiRnD/Ist/StiIstDetectorBuilder.h"
 #include "StiIst1HitErrorCalculator.h"
-#include "StiIst2HitErrorCalculator.h"
-#include "StiIst3HitErrorCalculator.h"
 //#include "StSsdUtil/StSsdConfig.hh"
 //#include "StSsdUtil/StSsdGeometry.hh"
 //#include "StSsdUtil/StSsdWaferGeometry.hh"
@@ -61,16 +62,28 @@ StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string & inputFi
     : StiDetectorBuilder("Ist",active,inputFile), _siMat(0), _hybridMat(0)
 {
     // Hit error parameters : it is set to 20 microns, in both x and y coordinates 
+    //_trackingParameters.setName("istTrackingParameters");
+    //_hitCalculator1.setName("ist1HitError");
+    //_hitCalculator2.setName("ist2HitError");
+    //_hitCalculator3.setName("ist3HitError");
 }
 
 StiIstDetectorBuilder::~StiIstDetectorBuilder()
 {} 
 
+void StiIstDetectorBuilder::loadDS(TDataSet& ds){
+  cout<<"StiIstDetectorBuilder::loadDS(TDataSet& ds) -I- started: "<<endl;
+  //_hitCalculator1.loadDS(ds);
+  //_hitCalculator2.loadDS(ds);
+  //_hitCalculator3.loadDS(ds);
+}
+
 
 void StiIstDetectorBuilder::buildDetectors(StMaker & source)
 {
-    char name[50];  
     int nRows = 1 ;
+    gMessMgr->Info() << "StiIstDetectorBuilder::buildDetectors() - I - Started "<<endm;
+    //load(_inputFile, source);
     
     setNRows(nRows);
     if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
@@ -80,6 +93,8 @@ void StiIstDetectorBuilder::buildDetectors(StMaker & source)
 void StiIstDetectorBuilder::useVMCGeometry() {
   cout << "StiIstDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
   SetCurrentDetectorBuilder(this);
+
+  // Build the material map
   struct Material_t {
     Char_t *name;
     StiMaterial    **p;
@@ -101,28 +116,35 @@ void StiIstDetectorBuilder::useVMCGeometry() {
 				    mat->GetDensity()*mat->GetRadLen(),
 				    PotI));
   }
-  const VolumeMap_t IstVolumes[] = { 
-  // SSD
-  {"IBSS", "the mother of each wafer","HALL_1/CAVE_1/IBMO_1","",""},
-  };
+
+  // Build the volume map and loop over all found volumes
+  const VolumeMap_t IstVolumes[] = 
+        { 
+          {"IBSS", "active silicon",  "HALL_1/CAVE_1/IBMO_1","",""}, 
+	  {"IBSP", "inactive silicon","HALL_1/CAVE_1/IBMO_1","",""}
+        };
   Int_t NoIstVols = sizeof(IstVolumes)/sizeof(VolumeMap_t);
-  TString pathT("HALL_1/CAVE_1/IBMO_1");
-  TString path("");
+  gGeoManager->RestoreMasterVolume(); 
+  gGeoManager->CdTop();
   for (Int_t i = 0; i < NoIstVols; i++) {
-    gGeoManager->RestoreMasterVolume(); 
-    gGeoManager->CdTop();
-    gGeoManager->cd(pathT); path = pathT;
+    gGeoManager->cd(IstVolumes[i].path); 
     TGeoNode *nodeT = gGeoManager->GetCurrentNode();
     if (! nodeT) continue;;
-    //StiVMCToolKit::SetDebug(1);
-    StiVMCToolKit::LoopOverNodes(nodeT, path, IstVolumes[i].name, MakeAverageVolume);
+    StiVMCToolKit::LoopOverNodes(nodeT, IstVolumes[i].path, IstVolumes[i].name, MakeAverageVolume);
   }
 }
 
 void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
+
   LOG_DEBUG << "StiDetectorBuilder::AverageVolume -I TGeoPhysicalNode\t" << nodeP->GetName() << endm;
-  // decode detector ------------------------------
+  //cout << "StiDetectorBuilder::AverageVolume -I TGeoPhysicalNode\t" << nodeP->GetName() << endl;
+
+  // Ugh, have to hardwire
+  const Int_t NWAFERS = 12;
+
   TString nameP(nodeP->GetName());
+
+  // decode detector ------------------------------
   nameP.ReplaceAll("HALL_1/CAVE_1/","");
   TString temp=nameP;
   temp.ReplaceAll("/IBMO_1/IBMY","");
@@ -134,9 +156,7 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   temp.Replace(0,q+1,"");
   TString num1=temp(0,2);
   if(!num1.IsDigit()) num1=temp(0,1);
-  int ladder=num1.Atoi();
-  int nWafers=10;
-  if(layer==2) nWafers=13;
+  int ladder=num1.Atoi(); 
   q=temp.Index("_");
   temp.Replace(0,q+1,"");
   TString num2=temp(0,2);
@@ -146,15 +166,16 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   temp.Replace(0,q+1,"");
   TString num3=temp(0,1);
   int side=num3.Atoi();
-  if (wafer != 1) return;
-  StiDetector *pDetector = 0;
-  //  if (_detectors.size() && _detectors[2*(layer-1)+side-1] getDetector(2*(layer-1)+side-1,0);
-  //  if (pDetector) return;
-  //----------------------------------------
-  TGeoVolume   *volP   = nodeP->GetVolume();
-  TGeoMaterial *matP   = volP->GetMaterial(); if (debug()) matP->Print("");
-  TGeoShape    *shapeP = nodeP->GetShape();   if (debug()) {cout << "New Shape\t"; StiVMCToolKit::PrintShape(shapeP);}
-  TGeoHMatrix  *hmat   = nodeP->GetMatrix();  if (debug()) hmat->Print("");
+  if(wafer!=1) return;
+
+  // Check whether this is an active volume
+  Bool_t ActiveVolume = kFALSE;
+  if (nodeP->GetVolume()->GetMedium()->GetParam(0) == 1) {
+    ActiveVolume = kTRUE;
+  }
+
+  // Material definitions
+  TGeoMaterial *matP = nodeP->GetVolume()->GetMaterial();
   Double_t PotI = StiVMCToolKit::GetPotI(matP);
   static StiMaterial *matS = 0;
   if (! matS) matS = add(new StiMaterial(matP->GetName(),
@@ -164,98 +185,65 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
 					 matP->GetDensity()*matP->GetRadLen(),
 					 PotI));
   Double_t ionization = matS->getIonization();
-  StiElossCalculator *ElossCalculator = new StiElossCalculator(matS->getZOverA(), ionization*ionization, matS->getA(), matS->getZ(),matS->getDensity());
-  StiShape     *sh     = findShape(volP->GetName());
+  StiElossCalculator *ElossCalculator = new StiElossCalculator(matS->getZOverA(), 
+                                                               ionization*ionization, 
+                                                               matS->getA(), 
+                                                               matS->getZ(),
+                                                               matS->getDensity());
+  // Extract volume geometry for this node
+  TGeoBBox *box = (TGeoBBox *) nodeP->GetShape();
+  StiShape *sh  = new StiPlanarShape(nodeP->GetVolume()->GetName(), // Name
+			             NWAFERS*box->GetDZ(),          // halfDepth
+			             box->GetDY(),                  // thickness
+			             box->GetDX());                 // halfWidth
+  add(sh);
+    
+  // Position information
+  TGeoHMatrix  *hmat   = nodeP->GetMatrix();
   Double_t     *xyz    = hmat->GetTranslation();
   Double_t     *rot    = hmat->GetRotationMatrix();
-  Double_t      Phi    = 0;
-  //  Double_t xc,yc,zc,rc,rn, nx,ny,nz,yOff;
-  StiPlacement *pPlacement = 0;
-  if (xyz[0]*xyz[0] + xyz[1]*xyz[1] < 1.e-3 && 
-      TMath::Abs(rot[0]*rot[0] + rot[4]*rot[4] + rot[8]*rot[8] - 3) < 1e-5 &&
-      (shapeP->TestShapeBit(TGeoShape::kGeoTubeSeg) ||
-       shapeP->TestShapeBit(TGeoShape::kGeoTube))) {
-    Double_t paramsBC[3];
-    shapeP->GetBoundingCylinder(paramsBC);
-    TGeoTube *shapeC = (TGeoTube *) shapeP;
-    Double_t Rmax = shapeC->GetRmax();
-    Double_t Rmin = shapeC->GetRmin();
-    Double_t dZ   = shapeC->GetDz();
-    Double_t radius = (Rmin + Rmax)/2;
-    Double_t dPhi = 2*TMath::Pi();
-    Double_t dR   = Rmax - Rmin;
-    dR = TMath::Min(0.2*dZ, dR);
-    if (dR < 0.1) dR = 0.1;
-    int Nr = (int) ((Rmax - Rmin)/dR);
-    if (Nr <= 0) Nr = 1;
-    dR = (Rmax - Rmin)/Nr;
-    if(shapeP->TestShapeBit(TGeoShape::kGeoTubeSeg)) {
-      TGeoTubeSeg *shapeS = (TGeoTubeSeg *) shapeP;
-      Phi =  TMath::DegToRad()*(shapeS->GetPhi2() + shapeS->GetPhi1())/2;
-      Phi =  StiVMCToolKit::Nice(Phi);
-      dPhi = TMath::DegToRad()*(shapeS->GetPhi2() - shapeS->GetPhi1());
-    }
-    for (Int_t ir = 0; ir < Nr; ir++) {
-      TString Name(volP->GetName());
-      if (ir > 0) {
-	Name += "__";
-	Name += ir;
-      }
-      sh     = findShape(Name.Data());
-      if (! sh) {// I assume that the shape name is unique
-	sh = new StiCylindricalShape(volP->GetName(), // Name
-				     dZ,      // halfDepth nWafers*
-				     dR,              // thickness
-				     Rmin + (ir+1)*dR,// outerRadius
-				     dPhi);           // openingAngle
-	add(sh);
-      }
-      pPlacement = new StiPlacement;
-      pPlacement->setZcenter(xyz[2]);
-      pPlacement->setLayerRadius(Rmin + (ir+0.5)*dR);
-      pPlacement->setLayerAngle(Phi);
-      pPlacement->setRegion(StiPlacement::kMidRapidity);
-      pPlacement->setNormalRep(Phi,radius, 0); 
-    }
-  }
-  else {// BBox
-    shapeP->ComputeBBox();
-    TGeoBBox *box = (TGeoBBox *) shapeP;
-    if (! sh) {
-      sh = new StiPlanarShape(volP->GetName(),// Name
-			      nWafers*box->GetDZ(),   // halfDepth
-			      box->GetDY(),   // thickness
-			      box->GetDX());  // halfWidth
-      add(sh);
-    }
-    // rot = {r0, r1, r2,
-    //        r3, r4, r5,
-    //        r6, r7, r8}
-    //  double nx = rot[3];// 
-    //  double ny = rot[4];
-    StThreeVectorD centerVector(xyz[0],xyz[1],xyz[2]);
-    StThreeVectorD normalVector(rot[1],rot[4],rot[7]);
-    Double_t phi  = centerVector.phi();
-    Double_t phiD = normalVector.phi();
-    Double_t r = centerVector.perp();
-    pPlacement = new StiPlacement;
-    //    pPlacement->setZcenter(xyz[2]);
-    pPlacement->setZcenter(0);
-    pPlacement->setLayerRadius(r); //this is only used for ordering in detector container...
-    pPlacement->setLayerAngle(phi); //this is only used for ordering in detector container...
-    pPlacement->setRegion(StiPlacement::kMidRapidity);
-    //	  pPlacement->setNormalRep(phi, r*TMath::Cos(phi), r*TMath::Sin(phi)); 
-    //    pPlacement->setNormalRep(phiD, r*TMath::Cos(phi-phiD), -r*TMath::Sin(phi-phiD)); 
-    pPlacement->setNormalRep(phiD, r*TMath::Cos(phi-phiD), r*TMath::Sin(phi-phiD)); 
-  }
+  StThreeVectorD centerVector(xyz[0],xyz[1],xyz[2]);
+  StThreeVectorD normalVector(rot[1],rot[4],rot[7]);
+  //cout<<"centerVector: "<<centerVector<<endl;
+  //cout<<"normalVector: "<<normalVector<<endl;
+
+  // Normalize normal vector, just in case....
+  normalVector /= normalVector.magnitude();
+
+  // Volume positioning
+  StiPlacement *pPlacement = new StiPlacement;
+  Double_t phi  = centerVector.phi();
+  Double_t phiD = normalVector.phi();
+  Double_t r    = centerVector.perp();
+  pPlacement->setZcenter(0);
+  pPlacement->setLayerRadius(r); 
+  /*
+  double layerAngleOffset=(wafer-NWAFERS/2.)/25.;
+  cout<<"offset: "<<layerAngleOffset<<endl;
+  double layerAngle=phi+layerAngleOffset;
+  cout<<"layerAngle: "<<layerAngle<<endl;
+  pPlacement->setLayerAngle(layerAngle);
+  */
+  if(nameP.Contains("IBSS")) pPlacement->setLayerAngle(phi);
+  if(nameP.Contains("IBSP")) pPlacement->setLayerAngle(phi-.05);
+  pPlacement->setRegion(StiPlacement::kMidRapidity);
+  pPlacement->setNormalRep(phiD, r*TMath::Cos(phi-phiD), r*TMath::Sin(phi-phiD)); 
   assert(pPlacement);
-  pDetector = getDetectorFactory()->getInstance();
+  //cout<<"normal radius: "<<pPlacement->getNormalRadius()<<endl;
+  //cout<<"normal ref angle: "<<pPlacement->getNormalRefAngle()<<endl;
+   
+  StiDetector *pDetector = getDetectorFactory()->getInstance();
   pDetector->setName(nameP.Data());
   pDetector->setIsOn(false);
-  //if(side==1)
-  pDetector->setIsActive(new StiIstIsActiveFunctor);
-  //else 
-  //pDetector->setIsActive(new StiNeverActiveFunctor);
+  if (ActiveVolume) {
+    pDetector->setIsActive(new StiIstIsActiveFunctor);
+    cout<<"active volume: "<<nameP<<endl;
+  }
+  else {
+    pDetector->setIsActive(new StiNeverActiveFunctor);
+    cout<<"inactive volume: "<<nameP<<endl;
+    layer++;
+  }
   pDetector->setIsContinuousMedium(false);
   pDetector->setIsDiscreteScatterer(true);
   pDetector->setShape(sh);
@@ -263,15 +251,33 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   pDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
   pDetector->setMaterial(matS);
   pDetector->setElossCalculator(ElossCalculator);
-  if(layer==1) pDetector->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
-  if(layer==2 && side==1) pDetector->setHitErrorCalculator(StiIst3HitErrorCalculator::instance());
-  if(layer==2 && side==2) pDetector->setHitErrorCalculator(StiIst2HitErrorCalculator::instance());
-  //  add(2*(layer-1)+side-1,wafer-1,pDetector);
-  add(2*(layer-1)+side-1,ladder,pDetector);  
-  //add(2*ladder-3+side,0,pDetector);
-  if (debug()) {
-  LOG_INFO<<"layer/ladder/wafer/side "<< layer << "/" << ladder << "/" << wafer << "/" << side << endm;
-  LOG_INFO<<"the numbers defining this volume are 2*(layer-1)+side-1: "<<2*(layer-1)+side-1<<" and "<<ladder<<endm;
-  }
+  pDetector->setHitErrorCalculator(StiIst1HitErrorCalculator::instance());
+
+  // Adding detector, note that no keys are set in IST!
+  //add(ladder,wafer,pDetector);
+  add(layer,ladder,pDetector);
+
+  LOG_INFO << "StiIstDetectorBuilder: Added detector -I- " << pDetector->getName() << endm;
+
+  // Whole bunch of debugging information
+  /*
+  Float_t rad2deg = 180.0/3.1415927;
+  cout << "===>NEW:IST:pDetector:Name               = " << pDetector->getName()                       << endl;
+  cout << "===>NEW:IST:pPlacement:NormalRefAngle    = " << pPlacement->getNormalRefAngle()*rad2deg    << endl;
+  cout << "===>NEW:IST:pPlacement:NormalRadius      = " << pPlacement->getNormalRadius()              << endl;
+  cout << "===>NEW:IST:pPlacement:NormalYoffset     = " << pPlacement->getNormalYoffset()             << endl;
+  cout << "===>NEW:IST:pPlacement:CenterRefAngle    = " << pPlacement->getCenterRefAngle()*rad2deg    << endl;
+  cout << "===>NEW:IST:pPlacement:CenterRadius      = " << pPlacement->getCenterRadius()              << endl;
+  cout << "===>NEW:IST:pPlacement:CenterOrientation = " << pPlacement->getCenterOrientation()*rad2deg << endl;
+  cout << "===>NEW:IST:pPlacement:LayerRadius       = " << pPlacement->getLayerRadius()               << endl;
+  cout << "===>NEW:IST:pPlacement:LayerAngle        = " << pPlacement->getLayerAngle()*rad2deg        << endl;
+  cout << "===>NEW:IST:pPlacement:Zcenter           = " << pPlacement->getZcenter()                   << endl;
+  cout << "===>NEW:IST:pDetector:Layer             = " << layer                                       << endl;
+  cout << "===>NEW:IST:pDetector:Ladder            = " << ladder                                      << endl;
+  cout << "===>NEW:IST:pDetector:Wafer             = " << wafer                                       << endl;
+  cout << "===>NEW:IST:pDetector:Side(defunct)     = " << side                                        << endl;
+  cout << "===>NEW:IST:pDetector:Active?           = " << pDetector->isActive()                       << endl;
+  */
+
 }
 

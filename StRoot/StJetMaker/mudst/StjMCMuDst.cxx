@@ -1,4 +1,4 @@
-// $Id: StjMCMuDst.cxx,v 1.4 2008/08/22 17:32:54 tai Exp $
+// $Id: StjMCMuDst.cxx,v 1.3 2008/08/03 00:29:03 tai Exp $
 
 #include <StjMCMuDst.h>
 
@@ -15,7 +15,7 @@
 
 #include <TLorentzVector.h>
 
-StjMCParticleList StjMCMuDst::getMCParticleList()
+StjMCParticleList StjMCMuDst::getMCPartilceList()
 {
 
   TDataSet *Event = _maker->GetDataSet("geant");

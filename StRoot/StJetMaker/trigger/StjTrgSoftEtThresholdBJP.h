@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjTrgSoftEtThresholdBJP.h,v 1.2 2008/08/21 22:23:05 tai Exp $
+// $Id: StjTrgSoftEtThresholdBJP.h,v 1.1 2008/08/18 08:50:59 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJTRGSOFTETTHRESHOLDBJP_H
 #define STJTRGSOFTETTHRESHOLDBJP_H
@@ -42,7 +42,7 @@ private:
   int _runNumber;
   int _eventId;
 
-  bool                      _passed;
+  bool                      _pass;
   std::vector<int>          _jetPatches;
   std::vector<int>          _jetPatchDsmAdc;
   std::vector<unsigned int> _jetPatchAdc;

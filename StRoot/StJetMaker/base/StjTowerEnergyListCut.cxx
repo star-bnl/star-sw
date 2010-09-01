@@ -1,4 +1,4 @@
-// $Id: StjTowerEnergyListCut.cxx,v 1.7 2008/11/04 08:07:01 tai Exp $
+// $Id: StjTowerEnergyListCut.cxx,v 1.4 2008/08/04 02:48:47 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTowerEnergyListCut.h"
 

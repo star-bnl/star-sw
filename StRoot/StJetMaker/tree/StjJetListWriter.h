@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjJetListWriter.h,v 1.8 2008/09/15 05:50:06 tai Exp $
+// $Id: StjJetListWriter.h,v 1.6 2008/08/13 19:37:29 tai Exp $
 #ifndef STJJETLISTWRITER_H
 #define STJJETLISTWRITER_H
 
@@ -21,12 +21,15 @@ public:
   StjJetListWriter(const char* jetTreeName, const char* jetFourVecTreeName, TDirectory* file);
   virtual ~StjJetListWriter() { }
 
-  void Fill(const StjJetList& jetList);
+  void Fill(const StjJetList& jetList, const StjFourVecList& fourVecList);
   void Finish();
 
 private:
 
-  void fillFourVecTree(int jetId, const StjFourVecList& fourVecList);
+  void fillJetTree(const StjJetList& jetList);
+  void fillFourVecTree(const StjJetList& jetList, const StjFourVecList& fourVecList);
+
+  Int_t findJetId(const StjFourVec& four, const StjJetList& jetList);
 
   TDirectory* _file;
   TTree* _jetTree;
@@ -53,15 +56,10 @@ private:
   Int_t    _four_detectorId[4096];
   Short_t  _four_trackId[4096];
   Int_t    _four_towerId[4096];
-  Int_t    _four_mcparticleId[4096];
   Double_t _four_pt[4096];
   Double_t _four_eta[4096];
   Double_t _four_phi[4096];
   Double_t _four_m[4096];
-  Double_t _four_vertexZ;
-
-  int _ifourvec;
-
   ClassDef(StjJetListWriter, 1)
 
 };

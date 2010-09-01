@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.38 2008/11/07 20:42:06 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.41 2009/01/28 23:03:42 fisyak Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,15 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.41  2009/01/28 23:03:42  fisyak
+ * Fix wafId
+ *
+ * Revision 1.40  2009/01/22 23:19:21  fine
+ * Prptection against fo the crash
+ *
+ * Revision 1.39  2008/12/13 01:12:57  caines
+ * Check that ladder index not out of range in translation routine
+ *
  * Revision 1.38  2008/11/07 20:42:06  caines
  * Fix some mistakes in new way of initializing variables. lifetime was missing
  *
@@ -316,12 +325,13 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   mSvtSimulation->setAnodeTimeBinSizes(mTimeBinSize , mAnodeSize);
   mSvtSimulation->setDriftVelocity(mDefaultDriftVelocity);
   mSvtSimulation->setElCloud(mElectronCloud);
-  cout<<"StSvtSimulationMaker::InitRun info:"<<endl;
-  cout<<"  Anode size="<<mAnodeSize<<" ,time bin size="<<mTimeBinSize<<endl;
-  cout<<"  default drift velocity="<<mDefaultDriftVelocity<<endl;
-  cout<<"  pedestal offset(from database)="<<mPedOffset<<endl;
-  cout<<"  T0(from database)= "<<mT0->getT0(1)<<endl;
-  
+
+  LOG_INFO <<"StSvtSimulationMaker::InitRun info:"<<endm;
+  LOG_INFO <<"  Anode size="<<mAnodeSize<<" ,time bin size="<<mTimeBinSize<<endm;
+  LOG_INFO <<"  default drift velocity="<<mDefaultDriftVelocity<<endm;
+  LOG_INFO <<"  pedestal offset(from database)="<<mPedOffset<<endm;
+  LOG_INFO <<"  T0(from database)= "<<mT0->getT0(1)<<endm;
+
   // Get BField;
   Float_t x[3] = {0,0,0};
   Float_t b[3];
@@ -553,6 +563,10 @@ Int_t StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  
   StThreeVector<double> x;
   // Find wafer geometry of wafer track passed through in Ideal Geom
   int index = mSvtGeom->getWaferIndex(*wafId);
+  if (index < 0) {
+    LOG_DEBUG << "StSvtSimulationMaker::ideal2RealTranslation: illegal wafId = " << *wafId << endl;
+    return kStSkip;
+  }
   //cout << "pos going in : " << *pos << endl;
 
   // Get normal and center position of the REAL wafer geom
@@ -591,6 +605,7 @@ Int_t StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  
     int iladder;
     for( iladder = ladder-1; iladder <= ladder+1; iladder++){
       if( iladder==0) continue;
+      if( iladder > mConfig->getNumberOfLadders(barrel)) break;
       for( int iwaf = 1;  iwaf <= mConfig->getNumberOfWafers(barrel); iwaf++){
 	//wafId = 1000*layer+ 100*iwaf + iladder;
 	index = mSvtGeom->getWaferIndex(barrel, iladder, iwaf);
@@ -612,7 +627,7 @@ Int_t StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  
 	pos->setY(x.y());
 	pos->setZ(x.z());
 	globalCor.setPosition(*pos);  
-	*wafId = 1000*mConfig->getLayer(index) + 100*iladder + iwaf;
+	*wafId = 1000*mConfig->getLayer(index) + 100*iwaf + iladder;
 	if( mCoordTransform->IsOnWaferZ(*pos,*wafId) && mCoordTransform->IsOnWaferR(*pos,*wafId)){
 	  //cout << " Coming out " << *pos << endl;
 	  x = tHelix.momentumAt(s,mBField);
@@ -647,7 +662,7 @@ Int_t StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  
 	pos->setY(x.y());
 	pos->setZ(x.z());
 	globalCor.setPosition(*pos);  
-	*wafId = 1000*mConfig->getLayer(index) + 100*iladder + iwaf;
+	*wafId = 1000*mConfig->getLayer(index) + 100*iwaf + iladder;
 	if( mCoordTransform->IsOnWaferZ(*pos,*wafId) && 
 	    mCoordTransform->IsOnWaferR(*pos,*wafId)){
 	  //cout << " Coming out " << *pos << endl;
@@ -657,7 +672,7 @@ Int_t StSvtSimulationMaker::ideal2RealTranslation( StThreeVector<double> *pos,  
 	  mtm->setZ(x.z());
 	  return kStOk;
 	}
-      }   
+      }  
     }
     //cout << " Coming out " << *pos << endl;
     return kStSkip;

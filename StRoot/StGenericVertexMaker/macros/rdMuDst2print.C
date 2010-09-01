@@ -4,17 +4,15 @@ StChain *chain=0;
 
 
 int rdMuDst2print(
-	  char* file    = "st_physics_adc_9067013_raw_1430001.MuDst.root",
-	  int nEve=1,
-	  Int_t nFiles  = 1, 
-	  char* inDir   = "/star/data05/scratch/balewski/bug1new/")
+	  char* file    = "st_physics_9069005_raw_1010002.MuDst.root",
+	  int nEve=3,
+	  char* inDir   = "/star/data05/scratch/balewski/bug3c/"
+	  )
 { 
-
-  printf("BPRSX %s\n",inDir+20);
+  Int_t nFiles  = 1;
   
-  // inDir="/star/institutions/iucf/balewski/2006-ppv-eval/test7/";
-  //file    = "st_physics_adc_7118049_raw_1070001.MuDst.root",
-
+  //inDir="/star/data05/scratch/balewski/bug4d/"; file= "Wsample2.MuDst.root";
+   
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
 
@@ -36,6 +34,11 @@ int rdMuDst2print(
   chain->ls(3);
 
   h1=new TH1F("nP","# of prim tracks per vertex",100,0,200);
+  h2=new TH1F("vR","PPV Vertex rank; rank", 300, -1.2e6, 1.2e6); h2->SetLineColor(kRed);
+  h3=new TH1F("vRL","PPV Vertex rank, funny X-axis;if rank>1e6: X=Log10(rank-1e6)+10, elseif rank>0   X=Log10(rank), else  X=Log10(rank+1e6)-10", 150, -9,21);
+  h2->GetXaxis()->SetTitleSize(.043);
+  h2->GetXaxis()->SetTitleSize(.043);
+
   //---------------------------------------------------
   int eventCounter=0;
   int t1=time(0);
@@ -87,21 +90,26 @@ int rdMuDst2print(
 	nPrimTr ++;
       }
       if(nPrimV>0)h1->Fill(nPrimTr);
+      float rank=V->ranking();
+      h2->Fill(rank);
+      if(rank>1e6)  h3->Fill(log(rank-1e6)+10);
+      else if(rank>0)   h3->Fill(log(rank));
+      else   h3->Fill(log(rank+1e6)-10);
 
       if(1)printf("  nPrimTr=%d , Z=%.1f VFid=%d:: ntrVF=%d nCtb=%d nBemc=%d nEEmc=%d nTpc=%d sumPt=%.1f rank=%g\n"
 		  ,nPrimTr,r.z(), V->vertexFinderId() ,V->nTracksUsed()  ,V->nCTBMatch()  ,V-> nBEMCMatch() ,V->nEEMCMatch()  ,V->nCrossCentralMembrane()  ,V->sumTrackPt()  ,V->ranking());
 
     } 
 
-    continue;   // do NOT print prim tracks for each vertex  
+    // continue;   // do NOT print prim tracks for each vertex  
 
-    for(iv=0;iv<nPrimV;iv++) {
+    if(0)for(iv=0;iv<nPrimV;iv++) {
       printf("  Prim tracks belonging to %d prim vertex:\n",iv);      
       int itr; 
       int ntr=0;
       for(itr=0;itr<nPrimTrAll;itr++) {
 	StMuTrack *pr_track=muMk->muDst()->primaryTracks(itr);
-	assert((pr_track->vertexIndex()==iv));
+	if(pr_track->vertexIndex()!=iv) continue;
 	if(pr_track->flag()<=0) continue;	
 	ntr++;
 	cout << "\nPrimary track " << ntr << " momentum " << pr_track->p() << endl;  cout << "\t flag=" << pr_track->flag() << " nHits=" << pr_track->nHits()<< " vertID="<<  pr_track->vertexIndex()<< endl;
@@ -112,8 +120,8 @@ int rdMuDst2print(
       } // end of loop over tracks
     }// end of loop over vertices
     
-    continue; 
-
+    // continue; 
+    
     StMuEmcCollection* emc = muMk->muDst()->muEmcCollection();
     if (!emc) {
       printf(" No EMC data for this event\n");
@@ -122,7 +130,10 @@ int rdMuDst2print(
     // printEEtower(emc);
     // printEEpre(emc);
     // printEEsmd(emc);
-    printBPRS(emc);
+    printBEtower(emc);
+    printBEpre(emc);
+    printBEsmd(emc);
+  
     
   }
   printf("****************************************** \n");
@@ -132,7 +143,9 @@ int rdMuDst2print(
   float tMnt=(t2-t1)/60.;
   float rate=1.*eventCounter/(t2-t1);
   printf("sorting done %d of   nEve=%d, CPU rate=%.1f Hz, total time %.1f minute(s) \n\n",eventCounter,nEntries,rate,tMnt);
-  h1->Draw();
+  c=new TCanvas(); c->Divide(1,2);
+  c->cd(1);  h2->Draw();
+  c->cd(2);  h3->Draw();
 
   return;
   
@@ -205,18 +218,73 @@ printEEsmd( StMuEmcCollection* emc ) {
 
 //===========================================
 //===========================================
-printBPRS( StMuEmcCollection* muEmc ) {
-  int nprshits = muEmc->getNPrsHits();
-  int prstot = 0;
-  int captot = 0;
-  printf("BPRSX %d hits====================\n",nprshits);
-  for(int j = 0; j < nprshits; j++){
-    StMuEmcHit* phit = muEmc->getPrsHit(j);
-    int adc = phit->getAdc();
-    int cap = phit->getCalType();
-    int id= phit->getId();
-    // printf("ih=%d softId=%d adc=%.1f cap=%d\n",j,id,adc,cap);
-    printf("BPRSX %d %d %d\n",id,adc,cap);
-  }
+printBEtower( StMuEmcCollection* emc ) {
+  int sec,eta,sub,adc;
+  StMuEmcHit *hit;
+
+  int i, nh;
+
+  printf("\Total hits in Tower (only ADC>0)\n");
+  nh=0;
+  for (i=0; i< 4800; i++) {
+    int adc = emc->getTowerADC(i);
+    if (adc<=4) continue; // print only non-zero values
+    nh++;
+    printf(" Tower id=%d   adc=%4d\n",i,adc );
+    //    assert(adc==adcX );
+}
+  printf("  --> %d towers with ADC>thr\n",nh);
 }
 
+
+
+
+//===========================================
+//===========================================
+printBEpre( StMuEmcCollection* emc ) {
+
+  int i, nh;
+  nh = emc->getNPrsHits();
+  printf("\nTotal %d hits in pre1\n",nh);
+
+  int n1=0;
+  for (i=0; i<nh; i++) {
+    StMuEmcHit * hit = emc->getPrsHit(i);
+    int adc = hit->getAdc();
+    int id=hit->getId();
+    if(adc<4) continue;
+    n1++;
+    printf("BPRS i=%d, id=%d adc = %d\n",i,id,adc);
+  } 
+  printf("   --> %d BPRS hits with ADC>thr\n",n1);
+}
+
+//===========================================
+//===========================================
+printBEsmd( StMuEmcCollection* emc ) {
+
+  int n1=0,n2=0;
+  int nh = emc->getNSmdHits(3);
+  printf("\nTotal %d hits in SMDE\n",nh);
+  for (int i=0; i<nh; i++) {
+    StMuEmcHit * hit = emc->getSmdHit(i,3);
+    adc = hit->getAdc();
+    int id=hit->getId();
+     if(adc<4) continue;
+    n1++;
+    printf("BSMDE i=%d, id=%d adc = %d\n",i,id,adc);
+  }
+
+  int nh = emc->getNSmdHits(4);
+  printf("\nTotal %d hits in SMDP\n",nh);
+  for (int i=0; i<nh; i++) {
+    hit = emc->getSmdHit(i,4);
+    adc = hit->getAdc();
+    int id=hit->getId(); 
+    if(adc<4) continue;
+    n2++;
+    printf("BSMDP i=%d,id=%d adc = %d\n",i,id,adc);
+  }
+
+  printf("   --> %d BSMD-E & %d BSMD-P  hits with ADC>thr\n",n1,n2);
+}

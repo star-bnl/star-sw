@@ -1,8 +1,12 @@
 *
-* $Id: csjcax.F,v 1.1.1.1 2004/01/12 23:49:39 potekhin Exp $
+* $Id: csjcax.F,v 1.2 2009/01/18 23:51:38 perev Exp $
 *
 * $Log: csjcax.F,v $
+* Revision 1.2  2009/01/18 23:51:38  perev
+* BugFix. imitation of stack, non static variable
+*
 * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
+*
 *
 * Revision 1.3  2003/10/03 13:24:12  nevski
 * make comis call re-entrant
@@ -22,7 +26,13 @@
          PARAMETER (KLK=45, KCALLS=87, KEXIT=113)
          INTEGER M(2)
 *PN, 03.10.03: make it re-entrant
-       I=MHLOC(64)
+         integer nStk/0/,iStk(100)
+         save iStk
+
+       I=MHLOC(64) 
+       nStk = nStk+1
+       if (nStk .gt. 100) call abort
+       iStk(nStk) = I
        K=I+2*NP
        IQ(K)=KCALLS
        IQ(K+1)=J
@@ -40,5 +50,7 @@
 **      IF(INT.LE.0)THEN
 **         CONTINUE
 **      ENDIF
+       I = iStk(nStk)
+       nStk = nStk-1
       CALL MHFREE(I)
       END

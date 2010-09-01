@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.h,v 1.13 2007/12/22 20:31:21 calderon Exp $
+ * $Id: StMiniMcMaker.h,v 1.14 2009/02/02 19:30:50 fisyak Exp $
  * \file  StMiniMcMaker.h
  * \brief Filling of StMiniMcEvent classes from StMcEvent, StEvent, StAssociationMaker
  * 
@@ -12,6 +12,9 @@
  * manuel calderon de la barca's code.
  *
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.14  2009/02/02 19:30:50  fisyak
+ * Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
+ *
  * Revision 1.13  2007/12/22 20:31:21  calderon
  * Storing of info of 3 EMC towers for each TinyRcTrack and TinyMcTrack.
  *
@@ -77,6 +80,9 @@
  * Revision 1.4  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.14  2009/02/02 19:30:50  fisyak
+ * Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
+ *
  * Revision 1.13  2007/12/22 20:31:21  calderon
  * Storing of info of 3 EMC towers for each TinyRcTrack and TinyMcTrack.
  *
@@ -138,7 +144,7 @@
  * but in order not to break Jenn's scripts if she was already using this macro,
  * this parameter was added at the end and defaults to "rcf", which is appropriate
  * for hijing files reconstructed in rcf.
- * and $Id: StMiniMcMaker.h,v 1.13 2007/12/22 20:31:21 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.h,v 1.14 2009/02/02 19:30:50 fisyak Exp $ plus header comments for the macros
  *
  */
 
@@ -162,7 +168,6 @@
 
 class TFile;
 class TTree;
-class StRun;
 class StEvent;
 class StMcEvent;
 class StMcTrack;
@@ -212,7 +217,7 @@ class StMiniMcMaker : public StMaker{
   Int_t Make();
   Int_t Finish();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMiniMcMaker.h,v 1.13 2007/12/22 20:31:21 calderon Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMiniMcMaker.h,v 1.14 2009/02/02 19:30:50 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   //---- SETS -------
 
@@ -303,7 +308,6 @@ class StMiniMcMaker : public StMaker{
 
   StEvent*         mRcEvent;      //!
   StMcEvent*       mMcEvent;      //!
-  StRun*           mRun;          //!
   rcTpcHitMapType* mRcHitMap;     //!
   rcTrackMapType*  mRcTrackMap;   //!
   mcTrackMapType*  mMcTrackMap;   //!

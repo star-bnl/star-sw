@@ -22,7 +22,7 @@ public:
   virtual ~StjMCParticleListMaker() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjMCParticleListMaker.C,v 1.2 2008/09/17 19:04:13 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjMCParticleListMaker.C,v 1.1 2008/08/06 06:36:26 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -52,7 +52,7 @@ public:
 
   Int_t Make()
   {
-    StjMCParticleList theList = _mc->getMCParticleList();
+    StjMCParticleList theList = _mc->getMCPartilceList();
 
     theList = _mcCut(theList);
 

@@ -93,9 +93,7 @@ am_libStJetMakerTest_la_OBJECTS = libStJetMakerTest_la-Misc.lo \
 	libStJetMakerTest_la-StjJetCutTest.lo \
 	libStJetMakerTest_la-StjTrgMock.lo \
 	libStJetMakerTest_la-StjFormDijetTest.lo \
-	libStJetMakerTest_la-StjDijetCutTest.lo \
-	libStJetMakerTest_la-StjTrgRaiseThresholdEtHTTest.lo \
-	libStJetMakerTest_la-StjTrgRaiseThresholdEtJPTest.lo
+	libStJetMakerTest_la-StjDijetCutTest.lo
 libStJetMakerTest_la_OBJECTS = $(am_libStJetMakerTest_la_OBJECTS)
 am__EXEEXT_1 = TestApp$(EXEEXT)
 am_TestApp_OBJECTS = TestApp-TestMain.$(OBJEXT)
@@ -287,9 +285,7 @@ libStJetMakerTest_la_SOURCES = \
 	StjJetCutTest.C StjJetCutTest.hh \
 	StjTrgMock.C StjTrgMock.hh \
 	StjFormDijetTest.C StjFormDijetTest.hh \
-	StjDijetCutTest.C StjDijetCutTest.hh \
-	StjTrgRaiseThresholdEtHTTest.C StjTrgRaiseThresholdEtHTTest.hh \
-	StjTrgRaiseThresholdEtJPTest.C StjTrgRaiseThresholdEtJPTest.hh
+	StjDijetCutTest.C StjDijetCutTest.hh
 
 libStJetMakerTest_la_CXXFLAGS = \
 	-I../.. \
@@ -302,9 +298,6 @@ libStJetMakerTest_la_CXXFLAGS = \
 	-I../mudst \
 	-I../tree \
 	-I../trigger \
-	-I../jets \
-	-I../dijets \
-	-I../mckin \
 	-I../../StSpinPool \
 	-I../../StTriggerUtilities \
 	-I$(STAR)/.$(STAR_HOST_SYS)/include \
@@ -432,8 +425,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTreeEntryMakerTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTreeIndexListCreatorTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTrgMock.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTrgRaiseThresholdEtHTTest.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTrgRaiseThresholdEtJPTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjTrgTreeTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StjeBemcEnergySumCalculatorBuilderTest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libStJetMakerTest_la-StppAnaParsTest.Plo@am__quote@
@@ -670,20 +661,6 @@ libStJetMakerTest_la-StjDijetCutTest.lo: StjDijetCutTest.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='StjDijetCutTest.C' object='libStJetMakerTest_la-StjDijetCutTest.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-StjDijetCutTest.lo `test -f 'StjDijetCutTest.C' || echo '$(srcdir)/'`StjDijetCutTest.C
-
-libStJetMakerTest_la-StjTrgRaiseThresholdEtHTTest.lo: StjTrgRaiseThresholdEtHTTest.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-StjTrgRaiseThresholdEtHTTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-StjTrgRaiseThresholdEtHTTest.Tpo" -c -o libStJetMakerTest_la-StjTrgRaiseThresholdEtHTTest.lo `test -f 'StjTrgRaiseThresholdEtHTTest.C' || echo '$(srcdir)/'`StjTrgRaiseThresholdEtHTTest.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-StjTrgRaiseThresholdEtHTTest.Tpo" "$(DEPDIR)/libStJetMakerTest_la-StjTrgRaiseThresholdEtHTTest.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-StjTrgRaiseThresholdEtHTTest.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='StjTrgRaiseThresholdEtHTTest.C' object='libStJetMakerTest_la-StjTrgRaiseThresholdEtHTTest.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-StjTrgRaiseThresholdEtHTTest.lo `test -f 'StjTrgRaiseThresholdEtHTTest.C' || echo '$(srcdir)/'`StjTrgRaiseThresholdEtHTTest.C
-
-libStJetMakerTest_la-StjTrgRaiseThresholdEtJPTest.lo: StjTrgRaiseThresholdEtJPTest.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -MT libStJetMakerTest_la-StjTrgRaiseThresholdEtJPTest.lo -MD -MP -MF "$(DEPDIR)/libStJetMakerTest_la-StjTrgRaiseThresholdEtJPTest.Tpo" -c -o libStJetMakerTest_la-StjTrgRaiseThresholdEtJPTest.lo `test -f 'StjTrgRaiseThresholdEtJPTest.C' || echo '$(srcdir)/'`StjTrgRaiseThresholdEtJPTest.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libStJetMakerTest_la-StjTrgRaiseThresholdEtJPTest.Tpo" "$(DEPDIR)/libStJetMakerTest_la-StjTrgRaiseThresholdEtJPTest.Plo"; else rm -f "$(DEPDIR)/libStJetMakerTest_la-StjTrgRaiseThresholdEtJPTest.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='StjTrgRaiseThresholdEtJPTest.C' object='libStJetMakerTest_la-StjTrgRaiseThresholdEtJPTest.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile --tag=CXX $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libStJetMakerTest_la_CXXFLAGS) $(CXXFLAGS) -c -o libStJetMakerTest_la-StjTrgRaiseThresholdEtJPTest.lo `test -f 'StjTrgRaiseThresholdEtJPTest.C' || echo '$(srcdir)/'`StjTrgRaiseThresholdEtJPTest.C
 
 TestApp-TestMain.o: TestMain.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(TestApp_CXXFLAGS) $(CXXFLAGS) -MT TestApp-TestMain.o -MD -MP -MF "$(DEPDIR)/TestApp-TestMain.Tpo" -c -o TestApp-TestMain.o `test -f 'TestMain.C' || echo '$(srcdir)/'`TestMain.C; \

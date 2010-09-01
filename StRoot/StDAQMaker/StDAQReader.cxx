@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.66 2008/10/01 18:12:19 fine Exp $
+ * $Id: StDAQReader.cxx,v 1.68 2008/11/26 18:01:29 fine Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.68  2008/11/26 18:01:29  fine
+ * prepare StRtsReaderMaker for DAQ_READER transition
+ *
+ * Revision 1.67  2008/11/25 21:42:53  fine
+ * preparing  DAQ maker for DAQ_READER
+ *
  * Revision 1.66  2008/10/01 18:12:19  fine
  * Adjust the code to satisfy the new evpReader interface
  *
@@ -221,8 +227,10 @@
 #include "StDAQReader.h"
 
 #include "StDaqLib/GENERIC/EventReader.hh"
-#ifndef OLD_EVP_READER
+#if !defined(OLD_EVP_READER) && !defined(NEW_DAQ_READER)
 #   include "RTS/src/EVP_READER/evpReaderClass.h"
+#elif NEW_DAQ_READER
+#   include "RTS/src/DAQ_READER/daqReader.h"
 #endif
 
 #include "StDaqLib/RICH/RICH_Reader.hh"

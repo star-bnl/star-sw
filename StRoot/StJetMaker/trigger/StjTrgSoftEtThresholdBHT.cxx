@@ -1,12 +1,10 @@
-// $Id: StjTrgSoftEtThresholdBHT.cxx,v 1.4 2008/09/17 18:42:59 tai Exp $
+// $Id: StjTrgSoftEtThresholdBHT.cxx,v 1.1 2008/08/18 08:50:58 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgSoftEtThresholdBHT.h"
 
 #include "StjTowerEnergyCutEt.h"
 #include "StjTowerEnergyCutBemcStatus.h"
 #include "StjTowerEnergyPrint.h"
-#include "StjTowerEnergyCutEt.h"
-#include "StjTowerEnergyCutAdc.h"
 
 #include "StjBEMC.h"
 
@@ -22,9 +20,8 @@ using namespace std;
 StjTrgSoftEtThresholdBHT::StjTrgSoftEtThresholdBHT(StjBEMC* bemc, double minEt)
   : _bemc(bemc), _minEt(minEt), _runNumber(-1), _eventId(-1)
 {
-  _cut.addCut(  new StjTowerEnergyCutEt(minEt));
-  _cut.addCut(  new StjTowerEnergyCutBemcStatus(1));
-  _cut.addCut(  new StjTowerEnergyCutAdc(0, 2.0)   );
+  _cut.addCut(new StjTowerEnergyCutEt(minEt));
+  _cut.addCut(new StjTowerEnergyCutBemcStatus(1));
 }
 
 bool StjTrgSoftEtThresholdBHT::isNewEvent()
@@ -36,9 +33,6 @@ bool StjTrgSoftEtThresholdBHT::isNewEvent()
 
 void StjTrgSoftEtThresholdBHT::read()
 {
-  _runNumber = _trg->runNumber();
-  _eventId = _trg->eventId();
-
   _towers.clear();
   _towerDsmAdc.clear();
   _towerAdc.clear();
@@ -49,7 +43,7 @@ void StjTrgSoftEtThresholdBHT::read()
   energyList = _cut(energyList);
 
 
-  _passed = ( ! energyList.empty() );
+  _pass = ( ! energyList.empty() );
 
   for(StjTowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
     _towers.push_back((*it).towerId);
@@ -67,7 +61,7 @@ void StjTrgSoftEtThresholdBHT::read()
 bool StjTrgSoftEtThresholdBHT::soft()
 {
   if(isNewEvent()) read();
-  return _passed;
+  return _pass;
 }
 
 vector<int> StjTrgSoftEtThresholdBHT::towers()

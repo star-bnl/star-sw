@@ -20,10 +20,10 @@ Module PIPEGEO00 is the SIMPLIFIED geometry  of the STAR beam pipe.
    endFill
 * -----------------------------------------------------------------------------
 * The thinner new pipe, which will require an exoskeleton
-   FILL PIPG             !  Beam Pipe data
+   FILL PIPG             !  Beam Pipe data 02/13/2009: thickness is 30 mill = 762um
       config   =  0      ! both material and geo params
-      BeInnR    = 1.9750 ! Berillium section inner radius
-      BeOutR    = 2.0250 ! Berillium section outer radius
+      BeInnR    = 1.9619 ! Berillium section inner radius
+      BeOutR    = 2.0381 ! Berillium section outer radius
       BeLeng    = 200.0  ! Berillium section length
    endfill
 * -----------------------------------------------------------------------------
@@ -75,4 +75,3 @@ Block PVAC is the Vacuum Volume of Be section of pipe
 EndBlock
 * -----------------------------------------------------------------------------
       END
-

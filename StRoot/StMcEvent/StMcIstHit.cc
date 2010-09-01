@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.cc,v 2.7 2006/10/23 21:13:46 calderon Exp $
+ * $Id: StMcIstHit.cc,v 2.8 2009/02/06 15:36:45 fisyak Exp $
  * $Log: StMcIstHit.cc,v $
+ * Revision 2.8  2009/02/06 15:36:45  fisyak
+ * Jonathan: decoding for upgr15 geometry
+ *
  * Revision 2.7  2006/10/23 21:13:46  calderon
  * Updates to layer(), wafer() and side() methods from Willie L.
  *
@@ -41,7 +44,7 @@
 #include "StMcIstHit.hh"
 #include "tables/St_g2t_ist_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.7 2006/10/23 21:13:46 calderon Exp $";
+static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.8 2009/02/06 15:36:45 fisyak Exp $";
 #ifdef POOL
 StMemoryPool StMcIstHit::mPool(sizeof(StMcIstHit));
 #endif
@@ -75,7 +78,9 @@ ostream&  operator<<(ostream& os, const StMcIstHit& h)
 
 unsigned long
 StMcIstHit::layer() const
-{    
+{
+  //Only one ist layer now (WL, 03/13/08)
+  /*
   unsigned long iLayer = mVolumeId/1000000;
   unsigned long layer;
   if(iLayer<4) layer=iLayer-1;
@@ -86,21 +91,31 @@ StMcIstHit::layer() const
     }
   
   return layer;
+  */
+  return 1;
 }
 
 unsigned long
 StMcIstHit::ladder() const
 {
-  unsigned long iModule = (mVolumeId%1000000)/10000;
+  //unsigned long iModule = (mVolumeId%1000000)/10000;
+  unsigned long iLadder=mVolumeId/1000000-1;
+  /*
   unsigned long iLadder = 0;
-  if(iModule<=27) iLadder=iModule;
+  if(iModule<=24) iLadder=iModule;
   else 
     {
       cout << "StMcIstHit::ladder() -E- volumeId not known!" << endl;
       iLadder = 10000; 
     }
-  
+  */
   return iLadder;
+}
+
+unsigned long StMcIstHit::wafer() const
+{
+  unsigned long iWafer=(mVolumeId%1000000)/10000;
+  return iWafer;
 }
 //________________________________________________________________________________
 void StMcIstHit::Print(Option_t *option) const {

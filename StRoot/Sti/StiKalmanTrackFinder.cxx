@@ -607,7 +607,7 @@ static  const double ref1a  = 110.*degToRad;
        if (shapeCode >= kCylindrical) {
 	 OpenAngle = ((StiCylindricalShape *) detector->getShape())->getOpeningAngle();
        } else {
-	 if (radius <= 50 && radius>4.2)  OpenAngle = ref1a;
+	 if (radius <= 50 )  OpenAngle = ref1a;
        }
        diff = projAngle-angle;
        if (diff >  M_PI) diff -= 2*M_PI;
@@ -791,7 +791,7 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
 
   double xg = node->x_g();
   double yg = node->y_g();
-  if ((xg*xg + yg*yg) < 4.2*4.2) qa.qa= -2;
+//VP??  if ((xg*xg + yg*yg) < 4.2*4.2) qa.qa= -2;
 
 }
 //______________________________________________________________________________

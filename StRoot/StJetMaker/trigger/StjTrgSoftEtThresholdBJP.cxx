@@ -1,14 +1,10 @@
-// $Id: StjTrgSoftEtThresholdBJP.cxx,v 1.5 2008/09/17 18:43:00 tai Exp $
+// $Id: StjTrgSoftEtThresholdBJP.cxx,v 1.1 2008/08/18 08:50:59 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjTrgSoftEtThresholdBJP.h"
 
 #include "StjTowerEnergyCutEnergy.h"
 #include "StjTowerEnergyCutBemcStatus.h"
 #include "StjTowerEnergyPrint.h"
-#include "StjTowerEnergyCutBemcStatus.h"
-#include "StjTowerEnergyCutEnergy.h"
-#include "StjTowerEnergyCutEt.h"
-#include "StjTowerEnergyCutAdc.h"
 
 #include "StjTrgBEMCJetPatchTowerIdMap.h"
 
@@ -29,10 +25,8 @@ using namespace std;
 StjTrgSoftEtThresholdBJP::StjTrgSoftEtThresholdBJP(StjBEMC* bemc, StjTrgBEMCJetPatchTowerIdMap* jpTowerMap, double minEt)
   : _bemc(bemc), _jpTowerMap(jpTowerMap), _minEt(minEt), _runNumber(-1), _eventId(-1)
 {
-  _cut.addCut(  new StjTowerEnergyCutEnergy(0.0)   );
-  _cut.addCut(  new StjTowerEnergyCutBemcStatus(1) );
-  _cut.addCut(  new StjTowerEnergyCutAdc(0, 2.0)   );
-  _cut.addCut(  new StjTowerEnergyCutEt(0.2)       );
+  _cut.addCut(new StjTowerEnergyCutEnergy(0.0));
+  _cut.addCut(new StjTowerEnergyCutBemcStatus(1));
 }
 
 bool StjTrgSoftEtThresholdBJP::isNewEvent()
@@ -44,9 +38,6 @@ bool StjTrgSoftEtThresholdBJP::isNewEvent()
 
 void StjTrgSoftEtThresholdBJP::read()
 {
-  _runNumber = _trg->runNumber();
-  _eventId = _trg->eventId();
-
   _jetPatches.clear();
   _jetPatchDsmAdc.clear();
   _jetPatchAdc.clear();
@@ -65,24 +56,22 @@ void StjTrgSoftEtThresholdBJP::read()
   }
 
   for(map<int, StjTowerEnergyList>::const_iterator it = jpMap.begin(); it != jpMap.end(); ++it) {
-    int jpid = (*it).first;
-    const StjTowerEnergyList& energyList = (*it).second;
-    double Et = computeEtSum(energyList);
+    double Et = computeEtSum((*it).second);
     if(Et <= _minEt) continue;
-    _jetPatches.push_back(jpid);
+    _jetPatches.push_back((*it).first);
     _jetPatchDsmAdc.push_back(0);
     _jetPatchAdc.push_back(0);
     _jetPatchEnergy.push_back(0);
     _jetPatchEt.push_back(Et);
   }
 
-  _passed = ( ! _jetPatches.empty() );
+  _pass = ( ! _jetPatches.empty() );
 
 }
 
 double StjTrgSoftEtThresholdBJP::computeEtSum(const StjTowerEnergyList& energyList)
 {
-  double ret = 0;
+  double ret;
   for(StjTowerEnergyList::const_iterator it = energyList.begin(); it != energyList.end(); ++it) {
     TVector3 vec3;
     vec3.SetPtEtaPhi((*it).towerR, (*it).towerEta, (*it).towerPhi);
@@ -94,7 +83,7 @@ double StjTrgSoftEtThresholdBJP::computeEtSum(const StjTowerEnergyList& energyLi
 bool StjTrgSoftEtThresholdBJP::soft()
 {
   if(isNewEvent()) read();
-  return _passed;
+  return _pass;
 }
 
 vector<int> StjTrgSoftEtThresholdBJP::jetPatches()

@@ -28,7 +28,7 @@ public:
   virtual ~StjTrigger2005MCMaker2() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjTrigger2005MCMaker2.C,v 1.2 2008/08/19 20:02:16 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjTrigger2005MCMaker2.C,v 1.1 2008/08/18 08:50:55 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -60,7 +60,7 @@ public:
     _bht1Writer = new StjTrgHTWriter("trgBHT1", "trgBHT1", _file, bht1Trg, bht1FillCondition);
 
     StjTrgPassCondition* bht2PassCondition = new StjTrgPassConditionSoftOnly;
-    StjTrgSoft* softbht2 = new StjTrgSoftEtThresholdBHT(bemc, 3.0);
+    StjTrgSoft* softbht2 = new StjTrgSoftEtThresholdBHT(bemc, 2.0);
     StjTrg* bht2Trg = new StjTrgMuDst(96211, bht2PassCondition, _uDstMaker, softbht2);
     StjTrgPassCondition* bht2FillCondition = new StjTrgPassConditionSoftOnly;
     _bht2Writer = new StjTrgHTWriter("trgBHT2", "trgBHT2", _file, bht2Trg, bht2FillCondition);
@@ -68,13 +68,13 @@ public:
     StjTrgBEMCJetPatchTowerIdMap* bemcJpTowerMap = new StjTrgBEMCJetPatchTowerIdMap2005();
 
     StjTrgPassCondition* bjp1PassCondition = new StjTrgPassConditionSoftOnly;
-    StjTrgSoft* softbjp1 = new StjTrgSoftEtThresholdBJP(bemc, bemcJpTowerMap, 4.0);
+    StjTrgSoft* softbjp1 = new StjTrgSoftEtThresholdBJP(bemc, bemcJpTowerMap, 2.0);
     StjTrg* bjp1Trg = new StjTrgMuDst(96221, bjp1PassCondition, _uDstMaker, softbjp1);
     StjTrgPassCondition* bjp1FillCondition = new StjTrgPassConditionSoftOnly;
     _bjp1Writer = new StjTrgJPWriter("trgBJP1", "trgBJP1", _file, bjp1Trg, bjp1FillCondition);
 
     StjTrgPassCondition* bjp2PassCondition = new StjTrgPassConditionSoftOnly;
-    StjTrgSoft* softbjp2 = new StjTrgSoftEtThresholdBJP(bemc, bemcJpTowerMap, 5.0);
+    StjTrgSoft* softbjp2 = new StjTrgSoftEtThresholdBJP(bemc, bemcJpTowerMap, 2.0);
     StjTrg* bjp2Trg = new StjTrgMuDst(96233, bjp2PassCondition, _uDstMaker, softbjp2);
     StjTrgPassCondition* bjp2FillCondition = new StjTrgPassConditionSoftOnly;
     _bjp2Writer = new StjTrgJPWriter("trgBJP2", "trgBJP2", _file, bjp2Trg, bjp2FillCondition);

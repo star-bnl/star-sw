@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.cxx,v 1.1 2008/01/29 15:14:05 fine Exp $
+ * $Id: StRTSBaseMaker.cxx,v 1.2 2008/11/21 18:16:46 fine Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StRTSBaseMaker.cxx,v $
+ * Revision 1.2  2008/11/21 18:16:46  fine
+ * Change the return type of the GetNextDaqElement method to be StRtsTable *
+ *
  * Revision 1.1  2008/01/29 15:14:05  fine
  * Introduce the base class to access RTS raw data
  *
@@ -49,16 +52,18 @@ StRTSBaseMaker::~StRTSBaseMaker()
 { }
 
 //_____________________________________________________________
-Int_t StRTSBaseMaker::GetNextDaqElement(const char *elementPath)
+StRtsTable *StRTSBaseMaker::GetNextDaqElement(const char *elementPath)
 {
-  // Query  RTS/tpx/cld[%d] cluster data from DAQ system
+  // Query:  RTS/tpx/cld[%d] cluster data from DAQ system
+  // Return: the pointer the StRtsTable object filled with the query data
+  //         = 0; the no data for the "elementPath" was found
   fDaq_Dta = 0;
   if (elementPath && elementPath[0]) {
      TString path = fRTSRootDataset;
      path +=elementPath; 
      fDaq_Dta =  dynamic_cast<StRtsTable *>(GetDataSet((const char*)path));
   }
-  return fDaq_Dta ? 1 : 0;
+  return fDaq_Dta;
 }
 
 //_____________________________________________________________

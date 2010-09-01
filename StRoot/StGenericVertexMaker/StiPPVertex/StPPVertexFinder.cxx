@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.30 2008/10/21 19:23:05 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.32 2008/12/02 14:35:05 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -70,8 +70,13 @@ StPPVertexFinder::StPPVertexFinder() {
   setMC(false);                      // default = real Data
   useCTB(true);                      // default CTB is in the data stream
   setDropPostCrossingTrack(true);    // default PCT rejection on
-  mTestMode=0;                       // expert only flag
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
+
+  mAlgoSwitches=0; // default, as for 2008 pp data production
+
+  //........... tune for W-boson reco
+  mAlgoSwitches|=kSwitchOneHighPT;
+  mCut_oneTrackPT=15; // GeV, used only if coresponding algoSwitch switch is ON.
 
   // special histogram for finding the vertex, not to be saved
   int nb=5000;
@@ -81,13 +86,6 @@ StPPVertexFinder::StPPVertexFinder() {
   hM=new TH1D("ppvM","cumulative track multiplicity; Z /cm",nb,-zRange,zRange);
   hW=new TH1D("ppvW","cumulative track weight; Z /cm",nb,-zRange,zRange);
 
-  FILE *fd=fopen("ppvMode.dat","r");
-  if(fd) {
-    fscanf(fd,"%d ",&mTestMode);
-    LOG_WARN << "PPV cuts have been changed to mTestMode=" << mTestMode<<endm;
-    fclose(fd);
-  }
-
 } 
 
 
@@ -96,7 +94,7 @@ StPPVertexFinder::StPPVertexFinder() {
 void 
 StPPVertexFinder::Init() {
   assert(mTotEve==0); // can't be called twice
-  LOG_INFO << "PPV-2 cuts have been activated, mTestMode=" << mTestMode<<endm;
+  LOG_INFO << Form("PPV-algo switches=0x%0x,  following cuts have been activated:",mAlgoSwitches)<<endm;
   //.. set various params 
   mMaxTrkDcaRxy = 3.0;  // cm 
   mMinTrkPt     = 0.20; // GeV/c  //was 0.2 in 2005 prod
@@ -110,15 +108,6 @@ StPPVertexFinder::Init() {
 
   if(isMC) {
     mMinAdcBemc =7; //ideal BTOW gain 60 GeV ET @ 3500 ADC
-  }
-
-  // ... play with cuts, expert only
-  switch(mTestMode){
-  case 0: break; //use  default
-  case 1: mMaxZradius =5; break;
-  case 2: mMinMatchTr=3; break;
-  case 3: mMinAdcBemc*=1.5; mMinAdcEemc*=1.5; break;
-  default:;
   }
 
   //get pointer to Sti toolkit
@@ -166,10 +155,8 @@ StPPVertexFinder::InitRun(int runnumber){
   } else {
     mMinAdcBemc   = 8;    // BTOW used calibration of maxt Et @ ~60Gev 
   }
-    
-  if(mTestMode==3)  ctbList->initRun(1.5); //expert only
-  else  ctbList->initRun(); // defult
-
+  
+  ctbList->initRun(); 
   bemcList->initRun();
   eemcList->initRun();
 
@@ -187,6 +174,7 @@ StPPVertexFinder::InitRun(int runnumber){
     <<"\n bool useCtb ="<<mUseCtb
     <<"\n bool DropPostCrossingTrack ="<<mDropPostCrossingTrack
     <<"\n Store # of UnqualifiedVertex ="<<mStoreUnqualifiedVertex
+    <<"\n Store="<<(mAlgoSwitches & kSwitchOneHighPT)<<" oneTrack-vertex if trackPT>"<< mCut_oneTrackPT
     <<"\n"
     <<endm; 
 
@@ -399,7 +387,6 @@ StPPVertexFinder::fit(StEvent* event) {
   }
 
   
-  //tmp  StEvent*  mEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");  assert(mEvent);
   StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection(); 
   if(emcC==0) {
     LOG_WARN <<"no emcCollection , continue THE SAME eve"<<endm;
@@ -421,11 +408,6 @@ StPPVertexFinder::fit(StEvent* event) {
       eemcList->build(etow, mMinAdcEemc);
     }
   }
-
-  if(mTestMode==5) ctbList->clear(); // test of cuts
-  if(mTestMode==6) bemcList->clear(); // test of cuts
-  if(mTestMode==7) eemcList->clear(); // test of cuts
-
 
   //get the Sti track container...
   StiTrackContainer* tracks = mToolkit->getTrackContainer();
@@ -520,6 +502,8 @@ StPPVertexFinder::fit(StEvent* event) {
   // ...................... search for multiple vertices 
   //............................................................
 
+  const float par_rankOffset=1e6; // to separate class of vertices (approximately)
+
   int nBadVertex=0;
   int vertexID=0;
   while(1) {
@@ -528,10 +512,16 @@ StPPVertexFinder::fit(StEvent* event) {
     V.id=++vertexID;
     if(! findVertex(V)) break;
     bool trigV=evalVertex(V);   // V.print();
+    //bump up rank of 2+ track all vertices 
+    if(V.nAnyMatch>=mMinMatchTr) V.Lmax+=par_rankOffset;
     if(!trigV) {
       if( nBadVertex>=mStoreUnqualifiedVertex)  continue; // drop this vertex
+      /*  preserve this unqalified vertex for Akio 
+	  and deposit 1 cent on Jan's bank account (optional) 
+      */
       nBadVertex++;
-      V.Lmax-=1e6; // preserve this unqalified vertex for Akio and deposit 1 cent on Jan's bank account (optional) 
+      //bump down rank of sub-prime vertices 
+      V.Lmax-=par_rankOffset; 
     }
     mVertexData.push_back(V);
   }
@@ -686,7 +676,7 @@ StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
 
   int nt=mTrackData.size();
   LOG_DEBUG << "StPPVertexFinder::evalVertex Vid="<<V.id<<" start ..."<<endm;
-  int n1=0;
+  int n1=0, nHiPt=0;
   int i;
   
   for(i=0;i<nt;i++) {
@@ -698,6 +688,7 @@ StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
     t->vertexID=V.id;
     V.gPtSum+=t->gPt;
 
+    if( t->gPt>mCut_oneTrackPT && ( t->mBemc>0|| t->mEemc>0) ) nHiPt++;
 
     if(  t->mTpc>0)       V.nTpc++;
     else if (  t->mTpc<0) V.nTpcV++;
@@ -716,12 +707,13 @@ StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
   } 
   V.nUsedTrack=n1;  
 
-  bool validVerex = V.nAnyMatch>=mMinMatchTr;
-  //liberal allow nVeto>nMatch
-  //  validVerex *= V.nAnyMatch>=V.nAnyVeto;
+  bool validVertex = V.nAnyMatch>=mMinMatchTr;
+  if((mAlgoSwitches & kSwitchOneHighPT) && ( nHiPt>0)) {
+    validVertex|=1;
+  }
 
-  if(!validVerex) { // discrad vertex
-    //no trigTracks in this vertex, discard tracks
+  if(!validVertex) { // discrad vertex
+    //no match tracks in this vertex, tag vertex ID in tracks differently
     //V.print(cout);
     LOG_INFO << "StPPVertexFinder::evalVertex Vid="<<V.id<<" rejected"<<endm;
     for(i=0;i<nt;i++) {
@@ -1138,7 +1130,6 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 
   if(nFit<  mMinFitPfrac  * nPos) return false; // too short fragment of a track
 
-  if(mTestMode!=4) t.scanNodes(hitPatt,jz0); // if central membrane is crossed
   return true;
 }
 
@@ -1180,6 +1171,13 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.32  2008/12/02 14:35:05  balewski
+ * I forgot to require EMC hit for highPT track, now it is in
+ *
+ * Revision 1.31  2008/12/01 22:57:39  balewski
+ * Added capability to reco 1 high pT track vertices with positive rank. 2+ match vertices will have rank above 1e6. Sub-prime vertices (for Akio) have negative rank. More details is given at:
+ * http://drupal.star.bnl.gov/STAR/comp/reco/vf/ppv-vertex/2009-algo-upgrade-1
+ *
  * Revision 1.30  2008/10/21 19:23:05  balewski
  * store unqualified vertices on Akio's request
  *

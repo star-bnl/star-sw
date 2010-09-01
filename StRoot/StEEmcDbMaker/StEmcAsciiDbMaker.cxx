@@ -1,4 +1,4 @@
-//  $Id: StEmcAsciiDbMaker.cxx,v 1.2 2008/07/31 14:18:37 balewski Exp $ 
+//  $Id: StEmcAsciiDbMaker.cxx,v 1.3 2008/12/06 13:20:42 balewski Exp $ 
 // Emulates  L2 in offline for algorithm testing
 // Interface to online/L2jetAlgo/
 // Jan Balewski, Fall 2005
@@ -299,13 +299,16 @@ void StEmcAsciiDbMaker::initAuxHisto() {
   hA[3]=new TH2I("L2mapBTOW","map BTOW(#eta_{bin},#phi_{bin}) --> softID , L2 di-jet convention ;BTOW #eta_{bin} ;BTOW #phi_{bin} ",40,-0.5,39.5,120,-0.5,119.5); 
 
 
-  for(int i;i<4;i++) mHList->Add( hA[i]);
+  for(int i=0;i<4;i++) mHList->Add( hA[i]);
   mHList->Print();
 
 }
 
 /* *******************************
  $Log: StEmcAsciiDbMaker.cxx,v $
+ Revision 1.3  2008/12/06 13:20:42  balewski
+ fix of histo code, was non-fatal
+
  Revision 1.2  2008/07/31 14:18:37  balewski
  saves BTOW reative location mapping, needs manual activatio
 

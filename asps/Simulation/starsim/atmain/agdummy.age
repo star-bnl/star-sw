@@ -1,6 +1,12 @@
-* $Id: agdummy.age,v 1.2 2005/10/26 21:45:41 fisyak Exp $
+* $Id: agdummy.age,v 1.4 2009/01/12 19:44:37 perev Exp $
 * $Name:  $
 * $Log: agdummy.age,v $
+* Revision 1.4  2009/01/12 19:44:37  perev
+* icfmul added
+*
+* Revision 1.3  2008/12/15 00:17:36  perev
+* Load function icfnbl()
+*
 * Revision 1.2  2005/10/26 21:45:41  fisyak
 * add reference to mytrack,gdedxcalc for icc
 *
@@ -40,7 +46,8 @@ Replace[LIST #;] with [ #1 _
              ciopen,ciget,cigetw,ciperm,ciclos,cfperm,cfsize,
  "muonbx "   icloc,funlux,dzerox,dsfinv,radapt,etime,getnum,ncocti,
  "tr-prop"   trprfn,trprop,trscsp,trspsc,trscsd,trsdsc,Ssmt5t,Xmm55,
- "w-M433 "   WordSep,Words,Word
+ "w-M433 "   WordSep,Words,Word,
+ "cernlib"   icfnbl,icfmul
  ]
 #include "geant321/gcflag.inc"
   Integer  SystemF,Ix/0/;  Real x/0.0/;  Double Precision d/0.D0/

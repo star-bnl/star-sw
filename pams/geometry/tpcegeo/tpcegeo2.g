@@ -1,7 +1,10 @@
 
 ****************************************************************************
-* $Id: tpcegeo2.g,v 1.1 2005/12/08 00:40:18 potekhin Exp $
+* $Id: tpcegeo2.g,v 1.2 2009/02/22 21:39:29 perev Exp $
 * $Log: tpcegeo2.g,v $
+* Revision 1.2  2009/02/22 21:39:29  perev
+* max radius added TIKA,TIAL
+*
 * Revision 1.1  2005/12/08 00:40:18  potekhin
 * The origianal Underwoof version contained a syntax error in the array
 * initialization part. This has been corrected to the best of my intuition, as
@@ -531,14 +534,14 @@ endblock
 Block TIKA is the kapton film of the inner field cage
       Material  Mylar
       Attribute TIKA   seen=1  colo=6
-      SHAPE     TUBE   rmin=tikaIR 
+      SHAPE     TUBE   rmin=tikaIR rmax=tikaOR
       Create and position TIAL
 endblock
 *
 Block TIAL is the inner Aluminum cylinder
       material  Aluminium
       Attribute TIAL   seen=1  colo=7
-      SHAPE     TUBE   rmin=tialIR 
+      SHAPE     TUBE   rmin=tialIR rmax=tialOR
 endblock
 *
 *******************************************************************************
