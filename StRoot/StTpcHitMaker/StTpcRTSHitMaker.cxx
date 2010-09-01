@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.18 2010/08/31 15:19:37 genevb Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.19 2010/09/01 21:14:33 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -42,6 +42,12 @@
 #  include "DAQ_READER/daqReader.h"
 #endif /* NEW_DAQ_READER */
 ClassImp(StTpcRTSHitMaker); 
+#define __DEBUG__
+#ifdef __DEBUG__
+#define PrPP(A,B) if (Debug()%10 > 1) {LOG_INFO << "StTpcRTSHitMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
+#else
+#define PrPP(A,B)
+#endif
 //________________________________________________________________________________
 StTpcRTSHitMaker::~StTpcRTSHitMaker() {
   SafeDelete(fTpx);
@@ -189,8 +195,6 @@ Int_t StTpcRTSHitMaker::Make() {
       }
     }
     static StTpcCoordinateTransform transform(gStTpcDb);
-    static StTpcLocalSectorCoordinate local;
-    static StTpcLocalCoordinate global;
     static StThreeVectorF hard_coded_errors;
     //      fTpx->put("cld_sim");       // clean up clusters
     dta = fTpx->get("cld_sim"); // rerun the cluster finder on the simulated data...
@@ -231,9 +235,11 @@ Int_t StTpcRTSHitMaker::Make() {
 	  hitCollection = new StTpcHitCollection();
 	  rEvent->setTpcHitCollection(hitCollection);
 	}
-	StTpcPadCoordinate padcoord(dta->sec, dta->row, dta->sim_cld[i].cld.pad, dta->sim_cld[i].cld.tb);
-	transform(padcoord,local,kFALSE);
-	transform(local,global);
+	StTpcPadCoordinate Pad(dta->sec, dta->row, dta->sim_cld[i].cld.pad, dta->sim_cld[i].cld.tb); PrPP(Make,Pad);
+	static StTpcLocalSectorCoordinate LS;
+	static StTpcLocalCoordinate L;
+	transform(Pad,LS,kFALSE,kTRUE); PrPP(Make,LS); // don't useT0, useTau                  
+	transform(LS,L);                                                                             PrPP(Make,L);
 	if (dta->row != rowOld) {
 	  rowOld = dta->row;
 	  Double_t gain = (dta->row<=13) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
@@ -254,7 +260,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	hw += (ntmbk << 22);  // ntmbks...
 	Double_t q = ADC2GeV*dta->sim_cld[i].cld.charge;
 	Id++;
-	StTpcHit *hit = new StTpcHit(global.position(),hard_coded_errors,hw,q
+	StTpcHit *hit = new StTpcHit(L.position(),hard_coded_errors,hw,q
 				     , (UChar_t ) 0  // counter 
 				     , (UShort_t) dta->sim_cld[i].track_id  // idTruth=0
 				     , (UShort_t) dta->sim_cld[i].quality   // quality=0,
@@ -280,7 +286,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
 	if (! ntimebins) continue;
 	digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
-	// Update pixels if any
+	// Update pixels if any (for data)
 	dta = fTpx->get("adc_sim",sec);
 	Int_t Updated = 0;
 	while(dta && dta->iterate()) {
