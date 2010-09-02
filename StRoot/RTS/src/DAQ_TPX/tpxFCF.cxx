@@ -966,9 +966,9 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 							else {
 								qua = cur->quality * cur->f_charge ;
 							}
-							
+							if (cur->f_charge + old->f_charge > 0)
 							qua /= (cur->f_charge + old->f_charge) ;
-
+							else qua = 0;
 							cur->quality = (u_int )qua ;
 
 							// need to know what to do here when we 
