@@ -45,7 +45,7 @@
             <trackCut Comment = 'Require good flag'>
                 <cutName>Flag</cutName>
                 <Value widget = 'entry'>0</Value>
-                <Value widget = 'entry'>2000</Value>
+                <Value widget = 'entry'>699</Value>
             </trackCut>
             <trackCut Comment = 'charge cut'>
                 <cutName>Charge</cutName>
@@ -75,7 +75,7 @@
             <trackCut Comment = 'pt cut'>
                 <cutName>Pt</cutName>
                 <Value widget = 'entry'>0.15</Value>
-                <Value widget = 'entry'>20.0</Value>
+                <Value widget = 'entry'>50.0</Value>
             </trackCut>
             <trackCut Comment = 'phi cut'>
                 <cutName>Phi</cutName>
@@ -89,8 +89,8 @@
             </trackCut>
             <trackCut Comment = 'electron cut'>
                 <cutName>NSigmaElectron</cutName>
-                <Value widget = 'entry'>-2</Value>
-                <Value widget = 'entry'>2</Value>
+                <Value widget = 'entry'>-1.5</Value>
+                <Value widget = 'entry'>1.5</Value>
             </trackCut>
         </trackCuts>
 
@@ -111,6 +111,103 @@
             </declareReader>
             <preLoop id='preLoop' widget = 'text'>
     // Put special processing that needs to be done before the event loop here.
+    // TEventList sorts its list. I sub-classed it and added an Append method to avoid sorting.
+    TChain *ch = mk-&gt;chain();
+    int nEvents = ch-&gt;GetEntries();
+    cout &lt;&lt; "Total number of events in chain = " &lt;&lt; nEvents &lt;&lt; endl;
+    StEStructTEventList *evList = new StEStructTEventList();
+
+    if (sortEvents) {
+        ch-&gt;SetBranchStatus("*",0);
+        ch-&gt;SetBranchStatus("MuEvent.*",1);
+        ch-&gt;SetBranchStatus("PrimaryTracks.*",1);
+        ch-&gt;SetBranchStatus("GlobalTracks.*",1);
+        if (ch-&gt;GetBranch("PrimaryVertices")) {
+            ch-&gt;SetBranchStatus("PrimaryVertices.*",1);
+        }
+        ecuts-&gt;setDoFillHists(true);
+        tcuts-&gt;setDoFillHists(false);
+
+        float *m = (float *) malloc(sizeof(float)*nEvents);
+        float *z = (float *) malloc(sizeof(float)*nEvents);
+        int   *index = (int   *) malloc(sizeof(int)*nEvents);
+        StEStructEvent *ev;
+        int igood = -1;
+        int iev = -1;
+        bool done = false;
+        TTimeStamp TS;
+        int startTime = TS.GetSec();
+        while (!done) {
+            // This simply reads an event and fills a StEStructEvent object,
+            // applying cuts. If event fails ev will be NULL;
+            iev++;
+            ev = reader-&gt;next();
+            done = reader-&gt;done();
+            if (!ev) {
+                continue;
+            }
+            igood++;
+            if ((igood%500) == 0) {
+                TTimeStamp TS;
+                cout &lt;&lt; "scanning event " &lt;&lt; iev &lt;&lt; " at " &lt;&lt; TS.GetSec()-startTime &lt;&lt; " seconds since start of scan loop." &lt;&lt; endl;
+            }
+            m[igood] = ev-&gt;Ntrack();
+            z[igood] = ev-&gt;Vz();
+            index[igood] = iev;
+            delete ev;
+        }
+        nEvents = igood;
+        StarTSP *tsp = new StarTSP(igood);
+        int *f = tsp-&gt;getFileNumbers(ch,igood,index);
+        cout &lt;&lt; "Events passing cuts = " &lt;&lt; igood &lt;&lt; endl;
+        float *ff = (float *) malloc(sizeof(float)*igood);
+        for (int ie=0;ie&lt;igood;ie++) {
+            ff[ie] = 0;
+        }
+        int *eList = tsp-&gt;sortLists(m,z,ff);
+
+        // Note that we are appending to evList that already has one entry
+        // per event in the chain. The point is that StMuDstMaker is keeping
+        // track of how many events it has read. I would reset if if I knew how.
+        for (int ie=0;ie&lt;igood;ie++) {
+            evList-&gt;Append(index[eList[ie]]);
+        }
+        delete m;
+        delete z;
+        delete f;
+        delete ff;
+        delete index;
+        delete eList;
+        // Need to delete and recreate readers. They think they have read everything there is in the chain.
+        delete mk;
+        delete reader;
+        mk     = new StMuDstMaker(0,0,"",filelist,".",500);
+        reader = new StEStructMuDstReader(mk,ecuts,tcuts);
+        reader-&gt;setUseGlobalTracks(useGlobalTracks);
+        estructMaker-&gt;SetEventReader(reader);
+        ecuts-&gt;setDoFillHists(false);
+        tcuts-&gt;setDoFillHists(true);
+        ch = mk-&gt;chain();
+    } else {
+        for (int ie=0;ie&lt;nEvents;ie++) {
+            evList-&gt;Append(ie);
+        }
+    }
+
+    // Only reading a few branches should in principle speed up the reading.
+    // In practice it seems to make no difference (reading only the MuEvent branch is faster, but
+    // once we include the PrimaryTracks branch it is as fast to reas the entire event!)
+    // Might be safer to remove all this SetBranchStatus stuff here.
+    ch-&gt;SetBranchStatus("*",0);
+    ch-&gt;SetBranchStatus("MuEvent.*",1);
+    ch-&gt;SetBranchStatus("PrimaryTracks.*",1);
+    ch-&gt;SetBranchStatus("GlobalTracks.*",1);
+    if (ch-&gt;GetBranch("PrimaryVertices")) {
+        ch-&gt;SetBranchStatus("PrimaryVertices.*",1);
+    }
+
+    int counter=0, istat=0;
+    mk-&gt;SetEventList(evList);
             </preLoop>
             <preEvent id='preEvent' widget = 'text'>
         // Special processing before each event can go here.
