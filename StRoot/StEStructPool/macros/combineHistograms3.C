@@ -224,7 +224,7 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
         }
     }
     float  sf[2];
-    bool scaleYt = false;
+    bool scaleYt = true;
     double argList[10];
     double start = 0.95;
     double step  = 0.001;
@@ -246,6 +246,7 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
             ehelp->mapplyDEtaFix      = false;
             ehelp->mPairNormalization = false;
             ehelp->mIdenticalPair     = true;
+            ehelp->mYtYtNormalization = true;
 
             // Make sure LS histogram for zBin 0 is in file.
             if (0 == ehelp->histogramExists("YtYt", 0)) {
@@ -257,8 +258,10 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
             minuit = new TMinuit(1);
             if (!scaleYt) {
                 ehelp->setBGMode(0);
+                ehelp->mYtYtNormalization = true;
                 sf[0] = 1;
                 sf[1] = 1;
+                cout << ">>>>>Not fitting scale factors for centrality " << ic << " yt bin " << ibin << ", Using YtYtNormalization = " << ehelp->mYtYtNormalization << endl;
                 ytyt  = ehelp->buildChargeTypes("YtYt",5,sf);
                 ytytC = ehelp->buildCommon("YtYt",5,sf);
             } else {
@@ -266,6 +269,8 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
                 minData.mSupport    = ehelp;
                 minData.mChargeType = 0;
 
+                argList[0] = -1;
+                minuit->mnexcm("SET PRINT",argList,1,errFlag);
                 minuit->SetFCN(minimizeNegative);
                 minuit->mnparm( 0, "rho_ref scale factor", start, step, bmin, bmax, errFlag );
                 minuit->SetErrorDef(1);
@@ -275,11 +280,20 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
                 argList[0] = 500;
                 cout << ">>>>>Starting scale factor 0 fit for centrality " << ic << " yt bin " << ibin << endl;
                 minuit->mnexcm("MIGRAD",argList,1,errFlag);
-                minuit->GetParameter(0,sFactor[0][ibin][ic],eSFactor[0][ibin][ic]);
-                if (0 != errFlag) {
-                    cout << "++++Out of chesse error; Fit failed. Using scale factor = 1" << endl;
-                    sFactor[0][ibin][ic]  =   1;
-                    eSFactor[0][ibin][ic] = 100;
+                double cVal, eVal;
+                minuit->GetParameter(0,cVal,eVal);
+                sFactor[0][ibin][ic] = cVal;
+                eSFactor[0][ibin][ic] = eVal;
+                if (4 == errFlag) {
+                    minuit->mnexcm("MINOS",argList,1,errFlag);
+                    minuit->GetParameter(0,cVal,eVal);
+                    sFactor[0][ibin][ic] = cVal;
+                    eSFactor[0][ibin][ic] = eVal;
+                    if (4 == errFlag) {
+                        cout << "++++Out of chesse error; Fit failed. Using scale factor = 1" << endl;
+                        sFactor[0][ibin][ic]  =   1;
+                        eSFactor[0][ibin][ic] = 100;
+                    }
                 }
                 delete minuit;
 
@@ -288,6 +302,8 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
                 // a new one.
                 minData.mChargeType = 1;
                 minuit = new TMinuit(1);
+                argList[0] = -1;
+                minuit->mnexcm("SET PRINT",argList,1,errFlag);
                 minuit->SetFCN(minimizeNegative);
                 minuit->mnparm( 0, "rho_ref scale factor", start, step, bmin, bmax, errFlag );
                 minuit->SetErrorDef(1);
@@ -297,11 +313,19 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
                 argList[0] = 500;
                 cout << ">>>>>Starting scale factor 1 fit for centrality " << ic << " yt bin " << ibin << endl;
                 minuit->mnexcm("MIGRAD",argList,1,errFlag);
-                minuit->GetParameter(0,sFactor[1][ibin][ic],eSFactor[1][ibin][ic]);
-                if (0 != errFlag) {
-                    cout << "++++Out of chesse error; Fit failed. Using scale factor = 1" << endl;
-                    sFactor[1][ibin][ic]  =   1;
-                    eSFactor[1][ibin][ic] = 100;
+                minuit->GetParameter(0,cVal,eVal);
+                sFactor[1][ibin][ic] = cVal;
+                eSFactor[1][ibin][ic] = eVal;
+                if (4 == errFlag) {
+                    minuit->mnexcm("MINOS",argList,1,errFlag);
+                    minuit->GetParameter(0,cVal,eVal);
+                    sFactor[1][ibin][ic] = cVal;
+                    eSFactor[1][ibin][ic] = eVal;
+                    if (4 == errFlag) {
+                        cout << "++++Out of chesse error; Fit failed. Using scale factor = 1" << endl;
+                        sFactor[1][ibin][ic]  =   1;
+                        eSFactor[1][ibin][ic] = 100;
+                    }
                 }
 
                 sf[0] = sFactor[0][ibin][ic];
@@ -328,20 +352,22 @@ void combineHistograms3(const char *dirName, const char **inNames, const char *o
             delete ehelp;
         }
     }
-    cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
-    cout << " Here are Yt scale factors for rho_{ref}" << endl;
-    printf(" Centrality   all LS       SS LS        AS LS        all US       SS US        AS US    \n");
-    for (int ic=0;ic<nCent;ic++) {
-        printf("%6i    %9.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f)\n",ic,
-            sFactor[0][0][ic],1000*eSFactor[0][0][ic],sFactor[0][1][ic],1000*eSFactor[0][1][ic],sFactor[0][2][ic],1000*eSFactor[0][2][ic],
-            sFactor[1][0][ic],1000*eSFactor[1][0][ic],sFactor[1][1][ic],1000*eSFactor[1][1][ic],sFactor[1][2][ic],1000*eSFactor[1][2][ic]);
+    if (scaleYt) {
+        cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
+        cout << " Here are Yt scale factors for rho_{ref}" << endl;
+        printf(" Centrality   all LS       SS LS        AS LS        all US       SS US        AS US    \n");
+        for (int ic=0;ic<nCent;ic++) {
+            printf("%6i    %9.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f)\n",ic,
+                sFactor[0][0][ic],1000*eSFactor[0][0][ic],sFactor[0][1][ic],1000*eSFactor[0][1][ic],sFactor[0][2][ic],1000*eSFactor[0][2][ic],
+                sFactor[1][0][ic],1000*eSFactor[1][0][ic],sFactor[1][1][ic],1000*eSFactor[1][1][ic],sFactor[1][2][ic],1000*eSFactor[1][2][ic]);
+        }
+        for (int it=0;it<2;it++) {
+            for (int ibin=0;ibin<3;ibin++) {
+                delete sFactor[it][ibin];
+                delete eSFactor[it][ibin];
+            }
+        }
     }
     out->Close();
 //    delete out;
-    for (int it=0;it<2;it++) {
-        for (int ibin=0;ibin<3;ibin++) {
-            delete sFactor[it][ibin];
-            delete eSFactor[it][ibin];
-        }
-    }
 }
