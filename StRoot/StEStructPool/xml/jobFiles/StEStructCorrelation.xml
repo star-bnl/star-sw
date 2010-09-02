@@ -14,6 +14,14 @@
             <analysisMode id='analysisMode' widget='entry' Comment='2pt analysis option flag' typedef='int analysisMode = '>0</analysisMode>
             <sortEvents id='sortEvents' widget='entry' Comment='if true we sort events on multiplicity/z vertex' typedef='bool sortEvents = '>false</sortEvents>
             <declareAnalysis id='declareAnalysis' widget='text'>
+    StEStructOneBuffer *mixingBuffer = NULL;
+    if (sortEvents) {
+        // First argument is number of mixed events per real event
+        // Second is maximum multiplicity difference allowed
+        // Third is maximum Vz distance allowed
+        mixingBuffer = new StEStructOneBuffer(4,20,5);
+    }
+
     // choose the mode for the binning
     int numberOfAnalyses = mbNBins-1;
     StEStructCutBin* cb=StEStructCutBin::Instance();
@@ -23,6 +31,9 @@
             </declareAnalysis>
             <allocateAnalysis id='allocateAnalysis' widget='text'>
         analysis[i] = new StEStruct2ptCorrelations(pcuts,analysisMode);
+        if (sortEvents) {
+            analysis[i]-&gt;setOneZBuffer(mixingBuffer);
+        }
         analysis[i]-&gt;setZBuffLimits(ecuts);
         analysis[i]-&gt;setAnalysisIndex(i);
         analysis[i]-&gt;setOutputFileName(getOutFileName(outputDir,jobName,"data",i));
