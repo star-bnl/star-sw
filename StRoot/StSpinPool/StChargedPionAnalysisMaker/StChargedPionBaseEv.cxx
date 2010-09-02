@@ -1,4 +1,4 @@
-// $Id: StChargedPionBaseEv.cxx,v 1.1 2008/07/17 17:06:29 kocolosk Exp $
+// $Id: StChargedPionBaseEv.cxx,v 1.2 2010/09/02 02:46:34 perev Exp $
 
 #include "StChargedPionBaseEv.h"
 
@@ -8,7 +8,7 @@ using std::make_pair;
 ClassImp(StChargedPionBaseEv)
 
 // static member initialization
-std::pair<unsigned int, unsigned int> a[] = {
+static std::pair<unsigned int, unsigned int> a[] = {
     make_pair( 96011, 0x00000001),
     make_pair( 96201, 0x00000002),
     make_pair( 96211, 0x00000004),
@@ -67,6 +67,9 @@ unsigned int StChargedPionBaseEv::triggerBit(unsigned int trigId) {
 
 /*****************************************************************************
  * $Log: StChargedPionBaseEv.cxx,v $
+ * Revision 1.2  2010/09/02 02:46:34  perev
+ * Move variable a[] to static to avoid clash, bug #1993
+ *
  * Revision 1.1  2008/07/17 17:06:29  kocolosk
  * big-bang integration StChargedPionMcEvent framework
  *
