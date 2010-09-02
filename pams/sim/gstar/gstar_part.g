@@ -1,6 +1,10 @@
-* $Id: gstar_part.g,v 1.28 2010/07/20 15:32:43 jwebb Exp $
+* $Id: gstar_part.g,v 1.29 2010/09/02 19:25:53 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.29  2010/09/02 19:25:53  jwebb
+* Increased the precision of the lambda and lambdabar masses in gstar_part.g,
+* requested by Xianglei Zhu.
+*
 * Revision 1.28  2010/07/20 15:32:43  jwebb
 * Correcting gstar_part.g for problems discussed here:
 * http://www.star.bnl.gov/HyperNews-star/protected/get/heavy/2819/1/2.html
@@ -289,7 +293,7 @@ MODULE gstar_part Is the STAR Particle Database
  
         PARTICLE _lam_to_p_piminus_ code=98 ,
              pdg     = +3122                ,
-             mass    = 1.116                ,  
+             mass    = 1.115683             ,  
              tlife   = 0.26320E-9           ,
              charge  = 0                    ,
              bratio  = {1.000,}             ,
@@ -306,7 +310,7 @@ MODULE gstar_part Is the STAR Particle Database
 
         PARTICLE _lmb_to_pb_piplus_ code=97 ,
              pdg     = -3122                ,
-             mass    = 1.116                ,  
+             mass    = 1.115683             ,  
              tlife   = 0.26320E-9           ,
              charge  = 0                    ,
              bratio  = {1.000,}             ,
@@ -326,7 +330,7 @@ MODULE gstar_part Is the STAR Particle Database
 
   PARTICLE Lambda     code    = 10018                ,
                       pdg     = +3122                ,
-                      mass    = 1.116                ,  
+                      mass    = 1.115683             ,  
                       tlife   = 0.26320E-9           ,
                       charge  = 0                    ,
                       bratio  = {1.000,}             ,
@@ -335,7 +339,7 @@ MODULE gstar_part Is the STAR Particle Database
  
   PARTICLE LambdaBar  code    = 10026                ,
                       pdg     = -3122                ,
-                      mass    = 1.116                ,  
+                      mass    = 1.115683             ,  
                       tlife   = 0.26320E-9           ,
                       charge  = 0                    ,
                       bratio  = {1.000,}             ,
