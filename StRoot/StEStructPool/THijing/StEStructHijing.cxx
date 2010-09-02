@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHijing.cxx,v 1.7 2006/04/13 23:04:22 prindle Exp $
+ * $Id: StEStructHijing.cxx,v 1.8 2010/09/02 21:31:48 prindle Exp $
  *
  * Author: Chunhui Han
  *
@@ -130,22 +130,32 @@ void StEStructHijing::fillTracks(StEStructEvent* estructEvent) {
         eTrack->SetBzGlobal(gdca[2]);
         delete [] gdca;
 
-        eTrack->SetPIDe(10);
-        eTrack->SetPIDpi(10);
-        eTrack->SetPIDk(10);
-        eTrack->SetPIDp(10);
-        eTrack->SetPIDd(10);
+        eTrack->SetPIDe_dEdx(10);
+        eTrack->SetPIDpi_dEdx(10);
+        eTrack->SetPIDk_dEdx(10);
+        eTrack->SetPIDp_dEdx(10);
+        eTrack->SetPIDd_dEdx(10);
+        eTrack->SetPIDe_ToF(10);
+        eTrack->SetPIDpi_ToF(10);
+        eTrack->SetPIDk_ToF(10);
+        eTrack->SetPIDp_ToF(10);
+        eTrack->SetPIDd_ToF(10);
         if ((pid == 7) || (pid == 8)) {
-            eTrack->SetPIDe(0);
+            eTrack->SetPIDe_dEdx(0);
+            eTrack->SetPIDe_ToF(0);
         } else if ((pid == -211) || (pid == 211)) {
-            eTrack->SetPIDpi(0);
+            eTrack->SetPIDpi_dEdx(0);
+            eTrack->SetPIDpi_ToF(0);
         } else if ((pid == -321) || (pid == 321)) {
-            eTrack->SetPIDk(0);
+            eTrack->SetPIDk_dEdx(0);
+            eTrack->SetPIDk_ToF(0);
         } else if ((pid == -2212) || (pid == 2212)) {
-            eTrack->SetPIDp(0);
+            eTrack->SetPIDp_dEdx(0);
+            eTrack->SetPIDp_ToF(0);
         } else if ((pid == -2213) || (pid == 2213)) {
             // These numbers aren't right, but I don't care about dueterons right now.
-            eTrack->SetPIDd(0);
+            eTrack->SetPIDd_dEdx(0);
+            eTrack->SetPIDd_ToF(0);
         }
 
         eTrack->SetPx(p[0]);
