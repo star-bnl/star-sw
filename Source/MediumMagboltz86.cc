@@ -522,7 +522,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
     if (useSplittingFunction) { 
       esec = w * tan(RndmUniform() * atan(0.5 * (e - loss) / w));
       // Rescaling (SST)
-      // esec = w * pow(esec / w, 0.9524);
+      esec = w * pow(esec / w, 0.9524);
     } else {
       esec = RndmUniform() * (e - loss);
     }
@@ -2628,7 +2628,10 @@ MediumMagboltz86::RunMagboltz(const double e,
                               double& alpha, double& eta,
                               double& vxerr, double& vyerr, double& vzerr,
                               double& dlerr, double& dterr, 
-                              double& alphaerr, double& etaerr) {
+                              double& alphaerr, double& etaerr,
+                              double& alphapt, double& etapt,
+                              double& alphapterr, double& etapterr,
+                              double& alphatof) {
 
   // Set input parameters in Magboltz common blocks
   inpt_.nGas = nComponents;
@@ -2720,7 +2723,13 @@ MediumMagboltz86::RunMagboltz(const double e,
  
   alpha = ctowns_.alpha; alphaerr = ctwner_.alper;
   eta   = ctowns_.att;   etaerr = ctwner_.atter;
-  
+ 
+  alphapt = tofout_.ralpha; alphapterr = tofout_.ralper;
+  etapt   = tofout_.rattof; etapterr   = tofout_.ratofer;
+  double fc1 = 1.e5 * tofout_.tofwr / (2. * tofout_.tofdl);
+  double fc2 = 1.e12 * (alphapt - etapt) / tofout_.tofdl;
+  alphatof = fc1 - sqrt(fc1 * fc1 - fc2);
+
   if (verbose) {
     std::cout << className << "::RunMagboltz:\n";
     std::cout << "    Results: \n";
@@ -2734,6 +2743,12 @@ MediumMagboltz86::RunMagboltz(const double e,
               << " +/- " << dlerr << "%\n";
     std::cout << "      Transverse diffusion:     " << dt << " sqrt(cm) "
               << " +/- " << dterr << "%\n";
+    std::cout << "      Townsend coefficient (SST): " << alpha << " cm-1"
+              << " +/- " << alphaerr << "%\n";
+    std::cout << "      Attachment coefficient (SST): " << eta << " cm-1"
+              << " +/- " << etaerr << "%\n";
+    std::cout << "      Effective Townsend coefficient (TOF): " 
+              << alphatof << " cm-1\n";
   }
 
 }

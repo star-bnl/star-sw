@@ -94,6 +94,13 @@ extern "C" {
   extern struct {
     double alper, atter;
   } ctwner_;
+  extern struct {
+    double ralpha, ralper;
+    double tofene, tofener, tofwv, tofwver;
+    double tofdl, tofdler, tofdt, tofdter;
+    double tofwr, tofwrer;
+    double rattof, ratofer;
+  } tofout_;
 
   void gasmix_(long long* ngs, double* q, 
         double* qin, long long* nin, double* e, double* ei, char* name, 
@@ -255,7 +262,10 @@ class MediumMagboltz86 : public Medium {
                      double& alpha, double& eta,
                      double& vxerr, double& vyerr, double& vzerr,
                      double& dlerr, double& dterr,
-                     double& alphaerr, double& etaerr);
+                     double& alphaerr, double& etaerr,
+                     double& alphapt, double& etapt,
+                     double& alphapterr, double& etapterr,
+                     double& alphatof);
  
     void SetIonMobility(const double e, const double mu);
     bool IonVelocity(const double ex, const double ey, const double ez,
@@ -264,7 +274,7 @@ class MediumMagboltz86 : public Medium {
 
   private:
 
-    static const int nEnergySteps = 10000;
+    static const int nEnergySteps = 4000;
     static const int nEnergyStepsGamma = 1000;
     static const int nMaxGases = 6;
     static const int nMaxInelasticTerms = 220;
