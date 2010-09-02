@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.26 2010/06/23 22:33:50 prindle Exp $
+ * $Id: StEStructSupport.cxx,v 1.27 2010/09/02 21:31:14 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -107,6 +107,7 @@ StEStructSupport::StEStructSupport(TFile* tf, int bgmode, float* npairs) : mtf(t
   mPairNormalization = false;
   mPairWeighting = true;
   mIdenticalPair = true;
+  mYtYtNormalization = false;
 
   // Scan file for number of z-buffer bins
   getNZBins();
@@ -434,6 +435,69 @@ TH2D** StEStructSupport::getLocalClones(const char* name, int zBin){
   return hlocal;
 }
 //-----------------------------------------------------
+void StEStructSupport::rescale(TH2D** hists) {
+    // Divide hists by bin widths, divide by Nevents.
+    // Bin by bin errors should be scaled properly, but won't include errors on the scale factors.
+
+    if(!mtf) return;
+
+    //>>>>>Need to rethink how to handle old cases where _zBuf_n is not in histogram name!!!!!
+    TH1 *hNum;
+    double nSib = 0;
+    double nMix = 0;
+    for (int zBin=0;zBin<mNumZBins;zBin++) {
+        TString hSibName("NEventsSib_zBuf_");  hSibName += zBin;  mtf->GetObject(hSibName.Data(),hNum);
+        nSib += hNum->Integral();
+        TString hMixName("NEventsMix_zBuf_");  hMixName += zBin;  mtf->GetObject(hMixName.Data(),hNum);
+        nMix += hNum->Integral();
+    }
+
+    for (int i=0;i<4;i++) {
+//        cout << "\ni=" << i << " Integral: " << hists[i]->Integral();
+        if (hists[i]->Integral() > 0) {
+            // dividing by ex*ey converts all input hists from counts to densities, so all operations and final result should also be density.
+            double dx = (hists[i]->GetXaxis())->GetBinWidth(1);
+            double dy = (hists[i]->GetYaxis())->GetBinWidth(1);
+            double binFactor = dx*dy; 
+            hists[i]->Scale(1.0/(nSib*binFactor));
+            if (i==0 && !msilent) {
+                cout << "Scaling with Nevents " << nSib << " and binFactor " << binFactor << endl;
+            }
+
+            if (mPairNormalization) {
+                // This is original normalization. Average value of \rho_{sib}/\rho_{ref} should be one.
+                TH2D *tmp = (TH2D *) hists[i]->Clone();
+                tmp->Divide(hists[i+4]);
+                double scale = tmp->Integral() / (tmp->GetNbinsX() * tmp->GetNbinsY());
+                hists[i+4]->Scale(scale);
+                delete tmp;
+            } else if (mYtYtNormalization) {
+                // Scale so hists[i+4]->Integral() = hists[i]->Integral()
+                // Seems that bins with small number of counts (the case for large Yt in YtYt plots)
+                // can skew the scaling when we scale as above.
+                hists[i+4]->Scale(hists[i]->Integral()/hists[i+4]->Integral());
+            } else {
+                // We know how many sibling and mixed events there were.
+                // In this normalization we should be able to integrate (weighted with an
+                //  appropriate kernel) to get fluctuations at larger scales.
+                if (nMix > 0) {
+                    // For sibling the number of pairs are;
+                    //     n(n-1)/2  for ++ and --
+                    //     n^+ * n^- for +- (and -+)
+                    // For mixed the number of pairs are
+                    //     n^(1) * n^(2)                       for ++ and --
+                    //     n^(+1) * n^(-1) + n^(-1) * n^(+2)   for +-
+                    // Thus we have about twice as many pairs per mixed event as sibling event.
+                    hists[i+4]->Scale(0.5/(nMix*binFactor));
+                } else {
+                    hists[i+4]->Scale(0);
+                }
+            }
+        }
+    }
+}
+
+//-----------------------------------------------------
 void StEStructSupport::rescale(TH2D** hists, int zBin) {
     // Divide hists by bin widths, divide by Nevents.
     // Bin by bin errors should be scaled properly, but won't include errors on the scale factors.
@@ -460,12 +524,17 @@ void StEStructSupport::rescale(TH2D** hists, int zBin) {
             }
 
             if (mPairNormalization) {
-                // This is original normalization. Average value of \Delta\rho should be one.
+                // This is original normalization. Average value of \rho_{sib}/\rho_{ref} should be one.
                 TH2D *tmp = (TH2D *) hists[i]->Clone();
                 tmp->Divide(hists[i+4]);
                 double scale = tmp->Integral() / (tmp->GetNbinsX() * tmp->GetNbinsY());
                 hists[i+4]->Scale(scale);
                 delete tmp;
+            } else if (mYtYtNormalization) {
+                // Scale so hists[i+4]->Integral() = hists[i]->Integral()
+                // Seems that bins with small number of counts (the case for large Yt in YtYt plots)
+                // can skew the scaling when we scale as above.
+                hists[i+4]->Scale(hists[i]->Integral()/hists[i+4]->Integral());
             } else {
                 // We know how many sibling and mixed events there were.
                 // In this normalization we should be able to integrate (weighted with an
@@ -720,6 +789,8 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf) {
     for(int i=0;i<4;i++) {
         retVal[i]->SetName(swapIn(retVal[i]->GetName(),oldName[i],newName[i]));
         retVal[i]->SetTitle(swapIn(retVal[i]->GetTitle(),oldTitle[i],newTitle[i]));
+    }
+    for(int i=0;i<_pair_totalmax;i++) {
         retVal[i]->Reset();
     }
 
@@ -791,38 +862,96 @@ TH2D** StEStructSupport::buildCommon(const char* name, int opt, float* sf) {
             }
         }
     } else {
-        // We probably want to weight by number of pairs here as well.
-        // Make sure other section works, then fix this.
-        for (int iz=1;iz<mNumZBins;iz++) {
-            TH2D** tmpVal= buildCommon(name, opt, sf, iz);
-            for (int iType=0;iType<_pair_totalmax;iType++) {
+        // YtYt correlations
+        // I don't see any evidence for YtYt depending on the z-vertex position of the event.
+        // (I think there is clear evidence that (\eta_\Delta,\phi_\Delta) depends on z-vertex)
+        // It seems that in the  ratio \rho{sib} / \rho_{ref} we have problems with bins where
+        // \rho_{ref} is small.
+        // For now just add zBins together, then do calculation.
+
+        // buildCommon would scale each zBin. May want to refactor its functionality.
+        // For now copy the appropriate part here.
+        for (int iz=0;iz<mNumZBins;iz++) {
+            TH2D** tmpVal = getLocalClones(name, iz);
+            if (!tmpVal) {
+                continue;
+            }
+            for (int iType=0;iType<8;iType++) {
                 retVal[iType]->Add(tmpVal[iType]);
                 delete tmpVal[iType];
             }
             delete [] tmpVal;
         }
-        // Scale according to opt.
+
+        if (mDoSymmetrize) {
+            symmetrizeUS(name,retVal);
+        }
+
+        if (mnpairs) {  // manual scaling
+            for(int i=0;i<8;i++) {
+                retVal[i]->Scale(1.0/mnpairs[i]);
+            }
+        } else {
+            rescale(retVal);
+        }
+
+        if (strstr(name,"DEta") || strstr(name,"SEta")) {
+            fixDEtaGeometric((TH2**)retVal,8); // does nothing unless mapplyDEtaFix is set
+        }
+
+        float scf1=0.;
+        float scf2=0.;
+        if (sf) {
+            scf1=sf[0];
+            scf2=sf[1];
+        }
+        // if requested, scale bg to require correlations>=0 where statistics are large
+        // This is important for Yt-Yt correlations. When we return to study those we
+        // better double check this stuff is reasonable.
+        if (1==mbgMode) {
+            scaleBackGround(retVal[0],retVal[4],scf1);
+            scaleBackGround(retVal[1],retVal[5],scf2);
+            scaleBackGround(retVal[2],retVal[6],scf2);
+            scaleBackGround(retVal[3],retVal[7],scf1);
+        }
+
+
+        // Calculate quantity we were asked for.
         for (int iType=0;iType<4;iType++) {
-            retVal[iType]->Scale(wIdentical[iType]/mNumZBins);
-            retVal[iType+4]->Scale(wIdentical[iType]/mNumZBins);
-            retVal[iType]->Add(retVal[iType+4],-1);
-            for (int ix=1;ix<=retVal[iType]->GetNbinsX();ix++) {
-                for (int iy=1;iy<=retVal[iType]->GetNbinsY();iy++) {
-                    double rhoRef = retVal[iType+4]->GetBinContent(ix,iy);
-                    if (1 < rhoRef) {
-                        double val = retVal[iType]->GetBinContent(ix,iy);
-//                        double err = retVal[iType]->GetBinError(ix,iy);
-                        if (3 == opt) {
-                            retVal[iType]->SetBinContent(ix,iy,val/rhoRef);
-//                            retVal[iType]->SetBinError(ix,iy,err/rhoRef);
-                        } else if (5 == opt) {
-                            retVal[iType]->SetBinContent(ix,iy,val/sqrt(rhoRef));
-//                            retVal[iType]->SetBinError(ix,iy,err/sqrt(rhoRef));
+            retVal[iType]->Scale(wIdentical[iType]);
+            retVal[iType+4]->Scale(wIdentical[iType]);
+            if (3 == opt) {        // \Delta\rho/\rho_ref,  Calculate \rho_sib/\rho_ref. Subtract 1 later.
+                retVal[iType]->Divide(retVal[iType+4]);
+                for (int ix=1;ix<=retVal[iType]->GetNbinsX();ix++) {
+                    for (int iy=1;iy<=retVal[iType]->GetNbinsY();iy++) {
+                        double rhoSib = retVal[iType]->GetBinContent(ix,iy);
+                        retVal[iType]->SetBinContent(ix,iy,rhoSib-1);
+                    }
+                }
+            } else if (4 == opt) { // \rho_sib - \rho_ref
+                retVal[iType]->Add(retVal[iType+4],-1);
+            } else if (5 == opt) { // \Delta\rho/sqrt(\rho_ref. Need to calculate errors by hand.
+                for (int ix=1;ix<=retVal[iType]->GetNbinsX();ix++) {
+                    for (int iy=1;iy<=retVal[iType]->GetNbinsY();iy++) {
+                        double rhoSib = retVal[iType]->GetBinContent(ix,iy);
+                        double rhoRef = retVal[iType+4]->GetBinContent(ix,iy);
+                        double eRhoSib = retVal[iType]->GetBinError(ix,iy);
+                        double eRhoRef = retVal[iType+4]->GetBinError(ix,iy);
+                        if (rhoRef > 0) {
+                            double eVal2 = eRhoSib*eRhoSib/rhoRef +
+                                           eRhoRef*eRhoRef*pow(rhoSib/rhoRef+1,2)/rhoRef;
+                            double val = (rhoSib-rhoRef)/sqrt(rhoRef);
+                            retVal[iType]->SetBinContent(ix,iy,val);
+                            retVal[iType]->SetBinError(ix,iy,val,sqrt(eVal2));
+                        } else {
+                            retVal[iType]->SetBinContent(ix,iy,0);
+                            retVal[iType]->SetBinError(ix,iy,0);
                         }
                     }
                 }
             }
         }
+
     }
     return retVal;
 }
@@ -1639,8 +1768,18 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.27  2010/09/02 21:31:14  prindle
+ * Support: Can't find evidence that YtYt correlation depends on z vertex.
+ *            Add numerators and denominators then take ratio. Need a new
+ *            rescale method independent of z bin. Looks like we can normalize
+ *            mixed so \int{sib/mix} = number of bins (what we have recently been
+ *            doing) or \int{sib} = \int{mix} and the former is more snesitive
+ *            to bins with very few counts. That isn't important for angular
+ *            histograms but is for (yt,yt). I am calling the \int{sib} = \int(mix}
+ *            Yt normalization (even though it is what we did long ago).
+ *
  * Revision 1.26  2010/06/23 22:33:50  prindle
- * In HAdd we distinguish between the parent distributions of the
+ *   In HAdd we distinguish between the parent distributions of the
  *    two particles.
  *   In Support I fixed a number of problems in the Pt correlation section.
  *

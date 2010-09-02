@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.17 2010/06/23 22:33:56 prindle Exp $
+ * $Id: StEStructSupport.h,v 1.18 2010/09/02 21:31:14 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -37,7 +37,8 @@ public:
   bool  mPairNormalization;
   bool  mPairWeighting;
   bool  mIdenticalPair;
-
+  bool  mYtYtNormalization;
+  
   bool  goodName(const char* name); // test if name is one of ours
   bool  goodName_zBuf(const char* name, int zBin); // test if name is one of ours with zBuffer.
   char* getFrontName(int itype); 
@@ -45,6 +46,7 @@ public:
   const char* getChargeSignName(int ics);
   char* prepend(const char* name, const char* s1);
   char* swapIn(const char* name, const char* s1, const char* s2);
+  void rescale(TH2D** hists);
   void rescale(TH2D** hists, int zBin);
   void rescalePt(TH2D** hists, int zBin);
   void setSymmetrizeUS(bool symm);
@@ -138,8 +140,18 @@ inline bool StEStructSupport::silent() { return msilent; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.18  2010/09/02 21:31:14  prindle
+ * Support: Can't find evidence that YtYt correlation depends on z vertex.
+ *            Add numerators and denominators then take ratio. Need a new
+ *            rescale method independent of z bin. Looks like we can normalize
+ *            mixed so \int{sib/mix} = number of bins (what we have recently been
+ *            doing) or \int{sib} = \int{mix} and the former is more snesitive
+ *            to bins with very few counts. That isn't important for angular
+ *            histograms but is for (yt,yt). I am calling the \int{sib} = \int(mix}
+ *            Yt normalization (even though it is what we did long ago).
+ *
  * Revision 1.17  2010/06/23 22:33:56  prindle
- * In HAdd we distinguish between the parent distributions of the
+ *   In HAdd we distinguish between the parent distributions of the
  *    two particles.
  *   In Support I fixed a number of problems in the Pt correlation section.
  *
