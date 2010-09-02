@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.19 2010/03/02 21:45:28 prindle Exp $
+ * $Id: StEStructPairCuts.h,v 1.20 2010/09/02 21:24:08 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -75,6 +75,7 @@ protected:
   float mCrossing2[2];
   float mLUTParams[2];
   float mdEdxMomentumCut[4][2];
+  float mToFMomentumCut[4][2];
   float mpionOtherMass[2];
   float mpionpionMass[2];
   float mpionKaonMass[2];
@@ -144,7 +145,6 @@ public:
 
   float BField() const { return mBField; };
   void SetBField(const float bfield){ mBField=bfield; };
-  int  getdEdxPID(const StEStructTrack *t);
 
   // StEStructPairCuts stuff
 
@@ -665,8 +665,8 @@ inline int StEStructPairCuts::cutMass() {
     }
 
     int mode[4][4] = {{9, 0, 4, 7}, {0, 1, 2, 3}, {4, 2, 5, 6}, {7, 3, 6, 8}};
-    int it1 = getdEdxPID( Track1() );
-    int it2 = getdEdxPID( Track2() );
+    int it1 = Track1()->PID();
+    int it2 = Track2()->PID();
     if (it1 < 0 || 3 < it1) {
         return 0;
     }
@@ -960,8 +960,18 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.20  2010/09/02 21:24:08  prindle
+ * 2ptCorrelations: Fill histograms for event mixing information
+ *                    Option for common mixing buffer
+ *                    Switch to selectively fill QInv histograms (which take a long time)
+ *   CutBin: Moved PID code to Track class from Pair class. Needed to update this code.
+ *   PairCuts: Moved PID code from here to Track class.
+ *             Removed unnecessary creation of StThreeVector which seem to take a long time
+ *             Add ToF momentum cuts, modify dEdx momentum cuts. (Now allow dEdx to be
+ *             be identified up to 15GeV/c, ToF up to 10GeV/c.)
+ *
  * Revision 1.19  2010/03/02 21:45:28  prindle
- * Had a problem with pair cuts when one track exited via endplate
+ *   Had a problem with pair cuts when one track exited via endplate
  *   Calculate maxDEta properly
  *   Warning if you try turning histograms for pair cuts on
  *

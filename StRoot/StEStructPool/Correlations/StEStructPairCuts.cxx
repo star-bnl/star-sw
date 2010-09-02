@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.cxx,v 1.13 2010/03/02 21:45:28 prindle Exp $
+ * $Id: StEStructPairCuts.cxx,v 1.14 2010/09/02 21:24:08 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -56,15 +56,28 @@ void StEStructPairCuts::initCuts(){
     // Would be nice to have some way to change these without recompiling.
     // Normally upper pt cuts are 999, 1.0, 1.0, 1.5 for all, pi, K, p
     // Want to run Pythia without upper cut (I think we actually use 20 in cuts file.)
+    // I don't know right off what reasonable upper limits are on pid.
+    // dEdx can be done in the relativistic rise region, but probably Kaons can't be distinguished.
+    // With a requirement track is 2\sigma from any other particle we are probably ok without upper limits on data.
+    // For comparison with Pythia, Hijing and Therminator we need to think about it.
     mdEdxMomentumCut[0][0] =   0.0;
     mdEdxMomentumCut[0][1] = 999.0;
     mdEdxMomentumCut[1][0] =   0.1;  // pi
-    mdEdxMomentumCut[1][1] =   1.0;
+    mdEdxMomentumCut[1][1] =  15.0;
     mdEdxMomentumCut[2][0] =   0.1;  // K
-    mdEdxMomentumCut[2][1] =   1.0;
+    mdEdxMomentumCut[2][1] =  15.0;
     mdEdxMomentumCut[3][0] =   0.2;  // p
-    mdEdxMomentumCut[3][1] =   1.5;
-    
+    mdEdxMomentumCut[3][1] =  15.0;
+
+    mToFMomentumCut[0][0] =   0.0;
+    mToFMomentumCut[0][1] = 999.0;
+    mToFMomentumCut[1][0] =   0.1;  // pi
+    mToFMomentumCut[1][1] =  10.0;
+    mToFMomentumCut[2][0] =   0.1;  // K
+    mToFMomentumCut[2][1] =  10.0;
+    mToFMomentumCut[3][0] =   0.2;  // p
+    mToFMomentumCut[3][1] =  10.0;
+
     mdeltaPhiCut=mdeltaEtaCut=mGooddeltaZdeltaXYCut=mdeltaMtCut=mqInvCut=mEntSepCut=mExitSepCut=mQualityCut=mMidTpcSepLSCut=mMidTpcSepUSCut=false;
     mHBTCut=mCoulombCut=mMergingCut=mCrossingCut=mMergingCut2=mCrossingCut2=mLUTCut = false;
     mpionMomentumCut=mKaonMomentumCut=mprotonMomentumCut = false;
@@ -257,7 +270,7 @@ bool StEStructPairCuts::loadBaseCuts(const char* name, const char** vals, int nv
     cout << " Calculating Look Up Table with dXY cut = "<<mLUTParams[0]<<" and dZ cut = "<<mLUTParams[1]<< " (takes a little while)" <<endl;
     mLUT->mDelXYCut = mLUTParams[0];
     mLUT->mDelZCut  = mLUTParams[1];
-    mLUT->reAllocHists();
+    mLUT->initHists();
     mLUT->fillLUTs();
     cout << " LUT has been calculated " <<endl;
     return true;
@@ -265,6 +278,7 @@ bool StEStructPairCuts::loadBaseCuts(const char* name, const char** vals, int nv
 
   if(!strcmp(name,mpionMomentumName.name)){
     mdEdxMomentumCut[1][0]=atof(vals[0]); mdEdxMomentumCut[1][1]=atof(vals[1]);
+    mToFMomentumCut[1][0]=atof(vals[0]); mToFMomentumCut[1][1]=atof(vals[1]);
     mpionMomentumCut=true;
     cout << " Loading pion momentum cut with range of values = "<<mdEdxMomentumCut[1][0]<<","<<mdEdxMomentumCut[1][1]<<endl;
     return true;
@@ -272,6 +286,7 @@ bool StEStructPairCuts::loadBaseCuts(const char* name, const char** vals, int nv
 
   if(!strcmp(name,mKaonMomentumName.name)){
     mdEdxMomentumCut[2][0]=atof(vals[0]); mdEdxMomentumCut[2][1]=atof(vals[1]);
+    mToFMomentumCut[2][0]=atof(vals[0]); mToFMomentumCut[2][1]=atof(vals[1]);
     mKaonMomentumCut=true;
     cout << " Loading Kaon momentum cut with range of values = "<<mdEdxMomentumCut[2][0]<<","<<mdEdxMomentumCut[2][1]<<endl;
     return true;
@@ -279,6 +294,7 @@ bool StEStructPairCuts::loadBaseCuts(const char* name, const char** vals, int nv
 
   if(!strcmp(name,mprotonMomentumName.name)){
     mdEdxMomentumCut[3][0]=atof(vals[0]); mdEdxMomentumCut[3][1]=atof(vals[1]);
+    mToFMomentumCut[3][0]=atof(vals[0]); mToFMomentumCut[3][1]=atof(vals[1]);
     mprotonMomentumCut=true;
     cout << " Loading proton momentum cut with range of values = "<<mdEdxMomentumCut[3][0]<<","<<mdEdxMomentumCut[3][1]<<endl;    return true;
   }
@@ -744,8 +760,8 @@ StEStructPairCuts::NominalTpcZExitSeparation() const {
             return -3;
         }
     }
-    StThreeVectorF diff = mTrack1->NominalTpcExitPoint() - mTrack2->NominalTpcExitPoint();
-    return (double)(fabs(diff.z()+mZoffset));
+    double diff = mTrack1->NominalTpcExitPoint().z() - mTrack2->NominalTpcExitPoint().z();
+    return (double)(fabs(diff+mZoffset));
 
 }
 double 
@@ -772,8 +788,8 @@ StEStructPairCuts::NominalTpcXYEntranceSeparation() const {
 }
 double 
 StEStructPairCuts::NominalTpcZEntranceSeparation() const {
-  StThreeVectorF diff = mTrack1->NominalTpcEntrancePoint() - mTrack2->NominalTpcEntrancePoint();
-  return (double)(fabs(diff.z() + mZoffset));
+  double diff = mTrack1->NominalTpcEntrancePoint().z() - mTrack2->NominalTpcEntrancePoint().z();
+  return (double)(fabs(diff + mZoffset));
 }
 
 //--------------------------------------------------------
@@ -838,9 +854,9 @@ StEStructPairCuts::MidTpcXYSeparation() const {
 
 double 
 StEStructPairCuts::MidTpcZSeparation() const {
-  StThreeVectorF diff = mTrack1->MidTpcPoint() - mTrack2->MidTpcPoint();
+  double diff = mTrack1->MidTpcPoint().z() - mTrack2->MidTpcPoint().z();
   //cout << "Mid Z Sep" << fabs(diff.z()) << endl;
-  return (double)(fabs(diff.z()+mZoffset));
+  return (double)(fabs(diff+mZoffset));
 }
 //--------------------------------------------------------
 double StEStructPairCuts::OuterMidTpcSeparation() const {
@@ -865,71 +881,26 @@ double StEStructPairCuts::OuterMidTpcZSeparation() const {
             return -3;
         }
     }
-    StThreeVectorF diff = mTrack1->OuterMidTpcPoint() - mTrack2->OuterMidTpcPoint();
-    return (double)(fabs(diff.z()+mZoffset));
+    double diff = mTrack1->OuterMidTpcPoint().z() - mTrack2->OuterMidTpcPoint().z();
+    return (double)(fabs(diff+mZoffset));
 }
 
-// >>>>> Choose second version of getdEdxPID for an attempt
-//       to use GEANT dE/dx information.
-// pi  -> 1
-// K   -> 2
-// p   -> 3
-// Everything else
-//     -> 0
-//
-// June 8, 2006 djp If track is within 1sigma of electron we
-//                  exclude it as pi, K, p. (Tried 2sigma and
-//                  visually that looks really bad.)
-int StEStructPairCuts::getdEdxPID(const StEStructTrack *t) {
-  float e  = fabs(t->PIDe());
-  if (e < 1) {
-      return 0;
-  }
-  float ptot = t->Ptot();
-  float pi = fabs(t->PIDpi());
-  float k  = fabs(t->PIDk());
-  float p  = fabs(t->PIDp());
-
-  if ((mdEdxMomentumCut[1][0]<ptot) && (ptot<mdEdxMomentumCut[1][1]) && (pi<2.0) && (k>2.0) && (p>2.0)) {
-      return 1;
-  }
-  if ((mdEdxMomentumCut[2][0]<ptot) && (ptot<mdEdxMomentumCut[2][1]) && (pi>2.0) && (k<2.0) && (p>2.0)) {
-      return 2;
-  }
-  if ((mdEdxMomentumCut[3][0]<ptot) && (ptot<mdEdxMomentumCut[3][1]) && (pi>2.0) && (k>2.0) && (p<2.0)) {
-      return 3;
-  }
-  return 0;
-}
-// Here is a hack for dEdx in Pythia that has been run through GEANT.
-// The data I am looking at has dEdx off by about a factor of two
-// so PIDx does not work reasonably.
-//int StEStructPairCuts::getdEdxPID(const StEStructTrack *t) {
-//    double a0 = 2.16e-5, b0 = 4.8e-5;
-//    double a1 = 2.52e-5, b1 = 2.8e-5;
-//
-//    double dedx = t->Dedx();
-//    double ptot = t->Ptot();
-//    if ((dedx < 1.0e-6) && (ptot < 0.6)) {
-//        return 1;
-//    }
-//    if (dedx < 2.0e-6) {
-//        return 0;
-//    }
-//    if (dedx < a0-b0*ptot) {
-//        return 2;
-//    }
-//    if (dedx < a1-b1*ptot) {
-//        return 3;
-//    }
-//    return 0;
-//}
 
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.cxx,v $
+ * Revision 1.14  2010/09/02 21:24:08  prindle
+ * 2ptCorrelations: Fill histograms for event mixing information
+ *                    Option for common mixing buffer
+ *                    Switch to selectively fill QInv histograms (which take a long time)
+ *   CutBin: Moved PID code to Track class from Pair class. Needed to update this code.
+ *   PairCuts: Moved PID code from here to Track class.
+ *             Removed unnecessary creation of StThreeVector which seem to take a long time
+ *             Add ToF momentum cuts, modify dEdx momentum cuts. (Now allow dEdx to be
+ *             be identified up to 15GeV/c, ToF up to 10GeV/c.)
+ *
  * Revision 1.13  2010/03/02 21:45:28  prindle
- * Had a problem with pair cuts when one track exited via endplate
+ *   Had a problem with pair cuts when one track exited via endplate
  *   Calculate maxDEta properly
  *   Warning if you try turning histograms for pair cuts on
  *

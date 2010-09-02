@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairLUT.cxx,v 1.3 2009/02/03 14:30:22 fisyak Exp $
+ * $Id: StEStructPairLUT.cxx,v 1.4 2010/09/02 21:24:08 prindle Exp $
  *
  * Author: Duncan Prindle
  *
@@ -52,7 +52,6 @@ StEStructPairLUT::StEStructPairLUT() {
         }
     }
 
-    reAllocHists();
 }
 StEStructPairLUT::~StEStructPairLUT() {
     for (int i=0;i<4;i++) {
@@ -113,7 +112,7 @@ double StEStructPairLUT::delXY (double Ref) {
         return d;
     }
 }
-void StEStructPairLUT::reAllocHists() {
+void StEStructPairLUT::initHists() {
     for (int i=0;i<4;i++) {
         if (mDists[i]) {
             delete mDists[i];
