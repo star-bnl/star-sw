@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.17 2010/03/02 21:43:38 prindle Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.18 2010/09/02 21:20:09 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -17,6 +17,8 @@
 #include "StEStructPool/EventMaker/StEStructEvent.h"
 #include "StEStructPool/EventMaker/StEStructTrack.h"
 #include "StEStructPool/EventMaker/StEStructCentrality.h"
+#include "StBTofPidTraits.h"
+#include "StMuDSTMaker/COMMON/StMuBTofPidTraits.h"
 
 
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
@@ -28,6 +30,8 @@
 
 StEStructMuDstReader::StEStructMuDstReader() {
     mhasdEdxCuts  = 0;
+    mhasToFCuts   = 0;
+    mhasVertexRadiusCuts   = 0;
     mMaker        = 0;
     mECuts        = 0;
     mTCuts        = 0;
@@ -40,6 +44,8 @@ StEStructMuDstReader::StEStructMuDstReader(StMuDstMaker* maker,
                                            StEStructEventCuts* ecuts,
                                            StEStructTrackCuts* tcuts) {
     mhasdEdxCuts  = 0;
+    mhasToFCuts   = 0;
+    mhasVertexRadiusCuts   = 0;
     mMaker        = maker;
     setEventCuts(ecuts);
     setTrackCuts(tcuts);
@@ -64,13 +70,27 @@ void StEStructMuDstReader::setEventCuts(StEStructEventCuts* ecuts) {
     // I want to create histograms for trigger ids here.
     // However, I need an StMuEvent which I think I don't have until fillEvent.
     // Create histograms there.
+    // Histograms for ToF cuts.
+    //>>>>>>>>>> Need to figure out where to fill these, and how to write them out.
+    if ( !mECuts->goodToFFraction(100,0) ) {      
+        mhasToFCuts = 1;
+        ToFBefore = new TH2F("dEdxToFNoCut","dEdxToFNoCut",50,1,600,50,1,600);
+        ToFAfter  = new TH2F("dEdxToFCut","dEdxToFCut",50,1,600,50,1,600);
+        mECuts->addCutHists(ToFBefore, ToFAfter, "ToFPlots");
+    }
+    if ( !mECuts->goodPrimaryVertexRadius(-100) ) {      
+        mhasVertexRadiusCuts = 1;
+        VRadiusBefore = new TH2F("VertexRadiusNoCut","VertexRadiusNoCut",50,-10,10,50,-10,10);
+        VRadiusAfter  = new TH2F("VertexRadiusCut","VertexRadiusCut",50,-10,10,50,-10,10);
+        mECuts->addCutHists(VRadiusBefore, VRadiusAfter, "VertexRadiusPlots");
+    }
 };
 void StEStructMuDstReader::setTrackCuts(StEStructTrackCuts* tcuts) {
     mTCuts=tcuts;
     if ( !mTCuts->goodElectron(100.0) ) {      
         mhasdEdxCuts = 1;
-        dEdxBefore = new TH2F("dEdxNoCut","dEdxNoCut",150,0,1.5,150,0,0.000015);
-        dEdxAfter  = new TH2F("dEdxCut","dEdxCut",150,0,1.5,150,0,0.000015);
+        dEdxBefore = new TH2F("dEdxNoCut","dEdxNoCut",150,-1.5,1.5,150,0,0.000015);
+        dEdxAfter  = new TH2F("dEdxCut","dEdxCut",150,-1.5,1.5,150,0,0.000015);
         mTCuts->addCutHists(dEdxBefore, dEdxAfter, "dEdXPlots");
     }
 };
@@ -154,8 +174,15 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
                 !mECuts->goodPrimaryVertexZ(z) ) {
         useEvent = false;
     }
+    if (!mECuts->goodPrimaryVertexRadius(sqrt(x*x+y*y))) {
+        useEvent = false;
+    }
 
-    int nTracks = countGoodTracks();
+    int ndEdx, nToF;
+    int nTracks = countGoodTracks(&ndEdx, &nToF);
+    if (!mECuts->goodToFFraction(ndEdx, nToF)) {
+        useEvent = false;
+    }
 
 //    Feb2006 rjp ........
 //      currently for MuDst's all we have for centrality is NTracks 
@@ -200,11 +227,24 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
     }
     mECuts->fillHistogram(mECuts->primaryVertexZName(),z,useEvent);
     mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,useEvent);
+    mECuts->fillHistogram(mECuts->goodtoffractionName(),(float)ndEdx,(float)nToF,useEvent);
 
+    if (mhasToFCuts) {
+        ToFBefore->Fill(ndEdx,nToF);
+        if (useEvent) {
+            ToFAfter->Fill(ndEdx,nToF);
+        }
+    }
+    if (mhasVertexRadiusCuts) {
+        VRadiusBefore->Fill(x,y);
+        if (useEvent) {
+            VRadiusAfter->Fill(x,y);
+        }
+    }
     if (!useEvent) {
         delete retVal;
         retVal=NULL;
-    } else {
+    } else if (mECuts->hasZVertSepCut()) {
         // Only check for pileup if event passes other cuts.
         // (I am interested in fraction of "good" events with pileup.)
         double zDist;  // Distance from z to nearest pileup vertex.
@@ -261,8 +301,9 @@ bool StEStructMuDstReader::fillTracks(StEStructEvent* estructEvent) {
 //            continue;
 //        }
 
+        float ptot = track->charge() * track->p().magnitude();
         if (mhasdEdxCuts) {
-            dEdxBefore->Fill((track->p()).mag(),track->dEdx());
+            dEdxBefore->Fill(ptot,track->dEdx());
         }
 
         useTrack = isTrackGoodToUse( track ); //this includes track kine cuts
@@ -270,7 +311,7 @@ bool StEStructMuDstReader::fillTracks(StEStructEvent* estructEvent) {
 
         if (useTrack) {
             if (mhasdEdxCuts) {
-                dEdxAfter->Fill((track->p()).mag(),track->dEdx());
+                dEdxAfter->Fill(ptot,track->dEdx());
             }
             fillEStructTrack(eTrack,track);
             estructEvent->AddTrack(eTrack);
@@ -366,8 +407,10 @@ bool StEStructMuDstReader::isTrackGoodToUse(StMuTrack* track){
 //-------------------------------------------------------------
 // This method counts all good track.
 // No histogramming or copying data around.
-int StEStructMuDstReader::countGoodTracks() {
-    mNumGoodTracks=0;
+int StEStructMuDstReader::countGoodTracks(int *ndEdx, int *nToF) {
+    mNumGoodTracks = 0;
+    int ndedx = 0;
+    int ntof  = 0;
     StMuDst* muDst=mMaker->muDst();
     int numTracks;
     if (mUseGlobalTracks) {
@@ -382,13 +425,37 @@ int StEStructMuDstReader::countGoodTracks() {
         if (mUseGlobalTracks) {
             if (isTrackGood(muDst->globalTracks(i))) {
                 mNumGoodTracks++;
+                if ((fabs(muDst->globalTracks(i)->nSigmaPion()) < 2) ||
+                    (fabs(muDst->globalTracks(i)->nSigmaKaon()) < 2) ||
+                    (fabs(muDst->globalTracks(i)->nSigmaProton()) < 2)) {
+                    ndedx++;
+                }
+                StMuBTofPidTraits dProb = muDst->globalTracks(i)->btofPidTraits();
+                if ((fabs(dProb.sigmaPion()) < 2) ||
+                    (fabs(dProb.sigmaKaon()) < 2) ||
+                    (fabs(dProb.sigmaProton()) < 2)) {
+                    ntof++;
+                }
             }
         } else {
             if (isTrackGood(muDst->primaryTracks(i))) {
                 mNumGoodTracks++;
+                if ((fabs(muDst->primaryTracks(i)->nSigmaPion()) < 2) ||
+                    (fabs(muDst->primaryTracks(i)->nSigmaKaon()) < 2) ||
+                    (fabs(muDst->primaryTracks(i)->nSigmaProton()) < 2)) {
+                    ndedx++;
+                }
+                StMuBTofPidTraits dProb = muDst->primaryTracks(i)->btofPidTraits();
+                if ((fabs(dProb.sigmaPion()) < 2) ||
+                    (fabs(dProb.sigmaKaon()) < 2) ||
+                    (fabs(dProb.sigmaProton()) < 2)) {
+                    ntof++;
+                }
             }
         }
     }
+    *ndEdx = ndedx;
+    *nToF  = ntof;
     return mNumGoodTracks;
 }
 
@@ -434,11 +501,20 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
   //
   // -> note in my analysis I chose nSigma instead of prob.
   //
-  eTrack->SetPIDe(mTrack->nSigmaElectron()); 
-  eTrack->SetPIDpi(mTrack->nSigmaPion());
-  eTrack->SetPIDp(mTrack->nSigmaProton());
-  eTrack->SetPIDk(mTrack->nSigmaKaon());
-  eTrack->SetPIDd(10000.);
+  eTrack->SetPIDe_dEdx(mTrack->nSigmaElectron()); 
+  eTrack->SetPIDpi_dEdx(mTrack->nSigmaPion());
+  eTrack->SetPIDp_dEdx(mTrack->nSigmaProton());
+  eTrack->SetPIDk_dEdx(mTrack->nSigmaKaon());
+  eTrack->SetPIDd_dEdx(10000.);
+
+
+  StMuBTofPidTraits dProb = mTrack->btofPidTraits();
+  eTrack->SetPIDe_ToF(dProb.sigmaElectron());
+  eTrack->SetPIDpi_ToF(dProb.sigmaPion());
+  eTrack->SetPIDp_ToF(dProb.sigmaProton());
+  eTrack->SetPIDk_ToF(dProb.sigmaKaon());
+  eTrack->SetPIDd_ToF(999);
+  eTrack->SetBeta(dProb.beta());
 
   eTrack->SetNFitPoints(mTrack->nHitsFit());
   eTrack->SetNFoundPoints(mTrack->nHits());
@@ -459,8 +535,17 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.18  2010/09/02 21:20:09  prindle
+ * Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
+ *   EventCuts: Add radius cut on vertex, ToF fraction cut. Merge 2004 AuAu 200 GeV datasets.
+ *              Add 7, 11 and 39 GeV dataset selections
+ *   MuDstReader: Add 2D histograms for vertex radius and ToF fraction cuts.
+ *                Modify countGoodTracks to return number of dEdx and ToF pid identified tracks.
+ *                Include code to set track pid information from Dst.
+ *   QAHists: New ToF QA hists. Modify dEdx to include signed momentum.
+ *
  * Revision 1.17  2010/03/02 21:43:38  prindle
- * Use outerHelix() for global tracks
+ *   Use outerHelix() for global tracks
  *   Add sensible triggerId histograms
  *   Starting to add support to sort events (available for Hijing)
  *

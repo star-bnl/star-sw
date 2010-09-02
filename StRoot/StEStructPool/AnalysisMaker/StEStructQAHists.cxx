@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQAHists.cxx,v 1.8 2010/06/23 22:29:47 prindle Exp $
+ * $Id: StEStructQAHists.cxx,v 1.9 2010/09/02 21:20:09 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -208,7 +208,8 @@ void StEStructQAHists::initTrackHistograms(int numBins, int aIndex){
   mHPhi      = new TH1F*[qbins];
   mHPt       = new TH1F*[qbins];
   mHYt       = new TH1F*[qbins];
-  mHdEdxPtot = new TH2F*[qbins];
+  mHdEdxPtot = new TH2F*[numBins];
+  mHToFPtot  = new TH2F*[numBins];
   mHEtaPt    = new TH2F*[qbins];
 
   int nall = 100;
@@ -223,10 +224,12 @@ void StEStructQAHists::initTrackHistograms(int numBins, int aIndex){
   
   int nx = 101;
   int ny = 101;
-  float xpmin = 0.;
-  float xpmax = 1.5;
-  float ydmin = 0.;
+  float xpmin = -2.5;
+  float xpmax =  2.5;
+  float ydmin =  0.;
   float ydmax = 15.0e-06;
+  float ytofmin = 0.;
+  float ytofmax = 1.5;
 
   TString haIndex;
   if(aIndex>=0){
@@ -273,10 +276,12 @@ void StEStructQAHists::initTrackHistograms(int numBins, int aIndex){
     TString hdedxP("dEdx_P");
     if(mhasAIndex)hdedxP+=haIndex.Data();
     if(numBins>1)hdedxP+=i;   
-    TString hpdedxP("Qp"); hpdedxP+=hdedxP.Data();
-    mHdEdxPtot[i] = new TH2F(hpdedxP.Data(),hpdedxP.Data(),nx,xpmin,xpmax,ny,ydmin,ydmax);
-    TString hmdedxP("Qm"); hmdedxP+=hdedxP.Data();
-    mHdEdxPtot[i+numBins] = new TH2F(hmdedxP.Data(),hmdedxP.Data(),nx,xpmin,xpmax,ny,ydmin,ydmax);
+    mHdEdxPtot[i] = new TH2F(hdedxP.Data(),hdedxP.Data(),nx,xpmin,xpmax,ny,ydmin,ydmax);
+
+    TString htofP("mass_P");
+    if(mhasAIndex)htofP+=haIndex.Data();
+    if(numBins>1)htofP+=i;   
+    mHToFPtot[i] = new TH2F(htofP.Data(),htofP.Data(),nx,xpmin,xpmax,ny,ytofmin,ytofmax);
 
     TString hetapt("EtaPt"); 
     if(mhasAIndex)hetapt+=haIndex.Data();
@@ -290,18 +295,26 @@ void StEStructQAHists::initTrackHistograms(int numBins, int aIndex){
 };
 
 
-void StEStructQAHists::fillTrackHistograms(StEStructTrack* t, int ib){
+void StEStructQAHists::fillTrackHistograms(StEStructTrack* t, int ib) {
 
-  if(mntBins==0 || ib>mntBins) return;
-  int i = ib;
-  if(t->Charge()<0)i+=mntBins;
+    if (mntBins==0 || ib>mntBins) {
+        return;
+    }
+    int i = ib;
+    if (t->Charge()<0) {
+        mHdEdxPtot[i]->Fill(-t->Ptot(),t->Dedx());
+        mHToFPtot[i]->Fill(-t->Ptot(),t->Mass());
+        i += mntBins;
+    } else {
+        mHdEdxPtot[i]->Fill(t->Ptot(),t->Dedx());
+        mHToFPtot[i]->Fill(t->Ptot(),t->Mass());
+    }
 
-  mHEta[i]->Fill(t->Eta());
-  mHPhi[i]->Fill(t->Phi());
-  mHPt[i]->Fill(t->Pt());
-  mHYt[i]->Fill(t->Yt());
-  mHdEdxPtot[i]->Fill(t->Ptot(),t->Dedx());
-  mHEtaPt[i]->Fill(t->Eta(),t->Pt());
+    mHEta[i]->Fill(t->Eta());
+    mHPhi[i]->Fill(t->Phi());
+    mHPt[i]->Fill(t->Pt());
+    mHYt[i]->Fill(t->Yt());
+    mHEtaPt[i]->Fill(t->Eta(),t->Pt());
 
 };
 
@@ -316,8 +329,11 @@ void StEStructQAHists::writeTrackHistograms(TFile* tf){
     mHPhi[i]->Write();
     mHPt[i]->Write();
     mHYt[i]->Write();
-    mHdEdxPtot[i]->Write();
     mHEtaPt[i]->Write();
+  }
+  for(int i=0;i<mntBins;i++){
+    mHdEdxPtot[i]->Write();
+    mHToFPtot[i]->Write();
   }
 
 };
@@ -333,8 +349,17 @@ void StEStructQAHists::writeTrackHistograms(TFile* tf){
 /**********************************************************************
  *
  * $Log: StEStructQAHists.cxx,v $
+ * Revision 1.9  2010/09/02 21:20:09  prindle
+ * Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
+ *   EventCuts: Add radius cut on vertex, ToF fraction cut. Merge 2004 AuAu 200 GeV datasets.
+ *              Add 7, 11 and 39 GeV dataset selections
+ *   MuDstReader: Add 2D histograms for vertex radius and ToF fraction cuts.
+ *                Modify countGoodTracks to return number of dEdx and ToF pid identified tracks.
+ *                Include code to set track pid information from Dst.
+ *   QAHists: New ToF QA hists. Modify dEdx to include signed momentum.
+ *
  * Revision 1.8  2010/06/23 22:29:47  prindle
- * Hadd typo of 2004B instead of B2004 in EventCuts.cxx
+ *   Hadd typo of 2004B instead of B2004 in EventCuts.cxx
  *   Added a couple of histograms in QAHists.
  *
  * Revision 1.7  2010/03/02 21:43:38  prindle

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.cxx,v 1.8 2010/03/02 21:43:37 prindle Exp $
+ * $Id: StEStructCuts.cxx,v 1.9 2010/09/02 21:20:08 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -59,6 +59,7 @@ void StEStructCuts::initVars(){
   mvarHistsNoCut  = new TH1*[mMaxStore];
   mvarHistsCut    = new TH1*[mMaxStore];
   mnumVars=0;
+  mDoFillHists = true;
 }
 
 //-------------------------------------------------------------------
@@ -343,6 +344,10 @@ void StEStructCuts::addCutHists(TH1* before, TH1* after, const char* name){
 //------------------------------------------------------------------------
 void StEStructCuts::fillHistogram(const char* name, float value, bool passed){
 
+    if (!mDoFillHists) {
+        return;
+    }
+
   int i;
   for(i=0; i<mnumVars; i++)if(strstr(mvarName[i],name)) break;
 
@@ -354,6 +359,10 @@ void StEStructCuts::fillHistogram(const char* name, float value, bool passed){
 }
 //------------------------------------------------------------------------
 void StEStructCuts::fillHistogram(const char* name, float val1, float val2, bool passed){
+
+    if (!mDoFillHists) {
+        return;
+    }
 
   // Add "2D" to name.
   char *hName = new char[strlen(name)+2];
@@ -377,6 +386,10 @@ void StEStructCuts::fillHistogram(const char* name, float val1, float val2, bool
 }
 
 void StEStructCuts::fillHistograms(bool passed){
+
+    if (!mDoFillHists) {
+        return;
+    }
 
   for(int i=0;i<mnumVars; i++){
     mvarHistsNoCut[i]->Fill(mvalues[i],1.0);
@@ -434,8 +447,17 @@ void StEStructCuts::printCuts(const char* fileName){
 /***********************************************************************
  *
  * $Log: StEStructCuts.cxx,v $
+ * Revision 1.9  2010/09/02 21:20:08  prindle
+ * Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
+ *   EventCuts: Add radius cut on vertex, ToF fraction cut. Merge 2004 AuAu 200 GeV datasets.
+ *              Add 7, 11 and 39 GeV dataset selections
+ *   MuDstReader: Add 2D histograms for vertex radius and ToF fraction cuts.
+ *                Modify countGoodTracks to return number of dEdx and ToF pid identified tracks.
+ *                Include code to set track pid information from Dst.
+ *   QAHists: New ToF QA hists. Modify dEdx to include signed momentum.
+ *
  * Revision 1.8  2010/03/02 21:43:37  prindle
- * Use outerHelix() for global tracks
+ *   Use outerHelix() for global tracks
  *   Add sensible triggerId histograms
  *   Starting to add support to sort events (available for Hijing)
  *

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.16 2010/06/23 22:29:41 prindle Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.17 2010/09/02 21:20:09 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -36,7 +36,9 @@ void StEStructEventCuts::initCuts(){
 
   mtWord[0]=mtWord[1]=0;
   mpVertexZ[0]=mpVertexZ[1]=0;
+  mpVertexRadius[0]=mpVertexRadius[1]=0;
   mcentrality[0]=mcentrality[1]=0;
+  mgoodtoffraction[0]=mgoodtoffraction[1]=0;
   mZVertSep[0]=mZVertSep[1]=0;
 
 }
@@ -45,7 +47,9 @@ void StEStructEventCuts::initNames(){
 
   strcpy(mtWordName.name,"triggerWord");
   strcpy(mpVertexZName.name,"primaryVertexZ");
+  strcpy(mpVertexRadiusName.name,"primaryVertexRadius");
   strcpy(mcentralityName.name,"centrality");  
+  strcpy(mgoodtoffractionName.name,"goodToFFraction");  
   strcpy(mZVertSepName.name,"pileup");  
 }
 
@@ -67,14 +71,12 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
                 mtWord[0] = 4000;
                 mtWord[1] = 4500;
                 validRun = 1;
-            } else if (!strcmp("AuAu200GeVProductionMinBiasA2004",mRunPeriod)) {
-               // trgsetupname=productionMinBias; production P05ic; recommended -10 < Vz <30
-               //mtWord[0] = 15000;  mtWord[1] = 15010;  
-               mtWord[0] = 15000; 
-               mtWord[1] = 15050;
-               validRun = 1;
-            } else if (!strcmp("AuAu200GeVProductionMinBiasB2004",mRunPeriod)) {
-               // trgsetupname=productionMinBias; production P05ic; recommended |Vz|<30
+            } else if (!strcmp("AuAu200GeVProductionMinBias2004",mRunPeriod)  ||
+                       !strcmp("AuAu200GeVProductionMinBiasA2004",mRunPeriod) ||
+                       !strcmp("AuAu200GeVProductionMinBiasB2004",mRunPeriod)) {
+               // trgsetupname=productionMinBias; production P05ic;
+               // For period A the trigger page recommends -10 < Vz <30
+               // I think we are better off always using -15 < Vz < 15
                //mtWord[0] = 15000;  mtWord[1] = 15010;  
                mtWord[0] = 15000; 
                mtWord[1] = 15050;
@@ -116,6 +118,22 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
                // trgsetupname=production62Gev; productions P04id,P04ie,P05ic; recommended |Vz|<30
                mtWord[0] = 35000;
                mtWord[1] = 35050;
+               validRun = 1;
+            } else if (!strcmp("AuAu39GeVMinBias2010",mRunPeriod)) {
+               // trgsetupname=AuAu30_production; productions P10ih; Not sure about recommended V_z cut yet.
+               mtWord[0] = 28000;
+               mtWord[1] = 28050;
+               validRun = 1;
+            } else if (!strcmp("AuAu11GeVMinBias2010",mRunPeriod)) {
+               // trgsetupname=AuAu11_production; productions P10ih; Not sure about recommended V_z cut yet.
+               // Not sure I have the right triggerid.
+               mtWord[0] = 31000;
+               mtWord[1] = 31050;
+               validRun = 1;
+            } else if (!strcmp("AuAu7GeVMinBias2010",mRunPeriod)) {
+               // trgsetupname=AuAu7_production; productions P10ih; Not sure about recommended V_z cut yet.
+               mtWord[0] = 29000;
+               mtWord[1] = 29050;
                validRun = 1;
             } else if (!strcmp("CuCu200GeVProductionMinBias2005",mRunPeriod)) {
                // ...
@@ -219,11 +237,27 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
         return true;
     }
 
+    if (!strcmp(name,mpVertexRadiusName.name)) {
+        mpVertexRadius[0]=atof(vals[0]); 
+        mpVertexRadius[1]=atof(vals[1]);
+        mpVertexRadiusName.idx=createCutHists(name,mpVertexRadius);
+        setRange(mpVertexRadiusName.name,mpVertexRadius[0],mpVertexRadius[1]);
+        return true;
+    }
+
     if (!strcmp(name,mcentralityName.name)) {
         mcentrality[0]=atoi(vals[0]); 
         mcentrality[1]=atoi(vals[1]);
         mcentralityName.idx=createCutHists(name,mcentrality);
         setRange(mcentralityName.name,mcentrality[0],mcentrality[1]);
+        return true;
+    }
+
+    if (!strcmp(name,mgoodtoffractionName.name)) {
+        mgoodtoffraction[0]=atof(vals[0]); 
+        mgoodtoffraction[1]=atof(vals[1]);
+        mgoodtoffractionName.idx=createCutHists(name,mgoodtoffraction);
+        setRange(mgoodtoffractionName.name,mgoodtoffraction[0],mgoodtoffraction[1]);
         return true;
     }
 
@@ -311,6 +345,16 @@ bool StEStructEventCuts::goodTrigger(StMuDst* muDst) {
             if (muEvent->triggerIdCollection().nominal().isTrigger(200020)) {
                 return goodVertexTopology(muDst);
             }
+        } else if (!strcmp("AuAu200GeVProductionMinBias2004",mRunPeriod)) {
+            if (muEvent->runNumber() < 5023099) {
+                if (muEvent->triggerIdCollection().nominal().isTrigger(15003)) {
+                    return true;
+                }
+            } else if (muEvent->runNumber() > 503098) {
+                if (muEvent->triggerIdCollection().nominal().isTrigger(15007)) {
+                    return true;
+                }
+            }
         } else if (!strcmp("AuAu200GeVProductionMinBiasA2004",mRunPeriod)) {
             if (muEvent->runNumber() < 5023099) {
                 if (muEvent->triggerIdCollection().nominal().isTrigger(15003)) {
@@ -348,6 +392,19 @@ bool StEStructEventCuts::goodTrigger(StMuDst* muDst) {
                 ((muEvent->triggerIdCollection().nominal().isTrigger(35001) ||
                   muEvent->triggerIdCollection().nominal().isTrigger(35009) )
                   && muEvent->ctbMultiplicity()>15))) {
+                return true;
+            }
+        } else if (!strcmp("AuAu39GeVMinBias2010",mRunPeriod)) {
+            if (muEvent->triggerIdCollection().nominal().isTrigger(280001)) {
+                return true;
+            }
+        } else if (!strcmp("AuAu11GeVMinBias2010",mRunPeriod)) {
+            if (muEvent->triggerIdCollection().nominal().isTrigger(310014)) {
+                return true;
+            }
+        } else if (!strcmp("AuAu7GeVMinBias2010",mRunPeriod)) {
+            if (muEvent->triggerIdCollection().nominal().isTrigger(290001) ||
+                muEvent->triggerIdCollection().nominal().isTrigger(290004)) {
                 return true;
             }
         } else if (!strcmp("AuAu200GeVMinBias2001",mRunPeriod)) {
@@ -425,7 +482,9 @@ void StEStructEventCuts::printCutStats(ostream& ofs){
   ofs<<endl;
   ofs<<mtWordName.name<<","<<mtWord[0]<<","<<mtWord[1]<<"\t\t\t"<<" # triggerWord cut"<<endl;
   ofs<<mpVertexZName.name<<","<<mpVertexZ[0]<<","<<mpVertexZ[1]<<"\t\t"<<" # primary vertex cut"<<endl;
+  ofs<<mpVertexRadiusName.name<<","<<mpVertexRadius[0]<<","<<mpVertexRadius[1]<<"\t\t"<<" # primary vertex radius cut"<<endl;
   ofs<<mcentralityName.name<<","<<mcentrality[0]<<","<<mcentrality[1]<<"\t\t\t"<<" # number events passing centrality cuts"<<endl;
+  ofs<<mgoodtoffractionName.name<<","<<mgoodtoffraction[0]<<","<<mgoodtoffraction[1]<<"\t\t\t"<<" # number events passing centrality cuts"<<endl;
   ofs<<mZVertSepName.name<<","<<mZVertSep[0]<<","<<mZVertSep[1]<<"\t\t\t"<<" # number events passing vertex separation pileup cuts"<<endl;
   //  ofs<<"# ******************************************** "<<endl<<endl;
 
@@ -434,8 +493,17 @@ void StEStructEventCuts::printCutStats(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.17  2010/09/02 21:20:09  prindle
+ * Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
+ *   EventCuts: Add radius cut on vertex, ToF fraction cut. Merge 2004 AuAu 200 GeV datasets.
+ *              Add 7, 11 and 39 GeV dataset selections
+ *   MuDstReader: Add 2D histograms for vertex radius and ToF fraction cuts.
+ *                Modify countGoodTracks to return number of dEdx and ToF pid identified tracks.
+ *                Include code to set track pid information from Dst.
+ *   QAHists: New ToF QA hists. Modify dEdx to include signed momentum.
+ *
  * Revision 1.16  2010/06/23 22:29:41  prindle
- * Hadd typo of 2004B instead of B2004 in EventCuts.cxx
+ *   Hadd typo of 2004B instead of B2004 in EventCuts.cxx
  *   Added a couple of histograms in QAHists.
  *
  * Revision 1.15  2010/03/02 21:43:38  prindle

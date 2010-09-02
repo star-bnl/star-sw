@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.h,v 1.6 2010/03/02 21:43:38 prindle Exp $
+ * $Id: StEStructCuts.h,v 1.7 2010/09/02 21:20:09 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -45,6 +45,7 @@ protected:
   int    mnumVars; //!
   TH1**  mvarHistsNoCut; //!
   TH1**  mvarHistsCut; //!
+  bool   mDoFillHists;  // If true we fill histograms. If false skip filling.
 
   char   mcutTypeName[64];
 
@@ -69,6 +70,7 @@ public:
   virtual int createCutHists(const char* name, int* range, int nvals=2);
   virtual int createCutHists(const char* name, unsigned int* range, int nvals=2);
   virtual void addCutHists(TH1* before, TH1* after, const char* name=NULL);
+  virtual void setDoFillHists(bool filling);
 
 
   virtual void fillHistogram(const char* name, float value, bool passed);
@@ -178,6 +180,10 @@ inline void StEStructCuts::setRange(const char* cutName, float xmin, float xmax)
   setRange(cutID(cutName),xmin,xmax);
 }
 
+inline void StEStructCuts::setDoFillHists(bool filling) {
+    mDoFillHists = filling;
+}
+
 
 #endif
 
@@ -185,8 +191,17 @@ inline void StEStructCuts::setRange(const char* cutName, float xmin, float xmax)
 /***********************************************************************
  *
  * $Log: StEStructCuts.h,v $
+ * Revision 1.7  2010/09/02 21:20:09  prindle
+ * Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
+ *   EventCuts: Add radius cut on vertex, ToF fraction cut. Merge 2004 AuAu 200 GeV datasets.
+ *              Add 7, 11 and 39 GeV dataset selections
+ *   MuDstReader: Add 2D histograms for vertex radius and ToF fraction cuts.
+ *                Modify countGoodTracks to return number of dEdx and ToF pid identified tracks.
+ *                Include code to set track pid information from Dst.
+ *   QAHists: New ToF QA hists. Modify dEdx to include signed momentum.
+ *
  * Revision 1.6  2010/03/02 21:43:38  prindle
- * Use outerHelix() for global tracks
+ *   Use outerHelix() for global tracks
  *   Add sensible triggerId histograms
  *   Starting to add support to sort events (available for Hijing)
  *

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQAHists.h,v 1.5 2010/06/23 22:29:50 prindle Exp $
+ * $Id: StEStructQAHists.h,v 1.6 2010/09/02 21:20:09 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -56,6 +56,7 @@ class StEStructQAHists : public TObject {
   TH1F ** mHPt;
   TH1F ** mHYt;
   TH2F ** mHdEdxPtot;
+  TH2F ** mHToFPtot;
   TH2F ** mHEtaPt;
 
   void initBaseHistograms();
@@ -87,8 +88,17 @@ class StEStructQAHists : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructQAHists.h,v $
+ * Revision 1.6  2010/09/02 21:20:09  prindle
+ * Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
+ *   EventCuts: Add radius cut on vertex, ToF fraction cut. Merge 2004 AuAu 200 GeV datasets.
+ *              Add 7, 11 and 39 GeV dataset selections
+ *   MuDstReader: Add 2D histograms for vertex radius and ToF fraction cuts.
+ *                Modify countGoodTracks to return number of dEdx and ToF pid identified tracks.
+ *                Include code to set track pid information from Dst.
+ *   QAHists: New ToF QA hists. Modify dEdx to include signed momentum.
+ *
  * Revision 1.5  2010/06/23 22:29:50  prindle
- * Hadd typo of 2004B instead of B2004 in EventCuts.cxx
+ *   Hadd typo of 2004B instead of B2004 in EventCuts.cxx
  *   Added a couple of histograms in QAHists.
  *
  * Revision 1.4  2008/03/19 22:02:00  prindle
