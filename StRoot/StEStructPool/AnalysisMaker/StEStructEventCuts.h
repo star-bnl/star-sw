@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.h,v 1.14 2010/03/02 21:43:38 prindle Exp $
+ * $Id: StEStructEventCuts.h,v 1.15 2010/09/02 21:20:09 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -29,7 +29,9 @@ protected:
 
    CutName mtWordName;
    CutName mpVertexZName;
+   CutName mpVertexRadiusName;
    CutName mcentralityName;  
+   CutName mgoodtoffractionName;  
    CutName mZVertSepName;  
 
 
@@ -37,7 +39,9 @@ protected:
   bool         mtrgByRunPeriod;
   unsigned int mtWord[2];  
   float        mpVertexZ[2]; 
+  float        mpVertexRadius[2]; 
   float        mcentrality[2];
+  float        mgoodtoffraction[2];
   float        mZVertSep[2];
   int badTrigger;
 
@@ -59,12 +63,17 @@ public:
   bool goodTrigger(StMuDst* muDst);
   bool goodVertexTopology(StMuDst* muDst);
   bool goodPrimaryVertexZ( float z );
+  bool goodPrimaryVertexRadius( float r );
   bool goodCentrality( float n);
+  bool goodToFFraction(int ndEdx, int nToF);
   bool goodZVertSep(float dz);
+  bool hasZVertSepCut();
 
   char* triggerWordName(){ return (char*)mtWordName.name; };
   char* primaryVertexZName() { return (char*) mpVertexZName.name; };
+  char* primaryVertexRadiusName() { return (char*) mpVertexRadiusName.name; };
   char* centralityName() { return (char*) mcentralityName.name; };
+  char* goodtoffractionName() { return (char*) mgoodtoffractionName.name; };
   char* zVertSepName() { return (char*) mZVertSepName.name; };
 
 
@@ -82,10 +91,30 @@ inline bool StEStructEventCuts::goodPrimaryVertexZ(float z) {
   return (z>=mpVertexZ[0] && z<=mpVertexZ[1]);
 }
 
+inline bool StEStructEventCuts::goodPrimaryVertexRadius(float r) {
+  mvalues[mpVertexRadiusName.idx] = r;
+  if (mpVertexRadius[0]==mpVertexRadius[1] && mpVertexRadius[0]==0) {
+    return true;
+  }
+  return (r>=mpVertexRadius[0] && r<=mpVertexRadius[1]);
+}
+
 inline bool StEStructEventCuts::goodCentrality(float c){
   mvalues[mcentralityName.idx] = c;
   return (  (mcentrality[0]==mcentrality[1] && mcentrality[0]==0) ||
             (c>=mcentrality[0] && c<=mcentrality[1]) );
+}
+
+inline bool StEStructEventCuts::goodToFFraction(int ndEdx, int nToF) {
+    if (mgoodtoffraction[0]==mgoodtoffraction[1] && mgoodtoffraction[0]==0) {
+        return true;
+    }
+    float sToF = nToF - ndEdx * mgoodtoffraction[0];
+    if ((fabs(sToF) < mgoodtoffraction[1]) &&
+        (sToF > -0.5*ndEdx)) {
+        return true;
+    }
+    return false;
 }
 
 inline bool StEStructEventCuts::goodZVertSep(float dz){
@@ -94,13 +123,26 @@ inline bool StEStructEventCuts::goodZVertSep(float dz){
             (dz<mZVertSep[0] || mZVertSep[1]<dz) );
 }
 
+inline bool StEStructEventCuts::hasZVertSepCut() {
+    return (mZVertSep[0]!=mZVertSep[1]);
+}
+
 #endif
 
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.h,v $
+ * Revision 1.15  2010/09/02 21:20:09  prindle
+ * Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
+ *   EventCuts: Add radius cut on vertex, ToF fraction cut. Merge 2004 AuAu 200 GeV datasets.
+ *              Add 7, 11 and 39 GeV dataset selections
+ *   MuDstReader: Add 2D histograms for vertex radius and ToF fraction cuts.
+ *                Modify countGoodTracks to return number of dEdx and ToF pid identified tracks.
+ *                Include code to set track pid information from Dst.
+ *   QAHists: New ToF QA hists. Modify dEdx to include signed momentum.
+ *
  * Revision 1.14  2010/03/02 21:43:38  prindle
- * Use outerHelix() for global tracks
+ *   Use outerHelix() for global tracks
  *   Add sensible triggerId histograms
  *   Starting to add support to sort events (available for Hijing)
  *

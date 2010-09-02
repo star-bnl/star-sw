@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.h,v 1.10 2010/03/02 21:43:38 prindle Exp $
+ * $Id: StEStructMuDstReader.h,v 1.11 2010/09/02 21:20:09 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -39,8 +39,14 @@ public:
   int  mPrimaryVertexId;
   int  mNumGoodTracks;//!
   int  mhasdEdxCuts;
+  int  mhasToFCuts;
+  int  mhasVertexRadiusCuts;
   TH2F*  dEdxBefore;
   TH2F*  dEdxAfter;
+  TH2F*  ToFBefore;
+  TH2F*  ToFAfter;
+  TH2F*  VRadiusBefore;
+  TH2F*  VRadiusAfter;
 
   Float_t mEta;
   Float_t mPhi;
@@ -70,7 +76,7 @@ public:
   bool fillTracks(StEStructEvent* estructEvent);
   bool isTrackGood(StMuTrack* track);
   bool isTrackGoodToUse(StMuTrack* track);
-  int  countGoodTracks();
+  int  countGoodTracks(int *ndEdx, int *nToF);
   void fillEStructTrack(StEStructTrack* eTrack, StMuTrack* mTrack);
   
   ClassDef(StEStructMuDstReader,1)
@@ -84,8 +90,17 @@ inline bool StEStructMuDstReader::done(){ return mAmDone; };
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.h,v $
+ * Revision 1.11  2010/09/02 21:20:09  prindle
+ * Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
+ *   EventCuts: Add radius cut on vertex, ToF fraction cut. Merge 2004 AuAu 200 GeV datasets.
+ *              Add 7, 11 and 39 GeV dataset selections
+ *   MuDstReader: Add 2D histograms for vertex radius and ToF fraction cuts.
+ *                Modify countGoodTracks to return number of dEdx and ToF pid identified tracks.
+ *                Include code to set track pid information from Dst.
+ *   QAHists: New ToF QA hists. Modify dEdx to include signed momentum.
+ *
  * Revision 1.10  2010/03/02 21:43:38  prindle
- * Use outerHelix() for global tracks
+ *   Use outerHelix() for global tracks
  *   Add sensible triggerId histograms
  *   Starting to add support to sort events (available for Hijing)
  *
