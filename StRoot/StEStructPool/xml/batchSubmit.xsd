@@ -256,12 +256,16 @@ hell is in this directory.
             <xs:enumeration value='CuCu200GeVProductionMinBias2007ic' Comment='tag for 2005, 200GeV CuCu minimum bias trigger (2007ic production)'/>
             <xs:enumeration value='2007ProductionMinBias' Comment='tag for 2007, 200GeV AuAu minimum bias produced for PMD'/>
             <xs:enumeration value='2007LowLuminosity' Comment='tag for 2007, 200GeV AuAu minimum bias Low Luminosity trigger set'/>
+            <xs:enumeration value='AuAu200GeVProductionMinBias2004'  Comment='tag for 2004, 200GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu200GeVProductionMinBiasA2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger for early in run'/>
             <xs:enumeration value='AuAu200GeVProductionMinBiasB2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger for late in run'/>
             <xs:enumeration value='AuAu200GeVProductionLow2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger low luminosity sample'/>
             <xs:enumeration value='AuAu200GeVProductionMid2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger mid luminosity sample'/>
             <xs:enumeration value='AuAu200GeVProductionHigh2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger high luminosity sample'/>
             <xs:enumeration value='AuAu62GeVMinBias2004'  Comment='tag for 2004, 62GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu39GeVMinBias2010'  Comment='tag for 2010, 39GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu11GeVMinBias2010'  Comment='tag for 2010, 11GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu7GeVMinBias2010'   Comment='tag for 2010,  7GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu200GeVMinBias2001' Comment='tag for 2001, 200GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='AuAu200GeVCentral2001' Comment='tag for 2001, 200GeV AuAu central trigger'/>
             <xs:enumeration value='dAu200GeVMinBias2003' Comment='tag for 2003, 200GeV dAu minimum bias trigger'/>
@@ -296,11 +300,17 @@ hell is in this directory.
         <xs:enumeration value='primaryVertexZ'>
             <xs:Comment>min, max Z vertex position</xs:Comment>
         </xs:enumeration>
+        <xs:enumeration value='primaryVertexRadius'>
+            <xs:Comment>min, max radius for primary vertex position</xs:Comment>
+        </xs:enumeration>
         <xs:enumeration value='centrality'>
             <xs:Comment>min, max reference multiplicity</xs:Comment>
         </xs:enumeration>
         <xs:enumeration value='pileup'>
             <xs:Comment>Exclude events with predicted pileup vertex between min and max distances.</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='goodToFFraction'>
+            <xs:Comment>Mean s=nToF/ndEdx ratio, limit on |nToF-s*ndEdx|</xs:Comment>
         </xs:enumeration>
     </xs:restriction>
 </xs:simpleType>
