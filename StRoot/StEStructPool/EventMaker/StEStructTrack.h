@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.h,v 1.8 2010/03/02 21:47:18 prindle Exp $
+ * $Id: StEStructTrack.h,v 1.9 2010/09/02 21:26:29 prindle Exp $
  *
  * Author: Jeff Porter merge of work from Aya Ishihara and Jeff Reid
  *
@@ -42,12 +42,23 @@ private:
   Float_t       mByGlobal;
   Float_t       mBzGlobal;
 
-  Float_t       mPIDe;
-  Float_t       mPIDpi;
-  Float_t       mPIDp;
-  Float_t       mPIDk;
-  Float_t       mPIDd;
+  Int_t         mPID;
+  Int_t         mPID_dEdx;
+  Int_t         mPID_ToF;
   Float_t       mDedx;
+  Float_t       mPIDe_dEdx;
+  Float_t       mPIDpi_dEdx;
+  Float_t       mPIDp_dEdx;
+  Float_t       mPIDk_dEdx;
+  Float_t       mPIDd_dEdx;
+  Float_t       mPIDe_ToF;
+  Float_t       mPIDpi_ToF;
+  Float_t       mPIDp_ToF;
+  Float_t       mPIDk_ToF;
+  Float_t       mPIDd_ToF;
+  Float_t       mBeta;
+  Float_t       mMass;
+
   Float_t       mChi2;
 
   Int_t         mNFitPoints;
@@ -99,6 +110,8 @@ public:
   void evalXt();
   void evalCurvature();
   void evalFourMomentum(float mass=0);
+  void evalPID();
+  void evalMass();
   void evalTrajectory(float primvx, float primvy, float primvz, double bfield);
   void FillTpcReferencePoints();
 
@@ -122,13 +135,25 @@ public:
   Float_t ByGlobal() const { return mByGlobal; }
   Float_t BzGlobal() const { return mBzGlobal; }
 
-  Float_t PIDe() const { return mPIDe; }
-  Float_t PIDpi() const { return mPIDpi; }
-  Float_t PIDp() const { return mPIDp; }
-  Float_t PIDk() const { return mPIDk; }
-  Float_t PIDd() const { return mPIDd; }
+  Int_t   PID()      const { return mPID; }
+  Int_t   PID_dEdx() const { return mPID_dEdx; }
+  Int_t   PID_ToF()  const { return mPID_ToF; }
 
+  Float_t PIDe_dEdx() const { return mPIDe_dEdx; }
+  Float_t PIDpi_dEdx() const { return mPIDpi_dEdx; }
+  Float_t PIDp_dEdx() const { return mPIDp_dEdx; }
+  Float_t PIDk_dEdx() const { return mPIDk_dEdx; }
+  Float_t PIDd_dEdx() const { return mPIDd_dEdx; }
+
+  Float_t PIDe_ToF() const { return mPIDe_ToF; }
+  Float_t PIDpi_ToF() const { return mPIDpi_ToF; }
+  Float_t PIDp_ToF() const { return mPIDp_ToF; }
+  Float_t PIDk_ToF() const { return mPIDk_ToF; }
+  Float_t PIDd_ToF() const { return mPIDd_ToF; }
+
+  Float_t beta() const { return mBeta; }
   Float_t Dedx() const { return mDedx; }
+  Float_t Mass() const { return mMass; }
   Float_t Chi2() const { return mChi2; }
   Float_t AssignedMass() const { return mAssignedMass; };
   Float_t MidTPCRadius() const { return mMidTPCRadius; };
@@ -164,8 +189,6 @@ public:
   Float_t       Dca() const;
   Float_t       DcaPrimary() const;
   Float_t       DcaGlobal() const;
-  Float_t       PIDpiPlus() const;
-  Float_t       PIDpiMinus() const;
 
   // accessors to transient data ...
   Bool_t        isComplete() const { return mIsComplete; };
@@ -202,13 +225,21 @@ public:
   void SetByGlobal(Float_t byg) { mByGlobal = byg; }
   void SetBzGlobal(Float_t bzg) { mBzGlobal = bzg; }
 
-  void SetPIDe(Float_t pide) { mPIDe = pide; }
-  void SetPIDpi(Float_t pidpi) { mPIDpi = pidpi; }
-  void SetPIDp(Float_t pidp) { mPIDp = pidp; }
-  void SetPIDk(Float_t pidk) { mPIDk = pidk; }
-  void SetPIDd(Float_t pidd) { mPIDd = pidd; }
+  void SetPIDe_dEdx(Float_t pide) { mPIDe_dEdx = pide; }
+  void SetPIDpi_dEdx(Float_t pidpi) { mPIDpi_dEdx = pidpi; }
+  void SetPIDp_dEdx(Float_t pidp) { mPIDp_dEdx = pidp; }
+  void SetPIDk_dEdx(Float_t pidk) { mPIDk_dEdx = pidk; }
+  void SetPIDd_dEdx(Float_t pidd) { mPIDd_dEdx = pidd; }
 
+  void SetPIDe_ToF(Float_t pide) { mPIDe_ToF = pide; }
+  void SetPIDpi_ToF(Float_t pidpi) { mPIDpi_ToF = pidpi; }
+  void SetPIDp_ToF(Float_t pidp) { mPIDp_ToF = pidp; }
+  void SetPIDk_ToF(Float_t pidk) { mPIDk_ToF = pidk; }
+  void SetPIDd_ToF(Float_t pidd) { mPIDd_ToF = pidd; }
+
+  void SetBeta(Float_t beta) { mBeta = beta; }
   void SetDedx(Float_t dedx) { mDedx = dedx; }
+  void SetMass(Float_t mass) { mMass = mass; }
   void SetChi2(Float_t chi2) { mChi2 = chi2; }
   void SetMassAssignment(float mass){ mAssignedMass=mass; };
   void SetNFitPoints(Int_t nfit) { mNFitPoints = nfit; }
@@ -232,6 +263,13 @@ public:
 
 inline void  StEStructTrack::evalPt(){ mPt=sqrt((mPx*mPx)+(mPy*mPy)); }
 inline void  StEStructTrack::evalPtot(){ mPtot=sqrt((mPx*mPx)+(mPy*mPy)+(mPz*mPz)); }
+inline void  StEStructTrack::evalMass() {
+    if (mBeta >= 1.0) {
+        mMass = 0;
+    } else {
+        mMass = mPtot * sqrt( pow(mBeta,-2) - 1);
+    }
+}
 inline const StThreeVectorF& StEStructTrack::NominalTpcExitPoint() const { return mNominalTpcExitPoint; }
 inline const StThreeVectorF& StEStructTrack::NominalTpcEntrancePoint() const { return mNominalTpcEntrancePoint; };     
 inline const StThreeVectorF& StEStructTrack::MidTpcPoint() const{ return mMidTpcPoint; }; 
@@ -251,8 +289,11 @@ inline int      StEStructTrack::getYtBin() const { return mytbin; };
 /***********************************************************************
  *
  * $Log: StEStructTrack.h,v $
+ * Revision 1.9  2010/09/02 21:26:29  prindle
+ * Track: Added ToF pid information, modify dEdx, add combined pid code.
+ *
  * Revision 1.8  2010/03/02 21:47:18  prindle
- * Support to retrieve track radius when it crosses endplate
+ *   Support to retrieve track radius when it crosses endplate
  *   Add way to retrieve centrality
  *
  * Revision 1.7  2008/12/02 23:45:49  prindle

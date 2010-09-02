@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.cxx,v 1.8 2010/03/02 21:47:18 prindle Exp $
+ * $Id: StEStructTrack.cxx,v 1.9 2010/09/02 21:26:29 prindle Exp $
  *
  * Author: Jeff Porter merge of code from Aya Ishihara and Jeff Reid
  *
@@ -36,14 +36,20 @@ ClassImp(StEStructTrack)
   mByGlobal = track->ByGlobal();
   mBzGlobal = track->BzGlobal();
 
-  mPIDe = track->PIDe();
-  mPIDpi = track->PIDpi();
-  mPIDp = track->PIDp();
-  mPIDk = track->PIDk();
-  mPIDd = track->PIDd();
+  mPIDe_dEdx  = track->PIDe_dEdx();
+  mPIDpi_dEdx = track->PIDpi_dEdx();
+  mPIDp_dEdx  = track->PIDp_dEdx();
+  mPIDk_dEdx  = track->PIDk_dEdx();
+  mPIDd_dEdx  = track->PIDd_dEdx();
+
+  mPIDe_ToF  = track->PIDe_ToF();
+  mPIDpi_ToF = track->PIDpi_ToF();
+  mPIDp_ToF  = track->PIDp_ToF();
+  mPIDk_ToF  = track->PIDk_ToF();
+  mPIDd_ToF  = track->PIDd_ToF();
 
   mChi2 = track->Chi2();
-
+  mBeta = track->beta();
   mDedx = track->Dedx();
   mAssignedMass=track->AssignedMass();
 
@@ -85,6 +91,8 @@ void StEStructTrack::FillTransientData(){
   evalXt();
   evalCurvature();
   evalFourMomentum();
+  evalPID();
+  evalMass();
   
 };
 
@@ -116,6 +124,84 @@ void StEStructTrack::evalXt(){
 
 };
 
+
+//----------------------------------------------------------
+void StEStructTrack::evalPID(){
+    // Combine dEdx and ToF information
+    // Our numbering: (should we maybe be more forward thinking, with room for e, Lambda, K0??)
+    //     pi = 1
+    //     K  = 2
+    //     p  = 3
+    float pi = fabs(mPIDpi_dEdx);
+    float k  = fabs(mPIDk_dEdx);
+    float p  = fabs(mPIDp_dEdx);
+    bool dpi     = false;
+    bool dK      = false;
+    bool dp      = false;
+    mPID_dEdx = false;
+    if (fabs(pi)<2  && fabs(k)>2 && fabs(p)>2) {
+        dpi = true;
+        mPID_dEdx = true;
+    } else if (fabs(pi)>2  && fabs(k)<2 && fabs(p)>2) {
+        dK = true;
+        mPID_dEdx = true;
+    } else if (fabs(pi)>2  && fabs(k)>2 && fabs(p)<2) {
+        dp = true;
+        mPID_dEdx = true;
+    }
+
+    // Something like 30% of tracks have no ToF?
+    // Is a ToF hit the is not within a PID band more important than a missing ToF hit?
+    double tnpi = mPIDpi_ToF;
+    double tnK  = mPIDk_ToF;
+    double tnp  = mPIDp_ToF;
+    bool tpi    = false;
+    bool tK     = false;
+    bool tp     = false;
+    bool mPID_ToF = false;
+    if (fabs(tnpi)<2  && fabs(tnK)>2 && fabs(tnp)>2) {
+        tpi = true;
+        mPID_ToF = true;
+    } else if (fabs(tnpi)>2  && fabs(tnK)<2 && fabs(tnp)>2) {
+        tK = true;
+        mPID_ToF = true;
+    } else if (fabs(tnpi)>2  && fabs(tnK)>2 && fabs(tnp)<2) {
+        tp = true;
+        mPID_ToF = true;
+    }
+ 
+    if (mPID_dEdx && mPID_ToF) {
+        if (dpi && tpi) {
+            mPID = 1;
+        } else if (dK && tK) {
+            mPID = 2;
+        } else if (dp && tp) {
+            mPID = 3;
+        } else {
+            mPID = 0;
+        }
+    } else if (mPID_dEdx) {
+        if (dpi) {
+            mPID = 1;
+        } else if (dK) {
+            mPID = 2;
+        } else if (dp) {
+            mPID = 3;
+        } else {
+            mPID = 0;
+        }
+    } else {
+        if (tpi) {
+            mPID = 1;
+        } else if (tK) {
+            mPID = 2;
+        } else if (tp) {
+            mPID = 3;
+        } else {
+            mPID = 0;
+        }
+    }
+};
 
 //----------------------------------------------------------
 void StEStructTrack::evalCurvature(){
@@ -262,19 +348,14 @@ Float_t StEStructTrack::DcaGlobal() const {
   return (sqrt((mBxGlobal*mBxGlobal)+(mByGlobal*mByGlobal)+(mBzGlobal*mBzGlobal))); 
 }
 
-Float_t StEStructTrack::PIDpiPlus() const { 
-  return ((mCharge == 1) ? mPIDpi : 0); 
-}
-
-Float_t StEStructTrack::PIDpiMinus() const { 
-  return ((mCharge == -1) ? mPIDpi : 0); 
-}
-
 /**********************************************************************
  *
  * $Log: StEStructTrack.cxx,v $
+ * Revision 1.9  2010/09/02 21:26:29  prindle
+ * Track: Added ToF pid information, modify dEdx, add combined pid code.
+ *
  * Revision 1.8  2010/03/02 21:47:18  prindle
- * Support to retrieve track radius when it crosses endplate
+ *   Support to retrieve track radius when it crosses endplate
  *   Add way to retrieve centrality
  *
  * Revision 1.7  2008/12/02 23:45:48  prindle
