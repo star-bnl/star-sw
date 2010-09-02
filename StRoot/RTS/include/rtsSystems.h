@@ -251,7 +251,10 @@ so we keep it here for source compatibility
 #define HFT_SYSTEM      21
 #define HFT_ID          HFT_SYSTEM     /* Heavy Flavor Tracker */
 
-#define RTS_NUM_SYSTEMS	22	/* current maximum. Can not be greater than 32! */
+#define MTD_SYSTEM      22
+#define MTD_ID          MTD_SYSTEM     /* Muon Tracking Detector */
+
+#define RTS_NUM_SYSTEMS	23	/* current maximum. Can not be greater than 32! */
 
 #define PP_SEQE_INSTANCE  1
 #define PP_SEQW_INSTANCE  2
@@ -440,6 +443,7 @@ so we keep it here for source compatibility
 #define FGT01_NODE	((EXT_SYSTEM<<12)|(FGT_SYSTEM<<4) | 1)
 #define FGT_NODE	FGT01_NODE
 
+
 /* Endcap */
 
 #define ETOW_NODE	((EXT_SYSTEM<<12)|(ETOW_SYSTEM<<4)|1)
@@ -511,8 +515,10 @@ so we keep it here for source compatibility
 /* Tonko, Aug 2007, ready for 2007 */
 #define PP_NODES(x) ((EXT_SYSTEM<<12) | ((PP_SYSTEM)<<4) | (x))
 
-#define TPX_NODES(x)     ((EXT2_SYSTEM<<12) | ((TPX_SYSTEM)<<7) | (x))
-#define HFT_NODES(x)     ((EXT2_SYSTEM<<12) | ((HFT_SYSTEM)<<7) | (x))
+#define TPX_NODES(x)     ((EXT2_SYSTEM<<12) | (TPX_SYSTEM<<7) | (x))
+#define HFT_NODES(x)     ((EXT2_SYSTEM<<12) | (HFT_SYSTEM<<7) | (x))
+#define MTD_NODES(x)	 ((EXT2_SYSTEM<<12) | (MTD_SYSTEM<<7) | (x))
+
 
 extern inline const char *rts2name(int rts_id)
 {
@@ -557,6 +563,8 @@ extern inline const char *rts2name(int rts_id)
 	        return "PP2PP" ;
 	case RIC_SYSTEM :
 		return "RICH" ;
+	case MTD_SYSTEM :
+		return "MTD" ;
 	default :
 		return NULL ;	// unknown!
 	}
@@ -593,6 +601,7 @@ extern inline int rts2det(int ix)
 	case HFT_ID :
 	case PP_ID :
 	case FGT_ID :
+	case MTD_ID :
 		return ix ;
 	default :
 		return -1 ;
@@ -603,32 +612,38 @@ extern inline int rts2det(int ix)
 extern inline int rts2tcd(int rts)
 {
 	static const int map[32] = {
-		-1,		// TPC gone...
-		-1,		// SVT gone...
+		-1,		//0 TPC gone...
+		-1,		//1 SVT gone...
 		TCD_TOF,	//2
 		TCD_BTOW,	//3
 		-1,		//4: FPD gone...
 		TCD_FTPC,	//5
-		-1,
-		-1,
-		-1,
-		-1,
-		-1,
-		-1,
+		-1,		//6
+		-1,		//7
+		-1,		//8
+		-1,		//9
+		-1,		//10
+		-1,		//11
 		TCD_PMD,	//12
-		-1,	//13: SSD gone...
+		-1,		//13: SSD gone...
 		TCD_ETOW,	//14
-		-1,
+		-1,		//15
 		TCD_FGT,	//16
 		TCD_PP,		//17
 		TCD_BSMD,	//18
 		TCD_ESMD,	//19
 		TCD_TPX,	//20
-		-1,
-		-1,
-		-1,
-		-1,
-		-1,
+		-1,		//21 HFT
+		TCD_MTD,	//22 MTD
+		-1,		//23
+		-1,		//24
+		-1,		//25
+		-1,		//26
+		-1,		//27
+		-1,		//28
+		-1,		//29
+		-1,		//30
+		-1,		//31
 	} ;
 
 	return map[rts] ;
@@ -638,16 +653,16 @@ extern inline int rts2tcd(int rts)
 extern inline int tcd2rts(int tcd)
 {
 	static int map[32] = {
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
+        -1,		//0
+        -1,		//1
+        -1,		//2
+        -1,		//3
+        -1,		//4
+        -1,		//5
         ESMD_SYSTEM,	//6
         -1,		//7 BBC
         ETOW_SYSTEM,	//8
-        SSD_SYSTEM,	//9 ; used for MTD?
+        MTD_SYSTEM,	//9 ; used for MTD, was SSD?
         FGT_SYSTEM,	//10 ; moved from FPD
         TOF_SYSTEM,	//11
         PP_SYSTEM,	//12 ; moved from SVT_SYSTem to PP!
@@ -660,16 +675,16 @@ extern inline int tcd2rts(int tcd)
         PMD_SYSTEM,	//19
         -1,		//20 EMPTY ; TPC was here... removed Sep 08
         -1,		//21 VPD
-        -1,
-        -1,
-        -1,
-        -1,
-        -1
-        -1,
-        -1,
-        -1,
-        -1,
-        -1,
+        -1,		//22
+        -1,		//23
+        -1,		//24
+        -1,		//25
+        -1		//26
+        -1,		//27
+        -1,		//28
+        -1,		//29
+        -1,		//30
+        -1,		//31
         -1
 	};
 
@@ -680,7 +695,7 @@ extern inline int tcd2rts(int tcd)
 
 // BTOW, ETOW now part of trigger:   jan 2008
 #define LEGACY_DETS (1<<FTP_ID)
-#define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<HFT_ID) | (1<<SSD_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID) | (1<<L3_ID) | (1 << BSMD_ID))
+#define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<HFT_ID) | (1<<SSD_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID) | (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID))
 
 // 2009... unused dets:  SSD/SVT/TPC/PMD/HFT --->  FTPGROUP
 extern inline u_int grp2rts_mask(int grp)
@@ -705,7 +720,7 @@ extern inline u_int grp2rts_mask(int grp)
 	  ret |= (1 << BSMD_SYSTEM) ;
 	}
 	if(grp & (1 << TOF_GRP)) {
-	  ret |= (1 << TOF_SYSTEM);
+	  ret |= (1 << TOF_SYSTEM) | (1 << MTD_SYSTEM) ;	// added MTD to TOF's grp
 	}
 	if(grp & (1 << ESMD_GRP)) {
 	  ret |= (1 << ESMD_SYSTEM) ;
@@ -748,6 +763,8 @@ extern inline int rts2grp(int rts)
       return PMD_GRP;
     case FGT_ID:
       return FGT_GRP;
+    case MTD_ID:
+      return TOF_GRP;
     default:
 	return 31 ;	// this is an ERROR!
     }
