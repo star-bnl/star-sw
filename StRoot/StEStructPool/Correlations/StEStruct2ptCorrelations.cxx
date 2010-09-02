@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.27 2010/03/02 21:45:27 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.28 2010/09/02 21:24:07 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -75,6 +75,7 @@ void  StEStruct2ptCorrelations::initInternalData(){
   mMixingEvent = NULL;
   moutFileName = NULL;
   mqaoutFileName = NULL;
+  mOneZBuffer = NULL;
 
   mskipPairCuts              = false;
   mdoPairCutHistograms       = false;
@@ -85,6 +86,7 @@ void  StEStruct2ptCorrelations::initInternalData(){
   mdoFillSumHistograms       = false;
   mdontFillMeanPt            = false;
   mdontFillYtYt              = false;
+  mFillQInv                  = false;
 
   mInit = false;
   mDeleted = false;
@@ -106,7 +108,7 @@ void  StEStruct2ptCorrelations::initInternalData(){
 StEStruct2ptCorrelations::~StEStruct2ptCorrelations(){ cleanUp(); };
 
 
-void StEStruct2ptCorrelations::init(){
+void StEStruct2ptCorrelations::init() {
 
   cout << "Initializing with analysis mode " << manalysisMode << endl;
   cout << "Use Z Buffer cut binning =  " << mZBufferCutBinning << endl;
@@ -153,6 +155,9 @@ void StEStruct2ptCorrelations::init(){
   if (manalysisMode & 0x100) {
     mdontFillYtYt = true;
   }
+  if (manalysisMode & 0x200) {
+    mFillQInv = true;
+  }
 
   cout << "  Skip Pair Cuts = " << mskipPairCuts << endl;
   cout << "  Do Pair Cut Hists = " << mdoPairCutHistograms << endl;
@@ -163,6 +168,7 @@ void StEStruct2ptCorrelations::init(){
   cout << "  Fill Sum Histograms (SYt, SEta) = " << mdoFillSumHistograms << endl;
   cout << "  Don't fill mean pt histograms = " << mdontFillMeanPt << endl;
   cout << "  Don't fill YtYt histograms = " << mdontFillYtYt << endl;
+  cout << "  Fill QInv histograms = " << mFillQInv << endl;
     if (mdoPairCutHistograms) {
         cout << "  >>>>> You have tried to turn on Pair Cut Histograms. Those have not been re-implemented yet. " << endl;
         cout << "  >>>>> If you really want them we should do something about it. " << endl;
@@ -270,7 +276,8 @@ void StEStruct2ptCorrelations::init(){
   
 
   /* Event Mixing Parameters */
-  mHmix = new TH2D("EventMixing","Event Mixing: delta-Z vs delta-N",50,0,10, 50,0,200);  // deltaZ vs deltaN
+  mHMixdZdN = new TH2D("MixedDistance","Event Mixing: delta-Z vs delta-N",50,-5,5, 50,-50,50);  // deltaZ vs deltaN
+  mHMixNdN = new TH2D("MixedMults","Event Mixing: average-N vs delta-N",75,0,1500, 50,-50,50);  // aveN vs deltaN
   mHcb = new TH1D("hcb","Cutbin usage",ncutbins,-0.5,ncutbins - 0.5);  // local
   TH1::AddDirectory(kTRUE);
 
@@ -369,6 +376,9 @@ void StEStruct2ptCorrelations::setZBuffLimits(StEStructCuts* ecut) {
 //---------------------------------------------------------------------
 void StEStruct2ptCorrelations::writeDiagnostics(){
 
+  if (mOneZBuffer) {
+      return;
+  }
   int nIn=0;
   int nOut=0;
   for(int i=0;i<kNumBuffers;i++){
@@ -493,11 +503,15 @@ void StEStruct2ptCorrelations::moveEvents(){
       return;
   }
 
-  int i=bufferIndex();
+  if (mOneZBuffer) {
+      mOneZBuffer->addEvent(mCurrentEvent);
+  } else {
+      int i=bufferIndex();
 
-  if(i<0 || i>kNumBuffers-1) return;                              
-  mbuffer[i].addEvent(mCurrentEvent);
-  //  mbuffCounter[i]++;
+      if(i<0 || i>kNumBuffers-1) return;                              
+      mbuffer[i].addEvent(mCurrentEvent);
+      //  mbuffCounter[i]++;
+  }
 
 }
 
@@ -524,12 +538,20 @@ bool StEStruct2ptCorrelations::makeSiblingAndMixedPairs() {
   makePairs(mCurrentEvent,mCurrentEvent,2);
   makePairs(mCurrentEvent,mCurrentEvent,3);
 
-  mbuffer[i].resetCounter();
+  if (mOneZBuffer) {
+      mOneZBuffer->resetCounter();
+  } else {
+      mbuffer[i].resetCounter();
+  }
   int mult = mCurrentEvent->Ntrack();
   //cout << "Event " << mCurrentEvent->EventID() << ": " << mult << " tracks;   Z = " << mCurrentEvent->VertexZ() << ", i = " << i << endl;
   //cout << i <<"\t"; mbuffer[i].Print();
   while (1) {
-    mMixingEvent = mbuffer[i].nextEvent(mult);
+    if (mOneZBuffer) {
+        mMixingEvent = mOneZBuffer->nextEvent(mult,mCurrentEvent->VertexZ());
+    } else {
+        mMixingEvent = mbuffer[i].nextEvent(mult);
+    }
     if (!mMixingEvent) break;
     // Require magnetic field to have same sign.
     // Changing BField sign seems to interchage + and -.
@@ -545,9 +567,11 @@ bool StEStruct2ptCorrelations::makeSiblingAndMixedPairs() {
     mHNEventsMix[iZBin]->Fill(mMixingEvent->Ntrack());
     mHNEventsPosMix[iZBin]->Fill(mMixingEvent->Npos());
     mHNEventsNegMix[iZBin]->Fill(mMixingEvent->Nneg());
-    float deltaZ = fabs(mCurrentEvent->VertexZ() - mMixingEvent->VertexZ());
-    float deltaN = abs(mCurrentEvent->Ntrack() -  mMixingEvent->Ntrack());
-    mHmix->Fill(deltaZ,deltaN);
+    float deltaZ =  mCurrentEvent->VertexZ() - mMixingEvent->VertexZ();
+    float deltaN =  mCurrentEvent->Ntrack()  - mMixingEvent->Ntrack();
+    float aveN   = (mCurrentEvent->Ntrack()  + mMixingEvent->Ntrack()) / 2;
+    mHMixdZdN->Fill(deltaZ,deltaN);
+    mHMixNdN->Fill(aveN,deltaN);
     makePairs(mCurrentEvent,mMixingEvent,4);
     makePairs(mCurrentEvent,mMixingEvent,5);
     makePairs(mCurrentEvent,mMixingEvent,6);
@@ -654,8 +678,12 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
         }
     }
 
-  qBins*  qinv  = mQinv[j];
-  qBins*  nqinv = mNQinv[j];
+    qBins*  qinv;
+    qBins*  nqinv;
+    if (mFillQInv) {
+        qinv  = mQinv[j];
+        nqinv = mNQinv[j];
+    }
 
   TPCSepBins* avgtsep = mTPCAvgTSep[j];
   TPCSepBins* avgzsep = mTPCAvgZSep[j];
@@ -964,8 +992,10 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
           }
 
 
-          qinv[icb].q[b->iq(mPair.qInv())]+=nwgt;
-          nqinv[icb].q[b->iq(mPair.qInv())]+=1;
+          if (mFillQInv) {
+              qinv[icb].q[b->iq(mPair.qInv())]+=nwgt;
+              nqinv[icb].q[b->iq(mPair.qInv())]+=1;
+          }
 
           // Note that pair density histograms are filled within the pair cut check block.
           // Could move end of that block earlier and recalculate everything we need for
@@ -1071,9 +1101,13 @@ void StEStruct2ptCorrelations::fillHistograms() {
 
   for(int i=0; i<8; i++){
 
-    qBins*    qinv    = mQinv[i];
     phiBins** nphiphi = mNPhiPhi[i];
-    qBins*    nqinv   = mNQinv[i];
+    qBins*    qinv;
+    qBins*    nqinv;
+    if (!mFillQInv) {
+        qinv    = mQinv[i];
+        nqinv   = mNQinv[i];
+    }
 
     ytBins**  ytyt;
     ytBins**  nytyt;
@@ -1268,13 +1302,15 @@ void StEStruct2ptCorrelations::fillHistograms() {
                 }
             }
 
-            createHist1D(mHQinv,"Qinv",i,y,z,yz,b->qBins(),b->qMin(),b->qMax());
-            createHist1D(mHNQinv,"NQinv",i,y,z,yz,b->qBins(),b->qMin(),b->qMax());
-            for(int k=0;k<b->qBins();k++){
-                mHQinv[i][yz]->Fill(b->qVal(k),qinv[yz].q[k]);
-                mHNQinv[i][yz]->Fill(b->qVal(k),nqinv[yz].q[k]);
+            if (mFillQInv) {
+                createHist1D(mHQinv,"Qinv",i,y,z,yz,b->qBins(),b->qMin(),b->qMax());
+                createHist1D(mHNQinv,"NQinv",i,y,z,yz,b->qBins(),b->qMin(),b->qMax());
+                for(int k=0;k<b->qBins();k++){
+                    mHQinv[i][yz]->Fill(b->qVal(k),qinv[yz].q[k]);
+                    mHNQinv[i][yz]->Fill(b->qVal(k),nqinv[yz].q[k]);
+                }
+                //    delete [] qinv[yz];
             }
-            //    delete [] qinv[yz];
 
         } // for z
     } // for y
@@ -1414,7 +1450,8 @@ void StEStruct2ptCorrelations::writeHistograms() {
       mHNEventsNegSib[j]->Write();
       mHNEventsNegMix[j]->Write();
   }
-  mHmix->Write();
+  mHMixdZdN->Write();
+  mHMixNdN->Write();
   mHcb->Write();
 
   mHptAll->Write();
@@ -1466,8 +1503,10 @@ void StEStruct2ptCorrelations::writeHistograms() {
           }
       }
 
-      mHQinv[i][j]->Write();
-      mHNQinv[i][j]->Write();
+      if (mFillQInv) {
+          mHQinv[i][j]->Write();
+          mHNQinv[i][j]->Write();
+      }
     }
 
     if(mdoPairDensityHistograms) {
@@ -1571,10 +1610,12 @@ void StEStruct2ptCorrelations::initArrays(){
        mQoQop[i]=new qBins*[numCutBins];
      }
      */
-     mQinv[i]=new qBins[numCutBins];
-     mNQinv[i]=new qBins[numCutBins];
-     memset(mQinv[i],0,numCutBins*sizeof(qBins)); // do the memset here
-     memset(mNQinv[i],0,numCutBins*sizeof(qBins)); // do the memset here
+     if (mFillQInv) {
+         mQinv[i]=new qBins[numCutBins];
+         mNQinv[i]=new qBins[numCutBins];
+         memset(mQinv[i],0,numCutBins*sizeof(qBins)); // do the memset here
+         memset(mNQinv[i],0,numCutBins*sizeof(qBins)); // do the memset here
+     }
 
      if(mdoPairDensityHistograms) {     
        mTPCAvgTSep[i]=new TPCSepBins[nden];  //1D  
@@ -1806,8 +1847,10 @@ void StEStruct2ptCorrelations::deleteArrays(){
         }
     }
     
-    delete []  mQinv[i];
-    delete []  mNQinv[i];
+    if (mFillQInv) {
+        delete []  mQinv[i];
+        delete []  mNQinv[i];
+    }
 
     if(mdoPairDensityHistograms) {
       delete [] mTPCAvgTSep[i];
@@ -1889,8 +1932,10 @@ void StEStruct2ptCorrelations::initHistograms(){
         }
     }
 
-    mHQinv[i]=new TH1D*[numCutBins];
-    mHNQinv[i]=new TH1D*[numCutBins];
+    if (mFillQInv) {
+        mHQinv[i]=new TH1D*[numCutBins];
+        mHNQinv[i]=new TH1D*[numCutBins];
+    }
 
     if(mdoPairDensityHistograms) {
       mHTPCAvgTSep[i]=new TH1D*[nden];
@@ -1979,8 +2024,10 @@ void StEStruct2ptCorrelations::deleteHistograms(){
           }
       }
 
-      delete mHQinv[i][j];
-      delete mHNQinv[i][j];
+      if (mFillQInv) {
+          delete mHQinv[i][j];
+          delete mHNQinv[i][j];
+      }
     }
     if(mdoPairDensityHistograms) {
       for(int j=0;j<nden;j++){
@@ -2047,8 +2094,10 @@ void StEStruct2ptCorrelations::deleteHistograms(){
         }
     }
 
-    delete [] mHQinv[i];
-    delete [] mHNQinv[i];
+    if (mFillQInv) {
+        delete [] mHQinv[i];
+        delete [] mHNQinv[i];
+    }
 
     if(mdoPairDensityHistograms) {
       delete [] mHTPCAvgTSep[i];
@@ -2125,8 +2174,18 @@ void StEStruct2ptCorrelations::createHist1D(TH1F*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.28  2010/09/02 21:24:07  prindle
+ * 2ptCorrelations: Fill histograms for event mixing information
+ *                    Option for common mixing buffer
+ *                    Switch to selectively fill QInv histograms (which take a long time)
+ *   CutBin: Moved PID code to Track class from Pair class. Needed to update this code.
+ *   PairCuts: Moved PID code from here to Track class.
+ *             Removed unnecessary creation of StThreeVector which seem to take a long time
+ *             Add ToF momentum cuts, modify dEdx momentum cuts. (Now allow dEdx to be
+ *             be identified up to 15GeV/c, ToF up to 10GeV/c.)
+ *
  * Revision 1.27  2010/03/02 21:45:27  prindle
- * Had a problem with pair cuts when one track exited via endplate
+ *   Had a problem with pair cuts when one track exited via endplate
  *   Calculate maxDEta properly
  *   Warning if you try turning histograms for pair cuts on
  *

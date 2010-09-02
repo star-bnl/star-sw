@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.cxx,v 1.13 2009/11/09 21:32:41 prindle Exp $
+ * $Id: StEStructCutBin.cxx,v 1.14 2010/09/02 21:24:07 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -325,10 +325,9 @@ int StEStructCutBin::getCutBinMode4(StEStructPairCuts* pc){
 
 //------------------------ Mode=5 -------------------------------------------
 //
-// Particle id using dE/dx identification.
-//    Use dE/dx to identify pi, K, p within momentum ranges where this
-//    is possible. 
-// No yt cut for since dEdx works over a limited momentum range.
+// Particle id using dE/dx plus ToF identification.
+//    If we have both dEdx and ToF information require it to agree.
+// With ToF we can think of Yt cuts although ToF efficiency appears to be around 60% which might be a problem
 //
 // The cut values and their meanings are:
 //   0  pi-o  pair (where o is not pi, K or p)
@@ -349,8 +348,8 @@ int StEStructCutBin::getCutBinMode5(StEStructPairCuts* pc, int pairCase) {
 
     int mode[4][4] = {{9, 0, 4, 7}, {0, 1, 2, 3}, {4, 2, 5, 6}, {7, 3, 6, 8}};
 
-    int it1 = pc->getdEdxPID( pc->Track1() );
-    int it2 = pc->getdEdxPID( pc->Track2() );
+    int it1 = pc->Track1()->PID();
+    int it2 = pc->Track2()->PID();
     if (it1 < 0 || 3 < it1) {
         return -1;
     }
@@ -417,8 +416,8 @@ int StEStructCutBin::ignorePair5(StEStructPairCuts* pc) {
   * If both particles are un-identified we put pair in ipid=9
   * bin and treat as identical.
   */
-    int ip1 = pc->getdEdxPID( pc->Track1() );
-    int ip2 = pc->getdEdxPID( pc->Track2() );
+    int ip1 = pc->Track1()->PID();
+    int ip2 = pc->Track2()->PID();
     if (ip1 == ip2) {
         if (-1 == ic1) {
             return 1;
@@ -445,8 +444,8 @@ int StEStructCutBin::symmetrizeXX5(StEStructPairCuts* pc) {
     if ( pc->Track1()->Charge() != pc->Track2()->Charge() ) {
         return 0;
     }
-    int ip1 = pc->getdEdxPID( pc->Track1() );
-    int ip2 = pc->getdEdxPID( pc->Track2() );
+    int ip1 = pc->Track1()->PID();
+    int ip2 = pc->Track2()->PID();
     if (ip1 != ip2) {
         return 0;
     }
@@ -458,8 +457,8 @@ int StEStructCutBin::switchXX5(StEStructPairCuts* pc) {
   * For different pid order as 0 < pi < K < p.
   * For same pid want + before -.
   */
-    int ipid1 = pc->getdEdxPID( pc->Track1() );
-    int ipid2 = pc->getdEdxPID( pc->Track2() );
+    int ipid1 = pc->Track1()->PID();
+    int ipid2 = pc->Track2()->PID();
     if (ipid1 == ipid2) {
         if ( (-1 == pc->Track1()->Charge()) &&
              (+1 == pc->Track2()->Charge()) ) {
@@ -643,6 +642,16 @@ int StEStructCutBin::notSymmetrizedXX8(int cutBin, int pairCharge) {
 /***********************************************************************
  *
  * $Log: StEStructCutBin.cxx,v $
+ * Revision 1.14  2010/09/02 21:24:07  prindle
+ * 2ptCorrelations: Fill histograms for event mixing information
+ *                    Option for common mixing buffer
+ *                    Switch to selectively fill QInv histograms (which take a long time)
+ *   CutBin: Moved PID code to Track class from Pair class. Needed to update this code.
+ *   PairCuts: Moved PID code from here to Track class.
+ *             Removed unnecessary creation of StThreeVector which seem to take a long time
+ *             Add ToF momentum cuts, modify dEdx momentum cuts. (Now allow dEdx to be
+ *             be identified up to 15GeV/c, ToF up to 10GeV/c.)
+ *
  * Revision 1.13  2009/11/09 21:32:41  prindle
  * Fix warnings about casting char * to a const char * by redeclaring as const char *.
  *

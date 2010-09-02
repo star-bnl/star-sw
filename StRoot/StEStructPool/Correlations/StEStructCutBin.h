@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.h,v 1.11 2008/12/02 23:45:06 prindle Exp $
+ * $Id: StEStructCutBin.h,v 1.12 2010/09/02 21:24:08 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -179,7 +179,7 @@ inline int StEStructCutBin::getParentBin(StEStructPairCuts *pc, StEStructTrack* 
             return 2;
         }
     } else if (5 == mcutMode) {
-        return pc->getdEdxPID(trkPtr);
+        return trkPtr->PID();
     } else if (8 == mcutMode) {
         float yt = trkPtr->Yt();
         // These numbers are also used in StEStructCutBin::getCutBinMode3 (change both)
@@ -297,6 +297,16 @@ inline int StEStructCutBin::notSymmetrizedXX(int cutBin, int pairCharge) {
 /***********************************************************************
  *
  * $Log: StEStructCutBin.h,v $
+ * Revision 1.12  2010/09/02 21:24:08  prindle
+ * 2ptCorrelations: Fill histograms for event mixing information
+ *                    Option for common mixing buffer
+ *                    Switch to selectively fill QInv histograms (which take a long time)
+ *   CutBin: Moved PID code to Track class from Pair class. Needed to update this code.
+ *   PairCuts: Moved PID code from here to Track class.
+ *             Removed unnecessary creation of StThreeVector which seem to take a long time
+ *             Add ToF momentum cuts, modify dEdx momentum cuts. (Now allow dEdx to be
+ *             be identified up to 15GeV/c, ToF up to 10GeV/c.)
+ *
  * Revision 1.11  2008/12/02 23:45:06  prindle
  * Changed switchYt to switchXX (etc.) to better reflect function.
  * Change minYt to 1.0 in Binning so YtYt histogram doesn't have empty lower bin (pt = 0.164 for yt = 1.0)

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairLUT.h,v 1.1 2008/12/02 23:45:09 prindle Exp $
+ * $Id: StEStructPairLUT.h,v 1.2 2010/09/02 21:24:08 prindle Exp $
  *
  * Author: Duncan Prindle
  *
@@ -43,7 +43,7 @@ class StEStructPairLUT {
         double lambda (double eta);
         double delZ  (double Ref);
         double delXY (double Ref);
-        void reAllocHists();
+        void initHists();
         void fillDists();
         void integrateEta(TH2F *h);
         void fillLUTs();

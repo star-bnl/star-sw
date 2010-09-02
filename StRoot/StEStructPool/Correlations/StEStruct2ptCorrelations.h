@@ -1,6 +1,6 @@
  /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.15 2009/11/09 21:32:41 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.16 2010/09/02 21:24:07 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -37,6 +37,7 @@
 #include "StEStructPairCuts.h"
 #include "StEStructBinning.h"
 #include "StEStructBuffer.h"
+#include "StEStructOneBuffer.h"
 
 class TFile;
 class TH1;
@@ -61,7 +62,8 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   TH1D** mHNEventsNegSib;
   TH1D** mHNEventsNegMix;
   TH1D*  mHptAll;
-  TH2D*  mHmix;
+  TH2D*  mHMixdZdN;
+  TH2D*  mHMixNdN;
   TH1D*  mHcb;  // my local hist for cutbin usage
   TH1D **mHMeanPtP;
   TH1D **mHMeanPtM;
@@ -206,6 +208,7 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   bool mdoFillSumHistograms; //!
   bool mdontFillMeanPt; //!
   bool mdontFillYtYt; //!
+  bool mFillQInv; //!
   bool mInit;  //! found need when overridding this class
   bool mDeleted;//! "     " ...
   bool mHistosWritten;//! "     " ...
@@ -224,6 +227,7 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   float kZBuffMin, kZBuffMax; // Read from Cuts file. Default +/- 75cm if not found.
   float kBuffWidth;           // Set to 5 cm in Initr().
   StEStructBuffer mbuffer[_MAX_ZVBINS_];  // kNumBuffers slices in z-vertex from kZBuffMin to +kZBuffMax
+  StEStructOneBuffer *mOneZBuffer;
 
   int mZBufferCutBinning;  // If true each z-buffer gets its own but bins.
   //  int             mbuffCounter[_MAX_ZVBINS_];
@@ -246,7 +250,8 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   StEStructPairCuts* getPairCuts();
   void  setAnalysisMode(int mode);
   void  setCutFile(const char* cutFileName);  
-  void  setZBuffLimits(StEStructCuts* cuts);// const char* cutFileName );
+  void  setZBuffLimits(StEStructCuts* cuts); // const char* cutFileName );
+  void setOneZBuffer(StEStructOneBuffer *oneBuffer);
   void  setZBufferBinning(int zBinning);
   void  setQAHists(StEStructQAHists* qaHists);
   void  setPairCuts(StEStructPairCuts* cuts);
@@ -304,6 +309,10 @@ inline void StEStruct2ptCorrelations::setZBufferBinning(int zBinning){
   mZBufferCutBinning = zBinning;
 }
 
+inline void StEStruct2ptCorrelations::setOneZBuffer(StEStructOneBuffer *oneBuffer){
+  mOneZBuffer = oneBuffer;
+}
+
 inline void StEStruct2ptCorrelations::setQAHists(StEStructQAHists* qahists){
   mQAHists = qahists;
 }
@@ -350,6 +359,16 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.16  2010/09/02 21:24:07  prindle
+ * 2ptCorrelations: Fill histograms for event mixing information
+ *                    Option for common mixing buffer
+ *                    Switch to selectively fill QInv histograms (which take a long time)
+ *   CutBin: Moved PID code to Track class from Pair class. Needed to update this code.
+ *   PairCuts: Moved PID code from here to Track class.
+ *             Removed unnecessary creation of StThreeVector which seem to take a long time
+ *             Add ToF momentum cuts, modify dEdx momentum cuts. (Now allow dEdx to be
+ *             be identified up to 15GeV/c, ToF up to 10GeV/c.)
+ *
  * Revision 1.15  2009/11/09 21:32:41  prindle
  * Fix warnings about casting char * to a const char * by redeclaring as const char *.
  *
