@@ -799,6 +799,30 @@ AvalancheMicroscopic::TransportElectron(
           break;
         }
 
+        // Check if the electron has crossed a wire.
+        if (sensor->IsWireCrossed(x, y, z, 
+                                  x + vx * dt, y + vy * dt, z + vz * dt,
+                                  dx, dy, dz)) {
+          // If switched on, calculated the induced signal over this step.
+          if (useSignal) {
+            dt = sqrt(pow(dx - x, 2) + pow(dy - y, 2) + pow(dz - z, 2)) / 
+                 sqrt(vx * vx + vy * vy + vz * vz); 
+            sensor->AddSignal(-1, t, dt, 0.5 * (x + dx),
+                                         0.5 * (y + dy),
+                                         0.5 * (z + dz), vx, vy, vz);
+          }
+          stack[iEl].x = dx; stack[iEl].y = dy; stack[iEl].z = dz;
+          stack[iEl].t = t + dt;
+          stack[iEl].kx = newKx; 
+          stack[iEl].ky = newKy; 
+          stack[iEl].kz = newKz;
+          stack[iEl].status = -1;
+          endpoints.push_back(stack[iEl]);
+          stack.erase(stack.begin() + iEl);
+          ok = false;
+          break;
+        }
+        
         // If switched on, calculate the induced signal.
         if (useSignal) {
           sensor->AddSignal(-1, t, dt, x + 0.5 * vx * dt, 
@@ -1077,7 +1101,10 @@ AvalancheMicroscopic::TransportElectron(
     for (int i = nEndpoints; i--;) {
       const int np = GetNumberOfDriftLinePoints(i);
       int jL;
-      viewer->NewElectronDriftLine(np, jL);
+      if (np <= 0) continue;
+      viewer->NewElectronDriftLine(np, jL, 
+                                   endpoints[i].x0, endpoints[i].y0, 
+                                   endpoints[i].z0);
       for (int jP = np; jP--;) {
         GetDriftLinePoint(x, y, z, t, jP, i);
         viewer->SetPoint(jL, jP, x, y, z);

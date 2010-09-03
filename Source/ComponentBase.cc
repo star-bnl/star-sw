@@ -111,4 +111,14 @@ ComponentBase::GetBoundingBox(double& xmin, double& ymin, double& zmin,
 
 }
 
+bool
+ComponentBase::IsWireCrossed(
+                        const double x0, const double y0, const double z0,
+                        const double x1, const double y1, const double z1,
+                        double& xc, double& yc, double& zc) {
+  
+  return false;
+  
+}
+
 }

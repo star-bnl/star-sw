@@ -52,7 +52,10 @@ class Sensor {
                  double& xmax, double& ymax, double& zmax);
     // Check if a point is inside the user area
     bool IsInArea(const double x, const double y, const double z);
-
+    
+    bool IsWireCrossed(const double x0, const double y0, const double z0,
+                       const double x1, const double y1, const double z1,
+                       double& xc, double& yc, double& zc);
     // Return the voltage range
     bool GetVoltageRange(double& vmin, double& vmax);
 

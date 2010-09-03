@@ -511,8 +511,9 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
 
   // Get the energy loss for this process.
   double loss = energyLoss[level];
+  nsec = 0;
   // Secondary electron energy (none by default)
-  nsec = 0; esec = 0.;;
+  esec = 0.;;
   if (type == 1) {
     // Ionisation
     // Get the splitting parameter.
@@ -535,6 +536,10 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
     if (description[level][5] == 'D' &&
         description[level][6] == 'I' &&
         description[level][7] == 'S') {
+      if (fabs(loss * rgas[level] - 12.) < Small &&
+          e > 2 * loss * rgas[level]) {
+        loss += 2. * RndmUniform();
+      }
     }
     // Follow the de-excitation cascade (if switched on).
     if (useDeexcitation && iDeexcitation[level] >= 0) {
@@ -561,8 +566,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
         newDxcProd.energy = esec;
         newDxcProd.type = DxcTypeElectron;
         dxcProducts.push_back(newDxcProd);
-        ++nDeexcitationProducts;
-        ++nsec;
+        nsec = nDeexcitationProducts = 1;
         ++nPenning;
       }
     }
@@ -737,7 +741,7 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
   } 
 
   // Determine the scattering angle
-  ctheta = 1. - 2. * RndmUniform();
+  ctheta = 1. - 2 * RndmUniform();
   
   return true;
 

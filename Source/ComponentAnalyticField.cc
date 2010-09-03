@@ -17,9 +17,9 @@ ComponentAnalyticField::ComponentAnalyticField() {
 
 void 
 ComponentAnalyticField::ElectricField (
-                              const double x, const double y, const double z,
-                              double& ex, double& ey, double& ez, 
-                              Medium*& m, int& status) {
+                          const double x, const double y, const double z,
+                          double& ex, double& ey, double& ez, 
+                          Medium*& m, int& status) {
 
   // Initialize electric field and medium.
   ex = ey = ez = 0.;
@@ -53,9 +53,9 @@ ComponentAnalyticField::ElectricField (
 }
 
 void ComponentAnalyticField::ElectricField (
-                               const double x, const double y, const double z, 
-                               double& ex, double& ey, double& ez, double& v, 
-                               Medium*& m, int& status) {
+                           const double x, const double y, const double z, 
+                           double& ex, double& ey, double& ez, double& v, 
+                           Medium*& m, int& status) {
 
   // Initialize electric field and medium.
   ex = ey = ez = v = 0.;
@@ -154,6 +154,73 @@ ComponentAnalyticField::GetBoundingBox(double& x0, double& y0, double& z0,
     
 }
 
+bool
+ComponentAnalyticField::IsWireCrossed(double x0, double y0, double z0,
+                                      double x1, double y1, double z1,
+                                      double& xc, double& yc, double& zc) {
+
+  xc = x0; yc = y0; zc = z0;
+
+  if (nWires <= 0) return false;
+
+  const double dx = x1 - x0;
+  const double dy = y1 - y0;
+  const double d2 = dx * dx + dy * dy;
+  // Check that the step length is non-zero.
+  if (d2 < Small) return false;
+
+  // Check if a whole period has been crossed.
+  if ((perx && fabs(dx) >= sx) || 
+      (pery && fabs(dy) >= sy)) {
+    std::cerr << className << "::IsWireCrossed:\n";
+    std::cerr << "    Particle crossed more than one period.\n";
+    return false;
+  }
+  
+  // Both coordinates are assumed to be located inside 
+  // the drift area and inside a drift medium.
+  // This should have been checked before this call.
+
+  const double xm = 0.5 * (x0 + x1);
+  const double ym = 0.5 * (y0 + y1);
+  double dMin2 = 0.;
+  for (int i = nWires; i--;) {
+    double xw = w[i].x, yw = w[i].y;
+    if (perx) {
+      xw += sx * int(round((xm - xw) / sx));
+    }
+    if (pery) {
+      yw += sy * int(round((ym - yw) / sy));
+    }
+    // Calculate the smallest distance between track and wire.
+    const double xIn0 = dx * (xw - x0) + dy * (yw - y0);
+    // Check if the minimum is located before (x0, y0).
+    if (xIn0 < 0.) continue;
+    const double xIn1 = - (dx * (xw - x1) + dy * (yw - y1));
+    // Check if the minimum is located behind (x1, y1).
+    if (xIn1 < 0.) continue;
+    // Minimum is located between (x0, y0) and (x1, y1).
+    const double d02 = pow(xw - x0, 2) + pow(yw - y0, 2);
+    const double d12 = pow(xw - x1, 2) + pow(yw - y1, 2);
+    if (xIn1 * xIn1 * d02 > xIn0 * xIn0 * d12) {
+      dMin2 = d02 - xIn0 * xIn0 / d2;
+    } else {
+      dMin2 = d12 - xIn1 * xIn1 / d2;
+    }
+    const double r2 = 0.25 * w[i].d * w[i].d;
+    if (dMin2 < r2) {
+      // Wire has been crossed.
+      // Find the point of intersection.
+      const double t = (xIn0 - sqrt(xIn0 * xIn0 + d02 - r2)) / d2;
+      xc = x0 + t * dx;
+      yc = y0 + t * dy;
+      zc = z0 + (z1 - z0) * (xc - x0) / dx;
+      return true;
+    } 
+  }
+  return false;
+ 
+}
 
 void 
 ComponentAnalyticField::AddWire(const double x, const double y, 

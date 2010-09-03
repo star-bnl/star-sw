@@ -26,11 +26,17 @@ class ViewDrift {
     void SetArea(double xmin, double ymin, double zmin, 
                  double xmax, double ymax, double zmax);
     void Clear();
-    void NewElectronDriftLine(const int np, int& id);
-    void NewIonDriftLine(const int np, int& id);
+    void NewElectronDriftLine(const int np, int& id,
+                        const double x0, const double y0, const double z0);
+    void NewIonDriftLine(const int np, int& id,
+                        const double x0, const double y0, const double z0);
     void NewPhotonTrack(const double x0, const double y0, const double z0,
                         const double x1, const double y1, const double z1);
+    void NewChargedParticleTrack(const int np, int& id,
+                        const double x0, const double y0, const double z0);
     void SetPoint(const int iL, const int iP, 
+                  const double x, const double y, const double z);
+    void AddPoint(const int iL,
                   const double x, const double y, const double z);
     void Plot();
 
@@ -38,7 +44,7 @@ class ViewDrift {
     void SetIonColor(const std::string color);
     void SetHoleColor(const std::string color);
     void SetPhotonColor(const std::string color);
-    void SetTrackColor(const std::string color);
+    void SetChargedParticleColor(const std::string color);
 
   private:
  
@@ -63,7 +69,7 @@ class ViewDrift {
     int colorIon;
     int colorHole;
     int colorPhoton;
-    int colorTrack;
+    int colorChargedParticle;
 
 };
 

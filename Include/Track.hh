@@ -68,6 +68,10 @@ class Track {
 
     bool debug;
 
+    int plotId;
+    void PlotNewTrack(const double x0, const double y0, const double z0);
+    void PlotCluster(const double x0, const double y0, const double z0);
+
 };
 
 }

@@ -15,11 +15,11 @@ ViewDrift::ViewDrift() :
   nDriftLines(0) {
 
   plottingEngine.SetDefaultStyle();
-  colorElectron = plottingEngine.GetRootColor("orange");
-  colorIon      = plottingEngine.GetRootColor("red");
-  colorHole     = plottingEngine.GetRootColor("red");
-  colorPhoton   = plottingEngine.GetRootColor("blue");
-  colorTrack    = plottingEngine.GetRootColor("dark-green");
+  colorElectron        = plottingEngine.GetRootColor("orange");
+  colorIon             = plottingEngine.GetRootColor("red");
+  colorHole            = plottingEngine.GetRootColor("red");
+  colorPhoton          = plottingEngine.GetRootColor("blue");
+  colorChargedParticle = plottingEngine.GetRootColor("dark-green");
  
 }
 
@@ -71,17 +71,20 @@ ViewDrift::Clear() {
 }
 
 void
-ViewDrift::NewElectronDriftLine(const int np, int& id) {
+ViewDrift::NewElectronDriftLine(const int np, int& id,
+                      const double x0, const double y0, const double z0) {
 
   // Create a new electron drift line and add it to the list.
   if (np <= 0) {
     // Number of points is not yet known.
     TPolyLine3D p(1);
     p.SetLineColor(colorElectron);
+    p.SetPoint(0, x0, y0, z0);
     driftLines.push_back(p);
   } else {
     TPolyLine3D p(np);
     p.SetLineColor(colorElectron);
+    p.SetPoint(0, x0, y0, z0);
     driftLines.push_back(p);
   }
   // Return the index of this drift line.
@@ -91,17 +94,20 @@ ViewDrift::NewElectronDriftLine(const int np, int& id) {
 } 
 
 void
-ViewDrift::NewIonDriftLine(const int np, int& id) {
+ViewDrift::NewIonDriftLine(const int np, int& id,
+                 const double x0, const double y0, const double z0) {
 
   // Create a new ion drift line and add it to the list.
   if (np <= 0) {
     // Number of points is not yet known.
     TPolyLine3D p(1);
     p.SetLineColor(colorIon);
+    p.SetPoint(0, x0, y0, z0);
     driftLines.push_back(p);
   } else {
     TPolyLine3D p(np);
     p.SetLineColor(colorIon);
+    p.SetPoint(0, x0, y0, z0);
     driftLines.push_back(p);
   }
   // Return the index of this drift line.
@@ -126,6 +132,29 @@ ViewDrift::NewPhotonTrack(const double x0, const double y0, const double z0,
 }
 
 void
+ViewDrift::NewChargedParticleTrack(const int np, int& id,
+                     const double x0, const double y0, const double z0) {
+
+  // Create a new drift line and add it to the list.
+  if (np <= 0) {
+    // Number of points is not yet known.
+    TPolyLine3D p(1);
+    p.SetLineColor(colorChargedParticle);
+    p.SetPoint(0, x0, y0, z0);
+    driftLines.push_back(p);
+  } else {
+    TPolyLine3D p(np);
+    p.SetLineColor(colorChargedParticle);
+    p.SetPoint(0, x0, y0, z0);
+    driftLines.push_back(p);
+  }
+  // Return the index of this drift line.
+  id = nDriftLines;
+  ++nDriftLines;
+
+}
+
+void
 ViewDrift::SetPoint(const int iL, const int iP, 
                     const double x, const double y, const double z) {
   
@@ -138,6 +167,20 @@ ViewDrift::SetPoint(const int iL, const int iP,
   if (iP < 0) return;
   
   driftLines[iL].SetPoint(iP, x, y, z);
+
+}
+
+void
+ViewDrift::AddPoint(const int iL,
+                    const double x, const double y, const double z) {
+
+  if (iL < 0 || iL >= nDriftLines) {
+    std::cerr << "ViewDrift::AddPoint:\n";
+    std::cerr << "    Drift line index " << iL << " is out of range.\n";
+    return;
+  }
+
+  driftLines[iL].SetNextPoint(x, y, z);
 
 }
 
@@ -192,9 +235,9 @@ ViewDrift::SetPhotonColor(const std::string color) {
 }
 
 void
-ViewDrift::SetTrackColor(const std::string color) {
+ViewDrift::SetChargedParticleColor(const std::string color) {
 
-  colorTrack = plottingEngine.GetRootColor(color);
+  colorChargedParticle = plottingEngine.GetRootColor(color);
 
 }
 

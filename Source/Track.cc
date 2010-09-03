@@ -13,7 +13,8 @@ Track::Track() :
   sensor(0),
   isChanged(true), 
   usePlotting(false), viewer(0),
-  debug(false) {
+  debug(false),
+  plotId(-1) {
 
   SetBetaGamma(3.);
 
@@ -188,6 +189,27 @@ Track::DisablePlotting() {
 
   usePlotting = false;
   viewer = 0;
+
+}
+
+void
+Track::PlotNewTrack(const double x0, const double y0, const double z0) {
+
+  if (!usePlotting || viewer == 0) return;
+  
+  viewer->NewChargedParticleTrack(1, plotId, x0, y0, z0);
+ 
+}
+
+void
+Track::PlotCluster(const double x0, const double y0, const double z0) {
+
+  if (plotId < 0 || !usePlotting || viewer == 0) {
+    std::cerr << "Track::PlotCluster:\n";
+    std::cerr << "    No track set. Program bug!\n";
+    return;
+  }
+  viewer->AddPoint(plotId, x0, y0, z0);
 
 }
 

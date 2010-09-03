@@ -565,12 +565,14 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   if (useInducedCharge) ComputeInducedCharge(q);
 
   // Plot the drift line if requested
-  if (usePlotting) {
+  if (usePlotting && nDrift > 0) {
     int jL;
     if (q < 0) {
-      viewer->NewElectronDriftLine(nDrift, jL);
+      viewer->NewElectronDriftLine(nDrift, jL, 
+                                   drift[0].x, drift[0].y, drift[0].z);
     } else {
-      viewer->NewIonDriftLine(nDrift, jL);
+      viewer->NewIonDriftLine(nDrift, jL,
+                              drift[0].x, drift[0].y, drift[0].z);
     }
     for (int iP = 0; iP < nDrift; ++iP) {
       viewer->SetPoint(jL, iP, drift[iP].x, drift[iP].y, drift[iP].z);

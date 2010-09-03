@@ -17,7 +17,6 @@ class ComponentAnalyticField : public ComponentBase {
   public:
     // Constructor
     ComponentAnalyticField();
-    
     // Destructor
     ~ComponentAnalyticField() {}
     
@@ -36,6 +35,10 @@ class ComponentAnalyticField : public ComponentBase {
     
     bool GetBoundingBox(double& x0, double& y0, double& z0,
                         double& x1, double& y1, double& z1);
+
+    bool IsWireCrossed(double x0, double y0, double z0,
+                       double x1, double y1, double z1,
+                       double& xc, double& yc, double& zc);
 
     void AddWire(const double x, const double y, const double diameter, 
                  const double voltage, const char label,

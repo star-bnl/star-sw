@@ -78,7 +78,9 @@ $(OBJDIR)/DriftLineRKF.o: \
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
  
-$(OBJDIR)/Track.o: $(SRCDIR)/Track.cc $(INCDIR)/Track.hh
+$(OBJDIR)/Track.o: \
+	$(SRCDIR)/Track.cc $(INCDIR)/Track.hh \
+	$(INCDIR)/ViewDrift.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@        
 $(OBJDIR)/TrackBichsel.o: \

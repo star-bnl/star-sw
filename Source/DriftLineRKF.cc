@@ -200,11 +200,8 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
               << v[0] << ", " << v[1] << ", " <<v[2] << ")\n";
   }
 
-  int nPoints = 0;
   if (usePlotting) {
-    viewer->NewElectronDriftLine(1, iLine);
-    viewer->SetPoint(iLine, nPoints, r[0], r[1], r[2]);
-    ++nPoints;
+    viewer->NewElectronDriftLine(1, iLine, r[0], r[1], r[2]);
   }
  
   int counter = 0;
@@ -378,8 +375,7 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
     }
    
     if (usePlotting) {
-      viewer->SetPoint(iLine, nPoints, r[0], r[1], r[2]);
-      ++nPoints;
+      viewer->AddPoint(iLine, r[0], r[1], r[2]);
     }
 
     prev4th[0] = cur4th[0]; prev5th[0] = cur5th[0];
