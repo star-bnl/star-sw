@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: LoadJetLibraries.C,v 1.14.2.1 2010/03/06 00:56:44 tai Exp $
+// $Id: LoadJetLibraries.C,v 1.14.2.2 2010/09/03 22:42:39 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
 void LoadJetLibraries()
@@ -51,6 +51,41 @@ void LoadJetLibraries_DEV()
 }
 
 void LoadJetLibraries_SL10b()
+{
+  gROOT->Macro("loadMuDst.C");
+  gROOT->Macro("LoadLogger.C");
+  gSystem->Load("StTriggerFilterMaker");
+  gSystem->Load("StarMagField.so");
+  gSystem->Load("StMagF");
+  gSystem->Load("StTpcDb");
+  gSystem->Load("StDetectorDbMaker");
+  gSystem->Load("StDbUtilities");
+  gSystem->Load("StMcEvent");
+  gSystem->Load("StMcEventMaker");
+  gSystem->Load("geometry");
+  gSystem->Load("St_g2t");
+  gSystem->Load("St_geant_Maker");
+  gSystem->Load("StDaqLib");
+  gSystem->Load("StEmcRawMaker");
+  gSystem->Load("StEmcADCtoEMaker");
+  gSystem->Load("StPreEclMaker");
+  gSystem->Load("StEpcMaker");
+  gSystem->Load("StEmcSimulatorMaker");
+  gSystem->Load("StDbBroker");
+  gSystem->Load("St_db_Maker");
+  gSystem->Load("StEEmcUtil");
+  gSystem->Load("StEEmcDbMaker");
+  gSystem->Load("StSpinDbMaker");
+  gSystem->Load("StEmcTriggerMaker");
+  gSystem->Load("StTriggerUtilities");
+  gSystem->Load("StMCAsymMaker");
+  gSystem->Load("StJetFinder");
+  gSystem->Load("StJets");
+  gSystem->Load("StJetSkimEvent");
+  gSystem->Load("StJetMaker");
+}
+
+void LoadJetLibraries_SL09d()
 {
   gROOT->Macro("loadMuDst.C");
   gROOT->Macro("LoadLogger.C");
