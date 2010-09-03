@@ -513,7 +513,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
   double loss = energyLoss[level];
   nsec = 0;
   // Secondary electron energy (none by default)
-  esec = 0.;;
+  esec = 0.;
   if (type == 1) {
     // Ionisation
     // Get the splitting parameter.
@@ -527,7 +527,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
     } else {
       esec = RndmUniform() * (e - loss);
     }
-    if (esec <= 0) esec = 1.e-20;
+    if (esec <= 0) esec = Small;
     loss += esec;
     nsec = 1;
   } else if (type == 4) {
@@ -566,7 +566,8 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
         newDxcProd.energy = esec;
         newDxcProd.type = DxcTypeElectron;
         dxcProducts.push_back(newDxcProd);
-        nsec = nDeexcitationProducts = 1;
+        nsec = 1;
+        nDeexcitationProducts = 1;
         ++nPenning;
       }
     }

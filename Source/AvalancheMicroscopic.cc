@@ -968,14 +968,19 @@ AvalancheMicroscopic::TransportElectron(
                   const double yDxc = y + sDxc * sin(phi) * stheta0;
                   const double zDxc = z + sDxc * ctheta0;
                   // Get the electric field and medium at this location.
-                  Medium* dxcMedium;
-                  double fx, fy, fz;
+                  Medium* dxcMedium = 0;
+                  double fx = 0., fy = 0., fz = 0.;
                   sensor->ElectricField(xDxc, yDxc, zDxc, 
                                         fx, fy, fz, dxcMedium, status);
                   // Check if this location is inside a drift medium.
                   if (status != 0) continue;
-                  // Check if this location is inside the drift area
+                  // Check if this location is inside the drift area.
                   if (!sensor->IsInArea(xDxc, yDxc, zDxc)) continue;
+                  // Make sure we haven't jumped across a wire.
+                  if (sensor->IsWireCrossed(x, y, z, xDxc, yDxc, zDxc, 
+                                            dx, dy, dz)) {
+                    continue;
+                  } 
                   newElectron.x0 = xDxc; newElectron.x = xDxc;
                   newElectron.y0 = yDxc; newElectron.y = yDxc;
                   newElectron.z0 = zDxc; newElectron.z = zDxc;
