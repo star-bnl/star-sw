@@ -108,7 +108,7 @@ void StiDetectorContainer::reset()
   StiDetectorNodeVector::iterator where = find_if(mroot->begin(), mroot->end(), mySameOrderKey);
   if (where==mroot->end()) 
     throw runtime_error("StiDetectorContainer::setToDetector(StiDetector*) -E-  mid-rapidity region not found - where==0");
-  mregion = mregion = where;
+  mregion = where;
   //This will seg fault if (*mregion)->begin()==(*mregion)->end() !!!!!!!
   mradial_it = (*mregion)->begin(); //change (MLM)
   mphi_it = (*mradial_it)->begin();
