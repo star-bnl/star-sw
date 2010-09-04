@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: LoadJetLibraries.C,v 1.14.2.2 2010/09/03 22:42:39 tai Exp $
+// $Id: LoadJetLibraries.C,v 1.14.2.3 2010/09/04 04:37:30 tai Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 
 void LoadJetLibraries()
@@ -12,7 +12,7 @@ void LoadJetLibraries()
 
   setIncludePath();
 
-  gROOT->ProcessLine(".L StjDict.C+");
+  //  gROOT->ProcessLine(".L StjDict.C+");
 }
 
 void LoadJetLibraries_DEV()

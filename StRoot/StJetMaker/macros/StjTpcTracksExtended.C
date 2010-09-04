@@ -32,7 +32,7 @@ public:
   virtual ~StjTpcTracksExtended() { }
 
   const char* GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StjTpcTracksExtended.C,v 1.1.2.1 2010/09/03 22:42:54 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StjTpcTracksExtended.C,v 1.1.2.2 2010/09/04 04:35:44 tai Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 private:
 
@@ -106,6 +106,10 @@ public:
   {
     _file->cd();
     _tree = new TTree("tpcTracksExtended", "tpcTracksExtended");
+    _tree->SetAutoSave(kMaxLong64);
+    _tree->SetMaxTreeSize(kMaxLong64);
+
+
     _tree->Branch("runNumber"  , &_runNumber  , "runNumber/I"  );
     _tree->Branch("eventId"    , &_eventId    , "eventId/I"    );
 
