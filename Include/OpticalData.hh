@@ -25,23 +25,15 @@ class OpticalData {
 
   private:
 
-    std::vector<double> energy;
-    std::vector<double> eps1;
-    std::vector<double> eps2;
-    std::vector<double> pacs;
-
-    double emin, emax;
-
-    std::vector<double> energyIon;
-    std::vector<double> yieldIon;
-    double ionmin, ionmax;
-
     bool debug;
 
+    bool PhotoAbsorptionCsNeon(const double e, double& cs, double& eta);
     bool PhotoAbsorptionCsArgon(const double e, double& cs, double& eta);
+    
+    bool PhotoAbsorptionCsCO2(const double e, double& cs, double& eta);
+
     bool PhotoAbsorptionCsMethane(const double e, double& cs, double& eta);
     bool PhotoAbsorptionCsAcetylene(const double e, double& cs, double& eta);
-    void Isobutane();
  
 };
 
