@@ -20,14 +20,11 @@ StiTrackFinderFilter::~StiTrackFinderFilter()
 
 bool StiTrackFinderFilter::accept(const StiTrack *track) const
 {
-  //cout << " + ";
   int npts = track->getPointCount();
   int fitNpts = track->getFitPointCount();
-  //cout << " | ";
-  if (npts<1 || fitNpts<1) return false;
-  //  double ratio = fitNpts/npts;
-  if (npts>_minPtsCount && fitNpts>_minFitPtsCount) // && ratio>_minFitToPtsRatio)
-    {
+
+  if (npts > _minPtsCount && fitNpts > _minFitPtsCount) {
+#ifdef NODE_CHECK
       //cout << " $";
       const StiKalmanTrack * kTrack = static_cast<const StiKalmanTrack*>(track);
       if (kTrack==0) return false;
@@ -53,11 +50,19 @@ bool StiTrackFinderFilter::accept(const StiTrack *track) const
 	}
       
       if (!weird)
-	return true;
+	return kNoErrors;
       else
-	return false;
+	return kWeird;
+#else
+      return kNoErrors;
+#endif /* NODE_CHECK */
     }
-  else
+  else{
+    if (npts > _minPtsCount)
+      return kNoEnoughValidHits;
+    else
+      return kNoEnoughFittedValidHits;    
+  }
     return false;
 }
 

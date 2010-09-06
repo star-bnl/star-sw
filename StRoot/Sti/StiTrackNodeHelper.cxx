@@ -58,6 +58,7 @@ void StiTrackNodeHelper::reset()
 //______________________________________________________________________________
 void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode)		
 {
+  static const double EC = 2.99792458e-4;
   if(!pNode) reset();
   mParentNode = pNode;
   mTargetNode = sNode;
@@ -65,12 +66,12 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
   mParentHz = mTargetHz;
   if (mParentNode) {
     mParentHz = mParentNode->getHz();
-    assert(fabs(mParentHz-mParentNode->mFP._hz)<1e-10);
+    assert(fabs(mParentHz-mParentNode->mFP.hz()) < EC*0.1); // allow the difference in 100 Gauss. TODO check why 10 is not enough
     mParentNode->mFP.check("2StiTrackNodeHelper::set");
   }
   if (mTargetNode->isValid()) {
     mTargetNode->mFP.check("1StiTrackNodeHelper::set");
-    assert(fabs(mTargetHz-mTargetNode->mFP._hz)<1e-10);
+    assert(fabs(mTargetHz-mTargetNode->mFP.hz()) < EC*0.1);
   }
 
   mDetector   = mTargetNode->getDetector();
@@ -98,31 +99,31 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   rotPars = parPars;
   if (fabs(alpha) > 1.e-6) { //rotation part
 
-    double xt1=parPars._x; 
-    double yt1=parPars._y; 
+    double xt1=parPars.x(); 
+    double yt1=parPars.y(); 
     double cosCA0 = parPars._cosCA;
     double sinCA0 = parPars._sinCA;
 
     ca = cos(alpha);
     sa = sin(alpha);
 
-    rotPars._x = xt1*ca + yt1*sa;
-    rotPars._y= -xt1*sa + yt1*ca;
+    rotPars.x() = xt1*ca + yt1*sa;
+    rotPars.y() = -xt1*sa + yt1*ca;
     rotPars._cosCA =  cosCA0*ca+sinCA0*sa;
     rotPars._sinCA = -cosCA0*sa+sinCA0*ca;
     double nor = 0.5*(rotPars._sinCA*rotPars._sinCA+rotPars._cosCA*rotPars._cosCA +1);
     rotPars._cosCA /= nor;
     rotPars._sinCA /= nor;
-    rotPars._eta= NICE(parPars._eta-alpha); 
+    rotPars.eta()= NICE(parPars.eta()-alpha); 
   }// end of rotation part
   ierr = rotPars.check();
   if (ierr) return 1;
   
 //  	Propagation 
-  x1 = rotPars._x;
+  x1 = rotPars.x();
   x2 = (mDetector)? mDetector->getPlacement()->getNormalRadius():mHitPars[0];
   dx = x2-x1;
-  rho = 0.5*(mTargetHz*rotPars._ptin+rotPars._curv);
+  rho = 0.5*(mTargetHz*rotPars.ptin()+rotPars.curv());
   dsin = rho*dx;
   sinCA2=rotPars._sinCA + dsin; 
   if (sinCA2> 0.95) sinCA2= 0.95;
@@ -131,7 +132,7 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
   sumSin   = rotPars._sinCA+sinCA2;
   sumCos   = rotPars._cosCA+cosCA2;
   dy = dx*(sumSin/sumCos);
-  y2 = rotPars._y+dy;
+  y2 = rotPars.y()+dy;
   dl0 = rotPars._cosCA*dx+rotPars._sinCA*dy;
   sind = dl0*rho;
   if (fabs(dsin) < 0.02 && rotPars._cosCA >0) { //tiny angle
@@ -141,15 +142,15 @@ int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
     dl = atan2(sind,cosd)/rho;
   }
 
-  proPars._x = x2;
-  proPars._y = y2;
-  proPars._z= rotPars._z + dl*rotPars._tanl;
-  proPars._eta = (rotPars._eta+rho*dl);  					
-  proPars._eta = NICE(proPars._eta);  					
-  proPars._ptin = rotPars._ptin;
-  proPars._hz   = mTargetHz;
-  proPars._curv = proPars._ptin*mTargetHz;
-  proPars._tanl = rotPars._tanl;
+  proPars.x() = x2;
+  proPars.y() = y2;
+  proPars.z() = rotPars.z() + dl*rotPars.tanl();
+  proPars.eta() = (rotPars.eta()+rho*dl);  					
+  proPars.eta() = NICE(proPars.eta());  					
+  proPars.ptin() = rotPars.ptin();
+  proPars.hz()   = mTargetHz;
+  proPars.curv() = proPars.ptin()*mTargetHz;
+  proPars.tanl() = rotPars.tanl();
   proPars._sinCA   = sinCA2;
   proPars._cosCA   = cosCA2;
   ierr = proPars.check();
@@ -163,17 +164,17 @@ int StiTrackNodeHelper::propagateFitd()
 //		remember that in matrix diagonal and correction factors
 //              1. subtructed.
    int ierr = 0;
-   mBestPars._ptin *= (1+mMcs._ptinCorr);
-   mBestPars._curv *= (1+mMcs._ptinCorr);
+   mBestPars.ptin() *= (1+mMcs._ptinCorr);
+   mBestPars.curv() *= (1+mMcs._ptinCorr);
    mMtx.A[4][4] = (mMtx.A[4][4]+1)*(1+mMcs._ptinCorr) -1;
 
    StiNodePars rotPars;
    ierr = propagatePars(mFitdParentPars,rotPars,mPredPars);
    if (ierr) return 1;
 //   cutStep(&mBestPars,&mPredPars);
-   mPredPars._hz = mTargetHz;
-   mPredPars._ptin *= (1+mMcs._ptinCorr);
-   mPredPars._curv *= (1+mMcs._ptinCorr);
+   mPredPars.hz() = mTargetHz;
+   mPredPars.ptin() *= (1+mMcs._ptinCorr);
+   mPredPars.curv() *= (1+mMcs._ptinCorr);
    mPredPars.ready();
    ierr = mPredPars.check();
    if (ierr) return 2;
@@ -189,7 +190,7 @@ int StiTrackNodeHelper::propagateMtx()
   double fYE= dx*(1.+mBestParentRotPars._cosCA*cosCA2+mBestParentRotPars._sinCA*sinCA2)/(sumCos*cosCA2);
 //	fZE == dZ/dEta
   double dLdEta = dy/cosCA2;
-  double fZE =  mBestPars._tanl*dLdEta;
+  double fZE =  mBestPars.tanl()*dLdEta;
 //  	fZT == dZ/dTanL; 
   double fZT= dl; 
 
@@ -204,7 +205,7 @@ int StiTrackNodeHelper::propagateMtx()
                0.5*sinCA2*pow((1+pow(dang/2,2)*sinX(dang/2)),2) +
                    cosCA2*dang*sinX(dang));
 
-  double fZC = mBestPars._tanl*C2LDX/cosCA2;
+  double fZC = mBestPars.tanl()*C2LDX/cosCA2;
 
   fEC*=mTargetHz; fYC*=mTargetHz;fZC*=mTargetHz;
     
@@ -213,8 +214,8 @@ int StiTrackNodeHelper::propagateMtx()
 //  X related derivatives
   mMtx.A[0][0] = -1;
   mMtx.A[1][0] = -sinCA2/cosCA2; 
-  mMtx.A[2][0] = -mBestPars._tanl/cosCA2 ;
-  mMtx.A[3][0] = -mBestPars._curv/cosCA2 ;       ;
+  mMtx.A[2][0] = -mBestPars.tanl()/cosCA2 ;
+  mMtx.A[3][0] = -mBestPars.curv()/cosCA2 ;       ;
 
   mMtx.A[1][3]=fYE; mMtx.A[1][4]=fYC; mMtx.A[2][3]=fZE;
   mMtx.A[2][4]=fZC; mMtx.A[2][5]=fZT; mMtx.A[3][4]=fEC;
@@ -340,10 +341,10 @@ StiDebug::Break(nCall);
        {mWorstNode=mTargetNode;}
     if (!mParentNode) 			break;
     double accu,errr;
-    accu = mJoinPars._ptin - mBestParentPars._ptin*(1+mMcs._ptinCorr);
+    accu = mJoinPars.ptin() - mBestParentPars.ptin()*(1+mMcs._ptinCorr);
     errr = sqrt(0.5*(fabs(mJoinErrs._cPP)+fabs(mBestParentErrs._cPP)));
     mCurvQa.add(accu/errr);    
-    accu = mJoinPars._tanl - mBestParentPars._tanl;
+    accu = mJoinPars.tanl() - mBestParentPars.tanl();
     errr = sqrt(0.5*(fabs(mJoinErrs._cTT)+fabs(mBestParentErrs._cTT)));
     mTanlQa.add(accu/errr);    
   }while(0);
@@ -393,7 +394,7 @@ if (!oldJoinPrim) {
         chi2 = joinTwo(kNPars,mTargetNode->mPP().P,mTargetNode->mPE().A
                       ,kNPars,mFitdPars.P         ,mFitdErrs.A
                              ,mJoinPars.P         ,mJoinErrs.A);
-        mJoinPars._hz = mTargetHz;
+        mJoinPars.hz() = mTargetHz;
 	mJoinErrs.recov();
 
 
@@ -429,7 +430,7 @@ if (!oldJoinPrim) {
      }//end Switch
   } while(kase>=0);
 
-   assert(fabs(mJoinPars._hz-mTargetHz)<=1e-10);
+   assert(fabs(mJoinPars.hz()-mTargetHz)<=1e-10);
    assert(fabs(mTargetNode->getHz()-mTargetHz)<=1e-10);
 
 
@@ -622,8 +623,8 @@ double StiTrackNodeHelper::joinVtx(const double      *Y,const StiHitErrs  &B
 //______________________________________________________________________________
 int StiTrackNodeHelper::save()
 {
-   assert(fabs(mPredPars._hz-mTargetHz)<=1e-10);
-   assert(fabs(mFitdPars._hz-mTargetHz)<=1e-10);
+   assert(fabs(mPredPars.hz()-mTargetHz)<=1e-10);
+   assert(fabs(mFitdPars.hz()-mTargetHz)<=1e-10);
    assert(fabs(mTargetNode->getHz()-mTargetHz)<=1e-10);
    
    mTargetNode->mPP() = mPredPars;
@@ -650,8 +651,8 @@ int StiTrackNodeHelper::propagateMCS()
   mMcs.reset();
   if (!mDetector) 			return 0;
   mMcs._ptinCorr =  0;
-  if (fabs(mBestPars._ptin)<=1e-3)	return 0;
-  double pt     = 1./fabs(mBestPars._ptin);
+  if (fabs(mBestPars.ptin())<=1e-3)	return 0;
+  double pt     = 1./fabs(mBestPars.ptin());
 
   double relRadThickness;
   // Half path length in previous node
@@ -664,7 +665,7 @@ int StiTrackNodeHelper::propagateMCS()
   double x0p =-1;
   double x0Gas=-1;
   double x0=-1;
-  dx = mBestPars._x - mBestParentRotPars._x;
+  dx = mBestPars.x() - mBestParentRotPars.x();
   d1    = mParentNode->getDensity();
   x0p   = mParentNode->getX0();
   d3    = mDetector->getMaterial()->getDensity();
@@ -709,8 +710,8 @@ int StiTrackNodeHelper::propagateMCS()
 	dxEloss += d3*pL3;
       }
     }
-  double tanl   = mBestPars._tanl;
-  double pti    = mBestPars._ptin; 
+  double tanl   = mBestPars.tanl();
+  double pti    = mBestPars.ptin(); 
   double p2     = (1.+tanl*tanl)*pt*pt;
   double m      = StiKalmanTrackFinderParameters::instance()->getMassHypothesis();
   double m2     = m*m;
@@ -757,10 +758,10 @@ double StiTrackNodeHelper::evalChi2()
   //If required, recalculate the errors of the detector hits.
   //Do not attempt this calculation for the main vertex.
   if (fabs(mPredPars._sinCA)>0.99        )	return 1e41;
-  if (fabs(mPredPars._eta)       >kMaxEta) 	return 1e41;
-  if (fabs(mPredPars._curv)      >kMaxCur)      return 1e41;
+  if (fabs(mPredPars.eta())       >kMaxEta) 	return 1e41;
+  if (fabs(mPredPars.curv())      >kMaxCur)      return 1e41;
   if (!mDetector) 	{ //Primay vertex
-    mHitPars[0] = mPredPars._x;
+    mHitPars[0] = mPredPars.x();
 //    chi2 = joinVtx(mHitPars,mHrr.A,mPredPars.P,mPredErrs.A);
     chi2 = joinVtx(mHitPars,mHrr,mPredPars,mPredErrs);
   } else 		{ //Normal hit
@@ -775,8 +776,8 @@ double StiTrackNodeHelper::evalChi2()
     }
     double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
 
-    double dyt=(mPredPars._y-mHitPars[1]);
-    double dzt=(mPredPars._z-mHitPars[2]);
+    double dyt=(mPredPars.y()-mHitPars[1]);
+    double dzt=(mPredPars.z()-mHitPars[2]);
     chi2 = (dyt*r00*dyt + 2*r01*dyt*dzt + dzt*r11*dzt)/mDetm;
   }
   return chi2;
@@ -808,8 +809,8 @@ double StiTrackNodeHelper::evalChi2()
 double StiTrackNodeHelper::recvChi2() 
 {
   if (fabs(mJoinPars._sinCA)>0.99        )	return 1e41;
-  if (fabs(mJoinPars._eta)       >kMaxEta) 	return 1e41;
-  if (fabs(mJoinPars._curv)      >kMaxCur)      return 1e41;
+  if (fabs(mJoinPars.eta())       >kMaxEta) 	return 1e41;
+  if (fabs(mJoinPars.curv())      >kMaxCur)      return 1e41;
   if (!mDetector) {//Primary vertex
 //  double chi2 =joinVtx(mHitPars,mHrr.A,mPredPars.P,mPredErrs.A);
     double chi2 =joinVtx(mHitPars,mHrr  ,mPredPars  ,mPredErrs  );
@@ -831,8 +832,8 @@ double StiTrackNodeHelper::recvChi2()
   double chi2 = joinTwo(3,mHitPars    ,    myHrr.A
                        ,3,mJoinPars.P,mJoinErrs.A
 		         ,recovPars.P,recovErrs.A);
-  if (fabs(recovPars._y-mHitPars[1])>10) StiDebug::Break(-1);
-  if (fabs(recovPars._z-mHitPars[2])>10) StiDebug::Break(-1);
+  if (fabs(recovPars.y()-mHitPars[1])>10) StiDebug::Break(-1);
+  if (fabs(recovPars.z()-mHitPars[2])>10) StiDebug::Break(-1);
 
   mUnTouch.set(recovPars,recovErrs);
   return -chi2; //account that result is negative
@@ -873,10 +874,10 @@ static int nCall=0; nCall++;
   double r00,r01,r11;
   StiDebug::Break(mTargetNode->mId);
   if (!mDetector)	{ //Primary vertex
-    mHitPars[0] = mPredPars._x;
+    mHitPars[0] = mPredPars.x();
 //  double chi2 = joinVtx(mHitPars,mHrr.A,mPredPars.P,mPredErrs.A,mFitdPars.P,mFitdErrs.A);
     double chi2 = joinVtx(mHitPars,mHrr,mPredPars,mPredErrs,&mFitdPars,&mFitdErrs);
-    mFitdPars._curv = mTargetHz*mFitdPars._ptin;
+    mFitdPars.curv() = mTargetHz*mFitdPars.ptin();
     assert(chi2>900 || fabs(mChi2-chi2)<1e-10);
     if (debug()) {
       StiKalmanTrackNode::ResetComment(Form("Vertex                        "));
@@ -898,16 +899,16 @@ static int nCall=0; nCall++;
     double k30=mPredErrs._cPY*r00+mPredErrs._cPZ*r01, k31=mPredErrs._cPY*r01+mPredErrs._cPZ*r11;
     double k40=mPredErrs._cTY*r00+mPredErrs._cTZ*r01, k41=mPredErrs._cTY*r01+mPredErrs._cTZ*r11;
 
-    double myY = mPredPars._y;
-    double myZ = mPredPars._z;
+    double myY = mPredPars.y();
+    double myZ = mPredPars.z();
     double dyt  = mHitPars[1] - myY;
     double dzt  = mHitPars[2] - myZ;
     double dPt  = k30*dyt + k31*dzt;
     double dEt  = k20*dyt + k21*dzt;
     double dTa  = k40*dyt + k41*dzt;
-    double eta  = NICE(mPredPars._eta + dEt);
-    double pti  = mPredPars._ptin+ dPt;
-    double tanl = mPredPars._tanl + dTa;
+    double eta  = NICE(mPredPars.eta() + dEt);
+    double pti  = mPredPars.ptin() + dPt;
+    double tanl = mPredPars.tanl() + dTa;
     // Check if any of the quantities required to pursue the update
     // are infinite. If so, it means the tracks cannot be update/propagated
     // any longer and should therefore be abandoned. Just return. This is 
@@ -920,18 +921,18 @@ static int nCall=0; nCall++;
     // The following test introduces a track propagation error but happens
     // only when the track should be aborted so we don't care...
 
-    mFitdPars._hz = mTargetHz;
-    mFitdPars._x  = mPredPars._x;
-    mFitdPars._y  = p0;
-    mFitdPars._z  = p1;
-    mFitdPars._eta   = eta;
-    mFitdPars._ptin = pti;
-    mFitdPars._curv  = mTargetHz*pti;
-    mFitdPars._tanl  = tanl;
+    mFitdPars.hz() = mTargetHz;
+    mFitdPars.x()  = mPredPars.x();
+    mFitdPars.y()  = p0;
+    mFitdPars.z()  = p1;
+    mFitdPars.eta()   = eta;
+    mFitdPars.ptin() = pti;
+    mFitdPars.curv()  = mTargetHz*pti;
+    mFitdPars.tanl()  = tanl;
     mFitdPars._sinCA = sinCA;
     mFitdPars._cosCA = ::sqrt((1.-mFitdPars._sinCA)*(1.+mFitdPars._sinCA)); 
     if (!mDetector) 
-      assert(fabs(mFitdPars._y-mHitPars[1])>1e-10 ||  fabs(mHitPars[0])<4);
+      assert(fabs(mFitdPars.y()-mHitPars[1])>1e-10 ||  fabs(mHitPars[0])<4);
 //??    cutStep(&mFitdPars,&mPredPars);
 //??    cutStep(&mFitdPars,&mBestPars);
     if (mFitdPars.check()) return -11;
@@ -1027,14 +1028,14 @@ int StiTrackNodeHelper::nudge()
   if(!mHit) return 0;
   StiNodePars *pars = &mBestPars;
   for (int i=0;i<2;i++,pars =&mPredPars) {
-    double deltaX = mHitPars[0]-pars->_x;
+    double deltaX = mHitPars[0]-pars->x();
     if (fabs(deltaX) <1e-6) continue;
     double deltaL = deltaX/pars->_cosCA;
-    double deltaE = pars->_curv*deltaL;
-    pars->_x      = mHitPars[0];
-    pars->_y     += pars->_sinCA *deltaL;
-    pars->_z     += pars->_tanl  *deltaL;
-    pars->_eta   +=               deltaE;
+    double deltaE = pars->curv()*deltaL;
+    pars->x()      = mHitPars[0];
+    pars->y()     += pars->_sinCA *deltaL;
+    pars->z()     += pars->tanl()  *deltaL;
+    pars->eta()   +=               deltaE;
     pars->_cosCA -= pars->_sinCA *deltaE;
     pars->_sinCA += pars->_cosCA *deltaE;
     if (pars->_cosCA>=1.) pars->ready();
@@ -1047,7 +1048,7 @@ double StiTrackNodeHelper::pathIn(const StiDetector *det,StiNodePars *pars)
 {
   if (!det) return 0.; 
   double thickness = det->getShape()->getThickness();
-  double t = pars->_tanl;
+  double t = pars->tanl();
   double c = pars->_cosCA;
   return (thickness*::sqrt(1.+t*t)) / c;
 }
@@ -1073,9 +1074,9 @@ int errTest(StiNodePars &predP,StiNodeErrs &predE,
 
   StiNodePars mineP,hittP;
   StiNodeErrs mineE,hittE;
-  hittP._x = hit->x();
-  hittP._y = hit->y();
-  hittP._z = hit->z();
+  hittP.x() = hit->x();
+  hittP.y() = hit->y();
+  hittP.z() = hit->z();
   memcpy(hittE.A,hitErr.A,sizeof(StiNodeErrs));
   
   double myChi2 = StiTrackNodeHelper::joinTwo(

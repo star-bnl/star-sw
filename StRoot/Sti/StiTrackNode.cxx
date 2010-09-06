@@ -444,10 +444,10 @@ int StiNodePars::check(const char *pri) const
 
   int ierr=0;
 //?? temp test
-  double tmp = _curv - _ptin* _hz;
+  double tmp = curv() - ptin()* hz();
 //		1km for 1GeV is a zero field
 //  assert(fabs(_hz)<1e-5 || fabs(tmp)<= 1e-3*fabs(_curv));
-  if (fabs(_hz)>=1e-5 && fabs(tmp)> 1e-3*fabs(_curv)) {ierr=1313; goto FAILED;}
+  if (fabs(hz())>=1e-5 && fabs(tmp)> 1e-3*fabs(curv())) {ierr=1313; goto FAILED;}
   for (int i=0;i<kNPars;i++) {if (fabs(P[i]) > MAXPARS[i]) {ierr = i+1 ; break;}} 
   if(ierr) goto FAILED;
   for (int i=-2;i<0;i++)     {if (fabs(P[i]) > 1.)         {ierr = i+12; break;}} 
@@ -486,7 +486,7 @@ void StiHitErrs::rotate(double angle)
 //______________________________________________________________________________
 void StiNode2Pars::set(const StiNodePars &pars,StiNodeErrs &errs)
 {
-  mPar[0]=pars._y; mPar[1]=pars._z;
+  mPar[0]=pars.y(); mPar[1]=pars.z();
   mErr[0]=errs._cYY;
   mErr[1]=errs._cZY;
   mErr[2]=errs._cZZ;

@@ -20,9 +20,9 @@ Int_t StiKalmanTrackFitter::_debug = 0;
 */
 Int_t StiKalmanTrackFitter::fit(StiTrack * stiTrack, Int_t fitDirection) //throw (Exception)
 {
-   enum {kMaxNErr=333};
-static Int_t nCall=0; nCall++;
-StiKalmanTrackNode::Break(nCall);
+  enum {kMaxNErr=333};
+  static Int_t nCall=0; nCall++;
+  StiKalmanTrackNode::Break(nCall);
 
   if (debug() > 2) cout << "SKTFitter::fit() -I- Started:"<<endl;
   StiKalmanTrack * track = dynamic_cast<StiKalmanTrack * >(stiTrack);
@@ -46,7 +46,7 @@ StiKalmanTrackNode::Break(nCall);
   if (debug()) cout << "StiKalmanTrackFitter::fit direction = "  << fitDirection << endl;
 // 1st count number of accepted already good nodes
   Int_t nGoodNodes = track->getNNodes(3);
-  if (nGoodNodes<3) 			return 1;
+  if (nGoodNodes<3) 			return kShortTrackBeforeFit;
 
 
   StiKalmanTrackNode *pNode = 0;
@@ -59,7 +59,7 @@ StiKalmanTrackNode::Break(nCall);
       targetDet = targetNode->getDetector();
       targetHit = targetNode->getHit();
       Double_t oldChi2 = targetNode->getChi2(); if(oldChi2){/*debugonly*/};
-static Int_t myKount=0;myKount++;
+      static Int_t myKount=0;myKount++;
       if (!pNode && !targetNode->isValid()) continue;
       //begin refit at first hit
       status = 0;
@@ -102,8 +102,8 @@ static Int_t myKount=0;myKount++;
     } while(0);//end refit block
   }//end for of nodes
   nGoodNodes = track->getNNodes(3);
-  if (nGoodNodes<3) return 1;
-  return (nerr>kMaxNErr)? nerr:0;
+  if (nGoodNodes<3) return kShortTrackAfterFit;
+  return (nerr>kMaxNErr)? kManyErrors:0;
 }
 
 /*

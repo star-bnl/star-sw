@@ -1,11 +1,35 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.118 2010/04/03 04:04:57 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.118 2010/04/03 04:04:57 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.119 2010/09/06 18:20:48 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.119 2010/09/06 18:20:48 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.119  2010/09/06 18:20:48  fisyak
+ * Add TPCCATracker
+ *
+ * Revision 1.8  2010/08/25 21:34:05  ikulakov
+ * Warnings fix.
+ *
+ * Revision 1.7  2010/08/23 21:56:28  ikulakov
+ * Fix - alinghment bag.
+ *
+ * Revision 1.6  2010/08/09 17:51:14  mzyzak
+ * StiPerformance is added; bug with cov matrix of the seed parameters is fixed; bug with the q/p sign of the seed parameters is fixed; functionality of the performance is extended
+ *
+ * Revision 1.5  2010/08/05 21:16:53  ikulakov
+ * Add fit status statistic.
+ *
+ * Revision 1.4  2010/08/04 13:45:46  ikulakov
+ * Fix - hz & sign pt.
+ *
+ * Revision 1.3  2010/08/02 16:45:27  ikulakov
+ * Use tracks params obtained from CATracker for StRoot KF fitter initialization.
+ *
+ * Revision 1.2  2010/07/29 16:19:11  fisyak
+ * GSI CA tracker
+ *
  * Revision 2.118  2010/04/03 04:04:57  perev
  * Account field=0
  *
@@ -469,10 +493,22 @@ void StiKalmanTrack::setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>* val)
 <li>Throws a logic error exception if hits do not have a valid pointer to a detector object.</li>
 </OL>
 */
-
 //_____________________________________________________________________________
 int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
 {
+#ifdef DO_TPCCATRACKER
+  initialize0(hits);
+  
+  int ierr = approx(0);
+  if (!ierr) return 0;
+  BFactory::Free(this);
+  return 1;
+}
+
+
+int StiKalmanTrack::initialize0(const std::vector<StiHit*> &hits, StiNodePars *firstPars, StiNodePars *lastPars, StiNodeErrs *firstErrs, StiNodeErrs *lastErrs)
+{
+#endif /* DO_TPCCATRACKER */
   //cout << "StiKalmanTrack::initialize() -I- Started"<<endl;
   reset();
   //StiKalmanTrackNode * node  = 0;
@@ -488,11 +524,28 @@ int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
     n->initialize(hit);
     add(n,kOutsideIn);
   }
-
+#ifdef DO_TPCCATRACKER
+  if (firstPars){
+    firstNode->fitPars() = *firstPars;
+  }
+  if (firstErrs){ 
+    firstNode->fitErrs() = *firstErrs;
+      //    firstNode->resetError();
+  }
+  if (lastPars){
+    lastNode ->fitPars() = *lastPars;
+  }
+  if (lastErrs){ 
+    lastNode->fitErrs() = *lastErrs;
+      //    firstNode->resetError();
+  }
+  return 0;  
+#else /* !DO_TPCCATRACKER */
   int ierr = approx(0);
   if (!ierr) return 0;
   BFactory::Free(this);
   return 1;  
+#endif /* DO_TPCCATRACKER */
 }
 
 //_____________________________________________________________________________
@@ -731,7 +784,9 @@ enum {kPP=0,kMP=1,kFP=2};
 */
 double StiKalmanTrack::getTrackLength() const
 {
-  double x[2][4],len=0;
+  double x[2][4];
+  for (int i = 0; i < 4; i++){ x[0][i] = 0; }
+  double len=0;
   int iready=0;
   StiKalmanTrackNode *node;
   StiKTNIterator it = begin();
@@ -923,6 +978,36 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode(int qua)   const
 {
   return getInnOutMostNode(0,qua|1);
 }
+#ifdef DO_TPCCATRACKER
+StiKalmanTrackNode * StiKalmanTrack::getInnerMostTPCHitNode(int qua)   const
+{
+  if (firstNode==0 || lastNode==0)
+ {
+  //cout << "StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0" << endl;
+  throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0");
+ }
+
+  StiKalmanTrackNode *node = 0;
+  StiKalmanTrackNode* leaf = getLastNode();
+  StiKTNForwardIterator it(leaf);
+  StiKTNForwardIterator end = it.end();
+  for (;it!=end;++it) 
+  {
+    StiKalmanTrackNode& node_t = *it;
+    if (!node_t.isValid())		continue;
+    if (node_t.getChi2()>10000.) 	continue;
+    StiHit* hit = node_t.getHit();
+    if (!hit) 			continue;
+    if(hit->x()<58.f) continue;
+    node = &node_t;
+    return node;
+  }
+  
+  cout << "StiKalmanTrack::getInnOutMostNode() -E- No requested nodes " << endl;
+  //throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- No requested nodes");*/
+  return 0;
+}
+#endif /* DO_TPCCATRACKER */
 //_____________________________________________________________________________
 int StiKalmanTrack::getNNodes(int qua)  const
 {
@@ -1306,10 +1391,12 @@ void StiKalmanTrack::removeLastNode()
 //_____________________________________________________________________________
 int StiKalmanTrack::refit() 
 {
-static int nCall=0; nCall++;
-StiDebug::Break(nCall);
+  int errType = kNoErrors;
+  
+  static int nCall=0; nCall++;
+  StiDebug::Break(nCall);
   enum {kMaxIter=30,kPctLoss=10,kHitLoss=3};
-static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
+  static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
   int nNBeg = getNNodes(3), nNEnd = nNBeg;
   if (nNBeg<=3) 	return 1;
   if (!mgMaxRefiter) 	return 0;
@@ -1324,61 +1411,66 @@ static double defConfidence = StiDebug::dFlag("StiConfidence",0.01);
   for (int ITER=0;ITER<mgMaxRefiter;ITER++) {
     for (iter=0;iter<kMaxIter;iter++) {
       fail = 0;
+      errType = kNoErrors;
       sTNH.set(StiKalmanTrackFitterParameters::instance()->getMaxChi2()*10,StiKalmanTrackFitterParameters::instance()->getMaxChi2Vtx()*100,errConfidence,iter);
       pPrev = inn->fitPars();
       ePrev = inn->fitErrs(); 
       
       status = refitL();  
-      if (status) 	{fail= 1;break;}
+      if (status) 	{fail= 1; errType = kRefitFail; break;}
       nNEnd = sTNH.getUsed();
-      if ((nNEnd <=3))	{fail= 2;break;}
+      if ((nNEnd <=3))	{fail= 2; errType = kNotEnoughUsed; break;}
       if (!inn->isValid() || inn->getChi2()>1000) {
-        inn = getInnerMostNode(3); fail=-1;continue;}	
+        inn = getInnerMostNode(3); fail=-1; errType = kInNodeNotValid; continue;}	
       qA = diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
-static int oldRefit = StiDebug::iFlag("StiOldRefit");
-if (oldRefit) {
-      if (qA>0.5)		{fail=-2;continue;} 
-} else {
-      if (qA <1 && errConfidence>0.1) errConfidence = 0.1;
-      if (qA>0.01)		{fail=-2;continue;} 
-      if (sTNH.isCutStep())	{fail=-2;continue;} 
-}
+      static int oldRefit = StiDebug::iFlag("StiOldRefit");
+      if (oldRefit) {
+        if (qA>0.5)		{fail=-2; errType = kBadQA; continue;} 
+      } else {
+        if (qA <1 && errConfidence>0.1) errConfidence = 0.1;
+        if (qA>0.01)		{fail=-2; errType = kBadQA; continue;} 
+        if (sTNH.isCutStep())	{fail=-2; errType = kBadQA; continue;} 
+      }
       double info[2][8];
       sTNH.mCurvQa.getInfo(info[0]);
       sTNH.mTanlQa.getInfo(info[1]);
       break;
     }
     if (fail>0) 						break;
-//		
+      //		
     StiKalmanTrackNode *worstNode= sTNH.getWorst();
     if (worstNode && worstNode->getChi2()>StiKalmanTrackFitterParameters::instance()->getMaxChi2())     
-      {//worstNode->getHit()->setTimesUsed(0);
-       worstNode->setHit(0); worstNode->setChi2(3e33); continue;}
+    {//worstNode->getHit()->setTimesUsed(0);
+      worstNode->setHit(0); worstNode->setChi2(3e33); continue;}
     if (rejectByHitSet()) { releaseHits()            ; continue;}
     
     if (!fail) 							break;
     
     StiKalmanTrackNode *flipFlopNode= sTNH.getFlipFlop();
     if (flipFlopNode && flipFlopNode->getFlipFlop()>kMaxIter/3)     
-      {//flipFlopNode->getHit()->setTimesUsed(0);
-       flipFlopNode->setHit(0); flipFlopNode->setChi2(3e33); 	continue;}
+    {//flipFlopNode->getHit()->setTimesUsed(0);
+      flipFlopNode->setHit(0); flipFlopNode->setChi2(3e33); 	continue;}
     break;
-//	The last resource
-//    errConfidence = 0.5*(errConfidence+1);
-//    if (errConfidence>0.99) 					break;
+      //	The last resource
+      //    errConfidence = 0.5*(errConfidence+1);
+      //    if (errConfidence>0.99) 					break;
   }
   StiKalmanTrackNode *vertexNode= sTNH.getVertexNode();
 
-//		Test for primary 
+    //		Test for primary 
   while (!fail && vertexNode) {
     fail = 13;			//prim node invalid
+    errType = kVertexNodeInvalid;
     if (!vertexNode->isValid()) 				break;
     fail = 99;			//prim node Chi2 too big
+    errType = kNodeNotValid;
     if ( vertexNode->getChi2()>StiKalmanTrackFitterParameters::instance()->getMaxChi2Vtx())	break;
-    fail = 98;			//too many dropped nodes 
+    fail = 98;			//too many dropped nodes
+    errType = kTooManyDroppedNodes;    
     if (nNBeg*kPctLoss/100 < nNBeg-nNEnd
-    &&  nNEnd+kHitLoss < nNBeg)					break;
+        &&  nNEnd+kHitLoss < nNBeg)					break;
     fail = 0;
+    errType = kNoErrors;
     break;    
   }
   if (!fail) { //Cleanup. Hits of bad nodes set to zero
@@ -1397,21 +1489,22 @@ if (oldRefit) {
       node->setHit(hit);
     }
   }
-static int VPDEBUG=0;
-if (VPDEBUG) {
-  if (fail>0) {
-   LOG_DEBUG <<
-    Form("StiKalmanTrack::refit(%d)=%d ***FAILED***   %d>%d",fail,nCall,nNBeg,nNEnd)
-   << endm;
- } else {
-   LOG_DEBUG <<    
-    Form("StiKalmanTrack::refit(%d)=%d ***EndIters*** %d>%d",fail,nCall,nNBeg,nNEnd)
-   << endm;
- }
-} //endif VPDEBUG
+  static int VPDEBUG=0;
+  if (VPDEBUG) {
+    if (fail>0) {
+      LOG_DEBUG <<
+        Form("StiKalmanTrack::refit(%d)=%d ***FAILED***   %d>%d",fail,nCall,nNBeg,nNEnd)
+                << endm;
+    } else {
+      LOG_DEBUG <<    
+        Form("StiKalmanTrack::refit(%d)=%d ***EndIters*** %d>%d",fail,nCall,nNBeg,nNEnd)
+                << endm;
+    }
+  } //endif VPDEBUG
 
   if (fail) setFlag(-1);
-  return fail;
+//  return fail;
+  return errType;
 }
 //_____________________________________________________________________________
 int StiKalmanTrack::refitL() 
@@ -1584,15 +1677,15 @@ double Xi2=0;
     double alfa = targetNode->getAlpha();
     cirl.Rot(-alfa);
     StiNodePars P = targetNode->fitPars();
-    P._x  =  cirl.Pos()[0];
-    P._y  =  cirl.Pos()[1];
-    P._z  =  cirl.Pos()[2];
-    P._eta  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
-    P._curv = curv;
-    double hh = P._hz;
+    P.x()  =  cirl.Pos()[0];
+    P.y()  =  cirl.Pos()[1];
+    P.z()  =  cirl.Pos()[2];
+    P.eta()  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
+    P.curv() = curv;
+    double hh = P.hz();
     hh = (fabs(hh)<1e-10)? 0:1./hh;
-    P._ptin = (hh)? curv*hh:1e-3;
-    P._tanl = cirl.GetSin()/cirl.GetCos();
+    P.ptin() = (hh)? curv*hh:1e-3;
+    P.tanl() = cirl.GetSin()/cirl.GetCos();
     P._cosCA = cirl.Dir()[0]/cirl.GetCos();
     P._sinCA = cirl.Dir()[1]/cirl.GetCos();
     targetNode->fitPars() = P;

@@ -1,4 +1,5 @@
-// $Id: StiTpcSeedFinder.cxx,v 2.3 2010/03/12 21:38:50 fisyak Exp $
+// $Id: StiTpcSeedFinder.cxx,v 2.4 2010/09/06 18:20:49 fisyak Exp $
+#ifdef DO_TPCCATRACKER
 #include "StiTpcSeedFinder.h"
 #include "StiToolkit.h"
 #include "StiHit.h"
@@ -6,6 +7,15 @@
 #include "StTpcHit.h"
 #include "StiKalmanTrack.h"
 #include "StiKalmanTrackFinder.h"
+
+#include "StiTPCCATrackerInterface.h"
+
+#define PRINT_FIT_ERR_STATISTIC
+#ifdef PRINT_FIT_ERR_STATISTIC
+#include <map>
+#endif // PRINT_FIT_ERR_STATISTIC
+
+
 static const Short_t kPadRows = 44;
 static const Short_t kStartRow = 0;
 static const Double_t innerSectorPadPitch = 0.335;
@@ -114,7 +124,7 @@ void StiTpcSeedFinder::clusterPRT(Double_t x, Double_t z, Double_t &pad, Double_
   time = zToTime(z, row);//(z * DriftVelocity) / mTimeBinWidth;
 }
 //________________________________________________________________________________
-Bool_t StiTpcSeedFinder::OverONot(Hit_t *hit, Hit_t *match, Int_t tollerance) {
+Bool_t StiTpcSeedFinder::OverONot(SeedHit_t *hit, SeedHit_t *match, Int_t tollerance) {
   Bool_t status = kFALSE;
   if( (((hit->mMinPad  >= match->mMinPad-tollerance && 
 	 hit->mMinPad  <= match->mMaxPad+tollerance) || 
@@ -143,7 +153,7 @@ Bool_t StiTpcSeedFinder::OverONot(Hit_t *hit, Hit_t *match, Int_t tollerance) {
 }
 //________________________________________________________________________________
 // sort for the status 
-Bool_t StiTpcSeedFinder::HitsCompareStatus(const Hit_t a, const Hit_t b){
+Bool_t StiTpcSeedFinder::HitsCompareStatus(const SeedHit_t a, const SeedHit_t b){
   return (a.status > b.status);
 }
 //________________________________________________________________________________
@@ -151,184 +161,89 @@ Bool_t StiTpcSeedFinder::SeedsCompareStatus(const Seed_t a, const Seed_t b){
   return (a.total_hits < b.total_hits);
 }
 //________________________________________________________________________________
-void StiTpcSeedFinder::findTpcTracks() {
+void StiTpcSeedFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
+#ifdef PRINT_FIT_ERR_STATISTIC
+   static std::map<int,unsigned int> statusMap;
+#endif // PRINT_FIT_ERR_STATISTIC
+
+  
   // zero all banks before filling !!! 
-  Hit_t hitc;
-  Double_t x,y,z;
-  vector<Hit_t>        hitSecRow[25][46];
   HitMapToVectorAndEndType& map =  StiToolkit::instance()->getHitContainer()->hits();
-  HitMapToVectorAndEndType::iterator it;
-  StiHit *hit = 0;
-  for (it=map.begin(); it!=map.end(); ++it)     {
-    vector<StiHit*>& tempvec = (*it).second.hits();
-    vector<StiHit*>::iterator  start = tempvec.begin();
-    vector<StiHit*>::iterator  stop  = tempvec.end();
-    for (vector<StiHit*>::iterator cit = start; cit != stop; cit++) {
-      hit = *cit;
-      if (! hit->stHit()) continue;
-      const StTpcHit *tpcHit = dynamic_cast<const StTpcHit*>(hit->stHit());
-      if ( ! tpcHit) continue;
-      hitc.mMinPad  = padp((Int_t) tpcHit->minPad(),  tpcHit->padrow()-1);
-      hitc.mMaxPad  = padp((Int_t) tpcHit->maxPad(),  tpcHit->padrow()-1);
-      hitc.mMinTmbk = (Int_t) tpcHit->minTmbk();
-      hitc.mMaxTmbk = (Int_t) tpcHit->maxTmbk();
-      hitc.padrow = tpcHit->padrow()-1;
-      clusterXYZ(tpcHit->pad(), tpcHit->padrow(), tpcHit->timeBucket(), x, y, z);
-      hitc.x=x;
-      hitc.y=y;
-      hitc.z=z;
-      hitc.status=0;
-      hitc.taken=0;
-      hitc.track_key=tpcHit->idTruth();
-      hitc.hit  = hit;
-      hitSecRow[(tpcHit->sector()-1)][hitc.padrow].push_back(hitc);
-    }
-  }
-  //  done with hits .. let's keep going  .. first run .. marking 
-  Hit_t *hitFirst, *hitSecond; 
-  for(Int_t i=0;i<kMaxSector;i++){
-    for(Int_t j=0;j<46;j++){
-      for (vector<Hit_t>::iterator hitbIt1 = hitSecRow[i][j].begin();hitbIt1 != hitSecRow[i][j].end(); ++hitbIt1){
-	for (vector<Hit_t>::iterator hitbIt2 = hitSecRow[i][(j+1)].begin();hitbIt2 != hitSecRow[i][(j+1)].end(); ++hitbIt2){
-	  hitFirst=&(*hitbIt1);
-	  hitSecond=&(*hitbIt2);
-	  if(OverONot(hitFirst,hitSecond,2)) hitbIt2->status = hitbIt1->status + 1;
-	}
-      }
-    }
-  }
-  // define here how many overlap can it be 
-  for(Int_t i=0;i<kMaxSector;i++)
-    for(Int_t j=0;j<46;j++)
-      sort(hitSecRow[i][j].begin(), hitSecRow[i][j].end(),HitsCompareStatus );
-  Int_t HitsUsedTimes = 0;
-  Int_t size_array_tmp;
-  vector<Seed_t> seeds;
-  seeds.clear();
-  Seed_t seed;
-  seed.vhit.clear();
-  Double_t tx_first, tz_first;
-  Double_t x_extra, z_extra;
-  Double_t tx_second,  tz_second;
-  Hit_t *cluIt1, *cluIt2, *cluIt3;
-  Int_t PADrow_taken;
-  for(Int_t i=0;i<kMaxSector;i++){
-    for(Int_t j=45;j>0;j--){
-      for (vector<Hit_t>::iterator hitbIt1 = hitSecRow[i][j].begin();hitbIt1 != hitSecRow[i][j].end(); ++hitbIt1){
-	// check status here .. if it's done right 
-	if(!hitbIt1->taken)
-	  for (vector<Hit_t>::iterator hitbIt2 = hitSecRow[i][(j-1)].begin();hitbIt2 != hitSecRow[i][(j-1)].end(); ++hitbIt2){
-	    if(OverONot((&(*hitbIt1)),(&(*hitbIt2)),2) && hitbIt2->taken < 3 && hitbIt1->taken < 3 )	      {
-	      // do the search till the end of the list 
-	      seed.vhit.clear();
-	      HitsUsedTimes=0;
-	      HitsUsedTimes+=hitbIt2->taken;
-	      hitFirst=&(*hitbIt1);
-	      hitSecond=&(*hitbIt2);
-	      hitbIt2->taken++;
-	      hitbIt1->taken++;
-	      seed.vhit.push_back(hitSecond);
-	      seed.vhit.push_back(hitFirst);
-	      for(Int_t ij=(j-2);ij>=0;ij--){
-		/* zero it !! */
-		PADrow_taken=0;
-		for (vector<Hit_t>::iterator hitbIt3 = hitSecRow[i][(ij)].begin();hitbIt3 != hitSecRow[i][(ij)].end(); ++hitbIt3){
-		  /* if the padrow taken .. skip all the remaining hits ... */
-		  if(PADrow_taken) continue;
-		  size_array_tmp =seed.vhit.size();
-		  /* pointers to the last three hits in the vector */
-		  cluIt1=&(*hitbIt3); // latest
-		  cluIt2=seed.vhit[(--size_array_tmp)]; // one before latest
-		  cluIt3=seed.vhit[(--size_array_tmp)]; // the third
-		  /* extrapolation part */
-		  tx_first = (cluIt2->x - cluIt3->x)/(cluIt2->y - cluIt3->y);
-		  tz_first = (cluIt2->z - cluIt3->z)/(cluIt2->y - cluIt3->y);
-		  x_extra = tx_first * (cluIt1->y - cluIt2->y) + cluIt2->x;
-		  z_extra = tz_first * (cluIt1->y - cluIt2->y) + cluIt2->z;
-		  /*  mode distributions
-		      ddiffz->Fill(z_extra - cluIt1->z);
-		      ddiffx->Fill(x_extra - cluIt1->x);
-		  */
-		  //  cuts based on the extrapolation
-		   if(
-#ifdef EXTRAPOLATION_CUT
-		      (z_extra - cluIt1->z) < 1.3 && (z_extra - cluIt1->z)> -1.3 && 
-		      (x_extra - cluIt1->x) < 0.7 && (x_extra - cluIt1->x)> -0.7 && 
-#endif
-#ifdef OVERLAP_REJECTION
-		      OverONot(hitSecond,(&(*hitbIt3)),2) &&
-#endif
-		      hitSecond->taken < 3 && hitbIt3->taken < 3){
-		    /*          more plots
-				ddiffz1->Fill(z_extra-cluIt1->z);
-				ddiffx1->Fill(x_extra-cluIt1->x);
-		    */
-		    tx_second = (cluIt1->x - cluIt2->x)/(cluIt1->y - cluIt2->y);
-		    tz_second = (cluIt1->z - cluIt2->z)/(cluIt1->y - cluIt2->y);
-#ifdef KINK_REJECTION
-		    // kink cuts maybe a good idea to add those kinks to the associated hits somehow ... ?
-		    if((tz_first-tz_second) > 0.4 || (tz_first-tz_second) < -0.4)  continue; // cut on z
-		    if((tx_first-tx_second) > 0.2 || (tx_first-tx_second) < -0.2 ) continue; // cut on x angle
-#endif 
-		    HitsUsedTimes+=hitbIt3->taken;
-		    hitSecond=&(*hitbIt3);
-		    hitbIt3->taken++;
-		    seed.vhit.push_back(hitSecond);
-		    /* this will mark the padrow if it's taken  */
-		    PADrow_taken++;
-		  }
-		  else{
-		    // something should go here ... 
-		  }
-		 
-		  /*
-		  // let's check some residuals
-		  dphix->Fill(tx_first-tx_second);
-		  dphiz->Fill(tz_first-tz_second);
-		  dphiz1->Fill(tz_first-tz_second);
-		  */
-		}
-	      }
-	      // skip the seed if it has too many reused hits 
-	      if(seed.vhit.size()>4 && (((Float_t)HitsUsedTimes)/seed.vhit.size()) < 0.7 ){
-		seed.total_hits=seed.vhit.size();
-		seed.used_per_total=((Float_t)HitsUsedTimes)/seed.total_hits;
-		seeds.push_back(seed);
-	      }
-	      else{
-		for (vector<Hit_t *>::iterator cluIt = seed.vhit.begin();
-		     cluIt != seed.vhit.end(); ++cluIt){
-		  (*cluIt)->taken--;
-		  // hits relase .. if the seed failed to be formed 
-		}
-	      }
-	    }
-	  }
-      }
-    }
-  }
+
+
+  // Run reconstruction by the CA Tracker
+  caTrackerInt.SetHits(map);
+  caTrackerInt.Run();
+  vector<Seed_t> &seeds = caTrackerInt.GetSeeds();
+
+
   sort(seeds.begin(), seeds.end(),SeedsCompareStatus );
   Int_t nSeed = 0;
   while (! seeds.empty()) {
     Seed_t &aSeed = seeds.back();
     vector<StiHit*>        _seedHits;
-    for (vector<Hit_t *>::iterator hitb = aSeed.vhit.begin(); hitb != aSeed.vhit.end(); hitb++) {
-      hit = (*hitb)->hit;
+    for (vector<SeedHit_t *>::iterator hitb = aSeed.vhit.begin(); hitb != aSeed.vhit.end(); hitb++) {
+      StiHit *hit = (*hitb)->hit;
       if (!hit || hit->timesUsed()) continue;
       _seedHits.push_back(hit);
     }
     seeds.pop_back();
-    cout<< "seed: " << nSeed++ << "\t" <<aSeed.total_hits<<" total hits "<<aSeed.used_per_total;
+
+    cout<< "seed: " << nSeed++ << "\t" <<aSeed.total_hits<<" total hits "; //<<aSeed.used_per_total;
     cout << " no. unused hits " << _seedHits.size();
+
     if (_seedHits.size() < 4) {cout << endl; continue;}
     StiKalmanTrack* track = StiToolkit::instance()->getTrackFactory()->getInstance();
-    if (track->initialize(_seedHits)) {cout << " initialization failed" << endl; continue;}
-    if (((StiKalmanTrackFinder *)track->getTrackFinder())->Fit(track)) {cout << " fit failed " << endl; continue;}
-    cout << " fitted with " << track->getFitPointCount() << endl;
-    track->setSeedHitCount(track->getSeedHitCount()+100);
-  }
+    
+//   if (track->initialize(_seedHits)) {cout << " initialization failed" << endl; continue;} // use helix approximation
+   track->initialize0(_seedHits, &aSeed.firstNodePars, &aSeed.lastNodePars/*, &aSeed.firstNodeErrs, &aSeed.lastNodeErrs*/ ); // use CATracker parameters. P.S errors should not be copied, they'd be initialized.
+   StiKalmanTrackFinder *finderTmp = (StiKalmanTrackFinder *)track->getTrackFinder();
+   int status = finderTmp->Fit(track);
+   StiKalmanTrackFinder::PrintFitStatus(status,track);
+
+#ifdef PRINT_FIT_ERR_STATISTIC
+   if ( statusMap.find(status) != statusMap.end() ) statusMap[status]++;
+   else statusMap[status] = 1;
+#endif // PRINT_FIT_ERR_STATISTIC
+   
+   if (status){
+     BFactory::Free(track); // delete not fitted track
+     continue;
+   }
+   track->setSeedHitCount(track->getSeedHitCount()+100);
+  } // while (! seeds.empty())
+
+#ifdef PRINT_FIT_ERR_STATISTIC
+   cout << " ---- Fit status statistic.  ---- " << endl;
+   for ( std::map<int, unsigned int>::iterator it = statusMap.begin(); it != statusMap.end(); it++) {
+     cout << (*it).second << " entries for:" << endl;
+     StiKalmanTrackFinder::PrintFitStatus((*it).first,0);
+   }
+#endif // PRINT_FIT_ERR_STATISTIC
 }
+#endif /* DO_TPCCATRACKER */
 // $Log: StiTpcSeedFinder.cxx,v $
+// Revision 2.4  2010/09/06 18:20:49  fisyak
+// Add TPCCATracker
+//
+// Revision 1.7  2010/08/12 17:46:47  ikulakov
+// Change output file for caPerfo.
+//
+// Revision 1.6  2010/08/09 17:51:15  mzyzak
+// StiPerformance is added; bug with cov matrix of the seed parameters is fixed; bug with the q/p sign of the seed parameters is fixed; functionality of the performance is extended
+//
+// Revision 1.5  2010/08/05 21:16:53  ikulakov
+// Add fit status statistic.
+//
+// Revision 1.4  2010/08/04 13:45:46  ikulakov
+// Fix - hz & sign pt.
+//
+// Revision 1.3  2010/08/02 16:45:27  ikulakov
+// Use tracks params obtained from CATracker for StRoot KF fitter initialization.
+//
+// Revision 1.2  2010/07/29 16:19:11  fisyak
+// GSI CA tracker
+//
 // Revision 2.3  2010/03/12 21:38:50  fisyak
 // Add EXTRAPOLATION_CUT, OVERLAP_REJECTION and KINK_REJECTION flags (Y.Gorbunov)
 //
