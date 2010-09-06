@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.129 2010/05/24 15:46:58 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.130 2010/09/06 18:06:38 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -143,7 +143,10 @@
 	$G77FLAGS .= " -std=legacy -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
 	$FFLAGS    = $G77FLAGS;
 	$FLIBS     = "-lgfortran";
-
+#	$FLIBS      = `$FC $FFLAGS -print-file-name=libgfortran.$SOEXT`; chomp($FLIBS);
+#	if ($FLIBS eq "libgfortran.$SOEXT") {
+#	  $FLIBS    = `$FC $FFLAGS -print-file-name=libgfortran.a`; chomp($FLIBS);
+#	}
     } else {
 	$G77       = "g77";
 	$G77FLAGS  = "$XMACHOPT -fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
@@ -522,7 +525,7 @@
 	  # TODO: Possible cleanup to do between GFORTRAN and CERNLIB_LINUX
 	  $CERNLIB_FPPFLAGS .= " -DCERNLIB_GFORTRAN";
 	}
-	if ($IS_64BITS){
+	if ($USE_64BITS){
 	  $CERNLIB_FPPFLAGS .= " -DCERNLIB_QMLXIA64 -DCERNLIB_LXIA64";
 	  $CERNLIB_CPPFLAGS .= " -DCERNLIB_QMLXIA64 -DCERNLIB_LXIA64";
 	}
@@ -1011,56 +1014,56 @@
 	print "Could not find xml libs\n" if (! $param::quiet);
     }
     my @params = (
-		  'Package'       => 'None',
-		  'CPP'           => $CPP,
-		  'FPP'           => $FPP,
-		  'CPPPATH'       => $CPPPATH,
-		  'EXTRA_CPPPATH' => $EXTRA_CPPPATH,
-		  'CERNLIB_FPPFLAGS' => $CERNLIB_FPPFLAGS,
-		  'CPPFLAGS'      => $CPPFLAGS,
-		  'EXTRA_CPPFLAGS'=> $EXTRA_CPPFLAGS,
-		  'CERNLIB_CPPFLAGS' => $CERNLIB_CPPFLAGS,
-		  'ROOTLIBS'      => $ROOTLIBS,
-		  'DEBUG'         => $DEBUG,
-		  'GPROF'         => $GPROF,
-		  'FDEBUG'        => $FDEBUG,
-		  'NOOPT'         => $NOOPT,
-		  'G77'           => $G77,
-		  'G77FLAGS'      => $G77FLAGS,
-		  'G77EXTEND'     => $G77EXTEND,
-		  'LIBG2C'        => $LIBG2C,
-		  'LIBSTDC'       => $LIBSTDC,
-		  'FC'            => $FC,
-		  'FPPFLAGS'      => $FPPFLAGS,
-		  'EXTRA_FPPFLAGS'=> $EXTRA_FPPFLAGS,
-		  'FEXTEND'       => $FEXTEND,
-		  'FFLAGS'        => $FFLAGS,
-		  'FCPATH'        => $FCPATH,
-		  'EXTRA_FCPATH'  => $EXTRA_FCPATH,
-		  'Fout'          => $Fout,
-		  'CXXinp'        => $CXXinp,
-		  'Cinp'          => $Cinp,
-		  'Cout'          => $Cout,
-		  'Lout'          => $Lout,
-		  'SoOUT'         => $SoOUT,
-		  'FCCOM'         => $FCCOM,
-		  'AGETOF'        => $AGETOF,
-		  'AGETOFLAGS'    => $AGETOFLAGS,
-		  'AGETOFCOM'     => $AGETOFCOM,
-		  'FCviaAGETOFCOM'=> $FCviaAGETOFCOM,
-		  'CC'            => $CC,
-		  'CFLAGS'        => $CFLAGS,
-		  'EXTRA_CFLAGS'  => $EXTRA_CFLAGS,
-		  'KUIP'          => $KUIP,
-		  'KUIPCOM'       => '%KUIP %< %<.f && %FC %FDEBUG %FFLAGS -c %<.f -o %>',
-		  'CCCOM'         =>
-		  '%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS -c %Cinp%< %Cout%>',
+		  'Package'        => 'None',
+		  'CPP'            => $CPP,
+		  'FPP'            => $FPP,
+		  'CPPPATH'        => $CPPPATH,
+		  'EXTRA_CPPPATH'  => $EXTRA_CPPPATH,
+		  'CERNLIB_FPPFLAGS'  => $CERNLIB_FPPFLAGS,
+		  'CPPFLAGS'       => $CPPFLAGS,
+		  'EXTRA_CPPFLAGS' => $EXTRA_CPPFLAGS,
+		  'CERNLIB_CPPFLAGS'  => $CERNLIB_CPPFLAGS,
+		  'ROOTLIBS'       => $ROOTLIBS,
+		  'DEBUG'          => $DEBUG,
+		  'GPROF'          => $GPROF,
+		  'FDEBUG'         => $FDEBUG,
+		  'NOOPT'          => $NOOPT,
+		  'G77'            => $G77,
+		  'G77FLAGS'       => $G77FLAGS,
+		  'G77EXTEND'      => $G77EXTEND,
+		  'LIBG2C'         => $LIBG2C,
+		  'LIBSTDC'        => $LIBSTDC,
+		  'FC'             => $FC,
+		  'FPPFLAGS'       => $FPPFLAGS,
+		  'EXTRA_FPPFLAGS' => $EXTRA_FPPFLAGS,
+		  'FEXTEND'        => $FEXTEND,
+		  'FFLAGS'         => $FFLAGS,
+		  'FCPATH'         => $FCPATH,
+		  'EXTRA_FCPATH'   => $EXTRA_FCPATH,
+		  'Fout'           => $Fout,
+		  'CXXinp'         => $CXXinp,
+		  'Cinp'           => $Cinp,
+		  'Cout'           => $Cout,
+		  'Lout'           => $Lout,
+		  'SoOUT'          => $SoOUT,
+		  'FCCOM'          => $FCCOM,
+		  'AGETOF'         => $AGETOF,
+		  'AGETOFLAGS'     => $AGETOFLAGS,
+		  'AGETOFCOM'      => $AGETOFCOM,
+		  'FCviaAGETOFCOM' => $FCviaAGETOFCOM,
+		  'CC'             => $CC,
+		  'CFLAGS'         => $CFLAGS,
+		  'EXTRA_CFLAGS'   => $EXTRA_CFLAGS,
+		  'KUIP'           => $KUIP,
+		  'KUIPCOM'        => '%KUIP %< %<.f && %FC %FDEBUG %FFLAGS -c %<.f -o %>',
+		  'CCCOM'          => $CCCOM,
 		  'CXX'            => $CXX,
 	          'CXX_VERSION'    => $CXX_VERSION,
+	          'CXX_MAJOR'      => $CXX_MAJOR,
+	          'CXX_MINOR'      => $CXX_MINOR,
 		  'CXXFLAGS'       => $CXXFLAGS,
 		  'EXTRA_CXXFLAGS' => $EXTRA_CXXFLAGS,
 		  'CXXCOM'         => $CXXCOM,
-		  'CXX_VERSION'    => $CXX_VERSION,
 		  'CLIBS'          => $CLIBS,
 		  'FLIBS'          => $FLIBS,
 		  'XLIBS'          => $XLIBS,
