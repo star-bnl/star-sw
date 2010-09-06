@@ -5,7 +5,9 @@
 #include "Sti/StiTrackFinder.h"
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Described.h"
-
+#ifdef DO_TPCCATRACKER 
+class StiTPCCATrackerInterface;
+#endif /* DO_TPCCATRACKER */
 class TStopwatch;
 class StiDetector;
 class StiDetectorBuilder;
@@ -32,14 +34,17 @@ template<class Factorized>class Factory;
 class StiKalmanTrackFinder : public StiTrackFinder, public Named, public Described
 {
 public:
+  StiKalmanTrackFinder() {}
   StiKalmanTrackFinder(StiToolkit *toolkit);
-  virtual ~StiKalmanTrackFinder();
+  virtual ~StiKalmanTrackFinder() {}
   /// Initialize the finder
   virtual void initialize();
   /// Set timing of tracking
           void setTiming();
   /// Find all tracks of the currently loaded event
-  virtual void findTpcTracks(); 
+#ifdef DO_TPCCATRACKER 
+  virtual void findTpcTracks(StiTPCCATrackerInterface &caTrackerInt); 
+#endif /* DO_TPCCATRACKER */  
   virtual void findAllTracks(); 
   virtual void findTracks(); 
   /// Find/extend the given track, in the given direction
@@ -76,6 +81,25 @@ public:
   void doNextTrackStep();
   static void setDebug(int m = 0) {_debug = m;}
   static int  debug() {return _debug;}
+#ifdef DO_TPCCATRACKER
+  static void PrintFitStatus(const int status, const StiKalmanTrack* track); // print message according to the status value
+#endif /* DO_TPCCATRACKER */  
+  typedef enum{ // type of return value for the Fit() procedure
+    kNoErrors = 0,
+    kApproxFail,
+    kFitFail,
+    kExtendFail,
+    kCheckFail
+  } TFitStatus;
+
+  typedef enum{ // type of return value for the extendTrack() procedure
+    kExtended,
+    kNotExtended,
+    kRefitInFail,
+    kRefitOutFail
+  } TExtendStatus;
+
+  
 private:
 class QAFind;
   void find(StiKalmanTrack *track, int direction,StiKalmanTrackNode *node,QAFind &qa);

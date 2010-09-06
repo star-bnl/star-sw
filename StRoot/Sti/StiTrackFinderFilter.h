@@ -14,6 +14,13 @@ class StiTrackFinderFilter : public Filter<StiTrack>
   virtual void initialize();
   virtual void setDefaults();
 
+  typedef enum{ // type of return value for the fit() procedure
+    kNoErrors = 0,
+    kNoEnoughValidHits,
+    kNoEnoughFittedValidHits,
+    kWeird
+  } TAcceptStatus;
+  
  protected:
 	int _minPtsCount;
 	int _minFitPtsCount;

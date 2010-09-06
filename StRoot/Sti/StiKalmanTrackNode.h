@@ -104,7 +104,7 @@ public:
   void getGlobalTpt   (float   x[6],float   e[15]);
 
   /// Get the charge (sign) of the track at this node
-    int getCharge() const {return (mFP._ptin > 0) ? -1 : 1;}
+    int getCharge() const {return (mFP.ptin() > 0) ? -1 : 1;}
   /// Convenience Method that returns the track momentum at this node
   StThreeVectorF getMomentumF() const;
   /// Convenience Method that returns the track momentum at this node
@@ -116,14 +116,14 @@ public:
   /// in the local reference frame of this node.
   void getMomentum(double p[3], double e[6]=0) const;
   /// Calculates and returns the tangent of the track pitch angle at this node.
-    double getCurvature() const {return mFP._curv;}
-    void setCurvature(double curvature) {mFP._curv=curvature;}
-  double getDipAngle() const {return atan(mFP._tanl);}
-  double getTanL() const {return mFP._tanl;}
+    double getCurvature() const {return mFP.curv();}
+    void setCurvature(double curvature) {mFP.curv()=curvature;}
+  double getDipAngle() const {return atan(mFP.tanl());}
+  double getTanL() const {return mFP.tanl();}
   /// Calculates and returns the transverse momentum of the track at this node.
     double getPt() const;
   /// Calculates and returns the momentum of the track at this node.
-    double getP() const {return (getPt()*::sqrt(1.+mFP._tanl*mFP._tanl));}
+    double getP() const {return (getPt()*::sqrt(1.+mFP.tanl()*mFP.tanl()));}
   /// Calculates and returns the Z mag field in the current point.
   /// units: PGeV = Hz*Radcurv_in_CM
   double getHz() const;
@@ -132,15 +132,15 @@ public:
   double y_g() const;
   double z_g() const;
   void   getXYZ_g(double *xyz) const;
-  double getX() const 			{ return mFP._x;}
-  double getY() const 			{ return mFP._y;}  
-  double getZ() const 			{ return mFP._z;}
-  double x() const 			{ return mFP._x;}
-  double y() const 			{ return mFP._y;}  
-  double z() const 			{ return mFP._z;}
-  double getRxy() const 		{ return sqrt(mFP._x*mFP._x+mFP._y*mFP._y);}
+  double getX() const 			{ return mFP.x();}
+  double getY() const 			{ return mFP.y();}  
+  double getZ() const 			{ return mFP.z();}
+  double x() const 			{ return mFP.x();}
+  double y() const 			{ return mFP.y();}  
+  double z() const 			{ return mFP.z();}
+  double getRxy() const 		{ return sqrt(mFP.x()*mFP.x()+mFP.y()*mFP.y());}
   
-  double getEta  () const 		{return mFP._eta;  }
+  double getEta  () const 		{return mFP.eta();  }
   double getSin  () const 		{return mFP._sinCA;}
   double getCos  () const 		{return mFP._cosCA;}
   double getAlpha() const 		{return _alpha;  }
@@ -149,7 +149,7 @@ public:
   double getEzz()   const 		{return mHrr.hZZ;}
   double getCyy()   const 		{return mFE._cYY;}
   double getCzz()   const 		{return mFE._cZZ;}
-  double const *getPars()const          {return (&mFP._x);}
+  double const *getPars()const          {return mFP.P;}
   double getDiag(int idx)const          {return mFE.A[(idx*(idx+3))/2];}
   int    getHitCount () const		{return hitCount;}
   int    getNullCount() const       	{return nullCount;}
@@ -218,12 +218,12 @@ const StiNodeInf *getInfo() const 	{return _inf;}
   double evaluateChi2(const StiHit *hit); 
   int updateNode(); 
   int rotate(double alpha); 
-  int    getHelicity()const {return (mFP._curv < 0) ? -1 : 1;}
+  int    getHelicity()const {return (mFP.curv() < 0) ? -1 : 1;}
   double getPhase()   const;
   double getPsi()     const;
   double getWindowY();
   double getWindowZ();
-  double pitchAngle() const {return atan(mFP._tanl);}
+  double pitchAngle() const {return atan(mFP.tanl());}
   double crossAngle() const {return asin(mFP._sinCA);}
   double sinCrossAngle() const {return mFP._sinCA;}
   double pathlength() const;
@@ -324,13 +324,13 @@ inline double StiKalmanTrackNode::nice(double angle)
 inline StThreeVector<double> StiKalmanTrackNode::getMomentum() const
 {
   double pt = getPt();
-  return StThreeVector<double>(pt*mFP._cosCA,pt*mFP._sinCA,pt*mFP._tanl);
+  return StThreeVector<double>(pt*mFP._cosCA,pt*mFP._sinCA,pt*mFP.tanl());
 }
 
 inline StThreeVectorF StiKalmanTrackNode::getMomentumF() const
 {
   double pt = getPt();
-  return StThreeVectorF(pt*mFP._cosCA,pt*mFP._sinCA,pt*mFP._tanl);
+  return StThreeVectorF(pt*mFP._cosCA,pt*mFP._sinCA,pt*mFP.tanl());
 }
 
 inline StThreeVector<double> StiKalmanTrackNode::getGlobalMomentum() const
@@ -371,7 +371,7 @@ inline double StiKalmanTrackNode::pathlength() const
   const StiDetector * det = getDetector();
   if (!det) return 0.; 
   double thickness = det->getShape()->getThickness();
-  return (thickness*::sqrt(1.+mFP._tanl*mFP._tanl)) / mFP._cosCA;
+  return (thickness*::sqrt(1.+mFP.tanl()*mFP.tanl())) / mFP._cosCA;
 }
 
 ///Return the radiation length (in cm) of the 
