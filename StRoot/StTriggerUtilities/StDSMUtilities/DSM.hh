@@ -10,7 +10,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-
+#include <stdio.h>
 using namespace std;
 
 struct DSM {
