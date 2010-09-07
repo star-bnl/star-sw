@@ -1,6 +1,10 @@
-* $Id: gstar_part.g,v 1.29 2010/09/02 19:25:53 jwebb Exp $
+
+* $Id: gstar_part.g,v 1.30 2010/09/07 15:09:21 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.30  2010/09/07 15:09:21  jwebb
+* RT 1999: Adding XiMinus, XiMinusBar, XiZero and XiZeroBar
+*
 * Revision 1.29  2010/09/02 19:25:53  jwebb
 * Increased the precision of the lambda and lambdabar masses in gstar_part.g,
 * requested by Xianglei Zhu.
@@ -126,7 +130,6 @@ MODULE gstar_part Is the STAR Particle Database
    Integer kGtNINO / 6 /! A geantino
    Integer kGtHION / 8 /! A heavy ion
    Integer kGtCKOV / 7 /! A cherenkov photon (note mistake in geant manual)
-
 
 * --------------------------------------------------------------------------
 *
@@ -279,6 +282,8 @@ MODULE gstar_part Is the STAR Particle Database
 
 
 
+
+
 *************************************************************************************
 * Definition of 'nonstandard' particles are assigned GID 40000+
 * Redefinition of 'standard' particles are assigned GID 10000+
@@ -308,7 +313,7 @@ MODULE gstar_part Is the STAR Particle Database
                   bratio={1.0,}             ,
                   mode={9712,} 
 
-        PARTICLE _lmb_to_pb_piplus_ code=97 ,
+        PARTICLE _lam_to_pb_piplus_ code=97 ,
              pdg     = -3122                ,
              mass    = 1.115683             ,  
              tlife   = 0.26320E-9           ,
@@ -316,6 +321,32 @@ MODULE gstar_part Is the STAR Particle Database
              bratio  = {1.000,}             ,
              mode    = {1508,}              ,
              trktyp  = kGtNEUT
+
+
+  Particle XiMinus    code   = 40003     pdg   = +3312     ,
+                      trktyp = kGtHADR   mass  = 1.32171   ,
+                      charge = -1        tlife = 0.1639E-9 ,
+                      bratio = {1,}      mode  = {9708,}           
+
+  Particle XiMinusBar code   = 40004     pdg   = -3312     ,
+                      trktyp = kGtHADR   mass  = 1.32171   ,
+                      charge = +1        tlife = 0.1639E-9 ,
+                      bratio = {1,}      mode  = {9809,}           
+                     
+  Particle XiZero     code   = 40005     pdg   =+3322      ,
+                      trktyp = kGtNEUT   mass  = 1.31486   ,
+                      charge = 0         tlife = 0.290E-9  ,
+                      bratio = {1,}      mode  = {9807,}
+
+  Particle XiZeroBar  code   = 40006     pdg   =-3322      ,
+                      trktyp = kGtNEUT   mass  = 1.31486   ,
+                      charge = 0         tlife = 0.290E-9  ,
+                      bratio = {1,}      mode  = {9707,}
+
+
+
+
+
 
   ! phi --> K+ K- 100%
   PARTICLE phi    code=10151 trktyp=3 mass=1.0194 charge=0  tlife=1.482e-22,
