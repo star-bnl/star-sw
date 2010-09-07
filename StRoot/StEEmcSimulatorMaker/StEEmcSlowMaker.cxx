@@ -1,6 +1,6 @@
 // *-- Author : Hal Spinka
 // 
-// $Id: StEEmcSlowMaker.cxx,v 2.10 2010/08/03 02:20:40 stevens4 Exp $
+// $Id: StEEmcSlowMaker.cxx,v 2.11 2010/09/07 22:24:52 stevens4 Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -21,14 +21,14 @@ ClassImp(StEEmcSlowMaker)
 //________________________________________________
 StEEmcSlowMaker::StEEmcSlowMaker(const Char_t *name, const Char_t*)
 : StMaker(name) {
-   mMip2ene = 0.001998*0.7; // This is the SMD thickness of 7 mm
+   mMip2ene = getMipdEdx()*0.7; // This is the SMD thickness of 7 mm
                             // times the minimum ionizing energy loss of
                             // 1.998 MeV/cm from the PDG book
    mSig1pe = 0.85;          // from info from S. Vigdor on MAPMT test results
    //set different thicknesses for pre and post layers (found in geometry debug by Jason et. al.)
-   mPmip2ene[0] = 0.001998*0.475; // The pre-shower tiles are only 4.75 mm thick.
-   mPmip2ene[1] = 0.001998*0.475; // The pre-shower tiles are only 4.75 mm thick.
-   mPmip2ene[2] = 0.001998*0.5;   // The post-shower tiles are only 5 mm thick.
+   mPmip2ene[0] = getMipdEdx()*0.475; // The pre-shower tiles are only 4.75 mm thick.
+   mPmip2ene[1] = getMipdEdx()*0.475; // The pre-shower tiles are only 4.75 mm thick.
+   mPmip2ene[2] = getMipdEdx()*0.5;   // The post-shower tiles are only 5 mm thick.
    mPmip2pe = 2.6*1.5;      // 2.6 mip/tower scint * 1.5 light yield
                             // in pre- and post-shower elements
    // loop to init  mMip2pe[] - this will eventually need to be
@@ -997,7 +997,17 @@ void StEEmcSlowMaker::setZeroAdc(StMuEmcCollection *emc) {
   }
 }
 
+//________________________________________________
+Float_t StEEmcSlowMaker::getMipdEdx() {
+  // Return MIP dE/dx = 1.998 MeV/cm from the PDG book
+  // used to simulate SMD, Pre, Post ADC response
+  return 0.001998;
+}
+
 // $Log: StEEmcSlowMaker.cxx,v $
+// Revision 2.11  2010/09/07 22:24:52  stevens4
+// give access to MIP dE/dx to other makers
+//
 // Revision 2.10  2010/08/03 02:20:40  stevens4
 // final update from peer review
 //

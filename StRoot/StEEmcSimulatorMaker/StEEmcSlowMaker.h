@@ -1,4 +1,4 @@
-// $Id: StEEmcSlowMaker.h,v 2.8 2010/08/05 21:23:45 stevens4 Exp $
+// $Id: StEEmcSlowMaker.h,v 2.9 2010/09/07 22:24:52 stevens4 Exp $
 
 #ifndef STAR_StEEmcSlowMaker
 #define STAR_StEEmcSlowMaker
@@ -144,7 +144,7 @@ private:
   Float_t mPmip2ene[3]; // as above for pre- and post-shower elements                                                                                              
   Float_t mPmip2pe; // as above for pre- and post-shower elements                                                                                               
 
-  Float_t avgNumPePerMip(Int_t stripID); // avg # p.e. per mip                                                                                               
+  Float_t avgNumPePerMip(Int_t stripID); // avg # p.e. per mip                                                                      
 
   enum Source_t {kMuDst, kStEvent};
   Source_t mSource;
@@ -313,9 +313,12 @@ public:
   void setSmdGainSpread(Float_t s, Int_t strip_index);
   void setSmdGainSpread(Float_t s);
 
+  /// Return MIP dE/dx used for SMD, Pre, Post
+  static Float_t getMipdEdx(); 
+
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.8 2010/08/05 21:23:45 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 2.9 2010/09/07 22:24:52 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -325,6 +328,9 @@ public:
 #endif
 
 // $Log: StEEmcSlowMaker.h,v $
+// Revision 2.9  2010/09/07 22:24:52  stevens4
+// give access to MIP dE/dx to other makers
+//
 // Revision 2.8  2010/08/05 21:23:45  stevens4
 // Update sampling fraction to 4.8%
 //
