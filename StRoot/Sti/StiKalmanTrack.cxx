@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.119 2010/09/06 18:20:48 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.119 2010/09/06 18:20:48 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.120 2010/09/07 18:37:31 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.120 2010/09/07 18:37:31 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.120  2010/09/07 18:37:31  fisyak
+ * Restore Sti logic before TPCCATracker
+ *
  * Revision 2.119  2010/09/06 18:20:48  fisyak
  * Add TPCCATracker
  *
@@ -1503,8 +1506,11 @@ int StiKalmanTrack::refit()
   } //endif VPDEBUG
 
   if (fail) setFlag(-1);
-//  return fail;
+#ifdef DO_TPCCATRACKER
   return errType;
+#else /* !DO_TPCCATRACKER */
+  return fail;
+#endif /* DO_TPCCATRACKER */
 }
 //_____________________________________________________________________________
 int StiKalmanTrack::refitL() 
