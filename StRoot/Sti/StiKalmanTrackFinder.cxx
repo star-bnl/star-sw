@@ -231,12 +231,16 @@ Int_t StiKalmanTrackFinder::Fit(StiKalmanTrack *track, Double_t rMin) {
     track->setFlag(-1);
 #ifndef DO_TPCCATRACKER
     status = track->approx(0); // should be filled by track->initialize()
-#endif /* !DO_TPCCATRACKER */
     if (status) 	{nTSeed++; errType = abs(status)*100 + kApproxFail; break;}
+#endif /* !DO_TPCCATRACKER */
     status = track->fit(kOutsideIn);
     if (status) 	{nTSeed++; errType = abs(status)*100 + kFitFail; break;}
     status = extendTrack(track,rMin); // 0 - can't extend. 1 - can extend and refit -1 - can extend and can't refit. 
+#ifndef DO_TPCCATRACKER
+    if (status != kExtended)                               {nTFail++; errType = abs(status)*100 + kExtendFail; break;}
+#else /* DO_TPCCATRACKER */
     if ((status != kExtended) && (status != kNotExtended)) {nTFail++; errType = abs(status)*100 + kExtendFail; break;}
+#endif /* !DO_TPCCATRACKER */
     if (_trackFilter){
       status = _trackFilter->filter(track);
       if (status) {nTFilt++; errType = abs(status)*100 + kCheckFail; break;}
@@ -268,7 +272,6 @@ Int_t StiKalmanTrackFinder::Fit(StiKalmanTrack *track, Double_t rMin) {
 		      nTpcHits,nSvtHits,nSsdHits,nPxlHits,nIstHits)
 	      << endm;
   } while(0);
-
   return errType;
 }
 //______________________________________________________________________________
@@ -289,7 +292,8 @@ void StiKalmanTrackFinder::extendSeeds(double rMin)
     if (!track) break; // no more seeds
     nTTot++;
     if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Start(0);
-    Fit(track,rMin);
+    Int_t errType = Fit(track,rMin);
+    if (errType != kNoErrors) BFactory::Free(track);
     if (mTimg[kTrakTimg]) mTimg[kTrakTimg]->Stop();
   }
 }

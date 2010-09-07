@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.131 2010/09/06 18:20:48 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.132 2010/09/07 18:37:31 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.132  2010/09/07 18:37:31  fisyak
+ * Restore Sti logic before TPCCATracker
+ *
  * Revision 2.131  2010/09/06 18:20:48  fisyak
  * Add TPCCATracker
  *
@@ -1787,12 +1790,12 @@ int StiKalmanTrackNode::locate()
 
   if (fabs(mFP.z())>kMaxZ || fabs(mFP.y())> kMaxR) return -1;
   
-#ifdef USE_EDGE // insensible region on a detector plane
+#ifndef DO_TPCCATRACKER // insensible region on a detector plane
   edge  = 2.;
   if (mFP.x()<50.)      edge  = 0.3;
-#else
+#else /* DO_TPCCATRACKER */
   edge = 0.;
-#endif // USE_EDGE
+#endif /* !DO_TPCCATRACKER */
   
   //YF edge is tolerance when we consider that detector is hit. //  edge = 0; //VP the meaning of edge is not clear
   Int_t shapeCode  = sh->getShapeCode();
