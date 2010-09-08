@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.19 2010/09/01 21:14:33 fisyak Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.20 2010/09/08 15:44:41 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -70,7 +70,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   // do gains example; one loads them from database but I don't know how...
   daq_dta *dta  = fTpx->put("gain");
   Int_t maxHitsPerSector = St_tpcMaxHitsC::instance()->maxSectorHits();
-  if (maxHitsPerSector>0) SetAttr(".Privilege",1);
+  // No hit maximum if maxHitsPerSector == 0
   for(Int_t sector=1;sector<=24;sector++) {
     Int_t livePads = 0;
     Int_t totalPads = 0;
@@ -94,18 +94,25 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	}
       }
       dta->finalize(183,sector,row);
-      totalPads += numPadsAtRow;
-      if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
-          StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
-          St_tpcAnodeHVavgC::instance()->livePadrow(sector,row) &&
-          St_tpcPadGainT0C::instance()->livePadrow(sector,row))
-        livePads += numPadsAtRow;
+      if (maxHitsPerSector > 0) {
+        totalPads += numPadsAtRow;
+        if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
+            StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
+            St_tpcAnodeHVavgC::instance()->livePadrow(sector,row) &&
+            St_tpcPadGainT0C::instance()->livePadrow(sector,row))
+          livePads += numPadsAtRow;
+      }
     }
-    Float_t liveFrac = TMath::Max((Float_t) 0.1,
-                       ((Float_t) livePads) / ((Float_t) totalPads));
-    maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
-    if (Debug()) {LOG_INFO << "maxHits in sector " << sector
-                           << " = " << maxHits[sector-1] << endm;}
+    if (maxHitsPerSector > 0) {
+      Float_t liveFrac = TMath::Max((Float_t) 0.1,
+                         ((Float_t) livePads) / ((Float_t) totalPads));
+      maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
+      if (Debug()) {LOG_INFO << "maxHits in sector " << sector
+                             << " = " << maxHits[sector-1] << endm;}
+    } else {
+      maxHits[sector-1] = 0;
+      if (Debug()) {LOG_INFO << "No maxHits in sector " << sector << endm;}
+    }
   }
   /*
     InitRun will setup the internal representations of gain 
@@ -226,7 +233,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	    iBreak++;
 	  }
 	}
-	if (++hitsAdded > maxHits[sec-1]) {
+	if (maxHits[sec-1] && ++hitsAdded > maxHits[sec-1]) {
 	  LOG_ERROR << "Too many hits (" << hitsAdded << ") in one sector ("
 	            << sec << "). Skipping event." << endm;
 	  return kStSkip;
