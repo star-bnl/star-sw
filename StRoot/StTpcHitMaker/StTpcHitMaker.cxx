@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.28 2010/09/01 21:14:33 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.29 2010/09/08 15:44:41 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.29  2010/09/08 15:44:41  genevb
+ * Slightly better arrangement for limiting excessive TPC events
+ *
  * Revision 1.28  2010/09/01 21:14:33  fisyak
  * Add codes for S-shape correction (disactivated)
  *
@@ -209,24 +212,29 @@ Int_t StTpcHitMaker::Init() {
 //_____________________________________________________________
 Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
   Int_t maxHitsPerSector = St_tpcMaxHitsC::instance()->maxSectorHits();
-  if (maxHitsPerSector>0) SetAttr(".Privilege",1);
+  // No hit maximum if maxHitsPerSector == 0
   for(Int_t sector=1;sector<=24;sector++) {
-    Int_t livePads = 0;
-    Int_t totalPads = 0;
-    for(Int_t row=1;row<=45;row++) {
-      Int_t numPadsAtRow = StTpcDigitalSector::numberOfPadsAtRow(row);
-      totalPads += numPadsAtRow;
-      if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
-          StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
-          St_tpcAnodeHVavgC::instance()->livePadrow(sector,row) &&
-          St_tpcPadGainT0C::instance()->livePadrow(sector,row))
-        livePads += numPadsAtRow;
+    if (maxHitsPerSector > 0) {
+      Int_t livePads = 0;
+      Int_t totalPads = 0;
+      for(Int_t row=1;row<=45;row++) {
+        Int_t numPadsAtRow = StTpcDigitalSector::numberOfPadsAtRow(row);
+        totalPads += numPadsAtRow;
+        if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
+            StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
+            St_tpcAnodeHVavgC::instance()->livePadrow(sector,row) &&
+            St_tpcPadGainT0C::instance()->livePadrow(sector,row))
+          livePads += numPadsAtRow;
+      }
+      Float_t liveFrac = TMath::Max((Float_t) 0.1,
+                         ((Float_t) livePads) / ((Float_t) totalPads));
+      maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
+      if (Debug()) {LOG_INFO << "maxHits in sector " << sector
+                             << " = " << maxHits[sector-1] << endm;}
+    } else {
+      maxHits[sector-1] = 0;
+      if (Debug()) {LOG_INFO << "No maxHits in sector " << sector << endm;}
     }
-    Float_t liveFrac = TMath::Max((Float_t) 0.1,
-                       ((Float_t) livePads) / ((Float_t) totalPads));
-    maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
-    if (Debug()) {LOG_INFO << "maxHits in sector " << sector
-                           << " = " << maxHits[sector-1] << endm;}
   }
   return kStOK;
 }
@@ -295,7 +303,7 @@ Int_t StTpcHitMaker::Make() {
       }
       daqTpcTable = GetNextDaqElement(mQuery);
     }
-    if (hitsAdded > maxHits[sector-1]) {
+    if (maxHits[sector-1] && hitsAdded > maxHits[sector-1]) {
       LOG_ERROR << "Too many hits (" << hitsAdded << ") in one sector ("
                 << sector << "). Skipping event." << endm;
       return kStSkip;
