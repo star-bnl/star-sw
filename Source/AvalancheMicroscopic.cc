@@ -23,10 +23,13 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   rb31(0.), rb32(0.), rb33(1.), rx22(1.), rx23(0.), rx32(0.), rx33(1.),
   deltaCut(0.), gammaCut(0.),
   nCollSkip(100),
+  hasUserHandleStep(false),
   hasUserHandleAttachment(false),
   hasUserHandleInelastic(false),
   hasUserHandleIonisation(false),
-  userHandleAttachment(0), userHandleInelastic(0),
+  userHandleStep(0),
+  userHandleAttachment(0), 
+  userHandleInelastic(0),
   userHandleIonisation(0),
   debug(false) {
   
@@ -249,6 +252,24 @@ AvalancheMicroscopic::GetPhoton(const int i, double& e,
   status = photons[i].status;
   e = photons[i].energy;
 
+
+}
+
+void
+AvalancheMicroscopic::SetUserHandleStep(
+    void (*f)(double x, double y, double z, double t,
+              double e, double dx, double dy, double dz)) {
+
+  userHandleStep = f;
+  hasUserHandleStep = true;
+
+}
+
+void
+AvalancheMicroscopic::UnsetUserHandleStep() {
+
+  userHandleStep = 0;
+  hasUserHandleStep = false;
 
 }
 
@@ -616,6 +637,10 @@ AvalancheMicroscopic::TransportElectron(
           a2 = c2 * (ex * ex + ey * ey + ez * ez);
         }
 
+        if (hasUserHandleStep) {
+          userHandleStep(x, y, z, t, energy, kx, ky, kz);
+        }
+  
         // Determine the timestep.
         dt = 0.;
         while (1) {

@@ -117,6 +117,10 @@ class AvalancheMicroscopic {
           const double dx0 = 0., const double dy0 = 0., const double dz0 = 0.);
 
     // Set user handling procedures
+    void SetUserHandleStep(void (*f)(double x, double y, double z, 
+                                     double t, double e,
+                                     double dx, double dy, double dz));
+    void UnsetUserHandleStep(); 
     void SetUserHandleAttachment(void (*f)(double x, double y, double z, 
                                            double t, 
                                            int type, int level, Medium* m));
@@ -217,9 +221,13 @@ class AvalancheMicroscopic {
     int nCollSkip;
     
     // User procedures
+    bool hasUserHandleStep;
     bool hasUserHandleAttachment;
     bool hasUserHandleInelastic;
     bool hasUserHandleIonisation;
+    void (*userHandleStep)
+         (double x, double y, double z, double t,
+          double e, double dx, double dy, double dz);
     void (*userHandleAttachment)
          (double x, double y, double z, double t, 
           int type, int level, Medium* m);

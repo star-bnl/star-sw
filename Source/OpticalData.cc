@@ -271,6 +271,9 @@ OpticalData::PhotoAbsorptionCsCO2(const double e, double& cs, double& eta) {
   // J. Berkowitz, Atomic and Molecular Photoabsorption (2002)
   // N. Sakamoto et al., NIFS-DATA 109
   // Photoionization yield:
+  // Nakata et al., Science of Light 14 (1965), 14
+  // Barrus et al., Phys. Rev. A 20 (1979), 1045
+  // Ukai et al., J. Chem. Phys. 97 (1992), 2835
   
   if (e < 7.) {
     cs = eta = 0.;

@@ -437,8 +437,10 @@ MediumMagboltz86::GetElectronCollisionRate(const double e, const int band) {
     std::cerr << "    This medium does not have a band structure.\n";
   }
 
-  if (e > eFinal) return cfTot[nEnergySteps - 1];  
-  return cfTot[int(e / eStep)];
+  const int iStep = int(e / eStep);
+  if (iStep >= nEnergySteps) return cfTot[nEnergySteps - 1];
+  if (iStep < 0) return cfTot[0]; 
+  return cfTot[iStep];
 
 }
 
@@ -1835,68 +1837,132 @@ MediumMagboltz86::ComputeDeexcitationTable() {
   deexcitations.clear();
 
   // Concentrations of "de-excitable" gases
-  bool withAr = false;
-  double cAr = 0.;
-  int iAr = 0;
+  bool withAr = false, withNe = false;
+  double cAr = 0., cNe = 0.;
+  int iAr = 0, iNe = 0;
   std::map<std::string, int> mapLevels;
   // Make a mapping of all excitation levels 
   for (int i = 0; i < nTerms; ++i) {
     if (csType[i] % nCsTypes != 4) continue;
-    switch (gas[int(csType[i] / nCsTypes)]) {
-      case 2:
-        // Argon
-        if (!withAr) {
-          withAr = true;
-          iAr = int(csType[i] / nCsTypes);
-          cAr = fraction[iAr];
-        }
-        std::string level = "       ";
-        for (int j = 0; j < 7; ++j) level[j] = description[i][5 + j];
-        if      (level == "1S5    ") mapLevels["Ar_1S5"] = i;
-        else if (level == "1S4    ") mapLevels["Ar_1S4"] = i;
-        else if (level == "1S3    ") mapLevels["Ar_1S3"] = i;
-        else if (level == "1S2    ") mapLevels["Ar_1S2"] = i;
-        else if (level == "2P10   ") mapLevels["Ar_2P10"] = i;
-        else if (level == "2P9    ") mapLevels["Ar_2P9"] = i;
-        else if (level == "2P8    ") mapLevels["Ar_2P8"] = i;
-        else if (level == "2P7    ") mapLevels["Ar_2P7"] = i;
-        else if (level == "2P6    ") mapLevels["Ar_2P6"] = i;
-        else if (level == "2P5    ") mapLevels["Ar_2P5"] = i;
-        else if (level == "2P4    ") mapLevels["Ar_2P4"] = i;
-        else if (level == "2P3    ") mapLevels["Ar_2P3"] = i;
-        else if (level == "2P2    ") mapLevels["Ar_2P2"] = i;
-        else if (level == "2P1    ") mapLevels["Ar_2P1"] = i;
-        else if (level == "3D6    ") mapLevels["Ar_3D6"] = i;
-        else if (level == "3D5    ") mapLevels["Ar_3D5"] = i;
-        else if (level == "3D3    ") mapLevels["Ar_3D3"] = i;
-        else if (level == "3D4!   ") mapLevels["Ar_3D4!"] = i;
-        else if (level == "3D4    ") mapLevels["Ar_3D4"] = i;
-        else if (level == "3D1!!  ") mapLevels["Ar_3D1!!"] = i;
-        else if (level == "2S5    ") mapLevels["Ar_2S5"] = i;
-        else if (level == "2S4    ") mapLevels["Ar_2S4"] = i;
-        else if (level == "3D1!   ") mapLevels["Ar_3D1!"] = i;
-        else if (level == "3D2    ") mapLevels["Ar_3D2"] = i;
-        else if (level == "3S1!!!!") mapLevels["Ar_3S1!!!!"] = i;
-        else if (level == "3S1!!  ") mapLevels["Ar_3S1!!"] = i;
-        else if (level == "3S1!!! ") mapLevels["Ar_3S1!!!"] = i;
-        else if (level == "2S3    ") mapLevels["Ar_2S3"] = i;
-        else if (level == "2S2    ") mapLevels["Ar_2S2"] = i;
-        else if (level == "3S1!   ") mapLevels["Ar_3S1!"] = i;
-        else if (level == "4D5    ") mapLevels["Ar_4D5"] = i;
-        else if (level == "3S4    ") mapLevels["Ar_3S4"] = i;
-        else if (level == "4D2    ") mapLevels["Ar_4D2"] = i;
-        else if (level == "4S1!   ") mapLevels["Ar_4S1!"] = i;
-        else if (level == "3S2    ") mapLevels["Ar_3S2"] = i;
-        else if (level == "5D5    ") mapLevels["Ar_5D5"] = i;
-        else if (level == "4S4    ") mapLevels["Ar_4S4"] = i;
-        else if (level == "5D2    ") mapLevels["Ar_5D2"] = i;
-        else if (level == "6D5    ") mapLevels["Ar_6D5"] = i;
-        else if (level == "5S1!   ") mapLevels["Ar_5S1!"] = i;
-        else if (level == "4S2    ") mapLevels["Ar_4S2"] = i;
-        else if (level == "5S4    ") mapLevels["Ar_5S4"] = i;
-        else if (level == "6D2    ") mapLevels["Ar_6D2"] = i;
-        else if (level == "HIGH   ") mapLevels["Ar_High"] = i;
-        break;
+    const int ngas = int(csType[i] / nCsTypes);
+    if (ngas == 2) {
+      // Argon
+      if (!withAr) {
+        withAr = true;
+        iAr = int(csType[i] / nCsTypes);
+        cAr = fraction[iAr];
+      }
+      std::string level = "       ";
+      for (int j = 0; j < 7; ++j) level[j] = description[i][5 + j];
+      if      (level == "1S5    ") mapLevels["Ar_1S5"] = i;
+      else if (level == "1S4    ") mapLevels["Ar_1S4"] = i;
+      else if (level == "1S3    ") mapLevels["Ar_1S3"] = i;
+      else if (level == "1S2    ") mapLevels["Ar_1S2"] = i;
+      else if (level == "2P10   ") mapLevels["Ar_2P10"] = i;
+      else if (level == "2P9    ") mapLevels["Ar_2P9"] = i;
+      else if (level == "2P8    ") mapLevels["Ar_2P8"] = i;
+      else if (level == "2P7    ") mapLevels["Ar_2P7"] = i;
+      else if (level == "2P6    ") mapLevels["Ar_2P6"] = i;
+      else if (level == "2P5    ") mapLevels["Ar_2P5"] = i;
+      else if (level == "2P4    ") mapLevels["Ar_2P4"] = i;
+      else if (level == "2P3    ") mapLevels["Ar_2P3"] = i;
+      else if (level == "2P2    ") mapLevels["Ar_2P2"] = i;
+      else if (level == "2P1    ") mapLevels["Ar_2P1"] = i;
+      else if (level == "3D6    ") mapLevels["Ar_3D6"] = i;
+      else if (level == "3D5    ") mapLevels["Ar_3D5"] = i;
+      else if (level == "3D3    ") mapLevels["Ar_3D3"] = i;
+      else if (level == "3D4!   ") mapLevels["Ar_3D4!"] = i;
+      else if (level == "3D4    ") mapLevels["Ar_3D4"] = i;
+      else if (level == "3D1!!  ") mapLevels["Ar_3D1!!"] = i;
+      else if (level == "2S5    ") mapLevels["Ar_2S5"] = i;
+      else if (level == "2S4    ") mapLevels["Ar_2S4"] = i;
+      else if (level == "3D1!   ") mapLevels["Ar_3D1!"] = i;
+      else if (level == "3D2    ") mapLevels["Ar_3D2"] = i;
+      else if (level == "3S1!!!!") mapLevels["Ar_3S1!!!!"] = i;
+      else if (level == "3S1!!  ") mapLevels["Ar_3S1!!"] = i;
+      else if (level == "3S1!!! ") mapLevels["Ar_3S1!!!"] = i;
+      else if (level == "2S3    ") mapLevels["Ar_2S3"] = i;
+      else if (level == "2S2    ") mapLevels["Ar_2S2"] = i;
+      else if (level == "3S1!   ") mapLevels["Ar_3S1!"] = i;
+      else if (level == "4D5    ") mapLevels["Ar_4D5"] = i;
+      else if (level == "3S4    ") mapLevels["Ar_3S4"] = i;
+      else if (level == "4D2    ") mapLevels["Ar_4D2"] = i;
+      else if (level == "4S1!   ") mapLevels["Ar_4S1!"] = i;
+      else if (level == "3S2    ") mapLevels["Ar_3S2"] = i;
+      else if (level == "5D5    ") mapLevels["Ar_5D5"] = i;
+      else if (level == "4S4    ") mapLevels["Ar_4S4"] = i;
+      else if (level == "5D2    ") mapLevels["Ar_5D2"] = i;
+      else if (level == "6D5    ") mapLevels["Ar_6D5"] = i;
+      else if (level == "5S1!   ") mapLevels["Ar_5S1!"] = i;
+      else if (level == "4S2    ") mapLevels["Ar_4S2"] = i;
+      else if (level == "5S4    ") mapLevels["Ar_5S4"] = i;
+      else if (level == "6D2    ") mapLevels["Ar_6D2"] = i;
+      else if (level == "HIGH   ") mapLevels["Ar_High"] = i;
+      else {
+        std::cerr << className << "::ComputeDeexcitationTable:\n";
+        std::cerr << "    Unknown excitation level:\n";
+        std::cerr << "      Ar " << level << "\n";
+      }
+    } else if (ngas == 5) {
+      // Neon
+      if (!withNe) {
+        withNe = true;
+        iNe = int(csType[i] / nCsTypes);
+        cNe = fraction[iNe];
+      }
+      std::string level = "       ";
+      for (int j = 0; j < 7; ++j) level[j] = description[i][3 + j];
+      if      (level == "  1S5  ") mapLevels["Ne_1S5"] = i;
+      else if (level == "  1S4  ") mapLevels["Ne_1S4"] = i;
+      else if (level == "  1S3  ") mapLevels["Ne_1S3"] = i;
+      else if (level == "  1S2  ") mapLevels["Ne_1S2"] = i;
+      else if (level == " 2P10  ") mapLevels["Ne_2P10"] = i;
+      else if (level == "  2P9  ") mapLevels["Ne_2P9"] = i;
+      else if (level == "  2P8  ") mapLevels["Ne_2P8"] = i;
+      else if (level == "  2P7  ") mapLevels["Ne_2P7"] = i;
+      else if (level == "  2P6  ") mapLevels["Ne_2P6"] = i;
+      else if (level == "  2P5  ") mapLevels["Ne_2P5"] = i;
+      else if (level == "  2P4  ") mapLevels["Ne_2P4"] = i;
+      else if (level == "  2P3  ") mapLevels["Ne_2P3"] = i;
+      else if (level == "  2P2  ") mapLevels["Ne_2P2"] = i;
+      else if (level == "  2P1  ") mapLevels["Ne_2P1"] = i;
+      else if (level == "  2S5  ") mapLevels["Ne_2S5"] = i;
+      else if (level == "  2S4  ") mapLevels["Ne_2S4"] = i;
+      else if (level == "  2S3  ") mapLevels["Ne_2S3"] = i;
+      else if (level == "  2S2  ") mapLevels["Ne_2S2"] = i;
+      else if (level == "  3D6  ") mapLevels["Ne_3D6"] = i;
+      else if (level == "  3D5  ") mapLevels["Ne_3D5"] = i;
+      else if (level == " 3D4!  ") mapLevels["Ne_3D4!"] = i;
+      else if (level == "  3D4  ") mapLevels["Ne_3D4"] = i;
+      else if (level == "  3D3  ") mapLevels["Ne_3D3"] = i;
+      else if (level == "  3D2  ") mapLevels["Ne_3D2"] = i;
+      else if (level == " 3D1!! ") mapLevels["Ne_3D1!!"] = i;
+      else if (level == " 3D1!  ") mapLevels["Ne_3D1!"] = i;
+      else if (level == "3S1!!!!") mapLevels["Ne_3S1!!!!"] = i;
+      else if (level == "3S1!!! ") mapLevels["Ne_3S1!!!"] = i;
+      else if (level == " 3S1!! ") mapLevels["Ne_3S1!!"] = i;
+      else if (level == "  3S1! ") mapLevels["Ne_3S1!"] = i;
+      else if (level == "SUM 3P1") mapLevels["Ne_3P10_3P6"] = i;
+      else if (level == "SUM 3P5") mapLevels["Ne_3P5_3P2"] = i;
+      else if (level == "  3P1  ") mapLevels["Ne_3P1"] = i;
+      else if (level == "  3S4  ") mapLevels["Ne_3S4"] = i;
+      else if (level == "  3S2  ") mapLevels["Ne_3S2"] = i;
+      else if (level == "  4D5  ") mapLevels["Ne_4D5"] = i;
+      else if (level == "  4D2  ") mapLevels["Ne_4D2"] = i;
+      else if (level == " 4S1!  ") mapLevels["Ne_4S1!"] = i;
+      else if (level == "  4S4  ") mapLevels["Ne_4S4"] = i;
+      else if (level == "  5D5  ") mapLevels["Ne_5D5"] = i;
+      else if (level == "  5D2  ") mapLevels["Ne_5D2"] = i;
+      else if (level == "  4S2  ") mapLevels["Ne_4S2"] = i;
+      else if (level == " 5S1!  ") mapLevels["Ne_5S1!"] = i;
+      else if (level == "SUM S H") mapLevels["Ne_Sum_S_High"] = i;
+      else if (level == "SUM D H") mapLevels["Ne_Sum_P_High"] = i;
+      else {
+        std::cerr << className << "::ComputeDeexcitationTable:\n";
+        std::cerr << "    Unknown excitation level:\n";
+        std::cerr << "      Ne " << level << "\n";
+      }
+      break;
     }
   }
 

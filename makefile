@@ -29,8 +29,8 @@ CFLAGS = -Wall -Wextra -pedantic -Wabi -Wno-long-long -Woverloaded-virtual \
 FFLAGS = -fpic -Os -c
 
 # Debug flags
-# CFLAGS += -g
-# FFLAGS += -g
+ CFLAGS += -g
+ FFLAGS += -g
 
 # Linking flags
 LDFLAGS = `root-config --glibs` `root-config --ldflags`-lGeom \
