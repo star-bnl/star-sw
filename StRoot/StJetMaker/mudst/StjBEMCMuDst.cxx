@@ -1,4 +1,4 @@
-// $Id: StjBEMCMuDst.cxx,v 1.10 2010/06/03 22:06:54 pibero Exp $
+// $Id: StjBEMCMuDst.cxx,v 1.11 2010/09/08 04:54:29 pibero Exp $
 #include "StjBEMCMuDst.h"
 
 #include <StMuDSTMaker/COMMON/StMuDst.h>
@@ -42,12 +42,23 @@ StjBEMCMuDst::StjBEMCMuDst(bool doTowerSwapFix) : _bemcTables(0)
   }
 
   assert(_bemcTables);
+
+  _setVertex = false;
 }
 
 StjTowerEnergyList StjBEMCMuDst::getEnergyList()
 {
   if(isNewEvent()) _list = getlist();
   return _list;
+}
+
+void StjBEMCMuDst::setVertex(float vx, float vy, float vz)
+{
+  _setVertex = true;
+
+  _vx = vx;
+  _vy = vy;
+  _vz = vz;
 }
 
 bool StjBEMCMuDst::isNewEvent()
@@ -108,11 +119,18 @@ StjTowerEnergy StjBEMCMuDst::readTowerHit(const StEmcRawHit& hit)
   ret.towerEta = tower.Eta();
   ret.towerPhi = tower.Phi();
 
-  StThreeVectorF vertex = StMuDst::event()->primaryVertexPosition();
+  if (_setVertex) {
+    ret.vertexX = _vx;
+    ret.vertexY = _vy;
+    ret.vertexZ = _vz;
+  }
+  else {
+    StThreeVectorF vertex = StMuDst::event()->primaryVertexPosition();
 
-  ret.vertexX = vertex.x();
-  ret.vertexY = vertex.y();
-  ret.vertexZ = vertex.z(); 
+    ret.vertexX = vertex.x();
+    ret.vertexY = vertex.y();
+    ret.vertexZ = vertex.z(); 
+  }
 
   ret.energy = hit.energy();
   ret.adc    = hit.adc();

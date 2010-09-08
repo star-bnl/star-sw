@@ -83,6 +83,9 @@ int StJetMaker2009::Make()
       // Save vertex index
       int savedVertexIndex = tpc.currentVertexIndex();
 
+      // Keep track of number of good vertices
+      int nvertices = 0;
+
       for (int iVertex = 0; iVertex < tpc.numberOfVertices(); ++iVertex) {
 	tpc.setVertexIndex(iVertex);
 
@@ -91,6 +94,9 @@ int StJetMaker2009::Make()
 
 	// Skip pile-up vertex
 	if (vertex.ranking() <= 0) continue;
+
+	// Found good vertex
+	++nvertices;
 
 	StjTrackList trackList = jetbranch->anapars->tpcCuts()(tpc.getTrackList());
 
@@ -148,6 +154,60 @@ int StJetMaker2009::Make()
 	for (StProtoJet::FourVecList::const_iterator i = particles.begin(); i != particles.end(); ++i)
 	  delete *i;
       }	// End loop over vertices
+
+      // No good vertex was found. Use (0,0,0) for vertex and EMC-only jets.
+      // Useful for beam-gas background studies.
+      if (!nvertices) {
+	// Get BEMC towers
+	StjTowerEnergyList bemcEnergyList;
+
+	if (mUseBemc) {
+	  StjBEMCMuDst bemc;
+	  bemc.setVertex(0,0,0);
+	  bemcEnergyList = jetbranch->anapars->bemcCuts()(bemc.getEnergyList());
+	}
+
+	// Get EEMC towers
+	StjTowerEnergyList eemcEnergyList;
+
+	if (mUseEemc) {
+	  StjEEMCMuDst eemc;
+	  eemcEnergyList = jetbranch->anapars->eemcCuts()(eemc.getEnergyList());
+	}
+
+	// Merge BEMC and EEMC towers
+	StjTowerEnergyList energyList;
+
+	copy(bemcEnergyList.begin(),bemcEnergyList.end(),back_inserter(energyList));
+	copy(eemcEnergyList.begin(),eemcEnergyList.end(),back_inserter(energyList));
+
+	// Convert towers to Lorentz vectors
+	FourList energy4pList = StjeTowerEnergyListToStMuTrackFourVecList()(energyList);
+
+	// Merge tracks and towers
+	StProtoJet::FourVecList particles; // vector<const AbstractFourVec*>
+
+	copy(energy4pList.begin(),energy4pList.end(),back_inserter(particles));
+
+	// Run jet finder
+	StJetFinder::JetList protojets;	// list<StProtoJet>
+	jetbranch->jetfinder->findJets(protojets,particles);
+
+	// Filter jets
+	protojets = jetbranch->anapars->jetCuts()(protojets);
+
+	// Add dummy vertex (0,0,0)
+	StJetVertex* jetvertex = jetbranch->event->newVertex();
+	jetvertex->mPosition.SetXYZ(0,0,0);
+
+	// Add jets
+	for (StJetFinder::JetList::const_iterator iProtoJet = protojets.begin(); iProtoJet != protojets.end(); ++iProtoJet)
+	  addJet(*iProtoJet,jetbranch->event,jetvertex);
+
+	// Clean up particles
+	for (StProtoJet::FourVecList::const_iterator i = particles.begin(); i != particles.end(); ++i)
+	  delete *i;
+      }
 
       // Restore vertex index
       tpc.setVertexIndex(savedVertexIndex);

@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjEEMCMuDst.h,v 1.6 2010/05/30 07:10:06 pibero Exp $
+// $Id: StjEEMCMuDst.h,v 1.7 2010/09/08 04:54:30 pibero Exp $
 #ifndef STJEEMCMUDST_H
 #define STJEEMCMUDST_H
 
@@ -23,6 +23,11 @@ private:
 
   StEEmcDb* mEeDb;
 
+  bool _setVertex;
+
+  double _vx;
+  double _vy;
+  double _vz;
 };
 
 #endif // STJEEMCMUDST_H
