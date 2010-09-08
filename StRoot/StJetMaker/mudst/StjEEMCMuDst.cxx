@@ -1,4 +1,4 @@
-// $Id: StjEEMCMuDst.cxx,v 1.7 2010/05/30 07:10:06 pibero Exp $
+// $Id: StjEEMCMuDst.cxx,v 1.8 2010/09/08 04:54:30 pibero Exp $
 #include "StjEEMCMuDst.h"
 
 #include "StMaker.h"
@@ -13,6 +13,7 @@
 
 StjEEMCMuDst::StjEEMCMuDst() : mEeDb((StEEmcDb*)StMaker::GetChain()->GetDataSet("StEEmcDb"))
 {
+  _setVertex = false;
 }
 
 void StjEEMCMuDst::Init()
@@ -86,11 +87,18 @@ StjTowerEnergyList StjEEMCMuDst::getEnergyList()
     energyDeposit.towerEta = towerLocation.Eta();
     energyDeposit.towerPhi = towerLocation.Phi();
 
-    StThreeVectorF vertex = StMuDst::event()->primaryVertexPosition();
+    if (_setVertex) {
+      energyDeposit.vertexX = _vx;
+      energyDeposit.vertexY = _vy;
+      energyDeposit.vertexZ = _vz;
+    }
+    else {
+      StThreeVectorF vertex = StMuDst::event()->primaryVertexPosition();
 
-    energyDeposit.vertexX = vertex.x();
-    energyDeposit.vertexY = vertex.y();
-    energyDeposit.vertexZ = vertex.z(); 
+      energyDeposit.vertexX = vertex.x();
+      energyDeposit.vertexY = vertex.y();
+      energyDeposit.vertexZ = vertex.z(); 
+    }
 
     energyDeposit.energy   = energy;
     energyDeposit.adc      = rawadc;

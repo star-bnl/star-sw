@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjBEMCMuDst.h,v 1.10 2010/06/03 21:50:45 pibero Exp $
+// $Id: StjBEMCMuDst.h,v 1.11 2010/09/08 04:54:30 pibero Exp $
 #ifndef STJBEMCMUDST_H
 #define STJBEMCMUDST_H
 
@@ -18,6 +18,7 @@ public:
   virtual ~StjBEMCMuDst() { }
 
   StjTowerEnergyList getEnergyList();
+  void setVertex(float vx, float vy, float vz);
 
 private:
 
@@ -34,6 +35,12 @@ private:
 
   StjTowerEnergyList getlist();
   bool isNewEvent();
+
+  bool _setVertex;
+
+  double _vx;
+  double _vy;
+  double _vz;
 
 };
 
