@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.14 2009/11/11 03:52:14 genevb Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.15 2010/09/10 21:06:45 rjreed Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -13,7 +13,7 @@
 
 //______________________________________________________________________________
 StGenericVertexFinder::StGenericVertexFinder() : 
-  mVertexConstrain(false), mMode(0), mDebugLevel(0)
+  mVertexConstrain(false), mMode(0), mDebugLevel(0), mUseBtof(false)
 {
   mVertexOrderMethod = orderByNumberOfDaughters;
 }
@@ -58,7 +58,7 @@ void StGenericVertexFinder::UsePCT(bool usePCT)
   LOG_WARN << "StGenericVertexFinder::UsePCT() not implemented for this vertex finder." << endm;
   LOG_WARN << "StGenericVertexFinder::Expect Post-crossing tracks to be used by default in old finders." << endm;
 }
-//______________________________________________________________________________
+//_____________________________________________________________________________
 int StGenericVertexFinder::size() const
 {
   return mVertexList.size();
@@ -86,6 +86,9 @@ void StGenericVertexFinder::NoVertexConstraint()
 
 
 // $Log: StGenericVertexFinder.cxx,v $
+// Revision 1.15  2010/09/10 21:06:45  rjreed
+// Added function UseBOTF and bool mUseBtof to switch the use of the TOF on and off in vertex finding.  Default value is off (false).
+//
 // Revision 1.14  2009/11/11 03:52:14  genevb
 // Re-order the vertices upon filling StEvent
 //
