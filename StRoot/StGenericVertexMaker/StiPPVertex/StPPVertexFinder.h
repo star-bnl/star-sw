@@ -3,11 +3,12 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.14 2009/07/09 21:29:03 balewski Exp $
+ * $Id: StPPVertexFinder.h,v 1.15 2010/09/10 21:08:35 rjreed Exp $
  *
  */
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
 
+#include "StPhysicalHelixD.hh" // dongx
 class StiKalmanTrack;
 class TrackData;
 class VertexData;
@@ -17,7 +18,9 @@ class StiToolkit;
 class StEEmcDb;
 
 class EEmcGeomSimple;
+class StBTofGeometry; // dongx
 
+class  BtofHitList;  // dongx
 class  CtbHitList;
 class  BemcHitList;
 class  EemcHitList;
@@ -27,6 +30,7 @@ class StPPVertexFinder: public StGenericVertexFinder {
  private:
   enum {mxH=32};
   bool examinTrackDca(const StiKalmanTrack*, TrackData &t);
+  void matchTrack2BTOF(const StiKalmanTrack*, TrackData &t, StBTofGeometry *geom);  // dongx
   void matchTrack2CTB(const StiKalmanTrack*, TrackData &t);
   void matchTrack2EEMC(const StiKalmanTrack*, TrackData &t, float z);
   void matchTrack2BEMC(const StiKalmanTrack*, TrackData &t, float rxy);
@@ -52,6 +56,9 @@ class StPPVertexFinder: public StGenericVertexFinder {
   float  mMaxZradius;     // used in matching: tracks to zVertex
   int    mMinMatchTr;     // for valid vertex
   float  mMaxZrange;      // cut off for tracks Z_DCA
+  float  mDyBtof;         // BTOF delta y cut - dongx
+  float  mMinZBtof;       // BTOF local z min cut - dongx
+  float  mMaxZBtof;       // BTOF local z max cut - dongx
   float  mMinAdcBemc;     // BEMC towers with MIP response
   float  mMinAdcEemc;     // EEMC towers with MIP response
   float  mMinFitPfrac;    // nFit/nPossible
@@ -70,9 +77,11 @@ class StPPVertexFinder: public StGenericVertexFinder {
 
   // util
   StiToolkit     *mToolkit;
+  BtofHitList    *btofList;  // dongx
   CtbHitList     *ctbList;
   BemcHitList    *bemcList;
   EemcHitList    *eemcList;
+  StBTofGeometry *btofGeom;  // dongx btofGeometry
   StEEmcDb       *eeDb;
   EEmcGeomSimple *geomE;
   
@@ -89,6 +98,7 @@ public:
   void Finish();
 
   TH1F *hA[mxH];
+  TH2F *hACorr;
   TH1D *hL ;      // likelyhood distribution
   TH1D *hM, *hW ; // cumulative track mult & weight distribution, for better errZ calculation
   TObjArray * HList;
@@ -110,6 +120,10 @@ public:
 /***************************************************************************
  *
  * $Log: StPPVertexFinder.h,v $
+ * Revision 1.15  2010/09/10 21:08:35  rjreed
+ * Added function UseBOTF and bool mUseBtof to switch the use of the TOF on and off in vertex finding.  Default value is off (false).
+ * Added functions, and variables necessary to use the TOF in PPV for vertex finding.  Includes matching tracks to the TOF and changing the track weight based on its matched status with the TOF.
+ *
  * Revision 1.14  2009/07/09 21:29:03  balewski
  * allow export of prim tracks for 3D beam line fit (use VtxSeedCalG option),
  * oneTrack vertex thresholds was lowered form 15 to 10 GeV/c

@@ -14,7 +14,7 @@ TrackData::TrackData() {
   vertexID=0;
   gPt=0;
   anyMatch=anyVeto=false;
-  mCtb=mBemc=mEemc=mTpc=0;
+  mBtof=mCtb=mBemc=mEemc=mTpc=0;
   weight=1;
   zDca=ezDca=rxyDca=0;
   mother=0;
@@ -124,7 +124,8 @@ TrackData::updateAnyMatch(bool match, bool veto, int & mXXX){
     anyMatch=true;
     anyVeto=false;
     mXXX=1;
-  } else if(veto && (!anyMatch) ) {
+    //  } else if(veto && (!anyMatch) ) {
+  } else if(veto && (!match) ) { // dongx
     anyVeto=true;
     mXXX=-1;
   } else {

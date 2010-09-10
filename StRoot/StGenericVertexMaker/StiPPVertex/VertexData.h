@@ -1,7 +1,7 @@
 #ifndef VertexData_h
 #define VertexData_h
 /*********************************************************************
- * $Id: VertexData.h,v 1.2 2005/08/30 22:08:43 balewski Exp $
+ * $Id: VertexData.h,v 1.3 2010/09/10 21:08:35 rjreed Exp $
  *********************************************************************
  * full description of found vertex
  */
@@ -15,8 +15,8 @@ class VertexData {
   int nUsedTrack; // # of tracks used to identify the vertex
   float Lmax; // maximum of the likelhood function.
   float gPtSum; // total tranverse momentum of used tracks.
-  int nCtb,nBemc,nEemc,nTpc,nAnyMatch; // number of matched tracks 
-  int  nCtbV,nBemcV,nEemcV,nTpcV,nAnyVeto; // number of vetoed tracks
+  int nBtof,nCtb,nBemc,nEemc,nTpc,nAnyMatch; // number of matched tracks - dongx
+  int nBtofV,nCtbV,nBemcV,nEemcV,nTpcV,nAnyVeto; // number of vetoed tracks - dongx
   
   // methods
   VertexData();
@@ -27,6 +27,10 @@ class VertexData {
 
 /*
  * $Log: VertexData.h,v $
+ * Revision 1.3  2010/09/10 21:08:35  rjreed
+ * Added function UseBOTF and bool mUseBtof to switch the use of the TOF on and off in vertex finding.  Default value is off (false).
+ * Added functions, and variables necessary to use the TOF in PPV for vertex finding.  Includes matching tracks to the TOF and changing the track weight based on its matched status with the TOF.
+ *
  * Revision 1.2  2005/08/30 22:08:43  balewski
  * drop '*' from declaration of   mTrackData &  mVertexData
  *
