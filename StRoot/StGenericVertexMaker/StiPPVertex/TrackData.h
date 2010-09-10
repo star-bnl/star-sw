@@ -1,7 +1,7 @@
 #ifndef TrackData_h
 #define TrackData_h
 /***********************************************
- * $Id: TrackData.h,v 1.2 2009/07/09 21:29:03 balewski Exp $
+ * $Id: TrackData.h,v 1.3 2010/09/10 21:08:35 rjreed Exp $
  ******************************************************
  */
 #include <TVector3.h>
@@ -39,9 +39,10 @@ class TrackData {
   float rxyDca;
   float gPt; // (GeV) global
   // 3-stat logic: 1=match, -1=veto, 0=dunno
-  int mCtb,mBemc,mEemc,mTpc; 
+  int mBtof,mCtb,mBemc,mEemc,mTpc; 
   bool anyMatch,anyVeto;
   float weight; // compound from all maching tests
+  int btofBin; // >=0 if track passed through BTOF cell
   int ctbBin;  // >=0 if track passed through CTB slat
   int bemcBin; // >=0 if track passed through BTOW tower
   int eemcBin; // >=0 if track passed through ETOW tower
@@ -57,6 +58,10 @@ class TrackData {
 
 /*
  * $Log: TrackData.h,v $
+ * Revision 1.3  2010/09/10 21:08:35  rjreed
+ * Added function UseBOTF and bool mUseBtof to switch the use of the TOF on and off in vertex finding.  Default value is off (false).
+ * Added functions, and variables necessary to use the TOF in PPV for vertex finding.  Includes matching tracks to the TOF and changing the track weight based on its matched status with the TOF.
+ *
  * Revision 1.2  2009/07/09 21:29:03  balewski
  * allow export of prim tracks for 3D beam line fit (use VtxSeedCalG option),
  * oneTrack vertex thresholds was lowered form 15 to 10 GeV/c

@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.36 2009/11/20 18:54:08 genevb Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.37 2010/09/10 21:08:35 rjreed Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -51,11 +51,15 @@
 #include <StEEmcUtil/database/cstructs/eemcConstDB.hh>
 #include <StEEmcUtil/EEmcGeom/EEmcGeomSimple.h>
 
+#include "BtofHitList.h" // dongx
 #include "CtbHitList.h"
 #include "BemcHitList.h"
 #include "EemcHitList.h"
 
 #include "StEmcCollection.h"
+#include "StBTofCollection.h" // dongx
+#include "StBTofUtil/StBTofGeometry.h"
+
 
 //==========================================================
 //==========================================================
@@ -104,10 +108,14 @@ StPPVertexFinder::Init() {
   mMinFitPfrac  = 0.7;  // nFit /nPossible points on the track
   mMaxZradius   = 3.0;  //+sigTrack, to match tracks to Zvertex
   mMaxZrange    = 200;  // to accept Z_DCA of a track           
-  mMinMatchTr   = 2;    // required to accept vertex              
+  mMinMatchTr   = 2;    // required to accept vertex
+  mDyBtof       = 1.5;  // |dy|<1.5 cm for local position - not used now
+  mMinZBtof     = -3.0; //
+  mMaxZBtof     = 3.0;  // -3.0<zLocal<3.0 - dongx              
   mMinAdcEemc   = 5;    // chan, MIP @ 6-18 ADC depending on eta
 
   mStoreUnqualifiedVertex=5; // extension requested by Akio, October 2008, set to 0 do disable it
+  
 
   //get pointer to Sti toolkit
   mToolkit = StiToolkit::instance();
@@ -115,10 +123,28 @@ StPPVertexFinder::Init() {
   
   ctbList =new CtbHitList;
   bemcList =new BemcHitList;
+  btofList = new BtofHitList;
   vertex3D=0; // default
+ // Initialize BTOF geometry - dongx
+  St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("db");
+  btofGeom = 0;
+  if(TDataSet *geom = mydb->GetDataSet("btofGeometry")) {
+    btofGeom = (StBTofGeometry *)geom;
+    LOG_INFO << " Found btofGeometry ... " << endm;
+  } else {
+    btofGeom = new StBTofGeometry("btofGeometry","btofGeometry in VertexFinder");
+    LOG_INFO << " Create a new btofGeometry ... " << endm;
+  } 
+  if(btofGeom && !btofGeom->IsInitDone()) {
+    LOG_INFO << " BTofGeometry initialization ... " << endm;
+    TVolume *starHall = (TVolume *)mydb->GetDataSet("HALL");
+    btofGeom->Init(mydb, starHall);
+    mydb->AddConst(new TObjectSet("btofGeometry",btofGeom));
+  }
   // access EEMC-DB
   eeDb = (StEEmcDb*)StMaker::GetChain()->GetDataSet("StEEmcDb"); 
   assert(eeDb); // eemcDB must be in the chain, fix it,JB
+  cout<<"eeDb done"<<endl;
   geomE= new EEmcGeomSimple();
   // choose which 'stat' bits are fatal for mip detection
   uint  killStatEEmc=EEMCSTAT_ONLPED | EEMCSTAT_STKBT|  EEMCSTAT_HOTHT |  EEMCSTAT_HOTJP | EEMCSTAT_JUMPED ;
@@ -126,9 +152,12 @@ StPPVertexFinder::Init() {
    
   HList=new TObjArray(0);   
   initHisto();
+  cout<<"initiated histos"<<endl;
+  btofList->initHisto( HList); // dongx
   ctbList->initHisto( HList);
   bemcList->initHisto( HList);
   eemcList->initHisto( HList);
+  cout<<"Finished Init"<<endl;
 }
 
 //==========================================================
@@ -159,6 +188,7 @@ StPPVertexFinder::InitRun(int runnumber){
     mMinAdcBemc   = 8;    // BTOW used calibration of maxt Et @ ~60Gev 
   }
   
+  btofList->initRun(); // dongx
   ctbList->initRun(); 
   bemcList->initRun();
   eemcList->initRun();
@@ -179,10 +209,13 @@ StPPVertexFinder::InitRun(int runnumber){
     <<"\n MinMatchTr of prim tracks ="<< mMinMatchTr
     <<"\n MaxZrange (cm)for glob tracks ="<< mMaxZrange
     <<"\n MaxZradius (cm) for prim tracks &Likelihood  ="<< mMaxZradius
+    <<"\n DeltaY (cm) for BTOF local posision = "<< mDyBtof
+    <<"\n Min/Max Z position for BTOF hit = "<<mMinZBtof<<" "<<mMaxZBtof   // dongx
     <<"\n MinAdcBemc for MIP ="<<mMinAdcBemc
     <<"\n MinAdcEemc for MIP ="<<mMinAdcEemc
     <<"\n bool   isMC ="<<isMC
     <<"\n bool useCtb ="<<mUseCtb
+    <<"\n bool useBtof ="<<mUseBtof
     <<"\n bool DropPostCrossingTrack ="<<mDropPostCrossingTrack
     <<"\n Store # of UnqualifiedVertex ="<<mStoreUnqualifiedVertex
     <<"\n Store="<<(mAlgoSwitches & kSwitchOneHighPT)<<" oneTrack-vertex if track PT/GeV>"<< mCut_oneTrackPT 
@@ -221,10 +254,11 @@ StPPVertexFinder::initHisto() {
   hA[16]=new TH1F("ptTr","pT, ppv pool tracks; pT (GeV/c) ",50,0.,10.);
   hA[17]=new TH1F("vRL","PPV Vertex rank, 'funny' X-axis; X=Log10(rank-1e6)+offset", 150, -11,25);
 
+  hACorr=new TH2F("BTOFvsBEMC","BTOF vs BEMC", 5,-2.5,2.5,5,-2.5,2.5);
 
   int i;
   for(i=0;i<mxH; i++) if(hA[i]) HList->Add(hA[i]);
-
+  HList->Add(hACorr);
 }
 
 //==========================================================
@@ -233,6 +267,7 @@ void
 StPPVertexFinder::Clear(){
   LOG_DEBUG << "PPVertex::Clear nEve="<<mTotEve<<  endm;
   StGenericVertexFinder::Clear();
+  btofList->clear();  // dongx
   ctbList->clear();
   bemcList->clear();
   eemcList->clear();
@@ -255,6 +290,7 @@ StPPVertexFinder::~StPPVertexFinder() {
   //x delete mTrackData;
   //x delete mVertexData;
   delete geomE;
+  if(btofGeom) delete btofGeom; // dongx
 }
 
 //======================================================
@@ -281,6 +317,7 @@ StPPVertexFinder::printInfo(ostream& os) const
       <<
       Form("%d track@z0=%.2f +/- %.2f gPt=%.3f vertID=%d match:  bin,Fired,Track:\n",
 	   k,t->zDca,t->ezDca,t->gPt,t->vertexID) 
+      << Form("    Btof %3d,%d,%d",t->btofBin,btofList->getFired(t->btofBin),btofList->getTrack(t->btofBin))   // dongx
       << Form("    CTB  %3d,%d,%d",t->ctbBin,ctbList->getFired(t->ctbBin),ctbList->getTrack(t->ctbBin))
       << Form("    Bemc %3d,%d,%d",t->bemcBin,bemcList->getFired(t->bemcBin),bemcList->getTrack(t->bemcBin))
       << Form("    Eemc %3d,%d,%d",t->eemcBin,eemcList->getFired(t->eemcBin),bemcList->getTrack(t->bemcBin))
@@ -355,6 +392,7 @@ StPPVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double 
 //==========================================================
 int 
 StPPVertexFinder::fit(StEvent* event) {
+  cout<<"***** START FIT"<<endl;
   if(mBeamLineTracks) vertex3D->clearEvent();
 
   hA[0]->Fill(1);
@@ -395,6 +433,17 @@ StPPVertexFinder::fit(StEvent* event) {
   if(mToolkit==0) {    
    LOG_WARN <<"no Sti tool kit,  PPV is OFF"<<endm;
    return 0;
+  }
+
+ // get BTOF info - dongx
+
+  if(mUseBtof) {
+    StBTofCollection *btofColl = (StBTofCollection*)mEvent->btofCollection();
+    if(btofColl==0) {
+      LOG_WARN << "no btofCollection , continue THE SAME eve"<<endm;
+    } else {
+      btofList->build(btofColl);
+    }
   }
 
   // get CTB info, does not  work for embeding 
@@ -443,7 +492,7 @@ StPPVertexFinder::fit(StEvent* event) {
   
   //select reasonable tracks and add them to my list
   int k=0;
-  int kCtb=0,kBemc=0, kEemc=0,kTpc=0;
+  int kBtof=0,kCtb=0,kBemc=0, kEemc=0,kTpc=0;
   int nmAny=0;
 
   int ntrk[7]; for(int i=0; i<7; i++) ntrk[i]=0;
@@ -471,6 +520,7 @@ StPPVertexFinder::fit(StEvent* event) {
     //  dumpKalmanNodes(track);
     
     // ......... matcho various detectors ....................
+    if(mUseBtof) matchTrack2BTOF(track,t,btofGeom);  // matching track to btofGeometry
     if(mUseCtb)  matchTrack2CTB(track,t);
     matchTrack2BEMC(track,t,242); // middle of tower in Rxy
     matchTrack2EEMC(track,t,288); // middle of tower in Z
@@ -480,12 +530,15 @@ StPPVertexFinder::fit(StEvent* event) {
 
     hA[5]->Fill(t.rxyDca);
 
+    if( t.mBtof>0 ) kBtof++;   // dongx
     if( t.mCtb>0 )  kCtb++;   
     if( t.mBemc>0)  kBemc++;   
     if( t.mEemc>0)  kEemc++;
     if( t.mTpc>0 )  kTpc++;
  
-    if(t.mCtb>0 || t.mBemc>0 || t.mEemc>0 || t.mTpc>0 ) nmAny++ ;
+    if(t.mBtof>0 || t.mCtb>0 || t.mBemc>0 || t.mEemc>0 || t.mTpc>0 ) nmAny++ ; // dongx
+
+    hACorr->Fill(t.mBtof, t.mBemc);
     //  t.print();
   }
 
@@ -502,6 +555,11 @@ StPPVertexFinder::fit(StEvent* event) {
     ctbList ->doHisto();
   }
 
+ if(mUseBtof) {
+    btofList->print(); // dongx
+    btofList->doHisto(); // dongx
+  }
+
   bemcList->print();
   eemcList->print();
   LOG_INFO<< Form("PPV::TpcList size=%d nMatched=%d\n\n",mTrackData.size(),kTpc)<<endm;
@@ -509,7 +567,8 @@ StPPVertexFinder::fit(StEvent* event) {
   bemcList->doHisto();
   eemcList->doHisto();
 
-  LOG_INFO << "PPV::fit() nEve="<<mTotEve<<" , "<<nmAny<<" traks with good DCA, matching: CTB="<<kCtb<<" BEMC="<<kBemc<<" EEMC="<<kEemc<<endm;
+  LOG_INFO << "PPV::fit() nEve="<<mTotEve<<" , "<<nmAny<<" traks with good DCA, matching: BTOF="<<kBtof<<" CTB="<<kCtb<<" BEMC="<<kBemc<<" EEMC="<<kEemc<<endm;
+
 
   if(nmAny<mMinMatchTr &&  mStoreUnqualifiedVertex<=0){
     LOG_INFO << "StPPVertexFinder::fit() nEve="<<mTotEve<<" Quit, to few matched tracks"<<endm;
@@ -726,6 +785,9 @@ StPPVertexFinder::evalVertexZ(VertexData &V) { // and tag used tracks
     if(  t->mTpc>0)       V.nTpc++;
     else if (  t->mTpc<0) V.nTpcV++;
 
+    if(  t->mBtof>0)       V.nBtof++;  // dongx
+    else if (  t->mBtof<0) V.nBtofV++;
+
     if(  t->mCtb>0)       V.nCtb++;
     else if (  t->mCtb<0) V.nCtbV++;
 
@@ -790,6 +852,7 @@ StPPVertexFinder::exportVertices(){
     else         primV.setVertexFinderId(ppvNoCtbVertexFinder); 
 
     primV.setNumTracksUsedInFinder(V->nUsedTrack);
+    primV.setNumMatchesWithBTOF(V->nBtof);  // dongx
     primV.setNumMatchesWithCTB(V->nCtb);
     primV.setNumMatchesWithBEMC(V->nBemc);
     primV.setNumMatchesWithEEMC(V->nEemc);
@@ -950,6 +1013,68 @@ StPPVertexFinder::examinTrackDca(const StiKalmanTrack*track,TrackData &t){
   return true;
 }
 
+
+//==========================================================
+//==========================================================
+void  
+StPPVertexFinder::matchTrack2BTOF(const StiKalmanTrack* track,TrackData &t,StBTofGeometry* geom){
+
+  StiKalmanTrackNode* ouNode=track->getOuterMostNode();
+
+  StThreeVectorD posTOF;
+  // helix extrapolation:
+  StThreeVectorD ou(ouNode->getX(),ouNode->getY(),ouNode->getZ());
+  ou.rotateZ(ouNode->getAlpha());
+  StPhysicalHelixD hlx(fabs(ouNode->getCurvature()),
+                       ouNode->getDipAngle(),
+                       ouNode->getPhase(),
+                       ou,
+                       ouNode->getHelicity());
+  IntVec idVec;
+  DoubleVec pathVec;
+  PointVec crossVec;
+
+  IntVec iBinVec;
+  if(geom->HelixCrossCellIds(hlx,idVec,pathVec,crossVec)) {
+    for(size_t i=0;i<idVec.size();i++) {
+      int itray, imodule, icell;
+      geom->DecodeCellId(idVec[i], icell, imodule, itray);
+
+      Double_t local[3], global[3];
+      for(int j=0;j<3;j++) local[j] = 0;
+      global[0] = crossVec[i].x();
+      global[1] = crossVec[i].y();
+      global[2] = crossVec[i].z();
+      StBTofGeomSensor *sensor = geom->GetGeomSensor(imodule,itray);
+      if(!sensor) {
+        LOG_WARN << "no sensitive module in this projection??? - weird" << endm;
+        continue;
+      }
+      sensor->Master2Local(&global[0],&local[0]);
+//      LOG_INFO << "   Hit the TOF cell " << itray << " " << imodule << " " << icell << endm;
+//      LOG_INFO << "   position " << local[0] << " " << local[1] << " " << local[2] << endm;
+//      float yCenter = (icell-1-2.5)*3.45;  // cell center position;
+//      if(fabs(local[1]-yCenter)>mDyBtof) continue;
+//      if(icell==1||icell==6) continue;
+      if(local[2]<mMinZBtof||local[2]>mMaxZBtof) continue;
+      int iBin = btofList->cell2bin(itray, imodule, icell);
+      iBinVec.push_back(iBin);
+      btofList->addBtofTrack(itray, imodule, icell);
+      LOG_DEBUG << "   !!! Push to the list ...tray/module/cell " << itray << "/" << imodule << "/" << icell << endm;
+    }
+  }
+
+  bool  btofMatch=btofList->isMatched(iBinVec);
+  bool  btofVeto =btofList->isVetoed(iBinVec);
+  float btofW    =btofList->getWeight(iBinVec);
+  btofList->addBtofMatch(iBinVec);  // update the nMatch statistics
+
+  LOG_DEBUG << " ** BTOF ** match/veto/weight = " << btofMatch << " " << btofVeto << " " << btofW << endm;
+
+  t.updateAnyMatch(btofMatch,btofVeto,t.mBtof);
+  t.weight*=btofW;
+  t.btofBin= iBinVec.size() ? iBinVec[0] : -1;
+}
 
 //==========================================================
 //==========================================================
@@ -1225,6 +1350,10 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.37  2010/09/10 21:08:35  rjreed
+ * Added function UseBOTF and bool mUseBtof to switch the use of the TOF on and off in vertex finding.  Default value is off (false).
+ * Added functions, and variables necessary to use the TOF in PPV for vertex finding.  Includes matching tracks to the TOF and changing the track weight based on its matched status with the TOF.
+ *
  * Revision 1.36  2009/11/20 18:54:08  genevb
  * Avoid compiler warning about operator order precedence
  *
