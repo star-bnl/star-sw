@@ -362,6 +362,7 @@ Bfc_st BFC[] = { // standard chains
   // WARNING: introduction of usePct4Vtx with default:false breaks backward compatibility.
   // See related code in StBFChain.cxx for details
   {"usePct4Vtx"     ,""  ,"","",""                ,"","Use Post-Crossing Tracks for vertex finding",kFALSE},
+  {"useBTOF4Vtx"    ,""  ,"","",""                 ,"","Use BTOF track matching for vertex ranking",kFALSE},
   {"svt1hit",""  ,"","",""                                     ,"","Use 1 SVT hit only combination",kFALSE},
   {"CtbMatchVtx"    ,""  ,"","VFMinuit",""              ,"","... CTB Matching ON in Vertex Finding",kFALSE},
 #ifdef WithStiVMC /* switched off for StiVMC */

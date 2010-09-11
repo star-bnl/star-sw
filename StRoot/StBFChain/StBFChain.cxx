@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.566 2010/08/19 23:00:15 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.567 2010/09/11 05:03:06 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -410,6 +410,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("min2trkVtx" ) ) mk->SetAttr("minTracks" 	, 2);
       if (GetOption("VtxSeedCalG") ) mk->SetAttr("calibBeamline", kTRUE);
       if (GetOption("usePct4Vtx" ) ) mk->SetAttr("PCT"          , kTRUE);
+      if (GetOption("useBTOF4Vtx") ) mk->SetAttr("BTOF"         , kTRUE);
       mk->PrintAttr();
     }
     if (maker=="StAssociationMaker") {
