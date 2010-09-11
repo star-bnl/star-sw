@@ -53,6 +53,7 @@ StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name)
   calibBeamline = kFALSE;
   useCTB = kFALSE;
   usePCT = kFALSE;
+  useBTOF = kFALSE;
   eval = kFALSE;
   nEvTotal=nEvGood=0;
   externalFindUse=kTRUE; ///Default means that no finding actually done
@@ -93,6 +94,7 @@ Int_t StGenericVertexMaker::Init()
   calibBeamline = IAttr("calibBeamline");
   useCTB        = IAttr("CTB");
   usePCT        = IAttr("PCT");
+  useBTOF       = IAttr("BTOF");
   eval          = IAttr("eval");
   minTracks     = IAttr("minTracks");
 
@@ -139,6 +141,7 @@ Int_t StGenericVertexMaker::Init()
   }
 
   theFinder->UsePCT(usePCT);
+  theFinder->UseBTOF(useBTOF);
 
   if (calibBeamline) theFinder->CalibBeamLine();
 
