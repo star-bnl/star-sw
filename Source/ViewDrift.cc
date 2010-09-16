@@ -12,7 +12,7 @@ ViewDrift::ViewDrift() :
   xMin(-1.), yMin(-1.), zMin(-1.), 
   xMax( 1.), yMax( 1.), zMax( 1.),
   view(0),
-  nDriftLines(0) {
+  nDriftLines(0), nTracks(0) {
 
   plottingEngine.SetDefaultStyle();
   colorElectron        = plottingEngine.GetRootColor("orange");
@@ -20,7 +20,9 @@ ViewDrift::ViewDrift() :
   colorHole            = plottingEngine.GetRootColor("red");
   colorPhoton          = plottingEngine.GetRootColor("blue");
   colorChargedParticle = plottingEngine.GetRootColor("dark-green");
- 
+  driftLines.clear();
+  tracks.clear(); 
+
 }
 
 ViewDrift::~ViewDrift() {
@@ -135,31 +137,31 @@ void
 ViewDrift::NewChargedParticleTrack(const int np, int& id,
                      const double x0, const double y0, const double z0) {
 
-  // Create a new drift line and add it to the list.
+  // Create a new track and add it to the list.
   if (np <= 0) {
     // Number of points is not yet known.
-    TPolyLine3D p(1);
-    p.SetLineColor(colorChargedParticle);
+    TPointSet3D p(1);
+    p.SetMarkerColor(colorChargedParticle);
     p.SetPoint(0, x0, y0, z0);
-    driftLines.push_back(p);
+    tracks.push_back(p);
   } else {
-    TPolyLine3D p(np);
-    p.SetLineColor(colorChargedParticle);
+    TPointSet3D p(np);
+    p.SetMarkerColor(colorChargedParticle);
     p.SetPoint(0, x0, y0, z0);
-    driftLines.push_back(p);
+    tracks.push_back(p);
   }
   // Return the index of this drift line.
-  id = nDriftLines;
-  ++nDriftLines;
+  id = nTracks;
+  ++nTracks;
 
 }
 
 void
-ViewDrift::SetPoint(const int iL, const int iP, 
-                    const double x, const double y, const double z) {
+ViewDrift::SetDriftLinePoint(const int iL, const int iP, 
+                             const double x, const double y, const double z) {
   
   if (iL < 0 || iL >= nDriftLines) {
-    std::cerr << "ViewDrift::SetPoint:\n";
+    std::cerr << "ViewDrift::SetDriftLinePoint:\n";
     std::cerr << "    Drift line index " << iL << " is out of range.\n";
     return;
   }
@@ -171,16 +173,46 @@ ViewDrift::SetPoint(const int iL, const int iP,
 }
 
 void
-ViewDrift::AddPoint(const int iL,
-                    const double x, const double y, const double z) {
+ViewDrift::AddDriftLinePoint(const int iL,
+                             const double x, const double y, const double z) {
 
   if (iL < 0 || iL >= nDriftLines) {
-    std::cerr << "ViewDrift::AddPoint:\n";
+    std::cerr << "ViewDrift::AddDriftLinePoint:\n";
     std::cerr << "    Drift line index " << iL << " is out of range.\n";
     return;
   }
 
   driftLines[iL].SetNextPoint(x, y, z);
+
+}
+
+void
+ViewDrift::SetTrackPoint(const int iL, const int iP, 
+                         const double x, const double y, const double z) {
+  
+  if (iL < 0 || iL >= nTracks) {
+    std::cerr << "ViewDrift::SetTrackPoint:\n";
+    std::cerr << "    Track index " << iL << " is out of range.\n";
+    return;
+  }
+
+  if (iP < 0) return;
+  
+  tracks[iL].SetPoint(iP, x, y, z);
+
+}
+
+void
+ViewDrift::AddTrackPoint(const int iL,
+                         const double x, const double y, const double z) {
+
+  if (iL < 0 || iL >= nTracks) {
+    std::cerr << "ViewDrift::AddTrackPoint:\n";
+    std::cerr << "    Track index " << iL << " is out of range.\n";
+    return;
+  }
+
+  tracks[iL].SetNextPoint(x, y, z);
 
 }
 
@@ -201,6 +233,9 @@ ViewDrift::Plot() {
 
   for (int i = nDriftLines; i--;) {
     driftLines[i].Draw("same");
+  }
+  for (int i = nTracks; i--;) {
+    tracks[i].Draw("same");
   }
   canvas->Update();
 

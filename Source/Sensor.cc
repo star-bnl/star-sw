@@ -171,12 +171,15 @@ Sensor::GetArea(double& xmin, double& ymin, double& zmin,
     xmax = xMaxUser; ymax = yMaxUser; zmax = zMaxUser;
     return true;
   }
-    
-  std::cerr << "Sensor::GetArea:\n";
-  std::cerr << "    User area bounds are not yet defined.\n";
-  xmin = ymin = zmin = 0.;
-  xmax = ymax = zmax = 0.;
-  return false;
+  
+  // User area bounds are not (yet) defined.
+  // Get the bounding box of the sensor. 
+  if (!SetArea()) return false;
+  
+  xmin = xMinUser; ymin = yMinUser; zmin = zMinUser;
+  xmax = xMaxUser; ymax = yMaxUser; zmax = zMaxUser;
+
+  return true;
     
 }
 

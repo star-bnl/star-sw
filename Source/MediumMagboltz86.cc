@@ -525,7 +525,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
     if (useSplittingFunction) { 
       esec = w * tan(RndmUniform() * atan(0.5 * (e - loss) / w));
       // Rescaling (SST)
-      esec = w * pow(esec / w, 0.9524);
+      // esec = w * pow(esec / w, 0.9524);
     } else {
       esec = RndmUniform() * (e - loss);
     }

@@ -375,7 +375,7 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
     }
    
     if (usePlotting) {
-      viewer->AddPoint(iLine, r[0], r[1], r[2]);
+      viewer->AddDriftLinePoint(iLine, r[0], r[1], r[2]);
     }
 
     prev4th[0] = cur4th[0]; prev5th[0] = cur5th[0];

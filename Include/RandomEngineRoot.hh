@@ -15,7 +15,7 @@ class RandomEngineRoot : public RandomEngine {
     // Constructor
     RandomEngineRoot();
     // Destructor    
-    ~RandomEngineRoot() {}    
+    ~RandomEngineRoot();    
     // Call the random number generator
     double Draw() {return rng.Rndm();}
     // Initialise the random number generator

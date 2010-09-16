@@ -108,7 +108,7 @@ TrackHeed::TrackHeed() :
   emin(2.e-6), emax(2.e-1), nEnergyIntervals(200),
   energyMesh(0), transferCs(0),
   elScat(0), lowSigma(0), pairProd(0), deltaCs(0),
-  chamber(0) {
+  chamber(0), lX(0.), lY(0.), lZ(0.), cX(0.), cY(0.), cZ(0.) {
   
   HeedInterface::sensor = 0;
   HeedInterface::useEfield = false;
@@ -140,8 +140,8 @@ TrackHeed::~TrackHeed() {
 
 void
 TrackHeed::NewTrack(
-            const double x0, const double y0, const double z0, const double t0,
-            const double dx0, const double dy0, const double dz0) {
+        const double x0, const double y0, const double z0, const double t0,
+        const double dx0, const double dy0, const double dz0) {
 
   hasActiveTrack = false;
   
@@ -152,6 +152,30 @@ TrackHeed::NewTrack(
     ready = false;
     return;
   }
+  
+  // Get the bounding box.
+  double xmin = 0., ymin = 0., zmin = 0.;
+  double xmax = 0., ymax = 0., zmax = 0.;
+  if (!sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
+    std::cerr << "TrackHeed::NewTrack:\n";
+    std::cerr << "    Drift area is not set.\n";
+    ready = false;
+    return;
+  }
+  // Check if the bounding box has changed.
+  const double lx = fabs(xmax - xmin);
+  const double ly = fabs(ymax - ymin);
+  const double lz = fabs(zmax - zmin);
+  if (fabs(lx - lX) > Small || 
+      fabs(ly - lY) > Small || 
+      fabs(lz - lZ) > Small) {
+    lX = lx; lY = ly; lZ = lz;
+    isChanged = true;
+  }
+  // Update the center of the bounding box.
+  cX = 0.5 * (xmin + xmax);
+  cY = 0.5 * (ymin + ymax);
+  cZ = 0.5 * (zmin + zmax);
   
   HeedInterface::sensor = sensor;
   
@@ -175,7 +199,8 @@ TrackHeed::NewTrack(
     isChanged = true;
   }
   
-  // If medium or particle have changed, update the cross-sections.
+  // If medium, particle or bounding box have changed, 
+  // update the cross-sections.
   if (isChanged) {
     ready = false;
     if (!Setup(medium)) return;
@@ -183,7 +208,6 @@ TrackHeed::NewTrack(
     isChanged = false;
     mediumName    = medium->GetName();
     mediumDensity = medium->GetMassDensity();
-
   }
   
   particle_bank.clear();
@@ -218,8 +242,9 @@ TrackHeed::NewTrack(
               << dx << ", " << dy << ", " << dz << ")\n";
   }
 
-  // Initial position (convert from cm to mm).
-  point p0(x0 * 10., y0 * 10., z0 * 10.);
+  // Initial position (shift with respect to bounding box center and
+  // convert from cm to mm).
+  point p0((x0 - cX) * 10., (y0 - cY) * 10., (z0 - cZ) * 10.);
   // Setup the particle.
   last_particle_number = 0;
   if (particle != 0) {
@@ -232,6 +257,9 @@ TrackHeed::NewTrack(
   // Transport the particle.
   particle->fly();
   hasActiveTrack = true;
+
+  // Plot the new track.
+  if (usePlotting) PlotNewTrack(x0, y0, z0);
 
 }
 
@@ -260,34 +288,74 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
     return false;
   }
   
-  // Get the first element from the particle bank.
-  AbsListNode<ActivePtr<gparticle> >* node = particle_bank.get_first_node();
+  bool ok = false;
+  Medium* medium = 0;
+  AbsListNode<ActivePtr<gparticle> >* node = 0;
+  HeedPhoton* virtualPhoton = 0;
+  while (!ok) {
+    // Get the first element from the particle bank.
+    node = particle_bank.get_first_node();
   
-  // Make sure the particle bank is not empty.
-  if (node == 0) {
-    hasActiveTrack = false;
-    return false;
+    // Make sure the particle bank is not empty.
+    if (node == 0) {
+      hasActiveTrack = false;
+      return false;
+    }
+  
+    // Convert the particle to a (virtual) photon.
+    virtualPhoton = dynamic_cast<HeedPhoton*>(node->el.get());
+    if (virtualPhoton == 0) {
+      std::cerr << "TrackHeed::GetCluster:\n";
+      std::cerr << "    Particle is not a virtual photon.\n";
+      std::cerr << "    Program bug!\n";
+      // Delete the node.
+      particle_bank.erase(node);
+      // Try the next node.
+      continue;
+    }
+
+    if (virtualPhoton->parent_particle_number != 0) {
+      std::cerr << "TrackHeed::GetCluster:\n";
+      std::cerr << "    Virtual photon has an unexpected parent.\n";
+      // Delete this virtual photon.
+      particle_bank.erase(node);
+      continue;
+    }
+    // Get the location of the interaction (convert from mm to cm
+    // and shift with respect to bounding box center).
+    xcls = virtualPhoton->currpos.pt.v.x * 0.1 + cX;
+    ycls = virtualPhoton->currpos.pt.v.y * 0.1 + cY;
+    zcls = virtualPhoton->currpos.pt.v.z * 0.1 + cZ;
+    tcls = virtualPhoton->currpos.time;
+    // Make sure the cluster is inside the drift area.
+    if (!sensor->IsInArea(xcls, ycls, zcls)) {
+      // Delete this virtual photon and proceed with the next one.
+      particle_bank.erase(node);
+      continue;
+    }
+    // Make sure the cluster is inside a medium.
+    if (!sensor->GetMedium(xcls, ycls, zcls, medium)) {
+      // Delete this virtual photon and proceed with the next one.
+      particle_bank.erase(node);
+      continue;
+    }
+    // Make sure the medium has not changed.
+    if (medium->GetName()        != mediumName || 
+        medium->GetMassDensity() != mediumDensity || 
+        !medium->IsIonisable()) {
+      // Delete this virtual photon and proceed with the next one.
+      particle_bank.erase(node);
+      continue;
+    }
+    // Seems to be ok.
+    ok = true;
   }
   
-  // Convert the particle to a (virtual) photon.
-  HeedPhoton* virtualPhoton = dynamic_cast<HeedPhoton*>(node->el.get());
-  if (virtualPhoton == 0) {
-    std::cerr << "TrackHeed::GetCluster:\n";
-    std::cerr << "    Particle is not a virtual photon.\n";
-    std::cerr << "    Program bug!\n";
-    return false;
-  }
-  if (virtualPhoton->parent_particle_number != 0) {
-    std::cerr << "TrackHeed::GetCluster:\n";
-    std::cerr << "    Virtual photon has an unexpected parent particle.\n";
-    return false;
-  }
+  // Plot the cluster, if required.
+  if (usePlotting) PlotCluster(xcls, ycls, zcls);
+
+  // Transport the virtual photon.
   virtualPhoton->fly();
-  // Get the location of the interaction (convert from mm to cm).
-  xcls = virtualPhoton->currpos.pt.v.x * 0.1;
-  ycls = virtualPhoton->currpos.pt.v.y * 0.1;
-  zcls = virtualPhoton->currpos.pt.v.z * 0.1;
-  tcls = virtualPhoton->currpos.time;
   // Get the transferred energy (convert from MeV to eV).
   e = virtualPhoton->energy * 1.e6;
   
@@ -323,9 +391,9 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
           } else {
             // Add the delta electron to the list, for later use.
             deltaElectron newDeltaElectron;
-            newDeltaElectron.x = delta->currpos.pt.v.x * 0.1;
-            newDeltaElectron.y = delta->currpos.pt.v.y * 0.1;
-            newDeltaElectron.z = delta->currpos.pt.v.z * 0.1;
+            newDeltaElectron.x = delta->currpos.pt.v.x * 0.1 + cX;
+            newDeltaElectron.y = delta->currpos.pt.v.y * 0.1 + cY;
+            newDeltaElectron.z = delta->currpos.pt.v.z * 0.1 + cZ;
             newDeltaElectron.t = delta->currpos.time;
             newDeltaElectron.e = delta->curr_kin_energy * 1.e6;
             newDeltaElectron.dx = delta->currpos.dir.x;
@@ -403,9 +471,9 @@ TrackHeed::GetElectron(const int i, double& x, double& y, double& z,
       return false;
     }
   
-    x = chamber->conduction_electron_bank[i].ptloc.v.x * 0.1;
-    y = chamber->conduction_electron_bank[i].ptloc.v.y * 0.1;
-    z = chamber->conduction_electron_bank[i].ptloc.v.z * 0.1;
+    x = chamber->conduction_electron_bank[i].ptloc.v.x * 0.1 + cX;
+    y = chamber->conduction_electron_bank[i].ptloc.v.y * 0.1 + cY;
+    z = chamber->conduction_electron_bank[i].ptloc.v.z * 0.1 + cZ;
     
     e = 0.;
     dx = dy = dz = 0.;
@@ -463,6 +531,33 @@ TrackHeed::TransportDeltaElectron(
     return;
   }
   
+  // Get the bounding box.
+  double xmin, ymin, zmin;
+  double xmax, ymax, zmax;
+  if (!sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
+    std::cerr << "TrackHeed::TransportDeltaElectron:\n";
+    std::cerr << "    Drift area is not set.\n";
+    ready = false;
+    return;
+  }
+  // Check if the bounding box has changed.
+  bool update = false;
+  const double lx = fabs(xmax - xmin);
+  const double ly = fabs(ymax - ymin);
+  const double lz = fabs(zmax - zmin);
+  if (fabs(lx - lX) > Small || 
+      fabs(ly - lY) > Small || 
+      fabs(lz - lZ) > Small) {
+    lX = lx; lY = ly; lZ = lz;
+    isChanged = true;
+    update = true;
+    hasActiveTrack = false;
+  }
+  // Update the center of the bounding box.
+  cX = 0.5 * (xmin + xmax);
+  cY = 0.5 * (ymin + ymax);
+  cZ = 0.5 * (zmin + zmax);
+  
   HeedInterface::sensor = sensor;
   
   // Make sure the initial position is inside an ionisable medium.
@@ -482,8 +577,13 @@ TrackHeed::TransportDeltaElectron(
   if (medium->GetName()        != mediumName || 
       medium->GetMassDensity() != mediumDensity) {
     isChanged = true;
+    update = true;
     ready = false;
     hasActiveTrack = false;
+  }
+
+  // If medium or bounding box have changed, update the "chamber".
+  if (update) {
     if (!Setup(medium)) return;
     ready = true;
     mediumName    = medium->GetName();
@@ -516,8 +616,9 @@ TrackHeed::TransportDeltaElectron(
   double speed = mparticle::speed_of_light * beta;
   velocity = velocity * speed;
   
-  // Initial position (convert from cm to mm).
-  point p0(x0 * 10., y0 * 10., z0 * 10.);
+  // Initial position (shift with respect to bounding box center and 
+  // convert from cm to mm).
+  point p0((x0 - cX) * 10., (y0 - cY) * 10., (z0 - cZ) * 10.);
  
   // Transport the electron.
   HeedDeltaElectron delta(chamber, p0, velocity, t0, 0);
@@ -551,6 +652,33 @@ TrackHeed::TransportPhoton(
     return;
   }
   
+  // Get the bounding box.
+  double xmin, ymin, zmin;
+  double xmax, ymax, zmax;
+  if (!sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
+    std::cerr << "TrackHeed::TransportPhoton:\n";
+    std::cerr << "    Drift area is not set.\n";
+    ready = false;
+    return;
+  }
+  // Check if the bounding box has changed.
+  bool update = false;
+  const double lx = fabs(xmax - xmin);
+  const double ly = fabs(ymax - ymin);
+  const double lz = fabs(zmax - zmin);
+  if (fabs(lx - lX) > Small || 
+      fabs(ly - lY) > Small || 
+      fabs(lz - lZ) > Small) {
+    lX = lx; lY = ly; lZ = lz;
+    isChanged = true;
+    update = true;
+    hasActiveTrack = false;
+  }
+  // Update the center of the bounding box.
+  cX = 0.5 * (xmin + xmax);
+  cY = 0.5 * (ymin + ymax);
+  cZ = 0.5 * (zmin + zmax);
+  
   HeedInterface::sensor = sensor;
   
   // Make sure the initial position is inside an ionisable medium.
@@ -570,7 +698,12 @@ TrackHeed::TransportPhoton(
   if (medium->GetName()        != mediumName || 
       medium->GetMassDensity() != mediumDensity) {
     isChanged = true;
+    update = true;
     ready = false;
+  }
+  
+  // If medium or bounding box have changed, update the "chamber".
+  if (update) {
     if (!Setup(medium)) return;
     ready = true;
     mediumName    = medium->GetName();
@@ -604,8 +737,9 @@ TrackHeed::TransportPhoton(
   vec velocity(dx, dy, dz);
   velocity = velocity * mparticle::speed_of_light;
   
-  // Initial position (convert from cm to mm).
-  point p0(x0 * 10., y0 * 10., z0 * 10.);
+  // Initial position (shift with respect to bounding box center and 
+  // convert from cm to mm).
+  point p0((x0 - cX) * 10., (y0 - cY) * 10., (z0 - cZ) * 10.);
  
   // Create and transport the photon.
   HeedPhoton photon(chamber, p0, velocity, t0, 0, e0 * 1.e-6, 0);
@@ -643,9 +777,9 @@ TrackHeed::TransportPhoton(
           } else {
             // Add the delta electron to the list, for later use.
             deltaElectron newDeltaElectron;
-            newDeltaElectron.x = delta->currpos.pt.v.x * 0.1;
-            newDeltaElectron.y = delta->currpos.pt.v.y * 0.1;
-            newDeltaElectron.z = delta->currpos.pt.v.z * 0.1;
+            newDeltaElectron.x = delta->currpos.pt.v.x * 0.1 + cX;
+            newDeltaElectron.y = delta->currpos.pt.v.y * 0.1 + cY;
+            newDeltaElectron.z = delta->currpos.pt.v.z * 0.1 + cZ;
             newDeltaElectron.t = delta->currpos.time;
             newDeltaElectron.e = delta->curr_kin_energy * 1.e6;
             newDeltaElectron.dx = delta->currpos.dir.x;
@@ -814,12 +948,13 @@ TrackHeed::Setup(Medium* medium) {
     std::cout << "    W value:                     " << w << " eV\n";
     std::cout << "    Fano factor:                 " << f << "\n";
   }
-  
+
   fixsyscoor primSys(point(0., 0., 0.), basis("primary"), "primary");
   if (chamber != 0) {
     delete chamber; chamber = 0;
   }
-  chamber = new HeedChamber(primSys, transferCs, deltaCs);
+  chamber = new HeedChamber(primSys, lX, lY, lZ,
+                            transferCs, deltaCs);
 
   return true;
   

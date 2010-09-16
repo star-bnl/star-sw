@@ -113,8 +113,11 @@ class TrackHeed : public Track {
     HeedDeltaElectronCS* deltaCs;
 
     HeedChamber* chamber;
-    
-    bool Setup(Medium* medium);
+    // Bounding box
+    double lX, lY, lZ;
+    double cX, cY, cZ;
+
+    bool Setup(Medium* medium); 
     bool SetupGas(Medium* medium);
     bool SetupMaterial(Medium* medium);
     bool SetupDelta(const std::string databasePath);

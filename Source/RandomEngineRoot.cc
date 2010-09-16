@@ -13,6 +13,10 @@ RandomEngineRoot::RandomEngineRoot() : rng(0) {
 
 }
 
+RandomEngineRoot::~RandomEngineRoot() {
+
+}
+
 void
 RandomEngineRoot::Seed(unsigned int s) {
 

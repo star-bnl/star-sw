@@ -1137,7 +1137,7 @@ AvalancheMicroscopic::TransportElectron(
                                    endpoints[i].z0);
       for (int jP = np; jP--;) {
         GetDriftLinePoint(x, y, z, t, jP, i);
-        viewer->SetPoint(jL, jP, x, y, z);
+        viewer->SetDriftLinePoint(jL, jP, x, y, z);
       }
     }
     for (int i = nPhotons; i--;) {

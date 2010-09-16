@@ -575,7 +575,8 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
                               drift[0].x, drift[0].y, drift[0].z);
     }
     for (int iP = 0; iP < nDrift; ++iP) {
-      viewer->SetPoint(jL, iP, drift[iP].x, drift[iP].y, drift[iP].z);
+      viewer->SetDriftLinePoint(jL, iP, 
+                                drift[iP].x, drift[iP].y, drift[iP].z);
     }
   }
 

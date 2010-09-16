@@ -209,7 +209,7 @@ Track::PlotCluster(const double x0, const double y0, const double z0) {
     std::cerr << "    No track set. Program bug!\n";
     return;
   }
-  viewer->AddPoint(plotId, x0, y0, z0);
+  viewer->AddTrackPoint(plotId, x0, y0, z0);
 
 }
 

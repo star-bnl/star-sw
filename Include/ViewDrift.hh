@@ -6,6 +6,7 @@
 #include <RQ_OBJECT.h>
 #include <TCanvas.h>
 #include <TPolyLine3D.h>
+#include <TPointSet3D.h>
 #include <TView.h>
 
 namespace Garfield {
@@ -34,10 +35,16 @@ class ViewDrift {
                         const double x1, const double y1, const double z1);
     void NewChargedParticleTrack(const int np, int& id,
                         const double x0, const double y0, const double z0);
-    void SetPoint(const int iL, const int iP, 
+
+    void SetDriftLinePoint(const int iL, const int iP, 
                   const double x, const double y, const double z);
-    void AddPoint(const int iL,
+    void AddDriftLinePoint(const int iL,
                   const double x, const double y, const double z);
+    void SetTrackPoint(const int iL, const int iP,
+                  const double x, const double y, const double z);
+    void AddTrackPoint(const int iL, 
+                  const double x, const double y, const double z);
+
     void Plot();
 
     void SetElectronColor(const std::string color);
@@ -64,6 +71,9 @@ class ViewDrift {
 
     int nDriftLines;
     std::vector<TPolyLine3D> driftLines;
+    
+    int nTracks;
+    std::vector<TPointSet3D> tracks;
 
     int colorElectron;
     int colorIon;
