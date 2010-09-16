@@ -2706,7 +2706,7 @@ MediumMagboltz86::RunMagboltz(const double e,
 
   // Set input parameters in Magboltz common blocks
   inpt_.nGas = nComponents;
-  inpt_.nStep = nEnergySteps;
+  inpt_.nStep = 4000;
 
   inpt_.tempc = temperature - 273.15;
   inpt_.torr = pressure;

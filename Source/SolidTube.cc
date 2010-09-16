@@ -3,6 +3,7 @@
 
 #include "SolidTube.hh"
 #include "FundamentalConstants.hh"
+#include "GarfieldConstants.hh"
 
 namespace Garfield {
 

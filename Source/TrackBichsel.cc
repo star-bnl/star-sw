@@ -6,6 +6,7 @@
 #include "Sensor.hh"
 #include "TrackBichsel.hh"
 #include "FundamentalConstants.hh"
+#include "GarfieldConstants.hh"
 #include "Random.hh"
 
 namespace Garfield {

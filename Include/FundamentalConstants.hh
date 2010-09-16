@@ -58,10 +58,6 @@ static const double AtmosphericPressure = 760.;
 // Zero degree Celsius [K]
 static const double ZeroCelsius = 273.15;
 
-static const double Small = 1.e-20;
-// Max. permitted distance to boundary (for drift line termination)
-static const double BoundaryDistance = 1.e-8;
-
 }
 
 #endif

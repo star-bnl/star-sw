@@ -82,10 +82,6 @@ class AvalancheMicroscopic {
 
     int  GetNumberOfEndpoints() const {return nEndpoints;}
     // Status codes:
-    //   -1: electron left the drift area
-    //   -5: not in a microscopic drift medium
-    //   -7: electron attached by a gas molecule
-    //  -16: energy below transport cut
     void GetEndpoint(const int i, 
                 double& x0, double& y0, double& z0, double& t0, double& e0,
                 double& x1, double& y1, double& z1, double& t1, double& e1,
@@ -96,7 +92,6 @@ class AvalancheMicroscopic {
 
     int  GetNumberOfPhotons() const {return usePhotons ? nPhotons : 0;}
     // Status codes:
-    //   -1: photon left drift area
     //   -2: photon absorbed by gas molecule
     void GetPhoton(const int i, double& e,
                    double& x0, double& y0, double& z0, double& t0,

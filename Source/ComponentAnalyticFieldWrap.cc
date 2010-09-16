@@ -2,6 +2,7 @@
 #include <cmath>
 
 #include "ComponentAnalyticFieldWrap.hh"
+#include "GarfieldConstants.hh"
 #include "FundamentalConstants.hh"
 
 namespace Garfield {

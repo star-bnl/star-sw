@@ -3,6 +3,7 @@
 
 #include "SolidBox.hh"
 #include "FundamentalConstants.hh"
+#include "GarfieldConstants.hh"
 
 namespace Garfield {
 

@@ -3,7 +3,7 @@
 #include <cmath>
 
 #include "Sensor.hh"
-#include "FundamentalConstants.hh"
+#include "GarfieldConstants.hh"
 #include "Plotting.hh"
 
 namespace Garfield {

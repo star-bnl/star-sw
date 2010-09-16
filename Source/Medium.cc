@@ -3,6 +3,7 @@
 
 #include "Medium.hh"
 #include "FundamentalConstants.hh"
+#include "GarfieldConstants.hh"
 #include "Random.hh"
 
 namespace Garfield {

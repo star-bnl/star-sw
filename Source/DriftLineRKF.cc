@@ -3,6 +3,7 @@
 
 #include "DriftLineRKF.hh"
 #include "FundamentalConstants.hh"
+#include "GarfieldConstants.hh"
 
 namespace Garfield {
 

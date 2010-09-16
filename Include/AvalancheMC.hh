@@ -70,10 +70,7 @@ class AvalancheMC {
     int  GetNumberOfElectronEndpoints() const {return nEndpointsElectrons;}
     int  GetNumberOfHoleEndpoints() const     {return nEndpointsHoles;}
     int  GetNumberOfIonEndpoints() const      {return nEndpointsIons;}
-    // Status codes
-    //   -1: particle left the drift area
-    //   -3: calculation abandoned (e.g. error retrieving transport parameters)
-    //   -7: trapped/attached by gas molecule
+    
     void GetElectronEndpoint(const int i,
                              double& x0, double& y0, double& z0, double& t0,
                              double& x1, double& y1, double& z1, double& t1,

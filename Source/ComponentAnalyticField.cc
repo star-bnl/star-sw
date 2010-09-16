@@ -3,7 +3,9 @@
 #include <fstream>
 
 #include "Numerics.hh"
+#include "GarfieldConstants.hh"
 #include "ComponentAnalyticField.hh"
+
 
 namespace Garfield {
   

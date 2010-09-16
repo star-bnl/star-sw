@@ -6,6 +6,7 @@
 #include "ComponentNeBem2d.hh"
 #include "Random.hh"
 #include "FundamentalConstants.hh"
+#include "GarfieldConstants.hh"
 
 namespace Garfield {
 

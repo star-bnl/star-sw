@@ -537,7 +537,7 @@ AvalancheMicroscopic::TransportElectron(
         stack[iEl].t = t; stack[iEl].energy = energy; 
         stack[iEl].band = band;
         stack[iEl].kx = kx; stack[iEl].ky = ky; stack[iEl].kz = kz;
-        stack[iEl].status = -1;
+        stack[iEl].status = StatusLeftDriftMedium;
         endpoints.push_back(stack[iEl]);
         stack.erase(stack.begin() + iEl);
         if (debug) {
@@ -570,7 +570,7 @@ AvalancheMicroscopic::TransportElectron(
           stack[iEl].t = t; stack[iEl].energy = energy; 
           stack[iEl].band = band;
           stack[iEl].kx = kx; stack[iEl].ky = ky; stack[iEl].kz = kz;
-          stack[iEl].status = -16;
+          stack[iEl].status = StatusBelowTransportCut;
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
           ok = false;
@@ -588,7 +588,7 @@ AvalancheMicroscopic::TransportElectron(
             stack[iEl].t = t; stack[iEl].energy = energy;
             stack[iEl].band = band;
             stack[iEl].kx = kx; stack[iEl].ky = ky; stack[iEl].kz = kz;
-            stack[iEl].status = -5;
+            stack[iEl].status = StatusLeftDriftMedium;
             endpoints.push_back(stack[iEl]);
             stack.erase(stack.begin() + iEl);
             ok = false;
@@ -772,7 +772,7 @@ AvalancheMicroscopic::TransportElectron(
           stack[iEl].kx = newKx; 
           stack[iEl].ky = newKy; 
           stack[iEl].kz = newKz;
-          stack[iEl].status = -1;
+          stack[iEl].status = StatusLeftDriftMedium;
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
           ok = false;
@@ -817,7 +817,7 @@ AvalancheMicroscopic::TransportElectron(
           stack[iEl].kx = newKx; 
           stack[iEl].ky = newKy; 
           stack[iEl].kz = newKz;
-          stack[iEl].status = -1;
+          stack[iEl].status = StatusLeftDriftArea;
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
           ok = false;
@@ -841,7 +841,7 @@ AvalancheMicroscopic::TransportElectron(
           stack[iEl].kx = newKx; 
           stack[iEl].ky = newKy; 
           stack[iEl].kz = newKz;
-          stack[iEl].status = -1;
+          stack[iEl].status = StatusLeftDriftMedium;
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
           ok = false;
@@ -949,7 +949,7 @@ AvalancheMicroscopic::TransportElectron(
             --nElectrons;
             stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
             stack[iEl].t = t; stack[iEl].energy = energy;
-            stack[iEl].status = -7;
+            stack[iEl].status = StatusAttached;
             endpoints.push_back(stack[iEl]);
             stack.erase(stack.begin() + iEl);
             ok = false;
@@ -1241,7 +1241,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
     newPhoton.x0 = x0; newPhoton.y0 = y0; newPhoton.z0 = z0;
     newPhoton.x1 = x;  newPhoton.y1 = y;  newPhoton.z1 = z;
     newPhoton.energy = e0;
-    newPhoton.status = -1;
+    newPhoton.status = StatusLeftDriftMedium;
     photons.push_back(newPhoton);
     ++nPhotons;
     return;

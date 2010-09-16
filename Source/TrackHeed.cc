@@ -19,6 +19,7 @@
 #include "Sensor.hh"
 #include "ViewDrift.hh"
 #include "FundamentalConstants.hh"
+#include "GarfieldConstants.hh"
 #include "Random.hh"
 #include "HeedChamber.hh"
 #include "TrackHeed.hh"

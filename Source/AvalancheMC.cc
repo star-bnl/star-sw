@@ -5,6 +5,7 @@
 
 #include "AvalancheMC.hh"
 #include "FundamentalConstants.hh"
+#include "GarfieldConstants.hh"
 #include "Random.hh"
 
 namespace Garfield {
@@ -538,11 +539,11 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   endpoint endPoint;
   endPoint.x0 = x0; endPoint.y0 = y0; endPoint.z0 = z0; endPoint.t0 = t0;
   if (!ok) {
-    endPoint.status = -3;
+    endPoint.status = StatusCalculationAbandoned;
   } else if (trapped) {
-    endPoint.status = -7;
+    endPoint.status = StatusAttached;
   } else {
-    endPoint.status = -1;
+    endPoint.status = StatusLeftDriftArea;
   }
 
   endPoint.x1 = drift[nDrift - 1].x;

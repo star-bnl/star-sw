@@ -6,6 +6,7 @@
 
 #include "MediumSilicon.hh"
 #include "Random.hh"
+#include "GarfieldConstants.hh"
 #include "FundamentalConstants.hh"
 
 namespace Garfield {
