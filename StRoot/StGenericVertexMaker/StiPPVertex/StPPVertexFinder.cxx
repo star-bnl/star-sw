@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.37 2010/09/10 21:08:35 rjreed Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.38 2010/09/16 04:18:55 rjreed Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -125,22 +125,7 @@ StPPVertexFinder::Init() {
   bemcList =new BemcHitList;
   btofList = new BtofHitList;
   vertex3D=0; // default
- // Initialize BTOF geometry - dongx
-  St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("db");
-  btofGeom = 0;
-  if(TDataSet *geom = mydb->GetDataSet("btofGeometry")) {
-    btofGeom = (StBTofGeometry *)geom;
-    LOG_INFO << " Found btofGeometry ... " << endm;
-  } else {
-    btofGeom = new StBTofGeometry("btofGeometry","btofGeometry in VertexFinder");
-    LOG_INFO << " Create a new btofGeometry ... " << endm;
-  } 
-  if(btofGeom && !btofGeom->IsInitDone()) {
-    LOG_INFO << " BTofGeometry initialization ... " << endm;
-    TVolume *starHall = (TVolume *)mydb->GetDataSet("HALL");
-    btofGeom->Init(mydb, starHall);
-    mydb->AddConst(new TObjectSet("btofGeometry",btofGeom));
-  }
+
   // access EEMC-DB
   eeDb = (StEEmcDb*)StMaker::GetChain()->GetDataSet("StEEmcDb"); 
   assert(eeDb); // eemcDB must be in the chain, fix it,JB
@@ -153,7 +138,8 @@ StPPVertexFinder::Init() {
   HList=new TObjArray(0);   
   initHisto();
   cout<<"initiated histos"<<endl;
-  btofList->initHisto( HList); // dongx
+  if (mUseBtof)
+    btofList->initHisto( HList); // dongx
   ctbList->initHisto( HList);
   bemcList->initHisto( HList);
   eemcList->initHisto( HList);
@@ -169,7 +155,23 @@ StPPVertexFinder::InitRun(int runnumber){
   int dateY=mydb->GetDateTime().GetYear();
   
   if(isMC) assert(runnumber <1000000); // probably embeding job ,crash it, JB
-
+ // Initialize BTOF geometry - dongx
+  if (mUseBtof){ // only add btof if it is required
+    btofGeom = 0;
+    if(TDataSet *geom = mydb->GetDataSet("btofGeometry")) {
+      btofGeom = (StBTofGeometry *)geom;
+      LOG_INFO << " Found btofGeometry ... " << endm;
+    } else {
+      btofGeom = new StBTofGeometry("btofGeometry","btofGeometry in VertexFinder");
+      LOG_INFO << " Create a new btofGeometry ... " << endm;
+    } 
+    if(btofGeom && !btofGeom->IsInitDone()) {
+      LOG_INFO << " BTofGeometry initialization ... " << endm;
+      TVolume *starHall = (TVolume *)mydb->GetDataSet("HALL");
+      btofGeom->Init(mydb, starHall);
+      mydb->AddConst(new TObjectSet("btofGeometry",btofGeom));
+    }
+  }
   //assert(dateY<2008); // who knows what 2007 setup will be,  crash it just in case
   if(isMC) {
     LOG_INFO << "PPV InitRun() M-C, Db_date="<<mydb->GetDateTime().AsString()<<endm;
@@ -187,8 +189,8 @@ StPPVertexFinder::InitRun(int runnumber){
   } else {
     mMinAdcBemc   = 8;    // BTOW used calibration of maxt Et @ ~60Gev 
   }
-  
-  btofList->initRun(); // dongx
+  if (mUseBtof)
+    btofList->initRun(); // dongx
   ctbList->initRun(); 
   bemcList->initRun();
   eemcList->initRun();
@@ -1350,6 +1352,9 @@ bool StPPVertexFinder::isPostCrossingTrack(const StiKalmanTrack* track){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.38  2010/09/16 04:18:55  rjreed
+ * Moved intialized of btof from init to initrun and changed it so that the btof class is not utilized if mUseBtof is false
+ *
  * Revision 1.37  2010/09/10 21:08:35  rjreed
  * Added function UseBOTF and bool mUseBtof to switch the use of the TOF on and off in vertex finding.  Default value is off (false).
  * Added functions, and variables necessary to use the TOF in PPV for vertex finding.  Includes matching tracks to the TOF and changing the track weight based on its matched status with the TOF.
