@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.25 2010/09/17 19:34:54 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.26 2010/09/17 20:15:15 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -1100,18 +1100,19 @@ int  TxUCMCollector::getJobId(const char *reqName, const char *taskBrokerID, int
    setRequesterName(reqName);
    setBrokerTaskID (taskBrokerID);
    setBrokerJobID (brokerJobID);
-   try {
-      queryJobTable(1);
-      if (fResult) {
+   try { 
+       string where = string(" brokerJobID='") + itoa(brokerJobID) + "' ";
+       queryTable(jobTableName().c_str(),0,0,where.c_str());
+       if (fResult) {
           int nRows = mysql_num_rows(fResult) ;
-          if (nRows && nRows >1 ) {
-              log->error(string("Can not fetch the job id  from the the ") + taskBrokerID + itoa(brokerJobID)); 
+          if (nRows<=0 || nRows >1 ) {
+              log->error(string("Can not fetch the job id for the ") + taskBrokerID + " broker id=" + itoa(brokerJobID) + " nrow=" + itoa(nRows)); 
           } else {
                StRecord *job = new StRecord;     
                fillFields(job->getFields());
                id = job->getField("jobID")->toInt();
           }
-      }
+       }
    } catch (const StDataException &e) {
        log->error(e.getDescription() );
    }
