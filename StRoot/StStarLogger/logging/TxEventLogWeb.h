@@ -2,7 +2,7 @@
  * @file TxEventLogWeb.h
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogWeb.h,v 1.5 2010/09/17 17:03:57 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogWeb.h,v 1.6 2010/09/17 19:34:54 fine Exp $
  *
  * TxEventLogWeb provides an interface for applications so that they can send
  * event across of the Web into a CEDPS formated messages.
@@ -51,7 +51,7 @@ namespace TxLogging {
       virtual  StUcmJobs   *getJobList(int limit);
       virtual  StUcmJobs   *getJobList(int limit, int offset);
       virtual  StUcmJobs   *getJobList(StRecord *task, int limit, int offset);
-      virtual  int          getJobId(const char *taskBrokerId, int jobBrokerId);
+      virtual  int          getJobId(const char *reqName, const char *taskBrokerId, int jobBrokerId);
 
       virtual  StUcmEvents *getEventList();
       virtual  StUcmEvents *getEventList(StRecord *job);

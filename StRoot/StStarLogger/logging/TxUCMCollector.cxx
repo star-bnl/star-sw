@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.24 2010/09/17 17:03:57 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.25 2010/09/17 19:34:54 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -1094,9 +1094,10 @@ StUcmJobs  *TxUCMCollector::getJobList(StRecord *task, int limit, int offset)
    return &jobs;
 }
 //___________________________________________________________________________________
-int  TxUCMCollector::getJobId(const char *taskBrokerID, int brokerJobID)
+int  TxUCMCollector::getJobId(const char *reqName, const char *taskBrokerID, int brokerJobID)
 {
    int id = -1;
+   setRequesterName(reqName);
    setBrokerTaskID (taskBrokerID);
    setBrokerJobID (brokerJobID);
    try {

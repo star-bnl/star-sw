@@ -8,7 +8,7 @@
  * @file TxUCMCollector.h
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.h,v 1.7 2010/09/17 17:03:57 fine Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.h,v 1.8 2010/09/17 19:34:54 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -133,7 +133,7 @@ class TxUCMCollector : public TxEventLog{
       virtual  StUcmJobs   *getJobList(int limit);
       virtual  StUcmJobs   *getJobList(int limit, int offset);
       virtual  StUcmJobs   *getJobList(StRecord *task, int limit, int offset);
-      virtual  int          getJobId(const char *taskBrokerId, int jobBrokerId);
+      virtual  int          getJobId(const char * reqName, const char *taskBrokerId, int jobBrokerId);
 
       virtual  StUcmEvents *getEventList();
       virtual  StUcmEvents *getEventList(StRecord *job);

@@ -2,7 +2,7 @@
  * @file TxEventLogFile.cpp
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogCollector.cpp,v 1.7 2010/09/17 18:14:09 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogCollector.cpp,v 1.8 2010/09/17 19:34:54 fine Exp $
  *
  * Please see TxEventLogFile.h for more documentation.
  *****************************************************************/
@@ -73,9 +73,13 @@ StUcmJobs   *TxEventLogCollector::getJobList  (StRecord *task,int limit, int off
 }
 
 //______________________________________________________________
-int   TxEventLogCollector::getJobId(const char *taskBrokerId, int jobBrokerId)
+int   TxEventLogCollector::getJobId(const char *reqName, const char *taskBrokerId, int jobBrokerId)
 {
-   return fCollector->getJobId(taskBrokerId, jobBrokerId);
+   if (! fEvents)  {
+      InitDb();
+      fEvents    = new StUcmEvents;
+   }
+   return fCollector->getJobId(reqName,taskBrokerId, jobBrokerId);
 }
 
 //______________________________________________________________
