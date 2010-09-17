@@ -1,7 +1,7 @@
 
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.10 2010/08/09 18:45:36 geurts Exp $
+ * $Id: StBTofGeometry.cxx,v 1.11 2010/09/17 20:40:09 geurts Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -11,6 +11,10 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.11  2010/09/17 20:40:09  geurts
+ * Protect Init() and InitFromStar() against non-initialized database/geant.
+ * No immediate crash, but a LOG_ERROR instead.
+ *
  * Revision 1.10  2010/08/09 18:45:36  geurts
  * Include methods in StBTofNode and StBTofGeometry that calculate local theta [Masa]
  *
@@ -758,38 +762,41 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
    else {
      LOG_INFO << "[StBTofGeometry] retrieving geometry alignment parameters" << endm;
      TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofGeomAlign");
-     St_tofGeomAlign* tofGeomAlign = static_cast<St_tofGeomAlign*>(mDbTOFDataSet->Find("tofGeomAlign"));
-     if(!tofGeomAlign) {
-       LOG_WARN << "Unable to get tof geometry align parameter! Use ideal geometry!" << endm;
-     }
-     tofGeomAlign_st* geomAlign = static_cast<tofGeomAlign_st*>(tofGeomAlign->GetArray());
-     
-     for (Int_t i=0;i<mNTrays;i++) {
-       
-       double phi0 = geomAlign[i].phi0;
-       double x0 = geomAlign[i].x0;
-       double phi;
-       if(i<60) {
-	 phi = 72 - i*6;   // phi angle of tray Id = i+1, west
-	 double cs = TMath::Cos(phi*TMath::Pi()/180.);
-	 double ss = TMath::Sin(phi*TMath::Pi()/180.);
-	 mTrayX0[i] = phi0*ss + x0*cs;
-	 mTrayY0[i] = -phi0*cs + x0*ss;
-       } else {
-	 phi = 108 + (i-60)*6;   // phi angle of tray Id = i+1, east
-	 double cs = TMath::Cos(phi*TMath::Pi()/180.);
-	 double ss = TMath::Sin(phi*TMath::Pi()/180.);
-	 mTrayX0[i] = -phi0*ss + x0*cs;
-	 mTrayY0[i] = phi0*cs + x0*ss;
+     if (!mDbTOFDataSet) {
+       LOG_ERROR << "[StBTofGeometry] unable to find Calibrations/tof/tofGeomAlign" << endm;
+     } else {
+       St_tofGeomAlign* tofGeomAlign = static_cast<St_tofGeomAlign*>(mDbTOFDataSet->Find("tofGeomAlign"));
+       if(!tofGeomAlign) {
+	 LOG_WARN << "Unable to get tof geometry align parameter! Use ideal geometry!" << endm;
        }
-       mTrayZ0[i] = geomAlign[i].z0;
+       tofGeomAlign_st* geomAlign = static_cast<tofGeomAlign_st*>(tofGeomAlign->GetArray());
+     
+       for (Int_t i=0;i<mNTrays;i++) {
+       
+	 double phi0 = geomAlign[i].phi0;
+	 double x0 = geomAlign[i].x0;
+	 double phi;
+	 if(i<60) {
+	   phi = 72 - i*6;   // phi angle of tray Id = i+1, west
+	   double cs = TMath::Cos(phi*TMath::Pi()/180.);
+	   double ss = TMath::Sin(phi*TMath::Pi()/180.);
+	   mTrayX0[i] = phi0*ss + x0*cs;
+	   mTrayY0[i] = -phi0*cs + x0*ss;
+	 } else {
+	   phi = 108 + (i-60)*6;   // phi angle of tray Id = i+1, east
+	   double cs = TMath::Cos(phi*TMath::Pi()/180.);
+	   double ss = TMath::Sin(phi*TMath::Pi()/180.);
+	   mTrayX0[i] = -phi0*ss + x0*cs;
+	   mTrayY0[i] = phi0*cs + x0*ss;
+	 }
+	 mTrayZ0[i] = geomAlign[i].z0;
 
-       if(maker->Debug()) {
-	 LOG_DEBUG << " Tray # = " << i+1 << " Align parameters " << mTrayX0[i] << " " << mTrayY0[i] << " " << mTrayZ0[i] << endm;
+	 if(maker->Debug()) {
+	   LOG_DEBUG << " Tray # = " << i+1 << " Align parameters " << mTrayX0[i] << " " << mTrayY0[i] << " " << mTrayZ0[i] << endm;
+	 }
        }
      }
    }
-
    InitFromStar(starHall);
    mStarHall = starHall;
 }
@@ -799,6 +806,11 @@ void StBTofGeometry::InitFromStar(TVolume *starHall)
   // Initialize TOFr geometry from STAR geometry
   //     BTofConf   --     0     tray_BTof   (default)
   //                       1     full_BTof
+
+  if (!starHall) {
+    LOG_ERROR << "[StBTofGeometry] No STAR Hall volume defined" << endm;
+    return;
+  }
 
   // Loop over the STAR geometry and mark the volume needed
   TDataSetIter volume(starHall,0);
