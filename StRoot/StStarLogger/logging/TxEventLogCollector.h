@@ -2,7 +2,7 @@
  * @file TxEventLogCollector.h
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogCollector.h,v 1.4 2010/04/09 16:28:19 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogCollector.h,v 1.5 2010/09/17 18:14:10 fine Exp $
  *
  * TxEventLogCollector provides an interface for applications so that they can send
  * event across of the Collector into a CEDPS formated messages.
@@ -60,6 +60,7 @@ namespace TxLogging {
       virtual  StUcmJobs   *getJobList(int limit);
       virtual  StUcmJobs   *getJobList(int limit, int offset);
       virtual  StUcmJobs   *getJobList(StRecord *task, int limit, int offset);
+      virtual  int          getJobId(const char *taskBrokerId, int jobBrokerId);
 
       virtual  StUcmEvents *getEventList();
       virtual  StUcmEvents *getEventList(StRecord *job);

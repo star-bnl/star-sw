@@ -41,6 +41,8 @@ class testUcm {
           }
        }
     }
+     System.out.println(" Test GetJobID");
+     System.out.println(" Test GetJobID " +  ucm.getJobId("6d451854-408d-4629-aa25-1bf609001ab5",1));
   }
  }
  
