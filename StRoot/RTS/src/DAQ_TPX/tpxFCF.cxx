@@ -147,32 +147,29 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc, u_short version)
 {
 	double p, t ;
 	int p1,p2,t1,t2,cha,fla ;
-	int ptmp ;
-
-	fla = 0 ;
+	u_int p_tmp, t_tmp ;
 
 	// pad
-	u_int tmp = *p_buff & 0xFFFF ;
-	if(tmp & 0x8000) fla |= FCF_MERGED ;
-	if(tmp & 0x4000) fla |= FCF_DEAD_EDGE ;
-
-	if(version==FCF_V_FY08) {
-		p = (double)(tmp & 0x3FFF) / 32.0 ;
-	}
-	else {
-		p = (double)(tmp & 0x3FFF) / 64.0 ;
-	}			
+	p_tmp = *p_buff & 0xFFFF ;
 
 	// time
-	tmp = *p_buff >> 16 ;
-	if(tmp & 0x8000) fla |= FCF_ONEPAD ;
+	t_tmp = *p_buff >> 16 ;
 
-	if(version == FCF_V_FY08) {
-		t = (double)(tmp & 0x7FFF) / 32.0 ;
+
+	if(version==FCF_V_FY08) {
+		p = (double)(p_tmp & 0x3FFF) / 32.0 ;
+		t = (double)(t_tmp & 0x7FFF) / 32.0 ;
 	}
 	else {
-		t = (double)(tmp & 0x7FFF) / 64.0 ;
+		p = (double)(p_tmp & 0x3FFF) / 64.0 ;
+		t = (double)(t_tmp & 0x7FFF) / 64.0 ;
 	}			
+
+	fla = 0 ;
+	if(p_tmp & 0x8000) fla |= FCF_MERGED ;
+	if(p_tmp & 0x4000) fla |= FCF_DEAD_EDGE ;
+	if(t_tmp & 0x8000) fla |= FCF_ONEPAD ;
+
 
 	p_buff++ ;	// advance to next word
 	cha = *p_buff >> 16 ;
@@ -183,17 +180,17 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc, u_short version)
 		if(cha == 0) cha = 0x8000;	// exaclty
 	}
 
-	ptmp = *p_buff & 0xFFFF ;
+	p_tmp = *p_buff & 0xFFFF ;	// reuse p_tmp
 
-	if(ptmp & 0x8000) fla |= FCF_ROW_EDGE ;
-	if(ptmp & 0x4000) fla |= FCF_BROKEN_EDGE ;
+	if(p_tmp & 0x8000) fla |= FCF_ROW_EDGE ;
+	if(p_tmp & 0x4000) fla |= FCF_BROKEN_EDGE ;
 
-	t1 = ptmp & 0xF ;
-	t2 = (ptmp >> 4) & 0xF ;
+	t1 = p_tmp & 0xF ;
+	t2 = (p_tmp >> 4) & 0xF ;
 
 
-	p1 = (ptmp >> 8) & 0x7 ;
-	p2 = (ptmp >> 11) & 0x7 ;
+	p1 = (p_tmp >> 8) & 0x7 ;
+	p2 = (p_tmp >> 11) & 0x7 ;
 
 	t1 = (u_int)t - t1 ;
 	t2 = (u_int)t + t2 ;
