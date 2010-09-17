@@ -96,10 +96,10 @@ tpxGain::tpxGain()
 
 	memset(bad_rdo_mask,0,sizeof(bad_rdo_mask)) ;
 
-	pulser_ped = TPX_TCU_PED ;
-	pulser_start = TPX_TCU_START ;
-	pulser_stop = TPX_TCU_STOP ;
-	pulser_time_0 = TPX_TCU_TIME_0 ;
+	pulser_ped = TPX_TCU_LOC_PED ;
+	pulser_start = TPX_TCU_LOC_START ;
+	pulser_stop = TPX_TCU_LOC_STOP ;
+	pulser_time_0 = TPX_TCU_LOC_TIME_0 ;
 
 	return ;
 }
@@ -110,6 +110,32 @@ tpxGain::~tpxGain()
 
 	return ;
 }
+
+void tpxGain::clock_mode(int mode)
+{
+	switch(mode) {
+	default:
+	case TPX_CLOCK_TCU_LOC :	// default
+		pulser_start = TPX_TCU_LOC_START ;
+		pulser_stop = TPX_TCU_LOC_STOP ;
+		pulser_time_0 = TPX_TCU_LOC_TIME_0 ;
+		break ;
+	case TPX_CLOCK_TCD :	
+		pulser_start = TPX_TCD_START ;
+		pulser_stop = TPX_TCD_STOP ;
+		pulser_time_0 = TPX_TCD_TIME_0 ;
+		break ;
+	case TPX_CLOCK_TCU_RHIC :	// this changes...
+		pulser_start = TPX_TCU_RHIC_START ;	// don;t know yet!
+		pulser_stop = TPX_TCU_RHIC_STOP ;
+		pulser_time_0 = TPX_TCU_RHIC_TIME_0 ;
+		break ;
+	}
+
+
+	return ;
+}
+
 
 void tpxGain::free_store()
 {
@@ -961,7 +987,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.22 2009/12/14 21:43:06 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.23 2010/09/17 09:50:13 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {
