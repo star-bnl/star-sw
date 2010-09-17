@@ -2,7 +2,7 @@
  * @file TxEventLogFile.h
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLogFile.h,v 1.3 2010/04/09 16:28:19 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFile.h,v 1.4 2010/09/17 17:03:57 fine Exp $
  *
  * TxEventLogFile provides an interface for applications so that they can write
  * event information into a CEDPS formated file.
@@ -256,6 +256,7 @@ namespace TxLogging {
       virtual  StUcmJobs   *getJobList(int limit);
       virtual  StUcmJobs   *getJobList(int limit, int offset);
       virtual  StUcmJobs   *getJobList(StRecord *task, int limit, int offset);
+      virtual  int          getJobId(const char *taskBrokerId, int jobBrokerId);
 
       virtual  StUcmEvents *getEventList();
       virtual  StUcmEvents *getEventList(StRecord *job);

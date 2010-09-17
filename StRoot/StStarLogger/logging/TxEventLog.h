@@ -2,7 +2,7 @@
  * @file TxEventLog.h
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxEventLog.h,v 1.5 2010/07/14 22:12:51 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLog.h,v 1.6 2010/09/17 17:03:57 fine Exp $
  *
  * TxEventLog provides an interface for applications so that they can write
  * event information into a CEDPS formated file.
@@ -272,6 +272,7 @@ public:
       virtual  StUcmJobs   *getJobList(int limit);
       virtual  StUcmJobs   *getJobList(int limit, int offset);
       virtual  StUcmJobs   *getJobList(StRecord *task, int limit, int offset)=0;
+      virtual  int          getJobId(const char *taskBrokerId, int jobBrokerId) = 0; 
 
       virtual  StUcmEvents *getEventList();
       virtual  StUcmEvents *getEventList(StRecord *job);
@@ -284,7 +285,7 @@ public:
       virtual  int  queryTableSize(const char *tableName, const char *where)=0;
       virtual  int  queryTableSize(const char *tableName, const StRecord   *where)=0;
 
-    /* The current Db if for the last selected job
+    /* The current Db for the last selected job
      *       
      * @param int dbJobID, value of Job ID
      *
@@ -324,6 +325,9 @@ public:
  { return TxEventLog::writeDown(message); } 
 
 #define TXEVENT_DEFAULT_IMPLEMENTAION_2(classname)            \
+ int classname::getJobId (const char *taskBrokerId, int jobBrokerId)  \
+ {  assert(0 && "getJobId has not been implemented yet");     \
+    return 0; }                                               \
  StUcmTasks  *classname::getTaskList (int limit, int offset)  \
  {  assert(0 && "getTaskList has not been implemented yet");  \
     return 0; }                                               \

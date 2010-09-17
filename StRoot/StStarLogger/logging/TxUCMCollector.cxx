@@ -2,7 +2,7 @@
  * @file TxUCMCollector.cpp
  * @author Roopa Pundaleeka
  *
- * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.23 2010/08/27 23:58:37 fisyak Exp $
+ * @(#)cpp/api:$Id: TxUCMCollector.cxx,v 1.24 2010/09/17 17:03:57 fine Exp $
  *
  * Please see TxUCMCollector.h for more documentation.
  * "Translated" from the original TxUCMCOllector.java version 
@@ -1092,6 +1092,31 @@ StUcmJobs  *TxUCMCollector::getJobList(StRecord *task, int limit, int offset)
    static StUcmJobs jobs;
    fillJobList(jobs,limit,offset,task);
    return &jobs;
+}
+//___________________________________________________________________________________
+int  TxUCMCollector::getJobId(const char *taskBrokerID, int brokerJobID)
+{
+   int id = -1;
+   setBrokerTaskID (taskBrokerID);
+   setBrokerJobID (brokerJobID);
+   try {
+      queryJobTable(1);
+      if (fResult) {
+          int nRows = mysql_num_rows(fResult) ;
+          if (nRows && nRows >1 ) {
+              log->error(string("Can not fetch the job id  from the the ") + taskBrokerID + itoa(brokerJobID)); 
+          } else {
+               StRecord *job = new StRecord;     
+               fillFields(job->getFields());
+               id = job->getField("jobID")->toInt();
+          }
+      }
+   } catch (const StDataException &e) {
+       log->error(e.getDescription() );
+   }
+
+   setDbJobID(id);
+   return id;
 }
 
 //___________________________________________________________________________________
