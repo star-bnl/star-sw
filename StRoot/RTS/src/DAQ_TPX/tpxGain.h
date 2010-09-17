@@ -5,16 +5,39 @@
 
 #include "tpxCore.h"
 
-#define TPX_TCD_PED		92
-#define TPX_TCD_START		100
-#define TPX_TCD_STOP		103
-#define TPX_TCD_TIME_0		100.84	// or perhaps 100.90?
+// clock types aka frequencies
+#define TPX_CLOCK_TCU_LOC	9216000
+#define TPX_CLOCK_TCU_RHIC	9370000	// mean of all
+#define TPX_CLOCK_TCD		9434800	// ?
 
-#define TPX_TCU_PED		92	// will move to 92
-#define TPX_TCU_START		97
-#define TPX_TCU_STOP		101
-#define TPX_TCU_TIME_0		98.668442	// measured with run 10346005
 
+
+// default is TCU local
+#define TPX_TCU_LOC_PED			92
+#define TPX_TCU_LOC_START		97
+#define TPX_TCU_LOC_STOP		101
+#define TPX_TCU_LOC_TIME_0		98.668442	// measured with run 10346005
+
+// in the (rare) case we are running with RHIC I use some average
+#define TPX_TCU_RHIC_PED		92
+#define TPX_TCU_RHIC_START		98
+#define TPX_TCU_RHIC_STOP		102
+#define TPX_TCU_RHIC_TIME_0		99.0		// some number....
+
+
+
+/* FY10 and previous value.
+   In FY11 this will change due to:
+   - longer cable from the TCD to the distribution box
+   - new TCD
+*/
+#define TPX_TCD_PED			92
+#define TPX_TCD_START			100
+#define TPX_TCD_STOP			103
+#define TPX_TCD_TIME_0			100.84	// or perhaps 100.90?
+
+
+// accepted region: start must be the lowest, stop must be the highest
 #define TPX_PULSER_PED_START	92
 #define TPX_PULSER_PED_STOP	103
 
@@ -115,6 +138,8 @@ public:
 	int pulser_start ;	// timebin with peak
 	int pulser_stop ;	// last timebin which we use for the mean
 	double pulser_time_0 ;
+
+	void clock_mode(int mode) ;
 
 private:
 	void do_default(int sector) ;
