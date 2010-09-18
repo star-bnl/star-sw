@@ -332,11 +332,13 @@ ComponentAnalyticField::AddPlaneX(const double x, const double v, const char lab
     coplan[1] = x;
     vtplan[1] = v;
     planes[1].type = lab;
+    planes[1].ind = -1;
   } else {
     ynplan[0] = true;
     coplan[0] = x;
     vtplan[0] = v;
     planes[0].type = lab;
+    planes[0].ind = -1;
   }
   
   // Force recalculation of the capacitance and signal matrices.
@@ -359,17 +361,127 @@ ComponentAnalyticField::AddPlaneY(const double y, const double v, const char lab
     coplan[3] = y;
     vtplan[3] = v;
     planes[3].type = lab;
+    planes[3].ind = -1;
   } else {
     ynplan[2] = true;
     coplan[2] = y;
     vtplan[2] = v;
     planes[2].type = lab;
+    planes[2].ind = -1;
   }
   
   // Force recalculation of the capacitance and signal matrices.
   cellset = false;
   sigset = false;
 
+}
+
+void 
+ComponentAnalyticField::AddStripOnPlaneX(const char direction, const double x,
+                                         const double smin, const double smax, 
+                                         const char label, const double gap) {
+  
+  if (!ynplan[0] && !ynplan[1]) {
+    std:: cerr << className << "::AddStripOnPlaneX:\n";
+    std::cerr << "    There are no planes at constant x defined.\n";
+    return;
+  }
+  
+  if (direction != 'y' && direction != 'Y' &&
+      direction != 'z' && direction != 'Z') {
+    std::cerr << className << "::AddStripOnPlaneX:\n";
+    std::cerr << "    Invalid direction (" << direction << ").\n";
+    std::cerr << "    Only strips in y or z direction are possible.\n";
+    return;
+  }
+  
+  if (fabs(smax - smin) < Small) {
+    std::cerr << className << "::AddStripOnPlaneX:\n";
+    std::cerr << "    Strip width must be greater than zero.\n";
+    return;
+  }
+    
+  strip newStrip;
+  newStrip.type = label;
+  newStrip.ind = -1;
+  newStrip.smin = std::min(smin, smax);
+  newStrip.smax = std::max(smin, smax);
+  if (gap > Small) {
+    newStrip.gap = gap;
+  } else {
+    newStrip.gap = -1.;
+  }
+  
+  int iplane = 0;
+  if (ynplan[1]) {
+    const double d0 = fabs(coplan[0] - x);
+    const double d1 = fabs(coplan[1] - x);
+    if (d1 < d0) iplane = 1;
+  }
+  
+  if (direction == 'y' || direction == 'Y') {
+   planes[iplane].nStrips1++;
+   planes[iplane].strips1.push_back(newStrip);
+  } else {
+    planes[iplane].nStrips2++;
+    planes[iplane].strips2.push_back(newStrip);
+  }
+  
+                                         
+}
+
+void 
+ComponentAnalyticField::AddStripOnPlaneY(const char direction, const double y,
+                                         const double smin, const double smax, 
+                                         const char label, const double gap) {
+
+  if (!ynplan[2] && !ynplan[3]) {
+    std:: cerr << className << "::AddStripOnPlaneY:\n";
+    std::cerr << "    There are no planes at constant y defined.\n";
+    return;
+  }
+  
+  if (direction != 'x' && direction != 'X' &&
+      direction != 'z' && direction != 'Z') {
+    std::cerr << className << "::AddStripOnPlaneY:\n";
+    std::cerr << "    Invalid direction (" << direction << ").\n";
+    std::cerr << "    Only strips in x or z direction are possible.\n";
+    return;
+  }
+  
+  if (fabs(smax - smin) < Small) {
+    std::cerr << className << "::AddStripOnPlaneY:\n";
+    std::cerr << "    Strip width must be greater than zero.\n";
+    return;
+  }
+  
+  strip newStrip;
+  newStrip.type = label;
+  newStrip.ind = -1;
+  newStrip.smin = std::min(smin, smax);
+  newStrip.smax = std::max(smin, smax);
+  if (gap > Small) {
+    newStrip.gap = gap;
+  } else {
+    newStrip.gap = -1.;
+  }
+  
+  int iplane = 2;
+  if (ynplan[3]) {
+    const double d2 = fabs(coplan[2] - y);
+    const double d3 = fabs(coplan[3] - y);
+    if (d3 < d2) iplane = 3;
+  }
+  
+  if (direction == 'x' || direction == 'X') {
+   planes[iplane].nStrips1++;
+   planes[iplane].strips1.push_back(newStrip);
+  } else {
+    planes[iplane].nStrips2++;
+    planes[iplane].strips2.push_back(newStrip);
+  }
+                                         
+                                         
 }
 
 void
@@ -811,11 +923,11 @@ ComponentAnalyticField::Prepare() {
   }
   
   // Assign default strip widths.
-  // if (!PrepareStrips()) {
-  //   std::cerr << className << "::Prepare:\n";
-  //   std::cerr << "    Strip preparation failed.\n";
-  //   return false;
-  // }
+  if (!PrepareStrips()) {
+     std::cerr << className << "::Prepare:\n";
+     std::cerr << "    Strip preparation failed.\n";
+     return false;
+  }
   
   cellset = true;
   return true;
@@ -1534,6 +1646,99 @@ ComponentAnalyticField::CellType() {
   // Cell is not recognised.
   return false;
       
+}
+
+bool
+ComponentAnalyticField::PrepareStrips() {
+
+// -----------------------------------------------------------------------
+//    CELSTR - Assigns default anode-cathode gaps, if applicable.
+//    (Last changed on  7/12/00.)
+// -----------------------------------------------------------------------
+
+  double gapDef[4] = {0., 0., 0., 0.};
+  
+  // Compute default gaps.
+  if (ynplan[0]) {
+    if (ynplan[1]) {
+      gapDef[0] = coplan[1] - coplan[0];
+    } else if (nWires <= 0) {
+      gapDef[0] = -1.;
+    } else {
+      gapDef[0] = w[0].x - coplan[0];
+      for (int i = nWires; i--;) {
+        if (w[i].x - coplan[0] < gapDef[0]) gapDef[0] = w[i].x - coplan[0];
+      }
+    }
+  }
+  
+  if (ynplan[1]) {
+    if (ynplan[0]) {
+      gapDef[1] = coplan[1] - coplan[0];
+    } else if (nWires <= 0) {
+      gapDef[1] = -1.;
+    } else {
+      gapDef[1] = coplan[1] - w[0].x;
+      for (int i = nWires; i--;) {
+        if (coplan[1] - w[i].x < gapDef[1]) gapDef[1] = coplan[1] - w[i].x;
+      }
+    }
+  }
+  
+  if (ynplan[2]) {
+    if (ynplan[3]) {
+      gapDef[2] = coplan[3] - coplan[2];
+    } else if (nWires <= 0) {
+      gapDef[2] = -1.;
+    } else {
+      gapDef[2] = w[0].y - coplan[2];
+      for (int i = nWires; i--;) {
+        if (w[i].y - coplan[2] < gapDef[2]) gapDef[2] = w[i].y - coplan[2];
+      }
+    }
+  }
+  
+  if (ynplan[3]) {
+    if (ynplan[2]) {
+      gapDef[3] = coplan[3] - coplan[2];
+    } else if (nWires <= 0) {
+      gapDef[3] = -1.;
+    } else {
+      gapDef[3] = coplan[3] - w[0].y;
+      for (int i = nWires; i--;) {
+        if (coplan[3] - w[i].y < gapDef[3]) gapDef[3] = coplan[3] - w[i].y;
+      }
+    }
+  }
+  
+  // Assign.
+  for (int i = 0; i < 4; ++i) {
+    for (int j = planes[i].nStrips1; j--;) {
+      if (planes[i].strips1[j].gap < 0.) {
+        planes[i].strips1[j].gap = gapDef[i];
+      }
+      if (planes[i].strips1[j].gap < 0.) {
+        std::cerr << className << "::PrepareStrips:\n";
+        std::cerr << "    Not able to set a default anode-cathode gap\n";
+        std::cerr << "    for x/y-strip " << j << " of plane " << i << ".\n";
+        return false;
+      }
+    }
+    for (int j = planes[i].nStrips2; j--;) {
+      if (planes[i].strips2[j].gap < 0.) {
+        planes[i].strips2[j].gap = gapDef[i];
+      }
+      if (planes[i].strips2[j].gap < 0.) {
+        std::cerr << className << "::PrepareStrips:\n";
+        std::cerr << "    Not able to set a default anode-cathode gap\n";
+        std::cerr << "    for z-strip " << j << " of plane " << i << ".\n";
+        return false;
+      }
+    }
+  }
+  
+  return true;
+  
 }
 
 void
@@ -6127,26 +6332,26 @@ ComponentAnalyticField::WfieldStripXy(
   double xw = 0., yw = 0.;
   switch (ip) {
     case 0:
-      xw = -ypos + (theStrip.min + theStrip.max) / 2.;
+      xw = -ypos + (theStrip.smin + theStrip.smax) / 2.;
       yw = xpos - coplan[ip];
       break;
     case 1:
-      xw =  ypos - (theStrip.min + theStrip.max) / 2.;
+      xw =  ypos - (theStrip.smin + theStrip.smax) / 2.;
       yw = coplan[ip] - xpos;
       break;
     case 2:
-      xw =  xpos - (theStrip.min + theStrip.max) / 2.;
+      xw =  xpos - (theStrip.smin + theStrip.smax) / 2.;
       yw = ypos - coplan[ip];
       break;
     case 3:
-      xw = -xpos + (theStrip.min + theStrip.max) / 2.;
+      xw = -xpos + (theStrip.smin + theStrip.smax) / 2.;
       yw = coplan[ip] - ypos;
       break;
     default:
       return;
   }
   // Store the gap and strip width.
-  const double width = fabs(theStrip.max - theStrip.min);
+  const double width = fabs(theStrip.smax - theStrip.smin);
   const double gap = theStrip.gap;
   
   // Make sure we're in the fiducial part of the weighting map.
@@ -6206,19 +6411,19 @@ ComponentAnalyticField::WfieldStripZ(
   double xw = 0., yw = 0.;
   switch (ip) {
     case 0:
-      xw = -zpos + (theStrip.min + theStrip.max) / 2.;
+      xw = -zpos + (theStrip.smin + theStrip.smax) / 2.;
       yw = xpos - coplan[ip];
       break;
     case 1:
-      xw =  zpos - (theStrip.min + theStrip.max) / 2.;
+      xw =  zpos - (theStrip.smin + theStrip.smax) / 2.;
       yw = coplan[ip] - xpos;
       break;
     case 2:
-      xw =  zpos - (theStrip.min + theStrip.max) / 2.;
+      xw =  zpos - (theStrip.smin + theStrip.smax) / 2.;
       yw = ypos - coplan[ip];
       break;
     case 3:
-      xw = -zpos + (theStrip.min + theStrip.max) / 2.;
+      xw = -zpos + (theStrip.smin + theStrip.smax) / 2.;
       yw = coplan[ip] - ypos;
       break;
     default:
@@ -6226,7 +6431,7 @@ ComponentAnalyticField::WfieldStripZ(
   }
   
   // Store the gap and strip width.
-  const double width = fabs(theStrip.max - theStrip.min);
+  const double width = fabs(theStrip.smax - theStrip.smin);
   const double gap = theStrip.gap;
   
   // Make sure we're in the fiducial part of the weighting map.

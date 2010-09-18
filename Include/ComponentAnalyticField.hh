@@ -40,15 +40,26 @@ class ComponentAnalyticField : public ComponentBase {
                        double x1, double y1, double z1,
                        double& xc, double& yc, double& zc);
 
+    // Add a wire at (x, y) .
     void AddWire(const double x, const double y, const double diameter, 
                  const double voltage, const char label,
                  const double length = 100., 
                  const double tension = 50., const double rho = 19.3);    
+    // Add a tube.
     void AddTube(const double radius, const double voltage, 
                  const int nEdges, const char label);
+    // Add a plane at constant x
     void AddPlaneX(const double x, const double voltage, const char label);    
+    // Add a plane at constant y
     void AddPlaneY(const double y, const double voltage, const char label);
     
+    void AddStripOnPlaneX(const char direction, const double x,
+                          const double smin, const double smax, 
+                          const char label, const double gap = -1.);
+    void AddStripOnPlaneY(const char direction, const double y,
+                          const double smin, const double smax, 
+                          const char label, const double gap = -1.);
+
     // Set the periodic length [cm] in x/y direction
     void SetPeriodicityX(const double s);
     void SetPeriodicityY(const double s);
@@ -179,7 +190,7 @@ class ComponentAnalyticField : public ComponentBase {
       // Readout group
       int ind;
       // Coordinates
-      double min, max;
+      double smin, smax;
       double gap;
     };
     
@@ -234,6 +245,7 @@ class ComponentAnalyticField : public ComponentBase {
     bool Prepare();
     bool CellCheck();
     bool CellType();
+    bool PrepareStrips();
     
     bool PrepareSignals();
     bool SetupWireSignals();

@@ -126,6 +126,7 @@ Sensor::SetArea() {
   std::cout << "    " << xMinUser << " < x [cm] < " << xMaxUser << "\n";
   std::cout << "    " << yMinUser << " < y [cm] < " << yMaxUser << "\n";
   std::cout << "    " << zMinUser << " < z [cm] < " << zMaxUser << "\n";
+  hasUserArea = true;
   return true;
 
 }
