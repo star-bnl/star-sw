@@ -1,5 +1,8 @@
-!// $Id: tpcegeo3.g,v 1.25 2010/08/20 20:32:15 jwebb Exp $
+!// $Id: tpcegeo3.g,v 1.26 2010/09/19 19:39:01 jwebb Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.26  2010/09/19 19:39:01  jwebb
+!// Reduced size of TPC envelope to acommodate TOF.
+!//
 !// Revision 1.25  2010/08/20 20:32:15  jwebb
 !// Increased size of array to prevent an out-of-bounds condition.
 !//
@@ -288,7 +291,7 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
   Fill  TPCG !//   TPC basic dimensions
         version =       3               !// version    => current version
         Rmin =          46.107          !// Rmin          => TPC envelope inner radius
-        Rmax =          206.75/cos15    !// Rmax          => TPC envelope outer radius
+        Rmax =          207.77          ! TPC outer envelope | JCW, reduced to accomodate BTOF was 206.75/cos15  
         RminIFC =       46.6            !// RminIFC    => inner radius TPC IFC  : A.Lebedev measurement 10/16/08
         LengthT =       2*271.0         !// LengthT    => TPC full length up to front of EEMC
         Length  =       2*259.685       !// Length        => TPC full length including RDOs
@@ -527,6 +530,7 @@ USE TECW
   del = TPCG_Rmax-tofcOR;
   write(*,*) ' TPCEgeo : tpcConfig = ',TPCG_version;
   write(*,*) ' TPCEgeo: maximum  TPC  Radius is ',tofcOR,' clearance is ',del;
+
   if (del<0) write(*,*)' *** TPCEgeo ERROR : outer clearance negative '  ,del;
 !//   write(*,*) ' TPCEgeo: senset. gas inner radius ',tpgvIR;
 !//   write(*,*) ' TPCEgeo: sensitive gas length is ', tpgvLeng;
