@@ -126,9 +126,8 @@ Int_t StMyPointMaker::Make()
 	      TVector3 position = mEEsmd->getIntersection( u.sector(), u.mean(), v.mean() );
 	      if ( position.Z() < 0. )
 		{
-		  LOG_WARN<<GetName()<<" attempt to add point with invalid intersection"<<endm;
-		  LOG_WARN<<GetName()<<Form(" X=%5.1f Y=%5.1f sec=%i %i u=%5.1f v=%5.1f", 
-					    position.X(),position.Y(),u.sector(),v.sector(),u.mean(),v.mean());
+		  LOG_WARN<<GetName()<<" attempt to add point with invalid intersection: "<<Form(" X=%5.1f Y=%5.1f sec=%i %i u=%5.1f v=%5.1f", 
+					    position.X(),position.Y(),u.sector(),v.sector(),u.mean(),v.mean())<<endm;
 		  continue;
 		}
 	      p.position(position);
@@ -142,9 +141,8 @@ Int_t StMyPointMaker::Make()
 	      const StEEmcTower *tower = mEEanalysis->tower( position, 0 );
 	      if ( !tower )
 		{
-		  LOG_WARN<<GetName()<<" attempt to add point which misses the EEMC towers"<<endm;
-		  LOG_WARN<<GetName()<<Form(" X=%5.1f Y=%5.1f sec=%i %i u=%5.1f v=%5.1f", 
-					    position.X(),position.Y(),u.sector(),v.sector(),u.mean(),v.mean());		  
+		  LOG_WARN<<GetName()<<" attempt to add point which misses the EEMC towers: "<<Form(" X=%5.1f Y=%5.1f sec=%i %i u=%5.1f v=%5.1f", 
+					    position.X(),position.Y(),u.sector(),v.sector(),u.mean(),v.mean())<<endm;
 		  continue;
 		}
 	      p.tower(*tower);
