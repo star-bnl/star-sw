@@ -132,6 +132,8 @@ ostream& operator << (ostream& file, const particle_def& f);
 
 extern particle_def electron_def;
 extern particle_def positron_def;
+extern particle_def muon_minus_def;
+extern particle_def muon_plus_def;
 extern particle_def proton_def;
 extern particle_def anti_proton_def;
 extern particle_def neutron_def;
@@ -146,6 +148,7 @@ extern particle_def pi_0_meson_def;
 extern particle_def pi_minus_meson_def;
 extern particle_def eta_meson_def;
 extern particle_def K_plus_meson_def;
+extern particle_def K_minus_meson_def;
 
 extern particle_def deuteron_def;
 extern particle_def alpha_particle_def;

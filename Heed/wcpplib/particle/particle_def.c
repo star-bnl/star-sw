@@ -30,6 +30,11 @@ spin_def::spin_def(float ftotal, float fprojection):
 particle_def electron_def("electron", "e-", electron_mass_c2/c_squared, 
 		      electron_charge, 1, 0, 0.5, spin_def(0.0, 0.0));
 particle_def positron_def("positron", "e+", electron_def);
+
+particle_def muon_minus_def("muon_minus", "mu-", 105.658367 * MeV / c_squared,
+                      electron_charge, 1, 0, 0., spin_def(0.0, 0.0));
+particle_def muon_plus_def("muon_plus", "mu+", muon_minus_def); 
+
 particle_def proton_def("proton", "p+", proton_mass_c2/c_squared, eplus, 
 			0, 1, 0.5, spin_def(0.5, 0.5));
 particle_def anti_proton_def("", "p-", proton_def);
@@ -65,7 +70,7 @@ particle_def K_plus_meson_def("K_plus_meson_def","K+", 493.677*MeV/c_squared,
 			       1, 
 			      0, 0, 0.0, spin_def(0.0, 0.0)); // this I
 // don't know for the moment.
-
+particle_def K_minus_meson_def("K_minus_meson_def", "K-", K_plus_meson_def);
 
 particle_def deuteron_def("deuteron","dtr",
 				1875.613*MeV/c_squared, 

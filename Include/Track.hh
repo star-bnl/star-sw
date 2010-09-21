@@ -58,6 +58,7 @@ class Track {
     double energy;
     double beta2;
     bool isElectron;
+    std::string particleName;
 
     Sensor* sensor;
 

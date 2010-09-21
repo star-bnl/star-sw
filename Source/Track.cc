@@ -10,6 +10,7 @@ namespace Garfield {
 Track::Track() :
   q(-1.), spin(1),
   mass(MuonMass), energy(0.), isElectron(false),
+  particleName("mu-"),
   sensor(0),
   isChanged(true), 
   usePlotting(false), viewer(0),
@@ -26,35 +27,46 @@ Track::SetParticle(std::string part) {
   isElectron = false;
   if (part == "electron" || part == "Electron" || 
       part == "e-") {
-    q = -1; mass = ElectronMass; spin = 1; isElectron = true; 
+    q = -1; mass = ElectronMass; spin = 1; isElectron = true;
+    particleName = "e-"; 
   } else if (part == "positron" || part == "Positron" ||
              part == "e+") {
     q =  1; mass = ElectronMass; spin = 1;
+    particleName = "e+";
   } else if (part == "muon" || part == "Muon" ||  
              part == "mu" || part == "mu-") {
     q = -1; mass = MuonMass; spin = 1;
+    particleName = "mu-";
   } else if (part == "mu+") {
     q =  1; mass = MuonMass; spin = 1;
+    particleName = "mu+";
   } else if (part == "pion" || part == "Pion" ||
              part == "pi" || part == "pi-") {
     q = -1; mass = 139.57018e6; spin = 0;
+    particleName = "pi-";
   } else if (part == "pi+") {
     q =  1; mass = 139.57018e6; spin = 0;
+    particleName = "pi+";
   } else if (part == "kaon" || part == "Kaon" ||
              part == "K" || part == "K-") {
     q = -1; mass = 493.677e6; spin = 0;
+    particleName = "K-";
   } else if (part == "K+") {
     q =  1; mass = 493.677e6; spin = 0;
+    particleName = "K+";
   } else if (part == "proton" || part == "Proton" || 
              part == "p") {
     q =  1; mass = ProtonMass; spin = 1;
+    particleName = "p";
   } else if (part == "anti-proton" || part == "Anti-Proton" ||
              part == "antiproton" || part == "Antiproton" || 
              part == "p-bar") {
     q = -1; mass = ProtonMass; spin = 1;
+    particleName = "pbar";
   } else if (part == "deuteron" || part == "Deuteron" ||
              part == "d") {
     q = 2; mass = 1875.612793e6; spin = 2;
+    particleName = "d";
   } else {
     std::cerr << "Track::SetParticle:\n";
     std::cerr << "    Particle " << part << " is not defined.\n";

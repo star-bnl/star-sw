@@ -252,9 +252,42 @@ TrackHeed::NewTrack(
     delete particle;
     particle = 0;
   }
+  
+  particle_def* particleType = &muon_minus_def;
+  if (particleName == "e-") {
+    particleType = &electron_def;
+  } else if (particleName == "e+") {
+    particleType = &positron_def;
+  } else if (particleName == "mu-") {
+    particleType = &muon_minus_def;
+  } else if (particleName == "mu+") {
+    particleType = &muon_plus_def;
+  } else if (particleName == "pi-") {
+    particleType = &pi_minus_meson_def;
+  } else if (particleName == "pi+") {
+    particleType = &pi_plus_meson_def;
+  } else if (particleName == "K-") {
+    particleType = &K_minus_meson_def;
+  } else if (particleName == "K+") {
+    particleType = &K_plus_meson_def;
+  } else if (particleName == "p") {
+    particleType = &proton_def;
+  } else if (particleName == "pbar") {
+    particleType = &anti_proton_def;
+  } else if (particleName == "d") {
+    particleType = &deuteron_def;
+  } else {
+    // Not a predefined particle, use muon definition.
+    if (q > 0.) {
+      particleType = &muon_minus_def;
+    } else {
+      particleType = &muon_plus_def;
+    }
+  }
+    
   particle = new HeedParticle(chamber, 
-                              p0, velocity, t0, 
-                              &proton_def);
+                                p0, velocity, t0, 
+                                particleType);
   // Transport the particle.
   particle->fly();
   hasActiveTrack = true;

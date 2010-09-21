@@ -58,6 +58,7 @@ class ViewMedium {
 
     // Functions
     std::vector<TF1> functions;
+    int nFunctions;
     
     void SetupCanvas();
     void AddFunction(const double xmin, const double xmax, const bool keep, 

@@ -15,7 +15,8 @@ ViewMedium::ViewMedium() :
   debug(false),
   canvas(0), hasExternalCanvas(false),
   medium(0),
-  eMin(0.), eMax(1000.), bMin(0.), bMax(1.e5) {
+  eMin(0.), eMax(1000.), bMin(0.), bMax(1.e5),
+  nFunctions(0) {
   
   functions.clear();
   plottingEngine.SetDefaultStyle();
@@ -183,11 +184,15 @@ ViewMedium::AddFunction(const double xmin, const double xmax, const bool keep,
     fname = ss.str();
   }
 
-  if (!keep) functions.clear();
+  if (!keep) {
+    functions.clear();
+    nFunctions = 0;
+  }
 
   TF1 fNew(fname.c_str(), this, &ViewMedium::EvaluateFunction, 
             xmin, xmax, 1, "ViewMedium", "EvaluateFunction");
   functions.push_back(fNew);
+  ++nFunctions;
 
   const std::string title = medium->GetName() + ";" + 
                             xlabel + ";" + ylabel;
@@ -203,10 +208,13 @@ ViewMedium::AddFunction(const double xmin, const double xmax, const bool keep,
   } else {
     functions.back().SetLineColor(kRed);
   }
-  if (keep) {
-    functions.back().Draw("LSAME");
+  if (keep && nFunctions > 1) {
+    functions[0].Draw("");
+    for (int i = 1; i < nFunctions; ++i) {
+     functions[i].Draw("same");
+    }
   } else {
-    functions.back().DrawCopy("");
+    functions.back().Draw("");
   }
  
 }
