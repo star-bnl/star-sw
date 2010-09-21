@@ -3,30 +3,30 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
-#include <cmath>
 
+#include "ComponentTcad3d.hh"
 #include "GarfieldConstants.hh"
-#include "ComponentTcad2d.hh"
 
 namespace Garfield {
 
-ComponentTcad2d::ComponentTcad2d() : 
+ComponentTcad3d::ComponentTcad3d() : 
   ComponentBase(), 
   nRegions(0), nVertices(0), nElements(0),
-  hasBoundingBox(false), hasRangeZ(false), 
+  hasBoundingBox(false), 
   lastElement(0) {
 
-  className = "ComponentTcad2d";
+  className = "ComponentTcad3d";
     
   regions.clear();
   vertices.clear();
   elements.clear();
+  
   for (int i = nMaxVertices; i--;) w[i] = 0.;
-
+  
 }
 
 void 
-ComponentTcad2d::ElectricField(const double x, const double y, const double z,
+ComponentTcad3d::ElectricField(const double x, const double y, const double z,
                                double& ex, double& ey, double& ez, double& p,
                                Medium*& m, int& status) {
  
@@ -38,48 +38,39 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
     status = -10;
     return;
   }  
+
+  // Initialise the electric field and potential.
+  ex = ey = ez = p = 0.;
   
   // Check if the point is inside the bounding box.
   if (x < xMinBoundingBox || x > xMaxBoundingBox ||
-      y < yMinBoundingBox || y > yMaxBoundingBox) {
+      y < yMinBoundingBox || y > yMaxBoundingBox ||
+      z < zMinBoundingBox || z > zMaxBoundingBox) {
+    if (debug) {
+      std::cerr << className << "::ElectricField:\n";
+      std::cerr << "    Point (" << x << ", " << y << ", " << z
+                << ") is outside the bounding box.\n";
+    }
     status = -11;
     return;
   }
-  if (hasRangeZ) {
-    if (z < zMinBoundingBox || z > zMaxBoundingBox) {
-      status = -11;
-      return;
-    }
-  }
   
-  // Initialise the electric field and potential.
-  ex = ey = ez = p = 0.;
   // Assume this will work.
   status = 0;
   // Check if the point is still located in the previously found element.
   int i = lastElement;
   switch (elements[i].type) {
-    case 1:
-      if (CheckLine(x, y, i)) {
-        ex = w[0] * vertices[elements[i].vertex[0]].ex + 
-             w[1] * vertices[elements[i].vertex[1]].ex;
-        ey = w[0] * vertices[elements[i].vertex[0]].ey + 
-             w[1] * vertices[elements[i].vertex[1]].ey;
-        p  = w[0] * vertices[elements[i].vertex[0]].p + 
-             w[1] * vertices[elements[i].vertex[1]].p;
-        m = regions[elements[i].region].medium;
-        if (!regions[elements[i].region].drift || m == 0) status = -5;
-        return;
-      } 
-      break;
     case 2:
-      if (CheckTriangle(x, y, i)) {
+      if (CheckTriangle(x, y, z, i)) {
         ex = w[0] * vertices[elements[i].vertex[0]].ex + 
              w[1] * vertices[elements[i].vertex[1]].ex + 
              w[2] * vertices[elements[i].vertex[2]].ex;
         ey = w[0] * vertices[elements[i].vertex[0]].ey + 
              w[1] * vertices[elements[i].vertex[1]].ey + 
              w[2] * vertices[elements[i].vertex[2]].ey;
+        ez = w[0] * vertices[elements[i].vertex[0]].ez + 
+             w[1] * vertices[elements[i].vertex[1]].ez + 
+             w[2] * vertices[elements[i].vertex[2]].ez;
         p  = w[0] * vertices[elements[i].vertex[0]].p + 
              w[1] * vertices[elements[i].vertex[1]].p + 
              w[2] * vertices[elements[i].vertex[2]].p;
@@ -88,25 +79,29 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
         return;
       }
       break;  
-    case 3:
-      if (CheckRectangle(x, y, i)) {
+    case 5:
+      if (CheckTetrahedron(x, y, z, i)) {
         ex = w[0] * vertices[elements[i].vertex[0]].ex + 
              w[1] * vertices[elements[i].vertex[1]].ex + 
-             w[2] * vertices[elements[i].vertex[2]].ex + 
+             w[2] * vertices[elements[i].vertex[2]].ex +
              w[3] * vertices[elements[i].vertex[3]].ex;
         ey = w[0] * vertices[elements[i].vertex[0]].ey + 
              w[1] * vertices[elements[i].vertex[1]].ey + 
-             w[2] * vertices[elements[i].vertex[2]].ey + 
+             w[2] * vertices[elements[i].vertex[2]].ey +
              w[3] * vertices[elements[i].vertex[3]].ey;
+        ez = w[0] * vertices[elements[i].vertex[0]].ez + 
+             w[1] * vertices[elements[i].vertex[1]].ez + 
+             w[2] * vertices[elements[i].vertex[2]].ez +
+             w[3] * vertices[elements[i].vertex[3]].ez;
         p  = w[0] * vertices[elements[i].vertex[0]].p + 
              w[1] * vertices[elements[i].vertex[1]].p + 
-             w[2] * vertices[elements[i].vertex[2]].p + 
+             w[2] * vertices[elements[i].vertex[2]].p +
              w[3] * vertices[elements[i].vertex[3]].p;
         m = regions[elements[i].region].medium;
         if (!regions[elements[i].region].drift || m == 0) status = -5;
         return;
       }
-      break;
+      break;  
     default: 
       std::cerr << className << "::ElectricField:\n";
       std::cerr << "    Unknown element type (" 
@@ -119,56 +114,48 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
   // The point is not in the previous element.
   // We have to loop over all elements.
   for (i = nElements; i--;) {
-    if (x < vertices[elements[i].vertex[0]].x) continue;
     switch (elements[i].type) {
-      case 1:
-        if (CheckLine(x, y, i)) {
-          ex = w[0] * vertices[elements[i].vertex[0]].ex + 
-               w[1] * vertices[elements[i].vertex[1]].ex;
-          ey = w[0] * vertices[elements[i].vertex[0]].ey + 
-               w[1] * vertices[elements[i].vertex[1]].ey;
-          p  = w[0] * vertices[elements[i].vertex[0]].p + 
-               w[1] * vertices[elements[i].vertex[1]].p;
-          lastElement = i;
-          m = regions[elements[i].region].medium;
-          if (!regions[elements[i].region].drift || m == 0) status = -5; 
-          return;
-        }
-        break;
       case 2:
-        if (CheckTriangle(x, y, i)) {
+        if (CheckTriangle(x, y, z, i)) {
           ex = w[0] * vertices[elements[i].vertex[0]].ex + 
                w[1] * vertices[elements[i].vertex[1]].ex + 
                w[2] * vertices[elements[i].vertex[2]].ex;
           ey = w[0] * vertices[elements[i].vertex[0]].ey + 
                w[1] * vertices[elements[i].vertex[1]].ey + 
                w[2] * vertices[elements[i].vertex[2]].ey;
+          ez = w[0] * vertices[elements[i].vertex[0]].ez + 
+               w[1] * vertices[elements[i].vertex[1]].ez + 
+               w[2] * vertices[elements[i].vertex[2]].ez;
           p  = w[0] * vertices[elements[i].vertex[0]].p + 
                w[1] * vertices[elements[i].vertex[1]].p + 
-               w[2] * vertices[elements[i].vertex[2]].p;               
+               w[2] * vertices[elements[i].vertex[2]].p;
           lastElement = i;
           m = regions[elements[i].region].medium;
           if (!regions[elements[i].region].drift || m == 0) status = -5; 
           return;
         }
         break;    
-      case 3:
-        if (CheckRectangle(x, y, i)) {
+      case 5:
+        if (CheckTetrahedron(x, y, z, i)) {
           ex = w[0] * vertices[elements[i].vertex[0]].ex + 
                w[1] * vertices[elements[i].vertex[1]].ex + 
-               w[2] * vertices[elements[i].vertex[2]].ex + 
+               w[2] * vertices[elements[i].vertex[2]].ex +
                w[3] * vertices[elements[i].vertex[3]].ex;
           ey = w[0] * vertices[elements[i].vertex[0]].ey + 
                w[1] * vertices[elements[i].vertex[1]].ey + 
-               w[2] * vertices[elements[i].vertex[2]].ey + 
+               w[2] * vertices[elements[i].vertex[2]].ey +
                w[3] * vertices[elements[i].vertex[3]].ey;
+          ez = w[0] * vertices[elements[i].vertex[0]].ez + 
+               w[1] * vertices[elements[i].vertex[1]].ez + 
+               w[2] * vertices[elements[i].vertex[2]].ez +
+               w[3] * vertices[elements[i].vertex[3]].ez;
           p  = w[0] * vertices[elements[i].vertex[0]].p + 
-               w[1] * vertices[elements[i].vertex[1]].p + 
-               w[2] * vertices[elements[i].vertex[2]].p + 
+               w[1] * vertices[elements[i].vertex[1]].p +
+               w[2] * vertices[elements[i].vertex[2]].p +
                w[3] * vertices[elements[i].vertex[3]].p;               
           lastElement = i;
           m = regions[elements[i].region].medium;
-          if (!regions[elements[i].region].drift || m == 0) status = -5;
+          if (!regions[elements[i].region].drift || m == 0) status = -5; 
           return;
         }
         break;
@@ -184,7 +171,7 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
   // Point is outside the mesh.
   if (debug) {
     std::cerr << className << "::ElectricField:\n";
-    std::cerr << "    Point (" << x << ", " << y 
+    std::cerr << "    Point (" << x << ", " << y << ", " << z
               << ") is outside the mesh.\n";
   }
   status = -6;
@@ -193,7 +180,7 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
 }
 
 void 
-ComponentTcad2d::ElectricField(const double x, const double y, const double z,
+ComponentTcad3d::ElectricField(const double x, const double y, const double z,
                                double& ex, double& ey, double& ez,
                                Medium*& m, int& status) {
 
@@ -203,7 +190,7 @@ ComponentTcad2d::ElectricField(const double x, const double y, const double z,
 }
 
 bool 
-ComponentTcad2d::GetMedium(const double x, const double y, const double z,
+ComponentTcad3d::GetMedium(const double x, const double y, const double z,
                            Medium*& m) {
 
   m = 0;
@@ -216,39 +203,28 @@ ComponentTcad2d::GetMedium(const double x, const double y, const double z,
   
   // Check if the point is inside the bounding box.
   if (x < xMinBoundingBox || x > xMaxBoundingBox || 
-      y < yMinBoundingBox || y > yMaxBoundingBox) {
+      y < yMinBoundingBox || y > yMaxBoundingBox ||
+      z < zMinBoundingBox || z > zMaxBoundingBox) {
     return false;
-  }
-  if (hasRangeZ) {
-    if (z < zMinBoundingBox || z > zMaxBoundingBox) {
-      return false;
-    }
   }
   
   // Check if the point is still located in the previous element.
   int i = lastElement;
   switch (elements[i].type) {
-    case 1:
-      if (CheckLine(x, y, i)) {
-        m = regions[elements[i].region].medium;
-        if (m == 0) return false;
-        return true;
-      } 
-      break;
     case 2:
-      if (CheckTriangle(x, y, i)) {
+      if (CheckTriangle(x, y, z, i)) {
         m = regions[elements[i].region].medium;
         if (m == 0) return false;
         return true;
       }
       break;  
-    case 3:
-      if (CheckRectangle(x, y, i)) {
+    case 5:
+      if (CheckTetrahedron(x, y, z, i)) {
         m = regions[elements[i].region].medium;
         if (m == 0) return false;
         return true;
       }
-      break;
+      break;  
     default: 
       std::cerr << className << "::GetMedium:\n";
       std::cerr << "    Invalid element type (" 
@@ -260,26 +236,17 @@ ComponentTcad2d::GetMedium(const double x, const double y, const double z,
   // The point is not in the previous element.
   // We have to loop over all elements.
   for (i = nElements; i--;) {
-    if (x < vertices[elements[i].vertex[0]].x) continue;
     switch (elements[i].type) {
-      case 1:
-        if (CheckLine(x, y, i)) {
+      case 2:
+        if (CheckTriangle(x, y, z, i)) {
           lastElement = i;
           m = regions[elements[i].region].medium;
           if (m == 0) return false;
           return true;
         }
         break;
-      case 2:
-        if (CheckTriangle(x, y, i)) {
-          lastElement = i;
-          m = regions[elements[i].region].medium;
-          if (m == 0) return false;
-          return true;
-        }
-        break;    
-      case 3:
-        if (CheckRectangle(x, y, i)) {
+      case 5:
+        if (CheckTetrahedron(x, y, z, i)) {
           lastElement = i;
           m = regions[elements[i].region].medium;
           if (m == 0) return false;
@@ -300,7 +267,7 @@ ComponentTcad2d::GetMedium(const double x, const double y, const double z,
 }
  
 bool 
-ComponentTcad2d::Initialise(const std::string gridfilename, 
+ComponentTcad3d::Initialise(const std::string gridfilename, 
                             const std::string datafilename) {
   
   ready = false;
@@ -321,6 +288,7 @@ ComponentTcad2d::Initialise(const std::string gridfilename,
   // Find min./max. coordinates and potentials.
   xMaxBoundingBox = xMinBoundingBox = vertices[elements[0].vertex[0]].x;
   yMaxBoundingBox = yMinBoundingBox = vertices[elements[0].vertex[0]].y;  
+  zMaxBoundingBox = zMinBoundingBox = vertices[elements[0].vertex[0]].z;
   pMax = pMin = vertices[elements[0].vertex[0]].p;
   for (int i = nElements; i--;) {
     for (int j = 0; j <= elements[i].type; ++j) {
@@ -333,6 +301,11 @@ ComponentTcad2d::Initialise(const std::string gridfilename,
         yMinBoundingBox = vertices[elements[i].vertex[j]].y;
       } else if (vertices[elements[i].vertex[j]].y > yMaxBoundingBox) {
         yMaxBoundingBox = vertices[elements[i].vertex[j]].y;
+      }
+      if (vertices[elements[i].vertex[j]].z < zMinBoundingBox) {
+        zMinBoundingBox = vertices[elements[i].vertex[j]].z;
+      } else if (vertices[elements[i].vertex[j]].z > zMaxBoundingBox) {
+        zMaxBoundingBox = vertices[elements[i].vertex[j]].z;
       }
       if (vertices[elements[i].vertex[j]].p < pMin) {
         pMin = vertices[elements[i].vertex[j]].p;
@@ -348,40 +321,35 @@ ComponentTcad2d::Initialise(const std::string gridfilename,
                         << xMaxBoundingBox << "\n";
   std::cout << "      " << yMinBoundingBox << " < y [cm] < "
                         << yMaxBoundingBox << "\n";
+  std::cout << "      " << zMinBoundingBox << " < z [cm] < "
+                        << zMaxBoundingBox << "\n";
   std::cout << "    Voltage range:\n";
   std::cout << "      " << pMin << " < V < " << pMax << "\n";
-
+  
   bool ok = true;
   
   // Count the number of elements belonging to a region.
   std::vector<int> nElementsRegion;
   nElementsRegion.resize(nRegions);
   for (int i = nRegions; i--;) nElementsRegion[i] = 0;
-
+  
   // Count the different element shapes.
-  int nLines = 0;
   int nTriangles = 0;
-  int nRectangles = 0;
+  int nTetrahedra = 0;
   int nOtherShapes = 0;
 
   // Check if there are elements which are not part of any region.
   int nLoose = 0;
   std::vector<int> looseElements;
   looseElements.clear();
-
-  // Check if there are degenerate elements.  
+  
+  // Check if there are degenerate elements.
   int nDegenerate = 0;
   std::vector<int> degenerateElements;
   degenerateElements.clear();
- 
+  
   for (int i = nElements; i--;) {
-    if (elements[i].type == 1) {
-      ++nLines;
-      if (elements[i].vertex[0] == elements[i].vertex[1]) {
-        degenerateElements.push_back(i);
-        ++nDegenerate;
-      }
-    } else if (elements[i].type == 2) {
+    if (elements[i].type == 2) {
       ++nTriangles;
       if (elements[i].vertex[0] == elements[i].vertex[1] ||
           elements[i].vertex[1] == elements[i].vertex[2] ||
@@ -389,8 +357,7 @@ ComponentTcad2d::Initialise(const std::string gridfilename,
         degenerateElements.push_back(i);
         ++nDegenerate;
       }
-    } else if (elements[i].type == 3) {
-      ++nRectangles;
+    } else if (elements[i].type == 5) {
       if (elements[i].vertex[0] == elements[i].vertex[1] ||
           elements[i].vertex[0] == elements[i].vertex[2] ||
           elements[i].vertex[0] == elements[i].vertex[3] ||
@@ -400,6 +367,7 @@ ComponentTcad2d::Initialise(const std::string gridfilename,
         degenerateElements.push_back(i);
         ++nDegenerate;
       }
+      ++nTetrahedra;
     } else {
       // Other shapes should not occur, since they were excluded in LoadGrid.
       ++nOtherShapes;
@@ -420,7 +388,7 @@ ComponentTcad2d::Initialise(const std::string gridfilename,
     }
     ok = false;
   }
-  
+
   if (nLoose > 0) {
     std::cerr << className << "::Initialise:\n";
     std::cerr << "    The following elements are not part of any region:\n";
@@ -428,7 +396,7 @@ ComponentTcad2d::Initialise(const std::string gridfilename,
       std::cerr << "      " << looseElements[i] << "\n";
     }
     ok = false;
-  }  
+  }
   
   std::cout << className << "::Initialise:\n";
   std::cout << "    Number of regions: " << nRegions << "\n";
@@ -436,16 +404,13 @@ ComponentTcad2d::Initialise(const std::string gridfilename,
     std::cout << "      " << i << ": " << regions[i].name << ", "
               << nElementsRegion[i] << " elements\n";
   }
-
+  
   std::cout << "    Number of elements: " << nElements << "\n";
-  if (nLines > 0) {
-    std::cout << "      " << nLines << " lines\n";
-  }
   if (nTriangles > 0) {
     std::cout << "      " << nTriangles << " triangles\n";
   }
-  if (nRectangles > 0) {
-    std::cout << "      " << nRectangles << " rectangles\n";
+  if (nTetrahedra > 0) {
+    std::cout << "      " << nTetrahedra << " tetrahedra\n";
   }
   if (nOtherShapes > 0) {
     std::cout << "      " << nOtherShapes << " elements of unknown type\n";
@@ -454,50 +419,60 @@ ComponentTcad2d::Initialise(const std::string gridfilename,
     Cleanup();
     return false;
   }
+  if (debug) {
+    // For each element, print the indices of the constituting vertices.
+    for (int i = 0; i < nElements; ++i) {
+      if (elements[i].type == 2) {
+        std::cout << "      " << i << ": " 
+                  << elements[i].vertex[0] << "  "
+                  << elements[i].vertex[1] << "  "
+                  << elements[i].vertex[2] 
+                  << " (triangle, region " << elements[i].region << ")\n";
+      } else if (elements[i].type == 5) {
+        std::cout << "      " << i << ": "
+                  << elements[i].vertex[0] << "  " 
+                  << elements[i].vertex[1] << "  "
+                  << elements[i].vertex[2] << "  "
+                  << elements[i].vertex[3] 
+                  << " (tetrahedron, region " << elements[i].region << ")\n";
+      }
+    }
+  }
   
   std::cout << "    Number of vertices: " << nVertices << "\n";
+  if (debug) {
+    for (int i = 0; i < nVertices; ++i) {
+      std::cout << "      " << i << ": (x, y, z) = (" 
+                << vertices[i].x << ", " 
+                << vertices[i].y << ", "
+                << vertices[i].z << "), V = " << vertices[i].p << "\n";
+    }
+  }
   
   if (!ok) {
     ready = false;
     Cleanup();
     return false;
   }
-
+  
   ready = true;
   return true;
 
 }
 
 bool 
-ComponentTcad2d::GetBoundingBox(double& xmin, double& ymin, double& zmin,
+ComponentTcad3d::GetBoundingBox(double& xmin, double& ymin, double& zmin,
                                 double& xmax, double& ymax, double& zmax) {
 
   if (!ready) return false;
-  xmin = xMinBoundingBox; ymin = yMinBoundingBox; 
-  xmax = xMaxBoundingBox; ymax = yMaxBoundingBox;
-  if (hasRangeZ) {
-    zmin = zMinBoundingBox; zmax = zMaxBoundingBox;
-  }
+  xmin = xMinBoundingBox; ymin = yMinBoundingBox; zmin = zMinBoundingBox;
+  xmax = xMaxBoundingBox; ymax = yMaxBoundingBox; zmax = zMaxBoundingBox;
   return true;
 
 }
 
-void
-ComponentTcad2d::SetRangeZ(const double zmin, const double zmax) {
-
-  if (fabs(zmax - zmin) < Small) {
-    std::cerr << "ComponentTcad2d::SetRangeZ:\n";
-    std::cerr << "    Zero range is not permitted.\n";
-    return;
-  }
-  zMinBoundingBox = std::min(zmin, zmax);
-  zMaxBoundingBox = std::max(zmin, zmax);
-  hasRangeZ = true;
-
-}
-
 bool 
-ComponentTcad2d::GetVoltageRange(double& vmin, double& vmax) {
+ComponentTcad3d::GetVoltageRange(double& vmin, double& vmax) {
 
   if (!ready) return false;
   vmin = pMin; vmax = pMax;
@@ -506,7 +481,7 @@ ComponentTcad2d::GetVoltageRange(double& vmin, double& vmax) {
 }
 
 void 
-ComponentTcad2d::GetRegion(const int i, std::string& name, bool& active) {
+ComponentTcad3d::GetRegion(const int i, std::string& name, bool& active) {
 
   if (i < 0 || i >= nRegions) {
     std::cerr << className << "::GetRegion:\n";
@@ -519,7 +494,7 @@ ComponentTcad2d::GetRegion(const int i, std::string& name, bool& active) {
 }
 
 void 
-ComponentTcad2d::SetDriftRegion(const int i) {
+ComponentTcad3d::SetDriftRegion(const int i) {
 
   if (i < 0 || i >= nRegions) {
     std::cerr << className << "::SetDriftRegion:\n";
@@ -531,7 +506,7 @@ ComponentTcad2d::SetDriftRegion(const int i) {
 }
 
 void
-ComponentTcad2d::UnsetDriftRegion(const int i) {
+ComponentTcad3d::UnsetDriftRegion(const int i) {
 
   if (i < 0 || i >= nRegions) {
     std::cerr << className << "::UnsetDriftRegion:\n";
@@ -543,7 +518,7 @@ ComponentTcad2d::UnsetDriftRegion(const int i) {
 }
 
 void 
-ComponentTcad2d::SetMedium(const int i, Medium* medium) {
+ComponentTcad3d::SetMedium(const int i, Medium* medium) {
 
   if (i < 0 || i >= nRegions) {
     std::cerr << className << "::SetMedium:\n";
@@ -562,7 +537,7 @@ ComponentTcad2d::SetMedium(const int i, Medium* medium) {
 }
 
 bool
-ComponentTcad2d::GetMedium(const int i, Medium*& m) const {
+ComponentTcad3d::GetMedium(const int i, Medium*& m) const {
 
   if (i < 0 || i >= nRegions) {
     std::cerr << className << "::GetMedium:\n";
@@ -577,7 +552,7 @@ ComponentTcad2d::GetMedium(const int i, Medium*& m) const {
 }
 
 bool 
-ComponentTcad2d::LoadData(const std::string datafilename) {
+ComponentTcad3d::LoadData(const std::string datafilename) {
 
   std::ifstream datafile;
   datafile.open(datafilename.c_str(), std::ios::in);
@@ -598,6 +573,7 @@ ComponentTcad2d::LoadData(const std::string datafilename) {
     vertices[i].p = 0.;
     vertices[i].ex = 0.;
     vertices[i].ey = 0.;
+    vertices[i].ez = 0.;
     vertices[i].isShared = false;
   }
   
@@ -750,8 +726,8 @@ ComponentTcad2d::LoadData(const std::string datafilename) {
         line = line.substr(pBra + 1, pKet - pBra - 1);
         int nValues;
         data.str(line); data >> nValues; data.clear();
-        // In case of the electric field, there are two values per vertex.
-        nValues = nValues / 2;
+        // In case of the electric field, there are three values per vertex.
+        nValues = nValues / 3;
         for (int j = nVertices; j--;) isInRegion[j] = false;
         for (int j = 0; j < nElements; ++j) {
           if (elements[j].region != index) continue;
@@ -760,9 +736,9 @@ ComponentTcad2d::LoadData(const std::string datafilename) {
           } 
         }
         int ivertex = 0;
-        double val1, val2;
+        double val1, val2, val3;
         for (int j = 0; j < nValues; ++j) {
-          datafile >> val1 >> val2;
+          datafile >> val1 >> val2 >> val3;
           while (ivertex < nVertices) {
             if (isInRegion[ivertex]) break;
             ++ivertex;
@@ -778,6 +754,7 @@ ComponentTcad2d::LoadData(const std::string datafilename) {
           }
           vertices[ivertex].ex = val1;
           vertices[ivertex].ey = val2;
+          vertices[ivertex].ez = val3;
           ++ivertex;
         }
       }
@@ -801,7 +778,7 @@ ComponentTcad2d::LoadData(const std::string datafilename) {
 }
 
 bool 
-ComponentTcad2d::LoadGrid(const std::string gridfilename) {
+ComponentTcad3d::LoadGrid(const std::string gridfilename) {
 
   // Open the file containing the mesh description.
   std::ifstream gridfile;
@@ -945,12 +922,13 @@ ComponentTcad2d::LoadGrid(const std::string gridfilename) {
       vertices.resize(nVertices);
       // Get the coordinates of this vertex.
       for (int j = 0; j < nVertices; ++j) {
-        gridfile >> vertices[j].x >> vertices[j].y;
+        gridfile >> vertices[j].x >> vertices[j].y >> vertices[j].z;
         // Change units from micron to cm.
         vertices[j].x *= 1.e-4;
         vertices[j].y *= 1.e-4;
-        ++iLine;
+        vertices[j].z *= 1.e-4;
       }
+      iLine += nVertices - 1;
       break;
     }
   }
@@ -973,8 +951,8 @@ ComponentTcad2d::LoadGrid(const std::string gridfilename) {
   // Get the "edges" (lines connecting two vertices).
   int nEdges = 0;
   // Temporary arrays for storing edge points.
-  std::vector<int> edgeP1; edgeP1.clear();
-  std::vector<int> edgeP2; edgeP2.clear();
+  std::vector<int> edgeP1;
+  std::vector<int> edgeP2;
   while (!gridfile.fail()) {
     std::getline(gridfile, line); ++iLine;
     line.erase(line.begin(), find_if(line.begin(), line.end(), 
@@ -999,8 +977,8 @@ ComponentTcad2d::LoadGrid(const std::string gridfilename) {
       // Get the indices of the two endpoints.
       for (int j = 0; j < nEdges; ++j) {
         gridfile >> edgeP1[j] >> edgeP2[j];
-        ++iLine;
       }
+      iLine += nEdges - 1;
       break;
     }
   }
@@ -1018,7 +996,7 @@ ComponentTcad2d::LoadGrid(const std::string gridfilename) {
     Cleanup();
     gridfile.close();
     return false;
-  } 
+  }
   
   for (int i = nEdges; i--;) {
     // Make sure the indices of the edge endpoints are not out of range.
@@ -1039,11 +1017,72 @@ ComponentTcad2d::LoadGrid(const std::string gridfilename) {
       gridfile.close();
       return false;
     }
-
   }
   
+  // Get the "faces".
+  int nFaces = 0;
+  std::vector<face> faces;
+  faces.clear();
+
+  while (!gridfile.fail()) {
+    std::getline(gridfile, line); ++iLine;
+    line.erase(line.begin(), find_if(line.begin(), line.end(), 
+               not1(std::ptr_fun<int, int>(isspace))));
+    // Find section 'Faces'.
+    if (line.substr(0, 5) == "Faces") {
+      // Get the number of faces (given in brackets).
+      pBra = line.find('('); pKet = line.find(')');
+      if (pKet < pBra || 
+          pBra == std::string::npos || pKet == std::string::npos) {
+        // No closed brackets ()
+        std::cerr << className << "::LoadGrid:\n";
+        std::cerr << "    Could not read number of faces.\n";
+        Cleanup();
+        gridfile.close();
+        return false;
+      }
+      line = line.substr(pBra + 1, pKet - pBra - 1);
+      data.str(line); data >> nFaces; data.clear();
+      faces.resize(nFaces);
+      // Get the indices of the edges constituting this face.
+      for (int j = 0; j < nFaces; ++j) {
+        gridfile >> faces[j].type;
+        if (faces[j].type != 3 && faces[j].type != 4) {
+          std::cerr << className << "::LoadGrid:\n";
+          std::cerr << "    Face with index " << j 
+                    << " has invalid number of edges (" 
+                    << faces[j].type << ").\n";
+          Cleanup();
+          gridfile.close();
+          return false;
+        }
+        for (int k = 0; k < faces[j].type; ++k) {
+          gridfile >> faces[j].edge[k];
+        }
+      }
+      iLine += nFaces - 1;
+      break;
+    }
+  }
+  if (gridfile.eof()) {
+    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << "    Could not find section 'Faces' in file\n"; 
+    std::cerr << "    " << gridfilename << ".\n";
+    Cleanup();
+    gridfile.close();
+    return false;
+  } else if (gridfile.fail()) {
+    std::cerr << className << "::LoadGrid:\n";
+    std::cerr << "    Error reading file " << gridfilename 
+              << " (line " << iLine << ").\n";
+    Cleanup();
+    gridfile.close();
+    return false;
+  }  
+
   // Get the elements.
-  int edge0, edge1, edge2, edge3;
+  int edge0, edge1, edge2;
+  int face0, face1, face2, face3;
   int type;
   while (!gridfile.fail()) {
     std::getline(gridfile, line); ++iLine;
@@ -1070,120 +1109,133 @@ ComponentTcad2d::LoadGrid(const std::string gridfilename) {
       for (int j = 0; j < nElements; ++j) {
         ++iLine;
         gridfile >> type;
-        switch (type) {
-          case 1:
-            // Line
-            gridfile >> edge0 >> edge1;
-            if (edge0 < 0) edge0 = -edge0 - 1;
-            if (edge1 < 0) edge1 = -edge1 - 1;
-            // Make sure the indices are not out of range.
-            if (edge0 >= nEdges || edge1 >= nEdges) {
-              std::cerr << className << "::LoadGrid:\n";
-              std::cerr << "    Error reading file " << gridfilename
-                        << " (line " << iLine << ").\n";
-              std::cerr << "    Edge index out of range.\n";
-              Cleanup();
-              gridfile.close();
-              return false;
-            }
-            // Get the vertices of this element.
-            // Negative edge index means that the sequence of the two points 
-            // is supposed to be inverted. 
-            // The actual index is then given by "-index - 1".
-            // Orientt the line such that the first point is on the left.
-            if (vertices[edgeP1[edge0]].x > vertices[edgeP2[edge0]].x) {
-              elements[j].vertex[0] = edgeP2[edge0];
-              elements[j].vertex[1] = edgeP1[edge0];
-            } else {
-              elements[j].vertex[0] = edgeP1[edge0];
-              elements[j].vertex[1] = edgeP2[edge0];
-            }
-            break;
-          case 2:
-            // Triangle
-            gridfile >> edge0 >> edge1 >> edge2;
-            // Make sure the indices are not out of range.
-            if (edge0 < 0) edge0 = -edge0 - 1;
-            if (edge1 < 0) edge1 = -edge1 - 1;
-            if (edge2 < 0) edge2 = -edge2 - 1;
-            if (edge0 >= nEdges || edge1 >= nEdges || edge2 >= nEdges) {
-              std::cerr << className << "::LoadGrid:\n";
-              std::cerr << "    Error reading file " << gridfilename
-                        << " (line " << iLine << ").\n";
-              std::cerr << "    Edge index out of range.\n";
-              Cleanup();
-              gridfile.close();
-              return false;
-            }
-            elements[j].vertex[0] = edgeP1[edge0];
-            elements[j].vertex[1] = edgeP2[edge0];
-            if (edgeP1[edge1] != elements[j].vertex[0] &&
-                edgeP1[edge1] != elements[j].vertex[1]) {
-              elements[j].vertex[2] = edgeP1[edge1];
-            } else {
-              elements[j].vertex[2] = edgeP2[edge1];
-            }
-            // Rearrange vertices such that point 0 is on the left.
-            while (vertices[elements[j].vertex[0]].x > 
-                   vertices[elements[j].vertex[1]].x || 
-                   vertices[elements[j].vertex[0]].x > 
-                   vertices[elements[j].vertex[2]].x) {
-              const int tmp = elements[j].vertex[0];
-              elements[j].vertex[0] = elements[j].vertex[1];
-              elements[j].vertex[1] = elements[j].vertex[2];
-              elements[j].vertex[2] = tmp;
-            }
-            break;
-          case 3:
-            // Rectangle
-            gridfile >> edge0 >> edge1 >> edge2 >> edge3;
-            // Make sure the indices are not out of range.
-            if (edge0 >= nEdges || -edge0 - 1 >= nEdges ||
-                edge1 >= nEdges || -edge1 - 1 >= nEdges ||
-                edge2 >= nEdges || -edge2 - 1 >= nEdges ||
-                edge3 >= nEdges || -edge3 - 1 >= nEdges) {
-              std::cerr << className << "::LoadGrid:\n";
-              std::cerr << "    Error reading file " << gridfilename
-                        << " (line " << iLine << ").\n";
-              std::cerr << "    Edge index out of range.\n";
-              Cleanup();
-              gridfile.close();
-              return false;
-            }
-            if (edge0 >= 0) elements[j].vertex[0] = edgeP1[edge0];
-            else elements[j].vertex[0] = edgeP2[-edge0 - 1];
-            if (edge1 >= 0) elements[j].vertex[1] = edgeP1[edge1];
-            else elements[j].vertex[1] = edgeP2[-edge1 - 1];
-            if (edge2 >= 0) elements[j].vertex[2] = edgeP1[edge2];
-            else elements[j].vertex[2] = edgeP2[-edge2 - 1];
-            if (edge3 >= 0) elements[j].vertex[3] = edgeP1[edge3];
-            else elements[j].vertex[3] = edgeP2[-edge3 - 1];
-            
-            // Rearrange vertices such that point 0 is on the left. 
-            while (vertices[elements[j].vertex[0]].x > 
-                   vertices[elements[j].vertex[1]].x || 
-                   vertices[elements[j].vertex[0]].x > 
-                   vertices[elements[j].vertex[2]].x ||
-                   vertices[elements[j].vertex[0]].x > 
-                   vertices[elements[j].vertex[3]].x ) {
-              const int tmp = elements[j].vertex[0];
-              elements[j].vertex[0] = elements[j].vertex[1];
-              elements[j].vertex[1] = elements[j].vertex[2];
-              elements[j].vertex[2] = elements[j].vertex[3];
-              elements[j].vertex[3] = tmp;
-            }
-            break;
-          default:
-            // Other element types are not permitted for 2d grids.
-            std::cerr << className << "::LoadGrid:\n" 
-                      << "    Error reading file " << gridfilename 
+        if (type == 2) {
+          // Triangle
+          gridfile >> edge0 >> edge1 >> edge2;
+          // Get the vertices.
+          // Negative edge index means that the sequence of the two points 
+          // is supposed to be inverted. 
+          // The actual index is then given by "-index - 1".
+          // For our purposes, the orientation does not matter.
+          // Make sure the indices are not out of range.
+          if (edge0 >= nEdges || -edge0 - 1 >= nEdges ||
+              edge1 >= nEdges || -edge1 - 1 >= nEdges ||
+              edge2 >= nEdges || -edge2 - 1 >= nEdges) {
+            std::cerr << className << "::LoadGrid:\n";
+            std::cerr << "    Error reading file " << gridfilename
                       << " (line " << iLine << ").\n";
-            std::cerr << "    Invalid element type ("
-                        << type << ") for 2d mesh.\n";
-            Cleanup();        
+            std::cerr << "    Edge index out of range.\n";
+            Cleanup();
             gridfile.close();
             return false;
-            break;
+          }
+          if (edge0 < 0) edge0 = -edge0 - 1;
+          if (edge1 < 0) edge1 = -edge1 - 1;
+          elements[j].vertex[0] = edgeP1[edge0];
+          elements[j].vertex[1] = edgeP2[edge0];
+          if (edgeP1[edge1] != elements[j].vertex[0] &&
+              edgeP1[edge1] != elements[j].vertex[1]) {
+            elements[j].vertex[2] = edgeP1[edge1];
+          } else {
+            elements[j].vertex[2] = edgeP2[edge1];
+          }
+        } else if (type == 5) {
+          // Tetrahedron
+          // Get the faces.
+          // Negative face index means that the sequence of the edges
+          // is supposed to be inverted.
+          // For our purposes, the orientation does not matter. 
+          gridfile >> face0 >> face1 >> face2 >> face3;
+          // Make sure the face indices are not out of range.
+          if (face0 >= nFaces || -face0 - 1 >= nFaces ||
+              face1 >= nFaces || -face1 - 1 >= nFaces ||
+              face2 >= nFaces || -face2 - 1 >= nFaces ||
+              face3 >= nFaces || -face3 - 1 >= nFaces) {
+            std::cerr << className << "::LoadGrid:\n";
+            std::cerr << "    Error reading file " << gridfilename
+                      << " (line " << iLine << ").\n";
+            std::cerr << "    Face index out of range.\n";
+            Cleanup();
+            gridfile.close();
+            return false;
+          }
+          if (face0 < 0) face0 = -face0 - 1;
+          if (face1 < 0) face1 = -face1 - 1;
+          // Get the edges of the first face.
+          edge0 = faces[face0].edge[0];
+          edge1 = faces[face0].edge[1];
+          edge2 = faces[face0].edge[2];
+          if (edge0 < 0) edge0 = -edge0 - 1;
+          if (edge1 < 0) edge1 = -edge1 - 1;
+          if (edge2 < 0) edge2 = -edge2 - 1;
+          // Make sure the edge indices are not out of range.
+          if (edge0 >= nEdges || edge1 >= nEdges || edge2 >= nEdges) {
+            std::cerr << className << "::LoadGrid:\n";
+            std::cerr << "    Error reading file " << gridfilename << "\n";
+            std::cerr << "    Edge index in element " << j 
+                      << " out of range.\n";
+            Cleanup();
+            gridfile.close();
+            return false;
+          }
+          // Get the first three vertices.
+          elements[j].vertex[0] = edgeP1[edge0];
+          elements[j].vertex[1] = edgeP2[edge0];
+          if (edgeP1[edge1] != elements[j].vertex[0] &&
+              edgeP1[edge1] != elements[j].vertex[1]) {
+            elements[j].vertex[2] = edgeP1[edge1];
+          } else {
+            elements[j].vertex[2] = edgeP2[edge1];
+          }
+          // Get the fourth vertex from face 1.
+          edge0 = faces[face1].edge[0];
+          edge1 = faces[face1].edge[1];
+          edge2 = faces[face1].edge[2];
+          if (edge0 < 0) edge0 = -edge0 - 1;
+          if (edge1 < 0) edge1 = -edge1 - 1;
+          if (edge2 < 0) edge2 = -edge2 - 1;
+          if (edgeP1[edge0] != elements[j].vertex[0] &&
+              edgeP1[edge0] != elements[j].vertex[1] &&
+              edgeP1[edge0] != elements[j].vertex[2]) {
+            elements[j].vertex[3] = edgeP1[edge0];
+          } else if (edgeP2[edge0] != elements[j].vertex[0] &&
+                     edgeP2[edge0] != elements[j].vertex[1] &&
+                     edgeP2[edge0] != elements[j].vertex[2]) {
+            elements[j].vertex[3] = edgeP2[edge0];
+          } else if (edgeP1[edge1] != elements[j].vertex[0] &&
+                     edgeP1[edge1] != elements[j].vertex[1] &&
+                     edgeP1[edge1] != elements[j].vertex[2]) {
+            elements[j].vertex[3] = edgeP1[edge1];
+          } else if (edgeP2[edge1] != elements[j].vertex[0] &&
+                     edgeP2[edge1] != elements[j].vertex[1] &&
+                     edgeP2[edge1] != elements[j].vertex[2]) {
+            elements[j].vertex[3] = edgeP2[edge1];
+          } else {
+            std::cerr << className << "::LoadGrid:\n";
+            std::cerr << "    Error reading file " << gridfilename << "\n";
+            std::cerr << "    Face 1 of element " << j 
+                      << " is degenerate.\n";
+            Cleanup();
+            gridfile.close();
+            return false;
+          }            
+        } else {
+          // Other element types are not allowed.
+          std::cerr << className << "::LoadGrid:\n" 
+                    << "    Error reading file " << gridfilename 
+                    << " (line " << iLine << ").\n";
+          if (type == 0 || type == 1) {
+            std::cerr << "    Invalid element type (" 
+                      << type << ") for 3d mesh.\n";
+          } else {
+            std::cerr << "    Element type " << type 
+                      << " is not supported.\n";
+            std::cerr << "    Remesh with option -t to create only"
+                      << " triangles and tetrahedra.\n";
+          }
+          Cleanup();        
+          gridfile.close();
+          return false;
         }
         elements[j].type = type;
         elements[j].region = -1;
@@ -1278,7 +1330,7 @@ ComponentTcad2d::LoadGrid(const std::string gridfilename) {
 }
 
 void 
-ComponentTcad2d::Cleanup() {
+ComponentTcad3d::Cleanup() {
 
   // Vertices
   vertices.clear();
@@ -1294,65 +1346,162 @@ ComponentTcad2d::Cleanup() {
   
 }
 
-bool 
-ComponentTcad2d::CheckRectangle(const double x, const double y, const int i) {
- 
-  if (y < vertices[elements[i].vertex[0]].y) return false;
-  if (x > vertices[elements[i].vertex[3]].x) return false;
-  if (y > vertices[elements[i].vertex[1]].y) return false;
-  
-  // Map (x, y) to local variables (u, v) in [-1, 1].
-  const double u = (x - 0.5 * (vertices[elements[i].vertex[0]].x + 
-                               vertices[elements[i].vertex[3]].x)) / 
-                   (vertices[elements[i].vertex[3]].x - 
-                    vertices[elements[i].vertex[0]].x);
-  const double v = (y - 0.5 * (vertices[elements[i].vertex[0]].y + 
-                               vertices[elements[i].vertex[1]].y)) / 
-                   (vertices[elements[i].vertex[1]].y - 
-                    vertices[elements[i].vertex[0]].y);
-  // Compute weighting factors for each corner.
-  w[0] = (0.5 - u) * (0.5 - v);
-  w[1] = (0.5 - u) * (0.5 + v);
-  w[2] = (0.5 + u) * (0.5 + v);
-  w[3] = (0.5 + u) * (0.5 - v);            
-        
-  return true;
+bool
+ComponentTcad3d::CheckTetrahedron(const double x, const double y, 
+                                  const double z, const int i) {
 
+  w[0] = w[1] = w[2] = w[3] = 0.;
+  
+  const double x10 = vertices[elements[i].vertex[1]].x -
+                     vertices[elements[i].vertex[0]].x;
+  const double y10 = vertices[elements[i].vertex[1]].y -
+                     vertices[elements[i].vertex[0]].y;
+  const double z10 = vertices[elements[i].vertex[1]].z -
+                     vertices[elements[i].vertex[0]].z;
+                     
+  const double x20 = vertices[elements[i].vertex[2]].x -
+                     vertices[elements[i].vertex[0]].x;
+  const double y20 = vertices[elements[i].vertex[2]].y -
+                     vertices[elements[i].vertex[0]].y;
+  const double z20 = vertices[elements[i].vertex[2]].z -
+                     vertices[elements[i].vertex[0]].z;
+                     
+  const double x30 = vertices[elements[i].vertex[3]].x -
+                     vertices[elements[i].vertex[0]].x;
+  const double y30 = vertices[elements[i].vertex[3]].y -
+                     vertices[elements[i].vertex[0]].y;
+  const double z30 = vertices[elements[i].vertex[3]].z -
+                     vertices[elements[i].vertex[0]].z;
+
+  const double x21 = vertices[elements[i].vertex[2]].x -
+                     vertices[elements[i].vertex[1]].x;
+  const double y21 = vertices[elements[i].vertex[2]].y -
+                     vertices[elements[i].vertex[1]].y;
+  const double z21 = vertices[elements[i].vertex[2]].z -
+                     vertices[elements[i].vertex[1]].z;
+  
+  const double x31 = vertices[elements[i].vertex[3]].x -
+                     vertices[elements[i].vertex[1]].x;
+  const double y31 = vertices[elements[i].vertex[3]].y -
+                     vertices[elements[i].vertex[1]].y;
+  const double z31 = vertices[elements[i].vertex[3]].z -
+                     vertices[elements[i].vertex[1]].z;
+                     
+  const double x32 = vertices[elements[i].vertex[3]].x -
+                     vertices[elements[i].vertex[2]].x;
+  const double y32 = vertices[elements[i].vertex[3]].y -
+                     vertices[elements[i].vertex[2]].y;
+  const double z32 = vertices[elements[i].vertex[3]].z -
+                     vertices[elements[i].vertex[2]].z;
+
+  w[0] = (x - vertices[elements[i].vertex[1]].x) * (y21 * z31 - y31 * z21) +
+         (y - vertices[elements[i].vertex[1]].y) * (z21 * x31 - z31 * x21) +
+         (z - vertices[elements[i].vertex[1]].z) * (x21 * y31 - x31 * y21);
+
+  w[0] /= x10 * (y31 * z21 - y21 * z31) +
+          y10 * (z31 * x21 - z21 * x31) +
+          z10 * (x31 * y21 - x21 * y31);
+
+  if (w[0] < 0.) return false;
+              
+  w[1] = (x - vertices[elements[i].vertex[2]].x) * (-y20 * z32 + y32 * z20) +
+         (y - vertices[elements[i].vertex[2]].y) * (-z20 * x32 + z32 * x20) +
+         (z - vertices[elements[i].vertex[2]].z) * (-x20 * y32 + x32 * y20);
+  
+  w[1] /= x21 * (y20 * z32 - y32 * z20) +
+          y21 * (z20 * x32 - z32 * x20) +
+          z21 * (x20 * y32 - x32 * y20);
+  
+  if (w[1] < 0.) return false;
+  
+  w[2] = (x - vertices[elements[i].vertex[3]].x) * (y30 * z31 - y31 * z30) +
+         (y - vertices[elements[i].vertex[3]].y) * (z30 * x31 - z31 * x30) +
+         (z - vertices[elements[i].vertex[3]].z) * (x30 * y31 - x31 * y30);
+  
+  w[2] /= x32 * (y31 * z30 - y30 * z31) +
+          y32 * (z31 * x30 - z30 * x31) + 
+          z32 * (x31 * y30 - x30 * y31);
+      
+  if (w[2] < 0.) return false;
+  
+  w[3] = (x - vertices[elements[i].vertex[0]].x) * (y20 * z10 - y10 * z20) +
+         (y - vertices[elements[i].vertex[0]].y) * (z20 * x10 - z10 * x20) +
+         (z - vertices[elements[i].vertex[0]].z) * (x20 * y10 - x10 * y20);
+  
+  w[3] /= x30 * (y20 * z10 - y10 * z20) +
+          y30 * (z20 * x10 - z10 * x20) +
+          z30 * (x20 * y10 - x10 * y20);
+  
+  if (w[3] < 0.) return false;
+                 
+  if (debug) {
+    // Reconstruct the point from the local coordinates.
+    const double xr = w[0] * vertices[elements[i].vertex[0]].x +
+                      w[1] * vertices[elements[i].vertex[1]].x +
+                      w[2] * vertices[elements[i].vertex[2]].x +
+                      w[3] * vertices[elements[i].vertex[3]].x;
+    const double yr = w[0] * vertices[elements[i].vertex[0]].y +
+                      w[1] * vertices[elements[i].vertex[1]].y +
+                      w[2] * vertices[elements[i].vertex[2]].y +
+                      w[3] * vertices[elements[i].vertex[3]].y;
+    const double zr = w[0] * vertices[elements[i].vertex[0]].z +
+                      w[1] * vertices[elements[i].vertex[1]].z +
+                      w[2] * vertices[elements[i].vertex[2]].z +
+                      w[3] * vertices[elements[i].vertex[3]].z;
+    std::cout << className << "::CheckTetrahedron:\n";
+    std::cout << "    Original coordinates:      ("
+              << x << ", " << y << ", " << z << ")\n";
+    std::cout << "    Local coordinates:         ("
+              << w[0] << ", " << w[1] << ", " 
+              << w[2] << ", " << w[3] << ")\n";
+    std::cerr << "    Reconstructed coordinates: (" 
+              << xr << ", " << yr << ", " << zr << ")\n";
+    std::cerr << "    Checksum: " << w[0] + w[1] + w[2] + w[3] - 1. << "\n";
+  }
+  
+  return true;
+  
 }
 
 bool 
-ComponentTcad2d::CheckTriangle(const double x, const double y, const int i) {
+ComponentTcad3d::CheckTriangle(const double x, 
+                               const double y, const double z, const int i) {
 
-  if (x > vertices[elements[i].vertex[1]].x && 
-      x > vertices[elements[i].vertex[2]].x) return false;
-  if (y < vertices[elements[i].vertex[0]].y &&
-      y < vertices[elements[i].vertex[1]].y &&
-      y < vertices[elements[i].vertex[2]].y) return false;
-  if (y > vertices[elements[i].vertex[0]].y &&
-      y > vertices[elements[i].vertex[1]].y &&
-      y > vertices[elements[i].vertex[2]].y) return false;
+  const double v1x = vertices[elements[i].vertex[1]].x -
+                     vertices[elements[i].vertex[0]].x;
+  const double v2x = vertices[elements[i].vertex[2]].x -
+                     vertices[elements[i].vertex[0]].x;
+  const double v1y = vertices[elements[i].vertex[1]].y -
+                     vertices[elements[i].vertex[0]].y;
+  const double v2y = vertices[elements[i].vertex[2]].y -
+                     vertices[elements[i].vertex[0]].y;
+  const double v1z = vertices[elements[i].vertex[1]].z -
+                     vertices[elements[i].vertex[0]].z;
+  const double v2z = vertices[elements[i].vertex[2]].z -
+                     vertices[elements[i].vertex[0]].z;
+    
+  // Check whether the point lies in the plane of the triangle.
+  // Compute the coefficients of the plane equation.
+  const double a = v1y * v2z - v2y * v1z;
+  const double b = v1z * v2x - v2z * v1x;
+  const double c = v1x * v2y - v2x * v1y;
+  const double d = a * vertices[elements[i].vertex[0]].x +
+                   b * vertices[elements[i].vertex[0]].y +
+                   c * vertices[elements[i].vertex[0]].z;
+  // Check if the point satisfies the plane equation.
+  if (a * x + b * y + c * z != d) return false;
   
   // Map (x, y) onto local variables (b, c) such that
   // P = A + b * (B - A) + c * (C - A)
   // A point P is inside the triangle ABC if b, c > 0 and b + c < 1;
   // b, c are also weighting factors for points B, C
-  const double v1x = vertices[elements[i].vertex[1]].x - 
-                     vertices[elements[i].vertex[0]].x;
-  const double v1y = vertices[elements[i].vertex[1]].y - 
-                     vertices[elements[i].vertex[0]].y;
-  const double v2x = vertices[elements[i].vertex[2]].x - 
-                     vertices[elements[i].vertex[0]].x;
-  const double v2y = vertices[elements[i].vertex[2]].y - 
-                     vertices[elements[i].vertex[0]].y;
-  
+
   w[1] = ((x - vertices[elements[i].vertex[0]].x) * v2y - 
-        (y - vertices[elements[i].vertex[0]].y) * v2x) / 
-       (v1x * v2y - v1y * v2x);
+          (y - vertices[elements[i].vertex[0]].y) * v2x) / (v1x * v2y - v1y * v2x);
   if (w[1] < 0. || w[1] > 1.) return false;
   
   w[2] = ((vertices[elements[i].vertex[0]].x - x) * v1y - 
-        (vertices[elements[i].vertex[0]].y - y) * v1x) / 
-       (v1x * v2y - v1y * v2x);
+          (vertices[elements[i].vertex[0]].y - y) * v1x) / (v1x * v2y - v1y * v2x);
   if (w[2] < 0. || w[1] + w[2] > 1.) return false;
   
   // Weighting factor for point A
@@ -1362,43 +1511,16 @@ ComponentTcad2d::CheckTriangle(const double x, const double y, const int i) {
 
 }
 
-bool 
-ComponentTcad2d::CheckLine(const double x, const double y, const int i) {
-
-  if (x > vertices[elements[i].vertex[1]].x) return false;
-  if (y < vertices[elements[i].vertex[0]].y && 
-      y < vertices[elements[i].vertex[1]].y) return false;
-  if (y > vertices[elements[i].vertex[0]].y &&
-      y > vertices[elements[i].vertex[1]].y) return false;
-  const double v1x = vertices[elements[i].vertex[1]].x - 
-                     vertices[elements[i].vertex[0]].x;
-  const double v1y = vertices[elements[i].vertex[1]].y - 
-                     vertices[elements[i].vertex[0]].y;
-  const double tx = (x - vertices[elements[i].vertex[0]].x) / v1x;
-  if (tx < 0. || tx > 1.) return false;
-  const double ty = (y - vertices[elements[i].vertex[0]].y) / v1y;
-  if (ty < 0. || ty > 1.) return false;
-  if (tx == ty) {
-    // Compute weighting factors for endpoints A, B
-    w[0] = tx;
-    w[1] = 1. - w[0];
-    return true;
-  }
-  return false;
-
-}
-
 void
-ComponentTcad2d::Reset() {
+ComponentTcad3d::Reset() {
 
-  Cleanup();
-  hasRangeZ = false;
+  Cleanup(); 
   ready = false;
-
+  
 }
 
 void 
-ComponentTcad2d::UpdatePeriodicity() {
+ComponentTcad3d::UpdatePeriodicity() {
 
   if (debug) {
     std::cerr << className << "::UpdatePeriodicity\n:";

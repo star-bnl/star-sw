@@ -226,10 +226,13 @@ ViewDrift::Plot() {
   }
   canvas->cd();
 
-  if (view == 0) view = TView::CreateView(1, 0, 0);
-  view->SetRange(xMin, yMin, zMin, xMax, yMax, zMax);
-  view->ShowAxis();
-  view->Top();
+  if (canvas->GetView() == 0) {
+    if (view == 0) view = TView::CreateView(1, 0, 0);
+    view->SetRange(xMin, yMin, zMin, xMax, yMax, zMax);
+    view->ShowAxis();
+    view->Top();
+    canvas->SetView(view);
+  }
 
   for (int i = nDriftLines; i--;) {
     driftLines[i].Draw("same");

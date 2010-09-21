@@ -1,7 +1,7 @@
-// Interpolation in a two-dimensional field map created by Sentaurus Device
+// Interpolation in a three-dimensional field map created by Sentaurus Device
 
-#ifndef G_COMPONENT_TCAD_2D_H
-#define G_COMPONENT_TCAD_2D_H
+#ifndef G_COMPONENT_TCAD_3D_H
+#define G_COMPONENT_TCAD_3D_H
 
 #include <string>
 #include <vector>
@@ -10,13 +10,13 @@
 
 namespace Garfield {
 
-class ComponentTcad2d : public ComponentBase {
+class ComponentTcad3d : public ComponentBase {
 
   public:
     // Constructor
-    ComponentTcad2d();
+    ComponentTcad3d();
     // Destructor
-    ~ComponentTcad2d() {}
+    ~ComponentTcad3d() {}
     
     void ElectricField(const double x, const double y, const double z,
                        double& ex, double& ey, double& ez, double& v,
@@ -31,7 +31,6 @@ class ComponentTcad2d : public ComponentBase {
     bool GetVoltageRange(double& vmin, double& vmax);
     bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
                         double& xmax, double& ymax, double& zmax); 
-    void SetRangeZ(const double zmin, const double zmax);
                         
     // Import mesh and field map from files
     bool Initialise(const std::string gridfilename, 
@@ -46,9 +45,9 @@ class ComponentTcad2d : public ComponentBase {
     bool GetMedium(const int i, Medium*& m) const;
 
   private:
-
+  
     // Max. number of vertices per element
-    static const int nMaxVertices = 4;
+    static const int nMaxVertices = 7;
   
     // Regions
     int nRegions;
@@ -65,9 +64,9 @@ class ComponentTcad2d : public ComponentBase {
     int nVertices;
     struct vertex {
       // Coordinates [cm]
-      double x, y;
+      double x, y, z;
       // Potential [V] and electric field [V / cm]
-      double p, ex, ey;
+      double p, ex, ey, ez;
       // Flag indicating if vertex belongs to more than one region
       bool   isShared;
     };
@@ -78,31 +77,42 @@ class ComponentTcad2d : public ComponentBase {
     struct element {
       // Indices of vertices
       int vertex[nMaxVertices];
-      // Type of element
-      // 0: Point
+      // Type of element 
       // 1: Segment (line)
       // 2: Triangle
       // 3: Rectangle
       // 4: Polygon
-      // Types 1 - 3 are supported by this class.
+      // 5: Tetrahedron
+      // 6: Pyramid
+      // 7: Prism
+      // 8: Brick
+      // 9: Tetrabrick
+      // 10: Polyhedron
+      // Only types 2 and 5 are supported by this class.
       int type;
       // Associated region
       int region; 
     };
     std::vector<element> elements;
 
+    // Face
+    struct face {
+      // Indices of edges
+      int edge[4];
+      int type;
+    };
+    
     // Voltage range
     double pMin, pMax;
 
     // Bounding box
     bool hasBoundingBox;
-    bool hasRangeZ;
     double xMinBoundingBox, yMinBoundingBox, zMinBoundingBox;
     double xMaxBoundingBox, yMaxBoundingBox, zMaxBoundingBox;
 
     // Element from the previous call
     int lastElement;
-    // Shape functions for interpolation 
+    // Node point weighting factors for interpolation 
     // (local coordinates)
     double w[nMaxVertices];
     
@@ -111,9 +121,10 @@ class ComponentTcad2d : public ComponentBase {
     // Periodicities
     void UpdatePeriodicity();    
 
-    bool CheckRectangle(const double x, const double y, const int i);
-    bool CheckTriangle(const double x, const double y, const int i);
-    bool CheckLine(const double x, const double y, const int i);
+    bool CheckTetrahedron(const double x, const double y, const double z, 
+                          const int i);
+    bool CheckTriangle(const double x, const double y, const double z, 
+                       const int i);
 
     bool LoadGrid(const std::string gridfilename);
     bool LoadData(const std::string datafilename);

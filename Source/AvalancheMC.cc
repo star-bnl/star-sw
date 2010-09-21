@@ -818,7 +818,8 @@ AvalancheMC::ComputeAlphaEta(const int q) {
         // Check if this point is the last but one
         if (i < nDrift - 2) {
           std::cerr << className << "::ComputeAlphaEta:\n";
-          std::cerr << "    Got status value != 0 at segment " << j + 1
+          std::cerr << "    Got status value " << status 
+                    << " at segment " << j + 1
                     << "/6, drift point " << i + 1 << "/" << nDrift 
                     << ".\n";
           return false;

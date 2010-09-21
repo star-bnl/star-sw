@@ -68,13 +68,15 @@ ComponentFieldMap::DriftMedium(int imat) {
 
   // Do not proceed if not properly initialised.
   if (!ready) {
-    printf("ComponentFieldMap::DriftMedium: Field map not yet initialised, drift medium cannot be selected.\n");
+    printf("ComponentFieldMap::DriftMedium:\n");
+    printf("    Field map not yet initialised, drift medium cannot be selected.\n");
     return;
   }
 
   // Check value
   if (imat < 0 || imat >= nMaterials) {
-    printf("ComponentFieldMap::DriftMedium: Material index %d is out of range.\n", imat);
+    printf("ComponentFieldMap::DriftMedium:\n");
+    printf("    Material index %d is out of range.\n", imat);
     return;
   }
 
@@ -190,10 +192,13 @@ ComponentFieldMap::FindElement5(const double x, const double y, double const z,
   if (lastElement > -1 && !checkMultipleElement) {
     if (elements[lastElement].degenerate) {
       rc = Coordinates3(x, y, z, t1, t2, t3, t4, jac, det, lastElement);
-      if (rc == 0 && t1 >= 0 && t1 <= +1 && t2 >= 0 && t2 <= +1 && t3 >= 0 && t3 <= +1) return lastElement;
+      if (rc == 0 && t1 >= 0 && t1 <= +1 && 
+                     t2 >= 0 && t2 <= +1 && 
+                     t3 >= 0 && t3 <= +1) return lastElement;
     } else {
       rc = Coordinates5(x, y, z, t1, t2, t3, t4, jac, det, lastElement);
-      if (rc == 0 && t1 >= -1 && t1 <= +1 && t2 >= -1 && t2 <= +1) return lastElement;
+      if (rc == 0 && t1 >= -1 && t1 <= +1 && 
+                     t2 >= -1 && t2 <= +1) return lastElement;
     }
   }
   
@@ -230,7 +235,10 @@ ComponentFieldMap::FindElement5(const double x, const double y, double const z,
         ++nfound;
         imap = i;
         lastElement = i;
-        if (debug) printf("ComponentFieldMap::FindElement5: Found matching degenerate element %d.\n", i);
+        if (debug) {
+          printf("ComponentFieldMap::FindElement5:\n");
+          printf("    Found matching degenerate element %d.\n", i);
+        }
         if (!checkMultipleElement) return i;
         for (int j = 0; j < 4; ++j) {
           for (int k = 0; k < 4; ++k) jacbak[j][k] = jac[j][k];
@@ -257,7 +265,10 @@ ComponentFieldMap::FindElement5(const double x, const double y, double const z,
         ++nfound;
         imap = i;
         lastElement = i;
-        if (debug) printf("ComponentFieldMap::FindElement5: Found matching non-degenerate element %d.\n", i);
+        if (debug) {
+          printf("ComponentFieldMap::FindElement5:\n");
+          printf("    Found matching non-degenerate element %d.\n", i);
+        }
         if (!checkMultipleElement) return i;
         for (int j = 0; j < 4; ++j) {
           for (int k = 0; k < 4; ++k) jacbak[j][k] = jac[j][k];
@@ -283,12 +294,16 @@ ComponentFieldMap::FindElement5(const double x, const double y, double const z,
   // In checking mode, verify the tetrahedron/triangle count.
   if (checkMultipleElement) {
     if (nfound < 1) {
-      if (debug) printf("ComponentFieldMap::FindElement5: No element matching point (%g,%g) found.\n", x, y);
+      if (debug) {
+        printf("ComponentFieldMap::FindElement5:\n"); 
+        printf("    No element matching point (%g,%g) found.\n", x, y);
+      }
       lastElement = -1;
       return -1;
     }
     if (nfound > 1) {
-      printf("ComponentFieldMap::FindElement5: Found %d elements matching point (%g,%g).\n", nfound, x, y);
+      printf("ComponentFieldMap::FindElement5:\n");
+      printf("    Found %d elements matching point (%g,%g).\n", nfound, x, y);
     }
     if (nfound > 0) {
       for (int j = 0; j < 4; ++j) {
@@ -300,7 +315,10 @@ ComponentFieldMap::FindElement5(const double x, const double y, double const z,
     }
   }
   
-  if (debug) printf("ComponentFieldMap::FindElement5: No element matching point (%g,%g) found.\n", x, y);
+  if (debug) {
+    printf("ComponentFieldMap::FindElement5:\n");
+    printf("    No element matching point (%g,%g) found.\n", x, y);
+  }
   return -1;
   
 }
@@ -316,17 +334,17 @@ ComponentFieldMap::FindElement13(const double x, const double y, const double z,
   int imapbak = -1;
 
   // Initial values.
-  t1 = t2 = t3 = t4 = 0;
+  t1 = t2 = t3 = t4 = 0.;
 
   // Check previously used element
   int rc;
   if (lastElement > -1 && !checkMultipleElement) {
     rc = Coordinates13(x, y, z, t1, t2, t3, t4, jac, det, lastElement);
     if (rc == 0 &&
-	    t1 >= 0 && t1 <= +1 &&
-	    t2 >= 0 && t2 <= +1 &&
-	    t3 >= 0 && t3 <= +1 &&
-	    t4 >= 0 && t4 <= +1) return lastElement;
+	      t1 >= 0 && t1 <= +1 &&
+	      t2 >= 0 && t2 <= +1 &&
+	      t3 >= 0 && t3 <= +1 &&
+	      t4 >= 0 && t4 <= +1) return lastElement;
   }
 
   // Verify the count of volumes that contain the point.
@@ -364,7 +382,10 @@ ComponentFieldMap::FindElement13(const double x, const double y, const double z,
       ++nfound;
       imap = i;
       lastElement = i;
-      if (debug) printf("ComponentFieldMap::FindElement13: Found matching element %d.\n", i);
+      if (debug) {
+        printf("ComponentFieldMap::FindElement13:\n");
+        printf("    Found matching element %d.\n", i);
+      }
       if (!checkMultipleElement) return i;
       for (int j = 0; j < 4; ++j) {
         for (int k = 0; k < 4; ++k) jacbak[j][k] = jac[j][k];
@@ -391,12 +412,16 @@ ComponentFieldMap::FindElement13(const double x, const double y, const double z,
   // In checking mode, verify the tetrahedron/triangle count.
   if (checkMultipleElement) {
     if (nfound < 1) {
-      if (debug) printf("ComponentFieldMap::FindElement13: No element matching point (%g,%g,%g) found.\n", x, y, z);
+      if (debug) {
+        printf("ComponentFieldMap::FindElement13:\n");
+        printf("    No element matching point (%g,%g,%g) found.\n", x, y, z);
+      }
       lastElement = -1;
       return -1;
     }
     if (nfound > 1) {
-      printf("ComponentFieldMap::FindElement13: Found %d elements matching point (%g,%g,%g).\n", nfound, x, y, z);
+      printf("ComponentFieldMap::FindElement13:\n");
+      printf("    Found %d elements matching point (%g,%g,%g).\n", nfound, x, y, z);
     }
     if (nfound > 0) {
       for (int j = 0; j < 4; ++j) {
@@ -408,7 +433,10 @@ ComponentFieldMap::FindElement13(const double x, const double y, const double z,
     }
   }
 
-  if (debug) printf("ComponentFieldMap::FindElement13: No element matching point (%g,%g,%g) found.\n", x, y, z);
+  if (debug) {
+    printf("ComponentFieldMap::FindElement13:\n");
+    printf("   No element matching point (%g,%g,%g) found.\n", x, y, z);
+  }
   return -1;
 
 }
@@ -423,7 +451,8 @@ ComponentFieldMap::Jacobian3(int i, double u, double v, double w, double& det, d
 
   // Be sure that the element is within range
   if (i < 0 || i >= nElements) {
-    printf("ComponentFieldMap::Jacobian3: Element %d out of range.\n", i);
+    printf("ComponentFieldMap::Jacobian3:\n");
+    printf("    Element %d out of range.\n", i);
     return;
   }
   
@@ -485,7 +514,8 @@ void ComponentFieldMap::Jacobian5(int i, double u, double v, double& det, double
 
   // Be sure that the element is within range
   if (i < 0 || i >= nElements) {
-    printf("ComponentFieldMap::Jacobian5: Element %d out of range.\n", i);
+    printf("ComponentFieldMap::Jacobian5:\n");
+    printf("    Element %d out of range.\n", i);
     return;
   }  
 
@@ -680,7 +710,8 @@ ComponentFieldMap::Jacobian13(int i, double t, double u, double v, double w, dou
 
   // Be sure that the element is within range
   if (i < 0 || i >= nElements) {
-    printf("ComponentFieldMap::Jacobian13: Element %d out of range.\n", i);
+    printf("ComponentFieldMap::Jacobian13:\n");
+    printf("    Element %d out of range.\n", i);
     return;
   }
 
@@ -1069,7 +1100,10 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
                        double& t1, double& t2, double& t3, double& t4,
                        double jac[4][4], double& det, int imap) {
 
-  if (debug) printf("ComponentFieldMap::Coordinates3: Point (%g,%g).\n", x, y);
+  if (debug) {
+    printf("ComponentFieldMap::Coordinates3:\n");
+    printf("   Point (%g,%g).\n", x, y);
+  }
 
   // Failure flag
   int ifail = 1;
@@ -1090,7 +1124,8 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
       (nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[2]].xmap) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[2]].ymap) == 0 ||
       (nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[0]].xmap) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[0]].ymap) -
       (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[0]].ymap) == 0) {
-    printf("ComponentFieldMap::Coordinates3: Calculation of linear coordinates failed; abandoned.\n");
+    printf("ComponentFieldMap::Coordinates3:\n");
+    printf("    Calculation of linear coordinates failed; abandoned.\n");
     return ifail;
   } else {
     t1 = tt1 / ((nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[1]].xmap) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[1]].ymap) -
@@ -1105,7 +1140,8 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
   // Start iterative refinement
   double td1 = t1, td2 = t2, td3 = t3;
   if (debug) {
-    printf("ComponentFieldMap::Coordinates3: Linear estimate:   (u, v, w) = (%g,%g,%g), sum = %g.\n",
+    printf("ComponentFieldMap::Coordinates3:\n");
+    printf("    Linear estimate:   (u, v, w) = (%g,%g,%g), sum = %g.\n",
            td1,td2,td3,td1 + td2 + td3);
   }
 
@@ -1114,7 +1150,8 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
   double diff[2], corr[2];
   for (int iter=0; iter < 10; iter++) {
     if (debug) {
-      printf("ComponentFieldMap::Coordinates3: Iteration %3d:     (u, v, w) = (%g,%g,%g), sum = %g.\n",
+      printf("ComponentFieldMap::Coordinates3:\n");
+      printf("    Iteration %3d:     (u, v, w) = (%g,%g,%g), sum = %g.\n",
              iter,td1,td2,td3,td1 + td2 + td3);
     }
     // Re-compute the (x,y,z) position for this coordinate.
@@ -1156,7 +1193,10 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
     td3 += corr[2];
     // Check for convergence.
     if (fabs(corr[0]) < 1.0e-5 && fabs(corr[1]) < 1.0e-5 && fabs(corr[2]) < 1.0e-5) {
-      if (debug) {printf("ComponentFieldMap::Coordinates3: Convergence reached.\n");}
+      if (debug) {
+        printf("ComponentFieldMap::Coordinates3:\n");
+        printf("    Convergence reached.\n");
+      }
       converged = true;
       break;
     }
@@ -1179,7 +1219,8 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
 
     if (x >= xmin && x <= xmax && y >= ymin && y <= ymax) {
       printf("ComponentFieldMap::Coordinates3:\n");
-      printf("    No convergence achieved when refining internal isoparametric coordinates in element %d at position (%g,%g).\n",
+      printf("    No convergence achieved when refining internal isoparametric coordinates\n");
+      printf("    in element %d at position (%g,%g).\n",
              imap,x,y);
       t1 = t2 = t3 = t4 = 0;
       return ifail;
@@ -1191,7 +1232,10 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
   t2 = td2;
   t3 = td3;
   t4 = 0;
-  if (debug) printf("ComponentFieldMap::Coordinates3: Convergence reached at (t1, t2, t3) = (%g,%g,%g).\n", t1, t2, t3);
+  if (debug) {
+    printf("ComponentFieldMap::Coordinates3:\n");
+    printf("    Convergence reached at (t1, t2, t3) = (%g,%g,%g).\n", t1, t2, t3);
+  }
 
   // For debugging purposes, show position
   if (debug) {
@@ -1216,7 +1260,7 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
   }
   
   // Success
-  ifail=0;
+  ifail = 0;
   return ifail;
   
 }
@@ -1227,7 +1271,10 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
 			   double jac[4][4], double& det, int imap) {
 
   // Debugging
-  if (debug) {printf("ComponentFieldMap::Coordinates4: Point (%g,%g).\n", x, y);}
+  if (debug) {
+    printf("ComponentFieldMap::Coordinates4:\n");
+    printf("    Point (%g,%g).\n", x, y);
+  }
 
   // Failure flag
   int ifail=1;
@@ -1255,7 +1302,11 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
 
   // Check that the determinant is non-negative (this can happen if the point is out of range)
   if (det < 0) {
-    if (debug) {printf("ComponentFieldMap::Coordinates4: No solution found for isoparametric coordinates in element %d because the determinant %g is < 0.\n", imap, det);}
+    if (debug) {
+      printf("ComponentFieldMap::Coordinates4:\n");
+      printf("    No solution found for isoparametric coordinates\n");
+      printf("    in element %d because the determinant %g is < 0.\n", imap, det);
+    }
     return ifail;
   }
 
@@ -1278,7 +1329,8 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
     double yp=nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap;
     double dn=sqrt(xp*xp+yp*yp);
     if(dn <= 0) {
-      printf("ComponentFieldMap::Coordinates4: Element %d appears to be degenerate in the 1 - 2 axis.\n", imap);
+      printf("ComponentFieldMap::Coordinates4:\n");
+      printf("    Element %d appears to be degenerate in the 1 - 2 axis.\n", imap);
       return ifail;
     }
     xp=xp/dn;
@@ -1286,7 +1338,8 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
     double dpoint=xp*(x - nodes[elements[imap].emap[0]].xmap) + yp*(y - nodes[elements[imap].emap[0]].ymap);
     double dbox=  xp*(nodes[elements[imap].emap[3]].xmap - nodes[elements[imap].emap[0]].xmap) + yp*(nodes[elements[imap].emap[3]].ymap - nodes[elements[imap].emap[0]].ymap);
     if (dbox == 0) {
-      printf("ComponentFieldMap::Coordinates4: Element %d appears to be degenerate in the 1 - 3 axis.\n", imap);
+      printf("ComponentFieldMap::Coordinates4:\n");
+      printf("    Element %d appears to be degenerate in the 1 - 3 axis.\n", imap);
       return ifail;
     }
     double t=-1 + 2*dpoint/dbox;
@@ -1296,7 +1349,8 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
     double yt2 = nodes[elements[imap].emap[1]].ymap+0.5*(t+1) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[1]].ymap);
     dn=(xt1 - xt2) * (xt1 - xt2) + (yt1 - yt2) * (yt1 - yt2);
     if(dn <= 0) {
-      printf("ComponentFieldMap::Coordinates4: Coordinate requested at convergence point of element %d.\n", imap);
+      printf("ComponentFieldMap::Coordinates4:\n");
+      printf("    Coordinate requested at convergence point of element %d.\n", imap);
       return ifail;
     }
     t1 = -1 + 2*((x-xt1) * (xt2-xt1) + (y-yt1) * (yt2-yt1)) / dn;
@@ -1321,30 +1375,36 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
     double yp = nodes[elements[imap].emap[3]].xmap - nodes[elements[imap].emap[0]].xmap;
     double dn = sqrt(xp * xp + yp * yp);
     if(dn <= 0) {
-      printf("ComponentFieldMap::Coordinates4: Element %d appears to be degenerate in the 1 - 4 axis.\n", imap);
+      printf("ComponentFieldMap::Coordinates4:\n");
+      printf("    Element %d appears to be degenerate in the 1 - 4 axis.\n", imap);
       return ifail;
     }
-    xp=xp / dn;
-    yp=yp / dn;
+    xp = xp / dn;
+    yp = yp / dn;
     double dpoint = xp * (x - nodes[elements[imap].emap[0]].xmap) + yp*(y - nodes[elements[imap].emap[0]].ymap);
     double dbox =  xp * (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap) + yp*(nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[0]].ymap);
     if (dbox == 0) {
-      printf("ComponentFieldMap::Coordinates4: Element %d appears to be degenerate in the 1 - 2 axis.\n", imap);
+      printf("ComponentFieldMap::Coordinates4:\n");
+      printf("    Element %d appears to be degenerate in the 1 - 2 axis.\n", imap);
       return ifail;
     }
-    double t=-1 + 2*dpoint/dbox;
+    double t = -1 + 2 * dpoint / dbox;
     double xt1 = nodes[elements[imap].emap[0]].xmap+0.5*(t+1) * (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap);
     double yt1 = nodes[elements[imap].emap[0]].ymap+0.5*(t+1) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[0]].ymap);
     double xt2 = nodes[elements[imap].emap[3]].xmap+0.5*(t+1) * (nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[3]].xmap);
     double yt2 = nodes[elements[imap].emap[3]].ymap+0.5*(t+1) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[3]].ymap);
-    dn=(xt1 - xt2) * (xt1 - xt2) + (yt1 - yt2) * (yt1 - yt2);
+    dn = (xt1 - xt2) * (xt1 - xt2) + (yt1 - yt2) * (yt1 - yt2);
     if(dn <= 0) {
-      printf("ComponentFieldMap::Coordinates4: Coordinate requested at convergence point of element %d.\n", imap);
+      printf("ComponentFieldMap::Coordinates4:\n");
+      printf("    Coordinate requested at convergence point of element %d.\n", imap);
       return ifail;
     }
-    t2 = -1 + 2*((x-xt1) * (xt2-xt1) + (y-yt1) * (yt2-yt1)) / dn;
+    t2 = -1 + 2 * ((x - xt1) * (xt2 - xt1) + (y - yt1) * (yt2 - yt1)) / dn;
   }
-  if (debug) {printf("ComponentFieldMap::Coordinates4: Isoparametric (u, v):   (%g,%g).\n", t1, t2);}
+  if (debug) {
+    printf("ComponentFieldMap::Coordinates4:\n");
+    printf("    Isoparametric (u, v):   (%g,%g).\n", t1, t2);
+  }
 
   // Re-compute the (x,y,z) position for this coordinate.
   if (debug) {
@@ -1356,9 +1416,10 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
       nodes[elements[imap].emap[1]].ymap*(1 + t1) * (1 - t2) / 4+
       nodes[elements[imap].emap[2]].ymap*(1 + t1) * (1 + t2) / 4+
       nodes[elements[imap].emap[3]].ymap*(1 - t1) * (1 + t2) / 4;
-    printf("ComponentFieldMap::Coordinates4: Position requested:     (%g,%g),\n", x, y);
-    printf("              Reconstructed:          (%g,%g),\n", xr, yr);
-    printf("              Difference:             (%g,%g).\n",x-xr,y-yr);
+    printf("ComponentFieldMap::Coordinates4: \n");
+    printf("    Position requested:     (%g,%g),\n", x, y);
+    printf("    Reconstructed:          (%g,%g),\n", xr, yr);
+    printf("    Difference:             (%g,%g).\n", x - xr, y - yr);
   }
 
   // This should have worked if we get this far.
@@ -1373,10 +1434,13 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
                                 double jac[4][4], double& det, int imap) {
                
   // Debugging
-  if (debug) printf("ComponentFieldMap::Coordinates5: Point (%g,%g).\n", x, y);
+  if (debug) {
+    printf("ComponentFieldMap::Coordinates5:\n");
+    printf("    Point (%g,%g).\n", x, y);
+  }
 
   // Failure flag
-  int ifail=1;
+  int ifail = 1;
 
   // Provisional values
   t1 = 0;
@@ -1386,7 +1450,8 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
 
   // Degenerate elements should have been treated as triangles
   if (elements[imap].degenerate) {
-    printf("ComponentFieldMap::Coordinates5: Received degenerate element %d.\n", imap);
+    printf("ComponentFieldMap::Coordinates5:\n");
+    printf("    Received degenerate element %d.\n", imap);
     return ifail;
   }
 
@@ -1396,24 +1461,36 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
   // Make a first order approximation.
   int rc = Coordinates4(x, y, z, t1, t2, t3, t4, jac, det, imap);
   if (rc>0) {
-    if (debug) {printf("ComponentFieldMap::Coordinates5: Failure to obtain linear estimate of isoparametric coordinates in element %d.\n", imap);}
+    if (debug) {
+      printf("ComponentFieldMap::Coordinates5:\n");
+      printf("    Failure to obtain linear estimate of isoparametric coordinates\n");
+      printf("    in element %d.\n", imap);}
     return ifail;
   }
 
   // Check whether the point is far outside.
   if (t1 < -(1 + f) || t1 > (1 + f) || t2 < -(1 + f) || t2 > (1 + f)) {
-    if (debug) {printf("ComponentFieldMap::Coordinates5: Point far outside, (t1,t2) = (%g,%g).\n", t1, t2);}
+    if (debug) {
+      printf("ComponentFieldMap::Coordinates5:\n");
+      printf("    Point far outside, (t1,t2) = (%g,%g).\n", t1, t2);
+    }
     return ifail;
   }
 
   // Start iteration
   double td1 = t1, td2 = t2;
-  if (debug) {printf("ComponentFieldMap::Coordinates5: Iteration starts at (t1,t2) = (%g,%g).\n", td1,td2);}
+  if (debug) {
+    printf("ComponentFieldMap::Coordinates5:\n");
+    printf("    Iteration starts at (t1,t2) = (%g,%g).\n", td1,td2);
+  }
   // Loop
   bool converged = false;
   double diff[2], corr[2];
   for (int iter = 0; iter < 10; iter++) {
-    if (debug) printf("ComponentFieldMap::Coordinates5: Iteration %3d:     (t1, t2) = (%g,%g).\n", iter, td1, td2);
+    if (debug) {
+      printf("ComponentFieldMap::Coordinates5:\n");
+      printf("    Iteration %3d:     (t1, t2) = (%g,%g).\n", iter, td1, td2);
+    }
     // Re-compute the (x,y,z) position for this coordinate.
     double xr =
       nodes[elements[imap].emap[0]].xmap * (-(1 - td1) * (1 - td2) * (1 + td1 + td2)) / 4 +
@@ -1456,7 +1533,10 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
     td2 += corr[1];
     // Check for convergence.
     if (fabs(corr[0]) < 1.0e-5 && fabs(corr[1]) < 1.0e-5) {
-      if (debug) printf("ComponentFieldMap::Coordinates5: Convergence reached.\n");
+      if (debug) {
+        printf("ComponentFieldMap::Coordinates5:\n");
+        printf("    Convergence reached.\n");
+      }
       converged = true;
       break;
     }
@@ -1499,8 +1579,8 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
 
     if (x >= xmin && x <= xmax && y >= ymin && y <= ymax) {
       printf("ComponentFieldMap::Coordinates5:\n");
-      printf("    No convergence achieved when refining internal isoparametric coordinates in element %d at position (%g,%g).\n",
-             imap,x,y);
+      printf("    No convergence achieved when refining internal isoparametric coordinates\n");
+      printf("    in element %d at position (%g,%g).\n", imap,x,y);
       t1 = t2 = 0;
       return ifail;
     }
@@ -1511,8 +1591,11 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
   t2 = td2;
   t3 = 0;
   t4 = 0;
-  if (debug) printf("ComponentFieldMap::Coordinates5: Convergence reached at (t1, t2) = (%g,%g).\n", t1, t2);
-
+  if (debug) {
+    printf("ComponentFieldMap::Coordinates5:\n");
+    printf("    Convergence reached at (t1, t2) = (%g,%g).\n", t1, t2);
+  }
+  
   // For debugging purposes, show position
   if (debug) {
     double xr =
@@ -1533,14 +1616,16 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
       nodes[elements[imap].emap[5]].ymap*(1 + t1) * (1 + t2) * (1 - t2) / 2 + 
       nodes[elements[imap].emap[6]].ymap*(1 - t1) * (1 + t1) * (1 + t2) / 2 + 
       nodes[elements[imap].emap[7]].ymap*(1 - t1) * (1 + t2) * (1 - t2) / 2;
-    printf("ComponentFieldMap::Coordinates5: Position requested:     (%g,%g),\n", x, y);
-    printf("              Reconstructed:          (%g,%g),\n", xr, yr);
-    printf("              Difference:             (%g,%g).\n",x-xr,y-yr);
+    printf("ComponentFieldMap::Coordinates5:\n");
+    printf("    Position requested:     (%g,%g),\n", x, y);
+    printf("    Reconstructed:          (%g,%g),\n", xr, yr);
+    printf("    Difference:             (%g,%g).\n", x - xr, y - yr);
   }
 
   // Success
-  ifail=0;
+  ifail = 0;
   return ifail;
+  
 }
 
 int 
@@ -1550,10 +1635,13 @@ ComponentFieldMap::Coordinates12(double x, double y, double z,
 
   // Debugging
   //  bool debug; if (imap==1024) {debug=true;} else {debug = false;}
-  if (debug) {printf("ComponentFieldMap::Coordinates12: Point (%g,%g,%g) for element %d.\n", x, y, z, imap);}
+  if (debug) {
+    printf("ComponentFieldMap::Coordinates12:\n");
+    printf("    Point (%g,%g,%g) for element %d.\n", x, y, z, imap);
+  }
 
   // Failure flag
-  int ifail=1;
+  int ifail = 1;
   
   // Compute tetrahedral coordinates.
   t1 = (x - nodes[elements[imap].emap[1]].xmap) * ((nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[1]].ymap) * (nodes[elements[imap].emap[3]].zmap - nodes[elements[imap].emap[1]].zmap) - 
@@ -1606,8 +1694,11 @@ ComponentFieldMap::Coordinates12(double x, double y, double z,
              (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[0]].ymap)));
 
   // Result
-  if (debug) {printf("ComponentFieldMap::Coordinates12: Tetrahedral coordinates (t, u, v, w) = (%g,%g,%g,%g), sum = %g.\n",
-              t1, t2, t3, t4, t1 + t2 + t3 + t4);}
+  if (debug) {
+    printf("ComponentFieldMap::Coordinates12:\n");
+    printf("    Tetrahedral coordinates (t, u, v, w) = (%g,%g,%g,%g), sum = %g.\n",
+           t1, t2, t3, t4, t1 + t2 + t3 + t4);
+  }
   // Re-compute the (x,y,z) position for this coordinate.
   if (debug) {
     double xr = 
@@ -1629,8 +1720,8 @@ ComponentFieldMap::Coordinates12(double x, double y, double z,
     printf("ComponentFieldMap::Coordinates12:\n");
     printf("    Position requested:     (%g,%g,%g)\n", x, y, z);
     printf("    Position reconstructed: (%g,%g,%g)\n", xr, yr, zr);
-    printf("    Difference:             (%g,%g,%g)\n", x-xr, y-yr, z-zr);
-    printf("    Checksum - 1:           %g\n", sr-1);
+    printf("    Difference:             (%g,%g,%g)\n", x - xr, y - yr, z - zr);
+    printf("    Checksum - 1:           %g\n", sr - 1);
   }
 
   // This should always work
@@ -1645,13 +1736,16 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
                         double jac[4][4], double& det, int imap) {
   // Debugging
   // if (imap == 1024) {debug=true;} else {debug = false;}
-  if (debug) printf("ComponentFieldMap::Coordinates13: Point (%g,%g,%g).\n", x, y, z);
+  if (debug) {
+    printf("ComponentFieldMap::Coordinates13:\n");
+    printf("    Point (%g,%g,%g).\n", x, y, z);
+  }
 
   // Failure flag
   int ifail = 1;
 
   // Provisional values
-  t1 = t2 = t3 = t4 = 0;
+  t1 = t2 = t3 = t4 = 0.;
 
   // Set tolerance parameter.
   double f = 0.5;
@@ -1659,24 +1753,39 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
   // Make a first order approximation.
   int rc = Coordinates12(x, y, z, t1, t2, t3, t4, jac, det, imap);
   if (rc > 0) {
-    if (debug) {printf("ComponentFieldMap::Coordinates13: Failure to obtain linear estimate of isoparametric coordinates in element %d.\n", imap);}
+    if (debug) {
+      printf("ComponentFieldMap::Coordinates13:\n");
+      printf("    Failure to obtain linear estimate of isoparametric coordinates\n");
+      printf("    in element %d.\n", imap);
+    }
     return ifail;
   }
-  if (t1 <  -f || t2 <  -f || t3 <  -f || t4 <  -f ||
+  if (t1 <    -f || t2 <    -f || t3 <    -f || t4 <    -f ||
       t1 > 1 + f || t2 > 1 + f || t3 > 1 + f || t4 > 1 + f) {
-    if (debug) {printf("ComponentFieldMap::Coordinates13: Linear isoparametric coordinates more than f (%g) out of range in element %d.\n", f, imap);}
+    if (debug) {
+      printf("ComponentFieldMap::Coordinates13:\n");
+      printf("    Linear isoparametric coordinates more than\n");
+      printf("    f (%g) out of range in element %d.\n", f, imap);
+    }
     ifail = 0;
     return ifail;
   }
 
   // Start iteration
   double td1 = t1, td2 = t2, td3 = t3, td4 = t4;
-  if (debug) {printf("ComponentFieldMap::Coordinates13: Iteration starts at (t1,t2,t3,t4) = (%g,%g,%g,%g).\n", td1, td2, td3, td4);}
+  if (debug) {
+    printf("ComponentFieldMap::Coordinates13:\n");
+    printf("    Iteration starts at (t1,t2,t3,t4) = (%g,%g,%g,%g).\n", td1, td2, td3, td4);
+  }
   // Loop
   bool converged = false;
   double diff[4], corr[4];
   for (int iter = 0; iter < 10; iter++) {
-    if (debug) {printf("ComponentFieldMap::Coordinates13: Iteration %3d:      (t1,t2,t3,t4) = (%g,%g,%g,%g).\n", iter, td1, td2, td3, td4);}
+    if (debug) {
+      printf("ComponentFieldMap::Coordinates13:\n");
+      printf("    Iteration %3d:      (t1,t2,t3,t4) = (%g,%g,%g,%g).\n", 
+             iter, td1, td2, td3, td4);
+    }
     // Re-compute the (x,y,z) position for this coordinate.
     double xr = 
       nodes[elements[imap].emap[0]].xmap * td1 * (2 * td1 - 1) +
@@ -1731,8 +1840,9 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
 
     // Debugging
     if (debug) {
-      printf("ComponentFieldMap::Coordinates13: Difference vector:  (1, x, y, z)  = (%g,%g,%g,%g).\n", diff[0], diff[1], diff[2], diff[3]);
-      printf("               Correction vector:  (t1,t2,t3,t4) = (%g,%g,%g,%g).\n", corr[0], corr[1], corr[2], corr[3]);
+      printf("ComponentFieldMap::Coordinates13:\n");
+      printf("    Difference vector:  (1, x, y, z)  = (%g,%g,%g,%g).\n", diff[0], diff[1], diff[2], diff[3]);
+      printf("    Correction vector:  (t1,t2,t3,t4) = (%g,%g,%g,%g).\n", corr[0], corr[1], corr[2], corr[3]);
     }
 
     // Update the vector.
@@ -1744,7 +1854,10 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
     // Check for convergence.
     if (fabs(corr[0]) < 1.0e-5 && fabs(corr[1]) < 1.0e-5 &&
         fabs(corr[2]) < 1.0e-5 && fabs(corr[3]) < 1.0e-5) {
-      if (debug) printf("ComponentFieldMap::Coordinates13: Convergence reached.\n");
+      if (debug) {
+        printf("ComponentFieldMap::Coordinates13:\n");
+        printf("    Convergence reached.\n");
+      }
       converged = true;
       break;
     }
@@ -1780,8 +1893,9 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
 
     if (x >= xmin && x <= xmax && y >= ymin && 
         y <= ymax && z >= zmin && z <= zmax) {
-      printf("ComponentFieldMap::Coordinates13: No convergence achieved when refining internal isoparametric coordinates in element %d at position (%g,%g,%g).\n",
-	     imap, x, y, z);
+      printf("ComponentFieldMap::Coordinates13:\n");
+      printf("    No convergence achieved when refining internal isoparametric coordinates\n");
+      printf("    in element %d at position (%g,%g,%g).\n", imap, x, y, z);
       t1 = -1;
       t2 = -1;
       t3 = -1;
@@ -1795,8 +1909,11 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
   t2 = td2;
   t3 = td3;
   t4 = td4;
-  if (debug) printf("ComponentFieldMap::Coordinates13: Convergence reached at (t1, t2, t3, t4) = (%g,%g,%g,%g).\n", t1, t2, t3, t4);
-
+  if (debug) {
+    printf("ComponentFieldMap::Coordinates13:\n");
+    printf("    Convergence reached at (t1, t2, t3, t4) = (%g,%g,%g,%g).\n", t1, t2, t3, t4);
+  }
+  
   // For debugging purposes, show position
   if (debug) {
     // Re-compute the (x,y,z) position for this coordinate.
@@ -1834,10 +1951,11 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
       nodes[elements[imap].emap[8]].zmap * 4 * td2 * td4 +
       nodes[elements[imap].emap[9]].zmap * 4 * td3 * td4;
     double sr = td1 + td2 + td3 + td4;
-    printf("ComponentFieldMap::Coordinates13: Position requested:     (%g,%g,%g),\n", x, y, z);
-    printf("               Reconstructed:          (%g,%g,%g),\n", xr, yr, zr);
-    printf("               Difference:             (%g,%g,%g),\n", x - xr,y - yr, z - zr);
-    printf("               Checksum - 1:           %g.\n", sr - 1);
+    printf("ComponentFieldMap::Coordinates13:\n");
+    printf("    Position requested:     (%g,%g,%g),\n", x, y, z);
+    printf("    Reconstructed:          (%g,%g,%g),\n", xr, yr, zr);
+    printf("    Difference:             (%g,%g,%g),\n", x - xr, y - yr, z - zr);
+    printf("    Checksum - 1:           %g.\n", sr - 1);
   }
 
   // Success
@@ -1851,7 +1969,8 @@ ComponentFieldMap::UpdatePeriodicityCommon() {
 
   // Check the required data is available
   if (!ready) {
-    printf("ComponentFieldMap::UpdatePeriodicityCommon: No valid field map available.\n");
+    printf("ComponentFieldMap::UpdatePeriodicityCommon:\n");
+    printf("    No valid field map available.\n");
     return;
   }
 
@@ -1887,7 +2006,7 @@ ComponentFieldMap::UpdatePeriodicityCommon() {
     }
     if (fabs(mapnxa - int(0.5+mapnxa)) > 0.001 || mapnxa < 1.5) {
       printf("ComponentFieldMap::UpdatePeriodicityCommon:\n");
-      printf("    x-Axial symmetry has been requested but the map\n");
+      printf("    X-axial symmetry has been requested but the map\n");
       printf("    does not cover an integral fraction of 2 pi; reset.\n");
       xAxiallyPeriodic = false;
       warning = true;
@@ -1902,7 +2021,7 @@ ComponentFieldMap::UpdatePeriodicityCommon() {
     }
     if (fabs(mapnya - int(0.5 + mapnya)) > 0.001 || mapnya < 1.5) {
       printf("ComponentFieldMap::UpdatePeriodicityCommon:\n");
-      printf("    y-Axial symmetry has been requested but the map\n");
+      printf("    Y-axial symmetry has been requested but the map\n");
       printf("    does not cover an integral fraction of 2 pi; reset.\n");
       yAxiallyPeriodic = false;
       warning = true;
@@ -1917,7 +2036,7 @@ ComponentFieldMap::UpdatePeriodicityCommon() {
     }
     if (fabs(mapnza - int(0.5 + mapnza)) > 0.001 || mapnza < 1.5) {
       printf("ComponentFieldMap::UpdatePeriodicityCommon:\n");
-      printf("    z-Axial symmetry has been requested but the map\n");
+      printf("    Z-axial symmetry has been requested but the map\n");
       printf("    does not cover an integral fraction of 2 pi; reset.\n");
       zAxiallyPeriodic = false;
       warning = true;
@@ -2035,7 +2154,8 @@ ComponentFieldMap::UpdatePeriodicity2d() {
 
   // Check the required data is available
   if (!ready) {
-    printf("ComponentFieldMap::UpdatePeriodicity2d: No valid field map available.\n");
+    printf("ComponentFieldMap::UpdatePeriodicity2d:\n");
+    printf("    No valid field map available.\n");
     return;
   }
 
@@ -2072,7 +2192,8 @@ ComponentFieldMap::SetRange() {
 
   // Check the required data is available
   if (!ready || nNodes < 1) {
-    printf("ComponentFieldMap::SetRange: Field map not yet set or number of nodes < 1.\n");
+    printf("ComponentFieldMap::SetRange:\n");
+    printf("    Field map not yet set or number of nodes < 1.\n");
     return;
   }
   
@@ -2172,13 +2293,14 @@ ComponentFieldMap::SetRange() {
 void 
 ComponentFieldMap::PrintRange() {
 
-  printf("ComponentFieldMap::PrintRange: Dimensions of the elementary block\n");
+  printf("ComponentFieldMap::PrintRange:\n");
+  printf("        Dimensions of the elementary block\n");
   printf("            %15g < x < %-15g cm,\n", xMinBoundingBox, xMaxBoundingBox);
   printf("            %15g < y < %-15g cm,\n", yMinBoundingBox, yMaxBoundingBox);
   printf("            %15g < z < %-15g cm,\n", zMinBoundingBox, zMaxBoundingBox);
   printf("            %15g < V < %-15g V.\n",  mapvmin, mapvmax);
   
-  printf("            Periodicities\n");
+  printf("        Periodicities\n");
   
   printf("            x:");  
   if (xPeriodic)         {printf(" simple with length %g cm", cellsx);}

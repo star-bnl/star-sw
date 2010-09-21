@@ -119,6 +119,15 @@ ComponentBase::IsWireCrossed(
   
   return false;
   
+  // Quiet compiler against unused variable warning
+  xc = x0; yc = y0; zc = z0;
+  if (debug) {
+    std::cout << className << "::IsWireCrossed:\n";
+    std::cout << "    No wires between (" 
+              << x0 << ", " << y0 << ", " << z0 << ") and ("
+              << x1 << ", " << y1 << ", " << z1 << ").\n";
+  }
+ 
 }
 
 }

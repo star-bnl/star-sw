@@ -162,6 +162,11 @@ $(OBJDIR)/ComponentTcad2d.o: \
 	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@   
+$(OBJDIR)/ComponentTcad3d.o: \
+	$(SRCDIR)/ComponentTcad3d.cc $(INCDIR)/ComponentTcad3d.hh \
+	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@   
 
 $(OBJDIR)/GeometrySimple.o: \
 	$(SRCDIR)/GeometrySimple.cc $(INCDIR)/GeometrySimple.hh
