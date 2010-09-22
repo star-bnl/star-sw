@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.14 2010/09/22 01:43:17 hmasui Exp $
+// $Id: bfcMixer_Tpx.C,v 1.15 2010/09/22 02:01:33 hmasui Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -42,28 +42,45 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   TString prodP10ihAuAu7("DbV20100821 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
 
   TString geomP08ic("ry2008");
+  TString geomP10ih("ry2010");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
 //  TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
-  chain2Opt += " "; chain2Opt += geomP08ic;
+  chain2Opt += " ";
 
   TString chain3Opt("");
-  if (prodName == "P08icpp") {   chain3Opt = prodP08icpp; }
-  else if (prodName == "P08iepp") { chain3Opt = prodP08iepp; }
-  else if (prodName == "P08icAuAu9") {   chain3Opt = prodP08icAuAu9; }
-  else if (prodName == "P08icdAu") {   chain3Opt = prodP08icdAu; }
-  else if (prodName == "P08iedAu") {   chain3Opt = prodP08iedAu; }
-  else if (prodName == "P08icAuAu200") { chain3Opt = prodP08icAuAu200;}
-  else if (prodName == "P10iapp") { chain3opt = prodP10iapp;}
-  else if (prodName == "P10ihAuAu39") { chain3opt = prodP10ihAuAu39;}
-  else if (prodName == "P10ihAuAu11") { chain3opt = prodP10ihAuAu11;}
-  else if (prodName == "P10ihAuAu7") { chain3opt = prodP10ihAuAu7;}
+  if (prodName == "P08icpp")           { chain3Opt = prodP08icpp;       chain2Opt += geomP08ic; }
+  else if (prodName == "P08iepp")      { chain3Opt = prodP08iepp;       chain2Opt += geomP08ic; }
+  else if (prodName == "P08icAuAu9")   { chain3Opt = prodP08icAuAu9;    chain2Opt += geomP08ic; }
+  else if (prodName == "P08icdAu")     { chain3Opt = prodP08icdAu;      chain2Opt += geomP08ic; }
+  else if (prodName == "P08iedAu")     { chain3Opt = prodP08iedAu;      chain2Opt += geomP08ic; }
+  else if (prodName == "P08icAuAu200") { chain3Opt = prodP08icAuAu200;  chain2Opt += geomP08ic; }
+  else if (prodName == "P10iapp")      { chain3opt = prodP10iapp;       chain2Opt += geomP10ih; }
+  else if (prodName == "P10ihAuAu39")  { chain3opt = prodP10ihAuAu39;   chain2Opt += geomP10ih; }
+  else if (prodName == "P10ihAuAu11")  { chain3opt = prodP10ihAuAu11;   chain2Opt += geomP10ih; }
+  else if (prodName == "P10ihAuAu7")   { chain3opt = prodP10ihAuAu7;    chain2Opt += geomP10ih; }
   else {
-    cout << "Choice prodName does not correspond to known chain. Processing impossible. " << endl;
+    cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
   }
   chain3Opt += ",Embedding,TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,nodefault"; 
-  chain3Opt += ","; chain3Opt += geomP08ic;
+  chain3Opt += ",";
+
+  if (prodName == "P08icpp")           { chain3Opt += geomP08ic; }
+  else if (prodName == "P08iepp")      { chain3Opt += geomP08ic; }
+  else if (prodName == "P08icAuAu9")   { chain3Opt += geomP08ic; }
+  else if (prodName == "P08icdAu")     { chain3Opt += geomP08ic; }
+  else if (prodName == "P08iedAu")     { chain3Opt += geomP08ic; }
+  else if (prodName == "P08icAuAu200") { chain3Opt += geomP08ic; }
+  else if (prodName == "P10iapp")      { chain3Opt += geomP10ih; }
+  else if (prodName == "P10ihAuAu39")  { chain3Opt += geomP10ih; }
+  else if (prodName == "P10ihAuAu11")  { chain3Opt += geomP10ih; }
+  else if (prodName == "P10ihAuAu7")   { chain3Opt += geomP10ih; }
+  else {
+    cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
+    return;
+  }
+
   // Dynamically link some shared libs
   gROOT->LoadMacro("bfc.C");
   if (gClassTable->GetID("StBFChain") < 0) Load();
