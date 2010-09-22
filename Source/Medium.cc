@@ -26,14 +26,6 @@ Medium::Medium() :
 
 }
 
-void
-Medium::SetName(const std::string s) {
-
-  std::cerr << className << "::SetName:\n";
-  std::cerr << "    Name of the medium cannot be changed to " << s << ".\n";
-  
-}
-
 void 
 Medium::SetTemperature(const double t) {
 

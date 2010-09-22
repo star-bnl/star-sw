@@ -54,6 +54,9 @@ class AvalancheMC {
     // Exponentially distributed time step with mean equal 
     // to the specified multiple of the collision time (default model)
     void SetCollisionSteps(const int n = 100);
+
+    void SetTimeWindow(const double t0, const double t1);
+    void UnsetTimeWindow();
     
     // Treat positive charge carriers as holes or ions (default: ions)
     void SetHoles() {useIons = false;}
@@ -137,6 +140,10 @@ class AvalancheMC {
     double dMc;
     // Sample step size according to collision time
     int nMc;
+
+    // Time window
+    bool hasTimeWindow;
+    double tMin, tMax;
 
     // Number of electrons and ions produced
     int nElectrons;

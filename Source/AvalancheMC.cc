@@ -16,6 +16,7 @@ AvalancheMC::AvalancheMC() :
   sensor(0),
   nDrift(0), nAval(0),
   stepModel(2), tMc(0.02), dMc(0.001), nMc(100),
+  hasTimeWindow(false), tMin(0.), tMax(0.),
   nElectrons(0), nIons(0), 
   nEndpointsElectrons(0), nEndpointsHoles(0), nEndpointsIons(0),
   usePlotting(false), viewer(0), 
@@ -123,6 +124,28 @@ AvalancheMC::SetCollisionSteps(const int n) {
     nMc = n;
   }
   
+}
+
+void
+AvalancheMC::SetTimeWindow(const double t0, const double t1) {
+
+  if (fabs(t1 - t0) < Small) {
+    std::cerr << className << "::SetTimeWindow:\n";
+    std::cerr << "    Time interval must be greater than zero.\n";
+    return;
+  }
+
+  tMin = std::min(t0, t1);
+  tMax = std::max(t0, t1);
+  hasTimeWindow = true;
+
+}
+
+void
+AvalancheMC::UnsetTimeWindow() {
+
+  hasTimeWindow = false;
+
 }
 
 void 
@@ -315,6 +338,15 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
 
   bool ok = true;
   bool trapped = false;
+  int abortReason = 0;
+
+  if (t0 < tMin || t0 > tMax) {
+    std::cerr << className << "::DriftLine:\n";
+    std::cerr << "    Starting time " << t0 
+              << " is outside the specified time window.\n";
+    ok = false;
+    abortReason = StatusOutsideTimeWindow;
+  }
 
   // Get the electric field at the starting point
   sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
@@ -323,6 +355,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     std::cerr << className << "::DriftLine:\n";
     std::cerr << "    No drift medium at initial position.\n";
     ok = false;
+    abortReason = StatusLeftDriftMedium;
   }
 
   double e = Max(sqrt(ex * ex + ey * ey + ez * ez), Small);
@@ -334,24 +367,27 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
       if (!medium->ElectronVelocity(ex, ey, ez, 0., 0., 0., vx, vy, vz) || 
           !medium->ElectronDiffusion(ex, ey, ez, 0., 0., 0., dl, dt)) {
         ok = false;
+        abortReason = StatusCalculationAbandoned;
         break;
       }
     } else if (q == 1) {
       if (!medium->HoleVelocity(ex, ey, ez, 0., 0., 0., vx, vy, vz) || 
           !medium->HoleDiffusion(ex, ey, ez, 0., 0., 0., dl, dt)) {
         ok = false;
+        abortReason = StatusCalculationAbandoned;
         break;
       }
     } else if (q == 2) {
       if (!medium->IonVelocity(ex, ey, ez, 0., 0., 0., vx, vy, vz) ||
           !medium->IonDiffusion(ex, ey, ez, 0., 0., 0., dl, dt)) {
         ok = false;
+        abortReason = StatusCalculationAbandoned;
         break;
       }
     } else {
       std::cerr << className << "::DriftLine:\n";
       std::cerr << "    Unknown drift line type (" << q << ").\n";
-      std::cerr << "    Program bug!\n"; 
+      std::cerr << "    Program bug!\n";
       return false;
     }    
     v = Max(sqrt(vx * vx + vy * vy + vz * vz), Small);
@@ -376,6 +412,12 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
         std::cerr << "    Unknown stepping model.\n";
         return false;
     }
+
+    // Make sure the time is still within the specified interval.
+    if (point.t + delta > tMax) {
+      abortReason = StatusOutsideTimeWindow;
+      break;
+    }
         
     // Draw a random diffusion direction in the particle frame
     if (useDiffusion) {
@@ -385,7 +427,8 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
       dz = d * RndmGaussian(0., dt);
     }
 
-    // Compute the rotation to align the diffusion and drift velocity vectors
+    // Compute the rotation angles to align the diffusion 
+    // and drift velocity vectors
     vt = sqrt(vx * vx + vy * vy);
     if (vt < Small) {
       phi = 0.; theta = HalfPi;
@@ -428,6 +471,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
       point.x += dx * d; point.y += dy * d; point.z += dz * d;
       drift.push_back(point);
       ++nDrift;
+      abortReason = StatusLeftDriftMedium;
       break;   
     }
     
@@ -453,6 +497,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
       point.x += dx * d; point.y += dy * d; point.z += dz * d;      
       drift.push_back(point);
       ++nDrift;
+      abortReason = StatusLeftDriftArea;
       break;
     }
 
@@ -519,6 +564,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
           drift[i].ne = gain;
           drift[i].ni = 0;
         }
+        abortReason = StatusAttached;
         break;
       }
       if (q == -1) {
@@ -538,13 +584,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   // Create an "endpoint"
   endpoint endPoint;
   endPoint.x0 = x0; endPoint.y0 = y0; endPoint.z0 = z0; endPoint.t0 = t0;
-  if (!ok) {
-    endPoint.status = StatusCalculationAbandoned;
-  } else if (trapped) {
-    endPoint.status = StatusAttached;
-  } else {
-    endPoint.status = StatusLeftDriftArea;
-  }
+  endPoint.status = abortReason;
 
   endPoint.x1 = drift[nDrift - 1].x;
   endPoint.y1 = drift[nDrift - 1].y;

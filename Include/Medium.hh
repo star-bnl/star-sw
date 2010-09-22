@@ -19,8 +19,6 @@ class Medium {
     // Return the id number of the class instance
     int GetId() const {return id;}
     // Medium name/identifier
-    virtual
-    void SetName(const std::string s);
     std::string GetName() const {return name;}
     virtual
     bool IsGas() const {return false;}
