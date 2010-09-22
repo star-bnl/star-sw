@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.13 2010/06/04 16:58:59 hmasui Exp $
+// $Id: bfcMixer_Tpx.C,v 1.14 2010/09/22 01:43:17 hmasui Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -35,6 +35,12 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
 //  TString prodP08icdAu("DbV20080712 P2008 ITTF OSpaceZ2 OGridLeak3D beamLine, VFMCE TpxClu -VFMinuit -hitfilt");
   TString prodP08iedAu("DbV20090213 P2008 ITTF OSpaceZ2 OGridLeak3D beamLine VFMCE TpxClu -VFMinuit -hitfilt");
   TString prodP10iapp("DbV20091001 pp2009c TpcRS ITTF OSpaceZ2 OGridLeak3D beamLine, VFMCE TpcRS -VFMinuit -hitfilt");
+
+  // BES Run10 chains
+  TString prodP10ihAuAu39("DbV20100909 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
+  TString prodP10ihAuAu11("DbV20100821 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
+  TString prodP10ihAuAu7("DbV20100821 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
+
   TString geomP08ic("ry2008");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
@@ -49,6 +55,9 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   else if (prodName == "P08iedAu") {   chain3Opt = prodP08iedAu; }
   else if (prodName == "P08icAuAu200") { chain3Opt = prodP08icAuAu200;}
   else if (prodName == "P10iapp") { chain3opt = prodP10iapp;}
+  else if (prodName == "P10ihAuAu39") { chain3opt = prodP10ihAuAu39;}
+  else if (prodName == "P10ihAuAu11") { chain3opt = prodP10ihAuAu11;}
+  else if (prodName == "P10ihAuAu7") { chain3opt = prodP10ihAuAu7;}
   else {
     cout << "Choice prodName does not correspond to known chain. Processing impossible. " << endl;
     return;
