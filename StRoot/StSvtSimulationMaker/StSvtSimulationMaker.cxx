@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.45 2010/08/27 17:46:28 perev Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.46 2010/09/22 13:44:25 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.46  2010/09/22 13:44:25  caines
+ * Record is StMcHit the shifted hit position after caling ideal2real routines
+ *
  * Revision 1.45  2010/08/27 17:46:28  perev
  * WarnOff
  *
@@ -180,7 +183,11 @@ using namespace std;
 #include "StSvtSimulationMaker.h"
 #include "StDbUtilities/St_svtCorrectionC.h"
 #include "StDbUtilities/St_svtHybridDriftVelocityC.h"
-
+#include "StMcEvent/StMcSvtHitCollection.hh"
+#include "StParticleDefinition.hh"
+#include "StMcEvent.hh"
+#include "StMcTrack.hh"
+#include "StMcSvtHit.hh"
 #define gufld   gufld_
 extern "C" {void gufld(Float_t *, Float_t *);}
 
@@ -696,7 +703,7 @@ Int_t StSvtSimulationMaker::Make()
   LOG_DEBUG << "In StSvtSimulationMaker::Make()" << endm;
 
   int volId ,barrel, layer, ladder, wafer, hybrid;
-  Int_t NumOfHitsPerHyb=0;
+  // Int_t NumOfHitsPerHyb=0;
   StThreeVector<double> VecG(0,0,0);
   StThreeVector<double> VecL(0,0,0);
   StThreeVector<double> mtm(0,0,0);
@@ -714,144 +721,133 @@ Int_t StSvtSimulationMaker::Make()
 
   St_svtHybridDriftVelocityC *driftVel = St_svtHybridDriftVelocityC::instance();
   assert(driftVel);
+
+ int tmpBadCount=0;
   
-  //
-  //################  get geant hit table ##########################
-  // 
-  
-  St_DataSet *g2t_svt_hit =  GetDataSet("g2t_svt_hit");
-  St_DataSetIter g2t_svt_hit_it(g2t_svt_hit);
-  St_g2t_svt_hit *g2t_SvtHit = (St_g2t_svt_hit *) g2t_svt_hit_it.Find("g2t_svt_hit");
-
-
-  g2t_svt_hit_st *trk_st=0;
-  if( !g2t_SvtHit) {
-    gMessMgr->Warning() << "No SVT hits" << endm;
-    NumOfHitsPerHyb = 0;
-  }
-  else{  
-  trk_st = g2t_SvtHit->GetTable();    
-  NumOfHitsPerHyb = g2t_SvtHit->GetNRows();
-  }
-  // Get g2t tracks
-  St_DataSet *g2t_tracks =  GetDataSet("g2t_track");
-  St_DataSetIter g2t_track_it(g2t_tracks);
-  St_g2t_track *g2t_track = (St_g2t_track *) g2t_track_it.Find("g2t_track");
-  g2t_track_st *g2tTrack = 0;
-  g2tTrack = g2t_track->GetTable(); 
-
-  //
-  //################  Loop over geant hits ##########################
-  //
- 
-  LOG_INFO <<"mNumOfGeantHits = "<<NumOfHitsPerHyb<<endm;
-  int tmpBadCount=0;
-  if (NumOfHitsPerHyb>0) 
-   for (int j=0;j<NumOfHitsPerHyb ;j++)
+  StMcEvent* mcEvent = 0;
+  mcEvent = (StMcEvent*) GetDataSet("StMcEvent");
+  StMcSvtHitCollection *mcCol  = 0; 
+  //  StMcSvtHitCollection *mcCol1 = 0; 
+  if(mcEvent)
     {
-      double anode,time;
-      volId = trk_st[j].volume_id;
-      int trackId = trk_st[j].track_p;
-      //cout <<"geant hit #"<<j<<" volumeID="<< volId << " x=" << trk_st[j].x[0] << " y=" << trk_st[j].x[1] << " z=" <<  trk_st[j].x[2]<<endl;
-      //outGeantSvtGeom<< volId <<endl;
-      if( volId > 7000) continue; // SSD hit
-      /*
-        if (int(volId/1000) == 3)
-        volId = volId - 3000 + 4000;
-        else if (int(volId/1000) == 4)
-        volId = volId - 4000 + 3000;
-      */
-
-   
-      VecG.setX( trk_st[j].x[0]);
-      VecG.setY( trk_st[j].x[1]);
-      VecG.setZ( trk_st[j].x[2]);
-      mtm.setX(trk_st[j].p[0]);
-      mtm.setY(trk_st[j].p[1]);
-      mtm.setZ(trk_st[j].p[2]);
-
-      // Translate hit position from IDEAL geom coords to REAL geom coords in
-      // global coordinates
-      Int_t iok = ideal2RealTranslation(&VecG, &mtm, (double)g2tTrack[trackId-1].charge, &volId);
-      if (iok != kStOK) continue;
-      //double energy = 96000.; 
-      double  energy = trk_st[j].de*1e9; 
-      globalCor.setPosition(VecG);
-
-      mCoordTransform->operator()(globalCor,localCoord,volId);
-      if (! driftVel->p(localCoord.barrel(),localCoord.ladder(),localCoord.wafer(),localCoord.hybrid())) continue;
-      VecL.setX(localCoord.position().x());
-      VecL.setY(localCoord.position().y());
-      VecL.setZ(localCoord.position().z());
-
-
-      mCoordTransform->operator()(localCoord,waferCoord);
-      
-      barrel = waferCoord.barrel();
-      layer = waferCoord.layer(); ladder = waferCoord.ladder();
-      wafer = waferCoord.wafer(); hybrid = waferCoord.hybrid();     
-      time = waferCoord.timebucket();
-      double driftTime=time - mT0->getT0();
-      anode = waferCoord.anode();
-      //cout<<"time pos of hit(according to CoordTransform):"<<time<<" ,anodepos:"<<anode<<endl;
-    
-      if(driftTime < 0.0 || time > 128.0 || anode < 0.0 || anode > 240.0)
-	{ tmpBadCount++; continue;}
- #if 0     
-      
-      
-      //########### get barrel and ladder numbers correctly #################
-      
-static const int barrels[]={3,1,1,2,2};
-      barrel = 3;
-      if (layer<=4) barrel = barrels[layer];
-
-      if ( !strncmp(mConfig->getConfiguration(), "Y1L", strlen("Y1L")) ) {
-        if ((wafer == 1) || (wafer == 2) || (wafer == 3))
-          ladder = 2;
-      }	   
-        
-      //if(Debug()) mNTuple->Fill(time,anode,trk_st[j].x[0],trk_st[j].x[1],trk_st[j].x[2],0 ,0,0,0,0,0);
+      mcCol  = mcEvent->svtHitCollection();
+      LOG_INFO <<"mNumOfGeantHits = "<<mcCol->numberOfHits()<<endm;
+      for (unsigned int iBarrel=0; iBarrel< mcCol->numberOfBarrels(); iBarrel++) {
+	for (unsigned int iLadder=0; iLadder<mcCol->barrel(iBarrel)->numberOfLadders(); iLadder++) {
+	  for (unsigned int iWafer = 0; iWafer < mcCol->barrel(iBarrel)->ladder(iLadder)->numberOfWafers(); iWafer++) {
+	    for (StMcSvtHitIterator iter = mcCol->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits().begin();
+		 iter != mcCol->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits().end();
+		 iter++) {
+	      StMcSvtHit   *mchit = dynamic_cast<StMcSvtHit   *> (*iter);      
+	      
+	      VecG.setX( mchit->position().x());
+	      VecG.setY( mchit->position().y());
+	      VecG.setZ( mchit->position().z());
+	      mtm.setX(mchit->localMomentum().x());
+	      mtm.setY(mchit->localMomentum().y());
+	      mtm.setZ(mchit->localMomentum().z());
+	      volId = 1000*mchit->layer()+100*mchit->wafer()+mchit->ladder();
+	      
+	      // Translate hit position from IDEAL geom coords to REAL geom coords in
+	      // global coordinates
+	      //  cout << "Going in : " << VecG << endl;
+	      
+	      
+	      Int_t iok = ideal2RealTranslation(&VecG, &mtm, (double)mchit->parentTrack()->particleDefinition()->charge(), &volId);
+	      if (iok != kStOK) continue;
+	      mchit->setPosition(VecG);
+	      mchit->setLocalMomentum(mtm);
+	      
+	      globalCor.setPosition(VecG);	     
+	      mCoordTransform->operator()(globalCor,localCoord,volId);
+	      
+	      if (! driftVel->p(localCoord.barrel(),localCoord.ladder(),localCoord.wafer(),localCoord.hybrid())) continue;
+	      VecL.setX(localCoord.position().x());
+	      VecL.setY(localCoord.position().y());
+	      VecL.setZ(localCoord.position().z());
+	      
+	      
+	      mCoordTransform->operator()(localCoord,waferCoord);
+	      double anode,time;
+	      barrel = waferCoord.barrel();
+	      layer = waferCoord.layer(); ladder = waferCoord.ladder();
+	      wafer = waferCoord.wafer(); hybrid = waferCoord.hybrid();     
+	      time = waferCoord.timebucket();
+	      double driftTime=time - mT0->getT0();
+	      anode = waferCoord.anode();
+	      //cout<<"time pos of hit(according to CoordTransform):"<<time<<" ,anodepos:"<<anode<<endl;
+	      //  cout << "At this point hit has: "<<  globalCor << " " << localCoord << " " << waferCoord << endl;
+	      //mCoordTransform->operator()(waferCoord,localCoord);
+	      //mCoordTransform->operator()(localCoord,globalCor);
+	      
+	      //cout << "Now it is  this point hit has: "<<  globalCor << " " << localCoord << " " << waferCoord << endl;
+	      
+	      if(driftTime < 0.0 || time > 128.0 || anode < 0.0 || anode > 240.0)
+		{ tmpBadCount++; continue;}
+#if 0     
+	      
+	      
+	      //########### get barrel and ladder numbers correctly #################
+	      
+	      static const int barrels[]={3,1,1,2,2};
+	      barrel = 3;
+	      if (layer<=4) barrel = barrels[layer];
+	      
+	      if ( !strncmp(mConfig->getConfiguration(), "Y1L", strlen("Y1L")) ) {
+		if ((wafer == 1) || (wafer == 2) || (wafer == 3))
+		  ladder = 2;
+	      }	   
+	      
+	      //if(Debug()) mNTuple->Fill(time,anode,trk_st[j].x[0],trk_st[j].x[1],trk_st[j].x[2],0 ,0,0,0,0,0);
 #endif      
-      if( 1000*layer+100*wafer+ladder != volId){
-        LOG_INFO << "trouble - skipping hit" << volId <<"\t"<< trk_st[j].x[0] << "\t" 
-             << trk_st[j].x[1] <<"\t and our calc"<<"\t" << layer << " " 
-             << wafer << "\t" << ladder << "\t" << j <<endm;
-        continue;
-      }
-      
-      int index = mSvtSimPixelColl->getHybridIndex(barrel,ladder,wafer,hybrid);
-      if( index < 0) continue; 
-      svtSimDataPixels  = (StSvtHybridPixelsD*)mSvtSimPixelColl->at(index);
-      if (! mSvtAngles) mSvtAngles =  new StSvtAngles();
-      mSvtAngles->calcAngles(mSvtGeom,mtm.x(),mtm.y(),mtm.z(),layer,ladder,wafer);
-      double theta = mSvtAngles->getTheta();
-      double phi = mSvtAngles->getPhi();
-      //seting drift speed for simulation
-      double vd=-1;
+	      if( 1000*layer+100*wafer+ladder != volId){
+		LOG_INFO << "trouble - skipping hit" << volId <<"\t"<< mchit->position().x() << "\t" 
+			 << mchit->position().y() <<"\t and our calc"<<"\t" << layer << " " 
+			 << wafer << "\t" << ladder <<endm;
+		continue;
+	      }
+	      
+	      int index = mSvtSimPixelColl->getHybridIndex(barrel,ladder,wafer,hybrid);
+	      if( index < 0) continue; 
+	      svtSimDataPixels  = (StSvtHybridPixelsD*)mSvtSimPixelColl->at(index);
+	      if (! mSvtAngles) mSvtAngles =  new StSvtAngles();
+	      mSvtAngles->calcAngles(mSvtGeom,mtm.x(),mtm.y(),mtm.z(),layer,ladder,wafer);
+	      double theta = mSvtAngles->getTheta();
+	      double phi = mSvtAngles->getPhi();
+	      //seting drift speed for simulation
+	      double vd=-1;
 #if 0
-      if (mDriftSpeedColl && mDriftSpeedColl->at(index)){
-        vd = ((StSvtHybridDriftVelocity*)mDriftSpeedColl->at(index))->getV3(1);
-        if (vd<=0) vd=mDefaultDriftVelocity;
-        else vd=vd*1e-5;
-      }
-      //cout<<"drift velocity used: = "<<vd<<" (default would be "<<mDefaultDriftVelocity<<")"<<endl;
+	      if (mDriftSpeedColl && mDriftSpeedColl->at(index)){
+		vd = ((StSvtHybridDriftVelocity*)mDriftSpeedColl->at(index))->getV3(1);
+		if (vd<=0) vd=mDefaultDriftVelocity;
+		else vd=vd*1e-5;
+	      }
+	      //cout<<"drift velocity used: = "<<vd<<" (default would be "<<mDefaultDriftVelocity<<")"<<endl;
 #else
-      vd = driftVel->DriftVelocity(barrel,ladder,wafer,hybrid)*1e-5;
+	      vd = driftVel->DriftVelocity(barrel,ladder,wafer,hybrid)*1e-5;
 #endif
-
-      if (vd <= 0) continue;
-      // double PasaShift=0.1/vd*25.; //100 um shift from pasa
-      double PasaShift=0.22/vd*25.; //220 um shift from pasa
-
-      mSvtSimulation->setDriftVelocity(vd);
-      mSvtSimulation->doCloud(driftTime,energy,theta,phi,trackId);
-      mSvtSimulation->fillBuffer(anode,time-PasaShift,svtSimDataPixels);
-           
-      if (Debug()) 
-	FillGeantHit(barrel,ladder,wafer,hybrid,&waferCoord,&VecG,&VecL,mSvtSimulation->getPeak(),trackId);
-      
+	      if (vd <= 0) continue;
+	      // double PasaShift=0.1/vd*25.; //100 um shift from pasa
+	      double PasaShift=0.22/vd*25.; //220 um shift from pasa
+	      
+	      mSvtSimulation->setDriftVelocity(vd);
+	      double  energy = mchit->dE()*1e9; 
+	      mSvtSimulation->doCloud(driftTime,energy,theta,phi,mchit->parentTrack()->key());
+	      mSvtSimulation->fillBuffer(anode,time-PasaShift,svtSimDataPixels);
+	      
+	      if (Debug()) {
+		FillGeantHit(barrel,ladder,wafer,hybrid,&waferCoord,&VecG,&VecL,mSvtSimulation->getPeak(),mchit->parentTrack()->key());
+	      }
+	      
+	      
+	    }
+	  }
+	}
+      }
     }
+  else
+    LOG_INFO << "There's a problem no MC event" << endm;
+  
   int nSimDataPixels = mSvtSimPixelColl->size();
   for (int index=0;index<nSimDataPixels;index++) {
     svtSimDataPixels  = (StSvtHybridPixelsD*)mSvtSimPixelColl->at(index);
