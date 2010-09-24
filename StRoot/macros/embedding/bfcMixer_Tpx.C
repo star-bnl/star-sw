@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.15 2010/09/22 02:01:33 hmasui Exp $
+// $Id: bfcMixer_Tpx.C,v 1.16 2010/09/24 01:54:54 hmasui Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -55,10 +55,10 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   else if (prodName == "P08icdAu")     { chain3Opt = prodP08icdAu;      chain2Opt += geomP08ic; }
   else if (prodName == "P08iedAu")     { chain3Opt = prodP08iedAu;      chain2Opt += geomP08ic; }
   else if (prodName == "P08icAuAu200") { chain3Opt = prodP08icAuAu200;  chain2Opt += geomP08ic; }
-  else if (prodName == "P10iapp")      { chain3opt = prodP10iapp;       chain2Opt += geomP10ih; }
-  else if (prodName == "P10ihAuAu39")  { chain3opt = prodP10ihAuAu39;   chain2Opt += geomP10ih; }
-  else if (prodName == "P10ihAuAu11")  { chain3opt = prodP10ihAuAu11;   chain2Opt += geomP10ih; }
-  else if (prodName == "P10ihAuAu7")   { chain3opt = prodP10ihAuAu7;    chain2Opt += geomP10ih; }
+  else if (prodName == "P10iapp")      { chain3Opt = prodP10iapp;       chain2Opt += geomP10ih; }
+  else if (prodName == "P10ihAuAu39")  { chain3Opt = prodP10ihAuAu39;   chain2Opt += geomP10ih; }
+  else if (prodName == "P10ihAuAu11")  { chain3Opt = prodP10ihAuAu11;   chain2Opt += geomP10ih; }
+  else if (prodName == "P10ihAuAu7")   { chain3Opt = prodP10ihAuAu7;    chain2Opt += geomP10ih; }
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
