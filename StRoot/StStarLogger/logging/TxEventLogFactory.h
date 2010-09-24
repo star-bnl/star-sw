@@ -2,7 +2,7 @@
  * @file TxEventLogFactory.h
  * @author Valeri Fine
  *
- * @(#)cpp/api:$Id: TxEventLogFactory.h,v 1.2 2010/03/30 20:05:37 fine Exp $
+ * @(#)cpp/api:$Id: TxEventLogFactory.h,v 1.3 2010/09/24 17:17:35 fine Exp $
  *
  * TxEventLogFactory instantiuate the concrete implementation for 
  * * TxEventLOf interface
@@ -15,6 +15,7 @@ class TxEventLog;
 class TxEventLogFactory {
    public:
       static TxEventLog* create(const char *technology="file");
+      static int main(int argc, const char *argv[]);
 };
 }
 #endif
