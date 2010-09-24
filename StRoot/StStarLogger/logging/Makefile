@@ -48,6 +48,7 @@ endif
 # My project definition (same name in .i)
 MYMOD = logging
 MYJAR = tx-ucm
+MYMAINLOG = ulog
 
 UCMINC = $(STAR_USM_MODULE_DIR)/TxEventLog.h 
 
@@ -124,7 +125,7 @@ PDEPS= $(MYMOD)_perl_wrap.cxx
 POBJS= $(MYMOD)_perl_wrap.o  $(PSRCS:%.cxx=%.o)
 
 # Main target $(MYMOD).$(SOEXT)  $(MYMOD)_main.class $(MYMOD)_perl.$(SOEXT)
-all: $(X86_DIR) $(X86_64_DIR) $(X86_DIR)/lib$(MYMOD).$(SOEXT)  $(X86_64_DIR)/lib$(MYMOD).$(SOEXT)  $(MYJAR).jar
+all: $(X86_DIR) $(X86_64_DIR) $(X86_DIR)/lib$(MYMOD).$(SOEXT)  $(X86_64_DIR)/lib$(MYMOD).$(SOEXT)  $(MYJAR).jar $(X86_64_DIR)/$(MYMAINLOG) $(X86_DIR)/$(MYMAINLOG)
 	@ echo "Try % perl test.pl"
 	@ echo "Try % $(JAVAX) -Djava.library.path=./ $(MYMOD)_main"
 
@@ -158,10 +159,10 @@ $(X86_64_DIR)/lib$(MYMOD)_java.$(SOEXT):  $(JOBJS:%=$(X86_64_DIR)/%) $(X86_64_DI
 	$(LD) -m64 $(SOFLAGS) $@ $(JOBJS:%=$(X86_64_DIR)/%) -L$(X86_64_DIR) -l$(MYMOD)Impl
         
 $(X86_64_DIR)/lib$(MYMOD).$(SOEXT):     $(X86_64_DIR)/lib$(MYMOD)_java.$(SOEXT)   
-	cd $(X86_64_DIR) && ln -s  lib$(MYMOD)_java.$(SOEXT) lib$(MYMOD).$(SOEXT) 
+	cd $(X86_64_DIR) && rm -f lib$(MYMOD).$(SOEXT) && ln -s lib$(MYMOD)_java.$(SOEXT) lib$(MYMOD).$(SOEXT) 
 
 $(X86_DIR)/lib$(MYMOD).$(SOEXT):     $(X86_DIR)/lib$(MYMOD)_java.$(SOEXT)   
-	cd $(X86_DIR) && ln -s  lib$(MYMOD)_java.$(SOEXT) lib$(MYMOD).$(SOEXT) 
+	cd $(X86_DIR) && rm -f lib$(MYMOD).$(SOEXT)  && ln -s lib$(MYMOD)_java.$(SOEXT) lib$(MYMOD).$(SOEXT) 
 
 
 $(X86_DIR)/%.o:  $(STAR_USM_BASE_DIR)/%.cpp
@@ -205,7 +206,20 @@ $(X86_64_DIR)/$(MYMOD)_java_wrap.o: $(MYMOD)_java_wrap.cxx
 # $(MYMOD)_main.class: test.java $(MYMOD).java $(SRCS:%.cpp=%.java)
 $(MYMOD)_main.class:  $(MYMOD).java $(UCMINC:%.h=%.java)
 	$(JAVAC) $?
+        
+$(MYMAINLOG).cxx:  $(STAR_USM_BASE_DIR)/TxEventLogFactory.h
+	rm -f $@
+	echo '#include "$(STAR_USM_BASE_DIR)/TxEventLogFactory.h"' >>$@
+	echo 'using namespace TxLogging;' >>$@
+	echo 'int main(int argc, const char *argv[]) {   return TxEventLogFactory::main(argc,argv); }' >>$@
 
+
+$(X86_64_DIR)/$(MYMAINLOG):  $(MYMAINLOG).cxx $(X86_64_DIR)/lib$(MYMOD)Impl.$(SOEXT)
+	$(CC) -m64  -o $@ $^ -L$(OPTSTAR_64)/lib -llog4cxx -L/usr/lib64/mysql -lmysqlclient 
+
+
+$(X86_DIR)/$(MYMAINLOG): $(MYMAINLOG).cxx $(X86_DIR)/lib$(MYMOD)Impl.$(SOEXT)
+	$(CC) -m32  -o $@ $^ -L$(OPTSTAR)/lib -llog4cxx -L/usr/lib/mysql -lmysqlclient 
 
 # Global
 .c.o:
@@ -236,7 +250,7 @@ clean:
 
 distclean: clean
 	/bin/rm -f $(MYJAR).jar
-	/bin/rm -f *.$(SOEXT)  $(X86_64_DIR)/*.$(SOEXT) $(X86_DIR)/*.$(SOEXT)
+	/bin/rm -f *.$(SOEXT)
 	/bin/rm -f $(DISTTAR)
 
 
