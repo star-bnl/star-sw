@@ -24,6 +24,4 @@
      
 //________________________________________________________________________
 int  Main(int argc, const char *argv[])
-{
-   return TxEventLogFactory::main(argc,argv);
-}
+{   return TxLogging::TxEventLogFactory::main(argc,argv); }
