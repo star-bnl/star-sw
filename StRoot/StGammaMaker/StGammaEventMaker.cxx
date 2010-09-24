@@ -125,8 +125,12 @@ Int_t StGammaEventMaker::Make()
 
     
     // Store timestamp index in place of run number in simulation
+    // when dynamic timestamps have been specified in the GammaMaker
     StGammaScheduleMaker *scheduler = dynamic_cast<StGammaScheduleMaker*>(GetMakerInheritsFrom("StGammaScheduleMaker"));
-    if(scheduler) mGammaEvent->SetRunNumber(scheduler->index());
+    if(scheduler) 
+    {
+        if(scheduler->nStamps()) mGammaEvent->SetRunNumber(scheduler->index());
+    }
     
     return kStOK;
   
