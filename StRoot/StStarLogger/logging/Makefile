@@ -210,8 +210,7 @@ $(MYMOD)_main.class:  $(MYMOD).java $(UCMINC:%.h=%.java)
 $(MYMAINLOG).cxx:  $(STAR_USM_BASE_DIR)/TxEventLogFactory.h
 	rm -f $@
 	echo '#include "$(STAR_USM_BASE_DIR)/TxEventLogFactory.h"' >>$@
-	echo 'using namespace TxLogging;' >>$@
-	echo 'int main(int argc, const char *argv[]) {   return TxEventLogFactory::main(argc,argv); }' >>$@
+	echo 'int main(int argc, const char *argv[]) {   return TxLogging::TxEventLogFactory::main(argc,argv); }' >>$@
 
 
 $(X86_64_DIR)/$(MYMAINLOG):  $(MYMAINLOG).cxx $(X86_64_DIR)/lib$(MYMOD)Impl.$(SOEXT)
