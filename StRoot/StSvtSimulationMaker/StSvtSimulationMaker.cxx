@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.46 2010/09/22 13:44:25 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.47 2010/09/25 16:17:50 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.47  2010/09/25 16:17:50  caines
+ * Add iteration to transformation routines so local -> wafer followed by wafer->local come to same point, needed because of dirft velocity assumptions
+ *
  * Revision 1.46  2010/09/22 13:44:25  caines
  * Record is StMcHit the shifted hit position after caling ideal2real routines
  *
@@ -716,7 +719,7 @@ Int_t StSvtSimulationMaker::Make()
   setGeantData(); //if this removed geant data need to be dealocated in Clear() 
   
   StSvtWaferCoordinate waferCoord (0,0,0,0,0,0);
-  StSvtLocalCoordinate localCoord (0,0,0);
+  StSvtLocalCoordinate localCoord (0,0,0), localCoordb(0,0,0);
   StGlobalCoordinate globalCor(0,0,0);
 
   St_svtHybridDriftVelocityC *driftVel = St_svtHybridDriftVelocityC::instance();
@@ -760,14 +763,45 @@ Int_t StSvtSimulationMaker::Make()
 	      
 	      globalCor.setPosition(VecG);	     
 	      mCoordTransform->operator()(globalCor,localCoord,volId);
+	      	      
 	      
 	      if (! driftVel->p(localCoord.barrel(),localCoord.ladder(),localCoord.wafer(),localCoord.hybrid())) continue;
+	     
+	      // need to djust drift time because the drift velocity assumptions are different in the conversion routines
+	      // to and from the wafer coordinate.
+	      mCoordTransform->operator()(localCoord,waferCoord);
+	      mCoordTransform->operator()(waferCoord,localCoordb);
+	      double tnew, told;
+	      int mtry=0;
+	      double scale = 1;
+	      double diffx = localCoordb.position().x()- localCoord.position().x();
+	      while( fabs(diffx) > 0.002){
+		
+		told = waferCoord.timebucket();
+		tnew =waferCoord.timebucket()+ scale*waferCoord.timebucket()*(localCoordb.position().x()- localCoord.position().x())/localCoord.position().x();
+		if( told-tnew > 4) tnew = told-0.5;
+		else if( told-tnew < -4) tnew = told+0.5;
+		waferCoord.setTimeBucket(tnew);
+		mCoordTransform->operator()(waferCoord,localCoordb);
+		if( fabs(diffx) < fabs(localCoordb.position().x()- localCoord.position().x())){
+		  waferCoord.setTimeBucket(told);
+		  scale *= 0.5;
+		}
+		else{
+		  diffx = localCoordb.position().x()- localCoord.position().x();
+		}
+		//	cout << "try "<< mtry << " " <<  scale << " " << diffx << " " << localCoord.position() << " " << localCoordb.position() << " " << told << " " << tnew << endl;
+		mtry++;
+		if( mtry > 10000) diffx = 0;
+
+	      }
+	      // cout << "Final best guess " << "try "<< mtry << " " <<  diffx << " " << scale << " " << told << " " << tnew << endl;
+
 	      VecL.setX(localCoord.position().x());
 	      VecL.setY(localCoord.position().y());
-	      VecL.setZ(localCoord.position().z());
+	      VecL.setZ(localCoord.position().z());	      
 	      
-	      
-	      mCoordTransform->operator()(localCoord,waferCoord);
+	      //mCoordTransform->operator()(localCoord,waferCoord);
 	      double anode,time;
 	      barrel = waferCoord.barrel();
 	      layer = waferCoord.layer(); ladder = waferCoord.ladder();
@@ -775,12 +809,6 @@ Int_t StSvtSimulationMaker::Make()
 	      time = waferCoord.timebucket();
 	      double driftTime=time - mT0->getT0();
 	      anode = waferCoord.anode();
-	      //cout<<"time pos of hit(according to CoordTransform):"<<time<<" ,anodepos:"<<anode<<endl;
-	      //  cout << "At this point hit has: "<<  globalCor << " " << localCoord << " " << waferCoord << endl;
-	      //mCoordTransform->operator()(waferCoord,localCoord);
-	      //mCoordTransform->operator()(localCoord,globalCor);
-	      
-	      //cout << "Now it is  this point hit has: "<<  globalCor << " " << localCoord << " " << waferCoord << endl;
 	      
 	      if(driftTime < 0.0 || time > 128.0 || anode < 0.0 || anode > 240.0)
 		{ tmpBadCount++; continue;}
