@@ -82,24 +82,25 @@ int  Main(int argc, const char *argv[])
    while (--argc) arg += *(++argv);
    regex_t rgex1;
    regex_t rgex2;
+   char errtext[512]={0};
+   int errcode = 0;
 
    const char *regX1 = "^ *([^ ]+) *= *([^ ]+.*[^ ]*) *$";
    const char *regX2 = "^ *-key *([^ ]+) *-value *([^ ]+.*[^ ]*) *$";
-   regcomp(&rgex1,regX1,REG_ICASE);
-   regcomp(&rgex2,regX2,REG_ICASE);
+   regcomp(&rgex1,regX1,REG_ICASE | REG_EXTENDED);
+   regcomp(&rgex2,regX2,REG_ICASE | REG_EXTENDED );
    regmatch_t matchptr [3]; 
    size_t nmatch = sizeof(matchptr)/sizeof(regmatch_t);
-
-   if (! regexec(&rgex1,arg.c_str(),nmatch,matchptr,0) )  {
-      string key   = arg.substr(matchptr[1].rm_so, matchptr[1].rm_eo-matchptr[1].rm_so+1 );
-      string value = arg.substr(matchptr[2].rm_so, matchptr[2].rm_eo-matchptr[2].rm_so+1 ); 
+   if (! (errcode = regexec(&rgex1,arg.c_str(),nmatch,matchptr,0) ) )  {
+      string key   = arg.substr(matchptr[1].rm_so, matchptr[1].rm_eo-matchptr[1].rm_so );
+      string value = arg.substr(matchptr[2].rm_so, matchptr[2].rm_eo-matchptr[2].rm_so ); 
       log(key.c_str(), value.c_str());
-    }  else if (! regexec(&rgex2,arg.c_str(),nmatch,matchptr,0) ) {
-      string key   = arg.substr(matchptr[1].rm_so, matchptr[1].rm_eo-matchptr[1].rm_so+1 );
-      string value = arg.substr(matchptr[2].rm_so, matchptr[2].rm_eo-matchptr[2].rm_so+1 ); 
+    } else if (! regexec(&rgex2,arg.c_str(),nmatch,matchptr,0) ) {
+      string key   = arg.substr(matchptr[1].rm_so, matchptr[1].rm_eo-matchptr[1].rm_so );
+      string value = arg.substr(matchptr[2].rm_so, matchptr[2].rm_eo-matchptr[2].rm_so ); 
       log(key.c_str(), value.c_str());
     } else{
-       const char *usage = "\nInput format error\n"
+       const char *usage = " Input format error\n"
                        "\n"
                        "Usage:\n"
                        "\n"
@@ -107,7 +108,7 @@ int  Main(int argc, const char *argv[])
                        "or\n"
                        "      ulog [key]=[value]\n"
                        "\n";
-            printf("%s\n",usage);
+            printf("\n%s: %s\n",arg.c_str(),usage);
             return 1;
     }
     regfree(&rgex1);
