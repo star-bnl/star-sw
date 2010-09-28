@@ -125,8 +125,8 @@ PDEPS= $(MYMOD)_perl_wrap.cxx
 POBJS= $(MYMOD)_perl_wrap.o  $(PSRCS:%.cxx=%.o)
 
 # Main target $(MYMOD).$(SOEXT)  $(MYMOD)_main.class $(MYMOD)_perl.$(SOEXT)
-# $(X86_64_DIR)/$(MYMAINLOG)
-all: $(X86_DIR) $(X86_64_DIR) $(X86_DIR)/lib$(MYMOD).$(SOEXT)  $(X86_64_DIR)/lib$(MYMOD).$(SOEXT)  $(MYJAR).jar  $(X86_DIR)/$(MYMAINLOG)
+# 
+all: $(X86_DIR) $(X86_64_DIR) $(X86_DIR)/lib$(MYMOD).$(SOEXT)  $(X86_64_DIR)/lib$(MYMOD).$(SOEXT)  $(MYJAR).jar  $(X86_DIR)/$(MYMAINLOG) $(X86_64_DIR)/$(MYMAINLOG)
 	@ echo "Try % perl test.pl"
 	@ echo "Try % $(JAVAX) -Djava.library.path=./ $(MYMOD)_main"
 
@@ -215,11 +215,11 @@ $(MYMAINLOG).cxx:  $(STAR_USM_BASE_DIR)/TxEventLogFactory.h
 
 
 $(X86_64_DIR)/$(MYMAINLOG):  $(MYMAINLOG).cxx $(X86_64_DIR)/lib$(MYMOD)Impl.$(SOEXT)
-	$(CC) -m64  -o $@ $^ $(INCDIRS:%=-I%)  -L$(OPTSTAR_64)/lib -llog4cxx -L/usr/lib64/mysql -lmysqlclient 
+	$(CC) -m64  -o $@ $< $(INCDIRS:%=-I%) -L$(X86_64_DIR) -l$(MYMOD)Impl -L$(OPTSTAR_64)/lib -llog4cxx -L/usr/lib64/mysql -lmysqlclient 
 
 
 $(X86_DIR)/$(MYMAINLOG): $(MYMAINLOG).cxx $(X86_DIR)/lib$(MYMOD)Impl.$(SOEXT)
-	$(CC) -m32  -o $@ $^ $(INCDIRS:%=-I%) -L$(OPTSTAR)/lib -llog4cxx -L/usr/lib/mysql -lmysqlclient 
+	$(CC) -m32  -o $@ $< $(INCDIRS:%=-I%) -L$(X86_DIR) -l$(MYMOD)Impl -L$(OPTSTAR)/lib -llog4cxx -L/usr/lib/mysql -lmysqlclient 
 
 # Global
 .c.o:
