@@ -2641,7 +2641,7 @@ ComponentAnalyticField::SetupD30() {
   wmap.resize(nWires);
   
   std::complex<double> wd;
-  
+ 
   InitializeCoefficientTables();
   
   // Evaluate kappa, a constant needed by ConformalMap.
@@ -3694,9 +3694,9 @@ ComponentAnalyticField::InitializeCoefficientTables() {
   // Tables of coefficients used by ConformalMap
   cc1.clear(); cc1.resize(6);
   cc2.clear(); cc2.resize(6);
-  for (int i = 0; i < nterms; ++i) {
-    cc1[i].clear();
-    cc2[i].clear();
+  for (int i = 0; i < 6; ++i) {
+    cc1[i].clear(); cc1[i].resize(nterms);
+    cc1[i].clear(); cc2[i].resize(nterms);
   }
   
   // Triangle: coefficients for centre and corner expansion.
@@ -3795,13 +3795,15 @@ ComponentAnalyticField::InitializeCoefficientTables() {
             0.4329345822e+00, -.3916820884e+00, 0.4401986003e+00,
             -.4197303057e+00};
   
-  cc1[0].assign(cc13, cc13 + nterms); cc2[0].assign(cc23, cc23 + nterms);
-  cc1[1].assign(cc14, cc14 + nterms); cc2[1].assign(cc24, cc24 + nterms);
-  cc1[2].assign(cc15, cc15 + nterms); cc2[2].assign(cc25, cc25 + nterms);
-  cc1[3].assign(cc16, cc16 + nterms); cc2[3].assign(cc26, cc26 + nterms);
-  cc1[4].assign(cc17, cc17 + nterms); cc2[4].assign(cc27, cc27 + nterms);
-  cc1[5].assign(cc18, cc18 + nterms); cc2[5].assign(cc28, cc28 + nterms);
-  
+  for (int i = 0; i < nterms; ++i) {
+    cc1[0][i] = cc13[i]; cc2[0][i] = cc23[i];
+    cc1[1][i] = cc14[i]; cc2[1][i] = cc24[i];
+    cc1[2][i] = cc15[i]; cc2[2][i] = cc25[i];
+    cc1[3][i] = cc16[i]; cc2[3][i] = cc26[i];
+    cc1[4][i] = cc17[i]; cc2[4][i] = cc27[i];
+    cc1[5][i] = cc18[i]; cc2[5][i] = cc28[i];
+  }
+
 }
 
 void
