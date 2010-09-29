@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpxAuAu7.C,v 1.1 2010/09/22 21:17:11 didenko Exp $
+// $Id: bfcMixer_TpxAuAu7.C,v 1.2 2010/09/29 19:21:34 didenko Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -130,7 +130,14 @@ void bfcMixer_TpxAuAu7(const Int_t Nevents=100,
 	{
 	  mixer->SetInput("Input1","TpxRaw/.data/Event");
         }
-  mixer->SetInput("Input2","Trs/.const/Event");
+  //  mixer->SetInput("Input2","Trs/.const/Event");
+
+  if (chain2Opt.Contains("TpcRS",TString::kIgnoreCase)) {
+   mixer->SetInput("Input2","TpcRS/Event");
+ }else {
+   mixer->SetInput("Input2","Trs/.const/Event");
+ }
+
   Chain->cd();
 
  //............. begin of EMC embedding makers................
