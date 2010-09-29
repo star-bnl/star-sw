@@ -912,11 +912,17 @@ ComponentAnalyticField::CellInit() {
   // Cell type.
   cellType = "A  ";
   iCellType = 1;
-  
+ 
+  // Bounding box and voltage range. 
+  xmin = xmax = 0.;
+  ymin = ymax = 0.;
+  zmin = zmax = 0.;
+  vmin = vmax = 0.;
+
   // Periodicities
   perx = pery = false;
   sx = sy = 1.;
-  
+ 
   // Signals
   nFourier = 1;
   cellTypeFourier = "A  ";
@@ -946,7 +952,7 @@ ComponentAnalyticField::CellInit() {
   b2sin.clear();
   // C type cells
   mode = 0;
-  zmult = 0.;
+  zmult = std::complex<double>(0., 0.);
   p1 = p2 = c1 = 0.;
   // D3 type cells
   wmap.clear();
@@ -955,8 +961,8 @@ ComponentAnalyticField::CellInit() {
   cc2.clear();
   
   // Reference potential
-  corvta = corvtb = corvtc = 0.;
   v0 = 0.;
+  corvta = corvtb = corvtc = 0.;
     
   // Planes.
   planes.clear(); planes.resize(5);
@@ -965,6 +971,9 @@ ComponentAnalyticField::CellInit() {
     coplan[i] = 0.;
     vtplan[i] = 0.;
   }
+  // Plane shorthand.
+  ynplax = ynplay = false;
+  coplax = coplay = 1.;
   
   for (int i = 0; i < 5; ++i) {
     planes[i].type = '?';
@@ -976,12 +985,6 @@ ComponentAnalyticField::CellInit() {
     planes[i].strips1.clear();
     planes[i].strips2.clear(); 
   } 
-
-  // Plane shorthand
-  ynplax = false;
-  ynplay = false;
-  coplax = 1.;
-  coplay = 1.;
 
   // Tube properties.
   tube = false;
@@ -2639,15 +2642,17 @@ ComponentAnalyticField::SetupD30() {
 //-----------------------------------------------------------------------
 
   wmap.resize(nWires);
+  for (int i = nWires; i--;) {
+    wmap[i] = std::complex<double>(0., 0.);
+  }
   
-  std::complex<double> wd;
+  std::complex<double> wd = std::complex<double>(0., 0.);
  
   InitializeCoefficientTables();
   
   // Evaluate kappa, a constant needed by ConformalMap.
-  kappa = gamma((ntube + 1.) / ntube) * gamma((ntube - 2.) / ntube) / 
-          gamma((ntube - 1.) / ntube);
-  
+  kappa = tgamma((ntube + 1.) / ntube) * tgamma((ntube - 2.) / ntube) / 
+          tgamma((ntube - 1.) / ntube);
   // Loop over all wire combinations.
   for (int i = 0; i < nWires; ++i) {
     // Compute wire mappings only once.
