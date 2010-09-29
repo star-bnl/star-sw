@@ -514,6 +514,32 @@ ComponentAnalyticField::SetPeriodicityY(const double s) {
 
 }
 
+bool
+ComponentAnalyticField::GetPeriodicityX(double& s) {
+
+  if (!xPeriodic) {
+    s = 0.;
+    return false;
+  }
+
+  s = sx;
+  return true;
+
+}
+
+bool 
+ComponentAnalyticField::GetPeriodicityY(double& s) {
+
+  if (!yPeriodic) {
+    s = 0.;
+    return false;
+  }
+
+  s = sy;
+  return true;
+
+}
+
 void 
 ComponentAnalyticField::UpdatePeriodicity() {
   
@@ -573,6 +599,101 @@ ComponentAnalyticField::UpdatePeriodicity() {
   
 }
 
+int
+ComponentAnalyticField::GetNumberOfPlanesX() {
+
+  if (ynplan[0] && ynplan[1]) {
+    return 2;
+  } else if (ynplan[0] || ynplan[1]) {
+    return 1;
+  }
+  return 0;
+
+}
+
+int
+ComponentAnalyticField::GetNumberOfPlanesY() {
+
+  if (ynplan[2] && ynplan[3]) {
+    return 2;
+  } else if (ynplan[2] || ynplan[3]) {
+    return 1;
+  }
+  return 0;
+
+}
+
+bool
+ComponentAnalyticField::GetWire(const int i, 
+                                double& x, double& y, 
+                                double& diameter, double& voltage,
+                                char& label, double& length,
+                                double& charge) {
+
+  if (i < 0 || i >= nWires) {
+    std::cerr << className << "::GetWire:\n";
+    std::cerr << "    Wire index is out of range.\n";
+    return false;
+  }
+
+  x = w[i].x; y = w[i].y;
+  diameter = w[i].d; voltage = w[i].v;
+  label = w[i].type;
+  length = w[i].u;
+  charge = w[i].e;
+  return true;
+
+}
+
+bool
+ComponentAnalyticField::GetPlaneX(const int i, 
+                                  double& x, double& voltage, 
+                                  char& label) {
+
+  if (i < 0 || i >= 2 || (i == 1 && !ynplan[1])) {
+    std::cerr << className << "::GetPlaneX:\n";
+    std::cerr << "    Plane index is out of range.\n";
+    return false;
+  }
+
+  x = coplan[i];
+  voltage = vtplan[i];
+  label = planes[i].type;
+  return true;
+ 
+}
+
+bool
+ComponentAnalyticField::GetPlaneY(const int i,
+                                  double& y, double& voltage,
+                                  char& label) {
+
+  if (i < 0 || i >= 2 || (i == 1 && !ynplan[3])) {
+    std::cerr << className << "::GetPlaneY:\n";
+    std::cerr << "    Plane index is out of range.\n";
+    return false;
+  }
+
+  y = coplan[i + 2];
+  voltage = vtplan[i + 2];
+  label = planes[i + 2].type;
+  return true;
+
+}
+
+bool
+ComponentAnalyticField::GetTube(double& r, double& voltage, int& nEdges,
+                                char& label) {
+
+  if (!tube) return false;
+  r = cotube;
+  voltage = vttube;
+  nEdges = ntube;
+  label = planes[4].type;
+  return true;
+
+} 
+                                  
 int
 ComponentAnalyticField::Field(
       const double xin, const double yin, const double zin,

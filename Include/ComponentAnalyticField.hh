@@ -63,11 +63,15 @@ class ComponentAnalyticField : public ComponentBase {
     // Set the periodic length [cm] in x/y direction
     void SetPeriodicityX(const double s);
     void SetPeriodicityY(const double s);
-    
+    bool GetPeriodicityX(double& s);
+    bool GetPeriodicityY(double& s);
+ 
     std::string GetCellType() {return cellType;}
-    // Cells are classified according to the number and orientation of planes,
-    // the presence of periodicities and the location of the wires
+    // Cells are classified according to the number 
+    // and orientation of planes, the presence of 
+    // periodicities and the location of the wires
     // as one of the following types:
+    // 
     // A    non-periodic cells with at most 1 x- and 1 y-plane
     // B1X  x-periodic cells without x-planes and at most 1 y-plane
     // B1Y  y-periodic cells without y-planes and at most 1 x-plane
@@ -85,7 +89,20 @@ class ComponentAnalyticField : public ComponentBase {
     
     void EnableChargeCheck()  {chargeCheck = true;}
     void DisableChargeCheck() {chargeCheck = false;}
- 
+
+    int GetNumberOfWires() {return nWires;}
+    bool GetWire(const int i, 
+                 double& x, double& y, double& diameter, 
+                 double& voltage, char& label, double& length,
+                 double& charge);
+    
+    int GetNumberOfPlanesX();
+    int GetNumberOfPlanesY();
+    bool GetPlaneX(const int i, double& x, double& voltage, char& label);
+    bool GetPlaneY(const int i, double& y, double& voltage, char& label);
+
+    bool GetTube(double& r, double& voltage, int& nEdges, char& label); 
+
   private:
   
     bool chargeCheck;

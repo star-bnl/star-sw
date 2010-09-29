@@ -415,7 +415,7 @@ MediumMagboltz86::EnablePenningTransfer(const double r,
   std::cout << className << "::EnablePenningTransfer:\n";
   std::cout << "    Global Penning transfer parameters set to: \n";
   std::cout << "    r      = " << rPenningGlobal << "\n";
-  std::cout << "    lambda = " << lambdaPenningGlobal << "\n";
+  std::cout << "    lambda = " << lambdaPenningGlobal << " cm\n";
 
   for (int i = nTerms; i--;) { 
     rPenning[i] = rPenningGlobal;
@@ -485,9 +485,9 @@ MediumMagboltz86::EnablePenningTransfer(const double r,
 
   if (nLevelsFound > 0) {
     std::cout << className << "::EnablePenningTransfer:\n";
-    std::cout << "    Penning transfer parameters " << nLevelsFound
+    std::cout << "    Penning transfer parameters for " << nLevelsFound
               << " excitation levels set to:\n";
-    std::cout << "      r      = " << rPenningGas[iGas];
+    std::cout << "      r      = " << rPenningGas[iGas] << "\n";
     std::cout << "      lambda = " << lambdaPenningGas[iGas] << " cm\n"; 
   } else {
     std::cerr << className << "::EnablePenningTransfer:\n";

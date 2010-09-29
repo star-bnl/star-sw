@@ -53,6 +53,9 @@ class ViewDrift {
     void SetPhotonColor(const std::string color);
     void SetChargedParticleColor(const std::string color);
 
+    void EnableDebugging()  {debug = true;}
+    void DisableDebugging() {debug = false;}
+
   private:
  
     // Options

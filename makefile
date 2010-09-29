@@ -187,11 +187,18 @@ $(OBJDIR)/ViewDrift.o: \
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
 $(OBJDIR)/ViewMedium.o: \
-	$(SRCDIR)/ViewMedium.cc $(INCDIR)/ViewMedium.hh
+	$(SRCDIR)/ViewMedium.cc $(INCDIR)/ViewMedium.hh \
+	$(INCDIR)/Medium.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
 $(OBJDIR)/ViewSignal.o: \
-	$(SRCDIR)/ViewSignal.cc $(INCDIR)/ViewSignal.hh
+	$(SRCDIR)/ViewSignal.cc $(INCDIR)/ViewSignal.hh \
+	$(INCDIR)/Sensor.hh
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
+$(OBJDIR)/ViewCell.o: \
+	$(SRCDIR)/ViewCell.cc $(INCDIR)/ViewCell.hh \
+	$(INCDIR)/ComponentAnalyticField.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
 
