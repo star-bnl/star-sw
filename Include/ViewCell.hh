@@ -35,11 +35,15 @@ class ViewCell {
 
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
+
+    void EnableWireMarkers()  {useWireMarker = true;}
+    void DisableWireMarkers() {useWireMarker = false;}  
   
   private:
  
     // Options
     bool debug;
+    bool useWireMarker;
 
     std::string label;
 
@@ -53,7 +57,6 @@ class ViewCell {
 
     ComponentAnalyticField* component;
 
-    bool useWireMarker;
     void PlotWire(const double x, const double y, const double d);
     void PlotLine(const double x0, const double y0, 
                   const double x1, const double y1);

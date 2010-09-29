@@ -13,14 +13,13 @@
 namespace Garfield {
 
 ViewCell::ViewCell() :
-  debug(false),
+  debug(false), useWireMarker(true),
   label("Cell Layout"),
   canvas(0), hasExternalCanvas(false),
   hasUserArea(false),
   xMin(-1.), yMin(-1.), zMin(-1.), 
   xMax( 1.), yMax( 1.), zMax( 1.),
-  component(0),
-  useWireMarker(true) {
+  component(0) {
 
   plottingEngine.SetDefaultStyle();
 
