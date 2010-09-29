@@ -204,7 +204,10 @@ class MediumMagboltz86 : public Medium {
     // Switch on/off simplified simulation of Penning transfers by means of 
     // transfer probabilities (not compatible with de-excitation handling)
     void EnablePenningTransfer(const double r, const double lambda);
-    void DisablePenningTransfer() {usePenning = false;}
+    void EnablePenningTransfer(const double r, const double lambda,
+                               const std::string gasname);
+    void DisablePenningTransfer();
+    void DisablePenningTransfer(const std::string gasname);
 
     // When enabled, the gas cross-section table is written to file
     // when loaded into memory
@@ -242,7 +245,7 @@ class MediumMagboltz86 : public Medium {
     // Get number of cross-section terms                              
     int GetNumberOfLevels();
     // Get detailed information about a given cross-section term i
-    bool GetLevel(const int i, int& gas, int& type, 
+    bool GetLevel(const int i, int& ngas, int& type, 
                   std::string& descr, double& e);    
     // Get number of collisions for a specific cross-section term    
     int GetNumberOfElectronCollisions(const int level) const;
@@ -334,9 +337,13 @@ class MediumMagboltz86 : public Medium {
     // Flag enabling/disabling Penning transfer
     bool usePenning;
     // Penning transfer probability
-    double rPenning;
+    double rPenningGlobal;
+    double rPenningGas[nMaxGases];
+    double rPenning[nMaxLevels];
     // Mean distance of Penning ionization
-    double lambdaPenning;
+    double lambdaPenningGlobal;
+    double lambdaPenningGas[nMaxGases];
+    double lambdaPenning[nMaxLevels];
     // Number of Penning ionisations
     int nPenning;
 

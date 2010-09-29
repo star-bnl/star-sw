@@ -340,7 +340,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   bool trapped = false;
   int abortReason = 0;
 
-  if (t0 < tMin || t0 > tMax) {
+  if (hasTimeWindow && (t0 < tMin || t0 > tMax)) {
     std::cerr << className << "::DriftLine:\n";
     std::cerr << "    Starting time " << t0 
               << " is outside the specified time window.\n";
@@ -414,7 +414,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     }
 
     // Make sure the time is still within the specified interval.
-    if (point.t + delta > tMax) {
+    if (hasTimeWindow && point.t + delta > tMax) {
       abortReason = StatusOutsideTimeWindow;
       break;
     }

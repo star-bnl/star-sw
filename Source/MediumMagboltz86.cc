@@ -18,7 +18,8 @@ MediumMagboltz86::MediumMagboltz86() :
   eFinal(40.), eStep(eFinal / nEnergySteps), useAutoAdjust(true), 
   useCsOutput(false), 
   nTerms(0), useAnisotropic(true), 
-  usePenning(false), rPenning(0.), nPenning(0), 
+  usePenning(false), rPenningGlobal(0.), lambdaPenningGlobal(0.), 
+  nPenning(0), 
   useDeexcitation(false), useRadTrap(true),
   nDeexcitations(0), nDeexcitationProducts(0),
   scaleExc(1.), useSplittingFunction(true),
@@ -60,7 +61,17 @@ MediumMagboltz86::MediumMagboltz86() :
   inpt_.torr = pressure;
   // Disable Penning transfer.
   inpt_.ipen = 0;
-  
+ 
+  // Initialise Penning parameters
+  for (int i = nMaxGases; i--;) {
+    rPenningGas[i] = 0.;
+    lambdaPenningGas[i] = 0.;
+  }
+  for (int i = nMaxLevels; i--;) {
+    rPenning[i] = 0.;
+    lambdaPenning[i] = 0.;
+  }  
+ 
   isChanged = true;
 
   EnableDrift();
@@ -85,6 +96,13 @@ MediumMagboltz86::SetComposition(const std::string gas1, const double f1,
                                  const std::string gas4, const double f4,
                                  const std::string gas5, const double f5, 
                                  const std::string gas6, const double f6) {
+
+  // Make a backup copy of the gas composition.
+  int gasOld[nMaxGases];
+  for (int i = nMaxGases; i--;) {
+    gasOld[i] = gas[i];
+  }
+  int nComponentsOld = nComponents;
 
   int i = 0;
   
@@ -118,13 +136,15 @@ MediumMagboltz86::SetComposition(const std::string gas1, const double f1,
   }
   
   nComponents = i;
-  std::string gasname = "";
+  std::vector<std::string> gasname;
+  gasname.resize(nComponents);
   name = "";  
-  double sum = 0.;  
+  double sum = 0.;
   for (i = 0; i < nComponents; ++i) {
+    gasname[i] = "";
     if (i > 0) name += "/";  
-    GetGasInfo(gas[i], gasname, atWeight[i], atNum[i]);
-    name += gasname;
+    GetGasInfo(gas[i], gasname[i], atWeight[i], atNum[i]);
+    name += gasname[i];
     sum += fraction[i];
   }
   // Normalise the fractions to one.
@@ -152,7 +172,30 @@ MediumMagboltz86::SetComposition(const std::string gas1, const double f1,
   
   // Force a recalculation of the collision rates.
   isChanged = true;
-    
+  
+  // Copy the previous Penning transfer parameters.
+  double rPenningGasOld[nMaxGases];
+  double lambdaPenningGasOld[nMaxGases];
+  for (int i = nMaxGases; i--;) {
+    rPenningGasOld[i] = rPenningGas[i];
+    lambdaPenningGasOld[i] = lambdaPenningGas[i];
+    rPenningGas[i] = 0.;
+    lambdaPenningGas[i] = 0.;
+  }
+  for (int i = nComponents; i--;) {
+    for (int j = nComponentsOld; j--;) {
+      if (gas[i] == gasOld[j]) {
+        if (rPenningGasOld[j] > 0.) {
+          rPenningGas[i] = rPenningGasOld[j];
+          std::cout << className << "::SetComposition:\n";
+          std::cout << "    Adopting Penning transfer parameters for " 
+                    << gasname[i] << " from previous mixture.\n";
+          std::cout << "      r      = " << rPenningGas[i] << "\n";
+          std::cout << "      lambda = " << lambdaPenningGas[i] << " cm\n";
+        }
+      }
+    }
+  }
   return true;
   
 }
@@ -352,7 +395,8 @@ MediumMagboltz86::EnableRadiationTrapping() {
 }
 
 void
-MediumMagboltz86::EnablePenningTransfer(const double r, const double lambda) {
+MediumMagboltz86::EnablePenningTransfer(const double r, 
+                                        const double lambda) {
 
   if (r < 0. || r > 1.) {
     std::cerr << className << "::EnablePenningTransfer:\n";
@@ -360,10 +404,23 @@ MediumMagboltz86::EnablePenningTransfer(const double r, const double lambda) {
               << " in the range [0, 1].\n";
     return;
   }
-  
-  rPenning = r;
-  lambdaPenning = lambda;
-  if (lambdaPenning < Small) lambdaPenning = 0.;
+
+  rPenningGlobal = r;
+  if (lambda < Small) {
+    lambdaPenningGlobal = 0.;
+  } else {
+    lambdaPenningGlobal = lambda;
+  }
+
+  std::cout << className << "::EnablePenningTransfer:\n";
+  std::cout << "    Global Penning transfer parameters set to: \n";
+  std::cout << "    r      = " << rPenningGlobal << "\n";
+  std::cout << "    lambda = " << lambdaPenningGlobal << "\n";
+
+  for (int i = nTerms; i--;) { 
+    rPenning[i] = rPenningGlobal;
+    lambdaPenning[i] = lambdaPenningGlobal;
+  }
   
   if (useDeexcitation) {
     std::cout << className << "::EnablePenningTransfer:\n";
@@ -371,6 +428,146 @@ MediumMagboltz86::EnablePenningTransfer(const double r, const double lambda) {
   }
   usePenning = true;
   
+}
+
+void
+MediumMagboltz86::EnablePenningTransfer(const double r, 
+                                        const double lambda, 
+                                        const std::string gasname) {
+
+  if (r < 0. || r > 1.) {
+    std::cerr << className << "::EnablePenningTransfer:\n";
+    std::cerr << "    Penning transfer probability must be " 
+              << " in the range [0, 1].\n";
+    return;
+  }
+
+  // Get the number of this gas.
+  int ng;
+  if (!GetGasNumber(gasname, ng)) {
+    std::cerr << className << "::EnablePenningTransfer:\n";
+    std::cerr << "    Gas " << gasname << " is not defined.\n";
+    return;
+  }
+
+  // Look for this gas in the present gas mixture.
+  bool found = false;
+  int iGas = -1;
+  for (int i = nComponents; i--;) {
+    if (gas[i] == ng) {
+      rPenningGas[i] = r;
+      if (lambda < Small) {
+        lambdaPenningGas[i] = 0.;
+      } else {
+        lambdaPenningGas[i] = lambda;
+      }
+      found = true;
+      iGas = i;
+      break;
+    }
+  }
+  
+  if (!found) {
+    std::cerr << className << "::EnablePenningTransfer:\n";
+    std::cerr << "    Specified gas (" << gasname 
+              << ") is not part of the present gas mixture.\n";
+    return;
+  }
+  
+  int nLevelsFound = 0;
+  for (int i = nTerms; i--;) {
+    if (int(csType[i] / nCsTypes) == iGas) {
+      if (csType[i] % nCsTypes == 4) ++nLevelsFound; 
+      rPenning[i] = rPenningGas[iGas];
+      lambdaPenning[i] = lambdaPenningGas[iGas];
+    }
+  }
+
+  if (nLevelsFound > 0) {
+    std::cout << className << "::EnablePenningTransfer:\n";
+    std::cout << "    Penning transfer parameters " << nLevelsFound
+              << " excitation levels set to:\n";
+    std::cout << "      r      = " << rPenningGas[iGas];
+    std::cout << "      lambda = " << lambdaPenningGas[iGas] << " cm\n"; 
+  } else {
+    std::cerr << className << "::EnablePenningTransfer:\n";
+    std::cerr << "    Specified gas (" << gasname 
+              << ") has no excitation levels in the present energy range.\n";
+  }
+
+  usePenning = true; 
+
+}
+ 
+void
+MediumMagboltz86::DisablePenningTransfer() {
+
+  for (int i = nTerms; i--;) {
+    rPenning[i] = 0.;
+    lambdaPenning[i] = 0.;
+  }
+  rPenningGlobal = 0.;
+  lambdaPenningGlobal = 0.;
+
+  for (int i = nMaxGases; i--;) {
+    rPenningGas[i] = 0.;
+    lambdaPenningGas[i] = 0.;
+  }
+
+  usePenning = false;    
+
+}
+
+void
+MediumMagboltz86::DisablePenningTransfer(const std::string gasname) {
+
+  // Get the number of this gas.
+  int ng;
+  if (!GetGasNumber(gasname, ng)) {
+    std::cerr << className << "::DisablePenningTransfer:\n";
+    std::cerr << "    Gas " << gasname << " is not defined.\n";
+    return;
+  }
+
+  // Look for this gas in the present gas mixture.
+  bool found = false;
+  int iGas = -1;
+  for (int i = nComponents; i--;) {
+    if (gas[i] == ng) {
+      rPenningGas[i] = 0.;
+      lambdaPenningGas[i] = 0.;
+      found = true;
+      iGas = i;
+      break;
+    }
+  }
+  
+  if (!found) {
+    std::cerr << className << "::DisablePenningTransfer:\n";
+    std::cerr << "    Specified gas (" << gasname 
+              << ") is not part of the present gas mixture.\n";
+    return;
+  }
+  
+  int nLevelsFound = 0;
+  for (int i = nTerms; i--;) {
+    if (int(csType[i] / nCsTypes) == iGas) {
+      rPenning[i] = 0.;
+      lambdaPenning[i] = 0.;
+    } else {
+      if (csType[i] % nCsTypes == 4 && rPenning[i] > Small) {
+        ++nLevelsFound;
+      }
+    }
+  }
+
+  if (nLevelsFound <= 0) {
+    // There are no more excitation levels with r > 0.
+    std::cout << className << "::DisablePenningTransfer:\n";
+    std::cout << "    Penning transfer globally switched off.\n";
+    usePenning = false;
+  }
+
 }
 
 void
@@ -556,7 +753,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
       // ionisation potential of one of the gases,
       // create a new electron (with probability rPenning).
       if (energyLoss[level] * rgas[level] > minIonPot && 
-          RndmUniform() < rPenning) {
+          RndmUniform() < rPenning[level]) {
         // The energy of the secondary electron is assumed to be given by
         // the difference of excitation and ionisation threshold.
         esec = energyLoss[level] * rgas[level] - minIonPot;
@@ -564,7 +761,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
         // Add the secondary electron to the list.
         dxcProd newDxcProd;
         newDxcProd.t = 0.;
-        newDxcProd.s = -lambdaPenning * log(RndmUniformPos());
+        newDxcProd.s = -lambdaPenning[level] * log(RndmUniformPos());
         newDxcProd.energy = esec;
         newDxcProd.type = DxcTypeElectron;
         dxcProducts.push_back(newDxcProd);
@@ -799,7 +996,7 @@ MediumMagboltz86::GetNumberOfLevels() {
 }
 
 bool 
-MediumMagboltz86::GetLevel(const int i, int& gas, int& type,
+MediumMagboltz86::GetLevel(const int i, int& ngas, int& type,
                            std::string& descr, double& e) {
 
   if (isChanged) {
@@ -820,7 +1017,7 @@ MediumMagboltz86::GetLevel(const int i, int& gas, int& type,
   
   // Collision type
   type = csType[i] % nCsTypes;
-  gas = int(csType[i] / nCsTypes);
+  ngas = int(csType[i] / nCsTypes);
   // Description (from Magboltz)
   descr = "                              ";
   for (int j = 30; j--;) descr[j] = description[i][j];
@@ -834,7 +1031,7 @@ MediumMagboltz86::GetLevel(const int i, int& gas, int& type,
     if (type == 4 && usePenning && 
         e > minIonPot) {
       std::cout << "    Penning transfer coefficient: " 
-                << rPenning << "\n";
+                << rPenning[i] << "\n";
     }
   }
   return true;
@@ -1805,6 +2002,16 @@ MediumMagboltz86::Mixer() {
     }
   }
 
+  // Reset the Penning transfer parameters
+  for (int i = nTerms; i--;) {
+    rPenning[i] = rPenningGlobal;
+    int iGas = int(csType[i] / nCsTypes);
+    if (rPenningGas[iGas] > Small) {
+      rPenning[i] = rPenningGas[iGas];
+      lambdaPenning[i] = lambdaPenningGas[iGas];
+    }
+  }   
+  
   return true;
 
 }
