@@ -1,8 +1,14 @@
-#! /common/star/star53/opt/star/sl53_gcc432/bin/perl -w
+#! /usr/local/bin/perl -w
 
 
 #====================================================================================================
 # Generate embedding job submission xml file
+#
+# $Id: get_embedding_xml.pl,v 1.12 2010/09/29 04:22:34 hmasui Exp $
+# $Log: get_embedding_xml.pl,v $
+# Revision 1.12  2010/09/29 04:22:34  hmasui
+# Dynamic directory creation for generator and temporary log files. Added chmod for HPSS directory
+#
 #----------------------------------------------------------------------------------------------------
 
 use Getopt::Long;
@@ -316,7 +322,7 @@ print OUT "set i = 0\n";
 print OUT "set ret = 1\n";
 print OUT "while (\$i &lt; 5 || \$ret != 0)\n";
 print OUT "  @ i++\n";
-print OUT "  hsi \"mkdir -p \$EMHPSS; prompt; cd \$EMHPSS; mput *.root; mput $logFileName; mput $errFileName\"\n";
+print OUT "  hsi \"mkdir -p \$EMHPSS; prompt; cd \$EMHPSS; mput *.root; mput $logFileName; mput $errFileName; chmod ug+rw -R \$EMHPSS \"\n";
 print OUT "  set ret = \$status\n";
 print OUT "  if (\$ret == 0) then\n";
 print OUT "    break\n";
@@ -564,7 +570,22 @@ sub getGeneratorDirectory {
   my $particleName  = shift @_ ;
   my $requestNumber = shift @_ ;
   my $dir           = getEmbeddingProjectDirectory($production, $particleName, $requestNumber, 1);
-  return "$dir/LIST";
+  my $target        = "$dir/LIST";
+
+  # Check directory
+  if ( -d $target ) {
+    return "$target" ;
+  }
+  else{
+    print "  Create generator directory : $target\n";
+    system("mkdir -pv $target");
+
+    my $command = "chmod ug+rw -R $dir";
+    print "  Make target directory group readable, executing: $command \n";
+    system("$command");
+  }
+
+  return "$target" ;
 }
 
 #----------------------------------------------------------------------------------------------------
@@ -574,7 +595,28 @@ sub getTempLogDirectory {
   # Make temporary LOG directory
   my $production = shift @_ ;
   my $flag       = shift @_ ;
-  return getProductionDirectory($production, $flag) . "/LOG";
+  my $target     = getProductionDirectory($production, $flag) . "/LOG";
+
+  # return here if $flag == 0
+  if ( $flag == 0 ){
+    return $target ;
+  }
+
+  # Check directory
+  if ( -d $target ) {
+    return "$target" ;
+  }
+  else{
+    print "  Create temporary log directory : $target\n";
+    system("mkdir -pv $target");
+
+    my $command = "chmod ug+rw -R $target";
+    print "  Make target directory group readable, executing: $command \n";
+    system("$command");
+  }
+
+  return "$target" ;
+
 }
 
 #----------------------------------------------------------------------------------------------------
