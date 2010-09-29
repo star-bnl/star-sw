@@ -1,13 +1,16 @@
 //StvStEventFiller.h
 /***************************************************************************
  *
- * $Id: StvStEventFiller.h,v 1.1 2010/07/06 20:27:53 perev Exp $
+ * $Id: StvStEventFiller.h,v 1.2 2010/09/29 23:39:12 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  * Author: Victor Perev, Jun 2010
  ***************************************************************************
  *
  * $Log: StvStEventFiller.h,v $
+ * Revision 1.2  2010/09/29 23:39:12  perev
+ * Intereface fillPulls(...) chamnged
+ *
  * Revision 1.1  2010/07/06 20:27:53  perev
  * Alpha version of Stv (Star Tracker Virtual)
  *
@@ -68,7 +71,7 @@ public:
     void getAllPointCount(const StvTrack *track,int count[1][3]);
 private:
  void fillResHack(StHit *hh,const StvHit *stiHit, const StvNode *node);
- void fillPulls  (StHit *hh,const StvHit *stiHit
+ void fillPulls  (double len,StHit *hh,const StvHit *stiHit
                  ,const StvNode  *node
 		 ,const StvTrack *track
 		 ,int dets[1][3],int gloPri);

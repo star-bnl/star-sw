@@ -1,12 +1,15 @@
 #if 1
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.1 2010/07/06 20:27:53 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.2 2010/09/29 23:39:25 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.2  2010/09/29 23:39:25  perev
+ * Intereface fillPulls(...) chamnged
+ *
  * Revision 1.1  2010/07/06 20:27:53  perev
  * Alpha version of Stv (Star Tracker Virtual)
  *
@@ -477,8 +480,8 @@
 #include "Stv/StvHit.h"
 #include "Stv/StvNode.h"
 #include "Stv/StvTrack.h"
-#include "Stv/StvPullEvent.h"
-#include "Stv/StvHitErrCalculator.h"
+#include "StvUtil/StvPullEvent.h"
+#include "StvUtil/StvHitErrCalculator.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
 //#include "StDetectorDbMaker/StvKalmanTrackFitterParameters.h"
 
@@ -632,20 +635,15 @@ static int nCall=0; nCall++;
 
   StvHit *hit=node->GetHit();
   assert(hit);
-  const StHitPlane *hitPlane = hit->detector();
-  assert(hitPlane);
-  StvHitErrCalculator* hitErrCalc = (StvHitErrCalculator*)hitPlane->GetHitErrCalc();
-  assert(hitErrCalc);
-  StvHitErrs hrr;
-  hitErrCalc->CalcDCAErrs(hit, &fp,&hrr);
+  const double *hrr=node->GetHE();
   double d[3]={ hit->x_g()[0]-fp._x, hit->x_g()[1]-fp._y,hit->x_g()[2]-fp._z};
   TVectorD dif(3,d); 
   TVectorD loc = dcaFrame*dif;
   yz[0]= loc[1];   yz[1]= loc[2] ;
   
-  yzErr[0] = (hrr.hYY - node->GetFE().mHH      );
-  yzErr[1] = (hrr.hZZ - node->GetFE().mZZ*cos2L);
-  for (int j=0;j<2;j++){yzErr[j] = (yzErr[j]>1e-8)? sqrt(yzErr[j]):1e-4;}
+  yzErr[0] = (hrr[0] - node->GetFE().mHH);
+  yzErr[1] = (hrr[2] - node->GetFE().mZZ);
+  for (int j=0;j<2;j++){yzErr[j] = (yzErr[j]>1e-6)? sqrt(yzErr[j]):1e-3;}
 
 
 }
@@ -1285,6 +1283,8 @@ void StvStEventFiller::fillPulls(const StvTrack* track, int gloPri)
   mPullEvent->Add(aux,gloPri);
 
 
+
+  double len=0,preRho,preXy[2]; int myNode=0;
   for (StvNodeConstIter tNode=track->begin();tNode!=track->end();++tNode) 
   {
       const StvNode *node = (*tNode);
@@ -1294,13 +1294,29 @@ void StvStEventFiller::fillPulls(const StvTrack* track, int gloPri)
       if (node->GetXi2()>1000)  continue;
 
       StHit *hh = (StHit*)stiHit->stHit();
-      fillPulls(hh,stiHit,node,track,dets,gloPri);
+      const StvNodePars &fp = node->GetFP();
+      double dL = (stiHit->x_g()[0]-fp._x)*fp._cosCA 
+	        + (stiHit->x_g()[1]-fp._y)*fp._sinCA;
+      double myX = fp._x+dL*fp._cosCA;
+      double myY = fp._y+dL*fp._sinCA;
+      if (myNode) {
+        dL = sqrt(pow(preXy[0]-myX,2)+pow(preXy[1]-myY,2));
+        double rho = 0.5*(preRho+fabs(fp._curv));
+        if (rho*dL>0.01) dL = 2*asin(0.5*dL*rho)/rho;
+	len+=dL; 
+      }
+      myNode++;preXy[0]=myX; preXy[1]=myY; preRho = fabs(fp._curv);
+
+      fillPulls(len,hh,stiHit,node,track,dets,gloPri);
+      
+
       if (gloPri) continue;
-      fillPulls(hh,stiHit,node,track,dets,2);
+      fillPulls(len,hh,stiHit,node,track,dets,2);
   }
 }
 //_____________________________________________________________________________
- void StvStEventFiller::fillPulls(StHit *stHit,const StvHit *stiHit
+ void StvStEventFiller::fillPulls(double len
+                                 ,StHit *stHit,const StvHit *stiHit
                                  ,const StvNode *node
 				 ,const StvTrack     *track
                                  ,int dets[1][3],int gloPriRnd)
@@ -1322,14 +1338,23 @@ void StvStEventFiller::fillPulls(const StvTrack* track, int gloPri)
 //   if (!aux.nHitCand)  aux.nHitCand=1;
   aux.lYHit = yz[0];
   aux.lZHit = yz[1];
-  aux.lYHitErr = yzErr[0];
-  aux.lZHitErr = yzErr[1];
-  aux.lYPul = aux.lYHit/aux.lYHitErr;
-  aux.lZPul = aux.lZHit/aux.lZHitErr;
+  aux.lYHitErr = sqrt(node->GetHE()[0]);
+  aux.lZHitErr = sqrt(node->GetHE()[2]);
+  aux.lYPulErr = yzErr[0];
+  aux.lZPulErr = yzErr[1];
+  aux.lYPul = aux.lYHit/aux.lYPulErr; if (fabs(aux.lYPul)>10) aux.lYPul=0;
+  aux.lZPul = aux.lZHit/aux.lZPulErr; if (fabs(aux.lZPul)>10) aux.lZPul=0;
+  aux.lLen = len;
 
 // 		global frame
 
 //		global Hit
+  const StHitPlane *hitPlane = stiHit->detector();
+  assert(hitPlane);
+  const float *n = hitPlane->GetDir(stiHit->x_g())[0];
+  aux.gPhiHP = atan2(n[1],n[0]);
+  aux.gLamHP = asin(n[2]);
+
   x = stiHit->x_g()[0]; y = stiHit->x_g()[1]; z = stiHit->x_g()[2];
   r = sqrt(x*x+y*y);
 
@@ -1355,7 +1380,7 @@ void StvStEventFiller::fillPulls(const StvTrack* track, int gloPri)
   aux.mPt     = fabs(1./fp._ptin);
   aux.mCharge = stHit->charge();
   aux.mChi2   = node->GetXi2();
-  aux.mDetector=0;
+  aux.mDetector=node->GetDetId();
   aux.mTrackNumber=mTrackNumber;
   aux.nAllHits  = dets[0][2];
   aux.nTpcHits  = dets[kTpcId][2];
