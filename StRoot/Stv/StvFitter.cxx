@@ -6,7 +6,7 @@
 #include "StvFitter.h"
 #include "StvNodePars.h"
 #include "StvHit.h"
-#include "StvHitErrCalculator.h"
+#include "StvUtil/StvHitErrCalculator.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
 
 StvFitter *StvFitter::mgFitter=0;

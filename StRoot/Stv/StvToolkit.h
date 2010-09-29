@@ -30,6 +30,7 @@ void Clear(const char* opt="");
 void Reset();
 
 void Init ();
+void Finish();
 
 StvGeoLoader 	*GeoLoader();
 StvHitLoader 	*HitLoader()  const	{return mHitLoader ;}
