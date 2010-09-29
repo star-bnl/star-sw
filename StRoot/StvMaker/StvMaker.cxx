@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.1 2010/07/06 20:27:53 perev Exp $
+// $Id: StvMaker.cxx,v 1.2 2010/09/29 23:42:28 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -59,6 +59,7 @@ More detailed: 				<br>
 #include "TSystem.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TTable.h"
 #include "TCernLib.h"
 #include "StDetectorId.h"
 #include "StEvent.h"
@@ -68,14 +69,14 @@ More detailed: 				<br>
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
 //#include "StvMCInitApp.h"
 #include "Stv/StvHit.h"
-#include "Stv/StvPullEvent.h"
+#include "StvUtil/StvPullEvent.h"
 #include "Stv/StvDiver.h"
 #include "StvHitLoader.h"
 #include "Stv/StvToolkit.h"
 #include "Stv/StvDefaultSeedFinder.h"
 #include "Stv/StvKalmanTrackFinder.h"
 #include "StvTGSelectors.h"
-#include "Stv/StvHitErrCalculator.h"
+#include "StvUtil/StvHitErrCalculator.h"
 #include "Stv/StvFitter.h"
 #include "StvStEventFiller.h"
 #include "StvStarVertexFinder.h"
@@ -111,12 +112,14 @@ StvMaker::~StvMaker()
 void StvMaker::Clear(const char*)
 {
   StvToolkit::Inst()->Clear();
+  if (mPullEvent) mPullEvent->Clear();
   StMaker::Clear();
 }
 
 //_____________________________________________________________________________
 Int_t StvMaker::Finish()
 {
+  StTGeoHelper::Inst()->Finish();
   return StMaker::Finish();
 }
 
@@ -133,11 +136,16 @@ Int_t StvMaker::Init()
   StTGeoHelper::Inst()->SetActive(kTpcId);
   StTGeoHelper::Inst()->Init(1+2+4);
 
-  const char*  innOutNames[2]  ={"TpcInner"    ,"TpcOuter"    };
-  const double innOutPars[2][6]={{4*0.0048,4*0.026},{0.0048,0.026}};
+  const char*  innOutNames[2]  ={"StvTpcInnerHitErrs"    ,"StvTpcOuterHitErrs"    };
   for (int io=0;io<2;io++) {
-    StvHitErrCalculator *hec = new StvTpcHitErrCalculator();
-    hec->SetPars(innOutPars[io],6);
+    StvHitErrCalculator *hec = new StvTpcHitErrCalculator(innOutNames[io]);
+    TString ts("Calibrations/tracker/");
+    ts+=innOutNames[io];
+    TTable *tt = (TTable*)GetDataBase(ts);
+//    TTable *tt = (TTable*)GetDataBase(innOutNames[io]);
+    assert(tt);
+
+    hec->SetPars((double*)tt->GetArray());
     StvTpcSelector        *sel = new StvTpcSelector(innOutNames[io]);
     int nHP = StTGeoHelper::Inst()->SetHitErrCalc(kTpcId,hec,sel);
     Info("Init","%s: %d HitPlanes",innOutNames[io],nHP);
@@ -257,9 +265,10 @@ Int_t StvMaker::FillPulls()
   mPullEvent->mRun  = hddr->GetRunNumber();
   mPullEvent->mEvt  = hddr->GetEventNumber();
   mPullEvent->mDate = hddr->GetDateTime();	//DAQ time (GMT)
-  const StvHit *vertex   = (mVertexFinder)? mVertexFinder->Result()[0]:0;
+  const StvHit *vertex   = 0;
+  if (mVertexFinder && mVertexFinder->Result().size()) vertex = mVertexFinder->Result()[0];
+
   mPullEvent->mChi2 = 0;	
-  
   memset(mPullEvent->mVtx,0,sizeof(mPullEvent->mVtx));
   memset(mPullEvent->mEtx,0,sizeof(mPullEvent->mEtx));
   if (vertex) {
@@ -270,5 +279,6 @@ Int_t StvMaker::FillPulls()
   }
   mPullEvent->Finish();
   mPullTTree->Fill();
+  mPullEvent->Clear();
   return kStOK;  
 }  
