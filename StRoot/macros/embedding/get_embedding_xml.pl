@@ -1,4 +1,5 @@
-#! /usr/local/bin/perl -w
+#! /common/star/star53/opt/star/sl53_gcc432/bin/perl -w
+
 
 #====================================================================================================
 # Generate embedding job submission xml file
@@ -311,7 +312,17 @@ print OUT "\n";
 #----------------------------------------------------------------------------------------------------
 printDebug("Set archive log/root files in HPSS: $hpssLogDir ...");
 print OUT "<!-- Archive in HPSS -->\n";
-print OUT "hsi \"mkdir -p \$EMHPSS; prompt; cd \$EMHPSS; mput *.root; mput $logFileName; mput $errFileName\"\n";
+print OUT "set i = 0\n";
+print OUT "set ret = 1\n";
+print OUT "while (\$i &lt; 5 || \$ret != 0)\n";
+print OUT "  @ i++\n";
+print OUT "  hsi \"mkdir -p \$EMHPSS; prompt; cd \$EMHPSS; mput *.root; mput $logFileName; mput $errFileName\"\n";
+print OUT "  set ret = \$status\n";
+print OUT "  if (\$ret == 0) then\n";
+print OUT "    break\n";
+print OUT "  endif\n";
+print OUT "  sleep 300\n";
+print OUT "end\n";
 print OUT "\n";
 print OUT "</command>\n";
 print OUT "\n";
