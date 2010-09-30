@@ -8,6 +8,7 @@
 namespace Garfield {
 
 Track::Track() :
+  className("Track"),
   q(-1.), spin(1),
   mass(MuonMass), energy(0.), isElectron(false),
   particleName("mu-"),

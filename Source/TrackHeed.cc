@@ -110,7 +110,9 @@ TrackHeed::TrackHeed() :
   energyMesh(0), transferCs(0),
   elScat(0), lowSigma(0), pairProd(0), deltaCs(0),
   chamber(0), lX(0.), lY(0.), lZ(0.), cX(0.), cY(0.), cZ(0.) {
-  
+ 
+  className = "TrackHeed";
+ 
   HeedInterface::sensor = 0;
   HeedInterface::useEfield = false;
   HeedInterface::useBfield = false;
@@ -148,7 +150,7 @@ TrackHeed::NewTrack(
   
   // Make sure the sensor has been set.
   if (sensor == 0) {
-    std::cerr << "TrackHeed::NewTrack:\n";
+    std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Sensor is not defined.\n";
     ready = false;
     return;
@@ -158,7 +160,7 @@ TrackHeed::NewTrack(
   double xmin = 0., ymin = 0., zmin = 0.;
   double xmax = 0., ymax = 0., zmax = 0.;
   if (!sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
-    std::cerr << "TrackHeed::NewTrack:\n";
+    std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Drift area is not set.\n";
     ready = false;
     return;
@@ -183,7 +185,7 @@ TrackHeed::NewTrack(
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium;
   if (!sensor->GetMedium(x0, y0, z0, medium)) {
-    std::cerr << "TrackHeed::NewTrack:\n";
+    std::cerr << className << "::NewTrack:\n";
     std::cerr << "    No medium at initial position.\n";
     ready = false;
     return;
@@ -235,7 +237,7 @@ TrackHeed::NewTrack(
   velocity = velocity * mparticle::speed_of_light * GetBeta();
   
   if (debug) {
-    std::cout << "TrackHeed::NewTrack:\n";
+    std::cout << className << "::NewTrack:\n";
     std::cout << "    Track starts at (" 
               << x0 << ", " << y0 << ", " << z0 << ") at time " 
               << t0 << "\n";
@@ -297,6 +299,25 @@ TrackHeed::NewTrack(
 
 }
 
+double
+TrackHeed::GetClusterDensity() {
+
+  if (!ready) {
+    std::cerr << className << "::GetClusterDensity:\n";
+    std::cerr << "    Track has not been initialized.\n";
+    return 0.;
+  }
+
+  if (transferCs == 0) {
+    std::cerr << className << "::GetClusterDensity:\n";
+    std::cerr << "    Ionisation cross-section is not available.\n";
+    return 0.;
+  }
+
+  return transferCs->quanC;
+
+}
+
 bool
 TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls, 
                       double& tcls,
@@ -310,14 +331,14 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
   
   // Make sure NewTrack has successfully been called. 
   if (!ready) {
-    std::cerr << "TrackHeed::GetCluster:\n";
+    std::cerr << className << "::GetCluster:\n";
     std::cerr << "    Track has not been initialized.\n";
     std::cerr << "    Call NewTrack first.\n";
     return false;
   }
   
   if (!hasActiveTrack) {
-    std::cerr << "TrackHeed::GetCluster:\n";
+    std::cerr << className << "::GetCluster:\n";
     std::cerr << "    There are no more clusters.\n";
     return false;
   }
@@ -339,7 +360,7 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
     // Convert the particle to a (virtual) photon.
     virtualPhoton = dynamic_cast<HeedPhoton*>(node->el.get());
     if (virtualPhoton == 0) {
-      std::cerr << "TrackHeed::GetCluster:\n";
+      std::cerr << className << "::GetCluster:\n";
       std::cerr << "    Particle is not a virtual photon.\n";
       std::cerr << "    Program bug!\n";
       // Delete the node.
@@ -349,7 +370,7 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
     }
 
     if (virtualPhoton->parent_particle_number != 0) {
-      std::cerr << "TrackHeed::GetCluster:\n";
+      std::cerr << className << "::GetCluster:\n";
       std::cerr << "    Virtual photon has an unexpected parent.\n";
       // Delete this virtual photon.
       particle_bank.erase(node);
@@ -444,7 +465,7 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
       // Check if it is a real photon.
       photon = dynamic_cast<HeedPhoton*>(nextNode->el.get());
       if (photon == 0) {
-        std::cerr << "TrackHeed::GetCluster:\n";
+        std::cerr << className << "::GetCluster:\n";
         std::cerr << "    Particle is neither an electron nor a photon.\n";
         return false;
       }
@@ -490,7 +511,7 @@ TrackHeed::GetElectron(const int i, double& x, double& y, double& z,
 
   // Make sure NewTrack has successfully been called.
   if (!ready) {
-    std::cerr << "TrackHeed::GetElectron:\n";
+    std::cerr << className << "::GetElectron:\n";
     std::cerr << "    Track has not been initialized.\n";
     std::cerr << "    Call NewTrack first.\n";
     return false;
@@ -500,7 +521,7 @@ TrackHeed::GetElectron(const int i, double& x, double& y, double& z,
     // Make sure an electron with this number exists.
     const int n = chamber->conduction_electron_bank.get_qel();
     if (i < 0 || i >= n) {
-      std::cerr << "TrackHeed::GetElectron:\n";
+      std::cerr << className << "::GetElectron:\n";
       std::cerr << "    Electron number out of range.\n";
       return false;
     }
@@ -515,7 +536,7 @@ TrackHeed::GetElectron(const int i, double& x, double& y, double& z,
   } else {
     // Make sure a delta electron with this number exists.
     if (i < 0 || i >= nDeltas) {
-      std::cerr << "TrackHeed::GetElectron:\n";
+      std::cerr << className << "::GetElectron:\n";
       std::cerr << "    Delta electron number out of range.\n";
       return false;
     }
@@ -545,21 +566,21 @@ TrackHeed::TransportDeltaElectron(
 
   // Check if delta electron transport was disabled.
   if (!useDelta) {
-    std::cerr << "TrackHeed::TransportDeltaElectron:\n";
+    std::cerr << className << "::TransportDeltaElectron:\n";
     std::cerr << "    Delta electron transport has been switched off.\n";
     return;
   }
 
   // Make sure the kinetic energy is positive.
   if (e0 <= 0.) {
-    std::cerr << "TrackHeed::TransportDeltaElectron:\n";
+    std::cerr << className << "::TransportDeltaElectron:\n";
     std::cerr << "    Kinetic energy must be positive.\n";
     return;
   }
   
   // Make sure the sensor has been set.
   if (sensor == 0) {
-    std::cerr << "TrackHeed::TransportDeltaElectron:\n";
+    std::cerr << className << "::TransportDeltaElectron:\n";
     std::cerr << "    Sensor is not defined.\n";
     ready = false;
     return;
@@ -569,7 +590,7 @@ TrackHeed::TransportDeltaElectron(
   double xmin, ymin, zmin;
   double xmax, ymax, zmax;
   if (!sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
-    std::cerr << "TrackHeed::TransportDeltaElectron:\n";
+    std::cerr << className << "::TransportDeltaElectron:\n";
     std::cerr << "    Drift area is not set.\n";
     ready = false;
     return;
@@ -597,7 +618,7 @@ TrackHeed::TransportDeltaElectron(
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium;
   if (!sensor->GetMedium(x0, y0, z0, medium)) {
-    std::cerr << "TrackHeed::TransportDeltaElectron:\n";
+    std::cerr << className << "::TransportDeltaElectron:\n";
     std::cerr << "    No medium at initial position.\n";
     return;
   } else if (!medium->IsIonisable()) {
@@ -673,14 +694,14 @@ TrackHeed::TransportPhoton(
 
   // Make sure the energy is positive.
   if (e0 <= 0.) {
-    std::cerr << "TrackHeed::TransportPhoton:\n";
+    std::cerr << className << "::TransportPhoton:\n";
     std::cerr << "    Photon energy must be positive.\n";
     return;
   }
   
   // Make sure the sensor has been set.
   if (sensor == 0) {
-    std::cerr << "TrackHeed::TransportPhoton:\n";
+    std::cerr << className << "::TransportPhoton:\n";
     std::cerr << "    Sensor is not defined.\n";
     ready = false;
     return;
@@ -690,7 +711,7 @@ TrackHeed::TransportPhoton(
   double xmin, ymin, zmin;
   double xmax, ymax, zmax;
   if (!sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
-    std::cerr << "TrackHeed::TransportPhoton:\n";
+    std::cerr << className << "::TransportPhoton:\n";
     std::cerr << "    Drift area is not set.\n";
     ready = false;
     return;
@@ -718,7 +739,7 @@ TrackHeed::TransportPhoton(
   // Make sure the initial position is inside an ionisable medium.
   Medium* medium;
   if (!sensor->GetMedium(x0, y0, z0, medium)) {
-    std::cerr << "TrackHeed::TransportPhoton:\n";
+    std::cerr << className << "::TransportPhoton:\n";
     std::cerr << "    No medium at initial position.\n";
     return;
   } else if (!medium->IsIonisable()) {
@@ -826,14 +847,14 @@ TrackHeed::TransportPhoton(
         }
       }
       if (!gotParent) {
-        std::cerr << "TrackHeed::TransportPhoton:\n";
+        std::cerr << className << "::TransportPhoton:\n";
         std::cerr << "    Delta electron with unknown parent.\n";
       }
     } else {
       // Check if it is a fluorescence photon.
       fluorescencePhoton = dynamic_cast<HeedPhoton*>(nextNode->el.get());
       if (fluorescencePhoton == 0) {
-        std::cerr << "TrackHeed::TransportPhoton:\n";
+        std::cerr << className << "::TransportPhoton:\n";
         std::cerr << "    Unknown secondary particle.\n";
         return;
       }
@@ -895,14 +916,14 @@ TrackHeed::SetEnergyMesh(const double e0, const double e1,
                          const int nsteps) {
 
   if (fabs(e1 - e0) < Small) {
-    std::cerr << "TrackHeed::SetEnergyMesh:\n";
+    std::cerr << className << "::SetEnergyMesh:\n";
     std::cerr << "    Invalid energy range:\n";
     std::cerr << "    " << e0 << " < E [eV] < " << e1 << "\n";
     return;
   }
   
   if (nsteps <= 0) {
-    std::cerr << "TrackHeed::SetEnergyMesh:\n";
+    std::cerr << className << "::SetEnergyMesh:\n";
     std::cerr << "    Number of intervals must be > 0.\n";
     return;
   }
@@ -921,7 +942,7 @@ TrackHeed::Setup(Medium* medium) {
   // Make sure the path to the Heed database is known.
   char* dbPath = getenv("HEED_DATABASE");
   if (dbPath == 0) {
-    std::cerr << "TrackHeed::Setup:\n";
+    std::cerr << className << "::Setup:\n";
     std::cerr << "    Database path is not defined.\n";
     std::cerr << "    Environment variable HEED_DATABASE is not set.\n";
     std::cerr << "    Cannot proceed with initialization.\n";
@@ -935,7 +956,7 @@ TrackHeed::Setup(Medium* medium) {
   
   // Check once more that the medium exists.
   if (medium == 0) {
-    std::cerr << "TrackHeed::Setup:\n";
+    std::cerr << className << "::Setup:\n";
     std::cerr << "    Medium pointer is null.\n";
     return false;
   }
@@ -973,7 +994,7 @@ TrackHeed::Setup(Medium* medium) {
     const double dedx1 = transferCs->meanC1 * 1.e3;
     const double w = matter->W * 1.e6;
     const double f = matter->F;
-    std::cout << "TrackHeed::Setup:\n";
+    std::cout << className << "::Setup:\n";
     std::cout << "    Cluster density:             " << nc << " cm-1\n";
     std::cout << "    Stopping power (restricted): " << dedxLeft << " - " 
                                          << dedx << " keV/cm\n";
@@ -1004,7 +1025,7 @@ TrackHeed::SetupGas(Medium* medium) {
   
   const int nComponents = medium->GetNumberOfComponents();
   if (nComponents < 1) {
-    std::cerr << "TrackHeed::SetupGas:\n";
+    std::cerr << className << "::SetupGas:\n";
     std::cerr << "    Gas " << medium->GetName() 
               << " has zero constituents.\n";
     return false;
@@ -1077,7 +1098,7 @@ TrackHeed::SetupGas(Medium* medium) {
     else if (gasname == "GeH4")   molPacs[i] = &GeH4_MPACS;
     else if (gasname == "SiH4")   molPacs[i] = &SiH4_MPACS;
     else {
-      std::cerr << "TrackHeed::SetupGas:\n";
+      std::cerr << className << "::SetupGas:\n";
       std::cerr << "    Photoabsorption cross-section data for " << gasname 
                 << " are not available.\n";
       return false;
@@ -1091,7 +1112,7 @@ TrackHeed::SetupGas(Medium* medium) {
   }
 
   gas = new GasDef(gasname, gasname, nComponents,
-                   notations, fractions, pressure, temperature);
+                   notations, fractions, pressure, temperature, -1.);
     
   double w = medium->GetW() * 1.e-6;
   if (w < 0.) w = 0.;
@@ -1132,7 +1153,7 @@ TrackHeed::SetupMaterial(Medium* medium) {
     else if (materialName == "Si") atPacs[i] = &Silicon_crystal_PACS;
     else if (materialName == "Ge") atPacs[i] = &Germanium_crystal_PACS;
     else {
-      std::cerr << "TrackHeed::SetupMaterial:\n";
+      std::cerr << className << "::SetupMaterial:\n";
       std::cerr << "    Photoabsorption cross-section data for " 
                 << materialName << " are not implemented.\n";
       return false;

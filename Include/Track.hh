@@ -52,6 +52,8 @@ class Track {
 
   protected:
 
+    std::string className;
+
     double q;
     int spin;
     double mass;

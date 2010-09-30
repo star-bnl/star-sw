@@ -42,6 +42,8 @@ class TrackHeed : public Track {
                      double& t, double& e,
                      double& dx, double& dy, double& dz); 
 
+    double GetClusterDensity();
+
     void TransportDeltaElectron(
         const double x0, const double y0, const double z0,
         const double t0, const double e0,
