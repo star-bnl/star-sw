@@ -12,8 +12,8 @@
 # On the 2nd pass these files in dir 0 will be copied to dirs 1-9
 # To run again using the same flowPhiWgt.hist.root files, do
 #  rm outDir/*/flowPhiWgtNew.hist.root
-# To run again using the same flowReCentAna.hist.root files, do
-#  rm outDir/*/flowReCentAnaNew.hist.root
+# To run again using the same flowReCentAna.root files, do
+#  rm outDir/*/flow.reCentAnaNew.root
 # To run again using the same flow.firstPassLYZ.root files, do
 #  rm outDir/*/flow.firstPassLYZNew.root
 # In all cases rm outDir/*/doFlowEvents.C if it has changed
@@ -24,9 +24,12 @@ use File::Basename;
 use File::Copy;
 use Getopt::Std;
 
-my $events = 30000;
-#my $events = 1000;
-my $queTime = "24:00:00";
+#my $events = 100000; # max for d, 3 hrs and overnight
+#my $events = 300000; # max for in72, 8 hrs and 19 hrs
+#my $events = 100000; # max for in73, 3 hrs and 7 hrs
+my $events = 1000;
+my $queTime = "30:00:00";
+#my $queTime = "24:00:00";
 #my $queTime = "01:00:00";
 my $reCent = "kTRUE"; # must be the same as in doFlowEvents.C
 
@@ -55,9 +58,10 @@ my $outPicoDir = shift || $defaultOut;
 -e $outPicoDir or die "$outPicoDir :$!\n";
 
 ###### User defined:
-my $homeDir = "~posk/root"; # directory containing the links
-my $macDir = "~posk/root/mac"; # directory containing the macro
-my $rootDir = "~posk/root"; # directory containing the library
+#my $homeDir = "~posk/root"; # directory containing the links
+my $homeDir = "~/v3"; # directory containing the links
+my $macDir = "$homeDir/mac"; # directory containing the macro
+my $rootDir = "$homeDir"; # directory containing the library
 print "homeDir = $homeDir\n";
 print "inDir = $inDir\n";
 print "outDir = $outDir\n";
@@ -75,9 +79,9 @@ my $resource = '';
 
 # which machine are we at?
 if ($ENV{HOST} =~ /pdsf/) {
-  if ($inDir eq "in4") {
-    $resource = "-l eliza9io=$io"; # in4
-  } elsif ($inDir eq "in7") {
+  if ($inDir eq "in4" || $inDir eq "in72" || $inDir eq "d") {
+    $resource = "-l eliza9io=$io"; # in4 or in72
+  } elsif ($inDir eq "in7" || $inDir eq "in73") {
     $resource = "-l eliza12io=$io"; # in7
   } else {
     print "no io resource\n";
@@ -100,8 +104,8 @@ my $firstPass;
 my $firstPassDir;
 my $runNo;
 my $workDir;
-my $exec = "qsub -V -m e"; # for mail at the end
-#my $exec = "qsub -V"; # for no mail
+#my $exec = "qsub -V -m e"; # for mail at the end
+my $exec = "qsub -V"; # for no mail
 my $subDirNo;
 
 # subdirectory loop
@@ -246,7 +250,7 @@ head -130 \$log > \$outLog
 echo " " >> \$outLog
 echo "########################  head -> tail ##########################" >> \$outLog
 echo " " >> \$outLog
-tail -300 \$log >> \$outLog
+tail -350 \$log >> \$outLog
 exit
 EOF
       # execute the shell script, option N should have only 10 characters
@@ -267,6 +271,11 @@ EOF
 #///////////////////////////////////////////////////////////////////////////////
 #//
 #// $Log: doFlowSubmit.pl,v $
+#// Revision 1.3  2010/09/30 19:28:17  posk
+#// Instead of reversing the weight for negative pseudrapidity for odd harmonics,
+#// it is now done only for the first harmonic.
+#// Recentering is now done for all harmonics.
+#//
 #// Revision 1.2  2010/03/05 17:04:37  posk
 #// ROOT 5.22 compatable.
 #// Moved doFlowEvents.C here from StRoot/macros/analysis/

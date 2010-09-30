@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.67 2010/03/05 17:04:38 posk Exp $
+// $Id: plot.C,v 1.68 2010/09/30 19:28:23 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -22,7 +22,7 @@
 #include <iostream.h>
 #include <iomanip.h>
 
-const    Int_t nHars    = 2; // 4
+const    Int_t nHars    = 4; // 4 
 const    Int_t nSels    = 2;
 const    Int_t nSubs    = 2;
 Int_t    runNumber      = 0;
@@ -38,8 +38,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   gInterpreter->ProcessLine(".O0");
 
   Bool_t includeFtpc = kTRUE;
-  //Bool_t includeFtpc = kFALSE;
-  Bool_t reCent = kFALSE;
+  Bool_t reCent = kTRUE;
 
   bool multiGraph  = kFALSE;                            // set flags
   bool singleGraph = kFALSE;
@@ -52,6 +51,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   gROOT->SetStyle("Bold");                              // set style
   gROOT->ForceStyle();
   gStyle->SetOptStat(10);
+  gStyle->SetPalette(1);
 
   // names of histograms made by StFlowAnalysisMaker
   // also projections of some of these histograms
@@ -403,11 +403,13 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   char* cp = strstr(shortName[pageNumber],"Subs");
   int columns = (cp) ? nSubs * nSels : nSels;
   int rows;
-  rows = (strstr(shortName[pageNumber],"Phi_")) ? 2 : nHars;
+  rows = (strstr(shortName[pageNumber],"Phi_") ||
+	  strstr(shortName[pageNumber],"Psi_Diff") ? 2 : nHars);
+  //rows = (strstr(shortName[pageNumber],"Phi_") ? 2 : nHars);
   if (strcmp(shortName[pageNumber],"Flow_Phi_Corr")==0) rows = nHars;
-  if (strcmp(shortName[pageNumber],"Flow_Psi_Sub_Corr_Diff")==0) rows = nHars -1;
+  if (strcmp(shortName[pageNumber],"Flow_Psi_Sub_Corr_Diff")==0) rows = 3;
   int pads = rows*columns;
-  //cout << "pads = " << pads << endl;
+  cout << "pads = " << pads << endl;
 
   // make the graph page
   if (multiGraph) {
@@ -709,11 +711,15 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	cout << "  Normalized by: " << norm << endl;
 	hist->Scale(norm);                           // normalize height to one
       	hist->SetMinimum(0.);
-	if (order == 1)	TF1* funcCosSin = new TF1("funcCosSin",
-				"1.+[0]*2/100*cos(1.*x)+[1]*2/100*sin(1.*x)", 0., twopi/1.);
-	else if (order == 2)	TF1* funcCosSin = new TF1("funcCosSin",
-				"1.+[0]*2/100*cos(2.*x)+[1]*2/100*sin(2.*x)", 0., twopi/2.);
-	funcCosSin->SetParNames("cos", "sin");
+// 	if (order == 1)	TF1* funcCosSin = new TF1("funcCosSin",
+// 				"1.+[0]*2/100*cos(1.*x)+[1]*2/100*sin(1.*x)", 0., twopi/1.);
+// 	else if (order == 2)	TF1* funcCosSin = new TF1("funcCosSin",
+// 				"1.+[0]*2/100*cos(2.*x)+[1]*2/100*sin(2.*x)", 0., twopi/2.);
+	TF1* funcCosSin = new TF1("funcCosSin",
+				"1.+[0]*2./100.*cos([2]*x)+[1]*2./100.*sin([2]*x)", 0., twopi/order);
+	funcCosSin->SetParNames("cos", "sin", "har");
+	funcCosSin->SetParameters(0, 0, order); // initial values
+	funcCosSin->SetParLimits(2, 1, 1); // har is fixed
 	hist->Fit("funcCosSin");
 	delete funcCosSin;
 	gStyle->SetOptFit(111);
@@ -779,7 +785,6 @@ TCanvas* plotResolution() {
 //     "Flow_Cumul_v_Order2_Sel",
 //     "Flow_Cumul_v_Order4_Sel"
   };
-  const Int_t nHars = 4; 
   int columns = nSels;
   int rows = sizeof(resName) / sizeof(char*);
   int pads = rows*columns;
@@ -888,6 +893,11 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.68  2010/09/30 19:28:23  posk
+// Instead of reversing the weight for negative pseudrapidity for odd harmonics,
+// it is now done only for the first harmonic.
+// Recentering is now done for all harmonics.
+//
 // Revision 1.67  2010/03/05 17:04:38  posk
 // ROOT 5.22 compatable.
 // Moved doFlowEvents.C here from StRoot/macros/analysis/
