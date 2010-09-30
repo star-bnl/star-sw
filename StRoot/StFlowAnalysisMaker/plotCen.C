@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.28 2010/03/05 17:04:40 posk Exp $
+// $Id: plotCen.C,v 1.29 2010/09/30 19:28:25 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -38,6 +38,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     
   //gROOT->SetStyle("Pub");                               // set style
   gROOT->SetStyle("Bold");                              // set style
+  gStyle->SetPalette(1);
   gROOT->ForceStyle();
   gStyle->SetLabelSize(.1,"X");
 
@@ -98,30 +99,30 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_YieldPart.Pt",
     "Flow_MeanDedxPos2D",
     "Flow_MeanDedxNeg2D",
-    "Flow_PidPiPlusPart",
-    "Flow_PidPiMinusPart",
-    "Flow_PidProtonPart",
-    "Flow_PidAntiProtonPart",
-    "Flow_PidKplusPart",
-    "Flow_PidKminusPart",
-    "Flow_PidDeuteronPart",
-    "Flow_PidAntiDeuteronPart",
-    "Flow_PidElectronPart",
-    "Flow_PidPositronPart",
+//     "Flow_PidPiPlusPart",
+//     "Flow_PidPiMinusPart",
+//     "Flow_PidProtonPart",
+//     "Flow_PidAntiProtonPart",
+//     "Flow_PidKplusPart",
+//     "Flow_PidKminusPart",
+//     "Flow_PidDeuteronPart",
+//     "Flow_PidAntiDeuteronPart",
+//     "Flow_PidElectronPart",
+//     "Flow_PidPositronPart",
     "Flow_PidMult",
 //     "Flow_CosPhiLab",
     "Flow_Yield2D_Sel",
     "Flow_Yield.Eta_Sel",
     "Flow_Yield.Pt_Sel",
     "Flow_Mul_Sel",
-    "Flow_Phi_East_Sel",
-    "Flow_Phi_Flat_East_Sel",
-    "Flow_Phi_West_Sel",
-    "Flow_Phi_Flat_West_Sel",
-    "Flow_Phi_FtpcEast_Sel",
-    "Flow_Phi_Flat_FtpcEast_Sel",
-    "Flow_Phi_FtpcWest_Sel",
-    "Flow_Phi_Flat_FtpcWest_Sel",
+//     "Flow_Phi_East_Sel",
+//     "Flow_Phi_Flat_East_Sel",
+//     "Flow_Phi_West_Sel",
+//     "Flow_Phi_Flat_West_Sel",
+//     "Flow_Phi_FtpcEast_Sel",
+//     "Flow_Phi_Flat_FtpcEast_Sel",
+//     "Flow_Phi_FtpcWest_Sel",
+//     "Flow_Phi_Flat_FtpcWest_Sel",
     "Flow_Psi_Subs",
     "Flow_Psi_Sel",
     "Flow_Psi_Sub_Corr_Sel",
@@ -162,6 +163,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     if (cp) *cp = '\0';                                  // truncate
   }
 
+  cout << "Harmonic = " << harN << endl << endl;
   // input the first run number
   if (runNumber == 0) {
     cout << "     first run number? ";
@@ -598,7 +600,7 @@ void plotCenAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
     can->Update();
     cout << "save? y/[n], quit? q" << endl;
     fgets(tmp, sizeof(tmp), stdin);
-    if (strstr(tmp,"y")!=0) can->Print(".ps");
+    if (strstr(tmp,"y")!=0) can->Print(".pdf");
     else if (strstr(tmp,"q")!=0) return;
   }
   cout << "  Done" << endl;
@@ -638,6 +640,11 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.29  2010/09/30 19:28:25  posk
+// Instead of reversing the weight for negative pseudrapidity for odd harmonics,
+// it is now done only for the first harmonic.
+// Recentering is now done for all harmonics.
+//
 // Revision 1.28  2010/03/05 17:04:40  posk
 // ROOT 5.22 compatable.
 // Moved doFlowEvents.C here from StRoot/macros/analysis/

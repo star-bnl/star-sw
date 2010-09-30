@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.118 2010/03/08 16:52:51 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.119 2010/09/30 19:30:28 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -234,7 +234,7 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.118 2010/03/08 16:52:51 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.119 2010/09/30 19:30:28 posk Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
@@ -504,7 +504,7 @@ Int_t StFlowMaker::ReadReCentFile() {
   if (mReCentCalc) {
     gMessMgr->Info("##### FlowMaker: Calculating ReCentering parameters.");
   } else {
-    gMessMgr->Info("##### FlowMaker: ReCent not requested. Will set values = 0.");
+    gMessMgr->Info("##### FlowMaker: Will set ReCentering parameters = 0.");
   }
   gDirectory = dirSave;
 
@@ -1924,6 +1924,11 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.119  2010/09/30 19:30:28  posk
+// Instead of reversing the weight for negative pseudrapidity for odd harmonics,
+// it is now done only for the first harmonic.
+// Recentering is now done for all harmonics.
+//
 // Revision 1.118  2010/03/08 16:52:51  posk
 // Added StFlowDirectCumulantMaker written by Dhevan Gangadharan.
 //

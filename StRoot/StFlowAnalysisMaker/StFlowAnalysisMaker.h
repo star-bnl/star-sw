@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.49 2009/11/24 19:29:12 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.50 2010/09/30 19:28:12 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -57,7 +57,7 @@ public:
   void     SetEtaRange_for_vPt(Float_t lo, Float_t hi);
   void     SetV1Ep1Ep2(Bool_t v1Ep1Ep2 = kTRUE);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.49 2009/11/24 19:29:12 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.50 2010/09/30 19:28:12 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -181,6 +181,9 @@ private:
     TProfile*   mHistReCentX;
     TProfile*   mHistReCentY;
     TProfile*   mHistQreCent;
+    TH2D*       mHistQXY2D;
+    TH2D*       mHistQFTPCSubXY2D;
+    TH2D*       mHistQTPCSubXY2D;
     TH1F*       mHistPsi_Diff;
     TH1F*       mHistMult;
     TH1F*       mHist_q;
@@ -219,9 +222,6 @@ private:
     TH1D*       mHistPhiFlatFtpcEast;
     TH1D*       mHistPhiFlatFtpcWest;
     TH1D*       mHistPhiFlatFtpcFarWest;
-    TH2D*       mHistQXY2D;
-    TH2D*       mHistQFTPCSubXY2D;
-    TH2D*       mHistQTPCSubXY2D;
   };
 
   // for each selection
@@ -255,6 +255,11 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.50  2010/09/30 19:28:12  posk
+// Instead of reversing the weight for negative pseudrapidity for odd harmonics,
+// it is now done only for the first harmonic.
+// Recentering is now done for all harmonics.
+//
 // Revision 1.49  2009/11/24 19:29:12  posk
 // Added reCenter to remove acceptance correlations as an option instead of phiWgt.
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.100 2010/02/15 12:01:58 canson Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.101 2010/09/30 19:28:09 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -768,6 +768,39 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistQreCent->SetXTitle("X, Y");
       histFull[k].histFullHar[j].mHistQreCent->SetYTitle("<Q_{n}/M>");
 
+      // QXY
+      histTitle = new TString("Flow_QXY2D_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histFullHar[j].mHistQXY2D = new TH2D(histTitle->Data(), histTitle->Data(),
+			    nQXYBins, QXYMin, QXYMax, nQXYBins, QXYMin, QXYMax);
+      histFull[k].histFullHar[j].mHistQXY2D->SetXTitle("Q_X/M");
+      histFull[k].histFullHar[j].mHistQXY2D->SetYTitle("Q_Y/M");
+      delete histTitle;
+    
+      // QSubXY for k=0 subevents
+      histTitle = new TString("Flow_QFTPCSubXY2D_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histFullHar[j].mHistQFTPCSubXY2D = new TH2D(histTitle->Data(), histTitle->Data(),
+			    nQXYBins, QXYMin*2., QXYMax*2., nQXYBins, QXYMin*2., QXYMax*2.);
+      histFull[k].histFullHar[j].mHistQFTPCSubXY2D->SetXTitle("QSub_X/M");
+      histFull[k].histFullHar[j].mHistQFTPCSubXY2D->SetYTitle("QSub_Y/M");
+      delete histTitle;
+    
+      // QSubXY for k=1 subevents
+      histTitle = new TString("Flow_QTPCSubXY2D_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histFullHar[j].mHistQTPCSubXY2D = new TH2D(histTitle->Data(), histTitle->Data(),
+			    nQXYBins, QXYMin*2., QXYMax*2., nQXYBins, QXYMin*2., QXYMax*2.);
+      histFull[k].histFullHar[j].mHistQTPCSubXY2D->SetXTitle("QSub_X/M");
+      histFull[k].histFullHar[j].mHistQTPCSubXY2D->SetYTitle("QSub_Y/M");
+      delete histTitle;
+ 
       // event plane difference of two selections
       histTitle = new TString("Flow_Psi_Diff_Sel");
       *histTitle += k+1;
@@ -1209,40 +1242,7 @@ Int_t StFlowAnalysisMaker::Init() {
 	("Azimuthal Angles (rad)");
       histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarWest->SetYTitle("Counts");
       delete histTitle;
-
-      // QXY
-      histTitle = new TString("Flow_QXY2D_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histTwoHar[j].mHistQXY2D = new TH2D(histTitle->Data(), histTitle->Data(),
-			    nQXYBins, QXYMin, QXYMax, nQXYBins, QXYMin, QXYMax);
-      histFull[k].histTwoHar[j].mHistQXY2D->SetXTitle("Q_X/M");
-      histFull[k].histTwoHar[j].mHistQXY2D->SetYTitle("Q_Y/M");
-      delete histTitle;
-    
-      // QSubXY for k=0 subevents
-      histTitle = new TString("Flow_QFTPCSubXY2D_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histTwoHar[j].mHistQFTPCSubXY2D = new TH2D(histTitle->Data(), histTitle->Data(),
-			    nQXYBins, QXYMin*2., QXYMax*2., nQXYBins, QXYMin*2., QXYMax*2.);
-      histFull[k].histTwoHar[j].mHistQFTPCSubXY2D->SetXTitle("QSub_X/M");
-      histFull[k].histTwoHar[j].mHistQFTPCSubXY2D->SetYTitle("QSub_Y/M");
-      delete histTitle;
-    
-      // QSubXY for k=1 subevents
-      histTitle = new TString("Flow_QTPCSubXY2D_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histTwoHar[j].mHistQTPCSubXY2D = new TH2D(histTitle->Data(), histTitle->Data(),
-			    nQXYBins, QXYMin*2., QXYMax*2., nQXYBins, QXYMin*2., QXYMax*2.);
-      histFull[k].histTwoHar[j].mHistQTPCSubXY2D->SetXTitle("QSub_X/M");
-      histFull[k].histTwoHar[j].mHistQTPCSubXY2D->SetYTitle("QSub_Y/M");
-      delete histTitle;
-    
+   
     }
   }
 
@@ -1256,7 +1256,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.100 2010/02/15 12:01:58 canson Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.101 2010/09/30 19:28:09 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1348,16 +1348,15 @@ void StFlowAnalysisMaker::FillEventHistograms() {
       for (int n = 0; n < Flow::nSubs; n++) {
 	int i = Flow::nSels*k + n;
 	if(mPsiSub[i][j]) { histSub[i].histSubHar[j].mHistPsiSubs->Fill(mPsiSub[i][j]); }
-	//if(mPsiSub[i][j]) { histSub[i].histSubHar[j].mHistPsiSubs->Fill(mPsiSub[i][j],mQSub[i][j].Mod()); }
-	if (mQSub[i][j].Mod() && mMultSub[i][j] && j<2) {
+	if (mQSub[i][j].Mod() && mMultSub[i][j]) {
 	  if (k==0) { // FTPC
 	    double QSubx = mQSub[i][j].X() / (double)mMultSub[i][j];
 	    double QSuby = mQSub[i][j].Y() / (double)mMultSub[i][j];
-	    histFull[n].histTwoHar[j].mHistQFTPCSubXY2D->Fill(QSubx,QSuby);
+	    histFull[n].histFullHar[j].mHistQFTPCSubXY2D->Fill(QSubx,QSuby);
 	  } else if (k==1) { // TPC
 	    double QSubx = mQSub[i][j].X() / (double)mMultSub[i][j];
 	    double QSuby = mQSub[i][j].Y() / (double)mMultSub[i][j];
- 	    histFull[n].histTwoHar[j].mHistQTPCSubXY2D->Fill(QSubx,QSuby);
+ 	    histFull[n].histFullHar[j].mHistQTPCSubXY2D->Fill(QSubx,QSuby);
 	  }
 	}
       }
@@ -1375,10 +1374,10 @@ void StFlowAnalysisMaker::FillEventHistograms() {
 	histFull[k].histFullHar[j].mHistPsi->Fill(mPsi[k][j]);
 	//histFull[k].histFullHar[j].mHistPsi->Fill(mPsi[k][j],mQ[k][j].Mod());
       }
-      if (mQ[k][j].Mod() && mMult[k][j] && j < 2) {
+      if (mQ[k][j].Mod() && mMult[k][j]) {
 	double Qx = mQ[k][j].X() / (double)mMult[k][j];
 	double Qy = mQ[k][j].Y() / (double)mMult[k][j];
-	histFull[k].histTwoHar[j].mHistQXY2D->Fill(Qx,Qy);
+	histFull[k].histFullHar[j].mHistQXY2D->Fill(Qx,Qy);
       }
       if (mPsi[0][j] && mPsi[1][j]) {
 	if (k < 2 && j < 2) {
@@ -1676,7 +1675,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	    int r = (eta > 0.) ? 1 : 0;
 	    psi_i =  mPsiSub[i+r][j]; // random
 	  }
-	} else if (order > 3. && !oddHar) {
+	} else if (order > 3. && !oddHar) { // 4, 6, etc
 	  psi_i = mPsi[k][1];  // 2nd harmomic event plane
 	  if (psi_i > twopi/order) psi_i -= twopi/order; // ???
 	  if (psi_i > twopi/order) psi_i -= twopi/order;
@@ -1757,7 +1756,8 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 		pFlowEvent->PtWgtSaturation();  // pt weighting going constant
 	    }
 	    float etaAbs = fabs(eta); // etaWgt, eta > 1.
-	    if (pFlowEvent->EtaWgt() && oddHar && etaAbs > 1.) { wt *= etaAbs; }
+	    //if (pFlowEvent->EtaWgt() && oddHar && etaAbs > 1.) { wt *= etaAbs; }
+	    if (pFlowEvent->EtaWgt() && j==0 && etaAbs > 1.) { wt *= etaAbs; }
 	    
 	    // Fill histograms with selections
 	    if (kFtpcFarEast) {
@@ -1796,7 +1796,8 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	      }
 	    }
 	    
-	    if (oddHar && eta < 0.) phiWgt /= -1.; // only for flat hists
+	    //if (oddHar && eta < 0.) phiWgt /= -1.; // only for flat hists
+	    if (j==0 && eta < 0.) phiWgt /= -1.; // only for flat hists
 	    // Fill Flat histograms
 	    if (kFtpcFarEast) {
 	      histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarEast->Fill(phi, phiWgt);
@@ -1815,7 +1816,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	    } else if (kTpcFarWest) {
 	      histFull[k].histTwoHar[j].mHistPhiFlatFarWest->Fill(phi, phiWgt);
 	    }
-	    if (oddHar && eta < 0.) phiWgt *= -1.; // restore value	    
+	    if (j==0 && eta < 0.) phiWgt *= -1.; // restore value	    
 	  }	  
 
 	  // Remove autocorrelations with full EP
@@ -1874,7 +1875,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	    v = cos(phi + psi_i - 2.*psi_2)/perCent;
 	  }
 	  float vFlip = v;
-	  if (eta < 0 && oddHar) vFlip *= -1;
+	  if (eta < 0 && j==0) vFlip *= -1; // for 1st harmonic only
 	  if (strlen(pFlowSelect->PidPart()) != 0) { // pid, fill rapidity 
 	    float rapidity = pFlowTrack->Y();
 	    histFull[k].histFullHar[j].mHist_vObs2D->Fill(rapidity, pt, v,mFlowWeight);
@@ -1929,8 +1930,9 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  // Correlation of Phi of all particles with Psi
 	  if (mPsi[k][j]) {
 	    float phi_i = phi;
-	    if (eta < 0 && oddHar) {
-	      phi_i += pi; // backward particle and odd harmonic
+	    //if (eta < 0 && oddHar) {
+	    if (eta < 0 && j==0) {
+	      phi_i += pi; // backward particle and 1st harmonic
 	      if (phi_i > twopi) phi_i -= twopi;
 	    }
 	    float dPhi = phi_i - psi_i;
@@ -2472,6 +2474,11 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.101  2010/09/30 19:28:09  posk
+// Instead of reversing the weight for negative pseudrapidity for odd harmonics,
+// it is now done only for the first harmonic.
+// Recentering is now done for all harmonics.
+//
 // Revision 1.100  2010/02/15 12:01:58  canson
 // Changed mHistCTBvsZDC2D from filling with ZDC_e + ZDC_e to filling with ZDC_e + ZDC_w
 //

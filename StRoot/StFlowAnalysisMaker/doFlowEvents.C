@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.4 2010/07/23 21:01:46 posk Exp $
+// $Id: doFlowEvents.C,v 1.5 2010/09/30 19:28:15 posk Exp $
 // Put a link to this at /StRoot/macros/analysis/doFlowEvents.C
 //
 // Description: 
@@ -84,7 +84,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
 
   Int_t maxTheta = 5;  // LYZ
   Int_t nSels    = 2;
-  Bool_t reCent  = kFALSE;
+  Bool_t reCent  = kTRUE;
 
   if (firstPass) {
     cout << " doFlowEvents - firstPass makers = kTRUE" << endl;
@@ -418,7 +418,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
     // corelates each particle with the event plane from the full event
     // minus the particle of interest, and subevents are made according to eta.
     // Don't set both of these at the same time.
-//     StFlowEvent::SetEtaSubs();
+//    StFlowEvent::SetEtaSubs();
 //     StFlowEvent::SetRanSubs();
    // With either of these set the higher harmonics are done with respect to the event planes
    // of the higher harmonic. This is not a good idea as the second harmonic full event plane
@@ -630,13 +630,22 @@ void doFlowEvents(Int_t nEvents, Bool_t firstPass) {
 
   // run 7 P07id
   // muDST files
-  Char_t* filePath="/eliza12/starprod/reco/2007ProductionMinBias/FullField/P07id/2007/131/8131027/";
-  //Char_t* filePath="./outDir/muDST/";
+//   Char_t* filePath="/eliza12/starprod/reco/2007ProductionMinBias/FullField/P07id/2007/131/8131027/";
+//   //Char_t* filePath="./outDir/muDST/";
+//   if (nEvents < 450) {
+//     //Char_t* fileExt="st_physics_8102049_raw_1010001.MuDst.root"; // 45 events
+//     Char_t* fileExt="st_physics_8131027_raw_1010001.MuDst.root";
+//   } else {
+//     Char_t* fileExt="*.MuDst.root";
+//   }
+
+  // run 7 P08ic
+  // muDST files
+  Char_t* filePath="/eliza9/starprod/reco/2007ProductionMinBias/FullField/P08ic/2007/125/";
   if (nEvents < 450) {
-    //Char_t* fileExt="st_physics_8102049_raw_1010001.MuDst.root"; // 45 events
-    Char_t* fileExt="st_physics_8131027_raw_1010001.MuDst.root";
+    Char_t* fileExt="st_physics_8125119_raw_1040090.MuDst.root";
   } else {
-    Char_t* fileExt="*.MuDst.root";
+    Char_t* fileExt="st_physics_*.MuDst.root";
   }
 
   doFlowEvents(nEvents, filePath, fileExt, firstPass);
@@ -645,6 +654,11 @@ void doFlowEvents(Int_t nEvents, Bool_t firstPass) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.5  2010/09/30 19:28:15  posk
+// Instead of reversing the weight for negative pseudrapidity for odd harmonics,
+// it is now done only for the first harmonic.
+// Recentering is now done for all harmonics.
+//
 // Revision 1.4  2010/07/23 21:01:46  posk
 // Added a comment about higher harmonics with the subevent method.
 //

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowSumAll.C,v 1.3 2007/02/06 19:00:50 posk Exp $
+// $Id: doFlowSumAll.C,v 1.4 2010/09/30 19:28:21 posk Exp $
 //
 // Makes root.files.<cenNo> files containing lists of flow.hist.root files
 // in all subdirectories of outDir, which is a link in this directory.
@@ -30,6 +30,8 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t 
 
   const  int nSels = 2;
   const  int nHars = 4; // 4
+  bool LYZ    = kFALSE;
+  bool reCent = kTRUE;
 
   char   rootFileName[80];
   char   logFileName[80];
@@ -41,7 +43,7 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t 
   char   cpCommand[80];
   char   logTitleCommand[80];
   char   logCommand[80];
-  char   phiWgtNewCommand[80];
+  char   firstPassCommand[80];
   char   secondPassCommand[80];
   char   rmCommand[80];
   TFile* histFile[1000];
@@ -105,9 +107,14 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t 
       histFile[nFile] = new TFile(rootFileName);
       char* cp = strstr(rootFileName, "flow.");
       if (cp) *cp = '\0';                                  // truncate to directory name
-      sprintf(phiWgtNewCommand, "test -f %sflowPhiWgtNew.hist.root", rootFileName);
-      sprintf(secondPassCommand, "test -f %sflow.firstPassLYZNew.root", rootFileName);
-      if (system(phiWgtNewCommand) && system(secondPassCommand)) {
+      sprintf(firstPassCommand, "test -f %sflowPhiWgtNew.hist.root", rootFileName);
+      sprintf(secondPassCommand, "test -f %sflowPhiWgt.hist.root", rootFileName);
+      if (LYZ) sprintf(secondPassCommand, "test -f %sflow.firstPassLYZNew.root", rootFileName);
+      if (reCent) {
+	sprintf(firstPassCommand, "test -f %sflow.reCentAnaNew.root", rootFileName);
+	sprintf(secondPassCommand, "test -f %sflow.reCentAna.root", rootFileName);
+      }
+      if (system(firstPassCommand) && system(secondPassCommand)) {
 	cout << "####################################" << endl;
  	cout << "### No 2nd pass for " << rootFileName << endl;
 	cout << "####################################" << endl;
@@ -419,6 +426,11 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowSumAll.C,v $
+// Revision 1.4  2010/09/30 19:28:21  posk
+// Instead of reversing the weight for negative pseudrapidity for odd harmonics,
+// it is now done only for the first harmonic.
+// Recentering is now done for all harmonics.
+//
 // Revision 1.3  2007/02/06 19:00:50  posk
 // In Lee Yang Zeros method, introduced recentering of Q vector.
 // Reactivated eta symmetry cut.

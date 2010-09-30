@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.62 2009/11/24 19:23:01 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.63 2010/09/30 19:30:26 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -55,6 +55,10 @@ Float_t  StFlowEvent::mEtaTpcCuts[2][2][Flow::nSels] = {{{0.,0.5},
                                                          {0.,0.} },
 							{{1.0,2.},
 							 {1.0,1.} }};
+// Float_t  StFlowEvent::mEtaTpcCuts[2][2][Flow::nSels] = {{{0.,0.},
+//                                                          {0.,0.} },
+// 							{{1.0,1.},
+// 							 {1.0,1.} }};
 Float_t  StFlowEvent::mEtaFtpcCuts[4][2][Flow::nSels] = {{{-4.0,-4.0},
 							  {-4.0,-4.0}},
 							 {{-2.7,-2.7},
@@ -188,12 +192,13 @@ Double_t StFlowEvent::Weight(Int_t selN, Int_t harN, StFlowTrack*
 			     pFlowTrack) const {
   // Weight for enhancing the resolution.
 
-  bool oddHar = (harN+1) % 2;
+  //bool oddHar = (harN+1) % 2;
   Double_t wgt = 1.;
   wgt *= PtAbsWgtValue(pFlowTrack->Pt());
   float eta = pFlowTrack->Eta();
   wgt *= EtaAbsWgtValue(eta);
-  if (oddHar && eta < 0.) { wgt *= -1. ; }
+  //if (oddHar && eta < 0.) { wgt *= -1. ; }
+  if (harN == 0 && eta < 0.) { wgt *= -1. ; } // reverse only for 1st har
 
   return wgt;
 }
@@ -1016,11 +1021,13 @@ void StFlowEvent::SetSelections() {
 	    // Tpc track or TopologyMap not available
 	    
 	    // Eta
-	    if (mEtaTpcCuts[1][harN%2][selN] > mEtaTpcCuts[0][harN%2][selN] && 
-		(fabs(eta) < mEtaTpcCuts[0][harN%2][selN] || 
-		 fabs(eta) >= mEtaTpcCuts[1][harN%2][selN])) continue;
-	    // 	    (eta < mEtaTpcCuts[0][harN%2][selN]         || both subs at +eta
-	    // 	     eta >= mEtaTpcCuts[1][harN%2][selN])) continue;
+// 	    if (mEtaTpcCuts[1][harN%2][selN] > mEtaTpcCuts[0][harN%2][selN] && 
+// 		(fabs(eta) < mEtaTpcCuts[0][harN%2][selN] || 
+// 		 fabs(eta) >= mEtaTpcCuts[1][harN%2][selN])) continue;
+	    int etaCut = harN ? 1 : 0;
+	    if (mEtaTpcCuts[1][etaCut][selN] > mEtaTpcCuts[0][etaCut][selN] && 
+		(fabs(eta) < mEtaTpcCuts[0][etaCut][selN] || 
+		 fabs(eta) >= mEtaTpcCuts[1][etaCut][selN])) continue;
 	    
 	    // Pt
 	    if (mPtTpcCuts[1][harN%2][selN] > mPtTpcCuts[0][harN%2][selN] && 
@@ -1350,7 +1357,7 @@ void StFlowEvent::PrintSelectionList() {
     cout << "#    PtWgt= FALSE" << endl;
   }
   if (mEtaWgt) {
-    cout << "#    EtaWgt= TRUE, also for output of PhiWgt file for odd harmonics" << endl;
+    cout << "#    EtaWgt= TRUE, also for output of PhiWgt file for 1st harmonic" << endl;
   } else {
     cout << "#    EtaWgt= FALSE" << endl;
   }
@@ -1415,6 +1422,11 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.63  2010/09/30 19:30:26  posk
+// Instead of reversing the weight for negative pseudrapidity for odd harmonics,
+// it is now done only for the first harmonic.
+// Recentering is now done for all harmonics.
+//
 // Revision 1.62  2009/11/24 19:23:01  posk
 // Added reCenter option to remove acceptance correlations instead of phiWgt.
 //

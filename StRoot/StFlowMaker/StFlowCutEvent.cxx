@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.45 2009/08/04 23:00:27 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.46 2010/09/30 19:30:23 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -396,7 +396,13 @@ Bool_t StFlowCutEvent::CheckEvent(StMuDst* pMu) {
       return kFALSE;
     }
   
-  Int_t tracks =  pMuEvent->refMult();
+    //Int_t tracks =  pMuEvent->refMult();
+    Int_t tracks;
+    if (pMuEvent->runId() > 8000000) { // year 7
+      tracks =  pMuEvent->grefmult();
+    } else {
+      tracks =  pMuEvent->refMult(); 
+    }
 
   if      (tracks < cent[0])  { centrality = 0; }
   else if (tracks < cent[1])  { centrality = 1; }
@@ -641,6 +647,11 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.46  2010/09/30 19:30:23  posk
+// Instead of reversing the weight for negative pseudrapidity for odd harmonics,
+// it is now done only for the first harmonic.
+// Recentering is now done for all harmonics.
+//
 // Revision 1.45  2009/08/04 23:00:27  posk
 // Reads year 7 MuDsts.
 //
