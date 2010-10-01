@@ -57,6 +57,8 @@ clean:
 	@echo Removing libraries...
 	@$(RM) $(LIBDIR)/*.a
 	@cd $(HEEDDIR); make clean
+	@echo Removing dictionary...
+	@$(RM) $(SRCDIR)/GarfieldDict.C 
 
 $(OBJDIR)/AvalancheMicroscopic.o: \
 	$(SRCDIR)/AvalancheMicroscopic.cc \
@@ -85,7 +87,7 @@ $(OBJDIR)/Track.o: \
 	@$(CXX) $(CFLAGS) $< -o $@        
 $(OBJDIR)/TrackBichsel.o: \
 	$(SRCDIR)/TrackBichsel.cc $(INCDIR)/TrackBichsel.hh \
- 	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc
+	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@       
 $(OBJDIR)/TrackPAI.o: \
