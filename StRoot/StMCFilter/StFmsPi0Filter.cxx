@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StFmsPi0Filter.cxx,v 1.1 2010/09/30 20:05:10 jwebb Exp $
+// @(#)root/eg:$Id: StFmsPi0Filter.cxx,v 1.2 2010/10/01 14:10:14 jwebb Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -115,6 +115,7 @@ int StFmsPi0Filter::RejectEG(const StGenParticleMaster &ptl) const
     }
   }  
   if (ntk==0) {return 1;}
+
   printf("Accepted/Total EG=%10d/%10d  GT=%10d/%10d  GE=%10d/%10d\n",
 	   GetNTotEG()-1-GetNRejEG(),GetNTotEG(),
 	   GetNTotGT()-GetNRejGT(),GetNTotGT(),
