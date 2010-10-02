@@ -62,6 +62,7 @@ daq_tpx.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 daq_tpx.o: tpxGain.h
 daq_tpx.o: tpxPed.h
 daq_tpx.o: tpxFCF.h
+daq_tpx.o: tpxFCF_flags.h
 daq_tpx.o: tpxStat.h
 tpxCore.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxCore.o: ../../../../StRoot/RTS/include/TPX/tpx_altro_to_pad.h
@@ -76,6 +77,7 @@ tpxFCF.o: tpxGain.h
 tpxFCF.o: tpxCore.h
 tpxFCF.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxFCF.o: tpxFCF.h
+tpxFCF.o: tpxFCF_flags.h
 tpxFCF.o: ../DAQ_READER/daq_dta_structs.h
 tpxGain.o: ../../../../StRoot/RTS/include/rtsLog.h
 tpxGain.o: ../../../../StRoot/RTS/include/TPC/rowlen.h
@@ -102,6 +104,7 @@ tpxDecodeGains.o: tpxCore.h
 tpxDecodeGains.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 daq_tpx.o: ../DAQ_READER/daq_det.h
 tpxCore.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
+tpxFCF.o: tpxFCF_flags.h
 tpxGain.o: tpxCore.h
 tpxGain.o: ../../../../StRoot/RTS/include/TPX/tpx_rdo.h
 tpxPed.o: tpxCore.h

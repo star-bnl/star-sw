@@ -1,6 +1,7 @@
-#ifndef _TPX_FCF_HH_
-#define _TPX_FCF_HH_
+#ifndef _TPX_FCF_H_
+#define _TPX_FCF_H_
 
+#include "tpxFCF_flags.h"
 
 // main tunable parameters
 #define FCF_ADC_NOISE           4
@@ -21,22 +22,6 @@
 #define FCF_V_FY09	0x0001		// /32 bug fixed 
 
 
-// flag definitions - NEVER CHANGE
-#define FCF_ONEPAD              1
-
-#define FCF_DOUBLE_PAD          2	// offline: merged
-#define FCF_MERGED		2
-
-#define FCF_DOUBLE_T            4
-
-#define FCF_FALLING             8	// offline: charge too big!
-#define FCF_BIG_CHARGE		8
-
-#define FCF_ROW_EDGE            16      // 0x10 touched end of row
-#define FCF_BROKEN_EDGE         32      // 0x20 touches one of the mezzanine edges
-#define FCF_DEAD_EDGE           64      // 0x40 touches a dead pad
-#define FCF_IN_DOUBLE           128	// 0x80 one should use the floating point in the union
-#define FCF_CHOPPED		256	// 0x100 cluster is chopped from its neighbour: OFFLINE use only
 
 
 
@@ -126,7 +111,7 @@ public:
 	static int afterburner(int cou, daq_cld *store[]) ;
 
 	const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.10 2010/10/02 21:55:40 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.11 2010/10/02 22:17:48 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
 private:
