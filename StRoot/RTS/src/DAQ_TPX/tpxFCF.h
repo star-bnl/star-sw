@@ -68,11 +68,11 @@ struct daq_sim_adc_tb ;
 
 struct tpxFCF_cl {
 	union {
-		u_int charge ;
+		unsigned int charge ;
 		fcf_type f_charge ;
 	} ;
 	union {
-		u_int t_ave ;
+		unsigned int t_ave ;
 		fcf_type f_t_ave ;
 	} ;
 
@@ -88,7 +88,7 @@ struct tpxFCF_cl {
 	fcf_short p2 ;
 
 	fcf_short flags ;
-	u_short track_id ;
+	unsigned short track_id ;
 
 	short quality ;	
 	short sim_length ;	// length of the corresponding sim data in *sim
@@ -97,14 +97,14 @@ struct tpxFCF_cl {
 } ;
 
 
-
+struct tpx_altro_struct ;
 
 class tpxFCF {
 public:
 	tpxFCF() ;
 	~tpxFCF() ;
 
-	void config(u_int rb_mask, int modes = 0) ;	// modes bitmask
+	void config(unsigned int rb_mask, int modes = 0) ;	// modes bitmask
 	int modes ;	// bit mask: 1 run simulated; 2 run simulated with local id
 
 	void apply_gains(int sector, tpxGain *gains) ;
@@ -112,7 +112,7 @@ public:
 	void start_evt() ;
 
 	int do_pad(tpx_altro_struct *a, daq_sim_adc_tb *extra = 0) ;
-	int stage2(u_int *outbuff, int max_bytes) ;
+	int stage2(unsigned int *outbuff, int max_bytes) ;
 
 
 
@@ -121,25 +121,25 @@ public:
 
 	int ch_min ;
 
-	static int fcf_decode(u_int *p_buff, daq_cld *dc, u_short version=0) ;
-	static int fcf_decode(u_int *p_buff, daq_sim_cld *sdc, u_short version=0) ;
+	static int fcf_decode(unsigned int *p_buff, daq_cld *dc, unsigned short version=0) ;
+	static int fcf_decode(unsigned int *p_buff, daq_sim_cld *sdc, unsigned short version=0) ;
 	static int afterburner(int cou, daq_cld *store[]) ;
 
 	const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.9 2010/10/02 19:39:08 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.10 2010/10/02 21:55:40 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
 private:
 
-	u_int *loc_buff ;
+	unsigned int *loc_buff ;
 	int cur_row ;
 	int cur_row_clusters ;
 	
 	int cl_marker ;
 
 	struct stage1 {
-		u_short count ;
-		u_short f ;	// flags?
+		unsigned short count ;
+		unsigned short f ;	// flags?
 		double g ;	// gain
 		double t0 ;	// t0
 		struct tpxFCF_cl cl[FCF_MAX_CL] ;		
@@ -165,12 +165,12 @@ private:
 
 
 
-	u_int rbs ;
+	unsigned int rbs ;
 	int sector ;
 	tpxGain *gains ;
 
-	u_int do_version ;
-	u_int read_version ;
+	unsigned int do_version ;
+	unsigned int read_version ;
 } ;
 
 #endif
