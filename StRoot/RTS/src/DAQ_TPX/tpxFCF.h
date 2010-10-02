@@ -36,7 +36,7 @@
 #define FCF_BROKEN_EDGE         32      // 0x20 touches one of the mezzanine edges
 #define FCF_DEAD_EDGE           64      // 0x40 touches a dead pad
 #define FCF_IN_DOUBLE           128	// 0x80 one should use the floating point in the union
-
+#define FCF_CHOPPED		256	// 0x100 cluster is chopped from its neighbour: OFFLINE use only
 
 
 
@@ -126,7 +126,7 @@ public:
 	static int afterburner(int cou, daq_cld *store[]) ;
 
 	const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.8 2009/12/02 22:14:56 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.9 2010/10/02 19:39:08 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
 private:
