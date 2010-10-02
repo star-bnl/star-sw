@@ -102,6 +102,7 @@ namespace Garfield {
 TrackHeed::TrackHeed() : 
   ready(false), hasActiveTrack(false),
   mediumDensity(-1.), mediumName(""),
+  usePhotonReabsorption(true),
   useDelta(true), nDeltas(0),
   particle(0), 
   matter(0), gas(0), material(0),
@@ -318,6 +319,25 @@ TrackHeed::GetClusterDensity() {
 
 }
 
+double
+TrackHeed::GetStoppingPower() {
+
+  if (!ready) {
+    std::cerr << className << "::GetStoppingPower:\n";
+    std::cerr << "    Track has not been initialized.\n";
+    return 0.;
+  }
+
+  if (transferCs == 0) {
+    std::cerr << className << "::GetStoppingPower:\n";
+    std::cerr << "    Ionisation cross-section is not available.\n";
+    return 0.;
+  }
+
+  return transferCs->meanC1 * 1.e6;
+
+} 
+
 bool
 TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls, 
                       double& tcls,
@@ -406,7 +426,7 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
     ok = true;
   }
   
-  // Plot the cluster, if required.
+  // Plot the cluster, if requested.
   if (usePlotting) PlotCluster(xcls, ycls, zcls);
 
   // Transport the virtual photon.
@@ -472,7 +492,7 @@ TrackHeed::GetCluster(double& xcls, double& ycls, double& zcls,
       for (int i = nIds; i--;) {
         if (photon->parent_particle_number == ids[i]) {
           // Transport the photon and add its number to the list of ids.
-          photon->fly();
+          if (usePhotonReabsorption) photon->fly();
           deleteNode = true;
           ids.push_back(photon->particle_number);
           ++nIds;

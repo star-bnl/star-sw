@@ -33,6 +33,13 @@ TrackSimple::SetClusterDensity(const double d) {
 
 }
 
+double
+TrackSimple::GetClusterDensity() {
+
+  return 1. / mfp;
+
+}
+
 void
 TrackSimple::SetStoppingPower(const double dedx) {
 
@@ -47,10 +54,17 @@ TrackSimple::SetStoppingPower(const double dedx) {
 
 }
 
+double
+TrackSimple::GetStoppingPower() {
+
+  return eloss;
+
+}
+
 void
-TrackSimple::NewTrack(
-            const double x0, const double y0, const double z0, const double t0,
-            const double dx0, const double dy0, const double dz0) {
+TrackSimple::NewTrack(const double x0, const double y0, const double z0, 
+                      const double t0,
+                      const double dx0, const double dy0, const double dz0) {
 
   // Check if a sensor has been defined
   if (sensor == 0) {
@@ -90,7 +104,8 @@ TrackSimple::NewTrack(
 }
 
 bool
-TrackSimple::GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
+TrackSimple::GetCluster(double& xcls, double& ycls, double& zcls, 
+                        double& tcls,
                         int& n, double& e, double& extra) {
 
   extra = 0.;

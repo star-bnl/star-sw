@@ -43,6 +43,7 @@ class TrackHeed : public Track {
                      double& dx, double& dy, double& dz); 
 
     double GetClusterDensity();
+    double GetStoppingPower();
 
     void TransportDeltaElectron(
         const double x0, const double y0, const double z0,
@@ -66,6 +67,9 @@ class TrackHeed : public Track {
     void EnableDeltaElectronTransport()  {useDelta = true;}
     void DisableDeltaElectronTransport() {useDelta = false;}
 
+    void EnablePhotonReabsorption()  {usePhotonReabsorption = true;}
+    void DisablePhotonReabsorption() {usePhotonReabsorption = false;}
+    
     void SetEnergyMesh(const double e0, const double e1,
                        const int nsteps);
 
@@ -80,7 +84,9 @@ class TrackHeed : public Track {
   
     double      mediumDensity;
     std::string mediumName;
-   
+  
+    bool usePhotonReabsorption;
+ 
     bool useDelta;
     int nDeltas;
     struct deltaElectron {

@@ -24,7 +24,7 @@ class TrackBichsel : public Track {
     bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
                     int& n, double& e, double& extra);
 
-    double GetInverseMeanFreePath();
+    double GetClusterDensity();
     double GetStoppingPower();
 
     void SetDataFile(const std::string filename) {datafile = filename;}

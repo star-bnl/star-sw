@@ -16,10 +16,14 @@ class TrackSimple: public Track {
 
     void SetEqualSpacing() {useEqualSpacing = true;}
     void SetExponentialSpacing() {useEqualSpacing = false;}
-    void SetClusterDensity(const double d);
-    void SetStoppingPower(const double dedx);
 
-    void NewTrack(const double x0, const double y0, const double z0, const double t0, 
+    void   SetClusterDensity(const double d);
+    double GetClusterDensity();
+    void   SetStoppingPower(const double dedx);
+    double GetStoppingPower();
+
+    void NewTrack(const double x0, const double y0, const double z0, 
+                  const double t0, 
                   const double dx0, const double dy0, const double dz0);
     bool GetCluster(double& xcls, double& ycls, double& zcls, double& tcls,
                     int& n, double& e, double& extra);

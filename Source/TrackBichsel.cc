@@ -89,7 +89,7 @@ TrackBichsel::NewTrack(
   // If the particle properties have changed, update the cross-section table.
   if (isChanged) {
     bg = GetBetaGamma();
-    imfp = GetInverseMeanFreePath();
+    imfp = GetClusterDensity();
     speed = SpeedOfLight * GetBeta();
     SelectCrossSectionTable();
     isChanged = false;
@@ -143,7 +143,7 @@ TrackBichsel::GetCluster(
 }
 
 double
-TrackBichsel::GetInverseMeanFreePath() {
+TrackBichsel::GetClusterDensity() {
 
   const int nEntries = 38;
 
@@ -171,7 +171,7 @@ TrackBichsel::GetInverseMeanFreePath() {
   
   if (bg < tabBg[0]) {
     if (debug) {
-      std::cerr << className << "::GetInverseMeanFreePath:\n";
+      std::cerr << className << "::GetClusterDensity:\n";
       std::cerr << "    Bg is below the tabulated range.\n";
     }
     return tabImfp[0] * 1.e4;
