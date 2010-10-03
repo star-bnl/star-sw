@@ -2052,11 +2052,11 @@ MediumMagboltz86::ComputeDeexcitationTable() {
   for (int i = 0; i < nTerms; ++i) {
     if (csType[i] % nCsTypes != 4) continue;
     const int ngas = int(csType[i] / nCsTypes);
-    if (ngas == 2) {
+    if (gas[ngas] == 2) {
       // Argon
       if (!withAr) {
         withAr = true;
-        iAr = int(csType[i] / nCsTypes);
+        iAr = ngas;
         cAr = fraction[iAr];
       }
       std::string level = "       ";
@@ -2110,11 +2110,11 @@ MediumMagboltz86::ComputeDeexcitationTable() {
         std::cerr << "    Unknown excitation level:\n";
         std::cerr << "      Ar " << level << "\n";
       }
-    } else if (ngas == 5) {
+    } else if (gas[ngas] == 5) {
       // Neon
       if (!withNe) {
         withNe = true;
-        iNe = int(csType[i] / nCsTypes);
+        iNe = ngas;
         cNe = fraction[iNe];
       }
       std::string level = "       ";
@@ -2640,8 +2640,12 @@ MediumMagboltz86::ComputeDeexcitationTable() {
 
   if (nComponents != 2) {
     std::cout << className << "::ComputeDeexcitationTable:\n";
-    std::cout << "    Gas mixture has " << nComponents 
-              << " components.\n";
+    if (nComponents == 1) {
+      std::cout << "    Gas mixture has 1 component.\n";
+    } else {
+      std::cout << "    Gas mixture has " << nComponents 
+                << " components.\n";
+    }
     std::cout << "    Penning effects are only implemented for "
               << " binary mixtures.\n";
   } else if ((gas[0] == 2 && gas [1] == 8) || (gas[0] == 8 && gas[1] == 2)) {
@@ -2806,8 +2810,8 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
   // Conversion factor from oscillator strength to cross-section
   const double f2cs = FineStructureConstant * 2 * Pi2 * HbarC * HbarC / 
                       ElectronMass;
-
-  // Reset the collision rate arrays
+  
+  // Reset the collision rate arrays.
   cfTotGamma.clear(); cfTotGamma.resize(nEnergyStepsGamma, 0.);
   cfGamma.clear(); cfGamma.resize(nEnergyStepsGamma);
   for (int j = nEnergyStepsGamma; j--;) cfGamma[j].clear();
@@ -2818,6 +2822,7 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
     const double prefactor = dens * SpeedOfLight * fraction[i];
     double a, z;
     GetGasInfo(gas[i], gasname, a, z);
+    // Check if optical data for this gas is available.
     if (!data.IsAvailable(gasname)) return false;
     // Continuum
     csTypeGamma.push_back(i * 4 + 1);
@@ -2854,19 +2859,23 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
         cfGamma[ie][nPhotonTerms] = prefactor * f2cs * deexcitations[k].osc;
         cfTotGamma[ie] += prefactor * f2cs * deexcitations[k].osc;
         ++nPhotonTerms;
-      } 
+      }
     }
   }
 
   if (debug && useRadTrap && useDeexcitation) {
-    std::cout << "MediumMagboltz::ComputePhotonCollisionTable:\n";
+    std::cout << className << "::ComputePhotonCollisionTable:\n";
     std::cout << "   Discrete absorption levels:\n";
     for (int i = 0; i < nPhotonTerms; ++i) {
       if (csTypeGamma[i] < 0) {
         int level = -csTypeGamma[i] - 1;
-        std::cout << "    " << std::setw(12) << deexcitations[level].label
-                  << std::setw(10) << deexcitations[level].energy  
-                  << " eV  " << std::setw(10)
+        std::cout << "    " << std::setw(12) 
+                  << deexcitations[level].label
+                  << std::setw(10) 
+                  << deexcitations[level].energy  << " eV  "
+                  << std::setw(12)
+                  << deexcitations[level].osc * f2cs  * 1.e18 << " Mbarn  " 
+                  << std::setw(10)
                   << cfGamma[int(deexcitations[level].energy / eStepGamma)][i]
                   << " ns-1\n";
       }
