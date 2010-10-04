@@ -1,11 +1,14 @@
 // -*- mode: C++ -*-
-// $Id: StPythiaEvent.h,v 1.3 2009/12/14 01:22:47 pibero Exp $
+// $Id: StPythiaEvent.h,v 1.4 2010/10/04 19:18:29 pibero Exp $
 
 // Pibero Djawotho <pibero@indiana.edu>
 // Indiana University
 // 12 July 2007
 //
 // $Log: StPythiaEvent.h,v $
+// Revision 1.4  2010/10/04 19:18:29  pibero
+// Fix copy constructor and assignment operator. Thanks, Alice!
+//
 // Revision 1.3  2009/12/14 01:22:47  pibero
 // const correctness
 //
@@ -225,7 +228,7 @@ inline void StPythiaEvent::Clear(Option_t* option)
     mF1[0] = 0; mF1[1] = 0;
     mF2[0] = 0; mF2[1] = 0;
 
-    mParticles->Clear(option);
+    if (mParticles) mParticles->Clear(option);
 }
 
 inline void StPythiaEvent::setRunId(int id) { mRunId = id; }
