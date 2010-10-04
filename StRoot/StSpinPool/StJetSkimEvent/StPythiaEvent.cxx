@@ -4,6 +4,9 @@
 // 12 July 2007
 //
 // $Log: StPythiaEvent.cxx,v $
+// Revision 1.3  2010/10/04 19:18:29  pibero
+// Fix copy constructor and assignment operator. Thanks, Alice!
+//
 // Revision 1.2  2009/12/08 15:14:24  pibero
 // Added Pythia tune per Helen Caines request.
 //
@@ -69,10 +72,12 @@ StPythiaEvent::StPythiaEvent(const StPythiaEvent& t)
         mF1[i]  = t.mF1[i];
         mF2[i]  = t.mF2[i];
     }
-    
-    for(int i=0; i<t.mParticles->GetEntries(); i++) {
-        TParticle *p = (TParticle*)(t.mParticles->At(i));
-        new ((*mParticles)[mParticles->GetEntriesFast()]) TParticle(*p);
+
+    mParticles = new TClonesArray("TParticle");
+
+    for (int i = 0; i < t.mParticles->GetEntriesFast(); ++i) {
+        TParticle* p = (TParticle*)t.mParticles->At(i);
+	new ((*mParticles)[i]) TParticle(*p);
     }
 }
 
@@ -103,10 +108,12 @@ StPythiaEvent& StPythiaEvent::operator=(const StPythiaEvent& rhs)
         mF1[i]  = rhs.mF1[i];
         mF2[i]  = rhs.mF2[i];
     }
+
+    mParticles->Clear();
     
-    for(int i=0; i<rhs.mParticles->GetEntries(); i++) {
-        TParticle *p = (TParticle*)(rhs.mParticles->At(i));
-        new ((*mParticles)[mParticles->GetEntriesFast()]) TParticle(*p);
+    for (int i = 0; i < rhs.mParticles->GetEntriesFast(); ++i) {
+        TParticle* p = (TParticle*)rhs.mParticles->At(i);
+        new ((*mParticles)[i]) TParticle(*p);
     }
     
     return *this;
