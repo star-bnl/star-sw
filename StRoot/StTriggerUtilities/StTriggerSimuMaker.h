@@ -90,6 +90,7 @@ public:
   TObjArray  *mHList; // output histo access point
   void setHList(TObjArray * x){mHList=x;}
   bool isTrigger(int trigId);
+  bool isTriggerDefined(int trigId);
   vector<int> triggerIds() const;
   
   /// returns object containing detailed information about simulation of given trigger
@@ -118,9 +119,12 @@ public:
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.26 2010/08/13 22:21:10 pibero Exp $
+// $Id: StTriggerSimuMaker.h,v 1.27 2010/10/05 15:49:23 rfatemi Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.27  2010/10/05 15:49:23  rfatemi
+// Include function to test if trigger is defined in trigger code
+//
 // Revision 1.26  2010/08/13 22:21:10  pibero
 // Move from online to offline DB
 //
