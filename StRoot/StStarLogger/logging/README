@@ -1,5 +1,6 @@
 -----------------------------------------------------------------------------
 !  How to prepare the tar ball to deploy UCM on the stand-alone Tomcat server
+!  $Id: README,v 1.4 2010/10/05 14:44:45 fine Exp $
 -----------------------------------------------------------------------------
 
 1.  Check out the source code:
@@ -24,7 +25,7 @@
        >  make -f StRoot/logging/Makefile upload
        
    
-3. Deploy the tar ball on Tomcat server  (see $STAR/StStarLogger/logging/README4TOMCAT )
+3. Deploy the tar ball on Tomcat server  (see $STAR/StRoot/StStarLogger/logging/README4TOMCAT )
 
 
 # ---------------------------------------------
