@@ -101,6 +101,18 @@ namespace Numerics {
                                     0.00068245 * pow(2. / xx, 6));
   }
 
+  double
+  Divdif(std::vector<double>& f, std::vector<double>& a, 
+         int nn, double x, int mm);
+  
+  bool 
+  Boxin3(std::vector<std::vector<std::vector<double> > >& value,
+         int nrow, int ncol, 
+         std::vector<double>& xAxis, std::vector<double>& yAxis,
+         std::vector<double>& zAxis, 
+         int maxx, int maxy, int maxz, int nx, int ny, int nz,
+         double xx, double yy, double zz, double f, int iOrder);
+
 }
 
 }
