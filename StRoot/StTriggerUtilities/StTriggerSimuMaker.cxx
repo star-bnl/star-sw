@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.43 2010/08/26 15:28:31 pibero Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.44 2010/10/05 15:49:01 rfatemi Exp $
 
 // MySQL C API
 #include "mysql.h"
@@ -229,6 +229,37 @@ vector<int> StTriggerSimuMaker::triggerIds() const
 
   return v;
 }
+
+bool StTriggerSimuMaker::isTriggerDefined(int trigId)
+{
+
+  bool TrigDefined;
+  
+  TrigDefined = false;
+
+  if (mYear < 2009) {
+    if (bemc) {
+      vector<int> b = bemc->triggerIds();
+      for (size_t i = 0; i < b.size(); ++i) {
+	if (trigId==b[i]) TrigDefined=true;
+      }
+    }
+    if (eemc) {
+      vector<int> e = bemc->triggerIds();
+      for (size_t i = 0; i < e.size(); ++i) {
+	if (trigId==e[i]) TrigDefined=true;
+      }
+    }
+  }
+  else {
+    set<int> s = emc->triggerIds();
+    if (s.count(trigId)>0) TrigDefined = true; 
+  }
+  
+  
+  return TrigDefined;
+}
+
 
 void StTriggerSimuMaker::buildDetailedResult(int trigId) {
     StTriggerSimuResult& result = mResults[trigId];
@@ -684,6 +715,9 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.44  2010/10/05 15:49:01  rfatemi
+ * Include ability to test if trigger is defined in trigger code for the database timestamp
+ *
  * Revision 1.43  2010/08/26 15:28:31  pibero
  * In the newer trigger code, the trigger DB is accessed with the query
  * "select idx_rn from triggers where beginTime >= '%s' limit 1".  The
