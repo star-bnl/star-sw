@@ -1,4 +1,5 @@
 #include <iomanip>
+#include <fstream>
 #include "heed++/code/EnTransfCS.h"
 #include "heed++/code/HeedMatterDef.h"
 #include "wcpplib/clhep_units/WSystemOfUnits.h"
@@ -16,11 +17,12 @@ EnTransfCS::EnTransfCS
  //int fs_simple_form, 
  int fs_primary_electron, 
  HeedMatterDef* fhmd, long fparticle_charge):
-particle_mass(fparticle_mass), gamma_1(fgamma_1), gamma(fgamma_1 + 1.0),
-betta(lorbetta(fgamma_1)), betta2(0.0), betta12(0.0), 
+particle_mass(fparticle_mass), particle_charge(fparticle_charge), 
+betta(lorbetta(fgamma_1)), betta2(0.0), betta12(0.0),
+gamma(fgamma_1 + 1.0), gamma_1(fgamma_1), 
 s_simple_form(1),
 s_primary_electron(fs_primary_electron), 
-hmd(fhmd), particle_charge(fparticle_charge),
+hmd(fhmd),
 quanC(0.0)
 #ifndef EXCLUDE_MEAN
 ,meanC(0.0), meanC1(0.0), meaneleC(0.0), meaneleC1(0.0)
@@ -670,6 +672,14 @@ quanC(0.0)
 #ifdef DEBUG_EnTransfCS
   treser.clear();
 #endif
+  std::ofstream dcsfile;
+  dcsfile.open("dcs.txt", std::ios::out);
+  for (int i = 0; i < qe; ++i) {
+    dcsfile << hmd->energy_mesh->get_ec(i) << "  "
+            << addaC[i] << "\n";
+  }
+  dcsfile.close(); 
+
   addaC.clear();
 #ifndef EXCLUDE_A_VALUES
   addaC_a.clear();

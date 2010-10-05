@@ -195,8 +195,16 @@ ExAtomPhotoAbsCS generate_Argon_PACS_mod_esc(void)
 {
   mfunnamep("ExAtomPhotoAbsCS generate_Argon_PACS_mod_esc(void)");
   ExAtomPhotoAbsCS Argon_PACS_mod_esc(18, 
-				      shelllist_dir_name + "shelllist.dat", 
-				      pacs_table_dir_name + "Ar.dat"); 
+                                      shelllist_dir_name + "shelllist.dat", 
+                                      pacs_table_dir_name + "Ar.dat");
+ 
+  // ExAtomPhotoAbsCS Argon_PACS_mod_esc(18, 
+  //                                     shelllist_dir_name + "shelllist.dat", 
+  //                                     shelllist_dir_name + "mw3.dat"); 
+
+  // ExAtomPhotoAbsCS Argon_PACS_mod_esc(18, "argon", 
+  //                                     shelllist_dir_name + "ftbf18.dat", 2);
+
   AtomicSecondaryProducts* asp =  Argon_PACS_mod_esc.get_asp(1);
   //asp->print(mcout, 2);
   DynLinArr< double > electron_energy;
