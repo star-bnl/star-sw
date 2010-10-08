@@ -131,6 +131,9 @@ ExAtomPhotoAbsCS Nitrogen_PACS(7,
 ExAtomPhotoAbsCS Oxygen_PACS(8, 
 			     shelllist_dir_name + "shelllist.dat", 
 			     pacs_table_dir_name + "O.dat"); 
+ExAtomPhotoAbsCS Oxygen_for_CO2_PACS(8,
+           shelllist_dir_name + "shelllist.dat",
+           pacs_table_dir_name + "O.dat");
 ExAtomPhotoAbsCS Fluorine_PACS(9, 
 			     shelllist_dir_name + "shelllist.dat", 
 			     pacs_table_dir_name + "F.dat"); 
@@ -275,7 +278,7 @@ MolecPhotoAbsCS Kr_MPACS(Krypton_PACS, 1, 24.4e-6);
 MolecPhotoAbsCS Xe_MPACS(Xenon_PACS, 1, 22.1e-6);
 MolecPhotoAbsCS NH3_MPACS(Nitrogen_PACS, 1, Hydrogen_for_NH4_PACS, 3, 26.6e-6);
 MolecPhotoAbsCS N2O_MPACS(Nitrogen_PACS, 2, Oxygen_PACS, 1, 34.8e-6);
-MolecPhotoAbsCS CO2_MPACS(Carbon_for_CO2_PACS, 1, Oxygen_PACS, 2, 33.0e-6);
+MolecPhotoAbsCS CO2_MPACS(Carbon_for_CO2_PACS, 1, Oxygen_for_CO2_PACS, 2, 33.0e-6);
 MolecPhotoAbsCS CH4_MPACS(Carbon_for_CH4_PACS, 1, Hydrogen_for_H2_PACS, 4, 
 			  27.3e-6);
 //MolecPhotoAbsCS CH4_MPACS(Carbon_for_CH4_PACS, 1, Hydrogen_for_CH4_PACS, 4);

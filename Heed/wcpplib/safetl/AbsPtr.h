@@ -13,6 +13,7 @@ The file is provided "as is" without express or implied warranty.
 */
 
 #include <iostream>
+#include <cstring>
 #include <limits.h>
 #include <typeinfo>
 //#include "wcpplib/util/List.h"

@@ -41,6 +41,7 @@ extern ExAtomPhotoAbsCS Carbon_for_CF4_PACS;
 extern ExAtomPhotoAbsCS Carbon_for_CO2_PACS;
 extern ExAtomPhotoAbsCS Nitrogen_PACS;
 extern ExAtomPhotoAbsCS Oxygen_PACS;
+extern ExAtomPhotoAbsCS Oxygen_for_CO2_PACS;
 extern ExAtomPhotoAbsCS Fluorine_PACS;
 extern ExAtomPhotoAbsCS Neon_PACS;
 extern ExAtomPhotoAbsCS Sodium_PACS;

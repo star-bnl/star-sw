@@ -12,7 +12,7 @@ It is provided "as is" without express or implied warranty.
 */
 
 #include <stdlib.h>
-//#include <string.h>
+#include <string.h>
 //#include <iostream.h>
 #include "wcpplib/stream/prstream.h"
 #include "wcpplib/util/inlinec.h"

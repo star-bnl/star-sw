@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include <algorithm>
 
 #include "Sensor.hh"
 #include "TrackBichsel.hh"

@@ -103,7 +103,7 @@ class AvalancheMicroscopic {
     // Secondary electrons are not transported
     bool DriftElectron(const double x0, const double y0, const double z0,
                        const double t0, const double e0,
-           const double dx0 = 0., const double dy0 = 0., const double z0 = 0.);
+           const double dx0 = 0., const double dy0 = 0., const double dz0 = 0.);
 
     // Calculate an avalanche initiated by an electron with given
     // initial coordinates, energy and direction (random if not specified)
@@ -247,7 +247,7 @@ class AvalancheMicroscopic {
                          
     void ComputeRotationMatrix(
         const double bx, const double by, const double bz, const double bmag,
-        const double ex, const double ey, const double ex);       
+        const double ex, const double ey, const double ez);       
 
     void RotateGlobal2Local(double& dx, double& dy, double& dz);
     void RotateLocal2Global(double& dx, double& dy, double& dz);

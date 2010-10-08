@@ -228,6 +228,10 @@ class Medium {
     // Switch on/off debugging messages
     bool debug;
 
+    // Field grids
+    std::vector<double> eFields;
+    std::vector<double> bFields;
+
     bool 
     BoxInterpolation3d(std::vector<std::vector<std::vector<double> > >& value, 
                        std::vector<double>& xAxis, std::vector<double>& yAxis, 

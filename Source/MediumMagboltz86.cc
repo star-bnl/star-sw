@@ -1983,9 +1983,9 @@ MediumMagboltz86::Mixer() {
     std::cout << className << "::Mixer:\n";
     std::cout << "    Energy [eV]    Collision Rate [ns-1]\n";
     for (int i = 0; i < 8; ++i) { 
-      std::cout << "    " << std::setw(10) 
+      std::cout << "    " << std::fixed << std::setw(10) << std::setprecision(2)  
                 << (2 * i + 1) * eFinal / 16
-                << "    " << std::setw(18) 
+                << "    " << std::setw(18) << std::setprecision(2)
                 << cfTot[(i + 1) * nEnergySteps / 16] << "\n";
     }
   }
