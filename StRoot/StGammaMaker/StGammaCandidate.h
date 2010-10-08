@@ -43,44 +43,46 @@ class StGammaCandidate: public TObject
     public:
 
         enum CalorimeterId { kEEmc = 0, kBEmc, kUnknown = 255}; 
+        enum thresholdCut { kMagnitude, kTransverse };
       
         StGammaCandidate();
         ~StGammaCandidate();
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaCandidate.h,v 1.14 2009/06/18 17:21:24 jwebb Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaCandidate.h,v 1.15 2010/10/08 19:56:09 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
 
         ////////////////////////////////////////////
         //               Accessors                //
         ////////////////////////////////////////////
         
-        Float_t sumPt( Float_t radius );
-        Float_t sumTrackPt( Float_t radius );
-        Float_t sumTowerPt( Float_t radius );
-        Float_t sumPreshower1( Float_t radius );
-        Float_t sumPreshower2( Float_t radius );
-        Float_t sumPostshower( Float_t radius );
+        Float_t sumPt( Float_t radius, Float_t threshold = 0.0, thresholdCut cut = kTransverse );
+        Float_t sumTrackPt( Float_t radius, Float_t threshold = 0.0, thresholdCut cut = kTransverse );
+        Float_t sumTowerPt( Float_t radius, Float_t threshold = 0.0, thresholdCut cut = kTransverse );
+        Float_t sumPreshower1( Float_t radius, Float_t threshold = 0.0 );
+        Float_t sumPreshower2( Float_t radius, Float_t threshold = 0.0 );
+        Float_t sumPostshower( Float_t radius, Float_t threshold = 0.0 );
         
-        Int_t numberOfTracks( Float_t radius, Float_t minpt = 0. );
-        Int_t numberOfTowers( Float_t radius, Float_t minpt = 0. );
-        Int_t numberOfPreshower1( Float_t radius, Float_t threshold = 0. );
-        Int_t numberOfPreshower2( Float_t radius, Float_t threshold = 0. );
-        Int_t numberOfPostshower( Float_t radius, Float_t threshold = 0. );
+        Int_t numberOfTracks( Float_t radius, Float_t threshold = 0.0, thresholdCut cut = kTransverse );
+        Int_t numberOfTowers( Float_t radius, Float_t threshold = 0.0, thresholdCut cut = kTransverse );
+        Int_t numberOfPreshower1( Float_t radius, Float_t threshold = 0.0 );
+        Int_t numberOfPreshower2( Float_t radius, Float_t threshold = 0.0 );
+        Int_t numberOfPostshower( Float_t radius, Float_t threshold = 0.0 );
         
         Int_t detectorId() { return mDetector; }
         Int_t id() { return mGammaId; }
         
-        TVector3 momentum() const { return mMomentum; }
-        TVector3 position() const { return mPosition; }
         Float_t  energy() const { return mEnergy; }
         Float_t  seedEnergy() const { return mSeedEnergy; }
-        Float_t  pre1Energy() const { return mPre1Energy; }
-        Float_t  pre2Energy() const { return mPre2Energy; }
-        Float_t  postEnergy() const { return mPostEnergy; }
-        Float_t  smduEnergy() const { return mSmduEnergy; }
-        Float_t  smdvEnergy() const { return mSmdvEnergy; }
-        Float_t  smdEtaEnergy() const { return mSmduEnergy; }
-        Float_t  smdPhiEnergy() const { return mSmdvEnergy; }
+        Float_t  pre1Energy(Float_t threshold = 0.0);
+        Float_t  pre2Energy(Float_t threshold = 0.0);
+        Float_t  postEnergy(Float_t threshold = 0.0);
+        Float_t  smduEnergy(Float_t threshold = 0.0);
+        Float_t  smdvEnergy(Float_t threshold = 0.0);
+        Float_t  smdEtaEnergy(Float_t threshold = 0.0) { return smduEnergy(threshold); }
+        Float_t  smdPhiEnergy(Float_t threshold = 0.0) { return smdvEnergy(threshold); }
+
+        TVector3 position() const { return mPosition; }
+        TVector3 momentum() const { return mMomentum; }
         
         TVector3 momentum1x1();
         TVector3 momentum1x1c();
@@ -123,6 +125,8 @@ class StGammaCandidate: public TObject
         ////////////////////////////////////////////
         //                Mutators                //
         ////////////////////////////////////////////
+
+        void recluster(TVector3 vertex, Float_t threshold, thresholdCut cut = kTransverse);
         
         void SetId(Int_t id) { if( id == kEEmc || id == kBEmc ) mGammaId = id; else mGammaId = kUnknown; }
         void SetTowerId( Int_t id ) { mTowerId = id; }
@@ -167,7 +171,6 @@ class StGammaCandidate: public TObject
         void addMyPostshower( StGammaTower *post ){ mMyPostshower.Add( post ); }
         
         void SetSmdFit(const StGammaFitterResult& fit, Int_t plane=0) { mSmdFit[plane] = fit; }
-
 
     protected:
 
