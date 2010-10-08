@@ -13,6 +13,8 @@
 
 #include "StGammaCandidate.h"
 
+#include "TVector3.h"
+
 ClassImp(StGammaCandidate);
 
 //////////////////////////////////////////////////
@@ -51,18 +53,21 @@ StGammaCandidate::~StGammaCandidate()
 //   within a cone of the given radius around   //
 //                 the candidate                //
 //////////////////////////////////////////////////
-Float_t StGammaCandidate::sumPt(Float_t radius)
+
+Float_t StGammaCandidate::sumPt(Float_t radius, Float_t threshold, thresholdCut cut)
 {
-    Float_t sumTracks = sumTrackPt(radius);
-    Float_t sumTowers = sumTowerPt(radius);
+    Float_t sumTracks = sumTrackPt(radius, threshold, cut);
+    Float_t sumTowers = sumTowerPt(radius, threshold, cut);
     return sumTracks + sumTowers;
 }
 
 //////////////////////////////////////////////////
 //    Return the total track pT within a cone   //
-//   of the given radius around the candidate   //
+//   of the given radius around the candidate,  //
+//  subject to a threshold requirement (in GeV) //
 //////////////////////////////////////////////////
-Float_t StGammaCandidate::sumTrackPt(Float_t radius)
+
+Float_t StGammaCandidate::sumTrackPt(Float_t radius, Float_t threshold, thresholdCut cut)
 {
 
     Float_t sum = 0.0;
@@ -78,7 +83,8 @@ Float_t StGammaCandidate::sumTrackPt(Float_t radius)
         Float_t dPhi = TVector2::Phi_mpi_pi(myPhi - t->phi());
         Float_t r = TMath::Sqrt(dEta * dEta + dPhi * dPhi);
         
-        if(r <= radius) sum += t->pt();
+        if(cut == kMagnitude)  if(r <= radius && t->momentum.Mag() > threshold) sum += t->pt();
+        if(cut == kTransverse) if(r <= radius && t->pt() > threshold)           sum += t->pt();
     
     }
 
@@ -89,8 +95,10 @@ Float_t StGammaCandidate::sumTrackPt(Float_t radius)
 //////////////////////////////////////////////////
 //    Return the total tower Et within a cone   //
 //   of the given radius around the candidate   //
+//  subject to a threshold requirement (in GeV) //
 //////////////////////////////////////////////////
-Float_t StGammaCandidate::sumTowerPt(Float_t radius)
+
+Float_t StGammaCandidate::sumTowerPt(Float_t radius, Float_t threshold, thresholdCut cut)
 {
 
     Float_t sum = 0.0;
@@ -107,7 +115,8 @@ Float_t StGammaCandidate::sumTowerPt(Float_t radius)
         Float_t dPhi = TVector2::Phi_mpi_pi(myPhi - t->phi);
         Float_t r = TMath::Sqrt(dEta * dEta + dPhi * dPhi);
         
-        if(r <= radius) sum += t->energy / TMath::CosH(t->eta);
+        if(cut == kMagnitude)  if(r <= radius && t->energy > threshold) sum += t->pt();
+        if(cut == kTransverse) if(r <= radius && t->pt() > threshold)   sum += t->pt();
     
     }
     
@@ -118,8 +127,10 @@ Float_t StGammaCandidate::sumTowerPt(Float_t radius)
 //////////////////////////////////////////////////
 //  Return the total preshower Et within a cone //
 //    of the given radius around the candidate  //
+//  subject to a threshold requirement (in GeV) //
 //////////////////////////////////////////////////
-Float_t StGammaCandidate::sumPreshower1(Float_t radius)
+
+Float_t StGammaCandidate::sumPreshower1(Float_t radius, Float_t threshold)
 {
 
     Float_t sum = 0.;
@@ -136,7 +147,7 @@ Float_t StGammaCandidate::sumPreshower1(Float_t radius)
         Float_t dPhi = TVector2::Phi_mpi_pi(myPhi - t->phi);
         Float_t r = TMath::Sqrt(dEta * dEta + dPhi * dPhi);
         
-        if(r <= radius) sum += t->energy / TMath::CosH(t->eta);
+        if(r <= radius && t->energy > threshold) sum += t->pt();
         
     }
     
@@ -147,8 +158,10 @@ Float_t StGammaCandidate::sumPreshower1(Float_t radius)
 //////////////////////////////////////////////////
 //  Return the total preshower Et within a cone //
 //    of the given radius around the candidate  //
+//  subject to a threshold requirement (in GeV) //
 //////////////////////////////////////////////////
-Float_t StGammaCandidate::sumPreshower2(Float_t radius)
+
+Float_t StGammaCandidate::sumPreshower2(Float_t radius, Float_t threshold)
 {
 
   Float_t sum = 0.0;
@@ -165,7 +178,7 @@ Float_t StGammaCandidate::sumPreshower2(Float_t radius)
       Float_t dPhi = TVector2::Phi_mpi_pi(myPhi - t->phi);
       Float_t r = TMath::Sqrt(dEta * dEta + dPhi * dPhi);
       
-      if(r <= radius) sum += t->energy / TMath::CosH(t->eta);
+      if(r <= radius && t->energy > threshold) sum += t->pt();
 	
     }
     
@@ -176,8 +189,10 @@ Float_t StGammaCandidate::sumPreshower2(Float_t radius)
 //////////////////////////////////////////////////
 // Return the total postshower Et within a cone //
 //    of the given radius around the candidate  //
+//  subject to a threshold requirement (in GeV) //
 //////////////////////////////////////////////////
-Float_t StGammaCandidate::sumPostshower(Float_t radius)
+
+Float_t StGammaCandidate::sumPostshower(Float_t radius, Float_t threshold)
 {
 
     Float_t sum = 0.0;
@@ -194,7 +209,7 @@ Float_t StGammaCandidate::sumPostshower(Float_t radius)
         Float_t dPhi = TVector2::Phi_mpi_pi(myPhi - t->phi);
         Float_t r = TMath::Sqrt(dEta * dEta + dPhi * dPhi);
         
-        if (r <= radius) sum += t->energy / TMath::CosH(t->eta);
+        if (r <= radius && t->energy > threshold) sum += t->pt();
       
     }
     
@@ -205,8 +220,10 @@ Float_t StGammaCandidate::sumPostshower(Float_t radius)
 //////////////////////////////////////////////////
 //   Return the number of tracks within a cone  //
 //    of the given radius around the candidate  //
+//  subject to a threshold requirement (in GeV) //
 //////////////////////////////////////////////////
-Int_t StGammaCandidate::numberOfTracks(Float_t radius, Float_t minPt)
+
+Int_t StGammaCandidate::numberOfTracks(Float_t radius, Float_t threshold, thresholdCut cut)
 {
 
     Int_t count = 0;
@@ -222,7 +239,8 @@ Int_t StGammaCandidate::numberOfTracks(Float_t radius, Float_t minPt)
       Float_t dPhi = TVector2::Phi_mpi_pi(myPhi - t->phi());
       Float_t r = TMath::Sqrt(dEta * dEta + dPhi * dPhi);
       
-      if (r <= radius && t->pt() >= minPt) count++;
+      if(cut == kMagnitude)  if(r <= radius && t->momentum.Mag() > threshold) ++count;
+      if(cut == kTransverse) if(r <= radius && t->pt() > threshold)           ++count;
       
     }
     
@@ -233,8 +251,10 @@ Int_t StGammaCandidate::numberOfTracks(Float_t radius, Float_t minPt)
 //////////////////////////////////////////////////
 //   Return the number of towers within a cone  //
 //    of the given radius around the candidate  //
+//  subject to a threshold requirement (in GeV) //
 //////////////////////////////////////////////////
-Int_t StGammaCandidate::numberOfTowers(Float_t radius, Float_t minPt)
+
+Int_t StGammaCandidate::numberOfTowers(Float_t radius, Float_t threshold, thresholdCut cut)
 {
 
     Int_t count = 0;
@@ -251,7 +271,8 @@ Int_t StGammaCandidate::numberOfTowers(Float_t radius, Float_t minPt)
         Float_t dPhi = TVector2::Phi_mpi_pi(myPhi - t->phi);
         Float_t r = TMath::Sqrt(dEta * dEta + dPhi * dPhi);
         
-        if (r <= radius && t->pt() >= minPt) count++;
+        if(cut == kMagnitude)  if(r <= radius && t->energy > threshold) ++count;
+        if(cut == kTransverse) if(r <= radius && t->pt() > threshold)   ++count;
         
     }
     
@@ -262,8 +283,10 @@ Int_t StGammaCandidate::numberOfTowers(Float_t radius, Float_t minPt)
 //////////////////////////////////////////////////
 // Return the number of preshowers within a cone//
 //    of the given radius around the candidate  //
+//  subject to a threshold requirement (in GeV) //
 //////////////////////////////////////////////////
-Int_t StGammaCandidate::numberOfPreshower1(Float_t radius, Float_t thresh)
+
+Int_t StGammaCandidate::numberOfPreshower1(Float_t radius, Float_t threshold)
 {
 
     Int_t count = 0;
@@ -279,7 +302,7 @@ Int_t StGammaCandidate::numberOfPreshower1(Float_t radius, Float_t thresh)
         Float_t dPhi = TVector2::Phi_mpi_pi(myPhi - t->phi);
         Float_t r = TMath::Sqrt(dEta * dEta + dPhi * dPhi);
         
-        if(r <= radius && t->energy >= thresh) count++;
+        if(r <= radius && t->energy > threshold) ++count;
       
     }
     
@@ -290,8 +313,10 @@ Int_t StGammaCandidate::numberOfPreshower1(Float_t radius, Float_t thresh)
 //////////////////////////////////////////////////
 // Return the number of preshowers within a cone//
 //    of the given radius around the candidate  //
+//  subject to a threshold requirement (in GeV) //
 //////////////////////////////////////////////////
-Int_t StGammaCandidate::numberOfPreshower2(Float_t radius, Float_t thresh)
+
+Int_t StGammaCandidate::numberOfPreshower2(Float_t radius, Float_t threshold)
 {
 
     Int_t count = 0;
@@ -307,7 +332,7 @@ Int_t StGammaCandidate::numberOfPreshower2(Float_t radius, Float_t thresh)
         Float_t dPhi = TVector2::Phi_mpi_pi(myPhi - t->phi);
         Float_t r = TMath::Sqrt(dEta * dEta + dPhi * dPhi);
       
-        if (r <= radius && t->energy >= thresh) count++;
+        if(r <= radius && t->energy > threshold) ++count;
         
     }
     
@@ -318,8 +343,10 @@ Int_t StGammaCandidate::numberOfPreshower2(Float_t radius, Float_t thresh)
 //////////////////////////////////////////////////
 //  Return the number of postshowers within a   //
 // cone of the given radius around the candidate//
+//  subject to a threshold requirement (in GeV) //
 //////////////////////////////////////////////////
-Int_t StGammaCandidate::numberOfPostshower(Float_t radius, Float_t thresh)
+
+Int_t StGammaCandidate::numberOfPostshower(Float_t radius, Float_t threshold)
 {
 
     Int_t count = 0;
@@ -335,10 +362,130 @@ Int_t StGammaCandidate::numberOfPostshower(Float_t radius, Float_t thresh)
         Float_t dPhi = TVector2::Phi_mpi_pi(myPhi - t->phi);
         Float_t r = TMath::Sqrt(dEta * dEta + dPhi * dPhi);
         
-        if (r <= radius && t->energy >= thresh) count++;
+        if(r <= radius && t->energy > threshold) ++count;
     }
     
     return count;
+  
+}
+
+//////////////////////////////////////////////////
+//       Return cluster preshower 1 energy      //
+// subject to a threshold requirement (in GeV)  //
+//////////////////////////////////////////////////
+
+Float_t StGammaCandidate::pre1Energy(Float_t threshold)
+{
+
+    mPre1Energy = 0;
+
+    for(Int_t i = 0; i < numberOfMyPreshower1(); i++)
+    {
+    
+        StGammaTower *t = mypreshower1(i);
+        if(t->fail) continue;
+        
+        if(t->energy > threshold) mPre1Energy += t->energy;
+        
+    }
+    
+    return mPre1Energy;
+  
+}
+
+//////////////////////////////////////////////////
+//       Return cluster preshower 2 energy      //
+// subject to a threshold requirement (in GeV)  //
+//////////////////////////////////////////////////
+
+Float_t StGammaCandidate::pre2Energy(Float_t threshold)
+{
+
+    mPre2Energy = 0;
+
+    for(Int_t i = 0; i < numberOfMyPreshower2(); i++)
+    {
+    
+        StGammaTower *t = mypreshower2(i);
+        if(t->fail) continue;
+        
+        if(t->energy > threshold) mPre2Energy += t->energy;
+        
+    }
+    
+    return mPre2Energy;
+  
+}
+
+//////////////////////////////////////////////////
+//       Return cluster postshower energy       //
+// subject to a threshold requirement (in GeV)  //
+//////////////////////////////////////////////////
+
+Float_t StGammaCandidate::postEnergy(Float_t threshold)
+{
+
+    mPostEnergy = 0;
+
+    for(Int_t i = 0; i < numberOfMyPostshower(); i++)
+    {
+    
+        StGammaTower *t = mypostshower(i);
+        if(t->fail) continue;
+        
+        if(t->energy > threshold) mPostEnergy += t->energy;
+        
+    }
+    
+    return mPostEnergy;
+  
+}
+
+//////////////////////////////////////////////////
+//       Return cluster Smd(U/Eta) energy       //
+// subject to a threshold requirement (in GeV)  //
+//////////////////////////////////////////////////
+
+Float_t StGammaCandidate::smduEnergy(Float_t threshold)
+{
+
+    mSmduEnergy = 0;
+
+    for(Int_t i = 0; i < numberOfSmdu(); i++)
+    {
+    
+        StGammaStrip *t = smdu(i);
+        if(t->fail) continue;
+        
+        if(t->energy > threshold) mSmduEnergy += t->energy;
+        
+    }
+    
+    return mSmduEnergy;
+  
+}
+
+//////////////////////////////////////////////////
+//       Return cluster Smd(V/Phi) energy       //
+// subject to a threshold requirement (in GeV)  //
+//////////////////////////////////////////////////
+
+Float_t StGammaCandidate::smdvEnergy(Float_t threshold)
+{
+
+    mSmdvEnergy = 0;
+
+    for(Int_t i = 0; i < numberOfSmdv(); i++)
+    {
+    
+        StGammaStrip *t = smdv(i);
+        if(t->fail) continue;
+        
+        if(t->energy > threshold) mSmdvEnergy += t->energy;
+        
+    }
+    
+    return mSmdvEnergy;
   
 }
 
@@ -355,6 +502,45 @@ struct Tower
 Bool_t SortDistance(const Tower& t1, const Tower& t2)
 {
     return (t1.dR < t2.dR);
+}
+
+//////////////////////////////////////////////////
+//     Recluster, computing cluster positon,    //
+//  momentum, and energy after exluding towers  //
+//      below a given threshold (in GeV)        //
+//////////////////////////////////////////////////
+
+void StGammaCandidate::recluster(TVector3 vertex, Float_t threshold, thresholdCut cut)
+{
+
+    mEnergy = 0.0;
+    mPosition.SetPtEtaPhi(0, 0, 0);
+
+    for(Int_t i = 0; i < numberOfMyTowers(); ++i)
+    {
+
+        StGammaTower *t = mytower(i);
+ 
+        if(t->fail)continue;
+
+        if(cut == kMagnitude)  if(t->energy < threshold) continue;
+        if(cut == kTransverse) if(t->pt() < threshold)   continue;
+        
+        TVector3 tower;
+        tower.SetPtEtaPhi(t->pt(), t->eta, t->phi);
+
+        mPosition += tower * t->energy;
+        mEnergy += t->energy;
+
+    }
+
+    mPosition *= 1.0 / mEnergy;
+    
+    mMomentum = mPosition - vertex;
+    mMomentum.SetMag(mEnergy);
+
+    return;
+
 }
 
 //////////////////////////////////////////////////
