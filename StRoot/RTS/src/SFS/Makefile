@@ -72,6 +72,10 @@ sfs_index_daq.o: ../../trg/include/trgStructures_32.h
 sfs_index_daq.o: ../../include/L3/L3Formats.h
 blastSFS.o: ../../include/SUNRT/clock.h
 blastSFS.o: ../../include/I386/i386Lib.h
+daq_test.o: sfs_index.h
+daq_test.o: fs_index.h
+daq_test.o: sfs_base.h
+daq_test.o: ../../include/rtsLog.h
 example.o: sfs_index.h
 example.o: fs_index.h
 example.o: sfs_base.h

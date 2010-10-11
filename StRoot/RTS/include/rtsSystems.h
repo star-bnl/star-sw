@@ -71,35 +71,23 @@
 	TCD_ID 21 -> VME 0x1F000000
 */
 #define TCD_ESMD        6
-#define TCD_BBC         7
+#define TCD_BBC         7	// trigger-only
 #define TCD_ETOW        8
-#define TCD_MTD         9	// Dec 18, was SSD before
+#define TCD_MTD_QT      9	// trigger-only
 #define TCD_FGT         10	// Aug 26, 2009: was FPD's before
 #define TCD_TOF         11      //
 #define TCD_PP          12      // added Oct 20, 07
-#define TCD_SVT		12	// keep copy for backwards compatibility
-#define TCD_SVT_CD      13      // empty, Oct 20, 07;
+#define TCD_MTD         13      // added Oct 5, 2010
 #define TCD_TPX		14	// codes VME 0x18000000; added on 18 Oct 07; Tonko
 #define TCD_BSMD        15      //
-#define TCD_CTB         16
+#define TCD_CTB         16	// trigger-only
 #define TCD_BTOW        17      //
 #define TCD_FTPC        18      //
 #define TCD_PMD         19      //
-#define TCD_TPC         20      // empty, Nov, 2008
-#define TCD_VPD		21      // Tonko,March07,instead of: TPC's cable driver slot
+#define TCD_EMPTY_20    20      // empty, Nov, 2008
+#define TCD_VPD		21      // trigger-only
 
 
-// Trigger Detector groupings...
-//	Names don't necessarily mean anything! Check grp2rts() AND rts2grp() for the
-//	membership!
-//#define TPC_GRP		0
-//#define FPD_GRP		1
-//#define ETOW_GRP	2	// this used to be TOF but somethings wrong with the hardware...
-//#define BTOW_GRP	3
-//#define BSMD_GRP	4
-//#define UNUSED_GRP	5
-//#define ESMD_GRP	6
-//#define TPX_GRP		7
 
 // 2010 Group definitions...
 #define FTP_GRP		0
@@ -112,6 +100,7 @@
 #define TPX_GRP		7
 #define PMD_GRP         8
 #define FGT_GRP         9
+#define MTD_GRP		15
 
 /* RTS Node Id, Tonko, 11/06/2000
 
@@ -662,11 +651,11 @@ extern inline int tcd2rts(int tcd)
         ESMD_SYSTEM,	//6
         -1,		//7 BBC
         ETOW_SYSTEM,	//8
-        MTD_SYSTEM,	//9 ; used for MTD, was SSD?
+        -1,		//9 ; used for MTD_QT, was SSD?
         FGT_SYSTEM,	//10 ; moved from FPD
         TOF_SYSTEM,	//11
         PP_SYSTEM,	//12 ; moved from SVT_SYSTem to PP!
-        -1,		//13 EMPTY
+        MTD_SYSTEM,	//13 was EMPTY in FY10, MTD in FY11
         TPX_SYSTEM,	//14
         BSMD_SYSTEM,	//15
         -1,		//16 CTB aka ZDC
@@ -720,7 +709,7 @@ extern inline u_int grp2rts_mask(int grp)
 	  ret |= (1 << BSMD_SYSTEM) ;
 	}
 	if(grp & (1 << TOF_GRP)) {
-	  ret |= (1 << TOF_SYSTEM) | (1 << MTD_SYSTEM) ;	// added MTD to TOF's grp
+	  ret |= (1 << TOF_SYSTEM)  ;	
 	}
 	if(grp & (1 << ESMD_GRP)) {
 	  ret |= (1 << ESMD_SYSTEM) ;
@@ -734,6 +723,10 @@ extern inline u_int grp2rts_mask(int grp)
 	if(grp & (1 << FGT_GRP)) {
 	  ret |= (1 << FGT_SYSTEM);
 	}
+	if(grp & (1 << MTD_GRP)) {
+	  ret |= (1 << MTD_SYSTEM);
+	}
+
 	return ret ;
 }
 
@@ -764,7 +757,7 @@ extern inline int rts2grp(int rts)
     case FGT_ID:
       return FGT_GRP;
     case MTD_ID:
-      return TOF_GRP;
+      return MTD_GRP;
     default:
 	return 31 ;	// this is an ERROR!
     }
