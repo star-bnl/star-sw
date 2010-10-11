@@ -4,8 +4,11 @@
 #====================================================================================================
 # Generate embedding job submission xml file
 #
-# $Id: get_embedding_xml.pl,v 1.12 2010/09/29 04:22:34 hmasui Exp $
+# $Id: get_embedding_xml.pl,v 1.13 2010/10/11 19:04:00 hmasui Exp $
 # $Log: get_embedding_xml.pl,v $
+# Revision 1.13  2010/10/11 19:04:00  hmasui
+# Added sync command before hsi
+#
 # Revision 1.12  2010/09/29 04:22:34  hmasui
 # Dynamic directory creation for generator and temporary log files. Added chmod for HPSS directory
 #
@@ -317,6 +320,9 @@ print OUT "\n";
 # put log file in HPSS
 #----------------------------------------------------------------------------------------------------
 printDebug("Set archive log/root files in HPSS: $hpssLogDir ...");
+print OUT "<!-- Write buffers into disk -->\n";
+print OUT "sync\n"
+print OUT ""
 print OUT "<!-- Archive in HPSS -->\n";
 print OUT "set i = 0\n";
 print OUT "set ret = 1\n";
