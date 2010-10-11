@@ -547,6 +547,8 @@ int tpxFCF::do_pad(tpx_altro_struct *a, daq_sim_adc_tb *sim_adc)
 		adc = a->adc[i] ;
 		tb = a->tb[i] ;
 
+//		printf("........looking at %d %d %d %d\n",a->row,a->pad,tb,adc) ;
+
 		if(unlikely( adc <= 1 )) {	// possible due to ALTROs way of sticking sequences...
 			continue ;
 		}
@@ -1177,6 +1179,14 @@ void tpxFCF::dump(tpxFCF_cl *cl, int row)
 
 		if(likely(fla & FCF_IN_DOUBLE)) ;
 		else {
+
+			if(likely(fla & FCF_ONEPAD)) ;
+			else {
+				LOG(WARN,"WTF? not onebad but not in double!?") ;
+			}
+
+//			printf("ONEPAD: %d %d %d %d %d\n",cl->p1,cl->p2,cl->t1,cl->t2,fla) ;
+
 			struct stage1 *gain = get_stage1(row, cl->p2) ;
 
 			cl->p1 = cl->p2 ;
