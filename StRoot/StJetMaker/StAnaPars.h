@@ -17,7 +17,7 @@
 class StAnaPars : public TObject {
 public:
   StAnaPars() : mCorrectTowerEnergyForTracks(new StjTowerEnergyCorrectionForTracksNull) {}
-  ~StAnaPars() { delete& mCorrectTowerEnergyForTracks; }
+  ~StAnaPars() { delete mCorrectTowerEnergyForTracks; }
 
   void setTowerEnergyCorrection(StjAbstractTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks)
   {
