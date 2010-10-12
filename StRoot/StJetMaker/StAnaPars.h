@@ -16,12 +16,12 @@
 
 class StAnaPars : public TObject {
 public:
-  StAnaPars() : mCorrectTowerEnergyForTracks(*new StjTowerEnergyCorrectionForTracksNull) {}
+  StAnaPars() : mCorrectTowerEnergyForTracks(new StjTowerEnergyCorrectionForTracksNull) {}
   ~StAnaPars() { delete& mCorrectTowerEnergyForTracks; }
 
   void setTowerEnergyCorrection(StjAbstractTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks)
   {
-    mCorrectTowerEnergyForTracks = *correctTowerEnergyForTracks;
+    mCorrectTowerEnergyForTracks = correctTowerEnergyForTracks;
   }
 
   void addTpcCut(StjTrackCut* c) { mTpcCuts.addCut(c); }
@@ -29,14 +29,14 @@ public:
   void addEemcCut(StjTowerEnergyCut* c) { mEemcCuts.addCut(c); }
   void addJetCut(StProtoJetCut* c) { mJetCuts.addCut(c); }
 
-  StjAbstractTowerEnergyCorrectionForTracks& correctTowerEnergyForTracks() { return mCorrectTowerEnergyForTracks; }
+  StjAbstractTowerEnergyCorrectionForTracks& correctTowerEnergyForTracks() { return *mCorrectTowerEnergyForTracks; }
   StjTrackListCut& tpcCuts() { return mTpcCuts; }
   StjTowerEnergyListCut& bemcCuts() { return mBemcCuts; }
   StjTowerEnergyListCut& eemcCuts() { return mEemcCuts; }
   StProtoJetListCut& jetCuts() { return mJetCuts; }
 
 private:
-  StjAbstractTowerEnergyCorrectionForTracks& mCorrectTowerEnergyForTracks;
+  StjAbstractTowerEnergyCorrectionForTracks* mCorrectTowerEnergyForTracks;
   StjTrackListCut mTpcCuts;
   StjTowerEnergyListCut mBemcCuts;
   StjTowerEnergyListCut mEemcCuts;
