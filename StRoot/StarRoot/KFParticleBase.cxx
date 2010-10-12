@@ -18,11 +18,12 @@
 
 #include "KFParticleBase.h"
 #include "TMath.h"
-
+#include "Riostream.h"
+#include "TString.h"
 ClassImp(KFParticleBase);
 
 
-KFParticleBase::KFParticleBase() :fQ(0), fNDF(-3), fChi2(0), fSFromDecay(0), fAtProductionVertex(0), fIsLinearized(0)
+KFParticleBase::KFParticleBase() :fID(0), fQ(0), fNDF(-3), fChi2(0), fSFromDecay(0), fAtProductionVertex(0), fIsLinearized(0)
 { 
   //* Constructor 
 
@@ -2104,6 +2105,21 @@ void KFParticleBase::MultQSQt( const Double_t Q[], const Double_t S[], Double_t 
       for( Int_t k=0; k<kN; k++ )  SOut[ij] += Q[ i*kN+k ] * mA[ k*kN+j ];
     }
   }
+}
+//________________________________________________________________________________
+void KFParticleBase::Print(Option_t *opt) const {
+  cout << *this << endl;
+}
+//________________________________________________________________________________
+ostream&  operator<<(ostream& os, const KFParticleBase& particle) {
+  static const Char_t *vn[11] = {"x","y","z","px","py","pz","E","S","Q","Chi2","NDF"};
+  os << "KFP:";
+  for (Int_t i = 0; i < 8; i++) 
+    os << Form(" %s: %7.2f +/- %7.2f", vn[i],
+	       particle.GetParameter(i), 
+	       (particle.GetCovariance(i,i) >= 0) ? TMath::Sqrt(particle.GetCovariance(i,i)) : -13);
+  os << " Q:" << particle.GetQ() << " chi2/NDF : " << particle.GetChi2() << "/" << particle.GetNDF();
+  return os;
 }
 
 
