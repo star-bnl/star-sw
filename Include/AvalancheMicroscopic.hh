@@ -40,7 +40,9 @@ class AvalancheMicroscopic {
     void DisableEnergyHistogramming();
     
     // Switch on/off filling histograms for distance distribution
-    void EnableDistanceHistogramming(TH1F* histo, const char opt = 'z');
+    void SetDistanceHistogram(TH1F* histo, const char opt = 'r');
+    void EnableDistanceHistogramming(const int type);
+    void DisableDistanceHistogramming(const int type);
     void DisableDistanceHistogramming();
 
     void EnableSecondaryEnergyHistogramming(TH1F* histo);
@@ -192,6 +194,9 @@ class AvalancheMicroscopic {
     TH1F* histDistance;
     bool hasDistanceHistogram;
     char distanceOption;
+    int nDistanceHistogramTypes;
+    std::vector<int> distanceHistogramType;
+
     TH1F* histSecondary;
     bool hasSecondaryHistogram;
 

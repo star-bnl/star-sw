@@ -167,6 +167,18 @@ class Medium {
                          const double bx, const double by, const double bz,
                          double& diss);    
 
+    // Select extrapolation method for fields below/above the table range.
+    void SetExtrapolationMethodVelocity(const std::string extrLow,
+                                        const std::string extrHigh);
+    void SetExtrapolationMethodDiffusion(const std::string extrLow,
+                                         const std::string extrHigh);
+    void SetExtrapolationMethodTownsend(const std::string extrLow,
+                                        const std::string extrHigh);
+    void SetExtrapolationMethodAttachment(const std::string extrLow,
+                                          const std::string extrHigh);
+    void SetExtrapolationMethodDissociation(const std::string extrLow,
+                                            const std::string extrHigh);
+    
     // Optical properties
     // Energy range [eV] of available optical data
     virtual 
@@ -231,17 +243,42 @@ class Medium {
     // Field grids
     std::vector<double> eFields;
     std::vector<double> bFields;
+    std::vector<double> bAngles;
 
-    bool 
-    BoxInterpolation3d(std::vector<std::vector<std::vector<double> > >& value, 
-                       std::vector<double>& xAxis, std::vector<double>& yAxis, 
-                       std::vector<double>& zAxis, 
-                       double x, double y, double z, double& f, int ip);
-    bool ComputeShapeFunctions(std::vector<double>& axis, 
-                               const double x, const int ip, 
-                               double& f1, double& f2, double& f3, double& f4, 
-                               int& i0, int& i1);
+    // Tables of transport parameters
+    bool map2d;
+    std::vector<std::vector<std::vector<double> > > tabElectronVelocityE;
+    std::vector<std::vector<std::vector<double> > > tabElectronVelocityExB;
+    std::vector<std::vector<std::vector<double> > > tabElectronVelocityB;
+    std::vector<std::vector<std::vector<double> > > tabElectronDiffLong;
+    std::vector<std::vector<std::vector<double> > > tabElectronDiffTrans;
+    std::vector<std::vector<std::vector<double> > > tabElectronTownsend;
+    std::vector<std::vector<std::vector<double> > > tabElectronAttachment;
 
+    std::vector<std::vector<std::vector<double> > > tabHoleVelocityE;
+    std::vector<std::vector<std::vector<double> > > tabHoleVelocityExB;
+    std::vector<std::vector<std::vector<double> > > tabHoleVelocityB;
+    std::vector<std::vector<std::vector<double> > > tabHoleDiffLong;
+    std::vector<std::vector<std::vector<double> > > tabHoleDiffTrans;
+    std::vector<std::vector<std::vector<double> > > tabHoleTownsend;
+    std::vector<std::vector<std::vector<double> > > tabHoleAttachment;
+
+    std::vector<std::vector<std::vector<double> > > tabIonDissociation;
+
+    // Extrapolation methods
+    int extrVelocityLow, extrVelocityHigh;
+    int extrDiffusionLow, extrDiffusionHigh;
+    int extrTownsendLow, extrTownsendHigh;
+    int extrAttachmentLow, extrAttachmentHigh;
+    int extrDissociationLow, extrDissociationHigh;
+ 
+    double Interpolate1D(const double e,
+                         const std::vector<double>& table, 
+                         const std::vector<double>& fields,
+                         const int iMeth, const int jExtr, const int iExtr);
+
+    bool GetExtrapolationIndex(std::string extrStr, int& extrNb);
+ 
 };
 
 }

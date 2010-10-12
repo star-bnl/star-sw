@@ -314,7 +314,7 @@ class MediumMagboltz86 : public Medium {
     
     // Level description
     char description[nMaxLevels][30]; 
-
+    
     // Total collision frequency
     double cfTot[nEnergySteps];
     // Null-collision frequencies

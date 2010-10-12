@@ -14,7 +14,8 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   nPhotons(0), nElectrons(0), nIons(0), nEndpoints(0),
   usePlotting(false), viewer(0), 
   histEnergy(0), hasEnergyHistogram(false),
-  histDistance(0), hasDistanceHistogram(false), distanceOption('z'),
+  histDistance(0), hasDistanceHistogram(false), distanceOption('r'),
+  nDistanceHistogramTypes(0),
   histSecondary(0), hasSecondaryHistogram(false),
   useSignal(false), useInducedCharge(false),
   useDriftLines(false), usePhotons(false), useBandStructure(false),
@@ -34,6 +35,7 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   debug(false) {
   
   className = "AvalancheMicroscopic";
+  distanceHistogramType.clear();
 
 }
 
@@ -98,10 +100,10 @@ AvalancheMicroscopic::DisableEnergyHistogramming() {
 }
 
 void 
-AvalancheMicroscopic::EnableDistanceHistogramming(TH1F* histo, const char opt) {
+AvalancheMicroscopic::SetDistanceHistogram(TH1F* histo, const char opt) {
 
   if (histo == 0) {
-    std::cerr << className << "::EnableDistanceHistogramming:\n"; 
+    std::cerr << className << "::SetDistanceHistogram:\n"; 
     std::cerr << "    Histogram pointer is null.\n";
     return;
   }
@@ -112,7 +114,7 @@ AvalancheMicroscopic::EnableDistanceHistogramming(TH1F* histo, const char opt) {
   if (opt == 'x' || opt == 'y' || opt == 'z' || opt == 'r') {
     distanceOption = opt;
   } else {
-    std::cerr << className << "::EnableDistanceHistogramming:";
+    std::cerr << className << "::SetDistanceHistogram:";
     std::cerr << "    Unknown option " << opt << ".\n";
     std::cerr << "    Valid options are x, y, z, r.\n";
     std::cerr << "    Using default value (r).\n";
@@ -121,10 +123,62 @@ AvalancheMicroscopic::EnableDistanceHistogramming(TH1F* histo, const char opt) {
   
 }
 
+void
+AvalancheMicroscopic::EnableDistanceHistogramming(const int type) {
+
+  // Check if this type of collision is already registered 
+  // for histogramming.
+  if (nDistanceHistogramTypes > 0) {
+    for (int i = nDistanceHistogramTypes; i--;) {
+      if (distanceHistogramType[i] == type) {
+        std::cout << className << "::EnableDistanceHistogramming:\n";
+        std::cout << "    Collision type " << type 
+                  << " is already histogrammed.\n";
+        return;
+      }
+    }
+  }
+
+  distanceHistogramType.push_back(type);
+  ++nDistanceHistogramTypes;
+  std::cout << className << "::EnableDistanceHistogramming:\n";
+  std::cout << "    Histogramming of collision type " 
+            << type << " enabled.\n";
+  
+}
+
+void
+AvalancheMicroscopic::DisableDistanceHistogramming(const int type) {
+
+  if (nDistanceHistogramTypes <= 0) {
+    std::cerr << className << "::DisableDistanceHistogramming:\n";
+    std::cerr << "    Collision type " << type 
+              << " is not histogrammed.\n";
+    return;
+  } 
+
+  for (int i = nDistanceHistogramTypes; i--;) {
+    if (distanceHistogramType[i] == type) {
+      distanceHistogramType.erase(distanceHistogramType.begin() + i);
+      --nDistanceHistogramTypes;
+      std::cout << "    Histogramming of collision type "
+                << type << " disabled.\n";
+      return;
+    }
+  }
+  
+  std::cerr << className << "::DisableDistanceHistogramming:\n"; 
+  std::cerr << "    Collision type " << type 
+            << " is not histogrammed.\n";
+
+}
+
 void 
 AvalancheMicroscopic::DisableDistanceHistogramming() {
 
   hasDistanceHistogram = false;
+  nDistanceHistogramTypes = 0;
+  distanceHistogramType.clear();
   
 }
 
@@ -468,9 +522,8 @@ AvalancheMicroscopic::TransportElectron(
   newElectron.e0 = std::max(e0, Small); 
   newElectron.energy = newElectron.e0;
   newElectron.band = band;
-  if (hasDistanceHistogram) {
-    newElectron.xLast = x0; newElectron.yLast = y0; newElectron.zLast = z0;
-  }  
+  // Previous coordinates for distance histogramming.
+  newElectron.xLast = x0; newElectron.yLast = y0; newElectron.zLast = z0;
   newElectron.driftLine.clear();
   stack.push_back(newElectron);
 
@@ -879,6 +932,36 @@ AvalancheMicroscopic::TransportElectron(
                                      energy, ctheta, 
                                      nsec, esec, band);
 
+        // If activated, histogram the distance with respect to the
+        // last collision.
+        if (hasDistanceHistogram && histDistance != 0 &&
+            nDistanceHistogramTypes > 0) {
+          for (int iType = nDistanceHistogramTypes; iType--;) {
+            if (iType != cstype) continue;
+            switch (distanceOption) {
+              case 'x':
+                histDistance->Fill(stack[iEl].xLast - x);
+                break;
+              case 'y':
+                histDistance->Fill(stack[iEl].yLast - y);
+                break;
+              case 'z':
+                histDistance->Fill(stack[iEl].zLast - z);
+                break;
+              case 'r':
+                const double rr = pow(stack[iEl].xLast - x, 2) + 
+                                  pow(stack[iEl].yLast - y, 2) + 
+                                  pow(stack[iEl].zLast - z, 2);
+                histDistance->Fill(sqrt(rr));
+                break;
+            }
+            stack[iEl].xLast = x; 
+            stack[iEl].yLast = y; 
+            stack[iEl].zLast = z;
+            break;  
+          }
+        }
+
         switch (cstype) {
           // Elastic collision
           case 0:
@@ -887,26 +970,6 @@ AvalancheMicroscopic::TransportElectron(
           case 1:
             if (hasUserHandleIonisation) {
               userHandleIonisation(x, y, z, t, cstype, level, medium);
-            }
-            if (hasDistanceHistogram) {
-              switch (distanceOption) {
-                case 'x':
-                  histDistance->Fill(stack[iEl].xLast - x);
-                  break;
-                case 'y':
-                  histDistance->Fill(stack[iEl].yLast - y);
-                  break;
-                case 'z':
-                  histDistance->Fill(stack[iEl].zLast - z);
-                  break;
-                case 'r':
-                  const double rion = pow(stack[iEl].xLast - x, 2) + 
-                                      pow(stack[iEl].yLast - y, 2) + 
-                                      pow(stack[iEl].zLast - z, 2);
-                  histDistance->Fill(sqrt(rion));
-                  break;
-              }
-              stack[iEl].xLast = x; stack[iEl].yLast = y; stack[iEl].zLast = z;  
             }
             if (hasSecondaryHistogram) histSecondary->Fill(esec);
             // Add the secondary electron to the stack.

@@ -664,7 +664,8 @@ GaussKronrod15(double (*f)(const double),
 }
 
 double
-Divdif(std::vector<double>& f, std::vector<double>& a, int nn, double x, int mm) {
+Divdif(const std::vector<double>& f, const std::vector<double>& a, 
+       int nn, double x, int mm) {
   
   // C++ version of DIVDIF (CERN program library E105) which performs 
   // tabular interpolation using symmetrically placed argument points.

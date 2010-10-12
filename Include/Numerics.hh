@@ -102,7 +102,7 @@ namespace Numerics {
   }
 
   double
-  Divdif(std::vector<double>& f, std::vector<double>& a, 
+  Divdif(const std::vector<double>& f, const std::vector<double>& a, 
          int nn, double x, int mm);
   
   bool 

@@ -5,6 +5,7 @@
 #include "FundamentalConstants.hh"
 #include "GarfieldConstants.hh"
 #include "Random.hh"
+#include "Numerics.hh"
 
 namespace Garfield {
 
@@ -22,8 +23,37 @@ Medium::Medium() :
   driftable(false), microscopic(false), ionisable(false),
   wValue(0.), fanoFactor(0.),
   isChanged(true),
-  debug(false) {
-
+  debug(false),
+  map2d(false) {
+  
+  eFields.clear();
+  bFields.clear();
+  bAngles.clear();
+  
+  tabElectronVelocityE.clear();
+  tabElectronVelocityB.clear();
+  tabElectronVelocityExB.clear();
+  tabElectronDiffLong.clear();
+  tabElectronDiffTrans.clear();
+  tabElectronTownsend.clear();
+  tabElectronAttachment.clear();
+  
+  tabHoleVelocityE.clear();
+  tabHoleVelocityB.clear();
+  tabHoleVelocityExB.clear();
+  tabHoleDiffLong.clear();
+  tabHoleDiffTrans.clear();
+  tabHoleTownsend.clear();
+  tabHoleAttachment.clear();
+  
+  tabIonDissociation.clear();
+  
+  extrVelocityLow = extrVelocityHigh = 0;
+  extrDiffusionLow = extrDiffusionHigh = 0;
+  extrTownsendLow = extrTownsendHigh = 0;
+  extrAttachmentLow = extrAttachmentHigh = 0;
+  extrDissociationLow = extrDissociationHigh = 0;
+  
 }
 
 void 
@@ -147,37 +177,78 @@ Medium::ElectronVelocity(const double ex, const double ey, const double ez,
                          double& vx, double& vy, double& vz) {
 
   vx = vy = vz = 0.;
-  // Compute the magnitude of the electric field
+  // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
-  if (e <= 0.) return false;
-  // Compute the magnitude of the magnetic field
-  const double b = sqrt(bx * bx + by * by + bz * bz);
-
-  // Compute unit vectors along E, E x B and Btrans
-  double ue[3] = {ex / e, ey / e, ez / e};
-  double uexb[3] = {ey * bz - ez * by, ez * bx - ex * bz, ex * by - ey * bx};
-  const double exb = sqrt(uexb[0] * uexb[0] + uexb[1] * uexb[1] + uexb[2] * uexb[2]);
-
-  double ubt[3] = {
-    uexb[1] * ez - uexb[2] * ey, 
-    uexb[2] * ex - uexb[0] * ez, 
-    uexb[0] * ey - uexb[1] * ex
-  };
-  const double bt = sqrt(ubt[0] * ubt[0] + ubt[1] * ubt[1] + ubt[2] * ubt[2]);
-
-  if (b > 0.) {
-    uexb[0] /= exb; uexb[1] /= exb; uexb[2] /= exb;
-    ubt[0] /= bt; ubt[1] /= bt; ubt[2] /= bt;
-  } else {
-    uexb[0] = ubt[0] = ue[0];
-    uexb[1] = ubt[1] = ue[1];
-    uexb[2] = ubt[2] = ue[2];
-  }
-
-  // Compute the angle between B field and E field
-  const double eb = fabs(ex * bx + ey * by + ez * bz);
+  if (e < Small) return true;
   
-  return false;
+  if (map2d) {
+    // Compute the magnitude of the magnetic field
+    const double b = sqrt(bx * bx + by * by + bz * bz);
+
+    // Compute unit vectors along E, E x B and Btrans.
+    double ue[3] = {ex / e, ey / e, ez / e};
+    double uexb[3] = {ey * bz - ez * by, 
+                      ez * bx - ex * bz, 
+                      ex * by - ey * bx};
+    const double exb = sqrt(uexb[0] * uexb[0] + 
+                            uexb[1] * uexb[1] + 
+                            uexb[2] * uexb[2]);
+
+    double ubt[3] = {
+      uexb[1] * ez - uexb[2] * ey, 
+      uexb[2] * ex - uexb[0] * ez, 
+      uexb[0] * ey - uexb[1] * ex
+    };
+    const double bt = sqrt(ubt[0] * ubt[0] + 
+                           ubt[1] * ubt[1] + 
+                           ubt[2] * ubt[2]);
+
+    if (b > 0.) {
+      uexb[0] /= exb; uexb[1] /= exb; uexb[2] /= exb;
+      ubt[0] /= bt; ubt[1] /= bt; ubt[2] /= bt;
+    } else {
+      uexb[0] = ubt[0] = ue[0];
+      uexb[1] = ubt[1] = ue[1];
+      uexb[2] = ubt[2] = ue[2];
+    }
+
+    // Compute the angle between B field and E field.
+    double ebang = 0.;
+    if (e * b > 0.) {
+      const double eb = fabs(ex * bx + ey * by + ez * bz);
+      if (eb > 0.2 * e * b) {
+        ebang = asin(std::min(1., 
+                              sqrt(pow(ex * by - ey * bx, 2) +
+                                   pow(ex * bz - ez * bx, 2) +
+                                   pow(ez * by - ey * bz, 2)) / (e * b)));
+      } else {
+        ebang = acos(std::min(1., eb / (e * b)));
+      }
+    } else {
+      ebang = bAngles[0];
+    }
+  
+    // Calculate the velocities in all directions.
+    double ve = 0.;
+    double vexb = 0.;
+    double vbt = 0.;
+    const double q = 1.;
+  
+    vx = q * (ve * ue[0] + q * q * vbt * ubt[0] + q * vexb * uexb[0]);
+    vy = q * (ve * ue[1] + q * q * vbt * ubt[1] + q * vexb * uexb[1]);
+    vz = q * (ve * ue[2] + q * q * vbt * ubt[2] + q * vexb * uexb[2]);
+  } else {
+    const double v = Interpolate1D(e, tabElectronVelocityE[0][0], eFields, 
+                                   extrVelocityLow, extrVelocityHigh, 0);
+  	const double mu = v / e;
+    const double q = 1.;
+    vx = q * mu * ex;
+    vy = q * mu * ey;
+    vz = q * mu * ez;
+  }
+  
+  // Verify value and apply scaling.
+  return true;
   
 }
 
@@ -186,14 +257,43 @@ Medium::ElectronDiffusion(const double ex, const double ey, const double ez,
                           const double bx, const double by, const double bz,
                           double& dl, double& dt) {
 
+  dl = dt = 0.;
+  // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
-  const double b = sqrt(bx * bx + by * by + bz * bz);
-  // Calculate diffusion coefficients using the Einstein relation
-  if (e < Small) {
-    dl = dt = 0.;
+  if (e < Small) return true;
+  
+  if (map2d) {
+    // Compute the magnitude of the magnetic field.
+    const double b = sqrt(bx * bx + by * by + bz * bz);
+    
+    // Compute the angle between B field and E field.
+    double ebang = 0.;
+    if (e * b > 0.) {
+      const double eb = fabs(ex * bx + ey * by + ez * bz);
+      if (eb > 0.2 * e * b) {
+        ebang = asin(std::min(1., 
+                              sqrt(pow(ex * by - ey * bx, 2) +
+                                   pow(ex * bz - ez * bx, 2) +
+                                   pow(ez * by - ey * bz, 2)) / (e * b)));
+      } else {
+        ebang = acos(std::min(1., eb / (e * b)));
+      }
+    } else {
+      ebang = bAngles[0];
+    }
+    // Interpolate.
+
   } else {
-    dl = dt = sqrt(2. * BoltzmannConstant * temperature / e);
+    dl = Interpolate1D(e, tabElectronDiffLong[0][0], eFields, 
+                       extrDiffusionLow, extrDiffusionHigh, 0);
+    dt = Interpolate1D(e, tabElectronDiffTrans[0][0], eFields, 
+                       extrDiffusionLow, extrDiffusionHigh, 0);
   }
+  
+  // Calculate diffusion coefficients using the Einstein relation
+  // dl = dt = sqrt(2. * BoltzmannConstant * temperature / e);
+  
+  // Verify value and apply scaling.
   return true;
 
 }
@@ -203,14 +303,42 @@ Medium::ElectronDiffusion(const double ex, const double ey, const double ez,
                           const double bx, const double by, const double bz,
                           double cov[3][3]) {
 
-  if (debug) {
-    std::cerr << className << "::ElectronDiffusionTensor:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
+  // Initialise the tensor.
   cov[0][0] = 0.; cov[0][1] = 0.; cov[0][2] = 0.;
   cov[1][0] = 0.; cov[1][1] = 0.; cov[1][2] = 0.;
   cov[2][0] = 0.; cov[2][1] = 0.; cov[2][2] = 0.;
-  return false;
+  
+  // Compute the magnitude of the electric field.
+  const double e = sqrt(ex * ex + ey * ey + ez * ez);
+  if (e < Small) return true;
+  
+  if (map2d) {
+    // Compute the magnitude of the magnetic field.
+    const double b = sqrt(bx * bx + by * by + bz * bz);
+    
+    // Compute the angle between B field and E field.
+    double ebang = 0.;
+    if (e * b > 0.) {
+      const double eb = fabs(ex * bx + ey * by + ez * bz);
+      if (eb > 0.2 * e * b) {
+        ebang = asin(std::min(1., 
+                              sqrt(pow(ex * by - ey * bx, 2) +
+                                   pow(ex * bz - ez * bx, 2) +
+                                   pow(ez * by - ey * bz, 2)) / (e * b)));
+      } else {
+        ebang = acos(std::min(1., eb / (e * b)));
+      }
+    } else {
+      ebang = bAngles[0];
+    }
+    // Interpolate.
+
+  } else {
+    // Interpolate.
+
+  }
+  
+  return true;
 
 }
 
@@ -219,12 +347,41 @@ Medium::ElectronTownsend(const double ex, const double ey, const double ez,
                          const double bx, const double by, const double bz,
                          double& alpha) {
 
-  if (debug) {
-    std::cerr << className << "::ElectronTownsend:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
   alpha = 0.;
-  return false;
+  // Compute the magnitude of the electric field.
+  const double e = sqrt(ex * ex + ey * ey + ez * ez);
+  if (e < Small) return true;
+  
+  if (map2d) {
+    // Compute the magnitude of the magnetic field.
+    const double b = sqrt(bx * bx + by * by + bz * bz);
+    
+    // Compute the angle between B field and E field.
+    double ebang = 0.;
+    if (e * b > 0.) {
+      const double eb = fabs(ex * bx + ey * by + ez * bz);
+      if (eb > 0.2 * e * b) {
+        ebang = asin(std::min(1., 
+                              sqrt(pow(ex * by - ey * bx, 2) +
+                                   pow(ex * bz - ez * bx, 2) +
+                                   pow(ez * by - ey * bz, 2)) / (e * b)));
+      } else {
+        ebang = acos(std::min(1., eb / (e * b)));
+      }
+    } else {
+      ebang = bAngles[0];
+    }
+    // Interpolate.
+
+  } else {
+    // Interpolate.
+    alpha = Interpolate1D(e, tabElectronTownsend[0][0], eFields, 
+                          extrTownsendLow, extrTownsendHigh, 0);
+  }
+  
+  // Apply scaling.
+  
+  return true;
 
 }
 
@@ -233,12 +390,41 @@ Medium::ElectronAttachment(const double ex, const double ey, const double ez,
                            const double bx, const double by, const double bz,
                            double& eta) {
 
-  if (debug) {
-    std::cerr << className << "::ElectronAttachment:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
   eta = 0.;
-  return false;
+  // Compute the magnitude of the electric field.
+  const double e = sqrt(ex * ex + ey * ey + ez * ez);
+  if (e < Small) return true;
+  
+  if (map2d) {
+    // Compute the magnitude of the magnetic field.
+    const double b = sqrt(bx * bx + by * by + bz * bz);
+    
+    // Compute the angle between B field and E field.
+    double ebang = 0.;
+    if (e * b > 0.) {
+      const double eb = fabs(ex * bx + ey * by + ez * bz);
+      if (eb > 0.2 * e * b) {
+        ebang = asin(std::min(1., 
+                              sqrt(pow(ex * by - ey * bx, 2) +
+                                   pow(ex * bz - ez * bx, 2) +
+                                   pow(ez * by - ey * bz, 2)) / (e * b)));
+      } else {
+        ebang = acos(std::min(1., eb / (e * b)));
+      }
+    } else {
+      ebang = bAngles[0];
+    }
+    // Interpolate.
+
+  } else {
+    // Interpolate.
+    eta = Interpolate1D(e, tabElectronAttachment[0][0], eFields, 
+                        extrAttachmentLow, extrAttachmentHigh, 0);
+  }
+  
+  // Apply scaling.
+  
+  return true;
 
 }
 
@@ -347,12 +533,79 @@ Medium::HoleVelocity(const double ex, const double ey, const double ez,
                      const double bx, const double by, const double bz, 
                      double& vx, double& vy, double& vz) {
             
-  if (debug) {
-    std::cerr << className << "::HoleVelocity:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
   vx = vy = vz = 0.;
-  return false;            
+  // Compute the magnitude of the electric field.
+  const double e = sqrt(ex * ex + ey * ey + ez * ez);
+  if (e < Small) return true;
+  
+  if (map2d) {
+    // Compute the magnitude of the magnetic field
+    const double b = sqrt(bx * bx + by * by + bz * bz);
+
+    // Compute unit vectors along E, E x B and Btrans.
+    double ue[3] = {ex / e, ey / e, ez / e};
+    double uexb[3] = {ey * bz - ez * by, 
+                      ez * bx - ex * bz, 
+                      ex * by - ey * bx};
+    const double exb = sqrt(uexb[0] * uexb[0] + 
+                            uexb[1] * uexb[1] + 
+                            uexb[2] * uexb[2]);
+
+    double ubt[3] = {
+      uexb[1] * ez - uexb[2] * ey, 
+      uexb[2] * ex - uexb[0] * ez, 
+      uexb[0] * ey - uexb[1] * ex
+    };
+    const double bt = sqrt(ubt[0] * ubt[0] + 
+                           ubt[1] * ubt[1] + 
+                           ubt[2] * ubt[2]);
+
+    if (b > 0.) {
+      uexb[0] /= exb; uexb[1] /= exb; uexb[2] /= exb;
+      ubt[0] /= bt; ubt[1] /= bt; ubt[2] /= bt;
+    } else {
+      uexb[0] = ubt[0] = ue[0];
+      uexb[1] = ubt[1] = ue[1];
+      uexb[2] = ubt[2] = ue[2];
+    }
+
+    // Compute the angle between B field and E field.
+    double ebang = 0.;
+    if (e * b > 0.) {
+      const double eb = fabs(ex * bx + ey * by + ez * bz);
+      if (eb > 0.2 * e * b) {
+        ebang = asin(std::min(1., 
+                              sqrt(pow(ex * by - ey * bx, 2) +
+                                   pow(ex * bz - ez * bx, 2) +
+                                   pow(ez * by - ey * bz, 2)) / (e * b)));
+      } else {
+        ebang = acos(std::min(1., eb / (e * b)));
+      }
+    } else {
+      ebang = bAngles[0];
+    }
+  
+    // Calculate the velocities in all directions.
+    double ve = 0.;
+    double vexb = 0.;
+    double vbt = 0.;
+    const double q = 1.;
+  
+    vx = q * (ve * ue[0] + q * q * vbt * ubt[0] + q * vexb * uexb[0]);
+    vy = q * (ve * ue[1] + q * q * vbt * ubt[1] + q * vexb * uexb[1]);
+    vz = q * (ve * ue[2] + q * q * vbt * ubt[2] + q * vexb * uexb[2]);
+  } else {
+    const double v = Interpolate1D(e, tabHoleVelocityE[0][0], eFields, 
+                                   extrVelocityLow, extrVelocityHigh, 0);
+  	const double mu = v / e;
+    const double q = 1.;
+    vx = q * mu * ex;
+    vy = q * mu * ey;
+    vz = q * mu * ez;
+  }
+  
+  // Verify value and apply scaling.
+  return true;
 
 }
 
@@ -361,13 +614,43 @@ Medium::HoleDiffusion(const double ex, const double ey, const double ez,
                       const double bx, const double by, const double bz,
                       double& dl, double& dt) {
 
+  dl = dt = 0.;
+  // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
-  // Calculate diffusion coefficients using the Einstein relation
-  if (e < Small) {
-    dl = dt = 0.;
+  if (e < Small) return true;
+  
+  if (map2d) {
+    // Compute the magnitude of the magnetic field.
+    const double b = sqrt(bx * bx + by * by + bz * bz);
+    
+    // Compute the angle between B field and E field.
+    double ebang = 0.;
+    if (e * b > 0.) {
+      const double eb = fabs(ex * bx + ey * by + ez * bz);
+      if (eb > 0.2 * e * b) {
+        ebang = asin(std::min(1., 
+                              sqrt(pow(ex * by - ey * bx, 2) +
+                                   pow(ex * bz - ez * bx, 2) +
+                                   pow(ez * by - ey * bz, 2)) / (e * b)));
+      } else {
+        ebang = acos(std::min(1., eb / (e * b)));
+      }
+    } else {
+      ebang = bAngles[0];
+    }
+    // Interpolate.
+
   } else {
-    dl = dt = sqrt(2. * BoltzmannConstant * temperature / e);
+    dl = Interpolate1D(e, tabHoleDiffLong[0][0], eFields, 
+                       extrDiffusionLow, extrDiffusionHigh, 0);
+    dt = Interpolate1D(e, tabHoleDiffTrans[0][0], eFields, 
+                       extrDiffusionLow, extrDiffusionHigh, 0);
   }
+  
+  // Calculate diffusion coefficients using the Einstein relation
+  // dl = dt = sqrt(2. * BoltzmannConstant * temperature / e);
+  
+  // Verify value and apply scaling.
   return true;
 
 }
@@ -377,14 +660,42 @@ Medium::HoleDiffusion(const double ex, const double ey, const double ez,
                       const double bx, const double by, const double bz,
                       double cov[3][3]) {
 
-  if (debug) {
-    std::cerr << className << "::HoleDiffusionTensor:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
+  // Initialise the tensor.
   cov[0][0] = 0.; cov[0][1] = 0.; cov[0][2] = 0.;
   cov[1][0] = 0.; cov[1][1] = 0.; cov[1][2] = 0.;
   cov[2][0] = 0.; cov[2][1] = 0.; cov[2][2] = 0.;
-  return false;
+  
+  // Compute the magnitude of the electric field.
+  const double e = sqrt(ex * ex + ey * ey + ez * ez);
+  if (e < Small) return true;
+  
+  if (map2d) {
+    // Compute the magnitude of the magnetic field.
+    const double b = sqrt(bx * bx + by * by + bz * bz);
+    
+    // Compute the angle between B field and E field.
+    double ebang = 0.;
+    if (e * b > 0.) {
+      const double eb = fabs(ex * bx + ey * by + ez * bz);
+      if (eb > 0.2 * e * b) {
+        ebang = asin(std::min(1., 
+                              sqrt(pow(ex * by - ey * bx, 2) +
+                                   pow(ex * bz - ez * bx, 2) +
+                                   pow(ez * by - ey * bz, 2)) / (e * b)));
+      } else {
+        ebang = acos(std::min(1., eb / (e * b)));
+      }
+    } else {
+      ebang = bAngles[0];
+    }
+    // Interpolate.
+
+  } else {
+    // Interpolate.
+
+  }
+  
+  return true;
 
 }
 
@@ -393,12 +704,41 @@ Medium::HoleTownsend(const double ex, const double ey, const double ez,
                      const double bx, const double by, const double bz,
                      double& alpha) {
 
-  if (debug) {
-    std::cerr << className << "::HoleTownsend:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
   alpha = 0.;
-  return false;
+  // Compute the magnitude of the electric field.
+  const double e = sqrt(ex * ex + ey * ey + ez * ez);
+  if (e < Small) return true;
+  
+  if (map2d) {
+    // Compute the magnitude of the magnetic field.
+    const double b = sqrt(bx * bx + by * by + bz * bz);
+    
+    // Compute the angle between B field and E field.
+    double ebang = 0.;
+    if (e * b > 0.) {
+      const double eb = fabs(ex * bx + ey * by + ez * bz);
+      if (eb > 0.2 * e * b) {
+        ebang = asin(std::min(1., 
+                              sqrt(pow(ex * by - ey * bx, 2) +
+                                   pow(ex * bz - ez * bx, 2) +
+                                   pow(ez * by - ey * bz, 2)) / (e * b)));
+      } else {
+        ebang = acos(std::min(1., eb / (e * b)));
+      }
+    } else {
+      ebang = bAngles[0];
+    }
+    // Interpolate.
+
+  } else {
+    // Interpolate.
+    alpha = Interpolate1D(e, tabHoleTownsend[0][0], eFields, 
+                          extrTownsendLow, extrTownsendHigh, 0);
+  }
+  
+  // Apply scaling.
+  
+  return true;
 
 }
 
@@ -407,12 +747,41 @@ Medium::HoleAttachment(const double ex, const double ey, const double ez,
                        const double bx, const double by, const double bz,
                        double& eta) {
             
-  if (debug) {
-    std::cerr << className << "::HoleAttachment:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
   eta = 0.;
-  return false;
+  // Compute the magnitude of the electric field.
+  const double e = sqrt(ex * ex + ey * ey + ez * ez);
+  if (e < Small) return true;
+  
+  if (map2d) {
+    // Compute the magnitude of the magnetic field.
+    const double b = sqrt(bx * bx + by * by + bz * bz);
+    
+    // Compute the angle between B field and E field.
+    double ebang = 0.;
+    if (e * b > 0.) {
+      const double eb = fabs(ex * bx + ey * by + ez * bz);
+      if (eb > 0.2 * e * b) {
+        ebang = asin(std::min(1., 
+                              sqrt(pow(ex * by - ey * bx, 2) +
+                                   pow(ex * bz - ez * bx, 2) +
+                                   pow(ez * by - ey * bz, 2)) / (e * b)));
+      } else {
+        ebang = acos(std::min(1., eb / (e * b)));
+      }
+    } else {
+      ebang = bAngles[0];
+    }
+    // Interpolate.
+
+  } else {
+    // Interpolate.
+    eta = Interpolate1D(e, tabHoleAttachment[0][0], eFields, 
+                        extrAttachmentLow, extrAttachmentHigh, 0);
+  }
+  
+  // Apply scaling.
+  
+  return true;
 
 }
 
@@ -443,6 +812,8 @@ Medium::IonDiffusion(const double ex, const double ey, const double ez,
     dl = dt = sqrt(2. * BoltzmannConstant * temperature / e);
   }
   return true;
+  
+  const double b = sqrt(bx * bx + by * by + bz * bz);
 
 }
 
@@ -451,12 +822,41 @@ Medium::IonDissociation(const double ex, const double ey, const double ez,
                         const double bx, const double by, const double bz,
                         double& diss) {
 
-  if (debug) {
-    std::cerr << className << "::IonDissociation:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
   diss = 0.;
-  return false;
+  // Compute the magnitude of the electric field.
+  const double e = sqrt(ex * ex + ey * ey + ez * ez);
+  if (e < Small) return true;
+  
+  if (map2d) {
+    // Compute the magnitude of the magnetic field.
+    const double b = sqrt(bx * bx + by * by + bz * bz);
+    
+    // Compute the angle between B field and E field.
+    double ebang = 0.;
+    if (e * b > 0.) {
+      const double eb = fabs(ex * bx + ey * by + ez * bz);
+      if (eb > 0.2 * e * b) {
+        ebang = asin(std::min(1., 
+                              sqrt(pow(ex * by - ey * bx, 2) +
+                                   pow(ex * bz - ez * bx, 2) +
+                                   pow(ez * by - ey * bz, 2)) / (e * b)));
+      } else {
+        ebang = acos(std::min(1., eb / (e * b)));
+      }
+    } else {
+      ebang = bAngles[0];
+    }
+    // Interpolate.
+
+  } else {
+    // Interpolate.
+    diss = Interpolate1D(e, tabIonDissociation[0][0], eFields, 
+                         extrDissociationLow, extrDissociationHigh, 0);
+  }
+  
+  // Apply scaling.
+  
+  return true;
 
 }
 
@@ -552,197 +952,205 @@ Medium::GetPhotonCollision(const double e, int& type, int& level,
 
 }
 
-bool
-Medium::BoxInterpolation3d(std::vector<std::vector<std::vector<double> > >& value,
-                    std::vector<double>& xAxis, std::vector<double>& yAxis, std::vector<double>& zAxis, 
-                    double x, double y, double z, double& f, const int ip) {
+void
+Medium::SetExtrapolationMethodVelocity(const std::string extrLow, 
+                                       const std::string extrHigh) {
 
-
-  // Shape functions
-  double fX[4] = {0., 0., 0., 0.};
-  double fY[4] = {0., 0., 0., 0.};
-  double fZ[4] = {0., 0., 0., 0.};
-
-  int iX0, iX1;
-  int iY0, iY1;
-  int iZ0, iZ1;
-
-  f = 0.;
-
-  // Check the interpolation order
-  if (ip < 0 || ip > 2) {
-    std::cerr << className << "::BoxInterpolation3d:\n";
-    std::cerr << "    Incorrect interpolation order.\n";
-    std::cerr << "    No interpolation.\n"; 
-    return false;
+  int iExtr;
+  if (GetExtrapolationIndex(extrLow, iExtr)) { 
+    extrVelocityLow = iExtr;
+  } else {
+    std::cerr << className << "::SetExtrapolationMethodVelocity:\n";
+    std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
 
-  // Compute the shape functions and ranges
-  if (!ComputeShapeFunctions(xAxis, x, ip, fX[0], fX[1], fX[2], fX[3], iX0, iX1)) {
-    std::cerr << className << "::BoxInterpolation3d:\n";
-    std::cerr << "    Incorrect grid in x direction.\n";
-    std::cerr << "    No interpolation.\n"; 
-    return false;
-  }
-  if (!ComputeShapeFunctions(yAxis, y, ip, fY[0], fY[1], fY[2], fY[3], iY0, iY1)) {
-    std::cerr << className << "::BoxInterpolation3d:\n";
-    std::cerr << "    Incorrect grid in y direction.\n"; 
-    std::cerr << "    No interpolation.\n"; 
-    return false;
-  }
-  if (!ComputeShapeFunctions(zAxis, z, ip, fZ[0], fZ[1], fZ[2], fZ[3], iZ0, iZ1)) {
-    std::cerr << className << "::BoxInterpolation3d:\n";
-    std::cerr << "    Incorrect grid in z direction.\n";
-    std::cerr << "    No interpolation.\n"; 
-    return false;
+  if (GetExtrapolationIndex(extrHigh, iExtr)) {
+    extrVelocityHigh = iExtr;
+  } else {
+    std::cerr << className << "::SetExtrapolationMethodVelocity:\n";
+    std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
   }
 
-  for (int iX = iX0; iX <= iX1; ++iX) {
-    for (int iY = iY0; iY <= iY1; ++iY) {
-      for (int iZ = iZ0; iZ <= iZ1; ++iZ) {
-        f += value[iX][iY][iZ] * fX[iX - iX0] * fY[iY - iY0] * fZ[iZ - iZ0];
-      }
-    }
+}
+
+void
+Medium::SetExtrapolationMethodDiffusion(const std::string extrLow, 
+                                        const std::string extrHigh) {
+
+  int iExtr;
+  if (GetExtrapolationIndex(extrLow, iExtr)) {
+    extrDiffusionLow = iExtr;
+  } else {
+    std::cerr << className << "::SetExtrapolationMethodDiffusion:\n";
+    std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
 
-  return true;
+  if (GetExtrapolationIndex(extrHigh, iExtr)) {
+    extrDiffusionHigh = iExtr;
+  } else {
+    std::cerr << className << "::SetExtrapolationMethodDiffusion:\n";
+    std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
+  }
+
+}
+
+void
+Medium::SetExtrapolationMethodTownsend(const std::string extrLow, 
+                                       const std::string extrHigh) {
+
+  int iExtr;
+  if (GetExtrapolationIndex(extrLow, iExtr)) {
+    extrTownsendLow = iExtr;
+  } else {
+    std::cerr << className << "::SetExtrapolationMethodTownsend:\n";
+    std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
+  }
+
+  if (GetExtrapolationIndex(extrHigh, iExtr)) {
+    extrTownsendHigh = iExtr;
+  } else {
+    std::cerr << className << "::SetExtrapolationMethodTownsend:\n";
+    std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
+  }
+
+}
+
+void
+Medium::SetExtrapolationMethodAttachment(const std::string extrLow, 
+                                         const std::string extrHigh) {
+
+  int iExtr;
+  if (GetExtrapolationIndex(extrLow, iExtr)) {
+    extrAttachmentLow = iExtr;
+  } else {
+    std::cerr << className << "::SetExtrapolationMethodAttachment:\n";
+    std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
+  }
+
+  if (GetExtrapolationIndex(extrHigh, iExtr)) {
+    extrAttachmentHigh = iExtr;
+  } else {
+    std::cerr << className << "::SetExtrapolationMethodAttachment:\n";
+    std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
+  }
+
+}
+
+void
+Medium::SetExtrapolationMethodDissociation(const std::string extrLow, 
+                                           const std::string extrHigh) {
+
+  int iExtr;
+  if (GetExtrapolationIndex(extrLow, iExtr)) {
+    extrDissociationLow = iExtr;
+  } else {
+    std::cerr << className << "::SetExtrapolationMethodDissociation:\n";
+    std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
+  }
+
+  if (GetExtrapolationIndex(extrHigh, iExtr)) {
+    extrDissociationHigh = iExtr;
+  } else {
+    std::cerr << className << "::SetExtrapolationMethodDissociation:\n";
+    std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
+  }
 
 }
 
 bool
-Medium::ComputeShapeFunctions(std::vector<double>& axis, const double x, 
-                              const int ip, 
-                              double& f1, double& f2, double& f3, double& f4, 
-                              int& i0, int& i1) {
-  
-  const int n = axis.size();
-                              
-  // Make sure we have enough points
-  if (n < 1) {
-    std::cerr << className << "::ComputeShapeFunctions:\n";
-    std::cerr << "    Incorrect number of points.\n";
+Medium::GetExtrapolationIndex(std::string extrStr, int& extrNb) {
+
+  // Convert to upper-case
+  for (unsigned int i = 0; i < extrStr.length(); ++i) {
+    extrStr[i] = toupper(extrStr[i]);
+  }
+
+  if (extrStr == "CONST" || extrStr == "CONSTANT") {
+    extrNb = 0;
+  } else if (extrStr == "LIN" || extrStr == "LINEAR") {
+    extrNb = 1;
+  } else if (extrStr == "EXP" || extrStr == "EXPONENTIAL") {
+    extrNb = 2;
+  } else {
     return false;
   }
- 
-  // Zeroth order interpolation
-  if (ip == 0 || n <= 1) {
-    // Find the nearest node
-    double d = fabs(x - axis[0]);
-    double d1 = d;
-    int iNode = 0;
-    for (int i = 1; i < n; ++i) {
-      d1 = fabs(x - axis[i]);
-      if (d1 < d) {
-        d = d1;
-        iNode = i;
-      }
-    }
-    // Set the summing range
-    i0 = i1 = iNode;
-    // Set the shape functions
-    f1 = 1.; f2 = 0.; f3 = 0.; f4 = 0.;
-    return true;
-  }
+  
+  return true;
+  
+}
 
-  // First order interpolation
-  if (ip == 1 || n <= 2) {
-    // Find the grid segment containing this point
-    int iGrid = 0;
-    for (int i = 1; i < n; ++i) {
-      if ((axis[i - 1] - x) * (x - axis[i]) >= 0.) iGrid = i;
-    }
-    // Ensure there won't be any divisions by zero
-    if (axis[iGrid] == axis[iGrid - 1]) return false;
-    // Compute local coordinates
-    const double xLocal = (x - axis[iGrid - 1]) / 
-                          (axis[iGrid] - axis[iGrid - 1]);
-    // Set the summing range
-    i0 = iGrid - 1;
-    i1 = iGrid;
-    // Set the shape functions
-    f1 = 1. - xLocal;
-    f2 = xLocal;
-    f3 = 0.;
-    f4 = 0.;
-    return true;
-  }
+double
+Medium::Interpolate1D(const double e, 
+                      const std::vector<double>& table,
+                      const std::vector<double>& fields,
+                      const int iMeth, const int extrLow, const int extrHigh) {
 
-  // Second order interpolation
-  if (ip == 2) {
-    // Find the grid segment containing this point
-    int iGrid = 0;
-    for (int i = 1; i < n; ++i) {
-      if ((axis[i - 1] - x) * (x - axis[i]) >= 0.) iGrid = i;
-    }
-    // Compute the local coordinate for this grid segment
-    const double xLocal = (x - axis[iGrid - 1]) / 
-                          (axis[iGrid] - axis[iGrid - 1]);
-    // Set the summing range and shape functions
-    if (iGrid == 1) {
-      i0 = iGrid - 1; i1 = iGrid + 1;
-      if (axis[i0] == axis[i0 + 1] || 
-          axis[i0] == axis[i0 + 2] || 
-          axis[i0 + 1] == axis[i0 + 2]) {
-        std::cerr << className << "::ComputeShapeFunctions:\n";
-        std::cerr << "    One or more grid points coincide.\n";
-        std::cerr << "    No interpolation.\n"; 
-        return false;
-      }
-      f1 =  (x - axis[i0 + 1]) * (x - axis[i0 + 2]) / 
-           ((axis[i0] - axis[i0 + 1]) * (axis[i0]     - axis[i0 + 2]));
-      f2 =  (x - axis[i0])     * (x - axis[i0 + 2]) / 
-           ((axis[i0 + 1] - axis[i0]) * (axis[i0 + 1] - axis[i0 + 2]));
-      f3 =  (x - axis[i0])     * (x - axis[i0 + 1]) / 
-           ((axis[i0 + 2] - axis[i0]) * (axis[i0 + 2] - axis[i0 + 1]));
-      f4 = 0.;
-      return true;
-    } else if (iGrid == n - 1) {
-      i0 = iGrid - 2; i1 = iGrid;
-      if (axis[i0] == axis[i0 + 1] || 
-          axis[i0] == axis[i0 + 2] || 
-          axis[i0 + 1] == axis[i0 + 2]) {
-        std::cerr << className << "::ComputeShapeFunctions:\n";
-        std::cerr << "    One or more grid points coincide.\n";
-        std::cerr << "    No interpolation.\n"; 
-        return false;
-      }
-      f1 =  (x - axis[i0 + 1]) * (x - axis[i0 + 2]) /
-           ((axis[i0] - axis[i0 + 1]) * (axis[i0] - axis[i0 + 2]));
-      f2 =  (x - axis[i0]) * (x - axis[i0 + 2]) /
-           ((axis[i0 + 1] - axis[i0]) * (axis[i0 + 1] - axis[i0 + 2]));
-      f3 =  (x - axis[i0])     * (x - axis[i0 + 1]) /
-           ((axis[i0 + 2] - axis[i0]) * (axis[i0 + 2] - axis[i0 + 1]));
-      f4 = 0.;
-      return true;
-    } else {
-      i0 = iGrid - 2; i1 = iGrid + 1;
-      if (axis[i0] == axis[i0 + 1] || 
-          axis[i0] == axis[i0 + 2] || 
-          axis[i0] == axis[i0 + 3] || 
-          axis[i0 + 1] == axis[i0 + 2] || axis[i0 + 1] == axis[i0 + 2] || 
-          axis[i0 + 1] == axis[i0 + 3] || axis[i0 + 2] == axis[i0 + 3]) {
-        std::cerr << className << "::ComputeShapeFunctions:\n";
-        std::cerr << "    One or more grid points coincide.\n";
-        std::cerr << "    No interpolation.\n"; 
-        return false;
-      }
-      f1 = (1 - xLocal) * (x - axis[i0 + 1]) * (x - axis[i0 + 2]) / 
-                ((axis[i0] - axis[i0 + 1]) * (axis[i0] - axis[i0 + 2]));
-      f2 = (1 - xLocal) * (x - axis[i0]) * (x - axis[i0 + 2]) / 
-                ((axis[i0 + 1] - axis[i0]) * (axis[i0 + 1] - axis[i0 + 2])) + 
-                 xLocal  * (x - axis[i0 + 1]) * (x - axis[i0 + 3]) /
-                ((axis[i0 + 1] - axis[i0 + 2]) * (axis[i0 + 1] - axis[i0 + 3]));
-      f3 = (1 - xLocal) * (x - axis[i0]) * (x - axis[i0 + 1]) / 
-                ((axis[i0 + 2] - axis[i0]) * (axis[i0 + 2] - axis[i0 + 1])) + 
-                 xLocal  * (x - axis[i0 + 1]) * (x - axis[i0 + 3]) /
-                ((axis[i0 + 2] - axis[i0 + 1]) * (axis[i0 + 2] - axis[i0 + 3]));
-      f4 =       xLocal  * (x - axis[i0 + 1]) * (x - axis[i0 + 2]) / 
-                ((axis[i0 + 3] - axis[i0 + 1]) * (axis[i0 + 3] - axis[i0 + 2]));
-      return true;
-    }
-  }  
+  // This function is a generalized version of the Fortran functions 
+  // GASVEL, GASVT1, GASVT2, GASLOR, GASMOB, GASDFT, and GASDFL
+  // for the case of a 1D table. All variables are generic. 
+  
+  const int nSizeTable = fields.size();
+  
+ 	if (e < 0. || nSizeTable < 1) return 0.;
 
-  return false;
+  double result = 0.;  
+  
+	if (nSizeTable == 1) {
+  	// Only one point
+     result = table[0];
+  } else if (e < fields[0]) {
+    // Extrapolation towards small fields
+    if (fields[0] >= fields[1]) {
+      if (debug) {
+        std::cerr << className << "::Interpolate1D:\n";
+        std::cerr << "    First two field values coincide.\n";
+        std::cerr << "    No extrapolation to lower fields.\n";
+      }
+      result = table[0];
+    } else if (extrLow == 1) {
+      // Linear extrapolation
+      const double extr4 = (table[1] - table[0]) / (fields[1] - fields[0]);
+      const double extr3 = table[0] - extr4 * fields[0];
+      result = extr3 + extr4 * e;
+    } else if (extrLow == 2) {
+      // Logarithmic extrapolation
+      const double extr4 = std::log(table[1] / table[0]) / (fields[1] - fields[0]);
+      const double extr3 = std::log(table[0] - extr4 * fields[0]);
+      result = std::exp(std::min(50., extr3 + extr4 * e));
+	  } else {
+      result = table[0];
+    }
+	} else if (e > fields[nSizeTable - 1]) {
+    // Extrapolation towards large fields
+    if (fields[nSizeTable - 1] <= fields[nSizeTable - 2]) {
+      if (debug) {
+        std::cerr << className << "::Interpolate1D:\n";
+        std::cerr << "    Last two field values coincide.\n";
+        std::cerr << "    No extrapolation to higher fields.\n";
+      }
+      result = table[nSizeTable - 1];
+    } else if (extrHigh == 1) {
+      // Linear extrapolation
+      const double extr2 = (table[nSizeTable - 1] - table[nSizeTable - 2]) / 
+                           (fields[nSizeTable - 1] - fields[nSizeTable - 2]);
+      const double extr1 = table[nSizeTable - 1] - extr2 * fields[nSizeTable - 1];
+      result = extr1 + extr2 * e;
+    } else if (extrHigh == 2) {
+      // Logarithmic extrapolation
+      const double extr2 = log(table[nSizeTable - 1] / table[nSizeTable - 2]) /
+                           (fields[nSizeTable - 1] - fields[nSizeTable - 2]);
+      const double extr1 = log(table[nSizeTable - 1]) - extr2 * fields[nSizeTable - 1];
+      result = exp(std::min(50., extr1 + extr2 * e));
+	  } else {
+      result = table[nSizeTable - 1];
+    }
+  } else {
+  	// Intermediate points, spline interpolation (not implemented).
+	  // Intermediate points, Newtonian interpolation
+	  result = Numerics::Divdif(table, fields, nSizeTable, e, iMeth);
+	}
+  
+	return result;
 
 }
 

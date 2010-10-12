@@ -1740,21 +1740,6 @@ MediumMagboltz86::Mixer() {
   // Description of cross-section terms
   static char scrpt[226][30];
   
-  // Number of inelastic cross-section terms
-  long long nIn;
-  // Threshold energies
-  double e[6], eIn[nMaxInelasticTerms];
-  
-  // Virial coefficient (not used)
-  double virial;
-  // Splitting function parameter
-  double w;
-  // Scattering algorithms
-  long long kIn[nMaxInelasticTerms] = {0};
-  long long kEl[6] = {0};    
-  
-  char name[15];  
-          
   if (debug) {
     std::cout << className << "::Mixer:\n";
     std::cout << "    Creating table of collision rates with " 
@@ -1771,6 +1756,21 @@ MediumMagboltz86::Mixer() {
 
   // Loop over the gases in the mixture.  
   for (int iGas = 0; iGas < nComponents; ++iGas) {
+  
+    // Number of inelastic cross-section terms
+    long long nIn = 0;
+    // Threshold energies
+    double e[6] = {0., 0., 0., 0., 0., 0.};
+    double eIn[nMaxInelasticTerms] = {0.};
+    // Virial coefficient (not used)
+    double virial = 0.;
+    // Splitting function parameter
+    double w = 0.;
+    // Scattering algorithms
+    long long kIn[nMaxInelasticTerms] = {0};
+    long long kEl[6] = {0, 0, 0, 0, 0, 0};    
+    char name[15];  
+
     // Retrieve the cross-section data for this gas from Magboltz.
     long long ngs = gas[iGas];
     gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, &w, 
@@ -1781,6 +1781,10 @@ MediumMagboltz86::Mixer() {
       std::cout << "      Ionisation threshold: " << e[2] << " eV\n";
       std::cout << "      Attachment threshold: " << e[3] << " eV\n";
       std::cout << "      Splitting parameter:  " << w << " eV\n";
+      std::cout << "      Cross-sections [cm2] at minimum ionising energy:\n";
+      std::cout << "        excitation: " << e[3] << "\n";
+      std::cout << "        ionisation: " << e[4] << "\n";
+      std::cout << "      " << nIn << " inelastic levels.\n";
     }
     int np0 = nTerms;
     
@@ -1917,7 +1921,7 @@ MediumMagboltz86::Mixer() {
     }
   }
   if (useCsOutput) outfile.close();
-
+  
   // Find the min. ionisation threshold
   for (int i = nMaxGases; i--;) {
     if (ionPot[i] < 0.) continue;
@@ -1927,6 +1931,7 @@ MediumMagboltz86::Mixer() {
       minIonPot = ionPot[i];
     }
   }
+
   if (debug) {
     std::cout << className << "::Mixer:\n";
     std::cout << "    Lowest ionisation threshold in the mixture: " 
@@ -1988,6 +1993,7 @@ MediumMagboltz86::Mixer() {
                 << "    " << std::setw(18) << std::setprecision(2)
                 << cfTot[(i + 1) * nEnergySteps / 16] << "\n";
     }
+    std::cout << std::resetiosflags(std::ios_base::floatfield);
   }
 
   // If requested, make a table of de-excitation channels
