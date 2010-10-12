@@ -78,13 +78,13 @@ class KFParticleBase : public TObject {
   //* Set decay vertex parameters for linearisation 
 
   void SetVtxGuess( double x, double y, double z );
-
+  void SetID(Int_t id=0) {fID = id;}
   //*
   //*  ACCESSORS
   //*
 
   //* Simple accessors 
-
+  Int_t  GetID() const {return fID;}
   double GetX    () const { return fP[0]; }
   double GetY    () const { return fP[1]; }
   double GetZ    () const { return fP[2]; }
@@ -227,7 +227,7 @@ class KFParticleBase : public TObject {
 
   void ConstructGammaBz( const KFParticleBase &daughter1,
 			 const KFParticleBase &daughter2, double Bz  );
-
+  virtual void Print(Option_t *opt="") const;
  protected:
 
   static int IJ( int i, int j ){ 
@@ -249,6 +249,7 @@ class KFParticleBase : public TObject {
 
   void GetMeasurement( const double XYZ[], double m[], double V[] ) const ;
 
+  Int_t  fID;
   double fP[8];  //* Main particle parameters {X,Y,Z,Px,Py,Pz,E,S[=DecayLength/P]}
   double fC[36]; //* Low-triangle covariance matrix of fP
   int    fQ;     //* Particle charge 
@@ -266,5 +267,5 @@ class KFParticleBase : public TObject {
   bool fIsLinearized;   //* Flag shows that the guess is present
   ClassDef(KFParticleBase,1)			    
 };
-
+ostream&  operator<<(ostream& os, KFParticleBase const & particle);
 #endif 
