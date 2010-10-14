@@ -98,9 +98,9 @@ float  fStartSign;
 float  fCurrentSign;
 char fMidl[1];
 THelixTrack *fHelix;
-Mtx55D_t    *fDeriv;
-StvELossTrak *fELossTrak;
-StvMCField  *fField;
+Mtx55D_t    *fDeriv;		//Derivative matrix in THelixTrack notation
+StvELossTrak *fELossTrak;	//Energy loss calculator
+StvMCField  *fField;		//Mag field calculator
 const TGeoMaterial *fPrevMat;
 char fLast[1];
 private:
