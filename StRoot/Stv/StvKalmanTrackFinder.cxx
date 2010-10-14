@@ -11,7 +11,7 @@
 #include "StMultiKeyMap.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
 #include "Stv/StvHit.h"
-#include "Stv/StvNodePars.h"
+#include "StvUtil/StvNodePars.h"
 #include "Stv/StvDiver.h"
 #include "Stv/StvHitter.h"
 #include "Stv/StvFitter.h"
@@ -132,6 +132,9 @@ if (DoShow()) {
     StvNode *node = kit->GetNode();      
     myTrak->push_front(node);
     node->SetDer(deriv,idir);
+
+Testik(deriv);
+
 //    assert(!idive || !par[1].check("FindTrack.1"));
     node->SetPre(par[1],err[1],idir);
     if (idive) node->SetType(StvNode::kDcaNode);
