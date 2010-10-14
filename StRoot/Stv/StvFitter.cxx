@@ -4,7 +4,7 @@
 #include "TMath.h"
 #include "TCernLib.h"
 #include "StvFitter.h"
-#include "StvNodePars.h"
+#include "StvUtil/StvNodePars.h"
 #include "StvHit.h"
 #include "StvUtil/StvHitErrCalculator.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"

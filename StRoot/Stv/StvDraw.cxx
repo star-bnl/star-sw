@@ -3,7 +3,7 @@
 #include "Stv/StvTrack.h"
 #include "Stv/StvNode.h"
 #include "Stv/StvHit.h"
-#include "Stv/StvNodePars.h"
+#include "StvUtil/StvNodePars.h"
 #include "Stv/StvStl.h"
 #include "THelixTrack.h"
 StvDraw *StvDraw::fgStvDraw=0;

@@ -5,7 +5,7 @@
 #include <string.h>
 #include <math.h>
 #include "TNamed.h"
-#include "StvNodePars.h"
+#include "StvUtil/StvNodePars.h"
 
 class StvHit;
 class StvNodePars;
