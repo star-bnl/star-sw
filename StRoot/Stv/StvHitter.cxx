@@ -3,7 +3,7 @@
 #include "TGeoVolume.h"
 #include "StvHitter.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
-#include "Stv/StvNodePars.h"
+#include "StvUtil/StvNodePars.h"
 #include "StarRoot/StMultiKeyMap.h"
 //_____________________________________________________________________________
 //_____________________________________________________________________________
