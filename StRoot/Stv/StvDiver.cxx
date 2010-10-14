@@ -5,7 +5,7 @@
 #include "StarVMC/GeoTestMaker/StVMCApplication.h"
 #include "StarVMC/GeoTestMaker/StMCStack.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
-#include "Stv/StvNodePars.h"
+#include "StvUtil/StvNodePars.h"
 #include "StarMagField.h"
 #include "StvELossTrak.h"
 #include "THelixTrack.h"
