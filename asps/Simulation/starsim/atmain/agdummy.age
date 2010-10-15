@@ -1,6 +1,9 @@
-* $Id: agdummy.age,v 1.4 2009/01/12 19:44:37 perev Exp $
+* $Id: agdummy.age,v 1.5 2010/10/15 20:28:44 perev Exp $
 * $Name:  $
 * $Log: agdummy.age,v $
+* Revision 1.5  2010/10/15 20:28:44  perev
+* subroutine gcalor micset added
+*
 * Revision 1.4  2009/01/12 19:44:37  perev
 * icfmul added
 *
@@ -27,6 +30,7 @@ Replace[LIST #;] with [ #1 _
              GpKine,GLast,GsCKOV,GpIons,Grndm,Granor,Gfnhit,
              GsRung,GfRung,GpRung,GsHead,GfHead,GpHead,
              GfDet,GfDetu,GfDeth,GfDetd,GfDeta,mytrack,gdedxcalc,
+	     micset,
  "vector "   vdist,vscale,vadd,vmod,vfill,Ublank,Ufill,Uzero,IuLast,
  "interp "   fint,polint,lfit,divdif,lfitw,lvsimx,lvmaxa,lzlong,
  "sorting"   sortzv,zsorvh,intsor,assndx,
