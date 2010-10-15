@@ -68,7 +68,6 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       StiHitTest hitTest;
       for (iter = hitvec.begin();iter != hitvec.end();++iter)        {
         StTpcHit*hit=*iter;
-	if (hit->flag() &  FCF_CHOPPED)     continue; // ignore hits marked by AfterBurner as chopped
         if(!_hitFactory) throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- _hitFactory==0");
         stiHit = _hitFactory->getInstance();
         if(!stiHit)   throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- stiHit==0");
