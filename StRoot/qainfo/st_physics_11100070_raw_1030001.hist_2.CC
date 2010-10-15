@@ -1,6 +1,6 @@
 {
 //=========Macro generated from canvas: CanvasName/ STAR Maker Histogram Canvas
-//=========  (Tue Jul 20 10:10:12 2010) by ROOT version5.22/00
+//=========  (Fri Oct 15 10:02:34 2010) by ROOT version5.22/00
    TCanvas *CanvasName = new TCanvas("CanvasName", " STAR Maker Histogram Canvas",1,1,600,756);
    gStyle->SetOptFit(1);
    CanvasName->Range(0,0,1,1);
@@ -25,7 +25,7 @@
    text = pt->AddText("Hists");
    pt->Draw();
    
-   pl = new TPaveLabel(0.7,0.01,0.95,0.03,"Tue Jul 20 10:10:12 2010","br");
+   pl = new TPaveLabel(0.7,0.01,0.95,0.03,"Fri Oct 15 10:02:34 2010","br");
    pl->SetTextSize(0.6);
    pl->Draw();
    
@@ -91,8 +91,8 @@
    StEQaVtxPrZ->SetBinContent(29,26);
    StEQaVtxPrZ->SetBinContent(30,40);
    StEQaVtxPrZ->SetBinContent(31,33);
-   StEQaVtxPrZ->SetBinContent(32,40);
-   StEQaVtxPrZ->SetBinContent(33,31);
+   StEQaVtxPrZ->SetBinContent(32,41);
+   StEQaVtxPrZ->SetBinContent(33,30);
    StEQaVtxPrZ->SetBinContent(34,26);
    StEQaVtxPrZ->SetBinContent(35,36);
    StEQaVtxPrZ->SetBinContent(36,35);
@@ -102,16 +102,16 @@
    StEQaVtxPrZ->SetBinContent(40,20);
    StEQaVtxPrZ->SetBinContent(41,16);
    StEQaVtxPrZ->SetBinContent(42,27);
-   StEQaVtxPrZ->SetBinContent(43,21);
-   StEQaVtxPrZ->SetBinContent(44,20);
+   StEQaVtxPrZ->SetBinContent(43,20);
+   StEQaVtxPrZ->SetBinContent(44,21);
    StEQaVtxPrZ->SetBinContent(45,6);
    StEQaVtxPrZ->SetBinContent(46,19);
    StEQaVtxPrZ->SetBinContent(47,10);
    StEQaVtxPrZ->SetBinContent(48,10);
    StEQaVtxPrZ->SetBinContent(49,9);
    StEQaVtxPrZ->SetBinContent(50,7);
-   StEQaVtxPrZ->SetBinContent(51,79);
-   StEQaVtxPrZ->SetEntries(1353);
+   StEQaVtxPrZ->SetBinContent(51,81);
+   StEQaVtxPrZ->SetEntries(1355);
    StEQaVtxPrZ->SetDirectory(0);
    
    TPaveStats *ptstats = new TPaveStats(0.78,0.675,0.98,0.995,"brNDC");
@@ -122,11 +122,11 @@
    ptstats->SetTextAlign(12);
    text = ptstats->AddText("StEQaVtxPrZ");
    text->SetTextSize(0.04906667);
-   text = ptstats->AddText("Entries = 1353   ");
+   text = ptstats->AddText("Entries = 1355   ");
    text = ptstats->AddText("Mean  = 0.6387");
    text = ptstats->AddText("RMS   =  23.63");
    text = ptstats->AddText("Underflow =     71");
-   text = ptstats->AddText("Overflow  =     79");
+   text = ptstats->AddText("Overflow  =     81");
    ptstats->SetOptStat(111111);
    ptstats->SetOptFit(111);
    ptstats->Draw();
@@ -195,7 +195,7 @@
    PadName_3 = new TPad("PadName_3", "PadName_3",0.01,0.3433333,0.49,0.6566667);
    PadName_3->Draw();
    PadName_3->cd();
-   PadName_3->Range(-45,2054.611,405,8456.002);
+   PadName_3->Range(-45,2045.789,405,8489.901);
    PadName_3->SetFillColor(10);
    PadName_3->SetBorderMode(0);
    PadName_3->SetBorderSize(2);
@@ -208,7 +208,7 @@
    PadName_4 = new TPad("PadName_4", "PadName_4",0.51,0.3433333,0.99,0.6566667);
    PadName_4->Draw();
    PadName_4->cd();
-   PadName_4->Range(-2.5,1.529086,2.5,5.241894);
+   PadName_4->Range(-2.5,1.532163,2.5,5.241429);
    PadName_4->SetFillColor(10);
    PadName_4->SetBorderMode(0);
    PadName_4->SetBorderSize(2);
@@ -222,7 +222,7 @@
    PadName_5 = new TPad("PadName_5", "PadName_5",0.01,0.01,0.49,0.3233333);
    PadName_5->Draw();
    PadName_5->cd();
-   PadName_5->Range(-3.75,-0.9071173,3.75,5.153756);
+   PadName_5->Range(-3.75,-0.9066196,3.75,5.149276);
    PadName_5->SetFillColor(10);
    PadName_5->SetBorderMode(0);
    PadName_5->SetBorderSize(2);
@@ -236,7 +236,7 @@
    PadName_6 = new TPad("PadName_6", "PadName_6",0.51,0.01,0.99,0.3233333);
    PadName_6->Draw();
    PadName_6->cd();
-   PadName_6->Range(1.625,-0.6733116,5.375,3.049504);
+   PadName_6->Range(1.625,-0.6730949,5.375,3.047554);
    PadName_6->SetFillColor(10);
    PadName_6->SetBorderMode(0);
    PadName_6->SetBorderSize(2);
