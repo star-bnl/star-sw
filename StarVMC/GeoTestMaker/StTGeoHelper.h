@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.10 2010/07/14 18:19:23 perev Exp $
+// $Id: StTGeoHelper.h,v 1.11 2010/10/15 20:12:38 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -187,6 +187,7 @@ virtual ~StTGeoHelper();
 public:
        int  Load(const char *geo);
        void Init(int mode=0);
+       void Finish();
 
        void SetModule (const char *voluName,int akt=1);
        void InitInfo();

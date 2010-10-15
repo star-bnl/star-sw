@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.11 2010/07/29 03:12:20 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.12 2010/10/15 20:12:31 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -149,6 +149,12 @@ void StTGeoHelper::Init(int mode)
   InitInfo();
   if (fMode&1) InitHitShape();
   if (fMode&2) InitHitPlane();
+}
+//_____________________________________________________________________________
+void StTGeoHelper::Finish()
+{
+// Avoid deleting of TGeoManager
+  gGeoManager = 0;
 }
 //_____________________________________________________________________________
 void StTGeoHelper::InitInfo()
