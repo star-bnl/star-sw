@@ -885,12 +885,12 @@ MediumGas::LoadGasFile(const std::string filename) {
           }
         } else if(strcmp(token, "A") == 0) {
           // Parameter for energy loss distribution
-          int a;
+          double a;
           token = strtok(NULL, " :,%=\t");
           if (token != NULL) a = atof(token);
         } else if (strcmp(token, "Z") == 0) {
           // Parameter for energy loss distribution
-          int z;
+          double z;
           token = strtok(NULL, " :,%=\t");
           if (token != NULL) z = atof(token);
         } else if (strcmp(token, "EMPROB") == 0) {
