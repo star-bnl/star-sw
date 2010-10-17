@@ -1086,7 +1086,8 @@ TrackHeed::SetupGas(Medium* medium) {
     else if (gasname == "C5H12")  molPacs[i] = &C5H12_MPACS;
     else if (gasname == "Water")  molPacs[i] = &H2O_MPACS;
     else if (gasname == "O2")     molPacs[i] = &O2_MPACS;
-    else if (gasname == "N2")     molPacs[i] = &N2_MPACS;
+    else if (gasname == "N2" || gasname == "N2 (Phelps)")    
+                                  molPacs[i] = &N2_MPACS;
     else if (gasname == "NO")     molPacs[i] = &NO_MPACS;
     else if (gasname == "N2O")    molPacs[i] = &N2O_MPACS;
     else if (gasname == "C2H4")   molPacs[i] = &C2H4_MPACS;

@@ -39,10 +39,10 @@ class ComponentFieldMap : public ComponentBase {
     // Number of materials
     int GetNumberOfMaterials() {return nMaterials;}
     // Return permittivity
-    double GetPermittivity(int imat);
+    double GetPermittivity(const int imat);
     // Return conductivity
-    double GetConductivity(int imat);
-    // Associate a medium with a material
+    double GetConductivity(const int imat);
+    // Associate a material with a Medium class
     void SetMedium(const int imat, Medium* medium);
     // Returns the medium for a material
     bool GetMedium(const int i, Medium*& m) const;

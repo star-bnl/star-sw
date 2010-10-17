@@ -176,8 +176,17 @@ class Medium {
                                         const std::string extrHigh);
     void SetExtrapolationMethodAttachment(const std::string extrLow,
                                           const std::string extrHigh);
-    void SetExtrapolationMethodDissociation(const std::string extrLow,
-                                            const std::string extrHigh);
+    void SetExtrapolationMethodIonMobility(const std::string extrLow,
+                                           const std::string extrHigh);
+    void SetExtrapolationMethodIonDissociation(const std::string extrLow,
+                                               const std::string extrHigh);
+
+    void SetInterpolationMethodVelocity(const int intrp);
+    void SetInterpolationMethodDiffusion(const int intrp);
+    void SetInterpolationMethodTownsend(const int intrp);
+    void SetInterpolationMethodAttachment(const int intrp);
+    void SetInterpolationMethodIonMobility(const int intrp);
+    void SetInterpolationMethodIonDissociation(const int intrp);
     
     // Optical properties
     // Energy range [eV] of available optical data
@@ -241,12 +250,20 @@ class Medium {
     bool debug;
 
     // Field grids
+    int nEfields;
+    int nBfields;
+    int nAngles;
+
     std::vector<double> eFields;
     std::vector<double> bFields;
     std::vector<double> bAngles;
 
     // Tables of transport parameters
     bool map2d;
+    // Electrons
+    bool hasElectronVelocityE, hasElectronVelocityB, hasElectronVelocityExB;
+    bool hasElectronDiffLong, hasElectronDiffTrans, hasElectronDiffTens;
+    bool hasElectronTownsend, hasElectronAttachment;
     std::vector<std::vector<std::vector<double> > > tabElectronVelocityE;
     std::vector<std::vector<std::vector<double> > > tabElectronVelocityExB;
     std::vector<std::vector<std::vector<double> > > tabElectronVelocityB;
@@ -255,6 +272,12 @@ class Medium {
     std::vector<std::vector<std::vector<double> > > tabElectronTownsend;
     std::vector<std::vector<std::vector<double> > > tabElectronAttachment;
 
+    std::vector<std::vector<std::vector<std::vector<double> > > > tabElectronDiffTens;
+
+    // Holes
+    bool hasHoleVelocityE, hasHoleVelocityB, hasHoleVelocityExB;
+    bool hasHoleDiffLong, hasHoleDiffTrans, hasHoleDiffTens;
+    bool hasHoleTownsend, hasHoleAttachment;
     std::vector<std::vector<std::vector<double> > > tabHoleVelocityE;
     std::vector<std::vector<std::vector<double> > > tabHoleVelocityExB;
     std::vector<std::vector<std::vector<double> > > tabHoleVelocityB;
@@ -263,22 +286,54 @@ class Medium {
     std::vector<std::vector<std::vector<double> > > tabHoleTownsend;
     std::vector<std::vector<std::vector<double> > > tabHoleAttachment;
 
+    std::vector<std::vector<std::vector<std::vector<double> > > > tabHoleDiffTens;
+
+    // Ions
+    bool hasIonMobility;
+    bool hasIonDiffLong, hasIonDiffTrans;
+    bool hasIonDissociation;
+    std::vector<std::vector<std::vector<double> > > tabIonMobility;
+    std::vector<std::vector<std::vector<double> > > tabIonDiffLong;
+    std::vector<std::vector<std::vector<double> > > tabIonDiffTrans;
     std::vector<std::vector<std::vector<double> > > tabIonDissociation;
 
+    // Thresholds for Townsend, attachment and dissociation coefficients.
+    int thrElectronTownsend;
+    int thrElectronAttachment;
+ 
+    int thrHoleTownsend;
+    int thrHoleAttachment;
+    int thrIonDissociation;
+
     // Extrapolation methods
-    int extrVelocityLow, extrVelocityHigh;
-    int extrDiffusionLow, extrDiffusionHigh;
-    int extrTownsendLow, extrTownsendHigh;
-    int extrAttachmentLow, extrAttachmentHigh;
-    int extrDissociationLow, extrDissociationHigh;
+    int extrLowVelocity, extrHighVelocity;
+    int extrLowDiffusion, extrHighDiffusion;
+    int extrLowTownsend, extrHighTownsend;
+    int extrLowAttachment, extrHighAttachment;
+    int extrLowMobility, extrHighMobility;
+    int extrLowDissociation, extrHighDissociation;
+
+    // Interpolation methods
+    int intpVelocity;
+    int intpDiffusion;
+    int intpTownsend;
+    int intpAttachment;
+    int intpMobility;
+    int intpDissociation;
  
     double Interpolate1D(const double e,
                          const std::vector<double>& table, 
                          const std::vector<double>& fields,
-                         const int iMeth, const int jExtr, const int iExtr);
-
+                         const int intpMeth, 
+                         const int jExtr, const int iExtr);
     bool GetExtrapolationIndex(std::string extrStr, int& extrNb);
- 
+    void InitParamArrays(const int eRes, const int bRes, const int aRes,
+         std::vector<std::vector<std::vector<double> > >& tab, 
+         const double val);
+    void InitParamTensor(const int eRes, const int bRes, const int aRes,
+         std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
+         const double val);
+
 };
 
 }

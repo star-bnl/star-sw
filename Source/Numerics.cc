@@ -23,8 +23,8 @@ Dfact(const int n, std::vector<std::vector<double> >& a, std::vector<int>& ir,
   det = 1.;
   
   for (int j = 1; j <= n; ++j) {
-    k  =  j;
-    p  =  fabs(a[j - 1][j - 1]);
+    k = j;
+    p = fabs(a[j - 1][j - 1]);
     if (j == n) {
       if (p <= 0.) {
         det = 0.;
@@ -33,8 +33,8 @@ Dfact(const int n, std::vector<std::vector<double> >& a, std::vector<int>& ir,
         return;
       }
       det *= a[j - 1][j - 1];
-      a[j - 1][j - 1]  =  1. / a[j - 1][j - 1];
-      t  =  fabs(det);
+      a[j - 1][j - 1] = 1. / a[j - 1][j - 1];
+      t = fabs(det);
       if (t < g1) {
         det = 0.;
         if (jfail == 0) jfail = -1;
@@ -65,8 +65,8 @@ Dfact(const int n, std::vector<std::vector<double> >& a, std::vector<int>& ir,
       return;
     }
     det *= a[j - 1][j - 1];
-    a[j - 1][j - 1]  =  1. / a[j - 1][j - 1];
-    t  =  fabs(det);
+    a[j - 1][j - 1] = 1. / a[j - 1][j - 1];
+    t = fabs(det);
     if (t < g1) {
       det = 0.;
       if (jfail == 0) jfail = -1;
@@ -75,8 +75,8 @@ Dfact(const int n, std::vector<std::vector<double> >& a, std::vector<int>& ir,
       if (jfail == 0) jfail = +1;
     }
     for (k = j + 1; k <= n; ++k) {
-      s11  =  -a[j - 1][k - 1];
-      s12  =  -a[k - 1][j];
+      s11 = -a[j - 1][k - 1];
+      s12 = -a[k - 1][j];
       if (j == 1) {
         a[j - 1][k - 1] = -s11 * a[j - 1][j - 1];
         a[k - 1][j] = -(s12 + a[j - 1][j] * a[k - 1][j - 1]);
@@ -86,8 +86,8 @@ Dfact(const int n, std::vector<std::vector<double> >& a, std::vector<int>& ir,
         s11 += a[i - 1][k - 1] * a[j - 1][i - 1];
         s12 += a[i - 1][j]     * a[k - 1][i - 1];
       }
-      a[j - 1][k - 1]  =  -s11 * a[j - 1][j - 1];
-      a[k - 1][j]      =  -a[j - 1][j] * a[k - 1][j - 1] - s12;
+      a[j - 1][k - 1] = -s11 * a[j - 1][j - 1];
+      a[k - 1][j]     = -a[j - 1][j] * a[k - 1][j - 1] - s12;
     }
   }
   
@@ -120,7 +120,6 @@ Dfeqn(const int n, std::vector<std::vector<double> >& a,
     
   b[0] *= a[0][0];
   if (n == 1) return;
-  
   
   for (int i = 2; i <= n; ++i) {
     s21 = -b[i - 1];
@@ -248,41 +247,41 @@ Deqinv(const int n, std::vector<std::vector<double> >& a,
     Dfeqn(n, a, ir, b);
     Dfinv(n, a, ir);
   } else if (n == 3) {
-    // n=3 CASE.
+    // n = 3 CASE.
     // COMPUTE COFACTORS.
-    c11=a[1][1]*a[2][2]-a[1][2]*a[2][1];
-    c12=a[1][2]*a[2][0]-a[1][0]*a[2][2];
-    c13=a[1][0]*a[2][1]-a[1][1]*a[2][0];
-    c21=a[2][1]*a[0][2]-a[2][2]*a[0][1];
-    c22=a[2][2]*a[0][0]-a[2][0]*a[0][2];
-    c23=a[2][0]*a[0][1]-a[2][1]*a[0][0];
-    c31=a[0][1]*a[1][2]-a[0][2]*a[1][1];
-    c32=a[0][2]*a[1][0]-a[0][0]*a[1][2];
-    c33=a[0][0]*a[1][1]-a[0][1]*a[1][0];
-    t1=fabs(a[0][0]);
-    t2=fabs(a[1][0]);
-    t3=fabs(a[2][0]);
+    c11 = a[1][1] * a[2][2] - a[1][2] * a[2][1];
+    c12 = a[1][2] * a[2][0] - a[1][0] * a[2][2];
+    c13 = a[1][0] * a[2][1] - a[1][1] * a[2][0];
+    c21 = a[2][1] * a[0][2] - a[2][2] * a[0][1];
+    c22 = a[2][2] * a[0][0] - a[2][0] * a[0][2];
+    c23 = a[2][0] * a[0][1] - a[2][1] * a[0][0];
+    c31 = a[0][1] * a[1][2] - a[0][2] * a[1][1];
+    c32 = a[0][2] * a[1][0] - a[0][0] * a[1][2];
+    c33 = a[0][0] * a[1][1] - a[0][1] * a[1][0];
+    t1 = fabs(a[0][0]);
+    t2 = fabs(a[1][0]);
+    t3 = fabs(a[2][0]);
 
-    // SET temp=PIVOT AND det=PIVOT*det.
+    // SET temp = PIVOT AND det = PIVOT * det.
     if (t1 >= t2) {
       if (t3 >= t1) {
         // PIVOT IS A31
-        temp=a[2][0];
-        det=c23*c12-c22*c13;
+        temp = a[2][0];
+        det = c23 * c12 - c22 * c13;
       } else {
         // PIVOT IS A11
-        temp=a[0][0];
-        det=c22*c33-c23*c32;
+        temp = a[0][0];
+        det = c22 * c33 - c23 * c32;
       }
     } else {
       if (t3 >= t2) {
         // PIVOT IS A31
-        temp=a[2][0];
-        det=c23*c12-c22*c13;
+        temp = a[2][0];
+        det = c23 * c12 - c22 * c13;
       } else {
         // PIVOT IS A21
-        temp=a[1][0];
-        det=c13*c32-c12*c33;
+        temp = a[1][0];
+        det = c13 * c32 - c12 * c33;
       }
     }
     
@@ -291,48 +290,48 @@ Deqinv(const int n, std::vector<std::vector<double> >& a,
       ifail = -1;
       return;
     }
-    s=temp/det;
-    a[0][0]=s*c11;
-    a[0][1]=s*c21;
-    a[0][2]=s*c31;
-    a[1][0]=s*c12;
-    a[1][1]=s*c22;
-    a[1][2]=s*c32;
-    a[2][0]=s*c13;
-    a[2][1]=s*c23;
-    a[2][2]=s*c33;
+    s = temp / det;
+    a[0][0] = s * c11;
+    a[0][1] = s * c21;
+    a[0][2] = s * c31;
+    a[1][0] = s * c12;
+    a[1][1] = s * c22;
+    a[1][2] = s * c32;
+    a[2][0] = s * c13;
+    a[2][1] = s * c23;
+    a[2][2] = s * c33;
     
     // REPLACE B BY AINV*B.
-    b1=b[0];
-    b2=b[1];
-    b[0]=a[0][0]*b1+a[0][1]*b2+a[0][2]*b[2];
-    b[1]=a[1][0]*b1+a[1][1]*b2+a[1][2]*b[2];
-    b[2]=a[2][0]*b1+a[2][1]*b2+a[2][2]*b[2];
+    b1 = b[0];
+    b2 = b[1];
+    b[0] = a[0][0] * b1 + a[0][1] * b2 + a[0][2] * b[2];
+    b[1] = a[1][0] * b1 + a[1][1] * b2 + a[1][2] * b[2];
+    b[2] = a[2][0] * b1 + a[2][1] * b2 + a[2][2] * b[2];
   } else if (n == 2) {
-    // n=2 CASE BY CRAMERS RULE.
-    det=a[0][0]*a[1][1]-a[0][1]*a[1][0];
+    // n = 2 CASE BY CRAMERS RULE.
+    det = a[0][0] * a[1][1] - a[0][1] * a[1][0];
     if (det == 0.) {
       ifail = -1;
       return;
     }
-    s=1./det;
-    c11   =s*a[1][1];
-    a[0][1]=-s*a[0][1];
-    a[1][0]=-s*a[1][0];
-    a[1][1]=s*a[0][0];
-    a[0][0]=c11;
+    s = 1. / det;
+    c11     =  s * a[1][1];
+    a[0][1] = -s * a[0][1];
+    a[1][0] = -s * a[1][0];
+    a[1][1] =  s * a[0][0];
+    a[0][0] = c11;
 
     b1=b[0];
     b[0]=c11*b1+a[0][1]*b[1];
     b[1]=a[1][0]*b1+a[1][1]*b[1];
   } else {
-    //n=1 CASE.
+    // n = 1 CASE.
     if (a[0][0] == 0.) {
       ifail = -1;
       return;
     }
-    a[0][0]=1./a[0][0];
-    b[0]=a[0][0]*b[0];
+    a[0][0] = 1. / a[0][0];
+    b[0] = a[0][0] * b[0];
   }
   
 }
@@ -356,9 +355,9 @@ Cfact(const int n, std::vector<std::vector<std::complex<double> > >& a,
   det = std::complex<double>(1., 0.);
   
   for (int j = 1; j <= n; ++j) {
-    k  =  j;
-    p  =  std::max(fabs(real(a[j - 1][j - 1])), 
-                   fabs(imag(a[j - 1][j - 1])));
+    k = j;
+    p = std::max(fabs(real(a[j - 1][j - 1])), 
+                 fabs(imag(a[j - 1][j - 1])));
     if (j == n) {
       if (p <= 0.) {
         det = std::complex<double>(0., 0.);
@@ -367,8 +366,8 @@ Cfact(const int n, std::vector<std::vector<std::complex<double> > >& a,
         return;
       }
       det *= a[j - 1][j - 1];
-      a[j - 1][j - 1]  =  std::complex<double>(1.,0.) / a[j - 1][j - 1];
-      t  =  std::max(fabs(real(det)), fabs(imag(det)));
+      a[j - 1][j - 1] = std::complex<double>(1.,0.) / a[j - 1][j - 1];
+      t = std::max(fabs(real(det)), fabs(imag(det)));
       if (t < g1) {
         det = std::complex<double>(0., 0.);
         if (jfail == 0) jfail = -1;
@@ -379,8 +378,8 @@ Cfact(const int n, std::vector<std::vector<std::complex<double> > >& a,
       continue;
     }
     for (int i = j + 1; i <= n; ++i) {
-      q  =  std::max(fabs(real(a[i - 1][j - 1])),
-                     fabs(imag(a[i - 1][j - 1])));
+      q = std::max(fabs(real(a[i - 1][j - 1])),
+                   fabs(imag(a[i - 1][j - 1])));
       if (q <= p) continue;
       k = i;
       p = q;
@@ -532,7 +531,7 @@ Cinv(const int n,
     if (ifail != 0) return;
     Cfinv(n, a, ir);
   } else if (n == 3) {
-    // n=3 CASE.
+    // n = 3 CASE.
     // COMPUTE COFACTORS.
     c11 = a[1][1] * a[2][2] - a[1][2] * a[2][1];
     c12 = a[1][2] * a[2][0] - a[1][0] * a[2][2];
@@ -547,7 +546,7 @@ Cinv(const int n,
     t2 = fabs(real(a[1][0])) + fabs(imag(a[1][0]));
     t3 = fabs(real(a[2][0])) + fabs(imag(a[2][0]));
 
-    // SET temp=PIVOT AND det=PIVOT*det.
+    // SET temp = PIVOT AND det = PIVOT * det.
     if (t1 >= t2) {
       if (t3 >= t1) {
         // PIVOT IS A31
@@ -574,7 +573,7 @@ Cinv(const int n,
       ifail = -1;
       return;
     }
-    s = temp/det;
+    s = temp / det;
     a[0][0] = s * c11;
     a[0][1] = s * c21;
     a[0][2] = s * c31;
@@ -598,12 +597,12 @@ Cinv(const int n,
     a[1][1] =  s * a[0][0];
     a[0][0] = c11;
   } else {
-    //n=1 CASE.
+    // n = 1 CASE.
     if (real(a[0][0]) == 0. && imag(a[0][0]) == 0.) {
       ifail = -1;
       return;
     }
-    a[0][0]=std::complex<double>(1.,0.)/a[0][0];
+    a[0][0] = std::complex<double>(1., 0.) / a[0][0];
   }
 
 }
@@ -675,19 +674,23 @@ Divdif(const std::vector<double>& f, const std::vector<double>& a,
   const int mmax = 10;
   
   // Check the arguments.
-  if (nn < 2 || mm < 1 || nn >= 20 || mm >= mmax) {
-    std::cout << "Divdif:\n";
-    std::cout << "    Received invalid array length (" << nn 
-              << ") or interpolation order (" << mm << ").\n";
+  if (nn < 2) {
+    std::cerr << "Divdif:\n";
+    std::cerr << "    Array length < 2.\n";
     return 0.;
   }
-  
+  if (mm < 1) {
+    std::cerr << "Divdif:\n";
+    std::cerr << "    Interpolation order < 1.\n";
+    return 0.;
+  }
+
   // Deal with the case that X is located at A(1) or A(N).
   if (fabs(x - a[0]) < 1.e-6 * (fabs(a[0]) + fabs(a[nn - 1]))) {
     return f[0];
   }
-  if (fabs(x - a[nn - 1]) < 1.e-6 * (fabs(a[0]) + fabs(a[nn-1]))) {
-    return f[nn-1];
+  if (fabs(x - a[nn - 1]) < 1.e-6 * (fabs(a[0]) + fabs(a[nn - 1]))) {
+    return f[nn - 1];
   }
   
   // Find subscript IX of X in array A.
@@ -784,10 +787,9 @@ Divdif(const std::vector<double>& f, const std::vector<double>& a,
 
 bool
 Boxin3(std::vector<std::vector<std::vector<double> > >& value, 
-      int nrow, int ncol, 
-      std::vector<double>& xAxis, std::vector<double>& yAxis, 
+      std::vector<double>& xAxis, 
+      std::vector<double>& yAxis, 
       std::vector<double>& zAxis, 
-      int maxx, int maxy, int maxz, 
       int nx, int ny, int nz, 
       double  xx, double yy, double zz, double f, int iOrder) {
 
@@ -810,9 +812,7 @@ Boxin3(std::vector<std::vector<std::vector<double> > >& value,
 
   // Make sure we have enough points.
   if (iOrder < 0 || iOrder > 2 ||
-      nx < 1 || nx > maxx ||
-      ny < 1 || ny > maxy ||
-      nz < 1 || nz > maxz) {
+      nx < 1 || ny < 1 || nz < 1) {
     std::cerr << "Boxin3:\n";
     std::cerr << "    Incorrect order or number of points.\n";
     std::cerr << "    No interpolation.\n";

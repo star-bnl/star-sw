@@ -1,6 +1,6 @@
 // Fundamental mathematical and physical constants
-// Source: C. Amsler et al., The Review of Particle Physics, 
-//         Physics Letters B667, 1 (2008)
+// Source: K. Nakamura et al., The Review of Particle Physics, 
+//         Journal of Physics G 37 075021 (2010)
 
 #ifndef G_FUNDAMENTAL_CONSTANTS_H
 #define G_FUNDAMENTAL_CONSTANTS_H
@@ -17,7 +17,7 @@ static const double CLog2 = 0.693147180559945309417;
 // Elementary particle masses [eV / c2]
 static const double ElectronMass =   0.510998910e6;
 static const double MuonMass     = 105.658367e6;
-static const double ProtonMass   = 938.27203e6;
+static const double ProtonMass   = 938.272013e6;
 static const double NeutronMass  = 939.56536e6;
 
 // Fine structure constant

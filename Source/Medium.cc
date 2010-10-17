@@ -26,34 +26,54 @@ Medium::Medium() :
   debug(false),
   map2d(false) {
   
+  // Initialise the transport tables.
+  nEfields = 0;
+  nBfields = 1;
+  nAngles = 1;
+  
   eFields.clear();
   bFields.clear();
-  bAngles.clear();
+  bAngles.clear(); bAngles.resize(1); bAngles[0] = 0.;
+ 
+  hasElectronVelocityE   = false; tabElectronVelocityE.clear();
+  hasElectronVelocityB   = false; tabElectronVelocityB.clear();
+  hasElectronVelocityExB = false; tabElectronVelocityExB.clear();
+  hasElectronDiffLong    = false; tabElectronDiffLong.clear();
+  hasElectronDiffTrans   = false; tabElectronDiffTrans.clear();
+  hasElectronTownsend    = false; tabElectronTownsend.clear();
+  hasElectronAttachment  = false; tabElectronAttachment.clear();
+  hasElectronDiffTens    = false; tabElectronDiffTens.clear();
+ 
+  hasHoleVelocityE   = false; tabHoleVelocityE.clear();
+  hasHoleVelocityB   = false; tabHoleVelocityB.clear();
+  hasHoleVelocityExB = false; tabHoleVelocityExB.clear();
+  hasHoleDiffLong    = false; tabHoleDiffLong.clear();
+  hasHoleDiffTrans   = false; tabHoleDiffTrans.clear();
+  hasHoleTownsend    = false; tabHoleTownsend.clear();
+  hasHoleAttachment  = false; tabHoleAttachment.clear();
+  hasHoleDiffTens    = false; tabHoleDiffTens.clear();
+
+  hasIonMobility     = false; tabIonMobility.clear();
+  hasIonDiffLong     = false; tabIonDiffLong.clear();
+  hasIonDiffTrans    = false; tabIonDiffTrans.clear(); 
+  hasIonDissociation = false; tabIonDissociation.clear();
   
-  tabElectronVelocityE.clear();
-  tabElectronVelocityB.clear();
-  tabElectronVelocityExB.clear();
-  tabElectronDiffLong.clear();
-  tabElectronDiffTrans.clear();
-  tabElectronTownsend.clear();
-  tabElectronAttachment.clear();
+  extrLowVelocity     = 0; extrHighVelocity     = 1;
+  extrLowDiffusion    = 0; extrHighDiffusion    = 1;
+  extrLowTownsend     = 0; extrHighTownsend     = 1;
+  extrLowAttachment   = 0; extrHighAttachment   = 1;
+  extrLowDissociation = 0; extrHighDissociation = 1;
   
-  tabHoleVelocityE.clear();
-  tabHoleVelocityB.clear();
-  tabHoleVelocityExB.clear();
-  tabHoleDiffLong.clear();
-  tabHoleDiffTrans.clear();
-  tabHoleTownsend.clear();
-  tabHoleAttachment.clear();
-  
-  tabIonDissociation.clear();
-  
-  extrVelocityLow = extrVelocityHigh = 0;
-  extrDiffusionLow = extrDiffusionHigh = 0;
-  extrTownsendLow = extrTownsendHigh = 0;
-  extrAttachmentLow = extrAttachmentHigh = 0;
-  extrDissociationLow = extrDissociationHigh = 0;
-  
+  intpVelocity     = 2;
+  intpDiffusion    = 2;
+  intpTownsend     = 2;
+  intpAttachment   = 2;
+  intpDissociation = 2;
+ 
+  thrElectronTownsend = thrElectronAttachment = 0;
+  thrHoleTownsend = thrHoleAttachment = 0;
+  thrIonDissociation = 0;
+
 }
 
 void 
@@ -86,7 +106,7 @@ void
 Medium::SetDielectricConstant(const double eps) {
 
   if (eps < 1.) {
-    std::cerr << className << "::SetDielectricConstant: \n";
+    std::cerr << className << "::SetDielectricConstant:\n";
     std::cerr << "    Dielectric constant must be >= 1.\n";
     return;
   }
@@ -106,7 +126,8 @@ void
 Medium::GetComponent(const int i, std::string& label, double& f) {
 
   if (i < 0 || i >= nComponents) {
-    std::cerr << className << "::GetComponent: Index out of range\n";
+    std::cerr << className << "::GetComponent:\n";
+    std::cerr << "    Index out of range.\n";
   }
   
   label = name; f = 1.;
@@ -177,15 +198,62 @@ Medium::ElectronVelocity(const double ex, const double ey, const double ez,
                          double& vx, double& vy, double& vz) {
 
   vx = vy = vz = 0.;
+  
+  // Make sure there is at least a table of velocities along the electric field.
+  if (!hasElectronVelocityE) return false;
+
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   if (e < Small) return true;
   
-  if (map2d) {
-    // Compute the magnitude of the magnetic field
-    const double b = sqrt(bx * bx + by * by + bz * bz);
+  // Compute the magnitude of the magnetic field.
+  const double b = sqrt(bx * bx + by * by + bz * bz);
+  
+  // Compute the angle between B field and E field.
+  double ebang = 0.;
+  if (e * b > 0.) {
+    const double eb = fabs(ex * bx + ey * by + ez * bz);
+    if (eb > 0.2 * e * b) {
+      ebang = asin(std::min(1., 
+                            sqrt(pow(ex * by - ey * bx, 2) +
+                                 pow(ex * bz - ez * bx, 2) +
+                                 pow(ez * by - ey * bz, 2)) / (e * b)));
+    } else {
+      ebang = acos(std::min(1., eb / (e * b)));
+    }
+  } else {
+    ebang = bAngles[0];
+  }
+  
+  if (b < Small) {
+    // No magnetic field.
 
-    // Compute unit vectors along E, E x B and Btrans.
+    // Calculate the velocity along E.
+    double ve = 0.;
+    if (map2d) {
+      if (!Numerics::Boxin3(tabElectronVelocityE, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, ve, intpVelocity)) {
+        std::cerr << className << "::ElectronVelocity:\n";
+        std::cerr << "    Interpolation of velocity along E failed.\n";
+        return false;
+      }
+    } else {
+      ve = Interpolate1D(e, tabElectronVelocityE[0][0], eFields,
+                         intpVelocity, 
+                         extrLowVelocity, extrHighVelocity);
+    }
+    const double q = -1.;
+    const double mu = q * ve / e;
+    vx = mu * ex;
+    vy = mu * ey;
+    vz = mu * ez;
+    
+  } else if (hasElectronVelocityB && hasElectronVelocityExB) {
+    // Magnetic field, velocities along ExB and Bt available
+    
+    // Compute unit vectors along E, E x B and Bt.
     double ue[3] = {ex / e, ey / e, ez / e};
     double uexb[3] = {ey * bz - ez * by, 
                       ez * bx - ex * bz, 
@@ -193,6 +261,13 @@ Medium::ElectronVelocity(const double ex, const double ey, const double ez,
     const double exb = sqrt(uexb[0] * uexb[0] + 
                             uexb[1] * uexb[1] + 
                             uexb[2] * uexb[2]);
+    if (exb > 0.) {
+      uexb[0] /= exb; uexb[1] /= exb; uexb[2] /= exb;
+    } else {
+      uexb[0] = ue[0];
+      uexb[1] = ue[1];
+      uexb[2] = ue[2];
+    }
 
     double ubt[3] = {
       uexb[1] * ez - uexb[2] * ey, 
@@ -203,48 +278,90 @@ Medium::ElectronVelocity(const double ex, const double ey, const double ez,
                            ubt[1] * ubt[1] + 
                            ubt[2] * ubt[2]);
 
-    if (b > 0.) {
-      uexb[0] /= exb; uexb[1] /= exb; uexb[2] /= exb;
+    if (bt > 0.) {
       ubt[0] /= bt; ubt[1] /= bt; ubt[2] /= bt;
     } else {
-      uexb[0] = ubt[0] = ue[0];
-      uexb[1] = ubt[1] = ue[1];
-      uexb[2] = ubt[2] = ue[2];
+      ubt[0] = ue[0];
+      ubt[1] = ue[1];
+      ubt[2] = ue[2];
     }
 
-    // Compute the angle between B field and E field.
-    double ebang = 0.;
-    if (e * b > 0.) {
-      const double eb = fabs(ex * bx + ey * by + ez * bz);
-      if (eb > 0.2 * e * b) {
-        ebang = asin(std::min(1., 
-                              sqrt(pow(ex * by - ey * bx, 2) +
-                                   pow(ex * bz - ez * bx, 2) +
-                                   pow(ez * by - ey * bz, 2)) / (e * b)));
-      } else {
-        ebang = acos(std::min(1., eb / (e * b)));
+    // Calculate the velocities in all directions.
+    double ve = 0., vbt = 0., vexb = 0.;
+    if (map2d) {
+      if (!Numerics::Boxin3(tabElectronVelocityE, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, ve, intpVelocity)) {
+        std::cerr << className << "::ElectronVelocity:\n";
+        std::cerr << "    Interpolation of velocity along E failed.\n";
+        return false;
+      }
+      if (!Numerics::Boxin3(tabElectronVelocityExB, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, vexb, intpVelocity)) {
+        std::cerr << className << "::ElectronVelocity:\n";
+        std::cerr << "    Interpolation of velocity along ExB failed.\n";
+        return false;
+      }
+      if (!Numerics::Boxin3(tabElectronVelocityB, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, vbt, intpVelocity)) {
+        std::cerr << className << "::ElectronVelocity:\n";
+        std::cerr << "    Interpolation of velocity along Bt failed.\n";
+        return false;
       }
     } else {
-      ebang = bAngles[0];
+      ve = Interpolate1D(e, tabElectronVelocityE[0][0], eFields,
+                         intpVelocity,
+                         extrLowVelocity, extrHighVelocity);
+      vbt = Interpolate1D(e, tabElectronVelocityB[0][0], eFields,
+                          intpVelocity,
+                          extrLowVelocity, extrHighVelocity);
+      vexb = Interpolate1D(e, tabElectronVelocityExB[0][0], eFields,
+                           intpVelocity,
+                           extrLowVelocity, extrHighVelocity);
     }
-  
-    // Calculate the velocities in all directions.
-    double ve = 0.;
-    double vexb = 0.;
-    double vbt = 0.;
-    const double q = 1.;
-  
+    const double q = -1.;  
     vx = q * (ve * ue[0] + q * q * vbt * ubt[0] + q * vexb * uexb[0]);
     vy = q * (ve * ue[1] + q * q * vbt * ubt[1] + q * vexb * uexb[1]);
     vz = q * (ve * ue[2] + q * q * vbt * ubt[2] + q * vexb * uexb[2]);
+    
   } else {
-    const double v = Interpolate1D(e, tabElectronVelocityE[0][0], eFields, 
-                                   extrVelocityLow, extrVelocityHigh, 0);
-  	const double mu = v / e;
-    const double q = 1.;
-    vx = q * mu * ex;
-    vy = q * mu * ey;
-    vz = q * mu * ez;
+    // Magnetic field, velocities along ExB, Bt not available
+    
+    // Calculate the velocity along E.
+    double ve = 0.;
+    if (map2d) {
+      if (!Numerics::Boxin3(tabElectronVelocityE, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, ve, intpVelocity)) {
+        std::cerr << className << "::ElectronVelocity:\n";
+        std::cerr << "    Interpolation of velocity along E failed.\n";
+        return false;
+      }
+    } else {
+      ve = Interpolate1D(e, tabElectronVelocityE[0][0], eFields, 
+                         intpVelocity,
+                         extrLowVelocity, extrHighVelocity);
+    }
+
+    const double q = -1.;
+    const double mu = q * ve / e;
+    const double eb = bx * ex + by * ey + bz * ez;
+    const double nom = 1. + pow(mu * b, 2);
+    vx = mu * (ex + 
+               mu * (ey * bz - ez * by) +
+               mu * mu * bx * eb) / nom;
+    vy = mu * (ey + 
+               mu * (ez * bx - ex * bz) +
+               mu * mu * bx * eb) / nom;
+    vz = mu * (ez + 
+               mu * (ex * by - ey * bx) +
+               mu * mu * bz * eb) / nom;
   }
   
   // Verify value and apply scaling.
@@ -265,7 +382,6 @@ Medium::ElectronDiffusion(const double ex, const double ey, const double ez,
   if (map2d) {
     // Compute the magnitude of the magnetic field.
     const double b = sqrt(bx * bx + by * by + bz * bz);
-    
     // Compute the angle between B field and E field.
     double ebang = 0.;
     if (e * b > 0.) {
@@ -281,17 +397,45 @@ Medium::ElectronDiffusion(const double ex, const double ey, const double ez,
     } else {
       ebang = bAngles[0];
     }
+    
     // Interpolate.
-
+    if (hasElectronDiffLong) {
+      if (!Numerics::Boxin3(tabElectronDiffLong, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, dl, intpDiffusion)) {
+        dl = 0.;
+      }
+    }
+    if (hasElectronDiffTrans) {
+      if (!Numerics::Boxin3(tabElectronDiffTrans,
+                            bAngles, bFields, eFields,
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, dt, intpDiffusion)) {
+        dt = 0.;
+      }
+    }
   } else {
-    dl = Interpolate1D(e, tabElectronDiffLong[0][0], eFields, 
-                       extrDiffusionLow, extrDiffusionHigh, 0);
-    dt = Interpolate1D(e, tabElectronDiffTrans[0][0], eFields, 
-                       extrDiffusionLow, extrDiffusionHigh, 0);
+    if (hasElectronDiffLong) {
+      dl = Interpolate1D(e, tabElectronDiffLong[0][0], eFields,
+                         intpDiffusion, 
+                         extrLowDiffusion, extrHighDiffusion);
+    }
+    if (hasElectronDiffTrans) {
+      dt = Interpolate1D(e, tabElectronDiffTrans[0][0], eFields,
+                         intpDiffusion, 
+                         extrLowDiffusion, extrHighDiffusion);
+    }
   }
-  
-  // Calculate diffusion coefficients using the Einstein relation
-  // dl = dt = sqrt(2. * BoltzmannConstant * temperature / e);
+
+  // If no data available, calculate 
+  // the diffusion coefficients using the Einstein relation
+  if (!hasElectronDiffLong) {
+    dl = sqrt(2. * BoltzmannConstant * temperature / e);
+  }
+  if (!hasElectronDiffTrans) {
+    dt = sqrt(2. * BoltzmannConstant * temperature / e);
+  }
   
   // Verify value and apply scaling.
   return true;
@@ -304,10 +448,12 @@ Medium::ElectronDiffusion(const double ex, const double ey, const double ez,
                           double cov[3][3]) {
 
   // Initialise the tensor.
-  cov[0][0] = 0.; cov[0][1] = 0.; cov[0][2] = 0.;
-  cov[1][0] = 0.; cov[1][1] = 0.; cov[1][2] = 0.;
-  cov[2][0] = 0.; cov[2][1] = 0.; cov[2][2] = 0.;
-  
+  cov[0][0] = cov[0][1] = cov[0][2] = 0.;
+  cov[1][0] = cov[1][1] = cov[1][2] = 0.;
+  cov[2][0] = cov[2][1] = cov[2][2] = 0.;
+ 
+  if (!hasElectronDiffTens) return false;
+ 
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   if (e < Small) return true;
@@ -332,12 +478,44 @@ Medium::ElectronDiffusion(const double ex, const double ey, const double ez,
       ebang = bAngles[0];
     }
     // Interpolate.
-
+    double diff = 0.;
+    for (int l = 0; l < 6; ++l) {
+      if (!Numerics::Boxin3(tabElectronDiffTens[l], 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, diff, intpDiffusion)) {
+        diff = 0.;
+      }
+      if (l < 3) {
+        cov[l][l] = diff;
+      } else if (l == 3) {
+        cov[0][1] = cov[1][0] = diff;
+      } else if (l == 4) {
+        cov[0][2] = cov[2][0] = diff;
+      } else if (l == 5) {
+        cov[1][2] = cov[2][1] = diff;
+      }
+    }
   } else {
     // Interpolate.
-
+    for (int l = 0; l < 6; ++l) {
+      double diff = Interpolate1D(e, tabElectronDiffTens[l][0][0], eFields,
+                                  intpDiffusion,
+                                  extrLowDiffusion, extrHighDiffusion);
+      if (l < 3) {
+        cov[l][l] = diff;
+      } else if (l == 3) {
+        cov[0][1] = cov[1][0] = diff;
+      } else if (l == 4) {
+        cov[0][2] = cov[2][0] = diff;
+      } else if (l == 5) {
+        cov[1][2] = cov[2][1] = diff;
+      }
+    }
   }
   
+  // Apply scaling.
+
   return true;
 
 }
@@ -348,6 +526,8 @@ Medium::ElectronTownsend(const double ex, const double ey, const double ez,
                          double& alpha) {
 
   alpha = 0.;
+
+  if (!hasElectronTownsend) return false;
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   if (e < Small) return true;
@@ -372,11 +552,37 @@ Medium::ElectronTownsend(const double ex, const double ey, const double ez,
       ebang = bAngles[0];
     }
     // Interpolate.
-
+    if (e < eFields[thrElectronTownsend]) {
+      if (!Numerics::Boxin3(tabElectronTownsend, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, alpha, 1)) {
+        alpha = -30.;
+      }
+    } else {
+      if (!Numerics::Boxin3(tabElectronTownsend,
+                            bAngles, bFields, eFields,
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, alpha, intpTownsend)) {
+        alpha = -30.;
+      }
+    }
   } else {
     // Interpolate.
-    alpha = Interpolate1D(e, tabElectronTownsend[0][0], eFields, 
-                          extrTownsendLow, extrTownsendHigh, 0);
+    if (e < eFields[thrElectronTownsend]) {
+      alpha = Interpolate1D(e, tabElectronTownsend[0][0], eFields,
+                            1, extrLowTownsend, extrHighTownsend);
+    } else {
+      alpha = Interpolate1D(e, tabElectronTownsend[0][0], eFields,
+                            intpTownsend,
+                            extrLowTownsend, extrHighTownsend);
+    }
+  }
+  
+  if (alpha < -20.) {
+    alpha = 0.;
+  } else {
+    alpha = exp(alpha);
   }
   
   // Apply scaling.
@@ -391,6 +597,7 @@ Medium::ElectronAttachment(const double ex, const double ey, const double ez,
                            double& eta) {
 
   eta = 0.;
+  if (!hasElectronAttachment) return false;
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   if (e < Small) return true;
@@ -415,11 +622,37 @@ Medium::ElectronAttachment(const double ex, const double ey, const double ez,
       ebang = bAngles[0];
     }
     // Interpolate.
-
+    if (e < eFields[thrElectronAttachment]) {
+      if (!Numerics::Boxin3(tabElectronAttachment, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, eta, 1)) {
+        eta = -30.;
+      }
+    } else {
+      if (!Numerics::Boxin3(tabElectronAttachment,
+                            bAngles, bFields, eFields,
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, eta, intpAttachment)) {
+        eta = -30.;
+      }
+    }
   } else {
     // Interpolate.
-    eta = Interpolate1D(e, tabElectronAttachment[0][0], eFields, 
-                        extrAttachmentLow, extrAttachmentHigh, 0);
+    if (e < eFields[thrElectronAttachment]) {
+      eta = Interpolate1D(e, tabElectronAttachment[0][0], eFields, 
+                          1, extrLowAttachment, extrHighAttachment);
+    } else {
+      eta = Interpolate1D(e, tabElectronAttachment[0][0], eFields,
+                          intpAttachment,
+                          extrLowAttachment, extrHighAttachment);
+    }
+  }
+  
+  if (eta < -20.) {
+    eta = 0.;
+  } else {
+    eta = exp(eta);
   }
   
   // Apply scaling.
@@ -534,15 +767,61 @@ Medium::HoleVelocity(const double ex, const double ey, const double ez,
                      double& vx, double& vy, double& vz) {
             
   vx = vy = vz = 0.;
+  
+  // Make sure there is at least a table of velocities along the electric field.
+  if (!hasHoleVelocityE) return false;
+
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   if (e < Small) return true;
   
-  if (map2d) {
-    // Compute the magnitude of the magnetic field
-    const double b = sqrt(bx * bx + by * by + bz * bz);
-
-    // Compute unit vectors along E, E x B and Btrans.
+  // Compute the magnitude of the magnetic field.
+  const double b = sqrt(bx * bx + by * by + bz * bz);
+  
+  // Compute the angle between B field and E field.
+  double ebang = 0.;
+  if (e * b > 0.) {
+    const double eb = fabs(ex * bx + ey * by + ez * bz);
+    if (eb > 0.2 * e * b) {
+      ebang = asin(std::min(1., 
+                            sqrt(pow(ex * by - ey * bx, 2) +
+                                 pow(ex * bz - ez * bx, 2) +
+                                 pow(ez * by - ey * bz, 2)) / (e * b)));
+    } else {
+      ebang = acos(std::min(1., eb / (e * b)));
+    }
+  } else {
+    ebang = bAngles[0];
+  }
+  
+  if (b < Small) {
+    // No magnetic field.
+    // Calculate the velocity along E.
+    double ve = 0.;
+    if (map2d) {
+      if (!Numerics::Boxin3(tabHoleVelocityE, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, ve, intpVelocity)) {
+        std::cerr << className << "::HoleVelocity:\n";
+        std::cerr << "    Interpolation of velocity along E failed.\n";
+        return false;
+      }
+    } else {
+      ve = Interpolate1D(e, tabHoleVelocityE[0][0], eFields,
+                         intpVelocity, 
+                         extrLowVelocity, extrHighVelocity);
+    }
+    const double q = 1.;
+    const double mu = q * ve / e;
+    vx = mu * ex;
+    vy = mu * ey;
+    vz = mu * ez;
+    
+  } else if (hasHoleVelocityB && hasHoleVelocityExB) {
+    // Magnetic field, velocities along ExB and Bt available
+    
+    // Compute unit vectors along E, E x B and Bt.
     double ue[3] = {ex / e, ey / e, ez / e};
     double uexb[3] = {ey * bz - ez * by, 
                       ez * bx - ex * bz, 
@@ -550,6 +829,13 @@ Medium::HoleVelocity(const double ex, const double ey, const double ez,
     const double exb = sqrt(uexb[0] * uexb[0] + 
                             uexb[1] * uexb[1] + 
                             uexb[2] * uexb[2]);
+    if (exb > 0.) {
+      uexb[0] /= exb; uexb[1] /= exb; uexb[2] /= exb;
+    } else {
+      uexb[0] = ue[0];
+      uexb[1] = ue[1];
+      uexb[2] = ue[2];
+    }
 
     double ubt[3] = {
       uexb[1] * ez - uexb[2] * ey, 
@@ -560,48 +846,90 @@ Medium::HoleVelocity(const double ex, const double ey, const double ez,
                            ubt[1] * ubt[1] + 
                            ubt[2] * ubt[2]);
 
-    if (b > 0.) {
-      uexb[0] /= exb; uexb[1] /= exb; uexb[2] /= exb;
+    if (bt > 0.) {
       ubt[0] /= bt; ubt[1] /= bt; ubt[2] /= bt;
     } else {
-      uexb[0] = ubt[0] = ue[0];
-      uexb[1] = ubt[1] = ue[1];
-      uexb[2] = ubt[2] = ue[2];
+      ubt[0] = ue[0];
+      ubt[1] = ue[1];
+      ubt[2] = ue[2];
     }
 
-    // Compute the angle between B field and E field.
-    double ebang = 0.;
-    if (e * b > 0.) {
-      const double eb = fabs(ex * bx + ey * by + ez * bz);
-      if (eb > 0.2 * e * b) {
-        ebang = asin(std::min(1., 
-                              sqrt(pow(ex * by - ey * bx, 2) +
-                                   pow(ex * bz - ez * bx, 2) +
-                                   pow(ez * by - ey * bz, 2)) / (e * b)));
-      } else {
-        ebang = acos(std::min(1., eb / (e * b)));
+    // Calculate the velocities in all directions.
+    double ve = 0., vbt = 0., vexb = 0.;
+    if (map2d) {
+      if (!Numerics::Boxin3(tabHoleVelocityE, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, ve, intpVelocity)) {
+        std::cerr << className << "::HoleVelocity:\n";
+        std::cerr << "    Interpolation of velocity along E failed.\n";
+        return false;
+      }
+      if (!Numerics::Boxin3(tabHoleVelocityExB, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, vexb, intpVelocity)) {
+        std::cerr << className << "::HoleVelocity:\n";
+        std::cerr << "    Interpolation of velocity along ExB failed.\n";
+        return false;
+      }
+      if (!Numerics::Boxin3(tabHoleVelocityB, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, vbt, intpVelocity)) {
+        std::cerr << className << "::HoleVelocity:\n";
+        std::cerr << "    Interpolation of velocity along Bt failed.\n";
+        return false;
       }
     } else {
-      ebang = bAngles[0];
+      ve = Interpolate1D(e, tabHoleVelocityE[0][0], eFields,
+                         intpVelocity,
+                         extrLowVelocity, extrHighVelocity);
+      vbt = Interpolate1D(e, tabHoleVelocityB[0][0], eFields,
+                          intpVelocity,
+                          extrLowVelocity, extrHighVelocity);
+      vexb = Interpolate1D(e, tabHoleVelocityExB[0][0], eFields,
+                           intpVelocity,
+                           extrLowVelocity, extrHighVelocity);
     }
-  
-    // Calculate the velocities in all directions.
-    double ve = 0.;
-    double vexb = 0.;
-    double vbt = 0.;
-    const double q = 1.;
-  
+    const double q = 1.;  
     vx = q * (ve * ue[0] + q * q * vbt * ubt[0] + q * vexb * uexb[0]);
     vy = q * (ve * ue[1] + q * q * vbt * ubt[1] + q * vexb * uexb[1]);
     vz = q * (ve * ue[2] + q * q * vbt * ubt[2] + q * vexb * uexb[2]);
+    
   } else {
-    const double v = Interpolate1D(e, tabHoleVelocityE[0][0], eFields, 
-                                   extrVelocityLow, extrVelocityHigh, 0);
-  	const double mu = v / e;
+    // Magnetic field, velocities along ExB, Bt not available
+    
+    // Calculate the velocity along E.
+    double ve = 0.;
+    if (map2d) {
+      if (!Numerics::Boxin3(tabHoleVelocityE, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, ve, intpVelocity)) {
+        std::cerr << className << "::HoleVelocity:\n";
+        std::cerr << "    Interpolation of velocity along E failed.\n";
+        return false;
+      }
+    } else {
+      ve = Interpolate1D(e, tabHoleVelocityE[0][0], eFields,
+                         intpVelocity, 
+                         extrLowVelocity, extrHighVelocity);
+    }
+
     const double q = 1.;
-    vx = q * mu * ex;
-    vy = q * mu * ey;
-    vz = q * mu * ez;
+    const double mu = q * ve / e;
+    const double eb = bx * ex + by * ey + bz * ez;
+    const double nom = 1. + pow(mu * b, 2);
+    vx = mu * (ex + 
+               mu * (ey * bz - ez * by) +
+               mu * mu * bx * eb) / nom;
+    vy = mu * (ey + 
+               mu * (ez * bx - ex * bz) +
+               mu * mu * by * eb) / nom;
+    vz = mu * (ez + 
+               mu * (ex * by - ey * bx) +
+               mu * mu * bz * eb) / nom;
   }
   
   // Verify value and apply scaling.
@@ -622,7 +950,6 @@ Medium::HoleDiffusion(const double ex, const double ey, const double ez,
   if (map2d) {
     // Compute the magnitude of the magnetic field.
     const double b = sqrt(bx * bx + by * by + bz * bz);
-    
     // Compute the angle between B field and E field.
     double ebang = 0.;
     if (e * b > 0.) {
@@ -638,17 +965,45 @@ Medium::HoleDiffusion(const double ex, const double ey, const double ez,
     } else {
       ebang = bAngles[0];
     }
+    
     // Interpolate.
-
+    if (hasHoleDiffLong) {
+      if (!Numerics::Boxin3(tabHoleDiffLong, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, dl, intpDiffusion)) {
+        dl = 0.;
+      }
+    }
+    if (hasHoleDiffTrans) {
+      if (!Numerics::Boxin3(tabHoleDiffTrans,
+                            bAngles, bFields, eFields,
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, dt, intpDiffusion)) {
+        dt = 0.;
+      }
+    }
   } else {
-    dl = Interpolate1D(e, tabHoleDiffLong[0][0], eFields, 
-                       extrDiffusionLow, extrDiffusionHigh, 0);
-    dt = Interpolate1D(e, tabHoleDiffTrans[0][0], eFields, 
-                       extrDiffusionLow, extrDiffusionHigh, 0);
+    if (hasHoleDiffLong) {
+      dl = Interpolate1D(e, tabHoleDiffLong[0][0], eFields,
+                         intpDiffusion, 
+                         extrLowDiffusion, extrHighDiffusion);
+    }
+    if (hasHoleDiffTrans) {
+      dt = Interpolate1D(e, tabHoleDiffTrans[0][0], eFields,
+                         intpDiffusion, 
+                         extrLowDiffusion, extrHighDiffusion);
+    }
   }
-  
-  // Calculate diffusion coefficients using the Einstein relation
-  // dl = dt = sqrt(2. * BoltzmannConstant * temperature / e);
+
+  // If no data available, calculate 
+  // the diffusion coefficients using the Einstein relation
+  if (!hasHoleDiffLong) {
+    dl = sqrt(2. * BoltzmannConstant * temperature / e);
+  }
+  if (!hasHoleDiffTrans) {
+    dt = sqrt(2. * BoltzmannConstant * temperature / e);
+  }
   
   // Verify value and apply scaling.
   return true;
@@ -661,10 +1016,12 @@ Medium::HoleDiffusion(const double ex, const double ey, const double ez,
                       double cov[3][3]) {
 
   // Initialise the tensor.
-  cov[0][0] = 0.; cov[0][1] = 0.; cov[0][2] = 0.;
-  cov[1][0] = 0.; cov[1][1] = 0.; cov[1][2] = 0.;
-  cov[2][0] = 0.; cov[2][1] = 0.; cov[2][2] = 0.;
-  
+  cov[0][0] = cov[0][1] = cov[0][2] = 0.;
+  cov[1][0] = cov[1][1] = cov[1][2] = 0.;
+  cov[2][0] = cov[2][1] = cov[2][2] = 0.;
+ 
+  if (!hasHoleDiffTens) return false;
+ 
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   if (e < Small) return true;
@@ -689,12 +1046,44 @@ Medium::HoleDiffusion(const double ex, const double ey, const double ez,
       ebang = bAngles[0];
     }
     // Interpolate.
-
+    double diff = 0.;
+    for (int l = 0; l < 6; ++l) {
+      if (!Numerics::Boxin3(tabHoleDiffTens[l], 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, diff, intpDiffusion)) {
+        diff = 0.;
+      }
+      if (l < 3) {
+        cov[l][l] = diff;
+      } else if (l == 3) {
+        cov[0][1] = cov[1][0] = diff;
+      } else if (l == 4) {
+        cov[0][2] = cov[2][0] = diff;
+      } else if (l == 5) {
+        cov[1][2] = cov[2][1] = diff;
+      }
+    }
   } else {
     // Interpolate.
-
+    for (int l = 0; l < 6; ++l) {
+      double diff = Interpolate1D(e, tabHoleDiffTens[l][0][0], eFields,
+                                  intpDiffusion,
+                                  extrLowDiffusion, extrHighDiffusion);
+      if (l < 3) {
+        cov[l][l] = diff;
+      } else if (l == 3) {
+        cov[0][1] = cov[1][0] = diff;
+      } else if (l == 4) {
+        cov[0][2] = cov[2][0] = diff;
+      } else if (l == 5) {
+        cov[1][2] = cov[2][1] = diff;
+      }
+    }
   }
   
+  // Apply scaling.
+
   return true;
 
 }
@@ -705,6 +1094,7 @@ Medium::HoleTownsend(const double ex, const double ey, const double ez,
                      double& alpha) {
 
   alpha = 0.;
+  if (!hasHoleTownsend) return false;
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   if (e < Small) return true;
@@ -729,11 +1119,37 @@ Medium::HoleTownsend(const double ex, const double ey, const double ez,
       ebang = bAngles[0];
     }
     // Interpolate.
-
+    if (e < eFields[thrHoleTownsend]) {
+      if (!Numerics::Boxin3(tabHoleTownsend, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, alpha, 1)) {
+        alpha = -30.;
+      }
+    } else {
+      if (!Numerics::Boxin3(tabHoleTownsend,
+                            bAngles, bFields, eFields,
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, alpha, intpTownsend)) {
+        alpha = -30.;
+      }
+    }
   } else {
     // Interpolate.
-    alpha = Interpolate1D(e, tabHoleTownsend[0][0], eFields, 
-                          extrTownsendLow, extrTownsendHigh, 0);
+    if (e < eFields[thrHoleTownsend]) {
+      alpha = Interpolate1D(e, tabHoleTownsend[0][0], eFields, 
+                            1, extrLowTownsend, extrHighTownsend);
+    } else {
+      alpha = Interpolate1D(e, tabHoleTownsend[0][0], eFields,
+                            intpTownsend,
+                            extrLowTownsend, extrHighTownsend);
+    }
+  }
+  
+  if (alpha < -20.) {
+    alpha = 0.;
+  } else {
+    alpha = exp(alpha);
   }
   
   // Apply scaling.
@@ -748,6 +1164,7 @@ Medium::HoleAttachment(const double ex, const double ey, const double ez,
                        double& eta) {
             
   eta = 0.;
+  if (!hasHoleAttachment) return false;
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   if (e < Small) return true;
@@ -772,11 +1189,37 @@ Medium::HoleAttachment(const double ex, const double ey, const double ez,
       ebang = bAngles[0];
     }
     // Interpolate.
-
+    if (e < eFields[thrHoleAttachment]) {
+      if (!Numerics::Boxin3(tabHoleAttachment, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, eta, 1)) {
+        eta = -30.;
+      }
+    } else {
+      if (!Numerics::Boxin3(tabHoleAttachment,
+                            bAngles, bFields, eFields,
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, eta, intpAttachment)) {
+        eta = -30.;
+      }
+    }
   } else {
     // Interpolate.
-    eta = Interpolate1D(e, tabHoleAttachment[0][0], eFields, 
-                        extrAttachmentLow, extrAttachmentHigh, 0);
+    if (e < eFields[thrHoleAttachment]) {
+      eta = Interpolate1D(e, tabHoleAttachment[0][0], eFields, 
+                          1, extrLowAttachment, extrHighAttachment);
+    } else {
+      eta = Interpolate1D(e, tabHoleAttachment[0][0], eFields,
+                          intpAttachment,
+                          extrLowAttachment, extrHighAttachment); 
+    }
+  }
+  
+  if (eta < -20.) {
+    eta = 0.;
+  } else {
+    eta = exp(eta);
   }
   
   // Apply scaling.
@@ -790,13 +1233,66 @@ Medium::IonVelocity(const double ex, const double ey, const double ez,
                     const double bx, const double by, const double bz, 
                     double& vx, double& vy, double& vz) {
 
-  if (debug) {
-    std::cerr << className << "::IonVelocity:\n";
-    std::cerr << "    Function is not implemented.\n";
-  }
   vx = vy = vz = 0.;
-  return false;
 
+  if (!hasIonMobility) return false;
+
+  // Compute the magnitude of the electric field.
+  const double e = sqrt(ex * ex + ey * ey + ez * ez);
+  if (e < Small) return true;
+  // Compute the magnitude of the electric field.
+  const double b = sqrt(bx * bx + by * by + bz * bz);  
+
+  double mu = 0.;
+  if (map2d) {
+    // Compute the angle between B field and E field.
+    double ebang = 0.;
+    if (e * b > 0.) {
+      const double eb = fabs(ex * bx + ey * by + ez * bz);
+      if (eb > 0.2 * e * b) {
+        ebang = asin(std::min(1., 
+                              sqrt(pow(ex * by - ey * bx, 2) +
+                                   pow(ex * bz - ez * bx, 2) +
+                                   pow(ez * by - ey * bz, 2)) / (e * b)));
+      } else {
+        ebang = acos(std::min(1., eb / (e * b)));
+      }
+    } else {
+      ebang = bAngles[0];
+    }
+    if (!Numerics::Boxin3(tabIonMobility,
+                          bAngles, bFields, eFields,
+                          nAngles, nBfields, nEfields,
+                          ebang, b, e, mu, intpVelocity)) {
+      mu = 0.;
+    }
+  } else {
+    mu = Interpolate1D(e, tabIonMobility[0][0], eFields,
+                       intpVelocity, 
+                       extrLowVelocity, extrHighVelocity);
+  }
+  
+  const double q = 1.;
+  mu *= q;
+  if (b < Small) {
+    vx = mu * ex;
+    vy = mu * ey;
+    vz = mu * ez;
+  } else {
+    const double eb = bx * ex + by * ey + bz * ez;
+    const double nom = 1. + pow(mu * b, 2);
+    vx = mu * (ex + 
+               mu * (ey * bz - ez * by) +
+               mu * mu * bx * eb) / nom;
+    vy = mu * (ey +
+               mu * (ez * bx - ex * bz) +
+               mu * mu * by * eb) / nom;
+    vz = mu * (ez +
+               mu * mu * bz * eb) / nom;
+  }
+  
+  return true;
+    
 }
 
 bool 
@@ -804,16 +1300,70 @@ Medium::IonDiffusion(const double ex, const double ey, const double ez,
                      const double bx, const double by, const double bz,
                      double& dl, double& dt) {
 
+  dl = dt = 0.;
+  // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
-  // Calculate diffusion coefficients using the Einstein relation
-  if (e < Small) {
-    dl = dt = 0.;
-  } else {
-    dl = dt = sqrt(2. * BoltzmannConstant * temperature / e);
-  }
-  return true;
+  if (e < Small) return true;
   
-  const double b = sqrt(bx * bx + by * by + bz * bz);
+  if (map2d) {
+    // Compute the magnitude of the magnetic field.
+    const double b = sqrt(bx * bx + by * by + bz * bz);
+    // Compute the angle between B field and E field.
+    double ebang = 0.;
+    if (e * b > 0.) {
+      const double eb = fabs(ex * bx + ey * by + ez * bz);
+      if (eb > 0.2 * e * b) {
+        ebang = asin(std::min(1., 
+                              sqrt(pow(ex * by - ey * bx, 2) +
+                                   pow(ex * bz - ez * bx, 2) +
+                                   pow(ez * by - ey * bz, 2)) / (e * b)));
+      } else {
+        ebang = acos(std::min(1., eb / (e * b)));
+      }
+    } else {
+      ebang = bAngles[0];
+    }
+    
+    // Interpolate.
+    if (hasIonDiffLong) {
+      if (!Numerics::Boxin3(tabIonDiffLong, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, dl, intpDiffusion)) {
+        dl = 0.;
+      }
+    }
+    if (hasIonDiffTrans) {
+      if (!Numerics::Boxin3(tabIonDiffTrans,
+                            bAngles, bFields, eFields,
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, dt, intpDiffusion)) {
+        dt = 0.;
+      }
+    }
+  } else {
+    if (hasIonDiffLong) {
+      dl = Interpolate1D(e, tabIonDiffLong[0][0], eFields,
+                         intpDiffusion, 
+                         extrLowDiffusion, extrHighDiffusion);
+    }
+    if (hasIonDiffTrans) {
+      dt = Interpolate1D(e, tabIonDiffTrans[0][0], eFields, 
+                         intpDiffusion,
+                         extrLowDiffusion, extrHighDiffusion);
+    }
+  }
+
+  // If no data available, calculate 
+  // the diffusion coefficients using the Einstein relation
+  if (!hasIonDiffLong) {
+    dl = sqrt(2. * BoltzmannConstant * temperature / e);
+  }
+  if (!hasIonDiffTrans) {
+    dt = sqrt(2. * BoltzmannConstant * temperature / e);
+  }
+  
+  return true;
 
 }
 
@@ -823,6 +1373,7 @@ Medium::IonDissociation(const double ex, const double ey, const double ez,
                         double& diss) {
 
   diss = 0.;
+  if (!hasIonDissociation) return false;
   // Compute the magnitude of the electric field.
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   if (e < Small) return true;
@@ -847,11 +1398,37 @@ Medium::IonDissociation(const double ex, const double ey, const double ez,
       ebang = bAngles[0];
     }
     // Interpolate.
-
+    if (e < eFields[thrIonDissociation]) {
+      if (!Numerics::Boxin3(tabIonDissociation, 
+                            bAngles, bFields, eFields, 
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, diss, 1)) {
+        diss = -30.;
+      }
+    } else {
+      if (!Numerics::Boxin3(tabIonDissociation,
+                            bAngles, bFields, eFields,
+                            nAngles, nBfields, nEfields,
+                            ebang, b, e, diss, intpDissociation)) {
+        diss = -30.;
+      }
+    }
   } else {
     // Interpolate.
-    diss = Interpolate1D(e, tabIonDissociation[0][0], eFields, 
-                         extrDissociationLow, extrDissociationHigh, 0);
+    if (e < eFields[thrIonDissociation]) {
+      diss = Interpolate1D(e, tabIonDissociation[0][0], eFields, 
+                           1, extrLowDissociation, extrHighDissociation);
+    } else {
+      diss = Interpolate1D(e, tabHoleTownsend[0][0], eFields,
+                           intpDissociation,
+                           extrLowDissociation, extrHighDissociation); 
+    }
+  }
+  
+  if (diss < -20.) {
+    diss = 0.;
+  } else {
+    diss = exp(diss);
   }
   
   // Apply scaling.
@@ -958,14 +1535,14 @@ Medium::SetExtrapolationMethodVelocity(const std::string extrLow,
 
   int iExtr;
   if (GetExtrapolationIndex(extrLow, iExtr)) { 
-    extrVelocityLow = iExtr;
+    extrLowVelocity = iExtr;
   } else {
     std::cerr << className << "::SetExtrapolationMethodVelocity:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
 
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
-    extrVelocityHigh = iExtr;
+    extrHighVelocity = iExtr;
   } else {
     std::cerr << className << "::SetExtrapolationMethodVelocity:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
@@ -979,14 +1556,14 @@ Medium::SetExtrapolationMethodDiffusion(const std::string extrLow,
 
   int iExtr;
   if (GetExtrapolationIndex(extrLow, iExtr)) {
-    extrDiffusionLow = iExtr;
+    extrLowDiffusion = iExtr;
   } else {
     std::cerr << className << "::SetExtrapolationMethodDiffusion:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
 
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
-    extrDiffusionHigh = iExtr;
+    extrHighDiffusion = iExtr;
   } else {
     std::cerr << className << "::SetExtrapolationMethodDiffusion:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
@@ -1000,14 +1577,14 @@ Medium::SetExtrapolationMethodTownsend(const std::string extrLow,
 
   int iExtr;
   if (GetExtrapolationIndex(extrLow, iExtr)) {
-    extrTownsendLow = iExtr;
+    extrLowTownsend = iExtr;
   } else {
     std::cerr << className << "::SetExtrapolationMethodTownsend:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
 
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
-    extrTownsendHigh = iExtr;
+    extrHighTownsend = iExtr;
   } else {
     std::cerr << className << "::SetExtrapolationMethodTownsend:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
@@ -1021,14 +1598,14 @@ Medium::SetExtrapolationMethodAttachment(const std::string extrLow,
 
   int iExtr;
   if (GetExtrapolationIndex(extrLow, iExtr)) {
-    extrAttachmentLow = iExtr;
+    extrLowAttachment = iExtr;
   } else {
     std::cerr << className << "::SetExtrapolationMethodAttachment:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
 
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
-    extrAttachmentHigh = iExtr;
+    extrHighAttachment = iExtr;
   } else {
     std::cerr << className << "::SetExtrapolationMethodAttachment:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
@@ -1037,21 +1614,41 @@ Medium::SetExtrapolationMethodAttachment(const std::string extrLow,
 }
 
 void
-Medium::SetExtrapolationMethodDissociation(const std::string extrLow, 
-                                           const std::string extrHigh) {
+Medium::SetExtrapolationMethodIonMobility(const std::string extrLow,
+                                          const std::string extrHigh) {
 
   int iExtr;
   if (GetExtrapolationIndex(extrLow, iExtr)) {
-    extrDissociationLow = iExtr;
+    extrLowMobility = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodDissociation:\n";
+    std::cerr << className << "::SetExtrapolationMethodIonMobility:\n";
+    std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
+  }
+  if (GetExtrapolationIndex(extrHigh, iExtr)) {
+    extrHighMobility = iExtr;
+  } else {
+    std::cerr << className << "::SetExtrapolationMethodIonMobility:\n";
+    std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
+  }
+
+}
+
+void
+Medium::SetExtrapolationMethodIonDissociation(const std::string extrLow, 
+                                              const std::string extrHigh) {
+
+  int iExtr;
+  if (GetExtrapolationIndex(extrLow, iExtr)) {
+    extrLowDissociation = iExtr;
+  } else {
+    std::cerr << className << "::SetExtrapolationMethodIonDissociation:\n";
     std::cerr << "    Unknown extrapolation method (" << extrLow << ")\n";
   }
 
   if (GetExtrapolationIndex(extrHigh, iExtr)) {
-    extrDissociationHigh = iExtr;
+    extrHighDissociation = iExtr;
   } else {
-    std::cerr << className << "::SetExtrapolationMethodDissociation:\n";
+    std::cerr << className << "::SetExtrapolationMethodIonDissociation:\n";
     std::cerr << "    Unknown extrapolation method (" << extrHigh << ")\n";
   }
 
@@ -1079,11 +1676,66 @@ Medium::GetExtrapolationIndex(std::string extrStr, int& extrNb) {
   
 }
 
+void
+Medium::SetInterpolationMethodVelocity(const int intrp) {
+
+  if (intrp > 0) {
+    intpVelocity = intrp;
+  }
+
+}
+
+void
+Medium::SetInterpolationMethodDiffusion(const int intrp) {
+
+  if (intrp > 0) {
+    intpDiffusion = intrp;
+  }
+
+}
+
+void
+Medium::SetInterpolationMethodTownsend(const int intrp) {
+
+  if (intrp > 0) {
+    intpTownsend = intrp;
+  }
+
+}
+
+void
+Medium::SetInterpolationMethodAttachment(const int intrp) {
+
+  if (intrp > 0) {
+    intpAttachment = intrp;
+  }
+
+}
+
+void
+Medium::SetInterpolationMethodIonMobility(const int intrp) {
+
+  if (intrp > 0) {
+    intpMobility = intrp;
+  }
+
+}
+
+void
+Medium::SetInterpolationMethodIonDissociation(const int intrp) {
+
+  if (intrp > 0) {
+    intpDissociation = intrp;
+  }
+
+}
+
 double
 Medium::Interpolate1D(const double e, 
                       const std::vector<double>& table,
                       const std::vector<double>& fields,
-                      const int iMeth, const int extrLow, const int extrHigh) {
+                      const int intpMeth,
+                      const int extrLow, const int extrHigh) {
 
   // This function is a generalized version of the Fortran functions 
   // GASVEL, GASVT1, GASVT2, GASLOR, GASMOB, GASDFT, and GASDFL
@@ -1091,13 +1743,13 @@ Medium::Interpolate1D(const double e,
   
   const int nSizeTable = fields.size();
   
- 	if (e < 0. || nSizeTable < 1) return 0.;
+  if (e < 0. || nSizeTable < 1) return 0.;
 
   double result = 0.;  
   
-	if (nSizeTable == 1) {
-  	// Only one point
-     result = table[0];
+  if (nSizeTable == 1) {
+    // Only one point
+    result = table[0];
   } else if (e < fields[0]) {
     // Extrapolation towards small fields
     if (fields[0] >= fields[1]) {
@@ -1114,13 +1766,14 @@ Medium::Interpolate1D(const double e,
       result = extr3 + extr4 * e;
     } else if (extrLow == 2) {
       // Logarithmic extrapolation
-      const double extr4 = std::log(table[1] / table[0]) / (fields[1] - fields[0]);
-      const double extr3 = std::log(table[0] - extr4 * fields[0]);
+      const double extr4 = log(table[1] / table[0]) / 
+                           (fields[1] - fields[0]);
+      const double extr3 = log(table[0] - extr4 * fields[0]);
       result = std::exp(std::min(50., extr3 + extr4 * e));
-	  } else {
+    } else {
       result = table[0];
     }
-	} else if (e > fields[nSizeTable - 1]) {
+  } else if (e > fields[nSizeTable - 1]) {
     // Extrapolation towards large fields
     if (fields[nSizeTable - 1] <= fields[nSizeTable - 2]) {
       if (debug) {
@@ -1133,24 +1786,78 @@ Medium::Interpolate1D(const double e,
       // Linear extrapolation
       const double extr2 = (table[nSizeTable - 1] - table[nSizeTable - 2]) / 
                            (fields[nSizeTable - 1] - fields[nSizeTable - 2]);
-      const double extr1 = table[nSizeTable - 1] - extr2 * fields[nSizeTable - 1];
+      const double extr1 = table[nSizeTable - 1] - 
+                           extr2 * fields[nSizeTable - 1];
       result = extr1 + extr2 * e;
     } else if (extrHigh == 2) {
       // Logarithmic extrapolation
-      const double extr2 = log(table[nSizeTable - 1] / table[nSizeTable - 2]) /
+      const double extr2 = log(table[nSizeTable - 1] / 
+                               table[nSizeTable - 2]) /
                            (fields[nSizeTable - 1] - fields[nSizeTable - 2]);
-      const double extr1 = log(table[nSizeTable - 1]) - extr2 * fields[nSizeTable - 1];
+      const double extr1 = log(table[nSizeTable - 1]) - 
+                           extr2 * fields[nSizeTable - 1];
       result = exp(std::min(50., extr1 + extr2 * e));
-	  } else {
+    } else {
       result = table[nSizeTable - 1];
     }
   } else {
-  	// Intermediate points, spline interpolation (not implemented).
-	  // Intermediate points, Newtonian interpolation
-	  result = Numerics::Divdif(table, fields, nSizeTable, e, iMeth);
-	}
-  
-	return result;
+    // Intermediate points, spline interpolation (not implemented).
+    // Intermediate points, Newtonian interpolation
+    result = Numerics::Divdif(table, fields, nSizeTable, e, intpMeth);
+  }
+
+  return result;
+
+}
+
+void
+Medium::InitParamArrays(const int eRes, const int bRes, const int aRes,
+                   std::vector<std::vector<std::vector<double> > >& tab,
+                   const double val) {
+
+  if (eRes <= 0 || bRes <= 0 || aRes <= 0) {
+    std::cerr << className << "::InitParamArrays:\n";
+    std::cerr << "    Invalid grid.\n";
+    return;
+  }
+
+  tab.resize(aRes);
+  for (int i = aRes; i--;) {
+    tab[i].resize(bRes);
+    for (int j = bRes; j--;) {
+      tab[i][j].resize(eRes);
+      for (int k = eRes; k--;) {
+        tab[i][j][k] = val;
+      }
+    }
+  }
+
+}
+        
+void
+Medium::InitParamTensor(const int eRes, const int bRes, const int aRes,
+       std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
+       const double val) {
+
+  if (eRes <= 0 || bRes <= 0 || aRes <= 0) {
+    std::cerr << className << "::InitParamArrays:\n";
+    std::cerr << "    Invalid grid.\n";
+    return;
+  }
+
+  tab.resize(6);
+  for (int l = 6; l--;) {
+    tab[l].resize(aRes);
+    for (int i = aRes; i--;) {
+      tab[l][i].resize(bRes);
+      for (int j = bRes; j--;) {
+        tab[l][i][j].resize(eRes);
+        for (int k = eRes; k--;) {
+          tab[l][i][j][k] = val;
+        }
+      }
+    }
+  }
 
 }
 

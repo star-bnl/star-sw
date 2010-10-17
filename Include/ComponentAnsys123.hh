@@ -7,10 +7,9 @@
 
 namespace Garfield {
 
-  // --------------------------------------------------------------------------
-  class ComponentAnsys123: public ComponentFieldMap { 
+class ComponentAnsys123: public ComponentFieldMap { 
 
-    RQ_OBJECT("ComponentAnsys123")
+  RQ_OBJECT("ComponentAnsys123")
     
   public:
     // Constructors

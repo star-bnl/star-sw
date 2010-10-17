@@ -5,7 +5,7 @@
 
 #include <vector>
 
-#include "Medium.hh"
+#include "MediumGas.hh"
 
 namespace Garfield {
 
@@ -131,40 +131,14 @@ extern "C" {
 
 }
 
-class MediumMagboltz86 : public Medium {
+class MediumMagboltz86 : public MediumGas {
 
   public:
     // Constructor
     MediumMagboltz86();
     // Destructor
     ~MediumMagboltz86() {}    
-
-    bool IsGas() const {return true;}
-  
-    // Set/get the gas mixture
-    bool SetComposition(const std::string gas1, const double f1, 
-                        const std::string gas2 = "", const double f2 = 0.,
-                        const std::string gas3 = "", const double f3 = 0.,
-                        const std::string gas4 = "", const double f4 = 0.,
-                        const std::string gas5 = "", const double f5 = 0., 
-                        const std::string gas6 = "", const double f6 = 0.);
-    void GetComposition(std::string& gas1, double& f1,
-                        std::string& gas2, double& f2,
-                        std::string& gas3, double& f3,
-                        std::string& gas4, double& f4,
-                        std::string& gas5, double& f5,
-                        std::string& gas6, double& f6);
-    void GetComponent(const int i, std::string& label, double& f);
-    
-    void   SetAtomicNumber(const double z);
-    double GetAtomicNumber() const;
-    void   SetAtomicWeight(const double a);
-    double GetAtomicWeight() const;
-    void   SetNumberDensity(const double n);
-    double GetNumberDensity() const;
-    void   SetMassDensity(const double rho);
-    double GetMassDensity() const;
- 
+       
     // Set/get the highest electron energy to be included 
     // in the scattering rates table
     bool   SetMaxElectronEnergy(const double e);
@@ -205,9 +179,9 @@ class MediumMagboltz86 : public Medium {
     // transfer probabilities (not compatible with de-excitation handling)
     void EnablePenningTransfer(const double r, const double lambda);
     void EnablePenningTransfer(const double r, const double lambda,
-                               const std::string gasname);
+                               std::string gasname);
     void DisablePenningTransfer();
-    void DisablePenningTransfer(const std::string gasname);
+    void DisablePenningTransfer(std::string gasname);
 
     // When enabled, the gas cross-section table is written to file
     // when loaded into memory
@@ -266,10 +240,14 @@ class MediumMagboltz86 : public Medium {
                      double& vxerr, double& vyerr, double& vzerr,
                      double& dlerr, double& dterr,
                      double& alphaerr, double& etaerr,
-                     double& alphapt, double& etapt,
-                     double& alphapterr, double& etapterr,
                      double& alphatof);
- 
+
+    // Generate a new gas table (can later be saved to file)
+    void GenerateGasTable(const int numCollisions,
+                  double eMin = 100., double eMax = 1.e5, int numEstep = 20,
+                  double bMin =   0., double bMax = 0.,   int numBstep =  1,
+                  int numAngStep = 1);
+
     void SetIonMobility(const double e, const double mu);
     bool IonVelocity(const double ex, const double ey, const double ez,
                      const double bx, const double by, const double bz,
@@ -279,17 +257,10 @@ class MediumMagboltz86 : public Medium {
 
     static const int nEnergySteps = 20000;
     static const int nEnergyStepsGamma = 1000;
-    static const int nMaxGases = 6;
     static const int nMaxInelasticTerms = 220;
     static const int nMaxLevels = 512;
     static const int nCsTypes = 6;
-   
-    // Gas mixture
-    int gas[nMaxGases];
-    double fraction[nMaxGases];
-    double atWeight[nMaxGases];
-    double atNum[nMaxGases];
-   
+      
     // Energy spacing of collision rate tables
     double eFinal, eStep;
     bool useAutoAdjust;
@@ -334,15 +305,9 @@ class MediumMagboltz86 : public Medium {
     std::vector<int> nCollisionsDetailed;
 
     // Penning transfer
-    // Flag enabling/disabling Penning transfer
-    bool usePenning;
-    // Penning transfer probability
-    double rPenningGlobal;
-    double rPenningGas[nMaxGases];
+    // Penning transfer probability (by level)
     double rPenning[nMaxLevels];
-    // Mean distance of Penning ionization
-    double lambdaPenningGlobal;
-    double lambdaPenningGas[nMaxGases];
+    // Mean distance of Penning ionisation (by level)
     double lambdaPenning[nMaxLevels];
     // Number of Penning ionisations
     int nPenning;
@@ -422,9 +387,7 @@ class MediumMagboltz86 : public Medium {
     std::vector<double> ionMobilityGrid;
     std::vector<double> ionMobilityValues;
 
-    bool GetGasNumber(std::string gasname, int& number) const;
-    bool GetGasInfo(const int number, std::string& gasname, 
-                    double& a, double& z) const;
+    bool GetGasNumberMagboltz(const std::string input, int& number) const;
     bool Mixer();
     void ComputeAngularCut(double parIn, double& cut, double &parOut);
     void ComputeDeexcitationTable();

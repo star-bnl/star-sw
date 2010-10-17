@@ -9,6 +9,7 @@
 #pragma link C++ class Garfield::AvalancheMC;
 
 #pragma link C++ class Garfield::Medium;
+#pragma link C++ class Garfield::MediumGas;
 #pragma link C++ class Garfield::MediumMagboltz86;
 #pragma link C++ class Garfield::MediumSilicon;
 #pragma link C++ class Garfield::OpticalData;
