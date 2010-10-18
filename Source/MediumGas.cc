@@ -970,13 +970,43 @@ MediumGas::LoadGasFile(const std::string filename) {
     }
   }
 
-  // Multiply the E/p values by the pressure.
-  for (int i = eFieldRes; i--;) {
-    eFields[i] *= pressure;
-  }
   // Set the reference pressure and temperature.
   pressureTable = pressure;
   temperatureTable = temperature;
+
+  // Multiply the E/p values by the pressure.
+  for (int i = eFieldRes; i--;) {
+    eFields[i] *= pressureTable;
+  }
+  // Scale the parameters.
+  const double sqrtPressure = sqrt(pressureTable);
+  const double logPressure = log(pressureTable);
+  for (int i = eFieldRes; i--;) {
+    for (int j = angRes; j--;) {
+      for (int k = bFieldRes; k--;) {
+        if (hasElectronDiffLong) {
+          tabElectronDiffLong[j][k][i] /= sqrtPressure;
+        }
+        if (hasElectronDiffTrans) {
+          tabElectronDiffTrans[j][k][i] /= sqrtPressure;
+        }
+        if (hasElectronDiffTens) {
+          for (int l = 6; l--;) {
+            tabElectronDiffTens[l][j][k][i] /= pressureTable;
+          }
+        }
+        if (hasElectronTownsend) {
+          tabElectronTownsend[j][k][i] += logPressure;
+        }
+        if (hasElectronAttachment) {
+          tabElectronAttachment[j][k][i] += logPressure;
+        }
+        if (hasIonDissociation) {
+          tabIonDissociation[j][k][i] += logPressure;
+        }
+      }
+    }
+  }
 
   // Decode the extrapolation and interpolation tables.
   extrHighVelocity = hExtrap[0];
@@ -1159,8 +1189,11 @@ MediumGas::WriteGasFile(const std::string filename) {
                << ionisationList[i].label  << "\t"
                << ionisationList[i].energy << "\n";
   }
-  outputFile << "The gas tables follow:\n";
 
+  const double sqrtPressure = sqrt(pressureTable);
+  const double logPressure = log(pressureTable);
+
+  outputFile << "The gas tables follow:\n";
   for (int i = 0; i < eFieldRes; i++) {
     for (int j = 0; j < angRes; j++) {
       for (int k = 0; k < bFieldRes; k++) {
@@ -1173,21 +1206,28 @@ MediumGas::WriteGasFile(const std::string filename) {
         double dl = 0., dt = 0.;
         if (hasElectronDiffLong)  dl = tabElectronDiffLong[j][k][i];
         if (hasElectronDiffTrans) dt = tabElectronDiffTrans[j][k][i];
-        double alpha = 0., alpha0 = 0., eta = 0.;
+        dl *= sqrtPressure; dt *= sqrtPressure;
+        double alpha = -30., alpha0 = -30., eta = -30.;
         if (hasElectronTownsend) {
           alpha = tabElectronTownsend[j][k][i];
           alpha0 = tabTownsendNoPenning[j][k][i];
+          alpha -= logPressure;
+          alpha0 -= logPressure;
         }
         if (hasElectronAttachment) {
           eta = tabElectronAttachment[j][k][i];
+          eta -= logPressure;
         }
         double muIon = 0.;
         if (hasIonMobility) muIon = tabIonMobility[j][k][i];
         // Convert from cm2 / (V ns) to cm2 / (V us).
         muIon *= 1.e3;
         double lorentzAngle = 0.;
-        double dissIon = 0.;
-        if (hasIonDissociation) dissIon = tabIonDissociation[j][k][i];
+        double dissIon = -30.;
+        if (hasIonDissociation) {
+          dissIon = tabIonDissociation[j][k][i];
+          dissIon -= logPressure;
+        }
         // Write the values to file.
         outputFile << ve << " " << vb << " " << vexb << " ";
         outputFile << dl << " " << dt << " ";
@@ -1197,6 +1237,7 @@ MediumGas::WriteGasFile(const std::string filename) {
           double diff = 0.;
           if (hasElectronDiffTens) {
             diff = tabElectronDiffTens[l][j][k][i];
+            diff *= pressureTable;
           }
           outputFile << diff << " ";
         }
