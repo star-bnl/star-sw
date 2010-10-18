@@ -2,6 +2,7 @@
 #define G_MEDIUM_GAS_H
 
 #include <vector>
+#include <cmath>
 
 #include "Medium.hh"
 
@@ -75,6 +76,10 @@ class MediumGas : public Medium {
     double lambdaPenningGlobal;
     double lambdaPenningGas[nMaxGases];
 
+    // Pressure and temperature at which the transport parameter
+    // table was calculated
+    double pressureTable, temperatureTable;
+
     // Table of Townsend coefficients without Penning transfer
     std::vector<std::vector<std::vector<double> > > tabTownsendNoPenning;
     
@@ -109,6 +114,20 @@ class MediumGas : public Medium {
     bool GetGasName(const int gasnumber, std::string& gasname);
     bool GetGasName(std::string input, std::string& gasname) const;
     bool GetGasNumberGasFile(const std::string input, int& number) const;
+
+    // Scaling laws.
+    double ScaleElectricField(const double e) {
+      return e * pressureTable / pressure;
+    }
+    double ScaleDiffusion(const double d) {
+      return d * sqrt(pressureTable / pressure);
+    }
+    double ScaleTownsend(const double alpha) {
+      return alpha * pressure / pressureTable;
+    }
+    double ScaleAttachment(const double eta) {
+      return eta * pressure / pressureTable;
+    }
 
 };
 

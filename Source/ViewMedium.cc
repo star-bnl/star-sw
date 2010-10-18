@@ -16,6 +16,7 @@ ViewMedium::ViewMedium() :
   canvas(0), hasExternalCanvas(false),
   medium(0),
   eMin(0.), eMax(1000.), bMin(0.), bMax(1.e5),
+  vMin(0.), vMax(0.),
   nFunctions(0) {
   
   functions.clear();
@@ -81,11 +82,31 @@ ViewMedium::SetMagneticFieldRange(const double bmin, const double bmax) {
 
 }
 
+void
+ViewMedium::SetVelocityRange(const double vmin, const double vmax) {
+
+  if (vmin >= vmax || vmin < 0.) {
+    std::cerr << "ViewMedium::SetVelocityRange:\n";
+    std::cerr << "    Incorrect range.\n";
+    return;
+  }
+
+  vMin = vmin; vMax = vmax;
+
+}
+
+void
+ViewMedium::SetVelocityRange() {
+
+  vMin = vMax = 0.;
+
+}
+
 void 
 ViewMedium::PlotElectronVelocity(const bool keep) {
 
   SetupCanvas();
-  AddFunction(eMin, eMax, keep,
+  AddFunction(eMin, eMax, vMin, vMax, keep,
               "electric field [V/cm]", "drift velocity [cm/ns]", 0);
   canvas->Update();
   
@@ -95,7 +116,7 @@ void
 ViewMedium::PlotHoleVelocity(const bool keep) {
 
   SetupCanvas();
-  AddFunction(eMin, eMax, keep,
+  AddFunction(eMin, eMax, vMin, vMax, keep,
               "electric field [V/cm]", "drift velocity [cm/ns]", 10);
   canvas->Update();
 
@@ -105,7 +126,7 @@ void
 ViewMedium::PlotIonVelocity(const bool keep) {
 
   SetupCanvas();
-  AddFunction(eMin, eMax, keep,
+  AddFunction(eMin, eMax, vMin, vMax, keep,
               "electric field [V/cm]", "drift velocity [cm/ns]", 20);
   canvas->Update();
 
@@ -115,7 +136,7 @@ void
 ViewMedium::PlotElectronTownsend(const bool keep) {
 
   SetupCanvas();
-  AddFunction(eMin, eMax, keep,
+  AddFunction(eMin, eMax, 0., 0., keep,
               "electric field [V/cm]", "Townsend coefficient [1/cm]", 3);
   canvas->Update();
 
@@ -125,7 +146,7 @@ void
 ViewMedium::PlotHoleTownsend(const bool keep) {
 
   SetupCanvas();
-  AddFunction(eMin, eMax, keep,
+  AddFunction(eMin, eMax, 0., 0., keep,
               "electric field [V/cm]", "Townsend coefficient [1/cm]", 13);
   canvas->Update();
 
@@ -135,7 +156,7 @@ void
 ViewMedium::PlotElectronAttachment(const bool keep) {
 
   SetupCanvas();
-  AddFunction(eMin, eMax, keep,
+  AddFunction(eMin, eMax, 0., 0., keep,
               "electric field [V/cm]", "Attachment coefficient [1/cm]", 4);
   canvas->Update();
 
@@ -145,7 +166,7 @@ void
 ViewMedium::PlotHoleAttachment(const bool keep) {
 
   SetupCanvas();
-  AddFunction(eMin, eMax, keep,
+  AddFunction(eMin, eMax, 0., 0., keep,
               "electric field [V/cm]", "Attachment coefficient [1/cm]", 14);
   canvas->Update();
   
@@ -164,7 +185,9 @@ ViewMedium::SetupCanvas() {
 }
 
 void
-ViewMedium::AddFunction(const double xmin, const double xmax, const bool keep,
+ViewMedium::AddFunction(const double xmin, const double xmax, 
+                        const double ymin, const double ymax,
+                        const bool keep,
                         const std::string xlabel, const std::string ylabel,
                         const int type) {
 
@@ -197,6 +220,10 @@ ViewMedium::AddFunction(const double xmin, const double xmax, const bool keep,
   const std::string title = medium->GetName() + ";" + 
                             xlabel + ";" + ylabel;
   functions.back().SetRange(xmin, xmax);
+  if ((fabs(ymax - ymin) > 0.)) {
+    functions.back().SetMinimum(ymin);
+    functions.back().SetMaximum(ymax);
+  }
   functions.back().GetXaxis()->SetTitle(xlabel.c_str());
   functions.back().GetYaxis()->SetTitle(ylabel.c_str());
   functions.back().SetTitle(title.c_str());

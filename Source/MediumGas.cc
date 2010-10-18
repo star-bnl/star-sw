@@ -9,7 +9,8 @@ namespace Garfield{
 
 MediumGas::MediumGas() :
   Medium(),
-  usePenning(false), rPenningGlobal(0.), lambdaPenningGlobal(0.), 
+  usePenning(false), rPenningGlobal(0.), lambdaPenningGlobal(0.),
+  pressureTable(pressure), temperatureTable(temperature), 
   hasExcRates(false), hasIonRates(false),
   nExcListElements(0), nIonListElements(0),
   extrLowExcRates(0), extrHighExcRates(1),
@@ -973,6 +974,9 @@ MediumGas::LoadGasFile(const std::string filename) {
   for (int i = eFieldRes; i--;) {
     eFields[i] *= pressure;
   }
+  // Set the reference pressure and temperature.
+  pressureTable = pressure;
+  temperatureTable = temperature;
 
   // Decode the extrapolation and interpolation tables.
   extrHighVelocity = hExtrap[0];
@@ -1104,8 +1108,8 @@ MediumGas::WriteGasFile(const std::string filename) {
   outputFile << "Version: \t" << versionNumber << "\n";
   outputFile << "GASOK bits:\t" << gasBits << "\n";
   outputFile << "Identifier:\t" << name 
-             << ", p = " << pressure / AtmosphericPressure 
-             << " atm, T = " << temperature << " K\n";
+             << ", p = " << pressureTable / AtmosphericPressure 
+             << " atm, T = " << temperatureTable << " K\n";
   outputFile << "Dimension:\t";
   if (map2d) {
     outputFile << "T\t";

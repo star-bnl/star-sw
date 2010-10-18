@@ -168,6 +168,7 @@ class Medium {
                          double& diss);    
 
     // Select extrapolation method for fields below/above the table range.
+    // Options are "constant"/"linear"/"exponential".
     void SetExtrapolationMethodVelocity(const std::string extrLow,
                                         const std::string extrHigh);
     void SetExtrapolationMethodDiffusion(const std::string extrLow,
@@ -181,6 +182,7 @@ class Medium {
     void SetExtrapolationMethodIonDissociation(const std::string extrLow,
                                                const std::string extrHigh);
 
+    // Set the degree of polynomial interpolation (usually 2).
     void SetInterpolationMethodVelocity(const int intrp);
     void SetInterpolationMethodDiffusion(const int intrp);
     void SetInterpolationMethodTownsend(const int intrp);
@@ -334,6 +336,18 @@ class Medium {
                          const int aRes, const int tRes,
          std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
          const double val);
+
+    // Scaling of fields and transport parameters.
+    virtual
+    double ScaleElectricField(const double e) {return e;}
+    virtual
+    double ScaleVelocity(const double v) {return v;}
+    virtual
+    double ScaleDiffusion(const double d) {return d;}
+    virtual
+    double ScaleTownsend(const double alpha) {return alpha;}
+    virtual
+    double ScaleAttachment(const double eta) {return eta;}
 
 };
 

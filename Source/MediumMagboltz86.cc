@@ -2542,6 +2542,10 @@ MediumMagboltz86::GenerateGasTable(const int numCollisions,
     bAngles[i] = i * angStepSize;
   }
 
+  // Set the reference pressure and temperature.
+  pressureTable = pressure;
+  temperatureTable = temperature;
+
   // Initialize the parameter arrays.
   InitParamArrays(nEfields, nBfields, nAngles, tabElectronVelocityE, 0.);
   InitParamArrays(nEfields, nBfields, nAngles, tabElectronVelocityB, 0.);
@@ -2629,7 +2633,7 @@ MediumMagboltz86::GenerateGasTable(const int numCollisions,
         if (eta > 0.) {
           tabElectronAttachment[j][k][i] = log(eta);
         } else {
-          tabElectronAttachment[j][k][i] = -30;
+          tabElectronAttachment[j][k][i] = -30.;
         }
         curB += bStepSize;
       }

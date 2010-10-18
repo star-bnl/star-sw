@@ -28,6 +28,8 @@ class ViewMedium {
     
     void SetElectricFieldRange(const double emin, const double emax);
     void SetMagneticFieldRange(const double bmin, const double bmax); 
+    void SetVelocityRange(const double vmin, const double vmax);
+    void SetVelocityRange();
 
     void PlotElectronVelocity(const bool keep = false);
     void PlotHoleVelocity(const bool keep = false);
@@ -55,13 +57,16 @@ class ViewMedium {
     // Ranges 
     double eMin, eMax;
     double bMin, bMax;
+    double vMin, vMax;
 
     // Functions
     std::vector<TF1> functions;
     int nFunctions;
     
     void SetupCanvas();
-    void AddFunction(const double xmin, const double xmax, const bool keep, 
+    void AddFunction(const double xmin, const double xmax, 
+                     const double ymin, const double ymax,
+                     const bool keep, 
                      const std::string xlabel, const std::string ylabel,
                      const int type);
  
