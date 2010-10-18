@@ -29,10 +29,10 @@ Medium::Medium() :
   // Initialise the transport tables.
   nEfields = 0;
   nBfields = 1;
-  nAngles = 1;
+  nAngles  = 1;
   
   eFields.clear();
-  bFields.clear();
+  bFields.clear(); bFields.resize(1); bFields[0] = 0.;
   bAngles.clear(); bAngles.resize(1); bAngles[0] = 0.;
  
   hasElectronVelocityE   = false; tabElectronVelocityE.clear();
@@ -1835,18 +1835,19 @@ Medium::InitParamArrays(const int eRes, const int bRes, const int aRes,
 }
         
 void
-Medium::InitParamTensor(const int eRes, const int bRes, const int aRes,
+Medium::InitParamTensor(const int eRes, const int bRes, 
+                        const int aRes, const int tRes,
        std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
        const double val) {
 
-  if (eRes <= 0 || bRes <= 0 || aRes <= 0) {
+  if (eRes <= 0 || bRes <= 0 || aRes <= 0 || tRes <= 0) {
     std::cerr << className << "::InitParamArrays:\n";
     std::cerr << "    Invalid grid.\n";
     return;
   }
 
-  tab.resize(6);
-  for (int l = 6; l--;) {
+  tab.resize(tRes);
+  for (int l = tRes; l--;) {
     tab[l].resize(aRes);
     for (int i = aRes; i--;) {
       tab[l][i].resize(bRes);

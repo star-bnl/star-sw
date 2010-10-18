@@ -244,14 +244,9 @@ class MediumMagboltz86 : public MediumGas {
 
     // Generate a new gas table (can later be saved to file)
     void GenerateGasTable(const int numCollisions,
-                  double eMin = 100., double eMax = 1.e5, int numEstep = 20,
-                  double bMin =   0., double bMax = 0.,   int numBstep =  1,
-                  int numAngStep = 1);
-
-    void SetIonMobility(const double e, const double mu);
-    bool IonVelocity(const double ex, const double ey, const double ez,
-                     const double bx, const double by, const double bz,
-                     double& vx, double& vy, double& vz);
+                  double eMin = 100., double eMax = 1.e5, int numE = 20,
+                  double bMin =   0., double bMax = 0.,   int numB =  1,
+                  int numAng = 1);
 
   private:
 

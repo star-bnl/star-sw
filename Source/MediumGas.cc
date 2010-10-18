@@ -572,7 +572,7 @@ MediumGas::LoadGasFile(const std::string filename) {
   }
   if (gasBits[10] == 'T') {
     hasElectronDiffTens = true;
-    InitParamTensor(eFieldRes, bFieldRes, angRes, 
+    InitParamTensor(eFieldRes, bFieldRes, angRes, 6, 
                     tabElectronDiffTens, 0.); 
   } else {
     hasElectronDiffTens = false;
@@ -589,15 +589,17 @@ MediumGas::LoadGasFile(const std::string filename) {
   // gasBits[12]: SRIM; skipped
   // gasBits[13]: HEED; skipped
   if (gasBits[14] == 'T') {
-    // hasExcRates = true;
-    // Initialize the array.
+    hasExcRates = true;
+    InitParamTensor(eFieldRes, bFieldRes, angRes, nExcListElements,
+                    tabExcRates, 0.);
   } else {
     hasExcRates = false;
     tabExcRates.clear();
   }
   if (gasBits[15] == 'T') {
-    // hasIonRates = true;
-    // Initialize the array.
+    hasIonRates = true;
+    InitParamTensor(eFieldRes, bFieldRes, angRes, nIonListElements,
+                    tabIonRates, 0.);
   } else {
     hasIonRates = false;
     tabIonRates.clear();
@@ -738,12 +740,12 @@ MediumGas::LoadGasFile(const std::string filename) {
           // Excitation rates
           for (int l = 0; l < nExcListElements; l++) {
             gasfile >> rate;
-            if (hasExcRates) tabExcRates[j][k][i][l] = rate;
+            if (hasExcRates) tabExcRates[l][j][k][i] = rate;
           }
           // Ionization rates
           for (int l = 0; l < nIonListElements; l++) {
             gasfile >> rate;
-            if (hasIonRates) tabIonRates[j][k][i][l] = rate;
+            if (hasIonRates) tabIonRates[l][j][k][i] = rate;
           }
         }
       }
@@ -793,13 +795,13 @@ MediumGas::LoadGasFile(const std::string filename) {
         // Excitation rates
         for (int j = 0; j < nExcListElements; j++) {
           gasfile >> rate;
-          if (hasExcRates) tabExcRates[0][0][i][j] = rate;
+          if (hasExcRates) tabExcRates[j][0][0][i] = rate;
         }
         for( int j = 0; j < nExcListElements; j++) gasfile >> waste;
         // Ionization rates
         for (int j = 0; j < nIonListElements; j++) {
           gasfile >> rate;
-          if (hasIonRates) tabIonRates[0][0][i][j] = rate;
+          if (hasIonRates) tabIonRates[j][0][0][i] = rate;
         }
         for (int j = 0; j < nIonListElements; j++) gasfile >> waste;
       }
@@ -842,12 +844,12 @@ MediumGas::LoadGasFile(const std::string filename) {
         // Excitation rates
         for (int j = 0; j < nExcListElements; j++) {
           gasfile >> rate;
-          if (hasExcRates) tabExcRates[0][0][i][j] = rate;
+          if (hasExcRates) tabExcRates[j][0][0][i] = rate;
         }
         // Ionization rates
         for (int j = 0; j < nIonListElements; j++) {
           gasfile >> rate;
-          if (hasIonRates) tabIonRates[0][0][i][j] = rate;
+          if (hasIonRates) tabIonRates[j][0][0][i] = rate;
         }
       }
     }
@@ -1101,7 +1103,9 @@ MediumGas::WriteGasFile(const std::string filename) {
   const int versionNumber = 11;
   outputFile << "Version: \t" << versionNumber << "\n";
   outputFile << "GASOK bits:\t" << gasBits << "\n";
-  outputFile << "Identifier:\t" << name << "\n";
+  outputFile << "Identifier:\t" << name 
+             << ", p = " << pressure / AtmosphericPressure 
+             << " atm, T = " << temperature << " K\n";
   outputFile << "Dimension:\t";
   if (map2d) {
     outputFile << "T\t";
@@ -1194,12 +1198,12 @@ MediumGas::WriteGasFile(const std::string filename) {
         }
         if (hasExcRates && nExcListElements > 0) {
           for (int l = 0; l < nExcListElements; l++) {
-            outputFile << tabExcRates[j][k][i][l] << " ";
+            outputFile << tabExcRates[l][j][k][i] << " ";
           }
         }
         if (hasIonRates && nIonListElements > 0) {
           for (int l = 0; l < nIonListElements; l++) {
-            outputFile << tabIonRates[j][k][i][l] << " ";
+            outputFile << tabIonRates[l][j][k][i] << " ";
           }
         }
       }
@@ -1291,31 +1295,36 @@ MediumGas::PrintGas() {
     std::cout << ")";
   }
   std::cout << "\n";
-  std::cout << "    Pressure: " << pressure << " Torr\n";
+  std::cout << "    Pressure:    " << pressure << " Torr\n";
   std::cout << "    Temperature: " << temperature << " K\n";
-  if (nEfields > 0) {
-    std::cout << "    Electric field range: " << eFields[0] 
+  if (nEfields > 1) {
+    std::cout << "    Electric field range:  " << eFields[0] 
               << " - " << eFields[nEfields - 1] 
-              << " V/cm in " << nEfields << " steps.\n";
+              << " V/cm in " << nEfields  - 1 << " steps.\n";
+  } else if (nEfields == 1) {
+    std::cout << "    Electric field:        " << eFields[0] << " V/cm\n";
   } else {
     std::cout << "    Electric field range: not set\n";
   }
-  if (map2d) {
-    if (nBfields > 0) {
-      std::cout << "    Magnetic field range: " << bFields[0]
-                << " - " << bFields[nBfields - 1] 
-                << " in " << nBfields << " steps.\n";
-    } else {
-      std::cout << "    Magnetic field range: not set\n";
-    }
-    if (nAngles > 0) {    
-      std::cout << "    Angular range:         " << bAngles[0]
-                << " - " << bAngles[nAngles - 1]
-                << " in " << nAngles << " steps.\n";
-    } else {
-      std::cout << "    Angular range: not set\n";
-    }
+  if (nBfields > 1) {
+    std::cout << "    Magnetic field range:  " << bFields[0]
+              << " - " << bFields[nBfields - 1] 
+              << " in " << nBfields - 1 << " steps.\n";
+  } else if (nBfields == 1) {
+    std::cout << "    Magnetic field:        " << bFields[0] << "\n";
+  } else {
+    std::cout << "    Magnetic field range: not set\n";
   }
+  if (nAngles > 1) {
+    std::cout << "    Angular range:         " << bAngles[0]
+              << " - " << bAngles[nAngles - 1]
+              << " in " << nAngles - 1 << " steps.\n";
+  } else if (nAngles == 1) {
+    std::cout << "    Angle between E and B: " << bAngles[0] << "\n";
+  } else {
+    std::cout << "    Angular range: not set\n";
+  }
+
   std::cout << "    Available electron transport data:\n";
   if (hasElectronVelocityE) {
     std::cout << "      Velocity along E\n";
@@ -1328,7 +1337,7 @@ MediumGas::PrintGas() {
   }
   if (hasElectronVelocityE || hasElectronVelocityB || 
       hasElectronVelocityExB) {
-    std::cout << "        Low field extrapolation: ";
+    std::cout << "        Low field extrapolation:  ";
     if (extrLowVelocity == 0) std::cout << " constant\n";
     else if (extrLowVelocity == 1) std::cout << " linear\n";
     else if (extrLowVelocity == 2) std::cout << " exponential\n";
@@ -1351,7 +1360,7 @@ MediumGas::PrintGas() {
   }
   if (hasElectronDiffLong || hasElectronDiffTrans ||
       hasElectronDiffTens) {
-    std::cout << "        Low field extrapolation: ";
+    std::cout << "        Low field extrapolation:  ";
     if (extrLowDiffusion == 0) std::cout << " constant\n";
     else if (extrLowDiffusion == 1) std::cout << " linear\n";
     else if (extrLowDiffusion == 2) std::cout << " exponential\n";
@@ -1365,7 +1374,7 @@ MediumGas::PrintGas() {
   }
   if (hasElectronTownsend) {
     std::cout << "      Townsend coefficient\n";
-    std::cout << "        Low field extrapolation: ";
+    std::cout << "        Low field extrapolation:  ";
     if (extrLowTownsend == 0) std::cout << " constant\n";
     else if (extrLowTownsend == 1) std::cout << " linear\n";
     else if (extrLowTownsend == 2) std::cout << " exponential\n";
@@ -1379,7 +1388,7 @@ MediumGas::PrintGas() {
   }
   if (hasElectronAttachment) {
     std::cout << "      Attachment coefficient\n";
-    std::cout << "        Low field extrapolation: ";
+    std::cout << "        Low field extrapolation:  ";
     if (extrLowAttachment == 0) std::cout << " constant\n";
     else if (extrLowAttachment == 1) std::cout << " linear\n";
     else if (extrLowAttachment == 2) std::cout << " exponential\n";
@@ -1393,7 +1402,7 @@ MediumGas::PrintGas() {
   }
   if (hasExcRates) {
     std::cout << "      Excitation rates\n";
-    std::cout << "        Low field extrapolation: ";
+    std::cout << "        Low field extrapolation:  ";
     if (extrLowExcRates == 0) std::cout << " constant\n";
     else if (extrLowExcRates == 1) std::cout << " linear\n";
     else if (extrLowExcRates == 2) std::cout << " exponential\n";
@@ -1407,7 +1416,7 @@ MediumGas::PrintGas() {
   }
   if (hasIonRates) {
     std::cout << "      Ionisation rates\n";
-    std::cout << "        Low field extrapolation: ";
+    std::cout << "        Low field extrapolation:  ";
     if (extrLowIonRates == 0) std::cout << " constant\n";
     else if (extrLowIonRates == 1) std::cout << " linear\n";
     else if (extrLowIonRates == 2) std::cout << " exponential\n";
@@ -1425,13 +1434,13 @@ MediumGas::PrintGas() {
       !hasElectronDiffTens && 
       !hasElectronTownsend && !hasElectronAttachment &&
       !hasExcRates && !hasIonRates) {
-    std::cout << "      None.\n";
+    std::cout << "      none\n";
   }
   
   std::cout << "    Available ion transport data:\n";
   if (hasIonMobility) {
     std::cout << "      Mobility\n";
-    std::cout << "        Low field extrapolation: ";
+    std::cout << "        Low field extrapolation:  ";
     if (extrLowMobility == 0) std::cout << " constant\n";
     else if (extrLowMobility == 1) std::cout << " linear\n";
     else if (extrLowMobility == 2) std::cout << " exponential\n";
@@ -1450,7 +1459,7 @@ MediumGas::PrintGas() {
     std::cout << "      Transverse diffusion coefficient\n";
   }
   if (hasIonDiffLong || hasIonDiffTrans) {
-    std::cout << "        Low field extrapolation: ";
+    std::cout << "        Low field extrapolation:  ";
     if (extrLowDiffusion == 0) std::cout << " constant\n";
     else if (extrLowDiffusion == 1) std::cout << " linear\n";
     else if (extrLowDiffusion == 2) std::cout << " exponential\n";
@@ -1464,7 +1473,7 @@ MediumGas::PrintGas() {
   }
   if (hasIonDissociation) {
     std::cout << "      Dissociation coefficient\n";
-    std::cout << "        Low field extrapolation: ";
+    std::cout << "        Low field extrapolation:  ";
     if (extrLowDissociation == 0) std::cout << " constant\n";
     else if (extrLowDissociation == 1) std::cout << " linear\n";
     else if (extrLowDissociation == 2) std::cout << " exponential\n";

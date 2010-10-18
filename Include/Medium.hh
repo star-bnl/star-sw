@@ -330,7 +330,8 @@ class Medium {
     void InitParamArrays(const int eRes, const int bRes, const int aRes,
          std::vector<std::vector<std::vector<double> > >& tab, 
          const double val);
-    void InitParamTensor(const int eRes, const int bRes, const int aRes,
+    void InitParamTensor(const int eRes, const int bRes, 
+                         const int aRes, const int tRes,
          std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
          const double val);
 

@@ -825,114 +825,6 @@ MediumMagboltz86::GetNumberOfPhotonCollisions(
 
 }
 
-void
-MediumMagboltz86::SetIonMobility(const double e, const double mu) {
-
-  if (mu < Small) {
-    std::cerr << className << "::SetIonMobility:\n";
-    std::cerr << "    Ion mobility must be greater than zero.\n";
-    return;
-  }
-
-  if (e < 0.) {
-    std::cerr << className << "::SetIonMobility:\n";
-    std::cerr << "    Energy must be greater than zero.\n";
-    return;
-  }
-
-  if (nIonMobilities == 0) {
-    ionMobilityGrid.push_back(e);
-    ionMobilityValues.push_back(mu);
-    ++nIonMobilities;
-    return;
-  }
-
-  if (e > ionMobilityGrid.back()) {
-    ionMobilityGrid.push_back(e);
-    ionMobilityValues.push_back(mu);
-    ++nIonMobilities;
-    return;
-  }
-
-  ionMobilityGrid.resize(nIonMobilities + 1);
-  for (int i = nIonMobilities; i--;) {
-    if (ionMobilityGrid[i] > e) {
-      ionMobilityGrid[i + 1] = ionMobilityGrid[i];
-      ionMobilityValues[i + 1] = ionMobilityValues[i];
-      if (i == 0) {
-        ionMobilityGrid[i] = e;
-        ionMobilityValues[i] = mu;
-      }
-    } else if (ionMobilityGrid[i] < e) {
-      ionMobilityGrid[i + 1] = e;
-      ionMobilityValues[i + 1] = mu;
-      break;
-    } else {
-      // Replace the previous value
-      std::cout << className << "::SetIonMobility:\n";
-      std::cout << "    Ion mobility at E = " << e << " was " 
-                << ionMobilityValues[i] << ",\n";
-      std::cout << "    Replaced by " << mu << ".\n";
-      ionMobilityValues[i] = mu;
-      break;
-    }
-  }
-  ++nIonMobilities;
-
-}
-
-bool
-MediumMagboltz86::IonVelocity(const double ex, const double ey, const double ez,
-                              const double bx, const double by, const double bz,
-                              double& vx, double& vy, double& vz) {
-
-  if (nIonMobilities <= 0) {
-    vx = vy = vz = 0.;
-    return false;
-  }
-
-  const double e = sqrt(ex * ex + ey * ey + ez * ez);
-  if (nIonMobilities == 1 || e <= ionMobilityGrid[0]) {
-    vx = ionMobilityValues[0] * ex;
-    vy = ionMobilityValues[0] * ey;
-    vz = ionMobilityValues[0] * ez;
-    return true;
-  }
-
-  if (e >= ionMobilityGrid[nIonMobilities - 1]) {
-    const double a2 = log(ionMobilityValues[nIonMobilities - 1] / 
-                          ionMobilityValues[nIonMobilities - 2]) /
-                      (ionMobilityGrid[nIonMobilities - 1] - 
-                       ionMobilityGrid[nIonMobilities - 2]);
-    const double a1 = log(ionMobilityValues[nIonMobilities - 1]) - 
-                      a2 * ionMobilityGrid[nIonMobilities - 1];
-    return exp(a1 + a2 * e);
-  }
-
-  int iLow = 0;
-  int iUp  = nIonMobilities - 1;
-  int iMid;
-  while (iUp - iLow > 1) {
-    iMid = (iLow + iUp) >> 1;
-    if (e < ionMobilityGrid[iMid]) {
-      iUp = iMid;
-    } else {
-      iLow = iMid;
-    }
-  }
-
-  double mu = ionMobilityValues[iLow] + (e - ionMobilityGrid[iLow]) * 
-              (ionMobilityValues[iUp] - ionMobilityValues[iLow]) / 
-              (ionMobilityGrid[iUp] - ionMobilityGrid[iLow]);
-  const double b = sqrt(bx * bx + by * by + bz * bz);
-  if (b > Small) {
-    // TODO: Laue-Langevin?
-  }
-  vx = mu * ex; vy = mu * ey; vz = mu * ez;
-  return true;
-
-}
-
 bool 
 MediumMagboltz86::GetGasNumberMagboltz(const std::string input, int& number) const {
 
@@ -2583,14 +2475,14 @@ MediumMagboltz86::RunMagboltz(const double e,
 
 void 
 MediumMagboltz86::GenerateGasTable(const int numCollisions,
-                   double eMin, double eMax, int numEStep,
-                   double bMin, double bMax, int numBStep,
-                   int numAngStep) {
+                   double eMin, double eMax, int numE,
+                   double bMin, double bMax, int numB,
+                   int numAng) {
 
   // Amount to change B, E by 
   double eStepSize, bStepSize;
 
-  if (numEStep <= 0) {
+  if (numE <= 0) {
     std::cerr << className << "::GenerateGasTable:\n";
     std::cerr << "    Number of E-fields must be > 0.\n";
     return;
@@ -2604,9 +2496,10 @@ MediumMagboltz86::GenerateGasTable(const int numCollisions,
     eMin = eMax;
     eMax = eStepSize;
   }
-  eStepSize = (eMax - eMin) / double(numEStep);
+  eStepSize = 0.;
+  if (numE > 1) eStepSize = (eMax - eMin) / (numE - 1.);
 
-  if (numBStep <= 0) {
+  if (numB <= 0) {
     std::cerr << className << "::GenerateGasTable:\n";
     std::cerr << "    Number of B-fields must be > 0.\n";
     return;
@@ -2618,20 +2511,22 @@ MediumMagboltz86::GenerateGasTable(const int numCollisions,
     bMin = bMax;
     bMax = bStepSize;
   }
-  bStepSize = (bMax - bMin) / double(numBStep);
+  bStepSize = 0.;
+  if (numB > 1) bStepSize = (bMax - bMin) / (numB - 1.);
 
-  if (numAngStep <= 0) {
+  if (numAng <= 0) {
     std::cerr << className << "GenerateGasTable:\n";
     std::cerr << "    Number of angles must be > 0.\n";
     return;
   }
-  double angStepSize = HalfPi / numAngStep;
   double angMin = 0.;
+  double angStepSize = 0.;
+  if (numAng > 1) angStepSize = HalfPi / (numAng - 1.);
   
   // Reset the field grids.
-  nEfields = numEStep;
-  nBfields = numBStep;
-  nAngles = numAngStep;
+  nEfields = numE;
+  nBfields = numB;
+  nAngles = numAng;
 
   eFields.resize(nEfields);
   bFields.resize(nBfields);
@@ -2657,6 +2552,9 @@ MediumMagboltz86::GenerateGasTable(const int numCollisions,
   InitParamArrays(nEfields, nBfields, nAngles, tabTownsendNoPenning, -30.);
   InitParamArrays(nEfields, nBfields, nAngles, tabElectronAttachment, -30.);
 
+  hasElectronDiffTens = false;
+  tabElectronDiffTens.clear();
+
   hasElectronVelocityE = true;
   hasElectronVelocityB = true;
   hasElectronVelocityExB = true;
@@ -2666,7 +2564,13 @@ MediumMagboltz86::GenerateGasTable(const int numCollisions,
   hasElectronAttachment = true;
 
   hasExcRates = false;
+  tabExcRates.clear();
+  excitationList.clear();
+  nExcListElements = 0;
   hasIonRates = false;
+  tabIonRates.clear();
+  ionisationList.clear();
+  nIonListElements = 0;
 
   hasIonMobility = false;
   hasIonDissociation = false;
@@ -2692,11 +2596,11 @@ MediumMagboltz86::GenerateGasTable(const int numCollisions,
   // if (debug) verbose = true;
   // Run through the grid of E- and B-fields and angles.
   double curE = eMin;
-  for (int i = 0; i < numEStep; i++) {
+  for (int i = 0; i < numE; i++) {
     double curAng = angMin;
-    for (int j = 0; j < numAngStep; j++) {
+    for (int j = 0; j < numAng; j++) {
       double curB = bMin;
-      for (int k = 0; k < numBStep; k++) {
+      for (int k = 0; k < numB; k++) {
         if (debug) {
           std::cout << className << "::GenerateGasTable:\n";
           std::cout << "    E = " << curE << " V/cm, B = "
