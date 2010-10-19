@@ -5,6 +5,8 @@
 #pragma link off all functions;
 #pragma link C++ nestedclasses;
 
+#pragma link C++ namespace Garfield;
+
 #pragma link C++ class Garfield::AvalancheMicroscopic;
 #pragma link C++ class Garfield::AvalancheMC;
 
@@ -36,5 +38,7 @@
 
 #pragma link C++ class Garfield::Track;
 #pragma link C++ class Garfield::TrackHeed;
+
+#pragma link C++ function Garfield::RndmUniform();
 
 #endif

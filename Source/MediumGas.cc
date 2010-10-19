@@ -31,6 +31,8 @@ MediumGas::MediumGas() :
   name = gas[0];
   GetGasInfo(gas[0], atWeight[0], atNum[0]);
 
+  isChanged = true;
+
   EnableDrift();
   EnablePrimaryIonisation();
 

@@ -122,6 +122,9 @@ class MediumGas : public Medium {
     double ScaleDiffusion(const double d) {
       return d * sqrt(pressureTable / pressure);
     }
+    double ScaleDiffusionTensor(const double d) {
+      return d * pressureTable / pressure;
+    }
     double ScaleTownsend(const double alpha) {
       return alpha * pressure / pressureTable;
     }

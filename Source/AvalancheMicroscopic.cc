@@ -120,6 +120,11 @@ AvalancheMicroscopic::SetDistanceHistogram(TH1F* histo, const char opt) {
     std::cerr << "    Using default value (r).\n";
     distanceOption = 'r';
   }
+
+  if (nDistanceHistogramTypes <= 0) {
+    std::cout << className << "::SetDistanceHistogram:\n";
+    std::cout << "    Don't forget to call EnableDistanceHistogramming.\n";
+  }
   
 }
 
@@ -144,7 +149,10 @@ AvalancheMicroscopic::EnableDistanceHistogramming(const int type) {
   std::cout << className << "::EnableDistanceHistogramming:\n";
   std::cout << "    Histogramming of collision type " 
             << type << " enabled.\n";
-  
+  if (!hasDistanceHistogram) {
+    std::cout << "    Don't forget to set the histogram.\n";
+  }
+
 }
 
 void
@@ -578,7 +586,7 @@ AvalancheMicroscopic::TransportElectron(
       if (debug) {
         std::cout << className << "::TransportElectron:\n";
         std::cout << "    Drifting electron " << iEl << ".\n";
-        std::cout << "    Field at " << x << ", " << y << ", " << z << ": "
+        std::cout << "    Field at (" << x << ", " << y << ", " << z << "): "
                   << ex << ", " << ey << ", " << ez << "\n";
         std::cout << "    Status: " << status << "\n";
         std::cout << "    Medium: " << medium->GetName() << "\n";
@@ -937,7 +945,13 @@ AvalancheMicroscopic::TransportElectron(
         if (hasDistanceHistogram && histDistance != 0 &&
             nDistanceHistogramTypes > 0) {
           for (int iType = nDistanceHistogramTypes; iType--;) {
-            if (iType != cstype) continue;
+            if (distanceHistogramType[iType] != cstype) continue;
+            if (debug) {
+              std::cout << className << "::TransportElectron:\n";
+              std::cout << "    Collision type: " << cstype << "\n";
+              std::cout << "    Fill distance histogram.\n";
+              getchar();
+            }
             switch (distanceOption) {
               case 'x':
                 histDistance->Fill(stack[iEl].xLast - x);
@@ -949,10 +963,10 @@ AvalancheMicroscopic::TransportElectron(
                 histDistance->Fill(stack[iEl].zLast - z);
                 break;
               case 'r':
-                const double rr = pow(stack[iEl].xLast - x, 2) + 
+                const double r2 = pow(stack[iEl].xLast - x, 2) + 
                                   pow(stack[iEl].yLast - y, 2) + 
                                   pow(stack[iEl].zLast - z, 2);
-                histDistance->Fill(sqrt(rr));
+                histDistance->Fill(sqrt(r2));
                 break;
             }
             stack[iEl].xLast = x; 

@@ -492,6 +492,8 @@ Medium::ElectronDiffusion(const double ex, const double ey, const double ez,
                             ebang, b, e0, diff, intpDiffusion)) {
         diff = 0.;
       }
+      // Apply scaling.
+      diff = ScaleDiffusionTensor(diff);
       if (l < 3) {
         cov[l][l] = diff;
       } else if (l == 3) {
@@ -508,6 +510,8 @@ Medium::ElectronDiffusion(const double ex, const double ey, const double ez,
       double diff = Interpolate1D(e0, tabElectronDiffTens[l][0][0], eFields,
                                   intpDiffusion,
                                   extrLowDiffusion, extrHighDiffusion);
+      // Apply scaling.
+      diff = ScaleDiffusionTensor(diff);
       if (l < 3) {
         cov[l][l] = diff;
       } else if (l == 3) {
@@ -520,8 +524,6 @@ Medium::ElectronDiffusion(const double ex, const double ey, const double ez,
     }
   }
   
-  // Apply scaling.
-
   return true;
 
 }
@@ -1067,6 +1069,8 @@ Medium::HoleDiffusion(const double ex, const double ey, const double ez,
                             ebang, b, e0, diff, intpDiffusion)) {
         diff = 0.;
       }
+      // Apply scaling.
+      diff = ScaleDiffusionTensor(diff);
       if (l < 3) {
         cov[l][l] = diff;
       } else if (l == 3) {
@@ -1083,6 +1087,8 @@ Medium::HoleDiffusion(const double ex, const double ey, const double ez,
       double diff = Interpolate1D(e0, tabHoleDiffTens[l][0][0], eFields,
                                   intpDiffusion,
                                   extrLowDiffusion, extrHighDiffusion);
+      // Apply scaling.
+      diff = ScaleDiffusionTensor(diff);
       if (l < 3) {
         cov[l][l] = diff;
       } else if (l == 3) {
@@ -1095,8 +1101,6 @@ Medium::HoleDiffusion(const double ex, const double ey, const double ez,
     }
   }
   
-  // Apply scaling.
-
   return true;
 
 }
@@ -1448,7 +1452,7 @@ Medium::IonDissociation(const double ex, const double ey, const double ez,
   }
   
   // Apply scaling.
-  
+  diss = ScaleDissociation(diss);  
   return true;
 
 }

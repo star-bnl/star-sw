@@ -345,9 +345,13 @@ class Medium {
     virtual
     double ScaleDiffusion(const double d) {return d;}
     virtual
+    double ScaleDiffusionTensor(const double d) {return d;}
+    virtual
     double ScaleTownsend(const double alpha) {return alpha;}
     virtual
     double ScaleAttachment(const double eta) {return eta;}
+    virtual
+    double ScaleDissociation(const double diss) {return diss;}
 
 };
 
