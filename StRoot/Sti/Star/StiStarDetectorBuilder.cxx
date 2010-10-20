@@ -14,6 +14,8 @@
 #include "TError.h"
 //________________________________________________________________________________
 void StiStarDetectorBuilder::buildDetectors(StMaker&s) {
+  if (! _gasMat) 
+    _gasMat    = add(new StiMaterial("Air",7.3, 14.61, 0.001205, 30420.*0.001205, 7.3*12.e-9));
   TGeoManager *geo = StiVMCToolKit::GetVMC();
   assert(geo);
   useVMCGeometry(); 
@@ -24,12 +26,16 @@ void StiStarDetectorBuilder::useVMCGeometry() {
   string name;
   setNRows(1);
   cout << "StiStarDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
+  SetCurrentDetectorBuilder(this);
   const VolumeMap_t PipeVolumes[] = { 
     {"PIPE","the STAR beam pipe mother volume","HALL_1/CAVE_1/PIPE_%d","",""},
     {"PIPC","the Central Beam PIPe Volume","HALL_1/CAVE_1/PIPE_%d/PIPC_1","",""},
     {"PVAC","the Vacuum Volume of Be section of pipe","HALL_1/CAVE_1/PIPE_%d/PIPC_1/PVAC_1","",""},
     {"PIPO","Steel pipe from Be to 1st flanges","HALL_1/CAVE_1/PIPE_%d/PIPO_1/PVAO_1","",""},
-    {"PVAO","its cavity","HALL_1/CAVE_1/PIPE_%d/PIPO_1/PVAO_1","",""}
+    {"PVAO","its cavity","HALL_1/CAVE_1/PIPE_%d/PIPO_1/PVAO_1","",""},
+    //    {"SCON", "Support cone mother","HALL_1/CAVE_1/SVTT_1/SCON_1-2/*","",""},
+    {"SROD", "Support rod","HALL_1/CAVE_1/SVTT_1/SROD_1-2","",""},
+    {"SBSP", "Beampipe support mother","HALL_1/CAVE_1/SVTT_1/SBSP_1-2","",""}
   };
   setNSectors(0,1);
   Double_t dPhi = 2*TMath::Pi();
@@ -101,6 +107,17 @@ void StiStarDetectorBuilder::useVMCGeometry() {
       Int_t layer = getNRows();
       add(layer+1,0,pipeVolume);
     }
+  }
+  Int_t NoExtraVols = sizeof(PipeVolumes)/sizeof(VolumeMap_t);
+  TString pathT("HALL_1/CAVE_1");
+  TString path("");
+  for (Int_t i = 5; i < NoExtraVols; i++) {
+    gGeoManager->RestoreMasterVolume(); 
+    gGeoManager->CdTop();
+    gGeoManager->cd(pathT); path = pathT;
+    TGeoNode *nodeT = gGeoManager->GetCurrentNode();
+    if (! nodeT) continue;
+    StiVMCToolKit::LoopOverNodes(nodeT, path, PipeVolumes[i].name, MakeAverageVolume);
   }
   cout << "StiStarDetectorBuilder::buildDetectors() -I- Done" << endl;
 }

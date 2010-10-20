@@ -83,7 +83,7 @@ StiDetector * StiDetectorBuilder::add(unsigned int row, unsigned int sector, Sti
 {
   setNSectors(row,sector+1);
   _detectors[row][sector] = detector;
-  if (_debug ) {
+  if (_debug || sector == 0) {
     cout << "StiDetectorBuilder::add(" << row << "," << sector << ") detector ";
     if (detector) cout << detector->getName();
     else          cout << " NULL ??";
@@ -257,7 +257,8 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   pDetector->setMaterial(matS);
   pDetector->setElossCalculator(ElossCalculator);
   Int_t layer = getNRows();
-  add(layer+1,0,pDetector);
+  add(layer+1,0,pDetector); 
+  cout << "StiDetectorBuilder::AverageVolume build detector " << pDetector->getName() << " at layer " << layer << endl;
 }
 ///Returns the number of sectors (or segments) in a the
 ///given row. Sector are expected to be azimuthally
