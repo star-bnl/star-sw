@@ -110,12 +110,12 @@ StiSvtDetectorBuilder::~StiSvtDetectorBuilder() {}
 void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 {
   char name[50];  
-	int nRows;
+  int nRows;
   cout << "StiSvtDetectorBuilder::buildDetectors() -I- Started" << endl;
 
-	St_DataSet *dataSet = NULL;
+  St_DataSet *dataSet = NULL;
   dataSet = source.GetDataSet("StSvtConfig");
-	if (!dataSet)	throw runtime_error("StiSvtDetectorBuilder::loadDb() -E- dataSet==0 while getting StSvtConfig");
+  if (!dataSet)	throw runtime_error("StiSvtDetectorBuilder::loadDb() -E- dataSet==0 while getting StSvtConfig");
   _config = static_cast<StSvtConfig*>(dataSet->GetObject());
   if (!_config) throw runtime_error("StiSvtDetectorBuilder::loadDb() -E- _config==0");
 
@@ -284,9 +284,6 @@ void StiSvtDetectorBuilder::useVMCGeometry() {
     {"SEL5","electronics mother volume","HALL_1/CAVE_1/SVTT_1/SLYD_6/SLSD_1/SELE_1","",""},//	Weight = 0.0510373[kG]
 #endif
     //  {"SVTD", "an active wafer volume","HALL_1/CAVE_1/SVTT_1/SLY*/SLS*/SLD*/STL*/STS*/SVTD_1","svt","SVTD"}, // <+++
-    {"SROD", "Support rod","HALL_1/CAVE_1/SVTT_1/SROD_1-2","",""},
-    {"SBSP", "Beampipe support mother","HALL_1/CAVE_1/SVTT_1/SBSP_1-2","",""},
-    //  {"SCON", "Support cone mother","HALL_1/CAVE_1/SVTT_1/SCON_1-2/*","",""},
     {"SBWC", "water manifold to support cone bracket mother","HALL_1/CAVE_1/SVTT_1/SBWC_1-2/*","",""},
     {"SWMM", "water manifold mother","HALL_1/CAVE_1/SVTT_1/SWMM_1-2/*","",""},
     {"SIES", "Volume to hold inner endring screws","HALL_1/CAVE_1/SVTT_1/SIES_1-2/*","",""},

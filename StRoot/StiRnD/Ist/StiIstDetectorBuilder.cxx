@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.cxx,v 1.21 2010/08/25 21:57:41 fisyak Exp $
+// $Id: StiIstDetectorBuilder.cxx,v 1.22 2010/10/20 20:05:06 fisyak Exp $
 // 
 // $Log: StiIstDetectorBuilder.cxx,v $
+// Revision 1.22  2010/10/20 20:05:06  fisyak
+// Move SROD and SBSP from StiSvtDetectorBuilder to StiStarDetectorBuilder to account configurations without SVT detector installed (bug #2025)
+//
 // Revision 1.21  2010/08/25 21:57:41  fisyak
 // Get rid off access to specfic detector tracking parameters which usage has been  disable since 2008/06/11
 //
@@ -100,7 +103,7 @@ void StiIstDetectorBuilder::useVMCGeometry() {
 
   // Build the material map
   struct Material_t {
-    Char_t *name;
+    const Char_t *name;
     StiMaterial    **p;
   };
   Material_t map[] = {
@@ -169,7 +172,7 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   q=temp.Index("_");
   temp.Replace(0,q+1,"");
   TString num3=temp(0,1);
-  int side=num3.Atoi();
+  //  int side=num3.Atoi();
   if(wafer!=1) return;
 
   // Check whether this is an active volume

@@ -1,6 +1,6 @@
 #include "StiMasterDetectorBuilder.h"
 #include "TGeoManager.h"
-
+#include "StiDetector.h"
 StiMasterDetectorBuilder::StiMasterDetectorBuilder(bool active)
   : StiDetectorBuilder("MasterDetectorBuilder",active,"none")
 {}
@@ -47,13 +47,17 @@ void StiMasterDetectorBuilder::build(StMaker&source)
       cout << "StiMasterDetectorBuilder::build() -I- Builder:"<<(*iter)->getName()<<endl;
       for (unsigned int i=0;i<(*iter)->getNRows();i++)
 	{
-	  cout << "StiMasterDetectorBuilder::build() -I- row:"<<row<<endl;
+	  cout << "StiMasterDetectorBuilder::build() -I- row:"<<row;
 	  unsigned int nSectors = (*iter)->getNSectors(i);
 	  setNSectors(row,nSectors);
+	  Int_t ifrow = 0;
 	  for (unsigned int sector=0;sector<nSectors;sector++)
 	    {
-	      setDetector(row,sector,(*iter)->getDetector(i,sector));
+	      StiDetector *detector = (*iter)->getDetector(i,sector);
+	      if (!ifrow && detector) {cout << "\t" << detector->getName(); ifrow++;}
+	      setDetector(row,sector,detector);
 	    }
+	  cout << endl;
 	  row++;
 	}
     }
