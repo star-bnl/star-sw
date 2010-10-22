@@ -4,14 +4,12 @@
 #define G_RANDOM_H
 
 #include <cmath>
-// #include "RandomEngineGSL.hh"
 #include "RandomEngineRoot.hh"
 #include "FundamentalConstants.hh"
 
 namespace Garfield {
 
 // Random number generator
-// extern RandomEngineGSL randomEngine;
 extern RandomEngineRoot randomEngine;
 
 // Draw a random number uniformly distributed in the range [0, 1)
@@ -26,8 +24,8 @@ double RndmUniform() {
 inline
 double RndmUniformPos() {
 
-  double r = randomEngine.Draw();
-  while (r <= 0.) r = randomEngine.Draw();
+  double r = RndmUniform();
+  while (r <= 0.) r = RndmUniform();
   return r;
 
 }
@@ -37,12 +35,12 @@ inline
 double RndmGaussian() {
 
   // Box-Muller algorithm
-  double v1 = 2. * randomEngine.Draw() - 1.;
-  double v2 = 2. * randomEngine.Draw() - 1.;
+  double v1 = 2. * RndmUniform() - 1.;
+  double v2 = 2. * RndmUniform() - 1.;
   double r2 = v1 * v1 + v2 * v2;
   while (r2 > 1.) {
-    v1 = 2. * randomEngine.Draw() - 1.;
-    v2 = 2. * randomEngine.Draw() - 1.;
+    v1 = 2. * RndmUniform() - 1.;
+    v2 = 2. * RndmUniform() - 1.;
     r2 = v1 * v1 + v2 * v2;
   }
   return v1 * sqrt(-2. * log(r2) / r2);
@@ -57,11 +55,25 @@ double RndmGaussian(const double mu, const double sigma) {
 
 }
 
-// Draw a Lorentzian random variate with mean mu and width sigma 
+// Draw a Lorentzian random variate with mean mu 
+// and half-width at half maximum gamma 
 inline
 double RndmLorentzian(const double mu, const double gamma) {
 
-  return mu + 0.5 * gamma * tan(Pi * randomEngine.Draw());
+  return mu + gamma * tan(Pi * (RndmUniform() - 0.5));
+
+}
+
+// Draw a random number according to a Voigt function with mean mu.
+// The Voigt function is a convolution of a Gaussian (variance sigma) and 
+// a Lorentzian (half width gamma). 
+inline
+double RndmVoigt(const double mu, const double sigma, const double gamma) { 
+
+  if (sigma <= 0.) return RndmLorentzian(mu, gamma);
+  const double a = gamma / (Sqrt2 * sigma);
+  const double x = RndmLorentzian(0., a) + RndmGaussian(0., 1. / Sqrt2);
+  return mu + x * Sqrt2 * sigma;
 
 }
 

@@ -978,10 +978,10 @@ AvalancheMicroscopic::TransportElectron(
 
         switch (cstype) {
           // Elastic collision
-          case 0:
+          case ElectronCollisionTypeElastic:
             break;
           // Ionising collision
-          case 1:
+          case ElectronCollisionTypeIonisation:
             if (hasUserHandleIonisation) {
               userHandleIonisation(x, y, z, t, cstype, level, medium);
             }
@@ -1018,7 +1018,7 @@ AvalancheMicroscopic::TransportElectron(
             }
             break;
           // Attachment
-          case 2:
+          case ElectronCollisionTypeAttachment:
             if (hasUserHandleAttachment) {
               userHandleAttachment(x, y, z, t, cstype, level, medium);
             }
@@ -1032,13 +1032,13 @@ AvalancheMicroscopic::TransportElectron(
             ok = false;
             break;
           // Inelastic collision
-          case 3:
+          case ElectronCollisionTypeInelastic:
             if (hasUserHandleInelastic) {
               userHandleInelastic(x, y, z, t, cstype, level, medium);
             }
             break;
           // Excitation
-          case 4:
+          case ElectronCollisionTypeExcitation:
             if (hasUserHandleInelastic) {
               userHandleInelastic(x, y, z, t, cstype, level, medium);
             }
@@ -1121,7 +1121,7 @@ AvalancheMicroscopic::TransportElectron(
             }
             break;
           // Super-elastic collision
-          case 5:
+          case ElectronCollisionTypeSuperelastic:
             break;
           case 10:
             // Acoustic intravalley phonon
@@ -1198,8 +1198,8 @@ AvalancheMicroscopic::TransportElectron(
   if (useInducedCharge) {
     for (int i = nEndpoints; i--;) {
       sensor->AddInducedCharge(-1, 
-                           endpoints[i].x0, endpoints[i].y0, endpoints[i].z0,
-                           endpoints[i].x,  endpoints[i].y,  endpoints[i].z);
+                       endpoints[i].x0, endpoints[i].y0, endpoints[i].z0,
+                       endpoints[i].x,  endpoints[i].y,  endpoints[i].z);
     }
   }
 

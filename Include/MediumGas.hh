@@ -20,7 +20,7 @@ class MediumGas : public Medium {
     bool IsGas() const {return true;}
     
     // Set/get the gas mixture
-    bool SetComposition(const std::string gas1, const double f1, 
+    bool SetComposition(const std::string gas1,      const double f1 = 1., 
                         const std::string gas2 = "", const double f2 = 0.,
                         const std::string gas3 = "", const double f3 = 0.,
                         const std::string gas4 = "", const double f4 = 0.,

@@ -1,7 +1,7 @@
-// Interface to Magboltz program (version 8)
+// Interface to Magboltz (version 8)
 
-#ifndef G_MEDIUM_MAGBOLTZ_86
-#define G_MEDIUM_MAGBOLTZ_86
+#ifndef G_MEDIUM_MAGBOLTZ_8
+#define G_MEDIUM_MAGBOLTZ_8
 
 #include <vector>
 
@@ -255,6 +255,7 @@ class MediumMagboltz86 : public MediumGas {
     static const int nMaxInelasticTerms = 220;
     static const int nMaxLevels = 512;
     static const int nCsTypes = 6;
+    static const int nCsTypesGamma = 4;
       
     // Energy spacing of collision rate tables
     double eFinal, eStep;
@@ -265,7 +266,7 @@ class MediumMagboltz86 : public MediumGas {
     // Number of different cross-section types in the current gas mixture
     int nTerms;
     // Recoil energy parameter
-    double rgas[nMaxLevels];
+    double rgas[nMaxGases];
     // For ionisation: Opal-Beaty-Peterson splitting parameter [eV]
     double wSplit[nMaxLevels];
     // Energy loss
@@ -295,7 +296,7 @@ class MediumMagboltz86 : public MediumGas {
     // 3: inelastic
     // 4: excitation
     // 5: super-elastic
-    int nCollisions[6];
+    int nCollisions[nCsTypes];
     // Number of collisions for each cross-section term
     std::vector<int> nCollisionsDetailed;
 
@@ -310,8 +311,8 @@ class MediumMagboltz86 : public MediumGas {
     // Deexcitation 
     // Flag enabling/disabling detailed simulation of de-excitation process
     bool useDeexcitation;
-    // Flag enabling/disable radiation trapping (re-absorption of 
-    // photons produced in the de-excitation cascade)
+    // Flag enabling/disable radiation trapping 
+    // (absorption of photons discrete excitation lines)
     bool useRadTrap;
 
     int nDeexcitations;
@@ -324,18 +325,28 @@ class MediumMagboltz86 : public MediumGas {
       double energy;
       // Number of de-excitation channels
       int nChannels;
-      // Branching ratio
+      // Branching ratios
       std::vector<double> p;
-      // Final level
+      // Final levels
       std::vector<int> final;
       // Type of transition
       std::vector<int> type;
       // Oscillator strength
       double osc;
-      // Total rate
-      double rate; 
+      // Total decay rate
+      double rate;
+      // Doppler broadening
+      double sDoppler;
+      // Pressure broadening
+      double gPressure;
+      // Effective width
+      double width;
+      // Integrated absorption collision rate 
+      double cf;
     };
     std::vector<deexcitation> deexcitations;
+    int lastDxc;
+    // Mapping between deexcitations and cross-section terms.
     int iDeexcitation[nMaxLevels];
     int nDeexcitationProducts;
     // List of de-excitation products
@@ -375,12 +386,7 @@ class MediumMagboltz86 : public MediumGas {
     // 1: ionisation
     // 2: inelastic
     // 3: excitation
-    int nPhotonCollisions[4];
-
-    // Ion transport properties
-    int nIonMobilities;
-    std::vector<double> ionMobilityGrid;
-    std::vector<double> ionMobilityValues;
+    int nPhotonCollisions[nCsTypesGamma];
 
     bool GetGasNumberMagboltz(const std::string input, int& number) const;
     bool Mixer();
