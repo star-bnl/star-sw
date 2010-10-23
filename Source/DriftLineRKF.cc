@@ -96,6 +96,7 @@ DriftLineRKF::EquationOfMotion(
   int status;
 
   sensor->MagneticField(x, y, z, bx, by, bz, status);
+  bx *= Tesla2Internal; by *= Tesla2Internal; bz *= Tesla2Internal;
   sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
 
   if (debug) {

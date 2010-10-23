@@ -441,8 +441,11 @@ MediumGas::LoadGasFile(const std::string filename) {
         } else if (strcmp(token, "B") == 0) {
           token = strtok(NULL, " :,%");
           if (strcmp(token, "fields") == 0) {
+            double bstore = 0.;
             for (int i = 0; i < bFieldRes; i++) {
-              gasfile >> bFields[i];
+              // B fields are stored in hGauss (to be checked!).
+              gasfile >> bstore;
+              bFields[i] = bstore / 100.;
             }
           }
         } else if (strcmp(token, "Mixture") == 0) {
@@ -1170,7 +1173,8 @@ MediumGas::WriteGasFile(const std::string filename) {
   outputFile << "B fields\n";
   for (int i = 0; i < bFieldRes; i++) {
     // List 5 values, then new line.
-    outputFile << bFields[i] << " ";
+    // B fields are stored in hGauss (to be checked!).
+    outputFile << bFields[i] * 100. << " ";
     if ((i + 1) % 5 == 0) outputFile <<"\n";
   }
   if (bFieldRes % 5 != 0) outputFile << "\n";
@@ -1306,16 +1310,15 @@ MediumGas::WriteGasFile(const std::string filename) {
              << ", Z\t= "    << 0. 
              << ", EMPROB= " << 0.
              << ", ePair = " << 0. <<"\n";
-  double ionDiffLong = 0.;
-  double ionDiffTrans = 0.;
+  double ionDiffLong = 0., ionDiffTrans = 0.;
   if (hasIonDiffLong) ionDiffLong = tabIonDiffLong[0][0][0];
   if (hasIonDiffTrans) ionDiffTrans = tabIonDiffTrans[0][0][0];
   outputFile << "Ion diffusion:\t" << ionDiffLong << " " 
                                    << ionDiffTrans << "\n";
   outputFile << "CMEAN = " << 0. 
              << ", RHO = " << 0. 
-             << ", PGAS = " << pressure 
-             << ", TGAS = " << temperature << "\n";
+             << ", PGAS = " << pressureTable
+             << ", TGAS = " << temperatureTable << "\n";
   outputFile << "CLSTYP:\t NOT SET \n";
   outputFile << "FCNCLS:\t\n";
   outputFile << "NCLS:\t" << 0 << "\n";
@@ -1356,7 +1359,7 @@ MediumGas::PrintGas() {
   if (nBfields > 1) {
     std::cout << "    Magnetic field range:  " << bFields[0]
               << " - " << bFields[nBfields - 1] 
-              << " in " << nBfields - 1 << " steps.\n";
+              << " T in " << nBfields - 1 << " steps.\n";
   } else if (nBfields == 1) {
     std::cout << "    Magnetic field:        " << bFields[0] << "\n";
   } else {

@@ -612,7 +612,7 @@ AvalancheMicroscopic::TransportElectron(
       // If switched on, get the local magnetic field.
       if (useBfield) {
         sensor->MagneticField(x, y, z, bx, by, bz, status);
-        bx = -bx; by = -by; bz = -bz;
+        bx *= -Tesla2Internal; by *= -Tesla2Internal; bz *= -Tesla2Internal;
         // Make sure that neither E nor B are zero.
         bmag = sqrt(bx * bx + by * by + bz * bz);
         emag = sqrt(ex * ex + ey * ey + ez * ez);
@@ -921,7 +921,7 @@ AvalancheMicroscopic::TransportElectron(
         // If switched on, get the magnetic field at the new location.
         if (useBfield) {
           sensor->MagneticField(x, y, z, bx, by, bz, status);
-          bx = -bx; by = -by; bz = -bz;
+          bx *= -Tesla2Internal; by *= -Tesla2Internal; bz *= -Tesla2Internal;
           // Make sure that neither E nor B are zero.
           bmag = sqrt(bx * bx + by * by + bz * bz);
           emag = sqrt(ex * ex + ey * ey + ez * ez);

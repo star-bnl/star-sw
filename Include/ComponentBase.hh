@@ -65,7 +65,7 @@ class ComponentBase {
                               const std::string label);
 
     // Magnetic field
-    // Calculate the magnetic field at (x, y, z)
+    // Calculate the magnetic field [Tesla] at (x, y, z)
     virtual 
     void MagneticField(const double x, const double y, const double z,
     	               double& bx, double& by, double& bz, int& status);
