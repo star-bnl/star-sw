@@ -78,7 +78,10 @@ field_map(const point& pt, vec& efield, vec& bfield, vfloat& mrange) {
     Garfield::HeedInterface::sensor->MagneticField(x, y, z, 
                                                    bx, by, bz, 
                                                    status);
-    bfield.x = bx; bfield.y = by; bfield.z = bz;
+    bfield.x = bx * 1.e-3;
+    bfield.y = by * 1.e-3; 
+    bfield.z = bz * 1.e-3;
+
   }
 
 }
