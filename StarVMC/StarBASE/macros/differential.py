@@ -27,9 +27,13 @@ def main():
    parser.add_option( "--basepath",     dest="basepath", default="NONE" )
    parser.add_option( "--geompath",     dest="geompath", default="NONE" )
 
+   parser.add_option( "--stat",         dest="stat",     default="radlen", help="Statistic to display" )
+
    
    parser.add_option( "--thumbnail",    dest="thumbnail", default=False, action="store_true",
                       help="Creates thumbnails of the front page of the PDF file." )
+   parser.add_option( "--size", dest="size", default=False,
+                      help="Sets the size of the thumbnail, e.g. 850x1100")
    
    (opts,args) = parser.parse_args()
 
@@ -82,7 +86,8 @@ def main():
                           top=opts.volume,
                           basegeo=opts.basename,
                           compgeo=opts.geomname,
-                          canvas=canvas
+                          canvas=canvas,
+                          stat=opts.stat
                           )
 
       

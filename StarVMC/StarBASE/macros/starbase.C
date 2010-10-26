@@ -33,7 +33,7 @@ void starbase( const char *gy="y2006c",
 {
 
   // Silence ROOT
-  gErrorIgnoreLevel = 9999;
+//  gErrorIgnoreLevel = 9999;
 
   // Load shared libraries
   if (!loaded) { Load(); loaded = 1; }
@@ -46,6 +46,9 @@ void starbase( const char *gy="y2006c",
   // Create the geometry
   gROOT->LoadMacro   ( TString(path)+tsy+".h" );
   gROOT->ProcessLine ( tsy+"()" );
+  // gROOT -> ProcessLine( TString( ".x "+tsy+".h" ) );
+
+  std::cout << "Done creating geometry" << std::endl;
 
 
   // Create the baseline maker
@@ -67,6 +70,16 @@ void starbase( const char *gy="y2006c",
   // Create histograms for all volumes beneath the "HALL" volume.
   steps->bookVolume("HALL");
 
+  // Print out tracking media for all volumes for debug poirposes
+  /*
+  TIter next( gGeoManager->GetListOfMedia() );
+  TGeoMedium *m;
+  while ( (m=(TGeoMedium*)next() ) )
+    {
+      m->SavePrimitive(std::cout);
+    }
+  */
+
   // Run the code now
   chain->EventLoop(1);  /// NOTE THE FUGLY HACK TO 
   chain->Finish();
@@ -74,7 +87,8 @@ void starbase( const char *gy="y2006c",
   // Write histograms to disk
   TFile *file = new TFile(Form("%s/%s.root",path,gy),"recreate");
   file->cd();
-  mk->GetHistList()->Write();
+  mk->GetHistList()->Print();
+      mk->GetHistList()->Write();
 
   // Write the geometry to disk
   gGeoManager->Write();

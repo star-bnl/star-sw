@@ -146,7 +146,7 @@ class CanvasLoop:
 # ----------------------------------------------------------------------------------------------------
 class CanvasPDF:
 
-    def __init__(self,name="canvaspdf",title="",wx=850*2/3,wy=1100*2/3,nx=0,ny=1,maxheads=10,thumbnail=False):
+    def __init__(self,name="canvaspdf",title="",wx=850*2/3,wy=1100*2/3,nx=0,ny=1,maxheads=10,thumbnail=False,thumbnailsize=False):
 
         self.canvas = CanvasIter(name,title,wx,wy,nx,ny)
         
@@ -160,6 +160,7 @@ class CanvasPDF:
         self.count = 0
         self.post  = "("     # append to the ps name
         self.thumbnail = thumbnail
+        self.thumbnailsize = thumbnailsize
 
     def __del__(self):
 
@@ -188,12 +189,17 @@ class CanvasPDF:
             # 2) If user selected thumbnail, then on first call we
             #    create a .png file and set thumbnail = False
             if ( self.thumbnail ):
+
+                print "Creating thumbnail"
+                
                 # Resize canvas to 1/2 normal
-                self.canvas.SetCanvasSize( self.wx/2, self.wy/2 )
+                self.canvas.SetCanvasSize( self.wx*2/3, self.wy*2/3 )
                 self.canvas.Print(self.name+".png")
                 self.thumbnail = False
                 # Reset to default size
                 self.canvas.SetCanvasSize( self.wx, self.wy )
+
+            
 
             # 2) Clear the canvas for the next iteration
             self.canvas.current=0
@@ -210,12 +216,15 @@ class CanvasPDF:
         # 1) If user selected thumbnail, then on first call we
         #    create a .png file and set thumbnail = False
         if ( self.thumbnail ):
+
+            print "Creating thumbnail"
+            
             # Resize canvas to 1/2 normal
-            self.canvas.SetCanvasSize( self.wx/2, self.wy/2 )
+            self.canvas.SetCanvasSize( self.wx*2/3, self.wy*2/3 )
             self.canvas.Print(self.name+".png")
             self.thumbnail = False
             # Reset to default size
-            self.canvas.SetCanvasSize( self.wx, self.wy )        
+            self.canvas.SetCanvasSize( self.wx, self.wy )
 
         # 2) Add the canvas to the .ps file
         self.canvas.Print( "/tmp/"+self.name+".ps" + self.post )

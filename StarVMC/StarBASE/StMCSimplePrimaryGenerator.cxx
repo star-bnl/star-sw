@@ -1,4 +1,4 @@
-// $Id: StMCSimplePrimaryGenerator.cxx,v 1.1 2010/02/11 19:50:54 jwebb Exp $
+// $Id: StMCSimplePrimaryGenerator.cxx,v 1.2 2010/10/26 19:39:57 jwebb Exp $
 #include <stdio.h>
 #include <assert.h>
 #include "Riostream.h"
@@ -88,6 +88,9 @@ void StMCSimplePrimaryGenerator::GenerateOnePrimary() {
   double e  = TMath::Sqrt(mass*mass + pz*pz + pT*pT);
   // Add particle to stack 
   assert(e>1e-6);
+
+  fVtx[2] = 0.5*(fZ_min+fZ_max);
+
   PushTrack(toBeDone, -1, pdg, px, py, pz, e
 	    ,fVtx[0], fVtx[1],fVtx[2]
 	    ,tof    , polx   ,poly, polz, 

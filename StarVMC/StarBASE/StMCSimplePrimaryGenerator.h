@@ -1,5 +1,8 @@
-// $Id: StMCSimplePrimaryGenerator.h,v 1.1 2010/02/11 19:50:55 jwebb Exp $
+// $Id: StMCSimplePrimaryGenerator.h,v 1.2 2010/10/26 19:39:57 jwebb Exp $
 // $Log: StMCSimplePrimaryGenerator.h,v $
+// Revision 1.2  2010/10/26 19:39:57  jwebb
+// Changes to interface, mostly.
+//
 // Revision 1.1  2010/02/11 19:50:55  jwebb
 // Code for StarBASE:  Star Baseline Analysis of the Simulation Environment
 // ========================================================================
@@ -59,6 +62,11 @@ class StMCSimplePrimaryGenerator :  public StMCPrimaryGenerator  {
      double Z_min   = 0 ,double Z_max   = 0, 
      const char *option = "G");
      virtual int Fun();
+
+     void SetVertex( Double_t zmin, Double_t zmax )
+     {
+       fZ_min = zmin; fZ_max = zmax;
+     };
 
  private:
      void GenerateOnePrimary();
