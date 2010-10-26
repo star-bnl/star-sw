@@ -1,4 +1,4 @@
-// $Id: StMCConstructGeometry.cxx,v 1.1 2010/02/11 19:50:48 jwebb Exp $
+// $Id: StMCConstructGeometry.cxx,v 1.2 2010/10/26 19:39:57 jwebb Exp $
 //
 //
 // Class StMCConstructGeometry
@@ -30,7 +30,6 @@ int  StMCConstructGeometry::Fun()
 {
   if (! gGeoManager) 
     {
-
       TString ts,tsn(GetName()),star("${STAR}");    
       if (tsn.Contains("yf")) {
 	star = "${STAR_PATH}/.DEV2";

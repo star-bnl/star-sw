@@ -81,6 +81,9 @@ def main():
     parser.add_option( "--wrapper", help="Set false for native execution (don't do this)",  dest="wrapper",   default=True )
     parser.add_option( "--verbose", help="Default 1.  0 supresses all output.  >1 shows output of root, zebra, etc...", dest="verbose", default=0 )
     parser.add_option( "--path",    help="Define the output path",                dest="path",   default="./" )
+
+    parser.add_option( "--makegeom",  help="Default=false.  If true, builds geometry from agstar.", dest="mkgeom",default=False)
+    parser.add_option( "--lib",       help="Sets the library to build the geom from.  Default $STAR_LIB", dest="library",default="$STAR_LIB")
     (opts, args) = parser.parse_args()
 
     if ( opts.geom == "NONE" ):
@@ -96,7 +99,8 @@ def main():
     # Run starsim and translate requested geometry
     # into the ROOT format
     #
-    make_geometry( opts )
+    if opts.mkgeom:
+        make_geometry( opts, opts.library )
     
 
     if ( opts.wrapper ):

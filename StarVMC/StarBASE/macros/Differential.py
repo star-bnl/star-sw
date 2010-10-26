@@ -177,14 +177,20 @@ def stat_histo(stat,volume,file=_current_file):
     """
            
     hname = "h_"+stat+"_"+volume+"_eta" 
-                                    
+
     hstats = file.Get(hname)
     hname = "h_counts_"+volume+"_eta"                         # retrive the histograms from the files
     hcount = file.Get(hname)
+
+    if hstats==None:
+        print "Warning: Could not find histogram "+hname+" in file "+file.GetName()
+        print "... probably going to throw an error here..."
+        return
+    
     hstats.Divide( hcount )
 
     # Make hcount unity so that subsequent calls
-    # does not change hstats
+    # does not change hstats  (means only one stat per run)
     nbinx=hcount.GetNbinsX()
     i=1
     while ( i<=nbinx ):
@@ -292,6 +298,8 @@ class Differential1D:
         compFile = get_geom_file(geom)
 
         hname = "h_"+stat+"_"+volume+"_eta"                             # retrive the histograms from the files
+        print "Get histo: " + str(hname)
+
 
         self.histo_base = stat_histo( stat, volume, file=baseFile )
         if ( geomvolume == "same" ):
@@ -426,7 +434,7 @@ class Differential:
     canvas:     An iterable python canvas.                         [Optional]
     """
 
-    def __init__(self,base,comp,basegeo="same",compgeo="same", top="CAVE", xmin=0., xmax=-1.,canvas=0):
+    def __init__(self,base,comp,basegeo="same",compgeo="same", top="CAVE", xmin=0., xmax=-1.,canvas=0, stat="radlen" ):
 
         # Baseline and comparison geometries
         baseFile = get_geom_file(base)
@@ -472,7 +480,18 @@ class Differential:
         # Front page is a single histogram of the top volume
         #
         #print "Page 1"
-        d = Differential1D( base=base, geom=comp, volume=top, xmin=xmin,xmax=xmax,canvas=canvas.next(), legend=True)
+        print "Page 1: statistic = " + stat
+        d = Differential1D( base=base,
+                            geom=comp,
+                            volume=top,
+                            xmin=xmin,
+                            xmax=xmax,
+                            canvas=canvas.next(),
+                            legend=True,
+                            stat=stat
+                            )
+                          
+        
         self.hmax.Fill( d.name, d.max_differential )
         self.differentials.append(d)
 
@@ -522,6 +541,10 @@ class Differential:
 
         # Reset to comparison geometry
         compGeometry = compFile.Get(compgeo)
+        if compGeometry==None:
+            print "Warning: could not find geometry "+compgeo+" in file "+compFile.GetName()
+            print "... probably going to throw an error now"
+
         self.top_volume = compGeometry.FindVolumeFast( top )
 
         for node in self.top_volume.GetNodes():
@@ -537,6 +560,8 @@ class Differential:
                 self.volumes_comp[ name ] = name       # builds list of volumes in comparison geometry
 
                 #print "++ adding "+name+" to comparison list"
+
+        mystat=stat
 
         #
         # For every volume in the base geometry we check to see if it is present
@@ -559,7 +584,14 @@ class Differential:
 
             except KeyError:
 
-                d = Differential1D( base=base, geom=comp, volume=name, canvas=canvas.next(),xmin=xmin,xmax=xmax )
+                d = Differential1D( base=base,
+                                    geom=comp,
+                                    volume=name,
+                                    canvas=canvas.next(),
+                                    xmin=xmin,
+                                    xmax=xmax,
+                                    stat=mystat)
+                
                 self.hmax.Fill( d.name, d.max_differential )
                 self.differentials.append(d)
 

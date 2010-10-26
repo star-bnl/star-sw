@@ -1,4 +1,4 @@
-// $Id: StMCStepping.h,v 1.1 2010/02/11 19:51:00 jwebb Exp $
+// $Id: StMCStepping.h,v 1.2 2010/10/26 19:39:58 jwebb Exp $
 //
 //
 // Class StMCStepping
@@ -23,7 +23,7 @@ class TGeoMedium;
 class TGeoMaterial;
 class TGeoNavigator;
 
-class TH1F;
+class TH1D;
 class TH2F;
 class TFile;
 
@@ -83,19 +83,24 @@ class StMCStepping : public GCall
   TH2F *h_pathlen_rz;
   TH2F *h_distance_rz;
 
-  TH1F *h_radlen_total_eta;  // material balance plot
-  TH1F *h_ncount_total_eta;
+  TH1D *h_radlen_total_eta;  // material balance plot
+  TH1D *h_ncount_total_eta;
   
   void       bookVolume( const Char_t *name );
 
   std::vector<const Char_t *>     fListOfVolumes;
 
   Int_t                  mNumberOfVolumes;
-  std::vector<TH1F *>    hRadlenHist1D;
-  std::vector<TH1F *>    hCountsHist1D;
+  std::vector<TH1D *>    hRadlenHist1D;
+  std::vector<TH1D *>    hCountsHist1D;
   std::vector<TH2F *>    hRadlenHist2D;
   std::vector<TH2F *>    hCountsHist2D;
-  std::vector<Float_t>   mRadlenSum;
+
+  std::vector<TH1D *>    hRadlenAccu1D;
+
+  std::vector<Double_t>   mRadlenSum; // Sum within the specified subsystem
+  std::vector<Bool_t>     mHasEntered; // Flag indicating volumes which have been entered
+  Double_t                mRadlenAcc; // Accumulated radiation length along the track
 
   void postTrack();
   
@@ -124,8 +129,8 @@ class StMCStepping : public GCall
   int    fKazePrev;
   int    fCase;
 
-  Float_t fSumRadlen;
-  Float_t fSumAbslen;
+  Double_t fSumRadlen;
+  Double_t fSumAbslen;
   
   TString       fParName;
   TString       fCasName;

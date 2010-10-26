@@ -1,4 +1,4 @@
-// $Id: StMCStepping.cxx,v 1.2 2010/02/15 18:47:47 jwebb Exp $
+// $Id: StMCStepping.cxx,v 1.3 2010/10/26 19:39:58 jwebb Exp $
 //
 //
 // Class StMCStepping
@@ -20,7 +20,7 @@
 
 #include "TFile.h"
 #include "TMath.h"
-#include "TH1F.h"
+#include "TH1D.h"
 #include "TH2F.h"
 #include "TList.h"
 
@@ -111,8 +111,11 @@ void StMCStepping::bookVolume( const Char_t *name )
 	  if ( ! hRadlenHist1D[vid] )                                    // check for existing histogram
 	    {
 	      //	      std::cout << "+ add volume " << vid << " " << name << std::endl;	  
-	      hRadlenHist1D[ vid ] = new TH1F( Form("h_radlen_%s_eta",vname), Form("Depth vs eta [%s];#eta;L/#chi_{0}",vname), 500,-5.0,+5.0 );
-	      hCountsHist1D[ vid ] = new TH1F( Form("h_counts_%s_eta",vname), Form("Number of geantinos vs eta [%s];#eta",vname), 500,-5.0,+5.0 );
+	      hRadlenHist1D[ vid ] = new TH1D( Form("h_radlen_%s_eta",vname), Form("Depth vs eta [%s];#eta;L/#chi_{0}",vname), 500,-5.0,+5.0 );
+	      hCountsHist1D[ vid ] = new TH1D( Form("h_counts_%s_eta",vname), Form("Number of geantinos vs eta [%s];#eta",vname), 500,-5.0,+5.0 );
+
+	      hRadlenAccu1D[ vid ] = new TH1D( Form("h_acc_radlen_%s_eta",vname), Form("Accumulated depth vs eta [%s];#eta;L/#chi_{0}",vname), 500,-5.0,+5.0 );
+
 	      // This will be fraking huge	      hRadlenHist2D[ vid ] = new TH2F( Form("h_radlen_%s_eta2",vname), Form("Radiation length vs eta [%s];#phi;#eta",vname), 250,0.,30.0,500,-5.0,+5.0 );    // 1GB
 	      // This will be fraking huge	      hCountsHist2D[ vid ] = new TH2F( Form("h_counts_%s_eta2",vname), Form("Number of geantinos vs eta [%s];#phi;#eta",vname), 250,0.,30.0,500,-5.0,+5.0 ); // 1GB
 	      bookVolume( vname ); // Recurse down the volume tree	  
@@ -121,47 +124,7 @@ void StMCStepping::bookVolume( const Char_t *name )
     }
 
 }
-
-#if 0
-void
-StMCStepping::bookVolume( const Char_t *name )
-{
-
-  if ( TString(name).Contains("everything") )
-    {
-      std::cout << "========================= booking all volumes in geometry ===============================" << std::endl;
-      TIter next( gGeoManager->GetTopVolume()->GetNodes() );
-      TGeoNode *node;
-      while ( (node=(TGeoNode*)next()) )
-	{
-	  TGeoVolume *volume = node->GetVolume();
-	  bookVolume( volume->GetName() );
-	}
-      return;
-    }
-
-  fListOfVolumes.push_back(name);
-
-  /////////////////////////////////////////////////////////////////////////////////////////////
-  //
-  // Book histogram and store in lookup table by volume Id
-  //
-  TGeoVolume *volume = gGeoManager->FindVolumeFast(name);
-  Int_t id = volume->GetNumber();
-  if ( ! hRadlenHist1D[id] )                                    // check for existing histogram
-    {
-      std::cout << "+ add volume " << name << std::endl;
-
-      hRadlenHist1D[ id ] = new TH1F( Form("h_radlen_%s_eta",name), Form("Radiation length vs eta [%s];#eta",name), 500,-5.0,+5.0 );
-      hCountsHist1D[ id ] = new TH1F( Form("h_counts_%s_eta",name), Form("Number of geantinos vs eta [%s];#eta",name), 500,-5.0,+5.0 );
-      //      hRadlenHist2D[ id ] = new TH2F( Form("h_radlen_%s_eta2",name), Form("Radiation length vs eta [%s];#phi;#eta",name), 250,0.,30.0,500,-5.0,+5.0 );
-      //      hCountsHist2D[ id ] = new TH2F( Form("h_counts_%s_eta2",name), Form("Number of geantinos vs eta [%s];#phi;#eta",name), 250,0.,30.0,500,-5.0,+5.0 );
-    }
-  //
-
-
-}
-#endif
+ 
 
 void
 StMCStepping::BookHistograms()
@@ -194,8 +157,12 @@ StMCStepping::BookHistograms()
       //      hRadlenHist2D.push_back( NULL );
       hCountsHist1D.push_back( NULL );
       //      hCountsHist2D.push_back( NULL );
-      mRadlenSum   .push_back( 0.   );
+      hRadlenAccu1D.push_back( NULL );
+      //
+      mRadlenSum   .push_back( 0.   );      
+      mHasEntered  .push_back( false );
     }
+
 
   ////////////////////////////////////////////////////////////////////////////////////
   //
@@ -336,9 +303,9 @@ int StMCStepping::Fun()
 {
 
   Case();  
-  Float_t radlen  = fMaterial->GetRadLen();
-  Float_t abslen  = fMaterial->GetIntLen();
-  Float_t density = fMaterial->GetDensity();
+  Double_t radlen  = fMaterial->GetRadLen();
+  Double_t abslen  = fMaterial->GetIntLen();
+  Double_t density = fMaterial->GetDensity();
   radlen*=density;  // convert cm --> g/cm^2
   abslen*=density;  // convert cm --> g/cm^2
   
@@ -351,6 +318,7 @@ int StMCStepping::Fun()
   Float_t xx = fCurrentPosition[0];
   Float_t yy = fCurrentPosition[1];
   Float_t zz = fCurrentPosition[2];
+
 
   TVector3 direction(xx,yy,zz);
   Float_t eta = -999.0;
@@ -369,6 +337,7 @@ int StMCStepping::Fun()
   // Path length only makes sense when track exits a volume.
   Float_t pathlen     = fCurrentLength - fEnterLength;  
   TString volume      = gMC->CurrentVolName();
+
   
   if ( TRACK_NEW )
     {
@@ -376,7 +345,10 @@ int StMCStepping::Fun()
       for ( Int_t i=0;i<mNumberOfVolumes+1;i++ )
 	{
 	  mRadlenSum[ i ] = 0.0;
+	  mHasEntered[ i ] = false;
 	}
+
+      mRadlenAcc = 0.0;
 	
     }
 
@@ -392,16 +364,89 @@ int StMCStepping::Fun()
       // On exit, accumulate radiation length sums
       if ( radlen > 0. ) 
 	{
-	  Float_t nradlen = density * pathlen / radlen;
+	  Double_t nradlen = density * pathlen / radlen;
 
-	  for ( Int_t i=0;i<level+1;i++ ) // Loop over volume numbers in this branch/path
+	  /////////////////////// <<<<<<<<<<<<<<<<<<< level or level+1 ??
+	  //$$$	  for ( Int_t i=0;i<level+1;i++ )     // Loop over volume numbers in this branch/path
+	  for ( Int_t i=0;i<level;i++ )
 	    {
 	      Int_t id = volu_numbers[i];
 	      mRadlenSum[ id ] += nradlen;
 	    }
 
+	  mRadlenAcc += nradlen;
+
 	}
+
     }
+
+  if ( TRACK_ENTER )
+    {
+
+      // Track is entering this volume.
+      Int_t level = fNavigator->GetLevel();
+      Int_t volu_numbers[ level+1 ];
+      Int_t copy_numbers[ level+1 ];
+      fNavigator->GetBranchNumbers( copy_numbers, volu_numbers );      
+
+      for ( Int_t i=0;i<level; i++ )
+	{
+	  Int_t id = volu_numbers[i];
+	  if ( ! mHasEntered[id] ) 
+	    {
+	      hRadlenAccu1D[ id ] -> Fill( eta, mRadlenAcc );
+	      mHasEntered[ id ] = true;
+	    }
+	}
+      
+    }
+
+
+
+
+#if 0
+
+  //  if ( path.Contains("TOFS") )
+    {
+      std::cout << "========================================================================================" << std::endl;
+      std::cout << Form("Volume: %s",fVolume->GetName())<<std::endl;
+      std::cout << Form("Shape: %s",fVolume->GetShape()->GetName())<<std::endl;
+      //fVolume->InspectShape();
+      fNode->InspectNode();
+
+      std::cout << path.Data() << std::endl;
+      std::cout << Form("x=%9.5f y=%9.5f z=%9.5f eta=%9.5f phi=%9.5f",xx,yy,zz,eta,phi) << std::endl;
+      std::cout << Form("Radlen  = %9.5f g/cm^2",radlen) << std::endl;
+      std::cout << Form("Density = %9.5f g/cm^3",density) << std::endl;
+      std::cout << Form("Pathlen = %9.5f cm",pathlen) << std::endl;
+      std::cout << Form("Medium  = %s", fMedium->GetName())<< std::endl;
+      const Char_t *keys[]={"isvol","ifield","fieldm","tmaxfd","stemax","deemax","epsil","stmin"};
+      for ( Int_t i=0;i<8;i++ )
+	{
+	  std::cout << Form("+ %10s = %9.4f",keys[i],fMedium->GetParam(i)) << std::endl;
+	}
+      std::cout << Form("Navigator")<<std::endl;
+      std::cout << Form("+ step  = %9.5f",fNavigator->GetStep()) << std::endl;
+      std::cout << Form("+ many  = %i",fNavigator->GetNmany())<< std::endl;
+      std::cout << Form("+ enter = %i",fNavigator->IsEntering())<<std::endl;
+      std::cout << Form("+ exit  = %i",fNavigator->IsExiting())<<std::endl;
+      std::cout << Form("+ safet = %f",fNavigator->Safety())<<std::endl;
+      fNavigator->InspectState();
+
+      Int_t level = fNavigator->GetLevel();
+      Int_t volu_numbers[ level+1 ];
+      Int_t copy_numbers[ level+1 ];
+      fNavigator->GetBranchNumbers( copy_numbers, volu_numbers );      
+
+      std::cout << Form("SUM rad = %9.5f",mRadlenSum[ volu_numbers[level] ]) << std::endl;      
+    }
+#endif
+
+
+
+
+
+
   
 
   switch (fCase) 

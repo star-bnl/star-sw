@@ -22,6 +22,8 @@
 #include "TVector3.h"
 #include "TPaveText.h"
 
+#include "TRandom3.h"
+
 ClassImp(StarBASE);
 
 //_____________________________________________________________________________
@@ -89,6 +91,10 @@ int StarBASE::Make()
 
   assert( dphi > 0.0 && deta > 0.0 );
 
+  TRandom3 *random = new TRandom3(1234);
+
+
+  //
   // Scan the detector
   //
   Float_t phi, eta;
@@ -97,13 +103,22 @@ int StarBASE::Make()
 
       for ( eta=min_eta+deta/2; eta<max_eta; eta+=deta )
 	{
-	  if ( *SAttr("sample") ) {
-	    mGenerator->SetGenerator( nsample, 48, 10, 10, eta-deta/2, eta+deta/2, phi-dphi/2, phi+dphi/2, 0., 0., "G" );
-	  }
-	  else {
-	    mGenerator->SetGenerator( 1, 48, 10, 10, eta, eta, phi, phi, 0., 0., "G" );
-	  }
+
+	  Double_t vertex=random->Gaus(0.,1.0); // smear by 1 cm in z	  
+	  mGenerator -> SetVertex( vertex, vertex );
+
+	  if ( *SAttr("sample") ) 
+	    {
+	      mGenerator->SetGenerator( nsample, 48, 10, 10, eta-deta/2, eta+deta/2, phi-dphi/2, phi+dphi/2, 0., 0., "G" );
+	    }
+	  else 
+	    {
+	      mGenerator->SetGenerator( 1, 48, 10, 10, eta, eta, phi, phi, 0., 0., "G" );
+	    }
 	  TVirtualMC::GetMC()->ProcessEvent();
+
+	  // Just once through
+	  //	  return kStOK;
 
 	}
 
@@ -153,6 +168,12 @@ int StarBASE::Finish()
       if ( mSteps->hRadlenHist1D[i] ) {
 	AddHist( mSteps->hRadlenHist1D[i] );
 	AddHist( mSteps->hCountsHist1D[i] );
+	AddHist( mSteps->hRadlenAccu1D[i] );
+
+	//	std::cout << mSteps->hRadlenAccu1D[i]->GetName() << std::endl;
+	
+	//	AddHist( mSteps->hEnterHist1D[i] );
+	//	AddHist( mSteps->hExitHist1D[i] );
       }
     }
 
