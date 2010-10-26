@@ -19,7 +19,8 @@ class Track {
     // Destructor
     virtual ~Track() {}
 
-    virtual void SetParticle(std::string part);
+    virtual 
+    void SetParticle(std::string part);
 
     void SetEnergy(const double e);
     void SetBetaGamma(const double bg);

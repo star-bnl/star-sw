@@ -151,12 +151,12 @@ TrackHeed::NewTrack(
         const double dx0, const double dy0, const double dz0) {
 
   hasActiveTrack = false;
-  
+  ready = false;
+ 
   // Make sure the sensor has been set.
   if (sensor == 0) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Sensor is not defined.\n";
-    ready = false;
     return;
   }
   
@@ -166,7 +166,6 @@ TrackHeed::NewTrack(
   if (!sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Drift area is not set.\n";
-    ready = false;
     return;
   }
   // Check if the bounding box has changed.
@@ -191,12 +190,10 @@ TrackHeed::NewTrack(
   if (!sensor->GetMedium(x0, y0, z0, medium)) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    No medium at initial position.\n";
-    ready = false;
     return;
   } else if (!medium->IsIonisable()) {
     std::cerr << "TrackHeed:NewTrack:\n";
     std::cerr << "    Medium at initial position is not ionisable.\n";
-    ready = false;
     return;
   }
 
@@ -209,9 +206,7 @@ TrackHeed::NewTrack(
   // If medium, particle or bounding box have changed, 
   // update the cross-sections.
   if (isChanged) {
-    ready = false;
     if (!Setup(medium)) return;
-    ready = true;
     isChanged = false;
     mediumName    = medium->GetName();
     mediumDensity = medium->GetMassDensity();
@@ -225,11 +220,16 @@ TrackHeed::NewTrack(
   // Check the direction vector.
   double dx = dx0, dy = dy0, dz = dz0;
   const double d = sqrt(dx * dx + dy * dy + dz * dz);
-  if (d <= 0.) {
+  if (d < Small) {
+    if (debug) {
+      std::cout << className << "::NewTrack:\n";
+      std::cout << "    Direction vector has zero norm.\n";
+      std::cout << "    Initial direction is randomized.\n";
+    }
     // Null vector. Sample the direction isotropically.
-    const double phi = TwoPi * RndmUniform();
     const double ctheta = 1. - 2. * RndmUniform();
     const double stheta = sqrt(1. - ctheta * ctheta);
+    const double phi = TwoPi * RndmUniform();
     dx = cos(phi) * stheta;
     dy = sin(phi) * stheta;
     dz = ctheta;
@@ -297,6 +297,7 @@ TrackHeed::NewTrack(
   // Transport the particle.
   particle->fly();
   hasActiveTrack = true;
+  ready = true;
 
   // Plot the new track.
   if (usePlotting) PlotNewTrack(x0, y0, z0);

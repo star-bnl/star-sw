@@ -32,17 +32,18 @@ class ComponentTcad3d : public ComponentBase {
     bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
                         double& xmax, double& ymax, double& zmax); 
                         
-    // Import mesh and field map from files
+    // Import mesh and field map from files.
     bool Initialise(const std::string gridfilename, 
                     const std::string datafilename);
 
+    // Get the number of regions in the device.
     int  GetNumberOfRegions() const {return nRegions;}
-    void GetRegion(const int i, std::string& name, bool& active);
-    void SetDriftRegion(const int i);
-    void UnsetDriftRegion(const int i);
+    void GetRegion(const int ireg, std::string& name, bool& active);
+    void SetDriftRegion(const int ireg);
+    void UnsetDriftRegion(const int ireg);
     // Set/get the medium for a given region
-    void SetMedium(const int i, Medium* m);
-    bool GetMedium(const int i, Medium*& m) const;
+    void SetMedium(const int ireg, Medium* m);
+    bool GetMedium(const int ireg, Medium*& m) const;
 
   private:
   

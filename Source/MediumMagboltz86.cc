@@ -632,14 +632,14 @@ MediumMagboltz86::GetPhotonCollisionRate(const double e) {
     // Check if the energy is within the width of a discrete line.
     int iExc = -1;
     if (deexcitations[lastDxc].cf > 0. && 
-        fabs(e - deexcitations[lastDxc].energy) < 
+        fabs(e - deexcitations[lastDxc].energy) <= 
         deexcitations[lastDxc].width) {
       iExc = lastDxc;
     } else {
       // Loop over the excitations.
       for (int i = nDeexcitations; i--;) {
         if (deexcitations[i].cf > 0. && 
-            fabs(e - deexcitations[i].energy) < deexcitations[i].width) {
+            fabs(e - deexcitations[i].energy) <= deexcitations[i].width) {
           iExc = lastDxc = i;
           break;
         }
@@ -648,7 +648,7 @@ MediumMagboltz86::GetPhotonCollisionRate(const double e) {
     if (iExc >= 0) {
       // Add the collision rate for the discrete line.
       cfSum += deexcitations[iExc].cf * 
-               TMath::Voigt(deexcitations[iExc].energy - e,
+               TMath::Voigt(e - deexcitations[iExc].energy,
                             deexcitations[iExc].sDoppler, 
                             2 * deexcitations[iExc].gPressure);
     }
@@ -2300,10 +2300,10 @@ MediumMagboltz86::ComputeDeexcitation(int iLevel) {
         double delta = RndmVoigt(0., 
                                  deexcitations[iLevel].sDoppler,
                                  deexcitations[iLevel].gPressure);
-        if (delta > deexcitations[iLevel].width) {
-          delta = deexcitations[iLevel].width;
-        } else if (delta < -deexcitations[iLevel].width) {
-          delta = -deexcitations[iLevel].width;
+        while (delta >=  deexcitations[iLevel].width || 
+               delta <= -deexcitations[iLevel].width) {
+          delta = RndmVoigt(0., deexcitations[iLevel].sDoppler,
+                                deexcitations[iLevel].gPressure);
         }
         newDxcProd.energy += delta;
       }
@@ -2421,7 +2421,8 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
     const double wDoppler = sqrt(BoltzmannConstant * temperature / mgas);
     deexcitations[i].sDoppler = wDoppler * deexcitations[i].energy;
     // Compute the half width at half maximum due to resonance broadening.
-    deexcitations[i].gPressure = FineStructureConstant * pow(HbarC, 3) * 
+    deexcitations[i].gPressure = 1.5 * 
+                                 FineStructureConstant * pow(HbarC, 3) * 
                                  deexcitations[i].osc * dens * 
                                  fraction[deexcitations[i].gas] / 
                                  (ElectronMass * deexcitations[i].energy);
@@ -2450,17 +2451,17 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
       if (minDist < 0. || d < minDist) minDist = d; 
     }
     if (deexcitations[i].width > 0.5 * minDist) {
-      deexcitations[i].width = 0.5 * minDist; 
+      deexcitations[i].width = 0.5 * minDist;
     }
-  } 
+  }
   
   if (debug) {
     std::cout << className << "::ComputePhotonCollisionTable:\n";
     std::cout << "    Discrete absorption lines:\n";
-    std::cout << "      Energy [eV]  Line width (FWHM) [eV]  "
-              << " Mean free path [um]\n";
-    std::cout << "                     Doppler   Pressure   "
-              << "   (peak)      (wing)\n";
+    std::cout << "      Energy [eV]        Line width (FWHM) [eV]  "
+              << "    Mean free path [um]\n";
+    std::cout << "                            Doppler     Pressure   "
+              << "     (peak)      (wing)\n";
     for (int i = 0; i < nDeexcitations; ++i) {
       if (deexcitations[i].osc < Small) continue;
       const double imfpP = (deexcitations[i].cf / SpeedOfLight) * 
@@ -2472,8 +2473,10 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
                                         2 * deexcitations[i].gPressure);
       std::cout << "      " << std::fixed << std::setw(6) 
                 << std::setprecision(3) 
-                << deexcitations[i].energy << "       "
-                << std::scientific << std::setprecision(3) 
+                << deexcitations[i].energy << " +/- " 
+                << std::scientific << std::setprecision(1)
+                << deexcitations[i].width << "   "
+                << std::setprecision(2)  
                 << 2 * sqrt(2 * log(2.)) * deexcitations[i].sDoppler 
                 << "   " << std::scientific << std::setprecision(3) 
                 << 2 * deexcitations[i].gPressure << "  "

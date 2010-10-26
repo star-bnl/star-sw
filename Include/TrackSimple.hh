@@ -12,7 +12,7 @@ class TrackSimple: public Track {
     // Constructor
     TrackSimple();
     // Destructor
-    virtual ~TrackSimple() {}
+    ~TrackSimple() {}
 
     void SetEqualSpacing() {useEqualSpacing = true;}
     void SetExponentialSpacing() {useEqualSpacing = false;}

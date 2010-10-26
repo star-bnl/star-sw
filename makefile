@@ -106,6 +106,11 @@ $(OBJDIR)/TrackHeed.o: \
 	$(HEEDDIR)/HeedChamber.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
+$(OBJDIR)/TrackElectron.o: \
+	$(SRCDIR)/TrackElectron.cc $(INCDIR)/TrackElectron.hh \
+	$(INCDIR)/Track.hh $(SRCDIR)/Track.cc
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
 
 $(OBJDIR)/ComponentBase.o: \
 	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh \

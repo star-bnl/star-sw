@@ -54,11 +54,11 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetStatBorderSize(0);    
   garfieldStyle->SetStatColor(0);
   garfieldStyle->SetStatFont(132);
-  garfieldStyle->SetStatFontSize(0.025);
+  garfieldStyle->SetStatFontSize(0.03);
   garfieldStyle->SetStatX(0.88);
   garfieldStyle->SetStatY(0.88);
   garfieldStyle->SetStatW(0.25);
-  garfieldStyle->SetStatH(0.10);
+  garfieldStyle->SetStatH(0.15);
   garfieldStyle->SetOptStat(111110);
   garfieldStyle->SetLabelFont(132, "xyz");
   garfieldStyle->SetPaperSize(TStyle::kA4);
@@ -79,21 +79,26 @@ PlottingEngineRoot::GetRootColor(std::string color) {
   }
 
   if (color == "RED") {
-    return kRed;
+    return kRed + 1;
   } else if (color == "GREEN") {
-    return kGreen;
+    return kGreen + 2;
   } else if (color == "BLUE") {
-    return kBlue;
+    return kBlue + 2;
+  } else if (color == "DARK-RED") {
+    return kRed + 3;
+  } else if (color == "DARK-GREEN") {
+    return kGreen + 3;
+  } else if (color == "DARK-BLUE") {
+    return kBlue + 3;
   } else if (color == "ORANGE") {
     return kOrange;
-  } else if (color == "DARK-GREEN") {
-    return kGreen + 2;
-  } else if (color == "DARK-RED") {
-    return kRed + 2;
-  } else if (color == "DARK-BLUE") {
-    return kBlue + 2;
+  } else if (color == "PURPLE") {
+    return kViolet - 7;
+  } else if (color == "CYAN") {
+    return kCyan + 3;
+  } else if (color == "OLIVE") {
+    return kSpring + 4;
   }
-
   return kBlack;
 
 }
