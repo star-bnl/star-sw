@@ -345,7 +345,6 @@ class MediumMagboltz86 : public MediumGas {
       double cf;
     };
     std::vector<deexcitation> deexcitations;
-    int lastDxc;
     // Mapping between deexcitations and cross-section terms.
     int iDeexcitation[nMaxLevels];
     int nDeexcitationProducts;

@@ -22,7 +22,7 @@ MediumMagboltz86::MediumMagboltz86() :
   nTerms(0), useAnisotropic(true), 
   nPenning(0), 
   useDeexcitation(false), useRadTrap(true),
-  nDeexcitations(0), lastDxc(0), nDeexcitationProducts(0), 
+  nDeexcitations(0), nDeexcitationProducts(0), 
   scaleExc(1.), useSplittingFunction(true),
   eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma) {
  
@@ -629,28 +629,16 @@ MediumMagboltz86::GetPhotonCollisionRate(const double e) {
   
   double cfSum = cfTotGamma[iE];
   if (useDeexcitation && useRadTrap && nDeexcitations > 0) {
-    // Check if the energy is within the width of a discrete line.
-    int iExc = -1;
-    if (deexcitations[lastDxc].cf > 0. && 
-        fabs(e - deexcitations[lastDxc].energy) <= 
-        deexcitations[lastDxc].width) {
-      iExc = lastDxc;
-    } else {
-      // Loop over the excitations.
-      for (int i = nDeexcitations; i--;) {
-        if (deexcitations[i].cf > 0. && 
-            fabs(e - deexcitations[i].energy) <= deexcitations[i].width) {
-          iExc = lastDxc = i;
-          break;
-        }
+    // Loop over the excitations.
+    for (int i = nDeexcitations; i--;) {
+      // Check if the energy is within the width of a discrete line.
+      if (deexcitations[i].cf > 0. && 
+          fabs(e - deexcitations[i].energy) <= deexcitations[i].width) {
+        cfSum += deexcitations[i].cf * 
+                 TMath::Voigt(e - deexcitations[i].energy,
+                              deexcitations[i].sDoppler, 
+                              2 * deexcitations[i].gPressure);
       }
-    }
-    if (iExc >= 0) {
-      // Add the collision rate for the discrete line.
-      cfSum += deexcitations[iExc].cf * 
-               TMath::Voigt(e - deexcitations[iExc].energy,
-                            deexcitations[iExc].sDoppler, 
-                            2 * deexcitations[iExc].gPressure);
     }
   }
 
@@ -694,37 +682,38 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
   double r = cfTotGamma[iE];
   if (useDeexcitation && useRadTrap && nDeexcitations > 0) {
     // Check if the energy is within the width of a discrete line.
-    int iExc = -1;
-    if (deexcitations[lastDxc].cf > Small && 
-        fabs(e - deexcitations[lastDxc].energy) < 
-        deexcitations[lastDxc].width) {
-      iExc = lastDxc;
-    } else {
-      for (int i = nDeexcitations; i--;) {
-        if (deexcitations[i].cf > Small && 
-            fabs(e - deexcitations[i].energy) < deexcitations[i].width) {
-          iExc = lastDxc = i;
-          break;
-        }
+    int nLines = 0;
+    std::vector<double> pLine(0);
+    std::vector<int> iLine(0);
+    // Loop over the excitations.
+    for (int i = nDeexcitations; i--;) {
+      if (deexcitations[i].cf > 0. && 
+          fabs(e - deexcitations[i].energy) <= deexcitations[i].width) {
+        r += deexcitations[i].cf * 
+             TMath::Voigt(e - deexcitations[i].energy,
+                          deexcitations[i].sDoppler, 
+                          2 * deexcitations[i].gPressure);
+        pLine.push_back(r);
+        iLine.push_back(i);
+        ++nLines;
       }
     }
-    if (iExc >= 0) {
-      // Add the collision rate for the discrete line.
-      r += deexcitations[iExc].cf * 
-           TMath::Voigt(deexcitations[iExc].energy - e,
-                        deexcitations[iExc].sDoppler, 
-                        2 * deexcitations[iExc].gPressure);
-      r *= RndmUniform();
-      if (r >= cfTotGamma[iE]) {
-        // Photon is absorbed by the discrete line.
-        ++nPhotonCollisions[PhotonCollisionTypeExcitation];
-        ComputeDeexcitation(iExc);
-        type = PhotonCollisionTypeExcitation;
-        nsec = nDeexcitationProducts;
-        return true;
+    r *= RndmUniform();
+    if (nLines > 0 && r >= cfTotGamma[iE]) {
+      // Photon is absorbed by a discrete line.
+      for (int i = 0; i < nLines; ++i) {
+        if (r <= pLine[i]) {
+          ++nPhotonCollisions[PhotonCollisionTypeExcitation];
+          ComputeDeexcitation(iLine[i]);
+          type = PhotonCollisionTypeExcitation;
+          nsec = nDeexcitationProducts;
+          return true;
+        }
       }
-    } else {
-      r *= RndmUniform();
+      std::cerr << className << "::GetPhotonCollision:\n";
+      std::cerr << "    Random sampling of deexcitation line failed.\n";
+      std::cerr << "    Program bug!\n";
+      return false;
     }
   } else {
     r *= RndmUniform();
@@ -1679,7 +1668,6 @@ MediumMagboltz86::ComputeDeexcitationTable() {
   std::map<std::string, int> mapDxc;
   std::map<std::string, int>::iterator itMap;
   nDeexcitations = 0;
-  lastDxc = 0;
   for (itMap = mapLevels.begin(); itMap != mapLevels.end(); itMap++) {
     std::string level = (*itMap).first;
     mapDxc[level] = nDeexcitations;
@@ -2421,19 +2409,20 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
     const double wDoppler = sqrt(BoltzmannConstant * temperature / mgas);
     deexcitations[i].sDoppler = wDoppler * deexcitations[i].energy;
     // Compute the half width at half maximum due to resonance broadening.
-    deexcitations[i].gPressure = 1.5 * 
+    //   A. W. Ali and H. R. Griem, Phys. Rev. 140, 1044
+    //   A. W. Ali and H. R. Griem, Phys. Rev. 144, 366
+    deexcitations[i].gPressure = 1.92 * Pi * sqrt(1. / 3.) * 
                                  FineStructureConstant * pow(HbarC, 3) * 
                                  deexcitations[i].osc * dens * 
                                  fraction[deexcitations[i].gas] / 
                                  (ElectronMass * deexcitations[i].energy);
     // Make an estimate for the width within which a photon can be 
     // absorbed by the line
-    deexcitations[i].width = 100 * (
+    deexcitations[i].width = 2000 * (
                      sqrt(2. * log(2.)) * deexcitations[i].sDoppler + 
                      deexcitations[i].gPressure);
     ++nResonanceLines;
   }
-  lastDxc = 0;
 
   if (nResonanceLines <= 0) {
     std::cerr << className << "::ComputePhotonCollisionTable:\n";
@@ -2441,27 +2430,13 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
     return true;
   }
 
-  // Adjust the width to keep the lines separated.
-  for (int i = nResonanceLines; i--;) {
-    double minDist = -1.;
-    for (int j = nResonanceLines; j--;) {
-      if (j == i) continue;
-      const double d = fabs(deexcitations[j].energy - 
-                            deexcitations[i].energy);
-      if (minDist < 0. || d < minDist) minDist = d; 
-    }
-    if (deexcitations[i].width > 0.5 * minDist) {
-      deexcitations[i].width = 0.5 * minDist;
-    }
-  }
-  
   if (debug) {
     std::cout << className << "::ComputePhotonCollisionTable:\n";
     std::cout << "    Discrete absorption lines:\n";
     std::cout << "      Energy [eV]        Line width (FWHM) [eV]  "
               << "    Mean free path [um]\n";
-    std::cout << "                            Doppler     Pressure   "
-              << "     (peak)      (wing)\n";
+    std::cout << "                            Doppler    Pressure   "
+              << "   (peak)      (wing)\n";
     for (int i = 0; i < nDeexcitations; ++i) {
       if (deexcitations[i].osc < Small) continue;
       const double imfpP = (deexcitations[i].cf / SpeedOfLight) * 
