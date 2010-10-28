@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.83 2010/05/30 21:12:44 genevb Exp $
+ * $Id: StMagUtilities.cxx,v 1.84 2010/10/28 19:10:59 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.84  2010/10/28 19:10:59  genevb
+ * Provide for  usage of tpcHVPlanes and GG Voltage Error
+ *
  * Revision 1.83  2010/05/30 21:12:44  genevb
  * For GridLeak studies: more knobs to adjust GL and SC in Predict() functions
  *
@@ -338,6 +341,7 @@ To do:  <br>
 #include "StTpcDb/StTpcDb.h"
 #include "tables/St_MagFactor_Table.h"
 #include "tables/St_tpcFieldCageShort_Table.h"
+#include "StDetectorDbMaker/St_tpcHVPlanesC.h"
 #include "StDetectorDbMaker/St_tpcFieldCageShortC.h"
   //#include "StDetectorDbMaker/StDetectorDbMagnet.h"
 
@@ -377,6 +381,7 @@ StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
   GetSpaceChargeR2()    ;    // Get the spacecharge variable R2 from the DB and EWRatio
   GetShortedRing()      ;    // Get the parameters that describe the shorted ring on the field cage
   GetGridLeak()         ;    // Get the parameters that describe the gating grid leaks
+  GetHVPlanes()         ;    // Get the parameters that describe the HV plane errors
   CommonStart( mode )   ;    // Read the Magnetic and Electric Field Data Files, set constants
   UseManualSCForPredict(kFALSE) ; // Initialize use of Predict() functions;
 }
@@ -400,6 +405,7 @@ StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t 
   ManualSpaceChargeR2(0,1) ;     // Do not get SpaceChargeR2 out of the DB - use defaults inserted here, SpcChg and EWRatio
   ManualShortedRing(0,0,0,0,0) ; // No shorted rings
   fGridLeak      =  0   ;        // Do not get Grid Leak data from the DB  - use defaults in CommonStart
+  fHVPlanes      =  0   ;        // Do not get GGVoltErr data from the DB  - use defaults in CommonStart
   CommonStart( mode )   ;        // Read the Magnetic and Electric Field Data Files, set constants
   UseManualSCForPredict(kFALSE) ; // Initialize use of Predict() functions;
 }
@@ -442,6 +448,7 @@ void StMagUtilities::GetTPCVoltages ()
   fTpcVolts      =  StDetectorDbTpcVoltages::instance() ;  // Initialize the DB for TpcVoltages
   CathodeV       =  fTpcVolts->getCathodeVoltage() * 1000 ; 
   GG             =  fTpcVolts->getGGVoltage() ; 
+  StarMagE       =  TMath::Abs((CathodeV-GG)/TPC_Z0) ;         // STAR Electric Field (V/cm) Magnitude
 }
 
 void StMagUtilities::GetSpaceCharge ()  
@@ -580,6 +587,20 @@ void StMagUtilities::ManualGridLeakWidth (Double_t inner, Double_t middle, Doubl
   OuterGridLeakWidth     =  outer  ;  // Half-width of the Outer grid leak.  
 }
 
+void StMagUtilities::GetHVPlanes ()
+{
+   fHVPlanes = St_tpcHVPlanesC::instance() ;
+   tpcHVPlanes_st* HVplanes = fHVPlanes -> Struct();
+   deltaVGGEast =   HVplanes -> GGE_shift_z * StarMagE;
+   deltaVGGWest = - HVplanes -> GGW_shift_z * StarMagE;
+}
+
+void StMagUtilities::ManualGGVoltError (Double_t east, Double_t west)
+{
+  deltaVGGEast = east;
+  deltaVGGWest = west;
+}
+
 //________________________________________
 
 //  Standard maps for E and B Field Distortions ... Note: These are no longer read from a file but are listed here (JT, 2009).
@@ -664,6 +685,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
     { 
       CathodeV    = -27950.0 ;      // Cathode Voltage (volts)
       GG          =   -115.0 ;      // Gating Grid voltage (volts)
+      StarMagE    =  TMath::Abs((CathodeV-GG)/TPC_Z0) ;         // STAR Electric Field (V/cm) Magnitude
       cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected TpcVoltages setting. " << endl ;
     } 
   else  cout << "StMagUtilities::CommonSta  Using TPC voltages from the DB."   << endl ; 
@@ -691,6 +713,13 @@ void StMagUtilities::CommonStart ( Int_t mode )
     }
   else  cout << "StMagUtilities::CommonSta  Using GridLeak parameters from the DB."   << endl ; 
   
+  if ( fHVPlanes == 0 ) 
+    {
+      ManualGGVoltError(0.0,0.0);
+      cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected HV planes parameters. " << endl ; 
+    }
+  else  cout << "StMagUtilities::CommonSta  Using HV planes parameters from the DB."   << endl ; 
+
   // Parse the mode switch which was received from the Tpt maker
   // To turn on and off individual distortions, set these higher bits
   // Default behavior: no bits set gives you the following defaults
@@ -728,7 +757,6 @@ void StMagUtilities::CommonStart ( Int_t mode )
   // Float_t TensorV1    =  1.35 ;  // Drift velocity tensor term: in the ExB direction
   // Float_t TensorV2    =  1.10 ;  // Drift velocity tensor term: direction perpendicular to Z and ExB
 
-  StarMagE   =  TMath::Abs((CathodeV-GG)/TPC_Z0) ;         // STAR Electric Field (V/cm) Magnitude
   OmegaTau   =  -10.0 * B[2] * StarDriftV / StarMagE ;     // B in kGauss, note the sign of B is important 
 
   Const_0    =  1. / ( 1. +  TensorV2*TensorV2*OmegaTau*OmegaTau ) ;
@@ -763,6 +791,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
   cout << "StMagUtilities::InnerGridLeak =  " << InnerGridLeakStrength << " " << InnerGridLeakRadius << " " << InnerGridLeakWidth << endl;
   cout << "StMagUtilities::MiddlGridLeak =  " << MiddlGridLeakStrength << " " << MiddlGridLeakRadius << " " << MiddlGridLeakWidth << endl;
   cout << "StMagUtilities::OuterGridLeak =  " << OuterGridLeakStrength << " " << OuterGridLeakRadius << " " << OuterGridLeakWidth << endl;
+  cout << "StMagUtilities::deltaVGG      =  " << deltaVGGEast << " V (east) : " << deltaVGGWest << " V (west)" << endl;
 
 }
 
@@ -2038,8 +2067,6 @@ void StMagUtilities::UndoGGVoltErrorDistortion( const Float_t x[], Float_t Xprim
   Double_t r, phi, z ;
 
   // if (fTpcVolts) DoOnce = UpdateGGVoltError() ;  // Reserved for Gene VB to do this correctly
-  deltaVGGEast = -10.0 ;                            // deltas should come from DB
-  deltaVGGWest =  10.0 ;                            // deltas should come from DB
 
   if ( DoOnce )  // Note reversed logic compared to other methods in StMagUtilities
     {

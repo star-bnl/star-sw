@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.46 2010/05/30 21:12:44 genevb Exp $
+ * $Id: StMagUtilities.h,v 1.47 2010/10/28 19:10:59 genevb Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.47  2010/10/28 19:10:59  genevb
+ * Provide for  usage of tpcHVPlanes and GG Voltage Error
+ *
  * Revision 1.46  2010/05/30 21:12:44  genevb
  * For GridLeak studies: more knobs to adjust GL and SC in Predict() functions
  *
@@ -182,6 +185,7 @@ enum   EBMapSizes
 
 class StTpcDb ;
 class TDataSet ;
+class St_tpcHVPlanesC;
 #include "StDetectorDbMaker/StDetectorDbSpaceCharge.h"
 #include "StDetectorDbMaker/StDetectorDbTpcVoltages.h"
 #include "StDetectorDbMaker/StDetectorDbTpcOmegaTau.h"
@@ -202,6 +206,7 @@ class StMagUtilities {
   StDetectorDbTpcVoltages*   fTpcVolts      ;
   StDetectorDbTpcOmegaTau*   fOmegaTau      ;
   StDetectorDbGridLeak*      fGridLeak      ;
+  St_tpcHVPlanesC*           fHVPlanes      ;
 
   virtual void    SetDb( StTpcDb* dbin , TDataSet* dbin2 ) ;
   virtual void    GetMagFactor ()     ;
@@ -212,6 +217,7 @@ class StMagUtilities {
   virtual void    GetShortedRing ()   ;  
   virtual void    GetOmegaTau ()      ;
   virtual void    GetGridLeak()       ;
+  virtual void    GetHVPlanes()       ;
 
   virtual void    CommonStart ( Int_t mode ) ;
   virtual void    ReadField ( ) ;
@@ -386,6 +392,7 @@ class StMagUtilities {
   virtual Float_t  CurrentSpaceChargeEWRatio() { return SpaceChargeEWRatio ; }
   virtual Bool_t   UpdateShortedRing();
   virtual void     UseManualSCForPredict(Bool_t flag=kTRUE) { useManualSCForPredict=flag; };
+  virtual void     ManualGGVoltError(Double_t east, Double_t west);
 
   ClassDef(StMagUtilities,1)    // Base class for all STAR MagField
 
