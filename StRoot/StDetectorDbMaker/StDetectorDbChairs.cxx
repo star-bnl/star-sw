@@ -528,7 +528,8 @@ MakeChairInstance(tpcPadPlanes,Geometry/tpc/tpcPadPlanes);
 MakeChairInstance(tpcGlobalPosition,Geometry/tpc/tpcGlobalPosition);
 #include "St_tpcFieldCageShortC.h"
 MakeChairInstance(tpcFieldCageShort,Geometry/tpc/tpcFieldCageShort);
-#include "St_SurveyC.h"
+#include "St_tpcHVPlanesC.h"
+MakeChairInstance(tpcHVPlanes,Geometry/tpc/tpcHVPlanes);
 #include "St_SurveyC.h"
 ClassImp(St_SurveyC);
 #include "StSvtSurveyC.h"
