@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.75 2010/09/11 05:03:09 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.76 2010/10/28 19:08:43 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -372,6 +372,7 @@ Bfc_st BFC[] = {
   {"OShortR" ,"" ,"","","" ,"","Shorted Ring correction",kFALSE},
   {"OGridLeak" ,"" ,"","","" ,"","Grid Leak correction",kFALSE},
   {"OGridLeak3D" ,"" ,"","","" ,"","3D Grid Leak correction",kFALSE},
+  {"OGGVoltErr" ,"" ,"","","" ,"","GG voltage error correction",kFALSE},
   {"AlignSectors","" ,"","","" ,"","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"DbRichSca" ,"" ,"","detdb","","", "Force reading of Rich scalers from DB",kFALSE},
   {"EastOff" ,"" ,"","","" ,"","Disactivate East part of tpc",kFALSE},
@@ -1450,6 +1451,7 @@ Bfc_st BFC[] = {
   {"OShortR" ,"" ,"","","" ,"","Shorted Ring correction",kFALSE},
   {"OGridLeak" ,"" ,"","","" ,"","Grid Leak correction",kFALSE},
   {"OGridLeak3D" ,"" ,"","","" ,"","3D Grid Leak correction",kFALSE},
+  {"OGGVoltErr" ,"" ,"","","" ,"","GG voltage error correction",kFALSE},
   {"AlignSectors","" ,"","","" ,"","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"DbRichSca" ,"" ,"","detdb","","", "Force reading of Rich scalers from DB",kFALSE},
   {"EastOff" ,"" ,"","","" ,"","Disactivate East part of tpc",kFALSE},
@@ -2773,6 +2775,7 @@ Int_t StBFChain::Instantiate()
 	if( GetOption("OBMap2d")    ) mk->SetAttr("OBMap2d"    , kTRUE);
 	if( GetOption("OGridLeak")  ) mk->SetAttr("OGridLeak"  , kTRUE);
 	if( GetOption("OGridLeak3D")) mk->SetAttr("OGridLeak3D", kTRUE);
+	if( GetOption("OGGVoltErr") ) mk->SetAttr("OGGVoltErr" , kTRUE);
       }
       mk->PrintAttr();
     }
