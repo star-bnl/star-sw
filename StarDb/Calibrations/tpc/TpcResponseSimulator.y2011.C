@@ -1,7 +1,7 @@
-// $Id: TpcResponseSimulator.y2011.C,v 1.1 2010/08/02 20:57:36 fisyak Exp $
+// $Id: TpcResponseSimulator.y2011.C,v 1.2 2010/10/28 23:41:54 fisyak Exp $
 // $Log: TpcResponseSimulator.y2011.C,v $
-// Revision 1.1  2010/08/02 20:57:36  fisyak
-// Provisional values for y2011
+// Revision 1.2  2010/10/28 23:41:54  fisyak
+// extra t0 off set for Altro chip
 //
 // Revision 1.7  2010/06/14 23:36:08  fisyak
 // Freeze version V
@@ -87,6 +87,7 @@ TDataSet *CreateTable() {
   }
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
+  row.T0offset   = 0.50; // From  Lokesh Kumar for Run X
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
