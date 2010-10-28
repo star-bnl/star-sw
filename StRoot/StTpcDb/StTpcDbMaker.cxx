@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.57 2010/09/01 21:11:32 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.58 2010/10/28 19:08:43 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.58  2010/10/28 19:08:43  genevb
+ * Introduce GG Voltage Error switch
+ *
  * Revision 1.57  2010/09/01 21:11:32  fisyak
  * Use Mag.field flavor besides simu flag
  *
@@ -275,6 +278,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     if( IAttr("OBMap2d")    ) mask |= ( kFast2DBMap   << 1);
     if( IAttr("OGridLeak")  ) mask |= ( kGridLeak     << 1);
     if( IAttr("OGridLeak3D")) mask |= ( k3DGridLeak   << 1);
+    if( IAttr("OGGVoltErr") ) mask |= ( kGGVoltError  << 1);
     LOG_QA << "Instantiate ExB The option passed will be " << Form("%d 0x%X\n",mask,mask) << endm;
     // option handling needs some clean up, but right now we stay compatible
     Int_t option = (mask & 0x7FFFFFFE) >> 1;

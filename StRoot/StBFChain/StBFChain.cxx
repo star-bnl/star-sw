@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.567 2010/09/11 05:03:06 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.568 2010/10/28 19:08:43 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -629,6 +629,7 @@ Int_t StBFChain::Instantiate()
 	if( GetOption("OBMap2d")    ) mk->SetAttr("OBMap2d"    , kTRUE);
 	if( GetOption("OGridLeak")  ) mk->SetAttr("OGridLeak"  , kTRUE);
 	if( GetOption("OGridLeak3D")) mk->SetAttr("OGridLeak3D", kTRUE);
+	if( GetOption("OGGVoltErr") ) mk->SetAttr("OGGVoltErr" , kTRUE);
       }
       mk->PrintAttr();
     }
