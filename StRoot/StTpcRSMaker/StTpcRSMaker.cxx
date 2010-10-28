@@ -47,7 +47,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.42 2010/10/22 18:13:33 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.43 2010/10/28 23:42:34 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -932,7 +932,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      Float_t bin = Pad.timeBucket();//L  - 1; // K
 	      Int_t binT = TMath::Nint(bin); //L bin;//K TMath::Nint(bin);// J bin; // I TMath::Nint(bin);
 	      if (binT < 0 || binT >= NoOfTimeBins) continue;
-	      Double_t dT = bin -  binT + 0.5; // Lokesh found a shift in Z ~ -/+ 0.3 cm for Z +/-
+	      Double_t dT = bin -  binT + St_TpcResponseSimulatorC::instance()->T0offset();
 	      if (sigmaJitterT) dT += gRandom->Gaus(0,sigmaJitterT);
 	      Double_t dely[1]      = {transform.yFromRow(row)-yOnWire};            
 	      Double_t localYDirectionCoupling = ChargeFraction->GetSaveL(dely);
@@ -1471,8 +1471,11 @@ Double_t StTpcRSMaker::polya(Double_t *x, Double_t *par) {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.42 2010/10/22 18:13:33 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.43 2010/10/28 23:42:34 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.43  2010/10/28 23:42:34  fisyak
+// extra t0 off set for Altro chip
+//
 // Revision 1.42  2010/10/22 18:13:33  fisyak
 // Add fix from Lokesh AuAu7 2010 embdedding
 //

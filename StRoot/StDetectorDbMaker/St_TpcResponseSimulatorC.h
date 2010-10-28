@@ -51,6 +51,8 @@ class St_TpcResponseSimulatorC : public TChair {
 
   Float_t       PolyaInner(Int_t i = 0)     const {return  Struct(i)->PolyaInner;}
   Float_t       PolyaOuter(Int_t i = 0)     const {return  Struct(i)->PolyaOuter;}
+  Float_t       T0offset(Int_t i = 0)       const {return  Struct(i)->T0offset;}
+  
  protected:
   St_TpcResponseSimulatorC(St_TpcResponseSimulator *table=0) : TChair(table) {}
   virtual ~St_TpcResponseSimulatorC() {fgInstance = 0;}
