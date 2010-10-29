@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.C,v 1.7 2010/10/28 23:41:54 fisyak Exp $
+// $Id: TpcResponseSimulator.C,v 1.8 2010/10/29 16:04:05 fisyak Exp $
 // $Log: TpcResponseSimulator.C,v $
+// Revision 1.8  2010/10/29 16:04:05  fisyak
+// Set proper t0 offset for Run IX
+//
 // Revision 1.7  2010/10/28 23:41:54  fisyak
 // extra t0 off set for Altro chip
 //
@@ -73,7 +76,7 @@ TDataSet *CreateTable() {
   Float_t *b = &row.SecRowSigIW[0];
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
-  row.T0offset   = 0.25; // From Xianglei Zhu for Run IX
+  row.T0offset   = 0.00;
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;

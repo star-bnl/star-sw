@@ -1,5 +1,8 @@
-// $Id: TpcResponseSimulator.y2009.C,v 1.6 2010/06/14 23:36:08 fisyak Exp $
+// $Id: TpcResponseSimulator.y2009.C,v 1.7 2010/10/29 16:04:05 fisyak Exp $
 // $Log: TpcResponseSimulator.y2009.C,v $
+// Revision 1.7  2010/10/29 16:04:05  fisyak
+// Set proper t0 offset for Run IX
+//
 // Revision 1.6  2010/06/14 23:36:08  fisyak
 // Freeze version V
 //
@@ -81,6 +84,7 @@ TDataSet *CreateTable() {
   }
   row.PolyaInner = 1.38;
   row.PolyaOuter = 1.38;
+  row.T0offset   = 0.25; // From Xianglei Zhu for Run IX
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
