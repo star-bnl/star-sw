@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.h,v 1.5 2010/05/12 22:46:21 geurts Exp $
+ * $Id: StBTofCalibMaker.h,v 1.6 2010/10/30 05:20:52 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.h,v $
+ * Revision 1.6  2010/10/30 05:20:52  geurts
+ * Calibration Maker reads (file/dbase) in and applies cell-based, module-based, or board-based (TDIG) calibration parameters
+ *
  * Revision 1.5  2010/05/12 22:46:21  geurts
  * Startless BTOF self-calibration method (Xin)
  *
@@ -105,8 +108,14 @@ public:
   void setCalibFileZhit(const Char_t*);
   void setCalibFileT0(const Char_t*);
 
+  enum calibtype {NOTSET=0, BOARDCALIB=960, MODULECALIB=3840, CELLCALIB=23040};
+  Int_t getZCalibType();
+  Int_t getTotCalibType();
+
 private:
 
+  /// Calibration type
+  calibtype mZCalibType, mTotCalibType;
   /// Reset the calibration parameters
   void  resetPars();
   /// initialize StEvent/MuDst pointer
@@ -173,10 +182,10 @@ private:
     Int_t      mVPDEastHitsCut;
     Int_t      mVPDWestHitsCut;
 
-    Double_t   mTofTotEdge[mNTray][mNTDIG][mNBinMax];
-    Double_t   mTofTotCorr[mNTray][mNTDIG][mNBinMax];
-    Double_t   mTofZEdge[mNTray][mNTDIG][mNBinMax];
-    Double_t   mTofZCorr[mNTray][mNTDIG][mNBinMax];  //! board-by-board slewing
+    Float_t   mTofTotEdge[mNTray][mNTDIG][mNCell][mNBinMax];//!From Double_t to Float_t 
+    Float_t   mTofTotCorr[mNTray][mNTDIG][mNCell][mNBinMax];//! from board-by-board to cell-by-cell
+    Float_t   mTofZEdge[mNTray][mNTDIG][mNCell][mNBinMax];//! boards now filled 24 times
+    Float_t   mTofZCorr[mNTray][mNTDIG][mNCell][mNBinMax];
     Double_t   mTofTZero[mNTray][mNModule][mNCell];  //! cell-by-cell T0
 
     Double_t   mVPDLeTime[2*mNVPD];
@@ -217,9 +226,9 @@ private:
     TH1D*    hEventCounter;     //!
             
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.5 2010/05/12 22:46:21 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.6 2010/10/30 05:20:52 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
-    ClassDef(StBTofCalibMaker,2)
+    ClassDef(StBTofCalibMaker,3)
 };
 
 inline void StBTofCalibMaker::setVPDHitsCut(const Int_t ieast, const Int_t iwest) { mVPDEastHitsCut=ieast ; mVPDWestHitsCut=iwest; }
@@ -234,5 +243,7 @@ inline void StBTofCalibMaker::setCalibFilePvpd(const Char_t* filename) {mCalibFi
 inline void StBTofCalibMaker::setCalibFileTot(const Char_t* filename)  {mCalibFileTot = filename;}
 inline void StBTofCalibMaker::setCalibFileZhit(const Char_t* filename) {mCalibFileZhit = filename;}
 inline void StBTofCalibMaker::setCalibFileT0(const Char_t* filename)   {mCalibFileT0 = filename;}
+inline Int_t StBTofCalibMaker::getZCalibType() {return Int_t(mZCalibType);}
+inline Int_t StBTofCalibMaker::getTotCalibType() {return Int_t(mTotCalibType);}
 
 #endif
