@@ -1128,6 +1128,7 @@ TrackHeed::SetupGas(Medium* medium) {
                 << " are not available.\n";
       return false;
     }
+    if (gasname == "CH4") gasname = "Ar";
     notations.increment(gasname);
     fractions.increment(frac);
   }

@@ -1072,7 +1072,7 @@ OpticalData::PhotoAbsorptionCsMethane(const double e,
   if (e >= 285. && e <= 340.) {
     // Carbon K edge
   
-    const int nEntries = 134;
+    const int nEntries = 106;
     
     const double xCH4[nEntries] = {
       2.8500e02, 2.8591e02, 2.8640e02, 2.8671e02, 2.8695e02, 

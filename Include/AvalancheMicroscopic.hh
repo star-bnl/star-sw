@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-#include <TH1F.h>
+#include <TH1.h>
 
 #include "Sensor.hh"
 #include "ViewDrift.hh"
@@ -36,16 +36,16 @@ class AvalancheMicroscopic {
    void DisableInducedChargeCalculation() {useInducedCharge = false;}
 
     // Switch on/off filling histograms for energy distribution
-    void EnableEnergyHistogramming(TH1F* histo);
+    void EnableEnergyHistogramming(TH1* histo);
     void DisableEnergyHistogramming();
     
     // Switch on/off filling histograms for distance distribution
-    void SetDistanceHistogram(TH1F* histo, const char opt = 'r');
+    void SetDistanceHistogram(TH1* histo, const char opt = 'r');
     void EnableDistanceHistogramming(const int type);
     void DisableDistanceHistogramming(const int type);
     void DisableDistanceHistogramming();
 
-    void EnableSecondaryEnergyHistogramming(TH1F* histo);
+    void EnableSecondaryEnergyHistogramming(TH1* histo);
     void DisableSecondaryEnergyHistogramming();
 
     // Switch on/off storage of drift lines
@@ -189,15 +189,15 @@ class AvalancheMicroscopic {
     bool usePlotting;
     ViewDrift* viewer;
 
-    TH1F* histEnergy;
+    TH1* histEnergy;
     bool hasEnergyHistogram; 
-    TH1F* histDistance;
+    TH1* histDistance;
     bool hasDistanceHistogram;
     char distanceOption;
     int nDistanceHistogramTypes;
     std::vector<int> distanceHistogramType;
 
-    TH1F* histSecondary;
+    TH1* histSecondary;
     bool hasSecondaryHistogram;
 
     bool useSignal;

@@ -45,12 +45,14 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetGridWidth(1);
   garfieldStyle->SetPadGridX(kTRUE);
   garfieldStyle->SetPadGridY(kTRUE);
+  garfieldStyle->SetTitleStyle(0);
   garfieldStyle->SetTitleBorderSize(0);
   garfieldStyle->SetTitleColor(1, "xyz");
   garfieldStyle->SetTitleColor(1, "t");
   garfieldStyle->SetTitleFillColor(0);
   garfieldStyle->SetTitleFont(132, "xyz");
   garfieldStyle->SetTitleFont(132, "t");
+  garfieldStyle->SetStatStyle(0);
   garfieldStyle->SetStatBorderSize(0);    
   garfieldStyle->SetStatColor(0);
   garfieldStyle->SetStatFont(132);

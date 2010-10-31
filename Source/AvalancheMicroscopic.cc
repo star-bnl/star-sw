@@ -79,7 +79,7 @@ AvalancheMicroscopic::DisablePlotting() {
 }
 
 void 
-AvalancheMicroscopic::EnableEnergyHistogramming(TH1F* histo) {
+AvalancheMicroscopic::EnableEnergyHistogramming(TH1* histo) {
 
   if (histo == 0) {
     std::cerr << className << "::EnableEnergyHistogramming:\n"; 
@@ -100,7 +100,7 @@ AvalancheMicroscopic::DisableEnergyHistogramming() {
 }
 
 void 
-AvalancheMicroscopic::SetDistanceHistogram(TH1F* histo, const char opt) {
+AvalancheMicroscopic::SetDistanceHistogram(TH1* histo, const char opt) {
 
   if (histo == 0) {
     std::cerr << className << "::SetDistanceHistogram:\n"; 
@@ -191,7 +191,7 @@ AvalancheMicroscopic::DisableDistanceHistogramming() {
 }
 
 void 
-AvalancheMicroscopic::EnableSecondaryEnergyHistogramming(TH1F* histo) {
+AvalancheMicroscopic::EnableSecondaryEnergyHistogramming(TH1* histo) {
 
   if (histo == 0) {
     std::cerr << className << "::EnableSecondaryEnergyHistogramming:\n"; 
