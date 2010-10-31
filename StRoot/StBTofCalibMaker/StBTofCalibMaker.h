@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.h,v 1.6 2010/10/30 05:20:52 geurts Exp $
+ * $Id: StBTofCalibMaker.h,v 1.7 2010/10/31 05:51:06 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.h,v $
+ * Revision 1.7  2010/10/31 05:51:06  geurts
+ * fixed array dimensions to accomodate cell-based calibrations
+ *
  * Revision 1.6  2010/10/30 05:20:52  geurts
  * Calibration Maker reads (file/dbase) in and applies cell-based, module-based, or board-based (TDIG) calibration parameters
  *
@@ -182,11 +185,11 @@ private:
     Int_t      mVPDEastHitsCut;
     Int_t      mVPDWestHitsCut;
 
-    Float_t   mTofTotEdge[mNTray][mNTDIG][mNCell][mNBinMax];//!From Double_t to Float_t 
-    Float_t   mTofTotCorr[mNTray][mNTDIG][mNCell][mNBinMax];//! from board-by-board to cell-by-cell
-    Float_t   mTofZEdge[mNTray][mNTDIG][mNCell][mNBinMax];//! boards now filled 24 times
-    Float_t   mTofZCorr[mNTray][mNTDIG][mNCell][mNBinMax];
-    Double_t   mTofTZero[mNTray][mNModule][mNCell];  //! cell-by-cell T0
+    Float_t   mTofTotEdge[mNTray][mNModule][mNCell][mNBinMax];//!From Double_t to Float_t 
+    Float_t   mTofTotCorr[mNTray][mNModule][mNCell][mNBinMax];//! from board-by-board to cell-by-cell
+    Float_t   mTofZEdge[mNTray][mNModule][mNCell][mNBinMax];//! boards now filled 24 times
+    Float_t   mTofZCorr[mNTray][mNModule][mNCell][mNBinMax];
+    Double_t  mTofTZero[mNTray][mNModule][mNCell];  //! cell-by-cell T0
 
     Double_t   mVPDLeTime[2*mNVPD];
     
@@ -226,7 +229,7 @@ private:
     TH1D*    hEventCounter;     //!
             
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.6 2010/10/30 05:20:52 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofCalibMaker.h,v 1.7 2010/10/31 05:51:06 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StBTofCalibMaker,3)
 };
