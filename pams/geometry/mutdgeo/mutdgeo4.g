@@ -1,5 +1,9 @@
-* $Id: mutdgeo4.g,v 1.1 2010/07/30 18:32:29 jwebb Exp $
+* $Id: mutdgeo4.g,v 1.2 2010/10/31 16:28:21 jwebb Exp $
 * $Log: mutdgeo4.g,v $
+* Revision 1.2  2010/10/31 16:28:21  jwebb
+* Latest version of MUTD geometry, was 27 backlegs and 117 trays, now 28
+* backlegs and 118 tray.
+*
 * Revision 1.1  2010/07/30 18:32:29  jwebb
 * Added 4th version of the muon telescope detector provided by Bill Llope.
 *
@@ -32,7 +36,7 @@ Module  MUTDGEO4 is the geometry of the STAR MTD, WMRPC Version
 	                 MtdIGstackdX, MtdIGstackdY, MtdIGstackdZ }
 
 *---- local variables...
-	Integer kTrayConfig,iphi;
+	Integer kTrayConfig,iphi,Ntrayplaced;
 	Real	thisphi,thisx,chandim;
 
 *---- Define default values...
@@ -75,7 +79,7 @@ Module  MUTDGEO4 is the geometry of the STAR MTD, WMRPC Version
 	if (kTrayConfig==4) then
 		print *,' MuTD: You have requested the Run11 Geometry - Single Backleg, 3 trays'
 	else if (kTrayConfig==5) then
-		print *,' MuTD: You have requested the Run13 Geometry - 27 Backlegs, 117 trays'
+		print *,' MuTD: You have requested the Run14 Geometry - 27 Backlegs, 118 trays'
 	else
 		print *,' MuTD: Unknown Tray Configuration. .....WATCH OUT.....'
 	end if
@@ -97,25 +101,36 @@ Block MUTD is the muon detector mother
 	
 	Shape     TUBE  rmin=MTDD_Rmin rmax=MTDD_Rmax dz=MTDD_dZmother
 	
+	Ntrayplaced	= 0
+
 	if (kTrayConfig.eq.4) then			! single backleg, 3 trays
 		Create    MTMT 
 		Position  MTMT AlphaZ=90 z=0 
+		Ntrayplaced = Ntrayplaced + 3
 		
 	else if (kTrayConfig.eq.5) then		! full system
 		Create    MTMT 
 		Create    MTMF 
-		do iphi = 1,30
-			thisphi	= -30.0 + (iphi-1)*12.0
-			if (iphi.le.21)then
-				if (iphi.ne.3.and.iphi.ne.19.and.iphi.ne.20) then
+		do iphi = 1,30					! 30 backlegs
+			thisphi	= -18.0 + (iphi-1)*12.0
+			if (iphi.le.19)then
+				if (iphi.ne.2.and.iphi.ne.18) then
+					print *,' MuTD: iphi=',iphi,'  phi=',thisphi,'  -> 5-pack'
 					Position  MTMF AlphaZ=thisphi Z=0  
+					Ntrayplaced = Ntrayplaced + 5
+				else
+					print *,' MuTD: iphi=',iphi,'  phi=',thisphi,'  -> No trays'
 				end if
 			else 
+					print *,' MuTD: iphi=',iphi,'  phi=',thisphi,'  -> 3-pack'
 					Position  MTMT AlphaZ=thisphi Z=0  
+					Ntrayplaced = Ntrayplaced + 3
 			end if
 		end do
 	end if
-
+	
+	print *,' MuTD: You have placed Ntrays = ',Ntrayplaced
+	
 EndBlock
 *
 * ---------------------------------------------------------------------------
