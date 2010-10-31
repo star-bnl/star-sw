@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.6 2010/05/25 22:09:48 geurts Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.7 2010/10/31 05:43:57 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.7  2010/10/31 05:43:57  geurts
+ * apply outlier truncation to all energies, keep at 20% (previously only enabled for low beam energies)
+ *
  * Revision 1.6  2010/05/25 22:09:48  geurts
  * improved database handling and reduced log output
  *
@@ -368,11 +371,12 @@ Bool_t StVpdCalibMaker::loadVpdData()
       return kFALSE;
     }
 
-    if(mMuDst->event() && mMuDst->event()->runInfo().centerOfMassEnergy()<40.) {
+    // Apply truncation to all energies and collision systems
+//    if(mMuDst->event() && mMuDst->event()->runInfo().centerOfMassEnergy()<40.) {
       mTruncation = kTRUE;
-    } else {
-      mTruncation = kFALSE;
-    }
+//    } else {
+//      mTruncation = kFALSE;
+//    }
 
 
     Int_t nhits = mMuDst->numberOfBTofHit();
