@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.218 2010/07/30 18:31:29 jwebb Exp $
+* $Id: geometry.g,v 1.219 2010/10/31 16:27:32 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.219  2010/10/31 16:27:32  jwebb
+* Switch PHMD on.  Modified configuration of MUTD at request of Bill Llope.
+*
 * Revision 1.218  2010/07/30 18:31:29  jwebb
 * Added development / baseline y2011 geometry tag and reduced the number
 * of write statements.
@@ -1032,8 +1035,9 @@ replace [exe MFLD54;] with [ MFLD=on; magField = 5.0; MfldConfig=4;]
 
 replace [exe MUTD01;] with [ "Muon Trigger System"; MUTD = on; MutdConfig = 1;]
 replace [exe MUTD03;] with [ "Muon Trigger System"; MUTD = on; MutdConfig = 3;]
-replace [exe MUTD04;] with [ "MTD Run 11: single backleg  /  3 trays"; MUTD = on; MutdConfig = 4;]
-replace [exe MUTD05;] with [ "MTD Run 13:     27 backlegs /117 trays"; MUTD = on; MutdConfig = 5;]
+replace [exe MUTD04;] with [ "MTD Run 11 - single backleg, 3 trays"; MUTD = on; MutdConfig = 4;]
+replace [exe MUTD05;] with [ "MTD Run 13 - 27 backlegs, 117 trays"; MUTD = on; MutdConfig = 5;]
+
 
 
 *                                                                         Photon Multiplicity Detector   
@@ -1655,11 +1659,11 @@ REPLACE [exe y2011;] with [;
     exe VPDD07;      "Latest version of VPD";
     exe FTPC01;      "FTPC";
     exe SVTTof;      "No SVT";
-    exe PHMDof;      "Photon mult detector off (pp run)";
+    exe PHMD02;      "Photon mult detector on";
     exe SISDof;      "No sisd";
     exe FTRO01;      "FTPC readout";
     exe MUTD04;      "Muon telescope detector";
-    exe CAVE05;      "Reasonable model of the cave geometry";
+    exe CAVE05;      "Cave and tunnel with appropriate shape and dimensions";
     exe PIPE12;      "The beam pipe";
 };]
 c ===============================================================================
@@ -3953,13 +3957,11 @@ c    write(*,*) 'FPDM'
 
 
    if (MUTD) {
-c    write(*,*) 'MUTD'
      if (MutdConfig==1) Call mutdgeo;
      if (MutdConfig==2) Call mutdgeo2;
      if (MutdConfig==3) Call mutdgeo3;
-     if (MutdConfig>=4) { 
-         Call AgDETP new ('MUTD')        
-         Call AgDETP add ( 'MTDG.Config=', MutdConfig, 1 ); 
+     if (MutdConfig==4 | MutdConfig==5) 
+     { 
          Call mutdgeo4;
      } 
    }
