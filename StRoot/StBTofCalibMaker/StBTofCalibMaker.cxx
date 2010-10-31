@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.11 2010/10/30 05:20:50 geurts Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.12 2010/10/31 05:52:11 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.12  2010/10/31 05:52:11  geurts
+ * fixed module index range for read in loop for BOARD (TDIG) based calibration
+ *
  * Revision 1.11  2010/10/30 05:20:50  geurts
  * Calibration Maker reads (file/dbase) in and applies cell-based, module-based, or board-based (TDIG) calibration parameters
  *
@@ -466,12 +469,12 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
     tofTotbCorr_st* totCorr = static_cast<tofTotbCorr_st*>(tofTotCorr->GetArray());
     Int_t numRows = tofTotCorr->GetNRows();
 
-    if(numRows!=mNTray*mNTDIG || numRows!=mNTray*mNModule*mNCell || numRows!=mNTray*mNModule) {
+    if(numRows!=mNTray*mNTDIG && numRows!=mNTray*mNModule*mNCell && numRows!=mNTray*mNModule) {
       LOG_WARN  << " Mis-matched number of rows in tofTotbCorr table! "  << numRows 
 		<< " (exp:" << mNTray*mNTDIG << " or " << mNTray*mNModule*mNCell << " or "<< mNTray*mNModule << ")" << endm;
     }
 
-    LOG_DEBUG << " Number of rows read in: " << numRows << " for ToT correction" << endm;
+    LOG_INFO << " Number of rows read in: " << numRows << " for ToT correction" << endm;
 
     // convert to calibtype
     mTotCalibType = calibtype(numRows);
@@ -489,7 +492,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
         if(trayId>0&&trayId<=mNTray&&moduleId>0&&moduleId<=mNModule&&cellId>0&&cellId<=mNCell){ // trays
 	  mTofTotEdge[trayId-1][moduleId-1][cellId-1][j] = totCorr[i].tot[j];
 	  mTofTotCorr[trayId-1][moduleId-1][cellId-1][j] = totCorr[i].corr[j];
-	  if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofTotEdge[trayId-1][moduleId-1][cellId-1][j] << " corr " << mTofTotCorr[trayId-1][moduleId-1][cellId-1][j] << endm; }
+	  if(Debug()&&j%10==0) { LOG_INFO << " j=" << j << " tot " << mTofTotEdge[trayId-1][moduleId-1][cellId-1][j] << " corr " << mTofTotCorr[trayId-1][moduleId-1][cellId-1][j] << endm; }
         } 
       } // end j 0->mNBinMax
     } // end i 0->numRows
@@ -508,7 +511,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
 	  for(Int_t k=0;k<mNCell;k++){
           mTofTotEdge[trayId-1][moduleId-1][cellId-1+k][j] = totCorr[i].tot[j];
           mTofTotCorr[trayId-1][moduleId-1][cellId-1+k][j] = totCorr[i].corr[j];
-          if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofTotEdge[trayId-1][moduleId-1][cellId-1+k][j] << " corr " << mTofTotCorr[trayId-1][moduleId-1][cellId-1+k][j] << endm; }
+          if(Debug()&&j%10==0) { LOG_INFO << " j=" << j << " tot " << mTofTotEdge[trayId-1][moduleId-1][cellId-1+k][j] << " corr " << mTofTotCorr[trayId-1][moduleId-1][cellId-1+k][j] << endm; }
 	  }//duplicating entries into each cell
         }	  
       } // end j 0->mNBinMax
@@ -525,11 +528,11 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
       LOG_DEBUG << " tray " << trayId << " module " << moduleId << " cell " << cellId << endm;
       for(Int_t j=0;j<mNBinMax;j++) {
         if(trayId>0&&trayId<=mNTray&&boardId>0&&boardId<=mNTDIG){ // trays
-	  for(Int_t k=0; k<mNModule;k++){
+	  for(Int_t k=0; k<4;k++){
 	    for(Int_t l=0;l<mNCell;l++){
               mTofTotEdge[trayId-1][moduleId-1+k][cellId-1+l][j] = totCorr[i].tot[j];
               mTofTotCorr[trayId-1][moduleId-1+k][cellId-1+l][j] = totCorr[i].corr[j];
-              if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofTotEdge[trayId-1][moduleId-1+k][cellId-1+l][j] << " corr " << mTofTotCorr[trayId-1][moduleId-1+k][cellId-1+l][j] << endm; }
+              if(Debug()&&j%10==0) { LOG_INFO << " j=" << j << " tot " << mTofTotEdge[trayId-1][moduleId-1+k][cellId-1+l][j] << " corr " << mTofTotCorr[trayId-1][moduleId-1+k][cellId-1+l][j] << endm; }
 	   }//duplicating into cells
 	  }//duplication into modules  
         }
@@ -553,11 +556,11 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
     tofZbCorr_st* zCorr = static_cast<tofZbCorr_st*>(tofZCorr->GetArray());
     numRows = tofZCorr->GetNRows();
     
-    if(numRows!=mNTray*mNTDIG || numRows!=mNTray*mNModule*mNCell || numRows !=mNTray*mNModule) {
+    if(numRows!=mNTray*mNTDIG && numRows!=mNTray*mNModule*mNCell && numRows !=mNTray*mNModule) {
       LOG_WARN << " Mis-matched number of rows in tofZbCorr table! "  << numRows 
 		<< " (exp:" << mNTray*mNTDIG << " or " << mNTray*mNModule*mNCell << " or "<< mNTray*mNModule << ")" << endm;
     }
-    LOG_DEBUG << " Number of rows read in: " << numRows << " for Z correction" << endm;
+    LOG_INFO << " Number of rows read in: " << numRows << " for Z correction" << endm;
 
     // convert to calibtype
     mZCalibType = calibtype(numRows);
@@ -575,7 +578,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
 	if(trayId>0&&trayId<=mNTray&&moduleId>0&&moduleId<=mNModule&&cellId>0&&cellId<=mNCell) {  // trays
 	  mTofZEdge[trayId-1][moduleId-1][cellId-1][j] = zCorr[i].z[j];
 	  mTofZCorr[trayId-1][moduleId-1][cellId-1][j] = zCorr[i].corr[j];
-	  if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofZEdge[trayId-1][moduleId-1][cellId-1][j] << " corr " << mTofZCorr[trayId-1][moduleId-1][cellId-1][j] << endm; }
+	  if(Debug()&&j%10==0) { LOG_INFO << " j=" << j << " tot " << mTofZEdge[trayId-1][moduleId-1][cellId-1][j] << " corr " << mTofZCorr[trayId-1][moduleId-1][cellId-1][j] << endm; }
 	}
       } // end j 0->mNBinMax
     } // end i 0->numRows
@@ -594,7 +597,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
 	  for(Int_t k=0;k<mNCell;k++){
             mTofZEdge[trayId-1][moduleId-1][cellId-1+k][j] = zCorr[i].z[j];
             mTofZCorr[trayId-1][moduleId-1][cellId-1+k][j] = zCorr[i].corr[j];
-            if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofZEdge[trayId-1][moduleId-1][cellId-1+k][j] << " corr " << mTofZCorr[trayId-1][moduleId-1][cellId-1+k][j] << endm; }
+            if(Debug()&&j%10==0) { LOG_INFO << " j=" << j << " tot " << mTofZEdge[trayId-1][moduleId-1][cellId-1+k][j] << " corr " << mTofZCorr[trayId-1][moduleId-1][cellId-1+k][j] << endm; }
 	  }//duplicating info to all cells
         }
       } // end j 0->mNBinMax
@@ -611,11 +614,11 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
       LOG_DEBUG << " tray " << trayId << " module " << moduleId << " cell " << cellId << endm;
       for(Int_t j=0;j<mNBinMax;j++) {
         if(trayId>0&&trayId<=mNTray&&boardId>0&&boardId<=mNTDIG) {  // trays
-	  for(Int_t k=0;k<mNModule;k++){
+	  for(Int_t k=0;k<4;k++){
 	    for(Int_t l=0;l<mNCell;l++){
               mTofZEdge[trayId-1][moduleId-1+k][cellId-1+l][j] = zCorr[i].z[j];
               mTofZCorr[trayId-1][moduleId-1+k][cellId-1+l][j] = zCorr[i].corr[j];
-          if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofZEdge[trayId-1][moduleId-1+k][cellId-1+l][j] << " corr " << mTofZCorr[trayId-1][moduleId-1+k][cellId-1+l][j] << endm; }
+          if(Debug()&&j%10==0) { LOG_INFO << " j=" << j << " tot " << mTofZEdge[trayId-1][moduleId-1+k][cellId-1+l][j] << " corr " << mTofZCorr[trayId-1][moduleId-1+k][cellId-1+l][j] << endm; }
 	    }//duplicating info to cell lvl
 	  }//duplicating info to module lvl
         }
@@ -651,7 +654,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
       if(trayId>0&&trayId<=mNTray) {
 	for(int j=0;j<mNTOF;j++) {
 	  mTofTZero[trayId-1][j/6][j%6] = tZero[i].T0[j];
-	  if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " T0 " << mTofTZero[trayId-1][j/6][j%6] << endm; }
+	  if(Debug()&&j%10==0) { LOG_INFO << " j=" << j << " T0 " << mTofTZero[trayId-1][j/6][j%6] << endm; }
 	}
       }
     }
