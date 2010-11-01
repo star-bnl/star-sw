@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.14 2010/07/12 21:30:23 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.15 2010/11/01 03:10:23 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.15  2010/11/01 03:10:23  hmasui
+ * Modify geantid check for MC tracks in order to avoid non primary tracks
+ *
  * Revision 1.14  2010/07/12 21:30:23  hmasui
  * Use StEmbeddingQAUtilities::getParticleDefinition(). Increase bin size, maximum for geantid histogram in order to cover geantid > 10k
  *
@@ -657,9 +660,9 @@ StEmbeddingQATrack* StEmbeddingQA::getEmbeddingQATrack(const StMiniMcEvent& mcev
     /// Get MC tracks
     const StTinyMcTrack* track = (StTinyMcTrack*) mcevent.tracks(category)->At(itrk) ;
 
-    /// Make sure that the input geantid exists in StParticleTable
-    if ( !utility->isGeantIdOk(track->geantId()) ){
-      LOG_DEBUG << Form("StEmbeddingQA::getEmbeddingQATrack", "No geantid = %3d exists in StParticleTable", track->geantId()) << endm ;
+    /// Remove contamination from MC tracks
+    if ( track->isPrimary() != 1 ){
+      LOG_DEBUG << Form("StEmbeddingQA::getEmbeddingQATrack", "MC track with GeantID %3d is not a primary track", track->geantId()) << endm ;
       return 0;
     }
 
