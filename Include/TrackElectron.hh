@@ -47,7 +47,8 @@ class TrackElectron : public Track {
       // Constant
       double cIon;
       // Density correction term
-      double delta;
+      double x0Dens, x1Dens;
+      double aDens, mDens;
       // Opal-Beaty-Peterson splitting factor
       double wSplit;
       // Ionisation threshold

@@ -33,6 +33,7 @@ class OpticalData {
     bool PhotoAbsorptionCsCO2(const double e, double& cs, double& eta);
 
     bool PhotoAbsorptionCsMethane(const double e, double& cs, double& eta);
+    bool PhotoAbsorptionCsEthane(const double e, double& cs, double& eta);
     bool PhotoAbsorptionCsAcetylene(const double e, double& cs, double& eta);
  
 };

@@ -276,67 +276,98 @@ TrackElectron::SetupGas(Medium* gas) {
     if (gasname == "CF4") {
       components[i].m2Ion = 7.2;
       components[i].cIon = 93.;
-      components[i].delta = 0.;
+      components[i].x0Dens = 0.;
+      components[i].x1Dens = 0.;
       components[i].ethr = 15.9;
       components[i].wSplit = 19.5;
     } else if (gasname == "Ar") {
       components[i].m2Ion = 3.593;
       components[i].cIon = 39.7;
-      components[i].delta = 0.;
+      components[i].x0Dens = 1.7635;
+      components[i].x1Dens = 4.4855;
+      components[i].aDens = 0.19714;
+      components[i].mDens = 2.9618;
       components[i].ethr = 15.75961;
       components[i].wSplit = 15.;
     } else if (gasname == "He") {
       components[i].m2Ion = 0.489;
       components[i].cIon = 5.5;
-      components[i].delta = 0.;
+      components[i].x0Dens = 2.2017;
+      components[i].x1Dens = 3.6122;
+      components[i].aDens = 0.13443;
+      components[i].mDens = 5.8347;
       components[i].ethr = 24.58739;
       components[i].wSplit = 10.5;
     } else if (gasname == "He-3") {
       components[i].m2Ion = 0.489;
       components[i].cIon = 5.5;
-      components[i].delta = 0.;
+      components[i].x0Dens = 2.2017;
+      components[i].x1Dens = 3.6122;
+      components[i].aDens = 0.13443;
+      components[i].mDens = 5.8347;
       components[i].ethr = 24.58739;
       components[i].wSplit = 10.5;
     } else if (gasname == "Ne") {
       components[i].m2Ion = 1.69;
       components[i].cIon = 17.8;
-      components[i].delta = 0.;
+      components[i].x0Dens = 2.0735;
+      components[i].x1Dens = 4.6421;
+      components[i].aDens = 0.08064;
+      components[i].mDens = 3.5771;
       components[i].ethr = 21.56454;
       components[i].wSplit = 19.5;
     } else if (gasname == "Kr") {
       components[i].m2Ion = 5.5;
       components[i].cIon = 56.9;
-      components[i].delta = 0.;
+      components[i].x0Dens = 1.7158;
+      components[i].x1Dens = 5.0748;
+      components[i].aDens = 0.07446;
+      components[i].mDens = 3.4051;
       components[i].ethr = 13.996;
       components[i].wSplit = 21.;
     } else if (gasname == "Xe") {
       components[i].m2Ion = 8.04;
       components[i].cIon = 75.25;
-      components[i].delta = 0.;
+      components[i].x0Dens = 1.5630;
+      components[i].x1Dens = 4.7371;
+      components[i].aDens = 0.23314;
+      components[i].mDens = 2.7414;
       components[i].ethr = 12.129843;
       components[i].wSplit = 23.7;
     } else if (gasname == "CH4") {
       components[i].m2Ion = 3.75;
       components[i].cIon = 42.5;
-      components[i].delta = 0.;
+      components[i].x0Dens = 1.6263;
+      components[i].x1Dens = 3.9716;
+      components[i].aDens = 0.09253;
+      components[i].mDens = 3.6257;
       components[i].ethr = 12.65;
       components[i].wSplit = 8.;
     } else if (gasname == "iC4H10") {
       components[i].m2Ion = 15.5;
       components[i].cIon = 160.;
-      components[i].delta = 0.;
+      components[i].x0Dens = 1.3788;
+      components[i].x1Dens = 3.7524;
+      components[i].aDens = 0.10852;
+      components[i].mDens = 3.4884;
       components[i].ethr = 10.67;
       components[i].wSplit = 7.;
     } else if (gasname == "CO2") {
       components[i].m2Ion = 5.6;
       components[i].cIon = 57.91;
-      components[i].delta = 0.;
+      components[i].x0Dens = 1.6294;
+      components[i].x1Dens = 4.1825;
+      components[i].aDens = 0.11768;
+      components[i].mDens = 3.3227;
       components[i].ethr = 13.777;
       components[i].wSplit = 13.;
     } else if (gasname == "N2") {
       components[i].m2Ion = 3.35;
       components[i].cIon = 38.1;
-      components[i].delta = 0.;
+      components[i].x0Dens = 1.7378;
+      components[i].x1Dens = 4.1323;
+      components[i].aDens = 0.15349;
+      components[i].mDens = 3.2125;
       components[i].ethr = 15.581;
       components[i].wSplit = 13.8;
     } else {
