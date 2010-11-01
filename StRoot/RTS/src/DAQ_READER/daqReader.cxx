@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.35 2010/10/29 15:48:58 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.36 2010/11/01 17:56:03 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -969,7 +969,7 @@ int daqReader::copySummaryInfoIn(SummaryInfo *info)
   daqbits = info->daqbits;
   evp_daqbits = info->evp_daqbits;
   //seq = info->seq;
-
+  
   // event descriptor is big endian...
   trgword = info->trgword;
   trgcmd = info->trgcmd;
@@ -978,6 +978,14 @@ int daqReader::copySummaryInfoIn(SummaryInfo *info)
   memcpy(L1summary, info->L1summary, sizeof(L1summary));
   memcpy(L2summary, info->L2summary, sizeof(L2summary));
   memcpy(L3summary, info->L3summary, sizeof(L3summary));
+  
+  // 64 bit extension...
+  daqbits64 = ((u_longlong)L3summary[1]) << 32;
+  daqbits64 += L3summary[0];
+  daqbits64_l1 = ((u_longlong)L1summary[1]) << 32;
+  daqbits64_l1 += L1summary[0];
+  daqbits64_l2 = ((u_longlong)L2summary[1]) << 32;
+  daqbits64_l2 += L2summary[0];
 
   return 0;
 }
@@ -994,6 +1002,10 @@ int daqReader::hackSummaryInfo()
   evpgroups = 0;
   daqbits = 0;
   evp_daqbits = 0;
+
+  daqbits64 = 0ll;
+  daqbits64_l1 = 0ll;
+  daqbits64_l2 = 0ll;
 
   // event descriptor is big endian...
   trgword = 0;
