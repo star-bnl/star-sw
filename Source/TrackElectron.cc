@@ -265,7 +265,10 @@ TrackElectron::SetupGas(Medium* gas) {
     return false;
   }
   components.resize(nComponents);
-  
+ 
+  // Density correction parameters from
+  //   R. M. Sternheimer, M. J. Berger, S. M. Seltzer,
+  //   Atomic Data and Nuclear Data Tables 30 (1984), 261-271 
   bool ok = true;
   for (int i = nComponents; i--;) {
     std::string gasname = "";
@@ -276,8 +279,11 @@ TrackElectron::SetupGas(Medium* gas) {
     if (gasname == "CF4") {
       components[i].m2Ion = 7.2;
       components[i].cIon = 93.;
-      components[i].x0Dens = 0.;
+      components[i].x0Dens = 1.;
       components[i].x1Dens = 0.;
+      components[i].cDens = 0.;
+      components[i].aDens = 0.;
+      components[i].mDens = 0.;
       components[i].ethr = 15.9;
       components[i].wSplit = 19.5;
     } else if (gasname == "Ar") {
@@ -285,6 +291,7 @@ TrackElectron::SetupGas(Medium* gas) {
       components[i].cIon = 39.7;
       components[i].x0Dens = 1.7635;
       components[i].x1Dens = 4.4855;
+      components[i].cDens = 11.9480;
       components[i].aDens = 0.19714;
       components[i].mDens = 2.9618;
       components[i].ethr = 15.75961;
@@ -294,6 +301,7 @@ TrackElectron::SetupGas(Medium* gas) {
       components[i].cIon = 5.5;
       components[i].x0Dens = 2.2017;
       components[i].x1Dens = 3.6122;
+      components[i].cDens = 11.1393;
       components[i].aDens = 0.13443;
       components[i].mDens = 5.8347;
       components[i].ethr = 24.58739;
@@ -303,6 +311,7 @@ TrackElectron::SetupGas(Medium* gas) {
       components[i].cIon = 5.5;
       components[i].x0Dens = 2.2017;
       components[i].x1Dens = 3.6122;
+      components[i].cDens = 11.1393;
       components[i].aDens = 0.13443;
       components[i].mDens = 5.8347;
       components[i].ethr = 24.58739;
@@ -312,6 +321,7 @@ TrackElectron::SetupGas(Medium* gas) {
       components[i].cIon = 17.8;
       components[i].x0Dens = 2.0735;
       components[i].x1Dens = 4.6421;
+      components[i].cDens = 11.9041;
       components[i].aDens = 0.08064;
       components[i].mDens = 3.5771;
       components[i].ethr = 21.56454;
@@ -321,6 +331,7 @@ TrackElectron::SetupGas(Medium* gas) {
       components[i].cIon = 56.9;
       components[i].x0Dens = 1.7158;
       components[i].x1Dens = 5.0748;
+      components[i].cDens = 12.5115;
       components[i].aDens = 0.07446;
       components[i].mDens = 3.4051;
       components[i].ethr = 13.996;
@@ -330,6 +341,7 @@ TrackElectron::SetupGas(Medium* gas) {
       components[i].cIon = 75.25;
       components[i].x0Dens = 1.5630;
       components[i].x1Dens = 4.7371;
+      components[i].cDens = 12.7281;
       components[i].aDens = 0.23314;
       components[i].mDens = 2.7414;
       components[i].ethr = 12.129843;
@@ -339,6 +351,7 @@ TrackElectron::SetupGas(Medium* gas) {
       components[i].cIon = 42.5;
       components[i].x0Dens = 1.6263;
       components[i].x1Dens = 3.9716;
+      components[i].cDens = 9.5243;
       components[i].aDens = 0.09253;
       components[i].mDens = 3.6257;
       components[i].ethr = 12.65;
@@ -348,6 +361,7 @@ TrackElectron::SetupGas(Medium* gas) {
       components[i].cIon = 160.;
       components[i].x0Dens = 1.3788;
       components[i].x1Dens = 3.7524;
+      components[i].cDens = 8.5633;
       components[i].aDens = 0.10852;
       components[i].mDens = 3.4884;
       components[i].ethr = 10.67;
@@ -366,6 +380,7 @@ TrackElectron::SetupGas(Medium* gas) {
       components[i].cIon = 38.1;
       components[i].x0Dens = 1.7378;
       components[i].x1Dens = 4.1323;
+      components[i].cDens = 10.5400;
       components[i].aDens = 0.15349;
       components[i].mDens = 3.2125;
       components[i].ethr = 15.581;
@@ -392,10 +407,22 @@ TrackElectron::UpdateCrossSection() {
 
   const double prefactor = 4 * Pi * pow(HbarC / ElectronMass, 2);
   const double lnBg2 = log(beta2 / (1. - beta2));
+  // Parameter X in the Sternheimer fit formula 
+  const double eta = mediumDensity / LoschmidtNumber;
+  const double x = 0.5 * (lnBg2 + log(eta)) / log(10.);
   double csSum = 0.;
   for (int i = nComponents; i--;) {
+    double delta = 0.;
+    if (components[i].x0Dens < components[i].x1Dens && 
+        x >= components[i].x0Dens) {
+      delta = 2 * log(10.) * x - components[i].cDens;
+      if (x < components[i].x1Dens) {
+        delta += components[i].aDens * pow(components[i].x1Dens - x, 
+                                           components[i].mDens);
+      }
+    }
     double cs = (components[i].fraction * prefactor / beta2) * 
-                (components[i].m2Ion * (lnBg2 - beta2) + 
+                (components[i].m2Ion * (lnBg2 - beta2 - delta) + 
                  components[i].cIon);
     components[i].p = cs;
     csSum += cs;

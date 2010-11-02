@@ -672,13 +672,13 @@ quanC(0.0)
 #ifdef DEBUG_EnTransfCS
   treser.clear();
 #endif
-  std::ofstream dcsfile;
-  dcsfile.open("dcs.txt", std::ios::out);
-  for (int i = 0; i < qe; ++i) {
-    dcsfile << hmd->energy_mesh->get_ec(i) << "  "
-            << addaC[i] << "\n";
-  }
-  dcsfile.close(); 
+//  std::ofstream dcsfile;
+//  dcsfile.open("dcs.txt", std::ios::out);
+//  for (int i = 0; i < qe; ++i) {
+//    dcsfile << hmd->energy_mesh->get_ec(i) << "  "
+//            << addaC[i] << "\n";
+//  }
+//  dcsfile.close(); 
 
   addaC.clear();
 #ifndef EXCLUDE_A_VALUES
