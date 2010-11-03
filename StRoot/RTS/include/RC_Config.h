@@ -61,13 +61,14 @@
 #define MAX_THREADS 400
 #define MAX_STR_LEN 40
 
-#define TRIGGERS_MAX 32          // Number of Triggers configurable
+#define TRIGGERS_MAX 64          // Number of Triggers configurable
+#define EVP_GROUP_MAX 32         // Number of EVP groups...
 #define CONDPERTRG_MAX 4         // Conditions per Trigger 
-#define PWDEF_BYTES TRIGGERS_MAX / 8
-#define TWDEF_BYTES TRIGGERS_MAX / 8   // Assume at most 4 detector groupings
+//#define PWDEF_BYTES TRIGGERS_MAX / 8
+//#define TWDEF_BYTES TRIGGERS_MAX / 8   // Assume at most 4 detector groupings
 
-#define MAX_TW (1<<16)    /* in principle max values for pw/tw */
-#define MAX_PW (1<<12)
+//#define MAX_TW (1<<16)    /* in principle max values for pw/tw */
+//#define MAX_PW (1<<12)
 
 // #define NUM_PHYSICS_BITS 16    // correct values but not used...
 // #define NUM_DET_BITS 12
@@ -170,6 +171,11 @@ struct GLB_RUN
   float bField;                
   float base_trg_rate;
   int destination;
+  //
+  float drift_velocity_east;
+  float drift_velocity_west;
+  unsigned int rhic_clock;
+  float reserved[10];
 };
 
 struct TRG_DICT_ENTRY
@@ -327,7 +333,7 @@ struct EvpGroup
 {
   char name[MAX_STR_LEN];    // name & id from /RTS/conf/handler/evpGroup.txt
   int id;                    // 
-  int definition;    // bitmask of triggers...
+  int definition[2];    // bitmask of triggers...
   float rate;
 };
 
@@ -347,7 +353,7 @@ struct TRG_SETUP
   RegValue registers[MAX_REGISTERS];
 
   //  L3_SETUP l3_setup;
-  EvpGroup evpGroup[TRIGGERS_MAX];
+  EvpGroup evpGroup[EVP_GROUP_MAX];
 };
 
 struct TRG_RUN 
@@ -683,91 +689,10 @@ bool node_inrun(int node, STAR_CFG *cfg);
 bool system_inrun(int sys, STAR_CFG *cfg);
 void maskDetectorsInRun(STAR_CFG *cfg);
 
-// cfg is a pointer to an existing TrgCfg structure
-// the function allocates memory for its internal structures
-// it assumes that these structures are free in this call
-//
-int cfgGetPWForInput(TrgCfg *cfg, STAR_CFG *rccfg, UINT32 input);
-int cfgGetTWForInput(TrgCfg *cfg, STAR_CFG *rccfg, UINT32 pw, UINT32 detmask);
 
-bool cfgBuildTrgTables(TrgCfg *cfg, RC_Config *rccfg);
 bool cfgBuildPS(TrgPS *ps, RC_Config *rccfg);
 
-// Frees the internal memory in the cfg structure
-void cfgFreeTrgTables(TrgCfg *cfg);
 
-// How much memory is allocated?
-int getTrgTableSizeAlloc(TrgCfg *cfg);
-int getTrgTableSizeReal(TrgCfg *cfg);
-
-// Figure out whether a given pw contributes to a given trigger id
-bool cfgPwSatisfiesDaqTrgId(TrgCfg *cfg, int id, int pw);
-
-// Does a given pw satisfy the lastDSM input
-bool cfgPwSatisfiesInput(TrgCfg *cfg, UINT16 pw, UINT16 in);
-
-// Does a given tw satisfy the twlut input
-bool cfgTwSatisfiesInput(TrgCfg *cfg, RC_Config *rccfg, UINT16 tw, UINT16 pw, UINT16 detmask);
-
-///////////////////////////////////////////////////
-// Used to build trigger configuration tables;
-///////////////////////////////////////////////////
-
-struct _tmask {
-  unsigned char mask[TRIGGERS_MAX/8];
-};
-
-struct _tdef {
-  int n;
-  int nalloc;
-  _tmask *defs;
-};
-
-struct _tuint16a {
-  int n;
-  int nalloc;
-  UINT16 *v;
-};
-
-struct _tfloata {
-  int n;
-  int nalloc;
-  float *v;
-};
-
-struct _tawca {
-  int n;
-  int nalloc;
-  AwCondition *awc;
-};
-
-struct _trginfo {
-  char name[MAX_STR_LEN];
-  int used;
-
-  UINT32 eff_l0ps;   // effective l0 ps
-  float eff_ps;     // effective total ps
-
-  float l1ps;
-  float l2ps;
-  float l3ps;
-
-  _tuint16a pws;
-  _tuint16a tws;
-  _tfloata rs;
-};
-
-
-struct TrgCfg {
-  int ndetbits;        // 6?
-  int npwbits;         // 10?
-  int nphysbits;
-  
-  _tdef pwdef;
-  _tdef twdef;
-  _trginfo info[TRIGGERS_MAX];
-  _tawca awc;
-};
 
 struct TrgPSEntry {
   int l0ps;
