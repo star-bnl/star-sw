@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.20 2010/09/08 15:44:41 genevb Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.21 2010/11/04 18:29:58 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -98,8 +98,7 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
         totalPads += numPadsAtRow;
         if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
             StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
-            St_tpcAnodeHVavgC::instance()->livePadrow(sector,row) &&
-            St_tpcPadGainT0C::instance()->livePadrow(sector,row))
+            St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
           livePads += numPadsAtRow;
       }
     }
