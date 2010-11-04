@@ -344,7 +344,7 @@ struct TRG_SETUP
 
   char TIER1_name[MAX_STR_LEN];                         // Tier 1 filename
   
-  Trigger triggers[TRIGGERS_MAX_CONFIG];
+  Trigger triggers[TRIGGERS_MAX];
   
   PwCondition contaminationDef;        //-------------------------------------
 
@@ -703,7 +703,7 @@ struct TrgPSEntry {
 };
 
 struct TrgPS {
-  TrgPSEntry ps[TRIGGERS_MAX_CONFIG];
+  TrgPSEntry ps[TRIGGERS_MAX];
 };
 
 struct EthServer
