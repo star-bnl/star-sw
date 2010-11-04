@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.31 2010/11/04 18:29:58 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.32 2010/11/04 18:30:47 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.32  2010/11/04 18:30:47  genevb
+ * Typo correction
+ *
  * Revision 1.31  2010/11/04 18:29:58  genevb
  * Max hits scaling does not need to use PadGainT0 table
  *
@@ -233,7 +236,7 @@ Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
       Float_t liveFrac = TMath::Max((Float_t) 0.1,
                          ((Float_t) livePads) / ((Float_t) totalPads));
       maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
-      if (1) {LOG_INFO << "maxHits in sector " << sector
+      if (Debug()) {LOG_INFO << "maxHits in sector " << sector
                              << " = " << maxHits[sector-1] << endm;}
     } else {
       maxHits[sector-1] = 0;
