@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.30 2010/10/04 19:06:56 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.31 2010/11/04 18:29:58 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.31  2010/11/04 18:29:58  genevb
+ * Max hits scaling does not need to use PadGainT0 table
+ *
  * Revision 1.30  2010/10/04 19:06:56  fisyak
  * Use FCF flag definition
  *
@@ -166,7 +169,6 @@
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcSlewingC.h"
 #include "StDetectorDbMaker/St_TpcPadCorrectionC.h"
-#include "StDetectorDbMaker/St_tpcPadGainT0C.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcMaxHitsC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
@@ -225,14 +227,13 @@ Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
         totalPads += numPadsAtRow;
         if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
             StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
-            St_tpcAnodeHVavgC::instance()->livePadrow(sector,row) &&
-            St_tpcPadGainT0C::instance()->livePadrow(sector,row))
+            St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
           livePads += numPadsAtRow;
       }
       Float_t liveFrac = TMath::Max((Float_t) 0.1,
                          ((Float_t) livePads) / ((Float_t) totalPads));
       maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
-      if (Debug()) {LOG_INFO << "maxHits in sector " << sector
+      if (1) {LOG_INFO << "maxHits in sector " << sector
                              << " = " << maxHits[sector-1] << endm;}
     } else {
       maxHits[sector-1] = 0;
