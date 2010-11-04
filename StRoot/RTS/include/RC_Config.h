@@ -61,8 +61,7 @@
 #define MAX_THREADS 400
 #define MAX_STR_LEN 40
 
-#define TRIGGERS_MAX_CONFIG 64          // Number of Triggers configurable
-#define TRIGGERS_MAX 32
+#define TRIGGERS_MAX 64
 
 #define EVP_GROUP_MAX 32         // Number of EVP groups...
 #define CONDPERTRG_MAX 4         // Conditions per Trigger 
