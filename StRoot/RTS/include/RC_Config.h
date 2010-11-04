@@ -61,7 +61,9 @@
 #define MAX_THREADS 400
 #define MAX_STR_LEN 40
 
-#define TRIGGERS_MAX 64          // Number of Triggers configurable
+#define TRIGGERS_MAX_CONFIG 64          // Number of Triggers configurable
+#define TRIGGERS_MAX 32
+
 #define EVP_GROUP_MAX 32         // Number of EVP groups...
 #define CONDPERTRG_MAX 4         // Conditions per Trigger 
 //#define PWDEF_BYTES TRIGGERS_MAX / 8
@@ -343,7 +345,7 @@ struct TRG_SETUP
 
   char TIER1_name[MAX_STR_LEN];                         // Tier 1 filename
   
-  Trigger triggers[TRIGGERS_MAX];
+  Trigger triggers[TRIGGERS_MAX_CONFIG];
   
   PwCondition contaminationDef;        //-------------------------------------
 
@@ -702,7 +704,7 @@ struct TrgPSEntry {
 };
 
 struct TrgPS {
-  TrgPSEntry ps[TRIGGERS_MAX];
+  TrgPSEntry ps[TRIGGERS_MAX_CONFIG];
 };
 
 struct EthServer
