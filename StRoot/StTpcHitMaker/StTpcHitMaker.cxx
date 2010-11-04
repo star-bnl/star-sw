@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.32 2010/11/04 18:30:47 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.33 2010/11/04 19:39:12 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.33  2010/11/04 19:39:12  genevb
+ * Maintain backward reproducibility
+ *
  * Revision 1.32  2010/11/04 18:30:47  genevb
  * Typo correction
  *
@@ -883,7 +886,11 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	  for (UInt_t k = 0; k < NoHits; k++) {
 	    StTpcHit* kHit = TpcHitCollection->sector(sec-1)->padrow(row-1)->hits().at(k);
 	    if (_debug) {cout << "k " << k; kHit->Print();}
+#ifdef FCF_CHOPPED
 	    if (kHit->flag() & FCF_CHOPPED)                          continue;
+#else
+	    if (kHit->flag())                          continue;
+#endif
 #ifdef __MAKE_NTUPLE__
 	    pairC.sec    = sec;
 	    pairC.row    = row;
@@ -901,7 +908,11 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	      if (k == l) continue;
 	      StTpcHit* lHit = TpcHitCollection->sector(sec-1)->padrow(row-1)->hits().at(l);
 	      if (_debug) {cout << "l " << l; lHit->Print();}
+#ifdef FCF_CHOPPED
 	      if (lHit->flag() & FCF_CHOPPED) continue;
+#else
+	      if (lHit->flag()) continue;
+#endif
 	      // Are extends overlapped ?
 	      Int_t padOverlap = TMath::Min(kHit->maxPad(),lHit->maxPad())
 		-                TMath::Max(kHit->minPad(),lHit->minPad());
@@ -928,7 +939,11 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	      // check hits near by
 	      if (TMath::Abs(kHit->pad()        - lHit->pad())        > padDiff ||
 		  TMath::Abs(kHit->timeBucket() - lHit->timeBucket()) > timeBucketDiff) continue;
+#ifdef FCF_CHOPPED
 	      UChar_t flag = lHit->flag() | FCF_CHOPPED; 
+#else
+	      UChar_t flag = lHit->flag() | 0x080;
+#endif
 	      lHit->setFlag(flag);
 	      if (_debug) {
 		cout << "mk" << k; kHit->Print();
@@ -969,7 +984,11 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	  // Correct S - shape in pad direction
 	  for (UInt_t k = 0; k < NoHits; k++) {
 	    StTpcHit* kHit = TpcHitCollection->sector(sec-1)->padrow(row-1)->hits().at(k);
+#ifdef FCF_CHOPPED
 	    if (kHit->flag() & FCF_CHOPPED)                         continue;
+#else
+	    if (kHit->flag())                         continue;
+#endif
 	    Double_t pad        = kHit->pad();
 	    Double_t timeBucket = kHit->timeBucket();
 	    Int_t io = 1;
