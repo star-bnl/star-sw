@@ -23,6 +23,7 @@
 #include "TGeoTrd2.h"
 #include "TGeoTube.h"
 #include "TGeoXtru.h"
+#include "TGeoEltu.h"
 class Elem_t;
 struct VolumeMap_t {
   const Char_t *name;

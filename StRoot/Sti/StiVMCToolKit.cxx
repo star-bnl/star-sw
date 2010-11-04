@@ -174,6 +174,7 @@ void StiVMCToolKit::PrintShape(TGeoShape *shape) {
   TGeoCone *cone = 0;
   TGeoConeSeg *cons = 0;
   TGeoArb8 *arb8 = 0;
+  TGeoEltu *eltu = 0;
   Double_t *XY;
   Double_t dZ;
   //  Double_t paramsBB[3];
@@ -264,10 +265,15 @@ void StiVMCToolKit::PrintShape(TGeoShape *shape) {
 	  cout << endl;
 	}
 	break;
+      case TGeoShape::kGeoEltu:    
+	eltu = (TGeoEltu *) shape;
+	cout << "Eltu\tdZ\t" << eltu->GetDz() 
+	     << "\tA\t" << eltu->GetA() << "\tB\t" << eltu->GetB()  
+	     << endl;
+	break;
       case TGeoShape::kGeoTorus:
       case TGeoShape::kGeoPara:    
       case TGeoShape::kGeoSph:     
-      case TGeoShape::kGeoEltu:    
       case TGeoShape::kGeoCtub:    
       default:
 	cout << bit << "\t has not yet implemented for " << shape->GetName() << endl;
@@ -288,6 +294,7 @@ Double_t StiVMCToolKit::GetShapeVolume(TGeoShape *shape) {
   TGeoPgon *pgon = 0;
   TGeoCone *cone = 0;
   TGeoConeSeg *cons = 0;
+  TGeoEltu *eltu = 0;
   Double_t volume = 0;
   Double_t paramsBC[3];
   Double_t volBB = 0;
@@ -356,12 +363,15 @@ Double_t StiVMCToolKit::GetShapeVolume(TGeoShape *shape) {
 	  volume *= TMath::Abs(cons->GetPhi2() - cons->GetPhi1())/360.;
 	}
 	break;
+      case TGeoShape::kGeoEltu:    
+	eltu = (TGeoEltu *) shape;
+	volume = 2*TMath::Pi()*eltu->GetA()*eltu->GetB()*eltu->GetDz();
+	break;
       case TGeoShape::kGeoArb8:    
       case TGeoShape::kGeoTrap:    
       case TGeoShape::kGeoTorus:
       case TGeoShape::kGeoPara:    
       case TGeoShape::kGeoSph:     
-      case TGeoShape::kGeoEltu:    
       case TGeoShape::kGeoCtub:    
       default:
 	if (Debug()) 
