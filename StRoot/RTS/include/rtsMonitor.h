@@ -1,6 +1,9 @@
 #ifndef _RTS_MONITOR_H_
 #define _RTS_MONITOR_H_
 
+
+#include <RC_Config.h>	/* for TRIGGERS_MAX of the day... */
+
 /* LINUX issues */
 #ifndef SHM_SHARE_MMU
 #define SHM_SHARE_MMU  0
@@ -139,7 +142,7 @@ struct rtsMonGB {
 	  u_int err ;		// events with error
 	  u_int built ;		// events built _successfully_
 	  u_int xpress ;		// events sent to xpress stream
-	} trgs[33] ;	// 0-31 are the usual, 32 is the sum
+	} trgs[TRIGGERS_MAX+1] ;	// TRIGGERS_MAX are the usual, last is the sum
 } ;
 
 
@@ -152,7 +155,7 @@ struct rtsMonSCA {
 	struct {
 		char name[32] ;
 		u_int rate ;
-	} trgs[33] ;	// 0-32 are normal, the rest is reserved
+	} trgs[TRIGGERS_MAX] ;	// 0-32 are normal, the rest is reserved
 
 } ;
 
@@ -161,7 +164,7 @@ struct rtsMonL1Counters {
     char name[32];
     u_int rate;
     u_int deadtime;
-  } trgs[33];
+  } trgs[TRIGGERS_MAX+1];
   u_int detector_deadtime[16];
 };
 
@@ -200,7 +203,7 @@ struct rtsMonEVB_supertask {
 
     u_int stream;	   // which stream evts sent to
 
-  } trgs[33] ;	           // 0-31 are the usual, 32 is the sum
+  } trgs[TRIGGERS_MAX+1] ;	           // 0-31 are the usual, 32 is the sum
 };
 
 
@@ -258,7 +261,7 @@ struct rtsMonRC {
 	struct {
 		char name[32] ;	// if strlen() == NULL, unused..
 		u_int off_id ;		// offline id number i.e. 5001
-	} trgs[32] ;
+	} trgs[TRIGGERS_MAX] ;
 } ;
 
 
@@ -270,7 +273,7 @@ struct rtsMonL1 {		// used by GL3 as well!
 		u_int accepted ;	// fired in the run so far
 		u_int rate ;		// rate/sec of "accepted"
 		u_int aborted ;		// number of evebts aborted in this run
-	} trgs[33] ;			// 0-31 are per trigger, 32 is the total sum...
+	} trgs[TRIGGERS_MAX+1] ;			// 0-31 are per trigger, 32 is the total sum...
 } ;
 
 struct rtsMonDET {
