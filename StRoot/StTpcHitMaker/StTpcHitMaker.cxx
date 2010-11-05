@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.33 2010/11/04 19:39:12 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.34 2010/11/05 16:25:19 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.34  2010/11/05 16:25:19  genevb
+ * No longer include hits found on dead padrows
+ *
  * Revision 1.33  2010/11/04 19:39:12  genevb
  * Maintain backward reproducibility
  *
@@ -175,6 +178,7 @@
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcSlewingC.h"
 #include "StDetectorDbMaker/St_TpcPadCorrectionC.h"
+#include "StDetectorDbMaker/St_tpcPadGainT0C.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcMaxHitsC.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
@@ -348,6 +352,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
     for (Int_t l = 0; l < NRows; tpc++) {
       if ( !tpc->has_clusters )  return 0;
       for(Int_t padrow=0;padrow<45;padrow++) {
+        if (! St_tpcPadGainT0C::instance()->livePadrow(sector,padrow+1)) continue;
 	tpc_cl *c = &tpc->cl[padrow][0];
 	Int_t ncounts = tpc->cl_counts[padrow];
 	for(Int_t j=0;j<ncounts;j++,c++) {
@@ -357,7 +362,8 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
 	}
       }
     }
-  } else {// kReaderType == kStandardTpx
+  } else if (St_tpcPadGainT0C::instance()->livePadrow(sector,row)) {
+    // kReaderType == kStandardTpx
     daq_cld *cld = (daq_cld *) DaqDta()->GetTable();
     if (Debug() > 1) {
       LOG_INFO << Form("CLD sec %2d: row %2d: clusters: %3d",sec, row, NRows) << endm;
