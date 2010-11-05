@@ -345,7 +345,7 @@ void EffRefMult(Int_t k = 0) {
 	title.ReplaceAll(" versus pTold","");
 	title.ReplaceAll(" for Global","");
 	title.ReplaceAll(" for Primaries","");
-	leg3->AddEntry(proj,Form("%s for %i < refMult < %i",title.Data(),xmin,xmax),"P");
+	leg3->AddEntry(proj,Form("%s for %i < Mult < %i",title.Data(),xmin,xmax),"P");
       }
     }
   }
@@ -428,6 +428,88 @@ void DrawEfficiency(Int_t k = 0) {
       } else {
 	leg4->AddEntry(effOldP,Form("Old efficiency for %i < Mult < %i", ymin, ymax));
 	leg4->AddEntry(effNewP,Form("New efficiency for %i < Mult < %i", ymin, ymax));
+      }
+    }
+  }
+  leg4->Draw();
+  DrawPng(c1);
+}
+//________________________________________________________________________________
+void DrawEffVsMult(Int_t k = 0) {
+  //________________________________________________________________________________
+  // Efficiency itself
+  //________________________________________________________________________________
+  cTitle  = gTitle;
+  TString hTitle("");
+  hTitle += " Efficiencies"; hTitle += " versus Multiplicity for "; hTitle += GPTitle[k];
+  cTitle += hTitle;
+  TCanvas* cnv4 = new TCanvas(cTitle,cTitle,400,400); c1 = cnv4; c1->SetLeftMargin(0.14);
+  c1->SetTicks(1,1);
+  TH2F *pTEf[4];
+  TH1D *pTEfP[4];
+  for (Int_t i = 0; i < 4; i++) {
+    pTEf[i] = (TH2F *) fIn->Get(Form("%s%s",NameEffPt[i],GP[k]));
+    if (pTEf[i]) pTEfP[i] = pTEf[i]->ProjectionY(Form("%s_all",pTEf[i]->GetName()),-1,-1,"e");
+    else         pTEfP[i] = 0;
+  }
+  TH1F* dummyeff= cnv4->DrawFrame(0.0,0.6,700, 1.05);
+  dummyeff->SetTitle(hTitle);
+  dummyeff->SetXTitle("(uncorrected) Multiplicity");
+  dummyeff->SetYTitle(Form("fit points>=%i rel. efficiency",effNFP)); 
+  TLegend* leg4 = new TLegend(.2,.15,.5,.4);
+#if 0
+  leg4->SetBorderSize(0);
+  leg4->SetFillColor(0);
+  leg4->SetTextSize(0.033);
+#endif
+  TAxis *x = pTEf[0]->GetXaxis();
+  Double_t xMin = x->GetXmin();
+  Double_t xMax = x->GetXmax();
+  Double_t pTs[4] = {0.1, 0.2, 0.5, 2.0};
+  for (Int_t m = 0; m < 5; m++) {
+    if (m < 0) m = 0;
+    Int_t m1 = -1, m2 = -1;
+    if (m == 0) {}
+    else {
+      m1            = x->FindBin(pTs[m-1]);
+      if (m < 4) m2 = x->FindBin(pTs[m])-1;
+    }
+    for (Int_t i = 0; i < 4; i++) {
+      pTEfP[i] = pTEf[i]->ProjectionY(Form("%s_all_%i",pTEf[i]->GetName(),m),m1,m2,"e");
+    }
+    if (! pTEfP[0] || pTEfP[0]->GetEntries() < 1e3) continue;
+    if (! pTEfP[1] || pTEfP[1]->GetEntries() < 1e3) continue;
+    TH1D *effNewP = new TH1D(*pTEfP[3]); effNewP->SetName(Form("effNew%i",m)); effNewP->SetTitle(hTitle);
+    effNewP->Divide(pTEfP[3],pTEfP[1],1.,1.,"b");
+    TH1D *effOldP = new TH1D(*pTEfP[2]); effOldP->SetName(Form("effOld%i",m)); effOldP->SetTitle(hTitle);
+    effOldP->Divide(pTEfP[2],pTEfP[0],1.,1.,"b");
+    effOldP->SetMarkerStyle(21); 
+    effOldP->SetMarkerColor(1);
+    effNewP->SetMarkerStyle(20); 
+    effNewP->SetMarkerColor(1);
+    if (m) {
+      effOldP->SetMarkerColor(m+1);
+      effNewP->SetMarkerColor(m+1);
+    }
+    Double_t xmin = xMin;
+    Double_t xmax = xMax;
+    if (m1 >= 0)  xmin = x->GetBinLowEdge(m1);
+    if (m2 >= 0)  xmax = x->GetBinUpEdge(m2);
+    effOldP->Draw("same");
+    effNewP->Draw("same");
+    if (! m) {
+      leg4->AddEntry(effOldP,"Old efficiency for ALL");
+      leg4->AddEntry(effNewP,"New efficiency for ALL");
+    } else {
+      if        (xmin < xMin) {
+	leg4->AddEntry(effOldP,Form("Old efficiency for pT < %4.1f", xmax));
+	leg4->AddEntry(effNewP,Form("New efficiency for pT < %4.1f", xmax));
+      } else if (xmax > xMax) {
+	leg4->AddEntry(effOldP,Form("Old efficiency for pT > %4.1f", xmin));
+	leg4->AddEntry(effNewP,Form("New efficiency for pT > %4.1f", xmin));
+      } else {
+	leg4->AddEntry(effOldP,Form("Old efficiency for %4.1f < pT < %4.1f", xmin, xmax));
+	leg4->AddEntry(effNewP,Form("New efficiency for %4.1f < pT < %4.1f", xmin, xmax));
       }
     }
   }
@@ -828,7 +910,7 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
       }
     }
     //________________________________________________________________________________
-    // Efficiency versus refMult and pT
+    // Efficiency versus Mult and pT
     //________________________________________________________________________________
     //
     TH2F *pTEf[2][4]; 
@@ -842,7 +924,7 @@ void TbyTPlots(const Char_t *file = 0, Int_t Nentries=0) {
 	pTEf[k][i]->SetMarkerColor(1+i);
       }
     }
-    // Efficiency versus refMult and Phi
+    // Efficiency versus Mult and Phi
     //________________________________________________________________________________
     //
     TH2F *PhiEf[2][4]; 
