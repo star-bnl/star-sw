@@ -573,7 +573,7 @@ extern inline const char *rts2name(int rts_id)
 	case RPII_SYSTEM :
 		return "RPII" ;
 	default :
-		return NULL ;	// unknown!
+	  return (const char *)NULL ;	// unknown!
 	}
 } ;
 

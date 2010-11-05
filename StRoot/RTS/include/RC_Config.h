@@ -123,7 +123,7 @@ class UINT128 {
     x[byt] &= (~(1<<bit));
   }
 
-  char *tostring(char *out = NULL) {
+  char *tostring(char *out = (char *)NULL) {
     static char _out[70];
     
     if(out == NULL) out = _out;
@@ -718,7 +718,7 @@ struct EthServer
 // Reads from all.conf
 // returns -1 if no server, 0 if server exists.
 int getEthServer(int node, int task, EthServer *eth);   
-char *ReadAllDotConf(int node, int task, char *param, char *result=NULL, char *paramfilename="/RTS/conf/handler/all.conf");
+char *ReadAllDotConf(int node, int task, char *param, char *result=(char *)NULL, char *paramfilename="/RTS/conf/handler/all.conf");
 
 ///////////////////////////////////////////////////
 
