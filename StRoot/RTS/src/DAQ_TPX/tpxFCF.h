@@ -15,7 +15,7 @@
 #define TPC_FF_CLOSE	380
 
 
-#define FCF_MAX_CL	64		// max 1D clusters per pad
+#define FCF_MAX_CL	32		// max 1D clusters per pad
 
 // version/flavor reminders
 #define FCF_V_FY08	0x0000		// used in the FY08 run; has the /32 "bug"
@@ -111,7 +111,7 @@ public:
 	static int afterburner(int cou, daq_cld *store[]) ;
 
 	const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.12 2010/10/17 14:34:02 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
+		static const char cvs[]="Tag $Name:  $: $Id: tpxFCF.h,v 1.11 2010/10/02 22:17:48 tonko Exp $: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
 private:

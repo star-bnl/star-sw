@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.35 2010/10/29 15:48:58 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.34 2010/08/20 14:56:38 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -142,7 +142,7 @@ int daqReader::getDetectorSize(char *det)
   
   SfsDirsize sz;
   sfs->getDirSize(det, &sz);
-  printf("sizeof(%s) : %lld %lld (%3.1f%% overhead)\n",det, sz.size, sz.dataSize, ((double)(sz.size - sz.dataSize)) / ((double)(sz.dataSize)));
+  printf("sizeof(%s) : %lld  (%3.1f%% overhead)\n",det, sz.dataSize, ((double)(sz.size - sz.dataSize)) / ((double)(sz.dataSize)));
   return (int)sz.size;
 }
 

@@ -324,10 +324,7 @@ void tpxFCF::config(u_int mask, int mode)
 
 	storage = (struct stage1 *) valloc(tot_count * sizeof(struct stage1)) ;
 	
-	LOG(TERR,"FCF for mask 0x%02X: alloced %d bytes for %d tot_count X %d",mask,
-	    tot_count * sizeof(struct stage1),
-	    tot_count,
-	    sizeof(struct stage1)) ;
+	LOG(NOTE,"FCF for mask 0x%02X: alloced %d bytes",mask,tot_count * sizeof(struct stage1)) ;
 
 	// clear storage
 	memset(storage,0,tot_count * sizeof(struct stage1)) ;

@@ -1,7 +1,7 @@
 // LinkDef.h
 /***************************************************************************
  *
- * $Id: StarClassLibraryLinkDef.hh,v 1.11 2010/10/18 21:55:11 fisyak Exp $
+ * $Id: StarClassLibraryLinkDef.hh,v 1.10 2006/01/09 23:47:27 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -23,9 +23,6 @@
  ***************************************************************************
  *
  * $Log: StarClassLibraryLinkDef.hh,v $
- * Revision 1.11  2010/10/18 21:55:11  fisyak
- * Warn off for gcc4.5.1 64bits
- *
  * Revision 1.10  2006/01/09 23:47:27  fisyak
  * Add missing methods (found by Zhangbu) to Cint dictionary
  *
@@ -96,9 +93,7 @@
 
 #pragma link C++ function operator<<(ostream&, const StThreeVector<double>&);                     
 #pragma link C++ function operator>>(istream&, StThreeVector<double>&);                           
-#pragma link C++ function operator<<(ostream&, const StThreeVector<float>&);                     
-#pragma link C++ function operator>>(istream&, StThreeVector<float>&);                           
-
+#pragma link C++ function abs(const StThreeVector<double>&);                                         
 #pragma link C++ function cross_product(const StThreeVector<double>&, const StThreeVector<double>&);    
 #pragma link C++ function cross_product(const StThreeVector<double>&, const StThreeVector<float>&);    
 #pragma link C++ function operator+ (const StThreeVector<double>&, const StThreeVector<double>&);       
@@ -118,7 +113,6 @@
 #pragma link C++ function operator* (double, const StLorentzVector<float>&);                         
 #pragma link C++ function operator/ (const StLorentzVector<float>&, double);                         
 #pragma link C++ function abs(const StLorentzVector<float>&);
-
 #pragma link C++ function operator+ (const StLorentzVector<double>&, const StLorentzVector<float>&);  
 #pragma link C++ function operator+ (const StLorentzVector<float>&, const StLorentzVector<double>&);        
 #pragma link C++ function operator+ (const StLorentzVector<double>&, const StLorentzVector<double>&);        
