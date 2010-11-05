@@ -249,8 +249,8 @@ so we keep it here for source compatibility
 #define SS2_SYSTEM      24
 #define SS2_ID          SS2_SYSTEM     /* HFT's SSD */
 
-#define RP2_SYSTEM      25
-#define RP2_ID          RP2_SYSTEM     /* Roman Pots, Phase II */
+#define RPII_SYSTEM      25
+#define RPII_ID          RPII_SYSTEM     /* Roman Pots, Phase II */
 
 #define RTS_NUM_SYSTEMS	26	/* current maximum. Can not be greater than 32! */
 
@@ -519,7 +519,7 @@ so we keep it here for source compatibility
 #define PXL_NODES(x)     ((EXT2_SYSTEM<<12) | (PXL_SYSTEM<<7) | (x))
 #define IST_NODES(x)     ((EXT2_SYSTEM<<12) | (IST_SYSTEM<<7) | (x))
 #define SS2_NODES(x)     ((EXT2_SYSTEM<<12) | (SS2_SYSTEM<<7) | (x))
-#define RP2_NODES(x)     ((EXT2_SYSTEM<<12) | (RP2_SYSTEM<<7) | (x))
+#define RPII_NODES(x)     ((EXT2_SYSTEM<<12) | (RPII_SYSTEM<<7) | (x))
 
 extern inline const char *rts2name(int rts_id)
 {
@@ -570,8 +570,8 @@ extern inline const char *rts2name(int rts_id)
 		return "IST" ;
 	case SS2_SYSTEM :
 		return "SS2" ;
-	case RP2_SYSTEM :
-		return "RP2" ;
+	case RPII_SYSTEM :
+		return "RPII" ;
 	default :
 		return NULL ;	// unknown!
 	}
@@ -614,7 +614,7 @@ extern inline int rts2det(int ix)
 	case MTD_ID :
 	case IST_ID :
 	case SS2_ID :
-	case RP2_ID :
+	case RPII_ID :
 		return ix ;
 	default :
 		return -1 ;
@@ -709,7 +709,7 @@ extern inline int tcd2rts(int tcd)
 // BTOW, ETOW now part of trigger:   jan 2008
 #define LEGACY_DETS (1<<FTP_ID)
 #define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<PXL_ID) | (1<<SSD_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID) | \
-		      (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID) | (1<<IST_ID) | (1<<SS2_ID) | (1<<RP2_ID))
+		      (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID) | (1<<IST_ID) | (1<<SS2_ID) | (1<<RPII_ID))
 
 // 2009... unused dets:  SSD/SVT/TPC/PMD/HFT --->  FTPGROUP
 extern inline u_int grp2rts_mask(int grp)
