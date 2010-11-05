@@ -25,8 +25,8 @@ class StiTpcIsActiveFunctor : public StiIsActiveFunctor
 //		correct version not swiched on yet
 //Bool_t operator()(Double_t /* dYlocal */, Double_t dZlocal) const 
 //  {if (dZlocal<-1) return _eastActive;
-//  {if (dZlocal> 1) return _westActive;
-//  {if return  _eastActive || _westActive;}
+//   if (dZlocal> 1) return _westActive;
+//   if return  _eastActive || _westActive;}
   virtual Bool_t isActive() const {return _active && (_eastActive || _westActive);}
   virtual Bool_t isEastActive() const {return _eastActive;}
   virtual Bool_t isWestActive() const {return _westActive;}
