@@ -15,7 +15,7 @@
  * the Make method of the St_geant_Maker, or the simulated and real
  * event will not be appropriately matched.
  *
- * $Id: StPrepEmbedMaker.cxx,v 1.2 2010/05/26 03:23:09 hmasui Exp $
+ * $Id: StPrepEmbedMaker.cxx,v 1.3 2010/11/07 23:28:36 hmasui Exp $
  *
  */
 
@@ -48,6 +48,7 @@ struct embedSettings{
   Int_t rnd2;
   Double_t vzlow;
   Double_t vzhigh;
+  Double_t vr;
   Int_t NReqTrg;
   static const Int_t nTriggerId = 32 ;
   Int_t ReqTrgId[nTriggerId];
@@ -247,23 +248,29 @@ Int_t StPrepEmbedMaker::Make()
 
   // Skip event if no primary vertex - effectively if tags say it is 0,0,0
   if (fabs(xyz[0])<1e-7 && fabs(xyz[1])<1e-7 && fabs(xyz[2])<1e-7 ){
-    LOG_INFO << "StPrepEmbedMaker::Event " << EvtHddr->GetEventNumber()
+    LOG_INFO << "StPrepEmbedMaker::Make  Event " << EvtHddr->GetEventNumber()
              << " has tags with vertex approx at (0,0,0) - probably no PV, skipping."
              << endm;
     return kStSKIP;
   }
 
-  // Skip event if vertexZ is not in the required range
+  // Skip event 
+  // 1. if vertexZ is not in the required range
+  // 2. if vr = sqrt{vx^2 + vy^2} is not in the required range
   if (mSkipMode == kTRUE){
-    if (xyz[2]<mSettings->vzlow || xyz[2]>mSettings->vzhigh ){
-      LOG_INFO << "StPrepEmbedMaker::Event " << EvtHddr->GetEventNumber()
+    const Double_t vr = sqrt(xyz[0]*xyz[0] + xyz[1]*xyz[1]);
+    if (xyz[2]<mSettings->vzlow || xyz[2]>mSettings->vzhigh || vr>=mSettings->vr ){
+      LOG_INFO << "StPrepEmbedMaker::Make  Event " << EvtHddr->GetEventNumber()
         << " has tags with vertex at (" << xyz[0] << "," << xyz[1] << "," << xyz[2]
-        << ") - out of Vz range, skipping." << endm;
+        << "), vr = " << vr
+        << " - out of Vz or Vr range, skipping." << endm;
       return kStSKIP;
     }
-    LOG_INFO << "StPrepEmbedMaker::Event " << EvtHddr->GetEventNumber()
+
+    LOG_INFO << "StPrepEmbedMaker::Make  Event " << EvtHddr->GetEventNumber()
       << " has tags with vertex at (" << xyz[0] << "," << xyz[1] << "," << xyz[2]
-      << ") - within requested Vz range !" << endm;
+      << "), vr = " << vr
+      << " - within requested Vz and Vr range !" << endm;
   }          
   
   // more skipping. cut on trigger id.
@@ -536,6 +543,21 @@ void StPrepEmbedMaker::SetZVertexCut(const Double_t vzlow, const Double_t vzhigh
 }
 
 //________________________________________________________________________________
+void StPrepEmbedMaker::SetVrCut(const Double_t vr)
+{
+  // Make sure vr != 0
+  if( vr == 0.0 ){
+    LOG_ERROR << "StPrepEmbedMaker::SetVrCut  input vr = 0" << endm;
+    return;
+  }
+
+  mSettings->vr = vr ;
+  LOG_INFO << "StPrepEmbedMaker::SetVrCut  Cut vr in " << mSettings->vr
+    << " (cm)" << endm;
+}
+
+
+//________________________________________________________________________________
 void StPrepEmbedMaker::phasespace(const Int_t mult)
 {
   Double_t rapidityMin = mSettings->etalow ;
@@ -578,6 +600,9 @@ void StPrepEmbedMaker::gkine(const Int_t mult, const Double_t vzmin, const Doubl
 
 /* -------------------------------------------------------------------------
  * $Log: StPrepEmbedMaker.cxx,v $
+ * Revision 1.3  2010/11/07 23:28:36  hmasui
+ * Added transverse vertex cut
+ *
  * Revision 1.2  2010/05/26 03:23:09  hmasui
  * Implement spectrum option by gstar_micky
  *

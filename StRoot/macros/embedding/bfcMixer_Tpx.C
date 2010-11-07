@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.17 2010/09/29 02:52:17 hmasui Exp $
+// $Id: bfcMixer_Tpx.C,v 1.18 2010/11/07 23:29:49 hmasui Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -22,6 +22,7 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
                   const Double_t eta_high=1.5,
                   const Double_t vzlow = -150.0,
                   const Double_t vzhigh = 150.0,
+                  const Double_t vr = 100.0,
 		  const Int_t pid=9,
 		  const Double_t mult=100,
                   const std::vector<Int_t> triggers = 0,
@@ -208,6 +209,9 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
 
   // z-vertex cuts
   embMk->SetZVertexCut(vzlow, vzhigh) ;
+
+  // vr = sqrt{vx^2 + vy^2} cut
+  embMk->SetVrCut(vr);
 
   TAttr::SetDebug(0);
   Chain->SetAttr(".Privilege",0,"*"                ); 	//All  makers are NOT priviliged
