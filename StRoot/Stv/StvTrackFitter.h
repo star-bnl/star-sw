@@ -12,7 +12,7 @@ class StvTrackFitter : public TNamed
 public:
   StvTrackFitter(const char *name):TNamed(name,""){fgInst=this;Clear();}
   virtual ~StvTrackFitter()			{if(this==fgInst) fgInst=0;}
-  virtual  int FitTrack(StvTrack *trak,int dir)	=0;
+  virtual  int Refit(StvTrack *trak,int dir)	=0;
   virtual void Clear(const char *opt="")	{mNDF=0; mXi2=3e33;}
            int GetNDF() const 			{return mNDF;}     
         double GetXi2() const 			{return mXi2;}     

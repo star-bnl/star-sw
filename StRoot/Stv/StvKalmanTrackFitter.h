@@ -10,9 +10,9 @@ class StvTrack;
 class StvKalmanTrackFitter : public StvTrackFitter
 {
 public:
-  StvKalmanTrackFitter(const char *name);
+  StvKalmanTrackFitter();
   virtual ~StvKalmanTrackFitter(){;}	
-  virtual  int FitTrack(StvTrack *trak,int dir);
+  virtual  int Refit(StvTrack *trak,int dir);
   virtual void Clear(const char *opt="");
   
 
