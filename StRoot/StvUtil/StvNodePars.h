@@ -23,7 +23,8 @@ public:
   StvFitPars():mH(0),mZ(0),mA(0),mL(0),mC(0){}
   StvFitPars(double h,double z):mH(h),mZ(z),mA(0),mL(0),mC(0){}
   StvFitPars(const double *arr){memcpy(&mH,arr,5*sizeof(mH));}
-const StvFitPars &Trans(Mtx55D_t &t);    
+const StvFitPars &operator*(Mtx55D_t &t) const;    
+         int Check() const;
       double *Arr() 		{return &mH;}
 const double *Arr()  const 	{return &mH;}
 public:	
@@ -49,9 +50,15 @@ double getPt() const			{ return 1./fabs(_ptin); }
 double getP2() const;
 double getRxy() const;
   void reverse(); 
-  void convert( Mtx55D_t &fitDer, Mtx55D_t &hlxDer) const;
+
+///		convert THelixTrack derivativ matrix into StvFitPar one
+  void convert( Mtx55D_t &fitDer , const Mtx55D_t &hlxDer) const;
+///		invert or reverse StvFitPar derivativ matrix
+  void reverse( Mtx55D_t &fitDerI, const Mtx55D_t &fitDer) const;
+//		move point along helix  
   void move(double dLxy); 
-  void moveToR(double R); 
+//		move point along helix  up to given radius in xy
+  void moveToR(double Rxy); 
 StvNodePars &merge(double wt,StvNodePars &other);
 
 
@@ -60,11 +67,13 @@ double &operator[](int idx)       {return P[idx];}
     int getCharge() const {return (_ptin > 0) ? -1 : 1;}
     int     check(const char *pri=0) const;
 void  operator+=(const StvFitPars &add);
-StvFitPars operator-(const StvNodePars& sub) const;
+const StvFitPars &operator-(const StvNodePars& sub) const;
 void    print() const;
   void GetRadial(double radPar[6],double *radErr=0,const StvFitErrs *fE=0)  const;
   void GetImpact(StvImpact *imp,const StvFitErrs *fE=0)  const;
+
   enum {kX=0,kY,kZ,kPhi,kCurv,kTanL};
+public:	
   /// sine and cosine of cross angle
   double _cosCA;
   double _sinCA;
@@ -99,8 +108,8 @@ class StvFitErrs
 public:	
   enum eFitErrs {kNErrs=15};
   StvFitErrs(double hh=0,double hz=0,double zz=0):mHH(hh),mHZ(hz),mZZ(zz){}
-  void Trans(const StvFitErrs &whom,const Mtx55D_t &how);
   void Reset();
+  void Set(const StvFitErrs &fr,double errFactor);
   void Set(const THelixTrack *he,double hz);
   void Get(      THelixTrack *he)     const;
   void Get(const StvNodePars *np,  StvNodeErrs *ne)     const;
@@ -110,9 +119,10 @@ double GetHz() const 		{ return mHz ;}
         double *Arr()       	{ return &mHH;}
   StvFitErrs &operator*=(double f) {for (int i=0;i<kNErrs;i++){Arr()[i]*=f;}; return *this;}
   void Backward();
+const StvFitErrs &operator*(const Mtx55D_t &mtx) const; 
 double Sign() const;
-   int Check(const char *tit=0);
-  void Print(const char *tit=0);
+   int Check(const char *tit=0) const;
+  void Print(const char *tit=0) const;
 public:	
 double
 mHH,
@@ -120,7 +130,7 @@ mHZ, mZZ,
 mHA, mZA, mAA,
 mHL, mZL, mAL, mLL,
 mHC, mZC, mAC, mLC, mCC;
-protected:
+//protected:
 double mHz;
 };  
 
@@ -210,23 +220,6 @@ inline void StvNodePars::reverse()
  while (_psi> M_PI) {_psi-=2*M_PI;}
  while (_psi<-M_PI) {_psi+=2*M_PI;}
  _tanl  = -_tanl ; _curv = -_curv ; _ptin = -_ptin;
-}
-//------------------------------------------------------------------------------
-inline void StvNodePars::operator+=(const StvFitPars &fp)
-{
-  double cos2L = 1./(1+_tanl*_tanl); 
-  double cosL  = sqrt(cos2L);
-  double sinL  = _tanl*cosL;
-  _x += -_sinCA*fp.mH - sinL*_cosCA*fp.mZ;
-  _y +=  _cosCA*fp.mH - sinL*_sinCA*fp.mZ;
-  _z +=                 cosL       *fp.mZ;
- _psi   +=        fp.mA;
- _cosCA -= _sinCA*fp.mA;
- _sinCA += _cosCA*fp.mA;
-  _ptin  +=       fp.mC;
-  if (fabs(fp.mL) < 0.1) { _tanl= (sinL+cosL*fp.mL)/(cosL-sinL*fp.mL);}
-  else 		  	 { _tanl = tan(atan(_tanl)+fp.mL);}
-  _curv   = _hz *_ptin;
 }
 
 #endif
