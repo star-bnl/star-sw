@@ -38,7 +38,7 @@ MediumSilicon::MediumSilicon() :
   eFinal(2.), eStep(0.001),
   nLevelsX(0),
   cfNullElectrons(0.),
-  hasOpticalData(false), opticalDataFile("OpticalData_Si.txt") {
+  hasOpticalData(false), opticalDataFile("OpticalData_Si_V1.txt") {
 
   className = "MediumSilicon";
   name = "Si";

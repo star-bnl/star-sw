@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <cstdlib>
 
 #include "MediumGas.hh"
 #include "FundamentalConstants.hh"

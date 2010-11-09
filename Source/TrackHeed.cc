@@ -1018,6 +1018,7 @@ TrackHeed::Setup(Medium* medium) {
     const double dedx1 = transferCs->meanC1 * 1.e3;
     const double w = matter->W * 1.e6;
     const double f = matter->F;
+    const double minI = matter->min_ioniz_pot * 1.e6;
     std::cout << className << "::Setup:\n";
     std::cout << "    Cluster density:             " << nc << " cm-1\n";
     std::cout << "    Stopping power (restricted): " << dedxLeft << " - " 
@@ -1026,6 +1027,7 @@ TrackHeed::Setup(Medium* medium) {
                                                       << " keV/cm\n";
     std::cout << "    W value:                     " << w << " eV\n";
     std::cout << "    Fano factor:                 " << f << "\n";
+    std::cout << "    Min. ionization potential:   " << minI << " eV\n";
   }
 
   fixsyscoor primSys(point(0., 0., 0.), basis("primary"), "primary");

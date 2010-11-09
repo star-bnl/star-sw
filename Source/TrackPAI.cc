@@ -107,7 +107,8 @@ bool
 TrackPAI::GetCluster(double& xcls, double& ycls, double& zcls, 
                      double& tcls, int& ncls, double& edep, double& extra) {
 
-  extra = 0.;
+  ncls = 0;
+  edep = extra = 0.;
   
   // Clear the stack.
   electrons.clear();
@@ -162,8 +163,10 @@ TrackPAI::GetCluster(double& xcls, double& ycls, double& zcls,
   double f = 0.;
   const double u = RndmUniform();
   if (u < cdf.back()) {
-    if (u < cdf[0]) {
+    if (u <= cdf[0]) {
       edep = energies[0];
+    } else if (u >= 1.) {
+      edep = energies.back();
     } else {
       // Find the energy loss by interpolation 
       // from the cumulative distribution table
@@ -279,7 +282,7 @@ TrackPAI::SetupMedium(Medium* medium) {
   if (fabs(integral - trk) > 0.2 * trk) {
     std::cerr << className << "::SetupMedium:\n";
     std::cerr << "    Deviation from Thomas-Reiche-Kuhn sum rule by > 20%.\n"; 
-    std::cerr << "    Optical data might be incomplete or erroneous!\n";
+    std::cerr << "    Optical data are probably incomplete or erroneous!\n";
   }
   
   return true;
@@ -479,7 +482,11 @@ TrackPAI::ComputeCsTail(const double emin, const double emax) {
            pow(ek, 4) - 
            (2. / ek) * log(emax / emin);
   }
+  
+  return 1. / emin - 1. / emax - 
+         beta2 * log(emax / emin) / emax;
 
+  /*
   switch (spin) {
     case 0:
       // Spin 0
@@ -507,7 +514,7 @@ TrackPAI::ComputeCsTail(const double emin, const double emax) {
     default:
       break;
   }
-
+  */
   // Rutherford type cross-section
   return 1. / emin - 1. / emax;  
 
@@ -530,7 +537,11 @@ TrackPAI::ComputeDeDxTail(const double emin, const double emax) {
            (3. * emin * emin - 2. * emin * ek + 11. * ek * ek) / 
            (12. * pow(ek, 4));
   }
-  
+ 
+  return log(emax / emin) - 
+          beta2 * (emax - emin) / emax;
+
+  /* 
   switch (spin) {
     case 0:
       return log(emax / emin) - 
@@ -556,7 +567,8 @@ TrackPAI::ComputeDeDxTail(const double emin, const double emax) {
     default:
       break;
   }
-  
+  //*/
+
   // Rutherford cross-section
   return log(emax / emin);
 
@@ -574,7 +586,10 @@ TrackPAI::SampleAsymptoticCs(double u) {
   } else if (mass == ElectronMass) {
     return SampleAsymptoticCsPositron(emin, u);
   }
-  
+ 
+  return SampleAsymptoticCsSpinZero(emin, u);
+
+  /* 
   switch (spin) {
     case 0:
       // Spin 0
@@ -591,7 +606,7 @@ TrackPAI::SampleAsymptoticCs(double u) {
     default:
       break;
   }
-  
+  */
   // Rutherford cross-section (analytic inversion)
   return emin * emax / (u * emin + (1. - u) * emax);
   

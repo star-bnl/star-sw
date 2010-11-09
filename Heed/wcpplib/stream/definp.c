@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "wcpplib/stream/definp.h"
 #include "wcpplib/stream/findmark.h"
 

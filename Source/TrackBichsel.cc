@@ -193,11 +193,21 @@ TrackBichsel::GetClusterDensity() {
     }
   }
 
+  if (fabs(bg - tabBg[iLow]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
+    return tabImfp[iLow] * 1.e4;
+  }
+  if (fabs(bg - tabBg[iUp]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
+    return tabImfp[iUp] * 1.e4;
+  }
+
   // Log-log interpolation
-  return (tabImfp[iLow] + 
-          exp((log(bg) - log(tabBg[iLow])) * 
-              (log(tabImfp[iUp]) - log(tabImfp[iLow])) / 
-              (log(tabBg[iUp]) - log(tabBg[iLow])))) * 1.e4;
+  const double logX0 = log(tabBg[iLow]);
+  const double logX1 = log(tabBg[iUp]);
+  const double logY0 = log(tabImfp[iLow]);
+  const double logY1 = log(tabImfp[iUp]);
+  double d = logY0 + (log(bg) - logX0) * (logY1 - logY0) / 
+                                         (logX1 - logX0);
+  return 1.e4 * exp(d);
   
 }
 
@@ -257,12 +267,30 @@ TrackBichsel::GetStoppingPower() {
     }
   }
 
+  if (debug) {
+    std::cout << className << "::GetStoppingPower:\n";
+    std::cout << "    Bg = " << bg << "\n";
+    std::cout << "    Interpolating between " 
+              << tabBg[iLow] << " and " << tabBg[iUp] << "\n"; 
+  }
+
+  if (fabs(bg - tabBg[iLow]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
+    return tabdEdx[iLow] * 1.e4;
+  }
+  if (fabs(bg - tabBg[iUp]) < 1.e-6 * (tabBg[iUp] - tabBg[iLow])) {
+    return tabdEdx[iUp] * 1.e4;
+  }
+
   // Log-log interpolation
-  return (tabdEdx[iLow] + 
-          exp((log(bg) - log(tabBg[iLow])) * 
-              (log(tabdEdx[iUp]) - log(tabdEdx[iLow])) / 
-              (log(tabBg[iUp]) - log(tabBg[iLow])))) * 1.e4;
-  
+  const double logX0 = log(tabBg[iLow]);
+  const double logX1 = log(tabBg[iUp]);
+  const double logY0 = log(tabdEdx[iLow]);
+  const double logY1 = log(tabdEdx[iUp]);
+  const double dedx = logY0 + 
+                      (log(bg) - logX0) * (logY1 - logY0) / 
+                                          (logX1 - logX0);
+  return 1.e4 * exp(dedx);
+
 }
 
 bool
