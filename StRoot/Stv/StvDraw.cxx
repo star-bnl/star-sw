@@ -67,33 +67,8 @@ TObject *StvDraw::Trak(const THelixTrack &helx,const std::vector<StvHit*>  &hits
 //_____________________________________________________________________________
 TObject *StvDraw::Trak(const std::vector<float> &pnts, EDraw3DStyle sty)
 {
-  enum {kNSteps = 5};
   int n = pnts.size(); if (!n) return 0;
-  if (n<9) { return Line(pnts,sty);}
-  std::vector<float> myTrak;  
-  myTrak=pnts;
-#if 0
-  for (int j=0;j+6<n;j+=3) {
-    const float *d0 = &pnts[j+0];
-    const float *d1 = &pnts[j+3];
-    const float *d2 = &pnts[j+6];
-    float l0=0,l1=0,l2=0;
-    for (int i=0;i<3;i++) {l1+=(d1[i]-d0[i])*(d1[i]-d0[i]);
-                           l2+=(d2[i]-d1[i])*(d2[i]-d1[i]);}
-    l1=sqrt(l1);l2=sqrt(l2); l2+=l1;
-    double step = ((j+9)>=n)? (l2)/kNSteps: l1/kNSteps;
-    for (int k=0;k<=kNSteps;k++) {
-      float l = step*k;
-      float w0 = (l-l1)*(l-l2)/((l0-l1)*(l0-l2));
-      float w1 = (l-l0)*(l-l2)/((l1-l0)*(l1-l2));
-      float w2 = (l-l0)*(l-l1)/((l2-l0)*(l2-l1));
-      for (int i=0;i<3;i++) {myTrak.push_back(w0*d0[i]+w1*d1[i]+w2*d2[i]);}
-    }
-  }
-#endif //0
-  TObject *to = Line(myTrak,sty);
-  DoIt();
-  return to;
+  return Line(pnts,sty);
 }
 //_____________________________________________________________________________
 void  StvDraw::Trak(const StvTrack *tk, EDraw3DStyle sty)
