@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.3 2010/08/01 00:10:48 perev Exp $
+ * $Id: StvNode.cxx,v 1.4 2010/11/09 00:15:21 perev Exp $
  *
  * /author Victor Perev
  */
@@ -27,15 +27,15 @@ static int myCount=0;
 void StvNode::SetPre(StvNodePars &par,StvFitErrs &err,int dir) 	
 {
   mPP[dir]=par;mPE[dir]=err;
-  if (mIsFit[2]) return;
-  mFP[2]=par;mFE[2]=err;mIsFit[2]=1;
+  mFP[dir]=par;mFE[dir]=err;
+  mFP[  2]=par;mFE[  2]=err;
 }
 //______________________________________________________________________________
 void StvNode::SetFit(StvNodePars &par,StvFitErrs &err,int dir) 	
 {
-  mFP[dir]=par;mFE[dir]=err;  mIsFit[dir]=2;
-  if (dir==2 || mIsFit[2]==2) return;
-  mFP[2]=par;mFE[2]=err;mIsFit[2]=2;
+  mFP[dir]=par;mFE[dir]=err;
+  if (dir==2) return;
+  mFP[2]=par;mFE[2]=err;
 }
 //______________________________________________________________________________
 StDetectorId StvNode::GetDetId() const
@@ -92,4 +92,10 @@ static const char *hhh = "xyzre";
   printf("\n");
   return;
 }    
+//________________________________________________________________________________
+void StvNode::SetDer(const Mtx55D_t &der, int dir)
+{
+   memcpy(mDer[dir][0],der[0],sizeof(Mtx55D_t));
+   mPP[dir].reverse(mDer[1-dir],der);
+} 
  
