@@ -246,7 +246,7 @@ int StvHitCount::Skip() const
 void StvTrack::Print(const char *opt) const
 {
   if (!opt) opt = "";
-  printf("Track %p",(void*)this);
+  printf("Track %p\n",(void*)this);
 
   int n=0;
   for (StvNodeConstIter it=begin();it!=end();++it) {

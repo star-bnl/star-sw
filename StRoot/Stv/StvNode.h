@@ -68,8 +68,7 @@ public:
    void SetXi2(double Xi2) 			{ mXi2=Xi2   ;}
    void SetPre(StvNodePars &par,StvFitErrs &err,int dir); 	
    void SetFit(StvNodePars &par,StvFitErrs &err,int dir); 
-   void SetDer(Mtx55D_t &der, int dir) 	{Copy(mDer[dir],der);mIsDer[dir]=1;}
-//??   void GetDer(Mtx55D_t &der, int dir) 	{mDer[dir]=der);mIsDer[dir]=1;}
+   void SetDer(const Mtx55D_t &der, int dir);
 
  StvNode::ENodeType GetType() const 			{return (StvNode::ENodeType)mType;}
                void SetType(StvNode::ENodeType ty) 	{mType =(char)ty;}
@@ -81,8 +80,6 @@ void Print(const char *opt) const;
 
  char mBeg[1];  
  char mType; 			//0=regular,1=dca,2=primary
- char mIsFit[3];
- char mIsDer[2];
 const StHitPlane *mHitPlane;
 StvHit *mHit;
 
