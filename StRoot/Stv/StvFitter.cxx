@@ -36,6 +36,16 @@ void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
   memset(mBeg,'@',mEnd-mBeg+1);
   mInPars = inPars; mInErrs = inErrs;
   mOtPars = otPars; mOtErrs = otErrs;
+  mJnPars =      0; mJnErrs =      0;
+}
+//______________________________________________________________________________
+void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
+                   ,const StvNodePars *jnPars, const StvFitErrs *jnErrs
+                   ,      StvNodePars *otPars,       StvFitErrs *otErrs)
+{
+  mInPars = inPars; mInErrs = inErrs;
+  mOtPars = otPars; mOtErrs = otErrs;
+  mJnPars = jnPars; mJnErrs = jnErrs;
 }
 //______________________________________________________________________________
 void StvFitter::Prep()
@@ -110,11 +120,23 @@ double StvFitter::Xi2(const StvHit *hit)
   mXi2 = MyXi2(G,mDcaP,mDcaL);
   return mXi2 ; 
 }  
-  
+//______________________________________________________________________________
+double StvFitter::Xi2()
+{
+  StvFitPars F   = (*mInPars-*mJnPars);
+  double     Zero[5]= {0};
+  double myXi2 = JoinTwo(5,F.Arr()    ,mInErrs->Arr()
+                        ,5,Zero       ,mJnErrs->Arr()
+		        ,mQQPars.Arr(),mQQErrs.Arr());
+  return myXi2;
+}  
 //______________________________________________________________________________
 int StvFitter::Update()
 {
 static int nCall=0; nCall++;
+
+  if (mJnPars) {return Jpdate();}
+
 //const double *Nt = mDcaFrame[0];
   const double *Np = mDcaFrame[1];
   const double *Nl = mDcaFrame[2];
@@ -135,29 +157,21 @@ static int nCall=0; nCall++;
 		        ,  myJrkPars.Arr(),mOtErrs->Arr());
   assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2));
 
-  double befXi2 = MyXi2(myHitErrs.Arr(),myHitPars.mH,myHitPars.mZ);
-  double aftXi2 = MyXi2(myHitErrs.Arr(),myJrkPars.mH-myHitPars.mH
-                                       ,myJrkPars.mZ-myHitPars.mZ);
-  assert(befXi2>aftXi2);
-
   *mOtPars = mTkPars;
-  for (int i=0;i<3;i++) {
-   (&(mOtPars->_x))[i] += Np[i]*myJrkPars.mH +Nl[i]*myJrkPars.mZ;} 
-  double dA = myJrkPars.mA, dL = myJrkPars.mL;
-  mOtPars->_psi   += dA;
-  mOtPars->_ptin  += myJrkPars.mC;
-//   mOtPars->_cosCA -= mOtPars->_sinCA*dA;
-//   mOtPars->_sinCA += mOtPars->_cosCA*dA;
-  mOtPars->ready();
-  if (mOtPars->_tanl < 1) { mOtPars->_tanl = (mSinL+mCosL*dL)/(mCosL-mSinL*dL);}
-  else 		  	  { mOtPars->_tanl = tan(atan(mOtPars->_tanl)+dL);}
-
-  mOtPars->_curv   = mOtPars->_hz * mOtPars->_ptin;
-
+  *mOtPars+= myJrkPars;
   mOtPars->move(-mDeltaL*mCosL);
 
   return 0;
 }  
+//______________________________________________________________________________
+int StvFitter::Jpdate()
+{
+  *mOtPars = *mJnPars; (*mOtPars)+=mQQPars;
+  assert(!mOtPars->check());
+  *mOtErrs =  mQQErrs;   
+  return 0;
+}
+//______________________________________________________________________________
   
 #if 1
 //______________________________________________________________________________
