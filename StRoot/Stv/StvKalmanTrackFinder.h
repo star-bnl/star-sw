@@ -17,12 +17,13 @@ public:
   StvKalmanTrackFinder(const char *name="KalmanTrackFinder");
    ~StvKalmanTrackFinder(){;}
    int	FindTracks();
-StvTrack *FindTrack();
+   int	Refit(StvTrack *tk,int idir);
+StvTrack *FindTrack(int idir);
    void	Reset();
    void	Clear(const char *opt="");
-   void	Add(const StvPars *par);
-   void	Add(const StvHitVector *hitV);
-
+//   void	Add(const StvPars *par);
+//   void	Add(const StvHitVector *hitV);
+   
    
 
 protected:

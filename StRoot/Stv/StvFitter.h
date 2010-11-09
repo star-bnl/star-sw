@@ -18,15 +18,20 @@ public:
 
 StvFitter(const char *name="DefaultFitter");
       void    Set(const StvNodePars *inPars, const StvFitErrs *inErrs
-          ,             StvNodePars *otPars,       StvFitErrs *otErrs);
+                 ,      StvNodePars *otPars,       StvFitErrs *otErrs);
+      void    Set(const StvNodePars *inPars, const StvFitErrs *inErrs
+                 ,const StvNodePars *jnPars, const StvFitErrs *jnErrs
+                 ,      StvNodePars *otPars,       StvFitErrs *otErrs);
 const double *GetHitErrs() const {return mHitErrs;}        
   void Prep();
 
 double Xi2(const StvHit *hit);
+double Xi2();
 int  Update();
 static StvFitter *Inst() {return mgFitter;}	
 
 private:
+int  Jpdate();
 static double JoinTwo(int nP1,const double *P1,const double *E1
                      ,int nP2,const double *P2,const double *E2
 	             ,              double *PJ,      double *EJ);
@@ -35,6 +40,8 @@ protected:
       char         mBeg[1];
 const StvNodePars *mInPars;
 const StvFitErrs  *mInErrs;
+const StvNodePars *mJnPars;
+const StvFitErrs  *mJnErrs;
       StvNodePars *mOtPars;
       StvFitErrs  *mOtErrs;
 const StvHit      *mHit;
@@ -42,6 +49,8 @@ const StHitPlane  *mHitPlane;
       StvHitErrCalculator *mHitErrCalc;
       StvNodePars  mTkPars;
       StvFitErrs   mTkErrs;
+      StvFitPars   mQQPars;
+      StvFitErrs   mQQErrs;
       double       mHitErrs[3];
       double	   mCos2L,mCosL,mSinL,mCosP,mSinP,mXi2,mDeltaL;
       double       mDcaP,mDcaL,mDist;
