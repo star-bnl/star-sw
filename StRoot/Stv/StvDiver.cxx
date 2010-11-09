@@ -62,6 +62,7 @@ int  StvDiver::Dive()
 
   mInpPars->get(mHelix);
   mInpErrs->Get(mHelix);
+  mHlxDeri[0][0]=0;
   if (!mDir) mHelix->Backward();
 
   TVirtualMC::GetMC()->ProcessEvent();
@@ -79,10 +80,14 @@ int  StvDiver::Dive()
 
   mOutErrs->Set(mHelix,mOutPars->_hz);
   assert(mOutErrs->mCC>0);
+  mOutPars->convert(*mOutDeri,mHlxDeri);
+
+
   if (!mDir) {
     mOutPars->reverse();
+    mOutPars->reverse(*mOutDeri,*mOutDeri);
     mOutErrs->Backward();
-  assert(mOutErrs->mCC>0);
+    assert(mOutErrs->mCC>0);
   }
   assert (mInpPars->_ptin * mOutPars->_ptin >=0);
   return mSteps->GetExit();
@@ -104,9 +109,7 @@ void StvDiver::Set(StvNodePars *otpar,StvFitErrs *oterr,Mtx55D_t *deriv)
   mOutPars = otpar;
   mOutErrs = oterr;
   mOutDeri = deriv;
-  mSteps->Set(mOutDeri);
-  memset((*mOutDeri)[0],0,5*5*sizeof((*mOutDeri)[0][0]));
-  for (int j=0;j<5;j++) {(*mOutDeri)[j][j]=1.;}
+  mSteps->Set(&mHlxDeri);
 
 }
 //_____________________________________________________________________________
@@ -290,8 +293,15 @@ static int nCall=0; nCall++;
     
   fELossTrak->Add(dL);
   fHelix->Set((2*rho+curva)/3);
-  double T[5][5],R[5][5];
-  fHelix->Move(dL,T);
+
+  if (!(*fDeriv)[0][0]) {	//first time
+    fHelix->Move(dL,*fDeriv);
+  } else {
+    double T[5][5],R[5][5];
+    fHelix->Move(dL,T);
+    Multiply(R,T,*fDeriv);
+    memcpy((*fDeriv)[0],R[0],sizeof(R));
+  }
 
   assert(fabs(fHelix->Pos()[0]-pos[0])<0.3*(dL+1));
   assert(fabs(fHelix->Pos()[1]-pos[1])<0.3*(dL+1));
@@ -300,20 +310,16 @@ static int nCall=0; nCall++;
 
   THEmx_t *emx = fHelix->Emx();
   assert(emx->mCC>0);
-#if 1//??????
   double theta2 = fELossTrak->GetTheta2();
   emx->mAA+=theta2; emx->mLL+=theta2;
   double ort2 = fELossTrak->GetOrt2();
   assert(ort2>0);
-  emx->mHH+=ort2; emx->mZZ+= ort2*pow(fHelix->GetCos(),2);
+  emx->mHH+=ort2; emx->mZZ+= ort2/pow(fHelix->GetCos(),2);
   double eerr2= fELossTrak->ELossErr2();
   double dC2 =  -mom[3]/(mom[0]*mom[0]+mom[1]*mom[1]+mom[2]*mom[2])*curva;
   dC2 = dC2*eerr2;
   emx->mAA+=dC2;
-#endif //0 ????
-  Multiply(R,T,*fDeriv);
   fHelix->Set(pos,mom,curva);
-  memcpy((*fDeriv)[0],R[0],sizeof(R));
   return isDca;
 }
 //_____________________________________________________________________________

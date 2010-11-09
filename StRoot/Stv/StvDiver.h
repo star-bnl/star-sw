@@ -37,13 +37,14 @@ const StvNodePars    *mInpPars;
 const StvFitErrs     *mInpErrs;
 StvNodePars    *mOutPars;
 StvFitErrs     *mOutErrs;
-Mtx55D_t       *mOutDeri;
+Mtx55D_t       *mOutDeri; //Out derivatives in StvFitPars notation
 THelixTrack    *mHelix;
 StvELossTrak   *mELoss;
-
+Mtx55D_t        mHlxDeri; //Internal derivatives in StHeliTrack notation
 StvMCStepping  *mSteps;
 StvMCField     *mFld;
 StvMCPrimaryGenerator *mGen;
+
 char mEnd[1];
 ClassDef(StvDiver,0);
 };
