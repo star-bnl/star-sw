@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string.h>
+#include <cstdio>
+
 #include "wcpplib/stream/findmark.h"
 #include "wcpplib/stream/prstream.h"
 
