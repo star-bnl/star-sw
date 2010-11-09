@@ -11,8 +11,11 @@
   ,{ 6, 7, 8, 9,13,18},{10,11,12,13,14,19},{15,16,17,18,19,20}};
 static const double recvCORRMAX  = 0.99;
 static const double chekCORRMAX  = 0.9999;
-static double MAXPARS[]={555,555,555,6.66,111,111};
-static double MAXFITERR[5]={0.3,0.3,0.03,0.03,0.9};
+//                              x   y   z  psi   pt  tan  cur
+static double MAXNODPARS[]   ={555,555,555,6.66,111,  10, .1};
+//                              h  z   a    l  p
+static double MAXFITPARS[]   ={22,22, .5 , .5 ,3};
+static double MAXFITERR[5]   ={.3,.3,0.03,0.03,1};
 //____________________________________________________________
 static double EmxSign(int n,const double *a); 
 
@@ -40,13 +43,14 @@ void Multiply(double *res, const Mtx55D_t &A,const double *B)
   for (int i=0;i<5;i++) {
     double S = 0;
     const double *Ai = A[i];
-    for (int j=0;j<5;j++) {if (!Ai[j]) continue;S += Ai[j];}
+    for (int j=0;j<5;j++) {if (!Ai[j]) continue;S += Ai[j]*B[j];}
     res[i]=S;
   }
 }
 //______________________________________________________________________________ 
 void Invert(Mtx55D_t &to, const Mtx55D_t &fr)
 {
+assert(0);
 }
 //______________________________________________________________________________ 
 void Testik(const Mtx55D_t &tt)
@@ -103,22 +107,19 @@ int StvNodePars::check(const char *pri) const
 //?? temp test
   double tmp = _curv - _ptin* _hz;
 //		1km for 1GeV is a zero field
-//  assert(fabs(_hz)<1e-5 || fabs(tmp)<= 1e-3*fabs(_curv));
-  if (fabs(_hz)>=1e-5 && fabs(tmp)> 1e-3*fabs(_curv)) {ierr=1001; goto FAILED;}
-  for (int i=0;i<kNPars;i++) {if (fabs(P[i]) > MAXPARS[i]) {ierr = i+1 ; break;}} 
-  if(ierr) goto FAILED;
-  for (int i=-2;i<0;i++)     {if (fabs(P[i]) > 1.)         {ierr = i+12; break;}} 
-  if (ierr) goto FAILED;
+  if (fabs(_hz)>=1e-5 && fabs(tmp)> 1e-3*fabs(_curv)) {ierr=1001; 	   	goto FAILED;}
+  for (int i=0;i<=kNPars;i++){if (fabs(P[i]) > MAXNODPARS[i]) {ierr = i+ 1;	goto FAILED;}} 
+
+  for (int i=-2;i<0;i++)     {if (fabs(P[i]) > 1.0001)        {ierr = i+12;	goto FAILED;}} 
   tmp = fabs(cos(_psi)-_cosCA);
-  ierr = 1002; if (tmp>1e-4) goto FAILED;
+  ierr = 1002; if (tmp>1e-4) 							goto FAILED;
   tmp = fabs(sin(_psi)-_sinCA);
-  ierr = 1003; if (tmp>1e-4) goto FAILED;
-  ierr = 0;
+  ierr = 1003; if (tmp>1e-4) 							goto FAILED;
+  ierr = 1004; if (fabs(_z) <= 1e-10) 						goto FAILED;
+  return 0;
 FAILED: 
-  if (!ierr) return ierr;
   if (!pri ) return ierr;
-  printf("StvNodePars::check(%s) == FAILED(%d)\n",pri,ierr);
-  print();
+  printf("StvNodePars::check(%s) == FAILED(%d)\n",pri,ierr);  print();
   return ierr;
 } 
 //______________________________________________________________________________
@@ -185,24 +186,67 @@ void StvNodePars::moveToR(double R)
   if (myDot<0) dL = -dL;
   move(dL);
 }
+//------------------------------------------------------------------------------
+void StvNodePars::reverse( Mtx55D_t &fitDerI, const Mtx55D_t &fitDer) const
+{
+static const int mius[]= {1,2,5,8,9,10,13,14,0};
+  if (fitDerI != fitDer) memcpy(fitDerI[0],fitDer[0],sizeof(Mtx55D_t));
+  for (int i=0;mius[i];i++) {fitDerI[0][mius[i]]=-fitDerI[0][mius[i]];}
+}
 
 //______________________________________________________________________________
-StvFitPars StvNodePars::operator-(const StvNodePars& sub) const
+const StvFitPars &StvNodePars::operator-(const StvNodePars& sub) const
 {
-  double cos2L = 1./(1+_tanl*_tanl); 
+static StvFitPars fp;
+  double cos2L = 1./(1+sub._tanl*sub._tanl); 
   double cosL  = sqrt(cos2L);
-  double sinL  = _tanl*cosL;
-  StvFitPars fp;
+  double sinL  = sub._tanl*cosL;
   double dx = _x-sub._x;
   double dy = _y-sub._y;
   double dz = _z-sub._z;
   
-  fp.mH = dx*(-_sinCA)     + dy*(_cosCA);
-  fp.mZ = dx*(-sinL*_cosCA)+ dy*(-sinL*_sinCA) +dz*cosL;
+  fp.mH = dx*(     -sub._sinCA)+ dy*(      sub._cosCA);
+  fp.mZ = dx*(-sinL*sub._cosCA)+ dy*(-sinL*sub._sinCA) +dz*cosL;
   fp.mA = (_psi -sub._psi );
   fp.mC = (_ptin-sub._ptin);
-  fp.mL = (_tanl-sub._tanl)*cos2L;
+  double tL = (_tanl-sub._tanl)/(1+_tanl*sub._tanl);
+  if (fabs(tL)<0.05) { fp.mL = tL*(1-tL*tL/3); }
+  else               { fp.mL = atan(tL)      ; }
+
+  if      (fp.mL<0     ) {fp.mL = -fp.mL	; fp.mA=-fp.mA;}
+  else if (fp.mL>M_PI/2) {fp.mL = fp.mL-M_PI/2	; fp.mA=-fp.mA;}
+  assert(!fp.Check());
   return fp;
+}
+//______________________________________________________________________________
+void StvNodePars::operator+=(const StvFitPars &fp)
+{
+  double cos2L = 1./(1+_tanl*_tanl); 
+  double cosL  = sqrt(cos2L);
+  double sinL  = _tanl*cosL;
+  _x += -_sinCA*fp.mH - sinL*_cosCA*fp.mZ;
+  _y +=  _cosCA*fp.mH - sinL*_sinCA*fp.mZ;
+  _z +=                 cosL       *fp.mZ;
+
+  double a = fp.mA,cA,sA;
+  if (fabs(a) < 0.1) { sA = a*(1-a*a/6); cA = 1-a*a/2;}
+  else               { sA = sin(a)     ; cA = cos(a) ;}                
+ _psi   += a;
+  double cosCA = _cosCA;
+  _cosCA = cosCA*cA-_sinCA*sA;
+  _sinCA = cosCA*sA+_sinCA*cA;
+
+  _ptin  += fp.mC;
+
+  double l = fp.mL,tL;
+  if (fabs(l) < 0.1) { tL = l*(1+l*l/3); }
+  else               { tL = tan(l)      ;}                
+  _tanl = (tL+_tanl)/(1.-_tanl*tL);
+
+  assert(fabs(_tanl)<5);
+  _curv   = _hz *_ptin;
+  if (fabs( _cosCA)>1 || fabs( _sinCA)>1) ready();
+  assert(!check());
 }
 //______________________________________________________________________________
 void StvNodePars::print() const
@@ -212,7 +256,7 @@ static const char* tit[]={"cosCA","sinCA","X","Y","Z","Eta","Ptin","TanL","Curv"
   printf("\n");
 }   
 //______________________________________________________________________________
-void StvNodePars::convert( Mtx55D_t &fitDer, Mtx55D_t &hlxDer) const
+void StvNodePars::convert( Mtx55D_t &fitDer, const Mtx55D_t &hlxDer) const
 {
   double cosL = 1/sqrt(1+_tanl*_tanl);
   double sinL = _tanl*cosL;
@@ -260,9 +304,12 @@ void StvHitErrs::rotate(double angle)
 //______________________________________________________________________________
 double StvFitErrs::Sign() const {return EmxSign(5,Arr());}
 //______________________________________________________________________________
-void StvFitErrs::Trans(const StvFitErrs &whom,const Mtx55D_t &how)
+const StvFitErrs &StvFitErrs::operator*(const Mtx55D_t &how) const
 {
-  TCL::trasat(how[0],whom.Arr(),Arr(),5,5);
+static StvFitErrs myFitErrs;
+  TCL::trasat(how[0],Arr(),myFitErrs.Arr(),5,5);
+  assert(!myFitErrs.Check());
+  return myFitErrs;
 }  
 //______________________________________________________________________________
 void StvFitErrs::Reset()
@@ -327,12 +374,21 @@ void StvFitErrs::Get(THelixTrack *he) const
   emx->mCC = mCC*mHz*mHz ;
 }  
 //_____________________________________________________________________________
+void StvFitErrs::Set(const StvFitErrs &fr,double errFactor)
+{
+  Reset();
+  mHz = fr.mHz;  
+  double const *e =fr.Arr();
+  double       *ee=   Arr();
+  for (int i=0,li=0;i< 5;li+=++i) {ee[li+i] = e[li+i]*errFactor;}
+}
+//_____________________________________________________________________________
 void StvFitErrs::Backward()
 {
   mHA*=-1; mAC*=-1; mHZ*=-1; mZC*=-1; mAL*=-1; mZL*=-1;
 }
 //_____________________________________________________________________________
-int StvFitErrs::Check(const char *tit)
+int StvFitErrs::Check(const char *tit) const
 {
 
   int ierr=0;
@@ -344,15 +400,15 @@ int StvFitErrs::Check(const char *tit)
     for (int j=0;j<i;j++) {
        if (e[li+j]*e[li+j]>=dia[i]*dia[j]){ierr = 100+10*i+j;goto ERR;}
     } }
-    return 0;
+  return 0;
 ERR: if (!tit) return ierr;
-    printf("StvFitErrs::Check(%s)=%d\n",tit,ierr);
-    Print();
-    return ierr;
+  printf("StvFitErrs::Check(%s)=%d\n",tit,ierr);
+  Print();
+  return ierr;
 }     
 
 //_____________________________________________________________________________
- void StvFitErrs::Print(const char *tit) 
+ void StvFitErrs::Print(const char *tit) const
 {
   if (!tit) tit = "";
   printf("StvFitErrs::Print(%s) ==\n",tit);
@@ -363,7 +419,12 @@ ERR: if (!tit) return ierr;
     printf("\n");
   }
 }
-
+//_____________________________________________________________________________
+int StvFitPars::Check() const
+{
+  for (int i=0;i<5;i++) { if (fabs(Arr()[i]) > MAXFITPARS[i]) return i+1; }
+  return 0;
+}
 //_____________________________________________________________________________
 
 //_____________________________________________________________________________
@@ -470,10 +531,12 @@ void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
 
 }
 //______________________________________________________________________________
-const StvFitPars &StvFitPars::Trans(Mtx55D_t &t)    
+const StvFitPars &StvFitPars::operator*(Mtx55D_t &t) const  
 {
 static StvFitPars myPars;
-  Multiply(myPars.Arr(),t,Arr());
+//??  Multiply(myPars.Arr(),t,Arr());
+  TCL::vmatl(t[0],Arr(),myPars.Arr(),5,5);
+  assert(!myPars.Check());
   return myPars;
 }
 //_____________________________________________________________________________
