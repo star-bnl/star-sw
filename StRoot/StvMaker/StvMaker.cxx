@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.2 2010/09/29 23:42:28 perev Exp $
+// $Id: StvMaker.cxx,v 1.3 2010/11/09 00:07:11 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -68,6 +68,7 @@ More detailed: 				<br>
 #include "StarVMC/GeoTestMaker/StVMCApplication.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
 //#include "StvMCInitApp.h"
+#include "Stv/StvConst.h"
 #include "Stv/StvHit.h"
 #include "StvUtil/StvPullEvent.h"
 #include "Stv/StvDiver.h"
@@ -78,6 +79,7 @@ More detailed: 				<br>
 #include "StvTGSelectors.h"
 #include "StvUtil/StvHitErrCalculator.h"
 #include "Stv/StvFitter.h"
+#include "Stv/StvKalmanTrackFitter.h"
 #include "StvStEventFiller.h"
 #include "StvStarVertexFinder.h"
 
@@ -156,7 +158,9 @@ Int_t StvMaker::Init()
   kit->HitLoader()->Init();
   kit->SetSeedFinder (new StvDefaultSeedFinder);
   kit->SetTrackFinder(new StvKalmanTrackFinder);
+  new StvConst();
   new StvFitter();
+  new StvKalmanTrackFitter();
   mEventFiller= new StvStEventFiller;
   InitPulls();
   mVertexFinder = new StvStarVertexFinder("GenericVertex");
