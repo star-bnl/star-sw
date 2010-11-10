@@ -23,7 +23,7 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   rb11(1.), rb12(0.), rb13(0.), rb21(0.), rb22(1.), rb23(0.),
   rb31(0.), rb32(0.), rb33(1.), rx22(1.), rx23(0.), rx32(0.), rx33(1.),
   deltaCut(0.), gammaCut(0.),
-  nCollSkip(100),
+  sizeCut(-1), nCollSkip(100),
   hasUserHandleStep(false),
   hasUserHandleAttachment(false),
   hasUserHandleInelastic(false),
@@ -567,6 +567,15 @@ AvalancheMicroscopic::TransportElectron(
     // If the list of electrons is exhausted, we're done.
     nSize = stack.size();
     if (nSize <= 0) break;
+    if (sizeCut > 0 && nSize > sizeCut) {
+      // Avalanche exceeds the max. size
+      for (iEl = nSize; iEl--;) {
+        // Move all electrons to the list of endpoints.
+        endpoints.push_back(stack[iEl]);
+        stack.erase(stack.begin() + iEl);
+      }
+      break;
+    }
     // Loop over all electrons in the avalanche.
     for (iEl = nSize; iEl--;) {
       // Get an electron from the stack.

@@ -2204,11 +2204,13 @@ MediumMagboltz86::ComputeDeexcitationTable() {
 
   if (debug) {
     std::cout << className << "::ComputeDeexcitationTable:\n";
-    std::cout << "          Level                    Lifetimes [ns]\n";
-    std::cout << "                   Total      Radiative        "
+    std::cout << "          Level    Energy [eV]   "
+              << "                 Lifetimes [ns]\n";
+    std::cout << "                                "
+              << " Total    Radiative       "
               << " Collisional\n";
-    std::cout << "                                         "
-              << " Ionisation      Other\n";
+    std::cout << "                                     "
+              << "                Ionisation      Other\n";
   }
   for (int i = 0; i < nDeexcitations; ++i) {
     deexcitations[i].rate = 0.;
@@ -2225,20 +2227,25 @@ MediumMagboltz86::ComputeDeexcitationTable() {
     }
     if (deexcitations[i].rate > 0.) {
       if (debug) {
-        std::cout << std::setw(15) << deexcitations[i].label << "  " 
+        std::cout << std::setw(15) << deexcitations[i].label << "  "
+                  << std::fixed << std::setprecision(3)
+                  << std::setw(10) << deexcitations[i].energy << "  " 
                   << std::setw(10) << 1. / deexcitations[i].rate << "  ";
         if (fRad > 0.) {
-          std::cout << std::setw(10) <<  1. / fRad << "  ";
+          std::cout << std::fixed << std::setprecision(3)
+                    << std::setw(10) <<  1. / fRad << "  ";
         } else {
           std::cout << "----------  ";
         }
         if (fCollIon > 0.) {
-          std::cout << std::setw(10) << 1. / fCollIon << "  ";
+          std::cout << std::fixed << std::setprecision(3)
+                    << std::setw(10) << 1. / fCollIon << "  ";
         } else {
           std::cout << "----------  ";
         }
         if (fCollOther > 0.) {
-          std::cout << std::setw(10) << 1. / fCollOther << "\n";
+          std::cout << std::fixed << std::setprecision(3)
+                    << std::setw(10) << 1. / fCollOther << "\n";
         } else {
           std::cout << "----------  \n";
         }

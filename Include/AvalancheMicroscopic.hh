@@ -73,6 +73,11 @@ class AvalancheMicroscopic {
     void   SetPhotonTransportCut(const double cut) {gammaCut = cut;}
     double GetPhotonTransportCut() const {return gammaCut;}
 
+    // Enable/disable max. avalanche size
+    void EnableAvalancheSizeLimit(const int size) {sizeCut = size;}
+    void DisableAvalancheSizeLimit() {sizeCut = -1;}
+    int  GetAvalancheSizeLimit() const {return sizeCut;}
+    
     // Enable/disable magnetic field in stepping algorithm
     void EnableMagneticField()  {useBfield = true;}
     void DisableMagneticField() {useBfield = false;}
@@ -217,6 +222,9 @@ class AvalancheMicroscopic {
     // Transport cuts
     double deltaCut;
     double gammaCut;
+
+    // Max. avalanche size
+    int sizeCut;
 
     int nCollSkip;
     
