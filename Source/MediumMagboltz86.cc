@@ -1767,45 +1767,67 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[0] = 2.36e-4; newDxc.final[0] = mapDxc["Ar_1S4"];
       newDxc.p[1] = 0.0445;  newDxc.final[1] = mapDxc["Ar_1S2"];
     } else if (level == "Ar_3D6") {
-      int nc = 3; newDxc.nChannels = nc;
+      int nc = 4; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
-      newDxc.p[0] = 8.1e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
-      newDxc.p[1] = 1.2e-4; newDxc.final[1] = mapDxc["Ar_2P4"];
-      newDxc.p[2] = 3.6e-4; newDxc.final[2] = mapDxc["Ar_2P2"];
+      // Additional line (2P7) from Bartschat
+      newDxc.p[0] = 8.1e-3;  newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 7.73e-4; newDxc.final[1] = mapDxc["Ar_2P7"];
+      newDxc.p[2] = 1.2e-4;  newDxc.final[2] = mapDxc["Ar_2P4"];
+      newDxc.p[3] = 3.6e-4;  newDxc.final[3] = mapDxc["Ar_2P2"];
     } else if (level == "Ar_3D5") {
       newDxc.osc = 0.0011;
-      int nc = 6; newDxc.nChannels = nc;
+      int nc = 10; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
-      newDxc.p[0] = 7.4e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
-      newDxc.p[1] = 3.9e-5; newDxc.final[1] = mapDxc["Ar_2P8"];
-      newDxc.p[2] = 3.2e-5; newDxc.final[2] = mapDxc["Ar_2P4"];
-      newDxc.p[3] = 1.4e-4; newDxc.final[3] = mapDxc["Ar_2P3"];
-      newDxc.p[4] = 1.7e-4; newDxc.final[4] = mapDxc["Ar_2P2"];
+      // Additional lines (2P7, 2P6, 2P5, 2P1) from Bartschat
+      newDxc.p[0] = 7.4e-3;  newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 3.9e-5;  newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 3.09e-4; newDxc.final[2] = mapDxc["Ar_2P7"];
+      newDxc.p[3] = 1.37e-3; newDxc.final[3] = mapDxc["Ar_2P6"];
+      newDxc.p[4] = 5.75e-4; newDxc.final[4] = mapDxc["Ar_2P5"];
+      newDxc.p[5] = 3.2e-5;  newDxc.final[5] = mapDxc["Ar_2P4"];
+      newDxc.p[6] = 1.4e-4;  newDxc.final[6] = mapDxc["Ar_2P3"];
+      newDxc.p[7] = 1.7e-4;  newDxc.final[7] = mapDxc["Ar_2P2"];
+      newDxc.p[8] = 2.49e-6; newDxc.final[8] = mapDxc["Ar_2P1"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[5] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
-      newDxc.final[5] = -1;
+      newDxc.p[9] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[9] = -1;
     } else if (level == "Ar_3D3") {
-      int nc = 6; newDxc.nChannels = nc;
+      int nc = 8; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
-      newDxc.p[0] = 4.9e-3; newDxc.final[0] = mapDxc["Ar_2P10"];
-      newDxc.p[1] = 1.2e-4; newDxc.final[1] = mapDxc["Ar_2P8"];
-      newDxc.p[2] = 2.6e-4; newDxc.final[2] = mapDxc["Ar_2P7"];
-      newDxc.p[3] = 2.5e-3; newDxc.final[3] = mapDxc["Ar_2P6"];
-      newDxc.p[4] = 3.9e-4; newDxc.final[4] = mapDxc["Ar_2P3"];
-      newDxc.p[5] = 1.1e-4; newDxc.final[5] = mapDxc["Ar_2P2"];
+      // Additional lines (2P9, 2P4) from Bartschat
+      newDxc.p[0] = 4.9e-3;  newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 9.82e-5; newDxc.final[1] = mapDxc["Ar_2P9"];
+      newDxc.p[2] = 1.2e-4;  newDxc.final[2] = mapDxc["Ar_2P8"];
+      newDxc.p[3] = 2.6e-4;  newDxc.final[3] = mapDxc["Ar_2P7"];
+      newDxc.p[4] = 2.5e-3;  newDxc.final[4] = mapDxc["Ar_2P6"];
+      newDxc.p[5] = 9.41e-5; newDxc.final[5] = mapDxc["Ar_2P4"];
+      newDxc.p[6] = 3.9e-4;  newDxc.final[6] = mapDxc["Ar_2P3"];
+      newDxc.p[7] = 1.1e-4;  newDxc.final[7] = mapDxc["Ar_2P2"];
     } else if (level == "Ar_3D4!") {
-      newDxc.p.clear(); newDxc.final.clear();  newDxc.type.clear();
+      int nc = 1; newDxc.nChannels = nc;
+      // Additional line: 2P9
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
+      newDxc.p[0] = 0.02; newDxc.final[0] = mapDxc["Ar_2P9"];
     } else if (level == "Ar_3D4") {
-      int nc = 2; newDxc.nChannels = nc;
+      int nc = 4; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
-      newDxc.p[0] = 0.011;  newDxc.final[0] = mapDxc["Ar_2P8"];
-      newDxc.p[1] = 8.8e-5; newDxc.final[1] = mapDxc["Ar_2P6"];
+      // Additional lines (2P9, 2P3) from Bartschat
+      newDxc.p[0] = 2.29e-3; newDxc.final[0] = mapDxc["Ar_2P9"];
+      newDxc.p[1] = 0.011;   newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 8.8e-5;  newDxc.final[2] = mapDxc["Ar_2P6"];
+      newDxc.p[3] = 2.53e-6; newDxc.final[3] = mapDxc["Ar_2P3"];
     } else if (level == "Ar_3D1!!") {
-      int nc = 3; newDxc.nChannels = nc;
+      int nc = 8; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
-      newDxc.p[0] = 1.2e-4; newDxc.final[0] = mapDxc["Ar_2P9"];
-      newDxc.p[1] = 5.7e-3; newDxc.final[1] = mapDxc["Ar_2P8"];
-      newDxc.p[2] = 7.3e-3; newDxc.final[2] = mapDxc["Ar_2P7"];
+      // Additional lines (2P10, 2P6, 2P4 - 2P2) from Bartschat
+      newDxc.p[0] = 5.85e-6; newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 1.2e-4;  newDxc.final[1] = mapDxc["Ar_2P9"];
+      newDxc.p[2] = 5.7e-3;  newDxc.final[2] = mapDxc["Ar_2P8"];
+      newDxc.p[3] = 7.3e-3;  newDxc.final[3] = mapDxc["Ar_2P7"];
+      newDxc.p[4] = 2.e-4;   newDxc.final[4] = mapDxc["Ar_2P6"];
+      newDxc.p[5] = 1.54e-6; newDxc.final[5] = mapDxc["Ar_2P4"];
+      newDxc.p[6] = 2.08e-5; newDxc.final[6] = mapDxc["Ar_2P3"];
+      newDxc.p[7] = 6.75e-7; newDxc.final[7] = mapDxc["Ar_2P2"];
     } else if (level == "Ar_2S5") {
       int nc = 8; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -1832,35 +1854,60 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[8] = 3.e-5;   newDxc.final[8] = mapDxc["Ar_2P2"];
       newDxc.p[9] = 1.6e-4;  newDxc.final[9] = mapDxc["Ar_2P1"];
     } else if (level == "Ar_3D1!") {
-      int nc = 3; newDxc.nChannels = nc;
-      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
-      newDxc.p[0] = 3.1e-3; newDxc.final[0] = mapDxc["Ar_2P9"];
-      newDxc.p[1] = 2.e-3;  newDxc.final[1] = mapDxc["Ar_2P8"];
-      newDxc.p[2] = 9.8e-6; newDxc.final[2] = mapDxc["Ar_2P3"];
-    } else if (level == "Ar_3D2") {
-      newDxc.osc = 0.09;
       int nc = 4; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
+      // Additional line (2P6) from Bartschat
+      newDxc.p[0] = 3.1e-3; newDxc.final[0] = mapDxc["Ar_2P9"];
+      newDxc.p[1] = 2.e-3;  newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 0.015;  newDxc.final[2] = mapDxc["Ar_2P6"];
+      newDxc.p[3] = 9.8e-6; newDxc.final[3] = mapDxc["Ar_2P3"];
+    } else if (level == "Ar_3D2") {
+      newDxc.osc = 0.09;
+      int nc = 10; newDxc.nChannels = nc;
+      newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
+      // Additional lines (2P10, 2P6, 2P4-2P1) from Bartschat 
       newDxc.p[0] = 0.27;    newDxc.final[0] = -1;
-      newDxc.p[1] = 9.52e-4; newDxc.final[1] = mapDxc["Ar_2P8"];
-      newDxc.p[2] = 0.011;   newDxc.final[2] = mapDxc["Ar_2P7"];
-      newDxc.p[3] = 4.3e-3;  newDxc.final[3] = mapDxc["Ar_2P6"];
+      newDxc.p[1] = 1.35e-5; newDxc.final[1] = mapDxc["Ar_2P10"];
+      newDxc.p[2] = 9.52e-4; newDxc.final[2] = mapDxc["Ar_2P8"];
+      newDxc.p[3] = 0.011;   newDxc.final[3] = mapDxc["Ar_2P7"];
+      newDxc.p[4] = 4.01e-5; newDxc.final[4] = mapDxc["Ar_2P6"];
+      newDxc.p[5] = 4.3e-3;  newDxc.final[5] = mapDxc["Ar_2P5"];
+      newDxc.p[6] = 8.96e-4; newDxc.final[6] = mapDxc["Ar_2P4"];
+      newDxc.p[7] = 4.45e-5; newDxc.final[7] = mapDxc["Ar_2P3"];
+      newDxc.p[8] = 5.87e-5; newDxc.final[8] = mapDxc["Ar_2P2"];
+      newDxc.p[9] = 8.77e-4; newDxc.final[9] = mapDxc["Ar_2P1"];
     } else if (level == "Ar_3S1!!!!") {
-      int nc = 3; newDxc.nChannels = nc;
+      int nc = 8; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
-      newDxc.p[0] = 8.3e-4; newDxc.final[0] = mapDxc["Ar_2P8"];
-      newDxc.p[1] = 0.013;  newDxc.final[1] = mapDxc["Ar_2P4"];
-      newDxc.p[2] = 2.2e-3; newDxc.final[2] = mapDxc["Ar_2P3"];
+      // Additional lines (2P10, 2P9, 2P7, 2P6, 2P2) from Bartschat
+      newDxc.p[0] = 7.51e-6; newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 4.3e-5;  newDxc.final[1] = mapDxc["Ar_2P9"];
+      newDxc.p[2] = 8.3e-4;  newDxc.final[2] = mapDxc["Ar_2P8"];
+      newDxc.p[3] = 5.01e-5; newDxc.final[3] = mapDxc["Ar_2P7"];
+      newDxc.p[4] = 2.09e-4; newDxc.final[4] = mapDxc["Ar_2P6"];
+      newDxc.p[5] = 0.013;   newDxc.final[5] = mapDxc["Ar_2P4"];
+      newDxc.p[6] = 2.2e-3;  newDxc.final[6] = mapDxc["Ar_2P3"];
+      newDxc.p[7] = 3.35e-6; newDxc.final[7] = mapDxc["Ar_2P2"];
     } else if (level == "Ar_3S1!!") {
-      int nc = 3; newDxc.nChannels = nc;
+      int nc = 8; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
-      newDxc.p[0] = 3.69e-4; newDxc.final[0] = mapDxc["Ar_2P7"];
-      newDxc.p[1] = 3.76e-3; newDxc.final[1] = mapDxc["Ar_2P6"];
-      newDxc.p[2] = 6.2e-3;  newDxc.final[2] = mapDxc["Ar_2P2"];
+      // Additional lines (2P10 - 2P8, 2P5, 2P4)
+      newDxc.p[0] = 1.89e-4; newDxc.final[0] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 1.52e-4; newDxc.final[1] = mapDxc["Ar_2P9"];
+      newDxc.p[2] = 7.21e-4; newDxc.final[2] = mapDxc["Ar_2P8"];
+      newDxc.p[3] = 3.69e-4; newDxc.final[3] = mapDxc["Ar_2P7"];
+      newDxc.p[4] = 3.76e-3; newDxc.final[4] = mapDxc["Ar_2P6"];
+      newDxc.p[5] = 1.72e-4; newDxc.final[5] = mapDxc["Ar_2P4"];
+      newDxc.p[6] = 5.8e-4;  newDxc.final[6] = mapDxc["Ar_2P3"];
+      newDxc.p[7] = 6.2e-3;  newDxc.final[7] = mapDxc["Ar_2P2"];
     } else if (level == "Ar_3S1!!!") {
-      int nc = 1; newDxc.nChannels = nc;
+      int nc = 4; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
-      newDxc.p[0] = 0.015; newDxc.final[0] = mapDxc["Ar_2P3"];
+      // Additional lines (2P9, 2P8, 2P6) from Bartschat
+      newDxc.p[0] = 7.36e-4; newDxc.final[0] = mapDxc["Ar_2P9"];
+      newDxc.p[1] = 4.2e-5;  newDxc.final[1] = mapDxc["Ar_2P8"];
+      newDxc.p[2] = 9.3e-5;  newDxc.final[2] = mapDxc["Ar_2P6"];
+      newDxc.p[3] = 0.015;   newDxc.final[3] = mapDxc["Ar_2P3"];
     } else if (level == "Ar_2S3") {
       int nc = 4; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -1870,22 +1917,34 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[3] = 5.1e-3;  newDxc.final[3] = mapDxc["Ar_2P2"];
     } else if (level == "Ar_2S2") {
       newDxc.osc = 0.012;
-      int nc = 4; newDxc.nChannels = nc;
+      int nc = 10; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
-      newDxc.p[0] = 0.035;  newDxc.final[0] = -1;
-      newDxc.p[1] = 8.9e-3; newDxc.final[1] = mapDxc["Ar_2P3"];
-      newDxc.p[2] = 3.4e-3; newDxc.final[2] = mapDxc["Ar_2P2"];
-      newDxc.p[3] = 1.9e-3; newDxc.final[3] = mapDxc["Ar_2P1"];
+      // Additional lines: 2P10, 2P8 - 2P4
+      newDxc.p[0] = 0.035;   newDxc.final[0] = -1;
+      newDxc.p[1] = 1.76e-4; newDxc.final[1] = mapDxc["Ar_2P10"];
+      newDxc.p[2] = 2.1e-4;  newDxc.final[2] = mapDxc["Ar_2P8"];
+      newDxc.p[3] = 2.8e-4;  newDxc.final[3] = mapDxc["Ar_2P7"];
+      newDxc.p[4] = 1.39e-3; newDxc.final[4] = mapDxc["Ar_2P6"];
+      newDxc.p[5] = 3.8e-4;  newDxc.final[5] = mapDxc["Ar_2P5"];
+      newDxc.p[6] = 2.e-3;   newDxc.final[6] = mapDxc["Ar_2P4"];
+      newDxc.p[7] = 8.9e-3;  newDxc.final[7] = mapDxc["Ar_2P3"];
+      newDxc.p[8] = 3.4e-3;  newDxc.final[8] = mapDxc["Ar_2P2"];
+      newDxc.p[9] = 1.9e-3;  newDxc.final[9] = mapDxc["Ar_2P1"];
     } else if (level == "Ar_3S1!") {
       newDxc.osc = 0.106;
-      int nc = 6; newDxc.nChannels = nc;
+      int nc = 10; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
-      newDxc.p[0] = 0.318;   newDxc.final[0] = -1;
-      newDxc.p[1] = 3.96e-4; newDxc.final[1] = mapDxc["Ar_2P6"];
-      newDxc.p[2] = 4.2e-4;  newDxc.final[2] = mapDxc["Ar_2P5"];
-      newDxc.p[3] = 4.5e-3;  newDxc.final[3] = mapDxc["Ar_2P4"];
-      newDxc.p[4] = 7.1e-3;  newDxc.final[4] = mapDxc["Ar_2P2"];
-      newDxc.p[5] = 5.2e-3;  newDxc.final[5] = mapDxc["Ar_2P1"];
+      // Additional lines (2P10, 2P8, 2P7, 2P3) from Bartschat
+      newDxc.p[0] = 0.313;   newDxc.final[0] = -1;
+      newDxc.p[1] = 2.05e-5; newDxc.final[1] = mapDxc["Ar_2P10"];
+      newDxc.p[2] = 8.33e-5; newDxc.final[2] = mapDxc["Ar_2P8"];
+      newDxc.p[3] = 3.9e-4;  newDxc.final[3] = mapDxc["Ar_2P7"];
+      newDxc.p[4] = 3.96e-4; newDxc.final[4] = mapDxc["Ar_2P6"];
+      newDxc.p[5] = 4.2e-4;  newDxc.final[5] = mapDxc["Ar_2P5"];
+      newDxc.p[6] = 4.5e-3;  newDxc.final[6] = mapDxc["Ar_2P4"];
+      newDxc.p[7] = 4.84e-5; newDxc.final[7] = mapDxc["Ar_2P3"];
+      newDxc.p[8] = 7.1e-3;  newDxc.final[8] = mapDxc["Ar_2P2"];
+      newDxc.p[9] = 5.2e-3;  newDxc.final[9] = mapDxc["Ar_2P1"];
     } else if (level == "Ar_4D5") {
       newDxc.osc = 0.0019;
       int nc = 7; newDxc.nChannels = nc;
@@ -2028,22 +2087,25 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.final[7] = -1;
     } else if (level == "Ar_5S4") {
       newDxc.osc = 0.0211;
-      int nc = 5; newDxc.nChannels = nc;
+      int nc = 6; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 3.6e-4; newDxc.final[0] = mapDxc["Ar_2P8"];
       newDxc.p[1] = 1.2e-4; newDxc.final[1] = mapDxc["Ar_2P6"];
       newDxc.p[2] = 1.5e-4; newDxc.final[2] = mapDxc["Ar_2P4"];
-      newDxc.p[3] = 1.4e-4; newDxc.final[3] = mapDxc["Ar_2P2"];
+      newDxc.p[3] = 1.4e-4; newDxc.final[3] = mapDxc["Ar_2P3"];
+      newDxc.p[4] = 7.5e-5; newDxc.final[4] = mapDxc["Ar_2P2"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[4] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
-      newDxc.final[4] = -1;
+      newDxc.p[5] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[5] = -1;
     } else if (level == "Ar_6D2") {
       newDxc.osc = 0.0574;
-      int nc = 1; newDxc.nChannels = nc;
+      int nc = 2; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
+      // Additional line: 2P7
+      newDxc.p[0] = 3.33e-3; newDxc.final[0] = mapDxc["Ar_2P7"];
       // Transition probability to ground state calculated from osc. strength
-      newDxc.p[0] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
-      newDxc.final[0] = -1;
+      newDxc.p[1] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
+      newDxc.final[1] = -1;
     } else if (level == "Ar_High") {
       newDxc.osc = 0.0335;
       int nc = 1; newDxc.nChannels = nc;
