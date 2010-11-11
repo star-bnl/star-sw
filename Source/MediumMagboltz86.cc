@@ -1921,7 +1921,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       // Additional lines: 2P10, 2P8 - 2P4
       newDxc.p[0] = 0.035;   newDxc.final[0] = -1;
-      newDxc.p[1] = 1.76e-4; newDxc.final[1] = mapDxc["Ar_2P10"];
+      newDxc.p[1] = 1.76e-3; newDxc.final[1] = mapDxc["Ar_2P10"];
       newDxc.p[2] = 2.1e-4;  newDxc.final[2] = mapDxc["Ar_2P8"];
       newDxc.p[3] = 2.8e-4;  newDxc.final[3] = mapDxc["Ar_2P7"];
       newDxc.p[4] = 1.39e-3; newDxc.final[4] = mapDxc["Ar_2P6"];
