@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.219 2010/10/31 16:27:32 jwebb Exp $
+* $Id: geometry.g,v 1.220 2010/11/12 20:04:14 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.220  2010/11/12 20:04:14  jwebb
+* Added y2008b geometry tag with most recent models of the TPC, endcap
+* and barrel.
+*
 * Revision 1.219  2010/10/31 16:27:32  jwebb
 * Switch PHMD on.  Modified configuration of MUTD at request of Bill Llope.
 *
@@ -1555,6 +1559,10 @@ replace [exe y2008;] with [;
 *********   y2008a   ***
 replace [exe y2008a;] with [;exe y2008; exe SCON13;]
 
+replace [exe y2008b;] with [;exe y2008a; 
+        exe TPCE04;
+        exe CALB02;
+        exe ECALv6;]
 
 !//______________________________________________________________________________
 *                                                                           Y2009
@@ -2308,6 +2316,11 @@ If LL>0
   Case Y2008a   { y2008 + SCONE
                   Geom = 'Y2008a  ';
                 exe y2008a;
+	        }
+
+  Case Y2008b   { y2008 + SCONE + calorimeter fixes
+                  Geom = 'Y2008b  ';
+                exe y2008b;
 	        }
 
 ****************************************************************************************
