@@ -1015,15 +1015,32 @@ OpticalData::PhotoAbsorptionCsMethane(const double e,
     
 
     // Photoionization yield
-    const int nYieldEntries = 11;
+    const int nYieldEntries = 51;
+      
     const double xIon[nYieldEntries] = {
-      12.65, 12.87, 13.02, 13.24, 13.88, 
-      14.66, 15.01, 15.44, 15.67, 15.87, 
-      16.22};
-                 
+      12.05,   12.5833, 12.7333, 12.8167, 12.9167, 
+      13.0167, 13.0833, 13.1833, 13.2833, 13.3833, 
+      13.4667, 13.6,    13.6833, 13.75,   13.8167, 
+      13.9333, 14.0167, 14.1,    14.2167, 14.2667, 
+      14.3667, 14.5,    14.65,   14.7833, 14.8667, 
+      14.9833, 15.1667, 15.3167, 15.4333, 15.6833, 
+      16.05,   16.0833, 16.2167, 16.4167, 16.7333, 
+      16.95,   18.35,   19.7833, 20.1833, 20.35,
+      20.4667, 20.6,    21.1833, 21.4,    21.5167, 
+      21.65,   22.1167, 22.8667, 23.35,   23.75,   
+      24.1333};
+    
     const double yIon[nYieldEntries] = {
-      0.,     0.01226, 0.02900, 0.08853, 0.3693, 
-      0.7024, 0.8190,  0.9262,  0.9715,  0.9883, 
+      0.,       0.,       0.0017271, 0.0069085, 0.01209, 
+      0.022453, 0.039724, 0.063903,  0.10708,   0.15717,   
+      0.18653,  0.23661,  0.27288,   0.30225,   0.33333,  
+      0.37478,  0.39896,  0.43005,   0.4715,    0.49223,  
+      0.55095,  0.59931,  0.66839,   0.72539,   0.75648,   
+      0.7962,   0.84629,  0.88428,   0.90846,   0.95164, 
+      0.99309,  1.,       1.,        1.,        1.,
+      1.,       1.,       0.99482,   0.97927,   0.98446, 
+      0.97755,  0.98446,  0.97927,   0.98964,   0.97927,   
+      0.98618,  0.97927,  0.981,     0.98791,   1.,       
       1.};
       
     // Locate the requested energy in the tables.
@@ -1260,65 +1277,133 @@ OpticalData::PhotoAbsorptionCsEthane(const double e,
       5.1758e-01, 4.9555e-01, 4.8454e-01, 4.6252e-01, 4.6252e-01,
       4.5150e-01, 4.4049e-01};
       
-      const int nYieldEntries = 23;
+    const int nYieldEntries = 67;
       
-      const double xIon[nYieldEntries] = {
-        11.52,    11.67143, 11.84286, 11.97143, 12.18571, 
-        12.35714, 12.57143, 12.91429, 13.17143, 13.42857, 
-        13.64286, 13.68571, 13.94286, 14.24286, 14.45714, 
-        14.67143, 14.97143, 15.22857, 15.57143, 15.82857, 
-        16.21428, 16.55714, 17.02857};
+    const double xIon[nYieldEntries] = {
+        11.52,    11.6667, 11.8167, 12.,     12.1833, 
+        12.2667,  12.4333, 12.65,   12.8,    13.05,
+        13.25,    13.45,   13.5833, 13.6833, 13.7667, 
+        13.95,    14.2333, 14.4,    14.55,   14.7333, 
+        14.8667,  15.,     15.15,   15.2833, 15.45,
+        15.7333,  16.0167, 16.2833, 16.3333, 16.8167, 
+        17.2,     17.4833, 17.7333, 18.0167, 18.25,
+        18.3667,  18.5333, 18.7,    18.7833, 18.8667, 
+        18.9333,  19.,     19.1667, 19.2667, 19.3333, 
+        19.4,     19.4667, 19.5667, 19.6,    19.7,
+        19.7833,  19.9333, 20.,     20.0833, 20.2,
+        20.6,     20.9333, 21.1333, 21.3167, 21.6167, 
+        21.9833,  22.2333, 22.6,    22.9667, 23.1667,
+        23.3833,  23.5667};
         
-      const double yIon[nYieldEntries] = {
-        0.,      0.00881, 0.04846, 0.08370, 0.19824, 
-        0.28194, 0.37004, 0.54185, 0.66960, 0.78414, 
-        0.82819, 0.85022, 0.84582, 0.83260, 0.81498, 
-        0.80176, 0.81938, 0.86344, 0.89427, 0.93392, 
-        0.96916, 0.98678, 1.};
+    const double yIon[nYieldEntries] = {
+        0.,      0.0034433, 0.055093, 0.12396, 0.21349, 
+        0.25825, 0.33745,   0.42697,  0.50789, 0.62324,   
+        0.71966, 0.79197,   0.82984,  0.84706, 0.8505,  
+        0.84362, 0.83156,   0.82296,  0.81263, 0.80918, 
+        0.81607, 0.83329,   0.85395,  0.87461, 0.89871,
+        0.93314, 0.96069,   0.98135,  0.98307, 0.99168, 
+        0.99512, 0.98996,   0.98479,  0.98824, 0.99168,  
+        0.98824, 0.98824,   0.98135,  0.97618, 0.97963, 
+        0.97618, 0.98135,   0.98135,  0.97791, 0.97791, 
+        0.98135, 0.97618,   0.97618,  0.97446, 0.98135,   
+        0.97446, 0.97102,   0.97274,  0.96758, 0.96758, 
+        0.97446, 0.97791,   0.97791,  0.97618, 0.97618, 
+        0.97791, 0.97791,   0.97618,  0.97791, 0.97446,
+        0.97446, 0.97446};
+        
+    // Branching ratio (%) for dissociation to C2H5+ + H-
+    const int nBranchEntries = 50;
+  
+    const double xBranch[nBranchEntries] = {
+        11.,  11.5, 12.,  12.5, 13., 
+        13.5, 14.,  14.5, 15.,  15.5,
+        16.,  16.5, 17.,  17.5, 18., 
+        18.5, 19.,  19.5, 20.,  20.5, 
+        21.,  21.5, 22.,  22.5, 23., 
+        23.5, 24.,  24.5, 25.,  25.5, 
+        26.,  26.5, 27.,  27.5, 28., 
+        28.5, 29.,  29.5, 30.,  31., 
+        32.,  33.,  34.,  35.,  36., 
+        37.,  38.,  39.,  40.,  41.};
+      
+    const double yBranch[nBranchEntries] = {
+        0.,     0.,      2.8,   4.56,  8.98, 
+       11.87,  13.21,   14.71, 14.6,  14.18,
+       13.27,  13.28,   13.12, 12.78, 13.04, 
+       13.16,  13.04,   13.11, 12.76, 12.62,
+       12.27,  12.17,   12.28, 12.04, 11.94, 
+       11.76,  11.73,   11.56, 11.24, 11.49,
+       11.17,  11.,     11.04, 10.83, 10.8,
+       10.59,  10.65,   10.53, 10.27, 10.45,
+       10.3,   10.24,    9.89,  9.28,  9.24,  
+        9.4,    9.13,    9.41,  8.78,  9.54};
+      
+    // Locate the requested energy in the tables.
+    // First the photoabsorption cross-section.
+    int iLow = 0;
+    int iUp = nPacsEntries - 1;
+    int iM;
+    while (iUp - iLow > 1) {
+      iM = (iUp + iLow) >> 1;
+      if (e >= xC2H6[iM]) {
+        iLow = iM;
+      } else {
+        iUp = iM;
+      }
+    }
 
-      // Locate the requested energy in the tables.
-      // First the photoabsorption cross-section.
-      int iLow = 0;
-      int iUp = nPacsEntries - 1;
-      int iM;
+    // Linear interpolation.
+    cs = yC2H6[iLow] + (e - xC2H6[iLow]) * 
+         (yC2H6[iUp] - yC2H6[iLow]) / (xC2H6[iUp] - xC2H6[iLow]);
+    // Convert from Mbarn to cm2.
+    cs *= 1.e-18;
+    
+    if (e < xIon[0]) {
+      eta = 0.;
+    } else if (e >= xIon[nYieldEntries - 1]) {
+      eta = 1.;
+    } else {
+      // Linear interpolation.
+      // Same procedure as for photoabsorption cross-section.
+      iLow = 0;
+      iUp = nYieldEntries - 1;
       while (iUp - iLow > 1) {
         iM = (iUp + iLow) >> 1;
-        if (e >= xC2H6[iM]) {
+        if (e >= xIon[iM]) {
           iLow = iM;
         } else {
           iUp = iM;
         }
       }
-
-      // Linear interpolation.
-      cs = yC2H6[iLow] + (e - xC2H6[iLow]) * 
-           (yC2H6[iUp] - yC2H6[iLow]) / (xC2H6[iUp] - xC2H6[iLow]);
-      // Convert from Mbarn to cm2.
-      cs *= 1.e-18;
-    
-      if (e < xIon[0]) {
-        eta = 0.;
-      } else if (e >= xIon[nYieldEntries - 1]) {
-        eta = 1.;
+      eta = yIon[iLow] + (e - xIon[iLow]) * 
+            (yIon[iUp] - yIon[iLow]) / (xIon[iUp] - xIon[iLow]);
+    }
+     
+    const bool useBranching = true;
+    if (useBranching) {
+      double br = 0.;
+      if (e < xBranch[0]) {
+        br = 0.;
+      } else if (e >= xBranch[nBranchEntries - 1]) {
+        br = yBranch[nBranchEntries - 1];
       } else {
         // Linear interpolation.
-        // Same procedure as for photoabsorption cross-section.
         iLow = 0;
         iUp = nYieldEntries - 1;
         while (iUp - iLow > 1) {
           iM = (iUp + iLow) >> 1;
-          if (e >= xIon[iM]) {
+          if (e >= xBranch[iM]) {
             iLow = iM;
           } else {
             iUp = iM;
           }
         }
-        eta = yIon[iLow] + (e - xIon[iLow]) * 
-              (yIon[iUp] - yIon[iLow]) / (xIon[iUp] - xIon[iLow]);
+        br = yBranch[iLow] + (e - xBranch[iLow]) *
+             (yBranch[iUp] - yBranch[iLow]) / (xBranch[iUp] - xBranch[iLow]);
       }
-     
-     return true;
-    
+      eta *= (1. - 0.01 * br);
+    }
+    return true;    
   }
   
   if (e >= 280. && e <= 320.) {

@@ -1271,10 +1271,11 @@ MediumMagboltz86::Mixer() {
       std::cout << "      Ionisation threshold: " << e[2] << " eV\n";
       std::cout << "      Attachment threshold: " << e[3] << " eV\n";
       std::cout << "      Splitting parameter:  " << w << " eV\n";
-      std::cout << "      Cross-sections [cm2] at minimum ionising energy:\n";
-      std::cout << "        excitation: " << e[3] << "\n";
-      std::cout << "        ionisation: " << e[4] << "\n";
-      std::cout << "      " << nIn << " inelastic levels\n";
+      if (e[3] > 0. || e[4] > 0.) {
+        std::cout << "      Cross-sections at minimum ionising energy:\n";
+        std::cout << "        excitation: " << e[3] << " cm2\n";
+        std::cout << "        ionisation: " << e[4] << " cm2\n";
+      }
     }
     int np0 = nTerms;
     
@@ -1325,6 +1326,7 @@ MediumMagboltz86::Mixer() {
       csType[np] = nCsTypes * iGas + ElectronCollisionTypeAttachment;
     }
     // Inelastic terms
+    int nExc = 0, nSuperEl = 0;
     for (int j = 0; j < nIn; ++j) {
       ++np;
       scatModel[np] = kIn[j];
@@ -1336,9 +1338,11 @@ MediumMagboltz86::Mixer() {
           (description[np][0] == 'E' && description[np][1] == 'X')) {
         // Excitation
         csType[np] = nCsTypes * iGas + ElectronCollisionTypeExcitation;    
+        ++nExc;
       } else if (eIn[j] < 0.) {
         // Super-elastic collision
         csType[np] = nCsTypes * iGas + ElectronCollisionTypeSuperelastic;
+        ++nSuperEl;
       } else {
         // Inelastic collision
         csType[np] = nCsTypes * iGas + ElectronCollisionTypeInelastic;
@@ -1403,6 +1407,12 @@ MediumMagboltz86::Mixer() {
         } else if (scatModel[np] == 2) {
           scatParameter[iE][np] = pEqIn[iE][j];
         }
+      }
+      if (debug && nIn > 0 && iE == nEnergySteps - 1) {
+        std::cout << "      " << nIn << " inelastic terms ("
+                  << nExc << " excitations, " 
+                  << nSuperEl << " superelastic terms, "
+                  << nIn - nExc - nSuperEl << " other)\n";
       }
       if (useCsOutput) outfile << "\n";
     }
@@ -1596,7 +1606,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       else if (level == "4S2    ") mapLevels["Ar_4S2"] = i;
       else if (level == "5S4    ") mapLevels["Ar_5S4"] = i;
       else if (level == "6D2    ") mapLevels["Ar_6D2"] = i;
-      else if (level == "HIGH   ") mapLevels["Ar_High"] = i;
+      else if (level == "HIGH   ") mapLevels["Ar_Higher"] = i;
       else {
         std::cerr << className << "::ComputeDeexcitationTable:\n";
         std::cerr << "    Unknown excitation level:\n";
@@ -1676,10 +1686,13 @@ MediumMagboltz86::ComputeDeexcitationTable() {
   }
 
   // Radiative de-excitation channels
-  // Transition probabilities:
+  // Transition rates (unless indicated otherwise) are taken from:
   //     NIST Atomic Spectra Database 
-  // Oscillator strengths:
+  // Transition rates for lines missing in the NIST database:
+  //     O. Zatsarinny and K. Bartschat, J. Phys. B 39 (2006), 2145-2158
+  // Oscillator strengths not included in the NIST database:
   //     J. Berkowitz, Atomic and Molecular Photoabsorption (2002)
+  //     C.-M. Lee and K. T. Lu, Phys. Rev. A 8 (1973), 1241-1257
   // Conversion from oscillator strength to transition probability
   const double f2A = 2. * SpeedOfLight * FineStructureConstant / 
                     (3. * ElectronMass * HbarC);
@@ -1698,12 +1711,16 @@ MediumMagboltz86::ComputeDeexcitationTable() {
     if (level == "Ar_1S3" || level == "Ar_1S5") {
       newDxc.p.clear(); newDxc.final.clear(); newDxc.type.clear(); 
     } else if (level == "Ar_1S4") {
-      newDxc.osc = 0.058;
+      // Oscillator strength from NIST database
+      newDxc.osc = 0.0609;
+      // Berkowitz: f = 0.058
       int nc = 1; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.119; newDxc.final[0] = -1;
     } else if (level == "Ar_1S2") {
-      newDxc.osc = 0.2214;
+      // Oscillator strength from NIST database
+      newDxc.osc = 0.25;
+      // Berkowitz: 0.2214
       int nc = 1; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.51; newDxc.final[0] = -1;
@@ -1775,6 +1792,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[2] = 1.2e-4;  newDxc.final[2] = mapDxc["Ar_2P4"];
       newDxc.p[3] = 3.6e-4;  newDxc.final[3] = mapDxc["Ar_2P2"];
     } else if (level == "Ar_3D5") {
+      // Oscillator strength from Berkowitz
       newDxc.osc = 0.0011;
       int nc = 10; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -1840,7 +1858,9 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[6] = 1.2e-4; newDxc.final[6] = mapDxc["Ar_2P3"];
       newDxc.p[7] = 3.1e-4; newDxc.final[7] = mapDxc["Ar_2P2"];
     } else if (level == "Ar_2S4") {
-      newDxc.osc = 0.026;
+      // Oscillator strength from NIST database
+      newDxc.osc = 0.027;
+      // Berkowitz: f = 0.026;
       int nc = 10; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.077;   newDxc.final[0] = -1;
@@ -1862,7 +1882,9 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[2] = 0.015;  newDxc.final[2] = mapDxc["Ar_2P6"];
       newDxc.p[3] = 9.8e-6; newDxc.final[3] = mapDxc["Ar_2P3"];
     } else if (level == "Ar_3D2") {
-      newDxc.osc = 0.09;
+      // Oscillator strength from NIST database
+      newDxc.osc = 0.0932;
+      // Berkowitz: f = 0.09
       int nc = 10; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       // Additional lines (2P10, 2P6, 2P4-2P1) from Bartschat 
@@ -1891,7 +1913,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
     } else if (level == "Ar_3S1!!") {
       int nc = 8; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
-      // Additional lines (2P10 - 2P8, 2P5, 2P4)
+      // Additional lines (2P10 - 2P8, 2P4, 2P3)
       newDxc.p[0] = 1.89e-4; newDxc.final[0] = mapDxc["Ar_2P10"];
       newDxc.p[1] = 1.52e-4; newDxc.final[1] = mapDxc["Ar_2P9"];
       newDxc.p[2] = 7.21e-4; newDxc.final[2] = mapDxc["Ar_2P8"];
@@ -1916,7 +1938,9 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[2] = 0.01;    newDxc.final[2] = mapDxc["Ar_2P4"];
       newDxc.p[3] = 5.1e-3;  newDxc.final[3] = mapDxc["Ar_2P2"];
     } else if (level == "Ar_2S2") {
-      newDxc.osc = 0.012;
+      // Oscillator strength from NIST database
+      newDxc.osc = 0.0119;
+      // Berkowitz: f = 0.012;
       int nc = 10; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       // Additional lines: 2P10, 2P8 - 2P4
@@ -1931,7 +1955,9 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[8] = 3.4e-3;  newDxc.final[8] = mapDxc["Ar_2P2"];
       newDxc.p[9] = 1.9e-3;  newDxc.final[9] = mapDxc["Ar_2P1"];
     } else if (level == "Ar_3S1!") {
+      // Oscillator strength from NIST database
       newDxc.osc = 0.106;
+      // Berkowitz: f = 0.106
       int nc = 10; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       // Additional lines (2P10, 2P8, 2P7, 2P3) from Bartschat
@@ -1946,6 +1972,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[8] = 7.1e-3;  newDxc.final[8] = mapDxc["Ar_2P2"];
       newDxc.p[9] = 5.2e-3;  newDxc.final[9] = mapDxc["Ar_2P1"];
     } else if (level == "Ar_4D5") {
+      // Oscillator strength from Berkowitz
       newDxc.osc = 0.0019;
       int nc = 7; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -1959,6 +1986,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
       newDxc.final[6] = -1;
     } else if (level == "Ar_3S4") {
+      // Oscillator strength from Berkowitz
       newDxc.osc = 0.0144;
       int nc = 10; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -1975,6 +2003,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[9] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
       newDxc.final[9] = -1;
     } else if (level == "Ar_4D2") {
+      // Oscillator strength from Berkowitz
       newDxc.osc = 0.048;
       int nc = 2; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -1983,6 +2012,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[1] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
       newDxc.final[1] = -1;
     } else if (level == "Ar_4S1!") {
+      // Oscillator strength from Berkowitz
       newDxc.osc = 0.0209;
       int nc = 7; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -1996,6 +2026,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
       newDxc.final[6] = -1;
     } else if (level == "Ar_3S2") {
+      // Oscillator strength from Berkowitz
       newDxc.osc = 0.0221;
       int nc = 10; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -2012,6 +2043,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[9] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
       newDxc.final[9] = -1;
     } else if (level == "Ar_5D5") {
+      // Oscillator strength from Berkowitz
       newDxc.osc = 0.0041;
       int nc = 9; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -2027,6 +2059,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[8] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
       newDxc.final[8] = -1;
     } else if (level == "Ar_4S4") {
+      // Oscillator strength from Berkowitz
       newDxc.osc = 0.0139;
       int nc = 7; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -2040,6 +2073,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
       newDxc.final[6] = -1;
     } else if (level == "Ar_5D2") {
+      // Oscillator strength from Berkowitz
       newDxc.osc = 0.0426;
       int nc = 5; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -2051,7 +2085,10 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[4] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
       newDxc.final[4] = -1;
     } else if (level == "Ar_6D5") {
-      newDxc.osc = 0.0062;
+      // Oscillator strength from Lee and Lu 
+      newDxc.osc = 0.00075;
+      // Berkowitz estimates f = 0.0062 for the sum of over
+      // all "weak" nd levels with n = 6 and higher.
       int nc = 7; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 1.9e-3;  newDxc.final[0] = mapDxc["Ar_2P10"];
@@ -2064,7 +2101,10 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[6] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
       newDxc.final[6] = -1;
     } else if (level == "Ar_5S1!") {
-      newDxc.osc = 0.0562;
+      // Oscillator strength from Lee and Lu 
+      newDxc.osc = 0.00051;
+      // Berkowitz estimates f = 0.0562, for the sum 
+      // of all nd' levels with n = 5 and higher.
       int nc = 2; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 7.7e-5; newDxc.final[0] = mapDxc["Ar_2P5"];
@@ -2072,7 +2112,10 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[1] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
       newDxc.final[1] = -1;
     } else if (level == "Ar_4S2") {
-      newDxc.osc = 0.0069;
+      // Oscillator strength from Lee and Lu 
+      newDxc.osc = 0.00074;
+      // Berkowitz estimates f = 0.0069 for the sum over all
+      // ns' levels with n = 7 and higher.
       int nc = 8; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 4.5e-4; newDxc.final[0] = mapDxc["Ar_2P10"];
@@ -2086,6 +2129,10 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[7] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
       newDxc.final[7] = -1;
     } else if (level == "Ar_5S4") {
+      // Oscillator strength from Lee and Lu 
+      newDxc.osc = 0.0130;
+      // Berkowitz estimates f = 0.0211 for the sum over all
+      // ns levels with n = 8 and higher.
       newDxc.osc = 0.0211;
       int nc = 6; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -2098,6 +2145,10 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       newDxc.p[5] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
       newDxc.final[5] = -1;
     } else if (level == "Ar_6D2") {
+      // Oscillator strength from Lee and Lu 
+      newDxc.osc = 0.0290;
+      // Berkowitz estimates f = 0.0574 for the sum over all
+      // "strong" nd levels with n = 6 and higher.
       newDxc.osc = 0.0574;
       int nc = 2; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -2106,13 +2157,18 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       // Transition probability to ground state calculated from osc. strength
       newDxc.p[1] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
       newDxc.final[1] = -1;
-    } else if (level == "Ar_High") {
-      newDxc.osc = 0.0335;
-      int nc = 1; newDxc.nChannels = nc;
+    } else if (level == "Ar_Higher") {
+      newDxc.osc = 0.;
+      // This (artificial) level represents the sum of higher J = 1 states.
+      // The deeexcitation cascade is simulated by allocating it 
+      // with equal probability to one of the lower-lying levels.
+      int nc = 5; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
-      // Transition probability to ground state calculated from osc. strength
-      newDxc.p[0] = f2A * pow(newDxc.energy, 2) * newDxc.osc; 
-      newDxc.final[0] = -1;
+      newDxc.p[0] = 100.; newDxc.final[0] = mapDxc["Ar_6D5"];
+      newDxc.p[1] = 100.; newDxc.final[1] = mapDxc["Ar_5S1!"];
+      newDxc.p[2] = 100.; newDxc.final[2] = mapDxc["Ar_4S2"];
+      newDxc.p[3] = 100.; newDxc.final[3] = mapDxc["Ar_5S4"];
+      newDxc.p[4] = 100.; newDxc.final[4] = mapDxc["Ar_6D2"];
     } else {
       std::cerr << className << "::ComputeDeexcitationTable:\n";
       std::cerr << "    Missing de-excitation data for level " 
@@ -2193,7 +2249,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
           level == "Ar_4S1!" || level == "Ar_3S2" || level == "Ar_5D5" ||
           level == "Ar_4S4"  || level == "Ar_5D2" || level == "Ar_6D5" ||
           level == "Ar_5S1!" || level == "Ar_4S2" || level == "Ar_5S4" ||
-          level == "Ar_6D2"  || level == "Ar_High") {
+          level == "Ar_6D2") {
         // Hornbeck-Molnar ionisation
         // P. Becker and F. Lampe, J. Chem. Phys. 42 (1965), 3857-3863
         // A. Bogaerts and R. Gijbels, Phys. Rev. A 52 (1995), 3743-3751
@@ -2252,7 +2308,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
                  level == "Ar_4S4" || level == "Ar_5D2"  ||
                  level == "Ar_6D5" || level == "Ar_5S1!" ||
                  level == "Ar_4S2" || level == "Ar_5S4"  ||
-                 level == "Ar_6D2" || level == "Ar_High") {
+                 level == "Ar_6D2") {
         deexcitations[j].p.push_back(fB / 100.);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(1);
