@@ -288,6 +288,17 @@ void StGammaRawMaker::GetBarrel()
                 StEmcRawHit* tempRawHit = rawHits[k];
                 
                 int id = tempRawHit->softId(BTOW);
+ 
+                // Ignore excluded towers
+                for(int i = 0; i < mExcludedBemcTowers.size(); ++i)
+                {
+                    if(id == mExcludedBemcTowers.at(i))
+                    {
+                        LOG_DEBUG << " Excluding tower "<< id << endm;
+                        continue;
+                    }
+                }
+
                 int status;
                 int ADC = tempRawHit->adc(); //not pedestal subtracted!
                 double energy = tempRawHit->energy();
