@@ -182,7 +182,7 @@ ViewGeometryShape::GetBuffer(bool& ok) {
 
 ViewGeometry::ViewGeometry() :
   TObject(), 
-  debug(false), 
+  className("ViewGeometry"), debug(false), 
   canvas(0), hasExternalCanvas(false),
   geometry(0), nShapes(0) {
 
@@ -201,7 +201,7 @@ void
 ViewGeometry::SetGeometry(GeometrySimple* geo) {
 
   if (geo == 0) {
-    std::cerr << "ViewGeometry::SetGeometry:\n";
+    std::cerr << className << "::SetGeometry:\n";
     std::cerr << "    Geometry pointer is null.\n";
     return;
   }
@@ -227,7 +227,7 @@ void
 ViewGeometry::Plot() {
 
   if (geometry == 0) {
-    std::cerr << "ViewGeometry::Plot:\n";
+    std::cerr << className << "::Plot:\n";
     std::cerr << "    Geometry is not defined.\n";
     return;
   }
@@ -244,7 +244,7 @@ ViewGeometry::Plot() {
 
   const int nSolids = geometry->GetNumberOfSolids();
   if (nSolids <= 0) {
-    std::cerr << "ViewGeometry::Plot:\n";
+    std::cerr << className << "::Plot:\n";
     std::cerr << "    Geometry is empty.\n";
     return;
   }
@@ -253,12 +253,12 @@ ViewGeometry::Plot() {
   for (int i = nSolids; i--;) {
     solid = 0;
     if (!geometry->GetSolid(i, solid)) {
-      std::cerr << "ViewGeometry::Plot:\n";
+      std::cerr << className << "::Plot:\n";
       std::cerr << "    Could not get solid " << i << " from geometry.\n";
       continue;
     }
     if (solid == 0) {
-      std::cerr << "ViewGeometry::Plot:\n";
+      std::cerr << className << "::Plot:\n";
       std::cerr << "    Got null pointer from geometry.\n";
       continue;
     }
@@ -276,7 +276,7 @@ void
 ViewGeometry::Paint(Option_t*) {
 
   if (nShapes <= 0) {
-    std::cerr << "ViewGeometry::Paint:\n";
+    std::cerr << className << "::Paint:\n";
     std::cerr << "    There is nothing to paint.\n";
     return;
   }
@@ -290,7 +290,7 @@ ViewGeometry::Paint(Option_t*) {
     int req = viewer->AddObject(buffer);
 
     if (req != TBuffer3D::kNone) {
-      std::cerr << "ViewGeometry::Paint:\n";
+      std::cerr << className << "::Paint:\n";
       std::cerr << "    Could not pass object to viewer.\n";
     }
   }

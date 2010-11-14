@@ -14,6 +14,7 @@
 namespace Garfield {
 
 ViewField::ViewField() :
+  className("ViewField"),
   debug(false), sensor(0),
   pxmin(-1.), pymin(-1.), pxmax(1.), pymax(1.),
   fmin(0.), fmax(100.),
@@ -36,7 +37,7 @@ void
 ViewField::SetSensor(Sensor* s) {
 
   if (s == 0) {
-    std::cout << "ViewField::SetSensor:\n";
+    std::cout << className << "::SetSensor:\n";
     std::cout << "    Sensor pointer is null.\n";
     return;
   }
@@ -68,7 +69,7 @@ ViewField::SetArea(double xmin, double ymin, double zmin,
 
   // Check range, assign if non-null
   if (xmin == xmax || ymin == ymax || zmin == zmax) {
-    std::cerr << "ViewField::SetArea:\n";
+    std::cerr << className << "::SetArea:\n";
     std::cerr << "    Null area range not permitted.\n";
     std::cerr << "      " << xmin << " < x < " << xmax << "\n";
     std::cerr << "      " << ymin << " < y < " << ymax << "\n";
@@ -98,7 +99,7 @@ ViewField::SetNumberOfContours(const int n) {
   if (n <= nMaxContours) {
     nContours = n;
   } else {
-    std::cerr << "ViewField::SetNumberOfContours:\n";
+    std::cerr << className << "::SetNumberOfContours:\n";
     std::cerr << "    Max. number of contours is " << nMaxContours << ".\n";
   }
   
@@ -131,7 +132,7 @@ ViewField::PlotContour() {
   fPot->SetContour(nContours, level);
   
   if (debug) {
-    std::cout << "ViewField::PlotContour:\n";
+    std::cout << className << "::PlotContour:\n";
     std::cout << "    Number of contours: " << nContours << "\n";
     for (int i = 0; i < nContours; ++i) {
       std::cout << "        Level " << i << " = " << level[i] << "\n";
@@ -225,7 +226,7 @@ ViewField::EvaluatePotential(double* pos, double* par) {
  
   sensor->ElectricField(xpos, ypos, zpos, ex, ey, ez, volt, medium, status);
   if (debug) {
-    std::cout << "ViewField::EvaluatePotential:\n";
+    std::cout << className << "::EvaluatePotential:\n";
     std::cout << "    At (u, v) = (" << pos[0] << ", " << pos[1] << "), "
               << " (x,y,z) = (" << xpos << "," << ypos << "," << zpos << ")\n";
     std::cout << "    E = " << ex << ", " << ey << ", " << ez << "), V = "
@@ -467,7 +468,7 @@ void ViewField::Labels() {
   strcat(description, buf);
 
   if (debug) {
-    std::cout << "ViewField::Labels:\n";
+    std::cout << className << "::Labels:\n";
     std::cout << "    x label: |" << xLabel << "|\n";
     std::cout << "    y label: |" << yLabel << "|\n";
     std::cout << "    plane:   |" << description << "|\n";
@@ -502,7 +503,7 @@ ViewField::SetPlane(const double fx, const double fy, const double fz,
     project[2][1] =  y0;
     project[2][2] =  z0;
   } else {
-    std::cout << "ViewField::SetPlane:\n";
+    std::cout << className << "::SetPlane:\n";
     std::cout << "    Normal vector has zero norm.\n";
     std::cout << "    No new projection set.\n";
   }

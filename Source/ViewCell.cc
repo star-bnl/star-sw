@@ -13,7 +13,7 @@
 namespace Garfield {
 
 ViewCell::ViewCell() :
-  debug(false), useWireMarker(true),
+  className("ViewCell"), debug(false), useWireMarker(true),
   label("Cell Layout"),
   canvas(0), hasExternalCanvas(false),
   hasUserArea(false),
@@ -35,7 +35,7 @@ void
 ViewCell::SetComponent(ComponentAnalyticField* comp) {
 
   if (comp == 0) {
-    std::cerr << "ViewCell::SetComponent:\n";
+    std::cerr << className << "::SetComponent:\n";
     std::cerr << "    Component pointer is null.\n";
     return;
   }
@@ -63,7 +63,7 @@ ViewCell::SetArea(double xmin, double ymin, double zmin,
 
   // Check range, assign if non-null
   if (xmin == xmax || ymin == ymax || zmin == zmax) {
-    std::cout << "ViewCell::SetArea:\n";
+    std::cout << className << "::SetArea:\n";
     std::cout << "    Null area range not permitted.\n";
     return;
   }
@@ -93,14 +93,14 @@ void
 ViewCell::Plot() {
 
   if (component == 0) {
-    std::cerr << "ViewCell::Plot:\n";
+    std::cerr << className << "::Plot:\n";
     std::cerr << "    Component is not defined.\n";
     return;
   }
   
   double pmin = 0., pmax = 0.;
   if (!component->GetVoltageRange(pmin, pmax)) {
-    std::cerr << "ViewCell::Plot:\n";
+    std::cerr << className << "::Plot:\n";
     std::cerr << "    Component is not ready.\n";
     return;
   }
@@ -110,7 +110,7 @@ ViewCell::Plot() {
   double x1 = xMax, y1 = yMax, z1 = zMax;
   if (!hasUserArea) {
     if (!component->GetBoundingBox(x0, y0, z0, x1, y1, z1)) {
-      std::cerr << "ViewCell::Plot:\n";
+      std::cerr << className << "::Plot:\n";
       std::cerr << "    Bounding box cannot be determined.\n";
       std::cerr << "    Call SetArea first.\n";
       return;

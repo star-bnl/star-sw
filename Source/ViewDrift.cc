@@ -6,7 +6,7 @@
 namespace Garfield {
 
 ViewDrift::ViewDrift() :
-  debug(false),
+  className("ViewDrift"), debug(false),
   label("Drift Lines"),
   canvas(0), hasExternalCanvas(false),
   xMin(-1.), yMin(-1.), zMin(-1.), 
@@ -51,7 +51,7 @@ ViewDrift::SetArea(double xmin, double ymin, double zmin,
 
   // Check range, assign if non-null
   if (xmin == xmax || ymin == ymax || zmin == zmax) {
-    std::cout << "ViewDrift::SetArea:\n";
+    std::cout << className << "::SetArea:\n";
     std::cout << "    Null area range not permitted.\n";
     return;
   }
@@ -161,7 +161,7 @@ ViewDrift::SetDriftLinePoint(const int iL, const int iP,
                              const double x, const double y, const double z) {
   
   if (iL < 0 || iL >= nDriftLines) {
-    std::cerr << "ViewDrift::SetDriftLinePoint:\n";
+    std::cerr << className << "::SetDriftLinePoint:\n";
     std::cerr << "    Drift line index " << iL << " is out of range.\n";
     return;
   }
@@ -177,7 +177,7 @@ ViewDrift::AddDriftLinePoint(const int iL,
                              const double x, const double y, const double z) {
 
   if (iL < 0 || iL >= nDriftLines) {
-    std::cerr << "ViewDrift::AddDriftLinePoint:\n";
+    std::cerr << className << "::AddDriftLinePoint:\n";
     std::cerr << "    Drift line index " << iL << " is out of range.\n";
     return;
   }
@@ -191,7 +191,7 @@ ViewDrift::SetTrackPoint(const int iL, const int iP,
                          const double x, const double y, const double z) {
   
   if (iL < 0 || iL >= nTracks) {
-    std::cerr << "ViewDrift::SetTrackPoint:\n";
+    std::cerr << className << "::SetTrackPoint:\n";
     std::cerr << "    Track index " << iL << " is out of range.\n";
     return;
   }
@@ -207,7 +207,7 @@ ViewDrift::AddTrackPoint(const int iL,
                          const double x, const double y, const double z) {
 
   if (iL < 0 || iL >= nTracks) {
-    std::cerr << "ViewDrift::AddTrackPoint:\n";
+    std::cerr << className << "::AddTrackPoint:\n";
     std::cerr << "    Track index " << iL << " is out of range.\n";
     return;
   }

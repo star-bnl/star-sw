@@ -21,7 +21,7 @@ MediumMagboltz86::MediumMagboltz86() :
   useCsOutput(false), 
   nTerms(0), useAnisotropic(true), 
   nPenning(0), 
-  useDeexcitation(false), useRadTrap(true),
+  useDeexcitation(false), useRadTrap(true), useDeexcitationTest(false),
   nDeexcitations(0), nDeexcitationProducts(0), 
   scaleExc(1.), useSplittingFunction(true),
   eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma) {
@@ -1505,6 +1505,8 @@ MediumMagboltz86::Mixer() {
       useDeexcitation = false;
     }
   }
+  
+  if (useDeexcitation && useDeexcitationTest) TestDeexcitationCascade();
 
   // Reset the Penning transfer parameters.
   for (int i = nTerms; i--;) {
@@ -2213,16 +2215,18 @@ MediumMagboltz86::ComputeDeexcitationTable() {
     mapDxc["Ar_Excimer"] = nDeexcitations;
     deexcitations.push_back(newDxc);
     ++nDeexcitations;
+    const bool useCollDxc = false;
     for (int j = nDeexcitations; j--;) {
       std::string level = deexcitations[j].label;
-      if (level == "Ar_1S5") {
+      if (level == "Ar_1S5" && useCollDxc) {
         // Two-body and three-body collision rates
         // K. Tachibana, Phys. Rev. A 34 (1986), 1007-1015
         // A. Bogaerts and R. Gijbels, Phys. Rev. A 52 (1995), 3743-3751
         const double fLoss2b = 2.3e-24 * dens * cAr;
         const double fLoss3b = 1.4e-41 * pow(dens * cAr, 2.);
         // Assume that three-body collisions lead to excimer formation.
-        // Two-body collisions might lead to collisional mixing? For now: loss
+        // Two-body collisions might lead to collisional mixing? 
+        // For now: loss
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(mapDxc["Ar_Excimer"]);
         deexcitations[j].type.push_back(-1);
@@ -2231,7 +2235,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
         deexcitations[j].p.push_back(fLoss3b);
         deexcitations[j].nChannels += 2;
       }
-      if (level == "Ar_1S3") {
+      if (level == "Ar_1S3" && useCollDxc) {
         // Two-body and three-body collision rates
         // K. Tachibana, Phys. Rev. A 34 (1986), 1007-1015
         // A. Bogaerts and R. Gijbels, Phys. Rev. A 52 (1995), 3743-3751
@@ -2247,14 +2251,15 @@ MediumMagboltz86::ComputeDeexcitationTable() {
         deexcitations[j].p.push_back(fLoss3b);
         deexcitations[j].nChannels += 2;
       }        
-      if (level == "Ar_4D5"  || level == "Ar_3S4" || level == "Ar_4D2" ||
-          level == "Ar_4S1!" || level == "Ar_3S2" || level == "Ar_5D5" ||
-          level == "Ar_4S4"  || level == "Ar_5D2" || level == "Ar_6D5" ||
-          level == "Ar_5S1!" || level == "Ar_4S2" || level == "Ar_5S4" ||
-          level == "Ar_6D2") {
+      if ((level == "Ar_4D5"  || level == "Ar_3S4" || level == "Ar_4D2" ||
+           level == "Ar_4S1!" || level == "Ar_3S2" || level == "Ar_5D5" ||
+           level == "Ar_4S4"  || level == "Ar_5D2" || level == "Ar_6D5" ||
+           level == "Ar_5S1!" || level == "Ar_4S2" || level == "Ar_5S4" ||
+           level == "Ar_6D2") && useCollDxc) {
         // Hornbeck-Molnar ionisation
         // P. Becker and F. Lampe, J. Chem. Phys. 42 (1965), 3857-3863
         // A. Bogaerts and R. Gijbels, Phys. Rev. A 52 (1995), 3743-3751
+        // This value is unrealistic, to be checked!
         const double fHM = 2.e-18 * dens * cAr;
         deexcitations[j].final.push_back(mapDxc["Ar_Dimer"]);
         deexcitations[j].type.push_back(1);
@@ -2376,7 +2381,8 @@ MediumMagboltz86::ComputeDeexcitationTable() {
       }
     }
   }
-  
+
+
 }
 
 void
@@ -2462,6 +2468,44 @@ MediumMagboltz86::ComputeDeexcitation(int iLevel, int& fLevel) {
     }
     // Proceed with the next level in the cascade. 
     iLevel = fLevel;
+  }
+
+}
+
+void
+MediumMagboltz86::TestDeexcitationCascade() {
+
+  if (!useDeexcitation) return;
+  
+  std::vector<int> final;
+  final.resize(nDeexcitations);
+  const int nEvents = 1000000;
+  int fLevel;
+  std::cout << className << "::TestDeexcitationCascade:\n";
+  if (nDeexcitations <= 0) {
+    std::cout << "    No de-excitable levels found.\n";
+    return;
+  }
+  std::cout << "    Initial state      Final state        Percentage\n";
+  for (int iLevel = 0; iLevel < nDeexcitations; ++iLevel) {
+    for (int j = nDeexcitations; j--;) final[j] = 0; 
+    for (int j = nEvents; j--;) {
+      ComputeDeexcitation(iLevel, fLevel);
+      ++final[fLevel];
+    }
+    std::cout << "    " << deexcitations[iLevel].label << "\n";
+    for (int j = 0; j < nDeexcitations; ++j) {
+      if (final[j] > 0) {
+        if (j == iLevel) {
+          std::cout << "                        Direct decay: " 
+                    << 100. * final[j] / nEvents << "%\n";
+        } else {
+          std::cout << "                        " 
+                    << deexcitations[j].label << ": "
+                    << 100. * final[j] / nEvents << "%\n";
+        }
+      }
+    }
   }
 
 }

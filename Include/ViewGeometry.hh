@@ -53,6 +53,8 @@ class ViewGeometry : public TObject {
     void Paint(Option_t* option);
 
   private:
+   
+    std::string className;
  
     // Options
     bool debug;

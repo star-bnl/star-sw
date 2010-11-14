@@ -40,6 +40,8 @@ class ViewCell {
     void DisableWireMarkers() {useWireMarker = false;}  
   
   private:
+
+    std::string className;
  
     // Options
     bool debug;

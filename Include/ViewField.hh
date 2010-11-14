@@ -42,6 +42,8 @@ class ViewField {
     void DisableDebugging() {debug = false;}
 
   private:
+
+    std::string className;
  
     static const int nMaxContours = 20;
  
