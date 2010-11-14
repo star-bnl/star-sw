@@ -508,7 +508,8 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
     }
     // Follow the de-excitation cascade (if switched on).
     if (useDeexcitation && iDeexcitation[level] >= 0) {
-      ComputeDeexcitation(iDeexcitation[level]);
+      int fLevel = 0;
+      ComputeDeexcitation(iDeexcitation[level], fLevel);
       esec = -1.;
       nsec = nDeexcitationProducts;
     } else if (usePenning) {
@@ -704,7 +705,8 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
       for (int i = 0; i < nLines; ++i) {
         if (r <= pLine[i]) {
           ++nPhotonCollisions[PhotonCollisionTypeExcitation];
-          ComputeDeexcitation(iLine[i]);
+          int fLevel = 0;
+          ComputeDeexcitation(iLine[i], fLevel);
           type = PhotonCollisionTypeExcitation;
           nsec = nDeexcitationProducts;
           return true;
@@ -2378,7 +2380,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
 }
 
 void
-MediumMagboltz86::ComputeDeexcitation(int iLevel) {
+MediumMagboltz86::ComputeDeexcitation(int iLevel, int& fLevel) {
 
   nDeexcitationProducts = 0;
   dxcProducts.clear();
@@ -2386,13 +2388,18 @@ MediumMagboltz86::ComputeDeexcitation(int iLevel) {
   dxcProd newDxcProd;
   newDxcProd.t = 0.;
 
+  fLevel = iLevel;
   while (iLevel >= 0 && iLevel < nDeexcitations) {
     if (deexcitations[iLevel].rate <= 0. || 
-        deexcitations[iLevel].nChannels <= 0) return;
-    // Determine the de-excitation time
+        deexcitations[iLevel].nChannels <= 0) {
+      // This level is a dead end.
+      fLevel = iLevel;
+      return;
+    }
+    // Determine the de-excitation time.
     newDxcProd.t += -log(RndmUniformPos()) / deexcitations[iLevel].rate;
-    // Select the transition
-    int fLevel = -1;
+    // Select the transition.
+    fLevel = -1;
     int type = 0;
     const double r = RndmUniform();
     for (int j = 0; j < deexcitations[iLevel].nChannels; ++j) {
@@ -2407,9 +2414,13 @@ MediumMagboltz86::ComputeDeexcitation(int iLevel) {
       newDxcProd.type = DxcTypePhoton;
       newDxcProd.energy = deexcitations[iLevel].energy;
       if (fLevel >= 0) {
+        // Decay to a lower lying excited state.
         newDxcProd.energy -= deexcitations[fLevel].energy;
+        if (newDxcProd.energy < Small) newDxcProd.energy = Small;
+        dxcProducts.push_back(newDxcProd);
+        ++nDeexcitationProducts;
       } else {
-        // Decay to ground state
+        // Decay to ground state.
         double delta = RndmVoigt(0., 
                                  deexcitations[iLevel].sDoppler,
                                  deexcitations[iLevel].gPressure);
@@ -2419,10 +2430,13 @@ MediumMagboltz86::ComputeDeexcitation(int iLevel) {
                                 deexcitations[iLevel].gPressure);
         }
         newDxcProd.energy += delta;
+        if (newDxcProd.energy < Small) newDxcProd.energy = Small;
+        dxcProducts.push_back(newDxcProd);
+        ++nDeexcitationProducts;
+        // Deexcitation cascade is over.
+        fLevel = iLevel;
+        return;
       }
-      if (newDxcProd.energy < Small) newDxcProd.energy = Small;
-      dxcProducts.push_back(newDxcProd);
-      ++nDeexcitationProducts;
     } else if (type == 1) {
       // Ionisation electron
       newDxcProd.type = DxcTypeElectron;
@@ -2430,15 +2444,23 @@ MediumMagboltz86::ComputeDeexcitation(int iLevel) {
       if (fLevel >= 0) {
         // Associative ionisation
         newDxcProd.energy -= deexcitations[fLevel].energy;
+        if (newDxcProd.energy < Small) newDxcProd.energy = Small;
+        ++nPenning;
+        dxcProducts.push_back(newDxcProd);
+        ++nDeexcitationProducts;
       } else {
         // Penning ionisation
         newDxcProd.energy -= minIonPot;
+        if (newDxcProd.energy < Small) newDxcProd.energy = Small;
+        ++nPenning;
+        dxcProducts.push_back(newDxcProd);
+        ++nDeexcitationProducts;
+        // Deexcitation cascade is over.
+        fLevel = iLevel;
+        return; 
       }
-      if (newDxcProd.energy < Small) newDxcProd.energy = Small;
-      ++nPenning;
-      dxcProducts.push_back(newDxcProd);
-      ++nDeexcitationProducts;
-    } 
+    }
+    // Proceed with the next level in the cascade. 
     iLevel = fLevel;
   }
 
@@ -2536,7 +2558,8 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
     // Compute the half width at half maximum due to resonance broadening.
     //   A. W. Ali and H. R. Griem, Phys. Rev. 140, 1044
     //   A. W. Ali and H. R. Griem, Phys. Rev. 144, 366
-    deexcitations[i].gPressure = 1.92 * Pi * sqrt(1. / 3.) * 
+    // Replace prefactor 1.92 by 2.2
+    deexcitations[i].gPressure = 2.2 * Pi * sqrt(1. / 3.) * 
                                  FineStructureConstant * pow(HbarC, 3) * 
                                  deexcitations[i].osc * dens * 
                                  fraction[deexcitations[i].gas] / 

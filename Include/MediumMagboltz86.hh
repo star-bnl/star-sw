@@ -391,7 +391,7 @@ class MediumMagboltz86 : public MediumGas {
     bool Mixer();
     void ComputeAngularCut(double parIn, double& cut, double &parOut);
     void ComputeDeexcitationTable();
-    void ComputeDeexcitation(int iLevel);
+    void ComputeDeexcitation(int iLevel, int& fLevel);
     bool ComputePhotonCollisionTable();
 
 };

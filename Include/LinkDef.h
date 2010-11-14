@@ -35,6 +35,8 @@
 #pragma link C++ class Garfield::ViewField;
 #pragma link C++ class Garfield::ViewDrift;
 #pragma link C++ class Garfield::ViewSignal;
+#pragma link C++ class Garfield::ViewCell;
+#pragma link C++ class Garfield::ViewGeometry;
 
 #pragma link C++ class Garfield::Track;
 #pragma link C++ class Garfield::TrackHeed;

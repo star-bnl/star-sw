@@ -208,6 +208,11 @@ $(OBJDIR)/ViewCell.o: \
 	$(INCDIR)/ComponentAnalyticField.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
+$(OBJDIR)/ViewGeometry.o: \
+	$(SRCDIR)/ViewGeometry.cc $(INCDIR)/ViewGeometry.hh \
+	$(INCDIR)/GeometrySimple.hh
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
 
 $(OBJDIR)/Medium.o: \
 	$(SRCDIR)/Medium.cc $(INCDIR)/Medium.hh \
