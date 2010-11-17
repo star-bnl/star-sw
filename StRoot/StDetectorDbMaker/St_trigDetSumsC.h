@@ -4,6 +4,7 @@
 #include "TChair.h"
 #include <math.h>
 #include "tables/St_trigDetSums_Table.h"
+#include "StDetectorDbClock.h"
 
 class St_trigDetSumsC : public TChair {
  public:
@@ -31,12 +32,23 @@ class St_trigDetSumsC : public TChair {
   Double_t 	bbcBlueBkg(Int_t i = 0) 	{return validity(Struct(i)->bbcBlueBkg);}
   Double_t 	pvpdWest(Int_t i = 0) 	        {return validity(Struct(i)->pvpdWest);}
   Double_t 	pvpdEast(Int_t i = 0) 	        {return validity(Struct(i)->pvpdEast);}
+  Double_t 	zdcCoin(Int_t i = 0)            {return Nc(zdcX(i),zdcEast(i),zdcWest(i));}
+  Double_t 	bbcCoin(Int_t i = 0)            {return Nc(bbcX(i),bbcEast(i),bbcWest(i));}
   static St_trigDetSums* fgTableCopy;
   void		validityMargin(Double_t margin=0) {fMargin = margin;}
  protected:
  private:
   static St_trigDetSumsC* fgInstance;
   Double_t	fMargin;
+
+  // The following code attempts to correct coincidence rates for accidentals and multiples
+  // See STAR Note 528
+  Double_t      Nc(Double_t New, Double_t Ne, Double_t Nw) {
+    // This is an approximation using the maximum seen filled bunches in RHIC so far
+    // (not always true, but we don't have access to this number)
+    double Nbc = StDetectorDbClock::instance()->CurrentFrequency() * (111./120.);
+    return -Nbc * TMath::Log(1. - ((New - (Ne*Nw/Nbc)) / (Nbc+New-Ne-Nw)));
+  }
 
   // The following code is meant to handle "stuck" RICH Scalers, where the scaler
   // integrates rates for a factor of 2 or 3 times as long as it is expected to,
