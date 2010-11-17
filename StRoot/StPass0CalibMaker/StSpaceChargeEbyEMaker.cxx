@@ -20,6 +20,7 @@
 #include "StBTofHeader.h"
 #include "StBTofPidTraits.h"
 #include "StTrackPidTraits.h"
+#include "StDetectorDbMaker/St_trigDetSumsC.h"
 
 #include "TUnixTime.h"
 #include "TFile.h"
@@ -381,11 +382,11 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 
   if (doGaps) DetermineGaps();
   if (doNtuple) {
-      static float X[37];
+      static float X[39];
       static float ntent = 0.0;
       static float nttrk = 0.0;
 
-      if (ntent == 0.0) for (i=0; i<37; i++) X[i] = 0.0;
+      if (ntent == 0.0) for (i=0; i<39; i++) X[i] = 0.0;
       ntent++;  // # entries since last reset, including this one
       float last_nttrk = nttrk;
       nttrk = ntrks[curhist];  // # tracks since last reset, including these
@@ -442,6 +443,10 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       X[34] = gapZdivslopewest;
       X[35] = s0*X[35] + s1*runinfo->spaceCharge();
       X[36] = s0*X[36] + s1*((float) (runinfo->spaceChargeCorrectionMode()));
+      X[37] = s0*X[37] + s1*St_trigDetSumsC::Nc(runinfo->zdcCoincidenceRate(),
+                                 runinfo->zdcEastRate(),runinfo->zdcWestRate());
+      X[38] = s0*X[38] + s1*St_trigDetSumsC::Nc(runinfo->bbcCoincidenceRate(),
+                                 runinfo->bbcEastRate(),runinfo->bbcWestRate());
 	      
       // In calib mode, only fill when doReset (we found an sc)
       if (doReset || !Calibmode) ntup->Fill(X);
@@ -649,7 +654,7 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
   }
 
   if (doNtuple) ntup = new TNtuple("SC","Space Charge",
-    "sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:dcan:dcap:dcae:dcaw:gapf:gapi:gapd:gapfn:gapin:gapdn:gapfp:gapip:gapdp:gapfe:gapie:gapde:gapfw:gapiw:gapdw:usc:uscmode");
+    "sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:dcan:dcap:dcae:dcaw:gapf:gapi:gapd:gapfn:gapin:gapdn:gapfp:gapip:gapdp:gapfe:gapie:gapde:gapfw:gapiw:gapdw:usc:uscmode:zdcc:bbcc");
     //"sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:sce:scw:dcae:dcaw:gapf:gapd:gapfn:gapdn:gapfp:gapdp:gapfe:gapde:gapfw:gapdw:usc:uscmode");
 
   if (doGaps) {
@@ -1041,8 +1046,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.31 2010/07/09 19:01:54 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.32 2010/11/17 17:23:33 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.32  2010/11/17 17:23:33  genevb
+// Include corrected coincidence rates in ntuple
+//
 // Revision 1.31  2010/07/09 19:01:54  genevb
 // Add TOF matching
 //
