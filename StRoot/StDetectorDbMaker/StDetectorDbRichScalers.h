@@ -15,9 +15,11 @@ public:
   Double_t getZDCWest() {return St_trigDetSumsC::instance()->zdcWest();}
   Double_t getZDCEast() {return St_trigDetSumsC::instance()->zdcEast();}
   Double_t getZDCX() {return St_trigDetSumsC::instance()->zdcX();}
+  Double_t getZDCCoin() {return St_trigDetSumsC::instance()->zdcCoin();}
   Double_t getMult() {return St_trigDetSumsC::instance()->mult();}
   Double_t getL0() {return St_trigDetSumsC::instance()->L0();}
   Double_t getBBCX() {return St_trigDetSumsC::instance()->bbcX();}
+  Double_t getBBCCoin() {return St_trigDetSumsC::instance()->bbcCoin();}
   Double_t getBBCXCTB() {return St_trigDetSumsC::instance()->bbcXctbTOFp();}
   Double_t getBBCWest() {return St_trigDetSumsC::instance()->bbcWest();}
   Double_t getBBCEast() {return St_trigDetSumsC::instance()->bbcEast();}
