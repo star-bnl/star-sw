@@ -21,7 +21,7 @@ MediumMagboltz86::MediumMagboltz86() :
   useCsOutput(false), 
   nTerms(0), useAnisotropic(true), 
   nPenning(0), 
-  useDeexcitation(false), useRadTrap(true), useDeexcitationTest(false),
+  useDeexcitation(false), useRadTrap(true), 
   nDeexcitations(0), nDeexcitationProducts(0), 
   scaleExc(1.), useSplittingFunction(true),
   eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma) {
@@ -509,7 +509,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
     // Follow the de-excitation cascade (if switched on).
     if (useDeexcitation && iDeexcitation[level] >= 0) {
       int fLevel = 0;
-      ComputeDeexcitation(iDeexcitation[level], fLevel);
+      ComputeDeexcitationInternal(iDeexcitation[level], fLevel);
       esec = -1.;
       nsec = nDeexcitationProducts;
     } else if (usePenning) {
@@ -632,9 +632,7 @@ MediumMagboltz86::GetPhotonCollisionRate(const double e) {
   if (useDeexcitation && useRadTrap && nDeexcitations > 0) {
     // Loop over the excitations.
     for (int i = nDeexcitations; i--;) {
-      // Check if the energy is within the width of a discrete line.
-      if (deexcitations[i].cf > 0. && 
-          fabs(e - deexcitations[i].energy) <= deexcitations[i].width) {
+      if (deexcitations[i].cf > 0.) {
         cfSum += deexcitations[i].cf * 
                  TMath::Voigt(e - deexcitations[i].energy,
                               deexcitations[i].sDoppler, 
@@ -706,7 +704,7 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
         if (r <= pLine[i]) {
           ++nPhotonCollisions[PhotonCollisionTypeExcitation];
           int fLevel = 0;
-          ComputeDeexcitation(iLine[i], fLevel);
+          ComputeDeexcitationInternal(iLine[i], fLevel);
           type = PhotonCollisionTypeExcitation;
           nsec = nDeexcitationProducts;
           return true;
@@ -1506,8 +1504,6 @@ MediumMagboltz86::Mixer() {
     }
   }
   
-  if (useDeexcitation && useDeexcitationTest) TestDeexcitationCascade();
-
   // Reset the Penning transfer parameters.
   for (int i = nTerms; i--;) {
     rPenning[i] = rPenningGlobal;
@@ -1704,6 +1700,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
   for (itMap = mapLevels.begin(); itMap != mapLevels.end(); itMap++) {
     std::string level = (*itMap).first;
     newDxc.gas = int(csType[(*itMap).second] / nCsTypes);
+    newDxc.level = (*itMap).second;
     newDxc.label = level;
     // Excitation energy
     newDxc.energy = energyLoss[(*itMap).second] * rgas[newDxc.gas];
@@ -2195,6 +2192,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
   if (withAr) {
     // Add the Ar dimer ground state.
     newDxc.label = "Ar_Dimer";
+    newDxc.level = -1;
     newDxc.gas = iAr;
     newDxc.energy = 14.71;
     newDxc.osc = newDxc.cf = 0.;
@@ -2206,6 +2204,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
     ++nDeexcitations;
     // Add an Ar excimer level.
     newDxc.label = "Ar_Excimer";
+    newDxc.level = -1;
     newDxc.gas = iAr;
     newDxc.energy = 14.71;
     newDxc.osc = newDxc.cf = 0.;
@@ -2388,6 +2387,45 @@ MediumMagboltz86::ComputeDeexcitationTable() {
 void
 MediumMagboltz86::ComputeDeexcitation(int iLevel, int& fLevel) {
 
+  if (!useDeexcitation) {
+    std::cerr << className << "::ComputeDeexcitation:\n";
+    std::cerr << "    Deexcitation is disabled.\n";
+    return;
+  }
+  
+  // Make sure that the tables are updated.
+  if (isChanged) {
+    if (!Mixer()) {
+      std::cerr << className << "::ComputeDeexcitation:\n";
+      std::cerr << "    Error calculating the collision rates table.\n";
+      return;
+    }
+    isChanged = false;
+  }
+
+  if (iLevel < 0 || iLevel >= nTerms) {
+    std::cerr << className << "::ComputeDeexcitation:\n";
+    std::cerr << "    Level index is out of range.\n";
+    return;
+  }
+
+  iLevel = iDeexcitation[iLevel];
+  if (iLevel < 0 || iLevel >= nDeexcitations) {
+    std::cerr << className << "::ComputeDeexcitation:\n";
+    std::cerr << "    Level is not deexcitable.\n";
+    return;
+  }
+
+  ComputeDeexcitationInternal(iLevel, fLevel);
+  if (fLevel >= 0 && fLevel < nDeexcitations) {
+    fLevel = deexcitations[fLevel].level;
+  }
+
+}
+
+void
+MediumMagboltz86::ComputeDeexcitationInternal(int iLevel, int& fLevel) {
+
   nDeexcitationProducts = 0;
   dxcProducts.clear();
 
@@ -2430,13 +2468,11 @@ MediumMagboltz86::ComputeDeexcitation(int iLevel, int& fLevel) {
         double delta = RndmVoigt(0., 
                                  deexcitations[iLevel].sDoppler,
                                  deexcitations[iLevel].gPressure);
-        while (delta >=  deexcitations[iLevel].width || 
-               delta <= -deexcitations[iLevel].width) {
+        while (newDxcProd.energy + delta < Small) {
           delta = RndmVoigt(0., deexcitations[iLevel].sDoppler,
                                 deexcitations[iLevel].gPressure);
         }
         newDxcProd.energy += delta;
-        if (newDxcProd.energy < Small) newDxcProd.energy = Small;
         dxcProducts.push_back(newDxcProd);
         ++nDeexcitationProducts;
         // Deexcitation cascade is over.
@@ -2468,44 +2504,6 @@ MediumMagboltz86::ComputeDeexcitation(int iLevel, int& fLevel) {
     }
     // Proceed with the next level in the cascade. 
     iLevel = fLevel;
-  }
-
-}
-
-void
-MediumMagboltz86::TestDeexcitationCascade() {
-
-  if (!useDeexcitation) return;
-  
-  std::vector<int> final;
-  final.resize(nDeexcitations);
-  const int nEvents = 1000000;
-  int fLevel;
-  std::cout << className << "::TestDeexcitationCascade:\n";
-  if (nDeexcitations <= 0) {
-    std::cout << "    No de-excitable levels found.\n";
-    return;
-  }
-  std::cout << "    Initial state      Final state        Percentage\n";
-  for (int iLevel = 0; iLevel < nDeexcitations; ++iLevel) {
-    for (int j = nDeexcitations; j--;) final[j] = 0; 
-    for (int j = nEvents; j--;) {
-      ComputeDeexcitation(iLevel, fLevel);
-      ++final[fLevel];
-    }
-    std::cout << "    " << deexcitations[iLevel].label << "\n";
-    for (int j = 0; j < nDeexcitations; ++j) {
-      if (final[j] > 0) {
-        if (j == iLevel) {
-          std::cout << "                        Direct decay: " 
-                    << 100. * final[j] / nEvents << "%\n";
-        } else {
-          std::cout << "                        " 
-                    << deexcitations[j].label << ": "
-                    << 100. * final[j] / nEvents << "%\n";
-        }
-      }
-    }
   }
 
 }

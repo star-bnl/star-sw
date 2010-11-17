@@ -174,9 +174,6 @@ class MediumMagboltz86 : public MediumGas {
     // Switch on/off discrete photoabsorption levels
     void EnableRadiationTrapping();
     void DisableRadiationTrapping() {useRadTrap = false;}
-    // Switch on/off test of deexcitation cascade
-    void EnableDeexcitationTest()  {useDeexcitationTest = true;}
-    void DisableDeexcitationTest() {useDeexcitationTest = false;}
 
     // Switch on/off simplified simulation of Penning transfers by means of 
     // transfer probabilities (not compatible with de-excitation handling)
@@ -202,6 +199,7 @@ class MediumMagboltz86 : public MediumGas {
     bool   GetElectronCollision(const double e, int& type, int& level, 
                                 double& e1, double& ctheta, 
                                 int& nsec, double& esec, int& band);
+    void ComputeDeexcitation(int iLevel, int& fLevel);   
     int  GetNumberOfDeexcitationProducts() {return nDeexcitationProducts;}
     bool GetDeexcitationProduct(const int i, double& t, double& s, 
                                 int& type, double& energy); 
@@ -317,12 +315,13 @@ class MediumMagboltz86 : public MediumGas {
     // Flag enabling/disable radiation trapping 
     // (absorption of photons discrete excitation lines)
     bool useRadTrap;
-    bool useDeexcitationTest;
 
     int nDeexcitations;
     struct deexcitation {
       // Gas component
       int gas;
+      // Associated cross-section term
+      int level;
       // Level description
       std::string label;
       // Energy
@@ -395,9 +394,8 @@ class MediumMagboltz86 : public MediumGas {
     bool Mixer();
     void ComputeAngularCut(double parIn, double& cut, double &parOut);
     void ComputeDeexcitationTable();
-    void ComputeDeexcitation(int iLevel, int& fLevel);
+    void ComputeDeexcitationInternal(int iLevel, int& fLevel);
     bool ComputePhotonCollisionTable();
-    void TestDeexcitationCascade();
 
 };
 

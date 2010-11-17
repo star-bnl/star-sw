@@ -88,7 +88,6 @@ class AvalancheMicroscopic {
     void GetAvalancheSize(int& ne, int& ni) const {ne = nElectrons; ni = nIons;}
 
     int  GetNumberOfEndpoints() const {return nEndpoints;}
-    // Status codes:
     void GetEndpoint(const int i, 
                 double& x0, double& y0, double& z0, double& t0, double& e0,
                 double& x1, double& y1, double& z1, double& t1, double& e1,
