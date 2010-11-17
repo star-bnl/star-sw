@@ -134,11 +134,16 @@ TrackBichsel::GetCluster(
     return false;
   }
 
-  int j = int(RndmUniform() * nCdfEntries);
-  if (j >= nCdfEntries) j = nCdfEntries - 1;
-  if (j <= 0) j = 0;
+  const double u = nCdfEntries * RndmUniform();
+  const int j = int(u);
+  if (j == 0) {
+    e = 0. + u * cdf[0][iCdf];
+  } else if (j >= nCdfEntries) {
+    e = cdf[nCdfEntries - 1][iCdf];
+  } else {
+    e = cdf[j - 1][iCdf] + (u - j) * (cdf[j][iCdf] - cdf[j - 1][iCdf]);
+  }
 
-  e = cdf[j][iCdf];
   return true;
 
 }
@@ -418,7 +423,7 @@ TrackBichsel::SelectCrossSectionTable() {
   if (debug) {
     std::cout << className << "::SelectCrossSectionTable:\n";
     std::cout << "    Requested value: bg = " << bg << "\n";
-    std::cout << "    Select table for bg = " << tabBg[iCdf] << "\n";
+    std::cout << "    Used table:      bg = " << tabBg[iCdf] << "\n";
   }
 
 }
