@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.53 2010/02/17 23:39:26 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.54 2010/11/18 20:34:01 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.54  2010/11/18 20:34:01  dmitry
+ * enabled automatic reconnect via mysql option
+ *
  * Revision 1.53  2010/02/17 23:39:26  dmitry
  * indirect log info added
  *
@@ -316,8 +319,11 @@ bool MysqlDb::reConnect(){
 
   bool connected=false;
   unsigned int timeOutConnect=mtimeout;
+  my_bool auto_reconnect = 1;
+
   while(!connected && timeOutConnect<600){ 
     mysql_options(&mData,MYSQL_OPT_CONNECT_TIMEOUT,(const char*)&timeOutConnect);
+    mysql_options(&mData,MYSQL_OPT_RECONNECT, &auto_reconnect);
 
     loadBalance(); // does nothing in the fall-back scenario
 
