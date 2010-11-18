@@ -632,7 +632,8 @@ MediumMagboltz86::GetPhotonCollisionRate(const double e) {
   if (useDeexcitation && useRadTrap && nDeexcitations > 0) {
     // Loop over the excitations.
     for (int i = nDeexcitations; i--;) {
-      if (deexcitations[i].cf > 0.) {
+      if (deexcitations[i].cf > 0. && 
+          fabs(e - deexcitations[i].energy) <= deexcitations[i].width) {
         cfSum += deexcitations[i].cf * 
                  TMath::Voigt(e - deexcitations[i].energy,
                               deexcitations[i].sDoppler, 
@@ -680,7 +681,6 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
   
   double r = cfTotGamma[iE];
   if (useDeexcitation && useRadTrap && nDeexcitations > 0) {
-    // Check if the energy is within the width of a discrete line.
     int nLines = 0;
     std::vector<double> pLine(0);
     std::vector<int> iLine(0);
@@ -2468,7 +2468,8 @@ MediumMagboltz86::ComputeDeexcitationInternal(int iLevel, int& fLevel) {
         double delta = RndmVoigt(0., 
                                  deexcitations[iLevel].sDoppler,
                                  deexcitations[iLevel].gPressure);
-        while (newDxcProd.energy + delta < Small) {
+        while (newDxcProd.energy + delta < Small || 
+               fabs(delta) >= deexcitations[iLevel].width) {
           delta = RndmVoigt(0., deexcitations[iLevel].sDoppler,
                                 deexcitations[iLevel].gPressure);
         }
@@ -2608,7 +2609,7 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
                                  (ElectronMass * deexcitations[i].energy);
     // Make an estimate for the width within which a photon can be 
     // absorbed by the line
-    deexcitations[i].width = 2000 * (
+    deexcitations[i].width = 5000 * (
                      sqrt(2. * log(2.)) * deexcitations[i].sDoppler + 
                      deexcitations[i].gPressure);
     ++nResonanceLines;
@@ -2626,16 +2627,12 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
     std::cout << "      Energy [eV]        Line width (FWHM) [eV]  "
               << "    Mean free path [um]\n";
     std::cout << "                            Doppler    Pressure   "
-              << "   (peak)      (wing)\n";
+              << "   (peak)     \n";
     for (int i = 0; i < nDeexcitations; ++i) {
       if (deexcitations[i].osc < Small) continue;
       const double imfpP = (deexcitations[i].cf / SpeedOfLight) * 
                            TMath::Voigt(0., deexcitations[i].sDoppler,
                                             2 * deexcitations[i].gPressure);
-      const double imfpW = (deexcitations[i].cf / SpeedOfLight) *
-                           TMath::Voigt(deexcitations[i].width,
-                                        deexcitations[i].sDoppler,
-                                        2 * deexcitations[i].gPressure);
       std::cout << "      " << std::fixed << std::setw(6) 
                 << std::setprecision(3) 
                 << deexcitations[i].energy << " +/- " 
@@ -2648,12 +2645,6 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
                 << std::fixed << std::setw(10) << std::setprecision(4);
       if (imfpP > 0.) {
         std::cout << 1.e4 / imfpP;
-      } else {
-        std::cout << "----------";
-      }
-      std::cout << "  " << std::fixed << std::setw(10) << std::setprecision(4);
-      if (imfpW > 0.) {
-        std::cout << 1.e4 / imfpW;
       } else {
         std::cout << "----------";
       }
