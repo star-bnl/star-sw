@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.54 2010/11/18 20:34:01 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.55 2010/11/19 14:54:30 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.55  2010/11/19 14:54:30  dmitry
+ * added define guard (mysql version) to enable automatic reconnect in mysql 5.0.44+, excluding mysql 4
+ *
  * Revision 1.54  2010/11/18 20:34:01  dmitry
  * enabled automatic reconnect via mysql option
  *
@@ -323,7 +326,12 @@ bool MysqlDb::reConnect(){
 
   while(!connected && timeOutConnect<600){ 
     mysql_options(&mData,MYSQL_OPT_CONNECT_TIMEOUT,(const char*)&timeOutConnect);
+
+#ifdef MYSQL_VERSION_ID
+# if MYSQL_VERSION_ID > 50044
     mysql_options(&mData,MYSQL_OPT_RECONNECT, &auto_reconnect);
+# endif
+#endif
 
     loadBalance(); // does nothing in the fall-back scenario
 
