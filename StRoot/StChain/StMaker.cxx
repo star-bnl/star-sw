@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.234 2010/07/21 21:39:29 fisyak Exp $
+// $Id: StMaker.cxx,v 1.235 2010/11/19 20:00:55 fisyak Exp $
 //
 //
 /*!
@@ -248,6 +248,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   // SVT/SSD is out
   {"y2008",       20071101,     0, "y2008",    "base for y2008: SVT/SSD out, cone is lost"},
   {"y2008a",      20071101,     1, "y2008a",   "base for y2008: SVT/SSD out, cone in separate SCON"},
+  {"y2008b",      20071101,     2, "y2008b",   "base for y2008: SVT/SSD out, latest TPC ECAL CALB"},
   // 
   {"y2009",       20081215,     0, "y2009",    "based on TGeomanager of YF"},
 
@@ -1959,6 +1960,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.235  2010/11/19 20:00:55  fisyak
+// Add y2008b (requested by Jason)
+//
 // Revision 1.234  2010/07/21 21:39:29  fisyak
 // Add alias for y2011
 //
