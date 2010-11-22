@@ -134,6 +134,7 @@ class sfs_index : public fs_index {
   int mountSingleDir(char *fn, long long int offset=0);
   int getSingleDirSize(char *fn, long long int offset);
   long long int singleDirOffset;
+  long long int nextSingleDirOffset;
   int mountSingleDirMem(char *buff, int size, long long int offset=0);
   int singleDirSize;
 #else
@@ -141,6 +142,7 @@ class sfs_index : public fs_index {
   int getSingleDirSize(char *fn, int offset);
   int singleDirOffset;
   int singleDirSize;
+  int nextSingleDirOffset;
   int mountSingleDirMem(char *buff, int size, int offset=0);
 #endif
 
@@ -150,6 +152,8 @@ class sfs_index : public fs_index {
 
 
   sfs_index();
+  ~sfs_index() { wfile.close(); }
+
   int _create();
   void dump(int) { dump("/",root); };
  

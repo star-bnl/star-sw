@@ -14,7 +14,7 @@
 #include <rtsLog.h>
 
 char g_filename[100];
-fs_index *idx;
+sfs_index *idx;
 int idx_fd;
 
 char *striptodir(char *str)
@@ -36,37 +36,6 @@ char *striptodir(char *str)
 }
 
 
-// void write_env(char *var, char *value)
-// {
-//   //printf("Hereasf\n");
-//   char *user = getenv("USER");
-//   if(!user) return;
-//   char fn[256];
-//   sprintf(fn, "/tmp/%s_FS_%s",user,var);
-//   unlink(fn);
-//   int fd = open(fn, O_WRONLY | O_CREAT, 0666);
-//   write(fd, value, strlen(value));
-//   close(fd);
-// }
-
-// char *read_env(char *var)
-// {
-//   char *user = getenv("USER");
-//   if(!user) return NULL;
-
-//   char fn[256];
-//   sprintf(fn, "/tmp/%s_FS_%s",user,var);
-//   int fd = open(fn, O_RDONLY);
-  
-//   if(fd < 0) return NULL;
-
-//   static char res[256];
-//   memset(res,0,sizeof(res));
-//   read(fd, res, 256);
-
-//   close(fd);
-//   return res;
-// }
 
 int fs_cd(int argc, char *argv[])
 {
@@ -81,26 +50,6 @@ int fs_cd(int argc, char *argv[])
   
   return 0;
 }
-
-//char *fs_getpwd()
-//{
-//char cd[256];
-// char mount[256];
-//static char pwd[256];
-//char *tmp;
-
-  //tmp = read_env("PWD");
-  //if(!tmp) tmp = "NONE";
-  //strcpy(cd,tmp);
-
-  //tmp = read_env("MOUNT");
-  //if(!tmp) tmp = "NONE";
-  //strcpy(mount,tmp);
-
-  //sprintf(pwd, "%s:%s",mount,cd);
-  //return pwd;
-  //}
-
 
 int fs_pwd()
 {
@@ -159,24 +108,6 @@ int fs_mount(int argc, char *argv[])
     //write_env("PWD", "NONE");
     return -1;
   }
-
-//   char pp[4];
-//   read(idx_fd,pp,4);
-
-//   if(memcmp(pp,"SFS",3) == 0) {
-//     printf("Mounting sfs file: %s\n",fn);
-//     idx = new sfs_index;
-//   }
-//   if(memcmp(pp,"FIL",3) == 0) {
-//     printf("Mounting sfs file  %s\n",fn);
-//     idx = new sfs_index;
-//   }
-//   else {
-//     printf("Mounting daq file: %s\n",fn);
-//     idx = new sfs_index;
-//   }
-  
-//   close(idx_fd);
 
   idx = new sfs_index;
 
@@ -246,53 +177,23 @@ int fs_cat(int argc, char *argv[])
     printf("cat <file> <optional output file>\n");
     return -1;
   }
-
+  
+  printf("[%s: %s %s]\n",idx->pwd(),argv[0], argv[1]);
   int type;
   if(strcmp(argv[0], "cat") == 0) type = 0;
   else if (strcmp(argv[0], "od") == 0) type = 8;
   else type = 1;
 
-  fs_dirent *entry = idx->readdirent(argv[1]);
-  if(!entry) {
-    printf("Can't find file %s\n",argv[1]);
-    return -1;
-  }
-
-  if(entry->sz == 0) {
-    printf("%s has no data...\n",argv[1]);
-    return 0;
-  }
-
-  char *buff = (char *)malloc(entry->sz);
+  int sz = idx->fileSize(argv[1]);
+  char *buff = (char *)malloc(sz);
   if(!buff) {
-    printf("Error allocating %d bytes\n",entry->sz);
+    printf("Error allocating %d bytes\n",sz);
     return -1;
   }
 
-#if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-  long long int ret = lseek(idx_fd, entry->offset, SEEK_SET);
-#else
-  int ret = lseek(idx_fd, entry->offset, SEEK_SET);
-#endif
-
-  if(ret != entry->offset) {
-#if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-    printf("Invalid seek %lld vs %lld  (%s)\n",ret,entry->offset,strerror(errno));
-#else
-    printf("Invalid seek %d vs %d  (%s)\n",ret,entry->offset,strerror(errno));
-#endif
-
-    return -1;
-  }
-
-  ret = read(idx_fd, buff, entry->sz);
-  if(ret != entry->sz) {
-#if defined(__USE_LARGEFILE64) || defined(_LARGEFILE64_SOURCE)
-    printf("Error reading file %lld vs %d\n", ret, entry->sz);
-#else
-    printf("Error reading file %d vs %d\n", ret, entry->sz);
-#endif
-    return -1;
+  int ret = idx->read(argv[1], buff, sz);
+  if(ret != sz) {
+    printf("Error reading %d bytes\n",sz);
   }
 
   if(strcmp(argv[0], "save") == 0) {
@@ -312,10 +213,10 @@ int fs_cat(int argc, char *argv[])
       printf("error opening file %s\n",argv[2]);
       return -1;
     }
-    int ret = write(fd,buff,entry->sz);
-    if(ret < entry->sz) {
+    int ret = write(fd,buff,sz);
+    if(ret < sz) {
       printf("Error writing to file %s (only wrote %d of %d bytes\n",
-	     argv[2], ret, entry->sz);
+	     argv[2], ret, sz);
       free(buff);
       return -1;
     }
@@ -325,7 +226,7 @@ int fs_cat(int argc, char *argv[])
   }
 
   if(type == 0) {
-    write(STDOUT_FILENO, buff, entry->sz);
+    write(STDOUT_FILENO, buff, sz);
     write(STDOUT_FILENO, "\n", sizeof("\n"));
    
   }
@@ -333,12 +234,12 @@ int fs_cat(int argc, char *argv[])
     //printf("Header:\n");
     //fsBankReader::headerdump(buff);
     //printf("Data:\n");
-    fs_index::hexdump(buff, entry->sz);
+    fs_index::hexdump(buff, sz);
     printf("\n");
   }
   else {   // strings...
     int instr = 0;
-    for(int i=0;i<entry->sz;i++) {
+    for(int i=0;i<sz;i++) {
       if(isprint(buff[i])) {
 	instr = 1;
 	putchar(buff[i]);
@@ -437,7 +338,6 @@ int main(int argc, char *argv[])
   // Parse cmds...
   char *av[10];
   int ac = 0;
-  //  char fn[256];
   
   rtsLogOutput(2);
   rtsLogLevel(WARN);
@@ -455,7 +355,12 @@ int main(int argc, char *argv[])
     int ret = stat(argv[1], &sstat);
 #endif
 
-    if(ret == 0) {
+    if(ret != 0) {
+      printf("No file %s\n",argv[1]);
+      return -1;
+    }
+
+    if(argc == 2) {
       av[0] = "mount";
       av[1] = argv[1];
       ac = 2;
@@ -463,11 +368,28 @@ int main(int argc, char *argv[])
       docmd(ac, av);
     }
     else {
-      printf("No file %s\n",argv[1]);
-    }
-    
-    if(argc > 2) {
-      docmd(argc-2, &argv[2]);
+      idx = new sfs_index();
+      int ret = idx->mountSingleDir(argv[1]);
+      if(ret < 0) {
+	printf("Error reading %s\n", argv[1]);
+	return -1;
+      }
+      do {
+
+	if(strcmp(argv[2],"ls") != 0) {  // if not cd to event directory
+	  fs_dir *d = idx->opendir("/");
+	  if(d) {
+	    fs_dirent *e = idx->readdir(d);
+	    if(e) idx->cd(e->full_name);
+	    idx->closedir(d);
+	  }
+	}
+	
+	docmd(argc-2, &argv[2]);
+	ret = idx->mountNextDir();
+	} while(ret > 0);
+
+      
       return 0;
     } 
   }
