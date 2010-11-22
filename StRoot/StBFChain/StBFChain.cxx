@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.568 2010/10/28 19:08:43 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.569 2010/11/22 22:50:55 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -213,7 +213,7 @@ Int_t StBFChain::Instantiate()
 	maker == "StEEmcDbMaker"  ||
 	maker == "St_geant_Maker" ||
 	maker == "StVMCMaker") {
-      mk = GetChain()->GetMakerInheritsFrom(maker);
+      mk = GetTopChain()->GetMakerInheritsFrom(maker);
       if (mk) {
 	if (maker == "St_geant_Maker" || maker == "StVMCMaker") {
 	  LOG_INFO << "StBFChain::Instantiate ignore request for instantiation of " << maker
