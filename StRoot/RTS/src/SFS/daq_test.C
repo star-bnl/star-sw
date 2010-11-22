@@ -6,10 +6,10 @@
 
 int main(int argc, char *argv[])
 {
-  //rtsLogOutput(2);
+  rtsLogOutput(2);
   // rtsLogLevel(DBG);
 
-  if(argc < 3) {
+  if(argc < 2) {
     printf("Need a filename and offset\n");
     exit(0);
   }
@@ -19,7 +19,9 @@ int main(int argc, char *argv[])
   sfs_index sfs;
   //debug = 0;
 
-  long long int off = atoi(argv[2]);
+  long long int off = 0;
+  if(argc>2) off = atoi(argv[2]);
+
   int sz = 0;
   int ret = sfs.mountSingleDir(argv[1], off);
   //int ret = sfs.mountSingleDir(argv[1], 2147451904);
@@ -35,7 +37,7 @@ int main(int argc, char *argv[])
     off = sfs.singleDirOffset;
 
 
-    printf("Mounting new directory: (%s) offset=%lld (calc: %lld) size=%d\n",
+    LOG("JEFF", "Mounting new directory: (%s) offset=%lld (calc: %lld) size=%d",
 	   sfs.singleDirIttr->fullpath,
 	   off, 
 	   (last_off + last_sz) - off,
@@ -47,17 +49,23 @@ int main(int argc, char *argv[])
       fs_filelist list;
       sfs.mem_ls(&list, 1, dir);
       for(int i=0;i<list.n;i++) {
-	printf(":::%s\n",list.filename[i]);
+	if(strstr(list.filename[i], "TRGID") != NULL) {
+	  int sz = sfs.fileSize(list.filename[i]);
+	  LOG("JEFF", "%s: %d bytes",list.filename[i],sz);
+	  char *buff = (char *)malloc(sz);
+	  sfs.read(list.filename[i], buff, sz);
+	  sfs.hexdump(buff, sz);
+	  free(buff);
+	}
       }
 
-      sfs.closedir(dir);
+     sfs.closedir(dir);
     }
     else {
       printf("no rootdir?\n");
     }
 
     ret = sfs.mountNextDir();
-    printf("mountnextdir()  ret=%d\n",ret);
   } while(ret > 0);
   
 
