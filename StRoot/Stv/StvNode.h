@@ -62,7 +62,9 @@ public:
         StvHit *GetHit() const 			{ return mHit;}
   void  SetHit(StvHit *hit) 			{ mHit=hit   ;}
   const StHitPlane *GetHitPlane() const 	{ return mHitPlane  ;}
-  void  SetHitPlane(const StHitPlane *hitPlane){ mHitPlane=hitPlane;}
+  void  SetHitPlane(const StHitPlane *hitPlane) { mHitPlane=hitPlane;}
+  void  SetELoss(const StvELossData &el,int   ) {mELossData=el;}  
+const StvELossData &GetELoss() const		{return mELossData;}  
   
  double GetXi2() const 				{ return mXi2;}
    void SetXi2(double Xi2) 			{ mXi2=Xi2   ;}
@@ -92,6 +94,8 @@ StvHit *mHit;
   Mtx55D_t    mDer[2];
   double      mHrr[3];  // Hit errors in DCA frame
   double      mXi2; 	// Xi2 of fit to hit
+  double      mLen; 	// Length
+  StvELossData mELossData; //EnergyLoss&MCS from the upper node 
   char   mEnd[1];
 public:
   int mId;  //for debug only 
