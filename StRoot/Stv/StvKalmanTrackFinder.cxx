@@ -51,6 +51,7 @@ static int kitShow=0;
   int nTrk = 0;
   StvToolkit *kit = StvToolkit::Inst();
   StvSeedFinder *sf = kit->SeedFinder();
+  double aveRes=0,aveXi2=0;
   while ((mSeedHelx = sf->NextSeed())) 
   {
 if (sf->DoShow())  sf->Show();
@@ -59,16 +60,20 @@ if (sf->DoShow())  sf->Show();
     if (!stk) continue;
     nTrk++;
 if (trkShow)    stk->Show();
+    int ans = 0;
 //		Refit track   
-    int ans = Refit(stk,1);
+    ans = Refit(stk,1);
 
     if (!ans) kit->GetTracks().push_back(stk);
+    nTrk++;
+    aveRes += stk->GetRes();
+    aveXi2 += stk->GetXi2();
   }
 if (kitShow)  kit->Show();
 if (sf->DoShow()>1)  sf->ShowRest();
 if (StvDraw::Jnst()) StvDraw::Wait();
-
-
+  if (nTrk) {aveRes/=nTrk; aveXi2/=nTrk;}
+  Info("FindTracks","aveRes = %g aveXi2=%g",aveRes,aveXi2);
   return nTrk;
 }
 //_____________________________________________________________________________
@@ -148,9 +153,10 @@ if (DoShow()) {
 //Testik(deriv);
 
 //    assert(!idive || !par[1].check("FindTrack.1"));
+    node->mLen = totLen;
     node->SetPre(par[1],err[1],idir);
     node->SetDer(derivFit,idir);
-
+    node->SetELoss(mDive->GetELossData(),idir);
 
     if (idive) node->SetType(StvNode::kDcaNode);
 
