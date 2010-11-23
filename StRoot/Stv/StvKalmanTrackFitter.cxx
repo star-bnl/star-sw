@@ -66,70 +66,28 @@ static const double kBigErrFact = 10;
         StvFitPars del    = delPre*preNode->mDer[dir];
         node->mPP[dir]+= del;node->mFP[dir]=node->mPP[dir];
 
-//===================================================
-{
-printf("STANDARD:\n");
-        node->mPP[dir].print();
-        THelixTrack hlx,dlx;
-        double F[5][5],dL;
-        preNode->mFP[1].get(&dlx);
-        dL = dlx.Path(node->mFP[0].P);
-	dlx.Move(dL,F);
-        StvNodePars mypars;
-        mypars.set(&dlx,node->mFP[0]._hz);
-
-printf("ByHELIX:\n");
-        mypars.print();
-
-        double myF[5][5];
-        mypars.convert(myF,F);
-
-
-  enum {kH=0,kA,kC,kZ,kL};
-        double dA[5],dB[5],dX[2];
-        dX[0] = preNode->mFP[1]._x-preNode->mPP[0]._x;
-        dX[1] = preNode->mFP[1]._y-preNode->mPP[0]._y;
-        dA[kH] = -dX[0]*preNode->mPP[0]._sinCA+dX[1]*preNode->mPP[0]._cosCA;
-        dA[kA] = preNode->mFP[1]._psi-preNode->mPP[0]._psi;
-        dA[kC] = preNode->mFP[1]._curv-preNode->mPP[0]._curv;
-        dA[kZ] = preNode->mFP[1]._z-preNode->mPP[0]._z;
-        dA[kL] = atan(preNode->mFP[1]._tanl)-atan(preNode->mPP[0]._tanl);
-        TCL::vmatl(F[0],dA,dB,5,5);
-        mypars = node->mFP[0];
-        mypars._x += -mypars._sinCA*dB[kH];
-        mypars._y +=  mypars._cosCA*dB[kH];
-        mypars._z += dB[kZ];
-        mypars._psi += dB[kA];
-        mypars._curv += dB[kC];
-        mypars._ptin  = mypars._curv/mypars._hz;
-        mypars._tanl  = tan(atan(mypars._tanl)+dB[kL]);
-        mypars.ready();
-printf("DerHELIX:\n");
-        mypars.print();
-
-
-
-}
-//===================================================
         
 //??        node->mPP[dir]+= ((preNode->mFP[dir]-preNode->mPP[1-dir])*node->mDer[dir]);
         node->mPE[dir] = preNode->mFE[dir]*node->mDer[dir];
+        node->mPE[dir].Add(preNode->mELossData,node->mPP[dir]);
         node->mFE[dir] = node->mPE[dir];
+        
       }
 //		Standard Kalman fit step.
       node->mFP[dir] = node->mPP[dir];
       node->mFE[dir] = node->mPE[dir];
-      Xi2[0] = 3e33;
-      if (!node->GetHit()) 		break;
+      Xi2[0] = 0;
+      StvHit *hit = node->GetHit();
+      if (!hit) 		break;
 
       fitt->Set(node->mPP+dir,node->mPE+dir,node->mFP+dir,node->mFE+dir);
       fitt->Prep();
-      Xi2[2] = fitt->Xi2(node->GetHit());
-      if (Xi2[2] > kons->mXi2Hit) 	break;
+      Xi2[2] = fitt->Xi2(hit);
+      if (Xi2[2] > kons->mXi2Hit) { hit->release(); node->SetHit(0); break;}
       Xi2[0] = Xi2[2];
 
       fitt->Update();
-
+      node->mFP[2] = node->mFP[dir];
     } while(0);
 
     preNode = node; if (skip) continue;
@@ -142,8 +100,10 @@ printf("DerHELIX:\n");
       fitt->Update();
       node->SetXi2(Xi2[0]+Xi2[1]);}
     else {
-      node->SetFit(node->mFP[dir],node->mFE[dir],2);
-      node->SetXi2(Xi2[0]);
+      trak->CutTail(node);
+      break;
+//??      node->SetFit(node->mFP[dir],node->mFE[dir],2);
+//??      node->SetXi2(Xi2[0]);
     }
   }
   return 0;
