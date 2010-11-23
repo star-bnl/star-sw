@@ -96,11 +96,8 @@ double StvFitter::Xi2(const StvHit *hit)
 
 //		Distance to DCA along track in xy
   mDeltaL = DDOT(hP,tP,tD);  
-
 //		DCA track position
-  VADD(tP,mDeltaL*tD);
-  double tkDir[3]={mTkPars._cosCA,mTkPars._sinCA,mTkPars._tanl};
-  mHitErrCalc->SetTrack(tkDir);
+  mHitErrCalc->SetTrack(tD);
   const StHitPlane *hp = hit->detector(); 
   const Mtx33F_t &hD = hp->GetDir(hit->x_g());
   mHitErrCalc->CalcDcaErrs(hit->x_g(),hD,mHitErrs);
@@ -137,10 +134,6 @@ static int nCall=0; nCall++;
 
   if (mJnPars) {return Jpdate();}
 
-//const double *Nt = mDcaFrame[0];
-  const double *Np = mDcaFrame[1];
-  const double *Nl = mDcaFrame[2];
-
 		
   mTkErrs = *mInErrs;
 
@@ -159,7 +152,6 @@ static int nCall=0; nCall++;
 
   *mOtPars = mTkPars;
   *mOtPars+= myJrkPars;
-  mOtPars->move(-mDeltaL*mCosL);
 
   return 0;
 }  
@@ -172,8 +164,45 @@ int StvFitter::Jpdate()
   return 0;
 }
 //______________________________________________________________________________
+double StvFitter::JoinTwo(int nP1,const double *P1,const double *E1
+                         ,int nP2,const double *P2,const double *E2
+	                 ,              double *PJ,      double *EJ)
+{
+
+  assert(nP1<=nP2);
+  int nE1 = nP1*(nP1+1)/2;
+  int nE2 = nP2*(nP2+1)/2;
+  TArrayD ard(nE2*6);
+  double *a = ard.GetArray();  
+  double *sumE 		= (a);
+  double *sumEI 	= (a+=nE2);
+  double *e1sumEIe1 	= (a+=nE2);
+  double *subP 		= (a+=nE2);
+  double *sumEIsubP	= (a+=nE2);
+  double chi2=3e33;
+
+
+  do {//empty loop
+//  	Join errors
+    TCL::vadd(E2,E1,sumE,nE1);
+    TCL::trsinv(sumE,sumEI,nP1);
+    TCL::vsub  (P1  ,P2   ,subP   ,nP1);
+    TCL::trasat(subP,sumEI,&chi2,1,nP1); 
+    if (!EJ) break;
+
+    TCL::trqsq (E2  ,sumEI,e1sumEIe1,nP2); 
+    TCL::vsub(E2,e1sumEIe1,EJ,nE2);
+  } while(0);
+//  	Join params
+  if (PJ) {
+    TCL::tras(subP     ,sumEI,sumEIsubP,1,nP1);
+    TCL::tras(sumEIsubP,E2   ,PJ       ,1,nP2);
+    TCL::vadd(PJ       ,P2   ,PJ         ,nP2);
+  }
+  return chi2;
+}
   
-#if 1
+#if 0
 //______________________________________________________________________________
 double StvFitter::JoinTwo(int nP1,const double *P1,const double *E1
                          ,int nP2,const double *P2,const double *E2
