@@ -35,6 +35,7 @@ const StvNode *GetNode(EPointType poTy) const;
 
 	 /// Returns the number of hits associated and used in the fit of this track.
    int CountHits(StvHitCount &cnt) const;  
+  void CutTail(const StvNode *start);
 
    /*!
      Returns the track length (in centimeters) from the :
@@ -47,6 +48,7 @@ const StvNode *GetNode(EPointType poTy) const;
 
    int ReleaseHits();
 double GetXi2() const;   	// chi2/ndf of fit,        all nodes
+double GetRes() const;		// Average residual
 
   void SetFlag(int flag) 	{mFlag = flag;}
    int GetFlag() const   	{return mFlag;}
@@ -56,7 +58,8 @@ double GetXi2() const;   	// chi2/ndf of fit,        all nodes
    int IsPrimary() const 	{return mPrimary ;}
   void Print(const char *opt) const;
 
-
+  double Approx(int mode=0);
+ 
   void Show() const;  
 
 protected:
