@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.h,v 1.1 2010/07/06 20:27:43 perev Exp $
+// $Id: StvELossTrak.h,v 1.2 2010/11/23 01:54:14 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -25,10 +25,10 @@ public:
   double GetTheta2() const;
   double GetOrt2()   const;
 
-  double ELoss    (double len) const;
-  double ELossErr2(double len) const;
-  double ELoss    () const	{return fTotELoss;}
-  double ELossErr2() const	{return fTotELossErr2;}
+  double ELoss    (double len) 	const;
+  double ELossErr2(double len) 	const;
+  double ELoss    () 		const	{return fTotELoss;}
+  double ELossErr2() 		const	{return fTotELossErr2;}
 
 private:
 char   fBeg[1];
