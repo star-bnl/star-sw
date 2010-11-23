@@ -101,6 +101,7 @@ public:
     int timesUsed() const 	{ return (int)mTimesUsed;}
     void addTimesUsed()	  	{ mTimesUsed++ ;}
     void setTimesUsed(int ijk)	{ mTimesUsed=(UChar_t)ijk; }
+    void release()		{ mTimesUsed=0; }
     void reset();
     void unset(){;}
     void rotate(double angle);
