@@ -5,6 +5,7 @@
 #include "TNamed.h"
 #include "StarVMC/GeoTestMaker/GCall.h"
 #include "StarVMC/GeoTestMaker/StMCStepping.h"
+#include "StvUtil/StvNodePars.h"
 
 class StvMCStepping;
 class StvMCPrimaryGenerator; 
@@ -30,6 +31,8 @@ void Set(const StvNodePars *inpar,const StvFitErrs *inerr,int idir);
 void Set(      StvNodePars *otpar,      StvFitErrs *oterr,Mtx55D_t *deriv);
 void SetSkip(int skip=1);
 double GetLength() const;
+const StvELossData &GetELossData() const;
+
 protected:
 char mBeg[1];
 int mDir;
@@ -81,6 +84,9 @@ void Set(THelixTrack *helx )	{fHelix    = helx ;}
 void Set(Mtx55D_t    *deriv)	{fDeriv    = deriv;}
 void Set(StvMCField  *field)	{fField    = field;}
 void SetSkip(int skip=1)	{fSkip     = skip ;}
+const StvELossData &GetELossData() const { return fELossData;}
+
+
  int BegVolume();
  int EndVolume();
  int IsDca00(int begEnd);
@@ -101,6 +107,7 @@ char fMidl[1];
 THelixTrack *fHelix;
 Mtx55D_t    *fDeriv;		//Derivative matrix in THelixTrack notation
 StvELossTrak *fELossTrak;	//Energy loss calculator
+StvELossData  fELossData;	//Energy loss data
 StvMCField  *fField;		//Mag field calculator
 const TGeoMaterial *fPrevMat;
 char fLast[1];
