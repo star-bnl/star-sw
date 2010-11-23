@@ -4,9 +4,10 @@
 #include "StDraw3D.h"
 
 class StvHit;
+class StvNode;
 class StvTrack;
 class THelixTrack;
-
+class StvPoints;
 class StvDraw : public StDraw3D
 {
 public: 
@@ -26,6 +27,8 @@ static StvDraw *Inst() {if (!fgStvDraw) fgStvDraw=new StvDraw(); return fgStvDra
 static StvDraw *Jnst() {return fgStvDraw;}
 static void Wait();
 static void Show(const StvTrack *tk);
+private:
+   void Join(const StvNode *left,const StvNode *rite,StvPoints &poits);
 private:
 int mNDoIt;
 int mNPow2;
