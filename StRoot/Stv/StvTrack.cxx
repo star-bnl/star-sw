@@ -1,3 +1,4 @@
+#include <TVector3.h>
 #include <Stiostream.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -182,12 +183,87 @@ int StvTrack::ReleaseHits()
     StvHit *hit = node->GetHit();
     if (!hit) 			continue;
     if (!node->GetDetId())	continue;
-    hit->setTimesUsed(0);
+    hit->release();
     node->SetHit(0);
     nd++;
   }
   return nd;
 }
+//_____________________________________________________________________________
+void StvTrack::CutTail(const StvNode *start)
+{
+  StvNodeIter tail;
+  int kase=0;
+  for (StvNodeIter it = begin();it != end();++it) 
+  {
+    StvNode *node = *it;
+    switch (kase) {
+      case 0: if (node !=start) break;
+              kase=1; tail=it;
+      case 1: StvHit *hit = node->GetHit();
+              if (hit) 	hit->release();		
+    }
+  }
+  assert(kase);
+  erase(tail,end());
+}
+//_____________________________________________________________________________
+double StvTrack::Approx(int mode)
+{
+  THelixFitter hlx;
+  int iNode=0;
+  StvNode *fstNode = 0,*lstNode = 0;
+  for (StvNodeIter it=begin();it!=end(); ++it) {
+    StvNode *node = *it; iNode++;
+    const StvHit *hit= node->GetHit();
+    if (!hit) continue;
+    if (!fstNode) fstNode = node;
+    lstNode = node;
+    hlx.Add(hit->x_g()[0],hit->x_g()[1],hit->x_g()[2]);
+  }  
+  double Xi2 =hlx.Fit();
+  double dL = hlx.Path(fstNode->GetFP().P);
+  hlx.Move(dL);
+
+  if (!mode) {//Printout only
+    double myPsi = atan2(hlx.Dir()[1],hlx.Dir()[0]);
+    double myTan = tan(asin(hlx.Dir()[2]));
+    double myCur = hlx.GetRho();
+    printf("StvTrack::Approx(Helix  ) Xi2=%g \tPsi,Tan,Curv=%g %g %g\n",  Xi2,myPsi,myTan,myCur);
+    myPsi = fstNode->GetFP()._psi;
+    myTan = fstNode->GetFP()._tanl;
+    myCur = fstNode->GetFP()._curv;
+    double myXi2 = fstNode->GetXi2();
+    printf("StvTrack::Approx(fstNode) Xi2=%g \tPsi,Tan,Curv=%g %g %g\n",myXi2,myPsi,myTan,myCur);
+    myPsi = lstNode->GetFP()._psi;
+    myTan = lstNode->GetFP()._tanl;
+    myCur = lstNode->GetFP()._curv;
+    myXi2 = lstNode->GetXi2();
+    printf("StvTrack::Approx(lstNode) Xi2=%g \tPsi,Tan,Curv=%g %g %g\n",myXi2,myPsi,myTan,myCur);
+    return Xi2;
+  }
+  return Xi2;
+}
+//_____________________________________________________________________________
+double StvTrack::GetRes() const
+{
+  int nRes=0; double res = 0;
+  for (StvNodeConstIter it=begin();it!=end(); ++it) {
+    StvNode *node = *it;
+    const StvHit *hit= node->GetHit();
+    if (!hit) continue;
+    TVector3 dif,dir;
+    const StvNodePars &fp = node->GetFP();
+    for (int i=0;i<3;i++) { dif[i]=fp.P[i]-hit->x_g()[i];}
+    dir[0]= fp._cosCA; 
+    dir[1]= fp._sinCA; 
+    dir[2]= fp._tanl; 
+    dir = dir.Unit();
+    res += (dif.Cross(dir)).Mag(); nRes++;
+  }  
+  return (nRes)? res/nRes:0.;
+}
+
 //_____________________________________________________________________________
 void StvTrack::Show() const
 {
