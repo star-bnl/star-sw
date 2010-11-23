@@ -20,6 +20,8 @@ static void mybreak(int key)
 ClassImp(StvDiver)
 //_____________________________________________________________________________
 //_____________________________________________________________________________
+const StvELossData &StvDiver::GetELossData() const { return mSteps->GetELossData();}
+//_____________________________________________________________________________
 StvDiver::StvDiver(const char *name):TNamed(name,"")
 {
   memset(mBeg,0,mEnd-mBeg+1);
@@ -310,15 +312,15 @@ static int nCall=0; nCall++;
 
   THEmx_t *emx = fHelix->Emx();
   assert(emx->mCC>0);
-  double theta2 = fELossTrak->GetTheta2();
-  emx->mAA+=theta2; emx->mLL+=theta2;
-  double ort2 = fELossTrak->GetOrt2();
-  assert(ort2>0);
-  emx->mHH+=ort2; emx->mZZ+= ort2/pow(fHelix->GetCos(),2);
-  double eerr2= fELossTrak->ELossErr2();
-  double dC2 =  -mom[3]/(mom[0]*mom[0]+mom[1]*mom[1]+mom[2]*mom[2])*curva;
-  dC2 = dC2*eerr2;
-  emx->mAA+=dC2;
+  fELossData.mTheta2 = fELossTrak->GetTheta2();
+  fELossData.mOrt2   = fELossTrak->GetOrt2();
+  double cosL = fHelix->GetCos();
+  emx->mAA+=fELossData.mTheta2/(cosL*cosL);
+  emx->mLL+=fELossData.mTheta2;
+
+  emx->mHH+= fELossData.mOrt2;
+  emx->mZZ+= fELossData.mOrt2/(cosL*cosL);
+//  double eerr2= fELossTrak->ELossErr2();
   fHelix->Set(pos,mom,curva);
   return isDca;
 }
