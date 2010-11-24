@@ -1336,8 +1336,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
   if (!medium->GetPhotonCollision(e, type, level, e1, ctheta, 
                                   nsec, esec)) return;
  
-  if (type == 1) {
-    // Ionisation
+  if (type == PhotonCollisionTypeIonisation) {
     // Randomise secondary electron direction
     phi = TwoPi * RndmUniform();
     ctheta = 1. - 2. * RndmUniform();
@@ -1357,8 +1356,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
     stack.push_back(newElectron);
     // Increment the electron and ion counters         
     ++nElectrons; ++nIons;
-  } else if (type == 3) {
-    // Excitation
+  } else if (type == PhotonCollisionTypeExcitation) {
     double tDxc = 0.;
     double sDxc = 0.;
     int typeDxc = 0;

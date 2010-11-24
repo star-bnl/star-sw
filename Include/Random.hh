@@ -65,7 +65,8 @@ double RndmLorentzian(const double mu, const double gamma) {
 }
 
 // Draw a random number according to a Voigt function with mean mu.
-// The Voigt function is a convolution of a Gaussian (variance sigma) and 
+// The Voigt function is a convolution of a 
+// Gaussian (standard deviation sigma) and 
 // a Lorentzian (half width gamma). 
 inline
 double RndmVoigt(const double mu, const double sigma, const double gamma) { 
