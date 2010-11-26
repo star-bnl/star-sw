@@ -1258,7 +1258,7 @@ MediumMagboltz86::Mixer() {
 
   // Loop over the gases in the mixture.  
   for (int iGas = 0; iGas < nComponents; ++iGas) {
-  
+
     // Number of inelastic cross-section terms
     long long nIn = 0;
     // Threshold energies
@@ -1399,13 +1399,6 @@ MediumMagboltz86::Mixer() {
         cf[iE][np] = qIn[iE][j] * van;
         // Scale the excitation cross-sections (for error estimates).
         cf[iE][np] *= scaleExc;
-        // Temporary hack for methane dissociative excitations:
-        if (description[np][5] == 'D' &&
-            description[np][6] == 'I' &&
-            description[np][7] == 'S' &&
-            energyLoss[np] * r >= 12.) {
-        
-        }
         if (cf[iE][np] < 0.) {
           std::cerr << className << "::Mixer:\n";
           std::cerr << "    Negative inelastic cross-section at " 
@@ -1496,7 +1489,8 @@ MediumMagboltz86::Mixer() {
     std::cout << className << "::Mixer:\n";
     std::cout << "    Energy [eV]    Collision Rate [ns-1]\n";
     for (int i = 0; i < 8; ++i) { 
-      std::cout << "    " << std::fixed << std::setw(10) << std::setprecision(2)  
+      std::cout << "    " << std::fixed << std::setw(10) 
+                << std::setprecision(2)  
                 << (2 * i + 1) * eFinal / 16
                 << "    " << std::setw(18) << std::setprecision(2)
                 << cfTot[(i + 1) * nEnergySteps / 16] << "\n";
@@ -1531,7 +1525,8 @@ MediumMagboltz86::Mixer() {
 }
 
 void 
-MediumMagboltz86::ComputeAngularCut(double parIn, double& cut, double &parOut) {
+MediumMagboltz86::ComputeAngularCut(double parIn, double& cut, 
+                                    double &parOut) {
 
   // Set cuts on angular distribution and
   // renormalise forward scattering probability.

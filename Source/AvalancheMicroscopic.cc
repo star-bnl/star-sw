@@ -1011,6 +1011,7 @@ AvalancheMicroscopic::TransportElectron(
               newElectron.kx = cos(phi) * stheta;
               newElectron.ky = sin(phi) * stheta;
               newElectron.kz = ctheta;
+              newElectron.status = 0;
               newElectron.driftLine.clear();
             }
             if (aval) stack.push_back(newElectron);
@@ -1101,6 +1102,7 @@ AvalancheMicroscopic::TransportElectron(
                   newElectron.kx = cos(phi) * stheta;
                   newElectron.ky = sin(phi) * stheta;
                   newElectron.kz = ctheta;
+                  newElectron.status = 0;
                   newElectron.driftLine.clear();
                   // Add the electron to the list.
                   stack.push_back(newElectron);
@@ -1322,6 +1324,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
     newElectron.kx = cos(phi) * stheta;
     newElectron.ky = sin(phi) * stheta;
     newElectron.kz = ctheta;
+    newElectron.status = 0;
     newElectron.driftLine.clear();
     stack.push_back(newElectron);
     // Increment the electron and ion counters         
@@ -1351,6 +1354,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
         newElectron.kx = cos(phi) * stheta;
         newElectron.ky = sin(phi) * stheta;
         newElectron.kz = ctheta;
+        newElectron.status = 0;
         newElectron.driftLine.clear();
         stack.push_back(newElectron);
         // Increment the electron and ion counters         
