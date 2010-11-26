@@ -530,7 +530,9 @@ MediumMagboltz86::GetElectronCollision(const double e,
         ++nPenning;
       }
     }
-  }
+  } else if (type == ElectronCollisionTypeAttachment) {
+    return true;
+  } 
 
   // Make sure the energy loss is smaller than the energy.
   if (e < loss) loss = e - 0.0001;
@@ -557,38 +559,42 @@ MediumMagboltz86::GetElectronCollision(const double e,
     }
   }
 
+  // Update the energy.
   const double s1 = rgas[igas];
   const double s2 = (s1 * s1) / (s1 - 1.);
-  const double stheta0 = sqrt(1. - ctheta0 * ctheta0);
-  double arg = std::max(1. - s1 * loss / e, Small);
-  const double d = 1. - ctheta0 * sqrt(arg);
-
-  // Update the energy. 
+  const double arg1 = std::max(1. - s1 * loss / e, Small);
+  const double d = 1. - ctheta0 * sqrt(arg1);
   e1 = std::max(e * (1. - loss / (s1 * e) - 2. * d / s2), Small);
 
   // Update the direction.
-  const double q = std::min(sqrt((e / e1) * arg) / s1, 1.);
-  double ctheta = sqrt(1. - pow(q * stheta0, 2));
+  const double q = std::min(sqrt((e / e1) * arg1) / s1, 1.);
+  // const double stheta0 = sqrt(1. - ctheta0 * ctheta0);
+  const double theta0 = acos(ctheta0);
+  const double theta = asin(q * sin(theta0));
+  // const double stheta = q * stheta0;
+  // double ctheta = sqrt(1. - stheta * stheta);
+  double ctheta = cos(theta);
   if (ctheta0 < 0.) {
-    const double u = (s1 - 1.) * (s1 - 1.) / arg;
+    const double u = (s1 - 1.) * (s1 - 1.) / arg1;
     if (ctheta0 * ctheta0 > u) ctheta = -ctheta;
   }
+  const double stheta = sin(theta);
+
   dz = std::min(dz, 1.);
-  arg = sqrt(dx * dx + dy * dy);
-  const double stheta = sqrt(1. - ctheta * ctheta);
+  const double argz = sqrt(dx * dx + dy * dy);
   // Azimuth is uniformly distributed.
   const double phi = TwoPi * RndmUniform();
   const double cphi = cos(phi);
   const double sphi = sqrt(1. - cphi * cphi);
-  if (arg == 0.) {
+  if (argz == 0.) {
     dz = ctheta;
     dx = cphi * stheta;
     dy = sphi * stheta;
   } else {
-    const double a1 = stheta / arg;
-    const double dz1 = dz * ctheta + arg * stheta * sphi;
-    const double dy1 = dy * ctheta + a1 * (dx * cphi - dy * dz * sphi);
-    const double dx1 = dx * ctheta - a1 * (dy * cphi + dx * dz * sphi);
+    const double a = stheta / argz;
+    const double dz1 = dz * ctheta + argz * stheta * sphi;
+    const double dy1 = dy * ctheta + a * (dx * cphi - dy * dz * sphi);
+    const double dx1 = dx * ctheta - a * (dy * cphi + dx * dz * sphi);
     dx = dx1; dy = dy1; dz = dz1;
   }
 
@@ -811,8 +817,8 @@ MediumMagboltz86::GetNumberOfLevels() {
 
   if (isChanged) {
     if (!Mixer()) {
-      std::cerr << "MediumMagboltz86: Error calculating the"
-                << " collision rates table.\n";
+      std::cerr << className << "::GetNumberOfLevels:\n";
+      std::cerr << "    Error calculating the collision rates table.\n";
       return 0;
     }
     isChanged = false;
@@ -1232,7 +1238,7 @@ MediumMagboltz86::Mixer() {
   static char scrpt[226][30];
 
   // Check the gas composition and establish the gas numbers.
-  int gasNumber[nMaxGases];
+  int gasNumber[nMaxGases] = {0};
   for (int i = 0; i < nComponents; ++i) {
     if (!GetGasNumberMagboltz(gas[i], gasNumber[i])) {
       std::cerr << className << "::Mixer:\n";
@@ -1270,7 +1276,7 @@ MediumMagboltz86::Mixer() {
     double w = 0.;
     // Scattering algorithms
     long long kIn[nMaxInelasticTerms] = {0};
-    long long kEl[6] = {0, 0, 0, 0, 0, 0};    
+    long long kEl[6] = {0};    
     char name[15];  
 
     // Retrieve the cross-section data for this gas from Magboltz.
@@ -1493,7 +1499,7 @@ MediumMagboltz86::Mixer() {
                 << std::setprecision(2)  
                 << (2 * i + 1) * eFinal / 16
                 << "    " << std::setw(18) << std::setprecision(2)
-                << cfTot[(i + 1) * nEnergySteps / 16] << "\n";
+                << cfTot[(2 * i + 1) * nEnergySteps / 16] << "\n";
     }
     std::cout << std::resetiosflags(std::ios_base::floatfield);
   }

@@ -638,6 +638,11 @@ AvalancheMicroscopic::TransportElectron(
           stack[iEl].status = StatusBelowTransportCut;
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
+          if (debug) {
+            std::cout << className << "::TransportElectron:\n";
+            std::cout << "    Electron energy (" << energy << ")"
+                      << " below transport cut.\n";
+          }
           ok = false;
           break;
         }
@@ -718,11 +723,11 @@ AvalancheMicroscopic::TransportElectron(
             newEnergy = std::max(energy + (a1 + a2 * dt) * dt + 
                                  a3 * (1. - cwt) + a4 * swt, Small);
           } else if (useBandStructure) {
-            newEnergy = medium->GetElectronEnergy(kx + ex * dt * SpeedOfLight,
+            newEnergy = std::max(medium->GetElectronEnergy(
+                                                  kx + ex * dt * SpeedOfLight,
                                                   ky + ey * dt * SpeedOfLight,
                                                   kz + ez * dt * SpeedOfLight, 
-                                                  dx, dy, dz, band);
-            if (newEnergy < Small) newEnergy = Small;
+                                                  dx, dy, dz, band), Small);
           } else {
             newEnergy = std::max(energy + (a1 + a2 * dt) * dt, Small);
           }
@@ -868,7 +873,7 @@ AvalancheMicroscopic::TransportElectron(
           // Place the electron OUTSIDE the drift area.
           x += d * dx; y += d * dy; z += d * dz;
 
-          // If switched on, calculated the induced signal over this step.
+          // If switched on, calculate the induced signal over this step.
           if (useSignal) {
             sensor->AddSignal(-1, stack[iEl].t, t - stack[iEl].t, 
                                   0.5 * (x - stack[iEl].x), 
@@ -943,7 +948,7 @@ AvalancheMicroscopic::TransportElectron(
         medium->GetElectronCollision(newEnergy, cstype, level, 
                                      energy, newKx, newKy, newKz, 
                                      nsec, esec, band);
-        kx = newKx; ky = newKy; kz = newKz;
+
 
         // If activated, histogram the distance with respect to the
         // last collision.
@@ -1149,9 +1154,11 @@ AvalancheMicroscopic::TransportElectron(
             break;
         }
 
+        if (!ok) break;
         // Continue with the next electron in the stack?
-        if (!ok || nCollTemp > nCollSkip) break;
-        
+        if (nCollTemp > nCollSkip) break;
+        kx = newKx; ky = newKy; kz = newKz;
+
       }
       
       if (!ok) continue;
