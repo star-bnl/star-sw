@@ -184,7 +184,7 @@ class MediumMagboltz86 : public MediumGas {
     void DisablePenningTransfer(std::string gasname);
 
     // When enabled, the gas cross-section table is written to file
-    // when loaded into memory
+    // when loaded into memory.
     void EnableCrossSectionOutput()  {useCsOutput = true;}
     void DisableCrossSectionOutput() {useCsOutput = false;}
 
@@ -197,7 +197,8 @@ class MediumMagboltz86 : public MediumGas {
     double GetElectronCollisionRate(const double e, const int band);
     // Sample the collision type
     bool   GetElectronCollision(const double e, int& type, int& level, 
-                                double& e1, double& ctheta, 
+                                double& e1,
+                                double& dx, double& dy, double& dz,
                                 int& nsec, double& esec, int& band);
     void ComputeDeexcitation(int iLevel, int& fLevel);   
     int  GetNumberOfDeexcitationProducts() {return nDeexcitationProducts;}

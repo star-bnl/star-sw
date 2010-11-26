@@ -408,15 +408,17 @@ MediumMagboltz86::GetElectronCollisionRate(const double e, const int band) {
 }
 
 bool 
-MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level, 
-                                       double& e1, double& ctheta, 
+MediumMagboltz86::GetElectronCollision(const double e, 
+                                       int& type, int& level, 
+                                       double& e1, 
+                                       double& dx, double& dy, double& dz,
                                        int& nsec, double& esec, 
                                        int& band) {
 
   // Check if the electron energy is within the currently set range.
   if (e > eFinal && useAutoAdjust) {
     std::cerr << className << "::GetElectronCollision:\n";
-    std::cerr << "    Provided electron energy  (" << e 
+    std::cerr << "    Requested electron energy  (" << e 
               << " eV) exceeds current energy range  (" << eFinal 
               << " eV).\n";
     std::cerr << "    Increasing energy range to " << 1.05 * e
@@ -550,7 +552,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
         break;
       case 1:
         ctheta0 = 1. - RndmUniform() * scatCut[iE][level];
-        if (RndmUniform() > scatParameter[iE][level]) ctheta = -ctheta;
+        if (RndmUniform() > scatParameter[iE][level]) ctheta0 = -ctheta0;
         break;
       case 2:
         ctheta0 = (ctheta0 + scatParameter[iE][level]) / 
@@ -567,19 +569,38 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
   const double s1 = rgas[igas];
   const double s2 = (s1 * s1) / (s1 - 1.);
   const double stheta0 = sqrt(1. - ctheta0 * ctheta0);
-  const double arg = std::max(1. - s1 * loss / e, Small);
+  double arg = std::max(1. - s1 * loss / e, Small);
   const double d = 1. - ctheta0 * sqrt(arg);
 
   // Update the energy. 
   e1 = std::max(e * (1. - loss / (s1 * e) - 2. * d / s2), Small);
-  double q = std::min(sqrt((e / e1) * arg) / s1, 1.);
-  const double stheta = q * stheta0;
-  
-  ctheta = sqrt(1. - stheta * stheta);
+
+  // Update the direction.
+  const double q = std::min(sqrt((e / e1) * arg) / s1, 1.);
+  double ctheta = sqrt(1. - pow(q * stheta0, 2));
   if (ctheta0 < 0.) {
     const double u = (s1 - 1.) * (s1 - 1.) / arg;
-    if (ctheta0 * ctheta0 > u) ctheta *= -1.;
+    if (ctheta0 * ctheta0 > u) ctheta = -ctheta;
   }
+  dz = std::min(dz, 1.);
+  arg = sqrt(dx * dx + dy * dy + dz * dz);
+  const double stheta = sqrt(1. - ctheta * ctheta);
+  // Azimuth is uniformly distributed.
+  const double phi = TwoPi * RndmUniform();
+  const double sphi = sin(phi);
+  const double cphi = sqrt(1. - sphi * sphi); 
+  if (arg == 0.) {
+    dz = ctheta;
+    dx = cphi * stheta;
+    dy = sphi * stheta;
+  } else {
+    const double a1 = stheta / arg;
+    const double dz1 = dz * ctheta + arg * stheta * sphi;
+    const double dy1 = dy * ctheta + a1 * (dx * cphi - dy * dz * sphi);
+    const double dx1 = dx * ctheta - a1 * (dy * cphi + dx * dz * sphi);
+    dx = dx1; dy = dy1; dz = dz1;
+  }
+
   return true;
 
 }
@@ -653,7 +674,7 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
 
   if (e > eFinalGamma && useAutoAdjust) {
     std::cerr << className << "::GetPhotonCollision:\n";
-    std::cerr << "    Provided electron energy  (" << e 
+    std::cerr << "    Requested electron energy  (" << e 
               << " eV) exceeds current energy range  (" << eFinalGamma
               << " eV).\n";
     std::cerr << "    Increasing energy range to " << 1.05 * e

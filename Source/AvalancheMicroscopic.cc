@@ -504,11 +504,6 @@ AvalancheMicroscopic::TransportElectron(
   int cstype;
   // Cross-section term
   int level;
-  // Scattering angles
-  double phi, cphi, sphi;
-  double ctheta, stheta;
-  double ctheta0, stheta0;
-  double arg;
 
   // Number of secondaries
   int nsec; 
@@ -538,7 +533,7 @@ AvalancheMicroscopic::TransportElectron(
   // Check the given initial direction.
   k = sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0);
   if (useBandStructure) {
-    // With band structure, (kx, ky, kz) represents the wave vector.
+    // With band structure, (kx, ky, kz) represents the momentum.
     // No normalization in this case.
     medium->GetElectronMomentum(std::max(e0, Small), kx, ky, kz, band);
     stack[0].kx = kx;
@@ -546,9 +541,9 @@ AvalancheMicroscopic::TransportElectron(
     stack[0].kz = kz;
   } else if (fabs(k) < Small) {
     // Direction has zero norm, draw a random direction.
-    phi = TwoPi * RndmUniform();
-    ctheta = 1. - 2. * RndmUniform();
-    stheta = sqrt(1. - ctheta * ctheta);
+    const double phi = TwoPi * RndmUniform();
+    const double ctheta = 1. - 2. * RndmUniform();
+    const double stheta = sqrt(1. - ctheta * ctheta);
     stack[0].kx = cos(phi) * stheta;
     stack[0].ky = sin(phi) * stheta;
     stack[0].kz = ctheta;
@@ -723,12 +718,11 @@ AvalancheMicroscopic::TransportElectron(
             newEnergy = std::max(energy + (a1 + a2 * dt) * dt + 
                                  a3 * (1. - cwt) + a4 * swt, Small);
           } else if (useBandStructure) {
-            newEnergy = std::max(
-                            medium->GetElectronEnergy(kx + ex * dt,
-                                                      ky + ey * dt,
-                                                      kz + ez * dt, 
-                                                      dx, dy, dz, band),
-                            Small);
+            newEnergy = medium->GetElectronEnergy(kx + ex * dt * SpeedOfLight,
+                                                  ky + ey * dt * SpeedOfLight,
+                                                  kz + ez * dt * SpeedOfLight, 
+                                                  dx, dy, dz, band);
+            if (newEnergy < Small) newEnergy = Small;
           } else {
             newEnergy = std::max(energy + (a1 + a2 * dt) * dt, Small);
           }
@@ -777,9 +771,9 @@ AvalancheMicroscopic::TransportElectron(
           RotateLocal2Global(vx, vy, vz);
         } else if (useBandStructure) {
           // Update the wave-vector.
-          newKx = kx + ex * dt;
-          newKy = ky + ey * dt;
-          newKz = kz + ez * dt;
+          newKx = kx + ex * dt * SpeedOfLight;
+          newKy = ky + ey * dt * SpeedOfLight;
+          newKz = kz + ez * dt * SpeedOfLight;
           // Average velocity over the step.
           vx = 0.5 * (vx + dx);
           vy = 0.5 * (vy + dy);
@@ -924,6 +918,7 @@ AvalancheMicroscopic::TransportElectron(
                                        y + 0.5 * vy * dt,
                                        z + 0.5 * vy * dt, vx, vy, vz);
         }
+
         // Update the coordinates.
         x += vx * dt; y += vy * dt; z += vz * dt; t += dt;
 
@@ -946,7 +941,7 @@ AvalancheMicroscopic::TransportElectron(
         
         // Get the collision type and parameters.
         medium->GetElectronCollision(newEnergy, cstype, level, 
-                                     energy, ctheta, 
+                                     energy, dx, dy, dz, 
                                      nsec, esec, band);
 
         // If activated, histogram the distance with respect to the
@@ -1009,12 +1004,12 @@ AvalancheMicroscopic::TransportElectron(
                                           newElectron.kz, band);
             } else {
               // Randomise the secondary electron direction.
-              phi = TwoPi * RndmUniform();
-              ctheta0 = 1. - 2. * RndmUniform();
-              stheta0 = sqrt(1. - ctheta0 * ctheta0);
-              newElectron.kx = cos(phi) * stheta0;
-              newElectron.ky = sin(phi) * stheta0;
-              newElectron.kz = ctheta0;
+              const double phi = TwoPi * RndmUniform();
+              const double ctheta = 1. - 2. * RndmUniform();
+              const double stheta = sqrt(1. - ctheta * ctheta);
+              newElectron.kx = cos(phi) * stheta;
+              newElectron.ky = sin(phi) * stheta;
+              newElectron.kz = ctheta;
               newElectron.driftLine.clear();
             }
             if (aval) stack.push_back(newElectron);
@@ -1072,12 +1067,12 @@ AvalancheMicroscopic::TransportElectron(
                   // Penning ionisation
                   newElectron = stack[iEl];
                   // Randomise the point of creation.
-                  phi = TwoPi * RndmUniform();
-                  ctheta0 = 1. - 2 * RndmUniform();
-                  stheta0 = sqrt(1. - ctheta0 * ctheta0);
-                  const double xDxc = x + sDxc * cos(phi) * stheta0;
-                  const double yDxc = y + sDxc * sin(phi) * stheta0;
-                  const double zDxc = z + sDxc * ctheta0;
+                  double phi = TwoPi * RndmUniform();
+                  double ctheta = 1. - 2 * RndmUniform();
+                  double stheta = sqrt(1. - ctheta * ctheta);
+                  const double xDxc = x + sDxc * cos(phi) * stheta;
+                  const double yDxc = y + sDxc * sin(phi) * stheta;
+                  const double zDxc = z + sDxc * ctheta;
                   // Get the electric field and medium at this location.
                   Medium* dxcMedium = 0;
                   double fx = 0., fy = 0., fz = 0.;
@@ -1100,11 +1095,11 @@ AvalancheMicroscopic::TransportElectron(
                   newElectron.e0 = newElectron.energy;
                   // Randomise the initial direction.
                   phi = TwoPi * RndmUniform();
-                  ctheta0 = 1. - 2 * RndmUniform();
-                  stheta0 = sqrt(1. - ctheta0 * ctheta0);
-                  newElectron.kx = cos(phi) * stheta0;
-                  newElectron.ky = sin(phi) * stheta0;
-                  newElectron.kz = ctheta0;
+                  ctheta = 1. - 2 * RndmUniform();
+                  stheta = sqrt(1. - ctheta * ctheta);
+                  newElectron.kx = cos(phi) * stheta;
+                  newElectron.ky = sin(phi) * stheta;
+                  newElectron.kz = ctheta;
                   newElectron.driftLine.clear();
                   // Add the electron to the list.
                   stack.push_back(newElectron);
@@ -1151,35 +1146,9 @@ AvalancheMicroscopic::TransportElectron(
             break;
         }
 
-        if (!ok) break;
-        
-        if (useBandStructure) {
-          medium->GetElectronMomentum(energy, kx, ky, kz, band);
-          continue;
-        }
-
-        // Calculate the direction after the collision.
-        newKz = std::min(newKz, 1.); 
-        arg = sqrt(newKx * newKx + newKy * newKy);
-        stheta = sqrt(1. - ctheta * ctheta);
-        // Azimuth is chosen at random.
-        phi = TwoPi * RndmUniform();
-        sphi = sin(phi); cphi = cos(phi);
-
-        if (arg == 0.) {
-          kz = ctheta;
-          kx = cphi * stheta;
-          ky = sphi * stheta;
-        } else {
-          a1 = stheta / arg;
-          kz = newKz * ctheta + arg * stheta * sphi;
-          ky = newKy * ctheta + a1 * (newKx * cphi - newKy * newKz * sphi);
-          kx = newKx * ctheta - a1 * (newKy * cphi + newKx * newKz * sphi);
-        }
-
         // Continue with the next electron in the stack?
-        if (nCollTemp > nCollSkip) break;
-
+        if (!ok || nCollTemp > nCollSkip) break;
+        
       }
       
       if (!ok) continue;

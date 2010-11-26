@@ -21,6 +21,7 @@ class MediumSilicon : public Medium {
     // Doping concentration [cm-3] and type ('i', 'n', 'p')
     void SetDoping(const char type, const double c);
     void GetDoping(char& type, double& c) const;
+
     // Trapping cross-section
     void SetTrapCrossSection(const double ecs, const double hcs);
     void SetTrapDensity(const double n);
@@ -50,7 +51,6 @@ class MediumSilicon : public Medium {
     void SetLowFieldMobility(const double mue, const double muh);
     void SetLatticeMobilityModelMinimos();
     void SetLatticeMobilityModelSentaurus();
-    void SetLatticeMobilityModelSah();
     void SetLatticeMobilityModelReggiani();
     
     void SetDopingMobilityModelMinimos();
@@ -69,12 +69,21 @@ class MediumSilicon : public Medium {
     void SetImpactIonisationModelVanOverstraetenDeMan();
     void SetImpactIonisationModelGrant();
 
-    // Microscopic scattering rates
+    // Microscopic transport properties
 
     // Set/get the highest electron energy to be included
     // in the scattering rates table
     bool   SetMaxElectronEnergy(const double e);
     double GetMaxElectronEnergy() const {return eFinal;}
+
+    // When enabled, the scattering rates table is written to file
+    // when loaded into memory.
+    void EnableScatteringRateOutput()  {useCfOutput = true;}
+    void DisableScatteringRateOutput() {useCfOutput = false;}
+
+    void EnableNonParabolicity()  {useNonParabolicity = true;}
+    void DisableNonParabolicity() {useNonParabolicity = false;}
+    
     // Get the electron energy (and its gradient) 
     // for a given (crystal) momentum
     double GetElectronEnergy(const double px, const double py, const double pz,
@@ -90,7 +99,8 @@ class MediumSilicon : public Medium {
     double GetElectronCollisionRate(const double e, const int band);
     // Sample the collision type
     bool   GetElectronCollision(const double e, int& type, int& level,
-                                double& e1, double& ctheta,
+                                double& e1,
+                                double& dx, double& dy, double& dz,
                                 int& nsec, double& esec, int& band);
     double GetConductionBandDensityOfStates(const double e, 
                                             const int band = 0);
@@ -99,6 +109,21 @@ class MediumSilicon : public Medium {
     bool GetDielectricFunction(const double e, double& eps1, double& eps2, const int i = 0);
 
   private:
+
+    static const int LatticeMobilityModelSentaurus   = 0;
+    static const int LatticeMobilityModelMinimos     = 1;
+    static const int LatticeMobilityModelReggiani    = 2;
+    static const int DopingMobilityModelMinimos      = 0;
+    static const int DopingMobilityModelMasetti      = 1;
+    static const int SaturationVelocityModelMinimos  = 0;
+    static const int SaturationVelocityModelCanali   = 1;
+    static const int SaturationVelocityModelReggiani = 2;
+    static const int HighFieldMobilityModelMinimos   = 0;
+    static const int HighFieldMobilityModelCanali    = 1;
+    static const int HighFieldMobilityModelReggiani  = 2;
+    static const int HighFieldMobilityModelConstant  = 3;
+    static const int ImpactIonisationModelVanOverstraeten = 0;
+    static const int ImpactIonisationModelGrant = 1;
 
     double bandGap;
     // Doping
@@ -132,17 +157,23 @@ class MediumSilicon : public Medium {
     double hImpactB0, hImpactB1, hImpactB2;    
     
     // Models
-    bool userMobility;
-    bool userSaturationVelocity;
+    bool hasUserMobility;
+    bool hasUserSaturationVelocity;
     int latticeMobilityModel;
     int dopingMobilityModel;
     int saturationVelocityModel;
     int highFieldMobilityModel;
     int impactIonisationModel;
+
+    // Options 
+    bool useCfOutput;
+    bool useNonParabolicity;
+    bool useAnisotropy;
  
     // Scattering rates
     double eFinal, eStep;
     static const int nEnergySteps = 2000;
+
     int nLevelsX;
     double cfNullElectrons;
     std::vector<double> cfTotElectronsX;
@@ -154,7 +185,6 @@ class MediumSilicon : public Medium {
     bool UpdateTransportParameters();
     void UpdateLatticeMobilityMinimos();
     void UpdateLatticeMobilitySentaurus();
-    void UpdateLatticeMobilitySah();
     void UpdateLatticeMobilityReggiani();
 
     void UpdateDopingMobilityMinimos();

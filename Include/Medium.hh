@@ -108,7 +108,8 @@ class Medium {
     // Dispersion relation (Energy vs. wave vector)
     virtual
     double GetElectronEnergy(const double px, const double py, const double pz,
-                        double& vx, double& vy, double& vz, const int band = 0);
+                             double& vx, double& vy, double& vz, 
+                             const int band = 0);
     virtual
     void GetElectronMomentum(const double e, 
                              double& px, double& py, double& pz, 
@@ -121,8 +122,10 @@ class Medium {
     virtual 
     double GetElectronCollisionRate(const double e, const int band = 0);
     virtual 
-    bool GetElectronCollision(const double e, int& type, int& level, double& e1,
-                      double& ctheta, int& nsec, double& esec, int& band);
+    bool GetElectronCollision(const double e, 
+                              int& type, int& level, double& e1,
+                              double& dx, double& dy, double& dz,
+                              int& nsec, double& esec, int& band);
 
     virtual
     int GetNumberOfDeexcitationProducts() {return 0;}

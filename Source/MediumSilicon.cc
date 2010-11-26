@@ -29,12 +29,14 @@ MediumSilicon::MediumSilicon() :
   eImpactB0(1.135e6), eImpactB1(1.231e6), eImpactB2(0.),
   hImpactA0(1.582e6), hImpactA1(0.671e6), hImpactA2(0.),
   hImpactB0(2.036e6), hImpactB1(1.693e6), hImpactB2(0.),
-  userMobility(false), userSaturationVelocity(false),
+  hasUserMobility(false), hasUserSaturationVelocity(false),
   latticeMobilityModel(0),
   dopingMobilityModel(0),
   saturationVelocityModel(0),
   highFieldMobilityModel(0),
   impactIonisationModel(0),
+  useCfOutput(false),
+  useNonParabolicity(false), useAnisotropy(false),
   eFinal(2.), eStep(0.001),
   nLevelsX(0),
   cfNullElectrons(0.),
@@ -182,13 +184,13 @@ MediumSilicon::ElectronVelocity(
   // Calculate the mobility
   double mu;
   switch (highFieldMobilityModel) {
-    case 0:
+    case HighFieldMobilityModelMinimos:
       ElectronMobilityMinimos(e, mu);
       break;
-    case 1:
+    case HighFieldMobilityModelCanali:
       ElectronMobilityCanali(e, mu);
       break;
-    case 2:
+    case HighFieldMobilityModelReggiani:
       ElectronMobilityReggiani(e, mu);
       break;
     default:
@@ -223,10 +225,10 @@ MediumSilicon::ElectronTownsend(
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   
   switch (impactIonisationModel) {
-    case 0:
+    case ImpactIonisationModelVanOverstraeten:
       return ElectronImpactIonisationVanOverstraetenDeMan(e, alpha);
       break;
-    case 1:
+    case ImpactIonisationModelGrant:
       return ElectronImpactIonisationGrant(e, alpha);
       break;
     default:
@@ -286,13 +288,13 @@ MediumSilicon::HoleVelocity(
   // Calculate the mobility
   double mu;
   switch (highFieldMobilityModel) {
-    case 0:
+    case HighFieldMobilityModelMinimos:
       HoleMobilityMinimos(e, mu);
       break;
-    case 1:
+    case HighFieldMobilityModelCanali:
       HoleMobilityCanali(e, mu);
       break;
-    case 2:
+    case HighFieldMobilityModelReggiani:
       HoleMobilityReggiani(e, mu);
       break;
     default:
@@ -325,10 +327,10 @@ MediumSilicon::HoleTownsend(
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   
   switch (impactIonisationModel) {
-    case 0:
+    case ImpactIonisationModelVanOverstraeten:
       return HoleImpactIonisationVanOverstraetenDeMan(e, alpha);
       break;
-    case 1:
+    case ImpactIonisationModelGrant:
       return HoleImpactIonisationGrant(e, alpha);
       break;
     default:
@@ -383,7 +385,7 @@ MediumSilicon::SetLowFieldMobility(const double mue, const double muh) {
   
   eMobility = mue;
   hMobility = muh;
-  userMobility = true;
+  hasUserMobility = true;
   isChanged = true;
 
 }
@@ -391,8 +393,8 @@ MediumSilicon::SetLowFieldMobility(const double mue, const double muh) {
 void 
 MediumSilicon::SetLatticeMobilityModelMinimos() {
 
-  latticeMobilityModel = 0;  
-  userMobility = false;
+  latticeMobilityModel = LatticeMobilityModelMinimos;  
+  hasUserMobility = false;
   isChanged = true;
   
 }
@@ -400,17 +402,8 @@ MediumSilicon::SetLatticeMobilityModelMinimos() {
 void 
 MediumSilicon::SetLatticeMobilityModelSentaurus() {
 
-  latticeMobilityModel = 1;
-  userMobility = false;
-  isChanged = true;
-  
-}
-
-void 
-MediumSilicon::SetLatticeMobilityModelSah() {
-  
-  latticeMobilityModel = 2;
-  userMobility = false;
+  latticeMobilityModel = LatticeMobilityModelSentaurus;
+  hasUserMobility = false;
   isChanged = true;
   
 }
@@ -418,8 +411,8 @@ MediumSilicon::SetLatticeMobilityModelSah() {
 void
 MediumSilicon::SetLatticeMobilityModelReggiani() {
 
-  latticeMobilityModel = 3;
-  userMobility = false;
+  latticeMobilityModel = LatticeMobilityModelReggiani;
+  hasUserMobility = false;
   isChanged = true;
 
 }
@@ -427,8 +420,8 @@ MediumSilicon::SetLatticeMobilityModelReggiani() {
 void 
 MediumSilicon::SetDopingMobilityModelMinimos() {
 
-  dopingMobilityModel = 0;
-  userMobility = false;
+  dopingMobilityModel = DopingMobilityModelMinimos;
+  hasUserMobility = false;
   isChanged = true;
   
 }
@@ -436,8 +429,8 @@ MediumSilicon::SetDopingMobilityModelMinimos() {
 void 
 MediumSilicon::SetDopingMobilityModelMasetti() {
 
-  dopingMobilityModel = 1;
-  userMobility = false;
+  dopingMobilityModel = DopingMobilityModelMasetti;
+  hasUserMobility = false;
   isChanged = true;
   
 }
@@ -448,10 +441,10 @@ MediumSilicon::SetSaturationVelocity(const double vsate, const double vsath) {
   if (vsate <= 0. || vsath <= 0.) {
     std::cout << className << "::SetSaturationVelocity:\n";
     std::cout << "    Restoring default values.\n";
-    userSaturationVelocity = false;
+    hasUserSaturationVelocity = false;
   } else {
     eSatVel = vsate; hSatVel = vsath;
-    userSaturationVelocity = true;
+    hasUserSaturationVelocity = true;
   }
   
   isChanged = true;
@@ -461,8 +454,8 @@ MediumSilicon::SetSaturationVelocity(const double vsate, const double vsath) {
 void
 MediumSilicon::SetSaturationVelocityModelMinimos() {
 
-  saturationVelocityModel = 0;
-  userSaturationVelocity = false;
+  saturationVelocityModel = SaturationVelocityModelMinimos;
+  hasUserSaturationVelocity = false;
   isChanged = true;
 
 }
@@ -470,8 +463,8 @@ MediumSilicon::SetSaturationVelocityModelMinimos() {
 void
 MediumSilicon::SetSaturationVelocityModelCanali() {
 
-  saturationVelocityModel = 1;
-  userSaturationVelocity = false;
+  saturationVelocityModel = SaturationVelocityModelCanali;
+  hasUserSaturationVelocity = false;
   isChanged = true;
 
 }
@@ -479,8 +472,8 @@ MediumSilicon::SetSaturationVelocityModelCanali() {
 void
 MediumSilicon::SetSaturationVelocityModelReggiani() {
 
-  saturationVelocityModel = 2;
-  userSaturationVelocity = false;
+  saturationVelocityModel = SaturationVelocityModelReggiani;
+  hasUserSaturationVelocity = false;
   isChanged = true;
 
 }
@@ -488,7 +481,7 @@ MediumSilicon::SetSaturationVelocityModelReggiani() {
 void 
 MediumSilicon::SetHighFieldMobilityModelMinimos() {
 
-  highFieldMobilityModel = 0;
+  highFieldMobilityModel = HighFieldMobilityModelMinimos;
   isChanged = true;
   
 }
@@ -496,7 +489,7 @@ MediumSilicon::SetHighFieldMobilityModelMinimos() {
 void 
 MediumSilicon::SetHighFieldMobilityModelCanali() {
 
-  highFieldMobilityModel = 1;
+  highFieldMobilityModel = HighFieldMobilityModelCanali;
   isChanged = true;
   
 }
@@ -504,7 +497,7 @@ MediumSilicon::SetHighFieldMobilityModelCanali() {
 void
 MediumSilicon::SetHighFieldMobilityModelReggiani() {
 
-  highFieldMobilityModel = 2;
+  highFieldMobilityModel = HighFieldMobilityModelReggiani;
   isChanged = true;
 
 }
@@ -512,14 +505,14 @@ MediumSilicon::SetHighFieldMobilityModelReggiani() {
 void
 MediumSilicon::SetHighFieldMobilityModelConstant() {
 
-  highFieldMobilityModel = 3;
+  highFieldMobilityModel = HighFieldMobilityModelConstant;
   
 }
 
 void 
 MediumSilicon::SetImpactIonisationModelVanOverstraetenDeMan() {
 
-  impactIonisationModel = 0;
+  impactIonisationModel = ImpactIonisationModelVanOverstraeten;
   isChanged = true;  
 
 }
@@ -527,7 +520,7 @@ MediumSilicon::SetImpactIonisationModelVanOverstraetenDeMan() {
 void
 MediumSilicon::SetImpactIonisationModelGrant() {
 
-  impactIonisationModel = 1;
+  impactIonisationModel = ImpactIonisationModelGrant;
   isChanged = true;
  
 }
@@ -559,14 +552,25 @@ MediumSilicon::GetElectronEnergy(
 
   double e = 0.;
   double a = 0.;
+
+  // Non-parabolicity parameter
+  double alpha = 0.;
+  if (useNonParabolicity) {
+    alpha = 0.5;
+  }
+  
   switch (band) {
     case 0:
     case 1:
       // X 100, -100  
       a = 0.5 * inverseElectronMass * (px * px / mLongX + 
                                       (py * py + pz * pz) / mTransX);
-      e = sqrt(1. + 2. * a) - 1.;
-      a = inverseElectronMass / (1. + e); 
+      if (useNonParabolicity) {
+        e = 0.5 * (sqrt(1. + 4 * alpha * a) - 1.) / alpha;
+      } else {
+        e = a;
+      }
+      a = SpeedOfLight * inverseElectronMass / (1. + 2 * alpha * e); 
       vx = a * px / mLongX; vy = a * py / mTransX; vz = a * pz / mTransX;
       return e;
       break;
@@ -575,8 +579,12 @@ MediumSilicon::GetElectronEnergy(
       // X 010, 0-10
       a = 0.5 * inverseElectronMass * (py * py / mLongX + 
                                       (px * px + pz * pz) / mTransX);
-      e = sqrt(1. + 2. * a) - 1.;
-      a = inverseElectronMass / (1. + e); 
+      if (useNonParabolicity) {
+        e = 0.5 * (sqrt(1. + 4 * alpha * a) - 1.) / alpha;
+      } else {
+        e = a;
+      }
+      a = SpeedOfLight * inverseElectronMass / (1. + 2 * alpha * e); 
       vx = a * px / mTransX; vy = a * py / mLongX; vz = a * pz / mTransX;
       return e;
       break;
@@ -585,8 +593,12 @@ MediumSilicon::GetElectronEnergy(
       // X 001, 00-1
       a = 0.5 * inverseElectronMass * (pz * pz / mLongX + 
                                       (px * px + py * py) / mTransX);
-      e = sqrt(1. + 2. * a) - 1.; 
-      a = inverseElectronMass / (1. + e); 
+      if (useNonParabolicity) {
+        e = 0.5 * (sqrt(1. + 4 * alpha * a) - 1.) / alpha;
+      } else {
+        e = a;
+      } 
+      a = SpeedOfLight * inverseElectronMass / (1. + 2 * alpha * e); 
       vx = a * px / mTransX; vy = a * py / mTransX; vz = a * pz / mLongX;
       return e;
       break;     
@@ -596,9 +608,9 @@ MediumSilicon::GetElectronEnergy(
       break;
   }
   
-  vx = inverseElectronMass * px;
-  vy = inverseElectronMass * py;
-  vz = inverseElectronMass * pz;
+  vx = SpeedOfLight * inverseElectronMass * px;
+  vy = SpeedOfLight * inverseElectronMass * py;
+  vz = SpeedOfLight * inverseElectronMass * pz;
   return 0.5 * inverseElectronMass * (px * px + py * py + pz * pz);
 
 }
@@ -608,9 +620,10 @@ MediumSilicon::GetElectronMomentum(const double e,
                                    double& px, double& py, double& pz,
                                    const int band) {
 
-  
-  const double pstar = sqrt(2. * ElectronMass * e * (1. + 0.5 * e)) /
-                       SpeedOfLight;
+  double alpha = 0.;
+  if (useNonParabolicity) alpha = 0.5;
+
+  const double pstar = sqrt(2. * ElectronMass * e * (1. + alpha * e));
   const double ctheta = 1. - 2. * RndmUniform();
   const double stheta = sqrt(1. - ctheta * ctheta);
   const double phi = TwoPi * RndmUniform();
@@ -711,13 +724,15 @@ MediumSilicon::GetElectronCollisionRate(const double e, const int band) {
 }
 
 bool
-MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
-                     double& e1, double& ctheta, int& nsec, double& esec,
-                     int& band) {
+MediumSilicon::GetElectronCollision(const double e, 
+                                    int& type, int& level, double& e1, 
+                                    double& px, double& py, double& pz, 
+                                    int& nsec, double& esec,
+                                    int& band) {
 
   if (e > eFinal) {
     std::cerr << className << "::GetElectronCollision:\n";
-    std::cerr << "    Provided electron energ (" << e;
+    std::cerr << "    Requested electron energy (" << e;
     std::cerr << " eV) exceeds current energy range (" << eFinal;
     std::cerr << " eV).\n";
     std::cerr << "    Increasing energy range to " << 1.05 * e
@@ -738,9 +753,11 @@ MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
     isChanged = false;
   }
 
-  // Energy interval
-  const int iE = int(e / eStep);
+  // Get the energy interval.
+  int iE = int(e / eStep);
+  if (iE >= nEnergySteps) iE = nEnergySteps - 1;
 
+  // Sample the scattering process.
   if (band >= 0 && band < 6) {
     const double r = RndmUniform();
     int iLow = 0; 
@@ -748,7 +765,7 @@ MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
     if (r <= cfElectronsX[iE][iLow]) {
       level = iLow;
     } else if (r >= cfElectronsX[iE][nLevelsX - 1]) {
-      level = nLevelsX - 1;
+      level = iUp;
     } else {
       int iMid;
       while (iUp - iLow > 1) {
@@ -762,7 +779,7 @@ MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
       level = iUp;
     }
 
-    // Collision type
+    // Get the collision type.
     type = scatTypeElectronsX[level];
     if (type == 11 || type == 12) {
       // Intervalley scattering
@@ -801,7 +818,7 @@ MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
       }
     }
       
-    // Energy loss
+    // Get the energy loss.
     double loss = energyLossElectronsX[level];
     // Secondary electron energy (none by default)
     esec = 0.;
@@ -815,13 +832,50 @@ MediumSilicon::GetElectronCollision(const double e, int& type, int& level,
     }
 
     if (e < loss) loss = e - 0.0001;
-    // Update the energy
+    // Update the energy.
     e1 = e - loss;
     if (e1 < Small) e1 = Small;
+  
+    // Update the momentum.
+    double alpha = 0.;
+    if (useNonParabolicity) alpha = 0.5;
+
+    const double pstar = sqrt(2. * ElectronMass * e1 * (1. + alpha * e1));
+    const double ctheta = 1. - 2. * RndmUniform();
+    const double stheta = sqrt(1. - ctheta * ctheta);
+    const double phi = TwoPi * RndmUniform();
+
+    const double pl = pstar * sqrt(mLongX);
+    const double pt = pstar * sqrt(mTransX);
+    switch (band) {
+      case 0:
+      case 1:
+        // 100
+        px = pl * cos(phi) * stheta;
+        py = pt * sin(phi) * stheta;
+        pz = pt * ctheta;
+        break;
+      case 2:
+      case 3:
+        // 010
+        px = pt * cos(phi) * stheta;
+        py = pl * sin(phi) * stheta;
+        pz = pt * ctheta;
+        break;
+      case 4:
+      case 5:
+        // 001
+        px = pt * cos(phi) * stheta;
+        py = pt * sin(phi) * stheta;
+        pz = pl * ctheta;
+        break;
+      default:
+        return false;
+        break;
+    }
     
-    ctheta = 1. - 2. * RndmUniform();
     return true;
-    
+
   } 
   
   std::cerr << className << "::GetElectronCollision:\n";
@@ -862,7 +916,8 @@ MediumSilicon::GetOpticalDataRange(double& emin, double& emax, const int i) {
 
 bool 
 MediumSilicon::GetDielectricFunction(const double e, 
-                                     double& eps1, double& eps2, const int i) {
+                                     double& eps1, double& eps2, 
+                                     const int i) {
                         
   if (i != 0) {
     std::cerr << className << "::GetDielectricFunction:\n";
@@ -937,10 +992,10 @@ MediumSilicon::UpdateTransportParameters() {
 
   // Calculate impact ionisation coefficients
   switch (impactIonisationModel) {
-    case 0:
+    case ImpactIonisationModelVanOverstraeten:
       UpdateImpactIonisationVanOverstraetenDeMan();
       break;
-    case 1:
+    case ImpactIonisationModelGrant:
       UpdateImpactIonisationGrant();
       break;
     default:
@@ -949,19 +1004,16 @@ MediumSilicon::UpdateTransportParameters() {
       break;
   }
   
-  if (!userMobility) {        
+  if (!hasUserMobility) {        
     // Calculate lattice mobility
     switch (latticeMobilityModel) {
-      case 0:
+      case LatticeMobilityModelMinimos:
         UpdateLatticeMobilityMinimos();
         break;
-      case 1:
+      case LatticeMobilityModelSentaurus:
         UpdateLatticeMobilitySentaurus();
         break;   
-      case 2:
-        UpdateLatticeMobilitySah();
-        break;     
-      case 3:
+      case LatticeMobilityModelReggiani:
         UpdateLatticeMobilityReggiani();
         break; 
       default:
@@ -974,10 +1026,10 @@ MediumSilicon::UpdateTransportParameters() {
   
     // Calculate doping mobility
     switch (dopingMobilityModel) {
-      case 0:
+      case DopingMobilityModelMinimos:
         UpdateDopingMobilityMinimos();
         break;
-      case 1:
+      case DopingMobilityModelMasetti:
         UpdateDopingMobilityMasetti();
         break;
       default:
@@ -989,15 +1041,15 @@ MediumSilicon::UpdateTransportParameters() {
   }
       
   // Calculate saturation velocity
-  if (!userSaturationVelocity) {
+  if (!hasUserSaturationVelocity) {
     switch (saturationVelocityModel) {
-      case 0:
+      case SaturationVelocityModelMinimos:
         UpdateSaturationVelocityMinimos();
         break;
-      case 1:
+      case SaturationVelocityModelCanali:
         UpdateSaturationVelocityCanali();
         break;
-      case 2:
+      case SaturationVelocityModelReggiani:
         UpdateSaturationVelocityReggiani();
         break;
     }
@@ -1005,7 +1057,7 @@ MediumSilicon::UpdateTransportParameters() {
 
   // Calculate high field saturation parameters
   switch (highFieldMobilityModel) {
-    case 1:
+    case HighFieldMobilityModelCanali:
       UpdateHighFieldMobilityCanali();
       break;
   }
@@ -1065,28 +1117,6 @@ MediumSilicon::UpdateLatticeMobilitySentaurus() {
   eLatticeMobility = eMu0 * pow(t, -2.5);
   hLatticeMobility = hMu0 * pow(t, -2.2);
   
-}
-
-void 
-MediumSilicon::UpdateLatticeMobilitySah() {
-
-  // References:
-  // - S. Selberherr, 
-  //   Analysis and Simulation of Semiconductor Devices
-  //   Springer 1984
-  // - C. Sah et al.,
-  //   IEEE Trans. Electron Devices 28 (1981), 304-313
-
-  // Temperature normalized to 300 K
-  const double t = temperature / 300.;
-
-  eLatticeMobility = 1. / (4.195e-6 * pow(t, -1.5)) + 
-                     1. / (2.153e-6 * pow(t, -3.13));
-  hLatticeMobility = 1. / (2.502e-6 * pow(t, -1.5)) + 
-                     1. / (0.591e-6 * pow(t, -3.25));
-  eLatticeMobility = 1. / eLatticeMobility;
-  hLatticeMobility = 1. / hLatticeMobility;
-
 }
 
 void
@@ -1575,18 +1605,18 @@ MediumSilicon::ElectronScatteringRates() {
   nLevelsX = 0;
   // Fill the scattering rates table
   ElectronAcousticScatteringRatesX();
-  ElectronImpurityScatteringRates();
+  // ElectronImpurityScatteringRates();
   ElectronIntervalleyScatteringRatesXX();
   ElectronIonisationRates();
 
   std::ofstream outfile;  
-  if (debug) outfile.open("rates.txt", std::ios::out);
+  if (useCfOutput) outfile.open("rates.txt", std::ios::out);
 
   for (int i = 0; i < nEnergySteps; ++i) {
     // Sum up the scattering rates of all processes 
     for (int j = nLevelsX; j--;) cfTotElectronsX[i] += cfElectronsX[i][j];
     
-    if (debug) {
+    if (useCfOutput) {
       outfile << i * eStep << " " << cfTotElectronsX[i] << " ";
       for (int j = 0; j < nLevelsX; ++j) outfile << cfElectronsX[i][j] << " ";
       outfile << "\n";
@@ -1610,7 +1640,7 @@ MediumSilicon::ElectronScatteringRates() {
     }  
 
   }
-  if (debug) outfile.close();
+  if (useCfOutput) outfile.close();
 
   return true;
 
@@ -1643,9 +1673,10 @@ MediumSilicon::ElectronAcousticScatteringRatesX() {
   
   double en = Small;
   for (int i = 0; i < nEnergySteps; ++i) {
-    cfElectronsX[i].push_back(cIntra * GetConductionBandDensityOfStates(en, 0));
+    cfElectronsX[i].push_back(cIntra * 
+                              GetConductionBandDensityOfStates(en, 0));
     en += eStep;
-  }  
+  }
   
   energyLossElectronsX.push_back(0.);
   scatTypeElectronsX.push_back(10);
@@ -1773,9 +1804,11 @@ MediumSilicon::ElectronImpurityScatteringRates() {
 
   // Band parameters
   // Density of states effective mass
-  const double md = pow(mLongX * mTransX * mTransX, 1. / 3.) * ElectronMass;
+  const double md = ElectronMass * 
+                    pow(mLongX * mTransX * mTransX, 1. / 3.);
   // Non-parabolicity coefficient [eV-1]
-  const double alpha = 0.5;
+  // const double alpha = 0.5;
+  const double alpha = 0.;
 
   // Dielectric constant
   const double eps = GetDielectricConstant();
@@ -1784,7 +1817,8 @@ MediumSilicon::ElectronImpurityScatteringRates() {
   if (impurityConcentration < Small) return true;
 
   // Screening length
-  const double ls = sqrt(eps * kbt / (4 * Pi * FineStructureConstant * HbarC * 
+  const double ls = sqrt(eps * kbt / (4 * Pi * 
+                                      FineStructureConstant * HbarC * 
                                       impurityConcentration));
   const double eb = 0.5 * HbarC * HbarC / (md * ls * ls);
 
@@ -1832,8 +1866,9 @@ MediumSilicon::GetConductionBandDensityOfStates(const double e,
     const double md3 = mLongX * mTransX * mTransX;
   
     // Non-parabolicity parameter
-    const double alpha = 0.5;
-  
+    double alpha = 0.;
+    if (useNonParabolicity) alpha = 0.5;
+
     return ElectronMass * 
            sqrt(ElectronMass * md3 * e * (1. + alpha * e) / 2.) * 
            (1. + 2. * alpha * e) / (Pi2 * pow(HbarC, 3.));
