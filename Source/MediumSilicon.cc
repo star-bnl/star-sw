@@ -179,6 +179,11 @@ MediumSilicon::ElectronVelocity(
     isChanged = false;
   }
 
+  if (hasElectronVelocityE) {
+    // Interpolation in user table.
+    return Medium::ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
+  }
+
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
 
   // Calculate the mobility
@@ -221,7 +226,12 @@ MediumSilicon::ElectronTownsend(
     UpdateTransportParameters();
     isChanged = false;
   }
-  
+ 
+  if (hasElectronTownsend) {
+    // Interpolation in user table.
+    return Medium::ElectronTownsend(ex, ey, ez, bx, by, bz, alpha);
+  }
+ 
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   
   switch (impactIonisationModel) {
@@ -249,6 +259,11 @@ MediumSilicon::ElectronAttachment(
   if (isChanged) {
     UpdateTransportParameters();
     isChanged = false;
+  }
+
+  if (hasElectronAttachment) {
+    // Interpolation in user table.
+    return Medium::ElectronAttachment(ex, ey, ez, bx, by, bz, eta);
   }
   
   switch (trappingModel) {
@@ -281,6 +296,11 @@ MediumSilicon::HoleVelocity(
   if (isChanged) {
     UpdateTransportParameters();
     isChanged = false;
+  }
+
+  if (hasHoleVelocityE) {
+    // Interpolation in user table.
+    return Medium::HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
   }
 
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
@@ -323,7 +343,12 @@ MediumSilicon::HoleTownsend(
     UpdateTransportParameters();
     isChanged = false;
   }
-  
+ 
+  if (hasHoleTownsend) {
+    // Interpolation in user table.
+    return Medium::HoleTownsend(ex, ey, ez, bx, by, bz, alpha);
+  }
+ 
   const double e = sqrt(ex * ex + ey * ey + ez * ez);
   
   switch (impactIonisationModel) {
@@ -351,6 +376,11 @@ MediumSilicon::HoleAttachment(
   if (isChanged) {
     UpdateTransportParameters();
     isChanged = false;
+  }
+
+  if (hasHoleAttachment) {
+    // Interpolation in user table.
+    return Medium::HoleAttachment(ex, ey, ez, bx, by, bz, eta);
   }
   
   switch (trappingModel) {

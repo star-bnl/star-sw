@@ -941,8 +941,9 @@ AvalancheMicroscopic::TransportElectron(
         
         // Get the collision type and parameters.
         medium->GetElectronCollision(newEnergy, cstype, level, 
-                                     energy, dx, dy, dz, 
+                                     energy, newKx, newKy, newKz, 
                                      nsec, esec, band);
+        kx = newKx; ky = newKy; kz = newKz;
 
         // If activated, histogram the distance with respect to the
         // last collision.

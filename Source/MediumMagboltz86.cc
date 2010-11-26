@@ -495,19 +495,10 @@ MediumMagboltz86::GetElectronCollision(const double e,
     } else {
       esec = RndmUniform() * (e - loss);
     }
-    if (esec <= 0) esec = Small;
+    if (esec < Small) esec = Small;
     loss += esec;
     nsec = 1;
   } else if (type == ElectronCollisionTypeExcitation) {
-    // Dissociative excitation: continuous loss distribution?
-    if (description[level][5] == 'D' &&
-        description[level][6] == 'I' &&
-        description[level][7] == 'S') {
-      if (fabs(loss * rgas[igas] - 12.) < Small &&
-          e > 2 * loss * rgas[igas]) {
-        loss += 2. * RndmUniform();
-      }
-    }
     // Follow the de-excitation cascade (if switched on).
     if (useDeexcitation && iDeexcitation[level] >= 0) {
       int fLevel = 0;
@@ -583,12 +574,12 @@ MediumMagboltz86::GetElectronCollision(const double e,
     if (ctheta0 * ctheta0 > u) ctheta = -ctheta;
   }
   dz = std::min(dz, 1.);
-  arg = sqrt(dx * dx + dy * dy + dz * dz);
+  arg = sqrt(dx * dx + dy * dy);
   const double stheta = sqrt(1. - ctheta * ctheta);
   // Azimuth is uniformly distributed.
   const double phi = TwoPi * RndmUniform();
-  const double sphi = sin(phi);
-  const double cphi = sqrt(1. - sphi * sphi); 
+  const double cphi = cos(phi);
+  const double sphi = sqrt(1. - cphi * cphi);
   if (arg == 0.) {
     dz = ctheta;
     dx = cphi * stheta;
