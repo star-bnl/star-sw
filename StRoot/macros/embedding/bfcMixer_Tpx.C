@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.20 2010/11/24 19:15:35 hmasui Exp $
+// $Id: bfcMixer_Tpx.C,v 1.21 2010/11/26 21:12:36 hmasui Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -32,6 +32,7 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   TString DbVP08iepp("DbV20081117 ");
   TString DbVP08iedAu("DbV20090213 ");
   TString DbVP10iapp("DbV20091001 ");
+  TSTring DbVP10icpp("DbV20100301 ");
   TString DbVP10ihAuAu39("DbV20100909 ");
   TString DbVP10ihAuAu11("DbV20100821 ");
   TString DbVP10ihAuAu7("DbV20100821 ");
@@ -45,12 +46,16 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   TString prodP08iedAu("P2008 ITTF OSpaceZ2 OGridLeak3D beamLine VFMCE TpxClu -VFMinuit -hitfilt");
   TString prodP10iapp("pp2009c TpcRS ITTF OSpaceZ2 OGridLeak3D beamLine, VFMCE TpcRS -VFMinuit -hitfilt");
 
+  // production chain for P10ic p+p RFF & FF
+  TString prodP10icpp("pp2009c ITTF BEmcChkStat btof Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -hitfilt");
+
   // BES Run10 chains
   TString prodP10ihAuAu39("P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
   TString prodP10ihAuAu11("P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
   TString prodP10ihAuAu7("P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
 
   TString geomP08ic("ry2008");
+  TString geomP10ic("ry2009a");
   TString geomP10ih("ry2010");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
@@ -65,6 +70,7 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   else if (prodName == "P08iedAu")     { chain1Opt.Prepend(DbVP08iedAu);     chain3Opt = prodP08iedAu;      chain2Opt += geomP08ic; }
 //  else if (prodName == "P08icAuAu200") { chain1Opt.Prepend(DbVP08icAuAu200); chain3Opt = prodP08icAuAu200;  chain2Opt += geomP08ic; }
   else if (prodName == "P10iapp")      { chain1Opt.Prepend(DbVP10iapp);      chain3Opt = prodP10iapp;       chain2Opt += geomP10ih; }
+  else if (prodName == "P10icpp")      { chain1Opt.Prepend(DbVP10icpp);      chain3Opt = prodP10icpp;       chain2Opt += geomP10ic; }
   else if (prodName == "P10ihAuAu39")  { chain1Opt.Prepend(DbVP10ihAuAu39);  chain3Opt = prodP10ihAuAu39;   chain2Opt += geomP10ih; }
   else if (prodName == "P10ihAuAu11")  { chain1Opt.Prepend(DbVP10ihAuAu11);  chain3Opt = prodP10ihAuAu11;   chain2Opt += geomP10ih; }
   else if (prodName == "P10ihAuAu7")   { chain1Opt.Prepend(DbVP10ihAuAu7);   chain3Opt = prodP10ihAuAu7;    chain2Opt += geomP10ih; }
@@ -76,12 +82,13 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   chain3Opt += ",";
 
 //  if (prodName == "P08icpp")           { chain3Opt.Prepend(DbVP08iepp);      chain3Opt += geomP08ic; }
-  else if (prodName == "P08iepp")      { chain3Opt.Prepend(DbVP08iepp);      chain3Opt += geomP08ic; }
+  if (prodName == "P08iepp")           { chain3Opt.Prepend(DbVP08iepp);      chain3Opt += geomP08ic; }
 //  else if (prodName == "P08icAuAu9")   { chain3Opt.Prepend(DbVP08icAuAu9);   chain3Opt += geomP08ic; }
 //  else if (prodName == "P08icdAu")     { chain3Opt.Prepend(DbVP08icdAu);     chain3Opt += geomP08ic; }
   else if (prodName == "P08iedAu")     { chain3Opt.Prepend(DbVP08iedAu);     chain3Opt += geomP08ic; }
 //  else if (prodName == "P08icAuAu200") { chain3Opt.Prepend(DbVP08icAuAu200); chain3Opt += geomP08ic; }
   else if (prodName == "P10iapp")      { chain3Opt.Prepend(DbVP10iapp);      chain3Opt += geomP10ih; }
+  else if (prodName == "P10icpp")      { chain3Opt.Prepend(DbVP10icpp);      chain3Opt += geomP10ic; }
   else if (prodName == "P10ihAuAu39")  { chain3Opt.Prepend(DbVP10ihAuAu39);  chain3Opt += geomP10ih; }
   else if (prodName == "P10ihAuAu11")  { chain3Opt.Prepend(DbVP10ihAuAu11);  chain3Opt += geomP10ih; }
   else if (prodName == "P10ihAuAu7")   { chain3Opt.Prepend(DbVP10ihAuAu7);   chain3Opt += geomP10ih; }
@@ -238,6 +245,8 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
 }
 
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.21  2010/11/26 21:12:36  hmasui
+// Fix a bug for if loop. Add run9 p+p chain
+//
 // Revision 1.20  2010/11/24 19:15:35  hmasui
 // Separate DbV timestamp from the main chain string in order to include it into chain1
-//
