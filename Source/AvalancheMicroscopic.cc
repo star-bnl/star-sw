@@ -721,7 +721,7 @@ AvalancheMicroscopic::TransportElectron(
           dt += - log(r) / fLim;
           // Calculate the energy after the proposed step.
           if (useBfield && bOk) {
-            cwt = cos(wb * dt); swt = sqrt(1. - cwt * cwt);
+            cwt = cos(wb * dt); swt = sin(wb * dt);
             newEnergy = std::max(energy + (a1 + a2 * dt) * dt + 
                                  a3 * (1. - cwt) + a4 * swt, Small);
           } else if (useBandStructure) {
