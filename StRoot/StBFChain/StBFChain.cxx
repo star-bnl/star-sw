@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.569 2010/11/22 22:50:55 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.570 2010/11/27 18:21:31 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -231,33 +231,34 @@ Int_t StBFChain::Instantiate()
     if (strlen(fBFC[i].Chain) > 0) myChain = GetMaker(fBFC[i].Chain);
     if (maker == "St_db_Maker"){
       if (Key.CompareTo("db",TString::kIgnoreCase) == 0) {
-	TString MySQLDb("MySQL:StarDb");
-	TString MainCintDb("$STAR/StarDb");
-	TString MyCintDb("$PWD/StarDb");
-	if (GetOption("NoMySQLDb"))   {MySQLDb = "";}
-	// Removed twice already and put back (start to be a bit boring)
-	// DO NOT REMOVE THE NEXT OPTION - Used in AutoCalibration
-	if (GetOption("NoLocalCintDb")) {MyCintDb = "";}
-	if (GetOption("NoStarCintDb") ) {MainCintDb = "";}
-	if (GetOption("NoCintDb")     ) {MainCintDb = ""; MyCintDb = "";}
-
-	TString Dirs[3];
-	Int_t j;
-	for (j = 0; j < 3; j++) Dirs[j] = "";
-	j = 0;
-	if (MySQLDb    != "") {Dirs[j] = MySQLDb;    j++;}
-	if (MainCintDb != "") {Dirs[j] = MainCintDb; j++;}
-	if (MyCintDb   != "") {Dirs[j] = MyCintDb;   j++;}
-	if (! mk) {
-	  St_db_Maker* dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2]);
+	St_db_Maker* dbMk = (St_db_Maker *) mk;
+	if (! dbMk) {
+	  TString MySQLDb("MySQL:StarDb");
+	  TString MainCintDb("$STAR/StarDb");
+	  TString MyCintDb("$PWD/StarDb");
+	  if (GetOption("NoMySQLDb"))   {MySQLDb = "";}
+	  // Removed twice already and put back (start to be a bit boring)
+	  // DO NOT REMOVE THE NEXT OPTION - Used in AutoCalibration
+	  if (GetOption("NoLocalCintDb")) {MyCintDb = "";}
+	  if (GetOption("NoStarCintDb") ) {MainCintDb = "";}
+	  if (GetOption("NoCintDb")     ) {MainCintDb = ""; MyCintDb = "";}
+	  
+	  TString Dirs[3];
+	  Int_t j;
+	  for (j = 0; j < 3; j++) Dirs[j] = "";
+	  j = 0;
+	  if (MySQLDb    != "") {Dirs[j] = MySQLDb;    j++;}
+	  if (MainCintDb != "") {Dirs[j] = MainCintDb; j++;}
+	  if (MyCintDb   != "") {Dirs[j] = MyCintDb;   j++;}
+	  dbMk = new St_db_Maker(fBFC[i].Name,Dirs[0],Dirs[1],Dirs[2]);
 	  if (!dbMk) goto Error;
 	  strcpy (fBFC[i].Name, (Char_t *) dbMk->GetName());
 	  mk = dbMk;
 	  if (GetOption("Simu") && ! GetOption("NoSimuDb")) dbMk->SetFlavor("sim+ofl");
 	  else                                              dbMk->SetFlavor("ofl");
-	  if (GetOption("dbSnapshot")) dbMk->SetAttr("dbSnapshot","dbSnapshot.root",dbMk->GetName());
-	  SetDbOptions(mk);
 	}
+	if (GetOption("dbSnapshot")) dbMk->SetAttr("dbSnapshot","dbSnapshot.root",dbMk->GetName());
+	SetDbOptions(dbMk);
       }
       goto Add2Chain;
     }
