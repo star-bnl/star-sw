@@ -408,8 +408,7 @@ MediumMagboltz86::GetElectronCollisionRate(const double e, const int band) {
 }
 
 bool 
-MediumMagboltz86::GetElectronCollision(const double e, 
-                                       int& type, int& level, 
+MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level, 
                                        double& e1, 
                                        double& dx, double& dy, double& dz,
                                        int& nsec, double& esec, 
@@ -418,7 +417,7 @@ MediumMagboltz86::GetElectronCollision(const double e,
   // Check if the electron energy is within the currently set range.
   if (e > eFinal && useAutoAdjust) {
     std::cerr << className << "::GetElectronCollision:\n";
-    std::cerr << "    Requested electron energy  (" << e 
+    std::cerr << "    Provided electron energy  (" << e 
               << " eV) exceeds current energy range  (" << eFinal 
               << " eV).\n";
     std::cerr << "    Increasing energy range to " << 1.05 * e
@@ -495,10 +494,19 @@ MediumMagboltz86::GetElectronCollision(const double e,
     } else {
       esec = RndmUniform() * (e - loss);
     }
-    if (esec < Small) esec = Small;
+    if (esec <= 0) esec = Small;
     loss += esec;
     nsec = 1;
   } else if (type == ElectronCollisionTypeExcitation) {
+    // Dissociative excitation: continuous loss distribution?
+    if (description[level][5] == 'D' &&
+        description[level][6] == 'I' &&
+        description[level][7] == 'S') {
+      if (fabs(loss * rgas[igas] - 12.) < Small &&
+          e > 2 * loss * rgas[igas]) {
+        loss += 2. * RndmUniform();
+      }
+    }
     // Follow the de-excitation cascade (if switched on).
     if (useDeexcitation && iDeexcitation[level] >= 0) {
       int fLevel = 0;
@@ -530,9 +538,7 @@ MediumMagboltz86::GetElectronCollision(const double e,
         ++nPenning;
       }
     }
-  } else if (type == ElectronCollisionTypeAttachment) {
-    return true;
-  } 
+  }
 
   // Make sure the energy loss is smaller than the energy.
   if (e < loss) loss = e - 0.0001;
@@ -559,45 +565,44 @@ MediumMagboltz86::GetElectronCollision(const double e,
     }
   }
 
-  // Update the energy.
   const double s1 = rgas[igas];
   const double s2 = (s1 * s1) / (s1 - 1.);
-  const double arg1 = std::max(1. - s1 * loss / e, Small);
-  const double d = 1. - ctheta0 * sqrt(arg1);
+  const double stheta0 = sqrt(1. - ctheta0 * ctheta0);
+  const double arg = std::max(1. - s1 * loss / e, Small);
+  const double d = 1. - ctheta0 * sqrt(arg);
+
+  // Update the energy. 
   e1 = std::max(e * (1. - loss / (s1 * e) - 2. * d / s2), Small);
-
-  // Update the direction.
-  const double q = std::min(sqrt((e / e1) * arg1) / s1, 1.);
-  // const double stheta0 = sqrt(1. - ctheta0 * ctheta0);
-  const double theta0 = acos(ctheta0);
-  const double theta = asin(q * sin(theta0));
-  // const double stheta = q * stheta0;
-  // double ctheta = sqrt(1. - stheta * stheta);
-  double ctheta = cos(theta);
+  double q = std::min(sqrt((e / e1) * arg) / s1, 1.);
+  double stheta = q * stheta0;
+  
+  double ctheta = sqrt(1. - stheta * stheta);
   if (ctheta0 < 0.) {
-    const double u = (s1 - 1.) * (s1 - 1.) / arg1;
-    if (ctheta0 * ctheta0 > u) ctheta = -ctheta;
+    const double u = (s1 - 1.) * (s1 - 1.) / arg;
+    if (ctheta0 * ctheta0 > u) ctheta *= -1.;
   }
-  const double stheta = sin(theta);
+  
+  // Calculate the direction after the collision.
+  dz = std::min(dz, 1.); 
+  const double argZ = sqrt(dx * dx + dy * dy);
 
-  dz = std::min(dz, 1.);
-  const double argz = sqrt(dx * dx + dy * dy);
-  // Azimuth is uniformly distributed.
+  // Azimuth is chosen at random.
   const double phi = TwoPi * RndmUniform();
   const double cphi = cos(phi);
-  const double sphi = sqrt(1. - cphi * cphi);
-  if (argz == 0.) {
+  const double sphi = sin(phi); 
+
+  if (argZ == 0.) {
     dz = ctheta;
     dx = cphi * stheta;
     dy = sphi * stheta;
   } else {
-    const double a = stheta / argz;
-    const double dz1 = dz * ctheta + argz * stheta * sphi;
-    const double dy1 = dy * ctheta + a * (dx * cphi - dy * dz * sphi);
-    const double dx1 = dx * ctheta - a * (dy * cphi + dx * dz * sphi);
-    dx = dx1; dy = dy1; dz = dz1;
+    const double a1 = stheta / argZ;
+    const double dz1 = dz * ctheta + argZ * stheta * sphi;
+    const double dy1 = dy * ctheta + a1 * (dx * cphi - dy * dz * sphi);
+    const double dx1 = dx * ctheta - a1 * (dy * cphi + dx * dz * sphi);
+    dz = dz1; dy = dy1; dx = dx1;
   }
-
+  
   return true;
 
 }
@@ -671,7 +676,7 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
 
   if (e > eFinalGamma && useAutoAdjust) {
     std::cerr << className << "::GetPhotonCollision:\n";
-    std::cerr << "    Requested electron energy  (" << e 
+    std::cerr << "    Provided electron energy  (" << e 
               << " eV) exceeds current energy range  (" << eFinalGamma
               << " eV).\n";
     std::cerr << "    Increasing energy range to " << 1.05 * e
@@ -817,8 +822,8 @@ MediumMagboltz86::GetNumberOfLevels() {
 
   if (isChanged) {
     if (!Mixer()) {
-      std::cerr << className << "::GetNumberOfLevels:\n";
-      std::cerr << "    Error calculating the collision rates table.\n";
+      std::cerr << "MediumMagboltz86: Error calculating the"
+                << " collision rates table.\n";
       return 0;
     }
     isChanged = false;
@@ -1238,7 +1243,7 @@ MediumMagboltz86::Mixer() {
   static char scrpt[226][30];
 
   // Check the gas composition and establish the gas numbers.
-  int gasNumber[nMaxGases] = {0};
+  int gasNumber[nMaxGases];
   for (int i = 0; i < nComponents; ++i) {
     if (!GetGasNumberMagboltz(gas[i], gasNumber[i])) {
       std::cerr << className << "::Mixer:\n";
@@ -1264,7 +1269,7 @@ MediumMagboltz86::Mixer() {
 
   // Loop over the gases in the mixture.  
   for (int iGas = 0; iGas < nComponents; ++iGas) {
-
+  
     // Number of inelastic cross-section terms
     long long nIn = 0;
     // Threshold energies
@@ -1276,7 +1281,7 @@ MediumMagboltz86::Mixer() {
     double w = 0.;
     // Scattering algorithms
     long long kIn[nMaxInelasticTerms] = {0};
-    long long kEl[6] = {0};    
+    long long kEl[6] = {0, 0, 0, 0, 0, 0};    
     char name[15];  
 
     // Retrieve the cross-section data for this gas from Magboltz.
@@ -1405,6 +1410,13 @@ MediumMagboltz86::Mixer() {
         cf[iE][np] = qIn[iE][j] * van;
         // Scale the excitation cross-sections (for error estimates).
         cf[iE][np] *= scaleExc;
+        // Temporary hack for methane dissociative excitations:
+        if (description[np][5] == 'D' &&
+            description[np][6] == 'I' &&
+            description[np][7] == 'S' &&
+            energyLoss[np] * r >= 12.) {
+        
+        }
         if (cf[iE][np] < 0.) {
           std::cerr << className << "::Mixer:\n";
           std::cerr << "    Negative inelastic cross-section at " 
@@ -1495,11 +1507,10 @@ MediumMagboltz86::Mixer() {
     std::cout << className << "::Mixer:\n";
     std::cout << "    Energy [eV]    Collision Rate [ns-1]\n";
     for (int i = 0; i < 8; ++i) { 
-      std::cout << "    " << std::fixed << std::setw(10) 
-                << std::setprecision(2)  
+      std::cout << "    " << std::fixed << std::setw(10) << std::setprecision(2)  
                 << (2 * i + 1) * eFinal / 16
                 << "    " << std::setw(18) << std::setprecision(2)
-                << cfTot[(2 * i + 1) * nEnergySteps / 16] << "\n";
+                << cfTot[(i + 1) * nEnergySteps / 16] << "\n";
     }
     std::cout << std::resetiosflags(std::ios_base::floatfield);
   }
@@ -1531,8 +1542,7 @@ MediumMagboltz86::Mixer() {
 }
 
 void 
-MediumMagboltz86::ComputeAngularCut(double parIn, double& cut, 
-                                    double &parOut) {
+MediumMagboltz86::ComputeAngularCut(double parIn, double& cut, double &parOut) {
 
   // Set cuts on angular distribution and
   // renormalise forward scattering probability.

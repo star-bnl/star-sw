@@ -11,7 +11,8 @@ namespace Garfield {
 
 int Medium::idCounter = -1;
 
-double Medium::inverseElectronMass = 1. / ElectronMass;
+double Medium::inverseElectronMass = SpeedOfLight * SpeedOfLight / 
+                                     ElectronMass;
 
 Medium::Medium() :
   className("Medium"), 
@@ -679,11 +680,11 @@ Medium::GetElectronEnergy(const double px, const double py, const double pz,
     std::cerr << "    Unknown band index.\n";
   }
   
-  vx = SpeedOfLight * px / ElectronMass;
-  vy = SpeedOfLight * py / ElectronMass;
-  vz = SpeedOfLight * pz / ElectronMass;
+  vx = inverseElectronMass * px;
+  vy = inverseElectronMass * py;
+  vz = inverseElectronMass * pz;
   
-  return 0.5 * (px * px + py * py + pz * pz) / ElectronMass;
+  return 0.5 * inverseElectronMass * (px * px + py * py + pz * pz);
   
 }
 
@@ -697,7 +698,7 @@ Medium::GetElectronMomentum(const double e,
     std::cerr << "    Unknown band index.\n";
   }
 
-  const double p = sqrt(2. * ElectronMass * e);
+  const double p = sqrt(2. * ElectronMass * e) / SpeedOfLight;
   const double ctheta = 1. - 2. * RndmUniform();
   const double stheta = sqrt(1. - ctheta * ctheta);
   const double phi = TwoPi * RndmUniform();
@@ -735,7 +736,7 @@ Medium::GetElectronCollisionRate(const double e, const int band) {
 bool 
 Medium::GetElectronCollision(const double e, int& type, int& level,
                              double& e1, 
-                             double& dx, double& dy, double& dz,
+                             double& dx, double& dy, double& dz, 
                              int& nsec, double& esec,
                              int& band) {
   

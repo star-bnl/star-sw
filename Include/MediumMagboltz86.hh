@@ -200,6 +200,7 @@ class MediumMagboltz86 : public MediumGas {
                                 double& e1,
                                 double& dx, double& dy, double& dz,
                                 int& nsec, double& esec, int& band);
+
     void ComputeDeexcitation(int iLevel, int& fLevel);   
     int  GetNumberOfDeexcitationProducts() {return nDeexcitationProducts;}
     bool GetDeexcitationProduct(const int i, double& t, double& s, 

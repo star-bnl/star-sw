@@ -488,18 +488,18 @@ AvalancheMicroscopic::TransportElectron(
 
   // Current position, direction, velocity and energy
   double x, y, z, t;
-  double kx, ky, kz, k;
-  double vx, vy, vz, v;
-  double dx, dy, dz, d;
+  double kx, ky, kz;
+  double vx, vy, vz;
   double energy;
   // Index of the conduction band (irrelevant for gases)
   int band = 0;
   
   // Timestep
   double dt;
-  // Direction and energy after a step
-  double newKx = 0., newKy = 0., newKz = 0., newEnergy = 0.;
-  
+  // Direction, velocity and energy after a step
+  double newKx = 0., newKy = 0., newKz = 0.;
+  double newVx = 0., newVy = 0., newVz = 0.;
+  double newEnergy = 0.;
   // Collision type (elastic, ionisation, attachment, inelastic, ...)
   int cstype;
   // Cross-section term
@@ -530,8 +530,6 @@ AvalancheMicroscopic::TransportElectron(
   newElectron.driftLine.clear();
   stack.push_back(newElectron);
 
-  // Check the given initial direction.
-  k = sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0);
   if (useBandStructure) {
     // With band structure, (kx, ky, kz) represents the momentum.
     // No normalization in this case.
@@ -539,17 +537,21 @@ AvalancheMicroscopic::TransportElectron(
     stack[0].kx = kx;
     stack[0].ky = ky;
     stack[0].kz = kz;
-  } else if (fabs(k) < Small) {
-    // Direction has zero norm, draw a random direction.
-    const double phi = TwoPi * RndmUniform();
-    const double ctheta = 1. - 2. * RndmUniform();
-    const double stheta = sqrt(1. - ctheta * ctheta);
-    stack[0].kx = cos(phi) * stheta;
-    stack[0].ky = sin(phi) * stheta;
-    stack[0].kz = ctheta;
   } else {
-    // Normalise the direction to 1.
-    stack[0].kx /= k; stack[0].ky /= k; stack[0].kz /= k;
+    // Check the given initial direction.
+    const double k = sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0);
+    if (fabs(k) < Small) {
+      // Direction has zero norm, draw a random direction.
+      const double phi = TwoPi * RndmUniform();
+      const double ctheta = 1. - 2. * RndmUniform();
+      const double stheta = sqrt(1. - ctheta * ctheta);
+      stack[0].kx = cos(phi) * stheta;
+      stack[0].ky = sin(phi) * stheta;
+      stack[0].kz = ctheta;
+    } else {
+      // Normalise the direction to 1.
+      stack[0].kx /= k; stack[0].ky /= k; stack[0].kz /= k;
+    }
   }
 
   // Status flag
@@ -688,7 +690,7 @@ AvalancheMicroscopic::TransportElectron(
           RotateGlobal2Local(kx, ky, kz);
  
           // Calculate the velocity vector in the local frame.
-          v = c1 * sqrt(energy);
+          const double v = c1 * sqrt(energy);
           vx = v * kx; vy = v * ky; vz = v * kz;
           
           a1 = vx * ex;
@@ -700,7 +702,7 @@ AvalancheMicroscopic::TransportElectron(
         } else {
           // No band structure, no magnetic field.
           // Calculate the velocity vector.
-          v = c1 * sqrt(energy);
+          const double v = c1 * sqrt(energy);
           vx = v * kx; vy = v * ky; vz = v * kz;
           
           a1 = vx * ex + vy * ey + vz * ez;
@@ -727,7 +729,8 @@ AvalancheMicroscopic::TransportElectron(
                                                   kx + ex * dt * SpeedOfLight,
                                                   ky + ey * dt * SpeedOfLight,
                                                   kz + ez * dt * SpeedOfLight, 
-                                                  dx, dy, dz, band), Small);
+                                                  newVx, newVy, newVz, band), 
+                                 Small);
           } else {
             newEnergy = std::max(energy + (a1 + a2 * dt) * dt, Small);
           }
@@ -765,7 +768,7 @@ AvalancheMicroscopic::TransportElectron(
           vz = vz * cwt - a2 * swt;
           // Rotate back to the lab frame.
           RotateLocal2Global(vx, vy, vz);
-          v = sqrt(vx * vx + vy * vy + vz * vz);
+          const double v = sqrt(vx * vx + vy * vy + vz * vz);
           newKx = vx / v; newKy = vy / v; newKz = vz / v;
           
           // Calculate the step in coordinate space.
@@ -780,9 +783,9 @@ AvalancheMicroscopic::TransportElectron(
           newKy = ky + ey * dt * SpeedOfLight;
           newKz = kz + ez * dt * SpeedOfLight;
           // Average velocity over the step.
-          vx = 0.5 * (vx + dx);
-          vy = 0.5 * (vy + dy);
-          vz = 0.5 * (vz + dz);
+          vx = 0.5 * (vx + newVx);
+          vy = 0.5 * (vy + newVy);
+          vz = 0.5 * (vz + newVz);
         } else {
           // Update the direction.
           a1 = sqrt(energy / newEnergy);
@@ -810,8 +813,8 @@ AvalancheMicroscopic::TransportElectron(
           // by means of iterative bisection.
           stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
           stack[iEl].t = t; stack[iEl].energy = energy;
-          dx = vx * dt; dy = vy * dt; dz = vz * dt;
-          d = sqrt(dx * dx + dy * dy + dz * dz);
+          double dx = vx * dt, dy = vy * dt, dz = vz * dt;
+          double d = sqrt(dx * dx + dy * dy + dz * dz);
           if (d > 0) {
             dx /= d; dy /= d; dz /= d;
           }
@@ -854,8 +857,8 @@ AvalancheMicroscopic::TransportElectron(
           // by means of iterative bisection.
           stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
           stack[iEl].t = t; stack[iEl].energy = energy;
-          dx = vx * dt, dy = vy * dt, dz = vz * dt;
-          d = sqrt(dx * dx + dy * dy + dz * dz);
+          double dx = vx * dt, dy = vy * dt, dz = vz * dt;
+          double d = sqrt(dx * dx + dy * dy + dz * dz);
           if (d > 0) {
             dx /= d; dy /= d; dz /= d;
           }
@@ -894,18 +897,23 @@ AvalancheMicroscopic::TransportElectron(
         }
 
         // Check if the electron has crossed a wire.
+        double xCross, yCross, zCross;
         if (sensor->IsWireCrossed(x, y, z, 
                                   x + vx * dt, y + vy * dt, z + vz * dt,
-                                  dx, dy, dz)) {
+                                  xCross, yCross, zCross)) {
           // If switched on, calculated the induced signal over this step.
           if (useSignal) {
-            dt = sqrt(pow(dx - x, 2) + pow(dy - y, 2) + pow(dz - z, 2)) / 
+            dt = sqrt(pow(xCross - x, 2) + 
+                      pow(yCross - y, 2) + 
+                      pow(zCross - z, 2)) / 
                  sqrt(vx * vx + vy * vy + vz * vz); 
-            sensor->AddSignal(-1, t, dt, 0.5 * (x + dx),
-                                         0.5 * (y + dy),
-                                         0.5 * (z + dz), vx, vy, vz);
+            sensor->AddSignal(-1, t, dt, 0.5 * (x + xCross),
+                                         0.5 * (y + yCross),
+                                         0.5 * (z + zCross), vx, vy, vz);
           }
-          stack[iEl].x = dx; stack[iEl].y = dy; stack[iEl].z = dz;
+          stack[iEl].x = xCross; 
+          stack[iEl].y = yCross; 
+          stack[iEl].z = zCross;
           stack[iEl].t = t + dt;
           stack[iEl].kx = newKx; 
           stack[iEl].ky = newKy; 
@@ -1090,8 +1098,9 @@ AvalancheMicroscopic::TransportElectron(
                   // Check if this location is inside the drift area.
                   if (!sensor->IsInArea(xDxc, yDxc, zDxc)) continue;
                   // Make sure we haven't jumped across a wire.
+                  double xCross, yCross, zCross;
                   if (sensor->IsWireCrossed(x, y, z, xDxc, yDxc, zDxc, 
-                                            dx, dy, dz)) {
+                                            xCross, yCross, zCross)) {
                     continue;
                   } 
                   newElectron.x0 = xDxc; newElectron.x = xDxc;
@@ -1165,7 +1174,7 @@ AvalancheMicroscopic::TransportElectron(
       
       if (!useBandStructure) {
         // Normalise the direction vector.
-        k = sqrt(kx * kx + ky * ky + kz * kz);
+        const double k = sqrt(kx * kx + ky * ky + kz * kz);
         kx /= k; ky /= k; kz /= k;
       }
       // Update the stack.
