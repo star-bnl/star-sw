@@ -498,15 +498,6 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
     loss += esec;
     nsec = 1;
   } else if (type == ElectronCollisionTypeExcitation) {
-    // Dissociative excitation: continuous loss distribution?
-    if (description[level][5] == 'D' &&
-        description[level][6] == 'I' &&
-        description[level][7] == 'S') {
-      if (fabs(loss * rgas[igas] - 12.) < Small &&
-          e > 2 * loss * rgas[igas]) {
-        loss += 2. * RndmUniform();
-      }
-    }
     // Follow the de-excitation cascade (if switched on).
     if (useDeexcitation && iDeexcitation[level] >= 0) {
       int fLevel = 0;
@@ -567,21 +558,20 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
 
   const double s1 = rgas[igas];
   const double s2 = (s1 * s1) / (s1 - 1.);
-  const double stheta0 = sqrt(1. - ctheta0 * ctheta0);
+  const double theta0 = acos(ctheta0);
   const double arg = std::max(1. - s1 * loss / e, Small);
   const double d = 1. - ctheta0 * sqrt(arg);
 
   // Update the energy. 
   e1 = std::max(e * (1. - loss / (s1 * e) - 2. * d / s2), Small);
   double q = std::min(sqrt((e / e1) * arg) / s1, 1.);
-  double stheta = q * stheta0;
-  
-  double ctheta = sqrt(1. - stheta * stheta);
+  const double theta = asin(q * sin(theta0));
+  double ctheta = cos(theta);
   if (ctheta0 < 0.) {
     const double u = (s1 - 1.) * (s1 - 1.) / arg;
-    if (ctheta0 * ctheta0 > u) ctheta *= -1.;
+    if (ctheta0 * ctheta0 > u) ctheta = -ctheta;
   }
-  
+  const double stheta = sin(theta); 
   // Calculate the direction after the collision.
   dz = std::min(dz, 1.); 
   const double argZ = sqrt(dx * dx + dy * dy);
@@ -596,10 +586,10 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
     dx = cphi * stheta;
     dy = sphi * stheta;
   } else {
-    const double a1 = stheta / argZ;
+    const double a = stheta / argZ;
     const double dz1 = dz * ctheta + argZ * stheta * sphi;
-    const double dy1 = dy * ctheta + a1 * (dx * cphi - dy * dz * sphi);
-    const double dx1 = dx * ctheta - a1 * (dy * cphi + dx * dz * sphi);
+    const double dy1 = dy * ctheta + a * (dx * cphi - dy * dz * sphi);
+    const double dx1 = dx * ctheta - a * (dy * cphi + dx * dz * sphi);
     dz = dz1; dy = dy1; dx = dx1;
   }
   
