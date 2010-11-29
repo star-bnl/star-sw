@@ -4,12 +4,14 @@
 
 #include <DAQ_READER/daq_det.h>
 
+// modelled after TOF...
+
 struct mtd_t {
 	int mode ;
 	int channels ;
 	int max_channels ;
 
-	// new in FY05
+
 	u_int ddl[2][12000] ;	// content of up to 4 fibers; was 10000 before FY09 but
 				// Jo Schambach claims the maximum can be 11745
 	u_int ddl_words[2] ;	// the count of words (32bit) for above
@@ -22,7 +24,7 @@ struct mtd_t {
 class daq_mtd : public daq_det {
 private:
 	class daq_dta *handle_raw(int sec, int rdo) ;
-	class daq_dta *handle_legacy() ;
+	class daq_dta *handle_legacy() ;	// in the sense of TOF
 
 	class daq_dta *raw ;
 	class daq_dta *legacy ;
@@ -48,7 +50,7 @@ public:
 	}
 
 	static const int MAX_SEC = 1 ;
-	static const int MAX_RDO = 2 ;
+	static const int MAX_RDO = 2 ;	// 1 in FY11
 
 
 } ;
