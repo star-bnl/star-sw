@@ -783,9 +783,9 @@ AvalancheMicroscopic::TransportElectron(
           newKy = ky + ey * dt * SpeedOfLight;
           newKz = kz + ez * dt * SpeedOfLight;
           // Average velocity over the step.
-          vx += 0.5 * newVx;
-          vy += 0.5 * newVy;
-          vz += 0.5 * newVz;
+          vx = 0.5 * (vx + newVx);
+          vy = 0.5 * (vy + newVy);
+          vz = 0.5 * (vz + newVz);
         } else {
           // Update the direction.
           a1 = sqrt(energy / newEnergy);

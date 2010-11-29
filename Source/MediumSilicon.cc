@@ -1895,13 +1895,15 @@ MediumSilicon::GetConductionBandDensityOfStates(const double e,
     // Density-of-states effective mass (cube)
     const double md3 = mLongX * mTransX * mTransX;
   
-    // Non-parabolicity parameter
-    double alpha = 0.;
-    if (useNonParabolicity) alpha = 0.5;
-
-    return ElectronMass * 
-           sqrt(ElectronMass * md3 * e * (1. + alpha * e) / 2.) * 
-           (1. + 2. * alpha * e) / (Pi2 * pow(HbarC, 3.));
+    if (useNonParabolicity) {
+      const double alpha = 0.5;
+      return ElectronMass * 
+             sqrt(ElectronMass * md3 * e * (1. + alpha * e) / 2.) * 
+             (1. + 2. * alpha * e) / (Pi2 * pow(HbarC, 3.));
+    } else {
+      return ElectronMass * sqrt(ElectronMass * md3 * e / 2.) / 
+             (Pi2 * pow(HbarC, 3.));
+    }      
   }
   
   return ElectronMass * sqrt(ElectronMass * e / 2.) / 
