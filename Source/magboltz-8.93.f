@@ -2299,7 +2299,7 @@ C IF LAST ENERGY BIN IS HIGH INCREASE INTEGRATION ENERGY RANGE
        WRITE(6,50)
    50  FORMAT(' WARNING ENERGY OUT OF RANGE,INCREASE ELECTRON ENERGY INT
      /EGRATION RANGE ')
-       STOP      
+C       STOP      
       ENDIF
 C LOOP                                                                 
   210 CONTINUE

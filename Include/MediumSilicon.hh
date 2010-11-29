@@ -83,7 +83,9 @@ class MediumSilicon : public Medium {
 
     void EnableNonParabolicity()  {useNonParabolicity = true;}
     void DisableNonParabolicity() {useNonParabolicity = false;}
-    
+    void EnableAnisotropy()  {useAnisotropy = true;}
+    void DisableAnisotropy() {useAnisotropy = false;} 
+
     // Get the electron energy (and its gradient) 
     // for a given (crystal) momentum
     double GetElectronEnergy(const double px, const double py, const double pz,

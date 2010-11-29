@@ -726,10 +726,10 @@ AvalancheMicroscopic::TransportElectron(
                                  a3 * (1. - cwt) + a4 * swt, Small);
           } else if (useBandStructure) {
             newEnergy = std::max(medium->GetElectronEnergy(
-                                                  kx + ex * dt * SpeedOfLight,
-                                                  ky + ey * dt * SpeedOfLight,
-                                                  kz + ez * dt * SpeedOfLight, 
-                                                  newVx, newVy, newVz, band), 
+                                              kx + ex * dt * SpeedOfLight,
+                                              ky + ey * dt * SpeedOfLight,
+                                              kz + ez * dt * SpeedOfLight, 
+                                              newVx, newVy, newVz, band), 
                                  Small);
           } else {
             newEnergy = std::max(energy + (a1 + a2 * dt) * dt, Small);
@@ -783,9 +783,9 @@ AvalancheMicroscopic::TransportElectron(
           newKy = ky + ey * dt * SpeedOfLight;
           newKz = kz + ez * dt * SpeedOfLight;
           // Average velocity over the step.
-          vx = 0.5 * (vx + newVx);
-          vy = 0.5 * (vy + newVy);
-          vz = 0.5 * (vz + newVz);
+          vx += 0.5 * newVx;
+          vy += 0.5 * newVy;
+          vz += 0.5 * newVz;
         } else {
           // Update the direction.
           a1 = sqrt(energy / newEnergy);

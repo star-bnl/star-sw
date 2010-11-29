@@ -221,8 +221,6 @@ class Medium {
 
     static int idCounter;
     
-    static double inverseElectronMass;
-
     // Id number
     int id;
     // Name

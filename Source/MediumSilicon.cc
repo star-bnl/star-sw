@@ -566,7 +566,7 @@ MediumSilicon::SetMaxElectronEnergy(const double e) {
   }
 
   eFinal = e;
-  // Determine the energy interval size
+  // Determine the energy interval size.
   eStep = eFinal / nEnergySteps;
 
   isChanged = true;
@@ -580,68 +580,56 @@ MediumSilicon::GetElectronEnergy(
                const double px, const double py, const double pz, 
                double& vx, double& vy, double& vz, const int band) {
 
-  double e = 0.;
-  double a = 0.;
+  double mx = ElectronMass, my = ElectronMass, mz = ElectronMass;
+  if (useAnisotropy) {
+    switch (band) {
+      case 0:
+      case 1:
+        // X 100, -100
+        mx *= mLongX; my *= mTransX; mz *= mTransX;
+        break;
+      case 2:
+      case 3:
+        // X 010, 0-10
+        mx *= mTransX; my *= mLongX; mz *= mTransX;
+        break;
+      case 4:
+      case 5:
+        // X 001, 00-1
+        mx *= mTransX; my *= mTransX; mz *= mLongX;
+        break;
+      default:
+        std::cerr << className << "::GetElectronEnergy:\n";
+        std::cerr << "    Unknown band index " << band << "!\n";
+        break;
+    }
+  } else {
+    // Effective mass
+    const double mc = 3. / (1. / mLongX + 2. / mTransX);
+    mx *= mc; my *= mc; mz *= mc;
+  }
 
-  // Non-parabolicity parameter
-  double alpha = 0.;
   if (useNonParabolicity) {
-    alpha = 0.5;
+    // Non-parabolicity parameter
+    const double alpha = 0.5;
+
+    const double p2 = 0.5 * (px * px / mx + py * py / my + pz * pz / mz);
+    const double e = 0.5 * (sqrt(1. + 4 * alpha * p2) - 1.) / alpha;
+    const double a = SpeedOfLight / (1. + 2 * alpha * e);
+    vx = a * px / mx; vy = a * py / my; vz = a * pz / mz;
+    return e;
+  } else {
+    const double e = 0.5 * (px * px / mx + py * py / my + pz * pz / mz);
+    vx = SpeedOfLight * px / mx; 
+    vy = SpeedOfLight * py / my; 
+    vz = SpeedOfLight * pz / mz;
+    return e;
   }
-  
-  switch (band) {
-    case 0:
-    case 1:
-      // X 100, -100  
-      a = 0.5 * inverseElectronMass * (px * px / mLongX + 
-                                      (py * py + pz * pz) / mTransX);
-      if (useNonParabolicity) {
-        e = 0.5 * (sqrt(1. + 4 * alpha * a) - 1.) / alpha;
-      } else {
-        e = a;
-      }
-      a = SpeedOfLight * inverseElectronMass / (1. + 2 * alpha * e); 
-      vx = a * px / mLongX; vy = a * py / mTransX; vz = a * pz / mTransX;
-      return e;
-      break;
-    case 2:
-    case 3:
-      // X 010, 0-10
-      a = 0.5 * inverseElectronMass * (py * py / mLongX + 
-                                      (px * px + pz * pz) / mTransX);
-      if (useNonParabolicity) {
-        e = 0.5 * (sqrt(1. + 4 * alpha * a) - 1.) / alpha;
-      } else {
-        e = a;
-      }
-      a = SpeedOfLight * inverseElectronMass / (1. + 2 * alpha * e); 
-      vx = a * px / mTransX; vy = a * py / mLongX; vz = a * pz / mTransX;
-      return e;
-      break;
-    case 4:
-    case 5:
-      // X 001, 00-1
-      a = 0.5 * inverseElectronMass * (pz * pz / mLongX + 
-                                      (px * px + py * py) / mTransX);
-      if (useNonParabolicity) {
-        e = 0.5 * (sqrt(1. + 4 * alpha * a) - 1.) / alpha;
-      } else {
-        e = a;
-      } 
-      a = SpeedOfLight * inverseElectronMass / (1. + 2 * alpha * e); 
-      vx = a * px / mTransX; vy = a * py / mTransX; vz = a * pz / mLongX;
-      return e;
-      break;     
-    default:
-      std::cerr << className << "::GetElectronEnergy:\n";
-      std::cerr << "    Unknown band index " << band << "!\n";
-      break;
-  }
-  
-  vx = SpeedOfLight * inverseElectronMass * px;
-  vy = SpeedOfLight * inverseElectronMass * py;
-  vz = SpeedOfLight * inverseElectronMass * pz;
-  return 0.5 * inverseElectronMass * (px * px + py * py + pz * pz);
+
+  vx = SpeedOfLight * px / mx;
+  vy = SpeedOfLight * py / my;
+  vz = SpeedOfLight * pz / mz;
+  return 0.5 * (px * px + py * py + pz * pz) / ElectronMass;
 
 }
 
@@ -650,15 +638,17 @@ MediumSilicon::GetElectronMomentum(const double e,
                                    double& px, double& py, double& pz,
                                    const int band) {
 
-  double alpha = 0.;
-  if (useNonParabolicity) alpha = 0.5;
+  double pstar = sqrt(2. * ElectronMass * e);
+  if (useNonParabolicity) {
+    const double alpha = 0.5;
+    pstar *= sqrt(1. + alpha * e);
+  }
 
-  const double pstar = sqrt(2. * ElectronMass * e * (1. + alpha * e));
   const double ctheta = 1. - 2. * RndmUniform();
   const double stheta = sqrt(1. - ctheta * ctheta);
   const double phi = TwoPi * RndmUniform();
-  
-  if (band >= 0 && band < 6) {
+
+  if (useAnisotropy) {
     const double pl = pstar * sqrt(mLongX);
     const double pt = pstar * sqrt(mTransX);
     switch (band) {
@@ -668,7 +658,6 @@ MediumSilicon::GetElectronMomentum(const double e,
         px = pl * cos(phi) * stheta;
         py = pt * sin(phi) * stheta;
         pz = pt * ctheta;
-        return;
         break;
       case 2:
       case 3:
@@ -676,7 +665,6 @@ MediumSilicon::GetElectronMomentum(const double e,
         px = pt * cos(phi) * stheta;
         py = pl * sin(phi) * stheta;
         pz = pt * ctheta;
-        return;
         break;
       case 4:
       case 5:
@@ -684,20 +672,23 @@ MediumSilicon::GetElectronMomentum(const double e,
         px = pt * cos(phi) * stheta;
         py = pt * sin(phi) * stheta;
         pz = pl * ctheta;
-        return;
         break;
       default:
+        // Other band; hould not occur.
+        std::cerr << className << "::GetElectronMomentum:\n";
+        std::cerr << "    Unknown band index " << band << "!\n";
+        px = pstar * stheta * cos(phi);
+        py = pstar * stheta * sin(phi);
+        pz = pstar * ctheta;
         break;
     }
-  } 
+  } else {
+    pstar *= 3. / (1. / mLongX + 2. / mTransX);
+    px = pstar * cos(phi) * stheta;
+    py = pstar * sin(phi) * stheta;
+    pz = pstar * ctheta;
+  }
   
-  std::cerr << className << "::GetElectronMomentum:\n";
-  std::cerr << "    Unknown band index " << band << "!\n";
-  
-  px = pstar * stheta * cos(phi);
-  py = pstar * stheta * sin(phi);
-  pz = pstar * ctheta;
-
 }
 
 double
@@ -786,6 +777,7 @@ MediumSilicon::GetElectronCollision(const double e,
   // Get the energy interval.
   int iE = int(e / eStep);
   if (iE >= nEnergySteps) iE = nEnergySteps - 1;
+  if (iE < 0) iE = 0;
 
   // Sample the scattering process.
   if (band >= 0 && band < 6) {
@@ -861,49 +853,57 @@ MediumSilicon::GetElectronCollision(const double e,
       nsec = 1;
     }
 
-    if (e < loss) loss = e - 0.0001;
+    if (e < loss) loss = e - 0.00001;
     // Update the energy.
     e1 = e - loss;
     if (e1 < Small) e1 = Small;
   
     // Update the momentum.
-    double alpha = 0.;
-    if (useNonParabolicity) alpha = 0.5;
+    double pstar = sqrt(2. * ElectronMass * e1);
+    if (useNonParabolicity) {
+      const double alpha = 0.5;
+      pstar *= sqrt(1. + alpha * e1);
+    }
 
-    const double pstar = sqrt(2. * ElectronMass * e1 * (1. + alpha * e1));
     const double ctheta = 1. - 2. * RndmUniform();
     const double stheta = sqrt(1. - ctheta * ctheta);
     const double phi = TwoPi * RndmUniform();
 
-    const double pl = pstar * sqrt(mLongX);
-    const double pt = pstar * sqrt(mTransX);
-    switch (band) {
-      case 0:
-      case 1:
-        // 100
-        px = pl * cos(phi) * stheta;
-        py = pt * sin(phi) * stheta;
-        pz = pt * ctheta;
-        break;
-      case 2:
-      case 3:
-        // 010
-        px = pt * cos(phi) * stheta;
-        py = pl * sin(phi) * stheta;
-        pz = pt * ctheta;
-        break;
-      case 4:
-      case 5:
-        // 001
-        px = pt * cos(phi) * stheta;
-        py = pt * sin(phi) * stheta;
-        pz = pl * ctheta;
-        break;
-      default:
-        return false;
-        break;
+    if (useAnisotropy) {
+      const double pl = pstar * sqrt(mLongX);
+      const double pt = pstar * sqrt(mTransX);
+      switch (band) {
+        case 0:
+        case 1:
+          // 100
+          px = pl * cos(phi) * stheta;
+          py = pt * sin(phi) * stheta;
+          pz = pt * ctheta;
+          break;
+        case 2:
+        case 3:
+          // 010
+          px = pt * cos(phi) * stheta;
+          py = pl * sin(phi) * stheta;
+          pz = pt * ctheta;
+          break;
+        case 4:
+        case 5:
+          // 001
+          px = pt * cos(phi) * stheta;
+          py = pt * sin(phi) * stheta;
+          pz = pl * ctheta;
+          break;
+        default:
+          return false;
+          break;
+      }
+    } else {
+      pstar *= 3. / (1. / mLongX + 2. / mTransX);
+      px = pstar * cos(phi) * stheta;
+      py = pstar * sin(phi) * stheta;
+      pz = pstar * ctheta;
     }
-    
     return true;
 
   } 
@@ -1635,7 +1635,7 @@ MediumSilicon::ElectronScatteringRates() {
   nLevelsX = 0;
   // Fill the scattering rates table
   ElectronAcousticScatteringRatesX();
-  // ElectronImpurityScatteringRates();
+  ElectronImpurityScatteringRates();
   ElectronIntervalleyScatteringRatesXX();
   ElectronIonisationRates();
 

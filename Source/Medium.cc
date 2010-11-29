@@ -11,9 +11,6 @@ namespace Garfield {
 
 int Medium::idCounter = -1;
 
-double Medium::inverseElectronMass = SpeedOfLight * SpeedOfLight / 
-                                     ElectronMass;
-
 Medium::Medium() :
   className("Medium"), 
   id(++idCounter), name(""), 
@@ -680,11 +677,11 @@ Medium::GetElectronEnergy(const double px, const double py, const double pz,
     std::cerr << "    Unknown band index.\n";
   }
   
-  vx = inverseElectronMass * px;
-  vy = inverseElectronMass * py;
-  vz = inverseElectronMass * pz;
+  vx = SpeedOfLight * px / ElectronMass;
+  vy = SpeedOfLight * py / ElectronMass;
+  vz = SpeedOfLight * pz / ElectronMass;
   
-  return 0.5 * inverseElectronMass * (px * px + py * py + pz * pz);
+  return 0.5 * (px * px + py * py + pz * pz) / ElectronMass;
   
 }
 
@@ -745,6 +742,12 @@ Medium::GetElectronCollision(const double e, int& type, int& level,
   nsec = 0;
   esec = 0.;
   band = 0;
+  const double ctheta = 1. - 2 * RndmUniform();
+  const double stheta = sqrt(1. - ctheta * ctheta);
+  const double phi = TwoPi * RndmUniform();
+  dx = cos(phi) * stheta;
+  dy = sin(phi) * stheta;
+  dz = ctheta;
  
   if (debug) {
     std::cerr << className << "::GetElectronCollision:\n";
