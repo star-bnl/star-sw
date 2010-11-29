@@ -39,3 +39,5 @@ daq_hlt.o: ../DAQ_READER/daq_dta_structs.h
 daq_hlt.o: daq_hlt.h
 daq_hlt.o: ../DAQ_READER/daq_det.h
 daq_hlt.o: ../DAQ_READER/daq_det.h
+hlt_gl3.o: daq_hlt.h
+hlt_gl3.o: ../DAQ_READER/daq_det.h
