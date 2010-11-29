@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.21 2010/11/26 21:12:36 hmasui Exp $
+// $Id: bfcMixer_Tpx.C,v 1.22 2010/11/29 15:24:34 didenko Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -13,9 +13,9 @@ StChain  *Chain=0;
 class StBFChain;
 StBFChain *chain1, *chain2, *chain3;
 //_____________________________________________________________________
-void bfcMixer_Tpx(const Int_t Nevents=1,
-		  const Char_t *daqfile="/star/rcf/test/daq/2009/emb/st_physics_adc_10128048_raw_1320001.daq",
-		  const Char_t *tagfile="/star/rcf/test/daq/2009/emb/st_physics_adc_10128048_raw_1320001.tags.root",
+void bfcMixer_Tpx(const Int_t Nevents=100,
+		  const Char_t *daqfile="/star/rcf/test/daq/2009/embed/st_physics_adc_10128048_raw_1320001.daq",
+		  const Char_t *tagfile="/star/rcf/test/daq/2009/embed/st_physics_adc_10128048_raw_1320001.tags.root",
 		  const Double_t pt_low=0.1,
 		  const Double_t pt_high=5.0,
                   const Double_t eta_low=-1.5,
@@ -28,34 +28,21 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
                   const std::vector<Int_t> triggers = 0,
                   const Char_t *prodName = "P08iepp",
                   const Char_t* type = "FlatPt"){
-  // Separate DB timestamp to add it in both chain1 and chain3
-  TString DbVP08iepp("DbV20081117 ");
-  TString DbVP08iedAu("DbV20090213 ");
-  TString DbVP10iapp("DbV20091001 ");
-  TSTring DbVP10icpp("DbV20100301 ");
-  TString DbVP10ihAuAu39("DbV20100909 ");
-  TString DbVP10ihAuAu11("DbV20100821 ");
-  TString DbVP10ihAuAu7("DbV20100821 ");
-
   // production chains for P08ic - p+p, Au+Au 9 GeV and d+Au
-  TString prodP08iepp("B2008a ITTF IAna ppOpt l3onl emcDY2 fpd ftpc trgd ZDCvtx NosvtIT NossdIT Corr4 OSpaceZ2 OGridLeak3D VFMCE -hitfilt");
+  TString prodP08iepp("DbV20081117 B2008a ITTF IAna ppOpt l3onl emcDY2 fpd ftpc trgd ZDCvtx NosvtIT NossdIT Corr4 OSpaceZ2 OGridLeak3D VFMCE -hitfilt");
 //  TString prodP08icpp("DbV20080712,pp2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine,VFMCE,TpxClu -VFPPV -hitfilt");
 //  TString prodP08icAuAu9("DbV20080709 P2008 ITTF VFMCE -hitfilt");
 //  TString prodP08icAuAu200("DbV20070101 P2008 ITTF VFMCE -hitfilt");  
 //  TString prodP08icdAu("DbV20080712 P2008 ITTF OSpaceZ2 OGridLeak3D beamLine, VFMCE TpxClu -VFMinuit -hitfilt");
-  TString prodP08iedAu("P2008 ITTF OSpaceZ2 OGridLeak3D beamLine VFMCE TpxClu -VFMinuit -hitfilt");
-  TString prodP10iapp("pp2009c TpcRS ITTF OSpaceZ2 OGridLeak3D beamLine, VFMCE TpcRS -VFMinuit -hitfilt");
-
-  // production chain for P10ic p+p RFF & FF
-  TString prodP10icpp("pp2009c ITTF BEmcChkStat btof Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -hitfilt");
+  TString prodP08iedAu("DbV20090213 P2008 ITTF OSpaceZ2 OGridLeak3D beamLine VFMCE TpxClu -VFMinuit -hitfilt");
+  TString prodP10iapp("DbV20091001 pp2009c TpcRS ITTF OSpaceZ2 OGridLeak3D beamLine, VFMCE TpcRS -VFMinuit -hitfilt");
 
   // BES Run10 chains
-  TString prodP10ihAuAu39("P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
-  TString prodP10ihAuAu11("P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
-  TString prodP10ihAuAu7("P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
+  TString prodP10ihAuAu39("DbV20100909 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
+  TString prodP10ihAuAu11("DbV20100821 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
+  TString prodP10ihAuAu7("DbV20100821 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
 
   TString geomP08ic("ry2008");
-  TString geomP10ic("ry2009a");
   TString geomP10ih("ry2010");
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
@@ -63,17 +50,16 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   chain2Opt += " ";
 
   TString chain3Opt("");
-//  if (prodName == "P08icpp")           { chain1Opt.Prepend(DbVP08iepp);      chain3Opt = prodP08icpp;       chain2Opt += geomP08ic; }
-  if (prodName == "P08iepp")           { chain1Opt.Prepend(DbVP08iepp);      chain3Opt = prodP08iepp;       chain2Opt += geomP08ic; }
-//  else if (prodName == "P08icAuAu9")   { chain1Opt.Prepend(DbVP08icAuAu9);   chain3Opt = prodP08icAuAu9;    chain2Opt += geomP08ic; }
-//  else if (prodName == "P08icdAu")     { chain1Opt.Prepend(DbVP08icdAu);     chain3Opt = prodP08icdAu;      chain2Opt += geomP08ic; }
-  else if (prodName == "P08iedAu")     { chain1Opt.Prepend(DbVP08iedAu);     chain3Opt = prodP08iedAu;      chain2Opt += geomP08ic; }
-//  else if (prodName == "P08icAuAu200") { chain1Opt.Prepend(DbVP08icAuAu200); chain3Opt = prodP08icAuAu200;  chain2Opt += geomP08ic; }
-  else if (prodName == "P10iapp")      { chain1Opt.Prepend(DbVP10iapp);      chain3Opt = prodP10iapp;       chain2Opt += geomP10ih; }
-  else if (prodName == "P10icpp")      { chain1Opt.Prepend(DbVP10icpp);      chain3Opt = prodP10icpp;       chain2Opt += geomP10ic; }
-  else if (prodName == "P10ihAuAu39")  { chain1Opt.Prepend(DbVP10ihAuAu39);  chain3Opt = prodP10ihAuAu39;   chain2Opt += geomP10ih; }
-  else if (prodName == "P10ihAuAu11")  { chain1Opt.Prepend(DbVP10ihAuAu11);  chain3Opt = prodP10ihAuAu11;   chain2Opt += geomP10ih; }
-  else if (prodName == "P10ihAuAu7")   { chain1Opt.Prepend(DbVP10ihAuAu7);   chain3Opt = prodP10ihAuAu7;    chain2Opt += geomP10ih; }
+  if (prodName == "P08icpp")           { chain3Opt = prodP08icpp;       chain2Opt += geomP08ic; }
+  else if (prodName == "P08iepp")      { chain3Opt = prodP08iepp;       chain2Opt += geomP08ic; }
+  else if (prodName == "P08icAuAu9")   { chain3Opt = prodP08icAuAu9;    chain2Opt += geomP08ic; }
+  else if (prodName == "P08icdAu")     { chain3Opt = prodP08icdAu;      chain2Opt += geomP08ic; }
+  else if (prodName == "P08iedAu")     { chain3Opt = prodP08iedAu;      chain2Opt += geomP08ic; }
+  else if (prodName == "P08icAuAu200") { chain3Opt = prodP08icAuAu200;  chain2Opt += geomP08ic; }
+  else if (prodName == "P10iapp")      { chain3Opt = prodP10iapp;       chain2Opt += geomP10ih; }
+  else if (prodName == "P10ihAuAu39")  { chain3Opt = prodP10ihAuAu39;   chain2Opt += geomP10ih; }
+  else if (prodName == "P10ihAuAu11")  { chain3Opt = prodP10ihAuAu11;   chain2Opt += geomP10ih; }
+  else if (prodName == "P10ihAuAu7")   { chain3Opt = prodP10ihAuAu7;    chain2Opt += geomP10ih; }
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
@@ -81,17 +67,16 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   chain3Opt += ",Embedding,TpcMixer,GeantOut,MiniMcMk,McAna,-in,NoInput,useInTracker,nodefault"; 
   chain3Opt += ",";
 
-//  if (prodName == "P08icpp")           { chain3Opt.Prepend(DbVP08iepp);      chain3Opt += geomP08ic; }
-  if (prodName == "P08iepp")           { chain3Opt.Prepend(DbVP08iepp);      chain3Opt += geomP08ic; }
-//  else if (prodName == "P08icAuAu9")   { chain3Opt.Prepend(DbVP08icAuAu9);   chain3Opt += geomP08ic; }
-//  else if (prodName == "P08icdAu")     { chain3Opt.Prepend(DbVP08icdAu);     chain3Opt += geomP08ic; }
-  else if (prodName == "P08iedAu")     { chain3Opt.Prepend(DbVP08iedAu);     chain3Opt += geomP08ic; }
-//  else if (prodName == "P08icAuAu200") { chain3Opt.Prepend(DbVP08icAuAu200); chain3Opt += geomP08ic; }
-  else if (prodName == "P10iapp")      { chain3Opt.Prepend(DbVP10iapp);      chain3Opt += geomP10ih; }
-  else if (prodName == "P10icpp")      { chain3Opt.Prepend(DbVP10icpp);      chain3Opt += geomP10ic; }
-  else if (prodName == "P10ihAuAu39")  { chain3Opt.Prepend(DbVP10ihAuAu39);  chain3Opt += geomP10ih; }
-  else if (prodName == "P10ihAuAu11")  { chain3Opt.Prepend(DbVP10ihAuAu11);  chain3Opt += geomP10ih; }
-  else if (prodName == "P10ihAuAu7")   { chain3Opt.Prepend(DbVP10ihAuAu7);   chain3Opt += geomP10ih; }
+  if (prodName == "P08icpp")           { chain3Opt += geomP08ic; }
+  else if (prodName == "P08iepp")      { chain3Opt += geomP08ic; }
+  else if (prodName == "P08icAuAu9")   { chain3Opt += geomP08ic; }
+  else if (prodName == "P08icdAu")     { chain3Opt += geomP08ic; }
+  else if (prodName == "P08iedAu")     { chain3Opt += geomP08ic; }
+  else if (prodName == "P08icAuAu200") { chain3Opt += geomP08ic; }
+  else if (prodName == "P10iapp")      { chain3Opt += geomP10ih; }
+  else if (prodName == "P10ihAuAu39")  { chain3Opt += geomP10ih; }
+  else if (prodName == "P10ihAuAu11")  { chain3Opt += geomP10ih; }
+  else if (prodName == "P10ihAuAu7")   { chain3Opt += geomP10ih; }
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
@@ -244,9 +229,4 @@ void bfcMixer_Tpx(const Int_t Nevents=1,
   gSystem->Exec("date");
 }
 
-// $Log: bfcMixer_Tpx.C,v $
-// Revision 1.21  2010/11/26 21:12:36  hmasui
-// Fix a bug for if loop. Add run9 p+p chain
-//
-// Revision 1.20  2010/11/24 19:15:35  hmasui
-// Separate DbV timestamp from the main chain string in order to include it into chain1
+//$LOG:$
