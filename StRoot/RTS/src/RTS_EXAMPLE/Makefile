@@ -78,6 +78,8 @@ rts_example.o: ../DAQ_TPC/daq_tpc.h
 rts_example.o: ../DAQ_TPX/daq_tpx.h
 rts_example.o: ../DAQ_TRG/daq_trg.h
 rts_example.o: ../DAQ_HLT/daq_hlt.h
+rts_example.o: ../DAQ_FGT/daq_fgt.h
+rts_example.o: ../DAQ_MTD/daq_mtd.h
 sfs_stuff.o: ../../../../StRoot/RTS/include/rtsLog.h
 sfs_stuff.o: ../DAQ_READER/daqReader.h
 sfs_stuff.o: ../DAQ_READER/daqConfig.h

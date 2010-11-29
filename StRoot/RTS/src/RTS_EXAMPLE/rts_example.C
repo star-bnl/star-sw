@@ -32,6 +32,8 @@
 #include <DAQ_TPX/daq_tpx.h>
 #include <DAQ_TRG/daq_trg.h>
 #include <DAQ_HLT/daq_hlt.h>
+#include <DAQ_FGT/daq_fgt.h>
+#include <DAQ_MTD/daq_mtd.h>
 
 // I wrapped more complicated detectors inside their own functions
 // for this example
@@ -45,10 +47,11 @@ static int trg_doer(daqReader *rdr, const char *do_print) ;
 static int ftp_doer(daqReader *rdr, const char *do_print) ;
 static int pmd_doer(daqReader *rdr, const char *do_print) ;
 static int hlt_doer(daqReader *rdr, const char *do_print) ;
-
 static int emc_pseudo_doer(daqReader *rdr, const char *do_print) ;
 static int pp2pp_doer(daqReader *rdr, const char *do_print) ;
 static int l3_doer(daqReader *rdr, const char *do_print) ;
+static int fgt_doer(daqReader *rdr, const char *do_print) ;
+static int mtd_doer(daqReader *rdr, const char *do_print) ;
 
 int main(int argc, char *argv[])
 {
@@ -218,8 +221,7 @@ int main(int argc, char *argv[])
 				while(dd->iterate()) {
 					tof_t *tof = (tof_t *)dd->Void ;
 					for(int r=0;r<4;r++) {
-
-						printf("RDO %d: words %d:\n",r+1,tof->ddl_words[r]) ;
+						printf("TOF RDO %d: words %d:\n",r+1,tof->ddl_words[r]) ;
 						for(u_int i=0;i<tof->ddl_words[r];i++) {
 							printf("\t%d: 0x%08X [%u dec]\n",i,tof->ddl[r][i],tof->ddl[r][i]) ;
 						}
@@ -255,7 +257,16 @@ int main(int argc, char *argv[])
 
 		/*************************** HLT10 **************************/
 		if(hlt_doer(evp,print_det)) LOG(INFO,"HLT_FY10 found") ;
+
+		/*************************** FGT **************************/
+		if(fgt_doer(evp,print_det)) LOG(INFO,"FGT found") ;
+
+		/*************************** MTD **************************/
+		if(mtd_doer(evp,print_det)) LOG(INFO,"MTD found") ;
 		
+
+
+
 		/************  PSEUDO: SHOULD ONLY BE USED FOR BACKWARD COMPATIBILITY! ************/
 #ifdef INSIST_ON_EMC_PSEUDO
 		if(emc_pseudo_doer(evp,print_det)) LOG(INFO,"EMC found (any detector)") ;
@@ -890,3 +901,62 @@ static int l3_doer(daqReader *rdr, const char *do_print)
 
 	return found ;
 }
+
+static int fgt_doer(daqReader *rdr, const char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"fgt")) ;	// leave as is...
+	else do_print = 0 ;
+
+
+	// right now only the "raw" pointer is available/known
+	dd = rdr->det("fgt")->get("raw") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found = 1 ;
+
+			// point to the start of the DDL raw data
+			u_char *ptr = (u_char *) dd->Void ;	
+
+
+			if(do_print) {
+				printf("FGT: RDO %d: %d bytes\n",dd->rdo,dd->ncontent) ;
+			}
+
+		}
+	}
+
+	return found ;
+}
+
+static int mtd_doer(daqReader *rdr, const char *do_print)
+{
+	int found = 0 ;
+	daq_dta *dd ;
+
+	if(strcasestr(do_print,"mtd")) ;	// leave as is...
+	else do_print = 0 ;
+
+
+	// right now only the "raw" pointer is available/known
+	dd = rdr->det("mtd")->get("raw") ;
+	if(dd) {
+		while(dd->iterate()) {
+			found = 1 ;
+
+			// point to the start of the DDL raw data
+			u_int *ptr = (u_int *) dd->Void ;	
+
+
+			if(do_print) {
+				printf("MTD: RDO %d: %d bytes\n",dd->rdo,dd->ncontent) ;
+			}
+
+		}
+	}
+
+	return found ;
+}
+
