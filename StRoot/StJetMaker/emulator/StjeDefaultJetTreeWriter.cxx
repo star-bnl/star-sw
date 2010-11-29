@@ -1,4 +1,4 @@
-// $Id: StjeDefaultJetTreeWriter.cxx,v 1.11 2010/05/30 07:10:04 pibero Exp $
+// $Id: StjeDefaultJetTreeWriter.cxx,v 1.12 2010/11/29 02:40:26 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #include "StjeDefaultJetTreeWriter.h"
 
@@ -12,6 +12,7 @@
 
 #include "StMuTrackEmu.h"
 #include "StMuTowerEmu.h"
+#include "StMcTrackEmu.h"
 
 #include <StJetFinder/StProtoJet.h>
 
@@ -135,9 +136,9 @@ void StjeDefaultJetTreeWriter::fillJet(StJets &stjets, StProtoJet& pj)
       detectorId = kEndcapEmcTowerId;
     else
       detectorId = kUnknownId;
-      
-    StMuTrackEmu* track = particle->track();
-    if (track) {
+
+    // Add tracks
+    if (StMuTrackEmu* track = particle->track()) {
       TrackToJetIndex t2j( jets->GetLast(), muTrackIndex, detectorId, jet );
 
       t2j.SetPxPyPzE(particle->px(), particle->py(), particle->pz(), particle->e() );
@@ -158,14 +159,13 @@ void StjeDefaultJetTreeWriter::fillJet(StJets &stjets, StProtoJet& pj)
       t2j.setetaext ( track->etaext() );
       t2j.setphiext ( track->phiext() );
       t2j.setdEdx ( track->dEdx() );
-      t2j.setTrackId( track->id() );
 
       stjets.addTrackToIndex(t2j); // for backward compatibility
       jet->addTrack((TrackToJetIndex*)stjets.tracks()->Last());
     }
 
-    StMuTowerEmu* tower = particle->tower();
-    if (tower) {
+    // Add towers
+    if (StMuTowerEmu* tower = particle->tower()) {
       TowerToJetIndex t2j(jets->GetLast());
 
       t2j.SetPxPyPzE(particle->px(), particle->py(), particle->pz(), particle->e());
@@ -178,6 +178,19 @@ void StjeDefaultJetTreeWriter::fillJet(StJets &stjets, StProtoJet& pj)
 
       stjets.addTowerToIndex(t2j); // for backward compatibility
       jet->addTower((TowerToJetIndex*)stjets.towers()->Last());
+    }
+
+    // Add Pythia particles
+    if (StMcTrackEmu* mctrack = particle->mctrack()) {
+      TrackToJetIndex t2j( jets->GetLast(), muTrackIndex, detectorId, jet );
+
+      t2j.SetPtEtaPhiE(mctrack->pt(),mctrack->eta(),mctrack->phi(),mctrack->e());
+      t2j.setId(mctrack->id());
+      t2j.setPdg(mctrack->pdg());
+      t2j.setStatus(mctrack->status());
+
+      stjets.addTrackToIndex(t2j); // for backward compatibility
+      jet->addTrack((TrackToJetIndex*)stjets.tracks()->Last());
     }
 
     if (mDetId==kTpcIdentifier) {
