@@ -1,7 +1,12 @@
-* $Id: btofgeo6.g,v 1.8 2010/06/23 19:09:49 jwebb Exp $
+* $Id: btofgeo6.g,v 1.9 2010/11/29 16:05:22 geurts Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo6.g,v $
+* Revision 1.9  2010/11/29 16:05:22  geurts
+* [RT#1980]: two geometry fixes
+* * wrong sign in xpos calculation of one BTFT volume in BUND (undercarriage support tray)
+* * wrong dx dimension used in BRSG (sensitive gas layer): mod7_IGHgt is too large, changed to mod7_SPRMax
+*
 * Revision 1.8  2010/06/23 19:09:49  jwebb
 * Resolved minor bug in the cooling tubes for the tof.  The inner radii of
 * the cooling tubes are passed to the block creating the water volume, but
@@ -1207,7 +1212,7 @@ Block BUND   is  Undercarriage support tray - same both for CTB and TOF
                  Y = -ypos dx = tray_Foot2Thk/2 dy = tray_FootThk/2
                  Position  BTFT   X = xpos,
                  Y = +ypos dx = tray_Foot2Thk/2 dy = tray_FootThk/2
-                 xpos = (tray_SupFullH + tray_FootThk)/2 - tray_Foot2Thk 
+                 xpos = (tray_SupFullH - tray_FootThk)/2 - tray_Foot2Thk 
                  ypos = ypos - (tray_FootThk + tray_Foot3Len)/2
                  Position  BTFT   X = xpos,
                  Y = -ypos dx = tray_FootThk/2 dy = tray_Foot3Len/2
@@ -1469,7 +1474,7 @@ Block BRSG  is the sensitive gas layer in the TOFr module
       Attribute BRSG seen=0   colo=5
       Material  RPCgas
       Medium    sensitive IsVol=1
-      Shape     BOX    dx = mod7_IGHgt/2,
+      Shape     BOX    dx = mod7_SPRMax,
                         dy = mod7_IGWid/2,
                         dz = mod7_IGLen/2
       
