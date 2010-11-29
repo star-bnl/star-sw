@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: TrackToJetIndex.h,v 1.8 2009/09/05 18:18:06 pibero Exp $
+// $Id: TrackToJetIndex.h,v 1.9 2010/11/29 02:40:59 pibero Exp $
 #ifndef TRACKTOJETINDEX_H
 #define TRACKTOJETINDEX_H
 
@@ -64,6 +64,11 @@ public:
   TVector3 momentum() const { return Vect(); }
   TVector3 localMomentum() const;
 
+  // For particle jets
+  short id    () const { return trackIndex(); }	// line in Pythia record
+  short pdg   () const { return trackId();    }	// PDG code
+  short status() const { return flag();       }	// 1=stable, 2=unstable, 3=incoming parton
+
   void setJetIndex(int n)             { mJetIndex = n; }
   void setTrackIndex(int n)           { mTrackIndex = n; }
   void setDetectorId(StDetectorId v)  { mDetId = v; }
@@ -84,6 +89,11 @@ public:
   void setphiext(double v)            { mphiext = v; }
   void setdEdx(double v)              { mdEdx = v; }
   void setTrackId(int v)              { mTrackId = v; }
+
+  // For particle jets
+  void setId(short v)     { setTrackIndex(v); }
+  void setPdg(short v)    { setTrackId(v);    }
+  void setStatus(short v) { setFlag(v);       }
 
 private:
   int mJetIndex;
