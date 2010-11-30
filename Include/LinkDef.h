@@ -16,6 +16,7 @@
 #pragma link C++ class Garfield::MediumSilicon;
 #pragma link C++ class Garfield::OpticalData;
 
+#pragma link C++ class Garfield::Solid;
 #pragma link C++ class Garfield::SolidBox;
 #pragma link C++ class Garfield::SolidTube;
 #pragma link C++ class Garfield::GeometryBase;

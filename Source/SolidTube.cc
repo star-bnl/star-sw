@@ -32,19 +32,19 @@ SolidTube::SolidTube(const double cx, const double cy, const double cz,
   if (d < Small) {
     std::cerr << "SolidTube: Direction vector has zero norm.\n";
   } else {
-    dX = dx / Small; dY = dy / Small; dZ = dz / Small;
+    dX = dx / d; dY = dy / d; dZ = dz / d;
     double phi, theta;
-    const double dt = sqrt(dx * dx + dy * dy);
-    if (dt <= Small) {
+    const double dt = sqrt(dX * dX + dY * dY);
+    if (dt < Small) {
       phi = 0.;    
-      if (dZ < 0.) {
-        theta = - HalfPi;
+      if (dZ > 0.) {
+        theta = 0.;
       } else {
-        theta = HalfPi;
+        theta = Pi;
       }
     } else {
       phi = atan2(dY, dX);
-      theta = acos(dZ);
+      theta = atan2(dt, dZ);
     }
     cTheta = cos(theta); 
     sTheta = sin(theta);
@@ -121,12 +121,12 @@ SolidTube::GetDimensions(double& l1, double& l2, double& l3) {
 }
 
 bool
-SolidTube::GetDirection(double& x, double& y, double& z) {
+SolidTube::GetOrientation(double& ctheta, double& stheta,
+                          double& cphi, double& sphi) {
 
- x = sTheta * cPhi;
- y = sTheta * sPhi;
- z = cTheta;
- return true;
+  ctheta = cTheta; stheta = sTheta;
+  cphi = cPhi; sphi = sPhi;
+  return true;
 
 }
 

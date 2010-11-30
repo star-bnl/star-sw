@@ -23,6 +23,8 @@ class ViewGeometryShape : public TObject {
     TBuffer3D& GetBuffer(bool& ok);
 
   private:
+    std::string className;
+
     Solid* solid;
     int col;
 

@@ -8,6 +8,7 @@
 #include <TMath.h>
 
 #include "MediumMagboltz86.hh"
+#include "MagboltzInterface.hh"
 #include "Random.hh"
 #include "FundamentalConstants.hh"
 #include "GarfieldConstants.hh"

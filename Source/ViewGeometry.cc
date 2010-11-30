@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 
 #include <TBuffer3D.h>
 #include <TBuffer3DTypes.h>
@@ -7,6 +8,8 @@
 #include "GeometrySimple.hh"
 #include "Solid.hh"
 #include "Plotting.hh"
+#include "FundamentalConstants.hh"
+#include "GarfieldConstants.hh"
 #include "ViewGeometry.hh"
 
 namespace Garfield {
@@ -15,13 +18,15 @@ ViewGeometryShape::ViewGeometryShape() :
   TObject(),
   solid(0), col(kBlue) {
 
+  className = "ViewGeometryShape";
+
 }
 
 void
 ViewGeometryShape::SetSolid(Solid* s) {
 
   if (s == 0) {
-    std::cerr << "ViewGeometryShape::SetSolid:\n";
+    std::cerr << className << "::SetSolid:\n";
     std::cerr << "    Solid pointer is null.\n";
     return;
   }
@@ -47,24 +52,40 @@ ViewGeometryShape::GetBuffer(bool& ok) {
   buffer.fID = this;
   buffer.fColor = col;
   buffer.fTransparency = 0;
-  buffer.fLocalFrame = kFALSE;
+  buffer.fLocalFrame = kTRUE;
   buffer.SetLocalMasterIdentity();
-  buffer.fReflection = kFALSE;
-  buffer.SetSectionsValid(TBuffer3D::kCore);
-
   // Make sure the shape has been set.
   if (solid == 0) {
-    std::cerr << "ViewGeometryShape::GetBuffer:\n";
+    std::cerr << className << "::GetBuffer:\n";
     std::cerr << "    Solid is not defined.\n";
     return buffer;
   }
+  // Get the rotation.
+  double ctheta = 1., stheta = 0.;
+  double cphi = 1., sphi = 0.;
+  if (!solid->GetOrientation(ctheta, stheta, cphi, sphi)) {
+    std::cerr << className << "::GetBuffer:\n";
+    std::cerr << "    Could not determine solid orientation.\n";
+    return buffer;
+  }
+  buffer.fLocalMaster[0] = cphi * ctheta;
+  buffer.fLocalMaster[4] = sphi * ctheta;
+  buffer.fLocalMaster[8] =       -stheta;
+  buffer.fLocalMaster[1] = -sphi;
+  buffer.fLocalMaster[5] =  cphi;
+  buffer.fLocalMaster[9] =    0.;
+  buffer.fLocalMaster[2] = cphi * stheta;
+  buffer.fLocalMaster[6] = sphi * stheta;
+  buffer.fLocalMaster[10] =       ctheta;
+  buffer.fReflection = kFALSE;
+  buffer.SetSectionsValid(TBuffer3D::kCore);
 
   // Get the bounding box.
   double bbxmin, bbymin, bbzmin;
   double bbxmax, bbymax, bbzmax;
   if (!solid->GetBoundingBox(bbxmin, bbymin, bbzmin,
                              bbxmax, bbymax, bbzmax)) {
-    std::cerr << "ViewGeometryShape::GetBuffer:\n";
+    std::cerr << className << "::GetBuffer:\n";
     std::cerr << "    Could not determine bounding box.\n";
     return buffer;
   }
@@ -83,9 +104,34 @@ ViewGeometryShape::GetBuffer(bool& ok) {
     tube.fID = this;
     tube.fColor = col;
     tube.fTransparency = 0;
-    tube.fLocalFrame = kFALSE;
+    tube.fLocalFrame = kTRUE;
     tube.SetLocalMasterIdentity();
     tube.fReflection = kFALSE;
+    // Get the center coordinates.
+    double x0 = 0., y0 = 0., z0 = 0.;
+    if (!solid->GetCenter(x0, y0, z0)) {
+      std::cerr << className << "::GetBuffer:\n";
+      std::cerr << "    Could not determine tube center.\n";
+      return tube;
+    }
+    tube.fLocalMaster[12] = x0;
+    tube.fLocalMaster[13] = y0;
+    tube.fLocalMaster[14] = z0;
+    // Get the rotation.
+    if (!solid->GetOrientation(ctheta, stheta, cphi, sphi)) {
+      std::cerr << className << "::GetBuffer:\n";
+      std::cerr << "    Could not determine tube orientation.\n";
+      return tube;
+    }
+    tube.fLocalMaster[0] = cphi * ctheta;
+    tube.fLocalMaster[4] = sphi * ctheta;
+    tube.fLocalMaster[8] =       -stheta;
+    tube.fLocalMaster[1] = -sphi;
+    tube.fLocalMaster[5] =  cphi;
+    tube.fLocalMaster[9] =    0.;
+    tube.fLocalMaster[2] = cphi * stheta;
+    tube.fLocalMaster[6] = sphi * stheta;
+    tube.fLocalMaster[10] =       ctheta;
     tube.SetSectionsValid(TBuffer3D::kCore);
   
     tube.SetAABoundingBox(origin, halfLength);
@@ -93,7 +139,7 @@ ViewGeometryShape::GetBuffer(bool& ok) {
 
     double rmin, rmax, lz;
     if (!solid->GetDimensions(rmin, rmax, lz)) {
-      std::cerr << "ViewGeometryShape::GetBuffer:\n";
+      std::cerr << className << "::GetBuffer:\n";
       std::cerr << "    Could not determine tube dimensions.\n";
       return tube;
     }
@@ -110,7 +156,7 @@ ViewGeometryShape::GetBuffer(bool& ok) {
     double x0, y0, z0;
     if (!solid->GetDimensions(dx, dy, dz) || 
         !solid->GetCenter(x0, y0, z0)) {
-      std::cerr << "ViewGeometryShape::GetBuffer:\n";
+      std::cerr << className << "::GetBuffer:\n";
       std::cerr << "    Could not determine box dimensions.\n";
       return buffer;
     }
@@ -173,7 +219,7 @@ ViewGeometryShape::GetBuffer(bool& ok) {
     return buffer;
   }
  
-  std::cerr << "ViewGeometryShape::GetBuffer:\n";
+  std::cerr << className << "::GetBuffer:\n";
   std::cerr << "    Unknown type of solid.\n";
 
   return buffer;

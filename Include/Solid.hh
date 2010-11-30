@@ -22,8 +22,9 @@ class Solid {
 
     virtual bool GetCenter(double& x, double& y, double& z) = 0;
     virtual bool GetDimensions(double& l1, double& l2, double& l3) = 0;
-    virtual bool GetDirection(double& x, double& y, double& z) = 0;
-                            
+    virtual bool GetOrientation(double& ctheta, double& stheta,
+                                double& cphi, double& shpi) = 0;
+ 
     // Switch on/off debugging messages
     void EnableDebugging() {debug = true;}
     void DisableDebugging() {debug = false;}
