@@ -12,6 +12,9 @@
 #define TPX_ALTRO_DO_ADC	(1<<1)	// dump the ADCs into the altro_struct
 #define TPX_ALTRO_DO_FCF	(1<<2)	// run the CLUSTERfinder as well...
 
+#define TPX_MAX_TB	420
+#define TPX_DEF_TB	400
+
 #include <TPX/tpx_rdo.h>
 
 struct tpx_odd_fee_t {

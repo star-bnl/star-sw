@@ -46,8 +46,10 @@ static const int fee_check_count = sizeof(fee_check)/sizeof(fee_check[0]) ;
 
 static FILE *stripes_f ;
 
-void tpxStat::run_start(u_int rb_mask, int run_type)
+void tpxStat::run_start(u_int rb_mask, int r_type)
 {
+
+	run_type = r_type ;
 
 	memset(r,0,sizeof(r)) ;
 	sector = 0 ;	// will get this from the data!
@@ -199,6 +201,7 @@ for(int i=0;i<6;i++) {
 			u_int have, expect ;
 			
 			int warn = 0 ;
+			int p_err = 0 ;
 
 			have = r[i].a[a].c[c].count ;
 			if(r[i].a[a].should) {
@@ -208,16 +211,21 @@ for(int i=0;i<6;i++) {
 				expect = 0 ;
 			}
 
+			int row ;
+			int pad ;
+
+			tpx_from_altro(i,a,c,row,pad) ;
 
 			for(int j=0;j<tpx_odd_fee_count;j++) {
 				if((tpx_odd_fee[j].sector != sector) || (tpx_odd_fee[j].rdo != (i+1))) continue ;
+
 				for(int k=0;k<2;k++) {
 					int aid = tpx_odd_fee[j].altro_id_padplane ;
 					
 					if(a == (aid+k)) {
 						expect = 0 ;
 						if(c==0) {
-							LOG(WARN,"sec %2d, rdo %2d: altro %3d was marked bad in the gain file...",sector,i+1,a) ;
+							LOG(WARN,"[RDO %d] altro %3d was marked odd in the gain file...",i+1,a) ;
 						}
 					}
 				}
@@ -226,22 +234,37 @@ for(int i=0;i<6;i++) {
 			if(have != expect) {
 				warn = 1 ;
 				a_err = 1 ;
-				fprintf(ofile,"\t%sERROR: ",ANSI_RED) ;
-				LOG(WARN,"RDO %d: AID %3d:%2d: expect %d counts, have %d",i+1,a,c,expect,have) ;
-			}
-			else {	
-				if(have) {
-					if(run_type == RUN_TYPE_PED) {
-						if(r[i].a[a].c[c].min_adc < 10) warn = 1 ;
-						if(r[i].a[a].c[c].max_adc > 200) warn = 1 ;
-					}
-					if(warn) fprintf(ofile,"\t%sWARN: ",ANSI_CYAN) ;
-				}
+				p_err = 1 ;
+
+				LOG(WARN,"[RDO %d] AID %3d:%2d (r:p %d:%d): expect %d counts, have %d",i+1,a,c,
+				    row,pad,
+				    expect,have) ;
 			}
 
-			
+
+			if(have && expect) {
+				int ped_warn = 0 ;
+				if(run_type == RUN_TYPE_PED) {
+					if(r[i].a[a].c[c].min_adc < 10) ped_warn = 1 ;
+					if(r[i].a[a].c[c].max_adc > 200) ped_warn = 1 ;
+				}
+
+				if(ped_warn) {
+					LOG(WARN,"[RDO %d] AID %3d:%2d (r:p %d:%d) pedestal: min adc %3d, max adx %4d",
+					    i+1,a,c,row,pad,
+					    r[i].a[a].c[c].min_adc,
+					    r[i].a[a].c[c].max_adc) ;
+					warn = 1 ;
+				}
+
+
+			}
+
 
 			if(warn) {
+				if(p_err) fprintf(ofile,"\t%sERROR: ",ANSI_RED) ;
+				else fprintf(ofile,"\t%sWARN: ",ANSI_CYAN) ;			
+
 				err++ ;
 				fprintf(ofile,"AID %3d:%2d: expect %d counts, have %d; min %4u, max %4u\n%s",a,c,expect,have,
 					r[i].a[a].c[c].min_adc,
@@ -375,7 +398,7 @@ void tpxStat::accum(char *rdobuff, int bytes)
 		return ;
 	}
 
-	sector = rdo.sector ;
+//	sector = rdo.sector ;
 
 	if(rdo.rdo > 6) {
 		LOG(ERR,"rdo error: %d",rdo.rdo) ;
@@ -447,17 +470,17 @@ void tpxStat::accum(char *rdobuff, int bytes)
 		r[a.rdo].a[a.id].c[a.ch].count++ ;
 
 		TLOG() ;
-		/* I don't need this anymore
-		for(int i=0;i<a.count;i++) {
-			if(a.adc[i] > r[a.rdo].a[a.id].c[a.ch].max_adc) {
-				r[a.rdo].a[a.id].c[a.ch].max_adc = a.adc[i] ;
-			}
-			if(a.adc[i] < r[a.rdo].a[a.id].c[a.ch].min_adc) {
-				r[a.rdo].a[a.id].c[a.ch].min_adc = a.adc[i] ;
-			}
+		if(run_type == RUN_TYPE_PED) {
+			for(int i=0;i<a.count;i++) {
+				if(a.adc[i] > r[a.rdo].a[a.id].c[a.ch].max_adc) {
+					r[a.rdo].a[a.id].c[a.ch].max_adc = a.adc[i] ;
+				}
+				if(a.adc[i] < r[a.rdo].a[a.id].c[a.ch].min_adc) {
+					r[a.rdo].a[a.id].c[a.ch].min_adc = a.adc[i] ;
+				}
 
+			}
 		}
-		*/
 
 		if(fee_check_on) {
 		

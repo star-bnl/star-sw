@@ -96,10 +96,14 @@ tpxGain::tpxGain()
 
 	memset(bad_rdo_mask,0,sizeof(bad_rdo_mask)) ;
 
-	pulser_ped = TPX_TCU_LOC_PED ;
+	pulser_ped = TPX_PULSER_PED_START ;
+
+	pulser_ped_stop = TPX_TCU_LOC_PED_STOP ;
 	pulser_start = TPX_TCU_LOC_START ;
 	pulser_stop = TPX_TCU_LOC_STOP ;
 	pulser_time_0 = TPX_TCU_LOC_TIME_0 ;
+
+	clock_mode = TPX_CLOCK_TCU_LOC ;
 
 	return ;
 }
@@ -111,21 +115,26 @@ tpxGain::~tpxGain()
 	return ;
 }
 
-void tpxGain::clock_mode(int mode)
+void tpxGain::set_clock_mode(int mode)
 {
+	clock_mode = mode ;
+
 	switch(mode) {
 	default:
 	case TPX_CLOCK_TCU_LOC :	// default
+		pulser_ped_stop = TPX_TCU_LOC_PED_STOP ;
 		pulser_start = TPX_TCU_LOC_START ;
 		pulser_stop = TPX_TCU_LOC_STOP ;
 		pulser_time_0 = TPX_TCU_LOC_TIME_0 ;
 		break ;
 	case TPX_CLOCK_TCD :	
+		pulser_ped_stop = TPX_TCD_PED_STOP ;
 		pulser_start = TPX_TCD_START ;
 		pulser_stop = TPX_TCD_STOP ;
 		pulser_time_0 = TPX_TCD_TIME_0 ;
 		break ;
 	case TPX_CLOCK_TCU_RHIC :	// this changes...
+		pulser_ped_stop = TPX_TCU_RHIC_PED_STOP ;
 		pulser_start = TPX_TCU_RHIC_START ;	// don;t know yet!
 		pulser_stop = TPX_TCU_RHIC_STOP ;
 		pulser_time_0 = TPX_TCU_RHIC_TIME_0 ;
@@ -229,7 +238,7 @@ void tpxGain::init(int sec)
 void tpxGain::ev_done() 
 {
 	if(events==0) {
-		LOG(WARN,"Using hardcoded tb range: ped at %d, peak at [%3d:%3d], T0 at %f!",pulser_ped, pulser_start,pulser_stop,pulser_time_0) ;
+		LOG(WARN,"Using hardcoded tb range: ped at [%3d:%3d], peak at [%3d:%3d], T0 at %f!",pulser_ped, pulser_ped_stop, pulser_start,pulser_stop,pulser_time_0) ;
 	}
 
 	events++ ;
@@ -486,7 +495,8 @@ void tpxGain::calc()
 
 			struct aux *as = get_aux(s,r,p) ;
 
-			for(int i=pulser_ped;i<pulser_start;i++) {
+			// this is used for the pedestal
+			for(int i=pulser_ped;i<=pulser_ped_stop;i++) {
 				ped += (double) as->adc_store[i-pulser_ped] / (double) c ;
 				ped_cou++ ;
 			}
@@ -495,7 +505,8 @@ void tpxGain::calc()
 			
 			double charge, t0 ;
 			charge = t0 = 0.0 ;
-
+			
+			// and this is the peak
 			for(int i=pulser_start;i<=pulser_stop;i++) {
 				double val = (double) as->adc_store[i-pulser_ped] / (double) c - ped ; 
 				charge += val ;
@@ -987,7 +998,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.23 2010/09/17 09:50:13 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.24 2010/11/30 13:23:08 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {

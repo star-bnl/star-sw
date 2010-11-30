@@ -6,39 +6,44 @@
 #include "tpxCore.h"
 
 // clock types aka frequencies
-#define TPX_CLOCK_TCU_LOC	9216000
-#define TPX_CLOCK_TCU_RHIC	9370000	// mean of all
-#define TPX_CLOCK_TCD		9434800	// ?
-
+#define TPX_CLOCK_TCU_LOC	9215889	// exactly
+#define TPX_CLOCK_TCU_RHIC	9383000	// typical value
+#define TPX_CLOCK_TCD_OLD	9434800	// exactly; with the old, pre FY11, TCD
+#define TPX_CLOCK_TCD		9370000	// exactly
 
 
 // default is TCU local
-#define TPX_TCU_LOC_PED			92
+#define TPX_TCU_LOC_PED_STOP		96
 #define TPX_TCU_LOC_START		97
 #define TPX_TCU_LOC_STOP		101
 #define TPX_TCU_LOC_TIME_0		98.668442	// measured with run 10346005
 
 // in the (rare) case we are running with RHIC I use some average
-#define TPX_TCU_RHIC_PED		92
+// note that this is not well defined yet!
+#define TPX_TCU_RHIC_PED_STOP		97
 #define TPX_TCU_RHIC_START		98
 #define TPX_TCU_RHIC_STOP		102
 #define TPX_TCU_RHIC_TIME_0		99.0		// some number....
 
-
+// new, FY11, TCD
+#define TPX_TCD_PED_STOP		97
+#define TPX_TCD_START			98
+#define TPX_TCD_STOP			101
+#define TPX_TCD_TIME_0			98.8585		// measured around Nov 2010
 
 /* FY10 and previous value.
    In FY11 this will change due to:
    - longer cable from the TCD to the distribution box
    - new TCD
 */
-#define TPX_TCD_PED			92
-#define TPX_TCD_START			100
-#define TPX_TCD_STOP			103
-#define TPX_TCD_TIME_0			100.84	// or perhaps 100.90?
+#define TPX_TCD_OLD_START		100
+#define TPX_TCD_OLD_STOP		103
+#define TPX_TCD_OLD_TIME_0		100.84	// or perhaps 100.90?
+
 
 
 // accepted region: start must be the lowest, stop must be the highest
-#define TPX_PULSER_PED_START	92
+#define TPX_PULSER_PED_START	91
 #define TPX_PULSER_PED_STOP	103
 
 class tpxGain
@@ -135,11 +140,12 @@ public:
 	u_int c_run ;	// run of file
 
 	int pulser_ped ;	// first timebin with ped=0
+	int pulser_ped_stop ;	// last timebin for ped calc
 	int pulser_start ;	// timebin with peak
 	int pulser_stop ;	// last timebin which we use for the mean
 	double pulser_time_0 ;
 
-	void clock_mode(int mode) ;
+	void set_clock_mode(int mode) ;
 
 private:
 	void do_default(int sector) ;
@@ -151,6 +157,8 @@ private:
 	int sector ;
 	int events ;
 	int tb_start, tb_stop ;	// timebin window
+
+	int clock_mode ;
 
 //	struct tpx_odd_fee_t tpx_odd_fee[256] ;
 //	int tpx_odd_fee_count  ;
