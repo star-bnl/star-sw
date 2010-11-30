@@ -6,7 +6,7 @@
 // Simple macro to read jet trees in old format (StJets) and skim trees
 //
 
-void ReadStJets(int nevents = 10, const char* jetfile = "blah.jets.root", const char* skimfile = "blah.skim.root")
+void ReadStJets(int nevents = 10, const char* jetfile = "Jets_pt15_25_01.root", const char* skimfile = "Skim_pt15_25_01.root")
 {
   // Load shared libraries
   gSystem->Load("StJets");
@@ -58,12 +58,24 @@ void ReadStJets(int nevents = 10, const char* jetfile = "blah.jets.root", const 
 
 	// Loop over tracks
 	TObjArray tracks = stjets->tracks(iJet);
-	for (int iTrack = 0; iTrack < tracks.GetEntriesFast(); ++iTrack) {
-	  TrackToJetIndex* track = (TrackToJetIndex*)tracks.At(iTrack);
-	  cout << "Track #" << iTrack << ": id = " << track->trackId() << ", detId = " << track->detectorId()
-	       << ", pt = " << track->Pt() << ", eta = " << track->Eta() << ", phi = " << track->Phi()
-	       << endl;
-	} // End loop over tracks
+	if (strcmp(branch->GetName(),"PythiaConeJets") == 0) {
+	  for (int iTrack = 0; iTrack < tracks.GetEntriesFast(); ++iTrack) {
+	    TrackToJetIndex* track = (TrackToJetIndex*)tracks.At(iTrack);
+	    cout << "Particle #" << iTrack << ": id = " << track->id() << ", pdg = " << track->pdg()
+		 << ", status = " << track->status()
+		 << ", pt = " << track->Pt() << ", eta = " << track->Eta() << ", phi = " << track->Phi()
+		 << ", e = " << track->E() << ", m = " << track->M()
+		 << endl;
+	  } // End loop over tracks
+	}
+	else {
+	  for (int iTrack = 0; iTrack < tracks.GetEntriesFast(); ++iTrack) {
+	    TrackToJetIndex* track = (TrackToJetIndex*)tracks.At(iTrack);
+	    cout << "Track #" << iTrack << ": id = " << track->trackId() << ", detId = " << track->detectorId()
+		 << ", pt = " << track->Pt() << ", eta = " << track->Eta() << ", phi = " << track->Phi()
+		 << endl;
+	  } // End loop over tracks
+	}
 
 	// Loop over towers
 	TObjArray towers = stjets->towers(iJet);
