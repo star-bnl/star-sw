@@ -38,7 +38,7 @@ ViewCellWire::ViewCellWire(const double x, const double y, const double z,
 }
 
 TBuffer3D&
-ViewCellWire::GetBuffer(bool& ok) {
+ViewCellWire::GetBuffer(bool& ok, const bool debug) {
 
   ok = false;
 
@@ -68,7 +68,356 @@ ViewCellWire::GetBuffer(bool& ok) {
   wire.fHalfLength = l;
   wire.SetSectionsValid(TBuffer3D::kShapeSpecific);
   ok = true; 
+  if (debug) {
+    std::cout << className << "::GetBuffer:\n";
+    std::cout << "    Center: (" << x0 << ", " << y0 << ", " << z0 << ")\n";
+    std::cout << "    Radii:  " << wire.fRadiusInner << " - " 
+                                << wire.fRadiusOuter << "\n";
+  }
   return wire;
+
+}
+
+ViewCellPlane::ViewCellPlane(const double center, const bool vert,
+                             const double size) :
+  TObject(),
+  planeCenter(center), isVertical(vert), planeSize(10.) {
+
+  className = "ViewCellPlane";
+  if (size > 0.) {
+    planeSize = size;
+  } else {
+    std::cerr << className << ":\n";
+    std::cerr << "    Unphysical size (" << size << ").\n";
+  }
+
+}
+
+TBuffer3D&
+ViewCellPlane::GetBuffer(bool& ok, const bool debug) {
+
+  ok = false;
+  const int col = kGreen + 2;
+  static TBuffer3D plane(TBuffer3DTypes::kGeneric);
+  plane.ClearSectionsValid();
+  plane.fID = this;
+  plane.fColor = col;
+  plane.fTransparency = 50;
+  plane.fLocalFrame = kTRUE;
+  plane.SetLocalMasterIdentity();
+  plane.fReflection = kFALSE;
+  // Set the center.
+  double x0 = 0., y0 = 0., z0 = 0.;
+  if (isVertical) {
+    x0 += planeCenter;
+  } else {
+    y0 += planeCenter;
+  }
+  plane.fLocalMaster[12] = x0;
+  plane.fLocalMaster[13] = y0;
+  plane.fLocalMaster[14] = z0;
+  plane.SetSectionsValid(TBuffer3D::kCore);
+
+  // Set the bounding box.
+  const double bb = planeSize;
+  double origin[3] = {x0, y0, z0};
+  double halfLength[3] = {bb, bb, bb};
+  plane.SetAABoundingBox(origin, halfLength);
+  plane.SetSectionsValid(TBuffer3D::kBoundingBox);
+
+  plane.SetRawSizes(8, 3 * 8, 12, 3 * 12, 6, 6 * 6);
+  plane.SetSectionsValid(TBuffer3D::kRawSizes);
+  // Points
+  double dx = 0., dy = 0., dz = 0.;
+  const double planeWidth = 0.01 * planeSize;
+  if (isVertical) {
+    dy = dz = planeSize;
+    dx = planeWidth;
+  } else {
+    dx = dz = planeSize;
+    dy = planeWidth;
+  }
+  // Points
+  plane.fPnts[ 0] = -dx; plane.fPnts[ 1] = -dy; plane.fPnts[ 2] = -dz; 
+  plane.fPnts[ 3] = +dx; plane.fPnts[ 4] = -dy; plane.fPnts[ 5] = -dz; 
+  plane.fPnts[ 6] = +dx; plane.fPnts[ 7] = +dy; plane.fPnts[ 8] = -dz; 
+  plane.fPnts[ 9] = -dx; plane.fPnts[10] = +dy; plane.fPnts[11] = -dz; 
+  plane.fPnts[12] = -dx; plane.fPnts[13] = -dy; plane.fPnts[14] = +dz; 
+  plane.fPnts[15] = +dx; plane.fPnts[16] = -dy; plane.fPnts[17] = +dz; 
+  plane.fPnts[18] = +dx; plane.fPnts[19] = +dy; plane.fPnts[20] = +dz; 
+  plane.fPnts[21] = -dx; plane.fPnts[22] = +dy; plane.fPnts[23] = +dz;
+      
+  // Segments
+  plane.fSegs[ 0] = col; plane.fSegs[ 1] = 0; plane.fSegs[ 2] = 1; 
+  plane.fSegs[ 3] = col; plane.fSegs[ 4] = 1; plane.fSegs[ 5] = 2; 
+  plane.fSegs[ 6] = col; plane.fSegs[ 7] = 2; plane.fSegs[ 8] = 3; 
+  plane.fSegs[ 9] = col; plane.fSegs[10] = 3; plane.fSegs[11] = 0; 
+  plane.fSegs[12] = col; plane.fSegs[13] = 4; plane.fSegs[14] = 5; 
+  plane.fSegs[15] = col; plane.fSegs[16] = 5; plane.fSegs[17] = 6; 
+  plane.fSegs[18] = col; plane.fSegs[19] = 6; plane.fSegs[20] = 7; 
+  plane.fSegs[21] = col; plane.fSegs[22] = 7; plane.fSegs[23] = 4; 
+  plane.fSegs[24] = col; plane.fSegs[25] = 0; plane.fSegs[26] = 4; 
+  plane.fSegs[27] = col; plane.fSegs[28] = 1; plane.fSegs[29] = 5; 
+  plane.fSegs[30] = col; plane.fSegs[31] = 2; plane.fSegs[32] = 6; 
+  plane.fSegs[33] = col; plane.fSegs[34] = 3; plane.fSegs[35] = 7; 
+
+  // Polygons
+  plane.fPols[ 0] = col; plane.fPols[ 1] = 4;  plane.fPols[ 2] = 8;
+  plane.fPols[ 3] = 4  ; plane.fPols[ 4] = 9;  plane.fPols[ 5] = 0;
+  plane.fPols[ 6] = col; plane.fPols[ 7] = 4;  plane.fPols[ 8] = 9;
+  plane.fPols[ 9] = 5  ; plane.fPols[10] = 10; plane.fPols[11] = 1;
+  plane.fPols[12] = col; plane.fPols[13] = 4;  plane.fPols[14] = 10;
+  plane.fPols[15] = 6  ; plane.fPols[16] = 11; plane.fPols[17] = 2;
+  plane.fPols[18] = col; plane.fPols[19] = 4;  plane.fPols[20] = 11;
+  plane.fPols[21] = 7  ; plane.fPols[22] = 8;  plane.fPols[23] = 3;
+  plane.fPols[24] = col; plane.fPols[25] = 4;  plane.fPols[26] = 1;
+  plane.fPols[27] = 2  ; plane.fPols[28] = 3;  plane.fPols[29] = 0;
+  plane.fPols[30] = col; plane.fPols[31] = 4;  plane.fPols[32] = 7;
+  plane.fPols[33] = 6  ; plane.fPols[34] = 5;  plane.fPols[35] = 4;
+  plane.SetSectionsValid(TBuffer3D::kRaw);
+  if (debug) {
+    std::cout << className << "::GetBuffer:\n";
+    std::cout << "    Center: (" << x0 << ", " << y0 << ", " << z0 << ")\n";
+  }
+  ok = true; 
+  return plane;
+
+}
+
+ViewCellTube::ViewCellTube(const double x, const double y, const double z, 
+                           const double radius, const int nEdges) :
+  TObject(),
+  x0(x), y0(y), z0(z), r(1.), n(0) {
+
+  className = "ViewCellTube";
+  if (radius > 0.) {
+    r = radius;
+  } else {
+    std::cerr << className << ":\n";
+    std::cerr << "    Unphysical radius (" << radius << ").\n";
+  }
+
+  if (nEdges < 3 && nEdges != 0) {
+    std::cerr << className << ":\n";
+    std::cerr << "    Unphysical number of edges (" << nEdges << ").\n";
+  } else {
+    n = nEdges;
+  }
+
+}
+
+TBuffer3D&
+ViewCellTube::GetBuffer(bool& ok, const bool debug) {
+
+  if (n == 0) return GetBufferCylinder(ok, debug);
+  return GetBufferPolygon(ok, debug);
+
+}
+
+TBuffer3D&
+ViewCellTube::GetBufferCylinder(bool& ok, const bool debug) {
+
+  ok = false;
+  static TBuffer3DTube tube;
+  tube.ClearSectionsValid();
+  tube.fID = this;
+  tube.fColor = kGreen + 2;
+  tube.fTransparency = 50;
+  tube.fLocalFrame = kTRUE;
+  tube.SetLocalMasterIdentity();
+  tube.fReflection = kFALSE;
+  // Set the center.
+  tube.fLocalMaster[12] = x0;
+  tube.fLocalMaster[13] = y0;
+  tube.fLocalMaster[14] = z0;
+  tube.SetSectionsValid(TBuffer3D::kCore);
+  // Estimate the length.
+  const double l = 3 * r;
+  // Set the bounding box.
+  const double bb = sqrt(r * r + l * l);
+  double origin[3] = {x0, y0, z0};
+  double halfLength[3] = {bb, bb, bb};
+  tube.SetAABoundingBox(origin, halfLength);
+  tube.SetSectionsValid(TBuffer3D::kBoundingBox);
+  
+  tube.fRadiusInner = 0.98 * r;
+  tube.fRadiusOuter = 1.02 * r;
+  tube.fHalfLength = l;
+  tube.SetSectionsValid(TBuffer3D::kShapeSpecific);
+  if (debug) {
+    std::cout << className << "::GetBufferCylinder:\n";
+    std::cout << "    Center: (" << x0 << ", " << y0 << ", " << z0 << ")\n";
+    std::cout << "    Radii:  " << tube.fRadiusInner << " - " 
+                                << tube.fRadiusOuter << "\n";
+  }
+  ok = true; 
+  return tube;
+
+}
+
+TBuffer3D&
+ViewCellTube::GetBufferPolygon(bool& ok, const bool debug) {
+
+  const int col = kGreen + 2;
+  static TBuffer3D tube(TBuffer3DTypes::kGeneric);
+  tube.ClearSectionsValid();
+  tube.fID = this;
+  tube.fColor = col;
+  tube.fTransparency = 50;
+  tube.fLocalFrame = kTRUE;
+  tube.SetLocalMasterIdentity();
+  tube.fReflection = kFALSE;
+  // Set the center.
+  tube.fLocalMaster[12] = x0;
+  tube.fLocalMaster[13] = y0;
+  tube.fLocalMaster[14] = z0;
+  tube.SetSectionsValid(TBuffer3D::kCore);
+  // Estimate the length.
+  const double l = 3 * r;
+  // Set the bounding box.
+  const double bb = sqrt(r * r + l * l);
+  double origin[3] = {x0, y0, z0};
+  double halfLength[3] = {bb, bb, bb};
+  tube.SetAABoundingBox(origin, halfLength);
+  tube.SetSectionsValid(TBuffer3D::kBoundingBox);
+  
+  // Raw sizes
+  // 4 * n points (3 coordinates)
+  // 8 * n segments (3 components: color, start point, end point
+  // 4 * n polygons (6 components: color, segment count, 4 segment indices)
+  tube.SetRawSizes(4 * n, 4 * 3 * n, 8 * n, 8 * 3 * n, 4 * n, 4 * 6 * n);
+  tube.SetSectionsValid(TBuffer3D::kRawSizes);
+  // Points
+  const double w = 0.01;
+  for (int i = 0; i < n; ++i) {
+    double x1 = (1. - w) * r * cos(i * TwoPi / double(n));
+    double y1 = (1. - w) * r * sin(i * TwoPi / double(n));
+    double x2 = (1. + w) * r * cos(i * TwoPi / double(n));
+    double y2 = (1. + w) * r * sin(i * TwoPi / double(n));
+    // Inner points
+    // Front, index i
+    tube.fPnts[3 * i]     = x1;
+    tube.fPnts[3 * i + 1] = y1;
+    tube.fPnts[3 * i + 2] = -l;
+    // Back, index n + i
+    tube.fPnts[3 * (i + n)]     = x1;
+    tube.fPnts[3 * (i + n) + 1] = y1;
+    tube.fPnts[3 * (i + n) + 2] = +l;
+    // Outer points
+    // Front, index 2 * n + i
+    tube.fPnts[3 * (i + 2 * n)]     = x2;
+    tube.fPnts[3 * (i + 2 * n) + 1] = y2;
+    tube.fPnts[3 * (i + 2 * n) + 2] = -l;
+    // Back, index 3 * n + i
+    tube.fPnts[3 * (i + 3 * n)]     = x2;
+    tube.fPnts[3 * (i + 3 * n) + 1] = y2;
+    tube.fPnts[3 * (i + 3 * n) + 2] = +l; 
+  }
+  // Segments
+  for (int i = 0; i < n; ++i) {
+    tube.fSegs[3 *  i         ] = col;
+    tube.fSegs[3 * (i +     n)] = col;
+    tube.fSegs[3 * (i + 2 * n)] = col;
+    tube.fSegs[3 * (i + 3 * n)] = col;
+    tube.fSegs[3 * (i + 4 * n)] = col;
+    tube.fSegs[3 * (i + 5 * n)] = col;
+    tube.fSegs[3 * (i + 6 * n)] = col;
+    tube.fSegs[3 * (i + 7 * n)] = col;
+
+    // Connect same-side points at constant radius.
+    // Indices: i         -> inner, front
+    //          i + n     -> inner, back
+    //          i + 3 * n -> outer, front
+    //          i + 4 * n -> outer, back
+    tube.fSegs[3 *  i          + 1] = i;
+    tube.fSegs[3 * (i +     n) + 1] = i + n;
+    tube.fSegs[3 * (i + 3 * n) + 1] = i + 2 * n;
+    tube.fSegs[3 * (i + 4 * n) + 1] = i + 3 * n;
+
+    if (i == n - 1) {
+      tube.fSegs[3 *  i          + 2] = 0;
+      tube.fSegs[3 * (i +     n) + 2] = n;
+      tube.fSegs[3 * (i + 3 * n) + 2] = 2 * n;
+      tube.fSegs[3 * (i + 4 * n) + 2] = 3 * n;
+    } else {
+      tube.fSegs[3 *  i          + 2] = i         + 1;
+      tube.fSegs[3 * (i +     n) + 2] = i +     n + 1;
+      tube.fSegs[3 * (i + 3 * n) + 2] = i + 2 * n + 1;
+      tube.fSegs[3 * (i + 4 * n) + 2] = i + 3 * n + 1;
+    }
+    // Connect opposite points at same radius.
+    // Indices: 2 * n + i -> inner
+    //          5 * n + i -> outer 
+    tube.fSegs[3 * (i + 2 * n) + 1] = i;
+    tube.fSegs[3 * (i + 2 * n) + 2] = i +     n;
+    tube.fSegs[3 * (i + 5 * n) + 1] = i + 2 * n;
+    tube.fSegs[3 * (i + 5 * n) + 2] = i + 3 * n;
+    // Connect same-side points at constant phi.
+    // Indices: 6 * n + i -> front
+    //          7 * n + i -> back
+    tube.fSegs[3 * (i + 6 * n) + 1] = i;
+    tube.fSegs[3 * (i + 6 * n) + 2] = i + 2 * n;
+    tube.fSegs[3 * (i + 7 * n) + 1] = i +     n;
+    tube.fSegs[3 * (i + 7 * n) + 2] = i + 3 * n;
+  }
+  if (debug) {
+    std::cout << className << "::GetBufferPolygon:\n";
+    std::cout << "    Segment      Start      End\n";
+    for (int i = 0; i < 8 * n; ++i) {
+      std::cout << "      " << i 
+                << "      " << tube.fSegs[3 * i + 1] 
+                << "      " << tube.fSegs[3 * i + 2] << "\n";
+    }
+  }
+  // Polygons
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < 4; ++j) {
+      tube.fPols[6 * (j * n + i)] = col;
+      tube.fPols[6 * (j * n + i) + 1] = 4;
+    }
+
+    tube.fPols[6 *  i      + 2] = i;
+    tube.fPols[6 * (i + n) + 2] = i + 3 * n;
+    if (i == n - 1) {
+      tube.fPols[6 *  i      + 3] = 2 * n;
+      tube.fPols[6 * (i + n) + 3] = 5 * n;
+    } else {
+      tube.fPols[6 *  i      + 3] = 2 * n + i + 1;
+      tube.fPols[6 * (i + n) + 3] = 5 * n + i + 1;  
+    }
+    tube.fPols[6 *  i      + 4] = i + n;
+    tube.fPols[6 * (i + n) + 4] = i + 4 * n;
+    tube.fPols[6 *  i      + 5] = 2 * n + i;
+    tube.fPols[6 * (i + n) + 5] = 5 * n + i;
+  
+    tube.fPols[6 * (i + 2 * n) + 2] = i;
+    tube.fPols[6 * (i + 3 * n) + 2] = i + n;
+    if (i == n - 1) {
+      tube.fPols[6 * (i + 2 * n) + 3] = 6 * n;
+      tube.fPols[6 * (i + 3 * n) + 3] = 7 * n;
+    } else {
+      tube.fPols[6 * (i + 2 * n) + 3] = 6 * n + i + 1;
+      tube.fPols[6 * (i + 3 * n) + 3] = 7 * n + i + 1;
+    }
+    tube.fPols[6 * (i + 2 * n) + 4] = i + 3 * n;
+    tube.fPols[6 * (i + 3 * n) + 4] = i + 4 * n; 
+    tube.fPols[6 * (i + 2 * n) + 5] = i + 6 * n;
+    tube.fPols[6 * (i + 3 * n) + 5] = i + 7 * n;
+  }
+  if (debug) {
+    std::cout << className << "::GetBufferPolygon:\n";
+    std::cout << "    Polygon      S1      S2      S3      S4\n";
+    for (int i = 0; i < 4 * n; ++i) {
+      std::cout << "      " << i 
+                << "      " << tube.fPols[6 * i + 2] 
+                << "      " << tube.fPols[6 * i + 3] 
+                << "      " << tube.fPols[6 * i + 4]
+                << "      " << tube.fPols[6 * i + 5] << "\n";
+    }
+  }
+  tube.SetSectionsValid(TBuffer3D::kRaw);     
+  ok = true; 
+  return tube;
 
 }
 
@@ -82,7 +431,13 @@ ViewCell::ViewCell() :
   component(0) {
 
   plottingEngine.SetDefaultStyle();
-
+  nWires3d = 0;
+  nPlanes3d = 0;
+  nTubes3d = 0;
+  wires3d.clear();
+  planes3d.clear();
+  tubes3d.clear();
+  
 }
 
 ViewCell::~ViewCell() {
@@ -228,6 +583,11 @@ ViewCell::Plot(const bool use3d) {
 
   wires3d.clear();
   nWires3d = 0;
+  planes3d.clear();
+  nPlanes3d = 0;
+  tubes3d.clear();
+  nTubes3d = 0;
+
   // Get the number of wires.
   int nWires = component->GetNumberOfWires();
   // Loop over the wires.
@@ -264,9 +624,11 @@ ViewCell::Plot(const bool use3d) {
     component->GetPlaneX(i, xp, vp, label);
     for (int nx = nMinX; nx <= nMaxX; ++nx) {
       double x = xp + nx * sx;
-      if (x <= x0 || x >= x1) continue;
+      if (x < x0 || x > x1) continue;
       if (use3d) {
-
+        ViewCellPlane newPlane(x, true, (y1 - y0) / 2.);
+        planes3d.push_back(newPlane);
+        ++nPlanes3d; 
       } else {
         PlotLine(x, y0, x, y1);
       }
@@ -283,7 +645,9 @@ ViewCell::Plot(const bool use3d) {
       double y = yp + ny * sy;
       if (y < y0 || y > y1) continue;
       if (use3d) {
-      
+        ViewCellPlane newPlane(y, false, (x1 - x0) / 2.);
+        planes3d.push_back(newPlane);
+        ++nPlanes3d;
       } else {
         PlotLine(x0, y, x1, y);
       }
@@ -295,7 +659,9 @@ ViewCell::Plot(const bool use3d) {
   char label;
   if (component->GetTube(rt, vt, nt, label)) {
     if (use3d) {
-
+      ViewCellTube newTube(0., 0., 0., rt, nt);
+      tubes3d.push_back(newTube);
+      ++nTubes3d;
     } else {
       PlotTube(0., 0., rt, nt);
     }
@@ -314,7 +680,7 @@ ViewCell::Plot(const bool use3d) {
 void
 ViewCell::Paint(Option_t*) {
 
-  if (nWires3d <= 0) {
+  if (nWires3d <= 0 && nTubes3d <= 0 && nPlanes3d <= 0) {
     std::cerr << className << "::Paint:\n";
     std::cerr << "    There is nothing to paint.\n";
     return;
@@ -323,13 +689,39 @@ ViewCell::Paint(Option_t*) {
   TVirtualViewer3D* viewer = gPad->GetViewer3D();
   viewer->BeginScene();
 
-  for (int i = nWires3d; i--;) {
-    bool ok = false;
-    TBuffer3D& buffer = wires3d[i].GetBuffer(ok);
-    int req = viewer->AddObject(buffer);
-    if (req != TBuffer3D::kNone) {
-      std::cerr << className << "::Paint:\n";
-      std::cerr << "    Could not pass object to viewer.\n";
+  if (nWires3d > 0) {
+    for (int i = nWires3d; i--;) {
+      bool ok = false;
+      TBuffer3D& buffer = wires3d[i].GetBuffer(ok, debug);
+      int req = viewer->AddObject(buffer);
+      if (req != TBuffer3D::kNone) {
+        std::cerr << className << "::Paint:\n";
+        std::cerr << "    Could not pass wire object to viewer.\n";
+      }
+    }
+  }
+
+  if (nPlanes3d > 0) {
+    for (int i = nPlanes3d; i--;) {
+      bool ok = false;
+      TBuffer3D& buffer = planes3d[i].GetBuffer(ok, debug);
+      int req = viewer->AddObject(buffer);
+      if (req != TBuffer3D::kNone) {
+        std::cerr << className << "::Paint:\n";
+        std::cerr << "    Could not pass plane object to viewer.\n";
+      }
+    }
+  }
+
+  if (nTubes3d > 0) {
+    for (int i = nTubes3d; i--;) {
+      bool ok = false;
+      TBuffer3D& buffer = tubes3d[i].GetBuffer(ok, debug);
+      int req = viewer->AddObject(buffer);
+      if (req != TBuffer3D::kNone) {
+        std::cerr << className << "::Paint:\n";
+        std::cerr << "    Could not pass tube object to viewer.\n";
+      }
     }
   }
 

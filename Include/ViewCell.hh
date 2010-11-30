@@ -17,9 +17,10 @@ class ViewCellWire : public TObject {
     ViewCellWire(const double x, const double y, const double z,
                  const double diameter, const double length);
     ~ViewCellWire() {}
-    TBuffer3D& GetBuffer(bool& ok);
+    TBuffer3D& GetBuffer(bool& ok, const bool debug = false);
 
   private:
+
     std::string className;
     // Center
     double x0, y0, z0;
@@ -28,6 +29,45 @@ class ViewCellWire : public TObject {
     // Half-length
     double l;
     
+};
+
+class ViewCellPlane : public TObject {
+
+  public:
+    ViewCellPlane(const double center, const bool vert, const double size);
+    ~ViewCellPlane() {}
+    TBuffer3D& GetBuffer(bool& ok, const bool debug = false);
+
+  private:
+
+    std::string className;
+    double planeCenter;
+    bool   isVertical;
+    double planeSize;
+    
+};
+
+class ViewCellTube : public TObject {
+
+  public:
+    ViewCellTube(const double x, const double y, const double z,
+                 const double radius, const int nEdges);
+    ~ViewCellTube() {}
+
+    TBuffer3D& GetBuffer(bool& ok, const bool debug = false);
+     
+  private:
+    std::string className;
+    // Center
+    double x0, y0, z0;
+    // Radius
+    double r;
+    // Number of edges
+    int n;
+
+    TBuffer3D& GetBufferCylinder(bool& ok, const bool debug);
+    TBuffer3D& GetBufferPolygon(bool& ok, const bool debug);
+
 };
 
 class ViewCell : public TObject { 
@@ -86,6 +126,10 @@ class ViewCell : public TObject {
     // 3d objects
     int nWires3d;
     std::vector<ViewCellWire> wires3d;
+    int nTubes3d;
+    std::vector<ViewCellTube> tubes3d;
+    int nPlanes3d;
+    std::vector<ViewCellPlane> planes3d;
 
     bool Plot(const bool use3d);
     void PlotWire(const double x, const double y, const double d);
