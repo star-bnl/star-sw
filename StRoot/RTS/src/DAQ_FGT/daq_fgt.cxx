@@ -45,7 +45,9 @@ daq_fgt::daq_fgt(daqReader *rts_caller)
 
 	raw = new daq_dta ;
 	adc = new daq_dta ;
-	
+	phys = new daq_dta ;
+	ped = new daq_dta ;
+
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
 }
@@ -56,6 +58,8 @@ daq_fgt::~daq_fgt()
 
 	delete raw ;
 	delete adc ;
+	delete phys ;
+	delete ped ;
 
 	return ;
 }
@@ -74,6 +78,12 @@ daq_dta *daq_fgt::get(const char *bank, int sec, int rdo, int pad, void *p1, voi
 	else if(strcasecmp(bank,"adc")==0) {
 		return handle_adc(rdo) ;
 	}
+	else if(strcasecmp(bank,"phys")==0) {
+		return handle_phys(sec,rdo,pad) ;
+	}
+	else if(strcasecmp(bank,"pedrms")==0) {
+		return handle_ped(rdo) ;
+	}
 
 
 	LOG(ERR,"%s: unknown bank type \"%s\"",name,bank) ;
@@ -84,7 +94,7 @@ daq_dta *daq_fgt::get(const char *bank, int sec, int rdo, int pad, void *p1, voi
 
 daq_dta *daq_fgt::handle_raw(int rdo)
 {
-	char *from , *st ;
+	char *st ;
 	int r_start, r_stop ;
 	int bytes ;
 
@@ -101,22 +111,37 @@ daq_dta *daq_fgt::handle_raw(int rdo)
 	char str[256] ;
 	char *full_name ;
 
-	sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name, 1, 1) ;
-	full_name = caller->get_sfs_name(str) ;
-		
-	if(!full_name) return 0 ;
-	bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
 
-	raw->create(bytes,"fgt_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
-	st = (char *) raw->request(bytes) ;
-		
-	int ret = caller->sfs->read(str, st, bytes) ;
-	if(ret != bytes) {
-		LOG(ERR,"ret is %d") ;
+	if(rdo<=0) {
+		r_start = 1 ;
+		r_stop = 2 ;	
+	}
+	else {
+		r_start = r_stop = rdo ;
 	}
 
+
+	raw->create(8*1024,"fgt_raw",rts_id,DAQ_DTA_STRUCT(char)) ;
+
+	for(int r=r_start;r<=r_stop;r++) {
+		sprintf(str,"%s/sec%02d/rb%02d/raw",sfs_name, 1, r) ;
+		full_name = caller->get_sfs_name(str) ;
+		
+		if(!full_name) continue ;
+		bytes = caller->sfs->fileSize(full_name) ;	// this is bytes
+
+
+		st = (char *) raw->request(bytes) ;
+		
+		int ret = caller->sfs->read(str, st, bytes) ;
+		if(ret != bytes) {
+			LOG(ERR,"ret is %d") ;
+		}
+
 	
-	raw->finalize(bytes,1,1,0) ;	// sector 1; rdo 1; pad irrelevant...
+		raw->finalize(bytes,0,r,0) ;	// sector 0;
+	}
+
 	raw->rewind() ;
 
 	return raw ;
@@ -127,22 +152,27 @@ daq_dta *daq_fgt::handle_raw(int rdo)
 
 daq_dta *daq_fgt::handle_adc(int rdo)
 {
-	u_short *raw_dta ;
-
-	daq_dta *dd = handle_raw(rdo) ;
-
-	LOG(DBG,"%s: got raw %p",name,dd) ;
-
-	if(dd && dd->iterate()) {
-		raw_dta = (u_short *) dd->Byte ;
-	}
-	else {
-		return 0 ;
-	}
+	int r_start, r_stop ;
 
 	LOG(WARN,"FGT ADC not yet supported....") ;
 	return 0 ;
 }
+
+daq_dta *daq_fgt::handle_ped(int rdo)
+{
+
+	LOG(WARN,"FGT PEDRMS not yet supported....") ;
+	return 0 ;
+}
+
+
+daq_dta *daq_fgt::handle_phys(int disk, int quadrant, int strip_type)
+{
+
+	LOG(WARN,"FGT PHYS not yet supported....") ;
+	return 0 ;
+}
+
 
 
 int daq_fgt::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int do_log)
