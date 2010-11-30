@@ -94,9 +94,10 @@ bool
 SolidBox::GetBoundingBox(double& xmin, double& ymin, double& zmin,
                          double& xmax, double& ymax, double& zmax) {
 
-  xmin = cX - lX; xmax = cX + lX;
-  ymin = cY - lY; ymax = cY + lY;
-  zmin = cZ - lZ; zmax = cZ + lZ;
+  const double dd = sqrt(lX * lX + lY * lY + lZ * lZ);
+  xmin = cX - dd; xmax = cX + dd;
+  ymin = cY - dd; ymax = cY + dd;
+  zmin = cZ - dd; zmax = cZ + dd;
   return true;
 
 }

@@ -16,7 +16,7 @@ class ViewGeometryShape : public TObject {
 
   public:
     ViewGeometryShape();
-    ~ViewGeometryShape() {};
+    ~ViewGeometryShape() {}
 
     void SetSolid(Solid* s);    
     void SetColor(int col);

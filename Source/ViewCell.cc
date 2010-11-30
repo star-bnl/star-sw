@@ -5,12 +5,72 @@
 #include <TEllipse.h>
 #include <TLine.h>
 #include <TPolyLine.h>
+#include <TBuffer3D.h>
+#include <TBuffer3DTypes.h>
+#include <TVirtualViewer3D.h>
 
 #include "ComponentAnalyticField.hh"
 #include "Plotting.hh"
 #include "ViewCell.hh"
 
 namespace Garfield {
+
+ViewCellWire::ViewCellWire(const double x, const double y, const double z, 
+                           const double diameter, const double length) :
+  TObject(),
+  x0(x), y0(y), z0(z), r(10.e-4), l(50.) {
+
+  className = "ViewCellWire";
+  if (diameter > 0.) {
+    r = diameter / 2.;
+  } else {
+    std::cerr << className << ":\n";
+    std::cerr << "    Unphysical diameter (" << diameter << ").\n";
+  }
+
+  if (length > 0.) {
+    l = length / 2.;
+  } else {
+    std::cerr << className << ":\n";
+    std::cerr << "    Unphysical length (" << length << ").\n";
+  }
+
+}
+
+TBuffer3D&
+ViewCellWire::GetBuffer(bool& ok) {
+
+  ok = false;
+
+  static TBuffer3DTube wire;
+  wire.ClearSectionsValid();
+  wire.fID = this;
+  wire.fColor = kBlue;
+  wire.fTransparency = 0;
+  wire.fLocalFrame = kTRUE;
+  wire.SetLocalMasterIdentity();
+  wire.fReflection = kFALSE;
+  // Set the center.
+  wire.fLocalMaster[12] = x0;
+  wire.fLocalMaster[13] = y0;
+  wire.fLocalMaster[14] = z0;
+  wire.SetSectionsValid(TBuffer3D::kCore);
+
+  // Set the bounding box.
+  const double bb = sqrt(r * r + l * l);
+  double origin[3] = {x0, y0, z0};
+  double halfLength[3] = {bb, bb, bb};
+  wire.SetAABoundingBox(origin, halfLength);
+  wire.SetSectionsValid(TBuffer3D::kBoundingBox);
+  
+  wire.fRadiusInner = 0.;
+  wire.fRadiusOuter = r;
+  wire.fHalfLength = l;
+  wire.SetSectionsValid(TBuffer3D::kShapeSpecific);
+  ok = true; 
+  return wire;
+
+}
 
 ViewCell::ViewCell() :
   className("ViewCell"), debug(false), useWireMarker(true),
@@ -85,24 +145,39 @@ ViewCell::SetArea() {
 }
 
 void
-ViewCell::Clear() {
+ViewCell::Plot2d() {
+
+  if (!Plot(false)) {
+    std::cerr << className << "::Plot2d:\n";
+    std::cerr << "    Error creating 2d plot.\n";
+  }
 
 }
 
 void
-ViewCell::Plot() {
+ViewCell::Plot3d() {
+
+  if (!Plot(true)) {
+    std::cerr << className << "::Plot3d:\n";
+    std::cerr << "    Error creating 3d plot.\n";
+  }
+
+}
+
+bool
+ViewCell::Plot(const bool use3d) {
 
   if (component == 0) {
     std::cerr << className << "::Plot:\n";
     std::cerr << "    Component is not defined.\n";
-    return;
+    return false;
   }
   
   double pmin = 0., pmax = 0.;
   if (!component->GetVoltageRange(pmin, pmax)) {
     std::cerr << className << "::Plot:\n";
     std::cerr << "    Component is not ready.\n";
-    return;
+    return false;
   }
 
   // Get the bounding box
@@ -113,17 +188,19 @@ ViewCell::Plot() {
       std::cerr << className << "::Plot:\n";
       std::cerr << "    Bounding box cannot be determined.\n";
       std::cerr << "    Call SetArea first.\n";
-      return;
+      return false;
     }
   }
 
   if (canvas == 0) {
     canvas = new TCanvas();
-    canvas->SetTitle(label.c_str());
+    if (!use3d) canvas->SetTitle(label.c_str());
     if (hasExternalCanvas) hasExternalCanvas = false;
   }
-  canvas->Range(x0 - 0.1 * (x1 - x0), y0 - 0.1 * (y1 - y0), 
-                x1 + 0.1 * (x1 - x0), y1 + 0.1 * (y1 - y0));
+  if (!use3d) {
+    canvas->Range(x0 - 0.1 * (x1 - x0), y0 - 0.1 * (y1 - y0), 
+                  x1 + 0.1 * (x1 - x0), y1 + 0.1 * (y1 - y0));
+  }
   canvas->cd();
 
   // Get the cell type.
@@ -149,6 +226,8 @@ ViewCell::Plot() {
     nMaxY = int(y1 / sy) + 1;
   }
 
+  wires3d.clear();
+  nWires3d = 0;
   // Get the number of wires.
   int nWires = component->GetNumberOfWires();
   // Loop over the wires.
@@ -166,7 +245,13 @@ ViewCell::Plot() {
             y - 0.5 * dw >= y1) {
           continue;
         }
-        PlotWire(x, y, dw);
+        if (use3d) {
+          ViewCellWire newWire(x, y, 0., dw, lw);
+          wires3d.push_back(newWire);
+          ++nWires3d;
+        } else {
+          PlotWire(x, y, dw);
+        }
       }
     }
   }
@@ -180,7 +265,11 @@ ViewCell::Plot() {
     for (int nx = nMinX; nx <= nMaxX; ++nx) {
       double x = xp + nx * sx;
       if (x <= x0 || x >= x1) continue;
-      PlotLine(x, y0, x, y1);
+      if (use3d) {
+
+      } else {
+        PlotLine(x, y0, x, y1);
+      }
     }
   }
   
@@ -193,7 +282,11 @@ ViewCell::Plot() {
     for (int ny = nMinY; ny <= nMaxY; ++ny) {
       double y = yp + ny * sy;
       if (y < y0 || y > y1) continue;
-      PlotLine(x0, y, x1, y);
+      if (use3d) {
+      
+      } else {
+        PlotLine(x0, y, x1, y);
+      }
     }
   }
 
@@ -201,10 +294,54 @@ ViewCell::Plot() {
   int nt = 0;
   char label;
   if (component->GetTube(rt, vt, nt, label)) {
-    PlotTube(0., 0., rt, nt);
+    if (use3d) {
+
+    } else {
+      PlotTube(0., 0., rt, nt);
+    }
   }
-  
-  canvas->Update();
+
+  if (use3d) {
+    Draw("ogl");
+  } else {
+    canvas->Update();
+  }
+
+  return true;
+
+}
+
+void
+ViewCell::Paint(Option_t*) {
+
+  if (nWires3d <= 0) {
+    std::cerr << className << "::Paint:\n";
+    std::cerr << "    There is nothing to paint.\n";
+    return;
+  }
+
+  TVirtualViewer3D* viewer = gPad->GetViewer3D();
+  viewer->BeginScene();
+
+  for (int i = nWires3d; i--;) {
+    bool ok = false;
+    TBuffer3D& buffer = wires3d[i].GetBuffer(ok);
+    int req = viewer->AddObject(buffer);
+    if (req != TBuffer3D::kNone) {
+      std::cerr << className << "::Paint:\n";
+      std::cerr << "    Could not pass object to viewer.\n";
+    }
+  }
+
+  viewer->EndScene();
+
+}
+
+void
+ViewCell::Draw(Option_t* option) {
+
+  TObject::Draw(option);
+  gPad->GetViewer3D(option);
 
 }
 

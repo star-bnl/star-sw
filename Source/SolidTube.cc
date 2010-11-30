@@ -97,9 +97,10 @@ bool
 SolidTube::GetBoundingBox(double& xmin, double& ymin, double& zmin,
                           double& xmax, double& ymax, double& zmax) {
 
-  xmin = cX - rMax; xmax = cX + rMax;
-  ymin = cY - rMax; ymax = cY + rMax;
-  zmin = cZ - lZ; zmax = cZ + lZ;
+  const double dd = sqrt(rMax * rMax + lZ * lZ);
+  xmin = cX - dd; xmax = cX + dd;
+  ymin = cY - dd; ymax = cY + dd;
+  zmin = cZ - dd; zmax = cZ + dd;
   return true;
 
 }
