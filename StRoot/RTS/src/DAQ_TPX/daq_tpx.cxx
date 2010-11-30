@@ -1381,6 +1381,7 @@ daq_dta *daq_tpx::handle_cld_sim(int sec, int row)
 			fcf_algo[sim->sec]->do_cuts = fcf_do_cuts ;
 
 			fcf_algo[sim->sec]->apply_gains(sim->sec,gain_algo) ;
+//			fcf_algo[sim->sec]->apply_gains(sim->sec,0) ;
 			fcf_algo[sim->sec]->start_evt() ;
 
 			if(fcf_tmp_storage==0) {

@@ -54,6 +54,9 @@ static struct {
 
 */
 
+/*
+	RDO counts from 1
+*/
 void tpx_to_altro(int row, int pad, int &rdo, int &a, int &ch)
 {
 	static int first ;
@@ -85,7 +88,9 @@ void tpx_to_altro(int row, int pad, int &rdo, int &a, int &ch)
 
 }
 
-
+/*
+	RDO counts from 0!
+*/
 void tpx_from_altro(int rdo, int a, int ch, int &row, int &pad)
 {
 	row = tpx_altro_to_pad[rdo][a][ch].row ;
@@ -500,7 +505,7 @@ static u_int *data_test(u_int *h, struct tpx_altro_struct *a, int log, u_int *fi
   int wc ;
   int ret ;
   int delta ;
-  u_int *h_start = h ;
+//  u_int *h_start = h ;
 
   ret = 0 ;
 

@@ -292,18 +292,82 @@ int tpxPed::to_altro(char *buff, int rb, int timebins)
 		// of trigger...
 		for(t=15;t<timebins+15;t++) {
 			*ptr++ = (u_short) ped->ped[t] ;
+			if((row==42)&&(pad==140)) {
+				//LOG(TERR,"%d,%d = %d",t,tcou,(u_short)ped->ped[t]) ;
+			}
 			tcou++ ;
 		}
 
+
+
+		// follow with a "wall" of 1023
+		for(;t<(TPX_MAX_TB+15);t++) {
+			u_short val = (u_short) 1023 ;
+
+			*ptr++ = val ;
+			if((row==42)&&(pad==140)) {
+				//LOG(TERR,"%d,%d = %d",t,tcou,val) ;
+			}
+
+			tcou++ ;
+		}
+
+
+
+		// and this is the pedestal of the pre-trigger
+		// actually, I'm totally confused... this count of 15 must
+		// exist but the value seems irrelevant...
+		for(t=0;t<15;t++) {
+			u_short val = (u_short) ped->ped[t] ;
+			*ptr++ = val ;
+			if((row==42)&&(pad==140)) {
+				//LOG(TERR,"%d,%d = %d",t,tcou,val) ;
+			}
+
+			tcou++ ;
+		}
+
+		// this, last value is the one that gets used for the pre- pedestals
+		u_short val = (u_short) ped->ped[0] ;
+		*ptr++ = val ;
+		if((row==42)&&(pad==140)) {
+			//LOG(TERR,"%d,%d = %d",t,tcou,val) ;
+		}
+
+		tcou++ ;
+
+
+
+#if 0
+		// THIS is how it was done pre-FY11
 		// follow with pre-trigger pedestals
 		for(t=0;t<15;t++) {
 			*ptr++ = (u_short) ped->ped[t] ;
 			tcou++ ;
 		}
+#endif
 
+#if 0
+		// testing....
+		// follow with 510
+//		for(t=0;t<20;t++) {
+//			*ptr++ = t ;
+//			tcou++ ;
+//		}
+
+		*ptr++ = 5 ;
+		tcou++ ;
+		*ptr++ = 10 ;
+		tcou++ ;
+		*ptr++ = 15 ;
+		tcou++ ;
+		*ptr++ = 20 ;
+		tcou++ ;
+#endif
+		
 		// need to be even
 		if(tcou & 1) {
-			//LOG(WARN,"tcou %d is odd, adding ped of tb %d?",tcou,t) ;
+			LOG(WARN,"tcou %d is odd, adding ped of tb %d?",tcou,t) ;
 			*ptr++ = (u_short) ped->ped[0]; // was ped[t]; then ped[0]
 			tcou++ ;
 		}
@@ -637,6 +701,7 @@ int tpxPed::special_setup(int run_type, int sub_type)
 			
 			break ;
 		case RUN_TYPE_PED_A :	// starts with ped=0
+/*
 			m = 0 ;			
 			for(t=0;t<512;) {
 				for(int i=0;i<16;i++) {
@@ -646,6 +711,16 @@ int tpxPed::special_setup(int run_type, int sub_type)
 				else m = 0 ;
 				t += 16 ;
 			}
+*/
+
+			
+			for(t=0;t<512;t++) {
+				ped->ped[t] = 0 ;
+			}
+
+			//for(t=0;t<20;t++) ped->ped[t] = 10 ;
+			for(t=390;t<512;t++) ped->ped[t] = 20 ;
+
 			break ;
 		case RUN_TYPE_PED_B :	// starts with ped=1
 			m = 1 ;			

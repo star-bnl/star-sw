@@ -175,9 +175,12 @@ int tpxFCF::fcf_decode(u_int *p_buff, daq_cld *dc, u_short version)
 	cha = *p_buff >> 16 ;
 
 	if(cha >= 0x8000) {	// special case of very large charge...
+//printf("Big cha: 0x%08X\n",cha) ;
+
 		fla |= FCF_BIG_CHARGE ;
 		cha = (cha & 0x7FFF) * 1024 ;
 		if(cha == 0) cha = 0x8000;	// exaclty
+//printf("Big cha: 0x%08X\n",cha) ;
 	}
 
 	p_tmp = *p_buff & 0xFFFF ;	// reuse p_tmp
@@ -324,7 +327,7 @@ void tpxFCF::config(u_int mask, int mode)
 
 	storage = (struct stage1 *) valloc(tot_count * sizeof(struct stage1)) ;
 	
-	LOG(TERR,"FCF for mask 0x%02X: alloced %d bytes for %d tot_count X %d",mask,
+	LOG(TERR,"FCF for mask 0x%02X: alloced %d bytes for %d tot_count X %d; cleared gains",mask,
 	    tot_count * sizeof(struct stage1),
 	    tot_count,
 	    sizeof(struct stage1)) ;
@@ -360,8 +363,9 @@ void tpxFCF::config(u_int mask, int mode)
 				if(row > 45) continue ;
 				if(row == 0) continue ;
 
-				get_stage1(row, pad)->f = 0x8000 ;
-
+				get_stage1(row, pad)->f = 0x8000 | FCF_ONEPAD ;
+				get_stage1(row, pad)->g = 1.0 ;
+				get_stage1(row, pad)->t0 = 0.0 ;
 
 			}
 			}
@@ -381,7 +385,12 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 
 	int row, pad ;
 
-	LOG(NOTE,"Applying gains to sector %d [%p ?]",sec,gain) ;
+	if(gains == 0) {
+		LOG(WARN,"Sector %2d, gains NULL\n",sector) ;
+	}
+	else {
+		LOG(NOTE,"Applying gains to sector %d [%p ?]",sector,gains) ;
+	}
 
 	// clear all flags but the existing ones
 	for(row=1;row<=45;row++) {
@@ -398,11 +407,22 @@ void tpxFCF::apply_gains(int sec, tpxGain *gain)
 	for(row=1;row<=45;row++) {
 		if(row_ix[row] < 0) continue ;
 
+
+
 		for(pad=1;pad<=tpc_rowlen[row];pad++) {	
 			stage1 *s = get_stage1(row, pad) ;
 
-			s->g = gains->get_gains(sector,row,pad)->g ;
-			s->t0 = gains->get_gains(sector,row,pad)->t0 ;
+			if(gains) {
+				s->g = gains->get_gains(sector,row,pad)->g ;
+				s->t0 = gains->get_gains(sector,row,pad)->t0 ;
+			}
+			else {
+				s->g = 1.0 ;
+				s->t0 = 0.0 ;
+			}
+
+//			s->t0 = -1.0 ;
+//if((sector==16) && (pad==10)) printf("GGGGG row %d, pad %d %f %f\n",row,pad,s->g,s->t0) ;
 
 			u_int fl = 0 ;
 
@@ -853,8 +873,9 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 							cur->scharge = cur->f_charge ;
 							
 							cur->f_t_ave = cur->t_ave * cur1->g ;
-							cur->f_t_ave += cur1->g * cur1->t0 ;
-
+							//BUG in FY10!!!
+							//cur->f_t_ave += cur1->g * cur1->t0 ;
+							cur->f_t_ave += cur->f_charge * cur1->t0 ;
 							cur->p1 = p+1 ;
 							cur->p_ave = (p+1) * cur->f_charge ;
 
@@ -873,7 +894,9 @@ int tpxFCF::stage2(u_int *outbuff, int max_bytes)
 							old->scharge = old->f_charge ;
 
 							old->f_t_ave = old->t_ave * old1->g ;
-							old->f_t_ave += old1->g * old1->t0 ;
+							//BUG in FY10!!!
+							//old->f_t_ave += old1->g * old1->t0 ;
+							old->f_t_ave += old->f_charge * old1->t0 ;
 
 							old->t_min = old->t1 ;
 							old->t_max = old->t2 ;
@@ -1198,7 +1221,9 @@ void tpxFCF::dump(tpxFCF_cl *cl, int row)
 			// don't need scharge
 
 			cl->f_t_ave = cl->t_ave * gain->g ;
-			cl->f_t_ave += gain->g * gain->t0 ;
+			// BUG in FY10!!!
+			//cl->f_t_ave += gain->g * gain->t0 ;
+			cl->f_t_ave += cl->f_charge * gain->t0 ;
 
 			cl->p_ave = cl->p2 * cl->f_charge ;
 
