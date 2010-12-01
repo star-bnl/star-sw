@@ -47,7 +47,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.43 2010/10/28 23:42:34 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.44 2010/12/01 20:59:46 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -542,10 +542,12 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	id3        = tpc_track[Id-1].start_vertex_p;
 	ipart      = tpc_track[Id-1].ge_pid;
 	charge     = (Int_t) tpc_track[Id-1].charge;
+#if 0
 	if (tpc_track[Id-1].next_parent_p && ipart == 3) { // delta electrons ?
 	  Id = tpc_track[Id-1].next_parent_p;
 	  ipart      = tpc_track[Id-1].ge_pid;
 	}
+#endif
       }
       if (ipart == Laserino || ipart == Chasrino) {
 	charge = 0;
@@ -1471,8 +1473,11 @@ Double_t StTpcRSMaker::polya(Double_t *x, Double_t *par) {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.43 2010/10/28 23:42:34 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.44 2010/12/01 20:59:46 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.44  2010/12/01 20:59:46  fisyak
+// Remove special treatment for delta-electrons, this will cause that IdTruth for cluster will be degradated because charge from delta-electrons will be accounted with delta-electons track Id but not with original particle Id as was before
+//
 // Revision 1.43  2010/10/28 23:42:34  fisyak
 // extra t0 off set for Altro chip
 //
