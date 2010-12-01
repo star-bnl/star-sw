@@ -27,14 +27,6 @@ int StGammaPythiaEventMaker::Make()
         LOG_WARN << "No StGammaPythiaEvent" << endm;
         return kStWarn;
     }
-
-    // Get StMcEvent
-    StMcEvent* mcEvent = (StMcEvent*)GetDataSet("StMcEvent");
-    if(!mcEvent)
-    {
-        LOG_WARN << "No StMcEvent" << endm;
-        return kStWarn;
-    }
     
     // Get base StPythiaEvent pointer from StMCAsymMaker
     StMCAsymMaker* asym = dynamic_cast<StMCAsymMaker*>(GetMakerInheritsFrom("StMCAsymMaker"));
@@ -74,7 +66,7 @@ int StGammaPythiaEventMaker::Make()
 
         if(pTable[i].idhep == 111)
         {
-            mPythia->neutralPion().push_back(TLorentzVector(pTable[i].phep[0], pTable[i].phep[1], pTable[i].phep[2], pTable[i].phep[3]));
+        	mPythia->neutralPion().push_back(TLorentzVector(pTable[i].phep[0], pTable[i].phep[1], pTable[i].phep[2], pTable[i].phep[3]));
         }
 
     }
@@ -84,6 +76,14 @@ int StGammaPythiaEventMaker::Make()
     //          converted and nonconverted          //
     ////////////////////////////////////////////////// 
 
+    // Get StMcEvent
+    StMcEvent* mcEvent = (StMcEvent*)GetDataSet("StMcEvent");
+    if(!mcEvent)
+    {
+        LOG_WARN << "No StMcEvent" << endm;
+        return kStWarn;
+    }
+    
     long pid = mcEvent->subProcessId();
 
     // Collect photons from primary vertex

@@ -1,4 +1,4 @@
-// $Id: StEmcSimulatorMaker.cxx,v 1.59 2010/10/14 21:18:57 ogrebeny Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.58 2008/11/17 21:44:24 kocolosk Exp $
 
 #include "StEmcSimulatorMaker.h"
 
@@ -207,26 +207,27 @@ void StEmcSimulatorMaker::makeRawHits() {
     mTables->loadTables(this);
     
     // get a valid StEmcCollection to store the hits
-    if (mEmbeddingMode) {
+    if(mEmbeddingMode) {
         mEmcCollection = new StEmcCollection();
-    } else {
+    }
+    else {
         StEvent* event = (StEvent*)GetInputDS("StEvent");
-        if (!event) {
+        if(event == NULL) {
             event = new StEvent();
             AddData(event);
         }
         mEmcCollection = event->emcCollection();
-        if (!mEmcCollection) {
+        if(mEmcCollection == NULL) {
             mEmcCollection = new StEmcCollection();
             event->setEmcCollection(mEmcCollection);
         }
         StMuDst* mudst = (StMuDst*)GetInputDS("MuDst");
-        if (mudst) {
+        if(mudst) {
             mudst->setEmcCollection(mEmcCollection);
         }
     }
     
-    for (int det = BTOW;det <= BSMDP;det++) {
+    for(int det=BTOW; det<=BSMDP; det++) {
         StDetectorId detectorId = kUnknownId;
         switch(det) {
             case BTOW:  detectorId = kBarrelEmcTowerId; break;
@@ -237,16 +238,17 @@ void StEmcSimulatorMaker::makeRawHits() {
         StEmcDetector *detector = new StEmcDetector(detectorId, 120); // should this be a magic number?
         mEmcCollection->setDetector(detector);
         
-        for (unsigned int mod = 1;mod <= mEmcMcHits[det-1]->numberOfModules();mod++) {
+        for(unsigned int mod=1; mod<=mEmcMcHits[det-1]->numberOfModules(); mod++) {
             const StMcEmcModuleHitCollection* module = mEmcMcHits[det-1]->module(mod);
-            const vector<StMcCalorimeterHit*> hits = module->detectorHits();
-            for (unsigned long i = 0;i < hits.size();i++) {
-                int softId;
-		mGeom[det-1]->getId(hits[i]->module(), hits[i]->eta(), hits[i]->sub(), softId);
+            const vector<StMcCalorimeterHit*> hits   = module->detectorHits();
+            for(unsigned long i=0; i<hits.size(); i++) {
+                int softId; mGeom[det-1]->getId(hits[i]->module(), hits[i]->eta(), hits[i]->sub(), softId);
+                
                 LOG_DEBUG << "-----------------------------------------------------------------------------------------------" << endm;
+                
                 // check hit status
-                if (mCheckStatus[det-1]) { 
-                    if (mTables->status(det, softId) != 1) { 
+                if(mCheckStatus[det-1]) { 
+                    if(mTables->status(det, softId) != 1) { 
                         LOG_DEBUG << Form("det=%2d  softId=%5d -- removing hit b/c DB status!=1", detectorId, softId) << endm;
                         continue;
                     }
@@ -256,10 +258,10 @@ void StEmcSimulatorMaker::makeRawHits() {
                 rawHit->setCalibrationType(0);
                 
                 // do zero suppression
-                if (mDoZeroSuppression[det-1]) { 
+                if(mDoZeroSuppression[det-1]) { 
                     float pedMean = mTables->pedestal(det, softId);
                     float pedRMS  = mTables->pedestalRMS(det, softId);
-                    if ((rawHit->adc() - pedMean) < (mPedestalCut[det-1] * pedRMS)) {
+                    if((rawHit->adc() - pedMean) < (mPedestalCut[det-1] * pedRMS)) {
                         LOG_DEBUG << "removing hit b/c it failed pedestal cut" << endm;
                         delete rawHit;
                         continue;
@@ -267,7 +269,7 @@ void StEmcSimulatorMaker::makeRawHits() {
                 }
                 
                 // store GEANT dE in MuDST if this is BFC
-                if (mIsBFC && !mEmbeddingMode) {
+                if(mIsBFC && !mEmbeddingMode) {
                     rawHit->setEnergy(hits[i]->dE());
                 }
                 
@@ -284,188 +286,244 @@ void StEmcSimulatorMaker::makeRawHits() {
 void StEmcSimulatorMaker::makeCrossTalk(StMcTrack *track)
 {
     // Loop over BEMC detectors
-    for (int det = BSMDE;det <= BSMDP;++det) {
-        // No cross talk for the phi strips (not sure how to simulate yet) 
+    // TEMPORARILY OVER ONLY BSMD DETECTORS
+    for(int det = BSMDE; det <= BSMDP; ++det) {
+        // No cross talk for the phi strips (readout cables too short)
         if(det == BSMDP) continue;
+        
         // Fetch calorimeter hits deposited by the StMcTrack
         vector<StMcCalorimeterHit*> trackHits;
-        switch(det) {
-	    case BSMDE: trackHits = track->bsmdeHits(); break;
+        switch(det) 
+        {
+            //case BTOW:  trackHits = track->btowHits(); break;
+            case BPRS:  trackHits = track->bprsHits(); break;
+            case BSMDE: trackHits = track->bsmdeHits(); break;
             case BSMDP: trackHits = track->bsmdpHits(); break;
         }
-        LOG_DEBUG << " this track has BSMD of size = " << trackHits.size() << endm;
-		
+        
         ////////////////////////////////////////////////////////////////////////
         //    Find the detector element with the largest energy deposition    //
         ////////////////////////////////////////////////////////////////////////
-        double highEnergy = -1;
+        float highEnergy = 0;
         int highElement = -1;
-        for (unsigned long j = 0;j < trackHits.size();++j) {
-            double energy = trackHits.at(j)->dE();				
-            if ((energy > highEnergy) || (highEnergy < 0)) {
+        
+        for(unsigned long j = 0; j < trackHits.size(); ++j)
+        {
+            float energy = trackHits.at(j)->dE();
+            if(energy > highEnergy)
+            {
                 highEnergy = energy;
                 highElement = j;
             }
         }
-        if (highElement != -1) {
+    
+        // Ensure a high element was found
+        if(highElement != -1)
+        {
             ///////////////////////////////////////////////////////////////////////////////////
             //    Calculate the software ID of the high element and its nearest neighbors    //
             ///////////////////////////////////////////////////////////////////////////////////
             StMcCalorimeterHit* highHit = trackHits.at(highElement);
-            
-	    const Int_t numCross = 5;
-            int softIds[2 * numCross + 1] = {0};
-            // Pointers to the relevant detector hits
-	    // Will be assigned to point to the strip in the next step.
-            StMcCalorimeterHit *detectorNextHits[2 * numCross + 1] = {0};
-
-            switch (det) {
-		//1=bemc, 2=bprs, 3=bsmde, 4=bsmdp
-                case BSMDE:
-                case BSMDP:
-		    for (Int_t i = 0;i < (2*numCross + 1);i++) {
-                	softIds[i] = mPosition->getNextId(det, highHit->module(), highHit->eta(), highHit->sub(), (det == BSMDE) ? (i - numCross) : 0, (det == BSMDP) ? (i - numCross) : 0);
-		    }
-		    break;
-            }
-
+            int softHigh = 0;
             int modHigh = 0;
             float etaHigh = 0;
-            mGeom[det - 1]->getId(highHit->module(), highHit->eta(), highHit->sub(), softIds[numCross]);
+            
+            mGeom[det - 1]->getId(highHit->module(), highHit->eta(), highHit->sub(), softHigh);
             modHigh = highHit->module();
-            mGeom[det - 1]->getEta(softIds[numCross], etaHigh);
+            mGeom[det - 1]->getEta(softHigh, etaHigh);
+            
+            int softNext =             0;
+            int softNextNext =         0;
+            int softPrevious =         0;
+            int softPreviousPrevious = 0;
+            
+            switch(det) 
+            {
+                case BTOW:
+                    softNext =             0;
+                    softNextNext =         0;
+                    softPrevious =         0;
+                    softPreviousPrevious = 0;  
+                    break;
+                case BPRS:  
+                    softNext =             0;
+                    softNextNext =         0;
+                    softPrevious =         0;
+                    softPreviousPrevious = 0;
+                    break;
+                case BSMDE:
+                    softNext =             mPosition->getNextId(det, highHit->module(), highHit->eta(), highHit->sub(),  1, 0);
+                    softNextNext =         mPosition->getNextId(det, highHit->module(), highHit->eta(), highHit->sub(),  2, 0);
+                    softPrevious =         mPosition->getNextId(det, highHit->module(), highHit->eta(), highHit->sub(), -1, 0);
+                    softPreviousPrevious = mPosition->getNextId(det, highHit->module(), highHit->eta(), highHit->sub(), -2, 0); 
+                    break;
+                case BSMDP:
+                    softNext =             mPosition->getNextId(det, highHit->module(), highHit->eta(), highHit->sub(), 0,  1);
+                    softNextNext =         mPosition->getNextId(det, highHit->module(), highHit->eta(), highHit->sub(), 0,  2);
+                    softPrevious =         mPosition->getNextId(det, highHit->module(), highHit->eta(), highHit->sub(), 0, -1);
+                    softPreviousPrevious = mPosition->getNextId(det, highHit->module(), highHit->eta(), highHit->sub(), 0, -2);
+                    break;
+            }
             
             ///////////////////////////////////////////////////////////////////////////////////////
             //    Find the calorimeter hits corresponding to the high strip and its neighbors    //
             ///////////////////////////////////////////////////////////////////////////////////////
-    	    double totalenergyb = 0; // total energy before cross talk, part of the energy conservation check
-	    double totalenergya = 0; // total energy after cross talk
-            for (unsigned int mod = 1;mod <= mEmcMcHits[det- 1]->numberOfModules();++mod) {
+            
+            // Pointers to the relevant detector hits
+            StMcCalorimeterHit *detectorHigh = NULL;
+            StMcCalorimeterHit *detectorNext = NULL;
+            StMcCalorimeterHit *detectorNextNext = NULL;
+            StMcCalorimeterHit *detectorPrevious = NULL;
+            StMcCalorimeterHit *detectorPreviousPrevious = NULL;
+            
+            for(unsigned int mod = 1; mod <= mEmcMcHits[det- 1]->numberOfModules(); ++mod) {
                 const StMcEmcModuleHitCollection* module = mEmcMcHits[det - 1]->module(mod);
-                const vector<StMcCalorimeterHit*> &detectorHits = module->detectorHits();
-                for (unsigned long k = 0;k < detectorHits.size();++k) {
+                const vector<StMcCalorimeterHit*> detectorHits = module->detectorHits();
+                for(unsigned long k = 0; k < detectorHits.size(); ++k) {
                     int softTemp; 
                     mGeom[det - 1]->getId(detectorHits[k]->module(), detectorHits[k]->eta(), detectorHits[k]->sub(), softTemp);
-                    // loop through the strips in this module and assign the pointer to the strip objects
-		    for (Int_t i = 0;i < (2*numCross + 1);i++) {
-                	if (softTemp == softIds[i]) {
-                    	    detectorNextHits[i] = detectorHits[k]; 
-			    totalenergyb += detectorHits[k]->dE();
-                	}
-		    }
+                    
+                    if(softTemp == softHigh) {
+                        detectorHigh = detectorHits[k]; 
+                        continue;
+                    }
+                    if(softTemp == softNext) {
+                        detectorNext = detectorHits[k]; 
+                        continue;
+                    }
+                    if(softTemp == softNextNext) {
+                        detectorNextNext = detectorHits[k]; 
+                        continue;
+                    }
+                    if(softTemp == softPrevious) {
+                        detectorPrevious = detectorHits[k];
+                        continue;
+                    }
+                    if(softTemp == softPreviousPrevious) {
+                        detectorPreviousPrevious = detectorHits[k];
+                        continue;
+                    }
                 } // detectorHits
-	    } // Modules
-			
-    	    // cross-talk falls off linearly as we approach edge of barrel
-	    const float crossTalk = mCrossTalk[det - 1] * (1 - fabs(etaHigh) );
-
-	    double leakE1 = 0, leakE2 = 0;
-	    StMcCalorimeterHit *tempHit = new StMcCalorimeterHit();
-	    for (int i = 0;i <= numCross;i++) {
-		double energy1 = detectorNextHits[numCross + i] ? detectorNextHits[numCross + i]->dE() : 0;
-		double energy2 = detectorNextHits[numCross - i] ? detectorNextHits[numCross - i]->dE() : 0;
-		{LOG_DEBUG << "In: softId1 = " << softIds[numCross + i] << ", softId2 = " << softIds[numCross - i] << endm;}
-		{LOG_DEBUG << "In: energy1 = " << energy1 << ", energy2 = " << energy2 << endm;}
-		{LOG_DEBUG << "In: leakE1 = " << leakE1 << ", leakE2 = " << leakE2 << endm;}
-		//if (i == 0) {LOG_DEBUG << "old high Energy = " << energy1 << endm;}
-		energy1 += leakE1;
-		energy2 += leakE2;
-		// there are 3 situations: 
-		// 1: From the geometry, there is no next next strip (softNextNext==0)
-		// 2: There should be next next strip, but no pointer/hit to it, meaning it has zero energy (detectorNextNext==NULL)
-		// 3: There is next next strip and a pointer/hit with energy
-		// wenqin
-		if ((i < numCross) && softIds[numCross + i] && softIds[numCross + (i + 1)]) {
-		    // situation2 or situation3, leak the difference
-    		    const double energyNext1 = detectorNextHits[numCross + (i + 1)] ? detectorNextHits[numCross + (i + 1)]->dE() : 0;
-		    //if (i == 0) {LOG_DEBUG << "old next Energy = " << energyNext1 << endm;}
-		    leakE1 = crossTalk * (energy1 - energyNext1);
-		} else {
-		    leakE1 = 0; //situation1: do nothing
-		}
-		//if (i == 0) {LOG_DEBUG << "central strip leakage " << leakE1 << endm;}
-		if ((i < numCross) && softIds[numCross - i] && softIds[numCross - (i + 1)]) {
-		    // situation2 or situation3, leak the difference
-    		    const double energyNext2 = detectorNextHits[numCross - (i + 1)] ? detectorNextHits[numCross - (i + 1)]->dE() : 0;
-		    //if (i == 0) {LOG_DEBUG << "old previous Energy = " << energyNext2 << endm;}
-		    leakE2 = crossTalk * (energy2 - energyNext2);
-		} else {
-		    leakE2 = 0; //situation1: do nothing
-		}
-		//if (i == 0) {LOG_DEBUG << "central strip forward leakage " << leakE2 << endm;}
-		energy1 -= leakE1;
-		if (i == 0) {
-		    energy1 -= leakE2;
-		} else {
-		    energy2 -= leakE2;
-		}
-		{LOG_DEBUG << "Out: energy1 = " << energy1 << ", energy2 = " << energy2 << endm;}
-		{LOG_DEBUG << "Out: leakE1 = " << leakE1 << ", leakE2 = " << leakE2 << endm;}
-		//if (i == 0) {LOG_DEBUG << "new high Energy after leaking is " << energy1 << endm;}
-		int module, eta, sub;
-		if (detectorNextHits[numCross + i]) {
-		    detectorNextHits[numCross + i]->setdE(energy1);
-		} else {
-		    if (softIds[numCross + i]) {
-	    		///////////////////////////////////////////////////////////////////////////
-		        // Create empty calorimeter hits for  neighbors with no energy deposited,// 
-			// i.e. energy is zero! excluding neighbors in different modules         //
-		        ///////////////////////////////////////////////////////////////////////////
-    			mGeom[det - 1]->getBin(softIds[numCross + i], module, eta, sub);
-			tempHit->setModule(module);
-			tempHit->setEta(eta);
-			tempHit->setSub(sub);
-		        tempHit->setParentTrack(NULL);
-			tempHit->setdE(energy1);
-			detectorNextHits[numCross + i] = tempHit;
-			StMcEmcHitCollection::EAddHit returnCode = mEmcMcHits[det - 1]->addHit(tempHit);
-		        if (returnCode == StMcEmcHitCollection::kNew) {
-			    tempHit = new StMcCalorimeterHit();
-			}
-		    }
-		}
-		if (i != 0) {
-		    if (detectorNextHits[numCross - i]) {
-			detectorNextHits[numCross - i]->setdE(energy2);
-		    } else {
-			if (softIds[numCross - i]) {
-			    mGeom[det - 1]->getBin(softIds[numCross - i], module, eta, sub);
-		    	    tempHit->setModule(module);
-			    tempHit->setEta(eta);
-		            tempHit->setSub(sub);
-		    	    tempHit->setParentTrack(NULL);
-		    	    tempHit->setdE(energy2);
-		    	    detectorNextHits[numCross - i] = tempHit;
-		    	    StMcEmcHitCollection::EAddHit returnCode = mEmcMcHits[det - 1]->addHit(tempHit);
-		    	    if (returnCode == StMcEmcHitCollection::kNew) {
-		    		tempHit = new StMcCalorimeterHit();
-			    }
-			}
-		    }
-		}
-		totalenergya += detectorNextHits[numCross + i] ? detectorNextHits[numCross + i]->dE() : 0;
-		if (i != 0) totalenergya += detectorNextHits[numCross - i] ? detectorNextHits[numCross - i]->dE() : 0;
-	    }
-	    {LOG_DEBUG << "total energy before is " << totalenergyb << " and total energy after immediately, is " << totalenergya << endm;}
-	    delete tempHit;
-        } // highElement 
+            } // Modules
+            
+            ///////////////////////////////////////////////////////////////
+            //    Create empty calorimeter hits for missing neighbors    //
+            //          excluding neighbors in different modules         //
+            ///////////////////////////////////////////////////////////////
+            int module, eta, sub;
+            StMcCalorimeterHit *tempHit = new StMcCalorimeterHit();
+            
+            if(detectorNext == NULL && softNext != 0) {
+                mGeom[det - 1]->getBin(softNext, module, eta, sub);
+                if(module != modHigh) continue;
+                
+                tempHit->setModule(module);
+                tempHit->setEta(eta);
+                tempHit->setSub(sub);
+                tempHit->setdE(0.0);
+                tempHit->setParentTrack(NULL);
+                detectorNext = tempHit;
+                
+                StMcEmcHitCollection::EAddHit returnCode = mEmcMcHits[det - 1]->addHit(tempHit);
+                if(returnCode == StMcEmcHitCollection::kNew) 
+                {
+                    tempHit = new StMcCalorimeterHit();
+                }
+            }
+            
+            if(detectorNextNext == NULL && softNextNext != 0) {
+                mGeom[det - 1]->getBin(softNextNext, module, eta, sub);
+                if(module != modHigh) continue;
+                
+                tempHit->setModule(module);
+                tempHit->setEta(eta);
+                tempHit->setSub(sub);
+                tempHit->setdE(0.0);
+                tempHit->setParentTrack(NULL);
+                detectorNextNext = tempHit;
+                
+                StMcEmcHitCollection::EAddHit returnCode = mEmcMcHits[det- 1]->addHit(tempHit);
+                if(returnCode == StMcEmcHitCollection::kNew) {
+                    tempHit = new StMcCalorimeterHit();
+                }
+            }
+            
+            if(detectorPrevious == NULL && softPrevious != 0) {
+                mGeom[det - 1]->getBin(softPrevious, module, eta, sub);
+                if(module != modHigh) continue;
+                
+                tempHit->setModule(module);
+                tempHit->setEta(eta);
+                tempHit->setSub(sub);
+                tempHit->setdE(0.0);
+                tempHit->setParentTrack(NULL);
+                detectorPrevious = tempHit;
+                
+                StMcEmcHitCollection::EAddHit returnCode = mEmcMcHits[det - 1]->addHit(tempHit);
+                if(returnCode == StMcEmcHitCollection::kNew) {
+                    tempHit = new StMcCalorimeterHit();
+                }
+            }
+            
+            if(detectorPreviousPrevious == NULL && softPreviousPrevious != 0) {
+                mGeom[det - 1]->getBin(softPreviousPrevious, module, eta, sub);
+                if(module != modHigh) continue;
+                
+                tempHit->setModule(module);
+                tempHit->setEta(eta);
+                tempHit->setSub(sub);
+                tempHit->setdE(0.0);
+                tempHit->setParentTrack(NULL);
+                detectorPreviousPrevious = tempHit;
+                
+                StMcEmcHitCollection::EAddHit returnCode = mEmcMcHits[det - 1]->addHit(tempHit);
+                if(returnCode == StMcEmcHitCollection::kNew) {
+                    tempHit = new StMcCalorimeterHit();
+                }
+            }
+            
+            delete tempHit;
+            
+            ////////////////////////////////////////////////////////////////////
+            //    Cascade energy through the neighboring detector elements    //
+            ////////////////////////////////////////////////////////////////////
+            
+            if(detectorHigh == NULL) continue;
+            float highEnergy = detectorHigh->dE();
+            
+            // cross-talk falls off linearly as we approach edge of barrel
+            float crossTalk = mCrossTalk[det - 1] * (1 - fabs(etaHigh) );
+            
+            detectorHigh->setdE( (1 - 2 * crossTalk) * highEnergy);
+            
+            if(detectorNext != NULL) {
+                float nextEnergy = detectorNext->dE();
+                float newEnergy = nextEnergy + crossTalk * highEnergy;
+                detectorNext->setdE( (1 - crossTalk) * newEnergy);
+                
+                if(detectorNextNext != NULL)
+                {
+                    float nextnextEnergy = detectorNextNext->dE();
+                    detectorNextNext->setdE( nextnextEnergy + crossTalk * newEnergy);
+                }
+            }
+            
+            if(detectorPrevious != NULL) {
+                float previousEnergy = detectorPrevious->dE();
+                float newEnergy = previousEnergy + crossTalk * highEnergy;
+                detectorPrevious->setdE( (1 - crossTalk) * newEnergy);
+                
+                if(detectorPreviousPrevious != NULL) {
+                    float previouspreviousEnergy = detectorPreviousPrevious->dE();
+                    detectorPreviousPrevious->setdE( previouspreviousEnergy + crossTalk * newEnergy);
+                }
+            }
+        } // highElement check
     } // det Loop
 }
 
 /*****************************************************************************
  *  $Log: StEmcSimulatorMaker.cxx,v $
- *  Revision 1.59  2010/10/14 21:18:57  ogrebeny
- *  Changes from Wenqin (wqxu@ucla.edu):
- *
- *  For the cross talk part, make the energy assignments of the newly created
- *  strips happen before they are added to the mEmcMcHits collection, otherwise
- *  the energy assignments won't be recorded in the collection.
- *
- *  The cross talk leakage is now proportional to the difference of energies of two neighbor
- *  strips. The leakage range is extended to +/- 5 strips.
- *
- *  The cross talk in the BSMD-Phi still needs more solid adjustment, disabled for now.
- *
  *  Revision 1.58  2008/11/17 21:44:24  kocolosk
  *  don't store GEANT dE in MuDST if we're embedding
  *

@@ -1,7 +1,10 @@
 
-* $Id: gstar_part.g,v 1.30 2010/09/07 15:09:21 jwebb Exp $
+* $Id: gstar_part.g,v 1.31 2010/11/18 15:12:04 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.31  2010/11/18 15:12:04  jwebb
+* Added omega(728) w/ 100% decay to e+e-.
+*
 * Revision 1.30  2010/09/07 15:09:21  jwebb
 * RT 1999: Adding XiMinus, XiMinusBar, XiZero and XiZeroBar
 *
@@ -344,9 +347,10 @@ MODULE gstar_part Is the STAR Particle Database
                       bratio = {1,}      mode  = {9707,}
 
 
-
-
-
+  ! omega(782) --> e+ e- 100%
+  Particle omega  code=10150 TrkTyp=3 mass=.782   charge=0  tlife=7.79E-23,
+                  pdg=223  bratio  = { 1.00, },  
+                           mode    = { 0203, }
 
   ! phi --> K+ K- 100%
   PARTICLE phi    code=10151 trktyp=3 mass=1.0194 charge=0  tlife=1.482e-22,
