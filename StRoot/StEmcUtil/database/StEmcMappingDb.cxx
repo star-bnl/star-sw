@@ -1,10 +1,11 @@
-// $Id: StEmcMappingDb.cxx,v 1.7 2009/11/17 14:19:28 mattheww Exp $
+// $Id: StEmcMappingDb.cxx,v 1.9 2010/01/28 13:45:06 mattheww Exp $
 
 #include "StEmcMappingDb.h"
 
 #include "TUnixTime.h"
 #include "StMessMgr.h"
 #include "StMaker.h"
+#include "St_db_Maker/St_db_Maker.h"
 
 #include "StDbLib/StDbManager.hh"
 #include "StDbLib/StDbConfigNode.hh"
@@ -34,38 +35,39 @@ StEmcMappingDb::StEmcMappingDb(int date, int time) : mBemcTTable(NULL),
     
     if(!mChain) {
         StDbManager *mgr = StDbManager::Instance();
-        StDbConfigNode *db = mgr->initConfig("Calibrations_emc");
-        mBemcTable = db->addDbTable("bemcMap");
-        mSmdeTable = db->addDbTable("bsmdeMap");
-        mSmdpTable = db->addDbTable("bsmdpMap");
-        mBprsTable = db->addDbTable("bprsMap");
+        StDbConfigNode *db = mgr ? mgr->initConfig("Calibrations_emc") : 0;
+	if (db) {
+    	    mBemcTable = db->addDbTable("bemcMap");
+    	    mSmdeTable = db->addDbTable("bsmdeMap");
+    	    mSmdpTable = db->addDbTable("bsmdpMap");
+    	    mBprsTable = db->addDbTable("bprsMap");
         
-        int elements[18000]; for(int i=0; i<18000; i++) elements[i] = i+1;
+    	    int elements[18000]; for(int i=0; i<18000; i++) elements[i] = i+1;
         
-        mBemcTable->resizeElementID(4800);
-        mBemcTable->setElementID(elements, 4800);
+    	    mBemcTable->resizeElementID(4800);
+    	    mBemcTable->setElementID(elements, 4800);
         
-        mBprsTable->resizeElementID(4800);
-        mBprsTable->setElementID(elements, 4800);
+    	    mBprsTable->resizeElementID(4800);
+    	    mBprsTable->setElementID(elements, 4800);
         
-        mSmdeTable->resizeElementID(18000);
-        mSmdeTable->setElementID(elements, 18000);
+    	    mSmdeTable->resizeElementID(18000);
+    	    mSmdeTable->setElementID(elements, 18000);
         
-        mSmdpTable->resizeElementID(18000);
-        mSmdpTable->setElementID(elements, 18000);
+    	    mSmdpTable->resizeElementID(18000);
+    	    mSmdpTable->setElementID(elements, 18000);
         
-        mBemcTTable = new St_bemcMap();
-        mBemcTTable->Adopt(4800, mBemcTable->GetTable());
+    	    mBemcTTable = new St_bemcMap();
+    	    mBemcTTable->Adopt(4800, mBemcTable->GetTable());
         
-        mBprsTTable = new St_bprsMap();
-        mBprsTTable->Adopt(4800, mBprsTable->GetTable());
+    	    mBprsTTable = new St_bprsMap();
+    	    mBprsTTable->Adopt(4800, mBprsTable->GetTable());
         
-        mSmdeTTable = new St_bsmdeMap();
-        mSmdeTTable->Adopt(18000, mSmdeTable->GetTable());
+    	    mSmdeTTable = new St_bsmdeMap();
+    	    mSmdeTTable->Adopt(18000, mSmdeTable->GetTable());
         
-        mSmdpTTable = new St_bsmdpMap();
-        mSmdpTTable->Adopt(18000, mSmdpTable->GetTable());
-        
+    	    mSmdpTTable = new St_bsmdpMap();
+    	    mSmdpTTable->Adopt(18000, mSmdpTable->GetTable());
+        }
         SetDateTime(date, time);
     }
 }
@@ -90,19 +92,19 @@ void StEmcMappingDb::SetDateTime(int date, int time) {
     else {
         mBeginTime.Set(date, time);
         unsigned unix = TUnixTime::Convert(mBeginTime, true);
-        if( !(mBemcTable->getBeginTime() < unix && unix < mBemcTable->getEndTime()) ) {
+        if(mBemcTable && !(mBemcTable->getBeginTime() < unix && unix < mBemcTable->getEndTime()) ) {
             mBemcDirty = true;
             reset_bemc_cache();
         }
-        if( !(mBprsTable->getBeginTime() < unix && unix < mBprsTable->getEndTime()) ) {
+        if(mBprsTable && !(mBprsTable->getBeginTime() < unix && unix < mBprsTable->getEndTime()) ) {
             mBprsDirty = true;
             reset_bprs_cache();
         }
-        if( !(mSmdeTable->getBeginTime() < unix && unix < mSmdeTable->getEndTime()) ) {
+        if( mSmdeTable && !(mSmdeTable->getBeginTime() < unix && unix < mSmdeTable->getEndTime()) ) {
             mSmdeDirty = true;
             reset_smde_cache();
         }
-        if( !(mSmdpTable->getBeginTime() < unix && unix < mSmdpTable->getEndTime()) ) {
+        if(mSmdpTable && !(mSmdpTable->getBeginTime() < unix && unix < mSmdpTable->getEndTime()) ) {
             mSmdpDirty = true;
             reset_smdp_cache();
         }
@@ -115,28 +117,28 @@ void StEmcMappingDb::SetFlavor(const char *flavor, const char *tablename) {
     }
     else {
         if(!tablename || !strcmp(tablename, "bemcMap"))  {
-            if(strcmp(mBemcTable->getFlavor(), flavor)) {
+            if(mBemcTable && strcmp(mBemcTable->getFlavor(), flavor)) {
                 mBemcTable->setFlavor(flavor);
                 mBemcDirty = true;
                 reset_bemc_cache();
             }
         }
         if(!tablename || !strcmp(tablename, "bprsMap")) {
-            if(strcmp(mBprsTable->getFlavor(), flavor)) {
+            if(mBprsTable && strcmp(mBprsTable->getFlavor(), flavor)) {
                 mBprsTable->setFlavor(flavor);
                 mBprsDirty = true;
                 reset_bprs_cache();
             }
         }
         if(!tablename || !strcmp(tablename, "bsmdeMap")) {
-            if(strcmp(mSmdeTable->getFlavor(), flavor)) {
+            if(mSmdeTable && strcmp(mSmdeTable->getFlavor(), flavor)) {
                 mSmdeTable->setFlavor(flavor);
                 mSmdeDirty = true;
                 reset_smde_cache();
             }
         }
         if(!tablename || !strcmp(tablename, "bsmdpMap")) {
-            if(strcmp(mSmdpTable->getFlavor(), flavor)) {
+            if(mSmdpTable && strcmp(mSmdpTable->getFlavor(), flavor)) {
                 mSmdpTable->setFlavor(flavor);
                 mSmdpDirty = true;
                 reset_smdp_cache();
@@ -151,22 +153,22 @@ void StEmcMappingDb::SetMaxEntryTime(int date, int time) {
     }
     else {
         unsigned unixMax = TUnixTime::Convert(TDatime(date,time), true);
-        if(mBemcTable->getProdTime() != unixMax) {
+        if(mBemcTable && (mBemcTable->getProdTime() != unixMax)) {
             mBemcTable->setProdTime(unixMax);
             mBemcDirty = true;
             reset_bemc_cache();
         }
-        if(mBprsTable->getProdTime() != unixMax) {
+        if(mBprsTable && (mBprsTable->getProdTime() != unixMax)) {
             mBprsTable->setProdTime(unixMax);
             mBprsDirty = true;
             reset_bprs_cache();
         }
-        if(mSmdeTable->getProdTime() != unixMax) {
+        if(mSmdeTable && (mSmdeTable->getProdTime() != unixMax)) {
             mSmdeTable->setProdTime(unixMax);
             mSmdeDirty = true;
             reset_smde_cache();
         }
-        if(mSmdpTable->getProdTime() != unixMax) {
+        if(mSmdpTable && (mSmdpTable->getProdTime() != unixMax)) {
             mSmdpTable->setProdTime(unixMax);
             mSmdpDirty = true;
             reset_smdp_cache();
@@ -177,25 +179,25 @@ void StEmcMappingDb::SetMaxEntryTime(int date, int time) {
 // struct declaration auto-generated at $STAR/include/bemcMap.h
 const bemcMap_st* StEmcMappingDb::bemc() const {
     maybe_reload(kBarrelEmcTowerId);
-    return mBemcTTable->GetTable();
+    return mBemcTTable ? mBemcTTable->GetTable() : 0;
 }
 
 // struct declaration auto-generated at $STAR/include/bprsMap.h
 const bprsMap_st* StEmcMappingDb::bprs() const {
     maybe_reload(kBarrelEmcPreShowerId);
-    return mBprsTTable->GetTable();
+    return mBprsTTable ? mBprsTTable->GetTable() : 0;
 }
 
 // struct declaration auto-generated at $STAR/include/bsmdeMap.h
 const bsmdeMap_st* StEmcMappingDb::bsmde() const {
     maybe_reload(kBarrelSmdEtaStripId);
-    return mSmdeTTable->GetTable();
+    return mSmdeTTable ? mSmdeTTable->GetTable() : 0;
 }
 
 // struct declaration auto-generated at $STAR/include/bsmdpMap.h
 const bsmdpMap_st* StEmcMappingDb::bsmdp() const {
     maybe_reload(kBarrelSmdPhiStripId);
-    return mSmdpTTable->GetTable();
+    return mSmdpTTable ? mSmdpTTable->GetTable() : 0;
 }
 
 int 
@@ -220,6 +222,7 @@ int
 StEmcMappingDb::softIdFromCrate(StDetectorId det, int crate, int channel) const {
     if(det == kBarrelEmcTowerId) {
         const bemcMap_st* map = bemc();
+	if (!map) return 0;
         if(!mCacheCrate[crate-1][channel]) {
             for(int i=0; i<4800; ++i) {
                 mCacheCrate[map[i].crate-1][map[i].crateChannel] = i+1;
@@ -242,6 +245,7 @@ int
 StEmcMappingDb::softIdFromDaqId(StDetectorId det, int daqID) const {
     if(det == kBarrelEmcTowerId) {
         const bemcMap_st* map = bemc();
+	if (!map) return 0;
         if(!mCacheDaqId[daqID]) {
             for(int i=0; i<4800; ++i) {
                 mCacheDaqId[map[i].daqID] = i+1;
@@ -263,6 +267,7 @@ int
 StEmcMappingDb::softIdFromTDC(StDetectorId det, int TDC, int channel) const {
     if(det == kBarrelEmcTowerId) {
         const bemcMap_st* map = bemc();
+	if (!map) return 0;
         if(!mCacheTDC[TDC][channel]) {
             for(int i=0; i<4800; ++i) {
                 mCacheTDC[map[i].TDC][map[i].crateChannel] = i+1;
@@ -288,6 +293,7 @@ StEmcMappingDb::softIdFromRDO(StDetectorId det, int rdo, int channel) const {
         case kBarrelEmcPreShowerId:
 	  {
 	    const bprsMap_st* prs = bprs();
+	    if (!prs) return 0;
 	    if(mCacheBprsRdo[rdo][channel] == -1) {
 	      for(int i=0; i<4800; i++) {
                 if(prs[i].rdo == rdo && prs[i].rdoChannel == channel) {
@@ -323,6 +329,7 @@ StEmcMappingDb::softIdFromRDO(StDetectorId det, int rdo, int channel) const {
 	  {
 	    const bsmdeMap_st *smde = bsmde();
 	    const bsmdpMap_st *smdp = bsmdp();
+	    if (!smde || !smdp) return 0;
 	    if(mCacheSmdRdo[rdo][channel] == -1) {
 	      for(int i=0; i<18000; i++) {
                 if(smde[i].rdo == rdo && smde[i].rdoChannel == channel) {
@@ -423,11 +430,14 @@ void StEmcMappingDb::maybe_reload(StDetectorId det) const {
 }
 
 void StEmcMappingDb::reload_dbtable(StDbTable* table) const {
+    if (!table) return;
     LOG_DEBUG << "(re)loading mapping table using StDbManager" << endm;
     StDbManager *mgr = StDbManager::Instance();
-    mgr->setVerbose(false);
-    mgr->setRequestTime(mBeginTime.AsSQLString());
-    mgr->fetchDbTable(table);
+    if (mgr) { 
+	mgr->setVerbose(false);
+        mgr->setRequestTime(mBeginTime.AsSQLString());
+        mgr->fetchDbTable(table);
+    }
 }
 
 bool StEmcMappingDb::maybe_reset_cache(StDetectorId det) const {
@@ -437,7 +447,7 @@ bool StEmcMappingDb::maybe_reset_cache(StDetectorId det) const {
     Int_t version;
     switch(det) {
         case kBarrelEmcTowerId:
-        if((version = mChain->GetValidity(mBemcTTable,NULL)) != mBemcValidity) {
+        if((version = St_db_Maker::GetValidity(mBemcTTable,NULL)) != mBemcValidity) {
             mBemcValidity = version;
             reset_bemc_cache();
             return true;
@@ -445,7 +455,7 @@ bool StEmcMappingDb::maybe_reset_cache(StDetectorId det) const {
         break;
         
         case kBarrelEmcPreShowerId:
-        if((version = mChain->GetValidity(mBprsTTable,NULL)) != mBprsValidity) {
+        if((version = St_db_Maker::GetValidity(mBprsTTable,NULL)) != mBprsValidity) {
             mBprsValidity = version;
             reset_bprs_cache();
             return true;
@@ -453,7 +463,7 @@ bool StEmcMappingDb::maybe_reset_cache(StDetectorId det) const {
         break;
         
         case kBarrelSmdEtaStripId:
-        if((version = mChain->GetValidity(mSmdeTTable,NULL)) != mSmdeValidity) {
+        if((version = St_db_Maker::GetValidity(mSmdeTTable,NULL)) != mSmdeValidity) {
             mSmdeValidity = version;
             reset_smde_cache();
             return true;
@@ -461,7 +471,7 @@ bool StEmcMappingDb::maybe_reset_cache(StDetectorId det) const {
         break;
         
         case kBarrelSmdPhiStripId:
-        if((version = mChain->GetValidity(mSmdpTTable,NULL)) != mSmdpValidity) {
+        if((version = St_db_Maker::GetValidity(mSmdpTTable,NULL)) != mSmdpValidity) {
             mSmdpValidity = version;
             reset_smdp_cache();
             return true;
@@ -491,6 +501,9 @@ void StEmcMappingDb::reset_smdp_cache() const {
 
 /*****************************************************************************
  * $Log: StEmcMappingDb.cxx,v $
+ * Revision 1.9  2010/01/28 13:45:06  mattheww
+ * update from Oleksandr to protect against NULL pointers
+ *
  * Revision 1.7  2009/11/17 14:19:28  mattheww
  * fixed bug in some if statements
  *

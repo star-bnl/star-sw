@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.226 2009/11/19 18:35:02 perev Exp $
+// $Id: StMaker.cxx,v 1.234 2010/07/21 21:39:29 fisyak Exp $
 //
 //
 /*!
@@ -237,7 +237,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
 //{"y2006b",      20051201,     2, "y2006b",   "y2006+new FPD+SSD5/CALB2"},// code versions indicated
   {"y2006c",      20051201,     3, "y2006c",   "y2006+new FPD+SSD5/CALB2+noPMD"},// 
   {"y2006g",      20051201,     4, "y2006g",   "y2006c + SVT dead material"},
-  {"y2006h",      20051201,     5, "y2006g",   "y2006g + ecal6(JW)"},
+  {"y2006h",      20051201,     5, "y2006g",   "y2006g + ecal6+tpc2009(JW)"},
 
   // in preparation
   {"y2007",       20061105,     0, "y2007",    "base geometry for y2007"}, // advertized simu 20061101
@@ -250,8 +250,12 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2008a",      20071101,     1, "y2008a",   "base for y2008: SVT/SSD out, cone in separate SCON"},
   // 
   {"y2009",       20081215,     0, "y2009",    "based on TGeomanager of YF"},
+
   {"y2009a",      20081215,     1, "y2009a",   "y2009+ecalgeo6(JW)"},
+  {"y2009b",      20081215,     2, "y2009b",   "y2009+ecalgeo6(JW) w/ old tracking cuts in eemc."},
   {"y2010",       20091215,     0, "y2010",    "y2009+full BTOF"},
+  {"y2010a",      20091215,     1, "y2010a",   "y2010 production tag"},
+  {"y2011",       20101215,     0, "y2011",    "y2011"},
 
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
@@ -340,6 +344,7 @@ StMaker::~StMaker()
   TDataSet *ds = this;
   Cleanup(ds);
   StMkDeb::Cancel(this);
+  // delete fLogger;  fLogger = 0;
 }
 //_____________________________________________________________________________
 const Char_t *StMaker::GetName() const
@@ -729,14 +734,6 @@ void StMaker::SetFlavor(const Char_t *flav,const Char_t *tabname)
   StMaker *mk = GetMakerInheritsFrom("St_db_Maker");
   if (mk) mk->SetFlavor(flav,tabname);
 }
-//______________________________________________________________________________
-Int_t   StMaker::GetValidity(const TTable *tb, TDatime *const val) const
-{
-   StMaker *mk = GetMaker(tb);
-   if (!mk) 					return 10;
-   if (!mk->InheritsFrom("St_db_Maker"))	return 11;
-   return mk->GetValidity(tb,val);
-}
 //_____________________________________________________________________________
 void StMaker::Clear(Option_t *option)
 {
@@ -1013,6 +1010,7 @@ Int_t StMaker::Finish()
 //VP   Printf("=================================================================================\n");
    
    if (GetParent()==0) StMemStat::Summary();
+   // delete fLogger; fLogger=0;
    return nerr;
 }
 
@@ -1961,6 +1959,30 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.234  2010/07/21 21:39:29  fisyak
+// Add alias for y2011
+//
+// Revision 1.233  2010/06/01 20:18:30  perev
+// Added y2009b and y2010a geometry tags to support simulation requests
+//
+// Revision 1.232  2010/05/24 14:25:54  fisyak
+// move alias time stamp for y2010 from 20091214 to 20091215 (back, as it was before 2010/04/06)
+//
+// Revision 1.231  2010/04/30 17:13:20  fine
+// RT #1911. Protect against of the died pointer
+//
+// Revision 1.230  2010/04/27 21:31:44  fine
+// remove the logger destruction side effect
+//
+// Revision 1.229  2010/04/23 22:40:08  fine
+// RT #1911. Close the local logger at Finish
+//
+// Revision 1.228  2010/04/06 19:06:10  fisyak
+// shift y2010 tag from 20091215 to 20091214 because beginTime for the first tpcPadGainT0 for run X was set 20091214.215645
+//
+// Revision 1.227  2010/01/27 20:36:56  perev
+// GetValidity removed. It is St_db_Maker::GetValidity() now
+//
 // Revision 1.226  2009/11/19 18:35:02  perev
 // y2006h = y200hg+ecalgeo6
 //

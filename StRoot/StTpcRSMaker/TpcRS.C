@@ -29,7 +29,7 @@ class St_db_Maker;
 St_db_Maker *dbMk = 0;
 #endif
 //________________________________________________________________________________
-void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",  
+void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",  
 	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd", const Char_t *opt = "Bichsel", 
 	   Int_t tauIX = 0, Int_t tauCX = 0) {
   gROOT->LoadMacro("bfc.C"); 
@@ -40,8 +40,9 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
   RunOpt.ToLower();
   //  ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
   ChainOpt = "MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
-  ChainOpt += "Corr3,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
-  ChainOpt += "EvOut,MuDST,MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
+  ChainOpt += "Corr4,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
+  //  ChainOpt += "EvOut,MuDST,MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
+  ChainOpt += "MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
   if (RunOpt.Contains("fcf",TString::kIgnoreCase)) {
     ChainOpt += "tpl,tpcI,";
     RunOpt.ReplaceAll("TpcRS,","");
@@ -49,10 +50,10 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
   } else {
     ChainOpt += "tpcDB,TpcHitMover,TpxClu,";
   }
-  
+  //  Bool_t needAlias = kFALSE;
   TString FileIn(fileIn);
   if (FileIn == "") {
-    ChainOpt += "gstar,"; RootFile += "gstar_y8";
+    ChainOpt += "gstar,"; RootFile += "gstar_y9";
     if (! RunOpt.Contains("Y200",TString::kIgnoreCase)) ChainOpt += "Y2009,";
     if      (Opt.Contains("FieldOff" ,TString::kIgnoreCase)) ChainOpt += "FieldOff,";
     else if (Opt.Contains("HalfField",TString::kIgnoreCase)) ChainOpt += "HalfField,";
@@ -69,20 +70,33 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
       ChainOpt += "fzin,";
       RootFile.ReplaceAll(".fzd","");
       RootFile.ReplaceAll(".fz","");
+    } else {
+      if (FileIn.Contains(".geant.root",TString::kIgnoreCase)) {
+	RootFile = Form("%s",gSystem->BaseName(FileIn.Data())); 
+	ChainOpt += "in,";
+	RootFile.ReplaceAll(".geant.root","");
+	//	needAlias = kTRUE;
+      }
     }
   }
   ChainOpt += RunOpt;
-  RootFile += Form("_%s_%s_%i_%i",Run,Opt.Data(),First,NEvents);
+  RootFile += Form("_%s_%s_%i_%i",Run,Opt.Data(),First,Last);
   RootFile.ReplaceAll(",","_");
   if (tauIX > 0) {RootFile += "jI=";RootFile += tauIX;}
   if (tauCX > 0) {RootFile += "tauCX=";RootFile += tauCX;}
-
+  if (RootFile.Contains(";")) {
+    Int_t index = RootFile.Index(";");
+    RootFile = RootFile(0,index);
+  }
   RootFile += ".root";
   RootFile.ReplaceAll(" ","");
   cout << "ChainOpt : " << ChainOpt.Data() << "\tOuput file " << RootFile.Data() << endl;
+  
+
   TString output = RootFile;
   output.ReplaceAll(".root","O.root");
-  if (NEvents < 0) {
+  output.ReplaceAll("*","");
+  if (Last < 0) {
     bfc(-1,ChainOpt.Data(),0,0,0);
     return;
   }
@@ -90,6 +104,7 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
   if (ChainOpt.Contains("TpcRS",TString::kIgnoreCase)) {
     StTpcRSMaker *tpcRS = (StTpcRSMaker *) chain->Maker("TpcRS");
     if (tpcRS) {
+      //      if (needAlias) tpcRS->SetInput("geant","bfc/.make/inputStream/.make/inputStream_Root/.data/bfcTree/geantBranch");
       Int_t m_Mode = tpcRS->GetMode();
 #if 1
       if (Opt.Contains("pai",TString::kIgnoreCase))     {SETBIT(m_Mode,StTpcRSMaker::kPAI); CLRBIT(m_Mode,StTpcRSMaker::kBICHSEL);}
@@ -99,7 +114,7 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
       tpcRS->SetMode(m_Mode);
       if (tauIX  > 0) tpcRS->SettauIntegrationX(1e-9*tauIX);
       if (tauCX  > 0) tpcRS->SettauCX(1e-9*tauCX);
-      //      tpcRS->SetDebug(112);
+      //      tpcRS->SetDebug(13);
     }
   }
   else {
@@ -213,10 +228,10 @@ void TpcRS(Int_t First, Int_t NEvents, const Char_t *Run = "y2009,TpcRS",
       else // proton
 	geant->Do("gkine 100 14   0.05   50.  -1     1      0    6.28    -50.    50.;");
   }
-  if (NEvents > 0)  chain->EventLoop(First,First+NEvents);
+  if (Last > 0)  chain->EventLoop(First,Last);
 }
 //________________________________________________________________________________
-void TpcRS(Int_t NEvents=100,
+void TpcRS(Int_t Last=100,
 	   const Char_t *Run = "y2009,TpcRS",//trs,fcf", // "TpcRS,fcf",
 	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd",
 	   //		 const Char_t *fileIn = 0,
@@ -228,5 +243,5 @@ void TpcRS(Int_t NEvents=100,
   //  /star/data03/daq/2004/fisyak/st_physics_adc_5114043_raw_2080001.daq
   // nofield /star/data03/daq/2004/076/st_physics_adc_5076061_raw_2060001.daq
   //                                   st_physics_adc_5076061_raw_4050001.daq
-  TpcRS(0,NEvents,Run,fileIn,opt,tauIX,tauCX);
+  TpcRS(1,Last,Run,fileIn,opt,tauIX,tauCX);
 }
