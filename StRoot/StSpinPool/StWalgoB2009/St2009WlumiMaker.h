@@ -1,4 +1,4 @@
-// $Id: St2009WlumiMaker.h,v 1.1 2009/11/23 23:00:18 balewski Exp $
+// $Id: St2009WlumiMaker.h,v 1.2 2010/12/02 18:31:43 rcorliss Exp $
 //
 //*-- Author : Ross Corliss, MIT
 
@@ -28,8 +28,10 @@ class St2009WlumiMaker : public StMaker {
   // variables
   int nActiveTowers; // number of towers in the run that have good status
   bool towerInfoIsCurrent;//whether we've computed the active fraction for this run
-  int nBHT3; //number of L2W random accepts, hence the number of BHT3 triggers in general (prescaled)
-  int nBx[120];//number of randoms, broken up by bxing.
+  int nBHT3_hardware_L0; //number of L2W random accepts that pass the hardware L0 requirement.
+  int nBHT3_software_L0; //number of L2W random accepts that pass the software-imposed L0 requirement, hence the number of BHT3 triggers in general (prescaled)
+  int nBHT3[16]; //number of L2W random accepts, hence the number of BHT3 triggers in general (prescaled)
+  int nBx[16][120];//number of randoms, broken up by bxing.
   // parameters
   float  par_highET; // cut off for W 2x2 cluster ET
 
@@ -37,12 +39,12 @@ class St2009WlumiMaker : public StMaker {
   StMuDstMaker *muMK;
   // histograms
   TObjArray *HList;
-  enum {mxHA=32}; TH1 * hA[mxHA];
+  enum {mxHA=120}; TH1 * hA[mxHA];
   
   void initHistos();
   void sortTrigger();
   void getActiveTowers();
-  void getAbortGapCounts(int* n1,int* n2);
+  void getAbortGapCounts(int angle, int* n1,int* n2);
   
  public: 
   St2009WlumiMaker(const char *name="2009publWana");
@@ -60,7 +62,7 @@ class St2009WlumiMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WlumiMaker.h,v 1.1 2009/11/23 23:00:18 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WlumiMaker.h,v 1.2 2010/12/02 18:31:43 rcorliss Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -71,6 +73,9 @@ class St2009WlumiMaker : public StMaker {
 
 
 // $Log: St2009WlumiMaker.h,v $
+// Revision 1.2  2010/12/02 18:31:43  rcorliss
+// updated lumi code to match the starnote version
+//
 // Revision 1.1  2009/11/23 23:00:18  balewski
 // code moved spin-pool
 //

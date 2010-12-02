@@ -1,4 +1,4 @@
-// $Id: St2009WMaker.h,v 1.14 2010/05/01 01:31:44 balewski Exp $
+// $Id: St2009WMaker.h,v 1.15 2010/12/02 18:31:43 rcorliss Exp $
 
 #ifndef STAR_St2009WMaker
 #define STAR_St2009WMaker
@@ -174,6 +174,7 @@ class St2009WMaker : public StMaker {
   WeveCluster maxBtow2x2(int iEta, int iPhi, float zVert);
   WeveCluster sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi,float zVert);
   float sumEtowCone(float zVert, TVector3 refAxis,int flag,int &nTow);
+  void patchToEtaPhi(int patch, int*eta, int*phi);
 
   // histograms
   TObjArray *HList;
@@ -200,7 +201,7 @@ class St2009WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.14 2010/05/01 01:31:44 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2009WMaker.h,v 1.15 2010/12/02 18:31:43 rcorliss Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -211,6 +212,9 @@ class St2009WMaker : public StMaker {
 
 
 // $Log: St2009WMaker.h,v $
+// Revision 1.15  2010/12/02 18:31:43  rcorliss
+// updated lumi code to match the starnote version
+//
 // Revision 1.14  2010/05/01 01:31:44  balewski
 // added W->JJ code & JES calibration
 //

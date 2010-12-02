@@ -1,4 +1,4 @@
-// $Id: St2009W_trigger.cxx,v 1.4 2010/05/13 00:53:52 rcorliss Exp $
+// $Id: St2009W_trigger.cxx,v 1.5 2010/12/02 18:31:43 rcorliss Exp $
 //
 //*-- Author : Ross Corliss, MIT
 
@@ -45,7 +45,35 @@ St2009WMaker::passes_L2(){
   return false;
 }
 
+ void 
+ St2009WMaker::patchToEtaPhi(int patch, int*eta, int*phi)
+ {
+   if (patch<0 || patch>299)
+     {
+       printf("patchToEtaPhi p=%d, out of range. Eta phi not defined.\n",patch);
+       return;
+     }
+   if (patch<150)
+     {
+       int m=14-patch/10;
+       int n=patch%10;
+       *eta=n/2+5;
+       *phi=n%2+m*2;
+     }
+   else
+     {
+       int m=29-patch/10;
+       int n=patch%10;
+       *eta=4-n/2;
+       *phi=1-n%2+m*2;
+     }
+   return;
+ }
+
 //$Log: St2009W_trigger.cxx,v $
+//Revision 1.5  2010/12/02 18:31:43  rcorliss
+//updated lumi code to match the starnote version
+//
 //Revision 1.4  2010/05/13 00:53:52  rcorliss
 //fixed missing #include
 //
