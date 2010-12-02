@@ -1,8 +1,9 @@
-// @(#)root/eg:$Id: StFmsPi0Filter.cxx,v 1.2 2010/10/01 14:10:14 jwebb Exp $
+// @(#)root/eg:$Id: StFmsPi0Filter.cxx,v 1.3 2010/12/02 17:09:16 fisyak Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
 #include "stdlib.h"
+#include <stdio.h>
 #include "math.h"
 #include "StFmsPi0Filter.h"
 #include "StGenParticle.h"
