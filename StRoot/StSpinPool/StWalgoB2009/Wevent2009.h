@@ -1,4 +1,4 @@
-// $Id: Wevent2009.h,v 1.6 2010/04/27 16:53:45 stevens4 Exp $
+// $Id: Wevent2009.h,v 1.7 2010/12/02 18:31:43 rcorliss Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -187,6 +187,9 @@ class Wevent2009 {
   // .....variables ....
   L2wResult2009 *l2algo;
   int l2bitET,l2bitRnd;
+  int trigAwaySum[16]; //for lumi
+  int trigTotalSum;  //for lumi
+
   int id; // eventID
   int bx7, bx48; // raw from muDst
   bool zTag;
@@ -223,6 +226,9 @@ class Wevent2009 {
 
 
 // $Log: Wevent2009.h,v $
+// Revision 1.7  2010/12/02 18:31:43  rcorliss
+// updated lumi code to match the starnote version
+//
 // Revision 1.6  2010/04/27 16:53:45  stevens4
 // add code to remove events tagged as Zs from W candidates
 //

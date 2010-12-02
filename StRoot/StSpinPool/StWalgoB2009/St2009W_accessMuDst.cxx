@@ -1,4 +1,4 @@
-// $Id: St2009W_accessMuDst.cxx,v 1.16 2010/11/09 23:06:46 balewski Exp $
+// $Id: St2009W_accessMuDst.cxx,v 1.17 2010/12/02 18:31:43 rcorliss Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -43,6 +43,44 @@ St2009WMaker::accessTrig(){ // return non-zero on abort
   }
 
   StMuEvent* muEve = mMuDstMaker->muDst()->event();
+
+
+  //collect info for the luminosity monitor
+   int highestT=0;
+  int highestM=0;  
+  for (int m=0;m<300;m++)
+    {
+      int myT=muEve->emcTriggerDetector().highTower(m);
+      if  (myT>highestT)
+        {
+          highestT=myT;
+          highestM=m;
+        }
+    }
+  int highestPhi, tempPhi, tempEta;
+  int awaySum[16];
+int totalSum=0;
+ for (int i=0;i<16;i++) awaySum[i]=0;
+
+ patchToEtaPhi(highestM,&tempEta,&highestPhi);
+  
+  for (int m=0;m<300;m++)
+    {
+      int myT=muEve->emcTriggerDetector().highTower(m);
+      patchToEtaPhi(m,&tempEta,&tempPhi);
+      for (int away_width=0;away_width<16;away_width++)
+        if ((highestPhi+30-tempPhi)%30>(15-away_width) && (highestPhi+30-tempPhi)%30<(15+away_width))
+          {
+            //printf("==> adding %d to awaySum",myT);
+            awaySum[away_width]+=myT;
+          }
+      totalSum+=myT;
+    }
+  for (int i=0;i<16;i++)  wEve.trigAwaySum[i]=awaySum[i];
+  wEve.trigTotalSum=totalSum;
+  //
+
+
   StMuTriggerIdCollection *tic=&(muEve->triggerIdCollection());
   assert(tic);
   const StTriggerId &l1=tic->l1();
@@ -691,6 +729,9 @@ St2009WMaker::rejectMcTr(float effic){ //reject track in MC to match TPC efficie
 
 
 //$Log: St2009W_accessMuDst.cxx,v $
+//Revision 1.17  2010/12/02 18:31:43  rcorliss
+//updated lumi code to match the starnote version
+//
 //Revision 1.16  2010/11/09 23:06:46  balewski
 //small change
 //
