@@ -152,7 +152,7 @@ daq_dta *daq_fgt::handle_raw(int rdo)
 
 daq_dta *daq_fgt::handle_adc(int rdo)
 {
-	int r_start, r_stop ;
+
 
 	LOG(WARN,"FGT ADC not yet supported....") ;
 	return 0 ;
@@ -174,7 +174,291 @@ daq_dta *daq_fgt::handle_phys(int disk, int quadrant, int strip_type)
 }
 
 
+// used to grab trigger info from the event header
+int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
+{
+	const int FGT_BYTES_MIN = ((2400+10+3)*4) ;	// this is the minimum
+	const int FGT_BYTES_MAX = ((2400+10+3+30)*4) ;
+//	const u_int FGT_VERSION = 0x8035 ;		// 
+	const u_int FGT_SIGNATURE = 0x42534D44 ;	// "FGT"
+	const u_int FGT_HDR_ID = 5 ;	// by some definiton somewhere...
 
+	int t_cou = 0 ;
+	int bad = 0 ;
+	u_int *d32 = (u_int *)buff ;
+	int id_check_failed = 0 ;
+
+	//HACKINTOSH!
+	words = 2413 ;
+
+	// FIRST we check the length
+	int buff_bytes = 4 * words ;
+
+	if((buff_bytes < FGT_BYTES_MIN) || (buff_bytes > FGT_BYTES_MAX)) {
+		LOG(ERR,"RDO %d: expect %d bytes, received %d",rdo,FGT_BYTES_MIN,buff_bytes) ;
+		bad |= 1 ;
+	}
+
+
+	// grab crc from the last word
+	int last_ix = words - 1 ;
+	// misc signatures and errors from the header
+	if(d32[1] != FGT_SIGNATURE) {	// "FGT"
+		LOG(ERR,"RDO %d: bad header sig 0x%08X, expect 0x%08X",rdo,d32[1], FGT_SIGNATURE) ;
+		bad |= 1 ;
+	}
+
+	if(d32[9] != 0xDEADFACE) {	// deadface
+		LOG(ERR,"RDO %d: bad deadface 0x%08X",rdo,d32[9]) ;
+		bad |= 1 ;
+	}
+
+
+/* wait for it to stabilize
+	if((d32[2] >> 16) != FGT_VERSION) {
+		LOG(ERR,"RDO %d: bad version 0x%04X, expect 0x%04X",rdo,d32[2] >> 16, FGT_VERSION) ;
+		bad |= 2 ;	// soft error
+	
+	}
+*/
+
+	if((d32[3] & 0xFFFF0000)) {	// error_flags
+		LOG(ERR,"RDO %d: error flags 0x%04X",rdo,d32[3]>>16) ;
+		bad |= 2 ;
+	}
+
+	if(((d32[3]>>8) & 0xFF) != FGT_HDR_ID) {	// det_id
+		LOG(ERR,"RDO %d: bad det_id 0x%02X",rdo,(d32[3]>>8)&0xFF) ;
+		bad |= 1 ;
+	}
+
+
+	int rdo_in_dta = d32[3] & 0xFF ;	// fiber ID via jumpers...
+	if(rdo_id[rdo] != 0xFF) {
+		if(rdo_id[rdo] != rdo_in_dta) {
+			id_check_failed++ ;
+		}
+	}
+
+
+	// compare to what?
+	LOG(DBG,"RDO %d: in data %d",rdo,rdo_in_dta) ;
+
+
+	int format_code = (d32[2] >> 8) & 0xFF ;
+	if(format_code == 0x02) {	// null event
+		LOG(NOTE,"WARN %d: null event",rdo) ;
+
+		trg[0].t = 4097 ;
+		trg[0].daq = 0 ;
+		trg[0].trg = 0 ;
+		trg[0].rhic = d32[4] ;
+
+		return 1 ;
+
+	}
+
+#if 1
+#define	 G_CONST  0x04C11DB7 
+
+	u_int crc_in_data = d32[last_ix] ;
+	register u_int crc = 0xFFFFFFFF ;
+	if(crc_in_data) {	
+		for(int i=0;i<last_ix;i++) {
+			u_int datum ;
+
+			datum = d32[i] ;
+			register u_int data_j ;
+			register u_int crc_31 ;
+
+			for(register int j=31;j>=0;j--) {
+				data_j = (datum >> j) & 1 ;
+				crc_31 = (crc & 0x80000000) ? 1 : 0 ;
+
+				if(crc_31 == data_j) {
+					crc = (crc<<1) ^ G_CONST ;
+				}
+				else {
+					crc = (crc<<1) ;
+				}
+			}
+		}
+
+		if(crc != crc_in_data) {
+			LOG(ERR,"RDO %d: CRC in data 0x%08X, CRC calculated 0x%08X",rdo,crc_in_data,crc) ;
+			bad |= 1 ;
+		}
+	}	
+
+	LOG(DBG,"RDO %d: CRC in data 0x%08X, CRC calculated 0x%08X",rdo,crc_in_data,crc) ;
+#endif
+
+
+	// L0 part
+	t_cou = 0 ;
+	trg[0].t = d32[0] & 0xFFF ;
+	trg[0].daq = d32[2] & 0xF ;
+	trg[0].trg = (d32[2] >> 4) & 0xF ;
+	trg[0].rhic = d32[4] ;
+	
+	t_cou++ ;
+
+
+	LOG(NOTE,"RDO %d: token %d, trg %d, daq %d: rhic %u",rdo, 
+		trg[0].t, trg[0].trg, trg[0].daq, trg[0].rhic) ;
+
+
+	// check token and trg_cmd sanity...
+	if(trg[0].t == 0) {
+		LOG(ERR,"RDO %d: token 0?",rdo) ;
+		trg[0].t = 4097 ;	// turn it to sanity!
+		bad |= 2 ;
+	}
+
+	switch(trg[0].trg) {
+	case 4 :
+	case 8 :
+	case 11 :
+	case 12 :
+	case 15 :
+		break ;
+	default :
+		LOG(ERR,"RDO %d: bad trg_cmd %d",rdo, trg[0].trg) ;
+		// sanitize
+		trg[0].t = 4097 ;
+		bad |= 2 ;
+		break ;
+	}
+
+#if 1	// skip for the temporary 0x8129 V
+
+	// get mesg_length
+	int mesg_length = d32[last_ix-1] & 0xFFF ;	// 12 bits only
+	if(mesg_length > 30) {
+		LOG(ERR,"RDO %d: bad trigger length %d",rdo,mesg_length) ;
+		// kill it! this will make the main length bad too
+		mesg_length = 0 ;
+		bad |= 2 ;
+	}
+
+	for(int i=0;i<mesg_length;i++) {
+		u_int trg_data = d32[last_ix - 2 - i] ;
+
+		
+		
+		trg[t_cou].t = (trg_data >> 8) & 0xFFF ;
+		trg[t_cou].trg = (trg_data >> 4) & 0xF ;
+		trg[t_cou].daq = trg_data & 0xF ;
+		trg[t_cou].rhic = (trg_data >> 20) & 0x7FF ;
+
+
+		// check the triggers here!
+		if(trg_data & 0x80000000) {
+			LOG(ERR,"RDO %d: FIFO limit 0x%08X",rdo,trg_data) ;
+			bad |= 2 ;
+		}
+
+
+		// need some sane limit here on t_cou
+		if(t_cou >= 120) {
+			LOG(ERR,"RDO %d: too many triggers %d",rdo,t_cou) ;
+			bad |= 2 ;
+			break ;
+		}
+
+		t_cou++ ;
+	}
+
+
+//	int trailer_event = d32[last_ix - 2 - mesg_length] & 0xFFFF ;
+
+
+//	if(trailer_event != d32[0]) {
+//		LOG(ERR,"RDO %d: bad trailer event 0x%08X != header 0x%08X",rdo,trailer_event,d32[0]) ;
+//		bad |= 2 ;
+//	}
+#endif
+
+	// HACK!!!! since there is no L2 command implemented!
+	trg[t_cou].t = trg[0].t ;
+	trg[t_cou].trg = 15 ;
+	trg[t_cou].daq = 0 ;
+	trg[t_cou].rhic = trg[0].rhic + 1 ;
+	t_cou++ ;
+
+
+	
+	if(bad) {	
+		LOG(WARN,"RDO %d: words %d: bad %d:",rdo,words,bad) ;
+		// dump the whole header
+		for(int i=0;i<10;i++) {
+			LOG(WARN,"\tRDO %d: %4d: 0x%08X",rdo,i,d32[i]) ;
+		}
+		// dump last 4 words of the trailer as well
+		for(int i=(words-4);i<words;i++) {
+			LOG(WARN,"\tRDO %d: %4d: 0x%08X",rdo,i,d32[i]) ;
+		}
+		
+	}
+	else if(trg[0].trg==11) {	// special test pattern!
+		int bad_cou = 0;
+		int shutup = 0 ;
+		for(int i=10;i<2410;i++) {
+			u_int should ;
+			u_int b31, b21, b1, b0 ;
+
+			b31 = (t_data >> 31) & 1 ;
+			b21 = (t_data >> 21) & 1 ;
+			b1 = (t_data >> 1) & 1 ;
+			b0 = (t_data >> 0) & 1 ;
+
+			should = !(b31 ^ b21 ^ b1 ^b0) ;
+			should = (t_data << 1) | should ;
+
+			if(d32[i] != t_data) {
+				if(!shutup) LOG(WARN,"word %4d: should 0x%08X, is 0x%08X",i,t_data,d32[i]) ;
+				bad_cou++ ;
+			}
+
+			if(bad_cou > 2) shutup = 1  ;
+
+			should = !(b31 ^ b21 ^ b1 ^b0) ;
+			should = (t_data << 1) | should ;
+
+			t_data = should ;
+
+		}
+
+		if(bad_cou) LOG(ERR,"RDO %d: bad locations %d",rdo,bad_cou) ;
+	}
+	
+	if(bad & 1) {	// critical errors
+		return 0 ;	// no trigger!
+	}
+	else {
+
+		if(id_check_failed) {
+			rdo_warns[rdo]++ ;
+			if(rdo_warns[rdo] < 5) {
+				LOG(CAUTION,"RDO %d: rdo check failed: expect 0x%02X, found 0x%02X",
+				    rdo,rdo_id[rdo],rdo_in_dta) ;
+			}			
+		}
+
+
+		rdo_warns[rdo]++ ;
+		if(rdo_warns[rdo]<2) {
+			LOG(TERR,"RDO %d: rdo check: expect 0x%02X, found 0x%02X",
+			    rdo,rdo_id[rdo],rdo_in_dta) ;
+		}
+
+
+		return t_cou ;
+	}
+}
+
+
+#if 0
 int daq_fgt::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int do_log)
 {
 	u_short *us = (u_short *)buff ;
@@ -217,3 +501,4 @@ int daq_fgt::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int do
 
 	return 2 ;
 }
+#endif

@@ -4,14 +4,24 @@
 
 #include <DAQ_READER/daq_det.h>
 
+// logical maps
+#define FGT_RDO_COU		2
+#define FGT_ARM_COU		6
+#define FGT_APV_COU		24
+#define FGT_CH_COU		128
+#define FGT_TIMEBIN_COU		192
+
+// physical mapsa
+#define FGT_DISK_COU		6
+#define FGT_QUADRANT_COU	4
+#define FGT_STRIP_R_COU		326
+#define FGT_STRIP_PHI_COU	1138
 
 #define FGT_STRIP_TYPE_R	0
 #define FGT_STRIP_TYPE_PHI	1
 
-#define FGT_STRIP_R_COU		326
-#define FGT_STRIP_PHI_COU	1138
 
-#define FGT_POINT_MAX_COU	10	//?
+
 
 // when asking for the "phys" bank
 struct fgt_phys_t {
@@ -66,6 +76,9 @@ public:
                 static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
+	u_int rdo_warns[3] ;	// number of warnings issued, per rdo
+	u_char rdo_id[3] ;	// for RDO checks in get_l2
+	u_int t_data ;		// for trg_cmd==1 pattern tests...
 } ;
 
 

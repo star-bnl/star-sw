@@ -12,7 +12,7 @@ DEFINES += -DRTS_LOG_COLORED
 
 
 
-OBJS := daq_fgt.o
+OBJS := daq_fgt.o fgtPed.o
 
 LIBS = libfgt.a
 BINS = 
@@ -38,4 +38,11 @@ daq_fgt.o: ../../../../StRoot/RTS/include/rts.h
 daq_fgt.o: ../DAQ_READER/daq_dta_structs.h
 daq_fgt.o: daq_fgt.h
 daq_fgt.o: ../DAQ_READER/daq_det.h
+fgtPed.o: ../../../../StRoot/RTS/include/rtsLog.h
+fgtPed.o: ../../../../StRoot/RTS/include/daqModes.h
+fgtPed.o: fgtPed.h
+fgtPed.o: daq_fgt.h
+fgtPed.o: ../DAQ_READER/daq_det.h
 daq_fgt.o: ../DAQ_READER/daq_det.h
+fgtPed.o: daq_fgt.h
+fgtPed.o: ../DAQ_READER/daq_det.h
