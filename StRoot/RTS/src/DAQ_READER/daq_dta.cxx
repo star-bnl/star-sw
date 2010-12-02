@@ -57,7 +57,7 @@ void daq_dta::release()
 /*
 	objects is a first guess as to what we'll need, it is best that it is good!
 */
-daq_store *daq_dta::create(u_int bytes, char *name, int rts_id, const char *o_name, u_int obj_size) 
+daq_store *daq_dta::create(u_int bytes, const char *name, int rts_id, const char *o_name, u_int obj_size) 
 {
 	u_int requested ;
 

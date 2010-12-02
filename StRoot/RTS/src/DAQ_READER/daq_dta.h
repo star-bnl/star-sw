@@ -128,7 +128,7 @@ public:
 	virtual ~daq_dta() ;
 
 	// used for writing!
-	daq_store *create(u_int bytes, char *name, int rts_id, const char *o_name, u_int obj_size) ;
+	daq_store *create(u_int bytes, const char *name, int rts_id, const char *o_name, u_int obj_size) ;
 
 	void *request(u_int obj_cou) ;
 	void finalize(u_int obj_cou, int s=0, int row=0, int pad=0) ;
@@ -144,7 +144,7 @@ public:
 	}
 
 	virtual const char *GetCVS() const {	// Offline
-		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.5 2008/12/16 12:05:24 tonko Exp $: built "__DATE__" "__TIME__ ; 
+		static const char cvs[]="Tag $Name:  $: $Id: daq_dta.h,v 1.6 2010/12/02 07:28:20 tonko Exp $: built "__DATE__" "__TIME__ ; 
 		return cvs;
 	}
 
