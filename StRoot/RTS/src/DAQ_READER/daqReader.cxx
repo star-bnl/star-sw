@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.36 2010/11/01 17:56:03 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.37 2010/12/03 21:45:58 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -58,9 +58,12 @@ static const char *getCommand(void) ;
 
 
 
+
 // CONSTRUCTOR!
 daqReader::daqReader(char *mem, int size)
 {
+
+
   init();
   input_type = pointer;
   
@@ -68,6 +71,8 @@ daqReader::daqReader(char *mem, int size)
   data_size = size;  
 
   crit_cou = 0;
+
+
 }
 
 daqReader::daqReader(char *name) 
@@ -136,18 +141,31 @@ daqReader::daqReader(char *name)
   return ;
 }
 
-int daqReader::getDetectorSize(char *det)
+int daqReader::getDetectorSize(const char *det)
 {
   if (!sfs) return 0;
   
   SfsDirsize sz;
-  sfs->getDirSize(det, &sz);
-  printf("sizeof(%s) : %lld %lld (%3.1f%% overhead)\n",det, sz.size, sz.dataSize, ((double)(sz.size - sz.dataSize)) / ((double)(sz.dataSize)));
+
+  sfs->getDirSize((char *)det, &sz);
+  // printf("sizeof(%s) : %lld  (%3.1f%% overhead)  %lld %lld\n",det, sz.dataSize, ((double)(sz.size - sz.dataSize)) / ((double)(sz.dataSize)), sz.dataSize, sz.size);
+
   return (int)sz.size;
 }
 
 void daqReader::init()
 {
+  // Get evphostname
+  EVP_HOSTNAME = (char *)_EVP_HOSTNAME;
+  static char evp_hostname[100];
+  char *str = getenv((char *)"EVP_HOSTNAME");
+
+  if(str) {
+    strcpy(evp_hostname, str);
+    EVP_HOSTNAME = evp_hostname;
+  }
+
+
 #ifndef RTS_ONLINE
   // this is only for Offline!
 
@@ -161,6 +179,11 @@ void daqReader::init()
   rtsLogOutput(RTS_LOG_STDERR) ;	// STDERR only!
 
 #endif
+
+
+  // if(strcmp(EVP_HOSTNAME, _EVP_HOSTNAME) != 0) {
+  LOG("INFO","EVP_HOSTNAME set to %s", EVP_HOSTNAME);
+  //  }
 
   isevp = 0;   // assume not... 
   fname[0] = '\0';
@@ -1679,7 +1702,6 @@ int daqReader::reconnect(void)
   retries = 0 ;
 
   for(;;) {	// until success...
-
 
     evpDesc = msgNQCreate(EVP_HOSTNAME,EVP_PORT,120) ;
 
