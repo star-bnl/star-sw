@@ -35,9 +35,9 @@ class daq_det ;
 enum Input_Type { none, live, file, pointer, dir };
 
 #ifdef RTS_PROJECT_PP
-#define EVP_HOSTNAME    "ppdaq1.pp2pp.bnl.gov"
+#define _EVP_HOSTNAME    "ppdaq1.pp2pp.bnl.gov"
 #else
-#define EVP_HOSTNAME    "evp.starp.bnl.gov"
+#define _EVP_HOSTNAME    "evp.starp.bnl.gov"
 #endif
 
 #define EVP_PORT        8020
@@ -144,7 +144,7 @@ class daqReader {
   int event_size;   // size of the current event measured from beginning of memmap
   u_int bytes ;	    // size of the current event measured from beginning of datap
 
-  int getDetectorSize(char *str);   // actually gets the size of any arbitrary file/directory...
+  int getDetectorSize(const char *str);   // actually gets the size of any arbitrary file/directory...
 
   long long int evt_offset_in_file;
 
@@ -250,6 +250,8 @@ class daqReader {
   MemMap *memmap;
 
   int readNextFutureSummaryInfo(SummaryInfo *info);
+
+  char *EVP_HOSTNAME;
 
  private:	// one shouldn't care... 
 
