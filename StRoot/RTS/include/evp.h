@@ -4,9 +4,9 @@
 #include <rts.h>
 
 #ifdef RTS_PROJECT_PP
-#define EVP_HOSTNAME	"ppdaq1.pp2pp.bnl.gov"
+#define _EVP_HOSTNAME	"ppdaq1.pp2pp.bnl.gov"
 #else
-#define EVP_HOSTNAME	"evp.starp.bnl.gov"
+#define _EVP_HOSTNAME	"evp.starp.bnl.gov"
 #endif
 
 #define EVP_PORT	8020
