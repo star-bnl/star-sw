@@ -88,7 +88,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.11 2010/01/26 21:01:49 fisyak Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.12 2010/12/06 20:07:23 fisyak Exp $
  *
  */
 
@@ -159,7 +159,7 @@ private:
 
     StPhysicalHelixD*      mBeamHelix;        // Beam Line helix
     
-    enum                   {maxSeed=20};
+    enum                   {maxSeed=500};
     Int_t                  mNSeed;
     Float_t                mSeedZ[maxSeed];
     Int_t                  mBemcHit[120][20][2];  // modules, eta, sub
@@ -189,6 +189,9 @@ private:
 /***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.12  2010/12/06 20:07:23  fisyak
+ * Increase maximum number of possible seeds
+ *
  * Revision 1.11  2010/01/26 21:01:49  fisyak
  * Clean up, switch from bit mask to attributes
  *
