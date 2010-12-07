@@ -601,13 +601,9 @@ double THelixTrack::PathX(const THelixTrack &th,double *s2, double *dst, double 
 //_____________________________________________________________________________
 double THelixTrack::Path(double x,double y) const
 {
-//    double ar[6]={fX[0],fX[1],0,fP[0]/fCosL,fP[1]/fCosL,0};
-//    THelixTrack ht(ar,ar+3,fRho);
-//    ar[0]=x;ar[1]=y;
    TCircle ht(fX,fP,fRho);
    double ar[2]={x,y};
-   double s= ht.Path(ar)/fCosL;
-   return s;
+   return ht.Path(ar)/fCosL;
 }
 //_____________________________________________________________________________
 double THelixTrack::Step(const double *point,double *xyz, double *dir) const
@@ -2955,7 +2951,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.51 2010/12/07 16:50:32 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.52 2010/12/07 16:59:27 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2971,6 +2967,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.52  2010/12/07 16:59:27  perev
+ * Cleanup
+ *
  * Revision 1.51  2010/12/07 16:50:32  perev
  * THelixTrack::Path(x,y) TCircle inside
  *
