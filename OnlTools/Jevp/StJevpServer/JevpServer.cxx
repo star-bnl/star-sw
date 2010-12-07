@@ -1300,6 +1300,9 @@ void JevpServer::getMonitorString(char *s, EvpMessage *m)
   if((strcmp(s, "show plots") == 0) || (strcmp(s, "show all") == 0)) {
     
     JevpPlot *plot = (JevpPlot *)plots.First();
+    if(!plot) {
+      b += sprintf(b, "There are no plots\n");
+    }
     while(plot) {
       b += sprintf(b, "plot %50s:\t(run #%d:  %d sec old)\n",
 		   plot->GetPlotName(),

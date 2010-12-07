@@ -13,7 +13,7 @@
 
 #server=$1
 
-echo "Main program:"
+#echo "Main program:"
 
 
-launch JevpServerMain & 
+OnlTools/Jevp/launch JevpServerMain & 
