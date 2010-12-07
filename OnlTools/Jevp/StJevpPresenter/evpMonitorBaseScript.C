@@ -1,5 +1,5 @@
 
-void evpMonitor(char *args)
+void evpMonitorBaseScript(char *args)
 {
   static int firsttime=1;
   printf("starting\n");
@@ -22,11 +22,8 @@ void evpMonitor(char *args)
     gSystem->Load("StEEmcPoolmuEztPanitkin");
     gSystem->Load("StBEMCPlots");
     gSystem->Load("StMcEvent");
-    gSystem->Load("StPDFUtilities");    
-    gSystem->Load("StJevpPlot");    
-    gSystem->Load("StJevpBuilders");    
-    gSystem->Load("StJevpServer");
-    gSystem->Load("StJevpPresenter");
+    gSystem->Load("PDFUtil");    
+    gSystem->Load("Jevp");    
   }
   printf("calling main\n");
   EvpMonitor::main(args);
