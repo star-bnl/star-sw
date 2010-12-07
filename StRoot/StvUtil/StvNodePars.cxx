@@ -11,10 +11,12 @@
   ,{ 6, 7, 8, 9,13,18},{10,11,12,13,14,19},{15,16,17,18,19,20}};
 static const double recvCORRMAX  = 0.99;
 static const double chekCORRMAX  = 0.9999;
-//                              x   y   z  psi   pt  tan  cur
-static double MAXNODPARS[]   ={555,555,555,6.66,111,  10, .1};
-//                              h  z   a    l  p
-static double MAXFITPARS[]   ={22,22, .5 , .5 ,3};
+
+static double MAXTAN = 100;
+//                              x   y   z  psi   pt  tan      cur
+static double MAXNODPARS[]   ={555,555,555,6.66,111, MAXTAN+1, .1};
+//                              h  z   a    l  ptin
+static double MAXFITPARS[]   ={22,22, .5 , .5 ,20};
 static double MAXFITERR[5]   ={.3,.3,0.03,0.03,1};
 //____________________________________________________________
 static double EmxSign(int n,const double *a); 
@@ -130,6 +132,7 @@ StvNodePars &StvNodePars::merge(double wt,StvNodePars &other)
    ready();
    return *this;
 }
+
 //______________________________________________________________________________
 void StvNodePars::set(const THelixTrack *th, double Hz)
 {
@@ -138,12 +141,14 @@ void StvNodePars::set(const THelixTrack *th, double Hz)
   double sinL = th->Dir()[2];
   double cosL = sqrt((1-sinL)*(1+sinL));
   _tanl = sinL/cosL;
+  
   _cosCA = th->Dir()[0]/cosL;
   _sinCA = th->Dir()[1]/cosL;
   _curv = th->GetRho();
   _hz =  Hz;
-  _ptin = _curv/_hz;
-}
+   if (fabs(_curv) > fabs(1e-6*_hz)) 	{_ptin = _curv/_hz;              } 
+   else 				{_ptin = 1e-6; _curv = _ptin*_hz;}
+} 
 
 //______________________________________________________________________________
 void StvNodePars::get(THelixTrack *th) const
@@ -242,8 +247,8 @@ void StvNodePars::operator+=(const StvFitPars &fp)
   if (fabs(l) < 0.1) { tL = l*(1+l*l/3); }
   else               { tL = tan(l)      ;}                
   _tanl = (tL+_tanl)/(1.-_tanl*tL);
-
-  assert(fabs(_tanl)<5);
+  if (_tanl < -MAXTAN) _tanl = -MAXTAN;
+  if (_tanl >  MAXTAN) _tanl =  MAXTAN;
   _curv   = _hz *_ptin;
   if (fabs( _cosCA)>1 || fabs( _sinCA)>1) ready();
   assert(!check());
@@ -410,10 +415,12 @@ ERR: if (!tit) return ierr;
 //_____________________________________________________________________________
  void StvFitErrs::Print(const char *tit) const
 {
+static const char *N="HZALC";
   if (!tit) tit = "";
   printf("StvFitErrs::Print(%s) ==\n",tit);
   const double *e = &mHH;
   for (int i=0,li=0;i< 5;li+=++i) {
+    printf("%c ",N[i]);
     for (int j=0;j<=i;j++) {
     printf("%g\t",e[li+j]);} 
     printf("\n");
