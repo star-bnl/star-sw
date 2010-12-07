@@ -610,6 +610,7 @@ int JevpPlotSet::parseArgs(int argc, char *argv[])
     else if (memcmp(argv[i], "-file", 5) == 0) {
       i++;
       daqfile = argv[i];
+      server = NULL;
     }
     else if (memcmp(argv[i], "-noserver", 9) == 0) {
       server = NULL;
