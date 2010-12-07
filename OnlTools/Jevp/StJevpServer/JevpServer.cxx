@@ -6,7 +6,7 @@
 #include <TMonitor.h>
 #include <TClass.h>
 #include <TCanvas.h>
-#include <StPDFUtilities/PdfIndex.hh>
+#include <PDFUtil/PdfIndex.hh>
 #include <dirent.h>
 #include <TFile.h>
 #include <TLine.h>

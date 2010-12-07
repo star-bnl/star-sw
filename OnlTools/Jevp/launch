@@ -87,7 +87,7 @@ serv=`echo "$mainfunction" | grep -i -c server`
 pres=`echo "$mainfunction" | grep -i -c EvpMain`
 test=`echo "$mainfunction" | grep -i -c MainTest`
 
-evplibs="   gSystem->Load("\""StPDFUtilities"\""); "
+evplibs="   gSystem->Load("\""PDFUtil"\""); "
 #evplibs="$evplibs   gSystem->Load("\""StJevpPlot"\""); "
 #evplibs="$evplibs   gSystem->Load("\""StJevpBuilders"\""); "
 
