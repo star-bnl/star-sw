@@ -56,7 +56,7 @@ public:
   /// Calculates and returns the Z mag field in the current point.
   /// units: PGeV = Hz*Radcurv_in_CM
   double GetHz() const;
-  const double *x_g() const;
+  const double *x() const;
   double GetTime() const;
 
         StvHit *GetHit() const 			{ return mHit;}
@@ -67,6 +67,7 @@ public:
 const StvELossData &GetELoss() const		{return mELossData;}  
   
  double GetXi2() const 				{ return mXi2;}
+ double GetLen() const 				{ return mLen;}
    void SetXi2(double Xi2) 			{ mXi2=Xi2   ;}
    void SetPre(StvNodePars &par,StvFitErrs &err,int dir); 	
    void SetFit(StvNodePars &par,StvFitErrs &err,int dir); 

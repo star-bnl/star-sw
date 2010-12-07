@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "TMath.h"
+#include "TCernLib.h"
 
 #include "StvSeedFinder.h"
 #include "StvKalmanTrackFinder.h"
@@ -58,7 +59,7 @@ if (sf->DoShow())  sf->Show();
 
     StvTrack *stk = FindTrack(0);
     if (!stk) continue;
-    nTrk++;
+
 if (trkShow)    stk->Show();
     int ans = 0;
 //		Refit track   
@@ -129,10 +130,11 @@ Mtx55D_t derivFit;
 //============================
 
     totLen+=mDive->GetLength();
-    nNode++; 
+    nNode++; assert(nNode<200);
     par[0]=par[1]; err[0]=err[1];
-    if (fabs(par[0]._z)  > myConst->mZMax  ) break;
-    if (par[0].getRxy()  > myConst->mRxyMax) break;
+    if (idive >= kDiveBreak) 			break;
+    if (fabs(par[0]._z)  > myConst->mZMax  ) 	break;
+    if (par[0].getRxy()  > myConst->mRxyMax) 	break;
 
 
     assert(idive || !err[0].Check("AfterDive"));
@@ -158,7 +160,12 @@ if (DoShow()) {
     node->SetDer(derivFit,idir);
     node->SetELoss(mDive->GetELossData(),idir);
 
-    if (idive) node->SetType(StvNode::kDcaNode);
+    if (idive) {
+      node->SetType(StvNode::kDcaNode);
+      double testDca = TCL::vdot(&par[1]._cosCA,par[1].P,2);
+      assert(fabs(testDca)<1e-4);
+      continue;
+    }
 
     if (!localHits)	 continue;//Never hits in node 
     node->SetHitPlane(mHitter->GetHitPlane());

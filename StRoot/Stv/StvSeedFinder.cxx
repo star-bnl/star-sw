@@ -19,7 +19,7 @@ void StvSeedFinder::Clear(const char*)
 //_____________________________________________________________________________
 void StvSeedFinder::Show()
 {
-  if (!fDraw) return;
+  if (!fDraw) fDraw = NewDraw();
   fDraw->Trak(fHelix,fSeedHits,kGlobalTrack);
   fDraw->UpdateModified();
 }
@@ -33,7 +33,7 @@ void StvSeedFinder::ShowRest()
    for (int iHit=0;iHit<nHits;iHit++) {
      StvHit *stiHit = (StvHit*)(*hitArr)[iHit];
      if (stiHit->timesUsed()) continue;
-     const float *x = stiHit->x_g();
+     const float *x = stiHit->x();
     fDraw->Point(x[0],x[1],x[2],kUnusedHit);
    }
 

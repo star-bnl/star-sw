@@ -15,7 +15,7 @@
 #endif //APPROX_DEBUG
 #include "Stv/StvDraw.h"
 void myBreak(int);
-enum {kMinHits=5,kMaxHits = 115,kFstAng=80,kErrFakt=5,kLenFakt=5,kStpFakt=3};
+enum {kMinHits=5,kMaxHits = 115,kFstAng=70,kErrFakt=5,kLenFakt=5,kStpFakt=3};
 static const double kMinCos = 0.1;
 
 ClassImp(StvDefaultSeedFinder)
@@ -47,10 +47,10 @@ void StvDefaultSeedFinder::Reset()
   int nHits =  hitArr->size();
   for (int iHit=0;iHit<nHits;iHit++) {
     StvHit *stiHit = (StvHit*)(*hitArr)[iHit];
-    const float *x = stiHit->x_g();
+    const float *x = stiHit->x();
 //    float r2 = x[0]*x[0] + x[1]*x[1]+ x[2]*x[2];
     float r2 = x[0]*x[0] + x[1]*x[1];
-    f1stHitMap->insert(pair<float,StvHit*>(-r2, stiHit));
+    f1stHitMap->insert(std::pair<float,StvHit*>(-r2, stiHit));
     fMultiHits->Add(stiHit,x);
   } 
   fMultiHits->MakeTree();
@@ -136,7 +136,7 @@ fDraw->UpdateModified();StvDraw::Wait();
       fSeedHits.push_back(selHit); selHit->addTimesUsed();fNUsed[0]++;
       lstHit=selHit;
       int jst = fSeedHits.size()-1;
-      X[jst] = lstHit->x_g();
+      X[jst] = lstHit->x();
       mSel.mX = X[jst];
       mSel.mRxy2 = mSel.mX[0]*mSel.mX[0] + mSel.mX[1]*mSel.mX[1];
       if (jst) {
@@ -204,13 +204,13 @@ fDraw->UpdateModified();StvDraw::Wait();
       { 
 	StvHit *nexHit = (StvHit*)node->GetObj();
         if (nexHit->timesUsed()) continue;
-	int ans = mSel.Reject(nexHit->x_g());
+	int ans = mSel.Reject(nexHit->x());
 	if (ans>0) continue;
 	if (ans<0) fMultiIter->Update(mSel.mLim[0],mSel.mLim[1]);
 	if (minLen>mSel.mHitLen) { //Selecting the best
           delete selObj; minLen=mSel.mHitLen; selHit=nexHit;
 if(myDeb>0) {
-const float *p=nexHit->x_g();
+const float *p=nexHit->x();
 selObj = fDraw->Point(p[0],p[1],p[2],kUsedHit);
 fDraw->UpdateModified();fDraw->Wait();
 } 
@@ -264,11 +264,11 @@ const double BAD_RHO=0.1;
   int nNode=fSeedHits.size();
   for (int iNode = 0; iNode<nNode;++iNode) {
     const StvHit * hit = fSeedHits[iNode];
-    circ.Add(hit->x_g()[0],hit->x_g()[1],hit->x_g()[2]);
+    circ.Add(hit->x()[0],hit->x()[1],hit->x()[2]);
   }  
   double Xi2 =circ.Fit();
 //   float myDir[3];
-//   TCL::vsub(fSeedHits[nNode-1]->x_g(),fSeedHits[0]->x_g(),myDir,3);
+//   TCL::vsub(fSeedHits[nNode-1]->x(),fSeedHits[0]->x(),myDir,3);
 //   assert(myDir[0]*circ.Dir()[0]+myDir[1]*circ.Dir()[1]>0);
 
 #ifdef APPROX_DEBUG
@@ -278,7 +278,7 @@ const double BAD_RHO=0.1;
   if (Xi2>BAD_XI2) return 0; //Xi2 too bad, no updates
   if (fabs(circ.GetRho()) >BAD_RHO) return 0;
 
-  const float *fx = fSeedHits[0]->x_g();
+  const float *fx = fSeedHits[0]->x();
   const double dx[3]={fx[0],fx[1],fx[2]};
   double l = fHelix.Path(dx); fHelix.Move(l);
   return &fHelix;

@@ -17,7 +17,7 @@ class THelixTrack;
 class StvFitErrs;
 class StvNodePars;
 typedef double Mtx55D_t[5][5];
-
+enum StvDiverFlags {kDiveOk=0,kDiveDca=1,kDiveBreak=2};
 /// \class StvDiver
 class StvDiver : public TNamed
 {

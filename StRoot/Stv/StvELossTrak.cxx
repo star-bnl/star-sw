@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.1 2010/07/06 20:27:43 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.2 2010/12/07 16:54:03 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -36,7 +36,7 @@ void StvELossTrak::Set(double A, double Z, double dens, double x0
 //_____________________________________________________________________________
 void StvELossTrak::Set(double p)
 {
-  fP = p;
+  fP = p; if (fP>100) fP=100;
   fdEdX=0;fdEdXErr2=0;
   double p2 = fP*fP,m2 = fM*fM;
   fFak = (14.1*14.1*(p2+m2))/(p2*p2*1e6);
