@@ -6,7 +6,7 @@
 #include <TMessage.h>
 #include "EvpMessage.h"
 #include "Jevp/StJevpServer/EvpConstants.h"
-#include <StPDFUtilities/PdfIndex.hh>
+#include <PDFUtil/PdfIndex.hh>
 #include <RTS/include/SUNRT/clock.h>
 #include <signal.h>
 #include <RTS/include/rtsLog.h>
