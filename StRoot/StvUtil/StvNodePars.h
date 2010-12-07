@@ -9,6 +9,7 @@
 class StvFitPars;
 class StvFitErrs;
 class StvImpact;
+class StvELossData;
 //------------------------------------------------------------------------------
 typedef double Mtx55D_t[5][5];
 void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B);
@@ -44,11 +45,12 @@ public:
   void ready();
   void set(const THelixTrack *ht, double Hz);
   void get(      THelixTrack *ht) const;
-double getPt() const			{ return 1./fabs(_ptin); }
+double getPt() const			{ return 1./(fabs(_ptin)+1e-6); }
   void getMom(double p[3]) const; 
   void getDir(double d[3]) const; 
 double getP2() const;
 double getRxy() const;
+double getCos2L() const 		{return 1./(1.+_tanl*_tanl);}
   void reverse(); 
 
 ///		convert THelixTrack derivativ matrix into StvFitPar one
@@ -117,7 +119,8 @@ double GetHz() const 		{ return mHz ;}
   void SetHz(double hz)  	{ mHz=hz     ;}
   const double *Arr() const 	{ return &mHH;}
         double *Arr()       	{ return &mHH;}
-  StvFitErrs &operator*=(double f) {for (int i=0;i<kNErrs;i++){Arr()[i]*=f;}; return *this;}
+  void operator*=(double f) {for (int i=0;i<kNErrs;i++){Arr()[i]*=f;};}
+  void Add(const StvELossData &el,const StvNodePars &pa);
   void Backward();
 const StvFitErrs &operator*(const Mtx55D_t &mtx) const; 
 double Sign() const;
@@ -173,6 +176,17 @@ public:
     float  mPtiImp, mPtiZ, mPtiPsi, mPtiPti;
     float  mTanImp, mTanZ, mTanPsi, mTanPti, mTanTan;
 };
+
+//------------------------------------------------------------------------------
+class StvELossData 
+{
+public:
+  double mTheta2;	//multiple scattering angle error
+  double mOrt2;		//multiple scattering position error
+public:
+  void Clear() { mTheta2=0; mOrt2=0;}
+
+};
 //------------------------------------------------------------------------------
 class StvNodeParsTest
 {
@@ -195,7 +209,7 @@ inline void StvNodePars::ready(){_cosCA=cos(_psi);_sinCA=sin(_psi);_curv = _hz*_
 //------------------------------------------------------------------------------
 inline void StvNodePars::getMom(double p[3]) const 
 { 
-  double pt = 1./fabs(_ptin); 
+  double pt = 1./(fabs(_ptin)+1e-6); 
   p[0]=pt*_cosCA;p[1]=pt*_sinCA;p[2]=pt*_tanl;
 }
 //------------------------------------------------------------------------------
@@ -211,7 +225,7 @@ inline void StvNodePars::getDir(double d[3]) const
 }
 //------------------------------------------------------------------------------
 inline double StvNodePars::getP2() const 
-{ return 1./(_ptin*_ptin)/(1.+_tanl*_tanl);}
+{ return 1./(_ptin*_ptin+1e-12)*(1.+_tanl*_tanl);}
 
 //------------------------------------------------------------------------------
 inline void StvNodePars::reverse() 
@@ -220,6 +234,15 @@ inline void StvNodePars::reverse()
  while (_psi> M_PI) {_psi-=2*M_PI;}
  while (_psi<-M_PI) {_psi+=2*M_PI;}
  _tanl  = -_tanl ; _curv = -_curv ; _ptin = -_ptin;
+}
+//------------------------------------------------------------------------------
+inline void StvFitErrs::Add(const StvELossData &el,const StvNodePars &pa)
+{    
+  double cos2L = pa.getCos2L();
+  mAA+= el.mTheta2/cos2L;
+  mLL+= el.mTheta2;
+  mHH+= el.mOrt2;
+  mZZ+= el.mOrt2;
 }
 
 #endif
