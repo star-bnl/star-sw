@@ -219,7 +219,7 @@ double StvTrack::Approx(int mode)
     if (!hit) continue;
     if (!fstNode) fstNode = node;
     lstNode = node;
-    hlx.Add(hit->x_g()[0],hit->x_g()[1],hit->x_g()[2]);
+    hlx.Add(hit->x()[0],hit->x()[1],hit->x()[2]);
   }  
   double Xi2 =hlx.Fit();
   double dL = hlx.Path(fstNode->GetFP().P);
@@ -229,7 +229,12 @@ double StvTrack::Approx(int mode)
     double myPsi = atan2(hlx.Dir()[1],hlx.Dir()[0]);
     double myTan = tan(asin(hlx.Dir()[2]));
     double myCur = hlx.GetRho();
-    printf("StvTrack::Approx(Helix  ) Xi2=%g \tPsi,Tan,Curv=%g %g %g\n",  Xi2,myPsi,myTan,myCur);
+    printf("StvTrack::Approx(fstHelx) Xi2=%g \tPsi,Tan,Curv=%g %g %g\n",  Xi2,myPsi,myTan,myCur);
+    dL = hlx.Path(lstNode->GetFP().P); hlx.Move(dL);
+    myPsi = atan2(hlx.Dir()[1],hlx.Dir()[0]);
+    myTan = tan(asin(hlx.Dir()[2]));
+    myCur = hlx.GetRho();
+    printf("StvTrack::Approx(lstHelx) Xi2=%g \tPsi,Tan,Curv=%g %g %g\n",  Xi2,myPsi,myTan,myCur);
     myPsi = fstNode->GetFP()._psi;
     myTan = fstNode->GetFP()._tanl;
     myCur = fstNode->GetFP()._curv;
@@ -254,7 +259,7 @@ double StvTrack::GetRes() const
     if (!hit) continue;
     TVector3 dif,dir;
     const StvNodePars &fp = node->GetFP();
-    for (int i=0;i<3;i++) { dif[i]=fp.P[i]-hit->x_g()[i];}
+    for (int i=0;i<3;i++) { dif[i]=fp.P[i]-hit->x()[i];}
     dir[0]= fp._cosCA; 
     dir[1]= fp._sinCA; 
     dir[2]= fp._tanl; 
@@ -294,7 +299,7 @@ void StvHitCount::AddHit()
 //_____________________________________________________________________________
 void StvHitCount::AddNit()
 {
-    nPossHits++;nContNits++;
+    nPossHits++;nContNits++;nTotNits++;
     if (nContHits) {
       if (nContHits<kContHits) {nSeqShort++;} else { nGoodHits+=nContHits;}
       nContHits=0;nSeqHits++;
@@ -311,12 +316,12 @@ int StvHitCount::Reject()
       if (nContHits<kContHits) {nSeqShort++;} else { nGoodHits+=nContHits;}
       nContHits=0;nSeqHits++;
     }
-  return nGoodHits<kGoodHits && nTotHits<kTotHits;
+  return nGoodHits<kGoodHits || nTotHits<kTotHits || nTotNits > kTotNits;
 }
 //_____________________________________________________________________________
 int StvHitCount::Skip() const
 {
-  return (nContNits>kContNits) ;
+  return (nContNits>kContNits || nTotNits > kTotNits) ;
 }
 //_____________________________________________________________________________
 void StvTrack::Print(const char *opt) const

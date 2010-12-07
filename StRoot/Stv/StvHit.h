@@ -43,8 +43,8 @@
 
 #ifndef StvHit_HH
 #define StvHit_HH
-#include "StThreeVectorF.hh"
-#include "StMatrixF.hh"
+#include "assert.h"
+#include "math.h"
 class StHitPlane;
 class StvHit 
 {
@@ -52,22 +52,17 @@ public:
 
     ///Default constructor.
     StvHit();
-    StvHit(const StvHit&);
-    const StvHit& operator=(const StvHit& );
+//     StvHit(const StvHit&);
+//     const StvHit& operator=(const StvHit& );
     ///Default destructor.
     ~StvHit();
 
-//     ///Return the local x, y, z values.
-    float  x()             const {return mLoc[0];}
-    float  y() const {return mLoc[1];}
-    float  z() const {return mLoc[2];}
-     
     ///Return the global x, y, z values.
-    const float *x_g()   const {return mGlo;}
+    const float *x()     const {return mGlo;}
           float getRxy() const {return sqrt(mGlo[0]*mGlo[0]+mGlo[1]*mGlo[1]);}
     
     ///Return components of the error matrix.
-    const float *errMtx() const   		{return mErr;}
+    virtual const float *errMtx() const   		{return 0;}
     ///Return a const pointer to the StHitPlane object from which the hit
     ///arose.
     const StHitPlane* detector() const {return mDetector;}
@@ -76,49 +71,55 @@ public:
     //const StHit* stHit() const 
     const void *stHit() const {return msthit;}
 
-    ///If we are running in simulated mode, return a const pointer to the
-    /// StMcHit associated with this StvHit.
-    //const StMcHit* stMcHit() const;
-
-    ///Return a const reference to a StThreeVectorF that denotes the position
-    ///of the hit in global STAR coordinates.
-
-
-    ///Set the global position and error in one function call 
-    ///A transformation is performed internally from global to local coordinates
-    ///according to the detector information.
-    void setGlobal(const StHitPlane* detector
+    ///Set the global position one function call 
+    void set(const StHitPlane* detector
                   ,const void *stHit
-		  ,const float *x
-		  ,const float err[6]=0);
+		  ,const float *x);
+    ///Set the global position and error 
+    virtual void set(const float *x,const float *err){assert(0);}
     
     ///Set the position error matrix for the measurement from an float array
     ///object.
-    void setError(const float errMx[6]);
+    virtual void setError(const float errMx[6]){ assert(0);}
 
     ///Set the number of times used
     ///Return the number of times this hit was assigned to a track
     int timesUsed() const 	{ return (int)mTimesUsed;}
     void addTimesUsed()	  	{ mTimesUsed++ ;}
-    void setTimesUsed(int ijk)	{ mTimesUsed=(UChar_t)ijk; }
+    void setTimesUsed(int ijk)	{ mTimesUsed=(unsigned char)ijk; }
     void release()		{ mTimesUsed=0; }
-    void reset();
+    virtual void reset();
     void unset(){;}
-    void rotate(double angle);
-    double getValue(Int_t key) const;
-    friend ostream& operator<<(ostream& os, const StvHit& h);
-private:
+protected:
     char  mBeg[1];
     unsigned char mTimesUsed;
-    float mLoc[3]; 			//local position
     float mGlo[3]; 			//global position
-    float mErr[6];			//error matrix
     const void *msthit;
     const StHitPlane *mDetector;
     // drift velocities cm/mksec( 0 for non driting )
     char  mEnd[1];
 public:
-    Int_t mCount;
+    int mCount;
 };
 
+class StvVertex : public StvHit
+{
+public: 
+
+    ///Default constructor.
+    StvVertex(){;}
+    ///Default destructor.
+    ~StvVertex(){;}
+    ///Set the position error matrix for the measurement from an float array
+    ///object.
+    void reset();
+    void set(const float *x,const float *err);
+    void set(const StHitPlane* detector
+                  ,const void *stHit
+		  ,const float *x){assert(0);}
+
+    const float *errMtx() const   {return mErr;}
+protected:
+    float mErr[6];			//error matrix
+};
 #endif

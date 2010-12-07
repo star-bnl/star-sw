@@ -27,9 +27,9 @@ const StvHits& StvVertexFinder::Result()
   double Xd[9]; float  Xf[9];
 
   for (int i=0;(!GetVertex(i,Xd,Xd+3));i++) {
-    StvHit *hit=kit->GetHit();
+    StvHit *hit=kit->GetVertex();
     for (int j=0;j<9;j++) {Xf[j]=Xd[j];}
-    hit->setGlobal(0,0,Xf,Xf+3);
+    hit->set(Xf,Xf+3);
     mResult.push_back(hit);}	
   return mResult; 
 }

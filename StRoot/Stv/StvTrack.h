@@ -74,7 +74,12 @@ static int mgId; 	// static track counter
 /// Hit counting
 class StvHitCount
 { 
-enum {kTotHits=10,kGoodHits=5,kContHits=2,kContNits=5};
+enum {kTotHits=10	//Min number hits for track
+     ,kGoodHits=5	//Min number good hits for track
+     ,kContHits=2	//Min length of good hit sequence
+     ,kContNits=3	//Max length of acceptable non hit sequence
+     ,kTotNits=10	//Max number of acceptable non hits
+     };
 public:
 StvHitCount()		{Clear();}
 void Clear()		{memset(mBeg,0,mEnd-mBeg+1);}
@@ -89,6 +94,7 @@ int nTotHits ;	// Total number of hits
 int nGoodHits;  // Number of good hits (hits in sequences > kContHits
 int nSeqHits ;	// Number of hit sequences
 int nSeqShort;	// Number of too short hit sequences
+int nTotNits ;	// Total number of Non Hits(Nits) 
 int nSeqNits ;	// Number of Non Hit(Nit) sequences
 int nSeqLong ;	// Number of too long Non Hit(Nit) sequences
 int nContHits;	// Number of hits in current Hit sequence

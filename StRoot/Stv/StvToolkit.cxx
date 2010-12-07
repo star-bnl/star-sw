@@ -16,6 +16,7 @@
 class StvHitFactory  : public StvFactory<StvHit ,StvHit > 	{public:};
 class StvNodeFactory : public StvFactory<StvNode,StvNode> 	{public:};
 class StvTrackFactory: public StvFactory<StvTrack,StvTrack> 	{public:};
+class StvVertexFactory  : public StvFactory<StvVertex ,StvVertex > 	{public:};
 
 
 StvToolkit *StvToolkit::mgInstance = 0;
@@ -46,6 +47,16 @@ StvHit *StvToolkit::GetHit()
     mHitFactory->setFastDelete();
   }
   return mHitFactory->getInstance();	
+}
+//_____________________________________________________________________________
+StvHit *StvToolkit::GetVertex()
+{
+  if (!mVertexFactory) {
+    mVertexFactory = (StvVertexFactory*)StvVertexFactory::myInstance();
+    mVertexFactory->setMaxIncrementCount(100);
+    mVertexFactory->setFastDelete();
+  }
+  return mVertexFactory->getInstance();	
 }
 //_____________________________________________________________________________
 void StvToolkit::FreeHit(StvHit *&stiHit)

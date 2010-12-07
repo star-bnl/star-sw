@@ -230,7 +230,7 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
          if (!StTGeoHelper::Inst()->GetHitShape()->Inside(fCurrentPosition.Z(),fCurrentPosition.Perp()))
 	    fKaze=kENDEDtrack;
          if (fKaze==kENDEDtrack) break;
-         if (BegVolume()) fKaze=kENDEDtrack;
+         if ((fExit = BegVolume())) fKaze=kENDEDtrack;
     break;
     
     case kCONTINUEtrack:
@@ -239,8 +239,7 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
     
     case kOUTtrack:
     case kENDEDtrack:
-      fExit = 1;
-      EndVolume();
+      fExit = EndVolume();
       TVirtualMC::GetMC()->StopTrack();
       break;
 
@@ -283,8 +282,9 @@ static int nCall=0; nCall++;
   double pos[4],mom[4];
 
   int isDca = (IsDca00(1));
+  if (isDca>=kDiveBreak) return isDca;
   double dL = fCurrentLength-fEnterLength;
-  if (dL<1e-6) return 0;
+  if (dL<1e-6) return isDca;
   fCurrentPosition.GetXYZT(pos);
   fCurrentMomentum.GetXYZT(mom);
 
@@ -333,8 +333,10 @@ int StvMCStepping::IsDca00(int begEnd)
   if ((fCurrentSign<0)==(fDir==0)) return 0;
 
   double dL = fCurrentLength-fEnterLength;
+  if (dL<1e-6) return kDiveBreak;
   THelixTrack th(*fHelix);
   double dcaL = th.Path(0.,0.);
+  if (dcaL< 0) return kDiveBreak;
   double curva = -fField->GetHz()/fCurrentMomentum.Pt()*fCharge;
   if (begEnd) {
     double rho = fHelix->GetRho();
@@ -349,7 +351,7 @@ int StvMCStepping::IsDca00(int begEnd)
   double pt = fabs(fField->GetHz()*fCharge/curva);
   double p  = pt/th.GetCos();
   fCurrentMomentum.SetVectM(TVector3(th.Dir())*p,fMass);
-  return 1;
+  return kDiveDca;
 }
 
 //_____________________________________________________________________________

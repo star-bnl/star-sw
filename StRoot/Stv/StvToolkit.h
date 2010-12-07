@@ -15,6 +15,7 @@ class StvTrackFinder;
 class StvEventFiller;
 class StvHit;
 class StvHitFactory;
+class StvVertexFactory;
 class StvNode;
 class StvNodeFactory;
 class StvTrack;
@@ -46,6 +47,7 @@ void            Show() const;
 
 //		Factories for Stv objects
 StvHit          *GetHit();       
+StvHit          *GetVertex();       
 void            FreeHit(StvHit*     &stiHit );       
 StvNode         *GetNode();       
 void            FreeNode(StvNode*   &stiNode);       
@@ -72,6 +74,7 @@ StvEventFiller  *mEventFiller;
 StvHitFactory  	*mHitFactory;
 StvNodeFactory  *mNodeFactory;
 StvTrackFactory *mTrackFactory;
+StvVertexFactory 	*mVertexFactory;
 char            mEnd[1];
 
 protected:
