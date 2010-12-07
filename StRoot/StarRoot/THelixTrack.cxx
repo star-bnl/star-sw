@@ -86,7 +86,22 @@ void THEmx_t::Move(const double F[5][5])
   memcpy(oErr,Arr(),sizeof(oErr));
   TCL::trasat(F[0],oErr,Arr(),5,5); 
 }
+//______________________________________________________________________________
+void THEmx_t::Print(const char *tit) const
+{
+static const char *N="HACZL";
+  if (!tit) tit = "";
+  printf("THEmx_t::::Print(%s) ==\n",tit);
+  const double *e = &mHH;
+  for (int i=0,li=0;i< 5;li+=++i) {
+    printf("%c ",N[i]);
+    for (int j=0;j<=i;j++) {
+    printf("%g\t",e[li+j]);} 
+    printf("\n");
+  }
+}
 
+//______________________________________________________________________________
 const double Zero = 1.e-6;
 static TComplex sgCX1,sgCX2,sgCD1,sgCD2,sgImTet,sgCOne,sgCf1;
 static  int  SqEqu(double *, double *);
@@ -586,9 +601,11 @@ double THelixTrack::PathX(const THelixTrack &th,double *s2, double *dst, double 
 //_____________________________________________________________________________
 double THelixTrack::Path(double x,double y) const
 {
-   double ar[6]={fX[0],fX[1],0,fP[0]/fCosL,fP[1]/fCosL,0};
-   THelixTrack ht(ar,ar+3,fRho);
-   ar[0]=x;ar[1]=y;
+//    double ar[6]={fX[0],fX[1],0,fP[0]/fCosL,fP[1]/fCosL,0};
+//    THelixTrack ht(ar,ar+3,fRho);
+//    ar[0]=x;ar[1]=y;
+   TCircle ht(fX,fP,fRho);
+   double ar[2]={x,y};
    double s= ht.Path(ar)/fCosL;
    return s;
 }
@@ -662,11 +679,12 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
     { 
       double diff = (icut)? lMax-lMin: fabs(dstep);
       if (diff < 0.1) {
-        if (diff < 1.e-6) 	break;
-        double tmp = 0;
-        for (int i=0;i<3;i++) {tmp += fabs(point[i]-xnear[i]);}
-        if (diff < tmp*1.e-4) 	break;
-        if (tmp < 1.e-6) 	break;
+        if (diff < 1.e-6) 			break;
+        double tmpxy = fabs(point[0]-xnear[0])+fabs(point[1]-xnear[1]);
+        double tmpz  = fabs(point[2]-xnear[2]);
+        if (fabs(fCosL)   *diff <tmpxy*1e-6
+	  &&fabs(pnear[2])*diff <tmpz *1e-6) 	break;
+        if (tmpxy+tmpz < 1.e-6) 		break;
       }
       
       local.Step(ss,xnear,pnear);
@@ -2937,7 +2955,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.50 2010/10/31 23:36:35 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.51 2010/12/07 16:50:32 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2953,6 +2971,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.51  2010/12/07 16:50:32  perev
+ * THelixTrack::Path(x,y) TCircle inside
+ *
  * Revision 1.50  2010/10/31 23:36:35  perev
  * TestDer() Test deiivates added
  *
