@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#
+# The signal handler kills the child processes
+#
+
+echo "Main program:"
+
+launch_server &
+launch_builders &
