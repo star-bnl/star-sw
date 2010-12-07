@@ -1,8 +1,8 @@
-// $Id: StdEdxY2Maker.cxx,v 1.68 2010/09/01 21:24:13 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.69 2010/12/07 16:52:19 fisyak Exp $
 //#define dChargeCorrection
 //#define SpaceChargeQdZ
 //#define SeparateSums
-//#define CompareWithToF
+//#define CompareWithToF 
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 // ROOT
