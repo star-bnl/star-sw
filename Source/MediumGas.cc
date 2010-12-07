@@ -1118,7 +1118,7 @@ MediumGas::WriteGasFile(const std::string filename) {
     outputFile.close();
     return false;
   } else if (debug) {
-    std::cout << className << "::WriteGaseFile:\n";
+    std::cout << className << "::WriteGasFile:\n";
     std::cout << "    File opened sucessfully.\n";
   }
  

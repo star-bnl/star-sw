@@ -459,18 +459,6 @@ AvalancheMicroscopic::TransportElectron(
   // Reset the particle counters.
   nPhotons = 0; nElectrons = 1; nIons = 0; nEndpoints = 0;
   
-  // Get the null-collision rate.
-  double fLim = medium->GetElectronNullCollisionRate();
-  if (fLim <= 0.) {
-    std::cerr << className << "::TransportElectron:\n";
-    std::cerr << "    Got null-collision rate <= 0.\n";
-    return false;
-  }
-  // Null-collision flag
-  bool isNullCollision = false;
-  // Real collision rate
-  double fReal;
-   
   // Count number of collisions between updates
   int nCollTemp = 0;  
   
@@ -492,7 +480,7 @@ AvalancheMicroscopic::TransportElectron(
   double vx, vy, vz;
   double energy;
   // Index of the conduction band (irrelevant for gases)
-  int band = 0;
+  int band = -1;
   
   // Timestep
   double dt;
@@ -537,7 +525,10 @@ AvalancheMicroscopic::TransportElectron(
     stack[0].kx = kx;
     stack[0].ky = ky;
     stack[0].kz = kz;
+    stack[0].band = band;
   } else {
+    stack[0].band = 0;
+    band = 0;
     // Check the given initial direction.
     const double k = sqrt(dx0 * dx0 + dy0 * dy0 + dz0 * dz0);
     if (fabs(k) < Small) {
@@ -554,6 +545,14 @@ AvalancheMicroscopic::TransportElectron(
     }
   }
 
+  // Get the null-collision rate.
+  double fLim = medium->GetElectronNullCollisionRate(band);
+  if (fLim <= 0.) {
+    std::cerr << className << "::TransportElectron:\n";
+    std::cerr << "    Got null-collision rate <= 0.\n";
+    return false;
+  }
+
   // Status flag
   bool ok = true;
   // Stack size
@@ -564,15 +563,6 @@ AvalancheMicroscopic::TransportElectron(
     // If the list of electrons is exhausted, we're done.
     nSize = stack.size();
     if (nSize <= 0) break;
-    if (sizeCut > 0 && nSize > sizeCut) {
-      // Avalanche exceeds the max. size
-      for (iEl = nSize; iEl--;) {
-        // Move all electrons to the list of endpoints.
-        endpoints.push_back(stack[iEl]);
-        stack.erase(stack.begin() + iEl);
-      }
-      break;
-    }
     // Loop over all electrons in the avalanche.
     for (iEl = nSize; iEl--;) {
       // Get an electron from the stack.
@@ -629,7 +619,7 @@ AvalancheMicroscopic::TransportElectron(
       // Trace the electron. 
       while (1) {
 
-        isNullCollision = false;
+        bool isNullCollision = false;
 
         // Make sure the electron energy exceeds the transport cut.
         if (energy < deltaCut) {
@@ -668,7 +658,7 @@ AvalancheMicroscopic::TransportElectron(
           }
           id = medium->GetId();
           // Update the null-collision rate.
-          fLim = medium->GetElectronNullCollisionRate();
+          fLim = medium->GetElectronNullCollisionRate(band);
           if (fLim <= 0.) {
             std::cerr << className << "::TransportElectron:\n"; 
             std::cerr << "    Got null-collision rate <= 0.\n";
@@ -735,7 +725,13 @@ AvalancheMicroscopic::TransportElectron(
             newEnergy = std::max(energy + (a1 + a2 * dt) * dt, Small);
           }
           // Get the real collision rate at the updated energy.
-          fReal = medium->GetElectronCollisionRate(newEnergy, band);
+          double fReal = medium->GetElectronCollisionRate(newEnergy, band);
+          if (fReal <= 0.) {
+            std::cerr << className << "::TransportElectron:\n";
+            std::cerr << "    Got collision rate <= 0.\n";
+            std::cerr << "    At " << newEnergy << " eV (band " << band << ").\n";
+            return false;
+          }
           if (fReal > fLim) {
             // Real collision rate is higher than null-collision rate.
             dt += log(r) / fLim;
@@ -752,6 +748,8 @@ AvalancheMicroscopic::TransportElectron(
             break;
           }
         }
+        if (!ok) break;
+
         // Increase the collision counter.
         ++nCollTemp;
 
@@ -1012,10 +1010,12 @@ AvalancheMicroscopic::TransportElectron(
             newElectron.t0 = t; newElectron.t = t;
             newElectron.energy = std::max(esec, Small);
             newElectron.e0 = newElectron.energy;
+            newElectron.band = -1;
             if (useBandStructure) {
               medium->GetElectronMomentum(std::max(esec, Small), 
                                           newElectron.kx, newElectron.ky,
-                                          newElectron.kz, band);
+                                          newElectron.kz, 
+                                          newElectron.band);
             } else {
               // Randomise the secondary electron direction.
               const double phi = TwoPi * RndmUniform();
@@ -1027,7 +1027,9 @@ AvalancheMicroscopic::TransportElectron(
               newElectron.status = 0;
               newElectron.driftLine.clear();
             }
-            if (aval) stack.push_back(newElectron);
+            if (aval && (sizeCut <= 0 || nSize < sizeCut)) {
+              stack.push_back(newElectron);
+            }
             // Increment the electron and ion counters.
             ++nElectrons; ++nIons;
             if (debug) {
@@ -1144,17 +1146,19 @@ AvalancheMicroscopic::TransportElectron(
           // Super-elastic collision
           case ElectronCollisionTypeSuperelastic:
             break;
-          case 10:
-            // Acoustic intravalley phonon
+          // Acoustic phonon scattering (intravalley)
+          case ElectronCollisionTypeAcousticPhonon:
             break;
-          case 11:
-          case 12:
-          case 13:
-          case 14:
-            // Intervalley phonons
+          // Optical phonon scattering (intravalley)
+          case ElectronCollisionTypeOpticalPhonon:
             break;
-          case 15:
-            // Impurity scattering
+          // Intervalley scattering (phonon assisted)
+          case ElectronCollisionTypeIntervalleyG:
+          case ElectronCollisionTypeIntervalleyF:
+          case ElectronCollisionTypeInterband:
+            break;
+          // Coulomb scattering
+          case ElectronCollisionTypeImpurity:
             break;
           default:
             std::cerr << className << "::TransportElectron:\n"; 

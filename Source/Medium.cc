@@ -59,12 +59,14 @@ Medium::Medium() :
   extrLowDiffusion    = 0; extrHighDiffusion    = 1;
   extrLowTownsend     = 0; extrHighTownsend     = 1;
   extrLowAttachment   = 0; extrHighAttachment   = 1;
+  extrLowMobility     = 0; extrHighMobility     = 1;
   extrLowDissociation = 0; extrHighDissociation = 1;
   
   intpVelocity     = 2;
   intpDiffusion    = 2;
   intpTownsend     = 2;
   intpAttachment   = 2;
+  intpMobility     = 2;
   intpDissociation = 2;
  
   thrElectronTownsend = thrElectronAttachment = 0;
@@ -688,12 +690,7 @@ Medium::GetElectronEnergy(const double px, const double py, const double pz,
 void
 Medium::GetElectronMomentum(const double e, 
                             double& px, double& py, double& pz, 
-                            const int band) {
-
-  if (band != 0) {
-    std::cerr << className << "::GetElectronMomentum:\n";
-    std::cerr << "    Unknown band index.\n";
-  }
+                            int& band) {
 
   const double p = sqrt(2. * ElectronMass * e) / SpeedOfLight;
   const double ctheta = 1. - 2. * RndmUniform();
@@ -703,14 +700,18 @@ Medium::GetElectronMomentum(const double e,
   px = p * stheta * cos(phi);
   py = p * stheta * sin(phi);
   pz = p * ctheta;
-  
+ 
+  if (band < 0) band = 0;
+ 
 }
 
 double 
-Medium::GetElectronNullCollisionRate() {
+Medium::GetElectronNullCollisionRate(const int band) {
 
   if (debug) {
     std::cerr << className << "::GetElectronNullCollisionRate:\n";
+    std::cerr << "    Electron null collision rate for band "
+              << band << " not available.\n";
     std::cerr << "    Function is not implemented.\n";
   }
   return 0.;

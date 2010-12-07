@@ -65,6 +65,7 @@ MediumMagboltz86::MediumMagboltz86() :
   microscopic = true;
   
   // Initialize the collision counters.
+  nCollisionsDetailed.clear();
   for (int i = nCsTypes; i--;) nCollisions[i] = 0;
   for (int i = nCsTypesGamma; i--;) nPhotonCollisions[i] = 0; 
   
@@ -351,7 +352,7 @@ MediumMagboltz86::SetExcitationScalingFactor(const double r) {
 }
 
 double 
-MediumMagboltz86::GetElectronNullCollisionRate() {
+MediumMagboltz86::GetElectronNullCollisionRate(const int band) {
 
   // If necessary, update the collision rates table.
   if (isChanged) {
@@ -362,9 +363,14 @@ MediumMagboltz86::GetElectronNullCollisionRate() {
     }
     isChanged = false;
   }
-      
+ 
+  if (debug && band != 0) {
+    std::cerr << className << "::GetElectronNullCollisionRate:\n";
+    std::cerr << "    Band index out of range.\n";
+  }
+ 
   return cfNull[0];
-  
+ 
 }
 
 double 
@@ -777,6 +783,7 @@ void
 MediumMagboltz86::ResetCollisionCounters() {
 
   for (int j = nCsTypes; j--;) nCollisions[j] = 0;
+  nCollisionsDetailed.resize(nTerms);
   for (int j = nTerms; j--;) nCollisionsDetailed[j] = 0;
   nPenning = 0;
   for (int j = nCsTypesGamma; j--;) nPhotonCollisions[j] = 0;
@@ -2985,9 +2992,9 @@ MediumMagboltz86::RunMagboltz(const double e,
 
 void 
 MediumMagboltz86::GenerateGasTable(const int numCollisions,
-                   double eMin, double eMax, int numE,
-                   double bMin, double bMax, int numB,
-                   int numAng) {
+               double eMin, double eMax, int numE, bool logE,
+               double bMin, double bMax, int numB,
+               int numAng) {
 
   // Amount to change B, E by 
   double eStepSize, bStepSize;
@@ -2998,7 +3005,12 @@ MediumMagboltz86::GenerateGasTable(const int numCollisions,
     return;
   }
 
-  // Setup initial values
+  // Setup initial values.
+  if (eMin < 0. || eMax < 0.) {
+    std::cerr << className << "::GenerateGasTable:\n";
+    std::cerr << "    Electric fields must be positive.\n";
+    return;
+  }
   if (eMax < eMin) {
     std::cerr << className << "::GenerateGasTable:\n";
     std::cerr << "    Swapping min./max. E-field.\n";
@@ -3006,12 +3018,34 @@ MediumMagboltz86::GenerateGasTable(const int numCollisions,
     eMin = eMax;
     eMax = eStepSize;
   }
-  eStepSize = 0.;
-  if (numE > 1) eStepSize = (eMax - eMin) / (numE - 1.);
+
+  if (logE) {
+    // Logarithmic scale
+    if (eMin < Small) {
+      std::cerr << className << "::GenerateGasTable:\n";
+      std::cerr << "    Min. E-field must be non-zero for log. scale.\n";
+      return;
+    }
+    if (numE == 1) {
+      std::cerr << className << "::GenerateGasTable:\n";
+      std::cerr << "    Number of E-fields must be > 1 for log. scale.\n";
+      return;
+    }
+    eStepSize = pow(eMax / eMin, 1. / (numE - 1.));
+  } else {
+    // Linear scale
+    eStepSize = 0.;
+    if (numE > 1) eStepSize = (eMax - eMin) / (numE - 1.);
+  }
 
   if (numB <= 0) {
     std::cerr << className << "::GenerateGasTable:\n";
     std::cerr << "    Number of B-fields must be > 0.\n";
+    return;
+  }
+  if (bMax < 0. || bMin < 0.) {
+    std::cerr << className << "::GenerateGasTable:\n";
+    std::cerr << "    Magnetic fields must be positive.\n";
     return;
   }
   if (bMax < bMin) {
@@ -3029,7 +3063,6 @@ MediumMagboltz86::GenerateGasTable(const int numCollisions,
     std::cerr << "    Number of angles must be > 0.\n";
     return;
   }
-  double angMin = 0.;
   double angStepSize = 0.;
   if (numAng > 1) angStepSize = HalfPi / (numAng - 1.);
   
@@ -3043,7 +3076,11 @@ MediumMagboltz86::GenerateGasTable(const int numCollisions,
   bAngles.resize(nAngles);
 
   for (int i = 0; i < nEfields; ++i) {
-    eFields[i] = eMin + i * eStepSize;
+    if (logE) {
+      eFields[i] = eMin * pow(eStepSize, i);
+    } else {
+      eFields[i] = eMin + i * eStepSize;
+    }
   }
   for (int i = 0; i < nBfields; ++i) {
     bFields[i] = bMin + i * bStepSize;
@@ -3107,20 +3144,18 @@ MediumMagboltz86::GenerateGasTable(const int numCollisions,
   double alphatof = 0.;
 
   bool verbose = false;
-  // if (debug) verbose = true;
+  if (debug) verbose = true;
   // Run through the grid of E- and B-fields and angles.
-  double curE = eMin;
-  for (int i = 0; i < numE; i++) {
-    double curAng = angMin;
-    for (int j = 0; j < numAng; j++) {
-      double curB = bMin;
-      for (int k = 0; k < numB; k++) {
+  for (int i = 0; i < nEfields; ++i) {
+    for (int j = 0; j < nAngles; ++j) {
+      for (int k = 0; k < nBfields; ++k) {
         if (debug) {
           std::cout << className << "::GenerateGasTable:\n";
-          std::cout << "    E = " << curE << " V/cm, B = "
-                    << curB << ", angle: " << curAng << "\n";
+          std::cout << "    E = " << eFields[i] 
+                    << " V/cm, B = " << bFields[j] 
+                    << " T, angle: " << bAngles[k] << "\n";
         }
-        RunMagboltz(curE, curB, curAng,
+        RunMagboltz(eFields[i], bFields[j], bAngles[k],
                     numCollisions, verbose,
                     vx, vy, vz,
                     difl, dift,
@@ -3145,11 +3180,8 @@ MediumMagboltz86::GenerateGasTable(const int numCollisions,
         } else {
           tabElectronAttachment[j][k][i] = -30.;
         }
-        curB += bStepSize;
       }
-      curAng += angStepSize;
     }
-    curE += eStepSize;
   }
 
 }

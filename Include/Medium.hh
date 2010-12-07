@@ -113,11 +113,11 @@ class Medium {
     virtual
     void GetElectronMomentum(const double e, 
                              double& px, double& py, double& pz, 
-                             const int band = 0);
+                             int& band);
 
     // Null-collision rate [ns-1]
     virtual 
-    double GetElectronNullCollisionRate();
+    double GetElectronNullCollisionRate(const int band = 0);
     // Collision rate [ns-1] for given electron energy
     virtual 
     double GetElectronCollisionRate(const double e, const int band = 0);

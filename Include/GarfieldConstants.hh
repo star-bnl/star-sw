@@ -15,6 +15,13 @@ static const int ElectronCollisionTypeInelastic    = 3;
 static const int ElectronCollisionTypeExcitation   = 4;
 static const int ElectronCollisionTypeSuperelastic = 5; 
 
+static const int ElectronCollisionTypeAcousticPhonon = 10;
+static const int ElectronCollisionTypeOpticalPhonon  = 11;
+static const int ElectronCollisionTypeIntervalleyG   = 12;
+static const int ElectronCollisionTypeIntervalleyF   = 13;
+static const int ElectronCollisionTypeInterband      = 14;
+static const int ElectronCollisionTypeImpurity       = 15;
+
 static const int PhotonCollisionTypeElastic    = 0;
 static const int PhotonCollisionTypeIonisation = 1;
 static const int PhotonCollisionTypeInelastic  = 2;
