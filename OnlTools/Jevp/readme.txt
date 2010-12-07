@@ -1,120 +1,134 @@
--------------------------------------------------------------------------
--------------I.   Compile & Run -----------------------------------------
--------------------------------------------------------------------------
+#################################
+#  Jevp Histogram System Readme #
+#################################
 
-1.  Initial versions of the JEVP framework were compiled as executable code.
-This is too difficult to do when working with STAR offline code, so I've
-aborted this idea.  
+This readme describes the system from the point of view of someone who 
+wishes to add new histograms to the system.   For information about the
+histogram server or the histogram presenter please check the additional
+readme files:
 
-2.  This is still a test setup, so you must check out the following directories:
+    readme-server.txt
+    readme-presenter.txt
 
-    offline/users/jml/StJevpPool
-    offline/users/jml/StPDFUtil
-    mgr
+*********************************
+* I.  Obtain and compile the code
+*********************************
+****** Note: (December 2010) ***************************************
+There are a number of changes to the cons build system that are
+being put in place the Jevp.   So there are a few additional steps
+to compile as of this time...
 
-3.  You must make the following links in your cvs/StRoot directory:
-
-    ln -s offline/users/jml/StJevpPool StRoot/StJevpPool
-    ln -s offline/users/jml/StPDFUtil StRoot/StPDFUtilities
-
-4.  Instead of a main() function, the builder classes must contain:
-
-	static void main(int argc, char *argv[]);
-
-Additionally, the class must be split into a ".h" file and a ".cxx" file and
-include the 
-	
-	ClassDef(ClassName, 1);     and
-	ClassImp(ClassName);
-
-Flags as standard for root classes.
-
-5.  To compile use "cons" as standard for offline code
-
-6.  To run use the "launch" utility in StJevpPool.   The following example 
-    executes the "xxxBuilder" in a standalone mode:
-
-    launch xxxBuilder -file filename.daq -noserver -pdf output.pdf
-
-//--------------------------------------------------------------------
-//------------   Developing a new set of histograms ------------------
-//--------------------------------------------------------------------
-
-1.  Histogram builders run as separate processes from the event pool server.
-    All histogram builders inherit from the class "JevpPlotSet".   An example
-    of a working builder is the file:
-
-       StRoot/StJevpPool/StJevpBuilders/basePlotBuilder.cxx
-       StRoot/StJevpPool/StJevpBuilders/basePlotBuilder.h
-
-2.  To fit into the histogram package scheme for full running, builder classes
-    must satisfy the following:
-
-    a.  The files should be in the StJevpBuilders directory.
-    b.  The files should be named xxxBuilder.cxx / xxxBuilder.h
-    c.  The files need to be root visible (Use the ClassDef/ClassImp macros)
-    d.  The variable "plotsetname" should be set to the name of the builder
-        in the class constructor.   (ie.  plotsetname = "xxx";)
-    e.  Any plots / histograms should have names that are tagged with the
-        plotset name.  ie.  Don't use new TH1F("myplot",...).  Use
-        new TH1F("xxx_myplot",....);
-    f.  Even though the builders run stand alone for testing, the purpose
-        is to run as part of the official histogram package.   Therefore,
-        there can be no external data files in local directories.  
-        Instead use the following variables for any external data files dirs:
+> cvs co OnlTools/Jevp
+> cvs co mgr
+> cp OnlTools/Jevp/Conscript-standard mgr
+> cvs co StRoot/RTS
+> cons
+*****************************************************************
 
 
-	JevpPlotSet.confdatadir      // for any static configuration data
+> cvs co OnlTools/Jevp
+> cons
 
-	JevpPlotSet.clientdatadir    // for any data to be saved/loaded
-                                     // for example if there are any plots
-                                     // containing information over periods
-                                     // of days or weeks...   The full extent
-                                     // of uptime you can expect is a single
-                                     // run, therefore, if you need info
-                                     // from previous runs you must save it
-                                     // at the end of each run and load at 
-                                     // the start
+Should build everything.   The "executables" will be in the form
+of shared object libraries stored in the directory tree
 
-        For local testing and operation you can modify these using the 
-        command line flags "-confdatadir" and "-clientdatadir" in the
-        launch command.
+   .sl53_gcc432/   (or a varient for different linux systems...)
 
-        in both cases, create a subdirectory for your builder "xxx" under
-        the data directories for your builders data.
+In order to run the code you will need to execute the root scripts
+described in the following sections.
+
+**********************************
+* II.  Code structure
+**********************************
+
+The user code to construct histograms is contained in "Builders."  The
+builders must be located in the directory:
+
+Jevp/StJevpBuilders/
+
+There are numerous examples in that directory. A clean one to use as a 
+model is the "daqBuilder". 
+
+Here are the rules that builders must follow:
+
+1.  File names...
+
+    The files must be named like
+	 
+	Jevp/StJevpBuilders/xxxBuilder.h
+	Jevp/StJevpBuilders/xxxBuilder.cxx
+
+    The "xxx" should be a short 3-4 character descriptor for your
+    detector or subsystem. 
+
+2.  Must be a class inherited from "JevpPlotSet"
+
+    The new class should be named xxxBuilder, and must inherit from 
+    JevpPlotSet.   This class (and its supporting classes) are defined 
+    in the directory:
+
+        Jevp/StJevpPlot/
+
+3.  The builder classes must contain the appropriate CINT tags:
+    ClassDef() and ClassInt()
+
+*****************************************
+* III.   Executing the code 
+*****************************************
+
+To execute the code as part of the running system, you must contact
+the adminstrator of the system.   (The method for doing this is
+documented in the readme-server.txt file).   However to for debugging
+purposes the code is executed stand alone using a root script as folows
+
+> OnlTools/Jevp/launch xxxBuilder --file filename -pdf outputfilename.pdf
+
+Here, "filename" can be a daqfile or else a evp directory
+      "outputfilename.pdf" is the output file for the generated histograms
+
+The full set of possible arguments are
+
+ -file filename
+
+    Tells the builder to read from an existing file.   If there is no
+    "-file" parameter set, the builder will try to run from the current 
+    run.   By setting the "-file" parameter you automatically disable
+    sending data to the evp server (which is desired for stand alone ops)
+
+ -pdf pdffilename
+
+    Set the output filename
+
+ -datadir datadir       (default /RTScache/conf/jevp)
+ -clientdatadir datadir (default /a/jevp/client)
+
+    These parameters set the locations for user configuration/or data
+    These are available to the user code as the variables 
+    "datadir" and "clientdatadir".   And are the prefered way to 
+    save / load any external files.
+
+ -diska diskapath
+ -noserver
+ -server servername
+ -port port
+ -loglevel level
+ -steal   (be base plot builder)
+ -die     (die at end of run)
+ -pause
+ -buildxml <file>
+
+    These are lesser used options, unlikely to be needed for builder
+    development...
 
 
-	
-// The XML file and the JevpEditor
+****************************************
+* IV.   Builder Development
+****************************************
 
-Example:
+Builders must override several JevpPlotSet functions.
+(for now see the examples...)
 
-<doc>
-   <display_def>shift
-      <tab>base
-         <tab>Time
-            <wide>4</wide>
-            <deep>1</deep>
-            <histogram>trg_Time</histogram>
-            <histogram>daq_Time</histogram>
-            <histogram>base_Time</histogram>
-         </tab>
-      </tab>
-   </display_def>
-   <display_def>tpc
-      <tab>tpc
-         <histogram>h1</histogram>
-      </tab>
-   </display_def>
-   <pallete>
-	<histogram>a</histogram>
-   </pallete>
-</doc>
 
-   
-The top level directories are the xml files / GUI structures. 
-There can be any set of parameters, however the following are defined:
 
-<wide>  -> number of histograms wide on display
-<deep>  -> number of histograms deep on display  (if these are too small/not present assume square)
-<scaley> -> scale y for all histos to same value
+
+
