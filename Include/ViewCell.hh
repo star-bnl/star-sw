@@ -6,6 +6,7 @@
 #include <RQ_OBJECT.h>
 #include <TObject.h>
 #include <TCanvas.h>
+#include <TBuffer3D.h>
 
 namespace Garfield {
 

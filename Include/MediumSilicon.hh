@@ -71,7 +71,7 @@ class MediumSilicon : public Medium {
 
     // Microscopic transport properties
     bool   SetMaxElectronEnergy(const double e);
-    double GetMaxElectronEnergy() const {return eFinal;}
+    double GetMaxElectronEnergy() const {return eFinalG;}
 
     // When enabled, the scattering rates table is written to file
     // when loaded into memory.
@@ -187,8 +187,10 @@ class MediumSilicon : public Medium {
     bool useAnisotropy;
  
     // Scattering rates
-    double eFinal, eStep;
-    static const int nEnergySteps = 2000;
+    double eFinalXL, eStepXL;
+    double eFinalG, eStepG;
+    static const int nEnergyStepsXL = 2000;
+    static const int nEnergyStepsG = 2000;
 
     // Number of scattering terms
     int nLevelsX, nLevelsL, nLevelsG;
