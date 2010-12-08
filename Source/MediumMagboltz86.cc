@@ -351,6 +351,25 @@ MediumMagboltz86::SetExcitationScalingFactor(const double r) {
 
 }
 
+bool
+MediumMagboltz86::Initialise() {
+
+  if (!isChanged) {
+    if (debug) {
+      std::cerr << className << "::Initialise:\n";
+      std::cerr << "    Nothing changed.\n";
+    }
+    return true;
+  }
+  if (!Mixer()) {
+    std::cerr << className << "::Initialise:\n";
+    std::cerr << "    Errror calculating the collision rates table.\n";
+    return false;
+  }
+  return true;
+
+}
+
 double 
 MediumMagboltz86::GetElectronNullCollisionRate(const int band) {
 

@@ -68,7 +68,8 @@ class MediumMagboltz86 : public MediumGas {
 
     // Multiply excitation cross-sections by a uniform scaling factor
     void SetExcitationScalingFactor(const double r);
- 
+
+    bool Initialise(); 
     // Get the overall null-collision rate [ns-1]
     double GetElectronNullCollisionRate(const int band);
     // Get the (real) collision rate [ns-1] at a given electron energy e [eV]
