@@ -20,7 +20,7 @@ ViewField::ViewField() :
   fmin(0.), fmax(100.),
   nContours(nMaxContours),
   canvas(0), hasExternalCanvas(false),
-  fPot(0) {
+  fPot(0), fPotProfile(0) {
 
   SetDefaultProjection();
   plottingEngine.SetDefaultStyle();
@@ -31,6 +31,8 @@ ViewField::~ViewField() {
 
   if (!hasExternalCanvas && canvas != 0) delete canvas;
   if (fPot != 0) delete fPot;
+  if (fPotProfile != 0) delete fPotProfile;
+  
 }
 
 void
@@ -171,6 +173,52 @@ ViewField::PlotSurface() {
 
 }
 
+void 
+ViewField::PlotProfile(const double x0, const double y0, const double z0,
+                       const double x1, const double y1, const double z1) {
+
+  // Check the distance between the two points.
+  const double d = sqrt(pow(x1 - x0, 2) + pow(y1 - y0, 2) + pow(z1 - z0, 2));
+  if (d <= 0.) {
+    std::cerr << className << "::PlotProfile:\n";
+    std::cerr << "    Start and end point coincide.\n";
+    return;
+  }
+  
+  // Setup the canvas.
+  if (canvas == 0) {
+    canvas = new TCanvas();
+    canvas->SetTitle("Field View");
+    if (hasExternalCanvas) hasExternalCanvas = false;
+  }
+  canvas->cd();
+  
+  if (fPotProfile == 0) CreateProfileFunction();
+
+  fPotProfile->SetParameter(0, x0);
+  fPotProfile->SetParameter(1, y0);
+  fPotProfile->SetParameter(2, z0);
+  fPotProfile->SetParameter(3, x1);
+  fPotProfile->SetParameter(4, y1);
+  fPotProfile->SetParameter(5, z1);
+  if (debug) {
+    std::cout << className << "::PlotProfile:\n";
+    std::cout << "    Plotting potential along\n";
+    std::cout << "    (" << fPotProfile->GetParameter(0) << ", "
+                         << fPotProfile->GetParameter(1) << ", "
+                         << fPotProfile->GetParameter(2) <<") - ("
+                         << fPotProfile->GetParameter(3) << ", "
+                         << fPotProfile->GetParameter(4) << ", "
+                         << fPotProfile->GetParameter(5) << ")\n";
+  }
+  fPotProfile->GetXaxis()->SetTitle("normalised distance");
+  fPotProfile->GetYaxis()->SetTitle("potential [V]");
+  fPotProfile->SetTitle("Profile plot of the potential");
+  fPotProfile->Draw();
+  canvas->Update();
+
+}
+
 void
 ViewField::CreateFunction() {
 
@@ -185,7 +233,29 @@ ViewField::CreateFunction() {
   }
 
   fPot = new TF2(fname.c_str(), this, &ViewField::EvaluatePotential, 
-        pxmin, pxmax, pymin, pymax, 0, "ViewField", "EvaluatePotential");
+        pxmin, pxmax, pymin, pymax, 0, 
+        "ViewField", "EvaluatePotential");
+ 
+}
+
+void
+ViewField::CreateProfileFunction() {
+
+  int idx = 0;
+  std::string fname = "fPotentialProfile_0";
+  while (gROOT->GetListOfFunctions()->FindObject(fname.c_str())) {
+    ++idx;
+    std::stringstream ss;
+    ss << "fPotentialProfile_";
+    ss  << idx;
+    fname = ss.str();
+  }
+
+  const int nParameters = 6;
+  fPotProfile = new TF1(fname.c_str(), 
+        this, &ViewField::EvaluatePotentialProfile, 
+        0., 1., nParameters, 
+        "ViewField", "EvaluatePotentialProfile");
  
 }
 
@@ -203,7 +273,7 @@ ViewField::SetDefaultProjection() {
   plane[2] = 1;
   plane[3] = 0;
 
-  // Prepare axis lavels
+  // Prepare axis labels.
   Labels();
 
 }
@@ -213,7 +283,7 @@ ViewField::EvaluatePotential(double* pos, double* par) {
 
   if (sensor == 0) return 0.;
 
-  // Compute the field
+  // Compute the field.
   double ex = 0., ey = 0., ez = 0., volt = 0.;
   int status = 0;
   Medium* medium;
@@ -227,13 +297,47 @@ ViewField::EvaluatePotential(double* pos, double* par) {
   sensor->ElectricField(xpos, ypos, zpos, ex, ey, ez, volt, medium, status);
   if (debug) {
     std::cout << className << "::EvaluatePotential:\n";
-    std::cout << "    At (u, v) = (" << pos[0] << ", " << pos[1] << "), "
-              << " (x,y,z) = (" << xpos << "," << ypos << "," << zpos << ")\n";
+    std::cout << "    At (u, v) = (" 
+              << pos[0] << ", " << pos[1] << "), "
+              << " (x,y,z) = (" 
+              << xpos << "," << ypos << "," << zpos << ")\n";
     std::cout << "    E = " << ex << ", " << ey << ", " << ez << "), V = "
               << volt << ", status = " << status << "\n";
   }
   
-  // Return the potential
+  // Return the potential.
+  return volt;
+    
+}
+
+double
+ViewField::EvaluatePotentialProfile(double* pos, double* par) {
+
+  if (sensor == 0) return 0.;
+
+  // Get the start and end position.
+  const double x0 = par[0];
+  const double y0 = par[1];
+  const double z0 = par[2];
+  const double x1 = par[3];
+  const double y1 = par[4];
+  const double z1 = par[5];
+  // Compute the direction.
+  const double dx = x1 - x0;
+  const double dy = y1 - y0;
+  const double dz = z1 - z0;
+  // Get the position.
+  const double t = pos[0];
+
+  // Compute the field.
+  double ex = 0., ey = 0., ez = 0., volt = 0.;
+  int status = 0;
+  Medium* medium;
+  
+  sensor->ElectricField(x0 + t * dx, y0 + t * dy, z0 + t * dz, 
+                        ex, ey, ez, volt, medium, status);
+  
+  // Return the potential.
   return volt;
     
 }
