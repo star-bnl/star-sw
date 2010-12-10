@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.7 2010/10/31 05:43:57 geurts Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.8 2010/12/10 21:38:06 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.8  2010/12/10 21:38:06  geurts
+ * RT#1996: default initialization of database table in case dataset is not found
+ *
  * Revision 1.7  2010/10/31 05:43:57  geurts
  * apply outlier truncation to all energies, keep at 20% (previously only enabled for low beam energies)
  *
@@ -214,61 +217,71 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
   
     // read vpdTotCorr table
     TDataSet *dbDataSet = GetDataBase("Calibrations/tof/vpdTotCorr");
-    St_vpdTotCorr* vpdTotCorr = static_cast<St_vpdTotCorr*>(dbDataSet->Find("vpdTotCorr"));
-    if(!vpdTotCorr) {
-      LOG_ERROR << "unable to get vpdTotCorr table parameters" << endm;
-      //    assert(vpdTotCorr);
+    if (dbDataSet){
+      St_vpdTotCorr* vpdTotCorr = static_cast<St_vpdTotCorr*>(dbDataSet->Find("vpdTotCorr"));
+      if(!vpdTotCorr) {
+	LOG_ERROR << "unable to get vpdTotCorr table parameters" << endm;
+	//    assert(vpdTotCorr);
+	return kStErr;
+      }
+      vpdTotCorr_st* totCorr = static_cast<vpdTotCorr_st*>(vpdTotCorr->GetArray());
+      Int_t numRows = vpdTotCorr->GetNRows();
+
+      if(numRows!=NVPD*2) {
+	LOG_WARN  << " Mis-matched number of rows in vpdTotCorr table: " << numRows 
+		  << " (exp:" << NVPD*2 << ")" << endm;
+      }
+
+      LOG_DEBUG << " Number of rows read in: " << numRows << " for Vpd ToT correction" << endm;
+
+      for (Int_t i=0;i<numRows;i++) {
+	if(i==0) {  // identify once only, for the first tube
+	  short flag = totCorr[i].corralgo;
+	  if(flag==0) {
+	    setUseVpdStart(kTRUE);
+	    LOG_INFO << "Selected VPD for TOF start-timing (corralgo=1)" << endm;
+	  }
+	  else if(flag==1) {
+	    setUseVpdStart(kFALSE);
+	    LOG_INFO << "VPD NOT used for TOF start-timing (corralgo=0)" << endm;
+	  }
+	  else {
+	    LOG_WARN << "Unknown calibration option " << flag << endm;
+	  }
+	}
+	else { // verify that all other entries agree
+	  if (mUseVpdStart && (totCorr[i].corralgo!=0))
+	    {LOG_WARN << "corralgo dbase inconsistency: " << totCorr[i].corralgo << endm;}
+	  if (!mUseVpdStart && (totCorr[i].corralgo!=1))
+	    {LOG_WARN << "corralgo dbase inconsistency: " << totCorr[i].corralgo << endm;}
+	}
+
+
+	short tubeId = totCorr[i].tubeId;
+	// check index range
+	if (tubeId>2*NVPD) {
+	  LOG_ERROR << "tubeId (" << tubeId << ") out of range ("
+		    << 2*NVPD << ")" << endm;
+	  return kStErr;
+	}
+
+	for(Int_t j=0;j<NBinMax;j++) {
+	  mVPDTotEdge[tubeId-1][j] = totCorr[i].tot[j];
+	  mVPDTotCorr[tubeId-1][j] = totCorr[i].corr[j];
+	  LOG_DEBUG << " east/west: " << (tubeId-1)/NVPD << " tubeId: " << tubeId << endm;
+	} // end j 0->NBinMax
+      } // end i 0->numRows
+    }
+    else {
+    // Note: this construction addresses RT#1996 and allows backward compatibility with older database
+    //       timestamps at which these database structures did not exist. All values will be zero (hence the ERROR)
+    //       and the VPD will be disabled for TOF start timing, i.e. the TOF could still operate in start-less mode 
+      LOG_ERROR << "unable to get vpdTotCorr dataset ... reset all to zero values (NOT GOOD!) and disable use for TOF-start" << endm; 
+      resetPars();
+      setUseVpdStart(kFALSE);
       return kStErr;
     }
-    vpdTotCorr_st* totCorr = static_cast<vpdTotCorr_st*>(vpdTotCorr->GetArray());
-    Int_t numRows = vpdTotCorr->GetNRows();
-
-    if(numRows!=NVPD*2) {
-      LOG_WARN  << " Mis-matched number of rows in vpdTotCorr table: " << numRows 
-		<< " (exp:" << NVPD*2 << ")" << endm;
-    }
-
-    LOG_DEBUG << " Number of rows read in: " << numRows << " for Vpd ToT correction" << endm;
-
-    for (Int_t i=0;i<numRows;i++) {
-      if(i==0) {  // identify once only, for the first tube
-        short flag = totCorr[i].corralgo;
-        if(flag==0) {
-	  setUseVpdStart(kTRUE);
-	  LOG_INFO << "Selected VPD for TOF start-timing (corralgo=1)" << endm;
-	}
-	else if(flag==1) {
-	  setUseVpdStart(kFALSE);
-	  LOG_INFO << "VPD NOT used for TOF start-timing (corralgo=0)" << endm;
-	}
-	else {
-	  LOG_WARN << "Unknown calibration option " << flag << endm;
-	}
-      }
-      else { // verify that all other entries agree
-	if (mUseVpdStart && (totCorr[i].corralgo!=0))
-	  {LOG_WARN << "corralgo dbase inconsistency: " << totCorr[i].corralgo << endm;}
-	if (!mUseVpdStart && (totCorr[i].corralgo!=1))
-	  {LOG_WARN << "corralgo dbase inconsistency: " << totCorr[i].corralgo << endm;}
-      }
-
-
-      short tubeId = totCorr[i].tubeId;
-      // check index range
-      if (tubeId>2*NVPD) {
-      	LOG_ERROR << "tubeId (" << tubeId << ") out of range ("
-			      << 2*NVPD << ")" << endm;
-         return kStErr;
-      }
-
-      for(Int_t j=0;j<NBinMax;j++) {
-		mVPDTotEdge[tubeId-1][j] = totCorr[i].tot[j];
-		mVPDTotCorr[tubeId-1][j] = totCorr[i].corr[j];
-		LOG_DEBUG << " east/west: " << (tubeId-1)/NVPD << " tubeId: " << tubeId << endm;
-      } // end j 0->NBinMax
-    } // end i 0->numRows
   }
-
 
   return kStOK;
 }
