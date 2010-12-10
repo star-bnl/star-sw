@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofSortRawHit.cxx,v 1.9 2010/05/26 23:12:27 geurts Exp $
+ * $Id: StBTofSortRawHit.cxx,v 1.10 2010/12/10 21:37:45 geurts Exp $
  *  
  * Author: Xin Dong   
  *****************************************************************    
@@ -70,18 +70,34 @@ void StBTofSortRawHit::Init(StMaker *maker, StBTofDaqMap *daqMap) {
 
   LOG_INFO << "[StBTofSortRawHit] retrieving VPD delay settings" << endm;
   mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/vpdDelay");
-  St_vpdDelay *vpdDelayTable = static_cast<St_vpdDelay*>(mDbTOFDataSet->Find("vpdDelay"));
-  if (!vpdDelayTable) {
-    LOG_ERROR << "unable to find vpdDelay table" << endm;
-    return;
-  }
-  vpdDelay_st* vpdDelay = static_cast<vpdDelay_st*>(vpdDelayTable->GetArray());
-  if (!vpdDelay) {
-    LOG_ERROR << "unable to get vpdDelay data" << endm;
-    return;
-  }
-  for (int i=0;i<2*mNVPD;i++){
-    mVpdDelay[i] = vpdDelay->delay[i]; 
+
+  //fg  
+  if (mDbTOFDataSet){
+    St_vpdDelay *vpdDelayTable = static_cast<St_vpdDelay*>(mDbTOFDataSet->Find("vpdDelay"));
+    if (!vpdDelayTable) {
+      LOG_ERROR << "unable to find vpdDelay table" << endm;
+      return;
+    }
+    vpdDelay_st* vpdDelay = static_cast<vpdDelay_st*>(vpdDelayTable->GetArray());
+    if (!vpdDelay) {
+      LOG_ERROR << "unable to get vpdDelay data" << endm;
+      return;
+    }
+    for (int i=0;i<2*mNVPD;i++){
+      mVpdDelay[i] = vpdDelay->delay[i]; 
+    }
+  } 
+  else {
+    // Note: this construction addresses RT#1996 and allows backward compatibility with older database
+    //       timestamps at which these database structures did not exist.
+    LOG_WARN << "unable to find vpdDelay dataset:  assuming Run-9 (200GeV) default values for vpdDelay" << endm;
+    float delay[2*mNVPD]={	 
+      0,-0.564753,-4.62291,-4.84402,-4.05943,6.32389,-9.4035,-10.3113,-17.0374,-17.3734,-6.04608,-11.9614,-12.7579,8.79609,3.8467,-17.2994,-17.6424,-21.4749,-22.9736,	 
+      0,-2.1707,  -4.8195, -6.5161, -4.3109, 6.3116, -8.8655,-10.1037,-16.5970,-17.9588,-5.2079, -12.1249,-12.2412,8.4001, 5.5702,-16.5936,-16.4152,-21.3076,-21.1452};
+
+    for (int i=0;i<2*mNVPD;i++){
+      mVpdDelay[i] = delay[i]; 
+    }
   }
 
   return;
