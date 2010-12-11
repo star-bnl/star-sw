@@ -105,6 +105,8 @@ class MediumSilicon : public Medium {
                                 int& nsec, double& esec, int& band);
     double GetConductionBandDensityOfStates(const double e, 
                                             const int band = 0);
+    double GetValenceBandDensityOfStates(const double e,
+                                         const int band = -1);
 
     // Reset the collision counters
     void ResetCollisionCounters();
@@ -148,6 +150,8 @@ class MediumSilicon : public Medium {
     double mLongX, mTransX;
     // L valleys
     double mLongL, mTransL;
+    // Non-parabolicity parameters [1/eV]
+    double alphaX, alphaL;
     // Lattice mobility
     double eLatticeMobility, hLatticeMobility;
     // Low-field mobility
@@ -186,20 +190,24 @@ class MediumSilicon : public Medium {
     bool useFullBandDos;
     bool useAnisotropy;
  
-    // Scattering rates
+    // Energy range of scattering rates
     double eFinalXL, eStepXL;
     double eFinalG, eStepG;
+    double eFinalV, eStepV;
     static const int nEnergyStepsXL = 2000;
     static const int nEnergyStepsG = 2000;
+    static const int nEnergyStepsV = 2000;
 
     // Number of scattering terms
     int nLevelsX, nLevelsL, nLevelsG;
+    int nLevelsV;
     // Number of valleys
     int nValleysX, nValleysL;
     // Energy offset
     double eMinL, eMinG;
     int ieMinL, ieMinG;
 
+    // Electron scattering rates
     double cfNullElectronsX, cfNullElectronsL, cfNullElectronsG;
     std::vector<double> cfTotElectronsX;
     std::vector<double> cfTotElectronsL;
@@ -215,12 +223,38 @@ class MediumSilicon : public Medium {
     std::vector<int> scatTypeElectronsL;
     std::vector<int> scatTypeElectronsG;
 
+    // Hole scattering rates
+    double cfNullHoles;
+    std::vector<double> cfTotHoles;
+    std::vector<std::vector<double> > cfHoles;
+    std::vector<double> energyLossHoles;
+    // Cross-section type
+    std::vector<int> scatTypeHoles;
+
+    // Collision counters
     int nCollElectronAcoustic, nCollElectronOptical;
     int nCollElectronIntervalley;
     int nCollElectronImpurity;
     int nCollElectronIonisation;
     std::vector<int> nCollElectronDetailed;    
     std::vector<int> nCollElectronBand;
+
+    // Density of states tables
+    int nFbDosEntriesValence;
+    int nFbDosEntriesConduction;
+    std::vector<double> fbDosValence;
+    std::vector<double> fbDosConduction;
+
+    // Optical data
+    bool hasOpticalData;
+    std::string opticalDataFile;
+    struct opticalData {
+      // Energy [eV]
+      double energy;
+      // Dielectric function
+      double eps1, eps2;
+    };
+    std::vector<opticalData> opticalDataTable;    
 
     bool UpdateTransportParameters();
     void UpdateLatticeMobilityMinimos();
@@ -252,25 +286,25 @@ class MediumSilicon : public Medium {
                                    const double e, double& alpha) const;
     bool HoleImpactIonisationGrant(const double e, double& alpha) const;
         
-    // Optical data
-    bool hasOpticalData;
-    std::string opticalDataFile;
-    struct opticalData {
-      // Energy [eV]
-      double energy;
-      // Dielectric function
-      double eps1, eps2;
-    };
-    std::vector<opticalData> opticalDataTable;    
     bool LoadOpticalData(const std::string filename);
 
     bool ElectronScatteringRates();
     bool ElectronAcousticScatteringRates();
+    bool ElectronOpticalScatteringRates();
     bool ElectronIntervalleyScatteringRatesXX();
     bool ElectronIntervalleyScatteringRatesXL();
     bool ElectronIntervalleyScatteringRatesLL();
-    bool ElectronIonisationRates();
+    bool ElectronIntervalleyScatteringRatesXGLG();
+    bool ElectronIonisationRatesXL();
+    bool ElectronIonisationRatesG();
     bool ElectronImpurityScatteringRates();
+
+    bool HoleScatteringRates();
+    bool HoleAcousticScatteringRates();
+    bool HoleOpticalScatteringRates();
+    bool HoleIonisationRates();
+
+    void InitialiseDensityOfStates();
 
 };
 

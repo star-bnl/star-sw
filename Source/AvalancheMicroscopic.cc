@@ -600,7 +600,7 @@ AvalancheMicroscopic::TransportElectron(
         if (debug) {
           std::cout << className << "::TransportElectron:\n";
           std::cout << "    Electron left the drift medium.\n";
-          std::cout << "    At " << x << "," << ", " << y << "," << z << "\n";
+          std::cout << "    At " << x << ", " << y << "," << z << "\n";
         }
         continue;
       }
@@ -654,6 +654,10 @@ AvalancheMicroscopic::TransportElectron(
             endpoints.push_back(stack[iEl]);
             stack.erase(stack.begin() + iEl);
             ok = false;
+            if (debug) {
+              std::cout << className << "::TransportElectron:\n";
+              std::cout << "    New medium does not have microscopic data.\n";
+            }
             break;
           }
           id = medium->GetId();
@@ -846,10 +850,15 @@ AvalancheMicroscopic::TransportElectron(
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
           ok = false;
+          if (debug) {
+            std::cout << className << "::TransportElectron:\n";
+            std::cout << "    Electron left the drift medium.\n";
+            std::cout << "    At " << x << ", " << y << "," << z << "\n";
+          }
           break;
         }
 
-        // Check if the new position is inside the bounding box.
+        // Check if the new position is inside the user area.
         if (!sensor->IsInArea(x + vx * dt, y + vy * dt, z + vz * dt)) {
           // Try to terminate the drift line close to the boundary
           // by means of iterative bisection.
@@ -891,6 +900,11 @@ AvalancheMicroscopic::TransportElectron(
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
           ok = false;
+          if (debug) {
+            std::cout << className << "::TransportElectron:\n";
+            std::cout << "    Electron left the drift area.\n";
+            std::cout << "    At " << x << "," << y << "," << z << "\n";
+          }
           break;
         }
 
@@ -920,6 +934,11 @@ AvalancheMicroscopic::TransportElectron(
           endpoints.push_back(stack[iEl]);
           stack.erase(stack.begin() + iEl);
           ok = false;
+          if (debug) {
+            std::cout << className << "::TransportElectron:\n";
+            std::cout << "    Electron hit a wire.\n";
+            std::cout << "    At " << x << ", " << y << "," << z << "\n";
+          }
           break;
         }
         
@@ -1155,7 +1174,9 @@ AvalancheMicroscopic::TransportElectron(
           // Intervalley scattering (phonon assisted)
           case ElectronCollisionTypeIntervalleyG:
           case ElectronCollisionTypeIntervalleyF:
-          case ElectronCollisionTypeInterband:
+          case ElectronCollisionTypeInterbandXL:
+          case ElectronCollisionTypeInterbandXG:
+          case ElectronCollisionTypeInterbandLG:
             break;
           // Coulomb scattering
           case ElectronCollisionTypeImpurity:
