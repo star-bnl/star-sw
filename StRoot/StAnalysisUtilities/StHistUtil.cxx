@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.71 2010/04/19 20:43:49 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.72 2010/12/11 23:28:00 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.72  2010/12/11 23:28:00  genevb
+// Allow negative modes for 1-result
+//
 // Revision 2.71  2010/04/19 20:43:49  genevb
 // Fixed bug with AddHists introduced in last fix
 //
@@ -918,11 +921,11 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             double result = 0;
 
             // default to Kolm. for 1-d hists, Chi2 for others
-            int mode = ( huR ? huR->Mode : (chkdim > 1 ? 0 : 1) );
+            int mode = ( huR ? huR->Mode : -1 );
             double cut = ( huR ? huR->Cut : 0);
 
             // modes:
-            switch (mode) {
+            switch (TMath::Abs(mode)) {
               case (0) : // Chi2
                 result = hobjO->Chi2Test(hobjR,(huR ? huR->Options() : "WW"));
                 break;
@@ -935,6 +938,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
                 result = hobjO->KolmogorovTest(hobjR,(huR ? huR->Options() : ""));
                 break;
             }
+            if (mode < 0) result = 1.0 - result;
             bool analPass = (result >= cut);
 
             TString score = Form("Score: %4.2f (%s vs. %4.2f)",result,
