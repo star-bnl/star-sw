@@ -9,6 +9,7 @@
 namespace Garfield {
 
 class Sensor;
+class ComponentBase;
 
 class ViewField { 
 
@@ -21,6 +22,7 @@ class ViewField {
     ~ViewField();
    
     void SetSensor(Sensor* s);
+    void SetComponent(ComponentBase* c);
     void SetCanvas(TCanvas* c);
  
     // Establish area, normal vector, in-plane vector ...
@@ -56,6 +58,7 @@ class ViewField {
     
     // Sensor
     Sensor* sensor;
+    ComponentBase* component;
 
     // Projection for viewing
     double project[3][3];

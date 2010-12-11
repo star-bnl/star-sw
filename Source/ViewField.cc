@@ -9,13 +9,14 @@
 
 #include "Plotting.hh"
 #include "Sensor.hh"
+#include "ComponentBase.hh"
 #include "ViewField.hh"
 
 namespace Garfield {
 
 ViewField::ViewField() :
   className("ViewField"),
-  debug(false), sensor(0),
+  debug(false), sensor(0), component(0),
   pxmin(-1.), pymin(-1.), pxmax(1.), pymax(1.),
   fmin(0.), fmax(100.),
   nContours(nMaxContours),
@@ -39,16 +40,36 @@ void
 ViewField::SetSensor(Sensor* s) {
 
   if (s == 0) {
-    std::cout << className << "::SetSensor:\n";
-    std::cout << "    Sensor pointer is null.\n";
+    std::cerr << className << "::SetSensor:\n";
+    std::cerr << "    Sensor pointer is null.\n";
     return;
   }
 
   sensor = s; 
-  // Get bounding box
+  component = 0;
+  // Get bounding box.
   bool ok = sensor->GetArea(pxmin, pymin, pzmin, pxmax, pymax, pzmax);
-  // Get voltage range
+  // Get the voltage range.
   ok = sensor->GetVoltageRange(fmin, fmax);
+
+}
+
+void
+ViewField::SetComponent(ComponentBase* c) {
+
+  if (c == 0) {
+    std::cerr << className << "::SetComponent:\n";
+    std::cerr << "    Component pointer is null.\n";
+    return;
+  }
+
+  component = c;
+  sensor = 0;
+  // Get the bounding box.
+  bool ok = component->GetBoundingBox(pxmin, pymin, pzmin, 
+                                      pxmax, pymax, pzmax);
+  // Get the voltage range.
+  ok = component->GetVoltageRange(fmin, fmax);
 
 }
 
@@ -281,7 +302,7 @@ ViewField::SetDefaultProjection() {
 double
 ViewField::EvaluatePotential(double* pos, double* par) {
 
-  if (sensor == 0) return 0.;
+  if (sensor == 0 && component == 0) return 0.;
 
   // Compute the field.
   double ex = 0., ey = 0., ez = 0., volt = 0.;
@@ -294,7 +315,13 @@ ViewField::EvaluatePotential(double* pos, double* par) {
   const double zpos = project[0][2] * pos[0] + project[1][2] * pos[1] + 
                       project[2][2];
  
-  sensor->ElectricField(xpos, ypos, zpos, ex, ey, ez, volt, medium, status);
+  if (sensor == 0) {
+    component->ElectricField(xpos, ypos, zpos, 
+                             ex, ey, ez, volt, medium, status);
+  } else {
+    sensor->ElectricField(xpos, ypos, zpos, 
+                          ex, ey, ez, volt, medium, status);
+  }
   if (debug) {
     std::cout << className << "::EvaluatePotential:\n";
     std::cout << "    At (u, v) = (" 
@@ -313,7 +340,7 @@ ViewField::EvaluatePotential(double* pos, double* par) {
 double
 ViewField::EvaluatePotentialProfile(double* pos, double* par) {
 
-  if (sensor == 0) return 0.;
+  if (sensor == 0 && component == 0) return 0.;
 
   // Get the start and end position.
   const double x0 = par[0];
@@ -334,9 +361,14 @@ ViewField::EvaluatePotentialProfile(double* pos, double* par) {
   int status = 0;
   Medium* medium;
   
-  sensor->ElectricField(x0 + t * dx, y0 + t * dy, z0 + t * dz, 
-                        ex, ey, ez, volt, medium, status);
-  
+  if (sensor == 0) {
+    component->ElectricField(x0 + t * dx, y0 + t * dy, z0 + t * dz,
+                             ex, ey, ez, volt, medium, status);    
+  } else {
+    sensor->ElectricField(x0 + t * dx, y0 + t * dy, z0 + t * dz, 
+                          ex, ey, ez, volt, medium, status);
+  }
+
   // Return the potential.
   return volt;
     
