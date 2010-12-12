@@ -20,6 +20,7 @@ ViewField::ViewField() :
   pxmin(-1.), pymin(-1.), pxmax(1.), pymax(1.),
   fmin(0.), fmax(100.),
   nContours(nMaxContours),
+  nSamples1d(1000), nSamples2dX(200), nSamples2dY(200),
   canvas(0), hasExternalCanvas(false),
   fPot(0), fPotProfile(0) {
 
@@ -128,6 +129,46 @@ ViewField::SetNumberOfContours(const int n) {
   
 }
 
+void
+ViewField::SetNumberOfSamples1d(const int n) {
+
+  const int nmin = 10;
+  const int nmax = 100000;
+
+  if (n < nmin || n > nmax) {
+    std::cerr << className << "::SetNumberOfSamples1d:\n";
+    std::cerr << "    Number of points (" << n << ") out of range.\n";
+    std::cerr << "    " << nmin << " <= n <= " << nmax << "\n";
+    return;
+  }
+
+  nSamples1d = n;
+
+}
+
+void
+ViewField::SetNumberOfSamples2d(const int nx, const int ny) {
+
+  const int nmin = 10;
+  const int nmax = 10000;
+  if (nx < nmin || nx > nmax) {
+    std::cerr << className << "::SetNumberOfSamples2d:\n";
+    std::cerr << "    Number of x-points (" << nx <<  ") out of range.\n";
+    std::cerr << "    " << nmin << " <= nx <= " << nmax << "\n";
+  } else {
+    nSamples2dX = nx;
+  }
+
+  if (ny < nmin || ny > nmax) {
+    std::cerr << className << "::SetNumberOfSamples2d:\n";
+    std::cerr << "    Number of y-points (" << ny <<  ") out of range.\n";
+    std::cerr << "    " << nmin << " <= ny <= " << nmax << "\n";
+  } else {
+    nSamples2dY = ny;
+  }
+
+}
+
 void 
 ViewField::PlotContour() {
 
@@ -161,8 +202,8 @@ ViewField::PlotContour() {
       std::cout << "        Level " << i << " = " << level[i] << "\n";
     }
   }
-  fPot->SetNpx(100);
-  fPot->SetNpy(100);
+  fPot->SetNpx(nSamples2dX);
+  fPot->SetNpy(nSamples2dY);
   fPot->GetXaxis()->SetTitle(xLabel);
   fPot->GetYaxis()->SetTitle(yLabel);
   fPot->SetTitle("Contours of the potential");
@@ -186,6 +227,8 @@ ViewField::PlotSurface() {
   if (fPot == 0) CreateFunction();
 
   fPot->SetRange(pxmin, pymin, pxmax, pymax);
+  fPot->SetNpx(nSamples2dX); 
+  fPot->SetNpy(nSamples2dY);
   fPot->GetXaxis()->SetTitle(xLabel);
   fPot->GetYaxis()->SetTitle(yLabel);
   fPot->SetTitle("Surface plot of the potential");
@@ -235,6 +278,7 @@ ViewField::PlotProfile(const double x0, const double y0, const double z0,
   fPotProfile->GetXaxis()->SetTitle("normalised distance");
   fPotProfile->GetYaxis()->SetTitle("potential [V]");
   fPotProfile->SetTitle("Profile plot of the potential");
+  fPotProfile->SetNpx(nSamples1d);
   fPotProfile->Draw();
   canvas->Update();
 

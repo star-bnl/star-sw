@@ -25,6 +25,7 @@
 
 #pragma link C++ class Garfield::ComponentBase;
 #pragma link C++ class Garfield::ComponentAnalyticField;
+#pragma link C++ class Garfield::ComponentFieldMap;
 #pragma link C++ class Garfield::ComponentAnsys123;
 #pragma link C++ class Garfield::ComponentAnsys121;
 #pragma link C++ class Garfield::ComponentConstant;

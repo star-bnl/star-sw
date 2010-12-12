@@ -329,7 +329,8 @@ ComponentFieldMap::FindElement13(const double x, const double y, const double z,
                                  double jac[4][4], double& det) {
 
   // Backup
-  double jacbak[4][4], detbak = 1.;
+  double jacbak[4][4];
+  double detbak = 1.;
   double  t1bak = 0., t2bak = 0., t3bak = 0., t4bak = 0.;
   int imapbak = -1;
 
@@ -716,71 +717,71 @@ ComponentFieldMap::Jacobian13(int i, double t, double u, double v, double w, dou
   }
 
   // Determinant of the quadrilateral serendipity Jacobian
-det = 
--(((-4*v*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[1]].xmap+4*u*nodes[elements[i].emap[1]].xmap+nodes[elements[i].emap[3]].xmap-
-4*w*nodes[elements[i].emap[3]].xmap+4*t*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[6]].xmap+4*v*nodes[elements[i].emap[7]].xmap-
-4*u*nodes[elements[i].emap[8]].xmap+4*w*nodes[elements[i].emap[8]].xmap)*
-(4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+4*t*nodes[elements[i].emap[5]].ymap+
-4*u*nodes[elements[i].emap[7]].ymap)+
-(nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap-
-4*t*nodes[elements[i].emap[4]].xmap+4*t*nodes[elements[i].emap[5]].xmap+4*u*nodes[elements[i].emap[7]].xmap-4*v*nodes[elements[i].emap[7]].xmap+
-4*w*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[8]].xmap))*
-(4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+4*t*nodes[elements[i].emap[6]].ymap+
-4*u*nodes[elements[i].emap[8]].ymap)+
-(-4*w*nodes[elements[i].emap[9]].xmap+4*v*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap)+nodes[elements[i].emap[2]].xmap-
-nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*t*nodes[elements[i].emap[6]].xmap-
-4*u*nodes[elements[i].emap[7]].xmap+4*u*nodes[elements[i].emap[8]].xmap)*
-((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[7]].ymap+
-w*nodes[elements[i].emap[8]].ymap)))*((-1+4*t)*nodes[elements[i].emap[0]].zmap+4*(u*nodes[elements[i].emap[4]].zmap+
-v*nodes[elements[i].emap[5]].zmap+w*nodes[elements[i].emap[6]].zmap)))-
-((nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap-
-4*t*nodes[elements[i].emap[4]].xmap+4*t*nodes[elements[i].emap[6]].xmap+4*v*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[7]].xmap)+
-4*u*nodes[elements[i].emap[8]].xmap-4*w*nodes[elements[i].emap[8]].xmap)*
-((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[5]].ymap+
-w*nodes[elements[i].emap[6]].ymap))-
-((-1+4*t)*nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap+
-4*(-(t*nodes[elements[i].emap[4]].xmap)+u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+w*nodes[elements[i].emap[6]].xmap-
-v*nodes[elements[i].emap[7]].xmap-w*nodes[elements[i].emap[8]].xmap))*
-(4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+4*t*nodes[elements[i].emap[6]].ymap+
-4*u*nodes[elements[i].emap[8]].ymap)+
-((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*v*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[3]].xmap-
-4*w*nodes[elements[i].emap[3]].xmap+4*u*nodes[elements[i].emap[4]].xmap+4*v*nodes[elements[i].emap[5]].xmap-4*t*nodes[elements[i].emap[6]].xmap+
-4*w*nodes[elements[i].emap[6]].xmap-4*u*nodes[elements[i].emap[8]].xmap)*
-((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[7]].ymap+
-w*nodes[elements[i].emap[8]].ymap)))*(4*w*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[2]].zmap+4*v*nodes[elements[i].emap[2]].zmap+
-4*t*nodes[elements[i].emap[5]].zmap+4*u*nodes[elements[i].emap[7]].zmap)+
-((nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap-
-4*t*nodes[elements[i].emap[4]].xmap+4*t*nodes[elements[i].emap[5]].xmap+4*u*nodes[elements[i].emap[7]].xmap-4*v*nodes[elements[i].emap[7]].xmap+
-4*w*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[8]].xmap))*
-((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[5]].ymap+
-w*nodes[elements[i].emap[6]].ymap))-
-((-1+4*t)*nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap+
-4*(-(t*nodes[elements[i].emap[4]].xmap)+u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+w*nodes[elements[i].emap[6]].xmap-
-v*nodes[elements[i].emap[7]].xmap-w*nodes[elements[i].emap[8]].xmap))*
-(4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+4*t*nodes[elements[i].emap[5]].ymap+
-4*u*nodes[elements[i].emap[7]].ymap)+
-((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*w*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[2]].xmap-
-4*v*nodes[elements[i].emap[2]].xmap+4*u*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*v*nodes[elements[i].emap[5]].xmap+
-4*w*nodes[elements[i].emap[6]].xmap-4*u*nodes[elements[i].emap[7]].xmap)*
-((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[7]].ymap+
-w*nodes[elements[i].emap[8]].ymap)))*(4*v*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[3]].zmap+4*w*nodes[elements[i].emap[3]].zmap+
-4*t*nodes[elements[i].emap[6]].zmap+4*u*nodes[elements[i].emap[8]].zmap)+
-((-4*w*nodes[elements[i].emap[9]].xmap+4*v*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap)+nodes[elements[i].emap[2]].xmap-
-nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*t*nodes[elements[i].emap[6]].xmap-
-4*u*nodes[elements[i].emap[7]].xmap+4*u*nodes[elements[i].emap[8]].xmap)*
-((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[5]].ymap+
-w*nodes[elements[i].emap[6]].ymap))+
-((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*v*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[3]].xmap-
-4*w*nodes[elements[i].emap[3]].xmap+4*u*nodes[elements[i].emap[4]].xmap+4*v*nodes[elements[i].emap[5]].xmap-4*t*nodes[elements[i].emap[6]].xmap+
-4*w*nodes[elements[i].emap[6]].xmap-4*u*nodes[elements[i].emap[8]].xmap)*
-(4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+4*t*nodes[elements[i].emap[5]].ymap+
-4*u*nodes[elements[i].emap[7]].ymap)-
-((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*w*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[2]].xmap-
-4*v*nodes[elements[i].emap[2]].xmap+4*u*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*v*nodes[elements[i].emap[5]].xmap+
-4*w*nodes[elements[i].emap[6]].xmap-4*u*nodes[elements[i].emap[7]].xmap)*
-(4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+4*t*nodes[elements[i].emap[6]].ymap+
-4*u*nodes[elements[i].emap[8]].ymap))*((-1+4*u)*nodes[elements[i].emap[1]].zmap+4*(t*nodes[elements[i].emap[4]].zmap+
-						     v*nodes[elements[i].emap[7]].zmap+w*nodes[elements[i].emap[8]].zmap));
+  det = 
+    -(((-4*v*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[1]].xmap+4*u*nodes[elements[i].emap[1]].xmap+nodes[elements[i].emap[3]].xmap-
+    4*w*nodes[elements[i].emap[3]].xmap+4*t*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[6]].xmap+4*v*nodes[elements[i].emap[7]].xmap-
+    4*u*nodes[elements[i].emap[8]].xmap+4*w*nodes[elements[i].emap[8]].xmap)*
+    (4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+4*t*nodes[elements[i].emap[5]].ymap+
+    4*u*nodes[elements[i].emap[7]].ymap)+
+    (nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap-
+    4*t*nodes[elements[i].emap[4]].xmap+4*t*nodes[elements[i].emap[5]].xmap+4*u*nodes[elements[i].emap[7]].xmap-4*v*nodes[elements[i].emap[7]].xmap+
+    4*w*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[8]].xmap))*
+    (4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+4*t*nodes[elements[i].emap[6]].ymap+
+    4*u*nodes[elements[i].emap[8]].ymap)+
+    (-4*w*nodes[elements[i].emap[9]].xmap+4*v*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap)+nodes[elements[i].emap[2]].xmap-
+    nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*t*nodes[elements[i].emap[6]].xmap-
+    4*u*nodes[elements[i].emap[7]].xmap+4*u*nodes[elements[i].emap[8]].xmap)*
+    ((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[7]].ymap+
+    w*nodes[elements[i].emap[8]].ymap)))*((-1+4*t)*nodes[elements[i].emap[0]].zmap+4*(u*nodes[elements[i].emap[4]].zmap+
+    v*nodes[elements[i].emap[5]].zmap+w*nodes[elements[i].emap[6]].zmap)))-
+    ((nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap-
+    4*t*nodes[elements[i].emap[4]].xmap+4*t*nodes[elements[i].emap[6]].xmap+4*v*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[7]].xmap)+
+    4*u*nodes[elements[i].emap[8]].xmap-4*w*nodes[elements[i].emap[8]].xmap)*
+    ((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[5]].ymap+
+    w*nodes[elements[i].emap[6]].ymap))-
+    ((-1+4*t)*nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap+
+    4*(-(t*nodes[elements[i].emap[4]].xmap)+u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+w*nodes[elements[i].emap[6]].xmap-
+    v*nodes[elements[i].emap[7]].xmap-w*nodes[elements[i].emap[8]].xmap))*
+    (4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+4*t*nodes[elements[i].emap[6]].ymap+
+    4*u*nodes[elements[i].emap[8]].ymap)+
+    ((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*v*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[3]].xmap-
+    4*w*nodes[elements[i].emap[3]].xmap+4*u*nodes[elements[i].emap[4]].xmap+4*v*nodes[elements[i].emap[5]].xmap-4*t*nodes[elements[i].emap[6]].xmap+
+    4*w*nodes[elements[i].emap[6]].xmap-4*u*nodes[elements[i].emap[8]].xmap)*
+    ((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[7]].ymap+
+    w*nodes[elements[i].emap[8]].ymap)))*(4*w*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[2]].zmap+4*v*nodes[elements[i].emap[2]].zmap+
+    4*t*nodes[elements[i].emap[5]].zmap+4*u*nodes[elements[i].emap[7]].zmap)+
+    ((nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap-
+    4*t*nodes[elements[i].emap[4]].xmap+4*t*nodes[elements[i].emap[5]].xmap+4*u*nodes[elements[i].emap[7]].xmap-4*v*nodes[elements[i].emap[7]].xmap+
+    4*w*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[8]].xmap))*
+    ((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[5]].ymap+
+    w*nodes[elements[i].emap[6]].ymap))-
+    ((-1+4*t)*nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap+
+    4*(-(t*nodes[elements[i].emap[4]].xmap)+u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+w*nodes[elements[i].emap[6]].xmap-
+    v*nodes[elements[i].emap[7]].xmap-w*nodes[elements[i].emap[8]].xmap))*
+    (4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+4*t*nodes[elements[i].emap[5]].ymap+
+    4*u*nodes[elements[i].emap[7]].ymap)+
+    ((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*w*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[2]].xmap-
+    4*v*nodes[elements[i].emap[2]].xmap+4*u*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*v*nodes[elements[i].emap[5]].xmap+
+    4*w*nodes[elements[i].emap[6]].xmap-4*u*nodes[elements[i].emap[7]].xmap)*
+    ((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[7]].ymap+
+    w*nodes[elements[i].emap[8]].ymap)))*(4*v*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[3]].zmap+4*w*nodes[elements[i].emap[3]].zmap+
+    4*t*nodes[elements[i].emap[6]].zmap+4*u*nodes[elements[i].emap[8]].zmap)+
+    ((-4*w*nodes[elements[i].emap[9]].xmap+4*v*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap)+nodes[elements[i].emap[2]].xmap-
+    nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*t*nodes[elements[i].emap[6]].xmap-
+    4*u*nodes[elements[i].emap[7]].xmap+4*u*nodes[elements[i].emap[8]].xmap)*
+    ((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[5]].ymap+
+    w*nodes[elements[i].emap[6]].ymap))+
+    ((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*v*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[3]].xmap-
+    4*w*nodes[elements[i].emap[3]].xmap+4*u*nodes[elements[i].emap[4]].xmap+4*v*nodes[elements[i].emap[5]].xmap-4*t*nodes[elements[i].emap[6]].xmap+
+    4*w*nodes[elements[i].emap[6]].xmap-4*u*nodes[elements[i].emap[8]].xmap)*
+    (4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+4*t*nodes[elements[i].emap[5]].ymap+
+    4*u*nodes[elements[i].emap[7]].ymap)-
+    ((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*w*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[2]].xmap-
+    4*v*nodes[elements[i].emap[2]].xmap+4*u*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*v*nodes[elements[i].emap[5]].xmap+
+    4*w*nodes[elements[i].emap[6]].xmap-4*u*nodes[elements[i].emap[7]].xmap)*
+    (4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+4*t*nodes[elements[i].emap[6]].ymap+
+    4*u*nodes[elements[i].emap[8]].ymap))*((-1+4*u)*nodes[elements[i].emap[1]].zmap+4*(t*nodes[elements[i].emap[4]].zmap+
+    v*nodes[elements[i].emap[7]].zmap+w*nodes[elements[i].emap[8]].zmap));
 
 jac[0][0] =
 -((((-1+4*u)*nodes[elements[i].emap[1]].xmap+4*(t*nodes[elements[i].emap[4]].xmap+
@@ -1142,7 +1143,7 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
   if (debug) {
     printf("ComponentFieldMap::Coordinates3:\n");
     printf("    Linear estimate:   (u, v, w) = (%g,%g,%g), sum = %g.\n",
-           td1,td2,td3,td1 + td2 + td3);
+           td1, td2, td3, td1 + td2 + td3);
   }
 
   // Loop
@@ -1152,21 +1153,21 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
     if (debug) {
       printf("ComponentFieldMap::Coordinates3:\n");
       printf("    Iteration %3d:     (u, v, w) = (%g,%g,%g), sum = %g.\n",
-             iter,td1,td2,td3,td1 + td2 + td3);
+             iter, td1, td2, td3, td1 + td2 + td3);
     }
     // Re-compute the (x,y,z) position for this coordinate.
     double xr = nodes[elements[imap].emap[0]].xmap * td1 * (2 * td1 - 1) +
-      nodes[elements[imap].emap[1]].xmap * td2 * (2 * td2 - 1) +
-      nodes[elements[imap].emap[2]].xmap * td3 * (2 * td3 - 1) +
-      nodes[elements[imap].emap[3]].xmap * 4 * td1 * td2 +
-      nodes[elements[imap].emap[4]].xmap * 4 * td1 * td3 +
-      nodes[elements[imap].emap[5]].xmap * 4 * td2 * td3;
-    double yr=nodes[elements[imap].emap[0]].ymap * td1 * (2 * td1 - 1) +
-      nodes[elements[imap].emap[1]].ymap * td2 * (2 * td2 - 1) +
-      nodes[elements[imap].emap[2]].ymap * td3 * (2 * td3 - 1) +
-      nodes[elements[imap].emap[3]].ymap * 4 * td1 * td2 +
-      nodes[elements[imap].emap[4]].ymap * 4 * td1 * td3 +
-      nodes[elements[imap].emap[5]].ymap * 4 * td2 * td3;
+                nodes[elements[imap].emap[1]].xmap * td2 * (2 * td2 - 1) +
+                nodes[elements[imap].emap[2]].xmap * td3 * (2 * td3 - 1) +
+                nodes[elements[imap].emap[3]].xmap * 4 * td1 * td2 +
+                nodes[elements[imap].emap[4]].xmap * 4 * td1 * td3 +
+                nodes[elements[imap].emap[5]].xmap * 4 * td2 * td3;
+    double yr = nodes[elements[imap].emap[0]].ymap * td1 * (2 * td1 - 1) +
+                nodes[elements[imap].emap[1]].ymap * td2 * (2 * td2 - 1) +
+                nodes[elements[imap].emap[2]].ymap * td3 * (2 * td3 - 1) +
+                nodes[elements[imap].emap[3]].ymap * 4 * td1 * td2 +
+                nodes[elements[imap].emap[4]].ymap * 4 * td1 * td3 +
+                nodes[elements[imap].emap[5]].ymap * 4 * td2 * td3;
     double sr = td1 + td2 + td3;
     // Compute the Jacobian
     Jacobian3(imap, td1, td2, td3, det, jac);
@@ -1184,15 +1185,18 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
     // Debugging
     if (debug) {
       printf("ComponentFieldMap::Coordinates3:\n");
-      printf("    Difference vector: (1, x, y) = (%g,%g,%g).\n", diff[0], diff[1], diff[2]);
-      printf("    Correction vector: (u, v, w) = (%g,%g,%g).\n", corr[0], corr[1], corr[2]);
+      printf("    Difference vector: (1, x, y) = (%g,%g,%g).\n", 
+             diff[0], diff[1], diff[2]);
+      printf("    Correction vector: (u, v, w) = (%g,%g,%g).\n", 
+             corr[0], corr[1], corr[2]);
     }
     // Update the vector.
     td1 += corr[0];
     td2 += corr[1];
     td3 += corr[2];
     // Check for convergence.
-    if (fabs(corr[0]) < 1.0e-5 && fabs(corr[1]) < 1.0e-5 && fabs(corr[2]) < 1.0e-5) {
+    if (fabs(corr[0]) < 1.0e-5 && fabs(corr[1]) < 1.0e-5 && 
+        fabs(corr[2]) < 1.0e-5) {
       if (debug) {
         printf("ComponentFieldMap::Coordinates3:\n");
         printf("    Convergence reached.\n");
@@ -1277,13 +1281,10 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
   }
 
   // Failure flag
-  int ifail=1;
+  int ifail = 1;
 
   // Provisional values
-  t1 = 0;
-  t2 = 0;
-  t3 = 0;
-  t4 = 0;
+  t1 = t2 = t3 = t4 = 0.;
 
   // Compute determinant.
   det =
@@ -1313,7 +1314,7 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
   // Vector products for evaluation of T1.
   double prod=((nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[3]].xmap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[1]].ymap) - 
 	       (nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[1]].xmap) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[3]].ymap));
-  if (prod*prod > 1.0e-12*
+  if (prod * prod > 1.0e-12 *
       ((nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[1]].xmap) * (nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[1]].xmap) + 
        (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[1]].ymap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[1]].ymap))*
       ((nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[3]].xmap) * (nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[3]].xmap) + 
@@ -1325,8 +1326,8 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
 	x*nodes[elements[imap].emap[3]].ymap - nodes[elements[imap].emap[0]].xmap*y+nodes[elements[imap].emap[1]].xmap*y-
 	nodes[elements[imap].emap[2]].xmap*y+nodes[elements[imap].emap[3]].xmap*y+sqrt(det)) / prod;
   } else {
-    double xp=nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[1]].ymap;
-    double yp=nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap;
+    double xp = nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[1]].ymap;
+    double yp = nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap;
     double dn=sqrt(xp*xp+yp*yp);
     if(dn <= 0) {
       printf("ComponentFieldMap::Coordinates4:\n");
@@ -1443,10 +1444,7 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
   int ifail = 1;
 
   // Provisional values
-  t1 = 0;
-  t2 = 0;
-  t3 = 0;
-  t4 = 0;
+  t1 = t2 = t3 = t4 = 0;
 
   // Degenerate elements should have been treated as triangles
   if (elements[imap].degenerate) {
@@ -1460,7 +1458,7 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
 
   // Make a first order approximation.
   int rc = Coordinates4(x, y, z, t1, t2, t3, t4, jac, det, imap);
-  if (rc>0) {
+  if (rc > 0) {
     if (debug) {
       printf("ComponentFieldMap::Coordinates5:\n");
       printf("    Failure to obtain linear estimate of isoparametric coordinates\n");
@@ -1481,7 +1479,7 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
   double td1 = t1, td2 = t2;
   if (debug) {
     printf("ComponentFieldMap::Coordinates5:\n");
-    printf("    Iteration starts at (t1,t2) = (%g,%g).\n", td1,td2);
+    printf("    Iteration starts at (t1,t2) = (%g,%g).\n", td1, td2);
   }
   // Loop
   bool converged = false;
@@ -1599,23 +1597,23 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
   // For debugging purposes, show position
   if (debug) {
     double xr =
-      nodes[elements[imap].emap[0]].xmap * (-(1 - t1) * (1 - t2) * (1 + t1 + t2)) / 4+
-      nodes[elements[imap].emap[1]].xmap * (-(1 + t1) * (1 - t2) * (1 - t1 + t2)) / 4+
-      nodes[elements[imap].emap[2]].xmap * (-(1 + t1) * (1 + t2) * (1 - t1 - t2)) / 4+
-      nodes[elements[imap].emap[3]].xmap * (-(1 - t1) * (1 + t2) * (1 + t1 - t2)) / 4+
+      nodes[elements[imap].emap[0]].xmap * (-(1 - t1) * (1 - t2) * (1 + t1 + t2)) / 4 +
+      nodes[elements[imap].emap[1]].xmap * (-(1 + t1) * (1 - t2) * (1 - t1 + t2)) / 4 +
+      nodes[elements[imap].emap[2]].xmap * (-(1 + t1) * (1 + t2) * (1 - t1 - t2)) / 4 +
+      nodes[elements[imap].emap[3]].xmap * (-(1 - t1) * (1 + t2) * (1 + t1 - t2)) / 4 +
       nodes[elements[imap].emap[4]].xmap * (1 - t1) * (1 + t1) * (1 - t2) / 2 + 
       nodes[elements[imap].emap[5]].xmap * (1 + t1) * (1 + t2) * (1 - t2) / 2 + 
       nodes[elements[imap].emap[6]].xmap * (1 - t1) * (1 + t1) * (1 + t2) / 2 + 
       nodes[elements[imap].emap[7]].xmap * (1 - t1) * (1 + t2) * (1 - t2) / 2;
     double yr=
-      nodes[elements[imap].emap[0]].ymap*(-(1 - t1) * (1 - t2) * (1 + t1 + t2)) / 4+
-      nodes[elements[imap].emap[1]].ymap*(-(1 + t1) * (1 - t2) * (1 - t1 + t2)) / 4+
-      nodes[elements[imap].emap[2]].ymap*(-(1 + t1) * (1 + t2) * (1 - t1 - t2)) / 4+
-      nodes[elements[imap].emap[3]].ymap*(-(1 - t1) * (1 + t2) * (1 + t1 - t2)) / 4+
-      nodes[elements[imap].emap[4]].ymap*(1 - t1) * (1 + t1) * (1 - t2) / 2 + 
-      nodes[elements[imap].emap[5]].ymap*(1 + t1) * (1 + t2) * (1 - t2) / 2 + 
-      nodes[elements[imap].emap[6]].ymap*(1 - t1) * (1 + t1) * (1 + t2) / 2 + 
-      nodes[elements[imap].emap[7]].ymap*(1 - t1) * (1 + t2) * (1 - t2) / 2;
+      nodes[elements[imap].emap[0]].ymap * (-(1 - t1) * (1 - t2) * (1 + t1 + t2)) / 4 +
+      nodes[elements[imap].emap[1]].ymap * (-(1 + t1) * (1 - t2) * (1 - t1 + t2)) / 4 +
+      nodes[elements[imap].emap[2]].ymap * (-(1 + t1) * (1 + t2) * (1 - t1 - t2)) / 4 +
+      nodes[elements[imap].emap[3]].ymap * (-(1 - t1) * (1 + t2) * (1 + t1 - t2)) / 4 +
+      nodes[elements[imap].emap[4]].ymap * (  1 - t1) * (1 + t1) * (1 - t2) / 2 + 
+      nodes[elements[imap].emap[5]].ymap * (  1 + t1) * (1 + t2) * (1 - t2) / 2 + 
+      nodes[elements[imap].emap[6]].ymap * (  1 - t1) * (1 + t1) * (1 + t2) / 2 + 
+      nodes[elements[imap].emap[7]].ymap * (  1 - t1) * (1 + t2) * (1 - t2) / 2;
     printf("ComponentFieldMap::Coordinates5:\n");
     printf("    Position requested:     (%g,%g),\n", x, y);
     printf("    Reconstructed:          (%g,%g),\n", xr, yr);
@@ -1734,6 +1732,7 @@ int
 ComponentFieldMap::Coordinates13(double x, double y, double z,
                         double& t1, double& t2, double& t3, double& t4,
                         double jac[4][4], double& det, int imap) {
+
   // Debugging
   // if (imap == 1024) {debug=true;} else {debug = false;}
   if (debug) {
@@ -1799,16 +1798,16 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
       nodes[elements[imap].emap[8]].xmap * 4 * td2 * td4 +
       nodes[elements[imap].emap[9]].xmap * 4 * td3 * td4;
     double yr = 
-      nodes[elements[imap].emap[0]].ymap *td1*(2*td1 - 1) + 
-      nodes[elements[imap].emap[1]].ymap *td2*(2*td2-1) + 
-      nodes[elements[imap].emap[2]].ymap *td3*(2*td3-1) + 
-      nodes[elements[imap].emap[3]].ymap *td4*(2*td4-1) + 
-      nodes[elements[imap].emap[4]].ymap *4*td1*td2 + 
-      nodes[elements[imap].emap[5]].ymap *4*td1*td3+
-      nodes[elements[imap].emap[6]].ymap *4*td1*td4+
-      nodes[elements[imap].emap[7]].ymap *4*td2*td3+
-      nodes[elements[imap].emap[8]].ymap *4*td2*td4+
-      nodes[elements[imap].emap[9]].ymap *4*td3*td4;
+      nodes[elements[imap].emap[0]].ymap * td1 * (2 * td1 - 1) + 
+      nodes[elements[imap].emap[1]].ymap * td2 * (2 * td2 - 1) + 
+      nodes[elements[imap].emap[2]].ymap * td3 * (2 * td3 - 1) + 
+      nodes[elements[imap].emap[3]].ymap * td4 * (2 * td4 - 1) + 
+      nodes[elements[imap].emap[4]].ymap * 4 * td1 * td2 + 
+      nodes[elements[imap].emap[5]].ymap * 4 * td1 * td3 +
+      nodes[elements[imap].emap[6]].ymap * 4 * td1 * td4 +
+      nodes[elements[imap].emap[7]].ymap * 4 * td2 * td3 +
+      nodes[elements[imap].emap[8]].ymap * 4 * td2 * td4 +
+      nodes[elements[imap].emap[9]].ymap * 4 * td3 * td4;
     double zr = 
       nodes[elements[imap].emap[0]].zmap * td1 * (2 * td1 - 1) +
       nodes[elements[imap].emap[1]].zmap * td2 * (2 * td2 - 1) +
@@ -1841,8 +1840,10 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
     // Debugging
     if (debug) {
       printf("ComponentFieldMap::Coordinates13:\n");
-      printf("    Difference vector:  (1, x, y, z)  = (%g,%g,%g,%g).\n", diff[0], diff[1], diff[2], diff[3]);
-      printf("    Correction vector:  (t1,t2,t3,t4) = (%g,%g,%g,%g).\n", corr[0], corr[1], corr[2], corr[3]);
+      printf("    Difference vector:  (1, x, y, z)  = (%g,%g,%g,%g).\n", 
+             diff[0], diff[1], diff[2], diff[3]);
+      printf("    Correction vector:  (t1,t2,t3,t4) = (%g,%g,%g,%g).\n", 
+             corr[0], corr[1], corr[2], corr[3]);
     }
 
     // Update the vector.
@@ -1896,10 +1897,7 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
       printf("ComponentFieldMap::Coordinates13:\n");
       printf("    No convergence achieved when refining internal isoparametric coordinates\n");
       printf("    in element %d at position (%g,%g,%g).\n", imap, x, y, z);
-      t1 = -1;
-      t2 = -1;
-      t3 = -1;
-      t4 = -1;
+      t1 = t2 = t3 = t4 = -1;
       return ifail;
     }
   }
@@ -1911,7 +1909,8 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
   t4 = td4;
   if (debug) {
     printf("ComponentFieldMap::Coordinates13:\n");
-    printf("    Convergence reached at (t1, t2, t3, t4) = (%g,%g,%g,%g).\n", t1, t2, t3, t4);
+    printf("    Convergence reached at (t1, t2, t3, t4) = (%g,%g,%g,%g).\n", 
+           t1, t2, t3, t4);
   }
   
   // For debugging purposes, show position
@@ -2332,6 +2331,11 @@ bool
 ComponentFieldMap::IsInBoundingBox(const double x, 
                                    const double y, const double z) {
 
+  if (x >= xMinBoundingBox && x <= xMaxBoundingBox &&
+      y >= yMinBoundingBox && y <= yMaxBoundingBox &&
+      z >= zMinBoundingBox && z <= zMaxBoundingBox) {
+    return true;
+  }
   return false;
 
 }

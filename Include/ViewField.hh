@@ -33,6 +33,9 @@ class ViewField {
     void SetDefaultProjection();
     void SetPlane(double fx, double fy, double fz, 
                   double x0, double y0, double z0);
+    void SetNumberOfSamples1d(const int n);
+    void SetNumberOfSamples2d(const int nx, const int ny);
+
     // Rotate the viewing plane
     void Rotate(double angle);
 
@@ -51,7 +54,7 @@ class ViewField {
 
     std::string className;
  
-    static const int nMaxContours = 20;
+    static const int nMaxContours = 30;
 
     // Options
     bool debug;
@@ -72,6 +75,9 @@ class ViewField {
     
     // Number of contours
     int nContours;
+    // Number of points used to draw the functions
+    int nSamples1d;
+    int nSamples2dX, nSamples2dY;
     
     // Canvas
     TCanvas* canvas;

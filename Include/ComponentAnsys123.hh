@@ -12,10 +12,8 @@ class ComponentAnsys123: public ComponentFieldMap {
   RQ_OBJECT("ComponentAnsys123")
     
   public:
-    // Constructors
+    // Constructor
     ComponentAnsys123();
-    ComponentAnsys123(std::string elist,  std::string nlist,
-                      std::string mplist, std::string prnsol, std::string unit);
     // Destructor
     ~ComponentAnsys123() {}
     

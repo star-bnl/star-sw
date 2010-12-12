@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <iostream>
 #include <fstream>
 #include <stdlib.h>
 #include <math.h>
@@ -12,18 +13,11 @@ ComponentAnsys121::ComponentAnsys121() : ComponentFieldMap() {
 
   className = "ComponentAnsys121";
   ready = false;
+  // Default bounding box
+  zMinBoundingBox = -50.;
+  zMaxBoundingBox =  50.; 
 
 }
-
-ComponentAnsys121::ComponentAnsys121(std::string elist, std::string nlist, 
-                                     std::string mplist, std::string prnsol, 
-                                     std::string unit) : 
-  ComponentFieldMap() {
-
-  Initialise(elist, nlist, mplist, prnsol, unit);
-
-}
-
 
 bool
 ComponentAnsys121::Initialise(std::string elist, std::string nlist, 
@@ -1019,6 +1013,19 @@ ComponentAnsys121::GetMedium(
   m = materials[elements[imap].matmap].medium;
   return true;
   
+}
+
+void
+ComponentAnsys121::SetRangeZ(const double zmin, const double zmax) {
+
+  if (fabs(zmax - zmin) <= 0.) {
+    std::cerr << className << "::SetRangeZ:\n";
+    std::cerr << "    Zero range is not permitted.\n";
+    return;
+  }
+  zMinBoundingBox = std::min(zmin, zmax);
+  zMaxBoundingBox = std::min(zmin, zmax);
+
 }
 
 void 

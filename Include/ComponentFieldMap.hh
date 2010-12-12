@@ -74,6 +74,8 @@ class ComponentFieldMap : public ComponentBase {
       checkMultipleElement = true; lastElement = -1;
     }
     void DisableCheckMapIndices() {checkMultipleElement = false;}
+    void EnableDeleteBackgroundElements()  {deleteBackground = true;}
+    void DisableDeleteBackgroundElements() {deleteBackground = false;}
     
   protected:
   

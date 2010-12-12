@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cmath>
 
-#include "GarfieldConstants.hh"
 #include "ComponentTcad2d.hh"
 
 namespace Garfield {
@@ -485,8 +484,8 @@ ComponentTcad2d::GetBoundingBox(double& xmin, double& ymin, double& zmin,
 void
 ComponentTcad2d::SetRangeZ(const double zmin, const double zmax) {
 
-  if (fabs(zmax - zmin) < Small) {
-    std::cerr << "ComponentTcad2d::SetRangeZ:\n";
+  if (fabs(zmax - zmin) <= 0.) {
+    std::cerr << className << "::SetRangeZ:\n";
     std::cerr << "    Zero range is not permitted.\n";
     return;
   }

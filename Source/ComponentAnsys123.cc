@@ -10,16 +10,8 @@ namespace Garfield {
 
 ComponentAnsys123::ComponentAnsys123() : ComponentFieldMap() {
 
+  className = "ComponentAnsys123";
   ready = false;
-
-}
-
-ComponentAnsys123::ComponentAnsys123(std::string elist,  std::string nlist,
-                                     std::string mplist, std::string prnsol, 
-                                     std::string unit) :
-  ComponentFieldMap() {
-
-  Initialise(elist, nlist, mplist, prnsol, unit);
 
 }
 
@@ -197,9 +189,14 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
     // Split into tokens
     token = strtok(line, " ");
     // Skip blank lines and headers
-    if (!token || strcmp(token," ") == 0 || strcmp(token,"\n") == 0 || 
-        int(token[0]) == 10 || int(token[0]) == 13 ||
-        strcmp(token,"LIST") == 0 || strcmp(token,"ELEM") == 0) continue;
+    if (!token || strcmp(token," ") == 0 || 
+        strcmp(token,"\n") == 0 || 
+        int(token[0]) == 10 || 
+        int(token[0]) == 13 ||
+        strcmp(token,"LIST") == 0 || 
+        strcmp(token,"ELEM") == 0) {
+      continue;
+    }
     // Read the element
     int ielem = ReadInteger(token, -1, readerror);
     token = strtok(NULL, " "); int imat = ReadInteger(token, -1, readerror);
@@ -232,7 +229,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
       return false;
     } else if (ielem - 1 != nElements + nbackground) {
       printf("ComponentAnsys123:\n");
-      printf("    Synchronisation lost on file %s (line %d).\n", elist.c_str(), il);
+      printf("    Synchronisation lost on file %s (line %d).\n", 
+             elist.c_str(), il);
       printf("    Element: %d (expected %d), material: %d,\n", 
              ielem, nElements, imat);
       printf("    nodes: (%d %d %d %d %d %d %d %d %d %d)\n",
@@ -337,17 +335,18 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
          highestnode, nbackground);
   // Check the value of the unit
   double funit;
-  if (strcmp(unit.c_str(),"mum") == 0 || strcmp(unit.c_str(),"micron") == 0 || 
-      strcmp(unit.c_str(),"micrometer") == 0) {
+  if (strcmp(unit.c_str(), "mum") == 0 || 
+      strcmp(unit.c_str(), "micron") == 0 || 
+      strcmp(unit.c_str(), "micrometer") == 0) {
     funit = 0.0001;
-  } else if (strcmp(unit.c_str(),"mm") == 0 || 
-             strcmp(unit.c_str(),"millimeter") == 0) {
+  } else if (strcmp(unit.c_str(), "mm") == 0 || 
+             strcmp(unit.c_str(), "millimeter") == 0) {
     funit = 0.1;
-  } else if (strcmp(unit.c_str(),"cm") == 0 || 
-            strcmp(unit.c_str(),"centimeter") == 0) {
+  } else if (strcmp(unit.c_str(), "cm") == 0 || 
+             strcmp(unit.c_str(), "centimeter") == 0) {
     funit = 1.0;
-  } else if (strcmp(unit.c_str(),"m") == 0 || 
-             strcmp(unit.c_str(),"meter") == 0) {
+  } else if (strcmp(unit.c_str(), "m") == 0 || 
+             strcmp(unit.c_str(), "meter") == 0) {
     funit = 100.0;
   } else {
     printf("ComponentAnsys123::Initialise:\n");
@@ -454,7 +453,8 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
         strcmp(token,"NODE")    == 0) continue;
     // Read the element
     int inode = ReadInteger(token, -1, readerror);
-    token = strtok(NULL, " "); double volt = ReadDouble(token, -1, readerror);
+    token = strtok(NULL, " "); 
+    double volt = ReadDouble(token, -1, readerror);
     // Check syntax
     if (readerror) {
       printf("ComponentAnsys123::Initialise:\n");
@@ -679,6 +679,7 @@ ComponentAnsys123::ElectricField(
     4 * nodes[elements[imap].emap[7]].vmap * t2 * t3 + 
     4 * nodes[elements[imap].emap[8]].vmap * t2 * t4 +  
     4 * nodes[elements[imap].emap[9]].vmap * t3 * t4;
+    
   ex = -(nodes[elements[imap].emap[0]].vmap * (4 * t1 - 1) * jac[0][1] + 
          nodes[elements[imap].emap[1]].vmap * (4 * t2 - 1) * jac[1][1] + 
          nodes[elements[imap].emap[2]].vmap * (4 * t3 - 1) * jac[2][1] + 
@@ -695,6 +696,7 @@ ComponentAnsys123::ElectricField(
                                                4 * t2 * jac[3][1]) + 
          nodes[elements[imap].emap[9]].vmap * (4 * t4 * jac[2][1] + 
                                                4 * t3 * jac[3][1])) / det;
+                                               
   ey = -(nodes[elements[imap].emap[0]].vmap * (4 * t1 - 1) * jac[0][2] + 
          nodes[elements[imap].emap[1]].vmap * (4 * t2 - 1) * jac[1][2] + 
          nodes[elements[imap].emap[2]].vmap * (4 * t3 - 1) * jac[2][2] + 
@@ -711,6 +713,7 @@ ComponentAnsys123::ElectricField(
                                                4 * t2 * jac[3][2]) + 
          nodes[elements[imap].emap[9]].vmap * (4 * t4 * jac[2][2] + 
                                                4 * t3 * jac[3][2])) / det;
+                                               
   ez = -(nodes[elements[imap].emap[0]].vmap * (4 * t1 - 1) * jac[0][3] + 
          nodes[elements[imap].emap[1]].vmap * (4 * t2 - 1) * jac[1][3] + 
          nodes[elements[imap].emap[2]].vmap * (4 * t3 - 1) * jac[2][3] + 
@@ -816,6 +819,7 @@ ComponentAnsys123::WeightingField(
                                                4 * t2 * jac[3][1]) + 
          nodes[elements[imap].emap[9]].wmap * (4 * t4 * jac[2][1] + 
                                                4 * t3 * jac[3][1])) / det;
+                                               
   wy = -(nodes[elements[imap].emap[0]].wmap * (4 * t1 - 1) * jac[0][2] + 
          nodes[elements[imap].emap[1]].wmap * (4 * t2 - 1) * jac[1][2] + 
          nodes[elements[imap].emap[2]].wmap * (4 * t3 - 1) * jac[2][2] + 
@@ -832,6 +836,7 @@ ComponentAnsys123::WeightingField(
                                                4 * t2 * jac[3][2]) + 
          nodes[elements[imap].emap[9]].wmap * (4 * t4 * jac[2][2] + 
                                                4 * t3 * jac[3][2])) / det;
+                                               
   wz = -(nodes[elements[imap].emap[0]].wmap * (4 * t1 - 1) * jac[0][3] + 
          nodes[elements[imap].emap[1]].wmap * (4 * t2 - 1) * jac[1][3] + 
          nodes[elements[imap].emap[2]].wmap * (4 * t3 - 1) * jac[2][3] + 
@@ -902,16 +907,16 @@ ComponentAnsys123::WeightingPotential(
   }
 
   // Tetrahedral field
-  return nodes[elements[imap].emap[0]].vmap * t1 * (2 * t1 - 1) + 
-         nodes[elements[imap].emap[1]].vmap * t2 * (2 * t2 - 1) + 
-         nodes[elements[imap].emap[2]].vmap * t3 * (2 * t3 - 1) + 
-         nodes[elements[imap].emap[3]].vmap * t4 * (2 * t4 - 1) + 
-     4 * nodes[elements[imap].emap[4]].vmap * t1 * t2 +
-     4 * nodes[elements[imap].emap[5]].vmap * t1 * t3 + 
-     4 * nodes[elements[imap].emap[6]].vmap * t1 * t4 + 
-     4 * nodes[elements[imap].emap[7]].vmap * t2 * t3 + 
-     4 * nodes[elements[imap].emap[8]].vmap * t2 * t4 +  
-     4 * nodes[elements[imap].emap[9]].vmap * t3 * t4;
+  return nodes[elements[imap].emap[0]].wmap * t1 * (2 * t1 - 1) + 
+         nodes[elements[imap].emap[1]].wmap * t2 * (2 * t2 - 1) + 
+         nodes[elements[imap].emap[2]].wmap * t3 * (2 * t3 - 1) + 
+         nodes[elements[imap].emap[3]].wmap * t4 * (2 * t4 - 1) + 
+     4 * nodes[elements[imap].emap[4]].wmap * t1 * t2 +
+     4 * nodes[elements[imap].emap[5]].wmap * t1 * t3 + 
+     4 * nodes[elements[imap].emap[6]].wmap * t1 * t4 + 
+     4 * nodes[elements[imap].emap[7]].wmap * t2 * t3 + 
+     4 * nodes[elements[imap].emap[8]].wmap * t2 * t4 +  
+     4 * nodes[elements[imap].emap[9]].wmap * t3 * t4;
 
 }
 

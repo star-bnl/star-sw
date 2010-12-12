@@ -12,11 +12,8 @@ class ComponentAnsys121: public ComponentFieldMap {
     RQ_OBJECT("ComponentAnsys121")
 
   public:
-    // Constructors
+    // Constructor
     ComponentAnsys121();
-    ComponentAnsys121(std::string elist,  std::string nlist,
-                      std::string mplist, std::string prnsol, 
-                      std::string unit);
     // Destructor 
     ~ComponentAnsys121() {}
     
@@ -46,8 +43,11 @@ class ComponentAnsys121: public ComponentFieldMap {
     // Range
     bool IsInBoundingBox(const double x, const double y, const double z) {
       return x >= xMinBoundingBox && x <= xMaxBoundingBox && 
-             y >= yMinBoundingBox && y <= yMaxBoundingBox;
+             y >= yMinBoundingBox && y <= yMaxBoundingBox &&
+             z >= zMinBoundingBox && z <= zMaxBoundingBox;
     }
+
+    void SetRangeZ(const double zmin, const double zmax);
       
   protected:
   
