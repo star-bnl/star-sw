@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.72 2010/12/11 23:28:00 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.73 2010/12/13 16:23:26 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.73  2010/12/13 16:23:26  genevb
+// Remove previous change, add Kolmogorov maximum distance as default
+//
 // Revision 2.72  2010/12/11 23:28:00  genevb
 // Allow negative modes for 1-result
 //
@@ -921,15 +924,15 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             double result = 0;
 
             // default to Kolm. for 1-d hists, Chi2 for others
-            int mode = ( huR ? huR->Mode : -1 );
+            int mode = ( huR ? huR->Mode : 2 );
             double cut = ( huR ? huR->Cut : 0);
 
             // modes:
-            switch (TMath::Abs(mode)) {
+            switch (mode) {
               case (0) : // Chi2
                 result = hobjO->Chi2Test(hobjR,(huR ? huR->Options() : "WW"));
                 break;
-              case (1) : // Kolmogorov
+              case (1) : // Kolmogorov probability
                 // Note that Sumw2() seems to affect the way histograms are drawn,
                 // but Kolmogorov test complains in current ROOT version (won't in
                 // future versions). Don't know what to do for now.
@@ -937,8 +940,14 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
                 //if (hobjR->GetSumw2N() == 0) hobjR->Sumw2();
                 result = hobjO->KolmogorovTest(hobjR,(huR ? huR->Options() : ""));
                 break;
+              case (2) : // Kolmogorov maximum distance
+                // Seems to work for both 1D and 2D
+                TString analOpts = (huR ? huR->Options() : "");
+                analOpts.ToUpper();
+                if (! analOpts.Contains('M')) analOpts += 'M';
+                result = 1.0 - hobjO->KolmogorovTest(hobjR,analOpts.Data());
+                break;
             }
-            if (mode < 0) result = 1.0 - result;
             bool analPass = (result >= cut);
 
             TString score = Form("Score: %4.2f (%s vs. %4.2f)",result,
