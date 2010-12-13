@@ -172,12 +172,14 @@ JevpLogic::JevpLogic() : mLastDrawnCanvas(0)
 
     displayFile->ReadBuff(tabdata->args, strlen(tabdata->args));
     
-    
+    displayFile->setDisplay(evpMain->display);
     // printf("I just got the display file: \n");
     // displayFile->dump();
     // printf("Done dumping it...\n");
     
     delete tabdata;
+
+
   }
 
 

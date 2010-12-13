@@ -15,7 +15,7 @@
 #define DB_HOST "onldb.daq.bnl.local"
 #define DB_PORT 3501
 #define DB_NAME "RunLog"
-#define DB_TABLE "qaFiles07"
+#define DB_TABLE "qaFiles"
 
 static MYSQL mysql;
 
@@ -100,7 +100,7 @@ int writeToDB(int runNumber, char *pdfname, char *flavor)
 
   mysql_real_escape_string(&mysql, escaped_buff, buff, sz);
   
-  sprintf(sql_buff, "insert into " DB_TABLE " (runNumber, baseName, fileblob, extension, flavor) values (%d,'%d','%s','pdf', '%s')",
+  sprintf(sql_buff, "replace into " DB_TABLE " (runNumber, baseName, fileblob, extension, flavor) values (%d,'%d','%s','pdf', '%s')",
 	  runNumber,
 	  runNumber,
 	  escaped_buff,

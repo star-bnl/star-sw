@@ -86,15 +86,68 @@ void _JevpServerMain(int argc, char *argv[])
   JevpServer::main(argc, argv);
 }
 
+void JevpServer::launchBuilders()
+{
+  TListIter next(&builders);
+  BuilderStatus *curr;
+    
+  while((curr = (BuilderStatus *)next())) {
+    if(!curr->official) continue;
+
+    LOG("JEFF", "launching %sBuilder",curr->name);
+
+    char builderName[20];
+    sprintf(builderName, "%sBuilder",curr->name);
+
+    const char *args[20];
+      
+    int i=0;
+    args[i++] = "OnlTools/Jevp/launch";
+    args[i++] = builderName;
+
+    if(daqfilename) {
+      args[i++] = "-file";
+      args[i++] = daqfilename;
+    }
+      
+    if(socketName) {
+      args[i++] = "-socket";
+      args[i++] = socketName;
+    }
+    else {
+      char portstring[10];
+      sprintf(portstring, "%d", myport);
+      args[i++] = "-port";
+      args[i++] = portstring;
+    }
+      
+    args[i++] = "-server";
+    args[i++] = NULL;
+
+    CP;
+      
+    execScript("OnlTools/Jevp/launch", (char **)args, 0);
+  }
+}
 
 int JevpServer::init(int port) {
   LOG("JEFF", "Server port %d", port);
-  ssocket = new TServerSocket(port,kTRUE,100);
+  if(socketName) {
+    ssocket = new TServerSocket(socketName, kTRUE,100);
+  }
+  else {
+    ssocket = new TServerSocket(port,kTRUE,100);
+  }
+
   mon = new TMonitor();
 
   mon->Add(ssocket);
   
   updateDisplayDefs();
+
+  if(launchbuilders) {  // If launchbuilders is set launch the builders...
+    launchBuilders();
+  }
 
   return 0;
 }  
@@ -135,8 +188,7 @@ void JevpServer::getMessage() {
   CP;
 
   // printf("Got a message\n");
-
- //  LOG("JEFF", "calling sleep");
+  //  LOG("JEFF", "calling sleep");
   //   sleep(1);
   LOG(DBG, "calling select");
   s = mon->Select();
@@ -154,6 +206,13 @@ void JevpServer::getMessage() {
     TSocket *nsock = ssocket->Accept();
     TInetAddress adr = nsock->GetInetAddress();
     mon->Add(nsock);
+//     Move from "connect" to the hello message... 
+//     BuilderStatus *stat = new BuilderStatus();
+//     stat->sockid = (unsigned long long int)nsock;
+//     stat->setName("unknown");
+//     stat->setStatus("newconnect");
+//     stat->lastTransaction = time(NULL);
+//     builders.Add(stat);
   }
   else {
     CP;
@@ -162,6 +221,19 @@ void JevpServer::getMessage() {
     int ret = s->Recv(mess);
     if(ret == 0) {    // Got a disconnection...
       CP;
+
+      // Handle the BuilderStatus
+      BuilderStatus *stat = getBuilderStatusBySocket((unsigned long long int)s);
+      if(stat) {
+	LOG(WARN, "Disconnecting Builder Socket for (%s)",stat->name);
+	stat->setStatus("unknown");
+	stat->sockid = 0ll;
+	stat->events = 0;
+      }
+      else {
+	LOG(DBG, "Disconnecting socket, but not a builder socket...");
+      }
+
       mon->Remove(s);
       delete s;
       delete mess;
@@ -178,7 +250,53 @@ void JevpServer::getMessage() {
 	
       delete msg;
     }
-    else if (strcmp(mess->GetClass()->GetName(), "RunStatus") == 0) {
+    else if (strcmp(mess->GetClass()->GetName(), "BuilderStatus") == 0) {
+      BuilderStatus *newstat = (BuilderStatus *)mess->ReadObject(mess->GetClass());
+
+   
+      // Find the appropriate builder
+      BuilderStatus *builderstat = getBuilderStatusBySocket((unsigned long long int)s);
+      if(!builderstat) {
+	LOG(ERR, "Couldn't find builder status for socket=%lld name=%s",(unsigned long long int)s, newstat->name);
+	return;
+      }
+  
+      if(strcmp(builderstat->name, "unknown") == 0) {
+	LOG(NOTE, "Got the first message from %s, setting builder's name...", newstat->name);
+	builderstat->setName(newstat->name);
+      }
+
+      if(strcmp(newstat->name, builderstat->name) != 0) {
+	LOG(ERR, "Builder Status's don't match for %s vs %s", newstat->name, builderstat->name);
+	return;
+      }
+      
+      LOG("JEFF", "Got status change from %s: (%s --> %s)",newstat->name, builderstat->status, newstat->status);
+
+      // update the builder
+      builderstat->lastTransaction = time(NULL);
+      
+      LOG("JEFF", "old builder run = %d new =%d  run=%d",builderstat->run,newstat->run,runStatus.run);
+      builderstat->run  = newstat->run;
+      builderstat->setStatus(newstat->status);
+      builderstat->lastEventTime = newstat->lastEventTime;
+      builderstat->events = newstat->events;
+      builderstat->detectorsNeeded = newstat->detectorsNeeded;
+      
+      // Check the new run status
+      RunStatus newStatus;
+      
+      char *oldstatus = checkRunStatus(builderstat, &newStatus);
+      if(oldstatus == NULL) return;   // It's not an official builder!
+    
+      LOG("JEFF", "Checking %s vs %s",oldstatus, runStatus.status);
+      if(strcmp(oldstatus, runStatus.status) != 0) {  // Got a change!
+	LOG("JEFF", "Got a change to the run status: %s -> %s",oldstatus, runStatus.status);
+	if(strcmp(runStatus.status, "stopped")==0) performStopRun();
+	if(strcmp(runStatus.status, "running")==0) performStartRun();
+      }
+    }
+    /*    else if (strcmp(mess->GetClass()->GetName(), "RunStatus") == 0) {
       CP;
       RunStatus *newstat = (RunStatus *)mess->ReadObject(mess->GetClass());
 
@@ -192,42 +310,11 @@ void JevpServer::getMessage() {
 
       status->dump(); 
 
-      if(status->getEndOfRun() == 1) {   // stoprun
-	CP;
-	LOG("JEFF", "Got end of run...%d",displays->nDisplays());
-
-	// Write out the pdfs for all displays...
-	for(int i=0;i<displays->nDisplays();i++) {
-	  LOG(DBG,"Writing pdf for display %d, run %d",i,status->getRunNumber());
-	  CP;
-	  writePdf(i, status->getRunNumber());
-	  CP;
-	}
-
-	// Update the palletes and write out xml again
-	char fn[256];
-	sprintf(fn, "%s/%s", basedir, displays_fn);
-
-
-	//	xxxxx (got to add new histos... //
-	JevpPlot *curr = (JevpPlot *)plots.First();
-	while(curr) {
-	  LOG(DBG, "Add plot:  %s / %s", curr->GetPlotName(), curr->getParent());
-
-	  addToPallete(curr);
-
-	  curr = (JevpPlot *)plots.After(curr);	  
-	}
-	
-	LOG(DBG, "Writing display file...%s",fn);
-	if(displays->Write(fn) < 0) {
-	  LOG(ERR, "Error writing xml file %s",fn);
-	}
-
-	displays->dump();
+      if(strcmp(status->status, "stopped") == 0) {   // stoprun
+	prerformStopRun();
       }
 
-      if(status->getEndOfRun() == 0) {  // startrun
+      if(strcmp(status->status, "running") == 0) {  // startrun
 	CP;
 	JevpPlot *curr = (JevpPlot *)plots.First();
 	CP;
@@ -242,7 +329,7 @@ void JevpServer::getMessage() {
 	}  
       }
  
-    }
+      } */
     else if (strcmp(mess->GetClass()->GetName(), "JevpPlot")==0) {
       CP;
       JevpPlot *plot = (JevpPlot *)mess->ReadObject(mess->GetClass());
@@ -257,6 +344,67 @@ void JevpServer::getMessage() {
     CP;
   }    
   CP;
+}
+
+void JevpServer::performStartRun()
+{
+  LOG("JEFF", "Start run #%d",runStatus.run);
+  clearForNewRun();
+}
+
+void JevpServer::performStopRun()
+{
+  LOG("JEFF", "Got end of run...%d",displays->nDisplays());
+
+  // Write out the pdfs for all displays...
+  for(int i=0;i<displays->nDisplays();i++) {
+    LOG("JEFF","Writing pdf for display %d, run %d",i,runStatus.run);
+    CP;
+    writePdf(i, runStatus.run);
+    CP;
+  }
+
+  // Update the palletes and write out xml again
+  char fn[256];
+  sprintf(fn, "%s/%s", basedir, displays_fn);
+
+  // Add any new plots to the pallet...
+  JevpPlot *curr = (JevpPlot *)plots.First();
+  while(curr) {
+    LOG(DBG, "Add plot:  %s / %s", curr->GetPlotName(), curr->getParent());
+
+    addToPallete(curr);
+
+    curr = (JevpPlot *)plots.After(curr);	  
+  }
+	
+  LOG(DBG, "Writing display file...%s",fn);
+  if(displays->Write(fn) < 0) {
+    LOG(ERR, "Error writing xml file %s",fn);
+  }
+
+  if(killbuilders) {
+    LOG("JEFF", "Killbuilders is set, so kill builders");
+    
+    TListIter next(&builders);
+    BuilderStatus *curr;
+    while((curr = (BuilderStatus *)next())) {
+      if(curr->sockid) {
+	TSocket *s = (TSocket *)curr->sockid;
+	mon->Remove(s);
+	s->Close();
+	delete s;
+	curr->sockid = 0;
+      }
+    }
+  }
+
+  if(die) {
+    LOG("JEFF", "die is set, so now exit");
+    exit(0);
+  }
+
+  //displays->dump();
 }
 
 // This function actually checks if already in pallete
@@ -584,20 +732,43 @@ int JevpServer::launchNewServer(char *filename)
   // Now launch...
   char fullpath[256];
   sprintf(fullpath, "/a/%s",filename);
+
   LOG("JEFF", "Launch file %s on port %d", fullpath, port);
   
   char portstring[12];
   sprintf(portstring, "%d", port);
 
-  char *args[5];
-  args[0] = (char *)"launch_reanalyze";
-  args[1] = portstring;
+  char builderList[256];
+  builderList[0] = '\0';
+  TListIter next(&builders);
+  BuilderStatus *curr;
+  while((curr = (BuilderStatus *)next())) {
+    if(!curr->official) continue;
+
+    if(builderList[0] != '\0')
+      strcat(builderList,",");
+
+    strcat(builderList,curr->name);
+  }
+
+  const char *args[20];
+  i=0;
+  args[i++] = "OnlTools/Jevp/launch";
+  args[i++] = "JevpServerMain";
+  args[i++] = "-builders";
+  args[i++] = builderList;
+  args[i++] = "-port";
+  args[i++] = portstring;
+  args[i++] = "-launchbuilders";
+  args[i++] = fullpath;
+  args[i++] = "-kill";
+  args[i++] = NULL;
   args[2] = fullpath;
   args[3] = NULL;
 
   CP;
 
-  execScript((char *)"launch_reanalyze", args, 0);
+  execScript("launch_reanalyze", (char **)args, 0);
 
   CP;
 
@@ -612,8 +783,8 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
   CP;
   if(strcmp(msg->cmd, "newrun") == 0) {
     CP;
-    LOG("WARN", "Got a newrun");
-    clearForNewRun();
+    LOG("JEFF", "Got a newrun from %s....  Now obsolete",msg->source);
+    //clearForNewRun();
   }
   else if(strcmp(msg->cmd, "dump") == 0) {
     CP;
@@ -647,6 +818,10 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
   }
   else if(strcmp(msg->cmd, "display_desc") == 0) {  // Display Descriptor
 
+    LOG("JEFF", "Got request for display %s", msg->args);
+    int ret = displays->setDisplay(msg->args);
+    LOG("JEFF", "setdisplay returend %d", ret);
+
     EvpMessage m;
     m.setSource("serv");
     m.setCmd("xml");
@@ -655,6 +830,7 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
       return;
     }
 
+    
     m.setArgs(displays->textBuff);
 
     CP;
@@ -664,25 +840,40 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     s->Send(mess);
   }
   else if(strcmp(msg->cmd, "GetStatus") == 0) {
-    if(!status) {
-      char tmp[100];
-      sprintf(tmp, "No status available");
-      EvpMessage m;
-      m.setSource((char *)"serv");
-      m.setCmd((char *)"nostatus");
-      m.setArgs(tmp);
-      TMessage mess(kMESS_OBJECT);
-      mess.WriteObject(&m);
-      s->Send(mess);
-    } else {
-      TMessage mess(kMESS_OBJECT);
-      mess.WriteObject(status);
-      s->Send(mess);
-    }
+    TMessage mess(kMESS_OBJECT);
+    mess.WriteObject(&runStatus);
+    s->Send(mess);
   }
   else if(strcmp(msg->cmd, "hello") == 0) {
     CP;
-    LOG(WARN,"Got hello from: %s : (%s)\n", msg->source, msg->args);
+    LOG(NOTE,"Got hello from: %s : (%s)", msg->source, msg->args);
+
+    // This is a builder, so set the builder status!
+    BuilderStatus *stat = getBuilderStatusByName(msg->source);
+    if(stat) {
+      if(stat->sockid) {
+	CP;
+	LOG(ERR, "A new builder is connecting (%s) but already connected.  Killing new connection...", msg->source);
+	
+	mon->Remove(s);
+	s->Close();
+      }
+      else {
+	LOG(WARN, "A new builder is connecting (%s) {previously disconnected}", msg->source);
+	stat->sockid = (unsigned long long int)s;
+	stat->setStatus("newconnect");
+	stat->lastTransaction = time(NULL);
+      }
+    }
+    else {
+      LOG(WARN, "A new builder is connecting (%s)",msg->source);
+      BuilderStatus *stat = new BuilderStatus();
+      stat->sockid = (unsigned long long int)s;
+      stat->setName(msg->source);
+      stat->setStatus("newconnect");
+      stat->lastTransaction = time(NULL);
+      builders.Add(stat);
+    }
 
     CP;
     EvpMessage m;
@@ -741,7 +932,23 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     EvpMessage m;
     m.setSource((char *)"serv");
     m.setCmd((char *)"monitor");
-    getMonitorString(msg->args, &m);
+
+    if(memcmp(msg->args, "launch", 5) == 0) {
+      CP;
+      
+      LOG("JEFF", "Got launch:  launching builders for file %s",msg->args);
+      static char _launchname[256];
+      strcpy(_launchname, msg->args);
+      daqfilename = &_launchname[7];
+      CP;
+      launchBuilders();
+      CP;
+      m.setArgs("launched builders...");
+    }
+    else {
+      getMonitorString(msg->args, &m);
+    }
+
     TMessage mess(kMESS_OBJECT);
     mess.WriteObject(&m);
     CP;
@@ -758,13 +965,15 @@ void JevpServer::clearForNewRun()
 {
   // Delete all from histogram list
   // First free the actual histo, then remove the link...
-  JevpPlot *h = (JevpPlot *)plots.First();
+  LOG("JEFF", "Clear for new run  #%d",runStatus.run);
 
-  while(h) {
-    delete h;
-    plots.Remove(plots.FirstLink());
-    h = (JevpPlot *)plots.First();
+  TListIter next(&plots);
+  JevpPlot *curr;
+
+  while((curr = (JevpPlot *)next())) {   // delete the plots
+    delete curr;
   }
+  plots.Clear();   // clear the list...
 }
 
 void JevpServer::dump()
@@ -829,7 +1038,7 @@ void JevpServer::DrawCrossOfDeath(char *str)
 //
 int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page)
 {
-  LOG("JEFF", "Write histogram leaves: %s",node->name);
+  LOG(DBG, "Write histogram leaves: %s",node->name);
 
   CP;
   if((node->prev != NULL) || (!node->leaf)) {
@@ -871,10 +1080,10 @@ int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, inde
     cnode = node;
     while(cnode) {
 
-      LOG("JEFF", "cnode->name = %s", cnode->name);
+      LOG(DBG, "cnode->name = %s", cnode->name);
       JevpPlot *plot = getPlot(cnode->name);
       if(plot) {
-	LOG("JEFF", "got plot 0x%x",plot);
+	LOG(DBG, "got plot 0x%x",plot);
 	double my = plot->getMaxY();
 	if(my > ymax) ymax = my;
       }
@@ -904,15 +1113,15 @@ int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, inde
     c1->cd(pad);
     CP;
 
-    LOG("JEFF", "Plotting %s on page %d / pad %d",cnode->name, page, pad);
+    LOG(DBG, "Plotting %s on page %d / pad %d",cnode->name, page, pad);
     
     JevpPlot *plot = getPlot(cnode->name);
     if(plot) {
-      LOG("JEFF", "Found plot %s",cnode->name);
+      LOG(DBG, "Found plot %s",cnode->name);
       plot->draw();
     }
     else {
-      LOG("JEFF", "Can't find plot %s",cnode->name);
+      LOG(DBG, "Can't find plot %s",cnode->name);
       DrawCrossOfDeath(cnode->name);
     }
 
@@ -939,7 +1148,7 @@ int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, inde
 int JevpServer::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page, int nosibs)
 {
   
-  LOG("JEFF", "writeNodePdf:  %s page=%d",node->name,page);
+  LOG(DBG, "writeNodePdf:  %s page=%d",node->name,page);
 
   int npages = 0;
   if(node->leaf) {   // We are writing histograms...
@@ -976,7 +1185,7 @@ void JevpServer::writePdf(int display, int run)
     return;
   }
 
-  LOG("JEFF", "Set displays to %d",ret);
+  LOG(DBG, "Set displays to %d",ret);
 
   char filename[256];
   sprintf(filename, "%s/%s_%d.pdf", pdfdir, displays->displayRoot->name, run);
@@ -1012,7 +1221,7 @@ void JevpServer::writePdf(int display, int run)
     args[4] = NULL;
 
     //int ret = char((execScript *)"WritePDFToDB",args);
-    int ret = execScript((char *)"WritePDFToDB", args);
+    int ret = execScript("WritePDFToDB", args);
     LOG("JEFF", "Wrote PDF file:  ret=%d",ret);
   }
 }
@@ -1153,6 +1362,7 @@ void JevpServer::writePdf(int display, int run)
 
 void JevpServer::parseArgs(int argc, char *argv[])
 {
+
   for(int i=1;i<argc;i++) {
     if(strcmp(argv[i], "-dd")==0) {
       i++;
@@ -1165,17 +1375,68 @@ void JevpServer::parseArgs(int argc, char *argv[])
     else if (strcmp(argv[i], "-nodb")==0) {
       nodb = 1;
     }
+    else if (strcmp(argv[i], "-db") == 0) {
+      nodb = 0;
+    }
     else if (strcmp(argv[i], "-port")==0) {
       i++;
       myport = atoi(argv[i]);
     }
+    else if (strcmp(argv[i], "-builders")==0) {
+      char bstr[500];
+      if(((i+1)>argc) || (argv[i+1][0] == '-')) {   // no args, go with default
+	strcpy(bstr, "base,bbc,bemc,daq,eemc,fpd,ftp,hlt,l3,tof,tpx,trg,upc");
+      }
+      else {
+	i++;
+	strcpy(bstr, argv[i]);
+      }
+
+      char *s = strtok(bstr,",");
+      while(s) {
+	BuilderStatus *stat = new BuilderStatus();
+	stat->setName(s);
+	stat->setStatus("unknown");
+	stat->lastTransaction = time(NULL);
+	stat->official = 1;
+	builders.Add(stat);
+	
+	s = strtok(NULL, ",");
+      }
+    }
+    else if (strcmp(argv[i], "-launchbuilders")==0) {
+      launchbuilders = 1;
+    }
+    else if (strcmp(argv[i], "-localsocket")==0) {
+      static char _sockname[256];
+      sprintf(_sockname, "/tmp/jevp_sock_%d", getpid());
+      socketName = _sockname;
+    }
+    else if (strcmp(argv[i], "-file")==0) {
+      i++;
+      daqfilename = argv[i];
+    }
+    else if (strcmp(argv[i], "-kill")==0) {
+      killbuilders = 1;
+    }
+    else if (strcmp(argv[i], "-die")==0) {
+      die = 1;
+    }
     else {
-      printf("\n\nUsage for %s:\n",argv[0]);
+      printf("\n\nUsage for %s:  (bad arg %s)\n",argv[0],argv[i]);
       printf("\t[-dd filename]       for each display definition:\n");
       printf("\t[-basedir basedir]   config file directory\n");
       printf("\t[-nodb]\n");
+      printf("\t[-db]    not usually needed, but db usually disabled in reanalysis\n");
       printf("\t[-port] port]\n");
-
+      printf("\t[-localsocket]    use local socket\n");
+      printf("\t[-builders] builder,builder2...\n");
+      printf("\t[-kill]    (kill builders at end...)\n");
+      printf("\t[-die]\n");
+      printf("\t[-launchbuilders]\n");
+      printf("\t[-file daqfilename]\n");
+    
+     
       printf("\n\n");
       printf("Defaults:  \n");
       printf("\tbasedir      = '/RTScache/conf'\n");
@@ -1254,7 +1515,7 @@ void JevpServer::main(int argc, char *argv[])
 }
 
 
-int JevpServer::execScript(char *name, char *args[], int waitforreturn)
+int JevpServer::execScript(const char *name, char *args[], int waitforreturn)
 {
   CP;
   pid_t pid = fork();
@@ -1267,7 +1528,7 @@ int JevpServer::execScript(char *name, char *args[], int waitforreturn)
   if(pid == 0) {
     for(int i=0;;i++) {
       if(args[i] == NULL) break;
-      LOG("JEFF", "args[%d] = %s",i,args[i]);
+      LOG(NOTE, "args[%d] = %s",i,args[i]);
     }
     
     int ret = execvp(name,args);
@@ -1297,22 +1558,54 @@ void JevpServer::getMonitorString(char *s, EvpMessage *m)
   char buff[max_buff];
   char *b = buff;
 
-  if((strcmp(s, "show plots") == 0) || (strcmp(s, "show all") == 0)) {
-    
-    JevpPlot *plot = (JevpPlot *)plots.First();
-    if(!plot) {
-      b += sprintf(b, "There are no plots\n");
+  CP;
+
+  b += sprintf(b,"Run #%d:  status %s\n",runStatus.run, runStatus.status);
+
+  CP;
+
+  if((strcmp(s, "show builders") == 0) || (strcmp(s, "show all") == 0)) {
+    TListIter next(&builders);
+    BuilderStatus *curr;
+    int n=0;
+    CP;
+    while((curr = (BuilderStatus *)next())) {
+      n++;
+      b += sprintf(b, "builder %10s%c: \t(run #%d, status %s, events %d, evttime %ld, contacttime %ld)\n",
+		   curr->name, curr->official ? '*' : '-', curr->run, curr->status, curr->events, time(NULL) - curr->lastEventTime, time(NULL) - curr->lastTransaction);
     }
-    while(plot) {
-      b += sprintf(b, "plot %50s:\t(run #%d:  %d sec old)\n",
+    CP;
+    if(n == 0) {
+      b+= sprintf(b,"There are no builders\n");
+    }
+    CP;
+  } 
+
+  CP;
+  if((strcmp(s, "show plots") == 0) || (strcmp(s, "show all") == 0)) {
+    CP;
+    TListIter next(&plots);
+    JevpPlot *plot;
+    int n=0;
+
+    CP;
+    while((plot = (JevpPlot *)next())) {
+      CP;
+      n++;
+      b += sprintf(b, "plot %50s:\t(run #%d:  %ld sec old)\n",
 		   plot->GetPlotName(),
 		   plot->run,
 		   (time(NULL) - plot->lastUpdate));
-      
-      plot = (JevpPlot *)plots.After(plot);
     }
+    CP;
+    if(n==0) {
+      CP;
+      b += sprintf(b, "There are no plots\n");
+    }
+    CP;
   }
   
+  CP;
   if(b == buff) {
     m->setArgs("The status is good...?");
   }
@@ -1320,3 +1613,92 @@ void JevpServer::getMonitorString(char *s, EvpMessage *m)
     m->setArgs(buff);
 
 }
+
+BuilderStatus *JevpServer::getBuilderStatusBySocket(unsigned long long int sock)
+{
+  TListIter next(&builders);
+  BuilderStatus *curr;
+
+  while((curr = (BuilderStatus *)next())) {
+    if(curr->sockid == sock) {
+      return curr;
+    }
+  }
+  
+  return NULL;
+}
+
+BuilderStatus *JevpServer::getBuilderStatusByName(char *name)
+{
+  TListIter next(&builders);
+  BuilderStatus *curr;
+
+  if(name == NULL) return NULL;
+
+  while((curr = (BuilderStatus *)next())) {
+    if(curr->name == NULL) continue;
+    if(strcmp(curr->name, name) == 0) return curr;
+  }
+  
+  return NULL;
+}
+
+char *JevpServer::checkRunStatus(BuilderStatus *builderstat, RunStatus *stat)
+{
+  static char returnval[16];
+
+  stat->setStatus(runStatus.status);   // if no change, keep the old one, ugly!!!
+
+
+  if(!builderstat->official) return NULL;
+
+  TListIter next(&builders);
+  BuilderStatus *curr;
+ 
+  int allstopped=1;
+ 
+  int curr_run = builderstat->run;
+  if(curr_run == 0) {
+    curr_run = runStatus.run;
+  }
+
+  stat->run = curr_run;  
+
+  while((curr = (BuilderStatus *)next())) {
+    if(!curr->official) continue;
+    if(curr == builderstat) continue;
+
+    if((strcmp(curr->status, "stopped") != 0) ||
+       (curr->run != curr_run)) {
+      allstopped = 0;
+    }
+  }
+
+  if(strcmp(builderstat->status, "running") == 0) {
+    // The run starts when the first builder goes to running, not the last :-)
+    // This is because histos are cleared on startrun
+    stat->setStatus("running");
+  }
+  else if (strcmp(builderstat->status, "stopped") == 0) {
+    if(allstopped) {
+      stat->setStatus("stopped");
+
+      // Hack, set all runs to zero for the case where the same run is 
+      // started again...
+      TListIter next(&builders);
+      BuilderStatus *cb;
+      while((cb = (BuilderStatus *)next())) {
+	cb->run = 0;
+      }
+    }
+  } 
+
+  strcpy(returnval, runStatus.status);
+ 
+  runStatus.setStatus(stat->status);
+  runStatus.run = stat->run;
+ 
+  return returnval;
+}
+
+

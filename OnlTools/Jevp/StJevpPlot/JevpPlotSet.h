@@ -18,7 +18,7 @@
 class JevpPlotSet : public TObject {
   
  public:
-  BuilderStatus status;
+  BuilderStatus builderStatus;
   JevpPlotSet();
 
   char *getPlotSetName();
@@ -89,6 +89,7 @@ class JevpPlotSet : public TObject {
   char *daqfile;    // data file / null for live
   char *server;     // server
   int serverport;   // server port
+  char *socketName;
   char *pdf;        // direct pdf file output
   char *loglevel;
   char *buildxml;

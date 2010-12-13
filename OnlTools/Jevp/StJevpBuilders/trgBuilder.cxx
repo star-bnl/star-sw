@@ -325,13 +325,13 @@ void trgBuilder::initialize(int argc, char *argv[]) {
 
   // Add Plots to plot set...
   for(int i=0;i<=n;i++) {
-    LOG("JEFF", "Adding plot %d",i);
+    LOG(NOTE, "Adding plot %d",i);
     addPlot(plots[i]);
   }
 }
   
 void trgBuilder::startrun(daqReader *rdr) {
-  LOG("JEFF", "TriggerPlotBuilder starting run #%d",rdr->run);
+  LOG(DBG, "TriggerPlotBuilder starting run #%d",rdr->run);
   resetAllPlots();
 }
 

@@ -146,7 +146,7 @@ void PresenterConnect::update() {
 //       std::cout << "live again "<< endl;
 //     }
 //   }
-  emit signalEventInfo(mPresenter->run(),mPresenter->event(),mPresenter->counter(),mPresenter->token(),mPresenter->triggerBits(),mPresenter->detectorBits(),mPresenter->triggerBitsRun(),mPresenter->detectorBitsRun());
+  emit signalEventInfo(mPresenter->run(),0,0,0,0,0,0,0);
   //  emit signalServerInfo(mPresenter->serverStatus());
 }
 

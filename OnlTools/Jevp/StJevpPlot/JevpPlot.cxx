@@ -184,6 +184,9 @@ JevpPlot::JevpPlot(JevpPlot &x)
   palette = x.palette;
   gridx = x.gridx;
   gridy = x.gridy;
+  lastUpdate = x.lastUpdate;
+  nevts = x.nevts;
+  external_maxy = x.external_maxy;
 
   legendx1 = x.legendx1;
   legendx2 = x.legendx2;
@@ -344,19 +347,19 @@ char *JevpPlot::GetPlotName()
   PlotHisto *curr = (PlotHisto *)histos.First();
 
   if(!curr) {
-    LOG("JEFF", "No PlotHisto\n");
+    LOG(ERR, "No PlotHisto\n");
     return NULL;
   }
   
   if(!curr->histo) {
-    LOG("JEFF", "No curr histo\n");
+    LOG(ERR, "No curr histo\n");
     return NULL;
   }
 
   char *name = (char *)curr->histo->GetName();
   
   if(name == NULL) {
-    LOG("JEFF", "name is null\n");
+    LOG(ERR, "name is null\n");
   }
 
   if(parent) {
@@ -423,9 +426,11 @@ void JevpPlot::draw()
   curr = (PlotHisto *)histos.First();
   
   if(external_maxy > -9999) {
+    LOG(DBG, "set max to %f", (float)(external_maxy));
     curr->histo->SetMaximum(external_maxy);
   }
   else {
+    LOG(DBG, "set max to %f",(float)(max*1.1));
     curr->histo->SetMaximum(max * 1.1);
   }
 

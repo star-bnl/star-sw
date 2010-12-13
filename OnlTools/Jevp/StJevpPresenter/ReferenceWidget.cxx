@@ -93,6 +93,7 @@ PlotDisplay::PlotDisplay(ReferenceWidget *refwidget, JevpPlot *plot, int refid, 
 
       myrootwidget->GetCanvas()->cd();
       if(plot) {
+	LOG("JEFF", "Draw %s",ctext);
 	plot->draw();
       }
       else {
@@ -118,6 +119,7 @@ PlotDisplay::PlotDisplay(ReferenceWidget *refwidget, JevpPlot *plot, int refid, 
       myrootwidget->GetCanvas()->cd();
       myrootwidget->setEnabled(0);
       if(plot) {
+	LOG("JEFF", "Draw thumb");
 	plot->draw();
       }
       else {
@@ -151,7 +153,10 @@ void PlotDisplay::invalidate()  // ie... we changed the plot...
 {
   myrootwidget->GetCanvas()->Clear();
   myrootwidget->GetCanvas()->cd();
-  if(plot) plot->draw();
+  if(plot) {
+    LOG("JEFF", "invalidate...");
+    plot->draw();
+  }
   else CrossOfDeath(myrootwidget->GetCanvas());
 
   myrootwidget->GetCanvas()->Update();
@@ -232,6 +237,7 @@ void PlotDisplay::replaceData(JevpPlot *plot)
   myrootwidget->GetCanvas()->cd();
   if(plot) {
     printf("Draw\n");
+    LOG("JEFF", "Draw ctext=%s",ctext);
     plot->draw();
   }
   else {

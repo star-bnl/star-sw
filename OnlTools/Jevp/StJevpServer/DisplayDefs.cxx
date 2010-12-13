@@ -613,16 +613,18 @@ int DisplayFile::setDisplay(char *display_name)
 {
   DisplayNode *disp = root->child;
 
+  int i=0;
   while(disp) {
+    LOG("JEFF", "0x%x",disp->name);
+    LOG("JEFF", "disp->name = %s",disp->name);
+
     if(strcmp(disp->name, display_name) == 0) {
       displayRoot = disp;
-      
-      int idx = atoi(disp->getProperty("display_idx"));
-      printf("Set display %s : %d\n",display_name, idx);
-      return idx;
-    }
-
+      return i;
+     }
+    
     disp = disp->next;
+    i++;
   }
 
   return -1;

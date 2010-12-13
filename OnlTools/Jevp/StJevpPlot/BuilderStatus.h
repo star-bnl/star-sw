@@ -5,11 +5,13 @@
 #include <TROOT.h>
 #include <iostream>
 #include <iomanip>
+
 using namespace std;
 
 
 class BuilderStatus : public TObject {
  public:
+  // Set by the builder...
   char *name;
   int run;
   char *status;
@@ -18,15 +20,21 @@ class BuilderStatus : public TObject {
   
   int detectorsNeeded;
 
+  // These are used only by the server...
+  unsigned long long int sockid;  
+  int lastTransaction;
+  int official;
+
  public:
 
   BuilderStatus();
-  void setName(char *);
-  void setStatus(char *);
+  void setName(const char *);
+  void setStatus(const char *);
   ~BuilderStatus();
 
   bool running() {
     if(strcmp(status, "running") == 0) return true;
+    return false;
   }
 
  ClassDef(BuilderStatus,1) ;
