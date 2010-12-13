@@ -416,6 +416,8 @@ JevpGui::JevpGui(JevpLogic *logic, bool isRefWindow) :
   printf("Resize\n");
   resize(mWidth,mHight);
   printf("Done with resize\n");
+
+  SetWindowName("Live...");
 }
 
 
@@ -770,7 +772,10 @@ void JevpGui::ChangeToRun()
 
   char *name = new char[40];
   strcpy(name, newname);
-
+  static char windowname[100];
+  sprintf(windowname, "Run: %s",name);
+  SetWindowName(windowname);
+  
   printf("run name=%s\n",name);
 
   int newport = logic->LaunchRun(name);
@@ -789,6 +794,8 @@ void JevpGui::ChangeToLive()
 {
   printf("Change to live...\n");
   int x;
+
+  SetWindowName("Live Run");
 
   // This is the new result after QT sets/unsets the checkbox...
   x = fActions[kFileLive]->isOn();
@@ -877,7 +884,9 @@ int JevpGui::GetSubTabId() {
 
 //______________________________________________________________________________
 void  JevpGui::SetWindowName(const char* displayText)
-{ setCaption(displayText); }
+{ 
+  setCaption(displayText); 
+}
 
 
 
@@ -997,16 +1006,10 @@ void JevpGui::UpdatePlots()
     nupdates++;
 
 
-    //printf("next event....%d - 0x%x\n",fGuiRefreshRate, currentScreen);
-    char lab[100];
-    sprintf(lab, "%s - not available",currentScreen->plot->c_str());
-    //printf("UpdatePlots: lab=%s\n",lab);
+    //char lab[100];
+    //sprintf(lab, "%s - not available",currentScreen->plot->c_str());
 
-    //currentScreen->setUpdatesEnabled(false);
     logic->DrawPlot(currentScreen);
-    //currentScreen->setUpdatesEnabled(true);
-    //currentScreen->update();
-    //printf("cross done\n");
   }
   
   if (fActions[kAutoUpdate]->isOn()) {
