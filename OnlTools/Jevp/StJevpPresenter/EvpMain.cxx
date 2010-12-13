@@ -116,24 +116,7 @@ int EvpMain::_main(int argc, char **argv )
   // This issues an update...to start the update loop...
   QTimer::singleShot (100,gui,SLOT(UpdatePlots()));
 
-  // Enter qt event loop and don't return till 
-  // the application is closed...
-  // app.exec();   
-  // return 0;
-
-#ifdef TESTWIDGET
-  // Just test widget..
-
-  // QLabelTest test;
-  // test.exec();
-
-  ReferenceWidget ref(logic, "h77_zdc_time_west");
-  ref.exec();
-  return 0;
-#endif
-
-  
-  return 0;
+  return 0;  // just returns to roo4star...
 }
 
 int EvpMain::parseArgs(int argc, char *argv[])
@@ -170,54 +153,3 @@ int EvpMain::parseArgs(int argc, char *argv[])
   }
   return 0 ;
 }
-
-#if 0
-  cout << "command line arguments are: " << endl;
-  for ( int i=0; i<argc; i++) {
-    cout << i << " :   " << argv[i] << endl;
-  }
-  cout << endl;
-
-
-
-  printf("presenter gui\n");
-
-  PresenterGui* gui = new PresenterGui();
-  sleep(2);
-  printf("presenter\n");
-    
-
-  EvpPresenter* presenter = new EvpPresenter();
-  PresenterConnect* con = new PresenterConnect(gui,presenter);
-  sleep(2);
-  printf("connect\n");
-
-  presenter->Connect();
-
-  printf("resize\n");
-
-  gui->resize(500,500);
-  gui->show();
-  printf("here\n");
-  sleep(2);
-  printf("show\n");
-
-
-  // Everything is ready. It is safe to fire the event loop now !
-
-  printf("single shot\n");
-  
-//  QTimer::singleShot (0,gui,SLOT(GetNextEvent()));
-
-  for(;;) {
-    sleep(1);
-  }
-
-  printf("Done\n");
-  //    delete presenter;
-  //    delete con;
-  //    cout << "good bye " << endl;
-  return 0;
-}
-
-#endif

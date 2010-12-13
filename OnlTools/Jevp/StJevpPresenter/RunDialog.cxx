@@ -11,7 +11,7 @@ RunDialog::RunDialog(QWidget *parent)
   okButton = createButton(tr("&Ok"), SLOT(accept()));
   cancelButton = createButton(tr("&Cancel"), SLOT(reject()));
 
-  runLineEdit = createLineEdit("/net/evp/a");
+  runLineEdit = createLineEdit("/a");
   runLabel = new QLabel(tr("Run:"));
   createRunTable();
 

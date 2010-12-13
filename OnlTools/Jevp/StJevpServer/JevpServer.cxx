@@ -28,7 +28,7 @@
 
 //ClassImp(JevpServer);
 
-
+static int nselects=0;
 static int line_number=0;
 #define CP line_number=__LINE__
 
@@ -36,8 +36,10 @@ static void sigHandler(int arg, siginfo_t *sig, void *v)
 {
   static char str[255];
   
-  if(arg == 17) {
-    LOG(WARN, "Got signal 17 (reading pdf?): ignoring");
+  if(arg == SIGCHLD) {
+    int status;
+    waitpid(-1, &status, WNOHANG);
+    LOG(DBG, "Got signal SIGCHLD (reading pdf?) ");
     return;
   }
 
@@ -191,8 +193,12 @@ void JevpServer::getMessage() {
   //  LOG("JEFF", "calling sleep");
   //   sleep(1);
   LOG(DBG, "calling select");
+  nselects++;
+
+  
+  //for(;;) sleep(10);
   s = mon->Select();
-  //LOG("JEFF", "back from select");
+  LOG(DBG, "back from select");
   CP;
   if((int)s <= 0) {
     LOG(WARN, "Got a timeout or an error: %d",s);
@@ -703,6 +709,7 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
 int JevpServer::launchNewServer(char *filename)
 {
   CP;
+  printf("scan\n");
   int port=JEVP_PORT;
   int i;
   for(i=1;i<10;i++) {
@@ -716,6 +723,7 @@ int JevpServer::launchNewServer(char *filename)
     delete s;
   }
   
+ 
   CP;
 
   if(i < 10) {
@@ -726,6 +734,8 @@ int JevpServer::launchNewServer(char *filename)
     LOG("JEFF", "Launch but no unoccupied ports");
     return 0;
   }
+
+  printf("Scan found %d\n",port+i);
 
   CP;
 
@@ -751,6 +761,7 @@ int JevpServer::launchNewServer(char *filename)
     strcat(builderList,curr->name);
   }
 
+  
   const char *args[20];
   i=0;
   args[i++] = "OnlTools/Jevp/launch";
@@ -760,19 +771,18 @@ int JevpServer::launchNewServer(char *filename)
   args[i++] = "-port";
   args[i++] = portstring;
   args[i++] = "-launchbuilders";
+  args[i++] = "-file";
   args[i++] = fullpath;
   args[i++] = "-kill";
+  args[i++] = "-nodb";
   args[i++] = NULL;
-  args[2] = fullpath;
-  args[3] = NULL;
+
+  CP;
+  execScript("launch", (char **)args, 0);
 
   CP;
 
-  execScript("launch_reanalyze", (char **)args, 0);
-
-  CP;
-
-  LOG("JEFF", ">  launch_reanalyze %s %s",portstring, fullpath);
+  LOG("JEFF", ">> launch new run:  %s %s",portstring, fullpath);
 
   CP;
   return port;
@@ -1382,6 +1392,9 @@ void JevpServer::parseArgs(int argc, char *argv[])
       i++;
       myport = atoi(argv[i]);
     }
+    else if (strcmp(argv[i], "-test")==0) {
+      myport = JEVP_PORT + 10;
+    }
     else if (strcmp(argv[i], "-builders")==0) {
       char bstr[500];
       if(((i+1)>argc) || (argv[i+1][0] == '-')) {   // no args, go with default
@@ -1435,6 +1448,7 @@ void JevpServer::parseArgs(int argc, char *argv[])
       printf("\t[-die]\n");
       printf("\t[-launchbuilders]\n");
       printf("\t[-file daqfilename]\n");
+      printf("\t[-test]   (set port to %d)\n",myport+10);
     
      
       printf("\n\n");
@@ -1528,7 +1542,7 @@ int JevpServer::execScript(const char *name, char *args[], int waitforreturn)
   if(pid == 0) {
     for(int i=0;;i++) {
       if(args[i] == NULL) break;
-      LOG(NOTE, "args[%d] = %s",i,args[i]);
+      LOG("JEFF", "args[%d] = %s",i,args[i]);
     }
     
     int ret = execvp(name,args);
@@ -1560,7 +1574,7 @@ void JevpServer::getMonitorString(char *s, EvpMessage *m)
 
   CP;
 
-  b += sprintf(b,"Run #%d:  status %s\n",runStatus.run, runStatus.status);
+  b += sprintf(b,"Run #%d:  status %s  [line %d, nselects %d]\n",runStatus.run, runStatus.status, line_number, nselects);
 
   CP;
 
