@@ -10,7 +10,7 @@
 #include "DisplayDefs.h"
 #include "Jevp/StJevpPlot/RunStatus.h"
 #include "EvpConstants.h"
-
+#include "Jevp/StJevpPlot/BuilderStatus.h"
 #define MAX_DISPLAY_DEFS 20
 
 class JevpServer {
@@ -28,9 +28,14 @@ class JevpServer {
 
   int run;  // will be run info...
   int nodb;
+  int die;
+  int killbuilders;
+  int launchbuilders;
+  char *daqfilename;
+  char *socketName;
 
   TList plots;
-  RunStatus *status;
+  RunStatus runStatus;
 
   TList builders;  
 
@@ -40,7 +45,6 @@ class JevpServer {
     myport = JEVP_PORT;
     ssocket = NULL;
     mon = NULL;
-    status = NULL;
     refplotdir = (char *)DEFAULT_REF_PLOT_DIR;
  
  
@@ -53,6 +57,11 @@ class JevpServer {
     refplotdir = (char *)DEFAULT_REF_PLOT_DIR;
     pdfdir = (char *)DEFAULT_PDFDIR;
     nodb = 0;
+    socketName = NULL;
+    launchbuilders = 0;
+    killbuilders = 0;
+    die = 0;
+    daqfilename = NULL;
   };
 
   void archive_display_file();
@@ -73,6 +82,8 @@ class JevpServer {
   JevpPlot *getPlot(char *name);
   void handleGetPlot(TSocket *s, char *argstring);
   void handleSwapRefs(char *args);
+  void performStopRun();
+  void performStartRun();
   void clearForNewRun();
   void dump();
   int updateDisplayDefs();
@@ -85,5 +96,10 @@ class JevpServer {
   void writePdf(int display, int run);
   void getMonitorString(char *s, EvpMessage *m);
 
-  int execScript(char *name, char *args[], int waitforreturn=1);
+  BuilderStatus *getBuilderStatusBySocket(unsigned long long int sock);
+  BuilderStatus *getBuilderStatusByName(char *name);
+  char *checkRunStatus(BuilderStatus *builderStat, RunStatus *stat);
+  void launchBuilders();
+
+  int execScript(const char *name,  char *args[], int waitforreturn=1);
 };

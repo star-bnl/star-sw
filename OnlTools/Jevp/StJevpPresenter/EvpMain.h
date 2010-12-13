@@ -15,7 +15,7 @@ class EvpMain : public TObject
   EvpMain() {
     server = (char *)"evp.starp.bnl.gov";
     serverport = JEVP_PORT;
-    display = (char *)"test";
+    display = (char *)"shift";
     displayFile = 0;
   }  
 

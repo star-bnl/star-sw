@@ -12,7 +12,7 @@
 # get main function and shift args as appropriate...
 
 args="$1 $2"
-cmdstr="OnlTools/Jevp/StJevpPresenter/evpPresenterBaseScript.C(\"\")"
+cmdstr="OnlTools/Jevp/StJevpPresenter/evpPresenterBaseScript.C(\"-display shift\")"
 
 echo "Main program: $cmdstr"
 

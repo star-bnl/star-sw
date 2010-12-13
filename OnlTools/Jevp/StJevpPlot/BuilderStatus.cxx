@@ -13,6 +13,8 @@ BuilderStatus::BuilderStatus()
   lastEventTime = 0;
   events = 0;
   detectorsNeeded = 0;
+  official = 0;
+  sockid = 0;
 }
 
 BuilderStatus::~BuilderStatus()
@@ -21,7 +23,7 @@ BuilderStatus::~BuilderStatus()
   if(status) delete status;
 }
 
-void BuilderStatus::setName(char *s)
+void BuilderStatus::setName(const char *s)
 {
   if(name) delete name;
   int l = strlen(s);
@@ -29,7 +31,7 @@ void BuilderStatus::setName(char *s)
   strcpy(name, s);
 }
 
-void BuilderStatus::setStatus(char *s)
+void BuilderStatus::setStatus(const char *s)
 { 
   if(status) delete status;
   int l = strlen(s);

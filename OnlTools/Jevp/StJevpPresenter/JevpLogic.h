@@ -132,15 +132,15 @@ class JevpLogic : public QObject {
  void killServer();                 // sends kill command
  int LaunchRun(char *runNumber);   // run number is pathname w/o /a
 
- int event() { return mRS->getEventNumber(); }
+ // int event() { return mRS->run; }
  bool event (QEvent *e) {return QObject::event(e);} 
- int run() { return mRS->getRunNumber(); }
- int token() { return mRS->getToken(); }
- int counter() { return mRS->getEventCounter(); }
- unsigned int triggerBits() { return mRS->getTriggerBits(); }
- unsigned int detectorBits() { return mRS->getDetectorBits(); }
- unsigned int triggerBitsRun() { return mRS->getTriggerBitsRun(); }
- unsigned int detectorBitsRun() { return mRS->getDetectorBitsRun(); }
+ int run() { return mRS->run; }
+ //int token() { return mRS->getToken(); }
+ //int counter() { return mRS->getEventCounter(); }
+ //unsigned int triggerBits() { return mRS->getTriggerBits(); }
+ //unsigned int detectorBits() { return mRS->getDetectorBits(); }
+ //unsigned int triggerBitsRun() { return mRS->getTriggerBitsRun(); }
+ //unsigned int detectorBitsRun() { return mRS->getDetectorBitsRun(); }
 
  RunStatus*    runStatus() { return mRS;}
 
@@ -236,7 +236,7 @@ DisplayNode *getCanvasDescriptor(u_int combo_idx) {
 
 /***************************************************************************
  *
- * $Id: JevpLogic.h,v 1.1 2010/12/07 14:25:23 jml Exp $
+ * $Id: JevpLogic.h,v 1.2 2010/12/13 16:18:57 jml Exp $
  *
  * Author: Frank Laue, laue@bnl.gov
  ***************************************************************************
@@ -246,6 +246,9 @@ DisplayNode *getCanvasDescriptor(u_int combo_idx) {
  ***************************************************************************
  *
  * $Log: JevpLogic.h,v $
+ * Revision 1.2  2010/12/13 16:18:57  jml
+ * demo version
+ *
  * Revision 1.1  2010/12/07 14:25:23  jml
  * adding Jevp
  *

@@ -1,3 +1,32 @@
+# quick launches:
+
+For a local run analysis:
+
+(limited builders)
+     OnlTools/Jevp/launch JevpServerMain -die -kill -launchbuilders -localsocket -builders daq,trg,base -nodb -file xxx.daq
+
+(default builders)
+     OnlTools/Jevp/launch JevpServerMain -die -kill -launchbuilders -localsocket -nodb -file xxx.daq
+
+(don't die at end)
+     OnlTools/Jevp/launch JevpServerMain -kill -launchbuilders -localsocket -nodb -file xxx.daq 
+
+(don't start the run:  wait for jevpStatus to do it...)
+     OnlTools/Jevp/Launch JevpServerMain -kill -localsocket -nodb
+     jevpStatus launch xxx.daq
+
+For a normal server:  (doesn't kill builders, reads from evp, writes to database, uses port 3499)
+     OnlTools/Jevp/launch JevpServerMain -launchbuilders
+
+For a normal server on a different port
+     OnlTools/Jevp/launch JevpServerMain -launchbuilders -port 3500
+
+
+ 
+
+
+
+
 
 	
 // The XML file and the JevpEditor

@@ -63,6 +63,7 @@ JevpPlotSet::JevpPlotSet()
   daqfile = NULL;
   server = (char *)"evp.starp.bnl.gov";
   serverport = JEVP_PORT;
+  socketName = NULL;
   pdf = NULL;
   loglevel = NULL;
   socket = NULL;
@@ -71,7 +72,7 @@ JevpPlotSet::JevpPlotSet()
   confdatadir = (char *)"/RTScache/conf/jevp";
   clientdatadir = (char *)DEFAULT_CLIENTDATADIR;
   plotsetname = (char *)"def_plotset";
-  status.setStatus("stopped");
+  builderStatus.setStatus("stopped");
   pause = 0;
   CP;
 }
@@ -254,14 +255,13 @@ void JevpPlotSet::_startrun(daqReader *rdr)
 
   CP;
   run = rdr->run;
-  status.setStatus("running");
+  builderStatus.setStatus("running");
 
   CP;
-  if(base_client) {    
-    status.run = rdr->run;
-    status.lastEventTime = time(NULL);
-    send((TObject *)&status);
-  }
+  builderStatus.run = rdr->run;
+  builderStatus.lastEventTime = time(NULL);
+  send((TObject *)&builderStatus);
+  
 
   CP;
   LOG(NOTE, "Here");
@@ -306,11 +306,11 @@ void JevpPlotSet::_stoprun(daqReader *rdr)
 //   }
 
   CP;
-  status.setStatus("stopped");
-  if(base_client) {
-    LOG("JEFF", "Setting end of run #%d\n",run);
-    send((TObject *)&status);
-  }
+  builderStatus.setStatus("stopped");
+
+  LOG("JEFF", "Setting end of run #%d",run);
+  send((TObject *)&builderStatus);
+    
   CP;
 }
 
@@ -321,9 +321,11 @@ void JevpPlotSet::stoprun(daqReader *rdr)
 void JevpPlotSet::_event(daqReader *rdr)
 {
   CPC;
+  builderStatus.events++;
   event(rdr);
   CPC;
 
+  LOG(DBG, "pause=%d",pause);
   if(pause) {
     printf("Enter enter to continue: ");
     char nothing[20];
@@ -360,7 +362,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
     return;
   }
 
-
+  builderStatus.setName(plotsetname);
 
   rtsLogOutput(RTS_LOG_NET);
   rtsLogAddDest((char *)"172.16.0.1",8004);
@@ -368,7 +370,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
 
   if(loglevel) rtsLogLevel(loglevel);
     
-  LOG(WARN, "Starting BUILDER:%s",getPlotSetName());
+  LOG(NOTE, "Starting BUILDER:%s",getPlotSetName());
 
   gSystem->ResetSignal(kSigChild);
   gSystem->ResetSignal(kSigBus);
@@ -409,7 +411,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
       sleep(5);
     }
     else {
-      sleep(10);
+      sleep(5);
     }
 
     while(connect(server, serverport) < 0) {
@@ -430,9 +432,9 @@ void JevpPlotSet::Main(int argc, char *argv[])
   _initialize(argc, argv);
 
   CP;
-  if(server == NULL) {
-    status.setStatus("stopped");
-  }
+//   if(server == NULL) {
+//     builderStatus.setStatus("stopped");
+//   }
 
   for(;;) {
     CP;
@@ -446,7 +448,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
     CP;
     unsigned int tm = time(NULL);
     if(tm > (last_update + update_time)) {
-      if(socket && (status.running())) {
+      if(socket && (builderStatus.running())) {
 	updatePlots();
 	last_update = tm;
       }
@@ -463,36 +465,46 @@ void JevpPlotSet::Main(int argc, char *argv[])
 
       case EVP_STAT_EOR:
 	CP;
-	LOG(NOTE, "EVP_STAT_EOR stat=%s",status.status);
+	LOG(NOTE, "EVP_STAT_EOR stat=%s",builderStatus.status);
 
-	if(!status.running()) {
-	  LOG(NOTE, "Already end of run, don't stop it again... %d",status.running());
+	{
+	  EvpMessage m;
+	  m.setSource(plotsetname);
+	  m.setCmd((char *)"ping");
+	  m.setArgs("");
+	  int xxxret = send(&m);	// ping server...
+	  if(xxxret < 0) {
+	    LOG(NOTE, "Server down, exiting...");
+	    exit(0);
+	  }
+	}
+
+
+
+	
+	
+	if(!builderStatus.running()) {
+	  LOG(NOTE, "Already end of run, don't stop it again... %d",builderStatus.running());
 	  // already end of run, don't stop it again...
 	  sleep(5);
 	  continue;
 	}
 	
 
-	LOG(NOTE, "EOR");
+	LOG(DBG, "EOR");
 	_stoprun(reader);
 	LOG(DBG, "Stoprun");
 
-	if(reader->IsEvp()) {
-	  LOG("JEFF", "End of Run... [previous run=%d, current run=%d]",
-	      current_run, reader->run);
-	}
-       
+
+	LOG("JEFF", "End of Run... [previous run=%d, current run=%d]",
+	    current_run, reader->run);
+	
 	CP;
 	if(pdf) writePdfFile();  // Finish and exit...
 	CP;
 	
 	if(die_at_endofrun) {
 	  LOG("JEFF", "It's end of run and set to die, goodbye");
-	  exit(0);
-	}
-
-	if(!reader->IsEvp()) {
-	  LOG("JEFF", "It's end of run and the data source is a file, so exiting");
 	  exit(0);
 	}
 
@@ -522,7 +534,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
     LOG(DBG, "We've got some kind of event:  token=%d seq=%d",reader->token,reader->seq);
 
     if(reader->run != current_run) {
-      LOG("JEFF", "Got an event for a run change: prev run=%d new run=%d",
+      LOG(DBG, "Got an event for a run change: prev run=%d new run=%d",
 	  current_run, reader->run);
       
       current_run = reader->run;
@@ -602,6 +614,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
 int JevpPlotSet::parseArgs(int argc, char *argv[])
 {
   CP;
+  int explicit_server=0;
   for(int i=1;i<argc;i++) {
     if(memcmp(argv[i], "-diska", 6) == 0) {
       i++;
@@ -610,14 +623,18 @@ int JevpPlotSet::parseArgs(int argc, char *argv[])
     else if (memcmp(argv[i], "-file", 5) == 0) {
       i++;
       daqfile = argv[i];
-      server = NULL;
     }
     else if (memcmp(argv[i], "-noserver", 9) == 0) {
       server = NULL;
     }
     else if (memcmp(argv[i], "-server", 7) == 0) {
       i++;
-      server = argv[i];
+      explicit_server=1;
+      if((i<argc) && (argv[i][0] != '-')) {
+	server = argv[i];
+      }
+      else
+	i--;
     }
     else if (memcmp(argv[i], "-die", 4) == 0) {
       die_at_endofrun = 1;
@@ -656,6 +673,10 @@ int JevpPlotSet::parseArgs(int argc, char *argv[])
     else if (strcmp(argv[i], "-pause") == 0) {
       pause = 1;
     }
+    else if (strcmp(argv[i], "-socket") == 0) {
+      i++;
+      socketName = argv[i];
+    }
     else if (strcmp(argv[i], "-buildxml") == 0) {
       i++;
       buildxml = argv[i];
@@ -669,6 +690,15 @@ int JevpPlotSet::parseArgs(int argc, char *argv[])
       return -1;
     }    
   }
+
+  if((explicit_server == 0) && daqfile) {
+    server = NULL;
+  }
+
+  if(!server) {
+    die_at_endofrun = 1;
+  }
+  
   CP;
   return 0;
 }
@@ -774,9 +804,15 @@ void JevpPlotSet::writePdfFile()
 
 int JevpPlotSet::connect(char *host, int port) {
 
-  LOG(WARN, "Connecting...to %s:%d",host,port);
+  LOG(DBG, "Connecting...to %s:%d",host,port);
 
-  socket = new TSocket(host,port);
+  if(socketName) {
+    socket = new TSocket(socketName);
+  }
+  else {
+    socket = new TSocket(host,port);
+  }
+
   if(!socket->IsValid()) {
     LOG(ERR, "Error connecting to server: %d",socket->GetErrorCode());
 
@@ -817,11 +853,11 @@ int JevpPlotSet::connect(char *host, int port) {
   LOG(DBG, "Hello message is: %s",msg->args);
 
   if(strcmp(msg->args, "base") == 0) {
-    LOG("JERR", "%s:  I am the new base client", plotsetname);
+    LOG(DBG, "%s:  I am the new base client", plotsetname);
     base_client = 1;
   }
   else {
-    LOG("JERR", "%s:  I am not the base client", plotsetname);
+    LOG(DBG, "%s:  I am not the base client", plotsetname);
     base_client = 0;
   }
 
@@ -835,6 +871,7 @@ int JevpPlotSet::send(TObject *msg) {
   TMessage mess(kMESS_OBJECT);
   
   mess.WriteObject(msg);
-  socket->Send(mess);
-  return 0;
+  int ret = socket->Send(mess);
+  LOG(DBG, "socket send ret=%d",ret);
+  return ret;
 }
