@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <iostream>
 #include <fstream>
 
 #include <stdlib.h>
@@ -1301,7 +1302,8 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
 	nodes[elements[imap].emap[1]].xmap*(nodes[elements[imap].emap[0]].ymap-y) + 
 	(nodes[elements[imap].emap[0]].xmap+nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[3]].xmap)*y,2);
 
-  // Check that the determinant is non-negative (this can happen if the point is out of range)
+  // Check that the determinant is non-negative 
+  // (this can happen if the point is out of range).
   if (det < 0) {
     if (debug) {
       printf("ComponentFieldMap::Coordinates4:\n");
@@ -1446,7 +1448,7 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
   // Provisional values
   t1 = t2 = t3 = t4 = 0;
 
-  // Degenerate elements should have been treated as triangles
+  // Degenerate elements should have been treated as triangles.
   if (elements[imap].degenerate) {
     printf("ComponentFieldMap::Coordinates5:\n");
     printf("    Received degenerate element %d.\n", imap);
@@ -1508,12 +1510,12 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
       nodes[elements[imap].emap[5]].ymap * (1 + td1) * (1 + td2) * (1 - td2) / 2 +
       nodes[elements[imap].emap[6]].ymap * (1 - td1) * (1 + td1) * (1 + td2) / 2 +
       nodes[elements[imap].emap[7]].ymap * (1 - td1) * (1 + td2) * (1 - td2) / 2;
-    // Compute the Jacobian
+    // Compute the Jacobian.
     Jacobian5(imap, td1, td2, det, jac);
-    // Compute the difference vector
+    // Compute the difference vector.
     diff[0] = x - xr;
     diff[1] = y - yr;
-    // Update the estimate
+    // Update the estimate.
     for (int l = 0; l < 2; ++l) {
       corr[l] = 0;
       for (int k = 0; k < 2; ++k) {
@@ -1539,7 +1541,7 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
       break;
     }
   }
-  // No convergence reached
+  // No convergence reached.
   if (!converged) {
     double xmin, ymin, xmax, ymax;
     xmin = nodes[elements[imap].emap[0]].xmap;
@@ -1594,7 +1596,7 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
     printf("    Convergence reached at (t1, t2) = (%g,%g).\n", t1, t2);
   }
   
-  // For debugging purposes, show position
+  // For debugging purposes, show position.
   if (debug) {
     double xr =
       nodes[elements[imap].emap[0]].xmap * (-(1 - t1) * (1 - t2) * (1 + t1 + t2)) / 4 +
@@ -1722,7 +1724,7 @@ ComponentFieldMap::Coordinates12(double x, double y, double z,
     printf("    Checksum - 1:           %g\n", sr - 1);
   }
 
-  // This should always work
+  // This should always work.
   ifail = 0;
   return ifail;
 
@@ -1770,7 +1772,7 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
     return ifail;
   }
 
-  // Start iteration
+  // Start iteration.
   double td1 = t1, td2 = t2, td3 = t3, td4 = t4;
   if (debug) {
     printf("ComponentFieldMap::Coordinates13:\n");
@@ -1821,15 +1823,15 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
       nodes[elements[imap].emap[9]].zmap * 4 * td3 * td4;
     double sr = td1 + td2 + td3 + td4;
 
-    // Compute the Jacobian
+    // Compute the Jacobian.
     Jacobian13(imap, td1, td2, td3, td4, det, jac);
-    // Compute the difference vector
+    // Compute the difference vector.
     diff[0] = 1 - sr;
     diff[1] = x - xr;
     diff[2] = y - yr;
     diff[3] = z - zr;
 
-    // Update the estimate
+    // Update the estimate.
     for (int l = 0; l < 4; ++l) {
       corr[l] = 0;
       for (int k = 0; k < 4; ++k) {
@@ -1864,7 +1866,7 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
     }
   }
 
-  // No convergence reached
+  // No convergence reached.
   if (!converged) {
     double xmin, ymin, zmin, xmax, ymax, zmax;
     xmin = nodes[elements[imap].emap[0]].xmap; 
@@ -1913,7 +1915,7 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
            t1, t2, t3, t4);
   }
   
-  // For debugging purposes, show position
+  // For debugging purposes, show position.
   if (debug) {
     // Re-compute the (x,y,z) position for this coordinate.
     double xr = 
@@ -1966,37 +1968,41 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
 void 
 ComponentFieldMap::UpdatePeriodicityCommon() {
 
-  // Check the required data is available
+  // Check the required data is available.
   if (!ready) {
-    printf("ComponentFieldMap::UpdatePeriodicityCommon:\n");
-    printf("    No valid field map available.\n");
+    std::cerr << className << "::UpdatePeriodicityCommon:\n";
+    std::cerr << "    No valid field map available.\n";
     return;
   }
 
-  // No regular and mirror periodicity at the same time
+  // No regular and mirror periodicity at the same time.
   if (xPeriodic && xMirrorPeriodic) {
-    printf("ComponentFieldMap::UpdatePeriodicityCommon:\n");
-    printf("    Both simple and mirror periodicity along x requested; reset.\n");
+    std::cerr << className << "::UpdatePeriodicityCommon:\n";
+    std::cerr << "    Both simple and mirror periodicity\n";
+    std::cerr << "    along x requested; reset.\n";
     xPeriodic = false;
     xMirrorPeriodic = false;
     warning = true;
   }
   if (yPeriodic && yMirrorPeriodic) {
-    printf("ComponentFieldMap::UpdatePeriodicityCommon:\n");
-    printf("    Both simple and mirror periodicity along y requested; reset.\n");
+    std::cerr << className << "::UpdatePeriodicityCommon:\n";
+    std::cerr << "    Both simple and mirror periodicity\n";
+    std::cerr << "    along y requested; reset.\n";
     yPeriodic = false;
     yMirrorPeriodic = false;
     warning = true;
   }
   if (zPeriodic && zMirrorPeriodic) {
-    printf("ComponentFieldMap::UpdatePeriodicityCommon:\n");
-    printf("    Both simple and mirror periodicity along z requested; reset.\n");
+    std::cerr << className << "::UpdatePeriodicityCommon:\n";
+    std::cerr << "    Both simple and mirror periodicity\n";
+    std::cerr << "    along z requested; reset.\n";
     zPeriodic = false;
     zMirrorPeriodic = false;
     warning = true;
   }
 
-  // In case of axial periodicity, the range must be an integral part of 2 pi
+  // In case of axial periodicity, 
+  // the range must be an integral part of 2 pi.
   if (xAxiallyPeriodic) {
     if (mapxamin >= mapxamax) {
       mapnxa = 0;
@@ -2004,9 +2010,9 @@ ComponentFieldMap::UpdatePeriodicityCommon() {
       mapnxa = TwoPi / (mapxamax - mapxamin);
     }
     if (fabs(mapnxa - int(0.5+mapnxa)) > 0.001 || mapnxa < 1.5) {
-      printf("ComponentFieldMap::UpdatePeriodicityCommon:\n");
-      printf("    X-axial symmetry has been requested but the map\n");
-      printf("    does not cover an integral fraction of 2 pi; reset.\n");
+      std::cerr << className << "::UpdatePeriodicityCommon:\n";
+      std::cerr << "    X-axial symmetry has been requested but the map\n";
+      std::cerr << "    does not cover an integral fraction of 2 pi; reset.\n";
       xAxiallyPeriodic = false;
       warning = true;
     }
@@ -2019,9 +2025,9 @@ ComponentFieldMap::UpdatePeriodicityCommon() {
       mapnya = TwoPi / (mapyamax - mapyamin);
     }
     if (fabs(mapnya - int(0.5 + mapnya)) > 0.001 || mapnya < 1.5) {
-      printf("ComponentFieldMap::UpdatePeriodicityCommon:\n");
-      printf("    Y-axial symmetry has been requested but the map\n");
-      printf("    does not cover an integral fraction of 2 pi; reset.\n");
+      std::cerr << className << "::UpdatePeriodicityCommon:\n";
+      std::cerr << "    Y-axial symmetry has been requested but the map\n";
+      std::cerr << "    does not cover an integral fraction of 2 pi; reset.\n";
       yAxiallyPeriodic = false;
       warning = true;
     }
@@ -2034,9 +2040,9 @@ ComponentFieldMap::UpdatePeriodicityCommon() {
       mapnza = TwoPi / (mapzamax - mapzamin);
     }
     if (fabs(mapnza - int(0.5 + mapnza)) > 0.001 || mapnza < 1.5) {
-      printf("ComponentFieldMap::UpdatePeriodicityCommon:\n");
-      printf("    Z-axial symmetry has been requested but the map\n");
-      printf("    does not cover an integral fraction of 2 pi; reset.\n");
+      std::cerr << className << "::UpdatePeriodicityCommon:\n";
+      std::cerr << "    Z-axial symmetry has been requested but the map\n";
+      std::cerr << "    does not cover an integral fraction of 2 pi; reset.\n";
       zAxiallyPeriodic = false;
       warning = true;
     }
@@ -2046,8 +2052,8 @@ ComponentFieldMap::UpdatePeriodicityCommon() {
   if (xRotationSymmetry && yRotationSymmetry ||
       xRotationSymmetry && zRotationSymmetry ||
       yRotationSymmetry && zRotationSymmetry) {
-    printf("ComponentFieldMap::UpdatePeriodicityCommon:\n");
-    printf("    Only 1 rotational symmetry allowed; reset.\n");
+    std::cerr << className << "::UpdatePeriodicityCommon:\n";
+    std::cerr << "    Only 1 rotational symmetry allowed; reset.\n";
     xRotationSymmetry = false;
     yRotationSymmetry = false;
     zRotationSymmetry = false;
@@ -2056,9 +2062,10 @@ ComponentFieldMap::UpdatePeriodicityCommon() {
 
   // No rotational symmetry as well as axial periodicity
   if ((xRotationSymmetry || yRotationSymmetry || zRotationSymmetry) && 
-      (xAxiallyPeriodic || yAxiallyPeriodic || zAxiallyPeriodic)) {
-    printf("ComponentFieldMap::UpdatePeriodicityCommon:\n");
-    printf("    Not allowed to combine rotational symmetry and axial periodicity; reset.\n");
+      (xAxiallyPeriodic  || yAxiallyPeriodic  || zAxiallyPeriodic)) {
+    std::cerr << className << "::UpdatePeriodicityCommon:\n";
+    std::cerr << "    Not allowed to combine rotational symmetry\n";
+    std::cerr << "    and axial periodicity; reset.\n";
     xAxiallyPeriodic = false;
     yAxiallyPeriodic = false;
     zAxiallyPeriodic = false;
@@ -2068,11 +2075,12 @@ ComponentFieldMap::UpdatePeriodicityCommon() {
     warning = true;
   }
 
-  // In case of rotational symmetry, the x-range should not straddle 0
+  // In case of rotational symmetry, the x-range should not straddle 0.
   if (xRotationSymmetry || yRotationSymmetry || zRotationSymmetry) {
     if (mapxmin * mapxmax < 0) {
-      printf("ComponentFieldMap::UpdatePeriodicityCommon:\n");
-      printf("    Rotational symmetry requested, but x-range straddles 0; reset.\n");
+      std::cerr << className << "::UpdatePeriodicityCommon:\n";
+      std::cerr << "    Rotational symmetry requested, \n";
+      std::cerr << "    but x-range straddles 0; reset.\n";
       xRotationSymmetry = false;
       yRotationSymmetry = false;
       zRotationSymmetry = false;
@@ -2080,54 +2088,66 @@ ComponentFieldMap::UpdatePeriodicityCommon() {
     }
   }
 
-  // Recompute the cell ranges
+  // Recompute the cell ranges.
   xMinBoundingBox = mapxmin;
   xMaxBoundingBox = mapxmax;
   yMinBoundingBox = mapymin;
   yMaxBoundingBox = mapymax;
   zMinBoundingBox = mapzmin;
   zMaxBoundingBox = mapzmax;
-  cellsx = fabs(mapxmax-mapxmin);
-  cellsy = fabs(mapymax-mapymin);
-  cellsz = fabs(mapzmax-mapzmin);
+  cellsx = fabs(mapxmax - mapxmin);
+  cellsy = fabs(mapymax - mapymin);
+  cellsz = fabs(mapzmax - mapzmin);
   if (xRotationSymmetry) {
     xMinBoundingBox = mapymin;
     xMaxBoundingBox = mapymax;
-    yMinBoundingBox = -std::max(fabs(mapxmin),fabs(mapxmax));
-    yMaxBoundingBox = +std::max(fabs(mapxmin),fabs(mapxmax));
-    zMinBoundingBox = -std::max(fabs(mapxmin),fabs(mapxmax));
-    zMaxBoundingBox = +std::max(fabs(mapxmin),fabs(mapxmax));
+    yMinBoundingBox = -std::max(fabs(mapxmin), fabs(mapxmax));
+    yMaxBoundingBox = +std::max(fabs(mapxmin), fabs(mapxmax));
+    zMinBoundingBox = -std::max(fabs(mapxmin), fabs(mapxmax));
+    zMaxBoundingBox = +std::max(fabs(mapxmin), fabs(mapxmax));
   } else if (yRotationSymmetry) {
-    xMinBoundingBox = -std::max(fabs(mapxmin),fabs(mapxmax));
-    xMaxBoundingBox = +std::max(fabs(mapxmin),fabs(mapxmax));
+    xMinBoundingBox = -std::max(fabs(mapxmin), fabs(mapxmax));
+    xMaxBoundingBox = +std::max(fabs(mapxmin), fabs(mapxmax));
     yMinBoundingBox = mapymin;
     yMaxBoundingBox = mapymax;
-    zMinBoundingBox = -std::max(fabs(mapxmin),fabs(mapxmax));
-    zMaxBoundingBox = +std::max(fabs(mapxmin),fabs(mapxmax));
+    zMinBoundingBox = -std::max(fabs(mapxmin), fabs(mapxmax));
+    zMaxBoundingBox = +std::max(fabs(mapxmin), fabs(mapxmax));
   } else if (zRotationSymmetry) {
-    xMinBoundingBox = -std::max(fabs(mapxmin),fabs(mapxmax));
-    xMaxBoundingBox = +std::max(fabs(mapxmin),fabs(mapxmax));
-    yMinBoundingBox = -std::max(fabs(mapxmin),fabs(mapxmax));
-    yMaxBoundingBox = +std::max(fabs(mapxmin),fabs(mapxmax));
+    xMinBoundingBox = -std::max(fabs(mapxmin), fabs(mapxmax));
+    xMaxBoundingBox = +std::max(fabs(mapxmin), fabs(mapxmax));
+    yMinBoundingBox = -std::max(fabs(mapxmin), fabs(mapxmax));
+    yMaxBoundingBox = +std::max(fabs(mapxmin), fabs(mapxmax));
     zMinBoundingBox = mapymin;
     zMaxBoundingBox = mapymax;
   }
   
   if (xAxiallyPeriodic) {
-    yMinBoundingBox = -std::max(std::max(fabs(mapymin),fabs(mapymax)),std::max(fabs(mapzmin),fabs(mapzmax)));
-    yMaxBoundingBox = +std::max(std::max(fabs(mapymin),fabs(mapymax)),std::max(fabs(mapzmin),fabs(mapzmax)));
-    zMinBoundingBox = -std::max(std::max(fabs(mapymin),fabs(mapymax)),std::max(fabs(mapzmin),fabs(mapzmax)));
-    zMaxBoundingBox = +std::max(std::max(fabs(mapymin),fabs(mapymax)),std::max(fabs(mapzmin),fabs(mapzmax)));
+    yMinBoundingBox = -std::max(std::max(fabs(mapymin), fabs(mapymax)),
+                                std::max(fabs(mapzmin), fabs(mapzmax)));
+    yMaxBoundingBox = +std::max(std::max(fabs(mapymin), fabs(mapymax)),
+                                std::max(fabs(mapzmin), fabs(mapzmax)));
+    zMinBoundingBox = -std::max(std::max(fabs(mapymin), fabs(mapymax)),
+                                std::max(fabs(mapzmin), fabs(mapzmax)));
+    zMaxBoundingBox = +std::max(std::max(fabs(mapymin), fabs(mapymax)),
+                                std::max(fabs(mapzmin), fabs(mapzmax)));
   } else if (yAxiallyPeriodic) {
-    xMinBoundingBox = -std::max(std::max(fabs(mapxmin),fabs(mapxmax)),std::max(fabs(mapzmin),fabs(mapzmax)));
-    xMaxBoundingBox = +std::max(std::max(fabs(mapxmin),fabs(mapxmax)),std::max(fabs(mapzmin),fabs(mapzmax)));
-    zMinBoundingBox = -std::max(std::max(fabs(mapxmin),fabs(mapxmax)),std::max(fabs(mapzmin),fabs(mapzmax)));
-    zMaxBoundingBox = +std::max(std::max(fabs(mapxmin),fabs(mapxmax)),std::max(fabs(mapzmin),fabs(mapzmax)));
+    xMinBoundingBox = -std::max(std::max(fabs(mapxmin), fabs(mapxmax)),
+                                std::max(fabs(mapzmin), fabs(mapzmax)));
+    xMaxBoundingBox = +std::max(std::max(fabs(mapxmin), fabs(mapxmax)),
+                                std::max(fabs(mapzmin), fabs(mapzmax)));
+    zMinBoundingBox = -std::max(std::max(fabs(mapxmin), fabs(mapxmax)),
+                                std::max(fabs(mapzmin), fabs(mapzmax)));
+    zMaxBoundingBox = +std::max(std::max(fabs(mapxmin), fabs(mapxmax)),
+                                std::max(fabs(mapzmin), fabs(mapzmax)));
   } else if (zAxiallyPeriodic) {
-    xMinBoundingBox = -std::max(std::max(fabs(mapxmin),fabs(mapxmax)),std::max(fabs(mapymin),fabs(mapymax)));
-    xMaxBoundingBox = +std::max(std::max(fabs(mapxmin),fabs(mapxmax)),std::max(fabs(mapymin),fabs(mapymax)));
-    yMinBoundingBox = -std::max(std::max(fabs(mapxmin),fabs(mapxmax)),std::max(fabs(mapymin),fabs(mapymax)));
-    yMaxBoundingBox = +std::max(std::max(fabs(mapxmin),fabs(mapxmax)),std::max(fabs(mapymin),fabs(mapymax)));
+    xMinBoundingBox = -std::max(std::max(fabs(mapxmin), fabs(mapxmax)),
+                                std::max(fabs(mapymin), fabs(mapymax)));
+    xMaxBoundingBox = +std::max(std::max(fabs(mapxmin), fabs(mapxmax)),
+                                std::max(fabs(mapymin), fabs(mapymax)));
+    yMinBoundingBox = -std::max(std::max(fabs(mapxmin), fabs(mapxmax)),
+                                std::max(fabs(mapymin), fabs(mapymax)));
+    yMaxBoundingBox = +std::max(std::max(fabs(mapxmin), fabs(mapxmax)),
+                                std::max(fabs(mapymin), fabs(mapymax)));
   }
   
   if (xPeriodic || xMirrorPeriodic) {
@@ -2143,7 +2163,7 @@ ComponentFieldMap::UpdatePeriodicityCommon() {
     zMaxBoundingBox = +INFINITY;
   }
 
-  // Display the range if requested
+  // Display the range if requested.
   if (debug) PrintRange();
   
 }
@@ -2151,17 +2171,18 @@ ComponentFieldMap::UpdatePeriodicityCommon() {
 void
 ComponentFieldMap::UpdatePeriodicity2d() {
 
-  // Check the required data is available
+  // Check the required data is available.
   if (!ready) {
-    printf("ComponentFieldMap::UpdatePeriodicity2d:\n");
-    printf("    No valid field map available.\n");
+    std::cerr << className << "::UpdatePeriodicity2d:\n";
+    std::cerr << "    No valid field map available.\n";
     return;
   }
 
   // No z-periodicity in 2d
   if (zPeriodic || zMirrorPeriodic) {
-    printf("ComponentFieldMap::UpdatePeriodicity2d:\n");
-    printf("    Simple or mirror periodicity along z requested for a 2D map; reset.\n");
+    std::cerr << className << "::UpdatePeriodicity2d:\n";
+    std::cerr << "    Simple or mirror periodicity along z\n";
+    std::cerr << "    requested for a 2d map; reset.\n";
     zPeriodic = false;
     zMirrorPeriodic = false;
     warning = true;
@@ -2169,8 +2190,9 @@ ComponentFieldMap::UpdatePeriodicity2d() {
 
   // Only z-axial periodicity in 2d maps
   if (xAxiallyPeriodic || yAxiallyPeriodic ) {
-    printf("ComponentFieldMap::UpdatePeriodicity2d:\n");
-    printf("    Axial symmetry has been requested around x or y for a 2D map; reset.\n");
+    std::cerr << className << "::UpdatePeriodicity2d:\n";
+    std::cerr << "    Axial symmetry has been requested \n";
+    std::cerr << "    around x or y for a 2D map; reset.\n";
     xAxiallyPeriodic = false;
     yAxiallyPeriodic = false;
     warning = true;
@@ -2182,29 +2204,30 @@ void
 ComponentFieldMap::SetRange() {
 
   // Initial values
-  mapxmin = mapymin = mapzmin = 0;
-  mapxmax = mapymax = mapzmax = 0;
-  mapxamin = mapyamin = mapzamin = 0;
-  mapxamax = mapyamax = mapzamax = 0;
-  mapvmin = mapvmax = 0;
+  mapxmin = mapymin = mapzmin = 0.;
+  mapxmax = mapymax = mapzmax = 0.;
+  mapxamin = mapyamin = mapzamin = 0.;
+  mapxamax = mapyamax = mapzamax = 0.;
+  mapvmin = mapvmax = 0.;
   setangx = setangy = setangz = false;
 
-  // Check the required data is available
+  // Make sure the required data is available.
   if (!ready || nNodes < 1) {
-    printf("ComponentFieldMap::SetRange:\n");
-    printf("    Field map not yet set or number of nodes < 1.\n");
+    std::cerr << className << "::SetRange:\n";
+    std::cerr << "    Field map not yet set.\n";
+    return;
+  }
+  if (nNodes < 1) {
+    std::cerr << className << "::SetRange:\n";
+    std::cerr << "    Number of nodes < 1.\n";
     return;
   }
   
-  // Loop over the nodes
-  mapxmin = nodes[0].xmap;
-  mapymin = nodes[0].xmap;
-  mapzmin = nodes[0].ymap;
-  mapxmax = nodes[0].ymap;
-  mapymax = nodes[0].zmap;
-  mapzmax = nodes[0].zmap;
-  mapvmin = nodes[0].vmap;
-  mapvmax = nodes[0].vmap;
+  // Loop over the nodes.
+  mapxmin = mapxmax = nodes[0].xmap;
+  mapymin = mapymax = nodes[0].ymap;
+  mapzmin = mapzmax = nodes[0].zmap;
+  mapvmin = mapvmax = nodes[0].vmap;
     
   double ang;
   for (int i = 1; i < nNodes; i++) {
@@ -2251,7 +2274,7 @@ ComponentFieldMap::SetRange() {
     }
   }
 
-  // Fix the angular ranges
+  // Fix the angular ranges.
   if (mapxamax - mapxamin > Pi) {
     double aux = mapxamin;
     mapxamin = mapxamax;
@@ -2270,12 +2293,12 @@ ComponentFieldMap::SetRange() {
     mapzamax = aux + TwoPi;
   }
 
-  // Set the periodicity length (maybe not needed)
+  // Set the periodicity length (maybe not needed).
   mapsx = fabs(mapxmax - mapxmin);
   mapsy = fabs(mapymax - mapymin);
   mapsz = fabs(mapzmax - mapzmin);
 
-  // Set provisional cell dimensions
+  // Set provisional cell dimensions.
   xMinBoundingBox = mapxmin;
   xMaxBoundingBox = mapxmax;
   yMinBoundingBox = mapymin;
@@ -2284,7 +2307,7 @@ ComponentFieldMap::SetRange() {
   zMaxBoundingBox = mapzmax;
   hasBoundingBox = true;
 
-  // Display the range if requested
+  // Display the range if requested.
   if (debug) PrintRange();
   
 }
@@ -2294,9 +2317,9 @@ ComponentFieldMap::PrintRange() {
 
   printf("ComponentFieldMap::PrintRange:\n");
   printf("        Dimensions of the elementary block\n");
-  printf("            %15g < x < %-15g cm,\n", xMinBoundingBox, xMaxBoundingBox);
-  printf("            %15g < y < %-15g cm,\n", yMinBoundingBox, yMaxBoundingBox);
-  printf("            %15g < z < %-15g cm,\n", zMinBoundingBox, zMaxBoundingBox);
+  printf("            %15g < x < %-15g cm,\n", mapxmin, mapxmax);
+  printf("            %15g < y < %-15g cm,\n", mapymin, mapymax);
+  printf("            %15g < z < %-15g cm,\n", mapzmin, mapzmax);
   printf("            %15g < V < %-15g V.\n",  mapvmin, mapvmax);
   
   printf("        Periodicities\n");
@@ -2337,6 +2360,19 @@ ComponentFieldMap::IsInBoundingBox(const double x,
     return true;
   }
   return false;
+
+}
+
+bool
+ComponentFieldMap::GetBoundingBox(double& xmin, double& ymin, double& zmin,
+                                  double& xmax, double& ymax, double& zmax) {
+
+  if (!ready) return false;
+  
+  xmin = xMinBoundingBox; xmax = xMaxBoundingBox;
+  ymin = yMinBoundingBox; ymax = yMaxBoundingBox;
+  zmin = zMinBoundingBox; zmax = zMaxBoundingBox;
+  return true;
 
 }
 
@@ -2482,7 +2518,7 @@ ComponentFieldMap::UnmapFields(double& ex, double& ey, double& ez,
     ey = er * sin(theta);
   }
 
-  // And take care of symmetry
+  // Take care of symmetry.
   double eaxis;
   er = ex;
   eaxis = ey;

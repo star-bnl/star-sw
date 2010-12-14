@@ -170,6 +170,14 @@ class Medium {
                          const double bx, const double by, const double bz,
                          double& diss);    
 
+    // Set the range of fields to be covered by the transport tables.
+    void SetFieldGrid(double emin, double emax, int ne, bool logE,
+                      double bmin, double bmax, int nb, 
+                      double amin, double amax, int na);
+    void SetFieldGrid(const std::vector<double>& efields,
+                      const std::vector<double>& bfields,
+                      const std::vector<double>& angles);
+                       
     // Select extrapolation method for fields below/above the table range.
     // Options are "constant"/"linear"/"exponential".
     void SetExtrapolationMethodVelocity(const std::string extrLow,
@@ -330,6 +338,20 @@ class Medium {
                          const int intpMeth, 
                          const int jExtr, const int iExtr);
     bool GetExtrapolationIndex(std::string extrStr, int& extrNb);
+    void CloneTable(std::vector<std::vector<std::vector<double> > >& tab,
+                    const std::vector<double>& efields,
+                    const std::vector<double>& bfields,
+                    const std::vector<double>& angles,
+                    const int intp, const int extrLow, const int extrHigh,
+                    const double init, const std::string label);
+    void CloneTensor(std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
+                     const int n,
+                     const std::vector<double>& efields,
+                     const std::vector<double>& bfields,
+                     const std::vector<double>& angles,
+                     const int intp, const int extrLow, const int extrHigh,
+                     const double init, const std::string label);
+
     void InitParamArrays(const int eRes, const int bRes, const int aRes,
          std::vector<std::vector<std::vector<double> > >& tab, 
          const double val);

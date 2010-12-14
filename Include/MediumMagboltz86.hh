@@ -125,10 +125,7 @@ class MediumMagboltz86 : public MediumGas {
                      double& alphatof);
 
     // Generate a new gas table (can later be saved to file)
-    void GenerateGasTable(const int numCollisions,
-      double eMin = 100., double eMax = 1.e5, int numE = 20, bool logE = true,
-      double bMin =   0., double bMax = 0.,   int numB =  1,
-      int numAng = 1);
+    void GenerateGasTable(const int numCollisions);
 
   private:
 

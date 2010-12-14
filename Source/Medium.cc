@@ -31,6 +31,9 @@ Medium::Medium() :
   eFields.clear();
   bFields.clear(); bFields.resize(1); bFields[0] = 0.;
   bAngles.clear(); bAngles.resize(1); bAngles[0] = 0.;
+  
+  // Set the default grid.
+  SetFieldGrid(100., 100000., 20, true, 0., 0., 1, 0., 0., 1);
  
   hasElectronVelocityE   = false; tabElectronVelocityE.clear();
   hasElectronVelocityB   = false; tabElectronVelocityB.clear();
@@ -701,7 +704,7 @@ Medium::GetElectronMomentum(const double e,
   py = p * stheta * sin(phi);
   pz = p * ctheta;
  
-  if (band < 0) band = 0;
+  band = 0;
  
 }
 
@@ -1554,6 +1557,481 @@ Medium::GetPhotonCollision(const double e, int& type, int& level,
 }
 
 void
+Medium::SetFieldGrid(double emin, double emax, int ne, bool logE,
+                     double bmin, double bmax, int nb,
+                     double amin, double amax, int na) {
+     
+  // Check if the requested E-field range makes sense.
+  if (ne <= 0) {
+    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << "    Number of E-fields must be > 0.\n";
+    return;
+  }
+
+  if (emin < 0. || emax < 0.) {
+    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << "    Electric fields must be positive.\n";
+    return;
+  }
+  
+  if (emax < emin) {
+    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << "    Swapping min./max. E-field.\n";
+    const double etemp = emin;
+    emin = emax;
+    emax = etemp;
+  }
+
+  double estep = 0.;
+  if (logE) {
+    // Logarithmic scale
+    if (emin < Small) {
+      std::cerr << className << "::SetFieldGrid:\n";
+      std::cerr << "    Min. E-field must be non-zero for log. scale.\n";
+      return;
+    }
+    if (ne == 1) {
+      std::cerr << className << "::SetFieldGrid:\n";
+      std::cerr << "    Number of E-fields must be > 1 for log. scale.\n";
+      return;
+    }
+    estep = pow(emax / emin, 1. / (ne - 1.));
+  } else {
+    // Linear scale
+    if (ne > 1) estep = (emax - emin) / (ne - 1.);
+  }
+
+  // Check if the requested B-field range makes sense.
+  if (nb <= 0) {
+    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << "    Number of B-fields must be > 0.\n";
+    return;
+  }
+  if (bmax < 0. || bmin < 0.) {
+    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << "    Magnetic fields must be positive.\n";
+    return;
+  }
+  if (bmax < bmin) {
+    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << "    Swapping min./max. B-field.\n";
+    const double btemp = bmin;
+    bmin = bmax;
+    bmax = btemp;
+  }
+
+  double bstep = 0.;
+  if (nb > 1) bstep = (bmax - bmin) / (nb - 1.);
+
+  // Check if the requested angular range makes sense.
+  if (na <= 0) {
+    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << "    Number of angles must be > 0.\n";
+    return;
+  }
+  if (amax < 0. || amin < 0.) {
+    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << "    Angles must be positive.\n";
+    return;
+  }
+  if (amax < amin) {
+    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << "    Swapping min./max. angle.\n";
+    const double atemp = amin;
+    amin = amax;
+    amax = atemp;
+  }
+  double astep = 0.;
+  if (na > 1) astep = (amax - amin) / (na - 1.);
+  
+  // Setup the field grids.
+  std::vector<double> eFieldsNew;
+  std::vector<double> bFieldsNew;
+  std::vector<double> bAnglesNew;
+  eFieldsNew.resize(ne);
+  bFieldsNew.resize(nb);
+  bAnglesNew.resize(na);
+  
+  for (int i = 0; i < ne; ++i) {
+    if (logE) {
+      eFieldsNew[i] = emin * pow(estep, i);
+    } else {
+      eFieldsNew[i] = emin + i * estep;
+    }
+  }
+  for (int i = 0; i < nb; ++i) {
+    bFieldsNew[i] = bmin + i * bstep;
+  }
+  if (na == 1) {
+    bAnglesNew[0] = HalfPi;
+  } else {
+    for (int i = 0; i < na; ++i) {
+      bAnglesNew[i] = i * astep;
+    }
+  }
+  
+  SetFieldGrid(eFieldsNew, bFieldsNew, bAnglesNew);
+  
+}
+
+void
+Medium::SetFieldGrid(const std::vector<double>& efields, 
+                     const std::vector<double>& bfields,
+                     const std::vector<double>& angles) {
+
+  // Check the dimensions of the vectors.
+  const int nEfieldsNew = efields.size();
+  const int nBfieldsNew = bfields.size();
+  const int nAnglesNew  = angles.size();
+  
+  if (nEfieldsNew <= 0) {
+    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << "    Number of E-fields must be > 0.\n";
+    return;
+  }
+  if (nBfieldsNew <= 0) {
+    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << "    Number of B-fields must be > 0.\n";
+    return;
+  }
+  if (nAnglesNew <= 0) {
+    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << "    Number of angles must be > 0.\n";
+    return;
+  }
+  
+  // Make sure the values are not negative.
+  if (efields[0] < 0.) {
+    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << "    E-fields must be >= 0.\n";
+  }
+  if (bfields[0] < 0.) {
+    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << "    B-fields must be >= 0.\n";
+  }
+  if (angles[0] < 0.) {
+    std::cerr << className << "::SetFieldGrid:\n";
+    std::cerr << "    Angles must be >= 0.\n";
+  }
+  
+  
+  // Make sure the values are in strictly monotonic, ascending order.
+  if (nEfieldsNew > 1) {
+    for (int i = 1; i < nEfieldsNew; ++i) {
+      if (efields[i] <= efields[i - 1]) {
+        std::cerr << className << "::SetFieldGrid:\n";
+        std::cerr << "    E-fields are not in ascending order.\n";
+        return;
+      }
+    }
+  }
+  if (nBfieldsNew > 1) {
+    for (int i = 1; i < nBfieldsNew; ++i) {
+      if (bfields[i] <= bfields[i - 1]) {
+        std::cerr << className << "::SetFieldGrid:\n";
+        std::cerr << "    B-fields are not in ascending order.\n";
+        return;
+      }
+    }
+  }
+  if (nAnglesNew > 1) {
+    for (int i = 1; i < nAnglesNew; ++i) {
+      if (angles[i] <= angles[i - 1]) {
+        std::cerr << className << "::SetFieldGrid:\n";
+        std::cerr << "    Angles are not in ascending order.\n";
+        return;
+      }
+    }
+  }
+  
+  if (debug) {
+    std::cout << className << "::SetFieldGrid:\n";
+    std::cout << "    E-fields:\n";
+    for (int i = 0; i < nEfieldsNew; ++i) {
+      std::cout << "      " << efields[i] << "\n";
+    }
+    std::cout << "    B-fields:\n";
+    for (int i = 0; i < nBfieldsNew; ++i) {
+      std::cout << "      " << bfields[i] << "\n";
+    }
+    std::cout << "    Angles:\n";
+    for (int i = 0; i < nAnglesNew; ++i) {
+      std::cout << "      " << angles[i] << "\n";
+    }
+  }
+  
+  // Clone the existing tables.
+  // Electrons
+  if (hasElectronVelocityE) {
+    CloneTable(tabElectronVelocityE, 
+               efields, bfields, angles, 
+               intpVelocity, extrLowVelocity, extrHighVelocity,
+               0., "electron velocity along E");
+  }
+  if (hasElectronVelocityB) {
+    CloneTable(tabElectronVelocityB, 
+               efields, bfields, angles, 
+               intpVelocity, extrLowVelocity, extrHighVelocity,
+               0., "electron velocity along Bt");
+  }
+  if (hasElectronVelocityExB) {
+    CloneTable(tabElectronVelocityExB, 
+               efields, bfields, angles, 
+               intpVelocity, extrLowVelocity, extrHighVelocity,
+               0., "electron velocity along ExB");
+  }
+  if (hasElectronDiffLong) {
+    CloneTable(tabElectronDiffLong, 
+               efields, bfields, angles, 
+               intpDiffusion, extrLowDiffusion, extrHighDiffusion,
+               0., "electron longitudinal diffusion");
+  }
+  if (hasElectronDiffTrans) {
+    CloneTable(tabElectronDiffTrans, 
+               efields, bfields, angles, 
+               intpDiffusion, extrLowDiffusion, extrHighDiffusion,
+               0., "electron transverse diffusion");
+  }
+  if (hasElectronTownsend) {
+    CloneTable(tabElectronTownsend, 
+               efields, bfields, angles, 
+               intpTownsend, extrLowTownsend, extrHighTownsend,
+               -30., "electron Townsend coefficient");
+  }
+  if (hasElectronAttachment) {
+    CloneTable(tabElectronAttachment, 
+               efields, bfields, angles, 
+               intpAttachment, extrLowAttachment, extrHighAttachment,
+               -30., "electron attachment coefficient");
+  }
+  if (hasElectronDiffTens) {
+    CloneTensor(tabElectronDiffTens,
+                6, efields, bfields, angles,
+                intpDiffusion, extrLowDiffusion, extrHighDiffusion,
+                0., "electron diffusion tensor");
+  }
+  
+  // Holes
+  if (hasHoleVelocityE) {
+    CloneTable(tabHoleVelocityE, 
+               efields, bfields, angles, 
+               intpVelocity, extrLowVelocity, extrHighVelocity,
+               0., "hole velocity along E");
+  }
+  if (hasHoleVelocityB) {
+    CloneTable(tabHoleVelocityB, 
+               efields, bfields, angles, 
+               intpVelocity, extrLowVelocity, extrHighVelocity,
+               0., "hole velocity along Bt");
+  }
+  if (hasHoleVelocityExB) {
+    CloneTable(tabHoleVelocityExB, 
+               efields, bfields, angles, 
+               intpVelocity, extrLowVelocity, extrHighVelocity,
+               0., "hole velocity along ExB");
+  }
+  if (hasHoleDiffLong) {
+    CloneTable(tabHoleDiffLong, 
+               efields, bfields, angles, 
+               intpDiffusion, extrLowDiffusion, extrHighDiffusion,
+               0., "hole longitudinal diffusion");
+  }
+  if (hasHoleDiffTrans) {
+    CloneTable(tabHoleDiffTrans, 
+               efields, bfields, angles, 
+               intpDiffusion, extrLowDiffusion, extrHighDiffusion,
+               0., "hole transverse diffusion");
+  }
+  if (hasHoleTownsend) {
+    CloneTable(tabHoleTownsend, 
+               efields, bfields, angles, 
+               intpTownsend, extrLowTownsend, extrHighTownsend,
+               -30., "hole Townsend coefficient");
+  }
+  if (hasHoleAttachment) {
+    CloneTable(tabHoleAttachment, 
+               efields, bfields, angles, 
+               intpAttachment, extrLowAttachment, extrHighAttachment,
+               -30., "hole attachment coefficient");
+  }
+  if (hasHoleDiffTens) {
+    CloneTensor(tabHoleDiffTens,
+                6, efields, bfields, angles,
+                intpDiffusion, extrLowDiffusion, extrHighDiffusion,
+                0., "hole diffusion tensor");
+  }
+  
+  // Ions
+  if (hasIonMobility) {
+    CloneTable(tabIonMobility, 
+               efields, bfields, angles, 
+               intpMobility, extrLowMobility, extrHighMobility,
+               0., "ion mobility");
+  }
+  if (hasIonDiffLong) {
+    CloneTable(tabIonDiffLong, 
+               efields, bfields, angles, 
+               intpDiffusion, extrLowDiffusion, extrHighDiffusion,
+               0., "ion longitudinal diffusion");
+  }
+  if (hasIonDiffTrans) {
+    CloneTable(tabIonDiffTrans, 
+               efields, bfields, angles, 
+               intpDiffusion, extrLowDiffusion, extrHighDiffusion,
+               0., "ion transverse diffusion");
+  }
+  if (hasIonDissociation) {
+    CloneTable(tabIonDissociation, 
+               efields, bfields, angles, 
+               intpDissociation, extrLowDissociation, extrHighDissociation,
+               -30., "ion dissociation");
+  }
+  
+  nEfields = nEfieldsNew;
+  nBfields = nBfieldsNew;
+  nAngles = nAnglesNew;
+  if (nBfields > 1 || nAngles > 1) map2d = true;
+  eFields.resize(nEfields);
+  bFields.resize(nBfields);
+  bAngles.resize(nAngles);
+  for (int i = nEfields; i--;) eFields[i] = efields[i];
+  for (int i = nBfields; i--;) bFields[i] = bfields[i];
+  for (int i = nAngles; i--;) bAngles[i] = angles[i]; 
+    
+}  
+  
+void
+Medium::CloneTable(std::vector<std::vector<std::vector<double> > >& tab,
+                   const std::vector<double>& efields,
+                   const std::vector<double>& bfields,
+                   const std::vector<double>& angles,
+                   const int intp, const int extrLow, const int extrHigh,
+                   const double init, const std::string label) {
+                   
+  if (debug) {
+    std::cout << className << "::CloneTable:\n";
+    std::cout << "    Copying values of " << label << " to new grid.\n";
+  }
+  
+  // Get the dimensions of the new grid.
+  const int nEfieldsNew = efields.size();
+  const int nBfieldsNew = bfields.size();
+  const int nAnglesNew  = angles.size();
+
+  // Create a temporary table to store the values at the new grid points.
+  std::vector<std::vector<std::vector<double> > > tabClone;
+  tabClone.clear();
+  InitParamArrays(nEfieldsNew, nBfieldsNew, nAnglesNew, tabClone, init);
+  
+  // Fill the temporary table.
+  for (int i = 0; i < nEfieldsNew; ++i) {
+    for (int j = 0; j < nBfieldsNew; ++j) {
+      for (int k = 0; k < nAnglesNew; ++k) {
+        double val = 0.;
+        if (map2d) {
+          if (!Numerics::Boxin3(tab, 
+                                bAngles, bFields, eFields, 
+                                nAngles, nBfields, nEfields,
+                                angles[k], bfields[j], efields[i], 
+                                val, intp)) {
+            std::cerr << className << "::SetFieldGrid:\n";
+            std::cerr << "    Interpolation of " << label << " failed.\n";
+            std::cerr << "    Cannot copy value to new grid at: \n";
+            std::cerr << "      E = " << efields[i] << "\n";
+            std::cerr << "      B = " << bfields[j] << "\n";
+            std::cerr << "      angle: " << angles[k] << "\n";
+          } else {
+            tabClone[k][j][i] = val;
+          }
+        } else {
+          val = Interpolate1D(efields[i], tab[0][0], 
+                              eFields, intp, extrLow, extrHigh);
+          tabClone[k][j][i] = val;
+        }
+      }
+    }
+  }
+  // Re-dimension the original table.
+  InitParamArrays(nEfieldsNew, nBfieldsNew, nAnglesNew, tab, init);
+  // Copy the values to the original table.
+  for (int i = 0; i < nEfieldsNew; ++i) {
+    for (int j = 0; j < nBfieldsNew; ++j) {
+      for (int k = 0; k < nAnglesNew; ++k) {
+        tab[k][j][i] = tabClone[k][j][i];
+      }
+    }
+  }
+  tabClone.clear();
+
+}
+
+void
+Medium::CloneTensor(std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
+                    const int n,
+                    const std::vector<double>& efields,
+                    const std::vector<double>& bfields,
+                    const std::vector<double>& angles,
+                    const int intp, const int extrLow, const int extrHigh,
+                    const double init, const std::string label) {
+                   
+  // Get the dimensions of the new grid.
+  const int nEfieldsNew = efields.size();
+  const int nBfieldsNew = bfields.size();
+  const int nAnglesNew  = angles.size();
+
+  // Create a temporary table to store the values at the new grid points.
+  std::vector<std::vector<std::vector<std::vector<double> > > > tabClone;
+  tabClone.clear();
+  InitParamTensor(nEfieldsNew, nBfieldsNew, nAnglesNew, n, tabClone, init);
+  
+  // Fill the temporary table.
+  for (int l = 0; l < n; ++l) {
+    for (int i = 0; i < nEfieldsNew; ++i) {
+      for (int j = 0; j < nBfieldsNew; ++j) {
+        for (int k = 0; k < nAnglesNew; ++k) {
+          double val = 0.;
+          if (map2d) {
+            if (!Numerics::Boxin3(tab[l], 
+                                  bAngles, bFields, eFields, 
+                                  nAngles, nBfields, nEfields,
+                                  angles[k], bfields[j], efields[i], 
+                                  val, intp)) {
+              std::cerr << className << "::SetFieldGrid:\n";
+              std::cerr << "    Interpolation of " << label << " failed.\n";
+              std::cerr << "    Cannot copy value to new grid at: \n";
+              std::cerr << "      Index: " << l << "\n";
+              std::cerr << "      E = " << efields[i] << "\n";
+              std::cerr << "      B = " << bfields[j] << "\n";
+              std::cerr << "      angle: " << angles[k] << "\n";
+            } else {
+              tabClone[l][k][j][i] = val;
+            }
+          } else {
+            val = Interpolate1D(efields[i], tab[l][0][0], 
+                                eFields, intp, extrLow, extrHigh);
+            tabClone[l][k][j][i] = val;
+          }
+        }
+      }
+    }
+  }
+  // Re-dimension the original table.
+  InitParamTensor(nEfieldsNew, nBfieldsNew, nAnglesNew, n, tab, 0.);
+  // Copy the values to the original table.
+  for (int l = 0; l < n; ++l) {
+    for (int i = 0; i < nEfieldsNew; ++i) {
+      for (int j = 0; j < nBfieldsNew; ++j) {
+        for (int k = 0; k < nAnglesNew; ++k) {
+          tab[l][k][j][i] = tabClone[l][k][j][i];
+        }
+      }
+    }
+  }
+  tabClone.clear();
+
+}
+
+void
 Medium::SetExtrapolationMethodVelocity(const std::string extrLow, 
                                        const std::string extrHigh) {
 
@@ -1836,8 +2314,8 @@ Medium::Interpolate1D(const double e,
 
 void
 Medium::InitParamArrays(const int eRes, const int bRes, const int aRes,
-                   std::vector<std::vector<std::vector<double> > >& tab,
-                   const double val) {
+                        std::vector<std::vector<std::vector<double> > >& tab,
+                        const double val) {
 
   if (eRes <= 0 || bRes <= 0 || aRes <= 0) {
     std::cerr << className << "::InitParamArrays:\n";
