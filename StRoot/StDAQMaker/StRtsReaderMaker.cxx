@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRtsReaderMaker.cxx,v 1.31 2010/03/17 19:52:44 fine Exp $
+ * $Id: StRtsReaderMaker.cxx,v 1.32 2010/12/14 15:27:04 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StRtsReaderMaker.cxx,v $
+ * Revision 1.32  2010/12/14 15:27:04  genevb
+ * Use LOG_DEBUG only in maker's Debug modes
+ *
  * Revision 1.31  2010/03/17 19:52:44  fine
  * Comment out the redundant debug message
  *
@@ -292,9 +295,11 @@ StRtsTable *StRtsReaderMaker::InitTable(const char *detName,const char *bankName
        // make sure there was no data anymore
        if (fBank && !fBank->is_empty()) 
        {
-          LOG_DEBUG << " You are going to use \"" << detName << "/" << bankName << "\" RTS bank" << endm;
-          LOG_DEBUG << " even though you did not use all information from the previous RTS  bank: \""
-                << fLastQuery << "\" yet" << endm;
+          if (Debug()) {
+             LOG_DEBUG << " You are going to use \"" << detName << "/" << bankName << "\" RTS bank" << endm;
+             LOG_DEBUG << " even though you did not use all information from the previous RTS  bank: \""
+                   << fLastQuery << "\" yet" << endm;
+          }
        }
        delete fRtsTable; 
        fRtsTable = 0; // forget this table. It will be deleted by Clear method anyway
@@ -351,13 +356,13 @@ TDataSet *StRtsReaderMaker::FillTable()
       fRtsTable->AppendRows(fDatReader->Record(),1);
       fRtsTable->SetNRows(1);
    } else {
-      if (!fLastQuery.IsNull() ) {
 #ifdef HARD_DEBUG         
+      if (!fLastQuery.IsNull() && Debug()) {
          LOG_DEBUG <<" StRtsReaderMaker::FillTable(): No data has been found for \"" 
                   << fLastQuery << "\" to fill the table"
                   << endm;
-#endif
       }
+#endif
       if (fRtsTable && Debug() > 3 ) fRtsTable->Print(0,5);
       delete fRtsTable; 
       fRtsTable = 0; // forget this table. It will be deleted by Clear method anyway
@@ -413,11 +418,13 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
                case 2:
                  thisMaker->fBank = rts_det->get( tokens->At(2)->GetName()
                                  ,atoi(tokens->At(3)->GetName()));
-                 LOG_DEBUG <<" StRtsReaderMaker::FindDataSet det(\"" <<
-                       detName << "\")->get(\""<<tokens->At(2)->GetName()
-                       << "\"," << atoi(tokens->At(3)->GetName())
-                       << ")  "
-                       << "fBank = "<< thisMaker->fBank << endm;
+                 if (Debug()) {
+                    LOG_DEBUG <<" StRtsReaderMaker::FindDataSet det(\"" <<
+                          detName << "\")->get(\""<<tokens->At(2)->GetName()
+                          << "\"," << atoi(tokens->At(3)->GetName())
+                          << ")  "
+                          << "fBank = "<< thisMaker->fBank << endm;
+                 }
 	         break;
                case 3:
                  thisMaker->fBank = rts_det->get( tokens->At(2)->GetName()
@@ -443,8 +450,10 @@ TDataSet  *StRtsReaderMaker::FindDataSet (const char* logInput,const StMaker *up
            thisMaker->InitTable(detName,tokens->At(2)->GetName());
            thisMaker->fLastQuery = rtsRequest;
            rtsSystem = fDatReader->Record();
-           LOG_DEBUG << " StRtsReaderMaker::FindDataSet: DAT request was found: " 
-                    << fDatReader->Length() << (void *)fDatReader->Record() << endm;
+           if (Debug()) {
+              LOG_DEBUG << " StRtsReaderMaker::FindDataSet: DAT request was found: " 
+                       << fDatReader->Length() << (void *)fDatReader->Record() << endm;
+           }
         }
      }
      delete tokens;
