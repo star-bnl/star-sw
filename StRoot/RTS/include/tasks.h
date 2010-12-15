@@ -174,4 +174,6 @@
 
 #define SC_TASK             230
 
+#define EVP_ETH_RCV_TASK 51
+
 #endif 

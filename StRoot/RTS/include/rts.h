@@ -226,4 +226,11 @@ typedef unsigned char u_char ;
 typedef unsigned short u_short ;
 #endif
 
+
+// 64 bit int 
+
+#define hi64(x) ((UINT32)(x >> 32))
+#define lo64(x) ((UINT32)(x & 0xffffffff))
+#define make64(lo, hi)  ((UINT64)(((UINT64)hi << 32) | lo))
+
 #endif /* _RTS_H_ */

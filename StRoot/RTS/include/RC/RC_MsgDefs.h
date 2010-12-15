@@ -24,7 +24,7 @@ typedef int bool;
 
 // Supporting enums
 enum connect_direction {to_handler, from_handler};
-enum query_type {all=0, inrun=1, none=2};
+//enum query_type {all=0, inrun=1, none=2};
 enum mask_types {literal=1, bits_on=2, bits_off=3};
 
 //----------------------------------------
@@ -75,9 +75,9 @@ struct rc_drc_clear_handler                          //
 };
 struct rc_drc_querysystem                            //
 { 
-  query_type system;
-  query_type crates;
-  query_type threads;
+  int system;
+  int crates;
+  int threads;
   int status;
   int is_caller_cheese;
   bool client_threads;
