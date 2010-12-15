@@ -1,9 +1,11 @@
 #include "EvpMain.h"
 
 #include <qapplication.h>
-#include "JevpLogic.h"
+#include <TROOT.h>
+#include <TSystem.h>
+//#include "JevpLogic.h"
 #include "JevpGui.h"
-#include "PresenterConnect.h"
+//#include "PresenterConnect.h"
 #include "qtimer.h"
 #include "ReferenceWidget.h"
 //#include "QLabelTest.h"
@@ -104,14 +106,17 @@ int EvpMain::_main(int argc, char **argv )
 
   if(evpMain->parseArgs(argc, argv) < 0) return 0;
 
-  JevpLogic *logic = new JevpLogic();
+  JevpGui *gui = new JevpGui();
+  JevpGui *logic = gui;
+  gui->jl_JevpLogic();
 
-  JevpGui *gui = new JevpGui(logic);
+  gui->gui_JevpGui(logic);
  
   gui->show();
 
   //PresenterConnect *con = new PresenterConnect(gui, logic);
-  new PresenterConnect(gui, logic);
+  //new 
+  gui->pc_PresenterConnect(gui, logic);
 
   // This issues an update...to start the update loop...
   QTimer::singleShot (100,gui,SLOT(UpdatePlots()));

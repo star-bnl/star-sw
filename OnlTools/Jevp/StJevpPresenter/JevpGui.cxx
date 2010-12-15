@@ -6,10 +6,12 @@
 //#include "StJevpPool/StJevpUtils/ServerStatus.h"
 #include "TQtRootSlot.h"
 #include "TROOT.h"
+#include <TSocket.h>
+#include <TClass.h>
+#include <TLine.h>
 #include "TEnv.h"
 
 //#include "StRoot/StEEmcPool/muEztPanitkin/EEqaPresenter.h"
-#include "JevpLogic.h"
 #include "ReferenceWidget.h"
 #include "TQtWidget.h"
 #include "TQtZoomPadWidget.h"
@@ -26,6 +28,11 @@
 #include "qcursor.h"
 #include "qtimer.h"
 
+#if QT_VERSION < 0x40000
+#  include <qfiledialog.h>
+#else /* QT4 */
+#  include <q3filedialog.h>
+#endif /* QT4 */
 
 #include "q3vbox.h"
 #include "q3hbox.h"
@@ -44,7 +51,7 @@
 #include "RunDialog.h"
 #include "EvpMain.h"
 
-JevpLogic *Logic;
+JevpGui *Logic;
 
 char* mystrcat(const char* a, const char* b) {
   char* txt = new char[1024];
@@ -112,7 +119,7 @@ JevpScreenWidget::~JevpScreenWidget() {
 void JevpScreenWidget::mousePressEvent(QMouseEvent *e)
 {
   int wide, deep;
-  DisplayNode *node = Logic->getCanvasDescriptor(combo_index);
+  DisplayNode *node = Logic->jl_getCanvasDescriptor(combo_index);
   
   const char *tmp = node->parent->getProperty("wide");
   if(tmp) wide = atoi(tmp);
@@ -156,13 +163,13 @@ void JevpGui::fillTab(QTabWidget *tab, u_int idx)
   //int isCanvasMe = 0;
   //int isCanvasChild = 0;
 
-  //char *myname = logic->getTab(idx, &isCanvasMe);
-  DisplayNode *mynode = logic->getTab(idx);
-  u_int child_idx = logic->getTabChildIdx(idx);
+  //char *myname = jl_getTab(idx, &isCanvasMe);
+  DisplayNode *mynode = jl_getTab(idx);
+  u_int child_idx = jl_getTabChildIdx(idx);
   if(!mynode) return;
 
-  //char *childname = logic->getTab(child_idx, &isCanvasChild);
-  DisplayNode *childnode = logic->getTab(child_idx);
+  //char *childname = jl_getTab(child_idx, &isCanvasChild);
+  DisplayNode *childnode = jl_getTab(child_idx);
   if(!childnode) return;
 
   if(childnode->leaf) {
@@ -170,7 +177,7 @@ void JevpGui::fillTab(QTabWidget *tab, u_int idx)
 );    
     JevpScreenWidget *nwidget = new JevpScreenWidget(mynode->name, childnode->name, child_idx, tab);
 
-    logic->screens->Add((TObject *)nwidget);
+    jl_screens->Add((TObject *)nwidget);
 
     suspend << nwidget;
 
@@ -186,7 +193,7 @@ void JevpGui::fillTab(QTabWidget *tab, u_int idx)
   
     char lab[100];
     sprintf(lab, "%s - not available",nwidget->plot->c_str());
-    //logic->DrawPlot(nwidget);
+    //jl_DrawPlot(nwidget);
   }
   else {
     QTabWidget *nwidget = new QTabWidget();
@@ -199,7 +206,7 @@ void JevpGui::fillTab(QTabWidget *tab, u_int idx)
     fillTab(nwidget, child_idx);
   }
   
-  u_int next_idx = logic->getTabNextIdx(idx);
+  u_int next_idx = jl_getTabNextIdx(idx);
   fillTab(tab, next_idx);
 }
 
@@ -242,9 +249,11 @@ static TQtBrowserMenuItem_t gMenu_Data[] = {
 
 
 //------------------------------------------------------------------------
-JevpGui::JevpGui(JevpLogic *logic, bool isRefWindow) :  
-  Q3MainWindow(), mWidth(900), mHight(500), mStrLive(" Live  "), mStrFile(" File  "), 
-  mStrRun("Running"), mStrStop("Stopped"), fGuiRefreshRate(5000)
+JevpGui::JevpGui() : Q3MainWindow(), mWidth(900), mHight(500), mStrLive(" Live  "), mStrFile(" File  "), mStrRun("Running"), mStrStop("Stopped"), fGuiRefreshRate(5000)
+{
+}
+
+void JevpGui::gui_JevpGui(JevpGui *logic, bool isRefWindow)
 {
   fMenuBar = NULL;
   mZoomer = NULL;
@@ -312,7 +321,7 @@ JevpGui::JevpGui(JevpLogic *logic, bool isRefWindow) :
 
   
  //  for(int i=0;;i++) {
-//     char *tname = logic->getTab(i,0);
+//     char *tname = jl_getTab(i,0);
 //     if(tname == NULL) break;
 
 //     QTabWidget *toptab = new QTabWidget(fTab);
@@ -321,7 +330,7 @@ JevpGui::JevpGui(JevpLogic *logic, bool isRefWindow) :
 //     fTab->addTab(toptab, tname);
     
 //     for(int j=1;;j++) {
-//       tname = logic->getTab(i,j);
+//       tname = jl_getTab(i,j);
 //       if(tname == NULL) break;
 
 //       TQtWidget *w = new TQtWidget(toptab);
@@ -778,14 +787,14 @@ void JevpGui::ChangeToRun()
   
   printf("run name=%s\n",name);
 
-  int newport = logic->LaunchRun(name);
+  int newport = jl_LaunchRun(name);
   printf("newport = %d\n",newport);
   if(newport <= 0) return;   // no new connection...
 
   if(evpMain->serverport != JEVP_PORT) {
-    logic->killServer();
+    jl_killServer();
   }
-  logic->ConnectToServerPort(newport, 60);
+  jl_ConnectToServerPort(newport, 60);
 
   delete name;
 }
@@ -801,8 +810,8 @@ void JevpGui::ChangeToLive()
   x = fActions[kFileLive]->isOn();
   fActions[kFileLive]->setEnabled(x);
 
-  logic->killServer();
-  logic->ConnectToServerPort(JEVP_PORT,5);
+  jl_killServer();
+  jl_ConnectToServerPort(JEVP_PORT,5);
 }
 
 
@@ -909,7 +918,7 @@ void JevpGui::tabChanged(QWidget* q) {
 
 
     widget->setUpdatesEnabled(false);
-    logic->DrawPlot(widget);
+    jl_DrawPlot(widget);
     widget->setUpdatesEnabled(true);
     widget->update();
 
@@ -993,7 +1002,7 @@ void JevpGui::updateRequest() {
 void JevpGui::UpdatePlots() 
 {
 
-  if(logic->socket == NULL) {
+  if(jl_socket == NULL) {
     printf("Updating plots but socket is NULL... returning...\n");
   }
   else {
@@ -1009,7 +1018,7 @@ void JevpGui::UpdatePlots()
     //char lab[100];
     //sprintf(lab, "%s - not available",currentScreen->plot->c_str());
 
-    logic->DrawPlot(currentScreen);
+    jl_DrawPlot(currentScreen);
   }
   
   if (fActions[kAutoUpdate]->isOn()) {
@@ -1090,3 +1099,893 @@ void JevpGui::setServerInfo(ServerStatus* ss) {
   //   if ( !sub ) return 0;
   //   return sub->GetCanvas();
   // }
+
+
+
+//// PRESENTER_CONNECT
+
+void JevpGui::pc_PresenterConnect(JevpGui* gui, JevpGui* pre) 
+{
+
+    pc_mGui = gui;
+    pc_mPresenter = pre;
+
+  connect(pc_mGui,SIGNAL(live()), this, SLOT(live()) ); 
+  connect(pc_mGui,SIGNAL(file()), this, SLOT(file()) ); 
+  connect(pc_mGui,SIGNAL(update(TCanvas*, int, int )), this, SLOT(update(TCanvas*, int, int )) ); 
+  connect(pc_mGui,SIGNAL(update(TCanvas*, const char* )), this, SLOT(update(TCanvas*, const char*)) ); 
+  connect(pc_mGui,SIGNAL(update()), this, SLOT(update()) ); 
+  connect(pc_mGui,SIGNAL(save()), this, SLOT(save()) ); 
+  connect(pc_mGui,SIGNAL(saveAs()), this, SLOT(saveAs()) ); 
+  connect(pc_mGui,SIGNAL(print()), this, SLOT(print()) ); 
+  connect(pc_mGui,SIGNAL(openReference()), this, SLOT(openReference()) ); 
+
+  connect(pc_mGui,SIGNAL( tab(int) ),         this, SLOT( setTab(int)) ); 
+  connect(pc_mGui,SIGNAL( subTab(int) ),      this, SLOT( setSubTab(int)) ); 
+  connect(pc_mGui,SIGNAL( canvas(TCanvas*) ), this, SLOT( setCanvas(TCanvas*)) ); 
+
+  connect(this, SIGNAL( pc_signalEventInfo(int,int,int,int, unsigned int, unsigned int,unsigned int, unsigned int) ), pc_mGui, SLOT( setEventInfo(int,int,int,int, unsigned int, unsigned int,unsigned int, unsigned int) ) ); 
+  connect(this, SIGNAL( pc_signalServerInfo(ServerStatus*) ), pc_mGui, SLOT( setServerInfo(ServerStatus*) ) ); 
+  connect(this, SIGNAL( pc_updateRequest() ), pc_mGui, SLOT( updateRequest() ) );
+
+
+  //connect(pc_mPresenter, SIGNAL( addGroupTab(const char*) ), pc_mGui, SLOT( addGroupTab(const char*) ) );
+  //connect(pc_mPresenter, SIGNAL( addGroup(const char*) ), pc_mGui, SLOT( addGroup(const char*) ) );
+  //connect(pc_mPresenter, SIGNAL( removeGroupTabs()), pc_mGui, SLOT( removeGroupTabs()) );
+  connect(pc_mPresenter, SIGNAL( setEnabled(bool)) , pc_mGui, SLOT( setEnabled(bool) ) );
+
+  // Gui --> Presenter
+  connect(pc_mGui,SIGNAL(printAll(const char*)), pc_mPresenter, SLOT(printAll(const char*)) );
+  //connect(pc_mGui,SIGNAL(nextEvent()), pc_mPresenter, SLOT(NextEvent()) );
+//  connect(qApp,SIGNAL(lastWindowClosed()),pc_mPresenter,ClosePresenter()));
+  pc_mCanvas = 0;
+}
+
+
+void JevpGui::pc_save() {
+  pc_mPresenter->jl_Save("");
+}
+
+void JevpGui::pc_saveAs() {
+  // QString dir(EvpUtil::GetOutputPath());
+  QString dir("");
+
+  QString filter("*.root");
+#if QT_VERSION < 0x40000
+  QFileDialog dialog( dir, filter, pc_mGui, "", true );
+#else /* QT4 */
+  Q3FileDialog dialog( dir, filter, pc_mGui, "", true );
+#endif /* QT4 */
+  dialog.exec();
+  if (!dialog.selectedFile().isEmpty()) {
+    pc_mPresenter->jl_Save( dialog.selectedFile().ascii() );
+  }
+}
+
+
+void JevpGui::pc_live() {
+  //cout << "liveButton" << endl;
+  pc_mPresenter->jl_Stop();   // will restart automatically
+  //pc_mPresenter->jl_SetSource();
+}
+
+void JevpGui::pc_file() {
+  //cout << "fileButton" << endl;
+  //QString dir(EvpUtil::GetOutputPath());
+  QString dir("/home/jml");
+
+  QString caption("File dialog");
+#if QT_VERSION < 0x40000
+  QFileDialog dialog(dir, QString(), pc_mGui,caption);
+#else /* QT4 */
+  Q3FileDialog dialog(dir, QString(), pc_mGui,caption);
+#endif /* QT4 */
+  dialog.setCaption(caption);
+  dialog.addFilter("*.root");
+  //  dialog.addFilter("*.map");
+  dialog.exec();
+
+  QString file = dialog.selectedFile();
+  QString mapFile = file;
+  int iret = 0;
+//  if ( file.find(".map") < 0 ) {   // must be root file, only *.root and *.map are allowed
+//    mapFile.replace(".root",".map");
+//    iret = EvpUtil::Root2Map(file,mapFile);
+//  } 
+
+  if (iret) {
+#if QT_VERSION < 0x40000
+    cerr << "### error ### Can not open file : " << mapFile << endl;
+#else /* QT4 */
+    cerr << "### error ### Can not open file : " << mapFile.toStdString() << endl;
+#endif /* QT4 */
+    return;
+  }
+
+  //  pc_mPresenter->jl_SetSource( mapFile.ascii() );
+  emit pc_updateRequest();
+}
+
+void JevpGui::pc_openReference() {
+  cout << "Opening reference" << endl;
+  //JevpGui* gui2 = new JevpGui(true);
+  //gui2->resize(500,500);
+  //gui2->show();
+//  EvpUtil::ReadCanvasDefinitions();
+  //EvpPresenter* presenter2 = new EvpPresenter(EvpUtil::mReference);
+  //JevpGui* presenter2 = new JevpGui();
+  //PresenterConnect* con2 = new PresenterConnect(gui2,presenter2);
+
+//  QString file = "/home/dkettler/test/run10029077.root";
+//  QString mapFile = file;
+//  mapFile.replace(".root",".map");
+//  int iret = EvpUtil::Root2Map(file,mapFile);
+//  
+//  if (iret) {
+//    cerr << "### error ### Can not open file : " << mapFile << endl;
+//    return;
+//  }
+
+//  QString mapFile = "/a/pplot/histos/run10031084.map";
+//  presenter2->SetSource( EvpUtil::mReference );
+}
+   
+void JevpGui::pc_update() {
+//   if ( pc_mPresenter->jl_serverStatus()->diffTimeInSec() >120.) {
+//     if ( pc_mPresenter->jl_Status() ) {
+//       live();
+//       std::cout << "live again "<< endl;
+//     }
+//   }
+  emit pc_signalEventInfo(pc_mPresenter->jl_run(),0,0,0,0,0,0,0);
+  //  emit pc_signalServerInfo(pc_mPresenter->jl_serverStatus());
+}
+
+
+void JevpGui::pc_update(TCanvas* canvas, int tab, int subTab) {
+  update();
+  printf("In update? a \n");
+  if (canvas) pc_mPresenter->jl_Draw(canvas,pc_mTab,pc_mSubTab);
+}
+
+void JevpGui::pc_update(TCanvas* canvas, const char* name) {
+  update();
+  printf("In update? b\n");
+  if (canvas) pc_mPresenter->jl_Draw(canvas, name );
+}
+
+void JevpGui::pc_print() {
+//   //cout << "print" << endl;
+//   int tab = pc_mGui->GetTabId();
+//   int subTab = pc_mGui->GetSubTabId();
+//   TCanvas* cc = pc_mGui->GetCanvas();
+//   pc_mPresenter->jl_Print(cc,tab,subTab);
+}
+   
+   
+void JevpGui::pc_setTab(int t) { pc_mTab = t;} 
+void JevpGui::pc_setSubTab(int t) { pc_mSubTab = t;} 
+void JevpGui::pc_setCanvas(TCanvas* t) { pc_mCanvas = t;} 
+
+
+
+////////////////JevpLogic///////////////////
+
+
+int JevpGui::jl_ConnectToServerPort(int port, int ntries)
+{
+  // First disconnect from current server, if sensible.
+  if(jl_socket != NULL) {
+    jl_socket->Close();
+    jl_socket = NULL;
+  }
+  
+  evpMain->serverport = port;
+  TSocket *nsocket;
+  for(int i=0;i<ntries;i++) {
+    nsocket = new TSocket(evpMain->server, evpMain->serverport);
+    if(nsocket->IsValid()) {
+      jl_socket = nsocket;
+      return 0;
+    }
+
+    printf("Error Connecting (%dth of %d tries): %d\n", i, ntries, nsocket->GetErrorCode());
+    sleep(1);
+  }
+
+  return -1;
+}
+
+int JevpGui::jl_LaunchRun(char *runNumber) {
+  EvpMessage msg;
+  msg.setCmd((char *)"launch");
+  msg.setSource((char *)"presenter");
+  msg.setArgs(runNumber);
+  jl_send(&msg);
+
+
+  // Get response...
+  TMessage *mess;
+  int ret = jl_socket->Recv(mess);
+  if(ret == 0) {  // disconnect
+    printf("Server disconnected?\n");
+    exit(0);
+  }
+  
+  //int x = (int)mess->GetClass();
+  if(strcmp(mess->GetClass()->GetName(), "EvpMessage") != 0) {
+    printf("Didn't get a EvpMessage class\n");
+    exit(0);
+  }
+
+  EvpMessage *response = (EvpMessage *)mess->ReadObject(mess->GetClass());
+
+  printf("Got a response: %s %s\n",response->cmd,response->args);
+
+  if(strcmp(response->cmd, "launch") != 0) {
+    printf("Didn't get a launch command...");
+    return 0;
+  }
+
+  int port = atoi(response->args);
+  
+  return port;
+}
+
+void JevpGui::jl_killServer() {
+  EvpMessage msg;
+  msg.setCmd((char *)"kill");
+  jl_send(&msg);
+
+  jl_socket->Close();
+  jl_socket = NULL;
+}
+
+
+void JevpGui::jl_JevpLogic() 
+{
+  jl_mLastDrawnCanvas = NULL;
+  // We need to set up the sockets...
+  jl_screens = new TList();
+
+  jl_socket = NULL;
+
+  //   if(evpMain->server) {
+  //     socket = new TSocket(evpMain->server,  evpMain->serverport);
+  //     if(!socket->IsValid()) {
+  //       socket->NetError("connect: ",socket->GetErrorCode());
+  //       exit(0);
+  //     }
+  //   }
+
+  if(jl_ConnectToServerPort(evpMain->serverport,5) < 0) return;
+  
+  if(evpMain->display == NULL) {
+    printf("Need to specify the display\n");
+    exit(0);
+  }
+
+  if(!evpMain->server || evpMain->displayFile==1) {
+    // Read Display from file...
+
+    jl_displayFile = new DisplayFile();
+    if(jl_displayFile->Read(evpMain->display) < 0) {
+      printf("Error reading display file: %s\n",evpMain->display);
+      exit(0);
+    }
+    
+    jl_displayFile->dump();
+  }
+  else {
+    // Read display from server...
+    
+    EvpMessage msg;
+    msg.setCmd((char *)"display_desc");
+    msg.setArgs(evpMain->display);
+    jl_send(&msg);
+    
+    // get response...
+    //printf("Waiting for tab data from server...\n");
+    TMessage *mess;
+    int ret = jl_socket->Recv(mess);
+    if(ret == 0) {  // disconnect
+      printf("Server disconnected?\n");
+      exit(0);
+    }
+    
+    //printf("Got something ret=%d mess=0x%x\n",ret,mess);
+    int x = (int)mess->GetClass();
+
+    printf("--->0x%x\n",x);// , x[0],x[1],x[2],x[3]);
+
+    if(strcmp(mess->GetClass()->GetName(), "EvpMessage") != 0) {
+      printf("Didn't get a DisplayDefSender class\n");
+      exit(0);
+    }
+
+    EvpMessage *tabdata = (EvpMessage *)mess->ReadObject(mess->GetClass());
+
+    //   printf("....cmd was %s\n",tabdata->cmd);
+
+    if(tabdata->args == NULL) {
+      printf("No display '%s' found...\n", evpMain->display);
+      exit(0);
+    }
+
+    jl_displayFile = new DisplayFile();
+
+    //    printf("asdf\n");
+    //    printf("tabdata 0x%x\n",tabdata->args);
+    //    printf("%c%c%c\n",tabdata->args[0],tabdata->args[1],tabdata->args[2]);
+
+    jl_displayFile->ReadBuff(tabdata->args, strlen(tabdata->args));
+    
+    jl_displayFile->setDisplay(evpMain->display);
+    // printf("I just got the display file: \n");
+    // jl_displayFile->dump();
+    // printf("Done dumping it...\n");
+    
+    delete tabdata;
+
+
+  }
+
+
+  // Connect();
+  // Some preparations here
+  // Here is starting directory name
+  SetDebugLevel(0);
+}
+
+void JevpGui::jl_JevpLogic(const char* file) {
+  jl_mLastDrawnCanvas = 0;
+  // Some preparations here
+  // Here is starting directory name
+  SetDebugLevel(0);
+}
+
+//----------------------------------------------------------------
+//JevpGui::jl_~JevpLogic() {
+//}
+
+
+//--------------------------------------------------------------
+// void EvpPresenter::SetSource(const char* file)  {
+//   if ( mDebugLevel) cout << __PRETTY_FUNCTION__ << endl; 
+//   emit setEnabled(false);
+//   Disconnect();
+//   sprintf(mMapFile,"%s",file);
+//   Connect();
+//   emit setEnabled(true);
+// }
+//--------------------------------------------------------------
+
+
+
+//--------------------------------------------------------------
+// void EvpPresenter::ReconfigureTabs() {
+//   cout << __PRETTY_FUNCTION__ << endl;
+//   emit removeGroupTabs();
+//   addGroupTabs();  //tmp->remove();
+// }
+
+//--------------------------------------------------------------
+
+
+void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
+  char tmp[256];
+
+  screen->setUpdatesEnabled(false);   // keep double buffer in place...
+
+  int combo_index = screen->combo_index;
+  TCanvas *gcc = screen->GetCanvas();
+
+  //printf("sleeping 5\n");
+  //sleep(5);
+
+  //int isCanvas=0;
+  
+  printf("drawplot....combo_index = %d\n",combo_index);
+
+  // I need to use the display def version to get a 
+  // real object rather than a string...
+  CP;
+  DisplayNode *thetab = jl_displayFile->getTab(combo_index);
+  CP;
+  if(!thetab->leaf) {
+    sprintf(tmp, "No histo for index=%d",combo_index);
+    jl_CrossOfDeath(screen, tmp);
+    CP;
+    return;
+  }
+
+  //   void *thetab = jl_displayFile->getTab(combo_index, &isCanvas);
+  //   if(!isCanvas) {
+  //     sprintf(tmp, "No canvas for index=%d",combo_index);
+  //     jl_CrossOfDeath(screen, tmp);
+  //     return;
+  //   }
+
+  
+  CP;
+  // CanvasDescriptor *cd = (CanvasDescriptor *)thetab;
+  int nplots = thetab->nSiblings() + 1;
+  screen->Clear();
+  // gcc->Clear();
+  
+  int wide = thetab->getIntParentProperty("wide");
+  if(wide <= 0) wide = 1;
+  int deep = thetab->getIntParentProperty("deep");
+  if(deep <= 0) deep = 1;
+  int scaley = thetab->getIntParentProperty("scaley");
+  if(scaley <= 0) scaley = 0;
+
+  CP;
+  gcc->Divide(wide, deep);
+  //sleep(3);
+
+  double maxY = -9999;
+
+  DisplayNode *hd = thetab;
+  for(int i=0;i<nplots;i++) {   // First get plots!
+    char tmp[256];
+    JevpPlot *plot = jl_getPlotFromServer(hd->name,  tmp);
+  
+    if(plot) {
+      screen->addPlot(plot);
+      screen->addJevpPlot(plot);
+      double my = plot->getMaxY();
+      if(my > maxY) maxY = my;
+    }
+
+    hd = hd->next;   
+  }
+
+  CP;
+
+  // Now plot them
+  hd = thetab;
+  CP;
+  for(int i=0;i<nplots;i++) {
+    JevpPlot *plot = screen->getJevpPlot(hd->name);
+    gcc->cd(i+1);
+
+    if(plot == NULL) {
+      CP;
+      jl_CrossOfDeath(screen, tmp);     // Some error...
+    }
+    else {
+      CP;
+      if(scaley) {
+	plot->setMaxY(maxY * 1.2);
+      }
+      
+      CP;
+      plot->draw();
+      //delete plot;
+    }
+    CP;
+    //printf("drew %s\n",hd->name);
+
+    hd = hd->next;    
+    // sleep(3);
+  }
+
+  CP;
+
+  screen->setUpdatesEnabled(true);   // reenable the update
+  gcc->Update();
+  screen->update();                  // and trigger!
+
+  CP;
+  //showDirectories();
+}
+    
+void JevpGui::jl_saveExistingPlot(JevpPlot *plot)
+{
+  plot->refid = -plot->refid;
+  jl_writePlotToServer(plot);
+}
+
+void JevpGui::jl_writePlotToServer(JevpPlot *plot)
+{
+  TMessage mess(kMESS_OBJECT);
+  mess.WriteObject(plot);
+  jl_socket->Send(mess);
+}
+
+void JevpGui::jl_deletePlot(JevpPlot *plot) {
+  EvpMessage msg;
+  msg.setCmd((char *)"deleteplot");
+  char str[256];
+  sprintf(str, "%s %d",plot->GetPlotName(), plot->refid);
+  msg.setArgs(str);
+  jl_send(&msg);
+}
+
+void JevpGui::jl_swapRefsOnServer(char *name, int idx1, int idx2)
+{
+  EvpMessage msg;
+  msg.setCmd((char *)"swaprefs");
+  char str[256];
+  sprintf(str, "%s %d %d",name, idx1, idx2);
+  msg.setArgs(str);
+  jl_send(&msg);
+}
+
+JevpPlot *JevpGui::jl_getPlotFromServer(char *name, char *error)
+{
+  error[0] = '\0';   // clear error...
+  
+  // Ask server for plot...
+  EvpMessage msg;
+  msg.setCmd("getplot");
+  msg.setArgs(name);
+  jl_send(&msg);
+  
+  // get response...
+  printf("Waiting for plot from server...\n");
+  TMessage *mess;
+  int ret = jl_socket->Recv(mess);
+  if(ret == 0) {  // disconnect
+    printf("Server disconnected?\n");
+    sprintf(error, "Can't get plot: %s  (no server)",name);
+
+    return NULL;
+  }
+  
+  if(strcmp(mess->GetClass()->GetName(), "EvpMessage") == 0) {
+    // There was no valid object...
+    EvpMessage *msg = (EvpMessage *)mess->ReadObject(mess->GetClass());
+    sprintf(error, "Can't get plot: (%s)", msg->args);
+    
+    delete msg;
+    delete mess;
+    return NULL;
+  }
+
+  if(strcmp(mess->GetClass()->GetName(), "JevpPlot") == 0) {
+    JevpPlot *plot = (JevpPlot *)mess->ReadObject(mess->GetClass());
+
+    delete mess;
+    return plot;
+  }
+
+  printf("Invalid message type %s\n",mess->GetClass()->GetName());
+  sprintf(error, "Invalid message type %s",mess->GetClass()->GetName());
+  delete mess;
+  return NULL;
+}
+
+
+void JevpGui::jl_CrossOfDeath(JevpScreenWidget *screen, char *str) {
+
+  TLine* a = new TLine(0.,0.,1.,1.);
+  TLine* b = new TLine(0.,1.,1.,0.);
+  TText* t = new TText(0.5,0.5,str);
+
+  // This is how we free the memory...
+  a->SetBit(kCanDelete);
+  b->SetBit(kCanDelete);
+  t->SetBit(kCanDelete);
+  screen->addPlot(a);
+  screen->addPlot(b);
+  screen->addPlot(t);
+
+  a->SetLineColor(2);
+  b->SetLineColor(2);
+  t->SetTextColor(3);
+  t->SetTextAlign(22);
+
+  // Already cd()'d to proper pad...
+  a->Draw();
+  b->Draw();
+  t->Draw();
+
+  //gcc->Update();
+  //cout << __PRETTY_FUNCTION__ << endl;
+  return;
+}
+ 
+
+void JevpGui::jl_Draw(TCanvas* gcc, int  tab, int subTab) {
+  //   if(EvpUtil::hGroupName[tab][subTab] != "") {
+  //     Draw(gcc, EvpUtil::hGroupName[tab][subTab]);
+  //     return;
+  //   }
+
+  //   if ( mDebugLevel) {
+  //     cout << "Draw tab/subtab : " << tab << "/" << subTab << endl;
+  //   }
+  //   if ( (mRS->getDetectorBitsRun()&EvpUtil::canvasDetectorBits[tab][subTab])==0 ) { jl_CrossOfDeath(gcc); return; }
+  //   if ( (mRS->getTriggerBitsRun()&EvpUtil::canvasTriggerBits[tab][subTab])==0 ) { jl_CrossOfDeath(gcc); return; }
+  //   if (!mfile) return;
+  
+  //   if ( mLastDrawnCanvas != gcc ) needsUpdate = true;
+  //   if ( !needsUpdate ) return;
+  
+  // //  GenericFile* gen = new GenericFile(mfile);
+  // //  EvpUtil::DisplayOneCanvas(gen,gcc,tab,subTab);
+  // //  delete gen;
+  //   EvpUtil::DisplayOneCanvas(mfile,gcc,tab,subTab);
+  //   mLastDrawnCanvas =  gcc;
+}
+
+void JevpGui::jl_Draw(TCanvas* gcc, const char* group) {
+  //   if ( mDebugLevel ) {
+  //     cout << "Draw group : " << group << endl;
+  //   }
+  //   HistogramGroup* hg = mGroups.read(mfile,group);
+  //   if ( !gcc ) {
+  //     cout <<  __PRETTY_FUNCTION__ << " no canvas " << endl;
+  //     return; 
+  //   } 
+  //   if ( !hg ) { 
+  //     cout <<  __PRETTY_FUNCTION__ << " no histogram group " << endl;
+  //     return;
+  //   }
+  //   if ( mLastDrawnCanvas != gcc ) needsUpdate = true;
+  //   if ( !needsUpdate ) return;
+  
+  //   hg->draw(gcc);
+  //   mLastDrawnCanvas = gcc;
+}
+
+
+
+void JevpGui::jl_Save(const char* file){
+  //   char filename[1024];
+  //   //cout << " fileame " << file << endl;
+  //   if ( strcmp(file,"")==0 ) {
+  //     sprintf(filename,"%s/run%d.root",EvpUtil::GetOutputPath(),mRS->getRunNumber());
+  //   } else {
+  //     if ( strcmp(file,gSystem->BaseName(file))==0) { // no path given, add default path
+  //       sprintf(filename,"%s/%s",EvpUtil::GetOutputPath(),file);
+  //     } else { // use filename as given
+  //       sprintf(filename,"%s",file);
+  //     }
+  //   }
+  //   cout << " filename " << filename << endl;
+  //   if(mfile->mapFile()) {
+  //     TMapFile* mapfile = (TMapFile*) mfile->file();
+  //     EvpUtil::Map2Root(mapfile,filename);
+  //   } else {
+  //     TFile* rfile = (TFile*) mfile->file();
+  //     rfile->Write(filename);
+  //   }
+}
+
+void JevpGui::jl_SaveAll(){
+  //   char filename[1024];
+  //   char cmd[1024];
+  //   char title[1024];
+  //   char cname[1024];
+  //   //if ( true) return ;
+  //   sprintf(filename,"run%d.map",mRS->getRunNumber() );
+  //   sprintf(title,"End of run action : run%d",mRS->getRunNumber());
+  //   sprintf(cname,"%d",(int)time(0));
+  //   sprintf(cmd,"/bin/cp %s %s/%s",mMapFile,EvpUtil::GetOutputPath(),filename);
+  //   //cout << cmd << endl;
+  //   gSystem->Exec(cmd);
+  
+  //   gSystem->Sleep(1000);
+  //   sprintf(cmd,"pwd; endOfRunAction.csh %s/%s & ",EvpUtil::GetOutputPath(),filename);
+  //   cout << cmd << endl;
+  //   gSystem->Exec(cmd);
+
+}
+
+
+void JevpGui::jl_WriteCurrent(int i, int j){
+  //   char psFilename[1024];
+  //   char pdfFilename[1024];
+  //   sprintf(psFilename,"%s/run%d_tab%d_%d.ps",EvpUtil::GetOutputPath(),mRS->getRunNumber(),i,j);
+  //   sprintf(pdfFilename,"%s/run%d_tab%d_%d.pdf",EvpUtil::GetOutputPath(),mRS->getRunNumber(),i,j);
+  //   WriteCurrentCanvasToPSFile(psFilename,i,j);
+
+  //   char cmd[1024];
+  //   sprintf(cmd,"/usr/bin/convert %s %s",psFilename, pdfFilename);
+  //   int iret = gSystem->Exec(cmd);
+  //   if ( !iret ) {
+  //     cout << " ### error ### writing cureent canvas failed " << endl;
+  //     cout << " ### error ### psFilename: " << psFilename << endl;
+  //     cout << " ### error ### pdfFilename: " << pdfFilename << endl;
+  //     cout << " ### error ### error-code: " << iret << endl;
+  //   }
+  //   /*
+  //   if (iret==0) {
+  //     PGMessage* pg = new PGMessage("Writing current canvas:",false,0xffffff); 
+  //     pg->AddLine(psFilename);
+  //     pg->AddLine(pdfFilename);
+  //     pg->AddLine("O.K");
+  //     pg->Layout();
+  //   } else {
+  //     PGMessage* pg = new PGMessage("### error ### Writing current canvas:",false,0xff0000); 
+  //     pg->AddLine(psFilename);
+  //     pg->AddLine(pdfFilename);
+  //     pg->AddLine("return error");
+  //     pg->Layout();
+  //   }
+  //   */
+
+}    
+
+
+void JevpGui::jl_WriteCurrentCanvasToPSFile(const char* filename, int tab, int subTab){
+  //   // Find active canvas indexes
+  //   int i = tab;
+  //   int j = subTab;
+  //   //cout << filename << endl;
+  //   int type = 111; //portrait ps
+  //   //int type =112; //landscape ps
+  //   //int type =113; //eps
+
+  //   char *name = "Saving Canvas in PS File";
+  //   int canvasWidth  = EvpUtil::mCanvasWidth;
+  //   int canvasHeight = EvpUtil::mCanvasHeight;
+
+
+  //   TCanvas* c1 = new TCanvas(name, name, canvasWidth, canvasHeight);
+  //   TPaveLabel title(0.1,0.96,0.9,0.99,mHistoPSFile);
+
+  //   TDatime ftime;
+  //   TPaveLabel date(0.7,0.01,0.9,0.03,ftime.AsString());
+
+
+  //   //cout<<filename<<endl;
+  //   TPostScript *ps = new TPostScript(filename,type);
+
+
+  //   c1->cd();
+  //   title.Draw();
+  //   date.Draw();
+  //   EvpUtil::DisplayOneCanvas(mfile,c1,i,j);
+ 
+  //   c1->Update();
+
+  //   ps->Close();
+  //   c1->Close();
+
+  //   //gSystem->Exec("ghostview test.ps");
+  //   delete ps;
+  //   //delete plotPad;
+  //   delete c1;
+
+}
+
+
+
+void JevpGui::jl_printAll(const char* filename) {
+  //   cout << __PRETTY_FUNCTION__ << " " <<  filename << endl;
+
+  //   gROOT->SetBatch(kTRUE);
+  //   TCanvas *cc = new TCanvas("printAllCanvas","printAllCanvas",EvpUtil::mCanvasWidth,EvpUtil::mCanvasHeight);
+  //   cc->cd();
+  //   //TPostScript ps(filename,111);
+  //   char openPs[1024]; 
+  //   char printPs[1024];
+  //   char closePs[1024];
+  //   sprintf(openPs,"%s[",filename);
+  //   sprintf(printPs,"%s",filename);
+  //   sprintf(closePs,"%s]",filename);
+
+  //   cc->Print(openPs);
+  //   //DisplayRunStatus();
+  //   cc->Print(printPs);
+  //   for ( int tab=0; tab<EvpUtil::mNumberOfTabs; tab++) {
+  //     for ( int subTab=0; subTab<EvpUtil::mNumberOfSubTabs[tab]; subTab++) {
+  //       if ( (mRS->getDetectorBitsRun()&EvpUtil::canvasDetectorBits[tab][subTab])==0 ) continue;
+  //       if ( (mRS->getTriggerBitsRun()&EvpUtil::canvasTriggerBits[tab][subTab])==0 )   continue;
+  //       EvpUtil::DisplayOneCanvas(mfile,cc,tab,subTab,true);
+  //       cc->Print(printPs);
+  //     }
+  //   }
+  //   mGroups.print(cc,printPs);
+  //   cc->Print(closePs);
+  //   //mGroups.display(cc);
+  //   //ps.Close();
+  //   cout << filename << " written " << endl;
+  //   delete cc;
+}
+
+
+void JevpGui::jl_Print(TCanvas* gcc, int tab, int sub) {
+  //   char psFilename[1024];
+  //   sprintf(psFilename,"%s/run%d_tab%d_%d.ps",EvpUtil::GetOutputPath(),mRS->getRunNumber(),tab,sub);
+  //   gROOT->SetBatch(kTRUE);
+  //   TCanvas* cc = new TCanvas(psFilename,psFilename,EvpUtil::mCanvasWidth,EvpUtil::mCanvasHeight);
+  //   cc->cd();
+  //   if ( (mRS->getDetectorBitsRun()&EvpUtil::canvasDetectorBits[tab][sub])==0 ) { jl_CrossOfDeath(gcc); return; }
+  //   if ( (mRS->getTriggerBitsRun()&EvpUtil::canvasTriggerBits[tab][sub])==0 ) { jl_CrossOfDeath(gcc); return; }
+  //   EvpUtil::DisplayOneCanvas(mfile,cc,tab,sub);
+  //   cc->Update();
+  //   cc->Print(psFilename);
+  //   cc->Close(); 
+  //   gROOT->SetBatch(kFALSE);
+  //   char cmd[1024];
+  //   sprintf(cmd,"lp -d onlprinter2 %s",psFilename);
+  //   sprintf(cmd,"ls %s",psFilename);
+  //   gSystem->Exec(cmd);
+}
+
+
+
+void JevpGui::jl_addGroupTabs() {
+  //     GroupMap groupMap( mGroups );
+  //     char name[1024];
+  //     for( GroupMapIterator mapIter = groupMap.begin(); mapIter != groupMap.end(); mapIter++) {
+  //       //cout << (*mapIter).first.c_str() << endl;
+  //       sprintf(name,"%s",(*mapIter).first.c_str());
+  //       //PR((*mapIter).second.numberOfActiveGroups());
+  //       if ( (*mapIter).second.numberOfActiveGroups() ) {
+  // 	emit addGroupTab( name );
+  // 	for( GroupIterator groupIter = (*mapIter).second.begin(); groupIter != (*mapIter).second.end(); groupIter++) {
+  // 	  //cout << "\t " << (*groupIter)->subGroupName() << " " << (*groupIter)->id() << endl;
+  // 	  if ( (*groupIter)->active() ) {
+  // 	    //sprintf(name,"%s#%s#%s",(*groupIter)->subGroupName(),(*groupIter)->triggerName(),(*groupIter)->detectorName());
+  // 	    //emit addGroup( name );
+  // 	    emit addGroup( (*groupIter)->id() );
+  // 	  }
+  // 	}
+  //       }
+  //     }
+}
+#if 0
+//______________________________________________________________________________ 
+void JevpGui::jl_ClosePresenter() 
+{
+  // Qt [slot] to terminate the application
+  Stop();
+}
+
+#endif
+
+u_int JevpGui::jl_getTabBase()
+{
+  return DisplayFile::getTabBase();
+}
+
+// Gets the multiplier to access the final
+u_int JevpGui::jl_getTabDepthMult(u_int idx)
+{
+  return DisplayFile::getTabDepthMult(idx);
+}
+
+u_int JevpGui::jl_getTabNextIdx(u_int idx)
+{
+  return DisplayFile::getTabNextIdx(idx);
+}
+
+u_int JevpGui::jl_getTabChildIdx(u_int idx)
+{
+  return DisplayFile::getTabChildIdx(idx);
+}
+
+u_int JevpGui::jl_getTabIdxAtDepth(u_int idx, u_int depth)
+{
+  return DisplayFile::getTabIdxAtDepth(idx, depth);
+}
+
+int JevpGui::jl_send(TObject *msg) {
+  TMessage mess(kMESS_OBJECT);
+  
+  mess.WriteObject(msg);
+  jl_socket->Send(mess);
+  return 0;
+}
+
+
+void JevpGui::jl_showDirectories()
+{
+  printf("gDirectories ls()-------->\n");
+  gDirectory->ls();
+  printf("screen objects ls()------>\n");
+  
+  TIter next(jl_screens);
+  int i=0;
+  JevpScreenWidget *widget;
+  while((widget = (JevpScreenWidget *)next())) {
+    printf("Widget: %d\n",i++);
+    widget->GetCanvas()->ls();
+  }
+}

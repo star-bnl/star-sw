@@ -173,11 +173,11 @@ void PlotDisplay::mousePressEvent(QMouseEvent *e)
 	plot->setRefComment(str->toAscii().data());
 	replaceData(plot);
 
-	refwidget->logic->saveExistingPlot(plot);
+	refwidget->logic->jl_saveExistingPlot(plot);
       }
     }
     if(ret == 2) {
-      refwidget->logic->deletePlot(plot);
+      refwidget->logic->jl_deletePlot(plot);
       refwidget->removePlot(this);
     }
   }
@@ -302,7 +302,7 @@ void PlotDisplay::dropEvent(QDropEvent *event)
 
     printf("plotname to write %s\n",nplot->GetPlotName());
 
-    refwidget->logic->writePlotToServer(nplot);
+    refwidget->logic->jl_writePlotToServer(nplot);
     
     printf("here2\n");
     // Replace main ref plot if applicable...
@@ -366,7 +366,7 @@ void PlotDisplay::dropEvent(QDropEvent *event)
     src_menu->replaceData(tmp_disp);
     
     // Swap the plots on server...
-    refwidget->logic->swapRefsOnServer(plot->GetPlotName(), dst_id, src_id);     
+    refwidget->logic->jl_swapRefsOnServer(plot->GetPlotName(), dst_id, src_id);     
   }
  
   event->acceptProposedAction();
@@ -408,7 +408,7 @@ void ReferenceWidget::addPlotToMenu(PlotDisplay *display, JevpPlot *plot) {
   pd->replaceData(plot);
 }
 
-ReferenceWidget::ReferenceWidget(JevpLogic *logic, char *name) : QDialog()
+ReferenceWidget::ReferenceWidget(JevpGui *logic, char *name) : QDialog()
 {
   JevpPlot *plot;
   PlotDisplay *pd;
@@ -430,14 +430,14 @@ ReferenceWidget::ReferenceWidget(JevpLogic *logic, char *name) : QDialog()
   char error[256];
 
   // Get current data plot...
-  plot = logic->getPlotFromServer(name,error);
+  plot = logic->jl_getPlotFromServer(name,error);
   pd = new PlotDisplay(this, plot, 0, PD_LARGE_CUR);
   histosLayout->addWidget(pd);
 
   // Get default reference plot...
   char refargs[100];
   sprintf(refargs, "%s refid=1",name);
-  plot = logic->getPlotFromServer(refargs, error);
+  plot = logic->jl_getPlotFromServer(refargs, error);
 
   pd = new PlotDisplay(this, plot, 1, PD_LARGE_REF);
   mainRefPlot = pd;
@@ -453,7 +453,7 @@ ReferenceWidget::ReferenceWidget(JevpLogic *logic, char *name) : QDialog()
     sprintf(refargs, "%s refid=%d",name, i);
     
     if(i != 1) {   // if i==1, use plot from largeref...
-      plot = logic->getPlotFromServer(refargs,error);
+      plot = logic->jl_getPlotFromServer(refargs,error);
     }
 
     pd = new PlotDisplay(this, plot, i+100, PD_THUMB);

@@ -3,7 +3,7 @@
 
 #include <qdialog.h>
 #include <TQtWidget.h>
-#include "JevpLogic.h"
+#include "JevpGui.h"
 #include <qgroupbox.h>
 
 
@@ -52,14 +52,14 @@ class ReferenceWidget : public QDialog
   Q_OBJECT
 
  public:
-  ReferenceWidget(JevpLogic *logic, char *name);
+  ReferenceWidget(JevpGui *logic, char *name);
   
   void dragEnterEvent(QDragEnterEvent *event);
   void mousePressEvent(QMouseEvent *e);
   void addPlotToMenu(PlotDisplay *display, JevpPlot *plot);
   
   void removePlot(PlotDisplay *pd);
-  JevpLogic *logic;
+  JevpGui *logic;
   char *histoname;
 
   PlotDisplay *firstPlot;
