@@ -26,8 +26,8 @@ class ViewField {
     void SetCanvas(TCanvas* c);
  
     // Establish area, normal vector, in-plane vector ...
-    void SetArea(double xmin, double ymin, double zmin, 
-                 double xmax, double ymax, double zmax);
+    void SetArea(double xmin, double ymin, 
+                 double xmax, double ymax);
     void SetVoltageRange(const double minval, const double maxval);
     void SetNumberOfContours(const int n);
     void SetDefaultProjection();

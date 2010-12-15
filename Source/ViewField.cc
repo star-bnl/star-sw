@@ -50,7 +50,7 @@ ViewField::SetSensor(Sensor* s) {
 
   sensor = s; 
   component = 0;
-  // Get bounding box.
+  // Get the bounding box.
   bool ok = sensor->GetArea(pxmin, pymin, pzmin, pxmax, pymax, pzmax);
   // Get the voltage range.
   ok = sensor->GetVoltageRange(fmin, fmax);
@@ -90,24 +90,21 @@ ViewField::SetCanvas(TCanvas* c) {
 }
 
 void 
-ViewField::SetArea(double xmin, double ymin, double zmin, 
-                   double xmax, double ymax, double zmax) {
+ViewField::SetArea(double xmin, double ymin, 
+                   double xmax, double ymax) {
 
   // Check range, assign if non-null
-  if (xmin == xmax || ymin == ymax || zmin == zmax) {
+  if (xmin == xmax || ymin == ymax) {
     std::cerr << className << "::SetArea:\n";
     std::cerr << "    Null area range not permitted.\n";
     std::cerr << "      " << xmin << " < x < " << xmax << "\n";
     std::cerr << "      " << ymin << " < y < " << ymax << "\n";
-    std::cerr << "      " << zmin << " < z < " << zmax << "\n";
     return;
   } 
   pxmin = std::min(xmin,xmax);
   pymin = std::min(ymin,ymax);
-  pzmin = std::min(zmin,zmax);
   pxmax = std::max(xmin,xmax);
   pymax = std::max(ymin,ymax);
-  pzmax = std::max(zmin,zmax);
   
 }
 
@@ -300,8 +297,8 @@ ViewField::CreateFunction() {
   }
 
   fPot = new TF2(fname.c_str(), this, &ViewField::EvaluatePotential, 
-        pxmin, pxmax, pymin, pymax, 0, 
-        "ViewField", "EvaluatePotential");
+                 pxmin, pxmax, pymin, pymax, 0, 
+                 "ViewField", "EvaluatePotential");
  
 }
 
@@ -319,10 +316,10 @@ ViewField::CreateProfileFunction() {
   }
 
   const int nParameters = 6;
-  fPotProfile = new TF1(fname.c_str(), 
-        this, &ViewField::EvaluatePotentialProfile, 
-        0., 1., nParameters, 
-        "ViewField", "EvaluatePotentialProfile");
+  fPotProfile = new TF1(fname.c_str(), this, 
+                        &ViewField::EvaluatePotentialProfile, 
+                        0., 1., nParameters, 
+                        "ViewField", "EvaluatePotentialProfile");
  
 }
 
