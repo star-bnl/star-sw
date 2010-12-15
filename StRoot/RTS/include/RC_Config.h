@@ -84,9 +84,11 @@
 #define RTS_SENDCONFIG_FLAG  4
 #define RTS_STOPRUN_SECOND_FLAG 8
 
+
 typedef unsigned int UINT32;
 typedef unsigned short UINT16;
 typedef unsigned char UINT8;
+typedef unsigned long long int UINT64;
 
 class UINT128 {
  public:
