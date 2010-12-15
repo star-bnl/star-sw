@@ -13,20 +13,28 @@
 #include <fstream>
 #include <sstream>
 
-#include "TQtRootAction.h"
+#include <TROOT.h>
+#include <TSystem.h>
+#include <TMessage.h>
+
+#include <TQtRootAction.h>
+#include <TSocket.h>
+
+#include <TText.h>
 
 #include <qobject.h> 
 #include <TQtWidget.h>
 #include <qtabwidget.h>
 #include "Jevp/StJevpPlot/JevpPlot.h"
-
-
+#include "Jevp/StJevpPlot/RunStatus.h"
+#include "Jevp/StJevpPlot/EvpMessage.h"
+#include "Jevp/StJevpServer/DisplayDefs.h"
 
 #  include <q3intdict.h> 
 #  include <q3mainwindow.h>
 #  include <Q3Frame>
 
-class JevpLogic;
+//class JevpLogic;
 
 
 
@@ -105,7 +113,7 @@ private:
     int mHight;
     char mPsName[1024];
 
-    JevpLogic *logic;
+    JevpGui *logic;
 
 #if QT_VERSION < 0x40000
     QFrame* mBitsFrame;
@@ -189,7 +197,8 @@ private:
     void StopEventLoop();
  public:
 
-    JevpGui(JevpLogic *logic, bool isRefWindow = false);
+    JevpGui();
+    void gui_JevpGui(JevpGui *logic, bool isRefWindow = false);
     virtual ~JevpGui();
 
     // getters for static tabs
@@ -264,6 +273,192 @@ public slots:
       void canvas(TCanvas*);
       //   void updatePlots();
       void openReference();
+
+
+      //////////////////////////////  PresenterConnect
+
+ private:
+      JevpGui *pc_mGui;
+      JevpGui *pc_mPresenter;
+
+  int pc_mTab;
+  int pc_mSubTab;
+  TCanvas* pc_mCanvas;
+ public:
+
+  void pc_PresenterConnect(JevpGui *gui, JevpGui *pre);
+  
+
+ public slots:
+ void pc_save();
+ void pc_saveAs();
+ void pc_live();
+ void pc_file();
+ void pc_update();
+ void pc_update(TCanvas* cc, int tab, int subTab);
+ void pc_update(TCanvas*, const char*);
+ void pc_print();
+ void pc_setTab(int);
+ void pc_setSubTab(int);
+ void pc_setCanvas(TCanvas*);
+ void pc_openReference();
+ 
+ signals:
+ void pc_signalEventInfo(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int);
+ void pc_signalServerInfo(ServerStatus*);
+ void pc_updateRequest();
+
+
+
+ ///// JevpLogic..............................
+
+ private:
+
+  void jl_showDirectories();
+
+  int jl_send(TObject *msg);
+  // Server related fields...
+
+  DisplayFile *jl_displayFile;
+
+  RunStatus* jl_mRS;
+  
+  bool jl_mGo; // set mGo=false to top the event loop 
+  int jl_tab;
+  int jl_subTab;
+  int jl_tabLast ; // initial default: Tab    =0
+  int jl_subTabLast ; // initial default: subTab =1
+  int jl_runNumber;
+  int jl_runNumberLast;
+  int jl_evtNumber;
+  unsigned int jl_mTriggerBits;
+  unsigned int jl_mDetectorBits;
+  unsigned int jl_mTriggerBitsRun;
+  unsigned int jl_mDetectorBitsRun;
+  int jl_evtNumberLast;
+  int jl_evtCounter;
+  int jl_evtCounterLast;
+
+  bool jl_needsUpdate;
+  char displayText[1024];
+  int jl_mDebugLevel;
+
+ 
+ TString mHistoPSFile;       // file name for PostScript file
+ TString mHistoGIFFile;       // file name for GIF file
+ TString mHistoPDFFile;       // file name for PDF file
+ TString mHistoFileNameShort;  // file name without extension, but with path
+
+ char mMapFile[1024];
+
+ signals:
+ void jl_removeGroupTabs();
+ void jl_addGroupTab(const char*);
+ void jl_addGroup(const char*);
+ void jl_setEnabled(bool);
+ public:
+
+  TSocket *jl_socket;
+  void jl_JevpLogic();
+  void jl_JevpLogic(const char*);
+
+ int jl_file_uploaded; // flag if pdf file was uploaded into database; yes=1, no=0, error=-1
+
+ int jl_ConnectToServerPort(int port, int ntries); // reconnects to different port...
+ void jl_killServer();                 // sends kill command
+ int jl_LaunchRun(char *runNumber);   // run number is pathname w/o /a
+
+ // int jl_event() { return mRS->run; }
+ bool jl_event (QEvent *e) {return QObject::event(e);} 
+ int jl_run() { return jl_mRS->run; }
+ //int jl_token() { return mRS->getToken(); }
+ //int jl_counter() { return mRS->getEventCounter(); }
+ //unsigned int jl_triggerBits() { return mRS->getTriggerBits(); }
+ //unsigned int jl_detectorBits() { return mRS->getDetectorBits(); }
+ //unsigned int jl_triggerBitsRun() { return mRS->getTriggerBitsRun(); }
+ //unsigned int jl_detectorBitsRun() { return mRS->getDetectorBitsRun(); }
+
+ RunStatus*    jl_runStatus() { return jl_mRS;}
+
+ public slots:
+   //void jl_Connect();
+ void jl_printAll(const char* filename);
+
+ u_int jl_getTabBase();
+ u_int jl_getTabDepthMult(u_int idx);
+ u_int jl_getTabNextIdx(u_int idx);
+ u_int jl_getTabChildIdx(u_int idx);
+ u_int jl_getTabIdxAtDepth(u_int idx, u_int depth);
+ u_int jl_getFinalTabIdx(u_int idx) {
+   int fi=0;
+   int depth=0;
+   while((fi = jl_getTabIdxAtDepth(idx, depth)) > 0) {
+     depth++;
+   }
+   return fi;
+ }
+ u_int jl_getPenultimateTabIdx(u_int idx) {
+   int pi=0;
+   int fi=0;
+   int depth=1;
+   while((fi = jl_getTabIdxAtDepth(idx, depth)) > 0) {
+     depth++;
+   }
+   if(depth >=2) pi = jl_getTabIdxAtDepth(idx, depth-2);
+   return pi;
+ }
+
+ void jl_DrawPlot(JevpScreenWidget *screen);
+ JevpPlot *jl_getPlotFromServer(char *name, char *error);
+ void jl_swapRefsOnServer(char *name, int idx1, int idx2);
+ void jl_saveExistingPlot(JevpPlot *plot);
+ void jl_deletePlot(JevpPlot *plot);
+ void jl_writePlotToServer(JevpPlot *plot);
+
+DisplayNode *jl_getCanvasDescriptor(u_int combo_idx) {
+   DisplayNode *node = jl_displayFile->getTab(combo_idx);
+   if(node == NULL) {
+     return NULL;
+   }
+   if(!node->leaf) return NULL;
+   return node;
+ }
+
+ DisplayNode *jl_getTab(u_int combo_idx) {
+   DisplayNode *node = jl_displayFile->getTab(combo_idx);
+   LOG("JEFF", "getTab(%d) --> %s",combo_idx, node ? node->name : "null");
+   return node;
+ }
+ // i,j,k,l,m,n ---> i + 50*j + (50^2)*k + (50^3)*l etc...
+ // returns NULL for no tab
+ // isCanvas is a return value, type = 0 for tab, 1 for isCanvas
+ char *jl_getTabName(u_int combo_idx) {
+   DisplayNode *node = jl_displayFile->getTab(combo_idx);
+   if(!node) return NULL;
+   else return node->name;
+ } 
+
+ public:
+ void jl_Save(const char* file);
+ void jl_Disconnect();
+ bool jl_Status() { return jl_mGo; }
+ void jl_Start() { jl_mGo = true; }
+ void jl_Stop() { jl_mGo = false; }
+ void jl_Print(TCanvas* cc, int tab, int sub);
+ void jl_Draw(TCanvas*, int  tab, int subTab);
+ void jl_Draw(TCanvas*, const char* group);
+ void jl_SetDebugLevel(int lDebugLevel){mDebugLevel = lDebugLevel;}
+ void jl_WriteCurrent(int i, int j);
+ void jl_WriteCurrentCanvasToPSFile(const char* file, int tab, int subTag);
+ void jl_SaveAll();
+ void jl_CrossOfDeath(JevpScreenWidget *screen, char *label="No plot");
+ void jl_ReconfigureTabs();
+ private: 
+ void jl_addGroupTabs();
+ TCanvas* jl_mLastDrawnCanvas;
+
+ public:
+ TList *jl_screens;  // list of JevpScreenWidgets...
 };
 //************************************************************************
 
