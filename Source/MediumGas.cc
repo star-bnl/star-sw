@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cstring>
 #include <cstdlib>
+#include <algorithm>
 
 #include "MediumGas.hh"
 #include "FundamentalConstants.hh"

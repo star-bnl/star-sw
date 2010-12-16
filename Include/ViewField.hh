@@ -47,8 +47,10 @@ class ViewField {
     double EvaluatePotential(double* pos, double* par);
     double EvaluatePotentialProfile(double* pos, double* par);
 
-    void EnableIgnoreStatus()  {useStatus = false;}
-    void DisableIgnoreStatus() {useStatus = true;}
+    void EnableAcknowledgeStatus(const double v0 = 0.) {
+      useStatus = true; vBkg = v0;
+    }
+    void DisableAcknowledgeStatus() {useStatus = false;}
 
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
@@ -63,6 +65,7 @@ class ViewField {
     bool debug;
    
     bool useStatus;
+    double vBkg;
  
     // Sensor
     Sensor* sensor;

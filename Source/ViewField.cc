@@ -17,7 +17,7 @@ namespace Garfield {
 ViewField::ViewField() :
   className("ViewField"),
   debug(false), 
-  useStatus(false),
+  useStatus(false), vBkg(0.),
   sensor(0), component(0),
   pxmin(-1.), pymin(-1.), pxmax(1.), pymax(1.),
   fmin(0.), fmax(100.),
@@ -375,7 +375,7 @@ ViewField::EvaluatePotential(double* pos, double* par) {
               << volt << ", status = " << status << "\n";
   }
  
-  if (useStatus && status != 0) volt = 0.;
+  if (useStatus && status != 0) volt = vBkg;
  
   // Return the potential.
   return volt;
@@ -414,7 +414,7 @@ ViewField::EvaluatePotentialProfile(double* pos, double* par) {
                           ex, ey, ez, volt, medium, status);
   }
 
-  if (useStatus && status != 0) volt = 0.;
+  if (useStatus && status != 0) volt = vBkg;
 
   // Return the potential.
   return volt;
