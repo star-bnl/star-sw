@@ -3,6 +3,7 @@
 #include <assert.h>
 #include "TCernLib.h"
 #include "TMath.h"
+#include "TMath.h"
 #include "StvUtil/StvNodePars.h"
 #include "Stv/StvToolkit.h"
 
@@ -18,7 +19,7 @@ static double MAXNODPARS[]   ={555,555,555,6.66,111, MAXTAN+1, .1};
 //                              h  z   a    l  ptin
 static double MAXFITPARS[]   ={22,22, .5 , .5 ,20};
 static double MAXFITERR[5]   ={.3,.3,0.03,0.03,1};
-//____________________________________________________________
+//______________________________________________________________________________ 
 static double EmxSign(int n,const double *a); 
 
 
@@ -190,6 +191,7 @@ void StvNodePars::moveToR(double R)
   double dL = (dR2)/(dis+fabs(myDot));
   if (myDot<0) dL = -dL;
   move(dL);
+  assert(fabs(_x*_x+ _y*_y-R*R)/(2*R)<1e-2);//??????????????????
 }
 //------------------------------------------------------------------------------
 void StvNodePars::reverse( Mtx55D_t &fitDerI, const Mtx55D_t &fitDer) const
@@ -488,21 +490,34 @@ void StvNodePars::GetRadial(double radPar[6],double radErr[15],const StvFitErrs 
                         ,{ -sinL*_cosCA,-sinL*_sinCA, cosL}};
 			
 
-  double newFrame[3][3]={{  _x/radPar[jRad],_y/radPar[jRad], 0}	
+  double radFrame[3][3]={{  _x/radPar[jRad],_y/radPar[jRad], 0}	
                         ,{ -_y/radPar[jRad],_x/radPar[jRad], 0}
                         ,{                0,              0, 1}};
 
-  double qwe[3][3];
-  TCL::mxmpy1(newFrame[0],dcaFrame[0],qwe[0],3,3,3);
-  double pivo = qwe[0][0];
-  assert (fabs(pivo)>1e-6);
-  TCL::vlinco(qwe[1],1.,qwe[0],-qwe[1][0]/pivo,qwe[1],3);
-  TCL::vlinco(qwe[2],1.,qwe[0],-qwe[2][0]/pivo,qwe[2],3);
 
-  double T[5][5] = {{qwe[1][1]/rxy, qwe[1][2]/rxy, 0       ,0,0}
-                   ,{qwe[2][1]    , qwe[2][2]    , 0       ,0,0}
-                   ,{            0,             0, 1./cos2L,0,0}
-                   ,{            0,             0, 0       ,1,0}
+
+
+  double proj[3][3] = {{0}};
+  double D0R0 = TCL::vdot(dcaFrame[0],radFrame[0],3);
+  assert(fabs(D0R0)>1e-6);
+  for (int i=0;i<3;i++) {
+    proj[i][i] = 1;
+    for (int j=0;j<3;j++) {
+       proj[i][j] -= dcaFrame[0][i]*radFrame[0][j]/D0R0;
+  }  }
+  double qwe[3][3];
+  TCL::mxmpy1(proj[0],dcaFrame[1],qwe[0],3,3,2);
+  double asd[2][2];
+
+  TCL::mxmpy(radFrame[1],qwe[0],asd[0],2,3,2);
+  //asd[0][0] == dYrad/dHfit
+  //asd[0][1] == dYrad/dZfit
+  //asd[1][0] == dZrad/dHfit
+  //asd[1][1] == dZrad/dZfit
+  double T[5][5] = {{asd[0][0]/rxy, asd[0][1]/rxy, 0       ,0,0}
+                   ,{asd[1][0]    , asd[1][1]    , 0       ,0,0}
+                   ,{            0,             0, 0,1./cos2L,0}
+                   ,{            0,             0, 1       ,0,0}
                    ,{            0,             0, 0       ,0,1}};
                    
 
@@ -541,7 +556,6 @@ void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
 const StvFitPars &StvFitPars::operator*(Mtx55D_t &t) const  
 {
 static StvFitPars myPars;
-//??  Multiply(myPars.Arr(),t,Arr());
   TCL::vmatl(t[0],Arr(),myPars.Arr(),5,5);
   assert(!myPars.Check());
   return myPars;
@@ -637,9 +651,9 @@ RETN: if (B!=buf) delete B;
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 #include "TRandom.h"
-#include "TMatrixTSym.h"
-#include "TMatrixT.h"
-#include "TVectorT.h"
+#include "TMatrixDSym.h"
+#include "TMatrixD.h"
+#include "TVectorD.h"
 #include "StarRoot/TRandomVector.h"
 //_____________________________________________________________________________
 ClassImp(StvNodeParsTest);
@@ -675,26 +689,25 @@ void StvNodeParsTest::Test()
 void StvNodeParsTest::TestGetRadial(int nEv)
 {
 StvFitErrs fE;
-  fE.mHH = 1.0*1.0;
-  fE.mZZ = 2.0*2.0;
-  fE.mAA = 0.01*0.01;
-  fE.mLL = 0.01*0.01;
-  fE.mCC = 0.1*0.1;
-  double dia[5];
+  double f = 0.01;
+  TVectorD D(5);
+  D[0] = 1.0*1.0	*f;
+  D[1] = 2.0*2.0	*f;
+  D[2] = 0.03*0.01	*f;
+  D[3] = 0.04*0.01	*f;
+  D[4] = 0.07*0.07	*f;
+  TRandomVector RV(D);
+
+  TMatrixD S(RV.GetMtx());
+  S.Print();
+
   double *e = &fE.mHH;
   for (int i=0,li=0;i< 5;li+=++i) {
-    dia[i]=e[li+i];
-    for (int j=0;j<i;j++) {
-       e[li+j] = sqrt(dia[i]*dia[j])*(0.5-gRandom->Rndm())*0.2;
-//       printf("[%d][%d]=%d ",i,j,e[li+j]);
-    } 
-  }
-  TMatrixTSym<double> S(5);
-  for (int i=0,li=0;i< 5;li+=++i) {
     for (int j=0;j<=i;j++    ) {
-       S[i][j]=e[li+j]; S[j][i]=e[li+j];
-    } }
-  S.Print();
+       e[li+j]= S[i][j];
+  } }
+
+
   StvNodePars node;
   node.reset();
   double myRad = 100;
@@ -702,16 +715,15 @@ StvFitErrs fE;
   node._x    = myRad*cos(phi);
   node._y    = myRad*sin(phi);
   node._z    = (gRandom->Rndm()-0.5)*200;
-  node._hz   = 0.000299792458 * 4.98478;
   node._psi  = phi + (gRandom->Rndm()-0.5);
   node._tanl = gRandom->Rndm();
   node._ptin = (gRandom->Rndm()-0.5);
+  node._hz   = 0.000299792458 * 4.98478;
   node.ready();
 
-  TRandomVector RV(S);
   double radPar[6],radErr[15];
   node.GetRadial(radPar,radErr,&fE);
-  TMatrixTSym<double> SS(5);
+  TMatrixDSym SS(5);
   for (int i=0,li=0;i< 5;li+=++i) {
     for (int j=0;j<=i;j++    ) {
        SS[i][j]=radErr[li+j]; SS[j][i]=radErr[li+j];
@@ -721,7 +733,7 @@ StvFitErrs fE;
   double rE[15]={0};
   for (int ev=0;ev<nEv;ev++) 
   {
-    const TVectorT<double> &res = RV.Gaus();
+    const TVectorD &res = RV.Gaus();
     StvNodePars myNode(node);
     StvFitPars  fitPars(res.GetMatrixArray());
     myNode +=fitPars;
@@ -736,19 +748,18 @@ StvFitErrs fE;
     } }
   }  //End events
   for (int j=0;j<15;j++) {rE[j]/=(nEv);}
-   
-  double qA=0,qAmax=0;
+  double qA=0,qAmax=0,dia[5];
   for (int i=0,li=0;i< 5;li+=++i) {
     dia[i]=radErr[li+i];
     for (int j=0;j<=i;j++) {
-    double dif = (rE[li+j]-radErr[li+j])/sqrt(dia[i]*dia[j]);
-    printf("(%d %d) \t%g = \t%g \t%g\n",i,j,radErr[li+j],rE[li+j],dif);
-    dif = fabs(dif);
-    qA+= (dif); if (dif>qAmax) qAmax=dif;
+      double nor = sqrt(dia[i]*dia[j]);
+      double dif = (rE[li+j]-radErr[li+j])/nor;
+      printf("(%d %d) \t%g = \t%g \t%g\n",i,j,radErr[li+j]/nor,rE[li+j]/nor,dif);
+      dif = fabs(dif);
+      qA+= (dif); if (dif>qAmax) qAmax=dif;
   } }
   qA/=15;
   printf("Quality %g < %g < 1\n",qA,qAmax);
-
 }
 //_____________________________________________________________________________
 void StvNodeParsTest::TestErrProp(int nEv)
@@ -775,7 +786,7 @@ StvFitErrs iE,oE,oER;
   } }
 
 
-  TMatrixTSym<double> S(5);
+  TMatrixDSym S(5);
   e = &iE.mHH;
   for (int i=0,li=0;i< 5;li+=++i) {
     for (int j=0;j<=i;j++    ) {
@@ -787,7 +798,7 @@ StvFitErrs iE,oE,oER;
   for (int ev=0;ev <= nEv;ev++) {
     iPR = iP;
     if (ev) {
-      const TVectorT<double> &res = RV.Gaus();
+      const TVectorD &res = RV.Gaus();
       StvFitPars fp(res.GetMatrixArray());
       iPR+=fp;
     }
@@ -842,14 +853,14 @@ StvFitErrs iE,oE,oER;
 //_____________________________________________________________________________
 double EmxSign(int n,const double *e)
 {
-  TMatrixTSym<double> S(n);  
+  TMatrixDSym S(n);  
 
   for (int i=0,li=0;i< n;li+=++i) {
     for (int j=0;j<=i;j++    ) {
        S[i][j]=e[li+j]; S[j][i]=e[li+j];
   } }
-  TMatrixT<double> EigMtx(n,n);
-  TVectorT<double> EigVal(n);  
+  TMatrixD EigMtx(n,n);
+  TVectorD EigVal(n);  
   EigMtx = S.EigenVectors(EigVal);
 
   double ans = 3e33;

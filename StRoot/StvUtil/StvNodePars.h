@@ -23,11 +23,12 @@ class StvFitPars
 public:	
   StvFitPars():mH(0),mZ(0),mA(0),mL(0),mC(0){}
   StvFitPars(double h,double z):mH(h),mZ(z),mA(0),mL(0),mC(0){}
-  StvFitPars(const double *arr){memcpy(&mH,arr,5*sizeof(mH));}
+  StvFitPars(const double *arr) {memcpy(&mH,arr,5*sizeof(mH));}
 const StvFitPars &operator*(Mtx55D_t &t) const;    
          int Check() const;
       double *Arr() 		{return &mH;}
 const double *Arr()  const 	{return &mH;}
+  double &operator[](int i) 	{return (&mH)[i];}
 public:	
 double mH;	// direction perpendicular movement and Z
 double mZ;	// Pseudo Z, direction perpendicular movement & H
@@ -119,6 +120,7 @@ double GetHz() const 		{ return mHz ;}
   void SetHz(double hz)  	{ mHz=hz     ;}
   const double *Arr() const 	{ return &mHH;}
         double *Arr()       	{ return &mHH;}
+double &operator[](int i) 	{ return Arr()[i];}
   void operator*=(double f) {for (int i=0;i<kNErrs;i++){Arr()[i]*=f;};}
   void Add(const StvELossData &el,const StvNodePars &pa);
   void Backward();
