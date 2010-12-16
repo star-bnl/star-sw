@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.1 2010/07/06 20:27:53 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.2 2010/12/16 21:50:39 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -126,6 +126,6 @@ StvHit *StvHitLoader::MakeStvHit(const StHit *stHit,UInt_t upath)
    const StHitPlane *hp = StTGeoHelper::Inst()->AddHit(stiHit,xyz,hard,seed);
    if (!hp) { StvToolkit::Inst()->FreeHit(stiHit);return 0;}
    
-   stiHit->setGlobal(hp,stHit,xyz);
+   stiHit->set(hp,stHit,xyz);
    return stiHit;
 }

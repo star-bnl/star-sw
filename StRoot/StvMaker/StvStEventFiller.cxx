@@ -1,12 +1,15 @@
 #if 1
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.2 2010/09/29 23:39:25 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.3 2010/12/16 21:50:40 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.3  2010/12/16 21:50:40  perev
+ * Primary track fit
+ *
  * Revision 1.2  2010/09/29 23:39:25  perev
  * Intereface fillPulls(...) chamnged
  *
@@ -504,7 +507,7 @@ inline StThreeVectorF position(const StvNode *node)
 //_____________________________________________________________________________
 inline StThreeVectorF position(const StvHit  *hit )
 {
-  const float *f = hit->x_g();
+  const float *f = hit->x();
   return StThreeVectorF(f[0],f[1],f[2]);
 }
 //_____________________________________________________________________________
@@ -636,7 +639,7 @@ static int nCall=0; nCall++;
   StvHit *hit=node->GetHit();
   assert(hit);
   const double *hrr=node->GetHE();
-  double d[3]={ hit->x_g()[0]-fp._x, hit->x_g()[1]-fp._y,hit->x_g()[2]-fp._z};
+  double d[3]={ hit->x()[0]-fp._x, hit->x()[1]-fp._y,hit->x()[2]-fp._z};
   TVectorD dif(3,d); 
   TVectorD loc = dcaFrame*dif;
   yz[0]= loc[1];   yz[1]= loc[2] ;
@@ -856,7 +859,7 @@ void StvStEventFiller::fillEventPrimaries()
       const StvNode *lastNode = kTrack->GetNode(StvTrack::kPrimPoint);
       StvHit *pHit = lastNode->GetHit();
       assert (pHit);
-      if (fabs(pHit->x_g()[2]-zPrim)>0.1)		continue;//not this primary
+      if (fabs(pHit->x()[2]-zPrim)>0.1)		continue;//not this primary
 
       fillTrackCount1++;
       // detector info
@@ -1008,7 +1011,7 @@ void StvStEventFiller::fillFitTraits(StTrack* gTrack, const StvTrack* track){
   geantIdPidHyp = 9;
   // chi square and covariance matrix, plus other stuff from the
   // innermost track node
-  const StvNode* node = track->GetNode(StvTrack::kFirstPoint);
+  const StvNode* node = track->front();
   float x[6],covMFloat[15];
   getTpt(node,x,covMFloat);
   float chi2[2];
@@ -1268,7 +1271,8 @@ void StvStEventFiller::fillPulls(const StvTrack* track, int gloPri)
   aux.mChi2    = track->GetXi2();
   StvTrack::EPointType pty =  ( !gloPri) ? StvTrack::kDcaPoint : StvTrack::kPrimPoint;
   const StvNode *node = track->GetNode(pty);
-  assert(node);
+  assert(node || pty != StvTrack::kPrimPoint);
+  if (!node) return;
   const StvNodePars &fp = node->GetFP();
 
 
@@ -1295,8 +1299,8 @@ void StvStEventFiller::fillPulls(const StvTrack* track, int gloPri)
 
       StHit *hh = (StHit*)stiHit->stHit();
       const StvNodePars &fp = node->GetFP();
-      double dL = (stiHit->x_g()[0]-fp._x)*fp._cosCA 
-	        + (stiHit->x_g()[1]-fp._y)*fp._sinCA;
+      double dL = (stiHit->x()[0]-fp._x)*fp._cosCA 
+	        + (stiHit->x()[1]-fp._y)*fp._sinCA;
       double myX = fp._x+dL*fp._cosCA;
       double myY = fp._y+dL*fp._sinCA;
       if (myNode) {
@@ -1351,11 +1355,11 @@ void StvStEventFiller::fillPulls(const StvTrack* track, int gloPri)
 //		global Hit
   const StHitPlane *hitPlane = stiHit->detector();
   assert(hitPlane);
-  const float *n = hitPlane->GetDir(stiHit->x_g())[0];
+  const float *n = hitPlane->GetDir(stiHit->x())[0];
   aux.gPhiHP = atan2(n[1],n[0]);
   aux.gLamHP = asin(n[2]);
 
-  x = stiHit->x_g()[0]; y = stiHit->x_g()[1]; z = stiHit->x_g()[2];
+  x = stiHit->x()[0]; y = stiHit->x()[1]; z = stiHit->x()[2];
   r = sqrt(x*x+y*y);
 
   aux.gRHit = r;

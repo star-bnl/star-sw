@@ -19,6 +19,7 @@ public:
    int	FindTracks();
    int	Refit(StvTrack *tk,int idir);
 StvTrack *FindTrack(int idir);
+   int	FindPrimaries(const StvHits &vtxs);
    void	Reset();
    void	Clear(const char *opt="");
 //   void	Add(const StvPars *par);

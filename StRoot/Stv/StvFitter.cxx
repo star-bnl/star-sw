@@ -34,6 +34,7 @@ void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
                    ,      StvNodePars *otPars,       StvFitErrs *otErrs)
 {
   memset(mBeg,'@',mEnd-mBeg+1);
+  mKase = 0;
   mInPars = inPars; mInErrs = inErrs;
   mOtPars = otPars; mOtErrs = otErrs;
   mJnPars =      0; mJnErrs =      0;
@@ -43,6 +44,8 @@ void StvFitter::Set(const StvNodePars *inPars, const StvFitErrs *inErrs
                    ,const StvNodePars *jnPars, const StvFitErrs *jnErrs
                    ,      StvNodePars *otPars,       StvFitErrs *otErrs)
 {
+  memset(mBeg,'@',mEnd-mBeg+1);
+  mKase = 1;
   mInPars = inPars; mInErrs = inErrs;
   mOtPars = otPars; mOtErrs = otErrs;
   mJnPars = jnPars; mJnErrs = jnErrs;
@@ -78,9 +81,10 @@ double StvFitter::Xi2(const StvHit *hit)
 {
   if (mHit == hit) return mXi2;
   mHit = hit;
+  const float *errMtx=mHit->errMtx();
+  if (errMtx) mKase=2;
+
   mHitPlane = mHit->detector();
-  mHitErrCalc = (StvHitErrCalculator*)mHitPlane->GetHitErrCalc();
-  assert(mHitErrCalc);
 
 //	restore old parameters for nhits>1  
   mTkPars._x = mInPars->_x; mTkPars._y = mInPars->_y; mTkPars._z = mInPars->_z;
@@ -95,13 +99,27 @@ double StvFitter::Xi2(const StvHit *hit)
 
 
 //		Distance to DCA along track in xy
-  mDeltaL = DDOT(hP,tP,tD);  
+//mDeltaL = DDOT(hP,tP,tD);  
 //		DCA track position
-  mHitErrCalc->SetTrack(tD);
-  const StHitPlane *hp = hit->detector(); 
-  const Mtx33F_t &hD = hp->GetDir(hit->x());
-  mHitErrCalc->CalcDcaErrs(hit->x(),hD,mHitErrs);
+  switch (mKase) {
+    case 0: {
+    mHitErrCalc = (StvHitErrCalculator*)mHitPlane->GetHitErrCalc();
+    assert(mHitErrCalc);
+    mHitErrCalc->SetTrack(tD);
+    const StHitPlane *hp = hit->detector(); 
+    const Mtx33F_t &hD = hp->GetDir(hit->x());
+    mHitErrCalc->CalcDcaErrs(hit->x(),hD,mHitErrs);
+    }; break;
+    case 1: assert(0 && "Wrong case 1");
 
+    case 2: {
+      double d[6]={errMtx[0],errMtx[1],errMtx[2]
+                  ,errMtx[3],errMtx[4],errMtx[5]};
+      TCL::trasat(mDcaFrame[1],d,mHitErrs,2,3); }
+  }
+  assert(mHitErrs[0]>0);
+  assert(mHitErrs[2]>0);
+  assert(mHitErrs[2]*mHitErrs[0]>mHitErrs[1]*mHitErrs[1]);
 
 //		Hit position wrt track 
   double dca[3] = {hP[0]-tP[0],hP[1]-tP[1],hP[2]-tP[2]};
@@ -132,8 +150,11 @@ int StvFitter::Update()
 {
 static int nCall=0; nCall++;
 
-  if (mJnPars) {return Jpdate();}
-
+  switch (mKase) {
+    case 0: break;
+    case 1: return Jpdate();
+    case 2: return Vpdate();
+  }
 		
   mTkErrs = *mInErrs;
 
@@ -150,6 +171,32 @@ static int nCall=0; nCall++;
 		        ,  myJrkPars.Arr(),mOtErrs->Arr());
   assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2));
 
+  *mOtPars = mTkPars;
+  *mOtPars+= myJrkPars;
+
+  return 0;
+}  
+//______________________________________________________________________________
+int StvFitter::Vpdate()
+{
+static int nCall=0; nCall++;
+
+  mTkErrs = *mInErrs;
+  for (int i=0;i<3;i++) {mTkErrs[i]+=mHitErrs[i];}
+
+//		New Z ortogonal to X (track direction)
+  StvFitPars myHitPars(mDcaP, mDcaL );
+  StvFitErrs myHitErrs(0,0,0);
+  StvFitPars myTrkPars;
+  StvFitPars myJrkPars;
+  assert(mTkErrs.Sign()>0);
+
+  double myXi2 = JoinTwo(2,myHitPars.Arr(),myHitErrs.Arr()
+                        ,5,myTrkPars.Arr(),mTkErrs.Arr()
+		        ,  myJrkPars.Arr(),mOtErrs->Arr());
+  assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2));
+  assert(fabs(myJrkPars[0]-myHitPars[0])<1e-6);
+  assert(fabs(myJrkPars[1]-myHitPars[1])<1e-6);
   *mOtPars = mTkPars;
   *mOtPars+= myJrkPars;
 

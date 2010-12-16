@@ -13,6 +13,7 @@ public:
   StvKalmanTrackFitter();
   virtual ~StvKalmanTrackFitter(){;}	
   virtual  int Refit(StvTrack *trak,int dir);
+  virtual  int Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node);
   virtual void Clear(const char *opt="");
   
 
