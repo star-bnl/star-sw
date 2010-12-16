@@ -47,7 +47,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.44 2010/12/01 20:59:46 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.45 2010/12/16 15:36:07 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -650,10 +650,8 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	// Ignore hits outside of drift region with off ser margin
 	if (driftLength > 250. || driftLength < -1.0) {continue;}
 	if (driftLength <= 0) {
-	  if ((TrackSegmentHits[nSegHits].Pad.row() >  NoOfInnerRows && 
-	       driftLength > -gStTpcDb->WirePlaneGeometry()->outerSectorAnodeWirePadPlaneSeparation()) ||
-	      (TrackSegmentHits[nSegHits].Pad.row() <= NoOfInnerRows && 
-	       driftLength > -gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation())) 
+	  if ((row >  NoOfInnerRows && driftLength > -gStTpcDb->WirePlaneGeometry()->outerSectorAnodeWirePadPlaneSeparation()) ||
+	      (row <= NoOfInnerRows && driftLength > -gStTpcDb->WirePlaneGeometry()->innerSectorAnodeWirePadPlaneSeparation())) 
 	    driftLength = TMath::Abs(driftLength);
 	  else {continue;}
 	}
@@ -661,6 +659,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	// useT0, don't useTau
 	transform(TrackSegmentHits[nSegHits].coorLS,TrackSegmentHits[nSegHits].Pad,kFALSE,kFALSE); // don't use T0, don't use Tau
 	PrPP(Make,TrackSegmentHits[nSegHits].Pad); 
+	if (TrackSegmentHits[nSegHits].Pad.timeBucket() < 0 || TrackSegmentHits[nSegHits].Pad.timeBucket() > NoOfTimeBins) continue;
 	nSegHits++; 
       }
       sortedIndex = sIndex;
@@ -1473,8 +1472,11 @@ Double_t StTpcRSMaker::polya(Double_t *x, Double_t *par) {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.44 2010/12/01 20:59:46 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.45 2010/12/16 15:36:07 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.45  2010/12/16 15:36:07  fisyak
+// cut hits outside time buckets range
+//
 // Revision 1.44  2010/12/01 20:59:46  fisyak
 // Remove special treatment for delta-electrons, this will cause that IdTruth for cluster will be degradated because charge from delta-electrons will be accounted with delta-electons track Id but not with original particle Id as was before
 //
