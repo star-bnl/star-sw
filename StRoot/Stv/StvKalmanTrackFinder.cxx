@@ -50,7 +50,7 @@ static int trkShow=0;
 static int kitShow=0;
 //  DoShow(2);
   int nTrk = 0;
-  StvToolkit *kit = StvToolkit::Inst();
+static StvToolkit *kit = StvToolkit::Inst();
   StvSeedFinder *sf = kit->SeedFinder();
   double aveRes=0,aveXi2=0;
   while ((mSeedHelx = sf->NextSeed())) 
@@ -84,8 +84,8 @@ StvTrack *StvKalmanTrackFinder::FindTrack(int idir)
 static int nCall=0; nCall++;
 static const double P2CUT = 0.003; 	// Geant3 cut for too small momentum
 static const double CUCUT = 0.1; 	// Cut for too big curvature
-static const StvConst *myConst = StvConst::Inst();
-StvToolkit *kit = StvToolkit::Inst();
+static const StvConst   *myConst =   StvConst::Inst();
+static       StvToolkit *kit     = StvToolkit::Inst();
 
 StvTrack *myTrak = kit->GetTrack();
 StvNodePars par[2];
@@ -226,6 +226,44 @@ if (DoShow()) { Show();}
 
 }
 //_____________________________________________________________________________
+int StvKalmanTrackFinder::FindPrimaries(const StvHits &vtxs)	
+{
+static const StvConst *myConst =   StvConst::Inst();
+static     StvToolkit *kit     = StvToolkit::Inst();
+static     StvTrackFitter *tkf = StvTrackFitter::Inst();
+
+  StvTracks &traks = kit->GetTracks();
+  int goodCount= 0, plus=0, minus=0;
+  int nVertex = vtxs.size();  
+  if (!nVertex) return 0;
+  int nTracks = 0;
+  for (StvTrackIter it=traks.begin(); it!=traks.end() ;++it) {
+    StvTrack *track = *it;  nTracks++;
+    if (track->ToBeam() > myConst->mDca2dZeroXY) continue;
+    int bestVertex=-1; double bestXi2 = myConst->mXi2Vtx;
+    for (int iVertex=0;iVertex<nVertex;iVertex++) {
+      StvHit *vertex = vtxs[iVertex];
+      if (tkf->Fit(track,vertex,0)) 		continue;
+      double Xi2 = tkf->GetXi2();
+      if (Xi2>=bestXi2) 			continue;
+// 		Found better Xi2
+      bestXi2 = Xi2; bestVertex=iVertex;
+    }//End vertex loop
+    
+    if(bestVertex<0) 				continue;
+    StvNode *node = kit->GetNode();
+    StvHit *hit = vtxs[bestVertex];
+    tkf->Fit(track,hit,node);
+    track->push_front(node);
+    track->SetPrimary(bestVertex+1);
+    node->SetType(StvNode::kPrimNode);    
+    node->SetHit(hit);    
+    goodCount++;
+    if (track->GetCharge()>0) { plus++; } else { minus++; }
+
+  }//End track loop 
+  return goodCount;
+}
 //_____________________________________________________________________________
 int StvKalmanTrackFinder::Refit(StvTrack *tk,int idir)
 {

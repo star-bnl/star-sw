@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.3 2010/11/09 00:07:11 perev Exp $
+// $Id: StvMaker.cxx,v 1.4 2010/12/16 21:50:39 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -204,29 +204,28 @@ Int_t StvMaker::Make()
     mEventFiller->fillEvent();
   }
 
-
-  if (mVertexFinder) {
-     int nVtx = mVertexFinder->Fit(event);
-     Info("Make","VertexFinder found %d vertices",nVtx);
-     const StvHits &vertexes = mVertexFinder->Result();
-     if (vertexes.size()) {
-              //Set minimal errors
-       for (size_t i=0;i<vertexes.size();i++) {
-	 StvHit *vtx=vertexes[i];
-         float vtxErr[6];
-	 memcpy(vtxErr,vtx->errMtx(),sizeof(vtxErr));
-         if (vtxErr[0]>MIN_VTX_ERR2
-         &&  vtxErr[2]>MIN_VTX_ERR2
-         &&  vtxErr[5]>MIN_VTX_ERR2) continue;
-         memset(vtxErr,0,sizeof(vtxErr));
-         vtxErr[0]=MIN_VTX_ERR2;
-         vtxErr[2]=MIN_VTX_ERR2;
-         vtxErr[5]=MIN_VTX_ERR2;
-         vtx->setError(vtxErr);
-       }
-       //cout << "StvMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
-////????       kit->TrackFinder()->extendTracksToVertices(vertexes);
-  } }
+  do {//pseudo loop
+    if (!mVertexFinder) break;
+    int nVtx = mVertexFinder->Fit(event);
+    if (!nVtx) 		break;
+    Info("Make","VertexFinder found %d vertices",nVtx);
+    const StvHits &vertexes = mVertexFinder->Result();
+             //Set minimal errors
+    for (size_t i=0;i<vertexes.size();i++) {
+      StvHit *vtx=vertexes[i];
+      float *vtxErr = vtx->errMtx();
+      if (vtxErr[0]>MIN_VTX_ERR2
+      &&  vtxErr[2]>MIN_VTX_ERR2
+      &&  vtxErr[5]>MIN_VTX_ERR2) continue;
+      memset(vtxErr,0,sizeof(vtxErr[0])*3);
+      vtxErr[0]=MIN_VTX_ERR2;
+      vtxErr[2]=MIN_VTX_ERR2;
+      vtxErr[5]=MIN_VTX_ERR2;
+    }
+    //cout << "StvMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
+    kit->TrackFinder()->FindPrimaries(vertexes);
+    if (mEventFiller) mEventFiller->fillEventPrimaries();
+  } while(0);
 
   int iAns=kStOK,iAnz;
   if (mPullTTree) {iAns = FillPulls();}
@@ -276,9 +275,9 @@ Int_t StvMaker::FillPulls()
   memset(mPullEvent->mVtx,0,sizeof(mPullEvent->mVtx));
   memset(mPullEvent->mEtx,0,sizeof(mPullEvent->mEtx));
   if (vertex) {
-    mPullEvent->mVtx[0] = vertex->x_g()[0];
-    mPullEvent->mVtx[1] = vertex->x_g()[1];
-    mPullEvent->mVtx[2] = vertex->x_g()[2];
+    mPullEvent->mVtx[0] = vertex->x()[0];
+    mPullEvent->mVtx[1] = vertex->x()[1];
+    mPullEvent->mVtx[2] = vertex->x()[2];
     TCL::ucopy(vertex->errMtx(),mPullEvent->mEtx,6);
   }
   mPullEvent->Finish();

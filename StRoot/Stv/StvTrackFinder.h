@@ -16,6 +16,7 @@ public:
   StvTrackFinder(const char *name):TNamed(name,""){fgInst=this;fDraw=0;fDoShow=0;}
   virtual ~StvTrackFinder();
   virtual int       FindTracks()			=0;
+  virtual int	    FindPrimaries(const StvHits &vtxs)	=0;
   virtual void      Reset()				=0;
   virtual void      Clear(const char *opt="");
           void      AddPoint(const double pt[3]);
