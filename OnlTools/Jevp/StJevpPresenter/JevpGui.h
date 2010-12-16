@@ -67,7 +67,7 @@ class TQtZoomPadWidget;
 
 using namespace std;
 
-enum { kFileChangeToRun, kFileLive, kFilePrint, kFilePrintAll, kHelpAbout, kUpdate, kAutoUpdate, kToolBar, kOnlPrinter2 }; 
+enum { kFileChangeHistogramSet, kFileChangeToRun, kFileLive, kFilePrint, kFilePrintAll, kHelpAbout, kUpdate, kAutoUpdate, kToolBar, kOnlPrinter2 }; 
 
 class JevpScreenWidget : public  TQtWidget {
 public:
@@ -109,6 +109,9 @@ class JevpGui : public Q3MainWindow {
     QPushButton* fStarLogo;
 		  
 private:
+
+    QTabWidget *rootTab;
+
     int mWidth;
     int mHight;
     char mPsName[1024];
@@ -187,7 +190,10 @@ private:
     
     Int_t   fGuiRefreshRate; // msec.
 
-    void buildTabs(QWidget *container);
+    void deleteTabs(QTabWidget *tab);
+    void switchTabs(const char *newdisplay);
+    void buildTabs();
+
     void fillTab(QTabWidget *tab, u_int idx);
 
     JevpScreenWidget *currentScreen;
@@ -223,6 +229,7 @@ public slots:
      void QuitCB();
      void AboutCB();
      void ToolBarCB();
+     void ChangeHistogramSet();
      void ChangeToRun();
      void ChangeToLive();
 

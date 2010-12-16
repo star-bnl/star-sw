@@ -382,8 +382,15 @@ void JevpPlot::draw()
 {
   // Check for legends...
   //printf("in draw()\n");
-
+  
   PlotHisto *curr = (PlotHisto *)histos.First();
+
+  int dimension = 0;
+  if(curr) {
+    if(curr->histo) {
+      dimension = curr->histo->GetDimension();
+    }
+  }
 
   if(legend != NULL) {
     //printf("In legend\n");
@@ -415,23 +422,29 @@ void JevpPlot::draw()
   gStyle->SetPalette(palette);  
 
   // Get histo bounds...
-  curr = (PlotHisto *)histos.First();
-  double max=0;
-  while(curr) {
-    double m;
-    m = curr->histo->GetBinContent(curr->histo->GetMaximumBin());
-    if(m > max) max = m;
-    curr = (PlotHisto *)histos.After(curr);
-  }
-  curr = (PlotHisto *)histos.First();
-  
-  if(external_maxy > -9999) {
-    LOG(DBG, "set max to %f", (float)(external_maxy));
-    curr->histo->SetMaximum(external_maxy);
-  }
-  else {
-    LOG(DBG, "set max to %f",(float)(max*1.1));
-    curr->histo->SetMaximum(max * 1.1);
+
+  if(dimension == 1) {
+    curr = (PlotHisto *)histos.First();
+    double max=0;
+    while(curr) {
+      double m;
+      m = curr->histo->GetBinContent(curr->histo->GetMaximumBin());
+      
+      LOG("JEFF", "Histo %s: (%s) m=%f %d",GetPlotName(), curr->histo->GetName(), m, dimension);
+      
+      if(m > max) max = m;
+      curr = (PlotHisto *)histos.After(curr);
+    }
+    curr = (PlotHisto *)histos.First();
+    
+    if(external_maxy > -9999) {
+      LOG("JEFF", "set max to %f", (float)(external_maxy));
+      curr->histo->SetMaximum(external_maxy);
+    }
+    else {
+      LOG("JEFF", "set max to %f",(float)(max*1.1));
+      curr->histo->SetMaximum(max * 1.1);
+    }
   }
 
   int plotnum= 1;
@@ -442,12 +455,14 @@ void JevpPlot::draw()
     //printf("plot %d\n", plotnum);
     plotnum++;
 
-    if(logy) {
-      if(curr->histo->GetMaximum() == 0.0) curr->histo->SetMaximum(10.0);
-      if(curr->histo->GetMinimum() == 0.0) curr->histo->SetMinimum(1.0);
-    }
-    else {
-      if(curr->histo->GetMaximum() == 0.0) curr->histo->SetMaximum(1.0);
+    if(dimension == 1) {
+      if(logy) {
+	if(curr->histo->GetMaximum() == 0.0) curr->histo->SetMaximum(10.0);
+	if(curr->histo->GetMinimum() == 0.0) curr->histo->SetMinimum(1.0);
+      }
+      else {
+	if(curr->histo->GetMaximum() == 0.0) curr->histo->SetMaximum(1.0);
+      }
     }
 
     if(legend) {
