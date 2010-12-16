@@ -15,6 +15,7 @@
 #include "ReferenceWidget.h"
 #include "TQtWidget.h"
 #include "TQtZoomPadWidget.h"
+#include <qinputdialog.h>
 
 #include "qapplication.h"
 #include "qtabwidget.h"
@@ -210,30 +211,80 @@ void JevpGui::fillTab(QTabWidget *tab, u_int idx)
   fillTab(tab, next_idx);
 }
 
-void JevpGui::buildTabs(QWidget *container)
+void JevpGui::deleteTabs(QTabWidget *tab)
+{  
+  for(int idx=tab->currentIndex(); idx >= 0; idx=tab->currentIndex()) {
+
+    QWidget *widget = tab->currentWidget();
+    
+    widget->blockSignals(true);
+    
+    QTabWidget *ctab = dynamic_cast<QTabWidget *>(widget);
+    JevpScreenWidget *screen = dynamic_cast<JevpScreenWidget *>(widget);
+
+    LOG("JEFF", "deleteTabs:  idx=%d tab=%d screen=%d",idx, tab ? 1 : 0, screen ? 1 :0);
+
+    tab->removeTab(idx);
+
+    if(ctab) {
+      deleteTabs(ctab);
+      delete ctab;
+    }
+    if(screen) {
+      delete screen;
+    }
+  }
+}
+
+void JevpGui::switchTabs(const char *newdisplay) {
+  CP;
+  int ret = jl_displayFile->setDisplay((char *)newdisplay);
+  if(ret == -1) {
+    LOG(ERR, "No display %s",newdisplay);
+  }
+
+  CP;
+  evpMain->display = (char *)newdisplay;
+
+  CP;
+  LOG("JEFF", "Calling deleteTabs for root");
+
+  PresenterSuspend suspend;
+  suspend << rootTab;
+
+  deleteTabs(rootTab);
+  LOG("JEFF", "Back from deletTabs for root");
+  CP;
+  LOG("JEFF", "Calling buildTabs");
+  buildTabs();
+  LOG("JEFF", "Back from buildTabs");
+}
+
+void JevpGui::buildTabs()
 {
   PresenterSuspend suspend;
 
   LOG(DBG, "In buildTabs.  Setting current screen to NULL");
   
   currentScreen = NULL;
-  QTabWidget *maintab = new QTabWidget(container);
-  suspend << maintab;
+ 
+  suspend << rootTab;
 
   LOG(DBG, "fillTab currentScreen = 0x%x",currentScreen);
 
-  fillTab(maintab, 1);
+  fillTab(rootTab, 1);
 
   LOG(DBG, "after fillTab currentScreen = 0x%x",currentScreen);
 
   // Need to know when the tab is selected...
-  connect(maintab, SIGNAL(currentChanged(QWidget *)), this, SLOT(tabChanged(QWidget*)));
+  connect(rootTab, SIGNAL(currentChanged(QWidget *)), this, SLOT(tabChanged(QWidget*)));
 }
 
 
 static TQtBrowserMenuItem_t gMenu_Data[] = {
   // { text, id, accelerator, tooltip, icon }
   /* File Menu */
+  { "Change Histogram Set", kFileChangeHistogramSet, 0, "Change Histogram Set", ""},
   { "&Change To Run", kFileChangeToRun, 0, "Re-analyse old run ", ""},
   { "&Live", kFileLive, 0, "Analyze current run", ""},
   { "&Print",     kFilePrint,    Qt::CTRL+Qt::Key_P, "Print the TCanvas image ",            ":/printer.xpm" },
@@ -311,7 +362,8 @@ void JevpGui::gui_JevpGui(JevpGui *logic, bool isRefWindow)
   // Define Tabs
   //
   // main tab holding
-  buildTabs(mCentralWidget);
+  rootTab = new QTabWidget(mCentralWidget);
+  buildTabs();
 
   printf("Done building tabs\n");
 
@@ -479,6 +531,7 @@ void JevpGui::MakeMenuBar()
   Q3PopupMenu *fileMenu      = new Q3PopupMenu();
   mainMenu->insertItem("&File",fileMenu);
 
+  fActions[kFileChangeHistogramSet]->addTo(fileMenu);
   fActions[kFileChangeToRun]->addTo(fileMenu);
   fActions[kFileLive]->addTo(fileMenu);
   fActions[kFileLive]->setToggleAction(true);
@@ -722,6 +775,7 @@ void JevpGui::ProcessMessage()
 
      //case kFileSave:         SaveCB();         break;
      //case kFileSaveAs:       SaveAsCB();       break;
+   case kFileChangeHistogramSet:  ChangeHistogramSet(); break;
    case kFileChangeToRun:  ChangeToRun(); break;
    case kFileLive:         ChangeToLive(); break;
    case kFilePrint:        PrintCB();        break;
@@ -755,6 +809,24 @@ void JevpGui::SaveAsCB()
   setEnabled(true);
 }
 //______________________________________________________________________________
+void JevpGui::ChangeHistogramSet()
+{
+  bool ok;
+
+  QString text = QInputDialog::getText(this, 
+				       tr("New Histogram Set Name"),
+				       tr("New Histogram Set Name:"), 
+				       QLineEdit::Normal,
+				       tr(evpMain->display), &ok);
+
+  if(ok && !text.isEmpty()) {
+    printf("Change Histogram set to %s\n", (const char *)text);
+    switchTabs((const char *)text);
+  }
+
+  
+}
+
 void JevpGui::ChangeToRun()
 {
   printf("Change to Run...\n");
@@ -1474,6 +1546,7 @@ void JevpGui::jl_JevpLogic(const char* file) {
 
 void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
   char tmp[256];
+  tmp[0] = '\0';
 
   screen->setUpdatesEnabled(false);   // keep double buffer in place...
 
@@ -1494,6 +1567,7 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
   CP;
   if(!thetab->leaf) {
     sprintf(tmp, "No histo for index=%d",combo_index);
+    LOG("JEFF", "Cross of death: %s",tmp);
     jl_CrossOfDeath(screen, tmp);
     CP;
     return;
@@ -1552,6 +1626,8 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
 
     if(plot == NULL) {
       CP;
+      LOG("JEFF", "Cross of death: %s",tmp);
+      sprintf(tmp, "Server Doesn't Currently Have Plot %s",hd->name);
       jl_CrossOfDeath(screen, tmp);     // Some error...
     }
     else {
