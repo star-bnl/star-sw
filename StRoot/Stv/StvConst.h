@@ -17,6 +17,8 @@ public:
       float 	mXi2Big;		//Xi2 in Refit, temporary allowed Xi2.
       float	mRxyMax;		//Max radius for tracking
       float	mZMax;			//Max Z      for tracking
+      float     mDca2dZeroXY;		//max 2d dca to X=Y=0  for primary track
+      float     mDca3dVertex;  		//max 3d dca to vertex for primary track
       char   	mEnd[1];
 static StvConst *mgConst;
 ClassDef(StvConst,0)//
