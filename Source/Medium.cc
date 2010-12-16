@@ -1557,6 +1557,112 @@ Medium::GetPhotonCollision(const double e, int& type, int& level,
 }
 
 void
+Medium::ResetElectronVelocity() {
+
+  tabElectronVelocityE.clear();
+  tabElectronVelocityB.clear();
+  tabElectronVelocityExB.clear();
+  hasElectronVelocityE = false;
+  hasElectronVelocityB = false;
+  hasElectronVelocityExB = false;
+
+}
+
+void
+Medium::ResetElectronDiffusion() {
+
+  tabElectronDiffLong.clear();
+  tabElectronDiffTrans.clear();
+  tabElectronDiffTens.clear();
+  hasElectronDiffLong = false;
+  hasElectronDiffTrans = false;
+  hasElectronDiffTens = false;
+
+}
+
+void
+Medium::ResetElectronTownsend() {
+
+  tabElectronTownsend.clear();
+  hasElectronTownsend = false;
+
+}
+
+void
+Medium::ResetElectronAttachment() {
+
+  tabElectronAttachment.clear();
+  hasElectronAttachment = false;
+
+}
+
+void
+Medium::ResetHoleVelocity() {
+
+  tabHoleVelocityE.clear();
+  tabHoleVelocityB.clear();
+  tabHoleVelocityExB.clear();
+  hasHoleVelocityE = false;
+  hasHoleVelocityB = false;
+  hasHoleVelocityExB = false;
+
+}
+
+void
+Medium::ResetHoleDiffusion() {
+
+  tabHoleDiffLong.clear();
+  tabHoleDiffTrans.clear();
+  tabHoleDiffTens.clear();
+  hasHoleDiffLong = false;
+  hasHoleDiffTrans = false;
+  hasHoleDiffTens = false;
+
+}
+
+void
+Medium::ResetHoleTownsend() {
+
+  tabHoleTownsend.clear();
+  hasHoleTownsend = false;
+
+}
+
+void
+Medium::ResetHoleAttachment() {
+
+  tabHoleAttachment.clear();
+  hasHoleAttachment = false;
+
+}
+
+void
+Medium::ResetIonMobility() {
+
+  tabIonMobility.clear();
+  hasIonMobility = false;
+
+}
+
+void
+Medium::ResetIonDiffusion() {
+
+  tabIonDiffLong.clear();
+  tabIonDiffTrans.clear();
+  hasIonDiffLong = false;
+  hasIonDiffTrans = false;
+
+}
+
+void
+Medium::ResetIonDissociation() {
+
+  tabIonDissociation.clear();
+  hasIonDissociation = false;
+
+}
+
+void
 Medium::SetFieldGrid(double emin, double emax, int ne, bool logE,
                      double bmin, double bmax, int nb,
                      double amin, double amax, int na) {
@@ -1899,6 +2005,17 @@ Medium::SetFieldGrid(const std::vector<double>& efields,
   for (int i = nAngles; i--;) bAngles[i] = angles[i]; 
     
 }  
+
+void
+Medium::GetFieldGrid(std::vector<double>& efields,
+                     std::vector<double>& bfields,
+                     std::vector<double>& angles) {
+
+  efields = eFields;
+  bfields = bFields;
+  angles  = bAngles;
+
+}
   
 void
 Medium::CloneTable(std::vector<std::vector<std::vector<double> > >& tab,
@@ -2031,6 +2148,81 @@ Medium::CloneTensor(std::vector<std::vector<std::vector<std::vector<double> > > 
 
 }
 
+bool
+Medium::SetIonMobility(const int ie, const int ib, const int ia,
+                       const double mu) {
+
+  // Check the index.
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::SetIonMobility:\n";
+    std::cerr << "    Index (" 
+              << ie << ", " << ib << ", " << ia << ") out of range.\n";
+    return false;
+  }
+
+  if (!hasIonMobility) {
+    std::cerr << className << "::SetIonMobility:\n";
+    std::cerr << "    Ion mobility table not initialised.\n";
+    return false;
+  }
+ 
+  if (mu == 0.) {
+    std::cerr << className << "::SetIonMobility:\n";
+    std::cerr << "    Zero value not permitted.\n";
+    return false;
+  }
+  
+  tabIonMobility[ia][ib][ie] = mu;
+  if (debug) {
+    std::cout << className << "::SetIonMobility:\n";
+    std::cout << "   Ion mobility at E = " 
+              << eFields[ie] << " V/cm, B = " 
+              << bFields[ib] << " T, angle "
+              << bAngles[ia] << " set to " << mu << " cm2/(V ns).\n";
+  }
+  return true;
+
+}
+
+bool
+Medium::SetIonMobility(const std::vector<double>& efields,
+                       const std::vector<double>& mobilities) {
+
+  const int ne = efields.size();
+  const int nm = mobilities.size();
+  if (ne != nm) {
+    std::cerr << className << "::SetIonMobility:\n";
+    std::cerr << "    E-field and mobility arrays have different sizes.\n";
+    return false;
+  }
+  
+  ResetIonMobility();
+  InitParamArrays(nEfields, nBfields, nAngles, tabIonMobility, 0.);
+  for (int i = 0; i < nEfields; ++i) {
+    const double e = eFields[i];
+    const double mu = Interpolate1D(e, mobilities, efields,
+                                    intpMobility, 
+                                    extrLowMobility, extrHighMobility);
+    tabIonMobility[0][0][i] = mu;
+  }
+
+  if (map2d) {
+    for (int i = nAngles; i--;) {
+      for (int j = nBfields; j--;) {
+        for (int k = nEfields; k--;) {
+          tabIonMobility[i][j][k] = tabIonMobility[0][0][k];
+        }
+      }
+    }
+  }
+  hasIonMobility = true;
+    
+  return true;
+
+}
+  
 void
 Medium::SetExtrapolationMethodVelocity(const std::string extrLow, 
                                        const std::string extrHigh) {

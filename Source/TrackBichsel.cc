@@ -348,7 +348,7 @@ TrackBichsel::LoadCrossSectionTable(const std::string filename) {
     line.erase(line.begin(), std::find_if(line.begin(), line.end(),
                not1(std::ptr_fun<int, int>(isspace))));
     // Skip comments.
-    if (line[0] == '#' || 
+    if (line[0] == '#' || line[0] == '*' || 
         (line[0] == '/' && line[1] == '/')) continue;
     // Extract the values.
     data.str(line);

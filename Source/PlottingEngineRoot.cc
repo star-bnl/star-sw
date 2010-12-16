@@ -65,7 +65,7 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetLabelFont(132, "xyz");
   garfieldStyle->SetPaperSize(TStyle::kA4);
   garfieldStyle->SetFuncWidth(2);
-  garfieldStyle->SetHistLineColor(kOrange);
+  garfieldStyle->SetHistLineColor(kOrange - 3);
   garfieldStyle->SetPalette(1);
   
   garfieldStyle->cd();  

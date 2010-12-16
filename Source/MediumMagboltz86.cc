@@ -420,7 +420,7 @@ MediumMagboltz86::GetElectronCollisionRate(const double e, const int band) {
     isChanged = false;
   }
 
-  if (debug && band != 0) {
+  if (debug && band > 0) {
     std::cerr << className << "::GetElectronCollisionRate:\n";
     std::cerr << "    This medium does not have a band structure.\n";
   }

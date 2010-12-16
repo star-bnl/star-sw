@@ -19,6 +19,8 @@ ViewMedium::ViewMedium() :
   vMin(0.), vMax(0.),
   nFunctions(0) {
   
+  className = "ViewMedium";
+
   functions.clear();
   plottingEngine.SetDefaultStyle();
 
@@ -47,7 +49,7 @@ void
 ViewMedium::SetMedium(Medium* m) {
 
   if (m == 0) {
-    std::cerr << "ViewMedium::SetMedium:\n";
+    std::cerr << className << "::SetMedium:\n";
     std::cerr << "    Medium pointer is null.\n";
     return;
   }
@@ -60,7 +62,7 @@ void
 ViewMedium::SetElectricFieldRange(const double emin, const double emax) {
 
   if (emin >= emax || emin < 0.) {
-    std::cerr << "ViewMedium::SetElectricFieldRange:\n";
+    std::cerr << className << "::SetElectricFieldRange:\n";
     std::cerr << "    Incorrect field range.\n";
     return;
   }
@@ -73,7 +75,7 @@ void
 ViewMedium::SetMagneticFieldRange(const double bmin, const double bmax) {
 
   if (bmin >= bmax || bmin < 0.) { 
-    std::cerr << "ViewMedium::SetMagneticFieldRange:\n";
+    std::cerr << className << "::SetMagneticFieldRange:\n";
     std::cerr << "    Incorrect field range.\n";
     return;
   }
@@ -86,7 +88,7 @@ void
 ViewMedium::SetVelocityRange(const double vmin, const double vmax) {
 
   if (vmin >= vmax || vmin < 0.) {
-    std::cerr << "ViewMedium::SetVelocityRange:\n";
+    std::cerr << className << "::SetVelocityRange:\n";
     std::cerr << "    Incorrect range.\n";
     return;
   }
@@ -192,7 +194,7 @@ ViewMedium::AddFunction(const double xmin, const double xmax,
                         const int type) {
 
   if (medium == 0) {
-    std::cerr << "ViewMedium::AddFunction:\n";
+    std::cerr << className << "::AddFunction:\n";
     std::cerr << "    Medium is not defined.\n";
     return;
   }
@@ -325,7 +327,7 @@ ViewMedium::EvaluateFunction(double* pos, double* par) {
       y = a;
       break;
     default:
-      std::cerr << "ViewMedium::EvaluateFunction:\n";
+      std::cerr << className << "::EvaluateFunction:\n";
       std::cerr << "    Unknown type of transport coefficient requested.\n"; 
       std::cerr << "    Program bug!\n";
       return 0.;

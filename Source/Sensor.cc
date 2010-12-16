@@ -237,7 +237,7 @@ Sensor::AddComponent(ComponentBase* comp) {
 
   if (comp == 0) {
     std::cerr << "Sensor::AddComponent:\n";
-    std::cerr << "    Component is not defined.\n";
+    std::cerr << "    Component pointer is null.\n";
     return;
   }
 
@@ -254,7 +254,7 @@ Sensor::AddElectrode(ComponentBase* comp, std::string label) {
 
   if (comp == 0) {
     std::cerr << "Sensor::AddElectrode:\n";
-    std::cerr << "    Component is not defined.\n";
+    std::cerr << "    Component pointer is null.\n";
     return;
   }
 

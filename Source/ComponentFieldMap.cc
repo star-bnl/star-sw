@@ -33,22 +33,23 @@ ComponentFieldMap::PrintMaterials() {
 
   // Do not proceed if not properly initialised.
   if (!ready) {
-    printf("ComponentFieldMap::PrintMaterials:\n");
-    printf("    Field map not yet initialised, drift medium can not be selected.\n");
-    return;
+    std::cerr << className << "::PrintMaterials:\n";
+    std::cerr << "    Field map not yet initialised.\n";
+    return; 
   }
 
   if (nMaterials < 0) {
-    printf("ComponentFieldMap::PrintMaterials:\n");
-    printf("    No materials are currently defined.\n");
+    std::cerr << className << "::PrintMaterials:\n";
+    std::cerr << "    No materials are currently defined.\n";
     return;
   }
-  
-  printf("ComponentFieldMap::PrintMaterials:\n");
-  printf("    Currently %d materials are defined\n", nMaterials);
-  printf("                Index Permittivity  Resistivity Notes\n");
+ 
+  std::cout << className << "::PrintMaterials:\n"; 
+  std::cout << "    Currently " << nMaterials 
+            << " materials are defined.\n";
+  std::cout << "      Index Permittivity  Resistivity Notes\n";
   for (int i = 0; i < nMaterials; ++i) {
-    printf("                %5d %12g %12g", i, materials[i].eps, materials[i].ohm);
+    printf("      %5d %12g %12g", i, materials[i].eps, materials[i].ohm);
     if (materials[i].medium != 0) {
       std::string name = materials[i].medium->GetName();
       printf(" %s", name.c_str());
@@ -56,7 +57,7 @@ ComponentFieldMap::PrintMaterials() {
       if (materials[i].medium->IsIonisable()) printf(", ionisable");
     }
     if (materials[i].driftmedium) {
-      printf(" (old flag drift medium)\n");
+      printf(" (drift medium)\n");
     } else {
       printf("\n");
     }
@@ -69,15 +70,16 @@ ComponentFieldMap::DriftMedium(int imat) {
 
   // Do not proceed if not properly initialised.
   if (!ready) {
-    printf("ComponentFieldMap::DriftMedium:\n");
-    printf("    Field map not yet initialised, drift medium cannot be selected.\n");
+    std::cerr << className << "::DriftMedium:\n";
+    std::cerr << "    Field map not yet initialised.\n";
+    std::cerr << "    Drift medium cannot be selected.\n";
     return;
   }
 
   // Check value
   if (imat < 0 || imat >= nMaterials) {
-    printf("ComponentFieldMap::DriftMedium:\n");
-    printf("    Material index %d is out of range.\n", imat);
+    std::cerr << className << "::DriftMedium:\n";
+    std::cerr << "    Material index " << imat << " is out of range.\n";
     return;
   }
 
@@ -91,15 +93,16 @@ ComponentFieldMap::NotDriftMedium(const int imat) {
 
   // Do not proceed if not properly initialised.
   if (!ready) {
-    printf("ComponentFieldMap::NotDriftMedium:\n");
-    printf("    Field map not yet initialised, drift medium cannot be selected.\n");
+    std::cerr << className << "::NotDriftMedium:\n";
+    std::cerr << "    Field map not yet initialised.\n";
+    std::cerr << "    Drift medium cannot be selected.\n";
     return;
   }
 
   // Check value
   if (imat < 0 || imat >= nMaterials) {
-    printf("ComponentFieldMap::NotDriftMedium:\n");
-    printf("    Material index %d is out of range.\n", imat);
+    std::cerr << className << "::NotDriftMedium:\n";
+    std::cerr << "    Material index " << imat << " is out of range.\n";
     return;
   }
 
@@ -112,8 +115,8 @@ double
 ComponentFieldMap::GetPermittivity(const int imat) {
 
   if (imat < 0 || imat >= nMaterials) {
-    printf("ComponentFieldMap::GetPermittivity:\n");
-    printf("    Material index %d is out of range.\n", imat);
+    std::cerr << className << "::GetPermittivity:\n";
+    std::cerr << "    Material index " << imat << " is out of range.\n";
     return -1.;
   }
 
@@ -125,9 +128,9 @@ double
 ComponentFieldMap::GetConductivity(const int imat) {
 
   if (imat < 0 || imat >= nMaterials) {
-    printf("ComponentFieldMap::GetConductivity:\n");
-    printf("    Material index %d is out of range.\n", imat);
-    return -1;
+    std::cerr << className << "::GetConductivity:\n";
+    std::cerr << "    Material index " << imat << " is out of range.\n";
+    return -1.;
   }
 
   return materials[imat].ohm;
@@ -138,21 +141,22 @@ void
 ComponentFieldMap::SetMedium(const int imat, Medium* m) {
 
   if (imat < 0 || imat >= nMaterials) {
-    printf("ComponentFieldMap::SetMedium:\n");
-    printf("    Material index %d is out of range.\n", imat);
+    std::cerr << className << "::SetMedium:\n";
+    std::cerr << "    Material index " << imat << " is out of range.\n";
     return;
   }
   
   if (m == 0) {
-    printf("ComponentFieldMap::SetMedium:\n");
-    printf("    Medium is not defined.\n");
+    std::cerr << className << "::SetMedium:\n";
+    std::cerr << "    Medium pointer is null.\n";
     return;
   }
   
   if (debug) {
     std::string name = m->GetName();
-    printf("ComponentFieldMap::SetMedium:\n");
-    printf("    Associated material %d with medium %s.\n", imat, name.c_str());
+    std::cout << className << "::SetMedium:\n";
+    std::cout << "    Associated material " << imat 
+              << " with medium " << name << ".\n";
   }
   
   materials[imat].medium = m;
@@ -163,8 +167,8 @@ bool
 ComponentFieldMap::GetMedium(const int imat, Medium*& m) const {
 
   if (imat < 0 || imat >= nMaterials) {
-    printf("ComponentFieldMap::GetMedium:\n");
-    printf("    Material index %d is out of range.\n", imat);
+    std::cerr << className << "::GetMedium:\n";
+    std::cerr << "    Material index " << imat << " is out of range.\n";
     m = 0;
     return false;
   }

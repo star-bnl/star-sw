@@ -44,6 +44,8 @@ class ViewMedium {
     double EvaluateFunction(double* pos, double* par);
 
   private:
+
+    std::string className;
  
     // Options
     bool debug;

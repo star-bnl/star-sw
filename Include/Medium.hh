@@ -172,11 +172,31 @@ class Medium {
 
     // Set the range of fields to be covered by the transport tables.
     void SetFieldGrid(double emin, double emax, int ne, bool logE,
-                      double bmin, double bmax, int nb, 
-                      double amin, double amax, int na);
+                      double bmin = 0., double bmax = 0., int nb = 1, 
+                      double amin = 0., double amax = 0., int na = 1);
     void SetFieldGrid(const std::vector<double>& efields,
                       const std::vector<double>& bfields,
                       const std::vector<double>& angles);
+    void GetFieldGrid(std::vector<double>& efields,
+                      std::vector<double>& bfields,
+                      std::vector<double>& angles);
+
+    void ResetElectronVelocity();
+    void ResetElectronDiffusion();
+    void ResetElectronTownsend();
+    void ResetElectronAttachment();
+    void ResetHoleVelocity();
+    void ResetHoleDiffusion();
+    void ResetHoleTownsend();
+    void ResetHoleAttachment();
+    void ResetIonMobility();
+    void ResetIonDiffusion();
+    void ResetIonDissociation();
+
+    bool SetIonMobility(const int ie, const int ib, const int ia,
+                        const double mu);
+    bool SetIonMobility(const std::vector<double>& fields,
+                        const std::vector<double>& mobilities);
                        
     // Select extrapolation method for fields below/above the table range.
     // Options are "constant"/"linear"/"exponential".

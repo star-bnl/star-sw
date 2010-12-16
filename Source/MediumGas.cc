@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <cstring>
 #include <cstdlib>
 
@@ -1541,6 +1542,106 @@ MediumGas::PrintGas() {
       !hasIonDissociation) {
     std::cout << "      none\n";
   }
+
+}
+
+bool
+MediumGas::LoadIonMobility(const std::string filename) {
+
+  // Open the file.
+  std::ifstream infile;
+  infile.open(filename.c_str(), std::ios::in);
+  // Make sure the file could actually be opened.
+  if (!infile) {
+    std::cerr << className << "::LoadIonMobility:\n";
+    std::cerr << "    Error opening file " << filename << ".\n";
+    return false;
+  }
+  
+  double field = -1., mu = -1.;
+  double lastField = field;
+  std::vector<double> efields;
+  std::vector<double> mobilities;
+  efields.clear();
+  mobilities.clear();
+  
+  // Read the file line by line.
+  std::string line;
+  std::istringstream dataStream; 
+  dataStream.str("");
+  dataStream.clear();
+   
+  int i = 0;
+  while (!infile.eof()) {
+    ++i;
+    // Read the next line.
+    std::getline(infile, line);
+    // Strip white space from the beginning of the line.
+    line.erase(line.begin(), std::find_if(line.begin(), line.end(), 
+               not1(std::ptr_fun<int, int>(isspace))));
+    // Skip comments.
+    if (line[0] == '#' || line[0] == '*' ||
+        (line[0] == '/' && line[1] == '/')) continue;
+    if (line == "") break;
+    // Extract the values.
+    dataStream.str(line);
+    dataStream >> field >> mu;
+    if (dataStream.eof()) break;
+    // Check if the data has been read correctly.
+    if (infile.fail() && !infile.eof()) {
+      std::cerr << className << "::LoadIonMobility:\n";
+      std::cerr << "    Error reading file "
+                << filename << " (line " << i << ").\n";
+      return false;
+    }
+    // Reset the stringstream.
+    dataStream.str("");
+    dataStream.clear();
+    // Make sure the values make sense.
+    // Negative field values are not allowed.
+    if (field < 0.) {
+      std::cerr << className << "::LoadIonMobility:\n";
+      std::cerr << "    Negative electric field (line " 
+                << i << ").\n";
+      return false;
+    }
+    // The table has to be in ascending order.
+    if (field <= lastField) {
+      std::cerr << className << "::LoadIonMobility:\n";
+      std::cerr << "    Table is not in ascending order (line " 
+                << i << ").\n"; 
+      return false;
+    }
+    // Add the values to the list.
+    efields.push_back(field);
+    mobilities.push_back(mu);
+    lastField = field;
+  }
+  
+  const int ne = efields.size();
+  if (ne <= 0) {
+    std::cerr << className << "::LoadIonMobilities:\n";
+    std::cerr << "    No valid data found.\n";
+    return false;
+  }
+   
+  // The E/N values in the file are supposed to be in Td (10^-17 V cm2).
+  const double scaleField = 1.e-17 * GetNumberDensity();
+  // The reduced mobilities in the file are supposed to be in V / (cm2 s).
+  const double scaleMobility = 1.e-9 * (pressure / AtmosphericPressure) * 
+                                       (ZeroCelsius / temperature);
+  for (int j = ne; j--;) {
+    // Scale the fields and mobilities.
+    efields[j] *= scaleField;
+    mobilities[j] *= scaleMobility;
+  }
+  
+  std::cout << className << "::LoadIonMobility:\n";
+  std::cout << "    Read " << ne << " values from file " 
+              << filename << "\n";
+
+  
+  return SetIonMobility(efields, mobilities);
 
 }
 

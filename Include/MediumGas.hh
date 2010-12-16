@@ -49,6 +49,8 @@ class MediumGas : public Medium {
 
     void PrintGas();
 
+    bool LoadIonMobility(const std::string filename);
+
     void SetExtrapolationMethodExcitationRates(const std::string extrLow,
                                               const std::string extrHigh);
     void SetExtrapolationMethodIonisationRates(const std::string extrLow,
