@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.105  2010/12/17 14:54:56  jcs
+// For embedding, read raw data from StFtpcMixerMaker tables
+//
 // Revision 1.104  2010/04/08 16:46:16  jcs
 // swap data for RDO6,RDO7 FTPC East when Calibrations_ftpc/ftpcElectronics->swapRDO6RDO7East=1
 //
@@ -695,6 +698,8 @@ Int_t StFtpcClusterMaker::Make()
   }
         LOG_DEBUG<<" Using microsecondsPerTimebin = "<<dbReader.microsecondsPerTimebin()<<" for this event"<<endm;
 
+  // Test if input data is real data (DAQ)
+
   St_DataSet *daqDataset;
   StDAQReader *daqReader;
   StFTPCReader *ftpcReader=NULL;
@@ -795,9 +800,48 @@ Int_t StFtpcClusterMaker::Make()
   // ghitarray will only be used if fast simulator is active
   TObjArray ghitarray(10000);  
   ghitarray.SetOwner();
+ 
+  // Test if input data is embedding data (StFtpcMixerMaker)
+
+  St_DataSet *mix = NULL;
+  mix = GetDataSet("FtpcMixer");
+  if (mix) {
+     LOG_INFO <<" DataSet FtpcMixer found" << endm;  
+     //mix->ls(0);
+
+    // Create an iterator
+    St_DataSetIter ftpc_raw(mix);
+
+   //Get the tables
+   St_fcl_ftpcadc   *adc = (St_fcl_ftpcadc *) ftpc_raw.Find("fcl_ftpcadc");
+   St_fcl_ftpcsqndx *sqndx = (St_fcl_ftpcsqndx *) ftpc_raw.Find("fcl_ftpcsqndx");
+   if (adc && sqndx) {
+
+      ftpcReader=new StFTPCReader((short unsigned int *) sqndx->GetTable(),
+				  sqndx->GetNRows(),
+				  (char *) adc->GetTable(),
+				  adc->GetNRows());
+
+      LOG_INFO << "Created StFTPCReader from StFtpcMixerMaker(Embedding) tables #fcl_ftpcsqndx rows = "<<sqndx->GetNRows()<<" #fcl_ftpcadc rows = "<<adc->GetNRows() << endm;
+      using_FTPC_slow_simulator = 1;
   
+      // Set gas temperature to default values so that database values printed only once
+      paramReader.setGasTemperatureWest(dbReader.defaultTemperatureWest());
+      paramReader.setGasTemperatureEast(dbReader.defaultTemperatureEast());
+      LOG_INFO << "Found StFtpcMixerMaker sequences with #fcl_ftpcsqndx rows = "<<sqndx->GetNRows()<<" #fcl_ftpcadc rows = "<<adc->GetNRows() <<endm;
+   }
+    else {
+      LOG_WARN << "FTPC Embedding Tables are not found:" 
+               << " fcl_ftpcsqndx = " << sqndx 
+	       << " fcl_ftpcadc   = " << adc << endm;
+      return kStWarn;  
+    }
+  }
+
+  // Test if input data is simulated data (StFtpcSlowSimMaker)
+
   St_DataSet *raw = GetDataSet("ftpc_raw");
-  if (raw) {
+  if (raw && !mix) {
     //			FCL
     St_DataSetIter get(raw);
     
@@ -811,7 +855,7 @@ Int_t StFtpcClusterMaker::Make()
 				  (char *) fcl_ftpcadc->GetTable(),
 				  fcl_ftpcadc->GetNRows());
 
-      LOG_DEBUG << "created StFTPCReader from tables" << endm;
+      LOG_INFO << "Created StFTPCReader from FTPC Slow Simulator tables #fcl_ftpcsqndx rows = "<<fcl_ftpcsqndx->GetNRows()<<" #fcl_ftpcadc rows = "<<fcl_ftpcadc->GetNRows() << endm;
       using_FTPC_slow_simulator = 1;
   
       // Set gas temperature to default values so that database values printed only once
@@ -819,7 +863,7 @@ Int_t StFtpcClusterMaker::Make()
       paramReader.setGasTemperatureEast(dbReader.defaultTemperatureEast());
     }
     else {
-      LOG_WARN << "Tables are not found:" 
+      LOG_WARN << "FTPC Slow Simulator Tables are not found:" 
                << " fcl_ftpcsqndx = " << fcl_ftpcsqndx 
 	       << " fcl_ftpcadc   = " << fcl_ftpcadc << endm;
       return kStWarn;  
