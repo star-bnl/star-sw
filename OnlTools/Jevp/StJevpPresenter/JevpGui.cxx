@@ -84,13 +84,13 @@ public:
 JevpScreenWidget::JevpScreenWidget(char *tabname, char *plotname, u_int combo_index, QTabWidget *menu) : TQtWidget(menu, tabname) {
    
   //SetDoubleBuffer(0);
-  printf("Is Double Buffered? %d",IsDoubleBuffered());
+  //printf("Is Double Buffered? %d",IsDoubleBuffered());
 
   plots = new TList();
   jevpPlots = new TList();
   parentMenu = menu;
   this->combo_index = combo_index;
-  printf("Creating JevpScreen for %s %s\n",plotname,tabname);
+  LOG(DBG,"Creating JevpScreenWidget for %s %s\n",plotname,tabname);
   plot = new std::string(plotname);
 
   
@@ -113,7 +113,7 @@ JevpPlot *JevpScreenWidget::getJevpPlot(char *name) {
 }
 
 JevpScreenWidget::~JevpScreenWidget() {
-  printf("Deleting JevpScreen for %s\n",plot->c_str());
+  LOG(DBG,"Deleting JevpScreen for %s\n",plot->c_str());
   delete plot;
 }
 
@@ -148,12 +148,12 @@ void JevpScreenWidget::mousePressEvent(QMouseEvent *e)
     hnode = hnode->next;
   }
   
-  printf("Got a mouse press event...%d %d  %s:\n",x,y,hnode->name);
+  LOG(DBG,"Got a mouse press event...%d %d  %s:\n",x,y,hnode->name);
   
   if(hnode->name) {
     ReferenceWidget *ref = new ReferenceWidget(Logic, hnode->name);
     ref->exec();
-    printf("Returned....\n");
+    LOG(DBG,"Returned....\n");
     delete ref;
   }
 }
@@ -174,7 +174,7 @@ void JevpGui::fillTab(QTabWidget *tab, u_int idx)
   if(!childnode) return;
 
   if(childnode->leaf) {
-    printf("create widget: fillTab idx=%d, name=%s (canvas)\n",child_idx,childnode->name
+    LOG(DBG,"create widget: fillTab idx=%d, name=%s (canvas)\n",child_idx,childnode->name
 );    
     JevpScreenWidget *nwidget = new JevpScreenWidget(mynode->name, childnode->name, child_idx, tab);
 
@@ -236,15 +236,21 @@ void JevpGui::deleteTabs(QTabWidget *tab)
   }
 }
 
-void JevpGui::switchTabs(const char *newdisplay) {
+void JevpGui::switchTabs(const char *newdisplay, const char *newbuilderlist) {
   CP;
   int ret = jl_displayFile->setDisplay((char *)newdisplay);
   if(ret == -1) {
     LOG(ERR, "No display %s",newdisplay);
   }
 
-  CP;
-  evpMain->display = (char *)newdisplay;
+  static char evpMainDisplay[40];
+  strcpy(evpMainDisplay, newdisplay);
+  evpMain->display = evpMainDisplay;
+
+  jl_displayFile->setBuilderString(newbuilderlist);
+
+
+  jl_displayFile->dump();
 
   CP;
   LOG("JEFF", "Calling deleteTabs for root");
@@ -316,16 +322,20 @@ void JevpGui::gui_JevpGui(JevpGui *logic, bool isRefWindow)
   Logic = logic;
   
   
+  CP;
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowModality(Qt::WindowModal);
 
+  CP;
   PresenterSuspend blockWidgets;
   blockWidgets << this;
 
+  CP;
   // Some preparations here
   // Here is starting directory name
   SetDefaults();
 
+  CP;
   setUsesTextLabel(true); // use the text labels for the tool bar buttons
   
 
@@ -339,7 +349,7 @@ void JevpGui::gui_JevpGui(JevpGui *logic, bool isRefWindow)
 
   MakeMenuBar();
 
-  printf("then...\n");
+  LOG(DBG,"then...\n");
 
   if(isRefWindow) {
     ShowToolBar(false);
@@ -348,7 +358,7 @@ void JevpGui::gui_JevpGui(JevpGui *logic, bool isRefWindow)
   // Mother Frame for canvas tabs is defined here
   //
 
-  printf("Further\n");
+  LOG(DBG,"Further\n");
 
   // MakeConnectionFrame();
 
@@ -356,16 +366,19 @@ void JevpGui::gui_JevpGui(JevpGui *logic, bool isRefWindow)
   // mZoomer = new TQtZoomPadWidget(0);
   // mZoomer->SetZoomFactor(3);
 
-  printf("tabs..\n");
+  LOG(DBG,"tabs..\n");
 
   //
   // Define Tabs
   //
   // main tab holding
+  CP;
   rootTab = new QTabWidget(mCentralWidget);
+  CP;
   buildTabs();
 
-  printf("Done building tabs\n");
+  CP;
+  LOG(DBG,"Done building tabs\n");
 
   fActions[kAutoUpdate]->setOn(true);
 
@@ -474,9 +487,9 @@ void JevpGui::gui_JevpGui(JevpGui *logic, bool isRefWindow)
   //first->setCurrentPage(2);
   ///first->currentChanged( first->currentPage() );
   //emit currentChanged(first);
-  printf("Resize\n");
+  LOG(DBG,"Resize\n");
   resize(mWidth,mHight);
-  printf("Done with resize\n");
+  LOG(DBG,"Done with resize\n");
 
   SetWindowName("Live...");
 }
@@ -536,7 +549,7 @@ void JevpGui::MakeMenuBar()
   fActions[kFileLive]->addTo(fileMenu);
   fActions[kFileLive]->setToggleAction(true);
   fActions[kFileLive]->setOn(true);
-  printf("MakeMenuBar\n");
+  LOG(DBG,"MakeMenuBar\n");
  
   fileMenu->insertSeparator();
 
@@ -768,7 +781,7 @@ void JevpGui::DoPrintButton()
 //______________________________________________________________________________
 void JevpGui::ProcessMessage()
 {
-  printf("Processing:  %d\n",fActions[kFileLive]->isOn());
+  LOG(DBG,"Processing:  %d\n",fActions[kFileLive]->isOn());
 
    TQtRootAction *actionSender =  (TQtRootAction *)sender ();
    switch (actionSender->Id()) {
@@ -794,7 +807,7 @@ void JevpGui::ProcessMessage()
    default:                                  break;
 
    };
-   printf("Processed:  %d\n",fActions[kFileLive]->isOn());
+   LOG(DBG,"Processed:  %d\n",fActions[kFileLive]->isOn());
 }
 //______________________________________________________________________________
 void JevpGui::SaveCB()
@@ -820,22 +833,33 @@ void JevpGui::ChangeHistogramSet()
 				       tr(evpMain->display), &ok);
 
   if(ok && !text.isEmpty()) {
-    printf("Change Histogram set to %s\n", (const char *)text);
-    switchTabs((const char *)text);
+    LOG(DBG,"Change Histogram set to %s\n", (const char *)text);
   }
+  else return;
 
-  
+  QString text2 = QInputDialog::getText(this, 
+					tr("Detectors Available"),
+					tr("Detectors Available:"), 
+					QLineEdit::Normal,
+					tr("|base|"), &ok);
+
+  if(ok && !text2.isEmpty()) {
+    LOG(DBG,"Change Histogram detectors to %s\n", (const char *)text2);
+  }
+  else return;
+
+  switchTabs((const char *)text, (const char *)text2);
 }
 
 void JevpGui::ChangeToRun()
 {
-  printf("Change to Run...\n");
+  LOG(DBG,"Change to Run...\n");
   
   //char *name = getRunNumberDialog();
 
   RunDialog *mydialog = new RunDialog();
   int ret = mydialog->exec();
-  printf("my dialog returned %d\n",ret);
+  LOG(DBG,"my dialog returned %d\n",ret);
 
   char *newname = NULL;
 
@@ -857,10 +881,10 @@ void JevpGui::ChangeToRun()
   sprintf(windowname, "Run: %s",name);
   SetWindowName(windowname);
   
-  printf("run name=%s\n",name);
+  LOG(DBG,"run name=%s\n",name);
 
   int newport = jl_LaunchRun(name);
-  printf("newport = %d\n",newport);
+  LOG(DBG,"newport = %d\n",newport);
   if(newport <= 0) return;   // no new connection...
 
   if(evpMain->serverport != JEVP_PORT) {
@@ -873,7 +897,7 @@ void JevpGui::ChangeToRun()
 
 void JevpGui::ChangeToLive()
 {
-  printf("Change to live...\n");
+  LOG(DBG,"Change to live...\n");
   int x;
 
   SetWindowName("Live Run");
@@ -983,10 +1007,10 @@ void JevpGui::tabChanged(QWidget* q) {
   JevpScreenWidget *widget = dynamic_cast<JevpScreenWidget *>(q);
 
   if(widget) {
-    printf("tab changed to %s\n",widget->plot->c_str());
+    LOG(DBG,"tab changed to %s\n",widget->plot->c_str());
     char lab[100];
     sprintf(lab, "%s - not available",widget->plot->c_str());
-    printf("tabchanged:  lab=%s\n",lab);
+    LOG(DBG,"tabchanged:  lab=%s\n",lab);
 
 
     widget->setUpdatesEnabled(false);
@@ -1007,7 +1031,7 @@ void JevpGui::tabChanged(QWidget* q) {
   else {
     QTabWidget *tab = dynamic_cast<QTabWidget *>(q);
     if(!tab) {
-      printf("tab changed to something else (impossible?)\n");
+      LOG(ERR,"tab changed to something else (impossible?)\n");
       return;
     }
 
@@ -1075,7 +1099,7 @@ void JevpGui::UpdatePlots()
 {
 
   if(jl_socket == NULL) {
-    printf("Updating plots but socket is NULL... returning...\n");
+    LOG(ERR,"Updating plots but socket is NULL... returning...\n");
   }
   else {
     
@@ -1316,13 +1340,13 @@ void JevpGui::pc_update() {
 
 void JevpGui::pc_update(TCanvas* canvas, int tab, int subTab) {
   update();
-  printf("In update? a \n");
+  LOG(DBG,"In update? a \n");
   if (canvas) pc_mPresenter->jl_Draw(canvas,pc_mTab,pc_mSubTab);
 }
 
 void JevpGui::pc_update(TCanvas* canvas, const char* name) {
   update();
-  printf("In update? b\n");
+  LOG(DBG,"In update? b\n");
   if (canvas) pc_mPresenter->jl_Draw(canvas, name );
 }
 
@@ -1361,7 +1385,7 @@ int JevpGui::jl_ConnectToServerPort(int port, int ntries)
       return 0;
     }
 
-    printf("Error Connecting (%dth of %d tries): %d\n", i, ntries, nsocket->GetErrorCode());
+    LOG(ERR,"Error Connecting (%dth of %d tries): %d\n", i, ntries, nsocket->GetErrorCode());
     sleep(1);
   }
 
@@ -1380,22 +1404,22 @@ int JevpGui::jl_LaunchRun(char *runNumber) {
   TMessage *mess;
   int ret = jl_socket->Recv(mess);
   if(ret == 0) {  // disconnect
-    printf("Server disconnected?\n");
+    LOG(ERR,"Server disconnected?\n");
     exit(0);
   }
   
   //int x = (int)mess->GetClass();
   if(strcmp(mess->GetClass()->GetName(), "EvpMessage") != 0) {
-    printf("Didn't get a EvpMessage class\n");
+    LOG(ERR,"Didn't get a EvpMessage class\n");
     exit(0);
   }
 
   EvpMessage *response = (EvpMessage *)mess->ReadObject(mess->GetClass());
 
-  printf("Got a response: %s %s\n",response->cmd,response->args);
+  LOG(DBG,"Got a response: %s %s\n",response->cmd,response->args);
 
   if(strcmp(response->cmd, "launch") != 0) {
-    printf("Didn't get a launch command...");
+    LOG(ERR,"Didn't get a launch command...");
     return 0;
   }
 
@@ -1416,6 +1440,7 @@ void JevpGui::jl_killServer() {
 
 void JevpGui::jl_JevpLogic() 
 {
+  CP;
   jl_mLastDrawnCanvas = NULL;
   // We need to set up the sockets...
   jl_screens = new TList();
@@ -1433,7 +1458,7 @@ void JevpGui::jl_JevpLogic()
   if(jl_ConnectToServerPort(evpMain->serverport,5) < 0) return;
   
   if(evpMain->display == NULL) {
-    printf("Need to specify the display\n");
+    LOG(ERR,"Need to specify the display\n");
     exit(0);
   }
 
@@ -1442,7 +1467,7 @@ void JevpGui::jl_JevpLogic()
 
     jl_displayFile = new DisplayFile();
     if(jl_displayFile->Read(evpMain->display) < 0) {
-      printf("Error reading display file: %s\n",evpMain->display);
+      LOG(ERR,"Error reading display file: %s\n",evpMain->display);
       exit(0);
     }
     
@@ -1461,38 +1486,47 @@ void JevpGui::jl_JevpLogic()
     TMessage *mess;
     int ret = jl_socket->Recv(mess);
     if(ret == 0) {  // disconnect
-      printf("Server disconnected?\n");
+      LOG(ERR,"Server disconnected?\n");
       exit(0);
     }
     
     //printf("Got something ret=%d mess=0x%x\n",ret,mess);
     int x = (int)mess->GetClass();
 
-    printf("--->0x%x\n",x);// , x[0],x[1],x[2],x[3]);
+    LOG(DBG,"--->0x%x\n",x);// , x[0],x[1],x[2],x[3]);
 
     if(strcmp(mess->GetClass()->GetName(), "EvpMessage") != 0) {
-      printf("Didn't get a DisplayDefSender class\n");
+      LOG(ERR,"Didn't get a DisplayDefSender class\n");
       exit(0);
     }
 
+    CP;
     EvpMessage *tabdata = (EvpMessage *)mess->ReadObject(mess->GetClass());
 
     //   printf("....cmd was %s\n",tabdata->cmd);
 
     if(tabdata->args == NULL) {
-      printf("No display '%s' found...\n", evpMain->display);
+      LOG(ERR,"No display '%s' found...\n", evpMain->display);
       exit(0);
     }
 
+    CP;
     jl_displayFile = new DisplayFile();
 
     //    printf("asdf\n");
     //    printf("tabdata 0x%x\n",tabdata->args);
     //    printf("%c%c%c\n",tabdata->args[0],tabdata->args[1],tabdata->args[2]);
-
+    CP;
     jl_displayFile->ReadBuff(tabdata->args, strlen(tabdata->args));
     
+    CP;
     jl_displayFile->setDisplay(evpMain->display);
+    CP;
+    LOG("JEFF", "setting builder string");
+    jl_displayFile->setBuilderString("|daq|trg|base|");
+
+    LOG("JEFF", "builder string %s",jl_displayFile->builderString);
+
     // printf("I just got the display file: \n");
     // jl_displayFile->dump();
     // printf("Done dumping it...\n");
@@ -1558,7 +1592,7 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
 
   //int isCanvas=0;
   
-  printf("drawplot....combo_index = %d\n",combo_index);
+  LOG(DBG,"drawplot....combo_index = %d\n",combo_index);
 
   // I need to use the display def version to get a 
   // real object rather than a string...
@@ -1567,7 +1601,7 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
   CP;
   if(!thetab->leaf) {
     sprintf(tmp, "No histo for index=%d",combo_index);
-    LOG("JEFF", "Cross of death: %s",tmp);
+    LOG(DBG, "Cross of death: %s",tmp);
     jl_CrossOfDeath(screen, tmp);
     CP;
     return;
@@ -1626,7 +1660,7 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
 
     if(plot == NULL) {
       CP;
-      LOG("JEFF", "Cross of death: %s",tmp);
+      LOG(DBG, "Cross of death: %s",tmp);
       sprintf(tmp, "Server Doesn't Currently Have Plot %s",hd->name);
       jl_CrossOfDeath(screen, tmp);     // Some error...
     }
@@ -1700,11 +1734,11 @@ JevpPlot *JevpGui::jl_getPlotFromServer(char *name, char *error)
   jl_send(&msg);
   
   // get response...
-  printf("Waiting for plot from server...\n");
+  LOG(DBG,"Waiting for plot from server...\n");
   TMessage *mess;
   int ret = jl_socket->Recv(mess);
   if(ret == 0) {  // disconnect
-    printf("Server disconnected?\n");
+    LOG(ERR,"Server disconnected?\n");
     sprintf(error, "Can't get plot: %s  (no server)",name);
 
     return NULL;
@@ -1727,7 +1761,7 @@ JevpPlot *JevpGui::jl_getPlotFromServer(char *name, char *error)
     return plot;
   }
 
-  printf("Invalid message type %s\n",mess->GetClass()->GetName());
+  LOG(ERR,"Invalid message type %s\n",mess->GetClass()->GetName());
   sprintf(error, "Invalid message type %s",mess->GetClass()->GetName());
   delete mess;
   return NULL;
@@ -2053,9 +2087,9 @@ int JevpGui::jl_send(TObject *msg) {
 
 void JevpGui::jl_showDirectories()
 {
-  printf("gDirectories ls()-------->\n");
+  LOG(DBG,"gDirectories ls()-------->\n");
   gDirectory->ls();
-  printf("screen objects ls()------>\n");
+  LOG(DBG,"screen objects ls()------>\n");
   
   TIter next(jl_screens);
   int i=0;

@@ -717,6 +717,9 @@ int JevpPlotSet::updatePlots()
     curr = (JevpPlot *)plots.After(curr);
   }
 
+  // also update status
+  send((TObject *)&builderStatus);
+ 
   CP;
   return 0;
 }

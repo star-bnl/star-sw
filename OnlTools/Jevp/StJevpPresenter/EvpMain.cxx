@@ -78,7 +78,7 @@ int EvpMain::main(char *args)
   rtsLogOutput(RTS_LOG_NET);
   rtsLogAddDest((char *)"130.199.60.86", 8004);
 
-
+  CP;
 
   argv[0] = strtok(args, " ");
   argc++;
@@ -89,11 +89,12 @@ int EvpMain::main(char *args)
     argc++;
   }
  
-
+  CP;
   for(int i=0;i<argc;i++) {
     printf("arg[%d] = %s\n",i,argv[i]);
   }
     
+  CP;
   return _main(argc, argv);
 }
 
@@ -104,20 +105,24 @@ int EvpMain::_main(int argc, char **argv )
   evpMain = new EvpMain();   // store globals here...
   //QApplication app(argc, argv);
 
+  CP;
   if(evpMain->parseArgs(argc, argv) < 0) return 0;
 
+  CP;
   JevpGui *gui = new JevpGui();
+  CP;
   JevpGui *logic = gui;
+  CP;
   gui->jl_JevpLogic();
-
+  CP;
   gui->gui_JevpGui(logic);
- 
+  CP;
   gui->show();
-
+  CP;
   //PresenterConnect *con = new PresenterConnect(gui, logic);
   //new 
   gui->pc_PresenterConnect(gui, logic);
-
+  CP;
   // This issues an update...to start the update loop...
   QTimer::singleShot (100,gui,SLOT(UpdatePlots()));
 

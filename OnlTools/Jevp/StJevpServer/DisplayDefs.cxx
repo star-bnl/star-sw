@@ -272,12 +272,15 @@ DisplayFile::DisplayFile() {
   displayRoot = NULL;
   textBuffLen = 0;
   textBuff = NULL;
+  builderString = NULL;
 }
 
 DisplayFile::~DisplayFile() {
   if(textBuff) free(textBuff);
   if(root) freeDisplayNodes(root);
+  if(builderString) free(builderString);
 }
+
 
 // Free's all nodes below..
 void DisplayFile::freeDisplayNodes(DisplayNode *node)
@@ -353,7 +356,7 @@ int DisplayFile::Read(char *fn)
   if(fd < 0) {
     //    char tmp[100];
     //printf("pwd = %s\n",getwd(tmp));
-    printf("can't open %s\n",fn);
+    LOG(ERR,"can't open %s\n",fn);
     return -1;
   }
 
@@ -379,6 +382,18 @@ int DisplayFile::Read(char *fn)
   return ret;
 }
 
+void DisplayFile::setBuilderString(const char *builders)
+{
+  if(builderString) free(builderString);
+  int len = strlen(builders);
+  builderString = (char *)malloc(len+1);
+  if(!builderString) {
+    LOG(ERR, "Error allocating builderString");
+  }
+  else {
+    strcpy(builderString, builders);
+  }
+}
 
 int DisplayFile::Write(char *fn)
 {
@@ -615,8 +630,8 @@ int DisplayFile::setDisplay(char *display_name)
 
   int i=0;
   while(disp) {
-    LOG("JEFF", "0x%x",disp->name);
-    LOG("JEFF", "disp->name = %s",disp->name);
+    LOG(DBG, "0x%x",disp->name);
+    LOG(DBG, "disp->name = %s",disp->name);
 
     if(strcmp(disp->name, display_name) == 0) {
       displayRoot = disp;
@@ -710,18 +725,30 @@ DisplayNode *DisplayFile::getTab(u_int combo_index)
     int idx = getTabIdxAtDepth(combo_index, depth);
     int next_idx = getTabIdxAtDepth(combo_index, depth+1);
 
-    //printf("idx(%d @ %d)=%d   next=%d\n",combo_index,depth,idx,next_idx);
+    LOG(DBG,"idx(%d @ %d)=%d   next=%d  (%s)\n",combo_index,depth,idx,next_idx,node ? node->name : "null");
     
-    int x;
-    for(x=1;x<idx;x++) {
-      //printf("---->horizontal search[%d / %d] looking at: %s\n",x,idx,node ? node->name : "null");
-      if(!node) return NULL;
+    while(node && !node->matchBuilders(builderString)) {
       node = node->next;
     }
     
     if(!node) return NULL;
+
+    int x;
+    for(x=1;x<idx;x++) {
+      LOG(DBG,"---->horizontal search[%d / %d] looking at: %s\n",x,idx,node ? node->name : "null");
+
+      node = node->next;
+
+      while(node && !node->matchBuilders(builderString)) {
+	node = node->next;
+      }
+
+      if(!node) return NULL;
+    }
+    
+    if(!node) return NULL;
  
-    //printf("---->horizonatl search[%d / %d] found %s\n",x,idx,node->name);
+    LOG(DBG, "---->horizontal search[%d / %d] found %s\n",x,idx,node->name);
     
     if(next_idx == 0) {
       //printf("Got a tab...%s\n",node->name);
@@ -735,6 +762,37 @@ DisplayNode *DisplayFile::getTab(u_int combo_index)
 
     node = node->child;
   }
+}
+
+int DisplayNode::matchBuilders(char *buildersAvailable)
+{
+  
+  const char *val = _getProperty("builders");
+
+  LOG(DBG,"In match builders: node %s val = %s", name, val);
+
+  if(!val) return 1;
+
+  LOG(DBG,"require %s in string of available dets: %s",val, buildersAvailable);
+
+  static char mybuilders[256];
+  static char tmp[32];
+
+  strcpy(mybuilders, val);
+  char *x = strtok(mybuilders, ",");
+
+  while(x) {
+    sprintf(tmp, "|%s|", x);
+    if(!strstr(buildersAvailable, tmp)) {
+      LOG(DBG, "Match builders return false: didn't find %s in %s",tmp,buildersAvailable);
+      return 0;
+    }
+
+    x = strtok(NULL, ",");
+  }
+  
+  LOG(DBG, "Match builders return true: found %s in %s",val, buildersAvailable);
+  return 1;
 }
 
 
