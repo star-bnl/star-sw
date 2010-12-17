@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.220 2010/11/12 20:04:14 jwebb Exp $
+* $Id: geometry.g,v 1.221 2010/12/17 20:01:24 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.221  2010/12/17 20:01:24  jwebb
+* Defined TPCE04r (reduced TPC envelope radius) and BTOF67 (btof sensitive
+* volume size fix) and incorporated them into Y2011 tag.
+*
 * Revision 1.220  2010/11/12 20:04:14  jwebb
 * Added y2008b geometry tag with most recent models of the TPC, endcap
 * and barrel.
@@ -1147,10 +1151,17 @@ replace [exe BTOF16;] with [;" X.Dong";BTOF=on;
 replace [exe BTOF66;] with [;" X.Dong";BTOF=on;
                             BtofConfig=6; Itof=6 " call btofgeo6 ";
                             tofX0= 0.00; tofZ0=0;]
+
+replace [exe BTOF67;] with [;"F.Geurts fixes to sensitive volumes";
+                            BtofConfig=6; Itof=7 "call btofgeo7";
+                            tofX0=0.00; tofZ0=0.00;]
+
 replace [exe BTOFb6;] with [;" X.Dong";BTOF=on;
                             BtofConfig=11; Itof=6 " call btofgeo6 ";
                             tofX0= 0.00; tofZ0=-0.50;]
+
 replace [exe BTOFc6;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=6 " call btofgeo6 ";]
+replace [exe BTOFc7;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=6 " call btofgeo7 ";]
 
 
 
@@ -1163,6 +1174,10 @@ replace [exe TPCE03;] with [;"New version of the TPC backplane "; TpceConfig = 3
                              "gas density correction";            DensConfig = 1;]
 replace [exe TPCE04;] with [;"New version of the TPC backplane "; TpceConfig = 4;
                              "gas density correction";            DensConfig = 1;]
+replace [exe TPCE04r;] with [;"New version of the TPC backplane "; TpceConfig = 4;
+                              "gas density correction";            DensConfig = 1;
+                              "radius correction";                 RmaxConfig = 1;
+                            ]
 
 replace [exe ISTB00;] with [;ISTB=on;IstbConfig=-1;]
 
@@ -1656,8 +1671,8 @@ c ======================================================================= y2011 
 REPLACE [exe y2011;] with [;
 { "y2011 baseline: Base on y2010a with PMD off"
     exe SCON13;      "support cone without SVT and new cable weight estimates";
-    exe TPCE04;      "agstar version of yf model";
-    exe BTOF66;      "time of flight";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
     exe CALB02;      "updated bemc model";
     exe ECALv6;      "several bugfixes in eemc geometry";
     exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
@@ -1671,7 +1686,7 @@ REPLACE [exe y2011;] with [;
     exe SISDof;      "No sisd";
     exe FTRO01;      "FTPC readout";
     exe MUTD04;      "Muon telescope detector";
-    exe CAVE05;      "Cave and tunnel with appropriate shape and dimensions";
+    exe CAVE04;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
 };]
 c ===============================================================================
@@ -1824,7 +1839,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               CalbConfig, PixlConfig, IstbConfig, GembConfig, FstdConfig, FtroConfig, ConeConfig,
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
               ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig,
-              FhcmConfig
+              FhcmConfig, RmaxConfig
 
 * The following flags select different base geometry files for the endcap
    Integer    EcalGeometry / 6 /            ! defaults to version 5
@@ -1845,6 +1860,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
    Integer    pipeFlag
 
 *             DensConfig, ! TPC gas density correction
+*             RmaxConfig, ! TPC envelope max radius in tpcgeo3
 *             SvttConfig, ! SVTT version
 *             BtofConfig, ! BTOF trays
 *             VpddConfig, ! VPDD
@@ -1915,6 +1931,7 @@ replace[;Case#{#;] with [
    CaveConfig  = 1 ! custom for shielding studies=2, wider for muon detector=3, and longer=4
    ConeConfig  = 1 ! 1 (def) old version, 2=more copper
    DensConfig  = 0 ! gas density correction
+   RmaxConfig  = 0 ! tpcegeo3 rmax
    FgtdConfig  = 1 ! version
    FpdmConfig  = 0 ! 0 means the original source code
    FstdConfig  = 0 ! 0=no, >1=version
@@ -3851,11 +3868,17 @@ c      write(*,*) 'SVT'
 c     write(*,*) 'TPC';
 * Back in July 2003 Yuri has discovered the discrepancy
 * in the gas density. The patch for this is activated here: (was: if(CorrNum>=3) )
-     if(DensConfig>0) { call AgDETP new('TPCE');  call AgDETP add ('tpcg.gasCorr=',2 ,1);}
-     if (TpceConfig==1) Call tpcegeo
-     if (TpceConfig==2) Call tpcegeo1
-     if (TpceConfig==3) Call tpcegeo2
-     if (TpceConfig==4) Call tpcegeo3
+
+     call AgDETP new('TPCE');  
+
+     if (DensConfig >0) {        Call AgDETP add ('tpcg.gasCorr=',2 ,1);     }
+     if (TpceConfig==1)          Call tpcegeo
+     if (TpceConfig==2)          Call tpcegeo1
+     if (TpceConfig==3)          Call tpcegeo2
+     if (TpceConfig==4) {
+     if ( RmaxConfig>0) {        Call AgDetp add ('tpcg.rmax=',207.77,1);     }
+                                 Call tpcegeo3
+                        }
    }
    if (ftpc) then
 c       write(*,*) 'FTPC'
@@ -3885,7 +3908,8 @@ c    write(*,*) 'BTOF'
       if(Itof.eq.2) call btofgeo2
       if(Itof.eq.4) call btofgeo4
       if(Itof.eq.5) call btofgeo5
-      if(Itof.ge.6) call btofgeo6       !X.Dong + F.Geurts
+      if(Itof.eq.6) call btofgeo6       !X.Dong + F.Geurts
+      if(Itof.ge.7) call btofgeo7       !F.Geurts fixes to sensitive volumes
    }
 
    Call AGSFLAG('SIMU',1)
