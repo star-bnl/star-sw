@@ -81,12 +81,12 @@ public:
   JevpPlot *getJevpPlot(char *name);
   void addPlot(TObject *plot) { plot->SetBit(kCanDelete); plots->Add(plot); };
   void Clear() { 
-    printf("clear\n");
+    //printf("clear\n");
     plots->Clear(); 
     jevpPlots->Clear();
-    printf("more clear\n");
+    //printf("more clear\n");
     GetCanvas()->Clear(); 
-    printf("clearest\n");
+    //printf("clearest\n");
   };
   JevpScreenWidget(char *tabname, char *plotname, u_int combo_index, QTabWidget *menu);
   virtual ~JevpScreenWidget();
@@ -191,7 +191,7 @@ private:
     Int_t   fGuiRefreshRate; // msec.
 
     void deleteTabs(QTabWidget *tab);
-    void switchTabs(const char *newdisplay);
+    void switchTabs(const char *newdisplay, const char *newbuilderlist);
     void buildTabs();
 
     void fillTab(QTabWidget *tab, u_int idx);
@@ -433,7 +433,7 @@ DisplayNode *jl_getCanvasDescriptor(u_int combo_idx) {
 
  DisplayNode *jl_getTab(u_int combo_idx) {
    DisplayNode *node = jl_displayFile->getTab(combo_idx);
-   LOG("JEFF", "getTab(%d) --> %s",combo_idx, node ? node->name : "null");
+   LOG(DBG, "getTab(%d) --> %s",combo_idx, node ? node->name : "null");
    return node;
  }
  // i,j,k,l,m,n ---> i + 50*j + (50^2)*k + (50^3)*l etc...

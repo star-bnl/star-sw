@@ -430,7 +430,7 @@ void JevpPlot::draw()
       double m;
       m = curr->histo->GetBinContent(curr->histo->GetMaximumBin());
       
-      LOG("JEFF", "Histo %s: (%s) m=%f %d",GetPlotName(), curr->histo->GetName(), m, dimension);
+      LOG(NOTE, "Histo %s: (%s) m=%f %d",GetPlotName(), curr->histo->GetName(), m, dimension);
       
       if(m > max) max = m;
       curr = (PlotHisto *)histos.After(curr);
@@ -438,11 +438,11 @@ void JevpPlot::draw()
     curr = (PlotHisto *)histos.First();
     
     if(external_maxy > -9999) {
-      LOG("JEFF", "set max to %f", (float)(external_maxy));
+      LOG(NOTE, "set max to %f", (float)(external_maxy));
       curr->histo->SetMaximum(external_maxy);
     }
     else {
-      LOG("JEFF", "set max to %f",(float)(max*1.1));
+      LOG(NOTE, "set max to %f",(float)(max*1.1));
       curr->histo->SetMaximum(max * 1.1);
     }
   }
