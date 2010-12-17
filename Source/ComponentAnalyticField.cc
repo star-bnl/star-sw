@@ -213,7 +213,13 @@ ComponentAnalyticField::IsWireCrossed(double x0, double y0, double z0,
     if (dMin2 < r2) {
       // Wire has been crossed.
       // Find the point of intersection.
-      const double t = (xIn0 - sqrt(xIn0 * xIn0 + d02 - r2)) / d2;
+      const double sq = sqrt(xIn0 * xIn0 - d2 * (d02 - r2));
+      const double t = std::min((xIn0 - sq) / d2, (xIn0 + sq) / d2);
+      if (t < 0. || t > 1.) {
+        std::cerr << className << "::IsWireCrossed:\n";
+        std::cerr << "    Error finding the intersection point.\n";
+        return false;
+      }
       xc = x0 + t * dx;
       yc = y0 + t * dy;
       zc = z0 + (z1 - z0) * (xc - x0) / dx;

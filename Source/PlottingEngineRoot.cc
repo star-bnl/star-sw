@@ -67,6 +67,9 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetFuncWidth(2);
   garfieldStyle->SetHistLineColor(kOrange - 3);
   garfieldStyle->SetPalette(1);
+  garfieldStyle->SetAxisColor(kBlack, "X");
+  garfieldStyle->SetAxisColor(kBlack, "Y");
+  garfieldStyle->SetAxisColor(kBlack, "Z");
   
   garfieldStyle->cd();  
     
@@ -93,7 +96,7 @@ PlottingEngineRoot::GetRootColor(std::string color) {
   } else if (color == "DARK-BLUE") {
     return kBlue + 3;
   } else if (color == "ORANGE") {
-    return kOrange;
+    return kOrange - 3;
   } else if (color == "PURPLE") {
     return kViolet - 7;
   } else if (color == "CYAN") {

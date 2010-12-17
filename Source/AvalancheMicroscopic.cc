@@ -1165,7 +1165,7 @@ AvalancheMicroscopic::TransportElectron(
         }
 
         // Check if the electron/hole has crossed a wire.
-        double xCross, yCross, zCross;
+        double xCross = x, yCross = y, zCross = z;
         if (sensor->IsWireCrossed(x, y, z, 
                                   x + vx * dt, y + vy * dt, z + vz * dt,
                                   xCross, yCross, zCross)) {
@@ -1488,9 +1488,12 @@ AvalancheMicroscopic::TransportElectron(
             break;
         }
 
-        if (!ok) break;
-        // Continue with the next electron/hole in the stack?
-        if (nCollTemp > nCollSkip) break;
+        // Continue with the next electron/hole?
+        if (!ok || 
+            nCollTemp > nCollSkip || 
+            cstype == ElectronCollisionTypeIonisation) {
+          break;
+        }
         kx = newKx; ky = newKy; kz = newKz;
 
       }
