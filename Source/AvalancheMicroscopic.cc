@@ -11,9 +11,11 @@ namespace Garfield {
 
 AvalancheMicroscopic::AvalancheMicroscopic() :
   sensor(0), 
-  nPhotons(0), nElectrons(0), nIons(0), nEndpoints(0),
+  nPhotons(0), nElectrons(0), nHoles(0), nIons(0), 
+  nElectronEndpoints(0), nHoleEndpoints(0),
   usePlotting(false), viewer(0), 
-  histEnergy(0), hasEnergyHistogram(false),
+  histElectronEnergy(0), histHoleEnergy(0),
+  hasElectronEnergyHistogram(false), hasHoleEnergyHistogram(false),
   histDistance(0), hasDistanceHistogram(false), distanceOption('r'),
   nDistanceHistogramTypes(0),
   histSecondary(0), hasSecondaryHistogram(false),
@@ -24,11 +26,11 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   rb31(0.), rb32(0.), rb33(1.), rx22(1.), rx23(0.), rx32(0.), rx33(1.),
   deltaCut(0.), gammaCut(0.),
   sizeCut(-1), nCollSkip(100),
-  hasUserHandleStep(false),
+  hasUserHandleStep(false), 
   hasUserHandleAttachment(false),
   hasUserHandleInelastic(false),
   hasUserHandleIonisation(false),
-  userHandleStep(0),
+  userHandleStep(0), 
   userHandleAttachment(0), 
   userHandleInelastic(0),
   userHandleIonisation(0),
@@ -36,7 +38,14 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   
   className = "AvalancheMicroscopic";
   distanceHistogramType.clear();
+  
+  stack.clear();
+  endpointsElectrons.clear();
+  endpointsHoles.clear();
+  photons.clear();
 
+  distanceHistogramType.clear();
+  
 }
 
 void 
@@ -79,23 +88,44 @@ AvalancheMicroscopic::DisablePlotting() {
 }
 
 void 
-AvalancheMicroscopic::EnableEnergyHistogramming(TH1* histo) {
+AvalancheMicroscopic::EnableElectronEnergyHistogramming(TH1* histo) {
 
   if (histo == 0) {
-    std::cerr << className << "::EnableEnergyHistogramming:\n"; 
+    std::cerr << className << "::EnableElectronEnergyHistogramming:\n"; 
     std::cerr << "    Histogram pointer is null.\n";
     return;
   }
   
-  histEnergy = histo;
-  hasEnergyHistogram = true;
+  histElectronEnergy = histo;
+  hasElectronEnergyHistogram = true;
   
 }
 
 void 
-AvalancheMicroscopic::DisableEnergyHistogramming() {
+AvalancheMicroscopic::DisableElectronEnergyHistogramming() {
 
-  hasEnergyHistogram = false;
+  hasElectronEnergyHistogram = false;
+  
+}
+
+void 
+AvalancheMicroscopic::EnableHoleEnergyHistogramming(TH1* histo) {
+
+  if (histo == 0) {
+    std::cerr << className << "::EnableHoleEnergyHistogramming:\n"; 
+    std::cerr << "    Histogram pointer is null.\n";
+    return;
+  }
+  
+  histHoleEnergy = histo;
+  hasHoleEnergyHistogram = true;
+  
+}
+
+void 
+AvalancheMicroscopic::DisableHoleEnergyHistogramming() {
+
+  hasHoleEnergyHistogram = false;
   
 }
 
@@ -227,71 +257,160 @@ AvalancheMicroscopic::SetCollisionSteps(const int n) {
 }
 
 void 
-AvalancheMicroscopic::GetEndpoint(const int i, 
+AvalancheMicroscopic::GetElectronEndpoint(const int i, 
   double& x0, double& y0, double& z0, double& t0, double& e0,
   double& x1, double& y1, double& z1, double& t1, double& e1,
   int& status) const {
   
-  if (i < 0 || i >= nEndpoints) {
-    std::cerr << className << "::GetEndpoint:\n";
-    std::cerr << "    Endpoint " << i << " does not exist.\n";
+  if (i < 0 || i >= nElectronEndpoints) {
+    std::cerr << className << "::GetElectronEndpoint:\n";
+    std::cerr << "    Endpoint index " << i << " out of range.\n";
     x0 = y0 = z0 = t0 = e0 = 0.;
     x1 = y1 = t1 = t1 = e1 = 0.;
     status = 0;
     return;
   }
 
-  x0 = endpoints[i].x0; y0 = endpoints[i].y0; z0 = endpoints[i].z0;
-  t0 = endpoints[i].t0; e0 = endpoints[i].e0;
-  x1 = endpoints[i].x;  y1 = endpoints[i].y;  z1 = endpoints[i].z;
-  t1 = endpoints[i].t;  e1 = endpoints[i].energy;  
-  status = endpoints[i].status; 
+  x0 = endpointsElectrons[i].x0; 
+  y0 = endpointsElectrons[i].y0; 
+  z0 = endpointsElectrons[i].z0;
+  t0 = endpointsElectrons[i].t0; 
+  e0 = endpointsElectrons[i].e0;
+  x1 = endpointsElectrons[i].x;  
+  y1 = endpointsElectrons[i].y;  
+  z1 = endpointsElectrons[i].z;
+  t1 = endpointsElectrons[i].t;  
+  e1 = endpointsElectrons[i].energy;  
+  status = endpointsElectrons[i].status; 
+
+}
+
+void 
+AvalancheMicroscopic::GetHoleEndpoint(const int i, 
+  double& x0, double& y0, double& z0, double& t0, double& e0,
+  double& x1, double& y1, double& z1, double& t1, double& e1,
+  int& status) const {
+  
+  if (i < 0 || i >= nHoleEndpoints) {
+    std::cerr << className << "::GetHoleEndpoint:\n";
+    std::cerr << "    Endpoint index " << i << " out of range.\n";
+    x0 = y0 = z0 = t0 = e0 = 0.;
+    x1 = y1 = t1 = t1 = e1 = 0.;
+    status = 0;
+    return;
+  }
+
+  x0 = endpointsHoles[i].x0; 
+  y0 = endpointsHoles[i].y0; 
+  z0 = endpointsHoles[i].z0;
+  t0 = endpointsHoles[i].t0; 
+  e0 = endpointsHoles[i].e0;
+  x1 = endpointsHoles[i].x;  
+  y1 = endpointsHoles[i].y;  
+  z1 = endpointsHoles[i].z;
+  t1 = endpointsHoles[i].t;  
+  e1 = endpointsHoles[i].energy;  
+  status = endpointsHoles[i].status; 
 
 }
 
 int 
-AvalancheMicroscopic::GetNumberOfDriftLinePoints(const int i) const {
+AvalancheMicroscopic::GetNumberOfElectronDriftLinePoints(const int i) const {
 
-  if (i < 0 || i >= nEndpoints) {
-    std::cerr << className << "::GetNumberOfDriftLinePoints:\n"; 
-    std::cerr << "    Endpoint " << i << " does not exist.\n";
+  if (i < 0 || i >= nElectronEndpoints) {
+    std::cerr << className << "::GetNumberOfElectronDriftLinePoints:\n"; 
+    std::cerr << "    Endpoint index (" << i << ") out of range.\n";
     return 0;
   }
   
   if (!useDriftLines) return 2;
 
-  return endpoints[i].driftLine.size() + 2;
+  return endpointsElectrons[i].driftLine.size() + 2;
+
+}
+
+int 
+AvalancheMicroscopic::GetNumberOfHoleDriftLinePoints(const int i) const {
+
+  if (i < 0 || i >= nHoleEndpoints) {
+    std::cerr << className << "::GetNumberOfHoleDriftLinePoints:\n"; 
+    std::cerr << "    Endpoint index (" << i << ") out of range.\n";
+    return 0;
+  }
+  
+  if (!useDriftLines) return 2;
+
+  return endpointsHoles[i].driftLine.size() + 2;
 
 }
 
 void 
-AvalancheMicroscopic::GetDriftLinePoint(
+AvalancheMicroscopic::GetElectronDriftLinePoint(
   double& x, double& y, double& z, double &t,
   const int ip, const int iel) const {
   
-  if (iel < 0 || iel >= nEndpoints) {
-    std::cerr << className << "::GetDriftLinePoint:\n";
-    std::cerr << "    Endpoint " << iel << " does not exist.\n";
+  if (iel < 0 || iel >= nElectronEndpoints) {
+    std::cerr << className << "::GetElectronDriftLinePoint:\n";
+    std::cerr << "    Endpoint index (" << iel << ") out of range.\n";
     return;
   }
 
   if (ip <= 0) {
-    x = endpoints[iel].x0; y = endpoints[iel].y0; z = endpoints[iel].z0;
-    t = endpoints[iel].t0;
+    x = endpointsElectrons[iel].x0; 
+    y = endpointsElectrons[iel].y0; 
+    z = endpointsElectrons[iel].z0;
+    t = endpointsElectrons[iel].t0;
     return;
   }
 
-  const int np = endpoints[iel].driftLine.size();
+  const int np = endpointsElectrons[iel].driftLine.size();
   if (ip > np) {
-    x = endpoints[iel].x; y = endpoints[iel].y; z = endpoints[iel].z;
-    t = endpoints[iel].t;
+    x = endpointsElectrons[iel].x; 
+    y = endpointsElectrons[iel].y; 
+    z = endpointsElectrons[iel].z;
+    t = endpointsElectrons[iel].t;
     return;
   }
 
-  x = endpoints[iel].driftLine[ip - 1].x;
-  y = endpoints[iel].driftLine[ip - 1].y;
-  z = endpoints[iel].driftLine[ip - 1].z;
-  t = endpoints[iel].driftLine[ip - 1].t;
+  x = endpointsElectrons[iel].driftLine[ip - 1].x;
+  y = endpointsElectrons[iel].driftLine[ip - 1].y;
+  z = endpointsElectrons[iel].driftLine[ip - 1].z;
+  t = endpointsElectrons[iel].driftLine[ip - 1].t;
+
+}
+
+void 
+AvalancheMicroscopic::GetHoleDriftLinePoint(
+  double& x, double& y, double& z, double &t,
+  const int ip, const int ih) const {
+  
+  if (ih < 0 || ih >= nHoleEndpoints) {
+    std::cerr << className << "::GetHoleDriftLinePoint:\n";
+    std::cerr << "    Endpoint index (" << ih << ") out of range.\n";
+    return;
+  }
+
+  if (ip <= 0) {
+    x = endpointsHoles[ih].x0; 
+    y = endpointsHoles[ih].y0; 
+    z = endpointsHoles[ih].z0;
+    t = endpointsHoles[ih].t0;
+    return;
+  }
+
+  const int np = endpointsHoles[ih].driftLine.size();
+  if (ip > np) {
+    x = endpointsHoles[ih].x; 
+    y = endpointsHoles[ih].y; 
+    z = endpointsHoles[ih].z;
+    t = endpointsHoles[ih].t;
+    return;
+  }
+
+  x = endpointsHoles[ih].driftLine[ip - 1].x;
+  y = endpointsHoles[ih].driftLine[ip - 1].y;
+  z = endpointsHoles[ih].driftLine[ip - 1].z;
+  t = endpointsHoles[ih].driftLine[ip - 1].t;
 
 }
 
@@ -320,8 +439,14 @@ AvalancheMicroscopic::GetPhoton(const int i, double& e,
 void
 AvalancheMicroscopic::SetUserHandleStep(
     void (*f)(double x, double y, double z, double t,
-              double e, double dx, double dy, double dz)) {
+              double e, double dx, double dy, double dz,
+              bool hole)) {
 
+  if (f == 0) {
+    std::cerr << className << "::SetUserHandleStep:\n";
+    std::cerr << "    Function pointer is null.\n";
+    return;
+  }
   userHandleStep = f;
   hasUserHandleStep = true;
 
@@ -394,7 +519,16 @@ AvalancheMicroscopic::DriftElectron(
     const double x0, const double y0, const double z0, const double t0, 
     const double e0, const double dx0, const double dy0, const double dz0) {
 
-  return TransportElectron(x0, y0, z0, t0, e0, dx0, dy0, dz0, false);
+  // Clear the list of electrons and photons.
+  endpointsElectrons.clear(); 
+  endpointsHoles.clear();
+  photons.clear();
+  // Reset the particle counters.
+  nPhotons = nElectrons = nHoles = nIons = 0; 
+  nElectronEndpoints = nHoleEndpoints = 0;
+
+
+  return TransportElectron(x0, y0, z0, t0, e0, dx0, dy0, dz0, false, false);
 
 }
 
@@ -403,7 +537,16 @@ AvalancheMicroscopic::AvalancheElectron(
     const double x0, const double y0, const double z0, const double t0, 
     const double e0, const double dx0, const double dy0, const double dz0) {
 
-  return TransportElectron(x0, y0, z0, t0, e0, dx0, dy0, dz0, true);
+  // Clear the list of electrons, holes and photons.
+  endpointsElectrons.clear();
+  endpointsHoles.clear();
+  photons.clear();
+
+  // Reset the particle counters.
+  nPhotons = nElectrons = nHoles = nIons = 0; 
+  nElectronEndpoints = nHoleEndpoints = 0;
+
+  return TransportElectron(x0, y0, z0, t0, e0, dx0, dy0, dz0, true, false);
 
 }
 
@@ -411,7 +554,7 @@ bool
 AvalancheMicroscopic::TransportElectron(
     const double x0, const double y0, const double z0, const double t0, 
     const double e0, const double dx0, const double dy0, const double dz0,
-    const bool aval) {
+    const bool aval, bool hole) {
   
   // Make sure that the sensor is defined.
   if (sensor == 0) {
@@ -449,19 +592,10 @@ AvalancheMicroscopic::TransportElectron(
   const double c1 = SpeedOfLight * sqrt(2. / ElectronMass);
   const double c2 = c1 * c1 / 4.;
 
-  // Clear the lists of electrons and photons.
-  stack.clear(); endpoints.clear(); photons.clear();
-
   // Temporary stack of photons produced in the de-excitation cascade.
   std::vector<double> stackPhotonsTime;   stackPhotonsTime.clear();
   std::vector<double> stackPhotonsEnergy; stackPhotonsEnergy.clear();
-
-  // Reset the particle counters.
-  nPhotons = 0; nElectrons = 1; nIons = 0; nEndpoints = 0;
-  
-  // Count number of collisions between updates
-  int nCollTemp = 0;  
-  
+    
   // Electric and magnetic field
   double ex = 0., ey = 0., ez = 0., emag = 0.;
   double bx = 0., by = 0., bz = 0., bmag = 0.;
@@ -475,15 +609,15 @@ AvalancheMicroscopic::TransportElectron(
   bool bOk = true;
 
   // Current position, direction, velocity and energy
-  double x, y, z, t;
-  double kx, ky, kz;
-  double vx, vy, vz;
-  double energy;
+  double x = x0, y = y0, z = z0, t = t0;
+  double kx = dx0, ky = dy0, kz = dz0;
+  double vx = dx0, vy = dy0, vz = dz0;
+  double energy = e0;
   // Index of the conduction band (irrelevant for gases)
   int band = -1;
   
   // Timestep
-  double dt;
+  double dt = 0.;
   // Direction, velocity and energy after a step
   double newKx = 0., newKy = 0., newKz = 0.;
   double newVx = 0., newVy = 0., newVz = 0.;
@@ -494,29 +628,46 @@ AvalancheMicroscopic::TransportElectron(
   int level;
 
   // Number of secondaries
-  int nsec; 
+  int nsec = 0; 
   // Secondary electron energy
-  double esec;
+  double esec = 0.;
   
   // Random number
   double r;
   // Numerical factors
   double a1 = 0., a2 = 0., a3 = 0., a4 = 0.;
-    
-  // Add the first electron.
+
+  // Clear the stack.
+  stack.clear();     
+  // Add the initial electron to the stack.
   electron newElectron;
   newElectron.status = 0;
-  newElectron.x0 = x0;  newElectron.y0 = y0;  newElectron.z0 = z0;  
-  newElectron.x  = x0;  newElectron.y  = y0;  newElectron.z = z0;  
+  if (hole) {
+    newElectron.hole = true;
+  } else {
+    newElectron.hole = false;
+  }
+  newElectron.x0 = x0;  newElectron.x = x0;
+  newElectron.y0 = y0;  newElectron.y = y0;
+  newElectron.z0 = z0;  newElectron.z = z0;
   newElectron.t0 = t0;  newElectron.t  = t0;
-  newElectron.kx = dx0; newElectron.ky = dy0; newElectron.kz = dz0;
+  newElectron.kx = dx0; 
+  newElectron.ky = dy0; 
+  newElectron.kz = dz0;
   newElectron.e0 = std::max(e0, Small); 
   newElectron.energy = newElectron.e0;
   newElectron.band = band;
   // Previous coordinates for distance histogramming.
-  newElectron.xLast = x0; newElectron.yLast = y0; newElectron.zLast = z0;
+  newElectron.xLast = x0; 
+  newElectron.yLast = y0; 
+  newElectron.zLast = z0;
   newElectron.driftLine.clear();
   stack.push_back(newElectron);
+  if (hole) {
+    ++nHoles;
+  } else {
+    ++nElectrons;
+  }
 
   if (useBandStructure) {
     // With band structure, (kx, ky, kz) represents the momentum.
@@ -541,7 +692,9 @@ AvalancheMicroscopic::TransportElectron(
       stack[0].kz = ctheta;
     } else {
       // Normalise the direction to 1.
-      stack[0].kx /= k; stack[0].ky /= k; stack[0].kz /= k;
+      stack[0].kx /= k; 
+      stack[0].ky /= k; 
+      stack[0].kz /= k;
     }
   }
 
@@ -555,51 +708,75 @@ AvalancheMicroscopic::TransportElectron(
 
   // Status flag
   bool ok = true;
-  // Stack size
-  int nSize = 1;
-  // Index of the electron in the stack
-  int iEl;
   while (1) {
-    // If the list of electrons is exhausted, we're done.
-    nSize = stack.size();
+    // If the list of electrons/holes is exhausted, we're done.
+    const int nSize = stack.size();
     if (nSize <= 0) break;
-    // Loop over all electrons in the avalanche.
-    for (iEl = nSize; iEl--;) {
-      // Get an electron from the stack.
-      x = stack[iEl].x; y = stack[iEl].y; z = stack[iEl].z;
-      t = stack[iEl].t; energy = stack[iEl].energy; 
-      band = stack[iEl].band; 
-      kx = stack[iEl].kx; ky = stack[iEl].ky; kz = stack[iEl].kz;
+    // Loop over all electrons/holes in the avalanche.
+    for (int iE = nSize; iE--;) {
+      // Get an electron/hole from the stack.
+      x = stack[iE].x; 
+      y = stack[iE].y; 
+      z = stack[iE].z;
+      t = stack[iE].t; 
+      energy = stack[iE].energy; 
+      band = stack[iE].band; 
+      kx = stack[iE].kx; 
+      ky = stack[iE].ky; 
+      kz = stack[iE].kz;
+      hole = stack[iE].hole;
 
       ok = true;
-      nCollTemp = 0;
+      
+      // Count number of collisions between updates.
+      int nCollTemp = 0;
 
       // Get the local electric field and medium.
       sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
-      // Sign change (electrons).
-      ex = -ex; ey = -ey; ez = -ez;
+      // Sign change for electrons.
+      if (!hole) {
+        ex = -ex; ey = -ey; ez = -ez;
+      }
       
       if (debug) {
         std::cout << className << "::TransportElectron:\n";
-        std::cout << "    Drifting electron " << iEl << ".\n";
-        std::cout << "    Field at (" << x << ", " << y << ", " << z << "): "
+        if (hole) {
+          std::cout << "    Drifting hole " << iE << ".\n";
+        } else {
+          std::cout << "    Drifting electron " << iE << ".\n";
+        }
+        std::cout << "    Field [V/cm] at (" 
+                  << x  << ", " << y  << ", " << z  << "): "
                   << ex << ", " << ey << ", " << ez << "\n";
         std::cout << "    Status: " << status << "\n";
         std::cout << "    Medium: " << medium->GetName() << "\n";
       }
 
       if (status != 0) {
-        // Electron is not inside a drift medium.
-        stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
-        stack[iEl].t = t; stack[iEl].energy = energy; 
-        stack[iEl].band = band;
-        stack[iEl].kx = kx; stack[iEl].ky = ky; stack[iEl].kz = kz;
-        stack[iEl].status = StatusLeftDriftMedium;
-        endpoints.push_back(stack[iEl]);
-        stack.erase(stack.begin() + iEl);
+        // Electron/hole is not inside a drift medium.
+        stack[iE].x = x; 
+        stack[iE].y = y; 
+        stack[iE].z = z;
+        stack[iE].t = t; 
+        stack[iE].energy = energy; 
+        stack[iE].band = band;
+        stack[iE].kx = kx; 
+        stack[iE].ky = ky; 
+        stack[iE].kz = kz;
+        stack[iE].status = StatusLeftDriftMedium;
+        if (hole) {
+          endpointsHoles.push_back(stack[iE]);
+        } else {
+          endpointsElectrons.push_back(stack[iE]);
+        }
+        stack.erase(stack.begin() + iE);
         if (debug) {
           std::cout << className << "::TransportElectron:\n";
-          std::cout << "    Electron left the drift medium.\n";
+          if (hole) {
+            std::cout << "    Hole left the drift medium.\n";  
+          } else {
+            std::cout << "    Electron left the drift medium.\n";
+          }
           std::cout << "    At " << x << ", " << y << "," << z << "\n";
         }
         continue;
@@ -608,7 +785,15 @@ AvalancheMicroscopic::TransportElectron(
       // If switched on, get the local magnetic field.
       if (useBfield) {
         sensor->MagneticField(x, y, z, bx, by, bz, status);
-        bx *= -Tesla2Internal; by *= -Tesla2Internal; bz *= -Tesla2Internal;
+        if (hole) {
+          bx *=  Tesla2Internal; 
+          by *=  Tesla2Internal;
+          bz *=  Tesla2Internal;
+        } else {
+          bx *= -Tesla2Internal; 
+          by *= -Tesla2Internal; 
+          bz *= -Tesla2Internal;
+        }
         // Make sure that neither E nor B are zero.
         bmag = sqrt(bx * bx + by * by + bz * bz);
         emag = sqrt(ex * ex + ey * ey + ez * ez);
@@ -616,23 +801,32 @@ AvalancheMicroscopic::TransportElectron(
         else bOk = false;
       }
      
-      // Trace the electron. 
+      // Trace the electron/hole. 
       while (1) {
 
         bool isNullCollision = false;
 
         // Make sure the electron energy exceeds the transport cut.
         if (energy < deltaCut) {
-          stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
-          stack[iEl].t = t; stack[iEl].energy = energy; 
-          stack[iEl].band = band;
-          stack[iEl].kx = kx; stack[iEl].ky = ky; stack[iEl].kz = kz;
-          stack[iEl].status = StatusBelowTransportCut;
-          endpoints.push_back(stack[iEl]);
-          stack.erase(stack.begin() + iEl);
+          stack[iE].x = x; 
+          stack[iE].y = y; 
+          stack[iE].z = z;
+          stack[iE].t = t; 
+          stack[iE].energy = energy; 
+          stack[iE].band = band;
+          stack[iE].kx = kx; 
+          stack[iE].ky = ky; 
+          stack[iE].kz = kz;
+          stack[iE].status = StatusBelowTransportCut;
+          if (hole) {
+            endpointsHoles.push_back(stack[iE]);
+          } else {
+            endpointsElectrons.push_back(stack[iE]);
+          }
+          stack.erase(stack.begin() + iE);
           if (debug) {
             std::cout << className << "::TransportElectron:\n";
-            std::cout << "    Electron energy (" << energy << ")"
+            std::cout << "    Kinetic energy (" << energy << ")"
                       << " below transport cut.\n";
           }
           ok = false;
@@ -640,23 +834,37 @@ AvalancheMicroscopic::TransportElectron(
         }
         
         // Fill the energy distribution histogram.
-        if (hasEnergyHistogram) histEnergy->Fill(energy);
-
+        if (hole && hasHoleEnergyHistogram) {
+          histHoleEnergy->Fill(energy);
+        } else if (!hole && hasElectronEnergyHistogram) {
+          histElectronEnergy->Fill(energy);
+        }
+        
         if (medium->GetId() != id) {
           // Medium has changed.
           if (!medium->IsMicroscopic()) {
-            // Electron has left the microscopic drift medium.
-            stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
-            stack[iEl].t = t; stack[iEl].energy = energy;
-            stack[iEl].band = band;
-            stack[iEl].kx = kx; stack[iEl].ky = ky; stack[iEl].kz = kz;
-            stack[iEl].status = StatusLeftDriftMedium;
-            endpoints.push_back(stack[iEl]);
-            stack.erase(stack.begin() + iEl);
+            // Electron/hole has left the microscopic drift medium.
+            stack[iE].x = x; 
+            stack[iE].y = y; 
+            stack[iE].z = z;
+            stack[iE].t = t; 
+            stack[iE].energy = energy;
+            stack[iE].band = band;
+            stack[iE].kx = kx; 
+            stack[iE].ky = ky; 
+            stack[iE].kz = kz;
+            stack[iE].status = StatusLeftDriftMedium;
+            if (hole) {
+              endpointsHoles.push_back(stack[iE]);
+            } else {
+              endpointsElectrons.push_back(stack[iE]);
+            }
+            stack.erase(stack.begin() + iE);
             ok = false;
             if (debug) {
               std::cout << className << "::TransportElectron:\n";
-              std::cout << "    New medium does not have microscopic data.\n";
+              std::cout << "    Medium at " << x << ", " << y << ", " << z 
+                        << " does not have microscopic data.\n";
             }
             break;
           }
@@ -692,7 +900,7 @@ AvalancheMicroscopic::TransportElectron(
           a3 = ez * (2 * c2 * ez - vy);
           a4 = ez * vz;
         } else if (useBandStructure) {
-          energy = medium->GetElectronEnergy(kx, ky, kz, vx, vy, vz);
+          energy = medium->GetElectronEnergy(kx, ky, kz, vx, vy, vz, band);
         } else {
           // No band structure, no magnetic field.
           // Calculate the velocity vector.
@@ -704,7 +912,7 @@ AvalancheMicroscopic::TransportElectron(
         }
 
         if (hasUserHandleStep) {
-          userHandleStep(x, y, z, t, energy, kx, ky, kz);
+          userHandleStep(x, y, z, t, energy, kx, ky, kz, hole);
         }
   
         // Determine the timestep.
@@ -807,14 +1015,19 @@ AvalancheMicroscopic::TransportElectron(
         // Get the electric field and medium at the proposed new position.
         sensor->ElectricField(x + vx * dt, y + vy * dt, z + vz * dt, 
                               ex, ey, ez, medium, status);
-        ex = -ex; ey = -ey; ez = -ez;
- 
+        if (!hole) {
+          ex = -ex; ey = -ey; ez = -ez;
+        }
+        
         // Check if the electron is still inside a drift medium.
         if (status != 0) {
           // Try to terminate the drift line close to the boundary
           // by means of iterative bisection.
-          stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
-          stack[iEl].t = t; stack[iEl].energy = energy;
+          stack[iE].x = x; 
+          stack[iE].y = y; 
+          stack[iE].z = z;
+          stack[iE].t = t; 
+          stack[iE].energy = energy;
           double dx = vx * dt, dy = vy * dt, dz = vz * dt;
           double d = sqrt(dx * dx + dy * dy + dz * dz);
           if (d > 0) {
@@ -832,27 +1045,47 @@ AvalancheMicroscopic::TransportElectron(
               x = xM; y = yM; z = zM; t += dt;
             } 
           }
-          // Place the electron OUTSIDE the drift medium
+          // Place the endpoint OUTSIDE the drift medium
           x += d * dx; y += d * dy; z += d * dz; 
           if (useSignal) {
-            sensor->AddSignal(-1, stack[iEl].t, t - stack[iEl].t, 
-                                  0.5 * (x - stack[iEl].x), 
-                                  0.5 * (y - stack[iEl].y),
-                                  0.5 * (z - stack[iEl].z), 
-                                  vx, vy, vz);
+            if (hole) {
+              sensor->AddSignal(+1, stack[iE].t, 
+                                t - stack[iE].t, 
+                                0.5 * (x - stack[iE].x), 
+                                0.5 * (y - stack[iE].y),
+                                0.5 * (z - stack[iE].z), 
+                                vx, vy, vz);
+            } else {
+              sensor->AddSignal(-1, stack[iE].t,
+                                t - stack[iE].t,
+                                0.5 * (x - stack[iE].x),
+                                0.5 * (y - stack[iE].y),
+                                0.5 * (z - stack[iE].z),
+                                vx, vy, vz);
+            }
           }
-          stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
-          stack[iEl].t = t;
-          stack[iEl].kx = newKx; 
-          stack[iEl].ky = newKy; 
-          stack[iEl].kz = newKz;
-          stack[iEl].status = StatusLeftDriftMedium;
-          endpoints.push_back(stack[iEl]);
-          stack.erase(stack.begin() + iEl);
+          stack[iE].x = x; 
+          stack[iE].y = y; 
+          stack[iE].z = z;
+          stack[iE].t = t;
+          stack[iE].kx = newKx; 
+          stack[iE].ky = newKy; 
+          stack[iE].kz = newKz;
+          stack[iE].status = StatusLeftDriftMedium;
+          if (hole) {
+            endpointsHoles.push_back(stack[iE]);
+          } else {
+            endpointsElectrons.push_back(stack[iE]);
+          }
+          stack.erase(stack.begin() + iE);
           ok = false;
           if (debug) {
             std::cout << className << "::TransportElectron:\n";
-            std::cout << "    Electron left the drift medium.\n";
+            if (hole) {
+              std::cout << "    Hole left the drift medium.\n";
+            } else {
+              std::cout << "    Electron left the drift medium.\n";
+            }
             std::cout << "    At " << x << ", " << y << "," << z << "\n";
           }
           break;
@@ -862,8 +1095,11 @@ AvalancheMicroscopic::TransportElectron(
         if (!sensor->IsInArea(x + vx * dt, y + vy * dt, z + vz * dt)) {
           // Try to terminate the drift line close to the boundary
           // by means of iterative bisection.
-          stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
-          stack[iEl].t = t; stack[iEl].energy = energy;
+          stack[iE].x = x; 
+          stack[iE].y = y; 
+          stack[iE].z = z;
+          stack[iE].t = t; 
+          stack[iE].energy = energy;
           double dx = vx * dt, dy = vy * dt, dz = vz * dt;
           double d = sqrt(dx * dx + dy * dy + dz * dz);
           if (d > 0) {
@@ -880,35 +1116,55 @@ AvalancheMicroscopic::TransportElectron(
               x = xM; y = yM; z = zM; t += dt;
             }
           }
-          // Place the electron OUTSIDE the drift area.
+          // Place the endpoint OUTSIDE the drift area.
           x += d * dx; y += d * dy; z += d * dz;
 
           // If switched on, calculate the induced signal over this step.
           if (useSignal) {
-            sensor->AddSignal(-1, stack[iEl].t, t - stack[iEl].t, 
-                                  0.5 * (x - stack[iEl].x), 
-                                  0.5 * (y - stack[iEl].y),
-                                  0.5 * (z - stack[iEl].z), 
-                                  vx, vy, vz);
+            if (hole) {
+              sensor->AddSignal(+1, stack[iE].t,
+                                t - stack[iE].t,
+                                0.5 * (x - stack[iE].x),
+                                0.5 * (y - stack[iE].y),
+                                0.5 * (z - stack[iE].z),
+                                vx, vy, vz);
+            } else {
+              sensor->AddSignal(-1, stack[iE].t, 
+                                t - stack[iE].t, 
+                                0.5 * (x - stack[iE].x), 
+                                0.5 * (y - stack[iE].y),
+                                0.5 * (z - stack[iE].z), 
+                                vx, vy, vz);
+            }
           }
-          stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
-          stack[iEl].t = t;
-          stack[iEl].kx = newKx; 
-          stack[iEl].ky = newKy; 
-          stack[iEl].kz = newKz;
-          stack[iEl].status = StatusLeftDriftArea;
-          endpoints.push_back(stack[iEl]);
-          stack.erase(stack.begin() + iEl);
+          stack[iE].x = x; 
+          stack[iE].y = y; 
+          stack[iE].z = z;
+          stack[iE].t = t;
+          stack[iE].kx = newKx; 
+          stack[iE].ky = newKy; 
+          stack[iE].kz = newKz;
+          stack[iE].status = StatusLeftDriftArea;
+          if (hole) {
+            endpointsHoles.push_back(stack[iE]);
+          } else {
+            endpointsElectrons.push_back(stack[iE]);
+          }
+          stack.erase(stack.begin() + iE);
           ok = false;
           if (debug) {
             std::cout << className << "::TransportElectron:\n";
-            std::cout << "    Electron left the drift area.\n";
+            if (hole) {
+              std::cout << "    Hole left the drift area.\n";
+            } else {
+              std::cout << "    Electron left the drift area.\n";
+            }
             std::cout << "    At " << x << "," << y << "," << z << "\n";
           }
           break;
         }
 
-        // Check if the electron has crossed a wire.
+        // Check if the electron/hole has crossed a wire.
         double xCross, yCross, zCross;
         if (sensor->IsWireCrossed(x, y, z, 
                                   x + vx * dt, y + vy * dt, z + vz * dt,
@@ -919,24 +1175,34 @@ AvalancheMicroscopic::TransportElectron(
                       pow(yCross - y, 2) + 
                       pow(zCross - z, 2)) / 
                  sqrt(vx * vx + vy * vy + vz * vz); 
-            sensor->AddSignal(-1, t, dt, 0.5 * (x + xCross),
-                                         0.5 * (y + yCross),
-                                         0.5 * (z + zCross), vx, vy, vz);
+            if (hole) {
+              sensor->AddSignal(+1, t, dt, 0.5 * (x + xCross),
+                                           0.5 * (y + yCross),
+                                           0.5 * (z + zCross), vx, vy, vz);
+            } else {
+              sensor->AddSignal(-1, t, dt, 0.5 * (x + xCross),
+                                           0.5 * (y + yCross),
+                                           0.5 * (z + zCross), vx, vy, vz);
+            }
           }
-          stack[iEl].x = xCross; 
-          stack[iEl].y = yCross; 
-          stack[iEl].z = zCross;
-          stack[iEl].t = t + dt;
-          stack[iEl].kx = newKx; 
-          stack[iEl].ky = newKy; 
-          stack[iEl].kz = newKz;
-          stack[iEl].status = StatusLeftDriftMedium;
-          endpoints.push_back(stack[iEl]);
-          stack.erase(stack.begin() + iEl);
+          stack[iE].x = xCross; 
+          stack[iE].y = yCross; 
+          stack[iE].z = zCross;
+          stack[iE].t = t + dt;
+          stack[iE].kx = newKx; 
+          stack[iE].ky = newKy; 
+          stack[iE].kz = newKz;
+          stack[iE].status = StatusLeftDriftMedium;
+          if (hole) {
+            endpointsHoles.push_back(stack[iE]);
+          } else {
+            endpointsElectrons.push_back(stack[iE]);
+          }
+          stack.erase(stack.begin() + iE);
           ok = false;
           if (debug) {
             std::cout << className << "::TransportElectron:\n";
-            std::cout << "    Electron hit a wire.\n";
+            std::cout << "    Electron/hole hit a wire.\n";
             std::cout << "    At " << x << ", " << y << "," << z << "\n";
           }
           break;
@@ -944,9 +1210,15 @@ AvalancheMicroscopic::TransportElectron(
         
         // If switched on, calculate the induced signal.
         if (useSignal) {
-          sensor->AddSignal(-1, t, dt, x + 0.5 * vx * dt, 
-                                       y + 0.5 * vy * dt,
-                                       z + 0.5 * vy * dt, vx, vy, vz);
+          if (hole) {
+            sensor->AddSignal(+1, t, dt, x + 0.5 * vx * dt,
+                                         y + 0.5 * vy * dt,
+                                         z + 0.5 * vz * dt, vx, vy, vz);
+          } else {
+            sensor->AddSignal(-1, t, dt, x + 0.5 * vx * dt, 
+                                         y + 0.5 * vy * dt,
+                                         z + 0.5 * vy * dt, vx, vy, vz);
+          }
         }
 
         // Update the coordinates.
@@ -955,7 +1227,15 @@ AvalancheMicroscopic::TransportElectron(
         // If switched on, get the magnetic field at the new location.
         if (useBfield) {
           sensor->MagneticField(x, y, z, bx, by, bz, status);
-          bx *= -Tesla2Internal; by *= -Tesla2Internal; bz *= -Tesla2Internal;
+          if (hole) {
+            bx *=  Tesla2Internal;
+            by *=  Tesla2Internal;
+            bz *=  Tesla2Internal;
+          } else {
+            bx *= -Tesla2Internal; 
+            by *= -Tesla2Internal; 
+            bz *= -Tesla2Internal;
+          }
           // Make sure that neither E nor B are zero.
           bmag = sqrt(bx * bx + by * by + bz * bz);
           emag = sqrt(ex * ex + ey * ey + ez * ez);
@@ -989,24 +1269,24 @@ AvalancheMicroscopic::TransportElectron(
             }
             switch (distanceOption) {
               case 'x':
-                histDistance->Fill(stack[iEl].xLast - x);
+                histDistance->Fill(stack[iE].xLast - x);
                 break;
               case 'y':
-                histDistance->Fill(stack[iEl].yLast - y);
+                histDistance->Fill(stack[iE].yLast - y);
                 break;
               case 'z':
-                histDistance->Fill(stack[iEl].zLast - z);
+                histDistance->Fill(stack[iE].zLast - z);
                 break;
               case 'r':
-                const double r2 = pow(stack[iEl].xLast - x, 2) + 
-                                  pow(stack[iEl].yLast - y, 2) + 
-                                  pow(stack[iEl].zLast - z, 2);
+                const double r2 = pow(stack[iE].xLast - x, 2) + 
+                                  pow(stack[iE].yLast - y, 2) + 
+                                  pow(stack[iE].zLast - z, 2);
                 histDistance->Fill(sqrt(r2));
                 break;
             }
-            stack[iEl].xLast = x; 
-            stack[iEl].yLast = y; 
-            stack[iEl].zLast = z;
+            stack[iE].xLast = x; 
+            stack[iE].yLast = y; 
+            stack[iE].zLast = z;
             break;  
           }
         }
@@ -1022,7 +1302,12 @@ AvalancheMicroscopic::TransportElectron(
             }
             if (hasSecondaryHistogram) histSecondary->Fill(esec);
             // Add the secondary electron to the stack.
-            newElectron = stack[iEl];
+            newElectron = stack[iE];
+            // /\_/\_/\_/\_/\_/\_/\_/\_/\_/\_/\_
+            // ===============================
+            // TODO -> TREATMENT OF HOLES!!
+            // ===============================
+            // /\_/\_/\_/\_/\_/\_/\_/\_/\_/\_/\_
             newElectron.x0 = x; newElectron.x = x;
             newElectron.y0 = y; newElectron.y = y;
             newElectron.z0 = z; newElectron.z = z;
@@ -1049,8 +1334,12 @@ AvalancheMicroscopic::TransportElectron(
             if (aval && (sizeCut <= 0 || nSize < sizeCut)) {
               stack.push_back(newElectron);
             }
-            // Increment the electron and ion counters.
-            ++nElectrons; ++nIons;
+            // Increment the electron, hole and ion counters.
+            if (hole) {
+              ++nElectrons; ++nHoles;
+            } else {
+              ++nElectrons; ++nIons;
+            }
             if (debug) {
               std::cout << className << "::TransportElectron:\n";
               std::cout << "    Ionisation.\n";
@@ -1062,13 +1351,20 @@ AvalancheMicroscopic::TransportElectron(
             if (hasUserHandleAttachment) {
               userHandleAttachment(x, y, z, t, cstype, level, medium);
             }
-            // Decrement the electron counter.
-            --nElectrons;
-            stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
-            stack[iEl].t = t; stack[iEl].energy = energy;
-            stack[iEl].status = StatusAttached;
-            endpoints.push_back(stack[iEl]);
-            stack.erase(stack.begin() + iEl);
+            stack[iE].x = x; 
+            stack[iE].y = y; 
+            stack[iE].z = z;
+            stack[iE].t = t; 
+            stack[iE].energy = energy;
+            stack[iE].status = StatusAttached;
+            if (hole) {
+              endpointsHoles.push_back(stack[iE]);
+              --nHoles;
+            } else {
+              endpointsElectrons.push_back(stack[iE]);
+              --nElectrons;
+            }
+            stack.erase(stack.begin() + iE);
             ok = false;
             break;
           // Inelastic collision
@@ -1101,7 +1397,7 @@ AvalancheMicroscopic::TransportElectron(
                 if (typeDxc == DxcTypeElectron) {
                   if (!aval) continue;
                   // Penning ionisation
-                  newElectron = stack[iEl];
+                  newElectron = stack[iE];
                   // Randomise the point of creation.
                   double phi = TwoPi * RndmUniform();
                   double ctheta = 1. - 2 * RndmUniform();
@@ -1142,7 +1438,11 @@ AvalancheMicroscopic::TransportElectron(
                   // Add the electron to the list.
                   stack.push_back(newElectron);
                   // Increment the electron and ion counters.
-                  ++nElectrons; ++nIons;
+                  if (hole) {
+                    ++nElectrons; ++nHoles;
+                  } else {
+                    ++nElectrons; ++nIons;
+                  }
                 } else if (typeDxc == DxcTypePhoton && usePhotons && 
                            esec > gammaCut) {
                   // Radiative de-excitation
@@ -1189,7 +1489,7 @@ AvalancheMicroscopic::TransportElectron(
         }
 
         if (!ok) break;
-        // Continue with the next electron in the stack?
+        // Continue with the next electron/hole in the stack?
         if (nCollTemp > nCollSkip) break;
         kx = newKx; ky = newKy; kz = newKz;
 
@@ -1203,42 +1503,76 @@ AvalancheMicroscopic::TransportElectron(
         kx /= k; ky /= k; kz /= k;
       }
       // Update the stack.
-      stack[iEl].energy = energy; stack[iEl].t = t;
-      stack[iEl].x = x; stack[iEl].y = y; stack[iEl].z = z;
-      stack[iEl].kx = kx; stack[iEl].ky = ky; stack[iEl].kz = kz;
+      stack[iE].energy = energy; 
+      stack[iE].t = t;
+      stack[iE].x = x; 
+      stack[iE].y = y; 
+      stack[iE].z = z;
+      stack[iE].kx = kx; 
+      stack[iE].ky = ky; 
+      stack[iE].kz = kz;
       // Add a new point to the drift line (if enabled).
       if (useDriftLines) {
         point newPoint;
         newPoint.x = x; newPoint.y = y; newPoint.z = z; newPoint.t = t;
-        stack[iEl].driftLine.push_back(newPoint);
+        stack[iE].driftLine.push_back(newPoint);
       }
     }
   }
-  nEndpoints = endpoints.size();
+  nElectronEndpoints = endpointsElectrons.size();
+  nHoleEndpoints     = endpointsHoles.size();
 
   // Calculate the induced charge.
   if (useInducedCharge) {
-    for (int i = nEndpoints; i--;) {
+    for (int i = nElectronEndpoints; i--;) {
       sensor->AddInducedCharge(-1, 
-                       endpoints[i].x0, endpoints[i].y0, endpoints[i].z0,
-                       endpoints[i].x,  endpoints[i].y,  endpoints[i].z);
+                               endpointsElectrons[i].x0, 
+                               endpointsElectrons[i].y0, 
+                               endpointsElectrons[i].z0,
+                               endpointsElectrons[i].x,  
+                               endpointsElectrons[i].y,  
+                               endpointsElectrons[i].z);
+    }
+    for (int i = nHoleEndpoints; i--;) {
+      sensor->AddInducedCharge(+1,
+                               endpointsHoles[i].x0,
+                               endpointsHoles[i].y0,
+                               endpointsHoles[i].z0,
+                               endpointsHoles[i].x,
+                               endpointsHoles[i].y,
+                               endpointsHoles[i].z);
     }
   }
 
-  // Plot the electron drift paths and photon tracks.
+  // Plot the drift paths and photon tracks.
   if (usePlotting) {
-    for (int i = nEndpoints; i--;) {
-      const int np = GetNumberOfDriftLinePoints(i);
+    // Electrons
+    for (int i = nElectronEndpoints; i--;) {
+      const int np = GetNumberOfElectronDriftLinePoints(i);
       int jL;
       if (np <= 0) continue;
       viewer->NewElectronDriftLine(np, jL, 
-                                   endpoints[i].x0, endpoints[i].y0, 
-                                   endpoints[i].z0);
+                                   endpointsElectrons[i].x0, endpointsElectrons[i].y0, 
+                                   endpointsElectrons[i].z0);
       for (int jP = np; jP--;) {
-        GetDriftLinePoint(x, y, z, t, jP, i);
+        GetElectronDriftLinePoint(x, y, z, t, jP, i);
         viewer->SetDriftLinePoint(jL, jP, x, y, z);
       }
     }
+    // Holes
+    for (int i = nHoleEndpoints; i--;) {
+      const int np = GetNumberOfHoleDriftLinePoints(i);
+      int jL;
+      if (np <= 0) continue;
+      viewer->NewHoleDriftLine(np, jL, 
+                               endpointsHoles[i].x0, endpointsHoles[i].y0, 
+                               endpointsHoles[i].z0);
+      for (int jP = np; jP--;) {
+        GetHoleDriftLinePoint(x, y, z, t, jP, i);
+        viewer->SetDriftLinePoint(jL, jP, x, y, z);
+      }
+    }
+    // Photons
     for (int i = nPhotons; i--;) {
       viewer->NewPhotonTrack(photons[i].x0, photons[i].y0, photons[i].z0,
                              photons[i].x1, photons[i].y1, photons[i].z1);
@@ -1253,14 +1587,14 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
                                       const double z0, 
                                       const double t0, const double e0) {
 
-  // Make sure that the sensor is defined
+  // Make sure that the sensor is defined.
   if (sensor == 0) {
     std::cerr << className << "::TransportPhoton:\n";
     std::cerr << "    Sensor is not defined.\n";
     return;
   }
 
-  // Make sure that the starting point is inside a medium
+  // Make sure that the starting point is inside a medium.
   Medium* medium;
   if (!sensor->GetMedium(x0, y0, z0, medium)) {
     std::cerr << className << "::TransportPhoton:\n";
@@ -1268,7 +1602,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
     return;
   }
   
-  // Make sure that the medium is "driftable" and microscopic
+  // Make sure that the medium is "driftable" and microscopic.
   if (!medium->IsDriftable() || !medium->IsMicroscopic()) {
     std::cerr << className << "::TransportPhoton:\n";
     std::cerr << "    Medium at initial position does not provide " 
@@ -1282,7 +1616,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
               << medium->GetName() << ".\n";
   }
   
-  // Get the id number of the drift medium
+  // Get the id number of the drift medium.
   int id = medium->GetId();
 
   // Position 
@@ -1315,10 +1649,10 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
   dt *= SpeedOfLight;
   x += dt * dx; y += dt * dy; z += dt * dz;
 
-  // Check if the photon is still inside a medium
+  // Check if the photon is still inside a medium.
   if (!sensor->GetMedium(x, y, z, medium) || medium->GetId() != id) {
     // Try to terminate the photon track close to the boundary
-    // by means of iterative bisection
+    // by means of iterative bisection.
     dx *= dt; dy *= dt; dz *= dt;
     x -= dx; y -= dy; z -= dz;
     double delta = sqrt(dx * dx + dy * dy + dz * dz);
@@ -1331,7 +1665,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
       delta *= 0.5;
       dt *= 0.5;
       xM = x + delta * dx; yM = y + delta * dy; zM = z + delta * dz; 
-      // Check if the mid-point is inside the drift medium
+      // Check if the mid-point is inside the drift medium.
       if (sensor->GetMedium(xM, yM, zM, medium) && medium->GetId() == id) {
         x = xM; y = yM; z = zM; t += dt;
       }
@@ -1350,11 +1684,11 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
                                   nsec, esec)) return;
  
   if (type == PhotonCollisionTypeIonisation) {
-    // Randomise secondary electron direction
+    // Randomise secondary electron direction.
     phi = TwoPi * RndmUniform();
     ctheta = 1. - 2. * RndmUniform();
     stheta = sqrt(1. - ctheta * ctheta);
-    // Add the secondary electron to the stack
+    // Add the secondary electron to the stack.
     electron newElectron;
     newElectron.x0 = x; newElectron.x = x;
     newElectron.y0 = y; newElectron.y = y;
@@ -1368,7 +1702,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
     newElectron.status = 0;
     newElectron.driftLine.clear();
     stack.push_back(newElectron);
-    // Increment the electron and ion counters         
+    // Increment the electron and ion counters.        
     ++nElectrons; ++nIons;
   } else if (type == PhotonCollisionTypeExcitation) {
     double tDxc = 0.;
@@ -1384,7 +1718,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
         phi = TwoPi * RndmUniform();
         ctheta = 1. - 2 * RndmUniform();
         stheta = sqrt(1. - ctheta * ctheta);
-        // Add the electron to the stack
+        // Add the electron to the stack.
         electron newElectron;
         newElectron.x0 = x; newElectron.x = x;
         newElectron.y0 = y; newElectron.y = y;
@@ -1398,7 +1732,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
         newElectron.status = 0;
         newElectron.driftLine.clear();
         stack.push_back(newElectron);
-        // Increment the electron and ion counters         
+        // Increment the electron and ion counters.        
         ++nElectrons; ++nIons;
       } else if (typeDxc == DxcTypePhoton && 
                  usePhotons && esec > gammaCut) {
@@ -1407,7 +1741,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
         stackPhotonsEnergy.push_back(esec);
       }
     }
-    // Transport the photons (if any)
+    // Transport the photons (if any).
     const int nSizePhotons = stackPhotonsTime.size();
     for (int k = nSizePhotons; k--;) {
       TransportPhoton(x, y, z, stackPhotonsTime[k], stackPhotonsEnergy[k]);
@@ -1431,9 +1765,9 @@ AvalancheMicroscopic::ComputeRotationMatrix(
 
   // Adopting the Magboltz convention, the stepping is performed
   // in a coordinate system with the B field along the x axis
-  // and the electric field at an angle btheta in the x-z plane
+  // and the electric field at an angle btheta in the x-z plane.
 
-  // Calculate the first rotation matrix (to align B with x axis)
+  // Calculate the first rotation matrix (to align B with x axis).
   const double bt = by * by + bz * bz;
   if (bt < Small) {
     rb11 = rb22 = rb33 = 1.;
@@ -1446,7 +1780,7 @@ AvalancheMicroscopic::ComputeRotationMatrix(
     rb13 = bz / bmag; rb31 = -rb13;
     rb23 = rb32 = (1. - rb11) * by * bz / bt;
   }
-  // Calculate the second rotation matrix (rotation around x axis)
+  // Calculate the second rotation matrix (rotation around x axis).
   const double fy = rb21 * ex + rb22 * ey + rb23 * ez;
   const double fz = rb31 * ex + rb32 * ey + rb33 * ez;
   const double ft = sqrt(fy * fy + fz * fz);

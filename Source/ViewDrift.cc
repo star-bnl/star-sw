@@ -96,6 +96,29 @@ ViewDrift::NewElectronDriftLine(const int np, int& id,
 } 
 
 void
+ViewDrift::NewHoleDriftLine(const int np, int& id,
+                      const double x0, const double y0, const double z0) {
+
+  // Create a new hole drift line and add it to the list.
+  if (np <= 0) {
+    // Number of points is not yet known.
+    TPolyLine3D p(1);
+    p.SetLineColor(colorHole);
+    p.SetPoint(0, x0, y0, z0);
+    driftLines.push_back(p);
+  } else {
+    TPolyLine3D p(np);
+    p.SetLineColor(colorHole);
+    p.SetPoint(0, x0, y0, z0);
+    driftLines.push_back(p);
+  }
+  // Return the index of this drift line.
+  id = nDriftLines;
+  ++nDriftLines;
+
+}
+
+void
 ViewDrift::NewIonDriftLine(const int np, int& id,
                  const double x0, const double y0, const double z0) {
 

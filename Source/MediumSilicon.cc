@@ -2787,9 +2787,6 @@ MediumSilicon::ElectronImpurityScatteringRates() {
                      pow(mLongX * mTransX * mTransX, 1. / 3.);
   const double mdL = ElectronMass *
                      pow(mLongL * mTransL * mTransL, 1. / 3.);
-  // Non-parabolicity coefficients [eV-1]
-  const double alphaX = 0.5;
-  const double alphaL = 0.3;
 
   // Dielectric constant
   const double eps = GetDielectricConstant();

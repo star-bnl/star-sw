@@ -611,9 +611,12 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     if (q < 0) {
       viewer->NewElectronDriftLine(nDrift, jL, 
                                    drift[0].x, drift[0].y, drift[0].z);
-    } else {
+    } else if (useIons) {
       viewer->NewIonDriftLine(nDrift, jL,
                               drift[0].x, drift[0].y, drift[0].z);
+    } else {
+      viewer->NewHoleDriftLine(nDrift, jL,
+                               drift[0].x, drift[0].y, drift[0].z);
     }
     for (int iP = 0; iP < nDrift; ++iP) {
       viewer->SetDriftLinePoint(jL, iP, 

@@ -29,6 +29,8 @@ class ViewDrift {
     void Clear();
     void NewElectronDriftLine(const int np, int& id,
                         const double x0, const double y0, const double z0);
+    void NewHoleDriftLine(const int np, int& id,
+                          const double x0, const double y0, const double z0);
     void NewIonDriftLine(const int np, int& id,
                         const double x0, const double y0, const double z0);
     void NewPhotonTrack(const double x0, const double y0, const double z0,

@@ -97,7 +97,7 @@ class ViewField {
     
     void Labels();
     void CreateFunction();
-    void CreateProfileFunction(); 
+    void CreateProfileFunction();
 
 };
 
