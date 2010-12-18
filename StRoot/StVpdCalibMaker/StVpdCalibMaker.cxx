@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.8 2010/12/10 21:38:06 geurts Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.9 2010/12/18 01:10:27 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.9  2010/12/18 01:10:27  geurts
+ * bugfix: apply VPD outlier correction in StEvent mode, too.
+ *
  * Revision 1.8  2010/12/10 21:38:06  geurts
  * RT#1996: default initialization of database table in case dataset is not found
  *
@@ -429,11 +432,11 @@ Bool_t StVpdCalibMaker::loadVpdData()
       return kFALSE;
     }
 
-    if(thisEvent->runInfo() && thisEvent->runInfo()->centerOfMassEnergy()<40.) { // 40 GeV or less
+//    if(thisEvent->runInfo() && thisEvent->runInfo()->centerOfMassEnergy()<40.) { // 40 GeV or less
       mTruncation = kTRUE;
-    } else {
-      mTruncation = kFALSE;
-    }
+//    } else {
+//      mTruncation = kFALSE;
+//    }
 
     mBTofColl = thisEvent->btofCollection();
     StSPtrVecBTofHit &tofHits = mBTofColl->tofHits();
