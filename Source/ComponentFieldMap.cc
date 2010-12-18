@@ -179,6 +179,21 @@ ComponentFieldMap::GetMedium(const int imat, Medium*& m) const {
 
 }
 
+bool
+ComponentFieldMap::GetElement(const int i, double& vol, double& dmin, double& dmax) {
+
+  if (i < 0 || i >= nElements) {
+    std::cerr << className << "::GetElement:\n";
+    std::cerr << "    Element index (" << i << ") out of range.\n";
+    return false;
+  }
+  
+  vol = GetElementVolume(i);
+  GetAspectRatio(i, dmin, dmax);
+  return true;
+  
+}
+
 int 
 ComponentFieldMap::FindElement5(const double x, const double y, double const z,
                                 double& t1, double& t2, double& t3, double& t4,
@@ -217,18 +232,18 @@ ComponentFieldMap::FindElement5(const double x, const double y, double const z,
   // Scan all elements
   double xmin, ymin, zmin, xmax, ymax, zmax;
   for (int i = 0; i < nElements; ++i) {
-    xmin = std::min(std::min(nodes[elements[i].emap[0]].xmap, nodes[elements[i].emap[1]].xmap),
-                    std::min(nodes[elements[i].emap[2]].xmap, nodes[elements[i].emap[3]].xmap));
-    xmax = std::max(std::max(nodes[elements[i].emap[0]].xmap, nodes[elements[i].emap[1]].xmap),
-                    std::max(nodes[elements[i].emap[2]].xmap, nodes[elements[i].emap[3]].xmap));
-    ymin = std::min(std::min(nodes[elements[i].emap[0]].ymap, nodes[elements[i].emap[1]].ymap),
-                    std::min(nodes[elements[i].emap[2]].ymap, nodes[elements[i].emap[3]].ymap));
-    ymax = std::max(std::max(nodes[elements[i].emap[0]].ymap, nodes[elements[i].emap[1]].ymap),
-                    std::max(nodes[elements[i].emap[2]].ymap, nodes[elements[i].emap[3]].ymap));
-    zmin = std::min(std::min(nodes[elements[i].emap[0]].zmap, nodes[elements[i].emap[1]].zmap),
-                    std::min(nodes[elements[i].emap[2]].zmap, nodes[elements[i].emap[3]].zmap));
-    zmax = std::max(std::max(nodes[elements[i].emap[0]].zmap, nodes[elements[i].emap[1]].zmap),
-                    std::max(nodes[elements[i].emap[2]].zmap, nodes[elements[i].emap[3]].zmap)); 
+    xmin = std::min(std::min(nodes[elements[i].emap[0]].x, nodes[elements[i].emap[1]].x),
+                    std::min(nodes[elements[i].emap[2]].x, nodes[elements[i].emap[3]].x));
+    xmax = std::max(std::max(nodes[elements[i].emap[0]].x, nodes[elements[i].emap[1]].x),
+                    std::max(nodes[elements[i].emap[2]].x, nodes[elements[i].emap[3]].x));
+    ymin = std::min(std::min(nodes[elements[i].emap[0]].y, nodes[elements[i].emap[1]].y),
+                    std::min(nodes[elements[i].emap[2]].y, nodes[elements[i].emap[3]].y));
+    ymax = std::max(std::max(nodes[elements[i].emap[0]].y, nodes[elements[i].emap[1]].y),
+                    std::max(nodes[elements[i].emap[2]].y, nodes[elements[i].emap[3]].y));
+    zmin = std::min(std::min(nodes[elements[i].emap[0]].z, nodes[elements[i].emap[1]].z),
+                    std::min(nodes[elements[i].emap[2]].z, nodes[elements[i].emap[3]].z));
+    zmax = std::max(std::max(nodes[elements[i].emap[0]].z, nodes[elements[i].emap[1]].z),
+                    std::max(nodes[elements[i].emap[2]].z, nodes[elements[i].emap[3]].z)); 
     if (x < xmin - f * (xmax - xmin) || x > xmax + f * (xmax - xmin) ||
         y < ymin - f * (ymax - ymin) || y > ymax + f * (ymax - ymin) || 
         z < zmin - f * (zmax - zmin) || z > zmax + f * (zmax - zmin)) continue;
@@ -257,9 +272,9 @@ ComponentFieldMap::FindElement5(const double x, const double y, double const z,
           for (int ii = 0; ii < 6; ++ii) {
             printf("                          %-5d %12g %12g %12g\n",
                    elements[imap].emap[ii], 
-                   nodes[elements[imap].emap[ii]].xmap, 
-                   nodes[elements[imap].emap[ii]].ymap, 
-                   nodes[elements[imap].emap[ii]].vmap);
+                   nodes[elements[imap].emap[ii]].x, 
+                   nodes[elements[imap].emap[ii]].y, 
+                   nodes[elements[imap].emap[ii]].v);
           }
         }
       }
@@ -287,9 +302,9 @@ ComponentFieldMap::FindElement5(const double x, const double y, double const z,
           for (int ii = 0; ii < 8; ++ii) {
             printf("                          %-5d %12g %12g %12g\n",
                    elements[imap].emap[ii],
-                   nodes[elements[imap].emap[ii]].xmap,
-                   nodes[elements[imap].emap[ii]].ymap,
-                   nodes[elements[imap].emap[ii]].vmap);
+                   nodes[elements[imap].emap[ii]].x,
+                   nodes[elements[imap].emap[ii]].y,
+                   nodes[elements[imap].emap[ii]].v);
           }
         }
       }
@@ -363,18 +378,18 @@ ComponentFieldMap::FindElement13(const double x, const double y, const double z,
   // Scan all elements
   double xmin, ymin, zmin, xmax, ymax, zmax;
   for (int i = 0; i < nElements; i++) {
-    xmin = std::min(std::min(nodes[elements[i].emap[0]].xmap, nodes[elements[i].emap[1]].xmap),
-                    std::min(nodes[elements[i].emap[2]].xmap, nodes[elements[i].emap[3]].xmap));
-    xmax = std::max(std::max(nodes[elements[i].emap[0]].xmap, nodes[elements[i].emap[1]].xmap),
-                    std::max(nodes[elements[i].emap[2]].xmap, nodes[elements[i].emap[3]].xmap));
-    ymin = std::min(std::min(nodes[elements[i].emap[0]].ymap, nodes[elements[i].emap[1]].ymap),
-                    std::min(nodes[elements[i].emap[2]].ymap, nodes[elements[i].emap[3]].ymap));
-    ymax = std::max(std::max(nodes[elements[i].emap[0]].ymap, nodes[elements[i].emap[1]].ymap),
-                    std::max(nodes[elements[i].emap[2]].ymap, nodes[elements[i].emap[3]].ymap));
-    zmin = std::min(std::min(nodes[elements[i].emap[0]].zmap, nodes[elements[i].emap[1]].zmap),
-                    std::min(nodes[elements[i].emap[2]].zmap, nodes[elements[i].emap[3]].zmap));
-    zmax = std::max(std::max(nodes[elements[i].emap[0]].zmap, nodes[elements[i].emap[1]].zmap),
-                    std::max(nodes[elements[i].emap[2]].zmap, nodes[elements[i].emap[3]].zmap));
+    xmin = std::min(std::min(nodes[elements[i].emap[0]].x, nodes[elements[i].emap[1]].x),
+                    std::min(nodes[elements[i].emap[2]].x, nodes[elements[i].emap[3]].x));
+    xmax = std::max(std::max(nodes[elements[i].emap[0]].x, nodes[elements[i].emap[1]].x),
+                    std::max(nodes[elements[i].emap[2]].x, nodes[elements[i].emap[3]].x));
+    ymin = std::min(std::min(nodes[elements[i].emap[0]].y, nodes[elements[i].emap[1]].y),
+                    std::min(nodes[elements[i].emap[2]].y, nodes[elements[i].emap[3]].y));
+    ymax = std::max(std::max(nodes[elements[i].emap[0]].y, nodes[elements[i].emap[1]].y),
+                    std::max(nodes[elements[i].emap[2]].y, nodes[elements[i].emap[3]].y));
+    zmin = std::min(std::min(nodes[elements[i].emap[0]].z, nodes[elements[i].emap[1]].z),
+                    std::min(nodes[elements[i].emap[2]].z, nodes[elements[i].emap[3]].z));
+    zmax = std::max(std::max(nodes[elements[i].emap[0]].z, nodes[elements[i].emap[1]].z),
+                    std::max(nodes[elements[i].emap[2]].z, nodes[elements[i].emap[3]].z));
     if (x < xmin - f * (xmax - xmin) || x > xmax + f * (xmax - xmin) ||
         y < ymin - f * (ymax - ymin) || y > ymax + f * (ymax - ymin) || 
         z < zmin - f * (zmax - zmin) || z > zmax + f * (zmax - zmin)) continue;
@@ -406,10 +421,10 @@ ComponentFieldMap::FindElement13(const double x, const double y, const double z,
         for (int ii = 0; ii < 10; ++ii) {
           printf("                          %-5d %12g %12g %12g %12g\n",
                  elements[imap].emap[ii], 
-                 nodes[elements[imap].emap[ii]].xmap, 
-                 nodes[elements[imap].emap[ii]].ymap, 
-                 nodes[elements[imap].emap[ii]].zmap,
-                 nodes[elements[imap].emap[ii]].vmap);
+                 nodes[elements[imap].emap[ii]].x, 
+                 nodes[elements[imap].emap[ii]].y, 
+                 nodes[elements[imap].emap[ii]].z,
+                 nodes[elements[imap].emap[ii]].v);
         }
       }
     }
@@ -464,50 +479,50 @@ ComponentFieldMap::Jacobian3(int i, double u, double v, double w, double& det, d
   
   // Determinant of the quadratic triangular Jacobian
   det =
-    -(((-1+4*v)*nodes[elements[i].emap[1]].xmap+nodes[elements[i].emap[2]].xmap-4*w*nodes[elements[i].emap[2]].xmap+
-       4*u*nodes[elements[i].emap[3]].xmap-4*u*nodes[elements[i].emap[4]].xmap-4*v*nodes[elements[i].emap[5]].xmap+4*w*nodes[elements[i].emap[5]].xmap)*
-      (-nodes[elements[i].emap[0]].ymap+4*u*nodes[elements[i].emap[0]].ymap+4*v*nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[4]].ymap))-
-    ((-1+4*u)*nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap-4*v*nodes[elements[i].emap[1]].xmap-
-     4*u*nodes[elements[i].emap[3]].xmap+4*v*nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[4]].xmap-4*w*nodes[elements[i].emap[5]].xmap)*
-    (-nodes[elements[i].emap[2]].ymap+4*w*nodes[elements[i].emap[2]].ymap+4*u*nodes[elements[i].emap[4]].ymap+4*v*nodes[elements[i].emap[5]].ymap)+
-    ((-1+4*u)*nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[2]].xmap-4*w*nodes[elements[i].emap[2]].xmap+
-     4*v*nodes[elements[i].emap[3]].xmap-4*u*nodes[elements[i].emap[4]].xmap+4*w*nodes[elements[i].emap[4]].xmap-4*v*nodes[elements[i].emap[5]].xmap)*
-    (-nodes[elements[i].emap[1]].ymap+4*v*nodes[elements[i].emap[1]].ymap+4*u*nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[5]].ymap);
+    -(((-1+4*v)*nodes[elements[i].emap[1]].x+nodes[elements[i].emap[2]].x-4*w*nodes[elements[i].emap[2]].x+
+       4*u*nodes[elements[i].emap[3]].x-4*u*nodes[elements[i].emap[4]].x-4*v*nodes[elements[i].emap[5]].x+4*w*nodes[elements[i].emap[5]].x)*
+      (-nodes[elements[i].emap[0]].y+4*u*nodes[elements[i].emap[0]].y+4*v*nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[4]].y))-
+    ((-1+4*u)*nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x-4*v*nodes[elements[i].emap[1]].x-
+     4*u*nodes[elements[i].emap[3]].x+4*v*nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[4]].x-4*w*nodes[elements[i].emap[5]].x)*
+    (-nodes[elements[i].emap[2]].y+4*w*nodes[elements[i].emap[2]].y+4*u*nodes[elements[i].emap[4]].y+4*v*nodes[elements[i].emap[5]].y)+
+    ((-1+4*u)*nodes[elements[i].emap[0]].x+nodes[elements[i].emap[2]].x-4*w*nodes[elements[i].emap[2]].x+
+     4*v*nodes[elements[i].emap[3]].x-4*u*nodes[elements[i].emap[4]].x+4*w*nodes[elements[i].emap[4]].x-4*v*nodes[elements[i].emap[5]].x)*
+    (-nodes[elements[i].emap[1]].y+4*v*nodes[elements[i].emap[1]].y+4*u*nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[5]].y);
 
   // Terms of the quadratic triangular Jacobian
   jac[0][0] =
-    (-nodes[elements[i].emap[1]].xmap+4*v*nodes[elements[i].emap[1]].xmap+4*u*nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[5]].xmap)*
-    (-nodes[elements[i].emap[2]].ymap+4*w*nodes[elements[i].emap[2]].ymap+4*u*nodes[elements[i].emap[4]].ymap+4*v*nodes[elements[i].emap[5]].ymap)-
-    (-nodes[elements[i].emap[2]].xmap+4*w*nodes[elements[i].emap[2]].xmap+4*u*nodes[elements[i].emap[4]].xmap+4*v*nodes[elements[i].emap[5]].xmap)*
-    (-nodes[elements[i].emap[1]].ymap+4*v*nodes[elements[i].emap[1]].ymap+4*u*nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[5]].ymap);
+    (-nodes[elements[i].emap[1]].x+4*v*nodes[elements[i].emap[1]].x+4*u*nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[5]].x)*
+    (-nodes[elements[i].emap[2]].y+4*w*nodes[elements[i].emap[2]].y+4*u*nodes[elements[i].emap[4]].y+4*v*nodes[elements[i].emap[5]].y)-
+    (-nodes[elements[i].emap[2]].x+4*w*nodes[elements[i].emap[2]].x+4*u*nodes[elements[i].emap[4]].x+4*v*nodes[elements[i].emap[5]].x)*
+    (-nodes[elements[i].emap[1]].y+4*v*nodes[elements[i].emap[1]].y+4*u*nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[5]].y);
   jac[0][1] = 
-    (-1+4*v)*nodes[elements[i].emap[1]].ymap+nodes[elements[i].emap[2]].ymap-4*w*nodes[elements[i].emap[2]].ymap+
-    4*u*nodes[elements[i].emap[3]].ymap-4*u*nodes[elements[i].emap[4]].ymap-4*v*nodes[elements[i].emap[5]].ymap+4*w*nodes[elements[i].emap[5]].ymap;
+    (-1+4*v)*nodes[elements[i].emap[1]].y+nodes[elements[i].emap[2]].y-4*w*nodes[elements[i].emap[2]].y+
+    4*u*nodes[elements[i].emap[3]].y-4*u*nodes[elements[i].emap[4]].y-4*v*nodes[elements[i].emap[5]].y+4*w*nodes[elements[i].emap[5]].y;
   jac[0][2] = 
-    nodes[elements[i].emap[1]].xmap-4*v*nodes[elements[i].emap[1]].xmap+(-1+4*w)*nodes[elements[i].emap[2]].xmap-
-    4*u*nodes[elements[i].emap[3]].xmap+4*u*nodes[elements[i].emap[4]].xmap+4*v*nodes[elements[i].emap[5]].xmap-4*w*nodes[elements[i].emap[5]].xmap;
+    nodes[elements[i].emap[1]].x-4*v*nodes[elements[i].emap[1]].x+(-1+4*w)*nodes[elements[i].emap[2]].x-
+    4*u*nodes[elements[i].emap[3]].x+4*u*nodes[elements[i].emap[4]].x+4*v*nodes[elements[i].emap[5]].x-4*w*nodes[elements[i].emap[5]].x;
   jac[1][0] =
-    (-nodes[elements[i].emap[2]].xmap+4*w*nodes[elements[i].emap[2]].xmap+4*u*nodes[elements[i].emap[4]].xmap+4*v*nodes[elements[i].emap[5]].xmap)*
-    (-nodes[elements[i].emap[0]].ymap+4*u*nodes[elements[i].emap[0]].ymap+4*v*nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[4]].ymap)-
-    (-nodes[elements[i].emap[0]].xmap+4*u*nodes[elements[i].emap[0]].xmap+4*v*nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[4]].xmap)*
-    (-nodes[elements[i].emap[2]].ymap+4*w*nodes[elements[i].emap[2]].ymap+4*u*nodes[elements[i].emap[4]].ymap+4*v*nodes[elements[i].emap[5]].ymap);
+    (-nodes[elements[i].emap[2]].x+4*w*nodes[elements[i].emap[2]].x+4*u*nodes[elements[i].emap[4]].x+4*v*nodes[elements[i].emap[5]].x)*
+    (-nodes[elements[i].emap[0]].y+4*u*nodes[elements[i].emap[0]].y+4*v*nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[4]].y)-
+    (-nodes[elements[i].emap[0]].x+4*u*nodes[elements[i].emap[0]].x+4*v*nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[4]].x)*
+    (-nodes[elements[i].emap[2]].y+4*w*nodes[elements[i].emap[2]].y+4*u*nodes[elements[i].emap[4]].y+4*v*nodes[elements[i].emap[5]].y);
   jac[1][1] =
-    nodes[elements[i].emap[0]].ymap-4*u*nodes[elements[i].emap[0]].ymap-nodes[elements[i].emap[2]].ymap+4*w*nodes[elements[i].emap[2]].ymap-
-    4*v*nodes[elements[i].emap[3]].ymap+4*u*nodes[elements[i].emap[4]].ymap-4*w*nodes[elements[i].emap[4]].ymap+4*v*nodes[elements[i].emap[5]].ymap;
+    nodes[elements[i].emap[0]].y-4*u*nodes[elements[i].emap[0]].y-nodes[elements[i].emap[2]].y+4*w*nodes[elements[i].emap[2]].y-
+    4*v*nodes[elements[i].emap[3]].y+4*u*nodes[elements[i].emap[4]].y-4*w*nodes[elements[i].emap[4]].y+4*v*nodes[elements[i].emap[5]].y;
   jac[1][2] =
-    (-1+4*u)*nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[2]].xmap-4*w*nodes[elements[i].emap[2]].xmap+
-    4*v*nodes[elements[i].emap[3]].xmap-4*u*nodes[elements[i].emap[4]].xmap+4*w*nodes[elements[i].emap[4]].xmap-4*v*nodes[elements[i].emap[5]].xmap;
+    (-1+4*u)*nodes[elements[i].emap[0]].x+nodes[elements[i].emap[2]].x-4*w*nodes[elements[i].emap[2]].x+
+    4*v*nodes[elements[i].emap[3]].x-4*u*nodes[elements[i].emap[4]].x+4*w*nodes[elements[i].emap[4]].x-4*v*nodes[elements[i].emap[5]].x;
   jac[2][0] =
-    -((-nodes[elements[i].emap[1]].xmap+4*v*nodes[elements[i].emap[1]].xmap+4*u*nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[5]].xmap)*
-      (-nodes[elements[i].emap[0]].ymap+4*u*nodes[elements[i].emap[0]].ymap+4*v*nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[4]].ymap))+
-    (-nodes[elements[i].emap[0]].xmap+4*u*nodes[elements[i].emap[0]].xmap+4*v*nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[4]].xmap)*
-    (-nodes[elements[i].emap[1]].ymap+4*v*nodes[elements[i].emap[1]].ymap+4*u*nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[5]].ymap);
+    -((-nodes[elements[i].emap[1]].x+4*v*nodes[elements[i].emap[1]].x+4*u*nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[5]].x)*
+      (-nodes[elements[i].emap[0]].y+4*u*nodes[elements[i].emap[0]].y+4*v*nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[4]].y))+
+    (-nodes[elements[i].emap[0]].x+4*u*nodes[elements[i].emap[0]].x+4*v*nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[4]].x)*
+    (-nodes[elements[i].emap[1]].y+4*v*nodes[elements[i].emap[1]].y+4*u*nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[5]].y);
   jac[2][1] =
-    (-1+4*u)*nodes[elements[i].emap[0]].ymap+nodes[elements[i].emap[1]].ymap-4*v*nodes[elements[i].emap[1]].ymap-
-    4*u*nodes[elements[i].emap[3]].ymap+4*v*nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[4]].ymap-4*w*nodes[elements[i].emap[5]].ymap;
+    (-1+4*u)*nodes[elements[i].emap[0]].y+nodes[elements[i].emap[1]].y-4*v*nodes[elements[i].emap[1]].y-
+    4*u*nodes[elements[i].emap[3]].y+4*v*nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[4]].y-4*w*nodes[elements[i].emap[5]].y;
   jac[2][2] =
-    nodes[elements[i].emap[0]].xmap-4*u*nodes[elements[i].emap[0]].xmap-nodes[elements[i].emap[1]].xmap+4*v*nodes[elements[i].emap[1]].xmap+
-    4*u*nodes[elements[i].emap[3]].xmap-4*v*nodes[elements[i].emap[3]].xmap-4*w*nodes[elements[i].emap[4]].xmap+4*w*nodes[elements[i].emap[5]].xmap;
+    nodes[elements[i].emap[0]].x-4*u*nodes[elements[i].emap[0]].x-nodes[elements[i].emap[1]].x+4*v*nodes[elements[i].emap[1]].x+
+    4*u*nodes[elements[i].emap[3]].x-4*v*nodes[elements[i].emap[3]].x-4*w*nodes[elements[i].emap[4]].x+4*w*nodes[elements[i].emap[5]].x;
 
 }
 
@@ -527,181 +542,181 @@ void ComponentFieldMap::Jacobian5(int i, double u, double v, double& det, double
 
   // Determinant of the quadrilateral serendipity Jacobian
   det = 
-     (-2*u*u*u*((nodes[elements[i].emap[2]].xmap+nodes[elements[i].emap[3]].xmap-2*nodes[elements[i].emap[6]].xmap)*
-     (nodes[elements[i].emap[0]].ymap+nodes[elements[i].emap[1]].ymap-2*nodes[elements[i].emap[4]].ymap)-(nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap-
-     2*nodes[elements[i].emap[4]].xmap)*(nodes[elements[i].emap[2]].ymap+nodes[elements[i].emap[3]].ymap-2*nodes[elements[i].emap[6]].ymap))+
-     2*v*v*v*(-((nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[3]].xmap-2*nodes[elements[i].emap[7]].xmap)*
-     (nodes[elements[i].emap[1]].ymap+nodes[elements[i].emap[2]].ymap-2*nodes[elements[i].emap[5]].ymap))+
-     (nodes[elements[i].emap[1]].xmap+nodes[elements[i].emap[2]].xmap-2*nodes[elements[i].emap[5]].xmap)*(nodes[elements[i].emap[0]].ymap+nodes[elements[i].emap[3]].ymap-
-     2*nodes[elements[i].emap[7]].ymap))+2*(-((nodes[elements[i].emap[5]].xmap-nodes[elements[i].emap[7]].xmap)*
-     (nodes[elements[i].emap[4]].ymap-nodes[elements[i].emap[6]].ymap))+(nodes[elements[i].emap[4]].xmap-nodes[elements[i].emap[6]].xmap)*
-     (nodes[elements[i].emap[5]].ymap-nodes[elements[i].emap[7]].ymap))+v*(-(nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[0]].ymap)-
-     2*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[0]].ymap+nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[1]].ymap-
-     2*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[1]].ymap-nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[2]].ymap-
-     2*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[2]].ymap+nodes[elements[i].emap[4]].xmap*(nodes[elements[i].emap[0]].ymap-nodes[elements[i].emap[1]].ymap+
-     nodes[elements[i].emap[2]].ymap-nodes[elements[i].emap[3]].ymap)+nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[3]].ymap-
-     2*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[3]].ymap-nodes[elements[i].emap[0]].xmap*nodes[elements[i].emap[4]].ymap+
-     nodes[elements[i].emap[1]].xmap*nodes[elements[i].emap[4]].ymap-nodes[elements[i].emap[2]].xmap*nodes[elements[i].emap[4]].ymap+
-     nodes[elements[i].emap[3]].xmap*nodes[elements[i].emap[4]].ymap-2*nodes[elements[i].emap[0]].xmap*nodes[elements[i].emap[5]].ymap-
-     2*nodes[elements[i].emap[1]].xmap*nodes[elements[i].emap[5]].ymap-2*nodes[elements[i].emap[2]].xmap*nodes[elements[i].emap[5]].ymap-
-     2*nodes[elements[i].emap[3]].xmap*nodes[elements[i].emap[5]].ymap+8*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[5]].ymap+
-     nodes[elements[i].emap[0]].xmap*nodes[elements[i].emap[6]].ymap-nodes[elements[i].emap[1]].xmap*nodes[elements[i].emap[6]].ymap+
-     nodes[elements[i].emap[2]].xmap*nodes[elements[i].emap[6]].ymap-nodes[elements[i].emap[3]].xmap*nodes[elements[i].emap[6]].ymap+
-     2*nodes[elements[i].emap[5]].xmap*(nodes[elements[i].emap[0]].ymap+nodes[elements[i].emap[1]].ymap+nodes[elements[i].emap[2]].ymap+nodes[elements[i].emap[3]].ymap-
-     4*nodes[elements[i].emap[7]].ymap)+2*(nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap+nodes[elements[i].emap[2]].xmap+
-     nodes[elements[i].emap[3]].xmap)*nodes[elements[i].emap[7]].ymap)+v*v*(-(nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[0]].ymap)+
-     2*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[0]].ymap+nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[0]].ymap+
-     2*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[0]].ymap+nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[1]].ymap-
-     2*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[1]].ymap-nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[1]].ymap-
-     2*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[1]].ymap+nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[2]].ymap+
-     2*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[2]].ymap-nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[2]].ymap+
-     2*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[2]].ymap-nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[3]].ymap-
-     2*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[3]].ymap+nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[3]].ymap-
-     2*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[3]].ymap+
-     2*nodes[elements[i].emap[2]].xmap*(nodes[elements[i].emap[1]].ymap+nodes[elements[i].emap[3]].ymap)-nodes[elements[i].emap[2]].xmap*nodes[elements[i].emap[4]].ymap+
-     2*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[4]].ymap-2*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[4]].ymap-
-     2*nodes[elements[i].emap[2]].xmap*nodes[elements[i].emap[5]].ymap-2*nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[5]].ymap+
-     2*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[5]].ymap+nodes[elements[i].emap[2]].xmap*nodes[elements[i].emap[6]].ymap-
-     2*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[6]].ymap+2*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[6]].ymap+
-     nodes[elements[i].emap[0]].xmap*(2*nodes[elements[i].emap[1]].ymap+2*nodes[elements[i].emap[3]].ymap+nodes[elements[i].emap[4]].ymap-
-     2*nodes[elements[i].emap[5]].ymap-nodes[elements[i].emap[6]].ymap-2*nodes[elements[i].emap[7]].ymap)-
-     2*(nodes[elements[i].emap[2]].xmap-nodes[elements[i].emap[4]].xmap+nodes[elements[i].emap[6]].xmap)*nodes[elements[i].emap[7]].ymap+nodes[elements[i].emap[3]].xmap*
-     (-2*nodes[elements[i].emap[0]].ymap-2*nodes[elements[i].emap[2]].ymap+nodes[elements[i].emap[4]].ymap+
-     2*nodes[elements[i].emap[5]].ymap-nodes[elements[i].emap[6]].ymap+2*nodes[elements[i].emap[7]].ymap)+
-     nodes[elements[i].emap[1]].xmap*(-2*nodes[elements[i].emap[0]].ymap-2*nodes[elements[i].emap[2]].ymap-nodes[elements[i].emap[4]].ymap+
-     2*nodes[elements[i].emap[5]].ymap+nodes[elements[i].emap[6]].ymap+2*nodes[elements[i].emap[7]].ymap))+
-     u*(nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[0]].ymap-2*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[0]].ymap-
-     nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[0]].ymap-nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[1]].ymap-
-     2*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[1]].ymap+nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[1]].ymap+
-     nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[2]].ymap-2*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[2]].ymap-
-     nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[2]].ymap-nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[3]].ymap-
-     2*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[3]].ymap+nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[3]].ymap-
-     2*nodes[elements[i].emap[1]].xmap*nodes[elements[i].emap[4]].ymap-2*nodes[elements[i].emap[2]].xmap*nodes[elements[i].emap[4]].ymap-
-     2*nodes[elements[i].emap[3]].xmap*nodes[elements[i].emap[4]].ymap+8*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[4]].ymap+
-     nodes[elements[i].emap[1]].xmap*nodes[elements[i].emap[5]].ymap-nodes[elements[i].emap[2]].xmap*nodes[elements[i].emap[5]].ymap+
-     nodes[elements[i].emap[3]].xmap*nodes[elements[i].emap[5]].ymap+2*nodes[elements[i].emap[4]].xmap*(nodes[elements[i].emap[0]].ymap+
-     nodes[elements[i].emap[1]].ymap+nodes[elements[i].emap[2]].ymap+nodes[elements[i].emap[3]].ymap-4*nodes[elements[i].emap[6]].ymap)+
-     2*nodes[elements[i].emap[1]].xmap*nodes[elements[i].emap[6]].ymap+2*nodes[elements[i].emap[2]].xmap*nodes[elements[i].emap[6]].ymap+
-     2*nodes[elements[i].emap[3]].xmap*nodes[elements[i].emap[6]].ymap-(nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[2]].xmap+
-     nodes[elements[i].emap[3]].xmap)*nodes[elements[i].emap[7]].ymap+nodes[elements[i].emap[0]].xmap*
-     (-2*nodes[elements[i].emap[4]].ymap-nodes[elements[i].emap[5]].ymap+2*nodes[elements[i].emap[6]].ymap+nodes[elements[i].emap[7]].ymap)+
-     v*v*(4*nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[0]].ymap-3*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[0]].ymap-
-     4*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[0]].ymap-5*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[0]].ymap+
-     4*nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[1]].ymap-5*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[1]].ymap-
-     4*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[1]].ymap-3*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[1]].ymap+
-     4*nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[2]].ymap+5*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[2]].ymap-
-     4*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[2]].ymap+3*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[2]].ymap+
-     4*nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[3]].ymap+3*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[3]].ymap-
-     4*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[3]].ymap+5*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[3]].ymap+
-     8*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[4]].ymap+8*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[4]].ymap-
-     8*nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[5]].ymap+8*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[5]].ymap-
-     8*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[6]].ymap-8*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[6]].ymap+
-     nodes[elements[i].emap[3]].xmap*(5*nodes[elements[i].emap[0]].ymap+3*nodes[elements[i].emap[1]].ymap-4*nodes[elements[i].emap[4]].ymap-
-     3*nodes[elements[i].emap[5]].ymap+4*nodes[elements[i].emap[6]].ymap-5*nodes[elements[i].emap[7]].ymap)+
-     nodes[elements[i].emap[2]].xmap*(3*nodes[elements[i].emap[0]].ymap+5*nodes[elements[i].emap[1]].ymap-4*nodes[elements[i].emap[4]].ymap-
-     5*nodes[elements[i].emap[5]].ymap+4*nodes[elements[i].emap[6]].ymap-3*nodes[elements[i].emap[7]].ymap)-
-     8*nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[7]].ymap+8*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[7]].ymap+
-     nodes[elements[i].emap[1]].xmap*(-5*nodes[elements[i].emap[2]].ymap-3*nodes[elements[i].emap[3]].ymap-4*nodes[elements[i].emap[4]].ymap+
-     5*nodes[elements[i].emap[5]].ymap+4*nodes[elements[i].emap[6]].ymap+3*nodes[elements[i].emap[7]].ymap)+
-     nodes[elements[i].emap[0]].xmap*(-3*nodes[elements[i].emap[2]].ymap-5*nodes[elements[i].emap[3]].ymap-4*nodes[elements[i].emap[4]].ymap+
-     3*nodes[elements[i].emap[5]].ymap+4*nodes[elements[i].emap[6]].ymap+5*nodes[elements[i].emap[7]].ymap))-
-     2*v*(nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[0]].ymap-3*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[0]].ymap+
-     nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[1]].ymap-nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[1]].ymap+
-     3*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[2]].ymap-nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[2]].ymap+
-     3*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[3]].ymap-3*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[3]].ymap-
-     3*nodes[elements[i].emap[0]].xmap*nodes[elements[i].emap[4]].ymap-3*nodes[elements[i].emap[1]].xmap*nodes[elements[i].emap[4]].ymap-
-     nodes[elements[i].emap[2]].xmap*nodes[elements[i].emap[4]].ymap-nodes[elements[i].emap[3]].xmap*nodes[elements[i].emap[4]].ymap+
-     4*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[4]].ymap+nodes[elements[i].emap[0]].xmap*nodes[elements[i].emap[5]].ymap+
-     3*nodes[elements[i].emap[1]].xmap*nodes[elements[i].emap[5]].ymap+3*nodes[elements[i].emap[2]].xmap*nodes[elements[i].emap[5]].ymap+
-     nodes[elements[i].emap[3]].xmap*nodes[elements[i].emap[5]].ymap-4*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[5]].ymap-
-     nodes[elements[i].emap[0]].xmap*nodes[elements[i].emap[6]].ymap-nodes[elements[i].emap[1]].xmap*nodes[elements[i].emap[6]].ymap-
-     3*nodes[elements[i].emap[2]].xmap*nodes[elements[i].emap[6]].ymap-3*nodes[elements[i].emap[3]].xmap*nodes[elements[i].emap[6]].ymap+
-     4*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[6]].ymap-nodes[elements[i].emap[5]].xmap*(nodes[elements[i].emap[0]].ymap+
-     3*nodes[elements[i].emap[1]].ymap+3*nodes[elements[i].emap[2]].ymap+nodes[elements[i].emap[3]].ymap-
-     4*(nodes[elements[i].emap[4]].ymap+nodes[elements[i].emap[6]].ymap))+(3*nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap+
-     nodes[elements[i].emap[2]].xmap+3*nodes[elements[i].emap[3]].xmap-4*nodes[elements[i].emap[6]].xmap)*nodes[elements[i].emap[7]].ymap+
-     nodes[elements[i].emap[4]].xmap*(3*nodes[elements[i].emap[0]].ymap+3*nodes[elements[i].emap[1]].ymap+nodes[elements[i].emap[2]].ymap+
-     nodes[elements[i].emap[3]].ymap-4*(nodes[elements[i].emap[5]].ymap+nodes[elements[i].emap[7]].ymap))))+
-     u*u*(2*nodes[elements[i].emap[3]].xmap*nodes[elements[i].emap[0]].ymap-2*nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[0]].ymap-
-     nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[0]].ymap-2*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[0]].ymap+
-     nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[0]].ymap-2*nodes[elements[i].emap[0]].xmap*nodes[elements[i].emap[1]].ymap+
-     2*nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[1]].ymap-nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[1]].ymap+
-     2*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[1]].ymap+nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[1]].ymap+
-     2*nodes[elements[i].emap[3]].xmap*nodes[elements[i].emap[2]].ymap-2*nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[2]].ymap+
-     nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[2]].ymap-2*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[2]].ymap-
-     nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[2]].ymap+2*nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[3]].ymap+
-     nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[3]].ymap+2*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[3]].ymap-
-     nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[3]].ymap-2*nodes[elements[i].emap[3]].xmap*nodes[elements[i].emap[4]].ymap+
-     2*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[4]].ymap-2*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[4]].ymap-
-     nodes[elements[i].emap[3]].xmap*nodes[elements[i].emap[5]].ymap-2*nodes[elements[i].emap[4]].xmap*nodes[elements[i].emap[5]].ymap+
-     2*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[5]].ymap-2*nodes[elements[i].emap[3]].xmap*nodes[elements[i].emap[6]].ymap-
-     2*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[6]].ymap+2*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[6]].ymap+
-     nodes[elements[i].emap[0]].xmap*(-2*nodes[elements[i].emap[3]].ymap+2*nodes[elements[i].emap[4]].ymap+nodes[elements[i].emap[5]].ymap+
-     2*nodes[elements[i].emap[6]].ymap-nodes[elements[i].emap[7]].ymap)+(nodes[elements[i].emap[3]].xmap+2*nodes[elements[i].emap[4]].xmap-
-     2*nodes[elements[i].emap[6]].xmap)*nodes[elements[i].emap[7]].ymap+nodes[elements[i].emap[2]].xmap*(-2*nodes[elements[i].emap[1]].ymap-
-     2*nodes[elements[i].emap[3]].ymap+2*nodes[elements[i].emap[4]].ymap-nodes[elements[i].emap[5]].ymap+
-     2*nodes[elements[i].emap[6]].ymap+nodes[elements[i].emap[7]].ymap)-3*v*v*(nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[0]].ymap-
-     nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[0]].ymap-nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[0]].ymap+
-     nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[1]].ymap+nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[1]].ymap-
-     nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[1]].ymap-nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[2]].ymap+
-     nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[2]].ymap+nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[2]].ymap-
-     nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[3]].ymap-nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[3]].ymap+
-     nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[3]].ymap-2*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[4]].ymap+
-     2*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[4]].ymap-2*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[5]].ymap+
-     2*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[6]].ymap-2*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[6]].ymap+
-     nodes[elements[i].emap[4]].xmap*(nodes[elements[i].emap[0]].ymap-nodes[elements[i].emap[1]].ymap-nodes[elements[i].emap[2]].ymap+
-     nodes[elements[i].emap[3]].ymap+2*nodes[elements[i].emap[5]].ymap-2*nodes[elements[i].emap[7]].ymap)+
-     nodes[elements[i].emap[3]].xmap*(nodes[elements[i].emap[0]].ymap-nodes[elements[i].emap[2]].ymap-nodes[elements[i].emap[4]].ymap+
-     nodes[elements[i].emap[5]].ymap+nodes[elements[i].emap[6]].ymap-nodes[elements[i].emap[7]].ymap)+2*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[7]].ymap+
-     (nodes[elements[i].emap[0]].xmap-nodes[elements[i].emap[2]].xmap)*(nodes[elements[i].emap[1]].ymap-nodes[elements[i].emap[3]].ymap-nodes[elements[i].emap[4]].ymap-
-     nodes[elements[i].emap[5]].ymap+nodes[elements[i].emap[6]].ymap+nodes[elements[i].emap[7]].ymap))+
-     v*(4*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[0]].ymap+3*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[0]].ymap-
-     4*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[0]].ymap+4*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[1]].ymap-
-     3*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[1]].ymap-4*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[1]].ymap+
-     4*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[2]].ymap-5*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[2]].ymap-
-     4*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[2]].ymap+4*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[3]].ymap+
-     5*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[3]].ymap-4*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[3]].ymap-
-     8*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[4]].ymap+8*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[4]].ymap+
-     8*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[5]].ymap-8*nodes[elements[i].emap[5]].xmap*nodes[elements[i].emap[6]].ymap+
-     8*nodes[elements[i].emap[7]].xmap*nodes[elements[i].emap[6]].ymap+nodes[elements[i].emap[4]].xmap*(5*nodes[elements[i].emap[0]].ymap-
-     5*nodes[elements[i].emap[1]].ymap-3*nodes[elements[i].emap[2]].ymap+3*nodes[elements[i].emap[3]].ymap+8*nodes[elements[i].emap[5]].ymap-
-     8*nodes[elements[i].emap[7]].ymap)-8*nodes[elements[i].emap[6]].xmap*nodes[elements[i].emap[7]].ymap+
-     nodes[elements[i].emap[3]].xmap*(3*nodes[elements[i].emap[1]].ymap+5*nodes[elements[i].emap[2]].ymap-3*nodes[elements[i].emap[4]].ymap-
-     4*nodes[elements[i].emap[5]].ymap-5*nodes[elements[i].emap[6]].ymap+4*nodes[elements[i].emap[7]].ymap)+
-     nodes[elements[i].emap[0]].xmap*(5*nodes[elements[i].emap[1]].ymap+3*nodes[elements[i].emap[2]].ymap-5*nodes[elements[i].emap[4]].ymap-
-     4*nodes[elements[i].emap[5]].ymap-3*nodes[elements[i].emap[6]].ymap+4*nodes[elements[i].emap[7]].ymap)+nodes[elements[i].emap[2]].xmap*
-     (-3*nodes[elements[i].emap[0]].ymap-5*nodes[elements[i].emap[3]].ymap+3*nodes[elements[i].emap[4]].ymap-4*nodes[elements[i].emap[5]].ymap+
-     5*nodes[elements[i].emap[6]].ymap+4*nodes[elements[i].emap[7]].ymap))+nodes[elements[i].emap[1]].xmap*((-1+v)*(-2+3*v)*
-     nodes[elements[i].emap[0]].ymap+2*nodes[elements[i].emap[2]].ymap-2*nodes[elements[i].emap[4]].ymap+nodes[elements[i].emap[5]].ymap-
-     2*nodes[elements[i].emap[6]].ymap-nodes[elements[i].emap[7]].ymap+v*(-3*nodes[elements[i].emap[3]].ymap+5*nodes[elements[i].emap[4]].ymap-
-     4*nodes[elements[i].emap[5]].ymap+3*nodes[elements[i].emap[6]].ymap+4*nodes[elements[i].emap[7]].ymap-
-     3*v*(nodes[elements[i].emap[2]].ymap+nodes[elements[i].emap[4]].ymap-nodes[elements[i].emap[5]].ymap-nodes[elements[i].emap[6]].ymap+
-	  nodes[elements[i].emap[7]].ymap)))))/8;
+     (-2*u*u*u*((nodes[elements[i].emap[2]].x+nodes[elements[i].emap[3]].x-2*nodes[elements[i].emap[6]].x)*
+     (nodes[elements[i].emap[0]].y+nodes[elements[i].emap[1]].y-2*nodes[elements[i].emap[4]].y)-(nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x-
+     2*nodes[elements[i].emap[4]].x)*(nodes[elements[i].emap[2]].y+nodes[elements[i].emap[3]].y-2*nodes[elements[i].emap[6]].y))+
+     2*v*v*v*(-((nodes[elements[i].emap[0]].x+nodes[elements[i].emap[3]].x-2*nodes[elements[i].emap[7]].x)*
+     (nodes[elements[i].emap[1]].y+nodes[elements[i].emap[2]].y-2*nodes[elements[i].emap[5]].y))+
+     (nodes[elements[i].emap[1]].x+nodes[elements[i].emap[2]].x-2*nodes[elements[i].emap[5]].x)*(nodes[elements[i].emap[0]].y+nodes[elements[i].emap[3]].y-
+     2*nodes[elements[i].emap[7]].y))+2*(-((nodes[elements[i].emap[5]].x-nodes[elements[i].emap[7]].x)*
+     (nodes[elements[i].emap[4]].y-nodes[elements[i].emap[6]].y))+(nodes[elements[i].emap[4]].x-nodes[elements[i].emap[6]].x)*
+     (nodes[elements[i].emap[5]].y-nodes[elements[i].emap[7]].y))+v*(-(nodes[elements[i].emap[6]].x*nodes[elements[i].emap[0]].y)-
+     2*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[0]].y+nodes[elements[i].emap[6]].x*nodes[elements[i].emap[1]].y-
+     2*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[1]].y-nodes[elements[i].emap[6]].x*nodes[elements[i].emap[2]].y-
+     2*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[2]].y+nodes[elements[i].emap[4]].x*(nodes[elements[i].emap[0]].y-nodes[elements[i].emap[1]].y+
+     nodes[elements[i].emap[2]].y-nodes[elements[i].emap[3]].y)+nodes[elements[i].emap[6]].x*nodes[elements[i].emap[3]].y-
+     2*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[3]].y-nodes[elements[i].emap[0]].x*nodes[elements[i].emap[4]].y+
+     nodes[elements[i].emap[1]].x*nodes[elements[i].emap[4]].y-nodes[elements[i].emap[2]].x*nodes[elements[i].emap[4]].y+
+     nodes[elements[i].emap[3]].x*nodes[elements[i].emap[4]].y-2*nodes[elements[i].emap[0]].x*nodes[elements[i].emap[5]].y-
+     2*nodes[elements[i].emap[1]].x*nodes[elements[i].emap[5]].y-2*nodes[elements[i].emap[2]].x*nodes[elements[i].emap[5]].y-
+     2*nodes[elements[i].emap[3]].x*nodes[elements[i].emap[5]].y+8*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[5]].y+
+     nodes[elements[i].emap[0]].x*nodes[elements[i].emap[6]].y-nodes[elements[i].emap[1]].x*nodes[elements[i].emap[6]].y+
+     nodes[elements[i].emap[2]].x*nodes[elements[i].emap[6]].y-nodes[elements[i].emap[3]].x*nodes[elements[i].emap[6]].y+
+     2*nodes[elements[i].emap[5]].x*(nodes[elements[i].emap[0]].y+nodes[elements[i].emap[1]].y+nodes[elements[i].emap[2]].y+nodes[elements[i].emap[3]].y-
+     4*nodes[elements[i].emap[7]].y)+2*(nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x+nodes[elements[i].emap[2]].x+
+     nodes[elements[i].emap[3]].x)*nodes[elements[i].emap[7]].y)+v*v*(-(nodes[elements[i].emap[4]].x*nodes[elements[i].emap[0]].y)+
+     2*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[0]].y+nodes[elements[i].emap[6]].x*nodes[elements[i].emap[0]].y+
+     2*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[0]].y+nodes[elements[i].emap[4]].x*nodes[elements[i].emap[1]].y-
+     2*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[1]].y-nodes[elements[i].emap[6]].x*nodes[elements[i].emap[1]].y-
+     2*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[1]].y+nodes[elements[i].emap[4]].x*nodes[elements[i].emap[2]].y+
+     2*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[2]].y-nodes[elements[i].emap[6]].x*nodes[elements[i].emap[2]].y+
+     2*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[2]].y-nodes[elements[i].emap[4]].x*nodes[elements[i].emap[3]].y-
+     2*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[3]].y+nodes[elements[i].emap[6]].x*nodes[elements[i].emap[3]].y-
+     2*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[3]].y+
+     2*nodes[elements[i].emap[2]].x*(nodes[elements[i].emap[1]].y+nodes[elements[i].emap[3]].y)-nodes[elements[i].emap[2]].x*nodes[elements[i].emap[4]].y+
+     2*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[4]].y-2*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[4]].y-
+     2*nodes[elements[i].emap[2]].x*nodes[elements[i].emap[5]].y-2*nodes[elements[i].emap[4]].x*nodes[elements[i].emap[5]].y+
+     2*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[5]].y+nodes[elements[i].emap[2]].x*nodes[elements[i].emap[6]].y-
+     2*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[6]].y+2*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[6]].y+
+     nodes[elements[i].emap[0]].x*(2*nodes[elements[i].emap[1]].y+2*nodes[elements[i].emap[3]].y+nodes[elements[i].emap[4]].y-
+     2*nodes[elements[i].emap[5]].y-nodes[elements[i].emap[6]].y-2*nodes[elements[i].emap[7]].y)-
+     2*(nodes[elements[i].emap[2]].x-nodes[elements[i].emap[4]].x+nodes[elements[i].emap[6]].x)*nodes[elements[i].emap[7]].y+nodes[elements[i].emap[3]].x*
+     (-2*nodes[elements[i].emap[0]].y-2*nodes[elements[i].emap[2]].y+nodes[elements[i].emap[4]].y+
+     2*nodes[elements[i].emap[5]].y-nodes[elements[i].emap[6]].y+2*nodes[elements[i].emap[7]].y)+
+     nodes[elements[i].emap[1]].x*(-2*nodes[elements[i].emap[0]].y-2*nodes[elements[i].emap[2]].y-nodes[elements[i].emap[4]].y+
+     2*nodes[elements[i].emap[5]].y+nodes[elements[i].emap[6]].y+2*nodes[elements[i].emap[7]].y))+
+     u*(nodes[elements[i].emap[5]].x*nodes[elements[i].emap[0]].y-2*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[0]].y-
+     nodes[elements[i].emap[7]].x*nodes[elements[i].emap[0]].y-nodes[elements[i].emap[5]].x*nodes[elements[i].emap[1]].y-
+     2*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[1]].y+nodes[elements[i].emap[7]].x*nodes[elements[i].emap[1]].y+
+     nodes[elements[i].emap[5]].x*nodes[elements[i].emap[2]].y-2*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[2]].y-
+     nodes[elements[i].emap[7]].x*nodes[elements[i].emap[2]].y-nodes[elements[i].emap[5]].x*nodes[elements[i].emap[3]].y-
+     2*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[3]].y+nodes[elements[i].emap[7]].x*nodes[elements[i].emap[3]].y-
+     2*nodes[elements[i].emap[1]].x*nodes[elements[i].emap[4]].y-2*nodes[elements[i].emap[2]].x*nodes[elements[i].emap[4]].y-
+     2*nodes[elements[i].emap[3]].x*nodes[elements[i].emap[4]].y+8*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[4]].y+
+     nodes[elements[i].emap[1]].x*nodes[elements[i].emap[5]].y-nodes[elements[i].emap[2]].x*nodes[elements[i].emap[5]].y+
+     nodes[elements[i].emap[3]].x*nodes[elements[i].emap[5]].y+2*nodes[elements[i].emap[4]].x*(nodes[elements[i].emap[0]].y+
+     nodes[elements[i].emap[1]].y+nodes[elements[i].emap[2]].y+nodes[elements[i].emap[3]].y-4*nodes[elements[i].emap[6]].y)+
+     2*nodes[elements[i].emap[1]].x*nodes[elements[i].emap[6]].y+2*nodes[elements[i].emap[2]].x*nodes[elements[i].emap[6]].y+
+     2*nodes[elements[i].emap[3]].x*nodes[elements[i].emap[6]].y-(nodes[elements[i].emap[1]].x-nodes[elements[i].emap[2]].x+
+     nodes[elements[i].emap[3]].x)*nodes[elements[i].emap[7]].y+nodes[elements[i].emap[0]].x*
+     (-2*nodes[elements[i].emap[4]].y-nodes[elements[i].emap[5]].y+2*nodes[elements[i].emap[6]].y+nodes[elements[i].emap[7]].y)+
+     v*v*(4*nodes[elements[i].emap[4]].x*nodes[elements[i].emap[0]].y-3*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[0]].y-
+     4*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[0]].y-5*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[0]].y+
+     4*nodes[elements[i].emap[4]].x*nodes[elements[i].emap[1]].y-5*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[1]].y-
+     4*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[1]].y-3*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[1]].y+
+     4*nodes[elements[i].emap[4]].x*nodes[elements[i].emap[2]].y+5*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[2]].y-
+     4*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[2]].y+3*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[2]].y+
+     4*nodes[elements[i].emap[4]].x*nodes[elements[i].emap[3]].y+3*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[3]].y-
+     4*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[3]].y+5*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[3]].y+
+     8*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[4]].y+8*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[4]].y-
+     8*nodes[elements[i].emap[4]].x*nodes[elements[i].emap[5]].y+8*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[5]].y-
+     8*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[6]].y-8*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[6]].y+
+     nodes[elements[i].emap[3]].x*(5*nodes[elements[i].emap[0]].y+3*nodes[elements[i].emap[1]].y-4*nodes[elements[i].emap[4]].y-
+     3*nodes[elements[i].emap[5]].y+4*nodes[elements[i].emap[6]].y-5*nodes[elements[i].emap[7]].y)+
+     nodes[elements[i].emap[2]].x*(3*nodes[elements[i].emap[0]].y+5*nodes[elements[i].emap[1]].y-4*nodes[elements[i].emap[4]].y-
+     5*nodes[elements[i].emap[5]].y+4*nodes[elements[i].emap[6]].y-3*nodes[elements[i].emap[7]].y)-
+     8*nodes[elements[i].emap[4]].x*nodes[elements[i].emap[7]].y+8*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[7]].y+
+     nodes[elements[i].emap[1]].x*(-5*nodes[elements[i].emap[2]].y-3*nodes[elements[i].emap[3]].y-4*nodes[elements[i].emap[4]].y+
+     5*nodes[elements[i].emap[5]].y+4*nodes[elements[i].emap[6]].y+3*nodes[elements[i].emap[7]].y)+
+     nodes[elements[i].emap[0]].x*(-3*nodes[elements[i].emap[2]].y-5*nodes[elements[i].emap[3]].y-4*nodes[elements[i].emap[4]].y+
+     3*nodes[elements[i].emap[5]].y+4*nodes[elements[i].emap[6]].y+5*nodes[elements[i].emap[7]].y))-
+     2*v*(nodes[elements[i].emap[6]].x*nodes[elements[i].emap[0]].y-3*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[0]].y+
+     nodes[elements[i].emap[6]].x*nodes[elements[i].emap[1]].y-nodes[elements[i].emap[7]].x*nodes[elements[i].emap[1]].y+
+     3*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[2]].y-nodes[elements[i].emap[7]].x*nodes[elements[i].emap[2]].y+
+     3*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[3]].y-3*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[3]].y-
+     3*nodes[elements[i].emap[0]].x*nodes[elements[i].emap[4]].y-3*nodes[elements[i].emap[1]].x*nodes[elements[i].emap[4]].y-
+     nodes[elements[i].emap[2]].x*nodes[elements[i].emap[4]].y-nodes[elements[i].emap[3]].x*nodes[elements[i].emap[4]].y+
+     4*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[4]].y+nodes[elements[i].emap[0]].x*nodes[elements[i].emap[5]].y+
+     3*nodes[elements[i].emap[1]].x*nodes[elements[i].emap[5]].y+3*nodes[elements[i].emap[2]].x*nodes[elements[i].emap[5]].y+
+     nodes[elements[i].emap[3]].x*nodes[elements[i].emap[5]].y-4*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[5]].y-
+     nodes[elements[i].emap[0]].x*nodes[elements[i].emap[6]].y-nodes[elements[i].emap[1]].x*nodes[elements[i].emap[6]].y-
+     3*nodes[elements[i].emap[2]].x*nodes[elements[i].emap[6]].y-3*nodes[elements[i].emap[3]].x*nodes[elements[i].emap[6]].y+
+     4*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[6]].y-nodes[elements[i].emap[5]].x*(nodes[elements[i].emap[0]].y+
+     3*nodes[elements[i].emap[1]].y+3*nodes[elements[i].emap[2]].y+nodes[elements[i].emap[3]].y-
+     4*(nodes[elements[i].emap[4]].y+nodes[elements[i].emap[6]].y))+(3*nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x+
+     nodes[elements[i].emap[2]].x+3*nodes[elements[i].emap[3]].x-4*nodes[elements[i].emap[6]].x)*nodes[elements[i].emap[7]].y+
+     nodes[elements[i].emap[4]].x*(3*nodes[elements[i].emap[0]].y+3*nodes[elements[i].emap[1]].y+nodes[elements[i].emap[2]].y+
+     nodes[elements[i].emap[3]].y-4*(nodes[elements[i].emap[5]].y+nodes[elements[i].emap[7]].y))))+
+     u*u*(2*nodes[elements[i].emap[3]].x*nodes[elements[i].emap[0]].y-2*nodes[elements[i].emap[4]].x*nodes[elements[i].emap[0]].y-
+     nodes[elements[i].emap[5]].x*nodes[elements[i].emap[0]].y-2*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[0]].y+
+     nodes[elements[i].emap[7]].x*nodes[elements[i].emap[0]].y-2*nodes[elements[i].emap[0]].x*nodes[elements[i].emap[1]].y+
+     2*nodes[elements[i].emap[4]].x*nodes[elements[i].emap[1]].y-nodes[elements[i].emap[5]].x*nodes[elements[i].emap[1]].y+
+     2*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[1]].y+nodes[elements[i].emap[7]].x*nodes[elements[i].emap[1]].y+
+     2*nodes[elements[i].emap[3]].x*nodes[elements[i].emap[2]].y-2*nodes[elements[i].emap[4]].x*nodes[elements[i].emap[2]].y+
+     nodes[elements[i].emap[5]].x*nodes[elements[i].emap[2]].y-2*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[2]].y-
+     nodes[elements[i].emap[7]].x*nodes[elements[i].emap[2]].y+2*nodes[elements[i].emap[4]].x*nodes[elements[i].emap[3]].y+
+     nodes[elements[i].emap[5]].x*nodes[elements[i].emap[3]].y+2*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[3]].y-
+     nodes[elements[i].emap[7]].x*nodes[elements[i].emap[3]].y-2*nodes[elements[i].emap[3]].x*nodes[elements[i].emap[4]].y+
+     2*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[4]].y-2*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[4]].y-
+     nodes[elements[i].emap[3]].x*nodes[elements[i].emap[5]].y-2*nodes[elements[i].emap[4]].x*nodes[elements[i].emap[5]].y+
+     2*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[5]].y-2*nodes[elements[i].emap[3]].x*nodes[elements[i].emap[6]].y-
+     2*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[6]].y+2*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[6]].y+
+     nodes[elements[i].emap[0]].x*(-2*nodes[elements[i].emap[3]].y+2*nodes[elements[i].emap[4]].y+nodes[elements[i].emap[5]].y+
+     2*nodes[elements[i].emap[6]].y-nodes[elements[i].emap[7]].y)+(nodes[elements[i].emap[3]].x+2*nodes[elements[i].emap[4]].x-
+     2*nodes[elements[i].emap[6]].x)*nodes[elements[i].emap[7]].y+nodes[elements[i].emap[2]].x*(-2*nodes[elements[i].emap[1]].y-
+     2*nodes[elements[i].emap[3]].y+2*nodes[elements[i].emap[4]].y-nodes[elements[i].emap[5]].y+
+     2*nodes[elements[i].emap[6]].y+nodes[elements[i].emap[7]].y)-3*v*v*(nodes[elements[i].emap[5]].x*nodes[elements[i].emap[0]].y-
+     nodes[elements[i].emap[6]].x*nodes[elements[i].emap[0]].y-nodes[elements[i].emap[7]].x*nodes[elements[i].emap[0]].y+
+     nodes[elements[i].emap[5]].x*nodes[elements[i].emap[1]].y+nodes[elements[i].emap[6]].x*nodes[elements[i].emap[1]].y-
+     nodes[elements[i].emap[7]].x*nodes[elements[i].emap[1]].y-nodes[elements[i].emap[5]].x*nodes[elements[i].emap[2]].y+
+     nodes[elements[i].emap[6]].x*nodes[elements[i].emap[2]].y+nodes[elements[i].emap[7]].x*nodes[elements[i].emap[2]].y-
+     nodes[elements[i].emap[5]].x*nodes[elements[i].emap[3]].y-nodes[elements[i].emap[6]].x*nodes[elements[i].emap[3]].y+
+     nodes[elements[i].emap[7]].x*nodes[elements[i].emap[3]].y-2*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[4]].y+
+     2*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[4]].y-2*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[5]].y+
+     2*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[6]].y-2*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[6]].y+
+     nodes[elements[i].emap[4]].x*(nodes[elements[i].emap[0]].y-nodes[elements[i].emap[1]].y-nodes[elements[i].emap[2]].y+
+     nodes[elements[i].emap[3]].y+2*nodes[elements[i].emap[5]].y-2*nodes[elements[i].emap[7]].y)+
+     nodes[elements[i].emap[3]].x*(nodes[elements[i].emap[0]].y-nodes[elements[i].emap[2]].y-nodes[elements[i].emap[4]].y+
+     nodes[elements[i].emap[5]].y+nodes[elements[i].emap[6]].y-nodes[elements[i].emap[7]].y)+2*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[7]].y+
+     (nodes[elements[i].emap[0]].x-nodes[elements[i].emap[2]].x)*(nodes[elements[i].emap[1]].y-nodes[elements[i].emap[3]].y-nodes[elements[i].emap[4]].y-
+     nodes[elements[i].emap[5]].y+nodes[elements[i].emap[6]].y+nodes[elements[i].emap[7]].y))+
+     v*(4*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[0]].y+3*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[0]].y-
+     4*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[0]].y+4*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[1]].y-
+     3*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[1]].y-4*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[1]].y+
+     4*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[2]].y-5*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[2]].y-
+     4*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[2]].y+4*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[3]].y+
+     5*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[3]].y-4*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[3]].y-
+     8*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[4]].y+8*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[4]].y+
+     8*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[5]].y-8*nodes[elements[i].emap[5]].x*nodes[elements[i].emap[6]].y+
+     8*nodes[elements[i].emap[7]].x*nodes[elements[i].emap[6]].y+nodes[elements[i].emap[4]].x*(5*nodes[elements[i].emap[0]].y-
+     5*nodes[elements[i].emap[1]].y-3*nodes[elements[i].emap[2]].y+3*nodes[elements[i].emap[3]].y+8*nodes[elements[i].emap[5]].y-
+     8*nodes[elements[i].emap[7]].y)-8*nodes[elements[i].emap[6]].x*nodes[elements[i].emap[7]].y+
+     nodes[elements[i].emap[3]].x*(3*nodes[elements[i].emap[1]].y+5*nodes[elements[i].emap[2]].y-3*nodes[elements[i].emap[4]].y-
+     4*nodes[elements[i].emap[5]].y-5*nodes[elements[i].emap[6]].y+4*nodes[elements[i].emap[7]].y)+
+     nodes[elements[i].emap[0]].x*(5*nodes[elements[i].emap[1]].y+3*nodes[elements[i].emap[2]].y-5*nodes[elements[i].emap[4]].y-
+     4*nodes[elements[i].emap[5]].y-3*nodes[elements[i].emap[6]].y+4*nodes[elements[i].emap[7]].y)+nodes[elements[i].emap[2]].x*
+     (-3*nodes[elements[i].emap[0]].y-5*nodes[elements[i].emap[3]].y+3*nodes[elements[i].emap[4]].y-4*nodes[elements[i].emap[5]].y+
+     5*nodes[elements[i].emap[6]].y+4*nodes[elements[i].emap[7]].y))+nodes[elements[i].emap[1]].x*((-1+v)*(-2+3*v)*
+     nodes[elements[i].emap[0]].y+2*nodes[elements[i].emap[2]].y-2*nodes[elements[i].emap[4]].y+nodes[elements[i].emap[5]].y-
+     2*nodes[elements[i].emap[6]].y-nodes[elements[i].emap[7]].y+v*(-3*nodes[elements[i].emap[3]].y+5*nodes[elements[i].emap[4]].y-
+     4*nodes[elements[i].emap[5]].y+3*nodes[elements[i].emap[6]].y+4*nodes[elements[i].emap[7]].y-
+     3*v*(nodes[elements[i].emap[2]].y+nodes[elements[i].emap[4]].y-nodes[elements[i].emap[5]].y-nodes[elements[i].emap[6]].y+
+	  nodes[elements[i].emap[7]].y)))))/8;
   // Jacobian terms
-  jac[0][0] = (u*u*(-nodes[elements[i].emap[0]].ymap-nodes[elements[i].emap[1]].ymap+nodes[elements[i].emap[2]].ymap+
-     nodes[elements[i].emap[3]].ymap+2*nodes[elements[i].emap[4]].ymap-2*nodes[elements[i].emap[6]].ymap)+2*(-nodes[elements[i].emap[4]].ymap+
-     nodes[elements[i].emap[6]].ymap+v*(nodes[elements[i].emap[0]].ymap+nodes[elements[i].emap[1]].ymap+nodes[elements[i].emap[2]].ymap+nodes[elements[i].emap[3]].ymap-
-     2*nodes[elements[i].emap[5]].ymap-2*nodes[elements[i].emap[7]].ymap))+u*(nodes[elements[i].emap[0]].ymap-2*v*nodes[elements[i].emap[0]].ymap-
-     nodes[elements[i].emap[1]].ymap+2*v*nodes[elements[i].emap[1]].ymap+nodes[elements[i].emap[2]].ymap+2*v*nodes[elements[i].emap[2]].ymap-
-				      nodes[elements[i].emap[3]].ymap-2*v*nodes[elements[i].emap[3]].ymap-4*v*nodes[elements[i].emap[5]].ymap+4*v*nodes[elements[i].emap[7]].ymap))/4;
-  jac[0][1] = (u*u*(nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[2]].xmap-
-     nodes[elements[i].emap[3]].xmap-2*nodes[elements[i].emap[4]].xmap+2*nodes[elements[i].emap[6]].xmap)-2*(-nodes[elements[i].emap[4]].xmap+
-     nodes[elements[i].emap[6]].xmap+v*(nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap+nodes[elements[i].emap[2]].xmap+nodes[elements[i].emap[3]].xmap-
-     2*nodes[elements[i].emap[5]].xmap-2*nodes[elements[i].emap[7]].xmap))+u*((-1+2*v)*nodes[elements[i].emap[0]].xmap+
-     nodes[elements[i].emap[1]].xmap-2*v*nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[2]].xmap-2*v*nodes[elements[i].emap[2]].xmap+
-				      nodes[elements[i].emap[3]].xmap+2*v*nodes[elements[i].emap[3]].xmap+4*v*nodes[elements[i].emap[5]].xmap-4*v*nodes[elements[i].emap[7]].xmap))/4;
-  jac[1][0] = (v*(-nodes[elements[i].emap[0]].ymap+nodes[elements[i].emap[1]].ymap-nodes[elements[i].emap[2]].ymap+nodes[elements[i].emap[3]].ymap)-
-     2*nodes[elements[i].emap[5]].ymap+2*u*((-1+v)*nodes[elements[i].emap[0]].ymap+(-1+v)*nodes[elements[i].emap[1]].ymap-
-     nodes[elements[i].emap[2]].ymap-v*nodes[elements[i].emap[2]].ymap-nodes[elements[i].emap[3]].ymap-v*nodes[elements[i].emap[3]].ymap+
-     2*nodes[elements[i].emap[4]].ymap-2*v*nodes[elements[i].emap[4]].ymap+2*nodes[elements[i].emap[6]].ymap+2*v*nodes[elements[i].emap[6]].ymap)+
-     v*v*(nodes[elements[i].emap[0]].ymap-nodes[elements[i].emap[1]].ymap-nodes[elements[i].emap[2]].ymap+nodes[elements[i].emap[3]].ymap+
-	  2*nodes[elements[i].emap[5]].ymap-2*nodes[elements[i].emap[7]].ymap)+2*nodes[elements[i].emap[7]].ymap)/4;
-  jac[1][1] =(v*(nodes[elements[i].emap[0]].xmap-nodes[elements[i].emap[1]].xmap+nodes[elements[i].emap[2]].xmap-nodes[elements[i].emap[3]].xmap)+
-     2*u*(nodes[elements[i].emap[0]].xmap-v*nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap-v*nodes[elements[i].emap[1]].xmap+
-     nodes[elements[i].emap[2]].xmap+v*nodes[elements[i].emap[2]].xmap+nodes[elements[i].emap[3]].xmap+v*nodes[elements[i].emap[3]].xmap-
-     2*nodes[elements[i].emap[4]].xmap+2*v*nodes[elements[i].emap[4]].xmap-2*nodes[elements[i].emap[6]].xmap-2*v*nodes[elements[i].emap[6]].xmap)+
-     2*(nodes[elements[i].emap[5]].xmap-nodes[elements[i].emap[7]].xmap)+v*v*(-nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap+
-				      nodes[elements[i].emap[2]].xmap-nodes[elements[i].emap[3]].xmap-2*nodes[elements[i].emap[5]].xmap+2*nodes[elements[i].emap[7]].xmap))/4;
+  jac[0][0] = (u*u*(-nodes[elements[i].emap[0]].y-nodes[elements[i].emap[1]].y+nodes[elements[i].emap[2]].y+
+     nodes[elements[i].emap[3]].y+2*nodes[elements[i].emap[4]].y-2*nodes[elements[i].emap[6]].y)+2*(-nodes[elements[i].emap[4]].y+
+     nodes[elements[i].emap[6]].y+v*(nodes[elements[i].emap[0]].y+nodes[elements[i].emap[1]].y+nodes[elements[i].emap[2]].y+nodes[elements[i].emap[3]].y-
+     2*nodes[elements[i].emap[5]].y-2*nodes[elements[i].emap[7]].y))+u*(nodes[elements[i].emap[0]].y-2*v*nodes[elements[i].emap[0]].y-
+     nodes[elements[i].emap[1]].y+2*v*nodes[elements[i].emap[1]].y+nodes[elements[i].emap[2]].y+2*v*nodes[elements[i].emap[2]].y-
+				      nodes[elements[i].emap[3]].y-2*v*nodes[elements[i].emap[3]].y-4*v*nodes[elements[i].emap[5]].y+4*v*nodes[elements[i].emap[7]].y))/4;
+  jac[0][1] = (u*u*(nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x-nodes[elements[i].emap[2]].x-
+     nodes[elements[i].emap[3]].x-2*nodes[elements[i].emap[4]].x+2*nodes[elements[i].emap[6]].x)-2*(-nodes[elements[i].emap[4]].x+
+     nodes[elements[i].emap[6]].x+v*(nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x+nodes[elements[i].emap[2]].x+nodes[elements[i].emap[3]].x-
+     2*nodes[elements[i].emap[5]].x-2*nodes[elements[i].emap[7]].x))+u*((-1+2*v)*nodes[elements[i].emap[0]].x+
+     nodes[elements[i].emap[1]].x-2*v*nodes[elements[i].emap[1]].x-nodes[elements[i].emap[2]].x-2*v*nodes[elements[i].emap[2]].x+
+				      nodes[elements[i].emap[3]].x+2*v*nodes[elements[i].emap[3]].x+4*v*nodes[elements[i].emap[5]].x-4*v*nodes[elements[i].emap[7]].x))/4;
+  jac[1][0] = (v*(-nodes[elements[i].emap[0]].y+nodes[elements[i].emap[1]].y-nodes[elements[i].emap[2]].y+nodes[elements[i].emap[3]].y)-
+     2*nodes[elements[i].emap[5]].y+2*u*((-1+v)*nodes[elements[i].emap[0]].y+(-1+v)*nodes[elements[i].emap[1]].y-
+     nodes[elements[i].emap[2]].y-v*nodes[elements[i].emap[2]].y-nodes[elements[i].emap[3]].y-v*nodes[elements[i].emap[3]].y+
+     2*nodes[elements[i].emap[4]].y-2*v*nodes[elements[i].emap[4]].y+2*nodes[elements[i].emap[6]].y+2*v*nodes[elements[i].emap[6]].y)+
+     v*v*(nodes[elements[i].emap[0]].y-nodes[elements[i].emap[1]].y-nodes[elements[i].emap[2]].y+nodes[elements[i].emap[3]].y+
+	  2*nodes[elements[i].emap[5]].y-2*nodes[elements[i].emap[7]].y)+2*nodes[elements[i].emap[7]].y)/4;
+  jac[1][1] =(v*(nodes[elements[i].emap[0]].x-nodes[elements[i].emap[1]].x+nodes[elements[i].emap[2]].x-nodes[elements[i].emap[3]].x)+
+     2*u*(nodes[elements[i].emap[0]].x-v*nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x-v*nodes[elements[i].emap[1]].x+
+     nodes[elements[i].emap[2]].x+v*nodes[elements[i].emap[2]].x+nodes[elements[i].emap[3]].x+v*nodes[elements[i].emap[3]].x-
+     2*nodes[elements[i].emap[4]].x+2*v*nodes[elements[i].emap[4]].x-2*nodes[elements[i].emap[6]].x-2*v*nodes[elements[i].emap[6]].x)+
+     2*(nodes[elements[i].emap[5]].x-nodes[elements[i].emap[7]].x)+v*v*(-nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x+
+				      nodes[elements[i].emap[2]].x-nodes[elements[i].emap[3]].x-2*nodes[elements[i].emap[5]].x+2*nodes[elements[i].emap[7]].x))/4;
 
 }
 
@@ -723,381 +738,381 @@ ComponentFieldMap::Jacobian13(int i, double t, double u, double v, double w, dou
 
   // Determinant of the quadrilateral serendipity Jacobian
   det = 
-    -(((-4*v*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[1]].xmap+4*u*nodes[elements[i].emap[1]].xmap+nodes[elements[i].emap[3]].xmap-
-    4*w*nodes[elements[i].emap[3]].xmap+4*t*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[6]].xmap+4*v*nodes[elements[i].emap[7]].xmap-
-    4*u*nodes[elements[i].emap[8]].xmap+4*w*nodes[elements[i].emap[8]].xmap)*
-    (4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+4*t*nodes[elements[i].emap[5]].ymap+
-    4*u*nodes[elements[i].emap[7]].ymap)+
-    (nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap-
-    4*t*nodes[elements[i].emap[4]].xmap+4*t*nodes[elements[i].emap[5]].xmap+4*u*nodes[elements[i].emap[7]].xmap-4*v*nodes[elements[i].emap[7]].xmap+
-    4*w*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[8]].xmap))*
-    (4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+4*t*nodes[elements[i].emap[6]].ymap+
-    4*u*nodes[elements[i].emap[8]].ymap)+
-    (-4*w*nodes[elements[i].emap[9]].xmap+4*v*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap)+nodes[elements[i].emap[2]].xmap-
-    nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*t*nodes[elements[i].emap[6]].xmap-
-    4*u*nodes[elements[i].emap[7]].xmap+4*u*nodes[elements[i].emap[8]].xmap)*
-    ((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[7]].ymap+
-    w*nodes[elements[i].emap[8]].ymap)))*((-1+4*t)*nodes[elements[i].emap[0]].zmap+4*(u*nodes[elements[i].emap[4]].zmap+
-    v*nodes[elements[i].emap[5]].zmap+w*nodes[elements[i].emap[6]].zmap)))-
-    ((nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap-
-    4*t*nodes[elements[i].emap[4]].xmap+4*t*nodes[elements[i].emap[6]].xmap+4*v*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[7]].xmap)+
-    4*u*nodes[elements[i].emap[8]].xmap-4*w*nodes[elements[i].emap[8]].xmap)*
-    ((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[5]].ymap+
-    w*nodes[elements[i].emap[6]].ymap))-
-    ((-1+4*t)*nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap+
-    4*(-(t*nodes[elements[i].emap[4]].xmap)+u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+w*nodes[elements[i].emap[6]].xmap-
-    v*nodes[elements[i].emap[7]].xmap-w*nodes[elements[i].emap[8]].xmap))*
-    (4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+4*t*nodes[elements[i].emap[6]].ymap+
-    4*u*nodes[elements[i].emap[8]].ymap)+
-    ((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*v*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[3]].xmap-
-    4*w*nodes[elements[i].emap[3]].xmap+4*u*nodes[elements[i].emap[4]].xmap+4*v*nodes[elements[i].emap[5]].xmap-4*t*nodes[elements[i].emap[6]].xmap+
-    4*w*nodes[elements[i].emap[6]].xmap-4*u*nodes[elements[i].emap[8]].xmap)*
-    ((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[7]].ymap+
-    w*nodes[elements[i].emap[8]].ymap)))*(4*w*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[2]].zmap+4*v*nodes[elements[i].emap[2]].zmap+
-    4*t*nodes[elements[i].emap[5]].zmap+4*u*nodes[elements[i].emap[7]].zmap)+
-    ((nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap-
-    4*t*nodes[elements[i].emap[4]].xmap+4*t*nodes[elements[i].emap[5]].xmap+4*u*nodes[elements[i].emap[7]].xmap-4*v*nodes[elements[i].emap[7]].xmap+
-    4*w*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[8]].xmap))*
-    ((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[5]].ymap+
-    w*nodes[elements[i].emap[6]].ymap))-
-    ((-1+4*t)*nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap+
-    4*(-(t*nodes[elements[i].emap[4]].xmap)+u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+w*nodes[elements[i].emap[6]].xmap-
-    v*nodes[elements[i].emap[7]].xmap-w*nodes[elements[i].emap[8]].xmap))*
-    (4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+4*t*nodes[elements[i].emap[5]].ymap+
-    4*u*nodes[elements[i].emap[7]].ymap)+
-    ((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*w*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[2]].xmap-
-    4*v*nodes[elements[i].emap[2]].xmap+4*u*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*v*nodes[elements[i].emap[5]].xmap+
-    4*w*nodes[elements[i].emap[6]].xmap-4*u*nodes[elements[i].emap[7]].xmap)*
-    ((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[7]].ymap+
-    w*nodes[elements[i].emap[8]].ymap)))*(4*v*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[3]].zmap+4*w*nodes[elements[i].emap[3]].zmap+
-    4*t*nodes[elements[i].emap[6]].zmap+4*u*nodes[elements[i].emap[8]].zmap)+
-    ((-4*w*nodes[elements[i].emap[9]].xmap+4*v*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap)+nodes[elements[i].emap[2]].xmap-
-    nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*t*nodes[elements[i].emap[6]].xmap-
-    4*u*nodes[elements[i].emap[7]].xmap+4*u*nodes[elements[i].emap[8]].xmap)*
-    ((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[5]].ymap+
-    w*nodes[elements[i].emap[6]].ymap))+
-    ((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*v*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[3]].xmap-
-    4*w*nodes[elements[i].emap[3]].xmap+4*u*nodes[elements[i].emap[4]].xmap+4*v*nodes[elements[i].emap[5]].xmap-4*t*nodes[elements[i].emap[6]].xmap+
-    4*w*nodes[elements[i].emap[6]].xmap-4*u*nodes[elements[i].emap[8]].xmap)*
-    (4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+4*t*nodes[elements[i].emap[5]].ymap+
-    4*u*nodes[elements[i].emap[7]].ymap)-
-    ((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*w*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[2]].xmap-
-    4*v*nodes[elements[i].emap[2]].xmap+4*u*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*v*nodes[elements[i].emap[5]].xmap+
-    4*w*nodes[elements[i].emap[6]].xmap-4*u*nodes[elements[i].emap[7]].xmap)*
-    (4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+4*t*nodes[elements[i].emap[6]].ymap+
-    4*u*nodes[elements[i].emap[8]].ymap))*((-1+4*u)*nodes[elements[i].emap[1]].zmap+4*(t*nodes[elements[i].emap[4]].zmap+
-    v*nodes[elements[i].emap[7]].zmap+w*nodes[elements[i].emap[8]].zmap));
+    -(((-4*v*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[1]].x+4*u*nodes[elements[i].emap[1]].x+nodes[elements[i].emap[3]].x-
+    4*w*nodes[elements[i].emap[3]].x+4*t*nodes[elements[i].emap[4]].x-4*t*nodes[elements[i].emap[6]].x+4*v*nodes[elements[i].emap[7]].x-
+    4*u*nodes[elements[i].emap[8]].x+4*w*nodes[elements[i].emap[8]].x)*
+    (4*w*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y+4*t*nodes[elements[i].emap[5]].y+
+    4*u*nodes[elements[i].emap[7]].y)+
+    (nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x-nodes[elements[i].emap[2]].x+4*v*nodes[elements[i].emap[2]].x-
+    4*t*nodes[elements[i].emap[4]].x+4*t*nodes[elements[i].emap[5]].x+4*u*nodes[elements[i].emap[7]].x-4*v*nodes[elements[i].emap[7]].x+
+    4*w*(nodes[elements[i].emap[9]].x-nodes[elements[i].emap[8]].x))*
+    (4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y+4*t*nodes[elements[i].emap[6]].y+
+    4*u*nodes[elements[i].emap[8]].y)+
+    (-4*w*nodes[elements[i].emap[9]].x+4*v*(nodes[elements[i].emap[9]].x-nodes[elements[i].emap[2]].x)+nodes[elements[i].emap[2]].x-
+    nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[3]].x-4*t*nodes[elements[i].emap[5]].x+4*t*nodes[elements[i].emap[6]].x-
+    4*u*nodes[elements[i].emap[7]].x+4*u*nodes[elements[i].emap[8]].x)*
+    ((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[7]].y+
+    w*nodes[elements[i].emap[8]].y)))*((-1+4*t)*nodes[elements[i].emap[0]].z+4*(u*nodes[elements[i].emap[4]].z+
+    v*nodes[elements[i].emap[5]].z+w*nodes[elements[i].emap[6]].z)))-
+    ((nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x-nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[3]].x-
+    4*t*nodes[elements[i].emap[4]].x+4*t*nodes[elements[i].emap[6]].x+4*v*(nodes[elements[i].emap[9]].x-nodes[elements[i].emap[7]].x)+
+    4*u*nodes[elements[i].emap[8]].x-4*w*nodes[elements[i].emap[8]].x)*
+    ((-1+4*t)*nodes[elements[i].emap[0]].y+4*(u*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[5]].y+
+    w*nodes[elements[i].emap[6]].y))-
+    ((-1+4*t)*nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x+
+    4*(-(t*nodes[elements[i].emap[4]].x)+u*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[5]].x+w*nodes[elements[i].emap[6]].x-
+    v*nodes[elements[i].emap[7]].x-w*nodes[elements[i].emap[8]].x))*
+    (4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y+4*t*nodes[elements[i].emap[6]].y+
+    4*u*nodes[elements[i].emap[8]].y)+
+    ((-1+4*t)*nodes[elements[i].emap[0]].x-4*v*nodes[elements[i].emap[9]].x+nodes[elements[i].emap[3]].x-
+    4*w*nodes[elements[i].emap[3]].x+4*u*nodes[elements[i].emap[4]].x+4*v*nodes[elements[i].emap[5]].x-4*t*nodes[elements[i].emap[6]].x+
+    4*w*nodes[elements[i].emap[6]].x-4*u*nodes[elements[i].emap[8]].x)*
+    ((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[7]].y+
+    w*nodes[elements[i].emap[8]].y)))*(4*w*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[2]].z+4*v*nodes[elements[i].emap[2]].z+
+    4*t*nodes[elements[i].emap[5]].z+4*u*nodes[elements[i].emap[7]].z)+
+    ((nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x-nodes[elements[i].emap[2]].x+4*v*nodes[elements[i].emap[2]].x-
+    4*t*nodes[elements[i].emap[4]].x+4*t*nodes[elements[i].emap[5]].x+4*u*nodes[elements[i].emap[7]].x-4*v*nodes[elements[i].emap[7]].x+
+    4*w*(nodes[elements[i].emap[9]].x-nodes[elements[i].emap[8]].x))*
+    ((-1+4*t)*nodes[elements[i].emap[0]].y+4*(u*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[5]].y+
+    w*nodes[elements[i].emap[6]].y))-
+    ((-1+4*t)*nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x+
+    4*(-(t*nodes[elements[i].emap[4]].x)+u*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[5]].x+w*nodes[elements[i].emap[6]].x-
+    v*nodes[elements[i].emap[7]].x-w*nodes[elements[i].emap[8]].x))*
+    (4*w*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y+4*t*nodes[elements[i].emap[5]].y+
+    4*u*nodes[elements[i].emap[7]].y)+
+    ((-1+4*t)*nodes[elements[i].emap[0]].x-4*w*nodes[elements[i].emap[9]].x+nodes[elements[i].emap[2]].x-
+    4*v*nodes[elements[i].emap[2]].x+4*u*nodes[elements[i].emap[4]].x-4*t*nodes[elements[i].emap[5]].x+4*v*nodes[elements[i].emap[5]].x+
+    4*w*nodes[elements[i].emap[6]].x-4*u*nodes[elements[i].emap[7]].x)*
+    ((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[7]].y+
+    w*nodes[elements[i].emap[8]].y)))*(4*v*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[3]].z+4*w*nodes[elements[i].emap[3]].z+
+    4*t*nodes[elements[i].emap[6]].z+4*u*nodes[elements[i].emap[8]].z)+
+    ((-4*w*nodes[elements[i].emap[9]].x+4*v*(nodes[elements[i].emap[9]].x-nodes[elements[i].emap[2]].x)+nodes[elements[i].emap[2]].x-
+    nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[3]].x-4*t*nodes[elements[i].emap[5]].x+4*t*nodes[elements[i].emap[6]].x-
+    4*u*nodes[elements[i].emap[7]].x+4*u*nodes[elements[i].emap[8]].x)*
+    ((-1+4*t)*nodes[elements[i].emap[0]].y+4*(u*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[5]].y+
+    w*nodes[elements[i].emap[6]].y))+
+    ((-1+4*t)*nodes[elements[i].emap[0]].x-4*v*nodes[elements[i].emap[9]].x+nodes[elements[i].emap[3]].x-
+    4*w*nodes[elements[i].emap[3]].x+4*u*nodes[elements[i].emap[4]].x+4*v*nodes[elements[i].emap[5]].x-4*t*nodes[elements[i].emap[6]].x+
+    4*w*nodes[elements[i].emap[6]].x-4*u*nodes[elements[i].emap[8]].x)*
+    (4*w*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y+4*t*nodes[elements[i].emap[5]].y+
+    4*u*nodes[elements[i].emap[7]].y)-
+    ((-1+4*t)*nodes[elements[i].emap[0]].x-4*w*nodes[elements[i].emap[9]].x+nodes[elements[i].emap[2]].x-
+    4*v*nodes[elements[i].emap[2]].x+4*u*nodes[elements[i].emap[4]].x-4*t*nodes[elements[i].emap[5]].x+4*v*nodes[elements[i].emap[5]].x+
+    4*w*nodes[elements[i].emap[6]].x-4*u*nodes[elements[i].emap[7]].x)*
+    (4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y+4*t*nodes[elements[i].emap[6]].y+
+    4*u*nodes[elements[i].emap[8]].y))*((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+
+    v*nodes[elements[i].emap[7]].z+w*nodes[elements[i].emap[8]].z));
 
 jac[0][0] =
--((((-1+4*u)*nodes[elements[i].emap[1]].xmap+4*(t*nodes[elements[i].emap[4]].xmap+
-v*nodes[elements[i].emap[7]].xmap+w*nodes[elements[i].emap[8]].xmap))*
-(4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+
-4*t*nodes[elements[i].emap[6]].ymap+4*u*nodes[elements[i].emap[8]].ymap)-
-(4*v*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap+4*t*nodes[elements[i].emap[6]].xmap+
-4*u*nodes[elements[i].emap[8]].xmap)*((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+
-v*nodes[elements[i].emap[7]].ymap+w*nodes[elements[i].emap[8]].ymap)))*
-(4*w*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[2]].zmap+4*v*nodes[elements[i].emap[2]].zmap+4*t*nodes[elements[i].emap[5]].zmap+
-4*u*nodes[elements[i].emap[7]].zmap))+
-(((-1+4*u)*nodes[elements[i].emap[1]].xmap+4*(t*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[7]].xmap+
-w*nodes[elements[i].emap[8]].xmap))*(4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+
-4*t*nodes[elements[i].emap[5]].ymap+4*u*nodes[elements[i].emap[7]].ymap)-
-(4*w*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap+4*t*nodes[elements[i].emap[5]].xmap+
-4*u*nodes[elements[i].emap[7]].xmap)*((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+
-v*nodes[elements[i].emap[7]].ymap+w*nodes[elements[i].emap[8]].ymap)))*
-(4*v*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[3]].zmap+4*w*nodes[elements[i].emap[3]].zmap+4*t*nodes[elements[i].emap[6]].zmap+
-4*u*nodes[elements[i].emap[8]].zmap)+
-(-((4*v*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap+4*t*nodes[elements[i].emap[6]].xmap+
-4*u*nodes[elements[i].emap[8]].xmap)*(4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+
-4*t*nodes[elements[i].emap[5]].ymap+4*u*nodes[elements[i].emap[7]].ymap))+
-(4*w*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap+4*t*nodes[elements[i].emap[5]].xmap+
-4*u*nodes[elements[i].emap[7]].xmap)*(4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+
-4*t*nodes[elements[i].emap[6]].ymap+4*u*nodes[elements[i].emap[8]].ymap))*
-((-1+4*u)*nodes[elements[i].emap[1]].zmap+4*(t*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[7]].zmap+
-			      w*nodes[elements[i].emap[8]].zmap));
+-((((-1+4*u)*nodes[elements[i].emap[1]].x+4*(t*nodes[elements[i].emap[4]].x+
+v*nodes[elements[i].emap[7]].x+w*nodes[elements[i].emap[8]].x))*
+(4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y+
+4*t*nodes[elements[i].emap[6]].y+4*u*nodes[elements[i].emap[8]].y)-
+(4*v*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[3]].x+4*t*nodes[elements[i].emap[6]].x+
+4*u*nodes[elements[i].emap[8]].x)*((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+
+v*nodes[elements[i].emap[7]].y+w*nodes[elements[i].emap[8]].y)))*
+(4*w*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[2]].z+4*v*nodes[elements[i].emap[2]].z+4*t*nodes[elements[i].emap[5]].z+
+4*u*nodes[elements[i].emap[7]].z))+
+(((-1+4*u)*nodes[elements[i].emap[1]].x+4*(t*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[7]].x+
+w*nodes[elements[i].emap[8]].x))*(4*w*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y+
+4*t*nodes[elements[i].emap[5]].y+4*u*nodes[elements[i].emap[7]].y)-
+(4*w*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[2]].x+4*v*nodes[elements[i].emap[2]].x+4*t*nodes[elements[i].emap[5]].x+
+4*u*nodes[elements[i].emap[7]].x)*((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+
+v*nodes[elements[i].emap[7]].y+w*nodes[elements[i].emap[8]].y)))*
+(4*v*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[3]].z+4*w*nodes[elements[i].emap[3]].z+4*t*nodes[elements[i].emap[6]].z+
+4*u*nodes[elements[i].emap[8]].z)+
+(-((4*v*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[3]].x+4*t*nodes[elements[i].emap[6]].x+
+4*u*nodes[elements[i].emap[8]].x)*(4*w*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y+
+4*t*nodes[elements[i].emap[5]].y+4*u*nodes[elements[i].emap[7]].y))+
+(4*w*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[2]].x+4*v*nodes[elements[i].emap[2]].x+4*t*nodes[elements[i].emap[5]].x+
+4*u*nodes[elements[i].emap[7]].x)*(4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y+
+4*t*nodes[elements[i].emap[6]].y+4*u*nodes[elements[i].emap[8]].y))*
+((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
+			      w*nodes[elements[i].emap[8]].z));
 
 jac[0][1] =
-(nodes[elements[i].emap[1]].ymap-4*u*nodes[elements[i].emap[1]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap-
-4*t*nodes[elements[i].emap[4]].ymap+4*t*nodes[elements[i].emap[6]].ymap+4*v*(nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[7]].ymap)+
-4*u*nodes[elements[i].emap[8]].ymap-4*w*nodes[elements[i].emap[8]].ymap)*
-(4*w*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[2]].zmap+4*v*nodes[elements[i].emap[2]].zmap+4*t*nodes[elements[i].emap[5]].zmap+
-4*u*nodes[elements[i].emap[7]].zmap)+
-(-4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[1]].ymap+4*u*nodes[elements[i].emap[1]].ymap+nodes[elements[i].emap[2]].ymap-
-4*v*nodes[elements[i].emap[2]].ymap+4*t*nodes[elements[i].emap[4]].ymap-4*t*nodes[elements[i].emap[5]].ymap-4*u*nodes[elements[i].emap[7]].ymap+
-4*v*nodes[elements[i].emap[7]].ymap+4*w*nodes[elements[i].emap[8]].ymap)*
-(4*v*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[3]].zmap+4*w*nodes[elements[i].emap[3]].zmap+4*t*nodes[elements[i].emap[6]].zmap+
-4*u*nodes[elements[i].emap[8]].zmap)+
-(-4*v*nodes[elements[i].emap[9]].ymap+4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+
-nodes[elements[i].emap[3]].ymap-4*w*nodes[elements[i].emap[3]].ymap+4*t*nodes[elements[i].emap[5]].ymap-4*t*nodes[elements[i].emap[6]].ymap+
-4*u*nodes[elements[i].emap[7]].ymap-4*u*nodes[elements[i].emap[8]].ymap)*
-((-1+4*u)*nodes[elements[i].emap[1]].zmap+4*(t*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[7]].zmap+
-			      w*nodes[elements[i].emap[8]].zmap));
+(nodes[elements[i].emap[1]].y-4*u*nodes[elements[i].emap[1]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y-
+4*t*nodes[elements[i].emap[4]].y+4*t*nodes[elements[i].emap[6]].y+4*v*(nodes[elements[i].emap[9]].y-nodes[elements[i].emap[7]].y)+
+4*u*nodes[elements[i].emap[8]].y-4*w*nodes[elements[i].emap[8]].y)*
+(4*w*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[2]].z+4*v*nodes[elements[i].emap[2]].z+4*t*nodes[elements[i].emap[5]].z+
+4*u*nodes[elements[i].emap[7]].z)+
+(-4*w*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[1]].y+4*u*nodes[elements[i].emap[1]].y+nodes[elements[i].emap[2]].y-
+4*v*nodes[elements[i].emap[2]].y+4*t*nodes[elements[i].emap[4]].y-4*t*nodes[elements[i].emap[5]].y-4*u*nodes[elements[i].emap[7]].y+
+4*v*nodes[elements[i].emap[7]].y+4*w*nodes[elements[i].emap[8]].y)*
+(4*v*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[3]].z+4*w*nodes[elements[i].emap[3]].z+4*t*nodes[elements[i].emap[6]].z+
+4*u*nodes[elements[i].emap[8]].z)+
+(-4*v*nodes[elements[i].emap[9]].y+4*w*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y+
+nodes[elements[i].emap[3]].y-4*w*nodes[elements[i].emap[3]].y+4*t*nodes[elements[i].emap[5]].y-4*t*nodes[elements[i].emap[6]].y+
+4*u*nodes[elements[i].emap[7]].y-4*u*nodes[elements[i].emap[8]].y)*
+((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
+			      w*nodes[elements[i].emap[8]].z));
 
 jac[0][2] =
-(-4*v*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[1]].xmap+4*u*nodes[elements[i].emap[1]].xmap+nodes[elements[i].emap[3]].xmap-
-4*w*nodes[elements[i].emap[3]].xmap+4*t*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[6]].xmap+4*v*nodes[elements[i].emap[7]].xmap-
-4*u*nodes[elements[i].emap[8]].xmap+4*w*nodes[elements[i].emap[8]].xmap)*
-(4*w*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[2]].zmap+4*v*nodes[elements[i].emap[2]].zmap+4*t*nodes[elements[i].emap[5]].zmap+
-4*u*nodes[elements[i].emap[7]].zmap)+
-(nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap-
-4*t*nodes[elements[i].emap[4]].xmap+4*t*nodes[elements[i].emap[5]].xmap+4*u*nodes[elements[i].emap[7]].xmap-4*v*nodes[elements[i].emap[7]].xmap+
-4*w*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[8]].xmap))*
-(4*v*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[3]].zmap+4*w*nodes[elements[i].emap[3]].zmap+4*t*nodes[elements[i].emap[6]].zmap+
-4*u*nodes[elements[i].emap[8]].zmap)+
-(-4*w*nodes[elements[i].emap[9]].xmap+4*v*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap)+nodes[elements[i].emap[2]].xmap-
-nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*t*nodes[elements[i].emap[6]].xmap-
-4*u*nodes[elements[i].emap[7]].xmap+4*u*nodes[elements[i].emap[8]].xmap)*
-((-1+4*u)*nodes[elements[i].emap[1]].zmap+4*(t*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[7]].zmap+
-			      w*nodes[elements[i].emap[8]].zmap));
+(-4*v*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[1]].x+4*u*nodes[elements[i].emap[1]].x+nodes[elements[i].emap[3]].x-
+4*w*nodes[elements[i].emap[3]].x+4*t*nodes[elements[i].emap[4]].x-4*t*nodes[elements[i].emap[6]].x+4*v*nodes[elements[i].emap[7]].x-
+4*u*nodes[elements[i].emap[8]].x+4*w*nodes[elements[i].emap[8]].x)*
+(4*w*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[2]].z+4*v*nodes[elements[i].emap[2]].z+4*t*nodes[elements[i].emap[5]].z+
+4*u*nodes[elements[i].emap[7]].z)+
+(nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x-nodes[elements[i].emap[2]].x+4*v*nodes[elements[i].emap[2]].x-
+4*t*nodes[elements[i].emap[4]].x+4*t*nodes[elements[i].emap[5]].x+4*u*nodes[elements[i].emap[7]].x-4*v*nodes[elements[i].emap[7]].x+
+4*w*(nodes[elements[i].emap[9]].x-nodes[elements[i].emap[8]].x))*
+(4*v*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[3]].z+4*w*nodes[elements[i].emap[3]].z+4*t*nodes[elements[i].emap[6]].z+
+4*u*nodes[elements[i].emap[8]].z)+
+(-4*w*nodes[elements[i].emap[9]].x+4*v*(nodes[elements[i].emap[9]].x-nodes[elements[i].emap[2]].x)+nodes[elements[i].emap[2]].x-
+nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[3]].x-4*t*nodes[elements[i].emap[5]].x+4*t*nodes[elements[i].emap[6]].x-
+4*u*nodes[elements[i].emap[7]].x+4*u*nodes[elements[i].emap[8]].x)*
+((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
+			      w*nodes[elements[i].emap[8]].z));
 
 jac[0][3] =
-(nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap-
-4*t*nodes[elements[i].emap[4]].xmap+4*t*nodes[elements[i].emap[6]].xmap+4*v*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[7]].xmap)+
-4*u*nodes[elements[i].emap[8]].xmap-4*w*nodes[elements[i].emap[8]].xmap)*
-(4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+4*t*nodes[elements[i].emap[5]].ymap+
-4*u*nodes[elements[i].emap[7]].ymap)+
-(-4*w*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[1]].xmap+4*u*nodes[elements[i].emap[1]].xmap+nodes[elements[i].emap[2]].xmap-
-4*v*nodes[elements[i].emap[2]].xmap+4*t*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[5]].xmap-4*u*nodes[elements[i].emap[7]].xmap+
-4*v*nodes[elements[i].emap[7]].xmap+4*w*nodes[elements[i].emap[8]].xmap)*
-(4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+4*t*nodes[elements[i].emap[6]].ymap+
-4*u*nodes[elements[i].emap[8]].ymap)+
-(-4*v*nodes[elements[i].emap[9]].xmap+4*w*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap+
-nodes[elements[i].emap[3]].xmap-4*w*nodes[elements[i].emap[3]].xmap+4*t*nodes[elements[i].emap[5]].xmap-4*t*nodes[elements[i].emap[6]].xmap+
-4*u*nodes[elements[i].emap[7]].xmap-4*u*nodes[elements[i].emap[8]].xmap)*
-((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[7]].ymap+
-			      w*nodes[elements[i].emap[8]].ymap));
+(nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x-nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[3]].x-
+4*t*nodes[elements[i].emap[4]].x+4*t*nodes[elements[i].emap[6]].x+4*v*(nodes[elements[i].emap[9]].x-nodes[elements[i].emap[7]].x)+
+4*u*nodes[elements[i].emap[8]].x-4*w*nodes[elements[i].emap[8]].x)*
+(4*w*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y+4*t*nodes[elements[i].emap[5]].y+
+4*u*nodes[elements[i].emap[7]].y)+
+(-4*w*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[1]].x+4*u*nodes[elements[i].emap[1]].x+nodes[elements[i].emap[2]].x-
+4*v*nodes[elements[i].emap[2]].x+4*t*nodes[elements[i].emap[4]].x-4*t*nodes[elements[i].emap[5]].x-4*u*nodes[elements[i].emap[7]].x+
+4*v*nodes[elements[i].emap[7]].x+4*w*nodes[elements[i].emap[8]].x)*
+(4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y+4*t*nodes[elements[i].emap[6]].y+
+4*u*nodes[elements[i].emap[8]].y)+
+(-4*v*nodes[elements[i].emap[9]].x+4*w*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[2]].x+4*v*nodes[elements[i].emap[2]].x+
+nodes[elements[i].emap[3]].x-4*w*nodes[elements[i].emap[3]].x+4*t*nodes[elements[i].emap[5]].x-4*t*nodes[elements[i].emap[6]].x+
+4*u*nodes[elements[i].emap[7]].x-4*u*nodes[elements[i].emap[8]].x)*
+((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[7]].y+
+			      w*nodes[elements[i].emap[8]].y));
 
 jac[1][0] =
--((-((4*v*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[3]].xmap+
-4*w*nodes[elements[i].emap[3]].xmap+4*t*nodes[elements[i].emap[6]].xmap+4*u*nodes[elements[i].emap[8]].xmap)*
-(4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+
-4*t*nodes[elements[i].emap[5]].ymap+4*u*nodes[elements[i].emap[7]].ymap))+
-(4*w*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap+4*t*nodes[elements[i].emap[5]].xmap+
-4*u*nodes[elements[i].emap[7]].xmap)*(4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+
-4*t*nodes[elements[i].emap[6]].ymap+4*u*nodes[elements[i].emap[8]].ymap))*
-((-1+4*t)*nodes[elements[i].emap[0]].zmap+4*(u*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[5]].zmap+
-w*nodes[elements[i].emap[6]].zmap)))+
-(-((4*v*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap+4*t*nodes[elements[i].emap[6]].xmap+
-4*u*nodes[elements[i].emap[8]].xmap)*((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+
-v*nodes[elements[i].emap[5]].ymap+w*nodes[elements[i].emap[6]].ymap)))+
-((-1+4*t)*nodes[elements[i].emap[0]].xmap+4*(u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+
-w*nodes[elements[i].emap[6]].xmap))*(4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+
-4*t*nodes[elements[i].emap[6]].ymap+4*u*nodes[elements[i].emap[8]].ymap))*
-(4*w*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[2]].zmap+4*v*nodes[elements[i].emap[2]].zmap+4*t*nodes[elements[i].emap[5]].zmap+
-4*u*nodes[elements[i].emap[7]].zmap)-
-(-((4*w*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap+4*t*nodes[elements[i].emap[5]].xmap+
-4*u*nodes[elements[i].emap[7]].xmap)*((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+
-v*nodes[elements[i].emap[5]].ymap+w*nodes[elements[i].emap[6]].ymap)))+
-((-1+4*t)*nodes[elements[i].emap[0]].xmap+4*(u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+
-w*nodes[elements[i].emap[6]].xmap))*(4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+
-4*t*nodes[elements[i].emap[5]].ymap+4*u*nodes[elements[i].emap[7]].ymap))*
-(4*v*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[3]].zmap+4*w*nodes[elements[i].emap[3]].zmap+4*t*nodes[elements[i].emap[6]].zmap+
- 4*u*nodes[elements[i].emap[8]].zmap);
+-((-((4*v*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[3]].x+
+4*w*nodes[elements[i].emap[3]].x+4*t*nodes[elements[i].emap[6]].x+4*u*nodes[elements[i].emap[8]].x)*
+(4*w*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y+
+4*t*nodes[elements[i].emap[5]].y+4*u*nodes[elements[i].emap[7]].y))+
+(4*w*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[2]].x+4*v*nodes[elements[i].emap[2]].x+4*t*nodes[elements[i].emap[5]].x+
+4*u*nodes[elements[i].emap[7]].x)*(4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y+
+4*t*nodes[elements[i].emap[6]].y+4*u*nodes[elements[i].emap[8]].y))*
+((-1+4*t)*nodes[elements[i].emap[0]].z+4*(u*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[5]].z+
+w*nodes[elements[i].emap[6]].z)))+
+(-((4*v*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[3]].x+4*t*nodes[elements[i].emap[6]].x+
+4*u*nodes[elements[i].emap[8]].x)*((-1+4*t)*nodes[elements[i].emap[0]].y+4*(u*nodes[elements[i].emap[4]].y+
+v*nodes[elements[i].emap[5]].y+w*nodes[elements[i].emap[6]].y)))+
+((-1+4*t)*nodes[elements[i].emap[0]].x+4*(u*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[5]].x+
+w*nodes[elements[i].emap[6]].x))*(4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y+
+4*t*nodes[elements[i].emap[6]].y+4*u*nodes[elements[i].emap[8]].y))*
+(4*w*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[2]].z+4*v*nodes[elements[i].emap[2]].z+4*t*nodes[elements[i].emap[5]].z+
+4*u*nodes[elements[i].emap[7]].z)-
+(-((4*w*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[2]].x+4*v*nodes[elements[i].emap[2]].x+4*t*nodes[elements[i].emap[5]].x+
+4*u*nodes[elements[i].emap[7]].x)*((-1+4*t)*nodes[elements[i].emap[0]].y+4*(u*nodes[elements[i].emap[4]].y+
+v*nodes[elements[i].emap[5]].y+w*nodes[elements[i].emap[6]].y)))+
+((-1+4*t)*nodes[elements[i].emap[0]].x+4*(u*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[5]].x+
+w*nodes[elements[i].emap[6]].x))*(4*w*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y+
+4*t*nodes[elements[i].emap[5]].y+4*u*nodes[elements[i].emap[7]].y))*
+(4*v*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[3]].z+4*w*nodes[elements[i].emap[3]].z+4*t*nodes[elements[i].emap[6]].z+
+ 4*u*nodes[elements[i].emap[8]].z);
 
 jac[1][1] =
-(-4*w*nodes[elements[i].emap[9]].ymap+4*v*(nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap)+nodes[elements[i].emap[2]].ymap-
-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap-4*t*nodes[elements[i].emap[5]].ymap+4*t*nodes[elements[i].emap[6]].ymap-
-4*u*nodes[elements[i].emap[7]].ymap+4*u*nodes[elements[i].emap[8]].ymap)*
-((-1+4*t)*nodes[elements[i].emap[0]].zmap+4*(u*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[5]].zmap+
-w*nodes[elements[i].emap[6]].zmap))+
-((-1+4*t)*nodes[elements[i].emap[0]].ymap-4*v*nodes[elements[i].emap[9]].ymap+nodes[elements[i].emap[3]].ymap-4*w*nodes[elements[i].emap[3]].ymap+
-4*u*nodes[elements[i].emap[4]].ymap+4*v*nodes[elements[i].emap[5]].ymap-4*t*nodes[elements[i].emap[6]].ymap+4*w*nodes[elements[i].emap[6]].ymap-
-4*u*nodes[elements[i].emap[8]].ymap)*
-(4*w*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[2]].zmap+4*v*nodes[elements[i].emap[2]].zmap+4*t*nodes[elements[i].emap[5]].zmap+
-4*u*nodes[elements[i].emap[7]].zmap)-
-((-1+4*t)*nodes[elements[i].emap[0]].ymap-4*w*nodes[elements[i].emap[9]].ymap+nodes[elements[i].emap[2]].ymap-4*v*nodes[elements[i].emap[2]].ymap+
-4*u*nodes[elements[i].emap[4]].ymap-4*t*nodes[elements[i].emap[5]].ymap+4*v*nodes[elements[i].emap[5]].ymap+4*w*nodes[elements[i].emap[6]].ymap-
-4*u*nodes[elements[i].emap[7]].ymap)*
-(4*v*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[3]].zmap+4*w*nodes[elements[i].emap[3]].zmap+4*t*nodes[elements[i].emap[6]].zmap+
- 4*u*nodes[elements[i].emap[8]].zmap);
+(-4*w*nodes[elements[i].emap[9]].y+4*v*(nodes[elements[i].emap[9]].y-nodes[elements[i].emap[2]].y)+nodes[elements[i].emap[2]].y-
+nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y-4*t*nodes[elements[i].emap[5]].y+4*t*nodes[elements[i].emap[6]].y-
+4*u*nodes[elements[i].emap[7]].y+4*u*nodes[elements[i].emap[8]].y)*
+((-1+4*t)*nodes[elements[i].emap[0]].z+4*(u*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[5]].z+
+w*nodes[elements[i].emap[6]].z))+
+((-1+4*t)*nodes[elements[i].emap[0]].y-4*v*nodes[elements[i].emap[9]].y+nodes[elements[i].emap[3]].y-4*w*nodes[elements[i].emap[3]].y+
+4*u*nodes[elements[i].emap[4]].y+4*v*nodes[elements[i].emap[5]].y-4*t*nodes[elements[i].emap[6]].y+4*w*nodes[elements[i].emap[6]].y-
+4*u*nodes[elements[i].emap[8]].y)*
+(4*w*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[2]].z+4*v*nodes[elements[i].emap[2]].z+4*t*nodes[elements[i].emap[5]].z+
+4*u*nodes[elements[i].emap[7]].z)-
+((-1+4*t)*nodes[elements[i].emap[0]].y-4*w*nodes[elements[i].emap[9]].y+nodes[elements[i].emap[2]].y-4*v*nodes[elements[i].emap[2]].y+
+4*u*nodes[elements[i].emap[4]].y-4*t*nodes[elements[i].emap[5]].y+4*v*nodes[elements[i].emap[5]].y+4*w*nodes[elements[i].emap[6]].y-
+4*u*nodes[elements[i].emap[7]].y)*
+(4*v*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[3]].z+4*w*nodes[elements[i].emap[3]].z+4*t*nodes[elements[i].emap[6]].z+
+ 4*u*nodes[elements[i].emap[8]].z);
 
 jac[1][2] =
-(-4*v*nodes[elements[i].emap[9]].xmap+4*w*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap+
-nodes[elements[i].emap[3]].xmap-4*w*nodes[elements[i].emap[3]].xmap+4*t*nodes[elements[i].emap[5]].xmap-4*t*nodes[elements[i].emap[6]].xmap+
-4*u*nodes[elements[i].emap[7]].xmap-4*u*nodes[elements[i].emap[8]].xmap)*
-((-1+4*t)*nodes[elements[i].emap[0]].zmap+4*(u*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[5]].zmap+
-w*nodes[elements[i].emap[6]].zmap))-
-((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*v*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[3]].xmap-4*w*nodes[elements[i].emap[3]].xmap+
-4*u*nodes[elements[i].emap[4]].xmap+4*v*nodes[elements[i].emap[5]].xmap-4*t*nodes[elements[i].emap[6]].xmap+4*w*nodes[elements[i].emap[6]].xmap-
-4*u*nodes[elements[i].emap[8]].xmap)*
-(4*w*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[2]].zmap+4*v*nodes[elements[i].emap[2]].zmap+4*t*nodes[elements[i].emap[5]].zmap+
-4*u*nodes[elements[i].emap[7]].zmap)+
-((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*w*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[2]].xmap-4*v*nodes[elements[i].emap[2]].xmap+
-4*u*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*v*nodes[elements[i].emap[5]].xmap+4*w*nodes[elements[i].emap[6]].xmap-
-4*u*nodes[elements[i].emap[7]].xmap)*
-(4*v*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[3]].zmap+4*w*nodes[elements[i].emap[3]].zmap+4*t*nodes[elements[i].emap[6]].zmap+
- 4*u*nodes[elements[i].emap[8]].zmap);
+(-4*v*nodes[elements[i].emap[9]].x+4*w*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[2]].x+4*v*nodes[elements[i].emap[2]].x+
+nodes[elements[i].emap[3]].x-4*w*nodes[elements[i].emap[3]].x+4*t*nodes[elements[i].emap[5]].x-4*t*nodes[elements[i].emap[6]].x+
+4*u*nodes[elements[i].emap[7]].x-4*u*nodes[elements[i].emap[8]].x)*
+((-1+4*t)*nodes[elements[i].emap[0]].z+4*(u*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[5]].z+
+w*nodes[elements[i].emap[6]].z))-
+((-1+4*t)*nodes[elements[i].emap[0]].x-4*v*nodes[elements[i].emap[9]].x+nodes[elements[i].emap[3]].x-4*w*nodes[elements[i].emap[3]].x+
+4*u*nodes[elements[i].emap[4]].x+4*v*nodes[elements[i].emap[5]].x-4*t*nodes[elements[i].emap[6]].x+4*w*nodes[elements[i].emap[6]].x-
+4*u*nodes[elements[i].emap[8]].x)*
+(4*w*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[2]].z+4*v*nodes[elements[i].emap[2]].z+4*t*nodes[elements[i].emap[5]].z+
+4*u*nodes[elements[i].emap[7]].z)+
+((-1+4*t)*nodes[elements[i].emap[0]].x-4*w*nodes[elements[i].emap[9]].x+nodes[elements[i].emap[2]].x-4*v*nodes[elements[i].emap[2]].x+
+4*u*nodes[elements[i].emap[4]].x-4*t*nodes[elements[i].emap[5]].x+4*v*nodes[elements[i].emap[5]].x+4*w*nodes[elements[i].emap[6]].x-
+4*u*nodes[elements[i].emap[7]].x)*
+(4*v*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[3]].z+4*w*nodes[elements[i].emap[3]].z+4*t*nodes[elements[i].emap[6]].z+
+ 4*u*nodes[elements[i].emap[8]].z);
 
 jac[1][3] =
-(-4*w*nodes[elements[i].emap[9]].xmap+4*v*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap)+nodes[elements[i].emap[2]].xmap-
-nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*t*nodes[elements[i].emap[6]].xmap-
-4*u*nodes[elements[i].emap[7]].xmap+4*u*nodes[elements[i].emap[8]].xmap)*
-((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[5]].ymap+
-w*nodes[elements[i].emap[6]].ymap))+
-((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*v*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[3]].xmap-4*w*nodes[elements[i].emap[3]].xmap+
-4*u*nodes[elements[i].emap[4]].xmap+4*v*nodes[elements[i].emap[5]].xmap-4*t*nodes[elements[i].emap[6]].xmap+4*w*nodes[elements[i].emap[6]].xmap-
-4*u*nodes[elements[i].emap[8]].xmap)*
-(4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+4*t*nodes[elements[i].emap[5]].ymap+
-4*u*nodes[elements[i].emap[7]].ymap)-
-((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*w*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[2]].xmap-4*v*nodes[elements[i].emap[2]].xmap+
-4*u*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*v*nodes[elements[i].emap[5]].xmap+4*w*nodes[elements[i].emap[6]].xmap-
-4*u*nodes[elements[i].emap[7]].xmap)*
-(4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+4*t*nodes[elements[i].emap[6]].ymap+
- 4*u*nodes[elements[i].emap[8]].ymap);
+(-4*w*nodes[elements[i].emap[9]].x+4*v*(nodes[elements[i].emap[9]].x-nodes[elements[i].emap[2]].x)+nodes[elements[i].emap[2]].x-
+nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[3]].x-4*t*nodes[elements[i].emap[5]].x+4*t*nodes[elements[i].emap[6]].x-
+4*u*nodes[elements[i].emap[7]].x+4*u*nodes[elements[i].emap[8]].x)*
+((-1+4*t)*nodes[elements[i].emap[0]].y+4*(u*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[5]].y+
+w*nodes[elements[i].emap[6]].y))+
+((-1+4*t)*nodes[elements[i].emap[0]].x-4*v*nodes[elements[i].emap[9]].x+nodes[elements[i].emap[3]].x-4*w*nodes[elements[i].emap[3]].x+
+4*u*nodes[elements[i].emap[4]].x+4*v*nodes[elements[i].emap[5]].x-4*t*nodes[elements[i].emap[6]].x+4*w*nodes[elements[i].emap[6]].x-
+4*u*nodes[elements[i].emap[8]].x)*
+(4*w*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y+4*t*nodes[elements[i].emap[5]].y+
+4*u*nodes[elements[i].emap[7]].y)-
+((-1+4*t)*nodes[elements[i].emap[0]].x-4*w*nodes[elements[i].emap[9]].x+nodes[elements[i].emap[2]].x-4*v*nodes[elements[i].emap[2]].x+
+4*u*nodes[elements[i].emap[4]].x-4*t*nodes[elements[i].emap[5]].x+4*v*nodes[elements[i].emap[5]].x+4*w*nodes[elements[i].emap[6]].x-
+4*u*nodes[elements[i].emap[7]].x)*
+(4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y+4*t*nodes[elements[i].emap[6]].y+
+ 4*u*nodes[elements[i].emap[8]].y);
 
 jac[2][0] =
-(((-1+4*u)*nodes[elements[i].emap[1]].xmap+4*(t*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[7]].xmap+
-w*nodes[elements[i].emap[8]].xmap))*(4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+
-4*t*nodes[elements[i].emap[6]].ymap+4*u*nodes[elements[i].emap[8]].ymap)-
-(4*v*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap+4*t*nodes[elements[i].emap[6]].xmap+
-4*u*nodes[elements[i].emap[8]].xmap)*((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+
-v*nodes[elements[i].emap[7]].ymap+w*nodes[elements[i].emap[8]].ymap)))*
-((-1+4*t)*nodes[elements[i].emap[0]].zmap+4*(u*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[5]].zmap+
-w*nodes[elements[i].emap[6]].zmap))+
-(-(((-1+4*u)*nodes[elements[i].emap[1]].xmap+4*(t*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[7]].xmap+
-w*nodes[elements[i].emap[8]].xmap))*((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+
-v*nodes[elements[i].emap[5]].ymap+w*nodes[elements[i].emap[6]].ymap)))+
-((-1+4*t)*nodes[elements[i].emap[0]].xmap+4*(u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+
-w*nodes[elements[i].emap[6]].xmap))*((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+
-v*nodes[elements[i].emap[7]].ymap+w*nodes[elements[i].emap[8]].ymap)))*
-(4*v*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[3]].zmap+4*w*nodes[elements[i].emap[3]].zmap+4*t*nodes[elements[i].emap[6]].zmap+
-4*u*nodes[elements[i].emap[8]].zmap)-
-(-((4*v*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap+4*t*nodes[elements[i].emap[6]].xmap+
-4*u*nodes[elements[i].emap[8]].xmap)*((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+
-v*nodes[elements[i].emap[5]].ymap+w*nodes[elements[i].emap[6]].ymap)))+
-((-1+4*t)*nodes[elements[i].emap[0]].xmap+4*(u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+
-w*nodes[elements[i].emap[6]].xmap))*(4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+
-4*t*nodes[elements[i].emap[6]].ymap+4*u*nodes[elements[i].emap[8]].ymap))*
-((-1+4*u)*nodes[elements[i].emap[1]].zmap+4*(t*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[7]].zmap+
-			      w*nodes[elements[i].emap[8]].zmap));
+(((-1+4*u)*nodes[elements[i].emap[1]].x+4*(t*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[7]].x+
+w*nodes[elements[i].emap[8]].x))*(4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y+
+4*t*nodes[elements[i].emap[6]].y+4*u*nodes[elements[i].emap[8]].y)-
+(4*v*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[3]].x+4*t*nodes[elements[i].emap[6]].x+
+4*u*nodes[elements[i].emap[8]].x)*((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+
+v*nodes[elements[i].emap[7]].y+w*nodes[elements[i].emap[8]].y)))*
+((-1+4*t)*nodes[elements[i].emap[0]].z+4*(u*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[5]].z+
+w*nodes[elements[i].emap[6]].z))+
+(-(((-1+4*u)*nodes[elements[i].emap[1]].x+4*(t*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[7]].x+
+w*nodes[elements[i].emap[8]].x))*((-1+4*t)*nodes[elements[i].emap[0]].y+4*(u*nodes[elements[i].emap[4]].y+
+v*nodes[elements[i].emap[5]].y+w*nodes[elements[i].emap[6]].y)))+
+((-1+4*t)*nodes[elements[i].emap[0]].x+4*(u*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[5]].x+
+w*nodes[elements[i].emap[6]].x))*((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+
+v*nodes[elements[i].emap[7]].y+w*nodes[elements[i].emap[8]].y)))*
+(4*v*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[3]].z+4*w*nodes[elements[i].emap[3]].z+4*t*nodes[elements[i].emap[6]].z+
+4*u*nodes[elements[i].emap[8]].z)-
+(-((4*v*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[3]].x+4*t*nodes[elements[i].emap[6]].x+
+4*u*nodes[elements[i].emap[8]].x)*((-1+4*t)*nodes[elements[i].emap[0]].y+4*(u*nodes[elements[i].emap[4]].y+
+v*nodes[elements[i].emap[5]].y+w*nodes[elements[i].emap[6]].y)))+
+((-1+4*t)*nodes[elements[i].emap[0]].x+4*(u*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[5]].x+
+w*nodes[elements[i].emap[6]].x))*(4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y+
+4*t*nodes[elements[i].emap[6]].y+4*u*nodes[elements[i].emap[8]].y))*
+((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
+			      w*nodes[elements[i].emap[8]].z));
 
 jac[2][1] =
-(-4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[1]].ymap+4*u*nodes[elements[i].emap[1]].ymap+nodes[elements[i].emap[3]].ymap-
-4*w*nodes[elements[i].emap[3]].ymap+4*t*nodes[elements[i].emap[4]].ymap-4*t*nodes[elements[i].emap[6]].ymap+4*v*nodes[elements[i].emap[7]].ymap-
-4*u*nodes[elements[i].emap[8]].ymap+4*w*nodes[elements[i].emap[8]].ymap)*
-((-1+4*t)*nodes[elements[i].emap[0]].zmap+4*(u*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[5]].zmap+
-w*nodes[elements[i].emap[6]].zmap))+
-((-1+4*t)*nodes[elements[i].emap[0]].ymap+nodes[elements[i].emap[1]].ymap-4*u*nodes[elements[i].emap[1]].ymap+
-4*(-(t*nodes[elements[i].emap[4]].ymap)+u*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[5]].ymap+w*nodes[elements[i].emap[6]].ymap-
-v*nodes[elements[i].emap[7]].ymap-w*nodes[elements[i].emap[8]].ymap))*
-(4*v*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[3]].zmap+4*w*nodes[elements[i].emap[3]].zmap+4*t*nodes[elements[i].emap[6]].zmap+
-4*u*nodes[elements[i].emap[8]].zmap)-
-((-1+4*t)*nodes[elements[i].emap[0]].ymap-4*v*nodes[elements[i].emap[9]].ymap+nodes[elements[i].emap[3]].ymap-4*w*nodes[elements[i].emap[3]].ymap+
-4*u*nodes[elements[i].emap[4]].ymap+4*v*nodes[elements[i].emap[5]].ymap-4*t*nodes[elements[i].emap[6]].ymap+4*w*nodes[elements[i].emap[6]].ymap-
-4*u*nodes[elements[i].emap[8]].ymap)*
-((-1+4*u)*nodes[elements[i].emap[1]].zmap+4*(t*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[7]].zmap+
-			      w*nodes[elements[i].emap[8]].zmap));
+(-4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[1]].y+4*u*nodes[elements[i].emap[1]].y+nodes[elements[i].emap[3]].y-
+4*w*nodes[elements[i].emap[3]].y+4*t*nodes[elements[i].emap[4]].y-4*t*nodes[elements[i].emap[6]].y+4*v*nodes[elements[i].emap[7]].y-
+4*u*nodes[elements[i].emap[8]].y+4*w*nodes[elements[i].emap[8]].y)*
+((-1+4*t)*nodes[elements[i].emap[0]].z+4*(u*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[5]].z+
+w*nodes[elements[i].emap[6]].z))+
+((-1+4*t)*nodes[elements[i].emap[0]].y+nodes[elements[i].emap[1]].y-4*u*nodes[elements[i].emap[1]].y+
+4*(-(t*nodes[elements[i].emap[4]].y)+u*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[5]].y+w*nodes[elements[i].emap[6]].y-
+v*nodes[elements[i].emap[7]].y-w*nodes[elements[i].emap[8]].y))*
+(4*v*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[3]].z+4*w*nodes[elements[i].emap[3]].z+4*t*nodes[elements[i].emap[6]].z+
+4*u*nodes[elements[i].emap[8]].z)-
+((-1+4*t)*nodes[elements[i].emap[0]].y-4*v*nodes[elements[i].emap[9]].y+nodes[elements[i].emap[3]].y-4*w*nodes[elements[i].emap[3]].y+
+4*u*nodes[elements[i].emap[4]].y+4*v*nodes[elements[i].emap[5]].y-4*t*nodes[elements[i].emap[6]].y+4*w*nodes[elements[i].emap[6]].y-
+4*u*nodes[elements[i].emap[8]].y)*
+((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
+			      w*nodes[elements[i].emap[8]].z));
 
 jac[2][2] =
-(nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[3]].xmap+4*w*nodes[elements[i].emap[3]].xmap-
-4*t*nodes[elements[i].emap[4]].xmap+4*t*nodes[elements[i].emap[6]].xmap+4*v*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[7]].xmap)+
-4*u*nodes[elements[i].emap[8]].xmap-4*w*nodes[elements[i].emap[8]].xmap)*
-((-1+4*t)*nodes[elements[i].emap[0]].zmap+4*(u*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[5]].zmap+
-w*nodes[elements[i].emap[6]].zmap))-
-((-1+4*t)*nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap+
-4*(-(t*nodes[elements[i].emap[4]].xmap)+u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+w*nodes[elements[i].emap[6]].xmap-
-v*nodes[elements[i].emap[7]].xmap-w*nodes[elements[i].emap[8]].xmap))*
-(4*v*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[3]].zmap+4*w*nodes[elements[i].emap[3]].zmap+4*t*nodes[elements[i].emap[6]].zmap+
-4*u*nodes[elements[i].emap[8]].zmap)+
-((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*v*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[3]].xmap-4*w*nodes[elements[i].emap[3]].xmap+
-4*u*nodes[elements[i].emap[4]].xmap+4*v*nodes[elements[i].emap[5]].xmap-4*t*nodes[elements[i].emap[6]].xmap+4*w*nodes[elements[i].emap[6]].xmap-
-4*u*nodes[elements[i].emap[8]].xmap)*
-((-1+4*u)*nodes[elements[i].emap[1]].zmap+4*(t*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[7]].zmap+
-			      w*nodes[elements[i].emap[8]].zmap));
+(nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x-nodes[elements[i].emap[3]].x+4*w*nodes[elements[i].emap[3]].x-
+4*t*nodes[elements[i].emap[4]].x+4*t*nodes[elements[i].emap[6]].x+4*v*(nodes[elements[i].emap[9]].x-nodes[elements[i].emap[7]].x)+
+4*u*nodes[elements[i].emap[8]].x-4*w*nodes[elements[i].emap[8]].x)*
+((-1+4*t)*nodes[elements[i].emap[0]].z+4*(u*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[5]].z+
+w*nodes[elements[i].emap[6]].z))-
+((-1+4*t)*nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x+
+4*(-(t*nodes[elements[i].emap[4]].x)+u*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[5]].x+w*nodes[elements[i].emap[6]].x-
+v*nodes[elements[i].emap[7]].x-w*nodes[elements[i].emap[8]].x))*
+(4*v*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[3]].z+4*w*nodes[elements[i].emap[3]].z+4*t*nodes[elements[i].emap[6]].z+
+4*u*nodes[elements[i].emap[8]].z)+
+((-1+4*t)*nodes[elements[i].emap[0]].x-4*v*nodes[elements[i].emap[9]].x+nodes[elements[i].emap[3]].x-4*w*nodes[elements[i].emap[3]].x+
+4*u*nodes[elements[i].emap[4]].x+4*v*nodes[elements[i].emap[5]].x-4*t*nodes[elements[i].emap[6]].x+4*w*nodes[elements[i].emap[6]].x-
+4*u*nodes[elements[i].emap[8]].x)*
+((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
+			      w*nodes[elements[i].emap[8]].z));
 
 jac[2][3] =
-(-4*v*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[1]].xmap+4*u*nodes[elements[i].emap[1]].xmap+nodes[elements[i].emap[3]].xmap-
-4*w*nodes[elements[i].emap[3]].xmap+4*t*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[6]].xmap+4*v*nodes[elements[i].emap[7]].xmap-
-4*u*nodes[elements[i].emap[8]].xmap+4*w*nodes[elements[i].emap[8]].xmap)*
-((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[5]].ymap+
-w*nodes[elements[i].emap[6]].ymap))+
-((-1+4*t)*nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap+
-4*(-(t*nodes[elements[i].emap[4]].xmap)+u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+w*nodes[elements[i].emap[6]].xmap-
-v*nodes[elements[i].emap[7]].xmap-w*nodes[elements[i].emap[8]].xmap))*
-(4*v*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[3]].ymap+4*w*nodes[elements[i].emap[3]].ymap+4*t*nodes[elements[i].emap[6]].ymap+
-4*u*nodes[elements[i].emap[8]].ymap)-
-((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*v*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[3]].xmap-4*w*nodes[elements[i].emap[3]].xmap+
-4*u*nodes[elements[i].emap[4]].xmap+4*v*nodes[elements[i].emap[5]].xmap-4*t*nodes[elements[i].emap[6]].xmap+4*w*nodes[elements[i].emap[6]].xmap-
-4*u*nodes[elements[i].emap[8]].xmap)*
-((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[7]].ymap+
-			      w*nodes[elements[i].emap[8]].ymap));
+(-4*v*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[1]].x+4*u*nodes[elements[i].emap[1]].x+nodes[elements[i].emap[3]].x-
+4*w*nodes[elements[i].emap[3]].x+4*t*nodes[elements[i].emap[4]].x-4*t*nodes[elements[i].emap[6]].x+4*v*nodes[elements[i].emap[7]].x-
+4*u*nodes[elements[i].emap[8]].x+4*w*nodes[elements[i].emap[8]].x)*
+((-1+4*t)*nodes[elements[i].emap[0]].y+4*(u*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[5]].y+
+w*nodes[elements[i].emap[6]].y))+
+((-1+4*t)*nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x+
+4*(-(t*nodes[elements[i].emap[4]].x)+u*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[5]].x+w*nodes[elements[i].emap[6]].x-
+v*nodes[elements[i].emap[7]].x-w*nodes[elements[i].emap[8]].x))*
+(4*v*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[3]].y+4*w*nodes[elements[i].emap[3]].y+4*t*nodes[elements[i].emap[6]].y+
+4*u*nodes[elements[i].emap[8]].y)-
+((-1+4*t)*nodes[elements[i].emap[0]].x-4*v*nodes[elements[i].emap[9]].x+nodes[elements[i].emap[3]].x-4*w*nodes[elements[i].emap[3]].x+
+4*u*nodes[elements[i].emap[4]].x+4*v*nodes[elements[i].emap[5]].x-4*t*nodes[elements[i].emap[6]].x+4*w*nodes[elements[i].emap[6]].x-
+4*u*nodes[elements[i].emap[8]].x)*
+((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[7]].y+
+			      w*nodes[elements[i].emap[8]].y));
 
 jac[3][0] =
--((((-1+4*u)*nodes[elements[i].emap[1]].xmap+4*(t*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[7]].xmap+
-w*nodes[elements[i].emap[8]].xmap))*
-(4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+
-4*t*nodes[elements[i].emap[5]].ymap+4*u*nodes[elements[i].emap[7]].ymap)-
-(4*w*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap+4*t*nodes[elements[i].emap[5]].xmap+
-4*u*nodes[elements[i].emap[7]].xmap)*((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+
-v*nodes[elements[i].emap[7]].ymap+w*nodes[elements[i].emap[8]].ymap)))*
-((-1+4*t)*nodes[elements[i].emap[0]].zmap+4*(u*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[5]].zmap+
-w*nodes[elements[i].emap[6]].zmap)))-
-(-(((-1+4*u)*nodes[elements[i].emap[1]].xmap+4*(t*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[7]].xmap+
-w*nodes[elements[i].emap[8]].xmap))*((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+
-v*nodes[elements[i].emap[5]].ymap+w*nodes[elements[i].emap[6]].ymap)))+
-((-1+4*t)*nodes[elements[i].emap[0]].xmap+4*(u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+
-w*nodes[elements[i].emap[6]].xmap))*((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+
-v*nodes[elements[i].emap[7]].ymap+w*nodes[elements[i].emap[8]].ymap)))*
-(4*w*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[2]].zmap+4*v*nodes[elements[i].emap[2]].zmap+4*t*nodes[elements[i].emap[5]].zmap+
-4*u*nodes[elements[i].emap[7]].zmap)+
-(-((4*w*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap+4*t*nodes[elements[i].emap[5]].xmap+
-4*u*nodes[elements[i].emap[7]].xmap)*((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+
-v*nodes[elements[i].emap[5]].ymap+w*nodes[elements[i].emap[6]].ymap)))+
-((-1+4*t)*nodes[elements[i].emap[0]].xmap+4*(u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+
-w*nodes[elements[i].emap[6]].xmap))*(4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+
-4*t*nodes[elements[i].emap[5]].ymap+4*u*nodes[elements[i].emap[7]].ymap))*
-((-1+4*u)*nodes[elements[i].emap[1]].zmap+4*(t*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[7]].zmap+
-			      w*nodes[elements[i].emap[8]].zmap));
+-((((-1+4*u)*nodes[elements[i].emap[1]].x+4*(t*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[7]].x+
+w*nodes[elements[i].emap[8]].x))*
+(4*w*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y+
+4*t*nodes[elements[i].emap[5]].y+4*u*nodes[elements[i].emap[7]].y)-
+(4*w*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[2]].x+4*v*nodes[elements[i].emap[2]].x+4*t*nodes[elements[i].emap[5]].x+
+4*u*nodes[elements[i].emap[7]].x)*((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+
+v*nodes[elements[i].emap[7]].y+w*nodes[elements[i].emap[8]].y)))*
+((-1+4*t)*nodes[elements[i].emap[0]].z+4*(u*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[5]].z+
+w*nodes[elements[i].emap[6]].z)))-
+(-(((-1+4*u)*nodes[elements[i].emap[1]].x+4*(t*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[7]].x+
+w*nodes[elements[i].emap[8]].x))*((-1+4*t)*nodes[elements[i].emap[0]].y+4*(u*nodes[elements[i].emap[4]].y+
+v*nodes[elements[i].emap[5]].y+w*nodes[elements[i].emap[6]].y)))+
+((-1+4*t)*nodes[elements[i].emap[0]].x+4*(u*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[5]].x+
+w*nodes[elements[i].emap[6]].x))*((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+
+v*nodes[elements[i].emap[7]].y+w*nodes[elements[i].emap[8]].y)))*
+(4*w*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[2]].z+4*v*nodes[elements[i].emap[2]].z+4*t*nodes[elements[i].emap[5]].z+
+4*u*nodes[elements[i].emap[7]].z)+
+(-((4*w*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[2]].x+4*v*nodes[elements[i].emap[2]].x+4*t*nodes[elements[i].emap[5]].x+
+4*u*nodes[elements[i].emap[7]].x)*((-1+4*t)*nodes[elements[i].emap[0]].y+4*(u*nodes[elements[i].emap[4]].y+
+v*nodes[elements[i].emap[5]].y+w*nodes[elements[i].emap[6]].y)))+
+((-1+4*t)*nodes[elements[i].emap[0]].x+4*(u*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[5]].x+
+w*nodes[elements[i].emap[6]].x))*(4*w*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y+
+4*t*nodes[elements[i].emap[5]].y+4*u*nodes[elements[i].emap[7]].y))*
+((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
+			      w*nodes[elements[i].emap[8]].z));
 
 jac[3][1] = 
-(nodes[elements[i].emap[1]].ymap-4*u*nodes[elements[i].emap[1]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap-
-4*t*nodes[elements[i].emap[4]].ymap+4*t*nodes[elements[i].emap[5]].ymap+4*u*nodes[elements[i].emap[7]].ymap-4*v*nodes[elements[i].emap[7]].ymap+
-4*w*(nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[8]].ymap))*
-((-1+4*t)*nodes[elements[i].emap[0]].zmap+4*(u*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[5]].zmap+
-w*nodes[elements[i].emap[6]].zmap))-
-((-1+4*t)*nodes[elements[i].emap[0]].ymap+nodes[elements[i].emap[1]].ymap-4*u*nodes[elements[i].emap[1]].ymap+
-4*(-(t*nodes[elements[i].emap[4]].ymap)+u*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[5]].ymap+w*nodes[elements[i].emap[6]].ymap-
-v*nodes[elements[i].emap[7]].ymap-w*nodes[elements[i].emap[8]].ymap))*
-(4*w*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[2]].zmap+4*v*nodes[elements[i].emap[2]].zmap+4*t*nodes[elements[i].emap[5]].zmap+
-4*u*nodes[elements[i].emap[7]].zmap)+
-((-1+4*t)*nodes[elements[i].emap[0]].ymap-4*w*nodes[elements[i].emap[9]].ymap+nodes[elements[i].emap[2]].ymap-4*v*nodes[elements[i].emap[2]].ymap+
-4*u*nodes[elements[i].emap[4]].ymap-4*t*nodes[elements[i].emap[5]].ymap+4*v*nodes[elements[i].emap[5]].ymap+4*w*nodes[elements[i].emap[6]].ymap-
-4*u*nodes[elements[i].emap[7]].ymap)*
-((-1+4*u)*nodes[elements[i].emap[1]].zmap+4*(t*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[7]].zmap+
-			      w*nodes[elements[i].emap[8]].zmap));
+(nodes[elements[i].emap[1]].y-4*u*nodes[elements[i].emap[1]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y-
+4*t*nodes[elements[i].emap[4]].y+4*t*nodes[elements[i].emap[5]].y+4*u*nodes[elements[i].emap[7]].y-4*v*nodes[elements[i].emap[7]].y+
+4*w*(nodes[elements[i].emap[9]].y-nodes[elements[i].emap[8]].y))*
+((-1+4*t)*nodes[elements[i].emap[0]].z+4*(u*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[5]].z+
+w*nodes[elements[i].emap[6]].z))-
+((-1+4*t)*nodes[elements[i].emap[0]].y+nodes[elements[i].emap[1]].y-4*u*nodes[elements[i].emap[1]].y+
+4*(-(t*nodes[elements[i].emap[4]].y)+u*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[5]].y+w*nodes[elements[i].emap[6]].y-
+v*nodes[elements[i].emap[7]].y-w*nodes[elements[i].emap[8]].y))*
+(4*w*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[2]].z+4*v*nodes[elements[i].emap[2]].z+4*t*nodes[elements[i].emap[5]].z+
+4*u*nodes[elements[i].emap[7]].z)+
+((-1+4*t)*nodes[elements[i].emap[0]].y-4*w*nodes[elements[i].emap[9]].y+nodes[elements[i].emap[2]].y-4*v*nodes[elements[i].emap[2]].y+
+4*u*nodes[elements[i].emap[4]].y-4*t*nodes[elements[i].emap[5]].y+4*v*nodes[elements[i].emap[5]].y+4*w*nodes[elements[i].emap[6]].y-
+4*u*nodes[elements[i].emap[7]].y)*
+((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
+			      w*nodes[elements[i].emap[8]].z));
 
 jac[3][2] =
-(-4*w*nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[1]].xmap+4*u*nodes[elements[i].emap[1]].xmap+nodes[elements[i].emap[2]].xmap-
-4*v*nodes[elements[i].emap[2]].xmap+4*t*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[5]].xmap-4*u*nodes[elements[i].emap[7]].xmap+
-4*v*nodes[elements[i].emap[7]].xmap+4*w*nodes[elements[i].emap[8]].xmap)*
-((-1+4*t)*nodes[elements[i].emap[0]].zmap+4*(u*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[5]].zmap+
-w*nodes[elements[i].emap[6]].zmap))+
-((-1+4*t)*nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap+
-4*(-(t*nodes[elements[i].emap[4]].xmap)+u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+w*nodes[elements[i].emap[6]].xmap-
-v*nodes[elements[i].emap[7]].xmap-w*nodes[elements[i].emap[8]].xmap))*
-(4*w*nodes[elements[i].emap[9]].zmap-nodes[elements[i].emap[2]].zmap+4*v*nodes[elements[i].emap[2]].zmap+4*t*nodes[elements[i].emap[5]].zmap+
-4*u*nodes[elements[i].emap[7]].zmap)-
-((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*w*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[2]].xmap-4*v*nodes[elements[i].emap[2]].xmap+
-4*u*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*v*nodes[elements[i].emap[5]].xmap+
-4*w*nodes[elements[i].emap[6]].xmap-4*u*nodes[elements[i].emap[7]].xmap)*
-((-1+4*u)*nodes[elements[i].emap[1]].zmap+4*(t*nodes[elements[i].emap[4]].zmap+v*nodes[elements[i].emap[7]].zmap+
-			      w*nodes[elements[i].emap[8]].zmap));
+(-4*w*nodes[elements[i].emap[9]].x-nodes[elements[i].emap[1]].x+4*u*nodes[elements[i].emap[1]].x+nodes[elements[i].emap[2]].x-
+4*v*nodes[elements[i].emap[2]].x+4*t*nodes[elements[i].emap[4]].x-4*t*nodes[elements[i].emap[5]].x-4*u*nodes[elements[i].emap[7]].x+
+4*v*nodes[elements[i].emap[7]].x+4*w*nodes[elements[i].emap[8]].x)*
+((-1+4*t)*nodes[elements[i].emap[0]].z+4*(u*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[5]].z+
+w*nodes[elements[i].emap[6]].z))+
+((-1+4*t)*nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x+
+4*(-(t*nodes[elements[i].emap[4]].x)+u*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[5]].x+w*nodes[elements[i].emap[6]].x-
+v*nodes[elements[i].emap[7]].x-w*nodes[elements[i].emap[8]].x))*
+(4*w*nodes[elements[i].emap[9]].z-nodes[elements[i].emap[2]].z+4*v*nodes[elements[i].emap[2]].z+4*t*nodes[elements[i].emap[5]].z+
+4*u*nodes[elements[i].emap[7]].z)-
+((-1+4*t)*nodes[elements[i].emap[0]].x-4*w*nodes[elements[i].emap[9]].x+nodes[elements[i].emap[2]].x-4*v*nodes[elements[i].emap[2]].x+
+4*u*nodes[elements[i].emap[4]].x-4*t*nodes[elements[i].emap[5]].x+4*v*nodes[elements[i].emap[5]].x+
+4*w*nodes[elements[i].emap[6]].x-4*u*nodes[elements[i].emap[7]].x)*
+((-1+4*u)*nodes[elements[i].emap[1]].z+4*(t*nodes[elements[i].emap[4]].z+v*nodes[elements[i].emap[7]].z+
+			      w*nodes[elements[i].emap[8]].z));
 
 jac[3][3] = 
-(nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap-nodes[elements[i].emap[2]].xmap+4*v*nodes[elements[i].emap[2]].xmap-
-4*t*nodes[elements[i].emap[4]].xmap+4*t*nodes[elements[i].emap[5]].xmap+4*u*nodes[elements[i].emap[7]].xmap-4*v*nodes[elements[i].emap[7]].xmap+
-4*w*(nodes[elements[i].emap[9]].xmap-nodes[elements[i].emap[8]].xmap))*
-((-1+4*t)*nodes[elements[i].emap[0]].ymap+4*(u*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[5]].ymap+
-w*nodes[elements[i].emap[6]].ymap))-
-((-1+4*t)*nodes[elements[i].emap[0]].xmap+nodes[elements[i].emap[1]].xmap-4*u*nodes[elements[i].emap[1]].xmap+
-4*(-(t*nodes[elements[i].emap[4]].xmap)+u*nodes[elements[i].emap[4]].xmap+v*nodes[elements[i].emap[5]].xmap+w*nodes[elements[i].emap[6]].xmap-
-v*nodes[elements[i].emap[7]].xmap-w*nodes[elements[i].emap[8]].xmap))*
-(4*w*nodes[elements[i].emap[9]].ymap-nodes[elements[i].emap[2]].ymap+4*v*nodes[elements[i].emap[2]].ymap+4*t*nodes[elements[i].emap[5]].ymap+
-4*u*nodes[elements[i].emap[7]].ymap)+
-((-1+4*t)*nodes[elements[i].emap[0]].xmap-4*w*nodes[elements[i].emap[9]].xmap+nodes[elements[i].emap[2]].xmap-4*v*nodes[elements[i].emap[2]].xmap+
-4*u*nodes[elements[i].emap[4]].xmap-4*t*nodes[elements[i].emap[5]].xmap+4*v*nodes[elements[i].emap[5]].xmap+4*w*nodes[elements[i].emap[6]].xmap-
-4*u*nodes[elements[i].emap[7]].xmap)*
-((-1+4*u)*nodes[elements[i].emap[1]].ymap+4*(t*nodes[elements[i].emap[4]].ymap+v*nodes[elements[i].emap[7]].ymap+
-			      w*nodes[elements[i].emap[8]].ymap));
+(nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x-nodes[elements[i].emap[2]].x+4*v*nodes[elements[i].emap[2]].x-
+4*t*nodes[elements[i].emap[4]].x+4*t*nodes[elements[i].emap[5]].x+4*u*nodes[elements[i].emap[7]].x-4*v*nodes[elements[i].emap[7]].x+
+4*w*(nodes[elements[i].emap[9]].x-nodes[elements[i].emap[8]].x))*
+((-1+4*t)*nodes[elements[i].emap[0]].y+4*(u*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[5]].y+
+w*nodes[elements[i].emap[6]].y))-
+((-1+4*t)*nodes[elements[i].emap[0]].x+nodes[elements[i].emap[1]].x-4*u*nodes[elements[i].emap[1]].x+
+4*(-(t*nodes[elements[i].emap[4]].x)+u*nodes[elements[i].emap[4]].x+v*nodes[elements[i].emap[5]].x+w*nodes[elements[i].emap[6]].x-
+v*nodes[elements[i].emap[7]].x-w*nodes[elements[i].emap[8]].x))*
+(4*w*nodes[elements[i].emap[9]].y-nodes[elements[i].emap[2]].y+4*v*nodes[elements[i].emap[2]].y+4*t*nodes[elements[i].emap[5]].y+
+4*u*nodes[elements[i].emap[7]].y)+
+((-1+4*t)*nodes[elements[i].emap[0]].x-4*w*nodes[elements[i].emap[9]].x+nodes[elements[i].emap[2]].x-4*v*nodes[elements[i].emap[2]].x+
+4*u*nodes[elements[i].emap[4]].x-4*t*nodes[elements[i].emap[5]].x+4*v*nodes[elements[i].emap[5]].x+4*w*nodes[elements[i].emap[6]].x-
+4*u*nodes[elements[i].emap[7]].x)*
+((-1+4*u)*nodes[elements[i].emap[1]].y+4*(t*nodes[elements[i].emap[4]].y+v*nodes[elements[i].emap[7]].y+
+			      w*nodes[elements[i].emap[8]].y));
 
 }
 
@@ -1118,28 +1133,28 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
   t1 = t2 = t3 = t4 = 0;
 
   // Make a first order approximation, using the linear triangle.
-  double tt1 = (x - nodes[elements[imap].emap[1]].xmap) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[1]].ymap) -
-               (y - nodes[elements[imap].emap[1]].ymap) * (nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[1]].xmap);
-  double tt2 = (x - nodes[elements[imap].emap[2]].xmap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[2]].ymap) -
-               (y - nodes[elements[imap].emap[2]].ymap) * (nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[2]].xmap);
-  double tt3 = (x - nodes[elements[imap].emap[0]].xmap) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[0]].ymap) -
-               (y - nodes[elements[imap].emap[0]].ymap) * (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap);
-  if ((nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[1]].xmap) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[1]].ymap) -
-      (nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[1]].xmap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[1]].ymap) == 0 ||
-      (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[2]].xmap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[2]].ymap) -
-      (nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[2]].xmap) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[2]].ymap) == 0 ||
-      (nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[0]].xmap) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[0]].ymap) -
-      (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[0]].ymap) == 0) {
+  double tt1 = (x - nodes[elements[imap].emap[1]].x) * (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[1]].y) -
+               (y - nodes[elements[imap].emap[1]].y) * (nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[1]].x);
+  double tt2 = (x - nodes[elements[imap].emap[2]].x) * (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[2]].y) -
+               (y - nodes[elements[imap].emap[2]].y) * (nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[2]].x);
+  double tt3 = (x - nodes[elements[imap].emap[0]].x) * (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[0]].y) -
+               (y - nodes[elements[imap].emap[0]].y) * (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[0]].x);
+  if ((nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[1]].x) * (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[1]].y) -
+      (nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[1]].x) * (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[1]].y) == 0 ||
+      (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[2]].x) * (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[2]].y) -
+      (nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[2]].x) * (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[2]].y) == 0 ||
+      (nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[0]].x) * (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[0]].y) -
+      (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[0]].x) * (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[0]].y) == 0) {
     printf("ComponentFieldMap::Coordinates3:\n");
     printf("    Calculation of linear coordinates failed; abandoned.\n");
     return ifail;
   } else {
-    t1 = tt1 / ((nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[1]].xmap) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[1]].ymap) -
-      (nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[1]].xmap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[1]].ymap));
-    t2 = tt2 / ((nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[2]].xmap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[2]].ymap) -
-      (nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[2]].xmap) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[2]].ymap));
-    t3 = tt3 / ((nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[0]].xmap) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[0]].ymap) -
-      (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[0]].ymap));
+    t1 = tt1 / ((nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[1]].x) * (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[1]].y) -
+      (nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[1]].x) * (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[1]].y));
+    t2 = tt2 / ((nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[2]].x) * (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[2]].y) -
+      (nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[2]].x) * (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[2]].y));
+    t3 = tt3 / ((nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[0]].x) * (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[0]].y) -
+      (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[0]].x) * (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[0]].y));
     t4 = 0;
   }
 
@@ -1161,18 +1176,18 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
              iter, td1, td2, td3, td1 + td2 + td3);
     }
     // Re-compute the (x,y,z) position for this coordinate.
-    double xr = nodes[elements[imap].emap[0]].xmap * td1 * (2 * td1 - 1) +
-                nodes[elements[imap].emap[1]].xmap * td2 * (2 * td2 - 1) +
-                nodes[elements[imap].emap[2]].xmap * td3 * (2 * td3 - 1) +
-                nodes[elements[imap].emap[3]].xmap * 4 * td1 * td2 +
-                nodes[elements[imap].emap[4]].xmap * 4 * td1 * td3 +
-                nodes[elements[imap].emap[5]].xmap * 4 * td2 * td3;
-    double yr = nodes[elements[imap].emap[0]].ymap * td1 * (2 * td1 - 1) +
-                nodes[elements[imap].emap[1]].ymap * td2 * (2 * td2 - 1) +
-                nodes[elements[imap].emap[2]].ymap * td3 * (2 * td3 - 1) +
-                nodes[elements[imap].emap[3]].ymap * 4 * td1 * td2 +
-                nodes[elements[imap].emap[4]].ymap * 4 * td1 * td3 +
-                nodes[elements[imap].emap[5]].ymap * 4 * td2 * td3;
+    double xr = nodes[elements[imap].emap[0]].x * td1 * (2 * td1 - 1) +
+                nodes[elements[imap].emap[1]].x * td2 * (2 * td2 - 1) +
+                nodes[elements[imap].emap[2]].x * td3 * (2 * td3 - 1) +
+                nodes[elements[imap].emap[3]].x * 4 * td1 * td2 +
+                nodes[elements[imap].emap[4]].x * 4 * td1 * td3 +
+                nodes[elements[imap].emap[5]].x * 4 * td2 * td3;
+    double yr = nodes[elements[imap].emap[0]].y * td1 * (2 * td1 - 1) +
+                nodes[elements[imap].emap[1]].y * td2 * (2 * td2 - 1) +
+                nodes[elements[imap].emap[2]].y * td3 * (2 * td3 - 1) +
+                nodes[elements[imap].emap[3]].y * 4 * td1 * td2 +
+                nodes[elements[imap].emap[4]].y * 4 * td1 * td3 +
+                nodes[elements[imap].emap[5]].y * 4 * td2 * td3;
     double sr = td1 + td2 + td3;
     // Compute the Jacobian
     Jacobian3(imap, td1, td2, td3, det, jac);
@@ -1213,18 +1228,18 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
   // No convergence reached
   if (!converged) {
     double xmin, ymin, xmax, ymax;
-    xmin = nodes[elements[imap].emap[0]].xmap;
-    xmax = nodes[elements[imap].emap[0]].xmap;
-    if (nodes[elements[imap].emap[1]].xmap < xmin) {xmin = nodes[elements[imap].emap[1]].xmap;} 
-    if (nodes[elements[imap].emap[1]].xmap > xmax) {xmax = nodes[elements[imap].emap[1]].xmap;}
-    if (nodes[elements[imap].emap[2]].xmap < xmin) {xmin = nodes[elements[imap].emap[2]].xmap;} 
-    if (nodes[elements[imap].emap[2]].xmap > xmax) {xmax = nodes[elements[imap].emap[2]].xmap;}
-    ymin = nodes[elements[imap].emap[0]].ymap;
-    ymax = nodes[elements[imap].emap[0]].ymap;
-    if (nodes[elements[imap].emap[1]].ymap < ymin) {ymin = nodes[elements[imap].emap[1]].ymap;}
-    if (nodes[elements[imap].emap[1]].ymap > ymax) {ymax = nodes[elements[imap].emap[1]].ymap;}
-    if (nodes[elements[imap].emap[2]].ymap < ymin) {ymin = nodes[elements[imap].emap[2]].ymap;}
-    if (nodes[elements[imap].emap[2]].ymap > ymax) {ymax = nodes[elements[imap].emap[2]].ymap;}
+    xmin = nodes[elements[imap].emap[0]].x;
+    xmax = nodes[elements[imap].emap[0]].x;
+    if (nodes[elements[imap].emap[1]].x < xmin) {xmin = nodes[elements[imap].emap[1]].x;} 
+    if (nodes[elements[imap].emap[1]].x > xmax) {xmax = nodes[elements[imap].emap[1]].x;}
+    if (nodes[elements[imap].emap[2]].x < xmin) {xmin = nodes[elements[imap].emap[2]].x;} 
+    if (nodes[elements[imap].emap[2]].x > xmax) {xmax = nodes[elements[imap].emap[2]].x;}
+    ymin = nodes[elements[imap].emap[0]].y;
+    ymax = nodes[elements[imap].emap[0]].y;
+    if (nodes[elements[imap].emap[1]].y < ymin) {ymin = nodes[elements[imap].emap[1]].y;}
+    if (nodes[elements[imap].emap[1]].y > ymax) {ymax = nodes[elements[imap].emap[1]].y;}
+    if (nodes[elements[imap].emap[2]].y < ymin) {ymin = nodes[elements[imap].emap[2]].y;}
+    if (nodes[elements[imap].emap[2]].y > ymax) {ymax = nodes[elements[imap].emap[2]].y;}
 
     if (x >= xmin && x <= xmax && y >= ymin && y <= ymax) {
       printf("ComponentFieldMap::Coordinates3:\n");
@@ -1248,18 +1263,18 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
 
   // For debugging purposes, show position
   if (debug) {
-    double xr = nodes[elements[imap].emap[0]].xmap * td1 * (2 * td1 - 1) +
-                nodes[elements[imap].emap[1]].xmap * td2 * (2 * td2-1) +
-                nodes[elements[imap].emap[2]].xmap * td3 * (2 * td3-1) +
-                nodes[elements[imap].emap[3]].xmap * 4 * td1 * td2 +
-                nodes[elements[imap].emap[4]].xmap * 4 * td1 * td3 +
-                nodes[elements[imap].emap[5]].xmap * 4 * td2 * td3;
-    double yr = nodes[elements[imap].emap[0]].ymap * td1 * (2 * td1 - 1) +
-                nodes[elements[imap].emap[1]].ymap * td2 * (2 * td2 - 1) +
-                nodes[elements[imap].emap[2]].ymap * td3 * (2 * td3 - 1) +
-                nodes[elements[imap].emap[3]].ymap * 4 * td1 * td2 +    
-                nodes[elements[imap].emap[4]].ymap * 4 * td1 * td3 +
-                nodes[elements[imap].emap[5]].ymap * 4 * td2 * td3;
+    double xr = nodes[elements[imap].emap[0]].x * td1 * (2 * td1 - 1) +
+                nodes[elements[imap].emap[1]].x * td2 * (2 * td2-1) +
+                nodes[elements[imap].emap[2]].x * td3 * (2 * td3-1) +
+                nodes[elements[imap].emap[3]].x * 4 * td1 * td2 +
+                nodes[elements[imap].emap[4]].x * 4 * td1 * td3 +
+                nodes[elements[imap].emap[5]].x * 4 * td2 * td3;
+    double yr = nodes[elements[imap].emap[0]].y * td1 * (2 * td1 - 1) +
+                nodes[elements[imap].emap[1]].y * td2 * (2 * td2 - 1) +
+                nodes[elements[imap].emap[2]].y * td3 * (2 * td3 - 1) +
+                nodes[elements[imap].emap[3]].y * 4 * td1 * td2 +    
+                nodes[elements[imap].emap[4]].y * 4 * td1 * td3 +
+                nodes[elements[imap].emap[5]].y * 4 * td2 * td3;
     double sr = td1 + td2 + td3;
     printf("ComponentFieldMap::Coordinates3:\n");
     printf("    Position requested:     (%g,%g),\n", x, y);
@@ -1293,18 +1308,18 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
 
   // Compute determinant.
   det =
-    -(-((nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[3]].xmap) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[2]].ymap)) + 
-      (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[2]].xmap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[3]].ymap))*
-    (2*x*(-nodes[elements[imap].emap[0]].ymap+nodes[elements[imap].emap[1]].ymap+nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[3]].ymap) - 
-     (nodes[elements[imap].emap[0]].xmap+nodes[elements[imap].emap[3]].xmap) * (nodes[elements[imap].emap[1]].ymap+nodes[elements[imap].emap[2]].ymap-2*y) + 
-     nodes[elements[imap].emap[1]].xmap*(nodes[elements[imap].emap[0]].ymap+nodes[elements[imap].emap[3]].ymap-2*y) + nodes[elements[imap].emap[2]].xmap*
-     (nodes[elements[imap].emap[0]].ymap+nodes[elements[imap].emap[3]].ymap-2*y)) + 
-    pow(-(nodes[elements[imap].emap[0]].xmap*nodes[elements[imap].emap[1]].ymap) + 
-	nodes[elements[imap].emap[3]].xmap*nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[2]].xmap*nodes[elements[imap].emap[3]].ymap+
-	x*(-nodes[elements[imap].emap[0]].ymap+
-           nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[2]].ymap+nodes[elements[imap].emap[3]].ymap) + 
-	nodes[elements[imap].emap[1]].xmap*(nodes[elements[imap].emap[0]].ymap-y) + 
-	(nodes[elements[imap].emap[0]].xmap+nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[3]].xmap)*y,2);
+    -(-((nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[3]].x) * (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[2]].y)) + 
+      (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[2]].x) * (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[3]].y))*
+    (2*x*(-nodes[elements[imap].emap[0]].y+nodes[elements[imap].emap[1]].y+nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[3]].y) - 
+     (nodes[elements[imap].emap[0]].x+nodes[elements[imap].emap[3]].x) * (nodes[elements[imap].emap[1]].y+nodes[elements[imap].emap[2]].y-2*y) + 
+     nodes[elements[imap].emap[1]].x*(nodes[elements[imap].emap[0]].y+nodes[elements[imap].emap[3]].y-2*y) + nodes[elements[imap].emap[2]].x*
+     (nodes[elements[imap].emap[0]].y+nodes[elements[imap].emap[3]].y-2*y)) + 
+    pow(-(nodes[elements[imap].emap[0]].x*nodes[elements[imap].emap[1]].y) + 
+	nodes[elements[imap].emap[3]].x*nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[2]].x*nodes[elements[imap].emap[3]].y+
+	x*(-nodes[elements[imap].emap[0]].y+
+           nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[2]].y+nodes[elements[imap].emap[3]].y) + 
+	nodes[elements[imap].emap[1]].x*(nodes[elements[imap].emap[0]].y-y) + 
+	(nodes[elements[imap].emap[0]].x+nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[3]].x)*y,2);
 
   // Check that the determinant is non-negative 
   // (this can happen if the point is out of range).
@@ -1318,68 +1333,82 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
   }
 
   // Vector products for evaluation of T1.
-  double prod=((nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[3]].xmap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[1]].ymap) - 
-	       (nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[1]].xmap) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[3]].ymap));
+  double prod = ((nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[3]].x) * 
+                 (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[1]].y) - 
+	               (nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[1]].x) * 
+                 (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[3]].y));
   if (prod * prod > 1.0e-12 *
-      ((nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[1]].xmap) * (nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[1]].xmap) + 
-       (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[1]].ymap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[1]].ymap))*
-      ((nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[3]].xmap) * (nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[3]].xmap) + 
-       (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[3]].ymap) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[3]].ymap))) {
-    t1 = (-(nodes[elements[imap].emap[3]].xmap*nodes[elements[imap].emap[0]].ymap) + x*nodes[elements[imap].emap[0]].ymap+
-	nodes[elements[imap].emap[2]].xmap*nodes[elements[imap].emap[1]].ymap-x*nodes[elements[imap].emap[1]].ymap-
-	nodes[elements[imap].emap[1]].xmap*nodes[elements[imap].emap[2]].ymap+
-	x*nodes[elements[imap].emap[2]].ymap+nodes[elements[imap].emap[0]].xmap*nodes[elements[imap].emap[3]].ymap-
-	x*nodes[elements[imap].emap[3]].ymap - nodes[elements[imap].emap[0]].xmap*y+nodes[elements[imap].emap[1]].xmap*y-
-	nodes[elements[imap].emap[2]].xmap*y+nodes[elements[imap].emap[3]].xmap*y+sqrt(det)) / prod;
+      ((nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[1]].x) * 
+       (nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[1]].x) + 
+       (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[1]].y) * 
+       (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[1]].y))*
+      ((nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[3]].x) * 
+       (nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[3]].x) + 
+       (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[3]].y) * 
+       (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[3]].y))) {
+    t1 = (-(nodes[elements[imap].emap[3]].x*nodes[elements[imap].emap[0]].y) + x*nodes[elements[imap].emap[0]].y+
+	nodes[elements[imap].emap[2]].x*nodes[elements[imap].emap[1]].y-x*nodes[elements[imap].emap[1]].y-
+	nodes[elements[imap].emap[1]].x*nodes[elements[imap].emap[2]].y+
+	x*nodes[elements[imap].emap[2]].y+nodes[elements[imap].emap[0]].x*nodes[elements[imap].emap[3]].y-
+	x*nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[0]].x*y+nodes[elements[imap].emap[1]].x*y-
+	nodes[elements[imap].emap[2]].x*y+nodes[elements[imap].emap[3]].x*y+sqrt(det)) / prod;
   } else {
-    double xp = nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[1]].ymap;
-    double yp = nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap;
-    double dn=sqrt(xp*xp+yp*yp);
+    double xp = nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[1]].y;
+    double yp = nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[0]].x;
+    double dn = sqrt(xp * xp + yp * yp);
     if(dn <= 0) {
       printf("ComponentFieldMap::Coordinates4:\n");
       printf("    Element %d appears to be degenerate in the 1 - 2 axis.\n", imap);
       return ifail;
     }
-    xp=xp/dn;
-    yp=yp/dn;
-    double dpoint=xp*(x - nodes[elements[imap].emap[0]].xmap) + yp*(y - nodes[elements[imap].emap[0]].ymap);
-    double dbox=  xp*(nodes[elements[imap].emap[3]].xmap - nodes[elements[imap].emap[0]].xmap) + yp*(nodes[elements[imap].emap[3]].ymap - nodes[elements[imap].emap[0]].ymap);
+    xp = xp / dn;
+    yp = yp / dn;
+    double dpoint = xp * (x - nodes[elements[imap].emap[0]].x) + 
+                    yp * (y - nodes[elements[imap].emap[0]].y);
+    double dbox = xp * (nodes[elements[imap].emap[3]].x - nodes[elements[imap].emap[0]].x) + 
+                  yp * (nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[0]].y);
     if (dbox == 0) {
       printf("ComponentFieldMap::Coordinates4:\n");
       printf("    Element %d appears to be degenerate in the 1 - 3 axis.\n", imap);
       return ifail;
     }
-    double t=-1 + 2*dpoint/dbox;
-    double xt1 = nodes[elements[imap].emap[0]].xmap+0.5*(t+1) * (nodes[elements[imap].emap[3]].xmap - nodes[elements[imap].emap[0]].xmap);
-    double yt1 = nodes[elements[imap].emap[0]].ymap+0.5*(t+1) * (nodes[elements[imap].emap[3]].ymap - nodes[elements[imap].emap[0]].ymap);
-    double xt2 = nodes[elements[imap].emap[1]].xmap+0.5*(t+1) * (nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[1]].xmap);
-    double yt2 = nodes[elements[imap].emap[1]].ymap+0.5*(t+1) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[1]].ymap);
-    dn=(xt1 - xt2) * (xt1 - xt2) + (yt1 - yt2) * (yt1 - yt2);
+    double t = -1 + 2 * dpoint / dbox;
+    double xt1 = nodes[elements[imap].emap[0]].x + 0.5 * (t + 1) * (nodes[elements[imap].emap[3]].x - nodes[elements[imap].emap[0]].x);
+    double yt1 = nodes[elements[imap].emap[0]].y + 0.5 * (t + 1) * (nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[0]].y);
+    double xt2 = nodes[elements[imap].emap[1]].x + 0.5 * (t + 1) * (nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[1]].x);
+    double yt2 = nodes[elements[imap].emap[1]].y + 0.5 * (t + 1) * (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[1]].y);
+    dn = (xt1 - xt2) * (xt1 - xt2) + (yt1 - yt2) * (yt1 - yt2);
     if(dn <= 0) {
       printf("ComponentFieldMap::Coordinates4:\n");
       printf("    Coordinate requested at convergence point of element %d.\n", imap);
       return ifail;
     }
-    t1 = -1 + 2*((x-xt1) * (xt2-xt1) + (y-yt1) * (yt2-yt1)) / dn;
+    t1 = -1 + 2 * ((x - xt1) * (xt2 - xt1) + (y - yt1) * (yt2 - yt1)) / dn;
   }
 
   // Vector products for evaluation of T2.
-  prod=((nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[3]].xmap) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[2]].ymap) - 
-	(nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[2]].xmap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[3]].ymap));
-  if (prod*prod > 1.0e-12*
-      ((nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[3]].xmap) * (nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[3]].xmap) + 
-       (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[3]].ymap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[3]].ymap))*
-      ((nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[2]].xmap) * (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[2]].xmap) + 
-       (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[2]].ymap) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[2]].ymap))) {
-    t2 = (-(nodes[elements[imap].emap[1]].xmap*nodes[elements[imap].emap[0]].ymap) + x*nodes[elements[imap].emap[0]].ymap+
-	  nodes[elements[imap].emap[0]].xmap*nodes[elements[imap].emap[1]].ymap-x*nodes[elements[imap].emap[1]].ymap-
-	  nodes[elements[imap].emap[3]].xmap*nodes[elements[imap].emap[2]].ymap+
-	  x*nodes[elements[imap].emap[2]].ymap+nodes[elements[imap].emap[2]].xmap*nodes[elements[imap].emap[3]].ymap-
-	  x*nodes[elements[imap].emap[3]].ymap - nodes[elements[imap].emap[0]].xmap*y+nodes[elements[imap].emap[1]].xmap*y-
-	  nodes[elements[imap].emap[2]].xmap*y+nodes[elements[imap].emap[3]].xmap*y-sqrt(det)) / prod;
+  prod = ((nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[3]].x) * 
+          (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[2]].y) - 
+          (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[2]].x) * 
+          (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[3]].y));
+  if (prod*prod > 1.0e-12 *
+      ((nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[3]].x) * 
+       (nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[3]].x) + 
+       (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[3]].y) * 
+       (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[3]].y)) *
+      ((nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[2]].x) * 
+       (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[2]].x) + 
+       (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[2]].y) * 
+       (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[2]].y))) {
+    t2 = (-(nodes[elements[imap].emap[1]].x*nodes[elements[imap].emap[0]].y) + x*nodes[elements[imap].emap[0]].y+
+	  nodes[elements[imap].emap[0]].x*nodes[elements[imap].emap[1]].y-x*nodes[elements[imap].emap[1]].y-
+	  nodes[elements[imap].emap[3]].x*nodes[elements[imap].emap[2]].y+
+	  x*nodes[elements[imap].emap[2]].y+nodes[elements[imap].emap[2]].x*nodes[elements[imap].emap[3]].y-
+	  x*nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[0]].x*y+nodes[elements[imap].emap[1]].x*y-
+	  nodes[elements[imap].emap[2]].x*y+nodes[elements[imap].emap[3]].x*y-sqrt(det)) / prod;
   } else {
-    double xp = nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[3]].ymap;
-    double yp = nodes[elements[imap].emap[3]].xmap - nodes[elements[imap].emap[0]].xmap;
+    double xp = nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[3]].y;
+    double yp = nodes[elements[imap].emap[3]].x - nodes[elements[imap].emap[0]].x;
     double dn = sqrt(xp * xp + yp * yp);
     if(dn <= 0) {
       printf("ComponentFieldMap::Coordinates4:\n");
@@ -1388,18 +1417,20 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
     }
     xp = xp / dn;
     yp = yp / dn;
-    double dpoint = xp * (x - nodes[elements[imap].emap[0]].xmap) + yp*(y - nodes[elements[imap].emap[0]].ymap);
-    double dbox =  xp * (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap) + yp*(nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[0]].ymap);
+    double dpoint = xp * (x - nodes[elements[imap].emap[0]].x) + 
+                    yp * (y - nodes[elements[imap].emap[0]].y);
+    double dbox =  xp * (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[0]].x) + 
+                   yp * (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[0]].y);
     if (dbox == 0) {
       printf("ComponentFieldMap::Coordinates4:\n");
       printf("    Element %d appears to be degenerate in the 1 - 2 axis.\n", imap);
       return ifail;
     }
     double t = -1 + 2 * dpoint / dbox;
-    double xt1 = nodes[elements[imap].emap[0]].xmap+0.5*(t+1) * (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap);
-    double yt1 = nodes[elements[imap].emap[0]].ymap+0.5*(t+1) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[0]].ymap);
-    double xt2 = nodes[elements[imap].emap[3]].xmap+0.5*(t+1) * (nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[3]].xmap);
-    double yt2 = nodes[elements[imap].emap[3]].ymap+0.5*(t+1) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[3]].ymap);
+    double xt1 = nodes[elements[imap].emap[0]].x + 0.5 * (t + 1) * (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[0]].x);
+    double yt1 = nodes[elements[imap].emap[0]].y + 0.5 * (t + 1) * (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[0]].y);
+    double xt2 = nodes[elements[imap].emap[3]].x + 0.5 * (t + 1) * (nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[3]].x);
+    double yt2 = nodes[elements[imap].emap[3]].y + 0.5 * (t + 1) * (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[3]].y);
     dn = (xt1 - xt2) * (xt1 - xt2) + (yt1 - yt2) * (yt1 - yt2);
     if(dn <= 0) {
       printf("ComponentFieldMap::Coordinates4:\n");
@@ -1415,14 +1446,16 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
 
   // Re-compute the (x,y,z) position for this coordinate.
   if (debug) {
-    double xr=nodes[elements[imap].emap[0]].xmap*(1 - t1) * (1 - t2) / 4+
-      nodes[elements[imap].emap[1]].xmap*(1 + t1) * (1 - t2) / 4+
-      nodes[elements[imap].emap[2]].xmap*(1 + t1) * (1 + t2) / 4+
-      nodes[elements[imap].emap[3]].xmap*(1 - t1) * (1 + t2) / 4;
-    double yr=nodes[elements[imap].emap[0]].ymap*(1 - t1) * (1 - t2) / 4+
-      nodes[elements[imap].emap[1]].ymap*(1 + t1) * (1 - t2) / 4+
-      nodes[elements[imap].emap[2]].ymap*(1 + t1) * (1 + t2) / 4+
-      nodes[elements[imap].emap[3]].ymap*(1 - t1) * (1 + t2) / 4;
+    double xr = 
+      nodes[elements[imap].emap[0]].x * (1 - t1) * (1 - t2) / 4 +
+      nodes[elements[imap].emap[1]].x * (1 + t1) * (1 - t2) / 4 +
+      nodes[elements[imap].emap[2]].x * (1 + t1) * (1 + t2) / 4 +
+      nodes[elements[imap].emap[3]].x * (1 - t1) * (1 + t2) / 4;
+    double yr = 
+      nodes[elements[imap].emap[0]].y * (1 - t1) * (1 - t2) / 4 +
+      nodes[elements[imap].emap[1]].y * (1 + t1) * (1 - t2) / 4 +
+      nodes[elements[imap].emap[2]].y * (1 + t1) * (1 + t2) / 4 +
+      nodes[elements[imap].emap[3]].y * (1 - t1) * (1 + t2) / 4;
     printf("ComponentFieldMap::Coordinates4: \n");
     printf("    Position requested:     (%g,%g),\n", x, y);
     printf("    Reconstructed:          (%g,%g),\n", xr, yr);
@@ -1430,7 +1463,7 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
   }
 
   // This should have worked if we get this far.
-  ifail=0;
+  ifail = 0;
   return ifail;
 
 }
@@ -1497,23 +1530,23 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
     }
     // Re-compute the (x,y,z) position for this coordinate.
     double xr =
-      nodes[elements[imap].emap[0]].xmap * (-(1 - td1) * (1 - td2) * (1 + td1 + td2)) / 4 +
-      nodes[elements[imap].emap[1]].xmap * (-(1 + td1) * (1 - td2) * (1 - td1 + td2)) / 4 +
-      nodes[elements[imap].emap[2]].xmap * (-(1 + td1) * (1 + td2) * (1 - td1 - td2)) / 4 +
-      nodes[elements[imap].emap[3]].xmap * (-(1 - td1) * (1 + td2) * (1 + td1 - td2)) / 4 +
-      nodes[elements[imap].emap[4]].xmap * (1 - td1) * (1 + td1) * (1 - td2) / 2 +
-      nodes[elements[imap].emap[5]].xmap * (1 + td1) * (1 + td2) * (1 - td2) / 2 +
-      nodes[elements[imap].emap[6]].xmap * (1 - td1) * (1 + td1) * (1 + td2) / 2 +
-      nodes[elements[imap].emap[7]].xmap * (1 - td1) * (1 + td2) * (1 - td2) / 2;
+      nodes[elements[imap].emap[0]].x * (-(1 - td1) * (1 - td2) * (1 + td1 + td2)) / 4 +
+      nodes[elements[imap].emap[1]].x * (-(1 + td1) * (1 - td2) * (1 - td1 + td2)) / 4 +
+      nodes[elements[imap].emap[2]].x * (-(1 + td1) * (1 + td2) * (1 - td1 - td2)) / 4 +
+      nodes[elements[imap].emap[3]].x * (-(1 - td1) * (1 + td2) * (1 + td1 - td2)) / 4 +
+      nodes[elements[imap].emap[4]].x * (1 - td1) * (1 + td1) * (1 - td2) / 2 +
+      nodes[elements[imap].emap[5]].x * (1 + td1) * (1 + td2) * (1 - td2) / 2 +
+      nodes[elements[imap].emap[6]].x * (1 - td1) * (1 + td1) * (1 + td2) / 2 +
+      nodes[elements[imap].emap[7]].x * (1 - td1) * (1 + td2) * (1 - td2) / 2;
     double yr =
-      nodes[elements[imap].emap[0]].ymap * (-(1 - td1) * (1 - td2) * (1 + td1 + td2)) / 4 +
-      nodes[elements[imap].emap[1]].ymap * (-(1 + td1) * (1 - td2) * (1 - td1 + td2)) / 4 +
-      nodes[elements[imap].emap[2]].ymap * (-(1 + td1) * (1 + td2) * (1 - td1 - td2)) / 4 +
-      nodes[elements[imap].emap[3]].ymap * (-(1 - td1) * (1 + td2) * (1 + td1 - td2)) / 4 +
-      nodes[elements[imap].emap[4]].ymap * (1 - td1) * (1 + td1) * (1 - td2) / 2 +
-      nodes[elements[imap].emap[5]].ymap * (1 + td1) * (1 + td2) * (1 - td2) / 2 +
-      nodes[elements[imap].emap[6]].ymap * (1 - td1) * (1 + td1) * (1 + td2) / 2 +
-      nodes[elements[imap].emap[7]].ymap * (1 - td1) * (1 + td2) * (1 - td2) / 2;
+      nodes[elements[imap].emap[0]].y * (-(1 - td1) * (1 - td2) * (1 + td1 + td2)) / 4 +
+      nodes[elements[imap].emap[1]].y * (-(1 + td1) * (1 - td2) * (1 - td1 + td2)) / 4 +
+      nodes[elements[imap].emap[2]].y * (-(1 + td1) * (1 + td2) * (1 - td1 - td2)) / 4 +
+      nodes[elements[imap].emap[3]].y * (-(1 - td1) * (1 + td2) * (1 + td1 - td2)) / 4 +
+      nodes[elements[imap].emap[4]].y * (1 - td1) * (1 + td1) * (1 - td2) / 2 +
+      nodes[elements[imap].emap[5]].y * (1 + td1) * (1 + td2) * (1 - td2) / 2 +
+      nodes[elements[imap].emap[6]].y * (1 - td1) * (1 + td1) * (1 + td2) / 2 +
+      nodes[elements[imap].emap[7]].y * (1 - td1) * (1 + td2) * (1 - td2) / 2;
     // Compute the Jacobian.
     Jacobian5(imap, td1, td2, det, jac);
     // Compute the difference vector.
@@ -1548,38 +1581,38 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
   // No convergence reached.
   if (!converged) {
     double xmin, ymin, xmax, ymax;
-    xmin = nodes[elements[imap].emap[0]].xmap;
-    xmax = nodes[elements[imap].emap[0]].xmap;
-    if (nodes[elements[imap].emap[1]].xmap < xmin) {xmin = nodes[elements[imap].emap[1]].xmap;} 
-    if (nodes[elements[imap].emap[1]].xmap > xmax) {xmax = nodes[elements[imap].emap[1]].xmap;}
-    if (nodes[elements[imap].emap[2]].xmap < xmin) {xmin = nodes[elements[imap].emap[2]].xmap;} 
-    if (nodes[elements[imap].emap[2]].xmap > xmax) {xmax = nodes[elements[imap].emap[2]].xmap;}
-    if (nodes[elements[imap].emap[3]].xmap < xmin) {xmin = nodes[elements[imap].emap[3]].xmap;} 
-    if (nodes[elements[imap].emap[3]].xmap > xmax) {xmax = nodes[elements[imap].emap[3]].xmap;}
-    if (nodes[elements[imap].emap[4]].xmap < xmin) {xmin = nodes[elements[imap].emap[4]].xmap;} 
-    if (nodes[elements[imap].emap[4]].xmap > xmax) {xmax = nodes[elements[imap].emap[4]].xmap;}
-    if (nodes[elements[imap].emap[5]].xmap < xmin) {xmin = nodes[elements[imap].emap[5]].xmap;} 
-    if (nodes[elements[imap].emap[5]].xmap > xmax) {xmax = nodes[elements[imap].emap[5]].xmap;}
-    if (nodes[elements[imap].emap[6]].xmap < xmin) {xmin = nodes[elements[imap].emap[6]].xmap;} 
-    if (nodes[elements[imap].emap[6]].xmap > xmax) {xmax = nodes[elements[imap].emap[6]].xmap;}
-    if (nodes[elements[imap].emap[7]].xmap < xmin) {xmin = nodes[elements[imap].emap[7]].xmap;} 
-    if (nodes[elements[imap].emap[7]].xmap > xmax) {xmax = nodes[elements[imap].emap[7]].xmap;}
-    ymin = nodes[elements[imap].emap[0]].ymap;
-    ymax = nodes[elements[imap].emap[0]].ymap;
-    if (nodes[elements[imap].emap[1]].ymap < ymin) {ymin = nodes[elements[imap].emap[1]].ymap;} 
-    if (nodes[elements[imap].emap[1]].ymap > ymax) {ymax = nodes[elements[imap].emap[1]].ymap;}
-    if (nodes[elements[imap].emap[2]].ymap < ymin) {ymin = nodes[elements[imap].emap[2]].ymap;} 
-    if (nodes[elements[imap].emap[2]].ymap > ymax) {ymax = nodes[elements[imap].emap[2]].ymap;}
-    if (nodes[elements[imap].emap[3]].ymap < ymin) {ymin = nodes[elements[imap].emap[3]].ymap;} 
-    if (nodes[elements[imap].emap[3]].ymap > ymax) {ymax = nodes[elements[imap].emap[3]].ymap;}
-    if (nodes[elements[imap].emap[4]].ymap < ymin) {ymin = nodes[elements[imap].emap[4]].ymap;} 
-    if (nodes[elements[imap].emap[4]].ymap > ymax) {ymax = nodes[elements[imap].emap[4]].ymap;}
-    if (nodes[elements[imap].emap[5]].ymap < ymin) {ymin = nodes[elements[imap].emap[5]].ymap;} 
-    if (nodes[elements[imap].emap[5]].ymap > ymax) {ymax = nodes[elements[imap].emap[5]].ymap;}
-    if (nodes[elements[imap].emap[6]].ymap < ymin) {ymin = nodes[elements[imap].emap[6]].ymap;} 
-    if (nodes[elements[imap].emap[6]].ymap > ymax) {ymax = nodes[elements[imap].emap[6]].ymap;}
-    if (nodes[elements[imap].emap[7]].ymap < ymin) {ymin = nodes[elements[imap].emap[7]].ymap;} 
-    if (nodes[elements[imap].emap[7]].ymap > ymax) {ymax = nodes[elements[imap].emap[7]].ymap;}
+    xmin = nodes[elements[imap].emap[0]].x;
+    xmax = nodes[elements[imap].emap[0]].x;
+    if (nodes[elements[imap].emap[1]].x < xmin) {xmin = nodes[elements[imap].emap[1]].x;} 
+    if (nodes[elements[imap].emap[1]].x > xmax) {xmax = nodes[elements[imap].emap[1]].x;}
+    if (nodes[elements[imap].emap[2]].x < xmin) {xmin = nodes[elements[imap].emap[2]].x;} 
+    if (nodes[elements[imap].emap[2]].x > xmax) {xmax = nodes[elements[imap].emap[2]].x;}
+    if (nodes[elements[imap].emap[3]].x < xmin) {xmin = nodes[elements[imap].emap[3]].x;} 
+    if (nodes[elements[imap].emap[3]].x > xmax) {xmax = nodes[elements[imap].emap[3]].x;}
+    if (nodes[elements[imap].emap[4]].x < xmin) {xmin = nodes[elements[imap].emap[4]].x;} 
+    if (nodes[elements[imap].emap[4]].x > xmax) {xmax = nodes[elements[imap].emap[4]].x;}
+    if (nodes[elements[imap].emap[5]].x < xmin) {xmin = nodes[elements[imap].emap[5]].x;} 
+    if (nodes[elements[imap].emap[5]].x > xmax) {xmax = nodes[elements[imap].emap[5]].x;}
+    if (nodes[elements[imap].emap[6]].x < xmin) {xmin = nodes[elements[imap].emap[6]].x;} 
+    if (nodes[elements[imap].emap[6]].x > xmax) {xmax = nodes[elements[imap].emap[6]].x;}
+    if (nodes[elements[imap].emap[7]].x < xmin) {xmin = nodes[elements[imap].emap[7]].x;} 
+    if (nodes[elements[imap].emap[7]].x > xmax) {xmax = nodes[elements[imap].emap[7]].x;}
+    ymin = nodes[elements[imap].emap[0]].y;
+    ymax = nodes[elements[imap].emap[0]].y;
+    if (nodes[elements[imap].emap[1]].y < ymin) {ymin = nodes[elements[imap].emap[1]].y;} 
+    if (nodes[elements[imap].emap[1]].y > ymax) {ymax = nodes[elements[imap].emap[1]].y;}
+    if (nodes[elements[imap].emap[2]].y < ymin) {ymin = nodes[elements[imap].emap[2]].y;} 
+    if (nodes[elements[imap].emap[2]].y > ymax) {ymax = nodes[elements[imap].emap[2]].y;}
+    if (nodes[elements[imap].emap[3]].y < ymin) {ymin = nodes[elements[imap].emap[3]].y;} 
+    if (nodes[elements[imap].emap[3]].y > ymax) {ymax = nodes[elements[imap].emap[3]].y;}
+    if (nodes[elements[imap].emap[4]].y < ymin) {ymin = nodes[elements[imap].emap[4]].y;} 
+    if (nodes[elements[imap].emap[4]].y > ymax) {ymax = nodes[elements[imap].emap[4]].y;}
+    if (nodes[elements[imap].emap[5]].y < ymin) {ymin = nodes[elements[imap].emap[5]].y;} 
+    if (nodes[elements[imap].emap[5]].y > ymax) {ymax = nodes[elements[imap].emap[5]].y;}
+    if (nodes[elements[imap].emap[6]].y < ymin) {ymin = nodes[elements[imap].emap[6]].y;} 
+    if (nodes[elements[imap].emap[6]].y > ymax) {ymax = nodes[elements[imap].emap[6]].y;}
+    if (nodes[elements[imap].emap[7]].y < ymin) {ymin = nodes[elements[imap].emap[7]].y;} 
+    if (nodes[elements[imap].emap[7]].y > ymax) {ymax = nodes[elements[imap].emap[7]].y;}
 
     if (x >= xmin && x <= xmax && y >= ymin && y <= ymax) {
       printf("ComponentFieldMap::Coordinates5:\n");
@@ -1603,23 +1636,23 @@ ComponentFieldMap::Coordinates5(double x, double y, double z,
   // For debugging purposes, show position.
   if (debug) {
     double xr =
-      nodes[elements[imap].emap[0]].xmap * (-(1 - t1) * (1 - t2) * (1 + t1 + t2)) / 4 +
-      nodes[elements[imap].emap[1]].xmap * (-(1 + t1) * (1 - t2) * (1 - t1 + t2)) / 4 +
-      nodes[elements[imap].emap[2]].xmap * (-(1 + t1) * (1 + t2) * (1 - t1 - t2)) / 4 +
-      nodes[elements[imap].emap[3]].xmap * (-(1 - t1) * (1 + t2) * (1 + t1 - t2)) / 4 +
-      nodes[elements[imap].emap[4]].xmap * (1 - t1) * (1 + t1) * (1 - t2) / 2 + 
-      nodes[elements[imap].emap[5]].xmap * (1 + t1) * (1 + t2) * (1 - t2) / 2 + 
-      nodes[elements[imap].emap[6]].xmap * (1 - t1) * (1 + t1) * (1 + t2) / 2 + 
-      nodes[elements[imap].emap[7]].xmap * (1 - t1) * (1 + t2) * (1 - t2) / 2;
+      nodes[elements[imap].emap[0]].x * (-(1 - t1) * (1 - t2) * (1 + t1 + t2)) / 4 +
+      nodes[elements[imap].emap[1]].x * (-(1 + t1) * (1 - t2) * (1 - t1 + t2)) / 4 +
+      nodes[elements[imap].emap[2]].x * (-(1 + t1) * (1 + t2) * (1 - t1 - t2)) / 4 +
+      nodes[elements[imap].emap[3]].x * (-(1 - t1) * (1 + t2) * (1 + t1 - t2)) / 4 +
+      nodes[elements[imap].emap[4]].x * (1 - t1) * (1 + t1) * (1 - t2) / 2 + 
+      nodes[elements[imap].emap[5]].x * (1 + t1) * (1 + t2) * (1 - t2) / 2 + 
+      nodes[elements[imap].emap[6]].x * (1 - t1) * (1 + t1) * (1 + t2) / 2 + 
+      nodes[elements[imap].emap[7]].x * (1 - t1) * (1 + t2) * (1 - t2) / 2;
     double yr=
-      nodes[elements[imap].emap[0]].ymap * (-(1 - t1) * (1 - t2) * (1 + t1 + t2)) / 4 +
-      nodes[elements[imap].emap[1]].ymap * (-(1 + t1) * (1 - t2) * (1 - t1 + t2)) / 4 +
-      nodes[elements[imap].emap[2]].ymap * (-(1 + t1) * (1 + t2) * (1 - t1 - t2)) / 4 +
-      nodes[elements[imap].emap[3]].ymap * (-(1 - t1) * (1 + t2) * (1 + t1 - t2)) / 4 +
-      nodes[elements[imap].emap[4]].ymap * (  1 - t1) * (1 + t1) * (1 - t2) / 2 + 
-      nodes[elements[imap].emap[5]].ymap * (  1 + t1) * (1 + t2) * (1 - t2) / 2 + 
-      nodes[elements[imap].emap[6]].ymap * (  1 - t1) * (1 + t1) * (1 + t2) / 2 + 
-      nodes[elements[imap].emap[7]].ymap * (  1 - t1) * (1 + t2) * (1 - t2) / 2;
+      nodes[elements[imap].emap[0]].y * (-(1 - t1) * (1 - t2) * (1 + t1 + t2)) / 4 +
+      nodes[elements[imap].emap[1]].y * (-(1 + t1) * (1 - t2) * (1 - t1 + t2)) / 4 +
+      nodes[elements[imap].emap[2]].y * (-(1 + t1) * (1 + t2) * (1 - t1 - t2)) / 4 +
+      nodes[elements[imap].emap[3]].y * (-(1 - t1) * (1 + t2) * (1 + t1 - t2)) / 4 +
+      nodes[elements[imap].emap[4]].y * (  1 - t1) * (1 + t1) * (1 - t2) / 2 + 
+      nodes[elements[imap].emap[5]].y * (  1 + t1) * (1 + t2) * (1 - t2) / 2 + 
+      nodes[elements[imap].emap[6]].y * (  1 - t1) * (1 + t1) * (1 + t2) / 2 + 
+      nodes[elements[imap].emap[7]].y * (  1 - t1) * (1 + t2) * (1 - t2) / 2;
     printf("ComponentFieldMap::Coordinates5:\n");
     printf("    Position requested:     (%g,%g),\n", x, y);
     printf("    Reconstructed:          (%g,%g),\n", xr, yr);
@@ -1648,54 +1681,54 @@ ComponentFieldMap::Coordinates12(double x, double y, double z,
   int ifail = 1;
   
   // Compute tetrahedral coordinates.
-  t1 = (x - nodes[elements[imap].emap[1]].xmap) * ((nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[1]].ymap) * (nodes[elements[imap].emap[3]].zmap - nodes[elements[imap].emap[1]].zmap) - 
-                                                   (nodes[elements[imap].emap[3]].ymap - nodes[elements[imap].emap[1]].ymap) * (nodes[elements[imap].emap[2]].zmap - nodes[elements[imap].emap[1]].zmap)) +            
-       (y - nodes[elements[imap].emap[1]].ymap) * ((nodes[elements[imap].emap[2]].zmap - nodes[elements[imap].emap[1]].zmap) * (nodes[elements[imap].emap[3]].xmap - nodes[elements[imap].emap[1]].xmap) - 
-                                                   (nodes[elements[imap].emap[3]].zmap - nodes[elements[imap].emap[1]].zmap) * (nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[1]].xmap)) + 
-       (z - nodes[elements[imap].emap[1]].zmap) * ((nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[1]].xmap) * (nodes[elements[imap].emap[3]].ymap - nodes[elements[imap].emap[1]].ymap) - 
-                                                   (nodes[elements[imap].emap[3]].xmap - nodes[elements[imap].emap[1]].xmap) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[1]].ymap));
-  t2 = (x - nodes[elements[imap].emap[2]].xmap) * ((nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[2]].ymap) * (nodes[elements[imap].emap[3]].zmap - nodes[elements[imap].emap[2]].zmap) - 
-                                                   (nodes[elements[imap].emap[3]].ymap - nodes[elements[imap].emap[2]].ymap) * (nodes[elements[imap].emap[0]].zmap - nodes[elements[imap].emap[2]].zmap)) + 
-       (y - nodes[elements[imap].emap[2]].ymap) * ((nodes[elements[imap].emap[0]].zmap - nodes[elements[imap].emap[2]].zmap) * (nodes[elements[imap].emap[3]].xmap - nodes[elements[imap].emap[2]].xmap) - 
-                                                   (nodes[elements[imap].emap[3]].zmap - nodes[elements[imap].emap[2]].zmap) * (nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[2]].xmap)) + 
-       (z - nodes[elements[imap].emap[2]].zmap) * ((nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[2]].xmap) * (nodes[elements[imap].emap[3]].ymap - nodes[elements[imap].emap[2]].ymap) - 
-                                                   (nodes[elements[imap].emap[3]].xmap - nodes[elements[imap].emap[2]].xmap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[2]].ymap));
-  t3 = (x - nodes[elements[imap].emap[3]].xmap) * ((nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[3]].ymap) * (nodes[elements[imap].emap[1]].zmap - nodes[elements[imap].emap[3]].zmap) - 
-                                                   (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[3]].ymap) * (nodes[elements[imap].emap[0]].zmap - nodes[elements[imap].emap[3]].zmap)) + 
-       (y - nodes[elements[imap].emap[3]].ymap) * ((nodes[elements[imap].emap[0]].zmap - nodes[elements[imap].emap[3]].zmap) * (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[3]].xmap) - 
-                                                   (nodes[elements[imap].emap[1]].zmap - nodes[elements[imap].emap[3]].zmap) * (nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[3]].xmap)) + 
-       (z - nodes[elements[imap].emap[3]].zmap) * ((nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[3]].xmap) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[3]].ymap) - 
-                                                   (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[3]].xmap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[3]].ymap));
-  t4 = (x - nodes[elements[imap].emap[0]].xmap) * ((nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[0]].ymap) * (nodes[elements[imap].emap[1]].zmap - nodes[elements[imap].emap[0]].zmap) - 
-                                                   (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[0]].ymap) * (nodes[elements[imap].emap[2]].zmap - nodes[elements[imap].emap[0]].zmap)) + 
-       (y - nodes[elements[imap].emap[0]].ymap) * ((nodes[elements[imap].emap[2]].zmap - nodes[elements[imap].emap[0]].zmap) * (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap) - 
-                                                   (nodes[elements[imap].emap[1]].zmap - nodes[elements[imap].emap[0]].zmap) * (nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[0]].xmap)) +                                            
-       (z - nodes[elements[imap].emap[0]].zmap) * ((nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[0]].xmap) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[0]].ymap) - 
-                                                   (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[0]].ymap));
-  t1 = t1 / ((nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[1]].xmap) * ((nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[1]].ymap) * (nodes[elements[imap].emap[3]].zmap - nodes[elements[imap].emap[1]].zmap) - 
-             (nodes[elements[imap].emap[3]].ymap - nodes[elements[imap].emap[1]].ymap) * (nodes[elements[imap].emap[2]].zmap - nodes[elements[imap].emap[1]].zmap)) + 
-             (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[1]].ymap) * ((nodes[elements[imap].emap[2]].zmap - nodes[elements[imap].emap[1]].zmap) * (nodes[elements[imap].emap[3]].xmap - nodes[elements[imap].emap[1]].xmap) - 
-             (nodes[elements[imap].emap[3]].zmap - nodes[elements[imap].emap[1]].zmap) * (nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[1]].xmap)) + 
-             (nodes[elements[imap].emap[0]].zmap - nodes[elements[imap].emap[1]].zmap) * ((nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[1]].xmap) * (nodes[elements[imap].emap[3]].ymap - nodes[elements[imap].emap[1]].ymap) - 
-             (nodes[elements[imap].emap[3]].xmap - nodes[elements[imap].emap[1]].xmap) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[1]].ymap)));
-  t2 = t2 / ((nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[2]].xmap) * ((nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[2]].ymap) * (nodes[elements[imap].emap[3]].zmap - nodes[elements[imap].emap[2]].zmap) - 
-             (nodes[elements[imap].emap[3]].ymap - nodes[elements[imap].emap[2]].ymap) * (nodes[elements[imap].emap[0]].zmap - nodes[elements[imap].emap[2]].zmap)) + 
-             (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[2]].ymap) * ((nodes[elements[imap].emap[0]].zmap - nodes[elements[imap].emap[2]].zmap) * (nodes[elements[imap].emap[3]].xmap - nodes[elements[imap].emap[2]].xmap) - 
-             (nodes[elements[imap].emap[3]].zmap - nodes[elements[imap].emap[2]].zmap) * (nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[2]].xmap)) + 
-             (nodes[elements[imap].emap[1]].zmap - nodes[elements[imap].emap[2]].zmap) * ((nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[2]].xmap) * (nodes[elements[imap].emap[3]].ymap - nodes[elements[imap].emap[2]].ymap) - 
-             (nodes[elements[imap].emap[3]].xmap - nodes[elements[imap].emap[2]].xmap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[2]].ymap)));
-  t3 = t3 / ((nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[3]].xmap) * ((nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[3]].ymap) * (nodes[elements[imap].emap[1]].zmap - nodes[elements[imap].emap[3]].zmap) - 
-             (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[3]].ymap) * (nodes[elements[imap].emap[0]].zmap - nodes[elements[imap].emap[3]].zmap)) + 
-             (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[3]].ymap) * ((nodes[elements[imap].emap[0]].zmap - nodes[elements[imap].emap[3]].zmap) * (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[3]].xmap) - 
-             (nodes[elements[imap].emap[1]].zmap - nodes[elements[imap].emap[3]].zmap) * (nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[3]].xmap)) + 
-             (nodes[elements[imap].emap[2]].zmap - nodes[elements[imap].emap[3]].zmap) * ((nodes[elements[imap].emap[0]].xmap - nodes[elements[imap].emap[3]].xmap) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[3]].ymap) - 
-             (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[3]].xmap) * (nodes[elements[imap].emap[0]].ymap - nodes[elements[imap].emap[3]].ymap)));
-  t4 = t4 / ((nodes[elements[imap].emap[3]].xmap - nodes[elements[imap].emap[0]].xmap) * ((nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[0]].ymap) * (nodes[elements[imap].emap[1]].zmap - nodes[elements[imap].emap[0]].zmap) - 
-             (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[0]].ymap) * (nodes[elements[imap].emap[2]].zmap - nodes[elements[imap].emap[0]].zmap)) + 
-             (nodes[elements[imap].emap[3]].ymap - nodes[elements[imap].emap[0]].ymap) * ((nodes[elements[imap].emap[2]].zmap - nodes[elements[imap].emap[0]].zmap) * (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap) - 
-             (nodes[elements[imap].emap[1]].zmap - nodes[elements[imap].emap[0]].zmap) * (nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[0]].xmap)) + 
-             (nodes[elements[imap].emap[3]].zmap - nodes[elements[imap].emap[0]].zmap) * ((nodes[elements[imap].emap[2]].xmap - nodes[elements[imap].emap[0]].xmap) * (nodes[elements[imap].emap[1]].ymap - nodes[elements[imap].emap[0]].ymap) - 
-             (nodes[elements[imap].emap[1]].xmap - nodes[elements[imap].emap[0]].xmap) * (nodes[elements[imap].emap[2]].ymap - nodes[elements[imap].emap[0]].ymap)));
+  t1 = (x - nodes[elements[imap].emap[1]].x) * ((nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[1]].y) * (nodes[elements[imap].emap[3]].z - nodes[elements[imap].emap[1]].z) - 
+                                                (nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[1]].y) * (nodes[elements[imap].emap[2]].z - nodes[elements[imap].emap[1]].z)) +            
+       (y - nodes[elements[imap].emap[1]].y) * ((nodes[elements[imap].emap[2]].z - nodes[elements[imap].emap[1]].z) * (nodes[elements[imap].emap[3]].x - nodes[elements[imap].emap[1]].x) - 
+                                                (nodes[elements[imap].emap[3]].z - nodes[elements[imap].emap[1]].z) * (nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[1]].x)) + 
+       (z - nodes[elements[imap].emap[1]].z) * ((nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[1]].x) * (nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[1]].y) - 
+                                                (nodes[elements[imap].emap[3]].x - nodes[elements[imap].emap[1]].x) * (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[1]].y));
+  t2 = (x - nodes[elements[imap].emap[2]].x) * ((nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[2]].y) * (nodes[elements[imap].emap[3]].z - nodes[elements[imap].emap[2]].z) - 
+                                                (nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[2]].y) * (nodes[elements[imap].emap[0]].z - nodes[elements[imap].emap[2]].z)) + 
+       (y - nodes[elements[imap].emap[2]].y) * ((nodes[elements[imap].emap[0]].z - nodes[elements[imap].emap[2]].z) * (nodes[elements[imap].emap[3]].x - nodes[elements[imap].emap[2]].x) - 
+                                                (nodes[elements[imap].emap[3]].z - nodes[elements[imap].emap[2]].z) * (nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[2]].x)) + 
+       (z - nodes[elements[imap].emap[2]].z) * ((nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[2]].x) * (nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[2]].y) - 
+                                                (nodes[elements[imap].emap[3]].x - nodes[elements[imap].emap[2]].x) * (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[2]].y));
+  t3 = (x - nodes[elements[imap].emap[3]].x) * ((nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[3]].y) * (nodes[elements[imap].emap[1]].z - nodes[elements[imap].emap[3]].z) - 
+                                                (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[3]].y) * (nodes[elements[imap].emap[0]].z - nodes[elements[imap].emap[3]].z)) + 
+       (y - nodes[elements[imap].emap[3]].y) * ((nodes[elements[imap].emap[0]].z - nodes[elements[imap].emap[3]].z) * (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[3]].x) - 
+                                                (nodes[elements[imap].emap[1]].z - nodes[elements[imap].emap[3]].z) * (nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[3]].x)) + 
+       (z - nodes[elements[imap].emap[3]].z) * ((nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[3]].x) * (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[3]].y) - 
+                                                (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[3]].x) * (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[3]].y));
+  t4 = (x - nodes[elements[imap].emap[0]].x) * ((nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[0]].y) * (nodes[elements[imap].emap[1]].z - nodes[elements[imap].emap[0]].z) - 
+                                                (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[0]].y) * (nodes[elements[imap].emap[2]].z - nodes[elements[imap].emap[0]].z)) + 
+       (y - nodes[elements[imap].emap[0]].y) * ((nodes[elements[imap].emap[2]].z - nodes[elements[imap].emap[0]].z) * (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[0]].x) - 
+                                                (nodes[elements[imap].emap[1]].z - nodes[elements[imap].emap[0]].z) * (nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[0]].x)) +                                            
+       (z - nodes[elements[imap].emap[0]].z) * ((nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[0]].x) * (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[0]].y) - 
+                                                (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[0]].x) * (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[0]].y));
+  t1 = t1 / ((nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[1]].x) * ((nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[1]].y) * (nodes[elements[imap].emap[3]].z - nodes[elements[imap].emap[1]].z) - 
+             (nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[1]].y) * (nodes[elements[imap].emap[2]].z - nodes[elements[imap].emap[1]].z)) + 
+             (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[1]].y) * ((nodes[elements[imap].emap[2]].z - nodes[elements[imap].emap[1]].z) * (nodes[elements[imap].emap[3]].x - nodes[elements[imap].emap[1]].x) - 
+             (nodes[elements[imap].emap[3]].z - nodes[elements[imap].emap[1]].z) * (nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[1]].x)) + 
+             (nodes[elements[imap].emap[0]].z - nodes[elements[imap].emap[1]].z) * ((nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[1]].x) * (nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[1]].y) - 
+             (nodes[elements[imap].emap[3]].x - nodes[elements[imap].emap[1]].x) * (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[1]].y)));
+  t2 = t2 / ((nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[2]].x) * ((nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[2]].y) * (nodes[elements[imap].emap[3]].z - nodes[elements[imap].emap[2]].z) - 
+             (nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[2]].y) * (nodes[elements[imap].emap[0]].z - nodes[elements[imap].emap[2]].z)) + 
+             (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[2]].y) * ((nodes[elements[imap].emap[0]].z - nodes[elements[imap].emap[2]].z) * (nodes[elements[imap].emap[3]].x - nodes[elements[imap].emap[2]].x) - 
+             (nodes[elements[imap].emap[3]].z - nodes[elements[imap].emap[2]].z) * (nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[2]].x)) + 
+             (nodes[elements[imap].emap[1]].z - nodes[elements[imap].emap[2]].z) * ((nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[2]].x) * (nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[2]].y) - 
+             (nodes[elements[imap].emap[3]].x - nodes[elements[imap].emap[2]].x) * (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[2]].y)));
+  t3 = t3 / ((nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[3]].x) * ((nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[3]].y) * (nodes[elements[imap].emap[1]].z - nodes[elements[imap].emap[3]].z) - 
+             (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[3]].y) * (nodes[elements[imap].emap[0]].z - nodes[elements[imap].emap[3]].z)) + 
+             (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[3]].y) * ((nodes[elements[imap].emap[0]].z - nodes[elements[imap].emap[3]].z) * (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[3]].x) - 
+             (nodes[elements[imap].emap[1]].z - nodes[elements[imap].emap[3]].z) * (nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[3]].x)) + 
+             (nodes[elements[imap].emap[2]].z - nodes[elements[imap].emap[3]].z) * ((nodes[elements[imap].emap[0]].x - nodes[elements[imap].emap[3]].x) * (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[3]].y) - 
+             (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[3]].x) * (nodes[elements[imap].emap[0]].y - nodes[elements[imap].emap[3]].y)));
+  t4 = t4 / ((nodes[elements[imap].emap[3]].x - nodes[elements[imap].emap[0]].x) * ((nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[0]].y) * (nodes[elements[imap].emap[1]].z - nodes[elements[imap].emap[0]].z) - 
+             (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[0]].y) * (nodes[elements[imap].emap[2]].z - nodes[elements[imap].emap[0]].z)) + 
+             (nodes[elements[imap].emap[3]].y - nodes[elements[imap].emap[0]].y) * ((nodes[elements[imap].emap[2]].z - nodes[elements[imap].emap[0]].z) * (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[0]].x) - 
+             (nodes[elements[imap].emap[1]].z - nodes[elements[imap].emap[0]].z) * (nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[0]].x)) + 
+             (nodes[elements[imap].emap[3]].z - nodes[elements[imap].emap[0]].z) * ((nodes[elements[imap].emap[2]].x - nodes[elements[imap].emap[0]].x) * (nodes[elements[imap].emap[1]].y - nodes[elements[imap].emap[0]].y) - 
+             (nodes[elements[imap].emap[1]].x - nodes[elements[imap].emap[0]].x) * (nodes[elements[imap].emap[2]].y - nodes[elements[imap].emap[0]].y)));
 
   // Result
   if (debug) {
@@ -1706,20 +1739,20 @@ ComponentFieldMap::Coordinates12(double x, double y, double z,
   // Re-compute the (x,y,z) position for this coordinate.
   if (debug) {
     double xr = 
-      nodes[elements[imap].emap[0]].xmap * t1 + 
-      nodes[elements[imap].emap[1]].xmap * t2 + 
-      nodes[elements[imap].emap[2]].xmap * t3 +
-      nodes[elements[imap].emap[3]].xmap * t4;
+      nodes[elements[imap].emap[0]].x * t1 + 
+      nodes[elements[imap].emap[1]].x * t2 + 
+      nodes[elements[imap].emap[2]].x * t3 +
+      nodes[elements[imap].emap[3]].x * t4;
     double yr =
-      nodes[elements[imap].emap[0]].ymap * t1 + 
-      nodes[elements[imap].emap[1]].ymap * t2 + 
-      nodes[elements[imap].emap[2]].ymap * t3 +
-      nodes[elements[imap].emap[3]].ymap * t4;
+      nodes[elements[imap].emap[0]].y * t1 + 
+      nodes[elements[imap].emap[1]].y * t2 + 
+      nodes[elements[imap].emap[2]].y * t3 +
+      nodes[elements[imap].emap[3]].y * t4;
     double zr =
-      nodes[elements[imap].emap[0]].zmap * t1 + 
-      nodes[elements[imap].emap[1]].zmap * t2 + 
-      nodes[elements[imap].emap[2]].zmap * t3 +
-      nodes[elements[imap].emap[3]].zmap * t4;
+      nodes[elements[imap].emap[0]].z * t1 + 
+      nodes[elements[imap].emap[1]].z * t2 + 
+      nodes[elements[imap].emap[2]].z * t3 +
+      nodes[elements[imap].emap[3]].z * t4;
     double sr = t1 + t2 + t3 + t4;
     printf("ComponentFieldMap::Coordinates12:\n");
     printf("    Position requested:     (%g,%g,%g)\n", x, y, z);
@@ -1793,38 +1826,38 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
     }
     // Re-compute the (x,y,z) position for this coordinate.
     double xr = 
-      nodes[elements[imap].emap[0]].xmap * td1 * (2 * td1 - 1) +
-      nodes[elements[imap].emap[1]].xmap * td2 * (2 * td2 - 1) +
-      nodes[elements[imap].emap[2]].xmap * td3 * (2 * td3 - 1) +
-      nodes[elements[imap].emap[3]].xmap * td4 * (2 * td4 - 1) +
-      nodes[elements[imap].emap[4]].xmap * 4 * td1 * td2 +
-      nodes[elements[imap].emap[5]].xmap * 4 * td1 * td3 +
-      nodes[elements[imap].emap[6]].xmap * 4 * td1 * td4 +
-      nodes[elements[imap].emap[7]].xmap * 4 * td2 * td3 +
-      nodes[elements[imap].emap[8]].xmap * 4 * td2 * td4 +
-      nodes[elements[imap].emap[9]].xmap * 4 * td3 * td4;
+      nodes[elements[imap].emap[0]].x * td1 * (2 * td1 - 1) +
+      nodes[elements[imap].emap[1]].x * td2 * (2 * td2 - 1) +
+      nodes[elements[imap].emap[2]].x * td3 * (2 * td3 - 1) +
+      nodes[elements[imap].emap[3]].x * td4 * (2 * td4 - 1) +
+      nodes[elements[imap].emap[4]].x * 4 * td1 * td2 +
+      nodes[elements[imap].emap[5]].x * 4 * td1 * td3 +
+      nodes[elements[imap].emap[6]].x * 4 * td1 * td4 +
+      nodes[elements[imap].emap[7]].x * 4 * td2 * td3 +
+      nodes[elements[imap].emap[8]].x * 4 * td2 * td4 +
+      nodes[elements[imap].emap[9]].x * 4 * td3 * td4;
     double yr = 
-      nodes[elements[imap].emap[0]].ymap * td1 * (2 * td1 - 1) + 
-      nodes[elements[imap].emap[1]].ymap * td2 * (2 * td2 - 1) + 
-      nodes[elements[imap].emap[2]].ymap * td3 * (2 * td3 - 1) + 
-      nodes[elements[imap].emap[3]].ymap * td4 * (2 * td4 - 1) + 
-      nodes[elements[imap].emap[4]].ymap * 4 * td1 * td2 + 
-      nodes[elements[imap].emap[5]].ymap * 4 * td1 * td3 +
-      nodes[elements[imap].emap[6]].ymap * 4 * td1 * td4 +
-      nodes[elements[imap].emap[7]].ymap * 4 * td2 * td3 +
-      nodes[elements[imap].emap[8]].ymap * 4 * td2 * td4 +
-      nodes[elements[imap].emap[9]].ymap * 4 * td3 * td4;
+      nodes[elements[imap].emap[0]].y * td1 * (2 * td1 - 1) + 
+      nodes[elements[imap].emap[1]].y * td2 * (2 * td2 - 1) + 
+      nodes[elements[imap].emap[2]].y * td3 * (2 * td3 - 1) + 
+      nodes[elements[imap].emap[3]].y * td4 * (2 * td4 - 1) + 
+      nodes[elements[imap].emap[4]].y * 4 * td1 * td2 + 
+      nodes[elements[imap].emap[5]].y * 4 * td1 * td3 +
+      nodes[elements[imap].emap[6]].y * 4 * td1 * td4 +
+      nodes[elements[imap].emap[7]].y * 4 * td2 * td3 +
+      nodes[elements[imap].emap[8]].y * 4 * td2 * td4 +
+      nodes[elements[imap].emap[9]].y * 4 * td3 * td4;
     double zr = 
-      nodes[elements[imap].emap[0]].zmap * td1 * (2 * td1 - 1) +
-      nodes[elements[imap].emap[1]].zmap * td2 * (2 * td2 - 1) +
-      nodes[elements[imap].emap[2]].zmap * td3 * (2 * td3 - 1) +
-      nodes[elements[imap].emap[3]].zmap * td4 * (2 * td4 - 1) +
-      nodes[elements[imap].emap[4]].zmap * 4 * td1 * td2 +
-      nodes[elements[imap].emap[5]].zmap * 4 * td1 * td3 +
-      nodes[elements[imap].emap[6]].zmap * 4 * td1 * td4 +
-      nodes[elements[imap].emap[7]].zmap * 4 * td2 * td3 +
-      nodes[elements[imap].emap[8]].zmap * 4 * td2 * td4 +
-      nodes[elements[imap].emap[9]].zmap * 4 * td3 * td4;
+      nodes[elements[imap].emap[0]].z * td1 * (2 * td1 - 1) +
+      nodes[elements[imap].emap[1]].z * td2 * (2 * td2 - 1) +
+      nodes[elements[imap].emap[2]].z * td3 * (2 * td3 - 1) +
+      nodes[elements[imap].emap[3]].z * td4 * (2 * td4 - 1) +
+      nodes[elements[imap].emap[4]].z * 4 * td1 * td2 +
+      nodes[elements[imap].emap[5]].z * 4 * td1 * td3 +
+      nodes[elements[imap].emap[6]].z * 4 * td1 * td4 +
+      nodes[elements[imap].emap[7]].z * 4 * td2 * td3 +
+      nodes[elements[imap].emap[8]].z * 4 * td2 * td4 +
+      nodes[elements[imap].emap[9]].z * 4 * td3 * td4;
     double sr = td1 + td2 + td3 + td4;
 
     // Compute the Jacobian.
@@ -1873,30 +1906,30 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
   // No convergence reached.
   if (!converged) {
     double xmin, ymin, zmin, xmax, ymax, zmax;
-    xmin = nodes[elements[imap].emap[0]].xmap; 
-    xmax = nodes[elements[imap].emap[0]].xmap;
-    if (nodes[elements[imap].emap[1]].xmap < xmin) {xmin = nodes[elements[imap].emap[1]].xmap;} 
-    if (nodes[elements[imap].emap[1]].xmap > xmax) {xmax = nodes[elements[imap].emap[1]].xmap;}
-    if (nodes[elements[imap].emap[2]].xmap < xmin) {xmin = nodes[elements[imap].emap[2]].xmap;} 
-    if (nodes[elements[imap].emap[2]].xmap > xmax) {xmax = nodes[elements[imap].emap[2]].xmap;}
-    if (nodes[elements[imap].emap[3]].xmap < xmin) {xmin = nodes[elements[imap].emap[3]].xmap;} 
-    if (nodes[elements[imap].emap[3]].xmap > xmax) {xmax = nodes[elements[imap].emap[3]].xmap;}
-    ymin = nodes[elements[imap].emap[0]].ymap;
-    ymax = nodes[elements[imap].emap[0]].ymap;
-    if (nodes[elements[imap].emap[1]].ymap < ymin) {ymin = nodes[elements[imap].emap[1]].ymap;} 
-    if (nodes[elements[imap].emap[1]].ymap > ymax) {ymax = nodes[elements[imap].emap[1]].ymap;}
-    if (nodes[elements[imap].emap[2]].ymap < ymin) {ymin = nodes[elements[imap].emap[2]].ymap;} 
-    if (nodes[elements[imap].emap[2]].ymap > ymax) {ymax = nodes[elements[imap].emap[2]].ymap;}
-    if (nodes[elements[imap].emap[3]].ymap < ymin) {ymin = nodes[elements[imap].emap[3]].ymap;} 
-    if (nodes[elements[imap].emap[3]].ymap > ymax) {ymax = nodes[elements[imap].emap[3]].ymap;}
-    zmin = nodes[elements[imap].emap[0]].zmap;
-    zmax = nodes[elements[imap].emap[0]].zmap;
-    if (nodes[elements[imap].emap[1]].zmap < zmin) {zmin = nodes[elements[imap].emap[1]].zmap;}
-    if (nodes[elements[imap].emap[1]].zmap > zmax) {zmax = nodes[elements[imap].emap[1]].zmap;}
-    if (nodes[elements[imap].emap[2]].zmap < zmin) {zmin = nodes[elements[imap].emap[2]].zmap;}
-    if (nodes[elements[imap].emap[2]].zmap > zmax) {zmax = nodes[elements[imap].emap[2]].zmap;}
-    if (nodes[elements[imap].emap[3]].zmap < zmin) {zmin = nodes[elements[imap].emap[3]].zmap;}
-    if (nodes[elements[imap].emap[3]].zmap > zmax) {zmax = nodes[elements[imap].emap[3]].zmap;}
+    xmin = nodes[elements[imap].emap[0]].x; 
+    xmax = nodes[elements[imap].emap[0]].x;
+    if (nodes[elements[imap].emap[1]].x < xmin) {xmin = nodes[elements[imap].emap[1]].x;} 
+    if (nodes[elements[imap].emap[1]].x > xmax) {xmax = nodes[elements[imap].emap[1]].x;}
+    if (nodes[elements[imap].emap[2]].x < xmin) {xmin = nodes[elements[imap].emap[2]].x;} 
+    if (nodes[elements[imap].emap[2]].x > xmax) {xmax = nodes[elements[imap].emap[2]].x;}
+    if (nodes[elements[imap].emap[3]].x < xmin) {xmin = nodes[elements[imap].emap[3]].x;} 
+    if (nodes[elements[imap].emap[3]].x > xmax) {xmax = nodes[elements[imap].emap[3]].x;}
+    ymin = nodes[elements[imap].emap[0]].y;
+    ymax = nodes[elements[imap].emap[0]].y;
+    if (nodes[elements[imap].emap[1]].y < ymin) {ymin = nodes[elements[imap].emap[1]].y;} 
+    if (nodes[elements[imap].emap[1]].y > ymax) {ymax = nodes[elements[imap].emap[1]].y;}
+    if (nodes[elements[imap].emap[2]].y < ymin) {ymin = nodes[elements[imap].emap[2]].y;} 
+    if (nodes[elements[imap].emap[2]].y > ymax) {ymax = nodes[elements[imap].emap[2]].y;}
+    if (nodes[elements[imap].emap[3]].y < ymin) {ymin = nodes[elements[imap].emap[3]].y;} 
+    if (nodes[elements[imap].emap[3]].y > ymax) {ymax = nodes[elements[imap].emap[3]].y;}
+    zmin = nodes[elements[imap].emap[0]].z;
+    zmax = nodes[elements[imap].emap[0]].z;
+    if (nodes[elements[imap].emap[1]].z < zmin) {zmin = nodes[elements[imap].emap[1]].z;}
+    if (nodes[elements[imap].emap[1]].z > zmax) {zmax = nodes[elements[imap].emap[1]].z;}
+    if (nodes[elements[imap].emap[2]].z < zmin) {zmin = nodes[elements[imap].emap[2]].z;}
+    if (nodes[elements[imap].emap[2]].z > zmax) {zmax = nodes[elements[imap].emap[2]].z;}
+    if (nodes[elements[imap].emap[3]].z < zmin) {zmin = nodes[elements[imap].emap[3]].z;}
+    if (nodes[elements[imap].emap[3]].z > zmax) {zmax = nodes[elements[imap].emap[3]].z;}
 
     if (x >= xmin && x <= xmax && y >= ymin && 
         y <= ymax && z >= zmin && z <= zmax) {
@@ -1923,38 +1956,38 @@ ComponentFieldMap::Coordinates13(double x, double y, double z,
   if (debug) {
     // Re-compute the (x,y,z) position for this coordinate.
     double xr = 
-      nodes[elements[imap].emap[0]].xmap * td1 * (2 * td1 - 1) +
-      nodes[elements[imap].emap[1]].xmap * td2 * (2 * td2 - 1) +
-      nodes[elements[imap].emap[2]].xmap * td3 * (2 * td3 - 1) +
-      nodes[elements[imap].emap[3]].xmap * td4 * (2 * td4 - 1) +
-      nodes[elements[imap].emap[4]].xmap * 4 * td1 * td2 +
-      nodes[elements[imap].emap[5]].xmap * 4 * td1 * td3 +
-      nodes[elements[imap].emap[6]].xmap * 4 * td1 * td4 +
-      nodes[elements[imap].emap[7]].xmap * 4 * td2 * td3 +
-      nodes[elements[imap].emap[8]].xmap * 4 * td2 * td4 +
-      nodes[elements[imap].emap[9]].xmap * 4 * td3 * td4;
+      nodes[elements[imap].emap[0]].x * td1 * (2 * td1 - 1) +
+      nodes[elements[imap].emap[1]].x * td2 * (2 * td2 - 1) +
+      nodes[elements[imap].emap[2]].x * td3 * (2 * td3 - 1) +
+      nodes[elements[imap].emap[3]].x * td4 * (2 * td4 - 1) +
+      nodes[elements[imap].emap[4]].x * 4 * td1 * td2 +
+      nodes[elements[imap].emap[5]].x * 4 * td1 * td3 +
+      nodes[elements[imap].emap[6]].x * 4 * td1 * td4 +
+      nodes[elements[imap].emap[7]].x * 4 * td2 * td3 +
+      nodes[elements[imap].emap[8]].x * 4 * td2 * td4 +
+      nodes[elements[imap].emap[9]].x * 4 * td3 * td4;
     double yr = 
-      nodes[elements[imap].emap[0]].ymap * td1 * (2 * td1 - 1) +
-      nodes[elements[imap].emap[1]].ymap * td2 * (2 * td2 - 1) +
-      nodes[elements[imap].emap[2]].ymap * td3 * (2 * td3 - 1) +
-      nodes[elements[imap].emap[3]].ymap * td4 * (2 * td4 - 1) +
-      nodes[elements[imap].emap[4]].ymap * 4 * td1 * td2 +
-      nodes[elements[imap].emap[5]].ymap * 4 * td1 * td3 +
-      nodes[elements[imap].emap[6]].ymap * 4 * td1 * td4 +
-      nodes[elements[imap].emap[7]].ymap * 4 * td2 * td3 +
-      nodes[elements[imap].emap[8]].ymap * 4 * td2 * td4 +
-      nodes[elements[imap].emap[9]].ymap * 4 * td3 * td4;
+      nodes[elements[imap].emap[0]].y * td1 * (2 * td1 - 1) +
+      nodes[elements[imap].emap[1]].y * td2 * (2 * td2 - 1) +
+      nodes[elements[imap].emap[2]].y * td3 * (2 * td3 - 1) +
+      nodes[elements[imap].emap[3]].y * td4 * (2 * td4 - 1) +
+      nodes[elements[imap].emap[4]].y * 4 * td1 * td2 +
+      nodes[elements[imap].emap[5]].y * 4 * td1 * td3 +
+      nodes[elements[imap].emap[6]].y * 4 * td1 * td4 +
+      nodes[elements[imap].emap[7]].y * 4 * td2 * td3 +
+      nodes[elements[imap].emap[8]].y * 4 * td2 * td4 +
+      nodes[elements[imap].emap[9]].y * 4 * td3 * td4;
     double zr = 
-      nodes[elements[imap].emap[0]].zmap * td1 * (2 * td1 - 1) +
-      nodes[elements[imap].emap[1]].zmap * td2 * (2 * td2 - 1) +
-      nodes[elements[imap].emap[2]].zmap * td3 * (2 * td3 - 1) +
-      nodes[elements[imap].emap[3]].zmap * td4 * (2 * td4 - 1) +
-      nodes[elements[imap].emap[4]].zmap * 4 * td1 * td2 +
-      nodes[elements[imap].emap[5]].zmap * 4 * td1 * td3 +
-      nodes[elements[imap].emap[6]].zmap * 4 * td1 * td4 +
-      nodes[elements[imap].emap[7]].zmap * 4 * td2 * td3 +
-      nodes[elements[imap].emap[8]].zmap * 4 * td2 * td4 +
-      nodes[elements[imap].emap[9]].zmap * 4 * td3 * td4;
+      nodes[elements[imap].emap[0]].z * td1 * (2 * td1 - 1) +
+      nodes[elements[imap].emap[1]].z * td2 * (2 * td2 - 1) +
+      nodes[elements[imap].emap[2]].z * td3 * (2 * td3 - 1) +
+      nodes[elements[imap].emap[3]].z * td4 * (2 * td4 - 1) +
+      nodes[elements[imap].emap[4]].z * 4 * td1 * td2 +
+      nodes[elements[imap].emap[5]].z * 4 * td1 * td3 +
+      nodes[elements[imap].emap[6]].z * 4 * td1 * td4 +
+      nodes[elements[imap].emap[7]].z * 4 * td2 * td3 +
+      nodes[elements[imap].emap[8]].z * 4 * td2 * td4 +
+      nodes[elements[imap].emap[9]].z * 4 * td3 * td4;
     double sr = td1 + td2 + td3 + td4;
     printf("ComponentFieldMap::Coordinates13:\n");
     printf("    Position requested:     (%g,%g,%g),\n", x, y, z);
@@ -2228,24 +2261,24 @@ ComponentFieldMap::SetRange() {
   }
   
   // Loop over the nodes.
-  mapxmin = mapxmax = nodes[0].xmap;
-  mapymin = mapymax = nodes[0].ymap;
-  mapzmin = mapzmax = nodes[0].zmap;
-  mapvmin = mapvmax = nodes[0].vmap;
+  mapxmin = mapxmax = nodes[0].x;
+  mapymin = mapymax = nodes[0].y;
+  mapzmin = mapzmax = nodes[0].z;
+  mapvmin = mapvmax = nodes[0].v;
     
   double ang;
   for (int i = 1; i < nNodes; i++) {
-    if (mapxmin > nodes[i].xmap) mapxmin = nodes[i].xmap;
-    if (mapxmax < nodes[i].xmap) mapxmax = nodes[i].xmap;
-    if (mapymin > nodes[i].ymap) mapymin = nodes[i].ymap;
-    if (mapymax < nodes[i].ymap) mapymax = nodes[i].ymap;
-    if (mapzmin > nodes[i].zmap) mapzmin = nodes[i].zmap;
-    if (mapzmax < nodes[i].zmap) mapzmax = nodes[i].zmap;
-    if (mapvmin > nodes[i].vmap) mapvmin = nodes[i].vmap;
-    if (mapvmax < nodes[i].vmap) mapvmax = nodes[i].vmap;
+    if (mapxmin > nodes[i].x) mapxmin = nodes[i].x;
+    if (mapxmax < nodes[i].x) mapxmax = nodes[i].x;
+    if (mapymin > nodes[i].y) mapymin = nodes[i].y;
+    if (mapymax < nodes[i].y) mapymax = nodes[i].y;
+    if (mapzmin > nodes[i].z) mapzmin = nodes[i].z;
+    if (mapzmax < nodes[i].z) mapzmax = nodes[i].z;
+    if (mapvmin > nodes[i].v) mapvmin = nodes[i].v;
+    if (mapvmax < nodes[i].v) mapvmax = nodes[i].v;
     
-    if (nodes[i].ymap != 0 || nodes[i].zmap != 0) {
-      ang = atan2(nodes[i].zmap, nodes[i].ymap);
+    if (nodes[i].y != 0 || nodes[i].z != 0) {
+      ang = atan2(nodes[i].z, nodes[i].y);
       if (setangx) {
         if (ang < mapxamin) mapxamin = ang;
         if (ang > mapxamax) mapxamax = ang;
@@ -2255,8 +2288,8 @@ ComponentFieldMap::SetRange() {
       }
     }
     
-    if (nodes[i].zmap != 0 || nodes[i].xmap != 0) {
-      ang = atan2(nodes[i].xmap, nodes[i].zmap);
+    if (nodes[i].z != 0 || nodes[i].x != 0) {
+      ang = atan2(nodes[i].x, nodes[i].z);
       if (setangy) {
         if (ang < mapyamin) mapyamin = ang;
         if (ang > mapyamax) mapyamax = ang;
@@ -2266,8 +2299,8 @@ ComponentFieldMap::SetRange() {
       }
     }
         
-    if (nodes[i].xmap != 0 || nodes[i].ymap != 0) {
-      ang = atan2(nodes[i].ymap, nodes[i].xmap);
+    if (nodes[i].x != 0 || nodes[i].y != 0) {
+      ang = atan2(nodes[i].y, nodes[i].x);
       if (setangz) {
         if (ang < mapzamin) mapzamin = ang;
         if (ang > mapzamax) mapzamax = ang;

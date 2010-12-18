@@ -375,9 +375,9 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
     }
     
     // Store the point coordinates
-    newNode.xmap = xnode * funit;
-    newNode.ymap = ynode * funit;
-    newNode.zmap = znode * funit;
+    newNode.x = xnode * funit;
+    newNode.y = ynode * funit;
+    newNode.z = znode * funit;
     nodes.push_back(newNode);
     ++nNodes;
   }
@@ -438,7 +438,7 @@ ComponentAnsys121::Initialise(std::string elist, std::string nlist,
       printf("    on potential file %s (line %d).\n", prnsol.c_str(), il);
       ok = false;
     } else {
-      nodes[inode - 1].vmap = volt;
+      nodes[inode - 1].v = volt;
       nread++;
     }
   }
@@ -531,7 +531,7 @@ ComponentAnsys121::SetWeightingField(std::string prnsol, std::string label) {
       printf("    on potential file %s (line %d).\n", prnsol.c_str(), il);
       ok = false;
     } else {
-      nodes[inode - 1].wmap = volt;
+      nodes[inode - 1].w = volt;
       nread++;
     }
   }
@@ -626,101 +626,101 @@ ComponentAnsys121::ElectricField(
     for (int i = 0; i < 8; i++) {
       printf("                  %-5d %12g %12g %12g\n",
              elements[imap].emap[i], 
-             nodes[elements[imap].emap[i]].xmap, 
-             nodes[elements[imap].emap[i]].ymap,
-             nodes[elements[imap].emap[i]].vmap);
+             nodes[elements[imap].emap[i]].x, 
+             nodes[elements[imap].emap[i]].y,
+             nodes[elements[imap].emap[i]].v);
     }
   }
 
   // Calculate quadrilateral field, which can degenerate to a triangular field
   if (elements[imap].degenerate) {
-    volt = nodes[elements[imap].emap[0]].vmap * t1 * (2 * t1 - 1 ) +
-           nodes[elements[imap].emap[1]].vmap * t2 * (2 * t2 - 1 ) +
-           nodes[elements[imap].emap[2]].vmap * t3 * (2 * t3 - 1 ) +
-       4 * nodes[elements[imap].emap[3]].vmap * t1 * t2 +
-       4 * nodes[elements[imap].emap[4]].vmap * t1 * t3 +
-       4 * nodes[elements[imap].emap[5]].vmap * t2 * t3;
-    ex = -(nodes[elements[imap].emap[0]].vmap * (4 * t1 - 1) * jac[0][1] +
-           nodes[elements[imap].emap[1]].vmap * (4 * t2 - 1) * jac[1][1] +
-           nodes[elements[imap].emap[2]].vmap * (4 * t3 - 1) * jac[2][1] +
-           nodes[elements[imap].emap[3]].vmap * (
+    volt = nodes[elements[imap].emap[0]].v * t1 * (2 * t1 - 1 ) +
+           nodes[elements[imap].emap[1]].v * t2 * (2 * t2 - 1 ) +
+           nodes[elements[imap].emap[2]].v * t3 * (2 * t3 - 1 ) +
+       4 * nodes[elements[imap].emap[3]].v * t1 * t2 +
+       4 * nodes[elements[imap].emap[4]].v * t1 * t3 +
+       4 * nodes[elements[imap].emap[5]].v * t2 * t3;
+    ex = -(nodes[elements[imap].emap[0]].v * (4 * t1 - 1) * jac[0][1] +
+           nodes[elements[imap].emap[1]].v * (4 * t2 - 1) * jac[1][1] +
+           nodes[elements[imap].emap[2]].v * (4 * t3 - 1) * jac[2][1] +
+           nodes[elements[imap].emap[3]].v * (
                4 * t2 * jac[0][1] + 4 * t1 * jac[1][1]) +
-           nodes[elements[imap].emap[4]].vmap * (
+           nodes[elements[imap].emap[4]].v * (
                4 * t3 * jac[0][1] + 4 * t1 * jac[2][1]) +
-           nodes[elements[imap].emap[5]].vmap * (
+           nodes[elements[imap].emap[5]].v * (
                4 * t3 * jac[1][1] + 4 * t2 * jac[2][1])) / det;
-    ey = -(nodes[elements[imap].emap[0]].vmap * (4 * t1 - 1) * jac[0][2] +
-	   nodes[elements[imap].emap[1]].vmap * (4 * t2 - 1) * jac[1][2] +
-	   nodes[elements[imap].emap[2]].vmap * (4 * t3 - 1) * jac[2][2] +
-	   nodes[elements[imap].emap[3]].vmap * (
+    ey = -(nodes[elements[imap].emap[0]].v * (4 * t1 - 1) * jac[0][2] +
+	   nodes[elements[imap].emap[1]].v * (4 * t2 - 1) * jac[1][2] +
+	   nodes[elements[imap].emap[2]].v * (4 * t3 - 1) * jac[2][2] +
+	   nodes[elements[imap].emap[3]].v * (
                4 * t2 * jac[0][2] + 4 * t1 * jac[1][2]) +
-	   nodes[elements[imap].emap[4]].vmap * (
+	   nodes[elements[imap].emap[4]].v * (
                4 * t3 * jac[0][2] + 4 * t1 * jac[2][2]) +
-	   nodes[elements[imap].emap[5]].vmap * (
+	   nodes[elements[imap].emap[5]].v * (
                4 * t3 * jac[1][2] + 4 * t2 * jac[2][2])) / det;
   } else {
-    volt = -nodes[elements[imap].emap[0]].vmap * 
+    volt = -nodes[elements[imap].emap[0]].v * 
                 (1 - t1) * (1 - t2) * (1 + t1 + t2) / 4 -
-            nodes[elements[imap].emap[1]].vmap * 
+            nodes[elements[imap].emap[1]].v * 
                 (1 + t1) * (1 - t2) * (1 - t1 + t2) / 4 -
-            nodes[elements[imap].emap[2]].vmap * 
+            nodes[elements[imap].emap[2]].v * 
                 (1 + t1) * (1 + t2) * (1 - t1 - t2) / 4 -
-            nodes[elements[imap].emap[3]].vmap * 
+            nodes[elements[imap].emap[3]].v * 
                 (1 - t1) * (1 + t2) * (1 + t1 - t2) / 4 +
-            nodes[elements[imap].emap[4]].vmap * 
+            nodes[elements[imap].emap[4]].v * 
                 (1 - t1) * (1 + t1) * (1 - t2) / 2 +
-            nodes[elements[imap].emap[5]].vmap * 
+            nodes[elements[imap].emap[5]].v * 
                 (1 + t1) * (1 + t2) * (1 - t2) / 2 +
-            nodes[elements[imap].emap[6]].vmap * 
+            nodes[elements[imap].emap[6]].v * 
                 (1 - t1) * (1 + t1) * (1 + t2) / 2 +
-            nodes[elements[imap].emap[7]].vmap * 
+            nodes[elements[imap].emap[7]].v * 
                 (1 - t1) * (1 + t2) * (1 - t2) / 2;
-    ex = -(nodes[elements[imap].emap[0]].vmap * (
+    ex = -(nodes[elements[imap].emap[0]].v * (
                (1 - t2) * (2 * t1 + t2) * jac[0][0] + 
                (1 - t1) * (t1 + 2 * t2) * jac[1][0]) / 4 +
-           nodes[elements[imap].emap[1]].vmap * (
+           nodes[elements[imap].emap[1]].v * (
                (1 - t2) * (2 * t1 - t2) * jac[0][0] - 
                (1 + t1) * (t1 - 2 * t2) * jac[1][0]) / 4 +
-           nodes[elements[imap].emap[2]].vmap * (
+           nodes[elements[imap].emap[2]].v * (
                (1 + t2) * (2 * t1 + t2) * jac[0][0] + 
                (1 + t1) * (t1 + 2 * t2) * jac[1][0]) / 4 +
-           nodes[elements[imap].emap[3]].vmap * (
+           nodes[elements[imap].emap[3]].v * (
                (1 + t2) * (2 * t1 - t2) * jac[0][0] - 
                (1 - t1) * (t1 - 2 * t2) * jac[1][0]) / 4 +
-           nodes[elements[imap].emap[4]].vmap * (
+           nodes[elements[imap].emap[4]].v * (
                    t1  * (t2 - 1) * jac[0][0] + 
               (t1 - 1) * (t1 + 1) * jac[1][0] / 2) +
-           nodes[elements[imap].emap[5]].vmap * (
+           nodes[elements[imap].emap[5]].v * (
               (1 - t2) * (1 + t2)  * jac[0][0] / 2 - 
               (1 + t1) *      t2   * jac[1][0]) +
-           nodes[elements[imap].emap[6]].vmap * (
+           nodes[elements[imap].emap[6]].v * (
                  - t1  * (1 + t2)  * jac[0][0] + 
               (1 - t1) * (1 + t1)  * jac[1][0] / 2) +
-           nodes[elements[imap].emap[7]].vmap * (
+           nodes[elements[imap].emap[7]].v * (
               (t2 - 1) * (t2 + 1)  * jac[0][0] / 2 + 
               (t1 - 1) *  t2       * jac[1][0])) / det;
-    ey = -(nodes[elements[imap].emap[0]].vmap * (
+    ey = -(nodes[elements[imap].emap[0]].v * (
               (1 - t2) * (2 * t1 + t2) * jac[0][1] + 
               (1 - t1) * (t1 + 2 * t2) * jac[1][1]) / 4 +
-           nodes[elements[imap].emap[1]].vmap * (
+           nodes[elements[imap].emap[1]].v * (
               (1 - t2) * (2 * t1 - t2) * jac[0][1] - 
               (1 + t1) * (t1 - 2 * t2) * jac[1][1]) / 4 +
-           nodes[elements[imap].emap[2]].vmap * (
+           nodes[elements[imap].emap[2]].v * (
               (1 + t2) * (2 * t1 + t2) * jac[0][1] + 
               (1 + t1) * (t1 + 2 * t2) * jac[1][1]) / 4 +
-           nodes[elements[imap].emap[3]].vmap * (
+           nodes[elements[imap].emap[3]].v * (
               (1 + t2) * (2 * t1 - t2) * jac[0][1] - 
               (1 - t1) * (t1 - 2 * t2) * jac[1][1]) / 4 +
-           nodes[elements[imap].emap[4]].vmap * (
+           nodes[elements[imap].emap[4]].v * (
                    t1  * (t2 - 1) * jac[0][1] + 
               (t1 - 1) * (t1 + 1) * jac[1][1] / 2) +
-           nodes[elements[imap].emap[5]].vmap * (
+           nodes[elements[imap].emap[5]].v * (
               (1 - t2) * (1 + t2) * jac[0][1] / 2 - 
               (1 + t1) *      t2  * jac[1][1]) +
-           nodes[elements[imap].emap[6]].vmap * (
+           nodes[elements[imap].emap[6]].v * (
                   -t1  * (1 + t2) * jac[0][1] + 
               (1 - t1) * (1 + t1) * jac[1][1] / 2) +
-           nodes[elements[imap].emap[7]].vmap * (
+           nodes[elements[imap].emap[7]].v * (
               (t2 - 1) * (t2 + 1)  * jac[0][1] / 2 + 
               (t1 - 1) *  t2       * jac[1][1])) / det;
   }
@@ -789,79 +789,79 @@ ComponentAnsys121::WeightingField(
     for (int i = 0; i < 8; i++) {
       printf("                  %-5d %12g %12g %12g\n",
              elements[imap].emap[i], 
-             nodes[elements[imap].emap[i]].xmap, 
-             nodes[elements[imap].emap[i]].ymap,
-             nodes[elements[imap].emap[i]].wmap);
+             nodes[elements[imap].emap[i]].x, 
+             nodes[elements[imap].emap[i]].y,
+             nodes[elements[imap].emap[i]].w);
     }
   }
   
   // Calculate quadrilateral field, which can degenerate to a triangular field
   if (elements[imap].degenerate) {
-    wx = -(nodes[elements[imap].emap[0]].wmap * (4 * t1 - 1) * jac[0][1] +
-           nodes[elements[imap].emap[1]].wmap * (4 * t2 - 1) * jac[1][1] +
-           nodes[elements[imap].emap[2]].wmap * (4 * t3 - 1) * jac[2][1] +
-           nodes[elements[imap].emap[3]].wmap * (4 * t2 * jac[0][1] + 
-                                                 4 * t1 * jac[1][1]) +
-           nodes[elements[imap].emap[4]].wmap * (4 * t3 * jac[0][1] + 
-                                                 4 * t1 * jac[2][1]) +
-           nodes[elements[imap].emap[5]].wmap * (4 * t3 * jac[1][1] + 
-                                                 4 * t2 * jac[2][1])) / det;
-    wy = -(nodes[elements[imap].emap[0]].wmap * (4 * t1 - 1) * jac[0][2] +
-	   nodes[elements[imap].emap[1]].wmap * (4 * t2 - 1) * jac[1][2] +
-	   nodes[elements[imap].emap[2]].wmap * (4 * t3 - 1) * jac[2][2] +
-	   nodes[elements[imap].emap[3]].wmap * (4 * t2 * jac[0][2] + 
-                                                 4 * t1 * jac[1][2]) +
-	   nodes[elements[imap].emap[4]].wmap * (4 * t3 * jac[0][2] + 
-                                                 4 * t1 * jac[2][2]) +
-	   nodes[elements[imap].emap[5]].wmap * (4 * t3 * jac[1][2] + 
-                                                 4 * t2 * jac[2][2])) / det;
+    wx = -(nodes[elements[imap].emap[0]].w * (4 * t1 - 1) * jac[0][1] +
+           nodes[elements[imap].emap[1]].w * (4 * t2 - 1) * jac[1][1] +
+           nodes[elements[imap].emap[2]].w * (4 * t3 - 1) * jac[2][1] +
+           nodes[elements[imap].emap[3]].w * (4 * t2 * jac[0][1] + 
+                                              4 * t1 * jac[1][1]) +
+           nodes[elements[imap].emap[4]].w * (4 * t3 * jac[0][1] + 
+                                              4 * t1 * jac[2][1]) +
+           nodes[elements[imap].emap[5]].w * (4 * t3 * jac[1][1] + 
+                                              4 * t2 * jac[2][1])) / det;
+    wy = -(nodes[elements[imap].emap[0]].w * (4 * t1 - 1) * jac[0][2] +
+	   nodes[elements[imap].emap[1]].w * (4 * t2 - 1) * jac[1][2] +
+	   nodes[elements[imap].emap[2]].w * (4 * t3 - 1) * jac[2][2] +
+	   nodes[elements[imap].emap[3]].w * (4 * t2 * jac[0][2] + 
+                                        4 * t1 * jac[1][2]) +
+	   nodes[elements[imap].emap[4]].w * (4 * t3 * jac[0][2] + 
+                                        4 * t1 * jac[2][2]) +
+	   nodes[elements[imap].emap[5]].w * (4 * t3 * jac[1][2] + 
+                                        4 * t2 * jac[2][2])) / det;
   } else {
-    wx = -(nodes[elements[imap].emap[0]].wmap * (
+    wx = -(nodes[elements[imap].emap[0]].w * (
                (1 - t2) * (2 * t1 + t2) * jac[0][0] + 
                (1 - t1) * (t1 + 2 * t2) * jac[1][0]) / 4 +
-           nodes[elements[imap].emap[1]].wmap * (
+           nodes[elements[imap].emap[1]].w * (
                (1 - t2) * (2 * t1 - t2) * jac[0][0] - 
                (1 + t1) * (t1 - 2 * t2) * jac[1][0]) / 4 +
-           nodes[elements[imap].emap[2]].wmap * (
+           nodes[elements[imap].emap[2]].w * (
                (1 + t2) * (2 * t1 + t2) * jac[0][0] + 
                (1 + t1) * (t1 + 2 * t2) * jac[1][0]) / 4 +
-           nodes[elements[imap].emap[3]].wmap * (
+           nodes[elements[imap].emap[3]].w * (
                (1 + t2) * (2 * t1 - t2) * jac[0][0] - 
                (1 - t1) * (t1 - 2 * t2) * jac[1][0]) / 4 +
-           nodes[elements[imap].emap[4]].wmap * (
+           nodes[elements[imap].emap[4]].w * (
                     t1  * (t2 - 1) * jac[0][0] + 
                (t1 - 1) * (t1 + 1) * jac[1][0] / 2) +
-           nodes[elements[imap].emap[5]].wmap * (
+           nodes[elements[imap].emap[5]].w * (
                (1 - t2) * (1 + t2) * jac[0][0] / 2 - 
                (1 + t1) *      t2  * jac[1][0]) +
-           nodes[elements[imap].emap[6]].wmap * (
+           nodes[elements[imap].emap[6]].w * (
                   - t1  * (1 + t2) * jac[0][0] + 
                (1 - t1) * (1 + t1) * jac[1][0] / 2) +
-           nodes[elements[imap].emap[7]].wmap * (
+           nodes[elements[imap].emap[7]].w * (
                (t2 - 1) * (1 + t2) * jac[0][0] / 2 + 
                (t1 - 1) *      t2  * jac[1][0])) / det;
-    wy = -(nodes[elements[imap].emap[0]].wmap * (
+    wy = -(nodes[elements[imap].emap[0]].w * (
               (1 - t2) * (2 * t1 + t2) * jac[0][1] + 
               (1 - t1) * (t1 + 2 * t2) * jac[1][1]) / 4 +
-           nodes[elements[imap].emap[1]].wmap * (
+           nodes[elements[imap].emap[1]].w * (
               (1 - t2) * (2 * t1 - t2) * jac[0][1] - 
               (1 + t1) * (t1 - 2 * t2) * jac[1][1]) / 4 +
-           nodes[elements[imap].emap[2]].wmap * (
+           nodes[elements[imap].emap[2]].w * (
               (1 + t2) * (2 * t1 + t2) * jac[0][1] + 
               (1 + t1) * (t1 + 2 * t2) * jac[1][1]) / 4 +
-           nodes[elements[imap].emap[3]].wmap * (
+           nodes[elements[imap].emap[3]].w * (
               (1 + t2) * (2 * t1 - t2) * jac[0][1] - 
               (1 - t1) * (t1 - 2 * t2) * jac[1][1]) / 4 +
-           nodes[elements[imap].emap[4]].wmap * (
+           nodes[elements[imap].emap[4]].w * (
                    t1  * (t2 - 1) * jac[0][1] + 
               (t1 - 1) * (t1 + 1) * jac[1][1] / 2) +
-           nodes[elements[imap].emap[5]].wmap * (
+           nodes[elements[imap].emap[5]].w * (
               (1 - t2) * (1 + t2) * jac[0][1] / 2 - 
               (1 + t1) *      t2  * jac[1][1]) +
-           nodes[elements[imap].emap[6]].wmap * (
+           nodes[elements[imap].emap[6]].w * (
                  - t1  * (1 + t2) * jac[0][1] + 
               (1 - t1) * (1 + t1) * jac[1][1] / 2) +
-           nodes[elements[imap].emap[7]].wmap * (
+           nodes[elements[imap].emap[7]].w * (
               (t2 - 1) * (t2 + 1) * jac[0][1] / 2 + 
               (t1 - 1) *  t2      * jac[1][1])) / det;
   }
@@ -912,38 +912,38 @@ ComponentAnsys121::WeightingPotential(
     for (int i = 0; i < 8; ++i) {
       printf("                  %-5d %12g %12g %12g\n",
              elements[imap].emap[i], 
-             nodes[elements[imap].emap[i]].xmap, 
-             nodes[elements[imap].emap[i]].ymap,
-             nodes[elements[imap].emap[i]].wmap);
+             nodes[elements[imap].emap[i]].x, 
+             nodes[elements[imap].emap[i]].y,
+             nodes[elements[imap].emap[i]].w);
     }
   }
   
   // Calculate quadrilateral field, which can degenerate to a triangular field
   if (elements[imap].degenerate) {
-    return nodes[elements[imap].emap[0]].vmap * t1 * (2 * t1 - 1 ) +
-           nodes[elements[imap].emap[1]].vmap * t2 * (2 * t2 - 1 ) +
-           nodes[elements[imap].emap[2]].vmap * t3 * (2 * t3 - 1 ) +
-       4 * nodes[elements[imap].emap[3]].vmap * t1 * t2 +
-       4 * nodes[elements[imap].emap[4]].vmap * t1 * t3 +
-       4 * nodes[elements[imap].emap[5]].vmap * t2 * t3;
+    return nodes[elements[imap].emap[0]].v * t1 * (2 * t1 - 1 ) +
+           nodes[elements[imap].emap[1]].v * t2 * (2 * t2 - 1 ) +
+           nodes[elements[imap].emap[2]].v * t3 * (2 * t3 - 1 ) +
+       4 * nodes[elements[imap].emap[3]].v * t1 * t2 +
+       4 * nodes[elements[imap].emap[4]].v * t1 * t3 +
+       4 * nodes[elements[imap].emap[5]].v * t2 * t3;
   }
 
-  return  -nodes[elements[imap].emap[0]].vmap * (1 - t1) * (1 - t2) * 
-                                                (1 + t1 + t2) / 4 -
-           nodes[elements[imap].emap[1]].vmap * (1 + t1) * (1 - t2) * 
-                                                (1 - t1 + t2) / 4 -
-           nodes[elements[imap].emap[2]].vmap * (1 + t1) * (1 + t2) * 
-                                                (1 - t1 - t2) / 4 -
-           nodes[elements[imap].emap[3]].vmap * (1 - t1) * (1 + t2) * 
-                                                (1 + t1 - t2) / 4 +
-           nodes[elements[imap].emap[4]].vmap * (1 - t1) * (1 + t1) * 
-                                                (1 - t2) / 2 +
-           nodes[elements[imap].emap[5]].vmap * (1 + t1) * (1 + t2) * 
-                                                (1 - t2) / 2 +
-           nodes[elements[imap].emap[6]].vmap * (1 - t1) * (1 + t1) * 
-                                                (1 + t2) / 2 +
-           nodes[elements[imap].emap[7]].vmap * (1 - t1) * (1 + t2) * 
-                                                (1 - t2) / 2;
+  return  -nodes[elements[imap].emap[0]].v * (1 - t1) * (1 - t2) * 
+                                             (1 + t1 + t2) / 4 -
+           nodes[elements[imap].emap[1]].v * (1 + t1) * (1 - t2) * 
+                                             (1 - t1 + t2) / 4 -
+           nodes[elements[imap].emap[2]].v * (1 + t1) * (1 + t2) * 
+                                             (1 - t1 - t2) / 4 -
+           nodes[elements[imap].emap[3]].v * (1 - t1) * (1 + t2) * 
+                                             (1 + t1 - t2) / 4 +
+           nodes[elements[imap].emap[4]].v * (1 - t1) * (1 + t1) * 
+                                             (1 - t2) / 2 +
+           nodes[elements[imap].emap[5]].v * (1 + t1) * (1 + t2) * 
+                                             (1 - t2) / 2 +
+           nodes[elements[imap].emap[6]].v * (1 - t1) * (1 + t1) * 
+                                             (1 + t2) / 2 +
+           nodes[elements[imap].emap[7]].v * (1 - t1) * (1 + t2) * 
+                                             (1 - t2) / 2;
 
 }
 
@@ -1003,9 +1003,9 @@ ComponentAnsys121::GetMedium(
     for (int i = 0; i < 8; i++) {
       printf("                 %-5d %12g %12g %12g\n",
         elements[imap].emap[i], 
-        nodes[elements[imap].emap[i]].xmap, 
-        nodes[elements[imap].emap[i]].ymap,
-        nodes[elements[imap].emap[i]].vmap);
+        nodes[elements[imap].emap[i]].x, 
+        nodes[elements[imap].emap[i]].y,
+        nodes[elements[imap].emap[i]].v);
     }
   }
   
@@ -1033,6 +1033,53 @@ ComponentAnsys121::UpdatePeriodicity() {
 
   UpdatePeriodicity2d();
   UpdatePeriodicityCommon();
+  
+}
+
+double
+ComponentAnsys121::GetElementVolume(const int i) {
+
+  if (i < 0 || i >= nElements) return 0.;
+  const double surf = 
+    (fabs(
+       (nodes[elements[i].emap[1]].x - nodes[elements[i].emap[0]].x) *
+       (nodes[elements[i].emap[2]].y - nodes[elements[i].emap[0]].y) -
+       (nodes[elements[i].emap[2]].x - nodes[elements[i].emap[0]].x) *
+       (nodes[elements[i].emap[1]].y - nodes[elements[i].emap[0]].y)) + 
+     fabs(
+       (nodes[elements[i].emap[3]].x - nodes[elements[i].emap[0]].x) *
+       (nodes[elements[i].emap[2]].y - nodes[elements[i].emap[0]].y) -
+       (nodes[elements[i].emap[2]].x - nodes[elements[i].emap[0]].x) *
+       (nodes[elements[i].emap[3]].y - nodes[elements[i].emap[0]].y))) / 2.;
+  return surf;
+  
+}
+
+void
+ComponentAnsys121::GetAspectRatio(const int i, double& dmin, double& dmax) {
+
+  if (i < 0 || i >= nElements) {
+    dmin = dmax = 0.;
+    return;
+  }
+  
+  const int np = 8;
+  // Loop over all pairs of vertices.
+  for (int j = 0; j < np - 1; ++j) {
+    for (int k = j + 1; k < np; ++k) {
+      // Compute distance.
+      const double dist = sqrt(
+        pow(nodes[elements[i].emap[j]].x - nodes[elements[i].emap[k]].x, 2) +
+        pow(nodes[elements[i].emap[j]].y - nodes[elements[i].emap[k]].y, 2));
+      if (k == 1) {
+        dmin = dist;
+        dmax = dist;
+      } else {
+        if (dist < dmin) dmin = dist;
+        if (dist > dmax) dmax = dist;
+      }
+    }
+  }
   
 }
 

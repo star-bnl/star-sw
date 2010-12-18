@@ -54,6 +54,9 @@ class ComponentFieldMap : public ComponentBase {
                    Medium*& medium) = 0;
     int GetNumberOfMedia() {return nMaterials;}
 
+    int GetNumberOfElements() const {return nElements;}
+    bool GetElement(const int i, double& vol, double& dmin, double& dmax);
+
     virtual 
     void ElectricField(const double x, const double y, const double z,
                        double& ex, double& ey, double& ez, 
@@ -98,11 +101,11 @@ class ComponentFieldMap : public ComponentBase {
     int nNodes;
     struct node {
       // Coordinates
-      double xmap, ymap, zmap;
+      double x, y, z;
       // Potential
-      double vmap;
+      double v;
       // Weighting potential
-      double wmap;
+      double w;
     };
     std::vector<node> nodes;
 
@@ -210,6 +213,9 @@ class ComponentFieldMap : public ComponentBase {
     
     int    ReadInteger(char* token, int def, bool& error);
     double ReadDouble(char* token, double def, bool& error);
+
+    virtual double GetElementVolume(const int i) = 0;
+    virtual void GetAspectRatio(const int i, double& dmin, double& dmax) = 0;
 
 };
 
