@@ -934,8 +934,6 @@ Bfc_st BFC[] = { // standard chains
   {"auauUpgr06.prod2.ITTF.Chain" ,"" ,"","trs,Simu,ssd,upgr06,pixFastSim,Idst,IAna,tpcI,tcl,Tree,logger,"
    "ITTF,Sti,StiRnd,PixelIT,HpdIT,StiPulls,genvtx,NoSvtIt,SsdIt,MakeEvent,McEvent,geant,evout,IdTruth,tags,"
    "bbcSim,emcY2,EEfs,big,-dstout,fzin,MiniMcMk,McEvOut" ,"" ,"",""                                ,kFALSE},
-  {"nightly test (dev) chains","-----------","-----------","-----------------------------","","","",kFALSE},
-  // MC chains
   {"Test.ITTF","","","svtIT,ssdIT,ITTF,genvtx,event,analysis,EventQA,tags,Tree,EvOut,StarMagField,FieldOn"
    ",IDST,CMuDst,Tree,analysis"                                                           ,"","","",kFALSE},
   {"Test.reco.ITTF","","","MakeEvent,tpcI,tcl,ftpc,SvtCL,Test.ITTF"                       ,"","","",kFALSE},
@@ -976,96 +974,134 @@ Bfc_st BFC[] = { // standard chains
    ""                                                                                        ,"","",kFALSE},
   {"Test.srs.ITTF","","",   "gstar,trs,Simu,srs,svt,ssd,fss,bbcSim,emcY2,McEvOut,GeantOut,IdTruth,"
    "miniMcMk,McAna,Test.reco.ITTF,CMuDst"                                                 ,"","","",kFALSE},
-  {"Test.year_2003_dAuMinBias_daq.ittf", "","","DbV20040520,dau2003i,logger,ITTF,evout,in","","",
-   "/star/rcf/test/daq/2003/041/st_physics_4041002_raw_0020001.daq"                                ,kFALSE},
-  {"Test.year_2004_auau_central_trs.ittf","","","trs,Simu,srs,fss,y2004a,Idst,IAna,l0,ctf,tpcI,tcl,ftpc,Tree,"
-   "logger,ITTF,evout,Sti,genvtx,SvtIT,geant,tags,bbcSim,tofsim,emcY2,EEfs,evout,GeantOut,big,fzin,"
-   "MiniMcMk",                                "","","/star/rcf/simu/rcf1209_05_80evts.fzd",kFALSE},
-  {"Test.year_2004_AuAuMinBias_daq.ittf", "","","P2004,DbV20050312,logger,ITTF,evout,-dstout,pmdRaw",
-   "","","/star/rcf/test/daq/2004/028/st_physics_5028066_raw_1010003.daq"                          ,kFALSE},
-  {"Test.year_2004_auau_minbias_trs.ittf", "", "",   "trs,Simu,srs,fss,y2004,Idst,IAna,l0,ctf,tpcI,tcl,ftpc,"
-   "Tree,logger,ITTF,evout,Sti,genvtx,SvtIt,geant,tags,bbcSim,tofsim,emcY2,EEfs,evout,GeantOut,big,fzin,"
-   "MiniMcMk",                               "","","/star/rcf/simu/rcf1207_01_225evts.fzd",kFALSE},
-  {"Test.year_2004_AuAu_prodHigh_daq.ittf","","","P2004,DbV20050312,logger,ITTF,evout,-dstout,"
-   "pmdRaw","","",                 "/star/rcf/test/daq/2004/044/st_physics_5044102_raw_1010003.daq",kFALSE},
-  {"Test.year_2004_AuAu_prodLow_daq.ittf", "","",   "P2004,DbV20050312,logger,ITTF,evout,-dstout,"
-   "pmdRaw","","",                 "/star/rcf/test/daq/2004/044/st_physics_5044116_raw_3010002.daq",kFALSE},
-  {"Test.year_2004_prodPP_daq.ittf", "","","pp2004,DbV20050312,beamLine,logger,ITTF,evout,-dstout",
-   "",""                          ,"/star/rcf/test/daq/2004/134/st_physics_5134013_raw_2010010.daq",kFALSE},
-  {"Test.year_2005_CuCu200_HighTower_daq.ittf", "", "",
-   "P2005,tofDat,logger,useCDV,MakeEvent,ITTF,evout,ssddat,spt,SsdIt,pmdRaw,OShortR,OSpaceZ2",
-   "","","/star/rcf/test/daq/2005/054/st_physics_6054016_raw_1020005.daq"                          ,kFALSE},
-  {"Test.year_2005_CuCu200_MinBias_daq.ittf", "","",
-   "P2005,tofDat,logger,useCDV,MakeEvent,ITTF,evout,ssddat,spt,SsdIt,pmdRaw,OShortR,OSpaceZ2",
-   "","","/star/rcf/test/daq/2005/048/st_physics_6048025_raw_1020002.daq"                          ,kFALSE},
-  {"Test.year_2005_cucu200_minbias_trs.ittf", "","",   "trs,Simu,srs,fss,ssd,y2005x,Idst,IAna,l0,ctf,tpcI,"
-   "tcl,ftpc,Tree,logger,ITTF,evout,Sti,SsdIt,genvtx,geant,tags,bbcSim,tofsim,emcY2,EEfs,evout,GeantOut,"
-   "big,fzin,MiniMcMk,SvtIt",                "","","/star/rcf/simu/rcf1216_05_200evts.fzd",kFALSE},
-  {"Test.year_2005_CuCu22_MinBias_daq.ittf", "","",
-   "P2005,tofDat,logger,useCDV,MakeEvent,ITTF,evout,ssddat,spt,SsdIt,pmdRaw,OShortR,OSpaceZ2",
-   "","","/star/rcf/test/daq/2005/083/st_physics_6083006_raw_1040002.daq"                          ,kFALSE},
-  {"Test.year_2005_CuCu62_MinBias_daq.ittf", "","",
-   "P2005,tofDat,logger,useCDV,MakeEvent,ITTF,evout,ssddat,spt,SsdIt,pmdRaw,OShortR,OSpaceZ2",
-   "","","/star/rcf/test/daq/2005/080/st_physics_6080011_raw_1020004.daq"                          ,kFALSE},
-  {"Test.year_2005_cucu62_minbias_trs.ittf", "", "","trs,Simu,srs,fss,ssd,y2005x,Idst,IAna,l0,ctf,tpcI,tcl,"
-   "ftpc,Tree,logger,ITTF,evout,Sti,SsdIt,genvtx,SvtIT,geant,tags,bbcSim,tofsim,emcY2,EEfs,evout,GeantOut,"
-   "big,fzin,MiniMcMk",                      "","","/star/rcf/simu/rcf1237_01_500evts.fzd",kFALSE},
-
-  {"Test.year_2007_auau200_central.ITTF", "", "","trs,srs,ssd,fss,y2007,Idst,IAna,l0,tpcI,tcl,ftpc,Tree,"
-   "logger,ITTF,Sti,SvtIt,SsdIt,genvtx,MakeEvent,IdTruth,geant,tags,bbcSim,tofsim,emcY2,EEfs,evout,"
-   "GeantOut,big,fzin,MiniMcMk,-dstout,clearmem",     "","","/star/rcf/simu/rcf1296_02_100evts.fzd",kFALSE},
+  {"nightly test (dev) chains","-----------","-----------","-----------------------------","","","",kFALSE},
   // Data test chains
-  {"Test.year_2000_minbias.ITTF", "","","p2000,VFMinuit,logger,CMuDst,NosvtIT,NossdIT",
-   "","","/star/rcf/test/daq/2000/08/st_physics_1229021_raw_0003.daq"                              ,kFALSE},
-  {"Test.year_2000_central.ITTF", "","","p2000,VFMinuit,logger,CMuDst,NosvtIT,NossdIT",
-   "","","/star/rcf/test/daq/2000/09/st_physics_1248022_raw_0001.daq"                              ,kFALSE},
-  {"Test.year_2001_central.ITTF", "","","P2001a,VFMinuit,v0,xi,ZDCvtx,-dstout,logger,CMuDst,-SvtIT,NossdIT",
-   "","","/star/rcf/test/daq/2001/327/st_physics_2327038_raw_0010.daq"                             ,kFALSE},
-  {"Test.year_2001_minbias.ITTF", "","","P2001a,VFMinuit,v0,xi,ZDCvtx,-dstout,logger,CMuDst,-SvtIT,NossdIT",
-   "","","/star/rcf/test/daq/2001/295/st_physics_2295030_raw_0010.daq"                             ,kFALSE},
-  {"Test.year_2001_ppMinBias.ITTF", "","","pp2001a,VFppV,v0,xi,fpd,beamLine,est,logger,beamLine,"
-   "CMuDst,-SvtIT,NossdIT","","","/star/rcf/test/daq/2002/008/st_physics_3008016_raw_0001.daq"     ,kFALSE},
-  {"Test.year_2003_dAuMinBias.ITTF", "","","DbV20040520,dau2003i,logger,ITTF,in,NossdIT",
-   "","","/star/rcf/test/daq/2003/041/st_physics_4041002_raw_0020001.daq"                          ,kFALSE},
-  {"Test.year_2003_ppMinBias.ITTF", "","","pp2003,VFppV,v0,xi,l3onl,beamLine,est,eemcD,logger,CMuDst,"
-   "-SvtIT,NossdIT","","","/star/rcf/test/daq/2003/095/st_physics_4095050_raw_0010002.daq"         ,kFALSE},
-  {"Test.year_2004_AuAuMinBias.ITTF", "","","P2004,DbV20050312,logger,ITTF,clearmem,pmdRaw,-SvtIT,-SsdIT",
-   "","","/star/rcf/test/daq/2004/028/st_physics_5028066_raw_1010003.daq"                          ,kFALSE},
-  {"Test.year_2004_AuAu_prodHigh.ITTF", "","","P2004,DbV20050312,logger,ITTF,clearmem,pmdRaw,-SvtIT,-SsdIT",
-   "","","/star/rcf/test/daq/2004/044/st_physics_5044102_raw_1010003.daq"                          ,kFALSE},
-  //  {"Test.year_2004_AuAu_prodLow.ITTF", "","","pp2004,DbV20050312,beamLine,logger,ITTF,clearmem",
-  //   "","","/star/rcf/test/daq/2004/134/st_physics_5134013_raw_2010010.daq"                          ,kFALSE},
-  {"Test.year_2004_prodPP.ITTF", "","","pp2004,DbV20050312,beamLine,logger,ITTF,clearmem,-SvtIT,-SsdIT",
-   "","","/star/rcf/test/daq/2004/134/st_physics_5134013_raw_2010010.daq"                          ,kFALSE},
-  {"Test.year_2005_CuCu200_HighTower.ITTF", "","","P2005,tofDat,logger,MakeEvent,ITTF,ssddat,spt,SsdIt,SvtIt,"
-   "clearmem,pmdRaw,OShortR,OSpaceZ2",
-   "","","/star/rcf/test/daq/2005/054/st_physics_6054016_raw_1020005.daq"                          ,kFALSE},
-  {"Test.year_2005_CuCu200_MinBias.ITTF", "","","P2005,tofDat,logger,MakeEvent,ITTF,ssddat,spt,SsdIt,SvtIt,"
-   "clearmem,pmdRaw,OShortR,OSpaceZ2",
-   "","","/star/rcf/test/daq/2005/048/st_physics_6048025_raw_1020002.daq"                          ,kFALSE},
-  {"Test.year_2005_CuCu22_MinBias.ITTF", "","","P2005,tofDat,logger,MakeEvent,ITTF,ssddat,spt,SsdIt,SvtIt,"
-   "clearmem,pmdRaw,OShortR,OSpaceZ2",
-   "","","/star/rcf/test/daq/2005/083/st_physics_6083006_raw_1040002.daq"                          ,kFALSE},
-  {"Test.year_2005_CuCu62_MinBias.ITTF", "","",
-   "in,P2005,tofDat,logger,MakeEvent,ITTF,ssddat,spt,SsdIt,SvtIt,clearmem,pmdRaw,OShortR,OSpaceZ2",
-   "","","/star/rcf/test/daq/2005/080/st_physics_6080011_raw_1020004.daq"                          ,kFALSE},
-  {"Test.year_2005_ppProduction.ittf", "","","pp2005a,tofdat,ITTF,OSpaceZ2,OGridLeak3D",
-   "","","/star/rcf/test/daq/2005/171/st_physics_6171062_raw_2040010.daq"                          ,kFALSE},
-  {"Test.2006ppProdLong.ITTF", "","","pp2006b,ITTF,OSpaceZ2,OGridLeak3D",
-   "","","/star/rcf/test/daq/2006/155/7155010/st_physics_7155010_raw_1020003.daq"                  ,kFALSE},
-  {"Test.2006ppProdTrans.ITTF", "","","pp2006b,ITTF,OSpaceZ2,OGridLeak3D",
-   "","","/star/rcf/test/daq/2006/129/7129023/st_physics_7129023_raw_1020003.daq"                  ,kFALSE},
-  {"Test.2007ProductionMinBias.ITTF", "","","DbV20080418,B2007g,ITTF,IAna,KeepSvtHit,hitfilt,VFMinuit3,"
-   "l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,ssdIT,pmdReco,-dstout,Corr4,OSpaceZ2,OGridLeak3D",
-   "","","/star/rcf/test/daq/2007/113/8113044/st_physics_8113044_raw_1040042.daq"                  ,kFALSE},
-  {"Test.production_dAu2008.ITTF", "","","DbV20080712,P2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine",
-   "","","/star/rcf/test/daq/2007/352/st_physics_8352025_raw_1030011.daq"                          ,kFALSE},
-  {"Test.ppProduction2008.ITTF",  "","","DbV20080712,pp2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine", "","",
-   "/star/rcf/test/daq/2008/043/st_physics_9043046_raw_2030002.daq"                                ,kFALSE},
-  {"Test.production2009_200Gev_Hi.ITTF","","","pp2009c,ITTF,VFPPVnoCTB,beamLine,BEmcChkStat,btofDat,Corr3,"
-   "OSpaceZ2,OGridLeak3D", "","","/star/rcf/test/daq/2009/115/st_physics_10115020_raw_5020001.daq" ,kFALSE},
-  {"Test.production2009_500GeV.ITTF",  "","","pp2009c,ITTF,VFPPVnoCTB,beamLine,BEmcChkStat,btofDat,Corr3,"
-   "OSpaceZ2,OGridLeak3D", "","","/star/rcf/test/daq/2009/085/st_physics_10085024_raw_2020001.daq" ,kFALSE},
+  {"Test.year_2000_central","","","p2000,VFMinuit,logger,CMuDst,NosvtIT,NossdIT","","",
+   "/star/rcf/test/daq/2000/09/st_physics_1248022_raw_0001.daq",                                    kFALSE},
+  {"Test.year_2000_minbias","","","p2000,VFMinuit,logger,CMuDst,NosvtIT,NossdIT","","",
+   "/star/rcf/test/daq/2000/08/st_physics_1229021_raw_0003.daq",                                    kFALSE},
+  {"Test.year_2001_central","","","P2001a,VFMinuit,v02,xi2,ZDCvtx,logger,CMuDst,NosvtIT,NossdIT","","",
+   "/star/rcf/test/daq/2001/327/st_physics_2327038_raw_0010.daq",                                   kFALSE},
+  {"Test.year_2001_minbias","","","P2001a,VFMinuit,v02,xi2,ZDCvtx,logger,CMuDst,NosvtIT,NossdIT","","",
+   "/star/rcf/test/daq/2001/295/st_physics_2295030_raw_0010.daq",                                   kFALSE},
+  {"Test.year_2001_ppMinBias","","","pp2001a,genvtx,v02,xi2,fpd,logger,CMuDst,NossdIT","","",
+   "/star/rcf/test/daq/2002/008/st_physics_3008016_raw_0001.daq",                                   kFALSE},
+  {"Test.year_2003_dAuMinBias","","","DbV20040520,dau2003i,logger,ITTF,in,-SvtIT,NossdIT","","",
+   "/star/rcf/test/daq/2003/041/st_physics_4041002_raw_0020001.daq",                                kFALSE},
+  {"Test.year_2003_ppMinBias","","","pp2003,VFPPV,v0,xi,l3onl,beamLine,logger,CMuDst,-svtIT,NossdIT,Corr2"
+   ,"","","/star/rcf/test/daq/2003/095/st_physics_4095050_raw_0010002.daq",                         kFALSE},
+  {"Test.year_2004_AuAu_prodHigh","","","P2004,DbV20041213,ITTF,pmdRaw,logger,clearmem,-SvtIT,-SsdIT","","",
+   "/star/rcf/test/daq/2004/044/st_physics_5044102_raw_1010003.daq",                                kFALSE},
+  {"Test.year_2004_AuAu_prodLow","","","P2004,DbV20041213,ITTF,-SvtIT,-SsdIT,pmdRaw,logger,clearmem","","",
+   "/star/rcf/test/daq/2004/044/st_physics_5044116_raw_3010002.daq",                                kFALSE},
+  {"Test.year_2004_AuAuMinBias","","","P2004,DbV20041213,ITTF,-SsdIt,-SvtIt,pmdRaw,logger,clearmem,","","",
+   "/star/rcf/test/daq/2004/028/st_physics_5028066_raw_1010003.daq",                                kFALSE},
+  {"Test.year_2004_prodPP","","","pp2004,DbV20041213,beamLine,ITTF,logger","","",
+   "/star/rcf/test/daq/2004/134/st_physics_5134013_raw_2010010.daq",                                kFALSE},
+  {"Test.year_2005_CuCu200_HighTower","","","P2005,tofDat,logger,MakeEvent,ITTF,ssddat,spt,SsdIt,SvtIt,"
+   "pmdRaw,OShortR,OSpaceZ2","","","/star/rcf/test/daq/2005/054/st_physics_6054016_raw_1020005.daq",kFALSE},
+  {"Test.year_2005_CuCu200_MinBias","","","P2005,tofDat,logger,MakeEvent,ITTF,ssddat,spt,SsdIt,SvtIt,"
+   "pmdRaw,OShortR,OSpaceZ2","","","/star/rcf/test/daq/2005/048/st_physics_6048025_raw_1020002.daq",kFALSE},
+  {"Test.year_2005_CuCu22_MinBias","","","P2005,tofDat,logger,MakeEvent,ITTF,ssddat,spt,SsdIt,SvtIt,pmdRaw,"
+   "OShortR,OSpaceZ2","","","/star/rcf/test/daq/2005/083/st_physics_6083006_raw_1040002.daq",       kFALSE},
+  {"Test.year_2005_CuCu62_MinBias","","","P2005,tofDat,logger,MakeEvent,ITTF,ssddat,spt,SsdIt,SvtIt,pmdRaw,"
+   "OShortR,OSpaceZ2","","","/star/rcf/test/daq/2005/080/st_physics_6080011_raw_1020004.daq",       kFALSE},
+  {"Test.year_2005_ppProduction","","","pp2005a,tofdat,ITTF,OSpaceZ2,OGridLeak3D","","",
+   "/star/rcf/test/daq/2005/171/st_physics_6171062_raw_2040010.daq",                                kFALSE},
+  {"Test.year_2006_ppProdLong","","","pp2006b,ITTF,OSpaceZ2,OGridLeak3D","","",
+   "/star/rcf/test/daq/2006/155/7155010/st_physics_7155010_raw_1020003.daq",                        kFALSE},
+  {"Test.year_2006_ppProdTrans","","","pp2006b,ITTF,OSpaceZ2,OGridLeak3D","","",
+   "/star/rcf/test/daq/2006/129/7129023/st_physics_7129023_raw_1020003.daq",                        kFALSE},
+  {"Test.year_2007_2007ProductionMinBias","","","DbV20080418,B2007g,ITTF,IAna,KeepSvtHit,hitfilt,VFMinuit3,"
+   "l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,ssdIT,pmdReco,Corr4,OSpaceZ2,OGridLeak3D","","",
+   "/star/rcf/test/daq/2007/113/8113044/st_physics_8113044_raw_1040042.daq",                        kFALSE},
+  {"Test.year_2008_ppProduction2008","","","DbV20080712,pp2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine","","",
+   "/star/rcf/test/daq/2008/043/st_physics_9043046_raw_2030002.daq",                                kFALSE},
+  {"Test.year_2008_production_dAu2008","","","DbV20080712,P2008,ITTF,OSpaceZ2,OGridLeak3D,beamLine","","",
+   "/star/rcf/test/daq/2007/352/st_physics_8352025_raw_1030011.daq",                                kFALSE},
+  {"Test.year_2009_production2009_200Gev_Hi","","","pp2009c,ITTF,VFPPVnoCTB,beamLine,BEmcChkStat,btofDat,"
+   "Corr4,OSpaceZ2,OGridLeak3D","","","/star/rcf/test/daq/2009/115/st_physics_10115020_raw_5020001.daq"
+   ,                                                                                                kFALSE},
+  {"Test.year_2009_production2009_500GeV","","","pp2009c,ITTF,VFPPVnoCTB,beamLine,BEmcChkStat,btofDat,"
+   "Corr4,OSpaceZ2,OGridLeak3D","","","/star/rcf/test/daq/2009/085/st_physics_10085024_raw_2020001.daq"
+   ,                                                                                                kFALSE},
+  {"Test.year_2010_auau11_production","","","P2010a,pmdReco,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D",
+   "","","/star/rcf/test/daq/2010/157/st_physics_11157020_raw_2030001.daq",                         kFALSE},
+  {"Test.year_2010_auau200_production","","","P2010a,btof,BEmcChkStat,pmdReco,Corr4,OSpaceZ2,OGridLeak3D",
+   "","","/star/rcf/test/daq/2010/029/st_physics_11029020_raw_1030002.daq",                         kFALSE},
+  {"Test.year_2010_auau39_production","","","P2010a,pmdReco,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D",
+   "","","/star/rcf/test/daq/2010/100/st_physics_11100070_raw_1030001.daq",                         kFALSE},
+  {"Test.year_2010_auau62_production","","","P2010a,pmdReco,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D",
+   "","","/star/rcf/test/daq/2010/098/st_physics_11098050_raw_3020001.daq",                         kFALSE},
+  {"Test.year_2010_auau7_production","","","P2010a,pmdReco,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D",
+   "","","/star/rcf/test/daq/2010/138/st_physics_11138001_raw_2020001.daq",                         kFALSE},
+  // MC chains
+  {"Test.MC.year_2000_hc_standard","","","trs,rrs,y1h,Idst,rich,IAna,l0,tpcI,fcf,Tree,logger,ITTF,Sti,"
+   "NosvtIT,NossdIT,-Kink2,genvtx,geant,evout,IdTruth,tags,GeantOut,big,fzin,MiniMcMk","","","/star/rcf/"
+   "simu/cocktail/hadronic/default/standard/year_1h/half_field/hadronic_on/Gstardata/hc_standard.40_evts.fz"
+   ,                                                                                                kFALSE},
+  {"Test.MC.year_2001_hc_standard","","","trs,fss,rrs,y2001n,Idst,rich,IAna,l0,tpcI,fcf,ftpc,Tree,logger,"
+   "ITTF,Sti,-Kink2,genvtx,geant,evout,IdTruth,tags,emcY2,GeantOut,big,fzin,MiniMcMk","","",
+   "/star/rcf/simu/cocktail/hadronic/default/standard/year2001/hadronic_on/Gstardata/hc_standard.40_evts.fz"
+   ,                                                                                                kFALSE},
+  {"Test.MC.year_2001_pp_minbias","","","trs,rrs,fss,y2001n,Idst,rich,IAna,l0,tpcI,fcf,ftpc,Tree,logger,"
+   "ITTF,Sti,-Kink2,genvtx,geant,evout,IdTruth,tags,emcY2,MiniMcMk,GeantOut,logger,big,fzin","","",
+   "/star/rcf/simu/pp200/pythia/default/minbias/year2001/hadronic_on/gstardata/pds0200_04_12812evts.fzd"
+   ,                                                                                                kFALSE},
+  {"Test.MC.year_2003_dau_minbias","","","trs,fss,y2003,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,logger,ITTF,Sti,"
+   "genvtx,bbcSim,tofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,fzin,MiniMcMk,logger,clearmem","","",
+   "/star/rcf/simu/rcf1197_05_5940evts.fzd",                                                        kFALSE},
+  {"Test.MC.year_2004_auau_central","","","trs,srs,fss,y2004a,Idst,BAna,l0,tpcI,fcf,ftpc,Tree,logger,ITTF,"
+   "Sti,genvtx,SvtIT,geant,tags,bbcSim,tofsim,emcY2,EEfs,evout,GeantOut,big,fzin,MiniMcMk,clearmem","","",
+   "/star/rcf/simu/rcf1209_05_80evts.fzd",                                                          kFALSE},
+  {"Test.MC.year_2004_auau_minbias","","","trs,srs,fss,y2004,Idst,BAna,l0,tpcI,fcf,ftpc,Tree,ITTF,Sti,"
+   "genvtx,SvtIt,geant,evout,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,logger,fzin,MiniMcMk,clearmem",
+   "","","/star/rcf/simu/rcf1207_01_225evts.fzd",                                                   kFALSE},
+  {"Test.MC.year_2005_cucu200_minbias","","","trs,srs,fss,ssd,y2005x,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,SvtCL,"
+   "svtDb,logger,ITTF,Sti,SsdIt,SvtIt,genvtx,geant,evout,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,fzin,"
+   "MiniMcMk,clearmem","","","/star/rcf/simu/rcf1216_05_200evts.fzd",                               kFALSE},
+  {"Test.MC.year_2005_cucu62_minbias","","","trs,srs,fss,ssd,y2005x,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,SvtCL,"
+   "svtDb,logger,ITTF,Sti,SsdIt,SvtIt,genvtx,geant,evout,tags,bbcSim,tofsim,emcY2,EEfs,GeantOut,big,fzin,"
+   "MiniMcMk,clearmem","","","/star/rcf/simu/rcf1237_01_500evts.fzd",                               kFALSE},
+  {"Test.MC.year_2006_pp200_minbias","","","trs,fss,y2006h,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,logger,ITTF,Sti,"
+   "genvtx,NoSsdIt,NoSvtIt,MakeEvent,bbcSim,tofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,fzin,"
+   "MiniMcMk,clearmem","","","/star/rcf/simu/rcf9991_01_1000evts.fzd",                              kFALSE},
+  {"Test.MC.year_2007_auau200_central","","","trs,srs,ssd,fss,y2007,Idst,BAna,l0,tpcI,fcf,ftpc,Tree,logger,"
+   "ITTF,Sti,SvtIt,SsdIt,genvtx,MakeEvent,IdTruth,geant,tags,bbcSim,tofsim,emcY2,EEfs,evout,GeantOut,big,"
+   "fzin,MiniMcMk,clearmem","","","/star/rcf/simu/rcf1296_02_100evts.fzd",                          kFALSE},
+  {"Test.MC.year_2008_dau200_minbias","","","trs,fss,y2008a,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,logger,ITTF,"
+   "Sti,genvtx,NoSsdIt,NoSvtIt,MakeEvent,bbcSim,tofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,fzin,"
+   "MiniMcMk,clearmem","","",   "/star/rcf/simu/rcf9066_20_1000evts.fzd",                           kFALSE},
+  {"Test.MC.year_2008_pp200_minbias","","","trs,fss,y2008a,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,logger,ITTF,Sti,"
+   "genvtx,NoSsdIt,NoSvtIt,MakeEvent,bbcSim,tofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,fzin,"
+   "MiniMcMk,clearmem","","","/star/rcf/simu/rcf9992_01_1000evts.fzd",                              kFALSE},
+  {"Test.MC.year_2009_pp200_minbias","","","tpcRS,TpxClu,fss,y2009a,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,logger,"
+   "ITTF,Sti,genvtx,NoSsdIt,NoSvtIt,MakeEvent,bbcSim,tofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,"
+   "fzin,MiniMcMk,clearmem","",""
+   ,"/star/rcf/test/dev/trs_sl302.ittf/Sun/year_2009/pp200_minbias/rcf99001_10_500evts.fzd",        kFALSE},
+  {"Test.MC.year_2009_pp500_minbias","","","tpcRS,TpxClu,fss,y2009a,Idst,IAna,l0,tpcI,fcf,ftpc,Tree,logger,"
+   "ITTF,Sti,genvtx,NoSsdIt,NoSvtIt,MakeEvent,bbcSim,tofsim,tags,emcY2,EEfs,evout,IdTruth,geantout,big,"
+   "fzin,MiniMcMk,clearmem","",""
+   ,"/star/rcf/test/dev/trs_sl302.ittf/Sun/year_2009/pp500_minbias/rcf99002_10_500evts.fzd",        kFALSE},
+  {"Test.MC.year_2010_auau11_minbias","","","tpcRS,y2010a,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,"
+   "logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,"
+   "geantout,big,fzin,MiniMcMk,clearmem","",""
+   ,"/star/rcf/test/dev/trs_sl302.ittf/Sun/year_2010/auau11_minbias/rcf10031_1_100evts.fzd",        kFALSE},
+  {"Test.MC.year_2010_auau200_minbias","","","tpcRS,y2010,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,"
+   "logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,"
+   "geantout,big,fzin,MiniMcMk,clearmem","","","/star/rcf/simu/rcf9068_305_100evts.fzd",            kFALSE},
+  {"Test.MC.year_2010_auau39_minbias","","","tpcRS,y2010a,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,"
+   "logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,"
+   "geantout,big,fzin,MiniMcMk,clearmem","","",
+   "/star/rcf/test/dev/trs_sl302.ittf/Sun/year_2010/auau39_minbias/rcf10032_1_100evts.fzd",         kFALSE},
+  {"Test.MC.year_2010_auau62_minbias","","","tpcRS,y2010a,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,"
+   "logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,"
+   "geantout,big,fzin,MiniMcMk,clearmem","","",
+   "/star/rcf/test/dev/trs_sl302.ittf/Sun/year_2010/auau62_minbias/rcf10033_1_100evts.fzd",         kFALSE},
+  {"Test.MC.year_2010_auau7_minbias","","","tpcRS,y2010a,MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,BAna,l0,Tree,"
+   "logger,Sti,genvtx,tpcDB,TpcHitMover,TpxClu,bbcSim,btofsim,tags,emcY2,EEfs,evout,-dstout,IdTruth,"
+   "geantout,big,fzin,MiniMcMk,clearmem","","",
+   "/star/rcf/test/dev/trs_sl302.ittf/Sun/year_2010/auau7_minbias/rcf10030_1_100evts.fzd",          kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Aliased     ","time stamps","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE}
