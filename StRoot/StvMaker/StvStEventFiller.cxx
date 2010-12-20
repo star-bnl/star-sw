@@ -1,12 +1,15 @@
 #if 1
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.3 2010/12/16 21:50:40 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.4 2010/12/20 20:33:48 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.4  2010/12/20 20:33:48  perev
+ * Cleanup of mTrackNumber in StvPulls
+ *
  * Revision 1.3  2010/12/16 21:50:40  perev
  * Primary track fit
  *
@@ -1262,7 +1265,7 @@ void StvStEventFiller::fillPulls(const StvTrack* track, int gloPri)
   getAllPointCount(track,dets);
   StvPullTrk aux;
   aux.mVertex = (unsigned char)track->IsPrimary();
-  aux.mTrackNumber=mTrackNumber;
+  aux.mTrackNumber=track->GetId();;
   aux.nAllHits = dets[0][2];
   aux.nTpcHits = dets[kTpcId][2];
   aux.nSsdHits = dets[kSsdId][2];
@@ -1385,7 +1388,7 @@ void StvStEventFiller::fillPulls(const StvTrack* track, int gloPri)
   aux.mCharge = stHit->charge();
   aux.mChi2   = node->GetXi2();
   aux.mDetector=node->GetDetId();
-  aux.mTrackNumber=mTrackNumber;
+  aux.mTrackNumber=track->GetId();
   aux.nAllHits  = dets[0][2];
   aux.nTpcHits  = dets[kTpcId][2];
   aux.nFtpcHits = dets[kFtpcEastId][2]+dets[kFtpcWestId][2];

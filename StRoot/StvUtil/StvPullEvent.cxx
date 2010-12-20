@@ -58,7 +58,7 @@ void StvPullHit::Print(const char* option) const
   if (!option) option="";
   printf("StvPullHit::Print(%s)\n",option);
 
-  printf("lYHit %g(%g)\tlZHit %g(%g) lLen=$g\n"
+  printf("lYHit %g(%g)\tlZHit %g(%g) lLen=%g\n"
 	,lYHit,lYHitErr
 	,lZHit,lZHitErr,lLen);
 
@@ -137,29 +137,32 @@ void StvPullEvent::Clear(const char*)
 //_____________________________________________________________________________
 void StvPullEvent::Finish()
 {
-  int ihit=0;
-  int nHits = mHitsG.GetLast()+1;
-  for (int iprim=0;iprim<mNTrks[1];iprim++) 
-  {
-    const StvPullTrk* pTrk = (const StvPullTrk*)mTrksP[iprim];
-    assert(pTrk); 
-    int iTrk = pTrk->mTrackNumber;
-    assert(iTrk>0);
-    StvPullTrk* gTrk = (StvPullTrk*)mTrksG[iTrk-1];
-    assert(gTrk);
-    assert(gTrk->mTrackNumber==iTrk);
-    gTrk->mVertex = pTrk->mVertex;
-    int nUpd=0;
-    for (;ihit<nHits;ihit++) {
-      StvPullHit *gHit = (StvPullHit*)mHitsG[ihit];
-      if (gHit->mTrackNumber!=iTrk) {
-        if (nUpd) {break;} else {continue;}}
-      gHit->mVertex = pTrk->mVertex; nUpd++;
-    }
-    assert(nUpd);
-  }
+static int nCall=0; nCall++;
+  int iTkG=0,iTkP=-1,iHiG=0,iHiP=0,idP=0,idG=0;
+  StvPullTrk* trkG=0,*trkP =0;
+  StvPullHit* hiG=0,*hiP =0;
+  int nHiG = mHitsG.GetLast()+1;
+  int nHiP = mHitsP.GetLast()+1;
 
+  do {
+    iTkP++;
+    if (iTkP<mNTrks[1]) { trkP=(StvPullTrk*)mTrksP[iTkP];idP=trkP->mTrackNumber;}
+    else                { trkP=0; idP=0;}
+    for(;iTkG<mNTrks[0];iTkG++) {
+      int vertex = 0;
+      trkG=(StvPullTrk*)mTrksG[iTkG]; idG = trkG->mTrackNumber;
+      if (idP==idG) vertex = trkP->mVertex;
+      trkG->mVertex = vertex;
+      for(;iHiG<nHiG; iHiG ++) { 
+        hiG = (StvPullHit*)mHitsG[iHiG]; if (idG!=hiG->mTrackNumber) break;
+        hiG->mTrackNumber=iTkG; hiG->mVertex=vertex;
+      }
+      for(;iHiP<nHiP; iHiP ++) { 
+        hiP = (StvPullHit*)mHitsP[iHiP]; if (idP!=hiG->mTrackNumber) break;
+        hiP->mTrackNumber=iTkP; hiP->mVertex=vertex;
+      }
+    }
+  } while(trkP);
 }  
-  
   
   
