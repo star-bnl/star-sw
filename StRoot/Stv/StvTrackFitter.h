@@ -6,6 +6,8 @@
 
 /// \class StvTrackFitter
 class StvTrack;
+class StvNode;
+class StvHit;
 
 class StvTrackFitter : public TNamed
 {
@@ -14,6 +16,7 @@ public:
   virtual ~StvTrackFitter()			{if(this==fgInst) fgInst=0;}
   virtual  int Refit(StvTrack *trak,int dir)	=0;
   virtual void Clear(const char *opt="")	{mNDF=0; mXi2=3e33;}
+  virtual  int Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node)=0;
            int GetNDF() const 			{return mNDF;}     
         double GetXi2() const 			{return mXi2;}     
   
