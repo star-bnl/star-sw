@@ -45,6 +45,7 @@ const StvNode *GetNode(EPointType poTy) const;
      to the last point on track. 
     */
    double GetLength(EPointType ept=kFirstPoint) const;
+      int GetCharge() const;
 
    int ReleaseHits();
 double GetXi2() const;   	// chi2/ndf of fit,        all nodes
@@ -59,6 +60,7 @@ double GetRes() const;		// Average residual
   void Print(const char *opt) const;
 
   double Approx(int mode=0);
+  double ToBeam() const;
  
   void Show() const;  
 
@@ -77,8 +79,8 @@ class StvHitCount
 enum {kTotHits=10	//Min number hits for track
      ,kGoodHits=5	//Min number good hits for track
      ,kContHits=2	//Min length of good hit sequence
-     ,kContNits=3	//Max length of acceptable non hit sequence
-     ,kTotNits=10	//Max number of acceptable non hits
+     ,kContNits=8	//Max length of acceptable non hit sequence
+     ,kTotNits=13	//Max number of acceptable non hits
      };
 public:
 StvHitCount()		{Clear();}

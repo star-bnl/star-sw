@@ -285,12 +285,40 @@ StvPoints showTrak;
   StvDraw::Inst()->Hits(showHits,kUsedHit    );
 }
 //_____________________________________________________________________________
+void StvTrack::Print(const char *opt) const
+{
+  if (!opt) opt = "";
+  printf("Track %p\n",(void*)this);
+
+  int n=0;
+  for (StvNodeConstIter it=begin();it!=end();++it) {
+    const StvNode *node = (*it);
+    const StvHit *hit = node->GetHit();
+    if (!hit && strchr(opt,'H')) continue;
+    n++;printf("%3d - ",n);
+    node->Print(opt);
+  }
+}
+//_____________________________________________________________________________
+double StvTrack::ToBeam() const
+{
+  const StvNode *node = GetNode(kDcaPoint);
+  if (!node) return 3e33;
+  return node->GetFP().getRxy();
+}
+//_____________________________________________________________________________
+int StvTrack::GetCharge() const
+{
+  const StvNode *node = front();
+  return node->GetFP().getCharge();
+}
+//_____________________________________________________________________________
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 void StvHitCount::AddHit()
 {
     nPossHits++;  nTotHits++;nContHits++;
-    if (nContNits) {
+    if (nContNits && nContHits > kContHits) {
       if (nContNits>kContNits) nSeqLong++;
       nContNits=0;nSeqNits++;
     }
@@ -322,19 +350,4 @@ int StvHitCount::Reject()
 int StvHitCount::Skip() const
 {
   return (nContNits>kContNits || nTotNits > kTotNits) ;
-}
-//_____________________________________________________________________________
-void StvTrack::Print(const char *opt) const
-{
-  if (!opt) opt = "";
-  printf("Track %p\n",(void*)this);
-
-  int n=0;
-  for (StvNodeConstIter it=begin();it!=end();++it) {
-    const StvNode *node = (*it);
-    const StvHit *hit = node->GetHit();
-    if (!hit && strchr(opt,'H')) continue;
-    n++;printf("%3d - ",n);
-    node->Print(opt);
-  }
 }
