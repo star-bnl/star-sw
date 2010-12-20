@@ -635,10 +635,15 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 		}
 	    }
 	} else {
-	    if ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} > 3)) {
-		$CXXFLAGS .= "  -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION -msse -msse2";
-		#    $CXXFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE"; # uncomment for CA Efficiencies output
-		$LIBS = "-lTPCCATracker -lVc -lTBB ". $env->{Packages}->{ROOT}->{LIBS} . " -lEG";
+	    #if ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} > 3)) {
+	    #
+	    # do not switch on gcc version but on CATracker for now
+	    #
+	    if (  -e "StRoot/TPCCATracker" && 
+		  ($env->{CXX_MAJOR} > 4 or ($env->{CXX_MAJOR} == 4 and $env->{CXX_MINOR} > 3))  	){
+	    	$CXXFLAGS .= "  -DDO_TPCCATRACKER -DNODEBUG -DENABLE_VECTORIZATION -msse -msse2";
+	    	#    $CXXFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE"; # uncomment for CA Efficiencies output
+	    	$LIBS = "-lTPCCATracker -lVc -lTBB ". $env->{Packages}->{ROOT}->{LIBS} . " -lEG";
 	    }
 	}
     }
