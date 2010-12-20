@@ -499,7 +499,9 @@ void StvNodePars::GetRadial(double radPar[6],double radErr[15],const StvFitErrs 
 
   double proj[3][3] = {{0}};
   double D0R0 = TCL::vdot(dcaFrame[0],radFrame[0],3);
-  assert(fabs(D0R0)>1e-6);
+//  assert(fabs(D0R0)>1e-6);
+  if (fabs(D0R0)<1e-6) D0R0 = 1e-6;
+
   for (int i=0;i<3;i++) {
     proj[i][i] = 1;
     for (int j=0;j<3;j++) {
