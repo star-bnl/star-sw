@@ -115,6 +115,7 @@ void StvToolkit::Clear(const char*)
   if (mTrackFactory)	mTrackFactory->clear();
   if (mNodeFactory) 	mNodeFactory->clear();
   if (mHitFactory)  	mHitFactory->clear();
+  if (mVertexFactory)   mVertexFactory->clear();
   StvTrack::mgId=0;
 }
 /*! Calculate/return the z component of mag field 
