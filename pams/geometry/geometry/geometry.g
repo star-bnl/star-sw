@@ -1,6 +1,17 @@
-* $Id: geometry.g,v 1.221 2010/12/17 20:01:24 jwebb Exp $
+* $Id: geometry.g,v 1.222 2010/12/21 17:21:31 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.222  2010/12/21 17:21:31  jwebb
+* Added Y2008c tag.
+* Added Y2009c tag.
+* Added y2010b tag.
+*
+* These three tags represent the current best model of the STAR detector,
+* including TOF geometry, for Y2008 - Y2010.  Previous models used a TPC
+* envelope which was too large and overlapped with 'kOnly' volumes in the
+* TOF, causing 'odd' hit distributions.
+*
 * Revision 1.221  2010/12/17 20:01:24  jwebb
+*
 * Defined TPCE04r (reduced TPC envelope radius) and BTOF67 (btof sensitive
 * volume size fix) and incorporated them into Y2011 tag.
 *
@@ -1160,8 +1171,12 @@ replace [exe BTOFb6;] with [;" X.Dong";BTOF=on;
                             BtofConfig=11; Itof=6 " call btofgeo6 ";
                             tofX0= 0.00; tofZ0=-0.50;]
 
+replace [exe BTOFb7;] with [;" X.Dong";BTOF=on;
+                            BtofConfig=11; Itof=7 " call btofgeo7 ";
+                            tofX0= 0.00; tofZ0=-0.50;]
+
 replace [exe BTOFc6;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=6 " call btofgeo6 ";]
-replace [exe BTOFc7;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=6 " call btofgeo7 ";]
+replace [exe BTOFc7;] with [;" F.Geurts";BTOF=on; BtofConfig=12; Itof=7 " call btofgeo7 ";]
 
 
 
@@ -1547,6 +1562,7 @@ replace [exe y2007h;] with ["y2007g + TPC y2009"
          ]
 
 
+
 !//______________________________________________________________________________
 *********   y2008   ***
 replace [exe y2008;] with [;
@@ -1578,6 +1594,14 @@ replace [exe y2008b;] with [;exe y2008a;
         exe TPCE04;
         exe CALB02;
         exe ECALv6;]
+
+
+replace [exe y2008c;] with ["Y2008 production tag C: Fixes TOF response " ; 
+        exe y2008b ; "Inherit everything from y2008a";
+        exe TPCE04r; "Reduce the TPC envelope raidus";
+        exe BTOFb7;           "Fixed TOF sensitve volumes";
+        ]
+
 
 !//______________________________________________________________________________
 *                                                                           Y2009
@@ -1625,6 +1649,7 @@ replace [exe y2009a;] with [;
     exe PIPE12;
 };]
 
+
 replace [exe y2009b;] with [;
 {   "y2009b production tag B: Y2009A tag with the old tracking cuts in the EEMC.";
     "This tag is not appropriate for EEMC simulations.";
@@ -1632,6 +1657,13 @@ replace [exe y2009b;] with [;
     exe EMCUTS(eemc,0);   "10 keV EM thresholds in barrel and endcap calorimeters";
     exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
 };]
+
+replace [exe y2009c;] with [;
+   "y2009b production tag C: Y2009A tag with fixed TOF resonse";
+   exe Y2009A;           "Y2009A configugration";
+   exe TPCE04r;          "Reduced TPC envelope radius";
+   exe BTOFc7;           "Fixed TOF sensitve volumes";
+;]
 
 
 
@@ -1646,30 +1678,38 @@ replace [exe y2010;] with [;
 };]
 
 replace [exe y2010a;] with [;
-{ "y2010a: production tag A"
-    exe SCON13;      "support cone without SVT and new cable weight estimates";
-    exe TPCE04;      "agstar version of yf model";
-    exe BTOF66;      "time of flight";
-    exe CALB02;      "updated bemc model";
-    exe ECALv6;      "several bugfixes in eemc geometry";
-    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
-    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
-    exe BBCMon;      "beam beam counters";
-    exe FPDM03;      "";
-    exe VPDD07;      "";
-    exe FTPC01;      "";
-    exe SVTTof;      "";
-    exe PHMD02;      "Photon mult detector";
-    exe SISDof;
-    exe FTRO01;
-    exe MUTD03;
-    exe CAVE04;
-    exe PIPE12;
-};]
+ "y2010a: production tag A"
+  exe SCON13;      "support cone without SVT and new cable weight estimates";
+  exe TPCE04;      "agstar version of yf model";
+  exe BTOF66;      "time of flight";
+  exe CALB02;      "updated bemc model";
+  exe ECALv6;      "several bugfixes in eemc geometry";
+  exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+  exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+  exe BBCMon;      "beam beam counters";
+  exe FPDM03;      "";
+  exe VPDD07;      "";
+  exe FTPC01;      "";
+  exe SVTTof;      "";
+  exe PHMD02;      "Photon mult detector";
+  exe SISDof;
+  exe FTRO01;
+  exe MUTD03;
+  exe CAVE04;
+  exe PIPE12;
+;]
+
+replace [exe y2010b;] with ["Y2010 production tag B: Based on A, with TOF fixes";
+   exe y2010a;           "Inherit from y2010a";
+   exe TPCE04r;          "reduced TPC envelope raidus";
+   exe BTOF67;           "fixes to TOF sensitive volume dimensions";
+                         "note that TOF only uses the position of the";
+                         "detectors, not the dE/dx / depth.  So this ";
+                         "fix is not critical.";
+   ]
 
 c ======================================================================= y2011 =
-REPLACE [exe y2011;] with [;
-{ "y2011 baseline: Base on y2010a with PMD off"
+REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC envelope radius and TOF";
     exe SCON13;      "support cone without SVT and new cable weight estimates";
     exe TPCE04r;     "agstar version of yf model with reduced Rmax";
     exe BTOF67;      "time of flight";
@@ -1688,7 +1728,7 @@ REPLACE [exe y2011;] with [;
     exe MUTD04;      "Muon telescope detector";
     exe CAVE04;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
-};]
+]
 c ===============================================================================
 
 
@@ -2340,6 +2380,10 @@ If LL>0
                 exe y2008b;
 	        }
 
+  Case Y2008c   { "2008c production: y2008b geometry with fixes for TOF response.";
+                  Geom = 'Y2009c  ';
+                  exe y2008c;}
+
 ****************************************************************************************
   Case Y2009   { y2009 initial geometry: more detailed TPC
                  Geom = 'Y2009   ';
@@ -2353,6 +2397,10 @@ If LL>0
                   Geom = 'Y2009b  ';
                   exe y2009b;}
 
+  Case Y2009c   { "2009c production: y2009a geometry with fixes for TOF response.";
+                  Geom = 'Y2009c  ';
+                  exe y2009c;}
+
 ****************************************************************************************
   Case Y2010   { y2010: baseline
                  Geom = 'Y2010   ';
@@ -2361,6 +2409,11 @@ If LL>0
   Case Y2010A  { Y2010a: production tag A
                  Geom = 'Y2010A  ';
                  exe y2010a;       }
+
+  Case Y2010b  { "Y2010a: production tag B with fixes for TOF response";
+                 Geom = 'Y2010b  ';
+                 exe y2010b;       }
+
 ****************************************************************************************
   Case y2011   { Y2011: baseline y2011 geometry, placeholder added 07/30/2010
                  Geom = 'Y2011   ';
