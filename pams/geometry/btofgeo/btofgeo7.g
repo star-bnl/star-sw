@@ -1,5 +1,8 @@
-* $Id: btofgeo7.g,v 1.1 2010/12/17 20:02:32 jwebb Exp $
+* $Id: btofgeo7.g,v 1.2 2010/12/21 17:18:50 jwebb Exp $
 * $Log: btofgeo7.g,v $
+* Revision 1.2  2010/12/21 17:18:50  jwebb
+* Changed print statements to starsim-aware IO.
+*
 * Revision 1.1  2010/12/17 20:02:32  jwebb
 * Reverted to previous version of btofgeo6 code.  Fixes will be applied now
 * in btofgeo7.
@@ -512,29 +515,38 @@ Module  BTOFGEO7 is the Geometry of Barrel Trigger / Time Of Flight system
 *     increasing z is then toward eta=0 in each half.
 *
 Block BTOF is the whole CTF system envelope 
+
       Attribute BTOF      seen=1  colo=1
       Material  Air
       Medium    Standard
       Shape     Tube      rmin=btog_Rmin+btog_X0  Rmax=btog_Rmax+btog_X0  dz=btog_dz+btog_Z0
 
-      print *,'BTOF choice = ',btog_choice
-	  if (btog_choice ==  7) print *,' TOF: btog_choice=7: This is the Run-IV geometry...'
-	  if (btog_choice ==  8) print *,' TOF: btog_choice=8: This is the Run-V geometry...'
-	  if (btog_choice ==  9) print *,' TOF: btog_choice=9: This is the Run-VI geometry...'
-	  if (btog_choice == 10) print *,' TOF: btog_choice=10: This is the Run-VII geometry...'
-	  if (btog_choice == 11) print *,' TOF: btog_choice=11: This is the Run-VIII geometry...'
-	  if (btog_choice == 12) print *,' TOF: btog_choice=12: This is the Run-IX geometry...'
+      Prin0 btog_choice, 7; ('BTOF: btog_choice = ', F4.1, ' itof = ', I2);
+
+      if (btog_choice ==  7) { prin0 ; (' TOF: btog_choice=7: This is the Run-IV geometry...') }
+      if (btog_choice ==  8) { prin0 ; (' TOF: btog_choice=8: This is the Run-V geometry...')  }
+      if (btog_choice ==  9) { prin0 ; (' TOF: btog_choice=9: This is the Run-VI geometry...') }
+      if (btog_choice == 10) { prin0 ; (' TOF: btog_choice=10: This is the Run-VII geometry...') }
+      if (btog_choice == 11) { prin0 ; (' TOF: btog_choice=11: This is the Run-VIII geometry...') }
+      if (btog_choice == 12) { prin0 ; (' TOF: btog_choice=12: This is the Run-IX geometry...') }
 
       choice = 1                           ! ctb
       if (btog_choice == 2)  choice= 2     ! full tofp
       if (btog_choice == 6)  choice= 6     ! full tofr
       if (btog_choice == 12) choice=12     ! run-9 selection (west)
-      print *,' Positioning West Barrel, choice=',choice
+      prin1 choice; 
+        (' Positioning West Barrel, choice=',I2);
+
       Create and Position BTOH  z=+btog_dz/2+btog_Z0   alphay=180   ! West barrel
       choice = btog_choice                   
+
       if (btog_choice == 12) choice=-12    ! run-9 selection (east)
-      print *,' Positioning East Barrel, choice=',choice
+ 
+      prin1 choice;
+        (' Positioning East Barrel, choice=', I2 );
+
       Create and Position BTOH  z=-btog_dz/2-btog_Z0                 ! East barrel
+
 EndBlock
 *
 *------------------------------------------------------------------------------
