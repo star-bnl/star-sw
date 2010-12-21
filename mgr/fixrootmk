@@ -61,7 +61,11 @@ if ( ! defined($CERNL) ){
 }
 if ( ! defined($CERN) ){
     print "CERN defined as /cern\n";
-    $CERN = "/cern";
+    if ( defined($ENV{USE_64BITS}) && -e "/cern64" ){
+	$CERN = "/cern64";
+    } else {
+	$CERN = "/cern";
+    }
 }
 
 # Now do the work
