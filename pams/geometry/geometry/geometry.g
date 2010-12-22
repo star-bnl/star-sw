@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.222 2010/12/21 17:21:31 jwebb Exp $
+* $Id: geometry.g,v 1.223 2010/12/22 00:13:00 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.223  2010/12/22 00:13:00  jwebb
+* Correction to the documentation bank in the fzd file for y2008c geometry.
+*
 * Revision 1.222  2010/12/21 17:21:31  jwebb
 * Added Y2008c tag.
 * Added Y2009c tag.
@@ -1597,7 +1600,7 @@ replace [exe y2008b;] with [;exe y2008a;
 
 
 replace [exe y2008c;] with ["Y2008 production tag C: Fixes TOF response " ; 
-        exe y2008b ; "Inherit everything from y2008a";
+        exe y2008b ; "Inherit everything from y2008b";
         exe TPCE04r; "Reduce the TPC envelope raidus";
         exe BTOFb7;           "Fixed TOF sensitve volumes";
         ]
@@ -1703,9 +1706,6 @@ replace [exe y2010b;] with ["Y2010 production tag B: Based on A, with TOF fixes"
    exe y2010a;           "Inherit from y2010a";
    exe TPCE04r;          "reduced TPC envelope raidus";
    exe BTOF67;           "fixes to TOF sensitive volume dimensions";
-                         "note that TOF only uses the position of the";
-                         "detectors, not the dE/dx / depth.  So this ";
-                         "fix is not critical.";
    ]
 
 c ======================================================================= y2011 =
@@ -2381,7 +2381,7 @@ If LL>0
 	        }
 
   Case Y2008c   { "2008c production: y2008b geometry with fixes for TOF response.";
-                  Geom = 'Y2009c  ';
+                  Geom = 'Y2008c  ';
                   exe y2008c;}
 
 ****************************************************************************************
