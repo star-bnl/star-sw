@@ -79,7 +79,6 @@ endif
 #
 # Make it easy to do SL5/64 to SL4/32
 #
-
 if ( -e .sl44_gcc346 && ! -e .sl53_gcc432 ) then
     # as above, request confirmation
     /bin/ln -s .sl44_gcc346 .sl53_gcc432 && echo "SL53 compatibility link created"
@@ -87,10 +86,33 @@ endif
 
 
 
-
 #
 # Scientific Linux
 #
+if ( -e .sl53_gcc432 ) then
+    if ( ! -e .sl55_gcc432 ) then
+	echo "Backward compatibility assumed between SL55 -> SL53 / 32 bits"
+	/bin/ln -s .sl53_gcc432 .sl55_gcc432
+    endif
+    if ( ! -e .rh55_gcc432 ) then
+	echo "Backward compatibility assumed between RH55 -> SL53 / 32 bits"
+	/bin/ln -s .sl53_gcc432 .rh55_gcc432
+    endif
+endif
+if ( -e .sl53_x8664_gcc432 ) then
+    if ( ! -e .sl55_x8664_gcc432 ) then
+	echo "Backward compatibility assumed between SL55 -> SL53 / 64 bits"
+	/bin/ln -s .sl53_x8664_gcc432 .sl55_x8664_gcc432
+    endif
+    if ( ! -e .rh55_x8664_gcc432 ) then
+	echo "Backward compatibility assumed between RH55 -> SL53 / 64 bits"
+	/bin/ln -s .sl53_x8664_gcc432 .rh55_x8664_gcc432
+    endif
+endif
+
+# <--- started to be more complicated with 32 bits and 64 bits
+
+
 if ( -e .sl44_gcc346) then
     # support through SL44
     if ( ! -e .sl46_gcc346 ) then

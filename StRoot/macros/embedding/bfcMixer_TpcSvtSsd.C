@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_TpcSvtSsd.C,v 1.13 2010/06/02 16:42:39 hmasui Exp $
+// $Id: bfcMixer_TpcSvtSsd.C,v 1.14 2010/11/24 19:15:37 hmasui Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -28,8 +28,13 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
                     const Char_t* prodName = "P08icAuAu",
                     const Char_t* mode="flatpt"
 ) {
+  // Separate DB timestamp to add it in both chain1 and chain3
+  TString DbVP06idpp("DbV20060729 ");
+  TString DbVP07icCuCu("DbV20070518 ");
+  TString DbVP08icAuAu("DbV20080418 ");
+
   // production chains for P06id - p+p 200 GeV (Run6)
-  TString prodP06idpp("DbV20060729 pp2006b ITTF OSpaceZ2 OGridLeak3D VFMCE -VFPPVnoCTB -hitfilt");
+  TString prodP06idpp("pp2006b ITTF OSpaceZ2 OGridLeak3D VFMCE -VFPPVnoCTB -hitfilt");
 
   // production chain for P07ib
 //  TString prodP07ib("P2005b DbV20070518 MakeEvent ITTF Iana ToF spt SsdIt SvtIt pmdRaw SCEbyE OGridLeak OShortR OSpaceZ2 ssd_daq");// KeepSvtHit hitfilt skip1row");
@@ -41,7 +46,7 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
 //    TString prodP08if("B2007g DbV20080418 adcOnly MakeEvent ITTF Iana ToF spt SsdIt SvtIt pmdRaw SCEbyE  OShortR trgd Corr5 OSpaceZ2 ssd_daq KeepSvtHit -hitfilt VFMCE");// KeepSvtHit hitfilt skip1row");
 
   // Production chain for P08ic Au+Au 200 GeV (Run7)
-  TString prodP08icAuAu("DbV20080418 B2007g ITTF adcOnly IAna KeepSvtHit VFMCE -hitfilt l3onl emcDY2 fpd ftpc trgd ZDCvtx svtIT ssdIT Corr5 -dstout");
+  TString prodP08icAuAu("B2007g ITTF adcOnly IAna KeepSvtHit VFMCE -hitfilt l3onl emcDY2 fpd ftpc trgd ZDCvtx svtIT ssdIT Corr5 -dstout");
 
   TString geomP06id("ry2006");
   TString geomP07ic("ry2005f");
@@ -52,14 +57,17 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
 
   TString chain3Opt("");
   if( prodName == "P06idpp") {
+    chain1Opt.Prepend(DbVP06idpp);
     chain2Opt += " "; chain2Opt += geomP06id;
     chain3Opt = prodP06idpp ;
   }
   else if( prodName == "P07ic" ){
+    chain1Opt.Prepend(DbVP07icCuCu);
     chain2Opt += " "; chain2Opt += geomP07ic;
     chain3Opt = prodP07icCuCu;
   }
   else if ( prodName == "P08icAuAu" ){
+    chain1Opt.Prepend(DbVP08icAuAu);
     chain2Opt += " "; chain2Opt += geomP08ic;
     chain3Opt = prodP08icAuAu ;
   }
@@ -68,8 +76,8 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
     return;
   }
   //  chain3Opt += " Embedding onlraw GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker EmbeddingShortCut"; 
-  chain3Opt += " Embedding onlraw McEvent McEvOut GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker -hitfilt EmbeddingShortCut"; 
-//  chain3Opt += " Embedding onlraw McEvent McEvOut GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker -hitfilt -TrsPileUp -TrsToF";
+//  chain3Opt += " Embedding onlraw McEvent McEvOut GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker -hitfilt EmbeddingShortCut"; 
+  chain3Opt += " Embedding onlraw McEvent McEvOut GeantOut MiniMcMk McAna IdTruth -in NoInput,useInTracker -hitfilt -TrsPileUp -TrsToF";
   //  chain3Opt += " Embedding onlraw McEvent McEvOut GeantOut IdTruth -in NoInput -hitfilt EmbeddingShortCut"; 
 
   if (isSvtIn) chain3Opt += " SvtEmbed";
@@ -80,12 +88,15 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
   }
 
   if( prodName == "P06idpp") {
+    chain3Opt.Prepend(DbVP06idpp);
     chain3Opt += " "; chain3Opt += geomP06id;
   }
   else if( prodName == "P07ic" ){
+    chain3Opt.Prepend(DbVP07icCuCu);
     chain3Opt += " "; chain3Opt += geomP07ic;
   }
   else if ( prodName == "P08icAuAu" ){
+    chain3Opt.Prepend(DbVP08icAuAu);
     chain3Opt += " "; chain3Opt += geomP08ic;
   }
   else{
@@ -203,4 +214,7 @@ void bfcMixer_TpcSvtSsd(const Int_t Nevents=500,Int_t isSvtIn=1, Int_t isSsdIn=1
   gSystem->Exec("date");
 }
   
-  
+// $Log: bfcMixer_TpcSvtSsd.C,v $
+// Revision 1.14  2010/11/24 19:15:37  hmasui
+// Separate DbV timestamp from the main chain string in order to include it into chain1
+//  

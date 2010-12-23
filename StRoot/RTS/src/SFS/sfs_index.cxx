@@ -403,10 +403,10 @@ int sfs_index::getInodeSize(fs_inode *inode, SfsDirsize *sizes)
 
 int sfs_index::getDirSize(char *dir, SfsDirsize *sizes)
 {
-  memset(sizes, 0, sizeof(SfsDirsize));
   fs_dir *d = opendir(dir);
   if(!d) return -1;
- 
+  
+  memset(sizes, 0, sizeof(SfsDirsize));
   sizes->dataSize += d->inode->sz;
   sizes->size += d->inode->sz + d->inode->overhead;
 

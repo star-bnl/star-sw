@@ -1,5 +1,9 @@
-!// $Id: tpcegeo3.g,v 1.26 2010/09/19 19:39:01 jwebb Exp $
+!// $Id: tpcegeo3.g,v 1.27 2010/12/17 20:02:11 jwebb Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.27  2010/12/17 20:02:11  jwebb
+!// Reverted max radius to previous value.  Reduced radius will be set by
+!// TPCE04r flag in geometry.g.
+!//
 !// Revision 1.26  2010/09/19 19:39:01  jwebb
 !// Reduced size of TPC envelope to acommodate TOF.
 !//
@@ -291,7 +295,7 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
   Fill  TPCG !//   TPC basic dimensions
         version =       3               !// version    => current version
         Rmin =          46.107          !// Rmin          => TPC envelope inner radius
-        Rmax =          207.77          ! TPC outer envelope | JCW, reduced to accomodate BTOF was 206.75/cos15  
+        Rmax =          206.75/cos15    ! TPC outer envelope 
         RminIFC =       46.6            !// RminIFC    => inner radius TPC IFC  : A.Lebedev measurement 10/16/08
         LengthT =       2*271.0         !// LengthT    => TPC full length up to front of EEMC
         Length  =       2*259.685       !// Length        => TPC full length including RDOs
@@ -347,6 +351,7 @@ Structure TFEE {Vers,CardDX ,CardDY,CardDZ,PlateDX,PlateDY,PlateDZ,
         zGroundGrid = TPCG_zGatingGrid+TPCG_dGateGround       		!//
         DeadZone      = 12. !// Dead zone before GatingGrid. No hits there
         endFill
+
         USE TPCG
 
    Fill TPRS                    ! sector of padrows
@@ -528,8 +533,9 @@ USE TECW
 
   !//  make primitive control and basic printout
   del = TPCG_Rmax-tofcOR;
-  write(*,*) ' TPCEgeo : tpcConfig = ',TPCG_version;
-  write(*,*) ' TPCEgeo: maximum  TPC  Radius is ',tofcOR,' clearance is ',del;
+  write(*,*) ' TPCEgeo : tpcConfig = ',TPCG_version
+  write(*,*) ' TPCEgeo : tpcg_rmax = ',TPCG_rmax
+  write(*,*) ' TPCEgeo : maximum  TPC  Radius is ',tofcOR,' clearance is ',del;
 
   if (del<0) write(*,*)' *** TPCEgeo ERROR : outer clearance negative '  ,del;
 !//   write(*,*) ' TPCEgeo: senset. gas inner radius ',tpgvIR;

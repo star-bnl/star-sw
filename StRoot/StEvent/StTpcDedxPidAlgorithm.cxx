@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.27 2010/08/31 20:15:11 fisyak Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.28 2010/11/15 22:11:45 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.28  2010/11/15 22:11:45  fisyak
+ * Restore proper nSigma
+ *
  * Revision 2.27  2010/08/31 20:15:11  fisyak
  * Clean up
  *
@@ -117,7 +120,7 @@
 #include "StBichsel/Bichsel.h"
 
 static Bichsel *m_Bichsel = 0;
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.27 2010/08/31 20:15:11 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.28 2010/11/15 22:11:45 fisyak Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -191,7 +194,7 @@ StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
 	dedx_expected = 1.e-6*m_Bichsel->GetI70M(log10(momentum/particle->mass()),1.0);
 	dedx_resolution = mTraits->errorOnMean();
 	if (dedx_resolution > 0)
-	  z = ::log(mTraits->mean()/dedx_expected);
+	  z = ::log(mTraits->mean()/dedx_expected)/dedx_resolution;
       }
     }
     return z;
