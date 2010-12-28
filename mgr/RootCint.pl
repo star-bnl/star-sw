@@ -96,7 +96,8 @@ for my $def  (split /\s/,$sources) {		#print "SRC:", $def, "\n";
 close (Out);
 
 
-for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
+for my $h  (split /\s/,$sources) {	
+    #print "DEBUG SRC:", $h, "\n";
   next if !$h;
   next if $h =~ /LinkDef/;
 
@@ -125,11 +126,22 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
   my $includes = "";
   my $com = 0;
 
+  #my $NEW=1;
+
   while ($line = <In>) {
-#      print $line;
-      if ($line =~ /\/\//) {
-	  $line =~ s/\/\/.*$//;
-	  # print "==> $line";
+      chomp($line);
+      #my $rdebug =  ($h =~ /StEmcDbHandler/);
+      #print "DEBUG: [$line]\n" if ($rdebug);
+
+      #if ( ! $NEW){
+      #if ($line =~ /\/\//) {
+      #	  $line =~ s/\/\/.*$//;
+      #	  # print "==> $line";
+      #}
+      #}
+      if ( $line =~ /\/\/\*/){
+	  # will not try to analyze this one and assume //.*
+	  $line =~ s/\/\/\*//;
       }
       
 #      next if $line =~ /^\s*\/\//; # c++ comment '//'
@@ -140,21 +152,37 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
 	      $line =~ s/^*\*\///; # print "==> $line";
 			  
 	  } else {
-	      # print "==> skip\n";
+	      #print "DEBUG ==> skip\n" if ($rdebug);
 	      next;
 	  }
       }
-      if ($line =~ /\/\*/) {
-	  $com = 1;
-	  if ($line =~ /\*\//) {
-	      $line =~ s/\/\*.*\*\///;
-	      $com = 0;
-	  } else {
-	      $line =~ s/\/\*.*$//;
+      if ($line =~ m/(.*)(\/\*)/ ) {
+	  $Lprefix = $1;
+	  # be sure we do not have a /* preceded by a //
+	  # the //.* will be removed later
+	  if ( $Lprefix !~ m/\/\// ){ #|| ! $NEW ){
+	      #print "DEBUG: Enabling comment mode\n" if ($rdebug);
+	      $com = 1;
+	      if ($line =~ /\*\//) {
+		  $line =~ s/\/\*.*\*\///;
+		  $com = 0;
+	      } else {
+		  $line =~ s/\/\*.*$//;
+	      }
 	  }
       }
       #  next if ($com);
       
+      #if ( $NEW){
+      # strip of // should likely happen after /* */
+      if ($line =~ /\/\//) {
+	  $line =~ s/\/\/.*$//;
+	  # print "==> $line";
+      }
+      #}
+
+      #print "DEBUG: <$line>\n" if ($rdebug);
+
       if ($line =~ /\#include/ && $line !~ /(<>)/ && $line !~ /Table\.h/) {
 	  (my $inc_h = $line) =~ s/\#include\s//g; chop ($inc_h);
 	  $inc_h =~ s/\"//g; 
@@ -172,13 +200,14 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
 	  if ($line =~ /\#\#/) { next;} # ClassDefs in macro definition
 	  my @words = split /([\(,\-\!\)])/, $line;
 	  my $class = $words[2];      	
-	  # print "=================class = ",$class," ($h_dir)\n";
+	  #print "=================class = ",$class," ($h_dir)\n"; 
 	  if ( index($IncDirName,$h_dir) == -1 && $h_dir ne $DirName){
 	      # print "=> Adding $h_dir to [$IncDirname]\n";
 	      $IncDirName .= "-I$h_dir ";
 	  }
 	  
 	  if ($class) {
+	      #print "DEBUG pushing $class from $h\n";
 	      push @classes, $class;
 	      $class_hfile{$class} = $h; 	
 	      # print "class: $class, written: $class_written{$class}, h: $class_hfile{$class}\n";
@@ -212,6 +241,7 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
 	  foreach my $stem ("Iterator","PtrVec","SPtrVec") {
 	    if ($stem eq "Iterator") {$cl = "St" . $core . $stem      ;}
 	    else                     {$cl = "St" . $stem . $core . "-";}
+	    #print "DEBUG pushing $cl\n";
 	    push @classes, $cl;
 	    $class_hfile{$cl} = $new_h; $class_hfile_depens_on{$cl} = $includes;
 	    				#print "class: $stem $core $cl includes  $includes\n";
