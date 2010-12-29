@@ -4,11 +4,15 @@
 // 10 Dec 2009
 //
 
+// C++ STL
+#include <sstream>
+
 // STAR
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
 #include "StTriggerUtilities/Emc/StEmcTriggerSimu.h"
 #include "StTriggerUtilities/Bemc/StBemcTriggerSimu.h"
 #include "StTriggerUtilities/Eemc/StEemcTriggerSimu.h"
+#include "StEmcTriggerMaker/StEmcTriggerMaker.h"
 
 // Local
 #include "StBfcTriggerFilterMaker.h"
@@ -38,14 +42,53 @@ int StBfcTriggerFilterMaker::Init()
 		   mMask.test(13),
 		   mMask.test(14)) << endm;
 
+  // Print triggers (year < 2009)
+  ostringstream os;
+  copy(mTriggers.begin(),mTriggers.end(),ostream_iterator<int>(os," "));
+  LOG_INFO << "Triggers: " << os.str() << endm;
+
   return kStOk;
 }
 
+// Print format: trigger ID (trigger decision)
+// where trigger decision is 1=yes, 0=no, -1=unknown
+struct PrintTrigger {
+  ostream& out;
+  StEmcTriggerMaker* emcTrig;
+
+  PrintTrigger(ostream& out, StEmcTriggerMaker* emcTrig) : out(out), emcTrig(emcTrig) {}
+
+  ostream& operator()(int trigId) const { return out << trigId << "(" << emcTrig->isTrigger(trigId) << ") "; }
+};
+
 int StBfcTriggerFilterMaker::Make()
 {
+  const TDatime& datime = GetDBTime();
+
+  LOG_INFO << "DB Time = " << datime.AsSQLString() << endm;
+
+  if (datime.GetYear() < 2009) {
+    StEmcTriggerMaker* emcTrig = (StEmcTriggerMaker*)GetMakerInheritsFrom("StEmcTriggerMaker");
+    if (!emcTrig) {
+      LOG_ERROR << "Missing StEmcTriggerMaker" << endm;
+      return kStErr;
+    }
+
+    // Print trigger ID and decision for each trigger
+    ostringstream os;
+    for_each(mTriggers.begin(),mTriggers.end(),PrintTrigger(os,emcTrig));
+    LOG_INFO << "Triggers: " << os.str() << endm;
+
+    // If at least one trigger fired (trigger decision == 1), process event. Otherwise, skip.
+    return os.str().find("(1)") != string::npos ? kStOk : kStSkip;
+  }
+
   // Get trigger simulator
   StTriggerSimuMaker* trgsim = (StTriggerSimuMaker*)GetMakerInheritsFrom("StTriggerSimuMaker");
-  assert(trgsim);
+  if (!trgsim) {
+    LOG_ERROR << "Missing StTriggerSimuMaker" << endm;
+    return kStErr;
+  }
 
   // Get output of EMC L2 DSM
   bitset<16> emc(trgsim->emc->EM201output());
@@ -78,4 +121,9 @@ void StBfcTriggerFilterMaker::changeJPThresh(int dsm)
 {
   StTriggerSimuMaker* trgsim = (StTriggerSimuMaker*)GetMakerInheritsFrom("StTriggerSimuMaker");
   trgsim->changeJPThresh(dsm);
+}
+
+void StBfcTriggerFilterMaker::addTrigger(int trigId)
+{
+  mTriggers.push_back(trigId);
 }
