@@ -38,6 +38,9 @@
 
 // C++ STL
 #include <bitset>
+#include <vector>
+
+using namespace std;
 
 // ROOT
 #include "StMaker.h"
@@ -67,8 +70,11 @@ public:
 
   void changeJPThresh(int dsm);	/// Changes the JP Thresholds by dsm
 
+  void addTrigger(int trigId);
+
 private:
   bitset<16> mMask;
+  vector<int> mTriggers;
 
   ClassDef(StBfcTriggerFilterMaker,0);
 };
