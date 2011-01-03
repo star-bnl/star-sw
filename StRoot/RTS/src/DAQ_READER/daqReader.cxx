@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.37 2010/12/03 21:45:58 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.38 2011/01/03 21:32:52 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -608,39 +608,53 @@ char *daqReader::get(int num, int type)
 
   evt_offset_in_file = nexteventpos;
 
-  // Now we want to make sure run info is up to date
-  if(run != (unsigned int)runconfig->run) {
-    char rccnf_file[256];
+  // Now we want to get detsinrun/evpgroupsinrun
+  // First read from the EvbSummary
 
-    runconfig->run = 0;   // set invalid to start...
+  fs_dirent *esum = sfs->opendirent("EvbSummary");
+  if(esum) {
+    LOG("JEFF", "We've got an EvbSummary");
+    char *buff = (char *)memmap->mem + esum->offset;
+    EvbSummary *evbsum = (EvbSummary *)buff;
+    detsinrun = evbsum->detectorsInRun;
+    evpgroupsinrun = 0xffffffff;
+  }
+  else {
+    LOG("JEFF", "No EvbSummary Record");
+    if(run != (unsigned int)runconfig->run) {
+      char rccnf_file[256];
 
-   
-    if(input_type == live) {
-      sprintf(rccnf_file,"%s%s/%d/0",evp_disk,_evp_basedir_,run) ;
-    }
-    else if(input_type == dir) {
-      sprintf(rccnf_file,"%s/0",fname);
-    }
-    else if (input_type == file) {
-      sprintf(rccnf_file,"rccnf_%d.txt",run);
-    }
-   
-    if(input_type != pointer) {
-      if(getRccnf(rccnf_file, runconfig) < 0) {
-	LOG(DBG, "No runconfig file %s",rccnf_file,0,0,0,0);
+      runconfig->run = 0;   // set invalid to start...
+      
+      
+      if(input_type == live) {
+	sprintf(rccnf_file,"%s%s/%d/0",evp_disk,_evp_basedir_,run) ;
       }
-    }
-
-    if(runconfig->run == 0) {
-      detsinrun = 0xffffffff;
-      evpgroupsinrun = 0xffffffff;
-    }
-    else {
-      detsinrun = runconfig->detMask;
-      evpgroupsinrun = runconfig->grpMask;
+      else if(input_type == dir) {
+	sprintf(rccnf_file,"%s/0",fname);
+      }
+      else if (input_type == file) {
+	sprintf(rccnf_file,"rccnf_%d.txt",run);
+      }
+      
+      if(input_type != pointer) {
+	if(getRccnf(rccnf_file, runconfig) < 0) {
+	  LOG(DBG, "No runconfig file %s",rccnf_file,0,0,0,0);
+	}
+      }
+      
+      if(runconfig->run == 0) {
+	detsinrun = 0xffffffff;
+	evpgroupsinrun = 0xffffffff;
+      }
+      else {
+	detsinrun = runconfig->detMask;
+	evpgroupsinrun = runconfig->grpMask;
+      }
     }
   }
 
+  
 
   // Tonko: before we return, call Make which prepares the DETs for operation...
   //Make() ;

@@ -153,5 +153,14 @@ struct evtDoneMsg {
   u_short status;
 };
 
+#define EVB_SUMMARY_VERSION 1
+
+struct EvbSummary_v1 {
+  u_int version;  // version
+  u_int sz;       // size of structure
+  u_int detectorsInRun;
+};
+
+typedef EvbSummary_v1 EvbSummary;
 
 #endif
