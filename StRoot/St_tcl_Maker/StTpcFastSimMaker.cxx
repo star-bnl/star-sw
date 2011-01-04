@@ -1,5 +1,8 @@
-/* $Id: StTpcFastSimMaker.cxx,v 1.3 2010/08/16 21:59:46 fisyak Exp $
+/* $Id: StTpcFastSimMaker.cxx,v 1.4 2011/01/04 21:40:22 fisyak Exp $
     $Log: StTpcFastSimMaker.cxx,v $
+    Revision 1.4  2011/01/04 21:40:22  fisyak
+    Add pile-up
+
     Revision 1.3  2010/08/16 21:59:46  fisyak
     leave coordinates in TpcLocalCoordinate because StTpcHitMover expects that
 
@@ -20,6 +23,8 @@
 #include "TMath.h"
 #include "TRandom.h"
 #include "StTpcDb/StTpcDb.h"
+#include "tables/St_g2t_vertex_Table.h"
+#include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StDbUtilities/StMagUtilities.h"
@@ -41,24 +46,32 @@ Int_t StTpcFastSimMaker::Make() {
     rCol = new StTpcHitCollection; 
     rEvent->setTpcHitCollection(rCol); 
   }
-  TDataSetIter geant(GetInputDS("geant"));
-  St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
+  St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) GetDataSet("geant/g2t_tpc_hit");
   if (! g2t_tpc_hit) {
     LOG_WARN << "No g2t_tpc_hit on input, bye bye" << endm; return kStWarn;
    }
-  g2t_tpc_hit_st *g2t         = g2t_tpc_hit->GetTable();
   Int_t Nhits = g2t_tpc_hit->GetNRows();
   if (Nhits <= 0) return kStWarn;
+  St_g2t_track *g2t_track = (St_g2t_track *) GetDataSet("geant/g2t_track"); //  if (!g2t_track)    return kStWarn;
+  g2t_track_st *tpc_track = 0;
+  if (g2t_track) tpc_track = g2t_track->GetTable();
+  St_g2t_vertex  *g2t_ver = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex");// if (!g2t_ver)      return kStWarn;
+  g2t_vertex_st     *gver = 0;
+  if (g2t_ver) gver = g2t_ver->GetTable();
+  g2t_tpc_hit_st *tpc_hit         = g2t_tpc_hit->GetTable();
   StTpcCoordinateTransform transform(gStTpcDb);
-  
   for (Int_t i = 0; i < Nhits; i++)    {
-    if (g2t[i].volume_id > 100000) continue; // skip pseudo pad rows
-    Int_t sector = (g2t[i].volume_id%10000)/100;
-    Int_t row    =  g2t[i].volume_id%100;
-    StGlobalDirection     dirG(g2t[i].p[0],g2t[i].p[1],g2t[i].p[2]);
+    if (tpc_hit[i].volume_id > 100000) continue; // skip pseudo pad rows
+    Int_t Id         = tpc_hit[i].track_p;
+    Int_t id3 = 0;
+    if (tpc_track) 
+      id3        = tpc_track[Id-1].start_vertex_p;
+    Int_t sector = (tpc_hit[i].volume_id%10000)/100;
+    Int_t row    =  tpc_hit[i].volume_id%100;
+    StGlobalDirection     dirG(tpc_hit[i].p[0],tpc_hit[i].p[1],tpc_hit[i].p[2]);
     static StTpcLocalSectorDirection dirL;
     transform(dirG, dirL, sector, row);
-    StGlobalCoordinate    coorG(g2t[i].x[0],g2t[i].x[1],g2t[i].x[2]);
+    StGlobalCoordinate    coorG(tpc_hit[i].x[0],tpc_hit[i].x[1],tpc_hit[i].x[2]);
     static StTpcLocalCoordinate  coorLT;
     transform(coorG,coorLT,sector,row);
     StTpcLocalCoordinate  coorLTD = coorLT;
@@ -76,7 +89,7 @@ Int_t StTpcFastSimMaker::Make() {
     transform(coorLSA,coorLS); // alignment
     Double_t xyzL[3] = {coorLS.position().x(),coorLS.position().y(),coorLS.position().z()};
     if (Debug() && TMath::Abs(xyzL[1]-transform.yFromRow(row)) > 0.1000) {
-      cout << "Id: " << g2t[i].volume_id  
+      cout << "Id: " << tpc_hit[i].volume_id  
 	   << "\txyzL :" << xyzL[0] << "\t" << xyzL[1] << "\t" << xyzL[2] 
 	   << "\tdR :" << xyzL[1]-transform.yFromRow(row) << endl;
     }
@@ -95,18 +108,24 @@ Int_t StTpcFastSimMaker::Make() {
     coorLS.setPosition(newPosition);
     static StTpcPadCoordinate Pad;
     transform(coorLS,Pad,kFALSE,kTRUE); // don't use T0, use Tau
+    Double_t tof = 0;
+    if (gver) tof = gver[id3-1].ge_tof;
+    tof += tpc_hit[i].tof;
+    Float_t  timebkt =  Pad.timeBucket() + 1.e6*gStTpcDb->Electronics()->samplingFrequency()*tof;
+    if (timebkt < 0 || timebkt > 512) continue;
+    StTpcPadCoordinate newPad(Pad.sector(),Pad.row(), Pad.pad(),timebkt );
     static StTpcLocalCoordinate global; // leave coordinates in TpcLocalCoordinate because StTpcHitMover expects that.
-    transform(Pad,global,kFALSE); // alignment
+    transform(newPad,global,kFALSE); // alignment
     StThreeVectorF p(global.position().x(),global.position().y(),global.position().z());
     UInt_t hw = 1;   // detid_tpc
     hw += sector << 4;     // (row/100 << 4);   // sector
     hw += row    << 9;     // (row%100 << 9);   // row
     StTpcHit *tpcHit = new StTpcHit(p,e, 
-				    hw,TMath::Abs(g2t[i].de), i+1,   // hw, q, c
-				    g2t[i].track_p, 100,             // idTruth, quality
-				    0,                               // id
-				    0,  0, 0,                        // mnpad, mxpad, mntmbk
-				    0, Pad.pad(), Pad.timeBucket()); // mxtmbk, cl_x , cl_t
+				    hw,TMath::Abs(tpc_hit[i].de), i+1,   // hw, q, c
+				    tpc_hit[i].track_p, 100,             // idTruth, quality
+				    0,                                   // id
+				    0,  0, 0,                            // mnpad, mxpad, mntmbk
+				    0, Pad.pad(), Pad.timeBucket());     // mxtmbk, cl_x , cl_t
     rCol->addHit(tpcHit);
   }
   return kStOK;
