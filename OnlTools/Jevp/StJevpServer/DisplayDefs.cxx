@@ -272,13 +272,13 @@ DisplayFile::DisplayFile() {
   displayRoot = NULL;
   textBuffLen = 0;
   textBuff = NULL;
-  builderString = NULL;
+  serverTags = NULL;
 }
 
 DisplayFile::~DisplayFile() {
   if(textBuff) free(textBuff);
   if(root) freeDisplayNodes(root);
-  if(builderString) free(builderString);
+  if(serverTags) free(serverTags);
 }
 
 
@@ -382,16 +382,16 @@ int DisplayFile::Read(char *fn)
   return ret;
 }
 
-void DisplayFile::setBuilderString(const char *builders)
+void DisplayFile::setServerTags(const char *builders)
 {
-  if(builderString) free(builderString);
+  if(serverTags) free(serverTags);
   int len = strlen(builders);
-  builderString = (char *)malloc(len+1);
-  if(!builderString) {
-    LOG(ERR, "Error allocating builderString");
+  serverTags = (char *)malloc(len+1);
+  if(!serverTags) {
+    LOG(ERR, "Error allocating serverTags");
   }
   else {
-    strcpy(builderString, builders);
+    strcpy(serverTags, builders);
   }
 }
 
@@ -727,7 +727,7 @@ DisplayNode *DisplayFile::getTab(u_int combo_index)
 
     LOG(DBG,"idx(%d @ %d)=%d   next=%d  (%s)\n",combo_index,depth,idx,next_idx,node ? node->name : "null");
     
-    while(node && !node->matchBuilders(builderString)) {
+    while(node && !node->matchTags(serverTags)) {
       node = node->next;
     }
     
@@ -739,7 +739,7 @@ DisplayNode *DisplayFile::getTab(u_int combo_index)
 
       node = node->next;
 
-      while(node && !node->matchBuilders(builderString)) {
+      while(node && !node->matchTags(serverTags)) {
 	node = node->next;
       }
 
@@ -764,34 +764,35 @@ DisplayNode *DisplayFile::getTab(u_int combo_index)
   }
 }
 
-int DisplayNode::matchBuilders(char *buildersAvailable)
+int DisplayNode::matchTags(char *tags)
 {
   
-  const char *val = _getProperty("builders");
+  const char *val = _getProperty("requireTag");
 
   LOG(DBG,"In match builders: node %s val = %s", name, val);
 
   if(!val) return 1;
+  if(!tags) return 0;
 
-  LOG(DBG,"require %s in string of available dets: %s",val, buildersAvailable);
+  LOG(DBG,"require %s in string of available dets: %s",val, tags);
 
-  static char mybuilders[256];
-  static char tmp[32];
+  static char requiredTags[256];
+  static char req[32];
 
-  strcpy(mybuilders, val);
-  char *x = strtok(mybuilders, ",");
+  strcpy(requiredTags, val);
+  char *x = strtok(requiredTags, ",");
 
   while(x) {
-    sprintf(tmp, "|%s|", x);
-    if(!strstr(buildersAvailable, tmp)) {
-      LOG(DBG, "Match builders return false: didn't find %s in %s",tmp,buildersAvailable);
+    sprintf(req, "|%s|", x);
+    if(!strstr(tags, req)) {
+      LOG(DBG, "Match builders return false: didn't find %s in %s",req,tags);
       return 0;
     }
 
     x = strtok(NULL, ",");
   }
   
-  LOG(DBG, "Match builders return true: found %s in %s",val, buildersAvailable);
+  LOG(DBG, "Match builders return true: found %s in %s",val, tags);
   return 1;
 }
 

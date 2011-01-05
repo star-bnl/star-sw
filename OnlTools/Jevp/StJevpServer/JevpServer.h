@@ -25,6 +25,7 @@ class JevpServer {
   
   char *displays_fn;
   DisplayFile *displays;
+  char *serverTags;
 
   int run;  // will be run info...
   int nodb;
@@ -62,6 +63,7 @@ class JevpServer {
     killbuilders = 0;
     die = 0;
     daqfilename = NULL;
+    serverTags = NULL;
   };
 
   void archive_display_file();
@@ -102,4 +104,7 @@ class JevpServer {
   void launchBuilders();
 
   int execScript(const char *name,  char *args[], int waitforreturn=1);
+
+  void addServerTag(char *tag);
+  void addServerTags(char *tags);
 };

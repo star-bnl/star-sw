@@ -77,6 +77,15 @@ JevpPlotSet::JevpPlotSet()
   CP;
 }
 
+void JevpPlotSet::addServerTags(char *tags)
+{
+  EvpMessage msg;
+  msg.setSource(plotsetname);
+  msg.setCmd("addServerTag");
+  msg.setArgs(tags);
+  send(&msg);
+}
+
 int JevpPlotSet::addPlot(JevpPlot *hist)
 {
   CP;

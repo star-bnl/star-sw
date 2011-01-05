@@ -71,6 +71,9 @@ class JevpPlotSet : public TObject {
   char *plotsetname;
 
   char *hello_cmds;   // do I want to be base_client?  "steal if so"
+
+  void addServerTags(char *tags);
+
  private:
   TSocket *socket;
 

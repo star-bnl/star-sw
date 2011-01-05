@@ -45,7 +45,7 @@ class DisplayNode {
   void addProperty(DisplayProperty *p);
   const char *_getProperty(const char *s);
   const char *getProperty(const char *s);
-  int matchBuilders(char *builderString);
+  int matchTags(char *tags);
 
   int nSiblings() { 
     LOG(DBG, "nsibs:   %s  next=0x%x",name,(unsigned int) next);
@@ -92,7 +92,7 @@ class DisplayNode {
 //
 class DisplayFile {
  public:
-  char *builderString;    // The detectors in the run
+  char *serverTags;    // The detectors in the run
 
   DisplayNode *root;  // The parsed display
   DisplayNode *displayRoot;   // The root node of the current display
@@ -118,7 +118,7 @@ class DisplayFile {
   DisplayProperty *readNewProperty(xmlTextReaderPtr reader);
 
   // Manipulate displays
-  void setBuilderString(const char *builders);
+  void setServerTags(const char *tags);
 
   int setDisplay(char *display_name);
   int setDisplay(int display);

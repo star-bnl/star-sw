@@ -247,7 +247,7 @@ void JevpGui::switchTabs(const char *newdisplay, const char *newbuilderlist) {
   strcpy(evpMainDisplay, newdisplay);
   evpMain->display = evpMainDisplay;
 
-  jl_displayFile->setBuilderString(newbuilderlist);
+  jl_displayFile->setServerTags(newbuilderlist);
 
 
   jl_displayFile->dump();
@@ -308,6 +308,8 @@ static TQtBrowserMenuItem_t gMenu_Data[] = {
 //------------------------------------------------------------------------
 JevpGui::JevpGui() : Q3MainWindow(), mWidth(900), mHight(500), mStrLive(" Live  "), mStrFile(" File  "), mStrRun("Running"), mStrStop("Stopped"), fGuiRefreshRate(5000)
 {
+  serverTags = (char *)malloc(10);
+  strcpy(serverTags, "");
 }
 
 void JevpGui::gui_JevpGui(JevpGui *logic, bool isRefWindow)
@@ -497,7 +499,9 @@ void JevpGui::gui_JevpGui(JevpGui *logic, bool isRefWindow)
 
 //----------------------------------------------------------------
 JevpGui::~JevpGui()
-{}
+{
+  if(serverTags) free(serverTags);
+}
 
 //----------------------------------------------------------------
 void JevpGui::SetDefaults()
@@ -837,18 +841,18 @@ void JevpGui::ChangeHistogramSet()
   }
   else return;
 
-  QString text2 = QInputDialog::getText(this, 
-					tr("Detectors Available"),
-					tr("Detectors Available:"), 
-					QLineEdit::Normal,
-					tr("|base|"), &ok);
+//   QString text2 = QInputDialog::getText(this, 
+// 					tr("Detectors Available"),
+// 					tr("Detectors Available:"), 
+// 					QLineEdit::Normal,
+// 					tr("|base|"), &ok);
 
-  if(ok && !text2.isEmpty()) {
-    LOG(DBG,"Change Histogram detectors to %s\n", (const char *)text2);
-  }
-  else return;
+//   if(ok && !text2.isEmpty()) {
+//     LOG(DBG,"Change Histogram detectors to %s\n", (const char *)text2);
+//   }
+//   else return;
 
-  switchTabs((const char *)text, (const char *)text2);
+  switchTabs((const char *)text, (const char *)serverTags);
 }
 
 void JevpGui::ChangeToRun()
@@ -1097,6 +1101,7 @@ void JevpGui::updateRequest() {
 //______________________________________________________________________________
 void JevpGui::UpdatePlots() 
 {
+  CP;
 
   if(jl_socket == NULL) {
     LOG(ERR,"Updating plots but socket is NULL... returning...\n");
@@ -1110,13 +1115,52 @@ void JevpGui::UpdatePlots()
     }
     nupdates++;
 
+    CP;
+    // First check for a change to the serverTags...
+    EvpMessage msg;
+    msg.setCmd((char *)"getServerTags");
+    msg.setSource((char *)"presenter");
+    msg.setArgs((char *)"");
+    jl_send(&msg);
 
-    //char lab[100];
-    //sprintf(lab, "%s - not available",currentScreen->plot->c_str());
+    CP;
+    TMessage *mess;
+    int ret = jl_socket->Recv(mess);
+    if(ret == 0) {  // disconnect
+      LOG(ERR,"Server disconnected?\n");
+      exit(0);
+    }
+    
+    CP;
+    if(strcmp(mess->GetClass()->GetName(), "EvpMessage") != 0) {
+      LOG(ERR,"Didn't get a EvpMessage class\n");
+      exit(0);
+    }
+    
+    EvpMessage *response = (EvpMessage *)mess->ReadObject(mess->GetClass());
+    
+    CP;
+    LOG("JEFF", "0x%x 0x%x",serverTags, response);
+    LOG("JEFF", "0x%x 0x%x 0x%x ",serverTags, response, response->args);
+    LOG("JEFF", "%s %s", serverTags, response->args);
+    char *args = response->args;
+    if(!args) args = "";
 
-    jl_DrawPlot(currentScreen);
+    if(strcmp(serverTags, args) != 0) {
+      LOG("JEFF", "Changing server tags from %s to %s",serverTags, args);
+      free(serverTags);
+      serverTags = (char *)malloc(strlen(args) + 1);
+      strcpy(serverTags, args);
+
+      switchTabs(evpMain->display, serverTags);
+      CP;
+    }
+    else {
+      jl_DrawPlot(currentScreen);
+    }
   }
   
+  CP;
   if (fActions[kAutoUpdate]->isOn()) {
     QTimer::singleShot(fGuiRefreshRate,this,SLOT(UpdatePlots()));
   }
@@ -1522,10 +1566,10 @@ void JevpGui::jl_JevpLogic()
     CP;
     jl_displayFile->setDisplay(evpMain->display);
     CP;
-    LOG("JEFF", "setting builder string");
-    jl_displayFile->setBuilderString("|daq|trg|base|");
+//     LOG("JEFF", "setting builder string");
+//     jl_displayFile->setServerTags("|daq|trg|base|");
 
-    LOG("JEFF", "builder string %s",jl_displayFile->builderString);
+//     LOG("JEFF", "builder string %s",jl_displayFile->serverTags);
 
     // printf("I just got the display file: \n");
     // jl_displayFile->dump();
