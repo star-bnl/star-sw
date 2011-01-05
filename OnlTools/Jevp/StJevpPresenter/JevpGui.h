@@ -118,6 +118,8 @@ private:
 
     JevpGui *logic;
 
+    char *serverTags;
+
 #if QT_VERSION < 0x40000
     QFrame* mBitsFrame;
 #else /* QT4 */

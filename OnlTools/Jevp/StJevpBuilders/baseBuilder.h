@@ -22,6 +22,7 @@ class baseBuilder : public JevpPlotSet {
 public:
   //RunStatus status;
   int run;
+  int first_event;
 
   baseBuilder() {
     plotsetname = (char *)"base";

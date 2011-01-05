@@ -937,6 +937,28 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     sscanf(msg->args, "%s %d", str, &idx);
     deleteReferencePlot(str,idx);
   }
+  else if(strcmp(msg->cmd, "addServerTag") == 0) {
+    CP;
+    LOG("JEFF", "Adding serverTags: %s", msg->args);
+    addServerTags(msg->args);
+    CP;
+  }
+  else if(strcmp(msg->cmd, "getServerTags") == 0) {
+    CP;
+    EvpMessage m;
+    m.setSource((char *)"serv");
+    m.setCmd((char *)"getServerTags");
+    if(serverTags) {
+      m.setArgs(serverTags);
+    }
+    else {
+      m.setArgs("");
+    }
+
+    TMessage mess(kMESS_OBJECT);
+    mess.WriteObject(&m);
+    s->Send(mess);
+  }
   else if(strcmp(msg->cmd, "monitor") == 0) {
     CP;
     EvpMessage m;
@@ -984,6 +1006,11 @@ void JevpServer::clearForNewRun()
     delete curr;
   }
   plots.Clear();   // clear the list...
+
+  if(serverTags) {
+    free(serverTags);
+    serverTags = NULL;
+  }
 }
 
 void JevpServer::dump()
@@ -1715,4 +1742,45 @@ char *JevpServer::checkRunStatus(BuilderStatus *builderstat, RunStatus *stat)
   return returnval;
 }
 
+// server tag always has leading/trainling "|"
+void JevpServer::addServerTag(char *tag)
+{
+  char tmp[40];
+  sprintf(tmp, "|%s|",tag);
+  
+  if(!serverTags) {   // if this is the first, add it!
+    serverTags = (char *)malloc(strlen(tmp) +1);
+    strcpy(serverTags, tmp);
+    return;
+  }
+
+  if(strstr(serverTags, tmp)) {  // if its there do nothing!
+    return;
+  }
+
+  serverTags = (char *)realloc(serverTags, strlen(serverTags) + strlen(tmp));
+  strcat(serverTags, tag);
+  strcat(serverTags, "|");
+}
+
+// tags delimeted by "|"
+void JevpServer::addServerTags(char *tags)
+{
+  char *tmp = (char *)malloc(sizeof(tags)+1);
+  strcpy(tmp, tags);
+  
+  if(tmp[0] != '|') {
+    LOG(ERR, "Bad tag string: %s",tags);
+    free(tmp);
+    return;
+  }
+
+  char *t = strtok(tmp, "|");
+  while(t) {
+    addServerTag(t);
+    t = strtok(NULL, "|");
+  }
+  
+  free(tmp);
+}
 
