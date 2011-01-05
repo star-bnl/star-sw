@@ -67,9 +67,9 @@ $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
 if ($env->{ENV}->{STAR}) {$LIBS .= " -lGeom -lTable";}# -lStar2Root";}
 
 my $FEXTEND   = $env->{FEXTEND};
-if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^sl/ or 
-    $STAR_SYS =~ /^i386/ or $STAR_SYS =~ /^x8684/ or 
-    $STAR_SYS =~ m/^linux/) {
+my $OSTYPE    = $ENV{OSTYPE};
+#print "**** DEBUG $OSTYPE\n";
+if ( $OSTYPE =~ m/^linux/i ) {    # simplify this
     $FPPFLAGS .= " -DCERNLIB_LINUX";
 }
 if ($FC =~ /^pgf/) {
