@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.167 2010/09/06 18:14:26 fisyak Exp $
+# $Id: Construct,v 1.168 2011/01/05 21:43:25 jeromel Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -376,12 +376,12 @@ my @sysdirlist = qw(asps/Simulation/agetof
 		    StDb 
 		   );
 
-if (!($USE_64BITS and $USE_64BITS != "0")){
+#if (!($USE_64BITS and $USE_64BITS != "0")){
   push @sysdirlist, "asps/rexe";
   push @sysdirlist, "asps/Simulation/geant321";
   push @sysdirlist, "asps/Simulation/gcalor";
   push @sysdirlist, "asps/Simulation/starsim";
-}
+#}
 
 
 
