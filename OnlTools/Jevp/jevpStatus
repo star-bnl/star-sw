@@ -11,7 +11,7 @@
 
 # get main function and shift args as appropriate...
 
-args="$1 $2"
+args="$*"
 cmdstr="OnlTools/Jevp/StJevpPresenter/evpMonitorBaseScript.C(\"${args}\")"
 
 echo "Main program: $cmdstr"

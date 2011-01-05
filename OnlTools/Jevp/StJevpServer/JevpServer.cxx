@@ -111,6 +111,10 @@ void JevpServer::launchBuilders()
       args[i++] = "-file";
       args[i++] = daqfilename;
     }
+    else {
+      args[i++] = "-diska";
+      args[i++] = diska;
+    }
       
     if(socketName) {
       args[i++] = "-socket";
@@ -1399,6 +1403,9 @@ void JevpServer::writePdf(int display, int run)
 
 void JevpServer::parseArgs(int argc, char *argv[])
 {
+  // Default builders...
+  char bstr[500];
+  strcpy(bstr, "base,bbc,bemc,daq,eemc,fpd,ftp,hlt,l3,tof,tpx,trg,upc");
 
   for(int i=1;i<argc;i++) {
     if(strcmp(argv[i], "-dd")==0) {
@@ -1419,30 +1426,9 @@ void JevpServer::parseArgs(int argc, char *argv[])
       i++;
       myport = atoi(argv[i]);
     }
-    else if (strcmp(argv[i], "-test")==0) {
-      myport = JEVP_PORT + 10;
-    }
     else if (strcmp(argv[i], "-builders")==0) {
-      char bstr[500];
-      if(((i+1)>argc) || (argv[i+1][0] == '-')) {   // no args, go with default
-	strcpy(bstr, "base,bbc,bemc,daq,eemc,fpd,ftp,hlt,l3,tof,tpx,trg,upc");
-      }
-      else {
-	i++;
-	strcpy(bstr, argv[i]);
-      }
-
-      char *s = strtok(bstr,",");
-      while(s) {
-	BuilderStatus *stat = new BuilderStatus();
-	stat->setName(s);
-	stat->setStatus("unknown");
-	stat->lastTransaction = time(NULL);
-	stat->official = 1;
-	builders.Add(stat);
-	
-	s = strtok(NULL, ",");
-      }
+      i++;
+      strcpy(bstr, argv[i]);
     }
     else if (strcmp(argv[i], "-launchbuilders")==0) {
       launchbuilders = 1;
@@ -1462,6 +1448,18 @@ void JevpServer::parseArgs(int argc, char *argv[])
     else if (strcmp(argv[i], "-die")==0) {
       die = 1;
     }
+    else if (strcmp(argv[i], "-production") == 0) {
+      launchbuilders = 1;
+      nodb = 0;
+      myport = JEVP_PORT;
+    }
+    else if (strcmp(argv[i], "-test")==0) {
+      myport = JEVP_PORT + 10;
+    }
+    else if (strcmp(argv[i], "-diska")==0) {   // used only to pass to builders on launch...
+      i++;
+      diska = argv[i];
+    }
     else {
       printf("\n\nUsage for %s:  (bad arg %s)\n",argv[0],argv[i]);
       printf("\t[-dd filename]       for each display definition:\n");
@@ -1476,8 +1474,9 @@ void JevpServer::parseArgs(int argc, char *argv[])
       printf("\t[-launchbuilders]\n");
       printf("\t[-file daqfilename]\n");
       printf("\t[-test]   (set port to %d)\n",myport+10);
+      printf("\t[-production]\n");
+      printf("\t[-diska [/net/a]]  (used to pass to builders on launch)\n");
     
-     
       printf("\n\n");
       printf("Defaults:  \n");
       printf("\tbasedir      = '/RTScache/conf'\n");
@@ -1489,6 +1488,18 @@ void JevpServer::parseArgs(int argc, char *argv[])
     }
   }
 
+  char *s = strtok(bstr,",");
+  while(s) {
+    BuilderStatus *stat = new BuilderStatus();
+    stat->setName(s);
+    stat->setStatus("unknown");
+    stat->lastTransaction = time(NULL);
+    stat->official = 1;
+    builders.Add(stat);
+    
+    s = strtok(NULL, ",");
+  }
+  
   if(!displays_fn) {
     displays_fn = (char *)"HistoDefs.txt";
   }    
