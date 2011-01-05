@@ -22,7 +22,8 @@ class JevpServer {
   char *refplotdir;    // ref plot dir
   char *basedir;       // base for config files...
   char base_client[40];
-  
+  char *diska;
+
   char *displays_fn;
   DisplayFile *displays;
   char *serverTags;
@@ -47,7 +48,7 @@ class JevpServer {
     ssocket = NULL;
     mon = NULL;
     refplotdir = (char *)DEFAULT_REF_PLOT_DIR;
- 
+    diska = "/a";
  
     displays = NULL;
     displays_fn = NULL;

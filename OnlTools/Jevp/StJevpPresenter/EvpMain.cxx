@@ -151,6 +151,9 @@ int EvpMain::parseArgs(int argc, char *argv[])
       displayFile = 0;
       display = argv[i];
     }
+    else if (strcmp(argv[i], "-test") == 0) {
+      serverport = JEVP_PORT + 10;
+    }
     else if (memcmp(argv[i], "-localdisplay", 12) == 0) {
       i++;
       displayFile = 1;

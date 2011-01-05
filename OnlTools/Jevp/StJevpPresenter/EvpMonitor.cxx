@@ -79,6 +79,9 @@ int EvpMonitor::parseArgs(int argc, char *argv[])
       i++;
       serverport = atoi(argv[i]);
     }
+    else if (strcmp(argv[i], "-test") == 0) {
+      serverport = JEVP_PORT + 10;
+    }
     else if (argv[i][0] != '-') {  // append the rest to server args...
       char *s = evpMonitor->serverCommand;
       *s = '\0';
