@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.56 2011/01/07 17:12:29 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.57 2011/01/07 18:19:02 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.57  2011/01/07 18:19:02  dmitry
+ * user name lookup is done once now (for speedup, based on profiler report)
+ *
  * Revision 1.56  2011/01/07 17:12:29  dmitry
  * fixed pseudo-leaks in c-string and xml-string assignments
  *
@@ -303,6 +306,14 @@ mQuery=0;
 mQueryLast=0;
 mRes= new MysqlResult;
  for(int i=0;i<200;i++)cnames[i]=0;
+
+  mSysusername = "N/A";
+  struct passwd *pwd = 0;
+  pwd = getpwuid(geteuid());
+  if (pwd) {
+    mSysusername = pwd->pw_name;
+  }
+
 }
 //////////////////////////////////////////////////////////////////////
 
@@ -551,16 +562,10 @@ return true;
 bool MysqlDb::ExecQuery(){
 #define __METHOD__ "ExecQuery()"
 
-  struct passwd *pwd = 0;
-  pwd = getpwuid(geteuid());
-  std::string sysusername = "N/A";
-  if (pwd) {
-    sysusername = pwd->pw_name;
-  }
 
   std::string mQ(mQuery,mQueryLen);
   mQ.append(" /* RUSR: "); // real user name
-  mQ.append(sysusername);
+  mQ.append(mSysusername);
   mQ.append(" | SUSR: "); // set user name
   if (mdbuser) {
     mQ.append(mdbuser);
