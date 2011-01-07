@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.9 2010/12/18 01:10:27 geurts Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.10 2011/01/07 21:28:51 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.10  2011/01/07 21:28:51  geurts
+ * Allow user to "force" VPD-start or startless mode, regardless of dbase setting
+ *
  * Revision 1.9  2010/12/18 01:10:27  geurts
  * bugfix: apply VPD outlier correction in StEvent mode, too.
  *
@@ -109,7 +112,8 @@ StVpdCalibMaker::StVpdCalibMaker(const Char_t *name) : StMaker(name)
   // assign default locations and names to the calibration files 
   setCalibFilePvpd("/star/institutions/rice/calib/default/pvpdCali_4DB.dat");
   // use vpd as start by default;
-  setUseVpdStart(kTRUE);
+  mUseVpdStart = kTRUE;
+  mForceTofStart = kFALSE; // flag indicates user-override for TOF Start time calculation
 }
 
 //_____________________________________________________________________________
@@ -238,27 +242,37 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
       LOG_DEBUG << " Number of rows read in: " << numRows << " for Vpd ToT correction" << endm;
 
       for (Int_t i=0;i<numRows;i++) {
-	if(i==0) {  // identify once only, for the first tube
-	  short flag = totCorr[i].corralgo;
-	  if(flag==0) {
-	    setUseVpdStart(kTRUE);
-	    LOG_INFO << "Selected VPD for TOF start-timing (corralgo=1)" << endm;
+	if (!mForceTofStart){
+	  if(i==0) {  // identify once only, for the first tube
+	    short flag = totCorr[i].corralgo;
+	    if(flag==0) {
+	      mUseVpdStart=kTRUE;
+	      LOG_INFO << "Selected VPD for TOF start-timing (corralgo=1)" << endm;
+	    }
+	    else if(flag==1) {
+	      mUseVpdStart=kFALSE;
+	      LOG_INFO << "VPD NOT used for TOF start-timing (corralgo=0)" << endm;
+	    }
+	    else {
+	      LOG_WARN << "Unknown calibration option " << flag << endm;
+	    }
 	  }
-	  else if(flag==1) {
-	    setUseVpdStart(kFALSE);
-	    LOG_INFO << "VPD NOT used for TOF start-timing (corralgo=0)" << endm;
+	  else { // verify that all other entries agree
+	    if (totCorr[0].corralgo==0 && (totCorr[i].corralgo!=0))
+	      {LOG_WARN << "corralgo dbase inconsistency: " << totCorr[i].corralgo << endm;}
+	    if (totCorr[0].corralgo==1 && (totCorr[i].corralgo!=1))
+	      {LOG_WARN << "corralgo dbase inconsistency: " << totCorr[i].corralgo << endm;}
 	  }
-	  else {
-	    LOG_WARN << "Unknown calibration option " << flag << endm;
-	  }
-	}
-	else { // verify that all other entries agree
-	  if (mUseVpdStart && (totCorr[i].corralgo!=0))
-	    {LOG_WARN << "corralgo dbase inconsistency: " << totCorr[i].corralgo << endm;}
-	  if (!mUseVpdStart && (totCorr[i].corralgo!=1))
-	    {LOG_WARN << "corralgo dbase inconsistency: " << totCorr[i].corralgo << endm;}
 	}
 
+	// Let the user know what is used for calculating TOF Start (and how we got there)
+	if (mForceTofStart) { LOG_INFO << "Detected user override in Start Timing selection ::setUseVpdStart()." << endm;}
+	if (mUseVpdStart) {
+	  LOG_INFO << "Selected VPD for TOF start-timing" << endm;
+	}
+	else {
+	    LOG_INFO << "VPD NOT used for TOF start-timing" << endm;  
+	}
 
 	short tubeId = totCorr[i].tubeId;
 	// check index range
@@ -281,7 +295,7 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
     //       and the VPD will be disabled for TOF start timing, i.e. the TOF could still operate in start-less mode 
       LOG_ERROR << "unable to get vpdTotCorr dataset ... reset all to zero values (NOT GOOD!) and disable use for TOF-start" << endm; 
       resetPars();
-      setUseVpdStart(kFALSE);
+      mUseVpdStart=kFALSE;
       return kStErr;
     }
   }
