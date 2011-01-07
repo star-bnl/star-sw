@@ -48,7 +48,7 @@ class JevpServer {
     ssocket = NULL;
     mon = NULL;
     refplotdir = (char *)DEFAULT_REF_PLOT_DIR;
-    diska = "/a";
+    diska = (char *)"/a";
  
     displays = NULL;
     displays_fn = NULL;
@@ -101,7 +101,10 @@ class JevpServer {
 
   BuilderStatus *getBuilderStatusBySocket(unsigned long long int sock);
   BuilderStatus *getBuilderStatusByName(char *name);
-  char *checkRunStatus(BuilderStatus *builderStat, RunStatus *stat);
+  
+  int calculateAndUpdateRunStatus(BuilderStatus *changedBuilder);
+
+  // char *checkRunStatus(BuilderStatus *builderStat, RunStatus *stat);
   void launchBuilders();
 
   int execScript(const char *name,  char *args[], int waitforreturn=1);

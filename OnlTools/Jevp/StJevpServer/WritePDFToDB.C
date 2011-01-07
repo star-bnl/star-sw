@@ -40,6 +40,10 @@ int writeToDB(int runNumber, char *pdfname, char *flavor)
   static int init=0;
   int ret;
 
+  rtsLogOutput(RTS_LOG_NET);
+  rtsLogAddDest((char *)"172.16.0.1",8004);
+  rtsLogLevel((char *)WARN);
+
   if(!init) {
     initMysql();
     init = 1;
@@ -107,7 +111,7 @@ int writeToDB(int runNumber, char *pdfname, char *flavor)
 	  flavor);
   
   if(mysql_real_query(&mysql, sql_buff, strlen(sql_buff))) {
-    LOG(ERR, "Error inserting tpcPadGainT0 record (%s)",mysql_error(&mysql));
+    LOG(ERR, "Error inserting pdf (%d:%s) record to %s (%s)",runNumber,flavor,DB_TABLE,mysql_error(&mysql));
     free(buff);
     free(escaped_buff);
     free(sql_buff);

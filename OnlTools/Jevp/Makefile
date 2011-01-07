@@ -8,6 +8,4 @@
 install: 
 	cd ~/cvs/; cons; cd ~/cvs/OnlTools/Jevp
 	cp Conscript.batty Conscript; cd ~/cvs/; cons; cd ~/cvs/OnlTools/Jevp; rm -f Conscript
-	cp launch /RTScache/bin/LINUX/i686
-	cp ~/cvs/.sl53_gcc432/lib/* /RTScache/lib/LINUX/i686/STAR_ROOT
-	cp launch_reanalyze /RTScache/bin/LINUX/i686
+	cp ~/cvs/.sl53_gcc432/obj/OnlTools/Jevp/WritePDFToDB /RTScache/lib/LINUX/i686/

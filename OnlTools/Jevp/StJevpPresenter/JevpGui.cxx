@@ -574,7 +574,7 @@ void JevpGui::MakeMenuBar()
   mainMenu->insertItem("&Option",optionMenu);
   fActions[kToolBar]->addTo(optionMenu);
   fActions[kToolBar]->setToggleAction(true);
-  fActions[kToolBar]->setOn(true);
+  fActions[kToolBar]->setOn(false);
 
   mainMenu->insertSeparator();
 
@@ -606,6 +606,7 @@ void JevpGui::MakeMenuBar()
   fActions[kFilePrint]->addTo(fToolBar);
   fActions[kFilePrintAll]->addTo(fToolBar);
   fActions[kOnlPrinter2]->addTo(fToolBar);
+  fToolBar->hide();
 }
 
 //______________________________________________________________________________
@@ -765,8 +766,6 @@ void JevpGui::DoUpdateButton()
   }
   
   UpdatePlots();
-  //  emit nextEvent();
-  //  updateRequest();
 }
 //---------------------------------------------------------------
 void JevpGui::DoPrintButton()
@@ -882,7 +881,7 @@ void JevpGui::ChangeToRun()
   char *name = new char[40];
   strcpy(name, newname);
   static char windowname[100];
-  sprintf(windowname, "Run: %s",name);
+  sprintf(windowname, "Reanalysing Existing Run: %s",name);
   SetWindowName(windowname);
   
   LOG(DBG,"run name=%s\n",name);
@@ -1001,13 +1000,6 @@ void  JevpGui::SetWindowName(const char* displayText)
 
 //______________________________________________________________________________
 void JevpGui::tabChanged(QWidget* q) {
-//   mTab  = GetTabId();
-//   mSubTab =GetSubTabId();
-//   emit tab( mTab );
-//   emit subTab( mSubTab );
-//   emit canvas( GetCanvas() );
-//   updateRequest();
-  
   JevpScreenWidget *widget = dynamic_cast<JevpScreenWidget *>(q);
 
   if(widget) {
@@ -1023,14 +1015,6 @@ void JevpGui::tabChanged(QWidget* q) {
     widget->update();
 
     currentScreen = widget;
-
-    // widget->show();
-    //widget->Refresh();
-
-    // printf("tab index: %d   screen from tab index: %s\n",
-// 	   widget->parentMenu->currentIndex(), 
-// 	   ((JevpScreenWidge
-//	     t *)(widget->parentMenu->currentWidget()))->plot->c_str());
   }
   else {
     QTabWidget *tab = dynamic_cast<QTabWidget *>(q);
@@ -1078,27 +1062,87 @@ void JevpGui::setEventInfo(int run, int event, int count, int token,  unsigned i
   mTriggerDetectorBitsInfo->setTriggerBitsRun(triggerBitsRun);
 
 }
-//______________________________________________________________________________
-void JevpGui::updateRequest() {
-  int pro = fProgressBar->progress();
-  pro++;
-  if (pro>10) pro=0;
-  fProgressBar->setProgress(pro);
 
-//   if ( fTab->currentPage() == fStaticTab ) { 
-//     emit update(GetCanvas(), GetTabId(), GetSubTabId() );
-//     return;
-//   }  
-//   if ( fTab->currentPage() == fDynamicTab ) { 
-//     TQtWidget* widget = GetGroupWidget();
-//     if (widget) {
-//       emit update( widget->GetCanvas(), widget->name() );
-//       return;
-//     }
-//   }
-//  emit update(); 
+// Gets the run status from the server
+// updates the window name...
+int JevpGui::updateRunStatus()
+{
+  EvpMessage msg;
+  msg.setCmd((char *)"GetStatus");
+  msg.setSource((char *)"presenter");
+  msg.setArgs((char *)"");
+  jl_send(&msg);
+
+  CP;
+  TMessage *mess;
+  int ret = jl_socket->Recv(mess);
+  if(ret == 0) {  // disconnect
+    LOG(ERR,"Server disconnected?\n");
+    exit(0);
+  }
+  
+  CP;
+  if(strcmp(mess->GetClass()->GetName(), "RunStatus") != 0) {
+    LOG(ERR,"Didn't get a RunStatus class: got %s\n",mess->GetClass()->GetName());
+    exit(0);
+  }
+  
+  CP;
+  RunStatus *rs = (RunStatus *)mess->ReadObject(mess->GetClass());
+  
+  int isLive = fActions[kFileLive]->isOn();
+  int secs = time(NULL) - rs->timeOfLastChange;
+  char winlab[120];
+  sprintf(winlab, "%s:  Run #%d  (%s for %d seconds)",
+	  isLive ? "     Live" : "Reanalyse", rs->run, rs->status, secs);
+
+  SetWindowName(winlab);
+  return 0;
 }
-//______________________________________________________________________________
+
+// Gets the tags from the server
+// returns true if the tabs changed
+int JevpGui::updateServerTags()
+{
+  CP;
+  // First check for a change to the serverTags...
+  EvpMessage msg;
+  msg.setCmd((char *)"getServerTags");
+  msg.setSource((char *)"presenter");
+  msg.setArgs((char *)"");
+  jl_send(&msg);
+
+  CP;
+  TMessage *mess;
+  int ret = jl_socket->Recv(mess);
+  if(ret == 0) {  // disconnect
+    LOG(ERR,"Server disconnected?\n");
+    exit(0);
+  }
+  
+  CP;
+  if(strcmp(mess->GetClass()->GetName(), "EvpMessage") != 0) {
+    LOG(ERR,"Didn't get a EvpMessage class\n");
+    exit(0);
+  }
+  
+  EvpMessage *response = (EvpMessage *)mess->ReadObject(mess->GetClass());
+  
+  CP;
+  
+  char *args = response->args;
+  if(!args) args = (char *)"";
+  
+  if(strcmp(serverTags, args) != 0) {
+    LOG("JEFF", "Changing server tags from %s to %s",serverTags, args);
+    free(serverTags);
+    serverTags = (char *)malloc(strlen(args) + 1);
+    strcpy(serverTags, args);
+    return 1;
+  }
+  return 0;
+}
+
 void JevpGui::UpdatePlots() 
 {
   CP;
@@ -1115,47 +1159,13 @@ void JevpGui::UpdatePlots()
     }
     nupdates++;
 
-    CP;
-    // First check for a change to the serverTags...
-    EvpMessage msg;
-    msg.setCmd((char *)"getServerTags");
-    msg.setSource((char *)"presenter");
-    msg.setArgs((char *)"");
-    jl_send(&msg);
+    // Get run status and handle window name...
+    updateRunStatus();
 
-    CP;
-    TMessage *mess;
-    int ret = jl_socket->Recv(mess);
-    if(ret == 0) {  // disconnect
-      LOG(ERR,"Server disconnected?\n");
-      exit(0);
-    }
-    
-    CP;
-    if(strcmp(mess->GetClass()->GetName(), "EvpMessage") != 0) {
-      LOG(ERR,"Didn't get a EvpMessage class\n");
-      exit(0);
-    }
-    
-    EvpMessage *response = (EvpMessage *)mess->ReadObject(mess->GetClass());
-    
-    CP;
-    LOG("JEFF", "0x%x 0x%x",serverTags, response);
-    LOG("JEFF", "0x%x 0x%x 0x%x ",serverTags, response, response->args);
-    LOG("JEFF", "%s %s", serverTags, response->args);
-    char *args = response->args;
-    if(!args) args = "";
-
-    if(strcmp(serverTags, args) != 0) {
-      LOG("JEFF", "Changing server tags from %s to %s",serverTags, args);
-      free(serverTags);
-      serverTags = (char *)malloc(strlen(args) + 1);
-      strcpy(serverTags, args);
-
+    if(updateServerTags()) {  // Did the server tags change?  If so, update tab structure
       switchTabs(evpMain->display, serverTags);
-      CP;
     }
-    else {
+    else {  // if not, update visible plots and redraw...
       jl_DrawPlot(currentScreen);
     }
   }
@@ -1266,18 +1276,9 @@ void JevpGui::pc_PresenterConnect(JevpGui* gui, JevpGui* pre)
 
   connect(this, SIGNAL( pc_signalEventInfo(int,int,int,int, unsigned int, unsigned int,unsigned int, unsigned int) ), pc_mGui, SLOT( setEventInfo(int,int,int,int, unsigned int, unsigned int,unsigned int, unsigned int) ) ); 
   connect(this, SIGNAL( pc_signalServerInfo(ServerStatus*) ), pc_mGui, SLOT( setServerInfo(ServerStatus*) ) ); 
-  connect(this, SIGNAL( pc_updateRequest() ), pc_mGui, SLOT( updateRequest() ) );
 
-
-  //connect(pc_mPresenter, SIGNAL( addGroupTab(const char*) ), pc_mGui, SLOT( addGroupTab(const char*) ) );
-  //connect(pc_mPresenter, SIGNAL( addGroup(const char*) ), pc_mGui, SLOT( addGroup(const char*) ) );
-  //connect(pc_mPresenter, SIGNAL( removeGroupTabs()), pc_mGui, SLOT( removeGroupTabs()) );
   connect(pc_mPresenter, SIGNAL( setEnabled(bool)) , pc_mGui, SLOT( setEnabled(bool) ) );
-
-  // Gui --> Presenter
   connect(pc_mGui,SIGNAL(printAll(const char*)), pc_mPresenter, SLOT(printAll(const char*)) );
-  //connect(pc_mGui,SIGNAL(nextEvent()), pc_mPresenter, SLOT(NextEvent()) );
-//  connect(qApp,SIGNAL(lastWindowClosed()),pc_mPresenter,ClosePresenter()));
   pc_mCanvas = 0;
 }
 
@@ -1341,9 +1342,6 @@ void JevpGui::pc_file() {
 #endif /* QT4 */
     return;
   }
-
-  //  pc_mPresenter->jl_SetSource( mapFile.ascii() );
-  emit pc_updateRequest();
 }
 
 void JevpGui::pc_openReference() {

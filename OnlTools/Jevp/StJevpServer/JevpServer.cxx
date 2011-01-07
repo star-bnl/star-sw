@@ -263,7 +263,6 @@ void JevpServer::getMessage() {
     else if (strcmp(mess->GetClass()->GetName(), "BuilderStatus") == 0) {
       BuilderStatus *newstat = (BuilderStatus *)mess->ReadObject(mess->GetClass());
 
-   
       // Find the appropriate builder
       BuilderStatus *builderstat = getBuilderStatusBySocket((unsigned long long int)s);
       if(!builderstat) {
@@ -281,65 +280,30 @@ void JevpServer::getMessage() {
 	return;
       }
       
-      LOG("JEFF", "Got status change from %s: (%s --> %s)",newstat->name, builderstat->status, newstat->status);
+      LOG(DBG, "Got status change from %s: (%s --> %s)",newstat->name, builderstat->status, newstat->status);
 
       // update the builder
       builderstat->lastTransaction = time(NULL);
       
-      LOG("JEFF", "old builder run = %d new =%d  run=%d",builderstat->run,newstat->run,runStatus.run);
+      LOG(DBG, "old builder run = %d new =%d  run=%d",builderstat->run,newstat->run,runStatus.run);
       builderstat->run  = newstat->run;
       builderstat->setStatus(newstat->status);
       builderstat->lastEventTime = newstat->lastEventTime;
       builderstat->events = newstat->events;
       builderstat->detectorsNeeded = newstat->detectorsNeeded;
-      
-      // Check the new run status
-      RunStatus newStatus;
-      
-      char *oldstatus = checkRunStatus(builderstat, &newStatus);
-      if(oldstatus == NULL) return;   // It's not an official builder!
+
+
+      char oldstatus[20];
+      strcpy(oldstatus, runStatus.status);
+      int statuschanged = calculateAndUpdateRunStatus(builderstat);
     
-      LOG("JEFF", "Checking %s vs %s",oldstatus, runStatus.status);
-      if(strcmp(oldstatus, runStatus.status) != 0) {  // Got a change!
+      if(statuschanged) {	
 	LOG("JEFF", "Got a change to the run status: %s -> %s",oldstatus, runStatus.status);
 	if(strcmp(runStatus.status, "stopped")==0) performStopRun();
-	if(strcmp(runStatus.status, "running")==0) performStartRun();
+	if(strcmp(runStatus.status, "running")==0) performStartRun(); 
       }
+      CP;
     }
-    /*    else if (strcmp(mess->GetClass()->GetName(), "RunStatus") == 0) {
-      CP;
-      RunStatus *newstat = (RunStatus *)mess->ReadObject(mess->GetClass());
-
-      if(status) {
-	delete status;
-      }
-      
-      status = newstat;
-
-      CP;
-
-      status->dump(); 
-
-      if(strcmp(status->status, "stopped") == 0) {   // stoprun
-	prerformStopRun();
-      }
-
-      if(strcmp(status->status, "running") == 0) {  // startrun
-	CP;
-	JevpPlot *curr = (JevpPlot *)plots.First();
-	CP;
-	while(curr) {
-	  CP;
-	  plots.Remove(curr);
-	  CP;
-	  delete curr;
-	  CP;
-	  curr = (JevpPlot *)plots.First();
-	  CP;
-	}  
-      }
- 
-      } */
     else if (strcmp(mess->GetClass()->GetName(), "JevpPlot")==0) {
       CP;
       JevpPlot *plot = (JevpPlot *)mess->ReadObject(mess->GetClass());
@@ -1695,30 +1659,24 @@ BuilderStatus *JevpServer::getBuilderStatusByName(char *name)
   return NULL;
 }
 
-char *JevpServer::checkRunStatus(BuilderStatus *builderstat, RunStatus *stat)
+// Returns the new status.   Note... This MAY destroy the run number of the builders
+// use with care :-)
+int JevpServer::calculateAndUpdateRunStatus(BuilderStatus *changedBuilder)
 {
-  static char returnval[16];
+  char *newstatus = runStatus.status;
 
-  stat->setStatus(runStatus.status);   // if no change, keep the old one, ugly!!!
-
-
-  if(!builderstat->official) return NULL;
+  if(!changedBuilder->official) return NULL;
 
   TListIter next(&builders);
   BuilderStatus *curr;
- 
-  int allstopped=1;
- 
-  int curr_run = builderstat->run;
-  if(curr_run == 0) {
-    curr_run = runStatus.run;
-  }
-
-  stat->run = curr_run;  
+  
+  int allstopped = 1;
+  int curr_run = changedBuilder->run;
+  if(curr_run == 0) curr_run = runStatus.run;    // set buildersStatus to 0 for some reason after stop...
 
   while((curr = (BuilderStatus *)next())) {
     if(!curr->official) continue;
-    if(curr == builderstat) continue;
+    if(curr == changedBuilder) continue;
 
     if((strcmp(curr->status, "stopped") != 0) ||
        (curr->run != curr_run)) {
@@ -1726,32 +1684,93 @@ char *JevpServer::checkRunStatus(BuilderStatus *builderstat, RunStatus *stat)
     }
   }
 
-  if(strcmp(builderstat->status, "running") == 0) {
-    // The run starts when the first builder goes to running, not the last :-)
-    // This is because histos are cleared on startrun
-    stat->setStatus("running");
+  if(strcmp(changedBuilder->status, "running") == 0) {
+    newstatus = (char *)"running";
   }
-  else if (strcmp(builderstat->status, "stopped") == 0) {
+  else if (strcmp(changedBuilder->status, "stopped") == 0) {
     if(allstopped) {
-      stat->setStatus("stopped");
+      newstatus = (char *)"stopped";
 
-      // Hack, set all runs to zero for the case where the same run is 
-      // started again...
+      // Set the builders to run = 0 when stopped (this allows a new run with the same run # to work...)
       TListIter next(&builders);
       BuilderStatus *cb;
       while((cb = (BuilderStatus *)next())) {
 	cb->run = 0;
       }
     }
-  } 
+  }
+   
+  LOG("JEFF", "status Checking... old %s,  new %s,  chbuilder %s,  curr_run %d  chbuilder_run %d",
+      runStatus.status, newstatus, changedBuilder->status, curr_run, changedBuilder->run);
+  LOG("JEFF", "status allstop %d", allstopped);
 
-  strcpy(returnval, runStatus.status);
- 
-  runStatus.setStatus(stat->status);
-  runStatus.run = stat->run;
- 
-  return returnval;
+  if(strcmp(newstatus, runStatus.status) == 0) {
+    return 0;
+  }
+
+  runStatus.run = curr_run;
+  runStatus.setStatus(newstatus);
+  
+  return 1;
 }
+
+// char *JevpServer::checkRunStatus(BuilderStatus *builderstat, RunStatus *stat)
+// {
+//   static char returnval[16];
+
+//   stat->setStatus(runStatus.status);   // if no change, keep the old one, ugly!!!
+
+
+//   if(!builderstat->official) return NULL;
+
+//   TListIter next(&builders);
+//   BuilderStatus *curr;
+ 
+//   int allstopped=1;
+ 
+//   int curr_run = builderstat->run;
+//   if(curr_run == 0) {
+//     curr_run = runStatus.run;
+//   }
+
+//   stat->run = curr_run;  
+
+//   while((curr = (BuilderStatus *)next())) {
+//     if(!curr->official) continue;
+//     if(curr == builderstat) continue;
+
+//     if((strcmp(curr->status, "stopped") != 0) ||
+//        (curr->run != curr_run)) {
+//       allstopped = 0;
+//     }
+//   }
+
+//   if(strcmp(builderstat->status, "running") == 0) {
+//     // The run starts when the first builder goes to running, not the last :-)
+//     // This is because histos are cleared on startrun
+//     stat->setStatus("running");
+//   }
+//   else if (strcmp(builderstat->status, "stopped") == 0) {
+//     if(allstopped) {
+//       stat->setStatus("stopped");
+
+//       // Hack, set all runs to zero for the case where the same run is 
+//       // started again...
+//       TListIter next(&builders);
+//       BuilderStatus *cb;
+//       while((cb = (BuilderStatus *)next())) {
+// 	cb->run = 0;
+//       }
+//     }
+//   } 
+
+//   strcpy(returnval, runStatus.status);
+ 
+//   runStatus.setStatus(stat->status);
+//   runStatus.run = stat->run;
+ 
+//   return returnval;
+// }
 
 // server tag always has leading/trainling "|"
 void JevpServer::addServerTag(char *tag)
