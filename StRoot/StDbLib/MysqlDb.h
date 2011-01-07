@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.27 2007/10/29 22:50:56 deph Exp $
+ * $Id: MysqlDb.h,v 1.28 2011/01/07 18:19:02 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.28  2011/01/07 18:19:02  dmitry
+ * user name lookup is done once now (for speedup, based on profiler report)
+ *
  * Revision 1.27  2007/10/29 22:50:56  deph
  * Abstracted load balancer call from connect to own function called from reconnect
  * removed extraneuos methods from header
@@ -211,6 +214,8 @@ private:
   char* mdbpw;
   int mdbPort;  
   char* mdbServerVersion;
+
+  std::string mSysusername;
 
   unsigned int mtimeout; // wait time between connection tries
 
