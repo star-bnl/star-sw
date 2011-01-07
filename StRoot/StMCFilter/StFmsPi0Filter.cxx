@@ -1,4 +1,4 @@
-// @(#)root/eg:$Id: StFmsPi0Filter.cxx,v 1.3 2010/12/02 17:09:16 fisyak Exp $
+// @(#)root/eg:$Id: StFmsPi0Filter.cxx,v 1.4 2011/01/07 16:57:18 jwebb Exp $
 // Author: Victor Perev  17/03/2009
 
 //______________________________________________________________________________
@@ -94,9 +94,9 @@ StFmsPi0Filter::StFmsPi0Filter(): StMCFilter("fmsfilt")
 };
 
 //______________________________________________________________________________
-int StFmsPi0Filter::RejectEG(const StGenParticleMaster &ptl) const
+int StFmsPi0Filter::RejectGT(const StGenParticleMaster &ptl) const
 {
-  //ptl.Print("************** In RejectEG ************** ");
+  //ptl.Print("************** In RejectGT ************** ");
   const StGenParticle *tk=0;
   int n = ptl.Size();
   int ntk=0;
@@ -108,10 +108,12 @@ int StFmsPi0Filter::RejectEG(const StGenParticleMaster &ptl) const
         tk->Pt()  > mPtMin    ){
       double p[4];
       tk->Momentum(p);
+#ifdef __DEBUG__
       printf("PI0!!! %3d St=%3d Pid=%5d Gid=%3d P=%7.2f %7.2f %7.2f %7.2f pt=%7.2f eta=%7.2f\n",
 	     i,tk->GetStatusCode(),tk->GetPdgCode(),tk->GetGeaCode(),
 	     p[0],p[1],p[2],p[3],tk->Pt(),tk->Eta()
 	     );
+#endif
       ntk++;
     }
   }  
@@ -124,9 +126,9 @@ int StFmsPi0Filter::RejectEG(const StGenParticleMaster &ptl) const
   return 0;
 }
 //______________________________________________________________________________
-int StFmsPi0Filter::RejectGT(const StGenParticleMaster &ptl) const
+int StFmsPi0Filter::RejectEG(const StGenParticleMaster &ptl) const
 {
-  //ptl.Print("************** In RejectGT ************** ");
+  //ptl.Print("************** In RejectEG ************** ");
   return 0;
 }
 //______________________________________________________________________________
