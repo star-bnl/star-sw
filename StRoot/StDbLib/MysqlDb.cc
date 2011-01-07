@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.55 2010/11/19 14:54:30 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.56 2011/01/07 17:12:29 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.56  2011/01/07 17:12:29  dmitry
+ * fixed pseudo-leaks in c-string and xml-string assignments
+ *
  * Revision 1.55  2010/11/19 14:54:30  dmitry
  * added define guard (mysql version) to enable automatic reconnect in mysql 5.0.44+, excluding mysql 4
  *
@@ -315,6 +318,12 @@ if(mdbpw)   delete [] mdbpw;
 if(mdbName)  delete [] mdbName;
  if(mdbServerVersion) delete [] mdbServerVersion;
 
+#ifdef MYSQL_VERSION_ID
+# if MYSQL_VERSION_ID > 50044
+mysql_library_end();
+# endif
+#endif
+
 }
 //////////////////////////////////////////////////////////////////////// 
 bool MysqlDb::reConnect(){
@@ -343,8 +352,8 @@ bool MysqlDb::reConnect(){
 
     if(mysql_real_connect(&mData,mdbhost,mdbuser,mdbpw,mdbName,mdbPort,NULL,client_flag)) {
     	connected=true;
-        const char* query = "SHOW STATUS LIKE 'Ssl_cipher'";                                                                                                 
-        mysql_query(&mData, query);                                                                                                                          
+        std::string query = "SHOW STATUS LIKE 'Ssl_cipher'";                                                                                                 
+        mysql_query(&mData, query.c_str());                                                                                                                          
         MYSQL_RES *result = 0;                                                                                                                               
         MYSQL_ROW row = 0;                                                                                                                                   
         int num_fields = 0;                                                                                                                                  
@@ -356,6 +365,7 @@ bool MysqlDb::reConnect(){
 				LOG_INFO << row[0] << " = " << row[1] << endm; 
             }                                                                                                                                                
         } 
+		mysql_free_result(result);
 	}
 
     if(!connected){

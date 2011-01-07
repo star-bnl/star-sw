@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbWrappedMessenger.cc,v 1.9 2009/08/25 17:00:43 fine Exp $
+ * $Id: StDbWrappedMessenger.cc,v 1.10 2011/01/07 17:12:28 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbWrappedMessenger.cc,v $
+ * Revision 1.10  2011/01/07 17:12:28  dmitry
+ * fixed pseudo-leaks in c-string and xml-string assignments
+ *
  * Revision 1.9  2009/08/25 17:00:43  fine
  * fix the compilation issues under SL5_64_bits  gcc 4.3.2
  *
@@ -57,12 +60,17 @@ StDbWrappedMessenger::StDbWrappedMessenger() {
 void
 StDbWrappedMessenger::printMessage(const char* message, StDbMessLevel dbLevel, int lineNumber, const char* className, const char* methodName) {
 
-if(dbLevel<mdbLevel)return;
+if (dbLevel<mdbLevel) return;
 
- int n = strlen(message)+1000;
- char * str = new char[n];
+// int n = strlen(message)+1000;
+// char * str = new char[n];
 
- sprintf(str,"%s::%s line=%d %s",className,methodName,lineNumber,message);
+ std::ostringstream ostr;
+ ostr << className << "::" << methodName << " line=" << lineNumber << " " << message;
+
+ std::string str = ostr.str();
+
+// sprintf(str,"%s::%s line=%d %s",className,methodName,lineNumber,message);
 
  char lString[64];
  switch(dbLevel){
@@ -96,7 +104,7 @@ if(dbLevel<mdbLevel)return;
      LOG_INFO << str << endm;
      break;
    }
-   delete [] str;
+  // delete [] str;
  }
 
 // printMessage(message,(const char*)lString,lineNumber,className,methodName);
