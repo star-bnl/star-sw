@@ -242,8 +242,13 @@ the attribute, the name and value are read out in one step.*/
       return;
     }
 
- string AttributeName = (char*)xmlTextReaderName(reader);
- string NodeValue = filter_string((char*)xmlTextReaderValue(reader));
+ xmlChar* atname = xmlTextReaderName(reader);
+ string AttributeName = (char*)atname;
+ if ( atname != NULL )  { xmlFree(atname); atname = NULL; }
+
+ xmlChar* tmp = xmlTextReaderValue(reader);
+ string NodeValue = filter_string((char*)tmp);
+ if ( tmp != NULL )  { xmlFree(tmp); tmp = NULL; }
 
  IdString += AttributeName + "=" + NodeValue + ";";
 }
@@ -253,13 +258,19 @@ void StlXmlTree::ProcessNode()
   int NodeType = xmlTextReaderNodeType(reader);
   short HasValue = xmlTextReaderHasValue(reader);
   short HasAttributes = xmlTextReaderHasAttributes(reader);
-  NodeName = (char*)xmlTextReaderName(reader);
+  xmlChar* name = xmlTextReaderName(reader);
+  NodeName = (char*)name;
+  if ( name != NULL )  { xmlFree(name); name = NULL; }
+  
   string NodeValue = "";
 
   IdString = "";
   if (HasValue)
     {
-      NodeValue = filter_string((char*)xmlTextReaderValue(reader));
+	  xmlChar* tmp = xmlTextReaderValue(reader);
+      NodeValue = filter_string((char*)tmp);
+  	  if ( tmp != NULL )  { xmlFree(tmp); tmp = NULL; }
+
       IdString = NodeName + "=" + NodeValue + ";";
     }
 
@@ -314,6 +325,8 @@ void StlXmlTree::ProcessNode()
 	  MaxDepthWanted = Depth-1;
 	}
     }
+	
+
 }
 ////////////////////////////////////////////////////////
 map<string,string>  StlXmlTree::ParseAttributeString(string in)
