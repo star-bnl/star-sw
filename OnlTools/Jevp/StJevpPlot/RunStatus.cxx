@@ -17,9 +17,16 @@ RunStatus::~RunStatus()
 
 void RunStatus::setStatus(const char *s)
 {
+  if(status) {
+    if(strcmp(status, s) == 0) {
+      return;
+    }
+  }
+
   if(status) delete status;
   status = new char[strlen(s)+1];
   strcpy(status, s);
+  timeOfLastChange = time(NULL);
 }
 
 void RunStatus::dump()

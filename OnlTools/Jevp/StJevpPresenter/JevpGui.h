@@ -221,6 +221,9 @@ private:
 
     void  MakeActions();
 
+    int updateRunStatus();
+    int updateServerTags();
+
 public slots:
      void  ProcessMessage();
 // void  TurnLive(bool on=true);
@@ -242,7 +245,7 @@ public slots:
      void setServerInfo(ServerStatus*);
      void onlPrinter2();
      void OpenReference();
-     void updateRequest();
+     //void updateRequest();
     void CloseWindow(void);
     void DefineLayouts(void);
     void DoLiveButton(void);
@@ -315,7 +318,7 @@ public slots:
  signals:
  void pc_signalEventInfo(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int);
  void pc_signalServerInfo(ServerStatus*);
- void pc_updateRequest();
+ //void pc_updateRequest();
 
 
 

@@ -13,7 +13,8 @@ class RunStatus : public TObject {
  public:
   int run;
   char *status;
-  
+  int timeOfLastChange;
+
   RunStatus();
   ~RunStatus();
   

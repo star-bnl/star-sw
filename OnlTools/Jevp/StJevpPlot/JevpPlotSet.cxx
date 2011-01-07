@@ -303,21 +303,10 @@ void JevpPlotSet::_stoprun(daqReader *rdr)
   CP;
   updatePlots();  // make sure plots are ready to go...
   CP;
-//   if(server) {
-//     printf("Sending stoprun\n");
-//     EvpMessage msg;
-//     msg.setSource(plotsetname);
-//     msg.setCmd("stoprun");
-//     char args[14];
-//     sprintf(args, "%d", rdr->run);
-//     msg.setArgs(args);
-//     send(&msg);
-//   }
 
-  CP;
   builderStatus.setStatus("stopped");
 
-  LOG("JEFF", "Setting end of run #%d",run);
+  LOG("JEFF", "Stopping run #%d",run);
   send((TObject *)&builderStatus);
     
   CP;
@@ -473,8 +462,9 @@ void JevpPlotSet::Main(int argc, char *argv[])
 	continue;
 
       case EVP_STAT_EOR:
+
 	CP;
-	LOG(NOTE, "EVP_STAT_EOR stat=%s",builderStatus.status);
+	LOG(DBG, "EVP_STAT_EOR stat=%s",builderStatus.status);
 
 	{
 	  EvpMessage m;
@@ -487,10 +477,6 @@ void JevpPlotSet::Main(int argc, char *argv[])
 	    exit(0);
 	  }
 	}
-
-
-
-	
 	
 	if(!builderStatus.running()) {
 	  LOG(NOTE, "Already end of run, don't stop it again... %d",builderStatus.running());
@@ -499,7 +485,6 @@ void JevpPlotSet::Main(int argc, char *argv[])
 	  continue;
 	}
 	
-
 	LOG(DBG, "EOR");
 	_stoprun(reader);
 	LOG(DBG, "Stoprun");
@@ -535,7 +520,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
     
     CP;
     if(reader->status) {
-      LOG("JEFF", "bad event: status=0x%x",reader->status);
+      LOG(ERR, "bad event: status=0x%x",reader->status);
       continue;
     }
 
