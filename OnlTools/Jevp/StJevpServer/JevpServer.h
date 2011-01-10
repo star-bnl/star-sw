@@ -40,7 +40,7 @@ class JevpServer {
   RunStatus runStatus;
 
   TList builders;  
-
+  
   int myport;
 
   JevpServer() {
@@ -67,9 +67,11 @@ class JevpServer {
     serverTags = NULL;
   };
 
+  double liney(double x);
   void archive_display_file();
   void addToPallete(JevpPlot *plot);
 
+  JevpPlot *getJevpSummaryPlot();
   int launchNewServer(char *run);
   static void main(int argc, char *argv[]);
   void parseArgs(int argc, char *argv[]);

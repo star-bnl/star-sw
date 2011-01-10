@@ -226,6 +226,17 @@ JevpPlot::JevpPlot(JevpPlot &x)
   }
   else
     parent = NULL;
+
+  // copy elements...
+  TListIter next(&x.elements);
+  TObject *obj;
+  //  CP;
+  while((obj = (TObject *)next())) {
+    LOG("JEFF", "Copying an object...");
+    TObject *nobj = obj->Clone();
+    addElement(nobj);
+  }
+  //CP;
 }
 
 
@@ -358,6 +369,7 @@ char *JevpPlot::GetPlotName()
 
   char *name = (char *)curr->histo->GetName();
   
+  LOG("JEFF","Name = %s",name);
   if(name == NULL) {
     LOG(ERR, "name is null\n");
   }
@@ -369,12 +381,18 @@ char *JevpPlot::GetPlotName()
     int l=strlen(tmp);
     if(memcmp(name, tmp, l) != 0) {
       sprintf(myname, "%s%s",tmp,name);
+      LOG("JEFF", "myname %s",myname);
     }
     else {
       strcpy(myname, name);
+      LOG("JEFF", "myname %s",myname);
     }
   }
-
+  else {
+    strcpy(myname, name);
+  }
+    
+  LOG("JEFF", "myname %s",myname);
   return myname;
 }
 
@@ -491,6 +509,7 @@ void JevpPlot::draw()
   // Draw additional elements...
   TObject *element = (TObject *)elements.First();
   while(element) {
+    LOG("JEFF", "Drawing an element...");
     element->Draw();
     element = (TObject *)elements.After(element);
   }

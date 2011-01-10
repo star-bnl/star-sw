@@ -597,6 +597,89 @@ void JevpServer::handleEvpPlot(TSocket *s, JevpPlot *plot) {
   plots.Add(plot);
 }
 
+double JevpServer::liney(double x)
+{
+  return 1.0 - (x+5.0)/25.0;
+}
+
+JevpPlot *JevpServer::getJevpSummaryPlot()
+{
+  TListIter nextplot(&plots);
+  JevpPlot *cplot;
+  while((cplot = (JevpPlot *)nextplot())) {
+    if(strcmp(cplot->GetPlotName(), "JevpSummary") == 0) {
+      plots.Remove(cplot);
+      delete cplot;
+      break;
+    }
+  }
+
+  
+  CP;
+  JevpPlot *p = new JevpPlot();
+  TH1I *h = new TH1I("JevpSummary", "JevpSummary", 64,0,63);
+  //h->GetXaxis()->SetAxisColor(kWhite);
+  h->GetXaxis()->SetTickLength(0);
+  h->GetXaxis()->SetLabelColor(kWhite);
+  //h->GetYaxis()->SetAxisColor(kWhite);
+  h->GetYaxis()->SetTickLength(0);
+  h->GetYaxis()->SetLabelColor(kWhite);
+  //h->SetLineColor(kWhite);
+  //h->SetAxisColor(kWhite);
+  //h->SetLabelColor(kWhite);
+
+  p->addHisto(h);
+
+  p->setOptStat(0);
+  p->gridx = 0;
+  p->gridy = 0;
+  
+  
+  CP;
+  JLatex *l;
+  
+  
+  int i = 0;
+  char tmp[256];
+
+  sprintf(tmp,"Run #%d: (%s for %ld seconds)",runStatus.run, runStatus.status, time(NULL) - runStatus.timeOfLastChange);
+  l = new JLatex(2, liney(i++), tmp);
+  i++;
+  l->SetTextSize(.05);
+  p->addElement(l);
+
+  sprintf(tmp, "Tags:   %s", serverTags);
+  l = new JLatex(2, liney(i++), tmp);
+  i++;
+  l->SetTextSize(.035);
+  p->addElement(l);
+
+
+  // Now show builders...
+  TListIter next(&builders);
+  BuilderStatus *curr;
+  int n=0;
+  while((curr = (BuilderStatus *)next())) {
+    n++;
+    sprintf(tmp, "builder %10s%c: \t(run #%d, status %s, events %d, evttime %ld, contacttime %ld)",
+	    curr->name, curr->official ? '*' : '-', curr->run, curr->status, curr->events, time(NULL) - curr->lastEventTime, time(NULL) - curr->lastTransaction);
+    l = new JLatex(2, liney(i++), tmp);
+    l->SetTextSize(.035);
+    p->addElement(l); 
+  }
+  
+  CP;
+  if(n == 0) {
+    sprintf(tmp,"There are no builders");
+    l = new JLatex(2, liney(i++), tmp);
+    l->SetTextSize(.035);
+    p->addElement(l);
+  }
+  CP;
+
+  return p;
+}
+
 void JevpServer::handleGetPlot(TSocket *s, char *argstring) 
 {
   JevpPlot *plot=NULL;
@@ -625,6 +708,7 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
     }
     else {
       //f1->GetObject(plotname, plot);
+      // If JevpSummary, build a new one first...
       f1->GetObject("JevpPlot",plot);
       f1->Close();
 
@@ -653,6 +737,21 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
   }
   else {
     LOG(DBG,"getplot..\n");
+
+    if(strcmp(plotname, "JevpSummary") == 0) {
+      JevpPlot *p = getJevpSummaryPlot();
+ //      CP;
+//       LOG("JEFF", "Got summary Plot 0x%x",p);
+//       TMessage mess(kMESS_OBJECT);
+//       CP;
+//       mess.WriteObject(p);
+//       CP;
+//       s->Send(mess);
+//       CP;
+//       LOG("JEFF", "Sent summary plot");
+      
+      handleEvpPlot(NULL, p);
+    }
     plot = getPlot(plotname);
   }
 
