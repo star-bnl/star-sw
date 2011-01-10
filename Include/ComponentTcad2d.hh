@@ -46,6 +46,10 @@ class ComponentTcad2d : public ComponentBase {
     void SetMedium(const int ireg, Medium* m);
     bool GetMedium(const int ireg, Medium*& m) const;
 
+    int GetNumberOfElements() const {return nElements;}
+    bool GetElement(const int i, double& vol, 
+                    double& dmin, double& dmax, int& type);
+
   private:
 
     // Max. number of vertices per element

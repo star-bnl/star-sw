@@ -58,6 +58,26 @@ class MediumGas : public Medium {
     void SetInterpolationMethodExcitationRates(const int intrp);
     void SetInterpolationMethodIonisationRates(const int intrp);
 
+    // Scaling laws.
+    double ScaleElectricField(const double e) {
+      return e * pressureTable / pressure;
+    }
+    double UnScaleElectricField(const double e) {
+      return e * pressure / pressureTable;
+    }
+    double ScaleDiffusion(const double d) {
+      return d * sqrt(pressureTable / pressure);
+    }
+    double ScaleDiffusionTensor(const double d) {
+      return d * pressureTable / pressure;
+    }
+    double ScaleTownsend(const double alpha) {
+      return alpha * pressure / pressureTable;
+    }
+    double ScaleAttachment(const double eta) {
+      return eta * pressure / pressureTable;
+    }
+
   protected:
   
     static const int nMaxGases = 6;
@@ -116,23 +136,6 @@ class MediumGas : public Medium {
     bool GetGasName(const int gasnumber, std::string& gasname);
     bool GetGasName(std::string input, std::string& gasname) const;
     bool GetGasNumberGasFile(const std::string input, int& number) const;
-
-    // Scaling laws.
-    double ScaleElectricField(const double e) {
-      return e * pressureTable / pressure;
-    }
-    double ScaleDiffusion(const double d) {
-      return d * sqrt(pressureTable / pressure);
-    }
-    double ScaleDiffusionTensor(const double d) {
-      return d * pressureTable / pressure;
-    }
-    double ScaleTownsend(const double alpha) {
-      return alpha * pressure / pressureTable;
-    }
-    double ScaleAttachment(const double eta) {
-      return eta * pressure / pressureTable;
-    }
 
 };
 

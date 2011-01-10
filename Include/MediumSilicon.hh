@@ -18,6 +18,8 @@ class MediumSilicon : public Medium {
     // Destructor
     ~MediumSilicon() {}
 
+    bool IsSemiconductor() const {return true;}
+
     // Doping concentration [cm-3] and type ('i', 'n', 'p')
     void SetDoping(const char type, const double c);
     void GetDoping(char& type, double& c) const;
@@ -73,6 +75,8 @@ class MediumSilicon : public Medium {
     bool   SetMaxElectronEnergy(const double e);
     double GetMaxElectronEnergy() const {return eFinalG;}
 
+    bool Initialise();
+
     // When enabled, the scattering rates table is written to file
     // when loaded into memory.
     void EnableScatteringRateOutput()  {useCfOutput = true;}
@@ -99,10 +103,14 @@ class MediumSilicon : public Medium {
     // Get the (real) collision rate [ns-1] at a given electron energy
     double GetElectronCollisionRate(const double e, const int band);
     // Sample the collision type
-    bool   GetElectronCollision(const double e, int& type, int& level,
-                                double& e1,
+    bool   GetElectronCollision(const double e, int& type, 
+                                int& level, double& e1,
                                 double& dx, double& dy, double& dz,
-                                int& nsec, double& esec, int& band);
+                                int& nion, int& ndxc, int& band);
+    int GetNumberOfIonisationProducts() {return nIonisationProducts;}
+    bool GetIonisationProduct(const int i, int& type, double& energy);
+
+    // Density of states
     double GetConductionBandDensityOfStates(const double e, 
                                             const int band = 0);
     double GetValenceBandDensityOfStates(const double e,
@@ -122,6 +130,9 @@ class MediumSilicon : public Medium {
 
     bool GetOpticalDataRange(double& emin, double& emax, const int i = 0);
     bool GetDielectricFunction(const double e, double& eps1, double& eps2, const int i = 0);
+
+    void ComputeSecondaries(const double e0,
+                            double& ee, double& eh); 
 
   private:
 
@@ -239,11 +250,20 @@ class MediumSilicon : public Medium {
     std::vector<int> nCollElectronDetailed;    
     std::vector<int> nCollElectronBand;
 
+    int nIonisationProducts;
+    struct ionProd {
+      int type;
+      double energy;
+    };
+    std::vector<ionProd> ionProducts;
+
     // Density of states tables
+    double eStepDos;
     int nFbDosEntriesValence;
     int nFbDosEntriesConduction;
     std::vector<double> fbDosValence;
     std::vector<double> fbDosConduction;
+    double fbDosMaxV, fbDosMaxC;
 
     // Optical data
     bool hasOpticalData;
@@ -304,6 +324,8 @@ class MediumSilicon : public Medium {
     bool HoleOpticalScatteringRates();
     bool HoleIonisationRates();
 
+//    void ComputeSecondaries(const double e0,
+//                            double& ee, double& eh); 
     void InitialiseDensityOfStates();
 
 };

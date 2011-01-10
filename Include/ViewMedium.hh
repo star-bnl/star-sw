@@ -7,6 +7,7 @@
 #include <RQ_OBJECT.h>
 #include <TCanvas.h>
 #include <TF1.h>
+#include <TGraph.h>
 
 namespace Garfield {
 
@@ -28,18 +29,22 @@ class ViewMedium {
     
     void SetElectricFieldRange(const double emin, const double emax);
     void SetMagneticFieldRange(const double bmin, const double bmax); 
-    void SetVelocityRange(const double vmin, const double vmax);
-    void SetVelocityRange();
+    void SetFunctionRange(const double vmin, const double vmax);
+    void SetFunctionRange();
 
-    void PlotElectronVelocity(const bool keep = false);
-    void PlotHoleVelocity(const bool keep = false);
-    void PlotIonVelocity(const bool keep = false);
+    void PlotElectronVelocity();
+    void PlotHoleVelocity();
+    void PlotIonVelocity();
 
-    void PlotElectronTownsend(const bool keep = false);
-    void PlotHoleTownsend(const bool keep = false);
+    void PlotElectronDiffusion();
+    void PlotHoleDiffusion();
+    void PlotIonDiffusion();
 
-    void PlotElectronAttachment(const bool keep = false);
-    void PlotHoleAttachment(const bool keep = false);
+    void PlotElectronTownsend();
+    void PlotHoleTownsend();
+
+    void PlotElectronAttachment();
+    void PlotHoleAttachment();
     
     double EvaluateFunction(double* pos, double* par);
 
@@ -64,6 +69,9 @@ class ViewMedium {
     // Functions
     std::vector<TF1> functions;
     int nFunctions;
+    // Graphs
+    std::vector<TGraph> graphs;
+    int nGraphs;
     
     void SetupCanvas();
     void AddFunction(const double xmin, const double xmax, 

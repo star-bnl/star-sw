@@ -17,11 +17,12 @@ ViewMedium::ViewMedium() :
   medium(0),
   eMin(0.), eMax(1000.), bMin(0.), bMax(1.e5),
   vMin(0.), vMax(0.),
-  nFunctions(0) {
+  nFunctions(0), nGraphs(0) {
   
   className = "ViewMedium";
 
   functions.clear();
+  graphs.clear();
   plottingEngine.SetDefaultStyle();
 
 }
@@ -85,10 +86,10 @@ ViewMedium::SetMagneticFieldRange(const double bmin, const double bmax) {
 }
 
 void
-ViewMedium::SetVelocityRange(const double vmin, const double vmax) {
+ViewMedium::SetFunctionRange(const double vmin, const double vmax) {
 
   if (vmin >= vmax || vmin < 0.) {
-    std::cerr << className << "::SetVelocityRange:\n";
+    std::cerr << className << "::SetFunctionRange:\n";
     std::cerr << "    Incorrect range.\n";
     return;
   }
@@ -98,15 +99,16 @@ ViewMedium::SetVelocityRange(const double vmin, const double vmax) {
 }
 
 void
-ViewMedium::SetVelocityRange() {
+ViewMedium::SetFunctionRange() {
 
   vMin = vMax = 0.;
 
 }
 
 void 
-ViewMedium::PlotElectronVelocity(const bool keep) {
+ViewMedium::PlotElectronVelocity() {
 
+  bool keep = false;
   SetupCanvas();
   AddFunction(eMin, eMax, vMin, vMax, keep,
               "electric field [V/cm]", "drift velocity [cm/ns]", 0);
@@ -115,8 +117,9 @@ ViewMedium::PlotElectronVelocity(const bool keep) {
 }
 
 void 
-ViewMedium::PlotHoleVelocity(const bool keep) {
+ViewMedium::PlotHoleVelocity() {
 
+  bool keep = false;
   SetupCanvas();
   AddFunction(eMin, eMax, vMin, vMax, keep,
               "electric field [V/cm]", "drift velocity [cm/ns]", 10);
@@ -125,8 +128,9 @@ ViewMedium::PlotHoleVelocity(const bool keep) {
 }
 
 void 
-ViewMedium::PlotIonVelocity(const bool keep) {
+ViewMedium::PlotIonVelocity() {
 
+  bool keep = false;
   SetupCanvas();
   AddFunction(eMin, eMax, vMin, vMax, keep,
               "electric field [V/cm]", "drift velocity [cm/ns]", 20);
@@ -134,9 +138,58 @@ ViewMedium::PlotIonVelocity(const bool keep) {
 
 }
 
-void 
-ViewMedium::PlotElectronTownsend(const bool keep) {
+void
+ViewMedium::PlotElectronDiffusion() {
 
+  bool keep = false;
+  SetupCanvas();
+  AddFunction(eMin, eMax, vMin, vMax, keep,
+              "electric field [V/cm]", 
+              "diffusion coefficient [cm^{-1/2}]", 1);
+  keep = true;
+  AddFunction(eMin, eMax, vMin, vMax, keep,
+              "electric field [V/cm]",
+              "diffusion coefficient [cm^{-1/2}}]", 2);
+  canvas->Update();
+
+}
+ 
+void
+ViewMedium::PlotHoleDiffusion() {
+
+  bool keep = false;
+  SetupCanvas();
+  AddFunction(eMin, eMax, vMin, vMax, keep,
+              "electric field [V/cm]", 
+              "diffusion coefficient [1/#sqrt{cm}]", 11);
+  keep = true;
+  AddFunction(eMin, eMax, vMin, vMax, keep,
+              "electric field [V/cm]",
+              "diffusion coefficient [1/#sqrt{cm}]", 12);
+  canvas->Update();
+
+}
+
+void
+ViewMedium::PlotIonDiffusion() {
+
+  bool keep = false;
+  SetupCanvas();
+  AddFunction(eMin, eMax, vMin, vMax, keep,
+              "electric field [V/cm]", 
+              "diffusion coefficient [1/#sqrt{cm}]", 21);
+  keep = true;
+  AddFunction(eMin, eMax, vMin, vMax, keep,
+              "electric field [V/cm]",
+              "diffusion coefficient [1/#sqrt{cm}]", 22);
+  canvas->Update();
+
+}
+
+void
+ViewMedium::PlotElectronTownsend() {
+
+  bool keep = false;
   SetupCanvas();
   AddFunction(eMin, eMax, 0., 0., keep,
               "electric field [V/cm]", "Townsend coefficient [1/cm]", 3);
@@ -145,8 +198,9 @@ ViewMedium::PlotElectronTownsend(const bool keep) {
 }
 
 void 
-ViewMedium::PlotHoleTownsend(const bool keep) {
+ViewMedium::PlotHoleTownsend() {
 
+  bool keep = false;
   SetupCanvas();
   AddFunction(eMin, eMax, 0., 0., keep,
               "electric field [V/cm]", "Townsend coefficient [1/cm]", 13);
@@ -155,8 +209,9 @@ ViewMedium::PlotHoleTownsend(const bool keep) {
 }
 
 void 
-ViewMedium::PlotElectronAttachment(const bool keep) {
+ViewMedium::PlotElectronAttachment() {
 
+  bool keep = false;
   SetupCanvas();
   AddFunction(eMin, eMax, 0., 0., keep,
               "electric field [V/cm]", "Attachment coefficient [1/cm]", 4);
@@ -165,8 +220,9 @@ ViewMedium::PlotElectronAttachment(const bool keep) {
 }
 
 void 
-ViewMedium::PlotHoleAttachment(const bool keep) {
+ViewMedium::PlotHoleAttachment() {
 
+  bool keep = false;
   SetupCanvas();
   AddFunction(eMin, eMax, 0., 0., keep,
               "electric field [V/cm]", "Attachment coefficient [1/cm]", 14);
@@ -193,12 +249,14 @@ ViewMedium::AddFunction(const double xmin, const double xmax,
                         const std::string xlabel, const std::string ylabel,
                         const int type) {
 
+  // Make sure the medium pointer is set.
   if (medium == 0) {
     std::cerr << className << "::AddFunction:\n";
     std::cerr << "    Medium is not defined.\n";
     return;
   }
 
+  // Look for an unused function name.
   int idx = 0;
   std::string fname = "fMediumView_0";
   while (gROOT->GetListOfFunctions()->FindObject(fname.c_str())) {
@@ -212,8 +270,11 @@ ViewMedium::AddFunction(const double xmin, const double xmax,
   if (!keep) {
     functions.clear();
     nFunctions = 0;
+    graphs.clear();
+    nGraphs = 0;
   }
 
+  // Create a TF1 and add it to the list of functions.
   TF1 fNew(fname.c_str(), this, &ViewMedium::EvaluateFunction, 
             xmin, xmax, 1, "ViewMedium", "EvaluateFunction");
   functions.push_back(fNew);
@@ -230,22 +291,148 @@ ViewMedium::AddFunction(const double xmin, const double xmax,
   functions.back().GetYaxis()->SetTitle(ylabel.c_str());
   functions.back().SetTitle(title.c_str());
   functions.back().SetParameter(0, type);
-  if (type < 10) {
-    functions.back().SetLineColor(kOrange);
+  
+  // Set the color and marker style.
+  int color;
+  int marker = 20;
+  if (type == 2 || type == 4) {
+    color = plottingEngine.GetRootColorLine1();
+  } else if (type == 12 || type == 14 || type == 22) {
+    color = plottingEngine.GetRootColorLine2();
+  } else if (type < 10) {
+    color = plottingEngine.GetRootColorElectron();
   } else if (type < 20) {
-    functions.back().SetLineColor(kGreen + 2);
+    color = plottingEngine.GetRootColorHole();
   } else {
-    functions.back().SetLineColor(kRed);
+    color = plottingEngine.GetRootColorIon();
   }
+  functions.back().SetLineColor(color);
+  // Get the field grid.
+  std::vector<double> efields;
+  std::vector<double> bfields;
+  std::vector<double> bangles;
+  medium->GetFieldGrid(efields, bfields, bangles);
+  const int nEfields = efields.size();
+  const int nBfields = bfields.size();
+  const int nBangles = bangles.size();
+  bool withGraph = true;
+  if (nEfields <= 0 || nBfields <= 0 || nBangles <= 0) {
+    withGraph = false;
+  }
+  bool withBfield = false;
+  if (nBfields > 1) {
+    withBfield = true;
+  } else if (nBfields == 1 && bfields[0] > 0.) {
+    withBfield = true;
+  }
+
+  if (withGraph) {
+    TGraph graph(nEfields);
+    graph.SetMarkerStyle(marker);
+    graph.SetMarkerColor(color);
+    bool ok = true;
+    for (int i = 0; i < nEfields; ++i) {
+      double value = 0.;
+      switch (type) {
+        case 0:
+          // Electron drift velocity along E
+          ok = medium->GetElectronVelocityE(i, 0, 0, value);
+          value = medium->ScaleVelocity(value);
+          break;
+        case 1:
+          // Electron transverse diffusion
+          ok = medium->GetElectronTransverseDiffusion(i, 0, 0, value);
+          value = medium->ScaleDiffusion(value);
+          break;
+        case 2:
+          // Electron longitudinal diffusion
+          ok = medium->GetElectronLongitudinalDiffusion(i, 0, 0, value);
+          value = medium->ScaleDiffusion(value);
+          break;
+        case 3:
+          // Electron Townsend coefficient
+          ok = medium->GetElectronTownsend(i, 0, 0, value);
+          value = medium->ScaleTownsend(value);
+          break;
+        case 4:
+          // Electron attachment coefficient
+          ok = medium->GetElectronAttachment(i, 0, 0, value);
+          value = medium->ScaleAttachment(value);
+          break;
+        case 10:
+          // Hole drift velocity along E
+          ok = medium->GetHoleVelocityE(i, 0, 0, value);
+          value = medium->ScaleVelocity(value);
+          break;
+        case 11:
+          // Hole transverse diffusion
+          ok = medium->GetHoleTransverseDiffusion(i, 0, 0, value);
+          value = medium->ScaleDiffusion(value);
+          break;
+        case 12:
+          // Hole longitudinal diffusion
+          ok = medium->GetHoleLongitudinalDiffusion(i, 0, 0, value);
+          value = medium->ScaleDiffusion(value);
+          break;
+        case 13:
+          // Hole Townsend coefficient
+          ok = medium->GetHoleTownsend(i, 0, 0, value);
+          value = medium->ScaleTownsend(value);
+          break;
+        case 14:
+          // Hole attachment coefficient
+          ok = medium->GetHoleAttachment(i, 0, 0, value);
+          value = medium->ScaleAttachment(value);
+          break;
+        case 20:
+          // Ion drift velocity
+          ok = medium->GetIonMobility(i, 0, 0, value);
+          value *= medium->UnScaleElectricField(efields[i]);
+          break;
+        case 21:
+          // Ion transverse diffusion
+          ok = medium->GetIonTransverseDiffusion(i, 0, 0, value);
+          value = medium->ScaleDiffusion(value);
+          break;
+        case 22:
+          // Ion longitudinal diffusion
+          ok = medium->GetIonLongitudinalDiffusion(i, 0, 0, value);
+          value = medium->ScaleDiffusion(value);
+          break;
+        default:
+          ok = false;
+          break;
+      }
+      if (!ok) {
+        withGraph = false;
+        break;
+      }
+      graph.SetPoint(i, medium->UnScaleElectricField(efields[i]), value);
+    }
+    if (ok) {
+      graphs.push_back(graph);
+      ++nGraphs;
+    } else {
+      std::cerr << className << "::AddFunction:\n";
+      std::cerr << "    Error retrieving data table.\n";
+      std::cerr << "    Suppress plotting of graph.\n";
+    }
+  }
+        
   if (keep && nFunctions > 1) {
     functions[0].Draw("");
     for (int i = 1; i < nFunctions; ++i) {
-     functions[i].Draw("same");
+     functions[i].Draw("lsame");
     }
   } else {
     functions.back().Draw("");
   }
- 
+  if (nGraphs > 0) {
+    for (int i = 0; i < nGraphs; ++i) { 
+      graphs[i].Draw("p");
+    }
+  }
+
 }
 
 double

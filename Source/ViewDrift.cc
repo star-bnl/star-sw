@@ -14,12 +14,6 @@ ViewDrift::ViewDrift() :
   view(0),
   nDriftLines(0), nTracks(0) {
 
-  plottingEngine.SetDefaultStyle();
-  colorElectron        = plottingEngine.GetRootColor("orange");
-  colorIon             = plottingEngine.GetRootColor("red");
-  colorHole            = plottingEngine.GetRootColor("red");
-  colorPhoton          = plottingEngine.GetRootColor("blue");
-  colorChargedParticle = plottingEngine.GetRootColor("dark-green");
   driftLines.clear();
   tracks.clear(); 
 
@@ -76,16 +70,17 @@ void
 ViewDrift::NewElectronDriftLine(const int np, int& id,
                       const double x0, const double y0, const double z0) {
 
+  int col = plottingEngine.GetRootColorElectron();
   // Create a new electron drift line and add it to the list.
   if (np <= 0) {
     // Number of points is not yet known.
     TPolyLine3D p(1);
-    p.SetLineColor(colorElectron);
+    p.SetLineColor(col);
     p.SetPoint(0, x0, y0, z0);
     driftLines.push_back(p);
   } else {
     TPolyLine3D p(np);
-    p.SetLineColor(colorElectron);
+    p.SetLineColor(col);
     p.SetPoint(0, x0, y0, z0);
     driftLines.push_back(p);
   }
@@ -99,16 +94,17 @@ void
 ViewDrift::NewHoleDriftLine(const int np, int& id,
                       const double x0, const double y0, const double z0) {
 
+  int col = plottingEngine.GetRootColorHole();
   // Create a new hole drift line and add it to the list.
   if (np <= 0) {
     // Number of points is not yet known.
     TPolyLine3D p(1);
-    p.SetLineColor(colorHole);
+    p.SetLineColor(col);
     p.SetPoint(0, x0, y0, z0);
     driftLines.push_back(p);
   } else {
     TPolyLine3D p(np);
-    p.SetLineColor(colorHole);
+    p.SetLineColor(col);
     p.SetPoint(0, x0, y0, z0);
     driftLines.push_back(p);
   }
@@ -122,16 +118,17 @@ void
 ViewDrift::NewIonDriftLine(const int np, int& id,
                  const double x0, const double y0, const double z0) {
 
+  int col = plottingEngine.GetRootColorIon();
   // Create a new ion drift line and add it to the list.
   if (np <= 0) {
     // Number of points is not yet known.
     TPolyLine3D p(1);
-    p.SetLineColor(colorIon);
+    p.SetLineColor(col);
     p.SetPoint(0, x0, y0, z0);
     driftLines.push_back(p);
   } else {
     TPolyLine3D p(np);
-    p.SetLineColor(colorIon);
+    p.SetLineColor(col);
     p.SetPoint(0, x0, y0, z0);
     driftLines.push_back(p);
   }
@@ -145,9 +142,10 @@ void
 ViewDrift::NewPhotonTrack(const double x0, const double y0, const double z0,
                           const double x1, const double y1, const double z1) {
 
+  int col = plottingEngine.GetRootColorPhoton();
   // Create a new photon track (line between start and end point).
   TPolyLine3D p(2);
-  p.SetLineColor(colorPhoton);
+  p.SetLineColor(col);
   p.SetLineStyle(7);
   p.SetPoint(0, x0, y0, z0);
   p.SetPoint(1, x1, y1, z1);
@@ -160,16 +158,17 @@ void
 ViewDrift::NewChargedParticleTrack(const int np, int& id,
                      const double x0, const double y0, const double z0) {
 
+  int col = plottingEngine.GetRootColorChargedParticle();
   // Create a new track and add it to the list.
   if (np <= 0) {
     // Number of points is not yet known.
     TPointSet3D p(1);
-    p.SetMarkerColor(colorChargedParticle);
+    p.SetMarkerColor(col);
     p.SetPoint(0, x0, y0, z0);
     tracks.push_back(p);
   } else {
     TPointSet3D p(np);
-    p.SetMarkerColor(colorChargedParticle);
+    p.SetMarkerColor(col);
     p.SetPoint(0, x0, y0, z0);
     tracks.push_back(p);
   }
@@ -264,41 +263,6 @@ ViewDrift::Plot() {
     tracks[i].Draw("same");
   }
   canvas->Update();
-
-}
-
-void
-ViewDrift::SetElectronColor(const std::string color) {
-
-  colorElectron = plottingEngine.GetRootColor(color);
-
-}
-
-void
-ViewDrift::SetIonColor(const std::string color) {
-  
-  colorIon = plottingEngine.GetRootColor(color);
-
-}
-
-void
-ViewDrift::SetHoleColor(const std::string color) {
-
-  colorHole = plottingEngine.GetRootColor(color);
-
-}
-
-void
-ViewDrift::SetPhotonColor(const std::string color) {
-
-  colorPhoton = plottingEngine.GetRootColor(color);
-
-}
-
-void
-ViewDrift::SetChargedParticleColor(const std::string color) {
-
-  colorChargedParticle = plottingEngine.GetRootColor(color);
 
 }
 

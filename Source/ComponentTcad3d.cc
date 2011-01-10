@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cmath>
 #include <string>
 #include <algorithm>
 
@@ -549,6 +550,117 @@ ComponentTcad3d::GetMedium(const int i, Medium*& m) const {
   if (m == 0) return false;
   return true;
 
+}
+
+bool
+ComponentTcad3d::GetElement(const int i, double& vol,
+                            double& dmin, double& dmax, int& type) {
+                            
+  if (i < 0 || i >= nElements) {
+    std::cerr << className << "::GetElement:\n";
+    std::cerr << "    Element index (" << i << ") out of range.\n";
+    return false;
+  }
+  
+  type = elements[i].type;
+  if (elements[i].type == 2) {
+    // Triangle
+    const double vx = (vertices[elements[i].vertex[1]].y - 
+                       vertices[elements[i].vertex[0]].y) *
+                      (vertices[elements[i].vertex[2]].z - 
+                       vertices[elements[i].vertex[0]].z) -
+                      (vertices[elements[i].vertex[1]].z -
+                       vertices[elements[i].vertex[0]].z) *
+                      (vertices[elements[i].vertex[2]].y -
+                       vertices[elements[i].vertex[0]].y);
+    const double vy = (vertices[elements[i].vertex[1]].z -
+                       vertices[elements[i].vertex[0]].z) *
+                      (vertices[elements[i].vertex[2]].x -
+                       vertices[elements[i].vertex[0]].x) -
+                      (vertices[elements[i].vertex[1]].x -
+                       vertices[elements[i].vertex[0]].x) *
+                      (vertices[elements[i].vertex[2]].z -
+                       vertices[elements[i].vertex[0]].z);
+    const double vz = (vertices[elements[i].vertex[1]].x -
+                       vertices[elements[i].vertex[0]].x) *
+                      (vertices[elements[i].vertex[2]].y -
+                       vertices[elements[i].vertex[0]].y) -
+                      (vertices[elements[i].vertex[1]].y -
+                       vertices[elements[i].vertex[0]].y) *
+                      (vertices[elements[i].vertex[2]].x -
+                       vertices[elements[i].vertex[0]].x);
+    vol = sqrt(vx * vx + vy * vy + vz * vz);
+    const double a = sqrt(
+      pow(vertices[elements[i].vertex[1]].x -
+          vertices[elements[i].vertex[0]].x, 2) +
+      pow(vertices[elements[i].vertex[1]].y -
+          vertices[elements[i].vertex[0]].y, 2) +
+      pow(vertices[elements[i].vertex[1]].z -
+          vertices[elements[i].vertex[0]].z, 2));
+    const double b = sqrt(
+      pow(vertices[elements[i].vertex[2]].x -
+          vertices[elements[i].vertex[0]].x, 2) +
+      pow(vertices[elements[i].vertex[2]].y -
+          vertices[elements[i].vertex[0]].y, 2) +
+      pow(vertices[elements[i].vertex[2]].z -
+          vertices[elements[i].vertex[0]].z, 2));
+    const double c = sqrt(
+      pow(vertices[elements[i].vertex[1]].x -
+          vertices[elements[i].vertex[2]].x, 2) +
+      pow(vertices[elements[i].vertex[1]].y -
+          vertices[elements[i].vertex[2]].y, 2) +
+      pow(vertices[elements[i].vertex[1]].z -
+          vertices[elements[i].vertex[2]].z, 2));
+    dmin = dmax = a;
+    if (b < dmin) dmin = b;
+    if (c < dmin) dmin = c;
+    if (b > dmax) dmax = b;
+    if (c > dmax) dmax = c;
+  } else if (elements[i].type == 5) {
+    // Tetrahedron
+    vol = fabs(
+      (vertices[elements[i].vertex[3]].x - vertices[elements[i].vertex[0]].x) * (
+        (vertices[elements[i].vertex[1]].y - vertices[elements[i].vertex[0]].y) * 
+        (vertices[elements[i].vertex[2]].z - vertices[elements[i].vertex[0]].z) - 
+        (vertices[elements[i].vertex[2]].y - vertices[elements[i].vertex[0]].y) * 
+        (vertices[elements[i].vertex[1]].z - vertices[elements[i].vertex[0]].z)) +
+    (vertices[elements[i].vertex[3]].y - vertices[elements[i].vertex[0]].y) * (
+      (vertices[elements[i].vertex[1]].z - vertices[elements[i].vertex[0]].z) * 
+      (vertices[elements[i].vertex[2]].x - vertices[elements[i].vertex[0]].x) -
+      (vertices[elements[i].vertex[2]].z - vertices[elements[i].vertex[0]].z) * 
+      (vertices[elements[i].vertex[1]].x - vertices[elements[i].vertex[0]].x)) +
+    (vertices[elements[i].vertex[3]].z - vertices[elements[i].vertex[0]].z) * (
+      (vertices[elements[i].vertex[1]].x - vertices[elements[i].vertex[0]].x) * 
+      (vertices[elements[i].vertex[2]].y - vertices[elements[i].vertex[0]].y) -
+      (vertices[elements[i].vertex[3]].x - vertices[elements[i].vertex[0]].x) * 
+      (vertices[elements[i].vertex[1]].y - vertices[elements[i].vertex[0]].y))) / 6.;
+    // Loop over all pairs of vertices.
+    for (int j = 0; j < nMaxVertices - 1; ++j) {
+      for (int k = j + 1; k < nMaxVertices; ++k) {
+        // Compute distance.
+        const double dist = sqrt(
+          pow(vertices[elements[i].vertex[j]].x - 
+              vertices[elements[i].vertex[k]].x, 2) +
+          pow(vertices[elements[i].vertex[j]].y - 
+              vertices[elements[i].vertex[k]].y, 2) +
+          pow(vertices[elements[i].vertex[j]].z - 
+              vertices[elements[i].vertex[k]].z, 2));
+        if (k == 1) {
+          dmin = dist;
+          dmax = dist;
+        } else {
+          if (dist < dmin) dmin = dist;
+          if (dist > dmax) dmax = dist;
+        }
+      }
+    }
+  } else {
+    std::cerr << className << "::GetElement:\n";
+    std::cerr << "    Unexpected element type (" << type << ").\n";
+    return false; 
+  }
+  return true;
+  
 }
 
 bool 

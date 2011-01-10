@@ -63,13 +63,15 @@ clean:
 $(OBJDIR)/AvalancheMicroscopic.o: \
 	$(SRCDIR)/AvalancheMicroscopic.cc \
 	$(INCDIR)/AvalancheMicroscopic.hh \
-	$(INCDIR)/FundamentalConstants.hh $(INCDIR)/Random.hh \
+	$(INCDIR)/FundamentalConstants.hh $(INCDIR)/GarfieldConstants.hh \
+	$(INCDIR)/Random.hh \
 	$(INCDIR)/Sensor.hh $(INCDIR)/Medium.hh $(INCDIR)/ViewDrift.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
 $(OBJDIR)/AvalancheMC.o: \
 	$(SRCDIR)/AvalancheMC.cc $(INCDIR)/AvalancheMC.hh \
-	$(INCDIR)/FundamentalConstants.hh $(INCDIR)/Random.hh \
+	$(INCDIR)/FundamentalConstants.hh $(INCDIR)/GarfieldConstants.hh \
+	$(INCDIR)/Random.hh \
 	$(INCDIR)/Sensor.hh $(INCDIR)/Medium.hh $(INCDIR)/ViewDrift.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@      

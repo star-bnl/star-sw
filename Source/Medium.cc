@@ -62,7 +62,7 @@ Medium::Medium() :
   extrLowDiffusion    = 0; extrHighDiffusion    = 1;
   extrLowTownsend     = 0; extrHighTownsend     = 1;
   extrLowAttachment   = 0; extrHighAttachment   = 1;
-  extrLowMobility     = 0; extrHighMobility     = 1;
+  extrLowMobility     = 0; extrHighMobility     = 2;
   extrLowDissociation = 0; extrHighDissociation = 1;
   
   intpVelocity     = 2;
@@ -738,14 +738,11 @@ bool
 Medium::GetElectronCollision(const double e, int& type, int& level,
                              double& e1, 
                              double& dx, double& dy, double& dz, 
-                             int& nsec, double& esec,
-                             int& band) {
+                             int& nion, int& ndxc, int& band) {
   
   type = level = -1;
   e1 = e;
-  nsec = 0;
-  esec = 0.;
-  band = 0;
+  nion = ndxc = band = 0;
   const double ctheta = 1. - 2 * RndmUniform();
   const double stheta = sqrt(1. - ctheta * ctheta);
   const double phi = TwoPi * RndmUniform();
@@ -761,6 +758,20 @@ Medium::GetElectronCollision(const double e, int& type, int& level,
               
 }
 
+bool
+Medium::GetIonisationProduct(const int i, int& type, double& energy) {
+
+  if (debug) {
+    std::cerr << className << "::GetIonisationProduct:\n";
+    std::cerr << "    Ionisation product " << i << " requested.\n";
+    std::cerr << "    Not supported. Program bug!\n";
+  }
+  type = 0;
+  energy = 0.;
+  return false;
+
+}
+
 bool 
 Medium::GetDeexcitationProduct(const int i, double& t, double& s, 
                                int& type, double& energy) {
@@ -768,8 +779,7 @@ Medium::GetDeexcitationProduct(const int i, double& t, double& s,
   if (debug) {
     std::cerr << className << "::GetDeexcitationProduct:\n";
     std::cerr << "    Deexcitation product " << i << " requested.\n";
-    std::cerr << "    This medium does not support de-excitation.\n";
-    std::cerr << "    Program bug!\n";
+    std::cerr << "    Not supported. Program bug!\n";
   } 
   t = s = energy = 0.;
   type = 0;
@@ -1288,13 +1298,13 @@ Medium::IonVelocity(const double ex, const double ey, const double ez,
     if (!Numerics::Boxin3(tabIonMobility,
                           bAngles, bFields, eFields,
                           nAngles, nBfields, nEfields,
-                          ebang, b, e0, mu, intpVelocity)) {
+                          ebang, b, e0, mu, intpMobility)) {
       mu = 0.;
     }
   } else {
     mu = Interpolate1D(e0, tabIonMobility[0][0], eFields,
-                       intpVelocity, 
-                       extrLowVelocity, extrHighVelocity);
+                       intpMobility, 
+                       extrLowMobility, extrHighMobility);
   }
   
   const double q = 1.;
@@ -2016,7 +2026,499 @@ Medium::GetFieldGrid(std::vector<double>& efields,
   angles  = bAngles;
 
 }
-  
+ 
+bool
+Medium::GetElectronVelocityE(const int ie, const int ib, const int ia,
+                             double& v) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetElectronVelocityE:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    v = 0.;
+    return false;
+  }
+  if (!hasElectronVelocityE) {
+    if (debug) {
+      std::cerr << className << "::GetElectronVelocityE:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    v = 0.;
+    return false;
+  }
+
+  v = tabElectronVelocityE[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetElectronVelocityExB(const int ie, const int ib, const int ia,
+                               double& v) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetElectronVelocityExB:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    v = 0.;
+    return false;
+  }
+  if (!hasElectronVelocityExB) {
+    if (debug) {
+      std::cerr << className << "::GetElectronVelocityExB:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    v = 0.;
+    return false;
+  }
+
+  v = tabElectronVelocityExB[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetElectronVelocityB(const int ie, const int ib, const int ia,
+                             double& v) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetElectronVelocityB:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    v = 0.;
+    return false;
+  }
+  if (!hasElectronVelocityB) {
+    if (debug) {
+      std::cerr << className << "::GetElectronVelocityB:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    v = 0.;
+    return false;
+  }
+
+  v = tabElectronVelocityB[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetElectronLongitudinalDiffusion(const int ie, 
+                                         const int ib, const int ia,
+                                         double& dl) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetElectronLongitudinalDiffusion:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    dl = 0.;
+    return false;
+  }
+  if (!hasElectronDiffLong) {
+    if (debug) {
+      std::cerr << className << "::GetElectronLongitudinalDiffusion:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    dl = 0.;
+    return false;
+  }
+
+  dl = tabElectronDiffLong[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetElectronTransverseDiffusion(const int ie, 
+                                       const int ib, const int ia,
+                                       double& dt) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetElectronTransverseDiffusion:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    dt = 0.;
+    return false;
+  }
+  if (!hasElectronDiffTrans) {
+    if (debug) {
+      std::cerr << className << "::GetElectronTransverseDiffusion:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    dt = 0.;
+    return false;
+  }
+
+  dt = tabElectronDiffTrans[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetElectronTownsend(const int ie, const int ib, const int ia,
+                            double& alpha) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetElectronTownsend:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    alpha = 0.;
+    return false;
+  }
+  if (!hasElectronTownsend) {
+    if (debug) {
+      std::cerr << className << "::GetElectronTownsend:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    alpha = 0.;
+    return false;
+  }
+
+  alpha = tabElectronTownsend[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetElectronAttachment(const int ie, const int ib, const int ia,
+                              double& eta) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetElectronAttachment:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    eta = 0.;
+    return false;
+  }
+  if (!hasElectronAttachment) {
+    if (debug) {
+      std::cerr << className << "::GetElectronAttachment:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    eta = 0.;
+    return false;
+  }
+
+  eta = tabElectronAttachment[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetHoleVelocityE(const int ie, const int ib, const int ia,
+                         double& v) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetHoleVelocityE:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    v = 0.;
+    return false;
+  }
+  if (!hasHoleVelocityE) {
+    if (debug) {
+      std::cerr << className << "::GetHoleVelocityE:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    v = 0.;
+    return false;
+  }
+
+  v = tabHoleVelocityE[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetHoleVelocityExB(const int ie, const int ib, const int ia,
+                           double& v) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetHoleVelocityExB:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    v = 0.;
+    return false;
+  }
+  if (!hasHoleVelocityExB) {
+    if (debug) {
+      std::cerr << className << "::GetHoleVelocityExB:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    v = 0.;
+    return false;
+  }
+
+  v = tabHoleVelocityExB[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetHoleVelocityB(const int ie, const int ib, const int ia,
+                         double& v) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetHoleVelocityB:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    v = 0.;
+    return false;
+  }
+  if (!hasHoleVelocityB) {
+    if (debug) {
+      std::cerr << className << "::GetHoleVelocityB:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    v = 0.;
+    return false;
+  }
+
+  v = tabHoleVelocityB[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetHoleLongitudinalDiffusion(const int ie, 
+                                     const int ib, const int ia,
+                                     double& dl) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetHoleLongitudinalDiffusion:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    dl = 0.;
+    return false;
+  }
+  if (!hasHoleDiffLong) {
+    if (debug) {
+      std::cerr << className << "::GetHoleLongitudinalDiffusion:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    dl = 0.;
+    return false;
+  }
+
+  dl = tabHoleDiffLong[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetHoleTransverseDiffusion(const int ie, 
+                                   const int ib, const int ia,
+                                   double& dt) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetHoleTransverseDiffusion:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    dt = 0.;
+    return false;
+  }
+  if (!hasHoleDiffTrans) {
+    if (debug) {
+      std::cerr << className << "::GetHoleTransverseDiffusion:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    dt = 0.;
+    return false;
+  }
+
+  dt = tabHoleDiffTrans[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetHoleTownsend(const int ie, const int ib, const int ia,
+                        double& alpha) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetHoleTownsend:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    alpha = 0.;
+    return false;
+  }
+  if (!hasHoleTownsend) {
+    if (debug) {
+      std::cerr << className << "::GetHoleTownsend:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    alpha = 0.;
+    return false;
+  }
+
+  alpha = tabHoleTownsend[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetHoleAttachment(const int ie, const int ib, const int ia,
+                          double& eta) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetHoleAttachment:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    eta = 0.;
+    return false;
+  }
+  if (!hasHoleAttachment) {
+    if (debug) {
+      std::cerr << className << "::GetHoleAttachment:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    eta = 0.;
+    return false;
+  }
+
+  eta = tabHoleAttachment[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetIonMobility(const int ie, const int ib, const int ia,
+                       double& mu) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetIonMobility:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    mu = 0.;
+    return false;
+  }
+  if (!hasIonMobility) {
+    if (debug) {
+      std::cerr << className << "::GetIonMobility:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    mu = 0.;
+    return false;
+  }
+
+  mu = tabIonMobility[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetIonLongitudinalDiffusion(const int ie, 
+                                    const int ib, const int ia,
+                                    double& dl) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetIonLongitudinalDiffusion:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    dl = 0.;
+    return false;
+  }
+  if (!hasIonDiffLong) {
+    if (debug) {
+      std::cerr << className << "::GetIonLongitudinalDiffusion:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    dl = 0.;
+    return false;
+  }
+
+  dl = tabIonDiffLong[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetIonTransverseDiffusion(const int ie, 
+                                  const int ib, const int ia,
+                                  double& dt) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetIonTransverseDiffusion:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    dt = 0.;
+    return false;
+  }
+  if (!hasIonDiffTrans) {
+    if (debug) {
+      std::cerr << className << "::GetIonTransverseDiffusion:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    dt = 0.;
+    return false;
+  }
+
+  dt = tabIonDiffTrans[ia][ib][ie];
+  return true;
+
+}
+
+bool
+Medium::GetIonDissociation(const int ie, const int ib, const int ia,
+                           double& diss) {
+
+  if (ie < 0 || ie >= nEfields ||
+      ib < 0 || ib >= nBfields ||
+      ia < 0 || ia >= nAngles) {
+    std::cerr << className << "::GetIonDissociation:\n";
+    std::cerr << "     Index (" << ie << ", " << ib << ", " << ia
+              << ") out of range.\n";
+    diss = 0.;
+    return false;
+  }
+  if (!hasIonDissociation) {
+    if (debug) {
+      std::cerr << className << "::GetIonDissociation:\n";
+      std::cerr << "    Data not available.\n";
+    }
+    diss = 0.;
+    return false;
+  }
+
+  diss = tabIonDissociation[ia][ib][ie];
+  return true;
+
+}
+
 void
 Medium::CloneTable(std::vector<std::vector<std::vector<double> > >& tab,
                    const std::vector<double>& efields,

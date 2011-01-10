@@ -59,8 +59,8 @@ class AvalancheMicroscopic {
     void DisablePhotonTransport() {usePhotons = false;}
     
     // Switch on/off stepping according to band structure E(k)
-    void EnableBandStructure()  {useBandStructure = true;}
-    void DisableBandStructure() {useBandStructure = false;}
+    void EnableBandStructure()  {useBandStructureDefault = true;}
+    void DisableBandStructure() {useBandStructureDefault = false;}
 
     // Switch on/off update of coordinates for null-collision steps
     void EnableNullCollisionSteps()  {useNullCollisionSteps = true;}
@@ -235,7 +235,7 @@ class AvalancheMicroscopic {
     bool useInducedCharge;
     bool useDriftLines;
     bool usePhotons;
-    bool useBandStructure;
+    bool useBandStructureDefault;
     bool useNullCollisionSteps;
     bool useBfield;
     

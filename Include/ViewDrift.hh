@@ -49,12 +49,6 @@ class ViewDrift {
 
     void Plot();
 
-    void SetElectronColor(const std::string color);
-    void SetIonColor(const std::string color);
-    void SetHoleColor(const std::string color);
-    void SetPhotonColor(const std::string color);
-    void SetChargedParticleColor(const std::string color);
-
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
 
@@ -81,12 +75,6 @@ class ViewDrift {
     
     int nTracks;
     std::vector<TPointSet3D> tracks;
-
-    int colorElectron;
-    int colorIon;
-    int colorHole;
-    int colorPhoton;
-    int colorChargedParticle;
 
 };
 

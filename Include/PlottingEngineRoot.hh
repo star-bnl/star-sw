@@ -18,10 +18,27 @@ class PlottingEngineRoot : public PlottingEngine {
     ~PlottingEngineRoot();
 
     void SetDefaultStyle();
-    int  GetRootColor(std::string color);
+
+    int GetRootColorLine1();
+    int GetRootColorLine2();
+    int GetRootColorElectron();
+    int GetRootColorHole();
+    int GetRootColorIon();
+    int GetRootColorPhoton();
+    int GetRootColorChargedParticle();
+
+    bool GetRootColor(std::string color, int& rootcol);
 
   private:
     TStyle* garfieldStyle;
+
+    std::string colorLine1Default;
+    std::string colorLine2Default;
+    std::string colorElectronDefault;
+    std::string colorHoleDefault;
+    std::string colorIonDefault;
+    std::string colorPhotonDefault;
+    std::string colorChargedParticleDefault;
 
 };
 

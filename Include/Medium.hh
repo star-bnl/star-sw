@@ -22,6 +22,8 @@ class Medium {
     std::string GetName() const {return name;}
     virtual
     bool IsGas() const {return false;}
+    virtual
+    bool IsSemiconductor() const {return false;}
 
     // Temperature [K]
     void   SetTemperature(const double t);
@@ -125,7 +127,12 @@ class Medium {
     bool GetElectronCollision(const double e, 
                               int& type, int& level, double& e1,
                               double& dx, double& dy, double& dz,
-                              int& nsec, double& esec, int& band);
+                              int& nion, int& ndxc, int& band);
+
+    virtual
+    int GetNumberOfIonisationProducts() {return 0;}
+    virtual
+    bool GetIonisationProduct(const int i, int& type, double& energy);
 
     virtual
     int GetNumberOfDeexcitationProducts() {return 0;}
@@ -181,6 +188,51 @@ class Medium {
                       std::vector<double>& bfields,
                       std::vector<double>& angles);
 
+    bool GetElectronVelocityE(const int ie, const int ib, const int ia,
+                              double& v);
+    bool GetElectronVelocityExB(const int ie, const int ib, const int ia,
+                                double& v);
+    bool GetElectronVelocityB(const int ie, const int ib, const int ia,
+                              double& v);
+    bool GetElectronLongitudinalDiffusion(const int ie, 
+                                          const int ib, const int ia,
+                                          double& dl);
+    bool GetElectronTransverseDiffusion(const int ie,
+                                        const int ib, const int ia,
+                                        double& dt);
+    bool GetElectronTownsend(const int ie, const int ib, const int ia,
+                             double& alpha);
+    bool GetElectronAttachment(const int ie, const int ib, const int ia,
+                               double& eta);
+    
+    bool GetHoleVelocityE(const int ie, const int ib, const int ia,
+                          double& v);
+    bool GetHoleVelocityExB(const int ie, const int ib, const int ia,
+                            double& v);
+    bool GetHoleVelocityB(const int ie, const int ib, const int ia,
+                          double& v);
+    bool GetHoleLongitudinalDiffusion(const int ie, 
+                                      const int ib, const int ia,
+                                      double& dl);
+    bool GetHoleTransverseDiffusion(const int ie,
+                                    const int ib, const int ia,
+                                    double& dt);
+    bool GetHoleTownsend(const int ie, const int ib, const int ia,
+                         double& alpha);
+    bool GetHoleAttachment(const int ie, const int ib, const int ia,
+                           double& eta);
+
+    bool GetIonMobility(const int ie, const int ib, const int ia,
+                        double& mu);
+    bool GetIonLongitudinalDiffusion(const int ie, 
+                                     const int ib, const int ia,
+                                     double& dl);
+    bool GetIonTransverseDiffusion(const int ie, 
+                                   const int ib, const int ia,
+                                   double& dt);
+    bool GetIonDissociation(const int ie, const int ib, const int ia,
+                            double& diss);
+
     void ResetElectronVelocity();
     void ResetElectronDiffusion();
     void ResetElectronTownsend();
@@ -221,6 +273,24 @@ class Medium {
     void SetInterpolationMethodIonMobility(const int intrp);
     void SetInterpolationMethodIonDissociation(const int intrp);
     
+    // Scaling of fields and transport parameters.
+    virtual
+    double ScaleElectricField(const double e)   {return e;}
+    virtual
+    double UnScaleElectricField(const double e) {return e;}
+    virtual
+    double ScaleVelocity(const double v) {return v;}
+    virtual
+    double ScaleDiffusion(const double d) {return d;}
+    virtual
+    double ScaleDiffusionTensor(const double d) {return d;}
+    virtual
+    double ScaleTownsend(const double alpha) {return alpha;}
+    virtual
+    double ScaleAttachment(const double eta) {return eta;}
+    virtual
+    double ScaleDissociation(const double diss) {return diss;}
+
     // Optical properties
     // Energy range [eV] of available optical data
     virtual 
@@ -379,22 +449,6 @@ class Medium {
                          const int aRes, const int tRes,
          std::vector<std::vector<std::vector<std::vector<double> > > >& tab,
          const double val);
-
-    // Scaling of fields and transport parameters.
-    virtual
-    double ScaleElectricField(const double e) {return e;}
-    virtual
-    double ScaleVelocity(const double v) {return v;}
-    virtual
-    double ScaleDiffusion(const double d) {return d;}
-    virtual
-    double ScaleDiffusionTensor(const double d) {return d;}
-    virtual
-    double ScaleTownsend(const double alpha) {return alpha;}
-    virtual
-    double ScaleAttachment(const double eta) {return eta;}
-    virtual
-    double ScaleDissociation(const double diss) {return diss;}
 
 };
 

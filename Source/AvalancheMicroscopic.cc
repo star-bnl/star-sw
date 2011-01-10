@@ -20,7 +20,8 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   nDistanceHistogramTypes(0),
   histSecondary(0), hasSecondaryHistogram(false),
   useSignal(false), useInducedCharge(false),
-  useDriftLines(false), usePhotons(false), useBandStructure(false),
+  useDriftLines(false), usePhotons(false), 
+  useBandStructureDefault(true),
   useNullCollisionSteps(false), useBfield(false),
   rb11(1.), rb12(0.), rb13(0.), rb21(0.), rb22(1.), rb23(0.),
   rb31(0.), rb32(0.), rb33(1.), rx22(1.), rx23(0.), rx32(0.), rx33(1.),
@@ -578,7 +579,14 @@ AvalancheMicroscopic::TransportElectron(
               << " microscopic tracking data.\n";
     return false;
   }
-  
+
+  // If the medium is a semiconductor, use "band structure" stepping.
+  bool useBandStructure = useBandStructureDefault;
+  if (medium->IsSemiconductor() && useBandStructureDefault) {
+    useBandStructure = true;
+  } else {
+    useBandStructure = false;
+  }
   if (debug) {
     std::cout << className << "::TransportElectron:\n";
     std::cout << "    Starting to drift in medium " 
@@ -628,9 +636,7 @@ AvalancheMicroscopic::TransportElectron(
   int level;
 
   // Number of secondaries
-  int nsec = 0; 
-  // Secondary electron energy
-  double esec = 0.;
+  int nion = 0, ndxc = 0; 
   
   // Random number
   double r;
@@ -869,6 +875,11 @@ AvalancheMicroscopic::TransportElectron(
             break;
           }
           id = medium->GetId();
+          if (medium->IsSemiconductor() && useBandStructureDefault) {
+            useBandStructure = true;
+          } else {
+            useBandStructure = false;
+          }
           // Update the null-collision rate.
           fLim = medium->GetElectronNullCollisionRate(band);
           if (fLim <= 0.) {
@@ -949,7 +960,8 @@ AvalancheMicroscopic::TransportElectron(
             dt += log(r) / fLim;
             // Increase the null collision rate and try again.
             std::cerr << className << "::TransportElectron:\n";
-            std::cerr << "    Increasing the null-collision rate by 5%.\n"; 
+            std::cerr << "    Increasing null-collision rate by 5%.\n"; 
+            if (useBandStructure) std::cerr << "    Band " << band << "\n";
             fLim *= 1.05;
             continue;
           }
@@ -1252,8 +1264,7 @@ AvalancheMicroscopic::TransportElectron(
         // Get the collision type and parameters.
         medium->GetElectronCollision(newEnergy, cstype, level, 
                                      energy, newKx, newKy, newKz, 
-                                     nsec, esec, band);
-
+                                     nion, ndxc, band);
 
         // If activated, histogram the distance with respect to the
         // last collision.
@@ -1300,45 +1311,82 @@ AvalancheMicroscopic::TransportElectron(
             if (hasUserHandleIonisation) {
               userHandleIonisation(x, y, z, t, cstype, level, medium);
             }
-            if (hasSecondaryHistogram) histSecondary->Fill(esec);
-            // Add the secondary electron to the stack.
-            newElectron = stack[iE];
-            // /\_/\_/\_/\_/\_/\_/\_/\_/\_/\_/\_
-            // ===============================
-            // TODO -> TREATMENT OF HOLES!!
-            // ===============================
-            // /\_/\_/\_/\_/\_/\_/\_/\_/\_/\_/\_
-            newElectron.x0 = x; newElectron.x = x;
-            newElectron.y0 = y; newElectron.y = y;
-            newElectron.z0 = z; newElectron.z = z;
-            newElectron.t0 = t; newElectron.t = t;
-            newElectron.energy = std::max(esec, Small);
-            newElectron.e0 = newElectron.energy;
-            newElectron.band = -1;
-            if (useBandStructure) {
-              medium->GetElectronMomentum(std::max(esec, Small), 
-                                          newElectron.kx, newElectron.ky,
-                                          newElectron.kz, 
-                                          newElectron.band);
-            } else {
-              // Randomise the secondary electron direction.
-              const double phi = TwoPi * RndmUniform();
-              const double ctheta = 1. - 2. * RndmUniform();
-              const double stheta = sqrt(1. - ctheta * ctheta);
-              newElectron.kx = cos(phi) * stheta;
-              newElectron.ky = sin(phi) * stheta;
-              newElectron.kz = ctheta;
-              newElectron.status = 0;
-              newElectron.driftLine.clear();
-            }
-            if (aval && (sizeCut <= 0 || nSize < sizeCut)) {
-              stack.push_back(newElectron);
-            }
-            // Increment the electron, hole and ion counters.
-            if (hole) {
-              ++nElectrons; ++nHoles;
-            } else {
-              ++nElectrons; ++nIons;
+            for (int j = nion; j--;) {
+              int itype;
+              double esec;
+              medium->GetIonisationProduct(j, itype, esec);
+              if (itype == IonProdTypeElectron) {
+                esec = std::max(esec, Small);
+                if (hasSecondaryHistogram) histSecondary->Fill(esec);
+                // Add the secondary electron to the stack.
+                newElectron = stack[iE];
+                newElectron.hole = false;
+                newElectron.x0 = x; newElectron.x = x;
+                newElectron.y0 = y; newElectron.y = y;
+                newElectron.z0 = z; newElectron.z = z;
+                newElectron.t0 = t; newElectron.t = t;
+                newElectron.energy = esec;
+                newElectron.e0 = newElectron.energy;
+                if (useBandStructure) {
+                  newElectron.band = -1;
+                  medium->GetElectronMomentum(esec, 
+                                              newElectron.kx, 
+                                              newElectron.ky,
+                                              newElectron.kz, 
+                                              newElectron.band);
+                } else {
+                  // Randomise the secondary electron direction.
+                  const double phi = TwoPi * RndmUniform();
+                  const double ctheta = 1. - 2. * RndmUniform();
+                  const double stheta = sqrt(1. - ctheta * ctheta);
+                  newElectron.kx = cos(phi) * stheta;
+                  newElectron.ky = sin(phi) * stheta;
+                  newElectron.kz = ctheta;
+                }
+                newElectron.status = 0;
+                newElectron.driftLine.clear();
+                if (aval && (sizeCut <= 0 || nSize < sizeCut)) {
+                  stack.push_back(newElectron);
+                }
+                // Increment the electron counter.
+                ++nElectrons;
+              } else if (itype == IonProdTypeHole) {
+                esec = std::max(esec, Small);
+                // Add the secondary hole to the stack.
+                newElectron = stack[iE];
+                newElectron.hole = true;
+                newElectron.x0 = x; newElectron.x = x;
+                newElectron.y0 = y; newElectron.y = y;
+                newElectron.z0 = z; newElectron.z = z;
+                newElectron.t0 = t; newElectron.t = t;
+                newElectron.energy = esec;
+                newElectron.e0 = newElectron.energy;
+                if (useBandStructure) {
+                  newElectron.band = -1;
+                  medium->GetElectronMomentum(esec, 
+                                              newElectron.kx, 
+                                              newElectron.ky,
+                                              newElectron.kz, 
+                                              newElectron.band);
+                } else {
+                  // Randomise the secondary hole direction.
+                  const double phi = TwoPi * RndmUniform();
+                  const double ctheta = 1. - 2. * RndmUniform();
+                  const double stheta = sqrt(1. - ctheta * ctheta);
+                  newElectron.kx = cos(phi) * stheta;
+                  newElectron.ky = sin(phi) * stheta;
+                  newElectron.kz = ctheta;
+                }
+                newElectron.status = 0;
+                newElectron.driftLine.clear();
+                if (aval && (sizeCut <= 0 || nSize < sizeCut)) {
+                  stack.push_back(newElectron);
+                }
+                // Increment the hole counter.
+                ++nHoles;
+              } else if (itype == IonProdTypeIon) {
+                ++nIons;
+              }
             }
             if (debug) {
               std::cout << className << "::TransportElectron:\n";
@@ -1378,23 +1426,22 @@ AvalancheMicroscopic::TransportElectron(
             if (hasUserHandleInelastic) {
               userHandleInelastic(x, y, z, t, cstype, level, medium);
             }
-            if (nsec > 0) {
+            if (ndxc > 0) {
               // Get the electrons and photons produced in the 
               // deexcitation cascade.
-              double tDxc = 0.;
-              double sDxc = 0.;
+              double tDxc = 0., sDxc = 0., eDxc = 0.;
               int typeDxc = 0;
               stackPhotonsTime.clear(); stackPhotonsEnergy.clear();
-              for (int j = nsec; j--;) {
+              for (int j = ndxc; j--;) {
                 if (!medium->GetDeexcitationProduct(j, tDxc, sDxc,
-                                                    typeDxc, esec)) {
+                                                    typeDxc, eDxc)) {
                   std::cerr << className << "::TransportElectron:\n";
                   std::cerr << "    Cannot retrieve deexcitation product "
-                            << j << "/" << nsec << ".\n";
+                            << j << "/" << ndxc << ".\n";
                   break;
                 }
                 
-                if (typeDxc == DxcTypeElectron) {
+                if (typeDxc == DxcProdTypeElectron) {
                   if (!aval) continue;
                   // Penning ionisation
                   newElectron = stack[iE];
@@ -1424,7 +1471,7 @@ AvalancheMicroscopic::TransportElectron(
                   newElectron.y0 = yDxc; newElectron.y = yDxc;
                   newElectron.z0 = zDxc; newElectron.z = zDxc;
                   newElectron.t0 = t + tDxc; newElectron.t = t + tDxc;
-                  newElectron.energy = std::max(esec, Small);
+                  newElectron.energy = std::max(eDxc, Small);
                   newElectron.e0 = newElectron.energy;
                   // Randomise the initial direction.
                   phi = TwoPi * RndmUniform();
@@ -1438,16 +1485,12 @@ AvalancheMicroscopic::TransportElectron(
                   // Add the electron to the list.
                   stack.push_back(newElectron);
                   // Increment the electron and ion counters.
-                  if (hole) {
-                    ++nElectrons; ++nHoles;
-                  } else {
-                    ++nElectrons; ++nIons;
-                  }
-                } else if (typeDxc == DxcTypePhoton && usePhotons && 
-                           esec > gammaCut) {
+                  ++nElectrons; ++nIons;
+                } else if (typeDxc == DxcProdTypePhoton && usePhotons && 
+                           eDxc > gammaCut) {
                   // Radiative de-excitation
                   stackPhotonsTime.push_back(t + tDxc);
-                  stackPhotonsEnergy.push_back(esec);
+                  stackPhotonsEnergy.push_back(eDxc);
                 }
               }
                 
@@ -1641,8 +1684,8 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
 
   int type, level;
   double e1;
-  int nsec;
-  double esec;
+  int nsec = 0;
+  double esec = 0.;
 
   f = medium->GetPhotonCollisionRate(e);
   if (f <= 0.) return;
@@ -1716,7 +1759,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
     for (int j = nsec; j--;) {
       if (!medium->GetDeexcitationProduct(j, tDxc, sDxc,
                                           typeDxc, esec)) continue;
-      if (typeDxc == DxcTypeElectron) {
+      if (typeDxc == DxcProdTypeElectron) {
         // Ionisation
         phi = TwoPi * RndmUniform();
         ctheta = 1. - 2 * RndmUniform();
@@ -1737,7 +1780,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
         stack.push_back(newElectron);
         // Increment the electron and ion counters.        
         ++nElectrons; ++nIons;
-      } else if (typeDxc == DxcTypePhoton && 
+      } else if (typeDxc == DxcProdTypePhoton && 
                  usePhotons && esec > gammaCut) {
         // Radiative de-excitation
         stackPhotonsTime.push_back(t + tDxc);

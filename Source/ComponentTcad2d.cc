@@ -575,6 +575,76 @@ ComponentTcad2d::GetMedium(const int i, Medium*& m) const {
 
 }
 
+bool
+ComponentTcad2d::GetElement(const int i, double& vol,
+                            double& dmin, double& dmax, int& type) {
+                            
+  if (i < 0 || i >= nElements) {
+    std::cerr << className << "::GetElement:\n";
+    std::cerr << "    Element index (" << i << ") out of range.\n";
+    return false;
+  }
+  
+  type = elements[i].type;
+  if (elements[i].type == 1) {
+    const double d = sqrt(pow(vertices[elements[i].vertex[1]].x - 
+                              vertices[elements[i].vertex[0]].x, 2) + 
+                          pow(vertices[elements[i].vertex[1]].y - 
+                              vertices[elements[i].vertex[0]].y, 2));
+    dmin = dmax = vol = d;
+  } else if (elements[i].type == 2) {
+    vol = fabs(
+      (vertices[elements[i].vertex[2]].x - 
+       vertices[elements[i].vertex[0]].x) *
+      (vertices[elements[i].vertex[1]].y - 
+       vertices[elements[i].vertex[0]].y) -
+      (vertices[elements[i].vertex[2]].y -
+       vertices[elements[i].vertex[0]].y) *
+      (vertices[elements[i].vertex[1]].x -
+       vertices[elements[i].vertex[0]].x)) / 2.;
+    const double a = sqrt(
+      pow(vertices[elements[i].vertex[1]].x - 
+          vertices[elements[i].vertex[0]].x, 2) +
+      pow(vertices[elements[i].vertex[1]].y - 
+          vertices[elements[i].vertex[0]].y, 2));
+    const double b = sqrt(
+      pow(vertices[elements[i].vertex[2]].x - 
+          vertices[elements[i].vertex[0]].x, 2) +
+      pow(vertices[elements[i].vertex[2]].y - 
+          vertices[elements[i].vertex[0]].y, 2));
+    const double c = sqrt(
+      pow(vertices[elements[i].vertex[1]].x - 
+          vertices[elements[i].vertex[2]].x, 2) +
+      pow(vertices[elements[i].vertex[1]].y - 
+          vertices[elements[i].vertex[2]].y, 2));
+    dmin = dmax = a;
+    if (b > dmax) dmax = b;
+    if (c > dmax) dmax = c;
+    if (b < dmin) dmin = b;
+    if (c < dmin) dmin = c;
+  } else if (elements[i].type == 3) {
+    const double a = sqrt(
+      pow(vertices[elements[i].vertex[1]].x - 
+          vertices[elements[i].vertex[0]].x, 2) +
+      pow(vertices[elements[i].vertex[1]].y - 
+          vertices[elements[i].vertex[0]].y, 2));
+    const double b = sqrt(
+      pow(vertices[elements[i].vertex[3]].x - 
+          vertices[elements[i].vertex[0]].x, 2) +
+      pow(vertices[elements[i].vertex[3]].y - 
+          vertices[elements[i].vertex[0]].y, 2));
+    vol = a * b;
+    dmin = std::min(a, b);
+    dmax = sqrt(a * a + b * b);
+  } else {
+    std::cerr << className << "::GetElement:\n";
+    std::cerr << "    Unexpected element type (" << type << ")\n";
+    return false;
+  }
+  return true;
+  
+}
+
 bool 
 ComponentTcad2d::LoadData(const std::string datafilename) {
 

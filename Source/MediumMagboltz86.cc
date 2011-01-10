@@ -23,7 +23,8 @@ MediumMagboltz86::MediumMagboltz86() :
   nTerms(0), useAnisotropic(true), 
   nPenning(0), 
   useDeexcitation(false), useRadTrap(true), 
-  nDeexcitations(0), nDeexcitationProducts(0), 
+  nDeexcitations(0), 
+  nIonisationProducts(0), nDeexcitationProducts(0), 
   scaleExc(1.), useSplittingFunction(true),
   eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma) {
  
@@ -69,6 +70,9 @@ MediumMagboltz86::MediumMagboltz86() :
   for (int i = nCsTypes; i--;) nCollisions[i] = 0;
   for (int i = nCsTypesGamma; i--;) nPhotonCollisions[i] = 0; 
   
+  ionProducts.clear();
+  dxcProducts.clear();
+
 }
 
 bool 
@@ -363,7 +367,7 @@ MediumMagboltz86::Initialise() {
   }
   if (!Mixer()) {
     std::cerr << className << "::Initialise:\n";
-    std::cerr << "    Errror calculating the collision rates table.\n";
+    std::cerr << "    Error calculating the collision rates table.\n";
     return false;
   }
   return true;
@@ -437,8 +441,7 @@ bool
 MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level, 
                                        double& e1, 
                                        double& dx, double& dy, double& dz,
-                                       int& nsec, double& esec, 
-                                       int& band) {
+                                       int& nion, int& ndxc, int& band) {
 
   // Check if the electron energy is within the currently set range.
   if (e > eFinal && useAutoAdjust) {
@@ -505,14 +508,14 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
 
   // Get the energy loss for this process.
   double loss = energyLoss[level];
-  nsec = 0;
-  // Secondary electron energy (none by default)
-  esec = 0.;
+  nion = ndxc = 0;
+
   if (type == ElectronCollisionTypeIonisation) {
     // Get the splitting parameter.
     const double w = wSplit[level];
     // Sample the secondary electron energy according to 
     // the Opal-Beaty-Peterson parameterisation.
+    double esec = 0.;
     if (useSplittingFunction) { 
       esec = w * tan(RndmUniform() * atan(0.5 * (e - loss) / w));
       // Rescaling (SST)
@@ -522,14 +525,23 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
     }
     if (esec <= 0) esec = Small;
     loss += esec;
-    nsec = 1;
+    ionProducts.clear();
+    // Add the secondary electron.
+    ionProd newIonProd;
+    newIonProd.type = IonProdTypeElectron;
+    newIonProd.energy = esec;
+    ionProducts.push_back(newIonProd);
+    // Add the ion.
+    newIonProd.type = IonProdTypeIon;
+    newIonProd.energy = 0.;
+    ionProducts.push_back(newIonProd);
+    nIonisationProducts = nion = 2;
   } else if (type == ElectronCollisionTypeExcitation) {
     // Follow the de-excitation cascade (if switched on).
     if (useDeexcitation && iDeexcitation[level] >= 0) {
       int fLevel = 0;
       ComputeDeexcitationInternal(iDeexcitation[level], fLevel);
-      esec = -1.;
-      nsec = nDeexcitationProducts;
+      ndxc = nDeexcitationProducts;
     } else if (usePenning) {
       nDeexcitationProducts = 0;
       dxcProducts.clear();
@@ -541,17 +553,16 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
           RndmUniform() < rPenning[level]) {
         // The energy of the secondary electron is assumed to be given by
         // the difference of excitation and ionisation threshold.
-        esec = energyLoss[level] * rgas[igas] - minIonPot;
+        double esec = energyLoss[level] * rgas[igas] - minIonPot;
         if (esec <= 0) esec = Small;
         // Add the secondary electron to the list.
         dxcProd newDxcProd;
         newDxcProd.t = 0.;
         newDxcProd.s = -lambdaPenning[level] * log(RndmUniformPos());
         newDxcProd.energy = esec;
-        newDxcProd.type = DxcTypeElectron;
+        newDxcProd.type = DxcProdTypeElectron;
         dxcProducts.push_back(newDxcProd);
-        nsec = 1;
-        nDeexcitationProducts = 1;
+        nDeexcitationProducts = ndxc = 1;
         ++nPenning;
       }
     }
@@ -633,6 +644,22 @@ MediumMagboltz86::GetDeexcitationProduct(const int i, double& t, double& s,
   s = dxcProducts[i].s;
   type = dxcProducts[i].type;
   energy = dxcProducts[i].energy;
+  return true;
+
+}
+
+bool
+MediumMagboltz86::GetIonisationProduct(const int i, 
+                                       int& type, double& energy) {
+
+  if (i < 0 || i >= nIonisationProducts) {
+    std::cerr << className << "::GetIonisationProduct:\n";
+    std::cerr << "    Index out of range.\n";
+    return false;
+  }
+
+  type = ionProducts[i].type;
+  energy = ionProducts[i].energy;
   return true;
 
 }
@@ -2629,7 +2656,7 @@ MediumMagboltz86::ComputeDeexcitationInternal(int iLevel, int& fLevel) {
     }
     if (type == 0) {
       // Radiative decay
-      newDxcProd.type = DxcTypePhoton;
+      newDxcProd.type = DxcProdTypePhoton;
       newDxcProd.energy = deexcitations[iLevel].energy;
       if (fLevel >= 0) {
         // Decay to a lower lying excited state.
@@ -2656,7 +2683,7 @@ MediumMagboltz86::ComputeDeexcitationInternal(int iLevel, int& fLevel) {
       }
     } else if (type == 1) {
       // Ionisation electron
-      newDxcProd.type = DxcTypeElectron;
+      newDxcProd.type = DxcProdTypeElectron;
       newDxcProd.energy = deexcitations[iLevel].energy;
       if (fLevel >= 0) {
         // Associative ionisation

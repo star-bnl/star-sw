@@ -13,6 +13,14 @@ PlottingEngineRoot plottingEngine;
 PlottingEngineRoot::PlottingEngineRoot() :
   garfieldStyle(0) {
 
+  colorElectronDefault = "orange";
+  colorHoleDefault = "red";
+  colorIonDefault = "dark-red";
+  colorPhotonDefault = "blue";
+  colorChargedParticleDefault = "dark-green";
+  colorLine1Default = "dark-blue";
+  colorLine2Default = "olive";
+
 }
 
 PlottingEngineRoot::~PlottingEngineRoot() {
@@ -75,36 +83,140 @@ PlottingEngineRoot::SetDefaultStyle() {
     
 }
 
-int 
-PlottingEngineRoot::GetRootColor(std::string color) {
+int
+PlottingEngineRoot::GetRootColorLine1() {
 
-  // Convert to upper-case
+  int rootcol;
+  if (!GetRootColor(colorLine1, rootcol)) {
+    colorLine1 = colorLine1Default;
+    GetRootColor(colorLine1, rootcol);
+  }
+  return rootcol;
+
+}
+
+int
+PlottingEngineRoot::GetRootColorLine2() {
+
+  int rootcol;
+  if (!GetRootColor(colorLine2, rootcol)) {
+    colorLine2 = colorLine2Default;
+    GetRootColor(colorLine2, rootcol);
+  }
+  return rootcol;
+
+}
+
+int 
+PlottingEngineRoot::GetRootColorElectron() {
+
+  int rootcol;
+  if (!GetRootColor(colorElectron, rootcol)) {
+    colorElectron = colorElectronDefault;
+    GetRootColor(colorElectron, rootcol);
+  }
+  return rootcol;
+
+}
+
+int 
+PlottingEngineRoot::GetRootColorHole() {
+
+  int rootcol;
+  if (!GetRootColor(colorHole, rootcol)) {
+    colorHole = colorHoleDefault;
+    GetRootColor(colorHole, rootcol);
+  }
+  return rootcol;
+
+}
+
+int 
+PlottingEngineRoot::GetRootColorIon() {
+
+  int rootcol;
+  if (!GetRootColor(colorIon, rootcol)) {
+    colorIon = colorIonDefault;
+    GetRootColor(colorIon, rootcol);
+  }
+  return rootcol;
+
+}
+
+int
+PlottingEngineRoot::GetRootColorPhoton() {
+
+  int rootcol;
+  if (!GetRootColor(colorPhoton, rootcol)) {
+    colorPhoton = colorPhotonDefault;
+    GetRootColor(colorPhoton, rootcol);
+  }
+  return rootcol;
+
+}
+
+int
+PlottingEngineRoot::GetRootColorChargedParticle() {
+
+  int rootcol;
+  if (!GetRootColor(colorChargedParticle, rootcol)) {
+    colorChargedParticle = colorChargedParticleDefault;
+    GetRootColor(colorChargedParticle, rootcol);
+  }
+  return rootcol;
+
+}
+
+bool 
+PlottingEngineRoot::GetRootColor(std::string color, int& rootcol) {
+
+  rootcol = kBlack;
+
+  // Convert to upper-case.
   for (unsigned int i = 0; i < color.length(); ++i) {
     color[i] = toupper(color[i]);
   }
 
-  if (color == "RED") {
-    return kRed + 1;
-  } else if (color == "GREEN") {
-    return kGreen + 2;
-  } else if (color == "BLUE") {
-    return kBlue + 2;
-  } else if (color == "DARK-RED") {
-    return kRed + 3;
-  } else if (color == "DARK-GREEN") {
-    return kGreen + 3;
-  } else if (color == "DARK-BLUE") {
-    return kBlue + 3;
-  } else if (color == "ORANGE") {
-    return kOrange - 3;
-  } else if (color == "PURPLE") {
-    return kViolet - 7;
-  } else if (color == "CYAN") {
-    return kCyan + 3;
-  } else if (color == "OLIVE") {
-    return kSpring + 4;
+  if (color == "BLACK") {
+    rootcol = kBlack;
+    return true;
   }
-  return kBlack;
+  if (color == "RED") {
+    rootcol = kRed + 1;
+    return true;
+  } else if (color == "GREEN") {
+    rootcol = kGreen + 2;
+    return true;
+  } else if (color == "BLUE") {
+    rootcol = kBlue + 2;
+    return true;
+  } else if (color == "DARK-RED") {
+    rootcol = kRed + 3;
+    return true;
+  } else if (color == "DARK-GREEN") {
+    rootcol = kGreen + 3;
+    return true;
+  } else if (color == "DARK-BLUE") {
+    rootcol = kBlue + 3;
+    return true;
+  } else if (color == "ORANGE") {
+    rootcol = kOrange - 3;
+    return true;
+  } else if (color == "PURPLE") {
+    rootcol = kViolet - 7;
+    return true;
+  } else if (color == "CYAN") {
+    rootcol = kCyan + 3;
+    return true;
+  } else if (color == "OLIVE") {
+    rootcol = kSpring + 4;
+    return true;
+  }
+  if (debug) {
+    std::cerr << className << "::GetRootColor:\n";
+    std::cerr << "    Unknown color (" << color << ").\n";
+  }
+  return false;
 
 }
 

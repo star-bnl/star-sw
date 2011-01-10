@@ -12,40 +12,49 @@ class PlottingEngine {
 
   public:
     // Constructor
-    PlottingEngine() : xMin(0.), xMax(1.), yMin(0.), yMax(1.),
-      xLabel("x"), yLabel("y"), title(""),
-      color1("orange"), color2("dark-green"), 
+    PlottingEngine() :
+      className("PlottingEngine"), 
+      colorLine1("dark-blue"), colorLine2("olive"), 
+      colorElectron("orange"), colorHole("red"), colorIon("dark-red"),
+      colorPhoton("blue"), colorChargedParticle("dark-green"),
       debug(false) {}
 
     // Destructor
     virtual ~PlottingEngine() {}
     
-    void SetRangeX(const double xmin, const double xmax) {
-      xMin = xmin; xMax = xmax;
-    }
-    void SetRangeY(const double ymin, const double ymax) {
-      yMin = ymin; yMax = ymax;
-    }
-    
-    void SetLabelX(const std::string label) {xLabel = label;}
-    void SetLabelY(const std::string label) {yLabel = label;}
-    void SetTitle(const std::string label)  {title = label;}
-    
-    void SetLineColor1(const std::string col) {color1 = col;}
-    void SetLineColor2(const std::string col) {color2 = col;}
-    
+    // Set/get colors.
+    void SetLineColor1(const std::string col)    {colorLine1 = col;}
+    void SetLineColor2(const std::string col)    {colorLine2 = col;}
+    void SetElectronColor(const std::string col) {colorElectron = col;}
+    void SetHoleColor(const std::string col)     {colorHole = col;}
+    void SetIonColor(const std::string col)      {colorIon = col;}
+    void SetPhotonColor(const std::string col)   {colorPhoton = col;}
+    void SetChargedParticleColor(const std::string col) {
+                                                colorChargedParticle = col;}
+
+    std::string GetLineColor1()    {return colorLine1;}
+    std::string GetLineColor2()    {return colorLine2;}
+    std::string GetElectronColor() {return colorElectron;}
+    std::string GetHoleColor()     {return colorHole;}
+    std::string GetIonColor()      {return colorIon;}
+    std::string GetPhotonColor()   {return colorPhoton;}
+    std::string GetChargedParticleColor() {return colorChargedParticle;}
+
     // Switch on/off debugging messages
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
 
   protected:
-    double xMin, xMax;
-    double yMin, yMax;
-    std::string xLabel;
-    std::string yLabel;
-    std::string title;    
-    std::string color1, color2;
-    
+
+    std::string className;
+
+    std::string colorLine1, colorLine2;
+    std::string colorElectron;
+    std::string colorHole;
+    std::string colorIon;
+    std::string colorPhoton;
+    std::string colorChargedParticle;
+
     bool debug;
 
 };

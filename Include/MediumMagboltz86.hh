@@ -78,8 +78,9 @@ class MediumMagboltz86 : public MediumGas {
     bool   GetElectronCollision(const double e, int& type, int& level, 
                                 double& e1,
                                 double& dx, double& dy, double& dz,
-                                int& nsec, double& esec, int& band);
-
+                                int& nion, int& ndxc, int& band);
+    int GetNumberOfIonisationProducts() {return nIonisationProducts;}
+    bool GetIonisationProduct(const int i, int& type, double& energy);
     void ComputeDeexcitation(int iLevel, int& fLevel);   
     int  GetNumberOfDeexcitationProducts() {return nDeexcitationProducts;}
     bool GetDeexcitationProduct(const int i, double& t, double& s, 
@@ -228,8 +229,17 @@ class MediumMagboltz86 : public MediumGas {
     std::vector<deexcitation> deexcitations;
     // Mapping between deexcitations and cross-section terms.
     int iDeexcitation[nMaxLevels];
-    int nDeexcitationProducts;
+
+    // List of ionisation products.
+    int nIonisationProducts;
+    struct ionProd {
+      int type;
+      double energy;
+    };
+    std::vector<ionProd> ionProducts;
+
     // List of de-excitation products
+    int nDeexcitationProducts;
     struct dxcProd {
       // Radial spread
       double s;

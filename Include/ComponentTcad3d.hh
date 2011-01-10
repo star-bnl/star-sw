@@ -44,6 +44,10 @@ class ComponentTcad3d : public ComponentBase {
     // Set/get the medium for a given region
     void SetMedium(const int ireg, Medium* m);
     bool GetMedium(const int ireg, Medium*& m) const;
+    
+    int GetNumberOfElements() const {return nElements;}
+    bool GetElement(const int i, double& vol,
+                    double& dmin, double& dmax, int& type);
 
   private:
   

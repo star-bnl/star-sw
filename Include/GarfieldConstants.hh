@@ -4,8 +4,12 @@
 
 namespace Garfield {
 
-static const int DxcTypeElectron = -1;
-static const int DxcTypePhoton   =  1;
+static const int IonProdTypeElectron = -1;
+static const int IonProdTypeHole     =  1;
+static const int IonProdTypeIon      =  2;
+
+static const int DxcProdTypeElectron = -1;
+static const int DxcProdTypePhoton   =  1;
 
 // Collision types
 static const int ElectronCollisionTypeElastic      = 0;
