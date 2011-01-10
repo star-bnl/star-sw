@@ -1,5 +1,8 @@
-//$Id: LaserEvent.cxx,v 1.6 2008/06/02 13:48:02 fisyak Exp $
+//$Id: LaserEvent.cxx,v 1.7 2011/01/10 20:36:12 fisyak Exp $
 // $Log: LaserEvent.cxx,v $
+// Revision 1.7  2011/01/10 20:36:12  fisyak
+// Use sector/padrow in global => local transformation
+//
 // Revision 1.6  2008/06/02 13:48:02  fisyak
 // Add  t0 handlers for Tpx/Tpc time offsets
 //
@@ -314,7 +317,7 @@ Hit::Hit(StTpcHit *tpcHit)  : sector(0),row(0),charge(0),flag(0),usedInFit(0) {
     transform(coorLSA,local); 
 #else
     static StTpcLocalSectorCoordinate  local;
-    transform(glob,local); 
+    transform(glob,local,tpcHit->sector(),tpcHit->padrow()); 
 #endif
     xyzL = StThreeVectorF(local.position().x(),local.position().y(),local.position().z());
     static const Int_t NumberOfPadsAtRow[45] = {
