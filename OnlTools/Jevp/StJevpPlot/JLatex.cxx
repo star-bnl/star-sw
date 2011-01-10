@@ -1,5 +1,6 @@
 #include "JLatex.h"
 #include "TPad.h"
+#include <rtsLog.h>
 
 ClassImp(JLatex);
 
@@ -20,6 +21,8 @@ JLatex::JLatex(JLatex &l) : TLatex(l) {
   ndcX = l.ndcX;
   jx = l.jx;
   jy = l.jy;
+
+  LOG("JEFF", "Copy constructor for JLatex");
 }
 
 void JLatex::SetNDC_x(int ndc) {

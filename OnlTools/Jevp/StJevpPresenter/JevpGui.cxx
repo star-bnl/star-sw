@@ -1679,13 +1679,18 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
   DisplayNode *hd = thetab;
   for(int i=0;i<nplots;i++) {   // First get plots!
     char tmp[256];
+    
     JevpPlot *plot = jl_getPlotFromServer(hd->name,  tmp);
   
     if(plot) {
+      LOG("JEFF", "Got plot %s : %s",hd->name,plot->GetPlotName());
       screen->addPlot(plot);
       screen->addJevpPlot(plot);
       double my = plot->getMaxY();
       if(my > maxY) maxY = my;
+    }
+    else {
+      LOG("JEFF", "No plot for %s",hd->name);
     }
 
     hd = hd->next;   
