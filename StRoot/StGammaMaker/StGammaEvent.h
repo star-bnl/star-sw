@@ -43,7 +43,7 @@ class StGammaEvent: public TObject
         ~StGammaEvent();
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaEvent.h,v 1.14 2010/06/25 20:53:13 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaEvent.h,v 1.15 2011/01/11 18:33:20 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
         
         void Clear(Option_t *opts= "");
         
@@ -80,6 +80,13 @@ class StGammaEvent: public TObject
         Float_t vertexRank() { return mVertexRank; }                /// Returns rank of primary vertex
         Float_t magneticField() const { return mMagneticField; }    /// Magnetic field (kG)
         StGammaPythiaEvent* pythia() { return mPythia; }            /// Pythia event
+
+        Bool_t validSpinDb() { return mSpinDbValid; }
+        UShort_t spin4() { return mSpin4; }
+        UShort_t bunchCrossing7bit() { return mBunchCrossing7bit; }
+        UShort_t bunchCrossing48bit() { return mBunchCrossing48bit; }
+        UShort_t bunchCrossingStar() { return mBunchCrossingStar; }
+        UShort_t polarizationType() { return mPolarizationType; }        
         
         Float_t sumPt( Float_t eta_min = -2.5, Float_t eta_max = +2.5 ) const;     /// Returns track+tower pT in eta range
         Float_t sumTrackPt(Float_t eta_min = -2.5, Float_t eta_max = +2.5 ) const; /// Returns track pT in eta range
