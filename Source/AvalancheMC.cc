@@ -826,7 +826,6 @@ AvalancheMC::Avalanche() {
   int nAval = aval.size();
   while (nAval > 0) {
     for (int iAval = nAval; iAval--;) {
-
       if (withElectrons) {
         // Loop over the electrons at this location.
         for (int iE = aval[iAval].ne; iE--;) {
@@ -836,15 +835,15 @@ AvalancheMC::Avalanche() {
             continue;
           }
           // Loop over the drift line.
-          for (int iDrift = 0; iDrift < nDrift - 1; ++iDrift) {
+          for (int iDrift = 0; iDrift < nDrift - 2; ++iDrift) {
             if (drift[iDrift].ne > 0 || 
                 drift[iDrift].nh > 0 || 
                 drift[iDrift].ni > 0) {
               // Add the point to the table.
-              point.x = 0.5 * (drift[iDrift].x + drift[iDrift + 1].x);
-              point.y = 0.5 * (drift[iDrift].y + drift[iDrift + 1].y);
-              point.z = 0.5 * (drift[iDrift].z + drift[iDrift + 1].z);
-              point.t = 0.5 * (drift[iDrift].t + drift[iDrift + 1].t);
+              point.x = drift[iDrift + 1].x;
+              point.y = drift[iDrift + 1].y;
+              point.z = drift[iDrift + 1].z;
+              point.t = drift[iDrift + 1].t;
               point.ne = drift[iDrift].ne;
               point.nh = drift[iDrift].nh;
               point.ni = drift[iDrift].ni;
@@ -874,10 +873,10 @@ AvalancheMC::Avalanche() {
                 drift[iDrift].nh > 0 ||
                 drift[iDrift].ni > 0) {
               // Add the point to the table.
-              point.x = 0.5 * (drift[iDrift].x + drift[iDrift + 1].x);
-              point.y = 0.5 * (drift[iDrift].y + drift[iDrift + 1].y);
-              point.z = 0.5 * (drift[iDrift].z + drift[iDrift + 1].z);
-              point.t = 0.5 * (drift[iDrift].t + drift[iDrift + 1].t);
+              point.x = drift[iDrift + 1].x;
+              point.y = drift[iDrift + 1].y;
+              point.z = drift[iDrift + 1].z;
+              point.t = drift[iDrift + 1].t;
               point.ne = drift[iDrift].ne;
               point.nh = drift[iDrift].nh;
               point.ni = drift[iDrift].ni;
