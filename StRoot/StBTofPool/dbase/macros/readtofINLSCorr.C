@@ -33,7 +33,7 @@ void readtofINLSCorr()
   //-- connect to the db & get an empty container
   StDbConfigNode* configNode = dbManager->initConfig("Calibrations_tof");
 
-  string ZReadTime = "2010-02-15 00:00:00";
+  string ZReadTime = "2010-12-31 00:00:00";
   dbManager->setRequestTime(ZReadTime.c_str());
 
   StDbTable* tofinlcorr = configNode->addDbTable("tofINLSCorr");
@@ -82,5 +82,8 @@ void readtofINLSCorr()
   }
 
   cout << " Total # of boards read in : " << NTdig << endl;
+
+  // list the TDIG board IDs
+  for(int i=0;i<NTdig;i++){cout << mBoardId[i] << endl;}
 
 }
