@@ -11,6 +11,7 @@
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 
 #include "StTriggerUtilities/StTriggerSimuMaker.h"
+#include "StSpinPool/StSpinDbMaker/StSpinDbMaker.h"
 
 ClassImp(StGammaEventMaker);
 
@@ -96,6 +97,8 @@ Int_t StGammaEventMaker::Make()
     mGammaEvent->SetMudstFileName( muDstMaker->chain()->GetFile()->GetName() );
     mGammaEvent->SetMagneticField( StMuDst::event()->magneticField() );
     mGammaEvent->SetTriggerIds( StMuDst::event()->triggerIdCollection().nominal().triggerIds() );
+    mGammaEvent->SetBunchCrossing48bit( StMuDst::event()->l0Trigger().bunchCrossingId() );
+    mGammaEvent->SetBunchCrossing7bit( StMuDst::event()->l0Trigger().bunchCrossingId7bit( mGammaEvent->runNumber() ) );
 
     // Store simulated triggers
     vector<unsigned int> simuTriggers;
@@ -122,6 +125,20 @@ Int_t StGammaEventMaker::Make()
     }
 
     mGammaEvent->SetSimuTriggerIds(simuTriggers); 
+
+    // Store spin information
+    StSpinDbMaker* spinDb = dynamic_cast<StSpinDbMaker*>(GetMakerInheritsFrom("StSpinDbMaker"));
+    if(spinDb)
+    {
+
+        mGammaEvent->SetValidDb(spinDb->isValid());
+        mGammaEvent->SetSpin4( spinDb->spin4usingBX48( mGammaEvent->bunchCrossing48bit() ) );
+        mGammaEvent->SetBunchCrossingStar( spinDb->BXstarUsingBX48( mGammaEvent->bunchCrossing48bit() ) );        
+
+        if(spinDb->isPolDirLong())    mGammaEvent->SetPolarizationType(StGammaEvent::kLongLong);
+        else if(spinDb->isPolDirTrans()) mGammaEvent->SetPolarizationType(StGammaEvent::kTransTrans);
+
+    }
 
     
     // Store timestamp index in place of run number in simulation
