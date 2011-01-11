@@ -1350,6 +1350,9 @@ MediumGas::PrintGas() {
   std::cout << "\n";
   std::cout << "    Pressure:    " << pressure << " Torr\n";
   std::cout << "    Temperature: " << temperature << " K\n";
+  std::cout << "    Gas file:\n";
+  std::cout << "      Pressure:    " << pressureTable << " Torr\n";
+  std::cout << "      Temperature: " << temperatureTable << " K\n";
   if (nEfields > 1) {
     std::cout << "    Electric field range:  " << eFields[0] 
               << " - " << eFields[nEfields - 1] 

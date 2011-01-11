@@ -239,6 +239,7 @@ ViewMedium::SetupCanvas() {
     if (hasExternalCanvas) hasExternalCanvas = false;
   }
   canvas->cd();
+  gPad->SetLeftMargin(0.15);
 
 }
 
@@ -277,6 +278,7 @@ ViewMedium::AddFunction(const double xmin, const double xmax,
   // Create a TF1 and add it to the list of functions.
   TF1 fNew(fname.c_str(), this, &ViewMedium::EvaluateFunction, 
             xmin, xmax, 1, "ViewMedium", "EvaluateFunction");
+  fNew.SetNpx(1000);
   functions.push_back(fNew);
   ++nFunctions;
 
@@ -352,12 +354,12 @@ ViewMedium::AddFunction(const double xmin, const double xmax,
         case 3:
           // Electron Townsend coefficient
           ok = medium->GetElectronTownsend(i, 0, 0, value);
-          value = medium->ScaleTownsend(value);
+          value = medium->ScaleTownsend(exp(value));
           break;
         case 4:
           // Electron attachment coefficient
           ok = medium->GetElectronAttachment(i, 0, 0, value);
-          value = medium->ScaleAttachment(value);
+          value = medium->ScaleAttachment(exp(value));
           break;
         case 10:
           // Hole drift velocity along E
@@ -377,12 +379,12 @@ ViewMedium::AddFunction(const double xmin, const double xmax,
         case 13:
           // Hole Townsend coefficient
           ok = medium->GetHoleTownsend(i, 0, 0, value);
-          value = medium->ScaleTownsend(value);
+          value = medium->ScaleTownsend(exp(value));
           break;
         case 14:
           // Hole attachment coefficient
           ok = medium->GetHoleAttachment(i, 0, 0, value);
-          value = medium->ScaleAttachment(value);
+          value = medium->ScaleAttachment(exp(value));
           break;
         case 20:
           // Ion drift velocity
@@ -420,11 +422,13 @@ ViewMedium::AddFunction(const double xmin, const double xmax,
   }
         
   if (keep && nFunctions > 1) {
+    functions[0].GetYaxis()->SetTitleOffset(1.5);
     functions[0].Draw("");
     for (int i = 1; i < nFunctions; ++i) {
      functions[i].Draw("lsame");
     }
   } else {
+    functions.back().GetYaxis()->SetTitleOffset(1.5);
     functions.back().Draw("");
   }
   if (nGraphs > 0) {

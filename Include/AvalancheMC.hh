@@ -121,14 +121,13 @@ class AvalancheMC {
       // Townsend and attachment coefficient
       double alpha, eta;
       // Number of secondaries produced at this point
-      int ne, ni;
+      int ne, nh, ni;
     };
     std::vector<driftPoint> drift;
 
-    int nAval;
     struct avalPoint {
       double x, y, z, t;
-      int ne, ni;
+      int ne, nh, ni;
     };
     std::vector<avalPoint> aval;
 
@@ -145,9 +144,8 @@ class AvalancheMC {
     bool hasTimeWindow;
     double tMin, tMax;
 
-    // Number of electrons and ions produced
-    int nElectrons;
-    int nIons;
+    // Number of electrons, holes and ions produced
+    int nElectrons, nHoles, nIons;
 
     // Number of endpoints (including captured electrons)
     int nEndpointsElectrons;

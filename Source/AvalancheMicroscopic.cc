@@ -1171,7 +1171,7 @@ AvalancheMicroscopic::TransportElectron(
             } else {
               std::cout << "    Electron left the drift area.\n";
             }
-            std::cout << "    At " << x << "," << y << "," << z << "\n";
+            std::cout << "    At " << x << ", " << y << ", " << z << "\n";
           }
           break;
         }
