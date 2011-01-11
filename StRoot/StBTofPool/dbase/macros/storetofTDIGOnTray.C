@@ -31,7 +31,7 @@ void storetofTDIGOnTray()
 //  const Int_t NTRAY = 94;
 //  const Int_t NVPDTRAY = 2;
 //  const Int_t NMAX = 120;
-// year10
+// year10/year11
   const Int_t NTRAY = 120;
   const Int_t NVPDTRAY = 2;
   const Int_t NMAX = 120;
@@ -54,7 +54,8 @@ void storetofTDIGOnTray()
   //----------------------------------------
 //  TString ZStoreTime = "2007-11-01 00:00:03";
 //  TString ZStoreTime = "2008-11-01 00:00:00";
-  TString ZStoreTime = "2009-11-01 00:00:00";
+//  TString ZStoreTime = "2009-11-01 00:00:00";
+  TString ZStoreTime = "2010-12-20 00:00:00";
 
   //-- add table to the container with descriptor given by Database
   StDbTable* tofTDIGOnTray = configNode->addDbTable("tofTDIGOnTray");
@@ -74,9 +75,23 @@ void storetofTDIGOnTray()
     89, 91,  0,  0, 84, 82,  0,  0,
     85, 79,  0,  0, 80, 83,  0,  0
   };
-*/
 // year10
   Short_t trayId[NMAX] = { 68, 58, 63,  6,106, 67, 61, 50, 57, 60,
+                           47, 46, 87,133, 64, 72, 62, 42, 14, 11,
+                           28,  7, 25, 33, 19, 17, 37, 21, 30, 35,
+                            8, 20, 31, 27, 12,  9, 10, 29, 34, 13,
+                           16, 77, 89, 36, 39, 23, 32, 15, 24, 18,
+                           59, 66, 70, 38, 41, 45, 52, 54, 53, 55,
+                           84,105, 94, 91, 95, 48, 44, 22, 26, 49,
+                            5,  2, 75, 40,117,  4,121, 99,120,122,
+                          111,116,118,119,109,101,100,107, 98, 56,
+                           88,115,102,108,112,110,113,114,123, 90,
+                           93, 65, 51, 73, 76, 83, 69, 80, 82, 74,
+                           97, 79, 43, 86, 85,132,104, 92, 96,103};
+                              // B-132;  C-133  renamed
+*/
+// year11
+  Short_t trayId[NMAX] = { 68, 58, 63,  6,106, 67, 61, 50, 57, 71,
                            47, 46, 87,133, 64, 72, 62, 42, 14, 11,
                            28,  7, 25, 33, 19, 17, 37, 21, 30, 35,
                             8, 20, 31, 27, 12,  9, 10, 29, 34, 13,
@@ -94,7 +109,7 @@ void storetofTDIGOnTray()
   Short_t tdigId_Vpd[NVPDTRAY][NBOARD] = { 89, 91, 1102, 0, 885, 82, 0, 0,
                                            85, 79, 1101, 0,  80, 83, 0, 0};
 
-  ifstream infile("tdigs_10292009.txt");
+  ifstream infile("data/run11/INL/tdigs_20101220.txt");
   Short_t tId[123], boardId[123][NBOARD];  // two additional trays
   for(int i=0;i<123;i++) {
     for(int j=0;j<NBOARD;j++) {
