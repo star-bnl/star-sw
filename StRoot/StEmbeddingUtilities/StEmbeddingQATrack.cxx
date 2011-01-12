@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.cxx,v 1.13 2010/08/13 21:55:36 hmasui Exp $
+ * $Id: StEmbeddingQATrack.cxx,v 1.14 2011/01/12 21:36:15 hmasui Exp $
  * $Log: StEmbeddingQATrack.cxx,v $
+ * Revision 1.14  2011/01/12 21:36:15  hmasui
+ * Add nHitsFit/nHitsPoss cut
+ *
  * Revision 1.13  2010/08/13 21:55:36  hmasui
  * Separate charge for pi/K/p in isNSigmaOk() function
  *
@@ -48,6 +51,7 @@ using namespace std ;
   const Float_t StEmbeddingQATrack::kPtMaxCut   = 10.0 ;  /// Minimum pt cut, pt < 10 GeV/c
   const Float_t StEmbeddingQATrack::kEtaCut     = 1.5 ;   /// Eta cut, |eta| < 1.5
   const Short_t StEmbeddingQATrack::kNHitCut    = 10 ;    /// Minimum Nfit cut, Nfit >= 10
+  const Float_t StEmbeddingQATrack::kNHitToNPossCut = 0.51 ;    /// Minimum Nfit cut, NHitFit/NHitPoss > 0.51
   const Float_t StEmbeddingQATrack::kDcaCut     = 3.0 ;   /// Global dca cut, |dca_{gl}| < 3 cm
   const Double_t StEmbeddingQATrack::kNSigmaCut = 2.0 ;   /// Nsigma cut, |Nsigma| < 2
 
@@ -176,6 +180,15 @@ Bool_t StEmbeddingQATrack::isNHitOk() const
   const Bool_t isNHitOk = (StEmbeddingQAUtilities::instance()->isMc(mName)) ? kTRUE : mNHit >= kNHitCut ;
 
   return isCommonHitOk() && isNHitOk ;
+}
+
+//__________________________________________________________________________________________
+Bool_t StEmbeddingQATrack::isNHitToNPossOk() const
+{
+  /// Cut ratio of NHitFit to NHitPoss
+  const Float_t ratio = (mNHitPoss>0) ? (Float_t)mNHit/(Float_t)mNHitPoss : -1.0 ;
+
+  return (StEmbeddingQAUtilities::instance()->isMc(mName)) ? kTRUE : ratio > kNHitToNPossCut ;
 }
 
 //__________________________________________________________________________________________

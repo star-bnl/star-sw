@@ -3,8 +3,11 @@
 //    Store relevant track informations for the embedding/real data QA
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.h,v 1.8 2010/05/14 19:49:07 hmasui Exp $
+ * $Id: StEmbeddingQATrack.h,v 1.9 2011/01/12 21:36:17 hmasui Exp $
  * $Log: StEmbeddingQATrack.h,v $
+ * Revision 1.9  2011/01/12 21:36:17  hmasui
+ * Add nHitsFit/nHitsPoss cut
+ *
  * Revision 1.8  2010/05/14 19:49:07  hmasui
  * Add rapidity cut
  *
@@ -57,6 +60,7 @@ class StEmbeddingQATrack {
     Bool_t isRapidityOk(const Double_t ycut) const ; /// Rapidity cut
 
     Bool_t isNHitOk() const ;      /// Nhits cut
+    Bool_t isNHitToNPossOk() const ; /// Nhits/NhitsPoss cut
     Bool_t isDcaOk() const ;       /// Dca cut
     Bool_t isCommonHitOk() const ; /// Common hit cut
 
@@ -116,6 +120,7 @@ class StEmbeddingQATrack {
     static const Float_t kPtMaxCut ;   /// Maximum pt cut
     static const Float_t kEtaCut ;     /// Maximum eta cut
     static const Short_t kNHitCut ;    /// NHit cut
+    static const Float_t kNHitToNPossCut ; /// NHitFit/NHitPoss cut
     static const Float_t kDcaCut ;     /// Dca cut
     static const Double_t kNSigmaCut ; /// NSigma cut
 
