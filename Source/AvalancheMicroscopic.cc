@@ -1063,16 +1063,16 @@ AvalancheMicroscopic::TransportElectron(
             if (hole) {
               sensor->AddSignal(+1, stack[iE].t, 
                                 t - stack[iE].t, 
-                                0.5 * (x - stack[iE].x), 
-                                0.5 * (y - stack[iE].y),
-                                0.5 * (z - stack[iE].z), 
+                                0.5 * (x + stack[iE].x), 
+                                0.5 * (y + stack[iE].y),
+                                0.5 * (z + stack[iE].z), 
                                 vx, vy, vz);
             } else {
               sensor->AddSignal(-1, stack[iE].t,
                                 t - stack[iE].t,
-                                0.5 * (x - stack[iE].x),
-                                0.5 * (y - stack[iE].y),
-                                0.5 * (z - stack[iE].z),
+                                0.5 * (x + stack[iE].x),
+                                0.5 * (y + stack[iE].y),
+                                0.5 * (z + stack[iE].z),
                                 vx, vy, vz);
             }
           }
@@ -1136,16 +1136,16 @@ AvalancheMicroscopic::TransportElectron(
             if (hole) {
               sensor->AddSignal(+1, stack[iE].t,
                                 t - stack[iE].t,
-                                0.5 * (x - stack[iE].x),
-                                0.5 * (y - stack[iE].y),
-                                0.5 * (z - stack[iE].z),
+                                0.5 * (x + stack[iE].x),
+                                0.5 * (y + stack[iE].y),
+                                0.5 * (z + stack[iE].z),
                                 vx, vy, vz);
             } else {
               sensor->AddSignal(-1, stack[iE].t, 
                                 t - stack[iE].t, 
-                                0.5 * (x - stack[iE].x), 
-                                0.5 * (y - stack[iE].y),
-                                0.5 * (z - stack[iE].z), 
+                                0.5 * (x + stack[iE].x), 
+                                0.5 * (y + stack[iE].y),
+                                0.5 * (z + stack[iE].z), 
                                 vx, vy, vz);
             }
           }
