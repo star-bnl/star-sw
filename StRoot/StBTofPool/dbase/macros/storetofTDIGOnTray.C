@@ -55,7 +55,7 @@ void storetofTDIGOnTray()
 //  TString ZStoreTime = "2007-11-01 00:00:03";
 //  TString ZStoreTime = "2008-11-01 00:00:00";
 //  TString ZStoreTime = "2009-11-01 00:00:00";
-  TString ZStoreTime = "2010-12-20 00:00:00";
+  TString ZStoreTime = "2010-12-20 00:00:01";
 
   //-- add table to the container with descriptor given by Database
   StDbTable* tofTDIGOnTray = configNode->addDbTable("tofTDIGOnTray");
@@ -109,7 +109,7 @@ void storetofTDIGOnTray()
   Short_t tdigId_Vpd[NVPDTRAY][NBOARD] = { 89, 91, 1102, 0, 885, 82, 0, 0,
                                            85, 79, 1101, 0,  80, 83, 0, 0};
 
-  ifstream infile("data/run11/INL/tdigs_20101220.txt");
+  ifstream infile("data/run11/INL/tdigs_01122011.txt");
   Short_t tId[123], boardId[123][NBOARD];  // two additional trays
   for(int i=0;i<123;i++) {
     for(int j=0;j<NBOARD;j++) {
