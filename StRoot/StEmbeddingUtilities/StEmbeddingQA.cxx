@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.15 2010/11/01 03:10:23 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.16 2011/01/12 21:36:29 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.16  2011/01/12 21:36:29  hmasui
+ * Add nHitsFit/nHitsPoss cut
+ *
  * Revision 1.15  2010/11/01 03:10:23  hmasui
  * Modify geantid check for MC tracks in order to avoid non primary tracks
  *
@@ -759,7 +762,8 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
 
   // dE/dx (no PID cut)
   //  - Add NHit cut (Nov/13/2009)
-  if( track.isDcaOk() && track.isNHitOk() ){
+  //  - Add NHitFit/NHitPoss cut
+  if( track.isDcaOk() && track.isNHitOk() && track.isNHitToNPossOk() ) {
     mhdEdxVsMomMc[categoryid][geantid]->Fill(mom, track.getdEdxkeV());
     mhdEdxVsMomReco[categoryid][geantid]->Fill(momRc, track.getdEdxkeV());
   }
@@ -780,30 +784,33 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
 
       // Fill Ncommon hits vs Nhits
       mhNCommonHitVsNHit[categoryid][geantid]->Fill(track.getNHit(), track.getNCommonHit());
- 
-      // dE/dx (with PID cut)
-      mhdEdxVsMomMcPidCut[categoryid][geantid]->Fill(mom, track.getdEdxkeV());
-      mhdEdxVsMomRecoPidCut[categoryid][geantid]->Fill(momRc, track.getdEdxkeV());
- 
-      // Correlation between reconstructed and MC momentum
-      mhRecoPVsMcP[categoryid][geantid]->Fill(mom, momRc);
- 
-      // Pt, eta, phi
-      mhPtVsEta[categoryid][geantid]->Fill(eta, pt);
-      mhPtVsY[categoryid][geantid]->Fill(y, pt);
-      mhPtVsPhi[categoryid][geantid]->Fill(phi, pt);
-      mhPtVsMom[categoryid][geantid]->Fill(mom, pt);
-      mhdPtVsPt[categoryid][geantid]->Fill(pt, pt-track.getPtRc());
-      mhMomVsEta[categoryid][geantid]->Fill(eta, mom);
- 
-      mhEtaVsPhi[categoryid][geantid]->Fill(phi, eta);
-      mhEtaVsVz[categoryid][geantid]->Fill(mVz, eta);
-      mhYVsVz[categoryid][geantid]->Fill(mVz, y);
+
+      // NHitFit/NHitPoss cut
+      if( track.isNHitToNPossOk() ) {
+        // dE/dx (with PID cut)
+        mhdEdxVsMomMcPidCut[categoryid][geantid]->Fill(mom, track.getdEdxkeV());
+        mhdEdxVsMomRecoPidCut[categoryid][geantid]->Fill(momRc, track.getdEdxkeV());
+  
+        // Correlation between reconstructed and MC momentum
+        mhRecoPVsMcP[categoryid][geantid]->Fill(mom, momRc);
+  
+        // Pt, eta, phi
+        mhPtVsEta[categoryid][geantid]->Fill(eta, pt);
+        mhPtVsY[categoryid][geantid]->Fill(y, pt);
+        mhPtVsPhi[categoryid][geantid]->Fill(phi, pt);
+        mhPtVsMom[categoryid][geantid]->Fill(mom, pt);
+        mhdPtVsPt[categoryid][geantid]->Fill(pt, pt-track.getPtRc());
+        mhMomVsEta[categoryid][geantid]->Fill(eta, mom);
+  
+        mhEtaVsPhi[categoryid][geantid]->Fill(phi, eta);
+        mhEtaVsVz[categoryid][geantid]->Fill(mVz, eta);
+        mhYVsVz[categoryid][geantid]->Fill(mVz, y);
+      }
     }
   }
 
   // Fill Dca
-  if( track.isNHitOk() ){
+  if( track.isNHitOk() && track.isNHitToNPossOk() ){
     mhDca[categoryid][geantid]->Fill(pt, eta, track.getDcaGl());
   }
 
