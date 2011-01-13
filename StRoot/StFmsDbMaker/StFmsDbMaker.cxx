@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StFmsDbMaker.cxx,v 1.2 2010/01/11 20:35:30 jgma Exp $
+ * $Id: StFmsDbMaker.cxx,v 1.3 2011/01/13 02:56:34 jgma Exp $
  * \author: akio ogawa
  ***************************************************************************
  *
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StFmsDbMaker.cxx,v $
+ * Revision 1.3  2011/01/13 02:56:34  jgma
+ * Fixed bug in function nRow and nColumn
+ *
  * Revision 1.2  2010/01/11 20:35:30  jgma
  * Added reversed map and some other minor updates
  *
@@ -299,7 +302,7 @@ Int_t StFmsDbMaker::type(Int_t detectorId){
 }
 
 Int_t StFmsDbMaker::nRow(Int_t detectorId){
-  if(detectorId>=0 && detectorId<=mMaxDetectorId && maxChannel(detectorId)>0) return mChannelGeometry[detectorId].nX;
+  if(detectorId>=0 && detectorId<=mMaxDetectorId && maxChannel(detectorId)>0) return mChannelGeometry[detectorId].nY;
   else{
     LOG_WARN<<"StFmsDbMaker::nRow: Corresponding channel geometry not found."<<endm;
     return -1;
@@ -308,7 +311,7 @@ Int_t StFmsDbMaker::nRow(Int_t detectorId){
 
 Int_t StFmsDbMaker::nColumn(Int_t detectorId){
   if(detectorId>=0 && detectorId<=mMaxDetectorId && maxChannel(detectorId)>0)
-    return mChannelGeometry[detectorId].nY;
+    return mChannelGeometry[detectorId].nX;
   else{
     LOG_WARN<<"StFmsDbMaker::nColumn: Corresponding channel geometry not found."<<endm;
     return -1;
@@ -446,7 +449,7 @@ void StFmsDbMaker::dumpFmsMap(const Char_t* filename) {
   LOG_INFO << "Writing "<<filename<<endm;
   if((fp=fopen(filename,"w"))){
     fprintf(fp,"maxMap = %d\n",maxMap());
-    fprintf(fp,"    i DetId    ch  crt  slt qtch    getmap()   \n");
+    fprintf(fp,"    i DetId    ch  crt  slt qtch    getmap()   getReverseMap\n");
     for(Int_t i=0; i<mMaxMap; i++){
       Int_t d=mMap[i].detectorId;
       Int_t c=mMap[i].ch;
