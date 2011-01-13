@@ -22,16 +22,17 @@ class StGammaStrip: public TObject
 {
 
     public:
-        StGammaStrip()  {};
+        StGammaStrip();
         ~StGammaStrip() {};
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaStrip.h,v 1.7 2009/06/17 06:19:14 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaStrip.h,v 1.8 2011/01/13 21:48:08 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
         
         Int_t index;      // index of strip in plane
         Int_t sector;     // or bemc module
         Int_t plane;      // 0=esmd-u 1=esmdv 10=bsmd-eta 11=bsmd-phi
         Float_t energy;   // energy deposited
+        Int_t adc;        // ADC
         Int_t stat;       // status bits (non fatal HW problems)
         Int_t fail;       // fail bits (fatal HW problems)
 
