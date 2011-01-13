@@ -290,6 +290,9 @@ int daq_mtd::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 	trg[t_cou].rhic_delta = 0 ;
 	t_cou++ ;
 
+//	LOG(TERR,"MTD event: words %d: 0x%08X 0x%08X 0x%08X 0x%08X 0x%08X",
+//	    in_words,w[0],w[1],w[2],w[3],w[4]) ;
+
 
 	LOG(NOTE,"prompt: T %4d, trg %d, daq %d [0x%08X]: words %d",trg[0].t,trg[0].trg,trg[0].daq,w[0],in_words) ;
 
@@ -303,7 +306,7 @@ int daq_mtd::get_l2(char *addr, int words, struct daq_trg_word *trg, int rdo)
 		trg[0].t = 4097;	// trigger only contrib...
 	}
 	else {
-		if(in_words <= 3) {	// minimum if not trigger-only
+		if(in_words < 3) {	// minimum if not trigger-only
 			err |= 1 ;
 			LOG(ERR,"[%d] bad word count %d <= 3",rdo,in_words);
 		}
