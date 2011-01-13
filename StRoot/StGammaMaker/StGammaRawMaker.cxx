@@ -416,11 +416,17 @@ void StGammaRawMaker::GetBarrel()
                 
                     StEmcRawHit* hit = hits[k];
                     Int_t smde_id = hit->softId(BSMDE);
+
                     Int_t smde_status = 0;
-                    Float_t eta = -999;
                     mTables->getStatus(BSMDE,smde_id,smde_status);
+                    mTables->getPedestal(BSMDE, smde_id, hit->calibrationType(), pedestal, rms); 
+
+                    Float_t eta = -999;
                     geom->getEta(smde_id,eta);
                     
+                    // Remove strips too close to pedestal 
+                    if( (hit->adc() - pedestal) < 3.0 * rms) continue;
+
                     StGammaStrip *bstrip = mGammaEvent->newStrip();
                     
                     bstrip->index = smde_id;
@@ -429,6 +435,7 @@ void StGammaRawMaker::GetBarrel()
                     bstrip->stat   = smde_status;
                     bstrip->fail   = (int)(smde_status != 1);
                     bstrip->energy = hit->energy();
+                    bstrip->adc    = hit->adc();
                     bstrip->position = 230.705 * sinh(eta);
 
                     double offset = fabs(eta) < 0.5 ? 0.73 : 0.94;
@@ -469,11 +476,17 @@ void StGammaRawMaker::GetBarrel()
                 
                     StEmcRawHit* hit = hits[k];
                     Int_t smdp_id = hit->softId(BSMDP);
+
                     Int_t smdp_status = 0;
-                    Float_t phi = -999;
                     mTables->getStatus(BSMDP,smdp_id,smdp_status);
+                    mTables->getPedestal(BSMDP, smdp_id, hit->calibrationType(), pedestal, rms);
+
+                    Float_t phi = -999;
                     geom->getPhi(smdp_id,phi);
                     
+                    // Remove strips too close to pedestal
+                    if( (hit->adc() - pedestal) < 3.0 * rms) continue;
+
                     StGammaStrip *bstrip = mGammaEvent->newStrip();
                     
                     bstrip->index = smdp_id;
