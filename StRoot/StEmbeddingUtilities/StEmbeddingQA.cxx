@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.16 2011/01/12 21:36:29 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.17 2011/01/14 23:46:16 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.17  2011/01/14 23:46:16  hmasui
+ * Add Ncommon hit cut for NHitFit histograms
+ *
  * Revision 1.16  2011/01/12 21:36:29  hmasui
  * Add nHitsFit/nHitsPoss cut
  *
@@ -777,7 +780,10 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
 
   if( track.isDcaOk() ){
     // Fill NHit points
-    mhNHit[categoryid][geantid]->Fill(pt, eta, track.getNHit());
+    //  Added common hit cuts
+    if ( track.isCommonHitOk() ) {
+      mhNHit[categoryid][geantid]->Fill(pt, eta, track.getNHit());
+    }
 
     if( track.isNHitOk() ){
       const Double_t phi = track.getPhi() ;
