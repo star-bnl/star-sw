@@ -250,7 +250,7 @@ void JevpGui::switchTabs(const char *newdisplay, const char *newbuilderlist) {
   jl_displayFile->setServerTags(newbuilderlist);
 
 
-  jl_displayFile->dump();
+  // jl_displayFile->dump();
 
   CP;
   LOG("JEFF", "Calling deleteTabs for root");
@@ -829,11 +829,20 @@ void JevpGui::ChangeHistogramSet()
 {
   bool ok;
 
-  QString text = QInputDialog::getText(this, 
+  QStringList items;
+  int i=0;
+  char *disp = jl_displayFile->getDisplay(i);
+  while(disp) {
+    items << tr(disp);
+    i++;
+    disp = jl_displayFile->getDisplay(i);
+  }
+
+  QString text = QInputDialog::getItem(this, 
 				       tr("New Histogram Set Name"),
 				       tr("New Histogram Set Name:"), 
-				       QLineEdit::Normal,
-				       tr(evpMain->display), &ok);
+				       items,
+				       0, false, &ok);
 
   if(ok && !text.isEmpty()) {
     LOG(DBG,"Change Histogram set to %s\n", (const char *)text);
@@ -1513,7 +1522,7 @@ void JevpGui::jl_JevpLogic()
       exit(0);
     }
     
-    jl_displayFile->dump();
+    //jl_displayFile->dump();
   }
   else {
     // Read display from server...
@@ -1683,7 +1692,7 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
     JevpPlot *plot = jl_getPlotFromServer(hd->name,  tmp);
   
     if(plot) {
-      LOG("JEFF", "Got plot %s : %s",hd->name,plot->GetPlotName());
+      LOG(DBG, "Got plot %s : %s",hd->name,plot->GetPlotName());
       screen->addPlot(plot);
       screen->addJevpPlot(plot);
       double my = plot->getMaxY();

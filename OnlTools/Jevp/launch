@@ -4,18 +4,18 @@
 # The signal handler kills the child processes
 #
 function handle_interrupt {
-    echo "Got an interrupt: $1"
+    #echo "Got an interrupt: $1"
 
     for child in $(ps h -o pid --ppid $$); do
 	comm="$(ps h -o comm $child)"
        
 	if [ "$comm" != "" ]; then
-	    echo "Killing child process $child:  Command = $comm"
+	    #echo "Killing child process $child:  Command = $comm"
 	    kill $child
 	fi
     done 
 
-    echo "Now process $$ is dead..."
+    #echo "Now process $$ is dead..."
     exit
 }
 
@@ -33,12 +33,12 @@ fi
 # get main function and shift args as appropriate...
 
 mainfunction=$1
-echo "Main program:  $mainfunction"
+#echo "Main program:  $mainfunction"
 shift
 
 
 
-echo "shellname is $shellname"
+#echo "shellname is $shellname"
 
 if [ -e $shellname ]; then
     rm -f $shellname
@@ -64,7 +64,7 @@ while [ $# -gt 0 ]; do
     fi
 
     if [ $1 = "-port" ]; then
-	echo "launch found port $2"
+	#echo "launch found port $2"
 	port=$2
     fi
 
@@ -77,7 +77,7 @@ done
 myaccount=`whoami`;
 shellname="/tmp/${mainfunction}_${myaccount}_${port}_root.C"
 
-echo "launch with port = $port:  shellname = $shellname"
+#echo "launch with port = $port:  shellname = $shellname"
 
 #echo "-----"
 #echo -e "ARGSTRING:  $argstring"
@@ -91,8 +91,8 @@ evplibs="   gSystem->Load("\""PDFUtil"\""); "
 #evplibs="$evplibs   gSystem->Load("\""StJevpPlot"\""); "
 #evplibs="$evplibs   gSystem->Load("\""StJevpBuilders"\""); "
 
-echo "Server = $serv"
-echo "pres = $pres"
+#echo "Server = $serv"
+#echo "pres = $pres"
 
 #if [ $serv -ne 0 ]; then
 #    evplibs="$evplibs   gSystem->Load("\""StJevpServer"\""); "
@@ -154,11 +154,11 @@ else
     if [ $test -eq 1 ]; then
 	root4starN $shellname
     else
-        root4star -q -b $shellname &
+        root4star -q -b -l $shellname &
         wait
     fi
 fi
 
-echo "I am process $$, but root ended"
+#echo "I am process $$, but root ended"
 
 exit

@@ -25,7 +25,7 @@ static void sigHandler(int arg, siginfo_t *sig, void *v)
   static char str[255];
   
   if(arg == 17) {
-    LOG(WARN, "Got signal 1e: ignoring");
+    LOG(DBG, "Got signal 17: ignoring");
     return;
   }
 

@@ -624,6 +624,19 @@ int DisplayFile::ReadBuff(char *buff, int len)
 }
 
 
+char *DisplayFile::getDisplay(int idx)
+{
+  DisplayNode *disp = root->child;
+  int i=0;
+  while(disp) {
+    if(i == idx) return disp->name;
+    i++;
+    disp = disp->next;
+  }
+
+  return NULL;
+}
+
 int DisplayFile::setDisplay(char *display_name)
 {
   DisplayNode *disp = root->child;

@@ -30,9 +30,6 @@ EditDialog::EditDialog(QWidget *parent) : QDialog(parent)
 
 void EditDialog::accept()
 {
-  printf("accepting....\n");
-  printf("edit -> %s\n",_edit->toPlainText().toAscii().data());
-
   QDialog::accept();
 }
 
@@ -47,22 +44,14 @@ QString *EditDialog::run() {
   EditDialog *dialog = new EditDialog(NULL);
   int ans = dialog->exec();
   if(ans == QDialog::Accepted) {
-    
-    printf("Accepted...\n");
-
-    printf("edit2 --> %s\n",dialog->_edit->toPlainText().toAscii().data());
-
     ret = new QString(dialog->_edit->toPlainText());
   }
   else {
-    printf("Not accepted\n");
     ret = NULL;
   }
 
-  printf("Delete\n");
   delete dialog;
-  if(ret) 
-    printf("returning %s\n",ret->toAscii().data());
+
   return ret;
 }
 

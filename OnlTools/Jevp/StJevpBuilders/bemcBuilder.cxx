@@ -522,7 +522,7 @@ void bemcBuilder::addSmdFeeSumIndex(JevpPlot *plot)
       if (BEMCDecoderPresenter->GetSmdRDO(3, module, 1, 1, RDO, index)) {
 	moduleRdo[module - 1] = RDO;
       }
-      cout << "module " << module << ": RDO " << moduleRdo[module - 1] << endl;
+      //cout << "module " << module << ": RDO " << moduleRdo[module - 1] << endl;
     }
   }
   Int_t curmod = 1;
@@ -956,14 +956,14 @@ void bemcBuilder::initialize(int argc, char *argv[]) {
 
   // Add Plots to plot set...
   for(int i=0;i<=n;i++) {
-    LOG("JEFF", "Adding plot %d: %s",i,plots[i]->GetPlotName());
+    LOG(DBG, "Adding plot %d: %s",i,plots[i]->GetPlotName());
     plots[i]->optstat = 0;
     addPlot(plots[i]);
   }
 }
   
 void bemcBuilder::startrun(daqReader *rdr) {
-  LOG("JEFF", "bemcBuilder starting run #%d",rdr->run);
+  LOG(NOTE, "bemcBuilder starting run #%d",rdr->run);
  
   BEMCPlots::resetHisto(statusfile);
 }

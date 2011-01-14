@@ -54,7 +54,7 @@ void baseBuilder::event(daqReader *rdr) {
 
     // Set tags for detectors in run...
     int mask = rdr->detsinrun;
-    LOG("JEFF", "Detector mask = 0x%x",mask);
+    //LOG("JEFF", "Detector mask = 0x%x",mask);
     for(int i=0;i<32;i++) {
       if(mask & 1<<i) {
 	char *det = (char *)rts2name(i);
@@ -70,7 +70,7 @@ void baseBuilder::event(daqReader *rdr) {
 	char tmp2[20];
 	sprintf(tmp2, "|%s|",tmp);
 	addServerTags(tmp2);
-	LOG("JEFF", "det[%d] = %s",i, tmp2);
+	//LOG("JEFF", "det[%d] = %s",i, tmp2);
       }
     }
   }

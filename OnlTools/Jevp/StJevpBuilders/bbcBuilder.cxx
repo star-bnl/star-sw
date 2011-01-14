@@ -119,7 +119,7 @@ void bbcBuilder::initialize(int argc, char *argv[]) {
 
   // Add Plots to plot set...
   for(int i=0;i<=n;i++) {
-    LOG("JEFF", "Adding plot %d",i);
+    LOG(DBG, "Adding plot %d",i);
     addPlot(plots[i]);
     if(i<8) plots[i]->logy = 1;
 
@@ -129,7 +129,7 @@ void bbcBuilder::initialize(int argc, char *argv[]) {
 }
   
 void bbcBuilder::startrun(daqReader *rdr) {
-  LOG("JEFF", "TriggerPlotBuilder starting run #%d",rdr->run);
+  LOG("JEFF", "bbcBuilder starting run #%d",rdr->run);
   resetAllPlots();
 }
 
