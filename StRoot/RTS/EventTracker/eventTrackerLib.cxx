@@ -209,7 +209,7 @@ int EventTracker::copyl3_t(l3_t &l3, L3_P *l3p)
       return -1 ;
     }
 
-    LOG("JEFF", "l3gtd->nTracks=%d nHits=%d", l2h32(l3gtd->nTracks), l2h32(l3gtd->nHits));
+    LOG(NOTE, "l3gtd->nTracks=%d nHits=%d", l2h32(l3gtd->nTracks), l2h32(l3gtd->nHits));
     l3.tracks_num = l2h32(l3gtd->nTracks);
     l3.cluster_num = l2h32(l3gtd->nHits);
     l3.xVertex = l2hfloat(l3gtd->xVert);

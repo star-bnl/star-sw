@@ -142,7 +142,7 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
 #ifdef OLD_DAQ_READER
     ret = tpcReader(mem, i);
     if(ret < 0) { 
-      LOG(WARN, "No data for sector %d",i+1,0,0,0,0);
+      LOG(NOTE, "No data for sector %d",i+1,0,0,0,0);
 #else /* OLD_DAQ_READER */
     dd = rdr->det("tpx")->get("legacy",i+1);
     if(dd) {
@@ -179,7 +179,7 @@ int gl3Event::readFromEvpReader(daqReader *rdr,
     }
 
     if(!pTPC) {
-      LOG(WARN, "No data for TPC sector %d",i+1,0,0,0,0);
+      LOG(NOTE, "No data for TPC sector %d",i+1,0,0,0,0);
 #endif /* OLD_DAQ_READER */
       continue;
     }
