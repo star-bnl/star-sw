@@ -574,10 +574,10 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
       for (int j = 0; j < nDiv; ++j) {
         if (ne > 1000) {
           // Gaussian approximation.
-          const double gain = int(ne * alpha + RndmGaussian() * 
-                                  sqrt(ne * alpha * (1. - alpha)));
-          const double loss = int(ne * eta   + RndmGaussian() * 
-                                  sqrt(ne * eta   * (1. - eta)));
+          const int gain = int(ne * alpha + RndmGaussian() * 
+                               sqrt(ne * alpha * (1. - alpha)));
+          const int loss = int(ne * eta   + RndmGaussian() * 
+                               sqrt(ne * eta   * (1. - eta)));
           ne += gain - loss;
           ni += gain;
         } else {
