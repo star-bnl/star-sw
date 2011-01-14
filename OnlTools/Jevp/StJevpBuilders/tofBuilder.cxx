@@ -280,18 +280,18 @@ void tofBuilder::initialize(int argc, char *argv[]) {
 }
   
 void tofBuilder::startrun(daqReader *rdr) {
-  printf("start\n");
+  //printf("start\n");
   LOG("JEFF", "tofBuilder starting run #%d",rdr->run);
   resetAllPlots();
 
-  printf("reset\n");
+  //printf("reset\n");
 
   nevts=0;
   nerr1=0;
   nerr2=0;
   nerr3=0;
 
-  printf("tray list\n");
+  //printf("tray list\n");
 
   ReadTrayList();
   ReadValidBunchidPhase();
@@ -299,30 +299,39 @@ void tofBuilder::startrun(daqReader *rdr) {
 
   int TOF_L0_trg_idx = ((int)&contents.TOF_L0_trg[0] - (int)&contents) / 4;
 
-  printf("labels\n");
+  //printf("labels\n");
 
   for(int i=0;i<NTRAYS;i++) {
+    LOG("JEFF", "tray %d   (idx=%d)",i, TOF_L0_trg_idx);
+
     if(TOF_L0_trg_labels[i]) {
+      // remove element deletes it!
       plots[i+TOF_L0_trg_idx]->removeElement(TOF_L0_trg_labels[i]);
-      delete TOF_L0_trg_labels[i];
+      //delete TOF_L0_trg_labels[i];
       TOF_L0_trg_labels[i] = NULL;
     }
 
+   
+    LOG("JEFF", "checking... tray %d",i);
+
     if(NotActiveTray[i+1]) {
-      printf("Tray %d not active...\n",i+1);
+      LOG("JEFF", "Tray %d not active",i+1);
       TOF_L0_trg_labels[i] = new TLatex(.2,.8,"Not Active");
       TOF_L0_trg_labels[i]->SetNDC();
       plots[i+TOF_L0_trg_idx]->addElement(TOF_L0_trg_labels[i]);
     }
     else if (MaskoutTray[i+1]) {
-      printf("Tray %d masked out\n",i+1);
+      LOG("JEFF","Tray %d masked out\n",i+1);
       TOF_L0_trg_labels[i] = new TLatex(.2,.8,"Masked Out");
       TOF_L0_trg_labels[i]->SetNDC();
       plots[i+TOF_L0_trg_idx]->addElement(TOF_L0_trg_labels[i]);
     } 
+    
+    LOG("JEFF", "checkinged tray %d",i);
+    
   }
 
-  printf("done\n");
+  // printf("done\n");
 }
 
 int tofBuilder::Get_TOFTHUB(int trayid){

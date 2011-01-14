@@ -48,7 +48,7 @@ class JevpServer {
     ssocket = NULL;
     mon = NULL;
     refplotdir = (char *)DEFAULT_REF_PLOT_DIR;
-    diska = (char *)"/a";
+    diska = (char *)"/";
  
     displays = NULL;
     displays_fn = NULL;

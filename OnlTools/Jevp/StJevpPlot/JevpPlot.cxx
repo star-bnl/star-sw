@@ -232,7 +232,7 @@ JevpPlot::JevpPlot(JevpPlot &x)
   TObject *obj;
   //  CP;
   while((obj = (TObject *)next())) {
-    LOG("JEFF", "Copying an object...");
+    LOG(DBG, "Copying an object...");
     TObject *nobj = obj->Clone();
     addElement(nobj);
   }
@@ -367,12 +367,15 @@ char *JevpPlot::GetPlotName()
     return NULL;
   }
 
+  LOG(DBG, "get name");
   char *name = (char *)curr->histo->GetName();
   
-  LOG("JEFF","Name = %s",name);
+  LOG(DBG,"Name = %s",name);
   if(name == NULL) {
     LOG(ERR, "name is null\n");
   }
+
+  LOG(DBG, "parent = 0x%x",parent);
 
   if(parent) {
     char tmp[100];
@@ -381,18 +384,19 @@ char *JevpPlot::GetPlotName()
     int l=strlen(tmp);
     if(memcmp(name, tmp, l) != 0) {
       sprintf(myname, "%s%s",tmp,name);
-      LOG("JEFF", "myname %s",myname);
+      LOG(DBG, "myname %s",myname);
     }
     else {
       strcpy(myname, name);
-      LOG("JEFF", "myname %s",myname);
+      LOG(DBG, "myname %s",myname);
     }
   }
   else {
     strcpy(myname, name);
   }
-    
-  LOG("JEFF", "myname %s",myname);
+
+  
+  LOG(DBG, "myname %s",myname);
   return myname;
 }
 
@@ -509,7 +513,7 @@ void JevpPlot::draw()
   // Draw additional elements...
   TObject *element = (TObject *)elements.First();
   while(element) {
-    LOG("JEFF", "Drawing an element...");
+    LOG(DBG, "Drawing an element...");
     element->Draw();
     element = (TObject *)elements.After(element);
   }

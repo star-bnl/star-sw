@@ -22,7 +22,7 @@ JLatex::JLatex(JLatex &l) : TLatex(l) {
   jx = l.jx;
   jy = l.jy;
 
-  LOG("JEFF", "Copy constructor for JLatex");
+  LOG(DBG, "Copy constructor for JLatex");
 }
 
 void JLatex::SetNDC_x(int ndc) {

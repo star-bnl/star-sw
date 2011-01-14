@@ -194,7 +194,7 @@ void JevpPlotSet::dump()
 
   int i=0;
   while(curr) {
-    LOG("JEFF","hist[%d] = %s\n",i,curr->GetPlotName());
+    LOG(DBG,"hist[%d] = %s\n",i,curr->GetPlotName());
     i++;
     curr = (JevpPlot *)plots.After(curr);
   }
@@ -207,6 +207,7 @@ void JevpPlotSet::_initialize(int argc, char *argv[])
   TH1 *h;
   PlotHisto *ph;
 
+  LOG("JEFF", "Initializing %sBuilder: pid=%d file=%s",getPlotSetName(), (int)getpid(), daqfile ? daqfile : "live");
   CP;
   plotEvtsByTrigger = new JevpPlot();
   sprintf(tmp, "%s_EvtsByTrigger", getPlotSetName());
@@ -490,7 +491,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
 	LOG(DBG, "Stoprun");
 
 
-	LOG("JEFF", "End of Run... [previous run=%d, current run=%d]",
+	LOG(DBG, "End of Run... [previous run=%d, current run=%d]",
 	    current_run, reader->run);
 	
 	CP;

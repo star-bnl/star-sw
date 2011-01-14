@@ -120,6 +120,7 @@ class DisplayFile {
   // Manipulate displays
   void setServerTags(const char *tags);
 
+  char *getDisplay(int idx);
   int setDisplay(char *display_name);
   int setDisplay(int display);
   int nDisplays() {

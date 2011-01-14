@@ -96,7 +96,7 @@ void JevpServer::launchBuilders()
   while((curr = (BuilderStatus *)next())) {
     if(!curr->official) continue;
 
-    LOG("JEFF", "launching %sBuilder",curr->name);
+    LOG(DBG, "launching %sBuilder",curr->name);
 
     char builderName[20];
     sprintf(builderName, "%sBuilder",curr->name);
@@ -137,7 +137,7 @@ void JevpServer::launchBuilders()
 }
 
 int JevpServer::init(int port) {
-  LOG("JEFF", "Server port %d", port);
+  LOG(DBG, "Server port %d", port);
   if(socketName) {
     ssocket = new TServerSocket(socketName, kTRUE,100);
   }
@@ -229,6 +229,8 @@ void JevpServer::getMessage() {
     // read...
   
     int ret = s->Recv(mess);
+
+    CP;
     if(ret == 0) {    // Got a disconnection...
       CP;
 
@@ -247,8 +249,11 @@ void JevpServer::getMessage() {
       mon->Remove(s);
       delete s;
       delete mess;
+      CP;
       return;
     }
+    
+    CP;
 
     // Handle control messages...
     if(strcmp(mess->GetClass()->GetName(),"EvpMessage")==0) {
@@ -328,7 +333,7 @@ void JevpServer::performStartRun()
 
 void JevpServer::performStopRun()
 {
-  LOG("JEFF", "Got end of run...%d",displays->nDisplays());
+  //  LOG("JEFF", "Got end of run...%d",displays->nDisplays());
 
   // Write out the pdfs for all displays...
   for(int i=0;i<displays->nDisplays();i++) {
@@ -342,20 +347,27 @@ void JevpServer::performStopRun()
   char fn[256];
   sprintf(fn, "%s/%s", basedir, displays_fn);
 
+  CP;
+
   // Add any new plots to the pallet...
   JevpPlot *curr = (JevpPlot *)plots.First();
   while(curr) {
-    LOG(DBG, "Add plot:  %s / %s", curr->GetPlotName(), curr->getParent());
-
+    CP;
+    LOG(DBG, "Add plot:  %s / %s", curr->GetPlotName(), (curr->getParent()) ? curr->getParent() : "null");
+    CP;
     addToPallete(curr);
-
+    CP;
     curr = (JevpPlot *)plots.After(curr);	  
   }
 	
+  CP;
+
   LOG(DBG, "Writing display file...%s",fn);
   if(displays->Write(fn) < 0) {
     LOG(ERR, "Error writing xml file %s",fn);
   }
+
+  CP;
 
   if(killbuilders) {
     LOG("JEFF", "Killbuilders is set, so kill builders");
@@ -373,6 +385,8 @@ void JevpServer::performStopRun()
     }
   }
 
+  CP;
+
   if(die) {
     LOG("JEFF", "die is set, so now exit");
     exit(0);
@@ -388,7 +402,9 @@ void JevpServer::addToPallete(JevpPlot *plot)
   char *builder = plot->getParent();
   char *name = plot->GetPlotName();
 
+  CP;
   DisplayNode *palleteNode = displays->root->child;
+
   while(palleteNode) {
     if(strcmp(palleteNode->name, "pallete") == 0) {
       break;   // Found the node we are looking for!
@@ -399,14 +415,20 @@ void JevpServer::addToPallete(JevpPlot *plot)
     palleteNode = palleteNode->next;
   }
 
+  CP;
   if(!palleteNode) {
     LOG(ERR, "No pallete found!");
     return;
   }
   LOG(DBG, "Found pallete node");
 
+  CP;
+
   // Look for builder...
   DisplayNode *builderNode = palleteNode->child;
+
+  CP;
+
   while(builderNode) {
     if(strcmp(builderNode->name, builder) == 0) {
       break;
@@ -418,8 +440,11 @@ void JevpServer::addToPallete(JevpPlot *plot)
     builderNode = builderNode->next;
   }
   
+  CP;
+
   // If not there, create builder...
   if(!builderNode) {
+    CP;
     LOG(DBG, "Creating builder node!");
     builderNode = new DisplayNode();
     builderNode->setName(builder);
@@ -427,8 +452,10 @@ void JevpServer::addToPallete(JevpPlot *plot)
     palleteNode->insertChildAlpha(builderNode);
   }
   
+  CP;
   LOG(DBG, "Have builder node...");
   
+  CP;
   // Look for plot...
   DisplayNode *plotNode = builderNode->child;
   while(plotNode) {
@@ -440,6 +467,7 @@ void JevpServer::addToPallete(JevpPlot *plot)
   
     plotNode = plotNode->next;
   }
+  CP;
 
   LOG("JEFF", "inserting plot %s/%s into pallete", builder, name);
   // The plot was not found... insert it
@@ -447,6 +475,8 @@ void JevpServer::addToPallete(JevpPlot *plot)
   plotNode->setName(name);
   plotNode->leaf = 1;
   builderNode->insertChildAlpha(plotNode);
+
+  CP;
 }
 
 JevpPlot *JevpServer::getPlot(char *name) {
@@ -607,7 +637,7 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
   TListIter nextplot(&plots);
   JevpPlot *cplot;
   while((cplot = (JevpPlot *)nextplot())) {
-    if(strcmp(cplot->GetPlotName(), "JevpSummary") == 0) {
+    if(strcmp(cplot->GetPlotName(), "serv_JevpSummary") == 0) {
       plots.Remove(cplot);
       delete cplot;
       break;
@@ -617,6 +647,7 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
   
   CP;
   JevpPlot *p = new JevpPlot();
+  p->setParent("serv");
   TH1I *h = new TH1I("JevpSummary", "JevpSummary", 64,0,63);
   //h->GetXaxis()->SetAxisColor(kWhite);
   h->GetXaxis()->SetTickLength(0);
@@ -738,7 +769,7 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
   else {
     LOG(DBG,"getplot..\n");
 
-    if(strcmp(plotname, "JevpSummary") == 0) {
+    if(strcmp(plotname, "serv_JevpSummary") == 0) {
       JevpPlot *p = getJevpSummaryPlot();
  //      CP;
 //       LOG("JEFF", "Got summary Plot 0x%x",p);
@@ -895,9 +926,9 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
   }
   else if(strcmp(msg->cmd, "display_desc") == 0) {  // Display Descriptor
 
-    LOG("JEFF", "Got request for display %s", msg->args);
+    LOG(DBG, "Got request for display %s", msg->args);
     int ret = displays->setDisplay(msg->args);
-    LOG("JEFF", "setdisplay returend %d", ret);
+    LOG(DBG, "setdisplay returend %d", ret);
 
     EvpMessage m;
     m.setSource("serv");
@@ -936,7 +967,7 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
 	s->Close();
       }
       else {
-	LOG(WARN, "A new builder is connecting (%s) {previously disconnected}", msg->source);
+	LOG(NOTE, "A new builder is connecting (%s) {previously disconnected}", msg->source);
 	stat->sockid = (unsigned long long int)s;
 	stat->setStatus("newconnect");
 	stat->lastTransaction = time(NULL);
@@ -1218,7 +1249,7 @@ int JevpServer::writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, inde
     CP;
 
     LOG(DBG, "Plotting %s on page %d / pad %d",cnode->name, page, pad);
-    
+
     JevpPlot *plot = getPlot(cnode->name);
     if(plot) {
       LOG(DBG, "Found plot %s",cnode->name);
@@ -1312,7 +1343,7 @@ void JevpServer::writePdf(int display, int run)
   
   // Save it in the database...
   if(nodb != 1) {
-    LOG("JEFF", "Writing PDF file: %s",filename);
+    LOG(DBG, "Writing PDF file: %s",filename);
 
     char *args[5];
 
@@ -1326,7 +1357,7 @@ void JevpServer::writePdf(int display, int run)
 
     //int ret = char((execScript *)"WritePDFToDB",args);
     int ret = execScript("WritePDFToDB", args);
-    LOG("JEFF", "Wrote PDF file:  ret=%d",ret);
+    LOG("JEFF", "Wrote PDF file: %s (ret=%d)", filename, ret);
   }
 }
 
@@ -1619,6 +1650,9 @@ void JevpServer::main(int argc, char *argv[])
 
   serv.parseArgs(argc, argv);
 
+
+  LOG("JEFF", "Starting JevpServer: port=%d pid=%d", serv.myport, (int)getpid());
+
   // Each time we start, archive the existing display file...
   serv.archive_display_file();
 
@@ -1643,7 +1677,7 @@ int JevpServer::execScript(const char *name, char *args[], int waitforreturn)
   if(pid == 0) {
     for(int i=0;;i++) {
       if(args[i] == NULL) break;
-      LOG("JEFF", "args[%d] = %s",i,args[i]);
+      LOG(NOTE, "args[%d] = %s",i,args[i]);
     }
     
     int ret = execvp(name,args);
@@ -1799,9 +1833,9 @@ int JevpServer::calculateAndUpdateRunStatus(BuilderStatus *changedBuilder)
     }
   }
    
-  LOG("JEFF", "status Checking... old %s,  new %s,  chbuilder %s,  curr_run %d  chbuilder_run %d",
-      runStatus.status, newstatus, changedBuilder->status, curr_run, changedBuilder->run);
-  LOG("JEFF", "status allstop %d", allstopped);
+  //LOG("JEFF", "status Checking... old %s,  new %s,  chbuilder %s,  curr_run %d  chbuilder_run %d",
+  //runStatus.status, newstatus, changedBuilder->status, curr_run, changedBuilder->run);
+  //LOG("JEFF", "status allstop %d", allstopped);
 
   if(strcmp(newstatus, runStatus.status) == 0) {
     return 0;

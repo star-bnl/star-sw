@@ -85,7 +85,7 @@ void l3Builder::initialize(int argc, char *argv[]) {
 
   // Add Plots to plot set...
   for(int i=0;i<=n;i++) {
-    LOG("JEFF", "Adding plot %d",i);
+    LOG(DBG, "Adding plot %d",i);
     addPlot(plots[i]);
   }
 }
