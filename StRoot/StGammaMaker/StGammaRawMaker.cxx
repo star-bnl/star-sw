@@ -495,6 +495,7 @@ void StGammaRawMaker::GetBarrel()
                     bstrip->stat   = smdp_status;
                     bstrip->fail   = (int)(smdp_status != 1);
                     bstrip->energy = hit->energy(); 
+                    bstrip->adc    = hit->adc();
                     bstrip->position = phi;
 
                     double offset = 0.00293;
