@@ -16,7 +16,8 @@ class ViewCellWire : public TObject {
 
   public:
     ViewCellWire(const double x, const double y, const double z,
-                 const double diameter, const double length);
+                 const double diameter, const double length, 
+                 const int type);
     ~ViewCellWire() {}
     TBuffer3D& GetBuffer(bool& ok, const bool debug = false);
 
@@ -29,6 +30,8 @@ class ViewCellWire : public TObject {
     double r;
     // Half-length
     double l;
+
+    int wireType;
     
 };
 
@@ -133,7 +136,8 @@ class ViewCell : public TObject {
     std::vector<ViewCellPlane> planes3d;
 
     bool Plot(const bool use3d);
-    void PlotWire(const double x, const double y, const double d);
+    void PlotWire(const double x, const double y, const double d, 
+                  const int type);
     void PlotLine(const double x0, const double y0, 
                   const double x1, const double y1);
     void PlotTube(const double x0, const double y0, 

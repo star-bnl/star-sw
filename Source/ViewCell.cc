@@ -16,9 +16,10 @@
 namespace Garfield {
 
 ViewCellWire::ViewCellWire(const double x, const double y, const double z, 
-                           const double diameter, const double length) :
+                           const double diameter, const double length,
+                           const int type) :
   TObject(),
-  x0(x), y0(y), z0(z), r(10.e-4), l(50.) {
+  x0(x), y0(y), z0(z), r(10.e-4), l(50.), wireType(type) {
 
   className = "ViewCellWire";
   if (diameter > 0.) {
@@ -45,7 +46,17 @@ ViewCellWire::GetBuffer(bool& ok, const bool debug) {
   static TBuffer3DTube wire;
   wire.ClearSectionsValid();
   wire.fID = this;
-  wire.fColor = kBlue;
+  if (wireType == 0) {
+    wire.fColor = kBlue;
+  } else if (wireType == 1) {
+    wire.fColor = kRed + 2;
+  } else if (wireType == 2) {
+    wire.fColor = kPink + 3;
+  } else if (wireType == 3) {
+    wire.fColor = kCyan + 3;
+  } else {
+    wire.fColor = kBlue + wireType;
+  }
   wire.fTransparency = 0;
   wire.fLocalFrame = kTRUE;
   wire.SetLocalMasterIdentity();
@@ -590,11 +601,34 @@ ViewCell::Plot(const bool use3d) {
 
   // Get the number of wires.
   int nWires = component->GetNumberOfWires();
+  int nWireTypes = 0;
+  std::vector<char> wireTypes;
+  wireTypes.clear();
+
   // Loop over the wires.
   for (int i = nWires; i--;) {
     double xw = 0., yw = 0., dw = 0., vw = 0., lw = 0., qw = 0.;
     char label;
+    int type = -1;
     component->GetWire(i, xw, yw, dw, vw, label, lw, qw);
+    // Check if other wires with the same label already exist.
+    if (nWireTypes == 0) {
+      wireTypes.push_back(label);
+      type = 0;
+      ++nWireTypes;
+    } else {
+      for (int j = nWireTypes; j--;) {
+        if (label == wireTypes[j]) {
+          type = j;
+          break;
+        }
+      }
+      if (type < 0) {
+        wireTypes.push_back(label);
+        type = nWireTypes;
+        ++nWireTypes;
+      }
+    }
     for (int nx = nMinX; nx <= nMaxX; ++nx) {
       for (int ny = nMinY; ny <= nMaxY; ++ny) {
         double x = xw + nx * sx;
@@ -606,11 +640,11 @@ ViewCell::Plot(const bool use3d) {
           continue;
         }
         if (use3d) {
-          ViewCellWire newWire(x, y, 0., dw, lw);
+          ViewCellWire newWire(x, y, 0., dw, lw, type);
           wires3d.push_back(newWire);
           ++nWires3d;
         } else {
-          PlotWire(x, y, dw);
+          PlotWire(x, y, dw, type);
         }
       }
     }
@@ -738,10 +772,23 @@ ViewCell::Draw(Option_t* option) {
 }
 
 void
-ViewCell::PlotWire(const double x, const double y, const double d) {
+ViewCell::PlotWire(const double x, const double y, const double d,
+                   const int type) {
 
   if (useWireMarker) {
-    TMarker* marker = new TMarker(x, y, 4);
+    int markerStyle = 1;
+    if (type == 0) {
+      markerStyle = kFullCircle;
+    } else if (type == 1) {
+      markerStyle = kOpenCircle;
+    } else if (type == 2) {
+      markerStyle = kFullSquare;
+    } else if (type == 3) {
+      markerStyle = kOpenSquare;
+    } else {
+      markerStyle = 26 + type;
+    }
+    TMarker* marker = new TMarker(x, y, markerStyle);
     marker->Draw("P");
     return;
   }
