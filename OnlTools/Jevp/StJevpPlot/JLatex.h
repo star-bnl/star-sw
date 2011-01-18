@@ -4,6 +4,7 @@
 #include <TROOT.h>
 #include <TObject.h>
 #include <TLatex.h>
+#include <rtsLog.h>
 
 class JLatex : public TLatex {
   int ndcY;
@@ -22,7 +23,9 @@ class JLatex : public TLatex {
   JLatex();
   JLatex(Double_t x, Double_t y, const char *text);
   JLatex(JLatex &l); 
-    
+  virtual ~JLatex() {
+    //LOG("JEFF", "Deleting a jlatex");
+  }
   void SetText(const char *text) {
     TLatex::SetText(jx,jy,text);
   }

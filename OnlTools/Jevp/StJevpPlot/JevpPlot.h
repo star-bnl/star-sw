@@ -22,7 +22,7 @@ class PlotHisto : public TObject {
   PlotHisto(PlotHisto &x);
 
   PlotHisto(const PlotHisto &x) {
-    printf("Copy constructor\n");
+    //LOG("JEFF", "Copy Constructor");
     histo = new TH1(*(x.histo));
     if(x.legendText) setLegText(x.legendText);
     if(x.legendArgs) setLegArgs(x.legendArgs);
@@ -84,7 +84,7 @@ class JevpPlot : public TObject {
   void setDrawOpts(const char *opts);
   JevpPlot(TH1 *firsthisto=NULL);
   JevpPlot(JevpPlot &x);
-  ~JevpPlot();
+  virtual ~JevpPlot();
   
   void reset();
   void setParent(char *parent);

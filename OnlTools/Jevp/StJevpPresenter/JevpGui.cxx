@@ -54,6 +54,35 @@
 
 JevpGui *Logic;
 
+#define CM showMyMemory(__LINE__)
+
+void showMyMemory(int line) {
+  FILE *f = fopen("/proc/self/stat", "ro");
+  if(!f) {
+    LOG("JEFF", "Can't read stat");
+    return;
+  }
+
+  int pid;
+  char comm[256];
+  char state;
+  int ppid,pgrp,session,tty_nr,tpgid;
+  unsigned long int flags,minflt,cminflt,majflt,cmajflt,utime,stime;
+  long int cutime,cstime,priority,nice, place, itrealvalue;
+  unsigned long int starttime,vsize;
+  long int rss;
+  
+  fscanf(f, "%d %s %c %d %d %d %d %d %lu %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld%ld %ld %lu %lu %ld",
+	 &pid, comm, &state, 
+	 &ppid, &pgrp, &session, &tty_nr, &tpgid,
+	 &flags, &minflt, &cminflt, &majflt, &cmajflt, &utime, &stime,
+	 &cutime, &cstime, &priority, &nice, &place, &itrealvalue, &starttime, 
+	 &vsize, &rss);
+  
+  LOG("JEFF", "(%d) Mem: virt %lu rss %ld",line, vsize, rss);
+  fclose(f);
+}
+
 char* mystrcat(const char* a, const char* b) {
   char* txt = new char[1024];
   sprintf(txt,"%s%s",a,b);
@@ -222,7 +251,7 @@ void JevpGui::deleteTabs(QTabWidget *tab)
     QTabWidget *ctab = dynamic_cast<QTabWidget *>(widget);
     JevpScreenWidget *screen = dynamic_cast<JevpScreenWidget *>(widget);
 
-    LOG("JEFF", "deleteTabs:  idx=%d tab=%d screen=%d",idx, tab ? 1 : 0, screen ? 1 :0);
+    LOG(DBG, "deleteTabs:  idx=%d tab=%d screen=%d",idx, tab ? 1 : 0, screen ? 1 :0);
 
     tab->removeTab(idx);
 
@@ -310,6 +339,7 @@ JevpGui::JevpGui() : Q3MainWindow(), mWidth(900), mHight(500), mStrLive(" Live  
 {
   serverTags = (char *)malloc(10);
   strcpy(serverTags, "");
+
 }
 
 void JevpGui::gui_JevpGui(JevpGui *logic, bool isRefWindow)
@@ -323,7 +353,11 @@ void JevpGui::gui_JevpGui(JevpGui *logic, bool isRefWindow)
   this->logic = logic;
   Logic = logic;
   
+
+  LOG("JEFF", "Presenter pid=%d",getpid());
   
+  CM;
+
   CP;
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowModality(Qt::WindowModal);
@@ -1099,6 +1133,8 @@ int JevpGui::updateRunStatus()
   CP;
   RunStatus *rs = (RunStatus *)mess->ReadObject(mess->GetClass());
   
+  delete mess;
+
   int isLive = fActions[kFileLive]->isOn();
   int secs = time(NULL) - rs->timeOfLastChange;
   char winlab[120];
@@ -1156,6 +1192,7 @@ void JevpGui::UpdatePlots()
 {
   CP;
 
+  CM;
   if(jl_socket == NULL) {
     LOG(ERR,"Updating plots but socket is NULL... returning...\n");
   }
@@ -1169,16 +1206,22 @@ void JevpGui::UpdatePlots()
     nupdates++;
 
     // Get run status and handle window name...
+    CM;
     updateRunStatus();
 
+    CM;
     if(updateServerTags()) {  // Did the server tags change?  If so, update tab structure
+      CM;
       switchTabs(evpMain->display, serverTags);
     }
     else {  // if not, update visible plots and redraw...
+      CM;
       jl_DrawPlot(currentScreen);
     }
   }
   
+  CM;
+
   CP;
   if (fActions[kAutoUpdate]->isOn()) {
     QTimer::singleShot(fGuiRefreshRate,this,SLOT(UpdatePlots()));
@@ -1645,6 +1688,8 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
   
   LOG(DBG,"drawplot....combo_index = %d\n",combo_index);
 
+
+
   // I need to use the display def version to get a 
   // real object rather than a string...
   CP;
@@ -1665,11 +1710,12 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
   //     return;
   //   }
 
-  
   CP;
   // CanvasDescriptor *cd = (CanvasDescriptor *)thetab;
   int nplots = thetab->nSiblings() + 1;
+  CM;
   screen->Clear();
+  CM;
   // gcc->Clear();
   
   int wide = thetab->getIntParentProperty("wide");
@@ -1686,15 +1732,23 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
   double maxY = -9999;
 
   DisplayNode *hd = thetab;
+
   for(int i=0;i<nplots;i++) {   // First get plots!
     char tmp[256];
-    
+
+    CM;
+
     JevpPlot *plot = jl_getPlotFromServer(hd->name,  tmp);
-  
+    
+    CM;
+
     if(plot) {
       LOG(DBG, "Got plot %s : %s",hd->name,plot->GetPlotName());
+      CM;
       screen->addPlot(plot);
+      CM;
       screen->addJevpPlot(plot);
+      CM;
       double my = plot->getMaxY();
       if(my > maxY) maxY = my;
     }
@@ -1782,17 +1836,27 @@ void JevpGui::jl_swapRefsOnServer(char *name, int idx1, int idx2)
 JevpPlot *JevpGui::jl_getPlotFromServer(char *name, char *error)
 {
   error[0] = '\0';   // clear error...
-  
+
+  CM;
   // Ask server for plot...
   EvpMessage msg;
   msg.setCmd("getplot");
   msg.setArgs(name);
   jl_send(&msg);
   
+  CM;
+
   // get response...
   LOG(DBG,"Waiting for plot from server...\n");
   TMessage *mess;
+  CM;
+
   int ret = jl_socket->Recv(mess);
+
+ 
+  LOG("JEFF", "size received = %d",ret);
+  CM;
+
   if(ret == 0) {  // disconnect
     LOG(ERR,"Server disconnected?\n");
     sprintf(error, "Can't get plot: %s  (no server)",name);
@@ -1804,16 +1868,21 @@ JevpPlot *JevpGui::jl_getPlotFromServer(char *name, char *error)
     // There was no valid object...
     EvpMessage *msg = (EvpMessage *)mess->ReadObject(mess->GetClass());
     sprintf(error, "Can't get plot: (%s)", msg->args);
-    
+    LOG("JEFF", "error?");
+
     delete msg;
     delete mess;
     return NULL;
   }
 
   if(strcmp(mess->GetClass()->GetName(), "JevpPlot") == 0) {
+    CM;
     JevpPlot *plot = (JevpPlot *)mess->ReadObject(mess->GetClass());
-
+    CM;
+    
     delete mess;
+    
+    CM;
     return plot;
   }
 
