@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.26 2010/06/01 22:21:23 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.27 2011/01/18 23:06:07 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.27  2011/01/18 23:06:07  ullrich
+ * New function mtdgemAtAddress added. vpdADC, vpdTDC, vpdADCHighThr, vpdTDCHighThr, vpdEarliestTDC, and vpdEarliestTDCHighThr updated.
+ *
  * Revision 2.26  2010/06/01 22:21:23  ullrich
  * Reduce print-out for case when muDst is read.
  *
@@ -961,7 +964,10 @@ unsigned short StTriggerData2009::vpdADC(StBeamDirection eastwest, int pmt, int 
     static const int map[16] = {0, 1, 2, 3, 8, 9,10,11,16,17,18,19,24,25,26,27};
     if (pmt<1 || pmt>16) return 0;
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0) return bbq[buffer][10+(int)eastwest*2][map[pmt-1]];
+    if (buffer >= 0) {
+      if (mRun<=12003001) {return bbq[buffer][10+(int)eastwest*2][map[pmt-1]];}
+      else {return bbq[buffer][6+(int)eastwest*2][map[pmt-1]];}
+    }
     return 0;
 }
 
@@ -970,7 +976,10 @@ unsigned short StTriggerData2009::vpdTDC(StBeamDirection eastwest, int pmt, int 
     static const int map[16] = {0, 1, 2, 3, 8, 9,10,11,16,17,18,19,24,25,26,27};
     if (pmt<1 || pmt>16) return 0;
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0) return bbq[buffer][10+(int)eastwest*2][map[pmt-1]+4];
+    if (buffer >= 0) {
+      if (mRun<=12003001) {return bbq[buffer][10+(int)eastwest*2][map[pmt-1]+4];}
+      else {return bbq[buffer][6+(int)eastwest*2][map[pmt-1]+4];}     
+    }
     return 0;
 }
 
@@ -979,7 +988,10 @@ unsigned short StTriggerData2009::vpdADCHighThr(StBeamDirection eastwest, int pm
     static const int map[16] = {0, 1, 2, 3, 8, 9,10,11,16,17,18,19,24,25,26,27};
     if (pmt<1 || pmt>16) return 0;
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0) return bbq[buffer][6+(int)eastwest*2][map[pmt-1]];
+    if (buffer >= 0) {
+      if (mRun<=12003001) {return bbq[buffer][6+(int)eastwest*2][map[pmt-1]];}
+      else {return mxq[buffer][6+(int)eastwest*2][map[pmt-1]];}
+    }
     return 0;
 }
 
@@ -988,7 +1000,10 @@ unsigned short StTriggerData2009::vpdTDCHighThr(StBeamDirection eastwest, int pm
     static const int map[16] = {0, 1, 2, 3, 8, 9,10,11,16,17,18,19,24,25,26,27};
     if (pmt<1 || pmt>16) return 0;
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0) return bbq[buffer][6+(int)eastwest*2][map[pmt-1]+4];
+    if (buffer >= 0) {
+      if (mRun<=12003001) {return bbq[buffer][6+(int)eastwest*2][map[pmt-1]+4];}
+      else {return mxq[buffer][6+(int)eastwest*2][map[pmt-1]+4];};
+    }
     return 0;
 }
 
@@ -996,16 +1011,21 @@ unsigned short StTriggerData2009::vpdEarliestTDC(StBeamDirection eastwest, int p
 {
     int buffer = prepostAddress(prepost);
     if (buffer >= 0){
-        if (mBBC[buffer]){
-            if (mRun<=10096084){
-                if (eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
-                else               {return mBBC[buffer]->VPD[4]%4096;}
-            }
-            else {
-                if (eastwest==east) {return mBBC[buffer]->VPD[2]%4096;}
-                else               {return mBBC[buffer]->VPD[0]%4096;}
-            }
-        }
+      if (mBBC[buffer]){
+	if (mRun<=10096084){
+	  if (eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
+	  else               {return mBBC[buffer]->VPD[4]%4096;}
+	}
+	else if(mRun<=12003001) {
+	  if (eastwest==east) {return mBBC[buffer]->VPD[2]%4096;}
+	  else               {return mBBC[buffer]->VPD[0]%4096;}
+	}
+	else {
+	  if (eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
+	  else               {return mBBC[buffer]->VPD[4]%4096;}
+	}
+	
+      }
     }
     return 0;
 }
@@ -1018,10 +1038,15 @@ unsigned short StTriggerData2009::vpdEarliestTDCHighThr(StBeamDirection eastwest
             if (mRun<=10365999){ 
                 return 0;
             }
-            else {
+            else if(mRun<=12003001) {
                 if (eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
                 else               {return mBBC[buffer]->VPD[4]%4096;}
             }
+	    
+	    else {
+	      if (eastwest==east) {return mMIX[buffer]->MTD_P2PLayer1[12]+(mMIX[buffer]->MTD_P2PLayer1[13]&0x0f)<<8;}
+	      else               {return mMIX[buffer]->MTD_P2PLayer1[8]+(mMIX[buffer]->MTD_P2PLayer1[9]&0x0f)<<8;}
+	    }
         }
     }
     return 0;
@@ -1094,6 +1119,14 @@ unsigned short StTriggerData2009::mtdAtAddress(int address, int prepost) const
     if (buffer >= 0 && address>=0 && address<32) return mxq[buffer][0][address];
     return 0;
 }
+
+unsigned short StTriggerData2009::mtdgemAtAddress(int address, int prepost) const
+{
+    int buffer = prepostAddress(prepost);
+    if (buffer >= 0 && address>=0 && address<32) return mxq[buffer][10][address];
+    return 0;
+}
+
 
 unsigned short StTriggerData2009::mtdAdc(StBeamDirection eastwest, int pmt, int prepost) const
 {

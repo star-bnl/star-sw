@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.35 2010/06/01 22:18:44 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.36 2011/01/18 23:06:07 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.36  2011/01/18 23:06:07  ullrich
+ * New function mtdgemAtAddress added. vpdADC, vpdTDC, vpdADCHighThr, vpdTDCHighThr, vpdEarliestTDC, and vpdEarliestTDCHighThr updated.
+ *
  * Revision 2.35  2010/06/01 22:18:44  ullrich
  * Change member debug to mDebug.
  *
@@ -269,6 +272,7 @@ public:
 
     //MTD
     virtual unsigned short mtdAtAddress(int address, int prepost=0) const;
+    virtual unsigned short mtdgemAtAddress(int address, int prepost=0) const;
     virtual unsigned short mtdAdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short mtdTdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned char  mtdDsmAtCh(int ch, int prepost=0) const;
