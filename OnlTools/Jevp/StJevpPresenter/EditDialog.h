@@ -13,7 +13,7 @@ class EditDialog : public QDialog {
   QString text();
 
   ~EditDialog() {
-    printf("Deleting..\n");
+    //printf("Deleting..\n");
   }
 
   static QString *run();

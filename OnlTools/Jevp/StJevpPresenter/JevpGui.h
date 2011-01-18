@@ -77,11 +77,28 @@ public:
   TList *plots;
   TList *jevpPlots;
 
-  void addJevpPlot(JevpPlot *plot) {  jevpPlots->Add(plot); }
+  void addJevpPlot(JevpPlot *mplot) {  
+    jevpPlots->Add(mplot); 
+    LOG("JEFF", "jevpPlots has %d entries",jevpPlots->GetSize());
+  }
   JevpPlot *getJevpPlot(char *name);
-  void addPlot(TObject *plot) { plot->SetBit(kCanDelete); plots->Add(plot); };
+  void addPlot(TObject *mplot) { 
+    //mplot->SetBit(kCanDelete); 
+    plots->Add(mplot); 
+    LOG("JEFF", "plots has %d entries",plots->GetSize());
+  };
+
   void Clear() { 
     //printf("clear\n");
+
+    TListIter next(plots);
+    TObject *o;
+
+    while((o = (TObject *)next())) {
+      LOG("JEFF", "Deleting an object...");
+      delete o;
+    }
+
     plots->Clear(); 
     jevpPlots->Clear();
     //printf("more clear\n");

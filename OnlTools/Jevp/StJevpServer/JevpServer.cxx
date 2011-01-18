@@ -796,11 +796,14 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
     m.setArgs(tmp);
     TMessage mess(kMESS_OBJECT);
     mess.WriteObject(&m);
-    s->Send(mess);
+    
+    int ret = s->Send(mess);
+    LOG("JEFF", "sent (errmess) %d bytes",ret);
   } else {
     TMessage mess(kMESS_OBJECT);
     mess.WriteObject(plot);
-    s->Send(mess);
+    int ret = s->Send(mess);
+    LOG("JEFF", "Sent (plot) %d bytes",ret);
   }
 }
 

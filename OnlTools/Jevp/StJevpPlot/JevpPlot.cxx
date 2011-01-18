@@ -4,6 +4,9 @@
 #include <TStyle.h>
 #include <rtsLog.h>
 
+ClassImp(PlotHisto);
+ClassImp(JevpPlot);
+
 PlotHisto::PlotHisto(TH1 *hist)
 {
   histo = hist;
@@ -163,6 +166,8 @@ char *JevpPlot::getParent()
 
 JevpPlot::JevpPlot(JevpPlot &x)
 {
+  LOG(DBG, "Copy Constructor...");
+
   if(x.legend) {
     legend = new TLegend(*(x.legend));
   }
@@ -258,7 +263,7 @@ JevpPlot::~JevpPlot() {
 
   PlotHisto *curr = (PlotHisto *)histos.First();
 
-  LOG(DBG,"DESTRUCTOR FOR PLOT:  %s %d\n",(curr != NULL) ? curr->GetName() : "noname", refid);
+  LOG(DBG,"DESTRUCTOR FOR PLOT:  %s %d",(curr != NULL) ? curr->GetName() : "noname", refid);
 
   PlotHisto *next;
   while(curr) {
