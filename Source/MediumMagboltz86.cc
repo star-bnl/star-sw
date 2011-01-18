@@ -205,7 +205,7 @@ MediumMagboltz86::EnablePenningTransfer(const double r,
   // Get the "standard" name of this gas.
   if (!GetGasName(gasname, gasname)) {
     std::cerr << className << "::EnablePenningTransfer:\n";
-    std::cerr << "    Gas " << gasname << " is not defined.\n";
+    std::cerr << "    Unknown gas name.\n";
     return;
   }
 
@@ -1402,7 +1402,8 @@ MediumMagboltz86::Mixer() {
         description[np][k] = scrpt[6 + j][k];
       }
       if ((description[np][1] == 'E' && description[np][2] == 'X') ||
-          (description[np][0] == 'E' && description[np][1] == 'X')) {
+          (description[np][0] == 'E' && description[np][1] == 'X') ||
+          (gas[iGas] == "N2" && eIn[j] > 6.)) {
         // Excitation
         csType[np] = nCsTypes * iGas + ElectronCollisionTypeExcitation;    
         ++nExc;
