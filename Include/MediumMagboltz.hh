@@ -9,13 +9,13 @@
 
 namespace Garfield {
 
-class MediumMagboltz86 : public MediumGas {
+class MediumMagboltz : public MediumGas {
 
   public:
     // Constructor
-    MediumMagboltz86();
+    MediumMagboltz();
     // Destructor
-    ~MediumMagboltz86() {}    
+    ~MediumMagboltz() {}    
        
     // Set/get the highest electron energy to be included 
     // in the scattering rates table

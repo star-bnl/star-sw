@@ -7,7 +7,7 @@
 
 #include <TMath.h>
 
-#include "MediumMagboltz86.hh"
+#include "MediumMagboltz.hh"
 #include "MagboltzInterface.hh"
 #include "Random.hh"
 #include "FundamentalConstants.hh"
@@ -16,7 +16,7 @@
 
 namespace Garfield {
 
-MediumMagboltz86::MediumMagboltz86() :
+MediumMagboltz::MediumMagboltz() :
   MediumGas(),
   eFinal(40.), eStep(eFinal / nEnergySteps), useAutoAdjust(true), 
   useCsOutput(false), 
@@ -28,7 +28,7 @@ MediumMagboltz86::MediumMagboltz86() :
   scaleExc(1.), useSplittingFunction(true),
   eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma) {
  
-  className = "MediumMagboltz86";
+  className = "MediumMagboltz";
  
   // Set physical constants in Magboltz common blocks.
   cnsts_.echarg = ElementaryCharge;
@@ -76,7 +76,7 @@ MediumMagboltz86::MediumMagboltz86() :
 }
 
 bool 
-MediumMagboltz86::SetMaxElectronEnergy(const double e) {
+MediumMagboltz::SetMaxElectronEnergy(const double e) {
 
   if (e <= Small) {
     std::cerr << className << "::SetMaxElectronEnergy:\n";
@@ -101,7 +101,7 @@ MediumMagboltz86::SetMaxElectronEnergy(const double e) {
 }
 
 bool 
-MediumMagboltz86::SetMaxPhotonEnergy(const double e) {
+MediumMagboltz::SetMaxPhotonEnergy(const double e) {
 
   if (e <= Small) {
     std::cerr << className << "::SetMaxPhotonEnergy:\n";
@@ -122,7 +122,7 @@ MediumMagboltz86::SetMaxPhotonEnergy(const double e) {
 }
 
 void
-MediumMagboltz86::EnableDeexcitation() {
+MediumMagboltz::EnableDeexcitation() {
 
   std::cout << className << "::EnableDeexcitation:\n";
   if (usePenning) {
@@ -141,7 +141,7 @@ MediumMagboltz86::EnableDeexcitation() {
 }
 
 void
-MediumMagboltz86::EnableRadiationTrapping() {
+MediumMagboltz::EnableRadiationTrapping() {
 
   useRadTrap = true;
   if (!useDeexcitation) {
@@ -155,7 +155,7 @@ MediumMagboltz86::EnableRadiationTrapping() {
 }
 
 void
-MediumMagboltz86::EnablePenningTransfer(const double r, 
+MediumMagboltz::EnablePenningTransfer(const double r, 
                                         const double lambda) {
 
   if (r < 0. || r > 1.) {
@@ -191,7 +191,7 @@ MediumMagboltz86::EnablePenningTransfer(const double r,
 }
 
 void
-MediumMagboltz86::EnablePenningTransfer(const double r, 
+MediumMagboltz::EnablePenningTransfer(const double r, 
                                         const double lambda, 
                                         std::string gasname) {
 
@@ -271,7 +271,7 @@ MediumMagboltz86::EnablePenningTransfer(const double r,
 }
  
 void
-MediumMagboltz86::DisablePenningTransfer() {
+MediumMagboltz::DisablePenningTransfer() {
 
   for (int i = nTerms; i--;) {
     rPenning[i] = 0.;
@@ -290,7 +290,7 @@ MediumMagboltz86::DisablePenningTransfer() {
 }
 
 void
-MediumMagboltz86::DisablePenningTransfer(std::string gasname) {
+MediumMagboltz::DisablePenningTransfer(std::string gasname) {
 
   // Get the "standard" name of this gas.
   if (!GetGasName(gasname, gasname)) {
@@ -342,7 +342,7 @@ MediumMagboltz86::DisablePenningTransfer(std::string gasname) {
 }
 
 void
-MediumMagboltz86::SetExcitationScalingFactor(const double r) {
+MediumMagboltz::SetExcitationScalingFactor(const double r) {
 
   if (r <= 0.) {
     std::cerr << className << "::SetScalingFactor:\n";
@@ -356,7 +356,7 @@ MediumMagboltz86::SetExcitationScalingFactor(const double r) {
 }
 
 bool
-MediumMagboltz86::Initialise() {
+MediumMagboltz::Initialise() {
 
   if (!isChanged) {
     if (debug) {
@@ -375,7 +375,7 @@ MediumMagboltz86::Initialise() {
 }
 
 double 
-MediumMagboltz86::GetElectronNullCollisionRate(const int band) {
+MediumMagboltz::GetElectronNullCollisionRate(const int band) {
 
   // If necessary, update the collision rates table.
   if (isChanged) {
@@ -397,7 +397,7 @@ MediumMagboltz86::GetElectronNullCollisionRate(const int band) {
 }
 
 double 
-MediumMagboltz86::GetElectronCollisionRate(const double e, const int band) {
+MediumMagboltz::GetElectronCollisionRate(const double e, const int band) {
 
   // Check if the electron energy is within the currently set range.
   if (e <= 0.) {
@@ -438,7 +438,7 @@ MediumMagboltz86::GetElectronCollisionRate(const double e, const int band) {
 }
 
 bool 
-MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level, 
+MediumMagboltz::GetElectronCollision(const double e, int& type, int& level, 
                                        double& e1, 
                                        double& dx, double& dy, double& dz,
                                        int& nion, int& ndxc, int& band) {
@@ -635,7 +635,7 @@ MediumMagboltz86::GetElectronCollision(const double e, int& type, int& level,
 }
 
 bool
-MediumMagboltz86::GetDeexcitationProduct(const int i, double& t, double& s,
+MediumMagboltz::GetDeexcitationProduct(const int i, double& t, double& s,
                                          int& type, double& energy) {
 
   if (i < 0 || i >= nDeexcitationProducts || 
@@ -649,7 +649,7 @@ MediumMagboltz86::GetDeexcitationProduct(const int i, double& t, double& s,
 }
 
 bool
-MediumMagboltz86::GetIonisationProduct(const int i, 
+MediumMagboltz::GetIonisationProduct(const int i, 
                                        int& type, double& energy) {
 
   if (i < 0 || i >= nIonisationProducts) {
@@ -665,7 +665,7 @@ MediumMagboltz86::GetIonisationProduct(const int i,
 }
 
 double 
-MediumMagboltz86::GetPhotonCollisionRate(const double e) {
+MediumMagboltz::GetPhotonCollisionRate(const double e) {
 
   if (e <= 0.) {
     std::cerr << className << "::GetPhotonCollisionRate:\n";
@@ -713,7 +713,7 @@ MediumMagboltz86::GetPhotonCollisionRate(const double e) {
 }
 
 bool
-MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
+MediumMagboltz::GetPhotonCollision(const double e, int& type, int& level,
                                      double& e1, double& ctheta, 
                                      int& nsec, double& esec) {
 
@@ -733,7 +733,7 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
   
   if (isChanged) {
     if (!Mixer()) {
-      std::cerr << "MediumMagboltz86: Error calculating" 
+      std::cerr << "MediumMagboltz: Error calculating" 
                 << " the collision rates table.\n";
       return false;
     }
@@ -826,7 +826,7 @@ MediumMagboltz86::GetPhotonCollision(const double e, int& type, int& level,
 }
 
 void 
-MediumMagboltz86::ResetCollisionCounters() {
+MediumMagboltz::ResetCollisionCounters() {
 
   for (int j = nCsTypes; j--;) nCollisions[j] = 0;
   nCollisionsDetailed.resize(nTerms);
@@ -837,7 +837,7 @@ MediumMagboltz86::ResetCollisionCounters() {
 }
 
 int 
-MediumMagboltz86::GetNumberOfElectronCollisions() const {
+MediumMagboltz::GetNumberOfElectronCollisions() const {
 
   int ncoll = 0;
   for (int j = nCsTypes; j--;) ncoll += nCollisions[j];
@@ -846,7 +846,7 @@ MediumMagboltz86::GetNumberOfElectronCollisions() const {
 }
 
 int 
-MediumMagboltz86::GetNumberOfElectronCollisions(
+MediumMagboltz::GetNumberOfElectronCollisions(
         int& nElastic,   int& nIonisation, int& nAttachment, 
         int& nInelastic, int& nExcitation, int& nSuperelastic) const {
 
@@ -862,11 +862,11 @@ MediumMagboltz86::GetNumberOfElectronCollisions(
 }
 
 int 
-MediumMagboltz86::GetNumberOfLevels() {
+MediumMagboltz::GetNumberOfLevels() {
 
   if (isChanged) {
     if (!Mixer()) {
-      std::cerr << "MediumMagboltz86: Error calculating the"
+      std::cerr << "MediumMagboltz: Error calculating the"
                 << " collision rates table.\n";
       return 0;
     }
@@ -878,12 +878,12 @@ MediumMagboltz86::GetNumberOfLevels() {
 }
 
 bool 
-MediumMagboltz86::GetLevel(const int i, int& ngas, int& type,
+MediumMagboltz::GetLevel(const int i, int& ngas, int& type,
                            std::string& descr, double& e) {
 
   if (isChanged) {
     if (!Mixer()) {
-      std::cerr << "MediumMagboltz86: Error calculating the " 
+      std::cerr << "MediumMagboltz: Error calculating the " 
                 << " collision rates table.\n";
       return false;
     }
@@ -963,7 +963,7 @@ MediumMagboltz86::GetLevel(const int i, int& ngas, int& type,
 }
 
 int 
-MediumMagboltz86::GetNumberOfElectronCollisions(const int level) const {
+MediumMagboltz::GetNumberOfElectronCollisions(const int level) const {
 
   if (level < 0 || level >= nTerms) {
     std::cerr << className << "::GetNumberOfElectronCollisions:\n"; 
@@ -976,7 +976,7 @@ MediumMagboltz86::GetNumberOfElectronCollisions(const int level) const {
 }  
 
 int
-MediumMagboltz86::GetNumberOfPhotonCollisions() const {
+MediumMagboltz::GetNumberOfPhotonCollisions() const {
 
   int ncoll = 0;
   for (int j = nCsTypesGamma; j--;) ncoll += nPhotonCollisions[j];
@@ -985,7 +985,7 @@ MediumMagboltz86::GetNumberOfPhotonCollisions() const {
 }
 
 int
-MediumMagboltz86::GetNumberOfPhotonCollisions(
+MediumMagboltz::GetNumberOfPhotonCollisions(
     int& nElastic, int& nIonising, int& nInelastic) const {
 
   nElastic   = nPhotonCollisions[0];
@@ -996,7 +996,7 @@ MediumMagboltz86::GetNumberOfPhotonCollisions(
 }
 
 bool 
-MediumMagboltz86::GetGasNumberMagboltz(const std::string input, int& number) const {
+MediumMagboltz::GetGasNumberMagboltz(const std::string input, int& number) const {
 
   if (input == "") {
     number = 0; return false;
@@ -1225,7 +1225,7 @@ MediumMagboltz86::GetGasNumberMagboltz(const std::string input, int& number) con
 }
 
 bool 
-MediumMagboltz86::Mixer() {
+MediumMagboltz::Mixer() {
 
   // Set constants and parameters in Magboltz common blocks.
   cnsts_.echarg = ElementaryCharge;
@@ -1587,7 +1587,7 @@ MediumMagboltz86::Mixer() {
 }
 
 void 
-MediumMagboltz86::ComputeAngularCut(double parIn, double& cut, double &parOut) {
+MediumMagboltz::ComputeAngularCut(double parIn, double& cut, double &parOut) {
 
   // Set cuts on angular distribution and
   // renormalise forward scattering probability.
@@ -1608,7 +1608,7 @@ MediumMagboltz86::ComputeAngularCut(double parIn, double& cut, double &parOut) {
 }
 
 void
-MediumMagboltz86::ComputeDeexcitationTable() {
+MediumMagboltz::ComputeDeexcitationTable() {
 
   for (int i = nMaxLevels; i--;) iDeexcitation[i] = -1;
   deexcitations.clear();
@@ -2587,7 +2587,7 @@ MediumMagboltz86::ComputeDeexcitationTable() {
 }
 
 void
-MediumMagboltz86::ComputeDeexcitation(int iLevel, int& fLevel) {
+MediumMagboltz::ComputeDeexcitation(int iLevel, int& fLevel) {
 
   if (!useDeexcitation) {
     std::cerr << className << "::ComputeDeexcitation:\n";
@@ -2626,7 +2626,7 @@ MediumMagboltz86::ComputeDeexcitation(int iLevel, int& fLevel) {
 }
 
 void
-MediumMagboltz86::ComputeDeexcitationInternal(int iLevel, int& fLevel) {
+MediumMagboltz::ComputeDeexcitationInternal(int iLevel, int& fLevel) {
 
   nDeexcitationProducts = 0;
   dxcProducts.clear();
@@ -2712,7 +2712,7 @@ MediumMagboltz86::ComputeDeexcitationInternal(int iLevel, int& fLevel) {
 }
 
 bool
-MediumMagboltz86::ComputePhotonCollisionTable() {
+MediumMagboltz::ComputePhotonCollisionTable() {
 
   OpticalData data;
   double cs;
@@ -2859,7 +2859,7 @@ MediumMagboltz86::ComputePhotonCollisionTable() {
 }
 
 void
-MediumMagboltz86::RunMagboltz(const double e, 
+MediumMagboltz::RunMagboltz(const double e, 
                               const double bmag, const double btheta,
                               const int ncoll, bool verbose,
                               double& vx, double& vy, double& vz,
@@ -3038,7 +3038,7 @@ MediumMagboltz86::RunMagboltz(const double e,
 }
 
 void 
-MediumMagboltz86::GenerateGasTable(const int numCollisions) {
+MediumMagboltz::GenerateGasTable(const int numCollisions) {
 
   // Set the reference pressure and temperature.
   pressureTable = pressure;
