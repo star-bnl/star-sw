@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.16 2010/06/01 22:27:30 ullrich Exp $
+ * $Id: StTriggerData2009.h,v 2.17 2011/01/18 23:06:07 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.17  2011/01/18 23:06:07  ullrich
+ * New function mtdgemAtAddress added. vpdADC, vpdTDC, vpdADCHighThr, vpdTDCHighThr, vpdEarliestTDC, and vpdEarliestTDCHighThr updated.
+ *
  * Revision 2.16  2010/06/01 22:27:30  ullrich
  * Reduce print-out for case when muDst is read.
  *
@@ -205,6 +208,7 @@ public:
     unsigned short mtdTdc(StBeamDirection eastwest, int pmt, int prepost=0) const;
     unsigned char  mtdDsmAtCh(int ch, int prepost=0) const;
     bool           mtdDsmHit(int pmt, int prepost=0) const;
+    unsigned short mtdgemAtAddress(int address, int prepost=0) const;
 
     //TOF
     unsigned short tofAtAddress(int address, int prepost=0) const;

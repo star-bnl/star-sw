@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.15 2010/06/01 22:18:44 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.16 2011/01/18 23:06:07 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.16  2011/01/18 23:06:07  ullrich
+ * New function mtdgemAtAddress added. vpdADC, vpdTDC, vpdADCHighThr, vpdTDCHighThr, vpdEarliestTDC, and vpdEarliestTDCHighThr updated.
+ *
  * Revision 2.15  2010/06/01 22:18:44  ullrich
  * Change member debug to mDebug.
  *
@@ -58,7 +61,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.15 2010/06/01 22:18:44 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.16 2011/01/18 23:06:07 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -224,6 +227,7 @@ unsigned short StTriggerData::vpdEarliestTDC(StBeamDirection eastwest, int prepo
 unsigned short StTriggerData::vpdEarliestTDCHighThr(StBeamDirection eastwest, int prepost) const {return 0;}
 unsigned short StTriggerData::vpdTimeDifference() const {return 0;}
 unsigned short StTriggerData::mtdAtAddress(int address, int prepost) const {return 0;}
+unsigned short StTriggerData::mtdgemAtAddress(int address, int prepost) const {return 0;}
 unsigned short StTriggerData::mtdAdc(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 unsigned short StTriggerData::mtdTdc(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 unsigned char  StTriggerData::mtdDsmAtCh(int ch, int prepost) const {return 0;}
