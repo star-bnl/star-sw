@@ -5,8 +5,6 @@
 #include "StDbUtilities/StTpcLocalCoordinate.hh"
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StTpcDb/StTpcDb.h"
-#include "StTpcDb/StTpcPadPlaneI.h"
-#include "StTpcDb/StTpcDimensionsI.h"
 #include "Sti/StiPlanarShape.h"
 #include "Sti/StiCylindricalShape.h"
 #include "Sti/StiMaterial.h"
@@ -33,7 +31,7 @@
 //#define TPC_IDEAL_GEOM
 
 StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active, const string & inputFile)
-  : StiDetectorBuilder("Tpc",active,inputFile), _fcMaterial(0), _padPlane(0), _dimensions(0)
+  : StiDetectorBuilder("Tpc",active,inputFile), _fcMaterial(0)
 {
 }
 
@@ -80,16 +78,9 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     {"TPA1","outer pad row","HALL_1/CAVE_1/TPCE_1/TPGV_%d/TPSS_%d/TPA1_%d","tpc",""},
     {"tpad","all pad rows","/HALL_1/CAVE_1/TpcRefSys_1/TPCE_1/TpcSectorWhole_%d/TpcGas_1/TpcPadPlane_%d/tpad_%d","tpc"} // VMC
   };
-  _padPlane = gStTpcDb->PadPlaneGeometry();
-  if (!_padPlane)
-    throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- _padPlane==0");
-
-  _dimensions = gStTpcDb->Dimensions();
-  if (!_dimensions)
-    throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- _dimensions==0");
 
   // change to +1 instead of +2 to remove the ofc.
-  unsigned int nRows = _padPlane->numberOfRows();// Only sensitive detectors
+  unsigned int nRows = St_tpcPadPlanesC::instance()->numberOfRows();// Only sensitive detectors
   setNRows(nRows);
   UInt_t row;
 #if 0
@@ -121,28 +112,26 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
   StMatrixD  local2GlobalRotation;
   StMatrixD  unit(3,3,1);
   StThreeVectorD RowPosition;
-  unsigned int _nInnerPadrows = _padPlane->numberOfInnerRows();
+  unsigned int _nInnerPadrows = St_tpcPadPlanesC::instance()->numberOfInnerRows();
   for(row = 0; row<45; row++)    {
     //Nominal pad row information.
     // create properties shared by all sectors in this padrow
-    float fRadius = _padPlane->radialDistanceAtRow(row+1);
+    float fRadius = St_tpcPadPlanesC::instance()->radialDistanceAtRow(row+1);
     TString name(Form("Tpc/Padrow_%d", row));
     pShape = new StiPlanarShape;
     if (!pShape)
       throw runtime_error("StiTpcDetectorBuilder::buildDetectors() - FATAL - pShape==0||ofcShape==0");
     Double_t dZ = 0;
     if(row<_nInnerPadrows) {
-      pShape->setThickness(_padPlane->innerSectorPadLength());
-      //      dZ = _dimensions->innerEffectiveDriftDistance()/2;
+      pShape->setThickness(St_tpcPadPlanesC::instance()->innerSectorPadLength());
       dZ = St_tpcPadPlanesC::instance()->innerSectorPadPlaneZ();
     }
     else {
-      pShape->setThickness(_padPlane->outerSectorPadLength());
-      //      dZ = _dimensions->outerEffectiveDriftDistance()/2;
+      pShape->setThickness(St_tpcPadPlanesC::instance()->outerSectorPadLength());
       dZ = St_tpcPadPlanesC::instance()->outerSectorPadPlaneZ();
     }
     pShape->setHalfDepth(dZ*24/NoStiSectors);
-    pShape->setHalfWidth(_padPlane->PadPitchAtRow(row+1) * _padPlane->numberOfPadsAtRow(row+1) / 2.);
+    pShape->setHalfWidth(St_tpcPadPlanesC::instance()->PadPitchAtRow(row+1) * St_tpcPadPlanesC::instance()->numberOfPadsAtRow(row+1) / 2.);
     pShape->setName(name.Data()); if (debug>1) cout << *pShape << endl;
     for(unsigned int sector = 0; sector<getNSectors(); sector++) {
       //Retrieve position and orientation of the TPC pad rows from the database.

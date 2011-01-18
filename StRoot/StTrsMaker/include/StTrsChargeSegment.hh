@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.hh,v 1.10 2003/12/24 13:44:51 fisyak Exp $
+ * $Id: StTrsChargeSegment.hh,v 1.11 2011/01/18 14:40:15 fisyak Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.hh,v $
+ * Revision 1.11  2011/01/18 14:40:15  fisyak
+ * Clean up TpcDb interfaces and Tpc coordinate transformation
+ *
  * Revision 1.10  2003/12/24 13:44:51  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
  *
@@ -116,8 +119,6 @@ public:
     int                    pid()               const;
     double                 numberOfElectrons() const;
     
-    void  rotate(StTpcGeometry*, StTpcSlowControl*, StTpcElectronics*);
-
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     void  split(StTrsDeDx*, StMagneticField*, int, list<StTrsMiniChargeSegment>*);
     void  tssSplit(StTrsDeDx*, StMagneticField*, int, list<StTrsMiniChargeSegment>*);

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.42 2008/06/12 14:24:50 fisyak Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.43 2011/01/18 14:34:28 fisyak Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -238,11 +238,12 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StGloba
 
 void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLocalCoordinate& b, Int_t Id)
 {
-  // Id = 1000*layer + 100*wafer + ladder;
-  Int_t layer = Id/1000;
+  // Id = 10000*shell + 1000*layer + 100*wafer + ladder;
+  Int_t id = Id%10000;
+  Int_t layer = (id/1000);
   //  Int_t barrel = (layer - 1)/2 + 1;
-  Int_t ladder = Id%100;
-  Int_t wafer  = (Id - 1000*layer)/100;
+  Int_t ladder = id%100;
+  Int_t wafer  = (id - 1000*layer)/100;
   b.setLayer(layer);
   b.setLadder(ladder);
   b.setWafer(wafer);
@@ -342,7 +343,7 @@ int StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StS
   StSvtWaferGeometry* waferGeom = NULL;
 
   if( index < 0){
-    index = mgeom->getWaferIndex(HardWarePos);
+    index = mgeom->getWaferIndex(HardWarePos%10000);
   }
 
   if (index >= 0 && index<216)

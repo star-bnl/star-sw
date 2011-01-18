@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: TpcHitUtilities.cxx,v 1.8 2006/05/22 18:27:34 genevb Exp $
+// $Id: TpcHitUtilities.cxx,v 1.9 2011/01/18 14:40:32 fisyak Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: TpcHitUtilities.cxx,v $
+// Revision 1.9  2011/01/18 14:40:32  fisyak
+// Clean up TpcDb interfaces and Tpc coordinate transformation
+//
 // Revision 1.8  2006/05/22 18:27:34  genevb
 // Remove patch to observe fast offline issues
 //
@@ -45,7 +48,6 @@
 #include "StDbUtilities/StTpcPadCoordinate.hh"
 #include "StDbUtilities/StGlobalCoordinate.hh"
 #include "StTpcDb/StTpcDb.h"
-#include "StTpcDb/StTpcPadPlaneI.h"
 
 #ifndef ST_NO_NAMESPACES
 using std::sort;

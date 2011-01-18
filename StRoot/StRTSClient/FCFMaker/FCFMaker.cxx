@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.41 2010/05/28 15:05:39 fisyak Exp $
+ * $Id: FCFMaker.cxx,v 1.42 2011/01/18 14:39:01 fisyak Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.42  2011/01/18 14:39:01  fisyak
+ * Clean up TpcDb interfaces and Tpc coordinate transformation
+ *
  * Revision 1.41  2010/05/28 15:05:39  fisyak
  * new interface for pad t0
  *
@@ -176,6 +179,7 @@
 #include "tables/St_tcl_tphit_Table.h"
 #include "tables/St_type_shortdata_Table.h"
 #include "tables/St_tpcGain_Table.h"
+#include "tables/St_tss_tsspar_Table.h"
 #include "StDaqLib/TPC/trans_table.hh"
 #include "TH1.h"
 #include "TH2.h"

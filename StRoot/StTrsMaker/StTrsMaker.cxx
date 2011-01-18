@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.86 2010/01/27 21:33:08 perev Exp $
+// $Id: StTrsMaker.cxx,v 1.87 2011/01/18 14:40:15 fisyak Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.87  2011/01/18 14:40:15  fisyak
+// Clean up TpcDb interfaces and Tpc coordinate transformation
+//
 // Revision 1.86  2010/01/27 21:33:08  perev
 // Account Prompt hits
 //
@@ -400,7 +403,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.86 2010/01/27 21:33:08 perev Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.87 2011/01/18 14:40:15 fisyak Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -1215,7 +1218,9 @@ void StTrsMaker::CheckTruth(int no_tpc_hits, g2t_tpc_hit_st *tpc_hit)
   for (int ih=0;ih<no_tpc_hits;ih++) {
     UShort_t idtru = (UShort_t) tpc_hit[ih].track_p;
     StGlobalCoordinate global(tpc_hit[ih].x[0],tpc_hit[ih].x[1],tpc_hit[ih].x[2]);
-    StTpcPadCoordinate Pad;      transform(global,Pad);
+    sector = (tpc_hit[ih].volume_id/100)%100;
+    row    =  tpc_hit[ih].volume_id   %  100;
+    StTpcPadCoordinate Pad;      transform(global,Pad,sector,row);
     sector = Pad.sector();
     pad = (Int_t) Pad.pad();
     row = Pad.row();

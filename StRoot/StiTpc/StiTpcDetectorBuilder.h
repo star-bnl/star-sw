@@ -2,8 +2,6 @@
 #define StiTpcDetectorBuilder_H
 #include "Sti/StiDetectorBuilder.h"
 #include "StDetectorDbMaker/StiHitErrorCalculator.h"
-class StTpcPadPlaneI;
-class StTpcDimensionsI;
 
 class StiTpcDetectorBuilder : public StiDetectorBuilder
 {
@@ -21,8 +19,6 @@ public:
     //    virtual void AverageVolume(TGeoPhysicalNode *nodeP);
  protected:
     StiMaterial * _fcMaterial;    
-    StTpcPadPlaneI   * _padPlane; 
-    StTpcDimensionsI * _dimensions; 
 };
 
 /// Get the azimuthal angle of the given sector
