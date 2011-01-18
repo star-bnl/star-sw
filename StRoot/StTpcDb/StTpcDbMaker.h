@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.21 2009/12/07 23:44:58 fisyak Exp $
+ * $Id: StTpcDbMaker.h,v 1.22 2011/01/18 14:39:43 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.22  2011/01/18 14:39:43  fisyak
+ * Clean up TpcDb interfaces and Tpc coordinate transformation
+ *
  * Revision 1.21  2009/12/07 23:44:58  fisyak
  * Drop coordinate transformation for fortran, remove TpcHitErr
  *
@@ -82,44 +85,26 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-class StTpcDb;
-class St_tpg_pad_plane;
-class St_tpg_detector;
-//class StTpcCoordinateTransform;
-
+#include "StTpcDb.h"
 #ifdef StTpc_STATIC_ARRAYS
 static float aline[24][45];  //hold parameterization
 static float bline[24][45];  //ax+by=0
 #endif
 
 class StTpcDbMaker : public StMaker { 
- private:
-  StTpcDb* m_TpcDb;               //! tpc database class
-  St_tpg_pad_plane* m_tpg_pad_plane; //!
-  St_tpg_detector* m_tpg_detector; //! 
- protected:
  public: 
-                  StTpcDbMaker(const char *name="TpcDb");
-   virtual       ~StTpcDbMaker();
-   virtual Int_t Init();
-   virtual Int_t InitRun(int runnumber);
-   virtual Int_t  Make();
-   virtual void Clear(const char *opt);
-   virtual void Update_tpg_pad_plane();
-   virtual void Update_tpg_detector();
-   virtual void UseOnlyLaserDriftVelocity()   {m_Mode = m_Mode%1000000 + 2000000;}
-   virtual void UseOnlyCathodeDriftVelocity() {m_Mode = m_Mode%1000000 + 1000000;}
-   virtual void UseAnyDriftVelocity()         {m_Mode = m_Mode%1000000;}
-   virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
-// virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
-   virtual void SetTpc2Global();
+  StTpcDbMaker(const char *name="TpcDb") : StMaker(name) {}
+  virtual       ~StTpcDbMaker() {}
+  virtual Int_t InitRun(int runnumber);
+  virtual Int_t  Make();
+  virtual void UseOnlyLaserDriftVelocity()   {m_Mode = m_Mode%1000000 + 2000000;}
+  virtual void UseOnlyCathodeDriftVelocity() {m_Mode = m_Mode%1000000 + 1000000;}
+  virtual void UseAnyDriftVelocity()         {m_Mode = m_Mode%1000000;}
+  virtual StTpcDb* tpcDbInterface() const {return StTpcDb::instance();}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.21 2009/12/07 23:44:58 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
-   ClassDef(StTpcDbMaker,0)   //StAF chain virtual base class for Makers
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.22 2011/01/18 14:39:43 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  ClassDef(StTpcDbMaker,0)   //StAF chain virtual base class for Makers
 };
-
-
 #endif
 
 

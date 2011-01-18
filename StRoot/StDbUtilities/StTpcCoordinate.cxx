@@ -1,5 +1,5 @@
 /***********************************************************************
- * $Id: StTpcCoordinate.cxx,v 1.1 2004/06/05 23:31:09 fisyak Exp $
+ * $Id: StTpcCoordinate.cxx,v 1.2 2011/01/18 14:34:28 fisyak Exp $
  ***********************************************************************/
 #include "StTpcLocalDirection.hh"
 #include "StTpcLocalCoordinate.hh"
@@ -30,13 +30,6 @@ const StTpcLocalCoordinate& a) {
   return os << "TPC_Local( (" << OS;
 }
 //________________________________________________________________________________
-ostream& operator<<(ostream& os, const StTpcLocalSectorAlignedDirection& a) {
-  return os << "TPC_Local_Aligned_Sector Direction( (" << OS;
-}
-//________________________________________________________________________________
-ostream& operator<<(ostream& os, const StTpcLocalSectorAlignedCoordinate& a){
-  return os << "TPC_Local_Aligned_Sector( (" << OS;
-}
 ostream& operator<<(ostream& os, const StTpcLocalSectorCoordinate& a) {
   return os << "TPC_Local_Sector( (" << OS;
 }

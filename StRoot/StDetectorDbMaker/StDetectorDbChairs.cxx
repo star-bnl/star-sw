@@ -315,6 +315,51 @@ St_TpcPadCorrectionC::~St_TpcPadCorrectionC() {
 }
 #include "St_tpcGainCorrectionC.h"
 MakeChairInstance2(tpcCorrection,St_tpcGainCorrectionC,Calibrations/tpc/tpcGainCorrection);
+#include "StTpcHitErrors.h"
+StTpcHitErrors *StTpcHitErrors::fgInstance = 0;
+StTpcHitErrors *StTpcHitErrors::instance() {
+  if (! fgInstance) {
+    StMaker::GetChain()->GetDataBase("Calibrations/tpc/TpcHitErrors");
+    cout << "StTpcHitErrors have been instantiated with" << endl
+	 << "StTpcHitErrors fnXZ(" <<  fgInstance->fXZ << "," << fgInstance->fSec << "," << fgInstance->fRow << "," 
+	 << fgInstance->fMS << "," << fgInstance->fPrompt << ") = " << fgInstance->fNxz << endl;
+  }
+  return fgInstance;
+}
+Double_t StTpcHitErrors::calcError(Int_t iXZ, Int_t sec, Int_t row, Double_t _z,  Double_t _eta, Double_t _tanl, Int_t Npads, Int_t Ntmbks, Double_t AdcL, Double_t xPad) {
+  const static Double_t PitchLog[3] = {TMath::Log(0.335), TMath::Log(0.675), TMath::Log(5.78602945878541108e-01)};
+  /*
+    X[0] =            fit.Npads;
+    X[1] =            fit.Ntmbks;
+    X[2] = TMath::Tan(fit.phiL);
+    X[3] = TMath::Tan(fit.dipL);
+    X[4] =            fit.zL;
+    X[5] =            fit.AdcL;
+    X[6] =            fit.xPad;
+  */
+  Int_t s = 0, r = 0, p = 0;
+  if (sec > 12) s = 1;
+  if (row > 13) r = 1;
+  Int_t pitch = s;
+  if (iXZ) pitch = 2;
+  Double_t Vars[7] = {
+    Npads,             // 0 => no. of pads in cluster
+    Ntmbks,            // 1 => no. of time buckets in cluster
+    -TMath::Tan(_eta), // 2 => tan(phiL)
+    _tanl,             // 3 => tan(dipL)
+    _z,                // 4 => zL
+    TMath::Log(AdcL),  // 5 => Adc counts
+    xPad};             // 6=> xPad
+  if (s) {// East 
+    Vars[3] = - Vars[3];
+    Vars[4] = - Vars[4];
+  }
+  if (Vars[3] > 195) p = 1;
+  TMDFParameters *mdf = GetSigmaSQ(iXZ,s,r,p);
+  assert(mdf);
+  Double_t valueLog = mdf->Eval(Vars);
+  return   TMath::Exp(2*(valueLog + PitchLog[pitch]));
+}
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
@@ -580,3 +625,4 @@ St_SurveyC   *St_SurveyC::instance(const Char_t *name) {
   if (Name == "SsdWafersOnLadders")   return (St_SurveyC   *) StSsdWafersOnLadders::instance();
   return 0;
 }
+//________________________________________________________________________________

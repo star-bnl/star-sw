@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.58 2010/10/28 19:08:43 genevb Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.59 2011/01/18 14:39:43 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.59  2011/01/18 14:39:43  fisyak
+ * Clean up TpcDb interfaces and Tpc coordinate transformation
+ *
  * Revision 1.58  2010/10/28 19:08:43  genevb
  * Introduce GG Voltage Error switch
  *
@@ -197,20 +200,7 @@
 #endif
 ClassImp(StTpcDbMaker)
 //_____________________________________________________________________________
-StTpcDbMaker::StTpcDbMaker(const char *name): StMaker(name), m_TpcDb(0), m_tpg_pad_plane(0), m_tpg_detector(0) {}
-//_____________________________________________________________________________
-StTpcDbMaker::~StTpcDbMaker(){
-  //delete m_TpcDb;
-}
-//_____________________________________________________________________________
-Int_t StTpcDbMaker::Init(){
-
-
-   return StMaker::Init();
-}
-//_____________________________________________________________________________
 Int_t StTpcDbMaker::InitRun(int runnumber){
-  if (m_TpcDb) return 0;
   // Create Needed Tables:    
   Float_t gFactor = StarMagField::Instance()->GetFactor();
   // Set Table Flavors
@@ -247,9 +237,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
     SetFlavor("ofl+laserDV","tpcDriftVelocity");
     gMessMgr->Info() << "StTpcDbMaker::Using any drift velocity" << endm;
   }
-
-  m_TpcDb = new StTpcDb(this); if (Debug()) m_TpcDb->SetDebug(Debug());
-  m_TpcDb->SetDriftVelocity();
+  StTpcDb::instance()->SetDriftVelocity();
   
   if (IAttr("ExB")) {
     // Backward compatibility preserved.
@@ -287,20 +275,11 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
 #else
     StMagUtilities *magU = new StMagUtilities(gStTpcDb, option);
 #endif
-    m_TpcDb->SetExB(magU);
+    StTpcDb::instance()->SetExB(magU);
   }
-  m_tpg_pad_plane = new St_tpg_pad_plane("tpg_pad_plane",1);
-  m_tpg_detector = new St_tpg_detector("tpg_detector",1);
-  AddConst(m_tpg_pad_plane);
-  AddConst(m_tpg_detector);
-  if (tpcDbInterface()->PadPlaneGeometry()&&tpcDbInterface()->Dimensions())
-   Update_tpg_pad_plane();
-  if (tpcDbInterface()->Electronics()&&tpcDbInterface()->Dimensions()&&
-      tpcDbInterface()->DriftVelocity()) 
-   Update_tpg_detector();
+  StTpcDb::instance()->SetTpcRotations();
   //Here I fill in the arrays for the row parameterization ax+by=1
-  if (m_TpcDb->GlobalPosition()) {
-    SetTpc2Global();
+  if (StTpcDb::instance()->GlobalPosition()) {
     for (int i=0;i<24;i++){
       for (int j=0;j<45;j++){
 	int time[1] = {10}; 
@@ -342,82 +321,8 @@ Int_t StTpcDbMaker::Make(){
     gMessMgr->Info() << "StTpcDbMaker::TPC has tripped - declaring EOF to avoid possibly bad data" << endm;
     return kStEOF;
   }
-  if (!m_TpcDb) m_TpcDb = new StTpcDb(this);
-  m_TpcDb->SetDriftVelocity();
-  if (tpcDbInterface()->PadPlaneGeometry()&&tpcDbInterface()->Dimensions())
-    Update_tpg_pad_plane();
-  if (tpcDbInterface()->Electronics()&&tpcDbInterface()->Dimensions()&&
-      tpcDbInterface()->DriftVelocity()) 
-    Update_tpg_detector();
-  SetTpc2Global();
+  StTpcDb::instance()->SetDriftVelocity();
+  //  SetTpcRotations();
   return kStOK;
 }
-
-//---------------------------------------------------------------------------
-void StTpcDbMaker::Clear(const char *opt){
-  if (m_TpcDb) m_TpcDb->Clear();
-}
-
-//_____________________________________________________________________________
-void StTpcDbMaker::Update_tpg_pad_plane(){
-  if (m_tpg_pad_plane) {
-    tpg_pad_plane_st pp;
-    memset(&pp, 0, sizeof(tpg_pad_plane_st));
-    pp.nrow_in = tpcDbInterface()->PadPlaneGeometry()->numberOfInnerRows();
-    pp.nrow_out = tpcDbInterface()->PadPlaneGeometry()->numberOfOuterRows();
-    pp.pad_len_in = tpcDbInterface()->PadPlaneGeometry()->innerSectorPadLength();
-    pp.pad_len_out = tpcDbInterface()->PadPlaneGeometry()->outerSectorPadLength();
-    pp.pad_sep_in = tpcDbInterface()->PadPlaneGeometry()->innerSectorPadPitch();
-    pp.pad_sep_out = tpcDbInterface()->PadPlaneGeometry()->outerSectorPadPitch();
-    pp.pad_wid_in = tpcDbInterface()->PadPlaneGeometry()->innerSectorPadWidth();
-    pp.pad_wid_out = tpcDbInterface()->PadPlaneGeometry()->outerSectorPadWidth();
-    pp.nsect = tpcDbInterface()->Dimensions()->numberOfSectors();
-    for (int i=1;i<=tpcDbInterface()->PadPlaneGeometry()->numberOfRows();i++){
-      pp.npads[i-1] = tpcDbInterface()->PadPlaneGeometry()->numberOfPadsAtRow(i);
-      pp.rad[i-1] = tpcDbInterface()->PadPlaneGeometry()->radialDistanceAtRow(i);
-    }
-    m_tpg_pad_plane->AddAt(&pp,0);
-  }
-}
-
-//_____________________________________________________________________________
-void StTpcDbMaker::Update_tpg_detector(){
- if (m_tpg_detector) {
-   tpg_detector_st pp;
-   memset(&pp, 0, sizeof(tpg_detector_st));
-   pp.nsectors = 2*tpcDbInterface()->Dimensions()->numberOfSectors();
-   // note tpg table define number of sectors as 48
-   pp.drift_length = tpcDbInterface()->Dimensions()->outerEffectiveDriftDistance();
-   pp.clock_frequency = 1e6*tpcDbInterface()->Electronics()->samplingFrequency();
-   pp.z_inner_offset = 
-     tpcDbInterface()->Dimensions()->innerEffectiveDriftDistance() - 
-     tpcDbInterface()->Dimensions()->outerEffectiveDriftDistance();
-   pp.vdrift = tpcDbInterface()->DriftVelocity();
-   m_tpg_detector->AddAt(&pp,0);
- }
-}
-//_____________________________________________________________________________
-void StTpcDbMaker::SetTpc2Global() {
-  Double_t phi   = 0.0;  //large uncertainty, so set to 0
-  Double_t theta = 0.0;
-  Double_t psi   = 0.0;
-  Double_t xyz[3] = {0,0,0};
-  if (m_TpcDb->GlobalPosition()) {
-    theta = m_TpcDb->GlobalPosition()->TpcRotationAroundGlobalAxisY()*180./TMath::Pi();
-    psi   = m_TpcDb->GlobalPosition()->TpcRotationAroundGlobalAxisX()*180./TMath::Pi();
-    xyz[0] =  m_TpcDb->GlobalPosition()->TpcCenterPositionX();
-    xyz[1] =  m_TpcDb->GlobalPosition()->TpcCenterPositionY();
-    xyz[2] =  m_TpcDb->GlobalPosition()->TpcCenterPositionZ();
-  };
-  TGeoHMatrix Tpc2Global("Tpc2Global");
-  Tpc2Global.RotateX(-psi);
-  Tpc2Global.RotateY(-theta);
-  Tpc2Global.RotateZ(-phi);
-  Tpc2Global.SetTranslation(xyz);
-  m_TpcDb->SetTpc2GlobalMatrix(&Tpc2Global);
-}
-
-
-StTpcDb* StTpcDbMaker::tpcDbInterface() const {return m_TpcDb;}
-
 

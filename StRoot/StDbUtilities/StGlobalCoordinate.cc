@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * $Id: StGlobalCoordinate.cc,v 1.3 2000/04/28 16:40:34 calderon Exp $
+ * $Id: StGlobalCoordinate.cc,v 1.4 2011/01/18 14:34:27 fisyak Exp $
  *
  * Author:  brian May 20, 1998
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StGlobalCoordinate.cc,v $
+ * Revision 1.4  2011/01/18 14:34:27  fisyak
+ * Clean up TpcDb interfaces and Tpc coordinate transformation
+ *
  * Revision 1.3  2000/04/28 16:40:34  calderon
  * added constructor taking StThreeVectorF, because that's what
  * StHits and StMcHits have.
@@ -48,36 +51,7 @@
  *************************************************************************/
 #include "StGlobalCoordinate.hh"
 #include "StThreeVectorF.hh"
-static const char rcsid[] = "$Id: StGlobalCoordinate.cc,v 1.3 2000/04/28 16:40:34 calderon Exp $";
-
-    
-StGlobalCoordinate::StGlobalCoordinate() {/**/}
-
-StGlobalCoordinate::StGlobalCoordinate(const double x, const double y, const double z)
-    : mPosition(x,y,z) { /**/ }
-
-StGlobalCoordinate::StGlobalCoordinate(const StThreeVector<double>& x)
-    : mPosition(x) {/**/}
-
-StGlobalCoordinate::StGlobalCoordinate(const StThreeVectorF& x)
-    : mPosition(x.x(), x.y(), x.z()) {/**/}
-
-StGlobalCoordinate::~StGlobalCoordinate() {/**/}
-
-int
-StGlobalCoordinate::operator==(const StGlobalCoordinate& p) const
-{
-    return p.mPosition == mPosition;
-}
-
-int
-StGlobalCoordinate::operator!=(const StGlobalCoordinate& p) const
-{
-    return !(*this == p);  // use operator==()
-}
-
-void
-StGlobalCoordinate::setPosition(const StThreeVector<double>& val) { mPosition = val; }
+static const char rcsid[] = "$Id: StGlobalCoordinate.cc,v 1.4 2011/01/18 14:34:27 fisyak Exp $";
     
 // Non-member functions
 ostream& operator<<(ostream& os, const StGlobalCoordinate& a)

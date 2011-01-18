@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.41 2009/11/03 14:34:19 fisyak Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.42 2011/01/18 14:40:15 fisyak Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -13,6 +13,9 @@
  *
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.42  2011/01/18 14:40:15  fisyak
+ * Clean up TpcDb interfaces and Tpc coordinate transformation
+ *
  * Revision 1.41  2009/11/03 14:34:19  fisyak
  * Remove default in zFromTB
  *
@@ -215,19 +218,6 @@ StTrsChargeSegment::StTrsChargeSegment(StThreeVector<double>& pos,
 
 StTrsChargeSegment::~StTrsChargeSegment() {/* nopt */ }
 
-
-void StTrsChargeSegment::rotate(StTpcGeometry* geodb, StTpcSlowControl* SCdb, StTpcElectronics* elecDb)
-{ // rotate to sector 12 ---use a coordinate transform:
-    StTpcCoordinateTransform transformer(gStTpcDb);
-
-    //cout << "rotate() position= " << mPosition << endl;
-
-    mSector12Position =
-	transformer.sector12Coordinate(mPosition, &mSectorOfOrigin);
-
-//     PR(mSectorOfOrigin);
-//     PR(mSector12Position);
-}
 
 void StTrsChargeSegment::whichGEANTParticle(double& particleMass, int& charge)
 {
