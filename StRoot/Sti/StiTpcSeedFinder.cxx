@@ -1,4 +1,4 @@
-// $Id: StiTpcSeedFinder.cxx,v 2.4 2010/09/06 18:20:49 fisyak Exp $
+// $Id: StiTpcSeedFinder.cxx,v 2.5 2011/01/18 14:41:54 fisyak Exp $
 #ifdef DO_TPCCATRACKER
 #include "StiTpcSeedFinder.h"
 #include "StiToolkit.h"
@@ -188,10 +188,10 @@ void StiTpcSeedFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
       _seedHits.push_back(hit);
     }
     seeds.pop_back();
-
+#ifdef PRINT_SEED_STATISTIC
     cout<< "seed: " << nSeed++ << "\t" <<aSeed.total_hits<<" total hits "; //<<aSeed.used_per_total;
     cout << " no. unused hits " << _seedHits.size();
-
+#endif // PRINT_SEED_STATISTIC
     if (_seedHits.size() < 4) {cout << endl; continue;}
     StiKalmanTrack* track = StiToolkit::instance()->getTrackFactory()->getInstance();
     
@@ -223,6 +223,9 @@ void StiTpcSeedFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
 }
 #endif /* DO_TPCCATRACKER */
 // $Log: StiTpcSeedFinder.cxx,v $
+// Revision 2.5  2011/01/18 14:41:54  fisyak
+// Suppress seed print outs
+//
 // Revision 2.4  2010/09/06 18:20:49  fisyak
 // Add TPCCATracker
 //
