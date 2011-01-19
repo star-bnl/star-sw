@@ -9,8 +9,8 @@ void tpcDbTest() {
   gSystem->Load("St_db_Maker");
   gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StarMagField");
-  gSystem->Load("StDbUtilities");
   gSystem->Load("StTpcDb");
+  gSystem->Load("StDbUtilities");
   
   //  Create the makers to be called by the current chain
   StChain *chain =  new StChain();
@@ -19,14 +19,16 @@ void tpcDbTest() {
   dbMk->SetDebug();
   tpcDbMk->SetDebug();
   //  dbMk->SetDateTime(20090701,10000);
-  dbMk->SetDateTime(20090528,1);
+  //  dbMk->SetDateTime(20090328,164000);
+  dbMk->SetDateTime(20100107,132403);
+  dbMk->SetDateTime("y2010");
   chain->SetDebug();
   chain->Init();
   new StarMagField;
   chain->Make();
   StTpcCoordinateTransform tran(gStTpcDb);
   Int_t row = 1;
-  for (Int_t sector = 3; sector <= 24; sector += 12) {
+  for (Int_t sector = 5; sector <= 24; sector += 12) {
     StTpcPadCoordinate padP(sector,row,1,0);  cout << "padP\t" << padP << endl;
     StTpcLocalCoordinate locP;
     tran(padP,locP,kFALSE,kFALSE);            cout << "locP\t" << locP << endl;
