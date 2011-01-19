@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_anal.C,v 3.2 2011/01/19 02:05:22 genevb Exp $
+// $Id: bfcread_hist_anal.C,v 3.3 2011/01/19 02:41:54 genevb Exp $
 // $Log: bfcread_hist_anal.C,v $
+// Revision 3.3  2011/01/19 02:41:54  genevb
+// Flexible input arrangement for 1 file
+//
 // Revision 3.2  2011/01/19 02:05:22  genevb
 // Allow plain ROOT files with hists, and individual plot generation from 1 file
 //
@@ -64,6 +67,14 @@ void bfcread_hist_anal(
   const Char_t *refInFile=0
 )
 {             
+
+  // If no MainFile, try swapping for the input reference file...
+  if (strlen(MainFile)<1) {
+    cout << "bfcread_hist_anal.C, no input...trying reference as main input..." << endl;
+    const Char_t* temp = refInFile;
+    refInFile = MainFile;
+    MainFile = temp;
+  }
 
   cout << "bfcread_hist_anal.C, input hist file = " 
        << MainFile << endl;
