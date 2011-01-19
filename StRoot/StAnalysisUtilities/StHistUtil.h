@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.10 2010/03/12 07:29:05 genevb Exp $
+// $Id: StHistUtil.h,v 2.11 2011/01/19 02:05:22 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.11  2011/01/19 02:05:22  genevb
+// Allow plain ROOT files with hists, and individual plot generation from 1 file
+//
 // Revision 2.10  2010/03/12 07:29:05  genevb
 // Additional capability for saving images of each pad
 //
@@ -89,6 +92,7 @@ class StHistUtil {
   TList*  m_ListOfLogX; //! list of histogram names that will be drawn with logX scale
   TList*  m_ListOfPrint;//! list of histogram names that will be drawn,printed
   StMaker* m_PntrToMaker;//! pointer to an St_Maker, so can find histograms
+  TFile*  m_PntrToPlainFile; //! pointer to a plain root file if not using makers
   Int_t   maxHistCopy;  //! size of array of new histograms
   TH1**   newHist;      //! array of new histograms that other will be copied into
   Bool_t  debug;
@@ -163,6 +167,7 @@ class StHistUtil {
   void SetPDFFile(const Char_t *pdfFileName="");
 
   void SetPntrToMaker(StMaker *m1);
+  void SetPntrToPlainFile(TFile *m1);
   void SetGlobalTitle(const Char_t *globalTitle="");
   TH1** getNewHist();
   Int_t getNewHistSize();
@@ -173,7 +178,7 @@ class StHistUtil {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.10 2010/03/12 07:29:05 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.11 2011/01/19 02:05:22 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
@@ -195,6 +200,9 @@ inline void StHistUtil::SetPDFFile(const Char_t *pdfFileName)
 
 inline void StHistUtil::SetPntrToMaker(StMaker *m1) 
   {m_PntrToMaker = m1;}
+
+inline void StHistUtil::SetPntrToPlainFile(TFile *m1) 
+  {m_PntrToPlainFile = m1;}
 
 inline void StHistUtil::SetGlobalTitle(const Char_t *globalTitle)
   { m_GlobalTitle = globalTitle;}
