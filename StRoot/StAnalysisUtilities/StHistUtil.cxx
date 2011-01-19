@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.73 2010/12/13 16:23:26 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.74 2011/01/19 02:05:22 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.74  2011/01/19 02:05:22  genevb
+// Allow plain ROOT files with hists, and individual plot generation from 1 file
+//
 // Revision 2.73  2010/12/13 16:23:26  genevb
 // Remove previous change, add Kolmogorov maximum distance as default
 //
@@ -312,6 +315,8 @@ StHistUtil::StHistUtil(){
   m_refOutFile[0] = 0;
   m_refCuts = 0;
   m_refInFile = 0;
+  m_PntrToMaker = 0;
+  m_PntrToPlainFile = 0;
 }
 //_____________________________________________________________________________
 
@@ -555,7 +560,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
   // Now find the histograms
   // get the TList pointer to the histograms:
   if (dirName) strcpy(m_dirName,dirName);
-  TList* dirList = FindHists(m_dirName);
+  TList* dirList = (m_PntrToMaker ? FindHists(m_dirName) : FindHists(m_PntrToPlainFile));
   if (!dirList) { LOG_INFO << " DrawHists - histograms not available! " << endm; }
 
   TIter nextHist(dirList);
@@ -976,6 +981,9 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
                         histReadCounter,mode,score.Data()) << endm;
             if (!R_ostr) R_ostr = new ofstream(m_refResultsFile);
             (*R_ostr) << m_CurPage << " " << curPad << " " << oName << " " << result << endl;
+          } else {
+            if (m_OutIndividuals.Length())
+              gPad->Print(Form("%s%s",oName.Data(),m_OutIndividuals.Data()));
           }
 
         }
@@ -1156,9 +1164,7 @@ Int_t StHistUtil::ListHists(Char_t *dirName)
   }
 
 // get the TList pointer to the histograms:
-  TList  *dirList = 0;
-  if (dirName) strcpy(m_dirName,dirName);
-  dirList = FindHists(m_dirName);
+  TList* dirList = (m_PntrToMaker ? FindHists(m_dirName) : FindHists(m_PntrToPlainFile));
 
   if (!dirList) { LOG_INFO << " ListHists - histograms not available! " << endm; }
 
@@ -1971,8 +1977,7 @@ Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
   if (dirName) strcpy(m_dirName,dirName);
 
 // get the TList pointer to the histograms
-  TList  *dirList = 0;
-  dirList = FindHists(m_dirName);
+  TList* dirList = (m_PntrToMaker ? FindHists(m_dirName) : FindHists(m_PntrToPlainFile));
 
 // check that directory exists
   if (!dirList)
@@ -2093,8 +2098,7 @@ Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
   if (dirName) strcpy(m_dirName,dirName);
 
 // get the TList pointer to the histograms
-  TList  *dirList = 0;
-  dirList = FindHists(m_dirName);
+  TList* dirList = (m_PntrToMaker ? FindHists(m_dirName) : FindHists(m_PntrToPlainFile));
 
 // check that directory exists
   if (!dirList)

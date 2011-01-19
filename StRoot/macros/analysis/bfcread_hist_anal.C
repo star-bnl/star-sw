@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_anal.C,v 3.1 2009/04/03 02:35:30 genevb Exp $
+// $Id: bfcread_hist_anal.C,v 3.2 2011/01/19 02:05:22 genevb Exp $
 // $Log: bfcread_hist_anal.C,v $
+// Revision 3.2  2011/01/19 02:05:22  genevb
+// Allow plain ROOT files with hists, and individual plot generation from 1 file
+//
 // Revision 3.1  2009/04/03 02:35:30  genevb
 // Introduction of reference histogram analysis macro
 //
@@ -9,13 +12,14 @@
 // author: G. Van Buren (BNL)
 //
 // purpose: reads the *.hist.root file produced from a chain 
-//               (such as bfc) and
-//               then draws & sends to ps file the 
+//               (such as bfc) or plain root file with hists,
+//               and then draws & sends to ps file the 
 //               histograms from given input Maker
 //               also performing an analysis if a reference
 //               histogram file is supplied 
 //
-// inputs: MainFile - *.hist.root file from bfc output
+// inputs: MainFile - *.hist.root file can be from bfc output
+//                   or just a plain file with histograms
 //         MakerHistDir - directory name of Maker that you want histograms 
 //                   from (this will be first input when you did constructor)
 //             -- see standard Maker names note below!
@@ -23,6 +27,7 @@
 //                (this is 3rd argument of constructor for StTreeMaker that
 //                 you probably used to write the *.hist.root file)
 //           NOTE: if you ran bfc, then the TopDirTree = bfcTree !!
+//                 and if you are using a plain file, leave this as "" !!
 //         psFile - output postscript file name
 //         PageTitle - title at top of each page - if it's "", then it's
 //                set to MainFile by default
@@ -37,9 +42,6 @@
 // 
 //
 //======================================================================
-
-class StChain;
-StChain *chain;
 
 class StIOMaker;
 StIOMaker *IOMk=0;
@@ -80,56 +82,58 @@ void bfcread_hist_anal(
   cout << "bfcread_hist_anal.C, # histograms on page vertically = "
        << ZoneV << endl;
 
-//
-    gSystem->Load("St_base");
-    gSystem->Load("StChain");
-    gSystem->Load("StIOMaker");
-    gSystem->Load("StarClassLibrary");
-    gSystem->Load("libglobal_Tables");
-    gSystem->Load("StUtilities");
-    gSystem->Load("StAnalysisUtilities");
+  gSystem->Load("St_base");
+  gSystem->Load("StChain");
+  gSystem->Load("StIOMaker");
+  gSystem->Load("StarClassLibrary");
+  gSystem->Load("libglobal_Tables");
+  gSystem->Load("StUtilities");
+  gSystem->Load("StAnalysisUtilities");
 
+  // constructor for analysis class
+  StHistUtil   *HU  = new StHistUtil;
 
-// setup chain with IOMaker - can read in .dst.root, .dst.xdf files
-  StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,TopDirTree);
-  IOMk->SetDebug();
-  IOMk->SetIOMode("r");
-  IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-  IOMk->SetBranch("histBranch",0,"r"); //activate dst Branch
+  if (strlen(TopDirTree)) {
+    // set up IOMaker - flexibility for STAR input files
+    IOMk = new StIOMaker("IO","r",MainFile,TopDirTree);
+    IOMk->SetDebug();
+    IOMk->SetIOMode("r");
+    IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+    IOMk->SetBranch("histBranch",0,"r"); //activate dst Branch
 
+    // look into the file...
+    IOMk->Init();
+    IOMk->Clear();
+    IOMk->Make();
 
-// constructor for other maker (not used in chain)
-   StHistUtil   *HU  = new StHistUtil;
+    // now must set pointer to StMaker so HistUtil can find histograms
+    //  with StHistUtil methods
+    // -- input any maker pointer but must cast as type StMaker
+    HU->SetPntrToMaker((StMaker *)IOMk);
+  } else {
+    // now must set pointer to the plain file so HistUtil can find histograms
+    //  with StHistUtil methods
+    HU->SetPntrToPlainFile(TFile::Open(MainFile));
+  }
 
-// now must set pointer to StMaker so HistUtil can find histograms
-//  with StHistUtil methods
-// -- input any maker pointer but must cast as type StMaker
-   HU->SetPntrToMaker((StMaker *)IOMk);
+  // Set the default canvas style to plain (so it won't print out grey!)
+  gROOT->SetStyle("Plain");
 
-// ONLY use StIOMaker in chain 
-// --- now execute chain member functions - 1 event (histograms) only
-  IOMk->Init();
-  IOMk->Clear();
-  IOMk->Make();
+  HU->SetHistsNamesDraw("*","*");
+  HU->GetRunYear(MainFile);
+  HU->SetOutFile(psFile);
+  HU->SetZones(ZoneH,ZoneV);
+  HU->SetPaperSize();
+  HU->SetDefaultLogXList(MakerHistDir);
+  HU->SetDefaultLogYList(MakerHistDir);
+  if (PageTitle=="") PageTitle=MainFile;
+  HU->SetGlobalTitle(PageTitle);
 
-// Set the default canvas style to plain (so it won't print out grey!)
-    gROOT->SetStyle("Plain");
+  HU->SetDefaultPrintList(MakerHistDir,PrintList);
 
-    HU->SetHistsNamesDraw("*","*");
-    HU->GetRunYear(MainFile);
-    HU->SetOutFile(psFile);
-    HU->SetZones(ZoneH,ZoneV);
-    HU->SetPaperSize();
-    HU->SetDefaultLogXList(MakerHistDir);
-    HU->SetDefaultLogYList(MakerHistDir);
-      if (PageTitle=="") PageTitle=MainFile;
-    HU->SetGlobalTitle(PageTitle);
-
-    HU->SetDefaultPrintList(MakerHistDir,PrintList);
-
-   Int_t numLog = 0;
-   numLog = HU->ExamineLogYList();
-   cout <<" bfcread_hist_anal.C, Number hist to plot with log scale = " << numLog << endl;
+  Int_t numLog = 0;
+  numLog = HU->ExamineLogYList();
+  cout <<" bfcread_hist_anal.C, Number hist to plot with log scale = " << numLog << endl;
 
   Int_t numPrint = 0;
   numPrint = HU->ExaminePrintList();
@@ -137,21 +141,10 @@ void bfcread_hist_anal(
 
   HU->SetRefAnalysis(refOutFile,refResultsFile,refCutsFile,refInFile);
 
-//  Now draw the actual histograms to canvas and to ps file
-    HU->DrawHists(MakerHistDir);
+  //  Now draw the actual histograms to canvas and to ps file
+  HU->DrawHists(MakerHistDir);
    
-   cout <<" bfcread_hist_anal.C, end of macro" << endl;
+  cout <<" bfcread_hist_anal.C, end of macro" << endl;
 
 }
-
-
-
-
-
-
-
-
-
-
-
 
