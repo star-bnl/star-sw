@@ -21,6 +21,7 @@ void doBemcMuDst(bool StEv = true, char* list = "test.list", int nFiles = 5, int
   
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
+  gSystem->Load("StTpcDb");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");

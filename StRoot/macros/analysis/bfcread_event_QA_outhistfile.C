@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QA_outhistfile.C,v 1.14 2010/02/22 20:05:16 genevb Exp $ 
+// $Id: bfcread_event_QA_outhistfile.C,v 1.15 2011/01/19 20:03:03 fisyak Exp $ 
 // $Log: bfcread_event_QA_outhistfile.C,v $
+// Revision 1.15  2011/01/19 20:03:03  fisyak
+// switch order DbUtil and TpcDb shared libraries loading
+//
 // Revision 1.14  2010/02/22 20:05:16  genevb
 // Using StTpcDbMaker now requires StMagFMaker
 //
@@ -109,11 +112,11 @@ void bfcread_event_QA_outhistfile(
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StDetectorDbMaker");
+  gSystem->Load("StTpcDb");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-  gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
   gSystem->Load("StEmcUtil");
   gSystem->Load("StMcEvent");
