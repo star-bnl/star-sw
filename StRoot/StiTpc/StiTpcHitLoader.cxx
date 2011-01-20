@@ -15,6 +15,7 @@
 #include "Sti/StiDetectorBuilder.h"
 #include "StiTpcHitLoader.h"
 #include "Sti/StiHitTest.h"
+#include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 //________________________________________________________________________________
 StiTpcHitLoader::StiTpcHitLoader(): StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader"), 
 				    _minRow(1), _maxRow(45), _minSector(1), _maxSector(24) {}
