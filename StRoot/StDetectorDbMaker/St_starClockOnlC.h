@@ -18,6 +18,7 @@ class St_starClockOnlC : public TChair {
   Double_t  getCurrentFrequency(Int_t i = -1) {return CurrentFrequency(i);} 
   UInt_t    getTime(Int_t i = -1)             {return Time(i);}            
   Double_t  getFrequency(Int_t i = -1)        {return Frequency(i);}       
+  Double_t  samplingFrequency(Int_t i = -1)   {return 1e-6*CurrentFrequency(i);}
  protected:
   St_starClockOnlC(St_starClockOnl *table=0) : TChair(table) {}
   virtual ~St_starClockOnlC() {fgInstance = 0;}
