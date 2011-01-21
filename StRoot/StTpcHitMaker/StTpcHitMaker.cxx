@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.35 2011/01/20 18:26:30 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.36 2011/01/21 18:35:25 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.36  2011/01/21 18:35:25  fisyak
+ * change flag type from UChar_t to UShort_t
+ *
  * Revision 1.35  2011/01/20 18:26:30  genevb
  * Add FCF_flags include, and exclude any flagged hit from AfterBurner()
  *
@@ -942,9 +945,9 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	      if (TMath::Abs(kHit->pad()        - lHit->pad())        > padDiff ||
 		  TMath::Abs(kHit->timeBucket() - lHit->timeBucket()) > timeBucketDiff) continue;
 #ifdef FCF_CHOPPED
-	      UChar_t flag = lHit->flag() | FCF_CHOPPED; 
+	      UShort_t flag = lHit->flag() | FCF_CHOPPED; 
 #else
-	      UChar_t flag = lHit->flag() | 0x080;
+	      UShort_t flag = lHit->flag() | 0x080;
 #endif
 	      lHit->setFlag(flag);
 	      if (_debug) {
