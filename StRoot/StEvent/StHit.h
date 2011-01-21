@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.24 2011/01/21 16:14:40 fisyak Exp $
+ * $Id: StHit.h,v 2.25 2011/01/21 18:30:45 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.25  2011/01/21 18:30:45  fisyak
+ * fix setFlag with UShort_t
+ *
  * Revision 2.24  2011/01/21 16:14:40  fisyak
  * change mFlag type from UChar_t to UShort_t (bug #2058)
  *
@@ -132,7 +135,7 @@ public:
     
     
     void setCharge(float);
-    void setFlag(unsigned char);
+    void setFlag(UShort_t val) { mFlag = val; }
     void setFitFlag(unsigned char);
     void setTrackReferenceCount(unsigned char);
     void setHardwarePosition(unsigned int);
