@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.22 2009/11/23 16:34:06 fisyak Exp $
+ * $Id: StHit.cxx,v 2.23 2011/01/21 18:30:45 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.23  2011/01/21 18:30:45  fisyak
+ * fix setFlag with UShort_t
+ *
  * Revision 2.22  2009/11/23 16:34:06  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -88,7 +91,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.22 2009/11/23 16:34:06 fisyak Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.23 2011/01/21 18:30:45 fisyak Exp $";
 
 ClassImp(StHit)
 
@@ -138,9 +141,6 @@ StHit::setCharge(float val) { mCharge = val; }
 
 void
 StHit::setTrackReferenceCount(unsigned char val) { mTrackRefCount = val; }
-    
-void
-StHit::setFlag(unsigned char val) { mFlag = val; }
     
 void
 StHit::setFitFlag(unsigned char val) { mFitFlag = val; }
