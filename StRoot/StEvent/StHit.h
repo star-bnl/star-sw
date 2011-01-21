@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.23 2009/11/10 00:40:17 ullrich Exp $
+ * $Id: StHit.h,v 2.24 2011/01/21 16:14:40 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.24  2011/01/21 16:14:40  fisyak
+ * change mFlag type from UChar_t to UShort_t (bug #2058)
+ *
  * Revision 2.23  2009/11/10 00:40:17  ullrich
  * Changed print-out format.
  *
@@ -153,9 +156,9 @@ protected:
     UShort_t       mQuality; // quality of this information (percentage of charge produced by mIdTruth)
     UChar_t        mFitFlag;
     UChar_t        mTrackRefCount;
-    UChar_t        mFlag;
+    UShort_t       mFlag;
     StHit*         mNextHit; //!
-    ClassDef(StHit,5)
+    ClassDef(StHit,6)
 };
 
 inline unsigned int StHit::bits(unsigned int bit, unsigned int nbits) const
