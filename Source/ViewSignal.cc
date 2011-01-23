@@ -11,7 +11,7 @@ namespace Garfield {
 ViewSignal::ViewSignal() :
   debug(false), sensor(0),
   canvas(0), hasExternalCanvas(false),
-  hSignal(0) {
+  hSignal(0), gCrossings(0) {
 
   plottingEngine.SetDefaultStyle();
 
@@ -21,6 +21,7 @@ ViewSignal::~ViewSignal() {
 
   if (!hasExternalCanvas && canvas != 0) delete canvas;
   if (hSignal != 0) delete hSignal;
+  if (gCrossings != 0) delete gCrossings;
 
 }
 
@@ -76,16 +77,38 @@ ViewSignal::PlotSignal(const std::string label) {
     hSignal = 0;
   }
   hSignal = new TH1D("hSignal", label.c_str(), nBins, t0, t0 + nBins * dt);
+  hSignal->SetLineColor(plottingEngine.GetRootColorLine1());
   hSignal->GetXaxis()->SetTitle("time [ns]");
-  hSignal->GetYaxis()->SetTitle("signal");
+  hSignal->GetYaxis()->SetTitle("signal [fC / ns]");
   
   double sig = 0.;  
   for (int i = nBins; i--;) {
     sig = sensor->GetSignal(label, i);
     hSignal->SetBinContent(i, sig);
   }
+
+  if (gCrossings != 0) {
+    delete gCrossings;
+    gCrossings = 0;
+  }
+
+  // Get threshold crossings.
+  const int nCrossings = sensor->GetNumberOfThresholdCrossings();
+  if (nCrossings > 0) {
+    gCrossings = new TGraph(nCrossings);
+    gCrossings->SetMarkerStyle(20);
+    gCrossings->SetMarkerColor(plottingEngine.GetRootColorLine1());
+    double time = 0., level = 0.;
+    bool rise = true;
+    for (int i = nCrossings; i--;) {
+      if (sensor->GetThresholdCrossing(i, time, level, rise)) {
+        gCrossings->SetPoint(i, time, level);
+      }
+    }
+  }   
   
   hSignal->Draw();
+  if (nCrossings > 0) gCrossings->Draw("psame");
   canvas->Update();
 
 }

@@ -239,7 +239,7 @@ void HeedDeltaElectron::physics_after_new_speed(void)
 	  mcout<<"HeedDeltaElectron::physics_after_new_speed: \n";
 	  mcout<<"This is converted to conduction\n"; 
 	}
-	HeedCondElectron hce(currpos.ptloc);
+	HeedCondElectron hce(currpos.ptloc, currpos.time);
 	//HeedCondElectron hce(currpos.pt, currpos.ptloc, currpos.tid, this);
 	asv->conduction_electron_bank.append( hce);
 	//conduction_electron_bank.insert_after
@@ -407,7 +407,7 @@ void HeedDeltaElectron::physics_after_new_speed(void)
 	      mcout<<"New conduction electron will now be deposited\n";
 	      //Iprintnf(mcout, curpt);
 	    } 
-	    HeedCondElectron hce(ptloc);
+	    HeedCondElectron hce(ptloc, currpos.time);
 	    //HeedCondElectron hce(curpt, ptloc, prevpos.tid, this);
 	    asv->conduction_electron_bank.append( hce);
 	    //conduction_electron_bank.insert_after
@@ -679,7 +679,7 @@ void HeedDeltaElectron::physics_after_new_speed(void)
 	{
 	  mcout<<"Last conduction electron will now be deposited\n";
 	} 
-	HeedCondElectron hce(currpos.ptloc);
+	HeedCondElectron hce(currpos.ptloc, currpos.time);
 	//HeedCondElectron hce(currpos.pt, currpos.ptloc, currpos.tid, this);
 	asv->conduction_electron_bank.append( hce);
 	//conduction_electron_bank.insert_after

@@ -1,6 +1,5 @@
 #include <iostream>
 
-
 #include "wcpplib/matter/GasLib.h"
 #include "wcpplib/matter/MatterDef.h"
 #include "wcpplib/clhep_units/WPhysicalConstants.h"
@@ -553,7 +552,7 @@ TrackHeed::GetElectron(const int i, double& x, double& y, double& z,
     x = chamber->conduction_electron_bank[i].ptloc.v.x * 0.1 + cX;
     y = chamber->conduction_electron_bank[i].ptloc.v.y * 0.1 + cY;
     z = chamber->conduction_electron_bank[i].ptloc.v.z * 0.1 + cZ;
-    
+    t = chamber->conduction_electron_bank[i].time; 
     e = 0.;
     dx = dy = dz = 0.;
     

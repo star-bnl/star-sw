@@ -23,8 +23,8 @@ HeedParticle::HeedParticle
   eparticle(primvol, pt, vel, time, fpardef),
   transferred_energy_in_step(0.0), // tnpi_in_step(0),
   qtransfer(0),
-  s_loss_only(fs_loss_only),
-  s_print_listing(fs_print_listing)
+  s_print_listing(fs_print_listing),
+  s_loss_only(fs_loss_only)
 {
   mfunname("HeedParticle::HeedParticle(...)");
   particle_number = last_particle_number;
@@ -260,6 +260,9 @@ void HeedParticle::physics(void)
 	      vel.random_conic_vec(fabs(theta_t));  
 	      vel.down(&tempbas);   // direction is OK
 	      vel *= mparticle::speed_of_light;
+              // HS
+              double speed = length(vel);
+              double time = arange / speed;
 	      if(s_print_listing == 1)
 	      {
 		mcout<<"generating new virtual photon\n";
@@ -269,7 +272,7 @@ void HeedParticle::physics(void)
 			    //currpos.tid.eid[0].amvol.get(), 
 			    pt,
 			    vel,
-			    currpos.time,
+			    time,
 			    particle_number,
 			    //PassivePtr< gparticle > (this),
 			    transferred_energy[qtransfer-1],

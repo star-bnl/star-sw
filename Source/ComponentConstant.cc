@@ -137,6 +137,11 @@ ComponentConstant::WeightingField(
   Medium* m;
   if (!GetMedium(x, y, z, m)) {
     wx = wy = wz = 0.;
+    if (debug) {
+      std::cout << className << "::WeightingField:\n";
+      std::cout << "    No medium at (" 
+                << x << ", " << y << ", " << z << ")\n";
+    }
     return;
   }
   wx = fwx; wy = fwy; wz = fwz;

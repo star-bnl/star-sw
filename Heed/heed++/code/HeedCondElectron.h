@@ -29,11 +29,13 @@ class HeedCondElectron
 {public:
   //point pt;    // in the first system from tid system
   point ptloc;    // in the local system, the last system from tid
+  // Time
+  double time;
   //manip_absvol_treeid tid;
   //PassivePtr< HeedDeltaElectron > parent_de;  // reference to parent  
-  HeedCondElectron(void){;}
-  HeedCondElectron(point fptloc):
-    ptloc(fptloc) {;}
+  HeedCondElectron(void) {;}
+  HeedCondElectron(point fptloc, double ftime):
+    ptloc(fptloc), time(ftime) {;}
   //HeedCondElectron(point fpt, point fptloc, manip_absvol_treeid ftid,
   //		   PassivePtr< HeedDeltaElectron > fparent_de):
   // pt(fpt), ptloc(fptloc), tid(ftid), parent_de(fparent_de) {;}

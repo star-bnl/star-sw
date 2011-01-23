@@ -30,10 +30,7 @@ Medium::Medium() :
   
   eFields.clear();
   bFields.clear(); bFields.resize(1); bFields[0] = 0.;
-  bAngles.clear(); bAngles.resize(1); bAngles[0] = 0.;
-  
-  // Set the default grid.
-  SetFieldGrid(100., 100000., 20, true, 0., 0., 1, 0., 0., 1);
+  bAngles.clear(); bAngles.resize(1); bAngles[0] = 0.;  
  
   hasElectronVelocityE   = false; tabElectronVelocityE.clear();
   hasElectronVelocityB   = false; tabElectronVelocityB.clear();
@@ -75,6 +72,9 @@ Medium::Medium() :
   thrElectronTownsend = thrElectronAttachment = 0;
   thrHoleTownsend = thrHoleAttachment = 0;
   thrIonDissociation = 0;
+
+  // Set the default grid.
+  SetFieldGrid(100., 100000., 20, true, 0., 0., 1, 0., 0., 1);
 
 }
 

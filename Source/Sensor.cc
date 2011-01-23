@@ -5,27 +5,34 @@
 #include "Sensor.hh"
 #include "GarfieldConstants.hh"
 #include "Plotting.hh"
+#include "Numerics.hh"
+#include "FundamentalConstants.hh"
 
 namespace Garfield {
 
-//double Sensor::signalConversion = ElementaryCharge * 1.e9;
-double Sensor::signalConversion = 1.;
+double Sensor::signalConversion = ElementaryCharge * 1.e15;
+// double Sensor::signalConversion = 1.;
 
 Sensor::Sensor() :
   nComponents(0), lastComponent(-1), 
   nElectrodes(0),
-  nTimeBins(200),
-  tStart(0.), tStep(10.),
+  nTimeBins(200), tStart(0.), tStep(10.),
   nEvents(0),
+  hasTransferFunction(false), fTransfer(0),
+  hasNoiseFunction(false), fNoise(0),
+  nThresholdCrossings(0),
   xMin(0.), yMin(0.), zMin(0.),
   xMax(0.), yMax(0.), zMax(0),
   hasUserArea(false),
   xMinUser(0.), yMinUser(0.), zMinUser(0.), 
   xMaxUser(0.), yMaxUser(0.), zMaxUser(0.),
   debug(false) {
-    
+  
+  className = "Sensor";
+  
   components.clear();
   electrodes.clear();
+  thresholdCrossings.clear();
   
 }
 
@@ -73,6 +80,7 @@ Sensor::ElectricField(const double x, const double y, const double z,
     }
     ex += fx; ey += fy; ez += fz;
   }
+
 }
 
 void 
@@ -117,12 +125,12 @@ Sensor::SetArea() {
 
   if (!GetBoundingBox(xMinUser, yMinUser, zMinUser, 
                       xMaxUser, yMaxUser, zMaxUser)) {
-    std::cerr << "Sensor::SetArea:\n";
+    std::cerr << className << "::SetArea:\n";
     std::cerr << "    Bounding box is not known.\n";
     return false;
   }
   
-  std::cout << "Sensor::SetArea:\n";
+  std::cout << className << "::SetArea:\n";
   std::cout << "    " << xMinUser << " < x [cm] < " << xMaxUser << "\n";
   std::cout << "    " << yMinUser << " < y [cm] < " << yMaxUser << "\n";
   std::cout << "    " << zMinUser << " < z [cm] < " << zMaxUser << "\n";
@@ -189,7 +197,7 @@ Sensor::IsInArea(const double x, const double y, const double z) {
  
   if (!hasUserArea) {
     if (!SetArea()) {
-      std::cerr << "Sensor::IsInArea:\n";
+      std::cerr << className << "::IsInArea:\n";
       std::cerr << "    User area is not known.\n";
       return false;
     }
@@ -200,7 +208,7 @@ Sensor::IsInArea(const double x, const double y, const double z) {
 	  y >= yMinUser && y <= yMaxUser &&
 	  z >= zMinUser && z <= zMaxUser) {
     if (debug) {
-      std::cout << "Sensor::IsInArea:\n";
+      std::cout << className << "::IsInArea:\n";
       std::cout << "    (" << x << ", " << y << ", " << z << ") "
                 << " is inside.\n";
     }
@@ -208,7 +216,7 @@ Sensor::IsInArea(const double x, const double y, const double z) {
   } 
     
   if (debug) {
-    std::cout << "Sensor::IsInArea:\n" << std::endl;
+    std::cout << className << "::IsInArea:\n" << std::endl;
     std::cout << "    (" << x << ", " << y << ", " << z << ") "
               << " is outside.\n";
   }
@@ -236,7 +244,7 @@ void
 Sensor::AddComponent(ComponentBase* comp) {
 
   if (comp == 0) {
-    std::cerr << "Sensor::AddComponent:\n";
+    std::cerr << className << "::AddComponent:\n";
     std::cerr << "    Component pointer is null.\n";
     return;
   }
@@ -253,14 +261,14 @@ void
 Sensor::AddElectrode(ComponentBase* comp, std::string label) {
 
   if (comp == 0) {
-    std::cerr << "Sensor::AddElectrode:\n";
+    std::cerr << className << "::AddElectrode:\n";
     std::cerr << "    Component pointer is null.\n";
     return;
   }
 
   for (int i = nElectrodes; i--;) {
     if (electrodes[i].label == label) {
-      std::cout << "Sensor::AddElectrode:\n";
+      std::cout << className << "::AddElectrode:\n";
       std::cout << "    Warning: An electrode with label " 
                 << label << " exists already.\n";
       std::cout << "    Weighting fields will be summed up.\n";
@@ -274,7 +282,7 @@ Sensor::AddElectrode(ComponentBase* comp, std::string label) {
   electrodes.push_back(newElectrode);
   ++nElectrodes;
   electrodes[nElectrodes - 1].signal.resize(nTimeBins);
-  std::cout << "Sensor::AddElectrode:\n";
+  std::cout << className << "::AddElectrode:\n";
   std::cout << "    Added readout electrode " << label << ".\n";
   std::cout << "    All signals are reset.\n";
   ClearSignal();
@@ -318,7 +326,7 @@ Sensor::GetVoltageRange(double& vmin, double& vmax) {
   
   // Warn if we still don't know the range
   if (!set) {
-    std::cerr << "Sensor::GetVoltageRange:\n";
+    std::cerr << className << "::GetVoltageRange:\n";
     std::cerr << "    Sensor voltage range not known.\n";
     vmin = vmax = 0.;
     return false;
@@ -326,7 +334,7 @@ Sensor::GetVoltageRange(double& vmin, double& vmax) {
 
   // Debugging
   if (debug) {
-    std::cout << "Sensor::GetVoltageRange:\n";
+    std::cout << className << "::GetVoltageRange:\n";
     std::cout << "    Voltage range " << vmin 
               << " < V < " << vmax << ".\n";
   }
@@ -354,7 +362,7 @@ Sensor::AddSignal(const int q, const double t, const double dt,
   // Get the time bin
   if (t < tStart || dt <= 0.) {
     if (debug) {
-      std::cerr << "Sensor::AddSignal:\n";
+      std::cerr << className << "::AddSignal:\n";
       if (t < tStart) std::cerr << "    Time " << t << " out of range.\n";
       if (dt <= 0.) std::cerr << "    Time step < 0.\n";
     }
@@ -364,17 +372,17 @@ Sensor::AddSignal(const int q, const double t, const double dt,
   // Check if the starting time is outside the range 
   if (bin < 0 || bin >= nTimeBins) {
     if (debug) {
-      std::cerr << "Sensor::AddSignal:\n";
+      std::cerr << className << "::AddSignal:\n";
       std::cerr << "    Bin " << bin << " out of range.\n";
     }
     return;
   }
-  if (nEvents <= 0) ++nEvents;
+  if (nEvents <= 0) nEvents = 1;
   
   double wx = 0., wy = 0., wz = 0.;
   double cur, delta;
   if (debug) {
-    std::cout << "Sensor::AddSignal:\n";
+    std::cout << className << "::AddSignal:\n";
     std::cout << "    Time: " << t << "\n";
     std::cout << "    Step: " << dt << "\n";
     std::cout << "    Charge: " << q << "\n";
@@ -417,13 +425,13 @@ Sensor::AddInducedCharge(const int q,
                          const double x0, const double y0, const double z0,
                          const double x1, const double y1, const double z1) {
 
-  if (debug) std::cout << "Sensor::AddInducedCharge:\n";
+  if (debug) std::cout << className << "::AddInducedCharge:\n";
   double w0 = 0., w1 = 0.;
   for (int i = nElectrodes; i--;) {
-    // Calculate the weighting potential for the starting point
+    // Calculate the weighting potential at the starting point.
     w0 = electrodes[i].comp->WeightingPotential(x0, y0, z0, 
                                                 electrodes[i].label);
-    // Calculate the weighting potential for the end point
+    // Calculate the weighting potential at the end point.
     w1 = electrodes[i].comp->WeightingPotential(x1, y1, z1,
                                                 electrodes[i].label);
     electrodes[i].charge += q * (w1 - w0);
@@ -446,27 +454,27 @@ Sensor::SetTimeWindow(const double tstart, const double tstep,
 
   tStart = tstart;
   if (tstep <= 0.) {
-    std::cerr << "Sensor::SetTimeWindow:\n";
+    std::cerr << className << "::SetTimeWindow:\n";
     std::cerr << "    Starting time out of range.\n";
   } else {
     tStep = tstep;
   }
   
   if (nsteps <= 0) {
-    std::cerr << "Sensor::SetTimeWindow:\n";
+    std::cerr << className << "::SetTimeWindow:\n";
     std::cerr << "    Number of time bins out of range.\n";
   } else {
     nTimeBins = nsteps;
   }
   
   if (debug) {
-    std::cout << "Sensor::SetTimeWindow:\n";
+    std::cout << className << "::SetTimeWindow:\n";
     std::cout << "    " << tStart << " < t [ns] < " 
               << tStart + nTimeBins * tStep << "\n";
     std::cout << "    Step size: " << tStep << " ns\n";
   }
  
-  std::cout << "Sensor::SetTimeWindow:\n";
+  std::cout << className << "::SetTimeWindow:\n";
   std::cout << "    Resetting all signals.\n"; 
   for (int i = nElectrodes; i--;) {
     electrodes[i].signal.clear();
@@ -486,7 +494,7 @@ Sensor::GetSignal(const std::string label, const int bin) {
     if (electrodes[i].label == label) sig += electrodes[i].signal[bin];
   }
   if (debug) {
-    std::cout << "Sensor::GetSignal:\n";
+    std::cout << className << "::GetSignal:\n";
     std::cout << "    Electrode: " << label << "\n";
     std::cout << "    Bin: " << bin << "\n";
     std::cout << "    Signal: " << sig / tStep << "\n";
@@ -504,13 +512,291 @@ Sensor::GetInducedCharge(const std::string label) {
     if (electrodes[i].label == label) charge += electrodes[i].charge;
   }
   if (debug) {
-    std::cout << "Sensor::GetInducedCharge:\n";
+    std::cout << className << "::GetInducedCharge:\n";
     std::cout << "    Electrode: " << label << "\n";
     std::cout << "    Charge: " << charge / tStep << "\n";
   }
 
   return charge / nEvents;
 
+}
+
+void
+Sensor::SetTransferFunction(double (*f)(double t)) {
+
+  if (f == 0) {
+    std::cerr << className << "::SetTransferFunction:\n";
+    std::cerr << "    Function pointer is null.\n";
+    return;
+  }
+  fTransfer = f;
+  hasTransferFunction = true;
+  
+}
+  
+bool
+Sensor::ConvoluteSignal() {
+
+  if (!hasTransferFunction) {
+    std::cerr << className << "::ConvoluteSignal:\n";
+    std::cerr << "    No transfer function available.\n";
+    return false;
+  }
+  if (nEvents <= 0) {
+    std::cerr << className << "::ConvoluteSignal:\n";
+    std::cerr << "    No signals present.\n";
+    return false;
+  }
+  
+  // Set the range where the transfer function is valid.
+  double cnvMin = 0.;
+  double cnvMax = 1.e10;
+
+  std::vector<double> cnvTab;
+  cnvTab.resize(2 * nTimeBins);
+  int iOffset = nTimeBins;  
+  // Evaluate the transfer function.
+  for (int i = 0; i < nTimeBins; ++i) {
+    // Negative time part.
+    double t = -i * tStep;
+    if (t < cnvMin || t > cnvMax) {
+      cnvTab[iOffset - i] = 0.;
+    } else {
+      cnvTab[iOffset - i] = fTransfer(t);
+    }
+    if (i < 1) continue;
+    // Positive time part.
+    t = i * tStep;
+    if (t < cnvMin || t > cnvMax) {
+      cnvTab[iOffset + i] = 0.;
+    } else {
+      cnvTab[iOffset + i] = fTransfer(t);
+    }
+  }
+  
+  std::vector<double> tmpSignal;
+  tmpSignal.resize(nTimeBins);
+  // Loop over all electrodes.
+  for (int i = 0; i < nElectrodes; ++i) {
+    for (int j = 0; j < nTimeBins; ++j) {
+      tmpSignal[j] = 0.;
+      for (int k = 0; k < nTimeBins; ++k) {
+        tmpSignal[j] += tStep * cnvTab[iOffset + j - k] * 
+                        electrodes[i].signal[k];
+      }
+    }
+    for (int j = 0; j < nTimeBins; ++j) {
+      electrodes[i].signal[j] = tmpSignal[j];
+    }
+  }
+  return true;
+  
+}
+
+void
+Sensor::SetNoiseFunction(double (*f)(double t)) {
+
+  if (f == 0) {
+    std::cerr << className << "::SetNoiseFunction:\n";
+    std::cerr << "    Function pointer is null.\n";
+    return;
+  }
+  fNoise = f;
+  hasNoiseFunction = true;
+  
+}
+
+void
+Sensor::AddNoise() {
+
+  if (!hasNoiseFunction) {
+    std::cerr << className << "::AddNoise:\n";
+    std::cerr << "    Noise function is not defined.\n";
+    return;
+  }
+  if (nEvents <= 0) nEvents = 1;
+  
+  for (int i = nElectrodes; i--;) {
+    for (int j = nTimeBins; j--;) {
+      const double t = tStart + (j + 0.5) * tStep;
+      electrodes[i].signal[j] += fNoise(t);
+    }
+  }
+  
+}
+
+bool
+Sensor::ComputeThresholdCrossings(const double thr, const std::string label, int& n) {
+
+  // Reset the list of threshold crossings.
+  thresholdCrossings.clear();
+  nThresholdCrossings = n = 0;
+  thresholdLevel = thr;
+
+  // Set the interpolation order.
+  int iOrder = 1;
+  
+  if (nEvents <= 0) {
+    std::cerr << className << "::ComputeThresholdCrossings:\n";
+    std::cerr << "    No signals present.\n";
+    return false;
+  }
+  
+  // Compute the total signal.
+  std::vector<double> signal;
+  signal.resize(nTimeBins);
+  for (int i = nTimeBins; i--;) signal[i] = 0.;
+  // Loop over the electrodes.
+  bool foundLabel = false;
+  for (int j = nElectrodes; j--;) {
+    if (electrodes[j].label == label) {
+      foundLabel = true;
+      for (int i = nTimeBins; i--;) {
+        signal[i] += electrodes[j].signal[i];
+      }
+    }
+  }
+  if (!foundLabel) {
+    std::cerr << className << "::ComputeThresholdCrossings:\n";
+    std::cerr << "    Electrode " << label << " not found.\n";
+    return false;
+  }
+  for (int i = nTimeBins; i--;) {
+    signal[i] *= signalConversion / (nEvents * tStep);
+  }
+  
+  // Establish the range.
+  double vMin = signal[0];
+  double vMax = signal[0];
+  for (int i = nTimeBins; i--;) {
+    if (signal[i] < vMin) vMin = signal[i];
+    if (signal[i] > vMax) vMax = signal[i];
+  }
+  if (thr < vMin && thr > vMax) {
+    if (debug) {
+      std::cout << className << "::ComputeThresholdCrossings:\n";
+      std::cout << "    Threshold outside the range [" 
+                << vMin << ", " << vMax << "]\n";
+    }
+    return true;
+  }
+
+  // Check for rising edges.
+  bool rise = true;
+  bool fall = false;
+
+  while (rise || fall) {
+    if (debug) {
+      if (rise) {
+        std::cout << className << "::ComputeThresholdCrossings:\n";
+        std::cout << "    Hunting for rising edges.\n";
+      } else if (fall) {
+        std::cout << className << "::ComputeThresholdCrossings:\n";
+        std::cout << "    Hunting for falling edges.\n";
+      }
+    }
+    // Initialise the vectors.
+    std::vector<double> times;
+    std::vector<double> values;
+    times.clear();
+    values.clear();
+    times.push_back(tStart);
+    values.push_back(signal[0]);
+    int nValues = 1;
+    // Scan the signal.
+    for (int i = 1; i < nTimeBins; ++i) {
+      // Compute the vector element.
+      const double tNew = tStart + i * tStep;
+      const double vNew = signal[i];
+      // If still increasing or decreasing, add to the vector.
+      if ((rise && vNew > values.back()) ||
+          (fall && vNew < values.back())) {
+        times.push_back(tNew);
+        values.push_back(vNew);
+        ++nValues;
+      // Otherwise see whether we crossed the threshold level.
+      } else if ((values[0] - thr) * (thr - values.back()) >= 0. && 
+                 nValues > 1 && 
+                 ((rise && values.back() > values[0]) ||
+                  (fall && values.back() < values[0] ))) {      
+        // Compute the crossing time.
+        double tcr = Numerics::Divdif(times, values, nValues, thr, iOrder);
+        thresholdCrossing newCrossing;
+        newCrossing.time = tcr;
+        newCrossing.rise = rise;
+        thresholdCrossings.push_back(newCrossing);
+        ++nThresholdCrossings;
+        times.clear();
+        values.clear();
+        times.push_back(tNew);
+        values.push_back(vNew);
+        nValues = 1;
+      } else {
+        // No crossing, simply reset the vector.
+        times.clear();
+        values.clear();
+        times.push_back(tNew);
+        values.push_back(vNew);
+        nValues = 1;
+      }
+    }
+    // Check the final vector.
+    if ((values[0] - thr) * (thr - values.back()) >= 0. && 
+         nValues > 1 && 
+         ((rise && values.back() > values[0]) ||
+          (fall && values.back() < values[0]))) {
+      double tcr = Numerics::Divdif(times, values, nValues, thr, iOrder);
+      thresholdCrossing newCrossing;
+      newCrossing.time = tcr;
+      newCrossing.rise = rise;
+      thresholdCrossings.push_back(newCrossing);
+      ++nThresholdCrossings;
+    }
+    if (rise) {
+      rise = false;
+      fall = true;
+    } else if (fall) {
+      rise = fall = false;
+    }
+  }
+  n = nThresholdCrossings;
+  
+  if (debug) {
+    std::cout << className << "::ComputeThresholdCrossings:\n";
+    std::cout << "    Found " << nThresholdCrossings << " crossings.\n";
+    if (nThresholdCrossings > 0) {
+      std::cout << "      Time  [ns]    Direction\n";
+    }
+    for (int i = 0; i < nThresholdCrossings; ++i) {
+      std::cout << "      " << thresholdCrossings[i].time << "      ";
+      if (thresholdCrossings[i].rise) {
+        std::cout << "rising\n";
+      } else {
+        std::cout << "falling\n";
+      }
+    }
+  }
+  // Seems to have worked.
+  return true;
+
+}
+
+bool
+Sensor::GetThresholdCrossing(const int i, double& time, double& level, bool& rise) {
+  
+  level = thresholdLevel;
+  
+  if (i < 0 || i >= nThresholdCrossings) {
+    std::cerr << className << "::GetThresholdCrossing:\n";
+    std::cerr << "    Index (" << i << ") out of range.\n";
+    time = tStart + nTimeBins * tStep;
+    return false;
+  }
+  
+  time = thresholdCrossings[i].time;
+  rise = thresholdCrossings[i].rise;
+  return true;
+  
 }
 
 bool 
@@ -539,7 +825,7 @@ Sensor::GetBoundingBox(double& xmin, double& ymin, double& zmin,
 
   // Warn if we still don't know the range
   if (!set) {
-    std::cerr << "Sensor::GetBoundingBox:\n";
+    std::cerr << className << "::GetBoundingBox:\n";
     std::cerr << "    Sensor bounding box not known.\n";
     xmin = 0.; ymin = 0.; zmin = 0.;
     xmax = 0.; ymax = 0.; zmax = 0.;
@@ -547,7 +833,7 @@ Sensor::GetBoundingBox(double& xmin, double& ymin, double& zmin,
   } 
   
   if (debug) {
-    std::cout << "Sensor::GetBoundingBox:\n";
+    std::cout << className << "::GetBoundingBox:\n";
     std::cout << "    " << xmin << " < x [cm] < " << xmax << "\n";
     std::cout << "    " << ymin << " < y [cm] < " << ymax << "\n";
     std::cout << "    " << zmin << " < z [cm] < " << zmax << "\n";

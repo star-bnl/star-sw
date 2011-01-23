@@ -77,12 +77,23 @@ class Sensor {
     }
     double GetSignal(const std::string label, const int bin);
     double GetInducedCharge(const std::string label);
+    void SetTransferFunction(double (*f)(double t));
+    bool ConvoluteSignal();
+    void SetNoiseFunction(double (*f)(double t));
+    void AddNoise();
+    bool ComputeThresholdCrossings(const double thr, 
+                                   const std::string label, int& n);
+    int  GetNumberOfThresholdCrossings() {return nThresholdCrossings;}
+    bool GetThresholdCrossing(const int i, 
+                              double& time, double& level, bool& rise); 
 
     // Switch on/off debugging messages
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}    
 
   private:
+
+    std::string className;
 
     // Components
     int nComponents;
@@ -107,7 +118,23 @@ class Sensor {
     double tStart, tStep;
     int nEvents;
     static double signalConversion;
-    
+   
+    // Transfer function
+    bool hasTransferFunction;
+    double (*fTransfer) (double t);
+
+    // Noise
+    bool hasNoiseFunction;
+    double (*fNoise) (double t);
+
+    int nThresholdCrossings;
+    struct thresholdCrossing {
+      double time;
+      bool rise;
+    };
+    std::vector<thresholdCrossing> thresholdCrossings;
+    double thresholdLevel;
+
     // Bounding box
     double xMin, yMin, zMin;
     double xMax, yMax, zMax;
@@ -121,7 +148,7 @@ class Sensor {
 
     // Return the current sensor size
     bool GetBoundingBox(double& xmin, double& ymin, double& zmin,
-                         double& xmax, double& ymax, double& zmax);
+                        double& xmax, double& ymax, double& zmax);
 
 };
 

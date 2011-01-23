@@ -6,6 +6,7 @@
 #include <algorithm>
 
 #include "MediumGas.hh"
+#include "OpticalData.hh"
 #include "FundamentalConstants.hh"
 
 namespace Garfield{
@@ -2587,6 +2588,23 @@ MediumGas::GetGasNumberGasFile(const std::string input, int& number) const {
   std::cerr << "    Gas " << input << " is not defined.\n";
   return false;
   
+}
+
+bool
+MediumGas::GetPhotoabsorptionCrossSection(const double e, double& sigma,
+                                          const int i) {
+
+  if (i < 0 || i >= nMaxGases) {
+    std::cerr << className << "::GetPhotoabsorptionCrossSection:\n";
+    std::cerr << "    Index (" << i << ") out of range.\n";
+    return false;
+  }
+  
+  OpticalData optData;
+  if (!optData.IsAvailable(gas[i])) return false;
+  double eta = 0.;
+  return optData.GetPhotoabsorptionCrossSection(gas[i], e, sigma, eta);  
+
 }
 
 }

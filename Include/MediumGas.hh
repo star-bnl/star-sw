@@ -78,6 +78,9 @@ class MediumGas : public Medium {
       return eta * pressure / pressureTable;
     }
 
+    bool GetPhotoabsorptionCrossSection(const double e, double& sigma, 
+                                        const int i);
+
   protected:
   
     static const int nMaxGases = 6;

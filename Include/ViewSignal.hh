@@ -6,6 +6,7 @@
 #include <RQ_OBJECT.h>
 #include <TCanvas.h>
 #include <TH1D.h>
+#include <TGraph.h>
 
 namespace Garfield {
 
@@ -46,6 +47,9 @@ class ViewSignal {
 
     // Histogram
     TH1D* hSignal;
+
+    // Threshold crossings
+    TGraph* gCrossings;
     
 };
 

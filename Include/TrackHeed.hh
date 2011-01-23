@@ -69,7 +69,7 @@ class TrackHeed : public Track {
 
     void EnablePhotonReabsorption()  {usePhotonReabsorption = true;}
     void DisablePhotonReabsorption() {usePhotonReabsorption = false;}
-    
+ 
     void SetEnergyMesh(const double e0, const double e1,
                        const int nsteps);
 
@@ -78,7 +78,7 @@ class TrackHeed : public Track {
     // Prevent usage of copy constructor and assignment operator
     TrackHeed(const TrackHeed& heed);
     TrackHeed& operator=(const TrackHeed& heed);
-    
+ 
     bool ready;
     bool hasActiveTrack;
   
@@ -95,7 +95,7 @@ class TrackHeed : public Track {
       double dx, dy, dz;
     };
     std::vector<deltaElectron> deltaElectrons;
-    
+
     // Primary particle
     HeedParticle* particle;
 
@@ -103,16 +103,16 @@ class TrackHeed : public Track {
     HeedMatterDef* matter;
     GasDef* gas;
     MatterDef* material;
-    
+ 
     // Photoabsorption cross-sections
     AtomPhotoAbsCS** atPacs;
     MolecPhotoAbsCS** molPacs;
-    
+ 
     // Energy mesh
     double emin, emax;
     int nEnergyIntervals;
     EnergyMesh* energyMesh;
-    
+ 
     // Cross-sections
     EnTransfCS* transferCs;
     ElElasticScat* elScat;
