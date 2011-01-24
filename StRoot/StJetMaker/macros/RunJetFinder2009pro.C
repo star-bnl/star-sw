@@ -17,8 +17,8 @@ void RunJetFinder2009pro(int nevents = 1e6,
   gROOT->Macro("loadMuDst.C");
   gROOT->Macro("LoadLogger.C");
 
-  gSystem->Load("StTpcDb");
   gSystem->Load("StDetectorDbMaker");
+  gSystem->Load("StTpcDb");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");
