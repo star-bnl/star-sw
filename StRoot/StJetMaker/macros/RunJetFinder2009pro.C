@@ -5,9 +5,9 @@
 //
 
 void RunJetFinder2009pro(int nevents = 1e6,
-			 const char* mudstfile = "/star/data60/reco/production2009_200Gev_Single/ReversedFullField/P10ic/2009/143/10143008/st_physics_10143008_raw_6020001.MuDst.root",
-			 const char* jetfile   = "st_physics_10143008_raw_6020001.jets.root",
-			 const char* skimfile  = "st_physics_10143008_raw_6020001.skim.root",
+			 const char* mudstfile = "/star/data60/reco/production2009_200Gev_Single/FullField/P10ic/2009/151/10151044/st_physics_adc_10151044_raw_6320004.MuDst.root",
+			 const char* jetfile   = "st_physics_adc_10151044_raw_6320004.jets.root",
+			 const char* skimfile  = "st_physics_adc_10151044_raw_6320004.skim.root",
 			 bool useL2 = false)
 {
   cout << "Read MuDst file:\t" << mudstfile << endl;
