@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_anal.C,v 3.3 2011/01/19 02:41:54 genevb Exp $
+// $Id: bfcread_hist_anal.C,v 3.4 2011/01/24 18:13:48 genevb Exp $
 // $Log: bfcread_hist_anal.C,v $
+// Revision 3.4  2011/01/24 18:13:48  genevb
+// Reference hist file has no TopDirTree
+//
 // Revision 3.3  2011/01/19 02:41:54  genevb
 // Flexible input arrangement for 1 file
 //
@@ -74,6 +77,7 @@ void bfcread_hist_anal(
     const Char_t* temp = refInFile;
     refInFile = MainFile;
     MainFile = temp;
+    strcpy(TopDirTree,"");
   }
 
   cout << "bfcread_hist_anal.C, input hist file = " 
