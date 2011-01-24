@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.74 2011/01/19 02:05:22 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.75 2011/01/24 18:36:28 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.75  2011/01/24 18:36:28  genevb
+// Save hist list to results file even if not comparing
+//
 // Revision 2.74  2011/01/19 02:05:22  genevb
 // Allow plain ROOT files with hists, and individual plot generation from 1 file
 //
@@ -928,7 +931,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
              (StHistUtilRef*) (m_refCuts ? m_refCuts->FindObject(oname) : 0);
             double result = 0;
 
-            // default to Kolm. for 1-d hists, Chi2 for others
+            // default to Kolm. max distance, no cut
             int mode = ( huR ? huR->Mode : 2 );
             double cut = ( huR ? huR->Cut : 0);
 
@@ -979,11 +982,17 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
             LOG_INFO << Form("  -   %d. Reference Test (mode=%d) %s",
                         histReadCounter,mode,score.Data()) << endm;
-            if (!R_ostr) R_ostr = new ofstream(m_refResultsFile);
-            (*R_ostr) << m_CurPage << " " << curPad << " " << oName << " " << result << endl;
+            if (strlen(m_refResultsFile)) {
+              if (!R_ostr) R_ostr = new ofstream(m_refResultsFile);
+              (*R_ostr) << m_CurPage << " " << curPad << " " << oName << " " << result << endl;
+            }
           } else {
             if (m_OutIndividuals.Length())
               gPad->Print(Form("%s%s",oName.Data(),m_OutIndividuals.Data()));
+            if (strlen(m_refResultsFile)) {
+              if (!R_ostr) R_ostr = new ofstream(m_refResultsFile);
+              (*R_ostr) << m_CurPage << " " << curPad << " " << oName << " 1.0" << endl;
+            }
           }
 
         }
