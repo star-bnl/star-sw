@@ -3,6 +3,8 @@
 #ifndef G_GEOMETRY_BASE_H
 #define G_GEOMETRY_BASE_H
 
+#include <string>
+
 #include "Medium.hh"
 
 namespace Garfield {
@@ -11,7 +13,7 @@ class GeometryBase {
 
   public:
     // Constructor
-    GeometryBase() {}
+    GeometryBase() : className("GeometryBase") {}
     virtual ~GeometryBase() {}
 
     virtual bool 
@@ -25,6 +27,10 @@ class GeometryBase {
     virtual bool 
     GetBoundingBox(double& xmin, double& ymin, double& zmin,
                    double& xmax, double& ymax, double& zmax) = 0;
+
+    protected:
+
+      std::string className;
 
 };
   

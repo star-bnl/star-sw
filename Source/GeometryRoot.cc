@@ -14,6 +14,7 @@ GeometryRoot::GeometryRoot() :
   nMaterials(0), 
   debug(false) {
 
+  className = "GeometryRoot";
   materials.clear();
 
 }

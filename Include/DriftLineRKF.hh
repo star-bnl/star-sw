@@ -6,6 +6,9 @@
 
 #include "Sensor.hh"
 #include "ViewDrift.hh"
+#include "Medium.hh"
+#include "GeometryBase.hh"
+
 
 namespace Garfield {
   
@@ -17,15 +20,17 @@ namespace Garfield {
     ~DriftLineRKF() {}
 
     void SetSensor(Sensor* s);
-    void SetErrorBounds(const double min, const double max);
-    void SetTimeStep(const double dt);
+    void SetIntegrationAccuracy(double intAct);
+    void SetMaximumStepSize(double maxStep);
 
     void EnablePlotting(ViewDrift* view);
     void DisablePlotting();
 
-    void DriftLine(double x0, double y0, double z0, double t0, double e0, 
-                   double dx = 1., double dy = 0., double dz = 0.,
+    void DriftLine(double x0, double y0, double z0, double t0,  
                    std::string particleType = "e-");
+    
+    void SetMaxSteps(int max){maxSteps = max;};
+
 
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
@@ -35,8 +40,10 @@ namespace Garfield {
     Sensor* sensor;
     Medium* medium;
 
-    double minErr, maxErr;
-    double timeStep;
+    double maxStepSize;
+    double intAccuracy;
+
+    int maxSteps;
 
     bool usePlotting;
     int iLine;
@@ -44,10 +51,21 @@ namespace Garfield {
 
     bool debug;
 
-    bool EquationOfMotion(const double x, const double y, const double z,
-                          const double vx, const double vy, const double vz,
-                          const double t, double& kx, double& ky, double& kz, 
-                          const double qom);
+    //Used to drift a particle to the edge of a boundary.
+    void EndDriftLine();
+    //Used to drift a particle to a wire
+    void DriftToWire(double x0, double y0, double z0);
+
+    struct step{
+      //position (initial and final)
+      double xi,xf;
+      double yi,yf;
+      double zi,zf;
+      //time (initial and final)
+      double ti,tf;
+      std::string status;
+    };
+    std::vector<step> path;
 
   };
 

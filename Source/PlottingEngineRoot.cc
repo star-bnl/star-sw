@@ -45,6 +45,8 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetCanvasBorderMode(0);
   garfieldStyle->SetCanvasColor(0);
   garfieldStyle->SetCanvasPreferGL(kTRUE);
+  garfieldStyle->SetCanvasDefH(600);
+  garfieldStyle->SetCanvasDefW(600);
   garfieldStyle->SetPadBorderMode(0);
   garfieldStyle->SetPadColor(0);
   garfieldStyle->SetFrameBorderMode(0);

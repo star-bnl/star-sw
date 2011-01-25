@@ -7,6 +7,8 @@ GeometrySimple::GeometrySimple() :
   nMedia(0), nSolids(0),
   hasBoundingBox(false),
   debug(false) {
+  
+  className = "GeometrySimple";
 
   media.clear();
   solids.clear();
@@ -18,13 +20,13 @@ GeometrySimple::AddSolid(Solid* s, Medium* m) {
 
   // Make sure the solid and the medium are defined.
   if (s == 0) {
-    std::cerr << "GeometrySimple::AddSolid:\n";
+    std::cerr << className << "::AddSolid:\n";
     std::cerr << "    Solid pointer is null.\n";
     return;
   }
 
   if (m == 0) {
-    std::cerr << "GeometrySimple::AddSolid:\n";
+    std::cerr << className << "::AddSolid:\n";
     std::cerr << "    Medium pointer is null.\n";
     return;
   }
@@ -51,7 +53,7 @@ GeometrySimple::AddSolid(Solid* s, Medium* m) {
   double xmin, ymin, zmin;
   double xmax, ymax, zmax;
   if (!s->GetBoundingBox(xmin, ymin, zmin, xmax, ymax, zmax)) {
-    std::cerr << "GeometrySimple::AddSolid:\n";
+    std::cerr << className << "::AddSolid:\n";
     std::cerr << "    Solid has no bounding box.\n";
     return;
   }
@@ -111,7 +113,7 @@ bool
 GeometrySimple::GetSolid(const int i, Solid*& s) const {
 
   if (i < 0 || i >= nSolids) {
-    std::cerr << "GeometrySimple::GetSolid:\n";
+    std::cerr << className << "::GetSolid:\n";
     std::cerr << "    Requested solid " << i << " does not exist.\n";
     return false;
   }
@@ -125,7 +127,7 @@ bool
 GeometrySimple::GetMedium(const int i, Medium*& m) const {
 
   if (i < 0 || i >= nMedia) {
-    std::cerr << "GeometrySimple::GetMedium:\n";
+    std::cerr << className << "::GetMedium:\n";
     std::cerr << "    Requested medium " << i << " does not exist.\n";
     return false;
   }
@@ -145,6 +147,31 @@ GeometrySimple::Clear() {
 
 }
 
+void
+GeometrySimple::PrintSolids() {
+
+  std::cout << className << "::PrintSolids:\n";
+  if (nSolids == 1) {
+    std::cout << "    1 solid\n";
+  } else {
+    std::cout << "    " << nSolids << " solids\n";
+  }
+  if (nSolids <= 0) return;
+  std::cout << "      Index      Type    Medium\n";
+  for (int i = 0; i < nSolids; ++i) {
+    std::cout << "        " << i << "         ";
+    if (solids[i].solid->IsBox()) {
+      std::cout << "box      ";
+    } else if (solids[i].solid->IsTube()) {
+      std::cout << "tube     ";
+    } else {
+      std::cout << "unknown  ";
+    }
+    std::cout << media[solids[i].medium].medium->GetName() << "\n";
+  }
+  
+}
+  
 bool
 GeometrySimple::IsInside(const double x, const double y, const double z) {
 
@@ -163,7 +190,7 @@ GeometrySimple::IsInBoundingBox(
 
   if (!hasBoundingBox) {
     if (debug) {
-      std::cerr << "GeometrySimple::IsInBoundingBox:\n";
+      std::cerr << className << "::IsInBoundingBox:\n";
       std::cerr << "    Bounding box is not defined.\n";
     }
     return true;

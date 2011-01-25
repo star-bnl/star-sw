@@ -8,30 +8,16 @@
 namespace Garfield {
 
 DriftLineRKF::DriftLineRKF() :
-  sensor(0), medium(0),
-  minErr(0.), maxErr(0.01), timeStep(0.1),
-  usePlotting(false), viewer(0), debug(false) {
-   
-}
-
-void 
-DriftLineRKF::SetErrorBounds(const double min, const double max) {
-
-  if (min > max) {
-    std::cerr << "DriftLineRKF::SetErrorBounds:\n";
-    std::cerr << "    Min error bound greater then max error bound.\n";
-    std::cerr << "    Flipping values.\n";
-    maxErr = min;
-    minErr = max;
-  } else if (min == max) {
-    std::cerr << "DriftLineRKF::SetErrorBounds:\n";
-    std::cerr << "    Min error bound equals max error bound.\n";
-  } else {
-    minErr = min;
-    maxErr = max;
-  }
+  sensor(0), medium(0), 
+  maxStepSize(1.e8), intAccuracy(1.e-8), 
+  maxSteps(1000), 
+  usePlotting(false), viewer(0), 
+  debug(false) {
+  
+  path.clear();
 
 }
+
 
 void 
 DriftLineRKF::SetSensor(Sensor* s) {
@@ -43,19 +29,6 @@ DriftLineRKF::SetSensor(Sensor* s) {
   }
 
   sensor = s;
-
-}
-
-void
-DriftLineRKF::SetTimeStep(const double dt) {
-
-  if (dt <= 0.) {
-    std::cerr << "DriftLineRKF::SetTimeStep:\n";
-    std::cerr << "    Time step must be greater than zero.\n";
-    return;
-  }
-
-  timeStep = dt;
 
 }
 
@@ -81,50 +54,13 @@ DriftLineRKF::DisablePlotting() {
 
 }
 
-bool
-DriftLineRKF::EquationOfMotion(
-      const double x0, const double y0, const double z0, 
-      const double vx, const double vy, const double vz, const double t, 
-      double& kx, double& ky, double& kz, const double qom) {
-
-  const double x = x0 + t * vx;
-  const double y = y0 + t * vy;
-  const double z = z0 + t * vz;
-    
-  double ex, ey, ez; 
-  double bx, by, bz;
-  int status;
-
-  sensor->MagneticField(x, y, z, bx, by, bz, status);
-  bx *= Tesla2Internal; by *= Tesla2Internal; bz *= Tesla2Internal;
-  sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
-
-  if (debug) {
-    std::cout << "    B-field:\t(" << bx << ", " << by << ", " << bz << ")\n";
-    std::cout << "    E-field:\t(" << ex << ", " << ey << ", " << ez << ")\n";
-  }
-
-  kx = qom * ((vy * bz - vz * by) + ex);
-  ky = qom * ((vz * bx - vx * bz) + ey);
-  kz = qom * ((vx * by - vy * bx) + ez);
-
-  if (status != 0) {
-    if (debug) {
-      std::cerr << "DriftLineRKF::EquationOfMotion:" << std::endl;
-      std::cerr << "    Error receiving field.\n";
-      std::cerr << "    Status:\t" << status << "\n";
-    }
-    return false;
-  }
-
-  return true;
-
-}
-
 void 
 DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
-                        double e0, double dx, double dy, double dz,
                         std::string particleType) {
+
+  if (usePlotting) {
+    viewer->NewElectronDriftLine(1, iLine, x0, y0, z0);
+  }
 
   // Check if the sensor is defined
   if (sensor == 0) {
@@ -132,261 +68,383 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
     std::cerr << "    Sensor is not defined.\n";
     return;
   }
+  
+  // Check to make sure initial position is in a 
+  // valid location ie. non zero field, 
+  // in a drift medium.
+  
+  // Get field values
+  double ex, ey, ez, eTot; 
+  double bx, by, bz, bTot;
+  int status;
 
-  // Dependent and independent variables of ODE
-  double r[3] = {x0, y0, z0};
-  double v[3] = {dx, dy, dz};
-  double vAdd[3] = {0., 0., 0.};
-  double t = t0;
-
-  // Normalize the direction
-  double d = sqrt(dx * dx + dy * dy + dz * dz);
-  if (d <= Small) {
+  sensor->MagneticField(x0, y0, z0, bx, by, bz, status);
+  sensor->ElectricField(x0, y0, z0, ex, ey, ez, medium, status);
+  if (status != 0) {
     std::cerr << "DriftLineRKF::DriftLine:\n";
-    std::cerr << "    Initial direction is zero.\n";
+    std::cerr << "    No valid field at initial position.\n";
     return;
   }
-  v[0] /= d; v[1] /= d; v[2] /= d;
 
-  double qom;
-  // Calculate charge-mass ratio and velocity
-  if (particleType.compare("e-") == 0) {
-    qom = -SpeedOfLight * SpeedOfLight / ElectronMass;
-    d = SpeedOfLight * sqrt(2. * e0 / ElectronMass);
-  } else if (particleType.compare("e+") == 0){
-    qom =  SpeedOfLight * SpeedOfLight / ElectronMass;
-    d = SpeedOfLight * sqrt(2. * e0 / ElectronMass);
-  } else if (particleType.compare("p+") == 0) {
-    qom =  SpeedOfLight * SpeedOfLight / ProtonMass;
-    d = SpeedOfLight * sqrt(2. * e0 / ProtonMass);
-  } else if (particleType.compare("p-") == 0) {
-    qom = -SpeedOfLight * SpeedOfLight / ProtonMass;
-    d = SpeedOfLight * sqrt(2. * e0 / ProtonMass);
-  } else if (particleType.compare("u+") == 0) {
-    qom =  SpeedOfLight * SpeedOfLight / MuonMass;
-    d = SpeedOfLight * sqrt(2. * e0 / MuonMass);
-  } else if (particleType.compare("u-") == 0) {
-    qom = -SpeedOfLight * SpeedOfLight / MuonMass;
-    d = SpeedOfLight * sqrt(2. * e0 / MuonMass);
-  } else {
+  eTot = sqrt(ex * ex + ey * ey + ez * ez);
+  bTot = sqrt(bx * bx + by * by + bz * bz);
+
+  // Approximation parameters
+  const double c10 = 214. / 891.; 
+  const double c11 =   1. / 33.;
+  const double c12 = 650. / 891.;
+  const double c20 = 533. / 2106.; 
+  const double c22 = 800. / 1053.; 
+  const double c23 =  -1. / 78.;
+
+  const double b10 = 1. / 4.; 
+  const double b20 = -189. / 800.; 
+  const double b21 = 729. / 800.;
+  const double b30 = 214. / 891.; 
+  const double b31 = 1. / 33.; 
+  const double b32 = 650./891.;
+
+  // Current position
+  double r[3] = {x0, y0, z0};
+  // Estimate for next step
+  double r1[3] = {0., 0., 0.};
+  // Initial velocity
+  double v0[3] = {0., 0., 0.};
+  // Velocities at mid-points
+  double v1[3] = {0., 0., 0.};
+  double v2[3] = {0., 0., 0.};
+  double v3[3] = {0., 0., 0.};
+  // Position where particle has crossed the trap radius of a wire
+  double rc[3] = {0., 0., 0.}; 
+
+  //final velocity estimates
+  double phi1[3], phi2[3];
+
+  // Initialize particle velocity
+  // Add if clause for electron/hole/ion.
+  if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, v0[0], v0[1], v0[2])) {
     std::cerr << "DriftLineRKF::DriftLine:\n";
-    std::cerr << "    Error setting charge to mass ratio.\n";
-    std::cerr << "    Unknown particle type. Using electron as default.\n"; 
-    qom = -SpeedOfLight * SpeedOfLight / ElectronMass;
-    d = SpeedOfLight * sqrt(2. * e0 / ElectronMass);
+    std::cerr << "    Failed to retrieve drift velocity.\n";
+    return;
   }
-  v[0] *= d; v[1] *= d; v[2] *= d;
-
-  // RKF coefficients
-  double k1[3], k2[3], k3[3], k4[3], k5[3], k6[3];
+  double vTot = sqrt(v0[0] * v0[0] + v0[1] * v0[1] + v0[2] * v0[2]);
 
   // Time step and previous time step
-  double dt = timeStep;
+  std::cout <<"Electron Velocity (cm/ns): ("<< v0[0] <<", " << v0[1] <<", " << v0[2] <<") = " << vTot << "\n";
+  double dt = intAccuracy / vTot;
   double pdt = 0.;
-  double temp = 0.;
-
-  // 4th order current and previous approx.
-  double prev4th[3] = {v[0], v[1], v[2]};
-  double cur4th[3] = {0., 0., 0.};
-  // 5th order current and previous approx.
-  double prev5th[3] = {v[0], v[1], v[2]};
-  double cur5th[3] = {0., 0., 0.};
-  // Store calculation of error
-  double error;
-
-  if (debug) {
-    std::cout << "DriftLineRKF::DriftLine:" << std::endl;
-    std::cout << "    Initial position:\t(" 
-              << r[0] << ", " << r[1] << ", " << r[2] << ")\n";
-    std::cout << "    Initial velocity:\t(" 
-              << v[0] << ", " << v[1] << ", " <<v[2] << ")\n";
-  }
-
-  if (usePlotting) {
-    viewer->NewElectronDriftLine(1, iLine, r[0], r[1], r[2]);
-  }
- 
+  
+  // Count the number of steps
   int counter = 0;
+
+  // Continue with the next step of drift if true
   bool keepGoing = true;
-  bool accuracyGood = false;
 
-  while (keepGoing) {
-    counter = 0;
-    accuracyGood = false;
-    while (!accuracyGood) {
-      if (debug) getchar();
-      // 0th order calculation
-      EquationOfMotion(r[0], r[1], r[2], v[0], v[1], v[2], 
-                       0., k1[0], k1[1], k1[2], qom);
-      k1[0] *= dt; k1[1] *= dt; k1[2] *= dt;
+  path.clear();
+  while (counter <= maxSteps && keepGoing) {
+    step tempStep;
+    path.push_back(tempStep);
+    path[counter].xi = r[0];
+    path[counter].yi = r[1];
+    path[counter].zi = r[2];
+    if (counter == 0) path[counter].ti = t0;
+    else path[counter].ti = path[counter -1].tf;
 
-      // 1st order calculation
-      vAdd[0] = v[0] + k1[0] / 4.;
-      vAdd[1] = v[1] + k1[1] / 4.;
-      vAdd[2] = v[2] + k1[2] / 4.;
-      EquationOfMotion(r[0], r[1], r[2], vAdd[0], vAdd[1], vAdd[2], 
-                       dt / 4., k2[0], k2[1], k2[2], qom);
-      k2[0] *= dt; k2[1] *= dt; k2[2] *= dt;
-
-      // 2nd order calculation
-      vAdd[0] = v[0] + 3. * k1[0] / 32. + 9. * k2[0] / 32.;
-      vAdd[1] = v[1] + 3. * k1[1] / 32. + 9. * k2[1] / 32.;
-      vAdd[2] = v[2] + 3. * k1[2] / 32. + 9. * k2[2] / 32.;
-      EquationOfMotion(r[0], r[1], r[2], vAdd[0], vAdd[1], vAdd[2], 
-                       3. * dt / 8., 
-                       k3[0], k3[1], k3[2], qom);
-      k3[0] *= dt; k3[1] *= dt; k3[2] *= dt;
-
-      // 3rd order calculation
-      vAdd[0] = v[0] + (1932. * k1[0] - 7200. * k2[0] + 7296. * k3[0]) / 2197.;
-      vAdd[1] = v[1] + (1932. * k1[1] - 7200. * k2[1] + 7296. * k3[1]) / 2197.;
-      vAdd[2] = v[2] + (1932. * k1[2] - 7200. * k2[2] + 7296. * k3[2]) / 2197.;
-      EquationOfMotion(r[0], r[1], r[2], vAdd[0], vAdd[1], vAdd[2],
-                       12. * dt / 13., 
-                       k4[0], k4[1], k4[2], qom);
-      k4[0] *= dt; k4[1] *= dt; k4[2] *= dt;
-
-      // 4th order calculation
-      vAdd[0] = v[0] +  439. * k1[0] / 216. -   8. * k2[0] + 
-                       3680. * k3[0] / 513. - 845. * k4[0] / 4104.;
-      vAdd[1] = v[1] +  439. * k1[1] / 216. -   8. * k2[1] +
-                       3680. * k3[1] / 513. - 845. * k4[1] / 4104.;
-      vAdd[2] = v[2] +  439. * k1[2] / 216. -   8. * k2[2] +
-                       3680. * k3[2] / 513. - 845. * k4[2] / 4104.;
-      EquationOfMotion(r[0], r[1], r[2], vAdd[0], vAdd[1], vAdd[2], 
-                       dt, k5[0], k5[1], k5[2], qom);
-      k5[0] *= dt; k5[1] *= dt; k5[2] *= dt;
-
-      // 5th order calculation
-      vAdd[0] = v[0] - 8. * k1[0] / 27.   +    2. * k2[0] - 
-                    3544. * k3[0] / 2565. + 1859. * k4[0] / 4104. - 
-                      11. * k5[0] / 40.;
-      vAdd[1] = v[1] - 8. * k1[1] / 27.   +    2. * k2[1] - 
-                    3544. * k3[1] / 2565. + 1859. * k4[1] / 4104. - 
-                      11. * k5[1] / 40.;
-      vAdd[2] = v[2] - 8. * k1[2] / 27.   +    2. * k2[2] - 
-                    3544. * k3[2] / 2565. + 1859. * k4[2] / 4104. - 
-                      11. * k5[2] / 40.;
-      EquationOfMotion(r[0], r[1], r[2], vAdd[0], vAdd[1], vAdd[2], 
-                       dt / 2., k6[0], k6[1], k6[2], qom);
-      k6[0] *= dt; k6[1] *= dt; k6[2] *= dt;
-
-      // Calculate 4th and 5th order approximations
-      cur4th[0] = prev4th[0] + 25. * k1[0] / 216. + 1408. * k3[0] / 2565. + 
-                             2197. * k4[0] / 4104. - k5[0] / 5.;
-      cur4th[1] = prev4th[1] + 25. * k1[1] / 216. + 1408. * k3[1] / 2565. + 
-                             2197. * k4[1] / 4104. - k5[1] / 5.;
-      cur4th[2] = prev4th[2] + 25. * k1[2] / 216. + 1408. * k3[2] / 2565. + 
-                             2197. * k4[2] / 4104. - k5[2] / 5.;
-
-      cur5th[0] = prev5th[0] + 16. * k1[0] / 135. + 6656. * k3[0] / 12825. + 
-                            28561. * k4[0] / 56430. -  9. * k5[0] / 50. + 
-                                2. * k6[0] / 55.;
-      cur5th[1] = prev5th[1] + 16. * k1[1] / 135. + 6656. * k3[1] / 12825. + 
-                            28561. * k4[1] / 56430. -  9. * k5[1] / 50. + 
-                                2. * k6[1] / 55.;
-      cur5th[2] = prev5th[2] + 16. * k1[2] / 135. + 6656. * k3[2] / 12825. + 
-                            28561. * k4[2] / 56430. -  9. * k5[2] / 50. + 
-                                2. * k6[2] / 55.;
-
-      // Calculate error
-      error = sqrt(pow(cur4th[0] - cur5th[0], 2) + 
-                   pow(cur4th[1] - cur5th[1], 2) + 
-                   pow(cur4th[2] - cur5th[2], 2));
-      if(debug) {
-        std::cout << "    Iteration " << counter + 1 << "\n";
-        std::cout << "      Time step:\t" << dt <<" ns\n";
-        std::cout << "      4th order estimate: " 
-                  << cur4th[0] << "\t" << cur4th[1] << "\t" 
-                  << cur4th[2] << "\n";
-        std::cout << "      5th order estimate: "
-                  << cur5th[0] << "\t" << cur5th[1] << "\t" 
-                  << cur5th[2] << "\n";
-        std::cout << "      Error:\t" << error <<"\n";
-        std::cout << "      Bounds:\t" << minErr <<" -> " << maxErr <<"\n";
+    // First estimate of new drift velocity
+    r1[0] = r[0] + dt * b10 * v0[0];
+    r1[1] = r[1] + dt * b10 * v0[1];
+    r1[2] = r[2] + dt * b10 * v0[2];
+    sensor->MagneticField(r1[0], r1[1], r1[2], bx, by, bz, status);
+    sensor->ElectricField(r1[0], r1[1], r1[2], ex, ey, ez, medium, status);
+    if (status == 0) {
+      if (sensor->IsWireCrossed(path.back().xi, path.back().yi, path.back().zi, 
+                                r1[0], r1[1], r1[2], rc[0], rc[1], rc[2])) {
+        DriftToWire(rc[0], rc[1], rc[2]);
+        break;
       }
-
-      // Check if estimate is within error bounds
-      if (error == 0.0) {
-        accuracyGood = true;
-        dt *= 2.;
-        if (debug) std::cout << "    Error is 0. Increase time step.\n";
-      } else if (error < minErr) {
-        accuracyGood = true;
-        if (pdt == dt * 2) {
-          temp = (dt + pdt) / 2.;
-          pdt = dt;
-          dt = temp;
-        } else {
-          pdt = dt;
-          dt *= 2.;
-        }
-        if (debug) std::cout << "    Error too small. Increase time step.\n";
-      } else if (error > maxErr) {
-        accuracyGood = false;
-        if (pdt == dt / 2.) {
-          temp = (dt + pdt) / 2.;
-          pdt = dt;
-          dt = temp;
-        } else {
-          pdt = dt;
-          dt /= 2.;
-        }
-        if (debug) std::cout << "    Error too large. Reduce time step.\n";
-      } else {
-        accuracyGood = true;
-        if (debug) std::cout << "    Error within bounds.\n";
-      }
-
-      ++counter;
-      if (counter >= 1000) {
-        accuracyGood = true;
-        keepGoing = false;
+      if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, v1[0], v1[1], v1[2])) {
         std::cerr << "DriftLineRKF::DriftLine:\n";
-        std::cerr << "    Could not find step size suitable "
-                  << " for error bounds.\n";
-        std::cerr << "    Try increasing/decreasing the allowed error.\n"; 
+        std::cerr << "    Failed to retrieve drift velocity.\n";
+        return;
+      }     
+    } else {
+      EndDriftLine();
+      break;
+    }
+    // Second estimate of new drift velocity
+    r1[0] = r[0] + dt * (b20 * v0[0] + b21 * v1[0]);
+    r1[1] = r[1] + dt * (b20 * v0[1] + b21 * v1[1]);
+    r1[2] = r[2] + dt * (b20 * v0[2] + b21 * v1[2]);
+    sensor->MagneticField(r1[0], r1[1], r1[2], bx, by, bz, status);
+    sensor->ElectricField(r1[0], r1[1], r1[2], ex, ey, ez, medium, status);
+    if (status == 0) {
+      if (sensor->IsWireCrossed(path.back().xi, path.back().yi, path.back().zi, 
+                                r1[0], r1[1], r1[2], rc[0], rc[1], rc[2])) {
+        DriftToWire(rc[0], rc[1], rc[2]);
+        break;
+      }
+      if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, v2[0], v2[1], v2[2])) {
+        std::cerr << "DriftLineRKF::DriftLine:\n";
+        std::cerr << "    Failed to retrieve drift velocity.\n";
+        return;
+      }     
+    } else {
+      EndDriftLine();
+      break;
+    }
+   // Third estimate of new drift velocity
+    r1[0] = r[0] + dt * (b30 * v0[0] + b31 * v1[0] + b32 * v2[0]);
+    r1[1] = r[1] + dt * (b30 * v0[1] + b31 * v1[1] + b32 * v2[1]);
+    r1[2] = r[2] + dt * (b30 * v0[2] + b31 * v1[2] + b32 * v2[2]);   
+    sensor->MagneticField(r1[0],r1[1],r1[2],bx, by, bz, status);
+    sensor->ElectricField(r1[0],r1[1],r1[2],ex, ey, ez, medium, status);
+    if (status == 0) {
+      if (sensor->IsWireCrossed(path.back().xi, path.back().yi, path.back().zi, 
+                                r1[0], r1[1], r1[2], rc[0], rc[1], rc[2])) {
+        DriftToWire(rc[0], rc[1], rc[2]);
+        break;
+      }
+      if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, v3[0], v3[1], v3[2])) {
+        std::cerr << "DriftLineRKF::DriftLine:\n";
+        std::cerr << "    Failed to retrieve drift velocity.\n";
+        return;
+      }     
+    } else {
+      EndDriftLine();
+      break;
+    }
+    // Calculate estimates of velocity over step
+    phi1[0] = c10 * v0[0] + c11 * v1[0] + c12 * v2[0];
+    phi1[1] = c10 * v0[1] + c11 * v1[1] + c12 * v2[1];
+    phi1[2] = c10 * v0[2] + c11 * v1[2] + c12 * v2[2];
+ 
+    phi2[0] = c20 * v0[0] + c22 * v2[0] + c23 * v3[0];
+    phi2[1] = c20 * v0[1] + c22 * v2[1] + c23 * v3[1];
+    phi2[2] = c20 * v0[2] + c22 * v2[2] + c23 * v3[2];
+
+    // Check step length is valid
+    double stepLength = sqrt(phi1[0] * phi1[0] + phi1[1] * phi1[1] + phi1[2] * phi1[2]);
+    if (stepLength <= 0.0){
+      std::cerr << "DriftLineRKF::DriftLine::\n\t" 
+                << "Step length zero. Abandoning drift.\n";
+      keepGoing = false;
+    } else if (dt * stepLength > maxStepSize) {
+      if (debug) {
+        std::cerr << "DriftLineRKF::DriftLine::\n\t" 
+                  << "Step length too long. Reducing time step.\n";
+      }
+      dt = 0.5 * maxStepSize / stepLength;
+    } else {
+      if (debug) {
+        std::cout << "DriftLineRKF::DriftLine::\n\t" 
+                  << "Step good.\n";
+      }
+    }
+    pdt = dt;
+    // Update position
+    r[0] += dt * phi1[0];
+    r[1] += dt * phi1[1];
+    r[2] += dt * phi1[2];
+
+    path[counter].xf = r[0];
+    path[counter].yf = r[1];
+    path[counter].zf = r[2];
+    path[counter].tf = path[counter].ti + dt;
+ 
+    sensor->ElectricField(r[0], r[1], r[2], ex, ey, ez, medium, status);
+    if (status != 0) {
+      if (debug) std::cout << "Outside bounds!\n";
+      EndDriftLine();
+      break;
+    }
+    /*if(sensor->IsTrapped(x0,y0)){
+      if (debug) std::cout<<"\tElectron trapped by wire.\n";
+      keepGoing = false;
+      }*/
+
+    // Adjust step size depending on accuracy
+    if (phi1[0] != phi2[0] || phi1[1] != phi2[1] || phi1[2] != phi2[2]) {
+      if (debug) {
+        std::cout << "DriftLineRKF::DriftLine:\n\t" 
+                   << "Adapting step size.\n";
+      }
+      dt = sqrt(dt * intAccuracy / 
+                (fabs(phi1[0] - phi2[0]) + fabs(phi1[1] - phi2[1]) + fabs(phi1[2] - phi2[2])));
+    } else {
+      if (debug) {
+        std::cout << "DriftLineRKF::DriftLine:\n\t" 
+                  << "Increasing step size.\n";
+      }
+      dt *= 2.;
+    }
+    // Make sure that dt is different from zero; 
+    // this should always be ok.
+    if (dt <= 0.) {
+      std::cerr << "DriftLineRKF::DriftLine:\n";
+      std::cerr << "    Step size is zero (program bug).\n";
+      std::cerr << "    The calculation is abandoned.\n";
+      return;
+    }
+    // Skipped something about initial step sizes and previous step size
+
+    // Prevent step size growing to fast
+    if (dt > 10. * pdt) {
+      dt = 10. * pdt;
+    }
+
+    // Stop in case dt tends to become too small.
+    if (dt * (fabs(phi1[0]) + fabs(phi1[1]) + fabs(phi1[2])) < intAccuracy) {
+      if (debug) {
+        std::cerr << "DriftLineRKF::DriftLine:\n";
+        std::cerr << "    Step size has become smaller than int. accuracy.\n";
+        std::cerr << "    The calculation is abandoned.\n";
         return;
       }
     }
 
-    // Update the velocities and coordinates   
-    v[0] = cur5th[0];
-    v[1] = cur5th[1];
-    v[2] = cur5th[2];
-	    
-    r[0] += v[0] * dt;
-    r[1] += v[1] * dt;
-    r[2] += v[2] * dt;
-
-    t += dt;
+    // Update velocity
+    v0[0] = v3[0];
+    v0[1] = v3[1];
+    v0[2] = v3[2];
     
-    if (debug) {
-      std::cout << "    New velocity:\t("
-                << v[0] << ", " << v[1] << ", " << v[2] << ") = "
-                << sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]) << "\n"; 
-      std::cout << "    New position:\t("
-                << r[0] << ", " << r[1] <<", " << r[2] << ")\n";
-    }
+    std::cout << counter << ": " << sqrt(v0[0] * v0[0] + v0[1] * v0[1] + v0[2] * v0[2]) * 1.e3 << "\n";
 
-    // Make sure the new point is inside the geometry
-    if (!sensor->IsInArea(r[0], r[1], r[2])) { 
-      if (debug) std::cout << "    Outside bounds!\n";
+    if (keepGoing && counter <= maxSteps) {
+      path[counter].status = "alive";
+    } else if (counter > maxSteps) {
+       path[counter].status = "maxStep";
+    } else {
+       path[counter].status = "Abandoned";
+    }
+    // Increase counter (default counter max = 1000)
+    counter++;
+  }
+  // If the user specifies output step history
+  std::cout << "Step #\t\ttime\t\tXi\t\tYi\t\tZi\t\tdt\t\tStatus\n";
+  for(int i = 0; i < path.size() ; i++){
+    std::cout.precision(8);
+    std::cout<<i<<"\t\t"<<path[i].ti<<"\t\t"
+	     <<path[i].xi<<"\t\t"
+	     <<path[i].yi<<"\t\t"
+	     <<path[i].zi<<"\t\t"
+	     <<fabs(path[i].tf - path[i].ti)<<"\t\t"
+	     <<path[i].status <<"\n";
+  }
+  std::cout<<path.size()-1<<"\t\t"<<path.back().tf 
+           <<"\t\t" <<path.back().xf 
+           <<"\t\t"<<path.back().yf
+           <<"\t\t"<<path.back().zf
+           <<"\t\t---\t\tEND\n"; 
+  for (int i = 0; i < path.size(); i++){
+    if (usePlotting) {
+      viewer->AddDriftLinePoint(iLine, path[i].xi, path[i].yi, path[i].zi);
+    }
+  }
+  if (usePlotting) {
+      viewer->AddDriftLinePoint(iLine,path.back().xf,
+				path.back().yf,
+				path.back().zf);
+  }
+
+}
+  
+void
+DriftLineRKF::DriftToWire(double x0, double y0, double z0) {
+
+  std::cout<<"Particle trapped by wire at: ";
+  std::cout<<x0 <<", " <<y0 <<", " <<z0<<" = "<<sqrt(x0*x0 + y0*y0 + z0*z0) <<"\n";
+  
+}
+
+void 
+DriftLineRKF::EndDriftLine() {
+
+
+  double x,y,z;
+  double vx,vy,vz;
+  double bx,by,bz;
+  double ex,ey,ez;
+  double lastStepLength;
+  int status;
+
+  //these will store the original position for use later in time calculation
+  double xp = path.back().xi;
+  double yp = path.back().yi;
+  double zp = path.back().zi;
+  double x0 = xp, y0 = yp, z0 = zp;
+  double x1 = xp, y1 = yp, z1 = zp;
+  
+  sensor->MagneticField(x0, y0, z0, bx, by, bz, status);
+  sensor->ElectricField(x0, y0, z0, ex, ey, ez, medium, status);
+  if (status != 0) {
+    std::cerr << "DriftLineRKF::EndDriftLine:\n";
+    std::cerr << "    No valid field at initial point.\n";
+    std::cerr << "    Program bug!\n";
+    return;
+  }
+  if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz)) {
+    std::cerr << "DriftLineRKF::EndDriftLine:\n";
+    std::cerr << "    Failed to retrieve drift velocity.\n";
+    return;
+  }
+
+  double speed = sqrt(vx * vx + vy * vy + vz * vz);
+
+  // x1, y1, z1 to store beginning of previous step for now.
+  if (path.size() > 1) {
+    x1 = path[path.size() - 2].xi;
+    y1 = path[path.size() - 2].yi;
+    z1 = path[path.size() - 2].zi;
+  }
+  // TODO: Do something for single point case.
+ 
+  lastStepLength = sqrt(pow(fabs(x1-x0),2) +
+			pow(fabs(y1-y0),2) +
+			pow(fabs(z1-z0),2));
+ 
+  x1 = x0;
+  y1 = y0;
+  z1 = z0;
+
+  // Add steps sizes equal to the last step size until you leave the volume
+  // steps added in same direction as previous step
+  bool keepGoing = true;
+  while (keepGoing) {
+    sensor->ElectricField(x1, y1, z1, ex, ey, ez, medium, status);
+    // TODO: Check also if inside the drift area.
+    if (status != 0) {
       keepGoing = false;
       break;
     }
-   
-    if (usePlotting) {
-      viewer->AddDriftLinePoint(iLine, r[0], r[1], r[2]);
-    }
-
-    prev4th[0] = cur4th[0]; prev5th[0] = cur5th[0];
-    prev4th[1] = cur4th[1]; prev5th[1] = cur5th[1];
-    prev4th[2] = cur4th[2]; prev5th[2] = cur5th[2];
-
+    x1 += lastStepLength * vx / speed;
+    y1 += lastStepLength * vy / speed;
+    z1 += lastStepLength * vz / speed;
   }
-    
-}
+
+  for (int i = 0; i < 100; i++) {
+    x = x0 + 0.5 * (x1 - x0);
+    y = y0 + 0.5 * (y1 - y0);
+    z = z0 + 0.5 * (z1 - z0);
+    sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
+    if (status == 0) {
+      x0 = x;
+      y0 = y;
+      z0 = z;
+    }  else {
+      x1 = x;
+      y1 = y;
+      z1 = z;
+    }  
+  }
   
+  // Add final step to path
+  path.back().xf = x;
+  path.back().yf = y;
+  path.back().zf = z;
+  path.back().tf = path.back().ti + fabs(sqrt(pow((x - xp), 2) + pow((y - yp), 2) + pow((z - zp),2))) / speed; 
+  path.back().status = "left volume";
+
+}
+
 }
 

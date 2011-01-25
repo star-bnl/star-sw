@@ -61,7 +61,7 @@ SolidBox::SolidBox(const double cx, const double cy, const double cz,
 
 bool 
 SolidBox::IsInside(const double x, const double y, const double z) {
-  
+ 
   // Transform the point to local coordinates
   const double dx = x - cX;
   const double dy = y - cY;
@@ -69,7 +69,7 @@ SolidBox::IsInside(const double x, const double y, const double z) {
   const double u =  cPhi * cTheta * dx + sPhi * cTheta * dy - sTheta * dz;
   const double v = -sPhi          * dx + cPhi *          dy;
   const double w =  cPhi * sTheta * dx + sPhi * sTheta * dy + cTheta * dz;
-  
+ 
   // See whether the point is inside
   if (fabs(u) > lX || fabs(v) > lY || fabs(w) > lZ) {
     if (debug) {

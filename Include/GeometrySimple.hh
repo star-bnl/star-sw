@@ -32,6 +32,7 @@ class GeometrySimple : public GeometryBase {
     bool GetMedium(const int i, Medium*& m) const;
     // Reset the geometry
     void Clear();
+    void PrintSolids();
 
     bool IsInside(const double x, const double y, const double z);
     // Bounding box (envelope of geometry)
