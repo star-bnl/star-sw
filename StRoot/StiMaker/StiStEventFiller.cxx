@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.91 2010/09/01 21:26:15 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.92 2011/01/26 20:11:54 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.92  2011/01/26 20:11:54  perev
+ * track id into StiPull
+ *
  * Revision 2.91  2010/09/01 21:26:15  fisyak
  * switch from direct access to public members to methods
  *
@@ -1254,7 +1257,7 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
   track->getAllPointCount(dets,kMaxDetectorId-1);
   StiPullTrk aux;
   aux.mVertex = (unsigned char)track->isPrimary();
-  aux.mTrackNumber=mTrackNumber;
+  aux.mTrackNumber=track->getId();
   aux.nAllHits = dets[0][2];
   aux.nTpcHits = dets[kTpcId][2];
   aux.nSvtHits = dets[kSvtId][2];
@@ -1423,7 +1426,7 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
   aux.mNormalRefAngle = alfa;
   aux.mHardwarePosition=0;
   aux.mDetector=0;
-  aux.mTrackNumber=mTrackNumber;
+  aux.mTrackNumber=track->getId();
   aux.nAllHits  = dets[0][2];
   aux.nTpcHits  = dets[kTpcId][2];
   aux.nSvtHits  = dets[kSvtId][2];
