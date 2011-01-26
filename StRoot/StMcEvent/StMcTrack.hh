@@ -6,11 +6,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.24 2007/10/16 19:49:20 fisyak Exp $
+ * $Id: StMcTrack.hh,v 2.25 2011/01/26 19:46:24 perev Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.hh,v $
+ * Revision 2.25  2011/01/26 19:46:24  perev
+ * FPD ==> STAR Soft
+ *
  * Revision 2.24  2007/10/16 19:49:20  fisyak
  * rename Hft => Pxl, remove Hpd, Igt and Fst
  *
@@ -182,6 +185,8 @@ public:
   const StPtrVecMcCalorimeterHit& esmduHits() const { return mEsmduHits; }
   StPtrVecMcCalorimeterHit& esmdvHits() { return mEsmdvHits; }
   const StPtrVecMcCalorimeterHit& esmdvHits() const { return mEsmdvHits; }
+  StPtrVecMcCalorimeterHit& fpdHits() { return mFpdHits; }
+  const StPtrVecMcCalorimeterHit& fpdHits() const { return mFpdHits; }
   StPtrVecMcPixelHit& pixelHits() { return mPixelHits; }
   const StPtrVecMcPixelHit& pixelHits() const { return mPixelHits; }
   StPtrVecMcIstHit& istHits() { return mIstHits; }
@@ -245,6 +250,7 @@ public:
     void addEprsHit(StMcCalorimeterHit*); 
     void addEsmduHit(StMcCalorimeterHit*); 
     void addEsmdvHit(StMcCalorimeterHit*); 
+    void addFpdHit(StMcCalorimeterHit*);
     void addPixelHit(StMcPixelHit*); 
     void addIstHit(StMcIstHit*);
     void addFgtHit(StMcFgtHit*); 
@@ -291,6 +297,7 @@ protected:
     StPtrVecMcCalorimeterHit mEprsHits; 
     StPtrVecMcCalorimeterHit mEsmduHits; 
     StPtrVecMcCalorimeterHit mEsmdvHits; 
+    StPtrVecMcCalorimeterHit mFpdHits; 
     StPtrVecMcPixelHit       mPixelHits; 
     StPtrVecMcIstHit         mIstHits;
     StPtrVecMcFgtHit         mFgtHits; 

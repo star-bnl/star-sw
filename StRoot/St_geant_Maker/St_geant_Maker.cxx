@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.135 2010/08/10 16:35:33 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.136 2011/01/26 19:42:37 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.136  2011/01/26 19:42:37  perev
+// FPD ==> STAR Soft
+//
 // Revision 1.135  2010/08/10 16:35:33  fisyak
 // Add initialization of starsim parameter tables after opening zebra-file
 //
@@ -518,6 +521,7 @@
 #include "g2t/St_g2t_vpd_Module.h"
 #include "g2t/St_g2t_pmd_Module.h"
 #include "g2t/St_g2t_bbc_Module.h"
+#include "g2t/St_g2t_fpd_Module.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StarCallf77.h" 
 #include "StMagF.h"
@@ -1229,7 +1233,18 @@ Int_t St_geant_Maker::Make()
       iRes = g2t_bbc(g2t_track,g2t_bbc_hit); if (Debug() > 1) g2t_bbc_hit->Print(0,10);
       //           ==============================
     }
-  
+
+  nhit1 = nhit2 = 0;
+  geant3->Gfnhit("FPDH","FLGR",nhit1);
+  geant3->Gfnhit("FPDH","FLXF",nhit2);
+  nhits = nhit1+nhit2;
+  if (nhits>0) {
+    St_g2t_emc_hit* g2t_fpd_hit = new St_g2t_emc_hit("g2t_fpd_hit",nhits);
+    m_DataSet->Add(g2t_fpd_hit);
+    iRes = g2t_fpd(g2t_track,g2t_fpd_hit); if (Debug() > 1) g2t_fpd_hit->Print(0,10);
+    //           ==============================
+  }
+
   //------------------------all bloody detectors done--------------------//
 #if 0
   Char_t *g2t = "g2t_";
