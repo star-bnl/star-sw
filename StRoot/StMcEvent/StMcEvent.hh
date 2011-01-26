@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.27 2010/06/23 20:18:30 jwebb Exp $
+ * $Id: StMcEvent.hh,v 2.28 2011/01/26 19:46:24 perev Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.28  2011/01/26 19:46:24  perev
+ * FPD ==> STAR Soft
+ *
  * Revision 2.27  2010/06/23 20:18:30  jwebb
  * Fixed typo.  Bug had eprsCollection returning btow hits if called using
  * the const version.
@@ -137,6 +140,7 @@ class StMcBTofHitCollection;
 class StMcPixelHitCollection;
 class StMcIstHitCollection;
 class StMcFgtHitCollection;
+class StMcFpdHitCollection;
 class StMcVertex;
 class g2t_event_st;
 
@@ -225,6 +229,9 @@ class StMcEvent : public TDataSet {
   const StMcEmcHitCollection*  esmduHitCollection() const {return emcHitCollection("EsmduHits");}
   StMcEmcHitCollection*        esmdvHitCollection()       {return emcHitCollection("EsmdvHits");}
   const StMcEmcHitCollection*  esmdvHitCollection() const {return emcHitCollection("EsmdvHits");}
+
+  StMcEmcHitCollection*          fpdHitCollection()       { return emcHitCollection("FpdHits"); }
+  const StMcEmcHitCollection*    fpdHitCollection() const { return emcHitCollection("FpdHits"); }
   
   StMcPixelHitCollection*      pixelHitCollection()       {return mPixelHits;}				
   const StMcPixelHitCollection*pixelHitCollection() const {return mPixelHits;}		

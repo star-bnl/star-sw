@@ -9,11 +9,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.26 2007/10/16 19:49:20 fisyak Exp $
+ * $Id: StMcTrack.cc,v 2.27 2011/01/26 19:46:24 perev Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.cc,v $
+ * Revision 2.27  2011/01/26 19:46:24  perev
+ * FPD ==> STAR Soft
+ *
  * Revision 2.26  2007/10/16 19:49:20  fisyak
  * rename Hft => Pxl, remove Hpd, Igt and Fst
  *
@@ -62,8 +65,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.26 2007/10/16 19:49:20 fisyak Exp $
+ * $Id: StMcTrack.cc,v 2.27 2011/01/26 19:46:24 perev Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.27  2011/01/26 19:46:24  perev
+ * FPD ==> STAR Soft
+ *
  * Revision 2.26  2007/10/16 19:49:20  fisyak
  * rename Hft => Pxl, remove Hpd, Igt and Fst
  *
@@ -180,7 +186,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.26 2007/10/16 19:49:20 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.27 2011/01/26 19:46:24 perev Exp $";
 
 ClassImp(StMcTrack);
 
@@ -514,6 +520,11 @@ void StMcTrack::addEsmduHit(StMcCalorimeterHit* hit)
 void StMcTrack::addEsmdvHit(StMcCalorimeterHit* hit)
 {
   mEsmdvHits.push_back(hit);
+}
+
+void StMcTrack::addFpdHit(StMcCalorimeterHit* hit)
+{
+  mFpdHits.push_back(hit);
 }
 
 void StMcTrack::addPixelHit(StMcPixelHit* hit)

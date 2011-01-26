@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.22 2010/07/21 17:31:23 perev Exp $
+ * $Id: StMcEventMaker.h,v 1.23 2011/01/26 19:48:35 perev Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.23  2011/01/26 19:48:35  perev
+ * FPD ==> STAR Soft
+ *
  * Revision 1.22  2010/07/21 17:31:23  perev
  * useBtof cancelled useTof is ON instead (F.Geurt)
  *
@@ -106,7 +109,7 @@ public:
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.22 2010/07/21 17:31:23 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.23 2011/01/26 19:48:35 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -124,6 +127,7 @@ public:
     Bool_t  doUseTofp;             //!
     Bool_t  doUseTof;              //!
     Bool_t  doUseEemc;             //!
+    Bool_t  doUseFpd;		   //!
     Bool_t  doUsePixel;            //!
     Bool_t  doUseIst;              //!
     Bool_t  doUseFgt;              //!
@@ -133,6 +137,7 @@ protected:
     void   fillBemc(St_g2t_emc_hit*);
     void   fillBsmd(St_g2t_emc_hit*);
     void   fillEemc(St_g2t_emc_hit* g2t_tile,St_g2t_emc_hit* g2t_smd);
+    void   fillFpd(St_g2t_emc_hit*);
 
 
 private:

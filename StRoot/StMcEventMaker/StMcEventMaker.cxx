@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.69 2010/07/21 17:31:23 perev Exp $
+ * $Id: StMcEventMaker.cxx,v 1.70 2011/01/26 19:48:35 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.70  2011/01/26 19:48:35  perev
+ * FPD ==> STAR Soft
+ *
  * Revision 1.69  2010/07/21 17:31:23  perev
  * useBtof cancelled useTof is ON instead (F.Geurt)
  *
@@ -301,7 +304,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.69 2010/07/21 17:31:23 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.70 2011/01/26 19:48:35 perev Exp $";
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
@@ -325,6 +328,7 @@ ClassImp(StMcEventMaker)
 //_____________________________________________________________________________
 
     
+//_____________________________________________________________________________
 StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     StMaker(name,title),
     doPrintEventInfo (kFALSE),  
@@ -341,6 +345,7 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doUseTofp        (kFALSE),
     doUseTof         (kTRUE),
     doUseEemc        (kTRUE),
+    doUseFpd         (kTRUE),
     doUsePixel       (kTRUE),
     doUseIst         (kTRUE),
     doUseFgt         (kTRUE),
@@ -353,8 +358,6 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
 
 }
 //_____________________________________________________________________________
-
-
 StMcEventMaker::~StMcEventMaker()
 {
     // StMcEventMaker - destructor
@@ -366,7 +369,6 @@ StMcEventMaker::~StMcEventMaker()
 
 
 //_____________________________________________________________________________
-
 void StMcEventMaker::Clear(const char*)
 {
     if (doPrintMemoryInfo) StMemoryInfo::instance()->snapshot();    
@@ -384,8 +386,6 @@ void StMcEventMaker::Clear(const char*)
 
 
 //_____________________________________________________________________________
-
-
 Int_t StMcEventMaker::Finish()
 {
     // StMcEventMaker - Finish, Draw histograms if SetDraw true
@@ -398,14 +398,12 @@ Int_t StMcEventMaker::Finish()
 
 
 //_____________________________________________________________________________
-
 Int_t StMcEventMaker::Init()
 {
     return StMaker::Init();
 }
 
 //_____________________________________________________________________________
-
 Int_t StMcEventMaker::Make()
 {
     // StMcEventMaker - Make; fill StMcEvent objects
@@ -472,6 +470,7 @@ Int_t StMcEventMaker::Make()
     St_g2t_ctf_hit *g2t_tfr_hitTablePointer =  (St_g2t_ctf_hit *) geantDstI("g2t_tfr_hit");
     St_g2t_emc_hit *g2t_eem_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_eem_hit");
     St_g2t_emc_hit *g2t_esm_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_esm_hit");
+    St_g2t_emc_hit *g2t_fpd_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_fpd_hit"); // Added FPD Hits
     St_g2t_pix_hit *g2t_pix_hitTablePointer =  (St_g2t_pix_hit *) geantDstI("g2t_pix_hit");
     St_g2t_ist_hit *g2t_ist_hitTablePointer =  (St_g2t_ist_hit *) geantDstI("g2t_ist_hit");
     St_g2t_fgt_hit *g2t_fgt_hitTablePointer =  (St_g2t_fgt_hit *) geantDstI("g2t_fgt_hit");
@@ -614,6 +613,15 @@ Int_t StMcEventMaker::Make()
 	    esmHitTable = g2t_esm_hitTablePointer->GetTable();
 	else
 	    if (Debug()) cerr << "Table g2t_esm_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+
+	//
+	// FPD Hit Table
+	//
+	g2t_emc_hit_st* fpdHitTable = 0;
+	if (g2t_fpd_hitTablePointer)
+	  fpdHitTable = g2t_fpd_hitTablePointer->GetTable();
+	else
+	  if (Debug()) cout << "Table g2t_fpd_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 
 	//	
 	// Pixel Hit Table
@@ -1207,6 +1215,9 @@ Int_t StMcEventMaker::Make()
 	// EEMC and EPRS Hits, ESMDU & ESMDV Hits
 	if (doUseEemc) fillEemc(g2t_eem_hitTablePointer,g2t_esm_hitTablePointer);
 
+	// FPD Hits
+	if (doUseFpd) fillFpd(g2t_fpd_hitTablePointer);
+
 	ttemp.clear();
 	
 	//_______________________________________________________________
@@ -1239,8 +1250,8 @@ Int_t StMcEventMaker::Make()
 
 }
 
-void
-StMcEventMaker::fillBemc(St_g2t_emc_hit* g2t_emc_hitTablePointer)
+//_____________________________________________________________________________
+void StMcEventMaker::fillBemc(St_g2t_emc_hit* g2t_emc_hitTablePointer)
 {
     if (g2t_emc_hitTablePointer == 0) {
         if (Debug()) cout << "No BEMC and BPRS Hits in this event" << endl;
@@ -1320,8 +1331,8 @@ StMcEventMaker::fillBemc(St_g2t_emc_hit* g2t_emc_hitTablePointer)
     }
 }
 
-void
-StMcEventMaker::fillBsmd(St_g2t_emc_hit* g2t_smd_hitTablePointer)
+//_____________________________________________________________________________
+void StMcEventMaker::fillBsmd(St_g2t_emc_hit* g2t_smd_hitTablePointer)
 {
     if (g2t_smd_hitTablePointer == 0) {
         if (Debug()) cout << "No BSMDE and BSMDP Hits in this event" << endl;
@@ -1376,8 +1387,8 @@ StMcEventMaker::fillBsmd(St_g2t_emc_hit* g2t_smd_hitTablePointer)
     }
 }
 
-void
-StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_tile, St_g2t_emc_hit* g2t_smd){
+//_____________________________________________________________________________
+void StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_tile, St_g2t_emc_hit* g2t_smd){
     if (Debug()) {
        gMessMgr->Info() << GetName() << "fillEemc() called" << endm;
     }
@@ -1477,9 +1488,41 @@ StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_tile, St_g2t_emc_hit* g2t_smd){
     if (Debug()) gMessMgr->Info()<<GetName() <<"::fillEemc()   done, nHit="<<nHit<<endm;
 }
 
+//_____________________________________________________________________________
+void StMcEventMaker::fillFpd(St_g2t_emc_hit* g2t_fpd_hitTablePointer)
+{
+  if (!g2t_fpd_hitTablePointer) {
+    if (Debug()) cout << "No FPD Hits in this event" << endl;
+    return;
+  }
 
-void
-StMcEventMaker::printEventInfo()
+  g2t_emc_hit_st* fpdHitTable = g2t_fpd_hitTablePointer->GetTable();
+  StMcEmcHitCollection* fpdColl = mCurrentMcEvent->fpdHitCollection();
+
+  for (int iHit = 0; iHit < g2t_fpd_hitTablePointer->GetNRows(); ++iHit) {
+    g2t_emc_hit_st& hit = fpdHitTable[iHit];
+    // volume_id = ew*10000+nstb*1000+ch
+    int volume_id = hit.volume_id;
+    int ch = volume_id % 1000;
+    volume_id /= 1000;
+    int nstb = volume_id % 10;
+    int ew = volume_id / 10;
+    StMcTrack* track = ttemp[hit.track_p - 1];
+    // Store ew in module, nstb in sub, and ch in eta
+    StMcCalorimeterHit* fpdHit = new StMcCalorimeterHit(ew,ch,nstb,hit.de,track);
+    StMcEmcHitCollection::EAddHit fpdNew = fpdColl->addHit(fpdHit);
+    if (fpdNew == StMcEmcHitCollection::kNew) {
+      track->addFpdHit(fpdHit);
+    } else {
+      delete fpdHit; fpdHit = 0;
+    }
+  }
+
+  if (Debug()) cout << "Filled " << mCurrentMcEvent->fpdHitCollection()->numberOfHits() << " FPD Hits" << endl;
+}
+
+//_____________________________________________________________________________
+void StMcEventMaker::printEventInfo()
 {
     cout << "---------------------------------------------------------" << endl;
     cout << "StMcEvent at " << (void*) mCurrentMcEvent                  << endl;
