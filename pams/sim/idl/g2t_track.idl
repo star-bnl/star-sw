@@ -1,6 +1,9 @@
 struct g2t_track {
-  /* $Id: g2t_track.idl,v 1.12 2006/09/22 20:16:42 potekhin Exp $
+  /* $Id: g2t_track.idl,v 1.13 2011/01/26 19:21:17 perev Exp $
      $Log: g2t_track.idl,v $
+     Revision 1.13  2011/01/26 19:21:17  perev
+     FPD ==> STAR Soft
+
      Revision 1.12  2006/09/22 20:16:42  potekhin
      Added HPD (R&D)
 
@@ -37,6 +40,7 @@ struct g2t_track {
        long      hit_igt_p;  /* Id of first igt hit on track linked list */
        long      hit_fst_p;  /* Id of first fst hit on track linked list */
        long      hit_fgt_p;  /* Id of first fgt hit on track linked list */
+       long      hit_fpd_p;  /* Id of first fpd hit on track linked list */
        long      hit_mwc_p;  /* Id of first mwc hit on track linked list */
        long      hit_pgc_p;  /* Id of first pgc hit on track linked list */
        long      hit_pmd_p;  /* Id of first psc hit on track linked list */
@@ -61,6 +65,7 @@ struct g2t_track {
        long      n_igt_hit;  /* Nhits in igt */
        long      n_fst_hit;  /* Nhits in fst */
        long      n_fgt_hit;  /* Nhits in fgt */
+       long      n_fpd_hit;  /* Nhits in fpd */
        long      n_mwc_hit;  /* Nhits in mwc */
        long      n_pgc_hit;  /* Nhits in pgc  ???  */
        long      n_pmd_hit;  /* Nhits in pmd (PMD) */

@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.63 2010/08/03 22:14:49 geurts Exp $
+* $Id: g2t_volume_id.g,v 1.64 2011/01/26 19:21:17 perev Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.64  2011/01/26 19:21:17  perev
+* FPD ==> STAR Soft
+*
 * Revision 1.63  2010/08/03 22:14:49  geurts
 * Fix unknown TOFr choice for year2007 (btog_choice=10)  [bug ticket #1715]
 * Fix wrong TOFr tray position ID for run 5 (btog_choice=8)
@@ -140,6 +143,8 @@
       Integer          nEndcap,nFpd,depth,shift,nv
       Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/,istb/0/
       Integer          istVersion/0/,istLayer/0/
+*     FPD
+      Integer          n1,n2,ew,nstb,ch,sl
 *
 *    this is an internal agfhit/digi information - need a better access.
       integer          idigi
@@ -216,7 +221,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *
 *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-      If    (Csys=='svt') then
+      If (Csys=='svt') then
 *1*                                          Ken Wilson
 ** Helen altered SVT volume IDs so agrees with hardware defs.
         If  (Cd=='SVTD') then
@@ -231,17 +236,17 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                 ladder  = 12
                 lnumber = 4
 * Set First barrel ids
-           else If (lnumber.le.2) then
+           else if (lnumber.le.2) then
                 nladder = 8
 		nwafer  = 4
 *               wafer   = 5-wafer 
 * Set 2nd barrel ids
-           else If (lnumber.le.4) then
+           else if (lnumber.le.4) then
                 nladder  = 12
 		nwafer   = 6	
 *               wafer   = 7-wafer   
 * Set 3rd barrel ids
-           else If (lnumber.le.6) then
+           else if (lnumber.le.6) then
                 nladder  = 16
 		nwafer   = 7
 *               wafer   = 8-wafer
@@ -265,14 +270,14 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
            endif
 	if (ladder < 1 | ladder > nladder | wafer < 1 | wafer > nwafer) return
         volume_id  = 1000*lnumber+100*wafer+ladder
-        else If (Cd=='SFSD') then
+        else if (Cd=='SFSD') then
            volume_id =  7000+100*numbv(2)+numbv(1)
         endif
         
-      else If (Csys=='ssd') then
+      else if (Csys=='ssd') then
         volume_id = 7000+100*numbv(2)+numbv(1)
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      else If (Csys=='tpc') then
+      else if (Csys=='tpc') then
 *2*                                        Peter M. Jacobs
         tpgv  = numbv(1)
         tpss  = numbv(2)
@@ -295,7 +300,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
         volume_id=100000*isdet+100*sector+tpad
 *
-      else If (Csys=='mwc') then
+      else if (Csys=='mwc') then
 *3*
         rileft    = numbv(1)
         sector    = numbv(2) 
@@ -303,7 +308,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         innour    = numbv(4)
         volume_id = 1000*rileft+100*innout+10*innour+sector
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      else If (Csys=='tof') then
+      else if (Csys=='tof') then
 *4*                                             Frank Geurts
         If (btog_version==1) then
            rileft     = numbv(1)
@@ -311,7 +316,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
            sub_sector = numbv(3) 
            innout     = numbv(4)
            volume_id  = 100000*rileft+1000*innout+10*sector+sub_sector   
-        elseif (btog_version==2) then
+        else if (btog_version==2) then
 *          simulations done in 2000 - one tof tray on west side
            if (btog_choice==4) then
               rileft     = 1
@@ -322,7 +327,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
            else
               print *,' g2t_volume_id : choice not coded yet '
            endif        
-        elseif (btog_version>=3) then
+        else if (btog_version>=3) then
 *          For simulations after 28-sep-00, before it was version 2
            if (btog_choice==2) then      ! Full TOF
              rileft     = numbv(1)       !     west(1)/east(2)
@@ -330,13 +335,13 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
              innout     = numbv(3)       !     4wide(1)/5wide(2) sections
              sub_sector = numbv(4)       !     theta-tray(4w:1-4, 5w:1-5)
              section    = numbv(5)       !     phi-tray(4w:1-9,5w:1)
-           elseif (btog_choice==3) then  ! ~25% TOF (only on east side)
+           else if (btog_choice==3) then  ! ~25% TOF (only on east side)
              rileft     = 2              !     east (pre-set)
              sector     = numbv(1)       !     tray
              innout     = numbv(2)       !     4wide/5wide section
              sub_sector = numbv(3)       !     theta-tray
              section    = numbv(4)       !     phi-tray
-           elseif (btog_choice<=7) then  !  TOFp (single tray)
+           else if (btog_choice<=7) then  !  TOFp (single tray)
              rileft     = 2              !     east (pre-set)
              if (btog_choice!=7) then    !
               sector    = btog_posit1(1) !     tray (pre-set)
@@ -378,7 +383,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         endif
 
 * ------- TOFr detector (single tray) --------------
-      else If (Csys=='tfr') then   ! TOFr
+      else if (Csys=='tfr') then   ! TOFr
          if (btog_choice==5 .or. btog_choice==7) then      !  single tray
             rileft     = 2               !  east (pre-set)
             sector     = btog_posit2     !  tray (pre-set)
@@ -405,13 +410,13 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
          endif
          volume_id = layer +10*(module +100*(sector+100*rileft) )
 
-      else If (Csys=='ctb') then
+      else if (Csys=='ctb') then
 *5*
         volume_id = 1000*numbv(1)+100*numbv(3)+numbv(2)
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 *   ------------------  calorimetry  ---------------------
 
-      else If (Csys=='emc') then
+      else if (Csys=='emc') then
 *6*                                barrel calorimeter - K.Shester
         if (CALG_Nmodule(1)*CALG_Nmodule(2)>0) then
 *          both left and right barrels:
@@ -441,18 +446,18 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	if(rileft<1 .or. rileft>2) then            
 	  print *,'**ERROR at g2t_volume_id: emc rl ',rileft
-*	elseif(eta<1 .or. eta>CALG_NetaT)  then                 
+*	else if(eta<1 .or. eta>CALG_NetaT)  then                 
 *	  print *,'**ERROR at g2t_volume_id: emc eta ',eta
-*	elseif(phi<1 .or. phi>CALG_MaxModule)  then            
+*	else if(phi<1 .or. phi>CALG_MaxModule)  then            
 *	  print *,'**ERROR at g2t_volume_id: emc phi ',phi
-*	elseif(superl<1 .or. superl>CALG_NSub) then            
+*	else if(superl<1 .or. superl>CALG_NSub) then            
 *	  print *,'**ERROR at g2t_volume_id: emc superl ',superl
 	else 
 	  volume_id=10000000*rileft+100000*eta+100*phi+
      +	              +10*phi_sub+superl
 	endif
 
-      else If (Csys=='smd') then
+      else if (Csys=='smd') then
 *7*
         if (CALG_Nmodule(1)*CALG_Nmodule(2)>0) then
            rileft   =numbv(1)
@@ -480,26 +485,26 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	if(rileft<1 .or. rileft>2)  then                        
 	  print *,'**ERROR at g2t_volume_id: smd rl ',rileft
-*	elseif(eta<1 .or. eta>calg_NetaSMDp) then                  
+*	else if(eta<1 .or. eta>calg_NetaSMDp) then                  
 *	  print *,'**ERROR at g2t_volume_id: smd eta ',eta
-*	elseif(phi<1 .or. phi>CALG_MaxModule) then            
+*	else if(phi<1 .or. phi>CALG_MaxModule) then            
 *	  print *,'**ERROR at g2t_volume_id: smd phi ',phi
-	elseif(forw_back<1 .or. forw_back>3) then            
+	else if(forw_back<1 .or. forw_back>3) then            
 	  print *,'**ERROR at g2t_volume_id: smd forw_back ',forw_back
-	elseif(strip<1) then            
+	else if(strip<1) then            
 	  print *,'**ERROR at g2t_volume_id: smd strip ',strip
-	elseif(forw_back=1.and.strip>calg_Netfirst) then            
+	else if(forw_back=1.and.strip>calg_Netfirst) then            
 	  print *,'**ERROR at g2t_volume_id: smd strip ',strip, forw_back
-	elseif(forw_back=2.and.strip>calg_Netsecon)  then            
+	else if(forw_back=2.and.strip>calg_Netsecon)  then            
 	  print *,'**ERROR at g2t_volume_id: smd strip ',strip, forw_back
-	elseif(forw_back=3.and.strip>calg_NPhistr) then            
+	else if(forw_back=3.and.strip>calg_NPhistr) then            
 	  print *,'**ERROR at g2t_volume_id: smd strip ',strip, forw_back
 	else 
           volume_id=100000000*rileft+1000000*eta+1000*phi+
      +              100*forw_back+strip
 	endif
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      else If (Csys=='eem') then
+      else if (Csys=='eem') then
 *8*
 * PN, MAX:
 *      OnOff    = (0..3)  -  East-West config:  0-none,            1 - west,     2-east,   3-both
@@ -559,7 +564,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	endif ! cd==ESCI
 
 		  
-      else If (Csys=='esm') then
+      else if (Csys=='esm') then
 *9* 
           if (emcg_onoff < 3) then
             rileft    = emcg_onoff
@@ -596,7 +601,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  
 *   ------------------ forward region ---------------------
 
-      else If (Csys=='ftp') then
+      else if (Csys=='ftp') then
 *10*
 * ftpv=1 for west, 2 for east part of the FTPC
 * ftpc_sector is the phi division of the gas layer
@@ -611,7 +616,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	ftpc_sector= ftpc_hash(numbv(3),ftpv)
         volume_id  = (100*ftpv+padrow)*10 + ftpc_sector
 *   ---------------------
-      else If (Csys=='vpd') then
+      else if (Csys=='vpd') then
 *11*    Vertex position detector - Frank Geurts <geurts@rice.edu>
 
         if (vpdg_version == 1) then
@@ -625,39 +630,39 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         endif
         volume_id  =  1000*rileft + 100*innout + sector
 *
-      else If (Csys=='pgc') then
+      else if (Csys=='pgc') then
 *12*
-      else If (Csys=='psc') then
+      else if (Csys=='psc') then
 *13*
-      else If (Csys=='rch') then
+      else if (Csys=='rch') then
         is=0
-        if      cd=='RGAP' { is=1 }
-        elseif  cd=='RCSI' { is=2 }
-        elseif  cd=='QUAR' { is=3 }
-        elseif  cd=='FREO' { is=4 }
-        elseif  cd=='OQUA' { is=5 }
+        if       (cd=='RGAP') {is=1}
+        else if  (cd=='RCSI') {is=2} 
+        else if  (cd=='QUAR') {is=3} 
+        else if  (cd=='FREO') {is=4} 
+        else if  (cd=='OQUA') {is=5} 
 
         volume_id = numbv(1) + Is*1000
 *14*
-      else If (Csys=='zdc') then
+      else if (Csys=='zdc') then
         volume_id = numbv(1)*1000+numbv(2)
 
 *15*                                 pmd,     Bedanga
-      else If (Csys=='pmd') then
+      else if (Csys=='pmd') then
         volume_id = numbv(1)*1000000 + numbv(2)*100000 + numbv(3)*10000 _
                                      + numbv(4)*100    + numbv(5)
 
 *16*                          Mikhail Kopytine for the BBC group
-      else If (Csys=='bbc') then
+      else if (Csys=='bbc') then
 *        
 *       BBC has 4 levels: west/east, annulus, triple module, single module
         volume_id = numbv(1)*1000 + numbv(2)*100 + numbv(3)*10 + numbv(4)    
 *17*                                 Kai Schweda
-      else If (Csys=='pix') then
+      else if (Csys=='pix') then
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 
 *18*                                 Maxim Potekhin
-      else If (Csys=='ist') then
+      else if (Csys=='ist') then
         if(istVersion.ne.3.and.istVersion.ne.4) then
             istLayer=numbv(1)+1
 *            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(2),' ',numbv(3),' ',numbv(4)
@@ -674,23 +679,77 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             volume_id = istLayer*1000000 + numbv(1)*10000 + 100*numbv(2)  + numbv(3)
         endif
 *19*                                 Kai Schweda
-      else If (Csys=='fst') then
+      else if (Csys=='fst') then
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 *20*                                 Kai Schweda
-      else If (Csys=='fgt') then
+      else if (Csys=='fgt') then
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 
 *21*                                 Gerrit van Nieuwenhuizen
-      else If (Csys=='igt') then
+      else if (Csys=='igt') then
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 *22*                                 Sevil Salur
-      else If (Csys=='hpd') then
+      else if (Csys=='hpd') then
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
+*23*                                 Pibero Djawotho
+      else if (Csys=='fpd') then
+	n1 = numbv(1)
+	n2 = numbv(2)
+        sl = -999
+	if(cd=='FLGR') sl=1
+        if(cd=='FLXF') sl=2
+        if (sl<0) stop 'Wrong cd in FPD'
+        ew=(n1-1)/2+1
+        nstb = -999
+	if(n1.eq.1) nstb=1
+	if(n1.eq.2) nstb=2
+	if(n1.eq.3 .and. sl.eq.2) nstb=1
+	if(n1.eq.4 .and. sl.eq.2) nstb=2
+	if(n1.eq.3 .and. sl.eq.1) nstb=3
+	if(n1.eq.4 .and. sl.eq.1) nstb=4                    
+        if (nstb<0) stop 'Wrong nstb in FPD'
+        ch=n2
+        if(ew.eq.1) then
+           if(ch.gt.49 .and. ch.le.56) then
+              ch=ch-49
+              nstb=nstb+4
+           endif
+           if(nstb.eq.1 .or. nstb.eq.5) then
+              ch=ch + 6 - 2*mod(ch-1,7)
+           else if(nstb.eq.3 .or. nstb.eq.4) then
+              ch=ch + 4 - 2*mod(ch-1,5)
+           endif
+        else if(ew.eq.2) then
+
+	  if(nstb.le.2) then  
+	    if(n2.ge.11  .and. n2.le.21 )  ch=n2 +  7
+	    if(n2.ge.22  .and. n2.le.33 )  ch=n2 + 13
+	    if(n2.ge.34  .and. n2.le.46 )  ch=n2 + 18
+	    if(n2.ge.47  .and. n2.le.60 )  ch=n2 + 22
+	    if(n2.ge.61  .and. n2.le.75 )  ch=n2 + 25
+	    if(n2.ge.76  .and. n2.le.91 )  ch=n2 + 27
+	    if(n2.ge.92  .and. n2.le.125)  ch=n2 + 28
+	    if(n2.ge.126 .and. n2.le.269)  ch=n2 + 36 + 8*((n2-126)/9)
+	    if(n2.ge.270 .and. n2.le.319)  ch=n2 +156
+	    if(n2.ge.320 .and. n2.le.334)  ch=n2 +157
+	    if(n2.ge.335 .and. n2.le.348)  ch=n2 +159
+	    if(n2.ge.349 .and. n2.le.361)  ch=n2 +162
+	    if(n2.ge.362 .and. n2.le.373)  ch=n2 +166
+	    if(n2.ge.374 .and. n2.le.384)  ch=n2 +171
+	    if(n2.ge.385 .and. n2.le.394)  ch=n2 +177   
+    !        write(*,*) 'matrix check - Large cells FMS: ',nstb, ch,n2
+	  else
+	    if(n2.ge. 85 .and. n2.le.154)  ch=n2 +  5 + 5*((n2-85)/7)
+	    if(n2.ge.155 .and. n2.le.238)  ch=n2 + 50 
+    !        write(*,*) 'matrix check - Small cells FMS: ',nstb, ch,n2
+          endif
+      endif
+      volume_id=ew*10000+nstb*1000+ch       
 
       else
-        print *,' G2T warning: volume  ',Csys,'  not found '  
+          print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
-      g2t_volume_id = volume_id
+    g2t_volume_id = volume_id
 
-      end
+    end
       
