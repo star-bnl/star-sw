@@ -407,10 +407,10 @@ void JevpPlotSet::Main(int argc, char *argv[])
     LOG(DBG, "Pause for a while");
 
     if(strcmp(hello_cmds, "steal") == 0) {
-      sleep(5);
+      //sleep(5);
     }
     else {
-      sleep(5);
+      //sleep(5);
     }
 
     while(connect(server, serverport) < 0) {
@@ -482,7 +482,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
 	if(!builderStatus.running()) {
 	  LOG(NOTE, "Already end of run, don't stop it again... %d",builderStatus.running());
 	  // already end of run, don't stop it again...
-	  sleep(5);
+	  sleep(1);
 	  continue;
 	}
 	
@@ -507,7 +507,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
 
       case EVP_STAT_EVT:
 	CP;
-	LOG(WARN, "Problem reading event... skipping");
+	LOG(ERR, "Problem reading event... skipping");
 	sleep(1);
 	continue;
 

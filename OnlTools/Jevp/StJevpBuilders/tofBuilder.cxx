@@ -272,6 +272,7 @@ void tofBuilder::initialize(int argc, char *argv[]) {
   plots[++n] = new JevpPlot(contents.upvpd_eastT_vs_westT);
   plots[n]->setDrawOpts("col");
   plots[n]->optstat = 0;
+ 
   // Add Plots to plot set...
   for(int i=0;i<=n;i++) {
     LOG(DBG, "Adding plot %d",i);

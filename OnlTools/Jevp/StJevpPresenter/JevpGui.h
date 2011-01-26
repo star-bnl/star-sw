@@ -79,23 +79,22 @@ public:
 
   void addJevpPlot(JevpPlot *mplot) {  
     jevpPlots->Add(mplot); 
-    LOG("JEFF", "jevpPlots has %d entries",jevpPlots->GetSize());
+    LOG(DBG, "jevpPlots has %d entries",jevpPlots->GetSize());
   }
   JevpPlot *getJevpPlot(char *name);
   void addPlot(TObject *mplot) { 
     //mplot->SetBit(kCanDelete); 
     plots->Add(mplot); 
-    LOG("JEFF", "plots has %d entries",plots->GetSize());
+    LOG(DBG, "plots has %d entries",plots->GetSize());
   };
 
   void Clear() { 
-    //printf("clear\n");
-
+    LOG(DBG, "Clearing Screen Widget...");
     TListIter next(plots);
     TObject *o;
 
     while((o = (TObject *)next())) {
-      LOG("JEFF", "Deleting an object...");
+      LOG(DBG, "Deleting an object... %s",o->GetName());
       delete o;
     }
 
@@ -104,6 +103,8 @@ public:
     //printf("more clear\n");
     GetCanvas()->Clear(); 
     //printf("clearest\n");
+
+    LOG(DBG, "Done Clearing Screen Widget");
   };
   JevpScreenWidget(char *tabname, char *plotname, u_int combo_index, QTabWidget *menu);
   virtual ~JevpScreenWidget();
@@ -481,6 +482,7 @@ DisplayNode *jl_getCanvasDescriptor(u_int combo_idx) {
  void jl_WriteCurrentCanvasToPSFile(const char* file, int tab, int subTag);
  void jl_SaveAll();
  void jl_CrossOfDeath(JevpScreenWidget *screen, char *label="No plot");
+ void jl_DrawEmptySpace(JevpScreenWidget *screen, char *label=" ");
  void jl_ReconfigureTabs();
  private: 
  void jl_addGroupTabs();

@@ -28,6 +28,7 @@
 #include "qlabel.h"
 #include "qcursor.h"
 #include "qtimer.h"
+#include <mcheck.h>
 
 #if QT_VERSION < 0x40000
 #  include <qfiledialog.h>
@@ -282,17 +283,17 @@ void JevpGui::switchTabs(const char *newdisplay, const char *newbuilderlist) {
   // jl_displayFile->dump();
 
   CP;
-  LOG("JEFF", "Calling deleteTabs for root");
+  LOG(DBG, "Calling deleteTabs for root");
 
   PresenterSuspend suspend;
   suspend << rootTab;
 
   deleteTabs(rootTab);
-  LOG("JEFF", "Back from deletTabs for root");
+  LOG(DBG, "Back from deletTabs for root");
   CP;
-  LOG("JEFF", "Calling buildTabs");
+  LOG(DBG, "Calling buildTabs");
   buildTabs();
-  LOG("JEFF", "Back from buildTabs");
+  LOG(DBG, "Back from buildTabs");
 }
 
 void JevpGui::buildTabs()
@@ -339,7 +340,6 @@ JevpGui::JevpGui() : Q3MainWindow(), mWidth(900), mHight(500), mStrLive(" Live  
 {
   serverTags = (char *)malloc(10);
   strcpy(serverTags, "");
-
 }
 
 void JevpGui::gui_JevpGui(JevpGui *logic, bool isRefWindow)
@@ -355,8 +355,6 @@ void JevpGui::gui_JevpGui(JevpGui *logic, bool isRefWindow)
   
 
   LOG("JEFF", "Presenter pid=%d",getpid());
-  
-  CM;
 
   CP;
   setAttribute(Qt::WA_DeleteOnClose);
@@ -1142,6 +1140,8 @@ int JevpGui::updateRunStatus()
 	  isLive ? "     Live" : "Reanalyse", rs->run, rs->status, secs);
 
   SetWindowName(winlab);
+
+  delete rs;
   return 0;
 }
 
@@ -1178,21 +1178,25 @@ int JevpGui::updateServerTags()
   char *args = response->args;
   if(!args) args = (char *)"";
   
+  ret = 0;
   if(strcmp(serverTags, args) != 0) {
     LOG("JEFF", "Changing server tags from %s to %s",serverTags, args);
     free(serverTags);
     serverTags = (char *)malloc(strlen(args) + 1);
     strcpy(serverTags, args);
-    return 1;
+    ret = 1;
   }
-  return 0;
+
+  delete mess;
+  delete response;
+  return ret;
 }
 
 void JevpGui::UpdatePlots() 
 {
   CP;
 
-  CM;
+  //CM;
   if(jl_socket == NULL) {
     LOG(ERR,"Updating plots but socket is NULL... returning...\n");
   }
@@ -1206,21 +1210,16 @@ void JevpGui::UpdatePlots()
     nupdates++;
 
     // Get run status and handle window name...
-    CM;
     updateRunStatus();
-
-    CM;
+    
     if(updateServerTags()) {  // Did the server tags change?  If so, update tab structure
-      CM;
       switchTabs(evpMain->display, serverTags);
     }
     else {  // if not, update visible plots and redraw...
-      CM;
       jl_DrawPlot(currentScreen);
     }
+    
   }
-  
-  CM;
 
   CP;
   if (fActions[kAutoUpdate]->isOn()) {
@@ -1679,7 +1678,7 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
   screen->setUpdatesEnabled(false);   // keep double buffer in place...
 
   int combo_index = screen->combo_index;
-  TCanvas *gcc = screen->GetCanvas();
+
 
   //printf("sleeping 5\n");
   //sleep(5);
@@ -1713,9 +1712,7 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
   CP;
   // CanvasDescriptor *cd = (CanvasDescriptor *)thetab;
   int nplots = thetab->nSiblings() + 1;
-  CM;
-  screen->Clear();
-  CM;
+
   // gcc->Clear();
   
   int wide = thetab->getIntParentProperty("wide");
@@ -1725,77 +1722,86 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
   int scaley = thetab->getIntParentProperty("scaley");
   if(scaley <= 0) scaley = 0;
 
+  LOG(DBG, "wide = %d deep = %d scaley = %d nplots=%d", wide, deep, scaley, nplots);
+
   CP;
-  gcc->Divide(wide, deep);
+
   //sleep(3);
 
   double maxY = -9999;
 
   DisplayNode *hd = thetab;
 
+
+  screen->Clear();
+  TCanvas *gcc = screen->GetCanvas();
+  gcc->Divide(wide, deep);
+
   for(int i=0;i<nplots;i++) {   // First get plots!
     char tmp[256];
 
-    CM;
-
     JevpPlot *plot = jl_getPlotFromServer(hd->name,  tmp);
-    
-    CM;
 
     if(plot) {
       LOG(DBG, "Got plot %s : %s",hd->name,plot->GetPlotName());
-      CM;
       screen->addPlot(plot);
-      CM;
       screen->addJevpPlot(plot);
-      CM;
       double my = plot->getMaxY();
       if(my > maxY) maxY = my;
     }
     else {
-      LOG("JEFF", "No plot for %s",hd->name);
+      LOG(DBG, "No plot for %s",hd->name);
     }
 
     hd = hd->next;   
   }
-
   CP;
 
   // Now plot them
   hd = thetab;
   CP;
-  for(int i=0;i<nplots;i++) {
-    JevpPlot *plot = screen->getJevpPlot(hd->name);
+  for(int i=0;i<wide*deep;i++) {
+
     gcc->cd(i+1);
 
-    if(plot == NULL) {
+    if(i<nplots) {
+      JevpPlot *plot = screen->getJevpPlot(hd->name);
+      if(plot == NULL) {
+	CP;
+	LOG(DBG, "Cross of death: %s",tmp);
+	sprintf(tmp, "Server Doesn't Currently Have Plot %s",hd->name);
+	gcc->cd(i+1);
+	jl_CrossOfDeath(screen, tmp);     // Some error...
+      }
+      else {
+	CP;
+	if(scaley) {
+	  plot->setMaxY(maxY * 1.2);
+	}
+      
+	CP;
+	gcc->cd(i+1);
+	plot->draw();
+	//delete plot;
+      }
       CP;
-      LOG(DBG, "Cross of death: %s",tmp);
-      sprintf(tmp, "Server Doesn't Currently Have Plot %s",hd->name);
-      jl_CrossOfDeath(screen, tmp);     // Some error...
+      //printf("drew %s\n",hd->name);
+
+      hd = hd->next;    
+      // sleep(3);
     }
     else {
-      CP;
-      if(scaley) {
-	plot->setMaxY(maxY * 1.2);
-      }
-      
-      CP;
-      plot->draw();
-      //delete plot;
+      gcc->cd(i+1);
+      jl_DrawEmptySpace(screen, " ");
+      //jl_CrossOfDeath(screen, "blah...");
     }
-    CP;
-    //printf("drew %s\n",hd->name);
-
-    hd = hd->next;    
-    // sleep(3);
   }
 
   CP;
 
   screen->setUpdatesEnabled(true);   // reenable the update
   gcc->Update();
-  screen->update();                  // and trigger!
+  //screen->update();                  // and trigger!
 
   CP;
   //showDirectories();
@@ -1837,25 +1843,20 @@ JevpPlot *JevpGui::jl_getPlotFromServer(char *name, char *error)
 {
   error[0] = '\0';   // clear error...
 
-  CM;
   // Ask server for plot...
   EvpMessage msg;
   msg.setCmd("getplot");
   msg.setArgs(name);
   jl_send(&msg);
-  
-  CM;
 
   // get response...
   LOG(DBG,"Waiting for plot from server...\n");
   TMessage *mess;
-  CM;
 
   int ret = jl_socket->Recv(mess);
 
  
-  LOG("JEFF", "size received = %d",ret);
-  CM;
+  LOG(DBG, "size received = %d",ret);
 
   if(ret == 0) {  // disconnect
     LOG(ERR,"Server disconnected?\n");
@@ -1863,12 +1864,14 @@ JevpPlot *JevpGui::jl_getPlotFromServer(char *name, char *error)
 
     return NULL;
   }
-  
+
+  LOG(DBG, "Message class: %s",mess->GetClass()->GetName());
+
   if(strcmp(mess->GetClass()->GetName(), "EvpMessage") == 0) {
     // There was no valid object...
     EvpMessage *msg = (EvpMessage *)mess->ReadObject(mess->GetClass());
     sprintf(error, "Can't get plot: (%s)", msg->args);
-    LOG("JEFF", "error?");
+    LOG(DBG, "error?");
 
     delete msg;
     delete mess;
@@ -1876,13 +1879,9 @@ JevpPlot *JevpGui::jl_getPlotFromServer(char *name, char *error)
   }
 
   if(strcmp(mess->GetClass()->GetName(), "JevpPlot") == 0) {
-    CM;
     JevpPlot *plot = (JevpPlot *)mess->ReadObject(mess->GetClass());
-    CM;
-    
+  
     delete mess;
-    
-    CM;
     return plot;
   }
 
@@ -1900,9 +1899,9 @@ void JevpGui::jl_CrossOfDeath(JevpScreenWidget *screen, char *str) {
   TText* t = new TText(0.5,0.5,str);
 
   // This is how we free the memory...
-  a->SetBit(kCanDelete);
-  b->SetBit(kCanDelete);
-  t->SetBit(kCanDelete);
+  //a->SetBit(kCanDelete);
+  //b->SetBit(kCanDelete);
+  //t->SetBit(kCanDelete);
   screen->addPlot(a);
   screen->addPlot(b);
   screen->addPlot(t);
@@ -1921,7 +1920,26 @@ void JevpGui::jl_CrossOfDeath(JevpScreenWidget *screen, char *str) {
   //cout << __PRETTY_FUNCTION__ << endl;
   return;
 }
- 
+
+void JevpGui::jl_DrawEmptySpace(JevpScreenWidget *screen, char *str) {
+
+  TText* t = new TText(0.5,0.5,str);
+
+  // This is how we free the memory...
+  //t->SetBit(kCanDelete);
+  screen->addPlot(t);
+
+  t->SetTextColor(3);
+  t->SetTextAlign(22);
+
+  // Already cd()'d to proper pad.
+  t->Draw();
+
+  //gcc->Update();
+  //cout << __PRETTY_FUNCTION__ << endl;
+  return;
+} 
+
 
 void JevpGui::jl_Draw(TCanvas* gcc, int  tab, int subTab) {
   //   if(EvpUtil::hGroupName[tab][subTab] != "") {

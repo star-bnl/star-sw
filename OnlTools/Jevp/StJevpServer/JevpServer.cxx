@@ -798,12 +798,12 @@ void JevpServer::handleGetPlot(TSocket *s, char *argstring)
     mess.WriteObject(&m);
     
     int ret = s->Send(mess);
-    LOG("JEFF", "sent (errmess) %d bytes",ret);
+    LOG(DBG, "sent (errmess) %d bytes",ret);
   } else {
     TMessage mess(kMESS_OBJECT);
     mess.WriteObject(plot);
     int ret = s->Send(mess);
-    LOG("JEFF", "Sent (plot) %d bytes",ret);
+    LOG(DBG, "Sent (plot) %d bytes",ret);
   }
 }
 
