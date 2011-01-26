@@ -610,7 +610,8 @@ ViewCell::Plot(const bool use3d) {
     double xw = 0., yw = 0., dw = 0., vw = 0., lw = 0., qw = 0.;
     char label;
     int type = -1;
-    component->GetWire(i, xw, yw, dw, vw, label, lw, qw);
+    int nTrap;
+    component->GetWire(i, xw, yw, dw, vw, label, lw, qw, nTrap);
     // Check if other wires with the same label already exist.
     if (nWireTypes == 0) {
       wireTypes.push_back(label);
