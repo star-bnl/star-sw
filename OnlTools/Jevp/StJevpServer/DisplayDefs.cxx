@@ -136,7 +136,6 @@ const char *DisplayNode::getProperty(const char *s)
     if(child->leaf) {
       // Count children:
    
-
       int nchildren = child->nSiblings() + 1;
  
       // Must define wide / deep

@@ -269,6 +269,8 @@ JevpPlot::~JevpPlot() {
   while(curr) {
     next = (PlotHisto *)histos.After(curr);
     histos.Remove(curr);  // remove from list
+
+    LOG(DBG, "Deleting PlotHisto");
     delete curr;          // delete
 
     curr = next;
@@ -279,9 +281,12 @@ JevpPlot::~JevpPlot() {
   while(el) {
     nn = (TObject *)elements.After(el);
     elements.Remove(el);
+    LOG(DBG, "Deleting Element");
     delete el;
     el = nn;
   }
+
+  LOG(DBG, "Elements.size = %d histos.size = %d",elements.GetSize(),histos.GetSize());
 
   if(drawopts) {
     delete drawopts;

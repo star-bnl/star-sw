@@ -47,21 +47,21 @@ daqBuilder::~daqBuilder() {
 void daqBuilder::initialize(int argc, char *argv[]) {
 
   // Initialization of histograms.
-  contents.h2_tpc = new TH1D("h2_tpc","Log of TPC Buffer Size",50,0,10);
-  contents.h0_evt_size = new TH1D("h0_evt_size","Log of Event Size",50,1,10);
-  contents.h10_bemc_evsize = new TH1D("h10_bemc_evsize","log of BEMC Buffer Size",30,0.,6);
-  contents.h11_ftp_evsize = new TH1D("h11_ftp_evsize","log of FTPC Buffer Size",50,0.,10);
-  contents.h12_l3_evsize = new TH1D("h12_l3_evsize","log of L3 Buffer Size",30,0.,6);
-  contents.h14_tof_evsize = new TH1D("h14_tof_evsize","log of TOF Buffer Size",30,0.,6);
-  contents.h155_time_size_2min = new TH2D("h155_time_size_2min","Event Size (Log10) vs time (sec)", 120,0.,120.,160,0.,8);
-  contents.h156_time_size_10min = new TH2D("h156_time_size_10min","Event Size (Log10) vs time (sec)", 600,0.,600.,80,0.,8);
-  contents.h157_time_size_2hour = new TH2D("h157_time_size_2hour","Event Size (Log10) vs time(sec)",3600,0.,7200.,80,0.,8);
-  contents.h337_ftp_time_size_2hour = new TH2D("h337_ftp_time_size_2hour","FTPC Event Size vs time(sec)",600,0.,600.,80,0.,8);
-  contents.h103_tpc_frac = new TH1D("h103_tpc_frac","TPC Event Size Fraction (%)",50,0,100);
-  contents.h106_bemc_frac = new TH1D("h106_bemc_frac","BEMC Event Size Fraction (%)",50,0,100);
-  contents.h105_ftp_frac = new TH1D("h105_ftp_frac","FTP Event Size Fraction (%)",50,0,100);
-  contents.h108_l3_frac = new TH1D("h108_l3_frac","L3 Event Fraction (%)",50,0,100);
-  contents.h107_tof_frac = new TH1D("h107_tof_frac","TOFp Event Fraction (%)",50,0,100);
+  contents.h2_tpc = new TH1F("h2_tpc","Log of TPC Buffer Size",50,0,10);
+  contents.h0_evt_size = new TH1F("h0_evt_size","Log of Event Size",50,1,10);
+  contents.h10_bemc_evsize = new TH1F("h10_bemc_evsize","log of BEMC Buffer Size",30,0,6);
+  contents.h11_ftp_evsize = new TH1F("h11_ftp_evsize","log of FTPC Buffer Size",50,0,10);
+  contents.h12_l3_evsize = new TH1F("h12_l3_evsize","log of L3 Buffer Size",30,0,6);
+  contents.h14_tof_evsize = new TH1F("h14_tof_evsize","log of TOF Buffer Size",30,0.,6);
+  contents.h155_time_size_2min = new TH2F("h155_time_size_2min","Log10(event size) vs time", 120,0,120,400,0,8);
+  contents.h156_time_size_10min = new TH2F("h156_time_size_10min","Log10(event size) vs time", 600,0,600,400,0,8);
+  contents.h157_time_size_2hour = new TH2F("h157_time_size_2hour","Log10(event size) vs time",3600,0,7200,400,0,8);
+  contents.h337_ftp_time_size_2hour = new TH2F("h337_ftp_time_size_2hour","FTPC Event Size vs time(sec)",600,0,600,80,0,8);
+  contents.h103_tpc_frac = new TH1F("h103_tpc_frac","TPC Event Size Fraction (%)",50,0,100);
+  contents.h106_bemc_frac = new TH1F("h106_bemc_frac","BEMC Event Size Fraction (%)",50,0,100);
+  contents.h105_ftp_frac = new TH1F("h105_ftp_frac","FTP Event Size Fraction (%)",50,0,100);
+  contents.h108_l3_frac = new TH1F("h108_l3_frac","L3 Event Fraction (%)",50,0,100);
+  contents.h107_tof_frac = new TH1F("h107_tof_frac","TOFp Event Fraction (%)",50,0,100);
 
   // Add root histograms to Plots
   int np = sizeof(contents) / sizeof(TH1 *);
@@ -75,8 +75,14 @@ void daqBuilder::initialize(int argc, char *argv[]) {
   plots[++n] = new JevpPlot(contents.h12_l3_evsize);
   plots[++n] = new JevpPlot(contents.h14_tof_evsize);
   plots[++n] = new JevpPlot(contents.h155_time_size_2min);
-  plots[++n] = new JevpPlot(contents.h156_time_size_10min);
-  plots[++n] = new JevpPlot(contents.h157_time_size_2hour);
+  plots[n]->setDrawOpts("col");
+  plots[n]->optstat = 0;
+  plots[++n] = new JevpPlot(contents.h156_time_size_10min);  
+  plots[n]->setDrawOpts("col");
+  plots[n]->optstat = 0;
+  plots[++n] = new JevpPlot(contents.h157_time_size_2hour);   
+  plots[n]->setDrawOpts("col");
+  plots[n]->optstat = 0;
   plots[++n] = new JevpPlot(contents.h337_ftp_time_size_2hour);
   plots[++n] = new JevpPlot(contents.h103_tpc_frac);
   plots[++n] = new JevpPlot(contents.h106_bemc_frac);
@@ -118,7 +124,7 @@ void daqBuilder::event(daqReader *rdr)
   int tof_size = rdr->getDetectorSize("tof");
   int sz = rdr->getDetectorSize("/");
 
-  printf("rdr->getDetectorSize(): %d  evtSize : %d  (diff=%d)\n", sz, rdr->event_size,rdr->event_size-sz);
+  //printf("rdr->getDetectorSize(): %d  evtSize : %d  (diff=%d)\n", sz, rdr->event_size,rdr->event_size-sz);
 
   contents.h2_tpc->Fill(safelog(tpc_size));
   contents.h0_evt_size->Fill(safelog(sz));
@@ -142,6 +148,7 @@ void daqBuilder::event(daqReader *rdr)
     contents.h157_time_size_2hour->Reset();
     contents.h337_ftp_time_size_2hour->Reset();
   }
+
 
   contents.h155_time_size_2min->Fill(tm-t_2min, safelog(sz));
   contents.h156_time_size_10min->Fill(tm-t_10min, safelog(sz));
