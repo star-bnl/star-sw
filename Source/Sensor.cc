@@ -225,6 +225,7 @@ Sensor::IsInArea(const double x, const double y, const double z) {
 
 }
 
+
 bool
 Sensor::IsWireCrossed(const double x0, const double y0, const double z0,
                       const double x1, const double y1, const double z1,
@@ -233,6 +234,18 @@ Sensor::IsWireCrossed(const double x0, const double y0, const double z0,
   for (int i = nComponents; i--;) {
     if (components[i].comp->IsWireCrossed(x0, y0, z0, x1, y1, z1, 
                                           xc, yc, zc)) {
+      return true;
+    }
+  }
+  return false;
+
+}
+
+bool
+Sensor::IsInTrapRadius(double x0, double y0, double z0, double& xw, double& yw, double& rw){
+
+  for (int i = nComponents; i--;) {
+    if (components[i].comp->IsInTrapRadius(x0, y0, z0, xw, yw, rw)){ 
       return true;
     }
   }

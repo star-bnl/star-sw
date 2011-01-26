@@ -29,6 +29,8 @@ namespace Garfield {
     void DriftLine(double x0, double y0, double z0, double t0,  
                    std::string particleType = "e-");
     
+    bool CheckStep(double x, double y, double z, bool status);
+
     void SetMaxSteps(int max){maxSteps = max;};
 
 
@@ -51,10 +53,16 @@ namespace Garfield {
 
     bool debug;
 
-    //Used to drift a particle to the edge of a boundary.
+    // Used to drift a particle to the edge of a boundary.
     void EndDriftLine();
-    //Used to drift a particle to a wire
-    void DriftToWire(double x0, double y0, double z0);
+    // Used to drift a particle to a wire
+    void DriftToWire(double x0, double y0, double z0, int iWire);
+    // Used by DriftToWire to find the distance to the wires edge
+    double DistanceToWire(double x, double y, double z);
+
+
+    // These variables store the position and radius ofa trapping wire
+    double xWire, yWire, rWire;
 
     struct step{
       //position (initial and final)

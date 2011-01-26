@@ -86,6 +86,8 @@ class ComponentBase {
     bool IsWireCrossed(const double x0, const double y0, const double z0,
                        const double x1, const double y1, const double z1,
                        double& xc, double& yc, double& zc);
+    virtual
+    bool IsInTrapRadius(double x0, double y0, double z0, double& xw, double& yw, double& rw);
 
     // Enable and disable periodicities
     void EnablePeriodicityX()  {xPeriodic = true;  UpdatePeriodicity();}

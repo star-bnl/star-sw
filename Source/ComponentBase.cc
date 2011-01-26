@@ -111,6 +111,7 @@ ComponentBase::GetBoundingBox(double& xmin, double& ymin, double& zmin,
 
 }
 
+
 bool
 ComponentBase::IsWireCrossed(
                         const double x0, const double y0, const double z0,
@@ -130,4 +131,14 @@ ComponentBase::IsWireCrossed(
  
 }
 
+bool
+ComponentBase::IsInTrapRadius(double x0, double y0, double z0, double& xw, double& yw, double& rw){
+  
+  return false;
+  
+  if (debug) {
+    std::cout << className << "::IsInTrapRadius:\n\tDefault trap radius method.";
+  }
+ 
+}
 }

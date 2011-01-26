@@ -40,11 +40,14 @@ class ComponentAnalyticField : public ComponentBase {
                        double x1, double y1, double z1,
                        double& xc, double& yc, double& zc);
 
+    bool IsInTrapRadius(double x0, double y0, double z0, double& xw, double& yx, double& rw);
+
     // Add a wire at (x, y) .
     void AddWire(const double x, const double y, const double diameter, 
                  const double voltage, const char label,
                  const double length = 100., 
-                 const double tension = 50., const double rho = 19.3);    
+                 const double tension = 50., const double rho = 19.3,
+		 const int ntrap = 5);    
     // Add a tube.
     void AddTube(const double radius, const double voltage, 
                  const int nEdges, const char label);
@@ -94,7 +97,7 @@ class ComponentAnalyticField : public ComponentBase {
     bool GetWire(const int i, 
                  double& x, double& y, double& diameter, 
                  double& voltage, char& label, double& length,
-                 double& charge);
+                 double& charge, int& ntrap);
     
     int GetNumberOfPlanesX();
     int GetNumberOfPlanesY();
@@ -102,6 +105,7 @@ class ComponentAnalyticField : public ComponentBase {
     bool GetPlaneY(const int i, double& y, double& voltage, char& label);
 
     bool GetTube(double& r, double& voltage, int& nEdges, char& label); 
+  
 
   private:
   
@@ -156,6 +160,9 @@ class ComponentAnalyticField : public ComponentBase {
       double u;
       // Readout group
       int ind;
+      // Trap Radius - tracked particle "trapped" if within
+      // nTrap*radius of wire.
+      int nTrap;
     };
     std::vector<wire> w;
       

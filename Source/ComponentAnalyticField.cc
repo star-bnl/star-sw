@@ -14,7 +14,6 @@ ComponentAnalyticField::ComponentAnalyticField() {
   className = "ComponentAnalyticField";
   chargeCheck = false;
   CellInit();
-  
 }
 
 void 
@@ -209,17 +208,12 @@ ComponentAnalyticField::IsWireCrossed(double x0, double y0, double z0,
     } else {
       dMin2 = d12 - xIn1 * xIn1 / d2;
     }
-    const double r2 = 0.25 * w[i].d * w[i].d;
+    //Add in the times nTrap to account for the trap radius
+    const double r2 = 0.25*w[i].d*w[i].d;
     if (dMin2 < r2) {
       // Wire has been crossed.
       // Find the point of intersection.
-      const double sq = sqrt(xIn0 * xIn0 - d2 * (d02 - r2));
-      const double t = std::min((xIn0 - sq) / d2, (xIn0 + sq) / d2);
-      if (t < 0. || t > 1.) {
-        std::cerr << className << "::IsWireCrossed:\n";
-        std::cerr << "    Error finding the intersection point.\n";
-        return false;
-      }
+      const double t = (xIn0 - sqrt(xIn0 * xIn0 + d02 - r2)) / d2;
       xc = x0 + t * dx;
       yc = y0 + t * dy;
       zc = z0 + (z1 - z0) * (xc - x0) / dx;
@@ -230,11 +224,32 @@ ComponentAnalyticField::IsWireCrossed(double x0, double y0, double z0,
  
 }
 
+bool
+ComponentAnalyticField::IsInTrapRadius(double x0, double y0, double z0, double& xw, double& yw, double& rw){
+  
+  for(int i = 0; i < nWires;i++){
+     double xwc = w[i].x;
+     double yxc = w[i].y;
+     double r = sqrt( pow(xwc-x0,2) + pow(yxc-y0,2) );
+     double rTrap = 0.5*w[i].d*w[i].nTrap;
+     if(debug) std::cout<<"rTrap = " << rTrap << "\nr = " << r <<"\n";   
+     if(r < rTrap){
+       xw = w[i].x;
+       yw = w[i].y;
+       rw = w[i].d * 0.5;
+       return true;
+     }
+  }  
+  
+  return false;
+
+}
+
 void 
 ComponentAnalyticField::AddWire(const double x, const double y, 
                       const double diameter, 
                       const double voltage, const char label,
-                      const double length, const double tension, double rho) {
+                      const double length, const double tension, double rho, const int ntrap) {
                                 
   // Check if the provided parameters make sense.
   if (diameter <= 0.) {
@@ -261,6 +276,12 @@ ComponentAnalyticField::AddWire(const double x, const double y,
     return;
   }
   
+  if(ntrap <= 0){
+    std::cerr << className << "::AddWire:\n";
+    std::cerr << "    Number of trap radii must be > 0.\n";
+    return;
+  }
+
   // Create a new wire
   wire newWire;
   newWire.x = x;
@@ -271,7 +292,7 @@ ComponentAnalyticField::AddWire(const double x, const double y,
   newWire.type = label;
   newWire.e = 0.;
   newWire.ind = -1;
-  
+  newWire.nTrap = ntrap;
   // Add the wire to the list
   w.push_back(newWire);
   ++nWires;
@@ -634,7 +655,7 @@ ComponentAnalyticField::GetWire(const int i,
                                 double& x, double& y, 
                                 double& diameter, double& voltage,
                                 char& label, double& length,
-                                double& charge) {
+                                double& charge, int& ntrap ) {
 
   if (i < 0 || i >= nWires) {
     std::cerr << className << "::GetWire:\n";
@@ -647,6 +668,7 @@ ComponentAnalyticField::GetWire(const int i,
   label = w[i].type;
   length = w[i].u;
   charge = w[i].e;
+  ntrap = w[i].nTrap;
   return true;
 
 }
@@ -699,6 +721,7 @@ ComponentAnalyticField::GetTube(double& r, double& voltage, int& nEdges,
   return true;
 
 } 
+
                                   
 int
 ComponentAnalyticField::Field(
