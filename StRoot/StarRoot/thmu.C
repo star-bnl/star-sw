@@ -6,7 +6,7 @@
 #include "TTree.h"
 #include "TH1.h"
 #include "TCanvas.h"
-#include "$STAR/StRoot/StarRoot/TTreeIter.h"
+#include "TTreeIter.h"
 #endif
 
 TBranch *tb=0;
@@ -24,9 +24,9 @@ void th()
   th.AddFile("test.MuDst.root");
 //  th.ls();
 //  return;
-  int *&run = th("MuEvent.mEventInfo.mRunId");
-  int *&evt = th("MuEvent.mEventInfo.mId");
-  int& nGlobs = th("GlobalTracks");
+  const int *&run = th("MuEvent.mEventInfo.mRunId");
+  const int *&evt = th("MuEvent.mEventInfo.mId");
+  const int& nGlobs = th("GlobalTracks");
   printf("&run=%p &evt=%p\n",&run,&evt);
   int n=0;
   while (th.Next()) 
