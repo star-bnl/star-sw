@@ -1,16 +1,18 @@
 //
 // Pibero Djawotho <pibero@tamu.edu>
 // Texas A&M University
-// 28 May 2010
+// 24 Jan 2011
 //
 
-void RunJetFinder2009pro(int nevents = 1e6,
-			 const char* mudstfile = "/star/data60/reco/production2009_200Gev_Single/FullField/P10ic/2009/151/10151044/st_physics_adc_10151044_raw_6320004.MuDst.root",
-			 const char* jetfile   = "st_physics_adc_10151044_raw_6320004.jets.root",
-			 const char* skimfile  = "st_physics_adc_10151044_raw_6320004.skim.root",
+void RunJetFinder2009sim(int nevents = 1e6,
+			 const char* mudstfile = "/star/data47/reco/pp200/pythia6_410/15_25gev/cdf_a/y2006c/gheisha_on/p07ic/rcf1307_01_2000evts.MuDst.root",
+                         const char* geantfile = "/star/data47/reco/pp200/pythia6_410/15_25gev/cdf_a/y2006c/gheisha_on/p07ic/rcf1307_01_2000evts.geant.root",
+			 const char* jetfile   = "rcf1307_01_2000evts.jets.root",
+			 const char* skimfile  = "rcf1307_01_2000evts.skim.root",
 			 bool useL2 = false)
 {
   cout << "Read MuDst file:\t" << mudstfile << endl;
+  cout << "Read geant file:\t" << geantfile << endl;
   cout << "Write jet file:\t" << jetfile << endl;
   cout << "Write skim file:\t" << skimfile << endl;
 
@@ -25,7 +27,7 @@ void RunJetFinder2009pro(int nevents = 1e6,
   gSystem->Load("StDaqLib");
   gSystem->Load("StEmcRawMaker");
   gSystem->Load("StEmcADCtoEMaker");
-  gSystem->Load("StEpcMaker");
+  gSystem->Load("StPreEclMaker");
   gSystem->Load("StEmcSimulatorMaker");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
@@ -41,9 +43,22 @@ void RunJetFinder2009pro(int nevents = 1e6,
   gSystem->Load("StJets");
   gSystem->Load("StJetEvent");
   gSystem->Load("StJetMaker");
-  gSystem->Load("StTriggerFilterMaker");
+  gSystem->Load("StEEmcSimulatorMaker");
 
-  StChain* chain = new StChain; 
+  // Create chain
+  StChain* chain = new StChain;
+
+  // I/O maker
+  StIOMaker* ioMaker = new StIOMaker;
+  ioMaker->SetFile(geantfile);
+  ioMaker->SetIOMode("r");
+  ioMaker->SetBranch("*",0,"0");             // Deactivate all branches
+  ioMaker->SetBranch("geantBranch",0,"r");   // Activate geant Branch
+
+  // StMcEvent maker
+  StMcEventMaker* mcEventMaker = new StMcEventMaker;
+  mcEventMaker->doPrintEventInfo = false;
+  mcEventMaker->doPrintMemoryInfo = false;
 
   // MuDst reader
   StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,"",mudstfile,"",100000,"MuDst");
@@ -51,57 +66,30 @@ void RunJetFinder2009pro(int nevents = 1e6,
   // MuDst DB
   StMuDbReader* muDstDb = StMuDbReader::instance();
 
-  // Trigger filter
-  StTriggerFilterMaker* filterMaker = new StTriggerFilterMaker;
-
-  // 2009 pp500
-  filterMaker->addTrigger(230410); // JP1
-  filterMaker->addTrigger(230411); // JP2
-  filterMaker->addTrigger(230420); // AJP
-  filterMaker->addTrigger(230531); // BHT3
-
-  // 2009 pp200
-  // http://www.star.bnl.gov/protected/common/common2009/trigger2009/triggers2009.html
-  // L2JetHigh
-  filterMaker->addTrigger(240650);
-  filterMaker->addTrigger(240651);
-  filterMaker->addTrigger(240652);
-  // JP1
-  filterMaker->addTrigger(240410);
-  filterMaker->addTrigger(240411);
-  // L2BGamma
-  filterMaker->addTrigger(240620);
-  // L2EGamma
-  filterMaker->addTrigger(240630);
-  filterMaker->addTrigger(240631);
-  // BHT3
-  filterMaker->addTrigger(240530);
-  // BBCMB-Cat2
-  filterMaker->addTrigger(240013);
-  filterMaker->addTrigger(240113);
-  filterMaker->addTrigger(240123);
-  filterMaker->addTrigger(240223);
-  // BBCMB-Cat3
-  filterMaker->addTrigger(240014);
-  filterMaker->addTrigger(240114);
-  filterMaker->addTrigger(240124);
-  filterMaker->addTrigger(240224);
-
   // star database
   St_db_Maker* starDb = new St_db_Maker("StarDb","MySQL:StarDb");
+  starDb->SetDateTime(20090628,53220); // Run 10179006
 
   // Endcap database
   StEEmcDbMaker* eemcDb = new StEEmcDbMaker;
 
-  // Spin database
-  StSpinDbMaker* spinDb = new StSpinDbMaker;
+  // EEMC slow simulator
+  StEEmcSlowMaker* eess = new StEEmcSlowMaker;
+  eess->setSamplingFraction(0.0384);
+  eess->setAddPed(true);
+  eess->setSmearPed(true);
+
+  // BEMC simulator
+  StEmcSimulatorMaker* emcSim = new StEmcSimulatorMaker;
+  emcSim->setCalibSpread(kBarrelEmcTowerId,0.15);
+  StPreEclMaker* preEcl = new StPreEclMaker; // need this to fill new StEvent information
 
   // Barrel ADC to energy maker
   StEmcADCtoEMaker* adc = new StEmcADCtoEMaker;
 
   // Trigger simulator
   StTriggerSimuMaker* simuTrig = new StTriggerSimuMaker;
-  simuTrig->setMC(false); // Must be before individual detectors, to be passed
+  simuTrig->setMC(true); // Must be before individual detectors, to be passed
   // BBC was not used in Run 9
   //simuTrig->useBbc();
   simuTrig->useBemc();
@@ -117,12 +105,20 @@ void RunJetFinder2009pro(int nevents = 1e6,
     simuTrig->useL2(simL2Mk);
   }
 
+  // Get Pythia record
+  StMCAsymMaker* asym = new StMCAsymMaker;
+
   // Skim event maker
   StJetSkimEventMaker* skimEventMaker = new StJetSkimEventMaker("StJetSkimEventMaker",muDstMaker,skimfile);
+  skimEventMaker->addSimuTrigger(240530); // BHT3
+  skimEventMaker->addSimuTrigger(240652); // L2JetHigh
+  skimEventMaker->addSimuTrigger(240411); // JP1
 
   // Jet maker
   StJetMaker2009* jetmaker = new StJetMaker2009;
   jetmaker->setJetFile(jetfile);
+
+  //------------------------------------------------------------------------------------
 
   // Set analysis cuts for 12-point branch
   StAnaPars* anapars12 = new StAnaPars;
@@ -161,6 +157,8 @@ void RunJetFinder2009pro(int nevents = 1e6,
   anapars12->addJetCut(new StProtoJetCutPt(5,200));
   anapars12->addJetCut(new StProtoJetCutEta(-100,100));
 
+  //------------------------------------------------------------------------------------
+
   // Set analysis cuts for 5-point branch
   StAnaPars* anapars5 = new StAnaPars;
   anapars5->useTpc  = true;
@@ -197,11 +195,13 @@ void RunJetFinder2009pro(int nevents = 1e6,
   anapars5->addJetCut(new StProtoJetCutPt(5,200));
   anapars5->addJetCut(new StProtoJetCutEta(0.8,2.5));
 
+  //------------------------------------------------------------------------------------
+
   // Set analysis cuts for EMC branch
   StAnaPars* anaparsEMC = new StAnaPars;
   anaparsEMC->useTpc  = true;
   anaparsEMC->useBemc = true;
-  anaparsEMC->useEemc = true;
+  anaparsEMC->useEmc  = true;
 
   // TPC cuts
   anaparsEMC->addTpcCut(new StjTrackCutFlag(0));
@@ -221,6 +221,16 @@ void RunJetFinder2009pro(int nevents = 1e6,
   anaparsEMC->addJetCut(new StProtoJetCutPt(5,200));
   anaparsEMC->addJetCut(new StProtoJetCutEta(-100,100));
 
+  //------------------------------------------------------------------------------------
+
+  // Set analysis cuts for Pythia branch
+  StAnaPars* anaparsPythia = new StAnaPars;
+  anaparsPythia->useMc = true;
+
+  // Jet cuts
+  anaparsPythia->addJetCut(new StProtoJetCutPt(3,200));
+  anaparsPythia->addJetCut(new StProtoJetCutEta(-100,100));
+    
   // Set cone jet finder parameters
   StConePars* conepars = new StConePars;
   conepars->setGridSpacing(105,-3.0,3.0,120,-TMath::Pi(),TMath::Pi());
@@ -233,9 +243,14 @@ void RunJetFinder2009pro(int nevents = 1e6,
   conepars->setDoSplitMerge(true);
   conepars->setDebug(false);
 
+  //------------------------------------------------------------------------------------
+
   jetmaker->addBranch("ConeJets12",anapars12,conepars);
   jetmaker->addBranch("ConeJets5",anapars5,conepars);
   jetmaker->addBranch("ConeJetsEMC",anaparsEMC,conepars);
+  jetmaker->addBranch("PythiaConeJets",anaparsPythia,conepars);
+
+  //------------------------------------------------------------------------------------
 
   chain->Init();
   chain->EventLoop(nevents);

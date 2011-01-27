@@ -16,7 +16,15 @@
 
 class StAnaPars : public TObject {
 public:
-  StAnaPars() : mCorrectTowerEnergyForTracks(new StjTowerEnergyCorrectionForTracksNull) {}
+  StAnaPars()
+    : mCorrectTowerEnergyForTracks(new StjTowerEnergyCorrectionForTracksNull)
+    , useTpc(false)
+    , useBemc(false)
+    , useEemc(false)
+    , useMc(false)
+  {
+  }
+
   ~StAnaPars() { delete mCorrectTowerEnergyForTracks; }
 
   void setTowerEnergyCorrection(StjAbstractTowerEnergyCorrectionForTracks* correctTowerEnergyForTracks)
@@ -41,6 +49,12 @@ private:
   StjTowerEnergyListCut mBemcCuts;
   StjTowerEnergyListCut mEemcCuts;
   StProtoJetListCut mJetCuts;
+
+public:
+  bool useTpc;
+  bool useBemc;
+  bool useEemc;
+  bool useMc;
 
   ClassDef(StAnaPars,0);
 };

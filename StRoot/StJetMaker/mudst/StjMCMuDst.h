@@ -1,5 +1,5 @@
 // -*- mode: c++;-*-
-// $Id: StjMCMuDst.h,v 1.6 2009/12/09 05:12:20 pibero Exp $
+// $Id: StjMCMuDst.h,v 1.7 2011/01/27 16:42:44 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJMCMUDST_H
 #define STJMCMUDST_H
@@ -15,7 +15,7 @@ public:
   StjMCMuDst(StMaker* maker) : _maker(maker) { }
   virtual ~StjMCMuDst() { }
 
-  StThreeVectorF getMCVertex() const;
+  StjPrimaryVertex getMCVertex() const;
   StjMCParticleList getMCParticleList();
 
 private:
