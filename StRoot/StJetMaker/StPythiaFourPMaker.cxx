@@ -1,4 +1,4 @@
-// $Id: StPythiaFourPMaker.cxx,v 1.17 2011/01/27 16:42:26 pibero Exp $
+// $Id: StPythiaFourPMaker.cxx,v 1.18 2011/01/27 16:57:04 pibero Exp $
 #include "StPythiaFourPMaker.h"
 
 #include "StMuTrackFourVec.h"
@@ -50,16 +50,15 @@ void StPythiaFourPMaker::Clear(Option_t* opt)
 
 Int_t StPythiaFourPMaker::Make()
 {
-  StMuPrimaryVertex* pv = new StMuPrimaryVertex;
   const TVector3& v = _mc->getMCVertex().position();
-  StThreeVectorF vv;
-  vv.set(v.x(),v.y(),v.z());
+  StThreeVectorF vv(v.x(),v.y(),v.z());
+  StMuPrimaryVertex* pv = new StMuPrimaryVertex;
   pv->setPosition(vv);
   _vertexNodes.push_back(VertexNode());
   _vertexNodes[0].vertex = pv;
-  FourList& tracks = _vertexNodes[0].tracks;
   StjMCParticleList theList = _mc->getMCParticleList();
   theList = (*_cut)(theList);
+  FourList& tracks = _vertexNodes[0].tracks;
   transform(theList.begin(),theList.end(),back_inserter(tracks),StjMCParticleToStMuTrackFourVec());
 
   return kStOK;

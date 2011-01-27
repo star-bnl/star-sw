@@ -33,7 +33,6 @@ public:
 
 private:
 
-  friend class StPythiaFourPMaker;
   friend class StjMCParticleToStMuTrackFourVec;
   
   double _pt;			// transverse momentum
