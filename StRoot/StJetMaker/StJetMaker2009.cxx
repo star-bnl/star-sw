@@ -11,6 +11,7 @@
 #include "StjTPCMuDst.h"
 #include "StjBEMCMuDst.h"
 #include "StjEEMCMuDst.h"
+#include "StjMCMuDst.h"
 #include "StjTPCRandomMuDst.h"
 #include "StjTPCNull.h"
 #include "StjBEMCNull.h"
@@ -18,6 +19,7 @@
 #include "StjAbstractTowerEnergyCorrectionForTracks.h"
 #include "StjeTrackListToStMuTrackFourVecList.h"
 #include "StjeTowerEnergyListToStMuTrackFourVecList.h"
+#include "StjMCParticleToStMuTrackFourVec.h"
 #include "StJetFinder/StJetFinder.h"
 #include "StSpinPool/StJetEvent/StJetEventTypes.h"
 #include "StMuTrackFourVec.h"
@@ -59,10 +61,8 @@ int StJetMaker2009::Init()
 
   mTree->BranchRef();
 
-  if (mUseEemc) {
-    StEEmcDb* eemcDb = (StEEmcDb*)GetDataSet("StEEmcDb");
-    eemcDb->setThreshold(3);
-  }
+  StEEmcDb* eemcDb = (StEEmcDb*)GetDataSet("StEEmcDb");
+  eemcDb->setThreshold(3);
 
   return StMaker::Init();
 }
@@ -77,7 +77,7 @@ int StJetMaker2009::Make()
     jetbranch->event->mRunId = GetRunNumber();
     jetbranch->event->mEventId = GetEventNumber();
 
-    if (mUseTpc) {
+    if (jetbranch->anapars->useTpc) {
       StjTPCMuDst tpc;
 
       // Save vertex index
@@ -103,7 +103,7 @@ int StJetMaker2009::Make()
 	// Get BEMC towers
 	StjTowerEnergyList bemcEnergyList;
 
-	if (mUseBemc) {
+	if (jetbranch->anapars->useBemc) {
 	  StjBEMCMuDst bemc;
 	  bemcEnergyList = jetbranch->anapars->bemcCuts()(bemc.getEnergyList());
 	}
@@ -111,7 +111,7 @@ int StJetMaker2009::Make()
 	// Get EEMC towers
 	StjTowerEnergyList eemcEnergyList;
 
-	if (mUseEemc) {
+	if (jetbranch->anapars->useEemc) {
 	  StjEEMCMuDst eemc;
 	  eemcEnergyList = jetbranch->anapars->eemcCuts()(eemc.getEnergyList());
 	}
@@ -161,7 +161,7 @@ int StJetMaker2009::Make()
 	// Get BEMC towers
 	StjTowerEnergyList bemcEnergyList;
 
-	if (mUseBemc) {
+	if (jetbranch->anapars->useBemc) {
 	  StjBEMCMuDst bemc;
 	  bemc.setVertex(0,0,0);
 	  bemcEnergyList = jetbranch->anapars->bemcCuts()(bemc.getEnergyList());
@@ -170,7 +170,7 @@ int StJetMaker2009::Make()
 	// Get EEMC towers
 	StjTowerEnergyList eemcEnergyList;
 
-	if (mUseEemc) {
+	if (jetbranch->anapars->useEemc) {
 	  StjEEMCMuDst eemc;
 	  eemcEnergyList = jetbranch->anapars->eemcCuts()(eemc.getEnergyList());
 	}
@@ -211,7 +211,36 @@ int StJetMaker2009::Make()
 
       // Restore vertex index
       tpc.setVertexIndex(savedVertexIndex);
+
     }
+
+    if (jetbranch->anapars->useMc) {
+      StjMCMuDst mc(this);
+      StjPrimaryVertex mcvertex = mc.getMCVertex();
+      StjMCParticleList mcparticles = mc.getMCParticleList();
+      StProtoJet::FourVecList particles; // vector<const AbstractFourVec*>
+      transform(mcparticles.begin(),mcparticles.end(),back_inserter(particles),StjMCParticleToStMuTrackFourVec());
+
+      // Run jet finder
+      StJetFinder::JetList protojets;	// list<StProtoJet>
+      jetbranch->jetfinder->findJets(protojets,particles);
+
+      // Filter jets
+      protojets = jetbranch->anapars->jetCuts()(protojets);
+
+      // Add vertex
+      StJetVertex* jetvertex = jetbranch->event->newVertex();
+      copyVertex(mcvertex,jetvertex);
+
+      // Add jets
+      for (StJetFinder::JetList::const_iterator iProtoJet = protojets.begin(); iProtoJet != protojets.end(); ++iProtoJet)
+	addJet(*iProtoJet,jetbranch->event,jetvertex);
+
+      // Clean up particles
+      for (StProtoJet::FourVecList::const_iterator i = particles.begin(); i != particles.end(); ++i)
+	delete *i;
+    } // End use MC
+
   } // End loop over jet branches
 
   mTree->Fill();
@@ -237,21 +266,6 @@ void StJetMaker2009::addBranch(const char* name, StAnaPars* anapars, StJetPars* 
 void StJetMaker2009::setJetFile(const char* filename)
 {
   mFileName = filename;
-}
-
-void StJetMaker2009::useTpc(bool use)
-{
-  mUseTpc = use;
-}
-
-void StJetMaker2009::useBemc(bool use)
-{
-  mUseBemc = use;
-}
-
-void StJetMaker2009::useEemc(bool use)
-{
-  mUseEemc = use;
 }
 
 void StJetMaker2009::useRandomSelector(bool use)

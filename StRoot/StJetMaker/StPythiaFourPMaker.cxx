@@ -1,4 +1,4 @@
-// $Id: StPythiaFourPMaker.cxx,v 1.16 2010/05/24 23:11:35 pibero Exp $
+// $Id: StPythiaFourPMaker.cxx,v 1.17 2011/01/27 16:42:26 pibero Exp $
 #include "StPythiaFourPMaker.h"
 
 #include "StMuTrackFourVec.h"
@@ -10,6 +10,7 @@
 #include "StjMCParticleCut.h"
 #include "StjMCParticleCutEta.h"
 #include "StjMCParticleCutStatus.h"
+#include "StjMCParticleToStMuTrackFourVec.h"
 
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 
@@ -50,30 +51,16 @@ void StPythiaFourPMaker::Clear(Option_t* opt)
 Int_t StPythiaFourPMaker::Make()
 {
   StMuPrimaryVertex* pv = new StMuPrimaryVertex;
-  pv->setPosition(_mc->getMCVertex());
-
+  const TVector3& v = _mc->getMCVertex().position();
+  StThreeVectorF vv;
+  vv.set(v.x(),v.y(),v.z());
+  pv->setPosition(vv);
   _vertexNodes.push_back(VertexNode());
   _vertexNodes[0].vertex = pv;
   FourList& tracks = _vertexNodes[0].tracks;
-
   StjMCParticleList theList = _mc->getMCParticleList();
   theList = (*_cut)(theList);
-
-  for (StjMCParticleList::const_iterator it = theList.begin(); it != theList.end(); ++it) {
-    TLorentzVector p;
-    p.SetPtEtaPhiM(it->pt,it->eta,it->phi,it->m);
-    StMcTrackEmu* mctrack = new StMcTrackEmu;
-    mctrack->_pt     = it->pt;
-    mctrack->_eta    = it->eta;
-    mctrack->_phi    = it->phi;
-    mctrack->_m      = it->m;
-    mctrack->_e      = it->e;
-    mctrack->_id     = it->mcparticleId;
-    mctrack->_pdg    = it->pdg;
-    mctrack->_status = it->status;
-    StMuTrackFourVec* pmu = new StMuTrackFourVec(0,0,mctrack,p,0,it->mcparticleId-1,kUnknownId);
-    tracks.push_back(pmu);
-  }
+  transform(theList.begin(),theList.end(),back_inserter(tracks),StjMCParticleToStMuTrackFourVec());
 
   return kStOK;
 }

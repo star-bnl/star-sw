@@ -1,11 +1,11 @@
 // -*- mode: c++;-*-
-// $Id: StjMC.h,v 1.2 2009/12/09 05:12:17 pibero Exp $
+// $Id: StjMC.h,v 1.3 2011/01/27 16:42:39 pibero Exp $
 // Copyright (C) 2008 Tai Sakuma <sakuma@bnl.gov>
 #ifndef STJMC_H
 #define STJMC_H
 
 #include <TObject.h>
-#include <StThreeVectorF.hh>
+#include <StjPrimaryVertex.h>
 #include <StjMCParticleList.h>
 
 class StjMC : public TObject {
@@ -16,7 +16,7 @@ public:
 
   virtual void Init() { }
 
-  virtual StThreeVectorF getMCVertex() const = 0;
+  virtual StjPrimaryVertex  getMCVertex() const = 0;
   virtual StjMCParticleList getMCParticleList() = 0;
 
   ClassDef(StjMC, 1)

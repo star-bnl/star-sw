@@ -1,4 +1,4 @@
-// $Id: StjMCMuDst.cxx,v 1.9 2009/12/09 05:12:20 pibero Exp $
+// $Id: StjMCMuDst.cxx,v 1.10 2011/01/27 16:42:44 pibero Exp $
 
 #include <StjMCMuDst.h>
 
@@ -13,15 +13,19 @@
 
 #include <TLorentzVector.h>
 
-StThreeVectorF StjMCMuDst::getMCVertex() const
+StjPrimaryVertex StjMCMuDst::getMCVertex() const
 {
+  StjPrimaryVertex vertex;
   if (TDataSet* Event = _maker->GetDataSet("geant")) {
     TDataSetIter geantDstI(Event);
     if (const St_g2t_vertex* g2t_vertex_descriptor = (const St_g2t_vertex*)geantDstI("g2t_vertex"))
       if (const g2t_vertex_st* g2t_vertex_table = g2t_vertex_descriptor->GetTable())
-	return StThreeVectorF(g2t_vertex_table[0].ge_x);
+	{
+	  const float* geantvertex = g2t_vertex_table[0].ge_x;
+	  vertex.mPosition.SetXYZ(geantvertex[0],geantvertex[1],geantvertex[2]);
+	}
   }
-  return StThreeVectorF(-999,-999,-999);
+  return vertex;
 }
 
 StjMCParticleList StjMCMuDst::getMCParticleList()

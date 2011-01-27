@@ -34,9 +34,6 @@ public:
     : StMaker(name)
     , mFile(0)
     , mTree(0)
-    , mUseTpc(false)
-    , mUseBemc(false)
-    , mUseEemc(false)
     , mUseRandomSelector(false)
   {
   }
@@ -49,9 +46,6 @@ public:
   // Setters
   void addBranch(const char* name, StAnaPars* anapars, StJetPars* jetpars);
   void setJetFile(const char* filename);
-  void useTpc(bool use = true);
-  void useBemc(bool use = true);
-  void useEemc(bool use = true);
   void useRandomSelector(bool use = true);
 
   // Getters
@@ -83,14 +77,9 @@ private:
   };
 
   vector<StJetBranch*> mJetBranches;
-
   TString mFileName;
   TFile* mFile;
   TTree* mTree;
-
-  bool mUseTpc;
-  bool mUseBemc;
-  bool mUseEemc;
   bool mUseRandomSelector;
 
   ClassDef(StJetMaker2009,0);

@@ -56,6 +56,7 @@ public:
 
 private:
   friend class StjTPCMuDst;
+  friend class StjMCMuDst;
 
   TVector3 mPosition;
   TVector3 mPosError;
