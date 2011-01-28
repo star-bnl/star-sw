@@ -373,24 +373,21 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
     rmsTime += IntegrateDiffusion(path[i].xi, path[i].yi, path[i].zi, path[i].xf, path[i].yf, path[i].zf);
   }
   
-  rmsTime = sqrt( rmsTime );
+  rmsTime = sqrt(rmsTime);
   meanTime = path.back().tf;
-}
 
-bool
-DriftLineRKF::CheckStep(double x, double y, double z, bool status){
 }
 
 void
 DriftLineRKF::DriftToWire(double x0, double y0, double z0, int iWire) {
 
-  if(debug){ 
-    std::cout<<"Particle trapped by wire at: ";
-    std::cout<<x0 <<", " <<y0 <<", " <<z0<<" = "<<sqrt(x0*x0 + y0*y0 + z0*z0) <<"\n";
-    std::cout<<"By wire located at (" << xWire <<", " 
-             << yWire <<") with physical radius " 
-             << rWire <<" cm.\n";
-   }
+  if (debug) { 
+    std::cout << "Particle trapped by wire at: ";
+    std::cout << x0 << ", " << y0 << ", " << z0 << " = " << sqrt(x0 * x0 + y0 * y0 + z0 * z0) << "\n";
+    std::cout << "By wire located at (" << xWire << ", " 
+              << yWire << ") with physical radius " 
+              << rWire << " cm.\n";
+  }
  
   bool lastStep = false;
   double timeToDrift = 0.;
@@ -401,370 +398,349 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0, int iWire) {
   int status;
   sensor->MagneticField(x0, y0, z0, bx, by, bz, status);
   sensor->ElectricField(x0, y0, z0, ex, ey, ez, medium, status);
-  if(status != 0){
-    std::cerr<<"DriftLineRKF::DriftToWire:\n\t";
-    std::cerr<<"Zero field at initial position. Abandoning drift to wire.\n";
+  if (status != 0) {
+    std::cerr << "DriftLineRKF::DriftToWire:\n\t";
+    std::cerr << "Zero field at initial position. Abandoning drift to wire.\n";
     path.back().status = "Zero field. Abandoned.";
     return;
- }
+  }
   
- // Estimate time to wire
- double vx0 = 0.;
- double vz0 = 0.;
- double vy0 = 0.;
- if(!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx0, vy0, vz0)){
-   std::cerr<<"DriftLineRKF::DriftToWire:\n\t";
-   std::cerr<<"Unable to retrieve drift velocity.\n";
-   return;
- }
+  // Estimate time to wire
+  double vx0 = 0.;
+  double vz0 = 0.;
+  double vy0 = 0.;
+  if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx0, vy0, vz0)) {
+    std::cerr << "DriftLineRKF::DriftToWire:\n\t";
+    std::cerr << "Unable to retrieve drift velocity.\n";
+    return;
+  }
 
- double speed0 = sqrt( vx0 * vx0 + vy0 * vy0 + vz0 * vz0 );
- double dist2wire = DistanceToWire(x0, y0, z0);
- double tCrude = dist2wire / speed0;
+  double speed0 = sqrt( vx0 * vx0 + vy0 * vy0 + vz0 * vz0 );
+  double dist2wire = DistanceToWire(x0, y0, z0);
+  double tCrude = dist2wire / speed0;
 
- // Check if tCrude is to small
- if(tCrude < 1.e-6){
-   path.back().xf = x0;
-   path.back().yf = y0;
-   path.back().zf = z0;
-   path.back().tf = path.back().ti + tCrude;
-   path.back().status = "Distance to wire to small.";
-   return;
- }
+  // Check if tCrude is to small
+  if (tCrude < 1.e-6) {
+    path.back().xf = x0;
+    path.back().yf = y0;
+    path.back().zf = z0;
+    path.back().tf = path.back().ti + tCrude;
+    path.back().status = "Distance to wire to small.";
+    return;
+  }
 
- while(!lastStep){
+  while (!lastStep) {
    
-   // Estimate where the drift-line with end up
-   double x1 = x0 + tCrude * vx0;
-   double y1 = y0 + tCrude * vy0;
-   double z1 = z0 + tCrude * vz0;
-   if(debug){
-     std::cout<<"Step to wire: " << x1 << ", " << y1 <<", " << z1 << "\n";
-   }
+    // Estimate where the drift-line with end up
+    double x1 = x0 + tCrude * vx0;
+    double y1 = y0 + tCrude * vy0;
+    double z1 = z0 + tCrude * vz0;
+    if (debug) {
+      std::cout<<"Step to wire: " << x1 << ", " << y1 <<", " << z1 << "\n";
+    }
    
-   // Check to make sure step is in a good location
-   dist2wire = DistanceToWire(x1, y1, z1);
-   if(dist2wire < 0.){
+    // Check to make sure step is in a good location
+    dist2wire = DistanceToWire(x1, y1, z1);
+    if (dist2wire < 0.) {
      
-     if(debug){
-       std::cout<<"DriftLineRKF::DriftToWire:\n\t";
-       std::cout<<"Dirft line inside wire. This may be the last step.\n";
-     }
+      if (debug) {
+        std::cout<<"DriftLineRKF::DriftToWire:\n\t";
+        std::cout<<"Dirft line inside wire. This may be the last step.\n";
+      }
      
-     lastStep = true;
+      lastStep = true;
    
-     // Move the end point outside the wire.
-     while(dist2wire < 0.){
-       tCrude *= 0.9999;
-       x1 = x0 + tCrude * vx0;
-       y1 = y0 + tCrude * vy0;
-       z1 = z0 + tCrude * vz0;
-       dist2wire = DistanceToWire(x1,y1,z1);
-     }
-   }
+      // Move the end point outside the wire.
+      while (dist2wire < 0.) {
+        tCrude *= 0.9999;
+        x1 = x0 + tCrude * vx0;
+        y1 = y0 + tCrude * vy0;
+        z1 = z0 + tCrude * vz0;
+        dist2wire = DistanceToWire(x1,y1,z1);
+      }
+    }
    
-   sensor->MagneticField(x1, y1, z1, bx, by, bz, status);
-   sensor->ElectricField(x1, y1, z1, ex, ey, ez, medium, status);
-   if(status != 0){
-     std::cerr<<"DriftLineRKF::DriftToWire:\n\t";
-     std::cerr<<"Zero field at step location ("<<x1 <<", " <<y1 <<", " << z1 <<"). Abandoning.\n";
-     std::cerr<<"Status returned: " << status << ".\n";
-     path.back().status = "Zero field. Abandoned.";
-     return;
-   }
+    sensor->MagneticField(x1, y1, z1, bx, by, bz, status);
+    sensor->ElectricField(x1, y1, z1, ex, ey, ez, medium, status);
+    if (status != 0) {
+      std::cerr << "DriftLineRKF::DriftToWire:\n\t";
+      std::cerr << "Zero field at step location (" << x1 << ", " << y1 << ", " << z1 << "). Abandoning.\n";
+      std::cerr << "Status returned: " << status << ".\n";
+      path.back().status = "Zero field. Abandoned.";
+      return;
+    }
 
-   // Now Calculate the drift velocity at this end point
-   double vx1 = 0.;
-   double vy1 = 0.;
-   double vz1 = 0.;
-   if(!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx1, vy1, vz1)){
-     std::cerr << "DriftLineRKF::DriftToWire:\n\t";
-     std::cerr<< "Unable to retreive drift veloctiy. Abandoning.\n";
-     path.back().status = "Abandoned";
-   }
+    // Now calculate the drift velocity at this end point
+    double vx1 = 0.;
+    double vy1 = 0.;
+    double vz1 = 0.;
+    if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx1, vy1, vz1)) {
+      std::cerr << "DriftLineRKF::DriftToWire:\n\t";
+      std::cerr<< "Unable to retrieve drift velocity. Abandoning.\n";
+      path.back().status = "Abandoned";
+    }
    
-   double speed1 = sqrt( vx1 * vx1 + vy1 * vy1 + vz1 * vz1 );
+    double speed1 = sqrt( vx1 * vx1 + vy1 * vy1 + vz1 * vz1 );
    
-   // Calculate a mid point between (x0, y0) and (x1,y1)
+    // Calculate a mid point between (x0, y0) and (x1,y1)
+    double xm = 0.5 * (x0 + x1);
+    double ym = 0.5 * (y0 + y1);
+    double zm = 0.5 * (z0 + z1);
 
-   double xm = 0.5 * (x0 + x1);
-   double ym = 0.5 * (y0 + y1);
-   double zm = 0.5 * (z0 + z1);
+    // Check mid point location and find velocity
+    sensor->MagneticField(xm, ym, zm, bx, by, bz, status);
+    sensor->ElectricField(xm, ym, zm, ex, ey, ez, medium, status);
+    if (status != 0) {
+      std::cerr << "DriftLineRKF::DriftToWire:\n\t";
+      std::cerr << "Zero field at step location (" << xm << ", " << ym << ", " << zm << "). Abandoning.\n";
+      path.back().status = "Zero field. Abandoned.";
+      return;
+    }
+   
+    // Now calculate the drift velocity at this mid point
+    double vxm = 0.;
+    double vym = 0.;
+    double vzm = 0.;
+    if(!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vxm, vym, vzm)){
+      std::cerr << "DriftLineRKF::DriftToWire:\n\t";
+      std::cerr << "Unable to retrieve drift velocity. Abandoning.\n";
+      path.back().status = "Abandoned";
+    }
+    double speedm = sqrt(vxm * vxm + vym * vym + vzm * vzm);
+   
+    // Compare the first and second order estimates
+    double stepLength = sqrt(pow(x0 - x1, 2) + pow(y0 - y1, 2));
+    if (stepLength * fabs(1. / speed0 - 2. / speedm + 1. / speed1) / 3. < 1.e-4 * (1 + path.back().ti)) {
+      // Accuracy is good enough
+      timeToDrift += stepLength * (1. / speed0 + 4. / speedm + 1. / speed1) / 6.;
+      path.back().xf = x1;
+      path.back().yf = y1;
+      path.back().zf = z1;
+      // Proceed to the next step
+      x0 = x1;
+      y0 = y1;
+      z0 = z1;
+      vx0 = vx1;
+      vy0 = vy1;
+      vz0 = vz1;
+    } else {
+      // Accuracy was not good enough so half the step time
+      tCrude *= 0.5;
+      lastStep = false;
+    }
+  }
+  path.back().status = "Drifted to wire.";
+  path.back().tf = path.back().ti + timeToDrift;
 
-   // Check mid point location and find velocity
-
-   sensor->MagneticField(xm, ym, zm, bx, by, bz, status);
-   sensor->ElectricField(xm, ym, zm, ex, ey, ez, medium, status);
-   if(status != 0){
-     std::cerr<<"DriftLineRKF::DriftToWire:\n\t";
-     std::cerr<<"Zero field at step location ("<<xm <<", " <<ym <<", " << zm <<"). Abandoning.\n";
-     path.back().status = "Zero field. Abandoned.";
-     return;
-   }
-   
-   // Now Calculate the drift velocity at this mid point
-   
-   double vxm = 0.;
-   double vym = 0.;
-   double vzm = 0.;
-   if(!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vxm, vym, vzm)){
-     std::cerr<<"DriftLineRKF::DriftToWire:\n\t";
-     std::cerr<<"Unable to retreive drift veloctiy. Abandoning.\n";
-     path.back().status = "Abandoned";
-   }
-   double speedm = sqrt( vxm * vxm + vym * vym + vzm * vzm);
-   
-   // Compare the first and second order estimates
-   
-   double stepLength = sqrt( pow(x0 - x1, 2) + pow(y0 - y1, 2) );
-   
-   if(stepLength * fabs( 1./speed0 - 2./speedm + 1./speed1) / 3.< 1.e-4*(1+path.back().ti)){
-     // Accuracy is good enough
-     timeToDrift += stepLength * ( 1./speed0 + 4./speedm + 1./speed1)/6.;
-     path.back().xf = x1;
-     path.back().yf = y1;
-     path.back().zf = z1;
-     // Proceed to the next step
-     x0 = x1;
-     y0 = y1;
-     z0 = z1;
-     vx0 = vx1;
-     vy0 = vy1;
-     vz0 = vz1;
-   }
-   else{
-     // Accuracy was not good enough so half the step time
-     tCrude *= 0.5;
-     lastStep = false;
-   }
- }
- path.back().status = "Drifted to wire.";
- path.back().tf = path.back().ti + timeToDrift;
 }
 
 double
 DriftLineRKF::DistanceToWire(double x, double y, double z){
 
-  return sqrt( pow(xWire - x, 2) + pow(yWire - y, 2) ) - rWire;
+  return sqrt(pow(xWire - x, 2) + pow(yWire - y, 2)) - rWire;
 
 }
   
 double 
-DriftLineRKF::IntegrateDiffusion(double x0, double y0, double z0,
-				const double xe, const double ye, const double ze){
+DriftLineRKF::IntegrateDiffusion(const double x, const double y, const double z,
+                                 const double xe, const double ye, const double ze) {
 
-  if(debug){ 
-    std::cout<<"-----------------------------------------\n";
-    std::cout<<"Integrating diffusion over: ";
-    std::cout<<x0 <<", " <<y0 <<", " <<z0<<" to " 
-	     <<xe <<", " <<ye <<", " <<ze <<"\n";
+  if (debug) { 
+    std::cout << "-----------------------------------------\n";
+    std::cout << "Integrating diffusion over: ";
+    std::cout << x  << ", " << y  << ", " << z  << " to " 
+	      << xe << ", " << ye << ", " << ze <<"\n";
   }
 
   // Used to determine when the last integration step has been taken
   bool lastStep = false;
 
   // Store the total diffusion components
-  double DLrms = 0.;
-  double DTrms = 0.;
+  double dLrms = 0.;
+  double dTrms = 0.;
 
   // Check to make sure initial position has non-zero field
   double ex, ey, ez;
   double bx, by, bz;
   int status;
-  sensor->MagneticField(x0, y0, z0, bx, by, bz, status);
-  sensor->ElectricField(x0, y0, z0, ex, ey, ez, medium, status);
-  if(status != 0){
-    std::cerr<<"DriftLineRKF::IntegrateDiffussion:\n\t";
-    std::cerr<<"Zero field at initial position. Abandoning.\n";
+  sensor->MagneticField(x, y, z, bx, by, bz, status);
+  sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
+  if(status != 0) {
+    std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
+    std::cerr << "Zero field at initial position. Abandoning.\n";
     return 0.;
   }
   
   // Determine drift velocity at init point 
-
   double vx0 = 0.;
   double vy0 = 0.;
   double vz0 = 0.;
-  if(!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx0, vy0, vz0)){
-    std::cerr<<"DriftLineRKF::IntegrateDiffusion:\n\t";
-    std::cerr<<"Unable to retreive drift veloctiy. Abandoning.\n";
+  if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx0, vy0, vz0)) {
+    std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
+    std::cerr << "Unable to retrieve drift velocity. Abandoning.\n";
     path.back().status = "Abandoned";
   }
-  double speed0 = sqrt( vx0 * vx0 + vy0 * vy0 + vz0 * vz0);
+  double speed0 = sqrt(vx0 * vx0 + vy0 * vy0 + vz0 * vz0);
   
   // Determine diffusion at init point
-  
-  double dL0;
+  double dL0 = 0.;
   double dT0 = 0.;
-  if(!medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dL0, dT0)){
-    std::cerr<<"DriftLineRKF::IntegrateDiffusion:\n\t";
-    std::cerr<<"Unable to retrieve diffusion.\n";
+  if (!medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dL0, dT0)) {
+    std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
+    std::cerr << "Unable to retrieve diffusion.\n";
     return 0.;
   }
 
-  // Determine the initial step length;
-  double stepLength = sqrt ( pow(x0 - xe,2) + pow(y0 - ye,2) + pow(z0 - ze,2) );
- if(debug) std::cout<<"Step Length = " << stepLength <<"\n";
- // Check to see if initial step size is to small
- if(stepLength <= 1e-6){
-   if(debug){
-     std::cout<<"DriftLineRKF::IntegrateDiffusion:\n\t"
-	      <<"Initial stepSize to small.\t\n "
-	      <<"Using constant diffusion over step.\n";
-   }
-   return pow(dL0/speed0,2)*stepLength; 
-   
- }
+  // Determine the initial step length
+  double stepLength = sqrt(pow(x - xe, 2) + pow(y - ye, 2) + pow(z - ze, 2));
+  if(debug) std::cout << "Step Length = " << stepLength <<"\n";
+  // Check to see if initial step size is too small
+  if (stepLength <= 1.e-6) {
+    if (debug) {
+      std::cout << "DriftLineRKF::IntegrateDiffusion:\n\t"
+                << "Initial stepSize to small.\t\n "
+                << "Using constant diffusion over step.\n";
+    }
+    return pow(dL0 / speed0, 2) * stepLength; 
+  }
  
- double x1 = xe;
- double y1 = ye;
- double z1 = ze;
+  double x0 = x;
+  double y0 = y;
+  double z0 = z;
 
- bool keepGoing = true;
+  double x1 = xe;
+  double y1 = ye;
+  double z1 = ze;
 
- int stepCounter = 0;
- double x = x0;
- double y = y0;
- double z = z0;
-
- while(keepGoing){
-   stepCounter++;
-   if(lastStep) keepGoing = false;
-
-   //std::cout<<x0 <<", " << y0 << ", " << z0 <<"\n";
-   //std::cout<<x1 <<", " << y1 << ", " << z1 <<"\n\n";
+  bool keepGoing = true;
+  int stepCounter = 0;
+  while (keepGoing) {
+    stepCounter++;
+    if (lastStep) keepGoing = false;
    
-   sensor->MagneticField(x1, y1, z1, bx, by, bz, status);
-   sensor->ElectricField(x1, y1, z1, ex, ey, ez, medium, status);
-   if(status != 0){
-     std::cerr<<"DriftLineRKF::IntegrateDiffusion:\n\t";
-     std::cerr<<"Zero field at step location ("<<x1 <<", " <<y1 <<", " << z1 <<"). Abandoning.\n";
-     std::cerr<<"Status returned: " << status << ".\n";
-     return 0.;
-   }
+    sensor->MagneticField(x1, y1, z1, bx, by, bz, status);
+    sensor->ElectricField(x1, y1, z1, ex, ey, ez, medium, status);
+    if (status != 0) {
+      std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
+      std::cerr << "Zero field at step location (" << x1 << ", " << y1 << ", " << z1 << "). Abandoning.\n";
+      std::cerr << "Status returned: " << status << ".\n";
+      return 0.;
+    }
+ 
+    // Determine drift velocity at init point 
+    double vx1 = 0.;
+    double vy1 = 0.;
+    double vz1 = 0.;
+    if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx1, vy1, vz1)) {
+      std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
+      std::cerr << "Unable to retrieve drift velocity. Abandoning.\n";
+      path.back().status = "Abandoned";
+    }
+    double speed1 = sqrt(vx1 * vx1 + vy1 * vy1 + vz1 * vz1);
    
-   // Determine drift velocity at init point 
-   double vx1 = 0.;
-   double vy1 = 0.;
-   double vz1 = 0.;
-   if(!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx1, vy1, vz1)){
-     std::cerr<<"DriftLineRKF::IntegrateDiffusion:\n\t";
-     std::cerr<<"Unable to retreive drift veloctiy. Abandoning.\n";
-     path.back().status = "Abandoned";
-   }
-   double speed1 = sqrt( vx1 * vx1 + vy1 * vy1 + vz1 * vz1);
+    // Now calculate the diffusion at this end point
+    double dL1 = 0.;
+    double dT1 = 0.;
+    if (!medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dL1, dT1)) {
+      std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
+      std::cerr << "Unable to retrieve diffusion. Abandoning.\n";
+    }
    
-   // Now Calculate the diffusion at this end point
-   double dL1 = 0.;
-   double dT1 = 0.;
-   if(!medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dL1, dT1)){
-     std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
-     std::cerr<< "Unable to retreive diffusion. Abandoning.\n";
-   }
-   
-   // Calculate a mid point between (x0, y0) and (x1,y1)
-
-   double xm = 0.5 * (x0 + x1);
-   double ym = 0.5 * (y0 + y1);
-   double zm = 0.5 * (z0 + z1);
-
-   // Check mid point location and find diffusion
-
-   sensor->MagneticField(xm, ym, zm, bx, by, bz, status);
-   sensor->ElectricField(xm, ym, zm, ex, ey, ez, medium, status);
-   if(status != 0){
-     std::cerr<<"DriftLineRKF::IntegrateDiffusion:\n\t";
-     std::cerr<<"Zero field at step location ("<<xm <<", " <<ym <<", " << zm <<"). Abandoning.\n";
-     return 0.;
-   }
+    // Calculate a mid point between (x0, y0) and (x1, y1)
+    double xm = 0.5 * (x0 + x1);
+    double ym = 0.5 * (y0 + y1);
+    double zm = 0.5 * (z0 + z1);
+    // Check mid point location
+    sensor->MagneticField(xm, ym, zm, bx, by, bz, status);
+    sensor->ElectricField(xm, ym, zm, ex, ey, ez, medium, status);
+    if (status != 0) {
+      std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
+      std::cerr << "Zero field at step location (" << xm << ", " << ym << ", " << zm << "). Abandoning.\n";
+      return 0.;
+    }
   
-   // Determine drift velocity at init point 
+    // Determine drift velocity at mid point 
+    double vxm = 0.;
+    double vym = 0.;
+    double vzm = 0.;
+    if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vxm, vym, vzm)){
+      std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
+      std::cerr << "Unable to retrieve drift velocity. Abandoning.\n";
+      path.back().status = "Abandoned";
+    }
+    double speedm = sqrt(vxm * vxm + vym * vym + vzm * vzm); 
+    
+    // Now calculate the diffusion at this mid point
+    double dLm = 0.;
+    double dTm = 0.;
+    if (!medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dLm, dTm)) {
+     std::cerr << "DriftLineRKF::IntegrateDiffusion:\n\t";
+     std::cerr << "Unable to retrieve diffusion. Abandoning.\n";
+    }
 
-   double vxm = 0.;
-   double vym = 0.;
-   double vzm = 0.;
-   if(!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vxm, vym, vzm)){
-     std::cerr<<"DriftLineRKF::IntegrateDiffusion:\n\t";
-     std::cerr<<"Unable to retreive drift veloctiy. Abandoning.\n";
-     path.back().status = "Abandoned";
-   }
-   double speedm = sqrt( vxm * vxm + vym * vym + vzm * vzm); 
-   
-   // Now Calculate the diffusion at this mid point
-   
-   double dLm = 0.;
-   double dTm = 0.;
-   if(!medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dLm,dTm)){
-     std::cerr<<"DriftLineRKF::IntegrateDiffusion:\n\t";
-     std::cerr<<"Unable to retreive diffusion. Abandoning.\n";
-   }
-         
-   // Compare the trapoziodal estimate with the simpsons
-   
-   double diffIntAcc = 1.e-3;
+    // Compare the trapoziodal estimate with the simpsons
+    double diffIntAcc = 1.e-3;
+    const double sigma0 = pow(dL0 / speed0, 2);
+    const double sigma1 = pow(dL1 / speed1, 2);
+    const double sigmam = pow(dLm / speedm, 2); 
+    const double simpson = stepLength *(sigma0 + 4. * sigmam + sigma1) / 6.;
+    const double trapez = stepLength * (sigma0 + sigma1) / 2.;
+    if (fabs(trapez - simpson) * sqrt(2. * stepLength / (sigma0 + sigma1)) / 6. < diffIntAcc) {
+      // Accuracy is good enough
+      dLrms += simpson;
+      // Proceed to the next step
+      x0 = x1;
+      y0 = y1;
+      z0 = z1;
+      dL0 = dL1;
+      dT0 = dT1;
 
-   if(stepLength * fabs( pow(dL0/speed0, 2) - 2.* pow(dLm/speedm,2) + pow(dL1/speed1,2) ) 
-      * sqrt( 2.*stepLength / ( pow(dL0/speed0,2) + pow(dL1/speed1,2) )) / 6.  < diffIntAcc){
-     // Accuracy is good enough
+      if (x0 == xe && y0 == ye && z0 == ze) {
+        keepGoing = false;
+        //std::cout<<"Reached end of step.\n";
+        break;
+      }
      
-     DLrms += stepLength *( pow(dL0/speed0, 2) + 4.* pow(dLm/speedm,2) + pow(dL1/speed1,2)  ) / 6.;
-   
-     // Proceed to the next step
-   
-     x0 = x1;
-     y0 = y1;
-     z0 = z1;
-     dL0 = dL1;
-     dT0 = dT1;
+      double xn = xe - x0;
+      double yn = ye - y0;
+      double zn = ze - z0;
 
-     if(x0 == xe && y0 == ye && z0 ==ze){
-       lastStep = true;
-       //std::cout<<"Reached end of step.\n";
-       break;
-     }
-     
-     double xn = xe - x0;
-     double yn = ye - y0;
-     double zn = ze - z0;
+      double norm = sqrt(xn * xn + yn * yn + zn * zn);
+      if (norm < 1.e-6) {
+        if (debug) {
+          std::cout << "DriftLineRKF::IntegrateDiffusion:\n\t"
+                    << "Step too small. Using constant diffusion over step.\n";
+        }
+        dLrms += pow(dL0 / speed0, 2) * stepLength;
+        break;
+      }
+      xn /= norm;
+      yn /= norm;
+      zn /= norm;      
 
-     double norm = sqrt( xn * xn + yn * yn + zn * zn );
-     //std::cout << "norm: " << norm <<"\n";
-     if(norm < 1.e-6){
-       if(debug){
-	 std::cout<<"DriftLineRKF::IntegrateDiffusion:\n\t"
-		  <<"Step to small. Using constant diffusion over step.\n";
-       }
-       DLrms += pow(dL0/speed0,2)*stepLength;
-       break;
-     }
-     xn = xn / norm;
-     yn = yn / norm;
-     zn = zn / norm;      
+      x1 += stepLength * xn;
+      y1 += stepLength * yn;
+      z1 += stepLength * zn;
 
-     x1 = x1 + stepLength * xn;
-     y1 = y1 + stepLength * yn;
-     z1 = z1 + stepLength * zn;
+      if (DistanceToWire(x1, y1, z1) < rWire) {
+        std::cout << "Inside Wire.\n";
+        break;
+      }
+    } else {
+      // Accuracy was not good enough so half the step time
+      x1 = xm;
+      y1 = ym;
+      z1 = zm;
+      dL1 = dLm;
+      dT1 = dTm;
+      stepLength = sqrt(pow(x0 - x1, 2) + pow(y0 - y1, 2) + pow(z0 - z1, 2));
+    }
+    //getchar()
+  }
+  const double totalStep = sqrt(pow(x - xe, 2) + pow(y - ye, 2) + pow(z - ze, 2));
+  std::cout << "DLrms = " << dLrms << " Acquired over " << totalStep << " [cm] in  " << stepCounter << " steps.\n";
+  return dLrms;
 
-     if(DistanceToWire(x1, y1, z1) < rWire){
-       std::cout<<"Inside Wire.\n";
-       break;
-     }
-
-   }
-   else{
-     // Accuracy was not good enough so half the step time
-     x1 = xm;
-     y1 = ym;
-     z1 = zm;
-     dL1 = dLm;
-     dT1 = dTm;
-     stepLength = sqrt ( pow(x0 - x1,2) +pow(y0-y1,2) + pow(z0-z1,2));
-   }
-   //getchar()
- }
- double totalStep = sqrt( pow(x - xe,2) + pow(y - ye,2) );
- std::cout<<"DLrms = " << DLrms <<" Acquired over "<< totalStep<<" [cm] in  " <<stepCounter<<" steps.\n";
-
- return DLrms;
 }  
 
 void 

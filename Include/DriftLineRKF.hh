@@ -30,16 +30,13 @@ namespace Garfield {
 		   double& meanTime, double& rmsTime,                   
 		   std::string particleType = "e-");
     
-    bool CheckStep(double x, double y, double z, bool status);
-
     void SetMaxSteps(int max){maxSteps = max;};
-
 
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
 
-    void EnableVerbose() {verbose = true;}
-    void DiableVerbose() {verbose = false;}
+    void EnableVerbose()  {verbose = true;}
+    void DisableVerbose() {verbose = false;}
 
   private:
 
@@ -66,7 +63,7 @@ namespace Garfield {
     // Used by DriftToWire to find the distance to the wires edge
     double DistanceToWire(double x, double y, double z);
     // Used to determine the diffussion over the drift length
-    double IntegrateDiffusion(double x0, double y0, double z0,
+    double IntegrateDiffusion(const double x,  const double y,  const double z,
 			      const double xe, const double ye, const double ze);
     
     // These variables store the position and radius ofa trapping wire

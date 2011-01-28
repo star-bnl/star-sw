@@ -78,7 +78,7 @@ Track::SetParticle(std::string part) {
 void
 Track::SetEnergy(const double e) {
   
-  if (energy <= mass) {
+  if (e <= mass) {
     std::cerr << "Track::SetEnergy:\n";
     std::cerr << "    Particle energy must be greater than the mass.\n"; 
     return;
