@@ -27,7 +27,8 @@ namespace Garfield {
     void DisablePlotting();
 
     void DriftLine(double x0, double y0, double z0, double t0,  
-                   std::string particleType = "e-");
+		   double& meanTime, double& rmsTime,                   
+		   std::string particleType = "e-");
     
     bool CheckStep(double x, double y, double z, bool status);
 
@@ -36,6 +37,9 @@ namespace Garfield {
 
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
+
+    void EnableVerbose() {verbose = true;}
+    void DiableVerbose() {verbose = false;}
 
   private:
 
@@ -52,6 +56,8 @@ namespace Garfield {
     ViewDrift* viewer;
 
     bool debug;
+    
+    bool verbose;
 
     // Used to drift a particle to the edge of a boundary.
     void EndDriftLine();
@@ -59,8 +65,10 @@ namespace Garfield {
     void DriftToWire(double x0, double y0, double z0, int iWire);
     // Used by DriftToWire to find the distance to the wires edge
     double DistanceToWire(double x, double y, double z);
-
-
+    // Used to determine the diffussion over the drift length
+    double IntegrateDiffusion(double x0, double y0, double z0,
+			      const double xe, const double ye, const double ze);
+    
     // These variables store the position and radius ofa trapping wire
     double xWire, yWire, rWire;
 
