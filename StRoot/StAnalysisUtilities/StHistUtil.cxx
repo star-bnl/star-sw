@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.75 2011/01/24 18:36:28 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.76 2011/01/28 18:47:55 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.76  2011/01/28 18:47:55  genevb
+// Better handling of dirName
+//
 // Revision 2.75  2011/01/24 18:36:28  genevb
 // Save hist list to results file even if not comparing
 //
@@ -562,7 +565,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
   // Now find the histograms
   // get the TList pointer to the histograms:
-  if (dirName) strcpy(m_dirName,dirName);
+  if (dirName && strcmp(m_dirName,dirName)) strcpy(m_dirName,dirName);
   TList* dirList = (m_PntrToMaker ? FindHists(m_dirName) : FindHists(m_PntrToPlainFile));
   if (!dirList) { LOG_INFO << " DrawHists - histograms not available! " << endm; }
 
@@ -1042,7 +1045,7 @@ TList* StHistUtil::FindHists(Char_t *dirName, Char_t *withPrefix)
 //     have to check if there's really anything there (so use First method)
 
 //
-  if (dirName) strcpy(m_dirName,dirName);
+  if (dirName && strcmp(m_dirName,dirName)) strcpy(m_dirName,dirName);
   StMaker *temp = m_PntrToMaker->GetMaker(m_dirName);
     if (temp) {
       LOG_INFO << "FindHists - found pointer to maker" << endm;
@@ -1102,11 +1105,11 @@ TList* StHistUtil::FindHists(Char_t *dirName, Char_t *withPrefix)
 // now have we found them?
   if (dList){ 
       LOG_INFO << " FindHists - found hist. in histBranch, with name:  " 
-	   << dirName <<  endm;
+	   << m_dirName <<  endm;
      }
   else { 
          LOG_INFO << " FindHists - histogram branch has not been found for branch --> "
-	   << dirName <<  endm;
+	   << m_dirName <<  endm;
      }
 
   }
@@ -1173,7 +1176,7 @@ Int_t StHistUtil::ListHists(Char_t *dirName)
   }
 
 // get the TList pointer to the histograms:
-  TList* dirList = (m_PntrToMaker ? FindHists(m_dirName) : FindHists(m_PntrToPlainFile));
+  TList* dirList = (m_PntrToMaker ? FindHists(dirName) : FindHists(m_PntrToPlainFile));
 
   if (!dirList) { LOG_INFO << " ListHists - histograms not available! " << endm; }
 
@@ -1726,7 +1729,7 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
   }
 
 
-  if (dirName) strcpy(m_dirName,dirName);
+  if (dirName && strcmp(m_dirName,dirName)) strcpy(m_dirName,dirName);
   TString type;
   if (!strcmp(m_dirName,"QA"))
     type = "Tab";
@@ -1769,7 +1772,7 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
     LOG_INFO << " **** Now in StHistUtil::SetDefaultLogXList  **** " << endm;
   }
 
-  if (dirName) strcpy(m_dirName,dirName);
+  if (dirName && strcmp(m_dirName,dirName)) strcpy(m_dirName,dirName);
   TString type;
   if (!strcmp(m_dirName,"QA"))
     type = "Tab";
@@ -1816,7 +1819,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   const Char_t **sdefList=0;
   Int_t lengofList = 0;
 
-  if (dirName) strcpy(m_dirName,dirName);
+  if (dirName && strcmp(m_dirName,dirName)) strcpy(m_dirName,dirName);
   TString type;
   if (!strcmp(m_dirName,"QA"))
     type = "Tab";
@@ -1983,7 +1986,7 @@ Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
   LOG_INFO << " **** Now in StHistUtil::Overlay1D **** " << endm;
 
   Int_t n1dHists = 0;
-  if (dirName) strcpy(m_dirName,dirName);
+  if (dirName && strcmp(m_dirName,dirName)) strcpy(m_dirName,dirName);
 
 // get the TList pointer to the histograms
   TList* dirList = (m_PntrToMaker ? FindHists(m_dirName) : FindHists(m_PntrToPlainFile));
@@ -2104,7 +2107,7 @@ Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
   LOG_INFO << " **** Now in StHistUtil::Overlay2D **** " << endm;
 
   Int_t n2dHists = 0;
-  if (dirName) strcpy(m_dirName,dirName);
+  if (dirName && strcmp(m_dirName,dirName)) strcpy(m_dirName,dirName);
 
 // get the TList pointer to the histograms
   TList* dirList = (m_PntrToMaker ? FindHists(m_dirName) : FindHists(m_PntrToPlainFile));
