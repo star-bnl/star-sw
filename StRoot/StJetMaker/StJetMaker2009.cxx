@@ -9,10 +9,10 @@
 #include "TTree.h"
 #include "StAnaPars.h"
 #include "StjTPCMuDst.h"
+#include "StjTPCRandomMuDst.h"
 #include "StjBEMCMuDst.h"
 #include "StjEEMCMuDst.h"
 #include "StjMCMuDst.h"
-#include "StjTPCRandomMuDst.h"
 #include "StjTPCNull.h"
 #include "StjBEMCNull.h"
 #include "StjEEMCNull.h"
@@ -78,7 +78,10 @@ int StJetMaker2009::Make()
     jetbranch->event->mEventId = GetEventNumber();
 
     if (jetbranch->anapars->useTpc) {
-      StjTPCMuDst tpc;
+      StjTPCRandomMuDst tpc((StMuDstMaker*)0,
+			    jetbranch->anapars->randomSelectorProb,
+			    jetbranch->anapars->randomSelectorAt,
+			    jetbranch->anapars->randomSelectorSeed);
 
       // Save vertex index
       int savedVertexIndex = tpc.currentVertexIndex();
@@ -86,6 +89,7 @@ int StJetMaker2009::Make()
       // Keep track of number of good vertices
       int nvertices = 0;
 
+      // Vertex loop
       for (int iVertex = 0; iVertex < tpc.numberOfVertices(); ++iVertex) {
 	tpc.setVertexIndex(iVertex);
 
@@ -153,7 +157,7 @@ int StJetMaker2009::Make()
 	// Clean up particles
 	for (StProtoJet::FourVecList::const_iterator i = particles.begin(); i != particles.end(); ++i)
 	  delete *i;
-      }	// End loop over vertices
+      }	// End vertex loop
 
       // No good vertex was found. Use (0,0,0) for vertex and EMC-only jets.
       // Useful for beam-gas background studies.
@@ -212,9 +216,9 @@ int StJetMaker2009::Make()
       // Restore vertex index
       tpc.setVertexIndex(savedVertexIndex);
 
-    }
+    } // End useTpc
 
-    if (jetbranch->anapars->useMc) {
+    if (jetbranch->anapars->useMonteCarlo) {
       StjMCMuDst mc(this);
       StjPrimaryVertex mcvertex = mc.getMCVertex();
       StjMCParticleList mcparticles = mc.getMCParticleList();
@@ -239,7 +243,7 @@ int StJetMaker2009::Make()
       // Clean up particles
       for (StProtoJet::FourVecList::const_iterator i = particles.begin(); i != particles.end(); ++i)
 	delete *i;
-    } // End use MC
+    } // End useMonteCarlo
 
   } // End loop over jet branches
 
@@ -266,11 +270,6 @@ void StJetMaker2009::addBranch(const char* name, StAnaPars* anapars, StJetPars* 
 void StJetMaker2009::setJetFile(const char* filename)
 {
   mFileName = filename;
-}
-
-void StJetMaker2009::useRandomSelector(bool use)
-{
-  mUseRandomSelector = use;
 }
 
 // Getters
