@@ -370,7 +370,7 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
   // calculating the rmsTime and setting meanTime
   
   for(int i = 0; i < path.size(); i++){
-    rmsTime += pow( IntegrateDiffusion(path[i].xi, path[i].yi, path[i].zi, path[i].xf, path[i].yf, path[i].zf) , 2);
+    rmsTime += IntegrateDiffusion(path[i].xi, path[i].yi, path[i].zi, path[i].xf, path[i].yf, path[i].zf);
   }
   
   rmsTime = sqrt( rmsTime );
@@ -703,7 +703,7 @@ DriftLineRKF::IntegrateDiffusion(double x0, double y0, double z0,
    double diffIntAcc = 1.e-3;
 
    if(stepLength * fabs( pow(dL0/speed0, 2) - 2.* pow(dLm/speedm,2) + pow(dL1/speed1,2) ) 
-      * sqrt( 2.*stepLength / ( pow(dL0/speed0,2) + pow(dL1/speed1,2) ) / 6. ) < diffIntAcc){
+      * sqrt( 2.*stepLength / ( pow(dL0/speed0,2) + pow(dL1/speed1,2) )) / 6.  < diffIntAcc){
      // Accuracy is good enough
      
      DLrms += stepLength *( pow(dL0/speed0, 2) + 4.* pow(dLm/speedm,2) + pow(dL1/speed1,2)  ) / 6.;
