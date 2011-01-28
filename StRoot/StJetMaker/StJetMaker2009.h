@@ -34,7 +34,6 @@ public:
     : StMaker(name)
     , mFile(0)
     , mTree(0)
-    , mUseRandomSelector(false)
   {
   }
 
@@ -46,7 +45,6 @@ public:
   // Setters
   void addBranch(const char* name, StAnaPars* anapars, StJetPars* jetpars);
   void setJetFile(const char* filename);
-  void useRandomSelector(bool use = true);
 
   // Getters
   TTree* tree();
@@ -80,7 +78,6 @@ private:
   TString mFileName;
   TFile* mFile;
   TTree* mTree;
-  bool mUseRandomSelector;
 
   ClassDef(StJetMaker2009,0);
 };

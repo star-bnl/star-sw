@@ -125,6 +125,7 @@ void RunJetFinder2009sim(int nevents = 1e6,
   anapars12->useTpc  = true;
   anapars12->useBemc = true;
   anapars12->useEemc = true;
+  anapars12->randomSelectorProb = 0.93;
 
   // The classes available for correcting tower energy for tracks are:
   // 1. StjTowerEnergyCorrectionForTracksMip
@@ -164,6 +165,7 @@ void RunJetFinder2009sim(int nevents = 1e6,
   anapars5->useTpc  = true;
   anapars5->useBemc = true;
   anapars5->useEemc = true;
+  anapars5->randomSelectorProb = 0.93;
 
   // The classes available for correcting tower energy for tracks are:
   // 1. StjTowerEnergyCorrectionForTracksMip
@@ -225,7 +227,7 @@ void RunJetFinder2009sim(int nevents = 1e6,
 
   // Set analysis cuts for Pythia branch
   StAnaPars* anaparsPythia = new StAnaPars;
-  anaparsPythia->useMc = true;
+  anaparsPythia->useMonteCarlo = true;
 
   // Jet cuts
   anaparsPythia->addJetCut(new StProtoJetCutPt(3,200));

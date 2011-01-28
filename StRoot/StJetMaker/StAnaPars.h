@@ -21,7 +21,10 @@ public:
     , useTpc(false)
     , useBemc(false)
     , useEemc(false)
-    , useMc(false)
+    , useMonteCarlo(false)
+    , randomSelectorProb(1.0)
+    , randomSelectorAt(false)
+    , randomSelectorSeed(0)
   {
   }
 
@@ -54,7 +57,10 @@ public:
   bool useTpc;
   bool useBemc;
   bool useEemc;
-  bool useMc;
+  bool useMonteCarlo;
+  double randomSelectorProb;
+  double randomSelectorAt;
+  unsigned int randomSelectorSeed;
 
   ClassDef(StAnaPars,0);
 };
