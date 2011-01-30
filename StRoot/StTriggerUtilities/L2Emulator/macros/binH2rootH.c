@@ -1,10 +1,7 @@
 /* to compile:
-g++ -Wall -g -O    -I ../Tonko/ -I.//alg_include -I `root-config --incdir` -c binH2rootH.c -o binH2rootH.o
-g++ -o  binH2rootH binH2rootH.o -l m   -L .//alg_lib -l L2jetAlgo   -l L2pedAlgo -l L2gammaAlgo -l L2janUtil  `root-config --libs`
-
-----------------------
-g++ -Wall -g -O -I ../L2algoUtil/ -I `root-config --incdir` -c binH2rootH.c -o binH2rootH.o
-
+g++ -m32 -Wall -g -O -I `root-config --incdir` -c binH2rootH.c -o binH2rootH.o
+g++ -m32 -Wall -g -O -I `root-config --incdir` -c L2Histo.cxx -o L2Histo.o
+g++ -m32 -o binH2rootH-exe binH2rootH.o L2Histo.o -l m `root-config --libs`
 
 */
 
@@ -13,7 +10,7 @@ g++ -Wall -g -O -I ../L2algoUtil/ -I `root-config --incdir` -c binH2rootH.c -o b
 #include <stdlib.h>
 #include <string.h>
 /*********************************************************************
- * $Id: binH2rootH.c,v 1.1 2007/10/11 00:33:29 balewski Exp $
+ * $Id: binH2rootH.c,v 1.2 2011/01/30 03:02:52 balewski Exp $
  * \author Jan Balewski, IUCF, 2006 
  *********************************************************************
  * Descripion:
@@ -133,6 +130,9 @@ int main(int argc, char ** argv ) {
 
 /**********************************************************************
   $Log: binH2rootH.c,v $
+  Revision 1.2  2011/01/30 03:02:52  balewski
+  fixed instruction how to compile it
+
   Revision 1.1  2007/10/11 00:33:29  balewski
   L2algo added
 
