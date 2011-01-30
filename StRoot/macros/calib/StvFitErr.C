@@ -29,7 +29,19 @@ int StvFitErr(const char *file="pulls.root");
 
 #if !defined(__MAKECINT__)
 enum {kMaxPars = StvHitErrCalculator::kMaxPars};
+TMatrixD T(TMatrixD a) { TMatrixD mx(a); return mx.T();}
 
+
+//______________________________________________________________________________
+class FERead : public TNamed
+{
+public:
+FERead(const char *file);
+FEEvent *ReadEvent();
+private:
+TTreeIter *mTreeIter;
+FEEvent   *mEvent;
+};
 
 //______________________________________________________________________________
 class Poli2 {
@@ -48,11 +60,15 @@ int    Pw()  const 			{return fPw ;}
 int    NPt() const 			{return fN  ;}
 double Fun( double x ) const;
 double dXi2dW( int ipt ) const;
+double d2Xi2dW( int k, int l ) const;
 double dLiHdW( int ipt ) const;
+double d2LiHdW( int kpt ,int lpt) const;
 double Deriv( TVectorD &Di ) const;
+double D2riv( TMatrixD &Dik) const;
 void   TestIt() const;
 void   MyTest() const;
 static void Test();
+static void Test2();
 private:
 int fPw;
 char   fBeg[1];
@@ -69,18 +85,6 @@ TVectorD fB;
 TMatrixD fA;
 TMatrixD fAi;
 }; 
-
-
-//______________________________________________________________________________
-class FERead : public TNamed
-{
-public:
-FERead(const char *file);
-FEEvent *ReadEvent();
-private:
-TTreeIter *mTreeIter;
-FEEvent   *mEvent;
-};
 
 
 //______________________________________________________________________________
@@ -229,6 +233,7 @@ std::vector<float> 		mTks;
 static FEFcn *mgInst;
 };
 
+//______________________________________________________________________________
 class FEApprox 
 {
 public:
@@ -236,12 +241,13 @@ public:
 int Prepare();
 int Quadr();
 int Approx();
+int Test();
 private:
 FEFcn *mFcn;
 int mNPars;
 TMatrixD mG,mGi,mC;
 TVectorD mB,mP,mPrev,mClo,mIclo,mCup,mIcup;
-
+double mXi2;
 };
 FEFcn *FEFcn::mgInst=0;
 
@@ -264,16 +270,19 @@ int StvFitErr(const char *file)
   FERead input(file);
   int nEv=0;
   FEEvent *ev=0;
+  int eot=0;
   while ((ev=input.ReadEvent()))
   {
 //    printf ("Event %d\n",nEv);
-    nEv++; myFcn.Add(ev);
+    nEv++; eot = myFcn.Add(ev);
+    if (eot) break;
   }
   printf ("StvFitErr: %d Events used\n",nEv);
   myFcn.End();
   FEApprox app(&myFcn);
   myFcn.AvErr("Before Fit");
   int ans =0;
+  app.Test(); return 0;
   ans = app.Approx();
 //  myFcn.ResetFitter();
 //  ans = myFcn.Fit();
@@ -305,6 +314,8 @@ void CalcInit()
 //______________________________________________________________________________
 
 
+//______________________________________________________________________________
+//______________________________________________________________________________
 //______________________________________________________________________________
 //______________________________________________________________________________
 Poli2::Poli2(int npw):fP(npw+1),fB(npw+1),fA(npw+1,npw+1),fAi(npw+1,npw+1)
@@ -342,6 +353,7 @@ double Poli2::Fit()
   double Wt=0,Wx=0,Wy=0;
   for (int i=0;i<fN;i++) { Wt += fW[i]; Wx += fW[i]*fX[i];Wy += fW[i]*fY[i];}
   fX0 = Wx/Wt; fY0 = Wy/Wt;
+  fX0 = 0; fY0=0;
   for (int i=0;i<fN;i++) { fX[i]-=fX0; fY[i]-=fY0;}
 
   double A[3][3]={{0}},B[3]={0};
@@ -395,9 +407,9 @@ double Poli2::EvalXi2() const
 //______________________________________________________________________________
 double Poli2::dXi2dW( int ipt ) const
 {
-//   Xi2 = B*Ai*B
-//  dXi2 = 2*dB*Ai*B - B*Ai*dA*Ai*B
-//  dXi2 = 2*dB*Ai*B - P*dA*P
+//   Xi2 = Y*Y*W -B*Ai*B
+//  dXi2/dWk = Yk*Yk - (2*dBk*Ai*B - B*Ai*dAk*Ai*B)
+//  dXi2/dWk = Yk*Yk - (2*dBk*Ai*B - P*dAk*P
 
    double der = fY[ipt]*fY[ipt];
    TVectorD dB(fPw+1);
@@ -408,27 +420,77 @@ double Poli2::dXi2dW( int ipt ) const
    der -= (2*(dB*(fAi*fB))-(fP*(dA*fP)));
    return der;
 }
+#if 1
+//______________________________________________________________________________
+double Poli2::d2Xi2dW( int kpt ,int lpt) const
+{
+//   Xi2 = Y*Y*W -B*Ai*B
+// dAI/dWk = - Ai*dAk*Ai
+// d2Ai/dWk/dWl = -2* dAIl*dAk*Ai
+// d2Ai/dWk/dWl = +2* Ai*dAl*Ai*dAk*Ai
+
+//   dXi2/dWk = Yk*Yk-2dBk*Ai*B -B*dAIk*B
+//   d2Xi2/dWk/dWl = -2dBk*Ail*B -2dBk*Ai*dBl-2dBl*dAIk*B-B*dAIkl*B
+
+
+   double der = 0;
+   TVectorD dBk(fPw+1),dBl(fPw+1);
+   TMatrixD dAk(fPw+1,fPw+1),dAl(fPw+1,fPw+1);
+   {
+     double x[3]={1,fX[kpt],fX[kpt]*fX[kpt]};
+     for (int j=0;j<=fPw;j++) { dBk[j] = x[j]*fY[kpt];   
+     for (int k=0;k<=fPw;k++) { dAk[j][k] = x[j]*x[k]; }}  
+   }
+   {
+     double x[3]={1,fX[lpt],fX[lpt]*fX[lpt]};
+     for (int j=0;j<=fPw;j++) { dBl[j] = x[j]*fY[lpt];   
+     for (int k=0;k<=fPw;k++) { dAl[j][k] = x[j]*x[k]; }}  
+   }
+
+
+
+
+   TMatrixD dAIk(fPw+1,fPw+1),dAIl(fPw+1,fPw+1),dAIkl(fPw+1,fPw+1);
+   dAIk = -1.* fAi*dAk*fAi;
+   dAIl = -1.* fAi*dAl*fAi;
+   dAIkl = 2.* fAi*dAl*fAi*dAk*fAi;
+   der = 2.*(dBk*(dAIl*fB) + dBk*(fAi*dBl)+dBl*(dAIk*fB))+fB*(dAIkl*fB);
+
+
+   return -der;
+}
+#endif
 //______________________________________________________________________________
 double Poli2::dLiHdW( int ipt ) const
 {
    return dXi2dW(ipt)-1./fW[ipt];
 }
 //______________________________________________________________________________
+double Poli2::d2LiHdW( int kpt ,int lpt) const
+{
+   double qwe = 0;
+   if (kpt==lpt) { qwe = 1./(fW[kpt]*fW[kpt])		;}
+   return d2Xi2dW(kpt,lpt)+qwe;
+}
+//______________________________________________________________________________
 //______________________________________________________________________________
 double Poli2::Deriv( TVectorD &Di ) const
 {
   Di.ResizeTo(fN);
-  TVectorD diB(fPw+1);
-  TMatrixD diA(fPw+1,fPw+1),djA(fPw+1,fPw+1);
   for (int ipt=0;ipt<fN;ipt++) {
-    double der = fY[ipt]*fY[ipt];
-    double xi[3]={1,fX[ipt],fX[ipt]*fX[ipt]};
-    for (int k=0;k<=fPw;k++) { diB[k]   = fY[ipt]*xi[k];
-    for (int l=0;l<=fPw;l++) { diA(k,l) = xi[k]*xi[l];}}  
-    der -= (2*(diB*(fAi*fB))-(fP*(diA*fP)));
-    Di[ipt] = der;
+    Di[ipt]= dLiHdW(ipt);
   }
-  return Xi2();
+  return fXi2;
+}
+//______________________________________________________________________________
+double Poli2::D2riv( TMatrixD &Dik ) const
+{
+  Dik.ResizeTo(fN,fN);
+  for (int ipt=0;ipt<fN;ipt++) {
+    for (int kpt=0;kpt<=ipt;kpt++) {
+      double qwe = d2LiHdW(ipt,kpt);
+      Dik[ipt][kpt] = qwe; Dik[kpt][ipt] = qwe;}}
+  return fXi2;
 }
 
 //______________________________________________________________________________
@@ -461,14 +523,14 @@ void Poli2::Test()
   pp.Fit(); 
 //  pp.MyTest();
   double Xi2 = pp.Xi2();
-  double Xi2Eva = pp.Xi2();
+  double Xi2Eva = pp.EvalXi2();
   printf ("Xi2 = %g == %g\n",Xi2,Xi2Eva);
 //   for (int i=0; i<20; i++) {
 //     printf(" %g %g : %g\n",X[i],YY[i],pp.Fun(X[i]));
 //   }
 // check d/dW
   printf("\n check d/dWi\n");
-  double myDelta = 1e-2,delta;
+  double myDelta = 1e-3,delta,maxDif=0;
   for (int k=0;k<20;k++) {
     Poli2 ppp(npw);
     for (int i=0;i<20;i++) {
@@ -480,16 +542,52 @@ void Poli2::Test()
     double ana = pp.dXi2dW(k);
     double num = (ppp.Xi2()-pp.Xi2())/delta;
     double dif = 2*(num-ana)/(fabs(num+ana)+3e-33);
-//??    if (fabs(dif)<0.001) continue;
+    if (maxDif<fabs(dif)) maxDif=fabs(dif);
+    if (fabs(dif)<1e-3) continue;
     printf ("dXi2dW(%2d) \tana=%g \tnum = %g \tdif=%g\n",k,ana,num,dif);
   }
-  TVectorD g;
-  pp.Deriv(g);
+  printf ("Test dXi2dW(...) maxDif=%g\n",maxDif);
+}
+//______________________________________________________________________________
+void Poli2::Test2()
+{
+  int npw=2;
+  double X[20],Y[20],W[20],YY[20];
   for (int i=0;i<20;i++) {
-    double tst = pp.dXi2dW(i)-g[i];
-    if (fabs(tst)>1e-10) printf("g[%d] %g **************\n",i,tst);
+    X[i]=i;
+    Y[i]= 3+X[i]*(.02+.03*X[i]);
+    W[i]= 1+10./Y[i];
+    YY[i]=Y[i];
+    Y[i]+=gRandom->Gaus(0,sqrt(1./W[i]));
   }
+  Poli2 pp(npw,20,X,Y,W);
+  pp.Fit(); 
+//  pp.MyTest();
+  TVectorD myDer(20),nyDer(20);
+  pp.Deriv(myDer);
+  printf("\n check d/dWi\n");
+  double myDelta = 1e-3,delta,maxDif=0;
+  for (int k=0;k<20;k++) {
+    Poli2 ppp(npw);
+    for (int i=0;i<20;i++) {
+      double w = W[i];
+      if (i==k) { delta = w*myDelta; w+=delta;}
+      ppp.Add(X[i],Y[i],w);
+    }
+    ppp.Fit();
+    ppp.Deriv(nyDer);
+    for (int l=0;l<=k; l++) {
 
+      double ana = 0.5*(pp.d2Xi2dW(k,l)+ppp.d2Xi2dW(k,l));
+      double num = (nyDer(l)-myDer(l))/delta;
+      double dif = 2*(num-ana)/(fabs(num+ana)+3e-33);
+      if (fabs(dif)> maxDif) maxDif =fabs(dif);
+      if (fabs(dif)<1e-3) continue;
+      printf ("d2Xi2dW(%2d,%2d) \tana=%g \tnum = %g \tdif=%g\n",k,l,ana,num,dif);
+    }
+  }
+  printf ("Test2 d2Xi2dW(...) maxDif=%g\n",maxDif);
+  
 
 }
 //______________________________________________________________________________
@@ -521,6 +619,7 @@ void Poli2::TestIt() const
 void poli2()
 {
 Poli2::Test();
+Poli2::Test2();
 }
 
 //______________________________________________________________________________
@@ -835,7 +934,7 @@ int FEFcn::Add(FEEvent* ev)
   FENode node;
   while ((jl=ev->NextTrack(jr))>-1) 
   {
-    if (fabs(ev->mCurv[jl])>0.01) continue;
+    if (fabs(ev->mCurv[jl])>1./300) continue;
 ///    if (fabs(ev->mPt[jl])<0.5) continue;
     if (ev->nAllHits[jl] < 15) continue;
     assert(jr-jl+1>=15);
@@ -846,7 +945,7 @@ int FEFcn::Add(FEEvent* ev)
       double dip = ev->gDip[j];
       node.tkDir[0] = cos(dip)*cos(psi);
       node.tkDir[1] = cos(dip)*sin(psi);
-      node.tkDir[1] = sin(dip);
+      node.tkDir[2] = sin(dip);
 
       double phi = ev->gPFit[j];
       assert(fabs(phi)<7);
@@ -884,6 +983,7 @@ int FEFcn::Add(FEEvent* ev)
     mNHits += nNodes;
     mNTks++;
   }        
+  if (mNTks>10000) return -1;
   return 0;
 }
 //______________________________________________________________________________
@@ -977,8 +1077,11 @@ FEApprox::FEApprox(FEFcn *fefcn)
 int FEApprox::Prepare()
 {
    assert(mNPars<100);
-   long double myB[100]={0},myG[100][100]={{0}};
+   long double myXi2=0,myB[100]={0},myG[100][100]={{0}};
    int myN=0;
+   TMatrixD d2LdWWy,d2LdWWz,dSdPy,dSdPz;
+   TMatrixD dWdSy,dWdSz,d2WdSSy,d2WdSSz;
+   TVectorD dLdWy,dLdWz;
 
    Poli2 poliSY(2),poliSZ(1);
    const FETrak* trak = mFcn->GetTrak();
@@ -1001,70 +1104,63 @@ int FEApprox::Prepare()
 
      poliSY.Fit(); 
      poliSZ.Fit(); 
+     myXi2 +=poliSY.LiH()+poliSZ.LiH();
+     poliSY.Deriv(dLdWy); poliSY.D2riv(d2LdWWy);
+     poliSZ.Deriv(dLdWz); poliSZ.D2riv(d2LdWWz);
+     dWdSy.ResizeTo(nNodes,nNodes); dWdSy=0.;
+     dWdSz.ResizeTo(nNodes,nNodes); dWdSz=0.;
+     d2WdSSy.ResizeTo(nNodes,nNodes); d2WdSSy=0.;
+     d2WdSSz.ResizeTo(nNodes,nNodes); d2WdSSz=0.;
+     dSdPy.ResizeTo(mNPars,nNodes); dSdPy=0.;
+     dSdPz.ResizeTo(mNPars,nNodes); dSdPz=0.;
+     dSdPy.ResizeTo(mNPars,nNodes); dSdPy=0.;
      myN++;
 
-     int nAve=0,nPar=0,offs=0;
-     StvHitErrCalculator *calc=0,*preCalc=0;const FENode *n=0;
-     double aveQ[2]={0},aveDRR[kMaxPars][3]={{0}},aveRR[3]={0};
-     for (int iNode=0;iNode<=nNodes;iNode++) {//2nd Loop over nodes
-       calc = 0;
-       if (iNode!=nNodes) {
-         n=trak->GetNode(iNode);
-         calc = hold[iNode]->GetCalc();
-       }
-       if (nAve && calc != preCalc) {
-         preCalc = calc;
-         TCL::vscale(aveQ ,1./nAve,aveQ ,2);
-         TCL::vscale(aveRR,1./nAve,aveRR,3);
-         TCL::vscale(aveDRR[0],1./nAve,aveDRR[0],3*kMaxPars);
-         do {
-           if (aveQ[0] < 0.05*aveRR[0]) break;
-           if (aveQ[1] < 0.05*aveRR[2]) break;
-           double dLihd1Wy = -(aveRR[0]-aveQ[0])/(aveQ[0]*aveQ[0])*nAve;
-           double dLihd1Wz = -(aveRR[2]-aveQ[1])/(aveQ[1]*aveQ[1])*nAve;
-           double dLihd2Wy =                  1./(aveQ[0]*aveQ[0])*nAve;
-           double dLihd2Wz =                  1./(aveQ[1]*aveQ[1])*nAve;
-	   for (int iPar=0;iPar<nPar;iPar++) {	// iLoop over Calc params
-             myB[offs+iPar]+= dLihd1Wy*aveDRR[iPar][0];
-             myB[offs+iPar]+= dLihd1Wz*aveDRR[iPar][2];
-             for (int jPar=0;jPar<nPar;jPar++) {	// jLoop over Calc params
-               myG[offs+iPar][offs+jPar] += dLihd2Wy*aveDRR[iPar][0]*aveDRR[jPar][0];
-               myG[offs+iPar][offs+jPar] += dLihd2Wz*aveDRR[iPar][2]*aveDRR[jPar][2];
-             }// end jLoop over Calc params
-	   }  // end iLoop over Calc params
-         } while(0);
-         nAve=0;
-         memset(aveQ     ,0,sizeof(aveQ  ));
-         memset(aveRR    ,0,sizeof(aveRR ));
-         memset(aveDRR[0],0,sizeof(aveDRR));
-         if (!calc) break;
-       }
-       nAve++;
+     StvHitErrCalculator *calc=0;const FENode *n=0;
+     for (int iNode=0;iNode<nNodes;iNode++) {//2nd Loop over nodes
+       n=trak->GetNode(iNode);
+       calc = hold[iNode]->GetCalc();
        calc->SetTrack(n->tkDir);
        calc->CalcDcaErrs(n->hiPos,n->hiDir,hRR);
        calc->CalcDcaDers(dRR);
-       nPar=calc->GetNPars();
-       offs=hold[iNode]->GetOffset();
-//		dLih/dW*dW/dErr2
-//        double dLihdWy = poliSY.dLiHdW(iNode);
-//        double dLihdWz = poliSZ.dLiHdW(iNode);
-       aveQ[0] += poliSY.dLiHdW(iNode);
-       aveQ[1] += poliSZ.dLiHdW(iNode);
-       TCL::vadd(aveRR,hRR,aveRR,3);
-       TCL::vadd(aveDRR[0],dRR[0],aveDRR[0],3*nPar);
+       int offs=hold[iNode]->GetOffset();
+       int nP = calc->GetNPars();
+       for (int jp=0;jp<nP; jp++) {
+         dWdSy[iNode][iNode]   = -1./(hRR[0]*hRR[0]);
+         dWdSz[iNode][iNode]   = -1./(hRR[2]*hRR[2]);
+         d2WdSSy[iNode][iNode] =  dLdWy[iNode]*2./(hRR[0]*hRR[0]*hRR[0]);
+         d2WdSSz[iNode][iNode] =  dLdWz[iNode]*2./(hRR[2]*hRR[2]*hRR[2]);
+         dSdPy[offs+jp][iNode] = dRR[jp][0];
+         dSdPz[offs+jp][iNode] = dRR[jp][2];
+       }
+     }// end 2nd Loop over nodes
+     
+     TVectorD dLdPy(dSdPy*(dWdSy*dLdWy));
+     TVectorD dLdPz(dSdPz*(dWdSz*dLdWz));
+     dLdPz+=dLdPy;
+     TMatrixD d2LdPPy(dSdPy*(dWdSy*d2LdWWy*dWdSy+d2WdSSy)*T(dSdPy));
+     TMatrixD d2LdPPz(dSdPz*(dWdSz*d2LdWWz*dWdSz+d2WdSSz)*T(dSdPz));
+     d2LdPPz+=d2LdPPy;
 
-    }// end 2nd Loop over nodes
+     for (int ip=0;ip<mNPars;ip++) {
+       myB[ip]+=dLdPz[ip];
+     for (int jp=0;jp<=ip;jp++) {
+       myG[ip][jp] += d2LdPPz[ip][jp];
+     } }
+
+
   }//End tracks
   myN = int(log(double(myN))/log(2.)); myN = 1<<myN;
 
   double spur=0;
+  mXi2 = myXi2/myN;
   for (int i=0;i<mNPars;i++) {  
     mB[i] = myB[i]/myN;
-    for (int j=0;j<mNPars;j++) { mG[i][j] = myG[i][j]/myN;}
+    for (int j=0;j<=i;j++) { mG[i][j] = myG[i][j]/myN; mG[j][i]=mG[i][j];}
     spur+=mG[i][i];
   }
   spur*= 0.1/mNPars;
-  for (int i=0;i<mNPars;i++) { mG[i][i] += spur; }
+  //for (int i=0;i<mNPars;i++) { mG[i][i] += spur; }
 
 //	Prepare inequalities
 
@@ -1092,6 +1188,7 @@ int FEApprox::Prepare()
   }
   return 0;
 }
+
 //______________________________________________________________________________
 #include "Riostream.h"
 #include "TMath.h"
@@ -1104,6 +1201,41 @@ int FEApprox::Prepare()
 #include "TGondzioSolver.h"
 #include "TMehrotraSolver.h"
 
+//______________________________________________________________________________
+int FEApprox::Test()
+{
+  mP = TVectorD(mNPars,mFcn->GetPars());
+  Prepare(); 
+//  mB.Print();
+  TVectorD baseDer(mB);
+  TMatrixD baseD2r(mG);
+  double baseFcn = mXi2;
+  double part = 3e-2,minStp=3e-4;
+  for (int ip=0;ip<mNPars;ip++) {
+    if (mFcn->IsFixed(ip)) continue;
+    double eps = mP[ip]*part; if (eps <minStp) eps = minStp;
+    double sav = mP[ip];
+    mP[ip]+=eps;
+    mFcn->Update(mP.GetMatrixArray());
+    Prepare(); 
+    double nowFcn = mXi2;
+    double num = (nowFcn-baseFcn)/eps;
+    double ana = mB[ip];
+    double dif = 2*(num-ana)/(fabs(num+ana)+3e-33);
+    printf ("dXi2dP(%2d) \tana=%g \tnum = %g \tdif=%g\n",ip,ana,num,dif);
+    for (int jp=0;jp<=ip;jp++) {
+      if (mFcn->IsFixed(jp)) continue;
+      num = (mB[jp]-baseDer[jp])/eps;
+      ana = (mG[ip][jp]+baseD2r[ip][jp])/2;
+      dif = 2*(num-ana)/(fabs(num+ana)+3e-33);
+      printf ("\td2Xi2dPP(%2d,%2d) \tana=%g \tnum = %g \tdif=%g\n",ip,jp,ana,num,dif);
+    }
+    mP[ip]=sav;
+    mFcn->Update(mP.GetMatrixArray());
+  }
+  
+  return 0;
+}		
 //______________________________________________________________________________
 int FEApprox::Quadr()
 {
