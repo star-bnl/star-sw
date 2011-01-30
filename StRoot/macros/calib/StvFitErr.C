@@ -28,6 +28,7 @@ class StvTpcHitErrCalculator;
 int StvFitErr(const char *file="pulls.root");
 
 #if !defined(__MAKECINT__)
+enum {kMaxPars = StvHitErrCalculator::kMaxPars};
 
 
 //______________________________________________________________________________
@@ -118,7 +119,7 @@ const   float *&gZFit;
 class FECalcHolder
 {
 public:
-  FECalcHolder(int id,StvHitErrCalculator* calc);	
+  FECalcHolder(int id,StvHitErrCalculator* calc,const double miMax[2][2]);	
         StvHitErrCalculator *GetCalc() const 		{return mCalc;} 
 virtual StvHitErrCalculator *GetCalc(const float x[3])  {if(x){};return mCalc;} 
   int GetId() {return mId;}
@@ -131,20 +132,29 @@ const char   *GetName() const   {return mCalc->GetName() ;}
  void DbLoad();
  void DbSave();
 
+ void AvInit();
+ void AvAdd(const double hRR[3]);
+ void AvEnd();
+
 private:
+char    mBeg[1];
 TTable *mTab;
 int mId;
 int mOffset;
 public:
 double mAve[5];
+double mAveDer[kMaxPars][3];
+double mMiMax[2][2];
 StvHitErrCalculator* mCalc;
+char    mEnd[1];
 };
 
 //______________________________________________________________________________
 class FETpcCalcHolder: public FECalcHolder
 {
 public:
-  FETpcCalcHolder(StvHitErrCalculator* calc):FECalcHolder(1,calc){;}
+  FETpcCalcHolder(StvHitErrCalculator* calc,const double miMax[2][2])
+                 :FECalcHolder(1,calc,miMax){;}
 virtual StvHitErrCalculator *GetCalc(const float x[3]);
 };
 
@@ -224,14 +234,13 @@ class FEApprox
 public:
     FEApprox(FEFcn *fefcn);
 int Prepare();
-int Solve();
 int Quadr();
 int Approx();
 private:
 FEFcn *mFcn;
 int mNPars;
-TMatrixD mG,mGi;
-TVectorD mB,mP,mPrev;
+TMatrixD mG,mGi,mC;
+TVectorD mB,mP,mPrev,mClo,mIclo,mCup,mIcup;
 
 };
 FEFcn *FEFcn::mgInst=0;
@@ -257,9 +266,10 @@ int StvFitErr(const char *file)
   FEEvent *ev=0;
   while ((ev=input.ReadEvent()))
   {
-    printf ("Event %d\n",nEv); nEv++;
-    myFcn.Add(ev);
+//    printf ("Event %d\n",nEv);
+    nEv++; myFcn.Add(ev);
   }
+  printf ("StvFitErr: %d Events used\n",nEv);
   myFcn.End();
   FEApprox app(&myFcn);
   myFcn.AvErr("Before Fit");
@@ -276,15 +286,16 @@ void CalcInit()
 {
    const char*  innOutNames[2]  ={"StvTpcInnerHitErrs"    ,"StvTpcOuterHitErrs"    };
 
-   const double innOutPars[2][6]={{0.047,0.107,5e-5,0.048,0.0011, 0.0012}
-                                 ,{0.035,0.077,5e-5,0.041,0.0011, 0.0012}};
+   const double innOutPars[2][6]={{0.047,0.107,5e-5,1./12,0.0011, 0.0012}
+                                 ,{0.035,0.077,5e-5,1./12,0.0011, 0.0012}};
+   double TpcMiMax[2][2][2]={{{0.05,0.2},{0.05,0.2}},{{0.05,0.2},{0.05,0.2}}};
 
 
   myFcn.Clear();
   for (int io=0;io<2;io++) {
     StvHitErrCalculator *hec = new StvTpcHitErrCalculator(innOutNames[io]);
     hec->SetPars(innOutPars[io]);
-    FECalcHolder *hold= new FETpcCalcHolder(hec);
+    FECalcHolder *hold= new FETpcCalcHolder(hec,TpcMiMax[io]);
     myFcn.Add(hold);
   }
 }
@@ -568,9 +579,12 @@ FEEvent* FERead::ReadEvent()
 }
 
 //______________________________________________________________________________
-FECalcHolder::FECalcHolder(int id,StvHitErrCalculator* calc)	
+FECalcHolder::FECalcHolder(int id,StvHitErrCalculator* calc
+                          ,const double miMax[2][2])	
 {  
-  mId=id; mCalc=calc; memset(mAve,0,sizeof(mAve));
+  memset(mBeg,0,mEnd-mBeg+1);
+  mId=id; mCalc=calc; 
+  memcpy(mMiMax[0],miMax[0],sizeof(mMiMax));
 }
 //______________________________________________________________________________
  void FECalcHolder::Update(const double *a)	
@@ -624,6 +638,48 @@ void FECalcHolder::DbSave()
   }
   std::ofstream ofs(dbFile);
   mTab->SavePrimitive(ofs);
+}
+//______________________________________________________________________________
+void FECalcHolder::AvInit()
+{
+   memset(mAve      ,0,sizeof(mAve   ));
+   memset(mAveDer[0],0,sizeof(mAveDer));
+}
+//______________________________________________________________________________
+void FECalcHolder::AvAdd(const double hRR[3])
+{
+  double der[kMaxPars][3];
+  mAve[0]++;
+  mAve[1]+=hRR[0];
+  mAve[2]+=hRR[0]*hRR[0];
+  mAve[3]+=hRR[2];
+  mAve[4]+=hRR[2]*hRR[2];
+  mCalc->CalcDcaDers(der);
+  TCL::vadd(mAveDer[0],der[0],mAveDer[0],kMaxPars*3);
+}
+//______________________________________________________________________________
+void FECalcHolder::AvEnd()
+{
+    for (int i=1;i<5;i++) {mAve[i]/=mAve[0];}
+    for (int i=2;i<5;i+=2){mAve[i] -= pow(mAve[i-1],2);
+                           mAve[i]  = sqrt(fabs(mAve[i]))   ;}
+
+    printf(" %s\t yErr = %5.2g(+-%5.2g) \tzErr = %5.2g(+-%5.2g)  Hits=%g\n"
+          ,GetName()
+          ,mAve[1], mAve[2]   
+          ,mAve[3], mAve[4], mAve[0]);  
+
+    
+    TCL::vscale(mAveDer[0],1./mAve[0],mAveDer[0],kMaxPars*3);
+    int nPars = mCalc->GetNPars();
+    double yy=0,zz=0;
+    const double *par = mCalc->GetPars();
+    for (int i=0;i<nPars;i++) {
+      yy += par[i]*mAveDer[i][0];
+      zz += par[i]*mAveDer[i][2];
+    }
+    printf("Again: YY = %g ZZ=%g\n",yy,zz);
+
 }
 //______________________________________________________________________________
 StvHitErrCalculator *FETpcCalcHolder::GetCalc(const float x[3])
@@ -699,8 +755,8 @@ void FEFcn::InitFitter()
   assert(strstr(mCas[0]->GetName(),"TpcInner"));
   assert(strstr(mCas[1]->GetName(),"TpcOuter"));
   assert(myFitter.GetNumPars()==12);
-//   FixPar(StvHitErrCalculator::kThkDet,  2);
-//   FixPar(StvHitErrCalculator::kThkDet+6,2);
+  FixPar(StvHitErrCalculator::kThkDet+0,2);
+  FixPar(StvHitErrCalculator::kThkDet+6,2);
   myFitter.SetFCN(&Fcn);
 }
 //______________________________________________________________________________
@@ -946,34 +1002,56 @@ int FEApprox::Prepare()
      poliSY.Fit(); 
      poliSZ.Fit(); 
      myN++;
-     for (int iNode=0;iNode<nNodes;iNode++) {//2nd Loop over nodes
-       const FENode *n=trak->GetNode(iNode);
-       StvHitErrCalculator *calc = hold[iNode]->GetCalc();
+
+     int nAve=0,nPar=0,offs=0;
+     StvHitErrCalculator *calc=0,*preCalc=0;const FENode *n=0;
+     double aveQ[2]={0},aveDRR[kMaxPars][3]={{0}},aveRR[3]={0};
+     for (int iNode=0;iNode<=nNodes;iNode++) {//2nd Loop over nodes
+       calc = 0;
+       if (iNode!=nNodes) {
+         n=trak->GetNode(iNode);
+         calc = hold[iNode]->GetCalc();
+       }
+       if (nAve && calc != preCalc) {
+         preCalc = calc;
+         TCL::vscale(aveQ ,1./nAve,aveQ ,2);
+         TCL::vscale(aveRR,1./nAve,aveRR,3);
+         TCL::vscale(aveDRR[0],1./nAve,aveDRR[0],3*kMaxPars);
+         do {
+           if (aveQ[0] < 0.05*aveRR[0]) break;
+           if (aveQ[1] < 0.05*aveRR[2]) break;
+           double dLihd1Wy = -(aveRR[0]-aveQ[0])/(aveQ[0]*aveQ[0])*nAve;
+           double dLihd1Wz = -(aveRR[2]-aveQ[1])/(aveQ[1]*aveQ[1])*nAve;
+           double dLihd2Wy =                  1./(aveQ[0]*aveQ[0])*nAve;
+           double dLihd2Wz =                  1./(aveQ[1]*aveQ[1])*nAve;
+	   for (int iPar=0;iPar<nPar;iPar++) {	// iLoop over Calc params
+             myB[offs+iPar]+= dLihd1Wy*aveDRR[iPar][0];
+             myB[offs+iPar]+= dLihd1Wz*aveDRR[iPar][2];
+             for (int jPar=0;jPar<nPar;jPar++) {	// jLoop over Calc params
+               myG[offs+iPar][offs+jPar] += dLihd2Wy*aveDRR[iPar][0]*aveDRR[jPar][0];
+               myG[offs+iPar][offs+jPar] += dLihd2Wz*aveDRR[iPar][2]*aveDRR[jPar][2];
+             }// end jLoop over Calc params
+	   }  // end iLoop over Calc params
+         } while(0);
+         nAve=0;
+         memset(aveQ     ,0,sizeof(aveQ  ));
+         memset(aveRR    ,0,sizeof(aveRR ));
+         memset(aveDRR[0],0,sizeof(aveDRR));
+         if (!calc) break;
+       }
+       nAve++;
        calc->SetTrack(n->tkDir);
        calc->CalcDcaErrs(n->hiPos,n->hiDir,hRR);
        calc->CalcDcaDers(dRR);
+       nPar=calc->GetNPars();
+       offs=hold[iNode]->GetOffset();
 //		dLih/dW*dW/dErr2
 //        double dLihdWy = poliSY.dLiHdW(iNode);
 //        double dLihdWz = poliSZ.dLiHdW(iNode);
-       double qy = poliSY.Res2(iNode);
-       double qz = poliSZ.Res2(iNode);
-       double dLihd1Wy = -(hRR[0]-qy)/(hRR[0]*hRR[0]);
-       double dLihd1Wz = -(hRR[2]-qz)/(hRR[2]*hRR[2]);
-//        double dLihd2Wy = (2*qy-hRR[0])/(hRR[0]*hRR[0]*hRR[0]);
-//        double dLihd2Wz = (2*qz-hRR[2])/(hRR[2]*hRR[2]*hRR[2]);
-       double dLihd2Wy = 1./(hRR[0]*hRR[0]);
-       double dLihd2Wz = 1./(hRR[2]*hRR[2]);
-
-       int nPar=calc->GetNPars();
-       int offs=hold[iNode]->GetOffset();
-       for (int iPar=0;iPar<nPar;iPar++) {	// iLoop over Calc params
-         myB[offs+iPar]+= dLihd1Wy*dRR[iPar][0];
-         myB[offs+iPar]+= dLihd1Wz*dRR[iPar][2];
-         for (int jPar=0;jPar<nPar;jPar++) {	// jLoop over Calc params
-           myG[offs+iPar][offs+jPar] += dLihd2Wy*dRR[iPar][0]*dRR[jPar][0];
-           myG[offs+iPar][offs+jPar] += dLihd2Wz*dRR[iPar][2]*dRR[jPar][2];
-        }// end jLoop over Calc params
-       }  // end iLoop over Calc params
+       aveQ[0] += poliSY.dLiHdW(iNode);
+       aveQ[1] += poliSZ.dLiHdW(iNode);
+       TCL::vadd(aveRR,hRR,aveRR,3);
+       TCL::vadd(aveDRR[0],dRR[0],aveDRR[0],3*nPar);
 
     }// end 2nd Loop over nodes
   }//End tracks
@@ -985,67 +1063,36 @@ int FEApprox::Prepare()
     for (int j=0;j<mNPars;j++) { mG[i][j] = myG[i][j]/myN;}
     spur+=mG[i][i];
   }
-  spur*= 0.01/mNPars;
+  spur*= 0.1/mNPars;
   for (int i=0;i<mNPars;i++) { mG[i][i] += spur; }
 
+//	Prepare inequalities
 
+  int nCas = mFcn->mCas.size();  
+  mC.ResizeTo(nCas*2,mNPars); mC = 0.;
+  mClo.ResizeTo(nCas*2);
+  mIclo.ResizeTo(nCas*2); mIclo = 1;
+  mCup.ResizeTo(nCas*2);
+  mIcup.ResizeTo(nCas*2); mIcup = 1;
+  int iRow = 0;
+  for (int ic=0;ic<nCas;ic++) {
+    FECalcHolder *hold = mFcn->mCas[ic];
+    StvHitErrCalculator *calc = hold->GetCalc();
+    int iCol = hold->GetOffset();
+    int nP = calc->GetNPars();
+    for (int ip=0;ip<nP;ip++) {
+      mC[iRow+0][iCol+ip] = hold->mAveDer[ip][0];
+      mC[iRow+1][iCol+ip] = hold->mAveDer[ip][2];
+    }
+    mClo[iRow+0] = hold->mMiMax[0][0];
+    mClo[iRow+1] = hold->mMiMax[1][0];
+    mCup[iRow+0] = hold->mMiMax[0][1];
+    mCup[iRow+1] = hold->mMiMax[1][1];
+    iRow+=2;
+  }
   return 0;
 }
 //______________________________________________________________________________
-int FEApprox::Solve()
-{
-  TVectorD myPrev(mPrev),myB(mB);
-  for (int iter=0; iter <13; iter++) {
-    TMatrixD Gi(mG);
-
-    for (int iPar=0;iPar<mNPars;iPar++) {
-      if (!mFcn->IsFixed(iPar)) continue;
-      for (int jPar=0;jPar<mNPars;jPar++) {Gi[iPar][jPar]=0.;Gi[jPar][iPar]=0.;}
-      Gi[iPar][iPar]=1; myB[iPar]=0;
-    }
-    double det=0;
-    Gi.Invert(&det);
-    TVectorD add = Gi*myB;
-    
-//		Check negatives
-    mP = myPrev+add;
-    int iBad = -1; double bad = 0;
-    for (int iPar=0;iPar<mNPars;iPar++) {
-      if (mFcn->IsFixed(iPar)) continue;
-      double tst = mP[iPar]-1e-8;
-      if (tst>  0) continue;
-      mP[iPar] = 1e-8;
-      if (tst>bad) continue;
-      bad = tst; iBad = iPar;
-    }  
-
-// Now fix the worst
-    myPrev = mP;      
-    myB = mB-mG*myPrev;
-    if (iBad >-1) {mFcn->FixPar(iBad);	continue;}
-
-// No new fixes. Try to release some old ones
-    int iRel = -1; double rel = 0;
-    for (int iPar=0;iPar<mNPars;iPar++) {
-      if (mFcn->IsFixed(iPar)!=1) 	continue;
-      if (myB[iPar]<=0) 		continue;
-      if (myB[iPar]<rel) continue;
-      rel = myB[iPar]; iRel = iPar;
-    }  
-// Now release the best
-    if (iRel >-1) {mFcn->FixPar(iRel,0);continue;}
-    return 0;
-  }//End iter loop
-
-// Now release all the parameters  
-  for (int iPar=0;iPar<mNPars;iPar++) {
-    if (mFcn->IsFixed(iPar)!=1) continue;
-    printf("    Approx:: release parameter %d\n",iPar);
-    mFcn->FixPar(iPar,0);
-  }
-  
-  return 1;
-}  
 #include "Riostream.h"
 #include "TMath.h"
 #include "TSystem.h"
@@ -1062,7 +1109,7 @@ int FEApprox::Quadr()
 {
 const int nrVar=mNPars;
 const int nrEqual   = mFcn->GetNFixd()+3;
-const int nrInEqual = 0;
+const int nrInEqual = mC.GetNrows();
 TVectorD    c = (-1.)*mB;
 TMatrixDSym Q(nrVar,mG.GetMatrixArray());
 
@@ -1088,11 +1135,11 @@ TMatrixDSym Q(nrVar,mG.GetMatrixArray());
   //   whose values are either 0 or 1 . If iclo[j] = 1, the lower boundary condition 
   //   is active on x[j], etc. ...
 
-  TMatrixD C   (nrInEqual,nrVar);
-  TVectorD clo (nrInEqual);
-  TVectorD cup (nrInEqual);
-  TVectorD iclo(nrInEqual);
-  TVectorD icup(nrInEqual);
+//   TMatrixD C   (nrInEqual,nrVar);
+//   TVectorD clo (nrInEqual);
+//   TVectorD cup (nrInEqual);
+//   TVectorD iclo(nrInEqual);
+//   TVectorD icup(nrInEqual);
 
   // simple square boundary condition : 0 <= x_i, so only xlo is relevant .
   // Like for clo and cup above, we have to define an index vector ixlo and ixup .
@@ -1117,7 +1164,7 @@ TMatrixDSym Q(nrVar,mG.GetMatrixArray());
 
   // stuff all the matrices/vectors defined above in the proper places
 
-  TQpDataDens *prob = (TQpDataDens *)qp->MakeData(c,Q,xlo,ixlo,xup,ixup,A,b,C,clo,iclo,cup,icup);
+  TQpDataDens *prob = (TQpDataDens *)qp->MakeData(c,Q,xlo,ixlo,xup,ixup,A,b,mC,mClo,mIclo,mCup,mIcup);
 
 
   // setup the nrVar variables, vars->fX will contain the final solution
@@ -1147,7 +1194,6 @@ int FEApprox::Approx()
   for (;iter<26;iter++)
   { 
     Prepare(); 
-//    int ans = Solve();
     int ans = Quadr();  if(ans){};
     double eps = 0,maxpar=0;int ips=-1;
     for (int ip=0;ip<mNPars;ip++) {
@@ -1159,12 +1205,12 @@ int FEApprox::Approx()
       double dif = (fabs(mP[ip]-mPrev[ip]))/maxpar;
       if (eps<dif) {ips=ip;eps=dif;}
     }
-//    mP = 0.1*mP +0.9*mPrev;
+    mP = 0.5*mP +0.5*mPrev;
     printf("Approx: iter=%d eps[%d]=%g Parameters:\n",iter,ips,eps);
     mP.Print();
     mPrev = mP;
     mFcn->Update(mP.GetMatrixArray());
-    if (eps<0.01) break;
+    if (eps<0.03) break;
   }
 // Now release all the parameters  
   for (int iPar=0;iPar<mNPars;iPar++) {
@@ -1181,27 +1227,21 @@ void FEFcn::AvErr(const char *tit)
 {
   for (int ih=0;ih<(int)mCas.size();ih++) 
   {
-    FECalcHolder *hold = mCas[ih]; memset(hold->mAve,0,sizeof(hold->mAve));
+    FECalcHolder *hold = mCas[ih]; hold->AvInit();
   }
-   const FETrak* trak = GetTrak();
-   for (;trak;trak=trak->Next()) {   
-     int nNodes = trak->GetNNodes();
-     double hRR[3];
-     for (int iNode=0;iNode<nNodes;iNode++) {//1st Loop over nodes
-       const FENode *n = trak->GetNode(iNode);
-       int detId = n->detId;
-       FECalcHolder *hold = GetCalc(detId,n->hiPos);
-       StvHitErrCalculator *calc = hold->GetCalc();
-       calc->SetTrack(n->tkDir);
-       calc->CalcDcaErrs(n->hiPos,n->hiDir,hRR);
-       hold->mAve[0]++;
-       hold->mAve[1]+=hRR[0];
-       hold->mAve[2]+=hRR[0]*hRR[0];
-       hold->mAve[3]+=hRR[2];
-       hold->mAve[4]+=hRR[2]*hRR[2];
-
-
-     } // end Loop over nodes
+  const FETrak* trak = GetTrak();
+  for (;trak;trak=trak->Next()) {   
+    int nNodes = trak->GetNNodes();
+    double hRR[3];
+    for (int iNode=0;iNode<nNodes;iNode++) {//1st Loop over nodes
+      const FENode *n = trak->GetNode(iNode);
+      int detId = n->detId;
+      FECalcHolder *hold = GetCalc(detId,n->hiPos);
+      StvHitErrCalculator *calc = hold->GetCalc();
+      calc->SetTrack(n->tkDir);
+      calc->CalcDcaErrs(n->hiPos,n->hiDir,hRR);
+      hold->AvAdd(hRR);
+    } // end Loop over nodes
   }//End tracks
 
 
@@ -1211,14 +1251,7 @@ void FEFcn::AvErr(const char *tit)
   for (int ih=0;ih<(int)mCas.size();ih++) 
   {
     FECalcHolder *hold = mCas[ih];
-    for (int i=1;i<5;i++) {hold->mAve[i]/=hold->mAve[0];}
-    for (int i=2;i<5;i+=2){hold->mAve[i] -= pow(hold->mAve[i-1],2);
-                           hold->mAve[i]  = sqrt(hold->mAve[i])   ;}
-
-    printf("%d - %s\t yErr = %5.2g(+-%5.2g) \tzErr = %5.2g(+-%5.2g)  Hits=%g\n"
-          ,ih,hold->GetName()
-          ,hold->mAve[1], hold->mAve[2]   
-          ,hold->mAve[3], hold->mAve[4], hold->mAve[0]);  
+    hold->AvEnd();
   }
   return;
 }
