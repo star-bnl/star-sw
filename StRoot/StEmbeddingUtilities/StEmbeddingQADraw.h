@@ -42,8 +42,11 @@
 //
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.h,v 1.13 2010/06/22 16:31:17 hmasui Exp $
+ * $Id: StEmbeddingQADraw.h,v 1.14 2011/01/31 21:33:51 hmasui Exp $
  * $Log: StEmbeddingQADraw.h,v $
+ * Revision 1.14  2011/01/31 21:33:51  hmasui
+ * Add setParentGeantId() function to allow the multiple decays
+ *
  * Revision 1.13  2010/06/22 16:31:17  hmasui
  * Separate 2D and 1D QA for MC tracks. Add pol0 fit for MC eta, y and phi distributions.
  *
@@ -99,6 +102,12 @@ class StEmbeddingQADraw {
         const Int_t year, const TString production, const Int_t geantid, const Bool_t isEmbeddingOnly = kFALSE);
     virtual ~StEmbeddingQADraw();
 
+    /// Initialization
+    void init() ;
+
+    /// Set parent geant id (default is 0)
+    void setParentGeantId(const Int_t parentgeantid) ;
+
     /// Default is current directory
     void setOutputDirectory(const TString name = "./") ;
 
@@ -142,9 +151,6 @@ class StEmbeddingQADraw {
     /// Open input files
     //  return true only if both embedding and real data files are opened properly
     Bool_t open(const TString embeddingFile, const TString realDataFile) ;
-
-    /// Initialization
-    void init() ;
 
     /// Print figures (png only by default)
     void print(const TCanvas& canvas, const TString name) const;
@@ -266,6 +272,7 @@ class StEmbeddingQADraw {
 
     std::vector<Int_t> mDaughterGeantId ; /// Daughter geant id
     std::vector<Int_t> mMcGeantId ;       /// MC geant id
+    Int_t mParentGeantId ; /// Parent geant id
 
     ClassDef(StEmbeddingQADraw, 1)
 };
