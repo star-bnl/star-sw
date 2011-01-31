@@ -110,8 +110,11 @@ namespace AliHLTTPCCAParameters
   /**
    * The minimum for q/Pt that TrackletConstructor ensures at the end.
    */
+#ifndef __CINT__
   static const sfloat_v MinimumQPt = 1.e-8f;
-
+#else
+  static const float    MinimumQPt = 1.e-8f;
+#endif
   /**
    *  use find TODO:describe
    */
