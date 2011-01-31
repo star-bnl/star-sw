@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.24 2010/08/04 21:16:06 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.25 2011/01/31 21:33:53 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.25  2011/01/31 21:33:53  hmasui
+ * Add setParentGeantId() function to allow the multiple decays
+ *
  * Revision 1.24  2010/08/04 21:16:06  hmasui
  * Replace geantid to nsigma cut for real tracks in legend
  *
@@ -130,7 +133,7 @@ StEmbeddingQADraw::StEmbeddingQADraw(const TString embeddingFile, const TString 
     mProduction = "";
   }
 
-  init() ;
+  mParentGeantId = 0 ;
 }
 
 //____________________________________________________________________________________________________
@@ -148,7 +151,7 @@ StEmbeddingQADraw::StEmbeddingQADraw(const TString embeddingFile, const TString 
   mYear         = year ;
   mProduction   = production ;
 
-  init();
+  mParentGeantId = 0 ;
 }
 
 //____________________________________________________________________________________________________
@@ -163,6 +166,15 @@ StEmbeddingQADraw::~StEmbeddingQADraw()
   /// Close input files
   if( mInputEmbedding || mInputEmbedding->IsOpen() ) mInputEmbedding->Close();
   if( mInputRealData || mInputRealData->IsOpen() ) mInputRealData->Close();
+}
+
+//____________________________________________________________________________________________________
+void StEmbeddingQADraw::setParentGeantId(const Int_t parentgeantid)
+{
+  mParentGeantId = parentgeantid ;
+  LOG_INFO << "StEmbeddingQADraw::setParentGeantId  Set parent geantid = "
+    << mParentGeantId
+    << endm;
 }
 
 //____________________________________________________________________________________________________
@@ -476,13 +488,29 @@ void StEmbeddingQADraw::setDaughterGeantId()
   for(UInt_t id=0; id<1000; id++){
     const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
     const Int_t contamCategoryId = utility->getCategoryId("CONTAM") ;
-    TH3* hDca = (TH3D*) mInputEmbedding->Get(Form("hDca_%d_%d_%d_%d", contamCategoryId, 0, mGeantId, id));
+    TH3* hDca = 0 ;
+
+    if( mParentGeantId == 0 ){
+      hDca = (TH3D*) mInputEmbedding->Get(Form("hDca_%d_%d_%d_%d", contamCategoryId, 0, mGeantId, id));
+    }
+    else{
+      hDca = (TH3D*) mInputEmbedding->Get(Form("hDca_%d_%d_%d_%d", contamCategoryId, mGeantId, mParentGeantId, id));
+    }
 
     if ( hDca ){
-      const Char_t* daughterName = utility->getParticleDefinition(id)->name().c_str() ;
-      const Char_t* parentName   = utility->getParticleDefinition(mGeantId)->name().c_str() ; 
+      if( mParentGeantId == 0 ){
+        const Char_t* daughterName = utility->getParticleDefinition(id)->name().c_str() ;
+        const Char_t* parentName   = utility->getParticleDefinition(mGeantId)->name().c_str() ; 
 
-      LOG_INFO << Form("Find daughter %10s from parent %10s", daughterName, parentName) << endm;
+        LOG_INFO << Form("Find daughter %10s from parent %10s", daughterName, parentName) << endm;
+      }
+      else{
+        const Char_t* daughterName     = utility->getParticleDefinition(id)->name().c_str() ;
+        const Char_t* parentName       = utility->getParticleDefinition(mParentGeantId)->name().c_str() ; 
+        const Char_t* parentparentName = utility->getParticleDefinition(mGeantId)->name().c_str() ; 
+
+        LOG_INFO << Form("Find daughter %10s from parent %10s (from %10s)", daughterName, parentName, parentparentName) << endm;
+      }
 
       mDaughterGeantId.push_back(id);
     }
@@ -586,8 +614,14 @@ TObject* StEmbeddingQADraw::getHistogram(const TString name, const UInt_t daught
     /// Histogram name is 
     ///   - {histogram name}_{category id}_{particle id} for stable particles
     ///   - {histogram name}_{category id}_{parent-parent particle id}_{parent particle id}_{daughter particle id} for unstable particles
-    return (isDecay()) ? getHistogram(Form("%s_%d_%d_%d_%d", name.Data(), category, parentparentid, mGeantId, mDaughterGeantId[daughter])) 
-      : getHistogram(Form("%s_%d_%d", name.Data(), category, mGeantId)) ;
+
+    if( isDecay() ) {
+      if ( mParentGeantId == 0 ) return getHistogram(Form("%s_%d_%d_%d_%d", name.Data(), category, parentparentid, mGeantId, mDaughterGeantId[daughter])) ;
+      else                       return getHistogram(Form("%s_%d_%d_%d_%d", name.Data(), category, mGeantId, mParentGeantId, mDaughterGeantId[daughter])) ;
+    }
+    else {
+      return getHistogram(Form("%s_%d_%d", name.Data(), category, mGeantId)) ;
+    }
   }
   else{
     /// Only primary particles in the real data
@@ -697,12 +731,13 @@ const Char_t* StEmbeddingQADraw::getParticleName(const Int_t geantid) const
   /// Since particle name will be used for pdf filename, and "/" will be 
   /// recognized as directory so that output will be disappeared if "/"
   /// is included in the filename
+  /// Remove "()" and replace "*" to "start"
   TString name(particle->name().c_str());
-  while( name.Contains("/") ){
-    // Remove "/" from particle name
-    name.Remove(name.Index("/"), 1);
-  }
-    
+  while( name.Contains("/") ) name.Remove(name.Index("/"), 1); // Remove "/" from particle name
+  while( name.Contains("(") ) name.Remove(name.Index("("), 1); // Remove "(" from particle name
+  while( name.Contains(")") ) name.Remove(name.Index(")"), 1); // Remove "/" from particle name
+  while( name.Contains("*") ) name.Replace(name.Index("*"), 1, "star"); // Replace "*" to "star"
+
   return name.Data() ;
 }
 
@@ -729,13 +764,14 @@ const Char_t* StEmbeddingQADraw::getEmbeddingParticleName(const UInt_t id, const
   const Int_t categoryId = getCategoryId() ;
   const TString name(utility->getCategoryName(categoryId));
 
+  const TString parent( (mParentGeantId==0) ? "" : Form(" (from %s)", getParticleName(mParentGeantId)) );
   const TString daughter( (utility->isContaminated(name)) ? "Daughter " : "" ); 
   const Int_t daughterId = mDaughterGeantId[id] ;
 
-  return (doSplit) ? Form("#splitline{%s%s}{(%s, geantid=%d)}", daughter.Data(), getParticleName(daughterId),
-      utility->getCategoryName(categoryId).Data(), daughterId)
-    : Form("%s%s (%s, geantid=%d)", daughter.Data(), getParticleName(daughterId),
-      utility->getCategoryName(categoryId).Data(), daughterId);
+  return (doSplit) ? Form("#splitline{%s%s%s}{(%s, geantid=%d)}", daughter.Data(), getParticleName(daughterId),
+      parent.Data(), utility->getCategoryName(categoryId).Data(), daughterId)
+    : Form("%s%s%s (%s, geantid=%d)", daughter.Data(), getParticleName(daughterId),
+        parent.Data(), utility->getCategoryName(categoryId).Data(), daughterId);
 }
 
 //____________________________________________________________________________________________________
