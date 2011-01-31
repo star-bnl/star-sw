@@ -1,5 +1,10 @@
-* $Id: g2t_volume_id.g,v 1.64 2011/01/26 19:21:17 perev Exp $
+* $Id: g2t_volume_id.g,v 1.65 2011/01/31 18:05:43 jwebb Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.65  2011/01/31 18:05:43  jwebb
+* Added code to detect which version of the fpd geometry module is in use
+* so that we can decode geant volume Ids and associate with g2t volume id
+* properly.
+*
 * Revision 1.64  2011/01/26 19:21:17  perev
 * FPD ==> STAR Soft
 *
@@ -118,6 +123,10 @@
 *
 ********************************************************************
       function g2t_volume_id(Csys,numbv)
+
+ Replace [;ASSERT(#) ! #;] with [;if (.not.#1) { stop 'g2t_volume_id.g: line __LINE__' };];
+
+
 *
 * Modification history:                                            *
 * PN 28.12.99: use structure control access to avoid warnings      *
@@ -142,6 +151,7 @@
       Integer          module,layer
       Integer          nEndcap,nFpd,depth,shift,nv
       Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/,istb/0/
+      Integer          ifpd/0/,ifms/0/,ifpdmgeo/0/
       Integer          istVersion/0/,istLayer/0/
 *     FPD
       Integer          n1,n2,ew,nstb,ch,sl
@@ -178,10 +188,13 @@
       Structure  BTOG  {version, int choice, posit1(2), posit2, posit3}
       Structure  CALG  {version, int Nmodule(2), int NetaT, int MaxModule, 
                                  int Nsub, int NetaSMDp, int NPhistr,
-      	                         int Netfirst, int Netsecon}
+      	                         int Netfirst, int Netsecon} 
 *         
       Structure  EMCG { Version, int Onoff, int fillMode}
       Structure  ISMG { Layer, Rin,            Rout,        TotalLength, code}
+
+      Structure  FMCG { Version } ! FMS/FPD++/FPD geometry
+      Structure  FPDG { Version } ! FPD geometry
 
       logical    first/.true./
       logical    printOnce/.true./
@@ -200,11 +213,14 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           USE  /DETM/ECAL/EMCG  stat=ieem
           USE  /DETM/ISTB/ISMG  stat=istb
 
+          USE  /DETM/FPDM/FPDG  stat=ifpd
+          USE  /DETM/FPDM/FMCG  stat=ifms
+
           call RBPOPD
           if (itpc>=0) print *,' g2t_volume_id: TPC version =',tpcg_version
           if (ivpd>=0) print *,'              : VPD version =',vpdg_version
           if (ibtf>=0) print *,'              : TOF version =',btog_version,
-     >                         ' choice  =',btog_choice
+                               ' choice  =',btog_choice
           if (ical>=0) print *,'              : CALB patch  =',calg_nmodule
           if (ieem>=0) print *,'              : ECAL version=',emcg_version, 
                                ' onoff   =',emcg_onoff,emcg_FillMode
@@ -212,6 +228,21 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *             print *,'              : ISTB version of code=', ismg_code
              istVersion=ismg_code
           endif
+
+          !! IFPDMGEO indicates which major version of the FPD/FMS module is present
+          !! IFPD    indicates which geometry version is in place (to allow changes
+          !!         w/in each major version.)
+          if ( ifpd > 0 ) { 
+                         ifpdmgeo=0      !! fpdmgeo.g
+                         ifpd   =fpdg_version
+          } 
+          if ( ifms > 0 ) { 
+             ifms = fmcg_version
+             if (ifms=6) ifpdmgeo=1      !! fpdmgeo1.g
+             if (ifms=7) ifpdmgeo=2      !! fpdmgeo2.g
+             if (ifms=8) ifpdmgeo=3      !! fpdmgeo3.g                                       
+          }
+
       endif
 *
       volume_id = 0	
@@ -693,23 +724,20 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 *23*                                 Pibero Djawotho
       else if (Csys=='fpd') then
-	n1 = numbv(1)
-	n2 = numbv(2)
-        sl = -999
-	if(cd=='FLGR') sl=1
-        if(cd=='FLXF') sl=2
-        if (sl<0) stop 'Wrong cd in FPD'
-        ew=(n1-1)/2+1
-        nstb = -999
-	if(n1.eq.1) nstb=1
-	if(n1.eq.2) nstb=2
-	if(n1.eq.3 .and. sl.eq.2) nstb=1
-	if(n1.eq.4 .and. sl.eq.2) nstb=2
-	if(n1.eq.3 .and. sl.eq.1) nstb=3
-	if(n1.eq.4 .and. sl.eq.1) nstb=4                    
-        if (nstb<0) stop 'Wrong nstb in FPD'
-        ch=n2
-        if(ew.eq.1) then
+
+        if (ifpdmgeo==3 ) {                                                    !! FMS Geometry
+           n1 = numbv(1); n2 = numbv(2); sl = -999
+	   if(cd=='FLGR') sl=1
+           if(cd=='FLXF') sl=2; assert(sl.gt.0) ! Wrong sensitive detector in FPD/FMS
+           ew=(n1-1)/2+1
+           nstb = -999
+	   if(n1.eq.1) nstb=1; if(n1.eq.2) nstb=2
+	   if(n1.eq.3 .and. sl.eq.2) nstb=1
+	   if(n1.eq.4 .and. sl.eq.2) nstb=2
+	   if(n1.eq.3 .and. sl.eq.1) nstb=3
+	   if(n1.eq.4 .and. sl.eq.1) nstb=4 ; assert(nstb.gt.0) ! Wrong nstb in FPD/FMS
+           ch=n2
+           if(ew.eq.1) then
            if(ch.gt.49 .and. ch.le.56) then
               ch=ch-49
               nstb=nstb+4
@@ -719,9 +747,8 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
            else if(nstb.eq.3 .or. nstb.eq.4) then
               ch=ch + 4 - 2*mod(ch-1,5)
            endif
-        else if(ew.eq.2) then
-
-	  if(nstb.le.2) then  
+           else if(ew.eq.2) then
+	    if(nstb.le.2) then  
 	    if(n2.ge.11  .and. n2.le.21 )  ch=n2 +  7
 	    if(n2.ge.22  .and. n2.le.33 )  ch=n2 + 13
 	    if(n2.ge.34  .and. n2.le.46 )  ch=n2 + 18
@@ -737,14 +764,15 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	    if(n2.ge.362 .and. n2.le.373)  ch=n2 +166
 	    if(n2.ge.374 .and. n2.le.384)  ch=n2 +171
 	    if(n2.ge.385 .and. n2.le.394)  ch=n2 +177   
-    !        write(*,*) 'matrix check - Large cells FMS: ',nstb, ch,n2
-	  else
+            !write(*,*) 'matrix check - Large cells FMS: ',nstb, ch,n2
+	    else
 	    if(n2.ge. 85 .and. n2.le.154)  ch=n2 +  5 + 5*((n2-85)/7)
 	    if(n2.ge.155 .and. n2.le.238)  ch=n2 + 50 
-    !        write(*,*) 'matrix check - Small cells FMS: ',nstb, ch,n2
-          endif
-      endif
-      volume_id=ew*10000+nstb*1000+ch       
+            !write(*,*) 'matrix check - Small cells FMS: ',nstb, ch,n2
+            endif
+            endif
+            volume_id=ew*10000+nstb*1000+ch       
+        }
 
       else
           print *,' G2T warning: volume  ',Csys,'  not found '  
