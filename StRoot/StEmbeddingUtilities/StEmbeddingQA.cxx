@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.17 2011/01/14 23:46:16 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.18 2011/01/31 21:32:12 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.18  2011/01/31 21:32:12  hmasui
+ * Modify histogram keys to TString to take into account parent geantid
+ *
  * Revision 1.17  2011/01/14 23:46:16  hmasui
  * Add Ncommon hit cut for NHitFit histograms
  *
@@ -763,12 +766,14 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
   // Rapidity cut, default rapidity cut is 10 (Use setRapidityCut(const Float_t ycut) to restrict y window)
   if(!track.isRapidityOk(mRapidityCut)) return ;
 
+  const TString idcollection(getIdCollection(geantid, track.getParentGeantId(), track.getParentParentGeantId()));
+
   // dE/dx (no PID cut)
   //  - Add NHit cut (Nov/13/2009)
   //  - Add NHitFit/NHitPoss cut
   if( track.isDcaOk() && track.isNHitOk() && track.isNHitToNPossOk() ) {
-    mhdEdxVsMomMc[categoryid][geantid]->Fill(mom, track.getdEdxkeV());
-    mhdEdxVsMomReco[categoryid][geantid]->Fill(momRc, track.getdEdxkeV());
+    mhdEdxVsMomMc[categoryid][idcollection]->Fill(mom, track.getdEdxkeV());
+    mhdEdxVsMomReco[categoryid][idcollection]->Fill(momRc, track.getdEdxkeV());
   }
 
   //  Oct/21/2009
@@ -782,42 +787,42 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
     // Fill NHit points
     //  Added common hit cuts
     if ( track.isCommonHitOk() ) {
-      mhNHit[categoryid][geantid]->Fill(pt, eta, track.getNHit());
+      mhNHit[categoryid][idcollection]->Fill(pt, eta, track.getNHit());
     }
 
     if( track.isNHitOk() ){
       const Double_t phi = track.getPhi() ;
 
       // Fill Ncommon hits vs Nhits
-      mhNCommonHitVsNHit[categoryid][geantid]->Fill(track.getNHit(), track.getNCommonHit());
+      mhNCommonHitVsNHit[categoryid][idcollection]->Fill(track.getNHit(), track.getNCommonHit());
 
       // NHitFit/NHitPoss cut
       if( track.isNHitToNPossOk() ) {
         // dE/dx (with PID cut)
-        mhdEdxVsMomMcPidCut[categoryid][geantid]->Fill(mom, track.getdEdxkeV());
-        mhdEdxVsMomRecoPidCut[categoryid][geantid]->Fill(momRc, track.getdEdxkeV());
+        mhdEdxVsMomMcPidCut[categoryid][idcollection]->Fill(mom, track.getdEdxkeV());
+        mhdEdxVsMomRecoPidCut[categoryid][idcollection]->Fill(momRc, track.getdEdxkeV());
   
         // Correlation between reconstructed and MC momentum
-        mhRecoPVsMcP[categoryid][geantid]->Fill(mom, momRc);
+        mhRecoPVsMcP[categoryid][idcollection]->Fill(mom, momRc);
   
         // Pt, eta, phi
-        mhPtVsEta[categoryid][geantid]->Fill(eta, pt);
-        mhPtVsY[categoryid][geantid]->Fill(y, pt);
-        mhPtVsPhi[categoryid][geantid]->Fill(phi, pt);
-        mhPtVsMom[categoryid][geantid]->Fill(mom, pt);
-        mhdPtVsPt[categoryid][geantid]->Fill(pt, pt-track.getPtRc());
-        mhMomVsEta[categoryid][geantid]->Fill(eta, mom);
+        mhPtVsEta[categoryid][idcollection]->Fill(eta, pt);
+        mhPtVsY[categoryid][idcollection]->Fill(y, pt);
+        mhPtVsPhi[categoryid][idcollection]->Fill(phi, pt);
+        mhPtVsMom[categoryid][idcollection]->Fill(mom, pt);
+        mhdPtVsPt[categoryid][idcollection]->Fill(pt, pt-track.getPtRc());
+        mhMomVsEta[categoryid][idcollection]->Fill(eta, mom);
   
-        mhEtaVsPhi[categoryid][geantid]->Fill(phi, eta);
-        mhEtaVsVz[categoryid][geantid]->Fill(mVz, eta);
-        mhYVsVz[categoryid][geantid]->Fill(mVz, y);
+        mhEtaVsPhi[categoryid][idcollection]->Fill(phi, eta);
+        mhEtaVsVz[categoryid][idcollection]->Fill(mVz, eta);
+        mhYVsVz[categoryid][idcollection]->Fill(mVz, y);
       }
     }
   }
 
   // Fill Dca
   if( track.isNHitOk() && track.isNHitToNPossOk() ){
-    mhDca[categoryid][geantid]->Fill(pt, eta, track.getDcaGl());
+    mhDca[categoryid][idcollection]->Fill(pt, eta, track.getDcaGl());
   }
 
   LOG_DEBUG << Form("     RC:(nfit, pt, eta, phi) = (%5d, %1.4f, %1.4f, %1.4f)  MC:(pt, eta) = (%1.4f, %1.4f)",
@@ -891,7 +896,7 @@ Bool_t StEmbeddingQA::pushBackGeantId(const Int_t categoryid, const Short_t gean
     isOk = kFALSE ;
   }
   else{
-    TString idcollection(Form("%d_%d_%d", parentparentid, parentid, geantid));
+    const TString idcollection(getIdCollection(geantid, parentid, parentparentid));
 
     if( mGeantIdCollection.empty() ){
       /// Push back a new id collection if the array is empty
@@ -963,10 +968,11 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
         utility->getParticleDefinition(geantid)->name().c_str());
   }
 
-
   const TString categoryName(utility->getCategoryName(categoryid));
   const Bool_t isMc        = utility->isMc(categoryName);
   const Bool_t isEmbedding = utility->isEmbedding(categoryName);
+
+  const TString idcollection(getIdCollection(geantid, parentid, parentparentid));
 
   // NHit vs eta vs MC pt
   TString title(Form("N_{fit} distribution (|dcaGl|<3cm), %s", CategoryAndGeantId.Data()));
@@ -976,7 +982,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hNhit->SetYTitle("#eta");
   hNhit->SetZTitle("N_{fit}");
   utility->setStyle(hNhit);
-  mhNHit[categoryid].insert( pair<Int_t, TH3*>(geantid, hNhit) );
+  mhNHit[categoryid].insert( std::make_pair(idcollection, hNhit) );
 
   // Ncommon hit vs Nfit
   title = Form("N_{common} hit vs N_{fit} (|dcaGl|<3cm), %s", CategoryAndGeantId.Data());
@@ -985,7 +991,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hNCommonHitVsNHit->SetXTitle("N_{fit}");
   hNCommonHitVsNHit->SetYTitle("N_{common}");
   utility->setStyle(hNCommonHitVsNHit);
-  mhNCommonHitVsNHit[categoryid].insert( pair<Int_t, TH2*>(geantid, hNCommonHitVsNHit) );
+  mhNCommonHitVsNHit[categoryid].insert( std::make_pair(idcollection, hNCommonHitVsNHit) );
 
   // Dca vs eta vs MC pt
   title = Form("Dca vs #eta vs MC p_{T} (N_{fit}#geq10), %s", CategoryAndGeantId.Data());
@@ -997,7 +1003,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hDca->SetYTitle("#eta");
   hDca->SetZTitle("Global dca (cm)");
   utility->setStyle(hDca);
-  mhDca[categoryid].insert( pair<Int_t, TH3*>(geantid, hDca) );
+  mhDca[categoryid].insert( std::make_pair(idcollection, hDca) );
 
   //--------------------------------------------------
   // Common cuts for the 
@@ -1027,7 +1033,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hPtVsEta->SetXTitle("#eta");
   hPtVsEta->SetYTitle("MC p_{T} (GeV/c)");
   utility->setStyle(hPtVsEta);
-  mhPtVsEta[categoryid].insert( pair<Int_t, TH2*>(geantid, hPtVsEta) );
+  mhPtVsEta[categoryid].insert( std::make_pair(idcollection, hPtVsEta) );
 
   // pt vs y
   TH2* hPtVsY = new TH2D(Form("hPtVsY%s", nameSuffix.Data()), Form("MC p_{T} vs y%s", titleSuffix.Data()),
@@ -1035,7 +1041,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hPtVsY->SetXTitle("rapidity y");
   hPtVsY->SetYTitle("MC p_{T} (GeV/c)");
   utility->setStyle(hPtVsY);
-  mhPtVsY[categoryid].insert( pair<Int_t, TH2*>(geantid, hPtVsY) );
+  mhPtVsY[categoryid].insert( std::make_pair(idcollection, hPtVsY) );
 
   // pt vs phi
   TH2* hPtVsPhi = new TH2D(Form("hPtVsPhi%s", nameSuffix.Data()), Form("MC p_{T} vs #phi%s", titleSuffix.Data()),
@@ -1043,7 +1049,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hPtVsPhi->SetXTitle("#phi (rad)");
   hPtVsPhi->SetYTitle("MC p_{T} (GeV/c)");
   utility->setStyle(hPtVsPhi);
-  mhPtVsPhi[categoryid].insert( pair<Int_t, TH2*>(geantid, hPtVsPhi) );
+  mhPtVsPhi[categoryid].insert( std::make_pair(idcollection, hPtVsPhi) );
 
   // pt vs momentum
   TH2* hPtVsMom = new TH2D(Form("hPtVsMom%s", nameSuffix.Data()), Form("MC p_{T} vs momentum%s", titleSuffix.Data()),
@@ -1051,7 +1057,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hPtVsMom->SetXTitle("momentum (GeV/c)");
   hPtVsMom->SetYTitle("MC p_{T} (GeV/c)");
   utility->setStyle(hPtVsMom);
-  mhPtVsMom[categoryid].insert( pair<Int_t, TH2*>(geantid, hPtVsMom) );
+  mhPtVsMom[categoryid].insert( std::make_pair(idcollection, hPtVsMom) );
 
   // Delta pt vs pt
   TH2* hdPtVsPt = new TH2D(Form("hdPtVsPt%s", nameSuffix.Data()), Form("p_{T} - p_{T} (MC) vs p_{T}%s", titleSuffix.Data()),
@@ -1059,7 +1065,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hdPtVsPt->SetXTitle("reco. p_{T} (GeV/c)");
   hdPtVsPt->SetYTitle("reco. p_{T} - MC p_{T} (GeV/c)");
   utility->setStyle(hdPtVsPt);
-  mhdPtVsPt[categoryid].insert( pair<Int_t, TH2*>(geantid, hdPtVsPt) );
+  mhdPtVsPt[categoryid].insert( std::make_pair(idcollection, hdPtVsPt) );
 
   // momentum vs eta
   TH2* hMomVsEta = new TH2D(Form("hMomVsEta%s", nameSuffix.Data()), Form("Momentum vs #eta%s", titleSuffix.Data()),
@@ -1067,7 +1073,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hMomVsEta->SetXTitle("#eta");
   hMomVsEta->SetYTitle("momentum (GeV/c)");
   utility->setStyle(hMomVsEta);
-  mhMomVsEta[categoryid].insert( pair<Int_t, TH2*>(geantid, hMomVsEta) );
+  mhMomVsEta[categoryid].insert( std::make_pair(idcollection, hMomVsEta) );
 
   // dE/dx vs MC momentum
   TH2* hdEdxVsMomMc = new TH2D(Form("hdEdxVsMomMc%s", nameSuffix.Data()), Form("dE/dx vs MC p%s", titleSuffix.Data()),
@@ -1075,7 +1081,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hdEdxVsMomMc->SetXTitle("MC p (GeV/c)");
   hdEdxVsMomMc->SetYTitle("dE/dx (keV/cm)");
   utility->setStyle(hdEdxVsMomMc);
-  mhdEdxVsMomMc[categoryid].insert( pair<Int_t, TH2*>(geantid, hdEdxVsMomMc) );
+  mhdEdxVsMomMc[categoryid].insert( std::make_pair(idcollection, hdEdxVsMomMc) );
 
   // dE/dx vs reconstructed momentum
   TH2* hdEdxVsMomReco = new TH2D(Form("hdEdxVsMomReco%s", nameSuffix.Data()), Form("dE/dx vs Reconstructed p%s", titleSuffix.Data()),
@@ -1083,7 +1089,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hdEdxVsMomReco->SetXTitle("Reconstructed p (GeV/c)");
   hdEdxVsMomReco->SetYTitle("dE/dx (keV/cm)");
   utility->setStyle(hdEdxVsMomReco);
-  mhdEdxVsMomReco[categoryid].insert( pair<Int_t, TH2*>(geantid, hdEdxVsMomReco) );
+  mhdEdxVsMomReco[categoryid].insert( std::make_pair(idcollection, hdEdxVsMomReco) );
 
   // Reconstructed momentum vs MC momentum
   TH2* hRecoPVsMcP = new TH2D(Form("hRecoPVsMcP%s", nameSuffix.Data()), Form("Reconstructed p vs MC p%s", titleSuffix.Data()),
@@ -1091,7 +1097,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hRecoPVsMcP->SetXTitle("MC p (GeV/c)");
   hRecoPVsMcP->SetYTitle("Reconstructed p (GeV/c)");
   utility->setStyle(hRecoPVsMcP);
-  mhRecoPVsMcP[categoryid].insert( pair<Int_t, TH2*>(geantid, hRecoPVsMcP) );
+  mhRecoPVsMcP[categoryid].insert( std::make_pair(idcollection, hRecoPVsMcP) );
 
   // eta vs phi
   TH2* hEtaVsPhi = new TH2D(Form("hEtaVsPhi%s", nameSuffix.Data()), Form("#eta vs #phi%s", titleSuffix.Data()),
@@ -1099,8 +1105,8 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hEtaVsPhi->SetXTitle("#phi (rad)");
   hEtaVsPhi->SetYTitle("#eta");
   utility->setStyle(hEtaVsPhi);
-  mhRecoPVsMcP[categoryid].insert( pair<Int_t, TH2*>(geantid, hRecoPVsMcP) );
-  mhEtaVsPhi[categoryid].insert( pair<Int_t, TH2*>(geantid, hEtaVsPhi) );
+  mhRecoPVsMcP[categoryid].insert( std::make_pair(idcollection, hRecoPVsMcP) );
+  mhEtaVsPhi[categoryid].insert( std::make_pair(idcollection, hEtaVsPhi) );
 
   // eta vs vz
   TH2* hEtaVsVz = new TH2D(Form("hEtaVsVz%s", nameSuffix.Data()), Form("#eta vs v_{z}%s", titleSuffix.Data()),
@@ -1108,7 +1114,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hEtaVsVz->SetXTitle("v_{z} (cm)");
   hEtaVsVz->SetYTitle("#eta");
   utility->setStyle(hEtaVsVz);
-  mhEtaVsVz[categoryid].insert( pair<Int_t, TH2*>(geantid, hEtaVsVz) );
+  mhEtaVsVz[categoryid].insert( std::make_pair(idcollection, hEtaVsVz) );
  
   // rapidity vs vz
   TH2* hYVsVz = new TH2D(Form("hYVsVz%s", nameSuffix.Data()), Form("rapidity y vs v_{z}%s", titleSuffix.Data()),
@@ -1116,7 +1122,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hYVsVz->SetXTitle("v_{z} (cm)");
   hYVsVz->SetYTitle("rapidity y");
   utility->setStyle(hYVsVz);
-  mhYVsVz[categoryid].insert( pair<Int_t, TH2*>(geantid, hYVsVz) );
+  mhYVsVz[categoryid].insert( std::make_pair(idcollection, hYVsVz) );
 
   // dE/dx vs MC momentum (with pid cut)
   TH2* hdEdxVsMomMcPidCut = new TH2D(Form("hdEdxVsMomMcPidCut%s", nameSuffix.Data()), Form("dE/dx vs MC p (with 2#sigma pid cut)%s", titleSuffix.Data()),
@@ -1124,7 +1130,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hdEdxVsMomMcPidCut->SetXTitle("MC p (GeV/c)");
   hdEdxVsMomMcPidCut->SetYTitle("dE/dx (keV/cm)");
   utility->setStyle(hdEdxVsMomMcPidCut);
-  mhdEdxVsMomMcPidCut[categoryid].insert( pair<Int_t, TH2*>(geantid, hdEdxVsMomMcPidCut) );
+  mhdEdxVsMomMcPidCut[categoryid].insert( std::make_pair(idcollection, hdEdxVsMomMcPidCut) );
 
   // dE/dx vs Reconstructed momentum (with pid cut)
   TH2* hdEdxVsMomRecoPidCut = new TH2D(Form("hdEdxVsMomRecoPidCut%s", nameSuffix.Data()), 
@@ -1133,7 +1139,7 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geant
   hdEdxVsMomRecoPidCut->SetXTitle("Reconstructed p (GeV/c)");
   hdEdxVsMomRecoPidCut->SetYTitle("dE/dx (keV/cm)");
   utility->setStyle(hdEdxVsMomRecoPidCut);
-  mhdEdxVsMomRecoPidCut[categoryid].insert( pair<Int_t, TH2*>(geantid, hdEdxVsMomRecoPidCut) );
+  mhdEdxVsMomRecoPidCut[categoryid].insert( std::make_pair(idcollection, hdEdxVsMomRecoPidCut) );
 }
 
 //__________________________________________________________________________________________
@@ -1154,5 +1160,11 @@ Int_t StEmbeddingQA::getNtrack(const Int_t categoryid, const StMiniMcEvent& mcev
   }
 
   return 0 ;
+}
+
+//__________________________________________________________________________________________
+TString StEmbeddingQA::getIdCollection(const Short_t geantid, const Int_t parentid, const Int_t parentparentid) const
+{
+  return Form("%d_%d_%d", geantid, parentid, parentparentid) ;
 }
 

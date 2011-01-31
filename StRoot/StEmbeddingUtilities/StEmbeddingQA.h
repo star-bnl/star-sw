@@ -5,8 +5,11 @@
 //  for instructions
 //****************************************************************************************************
 /****************************************************************************************************
- * $Id: StEmbeddingQA.h,v 1.7 2010/07/12 21:29:40 hmasui Exp $
+ * $Id: StEmbeddingQA.h,v 1.8 2011/01/31 21:32:10 hmasui Exp $
  * $Log: StEmbeddingQA.h,v $
+ * Revision 1.8  2011/01/31 21:32:10  hmasui
+ * Modify histogram keys to TString to take into account parent geantid
+ *
  * Revision 1.7  2010/07/12 21:29:40  hmasui
  * Move isGeantIdOk() function into StEmbeddingQAUtilities
  *
@@ -69,6 +72,8 @@ class StEmbeddingQA {
     /// Destructor
     virtual ~StEmbeddingQA();
 
+    void init() ;  /// Initialization 
+
     /// Book histograms
     /// Default output is 'ana_{type}_{year}_{production}_{particleId}.root'
     /// if you don't put any words in the argument (i.e. whitespace)
@@ -105,7 +110,6 @@ class StEmbeddingQA {
     const Bool_t mIsSimulation ;      /// kTRUE : embedding QA,  kFALSE : real data QA
 
     void clear() ; /// Clear all histograms
-    void init() ;  /// Initialization
 
     // Fill histograms
     Bool_t fillEmbedding(const TString inputFileName) ; // Fill embedding histograms
@@ -140,6 +144,10 @@ class StEmbeddingQA {
     /// Number of tracks
     Int_t getNtrack(const Int_t categoryid, const StMiniMcEvent& mcevent) const ;
 
+    /// Get combination string of geantid, parent and parent-parent id
+    /// The format is ("%d_%d_%d", geantid, parentid, parentparentid)
+    TString getIdCollection(const Short_t geantid, const Int_t parentid, const Int_t parentparentid) const ;
+
     StMuDstMaker* mMuDstMaker ; /// Pointer to the StMuDstMaker
     Float_t mVertexCut ; /// z-vertex cut (Default is 30 cm)
     std::vector<UInt_t> mTriggerId ; /// Trigger id cut (can be multiple trigger id's)
@@ -173,24 +181,24 @@ class StEmbeddingQA {
                                                                     /// for Contaminated pairs only
 
     TH1* mhGeantId[StEmbeddingQAConst::mNCategory];                               /// Geant id
-    std::map<Int_t, TH3*> mhNHit[StEmbeddingQAConst::mNCategory] ;                /// Nhit distribution vs eta vs pt
-    std::map<Int_t, TH3*> mhDca[StEmbeddingQAConst::mNCategory] ;                 /// Dca vs eta vs pt
-    std::map<Int_t, TH2*> mhPtVsEta[StEmbeddingQAConst::mNCategory] ;             /// pt vs pseudo-rapidity
-    std::map<Int_t, TH2*> mhPtVsY[StEmbeddingQAConst::mNCategory] ;               /// pt vs rapidity
-    std::map<Int_t, TH2*> mhPtVsPhi[StEmbeddingQAConst::mNCategory] ;             /// pt vs phi
-    std::map<Int_t, TH2*> mhPtVsMom[StEmbeddingQAConst::mNCategory] ;             /// pt vs momentum
-    std::map<Int_t, TH2*> mhdPtVsPt[StEmbeddingQAConst::mNCategory] ;             /// pt - pt(MC) vs pt
-    std::map<Int_t, TH2*> mhMomVsEta[StEmbeddingQAConst::mNCategory] ;            /// momentum vs eta
-    std::map<Int_t, TH2*> mhdEdxVsMomMc[StEmbeddingQAConst::mNCategory] ;         /// dE/dx vs MC momentum (no PID cut)
-    std::map<Int_t, TH2*> mhdEdxVsMomMcPidCut[StEmbeddingQAConst::mNCategory] ;   /// dE/dx vs MC momentum (with PID cut, 2 sigma)
-    std::map<Int_t, TH2*> mhdEdxVsMomReco[StEmbeddingQAConst::mNCategory] ;       /// dE/dx vs reconstructed momentum (no PID cut)
-    std::map<Int_t, TH2*> mhdEdxVsMomRecoPidCut[StEmbeddingQAConst::mNCategory] ; /// dE/dx vs reconstructed momentum (with PID cut, 2 sigma)
-    std::map<Int_t, TH2*> mhRecoPVsMcP[StEmbeddingQAConst::mNCategory] ;          /// Reconstructed momentum vs MC momentum
-    std::map<Int_t, TH2*> mhNCommonHitVsNHit[StEmbeddingQAConst::mNCategory] ;      /// Ncommon hit vs Nhit
+    std::map<TString, TH3*> mhNHit[StEmbeddingQAConst::mNCategory] ;                /// Nhit distribution vs eta vs pt
+    std::map<TString, TH3*> mhDca[StEmbeddingQAConst::mNCategory] ;                 /// Dca vs eta vs pt
+    std::map<TString, TH2*> mhPtVsEta[StEmbeddingQAConst::mNCategory] ;             /// pt vs pseudo-rapidity
+    std::map<TString, TH2*> mhPtVsY[StEmbeddingQAConst::mNCategory] ;               /// pt vs rapidity
+    std::map<TString, TH2*> mhPtVsPhi[StEmbeddingQAConst::mNCategory] ;             /// pt vs phi
+    std::map<TString, TH2*> mhPtVsMom[StEmbeddingQAConst::mNCategory] ;             /// pt vs momentum
+    std::map<TString, TH2*> mhdPtVsPt[StEmbeddingQAConst::mNCategory] ;             /// pt - pt(MC) vs pt
+    std::map<TString, TH2*> mhMomVsEta[StEmbeddingQAConst::mNCategory] ;            /// momentum vs eta
+    std::map<TString, TH2*> mhdEdxVsMomMc[StEmbeddingQAConst::mNCategory] ;         /// dE/dx vs MC momentum (no PID cut)
+    std::map<TString, TH2*> mhdEdxVsMomMcPidCut[StEmbeddingQAConst::mNCategory] ;   /// dE/dx vs MC momentum (with PID cut, 2 sigma)
+    std::map<TString, TH2*> mhdEdxVsMomReco[StEmbeddingQAConst::mNCategory] ;       /// dE/dx vs reconstructed momentum (no PID cut)
+    std::map<TString, TH2*> mhdEdxVsMomRecoPidCut[StEmbeddingQAConst::mNCategory] ; /// dE/dx vs reconstructed momentum (with PID cut, 2 sigma)
+    std::map<TString, TH2*> mhRecoPVsMcP[StEmbeddingQAConst::mNCategory] ;          /// Reconstructed momentum vs MC momentum
+    std::map<TString, TH2*> mhNCommonHitVsNHit[StEmbeddingQAConst::mNCategory] ;      /// Ncommon hit vs Nhit
 
-    std::map<Int_t, TH2*> mhEtaVsPhi[StEmbeddingQAConst::mNCategory] ;  /// pseudo-rapidity vs phi
-    std::map<Int_t, TH2*> mhEtaVsVz[StEmbeddingQAConst::mNCategory] ;   /// pseudo-rapidity vs vz
-    std::map<Int_t, TH2*> mhYVsVz[StEmbeddingQAConst::mNCategory] ;     /// rapidity vs vz
+    std::map<TString, TH2*> mhEtaVsPhi[StEmbeddingQAConst::mNCategory] ;  /// pseudo-rapidity vs phi
+    std::map<TString, TH2*> mhEtaVsVz[StEmbeddingQAConst::mNCategory] ;   /// pseudo-rapidity vs vz
+    std::map<TString, TH2*> mhYVsVz[StEmbeddingQAConst::mNCategory] ;     /// rapidity vs vz
 
     ClassDef(StEmbeddingQA, 1);
 };
