@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMCTrack.cxx,v 1.2 2010/09/01 10:38:27 ikulakov Exp $
+// $Id: AliHLTTPCCAMCTrack.cxx,v 1.3 2011/01/31 17:18:28 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -86,7 +86,7 @@ void AliHLTTPCCAMCTrack::SetTPCPar( float X, float Y, float Z,
 
 ostream& operator<<(ostream& out, const AliHLTTPCCAMCTrack &a)
 {
-  out << a.fPDG << std::endl;
+  out << a.fMotherId << " " << a.fPDG << std::endl;
   for (int i = 0; i < 7; i++) out << a.fPar[i] << std::endl;
   for (int i = 0; i < 7; i++) out << a.fTPCPar[i] << std::endl;
   out << a.fP << " " << a.fPt << std::endl;
@@ -97,7 +97,7 @@ ostream& operator<<(ostream& out, const AliHLTTPCCAMCTrack &a)
 
 istream& operator>>(istream& in, AliHLTTPCCAMCTrack &a)
 {
-  in >> a.fPDG;
+  in >> a.fMotherId >> a.fPDG;
   for (int i = 0; i < 7; i++) in >> a.fPar[i];
   for (int i = 0; i < 7; i++) in >> a.fTPCPar[i];
   in >> a.fP >> a.fPt;

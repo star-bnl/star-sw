@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCATrackParamVector.h,v 1.2 2010/07/29 16:35:58 ikulakov Exp $
+// $Id: AliHLTTPCCATrackParamVector.h,v 1.3 2011/01/31 17:18:32 fisyak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -394,14 +394,16 @@ inline sfloat_m AliHLTTPCCATrackParamVector::FilterDelta( const sfloat_m &mask, 
   fC[ 2]( success ) -= k11 * c11 ;
   fC[ 7]( success ) -= k31 * c11 ;
   fC[ 9]( success ) -= k31 * c31 ;
-
+#if 1
+  const sfloat_m &check = ( fC[ 0] >= 0.f ) && ( fC[ 2] >= 0.f ) && ( fC[ 5] >= 0.f ) && ( fC[ 9] >= 0.f ) && ( fC[14] >= 0.f );
+#else
   assert( fC[ 0] >= 0.f );
   assert( fC[ 2] >= 0.f );
   assert( fC[ 5] >= 0.f );
   assert( fC[ 9] >= 0.f );
   assert( fC[14] >= 0.f );
-
-  return success;
+#endif
+  return success && check;
 }
 
 inline sfloat_m AliHLTTPCCATrackParamVector::Filter( const sfloat_m &mask, const sfloat_v &y, const sfloat_v &z,
@@ -510,14 +512,16 @@ inline sfloat_m AliHLTTPCCATrackParamVector::Filter( const sfloat_m &mask, const
   fC[ 2]( success ) -= k11 * c11 ;
   fC[ 7]( success ) -= k31 * c11 ;
   fC[ 9]( success ) -= k31 * c31 ;
-
+#if 1
+  const sfloat_m &check = ( fC[ 0] >= 0.f ) && ( fC[ 2] >= 0.f ) && ( fC[ 5] >= 0.f ) && ( fC[ 9] >= 0.f ) && ( fC[14] >= 0.f );
+#else
   assert( fC[ 0] >= 0.f );
   assert( fC[ 2] >= 0.f );
   assert( fC[ 5] >= 0.f );
   assert( fC[ 9] >= 0.f );
   assert( fC[14] >= 0.f );
-
-  return success;
+#endif
+  return success && check;
 }
 
 

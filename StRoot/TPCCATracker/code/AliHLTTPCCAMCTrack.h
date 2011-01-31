@@ -31,6 +31,7 @@ class AliHLTTPCCAMCTrack
 
     void SetTPCPar( float X, float Y, float Z, float Px, float Py, float Pz );
 
+    int    MotherId()    const { return fMotherId; }
     int    PDG()         const { return fPDG;}
     double Par( int i )    const { return fPar[i]; }
     double TPCPar( int i ) const { return fTPCPar[i]; }
@@ -46,6 +47,7 @@ class AliHLTTPCCAMCTrack
     int     Set()            const { return fSet; }
     int     NTurns()         const { return fNTurns; }
 
+    void SetMotherId( int v )   { fMotherId = v; }
     void SetP ( float v )          { fP = v; }
     void SetPt( float v )          { fPt = v; }
     void SetPDG( int v )         { fPDG = v; }
@@ -63,6 +65,7 @@ class AliHLTTPCCAMCTrack
 
   protected:
 
+    int    fMotherId;       //* index of mother track. -1 for primary
     int    fPDG;            //* particle pdg code
     double fPar[7];         //* x,y,z,ex,ey,ez,q/p
     double fTPCPar[7];      //* x,y,z,ex,ey,ez,q/p at TPC entrance (x=y=0 means no information)
