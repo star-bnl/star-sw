@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.24 2010/01/08 22:43:44 ullrich Exp $
+ * $Id: StContainers.h,v 2.25 2011/02/01 19:47:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.25  2011/02/01 19:47:36  ullrich
+ * Added HLT branch and hooks.
+ *
  * Revision 2.24  2010/01/08 22:43:44  ullrich
  * Updates needed to add StFmsCollection and related classes.
  *
@@ -128,6 +131,15 @@ class StL3AlgorithmInfo;
 class StPhmdHit;
 class StPhmdCluster;
 class StRnDHit;
+class StHltBEmcTowerHit;
+class StHltBTofHit;
+class StHltVpdHit;
+class StHltTrack;
+class StHltTrackNode;
+class StHltHighPt;
+class StHltHeavyFragment;
+class StHltDiElectron;
+class StHltTriggerReason;
 
 StCollectionDef(Object)
 StCollectionDef(BTofHit)
@@ -169,5 +181,15 @@ StCollectionDef(L3AlgorithmInfo)
 StCollectionDef(PhmdHit)
 StCollectionDef(PhmdCluster)
 StCollectionDef(RnDHit)
+StCollectionDef(HltBEmcTowerHit)
+StCollectionDef(HltBTofHit)
+StCollectionDef(HltVpdHit)
+StCollectionDef(HltTrack)
+StCollectionDef(HltTrackNode)
+StCollectionDef(HltHighPt)
+StCollectionDef(HltHeavyFragment)
+StCollectionDef(HltDiElectron)
+StCollectionDef(HltTriggerReason)
+
 
 #endif

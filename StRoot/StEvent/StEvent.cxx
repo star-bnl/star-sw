@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.44 2010/08/31 19:53:37 fisyak Exp $
+ * $Id: StEvent.cxx,v 2.45 2011/02/01 19:47:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.45  2011/02/01 19:47:36  ullrich
+ * Added HLT branch and hooks.
+ *
  * Revision 2.44  2010/08/31 19:53:37  fisyak
  * Remove SoftwareMonitors
  *
@@ -188,13 +191,14 @@
 #include "event_header.h"
 #include "StAutoBrowse.h"
 #include "StEventBranch.h"
+#include "StHltEvent.h"
 
 #ifndef ST_NO_NAMESPACES
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.44 2010/08/31 19:53:37 fisyak Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.44 2010/08/31 19:53:37 fisyak Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.45 2011/02/01 19:47:36 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.45 2011/02/01 19:47:36 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -678,6 +682,22 @@ StEvent::l3Trigger() const
     return trg;
 }
 
+StHltEvent*
+StEvent::hltEvent()
+{
+    StHltEvent *hlt = 0;
+    _lookup(hlt, mContent);
+    return hlt;
+}
+
+const StHltEvent*
+StEvent::hltEvent() const
+{
+    StHltEvent *hlt = 0;
+    _lookup(hlt, mContent);
+    return hlt;
+}
+
 StSPtrVecTrackDetectorInfo&
 StEvent::trackDetectorInfo()
 {
@@ -1087,6 +1107,12 @@ StEvent::setL3Trigger(StL3Trigger* val)
 }
 
 void
+StEvent::setHltEvent(StHltEvent* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
 StEvent::addPrimaryVertex(StPrimaryVertex* vertex, StPrimaryVertexOrder order)
 {
     if (!vertex) return;  // not a valid vertex, do nothing
@@ -1204,6 +1230,7 @@ void StEvent::statistics()
     cout << "\tStL0Trigger:                 " << static_cast<void*>(l0Trigger());
     cout << "\tStL1Trigger:                 " << static_cast<void*>(l0Trigger());
     cout << "\tStL3Trigger:                 " << static_cast<void*>(l3Trigger());
+    cout << "\tStHltEvent:                  " << static_cast<void*>(hltEvent());
     cout << "\tStTriggerDetectorCollection: " << static_cast<void*>(triggerDetectorCollection());
     cout << "\tStTriggerIdCollection:       " << static_cast<void*>(triggerIdCollection());
     cout << "\tStTriggerData:               " << static_cast<void*>(triggerData());

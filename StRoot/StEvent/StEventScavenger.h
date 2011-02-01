@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEventScavenger.h,v 2.8 2010/08/31 19:55:13 fisyak Exp $
+ * $Id: StEventScavenger.h,v 2.9 2011/02/01 19:47:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.h,v $
+ * Revision 2.9  2011/02/01 19:47:36  ullrich
+ * Added HLT branch and hooks.
+ *
  * Revision 2.8  2010/08/31 19:55:13  fisyak
  * Remove SoftwareMonitors
  *
@@ -64,6 +67,7 @@ public:
     static bool removeFpdCollection(StEvent*);
     static bool removeTofCollection(StEvent*);
     static bool removeCalibrationVertices(StEvent*);
+    static bool removeHltEvent(StEvent*);
  
     static bool remove(StTrack*);
 

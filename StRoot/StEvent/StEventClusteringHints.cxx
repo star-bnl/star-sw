@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.25 2010/08/31 19:55:38 fisyak Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.26 2011/02/01 19:47:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.26  2011/02/01 19:47:36  ullrich
+ * Added HLT branch and hooks.
+ *
  * Revision 2.25  2010/08/31 19:55:38  fisyak
  * Remove SoftwareMonitors
  *
@@ -89,7 +92,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.25 2010/08/31 19:55:38 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.26 2011/02/01 19:47:36 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -138,7 +141,8 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StTpcHitCollection",          "evt_hits",     8);
     setBranch("StFtpcHitCollection",         "evt_hits",     8);
     setBranch("StRnDHitCollection",          "evt_hits",     8);
-
+    setBranch("StHltEvent",                  "evt_hlt",      9);
+    
     setDstMode();
     setBranch("StRunInfo",                   "event", 1);
     setBranch("StEventInfo",                 "event", 1);
@@ -177,6 +181,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StSPtrVecTrackNode",          "event", 1);
     setBranch("StPhmdCollection",            "event", 1);
     setBranch("StRnDHitCollection",          "event", 1);
+    setBranch("StHltEvent",                  "event", 1);
 } 
 
 void
