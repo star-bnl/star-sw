@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventScavenger.cxx,v 2.9 2010/08/31 19:55:13 fisyak Exp $
+ * $Id: StEventScavenger.cxx,v 2.10 2011/02/01 19:47:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.cxx,v $
+ * Revision 2.10  2011/02/01 19:47:36  ullrich
+ * Added HLT branch and hooks.
+ *
  * Revision 2.9  2010/08/31 19:55:13  fisyak
  * Remove SoftwareMonitors
  *
@@ -233,6 +236,16 @@ bool StEventScavenger::removeTofCollection(StEvent* evt)
 {
     if (evt && evt->tofCollection()) {
         evt->tofCollection()->makeZombie();
+        return true;
+    }
+    else
+        return false;
+}
+
+bool StEventScavenger::removeHltEvent(StEvent* evt)
+{
+    if (evt && evt->hltEvent()) {
+        evt->hltEvent()->makeZombie();
         return true;
     }
     else

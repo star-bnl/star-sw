@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.39 2010/08/31 19:53:37 fisyak Exp $
+ * $Id: StEvent.h,v 2.40 2011/02/01 19:47:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.40  2011/02/01 19:47:36  ullrich
+ * Added HLT branch and hooks.
+ *
  * Revision 2.39  2010/08/31 19:53:37  fisyak
  * Remove SoftwareMonitors
  *
@@ -174,6 +177,7 @@ class StXiVertex;
 class StKinkVertex;
 class StPsd;
 class StRnDHitCollection;
+class StHltEvent;
 
 class StEvent : public StXRefMain {
 public:
@@ -225,6 +229,8 @@ public:
     const StPhmdCollection*             phmdCollection() const;
     StRnDHitCollection*                 rndHitCollection();
     const StRnDHitCollection*           rndHitCollection() const;
+    StHltEvent*                         hltEvent();
+    const StHltEvent*                   hltEvent() const;
     
     StL0Trigger*                        l0Trigger();
     const StL0Trigger*                  l0Trigger() const;
@@ -305,6 +311,7 @@ public:
     void setL0Trigger(StL0Trigger*);
     void setL1Trigger(StL1Trigger*);
     void setL3Trigger(StL3Trigger*);
+    void setHltEvent(StHltEvent*);
     void addPrimaryVertex(StPrimaryVertex*, StPrimaryVertexOrder = orderByNumberOfDaughters);
     void addCalibrationVertex(StCalibrationVertex*);
     void addDetectorState(StDetectorState*);

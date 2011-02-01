@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.21 2010/01/08 22:43:44 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.22 2011/02/01 19:47:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.22  2011/02/01 19:47:36  ullrich
+ * Added HLT branch and hooks.
+ *
  * Revision 2.21  2010/01/08 22:43:44  ullrich
  * Updates needed to add StFmsCollection and related classes.
  *
@@ -112,6 +115,15 @@
 #include "StPhmdHit.h"
 #include "StPhmdCluster.h"
 #include "StRnDHit.h"
+#include "StHltBEmcTowerHit.h"
+#include "StHltBTofHit.h"
+#include "StHltVpdHit.h"
+#include "StHltTrack.h"
+#include "StHltTrackNode.h"
+#include "StHltHighPt.h"
+#include "StHltHeavyFragment.h"
+#include "StHltDiElectron.h"
+#include "StHltTriggerReason.h"
 
 StCollectionImp(Object)
 StCollectionImp(CalibrationVertex)
@@ -153,3 +165,12 @@ StCollectionImp(L3AlgorithmInfo)
 StCollectionImp(PhmdHit)
 StCollectionImp(PhmdCluster)
 StCollectionImp(RnDHit)
+StCollectionImp(HltBEmcTowerHit)
+StCollectionImp(HltBTofHit)
+StCollectionImp(HltVpdHit)
+StCollectionImp(HltTrack)
+StCollectionImp(HltTrackNode)
+StCollectionImp(HltHighPt)
+StCollectionImp(HltHeavyFragment)
+StCollectionImp(HltDiElectron)
+StCollectionImp(HltTriggerReason)

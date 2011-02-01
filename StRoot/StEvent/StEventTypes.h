@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.33 2010/08/31 19:56:04 fisyak Exp $
+ * $Id: StEventTypes.h,v 2.34 2011/02/01 19:47:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.34  2011/02/01 19:47:36  ullrich
+ * Added HLT branch and hooks.
+ *
  * Revision 2.33  2010/08/31 19:56:04  fisyak
  * Remove SoftwareMonitors
  *
@@ -147,6 +150,17 @@
 #include "StGlobalTrack.h"
 #include "StHelixModel.h"
 #include "StHit.h"
+#include "StHltBEmcTowerHit.h"
+#include "StHltBTofHit.h"
+#include "StHltDiElectron.h"
+#include "StHltEvent.h"
+#include "StHltHeavyFragment.h"
+#include "StHltHighPt.h"
+#include "StHltTrack.h"
+#include "StHltTrackNode.h"
+#include "StHltTriggerReason.h"
+#include "StHltTriggerReasonCapable.h"
+#include "StHltVpdHit.h"
 #include "StKinkVertex.h"
 #include "StL0Trigger.h"
 #include "StL1Trigger.h"
