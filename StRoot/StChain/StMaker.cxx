@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.236 2010/12/22 17:46:30 perev Exp $
+// $Id: StMaker.cxx,v 1.237 2011/02/02 20:13:09 perev Exp $
 //
 //
 /*!
@@ -230,6 +230,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2005f",      20041201,     3, "y2005f",   "y2005e + SSD5/CALB2"},//       {"y2005e",      20041201,     0}
   {"y2005g",      20041201,     4, "y2005g",   "y2005f + SVT dead material"},//{"y2005e",      20041201,     0}
   {"y2005h",      20041201,     5, "y2005h",   "y2005g + TPC2009 "},
+  {"y2005i",      20041201,     6, "y2005i",   "y2005h + ECALv6  "},
 
   // Dead area in SSD, in version y2006b
   {"y2006",       20051201,     0, "y2006",    "base for y2006: y2005e+fixed TPC plane"},
@@ -1963,6 +1964,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.237  2011/02/02 20:13:09  perev
+// y2005i added
+//
 // Revision 1.236  2010/12/22 17:46:30  perev
 // y2008c y2009b y2010b added
 //
