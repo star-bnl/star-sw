@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerId.cxx,v 2.4 2005/08/16 22:36:27 ullrich Exp $
+ * $Id: StTriggerId.cxx,v 2.5 2011/02/02 20:20:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, January 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerId.cxx,v $
+ * Revision 2.5  2011/02/02 20:20:10  ullrich
+ * Extend to 64 bit (Jamie)
+ *
  * Revision 2.4  2005/08/16 22:36:27  ullrich
  * Fixed bug in copy and assignement operator (mMask not assigned).
  *
@@ -78,7 +81,7 @@ StTriggerId::index(unsigned int id) const
     return mMaxTriggerIds; // no index found (no such trigger id)
 }
 
-unsigned int
+uint64_t
 StTriggerId::mask() const {return mMask;}
 
 bool
@@ -138,7 +141,7 @@ StTriggerId::triggerIds() const {
 }
 
 void
-StTriggerId::setMask(unsigned int val) {mMask = val;}
+StTriggerId::setMask(uint64_t val) {mMask = val;}
 
 void
 StTriggerId::addTrigger(unsigned int id, unsigned int v,
