@@ -6,15 +6,17 @@ StChain *chain=0;
 
 
 int rdMuDst2print(
-		  char* file    = "st_W_10103041_raw_7170001.MuDst.root",
-	  int nEve=3,
-	  char* inDir   = "/star/data35/reco/production2009_500Gev_c/ReversedFullField/P09ib/2009/103/10103041/"
+		  char* file    = "st_physics_12033050_raw_4010001.MuDst.root",
+	  int nEve=100,
+	  char* inDir   = "./"
 	  )
 { 
   Int_t nFiles  = 1;
   
-  //inDir="/star/data05/scratch/balewski/bug4d/"; file= "Wsample2.MuDst.root";
-   
+  inDir="/star/institutions/anl/balewski/vmSink2/";
+  file="st_physics_12033048_raw_1010001.MuDst.root";
+  //file="st_physics_12033049_raw_2020001.MuDst.root";
+
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
 
@@ -37,10 +39,14 @@ int rdMuDst2print(
 
   h1=new TH1F("nP","# of prim tracks per vertex",100,0,200);
   h2=new TH1F("vR","PPV Vertex rank; rank", 300, -1.2e6, 1.2e6); h2->SetLineColor(kRed);
-  h3=new TH1F("vRL","PPV Vertex rank, funny X-axis;if rank>1e6: X=Log10(rank-1e6)+10, elseif rank>0   X=Log10(rank), else  X=Log10(rank+1e6)-10", 150, -9,21);
+  h3=new TH1F("vRL","PPV Vertex rank, funny X-axis; X=Log10(rank-1e6)+ offset", 150, -9,21);
   h2->GetXaxis()->SetTitleSize(.043);
   h2->GetXaxis()->SetTitleSize(.043);
 
+  h4=new TH1F("trPhi"," prim tracks phi if PT>1.0 GeV/c; phi (rad)",50,-3.2,3.2);
+  h5=new TH1F("zVerTrg"," Z trg-vertex , rank>0; Z (cm)", 50,-200,200);
+  h6=new TH1F("zVerPlp"," Z pileup-vertex , rank<0; Z (cm)", 50,-200,200);
+  h7=new TH1F("nPrV","# of prim tr used by PPV; rank>0",15,0,30);
   //---------------------------------------------------
   int eventCounter=0;
   int t1=time(0);
@@ -73,16 +79,17 @@ int rdMuDst2print(
       printf("ieve=%d  eventID %d nPrimV=%d  nGlobTrAll=%d =============\n", eventCounter,info.id(),nPrimV,nGlobTrAll);
       // printf("TrigID=%d fired=%d\n",trigID,fired);
       
-      if(nPrimV>1) printf("######\n");
+      // if(nPrimV>1) printf("######\n");
     }
+
     int iv;
-    for(iv=0;iv<nPrimV;iv++) {
+    if(1)for(iv=0;iv<nPrimV;iv++) {
       StMuPrimaryVertex* V= muMk->muDst()->primaryVertex(iv);
       assert(V);
       muMk->muDst()->setVertexIndex(iv);
       StThreeVectorF &r=V->position();
       StThreeVectorF &er=V->posError();
-      //  printf("iv=%d   Vz=%.2f +/-%.2f \n",iv,r.z(),er.z()  );
+      printf("iv=%d   Vz=%.2f +/-%.2f \n",iv,r.z(),er.z()  );
       // count prim tracks for this vert
       int nPrimTr =0;
       int itr; 
@@ -101,41 +108,51 @@ int rdMuDst2print(
 
       if(1)printf("  nPrimTr=%d , Z=%.1f VFid=%d:: ntrVF=%d nCtb=%d nBemc=%d nEEmc=%d nTpc=%d sumPt=%.1f rank=%g\n"
 		  ,nPrimTr,r.z(), V->vertexFinderId() ,V->nTracksUsed()  ,V->nCTBMatch()  ,V-> nBEMCMatch() ,V->nEEMCMatch()  ,V->nCrossCentralMembrane()  ,V->sumTrackPt()  ,V->ranking());
-
+      if (rank>0) h5->Fill(r.z());
+      if (rank>0) h7->Fill(V->nTracksUsed());
+      if (rank<0) h6->Fill(r.z());
     } 
+ 
 
-     continue;   // do NOT print prim tracks for each vertex  
+    // continue;   // do NOT print prim tracks for each vertex  
+  
+    if(1)
+      for(iv=0;iv<nPrimV;iv++) {
+	muMk->muDst()->setVertexIndex(iv);
+	Int_t nPrimTrAll=muMk->muDst()->GetNPrimaryTrack();
+	cout<<"\n  Prim "<<nPrimTrAll<<" tracks belonging to "<<iv<<"-th prim vertex"<<endl;      
 
-    if(0)for(iv=0;iv<nPrimV;iv++) {
-      printf("  Prim tracks belonging to %d prim vertex:\n",iv);      
-      int itr; 
-      int ntr=0;
-      for(itr=0;itr<nPrimTrAll;itr++) {
-	StMuTrack *pr_track=muMk->muDst()->primaryTracks(itr);
-	if(pr_track->vertexIndex()!=iv) continue;
-	if(pr_track->flag()<=0) continue;	
-	ntr++;
-	cout << "\nPrimary track " << ntr << " momentum " << pr_track->p() << endl;  cout << "\t flag=" << pr_track->flag() << " nHits=" << pr_track->nHits()<< " vertID="<<  pr_track->vertexIndex()<< endl;
-	cout << "\t primV("<<iv<<")  primDCA=" << pr_track->dca(iv) << endl;
-	if(pr_track->dca(iv).mag()>5) 	cout << "^^^^^ 3D DCA magnitude="<<pr_track->dca(iv).mag()<<endl;
-	// cout << "\t first point " << pr_track->firstPoint() << endl;
-	// cout << "\t last point " << pr_track->lastPoint() << endl;
-      } // end of loop over tracks
-    }// end of loop over vertices
-    
-    // continue; 
+	int itr; 
+	int ntr=0;
+	
+	for(itr=0;itr<nPrimTrAll;itr++) {
+	  StMuTrack *pr_track=muMk->muDst()->primaryTracks(itr);
+	  if(pr_track->flag()<=0) continue;	
+	  ntr++;
+	  cout << "\nPrimary track " << ntr << " momentum(P vect) " << pr_track->p() << " PT="<<pr_track->pt()<<  " recoCharge="<<pr_track->charge()<<  endl;  cout << "\t flag=" << pr_track->flag() << " nHits=" << pr_track->nHits()<< " vertID="<<  pr_track->vertexIndex()<< endl;
+	  cout << "\t primV("<<iv<<")  primDCA=" << pr_track->dca(iv) << endl;
+	  if(pr_track->dca(iv).mag()>5) 	cout << "^^^^^ 3D DCA magnitude="<<pr_track->dca(iv).mag()<<endl;
+	  // cout << "\t first point " << pr_track->firstPoint() << endl;
+	  // cout << "\t last point " << pr_track->lastPoint() << endl;
+	  if(pr_track->pt()>1.0) h4->Fill(pr_track->phi());
+
+	} // end of loop over tracks
+	
+      }// end of loop over vertices
+  
+    continue; 
     
     StMuEmcCollection* emc = muMk->muDst()->muEmcCollection();
     if (!emc) {
       printf(" No EMC data for this event\n");
       return kStOK;
     }
-    // printEEtower(emc);
+    //printEEtower(emc);
     // printEEpre(emc);
     // printEEsmd(emc);
     printBEtower(emc);
-    printBEpre(emc);
-    printBEsmd(emc);
+    //printBEpre(emc);
+    //printBEsmd(emc);
   
     
   }
@@ -146,9 +163,11 @@ int rdMuDst2print(
   float tMnt=(t2-t1)/60.;
   float rate=1.*eventCounter/(t2-t1);
   printf("sorting done %d of   nEve=%d, CPU rate=%.1f Hz, total time %.1f minute(s) \n\n",eventCounter,nEntries,rate,tMnt);
-  c=new TCanvas(); c->Divide(1,2);
-  c->cd(1);  h2->Draw();
+  c=new TCanvas(); c->Divide(2,2);
+  c->cd(1); h5->Fit("gaus"); //h5->Draw();
+  c->cd(3); h6->Fit("gaus"); //h5->Draw();
   c->cd(2);  h3->Draw();
+  c->cd(4);  h7->Draw();
 
   return;
   
@@ -231,7 +250,7 @@ printBEtower( StMuEmcCollection* emc ) {
   nh=0;
   for (i=0; i< 4800; i++) {
     int adc = emc->getTowerADC(i);
-    if (adc<=4) continue; // print only non-zero values
+    if (adc<=1000) continue; // print only non-zero values
     nh++;
     printf(" Tower id=%d   adc=%4d\n",i,adc );
     //    assert(adc==adcX );
