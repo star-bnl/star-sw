@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerId.h,v 2.6 2006/05/04 19:07:02 ullrich Exp $
+ * $Id: StTriggerId.h,v 2.7 2011/02/02 20:20:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, January 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerId.h,v $
+ * Revision 2.7  2011/02/02 20:20:10  ullrich
+ * Extend to 64 bit (Jamie)
+ *
  * Revision 2.6  2006/05/04 19:07:02  ullrich
  * Extended mMaxTriggerIds to 42.
  *
@@ -34,6 +37,7 @@
 #include "StObject.h"
 #include <Stiostream.h>
 #include <vector>
+#include <stdint.h>
 
 class StTriggerId : public StObject {
 public:
@@ -42,7 +46,7 @@ public:
     const StTriggerId &operator=(const StTriggerId &id);
     ~StTriggerId();
 	
-    unsigned int mask() const;
+    uint64_t mask() const;
     
     unsigned int maxTriggerIds() const;
     bool         isTrigger(unsigned int id) const;
@@ -56,7 +60,7 @@ public:
     vector<unsigned int> triggerIds() const;  
 
 
-    void setMask(unsigned int);
+    void setMask(uint64_t);
     void addTrigger(unsigned int, unsigned int,
 	          unsigned int, unsigned int, unsigned int);
 
@@ -66,18 +70,18 @@ private:
     unsigned int index(unsigned int) const;
     
 protected:
-    enum {mMaxTriggerIds = 42};
+    enum {mMaxTriggerIds = 64};
 
 private:
     UInt_t       mIdx;    //!
-    UInt_t       mMask;
+    uint64_t     mMask;
     UInt_t       mId[mMaxTriggerIds];
     UInt_t       mVersion[mMaxTriggerIds];
     UInt_t       mNameVersion[mMaxTriggerIds];
     UInt_t       mThresholdVersion[mMaxTriggerIds];
     UInt_t       mPrescaleVersion[mMaxTriggerIds];
     
-    ClassDef(StTriggerId,4)
+    ClassDef(StTriggerId,5)
 };
 
 inline unsigned int
