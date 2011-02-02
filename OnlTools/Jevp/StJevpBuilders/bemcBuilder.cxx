@@ -1001,7 +1001,8 @@ void bemcBuilder::event(daqReader *rdr)
 			trgd ? trgd->getDsm1_BEMC() : 0,
 			trgd ? trgd->getDsm2_EMC() : 0,
 			trgd ? trgd->getDsm3() : 0);
-  
+
+  if(trgd) delete trgd;
 }
 
 void bemcBuilder::stoprun(daqReader *rdr) {

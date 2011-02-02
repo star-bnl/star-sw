@@ -725,7 +725,9 @@ void tofBuilder::event(daqReader *rdr)
     if(leadingtime[ieast]*leadingtime[iwest]<1) continue;
     contents.upvpd_eastT_vs_westT->Fill(leadingtime[ieast],leadingtime[iwest]);
   }
- 
+
+
+  if(trgd) delete trgd;
 }
 
 void tofBuilder::stoprun(daqReader *rdr) {

@@ -111,7 +111,9 @@ public:
 
   //TObject *getPlot
   
-  void mousePressEvent(QMouseEvent *e);
+  void mouseDoubleClickEvent(QMouseEvent *e);
+
+  //void mousePressEvent(QMouseEvent *e);
 };
 
 

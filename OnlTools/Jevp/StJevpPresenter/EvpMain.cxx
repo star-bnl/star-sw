@@ -56,7 +56,6 @@ static void catchSignals(void)
 
 int EvpMain::main(char *args) 
 {
-  printf("This main...\n");
   char *argv[50];
   int argc=0;
 
@@ -90,11 +89,6 @@ int EvpMain::main(char *args)
   }
  
   CP;
-  for(int i=0;i<argc;i++) {
-    printf("arg[%d] = %s\n",i,argv[i]);
-  }
-    
-  CP;
   return _main(argc, argv);
 }
 
@@ -103,7 +97,6 @@ int EvpMain::main(char *args)
 int EvpMain::_main(int argc, char **argv )
 {
   evpMain = new EvpMain();   // store globals here...
-  //QApplication app(argc, argv);
 
   CP;
   if(evpMain->parseArgs(argc, argv) < 0) return 0;

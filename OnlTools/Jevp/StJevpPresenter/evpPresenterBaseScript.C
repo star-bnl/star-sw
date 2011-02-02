@@ -2,10 +2,8 @@
 void evpPresenterBaseScript(char *args)
 {
   static int firsttime=1;
-  printf("starting\n");
 
   if(firsttime) {
-    printf("loading\n");
     firsttime=0;
     gROOT->Macro("Load.C");
     gSystem->Load("libQtRootGui.so");
@@ -25,6 +23,5 @@ void evpPresenterBaseScript(char *args)
     gSystem->Load("PDFUtil");    
     gSystem->Load("Jevp");    
   }
-  printf("calling main\n");
   EvpMain::main(args);
 }
