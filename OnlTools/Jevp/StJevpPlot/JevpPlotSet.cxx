@@ -266,10 +266,11 @@ void JevpPlotSet::_startrun(daqReader *rdr)
   CP;
   run = rdr->run;
   builderStatus.setStatus("running");
-
+  
   CP;
   builderStatus.run = rdr->run;
   builderStatus.lastEventTime = time(NULL);
+  builderStatus.events = 0;
   send((TObject *)&builderStatus);
   
 
@@ -424,7 +425,27 @@ void JevpPlotSet::Main(int argc, char *argv[])
   
 
   CP;
-  RtsTimer clock;
+  RtsTimer clock;  // plot clock...
+
+  int _monitorTimerTime = time(NULL);
+  char _ofilename[80];
+  sprintf(_ofilename, "0");
+  int _nget = 0;
+  int _nupdate = 0;
+  int _nevents = 0;
+  double _getClockTime=0;
+  double _updateClockTime=0;
+  double _burpClockTime=0;
+  double _selectionClockTime=0;
+  double _eventClockTime=0;
+  double _fillsClockTime=0;
+  RtsTimer _getClock;
+  RtsTimer _updateClock;
+  RtsTimer _burpClock;
+  RtsTimer _selectionClock;
+  RtsTimer _eventClock;
+  RtsTimer _fillsClock;
+
   clock.record_time();
 
   // initialize client...
@@ -435,11 +456,50 @@ void JevpPlotSet::Main(int argc, char *argv[])
 //     builderStatus.setStatus("stopped");
 //   }
 
+ 
+
   for(;;) {
     CP;
     // Lets update the options for the get call eh?
 
+    _getClock.record_time();
     char *ret = reader->get(0,EVP_TYPE_ANY);
+    _nget++;
+    _getClockTime += _getClock.record_time();
+
+
+    if(builderStatus.running()) {
+      if(_monitorTimerTime + 20 < time(NULL)) {
+      
+	
+	int elapsed = time(NULL) - _monitorTimerTime;
+	_monitorTimerTime = time(NULL);
+	
+	static char str[512];
+	sprintf(str, "%sBuilder: %d elapsed (%s->%s): [%d gets() %4.2lf] [%d updts() %4.2lf] [%4.2lf burp] [%4.2lf selct] [%d evts %4.2lf] [%4.2lf fills]",
+		plotsetname,
+		elapsed,
+		_ofilename,
+		reader->file_name,
+		_nget, _getClockTime,
+		_nupdate, _updateClockTime,
+		_burpClockTime,
+		_selectionClockTime,
+		_nevents, _eventClockTime,
+		_fillsClockTime);
+	
+	strcpy(_ofilename, reader->file_name);
+	_nget = 0; _getClockTime = 0;
+	_nupdate = 0; _updateClockTime = 0;
+	_burpClockTime = 0;
+	_selectionClockTime = 0;
+	_nevents = 0; _eventClockTime = 0;
+	_fillsClockTime = 0;
+	
+	LOG("JEFF", "%s", str);
+      }
+    }
+
 
     CP;
     clock.record_time();
@@ -448,18 +508,27 @@ void JevpPlotSet::Main(int argc, char *argv[])
     unsigned int tm = time(NULL);
     if(tm > (last_update + update_time)) {
       if(socket && (builderStatus.running())) {
+
+	_updateClock.record_time();
 	updatePlots();
+	_nupdate++;
+	_updateClockTime += _updateClock.record_time();
+
 	last_update = tm;
       }
     }
 
     CP;
+
+    _burpClock.record_time();
     if(ret == NULL) {  // all kinds of burps...
       switch(reader->status) {
 
       case EVP_STAT_OK:  
 	CP;
 	LOG(DBG, "EVP_STAT_OK");
+
+	_burpClockTime += _burpClock.record_time();
 	continue;
 
       case EVP_STAT_EOR:
@@ -483,6 +552,7 @@ void JevpPlotSet::Main(int argc, char *argv[])
 	  LOG(NOTE, "Already end of run, don't stop it again... %d",builderStatus.running());
 	  // already end of run, don't stop it again...
 	  sleep(1);
+	  _burpClockTime += _burpClock.record_time();
 	  continue;
 	}
 	
@@ -502,13 +572,15 @@ void JevpPlotSet::Main(int argc, char *argv[])
 	  LOG("JEFF", "It's end of run and set to die, goodbye");
 	  exit(0);
 	}
-
+	
+	_burpClockTime += _burpClock.record_time();
 	continue;    // don't have an event to parse... go back to start
 
       case EVP_STAT_EVT:
 	CP;
 	LOG(ERR, "Problem reading event... skipping");
 	sleep(1);
+	_burpClockTime += _burpClock.record_time();
 	continue;
 
       case EVP_STAT_CRIT:
@@ -522,8 +594,11 @@ void JevpPlotSet::Main(int argc, char *argv[])
     CP;
     if(reader->status) {
       LOG(ERR, "bad event: status=0x%x",reader->status);
+      _burpClockTime += _burpClock.record_time();
       continue;
     }
+
+    _burpClockTime += _burpClock.record_time();
 
     CP;
     LOG(DBG, "We've got some kind of event:  token=%d seq=%d",reader->token,reader->seq);
@@ -534,9 +609,19 @@ void JevpPlotSet::Main(int argc, char *argv[])
       
       current_run = reader->run;
       _startrun(reader);
+      _monitorTimerTime = time(NULL);
+      strcpy(_ofilename, "0");
+      _nget = 0; _getClockTime = 0;
+      _nupdate = 0; _updateClockTime = 0;
+      _burpClockTime = 0;
+      _selectionClockTime = 0;
+      _nevents = 0; _eventClockTime = 0;
+      _fillsClockTime = 0;
     }
    
     CP;
+
+    _selectionClock.record_time();
     if(!selectRun(reader) || !selectEvent(reader)) {
       CP;
       LOG(NOTE, "Event doesn't contribute...");
@@ -564,17 +649,25 @@ void JevpPlotSet::Main(int argc, char *argv[])
 	}
       }
 
+      _selectionClockTime += _selectionClock.record_time();
       continue;
     }
-   
+    _selectionClockTime += _selectionClock.record_time();
+
     CP;
     LOG(NOTE, "Call user code");
+
+    _eventClock.record_time();
     _event(reader);   // process...
+    _nevents++;
+    _eventClockTime += _eventClock.record_time();
+
     LOG(NOTE, "Done with user code");
 
     CP;
     double t = clock.record_time();
 
+    _fillsClock.record_time();
     for(int i=0;i<32;i++) {
       CP;
       if(reader->daqbits & (1<<i)) {
@@ -600,6 +693,8 @@ void JevpPlotSet::Main(int argc, char *argv[])
     // Time...    
     ((TH1F *)plotTime->getHisto(0)->histo)->Fill(t);
     CP;
+
+    _fillsClockTime += _fillsClock.record_time();
   }
 }
 

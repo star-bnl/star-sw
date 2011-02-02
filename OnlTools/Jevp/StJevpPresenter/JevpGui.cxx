@@ -2,16 +2,12 @@
 ///  (TH1 *)mfile->Get(myNames[tab][subTab][i].Data());
 
 #include "JevpGui.h"
-//#include "StJevpPool/StJevpUtils/EvpUtil.h"
-//#include "StJevpPool/StJevpUtils/ServerStatus.h"
 #include "TQtRootSlot.h"
 #include "TROOT.h"
 #include <TSocket.h>
 #include <TClass.h>
 #include <TLine.h>
 #include "TEnv.h"
-
-//#include "StRoot/StEEmcPool/muEztPanitkin/EEqaPresenter.h"
 #include "ReferenceWidget.h"
 #include "TQtWidget.h"
 #include "TQtZoomPadWidget.h"
@@ -147,7 +143,8 @@ JevpScreenWidget::~JevpScreenWidget() {
   delete plot;
 }
 
-void JevpScreenWidget::mousePressEvent(QMouseEvent *e)
+//void JevpScreenWidget::mousePressEvent(QMouseEvent *e)
+void JevpScreenWidget::mouseDoubleClickEvent(QMouseEvent *e)
 {
   int wide, deep;
   DisplayNode *node = Logic->jl_getCanvasDescriptor(combo_index);
@@ -1311,25 +1308,25 @@ void JevpGui::pc_PresenterConnect(JevpGui* gui, JevpGui* pre)
     pc_mGui = gui;
     pc_mPresenter = pre;
 
-  connect(pc_mGui,SIGNAL(live()), this, SLOT(live()) ); 
-  connect(pc_mGui,SIGNAL(file()), this, SLOT(file()) ); 
-  connect(pc_mGui,SIGNAL(update(TCanvas*, int, int )), this, SLOT(update(TCanvas*, int, int )) ); 
-  connect(pc_mGui,SIGNAL(update(TCanvas*, const char* )), this, SLOT(update(TCanvas*, const char*)) ); 
+    //connect(pc_mGui,SIGNAL(live()), this, SLOT(live()) ); 
+    //connect(pc_mGui,SIGNAL(file()), this, SLOT(file()) ); 
+    //connect(pc_mGui,SIGNAL(update(TCanvas*, int, int )), this, SLOT(update(TCanvas*, int, int )) ); 
+    //connect(pc_mGui,SIGNAL(update(TCanvas*, const char* )), this, SLOT(update(TCanvas*, const char*)) ); 
   connect(pc_mGui,SIGNAL(update()), this, SLOT(update()) ); 
-  connect(pc_mGui,SIGNAL(save()), this, SLOT(save()) ); 
-  connect(pc_mGui,SIGNAL(saveAs()), this, SLOT(saveAs()) ); 
-  connect(pc_mGui,SIGNAL(print()), this, SLOT(print()) ); 
-  connect(pc_mGui,SIGNAL(openReference()), this, SLOT(openReference()) ); 
+  //connect(pc_mGui,SIGNAL(save()), this, SLOT(save()) ); 
+  //connect(pc_mGui,SIGNAL(saveAs()), this, SLOT(saveAs()) ); 
+  //connect(pc_mGui,SIGNAL(print()), this, SLOT(print()) ); 
+  //connect(pc_mGui,SIGNAL(openReference()), this, SLOT(openReference()) ); 
 
-  connect(pc_mGui,SIGNAL( tab(int) ),         this, SLOT( setTab(int)) ); 
-  connect(pc_mGui,SIGNAL( subTab(int) ),      this, SLOT( setSubTab(int)) ); 
-  connect(pc_mGui,SIGNAL( canvas(TCanvas*) ), this, SLOT( setCanvas(TCanvas*)) ); 
+  //connect(pc_mGui,SIGNAL( tab(int) ),         this, SLOT( setTab(int)) ); 
+  //connect(pc_mGui,SIGNAL( subTab(int) ),      this, SLOT( setSubTab(int)) ); 
+  //connect(pc_mGui,SIGNAL( canvas(TCanvas*) ), this, SLOT( setCanvas(TCanvas*)) ); 
 
   connect(this, SIGNAL( pc_signalEventInfo(int,int,int,int, unsigned int, unsigned int,unsigned int, unsigned int) ), pc_mGui, SLOT( setEventInfo(int,int,int,int, unsigned int, unsigned int,unsigned int, unsigned int) ) ); 
   connect(this, SIGNAL( pc_signalServerInfo(ServerStatus*) ), pc_mGui, SLOT( setServerInfo(ServerStatus*) ) ); 
 
-  connect(pc_mPresenter, SIGNAL( setEnabled(bool)) , pc_mGui, SLOT( setEnabled(bool) ) );
-  connect(pc_mGui,SIGNAL(printAll(const char*)), pc_mPresenter, SLOT(printAll(const char*)) );
+  // connect(pc_mPresenter, SIGNAL( setEnabled(bool)) , pc_mGui, SLOT( setEnabled(bool) ) );
+  //connect(pc_mGui,SIGNAL(printAll(const char*)), pc_mPresenter, SLOT(printAll(const char*)) );
   pc_mCanvas = 0;
 }
 
@@ -1792,7 +1789,7 @@ void JevpGui::jl_DrawPlot(JevpScreenWidget *screen) {
     }
     else {
       gcc->cd(i+1);
-      jl_DrawEmptySpace(screen, " ");
+      jl_DrawEmptySpace(screen, (char *)" ");
       //jl_CrossOfDeath(screen, "blah...");
     }
   }

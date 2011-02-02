@@ -169,6 +169,7 @@ void l3Builder::event(daqReader *rdr)
     }
   }
   
+  if(trgd) delete trgd;
 }
 
 void l3Builder::stoprun(daqReader *rdr) {

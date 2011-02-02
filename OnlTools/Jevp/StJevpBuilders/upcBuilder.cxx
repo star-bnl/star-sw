@@ -115,6 +115,9 @@ void upcBuilder::event(daqReader *rdr)
     contents.h_zdce_sum_vs_ctb_sum->Fill(ctbAdcSum, zdcEastUnattSum);
     contents.h_zdcw_sum_vs_ctb_sum->Fill(ctbAdcSum, zdcWestUnattSum);
   }
+
+  if(trgd) 
+    delete trgd;
 }
 
 void upcBuilder::stoprun(daqReader *rdr) {
