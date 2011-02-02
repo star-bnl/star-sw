@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerId.h,v 2.7 2011/02/02 20:20:10 ullrich Exp $
+ * $Id: StTriggerId.h,v 2.8 2011/02/02 20:26:30 ullrich Exp $
  *
  * Author: Thomas Ullrich, January 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerId.h,v $
+ * Revision 2.8  2011/02/02 20:26:30  ullrich
+ * Switched data member type of mask from uint64_t to ULong64_t
+ *
  * Revision 2.7  2011/02/02 20:20:10  ullrich
  * Extend to 64 bit (Jamie)
  *
@@ -74,7 +77,7 @@ protected:
 
 private:
     UInt_t       mIdx;    //!
-    uint64_t     mMask;
+    ULong64_t    mMask;
     UInt_t       mId[mMaxTriggerIds];
     UInt_t       mVersion[mMaxTriggerIds];
     UInt_t       mNameVersion[mMaxTriggerIds];
