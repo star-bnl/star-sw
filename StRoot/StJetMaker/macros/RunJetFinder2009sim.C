@@ -203,7 +203,7 @@ void RunJetFinder2009sim(int nevents = 1e6,
   StAnaPars* anaparsEMC = new StAnaPars;
   anaparsEMC->useTpc  = true;
   anaparsEMC->useBemc = true;
-  anaparsEMC->useEmc  = true;
+  anaparsEMC->useEemc  = true;
 
   // TPC cuts
   anaparsEMC->addTpcCut(new StjTrackCutFlag(0));
