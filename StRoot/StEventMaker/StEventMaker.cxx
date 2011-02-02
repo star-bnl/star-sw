@@ -48,7 +48,7 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.91 2009/11/23 16:37:08 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.92 2011/02/02 20:21:06 ullrich Exp $";
 //______________________________________________________________________________
 ClassImp(StEventMaker)
     //______________________________________________________________________________
@@ -283,10 +283,34 @@ StEventMaker::makeEvent()
         
         if (trigSummary && dbTriggerId) {
 	    
-	    // The nominal is a pointer to one of the above. 
-	    trigId[0]->setMask(trigSummary->L1summary[0]);
-	    trigId[1]->setMask(trigSummary->L2summary[0]);
-	    trigId[2]->setMask(trigSummary->L3summary[0]);
+	    // The nominal is a pointer to one of the above.
+	    // 64 bits for Run 11 and beyond
+	    if (mCurrentEvent->runId()> 12000000) {
+		
+		uint64_t mask = 0;
+		mask = trigSummary->L1summary[1];
+		mask <<= 32;
+		mask += trigSummary->L1summary[0];
+		trigId[0]->setMask(mask);
+
+		mask = trigSummary->L2summary[1];
+		mask <<= 32;
+		mask += trigSummary->L2summary[0];
+		trigId[1]->setMask(mask);
+
+		mask = trigSummary->L3summary[1];
+		mask <<= 32;
+		mask += trigSummary->L3summary[0];
+		trigId[2]->setMask(mask);
+		
+
+	    }
+	    else {
+		
+		trigId[0]->setMask(trigSummary->L1summary[0]);
+		trigId[1]->setMask(trigSummary->L2summary[0]);
+		trigId[2]->setMask(trigSummary->L3summary[0]);
+	    }
 	    
 	    
 	    // Loop over trigger level
@@ -296,7 +320,7 @@ StEventMaker::makeEvent()
 		// Loop over the triggers within this level
 		for (unsigned int iTrg = 0; iTrg < dbTriggerId->getIDNumRows() ; iTrg++){
 		    // Shift the mask by daqTrigId bits to examine that bit
-		    if ( whichTrig->mask() &  (1 << (dbTriggerId->getDaqTrgId(iTrg)) )  ) {
+		    if ( whichTrig->mask() &  ((uint64_t)1 << (dbTriggerId->getDaqTrgId(iTrg)) )  ) {
 
 		        //Check if StTriggerData found (partial) data corruption
 		        //and if so, add 9000 to offline trigger Id
@@ -812,8 +836,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.91 2009/11/23 16:37:08 fisyak Exp $
+ * $Id: StEventMaker.cxx,v 2.92 2011/02/02 20:21:06 ullrich Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.92  2011/02/02 20:21:06  ullrich
+ * Changes die to modified StTriggerId (32 -> 64 bit) (Jamie)
+ *
  * Revision 2.91  2009/11/23 16:37:08  fisyak
  * Clean up, fix problem with bunch crossing information in StEventInfo and StHddr
  *
