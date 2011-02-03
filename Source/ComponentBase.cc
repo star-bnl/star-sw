@@ -117,11 +117,11 @@ ComponentBase::IsWireCrossed(
                         const double x0, const double y0, const double z0,
                         const double x1, const double y1, const double z1,
                         double& xc, double& yc, double& zc) {
-  
+
+  xc = x0; yc = y0; zc = z0;
   return false;
   
   // Quiet compiler against unused variable warning
-  xc = x0; yc = y0; zc = z0;
   if (debug) {
     std::cout << className << "::IsWireCrossed:\n";
     std::cout << "    No wires between (" 
@@ -133,11 +133,14 @@ ComponentBase::IsWireCrossed(
 
 bool
 ComponentBase::IsInTrapRadius(double x0, double y0, double z0, double& xw, double& yw, double& rw){
-  
+ 
+  xw = x0; yw = y0; rw = 0.; 
   return false;
   
   if (debug) {
-    std::cout << className << "::IsInTrapRadius:\n\tDefault trap radius method.";
+    std::cout << className << "::IsInTrapRadius:\n";
+    std::cout << "    (" << x0 << ", " << y0 << ", " << z0 << ") \n";
+    std::cout << "    not trapped by a wire.\n";
   }
  
 }

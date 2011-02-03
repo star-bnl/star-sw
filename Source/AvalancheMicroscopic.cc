@@ -13,7 +13,8 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   sensor(0), 
   nPhotons(0), nElectrons(0), nHoles(0), nIons(0), 
   nElectronEndpoints(0), nHoleEndpoints(0),
-  usePlotting(false), viewer(0), 
+  usePlotting(false), viewer(0),
+  plotExcitations(true), plotIonisations(true), plotAttachments(true), 
   histElectronEnergy(0), histHoleEnergy(0),
   hasElectronEnergyHistogram(false), hasHoleEnergyHistogram(false),
   histDistance(0), hasDistanceHistogram(false), distanceOption('r'),
@@ -1308,6 +1309,9 @@ AvalancheMicroscopic::TransportElectron(
             break;
           // Ionising collision
           case ElectronCollisionTypeIonisation:
+            if (usePlotting && plotIonisations) {
+              viewer->AddIonisationMarker(x, y, z);
+            }
             if (hasUserHandleIonisation) {
               userHandleIonisation(x, y, z, t, cstype, level, medium);
             }
@@ -1396,6 +1400,9 @@ AvalancheMicroscopic::TransportElectron(
             break;
           // Attachment
           case ElectronCollisionTypeAttachment:
+            if (usePlotting && plotAttachments) {
+              viewer->AddAttachmentMarker(x, y, z);
+            }
             if (hasUserHandleAttachment) {
               userHandleAttachment(x, y, z, t, cstype, level, medium);
             }
@@ -1423,6 +1430,9 @@ AvalancheMicroscopic::TransportElectron(
             break;
           // Excitation
           case ElectronCollisionTypeExcitation:
+            if (usePlotting && plotExcitations) {
+              viewer->AddExcitationMarker(x, y, z);
+            }
             if (hasUserHandleInelastic) {
               userHandleInelastic(x, y, z, t, cstype, level, medium);
             }
@@ -1534,7 +1544,9 @@ AvalancheMicroscopic::TransportElectron(
         // Continue with the next electron/hole?
         if (!ok || 
             nCollTemp > nCollSkip || 
-            cstype == ElectronCollisionTypeIonisation) {
+            cstype == ElectronCollisionTypeIonisation || 
+            (plotExcitations && cstype == ElectronCollisionTypeExcitation) ||
+            (plotAttachments && cstype == ElectronCollisionTypeAttachment)) {
           break;
         }
         kx = newKx; ky = newKy; kz = newKz;

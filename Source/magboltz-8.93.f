@@ -19975,7 +19975,8 @@ C SUM EXCITATION
 C GET CORRECT ELASTIC X-SECTION
       Q(2,I)=Q(2,I)-SUMR
 C Q(1,I) TOTAL USED FOR INFORMATION ONLY          
-      Q(1,I)=QELA+Q(5,I)+Q(4,I)+SUMV+SUME                        
+      Q(1,I)=QELA+Q(5,I)+Q(4,I)+SUMV+SUME
+C      write (6,*) EN, SUMR, SUMV, Q(2,I)                    
  9000 CONTINUE                                                          
 C                                                                       
 C     SAVE ON COMPUTING TIME                                            

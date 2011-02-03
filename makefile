@@ -9,9 +9,7 @@ HEADERS = $(wildcard $(INCDIR)/*.hh)
 SOURCES = $(wildcard $(SRCDIR)/*.cc)
 
 OBJECTS = $(subst $(SRCDIR),$(OBJDIR),$(SOURCES:.cc=.o))
-OBJECTS += \
-	$(OBJDIR)/magboltz.o \
-	$(OBJDIR)/efieldCalc.o
+OBJECTS += $(OBJDIR)/magboltz.o 
 OBJECTS += $(OBJDIR)/GarfieldDict.o
 
 TARGETS = $(OBJECTS)
@@ -135,17 +133,6 @@ $(OBJDIR)/ComponentAnalyticField.o: \
 	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/ComponentAnalyticFieldWrap.o: \
-	$(SRCDIR)/ComponentAnalyticFieldWrap.cc \
-	$(INCDIR)/ComponentAnalyticFieldWrap.hh \
-	$(SRCDIR)/efieldCalc.f \
-	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
-	@echo $@
-	@$(CXX) $(CFLAGS) $< -o $@
-$(OBJDIR)/efieldCalc.o: \
-	$(SRCDIR)/efieldCalc.f
-	@echo $@
-	@$(FC) $(FFLAGS) $< -o $@
 $(OBJDIR)/ComponentNeBem2d.o: \
 	$(SRCDIR)/ComponentNeBem2d.cc $(INCDIR)/ComponentNeBem2d.hh \
 	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh

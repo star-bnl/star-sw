@@ -26,6 +26,12 @@ class AvalancheMicroscopic {
     // Switch on/off drift line plotting
     void EnablePlotting(ViewDrift* view);
     void DisablePlotting();
+    void EnableExcitationMarkers()  {plotExcitations = true;}
+    void DisableExcitationMarkers() {plotExcitations = false;}
+    void EnableIonisationMarkers()  {plotIonisations = true;}
+    void DisableIonisationMarkers() {plotIonisations = false;}
+    void EnableAttachmentMarkers()  {plotAttachments = true;}
+    void DisableAttachmentMarkers() {plotAttachments = false;}
 
     // Switch on/off calculation of induced currents
     void EnableSignalCalculation()  {useSignal = true;}
@@ -217,6 +223,9 @@ class AvalancheMicroscopic {
 
     bool usePlotting;
     ViewDrift* viewer;
+    bool plotExcitations;
+    bool plotIonisations;
+    bool plotAttachments;
 
     TH1* histElectronEnergy;
     TH1* histHoleEnergy;

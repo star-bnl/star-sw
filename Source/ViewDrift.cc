@@ -12,10 +12,16 @@ ViewDrift::ViewDrift() :
   xMin(-1.), yMin(-1.), zMin(-1.), 
   xMax( 1.), yMax( 1.), zMax( 1.),
   view(0),
-  nDriftLines(0), nTracks(0) {
+  nDriftLines(0), nTracks(0),
+  nExcMarkers(0), excPlot(0), 
+  nIonMarkers(0), ionPlot(0), 
+  nAttMarkers(0), attPlot(0) {
 
   driftLines.clear();
-  tracks.clear(); 
+  tracks.clear();
+  excMarkers.clear();
+  ionMarkers.clear();
+  attMarkers.clear();
 
 }
 
@@ -23,6 +29,9 @@ ViewDrift::~ViewDrift() {
 
   if (!hasExternalCanvas && canvas != 0) delete canvas;
   if (view != 0) delete view;
+  delete excPlot; excPlot = 0;
+  delete ionPlot; ionPlot = 0;
+  delete attPlot; attPlot = 0;
 
 }
 
@@ -63,6 +72,18 @@ ViewDrift::Clear() {
 
   driftLines.clear();
   nDriftLines = 0;
+
+  tracks.clear();
+  nTracks = 0;
+
+  nExcMarkers = nIonMarkers = nAttMarkers = 0;
+  excMarkers.clear();
+  ionMarkers.clear();
+  attMarkers.clear();
+
+  delete excPlot; excPlot = 0;
+  delete ionPlot; ionPlot = 0;
+  delete attPlot; attPlot = 0;
 
 }
 
@@ -164,6 +185,8 @@ ViewDrift::NewChargedParticleTrack(const int np, int& id,
     // Number of points is not yet known.
     TPointSet3D p(1);
     p.SetMarkerColor(col);
+    p.SetMarkerStyle(20);
+    p.SetMarkerSize(1);
     p.SetPoint(0, x0, y0, z0);
     tracks.push_back(p);
   } else {
@@ -239,6 +262,45 @@ ViewDrift::AddTrackPoint(const int iL,
 }
 
 void
+ViewDrift::AddExcitationMarker(
+    const double x, const double y, const double z) {
+
+  marker newMarker;
+  newMarker.x = x;
+  newMarker.y = y;
+  newMarker.z = z;
+  excMarkers.push_back(newMarker);
+  ++nExcMarkers;
+
+}
+
+void
+ViewDrift::AddIonisationMarker(
+    const double x, const double y, const double z) {
+  
+  marker newMarker;
+  newMarker.x = x;
+  newMarker.y = y;
+  newMarker.z = z;
+  ionMarkers.push_back(newMarker);
+  ++nIonMarkers;
+
+}
+
+void
+ViewDrift::AddAttachmentMarker(
+    const double x, const double y, const double z) {
+
+  marker newMarker;
+  newMarker.x = x;
+  newMarker.y = y;
+  newMarker.z = z;
+  attMarkers.push_back(newMarker);
+  ++nAttMarkers;
+
+}
+
+void
 ViewDrift::Plot() {
   
   if (canvas == 0) {
@@ -262,6 +324,40 @@ ViewDrift::Plot() {
   for (int i = nTracks; i--;) {
     tracks[i].Draw("same");
   }
+
+  if (excPlot != 0) {
+    delete excPlot; excPlot = 0;
+  }
+  excPlot = new TPointSet3D(nExcMarkers);
+  excPlot->SetMarkerColor(plottingEngine.GetRootColorLine2());
+  excPlot->SetMarkerStyle(20);
+  excPlot->SetMarkerSize(1);
+  for (int i = 0; i < nExcMarkers; ++i) {
+    excPlot->SetPoint(i + 1, excMarkers[i].x, excMarkers[i].y, excMarkers[i].z);
+  }
+  if (ionPlot != 0) {
+    delete ionPlot; ionPlot = 0;
+  }
+  ionPlot = new TPointSet3D(nIonMarkers);
+  ionPlot->SetMarkerColor(plottingEngine.GetRootColorIon());
+  ionPlot->SetMarkerStyle(20);
+  ionPlot->SetMarkerSize(1);
+  for (int i = 0; i < nIonMarkers; ++i) {
+    ionPlot->SetPoint(i + 1, ionMarkers[i].x, ionMarkers[i].y, ionMarkers[i].z);
+  }
+  if (attPlot != 0) {
+    delete attPlot; attPlot = 0;
+  }
+  attPlot = new TPointSet3D(nAttMarkers);
+  attPlot->SetMarkerColor(plottingEngine.GetRootColorLine1());
+  attPlot->SetMarkerStyle(20);
+  attPlot->SetMarkerSize(1);
+  for (int i = 0; i < nAttMarkers; ++i) {
+    attPlot->SetPoint(i + 1, attMarkers[i].x, attMarkers[i].y, attMarkers[i].z);
+  }
+  excPlot->Draw("same");
+  ionPlot->Draw("same");
+  attPlot->Draw("same");
   canvas->Update();
 
 }

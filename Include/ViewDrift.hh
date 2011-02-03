@@ -46,6 +46,9 @@ class ViewDrift {
                   const double x, const double y, const double z);
     void AddTrackPoint(const int iL, 
                   const double x, const double y, const double z);
+    void AddExcitationMarker(const double x, const double y, const double z);
+    void AddIonisationMarker(const double x, const double y, const double z);
+    void AddAttachmentMarker(const double x, const double y, const double z);
 
     void Plot();
 
@@ -75,6 +78,21 @@ class ViewDrift {
     
     int nTracks;
     std::vector<TPointSet3D> tracks;
+
+    struct marker {
+      double x;
+      double y;
+      double z;
+    };
+    int nExcMarkers;
+    std::vector<marker> excMarkers;
+    TPointSet3D* excPlot;
+    int nIonMarkers;
+    std::vector<marker> ionMarkers;
+    TPointSet3D* ionPlot;
+    int nAttMarkers;
+    std::vector<marker> attMarkers;
+    TPointSet3D* attPlot;
 
 };
 
