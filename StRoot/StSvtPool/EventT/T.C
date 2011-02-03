@@ -126,7 +126,7 @@ void TT::Loop(Int_t Nevents) {
                             (-beta   0     1)
 
                             (1     -gamma     0)
-          RotateZ(beta) =   (gamma      1     0)
+          RotateZ(gamma) =  (gamma      1     0)
                             (0          0     1)
 
                             (1     -gamma   beta)
