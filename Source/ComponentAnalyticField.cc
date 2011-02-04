@@ -14,6 +14,7 @@ ComponentAnalyticField::ComponentAnalyticField() {
   className = "ComponentAnalyticField";
   chargeCheck = false;
   CellInit();
+
 }
 
 void 
@@ -201,22 +202,26 @@ ComponentAnalyticField::IsWireCrossed(double x0, double y0, double z0,
     // Check if the minimum is located behind (x1, y1).
     if (xIn1 < 0.) continue;
     // Minimum is located between (x0, y0) and (x1, y1).
-    const double d02 = pow(xw - x0, 2) + pow(yw - y0, 2);
-    const double d12 = pow(xw - x1, 2) + pow(yw - y1, 2);
-    if (xIn1 * xIn1 * d02 > xIn0 * xIn0 * d12) {
-      dMin2 = d02 - xIn0 * xIn0 / d2;
+    const double dw02 = pow(xw - x0, 2) + pow(yw - y0, 2);
+    const double dw12 = pow(xw - x1, 2) + pow(yw - y1, 2);
+    if (xIn1 * xIn1 * dw02 > xIn0 * xIn0 * dw12) {
+      dMin2 = dw02 - xIn0 * xIn0 / d2;
     } else {
-      dMin2 = d12 - xIn1 * xIn1 / d2;
+      dMin2 = dw12 - xIn1 * xIn1 / d2;
     }
-    //Add in the times nTrap to account for the trap radius
-    const double r2 = 0.25*w[i].d*w[i].d;
+    // Add in the times nTrap to account for the trap radius.
+    const double r2 = 0.25 * w[i].d * w[i].d;
     if (dMin2 < r2) {
       // Wire has been crossed.
       // Find the point of intersection.
-      const double t = (xIn0 - sqrt(xIn0 * xIn0 + d02 - r2)) / d2;
+      const double p = -xIn0 / d2;
+      const double q = (dw02 - r2) / d2;
+      const double t1 = -p + sqrt(p * p - q);
+      const double t2 = -p - sqrt(p * p - q);
+      const double t = std::min(t1, t2); 
       xc = x0 + t * dx;
       yc = y0 + t * dy;
-      zc = z0 + (z1 - z0) * (xc - x0) / dx;
+      zc = z0 + t * (z1 - z0);
       return true;
     } 
   }
@@ -935,10 +940,10 @@ ComponentAnalyticField::CellInit() {
   cellset = false;
   sigset = false;
   
-  // Coordinate system.
+  // Coordinate system
   polar = false;
   
-  // Cell type.
+  // Cell type
   cellType = "A  ";
   iCellType = 1;
  
@@ -993,14 +998,14 @@ ComponentAnalyticField::CellInit() {
   v0 = 0.;
   corvta = corvtb = corvtc = 0.;
     
-  // Planes.
+  // Planes
   planes.clear(); planes.resize(5);
   for (int i = 0; i < 4; ++i) {
     ynplan[i] = false;
     coplan[i] = 0.;
     vtplan[i] = 0.;
   }
-  // Plane shorthand.
+  // Plane shorthand
   ynplax = ynplay = false;
   coplax = coplay = 1.;
   
@@ -1015,7 +1020,7 @@ ComponentAnalyticField::CellInit() {
     planes[i].strips2.clear(); 
   } 
 
-  // Tube properties.
+  // Tube properties
   tube = false;
   ntube = 0;
   mtube = 1;
@@ -1027,13 +1032,13 @@ ComponentAnalyticField::CellInit() {
   sigmat.clear();
   qplane.clear();
   
-  // 3D charges.
+  // 3D charges
   n3d = 0;
   ch3d.clear();
   nTermBessel = 10;
   nTermPoly = 100;
   
-  // Gravity.
+  // Gravity
   down[0] = down[1] = 0.;
   down[2] = 1.;
   

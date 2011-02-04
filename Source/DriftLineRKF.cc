@@ -164,20 +164,17 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
          std::cerr<<"DriftLineRKF::DriftLine:\n\tdrift line crossed wire. Abandoning.";
          path[counter].status = "Crossed Wire.";
          break;
-      }
-      else if(sensor->IsInTrapRadius(r1[0], r1[1], r1[2], xWire, yWire, rWire)){
+      } else if (sensor->IsInTrapRadius(r1[0], r1[1], r1[2], xWire, yWire, rWire)){
          DriftToWire(r1[0], r1[1], r1[2], iWire);
          break;
-      }
-      else{
+      } else {
          if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, v1[0], v1[1], v1[2])) {
            std::cerr << "DriftLineRKF::DriftLine:\n";
            std::cerr << "    Failed to retrieve drift velocity.\n";
            return;
          }      
       }
-    } 
-    else {
+    } else {
       EndDriftLine();
       break;
     }
@@ -190,27 +187,25 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
     if (status == 0) {
       if (sensor->IsWireCrossed(path.back().xi, path.back().yi, path.back().zi, 
                                 r1[0], r1[1], r1[2], rc[0], rc[1], rc[2])) {
-         std::cerr<<"DriftLineRKF::DriftLine:\n\tdrift line crossed wire. Abandoning.";
-         path[counter].status = "Crossed Wire.";
-         break;
-      }
-      else if(sensor->IsInTrapRadius(r1[0], r1[1], r1[2], xWire, yWire, rWire)){
-         DriftToWire(r1[0], r1[1], r1[2], iWire);
-         break;
-      }
-      else{
+        std::cerr << "DriftLineRKF::DriftLine:\n\t";
+        std::cerr << "Drift line crossed wire. Abandoning.";
+        path[counter].status = "Crossed Wire.";
+        break;
+      } else if (sensor->IsInTrapRadius(r1[0], r1[1], r1[2], xWire, yWire, rWire)) {
+        DriftToWire(r1[0], r1[1], r1[2], iWire);
+        break;
+      } else {
         if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, v2[0], v2[1], v2[2])) {
           std::cerr << "DriftLineRKF::DriftLine:\n";
           std::cerr << "    Failed to retrieve drift velocity.\n";
           return;
         }
       }     
-    } 
-    else {
+    } else {
       EndDriftLine();
       break;
     }
-   // Third estimate of new drift velocity
+    // Third estimate of new drift velocity
     r1[0] = r[0] + dt * (b30 * v0[0] + b31 * v1[0] + b32 * v2[0]);
     r1[1] = r[1] + dt * (b30 * v0[1] + b31 * v1[1] + b32 * v2[1]);
     r1[2] = r[2] + dt * (b30 * v0[2] + b31 * v1[2] + b32 * v2[2]);   
@@ -222,20 +217,17 @@ DriftLineRKF::DriftLine(double x0, double y0, double z0, double t0,
          std::cerr<<"DriftLineRKF::DriftLine:\n\tdrift line crossed wire. Abandoning.";
          path[counter].status = "Crossed Wire.";
          break;
-      }
-      else if(sensor->IsInTrapRadius(r1[0], r1[1], r1[2], xWire, yWire, rWire)){
-         DriftToWire(r1[0], r1[1], r1[2], iWire);
-         break;
-      }
-      else{
+      } else if(sensor->IsInTrapRadius(r1[0], r1[1], r1[2], xWire, yWire, rWire)){
+        DriftToWire(r1[0], r1[1], r1[2], iWire);
+        break;
+      } else {
         if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, v3[0], v3[1], v3[2])) {
           std::cerr << "DriftLineRKF::DriftLine:\n";
           std::cerr << "    Failed to retrieve drift velocity.\n";
           return;
         }       
       }
-    } 
-    else {
+    } else {
       EndDriftLine();
       break;
     }
@@ -383,8 +375,9 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0, int iWire) {
 
   if (debug) { 
     std::cout << "Particle trapped by wire at: ";
-    std::cout << x0 << ", " << y0 << ", " << z0 << " = " << sqrt(x0 * x0 + y0 * y0 + z0 * z0) << "\n";
-    std::cout << "By wire located at (" << xWire << ", " 
+    std::cout << x0 << ", " << y0 << ", " << z0
+              << " (r = " << sqrt(x0 * x0 + y0 * y0 + z0 * z0) << ")\n";
+    std::cout << "by wire located at (" << xWire << ", " 
               << yWire << ") with physical radius " 
               << rWire << " cm.\n";
   }
@@ -415,7 +408,7 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0, int iWire) {
     return;
   }
 
-  double speed0 = sqrt( vx0 * vx0 + vy0 * vy0 + vz0 * vz0 );
+  double speed0 = sqrt(vx0 * vx0 + vy0 * vy0 + vz0 * vz0);
   double dist2wire = DistanceToWire(x0, y0, z0);
   double tCrude = dist2wire / speed0;
 
@@ -425,18 +418,18 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0, int iWire) {
     path.back().yf = y0;
     path.back().zf = z0;
     path.back().tf = path.back().ti + tCrude;
-    path.back().status = "Distance to wire to small.";
+    path.back().status = "Distance to wire too small.";
     return;
   }
 
   while (!lastStep) {
    
-    // Estimate where the drift-line with end up
+    // Estimate where the drift-line will end up
     double x1 = x0 + tCrude * vx0;
     double y1 = y0 + tCrude * vy0;
     double z1 = z0 + tCrude * vz0;
     if (debug) {
-      std::cout<<"Step to wire: " << x1 << ", " << y1 <<", " << z1 << "\n";
+      std::cout << "Step to wire: " << x1 << ", " << y1 << ", " << z1 << "\n";
     }
    
     // Check to make sure step is in a good location
@@ -444,8 +437,8 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0, int iWire) {
     if (dist2wire < 0.) {
      
       if (debug) {
-        std::cout<<"DriftLineRKF::DriftToWire:\n\t";
-        std::cout<<"Dirft line inside wire. This may be the last step.\n";
+        std::cout << "DriftLineRKF::DriftToWire:\n\t";
+        std::cout << "Drift line inside wire. This may be the last step.\n";
       }
      
       lastStep = true;
@@ -476,13 +469,14 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0, int iWire) {
     double vz1 = 0.;
     if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx1, vy1, vz1)) {
       std::cerr << "DriftLineRKF::DriftToWire:\n\t";
-      std::cerr<< "Unable to retrieve drift velocity. Abandoning.\n";
+      std::cerr << "Unable to retrieve drift velocity. Abandoning.\n";
       path.back().status = "Abandoned";
+      return;
     }
    
-    double speed1 = sqrt( vx1 * vx1 + vy1 * vy1 + vz1 * vz1 );
+    double speed1 = sqrt(vx1 * vx1 + vy1 * vy1 + vz1 * vz1);
    
-    // Calculate a mid point between (x0, y0) and (x1,y1)
+    // Calculate a mid point between (x0, y0) and (x1, y1)
     double xm = 0.5 * (x0 + x1);
     double ym = 0.5 * (y0 + y1);
     double zm = 0.5 * (z0 + z1);
@@ -505,12 +499,14 @@ DriftLineRKF::DriftToWire(double x0, double y0, double z0, int iWire) {
       std::cerr << "DriftLineRKF::DriftToWire:\n\t";
       std::cerr << "Unable to retrieve drift velocity. Abandoning.\n";
       path.back().status = "Abandoned";
+      return;
     }
     double speedm = sqrt(vxm * vxm + vym * vym + vzm * vzm);
    
     // Compare the first and second order estimates
     double stepLength = sqrt(pow(x0 - x1, 2) + pow(y0 - y1, 2));
-    if (stepLength * fabs(1. / speed0 - 2. / speedm + 1. / speed1) / 3. < 1.e-4 * (1 + path.back().ti)) {
+    if (stepLength * fabs(1. / speed0 - 2. / speedm + 1. / speed1) / 3. < 
+        1.e-4 * (1. + path.back().ti)) {
       // Accuracy is good enough
       timeToDrift += stepLength * (1. / speed0 + 4. / speedm + 1. / speed1) / 6.;
       path.back().xf = x1;
