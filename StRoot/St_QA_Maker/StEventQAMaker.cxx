@@ -18,9 +18,6 @@
 #include "StEventTypes.h"
 #include "StMcEventTypes.hh"
 #include "StTpcDedxPidAlgorithm.h"
-#include "StDbUtilities/StCoordinates.hh"
-// include this because it's not in StCoordinates.hh yet
-#include "StDbUtilities/StSvtCoordinateTransform.hh"
 #include "HitHistograms.h"
 #include "StTpcDb/StTpcDb.h"
 #include "StarClassLibrary/StTimer.hh"
@@ -548,11 +545,9 @@ void StEventQAMaker::MakeHistGlob() {
         }
 	
 	// TPC padrow histogram
-	StTpcCoordinateTransform transformer(gStTpcDb);
-	StGlobalCoordinate globalHitPosition(firstPoint);
-	StTpcPadCoordinate padCoord;
-	transformer(globalHitPosition,padCoord);
-        hists->m_glb_padfT->Fill(padCoord.row());
+	Int_t minpadrow = 0;
+	while (minpadrow < 45) if (map.hasHitInRow(kTpcId,++minpadrow)) break;
+        hists->m_glb_padfT->Fill(minpadrow);
 	
         hists->m_pointT->Fill(detInfo->numberOfPoints());
         hists->m_max_pointT->Fill(globtrk->numberOfPossiblePoints());
@@ -565,11 +560,11 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_glb_phi0T->Fill(orphi);
 	
 	if (firstPoint.z() < 0) {
-	  hists->m_glb_padfTEW->Fill(padCoord.row(),0.);
+	  hists->m_glb_padfTEW->Fill(minpadrow,0.);
 	  hists->m_glb_phifT->Fill(fphi,0.);
 	}
 	else if (firstPoint.z() > 0) {
-	  hists->m_glb_padfTEW->Fill(padCoord.row(),1.);
+	  hists->m_glb_padfTEW->Fill(minpadrow,1.);
 	  hists->m_glb_phifT->Fill(fphi,1.);
 	}
 	
@@ -774,14 +769,6 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_chisq1F->Fill(chisq1,0.);
         hists->m_glb_impactF->Fill(logImpact,0.);
         hists->m_glb_impactrF->Fill(globtrk->impactParameter(),0.);
-	
-	// FTPC plane histogram - there are no FTPC transformation utilities yet.
-	//   => use m_glb_zfF for now.  -CPL
-	//StFtpcCoordinateTransform transformer();
-	//StGlobalCoordinate globalHitPosition(firstPoint);
-	//StFtpcLocalCoordinate planeCoord;
-	//transformer(globalHitPosition,planeCoord);
-        //hists->m_glb_planefF->Fill(planeCoord.plane());  
 	
 	if (fabs(firstPoint.z()-ftpcPadrowZPos[10])<=1)
 	  hists->m_glb_planefF->Fill(11,0.);
@@ -2346,8 +2333,11 @@ void StEventQAMaker::MakeHistTOF() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.95 2009/11/19 20:34:38 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.96 2011/02/04 02:34:06 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.96  2011/02/04 02:34:06  genevb
+// Replace firsthit position-to-padrow with minimum padrow in topo map
+//
 // Revision 2.95  2009/11/19 20:34:38  genevb
 // Remove Event Summary (using defunct old software monitors)
 //
