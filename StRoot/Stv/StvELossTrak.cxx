@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.2 2010/12/07 16:54:03 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.3 2011/02/05 22:01:29 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -30,7 +30,8 @@ void StvELossTrak::Set(double A, double Z, double dens, double x0
 {
   fdEdX=0;
   fA=A; fZ=Z; fDens=dens,fX0=x0; 
-  
+  if (fA<=0) fX0 = 1e+11;
+  assert(fX0>0);
   fM=mass; fCharge2=charge*charge;
 }
 //_____________________________________________________________________________
@@ -62,6 +63,7 @@ double StvELossTrak::ELossErr2(double l) const
 void StvELossTrak::Add(double len)
 {
   double l1 = fTotLen,l2 = l1+len;
+  assert(fX0>0);
   fMCS[0] += len/fX0;
   fMCS[1] -= (l2*l2-l1*l1)/fX0;
   fMCS[2] += (l2*l2*l2-l1*l1*l1)/(3*fX0);
