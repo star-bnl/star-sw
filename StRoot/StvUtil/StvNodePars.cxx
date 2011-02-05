@@ -20,11 +20,6 @@ static double MAXNODPARS[]   ={555,555,555,6.66,111, MAXTAN+1, .1};
 static double MAXFITPARS[]   ={22,22, .5 , .5 ,20};
 static double MAXFITERR[5]   ={.3,.3,0.03,0.03,1};
 //______________________________________________________________________________ 
-static double EmxSign(int n,const double *a); 
-
-
-
-//______________________________________________________________________________ 
 void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B)
 {
   memset(res[0],0,5*5*sizeof(res[0][0]));
@@ -215,14 +210,14 @@ static StvFitPars fp;
   fp.mH = dx*(     -sub._sinCA)+ dy*(      sub._cosCA);
   fp.mZ = dx*(-sinL*sub._cosCA)+ dy*(-sinL*sub._sinCA) +dz*cosL;
   fp.mA = (_psi -sub._psi );
-  fp.mC = (_ptin-sub._ptin);
+  fp.mP = (_ptin-sub._ptin);
   double tL = (_tanl-sub._tanl)/(1+_tanl*sub._tanl);
   if (fabs(tL)<0.05) { fp.mL = tL*(1-tL*tL/3); }
   else               { fp.mL = atan(tL)      ; }
 
   if      (fp.mL<0     ) {fp.mL = -fp.mL	; fp.mA=-fp.mA;}
   else if (fp.mL>M_PI/2) {fp.mL = fp.mL-M_PI/2	; fp.mA=-fp.mA;}
-  assert(!fp.Check());
+  fp.Check("StvNodePars::operator-");
   return fp;
 }
 //______________________________________________________________________________
@@ -243,7 +238,7 @@ void StvNodePars::operator+=(const StvFitPars &fp)
   _cosCA = cosCA*cA-_sinCA*sA;
   _sinCA = cosCA*sA+_sinCA*cA;
 
-  _ptin  += fp.mC;
+  _ptin  += fp.mP;
 
   double l = fp.mL,tL;
   if (fabs(l) < 0.1) { tL = l*(1+l*l/3); }
@@ -326,7 +321,7 @@ void StvFitErrs::Reset()
   mZZ =  MAXFITERR[1]*MAXFITERR[1];
   mAA =  MAXFITERR[2]*MAXFITERR[2];
   mLL =  MAXFITERR[3]*MAXFITERR[3];
-  mCC =  MAXFITERR[4]*MAXFITERR[4];
+  mPP =  MAXFITERR[4]*MAXFITERR[4];
 }
 
 //______________________________________________________________________________
@@ -348,11 +343,11 @@ mHL = emx->mHL ;
 mZL = emx->mZL*cosL ;
 mAL = emx->mAL + emx->mZL*dSdZbyCur;
 mLL = emx->mLL ;
-mHC = emx->mHC/mHz ;
-mZC = emx->mCZ/mHz*cosL ;
-mAC = (emx->mAC+emx->mCZ*dSdZbyCur)/mHz ;
-mLC = emx->mCL/mHz ;
-mCC = emx->mCC/mHz/mHz ;
+mHP = emx->mHC/mHz ;
+mZP = emx->mCZ/mHz*cosL ;
+mAP = (emx->mAC+emx->mCZ*dSdZbyCur)/mHz ;
+mLP = emx->mCL/mHz ;
+mPP = emx->mCC/mHz/mHz ;
 }  
 //______________________________________________________________________________
 void StvFitErrs::Get(THelixTrack *he) const
@@ -374,11 +369,11 @@ void StvFitErrs::Get(THelixTrack *he) const
   emx->mZL = mZL/cosL ;
   emx->mAL = (mAL + mZL*dSdZbyCur);
   emx->mLL = mLL ;
-  emx->mHC = mHC*mHz ;
-  emx->mCZ = mZC*mHz/cosL ;
-  emx->mAC = (mAC+mZC*dSdZbyCur)*mHz ;
-  emx->mCL = mLC*mHz ;
-  emx->mCC = mCC*mHz*mHz ;
+  emx->mHC = mHP*mHz ;
+  emx->mCZ = mZP*mHz/cosL ;
+  emx->mAC = (mAP+mZP*dSdZbyCur)*mHz ;
+  emx->mCL = mLP*mHz ;
+  emx->mCC = mPP*mHz*mHz ;
 }  
 //_____________________________________________________________________________
 void StvFitErrs::Set(const StvFitErrs &fr,double errFactor)
@@ -392,7 +387,7 @@ void StvFitErrs::Set(const StvFitErrs &fr,double errFactor)
 //_____________________________________________________________________________
 void StvFitErrs::Backward()
 {
-  mHA*=-1; mAC*=-1; mHZ*=-1; mZC*=-1; mAL*=-1; mZL*=-1;
+  mHA*=-1; mAP*=-1; mHZ*=-1; mZP*=-1; mAL*=-1; mZL*=-1;
 }
 //_____________________________________________________________________________
 int StvFitErrs::Check(const char *tit) const
@@ -429,10 +424,23 @@ static const char *N="HZALC";
   }
 }
 //_____________________________________________________________________________
-int StvFitPars::Check() const
+int StvFitPars::Check(const char *tit) const
 {
-  for (int i=0;i<5;i++) { if (fabs(Arr()[i]) > MAXFITPARS[i]) return i+1; }
+  int ifail = 0;
+  for (int i=0;i<5;i++) {if (fabs(Arr()[i]) > MAXFITPARS[i]){ifail=i+1;break;}};
+  if (!ifail) return 0;
+  if (!tit || !tit[0]) return ifail;
+  TString ts(tit);ts +=" *** Check = "; ts+=ifail;ts +=" ***";
+  Print(ts.Data());
   return 0;
+}
+//_____________________________________________________________________________
+void StvFitPars::Print(const char *tit) const
+{
+static const char* Nams[]={"mH","mZ","mA","mL","mP",0};
+  if (tit && tit[0]) printf("StvFitPars::Print(%s)\n",tit);
+  for (int i=0;Nams[i]; i++) {printf("%s=%g ",Nams[i],Arr()[i]);}
+  printf("\n");
 }
 //_____________________________________________________________________________
 
@@ -463,13 +471,13 @@ void StvNodePars::GetRadial(double radPar[6],double radErr[15],const StvFitErrs 
 //double mZ;	// Pseudo Z, direction perpendicular movement & H
 //double mA;	// Angle in XY. cos(A),sin(A),T moving direction
 //double mL;	// Angle lambda in Rxy/Z
-//double mC;	// Curvature
+//double mP;	// 1/pt with curvature sign
 
   enum {jRad=0,jPhi,jZ,jTan,jPsi,jPti};
   enum {jPhiPhi=0
        ,jPhiZ  ,jZZ
        ,jPhiTan,jZTan,jTanTan
-       ,jPhiPsi,jZPsi,jTanPsi,jPsiPsi,
+       ,jPhiPsi,jZPsi,jTanPsi,jPsiPsi
        ,jPhiPti,jZPti,jTanPti,jPsiPti,jPtiPti};
   double rxy = getRxy();
   radPar[jRad] = rxy;
@@ -543,16 +551,17 @@ void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
   if (!fe) return;
 
   float cos2L = 1./(1+_tanl*_tanl);
-  imp->mImpImp=fe->mHH;
-  imp->mZImp  =fe->mHZ; imp->mZZ  =fe->mZZ;
-  imp->mPsiImp=fe->mHA; imp->mPsiZ=fe->mHZ; imp->mPsiPsi=fe->mAA;
-  imp->mPtiImp=fe->mHC; imp->mPtiZ=fe->mZC; imp->mPtiPsi=fe->mAC; imp->mPtiPti=fe->mCC;
-  imp->mTanImp=fe->mHL/cos2L; 
-  imp->mTanZ  =fe->mZL/cos2L; 
-  imp->mTanPsi=fe->mAL/cos2L; 
-  imp->mTanPti=fe->mLC/cos2L;
-  imp->mTanTan=fe->mLL/cos2L/cos2L;
-
+  float cosL  =sqrt(cos2L);
+  float Rxy   = fabs(imp->mImp);
+  double T[5][5] = {
+  {1,    0,         0, 0,          0},
+  {0, cosL, _tanl*Rxy, 0,          0},
+  {0,    0,         1, 0,          0},
+  {0,    0,         0, 0,     1./_hz},
+  {0,    0,         0, 1/cos2L,    0}};
+  double qwe[15];
+  TCL::trasat(T[0],fe->Arr(),qwe,5,5); 
+  TCL::ucopy(qwe,&imp->mImpImp,15);
 }
 //______________________________________________________________________________
 const StvFitPars &StvFitPars::operator*(Mtx55D_t &t) const  
@@ -577,6 +586,7 @@ void StvFitErrs::Get(const StvNodePars *np,  StvNodeErrs *ne) const
   		   ,{         0,    0,         0,         0,  1}   //dPti
   		   ,{         0,    0,         0,      dTdL,  0}}; //dTan
 
+  assert(0);
   TCL::trasat(T[0],this->Arr(),ne->A,5,6); 
 
 }
@@ -777,8 +787,8 @@ double dia[5],*e,*er,vtx[3];
 StvFitErrs iE,oE,oER;
   iE.mHH = 0.0025928369042255385; iE.mHZ = -4.9934860023454386e-11; iE.mZZ = 0.014598355970801268; iE.mHA = -0.00059887440419442305; 
   iE.mZA = 1.0958739205478152e-11; iE.mAA = 0.00026524379894739812; iE.mHL = 3.463001237863329e-12; iE.mZL = -0.0016525557966380938; 
-  iE.mAL = 8.3669926017237923e-13; iE.mLL = 0.00041855110437868546; iE.mHC = 0.0043962440767417576; iE.mZC = -2.904206508909407e-11; 
-  iE.mAC = -0.0041320793241820105; iE.mLC = -2.5031139398137018e-12; iE.mCC = 0.78568815092933286; iE.SetHz(0.0014880496061989194);
+  iE.mAL = 8.3669926017237923e-13; iE.mLL = 0.00041855110437868546; iE.mHP = 0.0043962440767417576; iE.mZP = -2.904206508909407e-11; 
+  iE.mAP = -0.0041320793241820105; iE.mLP = -2.5031139398137018e-12; iE.mPP = 0.78568815092933286; iE.SetHz(0.0014880496061989194);
 
   e = iE.Arr();
   for (int i=0,li=0;i< 5;li+=++i) {
@@ -853,13 +863,26 @@ StvFitErrs iE,oE,oER;
 #include "TMatrixTSym.h"
 #include "TVectorT.h"
 //_____________________________________________________________________________
+double EmxSign(int n,const float *e)
+{
+  enum {maxN =10,maxE = (maxN*maxN-maxN)/2+maxN};
+  double d[maxE];
+  assert(n>0 && n<=maxN);
+  TCL::ucopy(e,d,(n*(n+1))/2);
+  return EmxSign(n,d);
+}
+//_____________________________________________________________________________
 double EmxSign(int n,const double *e)
 {
   TMatrixDSym S(n);  
-
+  TVectorD coe(n);
   for (int i=0,li=0;i< n;li+=++i) {
+    double qwe = e[li+i];
+    if(qwe<0) return qwe;
+    qwe = pow(2.,-int(log(qwe)/(2*log(2))));
+    coe[i]=qwe;
     for (int j=0;j<=i;j++    ) {
-       S[i][j]=e[li+j]; S[j][i]=e[li+j];
+       S[i][j]=e[li+j]*coe[i]*coe[j]; S[j][i]=S[i][j];
   } }
   TMatrixD EigMtx(n,n);
   TVectorD EigVal(n);  

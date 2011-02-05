@@ -17,15 +17,18 @@ void Multiply(double res[5], const Mtx55D_t &A,const double B[5]);
 inline void Copy(Mtx55D_t &to,const Mtx55D_t &fr){memcpy(to[0],fr[0],5*5*sizeof(to[0][0]));}
 void Invert(Mtx55D_t &to,const Mtx55D_t &fr);
 void Testik(const Mtx55D_t &tt);
+double EmxSign(int n,const double *a); 
+double EmxSign(int n,const float  *a); 
 //------------------------------------------------------------------------------
 class StvFitPars
 {
 public:	
-  StvFitPars():mH(0),mZ(0),mA(0),mL(0),mC(0){}
-  StvFitPars(double h,double z):mH(h),mZ(z),mA(0),mL(0),mC(0){}
+  StvFitPars():mH(0),mZ(0),mA(0),mL(0),mP(0){}
+  StvFitPars(double h,double z):mH(h),mZ(z),mA(0),mL(0),mP(0){}
   StvFitPars(const double *arr) {memcpy(&mH,arr,5*sizeof(mH));}
 const StvFitPars &operator*(Mtx55D_t &t) const;    
-         int Check() const;
+        void Print(const char *tit=0) const;
+         int Check(const char *tit=0) const;
       double *Arr() 		{return &mH;}
 const double *Arr()  const 	{return &mH;}
   double &operator[](int i) 	{return (&mH)[i];}
@@ -34,7 +37,7 @@ double mH;	// direction perpendicular movement and Z
 double mZ;	// Pseudo Z, direction perpendicular movement & H
 double mA;	// Angle in XY. cos(A),sin(A),T moving direction
 double mL;	// Angle lambda in Rxy/Z
-double mC;	// Curvature
+double mP;	// 1/pt with curvature sign
 };
 
 
@@ -134,7 +137,7 @@ mHH,
 mHZ, mZZ,
 mHA, mZA, mAA,
 mHL, mZL, mAL, mLL,
-mHC, mZC, mAC, mLC, mCC;
+mHP, mZP, mAP, mLP, mPP;
 //protected:
 double mHz;
 };  
