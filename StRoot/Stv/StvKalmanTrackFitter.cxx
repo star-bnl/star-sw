@@ -68,6 +68,8 @@ static const double kBigErrFact = 10;
         node->mPP[dir] = node->mFP[1-dir];
 //????		ONLY FOR dir==1
         StvFitPars delPre = preNode->mFP[dir]-preNode->mPP[1-dir];
+        if (delPre.Check()) return 1; 
+        
         StvFitPars del    = delPre*preNode->mDer[dir];
         node->mPP[dir]+= del;node->mFP[dir]=node->mPP[dir];
 
