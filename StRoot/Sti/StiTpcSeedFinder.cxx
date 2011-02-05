@@ -1,4 +1,4 @@
-// $Id: StiTpcSeedFinder.cxx,v 2.5 2011/01/18 14:41:54 fisyak Exp $
+// $Id: StiTpcSeedFinder.cxx,v 2.6 2011/02/05 14:58:04 fisyak Exp $
 #ifdef DO_TPCCATRACKER
 #include "StiTpcSeedFinder.h"
 #include "StiToolkit.h"
@@ -9,8 +9,8 @@
 #include "StiKalmanTrackFinder.h"
 
 #include "StiTPCCATrackerInterface.h"
-
-#define PRINT_FIT_ERR_STATISTIC
+//#define PRINT_SEED_STATISTIC
+//#define PRINT_FIT_ERR_STATISTIC
 #ifdef PRINT_FIT_ERR_STATISTIC
 #include <map>
 #endif // PRINT_FIT_ERR_STATISTIC
@@ -178,7 +178,9 @@ void StiTpcSeedFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
 
 
   sort(seeds.begin(), seeds.end(),SeedsCompareStatus );
+#ifdef PRINT_SEED_STATISTIC
   Int_t nSeed = 0;
+#endif // PRINT_SEED_STATISTIC
   while (! seeds.empty()) {
     Seed_t &aSeed = seeds.back();
     vector<StiHit*>        _seedHits;
@@ -192,16 +194,21 @@ void StiTpcSeedFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
     cout<< "seed: " << nSeed++ << "\t" <<aSeed.total_hits<<" total hits "; //<<aSeed.used_per_total;
     cout << " no. unused hits " << _seedHits.size();
 #endif // PRINT_SEED_STATISTIC
-    if (_seedHits.size() < 4) {cout << endl; continue;}
+    if (_seedHits.size() < 4) {
+#ifdef PRINT_SEED_STATISTIC
+      cout << endl; 
+#endif // PRINT_SEED_STATISTIC
+      continue;
+    }
     StiKalmanTrack* track = StiToolkit::instance()->getTrackFactory()->getInstance();
     
 //   if (track->initialize(_seedHits)) {cout << " initialization failed" << endl; continue;} // use helix approximation
    track->initialize0(_seedHits, &aSeed.firstNodePars, &aSeed.lastNodePars/*, &aSeed.firstNodeErrs, &aSeed.lastNodeErrs*/ ); // use CATracker parameters. P.S errors should not be copied, they'd be initialized.
    StiKalmanTrackFinder *finderTmp = (StiKalmanTrackFinder *)track->getTrackFinder();
    int status = finderTmp->Fit(track);
+#ifdef PRINT_FIT_ERR_STATISTIC
    StiKalmanTrackFinder::PrintFitStatus(status,track);
 
-#ifdef PRINT_FIT_ERR_STATISTIC
    if ( statusMap.find(status) != statusMap.end() ) statusMap[status]++;
    else statusMap[status] = 1;
 #endif // PRINT_FIT_ERR_STATISTIC
@@ -223,6 +230,9 @@ void StiTpcSeedFinder::findTpcTracks(StiTPCCATrackerInterface &caTrackerInt) {
 }
 #endif /* DO_TPCCATRACKER */
 // $Log: StiTpcSeedFinder.cxx,v $
+// Revision 2.6  2011/02/05 14:58:04  fisyak
+// reduce print outs
+//
 // Revision 2.5  2011/01/18 14:41:54  fisyak
 // Suppress seed print outs
 //
