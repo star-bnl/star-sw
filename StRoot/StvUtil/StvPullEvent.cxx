@@ -134,35 +134,44 @@ void StvPullEvent::Clear(const char*)
   memset(mNTrks,0,sizeof(mNTrks)+sizeof(mNHits));
   
 }
+  
 //_____________________________________________________________________________
 void StvPullEvent::Finish()
 {
 static int nCall=0; nCall++;
-  int iTkG=0,iTkP=-1,iHiG=0,iHiP=0,idP=0,idG=0;
+  int iTkG=0,iTkP=0,iHiG=0,iHiP=0,idP=0,idG=0;
   StvPullTrk* trkG=0,*trkP =0;
   StvPullHit* hiG=0,*hiP =0;
   int nHiG = mHitsG.GetLast()+1;
   int nHiP = mHitsP.GetLast()+1;
-
-  do {
-    iTkP++;
-    if (iTkP<mNTrks[1]) { trkP=(StvPullTrk*)mTrksP[iTkP];idP=trkP->mTrackNumber;}
-    else                { trkP=0; idP=0;}
-    for(;iTkG<mNTrks[0];iTkG++) {
-      int vertex = 0;
-      trkG=(StvPullTrk*)mTrksG[iTkG]; idG = trkG->mTrackNumber;
-      if (idP==idG) vertex = trkP->mVertex;
-      trkG->mVertex = vertex;
-      for(;iHiG<nHiG; iHiG ++) { 
-        hiG = (StvPullHit*)mHitsG[iHiG]; if (idG!=hiG->mTrackNumber) break;
-        hiG->mTrackNumber=iTkG; hiG->mVertex=vertex;
-      }
-      for(;iHiP<nHiP; iHiP ++) { 
-        hiP = (StvPullHit*)mHitsP[iHiP]; if (idP!=hiG->mTrackNumber) break;
-        hiP->mTrackNumber=iTkP; hiP->mVertex=vertex;
-      }
+  for (iTkG=0;iTkG<mNTrks[0];iTkG++) {// Loop over globs
+    trkG=(StvPullTrk*)mTrksG[iTkG]; idG = trkG->mTrackNumber;
+    idP=-1; trkP=0;
+    if (iTkP<mNTrks[1]) {
+      trkP=(StvPullTrk*)mTrksP[iTkP]; idP = trkP->mTrackNumber;
     }
-  } while(trkP);
+    int vertex = 0;
+    if (idG==idP) { //It is a primary
+      vertex = trkP->mVertex;
+      int nHits=0;
+      for(;iHiP<nHiP; iHiP ++) { // Loop over prim hits
+        hiP = (StvPullHit*)mHitsP[iHiP]; if (idP!=hiP->mTrackNumber) break;
+        nHits++;
+        hiP->mTrackNumber=iTkG+1; hiP->mVertex=vertex;
+      }
+      assert(nHits==trkP->nAllHits);
+      trkP->mTrackNumber= iTkG+1; iTkP++;
+    }//end It is a primary
+
+    int nHits=0;
+    for(;iHiG<nHiG; iHiG ++) { // Loop over glob hits
+      hiG = (StvPullHit*)mHitsG[iHiG]; if (idG!=hiG->mTrackNumber) break;
+      nHits++;
+      hiG->mTrackNumber=iTkG+1; hiG->mVertex=vertex;
+    }
+    assert(nHits==trkG->nAllHits);
+    trkG->mVertex = vertex; 
+    trkG->mTrackNumber= iTkG+1; 
+  }
 }  
-  
   
