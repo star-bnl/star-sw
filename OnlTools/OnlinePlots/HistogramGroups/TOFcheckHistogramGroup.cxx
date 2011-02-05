@@ -49,7 +49,7 @@ TOFcheckHistogramGroup::TOFcheckHistogramGroup(const char* group, const char* su
   : HistogramGroup(group,subGroup,trigger,detector) {
  
   TOF_Error1=new TH1F("TOF_Error1","TOF electronics error ",250,0.5,125.5);
-  TOF_Error2=new TH1F("TOF_Error2","TOF bunchid shift error",14,0,7.);
+  TOF_Error2=new TH1F("TOF_Error2","TOF bunchid shift error",14,0,6.);
   TOF_Error3=new TH1F("TOF_Error3","TOF bunchid shift error",14,0,7.);
 
   TOF_EventCount=new TH1F("TOF_EventCount","TOF_EventCount",2,0,2);
@@ -58,7 +58,7 @@ TOFcheckHistogramGroup::TOFcheckHistogramGroup(const char* group, const char* su
   //TOF_Tray_hits2=new TH1F("TOF_Tray_hits2","Hits in Trays",240,-0.5,119.5);
 
   TOF_Error1->SetXTitle("Tray #");
-  TOF_Error2->SetXTitle("THUB upvpd MTD");
+  TOF_Error2->SetXTitle("THUB upvpd");
 
   ReadTrayList(); 
   ReadValidBunchidPhase();
@@ -186,8 +186,6 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
   labela.DrawLatex(4.75,txty2," upvpd-west1");
   labela.DrawLatex(5.25,txty1," upvpd-east0");
   labela.DrawLatex(5.75,txty2," upvpd-east1");
-  labela.DrawLatex(6.25,txty1," MTD-0");
-  labela.DrawLatex(6.75,txty2," MTD-1");
 
   cc->Update();
 
@@ -204,7 +202,7 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
   // 
   int halftrayid=-1;
   int trayid=-1;
-  int allbunchid[2][124];
+  int allbunchid[2][122];
   for(int i=0;i<2;i++)for(int j=0;j<124;j++)allbunchid[i][j]=-9999;
 
   int totaltofdataword=0;
@@ -235,7 +233,7 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
          continue;
       }
       //cout<<"tray="<<trayid<<" halftray="<<halftrayid<<endl;
-      if(trayid <1 || trayid >124) continue;
+      if(trayid <1 || trayid >122) continue;
       if(trayid == 123) continue;  // no such tray number.
 
       // bunch id 
@@ -269,7 +267,7 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
   int bunchidref2 =   allbunchid[1][mReferenceTray-1];   // bunchid from tray 1 as reference.
   if(bunchidref1 != bunchidref2) {TOF_Error2->Fill(3);}
 
-  for(int itray=0;itray<124;itray++){
+  for(int itray=0;itray<122;itray++){
     int traynum=itray+1;
     if(NotActiveTray[traynum]) continue;
     for(int ihalf=0;ihalf<2;ihalf++){
@@ -343,8 +341,6 @@ void TOFcheckHistogramGroup::ReadValidBunchidPhase(){
       if(count==13 || count==14) mValidShift122[0][(count-1)%2]=number;
       if(count==15 || count==16) mValidShift122[1][(count-1)%2]=number;
 
-      if(count==17 || count==18) mValidShift124[(count-1)%2]=number;
-
       count++;
     }
   } else {cout<<"TOFcheckHistogramGroup::Can not open file:"<<mBunchShiftList<<endl;}
@@ -384,20 +380,17 @@ int TOFcheckHistogramGroup::ValidBunchid(int trayid,int halftrayid,int bunchid,i
   }
   if(trayid == 121) nthub =4;
   if(trayid == 122) nthub =5;
-  if(trayid == 124) nthub  =6;
   int diff=bunchid-refbunchid;
   if(diff>2048)   {diff =diff-4096;} 
   else if(diff<-2048) {diff =diff+4096;}
 
-  //cout<<"tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<nthub<<endl;
+  cout<<"tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<nthub<<endl;
   if(trayid>1 && trayid<121){
     if( (diff != mValidShiftTray[0][nthub])  && (diff != mValidShiftTray[1][nthub]) ) ret=nthub;
   } else if(trayid==121){
     if(diff !=mValidShift121[halftrayid][0] && diff != mValidShift121[halftrayid][1]) ret=nthub;
   } else if(trayid==122){
     if(diff !=mValidShift122[halftrayid][0] && diff != mValidShift122[halftrayid][1]) ret=nthub;
-  } else if(trayid==124) {
-    if(diff != mValidShift124[0] && diff != mValidShift124[1]) ret=nthub;
   }
 
   //if(ret>=0)cout<<"ERROR!! tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<ret<<endl;
