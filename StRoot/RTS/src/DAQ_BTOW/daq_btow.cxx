@@ -200,6 +200,13 @@ daq_dta *daq_btow::handle_adc()
 
 	// unpack 
 	u_short *data = (u_short *)((char *)raw_dta + 4 + 128) ;	// 4 byte dummy, 128 byte header
+
+#if 0
+	u_short *ppp = (u_short *) raw_dta ;
+	for(int i=0;i<10;i++) {
+		LOG(TERR,"%d: 0x%04X",i,ppp[i]) ;
+	}
+#endif
 	
 	for(int j=0;j<BTOW_PRESIZE;j++) {
 		for(int i=0;i<BTOW_MAXFEE;i++) {
