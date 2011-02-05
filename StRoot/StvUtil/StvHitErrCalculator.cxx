@@ -204,8 +204,6 @@ void StvHitErrCalculator::Test(double phiG,double lamG)
     if (fabs(V[0])>0.5*D) continue;
     V[1]+=  gRandom->Gaus()*par[kYErr];
     V[2]+=  gRandom->Gaus()*par[kZErr];
-  par[kZErr]=0;
-
 
     if(++iEl>=nEl) break;
     YZ[0] += V[1]*V[1]; YZ[1] += V[1]*V[2];YZ[2] += V[2]*V[2];
