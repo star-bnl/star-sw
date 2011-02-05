@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.4 2010/12/16 21:50:39 perev Exp $
+// $Id: StvMaker.cxx,v 1.5 2011/02/05 21:59:28 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -214,10 +214,8 @@ Int_t StvMaker::Make()
     for (size_t i=0;i<vertexes.size();i++) {
       StvHit *vtx=vertexes[i];
       float *vtxErr = vtx->errMtx();
-      if (vtxErr[0]>MIN_VTX_ERR2
-      &&  vtxErr[2]>MIN_VTX_ERR2
-      &&  vtxErr[5]>MIN_VTX_ERR2) continue;
-      memset(vtxErr,0,sizeof(vtxErr[0])*3);
+      if (vtxErr[5]>MIN_VTX_ERR2) continue;
+      memset(vtxErr,0,sizeof(vtxErr[0])*6);
       vtxErr[0]=MIN_VTX_ERR2;
       vtxErr[2]=MIN_VTX_ERR2;
       vtxErr[5]=MIN_VTX_ERR2;
