@@ -384,7 +384,7 @@ int TOFcheckHistogramGroup::ValidBunchid(int trayid,int halftrayid,int bunchid,i
   if(diff>2048)   {diff =diff-4096;} 
   else if(diff<-2048) {diff =diff+4096;}
 
-  cout<<"tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<nthub<<endl;
+//  cout<<"tray="<<trayid<<" halftrayid="<<halftrayid<<" bunchid="<<bunchid<<" refbunchid="<<refbunchid<<" diff="<<diff<<" nthub="<<nthub<<endl;
   if(trayid>1 && trayid<121){
     if( (diff != mValidShiftTray[0][nthub])  && (diff != mValidShiftTray[1][nthub]) ) ret=nthub;
   } else if(trayid==121){
