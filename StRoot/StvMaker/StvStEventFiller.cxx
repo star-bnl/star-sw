@@ -1,12 +1,15 @@
 #if 1
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.4 2010/12/20 20:33:48 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.5 2011/02/05 21:57:55 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.5  2011/02/05 21:57:55  perev
+ * Test for +ve error matrix added
+ *
  * Revision 1.4  2010/12/20 20:33:48  perev
  * Cleanup of mTrackNumber in StvPulls
  *
@@ -1230,8 +1233,9 @@ void StvStEventFiller::fillDca(StTrack* stTrack, const StvTrack* track)
   const StvNodePars &pars = tNode->GetFP(); 
   const StvFitErrs  &errs = tNode->GetFE();
   StvImpact myImp;
+  assert(errs.Sign()>0);
   pars.GetImpact(&myImp,&errs);
-
+  assert(EmxSign(5,&myImp.mImpImp)>0);
   StDcaGeometry *dca = new StDcaGeometry;
   gTrack->setDcaGeometry(dca);
   dca->set(&myImp.mImp,&myImp.mImpImp);
