@@ -26,10 +26,10 @@
 #define TPX_TCU_RHIC_TIME_0		99.0		// some number....
 
 // new, FY11, TCD
-#define TPX_TCD_PED_STOP		97
-#define TPX_TCD_START			98
-#define TPX_TCD_STOP			101
-#define TPX_TCD_TIME_0			98.8585		// measured around Nov 2010
+#define TPX_TCD_PED_STOP		177
+#define TPX_TCD_START			179
+#define TPX_TCD_STOP			182
+#define TPX_TCD_TIME_0			182.175466		// measured around Dec 2010
 
 /* FY10 and previous value.
    In FY11 this will change due to:
@@ -43,8 +43,8 @@
 
 
 // accepted region: start must be the lowest, stop must be the highest
-#define TPX_PULSER_PED_START	91
-#define TPX_PULSER_PED_STOP	103
+#define TPX_PULSER_PED_START	170
+#define TPX_PULSER_PED_STOP	186
 
 class tpxGain
 {
@@ -131,7 +131,7 @@ public:
 	void calc() ;				// calculates gains and bad pads
 
 	void compare(char *fname, int mysec=0) ;			// compares in memory image with a given file
-	int summarize(char *fname, FILE *log_file=0) ;			// prints a summary of bad channels to stdout
+	int summarize(char *fname, FILE *log_file=0, int gain_mode=0) ;			// prints a summary of bad channels to stdout
 
 	void free_store() ;
 

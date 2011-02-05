@@ -80,6 +80,7 @@ tpxFCF.o: tpxFCF.h
 tpxFCF.o: tpxFCF_flags.h
 tpxFCF.o: ../DAQ_READER/daq_dta_structs.h
 tpxGain.o: ../../../../StRoot/RTS/include/rtsLog.h
+tpxGain.o: ../../../../StRoot/RTS/include/daqModes.h
 tpxGain.o: ../../../../StRoot/RTS/include/TPC/rowlen.h
 tpxGain.o: ../../../../StRoot/RTS/include/TPX/tpx_altro_to_pad.h
 tpxGain.o: tpxCore.h

@@ -8,6 +8,8 @@
 #include <time.h>
 
 #include <rtsLog.h>
+#include <daqModes.h>
+
 #include <TPC/rowlen.h>
 
 #include <TPX/tpx_altro_to_pad.h>
@@ -998,7 +1000,7 @@ int tpxGain::to_file(char *fname)
 	    s_start,s_stop,
 	    c_run, c_date, c_time) ;
 
-	fprintf(f,"# $Id: tpxGain.cxx,v 1.24 2010/11/30 13:23:08 tonko Exp $\n") ;	// CVS id!
+	fprintf(f,"# $Id: tpxGain.cxx,v 1.25 2011/02/05 18:56:18 tonko Exp $\n") ;	// CVS id!
 	fprintf(f,"# Run %u\n",c_run) ;
 
 	for(s=s_start;s<=s_stop;s++) {
@@ -1045,6 +1047,14 @@ void tpxGain::compare(char *fname, int mysec)
 	dg_mean = dg_rms = dt_mean = dt_rms = 0.0 ;
 	dg_count = 0 ;
 
+
+	char (*f_bad)[46][183] = (char (*)[46][183]) malloc(25*46*183) ;
+	
+	if(f_bad == 0) {
+		LOG(ERR,"Malloc failed? Wha? [%s]",strerror(errno)) ;
+		return ;
+	}
+
 	while(!feof(f)) {
 		char str[1024] ;
 
@@ -1066,38 +1076,62 @@ void tpxGain::compare(char *fname, int mysec)
 		// skip edge pads, they are always a hassle
 		if((p==1) || (p==2)) continue ;
 		if((p==tpc_rowlen[r]) || (p==(tpc_rowlen[r]-1))) continue ;
-		
-		if(g==0.0) {	// bad in old file
-			if(get_gains(s,r,p)->g == 0.0) both++ ;
-			else old_only++ ;
+			
+		if(g==0.0) f_bad[s][r][p] = 1 ;
+		else f_bad[s][r][p] = 0 ;
+	}
+
+	fclose(f) ;
+
+	for(int s=1;s<=24;s++) {
+		if(mysec && (s != mysec)) continue ;
+
+		for(int r=1;r<=45;r++) {
+		for(int p=1;p<=tpc_rowlen[r];p++) {
+
+			// skip edge pads, they are always a hassle
+			if((p==1) || (p==2)) continue ;
+			if((p==tpc_rowlen[r]) || (p==(tpc_rowlen[r]-1))) continue ;
+
+			//printf("New bad %d %d %d %f, old %d\n",s,r,p,get_gains(s,r,p)->t0,f_bad[s][r][p]) ;
+			
+			if(f_bad[s][r][p]) {	// bad in old file
+				if(get_gains(s,r,p)->g == 0.0) both++ ;
+				else old_only++ ;
+			}
+			else {		// good in old file
+
+				// here I need to differentiate between bad FEEs and masked RDOs!
+				if(get_gains(s,r,p)->g == 0.0) {
+					if(get_gains(s,r,p)->t0 <  -9.0) {
+						LOG(DBG,"FEE/RDO was marked as bad (%d,%d,%d) -- skipping",s,r,p) ;
+					}
+					else {
+
+						new_only++ ;
+					}
+				}
+				else {	// both OK
+					double dg = get_gains(s,r,p)->g / g ;
+					double dt0 = get_gains(s,r,p)->t0 - t0 ;
+
+					dg_mean += dg ;
+					dg_rms += dg * dg ;
+
+					dt_mean += dt0 ;
+					dt_rms += dt0 * dt0 ;
+					
+					dg_count++ ;
+				}
+			}
 		}
-		else {		// good in old file
-
-			// here I need to differentiate between bad FEEs and masked RDOs!
-			if(get_gains(s,r,p)->g == 0.0) {
-				if(get_gains(s,r,p)->t0 <  -9.0) {
-					LOG(DBG,"FEE/RDO was marked as bad (%d,%d,%d) -- skipping",s,r,p) ;
-				}
-				else {
-					new_only++ ;
-				}
-			}
-			else {	// both OK
-				double dg = get_gains(s,r,p)->g / g ;
-				double dt0 = get_gains(s,r,p)->t0 - t0 ;
-
-				dg_mean += dg ;
-				dg_rms += dg * dg ;
-
-				dt_mean += dt0 ;
-				dt_rms += dt0 * dt0 ;
-
-				dg_count++ ;
-			}
 		}
 	}
 	
-	fclose(f) ;
+
+	free(f_bad) ;
+
+//	printf("dg_count %d\n",dg_count) ;
 
 	if(dg_count) {
 		dg_mean /= (double) dg_count ;
@@ -1126,7 +1160,7 @@ void tpxGain::compare(char *fname, int mysec)
 	return ;
 }
 
-int tpxGain::summarize(char *fname, FILE *log)
+int tpxGain::summarize(char *fname, FILE *log, int gain_mode)
 {
 	int s, r, a ;
 	char reason[1024] ;
@@ -1147,7 +1181,8 @@ int tpxGain::summarize(char *fname, FILE *log)
 			return notes ;
 		}
 	}
-		
+	
+	LOG(TERR,"fname %s, logfile %p, gain_mode %d",fname,log,gain_mode) ;
 
 
 	int s_start, s_stop ;
@@ -1287,27 +1322,62 @@ int tpxGain::summarize(char *fname, FILE *log)
 				if(err > 1) {
 					if(row && bad_gain) sprintf(reason+strlen(reason),"[Bad gain %.1f]",g) ;					
 					if(row && bad_t0) sprintf(reason+strlen(reason),"[Bad t0 %.1f]",t0) ;
-					if(row && bad_noise) sprintf(reason+strlen(reason),"[Bad noise %d%%]",bad_noise) ;
+					if(row && bad_noise) {
+						if(gain_mode != GAIN_MODE_CORRECTED) {
+							sprintf(reason+strlen(reason),"[Bad noise %d%%]",bad_noise) ;
+						}
+						else {
+							sprintf(reason+strlen(reason),"[JUST NOISE %d%%]",bad_noise) ;
+						}
+					}
 					if(row && bad_low) sprintf(reason+strlen(reason),"[Bad low %d%%]",bad_low) ;
 
 
-
+					
 					notes++ ;
 					if(log) {
-						fprintf(log,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,row,pad,
-							g,t0,err,reason) ;
+						if(gain_mode != GAIN_MODE_CORRECTED) {
+							fprintf(log,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,row,pad,
+								g,t0,err,reason) ;
+						}
+						else if(row && bad_noise) {
+							fprintf(log,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,row,pad,
+								g,t0,err,reason) ;
+						}
 					}
 				}
 
+				if(gain_mode != GAIN_MODE_CORRECTED) {
+					if((err>1) || bad_gain || bad_t0 || bad_noise || bad_low) {	// this now includes edge pads!
+						g = 0.0 ;	// mark real bad
+						get_gains(s,row,pad)->g = 0.0 ;	// need it later for comparison...
+					}
 
-				if((err>1) || bad_gain || bad_t0 || bad_noise || bad_low) {	// this now includes edge pads!
-					g = 0.0 ;	// mark real bad
-					get_gains(s,row,pad)->g = 0.0 ;	// need it later for comparison...
+					if(ofile) fprintf(ofile,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,row,pad,
+							  g,t0,err,reason) ;
 				}
+				else {
+					if(bad_noise) {
 
-				if(ofile) fprintf(ofile,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,row,pad,
-				       g,t0,err,reason) ;
 
+						g = 0.0 ;	// mark real bad
+						t0 = 0.0 ;
+						get_gains(s,row,pad)->g = 0.0 ;	// need it later for comparison...
+						get_gains(s,row,pad)->t0 = 0.0 ;	// need it later for comparison...
+
+						if(ofile) {
+							fprintf(ofile,"%2d %d %3d %2d %3d %2d %2d %3d %.3f %6.3f %d %s\n",s,r,fee,j1,a,ch,row,pad,
+									g,t0,err,reason) ;
+							fprintf(ofile,"%d %d %d 0.000 0.000        # ONLY NOISY\n",s,row,pad) ;
+						}
+					}
+					else {
+
+						get_gains(s,row,pad)->g = 1.0 ;	// need it later for comparison...
+						get_gains(s,row,pad)->t0 = -10.0 ;	// need it later for comparison...
+					}
+
+				}
 				fee_f->ch_count[a][ch] *= -1 ;	// mark as seen and done!
 			}
 		}
