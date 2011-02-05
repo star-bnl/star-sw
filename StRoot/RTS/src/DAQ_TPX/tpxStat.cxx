@@ -52,7 +52,7 @@ void tpxStat::run_start(u_int rb_mask, int r_type)
 	run_type = r_type ;
 
 	memset(r,0,sizeof(r)) ;
-	sector = 0 ;	// will get this from the data!
+//	sector = 0 ;	// will get this from the data!
 	stripes = 0 ;	
 
 	stripes_f = 0 ;
@@ -217,6 +217,7 @@ for(int i=0;i<6;i++) {
 			tpx_from_altro(i,a,c,row,pad) ;
 
 			for(int j=0;j<tpx_odd_fee_count;j++) {
+
 				if((tpx_odd_fee[j].sector != sector) || (tpx_odd_fee[j].rdo != (i+1))) continue ;
 
 				for(int k=0;k<2;k++) {

@@ -761,10 +761,12 @@ void tpxPed::smooth()
 		return ;
 	}
 
-#define TPX_GG_START	22
-#define TPX_START_OF_RIPPLE	32
-#define TPX_GG_STOP	51	// was 32 before Feb 20, 2008!
-#define TPX_CLEAN_SLATE 56
+	#define TPX_GG_START		20	// depends on TCD!
+	#define TPX_START_OF_RIPPLE	32	// doesn't depend on TCD
+	#define TPX_START_CORRECTION	34
+	#define TPX_USE_DATA		298
+	#define TPX_GG_DOWN		420
+
 
 	LOG(NOTE,"Smoothing pedestals...") ;
 
@@ -772,93 +774,64 @@ void tpxPed::smooth()
 	for(p=0;p<=182;p++) {
 		struct peds *ped = get(r,p) ;
 		double smoother[513] ;
-		double ripple[513] ;
+		double ripple[24] ;
 
-#ifdef TPX_PED_CONSTANT
-		mean = 0.0 ;
-		cou = 0 ;
-
-		for(t=0;t<30;t++) {
-			mean += ped->ped[t] ;
-			cou++ ;
-		}
-
-		mean /= (double)cou ;
-
-		// we need to round off correctly
-		for(t=0;t<512;t++) ped->ped[t] = (float) ((u_short) (mean+0.5)) ;	
-
-#else		// for GG
 
 		// this gets funky...
-
+		for(t=0;t<512;t++) {
+			smoother[t] = ped->ped[t] ;
+		}
+		
 		/******  time before GG _and_ ripple -- flat! */
-
 		mean = 0.0 ;
 		cou = 0 ;
 
-		for(t=0;t<22;t++) {	// before GG & ripple
-			mean += ped->ped[t] ;
+		for(t=0;t<TPX_GG_START;t++) {	// before GG & ripple
+			mean += smoother[t] ;
 			cou++ ;
 		}
 		mean /= (double)cou ;
 
-
-		// subtract this mean from all timebins to get the ripple...
-		for(t=0;t<512;t++) {
-			ripple[t] = ped->ped[t] - mean ;	// difference from the mean...
-		}	
-
-		// before the GG and ripple we use the simple mean
-		for(t=0;t<22;t++) {
+		for(t=0;t<TPX_GG_START;t++) {
 			smoother[t] = mean ;
 		}
 
-		// GG on, but no ripple yet: we use what was calculated;
-		for(t=22;t<32;t++) {
-			smoother[t] = ped->ped[t] ;	// keep the same ....
+
+		// now get the ripple at some nice point
+		mean = 0.0 ;
+		cou = 0 ;
+
+		for(t=TPX_USE_DATA;t<(TPX_USE_DATA+8);t++) {
+			mean += smoother[t] ;
+			cou++ ;
 		}
 
-		// for the first 2 timebins we subtract the ripple from some close
-		// timebins but which are after the GG. Scaled down a bit.
-		for(t=32;t<34;t++) {
-			smoother[t] = ped->ped[t] - 0.6 *ripple[t+24] ;
+		mean /= (double) cou ;
+
+		// calculate the ripple
+		for(t=TPX_USE_DATA;t<(TPX_USE_DATA+8);t++) {
+			ripple[t-TPX_USE_DATA] = smoother[t] - mean ;
 		}
+		
+		// special tweak!
+		smoother[TPX_START_OF_RIPPLE] -= ripple[2] * 0.6 ;
 
-		// scale is now 1
-		for(t=34;t<56;t++) {
-			smoother[t] = ped->ped[t] - ripple[t+24] ;
-		}
-
-		/****** after this we do 8 pixel smoothing */
-		for(t=56;t<512;t++) {
-			mean = 0.0 ;
-			cou = 0 ;
-			for(int j=0;j<8;j++) {
-				if(((t+j)<512) && (ped->ped[t+j]<1000.0)) {
-					mean += ped->ped[t+j] ;
-					cou++ ;
-				}
+		//apply ripple correction
+		for(t=TPX_START_CORRECTION;t<512;t+=8) {
+			for(int i=0;i<8;i++) {
+				if((t+i)>434) continue ;	// skip
+				smoother[t+i] -= ripple[i] ;
 			}
-
-			if(cou) {
-				mean /= (double) cou ;
-			}
-			else {
-				mean = ped->ped[t] ;
-			}
-
-			smoother[t] = mean ;
 		}
 
 		
-		// we need to round off correctly!
+		// finally, we need to round off correctly!
 		for(t=0;t<512;t++) {
 			ped->ped[t] = (double) ((u_short) (smoother[t]+0.5)) ;	
 		}
 
 
-#endif
+
 
 	}
 	}
