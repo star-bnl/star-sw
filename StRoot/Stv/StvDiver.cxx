@@ -9,8 +9,22 @@
 #include "StarMagField.h"
 #include "StvELossTrak.h"
 #include "THelixTrack.h"
+#include "TRandom.h"
+
+class MyRandom : public TRandom 
+{
+public:
+virtual Double_t Rndm(Int_t i = 0) 				{return 0.5;}
+virtual Double_t Gaus(Double_t mean = 0, Double_t sigma = 1)	{return 0.0;}
+};
+static MyRandom* gMyRandom=0;
 static const double gMyPiMass=0.1396;
 static const    int gMyPiPdg =9999;
+
+
+
+
+
 static void mybreak(int key)
 { static int kto=-2010;
   if (kto != key) return;
@@ -29,6 +43,7 @@ StvDiver::StvDiver(const char *name):TNamed(name,"")
 //_____________________________________________________________________________
 int StvDiver::Init() 
 {
+  gMyRandom = new MyRandom;
   mHelix = new THelixTrack;
   mELoss = new StvELossTrak;
   StVMCApplication *app = (StVMCApplication*)TVirtualMCApplication::Instance();
@@ -61,7 +76,9 @@ void StvDiver::SetSkip(int skip)
 //_____________________________________________________________________________
 int  StvDiver::Dive()
 {
-
+  TRandom *myRandom = gRandom;
+  gRandom = gMyRandom;
+  
   mInpPars->get(mHelix);
   mInpErrs->Get(mHelix);
   mHlxDeri[0][0]=0;
@@ -81,7 +98,7 @@ int  StvDiver::Dive()
   mOutPars->ready(); 
 
   mOutErrs->Set(mHelix,mOutPars->_hz);
-  assert(mOutErrs->mCC>0);
+  assert(mOutErrs->mPP>0);
   mOutPars->convert(*mOutDeri,mHlxDeri);
 
 
@@ -89,9 +106,11 @@ int  StvDiver::Dive()
     mOutPars->reverse();
     mOutPars->reverse(*mOutDeri,*mOutDeri);
     mOutErrs->Backward();
-    assert(mOutErrs->mCC>0);
+    assert(mOutErrs->mPP>0);
   }
   assert (mInpPars->_ptin * mOutPars->_ptin >=0);
+  gRandom = myRandom;
+
   return mSteps->GetExit();
 }
 //_____________________________________________________________________________
@@ -99,7 +118,7 @@ void StvDiver::Set(const StvNodePars *inpar,const StvFitErrs *inerr,int idir)
 {
   mInpPars= inpar;
   mInpErrs= inerr;
-  assert(mInpErrs->mCC>0);
+  assert(mInpErrs->mPP>0);
   mDir    = idir;
   mSteps->SetDir(mDir);
   mFld->SetHz(inpar->_hz);	//Set initial value of mag field
@@ -290,9 +309,12 @@ static int nCall=0; nCall++;
 
   double curva = -fField->GetHz()/fCurrentMomentum.Pt()*fCharge;
   double rho   = fHelix->GetRho();
-  assert (curva*rho>=0);
-  assert (fabs(curva-rho)<=0.3*(fabs(curva)+fabs(rho))*(dL+1));
-    
+  if (fabs(pos[2])<200) {
+    assert (curva*rho>=-1e-6);
+
+    assert (fabs(curva)+fabs(rho)< 1e-4 
+          ||fabs(curva-rho)<=0.5*(fabs(curva)+fabs(rho))*(dL+1));
+  } 
   fELossTrak->Add(dL);
   fHelix->Set((2*rho+curva)/3);
 
