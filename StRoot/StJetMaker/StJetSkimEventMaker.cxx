@@ -260,22 +260,6 @@ Int_t StJetSkimEventMaker::Make()
         
         StJetSkimVert skimVert;
         copyVertex(*muVert, skimVert);
-
-#if 0
-        // ATTENTION!!! Hack to get nBTOFMatch in Run 9. Should be removed once implemented in MuDst.
-	if (GetDBTime().GetYear() >= 2009) {
-	  int currentVertexIndex = StMuDst::currentVertexIndex();
-	  StMuDst::setVertexIndex(i);
-	  int nmatches = 0;
-	  TIter nextTrack(StMuDst::primaryTracks());
-	  while (StMuTrack* track = (StMuTrack*)nextTrack())
-	    if (track->tofHit())
-	      ++nmatches;
-	  StMuDst::setVertexIndex(currentVertexIndex);
-	  skimVert.setNBTOFMatch(nmatches);
-	}
-#endif
-
         mEvent->setVert(skimVert);
     }
     
