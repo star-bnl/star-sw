@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.11 2011/01/19 02:05:22 genevb Exp $
+// $Id: StHistUtil.h,v 2.12 2011/02/07 20:25:26 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.12  2011/02/07 20:25:26  genevb
+// Allow for limiting detectors
+//
 // Revision 2.11  2011/01/19 02:05:22  genevb
 // Allow plain ROOT files with hists, and individual plot generation from 1 file
 //
@@ -102,6 +105,7 @@ class StHistUtil {
   Int_t numOfPosPrefixes; // number of possible prefixes
   const Char_t** possiblePrefixes; //!
   const Char_t** possibleSuffixes; //!
+  TString m_Detectors;   // List of detectors
 
   // For reference analyses:
   Bool_t m_analMode;
@@ -155,6 +159,9 @@ class StHistUtil {
 
   virtual Int_t   GetRunYear(const Char_t *filename);
 
+  virtual void    SetDetectors(const Char_t *detectors);
+  virtual Bool_t  DetectorIn(const Char_t *detector);
+
 // Inline methods
   void SetHistsNamesDraw(const Char_t *firstName="*", const Char_t *lastName="*");
   void SetZones(Int_t columns=2, Int_t rows=3);   
@@ -178,7 +185,7 @@ class StHistUtil {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.11 2011/01/19 02:05:22 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.12 2011/02/07 20:25:26 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
