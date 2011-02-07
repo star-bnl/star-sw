@@ -334,6 +334,8 @@ public:
 
   int emcLayer2() const;
 
+  // See http://www.star.bnl.gov/public/trg/run2009/emc_recabling.pdf
+
   int  BHT() const;             // (Bit 0:3) Barrel HT bits (4 bits)
   int  EHT() const;             // (Bit 4:5) Endcap HT bits (2 bits)
   int  JP1() const;             // (Bit 6) JP1, unified over the BEMC+EEMC (1 bit)
@@ -345,6 +347,15 @@ public:
   int  AJP() const;             // (Bit 12) AJP for BEMC and EEMC but NOT the boundary (1 bit)
   int BAJP() const;             // (Bit 13) BAJP for the BEMC-only patches (1 bit)
   int EAJP() const;             // (Bit 14) EAJP for the EEMC-only patches (1 bit)
+  int  JP0() const;		// (Bit 15) JP0, unified over the BEMC+EEMC
+
+  int BHT0() const;
+  int BHT1() const;
+  int BHT2() const;
+  int BHT3() const;
+
+  int EHT0() const;
+  int EHT1() const;
 
   // Setters
   void setBarrelJetPatchTh(int i, int value);
@@ -444,6 +455,15 @@ inline int StJetSkimEvent::EJP2() const { return mEmcLayer2 >> 11 & 0x1; }
 inline int  StJetSkimEvent::AJP() const { return mEmcLayer2 >> 12 & 0x1; }
 inline int StJetSkimEvent::BAJP() const { return mEmcLayer2 >> 13 & 0x1; }
 inline int StJetSkimEvent::EAJP() const { return mEmcLayer2 >> 14 & 0x1; }
+inline int  StJetSkimEvent::JP0() const { return mEmcLayer2 >> 15 & 0x1; }
+
+inline int StJetSkimEvent::BHT0() const { return mEmcLayer2      & 1; }
+inline int StJetSkimEvent::BHT1() const { return mEmcLayer2 >> 1 & 1; }
+inline int StJetSkimEvent::BHT2() const { return mEmcLayer2 >> 2 & 1; }
+inline int StJetSkimEvent::BHT3() const { return mEmcLayer2 >> 3 & 1; }
+
+inline int StJetSkimEvent::EHT0() const { return mEmcLayer2 >> 4 & 1; }
+inline int StJetSkimEvent::EHT1() const { return mEmcLayer2 >> 5 & 1; }
 
 // Setters
 inline void StJetSkimEvent::setBarrelJetPatchTh(int i, int value) { mBarrelJetPatchTh[i] = value; }
