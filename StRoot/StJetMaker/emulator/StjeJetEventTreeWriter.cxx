@@ -27,28 +27,6 @@ class StJets;
 
 #include "StjeJetEventTreeWriter.h"
 
-static int nBTOFMatch(int vertexIndex)
-{
-  // Run 9 production did not use nBTOFMatch in vertex finder.
-  // Here we calculate it from the number of primary tracks with
-  // BTOF hits.
-
-  // Save vertex index
-  int currentVertexIndex = StMuDst::currentVertexIndex();
-
-  // Count how many primary tracks have TOF hits
-  StMuDst::setVertexIndex(vertexIndex);
-  int nmatches = 0;
-  TIter next(StMuDst::primaryTracks());
-  while (StMuTrack* track = (StMuTrack*)next())
-    if (track->tofHit()) ++nmatches;
-
-  // Restore vertex index
-  StMuDst::setVertexIndex(currentVertexIndex);
-
-  return nmatches;
-}
-
 ClassImp(StjeJetEventTreeWriter);
 
 StjeJetEventTreeWriter::StjeJetEventTreeWriter(const char* outFileName)
@@ -108,10 +86,6 @@ void StjeJetEventTreeWriter::fillJetTreeForOneVertex(StJetEvent* jetEvent, list<
 {
   StJetVertex* jetVertex = jetEvent->newVertex();
   copyVertex(fourPMaker->getVertexNodes()[iVertex].vertex,jetVertex);
-  // Run 9 production only. Remove when nBTOFMatch is properly filled in MuDst.
-  if (StMaker::GetChain()->GetDBTime().GetYear() >= 2009) {
-    jetVertex->mNBTOFMatch = nBTOFMatch(iVertex);
-  }
   for (list<StProtoJet>::iterator protojet = protoJetList->begin(); protojet != protoJetList->end(); ++protojet)
     jetVertex->addJet(fillJet(jetEvent,jetVertex,*protojet));
 }
