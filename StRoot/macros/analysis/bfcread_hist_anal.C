@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_anal.C,v 3.4 2011/01/24 18:13:48 genevb Exp $
+// $Id: bfcread_hist_anal.C,v 3.5 2011/02/07 20:29:57 genevb Exp $
 // $Log: bfcread_hist_anal.C,v $
+// Revision 3.5  2011/02/07 20:29:57  genevb
+// Allow detectors specification
+//
 // Revision 3.4  2011/01/24 18:13:48  genevb
 // Reference hist file has no TopDirTree
 //
@@ -45,6 +48,7 @@
 //         refCutsFile - name of file from where analysis cuts will be read
 //         refInFile - name of file from where reference histograms will be read
 //                   - without this file, no analysis will be done
+//         DetList - names of detectors to include (e.g. "tpc ftpc bemc")
 // 
 //
 //======================================================================
@@ -67,7 +71,8 @@ void bfcread_hist_anal(
   const Char_t *refOutFile="resultHists.root",
   const Char_t *refResultsFile="results.txt",
   const Char_t *refCutsFile=0,
-  const Char_t *refInFile=0
+  const Char_t *refInFile=0,
+  const Char_t *DetList=0
 )
 {             
 
@@ -134,6 +139,7 @@ void bfcread_hist_anal(
   // Set the default canvas style to plain (so it won't print out grey!)
   gROOT->SetStyle("Plain");
 
+  HU->SetDetectors(DetList);
   HU->SetHistsNamesDraw("*","*");
   HU->GetRunYear(MainFile);
   HU->SetOutFile(psFile);
