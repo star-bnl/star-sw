@@ -372,6 +372,15 @@ public:
   void setEmcLayer2(int value);
 
 private:
+  // returns value of bit from x at position pos
+  int btest(int x, int pos) const { return x >> pos & 1; }
+
+  // returns n bits from x starting at position pos
+  int getbits(int x, int pos, int n) const { return x >> pos & ~(~0 << n); }
+
+  // OR x with value starting at position pos
+  void setbits(int& x, int pos, int value) const { x |= value << pos; }
+
   float mFill;
   int mRunId;
   int mEventId;
@@ -444,26 +453,26 @@ inline int StJetSkimEvent::overlapJetPatchAdc(int jp) const { return mOverlapJet
 
 inline int StJetSkimEvent::emcLayer2() const { return mEmcLayer2; }
 
-inline int  StJetSkimEvent::BHT() const { return mEmcLayer2       & 0xf; }
-inline int  StJetSkimEvent::EHT() const { return mEmcLayer2 >>  4 & 0x3; }
-inline int  StJetSkimEvent::JP1() const { return mEmcLayer2 >>  6 & 0x1; }
-inline int  StJetSkimEvent::JP2() const { return mEmcLayer2 >>  7 & 0x1; }
-inline int StJetSkimEvent::BJP1() const { return mEmcLayer2 >>  8 & 0x1; }
-inline int StJetSkimEvent::BJP2() const { return mEmcLayer2 >>  9 & 0x1; }
-inline int StJetSkimEvent::EJP1() const { return mEmcLayer2 >> 10 & 0x1; }
-inline int StJetSkimEvent::EJP2() const { return mEmcLayer2 >> 11 & 0x1; }
-inline int  StJetSkimEvent::AJP() const { return mEmcLayer2 >> 12 & 0x1; }
-inline int StJetSkimEvent::BAJP() const { return mEmcLayer2 >> 13 & 0x1; }
-inline int StJetSkimEvent::EAJP() const { return mEmcLayer2 >> 14 & 0x1; }
-inline int  StJetSkimEvent::JP0() const { return mEmcLayer2 >> 15 & 0x1; }
+inline int  StJetSkimEvent::BHT() const { return getbits(mEmcLayer2,0,4); }
+inline int  StJetSkimEvent::EHT() const { return getbits(mEmcLayer2,4,2); }
+inline int  StJetSkimEvent::JP1() const { return btest(mEmcLayer2,6); }
+inline int  StJetSkimEvent::JP2() const { return btest(mEmcLayer2,7); }
+inline int StJetSkimEvent::BJP1() const { return btest(mEmcLayer2,8); }
+inline int StJetSkimEvent::BJP2() const { return btest(mEmcLayer2,9); }
+inline int StJetSkimEvent::EJP1() const { return btest(mEmcLayer2,10); }
+inline int StJetSkimEvent::EJP2() const { return btest(mEmcLayer2,11); }
+inline int  StJetSkimEvent::AJP() const { return btest(mEmcLayer2,12); }
+inline int StJetSkimEvent::BAJP() const { return btest(mEmcLayer2,13); }
+inline int StJetSkimEvent::EAJP() const { return btest(mEmcLayer2,14); }
+inline int  StJetSkimEvent::JP0() const { return btest(mEmcLayer2,15); }
 
-inline int StJetSkimEvent::BHT0() const { return mEmcLayer2      & 1; }
-inline int StJetSkimEvent::BHT1() const { return mEmcLayer2 >> 1 & 1; }
-inline int StJetSkimEvent::BHT2() const { return mEmcLayer2 >> 2 & 1; }
-inline int StJetSkimEvent::BHT3() const { return mEmcLayer2 >> 3 & 1; }
+inline int StJetSkimEvent::BHT0() const { return btest(mEmcLayer2,0); }
+inline int StJetSkimEvent::BHT1() const { return btest(mEmcLayer2,1); }
+inline int StJetSkimEvent::BHT2() const { return btest(mEmcLayer2,2); }
+inline int StJetSkimEvent::BHT3() const { return btest(mEmcLayer2,3); }
 
-inline int StJetSkimEvent::EHT0() const { return mEmcLayer2 >> 4 & 1; }
-inline int StJetSkimEvent::EHT1() const { return mEmcLayer2 >> 5 & 1; }
+inline int StJetSkimEvent::EHT0() const { return btest(mEmcLayer2,4); }
+inline int StJetSkimEvent::EHT1() const { return btest(mEmcLayer2,5); }
 
 // Setters
 inline void StJetSkimEvent::setBarrelJetPatchTh(int i, int value) { mBarrelJetPatchTh[i] = value; }
