@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.76 2011/01/28 18:47:55 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.77 2011/02/07 20:25:26 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.77  2011/02/07 20:25:26  genevb
+// Allow for limiting detectors
+//
 // Revision 2.76  2011/01/28 18:47:55  genevb
 // Better handling of dirName
 //
@@ -323,6 +326,8 @@ StHistUtil::StHistUtil(){
   m_refInFile = 0;
   m_PntrToMaker = 0;
   m_PntrToPlainFile = 0;
+
+  m_Detectors = "";
 }
 //_____________________________________________________________________________
 
@@ -1959,15 +1964,25 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
   Int_t numPrt = 0;
   Int_t ilg = 0;
   for (ilg=0;ilg<lengofList;ilg++) {
-    TString listString = sdefList[ilg];
-    if (!listString.BeginsWith("fcl")) {
-      for (Int_t k=0; k<numOfPosPrefixes; k++) {
-        ((listString = type) += possiblePrefixes[k]) += sdefList[ilg];
-        numPrt = AddToPrintList(listString.Data());
+    TString ilgString = sdefList[ilg];
+    Bool_t addIt = kTRUE;
+    if (ilgString.BeginsWith(":")) {
+      Ssiz_t endDetSpec = ilgString.Index(":",1) + 1;
+      TString detSpec = ilgString(0,endDetSpec);
+      addIt = DetectorIn(detSpec.Data());
+      if (addIt) ilgString.Remove(0,endDetSpec);
+    }
+    if (addIt) {
+      if (!ilgString.BeginsWith("fcl")) {
+        for (Int_t k=0; k<numOfPosPrefixes; k++) {
+          TString listString = type;
+          (listString += possiblePrefixes[k]) += ilgString;
+          numPrt = AddToPrintList(listString.Data());
+        }
+      } else numPrt = AddToPrintList(ilgString.Data());
+      if (Debug()) {
+        LOG_INFO <<  " !!! adding histogram " << ilgString << " to print list "  << endm ;
       }
-    } else numPrt = AddToPrintList(listString.Data());
-    if (Debug()) {
-      LOG_INFO <<  " !!! adding histogram " << sdefList[ilg] << " to print list "  << endm ;
     }
   }
   
@@ -2282,6 +2297,66 @@ void StHistUtil::SetRefAnalysis(const Char_t* refOutFile, const Char_t* refResul
   strcpy(m_refResultsFile,refResultsFile);
   // refOutFile will not be used if already writing hists to a ROOT file
   strcpy(m_refOutFile,refOutFile);
+}
+
+//_____________________________________________________________________________
+
+void StHistUtil::SetDetectors(const Char_t *detectors) {
+  // entering a null pointer uses all detector hists
+  // entering a zero length string uses no detector hists
+  if (detectors) {
+    m_Detectors = detectors;
+    // use colons as delimiters
+    m_Detectors.ReplaceAll(" ",":");
+    m_Detectors.ReplaceAll(",",":");
+    m_Detectors.Prepend(":");
+    m_Detectors.Append(":");
+    while (m_Detectors.Index("::") >= 0) m_Detectors.ReplaceAll("::",":");
+    LOG_INFO << "StHistUtil::SetDetectors(): using detectors " << m_Detectors << endm;
+  } else {
+    m_Detectors = "";
+    LOG_INFO << "StHistUtil::SetDetectors(): using all detectors" << endm;
+  }
+}
+
+//_____________________________________________________________________________
+
+Bool_t StHistUtil::DetectorIn(const Char_t *detector) {
+  // detector should be passed with delimeters, e.g. ":tpc:"
+  // semicolons should separate multiple possible detectors ("or")
+  // commas should separate multiple required detectors ("and")
+  // Example ":tpc,svt;tpx,svt:" is either tpc+svt or tpx+svt
+  Bool_t isIn = kFALSE;
+  if (m_Detectors.Length()) {
+    Ssiz_t idx =  0;
+    TString detOpts = detector;
+    TString curDetSet = "";
+    TString curDet = "";
+    while (idx < detOpts.Length() && ! isIn) {
+      Ssiz_t D1 = detOpts.Index(";",idx);
+      Ssiz_t setLength = (D1 < idx ? detOpts.Length() : D1+1) - idx;
+      curDetSet = detOpts(idx,setLength);
+      Ssiz_t idx2 = 0;
+      isIn = kTRUE;
+      while (idx2 < curDetSet.Length() && isIn) {
+        Ssiz_t D2 = curDetSet.Index(",",idx2);
+        Ssiz_t detLength = (D2 < idx2 ? curDetSet.Length() : D2+1) - idx2;
+        curDet = curDetSet(idx2,detLength);
+        curDet.ReplaceAll(";",":");
+        curDet.ReplaceAll(",",":");
+        curDet.Prepend(":");
+        curDet.Append(":");
+        while (curDet.Index("::") >= 0) curDet.ReplaceAll("::",":");
+        if (m_Detectors.Index(curDet.Data()) < 0) isIn = kFALSE;
+        else idx2 += detLength;
+      }
+      idx += setLength;
+    }
+  } else {
+    // set to use all detectors
+    isIn = kTRUE;
+  }
+  return isIn;
 }
 
 //_____________________________________________________________________________
