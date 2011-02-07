@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.30 2006/08/15 21:42:42 jeromel Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.31 2011/02/07 20:29:57 genevb Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.31  2011/02/07 20:29:57  genevb
+// Allow detectors specification
+//
 // Revision 1.30  2006/08/15 21:42:42  jeromel
 // Fix rhic -> rhic.bnl.gov
 //
@@ -116,6 +119,7 @@
 //         PrintList - name of subset histogram list that you want printed
 //                   - these are defined in StHistUtil, method SetDefaultPrintList
 //                   - default = "", prints all histograms in directory MakerHistDir
+//         DetList - names of detectors to include (e.g. "tpc ftpc bemc")
 // 
 //
 // standard Maker names in bfc 
@@ -146,7 +150,8 @@ void bfcread_hist_to_ps(
   const Char_t *PageTitle="",
   const Char_t *PrintList="",
   const Int_t ZoneH=2,
-  const Int_t ZoneV=3
+  const Int_t ZoneV=3,
+  const Char_t *DetList=0
 )
 {             
 
@@ -210,6 +215,7 @@ void bfcread_hist_to_ps(
     gROOT->SetStyle("Plain");
 //    gStyle->SetOptStat(111111);
 
+    HU->SetDetectors(DetList);
     HU->SetHistsNamesDraw("*","*");
     HU->GetRunYear(MainFile);
     HU->SetOutFile(psFile);
