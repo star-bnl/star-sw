@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.22 2010/11/29 15:24:34 didenko Exp $
+// $Id: bfcMixer_Tpx.C,v 1.23 2011/02/08 20:07:02 hmasui Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -42,8 +42,12 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   TString prodP10ihAuAu11("DbV20100821 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
   TString prodP10ihAuAu7("DbV20100821 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
 
+  // Run10 Au+Au 200 GeV chain
+  TString prodP10ikAuAu200("DbV20101213 P2010a pmdReco btof BEmcChkStat Corr4 OSpaceZ2 OGridLeak3D, VFMCE TpxClu -VFMinuit -hitfilt");
+
   TString geomP08ic("ry2008");
   TString geomP10ih("ry2010");
+  TString geomP10ik(geomP10ih); // Same chain as P10ih
   TString chain1Opt("in,magF,tpcDb,NoDefault,TpxRaw,-ittf,NoOutput");
   TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,TpcRS,-ittf,-tpc_daq,nodefault");
 //  TString chain2Opt("NoInput,PrepEmbed,gen_T,geomT,sim_T,trs,-ittf,-tpc_daq,nodefault");
@@ -60,6 +64,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   else if (prodName == "P10ihAuAu39")  { chain3Opt = prodP10ihAuAu39;   chain2Opt += geomP10ih; }
   else if (prodName == "P10ihAuAu11")  { chain3Opt = prodP10ihAuAu11;   chain2Opt += geomP10ih; }
   else if (prodName == "P10ihAuAu7")   { chain3Opt = prodP10ihAuAu7;    chain2Opt += geomP10ih; }
+  else if (prodName == "P10ikAuAu200") { chain3Opt = prodP10ikAuAu200;  chain2Opt += geomP10ik; }
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
@@ -77,6 +82,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   else if (prodName == "P10ihAuAu39")  { chain3Opt += geomP10ih; }
   else if (prodName == "P10ihAuAu11")  { chain3Opt += geomP10ih; }
   else if (prodName == "P10ihAuAu7")   { chain3Opt += geomP10ih; }
+  else if (prodName == "P10ikAuAu200") { chain3Opt += geomP10ik; }
   else {
     cout << "Choice prodName " << prodName << " does not correspond to known chain. Processing impossible. " << endl;
     return;
@@ -196,7 +202,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   embMk->SetPartOpt(  pid,mult);
 
   // Default is no event selections
-  embMk->SetSkipMode(kFALSE);
+  embMk->SetSkipMode(kTRUE);
 
   // Make trigger and z-vertex cuts (only if SkipMode is true)
   // Trigger cut
