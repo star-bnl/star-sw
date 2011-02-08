@@ -896,13 +896,14 @@ AvalancheMicroscopic::TransportElectron(
           // Calculate the angle between E and B vector.
           cbtheta = (ex * bx + ey * by + ez * bz) / (emag * bmag);
           sbtheta = sqrt(1. - cbtheta * cbtheta);
-          // Calculate the electric field in the rotated system.
-          ex = emag * cbtheta; ey = 0.; ez = emag * sbtheta / wb;
           
           // Rotate the direction vector into the local coordinate system.
           ComputeRotationMatrix(bx, by, bz, bmag, ex, ey, ez);
           RotateGlobal2Local(kx, ky, kz);
  
+          // Calculate the electric field in the rotated system.
+          ex = emag * cbtheta; ey = 0.; ez = emag * sbtheta / wb;
+
           // Calculate the velocity vector in the local frame.
           const double v = c1 * sqrt(energy);
           vx = v * kx; vy = v * ky; vz = v * kz;

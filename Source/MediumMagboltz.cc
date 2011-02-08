@@ -650,7 +650,7 @@ MediumMagboltz::GetDeexcitationProduct(const int i, double& t, double& s,
 
 bool
 MediumMagboltz::GetIonisationProduct(const int i, 
-                                       int& type, double& energy) {
+                                     int& type, double& energy) {
 
   if (i < 0 || i >= nIonisationProducts) {
     std::cerr << className << "::GetIonisationProduct:\n";
@@ -1255,7 +1255,7 @@ MediumMagboltz::Mixer() {
 
   // Fill the electron energy array, reset the collision rates.
   for (int i = nEnergySteps; i--;) {
-    cfTot[i] = 0.; 
+    cfTot[i] = 0.;
     scatModel[i] = 0; 
     for (int j = nMaxLevels; j--;) {
       cf[i][j] = 0.;
