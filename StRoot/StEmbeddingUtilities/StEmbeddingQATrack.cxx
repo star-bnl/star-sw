@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.cxx,v 1.14 2011/01/12 21:36:15 hmasui Exp $
+ * $Id: StEmbeddingQATrack.cxx,v 1.15 2011/02/09 20:56:07 hmasui Exp $
  * $Log: StEmbeddingQATrack.cxx,v $
+ * Revision 1.15  2011/02/09 20:56:07  hmasui
+ * Fix initialization of particle id's for real data
+ *
  * Revision 1.14  2011/01/12 21:36:15  hmasui
  * Add nHitsFit/nHitsPoss cut
  *
@@ -124,7 +127,7 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StContamPair* track)
 
 //____________________________________________________________________________________________________
 StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StMuTrack& track, const Short_t geantid)
-  : mNCommonHit(-10), mParentParentGeantId(-10), mParentGeantId(-10), mGeantId(geantid), mGeantProcess(-10),
+  : mNCommonHit(0), mParentParentGeantId(0), mParentGeantId(0), mGeantId(geantid), mGeantProcess(0),
   mNHit(track.nHitsFit(kTpcId)), mNHitPoss(track.nHitsPoss(kTpcId)), mCharge(track.charge()),
   mVectorMc(-9999., -9999., -9999., -9999.), // No MC momentum for real tracks
   mVectorRc(track.p().x(), track.p().y(), track.p().z(), 
