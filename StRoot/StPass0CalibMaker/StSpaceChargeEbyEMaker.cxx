@@ -444,10 +444,11 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       X[34] = gapZdivslopewest;
       X[35] = s0*X[35] + s1*runinfo->spaceCharge();
       X[36] = s0*X[36] + s1*((float) (runinfo->spaceChargeCorrectionMode()));
-      X[37] = s0*X[37] + s1*St_trigDetSumsC::Nc(runinfo->zdcCoincidenceRate(),
-                                 runinfo->zdcEastRate(),runinfo->zdcWestRate());
-      X[38] = s0*X[38] + s1*St_trigDetSumsC::Nc(runinfo->bbcCoincidenceRate(),
-                                 runinfo->bbcEastRate(),runinfo->bbcWestRate());
+      //X[37] = s0*X[37] + s1*St_trigDetSumsC::Nc(runinfo->zdcCoincidenceRate(),
+      //                           runinfo->zdcEastRate(),runinfo->zdcWestRate());
+      //X[38] = s0*X[38] + s1*St_trigDetSumsC::Nc(runinfo->bbcCoincidenceRate(),
+      //                           runinfo->bbcEastRate(),runinfo->bbcWestRate());
+      X[37] = 0; X[38] = 0;
 	      
       // In calib mode, only fill when doReset (we found an sc)
       if (doReset || !Calibmode) ntup->Fill(X);
@@ -1062,8 +1063,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.34 2011/02/09 21:11:36 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.35 2011/02/09 21:56:50 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.35  2011/02/09 21:56:50  genevb
+// Version which can work in SL10k
+//
 // Revision 1.34  2011/02/09 21:11:36  genevb
 // Parameters need to be available in normal event-by-event mode too
 //
