@@ -810,6 +810,21 @@ void StSpaceChargeEbyEMaker::SetTableName() {
   gMessMgr->Info() << "first event date = " << date << endm;
   gMessMgr->Info() << "first event time = " << time << endm;
   tabname = Form("./StarDb/Calibrations/rich/spaceChargeCorR2.%08d.%06d.C",date,time);
+
+  // Set Prepass default parameters based on data time
+  if (date < 20071000) {
+    setVtxEmcMatch(0);
+    setReqEmcMatch(kFALSE);
+    setVtxTofMatch(0);
+    setReqTofMatch(kFALSE);
+    setVtxMinTrks(10);
+  } else if (date < 20090000) {
+    setVtxEmcMatch(1);
+    setReqEmcMatch(kFALSE);
+    setVtxTofMatch(0);
+    setReqTofMatch(kFALSE);
+    setVtxMinTrks(5);
+  }
 }
 //_____________________________________________________________________________
 void StSpaceChargeEbyEMaker::WriteTableToFile(){
@@ -1046,8 +1061,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.32 2010/11/17 17:23:33 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.33 2011/02/09 16:24:18 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.33  2011/02/09 16:24:18  genevb
+// Allow for historical operating parameters in Prepass mode
+//
 // Revision 1.32  2010/11/17 17:23:33  genevb
 // Include corrected coincidence rates in ntuple
 //
