@@ -41,8 +41,8 @@ TOFcheckHistogramGroup::TOFcheckHistogramGroup() {
   TOF_Error2=0;
   TOF_Error3=0;
   TOF_EventCount=0;
-  //TOF_Tray_hits1=0;
-  //TOF_Tray_hits2=0;
+  TOF_Tray_hits1=0;
+  TOF_Tray_hits2=0;
 }
 
 TOFcheckHistogramGroup::TOFcheckHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector)
@@ -54,8 +54,8 @@ TOFcheckHistogramGroup::TOFcheckHistogramGroup(const char* group, const char* su
 
   TOF_EventCount=new TH1F("TOF_EventCount","TOF_EventCount",2,0,2);
 
-  //TOF_Tray_hits1=new TH1F("TOF_Tray_hits1","Hits in Trays",240,-0.5,119.5);
-  //TOF_Tray_hits2=new TH1F("TOF_Tray_hits2","Hits in Trays",240,-0.5,119.5);
+  TOF_Tray_hits1=new TH1F("TOF_Tray_hits1","Hits by TrayHalf",246,-0.5,122.5);
+  TOF_Tray_hits2=new TH1F("TOF_Tray_hits2","Hits by TrayHalf",246,-0.5,122.5);
 
   TOF_Error1->SetXTitle("Tray #");
   TOF_Error2->SetXTitle("THUB upvpd");
@@ -71,8 +71,8 @@ TOFcheckHistogramGroup::~TOFcheckHistogramGroup() {
   delete TOF_Error2;
   delete TOF_Error3;
   delete TOF_EventCount;
-  //delete TOF_Tray_hits1;
-  //delete TOF_Tray_hits2;
+  delete TOF_Tray_hits1;
+  delete TOF_Tray_hits2;
 
 }
 
@@ -84,8 +84,8 @@ void TOFcheckHistogramGroup::reset() {
   TOF_EventCount->Reset();
   ReadTrayList();
   ReadValidBunchidPhase();
-  //TOF_Tray_hits1->Reset();
-  //TOF_Tray_hits2->Reset();
+  TOF_Tray_hits1->Reset();
+  TOF_Tray_hits2->Reset();
 }
 
 
@@ -93,7 +93,7 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
 
   TLatex label;
   //label.SetTextAlign(23);  // center, top
-  label.SetTextSize(0.056);
+  label.SetTextSize(0.08);
   label.SetTextColor(45);
 
   TLine  line;
@@ -117,7 +117,7 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
   char tmpchr[200];
   cc->cd(); cc->SetFillColor(0);
   cc->Clear();
-  cc->Divide(1, 2);
+  cc->Divide(1, 3);
   cc->cd(1);
   gPad->SetGridx(1);
   gPad->SetGridy(0);
@@ -169,11 +169,11 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
     label.DrawLatex( 0.7, 0.88*hmax, tmpchr);
   }
   TLatex labela;
-  labela.SetTextSize(0.035);
+  labela.SetTextSize(0.055);
   labela.SetTextAlign(23);  // center, top
   labela.SetTextAngle(90);
   float txty1=0.11*hmax;
-  float txty2=0.22*hmax;
+  float txty2=0.11*hmax;  	//0.22*hmax;
   labela.DrawLatex(0.25,txty1," THUB1-NW0");
   labela.DrawLatex(0.75,txty2," THUB1-NW1");
   labela.DrawLatex(1.25,txty1," THUB2-NE0");
@@ -182,10 +182,22 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
   labela.DrawLatex(2.75,txty2," THUB3-SW1");
   labela.DrawLatex(3.25,txty1," THUB4-SE0");
   labela.DrawLatex(3.75,txty2," THUB4-SE1");
-  labela.DrawLatex(4.25,txty1," upvpd-west0");
-  labela.DrawLatex(4.75,txty2," upvpd-west1");
-  labela.DrawLatex(5.25,txty1," upvpd-east0");
-  labela.DrawLatex(5.75,txty2," upvpd-east1");
+  labela.DrawLatex(4.25,txty1," upvpd-W0");
+  labela.DrawLatex(4.75,txty2," upvpd-W1");
+  labela.DrawLatex(5.25,txty1," upvpd-E0");
+  labela.DrawLatex(5.75,txty2," upvpd-E1");
+
+  cc->cd(3);
+  gPad->SetGridx(1);
+  gPad->SetGridy(1);
+  gPad->SetLogy(1);
+  TOF_Tray_hits1->GetYaxis()->SetLabelSize(0.07);
+  TOF_Tray_hits1->GetXaxis()->SetLabelSize(0.055);
+  TOF_Tray_hits1->SetFillColor(5);
+  TOF_Tray_hits2->SetFillColor(7);
+  TOF_Tray_hits1->SetMinimum(0.5);
+  TOF_Tray_hits1->Draw();
+  TOF_Tray_hits2->Draw("same");
 
   cc->Update();
 
@@ -222,8 +234,8 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
       if(packetid == 0xD) continue;  
       if(packetid == 0xE) continue;  
       if(packetid == 0xA) {  // header trigger data flag
-	// do nothing at this moment.
-	continue;
+		// do nothing at this moment.
+		continue;
       }
       //
       // geographical data words for tray number.
@@ -234,7 +246,7 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
       }
       //cout<<"tray="<<trayid<<" halftray="<<halftrayid<<endl;
       if(trayid <1 || trayid >122) continue;
-      if(trayid == 123) continue;  // no such tray number.
+      if(trayid >= 123) continue;  // no such tray number.
 
       // bunch id 
       if(packetid == 0x2) {
@@ -246,11 +258,10 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
 
       //if( (dataword&0xF0000000)>>28 == 0x6) {continue;}
       //
-      //int edgeid =packetid;
-      //if((edgeid !=4) && (edgeid!=5)) continue;
-      //if(trayid<121) {
-      //if(halftrayid==0) TOF_Tray_hits1->Fill(trayid-1);
-      //if(halftrayid==1) TOF_Tray_hits2->Fill(trayid-0.5);
+      int edgeid =packetid;
+      if((edgeid !=4) && (edgeid!=5)) continue;
+      if(halftrayid==0) TOF_Tray_hits1->Fill(trayid-1.0);
+      if(halftrayid==1) TOF_Tray_hits2->Fill(trayid-0.5);
       
     }  // end loop nword
   }  // end loop fiber
