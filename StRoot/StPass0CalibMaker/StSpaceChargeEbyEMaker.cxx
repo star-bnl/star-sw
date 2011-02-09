@@ -154,8 +154,9 @@ Int_t StSpaceChargeEbyEMaker::Init() {
 //_____________________________________________________________________________
 Int_t StSpaceChargeEbyEMaker::Make() {
 
-  // On very first event
-  if (PrePassmode && (tabname.Length() == 0)) SetTableName();
+  // On very first event, determine first event timestamp and
+  //   set default parameters, unless in Calibmode
+  if ((!Calibmode) && (tabname.Length() == 0)) SetTableName();
   
   // Get instance of StMagUtilities
   m_ExB = StMagUtilities::Instance();
@@ -1061,8 +1062,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.33 2011/02/09 16:24:18 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.34 2011/02/09 21:11:36 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.34  2011/02/09 21:11:36  genevb
+// Parameters need to be available in normal event-by-event mode too
+//
 // Revision 1.33  2011/02/09 16:24:18  genevb
 // Allow for historical operating parameters in Prepass mode
 //
