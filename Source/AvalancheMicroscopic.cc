@@ -902,7 +902,7 @@ AvalancheMicroscopic::TransportElectron(
           RotateGlobal2Local(kx, ky, kz);
  
           // Calculate the electric field in the rotated system.
-          ex = emag * cbtheta; ey = 0.; ez = emag * sbtheta / wb;
+          RotateGlobal2Local(ex, ey, ez);
 
           // Calculate the velocity vector in the local frame.
           const double v = c1 * sqrt(energy);
@@ -910,8 +910,8 @@ AvalancheMicroscopic::TransportElectron(
           
           a1 = vx * ex;
           a2 = c2 * ex * ex;
-          a3 = ez * (2 * c2 * ez - vy);
-          a4 = ez * vz;
+          a3 = ez / bmag - vy;
+          a4 = (ez / wb); 
         } else if (useBandStructure) {
           energy = medium->GetElectronEnergy(kx, ky, kz, vx, vy, vz, band);
         } else {
@@ -938,7 +938,8 @@ AvalancheMicroscopic::TransportElectron(
           if (useBfield && bOk) {
             cwt = cos(wb * dt); swt = sin(wb * dt);
             newEnergy = std::max(energy + (a1 + a2 * dt) * dt + 
-                                 a3 * (1. - cwt) + a4 * swt, Small);
+                                 a4 * (a3 * (1. - cwt) + vz * swt), 
+                                 Small);
           } else if (useBandStructure) {
             newEnergy = std::max(medium->GetElectronEnergy(
                                               kx + ex * dt * SpeedOfLight,
@@ -983,22 +984,19 @@ AvalancheMicroscopic::TransportElectron(
         // and calculate the proposed new position.
         if (useBfield && bOk) {
           // Calculate the new velocity.
-          a1 = 2. * c2 * ez;
-          a2 = (vy - a1);
-          a3 = vx;
-          a4 = vz;
-          vx += 2. * c2 * ex * dt;
-          vy = a2 * cwt + vz * swt + a1;
-          vz = vz * cwt - a2 * swt;
-          // Rotate back to the lab frame.
-          RotateLocal2Global(vx, vy, vz);
-          const double v = sqrt(vx * vx + vy * vy + vz * vz);
-          newKx = vx / v; newKy = vy / v; newKz = vz / v;
-          
+          newVx = vx + 2. * c2 * ex * dt;
+          newVy = vz * swt - a3 * cwt + ez / bmag;
+          newVz = vz * cwt + a3 * swt;
+          // Normalise and rotate back to the lab frame.
+          const double v = sqrt(newVx * newVx + newVy * newVy + 
+                                newVz * newVz);
+          newKx = newVx / v; newKy = newVy / v; newKz = newVz / v; 
+          RotateLocal2Global(newKx, newKy, newKz);
           // Calculate the step in coordinate space.
-          vx = a3 + c2 * ex * dt;
-          vy = (a2 * swt + a4 * (1. - cwt)) / (wb * dt) + a1;
-          vz = (a4 * swt - a2 * (1. - cwt)) / (wb * dt);
+          vx += c2 * ex * dt;
+          ky = (vz * (1. - cwt) - a3 * swt) / (wb * dt) + ez / bmag;
+          kz = (vz * swt + a3 * (1. - cwt)) / (wb * dt); 
+          vy = ky; vz = kz;
           // Rotate back to the lab frame.
           RotateLocal2Global(vx, vy, vz);
         } else if (useBandStructure) {
@@ -1829,21 +1827,23 @@ AvalancheMicroscopic::ComputeRotationMatrix(
   // Calculate the first rotation matrix (to align B with x axis).
   const double bt = by * by + bz * bz;
   if (bt < Small) {
+    // B field is already along axis.
     rb11 = rb22 = rb33 = 1.;
     rb12 = rb13 = rb21 = rb23 = rb31 = rb32 = 0.;
   } else {
-    rb11 = bx / bmag; 
-    rb22 = rb11 + (1. - rb11) * bz * bz / bt;
-    rb33 = rb11 + (1. - rb11) * by * by / bt;
+    rb11 = bx / bmag;
     rb12 = by / bmag; rb21 = -rb12;
     rb13 = bz / bmag; rb31 = -rb13;
-    rb23 = rb32 = (1. - rb11) * by * bz / bt;
+    rb22 = (rb11 * by * by + bz * bz) / bt;
+    rb33 = (rb11 * bz * bz + by * by) / bt;
+    rb23 = rb32 = (rb11 - 1.) * by * bz / bt;
   }
   // Calculate the second rotation matrix (rotation around x axis).
   const double fy = rb21 * ex + rb22 * ey + rb23 * ez;
   const double fz = rb31 * ex + rb32 * ey + rb33 * ez;
   const double ft = sqrt(fy * fy + fz * fz);
   if (ft < Small) {
+    // E and B field are parallel.
     rx22 = rx33 = 1.;
     rx23 = rx32 = 0.;
   } else {
@@ -1870,12 +1870,12 @@ void
 AvalancheMicroscopic::RotateLocal2Global(double& dx, double& dy, double& dz) {
 
   const double dx1 = dx;
-  const double dy1 =  rx22 * dy - rx23 * dz;
-  const double dz1 = -rx23 * dy + rx33 * dz;
+  const double dy1 = rx22 * dy + rx32 * dz;
+  const double dz1 = rx23 * dy + rx33 * dz;
   
-  dx =  rb11 * dx1 - rb12 * dy1 - rb13 * dz1;
-  dy = -rb21 * dx1 + rb22 * dy1 + rb23 * dz1;
-  dz = -rb31 * dx1 + rb32 * dy1 + rb33 * dz1;
+  dx = rb11 * dx1 + rb21 * dy1 + rb31 * dz1;
+  dy = rb12 * dx1 + rb22 * dy1 + rb32 * dz1;
+  dz = rb13 * dx1 + rb23 * dy1 + rb33 * dz1;
 
 }
 

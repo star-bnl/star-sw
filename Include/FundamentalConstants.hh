@@ -43,7 +43,7 @@ static const double ClassicalElectronRadius = 2.8179402894e-13;
 // Electron charge magnitude [C]
 static const double ElementaryCharge = 1.602176487e-19;
 // Electron cyclotron frequency / field [rad / (ns * 10-5 T)]
-static const double OmegaCyclotronOverB = 1.578820150e-3;
+static const double OmegaCyclotronOverB = 1.758820150e-3;
 // Boltzmann constant [eV / K]
 static const double BoltzmannConstant = 8.617343e-5;
 // Permittivity of free space [F / cm]
