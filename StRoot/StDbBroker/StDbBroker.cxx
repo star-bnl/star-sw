@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.56 2009/11/10 20:24:00 fisyak Exp $
+ * $Id: StDbBroker.cxx,v 1.57 2011/02/10 17:31:01 dmitry Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.57  2011/02/10 17:31:01  dmitry
+ * added an option to blacklist domains
+ *
  * Revision 1.56  2009/11/10 20:24:00  fisyak
  * Use SafeDelete
  *
@@ -429,6 +432,11 @@ unsigned int numElements = mdescriptor->NumberOfColumns();
  }
 
 return descriptor;
+}
+
+void 
+StDbBroker::addBlacklistedDomain(const char* domainName) {
+	mgr->blacklistDbDomain(domainName);
 }
 
 //_____________________________________________________________________________

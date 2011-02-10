@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.35 2009/12/04 16:06:52 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.36 2011/02/10 17:30:42 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.36  2011/02/10 17:30:42  dmitry
+ * added an option to blacklist domains
+ *
  * Revision 1.35  2009/12/04 16:06:52  dmitry
  * StDbLib in standalone mode cannot use SafeDelete - proper wrapper added
  *
@@ -270,6 +273,7 @@
 #endif
 
 #include <string.h>
+#include <algorithm>
 
 #ifdef HPUX
 #define freeze(i) str()
@@ -1002,8 +1006,13 @@ StDbType StDbManagerImpl::getDbType(const char* typeName){
 
 StDbDomain StDbManagerImpl::getDbDomain(const char* domainName){
 #define __METHOD__ "getDbDomain(domainName)"
-
   StDbDomain retType=dbDomainUnknown;
+  std::string domain(domainName);
+  std::transform(domain.begin(), domain.end(), domain.begin(), ::tolower);
+  if (mBlacklist.find(domain) != mBlacklist.end()) {
+	return retType;
+  }
+
   bool found=false;
   for(dbDomains::iterator itr=mDomains.begin();
       itr != mDomains.end(); ++itr){
@@ -1019,6 +1028,14 @@ StDbDomain StDbManagerImpl::getDbDomain(const char* domainName){
 return newDbDomain(domainName);
 #undef __METHOD__
 }     
+
+void StDbManagerImpl::blacklistDbDomain(const char* domainName) {
+	std::string domain(domainName);
+	std::transform(domain.begin(), domain.end(), domain.begin(), ::tolower);
+	if (mBlacklist.find(domain) == mBlacklist.end()) {
+		mBlacklist.insert(domain);
+	}
+}
 
 ////////////////////////////////////////////////////////////////
 char* StDbManagerImpl::printDbName(StDbType type, StDbDomain domain){
