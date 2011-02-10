@@ -28,6 +28,7 @@
 #include "TH3.h"
 #include "TF1.h"
 #include "TNtuple.h"
+#include "TPad.h"
 
 // Histogram ranges:
 const int   SCN = 80;
@@ -64,16 +65,17 @@ ClassImp(StSpaceChargeEbyEMaker)
   
 //_____________________________________________________________________________
 StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
-    event(0), Calibmode(kFALSE),
-    PrePassmode(kFALSE), PrePassdone(kFALSE), QAmode(kFALSE), doNtuple(kFALSE),
-    doReset(kTRUE), doGaps(kFALSE), inGapRow(0),
+    event(0),
+    Calibmode(kFALSE), PrePassmode(kFALSE), PrePassdone(kFALSE), QAmode(kFALSE),
+    doNtuple(kFALSE), doReset(kTRUE), doGaps(kFALSE),
+    inGapRow(0),
     vtxEmcMatch(1), vtxTofMatch(0), vtxMinTrks(5),
     minTpcHits(25), reqEmcMatch(kFALSE), reqTofMatch(kTRUE),
     m_ExB(0),
     scehist(0), timehist(0), myhist(0), myhistN(0), myhistP(0),
     myhistE(0), myhistW(0), dczhist(0), dcehist(0), dcphist(0),
     dcahist(0), dcahistN(0), dcahistP(0), dcahistE(0), dcahistW(0),
-    gapZhist(0), gapZhistneg(0), gapZhistpos(0), ntup(0) {
+    gapZhist(0), gapZhistneg(0), gapZhistpos(0), cutshist(0), ntup(0) {
 
   HN=96;  // max events used, cannot exceed 96 used in header file
   MINTRACKS=1500;
@@ -154,6 +156,8 @@ Int_t StSpaceChargeEbyEMaker::Init() {
 //_____________________________________________________________________________
 Int_t StSpaceChargeEbyEMaker::Make() {
 
+  if (QAmode) cutshist->Fill(0);
+
   // On very first event, determine first event timestamp and
   //   set default parameters, unless in Calibmode
   if ((!Calibmode) && (tabname.Length() == 0)) SetTableName();
@@ -173,6 +177,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     gMessMgr->Warning("StSpaceChargeEbyEMaker: no StEvent; skipping event.");
     return kStWarn;
   }
+  if (QAmode) cutshist->Fill(1);
   // Get runinfo, determine if the magnetic field is nonzero 
   // EbyE maker not currently able to handle zero B field
   runinfo = event->runInfo();
@@ -186,6 +191,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
         << " in the actual database)" << endm;
     return kStFatal;
   }
+  if (QAmode) cutshist->Fill(2);
 
   // Select the highest ranked vertex + some quality cuts
   StPrimaryVertex* pvtx = event->primaryVertex();
@@ -193,6 +199,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       (pvtx->numberOfDaughters()  < vtxMinTrks)   ||
       (pvtx->numMatchesWithBEMC() < vtxEmcMatch)  ||
       (pvtx->numMatchesWithBTOF() < vtxTofMatch)) return kStOk;
+  if (QAmode) cutshist->Fill(3);
   StVertexFinderId vid = pvtx->vertexFinderId();
   float min_rank = -1e6;
   switch (vid) {
@@ -202,10 +209,12 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     default                   : break;
   }
   if (pvtx->ranking() < min_rank) return kStOk;
+  if (QAmode) cutshist->Fill(4);
   
   StSPtrVecTrackNode& theNodes = event->trackNodes();
   unsigned int nnodes = theNodes.size();
   if (!nnodes) return kStOk;
+  if (QAmode) cutshist->Fill(5);
 
   // Store and setup event-wise info
   evt++;
@@ -264,27 +273,34 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 
   for (i=0; i<nnodes; i++) {
       for (j=0; j<theNodes[i]->entries(global); j++) {
+        if (QAmode) cutshist->Fill(16);
         StTrack* tri = theNodes[i]->track(global,j);
         if (!tri) continue;
+        if (QAmode) cutshist->Fill(17);
 
           const StTrackTopologyMap& map = tri->topologyMap();
           //if (! map.trackTpcOnly()) continue;
           if (! map.hasHitInDetector(kTpcId)) continue;
+          if (QAmode) cutshist->Fill(18);
           // Multiple silicon hits destroy sDCA <-> SpaceCharge correlation,
           // and single hit in SVT is unreliable. Only good config is NO SVT!
           if (map.hasHitInDetector(kSvtId)) continue;
+          if (QAmode) cutshist->Fill(19);
           if (map.numberOfHits(kTpcId) < minTpcHits) continue;
+          if (QAmode) cutshist->Fill(20);
 
-          if (reqEmcMatch) {} // to be defined
           if (reqTofMatch) {
 
             const StPtrVecTrackPidTraits& theTofPidTraits = tri->pidTraits(kTofId);
             if (!theTofPidTraits.size()) continue;
+            if (QAmode) cutshist->Fill(21);
 
             StTrackPidTraits* theSelectedTrait = theTofPidTraits[theTofPidTraits.size()-1];
             if (!theSelectedTrait) continue;
+            if (QAmode) cutshist->Fill(22);
             StBTofPidTraits *pidTof = dynamic_cast<StBTofPidTraits *>(theSelectedTrait);
             if (!pidTof) continue;
+            if (QAmode) cutshist->Fill(23);
 
             int Mflag=pidTof->matchFlag();
             //  0: no matching
@@ -292,18 +308,25 @@ Int_t StSpaceChargeEbyEMaker::Make() {
             //  2: 1-2 matching, pick up the one with higher ToT vaule (<25ns) 
             //  3: 1-2 matching, pick up the one with closest projection position along local y
             if (Mflag <= 0) continue;
+            if (QAmode) cutshist->Fill(24);
 
           }
+          if (QAmode) cutshist->Fill(25);
+          if (reqEmcMatch) {} // to be defined
+          if (QAmode) cutshist->Fill(26);
 
           StTrackGeometry* triGeom = tri->geometry();
 
           StThreeVectorF xvec = triGeom->origin();
           if (!(xvec.x() || xvec.y() || xvec.z())) continue;
+          if (QAmode) cutshist->Fill(27);
           StThreeVectorF pvec = triGeom->momentum();
           if (!(pvec.x() || pvec.y())) continue;
+          if (QAmode) cutshist->Fill(28);
 
           float oldPt = pvec.perp();
           if (oldPt < 0.0001) continue;
+          if (QAmode) cutshist->Fill(29);
 
 	  int e_or_w = 0; // east is -1, west is +1
 	  if (pvec.z() * xvec.z() > 0) e_or_w = ( (xvec.z() > 0) ? 1 : -1 );
@@ -324,6 +347,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
             DCA2 = hh.geometricSignedDistance(ooo.x(),ooo.y());
           }
           if (DCA3 > 4) continue; // cut out pileup tracks!
+          if (QAmode) cutshist->Fill(30);
           Int_t ch = (int) triGeom->charge();
 
           Int_t PCT = 0;
@@ -355,11 +379,13 @@ Int_t StSpaceChargeEbyEMaker::Make() {
             }
           }
           if (PCT) continue; // Track has post-crossing hits
+          if (QAmode) cutshist->Fill(31);
           
           Float_t space = 10000.;
           if (!(m_ExB->PredictSpaceChargeDistortion(ch,oldPt,ooo.z(),
 	  //   eta,DCA2,map.data(0),map.data(1),space))) continue;
 	     eta,DCA2,map.data(0),map.data(1),rerrors,rphierrors,space))) continue;
+          if (QAmode) cutshist->Fill(32);
 
 	  space += lastsc;  // Assumes additive linearity of space charge!
 	  schists[curhist]->Fill(space);
@@ -374,6 +400,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 
       } // loop over j tracks
   } // loop over i Nodes
+  if (QAmode) cutshist->Fill(6);
 
 
   ntrks[curhist] = schists[curhist]->Integral();
@@ -444,12 +471,11 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       X[34] = gapZdivslopewest;
       X[35] = s0*X[35] + s1*runinfo->spaceCharge();
       X[36] = s0*X[36] + s1*((float) (runinfo->spaceChargeCorrectionMode()));
-      //X[37] = s0*X[37] + s1*St_trigDetSumsC::Nc(runinfo->zdcCoincidenceRate(),
-      //                           runinfo->zdcEastRate(),runinfo->zdcWestRate());
-      //X[38] = s0*X[38] + s1*St_trigDetSumsC::Nc(runinfo->bbcCoincidenceRate(),
-      //                           runinfo->bbcEastRate(),runinfo->bbcWestRate());
-      X[37] = 0; X[38] = 0;
-	      
+      X[37] = s0*X[37] + s1*St_trigDetSumsC::Nc(runinfo->zdcCoincidenceRate(),
+                                 runinfo->zdcEastRate(),runinfo->zdcWestRate());
+      X[38] = s0*X[38] + s1*St_trigDetSumsC::Nc(runinfo->bbcCoincidenceRate(),
+                                 runinfo->bbcEastRate(),runinfo->bbcWestRate());
+
       // In calib mode, only fill when doReset (we found an sc)
       if (doReset || !Calibmode) ntup->Fill(X);
 
@@ -642,6 +668,8 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
 			EVN,0.,EVN,PHN,0,PI2,DCN,DCL,DCH);
     dcahistW = new TH3F("DcaEvtW","psDCA vs. Phi vs. Event West",
 			EVN,0.,EVN,PHN,0,PI2,DCN,DCL,DCH);
+    cutshist = new TH1I("CutsHist","Step at which tracks and events are cut",
+                        64,-0.5,63.5); // Use < 16 for event-wise cuts
     AddHist(myhist);
     AddHist(dcahist);
     AddHist(dczhist);
@@ -653,6 +681,7 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
     AddHist(dcahistP);
     AddHist(dcahistE);
     AddHist(dcahistW);
+    AddHist(cutshist);
   }
 
   if (doNtuple) ntup = new TNtuple("SC","Space Charge",
@@ -706,6 +735,7 @@ void StSpaceChargeEbyEMaker::WriteQAHists() {
     dcahistW->Write();
     scehist->Write();
     timehist->Write();
+    cutshist->Write();
   }
   if (doGaps) {
     gapZhist->Write();
@@ -813,7 +843,8 @@ void StSpaceChargeEbyEMaker::SetTableName() {
   gMessMgr->Info() << "first event time = " << time << endm;
   tabname = Form("./StarDb/Calibrations/rich/spaceChargeCorR2.%08d.%06d.C",date,time);
 
-  // Set Prepass default parameters based on data time
+  // Set default parameters based on data time
+  //   for non-calib modes
   if (date < 20071000) {
     setVtxEmcMatch(0);
     setReqEmcMatch(kFALSE);
@@ -983,7 +1014,6 @@ void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* hh,
   delete GapsRMS;
 }
 //_____________________________________________________________________________
-#include "TPad.h"
 float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
 
   if (hdir) {
@@ -1063,8 +1093,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.35 2011/02/09 21:56:50 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.36 2011/02/10 18:31:45 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.36  2011/02/10 18:31:45  genevb
+// Restore corrected coincidence rates, add QA histogram of where events/tracks are cut
+//
 // Revision 1.35  2011/02/09 21:56:50  genevb
 // Version which can work in SL10k
 //

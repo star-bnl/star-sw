@@ -52,7 +52,7 @@ public:
           void   setReqTofMatch(Bool_t match = kTRUE) { reqTofMatch = match; }
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.12 2010/06/09 20:24:53 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.13 2011/02/10 18:31:45 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
@@ -133,6 +133,10 @@ protected:
   TH2F* gapZhistneg;         //!
   TH2F* gapZhistpos;         //!
 
+  // QA hists and ntuple
+  TH1I* cutshist;            //!
+  TNtuple* ntup;             //!
+
   float gapZfitslope;
   float egapZfitslope;
   float gapZfitintercept;
@@ -153,9 +157,6 @@ protected:
   float gapZdivslopewest;
 
 
-  // QA ntuple
-  TNtuple* ntup;             //!
-
   void InitQAHists();
   void WriteQAHists();
   void FillQAHists(float,float,int,StPhysicalHelixD&,int);
@@ -170,8 +171,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.12 2010/06/09 20:24:53 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.13 2011/02/10 18:31:45 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.13  2011/02/10 18:31:45  genevb
+// Restore corrected coincidence rates, add QA histogram of where events/tracks are cut
+//
 // Revision 1.12  2010/06/09 20:24:53  genevb
 // Modify interface to allow EMC and TOF matching requirements (needs implementation)
 //
