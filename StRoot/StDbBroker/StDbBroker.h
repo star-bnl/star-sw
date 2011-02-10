@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.30 2008/01/15 20:37:44 deph Exp $
+ * $Id: StDbBroker.h,v 1.31 2011/02/10 17:31:01 dmitry Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.31  2011/02/10 17:31:01  dmitry
+ * added an option to blacklist domains
+ *
  * Revision 1.30  2008/01/15 20:37:44  deph
  * Removed DbFill and corresponding calls from StDbBroker
  *
@@ -227,6 +230,7 @@ const char *GetFlavor();
     UInt_t GetProdTime()             {return m_prodTime;}
     Bool_t   IsZombie()              {return m_isZombie; }
 
+
     StTableDescriptorI* GetTableDescriptor();
 
     void loadOldDescriptor(){};
@@ -285,7 +289,8 @@ const char *GetFlavor();
     void   SetProdTime(UInt_t ptime);
     void   SetFlavor(const char* flavor);
     void   SetZombie(Bool_t zombie)          { m_isZombie=true; }
-    
+
+	void   addBlacklistedDomain(const char* domainName);
 
     static int DbInit(const char *);  		//Sasha's dbInit 
     void   setVerbose(int isVerbose) { m_isVerbose = isVerbose; } 
