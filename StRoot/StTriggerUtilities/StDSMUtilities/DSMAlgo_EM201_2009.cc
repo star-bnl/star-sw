@@ -172,6 +172,7 @@ void DSMAlgo_EM201_2009::operator()(DSM& dsm)
   if (jpBitsBarrel > jpBits) jpBits = jpBitsBarrel;
   if (jpBitsEndcap > jpBits) jpBits = jpBitsEndcap;
 
+  int jp0 = jpBits > 0;
   int jp1 = jpBits > 1;
   int jp2 = jpBits > 2;
 
@@ -184,7 +185,7 @@ void DSMAlgo_EM201_2009::operator()(DSM& dsm)
   int eajp = ajpEndcap(dsm);
   int  ajp = bajp || eajp;
 
-  // OUTPUT (15):
+  // OUTPUT (16):
 
   // (0:3) Barrel HT bits (4)
   // (4:5) Endcap HT bits (2)
@@ -197,6 +198,7 @@ void DSMAlgo_EM201_2009::operator()(DSM& dsm)
   // (12) AJP for BEMC and EEMC but NOT the boundary (1)
   // (13) BAJP for the BEMC-only patches (1)
   // (14) EAJP for the EEMC-only patches (1)
+  // (15) JP0, unified over the BEMC+EEMC (1)
 
   int out = 0;
 
@@ -211,6 +213,7 @@ void DSMAlgo_EM201_2009::operator()(DSM& dsm)
   out |= ajp  << 12;
   out |= bajp << 13;
   out |= eajp << 14;
+  out |= jp0  << 15;
 
   dsm.output = out;
 
