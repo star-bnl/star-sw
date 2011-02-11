@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.25 2011/01/31 21:33:53 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.26 2011/02/11 03:44:53 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.26  2011/02/11 03:44:53  hmasui
+ * Draw error messages in pdf if histogram is missing. Add error check for Ncommon histogram
+ *
  * Revision 1.25  2011/01/31 21:33:53  hmasui
  * Add setParentGeantId() function to allow the multiple decays
  *
@@ -396,8 +399,8 @@ void StEmbeddingQADraw::checkInputGeantId()
       LOG_INFO << "  Geantid in the MC histogram, geantid = " << mMcGeantId[0]
                << ",  particle name = " << utility->getParticleDefinition(mMcGeantId[0])->name().c_str() << endm;
       LOG_INFO << "  Do you want to proceed to the QA for geantid = " << mMcGeantId[0] << " ?" << endm;
-      LOG_INFO << "  [yes=true or kTRUE or 1/no=false or kFALSE or 0]:" << endm;
-      Bool_t proceedQA = kFALSE ;
+      LOG_INFO << "  [yes=1/no=0]:" << endm;
+      UInt_t proceedQA = 0 ;
       cin >> proceedQA ;
       LOG_INFO << "#----------------------------------------------------------------------------------------------------" << endm;
 
@@ -465,6 +468,9 @@ Bool_t StEmbeddingQADraw::isOpen() const
 Bool_t StEmbeddingQADraw::isMatchedPairOk() const
 {
   /// Check # of matched pairs > 0
+  // NOTE: If there are no matched pairs in the minimc due to the error
+  //       this function won't work.
+  //       The condition "!isDecay()" would give us the right answer
   TH1* hGeantId = (TH1D*) getHistogram("hGeantId_1");
   if(!hGeantId) return kFALSE ;
 
@@ -608,6 +614,13 @@ TObject* StEmbeddingQADraw::getHistogram(const TString name, const UInt_t daught
     return 0;
   }
 
+  return getHistogram(getHistogramName(name, daughter, isEmbedding, parentparentid), isEmbedding) ;
+}
+
+//____________________________________________________________________________________________________
+const Char_t* StEmbeddingQADraw::getHistogramName(const TString name, const UInt_t daughter, const Bool_t isEmbedding,
+    const UInt_t parentparentid) const
+{
   const Int_t category = getCategoryId(isEmbedding) ;
 
   if( isEmbedding ){
@@ -616,11 +629,11 @@ TObject* StEmbeddingQADraw::getHistogram(const TString name, const UInt_t daught
     ///   - {histogram name}_{category id}_{parent-parent particle id}_{parent particle id}_{daughter particle id} for unstable particles
 
     if( isDecay() ) {
-      if ( mParentGeantId == 0 ) return getHistogram(Form("%s_%d_%d_%d_%d", name.Data(), category, parentparentid, mGeantId, mDaughterGeantId[daughter])) ;
-      else                       return getHistogram(Form("%s_%d_%d_%d_%d", name.Data(), category, mGeantId, mParentGeantId, mDaughterGeantId[daughter])) ;
+      if ( mParentGeantId == 0 ) return Form("%s_%d_%d_%d_%d", name.Data(), category, parentparentid, mGeantId, mDaughterGeantId[daughter]) ;
+      else                       return Form("%s_%d_%d_%d_%d", name.Data(), category, mGeantId, mParentGeantId, mDaughterGeantId[daughter]) ;
     }
     else {
-      return getHistogram(Form("%s_%d_%d", name.Data(), category, mGeantId)) ;
+      return Form("%s_%d_%d", name.Data(), category, mGeantId) ;
     }
   }
   else{
@@ -629,7 +642,7 @@ TObject* StEmbeddingQADraw::getHistogram(const TString name, const UInt_t daught
     ///   NOTE: mDaughterGeantId[0] = mGeantId for stable particles
     const Int_t geantidReal = getGeantIdReal(daughter) ;
 
-    return getHistogram(Form("%s_%d_%d", name.Data(), category, geantidReal), kFALSE) ;
+    return Form("%s_%d_%d", name.Data(), category, geantidReal) ;
   }
 }
 
@@ -711,6 +724,64 @@ void StEmbeddingQADraw::drawLegend(const UInt_t id, TH1* hembed, TH1* hreal,
   leg->AddEntry(hembed, getEmbeddingParticleName(id, doSplit), option) ;
   if(hreal) leg->AddEntry(hreal, getRealParticleName(id, doSplit), option) ;
   leg->Draw();
+}
+
+//____________________________________________________________________________________________________
+void StEmbeddingQADraw::drawErrorMessages(const TString histogramName) const
+{
+  const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
+  const Int_t categoryId = getCategoryId() ;
+  const TString title(utility->getCategoryTitle(categoryId));
+
+  TPaveText* error0 = new TPaveText(0.05, 0.60, 0.95, 0.92);
+  error0->SetTextAlign(12);
+  error0->SetBorderSize(1);
+  error0->SetFillColor(10);
+  error0->SetTextColor(kBlack);
+  error0->SetTextSize(0.030);
+  error0->SetTextFont(42);
+  error0->AddText(Form("*** No histogram \"%s\" found", histogramName.Data()));
+  error0->AddText(Form("Please make sure that you have %s in the minimc.root.", title.Data()));
+  error0->AddText("Open minimc.root file and then check number of tracks.");
+  error0->AddText(Form("Most likely there are no %s in the minimc.", title.Data()));
+  error0->AddText("In case you have finite number of tracks,");
+  error0->AddText("please also have a look at geantid.");
+  error0->SetAllWith("***", "color", kRed+1);
+  error0->SetAllWith("***", "font", 72);
+  error0->SetAllWith("***", "size", 0.033);
+
+
+  TPaveText* error1 = new TPaveText(0.05, 0.05, 0.95, 0.55);
+  error1->SetTextAlign(12);
+  error1->SetBorderSize(1);
+  error1->SetFillColor(10);
+  error1->SetTextColor(kBlack);
+  error1->SetTextSize(0.025);
+  error1->SetTextFont(42);
+  error1->AddText("See example below how to check number of tracks and geantid");
+
+  if ( isDecay() ) {
+    error1->AddText("[ROOT]> StMiniMcTree->Draw(\"mNContamPair\")");
+    error1->AddText("or");
+    error1->AddText("[ROOT]> StMiniMcTree->Scan(\"mNContamPair\")");
+    error1->AddText(Form("For geantid in %s", title.Data()));
+    error1->AddText("[ROOT]> StMiniMcTree->Draw(\"mContamPairs.mGeantId\")");
+    error1->AddText("or use \"Scan()\" function");
+  }
+  else {
+    error1->AddText("[ROOT]> StMiniMcTree->Draw(\"mNMatchedPair\")");
+    error1->AddText("or");
+    error1->AddText("[ROOT]> StMiniMcTree->Scan(\"mNMatchedPair\")");
+    error1->AddText(Form("For geantid in %s", title.Data()));
+    error1->AddText("[ROOT]> StMiniMcTree->Draw(\"mMatchedPairs.mGeantId\")");
+    error1->AddText("or use \"Scan()\" function");
+  }
+  error1->SetAllWith("ROOT", "color", kBlue+1);
+  error1->SetAllWith("ROOT", "font",  52);
+  error1->SetAllWith("ROOT", "size",  0.028);
+
+  error0->Draw();
+  error1->Draw();
 }
 
 //____________________________________________________________________________________________________
@@ -1328,10 +1399,24 @@ Bool_t StEmbeddingQADraw::drawMomentum() const
 
   /// Plot reconstructed momentum vs MC momentum (2D) (Embedding only)
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
-    TPaveText* header = initCanvas("Reconstructed momentum vs MC momentum");
+    TPaveText* header = 0 ;
 
     TH2* hRecoPVsMcP = (TH2D*) getHistogram("hRecoPVsMcP", id, kTRUE);
-    if(!hRecoPVsMcP) return kFALSE ;
+    if(!hRecoPVsMcP){
+      // Draw error messages
+      header = initCanvas("Reconstructed momentum vs MC momentum");
+      drawErrorMessages(getHistogramName("hRecoPVsMcP", id, kTRUE)) ;
+
+      mCanvas->cd();
+      mCanvas->Update();
+      mPDF->NewPage();
+
+      delete header ;
+
+      return kFALSE ;
+    }
+
+    header = initCanvas("Reconstructed momentum vs MC momentum");
 
     hRecoPVsMcP->SetAxisRange(0, mPtMax, "X");
     hRecoPVsMcP->SetAxisRange(0, mPtMax, "Y");
@@ -1446,14 +1531,28 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name, const Bool_t isMC
   TH2* h2DMc = (TH2D*) getHistogram(Form("%s_0_%d", histoName.Data(), mGeantId));
 
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
+    const TString headerTitle(Form("Projection of %s for each %s bin", yTitle.Data(), xTitle.Data()));
+    TPaveText* header = 0 ;
+
     TH2* h2DEmbed = (TH2D*) getHistogram(histoName, id, kTRUE);
-    if(!h2DEmbed) return kFALSE ;
+    if(!h2DEmbed){
+      // Draw error message
+      header = initCanvas(headerTitle);
+      drawErrorMessages(getHistogramName(histoName, id, kTRUE)) ;
+
+      mCanvas->cd();
+      mCanvas->Update();
+      mPDF->NewPage();
+
+      delete header ;
+
+      return kFALSE ;
+    }
 
     TH2* h2DReal  = (TH2D*) getHistogram(histoName, id, kFALSE);
 
     /// Define canvas Ndivisions
-    TString headerTitle(Form("Projection of %s for each %s bin", yTitle.Data(), xTitle.Data()));
-    TPaveText* header = initCanvas(headerTitle);
+    header = initCanvas(headerTitle);
 
     Int_t npad = 0 ;
     Int_t npadMax = 0 ;
@@ -1638,11 +1737,25 @@ Bool_t StEmbeddingQADraw::drawdEdxVsMomentum(const Bool_t isMcMomentum) const
       headerTitle = Form("dE/dx vs momentum (Embedding:%s, Real:%s)", 
             getParticleName(mDaughterGeantId[id]), getParticleName(getGeantIdReal(id)) );
     }
-    TPaveText* header = initCanvas(headerTitle, 1, 2);
+    TPaveText* header = 0 ;
 
     // Embedding
     TH2* hdEdxVsMomEmbed = (TH2D*) getHistogram(Form("hdEdxVsMom%s", momName.Data()), id, kTRUE);
-    if(!hdEdxVsMomEmbed) return kFALSE ;
+    if(!hdEdxVsMomEmbed){
+      // Draw error messages
+      header = initCanvas(headerTitle);
+      drawErrorMessages(getHistogramName(Form("hdEdxVsMom%s", momName.Data()), id, kTRUE)) ;
+
+      mCanvas->cd();
+      mCanvas->Update();
+      mPDF->NewPage();
+
+      delete header ;
+
+      return kFALSE ;
+    }
+
+    header = initCanvas(headerTitle, 1, 2);
 
     hdEdxVsMomEmbed->SetLineColor(kRed);
     hdEdxVsMomEmbed->SetMarkerColor(kRed);
@@ -1914,15 +2027,19 @@ Bool_t StEmbeddingQADraw::drawNHit() const
       headerTitle = Form("N_{common} vs N_{hit} (Embedding:%s, Real:%s)", 
             getParticleName(mDaughterGeantId[id]), getParticleName(getGeantIdReal(id)) );
     }
-    TPaveText* header = initCanvas(headerTitle);
 
     TH2* hNCommonHitVsNHit = (TH2D*) getHistogram("hNCommonHitVsNHit", id, kTRUE);
-    hNCommonHitVsNHit->Draw("colz");
-
+    TPaveText* header = initCanvas(headerTitle);
+    if(!hNCommonHitVsNHit) {
+      // Draw error messages
+      drawErrorMessages(getHistogramName("hNCommonHitVsNHit", id, kTRUE));
+    }
+    else{
+      hNCommonHitVsNHit->Draw("colz");
+    }
     mCanvas->cd();
     mCanvas->Update();
-
-    mPDF->NewPage() ;
+    mPDF->NewPage();
 
     delete header ;
   }
@@ -1950,9 +2067,23 @@ Bool_t StEmbeddingQADraw::drawProjection3D(const TString name) const
 
   TString headerTitle(Form("%s distribution for (p_{T}, #eta) slices", name.Data()));
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
+    TPaveText* header = 0 ;
+
     /// Get 3D histograms
     TH3* h3DEmbed = (TH3D*) getHistogram(Form("h%s", name.Data()), id, kTRUE);
-    if(!h3DEmbed) return kFALSE ;
+    if(!h3DEmbed){
+      // Draw error messages
+      header = initCanvas(headerTitle);
+      drawErrorMessages(getHistogramName(Form("h%s", name.Data()), id, kTRUE));
+
+      mCanvas->cd();
+      mCanvas->Update();
+      mPDF->NewPage();
+
+      delete header ;
+
+      return kFALSE ;
+    }
 
     TH3* h3DReal  = (TH3D*) getHistogram(Form("h%s", name.Data()), id, kFALSE);
 
