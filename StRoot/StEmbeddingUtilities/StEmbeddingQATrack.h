@@ -3,8 +3,11 @@
 //    Store relevant track informations for the embedding/real data QA
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.h,v 1.10 2011/02/11 03:55:48 hmasui Exp $
+ * $Id: StEmbeddingQATrack.h,v 1.11 2011/02/11 23:21:28 hmasui Exp $
  * $Log: StEmbeddingQATrack.h,v $
+ * Revision 1.11  2011/02/11 23:21:28  hmasui
+ * Added missing functions getNSigma...()
+ *
  * Revision 1.10  2011/02/11 03:55:48  hmasui
  * Change geantid type to integer
  *
@@ -180,6 +183,11 @@ inline Float_t StEmbeddingQATrack::getPhi()           const { return mPhi ; }
 inline Float_t StEmbeddingQATrack::getdEdx()          const { return mdEdx ; }
 inline Float_t StEmbeddingQATrack::getdEdxkeV()       const { return mdEdx * 1.0e+06 ; }
 inline Float_t StEmbeddingQATrack::getDcaGl()         const { return mDcaGl ; }
+
+inline Double_t StEmbeddingQATrack::getNSigmaElectron() const { return mNSigmaElectron ; }
+inline Double_t StEmbeddingQATrack::getNSigmaPion()     const { return mNSigmaPion ; }
+inline Double_t StEmbeddingQATrack::getNSigmaKaon()     const { return mNSigmaKaon ; }
+inline Double_t StEmbeddingQATrack::getNSigmaProton()   const { return mNSigmaProton ; }
 
 inline const TString StEmbeddingQATrack::getName() const { return mName ; }
 
