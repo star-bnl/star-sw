@@ -5,8 +5,11 @@
 //  for instructions
 //****************************************************************************************************
 /****************************************************************************************************
- * $Id: StEmbeddingQA.h,v 1.8 2011/01/31 21:32:10 hmasui Exp $
+ * $Id: StEmbeddingQA.h,v 1.9 2011/02/11 03:55:44 hmasui Exp $
  * $Log: StEmbeddingQA.h,v $
+ * Revision 1.9  2011/02/11 03:55:44  hmasui
+ * Change geantid type to integer
+ *
  * Revision 1.8  2011/01/31 21:32:10  hmasui
  * Modify histogram keys to TString to take into account parent geantid
  *
@@ -128,11 +131,11 @@ class StEmbeddingQA {
     void fillHistograms(const StEmbeddingQATrack& track, const Int_t categoryid);
 
     /// Expand histograms if a new geantid is found in either MC or reconstructed track
-    void expandHistograms(const Int_t categoryid, const Short_t geantid, const Int_t parentid,
+    void expandHistograms(const Int_t categoryid, const Int_t geantid, const Int_t parentid,
         const Int_t parentparentid, const Int_t geantprocess);
 
     /// Push back a new geant id in mGeantId array
-    Bool_t pushBackGeantId(const Int_t categoryid, const Short_t geantid, const Int_t parentid,
+    Bool_t pushBackGeantId(const Int_t categoryid, const Int_t geantid, const Int_t parentid,
         const Int_t parentparentid, const Int_t geantprocess) ;
 
     /// Z-vertex cut
@@ -146,7 +149,7 @@ class StEmbeddingQA {
 
     /// Get combination string of geantid, parent and parent-parent id
     /// The format is ("%d_%d_%d", geantid, parentid, parentparentid)
-    TString getIdCollection(const Short_t geantid, const Int_t parentid, const Int_t parentparentid) const ;
+    TString getIdCollection(const Int_t geantid, const Int_t parentid, const Int_t parentparentid) const ;
 
     StMuDstMaker* mMuDstMaker ; /// Pointer to the StMuDstMaker
     Float_t mVertexCut ; /// z-vertex cut (Default is 30 cm)
@@ -176,7 +179,7 @@ class StEmbeddingQA {
     //
     //  - Use MC momentum instead of reconstructed momentum (Update on Nov/13/2009)
     //  - Add p (reco) vs p (MC) (Update on Nov/13/2009)
-    std::vector<Short_t> mGeantId[StEmbeddingQAConst::mNCategory] ; /// Geant id in both MC tracks and reconstructed pairs
+    std::vector<Int_t> mGeantId[StEmbeddingQAConst::mNCategory] ; /// Geant id in both MC tracks and reconstructed pairs
     std::vector<TString> mGeantIdCollection ;                       /// Array of (parent-parent id, parent id, geantid)
                                                                     /// for Contaminated pairs only
 

@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.18 2011/01/31 21:32:12 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.19 2011/02/11 03:55:46 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.19  2011/02/11 03:55:46  hmasui
+ * Change geantid type to integer
+ *
  * Revision 1.18  2011/01/31 21:32:12  hmasui
  * Modify histogram keys to TString to take into account parent geantid
  *
@@ -333,7 +336,7 @@ Bool_t StEmbeddingQA::book(const TString outputFileName)
     utility->setStyle(mhNParticles[ic]);
 
     // Initialize geantid histogram. Increase the bin and maximum in order to cover id > 10k
-    mhGeantId[ic] = new TH1D(Form("hGeantId_%d", ic), Form("Geantid, %s", utility->getCategoryTitle(ic).Data()), 20000, 0, 20000) ;
+    mhGeantId[ic] = new TH1D(Form("hGeantId_%d", ic), Form("Geantid, %s", utility->getCategoryTitle(ic).Data()), 60000, 0, 60000) ;
     mhGeantId[ic]->SetXTitle("Geantid");
 
     utility->setStyle(mhGeantId[ic]);
@@ -569,8 +572,8 @@ Bool_t StEmbeddingQA::runRealData(const TString inputFileList)
     expandHistograms(categoryid, 15, parentid, parentparentid, geantprocess);
 
     // Make sure the input particle list
-    for(vector<Short_t>::iterator iter = mGeantId[categoryid].begin(); iter != mGeantId[categoryid].end(); iter++){
-      const Short_t geantid = (*iter) ;
+    for(vector<Int_t>::iterator iter = mGeantId[categoryid].begin(); iter != mGeantId[categoryid].end(); iter++){
+      const Int_t geantid = (*iter) ;
       LOG_DEBUG << Form("  Input geant id = %10d,  name = %10s", geantid,
           StEmbeddingQAUtilities::instance()->getParticleDefinition(geantid)->name().c_str()) << endm ;
     }
@@ -721,8 +724,8 @@ StEmbeddingQATrack* StEmbeddingQA::getEmbeddingQATrack(const StMiniMcEvent& mcev
 void StEmbeddingQA::fillRealTracks(const StMuTrack& track, const Int_t categoryid, const Int_t itrk)
 {
   /// Loop over all registered particles (real tracks)
-  for(vector<Short_t>::iterator iter = mGeantId[categoryid].begin(); iter != mGeantId[categoryid].end(); iter++){
-    const Short_t geantid = (*iter) ;
+  for(vector<Int_t>::iterator iter = mGeantId[categoryid].begin(); iter != mGeantId[categoryid].end(); iter++){
+    const Int_t geantid = (*iter) ;
     StEmbeddingQATrack miniTrack(StEmbeddingQAUtilities::instance()->getCategoryName(categoryid), track, geantid);
  
     fillHistograms(miniTrack, categoryid);
@@ -738,7 +741,7 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
   /// Only pt cut will be applied for MC tracks
 
   /// do not fill histograms if geantid < 0
-  const Short_t geantid = track.getGeantId() ;
+  const Int_t geantid = track.getGeantId() ;
   if ( geantid < 0 ) return ;
 
   /// pt and eta cuts (see StEmbeddingQATrack::isPtAndEtaOk())
@@ -831,7 +834,7 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQA::pushBackGeantId(const Int_t categoryid, const Short_t geantid, const Int_t parentid,
+Bool_t StEmbeddingQA::pushBackGeantId(const Int_t categoryid, const Int_t geantid, const Int_t parentid,
     const Int_t parentparentid, const Int_t geantprocess)
 {
   /// Add geantid if it's new. If we have already had input geantid in the array, do nothing.
@@ -861,7 +864,7 @@ Bool_t StEmbeddingQA::pushBackGeantId(const Int_t categoryid, const Short_t gean
     /// Expand histogrm by checking the geant id
     ///   if it's new, expands the histogram array for it
     ///   if it has already exist, do nothing
-    const vector<Short_t>::iterator iter = find(mGeantId[categoryid].begin(), mGeantId[categoryid].end(), geantid) ;
+    const vector<Int_t>::iterator iter = find(mGeantId[categoryid].begin(), mGeantId[categoryid].end(), geantid) ;
  
     if ( iter != mGeantId[categoryid].end() ){
       /// Geant id already exist. do nothing
@@ -931,7 +934,7 @@ Bool_t StEmbeddingQA::pushBackGeantId(const Int_t categoryid, const Short_t gean
 
 
 //__________________________________________________________________________________________
-void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Short_t geantid, const Int_t parentid,
+void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Int_t geantid, const Int_t parentid,
     const Int_t parentparentid, const Int_t geantprocess)
 {
   /// Push back geant id if the input geantid is new (return true)
@@ -1163,7 +1166,7 @@ Int_t StEmbeddingQA::getNtrack(const Int_t categoryid, const StMiniMcEvent& mcev
 }
 
 //__________________________________________________________________________________________
-TString StEmbeddingQA::getIdCollection(const Short_t geantid, const Int_t parentid, const Int_t parentparentid) const
+TString StEmbeddingQA::getIdCollection(const Int_t geantid, const Int_t parentid, const Int_t parentparentid) const
 {
   return Form("%d_%d_%d", geantid, parentid, parentparentid) ;
 }
