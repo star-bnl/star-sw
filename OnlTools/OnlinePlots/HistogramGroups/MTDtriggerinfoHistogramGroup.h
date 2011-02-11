@@ -3,6 +3,8 @@
 
 #include "Rtypes.h"
 #include "HistogramGroup.h"
+#define ntray 3
+
 class MTDtriggerinfoHistogramGroup : public HistogramGroup {
 
 public:
@@ -16,11 +18,8 @@ public:
   virtual void draw(TCanvas* cc); 
 
 private:
-
-  TH1* MTD_adc[2];
-  TH1* MTD_tac[2];
-  TH2* MTD_eastTac_vs_westTac;
-  TH2* MTD_aveTac_vs_vpd_aveTac;
+  TH1* MTD_adc[ntray][2];// 3 trays; 0 east, 1 east
+  TH1* MTD_tac[ntray][2];
 
   ClassDef(MTDtriggerinfoHistogramGroup,1) ;
 
