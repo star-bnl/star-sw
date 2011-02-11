@@ -1,5 +1,5 @@
 /**
- * $Id: StTinyMcTrack.h,v 1.8 2007/12/22 20:37:53 calderon Exp $
+ * $Id: StTinyMcTrack.h,v 1.9 2011/02/11 03:32:14 perev Exp $
  * \file  StTinyMcTrack.h
  * \brief   Persistent MC track class.
  * 
@@ -37,7 +37,7 @@ class StTinyMcTrack : public TObject {
   void setNEprsHitMc(Short_t val) { mNEprsHitMc=val; }
   void setNEsmduHitMc(Short_t val) { mNEsmduHitMc=val; }
   void setNEsmdvHitMc(Short_t val) { mNEsmdvHitMc=val; }
-  void setGeantId(Short_t val) { mGeantId=val; }
+  void setGeantId(int val);
   void setChargeMc(Short_t val) { mChargeMc=val; }
   void setNAssocGl(Short_t val) { mNAssocGl=val; }
   void setNAssocPr(Short_t val) { mNAssocPr=val; }
@@ -46,7 +46,7 @@ class StTinyMcTrack : public TObject {
   void setPrimary(Bool_t val) { mIsPrimary = val;}
   void setValid() {mIsValid = 1;}
   void setParentKey(Short_t val) { mParentKey=val; }
-  void setParentGeantId(Short_t val) { mParentGeantId=val; }
+  void setParentGeantId(int val);
   void setEmcEnergyMcHit(Float_t val,size_t index) {if (index<3) mEmcEnergyMcHit[index]=val;}
   void setEmcEnergyMcSum(Float_t val) {mEmcEnergyMcSum=val;}  
   void setEmcSoftIdHiTowerMc(Short_t val,size_t index) {if (index<3) mEmcSoftIdHiTowerMc[index]=val;}
@@ -70,7 +70,7 @@ class StTinyMcTrack : public TObject {
   short nEprsHitMc() const { return mNEprsHitMc; }
   short nEsmduHitMc() const { return mNEsmduHitMc; }
   short nEsmdvHitMc() const { return mNEsmdvHitMc; }
-  short geantId() const { return mGeantId; }
+    int geantId() const { return mGeantId; }
   short chargeMc() const { return mChargeMc; }
   short nAssocGl() const { return mNAssocGl; }
   short nAssocPr() const { return mNAssocPr; }
@@ -80,7 +80,7 @@ class StTinyMcTrack : public TObject {
   Bool_t isValid() {return  mIsValid;}
   virtual void Print(Option_t *option="") const;
   short parentKey() const { return mParentKey; }
-  short parentGeantId() const { return mParentGeantId; }
+    int parentGeantId() const { return mParentGeantId; }
   float emcEnergyMcHit(size_t index) const { if (index<3) return mEmcEnergyMcHit[index]; else return -999;}
   float emcEnergyMcSum() const { return mEmcEnergyMcSum; }
   short emcSoftIdHiTowerMc(size_t index) const { if (index<3) return mEmcSoftIdHiTowerMc[index]; else return -999; }
@@ -104,12 +104,12 @@ private:
   Short_t    mNEprsHitMc;
   Short_t    mNEsmduHitMc;
   Short_t    mNEsmdvHitMc;
-  Short_t    mGeantId;
+  UShort_t   mGeantId;
   Short_t    mChargeMc;
   Float_t    mStopR;
   Short_t    mKey;
   Short_t    mParentKey;
-  Short_t    mParentGeantId;
+  UShort_t   mParentGeantId;
   Float_t    mEmcEnergyMcHit[3];
   Float_t    mEmcEnergyMcSum;
   Short_t    mEmcSoftIdHiTowerMc[3];
@@ -125,6 +125,9 @@ private:
 #endif
 //
 // $Log: StTinyMcTrack.h,v $
+// Revision 1.9  2011/02/11 03:32:14  perev
+// geantid now is ushort
+//
 // Revision 1.8  2007/12/22 20:37:53  calderon
 // Added EMC information to tracks.  MC info obtained from StMcTrack, Rec Info
 // obtained from track extrapolation to BEMC of rec track.
