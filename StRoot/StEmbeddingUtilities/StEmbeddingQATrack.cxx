@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.cxx,v 1.16 2011/02/11 03:55:50 hmasui Exp $
+ * $Id: StEmbeddingQATrack.cxx,v 1.17 2011/02/11 23:22:12 hmasui Exp $
  * $Log: StEmbeddingQATrack.cxx,v $
+ * Revision 1.17  2011/02/11 23:22:12  hmasui
+ * Added missing charge check in isNSigmaOk(), and error check for geantid
+ *
  * Revision 1.16  2011/02/11 03:55:50  hmasui
  * Change geantid type to integer
  *
@@ -36,6 +39,7 @@
  *
  ****************************************************************************************************/
 
+#include <assert.h>
 #include <iostream>
 
 #include "TMath.h"
@@ -227,6 +231,10 @@ Bool_t StEmbeddingQATrack::isNSigmaOk(const Int_t geantid) const
   /// NSigma cut will only apply for e/pi/K/p
   if ( !utility->isEPiKP(geantid) ) return kTRUE ;
 
+  /// Check charge
+  const Bool_t isChargeOk = utility->getParticleDefinition(geantid)->charge() == mCharge ;
+  if(!isChargeOk) return kFALSE ;
+
   /// NSigma cut for e, pi, K and p
   /// Implement different charge
   if( mCharge < 0 ){
@@ -236,21 +244,31 @@ Bool_t StEmbeddingQATrack::isNSigmaOk(const Int_t geantid) const
     else if ( utility->isKMinus(geantid) )  return TMath::Abs(mNSigmaKaon) < kNSigmaCut ;
     else if ( utility->isPBar(geantid) )    return TMath::Abs(mNSigmaProton) < kNSigmaCut ;
     else{
-      return kTRUE ;
+      /// This should not happen
+      LOG_ERROR << "StEmbeddingQATrack::isNSigmaOk  Geant id is not e, pi, K or p, geantid= " << geantid << endm;
+      LOG_ERROR << "StEmbeddingQATrack::isNSigmaOk  Please check geantid, real data QA should only contain e, pi, K and p" << endm;
+      assert(0);
     }
   }
-  else{
+  else if ( mCharge > 0 ) {
     // Positive charged particles
     if ( utility->isPositron(geantid) )    return TMath::Abs(mNSigmaElectron) < kNSigmaCut ;
     else if ( utility->isPiPlus(geantid) ) return TMath::Abs(mNSigmaPion) < kNSigmaCut ;
     else if ( utility->isKPlus(geantid) )  return TMath::Abs(mNSigmaKaon) < kNSigmaCut ;
     else if ( utility->isProton(geantid) ) return TMath::Abs(mNSigmaProton) < kNSigmaCut ;
     else{
-      return kTRUE ;
+      /// This should not happen
+      LOG_ERROR << "StEmbeddingQATrack::isNSigmaOk  Geant id is not e, pi, K or p, geantid= " << geantid << endm;
+      LOG_ERROR << "StEmbeddingQATrack::isNSigmaOk  Please check geantid, real data QA should only contain e, pi, K and p" << endm;
+      assert(0);
     }
   }
-
-  return kTRUE ;
+  else{
+    /// This should not happen
+    LOG_ERROR << "StEmbeddingQATrack::isNSigmaOk  Charge == 0, charge=" << mCharge << ", geantid= " << geantid << endm;
+    LOG_ERROR << "StEmbeddingQATrack::isNSigmaOk  Please check geantid, real data QA should only contain e, pi, K and p" << endm;
+    assert(0);
+  }
 }
 
 //____________________________________________________________________________________________________
