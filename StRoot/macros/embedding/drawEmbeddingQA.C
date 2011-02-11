@@ -14,13 +14,16 @@ void drawEmbeddingQA(
     const TString realDataFile  = "qa_real_2005_P07ie.root",
     const Int_t geantid = 8,
     const Double_t ptmax = 5.0, // default is 5 GeV/c
-    const Bool_t isEmbeddingOnly = kFALSE
+    const Bool_t isEmbeddingOnly = kFALSE,
+    const Int_t parentGeantId = 0
 ){
   gROOT->Macro("${STAR}/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   gSystem->Load("StMiniMcEvent");
   gSystem->Load("StEmbeddingUtilities");
 
   StEmbeddingQADraw* maker = new StEmbeddingQADraw(embeddingFile, realDataFile, geantid, isEmbeddingOnly);
+//  maker->setParentGeantId(parentGeantId) ;
+  maker->init();
   maker->setOutputDirectory(outputDirectory);
 
   // Flag for output figures (default is false)
@@ -72,13 +75,16 @@ void drawEmbeddingQA(
     const TString production,
     const Int_t geantid,
     const Double_t ptmax,
-    const Bool_t isEmbeddingOnly = kFALSE
+    const Bool_t isEmbeddingOnly = kFALSE,
+    const Int_t parentgeantId = 0
 ){
   gROOT->Macro("${STAR}/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   gSystem->Load("StMiniMcEvent");
   gSystem->Load("StEmbeddingUtilities");
 
   StEmbeddingQADraw* maker = new StEmbeddingQADraw(embeddingFile, realDataFile, year, production, geantid, isEmbeddingOnly);
+//  maker->setParentGeantId(parentGeantId) ;
+  maker->init();
   maker->setOutputDirectory(outputDirectory);
 
   // Flag for output figures (default is false)
