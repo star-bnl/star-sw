@@ -42,8 +42,11 @@
 //
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.h,v 1.14 2011/01/31 21:33:51 hmasui Exp $
+ * $Id: StEmbeddingQADraw.h,v 1.15 2011/02/11 03:44:57 hmasui Exp $
  * $Log: StEmbeddingQADraw.h,v $
+ * Revision 1.15  2011/02/11 03:44:57  hmasui
+ * Draw error messages in pdf if histogram is missing. Add error check for Ncommon histogram
+ *
  * Revision 1.14  2011/01/31 21:33:51  hmasui
  * Add setParentGeantId() function to allow the multiple decays
  *
@@ -193,6 +196,11 @@ class StEmbeddingQADraw {
     TObject* getHistogram(const TString name, const UInt_t daughter, const Bool_t isEmbedding,
         const UInt_t parentparentid = 0) const ;
 
+    /// Get histogram name (part of codes moved from getHistogram function)
+    const Char_t* getHistogramName(const TString name, const UInt_t daughter, const Bool_t isEmbedding,
+        const UInt_t parentparentid = 0) const ;
+
+
     /// (1/Ntrk) * (1/bin)
     Double_t getNormalization(const TH1& h) const ;
 
@@ -211,6 +219,9 @@ class StEmbeddingQADraw {
     /// Draw legend
     void drawLegend(const UInt_t id, TH1* hembed, TH1* hreal, const Option_t* option="L",
         const Bool_t doSplit=kFALSE) const ;
+
+    /// Draw error messages if histogram doesn't exist
+    void drawErrorMessages(const TString histogramName) const ;
 
     /// Event-wise informations
     Bool_t drawVertices() const;          /// Draw vertices
