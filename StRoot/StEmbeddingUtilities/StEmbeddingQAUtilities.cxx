@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.cxx,v 1.9 2010/08/13 21:54:51 hmasui Exp $
+ * $Id: StEmbeddingQAUtilities.cxx,v 1.10 2011/02/11 23:20:56 hmasui Exp $
  * $Log: StEmbeddingQAUtilities.cxx,v $
+ * Revision 1.10  2011/02/11 23:20:56  hmasui
+ * Bug fix for e+ and e-
+ *
  * Revision 1.9  2010/08/13 21:54:51  hmasui
  * Separate charge for pi/K/p
  *
@@ -217,10 +220,10 @@ Bool_t StEmbeddingQAUtilities::isReal(const TString name) const
 }
 
 //____________________________________________________________________________________________________
-Bool_t StEmbeddingQAUtilities::isElectron(const Int_t geantid) const { return geantid==2 ; }
+Bool_t StEmbeddingQAUtilities::isPositron(const Int_t geantid) const { return geantid==2 ; }
 
 //____________________________________________________________________________________________________
-Bool_t StEmbeddingQAUtilities::isPositron(const Int_t geantid) const { return geantid==3 ; }
+Bool_t StEmbeddingQAUtilities::isElectron(const Int_t geantid) const { return geantid==3 ; }
 
 //____________________________________________________________________________________________________
 Bool_t StEmbeddingQAUtilities::isPiPlus(const Int_t geantid) const { return geantid==8 ; }
