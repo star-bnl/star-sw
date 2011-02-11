@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.cxx,v 1.15 2011/02/09 20:56:07 hmasui Exp $
+ * $Id: StEmbeddingQATrack.cxx,v 1.16 2011/02/11 03:55:50 hmasui Exp $
  * $Log: StEmbeddingQATrack.cxx,v $
+ * Revision 1.16  2011/02/11 03:55:50  hmasui
+ * Change geantid type to integer
+ *
  * Revision 1.15  2011/02/09 20:56:07  hmasui
  * Fix initialization of particle id's for real data
  *
@@ -126,7 +129,7 @@ StEmbeddingQATrack::StEmbeddingQATrack(const TString name, StContamPair* track)
 }
 
 //____________________________________________________________________________________________________
-StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StMuTrack& track, const Short_t geantid)
+StEmbeddingQATrack::StEmbeddingQATrack(const TString name, const StMuTrack& track, const Int_t geantid)
   : mNCommonHit(0), mParentParentGeantId(0), mParentGeantId(0), mGeantId(geantid), mGeantProcess(0),
   mNHit(track.nHitsFit(kTpcId)), mNHitPoss(track.nHitsPoss(kTpcId)), mCharge(track.charge()),
   mVectorMc(-9999., -9999., -9999., -9999.), // No MC momentum for real tracks
@@ -212,7 +215,7 @@ Bool_t StEmbeddingQATrack::isCommonHitOk() const
 }
 
 //__________________________________________________________________________________________
-Bool_t StEmbeddingQATrack::isNSigmaOk(const Short_t geantid) const
+Bool_t StEmbeddingQATrack::isNSigmaOk(const Int_t geantid) const
 {
   /// Nsigma cut for electrons/pions/kaons/protons
 

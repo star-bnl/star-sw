@@ -3,8 +3,11 @@
 //    Store relevant track informations for the embedding/real data QA
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.h,v 1.9 2011/01/12 21:36:17 hmasui Exp $
+ * $Id: StEmbeddingQATrack.h,v 1.10 2011/02/11 03:55:48 hmasui Exp $
  * $Log: StEmbeddingQATrack.h,v $
+ * Revision 1.10  2011/02/11 03:55:48  hmasui
+ * Change geantid type to integer
+ *
  * Revision 1.9  2011/01/12 21:36:17  hmasui
  * Add nHitsFit/nHitsPoss cut
  *
@@ -51,7 +54,7 @@ class StEmbeddingQATrack {
     //  Need to put the geantid by hand 
     //  in order to calculate rapidity (and maybe invariant mass if you like)
     //  since the real tracks don't have geantid
-    StEmbeddingQATrack(const TString name, const StMuTrack& track, const Short_t geantid);
+    StEmbeddingQATrack(const TString name, const StMuTrack& track, const Int_t geantid);
 
     /// Destructor
     virtual ~StEmbeddingQATrack();
@@ -67,7 +70,7 @@ class StEmbeddingQATrack {
     /// NSigma cut for electrons, pions, kaons and protons
     // if ( real tracks ) return |nSigma| < 2 
     // else               return true (i.e. no nSigma cut)
-    Bool_t isNSigmaOk(const Short_t geantid) const ;
+    Bool_t isNSigmaOk(const Int_t geantid) const ;
 
     StLorentzVectorD getVectorMc() const ; /// Get MC 4-momentum
     StLorentzVectorD getVectorRc() const ; /// Get reconstructed 4-momentum
@@ -75,7 +78,7 @@ class StEmbeddingQATrack {
     Short_t getNCommonHit()          const ; /// Get number of common hits
     Int_t   getParentParentGeantId() const ; /// Get parent geant id
     Int_t   getParentGeantId()       const ; /// Get parent geant id
-    Short_t getGeantId()             const ; /// Get geant id
+    Int_t   getGeantId()             const ; /// Get geant id
     Int_t   getGeantProcess()        const ; /// Get geant process
     Short_t getNHit()                const ; /// Get number of fit points
     Short_t getNHitPoss()            const ; /// Get maximum number of fit points
@@ -127,7 +130,7 @@ class StEmbeddingQATrack {
     const Short_t mNCommonHit ;           /// Number of common hits
     const Int_t   mParentParentGeantId ;  /// Parent-parent geant id
     const Int_t   mParentGeantId ;        /// Parent geant id
-    const Short_t mGeantId ;              /// geant id
+    const Int_t   mGeantId ;              /// geant id
     const Int_t   mGeantProcess ;         /// geant process
     const Short_t mNHit ;                 /// Number of fit points
     const Short_t mNHitPoss ;             /// Number of maximum fit points
@@ -150,7 +153,7 @@ class StEmbeddingQATrack {
 inline Short_t StEmbeddingQATrack::getNCommonHit()          const { return mNCommonHit ; }
 inline Int_t   StEmbeddingQATrack::getParentParentGeantId() const { return mParentParentGeantId ; }
 inline Int_t   StEmbeddingQATrack::getParentGeantId()       const { return mParentGeantId ; }
-inline Short_t StEmbeddingQATrack::getGeantId()             const { return mGeantId ; }
+inline Int_t   StEmbeddingQATrack::getGeantId()             const { return mGeantId ; }
 inline Int_t   StEmbeddingQATrack::getGeantProcess()        const { return mGeantProcess ; }
 inline Short_t StEmbeddingQATrack::getNHit()                const { return mNHit ; }
 inline Short_t StEmbeddingQATrack::getNHitPoss()            const { return mNHitPoss ; }
