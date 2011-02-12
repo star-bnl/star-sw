@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: Pileup.h,v 1.1 2008/12/02 23:47:44 prindle Exp $
+ * $Id: Pileup.h,v 1.2 2011/02/12 00:07:04 prindle Exp $
  *
  * Author: Duncan Prindle
  *
@@ -11,10 +11,24 @@
  *     Usually only one of these will be `good', although it is possible for two (or more)
  *     collisions on the same beam crossing.
  *
- *     Probably you want to use
- *         int  nearest(double z, double *dist, int *mult);
- *     which returns the total number of pileup vertices and, if more than 0, the
- *     distance to and multiplicity of the closest.
+ *
+ *
+ *     Probably you want to make a Pileup object at the beginning of your job and call
+ *         int  nearest(StMuDst *muDst, double z, double *dist, int *mult);
+ *     for each event.
+ *     Inputs are:
+ *         muDst    pointer to the StMuDst object containing the event
+ *         z        Usually the z position of the primary vertex of interest.
+ *     Output arguments are:
+ *         dist     Distance from z to the nearest pileup vertex (if a pileup is found).
+ *         mult     Multiplicity associated with this pileup vertex.
+ *     Method returns the number of pileup vertices found.
+ *
+ *     I usually reject events with fabs(z) < 20cm. If you keep a histogram of z you can
+ *     estimate how many good events you rejected, and for 20cm this is usually a small fraction.
+ *
+ *
+ *
  *
  *     We flag vertices with seven possible meanings (in flag).
  *          1) Found vertex in +Z and -Z at same point. Probably good.
@@ -24,9 +38,9 @@
  *                     4 -> Difference between +Z TPC and -Z TPC (z).
  *          2) Offset +Z, -Z vertex matches distance expected for pre pileup
  *             Which = 1 -> Average position (should be actual vertex position), sum of tracks.
- *                     2 -> Apperent position determined by +Z TPC, tracks in +Z TPC
- *                     3 -> Apperent position determined by -Z TPC, tracks in -Z TPC
- *                     4 -> Distancee between vertices minus expected distance
+ *                     2 -> Apparent position determined by +Z TPC, tracks in +Z TPC
+ *                     3 -> Apparent position determined by -Z TPC, tracks in -Z TPC
+ *                     4 -> Distance between vertices minus expected distance
  *          3) Offset +Z, -Z vertex matches distance expected for post pileup
  *             Which : Same meanings as for 2)
  *          4) Expected pre pileup. Found vertex with mFlag=1 is consistent with pre pileup.
@@ -152,6 +166,10 @@ class Pileup : public TObject {
 /**********************************************************************
  *
  * $Log: Pileup.h,v $
+ * Revision 1.2  2011/02/12 00:07:04  prindle
+ * Just changed comments. Hopefully it is understandble how to use the package
+ * just from the comments now.
+ *
  * Revision 1.1  2008/12/02 23:47:44  prindle
  * Code to check for possible pileup. Really belongs in some vertex finding
  * package but is here for now.
