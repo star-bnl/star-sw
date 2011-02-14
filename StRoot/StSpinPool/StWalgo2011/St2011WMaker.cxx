@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.cxx,v 1.1 2011/02/10 20:33:22 balewski Exp $
+// $Id: St2011WMaker.cxx,v 1.2 2011/02/14 02:35:21 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -80,10 +80,10 @@ St2011WMaker::St2011WMaker(const char *name):StMaker(name){
   //... towers
   par_kSigPed=3; // rawADC-ped cut off
   par_AdcThres=8; // ADC threshold to avoid correlated noise
-  par_maxADC=20.; // (adc chan) on the highest tower in events :tmp was 200
+  par_maxADC=200.; // (adc chan) on the highest tower in events :tmp was 200
     
   //... Barrel Algo
-  par_clustET=1.5; // (GeV/c) 2x2 cluster ET :tmp was 15.0 GeV
+  par_clustET=15.; // (GeV/c) 2x2 cluster ET :tmp was 15.0 GeV
   par_clustFrac24=0.95; // ET ratio 2x2/4x4 cluster
   par_nearTotEtFrac=0.88;  // ratio 2x2/near Tot ET 
   par_delR3D=7.; // cm, dist between projected track and center of cluster 
@@ -93,11 +93,11 @@ St2011WMaker::St2011WMaker(const char *name):StMaker(name){
   par_nFitPts=15; // hits on the track
   par_nHitFrac=0.51;
   par_trackRin=90;  par_trackRout=160; // cm
-  par_trackPt=1.5;//GeV :tmp, was 10.0
+  par_trackPt=10.;//GeV :tmp, was 10.0
 
   //... Endcap Algo
   parE_trackEtaMin=0.7; // avoid bad extrapolation to ESMD
-  parE_clustET=1.5; // (GeV/c) 2x1 cluster ET  :tmp was 15.0 GeV
+  parE_clustET=15.; // (GeV/c) 2x1 cluster ET  :tmp was 15.0 GeV
   parE_clustFrac24=0.90; // ET ratio 2x2/4x4 cluster
   parE_nearTotEtFrac=0.85;  // ratio 2x2/near Tot ET 
   parE_delR3D=10.; // cm, dist between projected track and center of cluster 
@@ -108,7 +108,7 @@ St2011WMaker::St2011WMaker(const char *name):StMaker(name){
   parE_nFitPts=5; // hits on the track
   parE_nHitFrac=0.51;
   parE_trackRin=120;  parE_trackRout=70; // cm
-  parE_trackPt=1.5;//GeV :tmp, was 10.0
+  parE_trackPt=10.;//GeV :tmp, was 10.0
   parE_nSmdStrip=20;
 
   //... search for W's
@@ -507,6 +507,9 @@ void St2011WMaker::chainJetFile( const Char_t *file )
 }
 
 // $Log: St2011WMaker.cxx,v $
+// Revision 1.2  2011/02/14 02:35:21  stevens4
+// change back to 10 GeV track pt and 15 GeV cluster ET as default for both B + E algos
+//
 // Revision 1.1  2011/02/10 20:33:22  balewski
 // start
 //
