@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.1 2011/02/10 20:33:22 balewski Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.2 2011/02/14 01:36:17 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -49,6 +49,7 @@ St2011WMaker::findEndcap_W_boson(){
       if(T.cluster.ET /T.nearTotET< parE_nearTotEtFrac) continue; // too large nearET
 
       hE[20]->Fill("noNear",1.);
+      hE[112]->Fill( T.cluster.ET); // for Joe
       hE[50]->Fill(T.awayTpcPT);
       hE[51]->Fill(T.awayBtowET);
       hE[54]->Fill(T.awayTotET);
@@ -86,7 +87,6 @@ St2011WMaker::findEndcap_W_boson(){
         wEve->print();
       }/***************************/
 
-      printf(" JAN quit here W-E algo\n"); break;
       //put final W cut here
       if(T.sPtBalance<parE_ptBalance)  continue;
       //::::::::::::::::::::::::::::::::::::::::::::::::
@@ -324,7 +324,7 @@ St2011WMaker::matchTrack2EtowCluster(){
             
       float trackPT=T.prMuTrack->momentum().perp();
       T.cluster=maxEtow2x1(T.pointTower.iEta,T.pointTower.iPhi,zVert);
-      
+      hE[110]->Fill( T.cluster.ET);
       hE[33]->Fill(T.cluster.ET);
       hE[34]->Fill(T.cluster.adcSum,trackPT);
 
@@ -361,6 +361,7 @@ St2011WMaker::matchTrack2EtowCluster(){
       if(D.Perp()>par_delR3D) continue;
       T.isMatch2Cl=true; // cluster is matched to TPC track
       hE[20]->Fill("#Delta R",1.);
+      hE[111]->Fill( T.cluster.ET);
       
       nTr++;
     }// end of one vertex
@@ -450,6 +451,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.2  2011/02/14 01:36:17  stevens4
+// *** empty log message ***
+//
 // Revision 1.1  2011/02/10 20:33:22  balewski
 // start
 //
