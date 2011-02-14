@@ -1,4 +1,4 @@
-// $Id: St2011W_Ehisto.cxx,v 1.1 2011/02/10 20:33:22 balewski Exp $
+// $Id: St2011W_Ehisto.cxx,v 1.2 2011/02/14 01:36:17 stevens4 Exp $
 //
 //*-- Author :  Endcap: Justin Stevens, IUCF
 
@@ -18,7 +18,7 @@ St2011WMaker::initEHistos(){
   //...... data histograms
   memset(hE,0,sizeof(hE));
   TList *Lx;  TLine *ln;TH1 *h;
-  char txt[1000];
+  char txt[1000], txt0[100];
   int nCase=16;
   hE[0]=h=new TH1F("muEStatEve","Endcap W-algo: event count",nCase,0,nCase);
   h->GetXaxis()->SetTitleOffset(0.4);  h->GetXaxis()->SetLabelSize(0.06);  h->GetXaxis()->SetTitleSize(0.05); h->SetMinimum(0.8);
@@ -48,9 +48,9 @@ St2011WMaker::initEHistos(){
   hE[7]=h=new TH1F("muEDsm2","L2WE-Rnd events DMS spectrum; DSM value",64,-0.5,63.5);
   h->SetMinimum(0.8);
   sprintf(txt,"L2WE-ET events w/ DMS>%d vs.ETOW TP ID bXing; Hanks' TP ID",parE_DsmThres);
-  hE[8]=new TH1F("muEDsm3",txt,300,-0.5,299.5);
+  hE[8]=new TH1F("muEDsm3",txt,90,-0.5,89.5);
   sprintf(txt,"L2WE-ET events w/ DMS>%d & primVertexvs.ETOW TP ID bXing; Hanks' TP ID",parE_DsmThres);
-  hE[9]=h=new TH1F("muEDsm4",txt,300,-0.5,299.5);
+  hE[9]=h=new TH1F("muEDsm4",txt,90,-0.5,89.5);
   h->SetFillColor(kBlue); h->SetLineColor(kBlue);
 
 
@@ -205,7 +205,14 @@ St2011WMaker::initEHistos(){
   hE[100]=h=new TH2F("muE_WXY","Final Endcap W selection: Projected track XY at SMD depth; X (cm); Y (cm)",100,-280,280,100,-280,280);
 
   // free 101-116
-
+  //..... series of electron ET plots after succesive cuts
+  char tt2[][200]={"max 2x1","track matched","no near ET","no away ET"};
+  for(int i=0;i<4;i++){
+    sprintf(txt,"electron candidate, cut=%s; 2x1 ET (GeV)",tt2[i]);
+    sprintf(txt0,"muE_ETlive%d",i);
+    hE[110+i]=h=new TH1F(txt0,txt, 100,0,100);
+  }
+  
   hE[132]=h=new TH2F("muEptBalance_clust","ptBalance vs cluster ET; 2x2 Cluster ET; ptBalance",100,0,100,100,0,100);
   hE[133]=h=new TH2F("muEptBalance_awayTot","ptBalance vs awayside PT; awayside PT; ptBalance",100,0,100,100,0,100);
 

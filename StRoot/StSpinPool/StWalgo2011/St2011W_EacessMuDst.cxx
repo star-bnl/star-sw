@@ -1,4 +1,4 @@
-// $Id: St2011W_EacessMuDst.cxx,v 1.1 2011/02/10 20:33:22 balewski Exp $
+// $Id: St2011W_EacessMuDst.cxx,v 1.2 2011/02/14 01:36:17 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -86,6 +86,10 @@ St2011WMaker::accessEndcapTrig(){ // return non-zero on abort
   
   if(wEve->l2EbitRnd) {
     hE[0]->Fill("L2ewRnd",1.);
+    for (int m=0;m<90;m++){
+      int val=muEve->emcTriggerDetector().highTowerEndcap(m);
+      hE[7]->Fill(val);
+    }
     hE[61]->Fill(wEve->bx7);
   }
   
@@ -100,7 +104,6 @@ St2011WMaker::accessEndcapTrig(){ // return non-zero on abort
   for (int m=0;m<90;m++)	{
     int val=muEve->emcTriggerDetector().highTowerEndcap(m);
     if(wEve->l2EbitET) hE[6]->Fill(val);
-    if(wEve->l2EbitRnd) hE[7]->Fill(val);
     if(val<parE_DsmThres) continue;
     if(wEve->l2EbitET) hE[8]->Fill(m);
     //printf("Fired L0 EHT m=%d val=%d\n",m,val);
@@ -255,6 +258,9 @@ St2011WMaker::accessESMD(){
 
 
 //$Log: St2011W_EacessMuDst.cxx,v $
+//Revision 1.2  2011/02/14 01:36:17  stevens4
+//*** empty log message ***
+//
 //Revision 1.1  2011/02/10 20:33:22  balewski
 //start
 //

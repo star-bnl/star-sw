@@ -757,51 +757,8 @@ void doAllMC(){
 
 
 // $Log: plEana.C,v $
+// Revision 1.2  2011/02/14 01:37:56  stevens4
+// *** empty log message ***
+//
 // Revision 1.1  2011/02/10 20:33:34  balewski
 // start
-//
-// Revision 1.16  2010/03/22 16:11:44  balewski
-// better computation of AL(QCD)
-//
-// Revision 1.15  2010/03/20 18:38:43  balewski
-// *** empty log message ***
-//
-// Revision 1.14  2010/03/18 16:52:19  balewski
-// corrected sPtBalance for no-endcap
-//
-// Revision 1.13  2010/03/15 17:05:51  balewski
-// cleanup, used for W AL sort March 15, 2010
-//
-// Revision 1.12  2010/03/14 22:50:34  balewski
-// *** empty log message ***
-//
-// Revision 1.11  2010/02/04 03:48:25  balewski
-// add ET for lumi monitor
-//
-// Revision 1.10  2010/01/30 02:02:56  balewski
-// manore tunes
-//
-// Revision 1.9  2010/01/28 20:10:08  balewski
-// added eta dependent spin sorting
-//
-// Revision 1.8  2010/01/27 22:12:26  balewski
-// spin code matched to x-section code
-//
-// Revision 1.7  2010/01/26 19:28:07  balewski
-// added pt-balanc eplots
-//
-// Revision 1.6  2010/01/21 00:15:30  balewski
-// added sector & run  dependent TPC cuts on Rin, Rout
-//
-// Revision 1.4  2010/01/10 03:01:39  balewski
-// cleanup & nicer histos
-//
-// Revision 1.3  2009/12/30 18:37:08  balewski
-// code tagged in the form close to that used for the Fall 2009 DNP preliminary Jacobian peak
-//
-// Revision 1.2  2009/12/08 16:53:01  balewski
-// *** empty log message ***
-//
-// Revision 1.1  2009/11/23 23:00:20  balewski
-// code moved spin-pool
-//
