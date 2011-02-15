@@ -888,7 +888,7 @@ void BEMCPlots::processEvent( char *datap
 		  {
 		    BEMCGeom->getEta(softId, eta);
 		    BEMCGeom->getPhi(softId, iphi);
-		    if (this->mHist_ADCEtaPhi_TowHits) this->mHist_ADCEtaPhi_TowHits->Fill(iphi, eta);
+		    if ((this->mHist_ADCEtaPhi_TowHits) && (this->mTowerData[softId - 1][0] != 0) ) this->mHist_ADCEtaPhi_TowHits->Fill(iphi, eta);
 		  }
 		
 		if ((softId >= 1) && (softId <= 4800)) {
