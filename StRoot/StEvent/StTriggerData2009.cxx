@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.27 2011/01/18 23:06:07 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.28 2011/02/15 18:56:09 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.28  2011/02/15 18:56:09  ullrich
+ * New access fct for ZDCSMD, new ZDCSMD map, spinBit() modified.
+ *
  * Revision 2.27  2011/01/18 23:06:07  ullrich
  * New function mtdgemAtAddress added. vpdADC, vpdTDC, vpdADCHighThr, vpdTDCHighThr, vpdEarliestTDC, and vpdEarliestTDCHighThr updated.
  *
@@ -356,7 +359,11 @@ unsigned int StTriggerData2009::bunchId7Bit() const
 
 unsigned int StTriggerData2009::spinBit() const
 {
+  if(mRun<12000000){
     return (L1_DSM->lastDSM[7]/16)%256;
+  }else{
+    return (L1_DSM->lastDSM[4]/16)%256;
+  }
 }
 
 unsigned int StTriggerData2009::spinBitYellowFilled() const
@@ -620,10 +627,22 @@ unsigned short StTriggerData2009::zdcSMD(StBeamDirection eastwest, int verthori,
         { { 15, 14, 13, 12, 11, 10,  9,  2} , 
           {  8,  7,  6,  5,  4,  3,  0,  1} }
     };
+    static const int zdcsmd_map2011[2][2][8] ={
+        { {24, 25, 26, 27, 28, 29, 30, 31} ,
+	  {16, 17, 18, 19, 20, 21, 22, 23} } ,
+        { {8,  9,  10, 11, 12, 13, 14, 15} ,
+	  {0,  1,  2,  3,  4,  5,  6,  7} }
+    };
     if (verthori<0 || verthori>1) return 0;
     if (strip<1 || strip>8) return 0;  
     int buffer = prepostAddress(prepost);
-    if (buffer >= 0) return mxq[buffer][4][zdcsmd_map[eastwest][verthori][strip-1]];
+    if (buffer >= 0) {
+        if(mRun<12034085){
+	    return mxq[buffer][4][zdcsmd_map[eastwest][verthori][strip-1]];
+        }else{
+	    return mxq[buffer][4][zdcsmd_map2011[eastwest][verthori][strip-1]];
+        }
+    }
     return 0;
 }
 
@@ -632,8 +651,13 @@ unsigned short StTriggerData2009::zdcEarliestTDC(StBeamDirection eastwest, int p
     int buffer = prepostAddress(prepost);
     if (buffer >=0){
         if (mBBC[buffer]){
+	  if(mRun<12000000){
             if (eastwest==east) {return ((mBBC[buffer]->ZDClayer1[3] >> 12) % 16) | ((mBBC[buffer]->ZDClayer1[2] % 256) << 4);}
-            else               {return (mBBC[buffer]->ZDClayer1[3]) % 4096;}
+            else                {return (mBBC[buffer]->ZDClayer1[3]) % 4096;}
+	  }else{
+	    if (eastwest==east) {return ((mBBC[buffer]->ZDClayer1[3] >> 10) % 64) | ((mBBC[buffer]->ZDClayer1[2] % 16) << 6);}
+	    else                {return (mBBC[buffer]->ZDClayer1[3]) % 1024;}	    
+	  }
         }
     }
     return 0;
@@ -643,8 +667,13 @@ bool StTriggerData2009::zdcSumADCaboveThreshold(StBeamDirection eastwest, int pr
     int buffer = prepostAddress(prepost);
     if (buffer >=0){
         if (mBBC[buffer]){
+	  if(mRun<12000000){
             if (eastwest==east) {return mBBC[buffer]->ZDClayer1[2] & (1 << (27-16));}
-            else               {return mBBC[buffer]->ZDClayer1[2] & (1 << (24-16));}
+            else                {return mBBC[buffer]->ZDClayer1[2] & (1 << (24-16));}
+	  }else{
+	    if (eastwest==east) {return mBBC[buffer]->ZDClayer1[2] & (1 << (25-16));}
+	    else                {return mBBC[buffer]->ZDClayer1[2] & (1 << (22-16));}
+	  }
         }
     }
     return 0;
@@ -654,8 +683,13 @@ bool StTriggerData2009::zdcFrontADCaboveThreshold(StBeamDirection eastwest, int 
     int buffer = prepostAddress(prepost);
     if (buffer >=0){
         if (mBBC[buffer]){
+	  if(mRun<12000000){
             if (eastwest==east) {return mBBC[buffer]->ZDClayer1[2] & (1 << (29-16));}
-            else               {return mBBC[buffer]->ZDClayer1[2] & (1 << (26-16));}
+            else                {return mBBC[buffer]->ZDClayer1[2] & (1 << (26-16));}
+	  }else{
+	    if (eastwest==east) {return mBBC[buffer]->ZDClayer1[2] & (1 << (23-16));}
+	    else                {return mBBC[buffer]->ZDClayer1[2] & (1 << (20-16));}
+	  }
         }
     }
     return 0;
@@ -665,8 +699,13 @@ bool StTriggerData2009::zdcBackADCaboveThreshold(StBeamDirection eastwest, int p
     int buffer = prepostAddress(prepost);
     if (buffer >=0){
         if (mBBC[buffer]){
+	  if(mRun<12000000){
             if (eastwest==east) {return mBBC[buffer]->ZDClayer1[2] & (1 << (28-16));}
-            else               {return mBBC[buffer]->ZDClayer1[2] & (1 << (25-16));}
+            else                {return mBBC[buffer]->ZDClayer1[2] & (1 << (25-16));}
+	  }else{
+	    if (eastwest==east) {return mBBC[buffer]->ZDClayer1[2] & (1 << (24-16));}
+	    else                {return mBBC[buffer]->ZDClayer1[2] & (1 << (21-16));}
+	  }
         }
     }
     return 0;
@@ -690,20 +729,51 @@ bool StTriggerData2009::zdcBackADCaboveThresholdL2(StBeamDirection eastwest) con
 }
 
 bool StTriggerData2009::zdcSumADCaboveThresholdL3(StBeamDirection eastwest) const {
-    return lastDSM(2) & (1 << ((eastwest==east) ? 7 : 8));
+  if(mRun<12000000){ return lastDSM(2) & (1 << ((eastwest==east) ? 7 : 8)); }
+  else             { return lastDSM(1) & (1 << ((eastwest==east) ? 7 : 8)); }
 }
 
 bool StTriggerData2009::zdcFrontADCaboveThresholdL3(StBeamDirection eastwest) const {
-    return lastDSM(2) & (1 << ((eastwest==east) ? 9 : 11));
+  if(mRun<12000000){ return lastDSM(2) & (1 << ((eastwest==east) ? 9 : 11)); }
+  else             { return lastDSM(1) & (1 << ((eastwest==east) ? 9 : 11)); }
 }
 
 bool StTriggerData2009::zdcBackADCaboveThresholdL3(StBeamDirection eastwest) const {
-    return lastDSM(2) & (1 << ((eastwest==east) ? 10 : 12));
+  if(mRun<12000000){ return lastDSM(2) & (1 << ((eastwest==east) ? 10 : 12)); }
+  else             { return lastDSM(1) & (1 << ((eastwest==east) ? 10 : 12)); }
 }
 
 bool StTriggerData2009::zdcTimeDifferenceInWindow() const
 {
-    return lastDSM(2) & (1 << 6);
+  if(mRun<12000000){ return lastDSM(2) & (1 << 6); }
+  else             { return lastDSM(1) & (1 << 6); }
+}
+
+unsigned short StTriggerData2009::zdcSMDHighestStrip(StBeamDirection eastwest, int verthori, int prepost) const
+{
+  if(mRun<12000000) return 0;
+  // copy of the scaler output from ZDC SMD QT is sent to ZD101 J2
+  int buffer = prepostAddress(prepost);
+  if (buffer >=0){
+    if (mBBC[buffer]){
+      if (eastwest==east) {return (mBBC[buffer]->ZDClayer1[1] >> (verthori ? 6 : 9)) % 8;}
+      else {return (mBBC[buffer]->ZDClayer1[1] >> (verthori ? 0 : 3)) % 8;}
+    }
+  }
+  return 0;
+}
+
+unsigned short StTriggerData2009::zdcTruncatedSum(StBeamDirection eastwest, int prepost) const
+{
+  if(mRun<12000000) return 0;
+  int buffer = prepostAddress(prepost);
+  if (buffer >=0){
+    if (mBBC[buffer]){
+      if (eastwest==east) {return (mBBC[buffer]->ZDClayer1[2] >> (26-16)) % 8;}
+      else {return (mBBC[buffer]->ZDClayer1[2] >> (29-16)) % 8;}
+    }
+  }
+  return 0;
 }
 
 unsigned short StTriggerData2009::pp2ppADC(StBeamDirection eastwest, int vh, int udio, int ch, int prepost) const

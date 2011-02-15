@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2009.h,v 2.17 2011/01/18 23:06:07 ullrich Exp $
+ * $Id: StTriggerData2009.h,v 2.18 2011/02/15 18:56:09 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.h,v $
+ * Revision 2.18  2011/02/15 18:56:09  ullrich
+ * New access fct for ZDCSMD, new ZDCSMD map, spinBit() modified.
+ *
  * Revision 2.17  2011/01/18 23:06:07  ullrich
  * New function mtdgemAtAddress added. vpdADC, vpdTDC, vpdADCHighThr, vpdTDCHighThr, vpdEarliestTDC, and vpdEarliestTDCHighThr updated.
  *
@@ -170,12 +173,13 @@ public:
     bool zdcSumADCaboveThreshold(StBeamDirection eastwest, int prepost=0) const;
     bool zdcFrontADCaboveThreshold(StBeamDirection eastwest, int prepost=0) const;
     bool zdcBackADCaboveThreshold(StBeamDirection eastwest, int prepost=0) const;
-     //ZDC DSM L2
+    unsigned short zdcTruncatedSum(StBeamDirection eastwest, int prepost=0) const;
+    //ZDC DSM L2
     bool zdcSumADCaboveThresholdL2(StBeamDirection eastwest) const;
     bool zdcFrontADCaboveThresholdL2(StBeamDirection eastwest) const;
     bool zdcBackADCaboveThresholdL2(StBeamDirection eastwest) const;
     unsigned short zdcTimeDifference() const;
-     //ZDC Last DSM
+    //ZDC Last DSM
     bool zdcSumADCaboveThresholdL3(StBeamDirection eastwest) const;
     bool zdcFrontADCaboveThresholdL3(StBeamDirection eastwest) const;
     bool zdcBackADCaboveThresholdL3(StBeamDirection eastwest) const;
@@ -183,8 +187,9 @@ public:
     
     //ZDCSMD
     bool zdcSMDPresent(int prepost=0) const;
-    unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost=0) const;
-    
+    unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost=0) const; 
+    unsigned short zdcSMDHighestStrip(StBeamDirection eastwest, int verthori, int prepost=0) const;   
+
     // EMC
     unsigned char bemcHighTower(int patch_id, int prepost=0) const;
     unsigned char bemcJetPatch (int patch_id, int prepost=0) const;
