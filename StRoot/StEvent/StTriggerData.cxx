@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.16 2011/01/18 23:06:07 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.17 2011/02/15 18:56:08 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.17  2011/02/15 18:56:08  ullrich
+ * New access fct for ZDCSMD, new ZDCSMD map, spinBit() modified.
+ *
  * Revision 2.16  2011/01/18 23:06:07  ullrich
  * New function mtdgemAtAddress added. vpdADC, vpdTDC, vpdADCHighThr, vpdTDCHighThr, vpdEarliestTDC, and vpdEarliestTDCHighThr updated.
  *
@@ -61,7 +64,7 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.16 2011/01/18 23:06:07 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.17 2011/02/15 18:56:08 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
@@ -200,6 +203,8 @@ bool StTriggerData::zdcFrontADCaboveThresholdL3(StBeamDirection eastwest) const 
 bool StTriggerData::zdcBackADCaboveThresholdL3(StBeamDirection eastwest) const {return 0;}
 bool StTriggerData::zdcTimeDifferenceInWindow() const {return 0;}
 bool StTriggerData::zdcSMDPresent(int prepost) const {return 1;}
+unsigned short StTriggerData::zdcTruncatedSum(StBeamDirection eastwest, int prepost) const {return 0;}
+unsigned short StTriggerData::zdcSMDHighestStrip(StBeamDirection eastwest, int verthori, int prepost) const {return 0;}
 unsigned short StTriggerData::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost) const {return 0;}
 unsigned char  StTriggerData::bemcHighTower(int patch_id, int prepost) const {return 0;}
 unsigned char  StTriggerData::bemcJetPatch (int patch_id, int prepost) const {return 0;}

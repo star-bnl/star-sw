@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.36 2011/01/18 23:06:07 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.37 2011/02/15 18:56:09 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.37  2011/02/15 18:56:09  ullrich
+ * New access fct for ZDCSMD, new ZDCSMD map, spinBit() modified.
+ *
  * Revision 2.36  2011/01/18 23:06:07  ullrich
  * New function mtdgemAtAddress added. vpdADC, vpdTDC, vpdADCHighThr, vpdTDCHighThr, vpdEarliestTDC, and vpdEarliestTDCHighThr updated.
  *
@@ -218,6 +221,7 @@ public:
     virtual bool zdcSumADCaboveThreshold(StBeamDirection eastwest, int prepost=0) const;
     virtual bool zdcFrontADCaboveThreshold(StBeamDirection eastwest, int prepost=0) const;
     virtual bool zdcBackADCaboveThreshold(StBeamDirection eastwest, int prepost=0) const;
+    virtual unsigned short zdcTruncatedSum(StBeamDirection eastwest, int prepost=0) const;
     // ZDC DSM L2
     virtual bool zdcSumADCaboveThresholdL2(StBeamDirection eastwest) const;
     virtual bool zdcFrontADCaboveThresholdL2(StBeamDirection eastwest) const;
@@ -232,7 +236,8 @@ public:
     //ZDCSMD
     virtual bool zdcSMDPresent(int prepost=0) const;
     virtual unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost=0) const;
-  
+    virtual unsigned short zdcSMDHighestStrip(StBeamDirection eastwest, int verthori, int prepost=0) const;
+
     // EMC
     virtual unsigned char bemcHighTower(int patch_id, int prepost=0) const;
     virtual unsigned char bemcJetPatch (int patch_id, int prepost=0) const;
