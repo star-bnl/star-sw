@@ -1,4 +1,4 @@
-// $Id: St2011W_acessMuDst.cxx,v 1.2 2011/02/14 01:36:17 stevens4 Exp $
+// $Id: St2011W_acessMuDst.cxx,v 1.3 2011/02/15 17:39:12 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -115,7 +115,6 @@ St2011WMaker::accessBarrelTrig(){ // return non-zero on abort
 
   wEve->l2bitET=(l2algo->trigger&2)>0;  // bit1=ET>thr
   wEve->l2bitRnd=(l2algo->trigger&1)>0; // bit0=rnd,
-  wEve->l2bitRnd=wEve->l2bitET=1;//tmp to full WB-algo
 
   if( (wEve->l2bitRnd || wEve->l2bitET)==0) return -3; // L2W-algo did not accept this event
   hA[0]->Fill("L2bwBits",1.); // confirmation bits were set properly
@@ -583,6 +582,9 @@ St2011WMaker::accessBSMD(){
 
 
 //$Log: St2011W_acessMuDst.cxx,v $
+//Revision 1.3  2011/02/15 17:39:12  stevens4
+//remove accept-all for L2btowW bits
+//
 //Revision 1.2  2011/02/14 01:36:17  stevens4
 //*** empty log message ***
 //
