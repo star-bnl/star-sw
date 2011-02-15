@@ -1,8 +1,6 @@
 TCanvas *can=0;
 const float PI=2*acos(0);
 TString spinPre='A';
-
-
 /* to fix/change colors of lines embedded in histos do:
 root [5] TLine* ln = (TLine*)muWET->GetListOfFunctions()->At(0)
 root [6] ln->SetLineColor(kRed)
@@ -12,19 +10,10 @@ root [7] muWET->Draw()
 // Endcap reco algo
 
 //=================================================
-plEana(  int page=0,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
-  iPath="./out/";
-  core0="st_W_12037041_raw_1400001";
- //core0="R12038080.lis";
-  //iPath="/star/u/stevens4/endcapW/outMC/";
-  //core0="rcn10010"; 
-  //core0="acn10010_39_100evts"; 
-  //core0="all";
-  //core0="R10102105";
-  //core0="run9setP1234";
+plEana(  int page=0,int pl=0, char *core0="", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
     
   if(page==0) {
-    doAll();
+    doAll(core0,iPath);
     return;
   }
   if(page==-1) {
@@ -41,7 +30,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   char *nameB[]={"muEVRf","muEZv","muENV","muEbX48"};//pg 2
   char *nameC[]={"muEbX7","muEbX7v"};//pg 3
   char *nameD[]={"muEDsm1","muEDsm2","muEDsm3","muEDsm4"};//pg 4
-  char *nameE[]={"muETrNfit","muETrFitFrac","muETrch2","muETrRxyIn","muETrRxyOut","muTrch2b"};//pg 5
+  char *nameE[]={"muETrNfit","muETrFitFrac","muETrch2","muETrRxyIn","muETrRxyOut","muETrch2b"};//pg 5
   char *nameF[]={"muETr2D1","muETrPt1","muETrPt1N","muETrPt1Pr","muETrPt1NPr"};//pg 6
   char *nameG[]={"muEeXY","muEmaxAdc","muEtotAdc","muEclAdcPt","muEclET"};//pg 7
   char *nameH[]={"muEclET24","muEclE242D","muEclET24R"};//pg 8
@@ -52,12 +41,12 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
   char *nameM[]={"muETwayET","muEBwayET","muEEclETPt","muEEwayET"};//pg 12
   
   char *nameW[]={"muETotwayET2D","muEsPtBalance_clust","muE_WET","muE_W2D1"};//pg 13
-  char *namePB[]={"musPtBalance_clust", "musPtBalance_awayTot","muE_Weta","muE_WXY"};// pg 14 -Pt-Balance plots
+  char *namePB[]={"muEsPtBalance_clust", "muEsPtBalance_awayTot","muE_Weta","muE_WXY"};// pg 14 -Pt-Balance plots
   //pg 15 blank -> add ESMD plots
   char *nameN[]={"muETrdEdX","muE_Wdedx"}; //pg 16
   char *nameO[]={"muE_WglDca","muE_WglDcaSP","muE_WglDcaSN"}; // pg 17
   
-  char *nameP[]={"muETlive0","muETlive1","muETlive2","muETlive3","muE_Wcar1","muE_Wcar2","muE_Wcar3"}; // pg 18
+  char *nameP[]={"muE_ETlive0","muE_ETlive1","muE_ETlive2","muE_ETlive3","muE_Wcar1","muE_Wcar2","muE_Wcar3"}; // pg 18
   
   //add pub histograms for q/pt plots etc.
 
@@ -84,7 +73,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     printf("Opened: %s\n",fullInpName.Data());
   }
   if(page==1){ 
-   fd->ls(); 
+   //fd->ls(); 
    h0=(TH1*)fd->Get("muStatEve"); assert(h0);
    printf("%s: ",h0->GetName());
    for(int k=1;k<=10;k++) printf("%.0f, ",h0->GetBinContent(k));
@@ -631,7 +620,7 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
  case 42:{    sprintf(padTit,"TPC accepted tracks, %s",core0);
     can=new TCanvas("aa","aa",800,600);    TPad *c=makeTitle(can,padTit,page);
     c->Divide(2,1);gStyle->SetOptStat(10);
-    h2=muTr2D1; // cumulative
+    h2=muETr2D1; // cumulative
     c->cd(1); h2->Draw("colz");
     c->cd(2);
   
@@ -727,17 +716,17 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 }
 
 //============================
-void doAll(){
+void doAll(char *core0="", char *iPath=""){
   for(int i=1;i<=18;i++)  { 
     if(i==15) continue;
-    plEana(i,2);
+    plEana(i,2,core0,iPath);
   }
 
   //for(int i = 27; i<=29; i++) plEana(i,2);
  
   
   // TPC by sector:
-  for(int i=30;i<=42;i++)  plEana(i,2);
+  for(int i=30;i<=42;i++)  plEana(i,2,core0,iPath);
 
 }
 
@@ -757,8 +746,54 @@ void doAllMC(){
 
 
 // $Log: plEana.C,v $
-// Revision 1.2  2011/02/14 01:37:56  stevens4
-// *** empty log message ***
+// Revision 1.3  2011/02/15 17:34:11  stevens4
+// update plotting macros
 //
 // Revision 1.1  2011/02/10 20:33:34  balewski
 // start
+//
+// Revision 1.16  2010/03/22 16:11:44  balewski
+// better computation of AL(QCD)
+//
+// Revision 1.15  2010/03/20 18:38:43  balewski
+// *** empty log message ***
+//
+// Revision 1.14  2010/03/18 16:52:19  balewski
+// corrected sPtBalance for no-endcap
+//
+// Revision 1.13  2010/03/15 17:05:51  balewski
+// cleanup, used for W AL sort March 15, 2010
+//
+// Revision 1.12  2010/03/14 22:50:34  balewski
+// *** empty log message ***
+//
+// Revision 1.11  2010/02/04 03:48:25  balewski
+// add ET for lumi monitor
+//
+// Revision 1.10  2010/01/30 02:02:56  balewski
+// manore tunes
+//
+// Revision 1.9  2010/01/28 20:10:08  balewski
+// added eta dependent spin sorting
+//
+// Revision 1.8  2010/01/27 22:12:26  balewski
+// spin code matched to x-section code
+//
+// Revision 1.7  2010/01/26 19:28:07  balewski
+// added pt-balanc eplots
+//
+// Revision 1.6  2010/01/21 00:15:30  balewski
+// added sector & run  dependent TPC cuts on Rin, Rout
+//
+// Revision 1.4  2010/01/10 03:01:39  balewski
+// cleanup & nicer histos
+//
+// Revision 1.3  2009/12/30 18:37:08  balewski
+// code tagged in the form close to that used for the Fall 2009 DNP preliminary Jacobian peak
+//
+// Revision 1.2  2009/12/08 16:53:01  balewski
+// *** empty log message ***
+//
+// Revision 1.1  2009/11/23 23:00:20  balewski
+// code moved spin-pool
+//

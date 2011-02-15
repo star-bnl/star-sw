@@ -8,20 +8,11 @@ root [7] muWET->Draw()
 */
 
 //=================================================
-plWana(  int page=0,int pl=0, char *core0="R10096140", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
-  //iPath="./";
-  //iPath="/star/data05/scratch/stevens4/wAnalysis";
-  iPath="./out/";
-  //core0="st_W_10100015_raw_6180001";
-  core0="st_W_12037041_raw_1400001";
-  //core0="R12037063.lis"; // all trg
-  //core0="st_physics_12033043_raw_5010001"; //MB
-  //core0="st_physics_12033048_raw_1010001";
-  //core0="run9setABCD";
-  //core0="mcSetD1_ppWprod";
-  
+plWana(  int page=0,int pl=0, char *core0="", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
+  //cout<<iPath<<core0<<endl;
+
   if(page==0) {
-    doAll();
+    doAll(core0,iPath);
     return;
   }
   if(page==-1) {
@@ -81,7 +72,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
     printf("Opened: %s\n",fullInpName.Data());
   }
   if(page==1){ 
-   fd->ls(); 
+   //fd->ls(); 
    h0=(TH1*)fd->Get("muStatEve"); assert(h0);
    printf("%s: ",h0->GetName());
    for(int k=1;k<=10;k++) printf("%.0f, ",h0->GetBinContent(k));
@@ -689,12 +680,12 @@ TPad *makeTitle(TCanvas *c,char *core, int page) {
 }
 
 //============================
-void doAll(){
+void doAll(char *core0="", char *iPath=""){
   for(int i=1;i<=23;i++)  { 
-    plWana(i,2);
+    plWana(i,2,core0,iPath);
   }
   // TPC by sector:
-  for(int i=30;i<=42;i++)  plWana(i,2);
+  for(int i=30;i<=42;i++)  plWana(i,2,core0,iPath);
 
 }
 
@@ -712,6 +703,9 @@ void doAllMC(){
 
 
 // $Log: plWana.C,v $
+// Revision 1.2  2011/02/15 17:34:15  stevens4
+// update plotting macros
+//
 // Revision 1.1  2011/02/10 20:33:35  balewski
 // start
 //
