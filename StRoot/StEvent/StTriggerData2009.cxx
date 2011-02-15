@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.28 2011/02/15 18:56:09 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.29 2011/02/15 21:49:33 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.29  2011/02/15 21:49:33  ullrich
+ * MTD code only for runs after 12003001.
+ *
  * Revision 2.28  2011/02/15 18:56:09  ullrich
  * New access fct for ZDCSMD, new ZDCSMD map, spinBit() modified.
  *
@@ -1192,6 +1195,7 @@ unsigned short StTriggerData2009::mtdAtAddress(int address, int prepost) const
 
 unsigned short StTriggerData2009::mtdgemAtAddress(int address, int prepost) const
 {
+    if (mRun<=12003001) return 0;
     int buffer = prepostAddress(prepost);
     if (buffer >= 0 && address>=0 && address<32) return mxq[buffer][10][address];
     return 0;
