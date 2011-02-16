@@ -16,7 +16,7 @@ ClassImp(StTinyMcTrack);
 //________________________________________________________________________________
 void StTinyMcTrack::setGeantId(int val) 
 {
-  assert(val>0 && val <= 0xFFFF);
+  assert(val>=0 && val <= 0xFFFF);
   mGeantId=val; 
 }
 //________________________________________________________________________________
@@ -48,6 +48,9 @@ void StTinyMcTrack::Print(Option_t *option) const {
 }
 //
 // $Log: StTinyMcTrack.cxx,v $
+// Revision 1.6  2011/02/16 00:49:06  perev
+// geandId could be zero
+//
 // Revision 1.5  2011/02/11 03:32:14  perev
 // geantid now is ushort
 //
