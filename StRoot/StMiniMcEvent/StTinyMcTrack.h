@@ -1,5 +1,5 @@
 /**
- * $Id: StTinyMcTrack.h,v 1.10 2011/02/16 00:49:48 perev Exp $
+ * $Id: StTinyMcTrack.h,v 1.11 2011/02/16 16:46:30 perev Exp $
  * \file  StTinyMcTrack.h
  * \brief   Persistent MC track class.
  * 
@@ -38,10 +38,10 @@ class StTinyMcTrack : public TObject {
   void setNEsmduHitMc(Short_t val) { mNEsmduHitMc=val; }
   void setNEsmdvHitMc(Short_t val) { mNEsmdvHitMc=val; }
   void setGeantId(int val);
-  void setPdgId(int val);
-  void setChargeMc(Short_t val) { mChargeMc=val; }
-  void setNAssocGl(Short_t val) { mNAssocGl=val; }
-  void setNAssocPr(Short_t val) { mNAssocPr=val; }
+  void setPdgId(int val)	{ mPdgId   = val; }
+  void setChargeMc(Short_t val) { mChargeMc= val; }
+  void setNAssocGl(Short_t val) { mNAssocGl= val; }
+  void setNAssocPr(Short_t val) { mNAssocPr= val; }
   void setStopR(Float_t val) { mStopR=val; }
   void setKey(Short_t val) { mKey=val; }
   void setPrimary(Bool_t val) { mIsPrimary = val;}
@@ -127,6 +127,9 @@ private:
 #endif
 //
 // $Log: StTinyMcTrack.h,v $
+// Revision 1.11  2011/02/16 16:46:30  perev
+// setPdgId imp added
+//
 // Revision 1.10  2011/02/16 00:49:48  perev
 // mPdgId added
 //
