@@ -1,4 +1,4 @@
-// $Id: St2011W_acessMuDst.cxx,v 1.3 2011/02/15 17:39:12 stevens4 Exp $
+// $Id: St2011W_acessMuDst.cxx,v 1.4 2011/02/16 15:25:16 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -562,7 +562,6 @@ St2011WMaker::accessBSMD(){
 	adc-=pedRes;
 	if(adc>0) n4++;
 	if(adc<par_kSigPed*sigPed) continue;
-	adc*=gain; // use Willie's relative gains for run9 data
       }
       
       n5++;
@@ -582,6 +581,9 @@ St2011WMaker::accessBSMD(){
 
 
 //$Log: St2011W_acessMuDst.cxx,v $
+//Revision 1.4  2011/02/16 15:25:16  stevens4
+//remove relative gain correction for BSMD adc
+//
 //Revision 1.3  2011/02/15 17:39:12  stevens4
 //remove accept-all for L2btowW bits
 //
