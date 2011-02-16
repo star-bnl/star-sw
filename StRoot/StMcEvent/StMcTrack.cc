@@ -9,11 +9,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.27 2011/01/26 19:46:24 perev Exp $
+ * $Id: StMcTrack.cc,v 2.28 2011/02/16 00:47:59 perev Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.cc,v $
+ * Revision 2.28  2011/02/16 00:47:59  perev
+ * mGeantId>=0 && mGeantId<=0
+ *
  * Revision 2.27  2011/01/26 19:46:24  perev
  * FPD ==> STAR Soft
  *
@@ -65,8 +68,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.27 2011/01/26 19:46:24 perev Exp $
+ * $Id: StMcTrack.cc,v 2.28 2011/02/16 00:47:59 perev Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.28  2011/02/16 00:47:59  perev
+ * mGeantId>=0 && mGeantId<=0
+ *
  * Revision 2.27  2011/01/26 19:46:24  perev
  * FPD ==> STAR Soft
  *
@@ -173,6 +179,7 @@
  *
  **************************************************************************/
 #include <algorithm>
+#include <assert.h>
 #ifndef ST_NO_NAMESPACES
 using std::find;
 #endif
@@ -186,7 +193,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.27 2011/01/26 19:46:24 perev Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.28 2011/02/16 00:47:59 perev Exp $";
 
 ClassImp(StMcTrack);
 
@@ -205,6 +212,7 @@ StMcTrack::StMcTrack(g2t_track_st* trk) {
     mFourMomentum.setE(trk->e);
     mIsShower = trk->is_shower;
     mGeantId = trk->ge_pid;
+    assert(mGeantId>0 && mGeantId<=0xFFFF);
     mPdgId   = trk->eg_pid;
     mKey     = trk->id;
     mParticleDefinition = StParticleTable::instance()->findParticleByGeantId(trk->ge_pid);
@@ -437,7 +445,7 @@ void StMcTrack::setFgtHits(StPtrVecMcFgtHit& val) { mFgtHits = val; }
 
 void StMcTrack::setShower(char val) { mIsShower = val; }
 
-void StMcTrack::setGeantId(long val) { mGeantId = val; }
+void StMcTrack::setGeantId(long val) { mGeantId = val; assert(mGeantId>=0 && mGeantId<=0xFFFF); }
 
 void StMcTrack::setPdgId(long val) { mPdgId = val; }
 
