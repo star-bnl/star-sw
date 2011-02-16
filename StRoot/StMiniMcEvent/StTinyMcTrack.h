@@ -1,5 +1,5 @@
 /**
- * $Id: StTinyMcTrack.h,v 1.9 2011/02/11 03:32:14 perev Exp $
+ * $Id: StTinyMcTrack.h,v 1.10 2011/02/16 00:49:48 perev Exp $
  * \file  StTinyMcTrack.h
  * \brief   Persistent MC track class.
  * 
@@ -38,6 +38,7 @@ class StTinyMcTrack : public TObject {
   void setNEsmduHitMc(Short_t val) { mNEsmduHitMc=val; }
   void setNEsmdvHitMc(Short_t val) { mNEsmdvHitMc=val; }
   void setGeantId(int val);
+  void setPdgId(int val);
   void setChargeMc(Short_t val) { mChargeMc=val; }
   void setNAssocGl(Short_t val) { mNAssocGl=val; }
   void setNAssocPr(Short_t val) { mNAssocPr=val; }
@@ -105,6 +106,7 @@ private:
   Short_t    mNEsmduHitMc;
   Short_t    mNEsmdvHitMc;
   UShort_t   mGeantId;
+  Int_t      mPdgId;
   Short_t    mChargeMc;
   Float_t    mStopR;
   Short_t    mKey;
@@ -125,6 +127,9 @@ private:
 #endif
 //
 // $Log: StTinyMcTrack.h,v $
+// Revision 1.10  2011/02/16 00:49:48  perev
+// mPdgId added
+//
 // Revision 1.9  2011/02/11 03:32:14  perev
 // geantid now is ushort
 //
