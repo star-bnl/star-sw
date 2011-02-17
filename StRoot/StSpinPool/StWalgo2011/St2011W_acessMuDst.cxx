@@ -1,4 +1,4 @@
-// $Id: St2011W_acessMuDst.cxx,v 1.4 2011/02/16 15:25:16 stevens4 Exp $
+// $Id: St2011W_acessMuDst.cxx,v 1.5 2011/02/17 04:16:20 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -276,6 +276,12 @@ St2011WMaker::accessTracks(){ // return non-zero on abort
 	hA[22]->Fill(hitFrac);
 	hA[23]->Fill(ri.perp());
 	hA[24]->Fill(ro.perp());
+
+	//TPC sector dependent filter 
+	int secID=WtpcFilter::getTpcSec(ro.phi(),ro.pseudoRapidity());
+	if (mTpcFilter[secID-1].accept(prTr)==false) continue;
+	//if (secID==20) continue; //poorly calibrated sector?
+
 	hA[25]->Fill(glTr->p().perp());
 	if(glTr->charge()<0) hA[27]->Fill(glTr->p().perp());
 	hA[29]->Fill(pt);
@@ -298,6 +304,12 @@ St2011WMaker::accessTracks(){ // return non-zero on abort
 	hE[22]->Fill(hitFrac);
 	hE[23]->Fill(ri.perp());
 	hE[24]->Fill(ro.perp());
+
+	// TPC sector dependent filter 
+	int secID=WtpcFilter::getTpcSec(ro.phi(),ro.pseudoRapidity());
+	if ( mTpcFilterE[secID-1].accept(prTr)==false) continue;
+	//if (secID==20) continue; //poorly calibrated sector?
+
 	hE[25]->Fill(glTr->p().perp());
 	if(glTr->charge()<0)hE[27]->Fill(glTr->p().perp());
 	hE[29]->Fill(pt);
@@ -581,6 +593,9 @@ St2011WMaker::accessBSMD(){
 
 
 //$Log: St2011W_acessMuDst.cxx,v $
+//Revision 1.5  2011/02/17 04:16:20  stevens4
+//move sector dependent track QA cuts before track pt>10 cut and lower par_clustET and par_ptBalance thresholds to 14 GeV
+//
 //Revision 1.4  2011/02/16 15:25:16  stevens4
 //remove relative gain correction for BSMD adc
 //

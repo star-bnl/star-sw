@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.2 2011/02/14 01:36:17 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.3 2011/02/17 04:16:18 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -243,12 +243,6 @@ St2011WMaker::extendTrack2Endcap(){// return # of extended tracks
       if(T.prMuTrack->eta()<parE_trackEtaMin) 
 	continue; // to avoid extrapolation nonsense
 
-      // TPC sector dependent filter applied before extrapolation
-      StThreeVectorF ro=T.glMuTrack->lastPoint();
-      int secID=WtpcFilter::getTpcSec(ro.phi(),ro.pseudoRapidity());
-      if ( mTpcFilterE[secID-1].accept(T.prMuTrack)==false) continue;
-      //if (secID==20) continue; //remove poorly calibrated sector
-
       //.... extrapolate track to the disk perpendicular to the z-axis
       const StPhysicalHelixD trkHlx=T.prMuTrack->outerHelix(); 
       StThreeVectorD diskPosition=StThreeVectorD(0,0,parE_zSMD);
@@ -451,6 +445,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.3  2011/02/17 04:16:18  stevens4
+// move sector dependent track QA cuts before track pt>10 cut and lower par_clustET and par_ptBalance thresholds to 14 GeV
+//
 // Revision 1.2  2011/02/14 01:36:17  stevens4
 // *** empty log message ***
 //

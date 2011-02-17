@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.1 2011/02/10 20:33:23 balewski Exp $
+// $Id: St2011W_algo.cxx,v 1.2 2011/02/17 04:16:22 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -421,12 +421,6 @@ St2011WMaker::extendTrack2Barrel(){// return # of extended tracks
       WeveEleTrack &T=V.eleTrack[it];
       if(T.prMuTrack->flag()!=301) continue; //remove track for endcap algo only
 
-      // TPC sector dependent filter applied before extrapolation
-      StThreeVectorF ro=T.glMuTrack->lastPoint();
-      int secID=WtpcFilter::getTpcSec(ro.phi(),ro.pseudoRapidity());
-      if ( mTpcFilter[secID-1].accept(T.prMuTrack)==false) continue;
-      //if (secID==20) continue; //remove poorly calibrated sector
-
       //.... extrapolate track to the barrel @ R=entrance....
       const StPhysicalHelixD TrkHlx=T.prMuTrack->outerHelix();
       float Rcylinder= mBtowGeom->Radius();
@@ -605,6 +599,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.2  2011/02/17 04:16:22  stevens4
+// move sector dependent track QA cuts before track pt>10 cut and lower par_clustET and par_ptBalance thresholds to 14 GeV
+//
 // Revision 1.1  2011/02/10 20:33:23  balewski
 // start
 //
