@@ -1,6 +1,9 @@
-* $Id: ftpcgeo1.g,v 1.4 2008/11/30 01:30:52 perev Exp $
+* $Id: ftpcgeo1.g,v 1.5 2011/02/17 20:38:18 jwebb Exp $
 *
 * $Log: ftpcgeo1.g,v $
+* Revision 1.5  2011/02/17 20:38:18  jwebb
+* Removed redundant positioning of FKWI (ignored in AgSTAR).
+*
 * Revision 1.4  2008/11/30 01:30:52  perev
 * modifs for extending alpha,theta,phi,ort commandas
 *
@@ -260,9 +263,12 @@ Block FTPC is the Forward TPC mother (needed for standalong test only)
        Create and position FSSM z=-(ftpg_DzSuRa)
        Create and position FSSM z=-(ftpg_DzSuRb)
 
- 
-               position FKWI z=-((ftpg_totLen/2)-ftpg_DzKapton/2)
-*
+
+"Placement of a second copy of volume FKWI"
+"At exactly the same position will not have"
+"any effect in AgSTAR"
+cJCW   position FKWI z=-((ftpg_totLen/2)-ftpg_DzKapton/2)
+
 * Start here with the Readout Chambers
 *
 
