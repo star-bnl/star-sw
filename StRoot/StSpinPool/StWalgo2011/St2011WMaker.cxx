@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.cxx,v 1.2 2011/02/14 02:35:21 stevens4 Exp $
+// $Id: St2011WMaker.cxx,v 1.3 2011/02/17 04:16:14 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -80,20 +80,20 @@ St2011WMaker::St2011WMaker(const char *name):StMaker(name){
   //... towers
   par_kSigPed=3; // rawADC-ped cut off
   par_AdcThres=8; // ADC threshold to avoid correlated noise
-  par_maxADC=200.; // (adc chan) on the highest tower in events :tmp was 200
+  par_maxADC=200.; // (adc chan) on the highest tower in events 
     
   //... Barrel Algo
-  par_clustET=15.; // (GeV/c) 2x2 cluster ET :tmp was 15.0 GeV
+  par_clustET=14.; // (GeV/c) 2x2 cluster ET 
   par_clustFrac24=0.95; // ET ratio 2x2/4x4 cluster
   par_nearTotEtFrac=0.88;  // ratio 2x2/near Tot ET 
   par_delR3D=7.; // cm, dist between projected track and center of cluster 
   par_leptonEta=1.0; // bracket acceptance
-  par_ptBalance=15.; // (GeV), ele cluster vector + jet sum vector
+  par_ptBalance=14.; // (GeV), ele cluster vector + jet sum vector
   //... track
   par_nFitPts=15; // hits on the track
   par_nHitFrac=0.51;
   par_trackRin=90;  par_trackRout=160; // cm
-  par_trackPt=10.;//GeV :tmp, was 10.0
+  par_trackPt=10.;//GeV 
 
   //... Endcap Algo
   parE_trackEtaMin=0.7; // avoid bad extrapolation to ESMD
@@ -155,14 +155,6 @@ St2011WMaker::Init(){
 	f1 >> str; f1 >> str;
       }
     }
-    
-    //tree only written during MuDst analysis
-    mTreeFile=new TFile(mTreeName,"recreate");
-    mTreeFile->cd();
-    
-    wEve=new Wevent2011();
-    mWtree=new TTree("mWtree","W candidate Events");
-    mWtree->Branch("wEve","Wevent2011",&wEve);
   }
   else { 
     //setup for reading in tree
@@ -194,6 +186,16 @@ St2011WMaker::Init(){
     mTpcFilter[isec].init("sec",sec,HList);
     mTpcFilterE[isec].setCuts(parE_nFitPts,parE_nHitFrac,RinE,RoutE);
     mTpcFilterE[isec].init("secEemcTr",sec,HList);
+  }
+
+  //tree only written during MuDst analysis
+  if(mMuDstMaker) { 
+    mTreeFile=new TFile(mTreeName,"recreate");
+    mTreeFile->cd();
+    
+    wEve=new Wevent2011();
+    mWtree=new TTree("mWtree","W candidate Events");
+    mWtree->Branch("wEve","Wevent2011",&wEve);
   }
 
   return StMaker::Init();
@@ -507,6 +509,9 @@ void St2011WMaker::chainJetFile( const Char_t *file )
 }
 
 // $Log: St2011WMaker.cxx,v $
+// Revision 1.3  2011/02/17 04:16:14  stevens4
+// move sector dependent track QA cuts before track pt>10 cut and lower par_clustET and par_ptBalance thresholds to 14 GeV
+//
 // Revision 1.2  2011/02/14 02:35:21  stevens4
 // change back to 10 GeV track pt and 15 GeV cluster ET as default for both B + E algos
 //
