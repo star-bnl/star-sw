@@ -1,6 +1,9 @@
-* $Id: ftpcgeo1.g,v 1.5 2011/02/17 20:38:18 jwebb Exp $
+* $Id: ftpcgeo1.g,v 1.6 2011/02/17 20:40:59 jwebb Exp $
 *
 * $Log: ftpcgeo1.g,v $
+* Revision 1.6  2011/02/17 20:40:59  jwebb
+* No comment...
+*
 * Revision 1.5  2011/02/17 20:38:18  jwebb
 * Removed redundant positioning of FKWI (ignored in AgSTAR).
 *
@@ -267,7 +270,7 @@ Block FTPC is the Forward TPC mother (needed for standalong test only)
 "Placement of a second copy of volume FKWI"
 "At exactly the same position will not have"
 "any effect in AgSTAR"
-cJCW   position FKWI z=-((ftpg_totLen/2)-ftpg_DzKapton/2)
+* JCW   position FKWI z=-((ftpg_totLen/2)-ftpg_DzKapton/2)
 
 * Start here with the Readout Chambers
 *
