@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.39 2011/01/03 21:35:41 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.40 2011/02/18 20:59:25 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -976,7 +976,7 @@ int daqReader::openEventFile()
 int daqReader::getNextEventFilename(int num, int type)
 {
   if((event_number != 1) && (token == 0)) {	// we read at least one event and it was token==0 thus this is it...
-    LOG(NOTE,"Previous event (%d) was Token 0 in directory - stopping...",event_number,0,0,0,0) ;
+    LOG(DBG,"Previous event (%d) was Token 0 in directory - stopping...",event_number,0,0,0,0) ;
     status = EVP_STAT_EOR ;
     event_number = 1;
     return -1;
