@@ -178,13 +178,15 @@ int fs_cat(int argc, char *argv[])
     return -1;
   }
   
-  printf("[%s: %s %s]\n",idx->pwd(),argv[0], argv[1]);
+  //printf("[%s: %s %s]\n",idx->pwd(),argv[0], argv[1]);
   int type;
   if(strcmp(argv[0], "cat") == 0) type = 0;
   else if (strcmp(argv[0], "od") == 0) type = 8;
   else type = 1;
 
   int sz = idx->fileSize(argv[1]);
+  if(sz < 0) return -1;
+
   char *buff = (char *)malloc(sz);
   if(!buff) {
     printf("Error allocating %d bytes\n",sz);
