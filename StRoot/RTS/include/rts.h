@@ -229,6 +229,8 @@ typedef unsigned short u_short ;
 
 // 64 bit int 
 
+typedef unsigned long long int UINT64;
+
 #define hi64(x) ((UINT32)(x >> 32))
 #define lo64(x) ((UINT32)(x & 0xffffffff))
 #define make64(lo, hi)  ((UINT64)(((UINT64)hi << 32) | lo))

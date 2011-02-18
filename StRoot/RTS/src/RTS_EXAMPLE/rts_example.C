@@ -144,13 +144,14 @@ int main(int argc, char *argv[])
 
 		if(print_det[0]) {
 		  if(strcmp(print_det, "tinfo") == 0) {		    
-		    printf("trginfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%x  evptriggers=0x%x/0x%x\n",
+		    printf("trginfo: seq = #%d  token = %d detectors = 0x%x triggers = 0x%llx/0x%llx/0x%llx  evptriggers=0x%x\n",
 			   evp->seq,
 			   evp->token,
 			   evp->detectors,
-			   evp->daqbits,
-			   evp->evpgroups,
-			   evp->evpgroupsinrun);
+			   evp->daqbits64_l1,
+			   evp->daqbits64_l2,
+			   evp->daqbits64,
+			   evp->evpgroups);
 		  }
 		}
 
@@ -161,13 +162,14 @@ int main(int argc, char *argv[])
 		   
 		   
 		    if(ret <= 0) {
-		      printf("Event #%d, token %d triggers 0x%x  ---->   No Next Event...",
-			     evp->seq,evp->token,evp->daqbits);
+		      printf("Event #%d, token %d triggers 0x%llx  ---->   No Next Event...",
+			     evp->seq,evp->token,evp->daqbits64);
 		    }
 		    else {
-		      printf("Event #%d, token %d triggers 0x%x   ---->   Next Event:  #%d, token %d triggers 0x%x\n",
-			     evp->seq,evp->token,evp->daqbits,
-			     nsummary.seq, nsummary.token, nsummary.daqbits);
+		      printf("Event #%d, token %d triggers 0x%llx   ---->   Next Event:  #%d, token %d triggers 0x%llx\n",
+			     evp->seq,evp->token,evp->daqbits64,
+			     nsummary.seq, nsummary.token, 
+			     make64(nsummary.L3summary[0],nsummary.L3summary[1]));
 		    }
 		  }
 		}
