@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.77 2011/02/07 20:25:26 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.78 2011/02/19 02:22:18 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.78  2011/02/19 02:22:18  genevb
+// Allow for specification of histogram usage by the required detector sets
+//
 // Revision 2.77  2011/02/07 20:25:26  genevb
 // Allow for limiting detectors
 //
@@ -419,7 +422,10 @@ void StHistUtil::CloseOutFile() {
   }
 }
 //_____________________________________________________________________________
-TString StHistUtil::StripPrefixes(const Char_t* histName, Int_t& prenum) {
+TString StHistUtil::StripPrefixes(const Char_t* histName, Int_t& prenum, Int_t mode) {
+  // mode < 0 : strip maker name
+  // mode > 0 : strip trigger prefix
+  // mode = 0 : strip both
   // Figure out and strip appropriate prefix index
   TString hName(histName);
   Char_t makerBuffer[4];
@@ -429,14 +435,16 @@ TString StHistUtil::StripPrefixes(const Char_t* histName, Int_t& prenum) {
     hName.Remove(0,3);
   }
   prenum = 0; // Possible prefix=0 means no prefix
-  for (Int_t i=1; i<numOfPosPrefixes; i++) {
-    if (hName.BeginsWith(possiblePrefixes[i])) {
-      prenum = i;
-      hName.Remove(0,strlen(possiblePrefixes[i]));
-      break;
+  if (mode >= 0) {
+    for (Int_t i=1; i<numOfPosPrefixes; i++) {
+      if (hName.BeginsWith(possiblePrefixes[i])) {
+        prenum = i;
+        hName.Remove(0,strlen(possiblePrefixes[i]));
+        break;
+      }
     }
+    if (mode>0) hName.Prepend(makerBuffer);
   }
-  hName.Prepend(makerBuffer);
   return hName;
 }
 //_____________________________________________________________________________
@@ -843,15 +851,28 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 	  }
 
           if (oName.Contains("NullPrimVtx")) {
+            int msdVtx = (int) (hobj->GetBinContent(hobj->FindBin(-1.)));
+            int qstVtx = (int) (hobj->GetBinContent(hobj->FindBin(0.)));
+            int goodVtx = (int) (hobj->GetBinContent(hobj->FindBin(1.)));
+            int fndVtx = qstVtx + goodVtx;
+            int totVtx = fndVtx + msdVtx;
+            Float_t txtSiz = latex.GetTextSize();
+            latex.SetTextSize(txtSiz*1.5);
             latex.SetTextAngle(90);
             latex.SetTextAlign(3);
             latex.SetTextColor(4);
-            latex.DrawLatex(0.5,0,Form("   found:  %d",
-              (int) (hobj->GetBinContent(hobj->FindBin(1.)))));
+            latex.DrawLatex(-0.8,0,Form("  missed:  %d",msdVtx));
+            latex.DrawLatex(0.2,0,Form("  questionable:  %d",qstVtx));
+            latex.DrawLatex(1.2,0,Form("  good:  %d",goodVtx));
+            latex.SetTextSize(txtSiz*2);
+            latex.SetTextColor(2);
+            latex.DrawLatex(-1.8,0,Form("   total:  %d",totVtx));
             latex.SetTextAlign(1);
-            latex.DrawLatex(-0.5,0,Form("   missed:  %d",
-              (int) (hobj->GetBinContent(hobj->FindBin(-1.)))));
+            latex.SetTextColor(kGreen+3);
+            latex.DrawLatex(-1.1,0,Form("   found:  %d",fndVtx));
+            // restore
             latex.SetTextColor(1);
+            latex.SetTextSize(txtSiz);
           }
 
           if (oName.Contains("TpcSector")) {
@@ -935,8 +956,22 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
           // Run reference analysis...(on first loop, before we forgot hobj)
           if (hobjR) {
-            StHistUtilRef* huR =
-             (StHistUtilRef*) (m_refCuts ? m_refCuts->FindObject(oname) : 0);
+            Int_t tempint = -1;
+            StHistUtilRef* huR = 0;
+            if (m_refCuts) {
+              // try: full name
+              huR = (StHistUtilRef*) (m_refCuts->FindObject(oname));
+              if (!huR) {
+                // try: strip just maker from name
+                TString onamebase = StripPrefixes(oname,tempint,-1);
+                huR = (StHistUtilRef*) (m_refCuts->FindObject(onamebase.Data()));
+                if (!huR) {
+                  // try: strip maker and trigger type from name
+                  onamebase = StripPrefixes(oname,tempint,0);
+                  huR = (StHistUtilRef*) (m_refCuts->FindObject(onamebase.Data()));
+                }
+              }
+            }
             double result = 0;
 
             // default to Kolm. max distance, no cut
@@ -2282,13 +2317,18 @@ void StHistUtil::SetRefAnalysis(const Char_t* refOutFile, const Char_t* refResul
     }
     char buf_name[256];
     char buf_opts[64];
-    while (!refCuts.eof()) {
+    while (refCuts.good()) {
       refCuts >> buf_name;
-      if (refCuts.eof()) break;
+      if (!refCuts.good()) break;
       int mode;
       double cut;
       refCuts >> mode >> cut >> buf_opts;
+      if (!refCuts.good()) break;
       if (buf_opts[0] == '!') buf_opts[0] = 0; // no options
+      if (Debug()) {
+        LOG_INFO << "StHistUtil: Loading cut : " << buf_name << " : " << mode
+                 << " : " << cut << " : " << buf_opts << " :" << endm;
+      }
       m_refCuts->AddLast(new StHistUtilRef(buf_name,buf_opts,mode,cut));
     }
   }

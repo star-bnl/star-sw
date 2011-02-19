@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.36 2011/02/07 20:25:56 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.37 2011/02/19 02:22:18 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.37  2011/02/19 02:22:18  genevb
+// Allow for specification of histogram usage by the required detector sets
+//
 // Revision 2.36  2011/02/07 20:25:56  genevb
 // specify subsystems
 //
@@ -114,6 +117,7 @@
 ///////////////////////////////////////////////////////////////////////
 // Note: Editing this file means that StAnalysisUtilities/StHistUtil
 // must be recompiled
+// See StHistUtil::DetectorIn() for format of detector requirement
 
   "QaMultClass",
   "QaTrigWord",
@@ -128,8 +132,6 @@
   ":svt:QaPointXYSvt",
   ":svt:QaPointSvtLaser",
   ":ftpc:QaPointFtpc",
-  ":tpx;tpc:QaPointXYTpcE",
-  ":tpx;tpc:QaPointXYTpcW",
   ":tpx;tpc:QaPointRPTpcE",
   ":tpx;tpc:QaPointRPTpcW",
   ":ftpc:QaPointXYFtpcE",
@@ -163,7 +165,7 @@
   ":tpx;tpc:QaGtrkFlag",
   ":tpx;tpc:QaGtrkGood",
   ":tpx;tpc:QaGtrkNPntFitTTS",
-  ":tpx;tpc:QaGtrkNPntF",
+  ":ftpc:QaGtrkNPntF",
   ":tpx;tpc:QaGtrkGoodTTS",
   ":ftpc:QaGtrkGoodF",
   ":tpx;tpc:QaGtrkFitPntLTTS",
@@ -210,23 +212,23 @@
   ":tpx,svt;tpc,svt:QaGtrkRZf0TS",
   ":tpx,svt:QaPtrkRZf0",
   ":tpx,svt;tpc,svt:QaPtrkRZf0TS",
-  ":bemc:bemcClNum",
-  ":bemc:bemcClEnergy",
-  ":bemc:bemcEta",
-  ":bemc:bemcPhi",
+  ":emc:bemcClNum",
+  ":emc:bemcClEnergy",
+  ":emc:bemcEta",
+  ":emc:bemcPhi",
   ":bsmd:bsmdeClNum",
   ":bsmd:bsmdeEta",
   ":bsmd:bsmdpClNum",
   ":bsmd:bsmdpPhi",
-  ":bemc:EmcCat4_Point_Energy",
-  ":bemc:EmcCat4_Point_Eta",
-  ":bemc:EmcCat4_Point_Phi",
-  ":bemc:EmcCat4_Sigma_Eta",
-  ":bemc:EmcCat4_Sigma_Phi",
-  ":bemc:EmcCat4_Delta_Eta",
-  ":bemc:EmcCat4_Delta_Phi",
-  ":bemc:EmcCat4_Points_Multiplicity",
-  ":bemc:EmcCat4_Track_Momenta",
+  ":emc:EmcCat4_Point_Energy",
+  ":emc:EmcCat4_Point_Eta",
+  ":emc:EmcCat4_Point_Phi",
+  ":emc:EmcCat4_Sigma_Eta",
+  ":emc:EmcCat4_Sigma_Phi",
+  ":emc:EmcCat4_Delta_Eta",
+  ":emc:EmcCat4_Delta_Phi",
+  ":emc:EmcCat4_Points_Multiplicity",
+  ":emc:EmcCat4_Track_Momenta",
   " Point Flag",
   "QaGRpvtxDx",
   "QaGRpvtxDy",
