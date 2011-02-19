@@ -16,6 +16,7 @@ class StPrimaryVertex;
 class HitHistograms;
 class StPmdGeom;
 class StPmdMapUtil;
+class StTrackDetectorInfo;
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -32,6 +33,8 @@ class StEventQAMaker : public StQAMakerBase {
   StPmdMapUtil* maputil;   //!
   Int_t mRunNumber;
   Bool_t silHists;      // whether we're doing SVT,SSD hists
+  Bool_t hitsAvail;     // whether TPC hits are available
+  Float_t vertExists;   // prim vertex : none/questionable/good
   
   static const Int_t mNVPD = 19;
   static const Int_t mEastVpdTrayId = 121;
@@ -39,6 +42,7 @@ class StEventQAMaker : public StQAMakerBase {
   Float_t mEastVpdCorr[mNVPD];
   Float_t mWestVpdCorr[mNVPD];
 
+  Int_t PCThits(StTrackDetectorInfo* detInfo);
   
 //------------------------------------------------------------------------
   
@@ -70,15 +74,18 @@ class StEventQAMaker : public StQAMakerBase {
 
   /// the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.13 2009/11/19 20:34:38 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.14 2011/02/19 02:20:46 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
 };
     
 #endif
 
-// $Id: StEventQAMaker.h,v 2.13 2009/11/19 20:34:38 genevb Exp $
+// $Id: StEventQAMaker.h,v 2.14 2011/02/19 02:20:46 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.14  2011/02/19 02:20:46  genevb
+// Pile-up cuts
+//
 // Revision 2.13  2009/11/19 20:34:38  genevb
 // Remove Event Summary (using defunct old software monitors)
 //

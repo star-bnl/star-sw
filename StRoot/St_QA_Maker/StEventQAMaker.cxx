@@ -16,6 +16,7 @@
 //#include "TSpectrum.h"
 #include "StEventQAMaker.h"
 #include "StEventTypes.h"
+#include "StDcaGeometry.h"
 #include "StMcEventTypes.hh"
 #include "StTpcDedxPidAlgorithm.h"
 #include "HitHistograms.h"
@@ -84,6 +85,8 @@ StEventQAMaker::StEventQAMaker(const char *name, const char *title) :
 StQAMakerBase(name,title,"StE"), event(0), mHitHist(0), mPmdGeom(0), maputil(0) {
   mRunNumber = -1;
   silHists = kFALSE;
+  hitsAvail = kTRUE;
+  vertExists = -1.;
 }
 
 
@@ -140,6 +143,7 @@ Int_t StEventQAMaker::InitRun(int runnumber) {
 /// StEventQAMaker - Make; fill histograms
 Int_t StEventQAMaker::Make() {
   
+  hitsAvail = kTRUE;
   n_prim_good = 0;
   n_glob_good = 0;
   
@@ -334,17 +338,31 @@ Int_t StEventQAMaker::Make() {
   }
 
   int makeStat = kStOk;
-  float vertExists;
   
-  // only process if a primary vertex exists !!!
+  // only process if a primary vertex exists
+  //   and appears to not be pileup!!!
   primVtx = event->primaryVertex();
   if (primVtx) {
-    vertExists = 1.;
+    Float_t min_rank = -1e6;
+    switch (primVtx->vertexFinderId()) {
+      case minuitVertexFinder   : min_rank = -5; break;
+      case ppvVertexFinder      : 
+      case ppvNoCtbVertexFinder : min_rank = 0; break;
+      default                   : break;
+    }
+    if (primVtx->ranking() >= min_rank &&
+        ((float) (primVtx->numMatchesWithBEMC())) /
+        ((float) (primVtx->numberOfDaughters())) > 0.2) {
+      vertExists = 1.;
+    } else {
+      LOG_WARN << "questionable primary vertex found";
+      vertExists = 0.;
+    }
     fillHists = kTRUE;
   } else {
     vertExists = -1.;
     fillHists = kFALSE;
-    gMessMgr->Warning("StEventQAMaker::Make(): no primary vertex found!");
+    LOG_WARN << "no primary vertex found!";
   }
   mNullPrimVtx->Fill(vertExists);
   
@@ -367,10 +385,12 @@ void StEventQAMaker::MakeHistGlob() {
   if (Debug()) 
     gMessMgr->Info(" *** in StEventQAMaker - filling global track histograms ");
   
+  if (vertExists <= 0) return;
+
   StSPtrVecTrackNode &theNodes = event->trackNodes();
   StThreeVectorF pvert;
   if (primVtx) pvert = primVtx->position();
-  
+
   Int_t cnttrk=0;
   Int_t cnttrkT=0;
   Int_t cnttrkTS=0;
@@ -395,10 +415,13 @@ void StEventQAMaker::MakeHistGlob() {
     if (map.trackTpcOnly()) cnttrkT++;
     if (map.trackTpcSvt()) cnttrkTS++;
     if (globtrk->flag()>0) {
-      StTrackGeometry* geom = globtrk->geometry();
-      StTrackFitTraits& fTraits = globtrk->fitTraits();
       StTrackDetectorInfo* detInfo = globtrk->detectorInfo();
-      
+      if (PCThits(detInfo)) continue;
+
+      StTrackGeometry* geom = globtrk->geometry();
+      StDcaGeometry* dcageom = ((StGlobalTrack*) globtrk)->dcaGeometry();
+      StTrackFitTraits& fTraits = globtrk->fitTraits();
+
       n_glob_good++;
       cnttrkg++;
       Float_t pT = -999.;
@@ -424,6 +447,7 @@ void StEventQAMaker::MakeHistGlob() {
       Float_t fphi = firstPoint.phi()/degree;
       if (fphi<0) fphi+=360;
       StPhysicalHelixD hx = geom->helix();
+      StPhysicalHelixD dcahx = dcageom->helix();
       // get the helix position closest to the first point on track
       double sFirst = hx.pathLength(firstPoint);
       // get the helix position closest to the last point on track
@@ -445,13 +469,14 @@ void StEventQAMaker::MakeHistGlob() {
       Float_t radf = firstPoint.perp();
       
       Float_t logImpact = TMath::Log10(1e-30+globtrk->impactParameter());
-      Float_t sImpact = hx.geometricSignedDistance(pvert.x(),pvert.y());
+
+      Float_t sImpact = dcahx.geometricSignedDistance(pvert.x(),pvert.y());
       Float_t logCurvature = TMath::Log10(1e-30+geom->curvature());
       
       // pathLength(double x,double y) should return path length at
       // DCA in the xy-plane to a given point
-      double S = hx.pathLength(0,0);
-      StThreeVectorD dcaToBeam = hx.at(S);
+      double S = dcahx.pathLength(0,0);
+      StThreeVectorD dcaToBeam = dcahx.at(S);
       
       // from Lanny on 2 Jul 1999 9:56:03
       //1. x0,y0,z0 are coordinates on the helix at the starting point, which
@@ -906,6 +931,8 @@ void StEventQAMaker::MakeHistPrim() {
   if (Debug()) 
     gMessMgr->Info(" *** in StEventQAMaker - filling primary track histograms ");
   
+  if (vertExists <= 0) return;
+
   Int_t cnttrk=0;
   Int_t cnttrkg=0;
   Int_t cnttrkgT=0;
@@ -925,6 +952,7 @@ void StEventQAMaker::MakeHistPrim() {
   
   if (primVtx) {
     StThreeVectorF pvert = primVtx->position();
+
     cnttrk = primVtx->numberOfDaughters();
     hists->m_primtrk_tot->Fill(cnttrk);
     hists->m_primtrk_tot_sm->Fill(cnttrk);
@@ -944,17 +972,18 @@ void StEventQAMaker::MakeHistPrim() {
       hists->m_primtrk_iflag->Fill(primtrk->flag());
       
       if (primtrk->flag()>0) {
+        StTrackDetectorInfo* detInfo = primtrk->detectorInfo();
+        if (PCThits(detInfo)) continue;
+
         StTrackGeometry* geom = primtrk->geometry();
 	// due to variation on "kalman fitting" of primary tracks
 	// we want to look at the hit residuals using the outerGeometry()
 	// helix parameters (parameters at last point on track)
 	StTrackGeometry* outerGeom = primtrk->outerGeometry();
         StTrackFitTraits& fTraits = primtrk->fitTraits();
-        StTrackDetectorInfo* detInfo = primtrk->detectorInfo();
         const StTrackTopologyMap& map=primtrk->topologyMap();
 	StPhysicalHelixD hx = geom->helix();
 	StPhysicalHelixD ohx = outerGeom->helix();
-	
 
 	StTrack *gtrack = primtrk->node()->track(estGlobal);
         if (!gtrack || gtrack->bad()) {
@@ -1465,6 +1494,8 @@ void StEventQAMaker::MakeHistVertex() {
   if (Debug()) 
     gMessMgr->Info(" *** in StEventQAMaker - filling vertex histograms ");
   
+  if (vertExists <= 0) return;
+
   Float_t m_prmass2 = (proton_mass_c2*proton_mass_c2);
   Float_t m_pimass2 = (pion_minus_mass_c2*pion_minus_mass_c2);
   Float_t m_lamass2 = (lambda_mass_c2*lambda_mass_c2);
@@ -2331,10 +2362,31 @@ void StEventQAMaker::MakeHistTOF() {
 
   hists->m_tof_vtx_z->Fill(vz_tpc, vz_vpd);
 }
+//_____________________________________________________________________________
+Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
+  Int_t PCT = 0; // # hits beyond central membrane: post-crossing trks
+  if (hitsAvail) {
+    StPtrVecHit tpc_hits = detInfo->hits(kTpcId);
+    if (tpc_hits.size()) {
+      for (UInt_t k=0;k<tpc_hits.size();k++) {
+        StTpcHit* hit = (StTpcHit*) (tpc_hits[k]);
+        if ((hit->position().z() > 1 && hit->sector() > 12) ||
+            (hit->position().z() <-1 && hit->sector() < 13)) PCT++;
+      }
+    } else {
+      LOG_WARN << "Tpc hits are not available - cannot check for PCTs" << endm;
+      hitsAvail = kFALSE;
+    }
+  }
+  return PCT;
+}
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.96 2011/02/04 02:34:06 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.97 2011/02/19 02:20:46 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.97  2011/02/19 02:20:46  genevb
+// Pile-up cuts
+//
 // Revision 2.96  2011/02/04 02:34:06  genevb
 // Replace firsthit position-to-padrow with minimum padrow in topo map
 //
