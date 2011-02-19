@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.12 2011/02/07 20:25:26 genevb Exp $
+// $Id: StHistUtil.h,v 2.13 2011/02/19 02:22:18 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.13  2011/02/19 02:22:18  genevb
+// Allow for specification of histogram usage by the required detector sets
+//
 // Revision 2.12  2011/02/07 20:25:26  genevb
 // Allow for limiting detectors
 //
@@ -116,7 +119,7 @@ class StHistUtil {
 
  protected:
   virtual void    CloseOutFile();
-  virtual TString StripPrefixes(const Char_t* histName, Int_t& prenum);
+  virtual TString StripPrefixes(const Char_t* histName, Int_t& prenum, Int_t mode=1);
   virtual Bool_t  CheckOutFile(const Char_t* histName);
   virtual TList*  TrimListByPrefix(TList* dList, Char_t* withPrefix);
 
@@ -185,7 +188,7 @@ class StHistUtil {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.12 2011/02/07 20:25:26 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.13 2011/02/19 02:22:18 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
