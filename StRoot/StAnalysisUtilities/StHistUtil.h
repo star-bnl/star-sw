@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.13 2011/02/19 02:22:18 genevb Exp $
+// $Id: StHistUtil.h,v 2.14 2011/02/19 02:43:39 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.14  2011/02/19 02:43:39  genevb
+// Fix those missing consts
+//
 // Revision 2.13  2011/02/19 02:22:18  genevb
 // Allow for specification of histogram usage by the required detector sets
 //
@@ -121,7 +124,7 @@ class StHistUtil {
   virtual void    CloseOutFile();
   virtual TString StripPrefixes(const Char_t* histName, Int_t& prenum, Int_t mode=1);
   virtual Bool_t  CheckOutFile(const Char_t* histName);
-  virtual TList*  TrimListByPrefix(TList* dList, Char_t* withPrefix);
+  virtual TList*  TrimListByPrefix(TList* dList, const Char_t* withPrefix);
 
 
  public: 
@@ -129,10 +132,11 @@ class StHistUtil {
   virtual        ~StHistUtil();
   virtual void    SetDebug(Bool_t dbg=kTRUE) { debug=dbg; }
   virtual Bool_t  Debug() { return debug; }
-  virtual Int_t   DrawHists(Char_t *dirName="EventQA");
-  virtual Int_t   ListHists(Char_t *dirName="EventQA");
-  virtual TList*  FindHists(Char_t *dirName="EventQA", Char_t *withPrefix=0);
-  virtual TList*  FindHists(TFile* histFile, Char_t* withPrefix=0);
+  virtual Int_t   DrawHists(const Char_t *dirName="EventQA");
+  virtual Int_t   ListHists(const Char_t *dirName="EventQA");
+  virtual TList*  FindHists(const Char_t *dirName="EventQA",
+                            const Char_t *withPrefix=0);
+  virtual TList*  FindHists(TFile* histFile, const Char_t* withPrefix=0);
   virtual Int_t   CopyHists(TList  *dirList);
   virtual Int_t   AddHists(TList  *dirList, Int_t nHistCopy=-1);
   virtual void    IgnorePrefixes(Bool_t ignore=kTRUE) {ignorePrefixes = ignore;}
@@ -142,17 +146,18 @@ class StHistUtil {
   virtual void    SetRefAnalysis(const Char_t* refOutFile, const Char_t* refResultsFile,
                     const Char_t* refCutsFile=0, const Char_t* refInFile=0);
 
-  virtual void    SetDefaultLogYList(Char_t *dirName="EventQA");
+  virtual void    SetDefaultLogYList(const Char_t *dirName="EventQA");
   virtual Int_t   AddToLogYList(const Char_t *HistName="");
   virtual Int_t   RemoveFromLogYList(const Char_t *HistName="");
   virtual Int_t   ExamineLogYList();
 
-  virtual void    SetDefaultLogXList(Char_t *dirName="EventQA");
+  virtual void    SetDefaultLogXList(const Char_t *dirName="EventQA");
   virtual Int_t   AddToLogXList(const Char_t *HistName="");
   virtual Int_t   RemoveFromLogXList(const Char_t *HistName="");
   virtual Int_t   ExamineLogXList();
 
-  virtual void    SetDefaultPrintList(Char_t *dirName="EventQA",Char_t *analType="FullTable");
+  virtual void    SetDefaultPrintList(const Char_t *dirName="EventQA",
+                                      const Char_t *analType="FullTable");
   virtual Int_t   AddToPrintList(const Char_t *HistName="");
   virtual Int_t   RemoveFromPrintList(const Char_t *HistName="");
   virtual Int_t   ExaminePrintList();
@@ -188,7 +193,7 @@ class StHistUtil {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.13 2011/02/19 02:22:18 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.14 2011/02/19 02:43:39 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };

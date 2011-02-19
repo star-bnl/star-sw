@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.78 2011/02/19 02:22:18 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.79 2011/02/19 02:43:39 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.79  2011/02/19 02:43:39  genevb
+// Fix those missing consts
+//
 // Revision 2.78  2011/02/19 02:22:18  genevb
 // Allow for specification of histogram usage by the required detector sets
 //
@@ -475,7 +478,7 @@ Bool_t StHistUtil::CheckOutFile(const Char_t *histName) {
   return kTRUE;
 }
 //_____________________________________________________________________________
-Int_t StHistUtil::DrawHists(Char_t *dirName) {
+Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 // Method DrawHists -->
 // Plot the selected  histograms and generate the postscript file as well 
   
@@ -1062,7 +1065,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 //_____________________________________________________________________________
 
 
-TList* StHistUtil::FindHists(Char_t *dirName, Char_t *withPrefix) 
+TList* StHistUtil::FindHists(const Char_t *dirName, const Char_t *withPrefix) 
 {  
 
 // NOTE - must have already used method SetPntrToMaker to get the
@@ -1163,7 +1166,7 @@ TList* StHistUtil::FindHists(Char_t *dirName, Char_t *withPrefix)
 }
 //_____________________________________________________________________________
  
-TList* StHistUtil::FindHists(TFile* histFile, Char_t* withPrefix) {
+TList* StHistUtil::FindHists(TFile* histFile, const Char_t* withPrefix) {
   if (!histFile) return 0;
   TList* dList = histFile->GetList();
   if (dList->GetSize() == 0) {
@@ -1181,7 +1184,7 @@ TList* StHistUtil::FindHists(TFile* histFile, Char_t* withPrefix) {
 }
 //_____________________________________________________________________________
  
-TList* StHistUtil::TrimListByPrefix(TList* dList, Char_t* withPrefix) {
+TList* StHistUtil::TrimListByPrefix(TList* dList, const Char_t* withPrefix) {
   TList* dList2 = new TList;
 
   //Now want to loop over all histograms
@@ -1206,7 +1209,7 @@ TList* StHistUtil::TrimListByPrefix(TList* dList, Char_t* withPrefix) {
 //_____________________________________________________________________________
 
 
-Int_t StHistUtil::ListHists(Char_t *dirName) 
+Int_t StHistUtil::ListHists(const Char_t *dirName) 
 {  
 // Method ListHists -->
 // List of all histograms
@@ -1759,7 +1762,7 @@ Int_t StHistUtil::RemoveFromPrintList(const Char_t *HistName){
 // Method SetDefaultLogYList
 //    - create default list of histograms we want plotted in LogY scale
 
-void StHistUtil::SetDefaultLogYList(Char_t *dirName)
+void StHistUtil::SetDefaultLogYList(const Char_t *dirName)
 {  
 // Method SetDefaultLogYList
 //    - create default list of histograms we want plotted in LogY scale
@@ -1803,7 +1806,7 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
 // Method SetDefaultLogXList
 //    - create default list of histograms we want plotted in LogX scale
 
-void StHistUtil::SetDefaultLogXList(Char_t *dirName)
+void StHistUtil::SetDefaultLogXList(const Char_t *dirName)
 {  
 // Method SetDefaultLogXList
 //    - create default list of histograms we want plotted in LogX scale
@@ -1851,7 +1854,7 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
 //      (files like $STAR/StRoot/St_QA_Maker/QAhlist*.h are properly
 //      parsed as well, but histogram names are sufficient)
 
-void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
+void StHistUtil::SetDefaultPrintList(const Char_t *dirName, const Char_t *analType)
 {  
 
   LOG_INFO << " **** Now in StHistUtil::SetDefaultPrintList  **** " << endm;
