@@ -1,9 +1,11 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <cstring>
 #include <cstdlib>
 #include <algorithm>
+#include <ctime>
 
 #include "MediumGas.hh"
 #include "OpticalData.hh"
@@ -289,14 +291,10 @@ MediumGas::LoadGasFile(const std::string filename) {
     std::cerr << className << "::LoadGasFile:\n";
     std::cerr << "   Gas file could not be opened.\n";
     return false;
-  } else if (debug) {
-    std::cout << className << "::LoadGasFile:\n";
-    std::cout << "    Gas file open and ready for loading.\n";
-  } 
+  }
 
   char line[256];
   char* token;
-  bool atTables = false;
 
   // GASOK bits
   std::string gasBits = "";
@@ -306,7 +304,7 @@ MediumGas::LoadGasFile(const std::string filename) {
   std::vector<double> mixture(nMagboltzGases);
   for (int i = nMagboltzGases; i--;) mixture[i] = 0.;
 
-  int exciteCount = 0;
+  int excCount = 0;
   int ionCount = 0;
   
   int eFieldRes = 1;
@@ -314,12 +312,13 @@ MediumGas::LoadGasFile(const std::string filename) {
   int angRes = 1;
   
   int versionNumber = 11;
-  
-  // Start reading the data.
+ 
+  // Start reading the data. 
+  bool atTables = false;
   while (!atTables) {
     gasfile.getline(line, 256);
-    if(strncmp(line, " The gas tables follow:", 8) == 0 ||
-       strncmp(line, "The gas tables follow:", 7) == 0) {
+    if (strncmp(line, " The gas tables follow:", 8) == 0 ||
+        strncmp(line, "The gas tables follow:", 7) == 0) {
       atTables = true;
       if (debug) {
         std::cout << "    Entering tables.\n";
@@ -346,6 +345,9 @@ MediumGas::LoadGasFile(const std::string filename) {
             std::cerr << "    Files written in this format cannot be read.\n";
             gasfile.close();
             return false;
+          } else {
+             std::cout << className << "::LoadGasFile:\n";
+             std::cout << "    Version: " << versionNumber << "\n";
           } 
         } else if (strcmp(token, "GASOK") == 0) {
           // Get the GASOK bits indicating if a parameter
@@ -453,7 +455,7 @@ MediumGas::LoadGasFile(const std::string filename) {
             }
           }
         } else if (strcmp(token, "Mixture") == 0) {
-          for (int i = 0; i < nMagboltzGases; i++) {
+          for (int i = 0; i < nMagboltzGases; ++i) {
             gasfile >> mixture[i];
           }
         } else if (strcmp(token, "Excitation") == 0) {
@@ -461,15 +463,26 @@ MediumGas::LoadGasFile(const std::string filename) {
           token = strtok(NULL, " :,%");
           // Get label.
           token = strtok(NULL, " :,%");
-          excitationList[exciteCount].label += token;
+          excitationList[excCount].label += token;
           // Get energy.
           token = strtok(NULL, " :,%");
-          excitationList[exciteCount].energy = atof(token);
-          // Get probability.
+          excitationList[excCount].energy = atof(token);
+          // Get Penning probability.
           token = strtok(NULL, " :,%");
-          excitationList[exciteCount].prob = atof(token);
+          excitationList[excCount].prob = atof(token);
+          if (versionNumber == 11) {
+            // Get Penning rms distance.
+            token = strtok(NULL, " :,%");
+            excitationList[excCount].rms = atof(token);
+            // Get decay time.
+            token = strtok(NULL, " :,%");
+            excitationList[excCount].dt = atof(token);
+          } else {
+            excitationList[excCount].rms = 0.;
+            excitationList[excCount].dt = 0.;
+          }
           // Increase counter.
-          exciteCount++;
+          excCount++;
         } else if (strcmp(token, "Ionisation") == 0) {
           // Skip number.
           token = strtok(NULL, " :,%");
@@ -486,7 +499,7 @@ MediumGas::LoadGasFile(const std::string filename) {
       }
     }
   }
- 
+
   // Decode the GASOK bits.
   // GASOK(I)   : .TRUE. if present
   // (1)  electron drift velocity || E
@@ -653,7 +666,7 @@ MediumGas::LoadGasFile(const std::string filename) {
     for (int i = 0; i < gasCount; ++i) percentages[i] *= 100. / sum;
   }
     
-  // Force a recalculation of the collision rates.
+  // Force re-initialisation of collision rates etc.
   isChanged = true;
 
   if (gasMixOk) {
@@ -686,19 +699,17 @@ MediumGas::LoadGasFile(const std::string filename) {
     std::cout << "    Reading gas tables.\n";
   }
   
-  bool done = false;
-
-  // Extrapolation methods
-  int hExtrap[13], lExtrap[13];
-  // Interpolation methods
-  int interpMeth[13];
-
   // Temporary variables
+  // Velocities
   double ve = 0., vb = 0., vexb = 0.;
-  double lorentzAngle = 0.;
+  // Lorentz angle
+  double lor = 0.;
+  // Diffusion coefficients
   double dl = 0., dt = 0.;
+  // Towsend and attachment coefficients
   double alpha = 0., alpha0 = 0., eta = 0.;
-  double muIon = 0., dissIon = 0.;
+  // Ion mobility and dissociation coefficient
+  double mu = 0., diss = 0.;
   double ionDiffLong = 0., ionDiffTrans = 0.;
   double diff = 0.;
   double rate = 0.;
@@ -733,15 +744,15 @@ MediumGas::LoadGasFile(const std::string filename) {
             tabElectronAttachment[j][k][i] = eta;
           }
           // Ion mobility
-          gasfile >> muIon;
+          gasfile >> mu;
           // Convert from cm2 / (V us) to cm2 / (V ns)
-          muIon *= 1.e-3;
-          if (hasIonMobility) tabIonMobility[j][k][i] = muIon;
+          mu *= 1.e-3;
+          if (hasIonMobility) tabIonMobility[j][k][i] = mu;
           // Lorentz angle (unused)
-          gasfile >> lorentzAngle;
+          gasfile >> lor;
           // Ion dissociation
-          gasfile >> dissIon;
-          if (hasIonDissociation) tabIonDissociation[j][k][i] = dissIon;
+          gasfile >> diss;
+          if (hasIonDissociation) tabIonDissociation[j][k][i] = diss;
           // Diffusion tensor
           for (int l = 0; l < 6; l++) {
             gasfile >> diff;
@@ -765,219 +776,148 @@ MediumGas::LoadGasFile(const std::string filename) {
       std::cout << className << "::LoadGasFile:\n";
       std::cout << "    Gas table is 1D.\n";
     }
-    if (versionNumber == 10) {
-      for (int i = 0; i < eFieldRes; i++) {
-        if (debug) std::cout << "    Done table: " << i << "\n";
-        // Drift velocity along E, Bt, ExB
-        gasfile >> ve >> waste >> vb >> waste >> vexb >> waste;
-        ve *= 1.e-3; vb *= 1.e-3; vexb *= 1.e-3;
-        if (hasElectronVelocityE)   tabElectronVelocityE[0][0][i] = ve;
-        if (hasElectronVelocityB)   tabElectronVelocityB[0][0][i] = vb;
-        if (hasElectronVelocityExB) tabElectronVelocityExB[0][0][i] = vexb;
-        // Longitudinal and transferse diffusion coefficients
-        gasfile >> dl >> waste >> dt >> waste;
-        if (hasElectronDiffLong)  tabElectronDiffLong[0][0][i] = dl;
-        if (hasElectronDiffTrans) tabElectronDiffTrans[0][0][i] = dt;
-        // Townsend and attachment coefficients
-        gasfile >> alpha >> waste >> alpha0 >> eta >> waste;
-        if (hasElectronTownsend) {
-          tabElectronTownsend[0][0][i] = alpha;
-          tabTownsendNoPenning[0][0][i] = alpha0;
-        }
-        if (hasElectronAttachment) {
-          tabElectronAttachment[0][0][i] = eta;
-        }
-        // Ion mobility
-        gasfile >> muIon >> waste;
-        muIon *= 1.e-3;
-        if (hasIonMobility) tabIonMobility[0][0][i] = muIon;
-        // Lorentz angle (unused)
-        gasfile >> lorentzAngle >> waste;
-        // Ion dissociation
-        gasfile >> dissIon >> waste;
-        if (hasIonDissociation) tabIonDissociation[0][0][i] = dissIon;
-        // Diffusion tensor
-        for (int j = 0; j < 6; j++) {
-          gasfile >> diff;
-          if (hasElectronDiffTens) tabElectronDiffTens[j][0][0][i] = diff;
-        }
-        for (int j = 0; j < 6; j++) gasfile >> waste;
-        // Excitation rates
-        for (int j = 0; j < nExcListElements; j++) {
-          gasfile >> rate;
-          if (hasExcRates) tabExcRates[j][0][0][i] = rate;
-        }
-        for( int j = 0; j < nExcListElements; j++) gasfile >> waste;
-        // Ionization rates
-        for (int j = 0; j < nIonListElements; j++) {
-          gasfile >> rate;
-          if (hasIonRates) tabIonRates[j][0][0][i] = rate;
-        }
-        for (int j = 0; j < nIonListElements; j++) gasfile >> waste;
+    for (int i = 0; i < eFieldRes; i++) {
+      if (debug) std::cout << "    Done table: " << i << "\n";
+      // Drift velocity along E, Bt, ExB
+      gasfile >> ve >> waste >> vb >> waste >> vexb >> waste;
+      ve *= 1.e-3; vb *= 1.e-3; vexb *= 1.e-3;
+      if (hasElectronVelocityE)   tabElectronVelocityE[0][0][i] = ve;
+      if (hasElectronVelocityB)   tabElectronVelocityB[0][0][i] = vb;
+      if (hasElectronVelocityExB) tabElectronVelocityExB[0][0][i] = vexb;
+      // Longitudinal and transferse diffusion coefficients
+      gasfile >> dl >> waste >> dt >> waste;
+      if (hasElectronDiffLong)  tabElectronDiffLong[0][0][i] = dl;
+      if (hasElectronDiffTrans) tabElectronDiffTrans[0][0][i] = dt;
+      // Townsend and attachment coefficients
+      gasfile >> alpha >> waste >> alpha0 >> eta >> waste;
+      if (hasElectronTownsend) {
+        tabElectronTownsend[0][0][i] = alpha;
+        tabTownsendNoPenning[0][0][i] = alpha0;
       }
-    } else if (versionNumber == 11) {
-      for (int i = 0; i < eFieldRes; i++) {
-        if (debug) std::cout << "    Done table: " << i << "\n";
-        // Drift velocity along E, Bt, ExB
-        gasfile >> ve >> vb >> vexb;
-        ve *= 1.e-3; vb *= 1.e-3; vexb *= 1.e-3;
-        if (hasElectronVelocityE)   tabElectronVelocityE[0][0][i] = ve;
-        if (hasElectronVelocityB)   tabElectronVelocityB[0][0][i] = vb;
-        if (hasElectronVelocityExB) tabElectronVelocityExB[0][0][i] = vexb;
-        // Longitudinal and transferse diffusion coefficients
-        gasfile >> dl >> dt;
-        if (hasElectronDiffLong)  tabElectronDiffLong[0][0][i] = dl;
-        if (hasElectronDiffTrans) tabElectronDiffTrans[0][0][i] = dt;
-        // Townsend and attachment coefficients;
-        gasfile >> alpha >> alpha0 >> eta;
-        if (hasElectronTownsend) {
-          tabElectronTownsend[0][0][i] = alpha;
-          tabTownsendNoPenning[0][0][i] = alpha0;
-        }
-        if (hasElectronAttachment) {
-          tabElectronAttachment[0][0][i] = eta;
-        }
-        // Ion mobility
-        gasfile >> muIon;
-        muIon *= 1.e-3;
-        if (hasIonMobility) tabIonMobility[0][0][i] = muIon;
-        // Lorentz angle (unused)
-        gasfile >> lorentzAngle;
-        // Ion dissociation
-        gasfile >> dissIon;
-        if (hasIonDissociation) tabIonDissociation[0][0][i] = dissIon;
-        // Diffusion tensor
-        for (int j = 0; j < 6; j++) {
-          gasfile >> diff;
-          if (hasElectronDiffTens) tabElectronDiffTens[j][0][0][i] = diff;
-        }
-        // Excitation rates
-        for (int j = 0; j < nExcListElements; j++) {
-          gasfile >> rate;
-          if (hasExcRates) tabExcRates[j][0][0][i] = rate;
-        }
-        // Ionization rates
-        for (int j = 0; j < nIonListElements; j++) {
-          gasfile >> rate;
-          if (hasIonRates) tabIonRates[j][0][0][i] = rate;
-        }
+      if (hasElectronAttachment) {
+        tabElectronAttachment[0][0][i] = eta;
       }
-    }
-    if (debug) std::cout << "    Done with gas tables.\n";
-
-
-    // Done reading the gas tables, moving on to the file footer
-    while (!done) {
-      gasfile.getline(line, 256);
-      token = strtok (line, " :,%=\t");
-      while (token != NULL) {
-        if (strcmp(token, "H") == 0) {
-          token = strtok(NULL, " :,%=\t");
-          for (int i = 0; i < 13; i++) {
-            token = strtok(NULL, " :,%=\t");
-            if (token != NULL) hExtrap[i] = atoi(token);
-          }
-        } else if (strcmp(token, "L") == 0) {
-          token = strtok(NULL, " :,%=\t");
-          for (int i = 0; i < 13; i++) {
-            token = strtok(NULL, " :,%=\t");
-            if (token != NULL) lExtrap[i] = atoi(token);
-          }
-        } else if (strcmp(token, "Thresholds") == 0) {
-          token = strtok(NULL, " :,%=\t");
-          if (token != NULL) thrElectronTownsend = atoi(token);
-          token = strtok(NULL, " :,%=\t");
-          if (token != NULL) thrElectronAttachment = atoi(token);
-          token = strtok(NULL, " :,%=\t");
-          if (token != NULL) thrIonDissociation = atoi(token);
-        } else if (strcmp(token, "Interp") == 0) {
-          for (int i = 0; i < 13; i++) {
-            token = strtok(NULL, " :,%=\t");
-            if (token != NULL) interpMeth[i] = atoi(token);
-          }
-        } else if(strcmp(token, "A") == 0) {
-          // Parameter for energy loss distribution
-          double a;
-          token = strtok(NULL, " :,%=\t");
-          if (token != NULL) a = atof(token);
-        } else if (strcmp(token, "Z") == 0) {
-          // Parameter for energy loss distribution
-          double z;
-          token = strtok(NULL, " :,%=\t");
-          if (token != NULL) z = atof(token);
-        } else if (strcmp(token, "EMPROB") == 0) {
-          // Parameter for energy loss distribution
-          double emprob;
-          token = strtok(NULL, " :,%=\t");
-          if (token != NULL) emprob = atof(token);
-        } else if (strcmp(token, "EPAIR") == 0) {
-          // Parameter for energy loss distribution
-          double epair;
-          token = strtok(NULL, " :,%=\t");
-          if (token != NULL) epair = atof(token);
-        } else if (strcmp(token, "Ion") == 0) {
-          // Ion diffusion coefficients
-          token = strtok(NULL, " :,%=\t");
-          token = strtok(NULL, " :,%=\t");
-          if (token != NULL) ionDiffLong = atof(token);
-          token = strtok(NULL, " :,%=\t");
-          if (token != NULL) ionDiffTrans = atof(token);
-        } else if (strcmp(token, "CMEAN") == 0) {
-          // Cluster parameter
-          double clsPerCm;
-          token = strtok(NULL, " :,%=\t");
-          if (token != NULL) clsPerCm = atof(token);
-        } else if (strcmp(token, "RHO") == 0) {
-          // Parameter for energy loss distribution
-          double rho;
-          token = strtok(NULL, " :,%=\t"); 
-          if (token != NULL) rho = atof(token);
-        } else if (strcmp(token, "PGAS") == 0) {
-          token = strtok(NULL, " :,%=\t");
-          double pTorr = 760.;
-          if (token != NULL) pTorr = atof(token);
-          if (pTorr > 0.) pressure = pTorr;
-        } else if (strcmp(token, "TGAS") == 0) {
-          token = strtok(NULL, " :,%=\t");
-          double tKelvin = 293.15;
-          if (token != NULL) tKelvin = atof(token);
-          if (tKelvin > 0.) temperature = tKelvin;
-        } else if (strcmp(token, "CLSTYP") == 0) {
-          // Cluster parameter
-          int clusterType;
-          token = strtok(NULL, " :,%=\t"); 
-          if (token != NULL) clusterType = atoi(token);
-        } else if (strcmp(token, "FCNCLS") == 0) {
-          // Cluster parameter
-          token = strtok(NULL, " :,%=\t"); 
-        } else if (strcmp(token, "NCLS") == 0) {
-          // Cluster parameter
-          int numCls;
-          token = strtok(NULL, " :,%=\t");
-          if (token != NULL) numCls = atoi(token);
-        } else if (strcmp(token, "Average") == 0) {
-          // Cluster parameter
-          double avgNumCls;
-          token = strtok(NULL, " :,%=\t");
-          if (token != NULL) avgNumCls = atof(token);
-        } else if (strcmp(token, "Gas") == 0) {
-          token = strtok(NULL, " :,%=\t");
-        } else if (strcmp(token, "Heed") == 0) {
-          bool heedInit = false;
-          token = strtok(NULL, " :,%=\t");
-          token = strtok(NULL, " :,%=\t");
-          if (strcmp(token, "T") == 0) heedInit = true;
-        } else if (strcmp(token, "SRIM") == 0) {
-          bool srimInit = false;
-          token = strtok(NULL, " :,%=\t");
-          token = strtok(NULL, " :,%=\t");
-          if (strcmp(token, "T") == 0) srimInit = true;
-          done = true;
-        }
-        token = strtok(NULL, " :,%=\t");
+      // Ion mobility
+      gasfile >> mu >> waste;
+      mu *= 1.e-3;
+      if (hasIonMobility) tabIonMobility[0][0][i] = mu;
+      // Lorentz angle (unused)
+      gasfile >> lor >> waste;
+      // Ion dissociation
+      gasfile >> diss >> waste;
+      if (hasIonDissociation) tabIonDissociation[0][0][i] = diss;
+      // Diffusion tensor
+      for (int j = 0; j < 6; j++) {
+        gasfile >> diff >> waste;
+        if (hasElectronDiffTens) tabElectronDiffTens[j][0][0][i] = diff;
+      }
+      // Excitation rates
+      for (int j = 0; j < nExcListElements; j++) {
+        gasfile >> rate >> waste;
+        if (hasExcRates) tabExcRates[j][0][0][i] = rate;
+      }
+      // Ionization rates
+      for (int j = 0; j < nIonListElements; j++) {
+        gasfile >> rate >> waste;
+        if (hasIonRates) tabIonRates[j][0][0][i] = rate;
       }
     }
   }
+  if (debug) std::cout << "    Done with gas tables.\n";
+
+  // Extrapolation methods
+  int hExtrap[13], lExtrap[13];
+  // Interpolation methods
+  int interpMeth[13];
+
+  // Moving on to the file footer
+  bool done = false;
+  while (!done) {
+    gasfile.getline(line, 256);
+    token = strtok(line, " :,%=\t");
+    while (token != NULL) {
+      if (strcmp(token, "H") == 0) {
+        token = strtok(NULL, " :,%=\t");
+        for (int i = 0; i < 13; i++) {
+          token = strtok(NULL, " :,%=\t");
+          if (token != NULL) hExtrap[i] = atoi(token);
+        }
+      } else if (strcmp(token, "L") == 0) {
+        token = strtok(NULL, " :,%=\t");
+        for (int i = 0; i < 13; i++) {
+          token = strtok(NULL, " :,%=\t");
+          if (token != NULL) lExtrap[i] = atoi(token);
+        }
+      } else if (strcmp(token, "Thresholds") == 0) {
+        token = strtok(NULL, " :,%=\t");
+        if (token != NULL) thrElectronTownsend = atoi(token);
+        token = strtok(NULL, " :,%=\t");
+        if (token != NULL) thrElectronAttachment = atoi(token);
+        token = strtok(NULL, " :,%=\t");
+        if (token != NULL) thrIonDissociation = atoi(token);
+      } else if (strcmp(token, "Interp") == 0) {
+        for (int i = 0; i < 13; i++) {
+          token = strtok(NULL, " :,%=\t");
+          if (token != NULL) interpMeth[i] = atoi(token);
+        }
+      } else if(strcmp(token, "A") == 0) {
+        // Parameter for energy loss distribution
+        double a;
+        token = strtok(NULL, " :,%=\t");
+        if (token != NULL) a = atof(token);
+      } else if (strcmp(token, "Z") == 0) {
+        // Parameter for energy loss distribution
+        double z;
+        token = strtok(NULL, " :,%=\t");
+        if (token != NULL) z = atof(token);
+      } else if (strcmp(token, "EMPROB") == 0) {
+        // Parameter for energy loss distribution
+        double emprob;
+        token = strtok(NULL, " :,%=\t");
+        if (token != NULL) emprob = atof(token);
+      } else if (strcmp(token, "EPAIR") == 0) {
+        // Parameter for energy loss distribution
+        double epair;
+        token = strtok(NULL, " :,%=\t");
+        if (token != NULL) epair = atof(token);
+      } else if (strcmp(token, "Ion") == 0) {
+        // Ion diffusion coefficients
+        token = strtok(NULL, " :,%=\t");
+        token = strtok(NULL, " :,%=\t");
+        if (token != NULL) ionDiffLong = atof(token);
+        token = strtok(NULL, " :,%=\t");
+        if (token != NULL) ionDiffTrans = atof(token);
+      } else if (strcmp(token, "CMEAN") == 0) {
+        // Cluster parameter
+        double clsPerCm;
+        token = strtok(NULL, " :,%=\t");
+        if (token != NULL) clsPerCm = atof(token);
+      } else if (strcmp(token, "RHO") == 0) {
+        // Parameter for energy loss distribution
+        double rho;
+        token = strtok(NULL, " :,%=\t"); 
+        if (token != NULL) rho = atof(token);
+      } else if (strcmp(token, "PGAS") == 0) {
+        token = strtok(NULL, " :,%=\t");
+        double pTorr = 760.;
+        if (token != NULL) pTorr = atof(token);
+        if (pTorr > 0.) pressure = pTorr;
+      } else if (strcmp(token, "TGAS") == 0) {
+        token = strtok(NULL, " :,%=\t");
+        double tKelvin = 293.15;
+        if (token != NULL) tKelvin = atof(token);
+        if (tKelvin > 0.) temperature = tKelvin;
+        done = true;
+        break;
+      } else {
+        done = true;
+        break;
+      } 
+      token = strtok(NULL, " :,%=\t");
+    }
+  }
+
+  gasfile.close();
 
   // Set the reference pressure and temperature.
   pressureTable = pressure;
@@ -1081,7 +1021,6 @@ MediumGas::LoadGasFile(const std::string filename) {
     std::cout << "    Gas file sucessfully read.\n";
   }
     
-  gasfile.close();
   return true;
 
 }
@@ -1113,17 +1052,14 @@ MediumGas::WriteGasFile(const std::string filename) {
     std::cout << "    Writing gas tables to file: " << filename << "\n";
   }
 
-  std::ofstream outputFile;
-  outputFile.open(filename.c_str(), std::ios::out);
-  if (!outputFile.is_open()) {
+  std::ofstream outFile;
+  outFile.open(filename.c_str(), std::ios::out);
+  if (!outFile.is_open()) {
     std::cerr << className << "::WriteGasFile:\n";
     std::cerr << "    File could not be opened.\n";
-    outputFile.close();
+    outFile.close();
     return false;
-  } else if (debug) {
-    std::cout << className << "::WriteGasFile:\n";
-    std::cout << "    File opened sucessfully.\n";
-  }
+  } 
  
   // Assemble the GASOK bits.
   std::string gasBits = "FFFFFFFFFFFFFFFFFFFF";
@@ -1143,67 +1079,99 @@ MediumGas::WriteGasFile(const std::string filename) {
   if (hasExcRates)            gasBits[14] = 'T';
   if (hasIonRates)            gasBits[15] = 'T';
 
+  // Get the current time.
+  time_t rawtime = time(0);
+  tm timeinfo = *localtime(&rawtime);
+  char datebuf[80] = {0};
+  char timebuf[80] = {0};
+  // Format date and time.
+  strftime(datebuf, sizeof(datebuf) - 1, "%d/%m/%y", &timeinfo);
+  strftime(timebuf, sizeof(timebuf) - 1, "%H.%M.%S", &timeinfo);
+  // Set the member name.
+  std::string member = "< none >";
+  // Write the header.
+  outFile <<  "*----.----1----.----2----.----3----.----4----.----"
+          <<  "5----.----6----.----7----.----8----.----9----.---"
+          << "10----.---11----.---12----.---13--\n";
+  outFile << "% Created " << datebuf << " at " << timebuf << " ";
+  outFile << member << " GAS      ";
+  // Add remark.
+  std::string buffer;
+  buffer = std::string(25, ' ');
+  outFile << "\"none" << buffer << "\"\n";
   const int versionNumber = 11;
-  outputFile << "Version: \t" << versionNumber << "\n";
-  outputFile << "GASOK bits:\t" << gasBits << "\n";
-  outputFile << "Identifier:\t" << name 
-             << ", p = " << pressureTable / AtmosphericPressure 
-             << " atm, T = " << temperatureTable << " K\n";
-  outputFile << "Dimension:\t";
+  outFile << " Version   : " << versionNumber << "\n";
+  outFile << " GASOK bits: " << gasBits << "\n";
+  std::stringstream idStream;
+  idStream.str("");
+  idStream << name << ", p = " << pressureTable / AtmosphericPressure
+           << " atm, T = " << temperatureTable << " K";
+  std::string idString = idStream.str();
+  outFile << " Identifier: " << std::setw(80) << std::left 
+          << idString << "\n";
+  outFile << std::right;
+  buffer = std::string(80, ' ');
+  outFile << " Clusters  : " << buffer << "\n";
+  outFile << " Dimension : ";
   if (map2d) {
-    outputFile << "T\t";
+    outFile << "T ";
   } else {
-    outputFile << "F\t";
+    outFile << "F ";
   }
-  outputFile << eFieldRes << "\t"
-             << angRes    << "\t" 
-             << bFieldRes << "\t" 
-             << nExcListElements << "\t" 
-             << nIonListElements << "\n";
-  outputFile << "E fields\n";
+  outFile << std::setw(9) << eFieldRes << " "
+             << std::setw(9) << angRes    << " " 
+             << std::setw(9) << bFieldRes << " " 
+             << std::setw(9) << nExcListElements << " " 
+             << std::setw(9) << nIonListElements << "\n";
+  outFile << " E fields   \n";
+  outFile << std::scientific << std::setw(15) << std::setprecision(8);
   for (int i = 0; i < eFieldRes; i++) {
     // List 5 values, then new line.
-    outputFile << eFields[i] / pressure << " ";
-    if ((i + 1) % 5 == 0) outputFile << "\n";
+    outFile << std::setw(15) << eFields[i] / pressure;
+    if ((i + 1) % 5 == 0) outFile << "\n";
   }
-  if (eFieldRes % 5 != 0) outputFile << "\n";
-  outputFile << "E-B angles\n";
+  if (eFieldRes % 5 != 0) outFile << "\n";
+  outFile << " E-B angles \n";
   for (int i = 0; i < angRes; i++) {
     // List 5 values, then new line.
-    outputFile << bAngles[i] << " ";
-    if ((i + 1) % 5 == 0) outputFile << "\n";
+    outFile << std::setw(15) << bAngles[i];
+    if ((i + 1) % 5 == 0) outFile << "\n";
   }
-  if (angRes % 5 != 0) outputFile << "\n";
-  outputFile << "B fields\n";
+  if (angRes % 5 != 0) outFile << "\n";
+  outFile << " B fields   \n";
   for (int i = 0; i < bFieldRes; i++) {
     // List 5 values, then new line.
     // B fields are stored in hGauss (to be checked!).
-    outputFile << bFields[i] * 100. << " ";
-    if ((i + 1) % 5 == 0) outputFile <<"\n";
+    outFile << std::setw(15) << bFields[i] * 100.;
+    if ((i + 1) % 5 == 0) outFile <<"\n";
   }
-  if (bFieldRes % 5 != 0) outputFile << "\n";
-  outputFile << "Mixture:\n";
+  if (bFieldRes % 5 != 0) outFile << "\n";
+  outFile << " Mixture:   \n";
   for (int i = 0; i < nMagboltzGases; i++) {
     // List 5 values, then new line.
-    outputFile << mixture[i] << " ";
-    if ((i + 1) % 5 == 0) outputFile << "\n";
+    outFile << std::setw(15) << mixture[i];
+    if ((i + 1) % 5 == 0) outFile << "\n";
   }
+  if (nMagboltzGases % 5 != 0) outFile << "\n";
   for (int i = 0; i < nExcListElements; i++) {
-    outputFile << "Excitation " << i + 1 << ": " 
-               << excitationList[i].label  << "\t"
-               << excitationList[i].energy << "\t"
-               << excitationList[i].prob   << "\n";
+    outFile << " Excitation " << std::setw(5) << i + 1 << ": " 
+            << std::setw(45) << std::left << excitationList[i].label << "  "
+            << std::setw(15) << std::right << excitationList[i].energy 
+            << std::setw(15) << excitationList[i].prob 
+            << std::setw(15) << excitationList[i].rms 
+            << std::setw(15) << excitationList[i].dt << "\n";
   }
   for (int i = 0; i < nIonListElements; i++) {
-    outputFile << "Ionization " << i + 1 << ": " 
-               << ionisationList[i].label  << "\t"
-               << ionisationList[i].energy << "\n";
+    outFile << " Ionisation " << std::setw(5) << i + 1 << ": " 
+            << std::setw(45) << std::left << ionisationList[i].label  << "  "
+            << std::setw(15) << std::right << ionisationList[i].energy << "\n";
   }
 
   const double sqrtPressure = sqrt(pressureTable);
   const double logPressure = log(pressureTable);
 
-  outputFile << "The gas tables follow:\n";
+  outFile << " The gas tables follow:\n";
+  int cnt = 0;
   for (int i = 0; i < eFieldRes; i++) {
     for (int j = 0; j < angRes; j++) {
       for (int k = 0; k < bFieldRes; k++) {
@@ -1228,43 +1196,126 @@ MediumGas::WriteGasFile(const std::string filename) {
           eta = tabElectronAttachment[j][k][i];
           eta -= logPressure;
         }
-        double muIon = 0.;
-        if (hasIonMobility) muIon = tabIonMobility[j][k][i];
+        // Ion mobility
+        double mu = 0.;
+        if (hasIonMobility) mu = tabIonMobility[j][k][i];
         // Convert from cm2 / (V ns) to cm2 / (V us).
-        muIon *= 1.e3;
-        double lorentzAngle = 0.;
-        double dissIon = -30.;
+        mu *= 1.e3;
+        // Lorentz angle
+        double lor = 0.;
+        // Dissociation coefficient
+        double diss = -30.;
         if (hasIonDissociation) {
-          dissIon = tabIonDissociation[j][k][i];
-          dissIon -= logPressure;
+          diss = tabIonDissociation[j][k][i];
+          diss -= logPressure;
         }
+        // Set spline coefficient to dummy value.
+        const double spl = 0.;
         // Write the values to file.
-        outputFile << ve << " " << vb << " " << vexb << " ";
-        outputFile << dl << " " << dt << " ";
-        outputFile << alpha << " " << alpha0 << " " << eta << " ";
-        outputFile << muIon << " " << lorentzAngle << " " << dissIon << " ";
+        outFile << std::setw(15);
+        outFile << ve;     ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        if (!map2d) {
+          outFile << std::setw(15);
+          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n"; 
+        }
+        outFile << std::setw(15);
+        outFile << vb;     ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        if (!map2d) {
+          outFile << std::setw(15);
+          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        }
+        outFile << std::setw(15);
+        outFile << vexb;   ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        if (!map2d) {
+          outFile << std::setw(15);
+          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        }
+        outFile << std::setw(15);
+        outFile << dl;     ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        if (!map2d) {
+          outFile << std::setw(15);
+          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        }
+        outFile << std::setw(15);
+        outFile << dt;     ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        if (!map2d) {
+          outFile << std::setw(15);
+          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        }
+        outFile << std::setw(15);
+        outFile << alpha;  ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        if (!map2d) {
+          outFile << std::setw(15);
+          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        }
+        outFile << std::setw(15);
+        outFile << alpha0; ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        outFile << std::setw(15);
+        outFile << eta;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        outFile << std::setw(15);
+        if (!map2d) {
+          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+          outFile << std::setw(15);
+        }
+        outFile << mu;     ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        if (!map2d) {
+          outFile << std::setw(15);
+          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        }
+        outFile << std::setw(15);
+        outFile << lor;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        if (!map2d) {
+          outFile << std::setw(15);
+          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        }
+        outFile << std::setw(15);
+        outFile << diss;   ++cnt; if (cnt % 8 == 0) outFile << "\n";
+        if (!map2d) {
+          outFile << std::setw(15);
+          outFile << spl;    ++cnt; if (cnt % 8 == 0) outFile << "\n"; 
+        }
+        outFile << std::setw(15);
         for (int l = 0; l < 6; ++l) {
           double diff = 0.;
           if (hasElectronDiffTens) {
             diff = tabElectronDiffTens[l][j][k][i];
             diff *= pressureTable;
           }
-          outputFile << diff << " ";
+          outFile << std::setw(15);
+          outFile << diff; ++cnt; if (cnt % 8 == 0) outFile << "\n";
+          if (!map2d) {
+            outFile << std::setw(15) << spl; ++cnt; 
+            if (cnt % 8 == 0) outFile << "\n"; 
+          }
         }
         if (hasExcRates && nExcListElements > 0) {
           for (int l = 0; l < nExcListElements; l++) {
-            outputFile << tabExcRates[l][j][k][i] << " ";
+            outFile << std::setw(15);
+            outFile << tabExcRates[l][j][k][i]; ++cnt;
+            if (cnt % 8 == 0) outFile << "\n";
+            if (!map2d) {
+              outFile << std::setw(15) << spl; ++cnt;
+              if (cnt % 8 == 0) outFile << "\n";
+            }
           }
         }
         if (hasIonRates && nIonListElements > 0) {
           for (int l = 0; l < nIonListElements; l++) {
-            outputFile << tabIonRates[l][j][k][i] << " ";
+            outFile << std::setw(15);
+            outFile << tabIonRates[l][j][k][i]; ++cnt;
+            if (cnt % 8 == 0) outFile << "\n";
+            if (!map2d) {
+              outFile << std::setw(15) << spl; ++cnt;
+              if (cnt % 8 == 0) outFile << "\n";
+            }
           }
         }
       }
     }
-    outputFile << "\n\n";
+    if (cnt % 8 != 0) outFile << "\n";
+    cnt = 0; 
   }
+
   // Extrapolation methods
   int hExtrap[13], lExtrap[13];
   int interpMeth[13];
@@ -1298,38 +1349,47 @@ MediumGas::WriteGasFile(const std::string filename) {
   lExtrap[12] = extrLowIonRates;
   interpMeth[12] = intpIonRates;
     
-  outputFile << "H Extr:\t";
-  for (int i = 0; i < 13; i++) outputFile << hExtrap[i] << "\t";
-  outputFile << "\n";
-  outputFile << "L Extr:\t";
-  for (int i = 0; i < 13; i++) outputFile << lExtrap[i] << "\t";
-  outputFile << "\n";
-  outputFile << "Thresholds:\t" << thrElectronTownsend << "\t"
-                                << thrElectronAttachment << "\t"
-                                << thrIonDissociation << "\n";
-  outputFile << "Interp:\t";
-  for (int i = 0; i < 13; i++) outputFile << interpMeth[i] << "\t";
-  outputFile << "\n";
-  outputFile << "A\t= "      << 0. 
-             << ", Z\t= "    << 0. 
-             << ", EMPROB= " << 0.
-             << ", ePair = " << 0. <<"\n";
+  outFile << " H Extr: ";
+  for (int i = 0; i < 13; i++) {
+    outFile << std::setw(5) << hExtrap[i];
+  }
+  outFile << "\n";
+  outFile << " L Extr: ";
+  for (int i = 0; i < 13; i++) {
+    outFile << std::setw(5) << lExtrap[i];
+  }
+  outFile << "\n";
+  outFile << " Thresholds: " 
+             << std::setw(10) << thrElectronTownsend
+             << std::setw(10) << thrElectronAttachment
+             << std::setw(10) << thrIonDissociation << "\n";
+  outFile << " Interp: ";
+  for (int i = 0; i < 13; i++) {
+    outFile << std::setw(5) << interpMeth[i];
+  }
+  outFile << "\n";
+  outFile << " A     =" << std::setw(15) << 0. << "," 
+          << " Z     =" << std::setw(15) << 0. << ","
+          << " EMPROB=" << std::setw(15) << 0. << ","
+          << " EPAIR =" << std::setw(15) << 0. << "\n";
   double ionDiffLong = 0., ionDiffTrans = 0.;
   if (hasIonDiffLong) ionDiffLong = tabIonDiffLong[0][0][0];
   if (hasIonDiffTrans) ionDiffTrans = tabIonDiffTrans[0][0][0];
-  outputFile << "Ion diffusion:\t" << ionDiffLong << " " 
-                                   << ionDiffTrans << "\n";
-  outputFile << "CMEAN = " << 0. 
-             << ", RHO = " << 0. 
-             << ", PGAS = " << pressureTable
-             << ", TGAS = " << temperatureTable << "\n";
-  outputFile << "CLSTYP:\t NOT SET \n";
-  outputFile << "FCNCLS:\t\n";
-  outputFile << "NCLS:\t" << 0 << "\n";
-  outputFile << "Average:\t" << 0. << "\n";
-  outputFile << "Heed initialisation done: F\n";
-  outputFile << "SRIM initialisation done: F\n";
-  outputFile.close();
+  outFile << " Ion diffusion: " << std::setw(15) << ionDiffLong 
+                                << std::setw(15) << ionDiffTrans << "\n";
+  outFile << " CMEAN =" << std::setw(15) << 0. << "," 
+          << " RHO   =" << std::setw(15) << 0. << "," 
+          << " PGAS  =" << std::setw(15) << pressureTable << ","
+          << " TGAS  =" << std::setw(15) << temperatureTable << "\n";
+  outFile << " CLSTYP    : NOT SET   \n";
+  buffer = std::string(80, ' ');
+  outFile << " FCNCLS    : " << buffer << "\n";
+  outFile << " NCLS      : " << std::setw(10) << 0 << "\n";
+  outFile << " Average   : " << std::setw(25) 
+                             << std::setprecision(18) << 0. << "\n";
+  outFile << "  Heed initialisation done: F\n";
+  outFile << "  SRIM initialisation done: F\n";
+  outFile.close();
 
   return true;
 
@@ -1835,7 +1895,7 @@ MediumGas::GetGasName(const int gasnumber, std::string& gasname) {
 
   switch (gasnumber) {
     case 1:
-      gasname == "CF4";
+      gasname = "CF4";
       break;
     case 2:
       gasname = "Ar";   

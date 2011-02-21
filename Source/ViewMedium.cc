@@ -145,11 +145,12 @@ ViewMedium::PlotElectronDiffusion() {
   SetupCanvas();
   AddFunction(eMin, eMax, vMin, vMax, keep,
               "electric field [V/cm]", 
-              "diffusion coefficient [cm^{-1/2}]", 1);
+              "diffusion coefficient [1/#sqrt{cm}]", 1);
   keep = true;
   AddFunction(eMin, eMax, vMin, vMax, keep,
               "electric field [V/cm]",
-              "diffusion coefficient [cm^{-1/2}}]", 2);
+              "diffusion coefficient [1/#sqrt{cm}]", 2);
+
   canvas->Update();
 
 }

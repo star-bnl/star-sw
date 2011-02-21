@@ -119,6 +119,8 @@ class MediumGas : public Medium {
       std::string label;
       double energy;
       double prob;
+      double rms;
+      double dt;
     };
     std::vector<excListElement> excitationList;
 
