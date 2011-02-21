@@ -1169,7 +1169,7 @@ MediumMagboltz::GetGasNumberMagboltz(const std::string input, int& number) const
   if (input == "BF3") {
     number = 42; return true;
   }
-  // C2HF5 and C2H2F4.
+  // C2H2F4 (C2HF5).
   if (input == "C2HF5" || input == "C2H2F4") {
     number = 43; return true;
   }
@@ -1422,7 +1422,7 @@ MediumMagboltz::Mixer() {
       np = np0;
       if (useCsOutput) {
         outfile << iE * eStep << "  " << q[iE][1] << "  " << q[iE][2] 
-                << "  " << q[iE][3] << "  ";
+                << "  " << q[iE][3] << "  " << q[iE][4] << "  ";
       }
       // Elastic scattering
       cf[iE][np] = q[iE][1] * van;
@@ -1479,7 +1479,7 @@ MediumMagboltz::Mixer() {
       if (debug && nIn > 0 && iE == nEnergySteps - 1) {
         std::cout << "      " << nIn << " inelastic terms ("
                   << nExc << " excitations, " 
-                  << nSuperEl << " superelastic terms, "
+                  << nSuperEl << " superelastic, "
                   << nIn - nExc - nSuperEl << " other)\n";
       }
       if (useCsOutput) outfile << "\n";

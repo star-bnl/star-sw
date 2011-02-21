@@ -126,7 +126,7 @@ MoleculeDef::MoleculeDef(const String& fname, const String& fnotation,
   Z_totalh(0), A_totalh(0.0), tqatomh(0), awlsh(fawls)
 { 
   mfunname("MoleculeDef::MoleculeDef(...)");
-  long n, k;
+  long n;
 
   for( n=0; n<qatom(); n++)
   {
@@ -152,7 +152,6 @@ MoleculeDef::MoleculeDef(const String& fname, const String& fnotation,
   Z_totalh(0), A_totalh(0.0), tqatomh(fqatom_ps), awlsh(fawls)
 { 
   mfunname("MoleculeDef::MoleculeDef(...)");
-  long n;
 
   Z_totalh = atom(0)->Z() * fqatom_ps;
   A_totalh = atom(0)->A() * fqatom_ps;

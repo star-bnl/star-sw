@@ -15,18 +15,17 @@ and moleculas
 2004, I. Smirnov
 */
 
-
-//extern String shelllist_dir_name;  
-//extern String pacs_table_dir_name;
+// extern String shelllist_dir_name;  
+// extern String pacs_table_dir_name;
 
 extern HydrogenPhotoAbsCS Hydrogen_shell_PACS;
-//extern SimpleAtomPhotoAbsCS Hydrogen_PACS;
+extern SimpleAtomPhotoAbsCS Hydrogen_PACS;
 extern SimpleAtomPhotoAbsCS Hydrogen_for_H2_PACS;
 extern SimpleAtomPhotoAbsCS Hydrogen_for_CH4_PACS;
 extern SimpleAtomPhotoAbsCS Hydrogen_for_NH4_PACS;
-//extern ExAtomPhotoAbsCS Hydrogen_for_H2_PACS;
-//extern ExAtomPhotoAbsCS Hydrogen_for_CH4_PACS;
-//extern ExAtomPhotoAbsCS Hydrogen_for_NH4_PACS;
+// extern ExAtomPhotoAbsCS Hydrogen_for_H2_PACS;
+// extern ExAtomPhotoAbsCS Hydrogen_for_CH4_PACS;
+// extern ExAtomPhotoAbsCS Hydrogen_for_NH4_PACS;
 extern ExAtomPhotoAbsCS Helium_PACS;
 extern ExAtomPhotoAbsCS Lithium_PACS;
 extern ExAtomPhotoAbsCS Beryllium_PACS;
@@ -81,7 +80,6 @@ extern MolecPhotoAbsCS CF4_MPACS;
 extern MolecPhotoAbsCS SF4_MPACS;
 extern MolecPhotoAbsCS SF6_MPACS;
 
-
 extern MolecPhotoAbsCS C2H2_MPACS;
 extern MolecPhotoAbsCS C2H4_MPACS;
 extern MolecPhotoAbsCS C2H6_MPACS;
@@ -91,7 +89,6 @@ extern MolecPhotoAbsCS C4H10_MPACS;
 // The definition of the following in PhotoAbsLib.c may be refined 
 // (to adjust outer shell energies).
 extern MolecPhotoAbsCS C2F4H2_MPACS;
-
 extern MolecPhotoAbsCS Methylal_MPACS;
 
 // Additional molecular photoabsorption-cross sections 
@@ -112,6 +109,7 @@ extern MolecPhotoAbsCS CS2_MPACS;
 extern MolecPhotoAbsCS COS_MPACS;
 extern MolecPhotoAbsCS BF3_MPACS;
 extern MolecPhotoAbsCS C2HF5_MPACS;
+extern MolecPhotoAbsCS C2H2F4_MPACS;
 extern MolecPhotoAbsCS CHF3_MPACS;
 extern MolecPhotoAbsCS CF3Br_MPACS;
 extern MolecPhotoAbsCS C3F8_MPACS;

@@ -105,6 +105,7 @@ TrackHeed::TrackHeed() :
   ready(false), hasActiveTrack(false),
   mediumDensity(-1.), mediumName(""),
   usePhotonReabsorption(true),
+  usePacsOutput(false),
   useDelta(true), nDeltas(0),
   particle(0), 
   matter(0), gas(0), material(0),
@@ -1115,6 +1116,7 @@ TrackHeed::SetupGas(Medium* medium) {
     else if (gasname == "CD4")    molPacs[i] = &CH4_MPACS;
     else if (gasname == "BF3")    molPacs[i] = &BF3_MPACS;
     else if (gasname == "C2HF5")  molPacs[i] = &C2HF5_MPACS;
+    else if (gasname == "C2H2F4") molPacs[i] = &C2H2F4_MPACS;
     else if (gasname == "CHF3")   molPacs[i] = &CHF3_MPACS;
     else if (gasname == "CF3Br")  molPacs[i] = &CF3Br_MPACS;
     else if (gasname == "C3F8")   molPacs[i] = &C3F8_MPACS;
@@ -1129,10 +1131,27 @@ TrackHeed::SetupGas(Medium* medium) {
                 << " are not available.\n";
       return false;
     }
-    if (gasname == "CH4") gasname = "Ar";
     notations.increment(gasname);
     fractions.increment(frac);
   }
+  if (usePacsOutput) {
+    std::ofstream pacsfile;
+    pacsfile.open("heed_pacs.txt", std::ios::out);
+    const int nValues = energyMesh->get_q();
+    if (nValues > 0) {
+      for (int i = 0; i < nValues; ++i) {
+        double e = energyMesh->get_e(i);
+        pacsfile << 1.e6 * e << "  ";
+        for (int j = 0; j < nComponents; ++j) {
+          pacsfile << molPacs[j]->get_ACS(e) << "  "
+                   << molPacs[j]->get_ICS(e) << "  ";
+        }
+        pacsfile << "\n";
+      }
+    }
+    pacsfile.close();
+  }  
+
   std::string gasname = medium->GetName();
   if (gas != 0) {
     delete gas; gas = 0;

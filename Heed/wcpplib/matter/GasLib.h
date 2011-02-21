@@ -3,7 +3,7 @@
 
 /* 
 There are not only gases but also atoms and molecules.
-The gas is the highest class in this hierarhy.
+The gas is the highest class in this hierarchy.
 
 
 The reason to gather all initializations in one file is the undefinite
@@ -43,7 +43,6 @@ The last half of Mendeleev's (Mendel's) table is not totally included yet.
 #include "wcpplib/matter/MatterDef.h"
 #include "wcpplib/matter/MoleculeDef.h"
 #include "wcpplib/matter/GasDef.h"
-
 
 
 extern AtomDef Hydrogen; 

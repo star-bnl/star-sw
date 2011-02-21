@@ -311,7 +311,6 @@ AtomMixDef::AtomMixDef(const String& fatom_not):
   mean_ratio_Z_to_Ah(0.0)
 { 
   mfunnamep("AtomMixDef::AtomMixDef(...)");
-  long n;
   AtomDef* ad = AtomDef::get_AtomDef(fatom_not);
   if(ad == NULL)
   {

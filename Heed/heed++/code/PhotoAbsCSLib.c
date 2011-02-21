@@ -40,28 +40,33 @@ String pacs_table_dir_name =
 String((a_internal_HDB = getenv("HEED_DATABASE")) == NULL ? "" : 
        a_internal_HDB) + "/henke/";
 
-//HydrogenPhotoAbsCS Hydrogen_shell_PACS;
-//SimpleAtomPhotoAbsCS Hydrogen_PACS(1, Hydrogen_shell_PACS);
+// Hydrogen
+HydrogenPhotoAbsCS Hydrogen_shell_PACS;
+SimpleAtomPhotoAbsCS Hydrogen_PACS(1, Hydrogen_shell_PACS);
 
 PhenoPhotoAbsCS Hydrogen_for_H2_shell_PACS("Hydrogen_for_H2", 
                                            1, 15.43e-6, 3.228);
-//1, 16.4e-6, 3.228);
 PhenoPhotoAbsCS Hydrogen_for_CH4_shell_PACS("Hydrogen_for_CH4", 
-                                            1, 12.e-06, 3.228);
+                                             1, 12.65e-06, 3.228);
 PhenoPhotoAbsCS Hydrogen_for_NH4_shell_PACS("Hydrogen_for_NH4", 
                                             1, 10.0e-06, 3.228);
+
+// SimpleTablePhotoAbsCS Hydrogen_for_CH4_shell_PACS("Hydrogen_for_CH4", 
+//                                       1, 12.65e-6, 
+//                                       shelllist_dir_name + "H_for_CH4.dat");
 
 SimpleAtomPhotoAbsCS Hydrogen_for_H2_PACS(1, Hydrogen_for_H2_shell_PACS);
 SimpleAtomPhotoAbsCS Hydrogen_for_CH4_PACS(1, Hydrogen_for_CH4_shell_PACS);
 SimpleAtomPhotoAbsCS Hydrogen_for_NH4_PACS(1, Hydrogen_for_NH4_shell_PACS);
-
-//ExAtomPhotoAbsCS Hydrogen_for_H2_PACS(1, 
-//				      shelllist_dir_name + "shelllist.dat", 
-//				      pacs_table_dir_name + "H.dat"); 
-//ExAtomPhotoAbsCS Hydrogen_for_CH4_PACS(1, 
-//				       shelllist_dir_name + "shelllist.dat", 
-//				       pacs_table_dir_name + "H.dat",
-//				       12.0e-06); 
+ 
+// ExAtomPhotoAbsCS Hydrogen_for_H2_PACS(1, 
+//                                       shelllist_dir_name + "shelllist.dat", 
+//                                       pacs_table_dir_name + "H.dat"); 
+// ExAtomPhotoAbsCS Hydrogen_for_CH4_PACS(1, 
+//                                        shelllist_dir_name + "shelllist.dat", 
+//                                        shelllist_dir_name + "H_for_CH4.dat",
+//                                        "H_for_CH4",
+//                                        12.65e-6);
 //ExAtomPhotoAbsCS Hydrogen_for_NH4_PACS(1, 
 //				       shelllist_dir_name + "shelllist.dat", 
 //				       pacs_table_dir_name + "H.dat",
@@ -83,14 +88,20 @@ ExAtomPhotoAbsCS Carbon_PACS(6,
                              shelllist_dir_name + "shelllist.dat", 
                              pacs_table_dir_name + "C.dat"); 
 // for debug, FitBT
-//ExAtomPhotoAbsCS Carbon_PACS(6, "carbon",  
-//			     shelllist_dir_name + "shelltscf.dat", 2, 0, 0.0);
+// ExAtomPhotoAbsCS Carbon_PACS(6, "carbon",  
+//                              shelllist_dir_name + "shelltscf.dat", 
+//                              2, 0, 0.0);
 
-ExAtomPhotoAbsCS Carbon_for_CH4_PACS(6, 
-                                     shelllist_dir_name + "shelllist.dat", 
-                                     pacs_table_dir_name + "C.dat",
+// ExAtomPhotoAbsCS Carbon_for_CH4_PACS(6, 
+//                                      shelllist_dir_name + "shelllist.dat", 
+//                                      pacs_table_dir_name + "C.dat",
+//                                      "C_for_CH4",
+//                                      12.65e-06); 
+ExAtomPhotoAbsCS Carbon_for_CH4_PACS(6,
+                                     shelllist_dir_name + "shelllist.dat",
+                                     shelllist_dir_name + "C_for_CH4.dat",
                                      "C_for_CH4",
-                                     12.65e-06); 
+                                     12.65e-6);
 ExAtomPhotoAbsCS Carbon_for_C2H4_PACS(6, 
                                       shelllist_dir_name + "shelllist.dat", 
                                       pacs_table_dir_name + "C.dat",
@@ -108,7 +119,7 @@ ExAtomPhotoAbsCS Carbon_for_C4H10_PACS(6,
                                        10.55e-06); 
 ExAtomPhotoAbsCS Carbon_for_Methylal_PACS(6,
                                           shelllist_dir_name + "shelllist.dat", 
-                                           pacs_table_dir_name + "C.dat",
+                                          pacs_table_dir_name + "C.dat",
                                           "C_for_Methylal", 
                                           10.0e-06); 
 ExAtomPhotoAbsCS Carbon_for_CF4_PACS(6, 
@@ -167,32 +178,31 @@ ExAtomPhotoAbsCS Chlorine_PACS(17,
                                shelllist_dir_name + "shelllist.dat", 
                                pacs_table_dir_name + "Cl.dat"); 
 // "Standard" Argon:
-//ExAtomPhotoAbsCS Argon_PACS(18, 
-//			    shelllist_dir_name + "shelllist.dat", 
-//			    pacs_table_dir_name + "Ar.dat"); 
+// ExAtomPhotoAbsCS Argon_PACS(18, 
+//                             shelllist_dir_name + "shelllist.dat", 
+//                             pacs_table_dir_name + "Ar.dat"); 
 // Optional variants:
-//ExAtomPhotoAbsCS Argon_PACS(18, 
-//			    shelllist_dir_name + "shelllist.dat", 
-//			    shelllist_dir_name + "mw3.dat"); 
+// ExAtomPhotoAbsCS Argon_PACS(18, 
+//                             shelllist_dir_name + "shelllist.dat", 
+//                             shelllist_dir_name + "mw3.dat"); 
 // Variant for debug, pointwise cross section
-//ExAtomPhotoAbsCS Argon_PACS(18, "argon", 
-//			    shelllist_dir_name + "ftbf18.dat", 2);
+// ExAtomPhotoAbsCS Argon_PACS(18, "argon", 
+//                             shelllist_dir_name + "ftbf18.dat", 2);
 // Variant for debug, fitted cross section
-//ExAtomPhotoAbsCS Argon_PACS(18, "argon", 
-//			    shelllist_dir_name + "shelltscf.dat", 2, 0, 0.0);
+// ExAtomPhotoAbsCS Argon_PACS(18, "argon", 
+//                             shelllist_dir_name + "shelltscf.dat", 
+//                             2, 0, 0.0);
 // Variant for debug, fitted cross section with replacement from Henke
-//ExAtomPhotoAbsCS Argon_PACS(18, "argon", 
-//			    shelllist_dir_name + "shelltscf.dat", 
-//			    pacs_table_dir_name + "Ar.dat",
-//			    40.0e-6, 
-//			    2, 0.0);
+// ExAtomPhotoAbsCS Argon_PACS(18, "argon", 
+//                             shelllist_dir_name + "shelltscf.dat", 
+//                             pacs_table_dir_name + "Ar.dat",
+//                             40.0e-6, 2, 0.0);
 // Another variant for debug, fitted cross section with replacement from 
 // Marr and West, should be similar to old Fortran verion
-//ExAtomPhotoAbsCS Argon_PACS(18, "argon", 
-//			    shelllist_dir_name + "shelltscf.dat", 
-//			    shelllist_dir_name + "mw3.dat",
-//			    40.0e-6, 
-//			    2, 0.0);
+// ExAtomPhotoAbsCS Argon_PACS(18, "argon", 
+//                             shelllist_dir_name + "shelltscf.dat", 
+//                             shelllist_dir_name + "mw3.dat",
+//                             40.0e-6, 2, 0.0);
 
 ExAtomPhotoAbsCS generate_Argon_PACS_mod_esc(void)
 {
@@ -209,11 +219,11 @@ ExAtomPhotoAbsCS generate_Argon_PACS_mod_esc(void)
   //                                     shelllist_dir_name + "ftbf18.dat", 2);
 
   AtomicSecondaryProducts* asp =  Argon_PACS_mod_esc.get_asp(1);
-  //asp->print(mcout, 2);
+  // asp->print(mcout, 2);
   DynLinArr< double > electron_energy;
   DynLinArr< double > photon_energy;
-  //electron_energy.put_qel(1);
-  //electron_energy[0] = 0.002670;
+  // electron_energy.put_qel(1);
+  // electron_energy[0] = 0.002670;
   electron_energy.put_qel(1);
   electron_energy[0] = 0.000200;
   asp->add_channel(0.65, electron_energy, photon_energy);
@@ -221,17 +231,17 @@ ExAtomPhotoAbsCS generate_Argon_PACS_mod_esc(void)
   electron_energy[0] = 0.000050;
   electron_energy[1] = 0.000200;
   asp->add_channel(0.35, electron_energy, photon_energy, 1);
-  //mcout<<"L1:\n";
-  //asp->print(mcout, 2);
+  // mcout<<"L1:\n";
+  // asp->print(mcout, 2);
 
-  asp =  Argon_PACS_mod_esc.get_asp(2);
+  asp = Argon_PACS_mod_esc.get_asp(2);
   electron_energy.put_qel(1);
   electron_energy[0] = 0.000200;
   asp->add_channel(1.0, electron_energy, photon_energy, 1);
   //mcout<<"L2:\n";
   //asp->print(mcout, 2);
 
-  asp =  Argon_PACS_mod_esc.get_asp(3);
+  asp = Argon_PACS_mod_esc.get_asp(3);
   electron_energy.put_qel(1);
   electron_energy[0] = 0.000200;
   asp->add_channel(1.0, electron_energy, photon_energy, 1);
@@ -272,6 +282,7 @@ ExAtomPhotoAbsCS Uranium_PACS(92,
                               pacs_table_dir_name + "U.dat"); 
 
 MolecPhotoAbsCS H2_MPACS(Hydrogen_for_H2_PACS, 2);
+// MolecPhotoAbsCS H2_MPACS(Hydrogen_PACS, 2);
 MolecPhotoAbsCS He_MPACS(Helium_PACS, 1, 41.3e-6);
 MolecPhotoAbsCS N2_MPACS(Nitrogen_PACS, 2, 34.8e-6);
 MolecPhotoAbsCS O2_MPACS(Oxygen_PACS, 2, 30.8e-6);
@@ -286,13 +297,10 @@ MolecPhotoAbsCS N2O_MPACS(Nitrogen_PACS, 2,
 MolecPhotoAbsCS CO2_MPACS(Carbon_for_CO2_PACS, 1, 
                           Oxygen_for_CO2_PACS, 2, 33.0e-6);
                           
-// SimpleTablePhotoAbsCS CH4_Berkowitz_PACS("CH4_Berkowitz", 6,
-//                                         12.65e-6,  
-//                                         shelllist_dir_name + "CH4_Berkowitz.dat");
-//SimpleAtomPhotoAbsCS CH4_PACS(6, CH4_Berkowitz_PACS);
-MolecPhotoAbsCS CH4_MPACS(Carbon_for_CH4_PACS, 1, 
-                          Hydrogen_for_H2_PACS, 4, 27.3e-6);
-//MolecPhotoAbsCS CH4_MPACS(CH4_PACS, 1, 27.3e-6);
+// MolecPhotoAbsCS CH4_MPACS(Carbon_for_CH4_PACS, 1, 
+//                           Hydrogen_for_H2_PACS, 4, 27.3e-6);
+MolecPhotoAbsCS CH4_MPACS(Carbon_for_CH4_PACS, 1,
+                          Hydrogen_for_CH4_PACS, 4, 27.3e-6);
 MolecPhotoAbsCS CF4_MPACS(Carbon_for_CF4_PACS, 1, Fluorine_PACS, 4);
 
 // !!! The following line may need to be refined 
@@ -321,11 +329,11 @@ MolecPhotoAbsCS C2F4H2_MPACS(Carbon_for_CF4_PACS, 2,
 			     Fluorine_PACS, 4,
 			     Hydrogen_for_H2_PACS, 2);
 
-//MolecPhotoAbsCS C2H2_MPACS(Carbon_for_CH4_PACS, 2, Hydrogen_for_CH4_PACS, 2);
-//MolecPhotoAbsCS C2H4_MPACS(Carbon_for_CH4_PACS, 2, Hydrogen_for_CH4_PACS, 4);
-//MolecPhotoAbsCS C2H6_MPACS(Carbon_for_CH4_PACS, 2, Hydrogen_for_CH4_PACS, 6);
-//MolecPhotoAbsCS C3H8_MPACS(Carbon_for_CH4_PACS, 3, Hydrogen_for_CH4_PACS, 8);
-//MolecPhotoAbsCS C4H10_MPACS(Carbon_for_CH4_PACS, 4, Hydrogen_for_CH4_PACS, 10);
+// MolecPhotoAbsCS C2H2_MPACS(Carbon_for_CH4_PACS, 2, Hydrogen_for_CH4_PACS, 2);
+// MolecPhotoAbsCS C2H4_MPACS(Carbon_for_CH4_PACS, 2, Hydrogen_for_CH4_PACS, 4);
+// MolecPhotoAbsCS C2H6_MPACS(Carbon_for_CH4_PACS, 2, Hydrogen_for_CH4_PACS, 6);
+// MolecPhotoAbsCS C3H8_MPACS(Carbon_for_CH4_PACS, 3, Hydrogen_for_CH4_PACS, 8);
+// MolecPhotoAbsCS C4H10_MPACS(Carbon_for_CH4_PACS, 4, Hydrogen_for_CH4_PACS, 10);
 MolecPhotoAbsCS Methylal_MPACS(Oxygen_PACS, 2,
 			       Carbon_for_Methylal_PACS, 3, 
 			       Hydrogen_for_H2_PACS, 8, 
@@ -340,25 +348,25 @@ as in pure molecular hydrogen H2.
 */
 
 // Additional molecular photoabsorption-cross sections 
-// for compatibility with Magboltz
-// W values (where available) are taken from ICRU report 31
+// for consistency with Magboltz
+// Where available, the W values are taken from ICRU report 31
 MolecPhotoAbsCS C5H12_MPACS(Carbon_for_C4H10_PACS, 5, 
-                            Hydrogen_for_H2_PACS, 
-                            12, 23.2e-6);
+                            Hydrogen_for_H2_PACS, 12, 
+                            23.2e-6);
 MolecPhotoAbsCS H2O_MPACS(Hydrogen_for_H2_PACS, 2,
-                    Oxygen_PACS, 1, 
-                    29.6e-6);
+                          Oxygen_PACS, 1, 
+                          29.6e-6);
 MolecPhotoAbsCS NO_MPACS(Nitrogen_PACS, 1,
-                   Oxygen_PACS, 1);
+                         Oxygen_PACS, 1);
 MolecPhotoAbsCS CO_MPACS(Carbon_for_CO2_PACS, 1,
-                   Oxygen_PACS, 1);
+                         Oxygen_PACS, 1);
 MolecPhotoAbsCS DME_MPACS(Carbon_for_Methylal_PACS, 2,
-                    Hydrogen_for_H2_PACS, 6,
-                    Oxygen_PACS, 1);
+                          Hydrogen_for_H2_PACS, 6,
+                          Oxygen_PACS, 1);
 MolecPhotoAbsCS C2F6_MPACS(Carbon_for_C2H6_PACS, 2,
-                     Fluorine_PACS, 6);
+                           Fluorine_PACS, 6);
 MolecPhotoAbsCS C3H6_MPACS(Carbon_for_C2H6_PACS, 3,
-                     Hydrogen_for_H2_PACS, 6);
+                           Hydrogen_for_H2_PACS, 6);
 MolecPhotoAbsCS CH3OH_MPACS(Carbon_for_C2H6_PACS, 1,
                             Hydrogen_for_H2_PACS, 4,
                             Oxygen_PACS, 1, 
@@ -382,6 +390,9 @@ MolecPhotoAbsCS BF3_MPACS(Boron_PACS, 1,
 MolecPhotoAbsCS C2HF5_MPACS(Carbon_for_C2H6_PACS, 2,
                             Hydrogen_for_H2_PACS, 1,
                             Fluorine_PACS, 5);
+MolecPhotoAbsCS C2H2F4_MPACS(Carbon_for_C2H6_PACS, 2,
+                            Hydrogen_for_H2_PACS, 2,
+                            Fluorine_PACS, 4);
 MolecPhotoAbsCS CHF3_MPACS(Carbon_for_CF4_PACS, 1,
                            Hydrogen_for_H2_PACS, 1,
                            Fluorine_PACS, 3);
@@ -398,9 +409,5 @@ MolecPhotoAbsCS GeH4_MPACS(Germanium_PACS, 1,
                            Hydrogen_for_H2_PACS, 4);
 MolecPhotoAbsCS SiH4_MPACS(Silicon_PACS, 1,
                            Hydrogen_for_H2_PACS, 4);
-
-
-
-
 
                   

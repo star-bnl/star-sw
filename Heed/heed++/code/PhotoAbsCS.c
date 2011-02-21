@@ -311,7 +311,7 @@ OveragePhotoAbsCS::OveragePhotoAbsCS(PhotoAbsCS* apacs, double fwidth, // MeV
 				     double fstep,   // MeV
 				     long fmax_q_step):
   real_pacs(apacs, do_clone),
-  width(fwidth), step(fstep), max_q_step(fmax_q_step)
+  width(fwidth), max_q_step(fmax_q_step), step(fstep)
 {
   mfunname("OveragePhotoAbsCS::OveragePhotoAbsCS(...)");
   check_econd11(apacs , == NULL , mcerr);
@@ -443,14 +443,14 @@ const
     {
       return 0.5 *  // accounts one atom instead of two
 	0.0535 * pow(100.0e-6  , 3.228) / 2.228 *
-	( 1.0 / pow (energy1*1.0e6  , 2.228)  );
+	( 1.0 / pow (energy1  , 2.228)  );
     }
     else
     {
       return 0.5 *  // accounts one atom instead of two
 	0.0535 * pow(100.0e-6  , 3.228) / 2.228 *
-	( 1.0 / pow (energy1*1.0e6  , 2.228)  - 
-	  1.0 / pow (energy2*1.0e6  , 2.228) );
+	( 1.0 / pow (energy1  , 2.228)  - 
+	  1.0 / pow (energy2  , 2.228) );
     }
   }
 }

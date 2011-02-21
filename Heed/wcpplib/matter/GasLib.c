@@ -4,7 +4,7 @@
 1998-2003,  I. Smirnov
 */
 
-//AbsList< AtomDef* > AtomDef::logbook;
+// AbsList< AtomDef* > AtomDef::logbook;
 // This call should be before all atom_def
 // otherwise they are all lost.
 
@@ -73,10 +73,9 @@ AtomDef Bismuth(   "Bismuth",    "Bi", 83, 208.9804 * gram/mole);    // check
 AtomDef Uranium(   "Uranium",    "U",  92, 238.0289 * gram/mole);
 AtomDef Plutonium(  "Plutonium", "Pu", 94, 244.0 * gram/mole);
 
-//AbsList< MoleculeDef* > MoleculeDef::logbook;
+// AbsList< MoleculeDef* > MoleculeDef::logbook;
 // This call should be before all MoleculeDef
 // otherwise they are all lost.
-
 
 MoleculeDef Hydrogen2(  "Hydrogen",   "H2",   "H",  2);
 MoleculeDef Helium_molec(  "Helium",     "He", "He", 1);

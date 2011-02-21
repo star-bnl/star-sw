@@ -31,15 +31,15 @@ HeedDeltaElectron::HeedDeltaElectron
  int fs_print_listing 
  ):
   eparticle(primvol, pt, vel, time, &electron_def),
-  parent_particle_number(fparent_particle_number),
   //parent_part(fparent_part), 
-  necessary_energy(0.0), 
+  s_print_listing(fs_print_listing), 
+  phys_mrange(0.0), 
+  s_stop_eloss(0),
   s_mult_low_path_length(0), 
   q_low_path_length(0.0),
   s_path_length(0),
-  phys_mrange(0.0),
-  s_stop_eloss(0),
-  s_print_listing(fs_print_listing)
+  necessary_energy(0.0),
+  parent_particle_number(fparent_particle_number)
 {
   mfunname("HeedDeltaElectron::HeedDeltaElectron(...)");
   particle_number = last_particle_number;

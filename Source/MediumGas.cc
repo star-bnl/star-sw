@@ -1797,8 +1797,8 @@ MediumGas::GetGasInfo(const std::string gasname,
     a = 12.0107 + 4 * 2.01410177785; z = 6 + 4;
   } else if (gasname == "BF3") {
     a = 10.811 + 3 * 18.9984032; z = 5 + 3 * 9;
-  } else if (gasname == "C2HF5") {
-    a = 2 * 12.0107 + 1.00794 + 5 * 18.9984032; z = 2 * 6 + 1 + 5 * 9;
+  } else if (gasname == "C2H2F4") {
+    a = 2 * 12.0107 + 2 * 1.00794 + 4 * 18.9984032; z = 2 * 6 + 2 + 4 * 9;
   } else if (gasname == "CHF3") {
     a =     12.0107 + 1.00794 + 3 * 18.9984032; z =     6 + 1 + 3 * 9;
   } else if (gasname == "CF3Br") {
@@ -1961,7 +1961,7 @@ MediumGas::GetGasName(const int gasnumber, std::string& gasname) {
       gasname = "BF3";     
       break;
     case 43: 
-      gasname = "C2HF5";   
+      gasname = "C2H2F4";   
       break;
     case 44:
       gasname = "He-3";
@@ -2274,12 +2274,12 @@ MediumGas::GetGasName(std::string input, std::string& gasname) const {
     gasname = "BF3"; 
     return true;
   }
-  // C2HF5 and C2H2F4.
+  // C2H2F4 (and C2HF5).
   if (input == "C2HF5" || input == "C2H2F4" || input == "C2F5H" || 
       input == "C2F4H2" || input == "FREON-134" || input == "FREON-134-A" || 
       input == "FREON-125" || input == "ZYRON-125" || 
       input == "TETRAFLUOROETHANE" || input == "PENTAFLUOROETHANE") {
-    gasname = "C2HF5"; 
+    gasname = "C2H2F4"; 
     return true;
   }
   // CHF3

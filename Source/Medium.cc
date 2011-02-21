@@ -59,7 +59,7 @@ Medium::Medium() :
   extrLowDiffusion    = 0; extrHighDiffusion    = 1;
   extrLowTownsend     = 0; extrHighTownsend     = 1;
   extrLowAttachment   = 0; extrHighAttachment   = 1;
-  extrLowMobility     = 0; extrHighMobility     = 2;
+  extrLowMobility     = 0; extrHighMobility     = 1;
   extrLowDissociation = 0; extrHighDissociation = 1;
   
   intpVelocity     = 2;

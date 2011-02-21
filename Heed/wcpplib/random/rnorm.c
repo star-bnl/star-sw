@@ -21,7 +21,6 @@ double rnorm_improved(void)
   }
   else
   {
-    double r;
     double x1, x2, w, y1, y2;
     do {
       x1 = 2.0 * SRANLUX() - 1.0;

@@ -327,7 +327,7 @@ class vec: public absref
   // makes new turned vector and remains this unchanged
 
   void turn(const vec& dir, vfloat angle); // turns this vector
-  void shift(const vec& dir){;}  // not defined for vectors
+  void shift(const vec& dir);
 
   // Two following things generate random unit vectors, currently with
   // the help of SRANLUX.

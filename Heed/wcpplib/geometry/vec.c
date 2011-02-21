@@ -321,6 +321,10 @@ void vec::turn(const vec& dir, vfloat angle)
   *this=this->turn_new(dir,angle);
 }
 
+void vec::shift(const vec& dir) {
+ // Not defined for vectors
+}
+
 vec vec::down_new(const abssyscoor *fasc){ return down_new(fasc->Gabas()); }
 void vec::down(const abssyscoor *fasc){ down(fasc->Gabas()); }
 vec vec::up_new(const abssyscoor *fasc){ return up_new(fasc->Gabas()); }

@@ -41,7 +41,7 @@ Parabol::Parabol(double x[3], double y[3]): s_det(0), s_dxzero(0)
   DynArr<DoubleAc> mat(3,3);
   DynLinArr<DoubleAc> par(3);
   DynLinArr<DoubleAc> f(3);
-  int i, n;
+  int i;
   for( i=0; i<3; i++)
   {
     f[i]=y[i];

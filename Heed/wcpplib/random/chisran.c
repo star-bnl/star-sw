@@ -25,7 +25,6 @@ float chispre(float *x, float *p, float *f, long q)
 float chisran(float flat_random_number, float *x, float *f, long q)
 {
   mfunnamep("float chisran(float flat_random_number, float *x, float *f, long q)");
-  float r;
   float xr,xl,yr,yl;
   long nl,nr,nc;
   check_econd11(q , <=0 , mcerr);
@@ -122,7 +121,6 @@ double chisran(double flat_random_number, DynLinArr < double >  f)
   mfunnamep("double chisran(double flat_random_number, DynLinArr < double >  f)");
   //mcout<<"chisran is started\n";
   //Iprintn(mcout, flat_random_number);
-  double r;
   double xr,xl,yr,yl;
   long nl,nr,nc;
   long q = f.get_qel();

@@ -18,7 +18,7 @@ GasDef::GasDef(const String& fname, const String& fnotation,
 {
   mfunname("GasDef::GasDef(...many molecules...)");
 
-  long n,k,i;
+  long n, k;
   for( k=0; k<fqmolec; k++) // finding pointers to all molec. by notations
   {
     //mcout<<"fqmolec="<<fqmolec<<" fmolec_not[k]="<<fmolec_not[k]

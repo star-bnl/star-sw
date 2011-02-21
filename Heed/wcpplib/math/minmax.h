@@ -35,21 +35,21 @@ It is provided "as is" without express or implied warranty.
 #include "wcpplib/util/FunNameStack.h"
 
 // Minimal and maximal power of e, whose result can be represented.
-// Similar numbers for a != e can be obrained  in the user's program by     
+// Similar numbers for a != e can be obtained  in the user's program by     
 // double dbl_max_a_exp = dbl_max_e_exp / log(a);
  
-const double dbl_min_e_exp = (DBL_MIN_EXP-1) * log(double(FLT_RADIX));
-const double dbl_max_e_exp = (DBL_MAX_EXP-1) * log(double(FLT_RADIX));
-const double dbl_max_square = sqrt(DBL_MAX);  // maximal number,
+static const double dbl_min_e_exp = (DBL_MIN_EXP-1) * log(double(FLT_RADIX));
+static const double dbl_max_e_exp = (DBL_MAX_EXP-1) * log(double(FLT_RADIX));
+static const double dbl_max_square = sqrt(DBL_MAX);  // maximal number,
 // which square can be represented. 
-const double dbl_max_pow3 = pow(DBL_MAX, 1.0/3.0);  // maximal number,
+static const double dbl_max_pow3 = pow(DBL_MAX, 1.0/3.0);  // maximal number,
 // whose power 3 can be represented. 
 
-const double flt_min_e_exp = (FLT_MIN_EXP-1) * log(double(FLT_RADIX));
-const double flt_max_e_exp = (FLT_MAX_EXP-1) * log(double(FLT_RADIX));
-const double flt_max_square = sqrt(FLT_MAX);  // maximal number,
+static const double flt_min_e_exp = (FLT_MIN_EXP-1) * log(double(FLT_RADIX));
+static const double flt_max_e_exp = (FLT_MAX_EXP-1) * log(double(FLT_RADIX));
+static const double flt_max_square = sqrt(FLT_MAX);  // maximal number,
 // which square can be represented. 
-const double flt_max_pow3 = pow(FLT_MAX, float(1.0/3.0));  // maximal number,
+static const double flt_max_pow3 = pow(FLT_MAX, float(1.0/3.0));  // maximal number,
 // whose power 3 can be represented. 
 
 //There is a widely used macros min and max making

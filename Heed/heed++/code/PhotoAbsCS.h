@@ -138,7 +138,7 @@ public:
 };
 
 
-// The Hydrogen: emphirical fit of Kosarev & Podoliak 
+// Hydrogen: empirical fit of Kosarev & Podoliak 
 // Original formula for molecular hydrogen
 // Since this class for separated shell, we divide molecular CS by 2
 
@@ -156,7 +156,7 @@ public:
 
 // Typically this is for reading Experimental CS, for example of argon,
 // as if there is one shell.
-// File is two-column table, the first row is energy in Ev, 
+// File is two-column table, the first row is energy in eV, 
 // the second one is CS in Mbarn.
 // The points are understood as local points.
 // The interpolation between them are either straight or by power
@@ -184,7 +184,7 @@ public:
 			const DynLinArr< double >& fcs);
 
   // Fit from one of the papers of Band-Trzaskovskaya et al, CS for any shell
-  // It is difficult to integrate that formulas analitically.
+  // It is difficult to integrate that formulas analytically.
   // So I create numerical array and treat it as input data.
   SimpleTablePhotoAbsCS(const String& fname, int fZ, double fthreshold, 
 			int  l, double E0, double yw, double ya,

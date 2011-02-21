@@ -69,7 +69,9 @@ class TrackHeed : public Track {
 
     void EnablePhotonReabsorption()  {usePhotonReabsorption = true;}
     void DisablePhotonReabsorption() {usePhotonReabsorption = false;}
- 
+
+    void EnablePhotoAbsorptionCrossSectionOutput()  {usePacsOutput = true;}
+    void DisablePhotoAbsorptionCrossSectionOutput() {usePacsOutput = false;} 
     void SetEnergyMesh(const double e0, const double e1,
                        const int nsteps);
 
@@ -86,6 +88,7 @@ class TrackHeed : public Track {
     std::string mediumName;
   
     bool usePhotonReabsorption;
+    bool usePacsOutput;
  
     bool useDelta;
     int nDeltas;
