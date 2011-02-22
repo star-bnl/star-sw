@@ -22,6 +22,7 @@ virtual ~StBFChainOpt(){};
 const TString &GetFileIn()  	const;
 const TString &GetFileOut() 	const;
       TFile   *GetTFile()	const;
+      TString  GetGeometry()  	const;
 private:
 StBFChain *fBFChain;
 

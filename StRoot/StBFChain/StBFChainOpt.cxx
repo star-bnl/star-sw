@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChainOpt:$Name:  $:$Id: StBFChainOpt.cxx,v 1.2 2007/04/26 20:38:00 perev Exp $
+// @(#)StRoot/StBFChainOpt:$Name:  $:$Id: StBFChainOpt.cxx,v 1.3 2011/02/22 19:16:44 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -30,4 +30,9 @@ const TString &StBFChainOpt::StBFChainOpt::GetFileOut() const
 TFile *StBFChainOpt::GetTFile() const
 {
   return fBFChain->GetTFile();
+}
+//_____________________________________________________________________
+TString StBFChainOpt::GetGeometry() const
+{
+  return fBFChain->GetGeometry();
 }

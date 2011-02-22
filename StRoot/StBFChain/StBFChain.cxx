@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.570 2010/11/27 18:21:31 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.571 2011/02/22 19:15:27 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1019,6 +1019,7 @@ void StBFChain::SetOptions(const Char_t *options, const Char_t *chain) {
 /// Enable/disable valid command line options
 void StBFChain::SetOption(const Int_t k, const Char_t *chain) {
   if (k > 0) {
+    assert(k<fNoChainOptions);
     Int_t n = strlen(fBFC[k].Opts);
     if (n >  0) SetOptions(fBFC[k].Opts,fBFC[k].Key);
     if (!fBFC[k].Flag) {
@@ -1026,6 +1027,7 @@ void StBFChain::SetOption(const Int_t k, const Char_t *chain) {
       gMessMgr->QAInfo() << Form(" Switch On  %20s by %s", fBFC[k].Key, chain) << endm;
     }
   } else {
+    assert(-k<fNoChainOptions);
     if (k < 0 && fBFC[-k].Flag) {
       fBFC[-k].Flag = kFALSE;
       gMessMgr->QAInfo() << Form(" Switch Off %20s by %s", fBFC[-k].Key, chain) << endm;
@@ -1513,3 +1515,21 @@ Long_t  StBFChain::ProcessLine(const char *line) {
   }
   return res;
 }
+//________________________________________________________________________________
+TString StBFChain::GetGeometry() const
+{
+  int n = fchainOpt->GetNRows();
+  for (int i=0;i<n;i++) {
+    if (!fchainOpt->GetTable()[i].Flag) continue;
+    TString k(fchainOpt->GetTable()[i].Key);
+    k.ToLower();
+    if (k[0]!='y') 		continue;
+    if (k[1]!='2') 		continue;
+    if (k[2] <'0' || k[2]>'9') 	continue;
+    if (k[3] <'0' || k[3]>'9') 	continue;
+    if (k[4] <'0' || k[4]>'9') 	continue;
+    return k;
+  }
+  return TString(""); 
+}   
+   
