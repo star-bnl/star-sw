@@ -355,14 +355,14 @@ Int_t StEventQAMaker::Make() {
         ((float) (primVtx->numberOfDaughters())) > 0.2) {
       vertExists = 1.;
     } else {
-      LOG_WARN << "questionable primary vertex found";
+      LOG_WARN << "questionable primary vertex found" << endm;
       vertExists = 0.;
     }
     fillHists = kTRUE;
   } else {
     vertExists = -1.;
     fillHists = kFALSE;
-    LOG_WARN << "no primary vertex found!";
+    LOG_WARN << "no primary vertex found!" << endm;
   }
   mNullPrimVtx->Fill(vertExists);
   
@@ -416,7 +416,7 @@ void StEventQAMaker::MakeHistGlob() {
     if (map.trackTpcSvt()) cnttrkTS++;
     if (globtrk->flag()>0) {
       StTrackDetectorInfo* detInfo = globtrk->detectorInfo();
-      if (PCThits(detInfo)) continue;
+      if (map.hasHitInDetector(kTpcId) && PCThits(detInfo)) continue;
 
       StTrackGeometry* geom = globtrk->geometry();
       StDcaGeometry* dcageom = ((StGlobalTrack*) globtrk)->dcaGeometry();
@@ -447,7 +447,7 @@ void StEventQAMaker::MakeHistGlob() {
       Float_t fphi = firstPoint.phi()/degree;
       if (fphi<0) fphi+=360;
       StPhysicalHelixD hx = geom->helix();
-      StPhysicalHelixD dcahx = dcageom->helix();
+      StPhysicalHelixD dcahx = (dcageom ? dcageom->helix() : hx);
       // get the helix position closest to the first point on track
       double sFirst = hx.pathLength(firstPoint);
       // get the helix position closest to the last point on track
@@ -973,7 +973,8 @@ void StEventQAMaker::MakeHistPrim() {
       
       if (primtrk->flag()>0) {
         StTrackDetectorInfo* detInfo = primtrk->detectorInfo();
-        if (PCThits(detInfo)) continue;
+        const StTrackTopologyMap& map=primtrk->topologyMap();
+        if (map.hasHitInDetector(kTpcId) && PCThits(detInfo)) continue;
 
         StTrackGeometry* geom = primtrk->geometry();
 	// due to variation on "kalman fitting" of primary tracks
@@ -981,7 +982,6 @@ void StEventQAMaker::MakeHistPrim() {
 	// helix parameters (parameters at last point on track)
 	StTrackGeometry* outerGeom = primtrk->outerGeometry();
         StTrackFitTraits& fTraits = primtrk->fitTraits();
-        const StTrackTopologyMap& map=primtrk->topologyMap();
 	StPhysicalHelixD hx = geom->helix();
 	StPhysicalHelixD ohx = outerGeom->helix();
 
@@ -2382,8 +2382,11 @@ Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.97 2011/02/19 02:20:46 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.98 2011/02/22 20:00:54 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.98  2011/02/22 20:00:54  genevb
+// PCT check and dcaGeom only for TPC tracks
+//
 // Revision 2.97  2011/02/19 02:20:46  genevb
 // Pile-up cuts
 //
