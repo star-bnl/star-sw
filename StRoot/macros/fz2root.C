@@ -5,6 +5,7 @@ void fz2root(const char *file=
 {
    gROOT->LoadMacro("bfc.C");
    bfc(0,"fzin, GeantOut sdt20090312",file);
+   chain->SetDEBUG(0);
    chain->EventLoop(nEvent);
    chain->Finish();
 }
