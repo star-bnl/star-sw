@@ -23,7 +23,7 @@
 #include "TTable.h"
 #include "Ttypes.h"
 
-/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.46 2010/01/26 20:37:41 fisyak Exp $ */
+/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.47 2011/02/22 19:16:19 perev Exp $ */
 struct Bfc_st {
   Char_t       Key[63];      /* nick name */
   Char_t       Name[63];     /* maker name */
@@ -113,9 +113,10 @@ class StBFChain : public StChain {
    virtual Char_t     *GetOptionString(const Char_t  *);
    virtual const TString &GetFileIn()  const {return *(&fInFile);}
    virtual const TString &GetFileOut() const {return *(&fFileOut);}
+               TString GetGeometry() const;
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.46 2010/01/26 20:37:41 fisyak Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.47 2011/02/22 19:16:19 perev Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class

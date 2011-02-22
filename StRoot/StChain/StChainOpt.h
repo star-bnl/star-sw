@@ -13,6 +13,7 @@
 */
 //////////////////////////////////////////////////////////////////////////
 #include "TNamed.h"
+#include "TString.h"
 class TString;
 class StChainOpt : public TNamed {
  public:
@@ -22,6 +23,7 @@ class StChainOpt : public TNamed {
    virtual const TString &GetFileIn()  		const =0;
    virtual const TString &GetFileOut() 		const =0;
    virtual TFile *GetTFile()                    const =0;
+   virtual TString GetGeometry()  	        const {return TString("");}
 // ClassDef(StChainOpt, 0)
 };
 #endif
