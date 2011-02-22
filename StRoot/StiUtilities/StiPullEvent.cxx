@@ -146,28 +146,41 @@ void StiPullEvent::Clear(const char*)
 //_____________________________________________________________________________
 void StiPullEvent::Finish()
 {
-  int ihit=0;
-  int nHits = mHitsG.GetLast()+1;
-  for (int iprim=0;iprim<mNTrks[1];iprim++) 
-  {
-    const StiPullTrk* pTrk = (const StiPullTrk*)mTrksP[iprim];
-    assert(pTrk); 
-    int iTrk = pTrk->mTrackNumber;
-    assert(iTrk>0);
-    StiPullTrk* gTrk = (StiPullTrk*)mTrksG[iTrk-1];
-    assert(gTrk);
-    assert(gTrk->mTrackNumber==iTrk);
-    gTrk->mVertex = pTrk->mVertex;
-    int nUpd=0;
-    for (;ihit<nHits;ihit++) {
-      StiPullHit *gHit = (StiPullHit*)mHitsG[ihit];
-      if (gHit->mTrackNumber!=iTrk) {
-        if (nUpd) {break;} else {continue;}}
-      gHit->mVertex = pTrk->mVertex; nUpd++;
+static int nCall=0; nCall++;
+  int iTkG=0,iTkP=0,iHiG=0,iHiP=0,idP=0,idG=0;
+  StiPullTrk* trkG=0,*trkP =0;
+  StiPullHit* hiG=0,*hiP =0;
+  int nHiG = mHitsG.GetLast()+1;
+  int nHiP = mHitsP.GetLast()+1;
+  for (iTkG=0;iTkG<mNTrks[0];iTkG++) {// Loop over globs
+    trkG=(StiPullTrk*)mTrksG[iTkG]; idG = trkG->mTrackNumber;
+    idP=-1; trkP=0;
+    if (iTkP<mNTrks[1]) {
+      trkP=(StiPullTrk*)mTrksP[iTkP]; idP = trkP->mTrackNumber;
     }
-    assert(nUpd);
-  }
+    int vertex = 0;
+    if (idG==idP) { //It is a primary
+      vertex = trkP->mVertex;
+      int nHits=0;
+      for(;iHiP<nHiP; iHiP ++) { // Loop over prim hits
+        hiP = (StiPullHit*)mHitsP[iHiP]; if (idP!=hiP->mTrackNumber) break;
+        nHits++;
+        hiP->mTrackNumber=iTkG+1; hiP->mVertex=vertex;
+      }
+      assert(nHits==trkP->nAllHits || nHits-1==trkP->nAllHits);
+      trkP->mTrackNumber= iTkG+1; iTkP++;
+    }//end It is a primary
 
+    int nHits=0;
+    for(;iHiG<nHiG; iHiG ++) { // Loop over glob hits
+      hiG = (StiPullHit*)mHitsG[iHiG]; if (idG!=hiG->mTrackNumber) break;
+      nHits++;
+      hiG->mTrackNumber=iTkG+1; hiG->mVertex=vertex;
+    }
+    assert(nHits==trkG->nAllHits);
+    trkG->mVertex = vertex; 
+    trkG->mTrackNumber= iTkG+1; 
+  }
 }  
   
   
