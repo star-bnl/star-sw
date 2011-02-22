@@ -8,7 +8,7 @@ root [7] muWET->Draw()
 */
 
 //=================================================
-plWana(  int page=0,int pl=0, char *core0="", char *iPath="", char *oPath=""){ //1=gif, 2=ps, 3=both
+plWana(  int page=0,int pl=0, char *core0="sumFeb21_2011", char *iPath="./", char *oPath="out/"){ //1=gif, 2=ps, 3=both
   //cout<<iPath<<core0<<endl;
 
   if(page==0) {
@@ -51,7 +51,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
 
   char *nameR1[]={"pubStatEve","pubCrR","pubWET","pubchEtaCP","pubchEtaCN"};// pg 20
   char *nameR2[]={"pubchRecPNg","pubchRecPNp"};// pg 21
-  char *nameR3[]={"pubchWETPg"  ,"pubchWETPp","pubchCFP0" ,"pubchWETNp","pubchWETNg" ,"pubchCFN0"};// pg 22
+  char *nameR3[]={"pubchWETPg"  ,"pubchWETPp","pubchCFP0" ,"pubchWETNg" ,"pubchWETNp","pubchCFN0"};// pg 22
 
   char *nameS1[]={"spinStatEve","spins4mon","spinbX48","spinbX7","spinbX48c","spinbX7c"};// pg 23
   char *nameS5[]={"spinET_P","spinET_N","spinQpT","spinQpT2"};// pg 24
@@ -477,6 +477,10 @@ case 19:{    sprintf(padTit,"Background study for Joe, %s",core0);
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
       c->cd(i+1);  h->Draw();
+      h->SetFillColor(4);
+      if(i==0 ||i==3) h->SetFillColor(3);
+      h->Rebin();
+      h->SetAxisRange(0,80);
     }
  } break;//--------------------------------------
 
@@ -707,6 +711,9 @@ void doAllMC(){
 
 
 // $Log: plWana.C,v $
+// Revision 1.4  2011/02/22 21:38:05  balewski
+// First 100 Ws in run 11
+//
 // Revision 1.3  2011/02/22 19:22:45  stevens4
 // update j-peak plot
 //
