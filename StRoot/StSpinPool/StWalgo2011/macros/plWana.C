@@ -316,7 +316,7 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
       char txt[100];
       printf("->%s<\n",nameX[i]);
       h=(TH1*)fd->Get(nameX[i]);  assert(h);
-      if(i==3) { // draw on previous
+      if(i==100) { // draw on previous
 	float sum=h->GetEntries();
 	sprintf(txt,"%.0f eve >thres",sum);
 	tx=new TText(30,55,txt); tx->Draw();
@@ -328,8 +328,12 @@ cat mcSetD1*W*ps | ps2pdf - ~/WWW/tmp/all-W.pdf
       if(i==0 )	h->SetAxisRange(0,60,"y");
       if(i==1 )	{h->SetAxisRange(0,60,"x");h->SetAxisRange(-40,60,"y");}
       if(i==2 ) {
-	h->Draw("eh");  	h->SetAxisRange(0,60);
-	//	if(strstr("run9",core0)>=0) h->SetMaximum(80);
+	h->Draw("eh"); h->SetAxisRange(0,60);
+	float sum=h->Integral(29,100);
+	h->Rebin(); h->SetFillColor(4);
+	sprintf(txt,"%.0f eve >thres",sum);
+	tx=new TText(40,h->GetMaximum()*0.9,txt); tx->Draw();
+	h->SetAxisRange(0,60);
       }
     }
    
@@ -703,8 +707,8 @@ void doAllMC(){
 
 
 // $Log: plWana.C,v $
-// Revision 1.2  2011/02/15 17:34:15  stevens4
-// update plotting macros
+// Revision 1.3  2011/02/22 19:22:45  stevens4
+// update j-peak plot
 //
 // Revision 1.1  2011/02/10 20:33:35  balewski
 // start
