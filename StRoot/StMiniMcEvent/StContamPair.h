@@ -20,7 +20,6 @@ class StContamPair : public StMiniMcPair {
   StContamPair();
   virtual ~StContamPair();
 
-  void setParentGeantId(int val) 	{ mParentGeantId=val;}
   void setGeantProcess(int val) 	{ mGeantProcess=val;  }
   void setPtMcParent(Float_t val) 	{ mPtMcParent=val ; }
   void setEtaMcParent(Float_t val) 	{ mEtaMcParent=val;}
@@ -30,7 +29,6 @@ class StContamPair : public StMiniMcPair {
   void setPtMcParentParent(Float_t val) { mPtMcParentParent   =val;}
   void setParentParentGeantId(int val)  { mParentParentGeantId=val;}
 
-  Int_t      mParentGeantId; 
   Int_t      mGeantProcess;
   Float_t    mPtMcParent;
   Float_t    mEtaMcParent;
@@ -49,6 +47,9 @@ class StContamPair : public StMiniMcPair {
 
 //
 // $Log: StContamPair.h,v $
+// Revision 1.3  2011/02/23 19:34:42  perev
+// Remove redundant mParentGeantId
+//
 // Revision 1.2  2011/02/22 19:20:17  perev
 // now int mParentParentGeantId
 //
