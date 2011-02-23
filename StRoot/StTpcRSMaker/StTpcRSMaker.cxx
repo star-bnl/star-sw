@@ -47,7 +47,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.45 2010/12/16 15:36:07 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.46 2011/02/23 20:14:31 perev Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -797,6 +797,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	checkList[io][6]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),NP);
 #endif	
 	Double_t driftLength = TrackSegmentHits[iSegHits].coorLS.position().z();
+        if (driftLength<0) driftLength = 0;
 	Double_t D = 1. + OmegaTau*OmegaTau;
 	Double_t SigmaT = St_TpcResponseSimulatorC::instance()->transverseDiffusion()*  TMath::Sqrt(   driftLength/D);
 	//	Double_t SigmaL = St_TpcResponseSimulatorC::instance()->longitudinalDiffusion()*TMath::Sqrt(2*driftLength  );
@@ -1472,8 +1473,11 @@ Double_t StTpcRSMaker::polya(Double_t *x, Double_t *par) {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.45 2010/12/16 15:36:07 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.46 2011/02/23 20:14:31 perev Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.46  2011/02/23 20:14:31  perev
+// Hack to avoid sqrt(-)
+//
 // Revision 1.45  2010/12/16 15:36:07  fisyak
 // cut hits outside time buckets range
 //
