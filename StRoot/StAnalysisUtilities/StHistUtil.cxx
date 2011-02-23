@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.80 2011/02/23 18:46:29 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.81 2011/02/23 20:56:56 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.81  2011/02/23 20:56:56  genevb
+// Default to general histograms for references in absence of trig typed
+//
 // Revision 2.80  2011/02/23 18:46:29  genevb
 // Fixed a bug introduced in version 2.71 when adding hists
 //
@@ -711,8 +714,28 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           int curPad = (++padCount);
 
           // Will need to display both histograms if doing reference analysis...
-          TH1* hobjR = (TH1*) (dirListR ? dirListR->FindObject(oname) : 0);
           TH1* hobjO = hobj;
+          TH1* hobjR = 0;
+          if (dirListR) {
+            // try: full name
+            hobjR = (TH1*) (dirListR->FindObject(oname));
+            if (!hobjR) {
+              // try: strip just maker from name
+              Int_t tempint = -1;
+              TString onamebase = StripPrefixes(oname,tempint,-1);
+              hobjR = (TH1*) (dirListR->FindObject(onamebase.Data()));
+              if (!hobjR) {
+                // try: strip just trigger type from name
+                onamebase = StripPrefixes(oname,tempint,1);
+                hobjR = (TH1*) (dirListR->FindObject(onamebase.Data()));
+                if (!hobjR) {
+                // try: strip maker and trigger type from name
+                  onamebase = StripPrefixes(oname,tempint,0);
+                  hobjR = (TH1*) (dirListR->FindObject(onamebase.Data()));
+                }
+              }
+            }
+          }
           TVirtualPad* objPad = 0;
           for (int analRepeat = 0;analRepeat < (hobjR ? 2 : 1); analRepeat++) {
 
@@ -962,19 +985,24 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 
           // Run reference analysis...(on first loop, before we forgot hobj)
           if (hobjR) {
-            Int_t tempint = -1;
             StHistUtilRef* huR = 0;
             if (m_refCuts) {
               // try: full name
               huR = (StHistUtilRef*) (m_refCuts->FindObject(oname));
               if (!huR) {
                 // try: strip just maker from name
+                Int_t tempint = -1;
                 TString onamebase = StripPrefixes(oname,tempint,-1);
                 huR = (StHistUtilRef*) (m_refCuts->FindObject(onamebase.Data()));
                 if (!huR) {
-                  // try: strip maker and trigger type from name
-                  onamebase = StripPrefixes(oname,tempint,0);
+                  // try: strip just trigger type from name
+                  onamebase = StripPrefixes(oname,tempint,1);
                   huR = (StHistUtilRef*) (m_refCuts->FindObject(onamebase.Data()));
+                  if (!huR) {
+                    // try: strip maker and trigger type from name
+                    onamebase = StripPrefixes(oname,tempint,0);
+                    huR = (StHistUtilRef*) (m_refCuts->FindObject(onamebase.Data()));
+                  }
                 }
               }
             }
