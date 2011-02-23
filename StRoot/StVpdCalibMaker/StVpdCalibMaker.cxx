@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.cxx,v 1.10 2011/01/07 21:28:51 geurts Exp $
+ * $Id: StVpdCalibMaker.cxx,v 1.11 2011/02/23 20:00:52 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,10 @@
  *****************************************************************
  *
  * $Log: StVpdCalibMaker.cxx,v $
+ * Revision 1.11  2011/02/23 20:00:52  geurts
+ * Change MaxBin for ToT arrays from 60 to 128 (in agreement with the IDL definition of vpdTotCorr)
+ * Move the log message that informs the user about the start-timing mode outside the tube loop ... no need to see the same message 38 times.
+ *
  * Revision 1.10  2011/01/07 21:28:51  geurts
  * Allow user to "force" VPD-start or startless mode, regardless of dbase setting
  *
@@ -265,15 +269,6 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
 	  }
 	}
 
-	// Let the user know what is used for calculating TOF Start (and how we got there)
-	if (mForceTofStart) { LOG_INFO << "Detected user override in Start Timing selection ::setUseVpdStart()." << endm;}
-	if (mUseVpdStart) {
-	  LOG_INFO << "Selected VPD for TOF start-timing" << endm;
-	}
-	else {
-	    LOG_INFO << "VPD NOT used for TOF start-timing" << endm;  
-	}
-
 	short tubeId = totCorr[i].tubeId;
 	// check index range
 	if (tubeId>2*NVPD) {
@@ -288,6 +283,15 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
 	  LOG_DEBUG << " east/west: " << (tubeId-1)/NVPD << " tubeId: " << tubeId << endm;
 	} // end j 0->NBinMax
       } // end i 0->numRows
+
+      // Let the user know what is used for calculating TOF Start (and how we got there)
+      if (mForceTofStart) { LOG_INFO << "Detected user override in Start Timing selection ::setUseVpdStart()." << endm;}
+      if (mUseVpdStart) {
+	LOG_INFO << "Selected VPD for TOF start-timing" << endm;
+      }
+      else {
+	LOG_INFO << "VPD NOT used for TOF start-timing" << endm;  
+      }
     }
     else {
     // Note: this construction addresses RT#1996 and allows backward compatibility with older database
@@ -296,6 +300,7 @@ Int_t StVpdCalibMaker::initParameters(Int_t runnumber)
       LOG_ERROR << "unable to get vpdTotCorr dataset ... reset all to zero values (NOT GOOD!) and disable use for TOF-start" << endm; 
       resetPars();
       mUseVpdStart=kFALSE;
+      LOG_INFO << "VPD NOT used for TOF start-timing" << endm;  
       return kStErr;
     }
   }

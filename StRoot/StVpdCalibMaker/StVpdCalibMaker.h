@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StVpdCalibMaker.h,v 1.5 2011/01/07 21:28:51 geurts Exp $
+ * $Id: StVpdCalibMaker.h,v 1.6 2011/02/23 20:00:52 geurts Exp $
  *
  *******************************************************************/
 /*!
@@ -14,6 +14,10 @@
 /*****************************************************************
  *
  * $Log: StVpdCalibMaker.h,v $
+ * Revision 1.6  2011/02/23 20:00:52  geurts
+ * Change MaxBin for ToT arrays from 60 to 128 (in agreement with the IDL definition of vpdTotCorr)
+ * Move the log message that informs the user about the start-timing mode outside the tube loop ... no need to see the same message 38 times.
+ *
  * Revision 1.5  2011/01/07 21:28:51  geurts
  * Allow user to "force" VPD-start or startless mode, regardless of dbase setting
  *
@@ -116,10 +120,10 @@ private:
     NTDIG = 8,         // 8 per tray in Run 8++
     NVPD = 19,         // 19 tubes at each side
     MaxVpdVz = 20,
-    NBinMax = 60,      // 60 bins for T-Tot, T-Z correction
     NTray = 120,       // 120 BTof trays
     WestVpdTrayId = 121,
-    EastVpdTrayId = 122
+    EastVpdTrayId = 122,
+    NBinMax = 128,      // 128 max bins for T-Tot, T-Z correction
   };
 
   Bool_t     mValidCalibPar;
@@ -162,7 +166,7 @@ private:
   Bool_t mForceTofStart;   //! flag indicating that a user overrides any dbase-based start timing default
 
   virtual const char *GetCVS() const 
-  {static const char cvs[]="Tag $Name:  $ $Id: StVpdCalibMaker.h,v 1.5 2011/01/07 21:28:51 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StVpdCalibMaker.h,v 1.6 2011/02/23 20:00:52 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
   ClassDef(StVpdCalibMaker,1)
 };
