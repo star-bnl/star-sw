@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.79 2011/02/19 02:43:39 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.80 2011/02/23 18:46:29 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.80  2011/02/23 18:46:29  genevb
+// Fixed a bug introduced in version 2.71 when adding hists
+//
 // Revision 2.79  2011/02/19 02:43:39  genevb
 // Fix those missing consts
 //
@@ -1330,7 +1333,7 @@ Int_t StHistUtil::CopyHists(TList *dirList)
      if (obj->InheritsFrom("TH1") &&
          (!m_ListOfPrint || (m_ListOfPrint->FindObject(obj->GetName())))) {
        histCopyCount++;         
-       if (ijk>=maxHistCopy){
+       if (ijk >= maxHistCopy - 1){
          Int_t newMaxHistCopy = maxHistCopy * 4;
          TH1** temp1 = new TH1ptr[newMaxHistCopy];
          memset(temp1,0,newMaxHistCopy*sizeOfTH1Ptr);
@@ -1409,13 +1412,12 @@ Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
                notfound = false;
 	       //LOG_INFO << " !!! Added histograms with Name: " << newHist[imk]->GetName() <<  endm;
 	     } // strcmp
-          } else {
-            imk++; break;
-          }
+          } else break; // ran out of existing hists
 	}  // loop over imk
-        if (notfound) {
 
-          if (imk>=maxHistCopy){
+        if (notfound) {
+          // Hist doesn't exist yet, so let's add it
+          if (imk >= maxHistCopy-1){
             Int_t newMaxHistCopy = maxHistCopy * 4;
             TH1** temp1 = new TH1ptr[newMaxHistCopy];
             memset(temp1,0,newMaxHistCopy*sizeOfTH1Ptr);
