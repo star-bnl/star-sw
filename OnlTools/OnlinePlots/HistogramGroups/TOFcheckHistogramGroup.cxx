@@ -215,7 +215,7 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
   int halftrayid=-1;
   int trayid=-1;
   int allbunchid[2][122];
-  for(int i=0;i<2;i++)for(int j=0;j<124;j++)allbunchid[i][j]=-9999;
+  for(int i=0;i<2;i++)for(int j=0;j<122;j++)allbunchid[i][j]=-9999;
 
   int totaltofdataword=0;
   for(int ifib=0;ifib<4;ifib++){
