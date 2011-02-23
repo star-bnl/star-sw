@@ -17,12 +17,15 @@ public:
 
 private:
 
-  TH1* MTD_hitmap[2];
+  TH1* MTD26E_hitmap[2][2];
+	  TH1* MTD26C_hitmap[2][2];
+	  TH1* MTD26W_hitmap[2][2];
+	TH1* MTD1_hitmap[2][2];
   TH2* MTD_ToT;
   TH2* MTD_eastT_vs_westT;
   TH1* MTD_eastT_westT;
   TH2* MTD_hits_vs_TOF_hits;
-  int tdcchan2MTDchan(int,int);
+  int tdcchan2globalstrip(int,int,int,int);
   int tdcchan2mrpcchan(int);
   //
   double numberforsort;
