@@ -1,6 +1,14 @@
-!// $Id: tpcegeo3.g,v 1.27 2010/12/17 20:02:11 jwebb Exp $
+!// $Id: tpcegeo3.g,v 1.28 2011/02/24 15:48:20 jwebb Exp $
 !// $Log: tpcegeo3.g,v $
+!// Revision 1.28  2011/02/24 15:48:20  jwebb
+!// Volumes TBRW (Aluminum) and TWAS (Air) overlap.  Changed positioning of
+!// TBRW so that it is positioned as an ONLY volume, to remove ambiguity in
+!// geant tracking.  The change has no effect on an AgSTAR geometry, see
+!//
+!// http://drupal.star.bnl.gov/STAR/node/20519
+!//
 !// Revision 1.27  2010/12/17 20:02:11  jwebb
+!//
 !// Reverted max radius to previous value.  Reduced radius will be set by
 !// TPCE04r flag in geometry.g.
 !//
@@ -1019,7 +1027,7 @@ yhOF = {-15.025, -11.606, -8.177, -4.220,  0,  4.220,  8.177,  11.606, 15.025,
 !//  TGeoVolume *WheelRibBox = gGeoManager->MakeBox("WheelRibBox",GetMed("TPCE_ALUMINIUM"), TPCG_WheelBoxDy/2, TPCG_WheelBoxDx/2, TPCG_WheelTHK/2);
 !//  TpcSectorAndWheel->AddNodeOverlap(WheelRibBox, 1, new TGeoTranslation(TPCG_WheelR1, 0., zWheel1+TPCG_WheelTHK/2));
 
-        Create And Position TBRW        kOnly='MANY'  X=TPCG_WheelR1, Z=zWheel1+TPCG_WheelTHK/2 "//TpcWheelRibBox"
+        Create And Position TBRW          X=TPCG_WheelR1, Z=zWheel1+TPCG_WheelTHK/2 "//TpcWheelRibBox"
     x1 = TPCG_WheelR0*cos15;
     x2 = TPCG_WheelR2;
     dz = TPCG_WheelRibHeight/2;
@@ -1058,7 +1066,7 @@ yhOF = {-15.025, -11.606, -8.177, -4.220,  0,  4.220,  8.177,  11.606, 15.025,
       x = r ;
       y = r *tand(alpha);
 !//      TpcSectorAndWheel->AddNodeOverlap(WheelRibBox, 3+4*inOut+j, new TGeoCombiTrans(x, y, zWheel1+TPCG_WheelTHK/2, GetRot(rotm)));
-     Position TBRW x=x y=y z=zWheel1+TPCG_WheelTHK/2 alphaz=alpha kOnly='Many'
+     Position TBRW x=x y=y z=zWheel1+TPCG_WheelTHK/2 alphaz=alpha 
     }
     qwe(1) = -qwe(1);
     qwe(2) = -qwe(2);
