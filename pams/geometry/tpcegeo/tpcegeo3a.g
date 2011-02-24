@@ -1,5 +1,12 @@
-!// $Id: tpcegeo3a.g,v 1.1 2011/02/10 18:47:06 jwebb Exp $
+!// $Id: tpcegeo3a.g,v 1.2 2011/02/24 15:48:20 jwebb Exp $
 !// $Log: tpcegeo3a.g,v $
+!// Revision 1.2  2011/02/24 15:48:20  jwebb
+!// Volumes TBRW (Aluminum) and TWAS (Air) overlap.  Changed positioning of
+!// TBRW so that it is positioned as an ONLY volume, to remove ambiguity in
+!// geant tracking.  The change has no effect on an AgSTAR geometry, see
+!//
+!// http://drupal.star.bnl.gov/STAR/node/20519
+!//
 !// Revision 1.1  2011/02/10 18:47:06  jwebb
 !// This is a code-cleanup of tpcegeo3.g.  Significant changes, mainly to
 !// remove equivalence statements which are not permitted in AgML.
@@ -858,7 +865,7 @@ BLOCK TSAW  TpcSectorAndWheel
 
          Create And Position TSAS kOnly='MANY'
          Create And Position TWAS kOnly='MANY'
-         Create And Position TBRW X=TPCG_WheelR1 Z=zWheel1+TPCG_WheelTHK/2         konly='MANY'
+         Create And Position TBRW X=TPCG_WheelR1 Z=zWheel1+TPCG_WheelTHK/2      
 
          x1 = TPCG_WheelR0*cos15;
          x2 = TPCG_WheelR2;
@@ -897,7 +904,7 @@ BLOCK TSAW  TpcSectorAndWheel
             IF (j == 3) r = TPCG_WheelR1 - 7.0/8.5*(TPCG_WheelR1 - TPCG_WheelR0);
             x = r ;
             y = r *tand(alpha);
-            Position TBRW x=x y=y z=zWheel1+TPCG_WheelTHK/2 alphaz=alpha kOnly='Many'
+            Position TBRW x=x y=y z=zWheel1+TPCG_WheelTHK/2 alphaz=alpha 
 
          ENDDO
 
