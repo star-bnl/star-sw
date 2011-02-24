@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.57 2011/01/07 18:19:02 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.58 2011/02/24 03:54:35 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.58  2011/02/24 03:54:35  dmitry
+ * commented out unused variable
+ *
  * Revision 1.57  2011/01/07 18:19:02  dmitry
  * user name lookup is done once now (for speedup, based on profiler report)
  *
@@ -291,7 +294,7 @@ time_t get_time_nanosec() {
 }
 
 static const char* binaryMessage = {"Cannot Print Query with Binary data"};
-static MYSQL *conn;
+//static MYSQL *conn;
 
 
 
