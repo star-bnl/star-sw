@@ -1,5 +1,5 @@
 /**
- * $Id: StTinyMcTrack.h,v 1.11 2011/02/16 16:46:30 perev Exp $
+ * $Id: StTinyMcTrack.h,v 1.12 2011/02/24 17:58:03 perev Exp $
  * \file  StTinyMcTrack.h
  * \brief   Persistent MC track class.
  * 
@@ -121,12 +121,15 @@ private:
   Short_t      mNAssocPr;
   Bool_t     mIsPrimary;
 
-  ClassDef(StTinyMcTrack,5)
+  ClassDef(StTinyMcTrack,6)
 };
 
 #endif
 //
 // $Log: StTinyMcTrack.h,v $
+// Revision 1.12  2011/02/24 17:58:03  perev
+// change IO version
+//
 // Revision 1.11  2011/02/16 16:46:30  perev
 // setPdgId imp added
 //
