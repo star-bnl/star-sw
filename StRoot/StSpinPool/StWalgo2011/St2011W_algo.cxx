@@ -1,4 +1,4 @@
-// $Id: St2011W_algo.cxx,v 1.2 2011/02/17 04:16:22 stevens4 Exp $
+// $Id: St2011W_algo.cxx,v 1.3 2011/02/25 06:03:47 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -22,7 +22,7 @@ St2011WMaker::find_W_boson(){
   if(!wEve->l2bitET) return;
 
   //printf("========= find_W_boson() \n");
-  int nGoldW=0;
+  int nNoNear=0,nNoAway=0,nEta1=0,nGoldW=0;
   //remove events tagged as Zs
   if(wEve->zTag) return;
 
@@ -36,14 +36,16 @@ St2011WMaker::find_W_boson(){
       assert(T.cluster.nTower>0); // internal logical error
       assert(T.nearTotET>0); // internal logical error
       
-      //make cut on lepton |eta| for cross section 
+      //make cut on lepton |eta|  
       if(fabs(T.primP.Eta()) > par_leptonEta) continue;      
-      hA[0]->Fill("eta1",1.);
+      hA[20]->Fill("eta1",1.);
+      nEta1++;
 
       //signal plots w/o EEMC in veto
       if(T.cluster.ET/T.nearTotET_noEEMC>par_nearTotEtFrac){
 	if(T.sPtBalance_noEEMC>par_ptBalance ) {//only signed ptBalance cut 
 	  hA[140]->Fill(T.cluster.ET);
+	  hA[240]->Fill(T.prMuTrack->eta(),T.cluster.ET);
           if (T.prMuTrack->charge() < 0) {
             hA[184+3]->Fill(T.cluster.ET);
           } else if (T.prMuTrack->charge() > 0) {
@@ -55,6 +57,7 @@ St2011WMaker::find_W_boson(){
       if(T.cluster.ET /T.nearTotET< par_nearTotEtFrac) continue; // too large nearET
 
       hA[20]->Fill("noNear",1.);
+      nNoNear++;
       hA[112]->Fill( T.cluster.ET); // for Joe
       hA[50]->Fill(T.awayTpcPT);
       hA[51]->Fill(T.awayBtowET);
@@ -68,6 +71,7 @@ St2011WMaker::find_W_boson(){
       hA[133]->Fill(T.awayTotET,T.ptBalance.Perp());
       hA[134]->Fill(T.cluster.ET,T.sPtBalance);
       hA[135]->Fill(T.awayTotET,T.sPtBalance);
+      hA[209]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.ET);
 
       for (int i=0; i<=20; i++) {
 	//  float awayTot_cut = 10.+2.*((float) i);
@@ -86,6 +90,7 @@ St2011WMaker::find_W_boson(){
       //plots for backg sub yield
       if(T.sPtBalance>par_ptBalance ) {
         hA[136]->Fill(T.cluster.ET);//signal
+	hA[241]->Fill(T.prMuTrack->eta(),T.cluster.ET);
         hA[62]->Fill(T.pointTower.iEta ,T.cluster.energy);
         if (T.prMuTrack->charge() < 0) {
           hA[184+1]->Fill(T.cluster.ET);
@@ -99,6 +104,8 @@ St2011WMaker::find_W_boson(){
         } else if (T.prMuTrack->charge() > 0) {
           hA[184+6]->Fill(T.cluster.ET);
         }
+	hA[202]->Fill(T.cluster.position.PseudoRapidity(),T.prMuTrack->pt());
+	hA[204]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.energy/T.prMuTrack->p().mag());
       }
 
       if(0){/***************************/
@@ -110,11 +117,13 @@ St2011WMaker::find_W_boson(){
       
       //put final W cut here
       if(T.sPtBalance<par_ptBalance)  continue;
+      hA[20]->Fill("noAway",1.0);
+      nNoAway++;
+
       //::::::::::::::::::::::::::::::::::::::::::::::::
       //:::::accepted W events for x-section :::::::::::
       //::::::::::::::::::::::::::::::::::::::::::::::::
 
-      hA[20]->Fill("noAway",1.0);  
       hA[113]->Fill( T.cluster.ET);//for Joe
 
       hA[90]->Fill( T.cluster.ET); 
@@ -124,19 +133,30 @@ St2011WMaker::find_W_boson(){
       hA[94+k]->Fill( T.cluster.ET,T.glMuTrack->dcaD());
       // h95 used above
 
+      //plots to investigate east/west yield diff
+      hA[200]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.ET);
+      hA[201]->Fill(T.cluster.position.PseudoRapidity(),T.prMuTrack->pt());
+      hA[203]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.energy/T.prMuTrack->p().mag());
+      hA[205]->Fill(T.prMuTrack->lastPoint().pseudoRapidity(),T.prMuTrack->lastPoint().phi());
+      
+
       if(T.cluster.ET<par_highET) continue;  // very likely Ws
       hA[91]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.position.Phi());
       hA[96]->Fill(V.id);
       hA[97]->Fill(V.funnyRank);
       hA[98]->Fill(V.z);
-      hA[99]->Fill( T.prMuTrack->eta());
+      hA[99]->Fill(T.prMuTrack->eta());
+      hA[190+k]->Fill(T.prMuTrack->eta(),T.cluster.ET);
+      
       hA[20]->Fill("goldW",1.);
       nGoldW++;
     
     }// loop over tracks
   }// loop over vertices
-  if(nGoldW>0)
-    hA[0]->Fill("goldW",1.);
+  if(nNoNear>0) hA[0]->Fill("noNear",1.);
+  if(nNoAway>0) hA[0]->Fill("noAway",1.);
+  if(nEta1>0) hA[0]->Fill("eta1",1.);
+  if(nGoldW>0) hA[0]->Fill("goldW",1.);
 
 }
 
@@ -216,7 +236,7 @@ St2011WMaker::findPtBalance(){
 
       //****loop over branch with EEMC****
       mJets = getJets(mJetTreeBranch); 
-      if(mJetTreeChain) mJets = getJetsTreeAnalysis(mJetTreeBranch);
+      if(mJetTreeChain) mJets = getJetsTreeAnalysis(mJetTreeBranch); 
       int nJetsWE=nJets;
       for (int i_jet=0; i_jet< nJetsWE; i_jet++){//loop over jets
 	StJet* jet = getJet(i_jet);
@@ -268,11 +288,11 @@ St2011WMaker::findAwayJet(){
       T.awayBtowET=sumBtowCone(V.z,-T.primP,1); // '1'= only cut on delta phi
       T.awayEmcET=T.awayBtowET;
       T.awayEtowET=sumEtowCone(V.z,-T.primP,1);
-      T.awayEmcET+=T.awayEtowET;
+      T.awayEmcET+=T.awayEtowET; 
 
       //..... add TPC ET
-      if(mMuDstMaker) T.awayTpcPT=sumTpcCone(V.id,-T.primP,1);
-      else T.awayTpcPT=sumTpcConeFromTree(V.id,-T.primP,1);
+      if(mMuDstMaker) T.awayTpcPT=sumTpcCone(V.id,-T.primP,1,T.pointTower.id);
+      else T.awayTpcPT=sumTpcConeFromTree(V.id,-T.primP,1,T.pointTower.id);
       T.awayTotET=T.awayEmcET+T.awayTpcPT;
       T.awayTotET_noEEMC=T.awayBtowET+T.awayTpcPT;
       //printf("\n*** in   awayTpc=%.1f awayEmc=%.1f\n  ",T.awayTpcPT,T.awayEmcET); T.print(); 
@@ -297,31 +317,42 @@ St2011WMaker::findNearJet(){
       T.nearBtowET=sumBtowCone(V.z,T.primP,2); // '2'=2D cone
       T.nearEmcET+=T.nearBtowET;
       T.nearEtowET=sumEtowCone(V.z,T.primP,2);
-      T.nearEmcET+=T.nearEtowET;
+      T.nearEmcET+=T.nearEtowET; 
       // .... sum TPC-near component
-      if(mMuDstMaker) T.nearTpcPT=sumTpcCone(V.id,T.primP,2); // '2'=2D cone
-      else T.nearTpcPT=sumTpcConeFromTree(V.id,T.primP,2);
+      if(mMuDstMaker) T.nearTpcPT=sumTpcCone(V.id,T.primP,2,T.pointTower.id); // '2'=2D cone
+      else T.nearTpcPT=sumTpcConeFromTree(V.id,T.primP,2,T.pointTower.id);
       float nearSum=T.nearEmcET+T.nearTpcPT;
       
-      /* correct for double counting of electron track in near cone rarely primTrPT<10 GeV & globPT>10 - handle this here */
-      if(T.primP.Pt()>par_trackPt) nearSum-=par_trackPt; 
-      else  nearSum-=T.primP.Pt();
-      T.nearTotET=nearSum;
-      T.nearTotET_noEEMC=nearSum-T.nearEtowET;
-      // printf("\n*** in nearCone T.print\n  "); T.print();
-      
       //fill histos separately for 2 types of events
-      float nearTotETfrac=T.cluster.ET/ T.nearTotET;
       if(T.pointTower.id>0) { //only barrel towers
+	/* correct for double counting of electron track in near cone rarely primTrPT<10 GeV & globPT>10 - handle this here */
+	if(T.primP.Pt()>par_trackPt) nearSum-=par_trackPt; 
+	else  nearSum-=T.primP.Pt();
+	T.nearTotET=nearSum;
+	T.nearTotET_noEEMC=nearSum-T.nearEtowET; 
+	float nearTotETfrac=T.cluster.ET/ T.nearTotET;
+
 	hA[40]->Fill(T.nearEmcET);
 	hA[41]->Fill(T.cluster.ET,T.nearEmcET-T.cluster.ET);
 	hA[42]->Fill(nearTotETfrac);
 	hA[47]->Fill(T.nearTpcPT);
 	hA[48]->Fill(T.nearEmcET,T.nearTpcPT);
 	hA[49]->Fill(nearSum);
+
+	// check east/west yield diff
+	hA[210]->Fill(T.cluster.position.PseudoRapidity(),T.nearEtowET);
+	if(T.cluster.position.PseudoRapidity()>0) hA[211]->Fill(T.cluster.position.Phi(),T.nearEtowET);
+	else hA[212]->Fill(T.cluster.position.Phi(),T.nearEtowET);
+
       }
       else if(T.pointTower.id<0) { //only endcap towers
-	//else if(T.pointTower.test==WevePointTower::kEndcap){
+	/* correct for double counting of electron track in near cone rarely primTrPT<10 GeV & globPT>10 - handle this here */
+	if(T.primP.Pt()>parE_trackPt) nearSum-=parE_trackPt; 
+	else  nearSum-=T.primP.Pt();
+	T.nearTotET=nearSum;
+	T.nearTotET_noEEMC=nearSum-T.nearEtowET;
+	float nearTotETfrac=T.cluster.ET/ T.nearTotET;
+
 	hE[40]->Fill(T.nearEmcET);
 	hE[41]->Fill(T.cluster.ET,T.nearEmcET-T.cluster.ET);
 	hE[42]->Fill(nearTotETfrac);
@@ -367,7 +398,7 @@ St2011WMaker::sumBtowCone( float zVert,  TVector3 refAxis, int flag){
 //________________________________________________
 //________________________________________________
 float
-St2011WMaker::sumTpcConeFromTree(int vertID, TVector3 refAxis, int flag){
+St2011WMaker::sumTpcConeFromTree(int vertID, TVector3 refAxis, int flag,int pointTowId){
 
   // flag=2 use 2D cut, 1= only delta phi
 
@@ -379,7 +410,8 @@ St2011WMaker::sumTpcConeFromTree(int vertID, TVector3 refAxis, int flag){
   for(uint it=0;it<V.prTrList.size();it++){
     StMuTrack *prTr=V.prTrList[it];
     if(prTr->flag()<=0) continue;
-    if(prTr->flag()!=301) continue;// TPC-only regular tracks
+    if(prTr->flag()!=301 && pointTowId>0) continue;// TPC-only regular tracks for barrel candidate
+    if(prTr->flag()!=301 && prTr->flag()!=311 && pointTowId<0) continue;// TPC regular and short EEMC tracks for endcap candidate
     float hitFrac=1.*prTr->nHitsFit()/prTr->nHitsPoss();
     if(hitFrac<par_nHitFrac) continue;
     StThreeVectorF prPvect=prTr->p();
@@ -396,7 +428,10 @@ St2011WMaker::sumTpcConeFromTree(int vertID, TVector3 refAxis, int flag){
     }
     float pT=prTr->pt();
     //    printf(" passed pt=%.1f\n",pT);
-    if(pT>par_trackPt) ptSum+=par_trackPt;
+    
+    //separate quench for barrel and endcap candidates
+    if(pT>par_trackPt && pointTowId>0) ptSum+=par_trackPt;
+    else if(pT>parE_trackPt && pointTowId<0) ptSum+=parE_trackPt;
     else  ptSum+=pT;
   }
   return ptSum;
@@ -492,6 +527,8 @@ St2011WMaker::matchTrack2BtowCluster(){
       if (T.cluster.ET <par_clustET) continue; // too low energy
       hA[20]->Fill("CL",1.);
 
+      hA[206]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.ET);
+
       hA[37]->Fill( T.cl4x4.ET);
       hA[38]->Fill(T.cluster.energy, T.cl4x4.energy-T.cluster.energy);
       
@@ -510,12 +547,16 @@ St2011WMaker::matchTrack2BtowCluster(){
       //   printf("aaa %f %f %f   phi=%f\n",D.x(),D.y(),D.z(),delPhi);
       hA[45]->Fill( T.cluster.energy,Rcylinder*delPhi);// wrong?
       hA[46]->Fill( D.Mag());
+      hA[199]->Fill(T.cluster.position.PseudoRapidity(),D.Mag());
+      hA[207]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.ET);
 
       if(D.Mag()>par_delR3D) continue; 
       T.isMatch2Cl=true; // cluster is matched to TPC track
       hA[20]->Fill("#Delta R",1.);
       hA[111]->Fill( T.cluster.ET);
       
+      hA[208]->Fill(T.cluster.position.PseudoRapidity(),T.cluster.ET);
+
       nTr++;
     }// end of one vertex
   }// end of vertex loop
@@ -599,6 +640,9 @@ St2011WMaker::sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 
 
 // $Log: St2011W_algo.cxx,v $
+// Revision 1.3  2011/02/25 06:03:47  stevens4
+// addes some histos and enabled running on MC
+//
 // Revision 1.2  2011/02/17 04:16:22  stevens4
 // move sector dependent track QA cuts before track pt>10 cut and lower par_clustET and par_ptBalance thresholds to 14 GeV
 //

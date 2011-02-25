@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.cxx,v 1.3 2011/02/17 04:16:14 stevens4 Exp $
+// $Id: St2011WMaker.cxx,v 1.4 2011/02/25 06:03:32 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -71,7 +71,7 @@ St2011WMaker::St2011WMaker(const char *name):StMaker(name){
   //... MC trigger simulator
   par_l0emulAdcThresh=30;
   par_l2emulSeedThresh=5.0;
-  par_l2emulClusterThresh=13.0;
+  par_l2emulClusterThresh=12.0;
 
   //.. vertex
   par_minPileupVert=3; // to reject events w/o TPC, lower it for MC
@@ -94,28 +94,29 @@ St2011WMaker::St2011WMaker(const char *name):StMaker(name){
   par_nHitFrac=0.51;
   par_trackRin=90;  par_trackRout=160; // cm
   par_trackPt=10.;//GeV 
+  par_highET=28.; // (GeV), cut-off for final Barrel W-cluster 
 
   //... Endcap Algo
   parE_trackEtaMin=0.7; // avoid bad extrapolation to ESMD
-  parE_clustET=15.; // (GeV/c) 2x1 cluster ET  :tmp was 15.0 GeV
+  parE_clustET=14.; // (GeV/c) 2x1 cluster ET  
   parE_clustFrac24=0.90; // ET ratio 2x2/4x4 cluster
   parE_nearTotEtFrac=0.85;  // ratio 2x2/near Tot ET 
   parE_delR3D=10.; // cm, dist between projected track and center of cluster 
   parE_leptonEtaLow=1.1; // bracket acceptance
   parE_leptonEtaHigh=2.0; // bracket acceptance
-  parE_ptBalance=15.; // (GeV), ele cluster vector + jet sum vector
+  parE_ptBalance=14.; // (GeV), ele cluster vector + jet sum vector
   //... track
   parE_nFitPts=5; // hits on the track
   parE_nHitFrac=0.51;
   parE_trackRin=120;  parE_trackRout=70; // cm
-  parE_trackPt=10.;//GeV :tmp, was 10.0
+  parE_trackPt=7.;//GeV 
   parE_nSmdStrip=20;
+  parE_highET=25.; // (GeV), cut-off for final Endcap W-cluster 
 
   //... search for W's
   par_nearDeltaR=0.7; //(~rad) near-cone size
   par_awayDeltaPhi=0.7; // (rad) away-'cone' size
-  par_highET=28.; // (GeV), cut-off for final W-cluster ET
-  
+    
   setEtowScale(1.0); // for old the Endcap geometr you need ~1.3
   setBtowScale(1.0);
   
@@ -206,7 +207,7 @@ St2011WMaker::Init(){
 Int_t
 St2011WMaker::InitRun(int runNo){
   LOG_INFO<<Form("::InitRun(%d) start",runNo)<<endm;
-  assert(mRunNo==0);  // to prevent run merging - it was not tested 
+  if(!isMC) assert(mRunNo==0);  // to prevent run merging - it was not tested 
   if(mMuDstMaker) {
     mBarrelTables->loadTables(this );
     mRunNo=runNo;
@@ -273,6 +274,7 @@ St2011WMaker::Make(){
   if(mMuDstMaker){ //standard MuDst analysis
     wEve->id=mMuDstMaker->muDst()->event()->eventId();
     wEve->runNo=mMuDstMaker->muDst()->event()->runId();
+    wEve->zdcRate=mMuDstMaker->muDst()->event()->runInfo().zdcCoincidenceRate();
     const char *afile = mMuDstMaker->GetFile();
     //printf("inpEve=%d eveID=%d daqFile=%s\n",nInpEve, wEve->id,afile);
     if(nInpEve%200==1) printf("\n-----in---- %s, nEve: inp=%d trig=%d accpt=%d daqFile=%s\n", GetName(),nInpEve,nTrigEve, nAccEve,afile);
@@ -290,7 +292,12 @@ St2011WMaker::Make(){
  
     nTrigEve++; 
     
-    if( accessVertex()) return kStOK; //skip event w/o ~any reasonable vertex  
+    if(accessVertex()) {
+      fillTowHit(false); //fill 2D tower "hit" histos for _no_ vertex and L2BW trigger
+      return kStOK; //skip event w/o ~any reasonable vertex  
+    }
+
+    fillTowHit(true); //fill 2D tower "hit" histos for vertex found and L2BW trigger
     
     if( accessTracks()) return kStOK; //skip event w/o ~any highPt track
 
@@ -353,14 +360,14 @@ St2011WMaker::Make(){
 
   if(mJetReaderMaker || mJetTreeChain) {
     findPtBalance();
-    tag_Z_boson();
+    if(!bmatch) tag_Z_boson();
   }
 
   //endcap specific analysis
-  analyzeESMD();
+  if(!ematch) analyzeESMD();
   
-  find_W_boson();
-  findEndcap_W_boson();
+  if(!bmatch) find_W_boson();
+  if(!ematch) findEndcap_W_boson();
   if(nAccEve<2 ||nAccEve%1000==1 ) wEve->print(0x0,isMC);
   
   return kStOK;
@@ -509,6 +516,9 @@ void St2011WMaker::chainJetFile( const Char_t *file )
 }
 
 // $Log: St2011WMaker.cxx,v $
+// Revision 1.4  2011/02/25 06:03:32  stevens4
+// addes some histos and enabled running on MC
+//
 // Revision 1.3  2011/02/17 04:16:14  stevens4
 // move sector dependent track QA cuts before track pt>10 cut and lower par_clustET and par_ptBalance thresholds to 14 GeV
 //
