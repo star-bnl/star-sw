@@ -1,4 +1,4 @@
-// $Id: St2011W_acessMuDst.cxx,v 1.5 2011/02/17 04:16:20 stevens4 Exp $
+// $Id: St2011W_acessMuDst.cxx,v 1.6 2011/02/25 06:03:45 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -14,8 +14,8 @@
 #include "StEmcRawMaker/defines.h"
 #include "StEmcUtil/database/StBemcTables.h"
 
-//#include "StEEmcUtil/database/StEEmcDb.h"   
-//#include "StEEmcUtil/database/EEmcDbItem.h"  
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
 #include "St2011WMaker.h"
 //--------------------------------------
@@ -24,17 +24,16 @@ int
 St2011WMaker::accessBarrelTrig(){ // return non-zero on abort 
 
   if (isMC){
-    assert(4==5) ; //not tested
+    
     /*
       When the trigger emulator is ready, this should hook into that
       instead of the two functions used below.  For now, check that is passes both
       L0 and L2, and set the l2bitET flag to true if so.
     */
     
-    if (!passes_L0()) return -1;
-    hA[0]->Fill("BHT3Id",1.);
+    //if (!passes_L0()) return -1;
     if(!passes_L2()) return -2;
-    hA[0]->Fill("L2wId",1.);
+    hA[0]->Fill("L2bwET",1.);
 
     wEve->l2bitET=true;
     return 0; // we haven't set everything, but it should be good enough for simu.
@@ -260,9 +259,7 @@ St2011WMaker::accessTracks(){ // return non-zero on abort
 	hA[20]->Fill("pt1",1.);
       if(wEve->l2EbitET && ro.pseudoRapidity()>parE_trackEtaMin)
 	hE[20]->Fill("pt1",1.);
-
-      //TPC sector dependent cuts moved to extendTrack...
-            
+  
       //accepted tracks......
       float hitFrac=1.*prTr->nHitsFit()/prTr->nHitsPoss();
       StThreeVectorF ri=glTr->firstPoint();
@@ -295,6 +292,10 @@ St2011WMaker::accessTracks(){ // return non-zero on abort
 	if(ri.z()<0 && ro.z()<0)  hA[59]->Fill(globChi2dof);
 	hA[36]->Fill(globChi2dof,ro.pseudoRapidity());
 	hA[28]->Fill(prTr->p().mag(),dedx);
+
+	if(pt>10) 
+	  hA[197]->Fill(ro.pseudoRapidity(),ro.phi());
+	hA[198]->Fill(ro.pseudoRapidity(),prTr->pt());
       }
 
       //endcap algo track monitors
@@ -323,11 +324,13 @@ St2011WMaker::accessTracks(){ // return non-zero on abort
 	hE[28]->Fill(prTr->p().mag(),dedx);
       }
 
-      if(pt<par_trackPt) continue;
-      if(wEve->l2bitET && rank>0 && prTr->flag()==301)
-	hA[20]->Fill("ptOK",1.);
-      if(wEve->l2EbitET && ro.pseudoRapidity()>parE_trackEtaMin)
-	hE[20]->Fill("ptOK",1.);
+      
+      bool barrelTrack=(wEve->l2bitET && rank>0 && prTr->flag()==301 && pt>par_trackPt); 
+      if(barrelTrack) hA[20]->Fill("ptOK",1.);//good barrel candidate
+      bool endcapTrack=(wEve->l2EbitET && ro.pseudoRapidity()>parE_trackEtaMin && pt>parE_trackPt); 
+      if(endcapTrack) hE[20]->Fill("ptOK",1.);//good endcap candidate
+
+      if(!barrelTrack && !endcapTrack) continue;
       
       //keep all tracks in one container
       nTrOK++;
@@ -471,6 +474,10 @@ St2011WMaker::accessBTOW(){
   }
   hA[31]->Fill(maxADC);
   hA[32]->Fill(adcSum);
+  wEve->bemc.maxAdc=maxADC;
+
+  if(maxID<=2400) hA[195]->Fill(maxADC);
+  else hA[196]->Fill(maxADC);
 
   if(maxADC<par_maxADC)  return -2 ;  // not enough energy
   
@@ -478,11 +485,80 @@ St2011WMaker::accessBTOW(){
 }
 
 
+//________________________________________________
+//________________________________________________
+void
+St2011WMaker::fillTowHit(bool vert){
+  if(!wEve->l2bitET) return; //only barrel triggers
+
+  //find highest rank vertex
+  float maxRank=0; uint maxRankId=0;
+  for(uint iv=0;iv<wEve->vertex.size(); iv++) {
+    float rank=wEve->vertex[iv].rank;
+    if(rank<0) continue;
+    if(rank > maxRank){
+      maxRank=rank;
+      maxRankId=iv;
+    }
+  }
+
+  int bx7=wEve->bx7; int bxBin=-1;
+  if(bx7>=0 && bx7<30)
+    bxBin=0;
+  else if(bx7<40)
+    bxBin=1;
+  else if(bx7<110)
+    bxBin=2;
+  else if(bx7<120)
+    bxBin=3;
+  
+  float Rcylinder= mBtowGeom->Radius(), Rcylinder2=Rcylinder*Rcylinder;
+  //loop barrel towers and fill histo
+  for(int i=0; i<mxBtow; i++){
+    float adc=wEve->bemc.adcTile[kBTow][i];
+    bool fillAdc=false;
+    if(adc > 10) fillAdc=true; //~150 MeV threshold for tower firing
+    if(vert){
+      if(fillAdc) hA[215+bxBin]->Fill(positionBtow[i].Eta(),positionBtow[i].Phi()); 
+      float ene=wEve->bemc.eneTile[kBTow][i];
+      float delZ=positionBtow[i].z()-wEve->vertex[maxRankId].z;
+      float e2et=Rcylinder/sqrt(Rcylinder2+delZ*delZ);
+      float ET=ene*e2et;
+      if(ET > 2.0) hA[219+bxBin]->Fill(positionBtow[i].Eta(),positionBtow[i].Phi());
+    }
+    else if(fillAdc) hA[223+bxBin]->Fill(positionBtow[i].Eta(),positionBtow[i].Phi());
+  }
+  
+  for(int isec=0;isec<mxEtowSec;isec++){
+    for(int isub=0;isub<mxEtowSub;isub++){
+      for(int ieta=0;ieta<mxEtowEta;ieta++){
+	int iPhi=isec*mxEtowSub+isub;
+	float adc=wEve->etow.adc[iPhi][ieta];
+	bool fillAdc=false;
+	if(adc > 10) fillAdc=true; //~150 MeV threshold for tower firing
+	
+	if(vert){
+	  if(fillAdc) hA[227+bxBin]->Fill(ieta,iPhi); 
+	  float ene=wEve->etow.ene[iPhi][ieta];
+	  float delZ=positionEtow[iPhi][ieta].z()-wEve->vertex[maxRankId].z;
+	  float Rxy=positionEtow[iPhi][ieta].Perp();
+	  float e2et=Rxy/sqrt(Rxy*Rxy+delZ*delZ);
+	  float ET=ene*e2et;
+	  if(ET > 2.0) hA[231+bxBin]->Fill(ieta,iPhi);
+	}
+	else if(fillAdc) hA[235+bxBin]->Fill(ieta,iPhi);
+      }
+    }
+  }
+  
+  return;
+}
+
 
 //________________________________________________
 //________________________________________________
 float
-St2011WMaker::sumTpcCone(int vertID, TVector3 refAxis, int flag){ 
+St2011WMaker::sumTpcCone(int vertID, TVector3 refAxis, int flag, int pointTowId){ 
 
   // flag=2 use 2D cut, 1= only delta phi
 
@@ -501,7 +577,8 @@ St2011WMaker::sumTpcCone(int vertID, TVector3 refAxis, int flag){
   for(int itr=0;itr<nPrimTrAll;itr++) {
     StMuTrack *prTr=mMuDstMaker->muDst()->primaryTracks(itr);
     if(prTr->flag()<=0) continue;
-    if(prTr->flag()!=301) continue;// TPC-only regular tracks
+    if(prTr->flag()!=301 && pointTowId>0) continue;// TPC-only regular tracks for barrel candidate
+    if(prTr->flag()!=301 && prTr->flag()!=311 && pointTowId<0) continue;// TPC regular and short EEMC tracks for endcap candidate
     float hitFrac=1.*prTr->nHitsFit()/prTr->nHitsPoss();
     if(hitFrac<par_nHitFrac) continue;
     StThreeVectorF prPvect=prTr->p();
@@ -517,7 +594,10 @@ St2011WMaker::sumTpcCone(int vertID, TVector3 refAxis, int flag){
     }
     float pT=prTr->pt();
     //    printf(" passed pt=%.1f\n",pT);
-    if(pT>par_trackPt) ptSum+=par_trackPt;
+
+    //separate quench for barrel and endcap candidates
+    if(pT>par_trackPt && pointTowId>0) ptSum+=par_trackPt;
+    else if(pT>parE_trackPt && pointTowId<0) ptSum+=parE_trackPt;
     else  ptSum+=pT;
   }
   return ptSum;
@@ -593,6 +673,9 @@ St2011WMaker::accessBSMD(){
 
 
 //$Log: St2011W_acessMuDst.cxx,v $
+//Revision 1.6  2011/02/25 06:03:45  stevens4
+//addes some histos and enabled running on MC
+//
 //Revision 1.5  2011/02/17 04:16:20  stevens4
 //move sector dependent track QA cuts before track pt>10 cut and lower par_clustET and par_ptBalance thresholds to 14 GeV
 //

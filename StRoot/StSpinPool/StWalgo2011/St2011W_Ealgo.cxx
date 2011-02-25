@@ -1,4 +1,4 @@
-// $Id: St2011W_Ealgo.cxx,v 1.3 2011/02/17 04:16:18 stevens4 Exp $
+// $Id: St2011W_Ealgo.cxx,v 1.4 2011/02/25 06:03:39 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -109,6 +109,8 @@ St2011WMaker::findEndcap_W_boson(){
       hE[97]->Fill(V.funnyRank);
       hE[98]->Fill(V.z);
       hE[99]->Fill( T.prMuTrack->eta());
+      hE[100]->Fill(T.pointTower.R.X(),T.pointTower.R.Y());
+      hE[190+k]->Fill(T.prMuTrack->eta(),T.cluster.ET);
       hE[20]->Fill("goldW",1.);
       nGoldW++;
 
@@ -133,8 +135,7 @@ St2011WMaker::analyzeESMD(){
       if(T.pointTower.id>=0) continue; //skip barrel towers
       if(T.isMatch2Cl==false) continue;
       assert(T.cluster.nTower>0); // internal logical error
-      assert(T.nearTotET>0); // internal logical error
-    
+          
       //id of strips pointed by prim and glob tracks in each plane
       int hitStrip[2]={-1,-1}; int hitStripGlob[2]={-1,-1};
       //initialize shower shape histograms
@@ -445,6 +446,9 @@ St2011WMaker::sumEtowPatch(int iEta, int iPhi, int Leta,int  Lphi, float zVert){
 }
 
 // $Log: St2011W_Ealgo.cxx,v $
+// Revision 1.4  2011/02/25 06:03:39  stevens4
+// addes some histos and enabled running on MC
+//
 // Revision 1.3  2011/02/17 04:16:18  stevens4
 // move sector dependent track QA cuts before track pt>10 cut and lower par_clustET and par_ptBalance thresholds to 14 GeV
 //

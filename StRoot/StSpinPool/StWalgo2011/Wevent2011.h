@@ -1,4 +1,4 @@
-// $Id: Wevent2011.h,v 1.1 2011/02/10 20:33:26 balewski Exp $
+// $Id: Wevent2011.h,v 1.2 2011/02/25 06:03:56 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -157,6 +157,7 @@ class WeveBEMC { // info about BEMC
   float adcTile[mxBTile][mxBtow];
   float eneTile[mxBTile][mxBtow];
   int   statTile[mxBTile][mxBtow];
+  float maxAdc;
 
   //raw BSMD hits, both planes
   float adcBsmd[mxBSmd][mxBStrips];
@@ -169,6 +170,7 @@ class WeveBEMC { // info about BEMC
     memset(tileIn,0,sizeof(tileIn)); // detector was On/Off
     memset(adcBsmd,0,sizeof(adcBsmd));
     memset(statBsmd,-1,sizeof(statBsmd));// default all dead
+    maxAdc=0;
     //     memset(,0,sizeof());
   }
 
@@ -284,6 +286,7 @@ class Wevent2011 : public TObject {
 
   int id; // eventID
   int runNo;
+  float zdcRate;
   int bx7, bx48; // raw from muDst
   bool zTag;
   vector <WeveVertex> vertex;
@@ -298,6 +301,7 @@ class Wevent2011 : public TObject {
   void clear() { 
     //printf("W2011event:clear()\n");
     id=runNo=0;
+    zdcRate=0;
     l2bitET=l2bitRnd=0;
     l2EbitET=l2EbitRnd=0;
     bx7=bx48=-1;
@@ -326,6 +330,9 @@ class Wevent2011 : public TObject {
 
 
 // $Log: Wevent2011.h,v $
+// Revision 1.2  2011/02/25 06:03:56  stevens4
+// addes some histos and enabled running on MC
+//
 // Revision 1.1  2011/02/10 20:33:26  balewski
 // start
 //

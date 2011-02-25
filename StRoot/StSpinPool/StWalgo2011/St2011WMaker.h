@@ -1,4 +1,4 @@
-// $Id: St2011WMaker.h,v 1.1 2011/02/10 20:33:22 balewski Exp $
+// $Id: St2011WMaker.h,v 1.2 2011/02/25 06:03:35 stevens4 Exp $
 
 #ifndef STAR_St2011WMaker
 #define STAR_St2011WMaker
@@ -86,7 +86,7 @@ class St2011WMaker : public StMaker {
   float par_clustFrac24, par_nearTotEtFrac;
   float parE_clustFrac24,parE_nearTotEtFrac;
   float par_nearDeltaR, par_awayDeltaPhi;
-  float par_delR3D, parE_delR3D, par_highET,  par_ptBalance, parE_ptBalance;
+  float par_delR3D, parE_delR3D, par_highET, parE_highET,  par_ptBalance, parE_ptBalance;
   float par_leptonEta,parE_leptonEtaLow,parE_leptonEtaHigh; //bracket acceptance 
   float parE_trackEtaMin;
   int parE_nSmdStrip;
@@ -138,6 +138,7 @@ class St2011WMaker : public StMaker {
   int   accessBarrelTrig();
   int   accessEndcapTrig();
   int   accessVertex();
+  void  fillTowHit(bool vert);
   int   accessTracks();
   int   accessBTOW();
   void  accessBSMD();
@@ -167,10 +168,10 @@ class St2011WMaker : public StMaker {
   TClonesArray* getJetsTreeAnalysis(TString branchName);
 
   // tools
-  float sumTpcCone( int vertID, TVector3 refAxis, int flag);
+  float sumTpcCone( int vertID, TVector3 refAxis, int flag,int pointTowId);
   float sumBtowCone( float zVert,  TVector3 refAxis, int flag);
   float sumEtowCone(float zVert, TVector3 refAxis,int flag);
-  float sumTpcConeFromTree( int vertID, TVector3 refAxis, int flag); //uses track vector saved in tree
+  float sumTpcConeFromTree( int vertID, TVector3 refAxis, int flag,int pointTowId); //uses track vector saved in tree
   WeveCluster maxBtow2x2(int iEta, int iPhi, float zVert);
   WeveCluster sumBtowPatch(int iEta, int iPhi, int Leta,int  Lphi,float zVert);
   WeveCluster maxEtow2x1(int iEta, int iPhi, float zVert);
@@ -180,7 +181,7 @@ class St2011WMaker : public StMaker {
 
   // histograms
   TObjArray *HList;
-  enum {mxHA=200}; TH1 * hA[mxHA];
+  enum {mxHA=300}; TH1 * hA[mxHA];
   enum {mxHE=300}; TH1 * hE[mxHE];
     
   void initHistos(); void initEHistos();
@@ -217,7 +218,7 @@ class St2011WMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.1 2011/02/10 20:33:22 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2011WMaker.h,v 1.2 2011/02/25 06:03:35 stevens4 Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -228,6 +229,9 @@ class St2011WMaker : public StMaker {
 
 
 // $Log: St2011WMaker.h,v $
+// Revision 1.2  2011/02/25 06:03:35  stevens4
+// addes some histos and enabled running on MC
+//
 // Revision 1.1  2011/02/10 20:33:22  balewski
 // start
 //

@@ -1,4 +1,4 @@
-// $Id: St2011W_EacessMuDst.cxx,v 1.2 2011/02/14 01:36:17 stevens4 Exp $
+// $Id: St2011W_EacessMuDst.cxx,v 1.3 2011/02/25 06:03:37 stevens4 Exp $
 //
 //*-- Author : Jan Balewski, MIT
 //*-- Author for Endcap: Justin Stevens, IUCF
@@ -24,12 +24,10 @@
 int  
 St2011WMaker::accessEndcapTrig(){ // return non-zero on abort 
   if (isMC){
-    assert(4==51) ; //not tested
-    if(wEve->etow.maxAdc<5.9/60.*4096) hE[0]->Fill("EHT2Id",1.);
-    if(wEve->etow.maxAdc<10./60.*4096) return -1;
-    hE[0]->Fill("L2wET",1.);
+    if(wEve->etow.maxAdc<10./60.*4096) return -1; //L2 is HT
+    hE[0]->Fill("L2ewET",1.);
     wEve->l2EbitET=true;
-    return 0; //simple high tower for condition for now -JS
+    return 0; 
   }
   
   StMuEvent* muEve = mMuDstMaker->muDst()->event();
@@ -258,6 +256,9 @@ St2011WMaker::accessESMD(){
 
 
 //$Log: St2011W_EacessMuDst.cxx,v $
+//Revision 1.3  2011/02/25 06:03:37  stevens4
+//addes some histos and enabled running on MC
+//
 //Revision 1.2  2011/02/14 01:36:17  stevens4
 //*** empty log message ***
 //
