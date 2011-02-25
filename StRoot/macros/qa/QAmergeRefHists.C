@@ -11,6 +11,7 @@
 
 void QAmergeRefHists(char* listFile, char* oldFile, char* modFile, char* newFile) {
 
+  // STAR libs needed for StMultiH*F histograms
   gSystem->Load("St_base");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StUtilities");
@@ -24,33 +25,53 @@ void QAmergeRefHists(char* listFile, char* oldFile, char* modFile, char* newFile
   TList  newKeys;
 
   Char_t buffer[512];
+  TString histName,modName;
+  TMap modNames;
   Int_t nkeys,i;
 
   nkeys = oldKeys->GetSize();
-  for (i = 0; i < nkeys; i++) {
-    newKeys.Add(oldKeys->At(i));
-  }
+  // Start with the old keys
+  for (i = 0; i < nkeys; i++) newKeys.Add(oldKeys->At(i));
 
   ifstream listFi(listFile);
-  while (!listFi.eof()) {
+  while (listFi.good()) {
     listFi >> buffer;
-    TKey* modKey = (TKey*) (modKeys->FindObject(buffer));
+    histName = buffer;
+    Bool_t modifyName = histName.BeginsWith("((");
+    if (modifyName) {
+      // Will modify the histogram name
+      //  to whatever is between (( ))
+      Ssiz_t endNewName = histName.Index("))");
+      modName = histName(2,endNewName-2);
+      histName.Remove(0,endNewName+2);
+    }
+    TKey* modKey = (TKey*) (modKeys->FindObject(histName.Data()));
     if (modKey) {
-      TObject* oldKey = newKeys.FindObject(buffer);
+      // Don't add the same key twice
+      if (newKeys.FindObject(modKey)) continue;
+
+      // Look to see if we're replacing an old one
+      TObject* oldKey = newKeys.FindObject(modifyName ?
+                          modName.Data() : histName.Data());
       if (oldKey) {
         newKeys.AddAfter(oldKey,modKey);
         newKeys.Remove(oldKey);
       } else {
         newKeys.Add(modKey);
       }
+      if (modifyName) modNames.Add(modKey, new TNamed(modName,modName));
     }
   }
   listFi.close();
 
+  // Read and write the actual histogram objects
   nkeys = newKeys.GetSize();
   for (i = 0; i < nkeys; i++) {
     TKey* key = (TKey*) (newKeys.At(i));
     TObject* obj = key->ReadObj();
+    TObject* modValue = modNames.GetValue(key);
+    // Modify name if necessary
+    if (modValue) ((TNamed*) obj)->SetName(modValue->GetName());
     newFi.cd();
     obj->Write();
   }
@@ -62,8 +83,11 @@ void QAmergeRefHists(char* listFile, char* oldFile, char* modFile, char* newFile
 }
 
 ////////////////////////////////////////////////////////////////////////
-// $Id: QAmergeRefHists.C,v 1.1 2010/12/23 01:10:09 genevb Exp $
+// $Id: QAmergeRefHists.C,v 1.2 2011/02/25 23:00:47 genevb Exp $
 // $Log: QAmergeRefHists.C,v $
+// Revision 1.2  2011/02/25 23:00:47  genevb
+// Allow histogram name modification
+//
 // Revision 1.1  2010/12/23 01:10:09  genevb
 // Introduce macro
 //
