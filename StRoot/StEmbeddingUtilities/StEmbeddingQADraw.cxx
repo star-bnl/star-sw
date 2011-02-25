@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.26 2011/02/11 03:44:53 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.27 2011/02/25 18:34:40 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.27  2011/02/25 18:34:40  hmasui
+ * Add phi comparison between real and reconstructed primary (matched pairs) in embedding
+ *
  * Revision 1.26  2011/02/11 03:44:53  hmasui
  * Draw error messages in pdf if histogram is missing. Add error check for Ncommon histogram
  *
@@ -1369,7 +1372,12 @@ Bool_t StEmbeddingQADraw::drawPhi() const
   if(!isOpen()) return kFALSE ;
 
   /// Comparison of embedding with MC
-  return drawProjection2D("phi", kTRUE);
+  Bool_t isPhiEmbeddingVsMcOk   = drawProjection2D("phi", kTRUE);
+
+  /// Added comparison with real data
+  Bool_t isPhiEmbeddingVsRealOk = drawProjection2D("phi", kFALSE);
+
+  return isPhiEmbeddingVsMcOk && isPhiEmbeddingVsRealOk ;
 }
 
 //____________________________________________________________________________________________________
@@ -1609,18 +1617,18 @@ Bool_t StEmbeddingQADraw::drawProjection2D(const TString name, const Bool_t isMC
       }
 
       hEmbed->SetLineColor(kRed);
-      hEmbed->Sumw2();
+      if(hEmbed->GetSumw2N()==0) hEmbed->Sumw2();
       hEmbed->Scale( getNormalization(*hEmbed) );
 
       if( hReal ){
         hReal->SetLineColor(kBlue);
-        hReal->Sumw2();
+        if(hReal->GetSumw2N()==0) hReal->Sumw2();
         hReal->Scale( getNormalization(*hReal) );
       }
 
       if( hMc ){
         hMc->SetLineColor(kBlack);
-        hMc->Sumw2();
+        if(hMc->GetSumw2N()==0) hMc->Sumw2();
         hMc->Scale( getNormalization(*hMc) );
       }
 
