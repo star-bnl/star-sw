@@ -3,8 +3,11 @@ MODULE  CALBGEO is the geometry of the Barrel EM Calorimeter in (aG)STAR     *
 *                                                                            *
    Author    K. Shestermanov, IHEP. First version W. Llope 
    Created   November 17 1995
-* $Id: calbgeo.g,v 1.21 2009/11/10 02:14:30 perev Exp $
+* $Id: calbgeo.g,v 1.22 2011/02/28 15:40:03 jwebb Exp $
 * $Log: calbgeo.g,v $
+* Revision 1.22  2011/02/28 15:40:03  jwebb
+* Added parentheses around expression in IF statements.
+*
 * Revision 1.21  2009/11/10 02:14:30  perev
 * Where GSTPAR, set local material avoid bug in gphysi
 *
@@ -193,8 +196,8 @@ block CALB is  EMC Barrel envelope
                       rmn = { cut_radius,  Calg_rmin,  Calg_Rmin,  cut_radius},
                       rmx = { Rmax,        Rmax,       Rmax,       Rmax };
 
-      if calg_Nmodule(1)>0 { ii=1; create and Position CHLV;            }      
-      if calg_Nmodule(2)>0 { ii=2; create and Position CHLV thetaZ=180; }
+      if (calg_Nmodule(1)>0) { ii=1; create and Position CHLV;            }      
+      if (calg_Nmodule(2)>0) { ii=2; create and Position CHLV thetaZ=180; }
 *
 EndBlock
 * -----------------------------------------------------------------------------
