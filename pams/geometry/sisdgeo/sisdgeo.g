@@ -1,5 +1,8 @@
-* $Id: sisdgeo.g,v 1.4 2005/01/03 22:09:57 potekhin Exp $
+* $Id: sisdgeo.g,v 1.5 2011/02/28 16:36:38 jwebb Exp $
 * $Log: sisdgeo.g,v $
+* Revision 1.5  2011/02/28 16:36:38  jwebb
+* Cosmetic changes needed for AgML syntax matching.
+*
 * Revision 1.4  2005/01/03 22:09:57  potekhin
 * Need to optionally position the Strip Detector in
 * the CAVE, when the SVT is missing form the configuration
@@ -50,8 +53,8 @@ Module  SISDGEO  is the Silicon Strip Detector
                        ssLen,    wpLen,    sdlen,    tilt,     
                        cprad,    cpral,    cfrad,    gpThk,
                        Int ladderMap(20),
-                       ladderAngle(20), ladderTilt(20),LadderRadius(20)
-                       }
+                       ladderAngle(20), ladderTilt(20),LadderRadius(20)  }
+
 *
 
       Integer   ilad,iwaf,nc
