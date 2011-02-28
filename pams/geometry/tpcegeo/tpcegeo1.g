@@ -1,7 +1,10 @@
 
 ****************************************************************************
-* $Id: tpcegeo1.g,v 1.3 2005/07/14 22:06:53 potekhin Exp $
+* $Id: tpcegeo1.g,v 1.4 2011/02/28 16:47:18 jwebb Exp $
 * $Log: tpcegeo1.g,v $
+* Revision 1.4  2011/02/28 16:47:18  jwebb
+* Added "EndFILL" statements where required.
+*
 * Revision 1.3  2005/07/14 22:06:53  potekhin
 * An informative diagnostics about the TPC gas density added,
 * prompted by a recent debugging session with Yuri
@@ -90,6 +93,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
       tialDR     = 0.004    ! inner aluminum layer thickness
       MWCread    = 2        ! MWC readout flag
       gasCorr    = 1        ! gas density correction version
+EndFill
 *
    Fill TRDO              ! volume for tpc readout boards
       RdoVthk   =30.      ! length of RDO vloume
@@ -98,6 +102,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
       NRdobrd   = 9       ! number of RDO boards
       Rdoht = {60.0, 74.0, 84.0, 101.0,106.0,
                126.0,146.0,166.0,186.0} ! radial pos of rdo boards
+EndFill
 *
    Fill TPRS              ! sector of padrows
       sec    = 1            ! sector number: 1 for inner, 2 for outer
@@ -109,6 +114,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
                 158, 166, 174, 182 }        ! number of pads in row
       Rpads  = {60.0, 64.8, 69.6, 74.4, 79.2, 84.0, 88.8, 93.6, 98.8, 
                104.0,109.2,114.4,119.6 }    ! tpc padrow radii
+EndFill
 *
    Fill TPRS              ! sector of padrows
       sec    = 2            ! sector number: 1 for inner, 2 for outer
@@ -127,6 +133,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
                 167.195, 169.195, 171.195, 173.195, 175.195, 
                 177.195, 179.195, 181.195, 183.195, 185.195, 
                 187.195, 189.195 }        ! tpc padrow radii
+EndFill
 *
    Fill TECW              ! EC trapezoid and support Wheel
       sec      = 1          ! sector number: 1 for inner, 2 for outer
@@ -177,6 +184,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
       maniwid = 2.2                ! water manifold in phi
       tan15 = .26795               ! tangent of 15 deg
       clearance = 1.0              ! clearance for RDO boardsin phi
+EndFill
 *
    Fill TECW              ! endcap trapezoid and support Wheel
       sec      = 2          ! sector number: 1 for inner, 2 for outer
@@ -229,6 +237,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
       maniwid = 2.2                ! water manifold in phi
       tan15 = .26795               ! tangent of 15 deg
       clearance = 1.0              ! clearance for RDO boardsin phi
+EndFill
 *     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 **
       Fill TROV   !  cards in row 1
@@ -251,6 +260,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
             -19.11, -9.76, 0.0, 9.76, 19.11, 4*0.0;
             -20.15, -12.08, -4.05, 4.05, 12.08, 20.15, 3*0.0} ! x of holes
          offcardinout = -0.9    ! cards, first row inner sector
+EndFill
 ***  input PC card locations and information
       Fill TROV   ! holes and cards in row 1
         sec = 2  !  outer
@@ -273,6 +283,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
              -38.37, -29.47,-20.76,-10.61, 0.00, 10.61, 20.76, 29.47,  38.37;
              -38.37, -29.47,-20.76,-10.61, 0.00, 10.61, 20.76, 29.47,  38.37} ! x of holes
          offcardinout = 0.0  !  card no special case 
+EndFill
 *
       Use  TPCG  
 *
