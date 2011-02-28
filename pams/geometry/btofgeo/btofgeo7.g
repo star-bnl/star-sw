@@ -1,5 +1,8 @@
-* $Id: btofgeo7.g,v 1.2 2010/12/21 17:18:50 jwebb Exp $
+* $Id: btofgeo7.g,v 1.3 2011/02/28 15:33:40 jwebb Exp $
 * $Log: btofgeo7.g,v $
+* Revision 1.3  2011/02/28 15:33:40  jwebb
+* Cosmetic changes to comments needed for AgML translation.
+*
 * Revision 1.2  2010/12/21 17:18:50  jwebb
 * Changed print statements to starsim-aware IO.
 *
@@ -139,7 +142,8 @@ Module  BTOFGEO7 is the Geometry of Barrel Trigger / Time Of Flight system
                 support_aile_width, support_aile_Ypos, 
                 xpos, ypos, zpos, totlen, sublen, subcen, x0, z0,
                 Y, Z, DTHgt
-      integer   i,is, choice, tof, iwid, igap, islat
+
+      integer   i,is, choice, tof, iwid, igap, islat, YEAR
 *
 * -------------------------------------------------------------------------
 *
@@ -522,13 +526,8 @@ Block BTOF is the whole CTF system envelope
       Shape     Tube      rmin=btog_Rmin+btog_X0  Rmax=btog_Rmax+btog_X0  dz=btog_dz+btog_Z0
 
       Prin0 btog_choice, 7; ('BTOF: btog_choice = ', F4.1, ' itof = ', I2);
-
-      if (btog_choice ==  7) { prin0 ; (' TOF: btog_choice=7: This is the Run-IV geometry...') }
-      if (btog_choice ==  8) { prin0 ; (' TOF: btog_choice=8: This is the Run-V geometry...')  }
-      if (btog_choice ==  9) { prin0 ; (' TOF: btog_choice=9: This is the Run-VI geometry...') }
-      if (btog_choice == 10) { prin0 ; (' TOF: btog_choice=10: This is the Run-VII geometry...') }
-      if (btog_choice == 11) { prin0 ; (' TOF: btog_choice=11: This is the Run-VIII geometry...') }
-      if (btog_choice == 12) { prin0 ; (' TOF: btog_choice=12: This is the Run-IX geometry...') }
+      YEAR = btog_choice - 3
+      Prin0 YEAR;           ('    : this is the run ',I2,' geometry ...' );
 
       choice = 1                           ! ctb
       if (btog_choice == 2)  choice= 2     ! full tofp
@@ -562,28 +561,28 @@ Block BTOH is a half of trigger system (west-east)
       ! tof=5 means TOFr6 tray (not active), tof=6 means TOFr7 tray, tof=7 means TOFr8++ tray
       ! tof=-1 means no tray (Run 9)
       do is=1,60
-         tof=0		                                !-> all CTB for choice=1                     
-         if (choice==2)                       tof=1	!-> all TOFp
-         if (choice==3 & 46<=is&is<=60)       tof=1	!-> big TOFp patch, rest CTB
-         if (choice==4 & is==btog_posit1(1))  tof=1	!-> Run-2 (one TOFp tray)
-         if (choice==5 & is==btog_posit1(1))  tof=1	!-> Run-3 (one TOFp tray
+         tof=0		                                !// all CTB for choice=1                     
+         if (choice==2)                       tof=1	!// all TOFp
+         if (choice==3 & 46<=is&is<=60)       tof=1	!// big TOFp patch, rest CTB
+         if (choice==4 & is==btog_posit1(1))  tof=1	!// Run-2 (one TOFp tray)
+         if (choice==5 & is==btog_posit1(1))  tof=1	!// Run-3 (one TOFp tray
          if (choice==5 & is==btog_posit2)     tof=2	!      and one TOFr tray)
-         if (choice==6)                       tof=7	!-> all TOFr
-         if (choice==7 & is==btog_posit1(2))  tof=1	!-> Run-4 (one TOFp tray moved 1 slot
+         if (choice==6)                       tof=7	!// all TOFr
+         if (choice==7 & is==btog_posit1(2))  tof=1	!// Run-4 (one TOFp tray moved 1 slot
          if (choice==7 & is==btog_posit2)     tof=3	!      and one TOFrp tray)
-	 if (choice==8  & is==btog_posit3)    tof=4  	!-> Run-5 (one TOFr5 tray)
-	 if (choice==9  & is==btog_posit3)    tof=5  	!-> Run-6 (one TOFr6 tray)
-	 if (choice==10 & is==btog_posit3)    tof=6  	!-> Run-7 (one TOFr7 tray)
-         if (choice==11 & is==btog_posit4(1)) tof=7 	!-> Run-8 (5 TOFr8 trays)
-         if (choice==11 & is==btog_posit4(2)) tof=7 	!-> Run-8 (5 TOFr8 trays)
-         if (choice==11 & is==btog_posit4(3)) tof=7	!-> Run-8 (5 TOFr8 trays)
-         if (choice==11 & is==btog_posit4(4)) tof=7 	!-> Run-8 (5 TOFr8 trays)
-         if (choice==11 & is==btog_posit4(5)) tof=7 	!-> Run-8 (5 TOFr8 trays)
+	 if (choice==8  & is==btog_posit3)    tof=4  	!// Run-5 (one TOFr5 tray)
+	 if (choice==9  & is==btog_posit3)    tof=5  	!// Run-6 (one TOFr6 tray)
+	 if (choice==10 & is==btog_posit3)    tof=6  	!// Run-7 (one TOFr7 tray)
+         if (choice==11 & is==btog_posit4(1)) tof=7 	!// Run-8 (5 TOFr8 trays)
+         if (choice==11 & is==btog_posit4(2)) tof=7 	!// Run-8 (5 TOFr8 trays)
+         if (choice==11 & is==btog_posit4(3)) tof=7	!// Run-8 (5 TOFr8 trays)
+         if (choice==11 & is==btog_posit4(4)) tof=7 	!// Run-8 (5 TOFr8 trays)
+         if (choice==11 & is==btog_posit4(5)) tof=7 	!// Run-8 (5 TOFr8 trays)
 
-         if (choice==12  & btog_posit5(is)   ==1) tof= 7 !-> Run-9:TOFr8 tray (west)
-         if (choice==12  & btog_posit5(is)   ==0) tof=-1 !-> Run-9: no tray (west)
-         if (choice==-12 & btog_posit5(is+60)==1) tof= 7 !-> Run-9: TOFr8 tray (east)
-         if (choice==-12 & btog_posit5(is+60)==0) tof=-1 !-> Run-9: no tray (east)
+         if (choice==12  & btog_posit5(is)   ==1) tof= 7 !// Run-9:TOFr8 tray (west)
+         if (choice==12  & btog_posit5(is)   ==0) tof=-1 !// Run-9: no tray (west)
+         if (choice==-12 & btog_posit5(is+60)==1) tof= 7 !// Run-9: TOFr8 tray (east)
+         if (choice==-12 & btog_posit5(is+60)==0) tof=-1 !// Run-9: no tray (east)
 
 *         print *,' Positioning Tray, choice,is,tof=',choice,is,tof
 *         Create and Position BSEC  alphaz = 102+6*is
