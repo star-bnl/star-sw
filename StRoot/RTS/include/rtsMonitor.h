@@ -161,7 +161,8 @@ struct rtsMonSCA {
 
 struct rtsMonL1Counters {
   struct {
-    char name[32];
+    //  char name[32];
+    u_int enabled;
     u_int rate;
     u_int deadtime;
   } trgs[TRIGGERS_MAX+1];
