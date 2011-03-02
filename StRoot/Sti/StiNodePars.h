@@ -5,7 +5,7 @@ class StiNodePars {
  public:	
   void reset(){memset(this,0,sizeof(StiNodePars));_cosCA=1;}
   void ready(){_cosCA=cos(eta());_sinCA=sin(eta()); curv() = hz()*ptin();
-    if (fabs(curv()) < 1e-6) curv()=1e-6;}
+    if (fabs(curv()) < 1e-9) curv()=1e-9;}
   StiNodePars &merge(Double_t wt,StiNodePars &other);
 
     /// accessors
