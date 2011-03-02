@@ -25,7 +25,7 @@ MediumMagboltz::MediumMagboltz() :
   useDeexcitation(false), useRadTrap(true), 
   nDeexcitations(0), 
   nIonisationProducts(0), nDeexcitationProducts(0), 
-  scaleExc(1.), useSplittingFunction(true),
+  scaleExc(1.), useOpalBeaty(true), useGreenSawada(false),
   eFinalGamma(20.), eStepGamma(eFinalGamma / nEnergyStepsGamma) {
  
   className = "MediumMagboltz";
@@ -374,6 +374,96 @@ MediumMagboltz::Initialise() {
 
 }
 
+void
+MediumMagboltz::PrintGas() {
+
+  MediumGas::PrintGas();
+
+  if (isChanged) {
+    if (!Initialise()) return;
+  }
+
+  std::cout << className << "::PrintGas:\n";
+  for (int i = 0; i < nTerms; ++i) {
+    // Collision type
+    int type = csType[i] % nCsTypes;
+    int ngas = int(csType[i] / nCsTypes);
+    // Description (from Magboltz)
+    std::string descr = "                              ";
+    for (int j = 30; j--;) descr[j] = description[i][j];
+    // Threshold energy
+    double e = rgas[ngas] * energyLoss[i];
+    std::cout << "    Level " << i << ": " << descr << "\n";
+    std::cout << "        Type " << type;
+    if (type == ElectronCollisionTypeElastic) {
+      std::cout << " (elastic)\n";
+    } else if (type == ElectronCollisionTypeIonisation) {
+      std::cout << " (ionisation)\n";
+      std::cout << "        Ionization threshold: " << e << " eV\n";
+    } else if (type == ElectronCollisionTypeAttachment) {
+      std::cout << " (attachment)\n";
+    } else if (type == ElectronCollisionTypeInelastic) {
+      std::cout << " (inelastic)\n";
+      std::cout << "        Energy loss: " << e << " eV\n";
+    } else if (type == ElectronCollisionTypeExcitation) {
+      std::cout << " (excitation)\n";
+      std::cout << "        Excitation energy: " << e << " eV\n";
+    } else if (type == ElectronCollisionTypeSuperelastic) {
+      std::cout << " (super-elastic)\n";
+      std::cout << "        Energy gain: " << -e << " eV\n";
+    } else {
+      std::cout << " (unknown)\n";
+    }
+    if (type == ElectronCollisionTypeExcitation && 
+        usePenning && e > minIonPot) {
+      std::cout << "        Penning transfer coefficient: " 
+                << rPenning[i] << "\n";
+    } else if (type == ElectronCollisionTypeExcitation && 
+               useDeexcitation) {
+      const int idxc = iDeexcitation[i];
+      if (deexcitations[idxc].osc > 0.) { 
+        std::cout << "        Oscillator strength: " 
+                  << deexcitations[idxc].osc << "\n";
+      }
+      std::cout << "        Decay channels:\n";
+      for (int j = 0; j < deexcitations[idxc].nChannels; ++j) {
+        if (deexcitations[idxc].type[j] == 0) {
+          std::cout << "          Radiative decay to ";
+          if (deexcitations[idxc].final[j] < 0) {
+            std::cout << "ground state: ";
+          } else {
+            std::cout << deexcitations[deexcitations[idxc].final[j]].label
+                      << ": ";
+          }
+        } else if (deexcitations[idxc].type[j] == 1) {
+          if (deexcitations[idxc].final[j] < 0) {
+            std::cout << "          Penning ionisation: ";
+          } else {
+            std::cout << "          Associative ionisation: ";
+          }
+        } else if (deexcitations[idxc].type[j] == -1) {
+          if (deexcitations[idxc].final[j] >= 0) {
+            std::cout << "          Collision-induced transition to "
+                      << deexcitations[deexcitations[idxc].final[j]].label
+                      << ": ";
+          } else {
+            std::cout << "          Loss: ";
+          }
+        }
+        if (j == 0) {
+          std::cout << std::setprecision(5) 
+                    << deexcitations[idxc].p[j] * 100. << "%\n";
+        } else {
+          std::cout << std::setprecision(5) 
+                    << (deexcitations[idxc].p[j] - 
+                        deexcitations[idxc].p[j - 1]) * 100. << "%\n";
+        }
+      } 
+    }
+  }
+
+}
+
 double 
 MediumMagboltz::GetElectronNullCollisionRate(const int band) {
 
@@ -511,17 +601,20 @@ MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
   nion = ndxc = 0;
 
   if (type == ElectronCollisionTypeIonisation) {
-    // Get the splitting parameter.
-    const double w = wSplit[level];
     // Sample the secondary electron energy according to 
     // the Opal-Beaty-Peterson parameterisation.
     double esec = 0.;
     if (useSplittingFunction) { 
+      // Get the splitting parameter.
+      const double w = wOpalBeaty[level];
       esec = w * tan(RndmUniform() * atan(0.5 * (e - loss) / w));
       // Rescaling (SST)
       // esec = w * pow(esec / w, 0.9524);
     } else {
-      esec = RndmUniform() * (e - loss);
+      // Green-Sawada parameterisation for CH4
+      const double w = 7.06 * e / (e - 12.5);
+      const double e0 = 3.45 - 1000. / (e + 2 * 13.); 
+      // esec = RndmUniform() * (e - loss);
     }
     if (esec <= 0) esec = Small;
     loss += esec;
@@ -1374,7 +1467,7 @@ MediumMagboltz::Mixer() {
       ++nTerms; ++np;
       scatModel[np] = kEl[2];
       energyLoss[np] = e[2] / r;
-      wSplit[np] = w;
+      wOpalBeaty[np] = w;
       ionPot[iGas] = e[2];
       for (int j = 0; j < 30; ++j) {
         description[np][j] = scrpt[2][j];

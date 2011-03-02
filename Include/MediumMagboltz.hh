@@ -43,8 +43,8 @@ class MediumMagboltz : public MediumGas {
     // Switch on/off secondary electron energy distribution 
     // according to Opal et al. (enabled by default) 
     // If switched off, a flat distribution is used (for test purposes)
-    void EnableSplittingFunction()  {useSplittingFunction = true;}
-    void DisableSplittingFunction() {useSplittingFunction = false;}
+    void EnableSplittingFunction()  {useOpalBeaty = true;}
+    void DisableSplittingFunction() {useOpalBeaty = false;}
     
     // Switch on/off de-excitation handling
     void EnableDeexcitation();
@@ -70,6 +70,8 @@ class MediumMagboltz : public MediumGas {
     void SetExcitationScalingFactor(const double r);
 
     bool Initialise(); 
+    void PrintGas();
+
     // Get the overall null-collision rate [ns-1]
     double GetElectronNullCollisionRate(const int band);
     // Get the (real) collision rate [ns-1] at a given electron energy e [eV]
@@ -148,7 +150,7 @@ class MediumMagboltz : public MediumGas {
     // Recoil energy parameter
     double rgas[nMaxGases];
     // For ionisation: Opal-Beaty-Peterson splitting parameter [eV]
-    double wSplit[nMaxLevels];
+    double wOpalBeaty[nMaxLevels];
     // Energy loss
     double energyLoss[nMaxLevels];
     // Cross-section type
@@ -259,8 +261,9 @@ class MediumMagboltz : public MediumGas {
 
     // Scaling factor for excitation cross-sections
     double scaleExc;
-    // Flag switching on/off secondary electron energy distribution
-    bool useSplittingFunction;
+    // Flag selecting secondary electron energy distribution model
+    bool useOpalBeaty;
+    bool useGreenSawada;
 
     // Energy spacing of photon collision rates table
     double eFinalGamma, eStepGamma;
