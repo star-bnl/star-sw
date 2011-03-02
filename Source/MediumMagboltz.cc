@@ -604,7 +604,7 @@ MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
     // Sample the secondary electron energy according to 
     // the Opal-Beaty-Peterson parameterisation.
     double esec = 0.;
-    if (useSplittingFunction) { 
+    if (useOpalBeaty) { 
       // Get the splitting parameter.
       const double w = wOpalBeaty[level];
       esec = w * tan(RndmUniform() * atan(0.5 * (e - loss) / w));
