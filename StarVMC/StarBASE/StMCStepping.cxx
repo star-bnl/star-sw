@@ -1,4 +1,4 @@
-// $Id: StMCStepping.cxx,v 1.3 2010/10/26 19:39:58 jwebb Exp $
+// $Id: StMCStepping.cxx,v 1.4 2011/03/04 19:30:17 jwebb Exp $
 //
 //
 // Class StMCStepping
@@ -111,8 +111,18 @@ void StMCStepping::bookVolume( const Char_t *name )
 	  if ( ! hRadlenHist1D[vid] )                                    // check for existing histogram
 	    {
 	      //	      std::cout << "+ add volume " << vid << " " << name << std::endl;	  
+
 	      hRadlenHist1D[ vid ] = new TH1D( Form("h_radlen_%s_eta",vname), Form("Depth vs eta [%s];#eta;L/#chi_{0}",vname), 500,-5.0,+5.0 );
 	      hCountsHist1D[ vid ] = new TH1D( Form("h_counts_%s_eta",vname), Form("Number of geantinos vs eta [%s];#eta",vname), 500,-5.0,+5.0 );
+
+	      hRadlenHist1D_z[ vid ] = new TH1D( Form("h_radlen_%s_z",vname), Form("Depth vs z [%s];z [cm];L/#chi_{0}",vname), 500,-500.0,+500.0);
+	      hCountsHist1D_z[ vid ] = new TH1D( Form("h_counts_%s_z",vname), Form("Number of geantinos vs z [%s];z",vname), 500,-500.0,+500.0);
+
+	      hRadlenHist1D_r[ vid ] = new TH1D( Form("h_radlen_%s_r",vname), Form("Depth vs r [%s];r [cm];L/#chi_{0}",vname), 500,0.0,+500.0);
+	      hCountsHist1D_r[ vid ] = new TH1D( Form("h_counts_%s_r",vname), Form("Number of geantinos vs r [%s];r",vname), 500,0.0,+500.0);
+
+	      hRadlenHist1D_phi[ vid ] = new TH1D( Form("h_radlen_%s_phi",vname), Form("Depth vs phi [%s];phi [deg];L/#chi_{0}",vname), 360.0,-180.,180.0);
+	      hCountsHist1D_phi[ vid ] = new TH1D( Form("h_counts_%s_phi",vname), Form("Number of geantinos vs phi [%s];r",vname), 360.0,-180.,180.0);
 
 	      hRadlenAccu1D[ vid ] = new TH1D( Form("h_acc_radlen_%s_eta",vname), Form("Accumulated depth vs eta [%s];#eta;L/#chi_{0}",vname), 500,-5.0,+5.0 );
 
@@ -154,12 +164,21 @@ StMCStepping::BookHistograms()
   for ( Int_t i=0;i<mNumberOfVolumes+1;i++ )
     {
       hRadlenHist1D.push_back( NULL ); 
-      //      hRadlenHist2D.push_back( NULL );
       hCountsHist1D.push_back( NULL );
-      //      hCountsHist2D.push_back( NULL );
+
+      hRadlenHist1D_z.push_back( NULL ); 
+      hCountsHist1D_z.push_back( NULL );
+
+      hRadlenHist1D_r.push_back( NULL ); 
+      hCountsHist1D_r.push_back( NULL );
+
+      hRadlenHist1D_phi.push_back( NULL ); 
+      hCountsHist1D_phi.push_back( NULL );
+
       hRadlenAccu1D.push_back( NULL );
       //
       mRadlenSum   .push_back( 0.   );      
+      mRadlenEnter .push_back( 0.   );
       mHasEntered  .push_back( false );
     }
 
@@ -181,8 +200,19 @@ StMCStepping::BookHistograms()
 void StMCStepping::postTrack()
 {
 
+  //
+  // This is the eta, phi, x, y, z and r upon exiting the geometry
+  //
   Float_t eta = fCurrentPosition.Vect().Eta();
   Float_t phi = fCurrentPosition.Vect().Phi(); // phi returned in degrees
+  Float_t zzz = fCurrentPosition[2];
+  Float_t xxx = fCurrentPosition[0];
+  Float_t yyy = fCurrentPosition[1];
+  Float_t rrr = TMath::Sqrt(xxx*xxx+yyy*yyy);
+
+  Float_t cos_theta = TMath::Abs(fCurrentPosition.Vect().CosTheta());
+  Float_t sin_theta = TMath::Sqrt(1.0 - cos_theta*cos_theta);
+
   phi *= 180.0 / TMath::Pi();
 
   for ( Int_t i=0;i<mNumberOfVolumes+1;i++ )
@@ -191,6 +221,13 @@ void StMCStepping::postTrack()
 	{
 	  hRadlenHist1D[ i ] -> Fill( eta, mRadlenSum[ i ] );
 	  hCountsHist1D[ i ] -> Fill( eta, 1.0 );
+
+	  //	  hRadlenHist1D_z[ i ] -> Fill( zzz, mRadlenSum[ i ] * cos_theta );
+	  //	  hCountsHist1D_z[ i ] -> Fill( zzz, 1.0 );
+
+	  //	  hRadlenHist1D_r[ i ] -> Fill( rrr, mRadlenSum[ i ] * sin_theta );
+	  //	  hCountsHist1D_r[ i ] -> Fill( rrr, 1.0 );
+
 	  //	  hRadlenHist2D[ i ] -> Fill( phi, eta, mRadlenSum[ i ] );
 	  //	  hCountsHist2D[ i ] -> Fill( phi, eta );
 	}
@@ -244,6 +281,12 @@ void StMCStepping::Case()
   fMedium    = fVolume->GetMedium();
   fMaterial  = fMedium->GetMaterial();
   fCase      = 0;
+
+  /*
+  TString VOLUME = fVolume->GetName();
+  Bool_t  FEEA   = VOLUME=="FEEA";       // in FEE assembly
+  Bool_t  TBRW   = VOLUME=="TBRW";       // in big aluminium brick
+  */
 
   if(gMC->TrackLength() == 0      ) fCase |= kNewTrack;
   if(gMC->IsTrackDisappeared 	 ()) fCase |= kTrackDisappeared;
@@ -345,6 +388,7 @@ int StMCStepping::Fun()
       for ( Int_t i=0;i<mNumberOfVolumes+1;i++ )
 	{
 	  mRadlenSum[ i ] = 0.0;
+	  mRadlenEnter[ i ] = 0.0;
 	  mHasEntered[ i ] = false;
 	}
 
@@ -368,14 +412,27 @@ int StMCStepping::Fun()
 
 	  /////////////////////// <<<<<<<<<<<<<<<<<<< level or level+1 ??
 	  //$$$	  for ( Int_t i=0;i<level+1;i++ )     // Loop over volume numbers in this branch/path
-	  for ( Int_t i=0;i<level;i++ )
+
+	  // Number of radlen in front of current volume
+	  mRadlenAcc += nradlen;
+
+	  for ( Int_t i=0;i<level+1;i++ )
 	    {
 	      Int_t id = volu_numbers[i];
 	      mRadlenSum[ id ] += nradlen;
+
+	      Float_t total = mRadlenAcc - mRadlenEnter[id];
+	      hRadlenHist1D_z[ id ] -> Fill( z, total );
+	      hRadlenHist1D_r[ id ] -> Fill( r, total );
+	      hRadlenHist1D_phi[ id ] -> Fill( phi*TMath::RadToDeg(), total );
+	      
+	      hCountsHist1D_z[ id ] -> Fill( z, 1.0   );
+	      hCountsHist1D_r[ id ] -> Fill( r, 1.0   );
+	      hCountsHist1D_phi[ id ] -> Fill( phi*TMath::RadToDeg(), 1.0 );
+
 	    }
 
-	  mRadlenAcc += nradlen;
-
+	  
 	}
 
     }
@@ -389,9 +446,12 @@ int StMCStepping::Fun()
       Int_t copy_numbers[ level+1 ];
       fNavigator->GetBranchNumbers( copy_numbers, volu_numbers );      
 
+      // Radiation length on entrance
+      mRadlenEnter[ volu_numbers[ level ] ] = mRadlenAcc;
+
       for ( Int_t i=0;i<level; i++ )
 	{
-	  Int_t id = volu_numbers[i];
+	  Int_t id = volu_numbers[i];	  
 	  if ( ! mHasEntered[id] ) 
 	    {
 	      hRadlenAccu1D[ id ] -> Fill( eta, mRadlenAcc );
@@ -403,44 +463,6 @@ int StMCStepping::Fun()
 
 
 
-
-#if 0
-
-  //  if ( path.Contains("TOFS") )
-    {
-      std::cout << "========================================================================================" << std::endl;
-      std::cout << Form("Volume: %s",fVolume->GetName())<<std::endl;
-      std::cout << Form("Shape: %s",fVolume->GetShape()->GetName())<<std::endl;
-      //fVolume->InspectShape();
-      fNode->InspectNode();
-
-      std::cout << path.Data() << std::endl;
-      std::cout << Form("x=%9.5f y=%9.5f z=%9.5f eta=%9.5f phi=%9.5f",xx,yy,zz,eta,phi) << std::endl;
-      std::cout << Form("Radlen  = %9.5f g/cm^2",radlen) << std::endl;
-      std::cout << Form("Density = %9.5f g/cm^3",density) << std::endl;
-      std::cout << Form("Pathlen = %9.5f cm",pathlen) << std::endl;
-      std::cout << Form("Medium  = %s", fMedium->GetName())<< std::endl;
-      const Char_t *keys[]={"isvol","ifield","fieldm","tmaxfd","stemax","deemax","epsil","stmin"};
-      for ( Int_t i=0;i<8;i++ )
-	{
-	  std::cout << Form("+ %10s = %9.4f",keys[i],fMedium->GetParam(i)) << std::endl;
-	}
-      std::cout << Form("Navigator")<<std::endl;
-      std::cout << Form("+ step  = %9.5f",fNavigator->GetStep()) << std::endl;
-      std::cout << Form("+ many  = %i",fNavigator->GetNmany())<< std::endl;
-      std::cout << Form("+ enter = %i",fNavigator->IsEntering())<<std::endl;
-      std::cout << Form("+ exit  = %i",fNavigator->IsExiting())<<std::endl;
-      std::cout << Form("+ safet = %f",fNavigator->Safety())<<std::endl;
-      fNavigator->InspectState();
-
-      Int_t level = fNavigator->GetLevel();
-      Int_t volu_numbers[ level+1 ];
-      Int_t copy_numbers[ level+1 ];
-      fNavigator->GetBranchNumbers( copy_numbers, volu_numbers );      
-
-      std::cout << Form("SUM rad = %9.5f",mRadlenSum[ volu_numbers[level] ]) << std::endl;      
-    }
-#endif
 
 
 

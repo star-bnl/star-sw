@@ -170,6 +170,15 @@ int StarBASE::Finish()
 	AddHist( mSteps->hCountsHist1D[i] );
 	AddHist( mSteps->hRadlenAccu1D[i] );
 
+	AddHist( mSteps->hRadlenHist1D_z[i] );
+	AddHist( mSteps->hCountsHist1D_z[i] );
+
+	AddHist( mSteps->hRadlenHist1D_r[i] );
+	AddHist( mSteps->hCountsHist1D_r[i] );
+
+	AddHist( mSteps->hRadlenHist1D_phi[i] );
+	AddHist( mSteps->hCountsHist1D_phi[i] );
+
 	//	std::cout << mSteps->hRadlenAccu1D[i]->GetName() << std::endl;
 	
 	//	AddHist( mSteps->hEnterHist1D[i] );
