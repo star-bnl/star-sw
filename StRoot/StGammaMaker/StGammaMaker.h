@@ -76,7 +76,7 @@ class StGammaMaker: public StMaker
         ~StGammaMaker() {};
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaMaker.h,v 1.4 2010/11/13 22:52:00 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaMaker.h,v 1.5 2011/03/04 19:38:38 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
         
         // Required Maker Methods
         Int_t Init();
@@ -122,6 +122,9 @@ class StGammaMaker: public StMaker
 
         // Exclude any BEMC towers from the raw maker
         void excludeBemcTower(int softId) { mRawMaker->excludeBemcTower(softId); }
+
+        // Shift BEMC tower gain for systematic studies
+        void shiftBemcGains(double shift) { mRawMaker->shiftBemcGains(shift); }
         
         // Set threshold for including towers in the EEMC clustering
         // MinimumEnergy defaults to 0.1
