@@ -1,4 +1,4 @@
-// $Id: StMCStepping.h,v 1.2 2010/10/26 19:39:58 jwebb Exp $
+// $Id: StMCStepping.h,v 1.3 2011/03/04 19:30:17 jwebb Exp $
 //
 //
 // Class StMCStepping
@@ -98,7 +98,19 @@ class StMCStepping : public GCall
 
   std::vector<TH1D *>    hRadlenAccu1D;
 
-  std::vector<Double_t>   mRadlenSum; // Sum within the specified subsystem
+  
+  std::vector<TH1D *>    hRadlenHist1D_z;
+  std::vector<TH1D *>    hCountsHist1D_z;
+  std::vector<TH1D *>    hRadlenHist1D_r;
+  std::vector<TH1D *>    hCountsHist1D_r;
+  std::vector<TH1D *>    hRadlenHist1D_phi;
+  std::vector<TH1D *>    hCountsHist1D_phi;
+  
+  
+
+  std::vector<Double_t>   mRadlenSum;   // Sum within the specified subsystem
+  std::vector<Double_t>   mRadlenEnter; // Accumulated radiation length at entrance
+
   std::vector<Bool_t>     mHasEntered; // Flag indicating volumes which have been entered
   Double_t                mRadlenAcc; // Accumulated radiation length along the track
 
