@@ -35,6 +35,8 @@ StGammaRawMaker::StGammaRawMaker(const char *name): StMaker(name)
     
     mUseBemc = false;
     mUseEemc = false;
+
+    mBemcGainShift = 0.0;
     
 }
 
@@ -319,6 +321,9 @@ void StGammaRawMaker::GetBarrel()
                 if(ADC < 7) continue;
                 double pADC = ADC - pedestal;
                 if(pADC < 5.0 * rms) continue;	
+ 
+                // Vary energy per gain shift
+                energy = (1.0 + mBemcGainShift) * energy;
                 
                 // min pT cut next
                 if ( energy / TMath::CosH(bEta) < mTowerCutoff ) continue;
