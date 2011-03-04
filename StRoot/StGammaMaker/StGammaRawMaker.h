@@ -38,7 +38,7 @@ class StGammaRawMaker: public StMaker
         ~StGammaRawMaker();
         
         virtual const char* GetCVS() const
-        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaRawMaker.h,v 1.7 2010/11/13 22:51:22 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
+        {static const char cvs[] = "Tag $Name:  $ $Id: StGammaRawMaker.h,v 1.8 2011/03/04 19:39:15 betan Exp $ built "__DATE__" "__TIME__; return cvs; }
         
         // Required Maker Methods
         Int_t Init();
@@ -68,6 +68,7 @@ class StGammaRawMaker: public StMaker
         void AddPhiStrip(StGammaStrip *strip);
 
         void excludeBemcTower(int softId) { mExcludedBemcTowers.push_back(softId); }
+        void shiftBemcGains(double shift) { mBemcGainShift = shift; }
 
     protected:
 
@@ -110,6 +111,8 @@ class StGammaRawMaker: public StMaker
     
         bool mUseBemc;
         bool mUseEemc;
+
+        double mBemcGainShift;
 
         vector<int> mExcludedBemcTowers;
     
