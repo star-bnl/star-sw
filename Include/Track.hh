@@ -41,7 +41,7 @@ class Track {
     // Calculate a new track starting from (x0, y0, z0) at time t0
     // in direction (dx0, dy0, dz0).
     virtual 
-    void NewTrack(const double x0, const double y0, const double z0, 
+    bool NewTrack(const double x0, const double y0, const double z0, 
                   const double t0, 
                   const double dx0, const double dy0, const double dz0) = 0;
     virtual 

@@ -40,11 +40,10 @@ class MediumMagboltz : public MediumGas {
       useAnisotropic = false; isChanged = true;
     }
 
-    // Switch on/off secondary electron energy distribution 
-    // according to Opal et al. (enabled by default) 
-    // If switched off, a flat distribution is used (for test purposes)
-    void EnableSplittingFunction()  {useOpalBeaty = true;}
-    void DisableSplittingFunction() {useOpalBeaty = false;}
+    // Select secondary electron energy distribution parameterization 
+    void SetSplittingFunctionOpalBeaty();
+    void SetSplittingFunctionGreenSawada();
+    void SetSplittingFunctionFlat();
     
     // Switch on/off de-excitation handling
     void EnableDeexcitation();
@@ -149,8 +148,15 @@ class MediumMagboltz : public MediumGas {
     int nTerms;
     // Recoil energy parameter
     double rgas[nMaxGases];
-    // For ionisation: Opal-Beaty-Peterson splitting parameter [eV]
+    // Opal-Beaty-Peterson splitting parameter [eV]
     double wOpalBeaty[nMaxLevels];
+    // Green-Sawada splitting parameters [eV]
+    double gsGreenSawada[nMaxGases];
+    double gbGreenSawada[nMaxGases];
+    double tsGreenSawada[nMaxGases];
+    double taGreenSawada[nMaxGases];
+    double tbGreenSawada[nMaxGases];
+    bool hasGreenSawada[nMaxGases];
     // Energy loss
     double energyLoss[nMaxLevels];
     // Cross-section type
@@ -283,6 +289,7 @@ class MediumMagboltz : public MediumGas {
 
     bool GetGasNumberMagboltz(const std::string input, int& number) const;
     bool Mixer();
+    void SetupGreenSawada();
     void ComputeAngularCut(double parIn, double& cut, double &parOut);
     void ComputeDeexcitationTable();
     void ComputeDeexcitationInternal(int iLevel, int& fLevel);

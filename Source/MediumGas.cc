@@ -326,7 +326,7 @@ MediumGas::LoadGasFile(const std::string filename) {
       }
     }
     if (debug) {
-      std::cout <<"    Line: " << line << "\n";
+      std::cout << "    Line: " << line << "\n";
       getchar();
     }
     if (!atTables) {

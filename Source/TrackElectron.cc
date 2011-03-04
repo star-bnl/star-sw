@@ -47,7 +47,7 @@ TrackElectron::SetParticle(std::string particle) {
   
 }
 
-void 
+bool 
 TrackElectron::NewTrack(const double x0, const double y0, const double z0,
                         const double t0, 
                         const double dx0, const double dy0, const double dz0) {
@@ -58,7 +58,7 @@ TrackElectron::NewTrack(const double x0, const double y0, const double z0,
   if (sensor == 0) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Sensor is not defined.\n";
-    return;
+    return false;
   }
   
   // Get the medium at this location and check if it is "ionisable".
@@ -66,32 +66,32 @@ TrackElectron::NewTrack(const double x0, const double y0, const double z0,
   if (!sensor->GetMedium(x0, y0, z0, medium)) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    No medium at initial position.\n";
-    return;
+    return false;
   }
   if (!medium->IsIonisable()) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Medium at initial position is not ionisable.\n";
-    return;
+    return false;
   }
   
   // Check if the medium is a gas.
   if (!medium->IsGas()) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Medium at initial position is not a gas.\n";
-    return;
+    return false;
   }
   
   if (!SetupGas(medium)) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Properties of medium "
               << medium->GetName() << " are not available.\n";
-    return;
+    return false;
   }
   
   if (!UpdateCrossSection()) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Cross-sections could not be calculated.\n";
-    return;
+    return false;
   }
   
   mediumName = medium->GetName();
@@ -116,7 +116,8 @@ TrackElectron::NewTrack(const double x0, const double y0, const double z0,
   }
   
   ready = true;
-  
+  return true;
+
 }
 
 bool

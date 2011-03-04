@@ -30,7 +30,7 @@ TrackPAI::~TrackPAI() {
       
 }
 
-void 
+bool 
 TrackPAI::NewTrack(const double x0, const double y0, const double z0,
                    const double t0, 
                    const double dx0, const double dy0, const double dz0) {
@@ -41,7 +41,7 @@ TrackPAI::NewTrack(const double x0, const double y0, const double z0,
   if (sensor == 0) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Sensor is not defined.\n";
-    return;
+    return false;
   }
   
   // Get the medium at this location and check if it is "ionisable".
@@ -49,12 +49,12 @@ TrackPAI::NewTrack(const double x0, const double y0, const double z0,
   if (!sensor->GetMedium(x0, y0, z0, medium)) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    No medium at initial position.\n";
-    return;
+    return false;
   }
   if (!medium->IsIonisable()) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Medium at initial position is not ionisable.\n";
-    return;
+    return false;
   }
   
   if (medium->GetName() != mediumName ||
@@ -64,7 +64,7 @@ TrackPAI::NewTrack(const double x0, const double y0, const double z0,
       std::cerr << className << "::NewTrack:\n";
       std::cerr << "    Properties of medium "
                 << medium->GetName() << " are not available.\n";
-      return;
+      return false;
     }
     mediumName = medium->GetName();
     mediumDensity = medium->GetNumberDensity();
@@ -77,7 +77,7 @@ TrackPAI::NewTrack(const double x0, const double y0, const double z0,
       std::cerr << className << "::NewTrack:\n";
       std::cerr << "    Calculation of ionisation cross-section failed.\n";
       ready = false;
-      return;
+      return false;
     }
     isChanged = false;
   }
@@ -100,6 +100,7 @@ TrackPAI::NewTrack(const double x0, const double y0, const double z0,
     // Normalize the direction vector.
     dx = dx0 / d; dy = dy0 / d; dz = dz0 / d;
   }
+  return true;
                
 }
 

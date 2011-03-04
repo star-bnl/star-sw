@@ -211,7 +211,7 @@ Track::PlotNewTrack(const double x0, const double y0, const double z0) {
   if (!usePlotting || viewer == 0) return;
   
   viewer->NewChargedParticleTrack(1, plotId, x0, y0, z0);
- 
+
 }
 
 void

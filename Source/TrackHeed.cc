@@ -145,7 +145,7 @@ TrackHeed::~TrackHeed() {
 
 }
 
-void
+bool
 TrackHeed::NewTrack(
         const double x0, const double y0, const double z0, const double t0,
         const double dx0, const double dy0, const double dz0) {
@@ -157,7 +157,7 @@ TrackHeed::NewTrack(
   if (sensor == 0) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Sensor is not defined.\n";
-    return;
+    return false;
   }
   
   // Get the bounding box.
@@ -166,7 +166,7 @@ TrackHeed::NewTrack(
   if (!sensor->GetArea(xmin, ymin, zmin, xmax, ymax, zmax)) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Drift area is not set.\n";
-    return;
+    return false;
   }
   // Check if the bounding box has changed.
   const double lx = fabs(xmax - xmin);
@@ -190,11 +190,11 @@ TrackHeed::NewTrack(
   if (!sensor->GetMedium(x0, y0, z0, medium)) {
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    No medium at initial position.\n";
-    return;
+    return false;
   } else if (!medium->IsIonisable()) {
     std::cerr << "TrackHeed:NewTrack:\n";
     std::cerr << "    Medium at initial position is not ionisable.\n";
-    return;
+    return false;
   }
 
   // Check if the medium has changed since the last call.
@@ -206,7 +206,7 @@ TrackHeed::NewTrack(
   // If medium, particle or bounding box have changed, 
   // update the cross-sections.
   if (isChanged) {
-    if (!Setup(medium)) return;
+    if (!Setup(medium)) return false;
     isChanged = false;
     mediumName    = medium->GetName();
     mediumDensity = medium->GetMassDensity();
@@ -292,8 +292,8 @@ TrackHeed::NewTrack(
   }
     
   particle = new HeedParticle(chamber, 
-                                p0, velocity, t0, 
-                                particleType);
+                              p0, velocity, t0, 
+                              particleType);
   // Transport the particle.
   particle->fly();
   hasActiveTrack = true;
@@ -301,6 +301,8 @@ TrackHeed::NewTrack(
 
   // Plot the new track.
   if (usePlotting) PlotNewTrack(x0, y0, z0);
+
+  return true;
 
 }
 

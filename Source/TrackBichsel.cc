@@ -22,7 +22,7 @@ TrackBichsel::TrackBichsel() :
   
 }
 
-void
+bool
 TrackBichsel::NewTrack(
             const double x0, const double y0, const double z0, const double t0,
             const double dx0, const double dy0, const double dz0) {
@@ -32,7 +32,7 @@ TrackBichsel::NewTrack(
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Sensor is not defined.\n";
     isInMedium = false;
-    return;
+    return false;
   }
 
   // If not yet done, load the cross-section table from file. 
@@ -40,7 +40,7 @@ TrackBichsel::NewTrack(
     if (!LoadCrossSectionTable(datafile)) {
       std::cerr << className << "::NewTrack:\n";
       std::cerr << "    Cross-section table could not be loaded.\n";
-      return;
+      return false;
     }
     isInitialised = true;
   }
@@ -51,7 +51,7 @@ TrackBichsel::NewTrack(
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    No medium at initial position.\n";
     isInMedium = false;
-    return;
+    return false;
   }
 
   // Check if the medium is silicon.
@@ -59,7 +59,7 @@ TrackBichsel::NewTrack(
     std::cerr << className << "::NewTrack:" << std::endl;
     std::cerr << "    Medium at initial position is not silicon.\n";
     isInMedium = false;
-    return;
+    return false;
   }
 
   // Check if primary ionisation has been enabled.
@@ -67,7 +67,7 @@ TrackBichsel::NewTrack(
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Medium at initial position is not ionisable.\n"; 
     isInMedium = false;
-    return;
+    return false;
   }
 
   isInMedium = true;
@@ -95,6 +95,8 @@ TrackBichsel::NewTrack(
     SelectCrossSectionTable();
     isChanged = false;
   }
+
+  return true;
 
 }
 

@@ -61,7 +61,7 @@ TrackSimple::GetStoppingPower() {
 
 }
 
-void
+bool
 TrackSimple::NewTrack(const double x0, const double y0, const double z0, 
                       const double t0,
                       const double dx0, const double dy0, const double dz0) {
@@ -71,7 +71,7 @@ TrackSimple::NewTrack(const double x0, const double y0, const double z0,
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    Sensor is not defined.\n";
     isReady = false;
-    return;
+    return false;
   }
 
   // Make sure we are inside a medium
@@ -80,7 +80,7 @@ TrackSimple::NewTrack(const double x0, const double y0, const double z0,
     std::cerr << className << "::NewTrack:\n";
     std::cerr << "    No medium at initial position.\n";
     isReady = false;
-    return;
+    return false;
   }
 
   isReady = true;
@@ -100,6 +100,7 @@ TrackSimple::NewTrack(const double x0, const double y0, const double z0,
   } else {
    dx = dx0 / d; dy = dy0 / d; dz = dz0 / d;
   }
+  return true;
 
 }
 

@@ -121,6 +121,44 @@ MediumMagboltz::SetMaxPhotonEnergy(const double e) {
   
 }
 
+void 
+MediumMagboltz::SetSplittingFunctionOpalBeaty() {
+
+  useOpalBeaty = true;
+  useGreenSawada = false;
+
+}
+
+void
+MediumMagboltz::SetSplittingFunctionGreenSawada() {
+
+  useOpalBeaty = false;
+  useGreenSawada = true;
+  if (isChanged) return;
+  
+  bool allset = true;
+  for (int i = 0; i < nComponents; ++i) {
+    if (!hasGreenSawada[i]) {
+      if (allset) {
+        std::cout << className << "::SetSplittingFunctionGreenSawada:\n";
+        allset = false;
+      }
+      std::cout << "    Fit parameters for " 
+                << gas[i] << " not available.\n";
+      std::cout << "    Opal-Beaty formula is used instead.\n";
+    }
+  }
+
+}
+
+void
+MediumMagboltz::SetSplittingFunctionFlat() {
+
+  useOpalBeaty = false;
+  useGreenSawada = false;
+
+}
+
 void
 MediumMagboltz::EnableDeexcitation() {
 
@@ -610,11 +648,15 @@ MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
       esec = w * tan(RndmUniform() * atan(0.5 * (e - loss) / w));
       // Rescaling (SST)
       // esec = w * pow(esec / w, 0.9524);
-    } else {
-      // Green-Sawada parameterisation for CH4
-      const double w = 7.06 * e / (e - 12.5);
-      const double e0 = 3.45 - 1000. / (e + 2 * 13.); 
-      // esec = RndmUniform() * (e - loss);
+    } else if (useGreenSawada) {
+      const double w = gsGreenSawada[igas] * e / (e + gbGreenSawada[igas]);
+      const double esec0 = tsGreenSawada[igas] - 
+                           taGreenSawada[igas] / (e + tbGreenSawada[igas]); 
+      r = RndmUniform();
+      esec = esec0 + w * tan((r - 1.) * atan(esec0 / w) + 
+                             r * atan((0.5 * (e - loss) - esec0) / w));  
+    } else { 
+      esec = RndmUniform() * (e - loss);
     }
     if (esec <= 0) esec = Small;
     loss += esec;
@@ -1356,13 +1398,23 @@ MediumMagboltz::Mixer() {
       scatCut[i][j] = 1.;
     }
   }
-  for (int i = nMaxLevels; i--;) iDeexcitation[i] = -1;
   nDeexcitations = 0;
   deexcitations.clear();
+  for (int i = nMaxLevels; i--;) {
+    iDeexcitation[i] = -1;
+    wOpalBeaty[i] = 1.;
+  }
 
-  for (int i = nMaxGases; i--;) ionPot[i] = -1.;
   minIonPot = -1.;
-  
+  for (int i = nMaxGases; i--;) {
+    ionPot[i] = -1.;
+    gsGreenSawada[i] = 1.;
+    gbGreenSawada[i] = 0.;
+    tsGreenSawada[i] = 0.;
+    taGreenSawada[i] = 0.;
+    tbGreenSawada[i] = 0.;
+    hasGreenSawada[i] = false;
+  }
   // Cross-sections
   // 0: total, 1: elastic, 
   // 2: ionisation, 3: attachment, 
@@ -1468,6 +1520,8 @@ MediumMagboltz::Mixer() {
       scatModel[np] = kEl[2];
       energyLoss[np] = e[2] / r;
       wOpalBeaty[np] = w;
+      gsGreenSawada[iGas] = w;
+      tbGreenSawada[iGas] = 2 * e[2];
       ionPot[iGas] = e[2];
       for (int j = 0; j < 30; ++j) {
         description[np][j] = scrpt[2][j];
@@ -1673,12 +1727,79 @@ MediumMagboltz::Mixer() {
       rPenning[i] = rPenningGas[iGas];
       lambdaPenning[i] = lambdaPenningGas[iGas];
     }
-  }   
+  }
+
+  // Set the Green-Sawada splitting function parameters.
+  SetupGreenSawada(); 
   
   return true;
 
 }
 
+void
+MediumMagboltz::SetupGreenSawada() {
+
+  for (int i = nComponents; i--;) {
+    taGreenSawada[i] = 1000.;
+    hasGreenSawada[i] = true;
+    if (gas[i] == "Ne") {
+      tsGreenSawada[i] = -6.49;
+      gsGreenSawada[i] = 24.3;
+      gbGreenSawada[i] = 21.6;
+    } else if (gas[i] == "Ar") {
+      tsGreenSawada[i] =  6.87;
+      gsGreenSawada[i] =  6.92;
+      gbGreenSawada[i] =  7.85;
+    } else if (gas[i] == "Kr") {
+      tsGreenSawada[i] =  3.90;
+      gsGreenSawada[i] =  7.95;
+      gbGreenSawada[i] = 13.5;
+    } else if (gas[i] == "Xe") {
+      tsGreenSawada[i] =  3.81;
+      gsGreenSawada[i] =  7.93;
+      gbGreenSawada[i] = 11.5;
+    } else if (gas[i] == "H2") {
+      tsGreenSawada[i] =  1.87;
+      gsGreenSawada[i] =  7.07;
+      gbGreenSawada[i] =  7.7;
+    } else if (gas[i] == "CH4") {
+      tsGreenSawada[i] =  3.45;
+      gsGreenSawada[i] =  7.06;
+      gbGreenSawada[i] = 12.5;
+    } else if (gas[i] == "H20") {
+      tsGreenSawada[i] =  1.28;
+      gsGreenSawada[i] = 12.8;
+      gbGreenSawada[i] = 12.6;
+    } else if (gas[i] == "CO") {
+      tsGreenSawada[i] =  2.03;
+      gsGreenSawada[i] = 13.3;
+      gbGreenSawada[i] = 14.0;
+    } else if (gas[i] == "C2H2") {
+      tsGreenSawada[i] =  1.37;
+      gsGreenSawada[i] =  9.28;
+      gbGreenSawada[i] =  5.8;
+    } else if (gas[i] == "NO") {
+      tsGreenSawada[i] = -4.30;
+      gsGreenSawada[i] = 10.4;
+      gbGreenSawada[i] =  9.5;
+    } else if (gas[i] == "CO2") {
+      tsGreenSawada[i] = -2.46;
+      gsGreenSawada[i] = 12.3;
+      gbGreenSawada[i] = 13.8;
+    } else {
+      taGreenSawada[i] = 0.;
+      hasGreenSawada[i] = false;
+      if (useGreenSawada || debug) {
+        std::cout << className << "::SetupGreenSawada:\n";
+        std::cout << "    Fit parameters for " 
+                  << gas[i] << " not available.\n";
+        std::cout << "    Opal-Beaty formula is used instead.\n";
+      } 
+    }
+  }
+    
+} 
+    
 void 
 MediumMagboltz::ComputeAngularCut(double parIn, double& cut, double &parOut) {
 
