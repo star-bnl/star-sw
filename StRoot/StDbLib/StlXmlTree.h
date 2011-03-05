@@ -234,15 +234,14 @@
 #include <map>
 #include <string>
 
-namespace stl_xml_tree
-{
-const std::string sep = ">"; // will be parsed out of XML or cause an error -- safe to use here
-enum 
-  {
-    NO_ERROR,
-    NO_XML_BASE, // no file to be parsed
-    BAD_XML   // parsing error, the structure may be incomplete
-  };
+namespace stl_xml_tree {
+  const std::string sep = ">"; // will be parsed out of XML or cause an error -- safe to use here
+  enum 
+    {
+      NO_ERROR,
+      NO_XML_BASE, // no file to be parsed
+      BAD_XML      // parsing error, the structure may be incomplete
+    };
 }
 
 class StlXmlTree
