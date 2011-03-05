@@ -24,8 +24,7 @@
 #ifdef __ROOT__
 #include "Rtypes.h"
 #endif
-namespace st_db_service_broker
-{
+namespace st_db_service_broker {
   const std::string MyScatalogVersion = "version=1.0.1;"; 
   const short NightEnds = 8;
   const short NightBegins = 22;
@@ -43,18 +42,17 @@ namespace st_db_service_broker
     };
 }
 
-namespace lb_error
-{
-enum
-  {
-    NO_ERROR,           // 0
-    NO_LPD_ENV_VAR,     // 1
-    NO_GPD_ENV_VAR,     // 2
-    NO_WRITE_PERMISSION,// 3
-    NO_LPD_DIR,         // 4 
-    AFS_ERROR,          // 5
-    WWW_ERROR           // 6
-  };
+namespace lb_error {
+  enum
+    {
+      NO_ERROR,           // 0
+      NO_LPD_ENV_VAR,     // 1
+      NO_GPD_ENV_VAR,     // 2
+      NO_WRITE_PERMISSION,// 3
+      NO_LPD_DIR,         // 4 
+      AFS_ERROR,          // 5
+      WWW_ERROR           // 6
+    };
 }
 
 
