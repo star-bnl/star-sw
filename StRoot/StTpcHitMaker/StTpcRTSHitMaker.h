@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.h,v 1.7 2010/08/30 18:02:02 genevb Exp $
+ * $Id: StTpcRTSHitMaker.h,v 1.8 2011/03/08 18:20:44 genevb Exp $
  * StTpcRTSHitMaker - class to runonline (RTS) cluster maker over StTpcRawData
  * $Log: StTpcRTSHitMaker.h,v $
+ * Revision 1.8  2011/03/08 18:20:44  genevb
+ * Limit on number of hits starting at time bin 0
+ *
  * Revision 1.7  2010/08/30 18:02:02  genevb
  * Introduce hit maxima for tracking
  *
@@ -55,6 +58,8 @@ class StTpcRTSHitMaker : public StMaker {
   daq_tpx *fTpx; //!
   Double_t fminCharge; // ! minimum cluster charge in ADC
   Int_t    maxHits[24];
+  Int_t    maxBin0Hits;
+  Int_t    bin0Hits;
   // cvs
   virtual const char *GetCVS() const    {
     static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;

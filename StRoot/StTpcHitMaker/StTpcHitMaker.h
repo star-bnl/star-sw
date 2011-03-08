@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.11 2010/08/30 18:02:02 genevb Exp $
+ * $Id: StTpcHitMaker.h,v 1.12 2011/03/08 18:20:44 genevb Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.12  2011/03/08 18:20:44  genevb
+ * Limit on number of hits starting at time bin 0
+ *
  * Revision 1.11  2010/08/30 18:02:02  genevb
  * Introduce hit maxima for tracking
  *
@@ -96,6 +99,8 @@ class StTpcHitMaker : public StRTSBaseMaker {
   UShort_t IDTs[512];
   UShort_t fId; // current cluster Id
   Int_t    maxHits[24];
+  Int_t    maxBin0Hits;
+  Int_t    bin0Hits;
  protected:
   StTpcHit *CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t row);
   StTpcHit *CreateTpcHit(const daq_cld  &cluster, Int_t sector, Int_t row);
