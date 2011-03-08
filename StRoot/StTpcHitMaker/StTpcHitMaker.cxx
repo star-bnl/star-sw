@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.36 2011/01/21 18:35:25 fisyak Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.37 2011/03/08 18:20:44 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.37  2011/03/08 18:20:44  genevb
+ * Limit on number of hits starting at time bin 0
+ *
  * Revision 1.36  2011/01/21 18:35:25  fisyak
  * change flag type from UChar_t to UShort_t
  *
@@ -229,26 +232,38 @@ Int_t StTpcHitMaker::Init() {
   SetAttr("minRow",1);
   SetAttr("maxRow",45);
   memset(maxHits,0,sizeof(maxHits));
+  maxBin0Hits = 0;
+  bin0Hits = 0;
   return kStOK ;
 }
 //_____________________________________________________________
 Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
+  // Prepare scaled hit maxima
+
+  // No hit maxima if these DB params are 0
   Int_t maxHitsPerSector = St_tpcMaxHitsC::instance()->maxSectorHits();
-  // No hit maximum if maxHitsPerSector == 0
+  Int_t maxBinZeroHits = St_tpcMaxHitsC::instance()->maxBinZeroHits();
+  Int_t livePads = 0;
+  Int_t totalPads = 0;
+  Float_t liveFrac = 1;
   for(Int_t sector=1;sector<=24;sector++) {
-    if (maxHitsPerSector > 0) {
-      Int_t livePads = 0;
-      Int_t totalPads = 0;
+    Int_t liveSecPads = 0;
+    Int_t totalSecPads = 0;
+    if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
       for(Int_t row=1;row<=45;row++) {
         Int_t numPadsAtRow = StTpcDigitalSector::numberOfPadsAtRow(row);
-        totalPads += numPadsAtRow;
+        totalSecPads += numPadsAtRow;
         if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
             StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
             St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
-          livePads += numPadsAtRow;
+          liveSecPads += numPadsAtRow;
       }
-      Float_t liveFrac = TMath::Max((Float_t) 0.1,
-                         ((Float_t) livePads) / ((Float_t) totalPads));
+      livePads += liveSecPads;
+      totalPads += totalSecPads;
+    }
+    if (maxHitsPerSector > 0) {
+      liveFrac = TMath::Max((Float_t) 0.1,
+                 ((Float_t) liveSecPads) / ((Float_t) totalSecPads));
       maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
       if (Debug()) {LOG_INFO << "maxHits in sector " << sector
                              << " = " << maxHits[sector-1] << endm;}
@@ -256,6 +271,15 @@ Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
       maxHits[sector-1] = 0;
       if (Debug()) {LOG_INFO << "No maxHits in sector " << sector << endm;}
     }
+  }
+  if (maxBinZeroHits > 0) {
+    liveFrac = TMath::Max((Float_t) 0.1,
+               ((Float_t) livePads) / ((Float_t) totalPads));
+    maxBin0Hits = (Int_t) (liveFrac * maxBinZeroHits);
+    if (Debug()) {LOG_INFO << "maxBinZeroHits " << maxBin0Hits << endm;}
+  } else {
+    maxBin0Hits = 0;
+    if (Debug()) {LOG_INFO << "No maxBinZeroHits" << endm;}
   }
   return kStOK;
 }
@@ -266,6 +290,8 @@ Int_t StTpcHitMaker::Make() {
   Int_t minRow    = IAttr("minRow");
   Int_t maxRow    = IAttr("maxRow");
   
+  bin0Hits = 0;
+
   for (Int_t sector = minSector; sector <= maxSector; sector++) {
     fId = 0;
     // invoke tpcReader to fill the TPC DAQ sector structure
@@ -329,6 +355,11 @@ Int_t StTpcHitMaker::Make() {
                 << sector << "). Skipping event." << endm;
       return kStSkip;
     }
+  }
+  if (maxBin0Hits && bin0Hits > maxBin0Hits) {
+      LOG_ERROR << "Too many hits (" << bin0Hits
+                << ") starting at time bin 0. Skipping event." << endm;
+      return kStSkip;
   }
   StEvent *pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
   if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
@@ -443,7 +474,9 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
             , pad
             , time );
   hit->setFlag(cluster.flags);
+  if (hit->minTmbk() == 0) bin0Hits++;
 //  LOG_INFO << p << " sector " << sector << " row " << row << endm;
+
   return hit;
 }
 //_____________________________________________________________
@@ -493,6 +526,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
             , pad
             , time );
   hit->setFlag(cluster.flags);
+  if (hit->minTmbk() == 0) bin0Hits++;
 //  LOG_INFO << p << " sector " << sector << " row " << row << endm;
   return hit;
 }
