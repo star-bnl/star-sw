@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QA_outhistfile.C,v 1.15 2011/01/19 20:03:03 fisyak Exp $ 
+// $Id: bfcread_event_QA_outhistfile.C,v 1.16 2011/03/09 22:17:10 genevb Exp $ 
 // $Log: bfcread_event_QA_outhistfile.C,v $
+// Revision 1.16  2011/03/09 22:17:10  genevb
+// Update dependence on StEEmcUtil
+//
 // Revision 1.15  2011/01/19 20:03:03  fisyak
 // switch order DbUtil and TpcDb shared libraries loading
 //
@@ -119,6 +122,7 @@ void bfcread_event_QA_outhistfile(
   gSystem->Load("St_db_Maker");
   gSystem->Load("StEvent");
   gSystem->Load("StEmcUtil");
+  gSystem->Load("StEEmcUtil");
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");
   gSystem->Load("St_QA_Maker"); 
