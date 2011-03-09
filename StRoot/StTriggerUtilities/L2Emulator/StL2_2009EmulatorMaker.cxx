@@ -17,6 +17,9 @@
 #include "L2algoUtil/L2etowCalAlgo09.h"
 #include "L2jetAlgo/L2jetAlgo2009.h"
 #include "L2pedAlgo/L2pedAlgo09.h"
+#include "L2gammaAlgo/L2bemcGamma2009.h"
+#include "L2gammaAlgo/L2eemcGamma2009.h"
+#include "StDaqLib/TRG/trgStructures2009.h" // L2 results offsets
 #include "StL2_2009EmulatorMaker.h"
 
 ClassImp(StL2_2009EmulatorMaker)
@@ -41,10 +44,12 @@ StL2_2009EmulatorMaker::InitRun(int runNo){
   LOG_INFO << Form("::setupL2Algos2009(), dbDate=%d  ", mYearMonthDay)<<endm;
 
   //setup every algo one by one, params may be time dependent
-  mL2algo.push_back(new L2btowCalAlgo09("btowCal",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,0));
-  mL2algo.push_back(new L2etowCalAlgo09("etowCal",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,0));
-  mL2algo.push_back(new L2pedAlgo09("l2ped",mL2EmcDb,mL2EmcDb->logPath,2));
-  mL2algo.push_back(new L2jetAlgo2009("jet",mL2EmcDb,mL2EmcDb->logPath,9));
+  mL2algo.push_back(new L2btowCalAlgo09("btowCal",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_BTOW_CAL));
+  mL2algo.push_back(new L2etowCalAlgo09("etowCal",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_ETOW_CAL));
+  mL2algo.push_back(new L2pedAlgo09("l2ped",mL2EmcDb,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_EMC_PED));
+  mL2algo.push_back(new L2jetAlgo2009("jet",mL2EmcDb,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_DIJET));
+  mL2algo.push_back(new L2bemcGamma2009("bemcGamma",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_BGAMMA));
+  mL2algo.push_back(new L2eemcGamma2009("eemcGamma",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_EGAMMA));
 
   initRun2(runNo);
 
