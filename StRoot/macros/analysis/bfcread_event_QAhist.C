@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QAhist.C,v 1.18 2011/01/19 20:03:03 fisyak Exp $
+// $Id: bfcread_event_QAhist.C,v 1.19 2011/03/09 22:17:10 genevb Exp $
 // $Log: bfcread_event_QAhist.C,v $
+// Revision 1.19  2011/03/09 22:17:10  genevb
+// Update dependence on StEEmcUtil
+//
 // Revision 1.18  2011/01/19 20:03:03  fisyak
 // switch order DbUtil and TpcDb shared libraries loading
 //
@@ -141,6 +144,7 @@ void bfcread_event_QAhist(
   gSystem->Load("St_db_Maker");
   gSystem->Load("StEvent");
   gSystem->Load("StEmcUtil");
+  gSystem->Load("StEEmcUtil");
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");
   gSystem->Load("StarMagField");
