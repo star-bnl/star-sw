@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowSumAll.C,v 1.4 2010/09/30 19:28:21 posk Exp $
+// $Id: doFlowSumAll.C,v 1.5 2011/03/10 18:56:34 posk Exp $
 //
 // Makes root.files.<cenNo> files containing lists of flow.hist.root files
 // in all subdirectories of outDir, which is a link in this directory.
@@ -31,7 +31,7 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t 
   const  int nSels = 2;
   const  int nHars = 4; // 4
   bool LYZ    = kFALSE;
-  bool reCent = kTRUE;
+  bool reCent = kFALSE;
 
   char   rootFileName[80];
   char   logFileName[80];
@@ -426,6 +426,9 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowSumAll.C,v $
+// Revision 1.5  2011/03/10 18:56:34  posk
+// Added histogram for laboratory azimuthal distribution of particles.
+//
 // Revision 1.4  2010/09/30 19:28:21  posk
 // Instead of reversing the weight for negative pseudrapidity for odd harmonics,
 // it is now done only for the first harmonic.

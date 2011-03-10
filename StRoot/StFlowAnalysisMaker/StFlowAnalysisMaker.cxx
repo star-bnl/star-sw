@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.101 2010/09/30 19:28:09 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.102 2011/03/10 18:56:20 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -737,6 +737,17 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistPsi->SetYTitle("Counts");
       delete histTitle;
       
+      // phi lab
+      histTitle = new TString("Flow_PhiLab_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histFullHar[j].mHistPhiLab = new TH1F(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax / order);
+      histFull[k].histFullHar[j].mHistPhiLab->SetXTitle("Particle Lab Angle (rad)");
+      histFull[k].histFullHar[j].mHistPhiLab->SetYTitle("Counts");
+      delete histTitle;
+      
       // Recenter
       histTitle = new TString("FlowReCentX_Sel");
       *histTitle += k+1;
@@ -941,7 +952,6 @@ Int_t StFlowAnalysisMaker::Init() {
 
     // for two harmonics
     for (int j = 0; j < 2; j++) {
-      //float order  = (float)(j+1);
 
       // Phi lab
       // Tpc (FarEast)
@@ -1256,7 +1266,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.101 2010/09/30 19:28:09 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.102 2011/03/10 18:56:20 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1927,10 +1937,11 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  }
 	  if (etaPtNoCut) histFull[k].mHist_vObs->Fill(order, vFlip,mFlowWeight);
 	  
-	  // Correlation of Phi of all particles with Psi
+	  // PhiLab and Correlation of Phi of all particles with Psi
 	  if (mPsi[k][j]) {
+	    histFull[k].histFullHar[j].mHistPhiLab->Fill(phi);
+	    histFull[k].histFullHar[j].mHistPhiLab->Fill(phi);
 	    float phi_i = phi;
-	    //if (eta < 0 && oddHar) {
 	    if (eta < 0 && j==0) {
 	      phi_i += pi; // backward particle and 1st harmonic
 	      if (phi_i > twopi) phi_i -= twopi;
@@ -2474,6 +2485,9 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.102  2011/03/10 18:56:20  posk
+// Added histogram for laboratory azimuthal distribution of particles.
+//
 // Revision 1.101  2010/09/30 19:28:09  posk
 // Instead of reversing the weight for negative pseudrapidity for odd harmonics,
 // it is now done only for the first harmonic.

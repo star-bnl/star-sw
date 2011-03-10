@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.68 2010/09/30 19:28:23 posk Exp $
+// $Id: plot.C,v 1.69 2011/03/10 18:56:39 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -22,6 +22,7 @@
 #include <iostream.h>
 #include <iomanip.h>
 
+
 const    Int_t nHars    = 4; // 4 
 const    Int_t nSels    = 2;
 const    Int_t nSubs    = 2;
@@ -38,7 +39,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   gInterpreter->ProcessLine(".O0");
 
   Bool_t includeFtpc = kTRUE;
-  Bool_t reCent = kTRUE;
+  Bool_t reCent = kFALSE;
 
   bool multiGraph  = kFALSE;                            // set flags
   bool singleGraph = kFALSE;
@@ -130,6 +131,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_Yield.Pt_Sel",
     "Flow_Psi_Subs",
     "Flow_Psi_Sel",
+    "Flow_PhiLab_Sel",
     "Flow_Psi_Diff_Sel",
     "Flow_Psi_Sub_Corr_Sel",
     "Flow_Psi_Sub_Corr_Diff_Sel",
@@ -207,6 +209,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_Yield.Pt_Sel",
     "Flow_Psi_Subs",
     "Flow_Psi_Sel",
+    "Flow_PhiLab_Sel",
     "Flow_Psi_Diff_Sel",
     "Flow_Psi_Sub_Corr_Sel",
     "Flow_Psi_Sub_Corr_Diff_Sel",
@@ -285,6 +288,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_Yield.Pt_Sel",
     "Flow_Psi_Subs",
     "Flow_Psi_Sel",
+    "Flow_PhiLab_Sel",
     "Flow_Psi_Diff_Sel",
     "Flow_Psi_Sub_Corr_Sel",
     "Flow_Psi_Sub_Corr_Diff_Sel",
@@ -634,7 +638,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  funcCos1->SetParNames("k=1", "har");
 	  funcCos1->SetParameters(0, order+1);              // initial values
 	  funcCos1->SetParLimits(1, 1, 1);                  // har is fixed
-	  hist->Fit("funcCos1");
+	  //hist->Fit("funcCos1");
 	  delete funcCos1;
 	} else if (strstr(shortName[pageNumber],"Sub")!=0) { 
 	  TF1* funcSubCorr = new TF1("SubCorr", SubCorr, 0., twopi/order, 2);
@@ -650,7 +654,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  funcCos3->SetParNames("n=har", "n=har+1", "n=har+2", "har");
 	  funcCos3->SetParameters(0, 0, 0, order);          // initial values
 	  funcCos3->SetParLimits(3, 1, 1);                  // har is fixed
-	  hist->Fit("funcCos3");
+	  //hist->Fit("funcCos3");
 	  delete funcCos3;
 	}
 	if (strstr(shortName[pageNumber],"Phi")!=0)
@@ -699,7 +703,22 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	hist->Fit("qDist", "Q+");
 	fit_q->Draw("same");
  	fit_q->ReleaseParameter(0);               // v is unfixed
-      } else if (strstr(shortName[pageNumber],"Phi")!=0) {  // Phi distibutions
+      } else if (strstr(shortName[pageNumber],"PhiLab")!=0) {  // Phi lab distibution
+	hist->Draw("E1");
+	float norm = (hist->Integral()) ? ((float)(hist->GetNbinsX()) / hist->Integral()) : 1.; 
+	cout << "  Normalized by: " << norm << endl;
+	hist->Scale(norm);                           // normalize height to one
+        hist->SetMinimum(0.);
+	TF1* funcCosSin = new TF1("funcCosSin",
+	     "1.+[0]*2./100.*cos([2]*x)+[1]*2./100.*sin([2]*x)", 0., twopi/order);
+	funcCosSin->SetParNames("100*cos", "100*sin", "har");
+	funcCosSin->SetParameters(0, 0, order); // initial values
+	funcCosSin->SetParLimits(2, 1, 1); // har is fixed
+	hist->Fit("funcCosSin");
+	delete funcCosSin;
+	gStyle->SetOptFit(111);
+	hist->Scale(100.);
+      } else if (strstr(shortName[pageNumber],"Phi")!=0) {  // other Phi distibutions
        	//hist->SetMinimum(0.9*(hist->GetMinimum()));
        	hist->SetMinimum(0.);
 	gStyle->SetOptStat(10);
@@ -711,13 +730,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	cout << "  Normalized by: " << norm << endl;
 	hist->Scale(norm);                           // normalize height to one
       	hist->SetMinimum(0.);
-// 	if (order == 1)	TF1* funcCosSin = new TF1("funcCosSin",
-// 				"1.+[0]*2/100*cos(1.*x)+[1]*2/100*sin(1.*x)", 0., twopi/1.);
-// 	else if (order == 2)	TF1* funcCosSin = new TF1("funcCosSin",
-// 				"1.+[0]*2/100*cos(2.*x)+[1]*2/100*sin(2.*x)", 0., twopi/2.);
 	TF1* funcCosSin = new TF1("funcCosSin",
 				"1.+[0]*2./100.*cos([2]*x)+[1]*2./100.*sin([2]*x)", 0., twopi/order);
-	funcCosSin->SetParNames("cos", "sin", "har");
+	funcCosSin->SetParNames("100*cos", "100*sin", "har");
 	funcCosSin->SetParameters(0, 0, order); // initial values
 	funcCosSin->SetParLimits(2, 1, 1); // har is fixed
 	hist->Fit("funcCosSin");
@@ -825,18 +840,18 @@ TCanvas* plotResolution() {
       if (strstr(resName[resNumber],"_v")!=0) {
 	hist->SetMaximum(10.);
 	hist->SetMinimum(-5.);
-	for (int n=1; n < nHars+1; n++) {
-	  v   = hist->GetBinContent(n);                       // output v values
-	  err = hist->GetBinError(n);
-	  cout << " v" << n << "= " << setprecision(3) << v << " +/- " << err << endl;
-	  if (TMath::IsNaN(v)) {
-	    hist->SetBinContent(n, 0.);
-	    hist->SetBinError(n, 0.);
-	  }
-	}
       } else {
 	hist->SetMaximum(1.1);
 	hist->SetMinimum(0.);
+      }
+      for (int n=1; n < nHars+1; n++) {
+	v   = hist->GetBinContent(n);                       // output v values
+	err = hist->GetBinError(n);
+	cout << " " << n << ": " << setprecision(3) << v << " +/- " << err << endl;
+	if (TMath::IsNaN(v)) {
+	  hist->SetBinContent(n, 0.);
+	  hist->SetBinError(n, 0.);
+	}
       }
       hist->Draw();
       lineZeroHar->Draw();
@@ -893,6 +908,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.69  2011/03/10 18:56:39  posk
+// Added histogram for laboratory azimuthal distribution of particles.
+//
 // Revision 1.68  2010/09/30 19:28:23  posk
 // Instead of reversing the weight for negative pseudrapidity for odd harmonics,
 // it is now done only for the first harmonic.

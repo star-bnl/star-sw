@@ -24,22 +24,17 @@ use File::Basename;
 use File::Copy;
 use Getopt::Std;
 
-#my $events = 100000; # max for d, 3 hrs and overnight
-#my $events = 300000; # max for in72, 8 hrs and 19 hrs
-#my $events = 100000; # max for in73, 3 hrs and 7 hrs
-my $events = 1000;
-my $queTime = "30:00:00";
-#my $queTime = "24:00:00";
-#my $queTime = "01:00:00";
-my $reCent = "kTRUE"; # must be the same as in doFlowEvents.C
+#my $events = 1000;
+my $events = 100000; # in73, 1st pass: 9 hrs, 2nd pass: 9 hrs
+my $reCent = "kFALSE"; # must be the same as in doFlowEvents.C
 
 # For centralities 1 to 9
-my $nJobs = 9;
-my $firstJob = 1;
+#my $nJobs = 9;
+#my $firstJob = 1;
 
 # For only centrality 0, baseRunNo must end in zero
-#my $nJobs = 1;
-#my $firstJob = 0;
+my $nJobs = 1;
+my $firstJob = 0;
 
 # options
 # -t :test, no submission
@@ -58,8 +53,8 @@ my $outPicoDir = shift || $defaultOut;
 -e $outPicoDir or die "$outPicoDir :$!\n";
 
 ###### User defined:
-#my $homeDir = "~posk/root"; # directory containing the links
-my $homeDir = "~/v3"; # directory containing the links
+my $homeDir = "~posk/root"; # directory containing the links
+#my $homeDir = "~/v3"; # directory containing the links
 my $macDir = "$homeDir/mac"; # directory containing the macro
 my $rootDir = "$homeDir"; # directory containing the library
 print "homeDir = $homeDir\n";
@@ -93,7 +88,6 @@ if ($ENV{HOST} =~ /pdsf/) {
 print "host = $ENV{HOST}\n";
 print "resource = $resource\n";
 print "star ver.= $starVer\n";
-print "max time = $queTime\n";
 print "events = $events\n";
 print "reCent = $reCent\n";
 
@@ -104,8 +98,8 @@ my $firstPass;
 my $firstPassDir;
 my $runNo;
 my $workDir;
-#my $exec = "qsub -V -m e"; # for mail at the end
-my $exec = "qsub -V"; # for no mail
+my $exec = "qsub -V -m e"; # for mail at the end
+#my $exec = "qsub -V"; # for no mail
 my $subDirNo;
 
 # subdirectory loop
@@ -151,8 +145,8 @@ foreach my $subDir (@subDirs) {
 #	}
       };
       # make links
-      -e "$workDir/.sl44_gcc346" or do {
-	$command = "ln -s $rootDir/.sl44_gcc346 $workDir/.sl44_gcc346";
+      -e "$workDir/.sl53_gcc432" or do {
+	$command = "ln -s $rootDir/.sl53_gcc432 $workDir/.sl53_gcc432";
 	print $command,"\n";
 	`$command`;
       };
@@ -256,8 +250,8 @@ EOF
       # execute the shell script, option N should have only 10 characters
       close FH;
       chmod 0755, $scriptName;
-      $command = "$exec -hard $resource -l h_cpu=$queTime -N $inDir$subDirNo-$runNo $scriptName";
-      #$command = "$exec -hard $resource -l h_cpu=$queTime -N dir$subDirNo-$runNo $scriptName";
+      $command = "$exec -hard $resource -N $inDir$subDirNo-$runNo $scriptName";
+      #$command = "$exec -hard $resource -N dir$subDirNo-$runNo $scriptName";
       if ($secondPassDone eq "kFALSE") {      # skip if 2nd pass completed
 	if ($firstPass eq "kTRUE") { print "firstPass\n"; }
 	print "##### ",$command,"\n";
@@ -271,6 +265,9 @@ EOF
 #///////////////////////////////////////////////////////////////////////////////
 #//
 #// $Log: doFlowSubmit.pl,v $
+#// Revision 1.4  2011/03/10 18:56:32  posk
+#// Added histogram for laboratory azimuthal distribution of particles.
+#//
 #// Revision 1.3  2010/09/30 19:28:17  posk
 #// Instead of reversing the weight for negative pseudrapidity for odd harmonics,
 #// it is now done only for the first harmonic.

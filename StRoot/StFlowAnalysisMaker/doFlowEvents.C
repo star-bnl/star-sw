@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.5 2010/09/30 19:28:15 posk Exp $
+// $Id: doFlowEvents.C,v 1.6 2011/03/10 18:56:28 posk Exp $
 // Put a link to this at /StRoot/macros/analysis/doFlowEvents.C
 //
 // Description: 
@@ -84,7 +84,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t firstPass)
 
   Int_t maxTheta = 5;  // LYZ
   Int_t nSels    = 2;
-  Bool_t reCent  = kTRUE;
+  Bool_t reCent  = kFALSE;
 
   if (firstPass) {
     cout << " doFlowEvents - firstPass makers = kTRUE" << endl;
@@ -630,7 +630,7 @@ void doFlowEvents(Int_t nEvents, Bool_t firstPass) {
 
   // run 7 P07id
   // muDST files
-//   Char_t* filePath="/eliza12/starprod/reco/2007ProductionMinBias/FullField/P07id/2007/131/8131027/";
+//   Char_t* filePath="/eliza3/starprod/reco/2007ProductionMinBias/FullField/P07id/2007/131/8131027/";
 //   //Char_t* filePath="./outDir/muDST/";
 //   if (nEvents < 450) {
 //     //Char_t* fileExt="st_physics_8102049_raw_1010001.MuDst.root"; // 45 events
@@ -654,6 +654,9 @@ void doFlowEvents(Int_t nEvents, Bool_t firstPass) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.6  2011/03/10 18:56:28  posk
+// Added histogram for laboratory azimuthal distribution of particles.
+//
 // Revision 1.5  2010/09/30 19:28:15  posk
 // Instead of reversing the weight for negative pseudrapidity for odd harmonics,
 // it is now done only for the first harmonic.
