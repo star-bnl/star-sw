@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.50 2010/09/30 19:28:12 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.51 2011/03/10 18:56:25 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -57,7 +57,7 @@ public:
   void     SetEtaRange_for_vPt(Float_t lo, Float_t hi);
   void     SetV1Ep1Ep2(Bool_t v1Ep1Ep2 = kTRUE);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.50 2010/09/30 19:28:12 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.51 2011/03/10 18:56:25 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -175,6 +175,7 @@ private:
   // for each harmonic and each selection
   struct histFullHars {
     TH1F*       mHistPhiCorr;
+    TH1F*       mHistPhiLab;
     TH1F*       mHistPsiSubCorr;
     TH1F*       mHistPsiSubCorrDiff;
     TH1F*       mHistPsi;
@@ -255,6 +256,9 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.51  2011/03/10 18:56:25  posk
+// Added histogram for laboratory azimuthal distribution of particles.
+//
 // Revision 1.50  2010/09/30 19:28:12  posk
 // Instead of reversing the weight for negative pseudrapidity for odd harmonics,
 // it is now done only for the first harmonic.
