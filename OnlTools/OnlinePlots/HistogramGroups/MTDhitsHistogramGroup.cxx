@@ -46,57 +46,34 @@ MTDhitsHistogramGroup::MTDhitsHistogramGroup(const char* group, const char* subG
 : HistogramGroup(group,subGroup,trigger,detector) {
 	
 	char tmpchr[200];
-	sprintf(tmpchr,"MTD26E_HiZ_LE_hitmap");
+	sprintf(tmpchr,"MTD26E_EastEnd_hitmap");
 	MTD26E_hitmap[0][0]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
-	MTD26E_hitmap[0][0]->SetXTitle("Strip #");
-	sprintf(tmpchr,"MTD26E_HiZ_TE_hitmap");
 	MTD26E_hitmap[0][1]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
-	MTD26E_hitmap[0][1]->SetXTitle("Strip #");
-	sprintf(tmpchr,"MTD26E_LoZ_LE_hitmap");
+	sprintf(tmpchr,"MTD26E_WestEnd_hitmap");
 	MTD26E_hitmap[1][0]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
-	MTD26E_hitmap[1][0]->SetXTitle("Strip #");
-	sprintf(tmpchr,"MTD26E_LoZ_TE_hitmap");
 	MTD26E_hitmap[1][1]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
-	MTD26E_hitmap[1][1]->SetXTitle("Strip #");
 	
-	sprintf(tmpchr,"MTD26C_HiZ_LE_hitmap");
+	sprintf(tmpchr,"MTD26C_EastEnd_hitmap");
 	MTD26C_hitmap[0][0]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
-	MTD26C_hitmap[0][0]->SetXTitle("Strip #");
-	sprintf(tmpchr,"MTD26C_HiZ_TE_hitmap");
 	MTD26C_hitmap[0][1]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
-	MTD26C_hitmap[0][1]->SetXTitle("Strip #");
-	sprintf(tmpchr,"MTD26C_LoZ_LE_hitmap");
+	sprintf(tmpchr,"MTD26C_WestEnd_hitmap");
 	MTD26C_hitmap[1][0]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
-	MTD26C_hitmap[1][0]->SetXTitle("Strip #");
-	sprintf(tmpchr,"MTD26C_LoZ_TE_hitmap");
 	MTD26C_hitmap[1][1]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
-	MTD26C_hitmap[1][1]->SetXTitle("Strip #");
 	
-	sprintf(tmpchr,"MTD26W_HiZ_LE_hitmap");
+	//the 3rd tray is rotated: HiZ - WestEnd
+	sprintf(tmpchr,"MTD26W_WestEnd_hitmap");
 	MTD26W_hitmap[0][0]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
-	MTD26W_hitmap[0][0]->SetXTitle("Strip #");
-	sprintf(tmpchr,"MTD26W_HiZ_TE_hitmap");
 	MTD26W_hitmap[0][1]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
-	MTD26W_hitmap[0][1]->SetXTitle("Strip #");
-	sprintf(tmpchr,"MTD26W_LoZ_LE_hitmap");
+	sprintf(tmpchr,"MTD26W_EastEnd_hitmap");
 	MTD26W_hitmap[1][0]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
-	MTD26W_hitmap[1][0]->SetXTitle("Strip #");
-	sprintf(tmpchr,"MTD26W_LoZ_TE_hitmap");
 	MTD26W_hitmap[1][1]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
-	MTD26W_hitmap[1][1]->SetXTitle("Strip #");
 	
-	sprintf(tmpchr,"MTD1_EastEnd_LE_hitmap");
+	sprintf(tmpchr,"MTD1_EastEnd_hitmap");
 	MTD1_hitmap[0][0]=new TH1F(tmpchr,tmpchr,18,0.5,18.5);
-	MTD1_hitmap[0][0]->SetXTitle("Strip #");
-	sprintf(tmpchr,"MTD1_EastEnd_TE_hitmap");
 	MTD1_hitmap[0][1]=new TH1F(tmpchr,tmpchr,18,0.5,18.5);
-	MTD1_hitmap[0][1]->SetXTitle("Strip #");
-	sprintf(tmpchr,"MTD1_WestEnd_LE_hitmap");
+	sprintf(tmpchr,"MTD1_WestEnd_hitmap");
 	MTD1_hitmap[1][0]=new TH1F(tmpchr,tmpchr,18,0.5,18.5);
-	MTD1_hitmap[1][0]->SetXTitle("Strip #");
-	sprintf(tmpchr,"MTD1_WestEnd_TE_hitmap");
 	MTD1_hitmap[1][1]=new TH1F(tmpchr,tmpchr,18,0.5,18.5);
-	MTD1_hitmap[1][1]->SetXTitle("Strip #");
 	
 	MTD_ToT    =new TH2F("MTD_ToT","MTD ToT vs Chan #",36,-0.5,35.5,70,0,70);
 	MTD_ToT->SetXTitle("MTD Chan#");
@@ -173,123 +150,82 @@ void MTDhitsHistogramGroup::draw(TCanvas* cc) {
 	gStyle->SetPadGridX(0);
 	gStyle->SetPadGridY(0);
 	
-	cc->cd(); cc->SetFillColor(0);
+	cc->cd(); //cc->SetFillColor(0);
 	cc->Clear();
-	cc->Divide(4, 4,0.00005,0.00005);
+	cc->Divide(2, 4,0.00005,0.00005);
 	cc->cd(1);
 	
-	MTD26E_hitmap[0][0]->SetMinimum(0);
-	MTD26E_hitmap[0][0]->SetFillColor(19);
+//	MTD26E_hitmap[0][0]->SetMinimum(0);
+	MTD26E_hitmap[0][0]->SetLineColor(2);
 	MTD26E_hitmap[0][0]->GetYaxis()->SetLabelSize(0.07);
 	MTD26E_hitmap[0][0]->GetXaxis()->SetLabelSize(0.055);
 	MTD26E_hitmap[0][0]->Draw();
+	MTD26E_hitmap[0][1]->SetLineColor(4);
+	MTD26E_hitmap[0][1]->Draw("same");
 
 	
 	cc->cd(2);
-	MTD26E_hitmap[0][1]->SetMinimum(0);
-	MTD26E_hitmap[0][1]->SetFillColor(19);
-	MTD26E_hitmap[0][1]->GetYaxis()->SetLabelSize(0.07);
-	MTD26E_hitmap[0][1]->GetXaxis()->SetLabelSize(0.055);
-	MTD26E_hitmap[0][1]->Draw();
-
-	
-	cc->cd(3);
-	MTD26E_hitmap[1][0]->SetMinimum(0);
-	MTD26E_hitmap[1][0]->SetFillColor(19);
+//	MTD26E_hitmap[1][0]->SetMinimum(0);
+	MTD26E_hitmap[1][0]->SetLineColor(2);
 	MTD26E_hitmap[1][0]->GetYaxis()->SetLabelSize(0.07);
 	MTD26E_hitmap[1][0]->GetXaxis()->SetLabelSize(0.055);
 	MTD26E_hitmap[1][0]->Draw();
+	MTD26E_hitmap[1][1]->SetLineColor(4);
+	MTD26E_hitmap[1][1]->Draw("same");
 	
-	cc->cd(4);
-	MTD26E_hitmap[1][1]->SetMinimum(0);
-	MTD26E_hitmap[1][1]->SetFillColor(19);
-	MTD26E_hitmap[1][1]->GetYaxis()->SetLabelSize(0.07);
-	MTD26E_hitmap[1][1]->GetXaxis()->SetLabelSize(0.055);
-	MTD26E_hitmap[1][1]->Draw();
-	
-	cc->cd(5);
-	MTD26C_hitmap[0][0]->SetMinimum(0);
-	MTD26C_hitmap[0][0]->SetFillColor(19);
+	cc->cd(3);
+//	MTD26C_hitmap[0][0]->SetMinimum(0);
+	MTD26C_hitmap[0][0]->SetLineColor(2);
 	MTD26C_hitmap[0][0]->GetYaxis()->SetLabelSize(0.07);
 	MTD26C_hitmap[0][0]->GetXaxis()->SetLabelSize(0.055);
 	MTD26C_hitmap[0][0]->Draw();
-	
-	cc->cd(6);
-	MTD26C_hitmap[0][1]->SetMinimum(0);
-	MTD26C_hitmap[0][1]->SetFillColor(19);
-	MTD26C_hitmap[0][1]->GetYaxis()->SetLabelSize(0.07);
-	MTD26C_hitmap[0][1]->GetXaxis()->SetLabelSize(0.055);
-	MTD26C_hitmap[0][1]->Draw();
-	
-	cc->cd(7);
-	MTD26C_hitmap[1][0]->SetMinimum(0);
-	MTD26C_hitmap[1][0]->SetFillColor(19);
+	MTD26C_hitmap[0][1]->SetLineColor(4);
+	MTD26C_hitmap[0][1]->Draw("same");
+
+	cc->cd(4);
+//	MTD26C_hitmap[1][0]->SetMinimum(0);
+	MTD26C_hitmap[1][0]->SetLineColor(19);
 	MTD26C_hitmap[1][0]->GetYaxis()->SetLabelSize(0.07);
 	MTD26C_hitmap[1][0]->GetXaxis()->SetLabelSize(0.055);
 	MTD26C_hitmap[1][0]->Draw();
-	
-	cc->cd(8);
-	MTD26C_hitmap[1][1]->SetMinimum(0);
-	MTD26C_hitmap[1][1]->SetFillColor(19);
-	MTD26C_hitmap[1][1]->GetYaxis()->SetLabelSize(0.07);
-	MTD26C_hitmap[1][1]->GetXaxis()->SetLabelSize(0.055);
-	MTD26C_hitmap[1][1]->Draw();
-	
-	cc->cd(9);
-	MTD26W_hitmap[0][0]->SetMinimum(0);
-	MTD26W_hitmap[0][0]->SetFillColor(19);
-	MTD26W_hitmap[0][0]->GetYaxis()->SetLabelSize(0.07);
-	MTD26W_hitmap[0][0]->GetXaxis()->SetLabelSize(0.055);
-	MTD26W_hitmap[0][0]->Draw();
-	
-	cc->cd(10);
-	MTD26W_hitmap[0][1]->SetMinimum(0);
-	MTD26W_hitmap[0][1]->SetFillColor(19);
-	MTD26W_hitmap[0][1]->GetYaxis()->SetLabelSize(0.07);
-	MTD26W_hitmap[0][1]->GetXaxis()->SetLabelSize(0.055);
-	MTD26W_hitmap[0][1]->Draw();
-	
-	cc->cd(11);
+	MTD26C_hitmap[1][1]->SetLineColor(4);
+	MTD26C_hitmap[1][1]->Draw("same");
+
+	cc->cd(5);
 	MTD26W_hitmap[1][0]->SetMinimum(0);
-	MTD26W_hitmap[1][0]->SetFillColor(19);
+	MTD26W_hitmap[1][0]->SetLineColor(2);
 	MTD26W_hitmap[1][0]->GetYaxis()->SetLabelSize(0.07);
 	MTD26W_hitmap[1][0]->GetXaxis()->SetLabelSize(0.055);
 	MTD26W_hitmap[1][0]->Draw();
-	
-	cc->cd(12);
-	MTD26W_hitmap[1][1]->SetMinimum(0);
-	MTD26W_hitmap[1][1]->SetFillColor(19);
-	MTD26W_hitmap[1][1]->GetYaxis()->SetLabelSize(0.07);
-	MTD26W_hitmap[1][1]->GetXaxis()->SetLabelSize(0.055);
-	MTD26W_hitmap[1][1]->Draw();	
-	
-	cc->cd(13);
+	MTD26W_hitmap[1][1]->SetLineColor(4);
+	MTD26W_hitmap[1][1]->Draw("same");
+//	MTD26W_hitmap[0][0]->SetMinimum(0);
+
+	cc->cd(6);
+	MTD26W_hitmap[0][0]->SetLineColor(2);
+	MTD26W_hitmap[0][0]->GetYaxis()->SetLabelSize(0.07);
+	MTD26W_hitmap[0][0]->GetXaxis()->SetLabelSize(0.055);
+	MTD26W_hitmap[0][0]->Draw();
+	MTD26W_hitmap[0][1]->SetLineColor(4);
+	MTD26W_hitmap[0][1]->Draw("same");
+
+	cc->cd(7);
 	MTD1_hitmap[0][0]->SetMinimum(0);
-	MTD1_hitmap[0][0]->SetFillColor(19);
+	MTD1_hitmap[0][0]->SetLineColor(2);
 	MTD1_hitmap[0][0]->GetYaxis()->SetLabelSize(0.07);
 	MTD1_hitmap[0][0]->GetXaxis()->SetLabelSize(0.055);
 	MTD1_hitmap[0][0]->Draw();
-	
-	cc->cd(14);
-	MTD1_hitmap[0][1]->SetMinimum(0);
-	MTD1_hitmap[0][1]->SetFillColor(19);
-	MTD1_hitmap[0][1]->GetYaxis()->SetLabelSize(0.07);
-	MTD1_hitmap[0][1]->GetXaxis()->SetLabelSize(0.055);
-	MTD1_hitmap[0][1]->Draw();
-	
-	cc->cd(15);
+	MTD1_hitmap[0][1]->SetLineColor(4);
+	MTD1_hitmap[0][1]->Draw("same");
+
+	cc->cd(8);
 	MTD1_hitmap[1][0]->SetMinimum(0);
-	MTD1_hitmap[1][0]->SetFillColor(19);
+	MTD1_hitmap[1][0]->SetLineColor(2);
 	MTD1_hitmap[1][0]->GetYaxis()->SetLabelSize(0.07);
 	MTD1_hitmap[1][0]->GetXaxis()->SetLabelSize(0.055);
 	MTD1_hitmap[1][0]->Draw();
-	
-	cc->cd(16);
-	MTD1_hitmap[1][1]->SetMinimum(0);
-	MTD1_hitmap[1][1]->SetFillColor(19);
-	MTD1_hitmap[1][1]->GetYaxis()->SetLabelSize(0.07);
-	MTD1_hitmap[1][1]->GetXaxis()->SetLabelSize(0.055);
-	MTD1_hitmap[1][1]->Draw();
+	MTD1_hitmap[1][1]->SetLineColor(4);
+	MTD1_hitmap[1][1]->Draw("same");
 	
 	cc->Update();
 	
@@ -297,8 +233,6 @@ void MTDhitsHistogramGroup::draw(TCanvas* cc) {
 
 
 bool MTDhitsHistogramGroup::fill(evpReader* evp, char* datap) { 
-	
-	cout<< "debug MTDhitsHistogramGroup running======" <<endl;
 	int timeinbin=0;
 	float time=0.;
 	int halftrayid=-1;
@@ -318,7 +252,6 @@ bool MTDhitsHistogramGroup::fill(evpReader* evp, char* datap) {
 			for(int iword=0;iword<ndataword;iword++){
 				int dataword=mtd->ddl[ifib][iword];
 				
-				//cout<<"MTD :: dataword=0x"<<hex<<dataword<<dec<<" "<<iword<<"/"<<dec<<ndataword<<" ifiber="<<ifib<<endl;
 				if( (dataword&0xF0000000)>>28 == 0x2) continue;  //TDC header
 				if( (dataword&0xF0000000)>>28 == 0xD) continue;  //Header tag
 				if( (dataword&0xF0000000)>>28 == 0xE) continue;  //TDIG Separator
@@ -331,7 +264,6 @@ bool MTDhitsHistogramGroup::fill(evpReader* evp, char* datap) {
 				if( (dataword&0xF0000000)>>28 == 0xC) { //Geographical Data
 					halftrayid = dataword&0x01;    
 					trayid     = (dataword&0x0FE)>>1;
-					//cout << "trayid="<<trayid<<"halftrayid="<<halftrayid<<endl;
 					continue;
 				}
 				
@@ -341,11 +273,9 @@ bool MTDhitsHistogramGroup::fill(evpReader* evp, char* datap) {
 				if((edgeid !=4) && (edgeid!=5)) continue; //leading edge or trailing edge
 				
 				int tdcid=(dataword & 0x0F000000)>>24;  // 0-15
-//				cout<<"tdcid="<<tdcid<<" halftrayid="<<halftrayid<<endl;
 				int tdigboardid=tdcid/4;   // for halftray 0, 0-2 for tdig0; 4-6 for tdig1
 				if (halftrayid==1) tdigboardid=4; //for halftray1, 0-2 for tdig 4
 				int  tdcchan=(dataword&0x00E00000)>>21;          // tdcchan is 0-7 here.
-//				cout<<"======tdcchan="<<tdcchan<<endl;
 				//int globaltdcchan=tdcchan + (tdcid%4)*8+tdigboardid*24+96*halftrayid; // 0-191 for tray
 				timeinbin=((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  // time in tdc bin
 				time = timeinbin * 25./1024;   // time in ns 
@@ -366,14 +296,13 @@ bool MTDhitsHistogramGroup::fill(evpReader* evp, char* datap) {
 					zendid=tdigboardid/4; //0 for east end; 1 for west end
 				}
 				
-				cout<<"=======MTD========:: trayid="<<trayid<<" tdigboardid="<<tdigboardid<<" zendid="<<zendid<<
-				" halftray="<<halftrayid<<" tdcid="<<tdcid<<" tdcchan="<<tdcchan<<" stripid="<<stripid <<endl;
+//				cout<<"=======MTD========:: trayid="<<trayid<<" tdigboardid="<<tdigboardid<<" zendid="<<zendid<<
+//				" halftray="<<halftrayid<<" tdcid="<<tdcid<<" tdcchan="<<tdcchan<<" stripid="<<stripid <<endl;
 				
-				// fill hitmap. test for MTD 26, East tray, HiZ end
 				if(trayid==26&&tdigboardid==0) MTD26E_hitmap[zendid][edgeid-4]->Fill(stripid);
-								if(trayid==26&&tdigboardid==1) MTD26C_hitmap[zendid][edgeid-4]->Fill(stripid);
+				if(trayid==26&&tdigboardid==1) MTD26C_hitmap[zendid][edgeid-4]->Fill(stripid);
 				if(trayid==26&&tdigboardid==4) MTD26W_hitmap[zendid][edgeid-4]->Fill(stripid);
-								if(trayid==1&&tdigboardid==0) MTD1_hitmap[0][edgeid-4]->Fill(stripid);
+				if(trayid==1&&tdigboardid==0) MTD1_hitmap[0][edgeid-4]->Fill(stripid);
 				if(trayid==1&&tdigboardid==4) MTD1_hitmap[1][edgeid-4]->Fill(stripid);
 			}  // end loop nword
 		}
@@ -387,7 +316,6 @@ int MTDhitsHistogramGroup::tdcchan2globalstrip(int tdigboardid,int tdcid,int tdc
 {
 	int globalstripid=-1;
 	if(trayid==26){
-		
 		if (tdcid>3) tdcid=tdcid-4; //scale to H#
 		int globaltdcchan=(tdcid+1)*10+tdcchan;
 		int mtdstrip[24]={34,22,10,37,27,17,33,23,16,36,26,15,
@@ -399,7 +327,7 @@ int MTDhitsHistogramGroup::tdcchan2globalstrip(int tdigboardid,int tdcid,int tdc
 	
 	if(trayid==1){
 		int globaltdcchan=(tdcid+1)*10+tdcchan;
-		int mtdstrip[18]={34,22,10,37,27,17,16,36,32,20,14,35,25,13,30,24,11,31};
+		int mtdstrip[18]=  {34,22,10,37,27,17,33,23,16,36,26,15,32,20,30,24,11,31};
 		for(int i=0;i<18;i++){
 			if(mtdstrip[i]==globaltdcchan) {globalstripid=i+1;break;}
 		}
