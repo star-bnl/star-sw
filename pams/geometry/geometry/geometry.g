@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.223 2010/12/22 00:13:00 jwebb Exp $
+* $Id: geometry.g,v 1.224 2011/03/11 00:05:18 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.224  2011/03/11 00:05:18  jwebb
+* Added Y2008d, Y2009d, Y2010c and updated Y2011 geometry tags.  These tags
+* now contain an improved model of the SVT support cone... specifically the
+* support rods.  Previous geometry assumed solid carbon.  Now we assume a
+* carbon-fiber nomex sandwich.
+*
 * Revision 1.223  2010/12/22 00:13:00  jwebb
 * Correction to the documentation bank in the fzd file for y2008c geometry.
 *
@@ -1088,6 +1094,7 @@ replace [exe SCON02;] with [;SCON = off; ConeConfig=2 " new cable weight estimat
 
 replace [exe SCON12;] with [;SCON = on ; ConeConfig=2 " new cable weight estimate ";]
 replace [exe SCON13;] with [;SCON = on ; ConeConfig=3 " new cable weight estimate ";]
+replace [exe SCON14;] with [;SCON = on ; ConeConfig=4 " new cable weight estimate better SROD";]
 
 
 *                                                                               Silicon Strip Detector
@@ -1564,6 +1571,11 @@ replace [exe y2007h;] with ["y2007g + TPC y2009"
          exe TPCE04;
          ]
 
+""" ================================================================================= """
+""" NOTE: Y2007 and earlier need to have the SROD modification applied to the support """
+"""       rods in the SVT.  This involves correcting 10 different geometry files in   """
+"""       order to propagate this fix backwards.                                      """
+""" ================================================================================= """
 
 
 !//______________________________________________________________________________
@@ -1605,6 +1617,12 @@ replace [exe y2008c;] with ["Y2008 production tag C: Fixes TOF response " ;
         exe BTOFb7;           "Fixed TOF sensitve volumes";
         ]
 
+replace [exe y2008d;] with [
+   "Y2008 production tag D: Improved SROD description in support cone";
+   exe y2008c;
+   exe scon14;
+]
+ 
 
 !//______________________________________________________________________________
 *                                                                           Y2009
@@ -1668,6 +1686,12 @@ replace [exe y2009c;] with [;
    exe BTOFc7;           "Fixed TOF sensitve volumes";
 ;]
 
+replace [exe y2009d;] with [;
+   "y2009d production tag D: Improved SROD description in support cone";
+   exe Y2009C;           "Y2009C configugration";
+   exe SCON14;           "Improved SROD";
+;]
+
 
 
 !//______________________________________________________________________________
@@ -1707,10 +1731,14 @@ replace [exe y2010b;] with ["Y2010 production tag B: Based on A, with TOF fixes"
    exe TPCE04r;          "reduced TPC envelope raidus";
    exe BTOF67;           "fixes to TOF sensitive volume dimensions";
    ]
+replace [exe y2010c;] with ["Y2010 production tag C: Improved SROD description in support cone";
+   exe y2010b;           "Inherit from y2010a";
+   exe scon14;           "Support cone"
+   ] 
 
 c ======================================================================= y2011 =
 REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC envelope radius and TOF";
-    exe SCON13;      "support cone without SVT and new cable weight estimates";
+    exe SCON14;      "support cone without SVT and new cable weight estimates and SROD fix";
     exe TPCE04r;     "agstar version of yf model with reduced Rmax";
     exe BTOF67;      "time of flight";
     exe CALB02;      "updated bemc model";
@@ -2384,6 +2412,11 @@ If LL>0
                   Geom = 'Y2008c  ';
                   exe y2008c;}
 
+  Case Y2008d   { "Y2008 production tag D: Improved SROD description in support cone";
+                  Geom = 'Y2008d  ';
+                  exe y2008d;}
+ 
+
 ****************************************************************************************
   Case Y2009   { y2009 initial geometry: more detailed TPC
                  Geom = 'Y2009   ';
@@ -2401,6 +2434,11 @@ If LL>0
                   Geom = 'Y2009c  ';
                   exe y2009c;}
 
+  Case Y2009d    {   "y2009d production tag D: Improved SROD description in support cone";
+                   Geom = 'Y2009d';
+                   exe y2009d;
+                 }
+
 ****************************************************************************************
   Case Y2010   { y2010: baseline
                  Geom = 'Y2010   ';
@@ -2413,6 +2451,10 @@ If LL>0
   Case Y2010b  { "Y2010a: production tag B with fixes for TOF response";
                  Geom = 'Y2010b  ';
                  exe y2010b;       }
+
+  Case Y2010c  { "Y2010 production tag C: Improved SROD description in support cone";
+                 Geom = 'Y2010c  ';
+                 exe y2010c;       }
 
 ****************************************************************************************
   Case y2011   { Y2011: baseline y2011 geometry, placeholder added 07/30/2010
