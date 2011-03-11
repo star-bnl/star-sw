@@ -48,17 +48,14 @@ TOFcheckHistogramGroup::TOFcheckHistogramGroup() {
 TOFcheckHistogramGroup::TOFcheckHistogramGroup(const char* group, const char* subGroup, const char* trigger, const char* detector)
   : HistogramGroup(group,subGroup,trigger,detector) {
  
-  TOF_Error1=new TH1F("TOF_Error1","TOF electronics error ",250,0.5,125.5);
-  TOF_Error2=new TH1F("TOF_Error2","TOF bunchid shift error",14,0,6.);
-  TOF_Error3=new TH1F("TOF_Error3","TOF bunchid shift error",14,0,7.);
+  TOF_Error1=new TH1F("TOF_Error1","TOF electronics errors",244,0.5,122.5);
+  TOF_Error2=new TH1F("TOF_Error2","TOF incorrect bunchid errors",122,0.5,122.5);
+  TOF_Error3=new TH1F("TOF_Error3","TOF trays not read out",122,0.5,122.5); //defined as if bunchid not found
 
   TOF_EventCount=new TH1F("TOF_EventCount","TOF_EventCount",2,0,2);
 
-  TOF_Tray_hits1=new TH1F("TOF_Tray_hits1","Hits by TrayHalf",246,-0.5,122.5);
-  TOF_Tray_hits2=new TH1F("TOF_Tray_hits2","Hits by TrayHalf",246,-0.5,122.5);
-
-  TOF_Error1->SetXTitle("Tray #");
-  TOF_Error2->SetXTitle("THUB upvpd");
+  TOF_Tray_hits1=new TH1F("TOF_Tray_hits1","TOF Hits by TrayHalf",244,0.5,122.5);
+  TOF_Tray_hits2=new TH1F("TOF_Tray_hits2","TOF Hits by TrayHalf",244,0.5,122.5);
 
   ReadTrayList(); 
   ReadValidBunchidPhase();
@@ -112,12 +109,12 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
   gStyle->SetOptStat(0);
   gStyle->SetStatX(0.95); gStyle->SetStatY(0.92);
   gStyle->SetStatW(0.42); gStyle->SetStatH(0.20);
-  //gStyle->SetStatFontSize(0.14);
+  gStyle->SetStatFontSize(0.14);
 
   char tmpchr[200];
   cc->cd(); cc->SetFillColor(0);
   cc->Clear();
-  cc->Divide(1, 3);
+  cc->Divide(1, 4, 0.00002,0.00002);
   cc->cd(1);
   gPad->SetGridx(1);
   gPad->SetGridy(0);
@@ -130,15 +127,15 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
   TOF_Error1->Draw();
   int nerror1 = int(TOF_Error1->GetEntries());
   if(nerror1>0) {
-     float hmax=TOF_Error1->GetMaximum();
      label.SetTextColor(2);
-     sprintf(tmpchr,"%d electronics errors in %d events!",nerror1,mNevents);
-     label.DrawLatex(12, 0.8*hmax, tmpchr);
+     sprintf(tmpchr,"#scale[1.2]{%d electronics errors in %d events!}",nerror1,mNevents);
+		 label.SetNDC();
+		 label.DrawLatex(0.15, 0.8, tmpchr);
   } else {
-    float hmax=0.9 * gPad->GetUymax();
     label.SetTextColor(3);
-    sprintf(tmpchr,"No electronics error in %d events!",mNevents);
-    label.DrawLatex( 12, hmax, tmpchr);
+    sprintf(tmpchr,"#scale[1.2]{No electronics error in %d events}",mNevents);
+		label.SetNDC();
+    label.DrawLatex( 0.15, 0.8, tmpchr);
   }
 
   cc->cd(2);
@@ -149,43 +146,15 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
   TOF_Error2->SetFillColor(45);
   TOF_Error2->Draw();
   int nerror2 = int(TOF_Error2->GetEntries());
-  float hmax=0;
   if(nerror2>0) {
-     hmax=TOF_Error2->GetMaximum();
      label.SetTextColor(2);
-     sprintf(tmpchr,"%d bunchid errors in %d events!",nerror2,mNevents);
-     label.DrawLatex(0.7, 0.88*hmax, tmpchr);
-     label.SetTextColor(4);
-     int nerror3=int(TOF_Error3->GetEntries());
-     if(nerror3>0 && mNevents>9 && nerror3>0.5*mNevents){
-       label.DrawLatex(0.7, 0.78*hmax, "Possible tray lost.Check hitmap!");
-       label.DrawLatex(0.7, 0.67*hmax, "--------------- And CALL EXPERT!");
-     }
-
+     sprintf(tmpchr,"#scale[1.2]{%d incorrect bunchid errors in %d events!}",nerror2,mNevents);
+    label.DrawLatex( 0.15, 0.8, tmpchr);
   } else {
-    hmax=gPad->GetUymax();
     label.SetTextColor(3);
-    sprintf(tmpchr,"No bunchid error in %d events!",mNevents);
-    label.DrawLatex( 0.7, 0.88*hmax, tmpchr);
+    sprintf(tmpchr,"#scale[1.2]{No incorrect bunchid values in %d events!}",mNevents);
+    label.DrawLatex( 0.15, 0.8, tmpchr);
   }
-  TLatex labela;
-  labela.SetTextSize(0.055);
-  labela.SetTextAlign(23);  // center, top
-  labela.SetTextAngle(90);
-  float txty1=0.11*hmax;
-  float txty2=0.11*hmax;  	//0.22*hmax;
-  labela.DrawLatex(0.25,txty1," THUB1-NW0");
-  labela.DrawLatex(0.75,txty2," THUB1-NW1");
-  labela.DrawLatex(1.25,txty1," THUB2-NE0");
-  labela.DrawLatex(1.75,txty2," THUB2-NE1");
-  labela.DrawLatex(2.25,txty1," THUB3-SW0");
-  labela.DrawLatex(2.75,txty2," THUB3-SW1");
-  labela.DrawLatex(3.25,txty1," THUB4-SE0");
-  labela.DrawLatex(3.75,txty2," THUB4-SE1");
-  labela.DrawLatex(4.25,txty1," upvpd-W0");
-  labela.DrawLatex(4.75,txty2," upvpd-W1");
-  labela.DrawLatex(5.25,txty1," upvpd-E0");
-  labela.DrawLatex(5.75,txty2," upvpd-E1");
 
   cc->cd(3);
   gPad->SetGridx(1);
@@ -198,6 +167,47 @@ void TOFcheckHistogramGroup::draw(TCanvas* cc) {
   TOF_Tray_hits1->SetMinimum(0.5);
   TOF_Tray_hits1->Draw();
   TOF_Tray_hits2->Draw("same");
+	int nerror3 = int(TOF_Error3->GetEntries());
+	float hmax=0;
+	if(nerror3>0){
+		hmax=TOF_Error3->GetMaximum();
+		int nbadtrays=0;
+		for(int itray=0;itray<122;itray++){
+		Int_t nError = TOF_Error3->GetBinContent(itray+1);
+			if (nError>0) {
+				nbadtrays=nbadtrays+1;
+			  sprintf(tmpchr,"#scale[0.8]{%d}",itray+1);
+				label.SetNDC(0);
+			  label.DrawLatex(itray+0.5, 0.9*hmax,tmpchr);
+			}
+		}
+		if(nbadtrays==1)sprintf(tmpchr,"#scale[1.2]{%d tray not read out properly }",nbadtrays);
+		if(nbadtrays>1) sprintf(tmpchr,"#scale[1.2]{%d trays not read out properly}",nbadtrays);
+		label.SetTextColor(2);
+		label.SetNDC();
+		label.DrawLatex(0.15, 0.8, tmpchr);
+  } 
+	
+	cc->cd(4);
+  gPad->SetGridx(1);
+  gPad->SetGridy(0);
+  TOF_Error3->GetYaxis()->SetLabelSize(0.07);
+  TOF_Error3->GetXaxis()->SetLabelSize(0.055);
+  TOF_Error3->SetFillColor(45);
+  TOF_Error3->Draw();
+  if(nerror3>0) {
+		hmax=TOF_Error3->GetMaximum();
+		label.SetTextColor(2);
+		sprintf(tmpchr,"#scale[1.2]{%d read out errors in %d events!}",nerror3,mNevents);
+		label.SetNDC();
+		label.DrawLatex( 0.15, 0.8, tmpchr);
+  } else {
+    hmax=gPad->GetUymax();
+    label.SetTextColor(3);
+    sprintf(tmpchr,"#scale[1.2]{No read out errors in %d events!}",mNevents);
+		label.SetNDC();
+    label.DrawLatex( 0.15, 0.8, tmpchr);
+  }
 
   cc->Update();
 
@@ -255,13 +265,14 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
         allbunchid[halftrayid][trayid-1]=thebunchid;         
        continue;  
       }
+			//cout<<"tray="<<trayid<<" halftray="<<halftrayid<<" bunchid="<<thebunchid<<endl;
 
       //if( (dataword&0xF0000000)>>28 == 0x6) {continue;}
       //
       int edgeid =packetid;
       if((edgeid !=4) && (edgeid!=5)) continue;
-      if(halftrayid==0) TOF_Tray_hits1->Fill(trayid-1.0);
-      if(halftrayid==1) TOF_Tray_hits2->Fill(trayid-0.5);
+      if(halftrayid==0) TOF_Tray_hits1->Fill(trayid-0.5);
+      if(halftrayid==1) TOF_Tray_hits2->Fill(trayid);
       
     }  // end loop nword
   }  // end loop fiber
@@ -285,8 +296,8 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
       int bunchid=allbunchid[ihalf][itray];
       //if(bunchid == -9999) continue;
       int ret=ValidBunchid(traynum,ihalf,bunchid,bunchidref1);
-      if(ret>=0) TOF_Error2->Fill(ret+0.5*ihalf);
-      if(ret>=0 && bunchid==-9999) TOF_Error3->Fill(ret+0.5*ihalf);
+      if(ret>=0 && bunchid!=-9999) TOF_Error2->Fill(traynum); //real bunchid errors
+      if(bunchid==-9999) TOF_Error3->Fill(traynum); //missing bunchid
     }
   }
   return true;
@@ -360,7 +371,7 @@ void TOFcheckHistogramGroup::ReadValidBunchidPhase(){
 
 int TOFcheckHistogramGroup::ValidBunchid(int trayid,int halftrayid,int bunchid,int refbunchid)
 {
-  if(trayid<1 || trayid>124) return -1;
+  if(trayid<1 || trayid>122) return -1;
   if(trayid == 123) return -1;
   // THUB NW
   int trayinTHUB1[30]={21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50};
