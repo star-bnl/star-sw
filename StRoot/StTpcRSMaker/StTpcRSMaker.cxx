@@ -47,7 +47,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.46 2011/02/23 20:14:31 perev Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.47 2011/03/13 15:46:44 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -796,8 +796,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 #ifdef __ClusterProfile__
 	checkList[io][6]->Fill(TrackSegmentHits[iSegHits].xyzG.position().z(),NP);
 #endif	
-	Double_t driftLength = TrackSegmentHits[iSegHits].coorLS.position().z();
-        if (driftLength<0) driftLength = 0;
+	Double_t driftLength = TMath::Abs(TrackSegmentHits[iSegHits].coorLS.position().z());
 	Double_t D = 1. + OmegaTau*OmegaTau;
 	Double_t SigmaT = St_TpcResponseSimulatorC::instance()->transverseDiffusion()*  TMath::Sqrt(   driftLength/D);
 	//	Double_t SigmaL = St_TpcResponseSimulatorC::instance()->longitudinalDiffusion()*TMath::Sqrt(2*driftLength  );
@@ -1048,10 +1047,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 //________________________________________________________________________________
 Double_t StTpcRSMaker::GetNoPrimaryClusters(Double_t betaGamma) {
   if (! mdNdx) return 0;
-  Int_t bin = mdNdx->FindBin(betaGamma);
-  if (bin <= 0) bin = 1;
-  if (bin > mdNdx->GetNbinsX()) bin = mdNdx->GetNbinsX();
-  return mdNdx->GetBinContent(bin);
+  return mdNdx->Interpolate(betaGamma);
 }
 //________________________________________________________________________________
 Double_t StTpcRSMaker::ShaperFunc(Double_t *x, Double_t *par) {
@@ -1473,8 +1469,11 @@ Double_t StTpcRSMaker::polya(Double_t *x, Double_t *par) {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.46 2011/02/23 20:14:31 perev Exp $
+// $Id: StTpcRSMaker.cxx,v 1.47 2011/03/13 15:46:44 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.47  2011/03/13 15:46:44  fisyak
+// Replace step function by interpolation for dN/dx versus beta*gamma
+//
 // Revision 1.46  2011/02/23 20:14:31  perev
 // Hack to avoid sqrt(-)
 //

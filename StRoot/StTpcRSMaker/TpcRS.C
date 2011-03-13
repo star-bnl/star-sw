@@ -30,8 +30,7 @@ St_db_Maker *dbMk = 0;
 #endif
 //________________________________________________________________________________
 void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",  
-	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd", const Char_t *opt = "Bichsel", 
-	   Int_t tauIX = 0, Int_t tauCX = 0) {
+	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd", const Char_t *opt = "Bichsel") {
   gROOT->LoadMacro("bfc.C"); 
   TString ChainOpt("");
   TString RootFile("");
@@ -53,8 +52,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",
   //  Bool_t needAlias = kFALSE;
   TString FileIn(fileIn);
   if (FileIn == "") {
-    ChainOpt += "gstar,"; RootFile += "gstar_y9";
-    if (! RunOpt.Contains("Y200",TString::kIgnoreCase)) ChainOpt += "Y2009,";
+    ChainOpt += "gstar,"; RootFile += "gstar";
+    if (! RunOpt.Contains("Y200",TString::kIgnoreCase)) ChainOpt += "Y2011,";
     if      (Opt.Contains("FieldOff" ,TString::kIgnoreCase)) ChainOpt += "FieldOff,";
     else if (Opt.Contains("HalfField",TString::kIgnoreCase)) ChainOpt += "HalfField,";
     else                                                     ChainOpt += "FieldOn,";
@@ -82,8 +81,6 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",
   ChainOpt += RunOpt;
   RootFile += Form("_%s_%s_%i_%i",Run,Opt.Data(),First,Last);
   RootFile.ReplaceAll(",","_");
-  if (tauIX > 0) {RootFile += "jI=";RootFile += tauIX;}
-  if (tauCX > 0) {RootFile += "tauCX=";RootFile += tauCX;}
   if (RootFile.Contains(";")) {
     Int_t index = RootFile.Index(";");
     RootFile = RootFile(0,index);
@@ -112,8 +109,6 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",
 #endif
       //      CLRBIT(m_Mode,StTpcRSMaker::kDistortion);  // Check that distorton are IN chain
       tpcRS->SetMode(m_Mode);
-      if (tauIX  > 0) tpcRS->SettauIntegrationX(1e-9*tauIX);
-      if (tauCX  > 0) tpcRS->SettauCX(1e-9*tauCX);
       //      tpcRS->SetDebug(13);
     }
   }
@@ -203,7 +198,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",
       geant->Do("MULS 1");
       geant->Do("STRA 0");
       //         CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
-      geant->Do("CUTS     1e-4   1e-4   .001   .001   .001  .001  .001  1e-4  .001   .001 50.e-6");
+      geant->Do("CUTS     1e-4   1e+4   .001   .001   .001  .001  .001  1e+4  .001   .001 50.e-6");
       //    geant->Do("gclose all");
       geant->Do("physi");
     }
@@ -221,6 +216,10 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",
 	geant->Do("gkine   1  6   0.4     1.  -.1     .1      0    0     -50.    50.;");
       else if (Opt.Contains("50muons1GeV",TString::kIgnoreCase)) 
 	geant->Do("gkine  50  6   1.     1.  -1     1      0    6.28    -50.    50.;");
+      else if (Opt.Contains("1000muons1GeV",TString::kIgnoreCase)) 
+	geant->Do("gkine  1000  6   1.     1.  -1     1      0    6.28    -50.    50.;");
+      else if (Opt.Contains("1alpha1GeV",TString::kIgnoreCase)) 
+	geant->Do("gkine  1  47   1.     1.  -1     1      0    6.28    -50.    50.;");
       else if (Opt.Contains("50muons0.5GeV",TString::kIgnoreCase)) 
 	geant->Do("gkine  50  6  0.5  0.5  -1     1      0    6.28    -50.    50.;");
       else if (Opt.Contains("deuteron",TString::kIgnoreCase)) 
@@ -236,12 +235,10 @@ void TpcRS(Int_t Last=100,
 	   const Char_t *fileIn = "/star/rcf/simu/rcf1207_01_225evts.fzd",
 	   //		 const Char_t *fileIn = 0,
 	   //"/star/rcf/simu/auau200/hijing/b0_20/inverse/year2001/hadronic_on/gstardata/rcf0191_01_380evts.fzd",
-	   const Char_t *opt = "Bichsel",
-	   Int_t tauIX = 0, Int_t tauCX = 0
-	   ) {
+	   const Char_t *opt = "Bichsel") {
   //  /star/data03/daq/2004/093/st_physics_adc_5093007_raw_2050001.daq
   //  /star/data03/daq/2004/fisyak/st_physics_adc_5114043_raw_2080001.daq
   // nofield /star/data03/daq/2004/076/st_physics_adc_5076061_raw_2060001.daq
   //                                   st_physics_adc_5076061_raw_4050001.daq
-  TpcRS(1,Last,Run,fileIn,opt,tauIX,tauCX);
+  TpcRS(1,Last,Run,fileIn,opt);
 }
