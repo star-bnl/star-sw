@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.238 2011/03/11 16:43:21 perev Exp $
+// $Id: StMaker.cxx,v 1.239 2011/03/14 17:38:01 perev Exp $
 //
 //
 /*!
@@ -258,12 +258,12 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2009a",      20081215,     1, "y2009a",   "y2009+ecalgeo6(JW)"},
   {"y2009b",      20081215,     2, "y2009b",   "y2009+ecalgeo6(JW) w/ old tracking cuts in eemc."},
   {"y2009c",      20081215,     3, "y2009c",   "TOF fix & TPCE redused"},
-  {"y2009d",      20081215,     3, "y2009c",   "Honey sandwich fix"},
+  {"y2009d",      20081215,     4, "y2009c",   "Honey sandwich fix"},
   {"y2010",       20091215,     0, "y2010",    "y2009+full BTOF"},
   {"y2010a",      20091215,     1, "y2010a",   "y2010 production tag"},
   {"y2010b",      20091215,     2, "y2010b",   "TOF fix & TPCE redused"},
-  {"y2010c",      20091215,     2, "y2010b",   "Honey sandwich fix"},
-  {"y2011",       20101215,     0, "y2011",    "y2011 TOF fix & TPCE redused"},
+  {"y2010c",      20091215,     3, "y2010b",   "Honey sandwich fix"},
+  {"y2011",       20101215,     0, "y2011",    "y2011 TOF fix & TPCE redused & honey"},
 
   // development tags
   //  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
@@ -1967,6 +1967,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.239  2011/03/14 17:38:01  perev
+// copy/paste fix
+//
 // Revision 1.238  2011/03/11 16:43:21  perev
 // support cone honey sandwich fix geometries
 //
