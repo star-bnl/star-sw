@@ -184,13 +184,16 @@ TrackPAI::GetCluster(double& xcls, double& ycls, double& zcls,
         edep = energies[iLow] + (u - cdf[iLow]) * 
                (energies[iUp] - energies[iLow]) / (cdf[iUp] - cdf[iLow]);
         f = rutherford[iLow] + (edep - energies[iLow]) * 
-            (rutherford[iUp] - rutherford[iLow]) / (energies[iUp] - energies[iLow]);               
+            (rutherford[iUp] - rutherford[iLow]) / 
+            (energies[iUp] - energies[iLow]);               
       } else {
         edep = log(energies[iLow]) + (log(u) - log(cdf[iLow])) * 
-               (log(energies[iUp]) - log(energies[iLow])) / (log(cdf[iUp]) - log(cdf[iLow]));
+               (log(energies[iUp]) - log(energies[iLow])) / 
+               (log(cdf[iUp]) - log(cdf[iLow]));
         edep = exp(edep);
         f = rutherford[iLow] + (log(edep) - log(energies[iLow])) * 
-            (rutherford[iUp] - rutherford[iLow]) / (log(energies[iUp]) - log(energies[iLow]));        
+            (rutherford[iUp] - rutherford[iLow]) / 
+            (log(energies[iUp]) - log(energies[iLow]));        
       }
     }
   } else {
@@ -362,9 +365,9 @@ TrackPAI::SetupCrossSectionTable() {
 
   for (int i = 0; i < nSteps; ++i) {
     // Define shorthand variables for photon energy and dielectric function.
-    const double egamma = energies[i];
-    const double eps1 = opticalDataTable[i].eps1;
-    const double eps2 = opticalDataTable[i].eps2;
+    const double egamma   = energies[i];
+    const double eps1     = opticalDataTable[i].eps1;
+    const double eps2     = opticalDataTable[i].eps2;
     const double integral = opticalDataTable[i].integral;
 
     // First, calculate the distant-collision terms.
@@ -389,7 +392,7 @@ TrackPAI::SetupCrossSectionTable() {
     // Calculate the close-collision term (quasi-free scattering)
     double dcsRuth = 0.;
     double f = 0.;
-    if (energy > 0. && integral > 0.) {
+    if (egamma > 0. && integral > 0.) {
       dcsRuth = integral / (egamma * egamma);
       f = dcsRuth / (dcsLog + dcsDensity + dcsCerenkov);
     }
@@ -419,10 +422,10 @@ TrackPAI::SetupCrossSectionTable() {
 
   // Add the contribution of high energy transfers to the stopping power 
   // and the total cross-section
-  energy = energies.back();
-  if (energy < emax) {  
-    cs   += c1 * ComputeCsTail(energy, emax);
-    dedx += c1 * ComputeDeDxTail(energy, emax);
+  const double elim = energies.back();
+  if (elim < emax) {  
+    cs   += c1 * ComputeCsTail(elim, emax);
+    dedx += c1 * ComputeDeDxTail(elim, emax);
   } else {
     std::cerr << className << "::SetupCrossSectionTable:\n";
     std::cerr << "    Max. energy transfer lower than optical data range.\n";
@@ -484,10 +487,6 @@ TrackPAI::ComputeCsTail(const double emin, const double emax) {
            (2. / ek) * log(emax / emin);
   }
   
-  return 1. / emin - 1. / emax - 
-         beta2 * log(emax / emin) / emax;
-
-  /*
   switch (spin) {
     case 0:
       // Spin 0
@@ -515,7 +514,6 @@ TrackPAI::ComputeCsTail(const double emin, const double emax) {
     default:
       break;
   }
-  */
   // Rutherford type cross-section
   return 1. / emin - 1. / emax;  
 
@@ -539,10 +537,6 @@ TrackPAI::ComputeDeDxTail(const double emin, const double emax) {
            (12. * pow(ek, 4));
   }
  
-  return log(emax / emin) - 
-          beta2 * (emax - emin) / emax;
-
-  /* 
   switch (spin) {
     case 0:
       return log(emax / emin) - 
@@ -568,7 +562,6 @@ TrackPAI::ComputeDeDxTail(const double emin, const double emax) {
     default:
       break;
   }
-  //*/
 
   // Rutherford cross-section
   return log(emax / emin);
@@ -588,9 +581,6 @@ TrackPAI::SampleAsymptoticCs(double u) {
     return SampleAsymptoticCsPositron(emin, u);
   }
  
-  return SampleAsymptoticCsSpinZero(emin, u);
-
-  /* 
   switch (spin) {
     case 0:
       // Spin 0
@@ -607,7 +597,6 @@ TrackPAI::SampleAsymptoticCs(double u) {
     default:
       break;
   }
-  */
   // Rutherford cross-section (analytic inversion)
   return emin * emax / (u * emin + (1. - u) * emax);
   

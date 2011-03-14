@@ -1209,6 +1209,23 @@ TrackHeed::SetupMaterial(Medium* medium) {
     notations.increment(materialName);
     fractions.increment(frac);
   }
+  if (usePacsOutput) {
+    std::ofstream pacsfile;
+    pacsfile.open("heed_pacs.txt", std::ios::out);
+    const int nValues = energyMesh->get_q();
+    if (nValues > 0) {
+      for (int i = 0; i < nValues; ++i) {
+        double e = energyMesh->get_e(i);
+        pacsfile << 1.e6 * e << "  ";
+        for (int j = 0; j < nComponents; ++j) {
+          pacsfile << atPacs[j]->get_ACS(e) << "  "
+                   << atPacs[j]->get_ICS(e) << "  ";
+        }
+        pacsfile << "\n";
+      }
+    }
+    pacsfile.close();
+  }  
   if (material != 0) {
     delete material; material = 0;
   }

@@ -18,7 +18,9 @@ namespace Garfield {
 
 MediumMagboltz::MediumMagboltz() :
   MediumGas(),
-  eFinal(40.), eStep(eFinal / nEnergySteps), useAutoAdjust(true), 
+  eFinal(40.), eStep(eFinal / nEnergySteps), 
+  eMinLog(10000.), 
+  useAutoAdjust(true), 
   useCsOutput(false), 
   nTerms(0), useAnisotropic(true), 
   nPenning(0), 
@@ -87,7 +89,11 @@ MediumMagboltz::SetMaxElectronEnergy(const double e) {
   eFinal = e;
   
   // Determine the energy interval size.
-  eStep = eFinal / nEnergySteps;
+  if (eFinal <= eMinLog) {
+    eStep = eFinal / nEnergySteps;
+  } else {
+    eStep = eMinLog / nEnergySteps;
+  }
   
   // Set max. energy and step size also in Magboltz common block.
   inpt_.efinal = eFinal;
@@ -520,7 +526,7 @@ MediumMagboltz::GetElectronNullCollisionRate(const int band) {
     std::cerr << "    Band index out of range.\n";
   }
  
-  return cfNull[0];
+  return cfNull;
  
 }
 
@@ -558,18 +564,25 @@ MediumMagboltz::GetElectronCollisionRate(const double e, const int band) {
   }
 
   // Get the energy interval.
-  const int iE = int(e / eStep);
-  if (iE >= nEnergySteps) return cfTot[nEnergySteps - 1];
-  if (iE < 0) return cfTot[0]; 
-  return cfTot[iE];
+  int iE = 0;
+  if (e <= eMinLog) {
+    iE = int(e / eStep);
+    if (iE >= nEnergySteps) return cfTot[nEnergySteps - 1];
+    if (iE < 0) return cfTot[0]; 
+    return cfTot[iE];
+  }
+  
+  const double rLog = pow(eFinal / eMinLog, 1. / nEnergyStepsLog);
+  iE = int(log(e / eMinLog) / log(rLog));
+  return cfTotLog[iE];
 
 }
 
 bool 
 MediumMagboltz::GetElectronCollision(const double e, int& type, int& level, 
-                                       double& e1, 
-                                       double& dx, double& dy, double& dz,
-                                       int& nion, int& ndxc, int& band) {
+                                     double& e1, 
+                                     double& dx, double& dy, double& dz,
+                                     int& nion, int& ndxc, int& band) {
 
   // Check if the electron energy is within the currently set range.
   if (e > eFinal && useAutoAdjust) {
@@ -601,30 +614,67 @@ MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
     std::cerr << "    This medium does not have a band structure.\n";
   }
 
-  // Get the energy interval.
-  int iE = int(e / eStep);
-  if (iE >= nEnergySteps) iE = nEnergySteps - 1;
-  if (iE < 0) iE = 0;
+  double angCut = 1.;
+  double angPar = 0.5;
+  
+  if (e <= eMinLog) {
+    // Get the energy interval.
+    int iE = int(e / eStep);
+    if (iE >= nEnergySteps) iE = nEnergySteps - 1;
+    if (iE < 0) iE = 0;
 
-  // Sample the scattering process.
-  double r = RndmUniform();
-  int iLow = 0;
-  int iUp  = nTerms - 1;  
-  if (r <= cf[iE][iLow]) {
-    level = iLow;
-  } else if (r >= cf[iE][iUp]) {
-    level = iUp;
-  } else {
-    int iMid;
-    while (iUp - iLow > 1) {
-      iMid = (iLow + iUp) >> 1;
-      if (r < cf[iE][iMid]) {
-        iUp = iMid;
-      } else {
-        iLow = iMid;
+    // Sample the scattering process.
+    const double r = RndmUniform();
+    int iLow = 0;
+    int iUp  = nTerms - 1;  
+    if (r <= cf[iE][iLow]) {
+      level = iLow;
+    } else if (r >= cf[iE][iUp]) {
+      level = iUp;
+    } else {
+      int iMid;
+      while (iUp - iLow > 1) {
+        iMid = (iLow + iUp) >> 1;
+        if (r < cf[iE][iMid]) {
+          iUp = iMid;
+        } else {
+          iLow = iMid;
+        }
       }
+      level = iUp;
     }
-    level = iUp;
+    // Get the angular distribution parameters.
+    angCut = scatCut[iE][level];
+    angPar = scatParameter[iE][level];
+  } else {
+    const double rLog = pow(eFinal / eMinLog, 1. / nEnergyStepsLog);
+    // Get the energy interval.
+    int iE = int(log(e / eMinLog) / log(rLog));
+    if (iE < 0) iE = 0;
+    if (iE >= nEnergyStepsLog) iE = nEnergyStepsLog - 1;
+    // Sample the scattering process.
+    const double r = RndmUniform();
+    int iLow = 0;
+    int iUp  = nTerms - 1;  
+    if (r <= cfLog[iE][iLow]) {
+      level = iLow;
+    } else if (r >= cfLog[iE][iUp]) {
+      level = iUp;
+    } else {
+      int iMid;
+      while (iUp - iLow > 1) {
+        iMid = (iLow + iUp) >> 1;
+        if (r < cfLog[iE][iMid]) {
+          iUp = iMid;
+        } else {
+          iLow = iMid;
+        }
+      }
+      level = iUp;
+    }
+    // Get the angular distribution parameters.
+    angCut = scatCutLog[iE][level];
+    angPar = scatParameterLog[iE][level];
   }
   
   // Extract the collision type.
@@ -652,7 +702,7 @@ MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
       const double w = gsGreenSawada[igas] * e / (e + gbGreenSawada[igas]);
       const double esec0 = tsGreenSawada[igas] - 
                            taGreenSawada[igas] / (e + tbGreenSawada[igas]); 
-      r = RndmUniform();
+      const double r = RndmUniform();
       esec = esec0 + w * tan((r - 1.) * atan(esec0 / w) + 
                              r * atan((0.5 * (e - loss) - esec0) / w));  
     } else { 
@@ -672,6 +722,15 @@ MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
     ionProducts.push_back(newIonProd);
     nIonisationProducts = nion = 2;
   } else if (type == ElectronCollisionTypeExcitation) {
+    // if (gas[igas] == "CH4" && loss * rgas[igas] < 13.35 && e > 12.65) {
+    //   if (RndmUniform() < 0.5) {
+    //     loss = 8.55 + RndmUniform() * (13.3 - 8.55);
+    //     loss /= rgas[igas];
+    //   } else {
+    //     loss = std::max(Small, RndmGaussian(loss * rgas[igas], 1.));
+    //     loss /= rgas[igas];
+    //   }
+    // }
     // Follow the de-excitation cascade (if switched on).
     if (useDeexcitation && iDeexcitation[level] >= 0) {
       int fLevel = 0;
@@ -713,12 +772,11 @@ MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
       case 0:
         break;
       case 1:
-        ctheta0 = 1. - RndmUniform() * scatCut[iE][level];
-        if (RndmUniform() > scatParameter[iE][level]) ctheta0 = -ctheta0;
+        ctheta0 = 1. - RndmUniform() * angCut;
+        if (RndmUniform() > angPar) ctheta0 = -ctheta0;
         break;
       case 2:
-        ctheta0 = (ctheta0 + scatParameter[iE][level]) / 
-                  (1. + scatParameter[iE][level] * ctheta0);
+        ctheta0 = (ctheta0 + angPar) / (1. + angPar * ctheta0);
         break;
       default:
         std::cerr << className << "::GetElectronCollision:\n";
@@ -1380,8 +1438,6 @@ MediumMagboltz::Mixer() {
   } else {
     inpt_.nAniso = 0;
   }
-  inpt_.efinal = eFinal;
-  inpt_.estep = eStep;
   
   // Calculate the atomic density (ideal gas law).
   const double dens = GetNumberDensity();
@@ -1391,16 +1447,25 @@ MediumMagboltz::Mixer() {
   // Fill the electron energy array, reset the collision rates.
   for (int i = nEnergySteps; i--;) {
     cfTot[i] = 0.;
-    scatModel[i] = 0; 
     for (int j = nMaxLevels; j--;) {
       cf[i][j] = 0.;
       scatParameter[i][j] = 0.5;
       scatCut[i][j] = 1.;
     }
   }
+  for (int i = nEnergyStepsLog; i--;) {
+    cfTotLog[i] = 0.;
+    for (int j = nMaxLevels; j--;) {
+      cfLog[i][j] = 0.;
+      scatParameter[i][j] = 0.5;
+      scatCut[i][j] = 1.;
+    }
+  }
+
   nDeexcitations = 0;
   deexcitations.clear();
   for (int i = nMaxLevels; i--;) {
+    scatModel[i] = 0;
     iDeexcitation[i] = -1;
     wOpalBeaty[i] = 1.;
   }
@@ -1444,9 +1509,15 @@ MediumMagboltz::Mixer() {
   
   if (debug) {
     std::cout << className << "::Mixer:\n";
-    std::cout << "    Creating table of collision rates with " 
-              << nEnergySteps << " energy steps \n";
-    std::cout << "    between 0 and " << eFinal << " eV.\n";
+    std::cout << "    Creating table of collision rates with\n";
+    std::cout << "      " << nEnergySteps 
+                          << " linear energy steps between 0 and " 
+                          << std::min(eFinal, eMinLog) << " eV\n";
+    if (eFinal > eMinLog) {
+      std::cout << "      " << nEnergyStepsLog 
+                            << " logarithmic energy steps between "
+                            << eMinLog << " and " << eFinal << " eV\n";
+    }
   }
   nTerms = 0;
   
@@ -1458,6 +1529,12 @@ MediumMagboltz::Mixer() {
 
   // Loop over the gases in the mixture.  
   for (int iGas = 0; iGas < nComponents; ++iGas) {
+    if (eFinal <= eMinLog) {
+      inpt_.efinal = eFinal;
+    } else {
+      inpt_.efinal = eMinLog;
+    }
+    inpt_.estep = eStep;
   
     // Number of inelastic cross-section terms
     long long nIn = 0;
@@ -1485,8 +1562,8 @@ MediumMagboltz::Mixer() {
       std::cout << "      Splitting parameter:  " << w << " eV\n";
       if (e[3] > 0. || e[4] > 0.) {
         std::cout << "      Cross-sections at minimum ionising energy:\n";
-        std::cout << "        excitation: " << e[3] << " cm2\n";
-        std::cout << "        ionisation: " << e[4] << " cm2\n";
+        std::cout << "        excitation: " << e[3] * 1.e18 << " Mbarn\n";
+        std::cout << "        ionisation: " << e[4] * 1.e18 << " Mbarn\n";
       }
     }
     int np0 = nTerms;
@@ -1605,9 +1682,12 @@ MediumMagboltz::Mixer() {
         // Temporary hack for methane dissociative excitations:
         if (description[np][5] == 'D' &&
             description[np][6] == 'I' &&
-            description[np][7] == 'S' &&
-            energyLoss[np] * r >= 12.) {
-        
+            description[np][7] == 'S') {
+          // if (iE * eStep > 40.) {
+          //   cf[iE][np] *= 0.8;
+          // } else if (iE * eStep > 30.) {
+          //   cf[iE][np] *= (1. - (iE * eStep - 30.) * 0.02);
+          // }
         }
         if (cf[iE][np] < 0.) {
           std::cerr << className << "::Mixer:\n";
@@ -1630,6 +1710,74 @@ MediumMagboltz::Mixer() {
                   << nIn - nExc - nSuperEl << " other)\n";
       }
       if (useCsOutput) outfile << "\n";
+    }
+    
+    if (eFinal <= eMinLog) continue;
+    // Fill the high-energy part.
+    const double rLog = pow(eFinal / eMinLog, 1. / nEnergyStepsLog);
+    double emax = 0.5 * eMinLog * (1. + rLog);
+    for (int iE = 0; iE < nEnergyStepsLog; ++iE) {
+      inpt_.efinal = emax;
+      inpt_.estep = emax / nEnergySteps;
+      gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, &w, 
+              pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, scrpt);
+      np = np0;
+      if (useCsOutput) {
+        outfile << emax << "  " << q[nEnergySteps - 1][1] 
+                        << "  " << q[nEnergySteps - 1][2] 
+                        << "  " << q[nEnergySteps - 1][3] 
+                        << "  " << q[nEnergySteps - 1][4] << "  ";
+      }
+      // Elastic scattering
+      cfLog[iE][np] = q[nEnergySteps - 1][1] * van;
+      if (scatModel[np] == 1) {
+        ComputeAngularCut(pEqEl[nEnergySteps - 1][1], 
+                          scatCutLog[iE][np], 
+                          scatParameterLog[iE][np]);
+      } else if (scatModel[np] == 2) {
+        scatParameterLog[iE][np] = pEqEl[nEnergySteps - 1][1];
+      }
+      // Ionisation
+      if (withIon) {
+        ++np;
+        cfLog[iE][np] = q[nEnergySteps - 1][2] * van;
+        if (scatModel[np] == 1) {
+          ComputeAngularCut(pEqEl[nEnergySteps - 1][2], 
+                            scatCutLog[iE][np], 
+                            scatParameterLog[iE][np]);
+        } else if (scatModel[np] == 2) {
+          scatParameterLog[iE][np] = pEqEl[nEnergySteps - 1][2];
+        }
+      }
+      // Attachment
+      if (withAtt) {
+        ++np;
+        cfLog[iE][np] = q[nEnergySteps - 1][3] * van;
+      }
+      // Inelastic terms
+      for (int j = 0; j < nIn; ++j) {
+        ++np;
+        if (useCsOutput) outfile << qIn[nEnergySteps - 1][j] << "  ";
+        cfLog[iE][np] = qIn[nEnergySteps - 1][j] * van;
+        // Scale the excitation cross-sections (for error estimates).
+        cfLog[iE][np] *= scaleExc;
+        if (cfLog[iE][np] < 0.) {
+          std::cerr << className << "::Mixer:\n";
+          std::cerr << "    Negative inelastic cross-section at " 
+                    << emax << " eV.\n"; 
+          std::cerr << "    Set to zero.\n";
+          cfLog[iE][np] = 0.;
+        }
+        if (scatModel[np] == 1) {
+          ComputeAngularCut(pEqIn[nEnergySteps - 1][j], 
+                            scatCutLog[iE][np], 
+                            scatParameterLog[iE][np]);
+        } else if (scatModel[np] == 2) {
+          scatParameterLog[iE][np] = pEqIn[nEnergySteps - 1][j];
+        }
+      }
+      if (useCsOutput) outfile << "\n";
+      emax *= rLog;
     }
   }
   if (useCsOutput) outfile.close();
@@ -1673,23 +1821,38 @@ MediumMagboltz::Mixer() {
     cfTot[iE] *= eroot;
   }
   
-  int nInterval = int(nEnergySteps / 8.);  
-  // Calculate the null collision frequencies.
-  for (int i = 0; i < 8; ++i) {
-    cfNull[i] = 0.;
-    for (int j = nInterval * i; j < nInterval * (i + 1); ++j) {
-      if (cfTot[j] >= cfNull[i]) cfNull[i] = cfTot[j];
+  if (eFinal > eMinLog) {
+    const double rLog = pow(eFinal / eMinLog, 1. / nEnergyStepsLog);
+    for (int iE = nEnergyStepsLog; iE--;) {
+      // Calculate the total collision frequency.
+      for (int k = nTerms; k--;) {
+        if (cfLog[iE][k] < 0.) {
+          cfLog[iE][k] = 0.;
+        }
+        cfTotLog[iE] += cfLog[iE][k];
+      }
+      // Normalise the collision frequencies.
+      if (cfTotLog[iE] > 0.) {
+        for (int k = nTerms; k--;) cfLog[iE][k] /= cfTotLog[iE];
+      }
+      for (int k = 1; k < nTerms; ++k) {
+        cfLog[iE][k] += cfLog[iE][k - 1];
+      }
+      const double eroot = sqrt(eMinLog * pow(rLog, iE) * 
+                                (1. + rLog) / 2.);
+      cfTotLog[iE] *= eroot;
     }
-  } 
-
-  double nullmax = cfNull[0];
-  for (int i = 1; i < 8; ++i) {
-    if (cfNull[i] > nullmax) nullmax = cfNull[i];
-  }
-  for (int i = 0; i < 8; ++i) {
-    cfNull[i] = nullmax;
   }
   
+  // Determine the null collision frequency.
+  cfNull = 0.;
+  for (int j = 0; j < nEnergySteps; ++j) {
+    if (cfTot[j] >= cfNull) cfNull = cfTot[j];
+  }
+  for (int j = 0; j < nEnergyStepsLog; ++j) {
+    if (cfTotLog[j] >= cfNull) cfNull = cfTotLog[j];
+  } 
+
   // Reset the collision counters.
   nCollisionsDetailed.resize(nTerms);
   for (int j = nCsTypes; j--;) nCollisions[j] = 0;
@@ -1698,9 +1861,10 @@ MediumMagboltz::Mixer() {
   if (debug) {
     std::cout << className << "::Mixer:\n";
     std::cout << "    Energy [eV]    Collision Rate [ns-1]\n";
-    for (int i = 0; i < 8; ++i) { 
+    for (int i = 0; i < 8; ++i) {
+      const double emax = std::min(eMinLog, eFinal); 
       std::cout << "    " << std::fixed << std::setw(10) << std::setprecision(2)  
-                << (2 * i + 1) * eFinal / 16
+                << (2 * i + 1) * emax / 16
                 << "    " << std::setw(18) << std::setprecision(2)
                 << cfTot[(i + 1) * nEnergySteps / 16] << "\n";
     }

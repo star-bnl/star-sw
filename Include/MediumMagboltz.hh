@@ -132,6 +132,7 @@ class MediumMagboltz : public MediumGas {
   private:
 
     static const int nEnergySteps = 20000;
+    static const int nEnergyStepsLog = 100;
     static const int nEnergyStepsGamma = 1000;
     static const int nMaxInelasticTerms = 220;
     static const int nMaxLevels = 512;
@@ -140,6 +141,7 @@ class MediumMagboltz : public MediumGas {
       
     // Energy spacing of collision rate tables
     double eFinal, eStep;
+    double eMinLog;
     bool useAutoAdjust;
   
     // Flag enabling/disabling output of cross-section table to file
@@ -164,18 +166,22 @@ class MediumMagboltz : public MediumGas {
     // Parameters for calculation of scattering angles
     bool useAnisotropic;
     double scatParameter[nEnergySteps][nMaxLevels];
+    double scatParameterLog[nEnergyStepsLog][nMaxLevels];
     int    scatModel[nMaxLevels];
     double scatCut[nEnergySteps][nMaxLevels];
+    double scatCutLog[nEnergyStepsLog][nMaxLevels];
     
     // Level description
     char description[nMaxLevels][30]; 
     
     // Total collision frequency
     double cfTot[nEnergySteps];
-    // Null-collision frequencies
-    double cfNull[8];  
+    double cfTotLog[nEnergyStepsLog];
+    // Null-collision frequency
+    double cfNull;  
     // Collision frequencies
     double cf[nEnergySteps][nMaxLevels];
+    double cfLog[nEnergyStepsLog][nMaxLevels];
 
     // Collision counters
     // 0: elastic
