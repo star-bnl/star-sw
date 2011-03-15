@@ -37,13 +37,15 @@ void QAmergeRefHists(char* listFile, char* oldFile, char* modFile, char* newFile
   while (listFi.good()) {
     listFi >> buffer;
     histName = buffer;
-    Bool_t modifyName = histName.BeginsWith("((");
+    Bool_t modifyName = histName.BeginsWith("__");
     if (modifyName) {
       // Will modify the histogram name
-      //  to whatever is between (( ))
-      Ssiz_t endNewName = histName.Index("))");
-      modName = histName(2,endNewName-2);
-      histName.Remove(0,endNewName+2);
+      //  to whatever is between __*__x__
+      Ssiz_t endNewName = histName.Index("__x__",5,2);
+      if (endNewName > 0 && endNewName < histName.Length()-5) {
+        modName = histName(2,endNewName-2);
+        histName.Remove(0,endNewName+5);
+      } else modifyName = kFALSE;
     }
     TKey* modKey = (TKey*) (modKeys->FindObject(histName.Data()));
     if (modKey) {
@@ -83,8 +85,11 @@ void QAmergeRefHists(char* listFile, char* oldFile, char* modFile, char* newFile
 }
 
 ////////////////////////////////////////////////////////////////////////
-// $Id: QAmergeRefHists.C,v 1.2 2011/02/25 23:00:47 genevb Exp $
+// $Id: QAmergeRefHists.C,v 1.3 2011/03/15 23:02:12 genevb Exp $
 // $Log: QAmergeRefHists.C,v $
+// Revision 1.3  2011/03/15 23:02:12  genevb
+// Use __ delimeters, more careful about modifier spec
+//
 // Revision 1.2  2011/02/25 23:00:47  genevb
 // Allow histogram name modification
 //
