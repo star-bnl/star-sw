@@ -1,7 +1,13 @@
 
-* $Id: gstar_part.g,v 1.31 2010/11/18 15:12:04 jwebb Exp $
+* $Id: gstar_part.g,v 1.32 2011/03/15 22:39:54 jwebb Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.32  2011/03/15 22:39:54  jwebb
+* (1) Corrected mistakes in the Omega_plus, Omega_minus and XiMinus and XiPlus
+*     definitions of particles.
+* (2) Removed pdg ID from all embedding versions of particles, as these
+*     conflict with pythia simulations.
+*
 * Revision 1.31  2010/11/18 15:12:04  jwebb
 * Added omega(728) w/ 100% decay to e+e-.
 *
@@ -291,16 +297,18 @@ MODULE gstar_part Is the STAR Particle Database
 * Definition of 'nonstandard' particles are assigned GID 40000+
 * Redefinition of 'standard' particles are assigned GID 10000+
 
-  PARTICLE Omega_plus code=40001 pdg=+3334 ,
-                  mass=1.67245             ,
-                  tlife=0.0821E-9          ,
-                  charge=-1                ,
-                  trktyp=3                 ,
-                  bratio={1.0,}            ,
-                  mode={9811,}
+
+  """ Omega_plus --> lambdaBar K+ substitutes for standard GID 32 """
+  PARTICLE Omega_plus  code=40001 pdg=0     ,
+                  mass=1.67245              ,
+                  tlife=0.0821E-9           ,
+                  charge=+1                 ,
+                  trktyp=3                  ,
+                  bratio={1.0,}             ,
+                  mode={9711,} 
  
         PARTICLE _lam_to_p_piminus_ code=98 ,
-             pdg     = +3122                ,
+             pdg     = 0                    ,
              mass    = 1.115683             ,  
              tlife   = 0.26320E-9           ,
              charge  = 0                    ,
@@ -308,16 +316,17 @@ MODULE gstar_part Is the STAR Particle Database
              mode    = {1409,}              ,
              trktyp  = kGtNEUT
 
-  PARTICLE Omega_minus code=40002 pdg=-3334 ,
+  """ Omega_minus --> lambda + K- substitutes for standard GID 24 """
+  PARTICLE Omega_minus code=40002 pdg=0     ,
                   mass=1.67245              ,
                   tlife=0.0821E-9           ,
                   charge=-1                 ,
                   trktyp=3                  ,
                   bratio={1.0,}             ,
-                  mode={9712,} 
+                  mode={9812,} 
 
         PARTICLE _lam_to_pb_piplus_ code=97 ,
-             pdg     = -3122                ,
+             pdg     = 0                    ,
              mass    = 1.115683             ,  
              tlife   = 0.26320E-9           ,
              charge  = 0                    ,
@@ -326,22 +335,23 @@ MODULE gstar_part Is the STAR Particle Database
              trktyp  = kGtNEUT
 
 
-  Particle XiMinus    code   = 40003     pdg   = +3312     ,
+
+  Particle XiMinus    code   = 40003     pdg   = 0         ,
                       trktyp = kGtHADR   mass  = 1.32171   ,
                       charge = -1        tlife = 0.1639E-9 ,
-                      bratio = {1,}      mode  = {9708,}           
+                      bratio = {1,}      mode  = {9809,}           
 
-  Particle XiMinusBar code   = 40004     pdg   = -3312     ,
+  Particle XiMinusBar code   = 40004     pdg   = 0         ,
                       trktyp = kGtHADR   mass  = 1.32171   ,
                       charge = +1        tlife = 0.1639E-9 ,
-                      bratio = {1,}      mode  = {9809,}           
+                      bratio = {1,}      mode  = {9708,}           
                      
-  Particle XiZero     code   = 40005     pdg   =+3322      ,
+  Particle XiZero     code   = 40005     pdg   = 0         ,
                       trktyp = kGtNEUT   mass  = 1.31486   ,
                       charge = 0         tlife = 0.290E-9  ,
                       bratio = {1,}      mode  = {9807,}
 
-  Particle XiZeroBar  code   = 40006     pdg   =-3322      ,
+  Particle XiZeroBar  code   = 40006     pdg   = 0         ,
                       trktyp = kGtNEUT   mass  = 1.31486   ,
                       charge = 0         tlife = 0.290E-9  ,
                       bratio = {1,}      mode  = {9707,}
@@ -349,22 +359,22 @@ MODULE gstar_part Is the STAR Particle Database
 
   ! omega(782) --> e+ e- 100%
   Particle omega  code=10150 TrkTyp=3 mass=.782   charge=0  tlife=7.79E-23,
-                  pdg=223  bratio  = { 1.00, },  
+                  pdg=0    bratio  = { 1.00, },  
                            mode    = { 0203, }
 
   ! phi --> K+ K- 100%
   PARTICLE phi    code=10151 trktyp=3 mass=1.0194 charge=0  tlife=1.482e-22,
-                  pdg=333  bratio = { 1.00, },
+                  pdg=0    bratio = { 1.00, },
                   mode   = { 1112, }  
 
   ! phi --> e+e- 100%
   PARTICLE phi    code=11151 trktyp=3 mass=1.0194 charge=0  tlife=1.482e-22,
-                  pdg=333  bratio = { 1.00, } mode   = { 0203, }  
+                  pdg=0    bratio = { 1.00, } mode   = { 0203, }  
 
 
 
   PARTICLE Lambda     code    = 10018                ,
-                      pdg     = +3122                ,
+                      pdg     = 0                    ,
                       mass    = 1.115683             ,  
                       tlife   = 0.26320E-9           ,
                       charge  = 0                    ,
@@ -373,7 +383,7 @@ MODULE gstar_part Is the STAR Particle Database
                       trktyp  = kGtNEUT
  
   PARTICLE LambdaBar  code    = 10026                ,
-                      pdg     = -3122                ,
+                      pdg     = 0                    ,
                       mass    = 1.115683             ,  
                       tlife   = 0.26320E-9           ,
                       charge  = 0                    ,
@@ -383,7 +393,7 @@ MODULE gstar_part Is the STAR Particle Database
 
   ! The eta dalitz decay
   PARTICLE eta_dalitz code    = 10017                ,
-                      pdg     = +221                 ,
+                      pdg     = 0                    ,
                       mass    = 0.5475               ,
                       tlife   = 0.54850E-18          ,
                       charge  = 0                    , 
@@ -395,7 +405,7 @@ MODULE gstar_part Is the STAR Particle Database
   !          |
   !          +--> K+K-       100%
   PARTICLE D_s_plus   code    = 10039                ,
-                      pdg     = +431                 ,
+                      pdg     = 0                    ,
                       mass    = 1.969                ,
                       tlife   = 0.43600E-12          ,
                       charge  = +1                   ,
@@ -407,7 +417,7 @@ MODULE gstar_part Is the STAR Particle Database
   !          |
   !          +--> K+K-       100%
   PARTICLE D_s_minus  code    = 10040                ,
-                      pdg     = -431                 ,
+                      pdg     = 0                    ,
                       mass    = 1.969                ,
                       tlife   = 0.43600E-12          ,
                       charge  = -1                   ,
@@ -421,7 +431,7 @@ MODULE gstar_part Is the STAR Particle Database
                                 mass      = 1.0194         ,
                                 charge    = 0              ,
                                 tlife     = 1.482e-22      ,
-                                pdg       = 333            ,
+                                pdg       = 0              ,
                                 bratio    = {1.00,}        ,     
                                 mode      = {1112,}        ,
                                 trktyp    = kGtNEUT   
