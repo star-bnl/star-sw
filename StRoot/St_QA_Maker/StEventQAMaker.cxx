@@ -259,14 +259,15 @@ Int_t StEventQAMaker::Make() {
       
       // AuAu or generic
       
-      if (isTriggerInSubRange(trigId,0,99)) {
+      if (isTriggerInSubRange(trigId,0,99) ||
+         (run_year >= 12 && isTriggerInSubRange(trigId,100,199))) {
 	mTrigWord->Fill(1.); // "MinBias"
 	doEvent = kTRUE;
 	evClasses[nEvClasses] = 1;
 	nEvClasses++;
 	histsSet = StQA_AuAu;
       }
-      if (isTriggerInSubRange(trigId,100,199)) {
+      if (isTriggerInSubRange(trigId,100,199) && run_year < 12) {
 	mTrigWord->Fill(2.); // "Central"
 	doEvent = kTRUE;
 	evClasses[nEvClasses] = 2;
@@ -2382,8 +2383,11 @@ Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.98 2011/02/22 20:00:54 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.99 2011/03/15 23:08:12 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.99  2011/03/15 23:08:12  genevb
+// Adjust MB for Run 11
+//
 // Revision 2.98  2011/02/22 20:00:54  genevb
 // PCT check and dcaGeom only for TPC tracks
 //
