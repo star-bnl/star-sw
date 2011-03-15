@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.10 2010/08/03 13:51:31 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.11 2011/03/15 22:41:43 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,10 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.11  2011/03/15 22:41:43  jwebb
+ * (1) Added Omega+/- and Xi+/- embedding definitions.
+ * (2) 1st attempt at improving the Doxygenization of the particle table.
+ *
  * Revision 1.10  2010/08/03 13:51:31  jwebb
  * LambdaBar(1520) provided in particle table with Geant ID=996.
  *
@@ -71,92 +75,137 @@ StParticleTable::StParticleTable()
     //
     typedef mGeantPdgMapType::value_type geantPdgPairType;
 
-#define Geant2Pdg(X,Y) { mGeantPdgMap.insert(geantPdgPairType(X,Y)); }
-    
-    Geant2Pdg(1, 22);      // gamma
-    Geant2Pdg(2, -11);     // e+
-    Geant2Pdg(3, 11);      // e-
-    Geant2Pdg(4, 12);      // neutrino (ambigious)
-    Geant2Pdg(5, -13);     // mu+
-    Geant2Pdg(6, 13);      // mu-
-    Geant2Pdg(7, 111);     // pi0
-    Geant2Pdg(8, 211);     // pi+
-    Geant2Pdg(9, -211);    // pi-
-    Geant2Pdg(10, 130);    // K0_long
-    Geant2Pdg(11, 321);    // K+
-    Geant2Pdg(12, -321);   // K-
-    Geant2Pdg(13, 2112);   // n
-    Geant2Pdg(14, 2212);   // p
-    Geant2Pdg(15, -2212);  // anti_p
-    Geant2Pdg(16, 310);    // K0_short
-    Geant2Pdg(17, 221);    // eta
-    Geant2Pdg(18, 3122);   // lambda
-    Geant2Pdg(19, 3222);   // sigma+
-    Geant2Pdg(20, 3212);   // sigma0
-    Geant2Pdg(21, 3112);   // sigma-
-    Geant2Pdg(22, 3322);   // Xi0
-    Geant2Pdg(23, 3312);   // Xi-
-    Geant2Pdg(24, 3334);   // Omega
-    Geant2Pdg(25, -2112);  // anti_n
-    Geant2Pdg(26, -3122);  // anti_lambda
-    Geant2Pdg(27, -3222);  // anti_sigma-
-    Geant2Pdg(28, -3212);  // anti_sigma0
-    Geant2Pdg(29, -3112);  // anti_sigma+
-    Geant2Pdg(30, -3322);  // anti_Xi0
-    Geant2Pdg(31, -3312);  // anti_Xi+
-    Geant2Pdg(32, -3334);  // anti_omega+ 
-    Geant2Pdg(33, -15);    // anti_tau (STAR def.)
-    Geant2Pdg(34, 15);     // tau (STAR def.)
-    Geant2Pdg(35, 411);    // D+  (STAR def.)
-    Geant2Pdg(36, -411);   // D-  (STAR def.)
-    Geant2Pdg(37, 421);    // D0  (STAR def.)
-    Geant2Pdg(38, -421);   // anti_D0 (STAR def.)
-    Geant2Pdg(39, 431);    // Ds+ (STAR def.)
-    Geant2Pdg(40, -431);   // Ds- (STAR def.)
-    Geant2Pdg(41, 4122);   // lambda_c+ (STAR def.)
-    Geant2Pdg(42, 24);     // W+  (STAR def.)
-    Geant2Pdg(43, -24);    // W-  (STAR def.)
-    Geant2Pdg(44, 23);     // Z0  (STAR def.)
+#define Geant2Pdg(X,Y, NAME) {				\
+      /** NAME	*/					\
+      /** Geant ID: X	*/				\
+      /** PDG ID:   Y	*/				\
+      /** */						\
+      mGeantPdgMap.insert(geantPdgPairType(X,Y));	\
+    }
 
-    Geant2Pdg(52, kHyperTriton); // Star def. HyperTriton (fake pdg id)
 
-    Geant2Pdg( 60, +413 ); // D*+
-    Geant2Pdg( 61, -413 ); // D*-
-    Geant2Pdg( 62, +423 ); // D*0
-    Geant2Pdg( 63, -423 ); // D*0 bar
+    ///@addtogroup STANDARD
+    ///@{
+    Geant2Pdg(1, 22, gamma);      
+    Geant2Pdg(2, -11, e+);     // e+
+    Geant2Pdg(3, 11, e-);      // e-
+    Geant2Pdg(4, 12, neutrino);      // neutrino (ambigious)
+    Geant2Pdg(5, -13, mu+);     // mu+
+    Geant2Pdg(6, 13, mu-);      // mu-
+    Geant2Pdg(7, 111, pi0);     // pi0
+    Geant2Pdg(8, 211, pi+);     // pi+
+    Geant2Pdg(9, -211, pi-);    // pi-
+    Geant2Pdg(10, 130, K0_Long);    // K0_long
+    Geant2Pdg(11, 321, Kaon+ );    // K+
+    Geant2Pdg(12, -321, Kaon- );   // K-
+    Geant2Pdg(13, 2112, neutron);   // n
+    Geant2Pdg(14, 2212, proton);   // p
+    Geant2Pdg(15, -2212, antiproton);  // anti_p
+    Geant2Pdg(16, 310, K0_short);    // K0_short
+    Geant2Pdg(17, 221, eta);    // eta
+    Geant2Pdg(18, 3122, lambda);   // lambda
+    Geant2Pdg(19, 3222, sigma+);   // sigma+
+    Geant2Pdg(20, 3212, sigma0);   // sigma0
+    Geant2Pdg(21, 3112, sigma-);   // sigma-
+    Geant2Pdg(22, 3322, Xi0);   // Xi0
+    Geant2Pdg(23, 3312, XiMinus);   // Xi-
+    Geant2Pdg(24, 3334, Omega);   // Omega
+    Geant2Pdg(25, -2112, AntiNeutron );  // anti_n
+    Geant2Pdg(26, -3122, AntiLambda );  // anti_lambda
+    Geant2Pdg(27, -3222, AntiSigma- );  // anti_sigma-
+    Geant2Pdg(28, -3212, AntiSigma0 );  // anti_sigma0
+    Geant2Pdg(29, -3112, AntiSigma+ );  // anti_sigma+
+    Geant2Pdg(30, -3322, AntiXi0 );  // anti_Xi0
+    Geant2Pdg(31, -3312, AntiXi+ );  // anti_Xi+
+    Geant2Pdg(32, -3334, AntiOmega+ );  // anti_omega+ 
+    Geant2Pdg(33, -15,   AntiTau    );    // anti_tau (STAR def.)
+    Geant2Pdg(34, 15,    Tau);     // tau (STAR def.)
+    Geant2Pdg(35, 411,   D+ );    // D+  (STAR def.)
+    Geant2Pdg(36, -411,  D- );   // D-  (STAR def.)
+    Geant2Pdg(37, 421,   D0);    // D0  (STAR def.)
+    Geant2Pdg(38, -421,  AntiD0 );   // anti_D0 (STAR def.)
+    Geant2Pdg(39, 431,   Ds+ );    // Ds+ (STAR def.)
+    Geant2Pdg(40, -431,  Ds- );   // Ds- (STAR def.)
+    Geant2Pdg(41, 4122,  Lambda_c+ );   // lambda_c+ (STAR def.)
+    Geant2Pdg(42, 24,    W+ );     // W+  (STAR def.)
+    Geant2Pdg(43, -24,   W- );    // W-  (STAR def.)
+    Geant2Pdg(44, 23,    Z0 );     // Z0  (STAR def.)
+    ///@} 
 
-    Geant2Pdg(70, +521);    // B+ meson
-    Geant2Pdg(71, -521);    // B- meson
-    Geant2Pdg(72, +511);    // B0 meson
-    Geant2Pdg(73, -511);    // B0-bar meson
+    Geant2Pdg(52, kHyperTriton, HyperTriton ); // Star def. HyperTriton (fake pdg id)
 
-    Geant2Pdg(150, 223);   // omega meson (STAR def.)
-    Geant2Pdg(151, 333);   // phi meson (STAR def.)
-    Geant2Pdg(152, 113);   // rho meson (STAR def.)
-    Geant2Pdg(153, 213);   // rho+ meson (STAR def.)
-    Geant2Pdg(154, -213);  // rho- meson (STAR def.)
-    Geant2Pdg(155, 311);   // K0 (STAR def.)
-    Geant2Pdg(156, -311);  // anti_K0 (STAR def.)
+    Geant2Pdg( 60, +413, DStar+ ); // D*+
+    Geant2Pdg( 61, -413, DStar- ); // D*-
+    Geant2Pdg( 62, +423, DStar0 ); // D*0
+    Geant2Pdg( 63, -423, DStar0Bar ); // D*0 bar
 
-    Geant2Pdg( 160, 443 );     // JPsi
-    Geant2Pdg( 149, kDalitz ); // pi0 --> e+ e- gamma
+    Geant2Pdg(70, +521, B+);    // B+ meson
+    Geant2Pdg(71, -521, B-);    // B- meson
+    Geant2Pdg(72, +511, B0);    // B0 meson
+    Geant2Pdg(73, -511, B0Bar );    // B0-bar meson
 
-    Geant2Pdg( 161,    553); // Upsilon(1S)
-    Geant2Pdg( 162, 100553); // Upsilon(2S)
-    Geant2Pdg( 163, 200553); // Uspilon(3S)
-    Geant2Pdg( 164,    553); // Upsilon(1S) -- mu+ mu- channel w/ incorrect partial width
-    Geant2Pdg( 165, 100553); // Upsilon(2S) -- mu+ mu- channel w/ incorrect partial width
-    Geant2Pdg( 166, 200553); // Uspilon(3S) -- mu+ mu- channel w/ incorrect partial width
+    Geant2Pdg(150, 223, omega);   // omega meson (STAR def.)
+    Geant2Pdg(151, 333, phi);   // phi meson (STAR def.)
+    Geant2Pdg(152, 113, rho);   // rho meson (STAR def.)
+    Geant2Pdg(153, 213, rho+);   // rho+ meson (STAR def.)
+    Geant2Pdg(154, -213, rho-);  // rho- meson (STAR def.)
+    Geant2Pdg(155, 311, K0);   // K0 (STAR def.)
+    Geant2Pdg(156, -311, K0Bar);  // anti_K0 (STAR def.)
 
-    Geant2Pdg( 701, +3224 ); // Sigma 1385 +
-    Geant2Pdg( 702, +3114 ); // Sigma 1385 -
-    Geant2Pdg( 703, -3114 ); // Sigma 1385 plus bar
-    Geant2Pdg( 704, -3224 ); // Sigma 1385 minus bar 
+    Geant2Pdg( 160, 443, JPsi );     // JPsi
+    Geant2Pdg( 149, kDalitz, Pi0Dalitz ); // pi0 --> e+ e- gamma
 
-    Geant2Pdg( 707, 100311 ); // K0 --> pi+ pi- 
+    Geant2Pdg( 161,    553, Upsilon1S); // Upsilon(1S)
+    Geant2Pdg( 162, 100553, Upsilon2S); // Upsilon(2S)
+    Geant2Pdg( 163, 200553, Upsilon3S); // Uspilon(3S)
+    Geant2Pdg( 164,    553, Upsilon1S); // Upsilon(1S) -- mu+ mu- channel w/ incorrect partial width
+    /// mu+mu- channel 
+    Geant2Pdg( 165, 100553, Upsilon2S); // Upsilon(2S) -- mu+ mu- channel w/ incorrect partial width
+    /// mu+mu- channel 
+    Geant2Pdg( 166, 200553, Upsilon3S); // Uspilon(3S) -- mu+ mu- channel w/ incorrect partial width
+    /// mu+mu- channel 
 
-    Geant2Pdg( +995, +20003122 ); // Lambda 1520 
-    Geant2Pdg( +996, -20003122 ); // Lambda 1520 
+    Geant2Pdg( 701, +3224, Sigma(1385)+ ); // Sigma 1385 +
+    Geant2Pdg( 702, +3114, Sigma(1385)- ); // Sigma 1385 -
+    Geant2Pdg( 703, -3114, SigmaBar(1385)+ ); // Sigma 1385 plus bar
+    Geant2Pdg( 704, -3224, SigmaBar(1385)- ); // Sigma 1385 minus bar 
+
+    Geant2Pdg( 707, 100311, K0-->pi+pi- ); // K0 --> pi+ pi- 
+
+    Geant2Pdg( +995, +20003122, Lambda(1520) ); // Lambda 1520 
+    Geant2Pdg( +996, -20003122, LamdaBar(1520) ); // Lambda 1520 
+
+    ///@addtogroup Embedding
+    /// Embedding particle definitions
+    ///@{
+
+    Geant2Pdg(40001,  3334, Omega-); 
+    /// \f$ \Omega^{-} \rightarrow \Lambda K^{-} \f$ 100%
+    /// \f$ \Lambda    \rightarrow p \pi^{-} \$ 100%
+    ///
+    Geant2Pdg(40002, -3334, Omega+); 
+    /// \f$ \Omega^{+} \rightarrow \bar{\Lambda} K^{+} \f$ 100%
+    /// \f$ \bar{\Lambda}    \rightarrow \bar{p} \pi^{+} \$ 100%
+    ///
+
+    Geant2Pdg( 40003, +3312, XiMinus );
+    /// \f$ \Xi^{-} \rightarrow \Lambda \pi^{-} \f$ 100%
+    /// \f$ \Lambda    \rightarrow p \pi^{-} \$ 100%
+    ///
+    Geant2Pdg( 40004, -3312, XiPlus  );
+    /// \f$ \Xi^{+} \rightarrow \bar{\Lambda} \pi^{+} \f$ 100%
+    /// \f$ \bar{\Lambda}    \rightarrow \bar{p} \pi^{+} \$ 100%
+    ///
+    Geant2Pdg( 40005, +3322, XiZero );
+    /// \f$ \Xi^{0} \rightarrow \Lambda \pi^{0} \$
+    /// \f$ \Lambda    \rightarrow p \pi^{-} \$ 100%
+    ///
+    Geant2Pdg( 40006, +3322, XiZeroBar );
+    /// \f$ \bar{\Xi}^{0} \rightarrow \bar{\Lambda} \pi^{0} \$
+    /// \f$ \bar{\Lambda}    \rightarrow \bar{p} \pi^{+} \$ 100%
+    ///
+
+    ///@}
 
 #undef Geant2Pdg
 
