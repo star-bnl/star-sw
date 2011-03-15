@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.37 2011/02/19 02:22:18 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.38 2011/03/15 21:02:14 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.38  2011/03/15 21:02:14  genevb
+// Remove some unused EmcCat4 plots
+//
 // Revision 2.37  2011/02/19 02:22:18  genevb
 // Allow for specification of histogram usage by the required detector sets
 //
@@ -225,10 +228,6 @@
   ":emc:EmcCat4_Point_Phi",
   ":emc:EmcCat4_Sigma_Eta",
   ":emc:EmcCat4_Sigma_Phi",
-  ":emc:EmcCat4_Delta_Eta",
-  ":emc:EmcCat4_Delta_Phi",
-  ":emc:EmcCat4_Points_Multiplicity",
-  ":emc:EmcCat4_Track_Momenta",
   " Point Flag",
   "QaGRpvtxDx",
   "QaGRpvtxDy",
