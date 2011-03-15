@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.81 2011/02/23 20:56:56 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.82 2011/03/15 21:05:25 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.82  2011/03/15 21:05:25  genevb
+// TPC hit phi sector labels
+//
 // Revision 2.81  2011/02/23 20:56:56  genevb
 // Default to general histograms for references in absence of trig typed
 //
@@ -976,6 +979,25 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             }
             latex.SetTextSize(sz);
             ruler.SetLineStyle(1);
+          }
+
+          if (oName.EndsWith("QaPointPhiT")) {
+            float hmin = hobj->GetMinimum() ;
+            float hmax = hobj->GetMaximum() ;
+            float hmid = hmin+0.12*(hmax-hmin);
+            float sz = latex.GetTextSize();
+            latex.SetTextSize(0.045);
+            latex.SetTextColor(2);
+            latex.SetTextAngle(90);
+            latex.SetTextAlign(22);
+            for (int secn = 1; secn < 13; secn++) {
+              float phisec = 87 - secn*30;
+              while (phisec < 1) phisec += 360;
+              latex.DrawLatex(phisec,hmid,Form("%d  /  %d",secn,(23-secn)%12 + 13));
+            }
+            latex.SetTextSize(sz);
+            latex.SetTextColor(1);
+            latex.SetTextAngle(0);
           }
 
           if (padAdvance) {if (gPad) gPad->Update();}
