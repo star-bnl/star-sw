@@ -41,7 +41,8 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",
   ChainOpt = "MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
   ChainOpt += "Corr4,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
   //  ChainOpt += "EvOut,MuDST,MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
-  ChainOpt += "MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
+  //  ChainOpt += "MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
+  ChainOpt += "MiniMcMk,IdTruth,useInTracker,-hitfilt,CMuDst,Tree,tags,evout,";
   if (RunOpt.Contains("fcf",TString::kIgnoreCase)) {
     ChainOpt += "tpl,tpcI,";
     RunOpt.ReplaceAll("TpcRS,","");
@@ -63,7 +64,7 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",
     RootFile = Form("%s",gSystem->BaseName(FileIn.Data())); 
     RootFile.ReplaceAll(".daq","");
   } else {
-    ChainOpt += ",McAna,";
+    //    ChainOpt += ",McAna,";
     if (FileIn.Contains(".fz",TString::kIgnoreCase)) {
       RootFile = Form("%s",gSystem->BaseName(FileIn.Data())); 
       ChainOpt += "fzin,";

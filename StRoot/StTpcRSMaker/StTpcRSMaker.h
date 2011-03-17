@@ -55,7 +55,7 @@ class StTpcRSMaker : public StMaker {
   TF1F *GetPolya(Int_t io = 0)       {return (TF1F *) mPolya[io];}
   TF1F *GetTimeShape0(Int_t io = 0)  {return fgTimeShape0[io];}
   TF1F *GetTimeShape3(Int_t io = 0)  {return fgTimeShape3[io];}
-  Double_t GetNoPrimaryClusters(Double_t betaGamma);
+  Double_t GetNoPrimaryClusters(Double_t betaGamma, Int_t charge);
   virtual void Print(Option_t *option="") const;
   void DigitizeSector(Int_t sector);
   void SetLaserScale(Double_t m=1) {mLaserScale = m;}
@@ -129,14 +129,17 @@ class StTpcRSMaker : public StMaker {
  public:    
   virtual const char *GetCVS() const {
     static const char cvs[]= 
-      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.18 2010/06/14 23:34:26 fisyak Exp $ built __DATE__ __TIME__"; 
+      "Tag $Name:  $ $Id: StTpcRSMaker.h,v 1.19 2011/03/17 14:29:31 fisyak Exp $ built __DATE__ __TIME__"; 
       return cvs;
   }
   ClassDef(StTpcRSMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif
-// $Id: StTpcRSMaker.h,v 1.18 2010/06/14 23:34:26 fisyak Exp $
+// $Id: StTpcRSMaker.h,v 1.19 2011/03/17 14:29:31 fisyak Exp $
 // $Log: StTpcRSMaker.h,v $
+// Revision 1.19  2011/03/17 14:29:31  fisyak
+// Add extrapolation in region beta*gamma < 0.3
+//
 // Revision 1.18  2010/06/14 23:34:26  fisyak
 // Freeze at Version V
 //
