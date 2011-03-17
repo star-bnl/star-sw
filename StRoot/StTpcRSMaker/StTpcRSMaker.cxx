@@ -47,7 +47,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.47 2011/03/13 15:46:44 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.48 2011/03/17 14:29:31 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -514,7 +514,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   g2t_tpc_hit_st *tpc_hit = tpc_hit_begin;
   // sort 
   TTableSorter sorter(g2t_tpc_hit,&SearchT,&CompareT);//, 0, no_tpc_hits);
-  //Float_t amass, charge, tlife; 
   Int_t sortedIndex = 0;
   tpc_hit = tpc_hit_begin;
   for (Int_t sector = 1; sector <= NoOfSectors; sector++) {
@@ -808,7 +807,7 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	// end of dE/dx correction
 	// generate electrons: No. of primary clusters per cm
 	if (TESTBIT(m_Mode, kBICHSEL)) {
-	  NP = GetNoPrimaryClusters(betaGamma); // per cm
+	  NP = GetNoPrimaryClusters(betaGamma,charge); // per cm
 	  if (NP <= 0.0) {
 	    iBreak++; continue;
 	  }
@@ -838,7 +837,6 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
 	      else                           dE = St_TpcResponseSimulatorC::instance()->W()*
 		gRandom->Poisson(St_TpcResponseSimulatorC::instance()->Cluster());
 	    }
-	    dE *= charge*charge;
 	  }
 	  else { // charge == 0 geantino
 	    // for Laserino assume dE/dx = 25 keV/cm;
@@ -1045,9 +1043,24 @@ Int_t StTpcRSMaker::Make(){  //  PrintInfo();
   return kStOK;
 }
 //________________________________________________________________________________
-Double_t StTpcRSMaker::GetNoPrimaryClusters(Double_t betaGamma) {
-  if (! mdNdx) return 0;
-  return mdNdx->Interpolate(betaGamma);
+Double_t StTpcRSMaker::GetNoPrimaryClusters(Double_t betaGamma, Int_t charge) {
+  static Double_t slope = 8.91704e-01;
+  static Double_t betaGammaMin = mdNdx->GetBinCenter(1);
+  static Double_t betaMin  = betaGammaMin/TMath::Sqrt(1.0 - betaGammaMin*betaGammaMin);
+  Double_t dNdx = charge*charge*mdNdx->Interpolate(betaGamma);
+  Double_t beta = betaGamma/TMath::Sqrt(1.0 - betaGamma*betaGamma);
+  if (betaGamma <  betaGammaMin) {
+    dNdx *= TMath::Power(betaMin/beta,2*slope);
+  }
+  Double_t Q_eff = TMath::Abs(charge);
+  if (Q_eff > 1)   {
+    // Effective charge from GEANT ghion.F
+    Double_t w1 = 1.034 - 0.1777*TMath::Exp(-0.08114*Q_eff);
+    Double_t w2 = beta*TMath::Power(Q_eff,-2./3.);
+    Double_t w3 = 121.4139*w2 + 0.0378*TMath::Sin(190.7165*w2);
+    Q_eff      *= 1. -w1*TMath::Exp(-w3);
+  }
+  return Q_eff*Q_eff*dNdx;
 }
 //________________________________________________________________________________
 Double_t StTpcRSMaker::ShaperFunc(Double_t *x, Double_t *par) {
@@ -1469,8 +1482,11 @@ Double_t StTpcRSMaker::polya(Double_t *x, Double_t *par) {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.47 2011/03/13 15:46:44 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.48 2011/03/17 14:29:31 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.48  2011/03/17 14:29:31  fisyak
+// Add extrapolation in region beta*gamma < 0.3
+//
 // Revision 1.47  2011/03/13 15:46:44  fisyak
 // Replace step function by interpolation for dN/dx versus beta*gamma
 //
