@@ -19,8 +19,8 @@ private:
 
 public:
     StL2TriggerSimu() : mL2maker(0), mL2maker2009(0) {}
-    StL2TriggerSimu(StGenericL2Emulator *x){mL2maker=x;};
-    StL2TriggerSimu(StGenericL2Emulator2009 *x){mL2maker2009=x;};
+    StL2TriggerSimu(StGenericL2Emulator *x) : mL2maker(x), mL2maker2009(0) {}
+    StL2TriggerSimu(StGenericL2Emulator2009 *x) : mL2maker(0), mL2maker2009(x) {}
     void Init();
     void InitRun(int runnumber);
     void Clear(){};
@@ -39,6 +39,9 @@ public:
 
 //
 // $Log: StL2TriggerSimu.h,v $
+// Revision 1.10  2011/03/17 15:51:47  pibero
+// Fixed nontrivial constructors. Thanks, Mike.
+//
 // Revision 1.9  2010/04/17 16:41:51  pibero
 // *** empty log message ***
 //
