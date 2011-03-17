@@ -164,10 +164,10 @@ ExAtomPhotoAbsCS Silicon_PACS(14,
                               shelllist_dir_name + "shelllist.dat", 
                               pacs_table_dir_name + "Si.dat"); 
 ExAtomPhotoAbsCS Silicon_crystal_PACS(14, 
-                                      shelllist_dir_name + "shelllist.dat", 
+                                      shelllist_dir_name + 
+                                      "shelllist_solid.dat", 
                                       pacs_table_dir_name + "Si.dat",
-                                      "Si_crystal",
-                                      1.12e-06);
+                                      "Si_crystal");
 ExAtomPhotoAbsCS Phosphor_PACS(15, 
                                shelllist_dir_name + "shelllist.dat", 
                                pacs_table_dir_name + "P.dat"); 

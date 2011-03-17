@@ -52,7 +52,7 @@ HeedDeltaElectron::HeedDeltaElectron
 
 void HeedDeltaElectron::physics_mrange(double& fmrange)
 {
-  mfunname("void eedDeltaElectron::physics_mrange(double& fmrange)");
+  mfunname("void HeedDeltaElectron::physics_mrange(double& fmrange)");
   if(s_print_listing == 1)
     mcout<<"void HeedDeltaElectron::physics_mrange(double& fmrange)"<<endl;
   s_mult_low_path_length = 0;
@@ -109,55 +109,55 @@ void HeedDeltaElectron::physics_mrange(double& fmrange)
 
       Iprintnf(mcout, ek);
     }
-    double ek_resticted = ek;
-    if(ek_resticted < 0.0005) ek_resticted = 0.0005;
+    double ek_restricted = ek;
+    if(ek_restricted < 0.0005) ek_restricted = 0.0005;
     if(s_print_listing == 1)
     {
-      Iprintnf(mcout, ek_resticted/keV);
+      Iprintnf(mcout, ek_restricted/keV);
     }
 
-    long n1r = emesh->get_interval_number_between_centers(ek_resticted);
+    long n1r = emesh->get_interval_number_between_centers(ek_restricted);
     if(n1r < 0) n1r = 0;
     if(n1r > qener-2) n1r = qener-2;
     long n2r = n1r + 1;
-    double low_path_length;  // in internal units
+    double low_path_length = 0.;  // in internal units
     if(s_low_mult_scattering == 1)
     {
       low_path_length = (hdecs->low_lambda[n1r] + 
-			 (hdecs->low_lambda[n2r] - hdecs->low_lambda[n1r])/
-			 (emesh->get_ec(n2r) - emesh->get_ec(n1r)) *
-			 (ek_resticted - emesh->get_ec(n1r))) * cm;
+                        (hdecs->low_lambda[n2r] - hdecs->low_lambda[n1r])/
+                        (emesh->get_ec(n2r) - emesh->get_ec(n1r)) *
+                        (ek_restricted - emesh->get_ec(n1r))) * cm;
       if(s_print_listing == 1)
       {
-	Iprintnf(mcout, low_path_length/cm);
+        Iprintnf(mcout, low_path_length/cm);
       }
       long qscat = hdecs->eesls->get_qscat();
-      double sigma_ctheta = hdecs->get_sigma(ek_resticted, qscat);
+      double sigma_ctheta = hdecs->get_sigma(ek_restricted, qscat);
       if(sigma_ctheta > 0.3)  // to reduce the number of scatterings, if
       {                       // the angle is too large.
-	qscat = long(qscat * 0.3/sigma_ctheta);
+        qscat = long(qscat * 0.3/sigma_ctheta);
       }
       double mult_low_path_length = qscat * low_path_length;
       if(s_print_listing == 1)
       {
-	Iprintnf(mcout, mult_low_path_length);
+        Iprintnf(mcout, mult_low_path_length);
       }
       if(fmrange > mult_low_path_length) 
       {
-	fmrange = mult_low_path_length;
-	s_mult_low_path_length = 1;
-	q_low_path_length = hdecs->eesls->get_qscat();
-	s_stop_eloss = 0;
+        fmrange = mult_low_path_length;
+        s_mult_low_path_length = 1;
+        q_low_path_length = hdecs->eesls->get_qscat();
+        s_stop_eloss = 0;
       }
       else
       {
-	s_mult_low_path_length = 0;
-	q_low_path_length = fmrange / low_path_length;
+        s_mult_low_path_length = 0;
+        q_low_path_length = fmrange / low_path_length;
       }
       if(s_print_listing == 1)
       {
-	Iprintnf(mcout, fmrange);
-	Iprintnf(mcout, q_low_path_length);
+        Iprintnf(mcout, fmrange);
+        Iprintnf(mcout, q_low_path_length);
       }
     }
     
@@ -165,49 +165,49 @@ void HeedDeltaElectron::physics_mrange(double& fmrange)
     {
       if(s_print_listing == 1)
       {
-	Iprintf(mcout, currpos.pt);
-	Iprintnf(mcout, n1r);
-	Iprintnf(mcout, n2r);
-	Iprintnf(mcout, ek_resticted);
-	Iprintnf(mcout, emesh->get_ec(n1r));
-	Iprintnf(mcout, emesh->get_ec(n2r));
+        Iprintf(mcout, currpos.pt);
+        Iprintnf(mcout, n1r);
+        Iprintnf(mcout, n2r);
+        Iprintnf(mcout, ek_restricted);
+        Iprintnf(mcout, emesh->get_ec(n1r));
+        Iprintnf(mcout, emesh->get_ec(n2r));
       }
       double mean_path_length = (hdecs->lambda[n1r] + 
-	(hdecs->lambda[n2r] - hdecs->lambda[n1r])/
-	(emesh->get_ec(n2r) - emesh->get_ec(n1r)) *
-	(ek_resticted - emesh->get_ec(n1r))) * cm; 
+        (hdecs->lambda[n2r] - hdecs->lambda[n1r])/
+        (emesh->get_ec(n2r) - emesh->get_ec(n1r)) *
+        (ek_restricted - emesh->get_ec(n1r))) * cm; 
       if(s_print_listing == 1)
       {
-	Iprintnf(mcout, mean_path_length);
-	Iprintnf(mcout, mean_path_length/cm);
+        Iprintnf(mcout, mean_path_length);
+        Iprintnf(mcout, mean_path_length/cm);
       }
       double path_length = -mean_path_length * log(1.0 - SRANLUX()); 
       if(s_print_listing == 1)
       {
-	Iprintnf(mcout, path_length);
+        Iprintnf(mcout, path_length);
       }
       if(fmrange > path_length) 
       {
-	fmrange = path_length;
-	s_path_length = 1;
-	s_mult_low_path_length = 0;
-	if(s_low_mult_scattering == 1)
-	{
-	  q_low_path_length = fmrange / low_path_length;
-	  if(s_print_listing == 1)
-	  {
-	    Iprintnf(mcout, q_low_path_length);
-	  }
-	}
-	s_stop_eloss = 0;
+        fmrange = path_length;
+        s_path_length = 1;
+        s_mult_low_path_length = 0;
+        if(s_low_mult_scattering == 1)
+        {
+          q_low_path_length = fmrange / low_path_length;
+          if(s_print_listing == 1)
+          {
+            Iprintnf(mcout, q_low_path_length);
+          }
+        }
+        s_stop_eloss = 0;
       }
       else
       {
-	s_path_length = 0;
+        s_path_length = 0;
       }
       if(s_print_listing == 1)
       {
-	Iprintnf(mcout, fmrange);
+        Iprintnf(mcout, fmrange);
       }
     }
     phys_mrange = fmrange;
@@ -231,25 +231,25 @@ void HeedDeltaElectron::physics_after_new_speed(void)
     {
       absvol* av = currpos.G_lavol(); // get least address of volume
       SensitiveVolume* asv = 
-	dynamic_cast< SensitiveVolume*  >(av);
+        dynamic_cast< SensitiveVolume*  >(av);
       if(asv != NULL) 
       {
-	if(s_print_listing == 1)
-	{
-	  mcout<<"HeedDeltaElectron::physics_after_new_speed: \n";
-	  mcout<<"This is converted to conduction\n"; 
-	}
-	HeedCondElectron hce(currpos.ptloc, currpos.time);
-	//HeedCondElectron hce(currpos.pt, currpos.ptloc, currpos.tid, this);
-	asv->conduction_electron_bank.append( hce);
-	//conduction_electron_bank.insert_after
-	//( conduction_electron_bank.get_last_node(), hce);
+        if(s_print_listing == 1)
+        {
+          mcout<<"HeedDeltaElectron::physics_after_new_speed: \n";
+          mcout<<"This is converted to conduction\n"; 
+        }
+        HeedCondElectron hce(currpos.ptloc, currpos.time);
+        //HeedCondElectron hce(currpos.pt, currpos.ptloc, currpos.tid, this);
+        asv->conduction_electron_bank.append( hce);
+        //conduction_electron_bank.insert_after
+        //( conduction_electron_bank.get_last_node(), hce);
       }
       s_life = 0;
     }
     if(s_print_listing == 1)
     {
-      mcout<<"exit due to  currpos.prange <= 0.0\n";
+      mcout<<"exit due to currpos.prange <= 0.0\n";
     }
     return;
   }
@@ -305,9 +305,9 @@ void HeedDeltaElectron::physics_after_new_speed(void)
     else
     {
       dedx = hdecs->eLoss[n1] + 
-	(hdecs->eLoss[n2] - hdecs->eLoss[n1])/
-	(emesh->get_ec(n2) - emesh->get_ec(n1)) *
-	(ek - emesh->get_ec(n1));
+        (hdecs->eLoss[n2] - hdecs->eLoss[n1])/
+        (emesh->get_ec(n2) - emesh->get_ec(n1)) *
+        (ek - emesh->get_ec(n1));
       Eloss = dedx * MeV/cm;
       Eloss *= currpos.prange;
       total_Eloss += Eloss;
@@ -323,8 +323,8 @@ void HeedDeltaElectron::physics_after_new_speed(void)
       if(s_print_listing == 1)
       {
 	mcout<<"curr_kin_energy <= 0.0, curr_kin_energy="
-	     <<curr_kin_energy
-	     <<" curr_kin_energy/MeV="<<curr_kin_energy/MeV<<'\n';
+             <<curr_kin_energy
+             <<" curr_kin_energy/MeV="<<curr_kin_energy/MeV<<'\n';
       }
       curr_kin_energy = 0.0;
       curr_gamma_1 = 0.0;
@@ -345,101 +345,101 @@ void HeedDeltaElectron::physics_after_new_speed(void)
     {
       if(s_print_listing == 1)
       {
-	mcout<<"volume is sensitive\n";
-	Iprintnf(mcout, Eloss/eV); 
-	Iprintnf(mcout, necessary_energy/eV); 
+        mcout<<"volume is sensitive\n";
+        Iprintnf(mcout, Eloss/eV); 
+        Iprintnf(mcout, necessary_energy/eV); 
       }
       if(Eloss > 0.0)
       {
-	if(Eloss >= necessary_energy)
-	{  // can leave electrons
-	  // there is no need to recalculate mean energy loss per 1 cm, 
-	  // since necessary_energy is not an addition
-	  if(s_print_listing == 1)
-	  {
-	    mcout<<"\nstart to leave conduction electrons"<<endl;
-	    //Iprintnf(mcout, Eloss/eV); 
-	    //Iprintnf(mcout, necessary_energy/eV); 
-	    Iprintnf(mcout, dedx); 
-	  }
-	  if(necessary_energy <= 0.0)
-	  {
+        if(Eloss >= necessary_energy)
+        { // can leave electrons
+          // there is no need to recalculate mean energy loss per 1 cm, 
+          // since necessary_energy is not an addition
+          if(s_print_listing == 1)
+          {
+            mcout<<"\nstart to leave conduction electrons"<<endl;
+            //Iprintnf(mcout, Eloss/eV); 
+            //Iprintnf(mcout, necessary_energy/eV); 
+            Iprintnf(mcout, dedx); 
+          }
+          if(necessary_energy <= 0.0)
+          {
 #ifdef USE_ADJUSTED_W
-	    necessary_energy = hdecs->pairprod->get_eloss(prev_kin_energy/eV)
-	      * eV;
+            necessary_energy = hdecs->pairprod->get_eloss(prev_kin_energy/eV) 
+              * eV;
 #else 
-	    necessary_energy = hdecs->pairprod->get_eloss() 
-	      * eV;
+            necessary_energy = hdecs->pairprod->get_eloss() 
+              * eV;
 #endif
-	  }
-	  if(s_print_listing == 1)
-	  {
-	    Iprintnf(mcout, necessary_energy/eV);
-	  } 
-	  double Eloss_left = Eloss;
-	  point curpt = prevpos.pt;
-	  vec dir = prevpos.dir;   // this approximation ignores curvature
-	  double curr_kin_energy_for_cond = prev_kin_energy;
-	  
-	  if(s_print_listing == 1)
-	  {
-	    Iprintnf(mcout, curpt);
-	  } 
-	  // then at each step necessary_energy is energy due to expend till 
-	  // next conduction electron
-	  while(Eloss_left >= necessary_energy) // this condition provides 
-	    // also that the current electron energy is non negative
-	  {
-	    double step_length = necessary_energy / (dedx * MeV/cm); 
-	    if(s_print_listing == 1)
-	    {
-	      Iprintnf(mcout, step_length );
-	    } 
-	    curpt = curpt + dir * step_length;
-	    if(s_print_listing == 1)
-	    {
-	      Iprintf(mcout, curpt);
-	    } 
-	    point ptloc = curpt;
-	    prevpos.tid.up_absref(&ptloc);
-	    if(s_print_listing == 1)
-	    {
-	      mcout<<"New conduction electron will now be deposited\n";
-	      //Iprintnf(mcout, curpt);
-	    } 
-	    HeedCondElectron hce(ptloc, currpos.time);
-	    //HeedCondElectron hce(curpt, ptloc, prevpos.tid, this);
-	    asv->conduction_electron_bank.append( hce);
-	    //conduction_electron_bank.insert_after
-	    //  ( conduction_electron_bank.get_last_node(), hce);
-	    Eloss_left -= necessary_energy;
-	    curr_kin_energy_for_cond -= necessary_energy;
-	    // generate next random energy
+          }
+          if(s_print_listing == 1)
+          {
+            Iprintnf(mcout, necessary_energy/eV);
+          } 
+          double Eloss_left = Eloss;
+          point curpt = prevpos.pt;
+          vec dir = prevpos.dir;   // this approximation ignores curvature
+          double curr_kin_energy_for_cond = prev_kin_energy;
+ 
+          if(s_print_listing == 1)
+          {
+            Iprintnf(mcout, curpt);
+          } 
+          // then at each step necessary_energy is energy due to expend till 
+          // next conduction electron
+          while(Eloss_left >= necessary_energy) // this condition provides 
+            // also that the current electron energy is non negative
+          {
+            double step_length = necessary_energy / (dedx * MeV/cm); 
+            if(s_print_listing == 1)
+            {
+              Iprintnf(mcout, step_length );
+            } 
+            curpt = curpt + dir * step_length;
+            if(s_print_listing == 1)
+            {
+              Iprintf(mcout, curpt);
+            } 
+            point ptloc = curpt;
+            prevpos.tid.up_absref(&ptloc);
+            if(s_print_listing == 1)
+            {
+              mcout<<"New conduction electron will now be deposited\n";
+              //Iprintnf(mcout, curpt);
+            } 
+            HeedCondElectron hce(ptloc, currpos.time);
+            //HeedCondElectron hce(curpt, ptloc, prevpos.tid, this);
+            asv->conduction_electron_bank.append( hce);
+            //conduction_electron_bank.insert_after
+            //  ( conduction_electron_bank.get_last_node(), hce);
+            Eloss_left -= necessary_energy;
+            curr_kin_energy_for_cond -= necessary_energy;
+            // generate next random energy
 #ifdef USE_ADJUSTED_W
-	    necessary_energy = hdecs->pairprod->get_eloss
-	      (curr_kin_energy_for_cond/eV)
-	      * eV;
+            necessary_energy = hdecs->pairprod->get_eloss
+              (curr_kin_energy_for_cond/eV)
+              * eV;
 #else	    
-	    necessary_energy = hdecs->pairprod->get_eloss() 
-	      * eV;
+            necessary_energy = hdecs->pairprod->get_eloss() 
+              * eV;
 #endif
-	    if(s_print_listing == 1)
-	    {
-	      Iprintnf(mcout, Eloss_left/eV); 
-	      Iprint2nf(mcout, curr_kin_energy_for_cond/eV, 
-			necessary_energy/eV);
-	    } 
-	  }
-	  necessary_energy -= Eloss_left;
-	  if(s_print_listing == 1)
-	  {
-	    Iprintnf(mcout, necessary_energy/eV);
-	  } 
-	}
-	else
-	{
-	  necessary_energy -= Eloss;
-	}
+            if(s_print_listing == 1)
+            {
+              Iprintnf(mcout, Eloss_left/eV); 
+              Iprint2nf(mcout, curr_kin_energy_for_cond/eV, 
+                necessary_energy/eV);
+            } 
+          }
+          necessary_energy -= Eloss_left;
+          if(s_print_listing == 1)
+          {
+            Iprintnf(mcout, necessary_energy/eV);
+          } 
+        }
+        else
+        {
+          necessary_energy -= Eloss;
+        }
       }
     }
     if(s_print_listing == 1)
@@ -451,239 +451,238 @@ void HeedDeltaElectron::physics_after_new_speed(void)
     { 
       if(s_print_listing == 1)
       {
-	mcout<<"\nstart to rotate by low angle"<<endl;
+        mcout<<"\nstart to rotate by low angle"<<endl;
       }
-      double ek_resticted = ek;
-      if(ek_resticted < 0.0005) ek_resticted = 0.0005;
+      double ek_restricted = ek;
+      if(ek_restricted < 0.0005) ek_restricted = 0.0005;
       if(s_print_listing == 1)
       {
-	Iprintnf(mcout, currpos.prange);
-	Iprintnf(mcout, phys_mrange);
+        Iprintnf(mcout, currpos.prange);
+        Iprintnf(mcout, phys_mrange);
       }
       if(currpos.prange < phys_mrange)  // recalculate scatterings
       {
-	s_path_length = 0;
-	if(s_low_mult_scattering == 1)
-	{
-	  long n1r = emesh->get_interval_number_between_centers(ek_resticted);
-	  if(n1r < 0) n1r = 0;
-	  if(n1r > qener-2) n1r = qener-2;
-	  long n2r = n1r + 1;
-	  double low_path_length;  // in internal units
-	  if(s_low_mult_scattering == 1)
-	  {
-	    low_path_length = (hdecs->low_lambda[n1r] + 
-			       (hdecs->low_lambda[n2r] - hdecs->low_lambda[n1r])/
-			       (emesh->get_ec(n2r) - emesh->get_ec(n1r)) *
-			       (ek_resticted - emesh->get_ec(n1r))) * cm;
-	    if(s_print_listing == 1)
-	    {
-	      Iprintnf(mcout, low_path_length/cm);
-	    }
-	    s_mult_low_path_length = 0;
-	    q_low_path_length = currpos.prange / low_path_length;
-	    if(s_print_listing == 1)
-	    {
-	      Iprintnf(mcout, q_low_path_length);
-	    }
-	  }
-	}
+        s_path_length = 0;
+        if(s_low_mult_scattering == 1)
+        {
+          long n1r = emesh->get_interval_number_between_centers(ek_restricted);
+          if(n1r < 0) n1r = 0;
+          if(n1r > qener-2) n1r = qener-2;
+          long n2r = n1r + 1;
+          double low_path_length;  // in internal units
+          if(s_low_mult_scattering == 1)
+          {
+            low_path_length = (hdecs->low_lambda[n1r] + 
+                              (hdecs->low_lambda[n2r] - hdecs->low_lambda[n1r])/
+                              (emesh->get_ec(n2r) - emesh->get_ec(n1r)) *
+                              (ek_restricted - emesh->get_ec(n1r))) * cm;
+            if(s_print_listing == 1)
+            {
+              Iprintnf(mcout, low_path_length/cm);
+            }
+            s_mult_low_path_length = 0;
+            q_low_path_length = currpos.prange / low_path_length;
+            if(s_print_listing == 1)
+            {
+              Iprintnf(mcout, q_low_path_length);
+            }
+          }
+        }
       }
       if(s_print_listing == 1)
       {
-	Iprintnf(mcout, q_low_path_length);
+        Iprintnf(mcout, q_low_path_length);
       }
 #ifdef RANDOM_POIS
       long random_q_low_path_length = 0;
       if(q_low_path_length > 0.0)
       {
-	int ierror = 0;
-	random_q_low_path_length =
-	  pois( q_low_path_length, ierror);
-	check_econd11a(ierror , == 1 ,
-		       " q_low_path_length="<<q_low_path_length<<'\n' ,
-		       mcerr);
-	q_low_path_length = long(random_q_low_path_length);
-	if(s_print_listing == 1)
-	{
-	  mcout<<"After pois:\n";
-	  Iprintnf(mcout, q_low_path_length);
-	}
+        int ierror = 0;
+        random_q_low_path_length =
+          pois( q_low_path_length, ierror);
+        check_econd11a(ierror , == 1 ,
+                       " q_low_path_length="<<q_low_path_length<<'\n' ,
+                       mcerr);
+        q_low_path_length = long(random_q_low_path_length);
+        if(s_print_listing == 1)
+        {
+          mcout<<"After pois:\n";
+          Iprintnf(mcout, q_low_path_length);
+        }
       }
 #endif
       if(q_low_path_length > 0)
       {
 #ifdef DIRECT_LOW_IF_LITTLE
-	if(q_low_path_length < max_q_low_path_length_for_direct)
-	{  // direct modeling
-	  if(s_print_listing == 1)
-	  {
-	    mcout<<"direct modeling of low scatterings\n";
-	    Iprint(mcout, currpos.dir);
-	  }
-	  long n1r = 
-	    emesh->get_interval_number_between_centers(ek_resticted);
-	  if(n1r < 0) n1r = 0;
-	  if(n1r > qener-1) n1r = qener-1;
-	  long nscat;
-	  for(nscat = 0; nscat < q_low_path_length; nscat++)
-	  {
-	    if(s_print_listing == 1)
-	    {
-	      Iprintn(mcout, nscat);
-	    }
-	    double theta_rot = 
-	      hdecs->low_angular_points_ran[n1r].ran(SRANLUX())/180.0 * M_PI;
-	    if(s_print_listing == 1)
-	    {
-	      Iprint2nf(mcout, theta_rot, theta_rot/M_PI *180.0);
-	    }
-	    vec dir = currpos.dir;
-	    //Iprint(mcout, dir);
-	    basis temp(dir, "temp");
-	    vec vturn;
-	    vturn.random_round_vec();
-	    vturn = vturn * sin(theta_rot);
-	    vec new_dir(vturn.x, vturn.y, cos(theta_rot));
-	    new_dir.down(&temp);
-	    currpos.dir = new_dir;
-	    if(s_print_listing == 1)
-	    {
-	      Iprint(mcout, new_dir);
-	    }
-	  }
-	  currpos.dirloc = currpos.dir; 
-	  currpos.tid.up_absref(&currpos.dirloc);
-	}
-	else
-	{
+        if(q_low_path_length < max_q_low_path_length_for_direct)
+        {  // direct modeling
+          if(s_print_listing == 1)
+          {
+            mcout<<"direct modeling of low scatterings\n";
+            Iprint(mcout, currpos.dir);
+          }
+          long n1r = 
+            emesh->get_interval_number_between_centers(ek_restricted);
+          if(n1r < 0) n1r = 0;
+          if(n1r > qener-1) n1r = qener-1;
+          long nscat;
+          for(nscat = 0; nscat < q_low_path_length; nscat++)
+          {
+            if(s_print_listing == 1)
+            {
+              Iprintn(mcout, nscat);
+            }
+            double theta_rot = 
+              hdecs->low_angular_points_ran[n1r].ran(SRANLUX())/180.0 * M_PI;
+            if(s_print_listing == 1)
+            {
+              Iprint2nf(mcout, theta_rot, theta_rot/M_PI *180.0);
+            }
+            vec dir = currpos.dir;
+            //Iprint(mcout, dir);
+            basis temp(dir, "temp");
+            vec vturn;
+            vturn.random_round_vec();
+            vturn = vturn * sin(theta_rot);
+            vec new_dir(vturn.x, vturn.y, cos(theta_rot));
+            new_dir.down(&temp);
+            currpos.dir = new_dir;
+            if(s_print_listing == 1)
+            {
+              Iprint(mcout, new_dir);
+            }
+          }
+          currpos.dirloc = currpos.dir; 
+          currpos.tid.up_absref(&currpos.dirloc);
+        }
+        else
+        {
 #endif
-	  double sigma_ctheta = 
-	    hdecs->get_sigma(ek_resticted, q_low_path_length);
-	  // actually it is mean(1-cos(theta)) or
-	  // sqrt( mean( square(1-cos(theta) ) ) ) depending on USE_MEAN_COEF
-	  
-	  if(s_print_listing == 1)
-	  {
-	    Iprintnf(mcout, sigma_ctheta);
-	  }
-	  /*
-	  This is for Gauss.
-	  But actually exponential distribution fits better.
-
-	float r1 = SRANLUX(); 
-	float r2 = SRANLUX(); 
-	float x1, x2;
-	rnorm(r1, r2, x1, x2);
-	//Iprintn(mcout, x1);
-	double ctheta = 1.0 - fabs(x1 * sigma_ctheta);
-	// Bye the way,
-	// it seems that there were no condition > -1.0, this is error.
-	*/
-	// Exponential:
-	  double ctheta = 0.0;
-	  {
+          double sigma_ctheta = 
+            hdecs->get_sigma(ek_restricted, q_low_path_length);
+          // actually it is mean(1-cos(theta)) or
+          // sqrt( mean( square(1-cos(theta) ) ) ) depending on USE_MEAN_COEF
+ 
+          if(s_print_listing == 1)
+          {
+            Iprintnf(mcout, sigma_ctheta);
+          }
+          /*
+          This is for Gauss.
+          But actually exponential distribution fits better.
+          float r1 = SRANLUX(); 
+          float r2 = SRANLUX(); 
+          float x1, x2;
+          rnorm(r1, r2, x1, x2);
+          //Iprintn(mcout, x1);
+          double ctheta = 1.0 - fabs(x1 * sigma_ctheta);
+          // By the way,
+          // it seems that there were no condition > -1.0, this is error.
+          */
+          // Exponential:
+          double ctheta = 0.0;
+          {
 #ifdef USE_MEAN_COEF
 #else
-	    double sq2 = sqrt(2.0);
+            double sq2 = sqrt(2.0);
 #endif
-	    do
-	    {
-	      double  y=0.0;
-	      do  // in order to avoid SRANLUX() = 1
-	      { 
-		y = SRANLUX();
-		if(s_print_listing == 1)
-		{
-		  Iprintnf(mcout, y);
-		}
-	      } while(y == 1.0);
+            do
+            {
+              double y = 0.0;
+              do  // in order to avoid SRANLUX() = 1
+              { 
+                y = SRANLUX();
+                if(s_print_listing == 1)
+                {
+                  Iprintnf(mcout, y);
+                }
+              } while(y == 1.0);
 #ifdef USE_MEAN_COEF
-	      double x = sigma_ctheta * (-log(1.0 - y));
+              double x = sigma_ctheta * (-log(1.0 - y));
 #else
-	      double x = sigma_ctheta * 1.0/sq2 * (-log(1.0 - y));
+              double x = sigma_ctheta * 1.0/sq2 * (-log(1.0 - y));
 #endif
-	      ctheta = 1.0 - x;
-	      if(s_print_listing == 1)
-	      {
-		Iprint2nf(mcout, x, ctheta);
-	      }
-	    } while(ctheta <= -1.0);  // avoid absurd cos(theta)
-	    check_econd21(ctheta , < -1.0 || , > 1.0 , mcerr );
-	  }
-	  if(s_print_listing == 1)
-	  {
-	    Iprintnf(mcout, ctheta);
-	  }
-	  double theta_rot = acos(ctheta);
-	  if(s_print_listing == 1)
-	  {
-	    Iprint2nf(mcout, theta_rot, theta_rot/M_PI *180.0);
-	  }
-	  vec dir = currpos.dir;
-	  //Iprint(mcout, dir);
-	  basis temp(dir, "temp");
-	  //long n1r = emesh->get_interval_number_between_centers(ek_resticted);
-	  //double theta_rot = angular_points_ran[nr1].ran(SRANLUX());
-	  //Iprintn(mcout, theta_rot);
-	  //double phi = 2.0 * M_PI * SRANLUX();
-	  vec vturn;
-	  vturn.random_round_vec();
-	  vturn = vturn * sin(theta_rot);
-	  vec new_dir(vturn.x, vturn.y, cos(theta_rot));
-	  new_dir.down(&temp);
-	  currpos.dir = new_dir;
-	  //Iprint(mcout, new_dir);
-	  currpos.dirloc = currpos.dir; currpos.tid.up_absref(&currpos.dirloc);
-	}
+              ctheta = 1.0 - x;
+              if(s_print_listing == 1)
+              {
+                Iprint2nf(mcout, x, ctheta);
+              }
+            } while(ctheta <= -1.0);  // avoid absurd cos(theta)
+            check_econd21(ctheta , < -1.0 || , > 1.0 , mcerr );
+          }
+          if(s_print_listing == 1)
+          {
+            Iprintnf(mcout, ctheta);
+          }
+          double theta_rot = acos(ctheta);
+          if(s_print_listing == 1)
+          {
+            Iprint2nf(mcout, theta_rot, theta_rot/M_PI *180.0);
+          }
+          vec dir = currpos.dir;
+          //Iprint(mcout, dir);
+          basis temp(dir, "temp");
+          //long n1r = emesh->get_interval_number_between_centers(ek_restricted);
+          //double theta_rot = angular_points_ran[nr1].ran(SRANLUX());
+          //Iprintn(mcout, theta_rot);
+          //double phi = 2.0 * M_PI * SRANLUX();
+          vec vturn;
+          vturn.random_round_vec();
+          vturn = vturn * sin(theta_rot);
+          vec new_dir(vturn.x, vturn.y, cos(theta_rot));
+          new_dir.down(&temp);
+          currpos.dir = new_dir;
+          //Iprint(mcout, new_dir);
+          currpos.dirloc = currpos.dir; currpos.tid.up_absref(&currpos.dirloc);
+        }
 #ifdef DIRECT_LOW_IF_LITTLE
       }
 #endif
       if(s_path_length == 1)
       {
-	if(s_print_listing == 1)
-	{
-	  mcout<<"\nstarting to rotate by large angle"<<endl; 
-	  Iprintnf(mcout, s_path_length);
-	}
-	long n1r = emesh->get_interval_number_between_centers(ek_resticted);
-	if(n1r < 0) n1r = 0;
-	if(n1r > qener-1) n1r = qener-1;
-	double theta_rot = 
-	  hdecs->angular_points_ran[n1r].ran(SRANLUX())/180.0 * M_PI;
-	if(s_print_listing == 1)
-	{
-	  Iprintnf(mcout, theta_rot);
-	}
-	vec dir = currpos.dir;
-	//Iprint(mcout, dir);
-	basis temp(dir, "temp");
-	vec vturn;
-	vturn.random_round_vec();
-	vturn = vturn * sin(theta_rot);
-	vec new_dir(vturn.x, vturn.y, cos(theta_rot));
-	new_dir.down(&temp);
-	currpos.dir = new_dir;
-	//Iprint(mcout, new_dir);
-	currpos.dirloc = currpos.dir; currpos.tid.up_absref(&currpos.dirloc);
-      }            
+        if(s_print_listing == 1)
+        {
+          mcout<<"\nstarting to rotate by large angle"<<endl; 
+          Iprintnf(mcout, s_path_length);
+        }
+        long n1r = emesh->get_interval_number_between_centers(ek_restricted);
+        if(n1r < 0) n1r = 0;
+        if(n1r > qener-1) n1r = qener-1;
+        double theta_rot = 
+          hdecs->angular_points_ran[n1r].ran(SRANLUX())/180.0 * M_PI;
+        if(s_print_listing == 1)
+        {
+          Iprintnf(mcout, theta_rot);
+        }
+        vec dir = currpos.dir;
+        //Iprint(mcout, dir);
+        basis temp(dir, "temp");
+        vec vturn;
+        vturn.random_round_vec();
+        vturn = vturn * sin(theta_rot);
+        vec new_dir(vturn.x, vturn.y, cos(theta_rot));
+        new_dir.down(&temp);
+        currpos.dir = new_dir;
+        //Iprint(mcout, new_dir);
+        currpos.dirloc = currpos.dir; currpos.tid.up_absref(&currpos.dirloc);
+      }           
     }
     else  // no need to scater
     {
       absvol* vav = currpos.G_lavol(); // get least address of volume
       SensitiveVolume* asv = 
-	dynamic_cast< SensitiveVolume*  >(vav);
+        dynamic_cast< SensitiveVolume*  >(vav);
       if(asv != NULL) 
       {
-	if(s_print_listing == 1)
-	{
-	  mcout<<"Last conduction electron will now be deposited\n";
-	} 
-	HeedCondElectron hce(currpos.ptloc, currpos.time);
-	//HeedCondElectron hce(currpos.pt, currpos.ptloc, currpos.tid, this);
-	asv->conduction_electron_bank.append( hce);
-	//conduction_electron_bank.insert_after
-	//	( conduction_electron_bank.get_last_node(), hce);
+        if(s_print_listing == 1)
+        {
+          mcout<<"Last conduction electron will now be deposited\n";
+        } 
+        HeedCondElectron hce(currpos.ptloc, currpos.time);
+        //HeedCondElectron hce(currpos.pt, currpos.ptloc, currpos.tid, this);
+        asv->conduction_electron_bank.append( hce);
+        //conduction_electron_bank.insert_after
+        // ( conduction_electron_bank.get_last_node(), hce);
       }
     }
   }
@@ -699,18 +698,18 @@ void HeedDeltaElectron::print(ostream& file, int l) const
   if(l >=0 )
   {  
     Ifile<<"HeedDeltaElectron (l="<<l<<"): particle_number="<<particle_number
-	 <<"\n";
+         <<"\n";
     if(l == 1 ) return;
     indn.n+=2;
     Ifile<<"s_low_mult_scattering="<<s_low_mult_scattering
-	 <<" s_high_mult_scattering="<<s_high_mult_scattering<<'\n';
+         <<" s_high_mult_scattering="<<s_high_mult_scattering<<'\n';
     Ifile<<"phys_mrange="<<phys_mrange
-	 <<" s_stop_eloss="<<s_stop_eloss
-	 <<" s_mult_low_path_length="<<s_mult_low_path_length
-	 <<'\n';
+         <<" s_stop_eloss="<<s_stop_eloss
+         <<" s_mult_low_path_length="<<s_mult_low_path_length
+         <<'\n';
     Ifile<<"q_low_path_length="<<q_low_path_length
-	 <<" s_path_length="<<s_path_length
-	 <<" necessary_energy/eV="<<necessary_energy/eV<<'\n';
+         <<" s_path_length="<<s_path_length
+         <<" necessary_energy/eV="<<necessary_energy/eV<<'\n';
     Ifile<<" parent_particle_number="<<parent_particle_number<<'\n';
 
     /*

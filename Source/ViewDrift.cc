@@ -333,7 +333,8 @@ ViewDrift::Plot() {
   excPlot->SetMarkerStyle(20);
   excPlot->SetMarkerSize(1);
   for (int i = 0; i < nExcMarkers; ++i) {
-    excPlot->SetPoint(i + 1, excMarkers[i].x, excMarkers[i].y, excMarkers[i].z);
+    excPlot->SetPoint(i + 1, 
+                      excMarkers[i].x, excMarkers[i].y, excMarkers[i].z);
   }
   if (ionPlot != 0) {
     delete ionPlot; ionPlot = 0;
@@ -343,7 +344,8 @@ ViewDrift::Plot() {
   ionPlot->SetMarkerStyle(20);
   ionPlot->SetMarkerSize(1);
   for (int i = 0; i < nIonMarkers; ++i) {
-    ionPlot->SetPoint(i + 1, ionMarkers[i].x, ionMarkers[i].y, ionMarkers[i].z);
+    ionPlot->SetPoint(i + 1, 
+                      ionMarkers[i].x, ionMarkers[i].y, ionMarkers[i].z);
   }
   if (attPlot != 0) {
     delete attPlot; attPlot = 0;
@@ -353,7 +355,8 @@ ViewDrift::Plot() {
   attPlot->SetMarkerStyle(20);
   attPlot->SetMarkerSize(1);
   for (int i = 0; i < nAttMarkers; ++i) {
-    attPlot->SetPoint(i + 1, attMarkers[i].x, attMarkers[i].y, attMarkers[i].z);
+    attPlot->SetPoint(i + 1, 
+                      attMarkers[i].x, attMarkers[i].y, attMarkers[i].z);
   }
   excPlot->Draw("same");
   ionPlot->Draw("same");
