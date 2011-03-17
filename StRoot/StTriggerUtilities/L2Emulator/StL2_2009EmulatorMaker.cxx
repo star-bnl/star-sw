@@ -46,10 +46,10 @@ StL2_2009EmulatorMaker::InitRun(int runNo){
   //setup every algo one by one, params may be time dependent
   mL2algo.push_back(new L2btowCalAlgo09("btowCal",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_BTOW_CAL));
   mL2algo.push_back(new L2etowCalAlgo09("etowCal",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_ETOW_CAL));
-  mL2algo.push_back(new L2pedAlgo09("l2ped",mL2EmcDb,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_EMC_PED));
+  mL2algo.push_back(new L2pedAlgo09("ped",mL2EmcDb,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_EMC_PED));
   mL2algo.push_back(new L2jetAlgo2009("jet",mL2EmcDb,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_DIJET));
-  mL2algo.push_back(new L2bemcGamma2009("bemcGamma",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_BGAMMA));
-  mL2algo.push_back(new L2eemcGamma2009("eemcGamma",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_EGAMMA));
+  mL2algo.push_back(new L2bemcGamma2009("bGamma",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_BGAMMA));
+  mL2algo.push_back(new L2eemcGamma2009("eGamma",mL2EmcDb,mL2EmcGeom,mL2EmcDb->logPath,L2RESULTS_2009_OFFSET_EGAMMA));
 
   initRun2(runNo);
 
