@@ -40,7 +40,7 @@ L2DbConfig::L2DbConfig( const Char_t *fname )
 //=================================================================
 L2DbTime *L2DbConfig::getConfiguration( Int_t date, Int_t time, const Char_t *tag )
 {
-  //  std::cout << "L2DbConfig:: Get configuration for date=" << date << " time=" << time   <<" tag=" <<(tag? tag :"")<<"="<<std::endl;
+  std::cout << "L2DbConfig:: Get configuration for date=" << date << " time=" << time   <<" tag=" <<(tag? tag :"")<<"="<<std::endl;
   for ( UInt_t ii=0;ii<mConfig.size();ii++ )
     {
       if ( mConfig[ii].valid(date,time) )
