@@ -157,7 +157,7 @@ StGenericL2Emulator2009::make(){
     if(mL2algo[ia]==0) continue;
     //mL2algo[ia]-> doEvent(L0trgSwitch, mTotInpEve, (TrgDataType*)mTrigData,mBTOW_in, mBTOW_BANK, mETOW_in, mETOW_BANK);
     mL2algo[ia]->compute(fakeToken2);
-    mL2algo[ia]->decision(fakeToken1,mBTOW_in,mETOW_in,L2Result);
+    mL2algo[ia]->decision(fakeToken2,mBTOW_in,mETOW_in,L2Result);
   } // tmp, accept should be filled in internaly, in next iteration, Jan
   l2btowCal09->clear(fakeToken1);
   l2etowCal09->clear(fakeToken1);
@@ -537,8 +537,8 @@ StGenericL2Emulator2009::addTriggerList() {
   for(size_t ia=0;ia<mL2algo.size();ia++) {
     if (mL2algo[ia]==0) continue;
     if (mL2algo[ia]->getOflTrigID()==0) continue; // undefined triggerID
-    //if (mL2algo[ia]->accepted()) 
-    //mAcceptTriggerList.push_back(mL2algo[ia]->getOflTrigID());
+    if (mL2algo[ia]->isAccepted()) 
+      mAcceptTriggerList.push_back(mL2algo[ia]->getOflTrigID());
     else
       mVetoTriggerList.push_back(mL2algo[ia]->getOflTrigID());
   }
