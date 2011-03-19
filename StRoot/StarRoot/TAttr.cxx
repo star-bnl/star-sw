@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TAttr.cxx,v 1.7 2011/03/19 03:10:39 perev Exp $
+ * $Id: TAttr.cxx,v 1.8 2011/03/19 03:13:31 perev Exp $
  *
  ***************************************************************************
  *
@@ -42,7 +42,7 @@ void TAttr::SetAttr(const char *key, const char *val)
    TString tk(key);tk.ToLower();tk.ReplaceAll(" ","");tk.ReplaceAll("\t","");
    if (!val) val ="";
    TString tv(val);tv = tv.Strip(TString::kBoth)     ;tv.ReplaceAll("\t","");
-   if (tv != ".remove") {
+   if (tv == ".remove") {
      TObject *t = FindObject(tk.Data());
      if (t) {Remove(t); delete t;}
    } else {
