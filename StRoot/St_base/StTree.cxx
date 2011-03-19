@@ -408,6 +408,7 @@ Int_t StBranch::Open()
   if (fTFile)   return 0;
   if (strncmp(".none",GetFile(),4)==0) return 1;
   OpenTFile();
+  fUKey=GetName(); fUKey=0;
   return 0;
 }
 //_______________________________________________________________________________
@@ -481,6 +482,7 @@ Int_t StBranch::NextEvent()
   return GetEvent(1);
 }
 
+//_______________________________________________________________________________
 Int_t StBranch::NextEvent (StUKey &ukey)
 {
   if (fIOMode<=0)       return 0;
@@ -683,17 +685,22 @@ Int_t StTree::NextEvent(StUKey  &ukey)
 Int_t StTree::NextEvent()
 {
   int iret=0,iEOF=0,nAkt=0;
-  iEOF = NextKey();
+  TDataSetIter next(this); StBranch *br=0;
 
-  TDataSetIter next(this); StBranch *br;
-
+  int kase = 0; StBranch *br0=0;
   while ((br=(StBranch*)next())) {
-    if (  br->fIOMode<0) 		continue;
-    if (! br->fIOMode&1) 		continue;
-    if(iEOF && !br->IsOption("const"))	continue;
-    iret = br->ReadEvent(fUKey);
-    if (iret==kStErr) return iret;
-    if (iret)				continue;
+    switch(kase) {
+    case 0: kase=1; br0 = br;
+     	if (  br->fIOMode<0) 	return kStEOF;
+     	if (! br->fIOMode&1) 	return kStEOF;
+	iret = br->NextEvent();
+        if (iret)		return iret;
+	break;
+    case 1:
+     	if (  br->fIOMode<0) 	continue;
+     	if (! br->fIOMode&1) 	continue;
+	iret = br->ReadEvent(br0->GetUKey());
+    }
     nAkt++;
   }
   
