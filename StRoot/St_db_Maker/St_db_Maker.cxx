@@ -10,10 +10,10 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.123 2011/03/19 01:39:06 dmitry Exp $
+// $Id: St_db_Maker.cxx,v 1.124 2011/03/19 02:48:07 perev Exp $
 // $Log: St_db_Maker.cxx,v $
-// Revision 1.123  2011/03/19 01:39:06  dmitry
-// St_db_Maker now allows to blacklist subsystems too
+// Revision 1.124  2011/03/19 02:48:07  perev
+// blacklist added
 //
 // Revision 1.122  2010/05/05 20:44:15  dmitry
 // Fixed check for db broker in file mode
@@ -204,6 +204,38 @@
 // any stamp ended with garbage).Next commit will make it right ...
 //
 
+//	Example + explanation of DB maker statistics
+//==============================================================================
+// St_db_Maker::Init  	//Init without MySQL
+// Real time 0:00:00, CP time 0.330, 3 slices
+// 
+//       MySQL::Init	// It is clear
+// Real time 0:00:10, CP time 1.110, 2 slices
+// 
+// St_db_Maker::Make 	// All work without MySql
+// Real time 0:00:03, CP time 3.200, 3177 slices
+//       MySQL::Make   // MySql work
+// Real time 0:01:10, CP time 6.440, 3104 slices
+//       MySQL::Data	// Part of MySQL::Make with data transfer
+// Real time 0:01:10, CP time 6.420, 252 slices
+// 
+// St_db_Maker:INFO  - St_db_Maker::dbStat : Evts = 3 dbEvts=1 Evts/dbEvts =  3.0
+// // Evts =number of events, dbEvts = number of DB calls
+// 
+// St_db_Maker:INFO  - St_db_Maker::dbStat : dbData =      91.1 dbTime=25.3689 dbData/dbTime=3.59187
+// // dbData = megabytes read from DB
+// 
+// St_db_Maker:INFO  - St_db_Maker::dbStat : dbTime =      25.4 dbEvts=1 dbTime/dbEvts =25.3689
+// 
+// St_db_Maker:INFO  - St_db_Maker::dbStat : dbCpu  =       6.4 dbEvts=1  dbCpu/dbEvts =6.42
+// 
+// St_db_Maker:INFO  - St_db_Maker::dbStat : dbTime/tot  =     60.81% dbCpu/tot=     15.39%
+// // dbTime/tot = percent(%) of total time spent in DB
+// // dbCpu/tot  = percent(%) of total CPU spent in DB
+//==============================================================================
+
+
+
 #define MYSQLON 1999
 
 #include <Stiostream.h>
@@ -227,6 +259,7 @@
 #include "TTable.h"
 #include "TUnixTime.h"
 #include "StDbBroker/StDbBroker.h"
+#include "TAttr.h"
 #include "StValiSet.h"
 
 
@@ -283,7 +316,7 @@ delete fHierarchy;fHierarchy=0;
 //_____________________________________________________________________________
 Int_t St_db_Maker::InitRun(int runumber)
 {
-  if (!fDBBroker) return 0;
+  if (!fDBBroker || !runumber) return 0;
   fTimer[3].Start(0);
   fDBBroker->SetRunNumber(runumber);
   fTimer[3].Stop();
@@ -442,13 +475,6 @@ int St_db_Maker::Kind(const char *filename)
    return 0;
 }
 //_____________________________________________________________________________
-void St_db_Maker::AddBlacklistedDomain(char* subsystem = 0) {
-	if (subsystem) {
-		fBlacklistedSubsystems.push_back(subsystem);
-	}
-}
-
-//_____________________________________________________________________________
 TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
 {
    int nrows,irow,jrow;
@@ -457,18 +483,18 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
 
    fTimer[0].Stop(); fTimer[2].Start(0);
    fDBBroker  = new StDbBroker();
-
-   // inject blacklisted subsystems into broker
-
-   for (std::vector<std::string>::iterator iter = fBlacklistedSubsystems.begin(); iter != fBlacklistedSubsystems.end(); ++iter) {
-	fDBBroker->addBlacklistedDomain( (*iter).c_str() );
-   }
-
-   // continue with broker initialization
-
    if (Debug() > 1) fDBBroker->setVerbose(1);
    if (fMaxEntryTime) fDBBroker->SetProdTime(fMaxEntryTime);
-
+   const TAttr *attl = GetAttr();
+   if (attl) {
+     TIter next(attl);
+     TObject *obj;
+     while ((obj = next())) {
+       if (strcmp("blacklist",obj->GetName())!=0) continue;
+       fDBBroker->addBlacklistedDomain(obj->GetTitle());
+       Info("OpenMySQL","Block domain %s",obj->GetTitle());
+     }
+   }
    TString ts(dbname); ts+="_hierarchy";
    fHierarchy = new St_dbConfig((char*)ts.Data());
    thy = fDBBroker->InitConfig(dbname,nrows);
@@ -1135,7 +1161,6 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
      fl->SetTitle(flav);
      AddData(fl,".flavor");
    }
-   if (!(TestBIT(kInitBeg)|TestBIT(kInitEnd)))  return;
    if (!fDBBroker)                              return;
    int nAkt = 0;
    flaDir = Find(".flavor");

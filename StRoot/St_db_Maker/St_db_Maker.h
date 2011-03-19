@@ -1,7 +1,7 @@
-// $Id: St_db_Maker.h,v 1.39 2011/03/19 01:39:06 dmitry Exp $
+// $Id: St_db_Maker.h,v 1.40 2011/03/19 02:50:57 perev Exp $
 // $Log: St_db_Maker.h,v $
-// Revision 1.39  2011/03/19 01:39:06  dmitry
-// St_db_Maker now allows to blacklist subsystems too
+// Revision 1.40  2011/03/19 02:50:57  perev
+// blacklist added
 //
 // Revision 1.38  2010/05/05 18:35:04  dmitry
 // addon: single datasets also saved
@@ -109,9 +109,6 @@
 #include "TDatime.h"
 #include "StDbBroker/dbConfig.h"
 
-#include <vector>
-#include <string>
-
 class TFileSet;
 class TList;
 class TBrowser;
@@ -133,9 +130,8 @@ private:
   TStopwatch  fTimer[6];        //!Timer object
   int         fEvents[2];       // [0]=nEvents [1]=events with mysql request
   int         fDataSize[2];     // [0]=mysql data this event; [1]=total
-  std::vector<std::string> fBlacklistedSubsystems; // Array of blacklisted subsystems
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.39 2011/03/19 01:39:06 dmitry Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.40 2011/03/19 02:50:57 perev Exp $";
  protected:
  public:
                    St_db_Maker(const char *name
@@ -155,7 +151,6 @@ private:
    virtual Int_t   Make();
    virtual Int_t   Save(const char *path,const TDatime *newtime=0);
    virtual Int_t   SaveSnapshotPlus(char* path, int type = 0);      // snapshot mode, type: 0 = .root, 1 = .C 
-   virtual void    AddBlacklistedDomain(char* subsystem); 
    virtual void    SetOff(const Char_t *path);
    virtual void    SetOn (const Char_t *path);
    virtual void    SetFlavor(const char *flav,const char *tabname=".all");
@@ -183,7 +178,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.39 2011/03/19 01:39:06 dmitry Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.40 2011/03/19 02:50:57 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)
 };
