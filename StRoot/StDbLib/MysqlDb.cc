@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.58 2011/02/24 03:54:35 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.59 2011/03/19 01:21:49 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.59  2011/03/19 01:21:49  dmitry
+ * connect error messages converted to more user-frienly format
+ *
  * Revision 1.58  2011/02/24 03:54:35  dmitry
  * commented out unused variable
  *
@@ -385,10 +388,10 @@ bool MysqlDb::reConnect(){
     if(!connected){
       timeOutConnect*=2;
       StString wm;
-      wm<<" Connection Failed with MySQL on "<<mdbhost<<":"<<mdbPort<<stendl;
-      wm<<" Returned error =";
-      wm<<mysql_error(&mData)<<".  Will re-try with timeout set at \n==> ";
-      wm<<timeOutConnect<<" seconds <==";
+	  wm << " Cannot connect to " << mdbhost << ":" << mdbPort << ", database server is busy or unreachable.\n";
+      wm << " Returned error =";
+      wm << mysql_error(&mData)<<".\n  Will re-try with timeout set at \n==> ";
+      wm << timeOutConnect<<" seconds <==";
       StDbManager::Instance()->printInfo((wm.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__); 
     }
   }      
@@ -398,7 +401,7 @@ bool MysqlDb::reConnect(){
  //MPD added 4/28/04 check for valid (not Null) mData.server_version 
     if(!mData.server_version){
 	    StString smm;
-	    smm<<" No Server version - most likely incompatable libraries \n CONTACT ADMIN";
+	    smm<<" No Server version - most likely incompatible libraries \n CONTACT DATABASE ADMINISTRATOR";
 	    StDbManager::Instance()->printInfo((smm.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__); 
 	    assert(mData.server_version);
     }
