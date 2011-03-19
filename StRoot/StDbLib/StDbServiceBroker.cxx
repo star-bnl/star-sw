@@ -318,7 +318,7 @@ int StDbServiceBroker::RecommendHost()
 	  (conn,((*I).HostName).c_str(), "loadbalancer","lbdb","test",(*I).Port,Socket,0)==NULL)
         {
           LOG_WARN << "StDbServiceBroker::RecommendHost() mysql_real_connect "<< 
-	    conn << " "<<((*I).HostName).c_str()<<" "<<(*I).Port <<" failed"<<endm;
+	    conn << " "<<((*I).HostName).c_str()<<" "<<(*I).Port <<" did not succeed"<<endm;
           mysql_close(conn);
           continue;
         }
