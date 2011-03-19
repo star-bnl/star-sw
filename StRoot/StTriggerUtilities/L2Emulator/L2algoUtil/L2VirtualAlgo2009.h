@@ -3,7 +3,7 @@
 
 
 /*************************************************************
- * $Id: L2VirtualAlgo2009.h,v 1.4 2010/04/18 06:05:32 pibero Exp $
+ * $Id: L2VirtualAlgo2009.h,v 1.5 2011/03/19 13:06:40 pibero Exp $
  * \author Jan Balewski, IUCF, 2006 
  *************************************************************
  * Descripion:
@@ -82,7 +82,8 @@ class L2VirtualAlgo2009 {
       criticalError("setMaxHist called with negative argument.");
       k=0;
     }
-    mxHA=k;  hA=new L2Histo *[mxHA];
+    mxHA=k;  hA=new L2Histo*[mxHA];
+    memset(hA,sizeof(hA),0);
   }
   int finishCommonHistos(); 
 
