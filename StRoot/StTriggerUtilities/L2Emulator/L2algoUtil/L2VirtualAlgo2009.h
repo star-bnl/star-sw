@@ -3,7 +3,7 @@
 
 
 /*************************************************************
- * $Id: L2VirtualAlgo2009.h,v 1.5 2011/03/19 13:06:40 pibero Exp $
+ * $Id: L2VirtualAlgo2009.h,v 1.6 2011/03/20 02:14:50 pibero Exp $
  * \author Jan Balewski, IUCF, 2006 
  *************************************************************
  * Descripion:
@@ -83,7 +83,7 @@ class L2VirtualAlgo2009 {
       k=0;
     }
     mxHA=k;  hA=new L2Histo*[mxHA];
-    memset(hA,sizeof(hA),0);
+    memset(hA,0,mxHA*sizeof(L2Histo*));
   }
   int finishCommonHistos(); 
 
