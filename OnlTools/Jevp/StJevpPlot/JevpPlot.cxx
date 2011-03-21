@@ -3,6 +3,7 @@
 #include <TCanvas.h>
 #include <TStyle.h>
 #include <rtsLog.h>
+#include "JLatex.h"
 
 ClassImp(PlotHisto);
 ClassImp(JevpPlot);
@@ -450,6 +451,8 @@ void JevpPlot::draw()
   }
   gPad->SetGridx(gridx);
   gPad->SetGridy(gridy);
+  
+
 
   gStyle->SetPalette(palette);  
 
@@ -518,7 +521,7 @@ void JevpPlot::draw()
     curr = (PlotHisto *)histos.After(curr);
   }
 
-  gPad->Update();
+ 
 
   // Draw additional elements...
   TObject *element = (TObject *)elements.First();
@@ -527,6 +530,12 @@ void JevpPlot::draw()
     element->Draw();
     element = (TObject *)elements.After(element);
   }
+
+
+  //JLatex *el = new JLatex(.3,.5,GetPlotName());
+  //el->Draw();
+  //gPad->Update();
+  // delete el;
 
 
   if(legend)

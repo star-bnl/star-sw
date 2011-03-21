@@ -271,6 +271,7 @@ DisplayFile::DisplayFile() {
   displayRoot = NULL;
   textBuffLen = 0;
   textBuff = NULL;
+  ignoreServerTags = 0;
   serverTags = NULL;
 }
 
@@ -622,6 +623,23 @@ int DisplayFile::ReadBuff(char *buff, int len)
   return ret;
 }
 
+char *DisplayFile::getDisplayName()
+{
+  return displayRoot->name;
+}
+
+int DisplayFile::getDisplayIdx()
+{
+  DisplayNode *disp = root->child;
+
+  int i=0;
+  while(disp) {
+    if(disp == displayRoot)  return i;
+    disp = disp->next;
+    i++;
+  }
+  return -1;
+}
 
 char *DisplayFile::getDisplay(int idx)
 {
@@ -739,7 +757,7 @@ DisplayNode *DisplayFile::getTab(u_int combo_index)
 
     LOG(DBG,"idx(%d @ %d)=%d   next=%d  (%s)\n",combo_index,depth,idx,next_idx,node ? node->name : "null");
     
-    while(node && !node->matchTags(serverTags)) {
+    while(node && !(ignoreServerTags || node->matchTags(serverTags))) {
       node = node->next;
     }
     
@@ -751,7 +769,7 @@ DisplayNode *DisplayFile::getTab(u_int combo_index)
 
       node = node->next;
 
-      while(node && !node->matchTags(serverTags)) {
+      while(node && !(ignoreServerTags || node->matchTags(serverTags))) {
 	node = node->next;
       }
 

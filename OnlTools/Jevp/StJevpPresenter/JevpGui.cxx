@@ -107,6 +107,7 @@ public:
   }
 };
 
+
 JevpScreenWidget::JevpScreenWidget(char *tabname, char *plotname, u_int combo_index, QTabWidget *menu) : TQtWidget(menu, tabname) {
    
   //SetDoubleBuffer(0);
@@ -143,7 +144,42 @@ JevpScreenWidget::~JevpScreenWidget() {
   delete plot;
 }
 
-//void JevpScreenWidget::mousePressEvent(QMouseEvent *e)
+void JevpScreenWidget::mousePressEvent(QMouseEvent *e)
+{
+  if(e->buttons() & Qt::RightButton) {
+    int wide, deep;
+    DisplayNode *node = Logic->jl_getCanvasDescriptor(combo_index);
+    
+    const char *tmp = node->parent->getProperty("wide");
+    if(tmp) wide = atoi(tmp);
+    else wide = 1;
+    
+    tmp = node->parent->getProperty("deep");
+    if(tmp) deep = atoi(tmp);
+    else deep = 1;
+    
+    double xx = (double)e->x() / (double)width();
+    xx *= wide;
+    int x = (int)xx;
+    
+    double yy = (double)e->y() / (double)height();
+    yy *= deep;
+    int y = (int)yy; 
+    
+    int nn = y * wide + x;
+    
+    if(nn < 0) return;
+    if(nn > node->nSiblings()) return;
+    
+    DisplayNode *hnode = node;
+    for(int i=0;i<nn;i++) {
+      hnode = hnode->next;
+    }
+    QToolTip::showText(e->globalPos(), hnode->name);
+    //LOG("JEFF","Got a mouse press event...%d %d  %s:\n",x,y,hnode->name);
+  }
+}
+
 void JevpScreenWidget::mouseDoubleClickEvent(QMouseEvent *e)
 {
   int wide, deep;
@@ -318,11 +354,12 @@ static TQtBrowserMenuItem_t gMenu_Data[] = {
   // { text, id, accelerator, tooltip, icon }
   /* File Menu */
   { "Change Histogram Set", kFileChangeHistogramSet, 0, "Change Histogram Set", ""},
+  { "Ignore Server Tags", kFileIgnoreServerTags, 0, "Ignore Server Tags", ""},
   { "&Change To Run", kFileChangeToRun, 0, "Re-analyse old run ", ""},
   { "&Live", kFileLive, 0, "Analyze current run", ""},
   { "&Print",     kFilePrint,    Qt::CTRL+Qt::Key_P, "Print the TCanvas image ",            ":/printer.xpm" },
   { "&Print All", kFilePrintAll, 0,                  "Print the TCanvas image ",            ":/printer.xpm" },
-  { "onlprinter2",kOnlPrinter2 , 0,                  "Send last print to onlpinter2",       ":/printer.xpm" },
+//   { "onlprinter2",kOnlPrinter2 , 0,                  "Send last print to onlpinter2",       ":/printer.xpm" },
   { "About",      kHelpAbout,      0, "", ""},
   { "&Update",    kUpdate,       Qt::CTRL+Qt::Key_U, "Update current ",                      ":/update.xpm"  },
   { "&AutoUpdate",kAutoUpdate,   Qt::CTRL+Qt::Key_A, "Automatically update eventy 10 sec",   ":/update.xpm"  },
@@ -578,6 +615,11 @@ void JevpGui::MakeMenuBar()
   mainMenu->insertItem("&File",fileMenu);
 
   fActions[kFileChangeHistogramSet]->addTo(fileMenu);
+
+  fActions[kFileIgnoreServerTags]->addTo(fileMenu);
+  fActions[kFileIgnoreServerTags]->setToggleAction(true);
+  fActions[kFileIgnoreServerTags]->setOn(false);
+
   fActions[kFileChangeToRun]->addTo(fileMenu);
   fActions[kFileLive]->addTo(fileMenu);
   fActions[kFileLive]->setToggleAction(true);
@@ -588,7 +630,7 @@ void JevpGui::MakeMenuBar()
 
   fActions[kFilePrint]->addTo(fileMenu); 
   fActions[kFilePrintAll]->addTo(fileMenu); 
-  fActions[kOnlPrinter2]->addTo(fileMenu); 
+  //fActions[kOnlPrinter2]->addTo(fileMenu); 
 
   // Input Menu
   Q3PopupMenu *inputMenu     = new Q3PopupMenu();
@@ -616,7 +658,7 @@ void JevpGui::MakeMenuBar()
   // add text to actions icons
   fActions[kFilePrint]->setText("Print");
   fActions[kFilePrintAll]->setText("Print all");
-  fActions[kOnlPrinter2]->setText("onlPrinter2");
+  //fActions[kOnlPrinter2]->setText("onlPrinter2");
   //fActions[kReference]->setText("Reference");
   fActions[kUpdate]->setText("Update");
   fActions[kAutoUpdate]->setText("AutoUpdate");
@@ -634,7 +676,7 @@ void JevpGui::MakeMenuBar()
   fToolBar->addSeparator();
   fActions[kFilePrint]->addTo(fToolBar);
   fActions[kFilePrintAll]->addTo(fToolBar);
-  fActions[kOnlPrinter2]->addTo(fToolBar);
+  //fActions[kOnlPrinter2]->addTo(fToolBar);
   fToolBar->hide();
 }
 
@@ -821,6 +863,7 @@ void JevpGui::ProcessMessage()
      //case kFileSave:         SaveCB();         break;
      //case kFileSaveAs:       SaveAsCB();       break;
    case kFileChangeHistogramSet:  ChangeHistogramSet(); break;
+   case kFileIgnoreServerTags: IgnoreServerTags(); break;
    case kFileChangeToRun:  ChangeToRun(); break;
    case kFileLive:         ChangeToLive(); break;
    case kFilePrint:        PrintCB();        break;
@@ -878,18 +921,24 @@ void JevpGui::ChangeHistogramSet()
   }
   else return;
 
-//   QString text2 = QInputDialog::getText(this, 
-// 					tr("Detectors Available"),
-// 					tr("Detectors Available:"), 
-// 					QLineEdit::Normal,
-// 					tr("|base|"), &ok);
-
-//   if(ok && !text2.isEmpty()) {
-//     LOG(DBG,"Change Histogram detectors to %s\n", (const char *)text2);
-//   }
-//   else return;
-
   switchTabs((const char *)text, (const char *)serverTags);
+}
+
+void JevpGui::IgnoreServerTags()
+{
+  if (!fActions[kFileIgnoreServerTags]->isOn()) {
+    fActions[kFileIgnoreServerTags]->setOn(false);
+    LOG(DBG, "Ignore servertags 1");
+    jl_displayFile->ignoreServerTags = 0;
+  }
+  else {
+    fActions[kFileIgnoreServerTags]->setOn(true);
+    jl_displayFile->ignoreServerTags = 1;
+    LOG(DBG, "Ignore servertags off");
+  }
+
+  char *disp = jl_displayFile->getDisplayName();
+  switchTabs((const char *)disp, (const char *)serverTags);
 }
 
 void JevpGui::ChangeToRun()
@@ -955,27 +1004,32 @@ void JevpGui::ChangeToLive()
 
 void JevpGui::PrintCB()
 {
-#ifdef NOJML
-  TCanvas* cc = 0;
-  if ( fTab->currentPage() == fStaticTab ) {
-    cc = GetCanvas();
-    sprintf(mPsName,"%s/run%s_tab%dsubTab%d.ps",EvpUtil::GetOutputPath(),mEventInfo->run->text().ascii(),GetTabId(),GetSubTabId());
-  } else {
-    cc = GetGroupCanvas();
-    sprintf(mPsName,"%s/run%s_%s.ps",EvpUtil::GetOutputPath(),mEventInfo->run->text().ascii(),GetGroupWidget()->name());
-  }
-  if ( cc ) {
-    cc->Print(mPsName);
-  }
-#endif
+  char args[100];
+
+  sprintf(args, "OnlPrinter2 %d %d",
+	  jl_displayFile->getDisplayIdx(), 
+	  currentScreen->combo_index);
+	 
+  EvpMessage msg;
+  msg.setCmd((char *)"print");
+  msg.setSource((char *)"presenter");
+  msg.setArgs(args);
+  jl_send(&msg);
 }
 //______________________________________________________________________________
 void JevpGui::PrintAllCB()
 {
-#ifdef NOJML
-  sprintf(mPsName,"%s/run%s.ps",EvpUtil::GetOutputPath(),mEventInfo->run->text().ascii());
-  emit printAll(mPsName);
-#endif
+  EvpMessage msg;
+  char args[100];
+
+  sprintf(args, "OnlPrinter2 %d 0",
+	  jl_displayFile->getDisplayIdx());
+	 
+
+  msg.setCmd((char *)"print");
+  msg.setSource((char *)"presenter");
+  msg.setArgs(args);
+  jl_send(&msg);
 }
 //______________________________________________________________________________
 void JevpGui::onlPrinter2() 
@@ -1115,6 +1169,7 @@ int JevpGui::updateRunStatus()
   TMessage *mess;
   int ret = jl_socket->Recv(mess);
   if(ret == 0) {  // disconnect
+    CP;
     LOG(ERR,"Server disconnected?\n");
     exit(0);
   }
@@ -1177,7 +1232,7 @@ int JevpGui::updateServerTags()
   
   ret = 0;
   if(strcmp(serverTags, args) != 0) {
-    LOG("JEFF", "Changing server tags from %s to %s",serverTags, args);
+    LOG(DBG, "Changing server tags from %s to %s",serverTags, args);
     free(serverTags);
     serverTags = (char *)malloc(strlen(args) + 1);
     strcpy(serverTags, args);
@@ -1544,9 +1599,10 @@ void JevpGui::jl_JevpLogic()
   //       exit(0);
   //     }
   //   }
-
+  CP;
   if(jl_ConnectToServerPort(evpMain->serverport,5) < 0) return;
-  
+  CP;
+
   if(evpMain->display == NULL) {
     LOG(ERR,"Need to specify the display\n");
     exit(0);
@@ -1603,27 +1659,14 @@ void JevpGui::jl_JevpLogic()
     CP;
     jl_displayFile = new DisplayFile();
 
-    //    printf("asdf\n");
-    //    printf("tabdata 0x%x\n",tabdata->args);
-    //    printf("%c%c%c\n",tabdata->args[0],tabdata->args[1],tabdata->args[2]);
     CP;
     jl_displayFile->ReadBuff(tabdata->args, strlen(tabdata->args));
     
     CP;
     jl_displayFile->setDisplay(evpMain->display);
     CP;
-//     LOG("JEFF", "setting builder string");
-//     jl_displayFile->setServerTags("|daq|trg|base|");
-
-//     LOG("JEFF", "builder string %s",jl_displayFile->serverTags);
-
-    // printf("I just got the display file: \n");
-    // jl_displayFile->dump();
-    // printf("Done dumping it...\n");
     
     delete tabdata;
-
-
   }
 
 

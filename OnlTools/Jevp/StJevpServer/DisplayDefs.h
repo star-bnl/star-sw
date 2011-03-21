@@ -92,6 +92,7 @@ class DisplayNode {
 //
 class DisplayFile {
  public:
+  int ignoreServerTags;
   char *serverTags;    // The detectors in the run
 
   DisplayNode *root;  // The parsed display
@@ -120,6 +121,8 @@ class DisplayFile {
   // Manipulate displays
   void setServerTags(const char *tags);
 
+  char *getDisplayName();
+  int getDisplayIdx();
   char *getDisplay(int idx);
   int setDisplay(char *display_name);
   int setDisplay(int display);

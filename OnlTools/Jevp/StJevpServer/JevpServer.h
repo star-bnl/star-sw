@@ -3,6 +3,7 @@
 #include <TSocket.h>
 #include <TMessage.h>
 #include <TMonitor.h>
+#include "JTMonitor.h"
 #include <TClass.h>
 
 #include "Jevp/StJevpPlot/EvpMessage.h"
@@ -16,7 +17,7 @@
 class JevpServer {
  public:
   TServerSocket *ssocket; 
-  TMonitor *mon;
+  JTMonitor *mon;
 
   char *pdfdir;        // pdf dir
   char *refplotdir;    // ref plot dir
@@ -98,7 +99,8 @@ class JevpServer {
   
   int writeHistogramLeavesPdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page);
   int writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *prevIndexEntry, char *filename, int page, int nosibs);
-  void writePdf(int display, int run);
+  void writeRunPdf(int display, int run);
+  void writePdf(char *fn, int display, int combo_index);
   void getMonitorString(char *s, EvpMessage *m);
 
   BuilderStatus *getBuilderStatusBySocket(unsigned long long int sock);

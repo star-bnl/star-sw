@@ -13,20 +13,10 @@ readme files:
 *********************************
 * I.  Obtain and compile the code
 *********************************
-****** Note: (December 2010) ***************************************
-There are a number of changes to the cons build system that are
-being put in place the Jevp.   So there are a few additional steps
-to compile as of this time...
 
 > cvs co OnlTools/Jevp
-> cvs co mgr
-> cp OnlTools/Jevp/Conscript-standard mgr
+> cvs co OnlTools/PDFUtil
 > cvs co StRoot/RTS
-> cons
-*****************************************************************
-
-
-> cvs co OnlTools/Jevp
 > cons
 
 Should build everything.   The "executables" will be in the form

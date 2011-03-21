@@ -67,7 +67,7 @@ class TQtZoomPadWidget;
 
 using namespace std;
 
-enum { kFileChangeHistogramSet, kFileChangeToRun, kFileLive, kFilePrint, kFilePrintAll, kHelpAbout, kUpdate, kAutoUpdate, kToolBar, kOnlPrinter2 }; 
+enum { kFileChangeHistogramSet, kFileIgnoreServerTags, kFileChangeToRun, kFileLive, kFilePrint, kFilePrintAll, kHelpAbout, kUpdate, kAutoUpdate, kToolBar, kOnlPrinter2 }; 
 
 class JevpScreenWidget : public  TQtWidget {
 public:
@@ -113,7 +113,7 @@ public:
   
   void mouseDoubleClickEvent(QMouseEvent *e);
 
-  //void mousePressEvent(QMouseEvent *e);
+  void mousePressEvent(QMouseEvent *e);
 };
 
 
@@ -127,7 +127,7 @@ class JevpGui : public Q3MainWindow {
     ServerInfo* mServerInfo;
     TriggerDetectorBitsInfo* mTriggerDetectorBitsInfo;
     QPushButton* fStarLogo;
-		  
+
 private:
 
     QTabWidget *rootTab;
@@ -255,6 +255,7 @@ public slots:
      void AboutCB();
      void ToolBarCB();
      void ChangeHistogramSet();
+     void IgnoreServerTags();
      void ChangeToRun();
      void ChangeToLive();
 
