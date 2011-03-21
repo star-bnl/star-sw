@@ -24,7 +24,7 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 #include "Jevp/StJevpPlot/JLatex.h"
-
+#include "JTMonitor.h"
 
 
 //ClassImp(JevpServer);
@@ -146,7 +146,7 @@ int JevpServer::init(int port) {
     ssocket = new TServerSocket(port,kTRUE,100);
   }
 
-  mon = new TMonitor();
+  mon = new JTMonitor();
 
   mon->Add(ssocket);
   
@@ -340,7 +340,7 @@ void JevpServer::performStopRun()
   for(int i=0;i<displays->nDisplays();i++) {
     LOG("JEFF","Writing pdf for display %d, run %d",i,runStatus.run);
     CP;
-    writePdf(i, runStatus.run);
+    writeRunPdf(i, runStatus.run);
     CP;
   }
 
@@ -648,7 +648,7 @@ JevpPlot *JevpServer::getJevpSummaryPlot()
   
   CP;
   JevpPlot *p = new JevpPlot();
-  p->setParent("serv");
+  p->setParent((char *)"serv");
   TH1I *h = new TH1I("JevpSummary", "JevpSummary", 64,0,63);
   //h->GetXaxis()->SetAxisColor(kWhite);
   h->GetXaxis()->SetTickLength(0);
@@ -1017,6 +1017,19 @@ void JevpServer::handleEvpMessage(TSocket *s, EvpMessage *msg)
     CP;
     s->Send(mess);
   }
+  else if(strcmp(msg->cmd, "print") == 0) {
+    char printer[100];
+    int tab;
+    int display;
+
+    sscanf(msg->args, "%s %d %d", printer, &display, &tab);
+    LOG("JEFF", "Request to printing tab %d to printer %s", tab, printer);
+    
+    writePdf((char *)"/tmp/jevp.pdf", display, tab);
+
+    gSystem->Exec("/usr/bin/convert /tmp/jevp.pdf /tmp/jevp.ps");
+    
+  }
   else if(strcmp(msg->cmd, "newserver") == 0) {
     
   }
@@ -1316,21 +1329,55 @@ int JevpServer::writeNodePdf(DisplayNode *node, PdfIndex *index, index_entry *pr
   }
 }
 
-void JevpServer::writePdf(int display, int run)
+void JevpServer::writeRunPdf(int display, int run)
+{
+  char filename[256];
+  sprintf(filename, "%s/%s_%d.pdf",pdfdir, displays->displayRoot->name, run);
+  
+  writePdf(filename, display, 1);
+
+  // Save it in the database...
+  if(nodb != 1) {
+    LOG(DBG, "Writing PDF file: %s",filename);
+
+    char *args[5];
+
+    args[0] = (char *)"WritePDFToDB";
+    char tmp[10];
+    sprintf(tmp, "%d", run);
+    args[1] = tmp;
+    args[2] = filename;
+    args[3] = displays->displayRoot->name;
+    args[4] = NULL;
+
+    //int ret = char((execScript *)"WritePDFToDB",args);
+    int ret = execScript("WritePDFToDB", args);
+    LOG("JEFF", "Wrote PDF file: %s (ret=%d)", filename, ret);
+  }
+}
+
+void JevpServer::writePdf(char *filename, int display, int combo_index)
 {
   int ret = displays->setDisplay(display);
   if(ret < 0) {
     LOG(ERR, "Can't set display to %d",display);
     return;
   }
-
   LOG(DBG, "Set displays to %d",ret);
+  
+  DisplayNode *root = displays->getTab(combo_index);
 
-  char filename[256];
-  sprintf(filename, "%s/%s_%d.pdf", pdfdir, displays->displayRoot->name, run);
+  if(combo_index == 0) {
+    LOG("JEFF", "disproot = 0x%x root = 0x%x", displays->displayRoot, root);
+    root = displays->displayRoot;
+  }
+
+
+//   char filename[256];
+//   sprintf(filename, "%s/%s_%d.pdf", pdfdir, displays->displayRoot->name, run);
 
   PdfIndex index;
-  writeNodePdf(displays->displayRoot, &index, NULL, filename, 1, 1);
+  writeNodePdf(root, &index, NULL, filename, 1, 0);
   
   // Now a summary....
   char endfilename[256];
@@ -1344,25 +1391,6 @@ void JevpServer::writePdf(int display, int run)
   strcpy(indexedfilename, filename);
   // strcat(indexedfilename, ".idx");
   index.CreateIndexedFile(filename, indexedfilename);
-  
-  // Save it in the database...
-  if(nodb != 1) {
-    LOG(DBG, "Writing PDF file: %s",filename);
-
-    char *args[5];
-
-    args[0] = (char *)"WritePDFToDB";
-    char tmp[10];
-    sprintf(tmp, "%d", run);
-    args[1] = tmp;
-    args[2] = indexedfilename;
-    args[3] = displays->displayRoot->name;
-    args[4] = NULL;
-
-    //int ret = char((execScript *)"WritePDFToDB",args);
-    int ret = execScript("WritePDFToDB", args);
-    LOG("JEFF", "Wrote PDF file: %s (ret=%d)", filename, ret);
-  }
 }
 
     
