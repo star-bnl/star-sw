@@ -12,8 +12,18 @@
 #define TPX_ALTRO_DO_ADC	(1<<1)	// dump the ADCs into the altro_struct
 #define TPX_ALTRO_DO_FCF	(1<<2)	// run the CLUSTERfinder as well...
 
+/*
+        In pedestal mode I always include the 15 pre-triggers.
+        Due to FIFO sizes in the RDO & FEE I can't have more
+        than 502 entries thus pedestal runs will have 502 timebins,
+        from 0 to 511 where timebins 0..14 are before the trigger.
+*/
+
 #define TPX_MAX_TB	420
 #define TPX_DEF_TB	400
+
+//#define TPX_MAX_TB	480
+//#define TPX_DEF_TB	460
 
 #include <TPX/tpx_rdo.h>
 
