@@ -95,15 +95,35 @@ MTDhitsHistogramGroup::MTDhitsHistogramGroup(const char* group, const char* subG
 
 MTDhitsHistogramGroup::~MTDhitsHistogramGroup() {
 	
-	for (int i = 0; i < 2; ++i)delete MTD26E_hitmap[0][i];
+	for (int i = 0; i < 2; ++i) {
+          for (int j = 0; j < 2; ++j) {
+            delete MTD26E_hitmap[j][i];
+            delete MTD26C_hitmap[j][i];
+            delete MTD26W_hitmap[j][i];
+            delete MTD1_hitmap[j][i];
+          }
+        }
 	delete MTD_ToT;
+        delete MTD_eastT_vs_westT;
+        delete MTD_eastT_westT;
+        delete MTD_hits_vs_TOF_hits;
 }
 
 
 void MTDhitsHistogramGroup::reset() {
 	
-	for (int i = 0; i < 2; ++i)MTD26E_hitmap[0][i]->Reset();
+	for (int i = 0; i < 2; ++i) {
+          for (int j = 0; j < 2; ++j) {
+            MTD26E_hitmap[j][i]->Reset();
+            MTD26C_hitmap[j][i]->Reset();
+            MTD26W_hitmap[j][i]->Reset();
+            MTD1_hitmap[j][i]->Reset();
+          }
+        }
 	MTD_ToT->Reset();
+        MTD_eastT_vs_westT->Reset();
+        MTD_eastT_westT->Reset();
+        MTD_hits_vs_TOF_hits->Reset();
 }
 
 
