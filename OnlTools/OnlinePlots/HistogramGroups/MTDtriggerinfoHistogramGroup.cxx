@@ -41,7 +41,7 @@ MTDtriggerinfoHistogramGroup::MTDtriggerinfoHistogramGroup(const char* group, co
 	
 	char tmpchr[200];
 	char imtd[200];
-	for (int itray=0; itray<=2; itray++){
+	for (int itray=0; itray<nMTDtrays; itray++){
 		
 		if (itray==0) sprintf(imtd,"1");
 		if (itray==1) sprintf(imtd,"26C");
@@ -67,17 +67,21 @@ MTDtriggerinfoHistogramGroup::MTDtriggerinfoHistogramGroup(const char* group, co
 
 MTDtriggerinfoHistogramGroup::~MTDtriggerinfoHistogramGroup() {
 	
-	for (int itray=0;itray<=2;itray++){
-		for (int i = 0; i < 2; ++i)delete MTD_adc[itray][i];
-		for (int i = 0; i < 2; ++i)delete MTD_tac[itray][i];
+	for (int itray=0;itray<nMTDtrays;itray++){
+	  for (int i = 0; i < 2; ++i) {
+	    delete MTD_adc[itray][i];
+	    delete MTD_tac[itray][i];
+	  }
 	}
 }
 
 
 void MTDtriggerinfoHistogramGroup::reset() {
-	for (int itray=0;itray<=2;itray++){
-		for (int i = 0; i < 2; ++i)MTD_adc[itray][i]->Reset();
-		for (int i = 0; i < 2; ++i)MTD_tac[itray][i]->Reset();
+	for (int itray=0;itray<nMTDtrays;itray++){
+	  for (int i = 0; i < 2; ++i) {
+	    MTD_adc[itray][i]->Reset();
+	    MTD_tac[itray][i]->Reset();
+	  }
 	}
 }
 
@@ -128,7 +132,7 @@ void MTDtriggerinfoHistogramGroup::draw(TCanvas* cc) {
 	cc->cd(); cc->SetFillColor(0);
 	cc->Clear();
 	cc->Divide(2, 6);
-	for(int itray=0;itray<=2;itray++){
+	for(int itray=0;itray<nMTDtrays;itray++){
 		
 		cc->cd(itray*4+1);
 		MTD_adc[itray][0]->SetFillColor(19);
@@ -187,7 +191,7 @@ bool MTDtriggerinfoHistogramGroup::fill(evpReader* evp, char* datap) {
 	float west_tac[3];
 	float east_adc[3];
 	float east_tac[3];
-	for(int itray=0;itray<=2;itray++){ 
+	for(int itray=0;itray<nMTDtrays;itray++){ 
 		west_adc[itray]=-9999.;
 		west_tac[itray]=-9999.;
 		east_adc[itray]=-9999.;
@@ -209,7 +213,7 @@ bool MTDtriggerinfoHistogramGroup::fill(evpReader* evp, char* datap) {
 	east_adc[2]= trgd->mtdAtAddress(25, 0);
 	east_tac[2]= trgd->mtdAtAddress(29, 0);
 	
-	for (int itray=0;itray<=2; itray++){
+	for (int itray=0;itray<nMTDtrays; itray++){
 		if(east_adc[itray]>0)MTD_adc[itray][0]->Fill(east_adc[itray]);
 		if(west_adc[itray]>0)MTD_adc[itray][1]->Fill(west_adc[itray]);
 		if(east_tac[itray]>0)MTD_tac[itray][0]->Fill(east_tac[itray]);
