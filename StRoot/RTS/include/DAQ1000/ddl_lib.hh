@@ -31,6 +31,8 @@ public:
 	int get_priority(char **addr, u_int *status, int *ix=0) ;		// returns word count; 0 for no data; negative for error
 	int free(char *addr) ;		// return the particular buffer to the free pile
 
+	int get_free_fifos() ;
+
 	u_int status ;	// bitmask: xxx1=requested; xx1x=opened; x1xx=error
 //	u_int alloced ;	// how many bytes we used of physmem...
 	int start_ix ;
