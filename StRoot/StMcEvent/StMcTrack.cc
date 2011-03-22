@@ -9,11 +9,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.28 2011/02/16 00:47:59 perev Exp $
+ * $Id: StMcTrack.cc,v 2.29 2011/03/22 22:30:33 perev Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.cc,v $
+ * Revision 2.29  2011/03/22 22:30:33  perev
+ * Bug#2111 Remove redundant zeroing
+ *
  * Revision 2.28  2011/02/16 00:47:59  perev
  * mGeantId>=0 && mGeantId<=0
  *
@@ -68,8 +71,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.28 2011/02/16 00:47:59 perev Exp $
+ * $Id: StMcTrack.cc,v 2.29 2011/03/22 22:30:33 perev Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.29  2011/03/22 22:30:33  perev
+ * Bug#2111 Remove redundant zeroing
+ *
  * Revision 2.28  2011/02/16 00:47:59  perev
  * mGeantId>=0 && mGeantId<=0
  *
@@ -193,7 +199,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.28 2011/02/16 00:47:59 perev Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.29 2011/03/22 22:30:33 perev Exp $";
 
 ClassImp(StMcTrack);
 
@@ -212,7 +218,7 @@ StMcTrack::StMcTrack(g2t_track_st* trk) {
     mFourMomentum.setE(trk->e);
     mIsShower = trk->is_shower;
     mGeantId = trk->ge_pid;
-    assert(mGeantId>0 && mGeantId<=0xFFFF);
+    assert(mGeantId>=0 && mGeantId<=0xFFFF);
     mPdgId   = trk->eg_pid;
     mKey     = trk->id;
     mParticleDefinition = StParticleTable::instance()->findParticleByGeantId(trk->ge_pid);

@@ -8,8 +8,11 @@
  *
  ***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.29 2009/07/24 19:08:06 perev Exp $
+ * $Id: StMcEvent.cc,v 2.30 2011/03/22 22:30:33 perev Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.30  2011/03/22 22:30:33  perev
+ * Bug#2111 Remove redundant zeroing
+ *
  * Revision 2.29  2009/07/24 19:08:06  perev
  * Cleanup + Btof added (Geurts)
  *
@@ -150,8 +153,8 @@
 #include "TDataSetIter.h"
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.29 2009/07/24 19:08:06 perev Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.29 2009/07/24 19:08:06 perev Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.30 2011/03/22 22:30:33 perev Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.30 2011/03/22 22:30:33 perev Exp $";
 ClassImp(StMcEvent);
 //______________________________________________________________________________
 void StMcEvent::initToZero()
@@ -204,7 +207,6 @@ StMcEvent::StMcEvent(g2t_event_st* evTable)
      mNWoundedWest(evTable->n_wounded_west),
      mNJets(evTable->njets)
 {
-    initToZero();
     makeColls();
 }
 
@@ -213,9 +215,9 @@ StMcEvent::StMcEvent(g2t_event_st* evTable)
 StMcEvent::StMcEvent(const StMcEvent&) { /* noop */} // private
 
 //______________________________________________________________________________
-const StMcEvent&
-StMcEvent::operator=(const StMcEvent&) { return *this;} // private
+const StMcEvent& StMcEvent::operator=(const StMcEvent&) { return *this;} // private
 
+//______________________________________________________________________________
 StMcEvent::~StMcEvent()
 {
   for (int jk=1; mBegColl+jk<mEndColl;jk++) { 
