@@ -1113,7 +1113,6 @@ void tpxFCF::dump(tpxFCF_cl *cl, int row)
 	u_int p1, p2 ;
 	int div_fact ;
 
-	
 
 	switch(run_compatibility) {
 	case 9 :	//FY09	// THIS WAS IN RUN09, right or wrong!
