@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.35 2011/02/22 20:42:52 perev Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.36 2011/03/22 00:32:23 perev Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,9 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.36  2011/03/22 00:32:23  perev
+ * Added impact,phi impact & trigger time
+ *
  * Revision 1.35  2011/02/22 20:42:52  perev
  * now int parentParentGeantId
  *
@@ -159,6 +162,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.36  2011/03/22 00:32:23  perev
+ * Added impact,phi impact & trigger time
+ *
  * Revision 1.35  2011/02/22 20:42:52  perev
  * now int parentParentGeantId
  *
@@ -306,7 +312,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.35 2011/02/22 20:42:52 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.36 2011/03/22 00:32:23 perev Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -360,22 +366,27 @@
 
 static int StMiniMcMakerErrorCount=0;
 
+//______________________________________________________________________________
 //helper funtion prototypes
 void dominatrackInfo(const StTrack*, short& dominatrackKey, short&, float&);
 
+//______________________________________________________________________________
 // increasing order
 inline bool hitCmp(StTpcHit* p1, StTpcHit* p2){
   return (p1->position().perp()<p2->position().perp());
 }
+//______________________________________________________________________________
 // decreasing energy
 inline bool StMcCalorimeterHitCompdE(StMcCalorimeterHit* lhs, StMcCalorimeterHit* rhs) {
   return (lhs->dE() > rhs->dE());
 }
+//______________________________________________________________________________
 // decreasing energy
 inline bool StEmcRawHitCompEne(StEmcRawHit* lhs, StEmcRawHit* rhs) {
   return (lhs->energy() > rhs->energy());
 }
 
+//______________________________________________________________________________
 float scaleFactor(double Eta, int hitType=0) {
 //     hitType = 0 - towers
 //     hitType = 1 - pre shower
@@ -393,6 +404,7 @@ ClassImp(StMiniMcMaker)
 
 //---------CONSTRUCTORS, ETC--------
 
+//______________________________________________________________________________
 StMiniMcMaker::StMiniMcMaker(const Char_t *name, const Char_t *title)
   : 
   StMaker(name,title),
@@ -427,6 +439,7 @@ StMiniMcMaker::StMiniMcMaker(const Char_t *name, const Char_t *title)
 
 }
 
+//______________________________________________________________________________
 StMiniMcMaker::~StMiniMcMaker()
 {
   /* */
@@ -439,8 +452,8 @@ StMiniMcMaker::~StMiniMcMaker()
 /*
   standard Clear()
  */
-void
-StMiniMcMaker::Clear(Option_t* opt)
+//______________________________________________________________________________
+void StMiniMcMaker::Clear(Option_t* opt)
 {
   StMaker::Clear();
 }
@@ -448,8 +461,8 @@ StMiniMcMaker::Clear(Option_t* opt)
 /*
   called at the end
 */
-Int_t
-StMiniMcMaker::Finish()
+//______________________________________________________________________________
+Int_t StMiniMcMaker::Finish()
 {
   cout << "###StMiniMcMaker::Finish()" << endl;
 
@@ -463,12 +476,11 @@ StMiniMcMaker::Finish()
        << "\tmat global = " << mNMatGlob << endl;
 
   if (Debug()) cout << "deleting mMiniMcEvent" << endl;
-  delete mMiniMcEvent;
-  mMiniMcEvent = 0;
-  // for some reason, the tree doesn't like to get deleted here...
-//   if (Debug()) cout << "deleting mMiniMcTree" << endl;
-//   delete mMiniMcTree;
-//   mMiniMcTree = 0;
+  delete mMiniMcEvent; mMiniMcEvent = 0;
+// 	for some reason, the tree doesn't like to get deleted here...
+//   	if (Debug()) cout << "deleting mMiniMcTree" << endl;
+//   	delete mMiniMcTree;
+//   	mMiniMcTree = 0;
   if (Debug()) cout << "deleting mMiniMcDST" << endl;
   delete mMiniMcDST;
   mMiniMcDST = 0;
@@ -479,8 +491,9 @@ StMiniMcMaker::Finish()
   
  */
 
-Int_t
-StMiniMcMaker::InitRun(int runID) {
+//______________________________________________________________________________
+Int_t StMiniMcMaker::InitRun(int runID) 
+{
   cout << "###StMiniMcMaker::InitRun()" << endl;
 
   cout << "\tpt cut : " << mMinPt << " , " << mMaxPt << endl;
@@ -515,8 +528,8 @@ StMiniMcMaker::InitRun(int runID) {
 
 }   
     
-Int_t
-StMiniMcMaker::Init()
+//______________________________________________________________________________
+Int_t StMiniMcMaker::Init()
 {
   //Moved everything important to InitRun(int)
   cout << "###StMiniMcMaker::Init()" << endl;
@@ -535,8 +548,8 @@ StMiniMcMaker::Init()
   Make called every event
  */
 
-Int_t
-StMiniMcMaker::Make()
+//______________________________________________________________________________
+Int_t StMiniMcMaker::Make()
 {
   if(Debug()) cout << "###StMiniMcMaker::Make()" << endl;
   
@@ -593,8 +606,8 @@ StMiniMcMaker::Make()
   check if all the association stuff is there
  */
 
-Bool_t
-StMiniMcMaker::initAssociation()
+//______________________________________________________________________________
+Bool_t StMiniMcMaker::initAssociation()
 {
   StAssociationMaker* assoc = 0;
   assoc = (StAssociationMaker*) GetMaker("StAssociationMaker");
@@ -613,8 +626,8 @@ StMiniMcMaker::initAssociation()
   check if we have a valid vertex
  */
 
-Bool_t
-StMiniMcMaker::initVertex()
+//______________________________________________________________________________
+Bool_t StMiniMcMaker::initVertex()
 {
 
   if(!mRcEvent->primaryVertex(0)) {
@@ -650,8 +663,8 @@ StMiniMcMaker::initVertex()
 /*
 
  */
-void 
-StMiniMcMaker::trackLoop()
+//______________________________________________________________________________
+void  StMiniMcMaker::trackLoop()
 {
   if(Debug()) cout << "##StMiniMcMaker::trackLoop()" << endl;
 
@@ -1168,8 +1181,7 @@ StMiniMcMaker::trackLoop()
   mNMatGlob += nMatGlob;
 }
 //________________________________________________________________________________
-void 
-StMiniMcMaker::trackLoopIdT() // match with IdTruth
+void StMiniMcMaker::trackLoopIdT() // match with IdTruth
 {
   if(Debug()) cout << "##StMiniMcMaker::trackLoopIdT()" << endl;
   Short_t dominatrackKey, dominatrackHits;
@@ -1296,9 +1308,10 @@ StMiniMcMaker::trackLoopIdT() // match with IdTruth
 		nMcFtpcENch, nMcFtpcWNch,nFtpcEUncorrected,nFtpcWUncorrected);
 }
 
-void StMiniMcMaker::buildEmcIndexArray() {
-  
-  if (Debug()>1) cout << "StMiniMcMaker::buildEmcIndexArray" << endl;
+//______________________________________________________________________________
+void StMiniMcMaker::buildEmcIndexArray() 
+{
+    if (Debug()>1) cout << "StMiniMcMaker::buildEmcIndexArray" << endl;
   // Put all the EMC hits into an array that can then be
   // indexed by SoftId, for use when storing tower info for
   // tracks.
@@ -1353,8 +1366,7 @@ void StMiniMcMaker::buildEmcIndexArray() {
   Create the output root file and the TTree
 */
 
-Int_t
-StMiniMcMaker::openFile()
+Int_t StMiniMcMaker::openFile()
 {
   cout << "###StMiniMcMaker::openFile()" << endl;
   
@@ -1411,17 +1423,16 @@ StMiniMcMaker::openFile()
   return kStOk;
 }
 
-/*
-  close file and write.
-*/
-
-Int_t
-StMiniMcMaker::closeFile()
+//______________________________________________________________________________
+//  close file and write.
+Int_t StMiniMcMaker::closeFile()
 {
   cout << "###StMiniMcMaker::closeFile()" << endl;  
   cout << "\tWriting " << mOutFileName << endl;
   
   if(mMiniMcDST && mMiniMcDST->IsOpen()){
+    mMiniMcDST->cd();
+    mMiniMcTree->Write();
     mMiniMcDST->Write();
     mMiniMcDST->Close();
     delete mMiniMcDST; mMiniMcDST=0;
@@ -1432,21 +1443,21 @@ StMiniMcMaker::closeFile()
   return kStOk;
 }
 
-/*
-  
-*/
-
-void
-StMiniMcMaker::fillEventInfo(Int_t nGoodTrackEta, Int_t nRcGlobal, Int_t nRcGoodGlobal20,
-			     Int_t nMcGlobal, Int_t nMcGoodGlobal20,
-			     Int_t nMcNch, Int_t nMcHminus, Int_t nMcFtpcENch, Int_t nMcFtpcWNch, Int_t nFtpcEUncorrected, 
-			     Int_t nFtpcWUncorrected)
+//______________________________________________________________________________
+void StMiniMcMaker::fillEventInfo(Int_t nGoodTrackEta, Int_t nRcGlobal, Int_t nRcGoodGlobal20,
+			          Int_t nMcGlobal, Int_t nMcGoodGlobal20,
+			          Int_t nMcNch, Int_t nMcHminus, Int_t nMcFtpcENch, Int_t nMcFtpcWNch, Int_t nFtpcEUncorrected, 
+			          Int_t nFtpcWUncorrected)
 {
   mMiniMcEvent->setEventId((Int_t) mRcEvent->id());
   mMiniMcEvent->setRunId((Int_t) mRcEvent->runId());
   mMiniMcEvent->setOriginMult((Int_t)mRcEvent->primaryVertex(0)->numberOfDaughters());
   mMiniMcEvent->setCentralMult(nGoodTrackEta);
   
+  mMiniMcEvent->setImpact	(mMcEvent->impactParameter()  );
+  mMiniMcEvent->setImpactPhi	(mMcEvent->phiReactionPlane() );
+  mMiniMcEvent->setTimeOffset	(mMcEvent->triggerTimeOffset());
+
   mMiniMcEvent->setNMcNch(nMcNch);
   mMiniMcEvent->setNMcFtpcWNch(nMcFtpcWNch);
   mMiniMcEvent->setNMcFtpcENch(nMcFtpcENch);
@@ -1509,14 +1520,14 @@ StMiniMcMaker::fillEventInfo(Int_t nGoodTrackEta, Int_t nRcGlobal, Int_t nRcGood
   
 }
 
-void
-StMiniMcMaker::fillTrackPairInfo(StMiniMcPair* miniMcPair,
-				 StMcTrack* mcTrack, 
-				 const StTrack* prTrack, 
-				 const StTrack* glTrack,
-				 Int_t commonHits,
-				 Int_t nAssocMc, Int_t nAssocGl, 
-				 Int_t nAssocPr, Bool_t isBestContam)
+//______________________________________________________________________________
+void StMiniMcMaker::fillTrackPairInfo(	StMiniMcPair* miniMcPair,
+				 	StMcTrack* mcTrack, 
+				 	const StTrack* prTrack, 
+				 	const StTrack* glTrack,
+				 	Int_t commonHits,
+				 	Int_t nAssocMc, Int_t nAssocGl, 
+				 	Int_t nAssocPr, Bool_t isBestContam)
 {
   
   if(mcTrack) fillMcTrackInfo(miniMcPair,mcTrack,nAssocGl,nAssocPr);
@@ -1595,14 +1606,12 @@ StMiniMcMaker::fillTrackPairInfo(StMiniMcPair* miniMcPair,
   }
   
 }
-/*
-  
-*/
-void
-StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
-			       const StTrack* prTrack,
-			       const StTrack* glTrack,
-			       Int_t nAssocMc)
+
+//______________________________________________________________________________
+void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
+			            const StTrack* prTrack,
+			            const StTrack* glTrack,
+			            Int_t nAssocMc)
 {
   if (!glTrack) {
     cout << "Error StMiniMcMaker::fillRcTrackInfo, glTrack pointer is zero " << glTrack << endl;
@@ -1842,13 +1851,10 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   return;
 }
 
-/*
- */
-
-void 
-StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
-			       StMcTrack* mcTrack,
-			       Int_t nAssocGl, Int_t nAssocPr)
+//______________________________________________________________________________
+void  StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
+			             StMcTrack* mcTrack,
+			             Int_t nAssocGl, Int_t nAssocPr)
 {
   if (mcTrack) {
     tinyMcTrack->setValid();
@@ -1988,8 +1994,8 @@ StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
 /*
   given a mc track, returns a vector of matched associated pairs.
 */
-StTrackPairInfo*
-StMiniMcMaker::findBestMatchedGlobal(StMcTrack* mcTrack)
+//______________________________________________________________________________
+StTrackPairInfo* StMiniMcMaker::findBestMatchedGlobal(StMcTrack* mcTrack)
 {
   pair<mcTrackMapIter,mcTrackMapIter> mcBounds 
     = mMcTrackMap->equal_range(mcTrack);
@@ -2030,8 +2036,8 @@ StMiniMcMaker::findBestMatchedGlobal(StMcTrack* mcTrack)
   }// bounds loop
   return candTrackPair; // Note that candTrack might be zero, for example if only one track is matched and has 9 tpc fit pts.
 }
-PAIRVEC
-StMiniMcMaker::findMatchedRc(StMcTrack* mcTrack)
+//______________________________________________________________________________
+PAIRVEC StMiniMcMaker::findMatchedRc(StMcTrack* mcTrack)
 {
   //
   // now find the associated tracks
@@ -2081,11 +2087,8 @@ StMiniMcMaker::findMatchedRc(StMcTrack* mcTrack)
   return candPair;
 }
 
-/*
-  
-*/
-PAIRHIT
-StMiniMcMaker::findFirstLastHit(const StTrack* track)
+//______________________________________________________________________________
+PAIRHIT StMiniMcMaker::findFirstLastHit(const StTrack* track)
 {
   const StPtrVecHit& hits = track->detectorInfo()->hits(kTpcId);
   vector<StTpcHit*> vec;
@@ -2106,8 +2109,8 @@ StMiniMcMaker::findFirstLastHit(const StTrack* track)
   }
 }
 
-PAIRHIT
-StMiniMcMaker::findFirstLastFitHit(const StTrack* track)
+//______________________________________________________________________________
+PAIRHIT StMiniMcMaker::findFirstLastFitHit(const StTrack* track)
 {
   const StPtrVecHit& hits = track->detectorInfo()->hits(kTpcId);
   vector<StTpcHit*> vec;
@@ -2131,11 +2134,9 @@ StMiniMcMaker::findFirstLastFitHit(const StTrack* track)
 
 //--------- SIMPLE HELPERS--------------
 
-/*
-  bare minimum cuts to accept a raw mc track
-*/
-Bool_t
-StMiniMcMaker::acceptRaw(StMcTrack* mcTrack)
+//______________________________________________________________________________
+//  	bare minimum cuts to accept a raw mc track
+Bool_t StMiniMcMaker::acceptRaw(StMcTrack* mcTrack)
 {
   return (mcTrack);
   // commented out the cuts below, as they made sense for
@@ -2147,20 +2148,18 @@ StMiniMcMaker::acceptRaw(StMcTrack* mcTrack)
           //fabs(mcTrack->momentum().pseudoRapidity())<=4.);	  
 }
 
-/*
-  cut on an mc track to determine if we should look 
-  for a matched rc track.
-*/
-Bool_t
-StMiniMcMaker::accept(StMcTrack* mcTrack){
+//______________________________________________________________________________
+//  	cut on an mc track to determine if we should look 
+//  	for a matched rc track.
+Bool_t StMiniMcMaker::accept(StMcTrack* mcTrack)
+{
   return (mcTrack && mcTrack->tpcHits().size() >= 10);
 }
 
-/*
-  bare minimum cut to accept a rc track as valid
-*/
-Bool_t
-StMiniMcMaker::accept(StTrack* rcTrack){
+//______________________________________________________________________________
+//  	bare minimum cut to accept a rc track as valid
+Bool_t StMiniMcMaker::accept(StTrack* rcTrack)
+{
   UInt_t nFitPoint = rcTrack->fitTraits().numberOfFitPoints(kTpcId);
   return ( rcTrack &&
 	   rcTrack->impactParameter() < 3. &&
@@ -2169,37 +2168,32 @@ StMiniMcMaker::accept(StTrack* rcTrack){
 	   rcTrack->geometry()->momentum().perp() < 40 );
 }
 
-/*
-  are the mc and rc track of the same sign?
-*/
-inline Bool_t
-StMiniMcMaker::isSameSign(StTrack* rcTrack,StMcTrack* mcTrack){
+//______________________________________________________________________________
+//  		are the mc and rc track of the same sign?
+Bool_t StMiniMcMaker::isSameSign(StTrack* rcTrack,StMcTrack* mcTrack)
+{
   return (rcTrack->geometry()->charge()*
 	  mcTrack->particleDefinition()->charge()>0);
 }
 
-/*
-  possible pt cut when looking for split, background rc tracks
-*/
-inline Bool_t 
-StMiniMcMaker::acceptPt(StTrack* track){
+//______________________________________________________________________________
+//  		possible pt cut when looking for split, background rc tracks
+Bool_t StMiniMcMaker::acceptPt(StTrack* track)
+{
   return (track->geometry()->momentum().perp()>=mMinPt &&
 	  track->geometry()->momentum().perp()<=mMaxPt);
 }
 
-/*
-  possible pt cut on mc tracks
-*/
-inline Bool_t
-StMiniMcMaker::acceptPt(StMcTrack*track){
+//______________________________________________________________________________
+//  		possible pt cut on mc tracks
+Bool_t StMiniMcMaker::acceptPt(StMcTrack*track)
+{
   return (track->momentum().perp()>=mMinPt &&
 	  track->momentum().perp()<=mMaxPt);
 }
-/*
-  cut for debugging purposes
-*/
-inline Bool_t
-StMiniMcMaker::acceptDebug(StMcTrack* track)
+//______________________________________________________________________________
+//  		cut for debugging purposes
+Bool_t StMiniMcMaker::acceptDebug(StMcTrack* track)
 {  
   return (track->momentum().pseudoRapidity() <= .1
 	  && track->momentum().pseudoRapidity() >= 0 &&
@@ -2207,20 +2201,16 @@ StMiniMcMaker::acceptDebug(StMcTrack* track)
   
 }
 
-/*
-  cut for flow centrality definition
-*/
-inline Bool_t
-StMiniMcMaker::acceptCentrality(StTrack* track)
+//______________________________________________________________________________
+//  		cut for flow centrality definition
+Bool_t StMiniMcMaker::acceptCentrality(StTrack* track)
 {
   return (fabs(track->geometry()->momentum().pseudoRapidity())<.75);
 }
 
-/*
-  cut for h- uncorrected centrality
-*/
-Bool_t
-StMiniMcMaker::acceptUncorrected(StTrack* track)
+//______________________________________________________________________________
+//  		cut for h- uncorrected centrality
+Bool_t StMiniMcMaker::acceptUncorrected(StTrack* track)
 {
   return (
 	  track->geometry()->charge()<0 &&
@@ -2230,8 +2220,8 @@ StMiniMcMaker::acceptUncorrected(StTrack* track)
 	  );    
 }
 
-Bool_t 
-StMiniMcMaker::acceptFTPC(StTrack* prTrack)
+//______________________________________________________________________________
+Bool_t  StMiniMcMaker::acceptFTPC(StTrack* prTrack)
 {
   if(!prTrack) return false;
   StTrack* glTrack=prTrack->node()->track(global);
@@ -2245,60 +2235,47 @@ StMiniMcMaker::acceptFTPC(StTrack* prTrack)
           );
 }
 
-/*
-  positive track flag
-*/
-inline Bool_t
-StMiniMcMaker::ok(StTrack* track)
+//______________________________________________________________________________
+//  		positive track flag
+Bool_t StMiniMcMaker::ok(StTrack* track)
 {
   return (track && track->flag()>0);
 }
-/*
-  Good Global RC Tracks with fitpts > 20
-*/
-inline Bool_t
-StMiniMcMaker::acceptGood20(StTrack* track)
+//______________________________________________________________________________
+//  		Good Global RC Tracks with fitpts > 20
+Bool_t StMiniMcMaker::acceptGood20(StTrack* track)
 {
   UInt_t nFitPoint = track->fitTraits().numberOfFitPoints(kTpcId);
   return (track && nFitPoint >= 20);
 }
 
-/*
-  Good Global MC Tracks with fitpts > 20
-*/
-inline Bool_t
-StMiniMcMaker::acceptGood20(StMcTrack* track)
+//______________________________________________________________________________
+//  		Good Global MC Tracks with fitpts > 20
+Bool_t StMiniMcMaker::acceptGood20(StMcTrack* track)
 {
   return (track && track->tpcHits().size() >= 20);
 }
 
-/*
-  checks if the rc track is from the vertex
-*/
-StPrimaryTrack*
-StMiniMcMaker::isPrimaryTrack(StTrack* glTrack)
+//______________________________________________________________________________
+//  		checks if the rc track is from the vertex
+StPrimaryTrack* StMiniMcMaker::isPrimaryTrack(StTrack* glTrack)
 {
   if(!glTrack) return 0;
   return dynamic_cast<StPrimaryTrack*>(glTrack->node()->track(primary));
 }
 
-/*
-  checks if the mc track is from the vertex
-*/
-inline Bool_t
-StMiniMcMaker::isPrimaryTrack(StMcTrack* mcTrack)
+//______________________________________________________________________________
+//  		checks if the mc track is from the vertex
+Bool_t StMiniMcMaker::isPrimaryTrack(StMcTrack* mcTrack)
 {
   
   return(mcTrack->startVertex() == mMcEvent->primaryVertex());
   
 }
 
-/*
-  xy dca
-*/
-
-Float_t
-StMiniMcMaker::computeXY(const StThreeVectorF* pos, const StTrack* track)
+//______________________________________________________________________________
+//  		xy dca
+Float_t StMiniMcMaker::computeXY(const StThreeVectorF* pos, const StTrack* track)
 {
   //
   // find the distance between the center of the circle and pos.
@@ -2316,10 +2293,9 @@ StMiniMcMaker::computeXY(const StThreeVectorF* pos, const StTrack* track)
   return (Float_t) ( radius - dPosCenter );
 }
 
-/*
-  just find the xy and z projection of the 3d dca
-*/
-/*
+//______________________________________________________________________________
+//  		just find the xy and z projection of the 3d dca
+#if 0
   pair<Float_t,Float_t>
   StMiniMcMaker::computeProj(const StThreeVectorF* pos, const StTrack* track)
   {
@@ -2336,13 +2312,10 @@ StMiniMcMaker::computeXY(const StThreeVectorF* pos, const StTrack* track)
   return pair<Float_t,Float_t>((Float_t) distance.perp(), 
   (Float_t)distance.z());  
   }
-*/
-/*
-  z dca from ben norman (no longer used)
-*/
-
-Float_t
-StMiniMcMaker::computeZDca(const StThreeVectorF* point, const StTrack* track)
+#endif //0
+//______________________________________________________________________________
+//  		z dca from ben norman (no longer used)
+Float_t StMiniMcMaker::computeZDca(const StThreeVectorF* point, const StTrack* track)
 {
   const StPhysicalHelixD& helix = track->geometry()->helix();
   pairD path = helix.pathLength(point->perp());
@@ -2355,15 +2328,9 @@ StMiniMcMaker::computeZDca(const StThreeVectorF* point, const StTrack* track)
   double dcaZ = (dis1.mag() < dis2.mag()) ? dis1.z() : dis2.z();
   if(isnan(dcaZ)) return 999;
   return dcaZ;
-  
-  
 }
-
-/*
-  
-*/
-StDedxPidTraits*
-StMiniMcMaker::findDedxPidTraits(const StTrack* track)
+//______________________________________________________________________________
+StDedxPidTraits* StMiniMcMaker::findDedxPidTraits(const StTrack* track)
 {
   StDedxPidTraits* pid=0;
   StPtrVecTrackPidTraits traits = track->pidTraits(kTpcId);
@@ -2375,12 +2342,9 @@ StMiniMcMaker::findDedxPidTraits(const StTrack* track)
   return pid;
 }  
 
-/*
-  debugging
-*/
-
-void 
-StMiniMcMaker::checkMerged(StMcTrack* mergedMcTrack, Int_t mergedCommonHits,
+//______________________________________________________________________________
+//  		debugging
+void  StMiniMcMaker::checkMerged(StMcTrack* mergedMcTrack, Int_t mergedCommonHits,
 			   StTrack* track)
 {
   
@@ -2410,12 +2374,9 @@ StMiniMcMaker::checkMerged(StMcTrack* mergedMcTrack, Int_t mergedCommonHits,
   
 }
 
-/*
-  debugging
-*/
-
-void 
-StMiniMcMaker::checkSplit(StMcTrack* mcTrack, StTrack* glTrack,
+//______________________________________________________________________________
+//  		debugging
+void StMiniMcMaker::checkSplit(StMcTrack* mcTrack, StTrack* glTrack,
 			  Int_t commonHits)
 {
   // find the best rc match to this mc track
@@ -2472,8 +2433,8 @@ StMiniMcMaker::checkSplit(StMcTrack* mcTrack, StTrack* glTrack,
 }
 
 
-void 
-StMiniMcMaker::checkContam(StMcTrack* mcTrack, StGlobalTrack* glTrack,
+//______________________________________________________________________________
+void StMiniMcMaker::checkContam(StMcTrack* mcTrack, StGlobalTrack* glTrack,
 			   Int_t commonHits)
 {
   
@@ -2524,7 +2485,9 @@ StMiniMcMaker::checkContam(StMcTrack* mcTrack, StGlobalTrack* glTrack,
   
 }
 
-size_t StMiniMcMaker::getIndex(size_t mult) {
+//______________________________________________________________________________
+size_t StMiniMcMaker::getIndex(size_t mult) 
+{
   
   // note: this depends on the production
   //
@@ -2542,7 +2505,9 @@ size_t StMiniMcMaker::getIndex(size_t mult) {
   return 9;
 }
 
-void StMiniMcMaker::AppendMCDaughterTrack() {
+//______________________________________________________________________________
+void StMiniMcMaker::AppendMCDaughterTrack() 
+{
     if (Debug())
         cout << "##StMiniMcMaker::AppendMCDaughterTrack()"<< endl;
 
@@ -2574,6 +2539,9 @@ void StMiniMcMaker::AppendMCDaughterTrack() {
 
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.36  2011/03/22 00:32:23  perev
+// Added impact,phi impact & trigger time
+//
 // Revision 1.35  2011/02/22 20:42:52  perev
 // now int parentParentGeantId
 //
