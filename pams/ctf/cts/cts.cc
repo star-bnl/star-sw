@@ -9,7 +9,9 @@
 **:<------------------------------------------------------------------*/
 #include <math.h>
 #include "Stiostream.h"
+#ifndef __APPLE__
 #include <malloc.h>
+#endif
 #include "PAM.h"
 #include "cts.h"
 #include "ctfgeo.h"
