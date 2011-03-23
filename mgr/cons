@@ -31,7 +31,7 @@ use Cwd;
 
 use vars qw( $CVS_id $CVS_ver $ver_num $ver_rev $version );
 
-$CVS_id = '$Id: cons,v 1.106 2010/05/26 21:43:09 jeromel Exp $ ';
+$CVS_id = '$Id: cons,v 1.107 2011/03/23 22:32:27 jeromel Exp $ ';
 $CVS_ver = (split(/\s+/, $CVS_id))[2];
 
 $ver_num = "2.3";
@@ -1219,6 +1219,12 @@ sub find_xpm {
   return @main::search_files;
 }
 #________________________________________
+sub find_xml {
+  @main::search_files   = ();
+  &File::Find::find({wanted => \&wanted_xml, follow => 1}, @_);
+  return @main::search_files;
+}
+#________________________________________
 sub find_qrc {
   # Qt4 Resource file
   @main::search_files   = ();
@@ -1383,6 +1389,26 @@ sub wanted_xpm {
      ) {$File::Find::prune = 1; return;}
   if ( /^\.\#/) {return;}
   if ( /^\w.*\.xpm$/) {# print " $File::Find::name\n";
+      push @main::search_files,  $File::Find::name;
+  }
+}
+#________________________________________
+sub wanted_xml {
+#    print "wanted ",$_,"\n";
+  my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
+  if ( -d _ &&
+       (/^CVS$/ ||
+	/^macros$/ ||
+	/^doc$/ ||
+	/^run$/ ||
+	/^examples$/ ||
+	/^images$/ ||
+	/^local$/ ||
+	/^hold$/ )
+     ) {$File::Find::prune = 1; return;}
+  if ( /^\.\#/) {return;}
+  if ( /^\w+Geo.*\.xml$/) { # naming convention
+      print " $File::Find::name\n";
       push @main::search_files,  $File::Find::name;
   }
 }
