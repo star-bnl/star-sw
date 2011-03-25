@@ -224,7 +224,7 @@ public:
     pay->rtsDetMask = l2h32(detmask);
 
     if(pay->flags & EVBFLAG_L25ABORT) {
-      LOG(WARN, "Sending L25Abort: token=%d event=%d 1l=0x%x l2=0x%x l2abort=%d",
+      LOG(DBG, "Sending L25Abort: token=%d event=%d 1l=0x%x l2=0x%x l2abort=%d",
 	  token, eventNumber, l1trg, l2trg, l25abort);
     }
 
