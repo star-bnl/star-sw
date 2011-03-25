@@ -1906,7 +1906,11 @@ MediumMagboltz::SetupGreenSawada() {
   for (int i = nComponents; i--;) {
     taGreenSawada[i] = 1000.;
     hasGreenSawada[i] = true;
-    if (gas[i] == "Ne") {
+    if (gas[i] == "He" || gas[i] == "He-3") {
+      tsGreenSawada[i] = -2.25;
+      gsGreenSawada[i] = 15.5;
+      gbGreenSawada[i] = 24.5;
+    } else if (gas[i] == "Ne") {
       tsGreenSawada[i] = -6.49;
       gsGreenSawada[i] = 24.3;
       gbGreenSawada[i] = 21.6;
@@ -1922,10 +1926,18 @@ MediumMagboltz::SetupGreenSawada() {
       tsGreenSawada[i] =  3.81;
       gsGreenSawada[i] =  7.93;
       gbGreenSawada[i] = 11.5;
-    } else if (gas[i] == "H2") {
+    } else if (gas[i] == "H2" || gas[i] == "D2") {
       tsGreenSawada[i] =  1.87;
       gsGreenSawada[i] =  7.07;
       gbGreenSawada[i] =  7.7;
+    } else if (gas[i] == "N2") {
+      tsGreenSawada[i] =  4.71;
+      gsGreenSawada[i] = 13.8;
+      gbGreenSawada[i] = 15.6;
+    } else if (gas[i] == "O2") {
+      tsGreenSawada[i] =  1.86;
+      gsGreenSawada[i] = 18.5;
+      gbGreenSawada[i] = 12.1;
     } else if (gas[i] == "CH4") {
       tsGreenSawada[i] =  3.45;
       gsGreenSawada[i] =  7.06;

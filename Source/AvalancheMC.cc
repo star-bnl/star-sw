@@ -1060,9 +1060,11 @@ AvalancheMC::ComputeAlphaEta(const int q) {
       }
       // See whether we succeeded.
       if (!done) {
-        std::cerr << className << "::ComputeAlphaEta:\n";
-        std::cerr << "    Unable to even out backwards alpha steps.\n"; 
-        std::cerr << "    Avalanche calculation is probably inaccurate.\n"; 
+        if (debug) {
+          std::cerr << className << "::ComputeAlphaEta:\n";
+          std::cerr << "    Unable to even out backwards alpha steps.\n"; 
+          std::cerr << "    Calculation is probably inaccurate.\n";
+        } 
         return false;
       }
     }
@@ -1140,9 +1142,11 @@ AvalancheMC::ComputeAlphaEta(const int q) {
         }
       }
       if (!done) {
-        std::cerr << className << "::ComputeAlphaEta:\n";
-        std::cerr << "    Unable to even out backwards eta steps.\n";
-        std::cerr << "    Avalanche calculation is probably inaccurate.\n"; 
+        if (debug) {
+          std::cerr << className << "::ComputeAlphaEta:\n";
+          std::cerr << "    Unable to even out backwards eta steps.\n";
+          std::cerr << "    Calculation is probably inaccurate.\n";
+        } 
         return false;
       }
     }

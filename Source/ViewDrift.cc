@@ -15,7 +15,8 @@ ViewDrift::ViewDrift() :
   nDriftLines(0), nTracks(0),
   nExcMarkers(0), excPlot(0), 
   nIonMarkers(0), ionPlot(0), 
-  nAttMarkers(0), attPlot(0) {
+  nAttMarkers(0), attPlot(0),
+  markerSizeCluster(1.), markerSizeCollision(1.) {
 
   driftLines.clear();
   tracks.clear();
@@ -87,6 +88,30 @@ ViewDrift::Clear() {
 
 }
 
+void
+ViewDrift::SetClusterMarkerSize(const double size) {
+
+  if (size > 0.) {
+    markerSizeCluster = size;
+  } else {
+    std::cerr << className << "::SetClusterMarkerSize:\n";
+    std::cerr << "    Size must be positive.\n";
+  }
+
+}
+
+void
+ViewDrift::SetCollisionMarkerSize(const double size) {
+
+  if (size > 0.) {
+    markerSizeCollision = size;
+  } else {
+    std::cerr << className << "::SetCollisionMarkerSize:\n";
+    std::cerr << "    Size must be positive.\n";
+  }
+
+}
+  
 void
 ViewDrift::NewElectronDriftLine(const int np, int& id,
                       const double x0, const double y0, const double z0) {
@@ -186,12 +211,14 @@ ViewDrift::NewChargedParticleTrack(const int np, int& id,
     TPointSet3D p(1);
     p.SetMarkerColor(col);
     p.SetMarkerStyle(20);
-    p.SetMarkerSize(1);
+    p.SetMarkerSize(markerSizeCluster);
     p.SetPoint(0, x0, y0, z0);
     tracks.push_back(p);
   } else {
     TPointSet3D p(np);
     p.SetMarkerColor(col);
+    p.SetMarkerStyle(20);
+    p.SetMarkerSize(markerSizeCluster);
     p.SetPoint(0, x0, y0, z0);
     tracks.push_back(p);
   }
@@ -331,7 +358,7 @@ ViewDrift::Plot() {
   excPlot = new TPointSet3D(nExcMarkers);
   excPlot->SetMarkerColor(plottingEngine.GetRootColorLine2());
   excPlot->SetMarkerStyle(20);
-  excPlot->SetMarkerSize(1);
+  excPlot->SetMarkerSize(markerSizeCollision);
   for (int i = 0; i < nExcMarkers; ++i) {
     excPlot->SetPoint(i + 1, 
                       excMarkers[i].x, excMarkers[i].y, excMarkers[i].z);
@@ -342,7 +369,7 @@ ViewDrift::Plot() {
   ionPlot = new TPointSet3D(nIonMarkers);
   ionPlot->SetMarkerColor(plottingEngine.GetRootColorIon());
   ionPlot->SetMarkerStyle(20);
-  ionPlot->SetMarkerSize(1);
+  ionPlot->SetMarkerSize(markerSizeCollision);
   for (int i = 0; i < nIonMarkers; ++i) {
     ionPlot->SetPoint(i + 1, 
                       ionMarkers[i].x, ionMarkers[i].y, ionMarkers[i].z);
@@ -353,7 +380,7 @@ ViewDrift::Plot() {
   attPlot = new TPointSet3D(nAttMarkers);
   attPlot->SetMarkerColor(plottingEngine.GetRootColorLine1());
   attPlot->SetMarkerStyle(20);
-  attPlot->SetMarkerSize(1);
+  attPlot->SetMarkerSize(markerSizeCollision);
   for (int i = 0; i < nAttMarkers; ++i) {
     attPlot->SetPoint(i + 1, 
                       attMarkers[i].x, attMarkers[i].y, attMarkers[i].z);

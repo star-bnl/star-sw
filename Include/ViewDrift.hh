@@ -23,10 +23,16 @@ class ViewDrift {
     
     void SetCanvas(TCanvas* c);
     
-    // Set area to be plotted
+    // Set area to be plotted.
     void SetArea(double xmin, double ymin, double zmin, 
                  double xmax, double ymax, double zmax);
     void Clear();
+    void Plot();
+
+    void SetClusterMarkerSize(const double size);
+    void SetCollisionMarkerSize(const double size);
+
+    // Functions to be used by transport classes.
     void NewElectronDriftLine(const int np, int& id,
                         const double x0, const double y0, const double z0);
     void NewHoleDriftLine(const int np, int& id,
@@ -49,8 +55,6 @@ class ViewDrift {
     void AddExcitationMarker(const double x, const double y, const double z);
     void AddIonisationMarker(const double x, const double y, const double z);
     void AddAttachmentMarker(const double x, const double y, const double z);
-
-    void Plot();
 
     void EnableDebugging()  {debug = true;}
     void DisableDebugging() {debug = false;}
@@ -93,6 +97,9 @@ class ViewDrift {
     int nAttMarkers;
     std::vector<marker> attMarkers;
     TPointSet3D* attPlot;
+
+    double markerSizeCluster;
+    double markerSizeCollision;
 
 };
 
