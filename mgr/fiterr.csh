@@ -69,6 +69,7 @@ if (!(-e fiterrPrepass.DONE)) then
 rm fit.log sti.log
 touch sti.log
 touch fit.log
+setenv STARNODELETE YES
 
 echo '*** Prepass Started *** '
 echo '*** Prepass Started *** '>> sti.log
@@ -113,6 +114,9 @@ int ans =13;
 ans =runsti("$daqFile",999,"${Opt}");
 if (ans != 99) exit(13);
 ans =chain->Finish(); 
+//		Clear all ROOT lists to avoid deleting at the end
+.x ClearRoot.C
+
 if (ans) exit(14);
 exit(0);
 EOF
