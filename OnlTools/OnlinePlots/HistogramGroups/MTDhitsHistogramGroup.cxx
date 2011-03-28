@@ -160,9 +160,9 @@ void MTDhitsHistogramGroup::draw(TCanvas* cc) {
 	gStyle->SetTitleW(0.8); gStyle->SetTitleH(0.086);
 	//gStyle->SetTitleSize(0.06);
 	
-	gStyle->SetOptStat(110110);
-	gStyle->SetStatX(0.99); gStyle->SetStatY(0.91);
-	gStyle->SetStatW(0.18); gStyle->SetStatH(0.14);
+	gStyle->SetOptStat(0);
+//	gStyle->SetStatX(0.99); gStyle->SetStatY(0.91);
+//	gStyle->SetStatW(0.18); gStyle->SetStatH(0.14);
 	
 	gStyle->SetNdivisions(505,"xyz");
 	
@@ -347,7 +347,7 @@ int MTDhitsHistogramGroup::tdcchan2globalstrip(int tdigboardid,int tdcid,int tdc
 	
 	if(trayid==1){
 		int globaltdcchan=(tdcid+1)*10+tdcchan;
-		int mtdstrip[18]=  {34,22,10,37,27,17,33,23,16,36,26,15,32,20,30,24,11,31};
+		int mtdstrip[18]=  {34,22,10,37,27,17, 32,20,30,24,11,31, 33,23,16,36,26,15};
 		for(int i=0;i<18;i++){
 			if(mtdstrip[i]==globaltdcchan) {globalstripid=i+1;break;}
 		}
