@@ -85,6 +85,24 @@ class FtfBaseTrack
     double    dtanl ;
 
     void     *para  ;    // Parameters pointer     
+
+    unsigned short CompressOver1(double,double);
+    double DecompressOver1(unsigned short,double);
+
 } ;
+
+inline unsigned short FtfBaseTrack::CompressOver1(double v1,double v2) {
+  // drop 10 bits of precision for 1 < v1/|v2| < 1024 (upper limit)
+  double intermed = v1/fabs(v2);
+  return (intermed < 1 ?  (unsigned short) (intermed*32768.) :
+         (intermed > 1024. ? 65535 :
+          32768 + (unsigned short) ((intermed - 1.)*32.)));
+}
+inline double FtfBaseTrack::DecompressOver1(unsigned short v1,double v2) {
+  return fabs(v2)*(v1 <= 32768 ? ((double) v1)/32768. :
+                                 ((double) (v1 - 32768))/32. + 1.);
+}
+
+
 #endif
 

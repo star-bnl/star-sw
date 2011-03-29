@@ -333,8 +333,8 @@ int FtfSl3::fillTracks ( int maxBytes, char* buff, unsigned int token ) {
        uSTrack->z0    = track[i].z0    ; 
        uSTrack->trackLength  = track[i].length  ;
        uSTrack->dpt          = (short)(32768. * track[i].dpt / track[i].pt ) ; 
-       uSTrack->dpsi         = (short)(32768. * track[i].dpsi / fabs(track[i].psi)  ) ; 
-       uSTrack->dtanl        = (short)(32678. * track[i].dtanl / fabs(track[i].tanl) ) ;
+       uSTrack->dpsi         = track[i].CompressOver1(track[i].dpsi,track[i].psi);
+       uSTrack->dtanl        = track[i].CompressOver1(64.*track[i].dtanl,track[i].tanl);
        uSTrack->dz0          = (short)(1024. * track[i].dz0 ) ;
        uSTrack++ ;
     }
