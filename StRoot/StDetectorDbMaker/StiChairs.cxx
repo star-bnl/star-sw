@@ -11,11 +11,21 @@ void StiHitErrorCalculator::calculateError(Double_t _z,  Double_t _eta, Double_t
   static const Double_t min2Err = tenMicrons*tenMicrons;
   static const Double_t max2Err = 1.;
   const Double_t *Coeff = ((StiHitErrorCalculator *) this)->coeff();
-  Double_t dz = (200.-TMath::Abs(_z))/100.;
+#if 0
+  Double_t dz = (200.-TMath::Abs(_z+100))/100.; // Local z
+#else
+  Double_t dz = (200.-TMath::Abs(_z))/100.; // Global z
+#endif
   if (dz < 0) dz = 0;
-  Double_t cosCA = TMath::Cos(_eta);
-  Double_t sinCA = TMath::Sin(_eta);
-  if (cosCA<0.01) cosCA=0.01;
+#if 0
+  Int_t sec  = TMath::Nint(_eta*TMath::RadToDeg()/30);
+  Double_t Phi = _eta - TMath::DegToRad()*30*sec;
+#else
+  Double_t Phi = _eta;
+#endif
+  Double_t cosCA = TMath::Cos(Phi);
+  Double_t sinCA = TMath::Sin(Phi);
+  if (TMath::Abs(cosCA)<0.01) cosCA=0.01;
   Double_t tanCA = sinCA/cosCA;
   ecross=Coeff[0]+Coeff[1]*dz/(cosCA*cosCA) +Coeff[2]*tanCA*tanCA;
   if (ecross< min2Err) ecross = min2Err;
@@ -26,7 +36,7 @@ void StiHitErrorCalculator::calculateError(Double_t _z,  Double_t _eta, Double_t
   if (edip< min2Err) edip = min2Err;
   if (edip> max2Err) edip = max2Err;
 //	Temporary hack for Gene. Increase prompt hit errors
-  if (fabs(_z) >200) {ecross*=10; edip*=10;}
+//  if (fabs(_z) >200) {ecross*=10; edip*=10;}
 
 
 }
