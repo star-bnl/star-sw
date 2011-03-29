@@ -73,8 +73,8 @@ public:
        q           = (short )(trk->pt/fabs(trk->pt)) ;
        phi0        = trk->phi0 ;
        dpt         = float(trk->dpt)/32768. * pt ; 
-       dpsi        = float(trk->dpsi)/32768. * fabs(psi)  ;
-       dtanl       = float(trk->dtanl)/32678.* fabs(tanl) ;
+       dpsi        = DecompressOver1(trk->dpsi,psi);
+       dtanl       = DecompressOver1(trk->dtanl,tanl)/64.;
        dz0         = float(trk->dz0)/1024. ;
        nextTrack   = 0 ;
        firstHit    = 0 ;
