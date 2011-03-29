@@ -48,31 +48,39 @@ MTDhitsHistogramGroup::MTDhitsHistogramGroup(const char* group, const char* subG
 	char tmpchr[200];
 	sprintf(tmpchr,"MTD26E_EastEnd_hitmap");
 	MTD26E_hitmap[0][0]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
+	sprintf(tmpchr,"MTD26E_EastEnd_hitmapB");
 	MTD26E_hitmap[0][1]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
 	sprintf(tmpchr,"MTD26E_WestEnd_hitmap");
 	MTD26E_hitmap[1][0]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
+	sprintf(tmpchr,"MTD26E_WestEnd_hitmapB");
 	MTD26E_hitmap[1][1]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
 	
 	sprintf(tmpchr,"MTD26C_EastEnd_hitmap");
 	MTD26C_hitmap[0][0]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
+	sprintf(tmpchr,"MTD26C_EastEnd_hitmapB");
 	MTD26C_hitmap[0][1]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
 	sprintf(tmpchr,"MTD26C_WestEnd_hitmap");
 	MTD26C_hitmap[1][0]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
+	sprintf(tmpchr,"MTD26C_WestEnd_hitmapB");
 	MTD26C_hitmap[1][1]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
 	
 	//the 3rd tray is rotated: HiZ - WestEnd
 	sprintf(tmpchr,"MTD26W_WestEnd_hitmap");
 	MTD26W_hitmap[0][0]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
+	sprintf(tmpchr,"MTD26W_WestEnd_hitmapB");
 	MTD26W_hitmap[0][1]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
 	sprintf(tmpchr,"MTD26W_EastEnd_hitmap");
 	MTD26W_hitmap[1][0]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
+	sprintf(tmpchr,"MTD26W_EastEnd_hitmapB");
 	MTD26W_hitmap[1][1]=new TH1F(tmpchr,tmpchr,12,0.5,12.5);
 	
 	sprintf(tmpchr,"MTD1_EastEnd_hitmap");
 	MTD1_hitmap[0][0]=new TH1F(tmpchr,tmpchr,18,0.5,18.5);
+	sprintf(tmpchr,"MTD1_EastEnd_hitmapB");
 	MTD1_hitmap[0][1]=new TH1F(tmpchr,tmpchr,18,0.5,18.5);
 	sprintf(tmpchr,"MTD1_WestEnd_hitmap");
 	MTD1_hitmap[1][0]=new TH1F(tmpchr,tmpchr,18,0.5,18.5);
+	sprintf(tmpchr,"MTD1_WestEnd_hitmapB");
 	MTD1_hitmap[1][1]=new TH1F(tmpchr,tmpchr,18,0.5,18.5);
 	
 	MTD_ToT    =new TH2F("MTD_ToT","MTD ToT vs Chan #",36,-0.5,35.5,70,0,70);
