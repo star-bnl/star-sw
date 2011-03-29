@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2009.cxx,v 2.29 2011/02/15 21:49:33 ullrich Exp $
+ * $Id: StTriggerData2009.cxx,v 2.30 2011/03/29 18:06:21 ullrich Exp $
  *
  * Author: Akio Ogawa,Jan 2009
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2009.cxx,v $
+ * Revision 2.30  2011/03/29 18:06:21  ullrich
+ * Fixed bug in bug in vpdEarliestTDCHighThr()
+ *
  * Revision 2.29  2011/02/15 21:49:33  ullrich
  * MTD code only for runs after 12003001.
  *
@@ -1113,12 +1116,11 @@ unsigned short StTriggerData2009::vpdEarliestTDCHighThr(StBeamDirection eastwest
             }
             else if(mRun<=12003001) {
                 if (eastwest==east) {return mBBC[buffer]->VPD[6]%4096;}
-                else               {return mBBC[buffer]->VPD[4]%4096;}
+                else                {return mBBC[buffer]->VPD[4]%4096;}
             }
-	    
 	    else {
-	      if (eastwest==east) {return mMIX[buffer]->MTD_P2PLayer1[12]+(mMIX[buffer]->MTD_P2PLayer1[13]&0x0f)<<8;}
-	      else               {return mMIX[buffer]->MTD_P2PLayer1[8]+(mMIX[buffer]->MTD_P2PLayer1[9]&0x0f)<<8;}
+	      if (eastwest==east) {return mMIX[buffer]->MTD_P2PLayer1[13] + ((mMIX[buffer]->MTD_P2PLayer1[12]&0x0f)<<8);}
+	      else                {return mMIX[buffer]->MTD_P2PLayer1[9]  + ((mMIX[buffer]->MTD_P2PLayer1[8]&0x0f)<<8);}
 	    }
         }
     }
