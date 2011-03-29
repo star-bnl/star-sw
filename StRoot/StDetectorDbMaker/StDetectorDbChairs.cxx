@@ -360,6 +360,8 @@ Double_t StTpcHitErrors::calcError(Int_t iXZ, Int_t sec, Int_t row, Double_t _z,
   Double_t valueLog = mdf->Eval(Vars);
   return   TMath::Exp(2*(valueLog + PitchLog[pitch]));
 }
+#include "St_tpcStatusC.h"
+MakeChairInstance(tpcStatus,Calibrations/tpc/tpcStatus);
 //__________________Calibrations/trg______________________________________________________________
 #include "St_defaultTrgLvlC.h"
 MakeChairInstance(defaultTrgLvl,Calibrations/trg/defaultTrgLvl);
@@ -625,4 +627,7 @@ St_SurveyC   *St_SurveyC::instance(const Char_t *name) {
   if (Name == "SsdWafersOnLadders")   return (St_SurveyC   *) StSsdWafersOnLadders::instance();
   return 0;
 }
+//__________________Calibrations/rhic______________________________________________________________
+#include "St_vertexSeedC.h"
+MakeChairInstance(vertexSeed,Calibrations/rhic/vertexSeed);
 //________________________________________________________________________________
