@@ -536,14 +536,14 @@ typedef struct
 {
   int                    fd;
   int                    minor;
-  volatile unsigned long *p2pci;
+  volatile unsigned	*p2pci;
   unsigned               shift;
   unsigned short         vendor;
   unsigned short         device;
-  unsigned int           irq;
-  unsigned long          base_address[6];
-  unsigned long          rom_address;
-  unsigned long          bus_speed_mode;
+  unsigned               irq;
+  unsigned		 base_address[6];
+  unsigned		 rom_address;
+  unsigned		 bus_speed_mode;
   int                    rorc_revision;
   int                    rorc_serial;
   int                    diu_version;
@@ -552,16 +552,16 @@ typedef struct
   int                    driver_release;
   int                    ddl_channel;
   int                    fd_ch;
-  volatile unsigned long *reg[DRORC_REG_NUM];  /* D-RORC reg addresses */
-  volatile unsigned long *omb[5];              /* pRORC  reg addresses */
-  volatile unsigned long *imb[5];
-  volatile unsigned long *mwar;
-  volatile unsigned long *mwtc;
-  volatile unsigned long *mrar;
-  volatile unsigned long *mrtc;
-  volatile unsigned long *mbef;
-  volatile unsigned long *intcsr;
-  volatile unsigned long *mcsr;
+  volatile unsigned	 *reg[DRORC_REG_NUM];  /* D-RORC reg addresses */
+  volatile unsigned	 *omb[5];              /* pRORC  reg addresses */
+  volatile unsigned	 *imb[5];
+  volatile unsigned      *mwar;
+  volatile unsigned      *mwtc;
+  volatile unsigned      *mrar;
+  volatile unsigned      *mrtc;
+  volatile unsigned      *mbef;
+  volatile unsigned      *intcsr;
+  volatile unsigned       *mcsr;
   long long int          loop_per_usec;      /* loop/us for the given machine */
   long long int          max_resp_time;      /* the corresponding max. time */
 } rorc_pci_dev_t;
@@ -575,10 +575,11 @@ typedef struct
   int channel;
 } rorcChannelId_t;
 
+
 typedef struct
 {
-  volatile unsigned long   length;
-  volatile unsigned long   status;
+  volatile unsigned int   length;
+  volatile unsigned int   status;
 } rorcReadyFifo_t;
 
 typedef struct
