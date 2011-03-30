@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.12 2011/03/25 18:17:46 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.13 2011/03/30 17:32:50 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.13  2011/03/30 17:32:50  jwebb
+ * Added anti-nuclei (deuteron, triton, alpha and helium3) to the table.
+ *
  * Revision 1.12  2011/03/25 18:17:46  jwebb
  * Updates to StParticleTable and additions to STAR Class Library
  *
@@ -232,7 +235,7 @@ StParticleTable::StParticleTable()
     /// Embedding particle definitions
     ///@{
 
-       Geant2Pdg(10017, 221, eta --> e+ e- gamma);
+       Geant2Pdg(10017,  221, eta --> e+ e- gamma);
        Geant2Pdg(10018, 3122, lambda --> p + pi- );
        Geant2Pdg(10026,-3122, lambdaBar --> pbar + pi+ );
        Geant2Pdg(10039,  431,  D_s_+ --> phi + pi+ w/ phi --> K+ K- );
@@ -241,14 +244,24 @@ StParticleTable::StParticleTable()
        Geant2Pdg(10151,  333,  phi --> K+ K- );
        Geant2Pdg(11151,  333,  phi --> e+ e- );
              
-       Geant2Pdg(40001,  3334, Omega-); 
-       Geant2Pdg(40002, -3334, Omega+); 
+       Geant2Pdg( 40001,  3334, Omega-); 
+       Geant2Pdg( 40002, -3334, Omega+); 
        Geant2Pdg( 40003, +3312, XiMinus );       
        Geant2Pdg( 40004, -3312, XiPlus  );      
        Geant2Pdg( 40005, +3322, XiZero );       
        Geant2Pdg( 40006, +3322, XiZeroBar );
 
     ///@}
+
+    ///@addtogroup ANTINUCLEI
+    /// Definitions of anti nuclei
+    ///@{
+       Geant2Pdg( 50045, kUndefined, anti-deuteron );
+       Geant2Pdg( 50046, kUndefined, anti-triton );
+       Geant2Pdg( 50047, kUndefined, anti-alpha );
+       Geant2Pdg( 50048, kUndefined, anti-He3 );
+    ///@}
+
 
 #undef Geant2Pdg
 
