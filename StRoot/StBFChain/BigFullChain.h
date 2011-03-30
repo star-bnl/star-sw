@@ -688,22 +688,22 @@ Bfc_st BFC[] = { // standard chains
 
 
   // Some global Sti stuff including vertexing
-  {"StiLibs","","","StarMagField,StiTpcLib,StiSvtLib,StiSsdlib,StiRnDLib,StiUtil",""
-   ,                                                                   "","ITTF:load Sti libraries",kFALSE},
+  {"StiLibs","","","StarMagField,StiTpcLib,StiUtil","",                "","ITTF:load Sti libraries",kFALSE},
   {"StiVMCLibs","","","-StiLibs,detDb,StarMagField,StiUtil","",     "","ITTF:load StiVMC libraries",kFALSE},
-  {"StiTpcLib","","","tpcDB","",                          "Sti,StiTpc","Sti Tpc related libratries",kFALSE},
-  {"StiSvtLib","","","svtDB","",        "Sti,StSvtClassLibrary,StiSvt","Sti Svt related libratries",kFALSE},
-  {"StiSsdLib","","","ssdDB","",                "Sti,StSsdUtil,StiSsd","Sti Ssd related libratries",kFALSE},
+  {"StiTpcLib","","","","","tpc_T,dbutil,detDb,StarMagField,magF,Sti,StiTpc"
+   ,                                                                   "Sti Tpc related libratries",kFALSE},
+  {"StiSvtLib","","","","","StSvtClassLibrary,StSvtDbMaker,Sti,StiSvt","Sti Svt related libratries",kFALSE},
+  {"StiSsdLib","","","",        "","StSsdUtil,StSsdDbMaker,Sti,StiSsd","Sti Ssd related libratries",kFALSE},
   {"StiRnDLib","","","","",                               "Sti,StiRnD","Sti RnD related libratries",kFALSE},
   {"laserIT" ,"","","","",                               "TpcIT","use Sti for laser reconstruction",kFALSE},
-  {"TpcIT"       ,""  ,"","TpcDb",""                               ,"","ITTF: track using TPC geom",kFALSE},
+  {"TpcIT"       ,""  ,"","TpcDb,StiTpcLib",""                     ,"","ITTF: track using TPC geom",kFALSE},
+  {"SvtIT"       ,""  ,"","svtDb,StiSvtLib",""                     ,"","ITTF: track using SVT geom",kFALSE},
+  {"SsdIT"       ,""  ,"","ssdDb,StiSsdLib",""                     ,"","ITTF: track using SSD geom",kFALSE},
+  {"HpdIT"       ,""  ,"","",""                           ,"StiRnDLib","ITTF: track using Hpd geom",kFALSE},
+  {"PixelIT"     ,""  ,"","",""                         ,"StiRnDLib","ITTF: track using Pixel geom",kFALSE},
+  {"IstIT"       ,""  ,"","",""                           ,"StiRnDLib","ITTF: track using Ist geom",kFALSE},
   {"NoSvtIT"     ,""  ,"","-SvtIT",""                    ,"","ITTF: track with switch off SVT geom",kFALSE},
   {"NoSsdIT"     ,""  ,"","-SsdIT",""                    ,"","ITTF: track with switch off SSD geom",kFALSE},
-  {"SvtIT"       ,""  ,"","svtDb",""                               ,"","ITTF: track using SVT geom",kFALSE},
-  {"SsdIT"       ,""  ,"","ssdDb",""                               ,"","ITTF: track using SSD geom",kFALSE},
-  {"HpdIT"       ,""  ,"","",""                                    ,"","ITTF: track using Hpd geom",kFALSE},
-  {"PixelIT"     ,""  ,"","",""                                  ,"","ITTF: track using Pixel geom",kFALSE},
-  {"IstIT"       ,""  ,"","",""                                    ,"","ITTF: track using Ist geom",kFALSE},
   {"skip1row"    ,""  ,"","",""                           ,"","ITTF: skip the first pad row in TPC",kFALSE},
   {"genvtx"      ,""  ,"","ctf_T,EEmcUtil","StGenericVertexMaker",
                     "St_ctf,St_ctf_Maker,Minuit,StGenericVertexMaker",      "Generic Vertex Finder",kFALSE},

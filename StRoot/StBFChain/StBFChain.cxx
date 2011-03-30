@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.571 2011/02/22 19:15:27 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.572 2011/03/30 22:38:00 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1453,6 +1453,9 @@ void StBFChain::SetDbOptions(StMaker *mk){
       }
     }
   }
+  // Db blacklist (remove black listed system from St_Db_Maker configuration)
+  if (GetOption("NoSvtIT")) mk->SetAttr("blacklist", "svt"); // blacklist svt
+  if (GetOption("NoSsdIT")) mk->SetAttr("blacklist", "ssd"); // blacklist ssd
 }
 //_____________________________________________________________________
 /// Creates output-tree branches
