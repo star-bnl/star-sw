@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.34 2010/08/31 20:00:09 fisyak Exp $
+ * $Id: StTrack.cxx,v 2.35 2011/03/31 19:29:01 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.35  2011/03/31 19:29:01  fisyak
+ * Add IdTruth information for tracks and vertices
+ *
  * Revision 2.34  2010/08/31 20:00:09  fisyak
  * Clean up, add mSeedQuality
  *
@@ -130,7 +133,7 @@
 #include "StThreeVectorD.hh"
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.34 2010/08/31 20:00:09 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.35 2011/03/31 19:29:01 fisyak Exp $";
 
 StTrack::StTrack()
 {
@@ -151,6 +154,8 @@ StTrack::StTrack()
     mOuterGeometry = 0;
     mDetectorInfo = 0;
     mNode = 0;
+    mIdTruth = mQuality = 0;
+    mIdParentVx = 0;
 }
 
 
@@ -182,6 +187,10 @@ StTrack::StTrack(const StTrack& track)
     mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
     mPidTraitsVec = track.mPidTraitsVec;
     mNode = 0;                                 // do not assume any context here
+    mSeedQuality = track.mSeedQuality;
+    mIdTruth = track.mIdTruth;
+    mQuality = track.mQuality;
+    mIdParentVx = track.mIdParentVx;
 }
 
 StTrack&
@@ -216,6 +225,9 @@ StTrack::operator=(const StTrack& track)
         mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
         mPidTraitsVec = track.mPidTraitsVec;
         mNode = 0;                                 // do not assume any context here
+	mIdTruth = track.mIdTruth;
+	mQuality = track.mQuality;
+	mIdParentVx = track.mIdParentVx;
     }
     return *this;
 }

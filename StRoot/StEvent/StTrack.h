@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.24 2010/08/31 20:00:09 fisyak Exp $
+ * $Id: StTrack.h,v 2.25 2011/03/31 19:29:01 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -58,6 +58,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.25  2011/03/31 19:29:01  fisyak
+ * Add IdTruth information for tracks and vertices
+ *
  * Revision 2.24  2010/08/31 20:00:09  fisyak
  * Clean up, add mSeedQuality
  *
@@ -202,6 +205,12 @@ public:
     int          bad() const;
     void         setNumberOfPossiblePoints(unsigned char, StDetectorId);
     void         setSeedQuality(UShort_t qa) {mSeedQuality = qa;}
+    Int_t           idTruth() const { return mIdTruth;}
+    Int_t           qaTruth() const { return mQuality; }
+    Int_t           idParentVx() const {return mIdParentVx;}
+    void         setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
+    void         setIdParentVx(Int_t id) {mIdParentVx = id;}
+    
 protected:
     void         setNumberOfPossiblePoints(unsigned short); // obsolete
     
@@ -223,6 +232,10 @@ protected:
     StTrackFitTraits        mFitTraits;
     StTrackGeometry         *mGeometry;
     StTrackGeometry         *mOuterGeometry;
+    UShort_t      mIdTruth; // MC track id 
+    UShort_t      mQuality; // quality of this information (percentage of hits coming from the above MC track)
+    Int_t         mIdParentVx; // MC Parent vertex Id
+    
 //  StTrackDetectorInfo         *mDetectorInfo;         //$LINK
 //  StTrackNode                 *mNode;                 //$LINK
 #ifdef __CINT__
@@ -235,6 +248,6 @@ protected:
 
     StSPtrVecTrackPidTraits mPidTraitsVec;
 
-    ClassDef(StTrack,6)
+    ClassDef(StTrack,7)
 };
 #endif
