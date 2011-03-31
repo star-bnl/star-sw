@@ -709,7 +709,7 @@ Bfc_st BFC[] = { // standard chains
                     "St_ctf,St_ctf_Maker,Minuit,StGenericVertexMaker",      "Generic Vertex Finder",kFALSE},
   {"StiUtil"  ,"","","",                              "","StiUtilities","Load StiUtilities library",kFALSE},
   {"StiRnD"   ,"","","",                                  "","StiRnD", "Load StiRnD shared library",kFALSE},
-  {"Sti"      ,"Sti","","SCL,StEvent,StiLibs,StDbT,TpcIT,StiUtil,compend","StiMaker",
+  {"Sti"      ,"Sti","","SCL,StEvent,StiLibs,StDbT,TpcIT,StiUtil,compend,tbutil","StiMaker",
                                                     "StEventUtilities,Sti,StiMaker" ,"ITTF tracker",kFALSE},
   {"StiVMC"   ,"StiVMC","","-Sti,SCL,StEvent,StDbT,TpcDb,compend","StiVMCMaker"
    ,                                      "StEventUtilities,StiVMC,StiVMCMaker" ,"ITTF VMC tracker",kFALSE},
