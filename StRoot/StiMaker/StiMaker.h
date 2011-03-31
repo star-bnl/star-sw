@@ -46,7 +46,7 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.29 2010/01/27 21:43:49 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.30 2011/03/31 22:11:24 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 
     StiToolkit * getToolkit();
@@ -73,6 +73,7 @@ class StiMaker : public StMaker
     StiVertexFinder*      _vertexFinder;
     EditableFilter<StiTrack> * _loaderTrackFilter;
     EditableFilter<StiHit>   * _loaderHitFilter;
+    void fillVxFlags();
 
     TFile 		*mPullFile;
     StiPullEvent 	*mPullEvent;

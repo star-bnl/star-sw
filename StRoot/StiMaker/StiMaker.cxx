@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.193 2010/09/01 21:25:03 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.194 2011/03/31 22:11:24 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.194  2011/03/31 22:11:24  fisyak
+// Propagate IdTruth to StEvent
+//
 // Revision 1.193  2010/09/01 21:25:03  fisyak
 // Add comment
 //
@@ -404,6 +407,7 @@ More detailed: 				<br>
 #include "Sti/StiTimer.h"
 #include "StiDetectorVolume.h"
 #include "StarMagField.h"
+#include "StG2TrackVertexMap.h"
 /// Definion of minimal primary vertex errors.
 /// Typical case,vertex got from simulations with zero errors.
 /// But zero errors could to unpredicted problems
@@ -646,7 +650,9 @@ Int_t StiMaker::Make()
 
   eventIsFinished = false;
   StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
-
+  St_g2t_track *g2t_track = (St_g2t_track *) GetDataSet("geant/g2t_track");   
+  St_g2t_vertex *g2t_vertex = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex");   
+  StG2TrackVertexMap::instance(g2t_track,g2t_vertex);
   if (!event) return kStWarn;
 
   if (_tracker) {
@@ -722,7 +728,7 @@ Int_t StiMaker::Make()
 
 	      //cout << "StiMaker::Make() -I- Primary Filling"<<endl; 
               if (mTimg[kFilTimg]) mTimg[kFilTimg]->Start(0);
-	      if (_eventFiller) _eventFiller->fillEventPrimaries();
+	      if (_eventFiller) {_eventFiller->fillEventPrimaries(); fillVxFlags();}
               if (mTimg[kFilTimg]) mTimg[kFilTimg]->Stop();
 	    }
 	}
@@ -829,4 +835,49 @@ TDataSet  *StiMaker::FindDataSet (const char* logInput,const StMaker *uppMk,
      if (Debug()) fVolume->ls(3);
   }
   return fVolume;
+}
+//_____________________________________________________________________________
+void StiMaker::fillVxFlags() {// set vertices IdTruth if any
+  StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
+  if (! event) return;
+  UInt_t NVx = event->numberOfPrimaryVertices();
+  if (! NVx) return;
+  struct vertexPing {
+    Int_t  Id;
+    Int_t nPings;
+  };
+  const UInt_t NVxMax = 200;
+  for (UInt_t i = 0; i < NVx; i++) {
+    StPrimaryVertex  *vx = event->primaryVertex(i);
+    if (! vx) continue;
+    vertexPing *candidates = (vertexPing *) calloc(NVxMax, sizeof(vertexPing));
+    UInt_t N = 0;
+    UInt_t Ntracks = vx->numberOfDaughters();
+    Int_t IdVx = 0;
+    for (UInt_t l = 0; l < Ntracks; l++) {
+      const StTrack *pTrack = vx->daughter(l);
+      if (! pTrack) continue;
+      Int_t IdTk = pTrack->idTruth();
+      if (IdTk <= 0) continue;
+      IdVx = pTrack->idParentVx();
+      if (IdVx <= 0) continue;
+      Int_t J = -1;
+      for (UInt_t j = 0; j < N; j++) if (candidates[j].Id == IdVx) {J = j; break;}
+      if (J < 0) {J = N; if (N < NVxMax) N++;}
+      candidates[J].Id = IdVx;
+      candidates[J].nPings++;
+    }
+    Int_t dominant = -1;
+    Int_t J = -1;
+    for (UInt_t j = 0; j < N; j++) if (candidates[j].nPings > dominant) 
+      {dominant = candidates[j].nPings; J = j;}
+    if (J > -1) {
+      Int_t IdTruth = candidates[J].Id;
+      Int_t QA      = (100*dominant)/Ntracks;
+      vx->setIdTruth(IdTruth,QA);
+      Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(IdTruth);
+      vx->setIdParent(IdParentTk);
+    }
+    free(candidates);
+  }
 }
