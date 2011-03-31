@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StVertex.h,v 2.10 2009/11/23 16:34:08 fisyak Exp $
+ * $Id: StVertex.h,v 2.11 2011/03/31 19:29:01 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
+ * Revision 2.11  2011/03/31 19:29:01  fisyak
+ * Add IdTruth information for tracks and vertices
+ *
  * Revision 2.10  2009/11/23 16:34:08  fisyak
  * Cleanup, remove dependence on dst tables, clean up software monitors
  *
@@ -89,13 +92,20 @@ public:
     virtual void setParent(StTrack*);
     virtual void addDaughter(StTrack*) = 0;
     virtual void removeDaughter(StTrack*) = 0;
-
+    Int_t            idTruth() const { return mIdTruth;}
+    Int_t            qaTruth() const { return mQuality; }
+    Int_t            idParent() const { return mIdParent;}
+    void          setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
+    void          setIdParent(Int_t id) {mIdParent = id;}
 protected:
     StVertexId    mType;
     Int_t         mFlag;
     Float_t       mCovariantMatrix[6];
     Float_t       mChiSquared;
     Float_t       mProbChiSquared;
+    UShort_t      mIdTruth; // MC vertex id if any 
+    UShort_t      mQuality; // quality of this information (percentage of tracks coming the above MC Vertex)
+    Int_t         mIdParent;// Id of MC parent track
 //  StTrack*      mParent;           	//$LINK
 #ifdef __CINT__
     StObjLink     mParent;            
@@ -103,6 +113,6 @@ protected:
     StLink<StTrack> mParent;            
 #endif //__CINT__
 
-    ClassDef(StVertex,3)
+    ClassDef(StVertex,4)
 };
 #endif
