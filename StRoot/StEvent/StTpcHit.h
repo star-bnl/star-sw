@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.18 2011/01/20 18:25:41 genevb Exp $
+ * $Id: StTpcHit.h,v 2.19 2011/03/31 19:25:13 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.19  2011/03/31 19:25:13  fisyak
+ * Keep ADC value for cluster
+ *
  * Revision 2.18  2011/01/20 18:25:41  genevb
  * Place FCF_flags include where it is needed
  *
@@ -88,8 +91,8 @@ public:
 	     UShort_t idTruth=0, UShort_t quality=0,
 	     UShort_t id =0,
 	     Short_t mnpad=0, Short_t mxpad=0, Short_t mntmbk=0,
-	     Short_t mxtmbk=0, Float_t cl_x = 0, Float_t cl_t = 0) 
-      :  StHit(p, e, hw, q, c, idTruth, quality, id) {setExtends(cl_x, cl_t, mnpad, mxpad, mntmbk, mxtmbk); mChargeModified = 0;}
+	     Short_t mxtmbk=0, Float_t cl_x = 0, Float_t cl_t = 0, UShort_t adc = 0) 
+      :  StHit(p, e, hw, q, c, idTruth, quality, id), mAdc(adc) {setExtends(cl_x, cl_t, mnpad, mxpad, mntmbk, mxtmbk); mChargeModified = 0;}
     ~StTpcHit() {}
 
     void* operator new(size_t sz,void *p) { return p;}
@@ -99,6 +102,7 @@ public:
     void     setChargeModified(Float_t charge) {mChargeModified = charge;}
     void     setPadTmbk(Float_t cl_x, Float_t cl_t) { mMcl_x = TMath::Nint(cl_x*64);  mMcl_t = TMath::Nint(cl_t*64);}
     void     setExtends(Float_t cl_x, Float_t cl_t, Short_t mnpad, Short_t mxpad, Short_t mntmbk, Short_t mxtmbk);
+    void     setAdc(UShort_t adc = 0) {mAdc = adc;}
     UInt_t   sector() const {return bits(4, 5);}   // bits 4-8  -> 1-24
     UInt_t   padrow() const {return bits(9, 6);}   // bits 9-14 -> 1-45
     UInt_t   padsInHit()   const {return maxPad() - minPad() + 1;} 
@@ -108,9 +112,10 @@ public:
     Short_t  minTmbk()  const {return TMath::Nint(mMcl_t/64.) - mMintmbk;}
     Short_t  maxTmbk()  const {return TMath::Nint(mMcl_t/64.) + mMaxtmbk;}
     Int_t    volumeID() const {return 100 * sector() + padrow();}
-    Short_t  timeBucketsInHit()   const {return bits(22,7);} // number of time bucket fired in this hit
+    Short_t  timeBucketsInHit()   const {return maxTmbk() - minTmbk() + 1;} // number of time bucket fired in this hit
     Float_t  timeBucket() const {return static_cast<float>(mMcl_t)/64.;}
     Float_t  pad() const {return static_cast<float>(mMcl_x)/64.;}
+    UShort_t adc() const {return mAdc;}
     Float_t  chargeModified() const {return mChargeModified;}
     void     Print(Option_t *option="") const;
     
@@ -122,8 +127,9 @@ protected:
     UChar_t     mMaxtmbk;    /* highest time bucket in hit - central timebucket */
     Short_t     mMcl_x;      /* average pad*64 */
     Short_t     mMcl_t;      /* average timebucket*64 */
+    UShort_t    mAdc;        /* cluster ADC sum */
     Float_t     mChargeModified; //!
-    ClassDef(StTpcHit,4)
+    ClassDef(StTpcHit,5)
 };
 ostream&              operator<<(ostream& os, StTpcHit const & v);
 #endif
