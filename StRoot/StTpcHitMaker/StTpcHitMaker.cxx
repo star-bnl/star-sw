@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.37 2011/03/08 18:20:44 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.38 2011/03/31 19:31:12 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.38  2011/03/31 19:31:12  fisyak
+ * Add adc to Tpc hit
+ *
  * Revision 1.37  2011/03/08 18:20:44  genevb
  * Limit on number of hits starting at time bin 0
  *
@@ -463,16 +466,17 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
 				 (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 
   StTpcHit *hit = new StTpcHit(global.position(),hard_coded_errors,hw,q
-            , (UChar_t ) 0  // c
-            , (UShort_t) 0  // idTruth=0
-            , (UShort_t) 0  // quality=0,
-            , ++fId         // id
-            , cluster.p1 //  mnpad
-            , cluster.p2 //  mxpad
-            , cluster.t1 //  mntmbk
-            , cluster.t2 //  mxtmbk
-            , pad
-            , time );
+			       , (UChar_t ) 0  // c
+			       , (UShort_t) 0  // idTruth=0
+			       , (UShort_t) 0  // quality=0,
+			       , ++fId         // id
+			       , cluster.p1 //  mnpad
+			       , cluster.p2 //  mxpad
+			       , cluster.t1 //  mntmbk
+			       , cluster.t2 //  mxtmbk
+			       , pad
+			       , time 
+			       , cluster.charge);
   hit->setFlag(cluster.flags);
   if (hit->minTmbk() == 0) bin0Hits++;
 //  LOG_INFO << p << " sector " << sector << " row " << row << endm;
@@ -489,7 +493,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   Double_t gain = (row<=13) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
   Double_t wire_coupling = (row<=13) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
   Double_t q = cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * 
-				   (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
+				 (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 
   // Correct for slewing (needs corrected q, and time in microsec)
   Double_t freq = gStTpcDb->Electronics()->samplingFrequency();
@@ -515,16 +519,17 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   static StThreeVector<double> hard_coded_errors(fgDp,fgDt,fgDperp);
 
   StTpcHit *hit = new StTpcHit(global.position(),hard_coded_errors,hw,q
-            , (UChar_t ) 0  // c
-            , (UShort_t) 0  // idTruth=0
-            , (UShort_t) 0  // quality=0,
-            , ++fId         // id =0
-            , cluster.p1 //  mnpad
-            , cluster.p2 //  mxpad
-            , cluster.t1 //  mntmbk
-            , cluster.t2 //  mxtmbk
-            , pad
-            , time );
+			       , (UChar_t ) 0  // c
+			       , (UShort_t) 0  // idTruth=0
+			       , (UShort_t) 0  // quality=0,
+			       , ++fId         // id =0
+			       , cluster.p1 //  mnpad
+			       , cluster.p2 //  mxpad
+			       , cluster.t1 //  mntmbk
+			       , cluster.t2 //  mxtmbk
+			       , pad
+			       , time 
+			       , cluster.charge);
   hit->setFlag(cluster.flags);
   if (hit->minTmbk() == 0) bin0Hits++;
 //  LOG_INFO << p << " sector " << sector << " row " << row << endm;
@@ -988,7 +993,8 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 		cout << "mk" << k; kHit->Print();
 		cout << "ml" << l; lHit->Print();
 	      }
-	      Float_t q =           lHit->charge()                    + kHit->charge();	
+	      Float_t q          =  lHit->charge()                    + kHit->charge();	
+	      Float_t adc        =  lHit->adc()                       + kHit->adc();
 	      Float_t pad        = (lHit->charge()*lHit->pad()        + kHit->charge()*kHit->pad()       )/q;
 	      Float_t timeBucket = (lHit->charge()*lHit->timeBucket() + kHit->charge()*kHit->timeBucket())/q;
 	      Short_t minPad  = TMath::Min(lHit->minPad(),  kHit->minPad());
@@ -1009,6 +1015,7 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	      kHit->setIdTruth(IdT, TMath::Nint(QA));
 	      kHit->setCharge(q);
 	      kHit->setExtends(pad,timeBucket,minPad,maxPad,minTmbk,maxTmbk);
+	      kHit->setAdc(adc);
 	      StTpcPadCoordinate padcoord(sec, row, pad, timeBucket);
 	      transform(padcoord,local,kFALSE);
 	      transform(local,global);
