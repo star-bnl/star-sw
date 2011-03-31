@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.92 2011/01/26 20:11:54 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.93 2011/03/31 22:11:24 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.93  2011/03/31 22:11:24  fisyak
+ * Propagate IdTruth to StEvent
+ *
  * Revision 2.92  2011/01/26 20:11:54  perev
  * track id into StiPull
  *
@@ -481,7 +484,7 @@ using namespace std;
 
 //StiMaker
 #include "StiMaker/StiStEventFiller.h"
-
+#include "StG2TrackVertexMap.h"
 #include "TMath.h"
 #define NICE(angle) StiKalmanTrackNode::nice((angle))
 
@@ -1035,7 +1038,6 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
     // there are more than 2 hits with wrong Z -position
     Int_t flag = TMath::Abs(gTrack->flag());
     if (NoTpcFitPoints >= 11) {
-      const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
       const StPtrVecHit& hits = dinfo->hits(kTpcId);
       Int_t Nhits = hits.size();
       Int_t NoWrongSignZ = 0;
@@ -1065,6 +1067,58 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
 	    }
 	  }
 	}
+      }
+    }
+    // Propagate hit IdTruth info to track one.
+    struct trackPing {
+      Int_t  Id;
+      Int_t nPings;
+      Int_t nPingsTpc;
+      Int_t nPingsSvt;
+      Int_t nPingsSsd;
+      Int_t nPingsFtpc;
+      Int_t noPingsUnk;
+    };
+    static trackPing candidates[20];
+    memset(candidates,0,sizeof(candidates));
+    UInt_t N = 0;
+    const StPtrVecHit &hits = dinfo->hits();
+    Int_t Nhits = hits.size();
+    Int_t NDhits = 0;
+    for (Int_t i = 0; i < Nhits; i++) {
+      const StHit *hit = hits[i];
+      if (! hit) continue;
+      if (! hit->detector()) continue;
+      NDhits++;
+      if (! hit->idTruth()) continue;
+      Int_t J = -1;
+      for (UInt_t j = 0; j < N; j++) if (candidates[j].Id == hit->idTruth()) {J = j; break;}
+      if (J < 0) {J = N; N++;}
+      candidates[J].Id = hit->idTruth();
+      candidates[J].nPings++;
+      switch (hit->detector()) {
+      case kTpcId: candidates[J].nPingsTpc++; break;
+      case kSvtId: candidates[J].nPingsSvt++; break;
+      case kSsdId: candidates[J].nPingsSsd++; break;
+      case kFtpcWestId:
+      case kFtpcEastId: candidates[J].nPingsFtpc++; break;
+      default: candidates[J].noPingsUnk++;
+      }
+    }
+    Int_t dominant = -1;
+    Int_t J = -1;
+    for (UInt_t j = 0; j < N; j++) if (candidates[j].nPings > dominant) 
+      {dominant = candidates[j].nPings; J = j;}
+    if (J > -1) {
+      Int_t IdTruth = candidates[J].Id;
+      Int_t QA      = (100*dominant)/NDhits;
+      static Int_t MaxG2tTracks = 100000;
+      if (IdTruth <= 0 || IdTruth > MaxG2tTracks  || QA > 100) {
+	cout << "Illegal IdTruth: " << IdTruth << "/" << QA << endl;
+      } else {
+	gTrack->setIdTruth(IdTruth,QA);
+	Int_t IdVx = StG2TrackVertexMap::instance()->IdVertex(IdTruth);
+	gTrack->setIdParentVx(IdVx);
       }
     }
   }
