@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.h,v 2.7 2009/11/23 22:20:51 ullrich Exp $
+ * $Id: StTpcRawData.h,v 2.8 2011/03/31 19:27:47 fisyak Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.h,v $
+ * Revision 2.8  2011/03/31 19:27:47  fisyak
+ * Add more safety for work with pixel data
+ *
  * Revision 2.7  2009/11/23 22:20:51  ullrich
  * Minor cleanup performed, fixed compiler warnings.
  *
@@ -133,7 +136,8 @@ public:
     UInt_t getNoSectors() {return size();}
     StTpcDigitalSector *GetSector(UInt_t sector) {return sector > 0 && sector <= size() ? mSectors[sector-1] : 0;}
     StTpcDigitalSector *getSector(UInt_t sector) {return GetSector(sector);}
-    Int_t  getVecOfPixels(StVectPixel &pixels, Int_t sector, Int_t row, Int_t padMin, Int_t padMax, Int_t tMin, Int_t tMax);
+    Int_t  getVecOfPixels(StVectPixel &pixels, Int_t sector, Int_t row, Int_t padMin = 1, Int_t padMax = -1, 
+			  Int_t tMin = 0, Int_t tMax = -1);
     void   setNoSectors(UInt_t noSectors = 0) {mSectors.resize(noSectors); for (UInt_t i = 0; i < noSectors; i++) mSectors[i] = 0;} 
     void   setSector(UInt_t sector, StTpcDigitalSector* digitSector);
     void   clear() {Clear();}

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRawData.cxx,v 2.9 2009/11/23 22:20:51 ullrich Exp $
+ * $Id: StTpcRawData.cxx,v 2.10 2011/03/31 19:27:47 fisyak Exp $
  *
  * Author: Yuri Fisyak, Mar 2008
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcRawData.cxx,v $
+ * Revision 2.10  2011/03/31 19:27:47  fisyak
+ * Add more safety for work with pixel data
+ *
  * Revision 2.9  2009/11/23 22:20:51  ullrich
  * Minor cleanup performed, fixed compiler warnings.
  *
@@ -334,16 +337,24 @@ void StTpcRawData::Clear(const Option_t*) {
 Int_t StTpcRawData::getVecOfPixels(StVectPixel &pixels, Int_t sector, Int_t row, Int_t padMin, Int_t padMax, Int_t tMin, Int_t tMax) {
   pixels.clear();
   StTpcDigitalSector *s =   GetSector(sector);
-  static Short_t  ADCs[__MaxNumberOfTimeBins__];
-  static UShort_t IDTs[__MaxNumberOfTimeBins__];
-  Int_t npads = s->numberOfPadsInRow(row);
-  if (npads) {
-    for (Int_t pad = padMin; pad <= padMax; pad++) {
-      Int_t ntbs =    s->numberOfTimeBins(row,pad);
-      if (ntbs) {
-	s->getTimeAdc(row,pad,ADCs,IDTs);
-	for (Int_t tb = tMin; tb <= tMax; tb++) {
-	  if (ADCs[tb])	pixels.push_back(StTpcPixel(kTpcId,sector,row,pad,tb,ADCs[tb],IDTs[tb],0));
+  if (s) {
+    static Short_t  ADCs[__MaxNumberOfTimeBins__];
+    static UShort_t IDTs[__MaxNumberOfTimeBins__];
+    Int_t npads = s->numberOfPadsInRow(row);
+    if (npads) {
+      if (padMin <      1) padMin = 1;
+      if (padMax < padMin) padMax = StTpcDigitalSector::numberOfPadsAtRow(row);
+      padMax = TMath::Min(padMax, StTpcDigitalSector::numberOfPadsAtRow(row));
+      if (tMin   <      0) tMin   = 0;
+      if (tMax   <   tMin) tMax =  __MaxNumberOfTimeBins__ - 1;
+      tMax   = TMath::Min(tMax,  __MaxNumberOfTimeBins__ - 1);
+      for (Int_t pad = padMin; pad <= padMax; pad++) {
+	Int_t ntbs =    s->numberOfTimeBins(row,pad);
+	if (ntbs) {
+	  s->getTimeAdc(row,pad,ADCs,IDTs);
+	  for (Int_t tb = tMin; tb <= tMax; tb++) {
+	    if (ADCs[tb])	pixels.push_back(StTpcPixel(kTpcId,sector,row,pad,tb,ADCs[tb],IDTs[tb],0));
+	  }
 	}
       }
     }
