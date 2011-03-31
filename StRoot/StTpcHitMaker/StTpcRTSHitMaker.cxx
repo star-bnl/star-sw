@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.23 2011/03/08 18:20:44 genevb Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.24 2011/03/31 19:31:12 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -295,7 +295,8 @@ Int_t StTpcRTSHitMaker::Make() {
 				     , dta->sim_cld[i].cld.t1 //  mntmbk
 				     , dta->sim_cld[i].cld.t2 //  mxtmbk
 				     , dta->sim_cld[i].cld.pad
-				     , dta->sim_cld[i].cld.tb );
+				     , dta->sim_cld[i].cld.tb 
+				     , dta->sim_cld[i].cld.charge);
 	/*tpxFCF.h
 	  #define FCF_ROW_EDGE            16      // 0x10 touched end of row
 	  #define FCF_BROKEN_EDGE         32      // 0x20 touches one of the mezzanine edges
