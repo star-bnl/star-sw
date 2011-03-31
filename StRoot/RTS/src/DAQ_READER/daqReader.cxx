@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.40 2011/02/18 20:59:25 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.41 2011/03/31 13:56:09 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -101,7 +101,7 @@ daqReader::daqReader(char *name)
     return;
   }
 
-  LOG(INFO,"Using file \"%s\"...",fname,0,0,0,0) ;
+  LOG(NOTE,"Using file \"%s\"...",fname,0,0,0,0) ;
 
   // directory?
   if(stat_buf.st_mode & S_IFDIR) {
@@ -182,7 +182,7 @@ void daqReader::init()
 
 
   // if(strcmp(EVP_HOSTNAME, _EVP_HOSTNAME) != 0) {
-  LOG("INFO","EVP_HOSTNAME set to %s", EVP_HOSTNAME);
+  LOG(DBG,"EVP_HOSTNAME set to %s", EVP_HOSTNAME);
   //  }
 
   isevp = 0;   // assume not... 
@@ -1969,7 +1969,7 @@ static int ask(int desc, ic_msg *m)
 
       crit_cou++;
       if(crit_cou > 10) {
-	LOG(ERR,"CRITICAL ERROR: That's IT! Bye...",0,0,0,0,0);
+	LOG(ERR,"That's IT! Bye...",0,0,0,0,0);
 	sleep(1) ;	// linger...
 	exit(-1) ;
       }
