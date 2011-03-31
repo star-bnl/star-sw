@@ -19,7 +19,7 @@
 #include "L2pedAlgo/L2pedAlgo09.h"
 #include "L2gammaAlgo/L2bemcGamma2009.h"
 #include "L2gammaAlgo/L2eemcGamma2009.h"
-#include "StDaqLib/TRG/trgStructures2009.h" // L2 results offsets
+#include "L2algoUtil/l2Algorithm.h" // L2 results offsets
 #include "StL2_2009EmulatorMaker.h"
 
 ClassImp(StL2_2009EmulatorMaker)
