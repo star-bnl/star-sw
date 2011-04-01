@@ -192,6 +192,7 @@ public:
     virtual void Clear(Option_t *opt="");
     void Reset(const TObject *evt=0,const char *opt="");
 static int Kind(const TObject *to);
+static void Remove(StEvent *ev,const char *className);
 static void Break(int kase);
 private:
 
