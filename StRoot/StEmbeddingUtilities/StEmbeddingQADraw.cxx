@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.27 2011/02/25 18:34:40 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.28 2011/04/01 05:07:07 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.28  2011/04/01 05:07:07  hmasui
+ * Added track selections in the 2nd page, Ncommon vs NhitFit (pt dependent), and 1/pt(RC)-1/pt(MC) vs pt plot
+ *
  * Revision 1.27  2011/02/25 18:34:40  hmasui
  * Add phi comparison between real and reconstructed primary (matched pairs) in embedding
  *
@@ -83,6 +86,7 @@
 #include "TObject.h"
 #include "TPaveText.h"
 #include "TPDF.h"
+#include "TProfile.h"
 #include "TROOT.h"
 #include "TStyle.h"
 #include "TSystem.h"
@@ -328,6 +332,73 @@ void StEmbeddingQADraw::init()
   mCanvas->Update();
 
   mPDF->NewPage() ;
+
+  // Print event and track selections
+  const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
+  TPaveText* header = initCanvas("Event & track selections");
+
+  // Event selections
+  TPaveText* eventSelections = new TPaveText(0.05, 0.60, 0.95, 0.92);
+  eventSelections->SetTextAlign(12);
+  eventSelections->SetBorderSize(1);
+  eventSelections->SetFillColor(10);
+  eventSelections->SetTextColor(kBlack);
+  eventSelections->SetTextSize(0.030);
+  eventSelections->SetTextFont(42);
+
+  eventSelections->AddText("*** Event selections");
+  // z-vertex cut
+  eventSelections->AddText(Form("  z-vertex cut   : |v_{z}| < %1.1f cm", utility->getZVertexCut()));
+  // trigger id's
+  const vector<UInt_t> triggerId(utility->getTriggerIdCut());
+  if ( !triggerId.empty() ) {
+    TString triggers("");
+    for(UInt_t i=0; i<triggerId.size(); i++) {
+      triggers += Form("%d", triggers[i]);
+      if( i != triggerId.size() - 1 ) triggers += ", ";
+    }
+    eventSelections->AddText(Form("  trigger id cut : id = %s", triggers.Data()));
+  }
+  eventSelections->AddText("NOTE: Trigger id cut for real data has to be made manually in doEmbeddingQAMaker.C");
+  eventSelections->SetAllWith("***", "color", kRed+1);
+  eventSelections->SetAllWith("***", "font", 72);
+  eventSelections->SetAllWith("***", "size", 0.033);
+  eventSelections->SetAllWith("NOTE", "color", kBlue+1);
+  eventSelections->SetAllWith("NOTE", "font", 72);
+  eventSelections->SetAllWith("NOTE", "size", 0.020);
+  eventSelections->Draw();
+
+  // Track selections
+  TPaveText* trackSelections = new TPaveText(0.05, 0.05, 0.95, 0.59);
+  trackSelections->SetTextAlign(12);
+  trackSelections->SetBorderSize(1);
+  trackSelections->SetFillColor(10);
+  trackSelections->SetTextColor(kBlack);
+  trackSelections->SetTextSize(0.030);
+  trackSelections->SetTextFont(42);
+  trackSelections->AddText("*** Track selections");
+  trackSelections->AddText(Form("  %1.1f < p_{T} < %1.1f GeV/c", utility->getPtMinCut(), utility->getPtMaxCut())); // pt cut
+  trackSelections->AddText(Form("  |#eta| < %1.1f", utility->getEtaCut()));
+  trackSelections->AddText(Form("  |y| < %1.1f", utility->getRapidityCut()));
+  trackSelections->AddText(Form("  nHitsFit > %3d", utility->getNHitCut()));
+  trackSelections->AddText(Form("  nHitsFit/nHitsPoss > %1.2f", utility->getNHitToNPossCut()));
+  trackSelections->AddText(Form("  global Dca < %1.1f cm", utility->getDcaCut()));
+  trackSelections->AddText(Form("  |n#sigma| < %1.1f", utility->getNSigmaCut()));
+  trackSelections->AddText("NOTE1: Rapidity cut for real data has to be made manually in doEmbeddingQAMaker.C");
+  trackSelections->AddText("NOTE2: Cut on its own variable is currently disabled, e.x. no dca cut for dca histogram");
+  trackSelections->SetAllWith("***", "color", kRed+1);
+  trackSelections->SetAllWith("***", "font", 72);
+  trackSelections->SetAllWith("***", "size", 0.033);
+  trackSelections->SetAllWith("NOTE", "color", kBlue+1);
+  trackSelections->SetAllWith("NOTE", "font", 72);
+  trackSelections->SetAllWith("NOTE", "size", 0.020);
+  trackSelections->Draw();
+
+  mCanvas->cd();
+  mCanvas->Update();
+  mPDF->NewPage() ;
+
+  delete header ;
 }
 
 //____________________________________________________________________________________________________
@@ -1452,6 +1523,55 @@ Bool_t StEmbeddingQADraw::drawPt() const
   /// Make sure (1) input ROOT files and (2) input geantid
   if(!isOpen()) return kFALSE ;
 
+  // 1/pT(Gl) - 1/pT(MC) vs pT(MC) (Embedding only)
+  for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
+    TPaveText* header = 0 ;
+
+    TH2* hdInvPtVsPt = (TH2D*) getHistogram("hdInvPtVsPt", id, kTRUE);
+    if(!hdInvPtVsPt){
+      // Draw error messages
+      header = initCanvas(Form("1/p_{T} (Gl) - 1/p_{T} (MC) vs p_{T} (MC) (%s)", getParticleName(mDaughterGeantId[id])));
+      drawErrorMessages(getHistogramName("hdInvPtVsPt", id, kTRUE)) ;
+
+      mCanvas->cd();
+      mCanvas->Update();
+      mPDF->NewPage();
+
+      delete header ;
+
+      return kFALSE ;
+    }
+
+    gStyle->SetPadRightMargin(0.15);
+
+    header = initCanvas(Form("1/p_{T} (Gl) - 1/p_{T} (MC) vs p_{T} (MC) (%s)", getParticleName(mDaughterGeantId[id])), 1, 2);
+    // 2D
+    mMainPad->cd(1);
+    hdInvPtVsPt->SetAxisRange(0, mPtMax, "X");
+    hdInvPtVsPt->SetTitle("");
+    hdInvPtVsPt->Draw("colz");
+
+    // Profile
+    mMainPad->cd(2);
+    TProfile* pdInvPtVsPt = (TProfile*) hdInvPtVsPt->ProfileX(Form("p%s", hdInvPtVsPt->GetName()));
+    pdInvPtVsPt->SetAxisRange(0, mPtMax, "X");
+    pdInvPtVsPt->SetTitle("");
+    pdInvPtVsPt->SetYTitle(hdInvPtVsPt->GetYaxis()->GetTitle());
+    pdInvPtVsPt->SetLineWidth(2);
+    pdInvPtVsPt->SetMinimum(hdInvPtVsPt->GetYaxis()->GetXmin());
+    pdInvPtVsPt->SetMaximum(hdInvPtVsPt->GetYaxis()->GetXmax());
+    pdInvPtVsPt->Draw();
+
+    mCanvas->cd();
+    mCanvas->Update();
+
+    mPDF->NewPage() ;
+
+    delete header ;
+  }
+
+  gStyle->SetPadRightMargin(0.05);
+
   return drawProjection2D("pt");
 }
 
@@ -2025,8 +2145,13 @@ Bool_t StEmbeddingQADraw::drawNHit() const
   /// Make sure (1) input ROOT files and (2) input geantid
   if(!isOpen()) return kFALSE ;
 
+  gStyle->SetPadRightMargin(0.15);
+
   /// QA for NCommon hit vs NHit
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
+    TH3* hNCommonHitVsNHit = (TH3D*) getHistogram("hNCommonHitVsNHit", id, kTRUE);
+    if ( !hNCommonHitVsNHit ) continue ;
+
     TString headerTitle("");
     if( mIsEmbeddingOnly ){
       headerTitle = Form("N_{common} vs N_{hit} (Embedding:%s)", getParticleName(mDaughterGeantId[id]) );
@@ -2036,21 +2161,31 @@ Bool_t StEmbeddingQADraw::drawNHit() const
             getParticleName(mDaughterGeantId[id]), getParticleName(getGeantIdReal(id)) );
     }
 
-    TH2* hNCommonHitVsNHit = (TH2D*) getHistogram("hNCommonHitVsNHit", id, kTRUE);
-    TPaveText* header = initCanvas(headerTitle);
-    if(!hNCommonHitVsNHit) {
-      // Draw error messages
-      drawErrorMessages(getHistogramName("hNCommonHitVsNHit", id, kTRUE));
-    }
-    else{
-      hNCommonHitVsNHit->Draw("colz");
-    }
-    mCanvas->cd();
-    mCanvas->Update();
-    mPDF->NewPage();
+    // Slices for each pt bin (0.5 GeV/c step)
+    for(Int_t jpt=0; jpt<2; jpt++) {
+      TPaveText* header = initCanvas(headerTitle, 2, 3);
 
-    delete header ;
+      const Int_t npt = hNCommonHitVsNHit->GetNbinsX()/2 ;
+      for(Int_t ipt=0; ipt<npt; ipt++) {
+        mMainPad->cd(ipt+1);
+        const Int_t ptId     = jpt*npt + ipt + 1;
+        const Double_t ptmin = hNCommonHitVsNHit->GetXaxis()->GetBinLowEdge(ptId) ; 
+        const Double_t ptmax = hNCommonHitVsNHit->GetXaxis()->GetBinLowEdge(ptId+1) ; 
+        hNCommonHitVsNHit->SetAxisRange(ptmin, ptmax);
+        TH2* hNCommonHitVsNHit2D = (TH2D*) hNCommonHitVsNHit->Project3D("zy");
+        hNCommonHitVsNHit2D = (TH2D*) hNCommonHitVsNHit->Project3D("zy");
+        hNCommonHitVsNHit2D->SetName(Form("hNCommonHitVsNHit2D_%d_%d", ipt, jpt));
+        hNCommonHitVsNHit2D->SetTitle(Form("%1.1f < p_{T} < %1.1f GeV/c", ptmin, ptmax));
+        hNCommonHitVsNHit2D->Draw("colz");
+      }
+      mCanvas->cd();
+      mCanvas->Update();
+      mPDF->NewPage();
+      delete header ;
+    }
   }
+
+  gStyle->SetPadRightMargin(0.05);
 
   return drawProjection3D("NHit") ;
 }
