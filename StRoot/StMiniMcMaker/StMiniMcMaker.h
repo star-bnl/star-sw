@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.h,v 1.16 2010/08/31 20:16:15 fisyak Exp $
+ * $Id: StMiniMcMaker.h,v 1.17 2011/04/01 20:01:41 perev Exp $
  * \file  StMiniMcMaker.h
  * \brief Filling of StMiniMcEvent classes from StMcEvent, StEvent, StAssociationMaker
  * 
@@ -12,6 +12,9 @@
  * manuel calderon de la barca's code.
  *
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.17  2011/04/01 20:01:41  perev
+ * const++
+ *
  * Revision 1.16  2010/08/31 20:16:15  fisyak
  * Add track seedQuality
  *
@@ -86,6 +89,9 @@
  * Revision 1.4  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.17  2011/04/01 20:01:41  perev
+ * const++
+ *
  * Revision 1.16  2010/08/31 20:16:15  fisyak
  * Add track seedQuality
  *
@@ -156,7 +162,7 @@
  * but in order not to break Jenn's scripts if she was already using this macro,
  * this parameter was added at the end and defaults to "rcf", which is appropriate
  * for hijing files reconstructed in rcf.
- * and $Id: StMiniMcMaker.h,v 1.16 2010/08/31 20:16:15 fisyak Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.h,v 1.17 2011/04/01 20:01:41 perev Exp $ plus header comments for the macros
  *
  */
 
@@ -167,6 +173,7 @@
 
 #include <vector>
 #include <utility>
+#include <algorithm>
 #include <map>
 
 #include "TString.h"
@@ -199,9 +206,9 @@ class StEmcPoint;
 
 typedef map<UInt_t,Int_t> RCFOUNDMAP;
 typedef map<long,Int_t> MCFOUNDMAP;
-typedef map<Long_t,StMcTrack*> MCMAP;
+typedef map<Long_t,const StMcTrack*> MCMAP;
 typedef vector<StTrackPairInfo*> PAIRVEC;
-typedef pair<StTpcHit*,StTpcHit*> PAIRHIT;
+typedef pair<const StTpcHit*,const StTpcHit*> PAIRHIT;
 inline bool pairCmp(StTrackPairInfo* p1, StTrackPairInfo* p2){
   return p1->commonTpcHits() < p2->commonTpcHits();
 }
@@ -210,7 +217,7 @@ inline bool sortCmp(StTrackPairInfo* p1, StTrackPairInfo* p2){
 }
 
 #endif
-bool hitCmp(StTpcHit* p1, StTpcHit* p2);
+//bool hitCmp(StTpcHit* p1, StTpcHit* p2);
 
 
 // check StMiniMcEvent for the track categories...
@@ -229,7 +236,7 @@ class StMiniMcMaker : public StMaker{
   Int_t Make();
   Int_t Finish();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMiniMcMaker.h,v 1.16 2010/08/31 20:16:15 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMiniMcMaker.h,v 1.17 2011/04/01 20:01:41 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   //---- SETS -------
 
@@ -247,22 +254,22 @@ class StMiniMcMaker : public StMaker{
   
   Bool_t           initAssociation();  // sets all the assoc maps
   Bool_t           initVertex(); // finds the primary vertex if it exists
-  Bool_t           acceptRaw(StMcTrack*);
-  Bool_t           accept(StMcTrack*);
-  Bool_t           accept(StTrack*);
-  Bool_t	   acceptGood20(StTrack*);
-  Bool_t	   acceptGood20(StMcTrack*);
-  Bool_t           acceptCentrality(StTrack*);
-  Bool_t           acceptUncorrected(StTrack*);
-  Bool_t           acceptFTPC(StTrack*);
-  Bool_t           ok(StTrack*);
-  Bool_t           isSameSign(StTrack*,StMcTrack*);
-  Bool_t           acceptPt(StTrack*);
-  Bool_t           acceptPt(StMcTrack*);
-  Bool_t           acceptDebug(StMcTrack*);
+  Bool_t           acceptRaw(const StMcTrack*);
+  Bool_t           accept(const StMcTrack*);
+  Bool_t           accept(const StTrack*);
+  Bool_t	   acceptGood20(const StTrack*);
+  Bool_t	   acceptGood20(const StMcTrack*);
+  Bool_t           acceptCentrality(const StTrack*);
+  Bool_t           acceptUncorrected(const StTrack*);
+  Bool_t           acceptFTPC(const StTrack*);
+  Bool_t           ok(const StTrack*);
+  Bool_t           isSameSign(const StTrack*,const StMcTrack*);
+  Bool_t           acceptPt(const StTrack*);
+  Bool_t           acceptPt(const StMcTrack*);
+  Bool_t           acceptDebug(const StMcTrack*);
   
-  StTrackPairInfo* findBestMatchedGlobal(StMcTrack*);
-  PAIRVEC          findMatchedRc(StMcTrack*);
+  StTrackPairInfo* findBestMatchedGlobal(const StMcTrack*);
+  PAIRVEC          findMatchedRc(const StMcTrack*);
   PAIRHIT          findFirstLastHit(const StTrack*);
   PAIRHIT          findFirstLastFitHit(const StTrack*);
 
@@ -271,8 +278,8 @@ class StMiniMcMaker : public StMaker{
   //pair<Float_t,Float_t>  computeProj(const StThreeVectorF*,const StTrack*);
   Float_t          computeZDca(const StThreeVectorF*,const StTrack*);
 
-  StPrimaryTrack*  isPrimaryTrack(StTrack*);
-  Bool_t           isPrimaryTrack(StMcTrack*);
+  const StPrimaryTrack*  isPrimaryTrack(const StTrack*);
+  Bool_t           isPrimaryTrack(const StMcTrack*);
   Int_t            openFile();
   Int_t            closeFile();
   void             trackLoop();
@@ -285,7 +292,7 @@ class StMiniMcMaker : public StMaker{
 				 Int_t nMcFtpcENch, Int_t nMcFtpcWNch,
 				 Int_t nFtpcEUncorrected, Int_t nFtpcWUncorrected);
   void             fillTrackPairInfo(StMiniMcPair*,
-				     StMcTrack*,
+				     const StMcTrack*,
 				     const StTrack* prTrack, 
 				     const StTrack* glTrack,
 				     Int_t commonHits, Int_t nAssMc,
@@ -298,18 +305,18 @@ class StMiniMcMaker : public StMaker{
 				   Int_t nAssMc);
   
   void             fillMcTrackInfo(StTinyMcTrack*,
-				   StMcTrack*,
+				   const StMcTrack*,
 				   Int_t nAssGl, Int_t nAssPr);
 
-  void             checkMerged(StMcTrack* merged, Int_t mergedCommonHits,
-			       StTrack* prTrack);
-  void             checkSplit(StMcTrack*,StTrack*,Int_t);
-  void             checkContam(StMcTrack*,StGlobalTrack*,Int_t);
+  void             checkMerged(const StMcTrack* merged, Int_t mergedCommonHits,
+			       const StTrack* prTrack);
+  void             checkSplit (const StMcTrack*,const StTrack*,Int_t);
+  void             checkContam(const StMcTrack*,const StGlobalTrack*,Int_t);
 
   size_t           getIndex(size_t mult);
 
  void             AppendMCDaughterTrack();
-
+ static void      dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,int& dominatrackHits,float& avgQuality);
   // members
   StMiniMcEvent*   mMiniMcEvent; //! 
   StIOInterFace*   mIOMaker;      //!
