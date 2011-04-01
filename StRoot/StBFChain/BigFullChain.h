@@ -688,7 +688,8 @@ Bfc_st BFC[] = { // standard chains
 
 
   // Some global Sti stuff including vertexing
-  {"StiLibs","","","StarMagField,StiTpcLib,StiUtil","",                "","ITTF:load Sti libraries",kFALSE},
+  {"StiLibs","","","StarMagField,StiTpcLib,StiSvtLib,StiSsdLib,StiRnDLib,StiUtil",""
+   ,                                                                   "","ITTF:load Sti libraries",kFALSE},
   {"StiVMCLibs","","","-StiLibs,detDb,StarMagField,StiUtil","",     "","ITTF:load StiVMC libraries",kFALSE},
   {"StiTpcLib","","","","","tpc_T,dbutil,detDb,StarMagField,magF,Sti,StiTpc"
    ,                                                                   "Sti Tpc related libratries",kFALSE},
