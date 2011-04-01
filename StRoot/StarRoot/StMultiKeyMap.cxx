@@ -6,7 +6,7 @@
 
 #include <algorithm>
 #include <numeric>
-static int gMyId=0;
+static int gMyId=0,gMyInst=0;
 
 #include "StMultiKeyMap.h"
 #ifndef MAX
@@ -179,7 +179,7 @@ StMultiKeyNode::StMultiKeyNode(const StMultiKeyNode &fr)
 void StMultiKeyNode::Init()
 {
   memset(&mNKey,0,(char*)&mKeys-&mNKey+sizeof(mKeys));
-  mId = ++gMyId;
+  mId = ++gMyId; gMyInst++;
 }
 //______________________________________________________________________________
 void StMultiKeyNode::Clear()
@@ -192,7 +192,11 @@ StMultiKeyNode::~StMultiKeyNode()
   if (mObj) delete [] mKeys;
   delete mLink[0];
   delete mLink[1];
+  gMyInst--;
 } 
+//______________________________________________________________________________
+int StMultiKeyNode::GetNInst() 
+{ return gMyInst;}
 //______________________________________________________________________________
 void StMultiKeyNode::Set(const void *obj,const float *keys)
 {
