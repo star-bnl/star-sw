@@ -28,6 +28,7 @@ static StvDraw *Jnst() {return fgStvDraw;}
 static void Wait();
 static void Show(const StvTrack *tk);
 static void Klear();
+static void Browse(const TObject *to);
 private:
    void Join(const StvNode *left,const StvNode *rite,StvPoints &poits);
 private:
