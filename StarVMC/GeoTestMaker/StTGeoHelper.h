@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.11 2010/10/15 20:12:38 perev Exp $
+// $Id: StTGeoHelper.h,v 1.12 2011/04/01 19:11:56 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -186,6 +186,7 @@ virtual ~StTGeoHelper();
 
 public:
        int  Load(const char *geo);
+       void SetOpt (int opt)	{fOpt = (opt!=0);}
        void Init(int mode=0);
        void Finish();
 
@@ -199,6 +200,7 @@ public:
        void InitHitPlane();
        void InitHits();
        void ClearHits();
+       void Clear(const char *opt="");
 
         int SetHitErrCalc(StDetectorId modId,TNamed *hitErrCalc,const StTGeoSele *sel=0);
 static  StTGeoHelper *Instance();
@@ -255,6 +257,7 @@ private:
 private:
 char fBeg[1];
 int fMode;      //0=fill infos + hitShape, 1= hit planes
+int fOpt;      //0=Optimisation Off, !=0= Optimization ON
 Long64_t	fActiveModu;
 TObjArray      *fVoluInfoArr;           // array of all StVoluIinfo
 TObjArray      *fHitPlaneArr;           // array of StHitPlane's
