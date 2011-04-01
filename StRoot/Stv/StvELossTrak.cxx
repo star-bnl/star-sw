@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.3 2011/02/05 22:01:29 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.4 2011/04/01 20:49:48 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -43,7 +43,7 @@ void StvELossTrak::Set(double p)
   fFak = (14.1*14.1*(p2+m2))/(p2*p2*1e6);
   double T = sqrt(p2+m2)-fM;
   if (fA>0) {
-    fdEdX = gdrelx(fA,fZ,fDens,T,fM)*fZ*fZ*fDens*fCharge2;
+    fdEdX = gdrelx(fA,fZ,fDens,T,fM)*fDens*fCharge2;
     double beta2 = p2/(p2+m2);
     fdEdXErr2 = gsigma2(fZ/(fA+1e-6),fDens,fCharge2,fM ,beta2,1.);
   }
@@ -222,7 +222,7 @@ static const double B[93][6]={
   {7.29		,8.204	,19180.	,586.3	,0.002573	,847.}};
 
 static const double CECOF[7]={0.,0.42237,0.0304,-0.00038,3.858,-0.1668,0.00158};
-double C[6]={0};
+static       double C[6]={0};
 
 double poti,p,e,beta,bet2,tau,sl,sh,eta,eta2,b2g2,tmax,cc,x0,x1,xa,xm,delta;
 double f1,f2,f3,f4,f5,tupp,ce,st,sbb,dedx;
