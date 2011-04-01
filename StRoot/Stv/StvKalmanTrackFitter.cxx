@@ -68,9 +68,10 @@ static const double kBigErrFact = 10;
         node->mPP[dir] = node->mFP[1-dir];
 //????		ONLY FOR dir==1
         StvFitPars delPre = preNode->mFP[dir]-preNode->mPP[1-dir];
-        if (delPre.Check()) return 1; 
+        if (delPre.Check()) 	return 1; 
         
         StvFitPars del    = delPre*preNode->mDer[dir];
+        if (del.Check()) 	return 2; 
         node->mPP[dir]+= del;node->mFP[dir]=node->mPP[dir];
 
         
@@ -78,7 +79,7 @@ static const double kBigErrFact = 10;
         node->mPE[dir] = preNode->mFE[dir]*node->mDer[dir];
         node->mPE[dir].Add(preNode->mELossData,node->mPP[dir]);
         node->mFE[dir] = node->mPE[dir];
-        
+        if(node->mFE[dir].Check()) 	return 3; 
       }
 //		Standard Kalman fit step.
       node->mFP[dir] = node->mPP[dir];
@@ -90,7 +91,7 @@ static const double kBigErrFact = 10;
       fitt->Set(node->mPP+dir,node->mPE+dir,node->mFP+dir,node->mFE+dir);
       fitt->Prep();
       Xi2[2] = fitt->Xi2(hit);
-      if (Xi2[2] > kons->mXi2Hit) { hit->release(); node->SetHit(0); break;}
+      if (Xi2[2] > kons->mXi2Hit) { node->SetHit(0); break;}
       Xi2[0] = Xi2[2];
 
       fitt->Update();
