@@ -513,6 +513,19 @@ void StEventHelper::Break(int kase)
 {
   fprintf(stderr,"Break(%d)\n",kase);
 }
+//______________________________________________________________________________
+void StEventHelper::Remove(StEvent *ev,const char *className)
+{
+StSPtrVecObject& V = ev->content();
+  int n = V.size();
+  for (int i=0; i<n; i++) {
+    StObject *to = V[i];
+    if (!to) continue;
+    if (!strstr(to->ClassName(),className)) continue;
+    V[i] = 0; delete to;
+    break;
+  }
+}  
 
 //______________________________________________________________________________
 ClassImp(StPoints3DABC)
