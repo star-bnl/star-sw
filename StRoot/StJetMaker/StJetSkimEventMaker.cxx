@@ -345,7 +345,7 @@ void StJetSkimEventMaker::fillTriggerSimulationInfo(StJetSkimTrig &skimTrig)
     skimTrig.setShouldFireBemc(trigResult.bemcDecision());
     skimTrig.setShouldFireEemc(trigResult.eemcDecision());
     skimTrig.setShouldFireL2(trigResult.l2Decision());
-    
+
     if (trigResult.bemcDecision()==1){
       vector<short> towerId = trigResult.highTowerIds();
       for (unsigned i=0; i<towerId.size(); i++) {
@@ -364,7 +364,15 @@ void StJetSkimEventMaker::fillTriggerSimulationInfo(StJetSkimTrig &skimTrig)
     }
     
     if (trigResult.l2Decision()==1) {
-      skimTrig.setL2ResultEmulated((int*)trigResult.l2Result(kJet));
+      // Needs to be able to handle more than just jet triggers...
+      int year = GetDBTime().GetYear();
+      const int* L2ResultEmulated = (int*)trigResult.l2Result(kJet,year);
+      if (L2ResultEmulated) {
+	skimTrig.setL2ResultEmulated(L2ResultEmulated);
+      }
+      else {
+	LOG_WARN << "No emulated L2 result for trigger ID = " << skimTrig.trigId() << " of year = " << year << endm;
+      }
     }
   } else if (emcTrigMaker) {
     skimTrig.setShouldFire(emcTrigMaker->isTrigger(skimTrig.trigId()));
