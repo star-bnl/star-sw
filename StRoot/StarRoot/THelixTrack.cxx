@@ -765,6 +765,7 @@ double THelixTrack::Dca(const double point[3]
 
    dcaXY = T[0][0]*dif[0]+T[0][1]*dif[1];
    dcaZ  = dif[2];
+   if (!dcaEmx) return s;
    THEmx_t *emx =th.Emx();
    dcaEmx[0] = emx->mHH;
    dcaEmx[1] = 0;
@@ -2951,7 +2952,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.52 2010/12/07 16:59:27 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.53 2011/04/01 20:10:32 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2967,6 +2968,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.53  2011/04/01 20:10:32  perev
+ * +Check for 0 array
+ *
  * Revision 1.52  2010/12/07 16:59:27  perev
  * Cleanup
  *
