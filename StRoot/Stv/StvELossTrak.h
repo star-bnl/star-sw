@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.h,v 1.2 2010/11/23 01:54:14 perev Exp $
+// $Id: StvELossTrak.h,v 1.3 2011/04/01 20:49:59 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -17,7 +17,7 @@ public:
         ~StvELossTrak(){;}
     void Reset();
     void Clear(const char *opt);
-    void Set(const TGeoMaterial *mate,double mass=PiMASS,double charge=1);
+//  void Set(const TGeoMaterial *mate,double mass=PiMASS,double charge=1);
     void Set(double A, double Z, double Dens, double x0 
             ,double mass = PiMASS, double charge=1);
     void Set(double p); 
