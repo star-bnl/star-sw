@@ -245,8 +245,8 @@ StGenericL2Emulator2009::initRun2(int runNo){
 
 StTriggerSimuDecision
 StGenericL2Emulator2009::isTrigger(int trigId) {
-  if (find(mAcceptTriggerList.begin(),mAcceptTriggerList.end(),trigId) != mAcceptTriggerList.end()) return kYes;
-  if (find(mVetoTriggerList.begin(),mVetoTriggerList.end(),trigId) != mVetoTriggerList.end()) return kNo;
+  if (mAcceptTriggerList.find(trigId) != mAcceptTriggerList.end()) return kYes;
+  if (mVetoTriggerList.find(trigId) != mVetoTriggerList.end()) return kNo;
   return kDoNotCare;
 }
 
@@ -524,10 +524,10 @@ StGenericL2Emulator2009::addTriggerList() {
     if (mL2algo[ia]==0) continue;
     if (mL2algo[ia]->getOflTrigID()==0) continue; // undefined triggerID
     if (mL2algo[ia]->isAccepted()) {
-      mAcceptTriggerList.push_back(mL2algo[ia]->getOflTrigID());
+      mAcceptTriggerList.insert(mL2algo[ia]->getOflTrigID());
     }
     else {
-      mVetoTriggerList.push_back(mL2algo[ia]->getOflTrigID());
+      mVetoTriggerList.insert(mL2algo[ia]->getOflTrigID());
     }
   }
 

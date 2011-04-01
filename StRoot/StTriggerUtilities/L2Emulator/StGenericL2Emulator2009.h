@@ -8,6 +8,7 @@
 #ifndef STAR_StGenericL2Emulator2009
 #define STAR_StGenericL2Emulator2009
 #include <vector>
+#include <set>
 
 class  StTriggerSimuMaker;
 class  StEEmcDb;
@@ -80,8 +81,8 @@ class StGenericL2Emulator2009  {
   void  setSetupPath(char *x) { mSetupPath=x;}
   void  setOutPath(char *x)   { mOutPath=x;}
 
-  vector <int> mAcceptTriggerList;
-  vector <int> mVetoTriggerList;
+  set<int> mAcceptTriggerList;
+  set<int> mVetoTriggerList;
   StTriggerSimuDecision  isTrigger(int trigId);
   
   /// bag of 64 bytes whose interpretation changes year-by-year
