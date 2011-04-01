@@ -1,8 +1,11 @@
 /*****************************************
  *
- * $Id: StTrackPairInfo.hh,v 1.8 2010/06/22 22:06:33 fine Exp $
+ * $Id: StTrackPairInfo.hh,v 1.9 2011/04/01 19:40:07 perev Exp $
  *
  * $Log: StTrackPairInfo.hh,v $
+ * Revision 1.9  2011/04/01 19:40:07  perev
+ * const++
+ *
  * Revision 1.8  2010/06/22 22:06:33  fine
  * roll back the previous version to restore the nightly builds
  *
@@ -43,16 +46,16 @@ class StGlobalTrack;
 class StTrackPairInfo {
 
 public:
-  StTrackPairInfo(StGlobalTrack* rcTrk,
-		  StMcTrack*     mcTrk,
+  StTrackPairInfo(const StGlobalTrack* rcTrk,
+		  const StMcTrack*     mcTrk,
 		  unsigned int tpcPings,
 		  unsigned int svtPings,
 		  unsigned int ssdPings,
 		  unsigned int ftpcPings);
     virtual ~StTrackPairInfo();    
 
-    StMcTrack* partnerMcTrack() const;
-    StGlobalTrack* partnerTrack() const;
+    const StMcTrack* partnerMcTrack() const;
+    const StGlobalTrack* partnerTrack() const;
 
     unsigned int commonTpcHits() const;
     unsigned int commonSvtHits() const;
@@ -64,16 +67,16 @@ public:
     float percentOfPairedSsdHits() const;
     float percentOfPairedFtpcHits() const;
     
-    void setPartnerMcTrack(StMcTrack*);
-    void setPartnerTrack(StGlobalTrack*);
+    void setPartnerMcTrack(const StMcTrack*);
+    void setPartnerTrack(const StGlobalTrack*);
     
     void setCommonTpcHits(unsigned int);
     void setCommonSvtHits(unsigned int);
     void setCommonSsdHits(unsigned int);
     void setCommonFtpcHits(unsigned int);
 private:
-    StGlobalTrack*  mPartnerTrack;
-    StMcTrack*      mPartnerMcTrack;
+    const StGlobalTrack*  mPartnerTrack;
+    const StMcTrack*      mPartnerMcTrack;
     unsigned int    mCommonTpcHits;
     unsigned int    mCommonSvtHits;
     unsigned int    mCommonSsdHits;
@@ -84,9 +87,9 @@ private:
     float           mRatioCommonToTotalHitsFtpc;
 };
 
-inline StMcTrack* StTrackPairInfo::partnerMcTrack() const { return mPartnerMcTrack; }
+inline const StMcTrack* StTrackPairInfo::partnerMcTrack() const { return mPartnerMcTrack; }
 
-inline StGlobalTrack* StTrackPairInfo::partnerTrack() const { return mPartnerTrack; }
+inline const StGlobalTrack* StTrackPairInfo::partnerTrack() const { return mPartnerTrack; }
 
 inline unsigned int StTrackPairInfo::commonTpcHits() const { return mCommonTpcHits; }
 
