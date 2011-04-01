@@ -259,6 +259,7 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
     case kOUTtrack:
     case kENDEDtrack:
       fExit = EndVolume();
+      if (!fExit) fExit=kDiveBreak;
       TVirtualMC::GetMC()->StopTrack();
       break;
 
@@ -351,29 +352,37 @@ int StvMCStepping::IsDca00(int begEnd)
 {
   fCurrentSign = fCurrentMomentum[0]*fCurrentPosition[0]
                + fCurrentMomentum[1]*fCurrentPosition[1];
-  if (begEnd==0) fStartSign = fCurrentSign; 
-  if ((fCurrentSign<0)==(fDir==0)) return 0;
+  switch (begEnd) {
 
-  double dL = fCurrentLength-fEnterLength;
-  if (dL<1e-6) return kDiveBreak;
-  THelixTrack th(*fHelix);
-  double dcaL = th.Path(0.,0.);
-  if (dcaL< 0) return kDiveBreak;
-  double curva = -fField->GetHz()/fCurrentMomentum.Pt()*fCharge;
-  if (begEnd) {
-    double rho = fHelix->GetRho();
-    curva = (rho*(dL-dcaL)+dcaL*curva)/dL;
-    th.Set((2*rho+curva)/3);
-    dcaL = th.Path(0.,0.);
+    case 0: { // begin volume
+      fStartSign = fCurrentSign; 
+      if ((fCurrentSign<0)==(fDir==0)) return 0;
+      return kDiveBreak;
+    }
+
+    case 1: { // end volume
+      double dL = fCurrentLength-fEnterLength;
+      if (dL<1e-6) return 0;
+      if ((fCurrentSign<0)==(fDir==0)) return 0;
+      THelixTrack th(*fHelix);
+      double dcaL = th.Path(0.,0.);
+      if (dcaL< 0) return kDiveBreak;
+      double curva = -fField->GetHz()/fCurrentMomentum.Pt()*fCharge;
+      double rho = fHelix->GetRho();
+      curva = (rho*(dL-dcaL)+dcaL*curva)/dL;
+      th.Set((2*rho+curva)/3);
+      dcaL = th.Path(0.,0.);
+  //		Update end position
+      th.Move(dcaL);
+      fCurrentLength=fEnterLength+dcaL;
+      fCurrentPosition.SetVect(TVector3(th.Pos()));
+      double pt = fabs(fField->GetHz()*fCharge/curva);
+      double p  = pt/th.GetCos();
+      fCurrentMomentum.SetVectM(TVector3(th.Dir())*p,fMass);
+      return kDiveDca;
+    }
   }
-//		Update end position
-  th.Move(dcaL);
-  fCurrentLength=fEnterLength+dcaL;
-  fCurrentPosition.SetVect(TVector3(th.Pos()));
-  double pt = fabs(fField->GetHz()*fCharge/curva);
-  double p  = pt/th.GetCos();
-  fCurrentMomentum.SetVectM(TVector3(th.Dir())*p,fMass);
-  return kDiveDca;
+  return kDiveBreak;
 }
 
 //_____________________________________________________________________________
