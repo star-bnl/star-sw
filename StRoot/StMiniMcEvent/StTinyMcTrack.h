@@ -1,5 +1,5 @@
 /**
- * $Id: StTinyMcTrack.h,v 1.12 2011/02/24 17:58:03 perev Exp $
+ * $Id: StTinyMcTrack.h,v 1.13 2011/04/01 20:00:17 perev Exp $
  * \file  StTinyMcTrack.h
  * \brief   Persistent MC track class.
  * 
@@ -105,20 +105,20 @@ private:
   Short_t    mNEprsHitMc;
   Short_t    mNEsmduHitMc;
   Short_t    mNEsmdvHitMc;
-  UShort_t   mGeantId;
-  Int_t      mPdgId;
+  UShort_t   mGeantId;		//Geant particle id
+  Int_t      mPdgId;		//PDG particle id
   Short_t    mChargeMc;
   Float_t    mStopR;
-  Short_t    mKey;
-  Short_t    mParentKey;
-  UShort_t   mParentGeantId;
+  Short_t    mKey;		//Geant track id
+  Short_t    mParentKey;	//Geant vertex id
+  UShort_t   mParentGeantId;	//Geant Parent particle id
   Float_t    mEmcEnergyMcHit[3];
   Float_t    mEmcEnergyMcSum;
   Short_t    mEmcSoftIdHiTowerMc[3];
   
   // assoc stuff
-  Short_t      mNAssocGl;
-  Short_t      mNAssocPr;
+  Short_t    mNAssocGl;		//Number of rc globals   assigned to this mc track
+  Short_t    mNAssocPr;		//Number of rc primaries assigned to this mc track
   Bool_t     mIsPrimary;
 
   ClassDef(StTinyMcTrack,6)
@@ -127,6 +127,9 @@ private:
 #endif
 //
 // $Log: StTinyMcTrack.h,v $
+// Revision 1.13  2011/04/01 20:00:17  perev
+// Comments++
+//
 // Revision 1.12  2011/02/24 17:58:03  perev
 // change IO version
 //
