@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.12 2010/10/15 20:12:31 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.13 2011/04/01 19:11:29 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -126,6 +126,7 @@ StTGeoHelper::StTGeoHelper()
   memset(fBeg,0,fEnd-fBeg);  
   fVoluInfoArr = new TObjArray();
   fHitPlaneArr = new TObjArray();
+  fOpt = 1;
 }
 //_____________________________________________________________________________
 int StTGeoHelper::Load(const char *geo)
@@ -683,23 +684,26 @@ const StHitPlane *StTGeoHelper::AddHit(void *hit,const float xyz[3],unsigned int
 {
 static int nCall = 0;  nCall++;  
 //   Break(nCall);
-   if (seed) {//add to seed hit collection
-     fSeedHits->push_back(hit);
-  } 
   StHitPlaneHardMapIter it(fHitPlaneHardMap->find(hardw));
   StHitPlane *hp=0;
-  if (it !=  fHitPlaneHardMap->end()) { //HitPlane found
+  if (fOpt && it !=  fHitPlaneHardMap->end()) { //HitPlane found
      hp = (*it).second;
   } else {   
      hp = FindHitPlane(xyz);
      if (!hp) {
-       Warning("AddHit","Hit in %s Not Found",GetPath());
+       double pnt[3]={xyz[0],xyz[1],xyz[2]};
+       gGeoManager->SetCurrentPoint(pnt);
+       Warning("AddHit","Hit(%g,%g,%g) in %s Not Found",pnt[0],pnt[1],pnt[2],GetPath());
        return 0;
      }
      (*fHitPlaneHardMap)[hardw]=hp;
 
   }
   assert(hp);
+
+   if (seed) {//add to seed hit collection
+     fSeedHits->push_back(hit);
+  } 
   hp->AddHit(hit,xyz);
   if (hp->GetNHits()==1) AddHitPlane(hp);
 
@@ -709,6 +713,36 @@ static int nCall = 0;  nCall++;
 //_____________________________________________________________________________
 StHitPlane *StTGeoHelper::FindHitPlane(const float xyz[3])
 {
+// cos(a+b) = cos(a)*cos(b) - sin(a)*sin(b)
+// sin(a+b) = cos(a)*sin(b) + sin(a)*cos(b)
+static const float dirs[26][3] = {
+{ 1.0000,        0.0000,         0.0000}, 
+{-1.0000,        0.0000,         0.0000}, 
+{-0.5774,       -0.5774,        -0.5774}, 
+{-0.7071,       -0.7071,         0.0000}, 
+{-0.5774,       -0.5774,         0.5774}, 
+{-0.7071,        0.0000,        -0.7071}, 
+{-0.7071,        0.0000,         0.7071}, 
+{-0.5774,        0.5774,        -0.5774}, 
+{-0.7071,        0.7071,         0.0000}, 
+{-0.5774,        0.5774,         0.5774}, 
+{ 0.0000,       -0.7071,        -0.7071}, 
+{ 0.0000,       -1.0000,         0.0000}, 
+{ 0.0000,       -0.7071,         0.7071}, 
+{ 0.0000,        0.0000,        -1.0000}, 
+{ 0.0000,        0.0000,         1.0000}, 
+{ 0.0000,        0.7071,        -0.7071}, 
+{ 0.0000,        1.0000,         0.0000}, 
+{ 0.0000,        0.7071,         0.7071}, 
+{ 0.5774,       -0.5774,        -0.5774}, 
+{ 0.7071,       -0.7071,         0.0000}, 
+{ 0.5774,       -0.5774,         0.5774}, 
+{ 0.7071,        0.0000,        -0.7071}, 
+{ 0.7071,        0.0000,         0.7071}, 
+{ 0.5774,        0.5774,        -0.5774}, 
+{ 0.7071,        0.7071,         0.0000}, 
+{ 0.5774,        0.5774,         0.5774}};
+
   double pnt[3]={xyz[0],xyz[1],xyz[2]};
   TGeoNode *node = gGeoManager->FindNode(pnt[0],pnt[1],pnt[2]);
   assert(node);
@@ -716,26 +750,30 @@ StHitPlane *StTGeoHelper::FindHitPlane(const float xyz[3])
 //     assert(hp);
   if (hp  && hp->GetHitErrCalc()) return hp;
   double Rxy = sqrt(pnt[0]*pnt[0]+pnt[1]*pnt[1]);
-  double myDirs[6][3] = {{pnt[0]/Rxy   ,pnt[1]/Rxy   , 0}
-                        ,{-myDirs[0][0],-myDirs[0][1], 0}
-                        ,{-myDirs[0][1], myDirs[0][0], 0}
-                        ,{ myDirs[0][1],-myDirs[0][0], 0}
-                        ,{            0,            0, 1}
-                        ,{            0,            0,-1}};
+  double myCos= pnt[0]/Rxy,mySin=pnt[1]/Rxy;
+  double myDir[3];
   double minDist=10;
   StHitPlane *minHitPlane=0;
-  for (int idx=0;idx<6; idx++) {//		   
+  for (int idir=0;idir<26; idir++) {
     gGeoManager->SetCurrentPoint(pnt);
     gGeoManager->FindNode();
-    gGeoManager->SetCurrentDirection(myDirs[idx]);
-    node = gGeoManager->FindNextBoundaryAndStep();
-    if (!node) continue;
-    if (gGeoManager->GetStep()>minDist) 	continue;
-    hp = GetCurrentHitPlane();     
-    if (!hp || !hp->GetHitErrCalc()) 	continue;
-    minDist = gGeoManager->GetStep();
-    minHitPlane = hp;
+    myDir[0] = dirs[idir][0]*myCos - dirs[idir][1]*mySin; 
+    myDir[1] = dirs[idir][0]*mySin + dirs[idir][1]*myCos; 
+    myDir[2] = dirs[idir][2];
+    gGeoManager->SetCurrentDirection(myDir);
+    double myStep = 0;
+    while (1) {
+      node = gGeoManager->FindNextBoundaryAndStep();
+      if (!node) break;
+      myStep +=gGeoManager->GetStep();
+      if (myStep>minDist) break;
+      hp = GetCurrentHitPlane();     
+      if (!hp || !hp->GetHitErrCalc()) 	continue;
+      minDist = myStep; minHitPlane = hp; break;
+    }
+
   }
+
   return minHitPlane;  
 }       
        
@@ -769,6 +807,11 @@ void StTGeoHelper::ClearHits()
   }
   fHitPlaneArr->Clear();
 }    
+//_____________________________________________________________________________
+void StTGeoHelper::Clear(const char *)
+{
+  ClearHits();
+}
 //_____________________________________________________________________________
 void StTGeoHelper::InitHits()
 {
