@@ -408,7 +408,6 @@ Int_t StBranch::Open()
   if (fTFile)   return 0;
   if (strncmp(".none",GetFile(),4)==0) return 1;
   OpenTFile();
-  fUKey=GetName(); fUKey=0;
   return 0;
 }
 //_______________________________________________________________________________
@@ -423,8 +422,8 @@ Int_t StBranch::WriteEvent(const StUKey &ukey)
   if(Open()) return 1;
   fNEvents++;
 
-  TList *savList = new TList;
-  SetParAll(0,this,savList);
+  TList savList;
+  SetParAll(0,this,&savList);
   if (IsOption("const"))        {//Write constant branch (event independent)
     StUKey uk(fUKey); uk = (UInt_t)(-2);
     iret = StIO::Write(fTFile,uk,   fList);
@@ -432,7 +431,7 @@ Int_t StBranch::WriteEvent(const StUKey &ukey)
   } else {
     iret = StIO::Write(fTFile,fUKey,fList);
   }
-  SetParAll(savList); delete savList;
+  SetParAll(&savList); 
 
   return 0;
 }
@@ -684,7 +683,7 @@ Int_t StTree::NextEvent(StUKey  &ukey)
 //_______________________________________________________________________________
 Int_t StTree::NextEvent()
 {
-  int iret=0,iEOF=0,nAkt=0;
+  int iret=0,nAkt=0;
   TDataSetIter next(this); StBranch *br=0;
 
   int kase = 0; StBranch *br0=0;
@@ -733,8 +732,13 @@ StTree *StTree::GetTree(TFile *file, const char *treeName)
 {
   StUKey treeKey(treeName,2000); 
   StTree *ret = (StTree*)StIO::Read(file,treeKey);
-  if ((Long_t)ret == -1) ret = 0;
-  if (ret) ret->SetIOMode("0");
+  if ((Long_t)ret == -1) return 0;
+  TDataSetIter next(ret);StBranch *br=0;
+  while ((br=(StBranch*)next())) {
+     br->SetIOMode("0");
+     br->fUKey = br->GetName();
+     br->fUKey = 0;
+  }
   return ret;
 }
 
