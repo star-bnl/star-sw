@@ -17,6 +17,33 @@ void doEmbeddingQAMaker(
   gSystem->Load("StMiniMcEvent");
   gSystem->Load("StEmbeddingUtilities");
 
+  // Set relevant cut parameters here used in the base QA
+  // The default parameters can be found in the constructor of StRoot/StEmbeddingUtilities/StEmbeddingQAUtilities.cxx
+  // You should have consistent parameters in both doEmbeddingQAMaker.C and drawEmbeddingQA.C
+  // Below are the examples how to change the parameters
+  // All values used here are default ones
+  //
+  // NOTE: In order to keep backward compatibility, the functions
+  //   StEmbeddingQA::setZVertexCut()
+  //   StEmbeddingQA::setRapidityCut()
+  //   StEmbeddingQA::addTriggerIdCut()
+  // were not removed. These functions can be still used instead of those from StEmbeddingQAUtilities.
+  //
+  const StEmbeddingQAUtilities* utility = StEmbeddingQAUtilities::instance() ;
+//  utility->setPtMinCut(0.1);
+//  utility->setPtMaxCut(10.0);
+//  utility->setEtaCut(1.5);
+//  utility->setNHitCut(10);
+//  utility->setNHitToNPossCut(0.51);
+//  utility->setDcaCut(3.0);
+//  utility->setNSigmaCut(2.0);
+//  utility->setRapidityCut(10.0);
+//  utility->setZVertexCut(30.0);
+//  //
+//  //  Default is no trigger cut, you can add multiple trigger id's like
+//  utility->addTriggerIdCut(290001);
+//  utility->addTriggerIdCut(290004);
+
   StEmbeddingQA* maker = new StEmbeddingQA(year, production, isSimulation);
 
   /// Set z-vertex cut (default is 30cm unless otherwise specified)
