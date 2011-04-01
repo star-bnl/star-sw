@@ -5,8 +5,11 @@
 //  for instructions
 //****************************************************************************************************
 /****************************************************************************************************
- * $Id: StEmbeddingQA.h,v 1.9 2011/02/11 03:55:44 hmasui Exp $
+ * $Id: StEmbeddingQA.h,v 1.10 2011/04/01 05:05:47 hmasui Exp $
  * $Log: StEmbeddingQA.h,v $
+ * Revision 1.10  2011/04/01 05:05:47  hmasui
+ * Track selections by StEmbeddingQAUtilities. Added 1/pt(RC)-1/pt(MC) vs pt, and pt dependent Ncommon vs NhitFit histograms
+ *
  * Revision 1.9  2011/02/11 03:55:44  hmasui
  * Change geantid type to integer
  *
@@ -52,6 +55,7 @@ class TH1 ;
 class TH2 ;
 class TH3 ;
 class TObject ;
+//class TTree ;
 
 class StContamPair ;
 class StEmbeddingQAPair ;
@@ -99,12 +103,15 @@ class StEmbeddingQA {
     Bool_t end() const;
 
     /// set z-vertex cut (default is |vz|<30cm unless otherwise specified)
+    /// Moved to StEmbeddingQAUtilities but keep the function for backward compatibility
     void setZVertexCut(const Float_t vz) ;
 
     /// Add trigger id cut (default is no trigger id selections). Multiple trigger can be added
+    /// Moved to StEmbeddingQAUtilities but keep the function for backward compatibility
     void addTriggerIdCut(const UInt_t id) ;
 
     /// Set rapidity cut (default is |y|<10, i.e. no rapidity cut)
+    /// Moved to StEmbeddingQAUtilities but keep the function for backward compatibility
     void setRapidityCut(const Float_t ycut) ;
 
   private:
@@ -152,9 +159,6 @@ class StEmbeddingQA {
     TString getIdCollection(const Int_t geantid, const Int_t parentid, const Int_t parentparentid) const ;
 
     StMuDstMaker* mMuDstMaker ; /// Pointer to the StMuDstMaker
-    Float_t mVertexCut ; /// z-vertex cut (Default is 30 cm)
-    std::vector<UInt_t> mTriggerId ; /// Trigger id cut (can be multiple trigger id's)
-    Float_t mRapidityCut ; /// rapidity cut (Default is 10)
 
     TFile* mOutput ; /// Output histograms
 
@@ -190,14 +194,15 @@ class StEmbeddingQA {
     std::map<TString, TH2*> mhPtVsY[StEmbeddingQAConst::mNCategory] ;               /// pt vs rapidity
     std::map<TString, TH2*> mhPtVsPhi[StEmbeddingQAConst::mNCategory] ;             /// pt vs phi
     std::map<TString, TH2*> mhPtVsMom[StEmbeddingQAConst::mNCategory] ;             /// pt vs momentum
-    std::map<TString, TH2*> mhdPtVsPt[StEmbeddingQAConst::mNCategory] ;             /// pt - pt(MC) vs pt
+    std::map<TString, TH2*> mhdPtVsPt[StEmbeddingQAConst::mNCategory] ;             /// pt(RC) - pt(MC) vs pt
+    std::map<TString, TH2*> mhdInvPtVsPt[StEmbeddingQAConst::mNCategory] ;          /// 1/pt(RC) - 1/pt(MC) vs pt
     std::map<TString, TH2*> mhMomVsEta[StEmbeddingQAConst::mNCategory] ;            /// momentum vs eta
     std::map<TString, TH2*> mhdEdxVsMomMc[StEmbeddingQAConst::mNCategory] ;         /// dE/dx vs MC momentum (no PID cut)
     std::map<TString, TH2*> mhdEdxVsMomMcPidCut[StEmbeddingQAConst::mNCategory] ;   /// dE/dx vs MC momentum (with PID cut, 2 sigma)
     std::map<TString, TH2*> mhdEdxVsMomReco[StEmbeddingQAConst::mNCategory] ;       /// dE/dx vs reconstructed momentum (no PID cut)
     std::map<TString, TH2*> mhdEdxVsMomRecoPidCut[StEmbeddingQAConst::mNCategory] ; /// dE/dx vs reconstructed momentum (with PID cut, 2 sigma)
     std::map<TString, TH2*> mhRecoPVsMcP[StEmbeddingQAConst::mNCategory] ;          /// Reconstructed momentum vs MC momentum
-    std::map<TString, TH2*> mhNCommonHitVsNHit[StEmbeddingQAConst::mNCategory] ;      /// Ncommon hit vs Nhit
+    std::map<TString, TH3*> mhNCommonHitVsNHit[StEmbeddingQAConst::mNCategory] ;      /// Ncommon hit vs Nhit vs pT
 
     std::map<TString, TH2*> mhEtaVsPhi[StEmbeddingQAConst::mNCategory] ;  /// pseudo-rapidity vs phi
     std::map<TString, TH2*> mhEtaVsVz[StEmbeddingQAConst::mNCategory] ;   /// pseudo-rapidity vs vz
@@ -205,8 +210,6 @@ class StEmbeddingQA {
 
     ClassDef(StEmbeddingQA, 1);
 };
-
-inline void StEmbeddingQA::setZVertexCut(const Float_t vz) { mVertexCut = vz ; }
 
 #endif
 
