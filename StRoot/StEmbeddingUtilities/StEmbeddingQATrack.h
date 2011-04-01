@@ -3,8 +3,11 @@
 //    Store relevant track informations for the embedding/real data QA
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQATrack.h,v 1.11 2011/02/11 23:21:28 hmasui Exp $
+ * $Id: StEmbeddingQATrack.h,v 1.12 2011/04/01 05:00:18 hmasui Exp $
  * $Log: StEmbeddingQATrack.h,v $
+ * Revision 1.12  2011/04/01 05:00:18  hmasui
+ * Move track cuts into StEmbeddingQAUtilities, added global momentum for embedding
+ *
  * Revision 1.11  2011/02/11 23:21:28  hmasui
  * Added missing functions getNSigma...()
  *
@@ -76,7 +79,9 @@ class StEmbeddingQATrack {
     Bool_t isNSigmaOk(const Int_t geantid) const ;
 
     StLorentzVectorD getVectorMc() const ; /// Get MC 4-momentum
-    StLorentzVectorD getVectorRc() const ; /// Get reconstructed 4-momentum
+    StLorentzVectorD getVectorRc() const ; /// Get reconstructed 4-momentum (primary)
+    StLorentzVectorD getVectorPr() const ; /// Get reconstructed 4-momentum (primary <- return getVectorRc())
+    StLorentzVectorD getVectorGl() const ; /// Get reconstructed 4-momentum (global)
 
     Short_t getNCommonHit()          const ; /// Get number of common hits
     Int_t   getParentParentGeantId() const ; /// Get parent geant id
@@ -95,14 +100,14 @@ class StEmbeddingQATrack {
     Float_t getPMc()             const ; /// Get MC momentum
     Float_t getEtaMc()           const ; /// Get MC pseudorapidity
     Float_t getRapidityMc()      const ; /// Get MC rapidity
-    Double_t getMassRc()         const ; /// Get reconstructed particle mass
-    Float_t getPtRc()            const ; /// Get reconstructed transverse momentum
-    Float_t getPxRc()            const ; /// Get reconstructed px
-    Float_t getPyRc()            const ; /// Get reconstructed py
-    Float_t getPzRc()            const ; /// Get reconstructed pz
-    Float_t getPRc()             const ; /// Get reconstructed momentum
-    Float_t getEtaRc()           const ; /// Get reconstructed pseudorapidity
-    Float_t getRapidityRc()      const ; /// Get reconstructed rapidity
+    Double_t getMassRc()         const ; /// Get reconstructed particle mass (primary)
+    Float_t getPtRc()            const ; /// Get reconstructed transverse momentum (primary)
+    Float_t getPxRc()            const ; /// Get reconstructed px (primary)
+    Float_t getPyRc()            const ; /// Get reconstructed py (primary)
+    Float_t getPzRc()            const ; /// Get reconstructed pz (primary)
+    Float_t getPRc()             const ; /// Get reconstructed momentum (primary)
+    Float_t getEtaRc()           const ; /// Get reconstructed pseudorapidity (primary)
+    Float_t getRapidityRc()      const ; /// Get reconstructed rapidity (primary)
 
     Float_t getPhi()           const ; /// Get azimuthal angle
     Float_t getdEdx()          const ; /// Get dE/dx
@@ -122,14 +127,6 @@ class StEmbeddingQATrack {
     const TString getName() const ;
 
   private:
-    static const Float_t kPtMinCut ;   /// Minimum pt cut
-    static const Float_t kPtMaxCut ;   /// Maximum pt cut
-    static const Float_t kEtaCut ;     /// Maximum eta cut
-    static const Short_t kNHitCut ;    /// NHit cut
-    static const Float_t kNHitToNPossCut ; /// NHitFit/NHitPoss cut
-    static const Float_t kDcaCut ;     /// Dca cut
-    static const Double_t kNSigmaCut ; /// NSigma cut
-
     const Short_t mNCommonHit ;           /// Number of common hits
     const Int_t   mParentParentGeantId ;  /// Parent-parent geant id
     const Int_t   mParentGeantId ;        /// Parent geant id
@@ -139,7 +136,8 @@ class StEmbeddingQATrack {
     const Short_t mNHitPoss ;             /// Number of maximum fit points
     const Short_t mCharge ;               /// Charge
     const StLorentzVectorD mVectorMc ;    /// MC 4-momentum
-    const StLorentzVectorD mVectorRc ;    /// Reconstructed 4-momentum
+    const StLorentzVectorD mVectorRc ;    /// Reconstructed 4-momentum (primary)
+    const StLorentzVectorD mVectorGl ;    /// Reconstructed 4-momentum (global)
     const Float_t mPhi ;                  /// Azimuthal angle
     const Float_t mdEdx ;                 /// dE/dx
     const Float_t mDcaGl ;                /// Global dca
@@ -150,7 +148,7 @@ class StEmbeddingQATrack {
 
     TString mName ; /// Track name
 
-    ClassDef(StEmbeddingQATrack, 1)
+    ClassDef(StEmbeddingQATrack, 2)
 };
 
 inline Short_t StEmbeddingQATrack::getNCommonHit()          const { return mNCommonHit ; }
