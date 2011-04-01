@@ -122,13 +122,13 @@ Mtx55D_t derivFit;
 
     if (!mySkip) { 
       mySkip = hitCount.Skip();
-      if (mySkip) mDive->SetSkip();
+      if (mySkip) { mDive->SetSkip(); if (hitCount.Reject()) break;}
     }
     par[0]=par[1]; err[0]=err[1];
 //============================
     idive = mDive->Dive();
 //============================
-
+    assert(!(mySkip && !idive));
     totLen+=mDive->GetLength();
     nNode++; assert(nNode<200);
     par[0]=par[1]; err[0]=err[1];
@@ -136,9 +136,8 @@ Mtx55D_t derivFit;
     if (fabs(par[0]._z)  > myConst->mZMax  ) 	break;
     if (par[0].getRxy()  > myConst->mRxyMax) 	break;
 
-
-    assert(idive || !err[0].Check("AfterDive"));
-//    assert(         !par[0].check("AfterDive"));
+    if (!idive && err[0].Check("AfterDive"))	return 0;
+//    assert(idive || !err[0].Check("AfterDive"));
     float gate[2]={3,3};   
     const StvHits *localHits = mHitter->GetHits(par,gate); 
 
@@ -148,7 +147,7 @@ if (DoShow()) {
           ,StTGeoHelper::Inst()->GetPath());
     fShowTrak+=&par[0]._x;
 }//EndDoShow
-//	Create and add node
+//	Create and add nodemyTrak
     StvNode *node = kit->GetNode();      
     myTrak->push_front(node);
 
@@ -213,12 +212,13 @@ if (DoShow()) {
 
   } // End Dive&Fitter loop 
 
+  myTrak->SetTypeEnd(mySkip);
+  if (hitCount.Reject()) {
+    myTrak->ReleaseHits();myTrak->unset();
+    kit->FreeTrack(myTrak);myTrak=0; }
+    
 
-if (hitCount.Reject()) {
-  myTrak->ReleaseHits();myTrak->unset();
-  kit->FreeTrack(myTrak);myTrak=0; }
-  
-if (DoShow()) { Show();}
+  if (DoShow()) { Show();}
 
 
 
