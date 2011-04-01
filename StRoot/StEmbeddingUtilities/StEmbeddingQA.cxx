@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQA.cxx,v 1.19 2011/02/11 03:55:46 hmasui Exp $
+ * $Id: StEmbeddingQA.cxx,v 1.20 2011/04/01 05:05:49 hmasui Exp $
  * $Log: StEmbeddingQA.cxx,v $
+ * Revision 1.20  2011/04/01 05:05:49  hmasui
+ * Track selections by StEmbeddingQAUtilities. Added 1/pt(RC)-1/pt(MC) vs pt, and pt dependent Ncommon vs NhitFit histograms
+ *
  * Revision 1.19  2011/02/11 03:55:46  hmasui
  * Change geantid type to integer
  *
@@ -147,6 +150,7 @@ void StEmbeddingQA::clear()
     mhPtVsPhi[ic].clear();
     mhPtVsMom[ic].clear();
     mhdPtVsPt[ic].clear();
+    mhdInvPtVsPt[ic].clear();
     mhMomVsEta[ic].clear();
     mhdEdxVsMomMc[ic].clear();
     mhdEdxVsMomMcPidCut[ic].clear();
@@ -172,15 +176,6 @@ void StEmbeddingQA::init()
 
   mMuDstMaker = 0;
 
-  /// default z-vertex cut
-  mVertexCut = 30.0;
-
-  /// default is no trigger selections
-  mTriggerId.clear() ;
-
-  /// default rapidity cut
-  mRapidityCut = 10.0 ;
-
   mOutput = 0;
   mVz = -9999. ;
 
@@ -205,42 +200,44 @@ void StEmbeddingQA::init()
 }
 
 //__________________________________________________________________________________________
+void StEmbeddingQA::setZVertexCut(const Float_t vz)
+{
+  StEmbeddingQAUtilities::instance()->setZVertexCut(vz) ;
+}
+
+//__________________________________________________________________________________________
 void StEmbeddingQA::addTriggerIdCut(const UInt_t id)
 {
   /// Add trigger id in the array (NOTE: will be used for real data only)
 
-  mTriggerId.push_back(id);
-  LOG_INFO << "StEmbeddingQA::addTriggerIdCut()  add trigger id = " << id
-    << endm;
+  StEmbeddingQAUtilities::instance()->addTriggerIdCut(id) ;
 }
 
 //__________________________________________________________________________________________
 void StEmbeddingQA::setRapidityCut(const Float_t ycut)
 {
   /// Set rapidity cut
-
-  mRapidityCut = ycut ;
-  LOG_INFO << "StEmbeddingQA::setRapidityCut()  set rapidity cut, |y| < " << mRapidityCut
-    << endm;
+  StEmbeddingQAUtilities::instance()->setRapidityCut(ycut) ;
 }
 
 //__________________________________________________________________________________________
 Bool_t StEmbeddingQA::isZVertexOk(const StMiniMcEvent& mcevent) const
 {
   /// Apply z-vertex cut for embedding track nodes
-  return TMath::Abs(mcevent.vertexZ()) < mVertexCut ;
+  return StEmbeddingQAUtilities::instance()->isZVertexOk(mcevent.vertexZ()) ;
 }
 
 //__________________________________________________________________________________________
 Bool_t StEmbeddingQA::isTriggerOk(StMuEvent* event) const
 {
   /// return true if no trigger is found
-  if( mTriggerId.empty() ) return kTRUE ;
+  const vector<UInt_t> triggerId(StEmbeddingQAUtilities::instance()->getTriggerIdCut());
+  if( triggerId.empty() ) return kTRUE ;
 
   /// Assume one trigger per event. Need to be revised if we have multiple triggers per event
-  for(UInt_t i=0; i<mTriggerId.size(); i++){
-    if( event->triggerIdCollection().nominal().isTrigger( mTriggerId[i] ) ){
-      LOG_DEBUG << "StEmbeddingQA::isTriggerOk  Trigger found: " << mTriggerId[i] << endm ;
+  for(UInt_t i=0; i<triggerId.size(); i++){
+    if( event->triggerIdCollection().nominal().isTrigger( triggerId[i] ) ){
+      LOG_DEBUG << "StEmbeddingQA::isTriggerOk  Trigger found: " << triggerId[i] << endm ;
       return kTRUE ;
     }
   }
@@ -496,7 +493,8 @@ Bool_t StEmbeddingQA::fillRealData(const TString inputFileName)
     const Double_t vx = muEvent->primaryVertexPosition().x() ;
     const Double_t vy = muEvent->primaryVertexPosition().y() ;
     const Double_t vz = muEvent->primaryVertexPosition().z() ;
-    const Bool_t isVertexBad = TMath::Abs(vz) >= mVertexCut
+//    const Bool_t isVertexBad = TMath::Abs(vz) >= mVertexCut
+    const Bool_t isVertexBad = !StEmbeddingQAUtilities::instance()->isZVertexOk(vz)
       || ( TMath::Abs(vx) < 1.0e-5 && TMath::Abs(vy) < 1.0e-5 && TMath::Abs(vz) < 1.0e-5 )
       || ( TMath::Abs(vx) > 1000 || TMath::Abs(vy) > 1000 || TMath::Abs(vz) > 1000 )
       ;
@@ -612,7 +610,8 @@ Bool_t StEmbeddingQA::run(const TString inputFileList)
   /// Read either muDst or minimc file list and fill histograms
 
   LOG_INFO << "StEmbeddingQA::run()" << endm ;
-  LOG_INFO << "  z-vertex cut is |vz| < " << mVertexCut << endm;
+//  LOG_INFO << "  z-vertex cut is |vz| < " << mVertexCut << endm;
+  StEmbeddingQAUtilities::instance()->PrintCuts() ;
 
   if( mIsSimulation ){
     // Embedding QA
@@ -705,6 +704,7 @@ StEmbeddingQATrack* StEmbeddingQA::getEmbeddingQATrack(const StMiniMcEvent& mcev
     /// Make sure geantprocess = 5 (DECAY) for nomal decay daughters
     ///     or    geantprocess = 6 (PAIR) for photon conversion
     const Bool_t isGeantProcessOk = ( track->mGeantProcess == 5 || (track->parentGeantId() == 1 && track->mGeantProcess == 6) );
+
     if ( !isGeantProcessOk ){
       LOG_DEBUG << Form("StEmbeddingQA::getEmbeddingTrack()  geantprocess = %3d. Skip the track", track->mGeantProcess) << endm;
       return 0;
@@ -767,7 +767,8 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
   mhGeantId[categoryid]->Fill(track.getGeantId());
 
   // Rapidity cut, default rapidity cut is 10 (Use setRapidityCut(const Float_t ycut) to restrict y window)
-  if(!track.isRapidityOk(mRapidityCut)) return ;
+//  if(!track.isRapidityOk(mRapidityCut)) return ;
+  if(!utility->isRapidityOk(y)) return ;
 
   const TString idcollection(getIdCollection(geantid, track.getParentGeantId(), track.getParentParentGeantId()));
 
@@ -797,7 +798,7 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
       const Double_t phi = track.getPhi() ;
 
       // Fill Ncommon hits vs Nhits
-      mhNCommonHitVsNHit[categoryid][idcollection]->Fill(track.getNHit(), track.getNCommonHit());
+      mhNCommonHitVsNHit[categoryid][idcollection]->Fill(pt, track.getNHit(), track.getNCommonHit());
 
       // NHitFit/NHitPoss cut
       if( track.isNHitToNPossOk() ) {
@@ -813,7 +814,8 @@ void StEmbeddingQA::fillHistograms(const StEmbeddingQATrack& track, const Int_t 
         mhPtVsY[categoryid][idcollection]->Fill(y, pt);
         mhPtVsPhi[categoryid][idcollection]->Fill(phi, pt);
         mhPtVsMom[categoryid][idcollection]->Fill(mom, pt);
-        mhdPtVsPt[categoryid][idcollection]->Fill(pt, pt-track.getPtRc());
+        mhdPtVsPt[categoryid][idcollection]->Fill(pt, track.getPtRc()-pt);
+        mhdInvPtVsPt[categoryid][idcollection]->Fill(pt, (1.0/track.getVectorGl().perp()-1.0/pt)*1000.);
         mhMomVsEta[categoryid][idcollection]->Fill(eta, mom);
   
         mhEtaVsPhi[categoryid][idcollection]->Fill(phi, eta);
@@ -990,9 +992,10 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Int_t geantid
   // Ncommon hit vs Nfit
   title = Form("N_{common} hit vs N_{fit} (|dcaGl|<3cm), %s", CategoryAndGeantId.Data());
   if( isMc ) title = Form("N_{common} hit vs N_{fit}, %s", CategoryAndGeantId.Data());
-  TH2* hNCommonHitVsNHit = new TH2D(Form("hNCommonHitVsNHit%s", nameSuffix.Data()), title, 50, 0, 50, 50, 0, 50) ;
-  hNCommonHitVsNHit->SetXTitle("N_{fit}");
-  hNCommonHitVsNHit->SetYTitle("N_{common}");
+  TH3* hNCommonHitVsNHit = new TH3D(Form("hNCommonHitVsNHit%s", nameSuffix.Data()), title, 10, 0, 5, 50, 0, 50, 50, 0, 50) ;
+  hNCommonHitVsNHit->SetXTitle("p_{T} (GeV/c)");
+  hNCommonHitVsNHit->SetYTitle("N_{fit}");
+  hNCommonHitVsNHit->SetZTitle("N_{common}");
   utility->setStyle(hNCommonHitVsNHit);
   mhNCommonHitVsNHit[categoryid].insert( std::make_pair(idcollection, hNCommonHitVsNHit) );
 
@@ -1065,10 +1068,18 @@ void StEmbeddingQA::expandHistograms(const Int_t categoryid, const Int_t geantid
   // Delta pt vs pt
   TH2* hdPtVsPt = new TH2D(Form("hdPtVsPt%s", nameSuffix.Data()), Form("p_{T} - p_{T} (MC) vs p_{T}%s", titleSuffix.Data()),
       ptBin, ptMin, ptMax, 100, -5, 5);
-  hdPtVsPt->SetXTitle("reco. p_{T} (GeV/c)");
+  hdPtVsPt->SetXTitle("MC p_{T} (GeV/c)");
   hdPtVsPt->SetYTitle("reco. p_{T} - MC p_{T} (GeV/c)");
   utility->setStyle(hdPtVsPt);
   mhdPtVsPt[categoryid].insert( std::make_pair(idcollection, hdPtVsPt) );
+
+  // Delta 1/pt vs pt
+  TH2* hdInvPtVsPt = new TH2D(Form("hdInvPtVsPt%s", nameSuffix.Data()), Form("1/p_{T} (Gl) - 1/p_{T} (MC) vs p_{T}%s", titleSuffix.Data()),
+      ptBin, ptMin, ptMax, 200, -50, 50);
+  hdInvPtVsPt->SetXTitle("MC p_{T} (GeV/c)");
+  hdInvPtVsPt->SetYTitle("Gl 1/p_{T} - MC 1/p_{T} (c/MeV)");
+  utility->setStyle(hdInvPtVsPt);
+  mhdInvPtVsPt[categoryid].insert( std::make_pair(idcollection, hdInvPtVsPt) );
 
   // momentum vs eta
   TH2* hMomVsEta = new TH2D(Form("hMomVsEta%s", nameSuffix.Data()), Form("Momentum vs #eta%s", titleSuffix.Data()),
