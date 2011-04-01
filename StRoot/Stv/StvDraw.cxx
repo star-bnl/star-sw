@@ -1,4 +1,5 @@
 #include "TSystem.h"
+#include "TBrowser.h"
 #include "TCernLib.h"
 #include "StvDraw.h"
 #include "Stv/StvTrack.h"
@@ -163,10 +164,16 @@ int StvDraw::ProcessEvents()
   int ans = gSystem->ProcessEvents();
   return ans;
 }
+//_____________________________________________________________________________
 void StvDraw::Wait()
 {
-    if (!Jnst()) return;
-    Jnst()->UpdateModified();
+    if (Jnst()) Jnst()->UpdateModified();
     fprintf(stderr,"StvDraw::Waiting...\n");
     while(!ProcessEvents()){gSystem->Sleep(200);}; 
 }
+//_____________________________________________________________________________
+void StvDraw::Browse(const TObject *to)
+{
+  new TBrowser("StvDraw",(TObject*)to);
+}
+
