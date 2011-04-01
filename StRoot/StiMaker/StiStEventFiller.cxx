@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.93 2011/03/31 22:11:24 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.94 2011/04/01 15:52:21 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.94  2011/04/01 15:52:21  fisyak
+ * Enlarge array for possible candidates, add requirement that dominant track should have  > 2 good hits
+ *
  * Revision 2.93  2011/03/31 22:11:24  fisyak
  * Propagate IdTruth to StEvent
  *
@@ -1079,7 +1082,7 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
       Int_t nPingsFtpc;
       Int_t noPingsUnk;
     };
-    static trackPing candidates[20];
+    static trackPing candidates[50];
     memset(candidates,0,sizeof(candidates));
     UInt_t N = 0;
     const StPtrVecHit &hits = dinfo->hits();
@@ -1109,7 +1112,7 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
     Int_t J = -1;
     for (UInt_t j = 0; j < N; j++) if (candidates[j].nPings > dominant) 
       {dominant = candidates[j].nPings; J = j;}
-    if (J > -1) {
+    if (J > -1 && dominant > 2) {
       Int_t IdTruth = candidates[J].Id;
       Int_t QA      = (100*dominant)/NDhits;
       static Int_t MaxG2tTracks = 100000;
