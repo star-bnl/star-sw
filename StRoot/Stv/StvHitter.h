@@ -28,8 +28,8 @@ private:
 private:
 const    StHitPlane 	*mHitPlane;
 const StMultiKeyMap     *mHitMap;
-const         float     *mOrg; 
-const      Mtx33F_t    	*mDir;
+const         float     *mOrg; 	//xyz of origine of hit plane
+const      Mtx33F_t    	*mDir;	//orts of hit plane, local x,y,x orts
 StMultiKeyMapIter	*fMultiIter;
 
 StvHits mHits;
