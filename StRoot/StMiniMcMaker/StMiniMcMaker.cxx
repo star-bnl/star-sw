@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.36 2011/03/22 00:32:23 perev Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.37 2011/04/01 20:02:56 perev Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,9 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.37  2011/04/01 20:02:56  perev
+ * IdTruth part rewritten
+ *
  * Revision 1.36  2011/03/22 00:32:23  perev
  * Added impact,phi impact & trigger time
  *
@@ -34,7 +37,7 @@
  * Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
  *
  * Revision 1.28  2008/07/17 22:50:52  calderon
- * Remove a cut in acceptRaw(StMcTrack*) that checked on the pseudorapidity.
+ * Remove a cut in acceptRaw(const StMcTrack*) that checked on the pseudorapidity.
  * This cut was affecting heavy particles thrown flat in rapidity for embedding.
  *
  * Revision 1.27  2007/12/22 20:31:20  calderon
@@ -122,7 +125,7 @@
  * in rcTrack, for both primary and global tracks.
  *
  * Revision 1.9  2003/05/08 02:11:43  calderon
- * Set the data members for the Svt and Ftpc hits for McTrack and for the Svt and Ftpc
+ * Set the data members for the Svt and Ftpc hits for constMcTrack and for the Svt and Ftpc
  * fit points for the RcTrack.
  * Use primary track for the fit points in all cases, not the global tracks.
  * Selection of West or East Ftpc is based on eta>1.8 or eta<1.8
@@ -162,6 +165,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.37  2011/04/01 20:02:56  perev
+ * IdTruth part rewritten
+ *
  * Revision 1.36  2011/03/22 00:32:23  perev
  * Added impact,phi impact & trigger time
  *
@@ -188,7 +194,7 @@
  * Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
  *
  * Revision 1.28  2008/07/17 22:50:52  calderon
- * Remove a cut in acceptRaw(StMcTrack*) that checked on the pseudorapidity.
+ * Remove a cut in acceptRaw(const StMcTrack*) that checked on the pseudorapidity.
  * This cut was affecting heavy particles thrown flat in rapidity for embedding.
  *
  * Revision 1.27  2007/12/22 20:31:20  calderon
@@ -276,7 +282,7 @@
  * in rcTrack, for both primary and global tracks.
  *
  * Revision 1.9  2003/05/08 02:11:43  calderon
- * Set the data members for the Svt and Ftpc hits for McTrack and for the Svt and Ftpc
+ * Set the data members for the Svt and Ftpc hits for constMcTrack and for the Svt and Ftpc
  * fit points for the RcTrack.
  * Use primary track for the fit points in all cases, not the global tracks.
  * Selection of West or East Ftpc is based on eta>1.8 or eta<1.8
@@ -312,7 +318,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.36 2011/03/22 00:32:23 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.37 2011/04/01 20:02:56 perev Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -364,6 +370,17 @@
 
 #include "StMiniMcHelper.h"
 
+#include <vector>
+#include <map>
+#include "StTrack.h"
+#include "StGlobalTrack.h"
+#include "StDcaGeometry.h"
+#include "StContainers.h"
+#include "StTrackDetectorInfo.h"
+#include "StEnumerations.h"
+#include "StHit.h"
+#include "THelixTrack.h"
+
 static int StMiniMcMakerErrorCount=0;
 
 //______________________________________________________________________________
@@ -372,17 +389,18 @@ void dominatrackInfo(const StTrack*, short& dominatrackKey, short&, float&);
 
 //______________________________________________________________________________
 // increasing order
-inline bool hitCmp(StTpcHit* p1, StTpcHit* p2){
+bool hitCmp(const StTpcHit* p1,const StTpcHit* p2)
+{
   return (p1->position().perp()<p2->position().perp());
 }
 //______________________________________________________________________________
 // decreasing energy
-inline bool StMcCalorimeterHitCompdE(StMcCalorimeterHit* lhs, StMcCalorimeterHit* rhs) {
+bool StMcCalorimeterHitCompdE(const StMcCalorimeterHit*  const &lhs,const StMcCalorimeterHit*  const &rhs) {
   return (lhs->dE() > rhs->dE());
 }
 //______________________________________________________________________________
 // decreasing energy
-inline bool StEmcRawHitCompEne(StEmcRawHit* lhs, StEmcRawHit* rhs) {
+bool StEmcRawHitCompEne(const StEmcRawHit* lhs, const StEmcRawHit* rhs) {
   return (lhs->energy() > rhs->energy());
 }
 
@@ -568,7 +586,7 @@ Int_t StMiniMcMaker::Make()
   Bool_t assOk = initAssociation();
   if(!assOk) {
     gMessMgr->Warning() << "Association problems " << endm;
-    return kStErr;
+//    return kStErr;
   }
   //
   // vertex
@@ -701,13 +719,13 @@ void  StMiniMcMaker::trackLoop()
   // -Record which global tracks are already entered
   // -if a track has been entered, skip the match.
   // I won't do any more merging accounting, as that is already done for primaries.
-  vector<int> enteredGlobalTracks;
+  std::vector<int> enteredGlobalTracks;
   const StPtrVecMcTrack& allmcTracks = mMcEvent->tracks();
   cout << "size of mcEvent->tracks() : " << allmcTracks.size() << endl;
   
   StMcTrackConstIterator allMcTrkIter = allmcTracks.begin();
   for ( ; allMcTrkIter != allmcTracks.end(); ++allMcTrkIter) {
-      StMcTrack* mcGlobTrack = *allMcTrkIter;
+      const StMcTrack* mcGlobTrack = *allMcTrkIter;
       if(!acceptRaw(mcGlobTrack)) continue; // loose eta cut (4 units, so should include ftpc).
       if(accept(mcGlobTrack) || mcGlobTrack->ftpcHits().size()>=5) { // 10 tpc hits or 5 ftpc hits
 	if (Debug()>1) {
@@ -720,7 +738,7 @@ void  StMiniMcMaker::trackLoop()
 	  if (candTrackPair) {
 	      // ok, found a match! Enter into the array and store the glob id
 	      // to only enter a glob track once
-	      StGlobalTrack* glTrack = candTrackPair->partnerTrack();
+	      const StGlobalTrack* glTrack = candTrackPair->partnerTrack();
 
 	      if (Debug()>1) {
 		cout << "global match " << endl;
@@ -758,7 +776,7 @@ void  StMiniMcMaker::trackLoop()
 
   StMcTrackConstIterator mcTrkIter = mcTracks.begin();
   for( ; mcTrkIter != mcTracks.end(); mcTrkIter++){
-    StMcTrack* mcTrack = *mcTrkIter;
+    const StMcTrack* mcTrack = *mcTrkIter;
 
     // DEBUG
     if(!mcTrack) { cout << "No mc track? " << endl; continue; }
@@ -822,8 +840,8 @@ void  StMiniMcMaker::trackLoop()
 	  //*** DEBUGEND
 	    
 
-	  StGlobalTrack* glTrack   = (*iterBestMatchPair)->partnerTrack();
-	  StPrimaryTrack* prTrack  = isPrimaryTrack(glTrack);
+	  const StGlobalTrack* glTrack   = (*iterBestMatchPair)->partnerTrack();
+	  const StPrimaryTrack* prTrack  = isPrimaryTrack(glTrack);
 
 	  //
 	  // 02/15/01
@@ -847,15 +865,15 @@ void  StMiniMcMaker::trackLoop()
 	  // # of mc tracks matched to this rc track
 	  //
 	  UInt_t nAssocMc = mRcTrackMap->count(glTrack); 
-	  vector<UInt_t> nAssocGlVec; // # of rc globals matched to a merged mc cand
-	  vector<UInt_t> nAssocPrVec; // # of rc primaries matched to a merged mc 
+	  std::vector<UInt_t> nAssocGlVec; // # of rc globals matched to a merged mc cand
+	  std::vector<UInt_t> nAssocPrVec; // # of rc primaries matched to a merged mc 
 	  //
 	  // loop over the mc tracks associated with this rc track
 	  //
 	  
 	  for( ; rcMapIter != rcBounds.second; rcMapIter++){
 	    StTrackPairInfo* assocPair = (*rcMapIter).second; 
-	    StMcTrack* mcCandTrack = assocPair->partnerMcTrack();
+	    const StMcTrack* mcCandTrack = assocPair->partnerMcTrack();
 
 	    // no pt cut
 	    // but must lie with the loose cut (acceptRaw)
@@ -901,7 +919,7 @@ void  StMiniMcMaker::trackLoop()
 	  Bool_t isBestContam = kFALSE; // the best 'best matched' mc track
 	                                // is not a primary mc 
 	  for(unsigned int i=0; i<mcMergedPair.size(); i++){
-	    StMcTrack* mergedMcTrack = (mcMergedPair[i])->partnerMcTrack();
+	    const StMcTrack* mergedMcTrack = (mcMergedPair[i])->partnerMcTrack();
 	    UInt_t mergedCommonHits = (mcMergedPair[i])->commonTpcHits();
 	   	    
 	    if(Debug()==2 && mcMergedPair.size()>1) {
@@ -1001,8 +1019,8 @@ void  StMiniMcMaker::trackLoop()
     //
     if(!ok(prTrack)) continue; 
 
-    StGlobalTrack* glTrack 
-      = static_cast<StGlobalTrack*>(prTrack->node()->track(global));
+    const StGlobalTrack* glTrack 
+      = static_cast<const StGlobalTrack*>(prTrack->node()->track(global));
     
     
     //
@@ -1052,7 +1070,7 @@ void  StMiniMcMaker::trackLoop()
 
       for( ; rcMapIter != rcBounds.second; rcMapIter++){
 	StTrackPairInfo* assocPair = (*rcMapIter).second; 
-	//StMcTrack* mcCandTrack = assocPair->partnerMcTrack();
+	//const StMcTrack* mcCandTrack = assocPair->partnerMcTrack();
 
 	//
 	// new bug.  make sure the mc track was accepted!
@@ -1072,7 +1090,7 @@ void  StMiniMcMaker::trackLoop()
 	PAIRVEC::iterator iterBestMatchPair 
 	  = max_element(candPair.begin(),candPair.end(),pairCmp);
 	
-	StMcTrack* mcTrack = (*iterBestMatchPair)->partnerMcTrack();
+	const StMcTrack* mcTrack = (*iterBestMatchPair)->partnerMcTrack();
 	UInt_t commonHits = (*iterBestMatchPair)->commonTpcHits();
 	
 	nAssocGl = mMcTrackMap->count(mcTrack);
@@ -1181,6 +1199,106 @@ void  StMiniMcMaker::trackLoop()
   mNMatGlob += nMatGlob;
 }
 //________________________________________________________________________________
+struct MyHolder_t { const StTrack *gl;const StTrack *pr;int hits; float qa;};
+void StMiniMcMaker::trackLoopIdT() // match with IdTruth
+{
+
+
+  typedef std::map< int,const StTinyMcTrack*>  	McTinyMap_t;
+  typedef std::pair<int,const StTinyMcTrack*>  	McTrackPair_t;
+  typedef McTinyMap_t::const_iterator 		McTinyMapIter_t;
+
+//  struct MyHolder_t { public: const StTrack *gl;const StTrack *pr;int hits; float qa;};
+
+  typedef std::multimap< int,MyHolder_t>  	StTrackMap_t;
+  typedef std::pair<int,MyHolder_t>  	        StTrackPair_t;
+  typedef StTrackMap_t::const_iterator 		StTrackMapIter_t;
+
+  Int_t nAcceptedRaw(0),nAccepted(0), 
+      nRcGoodGlobal20(0), nRcGlobal(0), nMcGoodGlobal20(0), 
+      nMcNch(0), nMcHminus(0), nMcFtpcWNch(0), nMcFtpcENch(0);
+  Int_t nGoodTrackEta(0), nFtpcWUncorrected(0), nFtpcEUncorrected(0);
+
+  const StVertex *myVertex = mRcEvent->primaryVertex(0);
+
+  const StPtrVecMcTrack& mcTracks = mMcEvent->tracks();
+  int NMcTracks = mcTracks.size();
+  cout << "size of mcEvent->tracks() : " << NMcTracks << endl;
+
+//		Fill global and primary StTrackMap's
+  StTrackMap_t glMap,prMap;
+  StSPtrVecTrackNode& trackNode = mRcEvent->trackNodes();
+  int nTracks = trackNode.size(),myKey;
+  for (int i=0; i < nTracks; i++) {
+    StTrackNode *node = trackNode[i]; 
+    if (!node) 		continue;
+    StTrack *glTrack = node->track(global);
+    if (! glTrack) 	continue;
+
+    nRcGlobal++;	
+    if(acceptGood20(glTrack)) nRcGoodGlobal20++;
+
+    StPrimaryTrack *prTrack = (StPrimaryTrack*)node->track(primary);
+    if (prTrack && prTrack->vertex()!=myVertex) prTrack=0;
+    MyHolder_t h; h.gl = glTrack;h.pr = prTrack;
+    dominatTkInfo(glTrack,myKey ,h.hits,h.qa);
+    glMap.insert(StTrackPair_t(myKey,h));
+    if (!prTrack) 	continue;
+    prMap.insert(StTrackPair_t(myKey,h));
+
+    if(acceptCentrality(prTrack)) nGoodTrackEta++;
+    if(acceptFTPC(prTrack) && prTrack->geometry()->momentum().pseudoRapidity() < 0. ) nFtpcEUncorrected++;
+    if(acceptFTPC(prTrack) && prTrack->geometry()->momentum().pseudoRapidity() > 0. ) nFtpcWUncorrected++;
+  }
+
+//		Fill Tiny Mc tracks
+    McTinyMap_t  mcTinyMap ;
+    for (int k = 0; k < NMcTracks; k++) {
+      const StMcTrack* mcTrack = mcTracks[k];
+      if (! mcTrack->geantId()) continue;
+      int tkKey = mcTrack->key();  if (!tkKey) continue;
+      if(!acceptRaw(mcTrack)) continue; // loose eta cuts, etc
+      nAcceptedRaw++;
+      if(!accept(mcTrack))	continue;
+      nAccepted++;
+      if(acceptGood20(mcTrack)) nMcGoodGlobal20++;
+      if(fabs(mcTrack->pseudoRapidity())<.5 && isPrimaryTrack(mcTrack) && mcTrack->particleDefinition()){
+	if(mcTrack->particleDefinition()->charge()!=0) nMcNch++;
+	if(mcTrack->particleDefinition()->charge() <0) nMcHminus++;
+      }
+      if(mcTrack->particleDefinition() && mcTrack->particleDefinition()->charge()!=0 && isPrimaryTrack(mcTrack) ) {
+        if(mcTrack->pseudoRapidity()<-2.8 && mcTrack->pseudoRapidity()>-3.8) nMcFtpcENch++;
+        if(mcTrack->pseudoRapidity()> 2.8 && mcTrack->pseudoRapidity()< 3.8) nMcFtpcWNch++;
+      }
+      int nAssocGl = glMap.count(tkKey);  
+      int nAssocPr = prMap.count(tkKey);  
+      StTinyMcTrack *tinyMcTrack = mMiniMcEvent->addMcTrack(0);
+      fillMcTrackInfo(tinyMcTrack,mcTrack,nAssocGl,nAssocPr);
+      mcTinyMap[tkKey] = tinyMcTrack;
+    }
+
+//		Fill miniMcPair's
+
+    for (StTrackMapIter_t it =glMap.begin(); it!= glMap.end();++it) {
+      int tkKey = (*it).first;
+      const MyHolder_t &h = (*it).second;
+      StMiniMcPair *miniMcPair = mMiniMcEvent->addTrackPair(0,MATCHED);
+      const StTinyMcTrack *tinyMcTrack = mcTinyMap[tkKey];
+//      assert(tinyMcTrack);
+      if (tinyMcTrack) *((StTinyMcTrack*)miniMcPair) = *tinyMcTrack;
+      fillRcTrackInfo(miniMcPair,h.pr,h.gl,0); 
+      miniMcPair->setDominatrack(tkKey);
+      miniMcPair->setDominCommonHit(h.hits);
+      miniMcPair->setAvgQuality(h.qa);
+      miniMcPair->setNCommonHit(h.hits);	//??VP
+    }
+
+    fillEventInfo(nGoodTrackEta,nRcGlobal,nRcGoodGlobal20,
+		  nAcceptedRaw,nMcGoodGlobal20,nMcNch           ,nMcHminus,
+		  nMcFtpcENch ,nMcFtpcWNch    ,nFtpcEUncorrected,nFtpcWUncorrected);
+}
+#if 0
+//________________________________________________________________________________
 void StMiniMcMaker::trackLoopIdT() // match with IdTruth
 {
   if(Debug()) cout << "##StMiniMcMaker::trackLoopIdT()" << endl;
@@ -1191,16 +1309,16 @@ void StMiniMcMaker::trackLoopIdT() // match with IdTruth
       nMcNch(0), nMcHminus(0), nMcFtpcWNch(0), nMcFtpcENch(0);
   Int_t nGoodTrackEta(0), nFtpcWUncorrected(0), nFtpcEUncorrected(0);
 
-  vector<int> enteredGlobalTracks;
+  std::vector<int> enteredGlobalTracks;
   const StPtrVecMcTrack& mcTracks = mMcEvent->tracks();
   UInt_t NMcTracks = mcTracks.size();
   cout << "size of mcEvent->tracks() : " << NMcTracks << endl;
-  map<Long_t,StMcTrack*> mcMap;
+  map<Long_t,const StMcTrack*> mcMap;
   //  map<Long_t,StTinyMcTrack*> TinyMcMap;
   mcMap[0] = 0;
   //  TinyMcMap[0] = 0;
   for (UInt_t k = 0; k < NMcTracks; k++) {
-    StMcTrack* mcTrack = mcTracks[k];
+    const StMcTrack* mcTrack = mcTracks[k];
     if (! mcTrack->geantId()) continue;
     Int_t nAssocGl = mMcTrackMap->count(mcTrack);
     if (Debug() > 1) {
@@ -1209,7 +1327,7 @@ void StMiniMcMaker::trackLoopIdT() // match with IdTruth
       mcTrackMapIter mcMapIter = mcBounds.first;
       for ( ; mcMapIter != mcBounds.second; ++mcMapIter){
 	StTrackPairInfo* assocPair = (*mcMapIter).second;
-	StGlobalTrack* globTrack = assocPair->partnerTrack();
+	const StGlobalTrack* globTrack = assocPair->partnerTrack();
 	cout << * assocPair << endl;
 	cout << "globTrack FitPoints Tpc/FtpcE/W = " << globTrack->fitTraits().numberOfFitPoints(kTpcId) 
 	     << "/" << globTrack->fitTraits().numberOfFitPoints(kFtpcEastId) 
@@ -1239,7 +1357,7 @@ void StMiniMcMaker::trackLoopIdT() // match with IdTruth
   for (unsigned int i=0; i < nTracks; i++) {
     node = trackNode[i]; 
     if (!node) continue;
-    StGlobalTrack  *glTrack = static_cast<StGlobalTrack *>(node->track(global));
+    const StGlobalTrack  *glTrack = static_cast<const StGlobalTrack *>(node->track(global));
     if (! glTrack) continue;
     StPrimaryTrack *prTrack = static_cast<StPrimaryTrack*>(node->track(primary));
     //
@@ -1248,7 +1366,7 @@ void StMiniMcMaker::trackLoopIdT() // match with IdTruth
 
     dominatrackInfo(glTrack, dominatrackKey , dominatrackHits, avgQuality);
     Long_t Key = dominatrackKey;
-    StMcTrack* mcTrack =  mcMap[Key];
+    const StMcTrack* mcTrack =  mcMap[Key];
     StMiniMcPair *miniMcPair = mMiniMcEvent->addTrackPair(0,MATCHED);
     Int_t nAssocGl = mMcTrackMap->count(mcTrack);
     Int_t nAssocPr = 0;
@@ -1285,7 +1403,7 @@ void StMiniMcMaker::trackLoopIdT() // match with IdTruth
     Int_t i = 0;
     for( ; rcMapIter != rcBounds.second; rcMapIter++, i++){
       StTrackPairInfo *assocPair = (*rcMapIter).second;
-      StMcTrack* mcCandTrack = assocPair->partnerMcTrack();
+      const StMcTrack* mcCandTrack = assocPair->partnerMcTrack();
       if (mcCandTrack == mcTrack) {
 	candTrackPair = assocPair;
       }
@@ -1307,7 +1425,7 @@ void StMiniMcMaker::trackLoopIdT() // match with IdTruth
 		nMcGoodGlobal20,nMcNch,nMcHminus,
 		nMcFtpcENch, nMcFtpcWNch,nFtpcEUncorrected,nFtpcWUncorrected);
 }
-
+#endif//0
 //______________________________________________________________________________
 void StMiniMcMaker::buildEmcIndexArray() 
 {
@@ -1522,7 +1640,7 @@ void StMiniMcMaker::fillEventInfo(Int_t nGoodTrackEta, Int_t nRcGlobal, Int_t nR
 
 //______________________________________________________________________________
 void StMiniMcMaker::fillTrackPairInfo(	StMiniMcPair* miniMcPair,
-				 	StMcTrack* mcTrack, 
+				 	const StMcTrack* mcTrack, 
 				 	const StTrack* prTrack, 
 				 	const StTrack* glTrack,
 				 	Int_t commonHits,
@@ -1549,7 +1667,7 @@ void StMiniMcMaker::fillTrackPairInfo(	StMiniMcPair* miniMcPair,
   //
   StContamPair* contamPair = dynamic_cast<StContamPair*>(miniMcPair);
   if(contamPair){
-    StMcTrack*    mcTParent = mcTrack->parent();
+    const StMcTrack*    mcTParent = mcTrack->parent();
     
     if (mcTParent){
       contamPair->setParentGeantId(mcTrack->parent()->geantId());
@@ -1617,38 +1735,82 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     cout << "Error StMiniMcMaker::fillRcTrackInfo, glTrack pointer is zero " << glTrack << endl;
     return;
   }
+  const StGlobalTrack *global = (StGlobalTrack*)glTrack;
+  const StDcaGeometry* dcaGeo = global->dcaGeometry();
   tinyRcTrack->setValidGl();
   tinyRcTrack->setRecoKey(glTrack->key());
-  const StThreeVectorF& glMom = glTrack->geometry()->momentum();
-  
-  const StPhysicalHelixD& glHelix = glTrack->geometry()->helix();
-  
-  StMatrixF gCM = glTrack->fitTraits().covariantMatrix();
-  Float_t errorGl[5] = {gCM(1,1),gCM(2,2),gCM(3,3),gCM(4,4),gCM(5,5)};
-  
-  
-  tinyRcTrack->setPtGl(glMom.perp());
-  tinyRcTrack->setPzGl(glMom.z());
-  tinyRcTrack->setEtaGl(glMom.pseudoRapidity());
-  tinyRcTrack->setPhiGl(glMom.phi()); 
-  tinyRcTrack->setCurvGl(glTrack->geometry()->curvature());
-  tinyRcTrack->setTanLGl(tan(glTrack->geometry()->dipAngle()));
-  tinyRcTrack->setErrGl(errorGl);
-  tinyRcTrack->setSeedQuality(glTrack->seedQuality());
-  //
-  // reality check
-  //
-  //  if(fabs(tinyRcTrack->mDcaPr - prTrack->impactParameter())>.001){
-  //   cout << " helix : " << tinyRcTrack->mDcaPr 
-  //	 << " impact: " << prTrack->impactParameter() << endl;
-  // }
-  
-  tinyRcTrack->setDcaGl(glTrack->impactParameter());
-  tinyRcTrack->setDcaXYGl(computeXY(mRcVertexPos,glTrack));
-  //tinyRcTrack->setDcaZGl(computeZDca(mRcVertexPos,glTrack));
-  tinyRcTrack->setDcaXYGl(computeXY(mRcVertexPos,glTrack));
-  tinyRcTrack->setDcaZGlMcV(dcaz(glHelix,*mMcVertexPos,glTrack));
-  tinyRcTrack->setDcaXYGlMcV(computeXY(mMcVertexPos,glTrack));
+
+  if (dcaGeo ) { 
+
+    StThreeVectorF glMom = dcaGeo->momentum();
+    THelixTrack glHelix = dcaGeo->thelix();
+
+     
+    enum {	kImpImp=0,
+    		kZImp,   kZZ,
+    		kPsiImp, kPsiZ, kPsiPsi,
+    		kPtiImp, kPtiZ, kPtiPsi, kPtiPti,
+    		kTanImp, kTanZ, kTanPsi, kTanPti, kTanTan};
+    const float *dcaErr=dcaGeo->errMatrix();
+    // the indices of the error matrix correspond to
+    // 0 - error on y (track position along pad row direction)
+    // 1 - error on z (track position along drift direction)
+    // 2 - error on C*x0 where C is the track curvature and x0 is the helix center position along x
+    // 3 - error on C, the curvature
+    // 4 - error on tan(dipAngle)
+    float errorGl[5] = {dcaErr[kImpImp],dcaErr[kZZ],dcaErr[kPsiPsi],dcaErr[kPtiPti],dcaErr[kTanTan]};
+    float hz = dcaGeo->hz();
+    errorGl[3]*=hz*hz;
+    tinyRcTrack->setErrGl(errorGl);
+    tinyRcTrack->setPtGl(glMom.perp());
+    tinyRcTrack->setPzGl(glMom.z());
+    tinyRcTrack->setEtaGl(glMom.pseudoRapidity());
+    tinyRcTrack->setPhiGl(glMom.phi()); 
+    tinyRcTrack->setCurvGl(dcaGeo->curvature());
+    tinyRcTrack->setTanLGl(dcaGeo->tanDip());
+    tinyRcTrack->setSeedQuality(glTrack->seedQuality());
+    tinyRcTrack->setDcaGl(dcaGeo->impact());
+    double vtx[3]={mRcVertexPos[0][0],mRcVertexPos[0][1],mRcVertexPos[0][2]};
+    double dcaXY,dcaZ;
+    double s = glHelix.Dca(vtx,dcaXY,dcaZ,0);
+    tinyRcTrack->setDcaXYGl(dcaXY);
+    tinyRcTrack->setDcaZGl(dcaZ);
+    double mcv[3]={mMcVertexPos[0][0],mMcVertexPos[0][1],mMcVertexPos[0][2]};
+    s = glHelix.Dca(mcv,dcaXY,dcaZ,0);
+    tinyRcTrack->setDcaXYGlMcV(dcaXY);
+    tinyRcTrack->setDcaZGlMcV(dcaZ);
+  } else {
+    const StThreeVectorF& glMom = glTrack->geometry()->momentum();
+
+    const StPhysicalHelixD& glHelix = glTrack->geometry()->helix();
+
+    StMatrixF gCM = glTrack->fitTraits().covariantMatrix();
+    Float_t errorGl[5] = {gCM(1,1),gCM(2,2),gCM(3,3),gCM(4,4),gCM(5,5)};
+
+
+    tinyRcTrack->setPtGl(glMom.perp());
+    tinyRcTrack->setPzGl(glMom.z());
+    tinyRcTrack->setEtaGl(glMom.pseudoRapidity());
+    tinyRcTrack->setPhiGl(glMom.phi()); 
+    tinyRcTrack->setCurvGl(glTrack->geometry()->curvature());
+    tinyRcTrack->setTanLGl(tan(glTrack->geometry()->dipAngle()));
+    tinyRcTrack->setErrGl(errorGl);
+    tinyRcTrack->setSeedQuality(glTrack->seedQuality());
+    //
+    // reality check
+    //
+    //  if(fabs(tinyRcTrack->mDcaPr - prTrack->impactParameter())>.001){
+    //   cout << " helix : " << tinyRcTrack->mDcaPr 
+    //	 << " impact: " << prTrack->impactParameter() << endl;
+    // }
+
+    tinyRcTrack->setDcaGl(glTrack->impactParameter());
+    tinyRcTrack->setDcaXYGl(computeXY(mRcVertexPos,glTrack));
+    //tinyRcTrack->setDcaZGl(computeZDca(mRcVertexPos,glTrack));
+    tinyRcTrack->setDcaXYGl(computeXY(mRcVertexPos,glTrack));
+    tinyRcTrack->setDcaZGlMcV(dcaz(glHelix,*mMcVertexPos,glTrack));
+    tinyRcTrack->setDcaXYGlMcV(computeXY(mMcVertexPos,glTrack));
+  }
   
   StDedxPidTraits* pid = findDedxPidTraits(glTrack);
   float meanDedx = (pid) ? pid->mean() : -999;
@@ -1782,7 +1944,7 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     // Track hits BEMC.  Find the 9 closest towers around the projection.
     // Sort them according to energy.  Keep the highest 3.
     int softIdProj;
-    vector<StEmcRawHit*> towersOfTrack;
+    std::vector<StEmcRawHit*> towersOfTrack;
     StEmcGeom* emcGeom = StEmcGeom::getEmcGeom("bemc");
     emcGeom->getId(pos->phi(),pos->pseudoRapidity(),softIdProj); // softId range [1,4800];
     for(int idEta=-1; idEta<2; ++idEta) {
@@ -1853,7 +2015,7 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
 
 //______________________________________________________________________________
 void  StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
-			             StMcTrack* mcTrack,
+			             const StMcTrack* mcTrack,
 			             Int_t nAssocGl, Int_t nAssocPr)
 {
   if (mcTrack) {
@@ -1908,7 +2070,7 @@ void  StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
     tinyMcTrack->setNAssocGl(nAssocGl);
     tinyMcTrack->setNAssocPr(nAssocPr);
 
-    // Fill Mc Emc McTrack Information
+    // Fill Mc Emc constMcTrack Information
     // Find the 3 highest energy towers and store them
     // This is done by copying the hits to a vector for sorting
     // according to the hit energy (dE).  Then the first 3 values
@@ -1917,7 +2079,7 @@ void  StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
     // The softId of the hit with the highest tower is also stored.
     StPtrVecMcCalorimeterHit bemcHits = mcTrack->bemcHits();
     if (bemcHits.size()>0) {
-      vector<StMcCalorimeterHit*> bemcHitsSorted(bemcHits.size());
+      std::vector<StMcCalorimeterHit*> bemcHitsSorted(bemcHits.size());
       int  hiEnergyHitSoftId(-999);
       double sumEnergy(0);
       copy(bemcHits.begin(),bemcHits.end(),bemcHitsSorted.begin());
@@ -1995,16 +2157,15 @@ void  StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
   given a mc track, returns a vector of matched associated pairs.
 */
 //______________________________________________________________________________
-StTrackPairInfo* StMiniMcMaker::findBestMatchedGlobal(StMcTrack* mcTrack)
+StTrackPairInfo* StMiniMcMaker::findBestMatchedGlobal(const StMcTrack* mcTrack)
 {
-  pair<mcTrackMapIter,mcTrackMapIter> mcBounds 
-    = mMcTrackMap->equal_range(mcTrack);
+  pair<mcTrackMapIter,mcTrackMapIter> mcBounds = mMcTrackMap->equal_range((const StMcTrack*)mcTrack);
   StTrackPairInfo* candTrackPair = 0;  // used for finding the best matched track
-  StGlobalTrack* candTrack = 0;
+  const StGlobalTrack* candTrack = 0;
   mcTrackMapIter mcMapIter = mcBounds.first;
   for ( ; mcMapIter != mcBounds.second; ++mcMapIter){
     StTrackPairInfo* assocPair = (*mcMapIter).second;
-    StGlobalTrack* globTrack = assocPair->partnerTrack();
+    const StGlobalTrack* globTrack = assocPair->partnerTrack();
     if (Debug() > 1) {
       cout << * assocPair << endl;
       cout << "globTrack FitPoints Tpc/FtpcE/W = " << globTrack->fitTraits().numberOfFitPoints(kTpcId) 
@@ -2037,13 +2198,12 @@ StTrackPairInfo* StMiniMcMaker::findBestMatchedGlobal(StMcTrack* mcTrack)
   return candTrackPair; // Note that candTrack might be zero, for example if only one track is matched and has 9 tpc fit pts.
 }
 //______________________________________________________________________________
-PAIRVEC StMiniMcMaker::findMatchedRc(StMcTrack* mcTrack)
+PAIRVEC StMiniMcMaker::findMatchedRc(const StMcTrack* mcTrack)
 {
   //
   // now find the associated tracks
   //
-  pair<mcTrackMapIter,mcTrackMapIter> mcBounds 
-    = mMcTrackMap->equal_range(mcTrack);
+  pair<mcTrackMapIter,mcTrackMapIter> mcBounds = mMcTrackMap->equal_range((const StMcTrack*)mcTrack);
   
   PAIRVEC candPair;  // used for finding the best matched track
   
@@ -2051,12 +2211,12 @@ PAIRVEC StMiniMcMaker::findMatchedRc(StMcTrack* mcTrack)
   for( ; mcMapIter != mcBounds.second; mcMapIter++){
     StTrackPairInfo* assocPair = (*mcMapIter).second; 
     
-    StGlobalTrack* glTrack  = assocPair->partnerTrack();
+    const StGlobalTrack* glTrack  = assocPair->partnerTrack();
     
     //
     // primary tracks only
     //
-    StPrimaryTrack* prTrack=0;
+    const StPrimaryTrack* prTrack=0;
     if(!(prTrack = isPrimaryTrack(glTrack))) continue; 
     
     // conspicuously absent is a pt cut
@@ -2091,11 +2251,11 @@ PAIRVEC StMiniMcMaker::findMatchedRc(StMcTrack* mcTrack)
 PAIRHIT StMiniMcMaker::findFirstLastHit(const StTrack* track)
 {
   const StPtrVecHit& hits = track->detectorInfo()->hits(kTpcId);
-  vector<StTpcHit*> vec;
+  std::vector<const StTpcHit*> vec;
   // fill the vector
   //  cout << "\thits size " << hits.size() << endl;
   for(UInt_t i=0; i<hits.size(); i++){
-    StTpcHit* hit = dynamic_cast<StTpcHit*>(hits[i]);
+    const StTpcHit* hit = dynamic_cast<const StTpcHit*>(hits[i]);
     if(!hit) continue;
     vec.push_back(hit);
   }
@@ -2104,7 +2264,7 @@ PAIRHIT StMiniMcMaker::findFirstLastHit(const StTrack* track)
     return PAIRHIT(vec[0],vec[vec.size()-1]);   
   }
   else {
-    StTpcHit* empty = 0;
+    const StTpcHit* empty = 0;
     return PAIRHIT(empty,empty);
   }
 }
@@ -2113,11 +2273,11 @@ PAIRHIT StMiniMcMaker::findFirstLastHit(const StTrack* track)
 PAIRHIT StMiniMcMaker::findFirstLastFitHit(const StTrack* track)
 {
   const StPtrVecHit& hits = track->detectorInfo()->hits(kTpcId);
-  vector<StTpcHit*> vec;
+  std::vector<const StTpcHit*> vec;
   // fill the vector
   
   for(UInt_t i=0; i<hits.size(); i++){
-    StTpcHit* hit = dynamic_cast<StTpcHit*>(hits[i]);
+    const StTpcHit* hit = dynamic_cast<const StTpcHit*>(hits[i]);
     if(!hit) continue;
     if(!hit->usedInFit()) continue;
     vec.push_back(hit);
@@ -2127,7 +2287,7 @@ PAIRHIT StMiniMcMaker::findFirstLastFitHit(const StTrack* track)
     return PAIRHIT(vec[0],vec[vec.size()-1]);   
   }
   else {
-    StTpcHit* empty = 0;
+    const StTpcHit* empty = 0;
     return PAIRHIT(empty,empty);
   }
 }
@@ -2136,7 +2296,7 @@ PAIRHIT StMiniMcMaker::findFirstLastFitHit(const StTrack* track)
 
 //______________________________________________________________________________
 //  	bare minimum cuts to accept a raw mc track
-Bool_t StMiniMcMaker::acceptRaw(StMcTrack* mcTrack)
+Bool_t StMiniMcMaker::acceptRaw(const StMcTrack* mcTrack)
 {
   return (mcTrack);
   // commented out the cuts below, as they made sense for
@@ -2151,14 +2311,14 @@ Bool_t StMiniMcMaker::acceptRaw(StMcTrack* mcTrack)
 //______________________________________________________________________________
 //  	cut on an mc track to determine if we should look 
 //  	for a matched rc track.
-Bool_t StMiniMcMaker::accept(StMcTrack* mcTrack)
+Bool_t StMiniMcMaker::accept(const StMcTrack* mcTrack)
 {
   return (mcTrack && mcTrack->tpcHits().size() >= 10);
 }
 
 //______________________________________________________________________________
 //  	bare minimum cut to accept a rc track as valid
-Bool_t StMiniMcMaker::accept(StTrack* rcTrack)
+Bool_t StMiniMcMaker::accept(const StTrack* rcTrack)
 {
   UInt_t nFitPoint = rcTrack->fitTraits().numberOfFitPoints(kTpcId);
   return ( rcTrack &&
@@ -2170,7 +2330,7 @@ Bool_t StMiniMcMaker::accept(StTrack* rcTrack)
 
 //______________________________________________________________________________
 //  		are the mc and rc track of the same sign?
-Bool_t StMiniMcMaker::isSameSign(StTrack* rcTrack,StMcTrack* mcTrack)
+Bool_t StMiniMcMaker::isSameSign(const StTrack* rcTrack,const StMcTrack* mcTrack)
 {
   return (rcTrack->geometry()->charge()*
 	  mcTrack->particleDefinition()->charge()>0);
@@ -2178,7 +2338,7 @@ Bool_t StMiniMcMaker::isSameSign(StTrack* rcTrack,StMcTrack* mcTrack)
 
 //______________________________________________________________________________
 //  		possible pt cut when looking for split, background rc tracks
-Bool_t StMiniMcMaker::acceptPt(StTrack* track)
+Bool_t StMiniMcMaker::acceptPt(const StTrack* track)
 {
   return (track->geometry()->momentum().perp()>=mMinPt &&
 	  track->geometry()->momentum().perp()<=mMaxPt);
@@ -2186,14 +2346,14 @@ Bool_t StMiniMcMaker::acceptPt(StTrack* track)
 
 //______________________________________________________________________________
 //  		possible pt cut on mc tracks
-Bool_t StMiniMcMaker::acceptPt(StMcTrack*track)
+Bool_t StMiniMcMaker::acceptPt(const StMcTrack *track)
 {
   return (track->momentum().perp()>=mMinPt &&
 	  track->momentum().perp()<=mMaxPt);
 }
 //______________________________________________________________________________
 //  		cut for debugging purposes
-Bool_t StMiniMcMaker::acceptDebug(StMcTrack* track)
+Bool_t StMiniMcMaker::acceptDebug(const StMcTrack* track)
 {  
   return (track->momentum().pseudoRapidity() <= .1
 	  && track->momentum().pseudoRapidity() >= 0 &&
@@ -2203,14 +2363,14 @@ Bool_t StMiniMcMaker::acceptDebug(StMcTrack* track)
 
 //______________________________________________________________________________
 //  		cut for flow centrality definition
-Bool_t StMiniMcMaker::acceptCentrality(StTrack* track)
+Bool_t StMiniMcMaker::acceptCentrality(const StTrack* track)
 {
   return (fabs(track->geometry()->momentum().pseudoRapidity())<.75);
 }
 
 //______________________________________________________________________________
 //  		cut for h- uncorrected centrality
-Bool_t StMiniMcMaker::acceptUncorrected(StTrack* track)
+Bool_t StMiniMcMaker::acceptUncorrected(const StTrack* track)
 {
   return (
 	  track->geometry()->charge()<0 &&
@@ -2221,10 +2381,10 @@ Bool_t StMiniMcMaker::acceptUncorrected(StTrack* track)
 }
 
 //______________________________________________________________________________
-Bool_t  StMiniMcMaker::acceptFTPC(StTrack* prTrack)
+Bool_t  StMiniMcMaker::acceptFTPC(const StTrack* prTrack)
 {
   if(!prTrack) return false;
-  StTrack* glTrack=prTrack->node()->track(global);
+  const StTrack* glTrack=prTrack->node()->track(global);
   
   return (prTrack &&
           glTrack->geometry()->helix().distance(*mRcVertexPos)<3&&
@@ -2237,13 +2397,13 @@ Bool_t  StMiniMcMaker::acceptFTPC(StTrack* prTrack)
 
 //______________________________________________________________________________
 //  		positive track flag
-Bool_t StMiniMcMaker::ok(StTrack* track)
+Bool_t StMiniMcMaker::ok(const StTrack* track)
 {
   return (track && track->flag()>0);
 }
 //______________________________________________________________________________
 //  		Good Global RC Tracks with fitpts > 20
-Bool_t StMiniMcMaker::acceptGood20(StTrack* track)
+Bool_t StMiniMcMaker::acceptGood20(const StTrack* track)
 {
   UInt_t nFitPoint = track->fitTraits().numberOfFitPoints(kTpcId);
   return (track && nFitPoint >= 20);
@@ -2251,22 +2411,22 @@ Bool_t StMiniMcMaker::acceptGood20(StTrack* track)
 
 //______________________________________________________________________________
 //  		Good Global MC Tracks with fitpts > 20
-Bool_t StMiniMcMaker::acceptGood20(StMcTrack* track)
+Bool_t StMiniMcMaker::acceptGood20(const StMcTrack* track)
 {
   return (track && track->tpcHits().size() >= 20);
 }
 
 //______________________________________________________________________________
 //  		checks if the rc track is from the vertex
-StPrimaryTrack* StMiniMcMaker::isPrimaryTrack(StTrack* glTrack)
+const StPrimaryTrack* StMiniMcMaker::isPrimaryTrack(const StTrack* glTrack)
 {
   if(!glTrack) return 0;
-  return dynamic_cast<StPrimaryTrack*>(glTrack->node()->track(primary));
+  return dynamic_cast<const StPrimaryTrack*>(glTrack->node()->track(primary));
 }
 
 //______________________________________________________________________________
 //  		checks if the mc track is from the vertex
-Bool_t StMiniMcMaker::isPrimaryTrack(StMcTrack* mcTrack)
+Bool_t StMiniMcMaker::isPrimaryTrack(const StMcTrack* mcTrack)
 {
   
   return(mcTrack->startVertex() == mMcEvent->primaryVertex());
@@ -2344,8 +2504,8 @@ StDedxPidTraits* StMiniMcMaker::findDedxPidTraits(const StTrack* track)
 
 //______________________________________________________________________________
 //  		debugging
-void  StMiniMcMaker::checkMerged(StMcTrack* mergedMcTrack, Int_t mergedCommonHits,
-			   StTrack* track)
+void  StMiniMcMaker::checkMerged(const StMcTrack* mergedMcTrack, Int_t mergedCommonHits,
+			         const StTrack* track)
 {
   
   if(!isPrimaryTrack(mergedMcTrack))
@@ -2376,7 +2536,7 @@ void  StMiniMcMaker::checkMerged(StMcTrack* mergedMcTrack, Int_t mergedCommonHit
 
 //______________________________________________________________________________
 //  		debugging
-void StMiniMcMaker::checkSplit(StMcTrack* mcTrack, StTrack* glTrack,
+void StMiniMcMaker::checkSplit(const StMcTrack* mcTrack, const StTrack* glTrack,
 			  Int_t commonHits)
 {
   // find the best rc match to this mc track
@@ -2418,7 +2578,7 @@ void StMiniMcMaker::checkSplit(StMcTrack* mcTrack, StTrack* glTrack,
   cout << ">>Here are the rc tracks" << endl;
   for(unsigned int i=0; i<testPair.size(); i++){
     cout << "i: " << i << endl;
-    StGlobalTrack* testGlTrack = testPair[i]->partnerTrack();
+    const StGlobalTrack* testGlTrack = testPair[i]->partnerTrack();
     cout << "pt rc : " 
 	 << testGlTrack->geometry()->momentum().perp() << endl;
     cout << "all hits    : " 
@@ -2434,7 +2594,7 @@ void StMiniMcMaker::checkSplit(StMcTrack* mcTrack, StTrack* glTrack,
 
 
 //______________________________________________________________________________
-void StMiniMcMaker::checkContam(StMcTrack* mcTrack, StGlobalTrack* glTrack,
+void StMiniMcMaker::checkContam(const StMcTrack* mcTrack, const StGlobalTrack* glTrack,
 			   Int_t commonHits)
 {
   
@@ -2444,7 +2604,7 @@ void StMiniMcMaker::checkContam(StMcTrack* mcTrack, StGlobalTrack* glTrack,
   if(mcTrack->startVertex() == mMcEvent->primaryVertex()){
     cout << "\tERROR mc track is a primary!\n" << endl;
   }
-  StPrimaryTrack* prTrack=isPrimaryTrack(glTrack);
+  const StPrimaryTrack* prTrack=isPrimaryTrack(glTrack);
   cout << "common hits : " << commonHits << endl 
        << "rc key : " << prTrack->key() << endl 
        << "mc key : " << mcTrack->key() << endl
@@ -2463,7 +2623,7 @@ void StMiniMcMaker::checkContam(StMcTrack* mcTrack, StGlobalTrack* glTrack,
   
   for( ; rcMapIter != rcBounds.second; rcMapIter++){
     StTrackPairInfo* assocPair = (*rcMapIter).second; 
-    StMcTrack* mcCandTrack = assocPair->partnerMcTrack();
+    const StMcTrack* mcCandTrack = assocPair->partnerMcTrack();
     
     cout << "common hits=" << assocPair->commonTpcHits() 
 	 << ", is mc primary=" << (isPrimaryTrack(mcTrack)?"yes":"no") 
@@ -2477,7 +2637,7 @@ void StMiniMcMaker::checkContam(StMcTrack* mcTrack, StGlobalTrack* glTrack,
   
   for(unsigned int i=0; i<testPair.size(); i++){
     cout << "i: " << i << endl;
-    StGlobalTrack* testGlTrack = testPair[i]->partnerTrack();
+    const StGlobalTrack* testGlTrack = testPair[i]->partnerTrack();
     
     cout << "common hits=" << testPair[i]->commonTpcHits()
 	 << ", rc key=" << testGlTrack->key() << endl;
@@ -2511,14 +2671,14 @@ void StMiniMcMaker::AppendMCDaughterTrack()
     if (Debug())
         cout << "##StMiniMcMaker::AppendMCDaughterTrack()"<< endl;
 
-//  vector<int> enteredGlobalTracks;
+//  std::vector<int> enteredGlobalTracks;
     const StPtrVecMcTrack& allmcTracks = mMcEvent->tracks();
     cout << "size of mcEvent->tracks() : "<< allmcTracks.size() << endl;
 
     Int_t nAppendMC(0);
     StMcTrackConstIterator allMcTrkIter = allmcTracks.begin();
     for (; allMcTrkIter != allmcTracks.end(); ++allMcTrkIter) {
-        StMcTrack* mcGlobTrack = *allMcTrkIter;
+        const StMcTrack* mcGlobTrack = *allMcTrkIter;
         if (isPrimaryTrack(mcGlobTrack)) continue;
         if (!acceptRaw(mcGlobTrack)) continue; // loose eta cut (4 units, so should include ftpc).
 //      if (accept(mcGlobTrack) || mcGlobTrack->ftpcHits().size()>=5) { // 10 tpc hits or 5 ftpc hits
@@ -2537,8 +2697,70 @@ void StMiniMcMaker::AppendMCDaughterTrack()
     cout << "\tappended mc tracks: "<< nAppendMC << endl;
 }
 
+//______________________________________________________________________________
+void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,int& dominatrackHits,float& avgQuality) {
+    // initialize return values.
+    // dominatrack key initialized to nonsense, quality initialized to 0.
+    // Note, I'm using shorts, which should be ok up to 32768, but if we
+    // ever have track keys above this in an event, there will be trouble. 
+
+  int DetectorList[kMaxDetectorId]={0};
+  typedef std::map< int,float>  myMap_t;
+  typedef std::pair<int,float>  myPair_t;
+  typedef myMap_t::const_iterator myIter_t;
+  myMap_t  idTruths;
+    
+    const StPtrVecHit &recHits = recTrack->detectorInfo()->hits();	
+// 		Loop to store all the mc track keys and quality of every reco hit on the track.
+    int nHits = recHits.size();
+    int tkBest=0; float qaBest=0,qaSum=0;
+    for (int hi=0;hi<nHits; hi++) {
+	const StHit* rHit = recHits[hi]; 
+        int id = rHit->idTruth(); if (!id) continue;
+	int qa = rHit->qaTruth(); if (!qa) qa = 1;
+        float *pqa = &idTruths[id]; *pqa+=qa;
+        qaSum +=qa;
+        if(*pqa <qaBest) continue;
+        tkBest=id; qaBest =*pqa;
+    }
+    dominatrackKey = tkBest; avgQuality = 100*qaBest/(qaSum+1e-10);
+    for (int hi=0;hi<nHits; hi++) {
+	const StHit* rHit = recHits[hi]; 
+        if (rHit->idTruth()!=tkBest) continue;
+	DetectorList[rHit->detector()]++;
+    }
+    if (DetectorList[kTpcId] > 99) DetectorList[kTpcId] = 99;
+    if (DetectorList[kSvtId] >  9) DetectorList[kSvtId] =  9;
+    if (DetectorList[kSsdId] >  9) DetectorList[kSsdId] =  9;
+    dominatrackHits = DetectorList[kTpcId] + 100*(DetectorList[kSvtId] + 10*DetectorList[kSsdId]);
+    return;
+}
+
+//______________________________________________________________________________
+//
+// $Id: StMiniMcMaker.cxx,v 1.37 2011/04/01 20:02:56 perev Exp $
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.37  2011/04/01 20:02:56  perev
+// IdTruth part rewritten
+//
+// Revision 1.3  2007/02/23 17:07:41  fisyak
+// Resolve bug #682
+//
+// Revision 1.2  2005/07/19 22:05:19  perev
+// MultiVertex
+//
+// Revision 1.1  2004/03/31 23:44:36  calderon
+// Function to find the dominatrack, the number of hits belonging to the
+// dominatrack and the average hit quality of those hits (based on idTruth and
+// quality of StHit).
+//
+//
+//
+// $Log: StMiniMcMaker.cxx,v $
+// Revision 1.37  2011/04/01 20:02:56  perev
+// IdTruth part rewritten
+//
 // Revision 1.36  2011/03/22 00:32:23  perev
 // Added impact,phi impact & trigger time
 //
@@ -2565,7 +2787,7 @@ void StMiniMcMaker::AppendMCDaughterTrack()
 // Set common Hit as no.Tpc + 100*no.Svt + 1000*no.Ssd hits, add protection against empty emcCollection
 //
 // Revision 1.28  2008/07/17 22:50:52  calderon
-// Remove a cut in acceptRaw(StMcTrack*) that checked on the pseudorapidity.
+// Remove a cut in acceptRaw(const StMcTrack*) that checked on the pseudorapidity.
 // This cut was affecting heavy particles thrown flat in rapidity for embedding.
 //
 // Revision 1.27  2007/12/22 20:31:20  calderon
