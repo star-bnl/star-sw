@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.28 2011/01/26 19:46:24 perev Exp $
+ * $Id: StMcEvent.hh,v 2.29 2011/04/01 19:56:32 perev Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.29  2011/04/01 19:56:32  perev
+ * Redundant Browse removed
+ *
  * Revision 2.28  2011/01/26 19:46:24  perev
  * FPD ==> STAR Soft
  *
@@ -284,7 +287,7 @@ class StMcEvent : public TDataSet {
   void setIstHitCollection(StMcIstHitCollection*); 
   void setFgtHitCollection(StMcFgtHitCollection*);       
   virtual void Print(Option_t *option="") const; // *MENU* 
-  virtual void Browse(TBrowser *b) {TDataSet::Browse(b); Print("");}
+//vp  virtual void Browse(TBrowser *b) {TDataSet::Browse(b); Print("");}
  protected:
   char mBeg[1];				//!
   unsigned long                  mEventGeneratorEventLabel;
