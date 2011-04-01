@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.45 2011/02/01 19:47:36 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.46 2011/04/01 19:43:19 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.46  2011/04/01 19:43:19  perev
+ * Allow zero pointer for TBrowser. debug
+ *
  * Revision 2.45  2011/02/01 19:47:36  ullrich
  * Added HLT branch and hooks.
  *
@@ -159,6 +162,7 @@
 #include "TClass.h"
 #include "TDataSetIter.h"
 #include "TObjectSet.h"
+#include "TBrowser.h"
 #include "StCalibrationVertex.h"
 #include "StDetectorState.h"
 #include "StEvent.h"
@@ -197,8 +201,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.45 2011/02/01 19:47:36 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.45 2011/02/01 19:47:36 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.46 2011/04/01 19:43:19 perev Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.46 2011/04/01 19:43:19 perev Exp $";
 
 ClassImp(StEvent)
 
@@ -1197,6 +1201,7 @@ void StEvent::removePsd(StPsd* p)
 
 void StEvent::Browse(TBrowser* b)
 {
+    if (!b) b = new TBrowser("StEvent",(TObject*)0);
     StAutoBrowse::Browse(this,b);
     TDataSet::Browse(b);
 }
