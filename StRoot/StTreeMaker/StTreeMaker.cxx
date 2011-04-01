@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StTreeMaker class for Makers                                      //
+// StTreeMaker class, Star IO                                      	//
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include <Stiostream.h>
@@ -74,15 +74,12 @@ Int_t StTreeMaker::Open(const char*)
 
       
       fTree = StTree::GetTree(tf,GetTreeName()); assert(fTree);
+      fTree->SetIOMode("0");
       if (GetDebug()) 
 	printf("<%s(%s)::Init> FOUND Tree %s in file %s\n",
 	ClassName(),GetName(),
 	fTree->GetName(),fFile.Data());
 
-      AddData(fTree);
-//		Register for outer world
-      SetOutput(fTree);
-//      fTree->SetFile(fFile,"r");
 //	1st branch must be mentioned in fFile
       TString firstBr(fFile);
       i = firstBr.Last('.'); assert(i>0);
@@ -95,6 +92,7 @@ Int_t StTreeMaker::Open(const char*)
         firstBr+="Branch";
         fst = fTree->Find(firstBr);}
       if (fst) {
+        ((StBranch*)fst)->SetIOMode("r");
         fst->Shunt(0); fTree->AddFirst(fst);
         printf("<%s(%s)::Init> Branch %s is MAIN in tree\n",ClassName(),GetName(),fst->GetName());
       }
@@ -110,6 +108,10 @@ Int_t StTreeMaker::Open(const char*)
     UpdateTree(0);
     fTree->SetFile(fFile,"r");
     fTree->SetUKey(0);
+      AddData(fTree);
+//		Register for outer world
+      SetOutput(fTree);
+//      fTree->SetFile(fFile,"r");
     
   } else            { //Write mode  
 
@@ -310,7 +312,6 @@ void StTreeMaker::UpdateTree(Int_t flag)
   updList= Find(".branches");
   if (!updList) return;
   St_DataSetIter updNext(updList);
-  
   while ((upd=updNext())) {//loop updates
     updTitl = upd->GetTitle();
     updName = upd->GetName();
@@ -334,19 +335,11 @@ void StTreeMaker::UpdateTree(Int_t flag)
         continue;}
         
     br = (StBranch*)fTree->Find(updName);
-    if (!br && fIOMode!="r" && fIOMode!="0") {
-      br = new StBranch(updName,fTree); br->SetIOMode("w");}
-      
-    if (!br) 				continue;
+    if (!br) {br = new StBranch(updName,fTree);br->SetIOMode(fIOMode);}
     if (!updMode.IsNull() || !updFile.IsNull()) br->SetFile(updFile,updMode);  
     if (!updOpt.IsNull()) br->SetOption((const char*)updOpt);  
     
     if (flag==0) 		continue;    
-    if (*br->GetIOMode()=='0')	continue;
-
-//    isHist = (updName=="hist") || (updName=="histBranch"); 
-//    if ( (flag==1) != (!isHist)) 	continue;
-    if (flag!=1)		continue;
 
     logs = (const char*)updTitl;nlog=0;
     while(1999) //loop over log names
@@ -368,8 +361,6 @@ void StTreeMaker::UpdateTree(Int_t flag)
   }//end of updates
 
 }
-
-
 //_____________________________________________________________________________
 Int_t StTreeMaker::Finish()
 { 
