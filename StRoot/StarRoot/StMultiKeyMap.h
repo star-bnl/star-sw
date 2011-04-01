@@ -54,6 +54,7 @@ virtual       int    ls(const char *file="") const;
         int    Size() const    { return mNumb[0]+mNumb[1]+1;}
         void  *GetObj () const { return (void*)mObj ;}
 void Clear();
+static int GetNInst();
 //	Non user functions
 protected:
 StMultiKeyNode *LLink() const {return mLink[0];}
