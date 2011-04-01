@@ -38,11 +38,11 @@ void TpcRS(Int_t First, Int_t Last, const Char_t *Run = "y2009,TpcRS",
   TString RunOpt(Run);
   RunOpt.ToLower();
   //  ChainOpt = "MakeEvent,ITTF,ForceGeometry,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
-  ChainOpt = "MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,";
+  ChainOpt = "MakeEvent,ITTF,NoSsdIt,NoSvtIt,Idst,VFMinuit,analysis,dEdxY2,NoHistos,NoRunco,";
   ChainOpt += "Corr4,OSpaceZ2,OGridLeak3D,"; // check that StTpcRSMaker::kDistortion bit is set
   //  ChainOpt += "EvOut,MuDST,MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
-  //  ChainOpt += "MiniMcMk,McTpcAna,IdTruth,useInTracker,-hitfilt,";
-  ChainOpt += "MiniMcMk,IdTruth,useInTracker,-hitfilt,CMuDst,Tree,tags,evout,";
+  ChainOpt += "CMuDst,MiniMcMk,McTpcAna,IdTruth,useInTracker,";
+  // ChainOpt += "MiniMcMk,IdTruth,useInTracker,-hitfilt,CMuDst,Tree,tags,evout,";
   if (RunOpt.Contains("fcf",TString::kIgnoreCase)) {
     ChainOpt += "tpl,tpcI,";
     RunOpt.ReplaceAll("TpcRS,","");
