@@ -1,4 +1,4 @@
-// $Id: StTriggerSimuResult.cxx,v 1.7 2010/08/13 00:20:20 rfatemi Exp $
+// $Id: StTriggerSimuResult.cxx,v 1.8 2011/04/01 03:56:41 pibero Exp $
 
 #include <utility>
 using std::make_pair;
@@ -7,6 +7,11 @@ using std::make_pair;
 #include "StTriggerSimuResult.h"
 
 #include "StDaqLib/TRG/trgStructures2005.h"
+#include "StDaqLib/TRG/trgStructures2009.h"
+
+#ifndef L2RESULTS_2009_OFFSET_DIJET_HIGH
+#define L2RESULTS_2009_OFFSET_DIJET_HIGH 25
+#endif	// L2RESULTS_2009_OFFSET_DIJET_HIGH
 
 #include "L2Emulator/L2pedAlgo/L2pedResults2006.h"
 #include "L2Emulator/L2jetAlgo/L2jetResults2006.h"
@@ -67,19 +72,24 @@ HttpResult StTriggerSimuResult::httpPair(short towerId) const {
 const unsigned int* StTriggerSimuResult::l2Result(L2ResultType algo, int year) const {
     switch(algo) {
         case kPed:
-            if(year==2006) return  mL2Result + L2RESULTS_OFFSET_EMC_PED;
+            if(year==2006) return mL2Result + L2RESULTS_OFFSET_EMC_PED;
+	    if(year==2009) return mL2Result + L2RESULTS_2009_OFFSET_EMC_PED;
             break;
         case kJet:
             if(year==2006) return mL2Result + L2RESULTS_OFFSET_DIJET;
+	    if(year==2009) return mL2Result + L2RESULTS_2009_OFFSET_DIJET_HIGH;
             break;
         case kGammaBemc:
             if(year==2006) return mL2Result + L2RESULTS_OFFSET_PIG;
+	    if(year==2009) return mL2Result + L2RESULTS_2009_OFFSET_BGAMMA;
             break;
         case kGammaEemc:
             if(year==2006) return mL2Result + L2RESULTS_OFFSET_PIG + 2;
+	    if(year==2009) return mL2Result + L2RESULTS_2009_OFFSET_EGAMMA;
             break;
         case kUpsilon:
             if(year==2006) return mL2Result + L2RESULTS_OFFSET_UPS;
+	    if(year==2009) return mL2Result + L2RESULTS_2009_OFFSET_UPSILON;
             break;
     }
     return 0;
@@ -111,6 +121,9 @@ void StTriggerSimuResult::setL2Result(const unsigned int* result) {
 
 /*****************************************************************************
  * $Log: StTriggerSimuResult.cxx,v $
+ * Revision 1.8  2011/04/01 03:56:41  pibero
+ * Fix L2
+ *
  * Revision 1.7  2010/08/13 00:20:20  rfatemi
  * Changed the PIG+2 address from BEMC to EEMC based on structure in StTriggerData2005::isL2Trigger()
  *

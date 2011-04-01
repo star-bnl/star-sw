@@ -41,9 +41,6 @@
 #include "StMuDSTMaker/COMMON/StMuTriggerIdCollection.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 
-//trg stuff
-#include "StDaqLib/TRG/trgStructures.h"
-
 //L2 stuff
 #include "L2algoUtil/L2EmcDb.h"
 #include "L2algoUtil/L2EmcGeom.h"
@@ -73,7 +70,6 @@ ClassImp(StGenericL2Emulator2009)
 StGenericL2Emulator2009::StGenericL2Emulator2009(){
   mBTOW_BANK =new  unsigned short [MaxBtowRdo];
   mETOW_BANK =new  unsigned short [MaxEtowRdo];
-  mTrigData = new  TrgDataType; //note it is _local_ container to store L2Results - it has nothing in common with the same type container filled during data taking - do not mix them up -JB
   mUseMuDst=true;
   setMC(false);
 
@@ -142,8 +138,6 @@ StGenericL2Emulator2009::make(){
     doBanksFromStRawData(); 
   }
 
-  int L2Result[128]; //first 64 are L2Result, second 64 are C2Result
-  memset(L2Result,0,sizeof(L2Result));
   const int fakeToken1 = 1;
   const int fakeToken2 = 2;
   L2btowCalAlgo09* l2btowCal09 = dynamic_cast<L2btowCalAlgo09*>(mL2algo[0]);
@@ -152,20 +146,17 @@ StGenericL2Emulator2009::make(){
   l2btowCal09->calibrateBtow(fakeToken2,mBTOW_in,mBTOW_BANK);
   l2etowCal09->calibrateEtow(fakeToken2,mETOW_in,mETOW_BANK);
   int nInpTrg = StMaker::GetChain()->GetIventNumber();
-  l2ped->doPedestals(nInpTrg,L2Result,mBTOW_in,mBTOW_BANK,mETOW_in,mETOW_BANK);
+  l2ped->doPedestals(nInpTrg,(int*)mL2Result,mBTOW_in,mBTOW_BANK,mETOW_in,mETOW_BANK);
   for(size_t ia=3;ia<mL2algo.size();ia++) {//execute all instantiated L2algos 
     if(mL2algo[ia]==0) continue;
-    //mL2algo[ia]-> doEvent(L0trgSwitch, mTotInpEve, (TrgDataType*)mTrigData,mBTOW_in, mBTOW_BANK, mETOW_in, mETOW_BANK);
     mL2algo[ia]->compute(fakeToken2);
-    mL2algo[ia]->decision(fakeToken2,mBTOW_in,mETOW_in,L2Result);
+    mL2algo[ia]->decision(fakeToken2,mBTOW_in,mETOW_in,(int*)mL2Result);
   } // tmp, accept should be filled in internaly, in next iteration, Jan
   l2btowCal09->clear(fakeToken1);
   l2etowCal09->clear(fakeToken1);
   //  printf("L2Generic::make   BB=%d EE=%d \n",mBTOW_in,mETOW_in);
 
-  addTriggerList(); 
-
- return;
+  addTriggerList();
 }
 
 
@@ -254,13 +245,8 @@ StGenericL2Emulator2009::initRun2(int runNo){
 
 StTriggerSimuDecision
 StGenericL2Emulator2009::isTrigger(int trigId) {
-  uint j;
-  for(j=0; j<mAcceptTriggerList.size();j++) {
-    if(trigId==mAcceptTriggerList[j]) return kYes; 
-  }
-  for(j=0; j<mVetoTriggerList.size();j++) {
-    if(trigId==mVetoTriggerList[j]) return kNo; 
-  }
+  if (find(mAcceptTriggerList.begin(),mAcceptTriggerList.end(),trigId) != mAcceptTriggerList.end()) return kYes;
+  if (find(mVetoTriggerList.begin(),mVetoTriggerList.end(),trigId) != mVetoTriggerList.end()) return kNo;
   return kDoNotCare;
 }
 
@@ -283,7 +269,7 @@ StGenericL2Emulator2009::clear( ){
   mBTOW_in=mETOW_in=0;
   memset(mBTOW_BANK,0,MaxBtowRdo*sizeof(unsigned short));
   memset(mETOW_BANK,0,MaxEtowRdo*sizeof(unsigned short));
-  memset(mTrigData,0,sizeof(TrgDataType));
+  memset(mL2Result,0,sizeof(mL2Result));
   mAcceptTriggerList.clear();
   mVetoTriggerList.clear();
 }
@@ -537,15 +523,13 @@ StGenericL2Emulator2009::addTriggerList() {
   for(size_t ia=0;ia<mL2algo.size();ia++) {
     if (mL2algo[ia]==0) continue;
     if (mL2algo[ia]->getOflTrigID()==0) continue; // undefined triggerID
-    if (mL2algo[ia]->isAccepted()) 
+    if (mL2algo[ia]->isAccepted()) {
       mAcceptTriggerList.push_back(mL2algo[ia]->getOflTrigID());
-    else
+    }
+    else {
       mVetoTriggerList.push_back(mL2algo[ia]->getOflTrigID());
+    }
   }
 
   LOG_DEBUG  << Form("addTriggerList() yesSize=%d vetoSize=%d",mAcceptTriggerList.size(),mVetoTriggerList.size())<<endm;
-}
-
-const unsigned int * StGenericL2Emulator2009::result() const {
-    return ( (TrgDataType*)mTrigData)->TrgSum.L2Result;
 }

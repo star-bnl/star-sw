@@ -54,7 +54,7 @@ class StGenericL2Emulator2009  {
   unsigned short *mBTOW_BANK;
   unsigned short *mETOW_BANK;
   int  mBTOW_in, mETOW_in;
-  void *mTrigData; // I do not want to deal with this content here
+  unsigned int mL2Result[128];
 
   void  init();
   void  make();
@@ -85,7 +85,7 @@ class StGenericL2Emulator2009  {
   StTriggerSimuDecision  isTrigger(int trigId);
   
   /// bag of 64 bytes whose interpretation changes year-by-year
-  const unsigned int* result() const;
+  const unsigned int* result() const { return mL2Result; }
   
   ClassDef(StGenericL2Emulator2009,0) 
 };
