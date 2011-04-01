@@ -209,11 +209,13 @@ fDraw->UpdateModified();StvDraw::Wait();
 	if (ans<0) fMultiIter->Update(mSel.mLim[0],mSel.mLim[1]);
 	if (minLen>mSel.mHitLen) { //Selecting the best
           delete selObj; minLen=mSel.mHitLen; selHit=nexHit;
+
 if(myDeb>0) {
 const float *p=nexHit->x();
 selObj = fDraw->Point(p[0],p[1],p[2],kUsedHit);
 fDraw->UpdateModified();fDraw->Wait();
 } 
+
         } //endSelecting the best
       } //endMultiIter loop
 
@@ -224,11 +226,13 @@ if (myDeb>0) { mySeedObjs.push_back(selObj);}
       if (fSeedHits.size()>=kMaxHits) break;
     }// endNext hit loop
 
+//		Mark hits as unused when seed is created. Only tracker
+//		has right to deside to use or not to use
+    fSeedHits.unused();
     const THelixTrack *hel = 0;
     if (fSeedHits.size() >= kMinHits) hel = Approx();
     if (hel) { fNSeeds[0]++; ++(*f1stHitMapIter); return hel;}		//Good boy
  //		Bad seed
-    fSeedHits.unused();
     fNUsed[0] -= fSeedHits.size();
 
 if (myDeb>0){for (int i=0;i<(int)mySeedObjs.size();i++) {delete mySeedObjs[i];}}
