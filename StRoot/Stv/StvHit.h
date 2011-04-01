@@ -86,9 +86,8 @@ public:
     ///Set the number of times used
     ///Return the number of times this hit was assigned to a track
     int timesUsed() const 	{ return (int)mTimesUsed;}
-    void addTimesUsed()	  	{ mTimesUsed++ ;}
-    void setTimesUsed(int ijk)	{ mTimesUsed=(unsigned char)ijk; }
-    void release()		{ mTimesUsed=0; }
+    virtual void addTimesUsed(int add=1){ mTimesUsed+=add ;}
+    virtual void setTimesUsed(int ijk)	{ mTimesUsed=(unsigned char)ijk; }
     virtual void reset();
     void unset(){;}
 protected:
@@ -118,6 +117,8 @@ public:
     void set(const StHitPlane* detector
                   ,const void *stHit
 		  ,const float *x){assert(0);}
+    virtual void addTimesUsed(int){;}
+    virtual void setTimesUsed(int){;}
 
     const float *errMtx() const   {return mErr;}
           float *errMtx()         {return mErr;}
