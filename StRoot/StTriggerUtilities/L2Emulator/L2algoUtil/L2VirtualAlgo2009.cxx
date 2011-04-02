@@ -22,6 +22,7 @@ L2VirtualAlgo2009::L2VirtualAlgo2009(const char* name, L2EmcDb* db, char* outDir
   mOutDir1=outDir;
   mNeeds_barrel=needbarrel;
   mNeeds_endcap=needendcap;
+  mRunNumber=-1;
   mResultOffset=resOff;
 
   // map L2event variables for _read_
@@ -522,6 +523,9 @@ unsigned short L2VirtualAlgo2009::swap_bytes(unsigned short in)
 
 /******************************************************
   $Log: L2VirtualAlgo2009.cxx,v $
+  Revision 1.6  2011/04/02 20:35:51  pibero
+  Initialize mRunNumber to -1
+
   Revision 1.5  2010/04/18 06:05:32  pibero
   Address compiler warnings.
 
