@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StvPullEvent.h,v 1.1 2010/09/25 17:52:07 perev Exp $
+ * $Id: StvPullEvent.h,v 1.2 2011/04/03 20:53:54 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StvPullEvent.h,v $
+ * Revision 1.2  2011/04/03 20:53:54  perev
+ * Type of end tracking added
+ *
  * Revision 1.1  2010/09/25 17:52:07  perev
  * NewDir
  *
@@ -77,6 +80,7 @@ unsigned char nFtpcHits; 	//number of tpc hits in track
 unsigned char nSsdHits; 	//number of ssd hits in track
 unsigned char nRndHits; 	//number of RND hits in track
 unsigned char mL; 		//Length of track
+unsigned char mTypeEnd; 	//Type of end tracking
 
 float mChi2;
 float mCurv;        		//curvature
@@ -87,7 +91,7 @@ float mRxy;			//Rxy of track begining
 float mPhi;			//Phi angle of track begining
 float mZ;
 char mEnd[1];
-  ClassDef(StvPullTrk,2);
+  ClassDef(StvPullTrk,3);
 };
 
 class StvPullHit : public TObject {
