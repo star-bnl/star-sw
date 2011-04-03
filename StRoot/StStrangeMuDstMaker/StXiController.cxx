@@ -1,5 +1,8 @@
-// $Id: StXiController.cxx,v 3.6 2002/06/13 16:06:01 genevb Exp $
+// $Id: StXiController.cxx,v 3.7 2011/04/03 15:51:58 fisyak Exp $
 // $Log: StXiController.cxx,v $
+// Revision 3.7  2011/04/03 15:51:58  fisyak
+// Fix effect of constness in StAssociationMaker
+//
 // Revision 3.6  2002/06/13 16:06:01  genevb
 // Additional security against zombies in StEvent vectors
 //
@@ -120,7 +123,7 @@ Int_t StXiController::MakeCreateMcDst(StMcVertex* mcVert) {
   }
   if (!((assocMaker)&&(theMcXiMap)&&(theMcTrackMap))) return kStOk;
   StStrangeEvMuDst* ev = masterMaker->GetMcEvent();
-  StXiVertex* rcXiPartner = 0;
+  const StXiVertex* rcXiPartner = 0;
   StMcTrack* Bach = 0;
   StMcTrack* V0daughter = 0;
   Int_t indexRecoArray = -1;
@@ -168,7 +171,7 @@ Int_t StXiController::MakeCreateMcDst(StMcVertex* mcVert) {
         //Now loop over the bounds
         for(mcXiMapIter mcXiMapIt = mcXiBounds.first;
                         mcXiMapIt != mcXiBounds.second; ++mcXiMapIt) {
-          StXiVertex *temp = (*mcXiMapIt).second;
+          const StXiVertex *temp = (*mcXiMapIt).second;
           if (temp != rcXiPartner) {
             xd = x - temp->position().x();
             yd = y - temp->position().y();

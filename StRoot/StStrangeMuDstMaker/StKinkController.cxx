@@ -1,5 +1,8 @@
-// $Id: StKinkController.cxx,v 3.6 2002/06/13 16:06:01 genevb Exp $
+// $Id: StKinkController.cxx,v 3.7 2011/04/03 15:51:58 fisyak Exp $
 // $Log: StKinkController.cxx,v $
+// Revision 3.7  2011/04/03 15:51:58  fisyak
+// Fix effect of constness in StAssociationMaker
+//
 // Revision 3.6  2002/06/13 16:06:01  genevb
 // Additional security against zombies in StEvent vectors
 //
@@ -97,7 +100,7 @@ Int_t StKinkController::MakeCreateMcDst(StMcVertex* mcVert) {
     theMcTrackMap = assocMaker->mcTrackMap();
   }
   if (!((assocMaker)&&(theMcKinkMap)&&(theMcTrackMap))) return kStOk;
-  StKinkVertex* rcKinkPartner = 0;
+  const StKinkVertex* rcKinkPartner = 0;
   StMcTrack* Daughter = 0;
   Int_t indexRecoArray = -1;
   Int_t count = theMcKinkMap->count(mcVert);
@@ -131,7 +134,7 @@ Int_t StKinkController::MakeCreateMcDst(StMcVertex* mcVert) {
       //Now loop over the bounds      
       for(mcKinkMapIter mcKinkMapIt = mcKinkBounds.first;
                       mcKinkMapIt != mcKinkBounds.second; ++mcKinkMapIt) {
-        StKinkVertex *temp = (*mcKinkMapIt).second;
+        const StKinkVertex *temp = (*mcKinkMapIt).second;
         if (temp != rcKinkPartner) {
           xd = x - temp->position().x();
           yd = y - temp->position().y();

@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StTofpMcAnalysisMaker.h,v 1.1 2004/03/16 04:58:54 geurts Exp $
+ * $Id: StTofpMcAnalysisMaker.h,v 1.2 2011/04/03 15:52:57 fisyak Exp $
  * $Log: StTofpMcAnalysisMaker.h,v $
+ * Revision 1.2  2011/04/03 15:52:57  fisyak
+ * Fix effect of constness in StAssociationMaker
+ *
  * Revision 1.1  2004/03/16 04:58:54  geurts
  * *** empty log message ***
  *
@@ -93,7 +96,7 @@ class StTofpMcAnalysisMaker : public StMaker {
 
 private:
   bool             mOuterTrackGeometry; //!
-  StTrackGeometry* trackGeometry(StTrack*);//!
+  const StTrackGeometry* trackGeometry(const StTrack*);//!
   unsigned int     mMinHitsPerTrack;
   bool             validTrack(StTrack*);
   bool             validTofTrack(StTrack*);
@@ -108,7 +111,7 @@ private:
 
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMcAnalysisMaker.h,v 1.1 2004/03/16 04:58:54 geurts Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMcAnalysisMaker.h,v 1.2 2011/04/03 15:52:57 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
   ClassDef(StTofpMcAnalysisMaker,0)
 };

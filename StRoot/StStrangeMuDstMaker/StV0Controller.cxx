@@ -1,5 +1,8 @@
-// $Id: StV0Controller.cxx,v 3.10 2002/08/20 12:45:35 jones Exp $
+// $Id: StV0Controller.cxx,v 3.11 2011/04/03 15:51:58 fisyak Exp $
 // $Log: StV0Controller.cxx,v $
+// Revision 3.11  2011/04/03 15:51:58  fisyak
+// Fix effect of constness in StAssociationMaker
+//
 // Revision 3.10  2002/08/20 12:45:35  jones
 // Fix to MakeCreateMcDst in StV0Controller; better file handling in StStrangeMuDstPlayer
 //
@@ -127,7 +130,7 @@ Int_t StV0Controller::MakeCreateMcDst(StMcVertex* mcVert) {
   StStrangeEvMuDst* ev = masterMaker->GetMcEvent();
   StMcTrack *Pos = 0; 
   StMcTrack *Neg = 0;
-  StV0Vertex* rcV0Partner = 0;
+  const StV0Vertex* rcV0Partner = 0;
   Int_t indexRecoArray = -1;
   Int_t count = theMcV0Map->count(mcVert);
   
@@ -146,7 +149,7 @@ Int_t StV0Controller::MakeCreateMcDst(StMcVertex* mcVert) {
     //Now loop over the bounds      
     for(mcV0MapIter mcV0MapIt = mcV0Bounds.first;
                     mcV0MapIt != mcV0Bounds.second; ++mcV0MapIt) {
-      StV0Vertex *temp = (*mcV0MapIt).second;
+      const StV0Vertex *temp = (*mcV0MapIt).second;
       if (temp != rcV0Partner) {
         xd = x - temp->position().x();
         yd = y - temp->position().y();
