@@ -248,7 +248,7 @@ void StvNodePars::operator+=(const StvFitPars &fp)
   if (_tanl >  MAXTAN) _tanl =  MAXTAN;
   _curv   = _hz *_ptin;
   if (fabs( _cosCA)>1 || fabs( _sinCA)>1) ready();
-  assert(!check());
+  assert(!check("StvNodePars::operator+=") || 1);
 }
 //______________________________________________________________________________
 void StvNodePars::print() const
@@ -310,7 +310,7 @@ const StvFitErrs &StvFitErrs::operator*(const Mtx55D_t &how) const
 {
 static StvFitErrs myFitErrs;
   TCL::trasat(how[0],Arr(),myFitErrs.Arr(),5,5);
-  assert(!myFitErrs.Check());
+  assert(!myFitErrs.Check("StvFitErrs::operator*") || 1);
   return myFitErrs;
 }  
 //______________________________________________________________________________
@@ -550,14 +550,14 @@ void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
   imp->mCurv= _curv;
   if (!fe) return;
 
-  float cos2L = 1./(1+_tanl*_tanl);
-  float cosL  =sqrt(cos2L);
-  float Rxy   = fabs(imp->mImp);
+  double cos2L = 1./(1+_tanl*_tanl);
+  double cosL  =sqrt(cos2L);
+  double Rxy   = fabs(imp->mImp);
   double T[5][5] = {
   {1,    0,         0, 0,          0},
   {0, cosL, _tanl*Rxy, 0,          0},
   {0,    0,         1, 0,          0},
-  {0,    0,         0, 0,     1./_hz},
+  {0,    0,         0, 0,          1},
   {0,    0,         0, 1/cos2L,    0}};
   double qwe[15];
   TCL::trasat(T[0],fe->Arr(),qwe,5,5); 
@@ -568,7 +568,7 @@ const StvFitPars &StvFitPars::operator*(Mtx55D_t &t) const
 {
 static StvFitPars myPars;
   TCL::vmatl(t[0],Arr(),myPars.Arr(),5,5);
-  assert(!myPars.Check());
+  assert(!myPars.Check("StvFitPars::operator*") || 1);
   return myPars;
 }
 //_____________________________________________________________________________
@@ -878,7 +878,7 @@ double EmxSign(int n,const double *e)
   TVectorD coe(n);
   for (int i=0,li=0;i< n;li+=++i) {
     double qwe = e[li+i];
-    if(qwe<0) return qwe;
+    if(qwe<=0) return qwe;
     qwe = pow(2.,-int(log(qwe)/(2*log(2))));
     coe[i]=qwe;
     for (int j=0;j<=i;j++    ) {

@@ -99,15 +99,18 @@ void StvHitErrCalculator::CalcDcaErrs(const float hiPos[3],const float hiDir[3][
 ////  g[0] = mPar[kThkDet]*mSp*mSp 	   + mPar[kWidTrk] + mPar[kYErr]*mCp*mCp;
 ////  g[2] = mPar[kThkDet]*mCp*mCp*mSl*mSl + mPar[kWidTrk] + mPar[kYErr]*(mSl*mSp)*(mSl*mSp)+ mPar[kZErr]*mCl*mCl;
 ////  g[1] = mPar[kThkDet]*mCp*mSp*mSl;
-  mDD[kThkDet][0] = mSp*mSp;	      
-  mDD[kWidTrk][0] = 1;
-  mDD[kYErr  ][0] = mCp*mCp;
+  double amp = fabs(mCp*mCl);
+  amp = 1; //??????????????????????????????????????????????????????
+  mDD[kThkDet][0] = mSp*mSp		*amp;	      
+  mDD[kWidTrk][0] = 1			*amp;
+  mDD[kYErr  ][0] = mCp*mCp		*amp;
 
-  mDD[kThkDet][1] = mCp*mSp*mSl;
-  mDD[kThkDet][2] = mCp*mCp*mSl*mSl;
-  mDD[kWidTrk][2] = 1;
-  mDD[kYErr  ][2] = (mSl*mSp)*(mSl*mSp);
-  mDD[kZErr  ][2] = mCl*mCl;
+  mDD[kThkDet][1] = mCp*mSp*mSl		*amp;
+
+  mDD[kThkDet][2] = mCp*mCp*mSl*mSl	*amp;
+  mDD[kWidTrk][2] = 1			*amp;
+  mDD[kYErr  ][2] = (mSl*mSp)*(mSl*mSp)	    ;
+  mDD[kZErr  ][2] = mCl*mCl		    ;
 
   g[0] = mDD[kThkDet][0]*mPar[kThkDet]+mDD[kWidTrk][0]*mPar[kWidTrk]+mDD[kYErr][0]*mPar[kYErr];
   g[1] = mDD[kThkDet][1]*mPar[kThkDet];
@@ -190,6 +193,18 @@ void StvHitErrCalculator::Test(double phiG,double lamG)
   TVector3 Nt(cL*cP,cL*sP,sL);
   TVector3 Np(-sP, cP, 0);
   TVector3 Nl(-sL*cP,-sL*sP,cL);
+
+  double LamH = Lam + (gRandom->Rndm()-0.5);
+  double PhiH = Phi + (gRandom->Rndm()-0.5);
+  double cLH = cos(LamH);
+  double sLH = sin(LamH);
+  double cPH = cos(PhiH);
+  double sPH = sin(PhiH);
+  TVector3 NtH(cLH*cPH,cLH*sPH,sLH);
+  TVector3 NpH(-sPH, cPH, 0);
+  TVector3 NlH(-sLH*cPH,-sLH*sPH,cLH);
+
+
   TVector3 V;
 //   printf("Nt="); Nt.Print();
 //   printf("Np="); Np.Print();
@@ -197,22 +212,25 @@ void StvHitErrCalculator::Test(double phiG,double lamG)
   double YZ[3]={0},BG[3]={0};
   int nEl=10000,iEl=0;
   while (1) {
-    double alfa = D/Nt[0]*(gRandom->Rndm()-0.5)*1.9;
+    double alfa = D/(Nt*NtH)*(gRandom->Rndm()-0.5)*10;
     double beta = gRandom->Gaus()*W;
     double gama = gRandom->Gaus()*W;
     V = Nt*alfa + Np*beta + Nl*gama;
-    if (fabs(V[0])>0.5*D) continue;
     V[1]+=  gRandom->Gaus()*par[kYErr];
     V[2]+=  gRandom->Gaus()*par[kZErr];
+    if (fabs((V*NtH))>0.5*D) continue;
 
     if(++iEl>=nEl) break;
-    YZ[0] += V[1]*V[1]; YZ[1] += V[1]*V[2];YZ[2] += V[2]*V[2];
 
 //    Project along X to X=0
-    V[0]=0;
+    alfa = (V*NtH); V -= alfa*NtH;
     beta = (Np*V);
     gama = (Nl*V);
     BG[0]+=beta*beta; BG[1]+=beta*gama;BG[2]+=gama*gama;
+
+    beta = (NpH*V);
+    gama = (NlH*V);
+    YZ[0] += beta*beta; YZ[1] += beta*gama;YZ[2] += gama*gama;
   }
   for (int j=0;j<3;j++){YZ[j]/=nEl; BG[j]/=nEl;} 
   
@@ -224,7 +242,9 @@ void StvHitErrCalculator::Test(double phiG,double lamG)
   double np[3]={ cP,  sP, tL};
   double hitErr[3];
   calc.SetTrack(np);
-  float hiDir[3][3]={{1,0,0},{0,1,0},{0,0,1}};
+  float hiDir[3][3]={{NtH[0],NtH[1],NtH[2]}
+                    ,{NpH[0],NpH[1],NpH[2]}
+		    ,{NlH[0],NlH[1],NlH[2]}};
   calc.CalcDetErrs(0,hiDir,hitErr);
   printf("Calculator:  YY=%g YZ=%g ZZ=%g\n"
         ,hitErr[0],hitErr[1],hitErr[2]);
