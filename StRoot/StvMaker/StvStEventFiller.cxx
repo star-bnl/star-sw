@@ -1,12 +1,15 @@
 #if 1
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.5 2011/02/05 21:57:55 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.6 2011/04/03 20:45:11 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.6  2011/04/03 20:45:11  perev
+ * Cleanup
+ *
  * Revision 1.5  2011/02/05 21:57:55  perev
  * Test for +ve error matrix added
  *
@@ -743,6 +746,8 @@ StvStEventFiller::~StvStEventFiller()
 void StvStEventFiller::fillEvent()
 {
   //cout << "StvStEventFiller::fillEvent() -I- Started"<<endl;
+  StEventHelper::Remove(mEvent,"StSPtrVecTrackNode");
+  StEventHelper::Remove(mEvent,"StSPtrVecPrimaryVertex");
   mGloPri=0;
   gTrkNodeMap.clear();  // need to reset for this event
   StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
@@ -1225,6 +1230,7 @@ double StvStEventFiller::impactParameter(StTrack* track, StThreeVectorD &vertex)
 //_____________________________________________________________________________
 void StvStEventFiller::fillDca(StTrack* stTrack, const StvTrack* track)
 {
+static int nCall = 0; nCall++;
   StGlobalTrack *gTrack = dynamic_cast<StGlobalTrack*>(stTrack);
   assert(gTrack);
 
@@ -1233,9 +1239,17 @@ void StvStEventFiller::fillDca(StTrack* stTrack, const StvTrack* track)
   const StvNodePars &pars = tNode->GetFP(); 
   const StvFitErrs  &errs = tNode->GetFE();
   StvImpact myImp;
-  assert(errs.Sign()>0);
+  double signA = errs.Sign();
+  if (signA<=0) {
+    Warning("fillDca","-TIVE input errors %g, SKIPPED",signA);
+    return;
+  }
   pars.GetImpact(&myImp,&errs);
-  assert(EmxSign(5,&myImp.mImpImp)>0);
+  double signB = EmxSign(5,&myImp.mImpImp);
+  if (signB<=0) {
+    Warning("fillDca","-TIVE DCA errors %g %g, SKIPPED",signA,signB);
+    return;
+  }
   StDcaGeometry *dca = new StDcaGeometry;
   gTrack->setDcaGeometry(dca);
   dca->set(&myImp.mImp,&myImp.mImpImp);
@@ -1275,6 +1289,7 @@ void StvStEventFiller::fillPulls(const StvTrack* track, int gloPri)
   aux.nSsdHits = dets[kSsdId][2];
   aux.nFtpcHits = dets[kFtpcEastId][2]+dets[kFtpcWestId][2];
   aux.mL       = (unsigned char)track->GetLength();
+  aux.mTypeEnd = (unsigned char)track->GetTypeEnd();
   aux.mChi2    = track->GetXi2();
   StvTrack::EPointType pty =  ( !gloPri) ? StvTrack::kDcaPoint : StvTrack::kPrimPoint;
   const StvNode *node = track->GetNode(pty);
