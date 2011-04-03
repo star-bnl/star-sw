@@ -32,14 +32,13 @@
 
 
 
-#include "StEventMaker/StEventMaker.h"
 #include "StAssociationMaker/StAssociationMaker.h"
 
 #include "StStrangeMuDstMaker/StStrangeEvMuDst.hh"
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
 
-#include "StMcEvent/StMcEventTypes.hh"
-#include "StMcEventMaker/StMcEventMaker.h"
+#include "StMcEventTypes.hh"
+#include "StMcEvent.hh"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "StThreeVector.hh"
@@ -281,7 +280,7 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
 
   {for (rcTrackMapIter tIter=theTrackMap->begin(); tIter!=theTrackMap->end(); ++tIter){
     //    cout << "Doing track number " << ++icount << endl;
-    StGlobalTrack* rTrack = (*tIter).first;
+    const StGlobalTrack* rTrack = (*tIter).first;
     // do I really got a track
     if (!rTrack) {
       continue;

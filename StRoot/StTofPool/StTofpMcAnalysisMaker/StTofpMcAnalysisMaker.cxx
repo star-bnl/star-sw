@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StTofpMcAnalysisMaker.cxx,v 1.3 2007/04/17 23:11:04 dongx Exp $
+ * $Id: StTofpMcAnalysisMaker.cxx,v 1.4 2011/04/03 15:52:57 fisyak Exp $
  * $Log: StTofpMcAnalysisMaker.cxx,v $
+ * Revision 1.4  2011/04/03 15:52:57  fisyak
+ * Fix effect of constness in StAssociationMaker
+ *
  * Revision 1.3  2007/04/17 23:11:04  dongx
  * replaced with standard STAR Loggers
  *
@@ -42,9 +45,9 @@ const Float_t StTofpMcAnalysisMaker::mYMax  =  0.2;
 
 
 //----------------------------------------------------------------
-StGlobalTrack*  partnerTrack(mcTrackMapType* map, StMcTrack* mT) {
+const StGlobalTrack*  partnerTrack(mcTrackMapType* map, StMcTrack* mT) {
   mcTrackMapIter i = map->find(mT);
-  StGlobalTrack* rT = 0;
+  const StGlobalTrack* rT = 0;
   if (i != map->end()) rT = (*i).second->partnerTrack();
   return rT;
 }
@@ -761,7 +764,7 @@ Int_t StTofpMcAnalysisMaker::Make(){
       //if (mHisto) hTofpNumberOfTrackHits->Fill(nHitsPerTrack);
 	  
       // select the apropriate track geometry
-      StTrackGeometry *theTrackGeometry = trackGeometry(theTrack);
+      const StTrackGeometry *theTrackGeometry = trackGeometry(theTrack);
 
       //--- get momentum from track
       const StThreeVectorF momentum = theTrackGeometry->momentum();
@@ -851,7 +854,7 @@ Int_t StTofpMcAnalysisMaker::Make(){
   const StSPtrVecMcTrack& mcTracks = mEvent->primaryVertex()->daughters();
   if (Debug()) LOG_INFO << "mcTrack Loop: "<< mcTracks.size() << " entries" << endm;
   StMcTrack* mcTrack;
-  StTrack* rcTrack = 0;
+  const StTrack* rcTrack = 0;
 
   int nRecon(0), nMatch(0);
 
@@ -1050,10 +1053,10 @@ bool StTofpMcAnalysisMaker::validTofTrack(StTrack *track){
 }  
 
 
-StTrackGeometry* StTofpMcAnalysisMaker::trackGeometry(StTrack* track){
+const StTrackGeometry* StTofpMcAnalysisMaker::trackGeometry(const StTrack* track){
   // returns apropriate StTrackGeometry (standard or outerGeometry)
   if (!track) return 0;
-  StTrackGeometry *thisTrackGeometry;
+  const StTrackGeometry *thisTrackGeometry;
   if (mOuterTrackGeometry)
     thisTrackGeometry = track->outerGeometry();
   else
