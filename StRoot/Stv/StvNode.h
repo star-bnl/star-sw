@@ -60,7 +60,7 @@ public:
   double GetTime() const;
 
         StvHit *GetHit() const 			{ return mHit;}
-  void  SetHit(StvHit *hit) 			{ mHit=hit   ;}
+  void  SetHit(StvHit *hit); 			
   const StHitPlane *GetHitPlane() const 	{ return mHitPlane  ;}
   void  SetHitPlane(const StHitPlane *hitPlane) { mHitPlane=hitPlane;}
   void  SetELoss(const StvELossData &el,int   ) {mELossData=el;}  
