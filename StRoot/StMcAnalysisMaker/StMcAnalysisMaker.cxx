@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.37 2010/06/22 16:23:25 fine Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.38 2011/04/03 16:02:40 fisyak Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.38  2011/04/03 16:02:40  fisyak
+ * Fix effect of constness in StAssociationMaker
+ *
  * Revision 1.37  2010/06/22 16:23:25  fine
  * introduce the correct const StMcTarck * pointer cast
  *
@@ -730,7 +733,7 @@ Int_t StMcAnalysisMaker::Make()
   
   StSPtrVecTrackNode& rcTrackNodes = rEvent->trackNodes();
   StTrackNode*        firstTrackNode = 0;
-  StGlobalTrack*      firstTrack = 0;
+  const StGlobalTrack*      firstTrack = 0;
   if (! rcTrackNodes.size()) {
     cout << "Track Nodes List is empty!" << endl;
     return kStWarn;
@@ -740,7 +743,7 @@ Int_t StMcAnalysisMaker::Make()
     cout << "No tracks in Track Nodes List!" << endl;
     return kStWarn;
   }
-  firstTrack = dynamic_cast<StGlobalTrack*>(firstTrackNode->track(global));
+  firstTrack = dynamic_cast<const StGlobalTrack*>(firstTrackNode->track(global));
   if (! firstTrack) {
     cout << "GlobalTrack for first Track Nodehas not been found!" << endl;
     return kStWarn;
@@ -754,7 +757,7 @@ Int_t StMcAnalysisMaker::Make()
   cout << "Momentum of First Track and of Associated Tracks (if there are any):" << endl;
   // Get the momentum of the track and compare it to MC Track.
   // Use primary track if available
-  StPrimaryTrack* pTrk = dynamic_cast<StPrimaryTrack*>(firstTrack->node()->track(primary));
+  const StPrimaryTrack* pTrk = dynamic_cast<const StPrimaryTrack*>(firstTrack->node()->track(primary));
   StThreeVectorD recMom(0,0,0);
   if (pTrk)
     recMom = pTrk->geometry()->momentum();
@@ -771,8 +774,8 @@ Int_t StMcAnalysisMaker::Make()
   }
   // Example: Make a histogram of the momentum resolution of the event
   //          Make an Ntuple with rec & monte carlo mom, mean hit difference, and # of common hits
-  StGlobalTrack* recTrack;
-  StPrimaryTrack* primTrk;
+  const StGlobalTrack* recTrack;
+  const StPrimaryTrack* primTrk;
   const StMcTrack*     mcTrack;
   StThreeVectorD p(0,0,0);
   StThreeVectorD pmc(0,0,0);
@@ -790,7 +793,7 @@ Int_t StMcAnalysisMaker::Make()
     for (int k=0; k<3; k++) values[k] = pmc[k];  	 
     values[3]=pmc.mag(); 	 
     
-    primTrk = dynamic_cast<StPrimaryTrack*>(recTrack->node()->track(primary)); 	 
+    primTrk = dynamic_cast<const StPrimaryTrack*>(recTrack->node()->track(primary)); 	 
     if (primTrk) 	 
 	p = primTrk->geometry()->momentum(); 	 
     else 	 
@@ -904,7 +907,7 @@ Int_t StMcAnalysisMaker::Make()
   //Example: Print out position of V0 vertices that have been associated.
   //         (LSB)
   StSPtrVecMcVertex& mcVertices = mEvent->vertices();
-  StV0Vertex* rcV0Partner;
+  const StV0Vertex* rcV0Partner;
   StMcVertexIterator mcVertexIt;
   
   //Loop over all MC vertices
