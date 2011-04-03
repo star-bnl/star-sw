@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.5 2010/12/07 16:54:03 perev Exp $
+ * $Id: StvNode.cxx,v 1.6 2011/04/03 20:38:05 perev Exp $
  *
  * /author Victor Perev
  */
@@ -96,4 +96,13 @@ void StvNode::SetDer(const Mtx55D_t &der, int dir)
    memcpy(mDer[dir][0],der[0],sizeof(Mtx55D_t));
    mPP[dir].reverse(mDer[1-dir],der);
 } 
- 
+ //________________________________________________________________________________
+void StvNode::SetHit(StvHit *hit)
+{
+   if (mHit) mHit->addTimesUsed(-1);
+   mHit = hit;
+   if (!mHit) return;
+   assert(!mHit->timesUsed());
+   mHit->addTimesUsed(1);
+} 
+
