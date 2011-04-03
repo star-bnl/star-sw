@@ -183,7 +183,6 @@ int StvTrack::ReleaseHits()
     StvHit *hit = node->GetHit();
     if (!hit) 			continue;
     if (!node->GetDetId())	continue;
-    hit->release();
     node->SetHit(0);
     nd++;
   }
@@ -200,8 +199,8 @@ void StvTrack::CutTail(const StvNode *start)
     switch (kase) {
       case 0: if (node !=start) break;
               kase=1; tail=it;
-      case 1: StvHit *hit = node->GetHit();
-              if (hit) 	hit->release();		
+      case 1: node->SetHit(0);
+              		
     }
   }
   assert(kase);
@@ -315,23 +314,29 @@ int StvTrack::GetCharge() const
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 //_____________________________________________________________________________
+enum {kTotHits=10	//Min number hits for track
+     ,kGoodHits=5	//Min number good hits for track
+     ,kContHits=2	//Min length of good hit sequence
+     ,kContNits=8	//Max length of acceptable non hit sequence
+     ,kTotNits=13	//Max number of acceptable non hits
+     };
 void StvHitCount::AddHit()
 {
-    nPossHits++;  nTotHits++;nContHits++;
-    if (nContNits && nContHits > kContHits) {
-      if (nContNits>kContNits) nSeqLong++;
-      nContNits=0;nSeqNits++;
-    }
+  nPossHits++;  nTotHits++;nContHits++;
+  if (!nContNits)		return;
+  if (nContHits<kContHits) 	return;
+  if (nContNits>kContNits) nSeqLong++;
+  nContNits=0;nSeqNits++;
+    
 }
 
 //_____________________________________________________________________________
 void StvHitCount::AddNit()
 {
-    nPossHits++;nContNits++;nTotNits++;
-    if (nContHits) {
-      if (nContHits<kContHits) {nSeqShort++;} else { nGoodHits+=nContHits;}
-      nContHits=0;nSeqHits++;
-    }
+  nPossHits++;nContNits++;nTotNits++;
+  if (!nContHits) 	return;
+  if (nContHits<kContHits) {nSeqShort++;} else { nGoodHits+=nContHits;}
+  nContHits=0;nSeqHits++;
 }
 //_____________________________________________________________________________
 int StvHitCount::Reject()
@@ -349,5 +354,7 @@ int StvHitCount::Reject()
 //_____________________________________________________________________________
 int StvHitCount::Skip() const
 {
-  return (nContNits>kContNits || nTotNits > kTotNits) ;
+  if (nContNits>kContNits) return 1;
+  if (nTotNits > kTotNits) return 2;
+  return 0 ;
 }

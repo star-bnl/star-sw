@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.5 2011/02/05 21:59:28 perev Exp $
+// $Id: StvMaker.cxx,v 1.6 2011/04/03 20:44:28 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -113,7 +113,6 @@ StvMaker::~StvMaker()
 //_____________________________________________________________________________
 void StvMaker::Clear(const char*)
 {
-  StvToolkit::Inst()->Clear();
   if (mPullEvent) mPullEvent->Clear();
   StMaker::Clear();
 }
@@ -128,12 +127,29 @@ Int_t StvMaker::Finish()
 //_____________________________________________________________________________
 Int_t StvMaker::Init()
 {
-  StTGeoHelper::Inst()->Load("y2009a");
+  TString geom(GetChainOpt()->GetGeometry());
+  StTGeoHelper::Inst()->Load(geom);
   StVMCApplication *app = new StVMCApplication("y2009a", "StVMC application");
   StvMCInitApp *ini = new StvMCInitApp();
   app->SetInit(ini);
   
   app->Init();
+
+  return StMaker::Init();
+}
+
+//_____________________________________________________________________________
+Int_t StvMaker::InitDetectors()
+{
+  return kStOk;
+}
+
+//_____________________________________________________________________________
+Int_t StvMaker::InitRun(int run)
+{
+static int initialized = 0;
+  if (!initialized)
+  {
 
   StTGeoHelper::Inst()->SetActive(kTpcId);
   StTGeoHelper::Inst()->Init(1+2+4);
@@ -156,6 +172,9 @@ Int_t StvMaker::Init()
   StvToolkit *kit =StvToolkit::Inst();
   kit->SetHitLoader(new StvHitLoader);
   kit->HitLoader()->Init();
+  if (SAttr("HitLoadOpt")) StTGeoHelper::Inst()->SetOpt(IAttr("HitLoadOpt"));
+
+
   kit->SetSeedFinder (new StvDefaultSeedFinder);
   kit->SetTrackFinder(new StvKalmanTrackFinder);
   new StvConst();
@@ -165,21 +184,6 @@ Int_t StvMaker::Init()
   InitPulls();
   mVertexFinder = new StvStarVertexFinder("GenericVertex");
 //  InitDetectors();
-  return StMaker::Init();
-}
-
-//_____________________________________________________________________________
-Int_t StvMaker::InitDetectors()
-{
-  return kStOk;
-}
-
-//_____________________________________________________________________________
-Int_t StvMaker::InitRun(int run)
-{
-static int initialized = 0;
-  if (!initialized)
-  {
   }
   
   return StMaker::InitRun(run);
@@ -230,6 +234,7 @@ Int_t StvMaker::Make()
   cout<< "StvMaker::Make() -I- Done"<<endl;
   iAnz = StMaker::Make();
   kit->Clear();
+  StTGeoHelper::Inst()->Clear();
   if (iAns) return iAns;
   if (iAnz) return iAnz;
   return kStOK;
@@ -252,7 +257,7 @@ Int_t StvMaker::InitPulls()
   }
   tfile->cd();
   mPullTTree = new TTree("StvPulls","TTree Stv pulls");
-  mPullTTree->SetAutoSave(100000000);  // autosave when 0.1 Gbyte written
+  mPullTTree->SetAutoSave(10000000);  // autosave when 0.01 Gbyte written
   mPullEvent = new StvPullEvent;
   TBranch *branch = mPullTTree->Branch("event", mPullEvent->ClassName(),&mPullEvent, 16000,99);
   branch->SetAutoDelete(kFALSE);

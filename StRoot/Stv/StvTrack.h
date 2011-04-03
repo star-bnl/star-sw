@@ -22,19 +22,28 @@ class StvTrack: public StvNodes
   virtual ~StvTrack();
   void reset();
   void unset();
+
+  /// Set Type of End tracking
+  void SetTypeEnd (int tyEnd)  {mTypeEnd = tyEnd;} 
   
   /// returns node related ipt 0=DCA node, 1=1st point. 2=last point, 3=Primary vertex 
       StvNode *GetNode(EPointType poTy);
 const StvNode *GetNode(EPointType poTy) const;
 
+	 /// Returns the number of hits associated and used in the fit of this track.
+   int GetNHits(StDetectorId detectorId=kUnknownId) const;  
 	 /// Return the number of possible hits with this track.
    int GetNPoss(StDetectorId detectorId=kUnknownId) const;
 
-	 /// Returns the number of hits associated and used in the fit of this track.
-   int GetNHits(StDetectorId detectorId=kUnknownId) const;  
+	 /// Returns the End Type i.e reason of the end of tracking
+         /// 0=Dca,1 = too many continues nits,2 = too many total nits
+   int GetTypeEnd () const	{return mTypeEnd;} 
 
 	 /// Returns the number of hits associated and used in the fit of this track.
    int CountHits(StvHitCount &cnt) const;  
+   	/// 
+
+
   void CutTail(const StvNode *start);
 
    /*!
@@ -69,6 +78,8 @@ protected:
 public:
 int mId; 
 int mPrimary;
+int mTypeEnd;		// Type of end tracking. 0=Dca,
+                        // 1 = too many continues nits,2 = too many total nits
 static int mDebug; 	// Debug level
 static int mgId; 	// static track counter
 
@@ -76,12 +87,6 @@ static int mgId; 	// static track counter
 /// Hit counting
 class StvHitCount
 { 
-enum {kTotHits=10	//Min number hits for track
-     ,kGoodHits=5	//Min number good hits for track
-     ,kContHits=2	//Min length of good hit sequence
-     ,kContNits=8	//Max length of acceptable non hit sequence
-     ,kTotNits=13	//Max number of acceptable non hits
-     };
 public:
 StvHitCount()		{Clear();}
 void Clear()		{memset(mBeg,0,mEnd-mBeg+1);}
