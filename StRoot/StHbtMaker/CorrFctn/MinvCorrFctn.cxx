@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctn.cxx,v 1.10 2003/01/31 19:59:21 magestro Exp $
+ * $Id: MinvCorrFctn.cxx,v 1.11 2011/04/03 15:46:42 fisyak Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctn.cxx,v $
+ * Revision 1.11  2011/04/03 15:46:42  fisyak
+ * Warn off
+ *
  * Revision 1.10  2003/01/31 19:59:21  magestro
  * Removed irrelevant include statement
  *
@@ -72,15 +75,15 @@ MinvCorrFctn::MinvCorrFctn(char* title, const int& nbins, const float& MinvLo, c
 
   char theTitle[100];
   // set up numerator
-  char *TitNum = "MinvCorrFctn_Num";
+  const char *TitNum = "MinvCorrFctn_Num";
   sprintf(theTitle,"Num %s\n",title);
   mNumerator = new StHbt1DHisto(TitNum,theTitle,nbins,MinvLo,MinvHi);
   // set up denominator
-  char *TitDen= "MinvCorrFctn_Den";
+  const char *TitDen= "MinvCorrFctn_Den";
   sprintf(theTitle,"Den %s\n",title);
   mDenominator = new StHbt1DHisto(TitDen,theTitle,nbins,MinvLo,MinvHi);
   // set up difference
-  char *TitDif = "MinvCorrFctn_Dif";
+  const char *TitDif = "MinvCorrFctn_Dif";
   sprintf(theTitle,"Dif %s\n",title);
   mDifference = new StHbt1DHisto(TitDif,theTitle,nbins,MinvLo,MinvHi);
   // this next bit is unfortunately needed so that we can have many histos of same "title"
