@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.195 2011/04/04 15:18:52 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.196 2011/04/04 19:13:41 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.196  2011/04/04 19:13:41  fisyak
+// Move intialization of detectors in InitRun
+//
 // Revision 1.195  2011/04/04 15:18:52  fisyak
 // Add check that the corresponding Db maker has been instantiated before adding the detector
 //
@@ -538,7 +541,6 @@ Int_t StiMaker::Init()
     StMaker *selfMk = StMaker::New("StSvtSelfMaker",0,0);
     AddMaker(selfMk);
   }
-  InitDetectors();
   return StMaker::Init();
 }
 
@@ -603,14 +605,12 @@ Int_t StiMaker::InitDetectors()
 //_____________________________________________________________________________
 Int_t StiMaker::InitRun(int run)
 {
-  if (!_initialized)
-    {
+  if (!_initialized)    {
       cout <<"StiMaker::InitRun() -I- Initialization Segment Started"<<endl;
-
-
-			// Load Detector related parameters
-			StiMasterDetectorBuilder * masterBuilder = _toolkit->getDetectorBuilder();
-			masterBuilder->build(*this);
+      InitDetectors();
+      // Load Detector related parameters
+      StiMasterDetectorBuilder * masterBuilder = _toolkit->getDetectorBuilder();
+      masterBuilder->build(*this);
       StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer(); 
       detectorContainer->initialize();//build(masterBuilder);
       detectorContainer->reset();
