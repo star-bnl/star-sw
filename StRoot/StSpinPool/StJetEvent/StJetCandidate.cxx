@@ -20,7 +20,7 @@ StJetCandidate::StJetCandidate(const TVector3& vertex, const TLorentzVector& fou
   // This only works for BEMC jets.
   static const double BEMC_RADIUS = 225.405;
   TVector3 pos = momentum();
-  pos.SetMag(fabs(BEMC_RADIUS/pos.Unit().y()));
+  pos.SetMag(BEMC_RADIUS/pos.Unit().Perp());
   pos += vertex;
   mDetEta = pos.Eta();
 }
