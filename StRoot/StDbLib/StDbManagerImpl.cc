@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.36 2011/02/10 17:30:42 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.37 2011/04/04 15:44:24 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.37  2011/04/04 15:44:24  dmitry
+ * fix to blacklist Calibrations_bla only
+ *
  * Revision 1.36  2011/02/10 17:30:42  dmitry
  * added an option to blacklist domains
  *
@@ -1007,11 +1010,6 @@ StDbType StDbManagerImpl::getDbType(const char* typeName){
 StDbDomain StDbManagerImpl::getDbDomain(const char* domainName){
 #define __METHOD__ "getDbDomain(domainName)"
   StDbDomain retType=dbDomainUnknown;
-  std::string domain(domainName);
-  std::transform(domain.begin(), domain.end(), domain.begin(), ::tolower);
-  if (mBlacklist.find(domain) != mBlacklist.end()) {
-	return retType;
-  }
 
   bool found=false;
   for(dbDomains::iterator itr=mDomains.begin();
@@ -1630,6 +1628,21 @@ return true;
 //////////////////////////////////////////////////////////////////
 char* 
 StDbManagerImpl::getDbName(const char* typeName, const char* domainName){
+
+  std::string tpName(typeName);
+  std::string dmName(domainName);
+  std::string mergedName = tpName + "_" + dmName;
+  std::string completeName;
+  std::string blacklisted_domain;
+
+  for (std::set<std::string>::iterator it = mBlacklist.begin(); it != mBlacklist.end(); ++it) {
+    blacklisted_domain = *it;
+    completeName = "Calibrations_" + blacklisted_domain;
+    if (mergedName == completeName) {
+        mergedName = "blacklist_" + mergedName;
+        return mstringDup(mergedName.c_str());
+    }
+  }
  
   StString dbname;
   dbname<<typeName;

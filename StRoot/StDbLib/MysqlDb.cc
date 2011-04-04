@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.59 2011/03/19 01:21:49 dmitry Exp $
+ * $Id: MysqlDb.cc,v 1.60 2011/04/04 15:44:24 dmitry Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.60  2011/04/04 15:44:24  dmitry
+ * fix to blacklist Calibrations_bla only
+ *
  * Revision 1.59  2011/03/19 01:21:49  dmitry
  * connect error messages converted to more user-frienly format
  *
@@ -1012,6 +1015,9 @@ if(strcmp(dbName," ")==0)return true;
 
 bool tOk=false;
 unsigned int mysqlError;
+std::string sdbName(dbName);
+size_t found;
+found = sdbName.find("blacklist");
 
  if(mysql_select_db(&mData,dbName)){
 
@@ -1019,13 +1025,17 @@ unsigned int mysqlError;
     if(mysqlError==CR_SERVER_GONE_ERROR || mysqlError==CR_SERVER_LOST){
        reConnect();  
        if(mysql_select_db(&mData,dbName)){
+		if (found == std::string::npos) {
          LOG_ERROR<< "Error selecting database=" << dbName << endm;
+		}
          tOk=false;
        } else {
          tOk=true;
        }
     } else {
-       LOG_ERROR<< "Error selecting database=" << dbName << endm;
+		if (found == std::string::npos) {
+          LOG_ERROR<< "Error selecting database=" << dbName << endm;
+		}
        tOk=false;
     }
  } else {
