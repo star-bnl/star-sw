@@ -72,7 +72,7 @@ Bfc_st BFC[] = { // standard chains
   {"dAuMDCa" ,"" ,"","ppOpt,C2003,trs,tpc_daq,Simu,srs,fss,big,GeantOut,est","","","Chain for d+Au",kFALSE},
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
   // Detector combined-chains
-  {"SvtD"       ,"","","SvtDb,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit",       "","","SVT chain for Data",kFALSE},
+  {"SvtD"       ,"","","SvtCalDb,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit",    "","","SVT chain for Data",kFALSE},
   // Year 1 chains
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
@@ -485,6 +485,8 @@ Bfc_st BFC[] = { // standard chains
   {"dbutil"      ,""     ,"","detDb,StDbT"                 ,"","StDbUtilities","Load StDbUtilities",kFALSE},
   {"svtDb"       ,"svtDb","","tpcDb,SvtCL", "StSvtDbMaker","StSvtDbMaker","Load and run SvtDbMaker",kFALSE},
   {"ssdDb"      ,"ssdDb","","tpcDb,SsdUtil","StSsdDbMaker","StSsdDbMaker","Load and run SsdDbMaker",kFALSE},
+  {"svtCalDb"    ,""     ,"","svtDb"         ,"","","Declare Calibrations/svt as while list member",kFALSE},
+  {"ssdCalDb"    ,""     ,"","ssdDb"         ,"","","Declare Calibrations/ssd as while list member",kFALSE},
   {"eemcDb"      ,"eeDb" ,"","db",               "StEEmcDbMaker","StEEmcDbMaker","Load EEmcDbMaker",kFALSE},
   {"fmsDb"       ,"fmsDb","","db",                  "StFmsDbMaker","StFmsDbMaker","Load FmsDbMaker",kFALSE},
 
@@ -585,12 +587,12 @@ Bfc_st BFC[] = { // standard chains
   {"svt_daq"     ,"svt_raw","svtChain","daq,SvtCL"              ,"StSvtDaqMaker","StSvtDaqMaker","",kFALSE},
   {"sss"         ,"","","SvtSlowSim"                              ,"","","Short cut for SvtSlowSim",kFALSE},
   {"SvtSlowSim"  ,"","","SvtSSim,SvtOnlSeq"         ,"","","Short cut for SvtSlowSim and SvtOnlSeq",kFALSE},
-  {"SvtSSim","SvtSSimu","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
+  {"SvtSSim","SvtSSimu","svtChain","svtCalDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
    ,                               "StSvtSimulationMaker","StSvtSimulationMaker,StSvtCalibMaker","",kFALSE},
   {"SvtEmbed"  ,"","","SvtSSim,SvtEm,SvtOnlSeq"      ,"","","Short cutfor SvtSlowSim and SvtOnlSeq",kFALSE},
-  {"SvtEm","SvtEm","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit","StSvtEmbeddingMaker"
+  {"SvtEm","SvtEm","svtChain","svtCalDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit","StSvtEmbeddingMaker"
    ,                                                      "StSvtSimulationMaker,StSvtCalibMaker","",kFALSE},
-  {"SvtOnlSeq"   ,"SvtOnlSeq","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
+  {"SvtOnlSeq"   ,"SvtOnlSeq","svtChain","svtCalDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
    ,                                          "StSvtOnlineSeqAdjSimMaker","StSvtSimulationMaker","",kFALSE},
   {"srs","","","sfs",                    "","","WARNING *** Option is OBSOLETE use sfs instead ***",kFALSE},
   {"sfs","svt_hits","svtChain","svtDb,Simu,SvtCL,-sss,-SvtSlowSim,StEvent,MakeEvent"
@@ -618,10 +620,10 @@ Bfc_st BFC[] = { // standard chains
   {"pixFastSim","","","StMcEvent,StEvent"
    ,                               "StPixelFastSimMaker","StPixelFastSimMaker","FastPixelSimulator",kFALSE},
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
-  {"ssd_daq","","","ssddb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker"  ,"StSsdDaqMaker", "... SSD Daq",kFALSE},
+  {"ssd_daq","","","ssdCalDb,svt_T,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
   {"ssdfast"     ,"","","ssdDb,StMcEvent,StEvent","StSsdFastSimMaker","StSsdFastSimMaker",
    "... SSD fast simulator"                                                                        ,kFALSE},
-  {"ssd"         ,"","","sls,spa,spt"                        ,"","","SSD full chain for simulation",kFALSE},
+  {"ssd"         ,"","","ssdCalDb,sls,spa,spt"               ,"","","SSD full chain for simulation",kFALSE},
   {"sls","","","McEvent,Simu,svt_T,SvtCL"
    ,                                "St_sls_Maker","StSsdSimulationMaker", "... SSD slow simulator",kFALSE},
   {"spa"         ,"SpaStrip","","Simu,svt_T,SvtCL,ssdUtil","St_spa_Maker","StSsdSimulationMaker"
