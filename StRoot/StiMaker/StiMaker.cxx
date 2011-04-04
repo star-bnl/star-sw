@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.194 2011/03/31 22:11:24 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.195 2011/04/04 15:18:52 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.195  2011/04/04 15:18:52  fisyak
+// Add check that the corresponding Db maker has been instantiated before adding the detector
+//
 // Revision 1.194  2011/03/31 22:11:24  fisyak
 // Propagate IdTruth to StEvent
 //
@@ -408,6 +411,9 @@ More detailed: 				<br>
 #include "StiDetectorVolume.h"
 #include "StarMagField.h"
 #include "StG2TrackVertexMap.h"
+#include "StTpcDb/StTpcDb.h"
+#include "StSsdDbMaker/StSsdDbMaker.h"
+#include "StSvtDbMaker/StSvtDbMaker.h"
 /// Definion of minimal primary vertex errors.
 /// Typical case,vertex got from simulations with zero errors.
 /// But zero errors could to unpredicted problems
@@ -542,7 +548,7 @@ Int_t StiMaker::InitDetectors()
   StiDetectorGroup<StEvent> * group;
   cout<<"StiMaker::InitDetectors() -I- Adding detector group:Star"<<endl;
   _toolkit->add(new StiStarDetectorGroup(false,"none"));
-  if (IAttr("useTpc"))
+  if (IAttr("useTpc") && gStTpcDb)
     {
       cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
       _toolkit->add(group = new StiTpcDetectorGroup(IAttr("activeTpc"),SAttr("tpcInputFile")));
@@ -567,13 +573,13 @@ Int_t StiMaker::InitDetectors()
 	cout << "StiMaker::InitDetectors() -I- set laser time of flight correction" << endl;
       }
     }
-  if (IAttr("useSvt"))
+  if (IAttr("useSvt") && gStSvtDbMaker)
     {
     cout<<"StiMaker::Init() -I- Adding detector group:SVT"<<endl;
     _toolkit->add(group = new StiSvtDetectorGroup(IAttr("activeSvt"),SAttr("svtInputFile")));
     group->setGroupId(kSvtId);
     }
-  if (IAttr("useSsd"))
+  if (IAttr("useSsd") && gStSsdDbMaker)
       {
 	  cout<<"StiMaker::Init() -I- Adding detector group:Ssd"<<endl;
 	  _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSsd"),SAttr("ssdInputFile")));
