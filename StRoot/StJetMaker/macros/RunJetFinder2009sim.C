@@ -9,7 +9,7 @@ void RunJetFinder2009sim(int nevents = 1e6,
                          const char* geantfile = "/star/data47/reco/pp200/pythia6_410/15_25gev/cdf_a/y2006c/gheisha_on/p07ic/rcf1307_01_2000evts.geant.root",
 			 const char* jetfile   = "rcf1307_01_2000evts.jets.root",
 			 const char* skimfile  = "rcf1307_01_2000evts.skim.root",
-			 bool useL2 = false)
+			 bool useL2 = true)
 {
   cout << "Read MuDst file:\t" << mudstfile << endl;
   cout << "Read geant file:\t" << geantfile << endl;
@@ -69,6 +69,7 @@ void RunJetFinder2009sim(int nevents = 1e6,
   // star database
   St_db_Maker* starDb = new St_db_Maker("StarDb","MySQL:StarDb");
   starDb->SetDateTime(20090628,53220); // Run 10179006
+  //starDb->SetDateTime(20060516,110349); // Run 7136022
 
   // Endcap database
   StEEmcDbMaker* eemcDb = new StEEmcDbMaker;
@@ -88,22 +89,21 @@ void RunJetFinder2009sim(int nevents = 1e6,
   StEmcADCtoEMaker* adc = new StEmcADCtoEMaker;
 
   // Trigger simulator
+  // -- StL2_2009EmulatorMaker must run before StTriggerSimuMaker?
+  StL2_2009EmulatorMaker* simL2Mk = 0;
+  if (useL2) {
+    simL2Mk = new StL2_2009EmulatorMaker;
+    //simL2Mk->setSetupPath("/star/u/pibero/public/StarTrigSimuSetup/");
+    simL2Mk->setSetupPath("/star/institutions/mit/corliss/L2setup/");
+    simL2Mk->setOutPath("./");
+  }
   StTriggerSimuMaker* simuTrig = new StTriggerSimuMaker;
   simuTrig->setMC(true); // Must be before individual detectors, to be passed
-  // BBC was not used in Run 9
-  //simuTrig->useBbc();
+  //simuTrig->useBbc(); // No BBC in Run 9
   simuTrig->useBemc();
-  simuTrig->useEemc();
+  simuTrig->useEemc(); // No EEMC in Run 6
   simuTrig->bemc->setConfig(StBemcTriggerSimu::kOffline);
-
-  // L2 (only L2btowCalib, L2etowCalib, L2ped, L2jet in CVS as of 17 April 2010)
-  if (useL2) {
-    StL2_2009EmulatorMaker* simL2Mk = new StL2_2009EmulatorMaker;
-    assert(simL2Mk);
-    simL2Mk->setSetupPath("/star/u/pibero/public/StarTrigSimuSetup/");
-    simL2Mk->setOutPath("./");
-    simuTrig->useL2(simL2Mk);
-  }
+  if (useL2) simuTrig->useL2(simL2Mk);
 
   // Get Pythia record
   StMCAsymMaker* asym = new StMCAsymMaker;
@@ -114,49 +114,108 @@ void RunJetFinder2009sim(int nevents = 1e6,
   skimEventMaker->addSimuTrigger(240652); // L2JetHigh
   skimEventMaker->addSimuTrigger(240411); // JP1
 
+#if 0
+  // Run 6 triggers
+  skimEventMaker->addSimuTrigger(127611); //HTTP
+  skimEventMaker->addSimuTrigger(137611);
+  skimEventMaker->addSimuTrigger(5);
+  skimEventMaker->addSimuTrigger(127821); //HTTP-fast
+  skimEventMaker->addSimuTrigger(137821);
+  skimEventMaker->addSimuTrigger(137822);
+  skimEventMaker->addSimuTrigger(127212); //HT2
+  skimEventMaker->addSimuTrigger(137213);
+  skimEventMaker->addSimuTrigger(127501); //JP0
+  skimEventMaker->addSimuTrigger(137501);
+  skimEventMaker->addSimuTrigger(127622); //JP0-etot
+  skimEventMaker->addSimuTrigger(137622);
+  skimEventMaker->addSimuTrigger(127221); //JP1
+  skimEventMaker->addSimuTrigger(137221);
+  skimEventMaker->addSimuTrigger(137222);
+#endif
+
   // Jet maker
   StJetMaker2009* jetmaker = new StJetMaker2009;
   jetmaker->setJetFile(jetfile);
 
   //------------------------------------------------------------------------------------
 
-  // Set analysis cuts for 12-point branch
-  StAnaPars* anapars12 = new StAnaPars;
-  anapars12->useTpc  = true;
-  anapars12->useBemc = true;
-  anapars12->useEemc = true;
-  anapars12->randomSelectorProb = 0.93;
+  // Set analysis cuts for 12-point branch with 100% probability of accepting TPC tracks before jet finding
+  StAnaPars* anapars12_100 = new StAnaPars;
+  anapars12_100->useTpc  = true;
+  anapars12_100->useBemc = true;
+  anapars12_100->useEemc = true;
+  anapars12_100->randomSelectorProb = 1.00;
 
   // The classes available for correcting tower energy for tracks are:
   // 1. StjTowerEnergyCorrectionForTracksMip
   // 2. StjTowerEnergyCorrectionForTracksFraction
   // 3. StjTowerEnergyCorrectionForTracksNull (default: no correction)
-  anapars12->setTowerEnergyCorrection(new StjTowerEnergyCorrectionForTracksFraction(1.00));
+  anapars12_100->setTowerEnergyCorrection(new StjTowerEnergyCorrectionForTracksFraction(1.00));
 
   // TPC cuts
-  anapars12->addTpcCut(new StjTrackCutFlag(0));
-  anapars12->addTpcCut(new StjTrackCutNHits(12));
-  anapars12->addTpcCut(new StjTrackCutPossibleHitRatio(0.51));
-  anapars12->addTpcCut(new StjTrackCutDca(3));
-  anapars12->addTpcCut(new StjTrackCutDcaPtDependent);
-  anapars12->addTpcCut(new StjTrackCutChi2(0,4));
-  anapars12->addTpcCut(new StjTrackCutPt(0.2,200));
-  anapars12->addTpcCut(new StjTrackCutEta(-2.5,2.5));
-  anapars12->addTpcCut(new StjTrackCutLastPoint(125));
+  anapars12_100->addTpcCut(new StjTrackCutFlag(0));
+  anapars12_100->addTpcCut(new StjTrackCutNHits(12));
+  anapars12_100->addTpcCut(new StjTrackCutPossibleHitRatio(0.51));
+  anapars12_100->addTpcCut(new StjTrackCutDca(3));
+  anapars12_100->addTpcCut(new StjTrackCutDcaPtDependent);
+  anapars12_100->addTpcCut(new StjTrackCutChi2(0,4));
+  anapars12_100->addTpcCut(new StjTrackCutPt(0.2,200));
+  anapars12_100->addTpcCut(new StjTrackCutEta(-2.5,2.5));
+  anapars12_100->addTpcCut(new StjTrackCutLastPoint(125));
 
   // BEMC cuts
-  anapars12->addBemcCut(new StjTowerEnergyCutBemcStatus(1));
-  anapars12->addBemcCut(new StjTowerEnergyCutAdc(4,3));	// ADC-ped>4 AND ADC-ped>3*RMS
-  anapars12->addBemcCut(new StjTowerEnergyCutEt(0.2));
+  anapars12_100->addBemcCut(new StjTowerEnergyCutBemcStatus(1));
+  anapars12_100->addBemcCut(new StjTowerEnergyCutAdc(4,3));	// ADC-ped>4 AND ADC-ped>3*RMS
+  anapars12_100->addBemcCut(new StjTowerEnergyCutEt(0.2));
 
   // EEMC cuts
-  anapars12->addEemcCut(new StjTowerEnergyCutBemcStatus(1));
-  anapars12->addEemcCut(new StjTowerEnergyCutAdc(4,3));	// ADC-ped>4 AND ADC-ped>3*RMS
-  anapars12->addEemcCut(new StjTowerEnergyCutEt(0.2));
+  anapars12_100->addEemcCut(new StjTowerEnergyCutBemcStatus(1));
+  anapars12_100->addEemcCut(new StjTowerEnergyCutAdc(4,3));	// ADC-ped>4 AND ADC-ped>3*RMS
+  anapars12_100->addEemcCut(new StjTowerEnergyCutEt(0.2));
 
   // Jet cuts
-  anapars12->addJetCut(new StProtoJetCutPt(5,200));
-  anapars12->addJetCut(new StProtoJetCutEta(-100,100));
+  anapars12_100->addJetCut(new StProtoJetCutPt(5,200));
+  anapars12_100->addJetCut(new StProtoJetCutEta(-100,100));
+
+  //------------------------------------------------------------------------------------
+
+  // Set analysis cuts for 12-point branch with 93% probability of accepting TPC tracks before jet finding
+  StAnaPars* anapars12_093 = new StAnaPars;
+  anapars12_093->useTpc  = true;
+  anapars12_093->useBemc = true;
+  anapars12_093->useEemc = true;
+  anapars12_093->randomSelectorProb = 0.93;
+
+  // The classes available for correcting tower energy for tracks are:
+  // 1. StjTowerEnergyCorrectionForTracksMip
+  // 2. StjTowerEnergyCorrectionForTracksFraction
+  // 3. StjTowerEnergyCorrectionForTracksNull (default: no correction)
+  anapars12_093->setTowerEnergyCorrection(new StjTowerEnergyCorrectionForTracksFraction(1.00));
+
+  // TPC cuts
+  anapars12_093->addTpcCut(new StjTrackCutFlag(0));
+  anapars12_093->addTpcCut(new StjTrackCutNHits(12));
+  anapars12_093->addTpcCut(new StjTrackCutPossibleHitRatio(0.51));
+  anapars12_093->addTpcCut(new StjTrackCutDca(3));
+  anapars12_093->addTpcCut(new StjTrackCutDcaPtDependent);
+  anapars12_093->addTpcCut(new StjTrackCutChi2(0,4));
+  anapars12_093->addTpcCut(new StjTrackCutPt(0.2,200));
+  anapars12_093->addTpcCut(new StjTrackCutEta(-2.5,2.5));
+  anapars12_093->addTpcCut(new StjTrackCutLastPoint(125));
+
+  // BEMC cuts
+  anapars12_093->addBemcCut(new StjTowerEnergyCutBemcStatus(1));
+  anapars12_093->addBemcCut(new StjTowerEnergyCutAdc(4,3));	// ADC-ped>4 AND ADC-ped>3*RMS
+  anapars12_093->addBemcCut(new StjTowerEnergyCutEt(0.2));
+
+  // EEMC cuts
+  anapars12_093->addEemcCut(new StjTowerEnergyCutBemcStatus(1));
+  anapars12_093->addEemcCut(new StjTowerEnergyCutAdc(4,3));	// ADC-ped>4 AND ADC-ped>3*RMS
+  anapars12_093->addEemcCut(new StjTowerEnergyCutEt(0.2));
+
+  // Jet cuts
+  anapars12_093->addJetCut(new StProtoJetCutPt(5,200));
+  anapars12_093->addJetCut(new StProtoJetCutEta(-100,100));
 
   //------------------------------------------------------------------------------------
 
@@ -248,7 +307,8 @@ void RunJetFinder2009sim(int nevents = 1e6,
 
   //------------------------------------------------------------------------------------
 
-  jetmaker->addBranch("ConeJets12",anapars12,conepars);
+  jetmaker->addBranch("ConeJets12_100",anapars12_100,conepars);
+  jetmaker->addBranch("ConeJets12_093",anapars12_093,conepars);
   jetmaker->addBranch("ConeJets5",anapars5,conepars);
   jetmaker->addBranch("ConeJetsEMC",anaparsEMC,conepars);
   jetmaker->addBranch("PythiaConeJets",anaparsPythia,conepars);
