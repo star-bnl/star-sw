@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.574 2011/04/01 15:51:09 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.575 2011/04/04 15:20:30 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1454,12 +1454,12 @@ void StBFChain::SetDbOptions(StMaker *mk){
     }
   }
   if (this == GetTopChain()) {
-    // Db blacklist (remove black listed system from St_Db_Maker configuration)
-    if (! GetOption("TpcDb"))  mk->SetAttr("blacklist", "tpc"); // blacklist tpc
-    if (! GetOption("SvtDb"))  mk->SetAttr("blacklist", "svt"); // blacklist svt
-    if (! GetOption("SsdDb"))  mk->SetAttr("blacklist", "ssd"); // blacklist ssd
-    if (! GetOption("EemcDb")) mk->SetAttr("blacklist", "eemc");// blacklist eemc
-    if (! GetOption("FmsDb"))  mk->SetAttr("blacklist", "fms"); // blacklist fms
+    // Db blacklist (remove black listed system from St_Db_Maker Calibrations configuration)
+    if (! GetOption("TpcDb")                        )  mk->SetAttr("blacklist", "tpc"); // blacklist tpc
+    if (! GetOption("SvtDb") || GetOption("NoSvtIT"))  mk->SetAttr("blacklist", "svt"); // blacklist svt
+    if (! GetOption("SsdDb") || GetOption("NoSsdIT"))  mk->SetAttr("blacklist", "ssd"); // blacklist ssd
+    if (! GetOption("EemcDb")                       )  mk->SetAttr("blacklist", "eemc");// blacklist eemc
+    if (! GetOption("FmsDb")                        )  mk->SetAttr("blacklist", "fms"); // blacklist fms
   }
 }
 //_____________________________________________________________________
