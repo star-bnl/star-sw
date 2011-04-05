@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.197 2011/04/05 22:26:30 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.198 2011/04/05 22:49:16 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.198  2011/04/05 22:49:16  fisyak
+// Add safety marging
+//
 // Revision 1.197  2011/04/05 22:26:30  fisyak
 // Remove alloc/free
 //
@@ -872,7 +875,7 @@ void StiMaker::fillVxFlags() {// set vertices IdTruth if any
       if (IdVx <= 0) continue;
       Int_t J = -1;
       for (UInt_t j = 0; j < N; j++) if (candidates[j].Id == IdVx) {J = j; break;}
-      if (J < 0) {J = N; if (N < NVxMax) N++;}
+      if (J < 0) {J = N; if (N < NVxMax-1) N++;}
       candidates[J].Id = IdVx;
       candidates[J].nPings++;
     }
