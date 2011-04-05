@@ -22,9 +22,10 @@ void StIOInterFace::SetBranch(const Char_t *brName,const Char_t *file,const Char
 //_____________________________________________________________________________
 void StIOInterFace::IntoBranch(const Char_t *brName,const Char_t *logNames)
 {
- TDataSet *was = GetData(brName,".branches");
+ TString bN(brName); if (bN.Index("Branch")<0) bN+="Branch";
+ TDataSet *was = GetData(bN,".branches");
  if (was) delete was;
- AddAlias(brName,logNames,".branches");  
+ AddAlias(bN,logNames,".branches");  
 }
 //_____________________________________________________________________________
 //void StIOInterFace::Streamer(TBuffer &b) {};
