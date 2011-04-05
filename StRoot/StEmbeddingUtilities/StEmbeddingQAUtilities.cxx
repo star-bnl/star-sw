@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.cxx,v 1.11 2011/04/01 05:02:50 hmasui Exp $
+ * $Id: StEmbeddingQAUtilities.cxx,v 1.12 2011/04/05 23:12:36 hmasui Exp $
  * $Log: StEmbeddingQAUtilities.cxx,v $
+ * Revision 1.12  2011/04/05 23:12:36  hmasui
+ * Added getGeantId() function
+ *
  * Revision 1.11  2011/04/01 05:02:50  hmasui
  * Implement track selections (moved from StEmbeddingQATrack)
  *
@@ -413,7 +416,7 @@ StParticleDefinition* StEmbeddingQAUtilities::getParticleDefinition(const UInt_t
     assert(0);
   }
 
-  return StParticleTable::instance()->findParticleByGeantId(geantid%10000) ;
+  return StParticleTable::instance()->findParticleByGeantId(getGeantId(geantid));
 }
 
 //__________________________________________________________________________________________
@@ -422,7 +425,15 @@ Bool_t StEmbeddingQAUtilities::isGeantIdOk(const UInt_t geantid) const
   /// Check geant id in StParticleTable
   ///  Take into account the modulus of geantid by 10k
 
-  return StParticleTable::instance()->containsGeantId(geantid%10000) ;
+  return StParticleTable::instance()->containsGeantId(getGeantId(geantid));
+}
+
+//__________________________________________________________________________________________
+Int_t StEmbeddingQAUtilities::getGeantId(const UInt_t geantid) const
+{
+  /// Return geantid itself
+  /// except for geantid > 50000
+  return ( geantid > 50000 ) ? geantid%50000 : geantid ;
 }
 
 //__________________________________________________________________________________________

@@ -3,8 +3,11 @@
 //    - Provide category id, such as 'MC' track in the minimc tree
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.h,v 1.9 2011/04/01 05:02:48 hmasui Exp $
+ * $Id: StEmbeddingQAUtilities.h,v 1.10 2011/04/05 23:12:35 hmasui Exp $
  * $Log: StEmbeddingQAUtilities.h,v $
+ * Revision 1.10  2011/04/05 23:12:35  hmasui
+ * Added getGeantId() function
+ *
  * Revision 1.9  2011/04/01 05:02:48  hmasui
  * Implement track selections (moved from StEmbeddingQATrack)
  *
@@ -109,6 +112,9 @@ class StEmbeddingQAUtilities {
 
     /// Check geant id is defined in StParticleTable or not
     Bool_t isGeantIdOk(const UInt_t geantid) const ;
+
+    /// Return geant id
+    Int_t getGeantId(const UInt_t geantid) const ;
 
     /// Get track and event selections
     Float_t getPtMinCut() const ;
