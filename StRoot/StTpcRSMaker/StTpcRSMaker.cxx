@@ -47,7 +47,7 @@
 #else
 #define PrPP(A,B)
 #endif
-static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.48 2011/03/17 14:29:31 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcRSMaker.cxx,v 1.49 2011/04/05 20:55:02 fisyak Exp $";
 //#define __ClusterProfile__
 #define Laserino 170
 #define Chasrino 171
@@ -1048,7 +1048,7 @@ Double_t StTpcRSMaker::GetNoPrimaryClusters(Double_t betaGamma, Int_t charge) {
   static Double_t betaGammaMin = mdNdx->GetBinCenter(1);
   static Double_t betaMin  = betaGammaMin/TMath::Sqrt(1.0 - betaGammaMin*betaGammaMin);
   Double_t dNdx = charge*charge*mdNdx->Interpolate(betaGamma);
-  Double_t beta = betaGamma/TMath::Sqrt(1.0 - betaGamma*betaGamma);
+  Double_t beta = betaGamma/TMath::Sqrt(1.0 + betaGamma*betaGamma);
   if (betaGamma <  betaGammaMin) {
     dNdx *= TMath::Power(betaMin/beta,2*slope);
   }
@@ -1482,8 +1482,11 @@ Double_t StTpcRSMaker::polya(Double_t *x, Double_t *par) {
 }
 #undef PrPP
 //________________________________________________________________________________
-// $Id: StTpcRSMaker.cxx,v 1.48 2011/03/17 14:29:31 fisyak Exp $
+// $Id: StTpcRSMaker.cxx,v 1.49 2011/04/05 20:55:02 fisyak Exp $
 // $Log: StTpcRSMaker.cxx,v $
+// Revision 1.49  2011/04/05 20:55:02  fisyak
+// Fix betaMin calculations (thanx VP)
+//
 // Revision 1.48  2011/03/17 14:29:31  fisyak
 // Add extrapolation in region beta*gamma < 0.3
 //
