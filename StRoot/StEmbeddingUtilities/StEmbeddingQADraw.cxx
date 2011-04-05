@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.28 2011/04/01 05:07:07 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.29 2011/04/05 04:26:42 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.29  2011/04/05 04:26:42  hmasui
+ * Bug fix for printing trigger id's, and follow default ROOT color scheme
+ *
  * Revision 1.28  2011/04/01 05:07:07  hmasui
  * Added track selections in the 2nd page, Ncommon vs NhitFit (pt dependent), and 1/pt(RC)-1/pt(MC) vs pt plot
  *
@@ -354,16 +357,16 @@ void StEmbeddingQADraw::init()
   if ( !triggerId.empty() ) {
     TString triggers("");
     for(UInt_t i=0; i<triggerId.size(); i++) {
-      triggers += Form("%d", triggers[i]);
+      triggers += Form("%d", triggerId[i]);
       if( i != triggerId.size() - 1 ) triggers += ", ";
     }
     eventSelections->AddText(Form("  trigger id cut : id = %s", triggers.Data()));
   }
   eventSelections->AddText("NOTE: Trigger id cut for real data has to be made manually in doEmbeddingQAMaker.C");
-  eventSelections->SetAllWith("***", "color", kRed+1);
+  eventSelections->SetAllWith("***", "color", kRed);
   eventSelections->SetAllWith("***", "font", 72);
   eventSelections->SetAllWith("***", "size", 0.033);
-  eventSelections->SetAllWith("NOTE", "color", kBlue+1);
+  eventSelections->SetAllWith("NOTE", "color", kBlue);
   eventSelections->SetAllWith("NOTE", "font", 72);
   eventSelections->SetAllWith("NOTE", "size", 0.020);
   eventSelections->Draw();
@@ -386,10 +389,10 @@ void StEmbeddingQADraw::init()
   trackSelections->AddText(Form("  |n#sigma| < %1.1f", utility->getNSigmaCut()));
   trackSelections->AddText("NOTE1: Rapidity cut for real data has to be made manually in doEmbeddingQAMaker.C");
   trackSelections->AddText("NOTE2: Cut on its own variable is currently disabled, e.x. no dca cut for dca histogram");
-  trackSelections->SetAllWith("***", "color", kRed+1);
+  trackSelections->SetAllWith("***", "color", kRed);
   trackSelections->SetAllWith("***", "font", 72);
   trackSelections->SetAllWith("***", "size", 0.033);
-  trackSelections->SetAllWith("NOTE", "color", kBlue+1);
+  trackSelections->SetAllWith("NOTE", "color", kBlue);
   trackSelections->SetAllWith("NOTE", "font", 72);
   trackSelections->SetAllWith("NOTE", "size", 0.020);
   trackSelections->Draw();
@@ -820,7 +823,7 @@ void StEmbeddingQADraw::drawErrorMessages(const TString histogramName) const
   error0->AddText(Form("Most likely there are no %s in the minimc.", title.Data()));
   error0->AddText("In case you have finite number of tracks,");
   error0->AddText("please also have a look at geantid.");
-  error0->SetAllWith("***", "color", kRed+1);
+  error0->SetAllWith("***", "color", kRed);
   error0->SetAllWith("***", "font", 72);
   error0->SetAllWith("***", "size", 0.033);
 
@@ -850,7 +853,7 @@ void StEmbeddingQADraw::drawErrorMessages(const TString histogramName) const
     error1->AddText("[ROOT]> StMiniMcTree->Draw(\"mMatchedPairs.mGeantId\")");
     error1->AddText("or use \"Scan()\" function");
   }
-  error1->SetAllWith("ROOT", "color", kBlue+1);
+  error1->SetAllWith("ROOT", "color", kBlue);
   error1->SetAllWith("ROOT", "font",  52);
   error1->SetAllWith("ROOT", "size",  0.028);
 
