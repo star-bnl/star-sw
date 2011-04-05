@@ -22,6 +22,8 @@ void StIOInterFace::SetBranch(const Char_t *brName,const Char_t *file,const Char
 //_____________________________________________________________________________
 void StIOInterFace::IntoBranch(const Char_t *brName,const Char_t *logNames)
 {
+ TDataSet *was = GetData(brName,".branches");
+ if (was) delete was;
  AddAlias(brName,logNames,".branches");  
 }
 //_____________________________________________________________________________
