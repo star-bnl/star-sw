@@ -1,8 +1,11 @@
-// $Id: StiMaker.cxx,v 1.196 2011/04/04 19:13:41 fisyak Exp $
+// $Id: StiMaker.cxx,v 1.197 2011/04/05 22:26:30 fisyak Exp $
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.197  2011/04/05 22:26:30  fisyak
+// Remove alloc/free
+//
 // Revision 1.196  2011/04/04 19:13:41  fisyak
 // Move intialization of detectors in InitRun
 //
@@ -852,11 +855,11 @@ void StiMaker::fillVxFlags() {// set vertices IdTruth if any
     Int_t  Id;
     Int_t nPings;
   };
-  const UInt_t NVxMax = 200;
+  enum {NVxMax = 200};
   for (UInt_t i = 0; i < NVx; i++) {
     StPrimaryVertex  *vx = event->primaryVertex(i);
     if (! vx) continue;
-    vertexPing *candidates = (vertexPing *) calloc(NVxMax, sizeof(vertexPing));
+    vertexPing candidates[NVxMax]; memset(candidates,0,sizeof(candidates));
     UInt_t N = 0;
     UInt_t Ntracks = vx->numberOfDaughters();
     Int_t IdVx = 0;
@@ -884,6 +887,5 @@ void StiMaker::fillVxFlags() {// set vertices IdTruth if any
       Int_t IdParentTk = StG2TrackVertexMap::instance()->IdParentTrack(IdTruth);
       vx->setIdParent(IdParentTk);
     }
-    free(candidates);
   }
 }
