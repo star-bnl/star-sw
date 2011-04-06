@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.29 2011/04/05 04:26:42 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.30 2011/04/06 20:01:29 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.30  2011/04/06 20:01:29  hmasui
+ * Put back Ncommon vs NHitFit histogram for all pt, and fix a bug for name of projected histograms for Ncommon vs NHitFit
+ *
  * Revision 1.29  2011/04/05 04:26:42  hmasui
  * Bug fix for printing trigger id's, and follow default ROOT color scheme
  *
@@ -2148,7 +2151,7 @@ Bool_t StEmbeddingQADraw::drawNHit() const
   /// Make sure (1) input ROOT files and (2) input geantid
   if(!isOpen()) return kFALSE ;
 
-  gStyle->SetPadRightMargin(0.15);
+  gStyle->SetPadRightMargin(0.17);
 
   /// QA for NCommon hit vs NHit
   for(UInt_t id=0; id<mDaughterGeantId.size(); id++){
@@ -2164,7 +2167,29 @@ Bool_t StEmbeddingQADraw::drawNHit() const
             getParticleName(mDaughterGeantId[id]), getParticleName(getGeantIdReal(id)) );
     }
 
+    // pt integrated
+    TPaveText* header = initCanvas(headerTitle);
+
+    // Maximum pt = 5 GeV/c for ncommon hit histogram
+    hNCommonHitVsNHit->SetAxisRange(0.2, 5.0);
+    TH2* hNCommonHitVsNHit2D = (TH2D*) hNCommonHitVsNHit->Project3D("zy");
+    hNCommonHitVsNHit2D->SetName(Form("hNCommonHitVsNHit2D_%d", id));
+    hNCommonHitVsNHit2D->SetTitle(Form("%1.1f < p_{T} < %1.1f GeV/c", 0.2, 5.0));
+    hNCommonHitVsNHit2D->Draw("colz");
+
+    mCanvas->cd();
+    mCanvas->Update();
+    mPDF->NewPage();
+    delete header ;
+
     // Slices for each pt bin (0.5 GeV/c step)
+    if( mIsEmbeddingOnly ){
+      headerTitle = Form("N_{common} vs N_{hit}, p_{T} dependence (Embedding:%s)", getParticleName(mDaughterGeantId[id]) );
+    }
+    else{
+      headerTitle = Form("N_{common} vs N_{hit}, p_{T} dependence (Embedding:%s, Real:%s)", 
+            getParticleName(mDaughterGeantId[id]), getParticleName(getGeantIdReal(id)) );
+    }
     for(Int_t jpt=0; jpt<2; jpt++) {
       TPaveText* header = initCanvas(headerTitle, 2, 3);
 
@@ -2172,12 +2197,13 @@ Bool_t StEmbeddingQADraw::drawNHit() const
       for(Int_t ipt=0; ipt<npt; ipt++) {
         mMainPad->cd(ipt+1);
         const Int_t ptId     = jpt*npt + ipt + 1;
-        const Double_t ptmin = hNCommonHitVsNHit->GetXaxis()->GetBinLowEdge(ptId) ; 
-        const Double_t ptmax = hNCommonHitVsNHit->GetXaxis()->GetBinLowEdge(ptId+1) ; 
+        Double_t ptmin = hNCommonHitVsNHit->GetXaxis()->GetBinLowEdge(ptId) ; 
+        Double_t ptmax = hNCommonHitVsNHit->GetXaxis()->GetBinLowEdge(ptId+1) ; 
+        if( ptmin == 0.0 ) ptmin = 0.2 ;
+
         hNCommonHitVsNHit->SetAxisRange(ptmin, ptmax);
-        TH2* hNCommonHitVsNHit2D = (TH2D*) hNCommonHitVsNHit->Project3D("zy");
         hNCommonHitVsNHit2D = (TH2D*) hNCommonHitVsNHit->Project3D("zy");
-        hNCommonHitVsNHit2D->SetName(Form("hNCommonHitVsNHit2D_%d_%d", ipt, jpt));
+        hNCommonHitVsNHit2D->SetName(Form("hNCommonHitVsNHit2D_%d_%d_%d", id, ipt, jpt));
         hNCommonHitVsNHit2D->SetTitle(Form("%1.1f < p_{T} < %1.1f GeV/c", ptmin, ptmax));
         hNCommonHitVsNHit2D->Draw("colz");
       }
