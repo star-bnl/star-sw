@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.25 2011/04/07 23:29:52 genevb Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.26 2011/04/07 23:33:12 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -42,6 +42,12 @@
 #  include "DAQ_READER/daqReader.h"
 #endif /* NEW_DAQ_READER */
 ClassImp(StTpcRTSHitMaker); 
+#define __DEBUG__
+#ifdef __DEBUG__
+#define PrPP(A,B) if (Debug()%10 > 1) {LOG_INFO << "StTpcRTSHitMaker::" << (#A) << "\t" << (#B) << " = \t" << (B) << endm;}
+#else
+#define PrPP(A,B)
+#endif
 //________________________________________________________________________________
 StTpcRTSHitMaker::~StTpcRTSHitMaker() {
   SafeDelete(fTpx);
@@ -53,6 +59,8 @@ Int_t StTpcRTSHitMaker::Init() {
   SetAttr("minRow",1);
   SetAttr("maxRow",45);
   memset(maxHits,0,sizeof(maxHits));
+  maxBin0Hits = 0;
+  bin0Hits = 0;
   return kStOK;
 }
 //________________________________________________________________________________
@@ -63,11 +71,18 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
   if (GetDate() <= 20090101) fminCharge = 40;
   // do gains example; one loads them from database but I don't know how...
   daq_dta *dta  = fTpx->put("gain");
+
+  // Prepare scaled hit maxima
+
+  // No hit maxima if these DB params are 0
   Int_t maxHitsPerSector = St_tpcMaxHitsC::instance()->maxSectorHits();
-  if (maxHitsPerSector>0) SetAttr(".Privilege",1);
+  Int_t maxBinZeroHits = St_tpcMaxHitsC::instance()->maxBinZeroHits();
+  Int_t livePads = 0;
+  Int_t totalPads = 0;
+  Float_t liveFrac = 1;
   for(Int_t sector=1;sector<=24;sector++) {
-    Int_t livePads = 0;
-    Int_t totalPads = 0;
+    Int_t liveSecPads = 0;
+    Int_t totalSecPads = 0;
     for(Int_t row=1;row<=45;row++) {
       daq_det_gain *gain = (daq_det_gain *) dta->request(183);	// max pad+1		
       assert(gain);
@@ -88,17 +103,35 @@ Int_t StTpcRTSHitMaker::InitRun(Int_t runnumber) {
 	}
       }
       dta->finalize(183,sector,row);
-      totalPads += numPadsAtRow;
-      if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
-          StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
-          St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
-        livePads += numPadsAtRow;
+      if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
+        totalSecPads += numPadsAtRow;
+        if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
+            StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
+            St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
+          liveSecPads += numPadsAtRow;
+      }
     }
-    Float_t liveFrac = TMath::Max((Float_t) 0.1,
-                       ((Float_t) livePads) / ((Float_t) totalPads));
-    maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
-    if (Debug()) {LOG_INFO << "maxHits in sector " << sector
-                           << " = " << maxHits[sector-1] << endm;}
+    livePads += liveSecPads;
+    totalPads += totalSecPads;
+    if (maxHitsPerSector > 0) {
+      liveFrac = TMath::Max((Float_t) 0.1,
+                 ((Float_t) liveSecPads) / ((Float_t) totalSecPads));
+      maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
+      if (Debug()) {LOG_INFO << "maxHits in sector " << sector
+                             << " = " << maxHits[sector-1] << endm;}
+    } else {
+      maxHits[sector-1] = 0;
+      if (Debug()) {LOG_INFO << "No maxHits in sector " << sector << endm;}
+    }
+  }
+  if (maxBinZeroHits > 0) {
+    liveFrac = TMath::Max((Float_t) 0.1,
+               ((Float_t) livePads) / ((Float_t) totalPads));
+    maxBin0Hits = (Int_t) (liveFrac * maxBinZeroHits);
+    if (Debug()) {LOG_INFO << "maxBinZeroHits " << maxBin0Hits << endm;}
+  } else {
+    maxBin0Hits = 0;
+    if (Debug()) {LOG_INFO << "No maxBinZeroHits" << endm;}
   }
   /*
     InitRun will setup the internal representations of gain 
@@ -135,6 +168,9 @@ Int_t StTpcRTSHitMaker::Make() {
   Int_t maxSector = IAttr("maxSector");
   Int_t minRow    = IAttr("minRow");
   Int_t maxRow    = IAttr("maxRow");
+
+  bin0Hits = 0;
+
   for (Int_t sec = minSector; sec <= maxSector; sec++) {
     StTpcDigitalSector *digitalSector = tpcRawData->GetSector(sec);
     if (! digitalSector) continue;
@@ -144,6 +180,7 @@ Int_t StTpcRTSHitMaker::Make() {
     Int_t nup = 0;
     Int_t NoAdcs = 0;
     for (Int_t row = minRow; row <= maxRow; row++) {
+      if (! St_tpcPadGainT0C::instance()->livePadrow(sec,row)) continue;
       Int_t Npads = digitalSector->numberOfPadsInRow(row);
       if (! Npads) continue;
       for(Int_t pad = 1; pad <= Npads; pad++) {
@@ -188,8 +225,6 @@ Int_t StTpcRTSHitMaker::Make() {
       }
     }
     static StTpcCoordinateTransform transform(gStTpcDb);
-    static StTpcLocalSectorCoordinate local;
-    static StTpcLocalCoordinate global;
     static StThreeVectorF hard_coded_errors;
     //      fTpx->put("cld_sim");       // clean up clusters
     dta = fTpx->get("cld_sim"); // rerun the cluster finder on the simulated data...
@@ -221,18 +256,15 @@ Int_t StTpcRTSHitMaker::Make() {
 	    iBreak++;
 	  }
 	}
-	if (++hitsAdded > maxHits[sec-1]) {
-	  LOG_ERROR << "Too many hits (" << hitsAdded << ") in one sector ("
-	            << sec << "). Skipping event." << endm;
-	  return kStSkip;
-	}
 	if (! hitCollection )  {
 	  hitCollection = new StTpcHitCollection();
 	  rEvent->setTpcHitCollection(hitCollection);
 	}
-	StTpcPadCoordinate padcoord(dta->sec, dta->row, dta->sim_cld[i].cld.pad, dta->sim_cld[i].cld.tb);
-	transform(padcoord,local,kFALSE);
-	transform(local,global);
+	StTpcPadCoordinate Pad(dta->sec, dta->row, dta->sim_cld[i].cld.pad, dta->sim_cld[i].cld.tb); PrPP(Make,Pad);
+	static StTpcLocalSectorCoordinate LS;
+	static StTpcLocalCoordinate L;
+	transform(Pad,LS,kFALSE,kTRUE); PrPP(Make,LS); // don't useT0, useTau                  
+	transform(LS,L);                                                                             PrPP(Make,L);
 	if (dta->row != rowOld) {
 	  rowOld = dta->row;
 	  Double_t gain = (dta->row<=13) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
@@ -253,7 +285,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	hw += (ntmbk << 22);  // ntmbks...
 	Double_t q = ADC2GeV*dta->sim_cld[i].cld.charge;
 	Id++;
-	StTpcHit *hit = new StTpcHit(global.position(),hard_coded_errors,hw,q
+	StTpcHit *hit = new StTpcHit(L.position(),hard_coded_errors,hw,q
 				     , (UChar_t ) 0  // counter 
 				     , (UShort_t) dta->sim_cld[i].track_id  // idTruth=0
 				     , (UShort_t) dta->sim_cld[i].quality   // quality=0,
@@ -263,12 +295,15 @@ Int_t StTpcRTSHitMaker::Make() {
 				     , dta->sim_cld[i].cld.t1 //  mntmbk
 				     , dta->sim_cld[i].cld.t2 //  mxtmbk
 				     , dta->sim_cld[i].cld.pad
-				     , dta->sim_cld[i].cld.tb );
+				     , dta->sim_cld[i].cld.tb 
+				     , dta->sim_cld[i].cld.charge);
 	/*tpxFCF.h
 	  #define FCF_ROW_EDGE            16      // 0x10 touched end of row
 	  #define FCF_BROKEN_EDGE         32      // 0x20 touches one of the mezzanine edges
 	  #define FCF_DEAD_EDGE           64      // 0x40 touches a dead pad */
 	hit->setFlag(dta->sim_cld[i].cld.flags);
+        hitsAdded++;
+        if (hit->minTmbk() == 0) bin0Hits++;
 	hitCollection->addHit(hit);
       }
     }
@@ -279,7 +314,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	UInt_t ntimebins = digitalSector->numberOfTimeBins(row,pad);
 	if (! ntimebins) continue;
 	digitalSector->getTimeAdc(row,pad,ADCs,IDTs);
-	// Update pixels if any
+	// Update pixels if any (for data)
 	dta = fTpx->get("adc_sim",sec);
 	Int_t Updated = 0;
 	while(dta && dta->iterate()) {
@@ -311,6 +346,16 @@ Int_t StTpcRTSHitMaker::Make() {
 	LOG_INFO << "Update total " << nup << " pixels from Sector / row = " << sec << " / " << row <<   endm;
       }
     }
+    if (maxHits[sec-1] && hitsAdded > maxHits[sec-1]) {
+      LOG_ERROR << "Too many hits (" << hitsAdded << ") in one sector ("
+                << sec << "). Skipping event." << endm;
+      return kStSkip;
+    }
+  }
+  if (maxBin0Hits && bin0Hits > maxBin0Hits) {
+    LOG_ERROR << "Too many hits (" << bin0Hits
+              << ") starting at time bin 0. Skipping event." << endm;
+    return kStSkip;
   }
   StTpcHitMaker::AfterBurner(hitCollection);
   return kStOK;

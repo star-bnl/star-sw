@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.39 2011/04/07 23:29:52 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.40 2011/04/07 23:33:12 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,8 +13,41 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
- * Revision 1.39  2011/04/07 23:29:52  genevb
- * Version intended for SL10h embedding (patched for improper max hit calc when gains are falsely zeroed)
+ * Revision 1.40  2011/04/07 23:33:12  genevb
+ * Restore to version before previous commit
+ *
+ * Revision 1.38  2011/03/31 19:31:12  fisyak
+ * Add adc to Tpc hit
+ *
+ * Revision 1.37  2011/03/08 18:20:44  genevb
+ * Limit on number of hits starting at time bin 0
+ *
+ * Revision 1.36  2011/01/21 18:35:25  fisyak
+ * change flag type from UChar_t to UShort_t
+ *
+ * Revision 1.35  2011/01/20 18:26:30  genevb
+ * Add FCF_flags include, and exclude any flagged hit from AfterBurner()
+ *
+ * Revision 1.34  2010/11/05 16:25:19  genevb
+ * No longer include hits found on dead padrows
+ *
+ * Revision 1.33  2010/11/04 19:39:12  genevb
+ * Maintain backward reproducibility
+ *
+ * Revision 1.32  2010/11/04 18:30:47  genevb
+ * Typo correction
+ *
+ * Revision 1.31  2010/11/04 18:29:58  genevb
+ * Max hits scaling does not need to use PadGainT0 table
+ *
+ * Revision 1.30  2010/10/04 19:06:56  fisyak
+ * Use FCF flag definition
+ *
+ * Revision 1.29  2010/09/08 15:44:41  genevb
+ * Slightly better arrangement for limiting excessive TPC events
+ *
+ * Revision 1.28  2010/09/01 21:14:33  fisyak
+ * Add codes for S-shape correction (disactivated)
  *
  * Revision 1.27  2010/08/31 15:19:36  genevb
  * Lower bound on reduced hit maxima
@@ -149,6 +182,7 @@
 #include "StEvent.h"
 #include "StEvent/StTpcHitCollection.h"
 #include "StEvent/StTpcHit.h"
+#include "RTS/src/DAQ_TPX/tpxFCF_flags.h" // for FCF flag definition
 #include "StTpcRawData.h"
 #include "StThreeVectorF.hh"
 
@@ -159,6 +193,7 @@
 #include "StDbUtilities/StCoordinates.hh"
 #include "StDetectorDbMaker/St_tss_tssparC.h"
 #include "StDetectorDbMaker/St_tpcSlewingC.h"
+#include "StDetectorDbMaker/St_TpcPadCorrectionC.h"
 #include "StDetectorDbMaker/St_tpcPadGainT0C.h"
 #include "StDetectorDbMaker/St_tpcAnodeHVavgC.h"
 #include "StDetectorDbMaker/St_tpcMaxHitsC.h"
@@ -183,6 +218,7 @@ Float_t StTpcHitMaker::fgDt    = .2;
 Float_t StTpcHitMaker::fgDperp = .1;
 static Int_t _debug = 0;
 //#define __MAKE_NTUPLE__
+//#define __CORRECT_S_SHAPE__
 //_____________________________________________________________
 Int_t StTpcHitMaker::Init() {
   LOG_INFO << "StTpcHitMaker::Init as\t"  << GetName() << endm;
@@ -202,28 +238,54 @@ Int_t StTpcHitMaker::Init() {
   SetAttr("minRow",1);
   SetAttr("maxRow",45);
   memset(maxHits,0,sizeof(maxHits));
+  maxBin0Hits = 0;
+  bin0Hits = 0;
   return kStOK ;
 }
 //_____________________________________________________________
 Int_t StTpcHitMaker::InitRun(Int_t runnumber) {
+  // Prepare scaled hit maxima
+
+  // No hit maxima if these DB params are 0
   Int_t maxHitsPerSector = St_tpcMaxHitsC::instance()->maxSectorHits();
-  if (maxHitsPerSector>0) SetAttr(".Privilege",1);
+  Int_t maxBinZeroHits = St_tpcMaxHitsC::instance()->maxBinZeroHits();
+  Int_t livePads = 0;
+  Int_t totalPads = 0;
+  Float_t liveFrac = 1;
   for(Int_t sector=1;sector<=24;sector++) {
-    Int_t livePads = 0;
-    Int_t totalPads = 0;
-    for(Int_t row=1;row<=45;row++) {
-      Int_t numPadsAtRow = StTpcDigitalSector::numberOfPadsAtRow(row);
-      totalPads += numPadsAtRow;
-      if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
-          StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
-          St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
-        livePads += numPadsAtRow;
+    Int_t liveSecPads = 0;
+    Int_t totalSecPads = 0;
+    if (maxHitsPerSector > 0 || maxBinZeroHits > 0) {
+      for(Int_t row=1;row<=45;row++) {
+        Int_t numPadsAtRow = StTpcDigitalSector::numberOfPadsAtRow(row);
+        totalSecPads += numPadsAtRow;
+        if (StDetectorDbTpcRDOMasks::instance()->isOn(sector,
+            StDetectorDbTpcRDOMasks::instance()->rdoForPadrow(row)) &&
+            St_tpcAnodeHVavgC::instance()->livePadrow(sector,row))
+          liveSecPads += numPadsAtRow;
+      }
+      livePads += liveSecPads;
+      totalPads += totalSecPads;
     }
-    Float_t liveFrac = TMath::Max((Float_t) 0.1,
-                       ((Float_t) livePads) / ((Float_t) totalPads));
-    maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
-    if (Debug()) {LOG_INFO << "maxHits in sector " << sector
-                           << " = " << maxHits[sector-1] << endm;}
+    if (maxHitsPerSector > 0) {
+      liveFrac = TMath::Max((Float_t) 0.1,
+                 ((Float_t) liveSecPads) / ((Float_t) totalSecPads));
+      maxHits[sector-1] = (Int_t) (liveFrac * maxHitsPerSector);
+      if (Debug()) {LOG_INFO << "maxHits in sector " << sector
+                             << " = " << maxHits[sector-1] << endm;}
+    } else {
+      maxHits[sector-1] = 0;
+      if (Debug()) {LOG_INFO << "No maxHits in sector " << sector << endm;}
+    }
+  }
+  if (maxBinZeroHits > 0) {
+    liveFrac = TMath::Max((Float_t) 0.1,
+               ((Float_t) livePads) / ((Float_t) totalPads));
+    maxBin0Hits = (Int_t) (liveFrac * maxBinZeroHits);
+    if (Debug()) {LOG_INFO << "maxBinZeroHits " << maxBin0Hits << endm;}
+  } else {
+    maxBin0Hits = 0;
+    if (Debug()) {LOG_INFO << "No maxBinZeroHits" << endm;}
   }
   return kStOK;
 }
@@ -234,6 +296,8 @@ Int_t StTpcHitMaker::Make() {
   Int_t minRow    = IAttr("minRow");
   Int_t maxRow    = IAttr("maxRow");
   
+  bin0Hits = 0;
+
   for (Int_t sector = minSector; sector <= maxSector; sector++) {
     fId = 0;
     // invoke tpcReader to fill the TPC DAQ sector structure
@@ -292,11 +356,16 @@ Int_t StTpcHitMaker::Make() {
       }
       daqTpcTable = GetNextDaqElement(mQuery);
     }
-    if (hitsAdded > maxHits[sector-1]) {
+    if (maxHits[sector-1] && hitsAdded > maxHits[sector-1]) {
       LOG_ERROR << "Too many hits (" << hitsAdded << ") in one sector ("
                 << sector << "). Skipping event." << endm;
       return kStSkip;
     }
+  }
+  if (maxBin0Hits && bin0Hits > maxBin0Hits) {
+      LOG_ERROR << "Too many hits (" << bin0Hits
+                << ") starting at time bin 0. Skipping event." << endm;
+      return kStSkip;
   }
   StEvent *pEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
   if (Debug()) {LOG_INFO << "StTpcHitMaker::Make : StEvent has been retrieved " <<pEvent<< endm;}
@@ -327,6 +396,7 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
     for (Int_t l = 0; l < NRows; tpc++) {
       if ( !tpc->has_clusters )  return 0;
       for(Int_t padrow=0;padrow<45;padrow++) {
+        if (! St_tpcPadGainT0C::instance()->livePadrow(sector,padrow+1)) continue;
 	tpc_cl *c = &tpc->cl[padrow][0];
 	Int_t ncounts = tpc->cl_counts[padrow];
 	for(Int_t j=0;j<ncounts;j++,c++) {
@@ -336,7 +406,8 @@ Int_t StTpcHitMaker::UpdateHitCollection(Int_t sector) {
 	}
       }
     }
-  } else {// kReaderType == kStandardTpx
+  } else if (St_tpcPadGainT0C::instance()->livePadrow(sector,row)) {
+    // kReaderType == kStandardTpx
     daq_cld *cld = (daq_cld *) DaqDta()->GetTable();
     if (Debug() > 1) {
       LOG_INFO << Form("CLD sec %2d: row %2d: clusters: %3d",sec, row, NRows) << endm;
@@ -398,18 +469,21 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
 				 (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 
   StTpcHit *hit = new StTpcHit(global.position(),hard_coded_errors,hw,q
-            , (UChar_t ) 0  // c
-            , (UShort_t) 0  // idTruth=0
-            , (UShort_t) 0  // quality=0,
-            , ++fId         // id
-            , cluster.p1 //  mnpad
-            , cluster.p2 //  mxpad
-            , cluster.t1 //  mntmbk
-            , cluster.t2 //  mxtmbk
-            , pad
-            , time );
+			       , (UChar_t ) 0  // c
+			       , (UShort_t) 0  // idTruth=0
+			       , (UShort_t) 0  // quality=0,
+			       , ++fId         // id
+			       , cluster.p1 //  mnpad
+			       , cluster.p2 //  mxpad
+			       , cluster.t1 //  mntmbk
+			       , cluster.t2 //  mxtmbk
+			       , pad
+			       , time 
+			       , cluster.charge);
   hit->setFlag(cluster.flags);
+  if (hit->minTmbk() == 0) bin0Hits++;
 //  LOG_INFO << p << " sector " << sector << " row " << row << endm;
+
   return hit;
 }
 //_____________________________________________________________
@@ -422,7 +496,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   Double_t gain = (row<=13) ? St_tss_tssparC::instance()->gain_in() : St_tss_tssparC::instance()->gain_out();
   Double_t wire_coupling = (row<=13) ? St_tss_tssparC::instance()->wire_coupling_in() : St_tss_tssparC::instance()->wire_coupling_out();
   Double_t q = cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * 
-				   (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
+				 (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 
   // Correct for slewing (needs corrected q, and time in microsec)
   Double_t freq = gStTpcDb->Electronics()->samplingFrequency();
@@ -448,17 +522,19 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
   static StThreeVector<double> hard_coded_errors(fgDp,fgDt,fgDperp);
 
   StTpcHit *hit = new StTpcHit(global.position(),hard_coded_errors,hw,q
-            , (UChar_t ) 0  // c
-            , (UShort_t) 0  // idTruth=0
-            , (UShort_t) 0  // quality=0,
-            , ++fId         // id =0
-            , cluster.p1 //  mnpad
-            , cluster.p2 //  mxpad
-            , cluster.t1 //  mntmbk
-            , cluster.t2 //  mxtmbk
-            , pad
-            , time );
+			       , (UChar_t ) 0  // c
+			       , (UShort_t) 0  // idTruth=0
+			       , (UShort_t) 0  // quality=0,
+			       , ++fId         // id =0
+			       , cluster.p1 //  mnpad
+			       , cluster.p2 //  mxpad
+			       , cluster.t1 //  mntmbk
+			       , cluster.t2 //  mxtmbk
+			       , pad
+			       , time 
+			       , cluster.charge);
   hit->setFlag(cluster.flags);
+  if (hit->minTmbk() == 0) bin0Hits++;
 //  LOG_INFO << p << " sector " << sector << " row " << row << endm;
   return hit;
 }
@@ -834,6 +910,9 @@ Bool_t TpcHitLess(const StTpcHit *lhs, const StTpcHit *rhs) {
 //________________________________________________________________________________
 void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
   static Float_t padDiff = 2.5, timeBucketDiff = 5.0;
+  static StTpcCoordinateTransform transform(gStTpcDb);
+  static StTpcLocalSectorCoordinate local;
+  static StTpcLocalCoordinate global;
   if (! TpcHitCollection) return;
 #ifdef __MAKE_NTUPLE__
   if (! tup) {
@@ -862,7 +941,7 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	  for (UInt_t k = 0; k < NoHits; k++) {
 	    StTpcHit* kHit = TpcHitCollection->sector(sec-1)->padrow(row-1)->hits().at(k);
 	    if (_debug) {cout << "k " << k; kHit->Print();}
-	    if (kHit->flag())                               continue;
+	    if (kHit->flag())                          continue;
 #ifdef __MAKE_NTUPLE__
 	    pairC.sec    = sec;
 	    pairC.row    = row;
@@ -907,13 +986,18 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	      // check hits near by
 	      if (TMath::Abs(kHit->pad()        - lHit->pad())        > padDiff ||
 		  TMath::Abs(kHit->timeBucket() - lHit->timeBucket()) > timeBucketDiff) continue;
-	      UChar_t flag = lHit->flag() | 0x080; 
+#ifdef FCF_CHOPPED
+	      UShort_t flag = lHit->flag() | FCF_CHOPPED; 
+#else
+	      UShort_t flag = lHit->flag() | 0x080;
+#endif
 	      lHit->setFlag(flag);
 	      if (_debug) {
 		cout << "mk" << k; kHit->Print();
 		cout << "ml" << l; lHit->Print();
 	      }
-	      Float_t q =           lHit->charge()                    + kHit->charge();	
+	      Float_t q          =  lHit->charge()                    + kHit->charge();	
+	      Float_t adc        =  lHit->adc()                       + kHit->adc();
 	      Float_t pad        = (lHit->charge()*lHit->pad()        + kHit->charge()*kHit->pad()       )/q;
 	      Float_t timeBucket = (lHit->charge()*lHit->timeBucket() + kHit->charge()*kHit->timeBucket())/q;
 	      Short_t minPad  = TMath::Min(lHit->minPad(),  kHit->minPad());
@@ -934,9 +1018,7 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	      kHit->setIdTruth(IdT, TMath::Nint(QA));
 	      kHit->setCharge(q);
 	      kHit->setExtends(pad,timeBucket,minPad,maxPad,minTmbk,maxTmbk);
-	      static StTpcCoordinateTransform transform(gStTpcDb);
-	      static StTpcLocalSectorCoordinate local;
-	      static StTpcLocalCoordinate global;
+	      kHit->setAdc(adc);
 	      StTpcPadCoordinate padcoord(sec, row, pad, timeBucket);
 	      transform(padcoord,local,kFALSE);
 	      transform(local,global);
@@ -947,6 +1029,23 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
 	      merged++;
 	    }
 	  }
+#ifdef __CORRECT_S_SHAPE__
+	  // Correct S - shape in pad direction
+	  for (UInt_t k = 0; k < NoHits; k++) {
+	    StTpcHit* kHit = TpcHitCollection->sector(sec-1)->padrow(row-1)->hits().at(k);
+	    if (kHit->flag())                         continue;
+	    Double_t pad        = kHit->pad();
+	    Double_t timeBucket = kHit->timeBucket();
+	    Int_t io = 1;
+	    if (row > 13) io = 2;
+	    Int_t np = kHit->padsInHit();
+	    pad += St_TpcPadCorrectionC::instance()->GetCorrection(pad,io,np,0);
+	    StTpcPadCoordinate padcoord(sec, row, pad, timeBucket);
+	    transform(padcoord,local,kFALSE);
+	    transform(local,global);
+	    kHit->setPosition(global.position());
+	  }
+#endif
 	}
       }
     }
