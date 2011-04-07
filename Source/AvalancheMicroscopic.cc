@@ -529,7 +529,6 @@ AvalancheMicroscopic::DriftElectron(
   nPhotons = nElectrons = nHoles = nIons = 0; 
   nElectronEndpoints = nHoleEndpoints = 0;
 
-
   return TransportElectron(x0, y0, z0, t0, e0, dx0, dy0, dz0, false, false);
 
 }
@@ -566,13 +565,18 @@ AvalancheMicroscopic::TransportElectron(
   }
 
   // Make sure that the starting point is inside a medium.
-  Medium* medium;
+  Medium* medium = 0;
   if (!sensor->GetMedium(x0, y0, z0, medium)) {
     std::cerr << className << "::TransportElectron:\n";
     std::cerr << "    No medium at initial position.\n";
     return false;
   }
-  
+  if (medium == 0) {
+    std::cerr << className << "::TransportElectron:\n";
+    std::cerr << "    No medium at initial position.\n";
+    return false;
+  }
+
   // Make sure that the medium is "driftable" and microscopic.
   if (!medium->IsDriftable() || !medium->IsMicroscopic()) {
     std::cerr << className << "::TransportElectron:\n";

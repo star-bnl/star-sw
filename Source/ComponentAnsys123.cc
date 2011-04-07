@@ -985,8 +985,8 @@ ComponentAnsys123::GetMedium(
                  xmirrored, ymirrored, zmirrored,
                  rcoordinate, rotation);
 
-  // Initial values
-  m = NULL;
+  // Initial value
+  m = 0;
 
   // Do not proceed if not properly initialised.
   if (!ready) {
@@ -1034,8 +1034,9 @@ ComponentAnsys123::GetMedium(
     }
   }
   
-  // Assign a medium
+  // Assign a medium.
   m = materials[elements[imap].matmap].medium;
+  if (m == 0) return false;
   return true;
     
 }

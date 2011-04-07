@@ -102,17 +102,24 @@ bool
 Sensor::GetMedium(const double x, const double y, const double z,
                   Medium*& m) {
 
-  // Check if we are still in the same component as in the previous call
+  m = 0;
+
+  // Make sure there is at least one component.
   if (lastComponent < 0) return false;
 
+  // Check if we are still in the same component as in the previous call
   if (components[lastComponent].comp->GetMedium(x, y, z, m)) {
-    return true;
+    // Cross-check that the medium is defined.
+    if (m != 0) return true;
   }
 
   for (int i = nComponents; i--;) {
     if (components[i].comp->GetMedium(x, y, z, m)) {
-      lastComponent = i;
-      return true;
+      // Cross-check that the medium is defined.
+      if (m != 0) {
+        lastComponent = i;
+        return true;
+      }
     }
   }
 

@@ -949,7 +949,7 @@ ComponentAnsys121::WeightingPotential(
 
 bool 
 ComponentAnsys121::GetMedium(
-            const double xin, const double yin, const double zin, Medium*& m) {
+        const double xin, const double yin, const double zin, Medium*& m) {
 
   // Copy the coordinates
   double x = xin, y = yin, z = zin;
@@ -961,8 +961,8 @@ ComponentAnsys121::GetMedium(
                  xmirrored, ymirrored, zmirrored,
                  rcoordinate, rotation);
 
-  // Initial values
-  m = NULL;
+  // Initial value
+  m = 0;
 
   // Do not proceed if not properly initialised.
   if (!ready) {
@@ -975,7 +975,7 @@ ComponentAnsys121::GetMedium(
     printf("    Warnings have been issued for this field map.\n");
   }
 
-  // Find the element that contains this point
+  // Find the element that contains this point.
   double t1, t2, t3, t4, jac[4][4], det;
   int imap = FindElement5(x, y, z, t1, t2, t3, t4, jac, det);
   if (imap < 0) {
@@ -1009,8 +1009,9 @@ ComponentAnsys121::GetMedium(
     }
   }
   
-  // Assign a medium
+  // Assign a medium.
   m = materials[elements[imap].matmap].medium;
+  if (m == 0) return false;
   return true;
   
 }
