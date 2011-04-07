@@ -1,3 +1,0 @@
-Gui.Style:                  windows
-Gui.Backend:                qt
-Gui.Factory:                qtgui
