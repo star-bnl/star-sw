@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.30 2011/04/06 20:01:29 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.31 2011/04/07 02:29:57 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.31  2011/04/07 02:29:57  hmasui
+ * Print (pseudo-)rapidity up to 2nd digit string
+ *
  * Revision 1.30  2011/04/06 20:01:29  hmasui
  * Put back Ncommon vs NHitFit histogram for all pt, and fix a bug for name of projected histograms for Ncommon vs NHitFit
  *
@@ -384,8 +387,8 @@ void StEmbeddingQADraw::init()
   trackSelections->SetTextFont(42);
   trackSelections->AddText("*** Track selections");
   trackSelections->AddText(Form("  %1.1f < p_{T} < %1.1f GeV/c", utility->getPtMinCut(), utility->getPtMaxCut())); // pt cut
-  trackSelections->AddText(Form("  |#eta| < %1.1f", utility->getEtaCut()));
-  trackSelections->AddText(Form("  |y| < %1.1f", utility->getRapidityCut()));
+  trackSelections->AddText(Form("  |#eta| < %1.2f", utility->getEtaCut()));
+  trackSelections->AddText(Form("  |y| < %1.2f", utility->getRapidityCut()));
   trackSelections->AddText(Form("  nHitsFit > %3d", utility->getNHitCut()));
   trackSelections->AddText(Form("  nHitsFit/nHitsPoss > %1.2f", utility->getNHitToNPossCut()));
   trackSelections->AddText(Form("  global Dca < %1.1f cm", utility->getDcaCut()));
