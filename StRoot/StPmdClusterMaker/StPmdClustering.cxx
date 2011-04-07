@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.28 2010/04/20 23:08:51 rashmi Exp $
+ * $Id: StPmdClustering.cxx,v 1.30 2010/05/31 22:13:02 rashmi Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,6 +17,12 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.30  2010/05/31 22:13:02  rashmi
+ * New Clustering routine uses Edep() instead of Adc() of PmdHit; mOptCalibrate Flag set to kTRUE
+ *
+ * Revision 1.29  2010/05/29 00:47:10  rashmi
+ * Added a call to new clustering routines in StPmdClustering
+ *
  * Revision 1.28  2010/04/20 23:08:51  rashmi
  * removed refinedcluidet2.dat; no refined clusters in 2010 data
  *
@@ -1076,3 +1082,552 @@ void StPmdClustering::Cluster_Eta_Phi(Float_t xreal,Float_t yreal,Float_t zreal,
   if(xreal != 0) {phi = atan2(yreal,xreal);}
 
 }
+
+//---------------------------------
+//! finding Pmd and Cpv clusters
+Bool_t StPmdClustering::findPmdClusters2(StPmdDetector *mdet)
+{
+  cout<<"cutoff in findPmdClusters2="<<cutoff<<endl;
+  //cout<<" Finding cluster for PMD detector"<<endl;
+  
+  
+  // Declared in StpmdClusterin.h now
+  //  StPmdClusterCollection * pmdclus;
+  pmdclus = new StPmdClusterCollection();
+  mdet->setCluster(pmdclus);
+  
+  if(mdet){
+    
+    
+    for(Int_t ism = 1; ism<=12; ism++){
+      
+      TClonesArray * mPmdSuperClusters = new TClonesArray("TList",1000);
+      
+      // Getting the pointer to the supermodule from the detector
+      // notice that StPmdDetector->module(xx) takes xx from 1 to 12 
+      StPmdModule * pmd_mod = mdet->module(ism); //
+      Int_t nhits = mdet->module_hit(ism);
+      //      cout<<" Number of entries in "<<ism<<" module is "<<nhits<<endl;
+      
+      // if no hits, go to the next supermodule
+      if(nhits<=0) continue;
+      // pass on the StPmdModule to make superclusters
+      // All the superclusters are filled into the mPmdSuperClusters TClonesArray
+      Int_t nSuperClusters = MakeSuperClusters(ism,pmd_mod,mPmdSuperClusters);
+      //      cout<<" number of superclusters on module "<<ism<<" is "<<nSuperClusters<<endl;
+      
+      // Going to form clusters now
+      if (nSuperClusters==0|| nSuperClusters > nhits){
+	cout<<"Warning!!! nent/nsuper "<<nhits<<"/"<<nSuperClusters<<endl;
+	cout<<"The hits of this module will not be added to the outgoing TClonesArray of hits"<<endl;
+	//	      return kStErr;
+      }else{
+	//	cout<<"Going to MakeClusters()"<<endl;
+	//	Int_t gotclusters = MakeClusters(mPmdSuperClusters,pmdclus);
+	Int_t gotclusters = MakeClusters(mPmdSuperClusters);
+	
+	if (gotclusters==0){
+	  cout<<" Did not get any clusters in this sm"<<endl;
+	}
+	//      if (mOptDebug)
+      }
+      mPmdSuperClusters->Delete();
+      delete mPmdSuperClusters;
+    }
+  }
+  cout<<"Number of clusters in findPmdClusters2 = "<<pmdclus->Nclusters()<<endl;
+  
+  return kStOK;
+}
+
+//---------------------------------------------------------------------------------------
+
+Int_t StPmdClustering::MakeSuperClusters(Int_t modnum,StPmdModule * mpmdMod , TClonesArray* mPmdSuperClusters){
+
+  Int_t Columnneigh[6] = {-1,-1,0,1,1,0};
+  Int_t Rowneigh[6] = {0,1,1,0,-1,-1};
+  //  cout<<"In MakeSuperClusters: CutOff="<<cutoff<<endl;
+
+  //Initializing the hitmap
+  
+  //Row and column numbers start from 0
+  Int_t hitmap[NRowMax][NColumnMax];
+  Int_t Flag[NRowMax][NColumnMax];
+  for( Int_t ncellX = 0; ncellX < NRowMax; ncellX++ ){
+    for( Int_t ncellY = 0; ncellY < NColumnMax; ncellY++ ){
+      hitmap[ncellX][ncellY]=-1;
+      Flag[ncellX][ncellY]=0;     
+    }
+  }
+  // Get pointer to the TObjArray of pmd hits in this module
+  TObjArray * PmdHits = mpmdMod->Hits();
+  //  PmdHits->Sort();
+  // Sorts in descending order
+  PmdHits->Sort(0);
+  // GetNumber of hits in the module
+  Int_t Ncell_mod = PmdHits->GetEntries();
+  
+  // Just accountancy
+  Int_t NWithin=0;
+  Int_t NAccCut=0;
+  // Filling hitmap will all the hits. We start making superclusters
+  // with the hitmap.
+  //  cout<<" number of entries in module number "<<modnum<<" is "<<Ncell_mod<<endl;
+  for (Int_t i = 0; i < Ncell_mod; i++){
+
+    StPmdHit * mPmdHit = (StPmdHit*)PmdHits->At(i);
+    //    cout<<" mPmdHit deatils mod "<<mPmdHit->Gsuper()<<" detector="<<mPmdHit->SubDetector()<<endl;
+
+    // Add those cells which have adc above cutoff to the hitmap.
+    // The hitmap hold the index of the hit in the PmdHits TObjArray
+    if((mPmdHit->Row()>NRowMax||mPmdHit->Row()<=0)||
+       (mPmdHit->Column()>NColumnMax||mPmdHit->Column()<=0)){
+      cout<<"hit out of range :"<<mPmdHit->Row()-1<<"/"<<mPmdHit->Column()-1<<endl;
+    }else{  
+      if (mPmdHit->Edep() > cutoff ){
+	hitmap[mPmdHit->Row()-1][mPmdHit->Column()-1]= i;
+	NWithin++;
+      }else {
+	//	cout<<"Adc less than cutoff Adc/cutoff "<<
+	//mPmdHit->Edep()<<"/"<<cutoff<<endl;
+	hitmap[mPmdHit->Row()-1][mPmdHit->Column()-1] = -1;
+	Flag[mPmdHit->Row()-1][mPmdHit->Column()-1]=2; 
+	NAccCut++;
+      }
+    }   
+  }
+  // hitmap ready here 
+
+  // Account statement
+  if ((NWithin+NAccCut)!=Ncell_mod){
+    cout<<" Some hits outside hitmap NWithin/NAccCut/NTotal "<<
+      NWithin<<"/"<<NAccCut<<"/"<<Ncell_mod<<endl;
+  }
+  if (NWithin==0){
+    return 0;
+  }
+  //  cout<<" NWithin/NAccCut/NTotal "<<NWithin<<"/"<<NAccCut<<"/"<<Ncell_mod<<endl;
+
+
+ //Make superclusters now
+  //Initializing the number of Superclusters
+  Int_t  nPmdSuperCluster = -1;
+
+  for(Int_t icell = 0; icell < Ncell_mod; icell++){
+    StPmdHit *mPmdHit = (StPmdHit*)PmdHits->At(icell);
+    //    cout<<" flag of hit["<<icell<<"] is Flag["<<mPmdHit->Row()-1<<"]["<<mPmdHit->Column()-1<<"]="<<Flag[mPmdHit->Row()-1][mPmdHit->Column()-1]<<endl;
+    if((mPmdHit->Row()>NRowMax||mPmdHit->Row()<=0)||
+       (mPmdHit->Column()>NColumnMax||mPmdHit->Column()<=0)){
+      cout<<"hit out of range :"<<mPmdHit->Row()-1<<"/"<<mPmdHit->Column()-1<<endl;
+      continue;
+    }
+    
+    if (Flag[mPmdHit->Row()-1][mPmdHit->Column()-1]==0){
+      nPmdSuperCluster++;
+      //      cout<<"npmdsuperclusters="<<nPmdSuperCluster<<endl;
+      TList *  mPmdSuperCluster = (TList*)mPmdSuperClusters->New(nPmdSuperCluster);
+      //      cout<<" made a new supercluster with address "<<mPmdSuperCluster<<" in list with address "<<mPmdSuperClusters<<endl;
+      TIter ClusterListIter(mPmdSuperCluster);
+      //Add hit to the supercluster and put flag =1
+      mPmdSuperCluster->Add(mPmdHit);
+      //            cout<<" added hit # "<<icell<<" to supercluster # "<<nPmdSuperCluster<<endl;
+      Flag[mPmdHit->Row()-1][mPmdHit->Column()-1]=1;
+      //make a list of its neighbours and their neighbours
+      
+      for(Int_t k=0;k<mPmdSuperCluster->GetSize();k++){
+	StPmdHit* clusterhit = (StPmdHit*)mPmdSuperCluster->At(k);
+	Int_t clusterhitRow = clusterhit->Row();
+	Int_t clusterhitColumn = clusterhit->Column();
+	if(Flag[clusterhitRow-1][clusterhitColumn-1]!=1) cout<<"???????"<<endl;
+	//checking neighbours
+	for( Int_t ineigh = 0;ineigh < 6; ineigh++ ){
+	  Int_t neighbourRow = clusterhitRow + Rowneigh[ineigh];
+	  Int_t neighbourColumn = clusterhitColumn + Columnneigh[ineigh];
+	  Int_t boundary = CheckBoundary(modnum,neighbourRow-1,neighbourColumn-1);
+
+	  if (boundary==0 && hitmap[neighbourRow-1][neighbourColumn-1]!=-1){
+
+	    //	  if (hitmap[neighbourRow-1][neighbourColumn-1]!=-1){
+	    //	    if(mOptDebug)cout<<"neigh row/col "<<neighbourRow<<"/"<<neighbourColumn<<endl;
+	    StPmdHit* neighbour = (StPmdHit*)PmdHits->At(hitmap[neighbourRow-1][neighbourColumn-1]);
+	    //	    cout<<" ineigh = "<<ineigh<<" Got hit number "<<hitmap[neighbourRow-1][neighbourColumn-1]<<" with adc"<<neighbour->Edep()<<" as connecting hit. k= "<<k<<" SpCl size is "<<mPmdSuperCluster->GetSize()<<endl;
+	    if (neighbour){
+	      if (neighbour->Edep()>cutoff
+		  && Flag[neighbourRow-1][neighbourColumn-1]==0){
+		mPmdSuperCluster->Add(neighbour);
+		//		cout<<"The size of supercluster is "<<mPmdSuperCluster->GetSize()<<endl;
+		//		cout<<"added "<<hitmap[neighbourRow-1][neighbourColumn-1]<<" with adc"<<neighbour->Edep()<<" as connecting hit"<<endl;
+		Flag[neighbourRow-1][neighbourColumn-1]=1;
+	      }//if neighbour is above cutoff
+	    }//if neighbour exists and is not already part of the supercluster
+	  }//if hitmap exists
+	} //looping over 6 neighbours
+      }//looping over superclusterlist (for neighbours)
+      //      if (mOptDebug && (mPmdSuperCluster->GetSize()>MaxSuperSize)){
+      if (mPmdSuperCluster->GetSize()>MaxSuperSize){
+	cout<<"The size of supercluster "<<mPmdSuperCluster->GetSize()<<" exceeds MaxSuperSize("<<MaxSuperSize<<")"<<endl;
+	return 0;
+      }	
+      mPmdSuperCluster->Sort(0);
+      
+    }//if flag=0
+    
+  } // looping over all hits TObjArray     
+  
+  //  cout<<"going out of MakerSuperClusters with ";
+  Int_t Nentries = mPmdSuperClusters->GetEntries();
+  //  cout<<"Got "<<Nentries<<" Superclusters."<<endl;
+  
+  return Nentries;
+}
+
+//--------------------------------------------------------------------------------------
+
+//Int_t StPmdClustering::MakeClusters(TClonesArray * mPmdSuperClusters, StPmdClusterCollection * pmdclus)
+Int_t StPmdClustering::MakeClusters(TClonesArray * mPmdSuperClusters)
+{  
+  
+  //   cout<<" In MakeCluster"<<endl;
+  
+  Int_t nLocalPeak=0;
+  Int_t sum_nclusters = 0;
+  //  cout<<"MakeCluster::# of superclusters is "<<mPmdSuperClusters->GetEntries()<<endl;
+  //  cout<<" address of mPmdSuperCluster list is "<<mPmdSuperClusters<<endl;
+  for(Int_t i=0;i<mPmdSuperClusters->GetEntries();i++){
+    //    cout<<" Got supercluster number "<<i<<" / "<<mPmdSuperClusters->GetEntries()<<endl;
+    TList *mPmdSuperCluster = (TList*)mPmdSuperClusters->At(i);
+    Int_t ncell = mPmdSuperCluster->GetSize();
+    //    cout<<"# of cells in "<<i<<" superclusters is "<<ncell<<" address is "<<mPmdSuperCluster<<endl;
+    //Initialzation of cluster parameters
+    //    Int_t nmod,det;
+    if (ncell==0) {
+      break;
+      cout<<"zero cells in this supercluster!!!"<<endl;
+    }else{
+      
+      if ((ncell<3 && mOptRefineCluster==kTRUE)||(mOptRefineCluster==kFALSE)){
+	
+	//       cout<<" converting supercluster to cluster with ncell = "<<ncell<<endl;
+	
+	StPmdCluster *pcluster = new StPmdCluster();;
+	pmdclus->addCluster(pcluster);
+	Float_t hitfract[ncell];
+	
+	for(Int_t j = 0; j < ncell; j++ ){
+	  StPmdHit * phit = (StPmdHit*)mPmdSuperCluster->At(j);
+	  pcluster->addHitCollection(phit);
+	  hitfract[j]=1.0;
+	}
+	//	Float_t nmem = 
+	BuildCluster(pcluster,hitfract);
+	//	cout<<" No refine and so I have a cluster with "<<nmem<<" cells"<<endl;
+	
+	sum_nclusters++;
+      }
+      
+      // This option is used only if ncell >=3 and Refine Clustering is ON
+      else{ 
+	//	cout<<" Got a big cluster and Refined clustering ON says I have to break it"<<endl;
+	// jLocalPeak is array of the hits in a supercluster which are
+	// Local peaks. Since the index of hits in a supercluster starts
+	// with 0, the jLocalPeaks are initialised to -1 and not 0.
+	Int_t jLocalPeak[MaxLocalPeaks];
+	for (Int_t j=0;j<MaxLocalPeaks;j++){
+	  jLocalPeak[j] = -1; // 
+	}
+	// Get local peaks for SuperCluster with ncell
+	Int_t *pLocalPeak = &jLocalPeak[0];
+	//	cout<<"Choice="<<LocalPeakChoice<<BreakSuperClusterChoice<<SigmaChoice<<endl;
+	
+	nLocalPeak = GetLocalPeaks(pLocalPeak,mPmdSuperCluster);
+	
+	//       	if (mOptDebug)
+	//	cout<<i<<"\t"<<" pLocalPeak = "<< pLocalPeak <<"\t"<<"nLocalPeak = "<<nLocalPeak<<endl;
+	
+	// If there is only 1 local peak then we dont have to break the supercluster
+	if(nLocalPeak==1){
+	  
+	  StPmdCluster *pcluster = new StPmdCluster();;
+	  pmdclus->addCluster(pcluster);
+	  Float_t hitfract[nLocalPeak];
+	  
+	  // put all the hits into this cluste collection and send it to builtcluster
+	  for(Int_t ihit = 0;ihit<mPmdSuperCluster->GetEntries();ihit++){
+	    hitfract[ihit]=1.0;
+	    StPmdHit * phit = (StPmdHit*)mPmdSuperCluster->At(ihit);
+	    pcluster->addHitCollection(phit);
+	  }
+	  Float_t nmem = BuildCluster(pcluster,hitfract);
+	  
+	  if(nmem==0) cout<<" 1 local peak only  so I have a cluster with "<<nmem<<" cells"<<endl;
+	}
+	
+	if (nLocalPeak>1 && nLocalPeak<MaxLocalPeaks){
+	  sum_nclusters+=nLocalPeak;
+	  /*
+	  cout<<" sum_clusters = "<<sum_nclusters<<endl;
+	  cout<<" number of hits in this SuperCluster ="<<mPmdSuperCluster->GetEntries()<<endl;
+	  cout<<" Number of clusters in ClusterCollection is "<<pmdclus->Nclusters()<<endl;
+	  cout<<" address of jLocalPeak = "<<pLocalPeak<<endl;
+	  cout<<" address of mPmdSuperCluster = "<<mPmdSuperCluster<<endl;
+	  cout<<" address of pmdclusCollection = "<<pmdclus<<endl;
+	  */
+	  //	  Bool_t broken = BreakSuperCluster(nLocalPeak,pLocalPeak,mPmdSuperCluster,pmdclus);
+	  Bool_t broken = BreakSuperCluster(nLocalPeak,pLocalPeak,mPmdSuperCluster);
+	  //	  if(mOptDebug)
+	  
+	  if(broken==1){
+	    cout<<" too many local peaks I think"<<endl;
+	  }
+	}else{
+	  // the module was cut due to number of localpeaks>MaxLocalPeaks
+	  //if (mOptDebug)
+	  cout<<"Module cut due to nLocalPeaks>MaxLocalPeaks"<<endl;
+	  return 0;
+	}
+      }
+    }	
+  }
+  //  cout<<"out of makeclusters"<<endl;
+  return sum_nclusters;
+}
+
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------
+//Returns cell xy in units of the cell size wrt to the cornermost cell.
+// The corner most cell has row=0;col=0;
+//CAUTION: Not absolute xy.
+
+void StPmdClustering::CellXY(Int_t row, Int_t column, Float_t& xx, Float_t& yy){
+  //  column = column -1;
+  //  row = row -1;
+  xx = (Float_t)(column + 0.5*row);
+  yy = 0.5*sqrt(3.)*row;
+}
+//---------------------------------------------------------------------
+
+Int_t StPmdClustering::CheckBoundary(Int_t nmod,Int_t numRow, Int_t numColumn){
+  if ((numRow>=0 && numRow< NRowMax) &&
+      (numColumn>=0 && numColumn<NColumnMax))
+    {  //  cout<<"In checkboundary"<<endl;
+      return 0;}
+  else return 1;
+}
+//---------------------------------------------------------------------
+
+Int_t StPmdClustering::GetLocalPeaks(Int_t* jLocalPeak,TList *mPmdSuperCluster){
+  
+  Int_t nLocalPeak =-1;
+  Int_t ncell = mPmdSuperCluster->GetSize();
+  Float_t xLocalPeak[ncell];
+  Float_t yLocalPeak[ncell];
+  Float_t adcLocalPeak[ncell];
+
+  //The highest peak of the supercluster is definately a peak so:
+  nLocalPeak++;
+  if(nLocalPeak>=MaxLocalPeaks) cout<<" Number of Local peaks is "<<nLocalPeak+1<<" which exceeds the array size MaxLocalPeaks ="<<MaxLocalPeaks<<endl;
+  StPmdHit * phitj = (StPmdHit*)mPmdSuperCluster->At(0);
+  Float_t hitx1 = 0;   Float_t hity1 = 0;
+  CellXY(phitj->Row()-1,phitj->Column()-1,hitx1,hity1); 
+  Int_t sm = phitj->Gsuper();
+  jLocalPeak[nLocalPeak]   = 0;
+  xLocalPeak[nLocalPeak]   = hitx1;
+  yLocalPeak[nLocalPeak]   = hity1;
+  adcLocalPeak[nLocalPeak] = phitj->Edep();
+  //    cout<<"Out of ncell ="<<ncell<<" cell 0 has adc ="<<phitj->adc()<<endl;
+  //cout<<"nLocalPeak =  "<<nLocalPeak<<
+  //      " jLocalPeak ="<<jLocalPeak[nLocalPeak]<<
+  //      " adcLocalPeak =  "<<adcLocalPeak[nLocalPeak]<<
+  //      " x,y = "<<xLocalPeak[nLocalPeak]<<","<<yLocalPeak[nLocalPeak]<<endl;
+  // Check the next highest cell........ 
+  for (Int_t j = 1; j < ncell; j++){
+    StPmdHit * phitj = (StPmdHit*)mPmdSuperCluster->At(j);
+    //      cout<<"cell "<<j<<" has adc ="<<phitj->adc()<<endl;
+    Float_t hitx = 0;   Float_t hity = 0;
+    CellXY(phitj->Row()-1,phitj->Column()-1,hitx,hity);
+    //......against all the previous LocalPeaks
+    Int_t nclear = -1;
+    for (Int_t k = 0; k <= nLocalPeak; k++){ 
+      Float_t gap = Dist(hitx,hity,xLocalPeak[k],yLocalPeak[k]);
+      //      Float_t fadc = 1.0*phitj->adc()/adcLocalPeak[k];
+      //the distances are in units of cell sizes. 
+      if( gap >= 1.1 && gap < 1.8 && phitj->Edep() > adcLocalPeak[k]*0.30) nclear++;
+      if( gap >= 1.8 && gap < 2.1 && phitj->Edep() > adcLocalPeak[k]*0.15) nclear++;
+      if( gap >= 2.1 && gap < 2.8 && phitj->Edep() > adcLocalPeak[k]*0.05) nclear++;
+      if( gap >= 2.8 ) nclear++;
+    }      
+    if (nclear==nLocalPeak){//cleared against all previous local peaks
+      // then it is another local peak so add to list
+      nLocalPeak++;
+      if (nLocalPeak<MaxLocalPeaks){
+	jLocalPeak[nLocalPeak]   = j;
+	xLocalPeak[nLocalPeak]   = hitx;
+	yLocalPeak[nLocalPeak]   = hity;
+	adcLocalPeak[nLocalPeak] = phitj->Edep();
+      }else{
+	cout<<"number of local peaks is "<<nLocalPeak<<" which is more than "<<MaxLocalPeaks<<" for a supercluster of size ="<<ncell<<" in sm number ="<<sm<<endl;
+	return 0;
+      }
+    }
+  }
+  return ++nLocalPeak;
+    
+}
+//----------------------------------------------------------------------
+void StPmdClustering::Cell_eta_phi(Float_t xreal,Float_t yreal,Float_t& eta,Float_t& phi){
+
+  // Converts xyz from STAR 0,0,0 to actual vertex
+  xreal = xreal - mVertexPos.x();
+  yreal = yreal - mVertexPos.y();
+  Float_t zreal = -1.0*geom->GetPmdZ();
+  zreal = zreal - mVertexPos.z();
+  //  cout<<"IN Clustering: xreal="<<xreal<<" yreal="<<yreal<<" zreal="<<zreal;
+  
+  Float_t rdist = (TMath::Sqrt(xreal*xreal + yreal*yreal))/zreal;
+  
+  Int_t flag = -1;
+  if (rdist<0.) {
+    flag = +1;
+    rdist=TMath::Abs(rdist);
+  }
+
+  Float_t theta = TMath::ATan(rdist);
+  if(theta !=0.)eta = flag*TMath::Log(TMath::Tan(0.5*theta));
+  if( xreal==0) {
+    if(yreal>0) phi = TMath::Pi()/2.0;
+    if(yreal<0) phi = -1.0*TMath::Pi()/2.0;
+  }
+  if(xreal != 0) phi = atan2(yreal,xreal);
+
+  //  cout<<" theta="<<theta<<" eta="<<eta<<" phi="<<phi<<endl;
+}
+
+
+//-----------------------------------------------------------------------------
+Float_t StPmdClustering::BuildCluster( StPmdCluster *pcluster,Float_t* hitfract){
+  
+
+  // Get the hit collection from the pcluster and built the cluster
+  TObjArray* hitCollection = pcluster->HitCollection();
+  Int_t ncell = hitCollection->GetEntries();
+  
+  Float_t adchit[ncell],xhit[ncell],yhit[ncell];
+  Float_t SigmaL = 0, SigmaS = 0;
+  Float_t cluX=0, cluY=0, cluAdc=0;
+  Float_t eta=0,phi=0;
+  
+  
+  //  cout<<" Got hit collection with size = "<<ncell<<endl;
+  // Getting the module number of the cluster from the module and detector number of hit.
+  // and setting the module and number of member hits of pcluster
+  StPmdHit* phit = (StPmdHit*)hitCollection->At(0);
+  Int_t nmod = phit->Gsuper();
+  Int_t det = phit->SubDetector();//1 for pmd and 2 for cpv
+  //	    cout<<" nmod = "<<nmod<<" det = "<<det<<endl;
+  //	    nmod =  12*(2-det) + nmod-1;//to go to 0-23 format
+  Int_t nmodclu =  12*(2-det) + nmod;//to go to 0-23 format
+  //	    cout<<" New module number for clusters is "<<nmodclu<<endl;
+  pcluster->setModule(nmodclu);
+  Float_t nmem = Float_t(ncell*1.0);
+  pcluster->setNumofMems(nmem);
+  
+  
+  // Now to calculate the eta,phi and sigmaS,L and ADC of the cluster
+
+  // For a single cell cluster
+  if (ncell==1){
+    SigmaL=0;
+    SigmaS=0;
+    StPmdHit * phit = (StPmdHit*)hitCollection->At(0);
+
+    //    cout<<" Building cluster for 1 cell with adc ="<<phit->Edep()<<endl;
+    // Eta phi is useless here since it is wrt 0,0,0 and not wrt vertex
+    geom->IntDetCell_xy(nmod,(phit->Row()),(phit->Column()),cluX,cluY,eta,phi);
+    cluAdc = phit->Edep()*1.0;
+    //    cout<<" Cluster position and adc is  is "<<cluX<<" "<<cluY<<" "<<cluAdc<<endl;
+
+  }else{ 
+    // If there are more than 1 hit then
+    // loop over all the hits
+    Float_t sumx=0,sumy=0;
+    for(Int_t j = 0; j < ncell; j++ ){
+      StPmdHit * phit = (StPmdHit*)hitCollection->At(j);
+      if (!phit) cout<<" Did not get the phit I was hoping for "<<endl;
+      if (!phit) break;
+      //	  cout<<" Hi I am here with phit at address "<<phit<<endl;
+      
+      
+      Float_t xreal=0,yreal=0;
+      geom->IntDetCell_xy(nmod,(phit->Row()),(phit->Column()),xreal,yreal,eta,phi);
+      adchit[j] = hitfract[j]*phit->Edep();
+      xhit[j] = xreal;
+      yhit[j] = yreal;
+      //      cout<<"Hit in MakeCluster:"<<nmodclu<<","<<det<<","<<phit->Row()<<","<<phit->Column()<<","<<phit->Edep()<<","<<xreal<<","<<yreal<<","<<eta<<","<<phi<<endl;
+      //      cout<<"Hit in BuildCluster:"<<nmodclu<<","<<det<<","<<phit->Row()<<","<<phit->Column()<<","<<hitfract[j]<<","<<phit->Edep()<<","<<xreal<<","<<yreal<<endl;
+      sumx+=adchit[j]*xhit[j];
+      sumy+=adchit[j]*yhit[j];
+      cluAdc+=adchit[j];
+      
+    }
+    
+    cluX = sumx/cluAdc;
+    cluY = sumy/cluAdc;
+    //    if(ncell>3) cout<<"Cluster: Xcen,Ycen,cluADC="<<cluX<<","<<cluY<<","<<cluAdc<<endl;
+    
+    Float_t sumxx=0,sumxy=0,sumyy=0;
+    for(Int_t j=0;j<ncell;j++){
+      sumxx+=adchit[j]*(xhit[j]-cluX)*(xhit[j]-cluX)/cluAdc;
+      sumyy+=adchit[j]*(yhit[j]-cluY)*(yhit[j]-cluY)/cluAdc;
+      sumxy+=adchit[j]*(yhit[j]-cluY)*(xhit[j]-cluX)/cluAdc;
+    }
+    
+    Float_t b=sumxx+sumyy;
+    Float_t c=sumxx*sumyy-sumxy*sumxy;
+    //      cout<<"sumxx,sumyy,sumxy,b,c="<<sumxx<<","<<sumyy<<","<<sumxy<<","<<b<<","<<c<<endl;
+    Float_t r1=b/2.+sqrt(b*b/4.-c);
+    Float_t r2=b/2.-sqrt(b*b/4.-c);
+    //    cout<<"r1,r2="<<r1<<","<<r2<<endl;    
+    if (r1<r2) {
+      SigmaS = r1;
+      SigmaL = r2;
+    }else{
+      SigmaS = r2;
+      SigmaL = r1;
+    }
+    if(ncell==2) SigmaS=0;
+  }
+
+  // Get etaphi wrt vertex
+  Cell_eta_phi(cluX,cluY,eta,phi);
+  
+  // I have all the cluster paramters here and now I will fill the cluster
+  
+  pcluster->setCluSigmaS(SigmaS);
+  pcluster->setCluSigmaL(SigmaL);
+  
+  pcluster->setCluEta(eta);
+  pcluster->setCluPhi(phi);
+
+  Float_t edep = cluAdc*1.0;
+  pcluster->setCluEdep(edep);
+
+  pcluster->setCluX(cluX);
+  pcluster->setCluY(cluY);
+
+  Int_t pid = 0;
+  Int_t edeppid = 0;
+  Int_t mcpid = 0;
+
+  
+  pcluster->setMcCluPID(mcpid);
+  pcluster->setCluPID(pid);
+  pcluster->setCluEdepPID(edeppid);
+  //   cout<<"Cluster in BuildCluster :"<<nmod<<","<<ncell<<","<<cluX<<","<<cluY<<","<<eta<<","<<phi<<","<<edep<<endl;
+  
+  //	cout<<" And have added it to the pmdclus (StPmdClusterCollection) which now has "<<pmdclus->Nclusters()<<endl;
+
+  return nmem;
+ 
+}
+//-----------------------------------------------------------------------------------------

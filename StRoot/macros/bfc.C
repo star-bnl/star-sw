@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.176 2010/01/13 21:17:49 fisyak Exp $
+// $Id: bfc.C,v 1.177 2010/08/28 00:43:06 genevb Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -165,7 +165,8 @@ void bfc(Int_t First, Int_t Last,
   chain->SetAttr(".Privilege",1,"StIOInterFace::*" ); 	  //All IO makers are priviliged
   chain->SetAttr(".Privilege",1,"St_geant_Maker::*"); 	  //It is also IO maker
   chain->SetAttr(".Privilege",1,"StTpcDbMaker::*"); 	  //It is also TpcDb maker to catch trips
-  chain->SetAttr(".Privilege",1,"StTpcHitMoverMaker::*"); //May be allowed to act upon corrupt events
+  chain->SetAttr(".Privilege",1,"StTpcHitMover::*"); //May be allowed to act upon corrupt events
+  chain->SetAttr(".Privilege",1,"*::tpcChain"); //May be allowed to act upon corrupt events
   chain->SetAttr(".Privilege",1,"StTriggerDataMaker::*"); //TriggerData could reject event based on corrupt triggers
   Int_t iInit = chain->Init();
   if (iInit >=  kStEOF) {chain->FatalErr(iInit,"on init"); return;}

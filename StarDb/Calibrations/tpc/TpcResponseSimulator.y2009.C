@@ -1,5 +1,11 @@
-// $Id: TpcResponseSimulator.y2009.C,v 1.5 2010/05/24 16:07:20 fisyak Exp $
+// $Id: TpcResponseSimulator.y2009.C,v 1.7 2010/10/29 16:04:05 fisyak Exp $
 // $Log: TpcResponseSimulator.y2009.C,v $
+// Revision 1.7  2010/10/29 16:04:05  fisyak
+// Set proper t0 offset for Run IX
+//
+// Revision 1.6  2010/06/14 23:36:08  fisyak
+// Freeze version V
+//
 // Revision 1.5  2010/05/24 16:07:20  fisyak
 // Add default dE/dx calibration tables, replace TpcAltroParameters and asic_thresholds_tpx by tpcAltroParams
 //
@@ -42,9 +48,9 @@ TDataSet *CreateTable() {
   row.tauCI                 =   0;  
   row.tauCO                 =   0;  
   row.SigmaJitterTI         = 0.0;//i 0.2; //g 0.0; //f  0.2;//ad  0.0;// b for Tpx inner 
-  row.SigmaJitterTO         = 0.0;//i 0.2; //g 0.0; //f  0.2;//ad  0.0;// b for Tpx outer 
+  row.SigmaJitterTO         = 0.2;//i 0.2; //g 0.0; //f  0.2;//ad  0.0;// b for Tpx outer 
   row.longitudinalDiffusion = 0.0370;// 0.0232;//K  0.0370;J // cm/sqrt(cm)   ; // 0.0232; from Laser Fit
-  row.transverseDiffusion   = 0.06336*1.1585; //i 0.06336*1.24;//f 0.06336; //  cm/sqrt(cm)  ; from Field data fit with OmegaTau = 3.02 // 0.0633
+  row.transverseDiffusion   = 0.06336*1.1585; // R:0.06336; //i 0.06336*1.24;//f 0.06336; //  cm/sqrt(cm)  ; from Field data fit with OmegaTau = 3.02 // 0.0633
   row.NoElPerAdc            = 335.;   // No. of electrons per 1 ADC count
   row.OmegaTauScaleI        =  7.9;//i 2.145*1.45*1.62;//g 2.145*1.45;//f  //ad 2.145*1.25;  //b effective reduction of OmegaTau near Inner sector anode wire
   row.OmegaTauScaleO        =  2.275;//i 1.8  *1.06*1.09;//g  1.8  *1.06;//f    //ad 1.8  *1.25;  //b effective reduction of OmegaTau near Outer sector anode wire
@@ -61,6 +67,24 @@ TDataSet *CreateTable() {
   for (Int_t i = 0; i < 8; i++) {
     a[i] += SecRowTpcRS[i+4];
   }
+  // SecRow3CGFy2009_S: Inner  2.88735e-01, Outer 2.49370e-01;
+  // FitP->Draw("sqrt(sigma**2-2.88735e-01**2):y>>IW","(i&&j&&j<14&&i<=12)/(dsigma**2)","profw")
+  // FitP->Draw("sqrt(sigma**2-2.88735e-01**2):y>>IE","(i&&j&&j<14&&i>12)/(dsigma**2)","profwsame")
+  // FitP->Draw("sqrt(sigma**2-2.49370e-01**2):y>>OW","(i&&j&&j>=14&&i<=12)/(dsigma**2)","profwsame")
+  // FitP->Draw("sqrt(sigma**2-2.49370e-01**2):y>>OE","(i&&j&&j>=14&&i>12)/(dsigma**2)","profwsame")
+  // FitP->Draw("sqrt(sigma**2-2.49370e-01**2):y>>O","(i&&j&&j>=14)/(dsigma**2)","profwsame")
+  const Double_t RowSigmaTrs[8] = {//  2.88735e-01, 2.49370e-01 
+    /* W  */  1.94548e-01,  0.         ,  // Inner
+    /* WE */  1.34204e-01,  3.83899e-04,  // Outer
+    /* E  */  7.77511e-02,  3.94192e-03,  // Inner
+    /* WE */  1.34204e-01,  3.83899e-04}; // Outer
+  Float_t *b = &row.SecRowSigIW[0];
+  for (Int_t i = 0; i < 8; i++) {
+    b[i] = RowSigmaTrs[i];
+  }
+  row.PolyaInner = 1.38;
+  row.PolyaOuter = 1.38;
+  row.T0offset   = 0.25; // From Xianglei Zhu for Run IX
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
