@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.2 2011/04/08 01:14:15 balewski Exp $
+// $Id: bfc.C,v 1.3 2011/04/08 22:35:02 balewski Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -193,7 +193,7 @@ void bfc(Int_t First, Int_t Last,
   //...... auxiliary initialization
   HList=new  TObjArray;
   myMkSM->setHList(HList);  myMkCL->setHList(HList);  myMkEV->setHList(HList);
-  myMkSM->initFrankModel("StRoot/StFgtSimulatorMaker/macros/BichselELossProbHighBG.dat");
+  myMkSM->initFrankModel("StRoot/StEEmcPool/FgtSandbox1/macros/BichselELossProbHighBG.dat");
   // myMkSM->forcePerpTracks(); //only  for testing,all tracks will go perp through the GEM gas volume
 //  myMkSM->useOnlyDisk(1); //only  for testing, disk # 1...6
   myMkSM->useOnlyDisk(0); //All disks
@@ -206,15 +206,15 @@ void bfc(Int_t First, Int_t Last,
   myMkCL->setSeedStripThres(30.); // a.u. 
   myMkCL->setStripNoiseSigma(12.); // a.u. , default=12=10%
 
-  //add SandBox - is not working yet
-  //gROOT->ProcessLine(".x SandBox.C");
-
   // chain is ready
   chain->ls(3);
 
 
-
   Int_t iInit = chain->Init();
+
+
+
+
   if (iInit >=  kStEOF) {chain->FatalErr(iInit,"on init"); return;}
   if (Last == 0) return;
   StEvtHddr *hd = (StEvtHddr*)chain->GetDataSet("EvtHddr");
@@ -223,6 +223,7 @@ void bfc(Int_t First, Int_t Last,
   chain->EventLoop(First,Last,0);
   gMessMgr->QAInfo() << "Run completed " << endm;
   gSystem->Exec("date");
+
 
   //FGT end....
   {
