@@ -2,11 +2,9 @@ class AgModule;
 class Geometry;
 //
 Geometry *builder = 0;
-Bool_t    draw    = true;
-//
-void SandBox()
-{
 
+void SandBox(Bool_t  closeGeo = true,  Bool_t  draw = true ) {
+  printf("\nIN SAND_BOX:   closeGeo=%d draw=%d\n",closeGeo,draw);
   gSystem -> Load  (".$STAR_HOST_SYS/lib/libStarAgmlLib.so");
   gSystem -> Load  (".$STAR_HOST_SYS/lib/libStarGeometry.so");
   gSystem -> Load  (".$STAR_HOST_SYS/lib/libGeometry.so");
@@ -27,7 +25,7 @@ void SandBox()
   ConstructFgtd();
   
   // Close the geometry in preparation to draw it
-  gGeoManager -> CloseGeometry();
+  if(closeGeo)  gGeoManager -> CloseGeometry();
 
   // Apply a different color scheme
   ColorScheme();
@@ -81,6 +79,7 @@ void playground()
     geom.caveFlag = "CAVE04"; geom.caveStat = 1;
     geom.pipeFlag = "PIPE06"; geom.pipeStat = 1;
     geom.fgtdFlag = "FGTDon"; geom.fgtdStat = 1;
+    geom.fgtdFlag = "FGMOon"; geom.fgtdStat = 0;
     geom.magpFlag = "MAGPon"; geom.magpStat = 0;
 
     geom.closeGeometry = false;
@@ -100,7 +99,7 @@ Bool_t ConstructFgtd()
 
   // Prepare the interface to the structures defined
   // within the FgtdGeo.xml
-  AgStructure::AgDetpNew( "FgtdGeo2", "Forward Gem Tracker Configuration" );
+  AgStructure::AgDetpNew( "FgtdGeo3", "Forward Gem Tracker Configuration" );
   
   // Here you can change the values assigned to the data structures
   // inside of the geometry module.  i.e. you can change the FGTG
@@ -117,7 +116,7 @@ Bool_t ConstructFgtd()
   // Array_t<float> a(2); a[0]=1; a[1]=2;
   // AgDetpAdd("Fgtd_t", "array", a);
   
-  builder -> CreateModule( "FgtdGeo2" );
+  builder -> CreateModule( "FgtdGeo3" );
 
 }
 
