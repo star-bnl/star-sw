@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski
 // 
-// $Id: StFgtSlowSimuMaker.cxx,v 1.3 2011/04/08 19:25:45 wzhang Exp $
+// $Id: StFgtSlowSimuMaker.cxx,v 1.4 2011/04/08 22:18:42 balewski Exp $
 #include <TVector3.h>
 #include <TH2.h>
 #include <TF1.h>
@@ -154,6 +154,33 @@ StFgtSlowSimuMaker::Init(){
   LOG_INFO<<Form("::Init params: X,YamplSigma=%.4f cm,  2DpixAmplThres=%.2f a.u., stripAmplThres=%.2f a.u.,  forcePerpTracks=%d  useOnlyDisk=%d RadGain(m=%.2f,sig=%.2f)  PhiGain(m=%.2f,sig=%.2f, GemHexLatice: pitch/um=%.1f, phi1/deg=%.1f, transDiffusion=%.1f um/1cmOfPath, cutoffOfBichel=%d)",par_XYamplSigma,par_2DpixAmplThres,par_stripAmplThres,par_forcePerp,par_useOnlyDisk,par_radStripGainMean,par_radStripGainSigma,par_phiStripGainMean,par_phiStripGainSigma,par_hexLaticePitch*1e4, par_hexLaticePhi1deg,par_transDiffusionPerPath*1e4,par_cutoffOfBichel)<<  endm; // fix it
 
   assert(par_XYamplSigma>0);
+
+  Info("Init","testing access to TGeoManager");
+
+  if (gGeoManager) { // Geom already there
+    Info("Load","TGeoManager(%s,%s) is already there"
+            ,gGeoManager->GetName(),gGeoManager->GetTitle());
+  } else {
+    Warning("Init","add  TGeoManager");
+    //   TString geo="y2009a"; // got it from Victor
+    //   TString ts("$STAR/StarDb/VmcGeometry/");
+    //  ts+=geo; ts+=".h"; 
+    TString ts = "SandBox.C(0,0)";
+    //printf("WILL execute macro=%s=\n",ts.Data()); 
+    int ierr=0;
+    gROOT->Macro(ts, &ierr);
+    assert(!ierr);
+  }
+  assert(gGeoManager);
+
+  TGeoVolume *geoFgt = gGeoManager ->FindVolumeFast("FGMO");
+  assert(geoFgt);
+  geoFgt -> Print();
+  geoFgt -> InspectMaterial();
+  geoFgt -> InspectShape();
+  printf("XXXXXXXXXXXXXXXXXXXXXXXXX\nXXXXXXXXXXXXX\nXXXXXXXXXX\n");
+
+
 
   return StMaker::Init();
 }
@@ -410,6 +437,9 @@ StFgtSlowSimuMaker::exportStripPlane(TH1F *h, vector<fgt_strip> &L) {
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StFgtSlowSimuMaker.cxx,v $
+// Revision 1.4  2011/04/08 22:18:42  balewski
+// added access to TGeo
+//
 // Revision 1.3  2011/04/08 19:25:45  wzhang
 // Changed diskID assignment for Jan temporarily
 //

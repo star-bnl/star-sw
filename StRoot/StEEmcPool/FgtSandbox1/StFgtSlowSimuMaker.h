@@ -1,4 +1,4 @@
-// $Id: StFgtSlowSimuMaker.h,v 1.1 2011/04/07 19:31:22 balewski Exp $
+// $Id: StFgtSlowSimuMaker.h,v 1.2 2011/04/08 22:18:42 balewski Exp $
 
 
 /* \class StFgtSlowSimuMaker        
@@ -15,6 +15,9 @@
 
 #include "StFgtGeom.h"
 #include "StFgtContainers.h"
+
+#include "TGeoManager.h" // for gGeoManager
+#include "TROOT.h" // for gROOT
 
 class St_g2t_fgt_hit;
 class TH2F;
@@ -90,7 +93,7 @@ class StFgtSlowSimuMaker : public StMaker {
   void  forcePerpTracks(bool x=true) {par_forcePerp=x;}
   void  useOnlyDisk(int  x){par_useOnlyDisk=x;}
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StFgtSlowSimuMaker.h,v 1.1 2011/04/07 19:31:22 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StFgtSlowSimuMaker.h,v 1.2 2011/04/08 22:18:42 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
  private:
@@ -102,6 +105,9 @@ class StFgtSlowSimuMaker : public StMaker {
 
 
 // $Log: StFgtSlowSimuMaker.h,v $
+// Revision 1.2  2011/04/08 22:18:42  balewski
+// added access to TGeo
+//
 // Revision 1.1  2011/04/07 19:31:22  balewski
 // start
 //
