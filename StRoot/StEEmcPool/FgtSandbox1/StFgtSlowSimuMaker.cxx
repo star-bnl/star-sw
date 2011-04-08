@@ -1,7 +1,6 @@
 // *-- Author : J.Balewski
 // 
-// $Id: StFgtSlowSimuMaker.cxx,v 1.1 2011/04/07 19:31:22 balewski Exp $
-
+// $Id: StFgtSlowSimuMaker.cxx,v 1.2 2011/04/08 01:14:13 balewski Exp $
 #include <TVector3.h>
 #include <TH2.h>
 #include <TF1.h>
@@ -405,6 +404,9 @@ StFgtSlowSimuMaker::exportStripPlane(TH1F *h, vector<fgt_strip> &L) {
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StFgtSlowSimuMaker.cxx,v $
+// Revision 1.2  2011/04/08 01:14:13  balewski
+// removed most of FGT from ver 3
+//
 // Revision 1.1  2011/04/07 19:31:22  balewski
 // start
 //

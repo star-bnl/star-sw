@@ -115,13 +115,25 @@ unpacking g2t table:
   KEY: TH2F     ev_RokXY;1      gen clust X-Y , R-matched (#DeltaR<0.700mm)
   KEY: TH2F     ev_PhiokXY;1    gen clust X-Y , #Phi-matched (R#Delta#Phi<0.200mm)
 
-rcas6001:~$ls *FGT*/*C
-2007-FGT-FermiLab-v1/fitPed1.C     2007-FGT-v4b/hexSnap.C@       2007-FGT-v4/frankSimu.C
-2007-FGT-FermiLab-v1/plGer.C       2007-FGT-v4b/plHexGrod.C      2007-FGT-v4/plSS.C
-2007-FGT-FermiLab-v1/plQA.C        2007-FGT-v4b/plSnowflake.C    2007-FGT-v4/plStrips.C
-2007-FGT-FermiLab-v1/rdFLabTree.C  2007-FGT-v4b/plSS.C           2007-FGT-v4/plStrips_ver1+2.C
-2007-FGT-v4b/bfc.C                 2007-FGT-v4b/plStrips10x10.C  2007-FGT-v4/plXStrips.C
+
+2007-FGT-FermiLab-v1/fitPed1.C     2007-FGT-v4b/hexSnap.C@       
+2007-FGT-FermiLab-v1/plGer.C       2007-FGT-v4b/plHexGrod.C      
+2007-FGT-FermiLab-v1/plQA.C        2007-FGT-v4b/plSnowflake.C    
+2007-FGT-FermiLab-v1/rdFLabTree.C  2007-FGT-v4b/plSS.C           
+2007-FGT-v4b/bfc.C                 2007-FGT-v4b/plStrips10x10.C  
 2007-FGT-v4b/evalResolution.C      2007-FGT-v4b/plStrips.C@      2010-FGT/plOpenGL1.C
 2007-FGT-v4/bfc.C                  2007-FGT-v4b/x1.C             
 
 
+A1:  The <var name="nCables" ...> appears in *two* contexts --
+
+    <Structure ...>
+    <var name="nCables" type="float"  />
+    </Structure ...>
+
+    <Fill ...>
+    <var name="nCables" value="3" comment=" number of cable boundles for FGT    "  />
+    </Fill>
+
+The first declares the structure, the second fills it.  See StarVMC/Geometry/doc/AgML.html
+for (important) details about structures.
