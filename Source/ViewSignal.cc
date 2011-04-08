@@ -84,7 +84,7 @@ ViewSignal::PlotSignal(const std::string label) {
   double sig = 0.;  
   for (int i = nBins; i--;) {
     sig = sensor->GetSignal(label, i);
-    hSignal->SetBinContent(i, sig);
+    hSignal->SetBinContent(i + 1, sig);
   }
 
   if (gCrossings != 0) {
