@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.100 2010/05/28 19:47:51 tone421 Exp $
+ * $Id: StMuDstMaker.cxx,v 1.101 2011/04/08 01:25:50 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -27,7 +27,7 @@
 
 #include "StIOMaker/StIOMaker.h"
 #include "StTreeMaker/StTreeMaker.h"
-
+#ifndef __NO_STRANGE_MUDST__
 #include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"
 #include "StStrangeMuDstMaker/StStrangeEvMuDst.hh"
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
@@ -37,7 +37,7 @@
 #include "StStrangeMuDstMaker/StKinkMuDst.hh"
 #include "StStrangeMuDstMaker/StKinkMc.hh"
 #include "StStrangeMuDstMaker/StStrangeCuts.hh"
-
+#endif
 
 #include "StMuException.hh"
 #include "StMuEvent.h"
@@ -87,6 +87,9 @@
 #include "TEventList.h"
 
 #include "THack.h"
+#include "StMuMcVertex.h"
+#include "StMuMcTrack.h"
+
 ClassImp(StMuDstMaker)
 
 #if !(ST_NO_NAMESPACES)
@@ -106,7 +109,10 @@ ClassImp(StMuDstMaker)
    Also, the standard track and l3 track filters are set.
  */
 StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
-  mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
+  mStEvent(0), mStMuDst(0), 
+#ifndef __NO_STRANGE_MUDST__
+					       mStStrangeMuDstMaker(0),
+#endif
   mIOMaker(0), mTreeMaker(0),
   mIoMode(1), mIoNameMode((int)ioTreeMaker), mEventList(0),
   mTrackType(256), mReadTracks(1),
@@ -162,8 +168,13 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
 void StMuDstMaker::assignArrays()
 {
   mArrays         = mAArrays       + 0;       
+#ifndef __NO_STRANGE_MUDST__
   mStrangeArrays  = mArrays        + __NARRAYS__;
-  mEmcArrays      = mStrangeArrays + __NSTRANGEARRAYS__;    
+  mMCArrays       = mStrangeArrays + __NSTRANGEARRAYS__;    
+#else
+  mMCArrays       = mArrays        + __NARRAYS__;
+#endif
+  mEmcArrays      = mMCArrays      + __NMCARRAYS__;
   mPmdArrays      = mEmcArrays     + __NEMCARRAYS__;    
   mFmsArrays      = mPmdArrays     + __NPMDARRAYS__;      
   mTofArrays      = mFmsArrays     + __NFMSARRAYS__;    
@@ -173,7 +184,12 @@ void StMuDstMaker::assignArrays()
 
 void StMuDstMaker::clearArrays()
 {
-  const int ezIndex=__NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+
+  const int ezIndex=__NARRAYS__+
+#ifndef __NO_STRANGE_MUDST__
+    __NSTRANGEARRAYS__+
+#endif
+    __NMCARRAYS__+
+    __NEMCARRAYS__+
     __NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__;  /// dongx
   for ( int i=0; i<ezIndex; i++) {
     mAArrays[i]->Clear();
@@ -191,7 +207,12 @@ void StMuDstMaker::zeroArrays()
   memset(mAArrays,0,sizeof(void*)*__NALLARRAYS__);
   memset(mStatusArrays,(char)1,sizeof(mStatusArrays) ); //default all ON
   // ezt arrays switched off
-  memset(&mStatusArrays[__NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+
+  memset(&mStatusArrays[__NARRAYS__+
+#ifndef __NO_STRANGE_MUDST__
+			__NSTRANGEARRAYS__+
+#endif
+			__NMCARRAYS__+
+			__NEMCARRAYS__+
 			__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__],(char)0,__NEZTARRAYS__);  /// dongx
   
 }
@@ -224,17 +245,32 @@ void StMuDstMaker::zeroArrays()
 */
 void StMuDstMaker::SetStatus(const char *arrType,int status)
 {
-  static const char *specNames[]={"MuEventAll","StrangeAll","EmcAll","PmdAll","FMSAll","TofAll","BTofAll","EztAll",0};  /// dongx
+#ifndef __NO_STRANGE_MUDST__
+  static const char *specNames[]={"MuEventAll","StrangeAll","MCAll" ,"EmcAll","PmdAll","FMSAll","TofAll","BTofAll","EztAll",0};  /// dongx
+#else
+  static const char *specNames[]={"MuEventAll","MCAll"     ,"EmcAll","PmdAll","FMSAll","TofAll","BTofAll","EztAll",0};  /// dongx
+#endif
   static const int   specIndex[]={
     0, 
     __NARRAYS__,
+#ifndef __NO_STRANGE_MUDST__
     __NARRAYS__+__NSTRANGEARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__,                  /// dongx
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__,   /// dongx
+    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__,                  /// dongx
+    __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__,   /// dongx
+#else
+    __NARRAYS__+__NMCARRAYS__,
+    __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__,
+    __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__,
+    __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__,
+    __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__,
+    __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__,                  /// dongx
+    __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__,   /// dongx
+#endif
     -1};
 
   if (strncmp(arrType,"St",2)==0) arrType+=2;  //Ignore first "St"
@@ -262,8 +298,12 @@ void StMuDstMaker::SetStatus(const char *arrType,int status)
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles, const char* name) : StIOInterFace(name),
-  mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
+StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles, const char* name) :
+  StIOInterFace(name),
+  mStEvent(0), mStMuDst(0), 
+#ifndef __NO_STRANGE_MUDST__
+  mStStrangeMuDstMaker(0),
+#endif
   mIOMaker(0), mTreeMaker(0),
   mIoMode(mode), mIoNameMode(nameMode), 
   mDirName(dirName), mFileName(fileName), mFilter(filter), 
@@ -333,9 +373,9 @@ mFmsCollection(0), mPmdCollectionArray(0), mPmdCollection(0)
 StMuDstMaker::~StMuDstMaker() {
   DEBUGMESSAGE1("");
   //clear(999);
-  delete mStMuDst;
-  delete mTofUtil;
-  delete mBTofUtil;   /// dongx
+  if (mStMuDst && mStMuDst->TestBit(kCanDelete)) SafeDelete(mStMuDst);
+  SafeDelete(mTofUtil);
+  SafeDelete(mBTofUtil);   /// dongx
   DEBUGMESSAGE3("after arrays");
   saveDelete(mProbabilityPidAlgorithm);
   saveDelete(mTrackFilter);
@@ -346,8 +386,8 @@ StMuDstMaker::~StMuDstMaker() {
   DEBUGMESSAGE3("after close");
   saveDelete(mChain);
 //VP  saveDelete(mTTree);
-  delete mEmcCollectionArray;
-  delete mPmdCollectionArray;
+  SafeDelete(mEmcCollectionArray);
+  SafeDelete(mPmdCollectionArray);
   DEBUGMESSAGE3("out");
 }
 //-----------------------------------------------------------------------
@@ -360,7 +400,7 @@ StMuDstMaker::~StMuDstMaker() {
 void  StMuDstMaker::streamerOff() {
   StMuEvent::Class()->IgnoreTObjectStreamer();
   StMuL3EventSummary::Class()->IgnoreTObjectStreamer();
-
+#ifndef __NO_STRANGE_MUDST__
   StStrangeMuDst::Class()->IgnoreTObjectStreamer();
   StV0MuDst::Class()->IgnoreTObjectStreamer();
   StXiMuDst::Class()->IgnoreTObjectStreamer();
@@ -368,6 +408,9 @@ void  StMuDstMaker::streamerOff() {
   StV0Mc::Class()->IgnoreTObjectStreamer();
   StXiMc::Class()->IgnoreTObjectStreamer();
   StKinkMc::Class()->IgnoreTObjectStreamer();
+#endif
+  StMuMcVertex::Class()->IgnoreTObjectStreamer();
+  StMuMcTrack::Class()->IgnoreTObjectStreamer();
   StMuTrack::Class()->IgnoreTObjectStreamer();
   StMuPrimaryVertex::Class()->IgnoreTObjectStreamer();
   //  StDcaGeometry::Class()->IgnoreTObjectStreamer();
@@ -423,7 +466,9 @@ int StMuDstMaker::Init(){
   DEBUGMESSAGE2("");
   mIOMaker = (StIOMaker*)GetMaker("IOMaker");
   mTreeMaker = (StTreeMaker*)GetMaker("outputStream");
+#ifndef __NO_STRANGE_MUDST__
   mStStrangeMuDstMaker = (StStrangeMuDstMaker*)GetMaker("strangeMuDst");
+#endif
   TDataSet *muDstSet =  AddObj(mStMuDst,".const");   ///< added for Valeri to be able to pick it up in other makers
   if (muDstSet ) muDstSet ->SetName("muDst");          ///< added for Valeri to be able to pick it up in other makers
 
@@ -524,7 +569,7 @@ void StMuDstMaker::fill(){
   }
   /// once per event the pid algorithm has to be set up
   /// we make it static for the StMuTrack, because all tracks use the same instance
-  if (mProbabilityPidAlgorithm) delete mProbabilityPidAlgorithm;
+    if (mProbabilityPidAlgorithm) SafeDelete(mProbabilityPidAlgorithm);
   mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm(*mStEvent);
   StMuTrack::setProbabilityPidAlgorithm(mProbabilityPidAlgorithm);
   StMuTrack::setProbabilityPidCentrality(uncorrectedNumberOfNegativePrimaries(*mStEvent));
@@ -630,17 +675,31 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
     const char *bname=StMuArrays::arrayNames[i];
     TBranch *tb = chain->GetBranch(bname);
     if(!tb) {
-      if (i >= __NARRAYS__+__NSTRANGEARRAYS__ &&
-	  i < __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__) {
+#ifndef __NO_STRANGE_MUDST__
+      if (i >= __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__ &&
+	  i < __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__) {
 	emc_oldformat=1;
         continue;
       }
 
-      if (i >= __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__ &&
-	  i < __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__) {
+      if (i >= __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__ &&
+	  i < __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__) {
 	pmd_oldformat=1;
         continue;
       } 
+#else
+      if (i >= __NARRAYS__+__NMCARRAYS__ &&
+	  i < __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__) {
+	emc_oldformat=1;
+        continue;
+      }
+
+      if (i >= __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__ &&
+	  i < __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__) {
+	pmd_oldformat=1;
+        continue;
+      } 
+#endif
       Warning("setBranchAddresses","Branch name %s does not exist",bname);
       continue;
     }
@@ -802,7 +861,7 @@ void StMuDstMaker::openWrite(string fileName) {
   //  all stuff
   mTTree = new TTree("MuDst", "StMuDst",mSplit);
   mTTree->SetMaxTreeSize(MAXLONG);  // limited to 1.9 GB  - set to maximum
-  //mTTree->SetAutoSave(1000000);   // autosave when 1 Mbyte written
+  // mTTree->SetAutoSave(1000000);  // autosave when 1 Mbyte written
   DEBUGMESSAGE2("all arrays");
   for ( int i=0; i<__NALLARRAYS__; i++) {
     if (mStatusArrays[i]==0) continue;
@@ -882,9 +941,19 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     e.print();
     throw e;
   }
-
+#ifndef __NO_STRANGE_MUDST__
+  if (mStStrangeMuDstMaker) {
   try {
     fillStrange(mStStrangeMuDstMaker);
+  }
+  catch(StMuException e) {
+    e.print();
+    throw e;
+  }
+  }
+#endif
+  try {
+    fillMC();
   }
   catch(StMuException e) {
     e.print();
@@ -1047,11 +1116,16 @@ void StMuDstMaker::fillBTof(StEvent* ev) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillEzt(StEvent* ev) {
-  if (ev==0)
-    return;
-  char *eztArrayStatus=&mStatusArrays[__NARRAYS__+__NSTRANGEARRAYS__+
+  if (ev==0)    return;
+#ifndef __NO_STRANGE_MUDST__
+  char *eztArrayStatus=&mStatusArrays[__NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+
 				      __NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+
 				      __NTOFARRAYS__+__NBTOFARRAYS__]; /// dongx
+#else
+  char *eztArrayStatus=&mStatusArrays[__NARRAYS__+__NMCARRAYS__+
+				      __NEMCARRAYS__+__NPMDARRAYS__+__NFMSARRAYS__+
+				      __NTOFARRAYS__+__NBTOFARRAYS__]; /// dongx
+#endif
   if(eztArrayStatus[muEztHead]){
     EztEventHeader* header = mEzTree->copyHeader(ev);
     addType(mEztArrays[muEztHead], *header);
@@ -1294,6 +1368,7 @@ StRichSpectra* StMuDstMaker::richSpectra(const StTrack* track) {
   }
   return 0;
 }
+#ifndef __NO_STRANGE_MUDST__
 void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
   DEBUGMESSAGE2("");
   /// now fill the strangeness stuff
@@ -1326,6 +1401,21 @@ void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
 
   addType(maker->GetCutsArray(), mStrangeArrays[11],strangeCut);
 
+}
+#endif
+//-----------------------------------------------------------------------
+void StMuDstMaker::fillMC() {
+  St_g2t_track  *g2t_track  = (St_g2t_track  *) GetDataSet("geant/g2t_track");  if (!g2t_track)  return;
+  St_g2t_vertex *g2t_vertex = (St_g2t_vertex *) GetDataSet("geant/g2t_vertex"); if (!g2t_vertex) return;
+  StMuMcVertex *mcvx = 0;
+  StMuMcTrack  *mctr = 0;
+  g2t_vertex_st  *vertex =  g2t_vertex->GetTable();
+  UInt_t NV = g2t_vertex->GetNRows();
+  for (UInt_t i = 0; i < NV; i++) addType(mMCArrays[MCVertex], vertex[i], mcvx);   
+  g2t_track_st  *track = g2t_track->GetTable();
+  UInt_t NT = g2t_track->GetNRows();
+  for (UInt_t i = 0; i < NT; i++) addType(mMCArrays[MCTrack], track[i], mctr);   
+  
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1404,7 +1494,10 @@ string StMuDstMaker::basename(string s){
   pos = name.find_last_of("/");
   if (pos!=string::npos ) name.erase(0, pos );
   DEBUGVALUE3(name.c_str());
-  pos = name.find_first_of(".");
+  pos = name.find_last_of(".");
+  if (pos!=string::npos ) name.erase(pos,name.length()-pos );
+  DEBUGVALUE3(name.c_str());
+  pos = name.find_last_of(".");
   if (pos!=string::npos ) name.erase(pos,name.length()-pos );
   DEBUGVALUE3(name.c_str());
   return name;
@@ -1517,6 +1610,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.101  2011/04/08 01:25:50  fisyak
+ * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
+ *
  * Revision 1.100  2010/05/28 19:47:51  tone421
  * Removed a cout needed for test purposes in StMuDstMaker. Made sure StTriggerData objects copied into the MuDst have a debug value of 0..
  *

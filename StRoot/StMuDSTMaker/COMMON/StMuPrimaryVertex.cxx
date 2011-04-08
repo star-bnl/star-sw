@@ -3,7 +3,7 @@
  * A simple class to store porimary vertex information
  * All functions are inline
  *
- * $Id: StMuPrimaryVertex.cxx,v 1.5 2009/12/24 21:19:31 tone421 Exp $ 
+ * $Id: StMuPrimaryVertex.cxx,v 1.6 2011/04/08 01:25:51 fisyak Exp $ 
  */
 
 #include "StMuPrimaryVertex.h"
@@ -32,6 +32,10 @@ StMuPrimaryVertex::StMuPrimaryVertex(const StPrimaryVertex*& vertex) {
   mRefMultNeg = uncorrectedNumberOfNegativePrimaries(vertex); 
   mRefMultFtpcEast = uncorrectedNumberOfFtpcEastPrimaries(vertex);
   mRefMultFtpcWest = uncorrectedNumberOfFtpcWestPrimaries(vertex); 
+
+  mIdTruth  = vertex->idTruth();
+  mQuality  = vertex->qaTruth();
+  mIdParent = vertex->idParent();
 }
 
 void StMuPrimaryVertex::Print(Option_t *option) const {

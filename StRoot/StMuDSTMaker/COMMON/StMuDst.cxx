@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.53 2010/05/26 04:25:50 tone421 Exp $
+ * $Id: StMuDst.cxx,v 1.54 2011/04/08 01:25:50 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -37,13 +37,20 @@
 #include "StMuBTofHit.h"
 #include "TClonesArray.h"
 #include "TTree.h"
-
+#ifndef __NO_STRANGE_MUDST__
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
 #include "StStrangeMuDstMaker/StXiMuDst.hh"
 #include "StStrangeMuDstMaker/StKinkMuDst.hh"
-
+#endif
 TClonesArray** StMuDst::arrays       = 0;
+#ifndef __NO_STRANGE_MUDST__
 TClonesArray** StMuDst::strangeArrays= 0;
+#endif
+#include "StMuMcVertex.h"
+#include "StMuMcTrack.h"
+TClonesArray** StMuDst::mcArrays= 0;
+ClassImp(StMuMcVertex);
+ClassImp(StMuMcTrack);
 TClonesArray** StMuDst::emcArrays    = 0;
 TClonesArray** StMuDst::fmsArrays    = 0;
 TClonesArray** StMuDst::pmdArrays    = 0;
@@ -71,7 +78,10 @@ StMuDst::StMuDst() {
 //-----------------------------------------------------------------------
 void StMuDst::unset() {
     arrays        = 0;
+#ifndef __NO_STRANGE_MUDST__
     strangeArrays = 0;
+#endif
+    mcArrays = 0;
     emcArrays     = 0;
 	fmsArrays     = 0;
     pmdArrays     = 0;
@@ -93,7 +103,10 @@ void StMuDst::set(StMuDstMaker* maker) {
   DEBUGMESSAGE2("");
   if (!maker) { DEBUGVALUE(maker); return;}
   arrays        = maker->mArrays;
+#ifndef __NO_STRANGE_MUDST__
   strangeArrays = maker->mStrangeArrays;
+#endif
+  mcArrays = maker->mMCArrays;
   emcArrays     = maker->mEmcArrays;
   fmsArrays     = maker->mFmsArrays;
   pmdArrays     = maker->mPmdArrays;
@@ -106,17 +119,21 @@ void StMuDst::set(StMuDstMaker* maker) {
   mMuPmdCollection = maker->mPmdCollection;
   eztArrays     = maker->mEztArrays;
 
+#ifndef __NO_STRANGE_MUDST__
   StStrangeEvMuDst* ev = strangeEvent();
   int nV0s = v0s()->GetEntries(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
   int nXis = xis()->GetEntries(); for (int i=0;i<nXis; i++) xis(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
   //  int nKinks = kinks()->GetEntries(); for (int i=0;i<nKinks; i++) kinks(i)->SetEvent(ev);
-
+#endif
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDst::set(TClonesArray** theArrays, 
+#ifndef __NO_STRANGE_MUDST__
 		  TClonesArray** theStrangeArrays, 
+#endif
+		  TClonesArray** theMCArrays, 
 		  TClonesArray** theEmcArrays,
 		  TClonesArray** theFmsArrays,
 		  TClonesArray** thePmdArrays,
@@ -133,7 +150,10 @@ void StMuDst::set(TClonesArray** theArrays,
   // but cannot comile dictionary  when it is removed
   DEBUGMESSAGE2("");
   arrays        = theArrays;
+#ifndef __NO_STRANGE_MUDST__
   strangeArrays = theStrangeArrays;
+#endif
+  mcArrays = theMCArrays;
   emcArrays     = theEmcArrays;   
   fmsArrays     = theFmsArrays;
   pmdArrays     = thePmdArrays;
@@ -646,9 +666,10 @@ void StMuDst::Print(Option_t *option) const {
     cout << "( note vtx_id " << mCurrVertexId << " ) " ; 
   cout << numberOfGlobalTracks() << " global " << endl;
 
+#ifndef __NO_STRANGE_MUDST__
   cout << numberOfV0s() << " V0s, " << numberOfXis() << " Xis " 
        << numberOfKinks() << " kinks" << endl;
-
+#endif
   cout << endl;
   if (muEmcCollection())
     cout << "EMC data present" << endl;
@@ -718,6 +739,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.54  2011/04/08 01:25:50  fisyak
+ * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
+ *
  * Revision 1.53  2010/05/26 04:25:50  tone421
  * Added StTriggerData arrays in muevent and fixed an issue with PMD arrays being read....
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.45 2010/06/02 18:53:13 tone421 Exp $
+ * $Id: StMuTrack.cxx,v 1.46 2011/04/08 01:25:51 fisyak Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -41,7 +41,7 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
   mId(0), mType(0), mFlag(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), 
   mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), 
   /* mNSigmaElectron(__NOVALUE__), mNSigmaPion(__NOVALUE__), mNSigmaKaon(__NOVALUE__), mNSigmaProton(__NOVALUE__) ,*/ 
-  mdEdx(0.), mPt(0.), mEta(0.), mPhi(0.), mIndex2Cov(-1) {
+  mdEdx(0.), mPt(0.), mEta(0.), mPhi(0.), mIndex2Cov(-1), mIdTruth(0), mQuality(0), mIdParentVx(0)  {
 
   const StGlobalTrack* globalTrack = dynamic_cast<const StGlobalTrack*>(track->node()->track(global));
 
@@ -49,7 +49,9 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
   mType = track->type();
   mFlag = track->flag();
   mTopologyMap = track->topologyMap();
-
+  mIdTruth = track->idTruth();
+  mQuality = track->qaTruth();
+  mIdParentVx = track->idParentVx();
   // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
   // pointers to track and pidTraits are set 
   // So, even though BestGuess will generate a "variable not used" warning, DO NOT DELETE THE NEXT LINES
@@ -612,7 +614,7 @@ double StMuTrack::energyBEMC() const { //Return energy of negative 100 GeV is no
 	TArrayI tower = getTower();
 	unsigned int iMod = tower[0];
     unsigned int iEta = tower[1];
-	unsigned int iSub = tower[2];
+	int iSub = tower[2];
 	if(iMod < 1 ||iMod > 120) return -100.0;
 
 	if (StMuDst::emcCollection()) {
@@ -643,6 +645,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.46  2011/04/08 01:25:51  fisyak
+ * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
+ *
  * Revision 1.45  2010/06/02 18:53:13  tone421
  * Fixed a bug. Previously, only events where a vertex was found had global tracks with pt and eta filled properly...
  *

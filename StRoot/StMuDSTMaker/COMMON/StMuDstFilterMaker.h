@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.h,v 1.9 2005/05/18 22:47:29 mvl Exp $
+ * $Id: StMuDstFilterMaker.h,v 1.10 2011/04/08 01:25:50 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstFilterMaker_hh
@@ -13,11 +13,11 @@
 #include "StMuDst.h"
 #include "StMuEvent.h"
 #include "StMuTrack.h"
-
+#ifndef __NO_STRANGE_MUDST__
 class StStrangeEvMuDst;
 class StV0MuDst;
 class StXiMuDst;
-
+#endif
 #include <string>
 
 class StMuEmcCollection;
@@ -38,7 +38,7 @@ class StMuDstFilterMaker : public StMaker {
     int Make();   ///< Filters the muDst and writes the filtered version
     int Finish(); ///< Writes and closes the output file
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.9 2005/05/18 22:47:29 mvl Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.10 2011/04/08 01:25:50 fisyak Exp $ built "__DATE__" "__TIME__ ; 
 	return cvs;
     }
   
@@ -84,7 +84,9 @@ class StMuDstFilterMaker : public StMaker {
     
     /// the list of TClonesArrays to copy
     TClonesArray* mArrays[__NARRAYS__];//->
+#ifndef __NO_STRANGE_MUDST__
     TClonesArray* mStrangeArrays[__NSTRANGEARRAYS__];//->
+#endif
     TClonesArray* mEmcArrays[__NEMCARRAYS__];//->
     
     ClassDef(StMuDstFilterMaker, 1)
@@ -96,6 +98,9 @@ class StMuDstFilterMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.h,v $
+ * Revision 1.10  2011/04/08 01:25:50  fisyak
+ * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
+ *
  * Revision 1.9  2005/05/18 22:47:29  mvl
  * Fixed StMuDstFilterMaker to work again with changes in MuDstMaker
  * (the change in v1.6 was faulty. Thanks Alex for finding this)

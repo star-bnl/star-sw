@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.37 2010/04/27 20:47:17 tone421 Exp $
+ * $Id: StMuTrack.h,v 1.38 2011/04/08 01:25:51 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -52,7 +52,8 @@ class TObjArray;
 
 class StMuTrack : public TObject {
  public:
-  StMuTrack(): mVertexIndex(0), mNHitsPossInner(0), mNHitsFitInner(0), mNHitsPossTpc(255), mNHitsFitTpc(255), mIndex2Cov(-1) {/* no-op*/}; ///< default constructor
+  StMuTrack(): mVertexIndex(0), mNHitsPossInner(0), mNHitsFitInner(0), mNHitsPossTpc(255), mNHitsFitTpc(255), mIndex2Cov(-1), 
+    mIdTruth(0), mQuality(0), mIdParentVx(0) {/* no-op*/}; ///< default constructor
     StMuTrack(const StEvent*, const StTrack*, const StVertex*, int index2Global=-2, int index2RichSpectra=-2, bool l3=false, TObjArray *vtx_list=0); ///< constructor from StEvent and StTrack
     short id() const; ///< Returns the track id(or key), is unique for a track node, i.e. global and primary tracks have the same id.
     short type() const; ///< Returns the track type: 0=global, 1=primary, etc (see StEvent manual for type information) 
@@ -159,6 +160,10 @@ protected:
   StMuProbPidTraits mProbPidTraits; ///< Class holding the new Yuri Fisyak pid probabilities.
   StMuBTofPidTraits mBTofPidTraits; /// dongx
   Int_t mIndex2Cov;
+  // IdTruth
+  UShort_t         mIdTruth; // MC track id if any 
+  UShort_t         mQuality; // quality of this information (percentage of hits coming the above MC track)
+  Int_t         mIdParentVx;
   void setIndex2Global(int i) {mIndex2Global=i;} ///< Set index of associated global track.
   void setIndex2RichSpectra(int i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
   void setVertexIndex(int i) { mVertexIndex=i; } ///< Set index of primary vertex for which dca is stored
@@ -169,11 +174,15 @@ protected:
   void fillMuBTofPidTraits(const StTrack*); /// dongx
   static StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm; ///< StuProbabilityPidAlgorithm, we will use the same algorithm for all tracks
   static double mProbabilityPidCentrality; ///< Centrality for Aihong's pid prob calculations. Will set when new StMuEvent is made from StEvent
-
+  Int_t            idTruth() const { return mIdTruth;}
+  Int_t            qaTruth() const { return mQuality; }
+  Int_t           idParentVx() const {return mIdParentVx;}
+  void            setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
+  void         setIdParentVx(Int_t id) {mIdParentVx = id;}
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
-  ClassDef(StMuTrack,11)
+  ClassDef(StMuTrack,12)
 };
 
 inline short StMuTrack::id() const {return mId;}
@@ -225,6 +234,9 @@ inline const StMuBTofHit* StMuTrack::tofHit() const { return (mIndex2BTofHit>=0)
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.38  2011/04/08 01:25:51  fisyak
+ * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
+ *
  * Revision 1.37  2010/04/27 20:47:17  tone421
  * Added extra functions for BEMC matching. See this post for more details:
  *

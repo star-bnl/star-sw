@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.20 2010/05/26 04:25:50 tone421 Exp $
+ * $Id: StMuArrays.h,v 1.21 2011/04/08 01:25:50 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -18,10 +18,12 @@
 enum emcTypes {muEmcTow=0, muEmcPrs, muEmcSmde, muEmcSmdp, muEEmcPrs, muEEmcSmdu, muEEmcSmdv};
 
 enum fmsTypes {muFmsHit=0};
-
+#ifndef __NO_STRANGE_MUDST__
 /// @enum strangeTypes enumeration to to index the strangeArrays
 enum strangeTypes {smuEv=0, smuEvMc, smuV0, smuV0Mc, smuV0Assoc, smuXi, smuXiMc, smuXiAssoc, smuKink, smuKinkMc, smuKinkAssoc, smuCut};
-
+#endif
+/// @enum MCTypes enumeration to to index the mcArrays
+enum MCTypes {MCVertex=0, MCTrack};
 /// @enum enumeration to to index the arrays
 enum muDstTypes {muEvent=0, muPrimaryVertex, muPrimary, muGlobal, muOther, muL3, muRich, muState, muAccept, muReject, muCovGlobTrack, muCovPrimTrack, mupp2pp}; 
 
@@ -40,7 +42,10 @@ enum eztTypes {muEztHead=0, muEztTrig, muEztETow, muEztESmd,muEztFpd};
 
 enum NARRAYS {
 __NARRAYS__        =13,	///< size of the 'regular stuff' arrays, i.e. number of TClonesArrays  (add two more for global and primary track covariance matrices)
+#ifndef __NO_STRANGE_MUDST__
 __NSTRANGEARRAYS__ =12,	///< size of the strangeness arrays, i.e. number of TClonesArrays  
+#endif
+__NMCARRAYS__ =2,	///< size of the MCness arrays, i.e. number of TClonesArrays  
 __NEMCARRAYS__     =7 ,	///< size of the emc arrays, i.e. number of TClonesArrays  
 __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArrays  
  __NFMSARRAYS__     =1 ,	///< size of the fms arrays, i.e. number of TClonesArrays  
@@ -49,24 +54,34 @@ __NTOFARRAYS__     =3 ,  ///< size of the tof arrays >
 __NBTOFARRAYS__    =3 ,  /// dongx
 __NEZTARRAYS__     =5 ,  ///< size of the ez arrays >
 /// dongx
-__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__
+#ifndef __NO_STRANGE_MUDST__
+__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__
+#else
+__NALLARRAYS__     =  __NARRAYS__+__NMCARRAYS__+__NEMCARRAYS__+__NFMSARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NBTOFARRAYS__+__NEZTARRAYS__
+#endif
 };
 class StMuArrays {
  public:
  StMuArrays();
 ///< names of the TBranches in the TTree/File 
     static const char*         arrayNames    [__NALLARRAYS__    ];
+#ifndef __NO_STRANGE_MUDST__
     static const char** strangeArrayNames; //[__NSTRANGEARRAYS__]
+#endif
+    static const char** mcArrayNames; //[__NMCARRAYS__]
     static const char**      emcArrayNames;//[__NEMCARRAYS__    ]
     static const char**      pmdArrayNames;//[__NPMDARRAYS__    ]
-	static const char**      fmsArrayNames;//[__NFMSARRAYS__    ]
+    static const char**      fmsArrayNames;//[__NFMSARRAYS__    ]
     static const char**      tofArrayNames;//[__NTOFARRAYS__    ]
     static const char**     btofArrayNames;//[__NBTOFARRAYS__   ] // dongx
     static const char**      eztArrayNames;//[__NEZARRAYS__    ]
 
 ///< names of the classes, the TClonesArrays are arrays of this type
     static const char*   arrayTypes          [__NALLARRAYS__    ];
+#ifndef __NO_STRANGE_MUDST__
     static const char**  strangeArrayTypes;//[__NSTRANGEARRAYS__]
+#endif
+    static const char**  mcArrayTypes;//[__NMCARRAYS__]
     static const char**  emcArrayTypes;//    [__NEMCARRAYS__    ]
     static const char**  pmdArrayTypes;//    [__NPMDARRAYS__    ]
     static const char**  fmsArrayTypes;//    [__NFMSARRAYS__    ]
@@ -76,20 +91,26 @@ class StMuArrays {
 
 ///< maximum sizes of the TClonesArrays
     static int           arraySizes    [__NALLARRAYS__    ];
+#ifndef __NO_STRANGE_MUDST__
     static int*   strangeArraySizes;// [__NSTRANGEARRAYS__]
+#endif
+    static int*   mcArraySizes;// [__NMCARRAYS__]
     static int*       emcArraySizes;// [__NEMCARRAYS__    ]
-	static int*       pmdArraySizes;// [__NPMDARRAYS__    ]
-	static int*       fmsArraySizes;// [__NFMSARRAYS__    ]
+    static int*       pmdArraySizes;// [__NPMDARRAYS__    ]
+    static int*       fmsArraySizes;// [__NFMSARRAYS__    ]
     static int*       tofArraySizes;// [__NTOFARRAYS__    ]
     static int*      btofArraySizes;// [__NBTOFARRAYS__   ]  // dongx
     static int*       eztArraySizes;// [__NEZARRAYS__    ]
 
 ///< number of entries in current event, currently not used
     static int        arrayCounters    [__NALLARRAYS__    ];
+#ifndef __NO_STRANGE_MUDST__
     static int*strangeArrayCounters;// [__NSTRANGEARRAYS__]
+#endif
+    static int*mcArrayCounters;// [__NMCARRAYS__]
     static int*    emcArrayCounters;// [__NEMCARRAYS__    ]
     static int*    pmdArrayCounters;// [__NPMDARRAYS__    ]
-	static int*    fmsArrayCounters;// [__NFMSARRAYS__    ]
+    static int*    fmsArrayCounters;// [__NFMSARRAYS__    ]
     static int*    tofArrayCounters;// [__NTOFARRAYS__    ]
     static int*   btofArrayCounters;// [__NBTOFARRAYS__   ]  // dongx
     static int*    eztArrayCounters;// [__NEZARRAYS__    ]
@@ -100,6 +121,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.21  2011/04/08 01:25:50  fisyak
+ * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
+ *
  * Revision 1.20  2010/05/26 04:25:50  tone421
  * Added StTriggerData arrays in muevent and fixed an issue with PMD arrays being read....
  *
