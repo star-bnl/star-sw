@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.14 2009/05/22 23:48:18 fine Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.15 2011/04/08 01:25:50 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -59,12 +59,14 @@ void StMuDstFilterMaker::open(const Char_t *fname) {
     DEBUGVALUE2(i);
     branch = mTTree->Branch(StMuArrays::arrayNames[i],&mArrays[i], __BUFFER__, __SPLIT__);
   }
+#ifndef __NO_STRANGE_MUDST__
   // strange stuff
   DEBUGMESSAGE2("strange arrays");
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     DEBUGVALUE2(i);
     branch = mTTree->Branch(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i],  __BUFFER__, __SPLIT__);
   }
+#endif
   // emc stuff
   DEBUGMESSAGE2("emc arrays");
   for ( int i=0; i<__NEMCARRAYS__; i++) {
@@ -272,11 +274,13 @@ void StMuDstFilterMaker::createArrays() {
 	mArrays[i]= mMuDstMaker->clonesArray(mArrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],dummy);
 	DEBUGVALUE2(mArrays[i]);
     }
+#ifndef __NO_STRANGE_MUDST__
     /// from strangeness group
     for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
 	mStrangeArrays[i] = 0;
 	mStrangeArrays[i]= mMuDstMaker->clonesArray(mStrangeArrays[i],StMuArrays::strangeArrayTypes[i],StMuArrays::strangeArraySizes[i],dummy);
     }
+#endif
     /// from emc group
     for ( int i=0; i<__NEMCARRAYS__; i++) {
 	mEmcArrays[i] = 0;
@@ -290,10 +294,12 @@ void StMuDstFilterMaker::clearArrays()
     for ( int i=0; i<__NARRAYS__; i++) {
         mArrays[i]->Clear();
     }
+#ifndef __NO_STRANGE_MUDST__
     /// from strangeness group
     for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
          mStrangeArrays[i]->Clear();
     }
+#endif
     /// from emc group
     for ( int i=0; i<__NEMCARRAYS__; i++) {
         mEmcArrays[i]->Clear();
@@ -317,6 +323,9 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.15  2011/04/08 01:25:50  fisyak
+ * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
+ *
  * Revision 1.14  2009/05/22 23:48:18  fine
  * Test I/O errors after filling the TTree
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.40 2010/05/26 04:25:50 tone421 Exp $
+ * $Id: StMuDst.h,v 1.41 2011/04/08 01:25:50 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -18,7 +18,7 @@ class StMuTrack;
 class StRichSpectra;
 class StDetectorState;
 class StL3AlgorithmInfo;
-
+#ifndef __NO_STRANGE_MUDST__
 class StStrangeEvMuDst;
 class StV0MuDst;
 class StXiMuDst;
@@ -28,7 +28,7 @@ class StXiMc;
 class StKinkMc;
 class StStrangeAssoc;
 class TCut;
-
+#endif
 class StMuEmcCollection;
 class StMuFmsCollection;
 class StMuPmdCollection;
@@ -92,7 +92,22 @@ public:
   static void set(StMuDstMaker* maker);
   /// set the pointers to the TClonesArrays
   /// dongx
-  static void set(TClonesArray**, TClonesArray**, TClonesArray** emc_ptca=0, TClonesArray** fms_ptca=0, TClonesArray** pmd_ptca=0, TClonesArray** tof_ptca=0, TClonesArray** btof_ptca=0, TClonesArray *emc_tca=0, StMuEmcCollection *emc_col=0, StMuFmsCollection *fms_col=0, TClonesArray *pmd_tca=0, StMuPmdCollection *pmd_col=0, TClonesArray** ezt_ptca=0);
+    static void set(TClonesArray** /* Arrays */, 
+#ifndef __NO_STRANGE_MUDST__
+		    TClonesArray** /* StrangeArrays */, 
+#endif
+		    TClonesArray** mc_ptca=0, 
+		    TClonesArray** emc_ptca=0, 
+		    TClonesArray** fms_ptca=0, 
+		    TClonesArray** pmd_ptca=0, 
+		    TClonesArray** tof_ptca=0, 
+		    TClonesArray** btof_ptca=0, 
+		    TClonesArray *emc_tca=0, 
+		    StMuEmcCollection *emc_col=0, 
+		    StMuFmsCollection *fms_col=0, 
+		    TClonesArray *pmd_tca=0, 
+		    StMuPmdCollection *pmd_col=0, 
+		    TClonesArray** ezt_ptca=0);
   /// set pointer to current StEmcCollection
   static void setEmcCollection(StEmcCollection *emc_coll) { mEmcCollection=emc_coll; }
   
@@ -120,8 +135,11 @@ public:
  protected:
   /// array of TClonesArrays
   static TClonesArray** arrays;
+#ifndef __NO_STRANGE_MUDST__
   /// array of TClonesArrays for the stuff inherited from the StStrangeMuDst
   static TClonesArray** strangeArrays;
+#endif
+  static TClonesArray** mcArrays;
   /// array of TClonesArrays for the stuff inherited from the Emc
   static TClonesArray** emcArrays;
   /// array of TClonesArrays for the stuff inherited from the Fms
@@ -163,8 +181,11 @@ public:
   static Int_t currentVertexIndex() {return mCurrVertexId; }
   /// returns pointer to the n-th TClonesArray 
   static TClonesArray* array(int type) { return arrays[type]; }
+#ifndef __NO_STRANGE_MUDST__
   /// returns pointer to the n-th TClonesArray from the strangeness arrays
   static TClonesArray* strangeArray(int type) { return strangeArrays[type]; }
+#endif
+  static TClonesArray* mcArray(int type) { return mcArrays[type]; }
   /// returns pointer to the n-th TClonesArray from the emc arrays
   static TClonesArray* emcArray(int type) { return emcArrays[type]; }
    /// returns pointer to the n-th TClonesArray from the fms arrays
@@ -226,6 +247,7 @@ public:
   static StDcaGeometry* covGlobTracks(int i) { return (StDcaGeometry*)arrays[muCovGlobTrack]->UncheckedAt(i); }
   static StMuPrimaryTrackCovariance* covPrimTracks(int i) { return (StMuPrimaryTrackCovariance*)arrays[muCovPrimTrack]->UncheckedAt(i); }
  
+#ifndef __NO_STRANGE_MUDST__
   /// returns pointer to current StStrangeEvMuDst (class holding the event wise information, e.g. event number, run number)
   static StStrangeEvMuDst* strangeEvent() { return (StStrangeEvMuDst*)strangeArrays[smuEv]->UncheckedAt(0); }
   /// returns pointer to MC version of current StStrangeEvMuDst
@@ -264,7 +286,7 @@ public:
   static StStrangeAssoc* kinkAssoc(int i) { return (StStrangeAssoc*)strangeArrays[smuKinkAssoc]->UncheckedAt(i); }
   /// returns pointer to the i-th stranneCut (of type TCut)
   static TCut* strangeCuts(int i) { return (TCut*)strangeArrays[smuCut]->UncheckedAt(i); }
-
+#endif
   /// returns pointer to current StMuEmcCollection
   static StMuEmcCollection* muEmcCollection() { if (mMuEmcCollectionArray) return (StMuEmcCollection*) mMuEmcCollectionArray->UncheckedAt(0); else return mMuEmcCollection; }
    /// returns pointer to current StMuFmsCollection
@@ -319,6 +341,7 @@ public:
   static unsigned int numberOfL3AlgoRejects()  { return arrays[muReject]->GetEntries(); }
   static unsigned int numberOfCovGlobTracks()  { return arrays[muCovGlobTrack]->GetEntries(); }
   static unsigned int numberOfCovPrimTracks()  { return arrays[muCovPrimTrack]->GetEntries(); }
+#ifndef __NO_STRANGE_MUDST__
   static unsigned int numberOfV0s()            { return strangeArrays[smuV0]->GetEntries(); }
   static unsigned int numberOfV0sMc()          { return strangeArrays[smuV0Mc]->GetEntries(); }
   static unsigned int numberOfV0Assoc()        { return strangeArrays[smuV0Assoc]->GetEntries(); }
@@ -329,7 +352,7 @@ public:
   static unsigned int numberOfKinksMc()        { return strangeArrays[smuKinkMc]->GetEntries(); } 
   static unsigned int numberOfKinkAssoc()      { return strangeArrays[smuKinkAssoc]->GetEntries(); }
   static unsigned int numberOfStrangeCuts()    { return strangeArrays[smuCut]->GetEntries(); }
-
+#endif
   // tofr
   static unsigned int numberOfTofHit()        { return tofArrays[muTofHit]->GetEntries(); }
   static unsigned int numberOfTofData()       { return tofArrays[muTofData]->GetEntries(); }
@@ -348,6 +371,7 @@ public:
   static unsigned int GetNDetectorState()   { return numberOfDetectorStates(); } 
   static unsigned int GetNL3AlgoAccept()    { return numberOfL3AlgoAccepts(); }  
   static unsigned int GetNL3AlgoReject()    { return numberOfL3AlgoRejects(); }  
+#ifndef __NO_STRANGE_MUDST__
   static unsigned int GetNV0()              { return numberOfV0s(); }            
   static unsigned int GetNV0Mc()            { return numberOfV0sMc(); }            
   static unsigned int GetNV0Assoc()         { return numberOfV0Assoc(); }            
@@ -358,7 +382,7 @@ public:
   static unsigned int GetNKinkMc()          { return numberOfKinksMc(); }            
   static unsigned int GetNKinkAssoc()       { return numberOfKinkAssoc(); }            
   static unsigned int GetNStrangeCut()      { return numberOfStrangeCuts(); }    
-
+#endif
   static unsigned int GetNTofHit()          { return numberOfTofHit(); }
   static unsigned int GetNTofData()         { return numberOfTofData(); }
   // run 5 - dongx
@@ -382,6 +406,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.41  2011/04/08 01:25:50  fisyak
+ * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
+ *
  * Revision 1.40  2010/05/26 04:25:50  tone421
  * Added StTriggerData arrays in muevent and fixed an issue with PMD arrays being read....
  *

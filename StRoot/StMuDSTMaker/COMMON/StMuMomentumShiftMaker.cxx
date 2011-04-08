@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuMomentumShiftMaker.cxx,v 1.5 2009/05/22 23:48:18 fine Exp $
+ * $Id: StMuMomentumShiftMaker.cxx,v 1.6 2011/04/08 01:25:51 fisyak Exp $
  * Author: Marco van Leeuwen, LBNL
  *
  * This class is used to correct the momenta of tracks on MicroDst after 
@@ -14,12 +14,13 @@
 #include "StMuEvent.h"
 #include "StMuTrack.h"
 #include "StEvent/StRunInfo.h"
+#ifndef __NO_STRANGE_MUDST__
 #include "StStrangeMuDstMaker/StKinkMuDst.hh"
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
 #include "StStrangeMuDstMaker/StXiMuDst.hh"
 #include "StStrangeMuDstMaker/StStrangeEvMuDst.hh"
 #include "StMessMgr.h"
-
+#endif
 #include "TChain.h"
 #include "THack.h"
 #include "TFile.h"
@@ -39,7 +40,7 @@ void StMuMomentumShiftMaker::ScaleMomentum(StMuTrack *track) {
   track->mHelix.mP *= mMomentumScale;
   track->mOuterHelix.mP *= mMomentumScale;
 }
-
+#ifndef __NO_STRANGE_MUDST__
 void StMuMomentumShiftMaker::ScaleMomentum(StKinkMuDst *kink) {
   kink->mParentMomentum *= mMomentumScale;
   kink->mParentPrimMomentum *= mMomentumScale;
@@ -67,7 +68,7 @@ void StMuMomentumShiftMaker::ScaleMomentum(StXiMuDst *xi) {
   xi->mMomBachelorY *= mMomentumScale;
   xi->mMomBachelorZ *= mMomentumScale;
 }
-  
+#endif  
 int StMuMomentumShiftMaker::Make() {
 
   StMuDstMaker *mudstMaker = (StMuDstMaker*) GetMaker("MuDst");
@@ -100,10 +101,10 @@ int StMuMomentumShiftMaker::Make() {
   StMuEvent *event=mudst->event();
   event->eventSummary().setMagneticField(event->eventSummary().magneticField());
   event->runInfo().setMagneticField(mMomentumScale * event->runInfo().magneticField());
-
+#ifndef __NO_STRANGE_MUDST__
   StStrangeEvMuDst *strange_event=mudst->strangeEvent();
   strange_event->mMagneticField *= mMomentumScale;
-
+#endif
   if (mOutTree==0) {
     mOutTree=mudstMaker->chain()->GetTree()->CloneTree(0);
   }
@@ -131,7 +132,7 @@ int StMuMomentumShiftMaker::Make() {
     ScaleMomentum(track);
   }
   */
-
+#ifndef __NO_STRANGE_MUDST__
   // Scale momenta of V0 et al
   Int_t n_kink=mudst->numberOfKinks();
   for (Int_t i_kink=0; i_kink < n_kink; i_kink++) {
@@ -148,7 +149,7 @@ int StMuMomentumShiftMaker::Make() {
     StXiMuDst *xi= mudst->xis(i_xi);
     ScaleMomentum(xi);
   }
-
+#endif
   if (mWriteMuDst) {
     mOutTree->Fill(); THack::IsTreeWritable(mOutTree); 
   }

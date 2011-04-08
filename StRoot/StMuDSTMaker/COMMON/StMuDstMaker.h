@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.51 2010/05/26 04:25:50 tone421 Exp $
+ * $Id: StMuDstMaker.h,v 1.52 2011/04/08 01:25:50 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -39,7 +39,7 @@ class StuProbabilityPidAlgorithm;
 
 class StIOMaker;
 class StTreeMaker;
-
+#ifndef __NO_STRANGE_MUDST__
 /// strangeness group stuff
 class StStrangeEvMuDst;
 class StStrangeMuDstMaker;
@@ -51,7 +51,7 @@ class StKinkMuDst;
 class StKinkMc;
 class StStrangeAssoc;
 class StStrangeCuts;
-
+#endif
 /// emc stuff
 #include "StMuEmcCollection.h"
 class StMuEmcUtil;
@@ -172,7 +172,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.51 2010/05/26 04:25:50 tone421 Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.52 2011/04/08 01:25:50 fisyak Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -196,7 +196,9 @@ protected:
 
   StEvent* mStEvent;
   StMuDst* mStMuDst;
+#ifndef __NO_STRANGE_MUDST__
   StStrangeMuDstMaker* mStStrangeMuDstMaker;
+#endif
   StIOMaker* mIOMaker;
   StTreeMaker* mTreeMaker;
   StMuEmcUtil* mEmcUtil;
@@ -274,7 +276,10 @@ virtual   void closeRead();
   void fillPmd(StEvent* ev);
   void fillEmc(StEvent* ev);
   void fillFms(StEvent* ev);
+#ifndef __NO_STRANGE_MUDST__
   void fillStrange(StStrangeMuDstMaker*);
+#endif
+  void fillMC();
   void fillL3Tracks(StEvent* ev, StMuCut* cut=0);
   void fillTracks(StEvent* ev, StMuCut* cut=0);
   void fillDetectorStates(StEvent* ev);
@@ -299,20 +304,24 @@ virtual   void closeRead();
 
   void setStEvent(StEvent*);
   StEvent* stEvent();
+#ifndef __NO_STRANGE_MUDST__
   void setStStrangeMuDstMaker(StStrangeMuDstMaker*);
   StStrangeMuDstMaker* stStrangeMuDstMaker();
-
+#endif
   unsigned int trackType();
   bool readTracks();
+#ifndef __NO_STRANGE_MUDST__
   bool readV0s();
   bool readXis();
   bool readKinks();
+#endif
   void setTrackType(unsigned int);
   void setReadTracks(bool);
+#ifndef __NO_STRANGE_MUDST__
   void setReadV0s(bool);
   void setReadXis(bool);
   void setReadKinks(bool);
-
+#endif
   string basename(string);
   string dirname(string);
   string buildFileName(string dir, string fileName, string extention);
@@ -324,7 +333,10 @@ virtual   void closeRead();
   // See implementation for caveat
   TClonesArray*  mAArrays         [__NALLARRAYS__];
   TClonesArray** mArrays;       //[__NARRAYS__       ];
+#ifndef __NO_STRANGE_MUDST__
   TClonesArray** mStrangeArrays;//[__NSTRANGEARRAYS__];
+#endif
+  TClonesArray** mMCArrays;//[__NMCARRAYS__];
   TClonesArray** mEmcArrays;    //[__NEMCARRAYS__    ];
   TClonesArray** mFmsArrays;    //[__NFMSARRAYS__    ];
   TClonesArray** mPmdArrays;    //[__NPMDARRAYS__    ];
@@ -349,20 +361,25 @@ inline void StMuDstMaker::setTrackFilter(StMuCut* c) { mTrackFilter=c;}
 inline void StMuDstMaker::setL3TrackFilter(StMuCut* c) { mL3TrackFilter=c;}
 inline StMuFilter* StMuDstMaker::trackFilter() { return (StMuFilter*)mTrackFilter;}
 inline StMuL3Filter* StMuDstMaker::l3TrackFilter() { return (StMuL3Filter*)mL3TrackFilter;}
+#ifndef __NO_STRANGE_MUDST__
 inline void StMuDstMaker::setStStrangeMuDstMaker(StStrangeMuDstMaker* s) {mStStrangeMuDstMaker=s;}
 inline StStrangeMuDstMaker* StMuDstMaker::stStrangeMuDstMaker() {return mStStrangeMuDstMaker;}
+#endif
 inline void StMuDstMaker::setTrackType(unsigned int t) {mTrackType=t;}
 inline unsigned int StMuDstMaker::trackType() {return mTrackType;}
 
 inline bool StMuDstMaker::readTracks() { return mReadTracks;}
+#ifndef __NO_STRANGE_MUDST__
 inline bool StMuDstMaker::readV0s() { return mReadV0s;}
 inline bool StMuDstMaker::readXis() { return mReadXis;}
 inline bool StMuDstMaker::readKinks() { return mReadKinks;}
+#endif
 inline void StMuDstMaker::setReadTracks(bool b) { mReadTracks=b;}
+#ifndef __NO_STRANGE_MUDST__
 inline void StMuDstMaker::setReadV0s(bool b) { mReadV0s=b;}
 inline void StMuDstMaker::setReadXis(bool b) { mReadXis=b;}
 inline void StMuDstMaker::setReadKinks(bool b) { mReadKinks=b;}
-
+#endif
 
 inline void StMuDstMaker::setSplit(int split) { mSplit = split;}
 inline void StMuDstMaker::setCompression(int comp) { mCompression = comp;}
@@ -374,6 +391,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.52  2011/04/08 01:25:50  fisyak
+ * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
+ *
  * Revision 1.51  2010/05/26 04:25:50  tone421
  * Added StTriggerData arrays in muevent and fixed an issue with PMD arrays being read....
  *

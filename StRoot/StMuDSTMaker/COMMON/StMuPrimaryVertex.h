@@ -4,7 +4,7 @@
  * Simple class to store primary vertices. Data members are a mainly a copy of 
  * StPrimaryVertex
  *
- * $Id: StMuPrimaryVertex.h,v 1.5 2009/12/24 21:19:31 tone421 Exp $ 
+ * $Id: StMuPrimaryVertex.h,v 1.6 2011/04/08 01:25:51 fisyak Exp $ 
  */
 
 #include "TObject.h"
@@ -16,7 +16,10 @@ class StPrimaryVertex;
 class StMuPrimaryVertex : public TObject {
 
  public:
-  StMuPrimaryVertex(): mPosition(-999,-999,-999), mPosError(-999,-999,-999), mVertexFinderId(undefinedVertexFinder), mRanking(999),mNTracksUsed(0), mNCTBMatch(0), mNBEMCMatch(0), mNEEMCMatch(0), mNCrossCentralMembrane(0), mSumTrackPt(-999),mMeanDip(-999), mChiSquared(9999), mRefMultNeg(0), mRefMultPos(0), mRefMultFtpcWest(0), mRefMultFtpcEast(0) {;}
+  StMuPrimaryVertex(): mPosition(-999,-999,-999), mPosError(-999,-999,-999), mVertexFinderId(undefinedVertexFinder), 
+    mRanking(999),mNTracksUsed(0), mNCTBMatch(0), mNBEMCMatch(0), mNEEMCMatch(0), mNCrossCentralMembrane(0), 
+    mSumTrackPt(-999),mMeanDip(-999), mChiSquared(9999), mRefMultNeg(0), mRefMultPos(0), mRefMultFtpcWest(0), 
+    mRefMultFtpcEast(0), mIdTruth(0), mQuality(0), mIdParent(0) {}
   StMuPrimaryVertex(const StPrimaryVertex*& vertex);
   ~StMuPrimaryVertex() {;}
 
@@ -42,10 +45,14 @@ class StMuPrimaryVertex : public TObject {
    UShort_t         refMultFtpc()     const { return refMultFtpcEast() + refMultFtpcWest(); }
    void setPosition(const StThreeVectorF &pos)     { mPosition = pos; }
    void setPosError(const StThreeVectorF &pos_err) { mPosError = pos_err; }
-
+   Int_t            idTruth() const { return mIdTruth;}
+   Int_t            qaTruth() const { return mQuality; }
+   Int_t            idParent() const { return mIdParent;}
+   void          setIdTruth(Int_t idtru,Int_t qatru=0) {mIdTruth = (UShort_t) idtru; mQuality = (UShort_t) qatru;}
+   void          setIdParent(Int_t id) {mIdParent = id;}
    virtual void     Print(Option_t *option="") const; ///< Print essential vertex info
 
-  ClassDef(StMuPrimaryVertex,4)
+  ClassDef(StMuPrimaryVertex,5)
     
     private:
   StThreeVectorF   mPosition;
@@ -67,10 +74,17 @@ class StMuPrimaryVertex : public TObject {
   UShort_t         mRefMultPos;
   UShort_t         mRefMultFtpcWest;
   UShort_t         mRefMultFtpcEast;
+  // IdTruth
+  UShort_t         mIdTruth; // MC vertex id if any 
+  UShort_t         mQuality; // quality of this information (percentage of tracks coming the above MC Vertex)
+  Int_t            mIdParent;
 };
 #endif
 /*
  * $Log: StMuPrimaryVertex.h,v $
+ * Revision 1.6  2011/04/08 01:25:51  fisyak
+ * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
+ *
  * Revision 1.5  2009/12/24 21:19:31  tone421
  * Added StMuPrimaryVertex::nBTOFMatch()
  *
