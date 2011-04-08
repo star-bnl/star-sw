@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski
 // 
-// $Id: StFgtSlowSimuMaker.cxx,v 1.2 2011/04/08 01:14:13 balewski Exp $
+// $Id: StFgtSlowSimuMaker.cxx,v 1.3 2011/04/08 19:25:45 wzhang Exp $
 #include <TVector3.h>
 #include <TH2.h>
 #include <TF1.h>
@@ -233,6 +233,12 @@ StFgtSlowSimuMaker::sort_g2t_hits( St_g2t_fgt_hit *fgt_hitT){
     Int_t numbv1 = ivid/1000000;  
     Int_t numbv2 = (ivid/10000)%100;
     int diskID, iQuad;  // diskID and quadID, both start from 0
+
+//No Quad ID for now, it assigned to 0 for now
+     diskID = numbv1 - 1;
+     iQuad = 0; //temp
+//    
+/* Disk9 is not a concer for now, commented out 
     if(numbv2 != 0) {
        diskID = numbv1 - 1;
        iQuad = numbv2 - 1;
@@ -240,7 +246,7 @@ StFgtSlowSimuMaker::sort_g2t_hits( St_g2t_fgt_hit *fgt_hitT){
        diskID = 8;
        iQuad = numbv1 - 1;
     }
-
+*/
     cout << " Volume_id diskID QuadID: " 
 	 << ivid << " " << diskID << " " << iQuad << endl;
     
@@ -404,6 +410,9 @@ StFgtSlowSimuMaker::exportStripPlane(TH1F *h, vector<fgt_strip> &L) {
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StFgtSlowSimuMaker.cxx,v $
+// Revision 1.3  2011/04/08 19:25:45  wzhang
+// Changed diskID assignment for Jan temporarily
+//
 // Revision 1.2  2011/04/08 01:14:13  balewski
 // removed most of FGT from ver 3
 //
