@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.1 2011/04/07 19:31:25 balewski Exp $
+// $Id: bfc.C,v 1.2 2011/04/08 01:14:15 balewski Exp $
 //////////////////////////////////////////////////////////////////////////
 class StBFChain;        
 class StMessMgr;
@@ -179,7 +179,7 @@ void bfc(Int_t First, Int_t Last,
   //fnameOut2+=".fgt";
   cout<<"FGT output core="<<fnameOut2<<endl;
 
-  gSystem->Load("libStFgtSimulatorMaker");
+  gSystem->Load("libStEEmcPoolFgtSandbox1");
   StFgtSlowSimuMaker  *myMkSM=new StFgtSlowSimuMaker;
   StFgtClustFindMaker *myMkCL=new StFgtClustFindMaker;
   StFgtClustEvalMaker *myMkEV=new StFgtClustEvalMaker;
@@ -206,8 +206,8 @@ void bfc(Int_t First, Int_t Last,
   myMkCL->setSeedStripThres(30.); // a.u. 
   myMkCL->setStripNoiseSigma(12.); // a.u. , default=12=10%
 
-  //add SndBox
-  gROOT->ProcessLine(".x SandBox.C");
+  //add SandBox - is not working yet
+  //gROOT->ProcessLine(".x SandBox.C");
 
   // chain is ready
   chain->ls(3);

@@ -64,9 +64,8 @@
         </varlist>
         
         <Content  >
-        FGMO, FGGD, FGGF, FGFP, FGGN, FGGC, FGGK, FGGP, FGGR, FGFC, FGCT,
-        FGFA, FGFL, FGOR, FGOA, FGOU, FGSU, FGSV, FGRS, FGXR, FGXC, FGXD,
-        FGXE, FGAP, FGAB, FGAD, FGOC, FGSC, FGZC, FGSD, FGZD, FGAZ, FGAL
+        FGMO, FGGD,     FGGP,   FGCT,      
+          FGOC, FGSC, FGZC
        </Content>
         
         <varlist type="INTEGER"  >
@@ -110,14 +109,7 @@
             <var name="APVdy" type="float"  />
             <var name="APVDdz" type="float"  />
             <var name="APVDdy" type="float"  />
-            <var name="FGORrad" type="float"  />
-            <var name="FGORang" type="float"  />
-            <var name="FGOAdelR" type="float"  />
-            <var name="FGOAdelZ" type="float"  />
-            <var name="FGOUdelR" type="float"  />
-            <var name="FGOUang" type="float"  />
-            <var name="FGOUdelA" type="float"  />
-            <var name="nCables" type="float"  />
+
             <var name="IFCrin" type="float"  />
             <var name="IFCTUBrin" type="float"  />
             <var name="IFCTUBrout" type="float"  />
@@ -131,7 +123,7 @@
         
 
         <Fill name="FGTG" comment="Inner GEM Tracker Geometry data"  >
-            <var name="ConfigJan" value="2" comment=" internal reconfiguration of UPGR16, 3=default=all_in "  />
+            <var name="ConfigJan" value="1" comment=" internal reconfiguration of UPGR16, 3=default=all_in "  />
 
             <var name="GR2" value="0.3" comment=" outer gap between FGT disk and skin "  />
             <var name="GR3" value="2.3" comment="  outer artificial gap beyond skin for services "  />
@@ -143,19 +135,11 @@
             <var name="FPCthk" value="0.1" comment="  thickness of the front plate carbon layer  "  />
             <var name="OCthk" value="0.3" comment="  thickness of the outer carbon fiber cylinder "  />
             <var name="OClen" value="167.72" comment="  length of the outer carbon fiber cylinder "  />
-            <var name="FGORrad" value="0.3" comment=" radius of the rails "  />
-            <var name="FGORang" value="26." comment=" tilt of the rails "  />
-            <var name="FGOAdelR" value="1.0" comment=" R-thickness  of the outer alu ring   "  />
-            <var name="FGOAdelZ" value="5.0" comment=" thickness  of the outer alu ring   "  />
 
-            <var name="nCables" value="3" comment=" number of cable boundles for FGT    "  />
-            <var name="FGOUang" value="10." comment="  tilt of the cables "  />
-            <var name="FGOUdelA" value="0.67" comment=" angular span of the cables for 1 disk "  />
-            <var name="FGOUdelR" value="0.5" comment="  R-thickness  of the FGT cables "  />
             <var name="nDisk" value="8" comment=" # of disks "  />
             <var name="gemRI" value="10.5" comment=" inner radii for physical GEM volume.  "  />
             <var name="gemRO" value="38.1" comment=" outer radii for physical GEM volume.  "  />
-            <var name="Zstart" value="72.98" comment=" starting position along Z axis "  />
+            <var name="Zstart" value="62.98" comment=" starting position along Z axis "  />
             <var name="Zdisk" value="{5.4,15.4,25.4,35.4,45.4,55.4,105.,155.}" comment=" Z positions of GEM front face "  />
             <var name="RinLes" value="4.1" comment=" iner radii for the 9th disk for Les   "  />
 
@@ -168,7 +152,7 @@
             <var name="GGRLthk" value="0.02" comment=" thickness of FR4 readout layer in GEM disk "  />
             <var name="SR" value="1.0" comment=" radial size for inner &amp; outer spacers "  />
 
-            <var name="nQuad" value="4" comment=" # of quadrants per GEm disk     "  />
+            <var name="nQuad" value="2" comment=" # of quadrants per GEm disk     "  />
             <var name="APVx" value="26." comment=" length  of APV assembley (at two quadrants boundary) "  />
             <var name="APVy" value="6" comment=" width of APV assembley  "  />
             <var name="APVz" value="6." comment=" length  of APV assembley "  />
@@ -195,16 +179,8 @@
         <If expr="FGTG_ConfigJan.le.0"  >
             <Return  />
             <Elif expr="FGTG_ConfigJan.eq.1"  >
-                FGTG_nDisk=6        
-                <Elif expr="FGTG_ConfigJan.eq.2"  >
-                    FGTG_nDisk=6 
-                    <Elif expr="FGTG_ConfigJan.eq.3"  >
-                    </Elif>
-                    
-                </Elif>
-                
-            </Elif>
-            
+                FGTG_nDisk=1        
+            </Elif>            
         </If>
         
 
@@ -309,31 +285,8 @@
         lengthZ = FGTG_FPthk+FGTG_OClen 
 
         centerZ = FGTG_Zstart + lengthZ / 2.0 
-        <Create block="FGXR"  />
-        <Placement z="57" block="FGXR" in="CAVE"  >
-        </Placement>
-        
-        <Create block="FGSV"  />
-        <Placement z="58." block="FGSV" in="CAVE"  >
-        </Placement>
         
 
-        <If expr="FGTG_ConfigJan.gt.1"  >
-            <Create block="FGXC"  />
-            <Placement z="51.0" block="FGXC" in="CAVE"  >
-            </Placement>
-            
-            <Create block="FGXD"  />
-            <Placement z="24.0" block="FGXD" in="CAVE"  >
-            </Placement>
-            
-
-            <Create block="FGXE"  />
-            <Placement z="11.0" block="FGXE" in="CAVE"  >
-            </Placement>
-            
-        </If>
-        
 
         <Create block="FGCT"  />
         x1=FGTG_IFCrin-FGTG_IFCTUBrout  ! r-distance 
@@ -347,14 +300,6 @@
         <Placement y="x1*sin(x2)" x="x1*cos(x2)" z="0." block="FGCT"  >
         </Placement>
         
-
-        <Create block="FGRS"  />
-        <Create block="FGRS"  />
-        <Placement block="FGRS"  >
-            <Rotation alphaz="FGTG_IFCresAng"  />
-        </Placement>
-        
-
 
         <Create block="FGMO"  />
         <Placement z="centerZ" block="FGMO" in="CAVE"  >
@@ -371,95 +316,27 @@
                    rmin="FGTG_RinLes" 
                    dz="lengthZ/2.0"  
             />
-
-            <Create block="FGFP"  />
-            <Placement z="-lengthZ/2.0+FGTG_FPthk/2.0" block="FGFP"  >
-            </Placement>
             
-            <Create block="FGFA"  />
-            <Placement z="-lengthZ/2.0+FGTG_FRAthk/2.0" block="FGFA"  >
-            </Placement>
             
-            <Create block="FGFL"  />
-            <Placement z="-lengthZ/2.0+0.5*FGTG_FRAthk+FGTG_FPthk/2.0" block="FGFL"  >
-            </Placement>
             
             <Create block="FGOC"  />
             <Placement z="+FGTG_FPthk/2.0" block="FGOC"  >
             </Placement>
             
-            <Create block="FGOA"  />
-            <Placement z="+lengthZ/2.0-FGTG_FGOAdelZ/2.0" block="FGOA"  >
-            </Placement>
-            
-
-            x1=Rout+FGTG_FGORrad  ! r-distance 
-            x2=FGTG_FGORang/180.*3.1416 ! titl angle in rad 
-            <Create block="FGOR"  />
-            <Placement y="x1*sin(x2)" x="x1*cos(x2)" z="FGTG_FPthk/2.0" block="FGOR"  >
-            </Placement>
-            
-            <Create block="FGOR"  />
-            <Placement y="-x1*sin(x2)" x="-x1*cos(x2)" z="FGTG_FPthk/2.0" block="FGOR"  >
-            </Placement>
-            
-
+                        
             <Do var="disk" from="1" to="FGTG_nDisk"  >
 
-                <If expr="FGTG_ConfigJan.gt.1"  >
+                <If expr="FGTG_ConfigJan.eq.1"  >
                     zD=-lengthZ/2.0 + thickGG/2.0 + FGTG_Zdisk(disk) ! Z of this disk 
                     <Create block="FGGD"  />
                     <Placement z="zD" block="FGGD"  >
                     </Placement>
                     
-
-                    x3=rin+FGTG_APVx/2. ! Rxy of the APV-chip center 
-                    <Do var="quad" from="1" to="FGTG_nQuad"  >
-                        x2=FGTG_APVang+quad*360./FGTG_nQuad ! titl angle 
-                        <Create block="FGAP"  />
-                        <Placement y="x3*sin(x2/180.*3.1416)" x="x3*cos(x2/180.*3.1416)" z="zD+zsum+FGTG_APVz/2.0+FGTG_APVDdz/2" block="FGAP"  >
-                            <Rotation alphaz="x2"  />
-                        </Placement>
-                        
-                    </Do>
-                    
                 </If>
-                
-
-                <Do var="cable" from="1" to="FGTG_nCables"  >
-                    x2=90+FGTG_FGOUang + cable*90 !center angle 
-                    x3=x2+disk*FGTG_FGOUdelA*3.0 ! final phi orientation, space them apart 
-                    z1=FGTG_OClen/2.0-zD ! cable length 
-                    x1=FGTG_gemRO+FGTG_GR2+FGTG_OCthk !' inner radii 
-                    <Create block="FGOU"  />
-                    <Placement rmin="x1" rmax="x1+FGTG_FGOUdelR" dz="z1/2.0" phi2="FGTG_FGOUdelA" phi1="0" z="(FGTG_OClen-z1)/2.0" block="FGOU"  >
-                        <Rotation alphaz="x3"  />
-                    </Placement>
-                    
-                </Do>
-                
+                                
             </Do>
             
 
-            <If expr="FGTG_ConfigJan.gt.2"  >
-                FGSCrmin=FGTG_RinLes ; FGSCrmax=FGTG_gemRO; FGSCdz=FGTG_GGSCthk/2.0
-                FGSCz = -lengthZ/2.0+4.0 !Jan change 
-                <Create block="FGSD"  />
-                <Placement z="FGSCz" block="FGSD"  >
-                    <Rotation alphaz="-15"  />
-                </Placement>
-                
-            </If>
-            
-
-            <Do var="cable" from="1" to="FGTG_nCables"  >
-                x1=FGTG_gemRO+FGTG_GR2+FGTG_OCthk+0.1 !' outer radii 
-                <Create block="FGSU"  />
-                <Placement rmin="x1" rmax="x1+1.5" dz="FGTG_OClen/2.0" phi2="45" phi1="30" z="0" block="FGSU"  >
-                    <Rotation alphaz="80+FGTG_FGOUang+cable*90"  />
-                </Placement>
-                
-            </Do>
             
         </Block>
         
@@ -472,21 +349,10 @@
             zsum = -thickGG/2.0      ! Start at the front face. 
             rin=FGTG_gemRI 
             rout=FGTG_gemRO 
-
-            <Create block="FGGF"  />
-            <Placement z="zsum+FGTG_GGFR4thk/2.0" block="FGGF"  >
-            </Placement>
             
             zsum=zsum+FGTG_GGFR4thk 
 
-            <Create block="FGGN"  />
-            <Placement z="zsum+FGTG_GGNthk/2.0" block="FGGN"  >
-            </Placement>
-            
             zsum=zsum+FGTG_GGNthk 
-            <Create block="FGGF"  />
-            <Placement z="zsum+FGTG_GGFR4thk/2.0" block="FGGF"  >
-            </Placement>
             
             zsum=zsum+FGTG_GGFR4thk 
 
@@ -501,15 +367,9 @@
             
             zsum=zsum+FGTG_GGSCthk 
 
-            <Create block="FGGC"  />
-            <Placement z="zsum+FGTG_GGCUthk/2.0" block="FGGC"  >
-            </Placement>
             
             zsum=zsum+FGTG_GGCUthk 
 
-            <Create block="FGGK"  />
-            <Placement z="zsum+FGTG_GGKAthk/2.0" block="FGGK"  >
-            </Placement>
             
             zsum=zsum+FGTG_GGKAthk 
             <Create block="FGGP"  />
@@ -517,81 +377,18 @@
             </Placement>
             
             zsum=zsum+FGTG_GGPAthk 
-
-            <Create block="FGGR"  />
-            <Placement z="zsum+FGTG_GGRLthk/2.0" block="FGGR"  >
-            </Placement>
             
             zsum=zsum+FGTG_GGRLthk 
 
         </Block>
-        
-
-
-        <Block name="FGGF" comment="describes the FR4 layer of 3GEM"  >
-            <Material name="FR4"  />
-            <Attribute for="FGGF" seen="1" colo="4"  />
-            <Shape type="TUBE" rmax="rout" rmin="rin" dz="FGTG_GGFR4thk/2.0"  />
-        </Block>
-        
-
-
-        <Block name="FGFP" comment="front plate, heonecomb carbon"  >
-            <Material name="Nomex"  />
-            <Attribute for="FGFP" seen="1" colo="1"  />
-            <Shape type="TUBE" rmax="Rout" rmin="FGTG_FRArout" dz="FGTG_FPthk/2.0"  />
-            <Create block="FGFC"  />
-            <Placement z="-FGTG_FPthk/2.0+FGTG_FPCthk/2.0" block="FGFC"  >
-            </Placement>
-            
-            <Create block="FGFC"  />
-            <Placement z="+FGTG_FPthk/2.0-FGTG_FPCthk/2.0" block="FGFC"  >
-            </Placement>
-            
-        </Block>
-        
-
-        <Block name="FGGN" comment="tripple-GEM support plate, heonecomb nomex"  >
-            <Material name="Nomex"  />
-            <Attribute for="FGGN" seen="1" colo="1"  />
-            <Shape type="TUBE" rmax="Rout" rmin="Rin" dz="FGTG_GGNthk/2.0"  />
-        </Block>
-        
-
-        <Block name="FGGC" comment="combined Cu-layer in tripple-GEM"  >
-            <Material name="Copper_dens1"  />
-            <Attribute for="FGGC" seen="1" colo="3"  />
-            <Shape type="TUBE" rmax="Rout" rmin="Rin" dz="FGTG_GGCUthk/2.0"  />
-        </Block>
-        
-
-        <Block name="FGGK" comment="combined Kapton layer in tripple-GEM"  >
-            <Material name="Kapton_dens1"  />
-            <Attribute for="FGGK" seen="1" colo="4"  />
-            <Shape type="TUBE" rmax="Rout" rmin="Rin" dz="FGTG_GGKAthk/2.0"  />
-        </Block>
-        
+              
 
         <Block name="FGGP" comment="combined passive gas layer in tripple-GEM"  >
             <Material name="ArCO2_70_30"  />
             <Attribute for="FGGP" seen="1" colo="5"  />
             <Shape type="TUBE" rmax="Rout" rmin="Rin" dz="FGTG_GGPAthk/2.0"  />
         </Block>
-        
-
-        <Block name="FGGR" comment="FR4 readout layer in tripple-GEM"  >
-            <Material name="FR4_dens1"  />
-            <Attribute for="FGGR" seen="1" colo="4"  />
-            <Shape type="TUBE" rmax="Rout" rmin="Rin" dz="FGTG_GGRLthk/2.0"  />
-        </Block>
-        
-
-        <Block name="FGFC" comment="front plate carbon fiber"  >
-            <Material name="CFiber"  />
-            <Attribute for="FGFC" seen="1" colo="3"  />
-            <Shape type="TUBE" rmax="Rout" rmin="FGTG_FRArout" dz="FGTG_FPCthk/2.0"  />
-        </Block>
-        
+           
 
         <Block name="FGCT" comment="G10 Tube for IFC resitor chain"  >
             <Material name="FR4"  />
@@ -600,149 +397,8 @@
         </Block>
         
 
-        <Block name="FGFA" comment="front plate inner Alu ring"  >
-            <Material name="Aluminium"  />
-            <Attribute for="FGFA" seen="1" colo="1"  />
-            <Shape type="TUBE" rmax="FGTG_FRArout" rmin="FGTG_FRArin" dz="FGTG_FRAthk/2.0"  />
-        </Block>
         
-
-        <Block name="FGFL" comment="front plate lip of the inner Alu ring"  >
-            <Material name="Aluminium"  />
-            <Attribute for="FGFL" seen="1" colo="1"  />
-            <Shape type="TUBE" rmax="FGTG_FRArout" rmin="FGTG_FRALrin" dz="(FGTG_FPthk-FGTG_FRAthk)/2.0"  />
-        </Block>
-        
-
-        <Block name="FGOR" comment="outer rails , Alu"  >
-            <Material name="Aluminium"  />
-            <Attribute for="FGOR" seen="1" colo="2"  />
-            <Shape type="TUBE" rmax="FGTG_FGORrad" rmin="0" dz="FGTG_OClen/2.0"  />
-        </Block>
-        
-
-        <Block name="FGOA" comment="outer Alu ring"  >
-            <Material name="Aluminium"  />
-            <Attribute for="FGOA" seen="1" colo="1"  />
-            <Shape type="TUBE" rmax="Rout+FGTG_FGOAdelR" rmin="Rout" dz="FGTG_FGOAdelZ/2.0"  />
-        </Block>
-        
-
-        <Block name="FGOU" comment="FGT utility lines, all mixed and averaged"  >
-            <Material name="Cable_FGT"  />
-            <Attribute for="FGOU" seen="1" colo="1"  />
-            <Shape type="TUBS" rmin="0" rmax="0" dz="0" phi2="0" phi1="0"  />
-        </Block>
-        
-
-        <Block name="FGSU" comment="SSD utility lines, all mixed and averaged"  >
-            <Material name="Cable_SSD"  />
-            <Attribute for="FGSU" seen="1" colo="7"  />
-            <Shape type="TUBS" rmin="0" rmax="0" dz="0" phi2="0" phi1="0"  />
-        </Block>
-        
-
-        <Block name="FGSV" comment="SSD utility -tube, all mixed and averaged"  >
-            <Material name="Cable_SSD"  />
-            <Attribute for="FGSV" seen="1" colo="7"  />
-            <Shape type="TUBE" rmax="36.27" rmin="36.10" dz="5.0"  />
-        </Block>
-        
-
-
-        <Block name="FGRS" comment="Resistor Strip for IFC resitor chain"  >
-            <Material name="Alumina"  />
-            <Attribute for="FGRS" seen="1" colo="1"  />
-            <Shape type="TUBS" rmin="FGTG_IFCrin-FGTG_IFCResDelR-FGTG_IFCTUBrout" rmax="FGTG_IFCrin-FGTG_IFCTUBrout" dz="FGTG_IFClenZ/2.0" phi2="FGTG_IFCResDelA/2.0" phi1="-FGTG_IFCResDelA/2.0"  />
-        </Block>
-        
-
-
-        <Block name="FGXR" comment="SSD interface Alu ring"  >
-            <Material name="Aluminium"  />
-            <Attribute for="FGXR" seen="1" colo="1"  />
-            <Shape type="TUBE" rmax="36.0" rmin="28.0" dz="0.7/2.0"  />
-        </Block>
-        
-
-        <Block name="FGXC" comment="SSD supporting carbon ring"  >
-            <Material name="CARBON"  />
-            <Attribute for="FGXC" seen="1" colo="1"  />
-            <Shape type="TUBE" rmax="21.0" rmin="2.5" dz="0.1/2.0"  />
-        </Block>
-        
-
-        <Block name="FGXD" comment="IST supporting carbon ring"  >
-            <Material name="CARBON"  />
-            <Attribute for="FGXD" seen="1" colo="1"  />
-            <Shape type="TUBE" rmax="13.0" rmin="2.5" dz="0.1/2.0"  />
-        </Block>
-        
-
-        <Block name="FGXE" comment="HFT supporting carbon ring"  >
-            <Material name="CARBON"  />
-            <Attribute for="FGXE" seen="1" colo="1"  />
-            <Shape type="TUBE" rmax="8.0" rmin="2.5" dz="0.1/2.0"  />
-        </Block>
-        
-
-
-        <Block name="FGAP" comment="APV-chips block encapsulation volume"  >
-            <Material name="air"  />
-            <Attribute for="FGAP" seen="0" colo="6"  />
-            <Shape type="BOX" dz="FGTG_APVz/2.0+FGTG_APVDdz/2" dx="FGTG_APVx/2.0" dy="FGTG_APVy/2.0"  />
-            <Create block="FGAD"  />
-            <Placement y="0" x="0" z="-FGTG_APVz/2" block="FGAD"  >
-            </Placement>
-            
-            <Create block="FGAZ"  />
-            <Placement y="0" x="(-FGTG_APVx+FGTG_APVd)/2.0" z="FGTG_APVDdz/2" block="FGAZ"  >
-            </Placement>
-            
-            <Create block="FGAL"  />
-            <Placement y="0" x="(FGTG_APVx-FGTG_APVd)/2.0" z="FGTG_APVDdz/2" block="FGAL"  >
-            </Placement>
-            
-            <Create block="FGAB"  />
-            <Placement y="-FGTG_APVdy/2.0" x="0" z="FGTG_APVDdz/2" block="FGAB"  >
-            </Placement>
-            
-            <Create block="FGAB"  />
-            <Placement y="+FGTG_APVdy/2.0" x="0" z="FGTG_APVDdz/2" block="FGAB"  >
-            </Placement>
-            
-        </Block>
-        
-
-
-        <Block name="FGAL" comment="APV- large end-board made of FR4+Cu"  >
-            <Material name="FR4Cu"  />
-            <Attribute for="FGAL" seen="1" colo="7"  />
-            <Shape type="BOX" dz="FGTG_APVz/2.0" dx="FGTG_APVd/2.0" dy="FGTG_APVy/2.0"  />
-        </Block>
-        
-
-        <Block name="FGAZ" comment="APV- small end-board made of FR4+Cu"  >
-            <Material name="FR4Cu"  />
-            <Attribute for="FGAZ" seen="1" colo="7"  />
-            <Shape type="BOX" dz="FGTG_APVz/2.0" dx="FGTG_APVd/2.0" dy="FGTG_APVy2/2.0"  />
-        </Block>
-        
-
-        <Block name="FGAB" comment="APV- blade-board made of FR4+Cu"  >
-            <Material name="FR4Cu"  />
-            <Attribute for="FGAB" seen="1" colo="7"  />
-            <Shape type="BOX" dz="FGTG_APVz/2.0" dx="FGTG_APVx/2.0-FGTG_APVd" dy="FGTG_APVd/2.0"  />
-        </Block>
-        
-
-        <Block name="FGAD" comment="APV- material between quadrants made of FR4+Cu"  >
-            <Material name="FR4Cu"  />
-            <Attribute for="FGAD" seen="1" colo="1"  />
-            <Shape type="BOX" dz="FGTG_APVDdz/2.0" dx="FGTG_APVx/2.0" dy="FGTG_APVDdy/2.0"  />
-        </Block>
-        
-
+       
         <Block name="FGOC" comment="outer cylinder, carbon fiber FGTG_OCthk"  >
             <Material name="CFiber"  />
             <Attribute for="FGOC" seen="1" colo="3"  />
@@ -765,22 +421,6 @@
             <Shape type="DIVISION" ndiv="4" iaxis="2"  />
 
             <Hits for="FGZC" sleng="16:(0,500)" step=".01:" cz="10:" cy="10:" cx="10:" eloss="16:(0,0.001)" x=".001:" y=".001:" ptot="16:(0,100)" z=".001:S" tof="16:(0,1.E-6)"  />
-        </Block>
-        
-        <Block name="FGSD" comment="is FGSC of different size"  >
-            <Material name="ArCO2_70_30"  />
-            <Material name="Sensitive" isvol="1"  />
-            <Attribute for="FGSD" seen="1" colo="6"  />
-            <Shape type="TUBE" rmax="FGSCrmax" rmin="FGSCrmin" dz="FGSCdz"  />
-
-            <Create block="FGZD"  />
-        </Block>
-        
-        <Block name="FGZD" comment="describes the sensitive area"  >
-            <Attribute for="FGZD" seen="1" colo="7"  />
-            <Shape type="DIVISION" ndiv="4" iaxis="2"  />
-
-            <Hits for="FGZD" sleng="16:(0,500)" step=".01:" cz="10:" cy="10:" cx="10:" eloss="16:(0,0.001)" x=".001:" y=".001:" ptot="16:(0,100)" z=".001:S" tof="16:(0,1.E-6)"  />
         </Block>
         
     </Module>

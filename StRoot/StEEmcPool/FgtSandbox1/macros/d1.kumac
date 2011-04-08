@@ -19,7 +19,7 @@ Y=1.89
 *Y=1.6
  gfile   o d1.fzd
 
-gkine 1 [pId] [pT] [pT] 1.4 1.8 3.7854 4.5854 
+gkine 1 [pId] [pT] [pT] 1.3 1.8 1.8 2.2 
 *gkine 1 [pId] [pT] [pT] [Y] [Y] 3.7854 3.7854  216 deg
 *gkine 1 [pId] [pT] [pT] [Y] [Y] 2.1854 2.1854  
 *gkine 1 [pId] [pT] [pT] [Y] [Y] 4.5854 4.5854  262 deg see negative 
