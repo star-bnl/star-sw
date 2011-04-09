@@ -48,6 +48,7 @@ extern ExAtomPhotoAbsCS Magnesium_PACS;
 extern ExAtomPhotoAbsCS Aluminium_PACS;
 extern ExAtomPhotoAbsCS Silicon_PACS;
 extern ExAtomPhotoAbsCS Silicon_crystal_PACS;
+extern ExAtomPhotoAbsCS Silicon_G4_PACS;
 extern ExAtomPhotoAbsCS Phosphor_PACS;
 extern ExAtomPhotoAbsCS Sulfur_PACS;
 extern ExAtomPhotoAbsCS Chlorine_PACS;
