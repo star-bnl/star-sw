@@ -35,12 +35,12 @@ public:
   void threshold(Float_t cut, Int_t layer) { mSigmaPed[layer]=cut; }
 
   /// Set the name of the EEMC database, init obtains pointer.
-  void database(const Char_t * /*dbname*/) { /*mDbName=dbname;*/ } // obsolete
+  void database(const Char_t * /*dbname*/) { /*mDbName=dbname;*/ } /* obsolete */
 
   /// Set the name and type of the input data maker.
   /// \param name: name of the maker
   /// \param type: 1=muDst, 2=StEvent, 3=muEzt (unsupported)
-  void source(const Char_t * /*name*/, Int_t /*type*/ = 0) { /*mInputName=name; mInputType=type;*/ } // obsolete
+  void source(const Char_t * /*name*/, Int_t /*type*/ = 0) { /*mInputName=name; mInputType=type;*/ } /* obsolete */
 
   /// Returns a vector of hit tower, preshower and postshower
   /// elements.  Check hitTowers[i].layer() to deterimine if
@@ -132,7 +132,7 @@ public:
   void scale(Float_t s){ mScale=s; }
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StEEmcA2EMaker.h,v 1.5 2010/08/26 22:49:21 ogrebeny Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StEEmcA2EMaker.h,v 1.6 2011/04/11 19:35:40 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}
 
 protected:
   

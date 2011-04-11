@@ -9,7 +9,7 @@
  *                                                                                    
  *  06Dec99 zm  Created so offline can use and after modification for mod 8 DMA reads 
  *  08Dec99 zm  Changed Event Descriptor Structure to previous length                 
- *  03Feb00 zm  Changed "ushort ZDCDSM[8]" to "BYTE ZDC[16]" in L0_DSM_Data structure 
+ *  03Feb00 zm  Changed "UShort_t ZDCDSM[8]" to "BYTE ZDC[16]" in L0_DSM_Data structure 
  *  22Jul00 egj Added L0RegBytes and L0RegHeader to trgDataHeaders and TrgSumData.    
  *              Also added Mult_Reg, ZDC_Reg and Spare_Reg to TrgSumData, making a    
  *              total of 16 extra bytes. I compensated for this by removing 16 bytes, 

@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski
 // 
-// $Id: StFgtClustEvalMaker.cxx,v 1.1 2011/04/07 19:31:22 balewski Exp $
+// $Id: StFgtClustEvalMaker.cxx,v 1.2 2011/04/11 19:35:38 fisyak Exp $
 
 #include <TVector3.h>
 #include <TH2.h>
@@ -10,7 +10,7 @@
 #include <TPolyLine.h>
 #include <TCrown.h>
 #include <TRandom3.h>
-
+#include "TMath.h"
 #include "StFgtClustEvalMaker.h"
 #include "StFgtSlowSimuMaker.h"
 #include "StFgtClustFindMaker.h"
@@ -118,14 +118,14 @@ StFgtClustEvalMaker::matchRadClust1D( vector<fgt_g2t_auxil> *g2tTrL,  vector<fgt
 
   int nM=0;
   for(int iQuad=0; iQuad<kFgtMxQuad;iQuad++)     
-    for(uint ih=0;ih<g2tTrL[iQuad].size();ih++) {
+    for(UInt_t ih=0;ih<g2tTrL[iQuad].size();ih++) {
       double gR=g2tTrL[iQuad][ih].Rlab.Perp(); // radial distance from Z-axis
       double minDelR=par_minDelRad;
       int jc=-1;// best match
-      for(uint ic=0;ic<clL.size();ic++) {
+      for(UInt_t ic=0;ic<clL.size();ic++) {
 	if(clL[ic].matched) continue; //match only once
 	double delR=clL[ic].position - gR;
-	if(fabs(minDelR)<fabs(delR)) continue;
+	if(TMath::Abs(minDelR)<TMath::Abs(delR)) continue;
 	minDelR=delR;// better match found
 	jc=ic;
       }
@@ -155,7 +155,7 @@ StFgtClustEvalMaker::matchPhiClust1D( vector<fgt_g2t_auxil> *g2tTrL,  vector<fgt
 
   int nM=0;
   for(int iQuad=0; iQuad<kFgtMxQuad;iQuad++)     
-    for(uint ih=0;ih<g2tTrL[iQuad].size();ih++) {
+    for(UInt_t ih=0;ih<g2tTrL[iQuad].size();ih++) {
       double gR=g2tTrL[iQuad][ih].Rlab.Perp(); // radial distance from Z-axis
       double gPhi=g2tTrL[iQuad][ih].Rlab.Phi(); // radial distance from Z-axis
       while (gPhi<-pi) gPhi+=dpi;
@@ -163,7 +163,7 @@ StFgtClustEvalMaker::matchPhiClust1D( vector<fgt_g2t_auxil> *g2tTrL,  vector<fgt
 
       double minRdPhi=par_minRdPhi;
       int jc=-1;// best match
-      for(uint ic=0;ic<clL.size();ic++) {
+      for(UInt_t ic=0;ic<clL.size();ic++) {
 	if(clL[ic].matched) continue; //match only once
 	double rPhi=clL[ic].position;
 	while (rPhi<-pi) rPhi+=dpi;
@@ -174,7 +174,7 @@ StFgtClustEvalMaker::matchPhiClust1D( vector<fgt_g2t_auxil> *g2tTrL,  vector<fgt
 	double RdelPhi=gR*delPhi;
 	//printf("phi1,2: g r=%.3f phi/deg=%.2f, r phi/deg=%.2f,  delPR/cm=%.3f  \n",gR,gPhi/3.1416*180.,rPhi/3.1416*180.,RdelPhi);
 
-	if(fabs(minRdPhi)<fabs(RdelPhi)) continue;
+	if(TMath::Abs(minRdPhi)<TMath::Abs(RdelPhi)) continue;
 	minRdPhi=RdelPhi;// better match found
 	jc=ic;
       }
@@ -270,6 +270,9 @@ StFgtClustEvalMaker::Init(){
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StFgtClustEvalMaker.cxx,v $
+// Revision 1.2  2011/04/11 19:35:38  fisyak
+// Replace uint by UInt_t, use TMath
+//
 // Revision 1.1  2011/04/07 19:31:22  balewski
 // start
 //

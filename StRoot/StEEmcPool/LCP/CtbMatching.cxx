@@ -28,8 +28,8 @@ void CtbMatching::loadHits(StMuEvent* muEve) {
   
   assert(ctbDet);
   float ctbSum = 0;
-  for (uint slat = 0; slat < ctbDet->numberOfSlats(); slat++) {
-    for (uint tray = 0; tray < ctbDet->numberOfTrays(); tray++) {
+  for (UInt_t slat = 0; slat < ctbDet->numberOfSlats(); slat++) {
+    for (UInt_t tray = 0; tray < ctbDet->numberOfTrays(); tray++) {
       ctbHit curHit;
       curHit.adc = ctbDet->mips(tray,slat,0);
       if(curHit.adc > 0){

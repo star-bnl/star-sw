@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski
 // 
-// $Id: StFgtSlowSimuMaker.cxx,v 1.4 2011/04/08 22:18:42 balewski Exp $
+// $Id: StFgtSlowSimuMaker.cxx,v 1.5 2011/04/11 19:35:38 fisyak Exp $
 #include <TVector3.h>
 #include <TH2.h>
 #include <TF1.h>
@@ -219,7 +219,8 @@ StFgtSlowSimuMaker::Make(){
       // accumulate response in digXY array
       vector<fgt_g2t_auxil> &L=mG2tHitList[iDisk][iQuad];
       if(L.size()<=0) continue;// drop if empty quad
-      for(uint i=0;i<L.size();i++) { // populate: digXY
+      for(UInt_t
+ i=0;i<L.size();i++) { // populate: digXY
 	//responseLinearModel(h->Rloc,h->Dloc);
 	responseFrankModel(L[i].Rloc,L[i].Dloc);
 	hA[11+iDisk]->Fill(L[i].Rlab.x(),L[i].Rlab.y()); // monitor hit distribution
@@ -437,6 +438,9 @@ StFgtSlowSimuMaker::exportStripPlane(TH1F *h, vector<fgt_strip> &L) {
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StFgtSlowSimuMaker.cxx,v $
+// Revision 1.5  2011/04/11 19:35:38  fisyak
+// Replace uint by UInt_t, use TMath
+//
 // Revision 1.4  2011/04/08 22:18:42  balewski
 // added access to TGeo
 //

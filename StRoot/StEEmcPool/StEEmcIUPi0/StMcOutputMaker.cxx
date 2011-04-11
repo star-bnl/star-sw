@@ -1,6 +1,6 @@
 //*-- Author :Weihong He
 // 
-// $Id: StMcOutputMaker.cxx,v 1.2 2009/09/22 23:19:02 fine Exp $
+// $Id: StMcOutputMaker.cxx,v 1.3 2011/04/11 19:35:41 fisyak Exp $
 #include <TH2.h>
 
 #include "StMcOutputMaker.h"
@@ -113,7 +113,7 @@ StMcOutputMaker::Make(){
   const StSPtrVecMcVertex &VL=mMcEvent->vertices();
   //printf("%s::nVert=%d\n",GetName(),VL.size());
   //  int ipr=1;
-  uint i;
+  UInt_t i;
   zgg=0;
   for( i=0;i<VL.size();i++) { 
     StMcVertex* V=VL[i];
@@ -122,7 +122,7 @@ StMcOutputMaker::Make(){
     float x=V->position().x();
     float y=V->position().y();
     float zz=V->position().z();
-    float Rxy=sqrt(x*x+y*y);
+    float Rxy=TMath::Sqrt(x*x+y*y);
     
     //printf("vx=%f,vy=%f,vz=%f Rxy=%f\n",x,y,z,Rxy);
     //cout<<*V<<endl<<endl;
@@ -146,7 +146,7 @@ StMcOutputMaker::Make(){
       
       if(hHeight<=hlow || hHeight >=hhigh) continue;
       fflag++;
-      float etatheta=atan(hHeight/270.0);
+      float etatheta=TMath::ATan(hHeight/270.0);
       //printf("theta=%f etatheta=%f\n",p4.theta(), etatheta);
       float mideta=tan(etatheta/2.0);
       float eemceta=-log(mideta);

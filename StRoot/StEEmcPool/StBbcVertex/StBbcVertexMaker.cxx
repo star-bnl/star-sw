@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StBbcVertexMaker.cxx,v 1.2 2004/12/04 05:07:38 balewski Exp $
+// $Id: StBbcVertexMaker.cxx,v 1.3 2011/04/11 19:35:40 fisyak Exp $
 
 #include <TFile.h>
  
@@ -110,7 +110,7 @@ bool StBbcVertexMaker::unpackMuTrig(){
   // printf("\n\n ==================== processing eventID %d nPrim=%d nTrig=%d==============\n", info.id(),nPrim, trgId.size());
 
   bool isGood=false;
-  uint i;
+  UInt_t i;
   for(i = 0; i < trgId.size() ; i++){
     // printf("i=%d trgId=%d\n",i,trgId[i]);
     //.......... minB trig in pp200 in 2004
@@ -135,6 +135,9 @@ bool StBbcVertexMaker::unpackMuTrig(){
 
 
 // $Log: StBbcVertexMaker.cxx,v $
+// Revision 1.3  2011/04/11 19:35:40  fisyak
+// Replace uint by UInt_t, use TMath
+//
 // Revision 1.2  2004/12/04 05:07:38  balewski
 // export to NN
 //
