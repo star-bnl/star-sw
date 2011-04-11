@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.224 2011/03/11 00:05:18 jwebb Exp $
+* $Id: geometry.g,v 1.225 2011/04/11 17:37:56 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.225  2011/04/11 17:37:56  jwebb
+* Introduce UPGR2012 geometry as y2011 with inner detectors (FGT, SSD) and
+* supports removed.
+*
 * Revision 1.224  2011/03/11 00:05:18  jwebb
 * Added Y2008d, Y2009d, Y2010c and updated Y2011 geometry tags.  These tags
 * now contain an improved model of the SVT support cone... specifically the
@@ -1760,6 +1764,27 @@ REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC
 c ===============================================================================
 
 
+REPLACE [exe upgr2012;] with ["y2012 FGT upgrade studies";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMD02;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe MUTD04;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+]
+    
+
+
 !//______________________________________________________________________________
 replace [exe UPGR15;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
                             exe SVTTof; exe FTPCof; exe BTOF66; exe CALBc0; exe ECAL31;
@@ -2457,10 +2482,18 @@ If LL>0
                  exe y2010c;       }
 
 ****************************************************************************************
+
   Case y2011   { Y2011: baseline y2011 geometry, placeholder added 07/30/2010
                  Geom = 'Y2011   ';
                  exe y2011; }
-          
+
+  Case upgr2012 { upgr2012 : FGT upgrade studies for 2012;
+                 Geom = 'upgr2012';
+                 exe upgr2012; }
+
+
+****************************************************************************************
+****************************************************************************************
 ****************************************************************************************
   Case DUMM01   { R and D geometry: TPC+DUMM
 
