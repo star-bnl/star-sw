@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsoloPi0Maker.cxx,v 1.13 2009/02/04 20:33:21 ogrebeny Exp $
+// $Id: StEEsoloPi0Maker.cxx,v 1.14 2011/04/11 19:35:42 fisyak Exp $
 
 #include <TFile.h>
 
@@ -124,7 +124,7 @@ bool StEEsoloPi0Maker::unpackMuTrig(){ // trigger filter, has wrongID
 #endif
 
   bool isGood=false;
-  uint i;
+  UInt_t i;
   for(i = 0; i < trgId.size() ; i++){
     //    printf("i=%d trgId=%d\n",i,trgId[i]);
 #if 0
@@ -231,8 +231,8 @@ float StEEsoloPi0Maker::getCtbSum(){
   assert(ctbDet);
   float ctbSum = 0;
   int nHit=0;
-  for (uint slat = 0; slat < ctbDet->numberOfSlats(); slat++) {
-    for (uint tray = 0; tray < ctbDet->numberOfTrays(); tray++) {
+  for (UInt_t slat = 0; slat < ctbDet->numberOfSlats(); slat++) {
+    for (UInt_t tray = 0; tray < ctbDet->numberOfTrays(); tray++) {
       float  adc = ctbDet->mips(tray,slat,0);
       ctbSum += adc;      
       if(adc > 5) nHit++;
@@ -247,6 +247,9 @@ float StEEsoloPi0Maker::getCtbSum(){
 
 
 // $Log: StEEsoloPi0Maker.cxx,v $
+// Revision 1.14  2011/04/11 19:35:42  fisyak
+// Replace uint by UInt_t, use TMath
+//
 // Revision 1.13  2009/02/04 20:33:21  ogrebeny
 // Moved the EEMC database functionality from StEEmcDbMaker to StEEmcUtil/database. See ticket http://www.star.bnl.gov/rt2/Ticket/Display.html?id=1388
 //

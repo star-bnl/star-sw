@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski
 // 
-// $Id: StFgtClustFindMaker.cxx,v 1.1 2011/04/07 19:31:22 balewski Exp $
+// $Id: StFgtClustFindMaker.cxx,v 1.2 2011/04/11 19:35:38 fisyak Exp $
 
 #include <TVector3.h>
 #include <TH2.h>
@@ -96,7 +96,7 @@ StFgtClustFindMaker::Make(){
 
     printf("disk=%d  %d -->%d   %d -->%d \n",iDisk+1,ssMk->mRadAdcList[iDisk].size(),nRCl,ssMk->mPhiAdcList[iDisk].size(),nPCl);
     
-    uint i;
+    UInt_t i;
     int j;
 
     //::::::::::::::::process Rad-strips::::::::::::::::
@@ -230,7 +230,7 @@ StFgtClustFindMaker::findClust1D(vector<fgt_strip> &sL, vector<fgt_cluster1D> &c
 
   int bx0=-999,bx1=bx0; // first and last bin of current cluster
   double sum=0, sumx=0, peakA=0;
-  for(uint i=0;i<sL.size();i++) {
+  for(UInt_t i=0;i<sL.size();i++) {
     assert(sL[i].id>=bx1); //assumes strips are ordered  increasingly
     if(sL[i].id>=bx1+par_bx_valley) { // new clusters starts
       int nbin=bx1-bx0+1;
@@ -273,6 +273,9 @@ StFgtClustFindMaker::findClust1D(vector<fgt_strip> &sL, vector<fgt_cluster1D> &c
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StFgtClustFindMaker.cxx,v $
+// Revision 1.2  2011/04/11 19:35:38  fisyak
+// Replace uint by UInt_t, use TMath
+//
 // Revision 1.1  2011/04/07 19:31:22  balewski
 // start
 //

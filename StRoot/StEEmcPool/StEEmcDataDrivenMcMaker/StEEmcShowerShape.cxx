@@ -3,7 +3,7 @@
 // Indiana University
 // Jan 26, 2008
 //
-
+#include <assert.h>
 // C++ STL
 #include <iostream>
 #include <cassert>

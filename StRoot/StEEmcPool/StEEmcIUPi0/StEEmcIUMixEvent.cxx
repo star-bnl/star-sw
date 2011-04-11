@@ -1,4 +1,6 @@
+#include "TMath.h"
 #include "StEEmcIUMixEvent.h"
+
 ClassImp(StEEmcIUMixEvent);
 ClassImp(StEEmcIUMixEventHead);
 ClassImp(StEEmcIUMixEventClust);
@@ -117,9 +119,9 @@ void StEEmcIUMixEvent::addPair ( StEEmcIUPair  p ) {
     mPhigg[nPairs]  = p.phigg(); 
     mEnergy[nPairs] = p.energy();
     //calculate detector Eta
-    float Rxy=sqrt(p.vertex().x()*p.vertex().x()+p.vertex().y()*p.vertex().y());
+    float Rxy=TMath::Sqrt(p.vertex().x()*p.vertex().x()+p.vertex().y()*p.vertex().y());
     float hHeight=p.pt()*(270.0-p.vertex().Z())/p.pz()+Rxy;
-    float etatheta=atan(hHeight/270.0);
+    float etatheta=TMath::ATan(hHeight/270.0);
     //printf("accept pz=%f\n",pair.pz());
     float mideta=tan(etatheta/2.0);
     float eemceta=-log(mideta);

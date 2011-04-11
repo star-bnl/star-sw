@@ -214,9 +214,9 @@ Int_t StEEmcIUPi0Analysis::Make()
       DEtaMass->Fill(pair.mass(),deta);
       DPhiMass->Fill(pair.mass(),dphi);
       //calculate detector Eta
-      float Rxy=sqrt(pair.vertex().x()*pair.vertex().x()+pair.vertex().y()*pair.vertex().y());
+      float Rxy=TMath::Sqrt(pair.vertex().x()*pair.vertex().x()+pair.vertex().y()*pair.vertex().y());
       float hHeight=pair.pt()*(270.0-pair.vertex().Z())/pair.pz()+Rxy;
-      float etatheta=atan(hHeight/270.0);
+      float etatheta=TMath::ATan(hHeight/270.0);
       //printf("accept pz=%f\n",pair.pz());
       float mideta=tan(etatheta/2.0);
       float eemceta=-log(mideta);
@@ -302,8 +302,8 @@ Int_t StEEmcIUPi0Analysis::Make()
 		{deltaphi=6.283-deltaphi;}
 	      float deltaeta=rEta-etaMc;
 	      float Rdeltaeta=rEta-eemceta;
-	      float deltad=sqrt(deltaphi*deltaphi+deltaeta*deltaeta);
-	      float deltaR=sqrt(deltaphi*deltaphi+Rdeltaeta*Rdeltaeta);
+	      float deltad=TMath::Sqrt(deltaphi*deltaphi+deltaeta*deltaeta);
+	      float deltaR=TMath::Sqrt(deltaphi*deltaphi+Rdeltaeta*Rdeltaeta);
 	      if(deltad<=minD) 
 		{
 		  //printf("dphi=%f deta=%f\n",deltaphi,deltaeta);
@@ -334,8 +334,8 @@ Int_t StEEmcIUPi0Analysis::Make()
 		{deltaphi=6.283-deltaphi;}
 	      float deltaeta=rEta-etaMc;
 	      float Rdeltaeta=rEta-eemceta;
-	      float deltad=sqrt(deltaphi*deltaphi+deltaeta*deltaeta);
-	      float deltaR=sqrt(deltaphi*deltaphi+Rdeltaeta*Rdeltaeta);
+	      float deltad=TMath::Sqrt(deltaphi*deltaphi+deltaeta*deltaeta);
+	      float deltaR=TMath::Sqrt(deltaphi*deltaphi+Rdeltaeta*Rdeltaeta);
 	   
 		  
 	    
@@ -706,9 +706,9 @@ Bool_t StEEmcIUPi0Analysis::accept( StEEmcIUPair pair, Bool_t fill )
 
     /// Pair must be w/in eta range
 
-  float Rxy=sqrt(pair.vertex().x()*pair.vertex().x()+pair.vertex().y()*pair.vertex().y());
+  float Rxy=TMath::Sqrt(pair.vertex().x()*pair.vertex().x()+pair.vertex().y()*pair.vertex().y());
   float hHeight=pair.pt()*(270.0-pair.vertex().Z())/pair.pz()+Rxy;
-  float etatheta=atan(hHeight/270.0);
+  float etatheta=TMath::ATan(hHeight/270.0);
   //printf("accept pz=%f\n",pair.pz());
   float mideta=tan(etatheta/2.0);
   float eta=-log(mideta);

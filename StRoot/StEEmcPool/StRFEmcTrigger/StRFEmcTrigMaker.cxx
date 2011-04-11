@@ -1,6 +1,6 @@
 // *-- Author : Renee Fatemi
 // 
-// $Id: StRFEmcTrigMaker.cxx,v 1.7 2004/10/21 13:31:34 balewski Exp $
+// $Id: StRFEmcTrigMaker.cxx,v 1.8 2011/04/11 19:35:52 fisyak Exp $
 
 #include "StRFEmcTrigMaker.h"
 #include "StChain.h"
@@ -445,10 +445,10 @@ void  StRFEmcTrigMaker::unpackEmcFromSt(){
   StDetectorId BemcId=StDetectorId(kBarrelEmcTowerId);
   StEmcDetector *EmcDet = stEmcCol->detector(BemcId); //BEMC tower detector number  
   if(EmcDet) {
-    for (uint mod=1;mod<=EmcDet->numberOfModules();mod++){
+    for (UInt_t mod=1;mod<=EmcDet->numberOfModules();mod++){
       StEmcModule* module=EmcDet->module(mod); 
       StSPtrVecEmcRawHit& hit=module->hits();
-      for(uint ih=0;ih<hit.size();ih++){
+      for(UInt_t ih=0;ih<hit.size();ih++){
 	StEmcRawHit *x=hit[ih];
 	Bmod=x->module();
 	Bsub=x->sub();
@@ -510,10 +510,10 @@ void  StRFEmcTrigMaker::unpackEmcFromSt(){
   StDetectorId EemcId=StDetectorId(kEndcapEmcTowerId);
   EmcDet = stEmcCol->detector(EemcId); //EEMC tower detector number
   if(EmcDet) {
-    for (uint mod=1;mod<=EmcDet->numberOfModules();mod++){
+    for (UInt_t mod=1;mod<=EmcDet->numberOfModules();mod++){
       StEmcModule* module=EmcDet->module(mod); 
       StSPtrVecEmcRawHit& hit=module->hits();
-      for(uint ih=0;ih<hit.size();ih++){
+      for(UInt_t ih=0;ih<hit.size();ih++){
 	StEmcRawHit *x=hit[ih];
 	Esec=x->module();
 	Esub=x->sub();
@@ -622,6 +622,9 @@ void StRFEmcTrigMaker::fillHisto() {
 
 
 // $Log: StRFEmcTrigMaker.cxx,v $
+// Revision 1.8  2011/04/11 19:35:52  fisyak
+// Replace uint by UInt_t, use TMath
+//
 // Revision 1.7  2004/10/21 13:31:34  balewski
 // to match new name of emcCollection in muDst
 //

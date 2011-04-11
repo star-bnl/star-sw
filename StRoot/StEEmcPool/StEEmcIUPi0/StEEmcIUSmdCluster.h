@@ -40,9 +40,9 @@ class StEEmcIUSmdCluster : public TObject {
   Float_t mean();
    /// Return the mean strip number of this cluster
   Float_t mean()const;
-  /// Return the sigma -- sqrt(variance) -- of the cluster
+  /// Return the sigma -- TMath::Sqrt(variance) -- of the cluster
   Float_t sigma();
-  /// Return the sigma -- sqrt(variance) -- of the cluster
+  /// Return the sigma -- TMath::Sqrt(variance) -- of the cluster
   Float_t sigma()const;
 
   /// Set the mean of the cluster

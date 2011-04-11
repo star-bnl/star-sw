@@ -12,7 +12,7 @@
 
 #ifndef ST_EEMC_DATA_DRIVEN_MC_MAKER_H
 #define ST_EEMC_DATA_DRIVEN_MC_MAKER_H
-
+#include <vector>
 // ROOT
 class TClonesArray;
 class TH2F;

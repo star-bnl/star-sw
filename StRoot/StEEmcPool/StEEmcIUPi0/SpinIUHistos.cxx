@@ -3,7 +3,8 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TString.h" 
-
+#include "TMath.h"
+#include "TDirectory.h"
 #include <iostream> 
 
 ClassImp(SpinIUHistos);
