@@ -42,8 +42,11 @@
 //
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.h,v 1.15 2011/02/11 03:44:57 hmasui Exp $
+ * $Id: StEmbeddingQADraw.h,v 1.16 2011/04/12 03:01:07 hmasui Exp $
  * $Log: StEmbeddingQADraw.h,v $
+ * Revision 1.16  2011/04/12 03:01:07  hmasui
+ * Fix isMatchedPairOk() to properly process particles with decay daughters
+ *
  * Revision 1.15  2011/02/11 03:44:57  hmasui
  * Draw error messages in pdf if histogram is missing. Add error check for Ncommon histogram
  *
@@ -282,8 +285,10 @@ class StEmbeddingQADraw {
     TString mOutputFigureDirectory ; /// Figure directory (default is current directory)
 
     std::vector<Int_t> mDaughterGeantId ; /// Daughter geant id
+    std::vector<Int_t> mParentGeantId ;   /// Parent geant id (only relevant for unstable particles)
+    std::vector<Int_t> mParentParentGeantId ; /// Parent-parent geant id (only relevant for unstable particles)
     std::vector<Int_t> mMcGeantId ;       /// MC geant id
-    Int_t mParentGeantId ; /// Parent geant id
+    Int_t mInputParentGeantId ; /// Input parent geant id
 
     ClassDef(StEmbeddingQADraw, 1)
 };
