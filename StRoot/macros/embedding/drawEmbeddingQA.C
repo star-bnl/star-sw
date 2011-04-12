@@ -45,7 +45,7 @@ void drawEmbeddingQA(
 
 
   StEmbeddingQADraw* maker = new StEmbeddingQADraw(embeddingFile, realDataFile, geantid, isEmbeddingOnly);
-//  maker->setParentGeantId(parentGeantId) ;
+  maker->setParentGeantId(parentGeantId) ;
   maker->init();
   maker->setOutputDirectory(outputDirectory);
 
