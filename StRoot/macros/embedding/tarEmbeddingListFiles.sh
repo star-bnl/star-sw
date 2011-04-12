@@ -42,7 +42,7 @@ else
 	echo "FSET Minimum Range $FSET_MAX is not a number (enter, e.g., \"201\"). "
 	exit -2
 fi
-
+echo ""
 #___________________________________________________________________________________#
 
 #Obtain the list of subdirectories to tar. Ensure the FSETs are in the correct range.
@@ -57,11 +57,27 @@ fi
 FSETS_LIST_RANGE=fset.list
 echo "" > $FSETS_LIST_RANGE
 
+FSET_MAX_LIST=0
+FSET_MIN_LIST=10000
+FSET_MAX_ALL=0
+FSET_MIN_ALL=10000
 for LINE in $FSETS_LIST; do
 	FSET_NUMBER=`echo $LINE | cut -f1 -d"_" | cut -f2 -d"T"`
 	if [ $FSET_NUMBER  -eq $FSET_NUMBER 2> /dev/null ]; then
+		if [ $FSET_NUMBER -ge $FSET_MAX_ALL ]; then
+			FSET_MAX_ALL=$FSET_NUMBER
+		fi
+		if [ $FSET_NUMBER -le $FSET_MIN_ALL ]; then
+			FSET_MIN_ALL=$FSET_NUMBER
+		fi
 		if [ $FSET_NUMBER -ge $FSET_MIN ] && [ $FSET_NUMBER -le $FSET_MAX ]; then
 			echo -e "$LINE" >> $FSETS_LIST_RANGE
+			if [ $FSET_NUMBER -ge $FSET_MAX_LIST ]; then
+				FSET_MAX_LIST=$FSET_NUMBER
+			fi
+			if [ $FSET_NUMBER -le $FSET_MIN_LIST ]; then
+				FSET_MIN_LIST=$FSET_NUMBER
+			fi
 		fi
 	fi
 done
@@ -71,7 +87,22 @@ if [ $FSET_SANITY -le 0 ]; then
 	echo "ABORT"
 	exit -3
 fi
+echo "Range of FSETs is $FSET_MIN_ALL - $FSET_MAX_ALL"
+echo "Range of FSETs within specified range is $FSET_MIN_LIST - $FSET_MAX_LIST"
+if [ $FSET_MIN -eq $FSET_MIN_LIST ]; then
+	echo -e "" > /dev/null
+else 
+	echo "Setting FSET minimum = $FSET_MIN_LIST"
+	FSET_MIN=$FSET_MIN_LIST
+fi
+if [ $FSET_MAX -eq $FSET_MAX_LIST ]; then
+	echo -e "" > /dev/null
+else 
+	echo "Setting FSET maximum = $FSET_MAX_LIST"
+	FSET_MAX=$FSET_MAX_LIST
+fi
 FSETS=`cat "$FSETS_LIST_RANGE" | tr "\n" " "`
+echo ""
 echo "Directories to compress:"
 cat $FSETS_LIST_RANGE
 rm $FSETS_LIST_RANGE
@@ -104,8 +135,8 @@ echo "Directories will be compressed into file \"$FSET_TAR\""
 echo ""
 echo "tar czfv $FSET_TAR $FSETS"
 echo ""
-#tar czfv $FSET_TAR $FSETS
-#rm -r $FSETS
+tar czfv $FSET_TAR $FSETS
+rm -r $FSETS
 echo "Original directories have been deleted."
 echo ""
 echo "Compression complete!"
