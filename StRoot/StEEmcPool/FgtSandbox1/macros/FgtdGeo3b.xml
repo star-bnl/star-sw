@@ -26,7 +26,7 @@
 <varlist type="REAL"  >
      centerZ,lengthZ,
      diskLenZ,
-     flatAng1,flatAng2,quad,disk
+     flatAng1,flatAng2,quad,disk,
      xx,z1
 </varlist>
 
@@ -35,7 +35,7 @@
 <!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
     Create and initialize structure defining detector parameters
      mmmmmmmmmmmmmmmmmmmmmmmmmmmmmm     -->
-<Structure name="FGT"  >
+<Structure name="FGST"  >
    <var name="startZ" type="float"  />
    <var name="diskInR" type="float"  />
    <var name="diskOutR" type="float"  />
@@ -54,7 +54,7 @@
 </Structure>
 
 
-<Fill name="FGT" comment="FGT Geometry data"  >
+<Fill name="FGST" comment="FGT Geometry data"  >
    <var name="startZ" value="70" comment=" starting position along Z"  />
    <var name="diskStepZ" value="26" comment=" disk separation along Z"  />
    <var name="diskInR" value="10.35" comment=" inner radii for physical disk" />
@@ -91,14 +91,14 @@
 <!--  mmmmmmmmmmmm  COMPUTATION mmmmmmmmmmmmmmmmmmmmmmmmmmm -->
 
 <!--  Quad disk dept: front+sens+gem+back -->
-diskLenZ=FGT_frameFrontDZ+FGT_frameSensDZ+FGT_frameGemDZ+FGT_frameBackDZ; <!-- total disk thicness -->
+diskLenZ=FGST_frameFrontDZ+FGST_frameSensDZ+FGST_frameGemDZ+FGST_frameBackDZ <!-- total disk thicness -->
 
-lengthZ = nDisk*FGT_diskStepZ+diskLenZ
-centerZ = FGT_startZ+lengthZ/2.0
+lengthZ = nDisk*FGST_diskStepZ+diskLenZ
+centerZ = FGST_startZ+lengthZ/2.0
 
-xx=acos(FGT_flatOutR/FGT_diskOutR) <!-- half opening angle of the flat (rad) -->
-flatAng1=FGT_flatPerpAng-xx/deg2rad
-flatAng2=FGT_flatPerpAng+xx/deg2rad <!-- angle limits of the flat (deg) -->
+xx=acos(FGST_flatOutR/FGST_diskOutR) <!-- half opening angle of the flat (rad) -->
+flatAng1=FGST_flatPerpAng-xx/deg2rad
+flatAng2=FGST_flatPerpAng+xx/deg2rad <!-- angle limits of the flat (deg) -->
 
 
 <!--  ASSEMBLE GEOMETRY, start with placing main volume in cave-->
@@ -111,14 +111,14 @@ flatAng2=FGT_flatPerpAng+xx/deg2rad <!-- angle limits of the flat (deg) -->
 <Volume       name="FGTM" comment="mother volume for FGT assembly" >
     <Attribute for="FGTM" seen="1" colo="6"  />
     <Material name="Air"  />
-    <Shape type="TUBE" rmin="FGT_diskInR"    rmax="FGT_diskOutR"   dz="lengthZ/2.0"  />
+    <Shape type="TUBE" rmin="FGST_diskInR"    rmax="FGST_diskOutR"   dz="lengthZ/2.0"  />
 
     <!-- place disk(s) inside FGT mother volume -->
     disk=1
     z1=-lengthZ/2. + diskLenZ*(disk-0.5) 
     <Create    block="FGTD"  comment="single FGT disk" />
     <Placement block="FGTD"  z="z1" >
-        <Rotation alphaz="FGT_quadTiltAng"  />
+        <Rotation alphaz="FGST_quadTiltAng"  />
     </Placement>
 </Volume>
      
@@ -126,7 +126,7 @@ flatAng2=FGT_flatPerpAng+xx/deg2rad <!-- angle limits of the flat (deg) -->
 <Volume       name="FGTD" comment="mother volume for FGT disk" >
     <Attribute for="FGTD" seen="1" colo="1"  />
     <Material name="Air"  />
-    <Shape type="TUBE" rmin="FGT_diskInR"    rmax="FGT_diskOutR"   dz="diskLenZ/2.0"  />   
+    <Shape type="TUBE" rmin="FGST_diskInR"    rmax="FGST_diskOutR"   dz="diskLenZ/2.0"  />   
    
     <!--  place quadrants within one disk , temporary skip quad=1 -->
     <Do var="quad" from="2" to="nQuad"  >
@@ -142,9 +142,9 @@ flatAng2=FGT_flatPerpAng+xx/deg2rad <!-- angle limits of the flat (deg) -->
 <Volume       name="FGTQ" comment="quadrant "  >
     <Attribute for="FGTQ" seen="1" colo="4"  />
     <Material name="ArCO2_70_30"  />
-    <Shape type="TUBS"  rmin="FGT_diskInR"  rmax="FGT_diskOutR" dz="diskLenZ/2." phi1="0." phi2="90." />
+    <Shape type="TUBS"  rmin="FGST_diskInR"  rmax="FGST_diskOutR" dz="diskLenZ/2." phi1="0." phi2="90." />
     <Create    block="FGTS"  comment="quadrant: sensitive  " />
-    <Placement block="FGTS" z="-diskLenZ/2.+FGT_frameFrontDZ+FGT_frameSensDZ/2." /> 
+    <Placement block="FGTS" z="-diskLenZ/2.+FGST_frameFrontDZ+FGST_frameSensDZ/2." /> 
 
 </Volume> 
 
@@ -152,25 +152,25 @@ flatAng2=FGT_flatPerpAng+xx/deg2rad <!-- angle limits of the flat (deg) -->
     <Attribute for="FGTS" seen="1" colo="1"  />
     <Material name="ArCO2_70_30"  />
     <Material name="Sensitive_fgt_gas" isvol="1"  />
-    <Shape type="TUBS"  rmin="FGT_diskInR"  rmax="FGT_diskOutR" dz="FGT_frameSensDZ/2." phi1="0." phi2="90." />
+    <Shape type="TUBS"  rmin="FGST_diskInR"  rmax="FGST_diskOutR" dz="FGST_frameSensDZ/2." phi1="0." phi2="90." />
 
     <Hits for="FGTS" sleng="16:(0,500)" step=".01:" cz="10:" cy="10:" cx="10:" eloss="16:(0,0.001)" x=".001:" y=".001:" ptot="16:(0,100)" z=".001:S" tof="16:(0,1.E-6)"  />
 
      <Create    block="FGQA"  comment="A-spacer, bar" />
-     <Placement block="FGQA" x="FGT_frameWidth/2." y="(FGT_diskOutR+FGT_diskInR)/2."/> 
+     <Placement block="FGQA" x="FGST_frameWidth/2." y="(FGST_diskOutR+FGST_diskInR)/2."/> 
 
      <Create    block="FGQB"  comment="C-spacer, arc" />
      <Placement block="FGQB" /> 
 
      <Create    block="FGQC"  comment="C-spacer, bar" />
-     <Placement block="FGQC" y="FGT_frameWidth/2." x="(FGT_diskOutR+FGT_diskInR)/2."/> 
+     <Placement block="FGQC" y="FGST_frameWidth/2." x="(FGST_diskOutR+FGST_diskInR)/2."/> 
 
      <Create    block="FGQD"  comment="D-spacer, arc" />
      <Placement block="FGQD" /> 
 
      <Create    block="FGQE"  comment="E-spacer, flat" />
-     <Placement block="FGQE" x="(FGT_flatOutR-FGT_frameWidth/2.)*cos(FGT_flatPerpAng*deg2rad)" y="(FGT_flatOutR-FGT_frameWidth/2.)*sin(FGT_flatPerpAng*deg2rad)" >
-           <Rotation alphaz="FGT_flatPerpAng-90."  />
+     <Placement block="FGQE" x="(FGST_flatOutR-FGST_frameWidth/2.)*cos(FGST_flatPerpAng*deg2rad)" y="(FGST_flatOutR-FGST_frameWidth/2.)*sin(FGST_flatPerpAng*deg2rad)" >
+           <Rotation alphaz="FGST_flatPerpAng-90."  />
     </Placement>
 
      <Create    block="FGQF"  comment="F-spacer, arc" />
@@ -183,38 +183,38 @@ flatAng2=FGT_flatPerpAng+xx/deg2rad <!-- angle limits of the flat (deg) -->
 <Volume       name="FGQA" comment="C-spacer"  >
     <Attribute for="FGQA" seen="1" colo="2"  />
     <Material name="FR4"  />
-    <Shape type="BOX" dz="unitSpacerDZ/2." dx="FGT_frameWidth/2." dy="(FGT_diskOutR-FGT_diskInR-FGT_frameWidth)/2."/> 
+    <Shape type="BOX" dz="unitSpacerDZ/2." dx="FGST_frameWidth/2." dy="(FGST_diskOutR-FGST_diskInR-FGST_frameWidth)/2."/> 
 </Volume>
 
 <Volume       name="FGQB" comment="B-spacer, arc"  >
     <Attribute for="FGQB" seen="1" colo="3"  />
     <Material name="FR4"  />
-    <Shape type="TUBS"  rmin="FGT_diskInR"  rmax="FGT_diskInR+FGT_frameWidth"  phi1="0." phi2="90." dz="unitSpacerDZ/2."/>
+    <Shape type="TUBS"  rmin="FGST_diskInR"  rmax="FGST_diskInR+FGST_frameWidth"  phi1="0." phi2="90." dz="unitSpacerDZ/2."/>
 </Volume>
   
 <Volume       name="FGQC" comment="C-spacer, bar"  >
     <Attribute for="FGQC" seen="1" colo="2"  />
     <Material name="FR4"  />
-    <Shape type="BOX" dz="unitSpacerDZ/2." dy="FGT_frameWidth/2." dx="(FGT_diskOutR-FGT_diskInR-FGT_frameWidth)/2."/> 
+    <Shape type="BOX" dz="unitSpacerDZ/2." dy="FGST_frameWidth/2." dx="(FGST_diskOutR-FGST_diskInR-FGST_frameWidth)/2."/> 
 </Volume>
   
 <Volume       name="FGQD" comment="D-spacer, arc"  >
     <Attribute for="FGQD" seen="1" colo="3"  />
     <Material name="FR4"  />
-    <Shape type="TUBS"  rmin="FGT_diskOutR-FGT_frameWidth"  rmax="FGT_diskOutR"  phi1="0." phi2="flatAng1" dz="unitSpacerDZ/2." />
+    <Shape type="TUBS"  rmin="FGST_diskOutR-FGST_frameWidth"  rmax="FGST_diskOutR"  phi1="0." phi2="flatAng1" dz="unitSpacerDZ/2." />
 </Volume>
 
 
 <Volume       name="FGQE" comment="E-spacer, flat"  >
     <Attribute for="FGQE" seen="1" colo="2"  />
     <Material name="FR4"  />
-    <Shape type="BOX" dz="unitSpacerDZ/2."  dy="FGT_frameWidth/2." dx="FGT_diskOutR*sin(( flatAng2-flatAng1)*deg2rad/2.)" /> 
+    <Shape type="BOX" dz="unitSpacerDZ/2."  dy="FGST_frameWidth/2." dx="FGST_diskOutR*sin(( flatAng2-flatAng1)*deg2rad/2.)" /> 
 </Volume>
 
 <Volume       name="FGQF" comment="F-spacer, arc"  >
     <Attribute for="FGQF" seen="1" colo="3"  />
     <Material name="FR4"  />
-    <Shape type="TUBS"  rmin="FGT_diskOutR-FGT_frameWidth"  rmax="FGT_diskOutR"  phi1="flatAng2" phi2="90."  dz="unitSpacerDZ/2." />
+    <Shape type="TUBS"  rmin="FGST_diskOutR-FGST_frameWidth"  rmax="FGST_diskOutR"  phi1="flatAng2" phi2="90."  dz="unitSpacerDZ/2." />
 </Volume>
 
   
