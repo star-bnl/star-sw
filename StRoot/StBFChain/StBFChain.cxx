@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.576 2011/04/04 19:16:46 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.577 2011/04/15 19:40:07 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1231,8 +1231,10 @@ void StBFChain::SetGC (const Char_t *queue){
 void StBFChain::SetInputFile (const Char_t *infile){
   // define input file
   if (infile) fInFile = infile;
-  if (fInFile != "") gMessMgr->QAInfo() << "Input file name = " << fInFile.Data() << endm;
-  else {
+  if (fInFile != "") {
+    fInFile.ReplaceAll("\n",";");
+    gMessMgr->QAInfo() << "Input file name = " << fInFile.Data() << endm;
+  } else {
     if (fkChain >= 0) {
       fInFile = fBFC[fkChain].Comment;
       gMessMgr->QAInfo() << "Default Input file name = " << fInFile.Data() << " for chain : " << fBFC[fkChain].Key << endm;
