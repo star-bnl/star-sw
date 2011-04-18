@@ -31,9 +31,10 @@
 #include "TPad.h"
 
 // Histogram ranges:
-const int   SCN = 80;
+const int   SCN1 = 200;
+const int   SCN2 = 100;
 const float SCL = -0.015;
-const float SCH =  0.025;
+const float SCH =  0.085;
 
 const int   DCN = 125;
 const float DCL = -2.5;
@@ -97,10 +98,10 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
   SetMode(0); // default is mode 0 (no QA, no PrePass)
   //DoQAmode(); // For testing
 
-  schist = new TH1F("SpCh","Space Charge",80,SCL,SCH);
+  schist = new TH1F("SpCh","Space Charge",SCN1,SCL,SCH);
   schist->SetDirectory(0);
   for (int i=0;i<HN;i++){
-    schists[i] = new TH1F(Form("SpCh%d",i),"Space Charge",80,SCL,SCH);
+    schists[i] = new TH1F(Form("SpCh%d",i),"Space Charge",SCN1,SCL,SCH);
     schists[i]->SetDirectory(0);
   }
 }
@@ -646,20 +647,20 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
 
   if (QAmode) {
     myhist   = new TH3F("SpcEvt","SpaceCharge vs. Phi vs. Event",
-			EVN,0.,EVN,PHN,0,PI2,SCN,SCL,SCH);
+			EVN,0.,EVN,PHN,0,PI2,SCN2,SCL,SCH);
     dcahist  = new TH3F("DcaEvt","psDCA vs. Phi vs. Event",
 			EVN,0.,EVN,PHN,0,PI2,DCN,DCL,DCH);
     dczhist  = new TH2F("DcaZ","psDCA vs. Z",
 			//80,-200,200,250,-5.0,5.0);
 			ZN,ZL,ZH,DCN,DCL,DCH);
     myhistN  = new TH3F("SpcEvtN","SpaceCharge vs. Phi vs. Event Neg",
-			EVN,0.,EVN,PHN,0,PI2,SCN,SCL,SCH);
+			EVN,0.,EVN,PHN,0,PI2,SCN2,SCL,SCH);
     myhistP  = new TH3F("SpcEvtP","SpaceCharge vs. Phi vs. Event Pos",
-			EVN,0.,EVN,PHN,0,PI2,SCN,SCL,SCH);
+			EVN,0.,EVN,PHN,0,PI2,SCN2,SCL,SCH);
     myhistE  = new TH3F("SpcEvtE","SpaceCharge vs. Phi vs. Event East",
-			EVN,0.,EVN,PHN,0,PI2,SCN,SCL,SCH);
+			EVN,0.,EVN,PHN,0,PI2,SCN2,SCL,SCH);
     myhistW  = new TH3F("SpcEvtW","SpaceCharge vs. Phi vs. Event West",
-			EVN,0.,EVN,PHN,0,PI2,SCN,SCL,SCH);
+			EVN,0.,EVN,PHN,0,PI2,SCN2,SCL,SCH);
     dcahistN = new TH3F("DcaEvtN","psDCA vs. Phi vs. Event Neg",
 			EVN,0.,EVN,PHN,0,PI2,DCN,DCL,DCH);
     dcahistP = new TH3F("DcaEvtP","psDCA vs. Phi vs. Event Pos",
@@ -1093,8 +1094,11 @@ float StSpaceChargeEbyEMaker::EvalCalib(TDirectory* hdir) {
   return code;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.36 2011/02/10 18:31:45 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.37 2011/04/18 17:36:52 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.37  2011/04/18 17:36:52  genevb
+// Expanded range for sc hists
+//
 // Revision 1.36  2011/02/10 18:31:45  genevb
 // Restore corrected coincidence rates, add QA histogram of where events/tracks are cut
 //
