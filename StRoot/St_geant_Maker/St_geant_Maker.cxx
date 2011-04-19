@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.136 2011/01/26 19:42:37 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.137 2011/04/19 15:52:05 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.137  2011/04/19 15:52:05  fisyak
+// Restore handle for pile-up events
+//
 // Revision 1.136  2011/01/26 19:42:37  perev
 // FPD ==> STAR Soft
 //
@@ -725,24 +728,19 @@ Int_t St_geant_Maker::Init(){
   TString InputFile(fInputFile);
   if (fInputFile != "") {//check that first word contains .fz then add "gfile p" 
     //                                       -"-          .nt then add "user/input user" 
-    TObjArray *obj = InputFile.Tokenize(" ");
-    TIter next(obj);
-    TObjString *o = (TObjString *) obj->First();
-    TString file(o->GetString());
-    delete obj;
+    if (Debug()) gMessMgr->Info() << "St_geant_Maker::Init File " << fInputFile.Data() << endm;
     TString kuip("");
-    if (file.Contains(".fz")) {kuip = "gfile p ";         kuip += file; ifz = 1;}
-    if (file.Contains(".nt")) {
-      kuip = "user/input user "; kuip += file; ifn = 1;
+    if (InputFile.Contains(".fz")) {kuip = "gfile p ";         kuip += InputFile; ifz = 1;}
+    if (InputFile.Contains(".nt")) {
+      kuip = "user/input user "; kuip += InputFile; ifn = 1;
     }
     if (kuip != "") {
+    if (Debug()) gMessMgr->Info() << "St_geant_Maker::Init kuip " << kuip.Data() << endm;
       Do(kuip.Data()); 
       if (cquest->iquest[0] > kStOK) {
-	gMessMgr->Info() << "St_geant_Maker::Init File " << file.Data() << " cannot be opened. Exit!" << endm;
+	gMessMgr->Info() << "St_geant_Maker::Init File " << InputFile.Data() << " cannot be opened. Exit!" << endm;
 	gSystem->Exit(1);
       }
-      InputFile.ReplaceAll(file.Data(),"");
-      if (InputFile != "") Do(InputFile.Data());
       InputFile = "";
     }
   } else {  
