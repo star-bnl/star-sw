@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.15 2011/04/08 01:25:50 fisyak Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.16 2011/04/19 22:50:08 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -47,12 +47,12 @@ void StMuDstFilterMaker::open(const Char_t *fname) {
   TBranch* branch;
   mTTree = new TTree("MuDst", "StMuDst",__SPLIT__);
   if (!mTTree) throw StMuExceptionNullPointer("can not create tree",__PRETTYF__);
-
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,26,0)
   Long64_t MAXLONG=(Long64_t) TMath::Power(2,sizeof(Long64_t)*8)-1; // 1900000000 <=> 1.9 GB
   LOG_INFO << "Tree size MAX will be " << (float) MAXLONG/1000/1000/1000 << " GB " << endm;
 
   mTTree->SetMaxTreeSize(MAXLONG); 
-
+#endif
   //  muDst stuff
   DEBUGMESSAGE2("arrays");
   for ( int i=0; i<__NARRAYS__; i++) {
@@ -323,6 +323,9 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.16  2011/04/19 22:50:08  fisyak
+ * Use default size of TTree (100 GB) for ROOT >= 5.26.0
+ *
  * Revision 1.15  2011/04/08 01:25:50  fisyak
  * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
  *

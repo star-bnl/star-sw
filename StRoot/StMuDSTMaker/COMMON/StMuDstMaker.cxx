@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.101 2011/04/08 01:25:50 fisyak Exp $
+ * $Id: StMuDstMaker.cxx,v 1.102 2011/04/19 22:50:08 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -854,13 +854,13 @@ void StMuDstMaker::openWrite(string fileName) {
   TBranch* branch;
   int bufsize = mBufferSize;
   if (mSplit) bufsize /= 4;
-
-  Long64_t MAXLONG=(Long64_t) TMath::Power(2,sizeof(Long64_t)*8)-1; // 1900000000 <=> 1.9 GB
-  LOG_INFO << "Tree size MAX will be " << (float) MAXLONG/1000/1000/1000 << " GB " << endm;
-
   //  all stuff
   mTTree = new TTree("MuDst", "StMuDst",mSplit);
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,26,0)
+  Long64_t MAXLONG=(Long64_t) TMath::Power(2,sizeof(Long64_t)*8)-1; // 1900000000 <=> 1.9 GB
+  LOG_INFO << "Tree size MAX will be " << (float) MAXLONG/1000/1000/1000 << " GB " << endm;
   mTTree->SetMaxTreeSize(MAXLONG);  // limited to 1.9 GB  - set to maximum
+#endif
   // mTTree->SetAutoSave(1000000);  // autosave when 1 Mbyte written
   DEBUGMESSAGE2("all arrays");
   for ( int i=0; i<__NALLARRAYS__; i++) {
@@ -1610,6 +1610,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.102  2011/04/19 22:50:08  fisyak
+ * Use default size of TTree (100 GB) for ROOT >= 5.26.0
+ *
  * Revision 1.101  2011/04/08 01:25:50  fisyak
  * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
  *
