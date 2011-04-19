@@ -7,6 +7,7 @@
  \class  StBFChain
  \author Yuri Fisyak, Jerome LAURET
  \date   1999/07/29 , 2001-2008
+ @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.48 2011/04/19 16:20:34 fisyak Exp $
 
  Class to control "BFC" chain
 
@@ -22,8 +23,8 @@
 #include "TFile.h"
 #include "TTable.h"
 #include "Ttypes.h"
-
-/* @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.h,v 1.47 2011/02/22 19:16:19 perev Exp $ */
+#ifndef __Bfc_st__
+#define __Bfc_st__
 struct Bfc_st {
   Char_t       Key[63];      /* nick name */
   Char_t       Name[63];     /* maker name */
@@ -39,6 +40,7 @@ class St_Bfc : public TTable {
   ClassDefTable(St_Bfc,Bfc_st)
   ClassDef(St_Bfc,1) //C++ container for chain/makers status 
 };
+#endif /* __Bfc_st__ */
 //_____________________________________________________________________
 
 class StFileI;
@@ -68,10 +70,12 @@ class StBFChain : public StChain {
             StChain(name,UseOwnHeader)
            ,fSetFiles(0),fInFile(""),fFileOut(""),fTFile(0)
 	   ,fNoChainOptions(0), fchainOpt(0), fkChain(-1) {}
-  StBFChain(Int_t mode, const char *name="bfc",const Bool_t UseOwnHeader = kFALSE) :
+#if 0
+    StBFChain(Int_t /* mode */, const char *name="bfc",const Bool_t UseOwnHeader = kFALSE) :
             StChain(name,UseOwnHeader)
            ,fSetFiles(0),fInFile(""),fFileOut(""),fTFile(0)
 	   ,fNoChainOptions(0), fchainOpt(0), fkChain(-1) {}
+#endif
   void Setup(Int_t mode=1);
    virtual            ~StBFChain();
    virtual Int_t       Make(int number){ SetIventNumber(number); return StChain::Make(number);};
@@ -116,7 +120,7 @@ class StBFChain : public StChain {
                TString GetGeometry() const;
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.47 2011/02/22 19:16:19 perev Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.48 2011/04/19 16:20:34 fisyak Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class

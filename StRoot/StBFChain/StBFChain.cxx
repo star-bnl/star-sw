@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.577 2011/04/15 19:40:07 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.578 2011/04/19 16:20:34 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -55,8 +55,8 @@ void StBFChain::Setup(Int_t mode) {
   TString chain("BFC.C");
   Char_t *file = gSystem->Which(path,chain,kReadPermission);
 #ifdef STAR_LOGGER
-  if (! file) { LOG_FATAL  << Form("StBFChain::Setup","File %s has not been found in path %s",chain.Data(),path) << endm; }
-  else        { LOG_WARN   << Form("StBFChain::Setup","File %s has been found as %s",chain.Data(),file) << endm; }
+  if (! file) { LOG_FATAL  << Form("StBFChain::Setup\tFile %s has not been found in path %s",chain.Data(),path) << endm; }
+  else        { LOG_WARN   << Form("StBFChain::Setup\tFile %s has been found as %s",chain.Data(),file) << endm; }
 #else
 
   if (! file)   Fatal("StBFChain::Setup","File %s has not been found in path %s",chain.Data(),path);
@@ -278,9 +278,9 @@ Int_t StBFChain::Instantiate()
 	if (GetOption("ReadAll")) {	//activate all branches
 	  // inpMk->SetBranch("*",0,"r");
 	  const Char_t *allBranches[] = {
-	    "dstBranch","dstHitsBranch","emc_rawBranch","eventBranch","ftpc_rawBranch",
+	    "emc_rawBranch","eventBranch","ftpc_rawBranch",
 	    "geantBranch","globalBranch","McEventBranch","svt_hitsBranch","svt_tracksBranch",
-	    "tpc_hitsBranch","tpc_rawBranch","tpc_tracksBranch","trgBranch",0};
+	    "tpc_hitsBranch","trgBranch",0};
 	  for (Int_t i = 0; allBranches[i]; i++) inpMk->SetBranch(allBranches[i],0,"r");
 	}
         if (GetOption("adcOnly")) mk->SetAttr("adcOnly",1);                        ;
@@ -502,7 +502,7 @@ Int_t StBFChain::Instantiate()
     if (maker == "StTrsMaker") {
       Int_t mode = 0;
       if (GetOption("TrsPileUp")) mode += 1; // Pile-up correction
-      if (GetOption("TrsToF"))    mode += 2; // accoutn for particle time of flight
+      if (GetOption("TrsToF"))    mode += 2; // account for particle time of flight
       if (mode) mk->SetMode(mode);
     }
 #ifdef __KEEP_TPCDAQ_FCF__
@@ -544,9 +544,11 @@ Int_t StBFChain::Instantiate()
       ProcessLine(cmd);
     }
 #endif
+#if 0 /* probably bug 2106 : mismatch N_fit_points */
     if (maker == "StTpcRTSHitMaker") {
       if (GetOption("Trs") || GetOption("Embedding"))  mk->SetMode(2); // daq, no gain
     }
+#endif
 #ifdef __KEEP_TPCDAQ_FCF__
     if (maker == "StRTSClientFCFMaker"){
       Int_t DMode=0;
@@ -1129,10 +1131,12 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("-VMCPassive","Default,TGiant3");
       SetOption("-VMCAppl","Default,TGiant3");
       SetOption("-RootVMC","Default,TGiant3");
+#if 0 /* Not Active geant is not needed any more, except BTofUtil */
       if (!( GetOption("fzin") || GetOption("ntin") || GetOption("gstar") || GetOption("PrepEmbed"))) {// Not Active geant
 	SetOption("geant","Default,-fzin,-ntin,-gstar,TGiant3");
 	SetOption("MagF","Default,-fzin,-ntin,-gstar,TGiant3");
       }
+#endif
     } else {                                  // root
       if (GetOption("fzin")) {
 	gMessMgr->Error() << "Option fzin cannot be used in root.exe. Use root4star" << endm;
@@ -1447,7 +1451,7 @@ void StBFChain::SetDbOptions(StMaker *mk){
       SetFlavor(FieldOptions[k].name,        "MagFactor");
       gMessMgr->QAInfo() << "StBFChain::SetDbOptions SetFlavor(\"" << FieldOptions[k].name
 			 << "\",\"MagFactor\")" << endm;
-      if ( gClassTable->GetID("StarMagField") >= 0) {
+      if ( gClassTable->GetID("StarMagField") >= 0 && gClassTable->GetID("StMagFMaker") < 0) {
 	TString cmd =
 	  Form("if (!StarMagField::Instance()) new StarMagField( 2, %f, kTRUE);",
 	       FieldOptions[k].scale);
@@ -1476,18 +1480,8 @@ void StBFChain::SetTreeOptions()
     treeMk->IntoBranch("eventBranch","StEvent");
     if (GetOption("EvOutOnly")) return;
   }
-  if (! GetOption("nohistos"))
-    treeMk->SetBranch("histBranch");
-  if (GetOption("dstOut"))      {
-    treeMk->IntoBranch("dstBranch","dst");
-    if (GetOption("HitsBranch")) {
-      treeMk->SetBranch("dstHitsBranch");
-      treeMk->IntoBranch("dstHitsBranch","dst/.data/Hits");
-    }
-    else treeMk->IntoBranch("dstBranch","dst/.data/Hits");
-    treeMk->IntoBranch("dstBranch","dst/.data/dst");
-    treeMk->SetBranch("runcoBranch");
-  }
+  if (! GetOption("nohistos"))     treeMk->SetBranch("histBranch");
+  if (! GetOption("norunco"))    treeMk->SetBranch("runcoBranch");
   if (GetOption("McEvent") && GetOption("McEvOut")){
     gMessMgr->QAInfo() << "Will Write StMcEvent out, treeMk->GetFile() = "  << treeMk->GetFile() << endm;
     treeMk->IntoBranch("McEventBranch","StMcEvent");
@@ -1499,18 +1493,6 @@ void StBFChain::SetTreeOptions()
       treeMk->IntoBranch("geantBranch","geant/.data/particle");
       treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
     }
-#ifdef __NEVER__
-    if (GetOption("fss"))    treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
-    if (GetOption("tpc_daq") || GetOption("TpcRS"))
-      treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
-    if (GetOption("ems"))    treeMk->IntoBranch("emc_rawBranch","emc_raw/.data");
-    if (GetOption("fcf"))    treeMk->IntoBranch("tpc_hitsBranch","tpc_hits/.data");
-    if (GetOption("tpt"))    treeMk->IntoBranch("tpc_tracksBranch","tpc_tracks/.data");
-    if (GetOption("srs"))    treeMk->IntoBranch("svt_hitsBranch","svt_hits/.data");
-    if (GetOption("stk"))    treeMk->IntoBranch("svt_tracksBranch","svt_tracks/.data");
-    if (GetOption("trg"))    treeMk->IntoBranch("trgBranch","ctf mwc trg");
-    if (GetOption("global")) treeMk->IntoBranch("globalBranch","global/.data");
-#endif
   }
 }
 //________________________________________________________________________________
