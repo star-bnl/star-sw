@@ -42,7 +42,8 @@ class ViewField {
     void PlotContour();
     void PlotSurface();
     void PlotProfile(const double x0, const double y0, const double z0,
-                     const double x1, const double y1, const double z1); 
+                     const double x1, const double y1, const double z1,
+                     const std::string option = "v"); 
 
     double EvaluatePotential(double* pos, double* par);
     double EvaluatePotentialProfile(double* pos, double* par);

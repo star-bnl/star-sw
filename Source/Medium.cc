@@ -1778,7 +1778,7 @@ Medium::SetFieldGrid(double emin, double emax, int ne, bool logE,
   for (int i = 0; i < nb; ++i) {
     bFieldsNew[i] = bmin + i * bstep;
   }
-  if (na == 1) {
+  if (na == 1 && nb == 1 && fabs(bmin) < 1.e-4) {
     bAnglesNew[0] = HalfPi;
   } else {
     for (int i = 0; i < na; ++i) {

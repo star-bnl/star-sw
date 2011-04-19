@@ -238,7 +238,8 @@ ViewField::PlotSurface() {
 
 void 
 ViewField::PlotProfile(const double x0, const double y0, const double z0,
-                       const double x1, const double y1, const double z1) {
+                       const double x1, const double y1, const double z1,
+                       const std::string option) {
 
   // Check the distance between the two points.
   const double d = sqrt(pow(x1 - x0, 2) + pow(y1 - y0, 2) + pow(z1 - z0, 2));
@@ -264,9 +265,36 @@ ViewField::PlotProfile(const double x0, const double y0, const double z0,
   fPotProfile->SetParameter(3, x1);
   fPotProfile->SetParameter(4, y1);
   fPotProfile->SetParameter(5, z1);
+  int plotType = 0;
+  if (option == "v" || option == "p" || option == "phi" || 
+      option == "volt" || option == "voltage" || 
+      option == "pot" || option == "potential") {
+    fPotProfile->SetParameter(6, -1.);
+  } else if (option == "e" || option == "field") {
+    fPotProfile->SetParameter(6,  1.);
+    plotType = 1;
+  } else if (option == "ex") {
+    fPotProfile->SetParameter(6, 11.);
+    plotType = 2;
+  } else if (option == "ey") {
+    fPotProfile->SetParameter(6, 21.);
+    plotType = 3;
+  } else if (option == "ez") {
+    fPotProfile->SetParameter(6, 31.);
+    plotType = 4;
+  } else {
+    std::cerr << className << "::PlotProfile:\n";
+    std::cerr << "    Unknown option (" << option << ")\n";
+    std::cerr << "    Plotting the potential.\n";
+    fPotProfile->SetParameter(6, -1.);
+  }
   if (debug) {
     std::cout << className << "::PlotProfile:\n";
-    std::cout << "    Plotting potential along\n";
+    if (plotType == 0) {
+      std::cout << "    Plotting potential along\n";
+    } else {
+      std::cout << "    Plotting field along\n";
+    }
     std::cout << "    (" << fPotProfile->GetParameter(0) << ", "
                          << fPotProfile->GetParameter(1) << ", "
                          << fPotProfile->GetParameter(2) <<") - ("
@@ -276,7 +304,17 @@ ViewField::PlotProfile(const double x0, const double y0, const double z0,
   }
   fPotProfile->GetXaxis()->SetTitle("normalised distance");
   fPotProfile->GetYaxis()->SetTitle("potential [V]");
-  fPotProfile->SetTitle("Profile plot of the potential");
+  if (plotType == 0) {
+    fPotProfile->SetTitle("Profile plot of the potential");
+  } else if (plotType == 1) {
+    fPotProfile->SetTitle("Profile plot of the electric field");
+  } else if (plotType == 2) {
+    fPotProfile->SetTitle("Profile plot of the electric field (x-component)");
+  } else if (plotType == 3) {
+    fPotProfile->SetTitle("Profile plot of the electric field (y-component)");
+  } else if (plotType == 4) {
+    fPotProfile->SetTitle("Profile plot of the electric field (z-component)");
+  }
   fPotProfile->SetNpx(nSamples1d);
   fPotProfile->Draw();
   canvas->Update();
@@ -315,7 +353,7 @@ ViewField::CreateProfileFunction() {
     fname = ss.str();
   }
 
-  const int nParameters = 6;
+  const int nParameters = 7;
   fPotProfile = new TF1(fname.c_str(), this, 
                         &ViewField::EvaluatePotentialProfile, 
                         0., 1., nParameters, 
@@ -416,6 +454,16 @@ ViewField::EvaluatePotentialProfile(double* pos, double* par) {
 
   if (useStatus && status != 0) volt = vBkg;
 
+  // Select the quantity to be plotted.
+  if (par[6] > 30.) {
+    return ez;
+  } else if (par[6] > 20.) {
+    return ey;
+  } else if (par[6] > 10.) {
+    return ex;
+  } else if (par[6] > 0.) {
+    return sqrt(ex * ex + ey * ey + ez * ez);
+  }
   // Return the potential.
   return volt;
     
