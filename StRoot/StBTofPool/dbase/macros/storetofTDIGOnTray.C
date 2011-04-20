@@ -55,7 +55,8 @@ void storetofTDIGOnTray()
 //  TString ZStoreTime = "2007-11-01 00:00:03";
 //  TString ZStoreTime = "2008-11-01 00:00:00";
 //  TString ZStoreTime = "2009-11-01 00:00:00";
-  TString ZStoreTime = "2010-12-20 00:00:01";
+//  TString ZStoreTime = "2010-12-20 00:00:01";
+  TString ZStoreTime = "2011-04-20 00:00:00";
 
   //-- add table to the container with descriptor given by Database
   StDbTable* tofTDIGOnTray = configNode->addDbTable("tofTDIGOnTray");
@@ -106,7 +107,13 @@ void storetofTDIGOnTray()
                               // B-132;  C-133  renamed
 
   Short_t tdigId[NMAX][NBOARD];
+
+  /* VPD boards until April 2011
   Short_t tdigId_Vpd[NVPDTRAY][NBOARD] = { 89, 91, 1102, 0, 885, 82, 0, 0,
+                                           85, 79, 1101, 0,  80, 83, 0, 0};
+  */
+  // run 11 AuAu@18GeV
+  Short_t tdigId_Vpd[NVPDTRAY][NBOARD] = { 89, 91,  495, 0, 885, 82, 0, 0,
                                            85, 79, 1101, 0,  80, 83, 0, 0};
 
   ifstream infile("data/run11/INL/tdigs_01122011.txt");
