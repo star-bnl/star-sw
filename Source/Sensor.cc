@@ -302,6 +302,10 @@ Sensor::AddElectrode(ComponentBase* comp, std::string label) {
   electrodes.push_back(newElectrode);
   ++nElectrodes;
   electrodes[nElectrodes - 1].signal.resize(nTimeBins);
+  // Begin Schutsch : Separate arrays for electron and ion signal
+  electrodes[nElectrodes - 1].electronsignal.resize(nTimeBins);
+  electrodes[nElectrodes - 1].ionsignal.resize(nTimeBins);
+  // End Schutsch
   std::cout << className << "::AddElectrode:\n";
   std::cout << "    Added readout electrode " << label << ".\n";
   std::cout << "    All signals are reset.\n";
@@ -368,7 +372,13 @@ Sensor::ClearSignal() {
 
   for (int i = nElectrodes; i--;) {
     electrodes[i].charge = 0.;
-    for (int j = nTimeBins; j--;) electrodes[i].signal[j] = 0.;
+    for (int j = nTimeBins; j--;){
+      electrodes[i].signal[j] = 0.;
+      // Begin Schutsch
+      electrodes[i].electronsignal[j] = 0.;
+      electrodes[i].ionsignal[j]      = 0.;
+      // End Schutsch
+    }
   }
   nEvents = 0;
 
@@ -425,16 +435,59 @@ Sensor::AddSignal(const int q, const double t, const double dt,
     // Check if the provided timestep extends over more than one time bin
     if (dt > delta) {
       electrodes[i].signal[bin] += cur * delta; 
+      // Begin Schutsch
+      if(q<0)
+      {
+        electrodes[i].electronsignal[bin] += cur * delta;
+      }
+      else
+      {
+        electrodes[i].ionsignal[bin] += cur * delta;
+      }
+      // End Schutsch
       delta = dt - delta;
       int j = 1;
       while (delta > tStep && bin + j < nTimeBins) {
         electrodes[i].signal[bin + j] += cur * tStep;
+        // Begin Schutsch
+        if(q<0)
+        {
+          electrodes[i].electronsignal[bin+j] += cur * tStep;
+        }
+        else
+        {
+          electrodes[i].ionsignal[bin+j] += cur * tStep;
+        }
+        // End Schutsch
         delta -= tStep;
         ++j;
       }
-      if (bin + j < nTimeBins) electrodes[i].signal[bin + j] += cur * delta;
+      if (bin + j < nTimeBins)
+      {
+        electrodes[i].signal[bin + j] += cur * delta;
+        // Begin Schutsch
+        if(q<0)
+        {
+          electrodes[i].electronsignal[bin + j] += cur*delta;
+        }
+        else
+        {
+          electrodes[i].ionsignal[bin + j] += cur*delta;
+        }
+        // End Schutsch
+      }
     } else {
       electrodes[i].signal[bin] += cur * dt;
+      // Begin Schutsch
+      if(q<0)
+      {
+        electrodes[i].electronsignal[bin] += cur*dt;
+      }
+      else
+      {
+        electrodes[i].ionsignal[bin] += cur*dt;
+      }
+      // End Schutsch
     }
   }
 
@@ -499,10 +552,54 @@ Sensor::SetTimeWindow(const double tstart, const double tstep,
   for (int i = nElectrodes; i--;) {
     electrodes[i].signal.clear();
     electrodes[i].signal.resize(nTimeBins);
+    // Begin Schutsch
+    electrodes[i].electronsignal.clear();
+    electrodes[i].electronsignal.resize(nTimeBins);
+    electrodes[i].ionsignal.clear();
+    electrodes[i].ionsignal.resize(nTimeBins);
+    // End Schutsch
   }
   nEvents = 0;
 
 }
+
+// Begin Schutsch
+double
+Sensor::GetElectronSignal(const std::string label, const int bin) {
+
+  if (nEvents <= 0) return 0.;
+  if (bin<0 || bin >= nTimeBins) return 0.;
+  double sig = 0.;
+  for (int i = nElectrodes; i--;) {
+    if (electrodes[i].label == label) sig += electrodes[i].electronsignal[bin];
+  }
+  if (debug) {
+    std::cout << className << "::GetElectronSignal:\n";
+    std::cout << "    Electrode: " << label << "\n";
+    std::cout << "    Bin: " << bin << "\n";
+    std::cout << "    ElectronSignal: " << sig / tStep << "\n";
+  }
+  return signalConversion * sig / (nEvents * tStep);
+}  
+
+double
+Sensor::GetIonSignal(const std::string label, const int bin) {
+
+  if (nEvents <= 0) return 0.;
+  if (bin<0 || bin >= nTimeBins) return 0.;
+  double sig = 0.;
+  for (int i = nElectrodes; i--;) {
+    if (electrodes[i].label == label) sig += electrodes[i].ionsignal[bin];
+  }
+  if (debug) {
+    std::cout << className << "::GetIonSignal:\n";
+    std::cout << "    Electrode: " << label << "\n";
+    std::cout << "    Bin: " << bin << "\n";
+    std::cout << "    IonSignal: " << sig / tStep << "\n";
+  }
+  return signalConversion * sig / (nEvents * tStep);
+}
+// End Schutsch
 
 double 
 Sensor::GetSignal(const std::string label, const int bin) {
@@ -640,6 +737,11 @@ Sensor::AddNoise() {
     for (int j = nTimeBins; j--;) {
       const double t = tStart + (j + 0.5) * tStep;
       electrodes[i].signal[j] += fNoise(t);
+      // Begin Schutsch : Adding noise to both channels might be wrong, maybe an extended option
+      //                  where to add noise would be an idea?
+      electrodes[i].electronsignal[j] += fNoise(t);
+      electrodes[i].ionsignal[j] += fNoise(t);
+      // End Schutsch
     }
   }
   
