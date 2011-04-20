@@ -84,7 +84,7 @@
 #define TCD_BTOW        17      //
 #define TCD_FTPC        18      //
 #define TCD_PMD         19      //
-#define TCD_EMPTY_20    20      // empty, Nov, 2008
+#define TCD_20          20      // empty, Nov, 2008
 #define TCD_VPD		21      // trigger-only
 
 
@@ -252,7 +252,11 @@ so we keep it here for source compatibility
 #define RPII_SYSTEM      25
 #define RPII_ID          RPII_SYSTEM     /* Roman Pots, Phase II */
 
-#define RTS_NUM_SYSTEMS	26	/* current maximum. Can not be greater than 32! */
+#define GMT_SYSTEM      26
+#define GMT_ID          GMT_SYSTEM     /* GEM Monitor for TPC */
+
+
+#define RTS_NUM_SYSTEMS	27	/* current maximum. Can not be greater than 32! */
 
 #define PP_SEQE_INSTANCE  1
 #define PP_SEQW_INSTANCE  2
@@ -521,6 +525,8 @@ so we keep it here for source compatibility
 #define SS2_NODES(x)     ((EXT2_SYSTEM<<12) | (SS2_SYSTEM<<7) | (x))
 #define RPII_NODES(x)     ((EXT2_SYSTEM<<12) | (RPII_SYSTEM<<7) | (x))
 
+#define GMT_NODES(x)     ((EXT2_SYSTEM<<12) | (GMT_SYSTEM<<7) | (x))
+
 extern inline const char *rts2name(int rts_id)
 {
 	switch(rts_id) {
@@ -572,6 +578,8 @@ extern inline const char *rts2name(int rts_id)
 		return "SS2" ;
 	case RPII_SYSTEM :
 		return "RPII" ;
+	case GMT_SYSTEM :
+		return "GMT" ;
 	default :
 	  return (const char *)NULL ;	// unknown!
 	}
@@ -615,6 +623,7 @@ extern inline int rts2det(int ix)
 	case IST_ID :
 	case SS2_ID :
 	case RPII_ID :
+	case GMT_ID :
 		return ix ;
 	default :
 		return -1 ;
@@ -708,8 +717,8 @@ extern inline int tcd2rts(int tcd)
 
 // BTOW, ETOW now part of trigger:   jan 2008
 #define LEGACY_DETS (1<<FTP_ID)
-#define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<PXL_ID) | (1<<SSD_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID) | \
-		      (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID) | (1<<IST_ID) | (1<<SS2_ID) | (1<<RPII_ID))
+#define DAQ1000_DETS ((1<<TPX_ID) | (1<<TOF_ID) | (1<<PXL_ID) | (1<<PMD_ID) | (1<<ESMD_ID) | (1<<PP_ID) | (1<<FGT_ID) | \
+		      (1<<L3_ID) | (1 << BSMD_ID) | (1 << MTD_ID) | (1<<IST_ID) | (1<<SS2_ID) | (1<<RPII_ID) | (1<<GMT_ID))
 
 // 2009... unused dets:  SSD/SVT/TPC/PMD/HFT --->  FTPGROUP
 extern inline u_int grp2rts_mask(int grp)
