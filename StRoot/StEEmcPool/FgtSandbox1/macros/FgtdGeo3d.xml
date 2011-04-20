@@ -5,7 +5,7 @@
 <CDE  >     AGECOM , GCUNIT  </CDE>
 
 <!-- Key FGT volumes
-   FGTM - mother 
+   FGTM - mother i splaced in new beam support cone: IDSM
    FGTD - disk consisting of 4 quadrants:  FGTQ
    FGTQ quadrant is divided along z on to: front=FGTF, sensitive=FGZC, gem=FGTG, back=FGTB
    Unit depth spacers  at the edg of a quadrant:  FGQA, FGQB, FGQC , FGQD, FGQE, FGQF
@@ -55,7 +55,7 @@
 
 
 <Fill name="FGST" comment="FGT Geometry data"  >
-   <var name="startZ" value="70" comment=" starting position along Z"  />
+   <var name="startZ" value="70." comment=" starting position along Z"  />
    <var name="diskStepZ" value="26" comment=" disk separation along Z"  />
    <var name="diskInR" value="10.35" comment=" inner radii for physical disk" />
    <var name="diskOutR" value="39.4" comment=" outer radii for physical disk" />
@@ -104,7 +104,7 @@ flatAng2=FGST_flatPerpAng+xx/deg2rad <!-- angle limits of the flat (deg) -->
 <!--  ASSEMBLE GEOMETRY, start with placing main volume in cave-->
 
 <Create    block="FGTM"  />
-<Placement block="FGTM" in="CAVE" z="centerZ" />
+<Placement block="FGTM" in="IDSM" z="centerZ" />
 
 <!-- below no executable code outside Volumes -->
 
@@ -116,7 +116,7 @@ flatAng2=FGST_flatPerpAng+xx/deg2rad <!-- angle limits of the flat (deg) -->
     <!-- place disk(s) inside FGT mother volume -->
     <Do var="disk" from="1" to="nDisk"  >
        diskZ=-lengthZ/2. + diskLenZ*(disk-0.5) + (disk-1.0)*FGST_diskStepZ 
-       <Create    block="FGTD"  comment="single FGT disk" />
+       <Create    block="FGTD"  />
        <Placement block="FGTD"  z="diskZ" >
            <Rotation alphaz="FGST_quadTiltAng"  />
        </Placement>
@@ -131,7 +131,7 @@ flatAng2=FGST_flatPerpAng+xx/deg2rad <!-- angle limits of the flat (deg) -->
    
     <!--  place quadrants within one disk , temporary skip quad=1 -->
     <Do var="quad" from="2" to="nQuad"  >
-       <Create    block="FGTQ"  comment="quadrant: 1/4 pizza " />
+       <Create    block="FGTQ"  />
        <Placement block="FGTQ" z="0." >
            <Rotation alphaz="(1-quad)*90."  />
        </Placement>
@@ -144,7 +144,7 @@ flatAng2=FGST_flatPerpAng+xx/deg2rad <!-- angle limits of the flat (deg) -->
     <Attribute for="FGTQ" seen="1" colo="4"  />
     <Material name="ArCO2_70_30"  />
     <Shape type="TUBS"  rmin="FGST_diskInR"  rmax="FGST_diskOutR" dz="diskLenZ/2." phi1="0." phi2="90." />
-    <Create    block="FGZC"  comment="quadrant: sensitive  " />
+    <Create    block="FGZC"  />
     <Placement block="FGZC" z="-diskLenZ/2.+FGST_frameFrontDZ+FGST_frameSensDZ/2." /> 
 
 </Volume> 
@@ -157,24 +157,24 @@ flatAng2=FGST_flatPerpAng+xx/deg2rad <!-- angle limits of the flat (deg) -->
 
     <Hits for="FGZC" sleng="16:(0,500)" step=".01:" cz="10:" cy="10:" cx="10:" eloss="16:(0,0.001)" x=".001:" y=".001:" ptot="16:(0,100)" z=".001:S" tof="16:(0,1.E-6)"  />
 
-     <Create    block="FGQA"  comment="A-spacer, bar" />
+     <Create    block="FGQA"  />
      <Placement block="FGQA" x="FGST_frameWidth/2." y="(FGST_diskOutR+FGST_diskInR)/2."/> 
 
-     <Create    block="FGQB"  comment="C-spacer, arc" />
+     <Create    block="FGQB"   />
      <Placement block="FGQB" /> 
 
-     <Create    block="FGQC"  comment="C-spacer, bar" />
+     <Create    block="FGQC"  />
      <Placement block="FGQC" y="FGST_frameWidth/2." x="(FGST_diskOutR+FGST_diskInR)/2."/> 
 
-     <Create    block="FGQD"  comment="D-spacer, arc" />
+     <Create    block="FGQD"  />
      <Placement block="FGQD" /> 
 
-     <Create    block="FGQE"  comment="E-spacer, flat" />
+     <Create    block="FGQE"  />
      <Placement block="FGQE" x="(FGST_flatOutR-FGST_frameWidth/2.)*cos(FGST_flatPerpAng*deg2rad)" y="(FGST_flatOutR-FGST_frameWidth/2.)*sin(FGST_flatPerpAng*deg2rad)" >
            <Rotation alphaz="FGST_flatPerpAng-90."  />
     </Placement>
 
-     <Create    block="FGQF"  comment="F-spacer, arc" />
+     <Create    block="FGQF"  />
      <Placement block="FGQF" /> 
    
 </Volume>
