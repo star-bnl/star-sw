@@ -706,6 +706,9 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
 	mb.add(menu);
 	JMenuItem mi = new JMenuItem("SaveAs...");
 	mi.addActionListener(this);
+	menu.add(mi);	
+	mi = new JMenuItem("Help...");
+	mi.addActionListener(this);
 	menu.add(mi);
 	setJMenuBar(mb);
 
@@ -786,6 +789,9 @@ public class JevpEdit extends JFrame implements ActionListener, TreeSelectionLis
     {
 	System.out.printf("got %s for element %s\n", e.getActionCommand(), menuPath);
 
+	if(e.getActionCommand().equals("Help...")) {
+	    JOptionPane.showMessageDialog(null, "To start:   java JevpEdit <file>\n\nDrag and drop to move item:\n     +ctrl to copy\n      +shift to copy as a sibling"); 
+	}
 	if(e.getActionCommand().equals("SaveAs...")) {
 
 	    //myPropertyFrame.saveNode();
