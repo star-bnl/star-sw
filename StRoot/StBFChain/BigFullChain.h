@@ -36,6 +36,7 @@ Bfc_st BFC[] = { // standard chains
   {"PulserSvt"   ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"alltrigger"  ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"phys_off"    ,"","",""                                  ,"","","Turn off physics in simulation",kFALSE},
+  {"hadr_off"    ,"","",""                    ,"","","Turn off hadronic interactions in simulation",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"C H A I N S ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
