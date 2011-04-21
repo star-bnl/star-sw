@@ -37,7 +37,7 @@ mother volume=IDSM
 <!-- mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm 
     Create and initialize structures defining detector parameters
   mmmmmmmmmmmmmmmmmmmmmmmmmmmmmm     -->
-<Structure name="IDS"  >
+<Structure name="IDSZ"  >
    <var name="lenM" type="float"  />
    <var name="rM" type="float"  />
    <var name="lenW" type="float"  />
@@ -57,7 +57,7 @@ mother volume=IDSM
 </Structure>
 
 
-<Fill name="IDS" comment="IDS Geometry data,46.1cm=inner radii of IFC"  >
+<Fill name="IDSZ" comment="IDS Geometry data,46.1cm=inner radii of IFC"  >
    <var name="zStart" value="0." comment=" Z position of middle cone"  />
    <var name="thick" value="0.3" comment=" thickens of any element"  />
  
@@ -103,16 +103,16 @@ mother volume=IDSM
 
 <!--  mmmmmmmmmmmm initial  COMPUTATION mmmmmmmmmmmmmmmmmmmmmmmmmmm -->
 
-inR = IDS_rM - IDS_thick/2.
-outR = IDS_rrRes + IDS_r2Res
-lengthZ = IDS_lenM + 2.*IDS_lenW 
+inR = IDSZ_rM - IDSZ_thick/2.
+outR = IDSZ_rrRes + IDSZ_r2Res
+lengthZ = IDSZ_lenM + 2.*IDSZ_lenW 
 centerZ = 0.
-phi1=IDS_angFlat-IDS_angDel/2.
-phi2=IDS_angFlat+IDS_angDel/2.
-sinA=sin(IDS_angFlat/180.*3.1416)
-cosA=cos(IDS_angFlat/180.*3.1416)
-outRflat=IDS_rW*cos(IDS_angDel/180.*3.1416/2.)
-boxR=(outRflat+inR +IDS_thick)/2.
+phi1=IDSZ_angFlat-IDSZ_angDel/2.
+phi2=IDSZ_angFlat+IDSZ_angDel/2.
+sinA=sin(IDSZ_angFlat/180.*3.1416)
+cosA=cos(IDSZ_angFlat/180.*3.1416)
+outRflat=IDSZ_rW*cos(IDSZ_angDel/180.*3.1416/2.)
+boxR=(outRflat+inR +IDSZ_thick)/2.
 
 
 <!--  ASSEMBLE GEOMETRY, start with placing main volume in cave -->
@@ -131,11 +131,11 @@ boxR=(outRflat+inR +IDS_thick)/2.
 
     <!--  place east+werst cone  volumes -->  
     <Do var="k" from="0" to="1" >
-        z1=lengthZ/2-IDS_lenW/2.
-        z2=IDS_lenM/2.-IDS_thick
+        z1=lengthZ/2-IDSZ_lenW/2.
+        z2=IDSZ_lenM/2.-IDSZ_thick
         <If expr="k.eq.1"  >  
-            z1=-lengthZ/2+IDS_lenW/2. 
-            z2=-IDS_lenM/2.+IDS_thick/2.
+            z1=-lengthZ/2+IDSZ_lenW/2. 
+            z2=-IDSZ_lenM/2.+IDSZ_thick/2.
         </If>
 
         <Create    block="WSCC"  comment="east/west cylinder" />
@@ -149,16 +149,16 @@ boxR=(outRflat+inR +IDS_thick)/2.
      <!--  place TPC  resistor  volumes -->  
  
       <Do var="m" from="0" to="1" >
-          angR=IDS_angFlat-IDS_dangRes/2.
-          <If expr="m.eq.1"  >   angR=IDS_angFlat+IDS_dangRes/2.  </If>
+          angR=IDSZ_angFlat-IDSZ_dangRes/2.
+          <If expr="m.eq.1"  >   angR=IDSZ_angFlat+IDSZ_dangRes/2.  </If>
          <Create    block="TPRT"  comment=" tubes holding resistor protection"/>
-         <Placement block="TPRT"  z="0"  y="IDS_rrRes*sin(angR/180.*3.1416)" x="IDS_rrRes*cos(angR/180.*3.1416)"  />
+         <Placement block="TPRT"  z="0"  y="IDSZ_rrRes*sin(angR/180.*3.1416)" x="IDSZ_rrRes*cos(angR/180.*3.1416)"  />
      </Do>
 
 
     <Create    block="TPRR"  comment="resistor mass"/>
-    <Placement block="TPRR"  z="0"  y="IDS_rrRes*sinA" x="IDS_rrRes*cosA"> 
-          <Rotation alphaz="IDS_angFlat"  />
+    <Placement block="TPRR"  z="0"  y="IDSZ_rrRes*sinA" x="IDSZ_rrRes*cosA"> 
+          <Rotation alphaz="IDSZ_angFlat"  />
     </Placement>
 
 </Volume> <!-- end of mother volume -->
@@ -167,48 +167,48 @@ boxR=(outRflat+inR +IDS_thick)/2.
 <Volume       name="OSCA" comment="middle cylinder, carbon fiber"  >
     <Attribute for="OSCA" seen="1" colo="5"  />
     <Material name="CFiber"  />
-    <Shape type="TUBE"  rmin="inR"  rmax="inR+IDS_thick" dz="IDS_lenM/2."  />
+    <Shape type="TUBE"  rmin="inR"  rmax="inR+IDSZ_thick" dz="IDSZ_lenM/2."  />
 </Volume>
 
 <Volume       name="WSCC" comment=" east/west cylinder, carbon fiber"  >
     <Attribute for="WSCC" seen="0" colo="4"  />
     <Material name="Air"  />
-    <Shape type="TUBE"   rmin="IDS_rW-IDS_thick/2."  rmax="IDS_rW+IDS_thick/2." dz="IDS_lenW/2." />
+    <Shape type="TUBE"   rmin="IDSZ_rW-IDSZ_thick/2."  rmax="IDSZ_rW+IDSZ_thick/2." dz="IDSZ_lenW/2." />
 
     <Create    block="WSCO"  comment="oval part"/>
     <Placement block="WSCO"  z="0"  /> 
 
     <Create    block="WSCF"  comment="flat part"/>
     <Placement block="WSCF"  z="0"  y="outRflat*sinA" x="outRflat*cosA"> 
-          <Rotation alphaz="IDS_angFlat"  />
+          <Rotation alphaz="IDSZ_angFlat"  />
     </Placement>
 </Volume>
 
 <Volume       name="WSCO" comment=" circle carbon fiber"  >
     <Attribute for="WSCO" seen="1" colo="4"  />
     <Material name="CFiber"  />
-    <Shape type="TUBS"  rmin="IDS_rW-IDS_thick/2."  rmax="IDS_rW+IDS_thick/2." dz="IDS_lenW/2." 
+    <Shape type="TUBS"  rmin="IDSZ_rW-IDSZ_thick/2."  rmax="IDSZ_rW+IDSZ_thick/2." dz="IDSZ_lenW/2." 
                  phi2="phi1" phi1="phi2" />
 </Volume>
 
 <Volume       name="WSCF" comment=" flat carbon fiber"  >
     <Attribute for="WSCF" seen="1" colo="5"  />
     <Material name="CFiber"  />
-    <Shape type="BOX" dz="IDS_lenW/2." dx="IDS_thick/2." dy="IDS_rW*sin(IDS_angDel/180.*3.1416)/2.0+0.6" />	
+    <Shape type="BOX" dz="IDSZ_lenW/2." dx="IDSZ_thick/2." dy="IDSZ_rW*sin(IDSZ_angDel/180.*3.1416)/2.0+0.6" />	
 </Volume>
 
 
 <Volume       name="WSCD" comment=" east/west disk, carbon fiber"  >
     <Attribute for="WSCD" seen="0" colo="2"  />
     <Material name="Air"  />
-    <Shape type="TUBE"   rmin="IDS_rM-IDS_thick/2."  rmax="IDS_rW+IDS_thick/2." dz="IDS_thick/2."  />
+    <Shape type="TUBE"   rmin="IDSZ_rM-IDSZ_thick/2."  rmax="IDSZ_rW+IDSZ_thick/2." dz="IDSZ_thick/2."  />
 
     <Create    block="WSCP"  comment="pizza in pie"/>
     <Placement block="WSCP"  z="0"  /> 
 
     <Create    block="WSCB"  comment="box in pie"/>
     <Placement block="WSCB"  z="0"  y="(outRflat+inR)/2.*sinA" x="(outRflat+inR)/2.*cosA"> 
-          <Rotation alphaz="IDS_angFlat"  />
+          <Rotation alphaz="IDSZ_angFlat"  />
     </Placement>
 </Volume>
 
@@ -216,27 +216,27 @@ boxR=(outRflat+inR +IDS_thick)/2.
 <Volume       name="WSCP" comment=" circle carbon fiber"  >
     <Attribute for="WSCP" seen="1" colo="6"  />
     <Material name="CFiber"  />
-    <Shape type="TUBS"     rmin="IDS_rM-IDS_thick/2."  rmax="IDS_rW+IDS_thick/2." dz="IDS_thick/2." 
+    <Shape type="TUBS"     rmin="IDSZ_rM-IDSZ_thick/2."  rmax="IDSZ_rW+IDSZ_thick/2." dz="IDSZ_thick/2." 
                  phi2="phi1" phi1="phi2" />
 </Volume>
 
 <Volume       name="WSCB" comment=" box carbon fiber"  >
     <Attribute for="WSCB" seen="1" colo="7"  />
     <Material name="CFiber"  />
-    <Shape type="BOX" dz="IDS_thick/2." dx="(outRflat-inR)/2." dy="IDS_rW*sin(IDS_angDel/180.*3.1416)/1.85" />	
+    <Shape type="BOX" dz="IDSZ_thick/2." dx="(outRflat-inR)/2." dy="IDSZ_rW*sin(IDSZ_angDel/180.*3.1416)/1.85" />	
 </Volume>
  
  <Volume       name="TPRR" comment=" TPC resistor" >
     <Attribute for="TPRR" seen="1" colo="8"  />
     <Material name="Alumina"  />
-    <Shape type="BOX" dz="lengthZ/2." dx="IDS_dxRes/2" dy="IDS_dyRes/2." />
+    <Shape type="BOX" dz="lengthZ/2." dx="IDSZ_dxRes/2" dy="IDSZ_dyRes/2." />
 </Volume>
 
 
 <Volume       name="TPRT" comment="resistor protection,  carbon fiber"  >
     <Attribute for="TPRT" seen="1" colo="9"  />
     <Material name="FR4"  />
-    <Shape type="TUBE"  rmin="IDS_r1Res"  rmax="IDS_r2Res" dz="lengthZ/2."  />
+    <Shape type="TUBE"  rmin="IDSZ_r1Res"  rmax="IDSZ_r2Res" dz="lengthZ/2."  />
 </Volume>
 
 </Module>
