@@ -3,6 +3,10 @@
 
 #include <unistd.h>
 
+#ifdef __linux__
+#define linux
+#endif
+
 #ifdef linux
 #include <sys/time.h>
 #else
