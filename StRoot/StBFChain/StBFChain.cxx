@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.579 2011/04/20 15:18:17 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.580 2011/04/21 22:37:43 genevb Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -350,6 +350,7 @@ Int_t StBFChain::Instantiate()
       }
       else {
 	if (GetOption("phys_off")) mk->SetAttr("phys_off",kTRUE);
+	if (GetOption("hadr_off")) mk->SetAttr("hadr_off",kTRUE);
 	if (fInFile != "")  {
 	  if (ProcessLine(Form("((StVMCMaker *) %p)->SetInputFile(\"%s\")",mk,fInFile.Data())))
 	    goto Error;
@@ -1353,6 +1354,8 @@ void StBFChain::SetGeantOptions(StMaker *geantMk){
       if (! found) gMessMgr->QAInfo() << "StBFChain::SetGeantOptions() Chain has not found geometry tag. Use " << GeomVersion << endm;
       TString GeometryOpt("detp geometry ");
       GeometryOpt += GeomVersion;
+      if (GetOption("phys_off")) GeometryOpt += " phys_off=1";
+      if (GetOption("hadr_off")) GeometryOpt += " hadr_off=1";
       ProcessLine(Form("((St_geant_Maker *) %p)->LoadGeometry(\"%s\");",geantMk,GeometryOpt.Data()));
     }
     if ((GetOption("fzin") || GetOption("ntin")) && fInFile != "")
