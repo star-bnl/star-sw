@@ -46,7 +46,7 @@
 u_int evp_daqbits ;
 
 //Tonko:
-static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.41 2011/03/31 13:56:09 jml Exp $" ;
+static const char cvs_id_string[] = "$Id: daqReader.cxx,v 1.42 2011/04/21 19:10:50 jml Exp $" ;
 
 static int evtwait(int task, ic_msg *m) ;
 static int ask(int desc, ic_msg *m) ;
@@ -1956,11 +1956,11 @@ static int ask(int desc, ic_msg *m)
 
     switch(status) {
     case EVP_STAT_EVT :	// something wrong with last event...
-      delay = 500000;
+      delay = 100000;
       LOG(DBG, "Delaying for %d usec because of error on last event",delay);
       break ;
     case EVP_STAT_EOR :	// EndOfRun was the last status and yet we are asked again...
-      delay = 500000;
+      delay = 100000;
       LOG(DBG, "Delaying for %d usec because last event was end of run",delay);
       break ;
     case EVP_STAT_CRIT :
