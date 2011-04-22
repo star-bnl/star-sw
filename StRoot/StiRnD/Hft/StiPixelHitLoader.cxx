@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelHitLoader.cxx,v 1.22 2009/02/09 02:47:19 andrewar Exp $
+ * $Id: StiPixelHitLoader.cxx,v 1.23 2011/04/22 22:00:18 fisyak Exp $
  *
  * $Log: StiPixelHitLoader.cxx,v $
+ * Revision 1.23  2011/04/22 22:00:18  fisyak
+ * warn off
+ *
  * Revision 1.22  2009/02/09 02:47:19  andrewar
  * UPGR15 update. Will break backward compatibility with older geometries.
  *
@@ -101,7 +104,7 @@ void StiPixelHitLoader::loadHits(StEvent* source,
       //Resolve the layer and ladder ids.
       
       //detector= _detector->getDetector(pxlH->layer()-1, pxlH->ladder()-1);
-      int ittfLadder;
+      //      int ittfLadder;
       //assert(row<_detectors.size());
       //assert(sector<_detectors[row].size());
       //MLM 

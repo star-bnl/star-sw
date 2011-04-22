@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.26 2010/08/25 21:57:41 fisyak Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.27 2011/04/22 22:00:18 fisyak Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.27  2011/04/22 22:00:18  fisyak
+ * warn off
+ *
  * Revision 1.26  2010/08/25 21:57:41  fisyak
  * Get rid off access to specfic detector tracking parameters which usage has been  disable since 2008/06/11
  *
@@ -186,7 +189,7 @@ void StiPixelDetectorBuilder::useVMCGeometry() {
   // silicon for both the detector and the ladder support. This will be updated with
   // more detailed support structures at the appropriate time.
   struct Material_t {
-    Char_t *name;
+    const Char_t *name;
     StiMaterial    **p;
   };
   Material_t map[] = {
