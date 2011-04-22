@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.34 2010/08/25 21:57:42 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.35 2011/04/22 22:00:39 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.35  2011/04/22 22:00:39  fisyak
+// warn off
+//
 // Revision 1.34  2010/08/25 21:57:42  fisyak
 // Get rid off access to specfic detector tracking parameters which usage has been  disable since 2008/06/11
 //
@@ -184,7 +187,7 @@ void StiSsdDetectorBuilder::useVMCGeometry() {
   cout << "StiSsdDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
   SetCurrentDetectorBuilder(this);
   struct Material_t {
-    Char_t *name;
+    const Char_t *name;
     StiMaterial    **p;
   };
   Material_t map[] = {
