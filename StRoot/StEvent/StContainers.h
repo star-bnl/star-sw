@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.25 2011/02/01 19:47:36 ullrich Exp $
+ * $Id: StContainers.h,v 2.26 2011/04/25 21:24:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.26  2011/04/25 21:24:33  ullrich
+ * Added containers for MTD.
+ *
  * Revision 2.25  2011/02/01 19:47:36  ullrich
  * Added HLT branch and hooks.
  *
@@ -92,6 +95,8 @@
 class StObject;
 class StBTofHit;
 class StBTofRawHit;
+class StMtdHit;
+class StMtdRawHit;
 class StCalibrationVertex;
 class StDetectorState;
 class StHit;
@@ -144,6 +149,8 @@ class StHltTriggerReason;
 StCollectionDef(Object)
 StCollectionDef(BTofHit)
 StCollectionDef(BTofRawHit)
+StCollectionDef(MtdHit)
+StCollectionDef(MtdRawHit)
 StCollectionDef(CalibrationVertex)
 StCollectionDef(DetectorState)
 StCollectionDef(Hit)

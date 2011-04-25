@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.22 2011/02/01 19:47:36 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.23 2011/04/25 21:24:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.23  2011/04/25 21:24:33  ullrich
+ * Added containers for MTD.
+ *
  * Revision 2.22  2011/02/01 19:47:36  ullrich
  * Added HLT branch and hooks.
  *
@@ -124,6 +127,8 @@
 #include "StHltHeavyFragment.h"
 #include "StHltDiElectron.h"
 #include "StHltTriggerReason.h"
+#include "StMtdHit.h"
+#include "StMtdRawHit.h"
 
 StCollectionImp(Object)
 StCollectionImp(CalibrationVertex)
@@ -154,6 +159,8 @@ StCollectionImp(TofData)
 StCollectionImp(TofRawData)
 StCollectionImp(BTofHit)
 StCollectionImp(BTofRawHit)
+StCollectionImp(MtdHit)
+StCollectionImp(MtdRawHit)
 StCollectionImp(Track)
 StCollectionImp(TrackNode)
 StCollectionImp(TrackPidTraits)
