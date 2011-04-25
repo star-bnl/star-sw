@@ -237,7 +237,9 @@ bool TOFcheckHistogramGroup::fill(evpReader* evp, char* datap) {
       int dataword=tof.ddl[ifib][iword];
       //cout<<"TOF:: ifib="<<ifib<<" dataword=0x"<<hex<<dataword<<dec<<endl;
       int packetid = (dataword&0xF0000000)>>28;
-      if(!ValidDataword(packetid)) TOF_Error1->Fill(trayid+0.5*halftrayid);
+      if(!ValidDataword(packetid))
+        //ignore the tray95-0 error untill the bad HPTDC replaced
+        if(trayid!=95) TOF_Error1->Fill(trayid+0.5*halftrayid);
       //if(!ValidDataword(packetid)) cout<<"ERROR!!!!"<<hex<<"dataword=0x"<<dataword<<dec<<"tray="<<trayid<<endl;
       //}
 
