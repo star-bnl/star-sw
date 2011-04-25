@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.46 2011/04/01 19:43:19 perev Exp $
+ * $Id: StEvent.cxx,v 2.47 2011/04/25 21:25:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.47  2011/04/25 21:25:09  ullrich
+ * Modifications to hold MTD data.
+ *
  * Revision 2.46  2011/04/01 19:43:19  perev
  * Allow zero pointer for TBrowser. debug
  *
@@ -181,6 +184,7 @@
 #include "StRunInfo.h"
 #include "StTofCollection.h"
 #include "StBTofCollection.h"
+#include "StMtdCollection.h"
 #include "StFpdCollection.h"
 #include "StPhmdCollection.h"
 #include "StTrackDetectorInfo.h"
@@ -201,8 +205,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.46 2011/04/01 19:43:19 perev Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.46 2011/04/01 19:43:19 perev Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.47 2011/04/25 21:25:09 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.47 2011/04/25 21:25:09 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -556,6 +560,22 @@ StEvent::btofCollection() const
     StBTofCollection *btof = 0;
     _lookup(btof, mContent);
     return btof;
+}
+
+StMtdCollection*
+StEvent::mtdCollection()
+{
+    StMtdCollection *mtd = 0;
+    _lookup(mtd, mContent);
+    return mtd;
+}
+
+const StMtdCollection*
+StEvent::mtdCollection() const
+{
+    StMtdCollection *mtd = 0;
+    _lookup(mtd, mContent);
+    return mtd;
 }
 
 StFpdCollection*
@@ -1063,6 +1083,12 @@ StEvent::setBTofCollection(StBTofCollection* val)
 }
 
 void
+StEvent::setMtdCollection(StMtdCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
 StEvent::setFpdCollection(StFpdCollection* val)
 {
     _lookupAndSet(val, mContent);
@@ -1230,6 +1256,7 @@ void StEvent::statistics()
     cout << "\tStRpsCollection:             " << static_cast<void*>(rpsCollection());
     cout << "\tStTofCollection:             " << static_cast<void*>(tofCollection());
     cout << "\tStBTofCollection:            " << static_cast<void*>(btofCollection());
+    cout << "\tStMtdCollection:             " << static_cast<void*>(mtdCollection());
     cout << "\tStFpdCollection:             " << static_cast<void*>(fpdCollection());
     cout << "\tStPhmdCollection:            " << static_cast<void*>(phmdCollection());
     cout << "\tStL0Trigger:                 " << static_cast<void*>(l0Trigger());
