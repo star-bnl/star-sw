@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.225 2011/04/11 17:37:56 jwebb Exp $
+* $Id: geometry.g,v 1.226 2011/04/25 18:27:00 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.226  2011/04/25 18:27:00  jwebb
+* Added Y2008e tag, which implements the LOW_EM central calorimeter cuts in
+* the y2008 geometry.
+*
 * Revision 1.225  2011/04/11 17:37:56  jwebb
 * Introduce UPGR2012 geometry as y2011 with inner detectors (FGT, SSD) and
 * supports removed.
@@ -1626,6 +1630,15 @@ replace [exe y2008d;] with [
    exe y2008c;
    exe scon14;
 ]
+
+replace [exe y2008e;] with [
+   "Y2008 production tag E: Same as D but with lowered EM cuts in the EEMC and BEMC";
+   exe y2008d;
+   exe EMCUTS(eemc,1); "Enable 10 keV cuts in EEMC";
+   exe EMCUTS(bemc,1); "Enable 10 keV cuts in BEMC";
+   exe CALB02;
+   exe ECALv6;
+]
  
 
 !//______________________________________________________________________________
@@ -2440,7 +2453,10 @@ If LL>0
   Case Y2008d   { "Y2008 production tag D: Improved SROD description in support cone";
                   Geom = 'Y2008d  ';
                   exe y2008d;}
- 
+
+  Case Y2008e   {"Y2008 production tag E: Same as D but with lowered EM cuts in the EEMC and BEMC";
+                  Geom = 'Y2008e  ';
+                  exe y2008e;}
 
 ****************************************************************************************
   Case Y2009   { y2009 initial geometry: more detailed TPC
