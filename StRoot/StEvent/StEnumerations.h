@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.37 2009/11/23 22:22:25 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.38 2011/04/25 21:25:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.38  2011/04/25 21:25:09  ullrich
+ * Modifications to hold MTD data.
+ *
  * Revision 2.37  2009/11/23 22:22:25  ullrich
  * Minor cleanup performed and hooks for RPS added.
  *
@@ -193,6 +196,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kFpdEastId   = kFpdEastIdentifier, 
                    kFmsId       = kFmsIdentifier,  
                    kRpsId       = kRpsIdentifier,
+                   kMtdId       = kMtdIdentifier,
                    kMaxDetectorId};
 
 /*!

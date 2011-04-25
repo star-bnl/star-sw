@@ -34,6 +34,7 @@
 ** FPD West        = 30
 ** FPD East        = 31
 ** FMS             = 32
+** MTD             = 34
 */
 
 
@@ -91,6 +92,11 @@
 #define kRpsIdentifier                33
 
 /*
+ **  The following are for the Muon Telescope Detector
+ */
+#define kMtdIdentifier                34
+
+/*
 **  The following are more or less virtual detectors.
 **  Depending on funding or policy this stuff might
 **  happen or not. (OBSOLETE)
@@ -106,9 +112,12 @@
 
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.8 2009/11/23 22:22:25 ullrich Exp $
+/* $Id: StDetectorDefinitions.h,v 2.9 2011/04/25 21:25:09 ullrich Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.9  2011/04/25 21:25:09  ullrich
+** Modifications to hold MTD data.
+**
 ** Revision 2.8  2009/11/23 22:22:25  ullrich
 ** Minor cleanup performed and hooks for RPS added.
 **

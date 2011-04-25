@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.40 2011/02/01 19:47:36 ullrich Exp $
+ * $Id: StEvent.h,v 2.41 2011/04/25 21:25:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.41  2011/04/25 21:25:09  ullrich
+ * Modifications to hold MTD data.
+ *
  * Revision 2.40  2011/02/01 19:47:36  ullrich
  * Added HLT branch and hooks.
  *
@@ -164,6 +167,7 @@ class StRichCollection;
 class StRpsCollection;
 class StTofCollection;
 class StBTofCollection;
+class StMtdCollection;
 class StTriggerDetectorCollection;
 class StTriggerIdCollection;
 class StTriggerData;
@@ -223,6 +227,8 @@ public:
     const StTofCollection*              tofCollection() const;
     StBTofCollection*                   btofCollection();
     const StBTofCollection*             btofCollection() const;
+    StMtdCollection*                    mtdCollection();
+    const StMtdCollection*              mtdCollection() const;
     StFpdCollection*                    fpdCollection();
     const StFpdCollection*              fpdCollection() const;
     StPhmdCollection*                   phmdCollection();
@@ -303,6 +309,7 @@ public:
     void setRpsCollection(StRpsCollection*);
     void setTofCollection(StTofCollection*);
     void setBTofCollection(StBTofCollection*);
+    void setMtdCollection(StMtdCollection*);
     void setFpdCollection(StFpdCollection*);
     void setPhmdCollection(StPhmdCollection*);
     void setTriggerDetectorCollection(StTriggerDetectorCollection*);
@@ -332,7 +339,7 @@ private:
     StEvent(const StEvent&);
     void initToZero();
     
-    ClassDef(StEvent,4)
+    ClassDef(StEvent,5)
 };
 #endif
 
