@@ -352,8 +352,8 @@ Int_t StEventQAMaker::Make() {
       default                   : break;
     }
     if (primVtx->ranking() >= min_rank &&
-        ((float) (primVtx->numMatchesWithBEMC())) >
-        ((float) (primVtx->numberOfDaughters())) * 0.2) {
+        ((float) (primVtx->numMatchesWithBEMC())) /
+        ((float) (primVtx->numberOfDaughters())) > 0.2) {
       vertExists = 1.;
     } else {
       LOG_WARN << "questionable primary vertex found" << endm;
@@ -2383,11 +2383,8 @@ Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.100 2011/04/14 15:31:11 perev Exp $
+// $Id: StEventQAMaker.cxx,v 2.99 2011/03/15 23:08:12 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
-// Revision 2.100  2011/04/14 15:31:11  perev
-// 1/0 fix
-//
 // Revision 2.99  2011/03/15 23:08:12  genevb
 // Adjust MB for Run 11
 //

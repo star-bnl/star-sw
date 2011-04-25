@@ -1,0 +1,25 @@
+mv StarMuCut.cxx StMuCut.cxx
+mv StarMuCut.h StMuCut.h
+mv StarMuDebug.cxx StMuDebug.cxx
+mv StarMuDebug.h StMuDebug.h
+mv StarMuDst.cxx StMuDst.cxx
+mv StarMuDst.h StMuDst.h
+mv StarMuDstMaker.cxx StMuDstMaker.cxx
+mv StarMuDstMaker.h StMuDstMaker.h
+mv StarMuEvent.cxx StMuEvent.cxx
+mv StarMuEvent.h StMuEvent.h
+mv StarMuException.cc StMuException.cc
+mv StarMuException.hh StMuException.hh
+mv StarMuFilter.cxx StMuFilter.cxx
+mv StarMuFilter.h StMuFilter.h
+mv StarMuHelix.cxx StMuHelix.cxx
+mv StarMuHelix.h StMuHelix.h
+mv StarMuL3EventSummary.cxx StMuL3EventSummary.cxx
+mv StarMuL3EventSummary.h StMuL3EventSummary.h
+mv StarMuL3Filter.cxx StMuL3Filter.cxx
+mv StarMuL3Filter.h StMuL3Filter.h
+mv StarMuTrack.cxx StMuTrack.cxx
+mv StarMuTrack.h StMuTrack.h
+mv StarMuUtilities.cxx StMuUtilities.cxx
+mv StarMuUtilities.h StMuUtilities.h
+
