@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StPmdCleanConstants.cxx,v 1.3 2010/07/06 16:31:14 rashmi Exp $
+// $Id: StPmdCleanConstants.cxx,v 1.4 2011/04/26 13:15:11 rashmi Exp $
 //
 // Description: constants for the Pmd Cleaner and calibration Maker
 //
@@ -81,4 +81,6 @@ Int_t PmdClean::BadChain_y10d91[25]={3,5,6,7,8,9,10,11,15,16,17,21,22,23,24,27,2
 Int_t PmdClean::BadChain_y10d100[25]={6,7,8,9,11,15,17,18,21,25,27,32,0,0,0,0,0,0,0,0,0,0,0,0,0};
 Int_t PmdClean::BadChain_y10d105[25]={3,6,7,8,9,11,14,15,17,18,21,22,25,27,32,45,0,0,0,0};
 Int_t PmdClean::BadChain_y10d148[25]={3,5,6,7,8,9,11,15,16,17,18,21,22,23,24,27,29,32,43,45,0,0,0,0};
+
+Int_t PmdClean::BadChain_y12d0[25]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
