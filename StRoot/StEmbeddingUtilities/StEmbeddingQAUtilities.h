@@ -3,8 +3,11 @@
 //    - Provide category id, such as 'MC' track in the minimc tree
 //----------------------------------------------------------------------------------------------------
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.h,v 1.10 2011/04/05 23:12:35 hmasui Exp $
+ * $Id: StEmbeddingQAUtilities.h,v 1.11 2011/04/26 20:27:22 hmasui Exp $
  * $Log: StEmbeddingQAUtilities.h,v $
+ * Revision 1.11  2011/04/26 20:27:22  hmasui
+ * Add isGamma function
+ *
  * Revision 1.10  2011/04/05 23:12:35  hmasui
  * Added getGeantId() function
  *
@@ -98,6 +101,7 @@ class StEmbeddingQAUtilities {
     Bool_t isKaons(const Int_t geantid) const ;        /// Check the input geantid is kaons
     Bool_t isProtons(const Int_t geantid) const ;      /// Check the input geantid is protons
     Bool_t isEPiKP(const Int_t geantid) const ;        /// Check the input geantid is e/pi/K/p
+    Bool_t isGamma(const Int_t geantid) const ;       /// Check the input geantid is gamma
 
     // Histogram style
     void setStyle() const ;       /// Set overall styles
