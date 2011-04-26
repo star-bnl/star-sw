@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.35 2011/03/31 19:29:01 fisyak Exp $
+ * $Id: StTrack.cxx,v 2.36 2011/04/26 21:41:29 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.36  2011/04/26 21:41:29  fisyak
+ * Make mKey Int_t instead of UShort_t (no. of tracks might be more that 64k)
+ *
  * Revision 2.35  2011/03/31 19:29:01  fisyak
  * Add IdTruth information for tracks and vertices
  *
@@ -133,7 +136,7 @@
 #include "StThreeVectorD.hh"
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.35 2011/03/31 19:29:01 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.36 2011/04/26 21:41:29 fisyak Exp $";
 
 StTrack::StTrack()
 {
@@ -241,8 +244,6 @@ StTrack::~StTrack()
 short
 StTrack::flag() const { return mFlag; }
 
-unsigned short
-StTrack::key() const { return mKey; }
 
 unsigned short
 StTrack::encodedMethod() const { return mEncodedMethod; }
@@ -395,8 +396,6 @@ StTrack::node() { return mNode; }
 void
 StTrack::setFlag(short val) { mFlag = val; }
 
-void
-StTrack::setKey(unsigned short val) { mKey = val; }
 
 void
 StTrack::setEncodedMethod(unsigned short val) { mEncodedMethod = val; }
