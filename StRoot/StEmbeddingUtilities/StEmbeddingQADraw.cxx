@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQADraw.cxx,v 1.32 2011/04/12 03:01:04 hmasui Exp $
+ * $Id: StEmbeddingQADraw.cxx,v 1.33 2011/04/26 20:27:45 hmasui Exp $
  * $Log: StEmbeddingQADraw.cxx,v $
+ * Revision 1.33  2011/04/26 20:27:45  hmasui
+ * Add gamma geantid check
+ *
  * Revision 1.32  2011/04/12 03:01:04  hmasui
  * Fix isMatchedPairOk() to properly process particles with decay daughters
  *
@@ -571,6 +574,10 @@ Bool_t StEmbeddingQADraw::isMatchedPairOk() const
   if ( StEmbeddingQAUtilities::instance()->isEPiKP(mGeantId) ) {
     // stable
     return kTRUE ;
+  }
+  else if ( StEmbeddingQAUtilities::instance()->isGamma(mGeantId) ) {
+    // unstable for gamma
+    return kFALSE ;
   }
   else{
     return StEmbeddingQAUtilities::instance()->getParticleDefinition(mGeantId)->stable() ;
