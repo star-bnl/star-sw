@@ -1,6 +1,9 @@
 /****************************************************************************************************
- * $Id: StEmbeddingQAUtilities.cxx,v 1.12 2011/04/05 23:12:36 hmasui Exp $
+ * $Id: StEmbeddingQAUtilities.cxx,v 1.13 2011/04/26 20:27:22 hmasui Exp $
  * $Log: StEmbeddingQAUtilities.cxx,v $
+ * Revision 1.13  2011/04/26 20:27:22  hmasui
+ * Add isGamma function
+ *
  * Revision 1.12  2011/04/05 23:12:36  hmasui
  * Added getGeantId() function
  *
@@ -303,6 +306,14 @@ Bool_t StEmbeddingQAUtilities::isEPiKP(const Int_t geantid) const
   /// Check the input string geant id is e/pi/K/p
 
   return isElectrons(geantid) || isPions(geantid) || isKaons(geantid) || isProtons(geantid) ;
+}
+
+//____________________________________________________________________________________________________
+Bool_t StEmbeddingQAUtilities::isGamma(const Int_t geantid) const
+{
+  /// Check geantid is gamma or not
+
+  return (geantid == 1) ;
 }
 
 //____________________________________________________________________________________________________
