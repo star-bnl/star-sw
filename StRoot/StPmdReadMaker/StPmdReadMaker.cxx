@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.35 2010/07/06 16:30:45 rashmi Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.36 2011/04/26 13:14:27 rashmi Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.36  2011/04/26 13:14:27  rashmi
+ *mVmeCond,BadChain info changed for year==12 data
+ *
  *Revision 1.35  2010/07/06 16:30:45  rashmi
  *Calibration updates for run10
  *
@@ -219,7 +222,7 @@ Int_t StPmdReadMaker::InitRun(Int_t runnr) {
   else if(mRunNumber >= 5049020 && mRunNumber < 6000000) mVmeCond = 3;
   else if(mRunNumber >= 6000000 && mRunNumber < 7000000) mVmeCond = 4; // run 7 data
   else if(mRunNumber >= 8000000 && mRunNumber < 9000000) mVmeCond = 5; // run 7 data
-  else if(mRunNumber >= 9000000 && mRunNumber < 12000000) mVmeCond = 5; // run 7 data
+  else if(mRunNumber >= 9000000) mVmeCond = 5; // run 7 data
   // // Subhasis: 7000000 to 8000000, this was pp , PMD was absent..
   // subhasis (25th aug 2007:) These conditions need to be checked very carefully
   
@@ -253,7 +256,13 @@ void StPmdReadMaker::ReadBadChains(Int_t runNo){
   
   Int_t rn,year;
   mPmdGeom->GetRunYear(runNo,rn,year);
-  if(Debug())cout<<"runNo="<<runNo<<" year="<<year<<endl;
+   if(Debug())cout<<"runNo="<<runNo<<" year="<<year<<endl;
+  cout<<"runNo="<<runNo<<" year="<<year<<endl;
+  
+  if(year==12){
+    BadChain = PmdClean::BadChain_y12d0;
+    //    cout<<" I have read bad chains in this loop"<<endl;
+  }
   
   if(year==11){
     if(runNo>11148001){
@@ -299,7 +308,7 @@ void StPmdReadMaker::ReadBadChains(Int_t runNo){
   }
   
   if (BadChain[0]>0 && Debug()){
-    //if (BadChain[0]>0){
+    //  if (BadChain[0]>0){
     cout<<"BadChains are ";
     for(Int_t i=0;i<25;i++){
       if (BadChain[i]>0) cout<<BadChain[i]<<" ";
@@ -350,7 +359,7 @@ Int_t StPmdReadMaker::Make() {
   //  Float_t pmdADC=0.;
     
     for (int sector=1; sector<2;++sector) {
-      cout<<" sector = "<<sector<<endl;
+      //      cout<<" sector = "<<sector<<endl;
       while ( GetNextLegacy(sector) ) {
 	//
 	pmd_t*  fpmd = (pmd_t*)*DaqDta()->begin();
@@ -672,7 +681,7 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
     cout<<" NUmber of original hits ="<<orig_nhits<<endl;
     cout<<" number of hits="<<nhits<<endl;
     for(Int_t ism = 0;ism<24;ism++){
-      if(nhits_sm[ism]>0) cout<<"number if hits in module "<<ism+1<<" is ="<<nhits_sm[ism]<<endl;
+      if(nhits_sm[ism]>0) cout<<"number of hits in module "<<ism+1<<" is ="<<nhits_sm[ism]<<endl;
     }
   }
   if(mPmdPrint)gMessMgr->Info("StEvent to be called **");
@@ -730,6 +739,7 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det
     Int_t nmh1=pmd_det->module_hit(id);
     
     if(nmh1>0){
+      //      cout<<" PMD: Filled "<<nmh1<<" hits in Pre"<<endl;
       TIter next(pmd_mod->Hits());
       StPmdHit *spmcl1;
       for(Int_t im=0; im<nmh1; im++)
@@ -774,6 +784,7 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det
     
     if(nmh2>0)
       {
+	cout<<" PMD: Filled "<<nmh2<<" hits in CPV"<<endl;
 	TIter next(cpv_mod->Hits());
 	StPmdHit *spmcl2;
 	for(Int_t im=0; im<nmh2; im++)
@@ -968,6 +979,7 @@ Bool_t StPmdReadMaker::ReadCalibrationsConst(){
     
   }
   if(Debug()) cout<<" number of hot cells is "<< nhot<<endl;
+  //cout<<"PMD:  number of hot cells is "<< nhot<<endl;
   
   // SM_CHAIN_GNF
   
@@ -1022,7 +1034,7 @@ Int_t StPmdReadMaker::GetCalib(int sm,int row,int col,float& calib)
   if(sm>0 && row>0 && col>0)
     if(m_PmdCalibConst)calib=m_PmdCalibConst[sm-1].CellGain[row-1][col-1];
   
-  //cout<<"sm,row,col,calib"<<sm<<" "<<row<<" "<<col<<" "<<calib<<endl;
+  //  cout<<"sm,row,col,calib"<<sm<<" "<<row<<" "<<col<<" "<<calib<<endl;
   //  if(Debug() && calib>0)fout<<"sm,row,col,calib "<<sm<<" "<<row<<" "<<col<<" "<<calib<<endl;
   return kStOK;
   
