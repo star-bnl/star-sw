@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.25 2011/03/31 19:29:01 fisyak Exp $
+ * $Id: StTrack.h,v 2.26 2011/04/26 21:41:29 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -58,6 +58,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.26  2011/04/26 21:41:29  fisyak
+ * Make mKey Int_t instead of UShort_t (no. of tracks might be more that 64k)
+ *
  * Revision 2.25  2011/03/31 19:29:01  fisyak
  * Add IdTruth information for tracks and vertices
  *
@@ -164,7 +167,7 @@ public:
 
     virtual StTrackType            type() const = 0;
     virtual const StVertex*        vertex() const = 0;
-    virtual unsigned short         key() const;
+    virtual Int_t                  key() const { return mKey; }
     short                          flag() const;
     unsigned short                 encodedMethod() const;
     bool                           finderMethod(StTrackFinderMethod) const;
@@ -191,7 +194,7 @@ public:
     UShort_t                       seedQuality() const {return mSeedQuality;}
 
     void         setFlag(short);
-    void         setKey(unsigned short);
+    void         setKey(Int_t val) { mKey = val; }
     void         setEncodedMethod(unsigned short);
     void         setImpactParameter(float);
     void         setLength(float);
@@ -215,7 +218,7 @@ protected:
     void         setNumberOfPossiblePoints(unsigned short); // obsolete
     
 protected:
-    UShort_t                mKey;
+    Int_t                   mKey;
     Short_t                 mFlag;
     UShort_t                mEncodedMethod;
     UShort_t                mSeedQuality;   // ITTF: this is seed quality
@@ -248,6 +251,6 @@ protected:
 
     StSPtrVecTrackPidTraits mPidTraitsVec;
 
-    ClassDef(StTrack,7)
+    ClassDef(StTrack,8)
 };
 #endif
