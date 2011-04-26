@@ -1,6 +1,6 @@
 /*******************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.28 2010/04/15 06:55:48 rashmi Exp $
+ * $Id: StPmdGeom.cxx,v 1.29 2011/04/26 13:16:06 rashmi Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.29  2011/04/26 13:16:06  rashmi
+ * year==12 inserted for taking new mapping
+ *
  * Revision 1.28  2010/04/15 06:55:48  rashmi
  * functions to draw XY and eta/phi coverage & modifcations to mapping
  *
@@ -1951,7 +1954,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
     status[36][9]=0;
   }
 
-  if(rn >=1 && (year==10||year==11)){
+  if(rn >=1 && (year==10||year==11||year==12)){
     // RR 23/10/2009 Since some chains extend beyond 27 mapped boards
     // Setting status for boards beyond 27 for 
     // all chains except 1,7,19,20,23,24 to status 0 
@@ -2198,7 +2201,7 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     //    Non existent chains
     if(chain==6 || chain==17 || chain == 21 ){return kStWarn;}
   }else{
-    if(year==10||year==11){
+    if(year==10||year==11||year==12){
       if(chain==8||chain==12||chain==23||chain==24){
 	if(chtemp>=2304){return kStWarn;}
       }else{
@@ -6856,7 +6859,7 @@ void StPmdGeom::drawPMDXY(Int_t firstchain,Int_t lastchain, Int_t runno){
 	 chain==23 || chain==24) 
 	{bmax[chain]=36;}
     }
-    if(year==10||year==11){
+    if(year==10||year==11||year==12){
       if(chain==8||chain==12||chain==23||chain==24){bmax[chain]=36;}
     }
   }
@@ -6915,7 +6918,7 @@ void StPmdGeom::drawPMDetaphi(Int_t firstchain,Int_t lastchain, Int_t runno){
 	 chain==23 || chain==24) 
 	{bmax[chain]=36;}
     }
-    if(year==10||year==11){
+    if(year==10||year==11||year==12){
       if(chain==8||chain==12||chain==23||chain==24){bmax[chain]=36;}
     }
   }
@@ -6976,7 +6979,7 @@ void StPmdGeom::drawPMD(Int_t firstchain,Int_t lastchain, Int_t runno){
 	 chain==23 || chain==24) 
 	{bmax[chain]=36;}
     }
-    if(year==10||year==11){
+    if(year==10||year==11||year==12){
       if(chain==8||chain==12||chain==23||chain==24){bmax[chain]=36;}
     }
   }
