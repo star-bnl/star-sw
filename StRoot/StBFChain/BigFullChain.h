@@ -449,13 +449,9 @@ Bfc_st BFC[] = { // standard chains
   {"SCL"         ,""  ,"","",""                         ,"StarClassLibrary","Load StarClassLibrary",kFALSE},
   {"SvtCL"       ,""  ,"","",""                                     ,"libGeom,StSvtClassLibrary","",kFALSE},
   {"TbUtil"      ,""  ,"","sim_T,tpc_t,globT,SCL",""    ,"StTableUtilities","Load StTableUtilities",kFALSE},
-#if 0
-  {"TofUtil"     ,""  ,"","",""                 ,"StTofUtil,libGeom,St_geom_Maker","Load StTofUtil",kFALSE},
-  {"BTofUtil"    ,""  ,"","",""               ,"StBTofUtil,libGeom,St_geom_Maker","Load StBTofUtil",kFALSE},
-#else
   {"TofUtil"     ,""  ,"","",""                                       ,"StTofUtil","Load StTofUtil",kFALSE},
   {"BTofUtil"    ,""  ,"","",""                                     ,"StBTofUtil","Load StBTofUtil",kFALSE},
-#endif
+  {"MtdUtil"    ,""  ,"","",""                                        ,"StMtdUtil","Load StMtdUtil",kFALSE},
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
   {"StEvent"     ,""  ,"","globT,SCL,TRGDef,StBichsel,EmcUtil",""         ,"StEvent","Load StEvent",kFALSE},
   {"SsdUtil"     ,""  ,"","StarMagField,StEvent",""            ,"libGeom,StSsdUtil","Load SSD Util",kFALSE},
@@ -667,11 +663,13 @@ Bfc_st BFC[] = { // standard chains
   // BTOF related chains
   //  {"btof"       ,"BTofChain","","btofDat,vpdCalib,btofMatch,btofCalib","StMaker",
   //                                                                           "StChain","BTOF Chain",kFALSE}, 
-
   {"BtofDat"   ,"tof_raw","BTofChain","db,BTofutil","StBTofHitMaker","StEvent,StBTofHitMaker",
                                                                                    "BTOF hit maker",kFALSE},
   {"vpdCalib","","BTofChain","db,BTofUtil","StVpdCalibMaker","StVpdCalibMaker",   "VPD calibration",kFALSE}, 
 
+  // MTD related chains
+  {"MtdDat"   ,"mtd_raw","MtdChain","db,MtdUtil","StMtdHitMaker","StEvent,StMtdHitMaker",
+                                                                                   "MTD hit maker",kFALSE},
 
 
 
