@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.34 2011/02/01 19:47:36 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.35 2011/04/27 22:28:56 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.35  2011/04/27 22:28:56  ullrich
+ * Add MTD.
+ *
  * Revision 2.34  2011/02/01 19:47:36  ullrich
  * Added HLT branch and hooks.
  *
@@ -161,6 +164,10 @@
 #include "StHltTriggerReason.h"
 #include "StHltTriggerReasonCapable.h"
 #include "StHltVpdHit.h"
+#include "StMtdCollection.h"
+#include "StMtdHit.h"
+#include "StMtdRawHit.h"
+#include "StMtdHeader.h"
 #include "StKinkVertex.h"
 #include "StL0Trigger.h"
 #include "StL1Trigger.h"

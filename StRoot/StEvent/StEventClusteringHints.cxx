@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.26 2011/02/01 19:47:36 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.27 2011/04/27 22:28:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.27  2011/04/27 22:28:46  ullrich
+ * Add MTD.
+ *
  * Revision 2.26  2011/02/01 19:47:36  ullrich
  * Added HLT branch and hooks.
  *
@@ -92,7 +95,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.26 2011/02/01 19:47:36 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.27 2011/04/27 22:28:46 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -133,6 +136,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StRichCollection",            "evt_aux",      7);
     setBranch("StTofCollection",             "evt_aux",      7);
     setBranch("StBTofCollection",            "evt_aux",      7);
+    setBranch("StMtdCollection",             "evt_aux",      7);
     setBranch("StFpdCollection",             "evt_aux",      7);
     setBranch("StPhmdCollection",            "evt_aux",      7);
     setBranch("StRpsCollection",             "evt_aux",      7);
@@ -154,6 +158,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StRichCollection",            "event", 1);
     setBranch("StTofCollection",             "event", 1);
     setBranch("StBTofCollection",            "event", 1);
+    setBranch("StMtdCollection",             "event", 1);
     setBranch("StFpdCollection",             "event", 1);
     setBranch("StRpsCollection",             "event", 1);
     setBranch("StSsdHitCollection",          "event", 1);
