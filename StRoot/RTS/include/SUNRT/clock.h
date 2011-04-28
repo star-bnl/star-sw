@@ -4,7 +4,9 @@
 #include <unistd.h>
 
 #ifdef __linux__
+#ifndef linux
 #define linux
+#endif
 #endif
 
 #ifdef linux
