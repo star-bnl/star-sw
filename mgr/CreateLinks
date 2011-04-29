@@ -89,26 +89,30 @@ endif
 #
 # Scientific Linux
 #
-if ( -e .sl53_gcc432 ) then
-    if ( ! -e .sl55_gcc432 ) then
-	echo "Backward compatibility assumed between SL55 -> SL53 / 32 bits"
-	/bin/ln -s .sl53_gcc432 .sl55_gcc432
+foreach arch ( _ _x8664_ )
+    set refos="sl53"$arch"gcc432"
+    echo "Checking possible backward compatibility through refos $refos"
+    if ( -e .$refos || -e $refos ) then
+	foreach ospf ( sl rh )
+	    foreach vers ( 55 56 )
+		set dir=$ospf$vers$arch"gcc432"
+		if ( ! -e .$dir && -e .$refos ) then
+		    echo "  Backward compatibility assumed between $ospf$vers -> SL53 / 32 bits"
+		    /bin/ln -s .$refos .$dir
+		else
+		    if ( -e .$refos && -e .$dir ) echo " .$dir exists"
+		endif
+		if ( ! -e $dir && -e $refos ) then
+		    echo "Backward compatibility assumed between $ospf$vers -> SL53 / 32 bits"
+		    /bin/ln -s $refos $dir
+		else
+		    if ( -e $refos && -e $dir )   echo " $dir exists"
+		endif
+	    end
+	end
     endif
-    if ( ! -e .rh55_gcc432 ) then
-	echo "Backward compatibility assumed between RH55 -> SL53 / 32 bits"
-	/bin/ln -s .sl53_gcc432 .rh55_gcc432
-    endif
-endif
-if ( -e .sl53_x8664_gcc432 ) then
-    if ( ! -e .sl55_x8664_gcc432 ) then
-	echo "Backward compatibility assumed between SL55 -> SL53 / 64 bits"
-	/bin/ln -s .sl53_x8664_gcc432 .sl55_x8664_gcc432
-    endif
-    if ( ! -e .rh55_x8664_gcc432 ) then
-	echo "Backward compatibility assumed between RH55 -> SL53 / 64 bits"
-	/bin/ln -s .sl53_x8664_gcc432 .rh55_x8664_gcc432
-    endif
-endif
+end
+
 
 # <--- started to be more complicated with 32 bits and 64 bits
 
