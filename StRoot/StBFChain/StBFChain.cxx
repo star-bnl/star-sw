@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.580 2011/04/21 22:37:43 genevb Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.581 2011/04/29 22:38:48 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -138,6 +138,7 @@ Int_t StBFChain::Load()
 	  TString libL("");
 	  for (Int_t j = 0; j < 3; j++) {
 	    libL = prefix[j]; libL += libN;
+	    //LOG_QA  << "    Checking " << libL << endm;
 	    if ((path = gSystem->DynamicPathName(libL,kTRUE))) break;
 	  }
 	  iok = -1;
@@ -146,14 +147,20 @@ Int_t StBFChain::Load()
 	    TObjString *LoadedLib;
 	    while ((LoadedLib = (TObjString *) next())){
 	      TString Base(LoadedLib->GetName());
+	      //LOG_QA  << "    Checking " << Base << endm;
 	      if (Base == libN) {iok = 1; break;}
 	    }
 	    if (iok > 0) continue;
+
+
+	    //LOG_QA  << "Trying to load Library " << libL << endm;
+
+
 	    iok = gSystem->Load(libL);
 	    if (iok < 0)  {
 
-         LOG_QA  << "problem with loading of " << libL.Data() << endm;
-         LOG_QA  <<  fBFC[i].Key << " is switched off \t!!!!" << endm;
+	      LOG_QA  << "problem with loading of " << libL.Data() << endm;
+	      LOG_QA  <<  fBFC[i].Key << " is switched off \t!!!!" << endm;
 
 	      fBFC[i].Flag = kFALSE;
 	      status = kStErr;
@@ -162,9 +169,14 @@ Int_t StBFChain::Load()
 	    } else {
 	      if (Debug() > 1) {  TString ts("load "); ts += libL; StMemStat::PrintMem(ts.Data());}
 
-         LOG_QA  << "Library " << Form("%-20s\t(%s)\tis loaded",libL.Data(),path) << endm;
+	      LOG_QA  << "Library " << Form("%-20s\t(%s)\tis loaded",libL.Data(),path) << endm;
 
 	      LoadedLibs.Add(new TObjString(libN));
+	    }
+	  } else {
+	    if ( ! index(fBFC[i].Libs,',') || Debug() > 1 ) {
+	      LOG_WARN << "No path for Key=" << fBFC[i].Key << "-> Searched for [" << libL 
+		       << "] from Libs=" << fBFC[i].Libs << " (will proceed)" << endm;
 	    }
 	  }
 	}
