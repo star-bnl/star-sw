@@ -45,7 +45,11 @@ class AvalancheMC {
     // For avalanches the flag is ignored
     void EnableAttachment()  {useAttachment = true;}
     void DisableAttachment() {useAttachment = false;}
-    
+   
+    // Enable/disable magnetic field in stepping algorithm.
+    void EnableMagneticField()  {useBfield = true;}
+    void DisableMagneticField() {useBfield = false;}
+ 
     // Stepping model
     // Fixed time step (default 20 ps)
     void SetTimeSteps(const double d = 0.02);
@@ -168,6 +172,7 @@ class AvalancheMC {
     bool useEquilibration;
     bool useDiffusion;
     bool useAttachment;
+    bool useBfield;
     bool useIons;
     bool withElectrons;
     bool withHoles;

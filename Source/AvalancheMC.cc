@@ -21,7 +21,7 @@ AvalancheMC::AvalancheMC() :
   nEndpointsElectrons(0), nEndpointsHoles(0), nEndpointsIons(0),
   usePlotting(false), viewer(0), 
   useSignal(false), useInducedCharge(false), useEquilibration(true), 
-  useDiffusion(true), useAttachment(true), useIons(true), 
+  useDiffusion(true), useAttachment(true), useBfield(false), useIons(true), 
   withElectrons(true), withHoles(true),
   debug(false) {
   
@@ -317,7 +317,9 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   Medium* medium = 0;
   // Electric field
   int status = 0;  
-  double ex = 0., ey = 0., ez = 0.;  
+  double ex = 0., ey = 0., ez = 0.;
+  // Magnetic field
+  double bx = 0., by = 0., bz = 0.; 
   // Drift velocity
   double vx = 0., vy = 0., vz = 0., v = 0., vt = 0.;
   // Longitudinal and transverse diffusion coefficients
@@ -363,26 +365,31 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
 
   double e = Max(sqrt(ex * ex + ey * ey + ez * ez), Small);
 
+  if (useBfield) {
+    sensor->MagneticField(x, y, z, bx, by, bz, status);
+    bx *= Tesla2Internal; by *= Tesla2Internal; bz *= Tesla2Internal;
+  }
+
   while (ok) {
   
     // Compute the drift velocity and the diffusion coefficients.
     if (q < 0) {
-      if (!medium->ElectronVelocity(ex, ey, ez, 0., 0., 0., vx, vy, vz) || 
-          !medium->ElectronDiffusion(ex, ey, ez, 0., 0., 0., dl, dt)) {
+      if (!medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz) || 
+          !medium->ElectronDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
         ok = false;
         abortReason = StatusCalculationAbandoned;
         break;
       }
     } else if (q == 1) {
-      if (!medium->HoleVelocity(ex, ey, ez, 0., 0., 0., vx, vy, vz) || 
-          !medium->HoleDiffusion(ex, ey, ez, 0., 0., 0., dl, dt)) {
+      if (!medium->HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz) || 
+          !medium->HoleDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
         ok = false;
         abortReason = StatusCalculationAbandoned;
         break;
       }
     } else if (q == 2) {
-      if (!medium->IonVelocity(ex, ey, ez, 0., 0., 0., vx, vy, vz) ||
-          !medium->IonDiffusion(ex, ey, ez, 0., 0., 0., dl, dt)) {
+      if (!medium->IonVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz) ||
+          !medium->IonDiffusion(ex, ey, ez, bx, by, bz, dl, dt)) {
         ok = false;
         abortReason = StatusCalculationAbandoned;
         break;
@@ -546,6 +553,11 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
     point.x = x; point.y = y; point.z = z; point.t += delta;
     drift.push_back(point);
     ++nDrift;
+ 
+    if (useBfield) {
+      sensor->MagneticField(x, y, z, bx, by, bz, status);
+      bx *= Tesla2Internal; by *= Tesla2Internal; bz *= Tesla2Internal;
+    } 
 
   }
   
@@ -912,6 +924,8 @@ AvalancheMC::ComputeAlphaEta(const int q) {
   double x, y, z;
   // Electric field
   double ex = 0., ey = 0., ez = 0.;
+  // Magnetic field
+  double bx = 0., by = 0., bz = 0.; 
   // Drift velocity
   double vx = 0., vy = 0., vz = 0.;
   // Townsend and attachment coefficient
@@ -955,14 +969,18 @@ AvalancheMC::ComputeAlphaEta(const int q) {
         }
         continue;
       }
+      if (useBfield) {
+        sensor->MagneticField(x, y, z, bx, by, bz, status);
+        bx *= Tesla2Internal; by *= Tesla2Internal; bz *= Tesla2Internal;
+      }
       if (q < 0) {
-        medium->ElectronVelocity(ex, ey, ez, 0., 0., 0., vx, vy, vz);
-        medium->ElectronTownsend(ex, ey, ez, 0., 0., 0., alpha);
-        medium->ElectronAttachment(ex, ey, ez, 0., 0., 0., eta);
+        medium->ElectronVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
+        medium->ElectronTownsend(ex, ey, ez, bx, by, bz, alpha);
+        medium->ElectronAttachment(ex, ey, ez, bx, by, bz, eta);
       } else {
-        medium->HoleVelocity(ex, ey, ez, 0., 0., 0., vx, vy, vz);
-        medium->HoleTownsend(ex, ey, ez, 0., 0., 0., alpha);
-        medium->HoleAttachment(ex, ey, ez, 0., 0., 0., eta);
+        medium->HoleVelocity(ex, ey, ez, bx, by, bz, vx, vy, vz);
+        medium->HoleTownsend(ex, ey, ez, bx, by, bz, alpha);
+        medium->HoleAttachment(ex, ey, ez, bx, by, bz, eta);
       }
       vdx += wg[j] * vx; vdy += wg[j] * vy; vdz += wg[j] * vz;
       drift[i].alpha += wg[j] * alpha;

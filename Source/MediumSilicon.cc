@@ -250,14 +250,27 @@ MediumSilicon::ElectronVelocity(
   }
   mu = -mu;
 
-  // Hall mobility
-  const double muH = eHallFactor * mu;
-  // Compute drift velocity using the Langevin equation
-  const double c1 = mu / (1. + muH * muH * (bx * bx + by * by + bz * bz));
-  const double c2 = muH * muH * (bx * ex + by * ey + bz * ez);
-  vx = c1 * (ex + muH * (ey * bz - ez * by) + c2 * bx);
-  vy = c1 * (ey + muH * (ez * bx - ex * bz) + c2 * by);
-  vz = c1 * (ez + muH * (ex * by - ey * bx) + c2 * bz);
+  const double b = sqrt(bx * bx + by * by + bz * bz);
+  if (b < Small) {
+    vx = mu * ex;
+    vy = mu * ey;
+    vz = mu * ez;
+  } else {
+    // Hall mobility
+    const double muH = eHallFactor * mu;
+    const double eb = bx * ex + by * ey + bz * ez;
+    const double nom = 1. + pow(muH * b, 2);
+    // Compute the drift velocity using the Langevin equation.
+    vx = mu * (ex + 
+               muH * (ey * bz - ez * by) + 
+               muH * muH * bx * eb) / nom;
+    vy = mu * (ey + 
+               muH * (ez * bx - ex * bz) + 
+               muH * muH * by * eb) / nom;
+    vz = mu * (ez +
+               muH * (ex * by - ey * bx) +
+               muH * muH * bz * eb) / nom;
+  }
   return true;
 
 }
@@ -382,14 +395,27 @@ MediumSilicon::HoleVelocity(
       mu = hMobility;
   }
 
-  // Hall mobility
-  const double muH = hHallFactor * mu;
-  // Compute drift velocity using the Langevin equation.
-  const double c1 = mu / (1. + muH * muH * (bx * bx + by * by + bz * bz));
-  const double c2 = muH * muH * (bx * ex + by * ey + bz * ez);
-  vx = c1 * (ex + muH * (ey * bz - ez * by) + c2 * bx);
-  vy = c1 * (ey + muH * (ez * bx - ex * bz) + c2 * by);
-  vz = c1 * (ez + muH * (ex * by - ey * bx) + c2 * bz);
+  const double b = sqrt(bx * bx + by * by + bz * bz);
+  if (b < Small) {
+    vx = mu * ex;
+    vy = mu * ey;
+    vz = mu * ez;
+  } else {
+    // Hall mobility
+    const double muH = hHallFactor * mu;
+    const double eb = bx * ex + by * ey + bz * ez;
+    const double nom = 1. + pow(muH * b, 2);
+    // Compute the drift velocity using the Langevin equation.
+    vx = mu * (ex + 
+               muH * (ey * bz - ez * by) + 
+               muH * muH * bx * eb) / nom;
+    vy = mu * (ey + 
+               muH * (ez * bx - ex * bz) + 
+               muH * muH * by * eb) / nom;
+    vz = mu * (ez +
+               muH * (ex * by - ey * bx) +
+               muH * muH * bz * eb) / nom;
+  }
   return true;
 
 }

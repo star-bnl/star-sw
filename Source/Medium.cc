@@ -1323,6 +1323,7 @@ Medium::IonVelocity(const double ex, const double ey, const double ez,
                mu * (ez * bx - ex * bz) +
                mu * mu * by * eb) / nom;
     vz = mu * (ez +
+               mu * (ex * by - ey * bx) +
                mu * mu * bz * eb) / nom;
   }
   
