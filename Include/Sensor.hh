@@ -79,10 +79,8 @@ class Sensor {
       tstart = tStart; tstep = tStep; nsteps = nTimeBins;
     }
     double GetSignal(const std::string label, const int bin);
-    // Begin Schutsch
-    double GetElectronSignal(const  std::string label, const int bin);
+    double GetElectronSignal(const std::string label, const int bin);
     double GetIonSignal(const std::string label, const int bin);
-    // End Schutsch
     double GetInducedCharge(const std::string label);
     void SetTransferFunction(double (*f)(double t));
     bool ConvoluteSignal();
@@ -116,10 +114,8 @@ class Sensor {
       ComponentBase* comp;
       std::string label;
       std::vector<double> signal;
-      // Begin Schutsch
       std::vector<double> electronsignal;
       std::vector<double> ionsignal;
-      // End Schutsch
       double charge;
     };
     std::vector<electrode> electrodes;

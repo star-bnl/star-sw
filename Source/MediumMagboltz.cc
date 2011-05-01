@@ -521,9 +521,9 @@ MediumMagboltz::GetElectronNullCollisionRate(const int band) {
     isChanged = false;
   }
  
-  if (debug && band != 0) {
+  if (debug && band > 0) {
     std::cerr << className << "::GetElectronNullCollisionRate:\n";
-    std::cerr << "    Band index out of range.\n";
+    std::cerr << "    Warning: unexpected band index.\n";
   }
  
   return cfNull;
@@ -560,7 +560,7 @@ MediumMagboltz::GetElectronCollisionRate(const double e, const int band) {
 
   if (debug && band > 0) {
     std::cerr << className << "::GetElectronCollisionRate:\n";
-    std::cerr << "    This medium does not have a band structure.\n";
+    std::cerr << "    Warning: unexpected band index.\n";
   }
 
   // Get the energy interval.
@@ -609,9 +609,9 @@ MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
     isChanged = false;
   }
 
-  if (debug && band != 0) {
+  if (debug && band > 0) {
     std::cerr << className << "::GetElectronCollision:\n";
-    std::cerr << "    This medium does not have a band structure.\n";
+    std::cerr << "    Warning: unexpected band index.\n";
   }
 
   double angCut = 1.;

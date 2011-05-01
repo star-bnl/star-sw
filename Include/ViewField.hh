@@ -39,8 +39,8 @@ class ViewField {
     // Rotate the viewing plane
     void Rotate(double angle);
 
-    void PlotContour();
-    void PlotSurface();
+    void PlotContour(const std::string option = "v");
+    void PlotSurface(const std::string option = "v");
     void PlotProfile(const double x0, const double y0, const double z0,
                      const double x1, const double y1, const double z1,
                      const std::string option = "v"); 

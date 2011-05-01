@@ -169,7 +169,7 @@ ViewField::SetNumberOfSamples2d(const int nx, const int ny) {
 }
 
 void 
-ViewField::PlotContour() {
+ViewField::PlotContour(const std::string option) {
 
   // Setup the canvas
   if (canvas == 0) {
@@ -182,7 +182,30 @@ ViewField::PlotContour() {
 
   if (fPot == 0) CreateFunction();
 
-  fPot->SetRange(pxmin, pymin, pxmax, pymax);
+  int plotType = 0;
+  if (option == "v" || option == "p" || option == "phi" || 
+      option == "volt" || option == "voltage" || 
+      option == "pot" || option == "potential") {
+    fPot->SetParameter(0, -1.);
+    fPot->SetRange(pxmin, pymin, pxmax, pymax);
+  } else if (option == "e" || option == "field") {
+    fPot->SetParameter(0,  1.);
+    plotType = 1;
+  } else if (option == "ex") {
+    fPot->SetParameter(0, 11.);
+    plotType = 2;
+  } else if (option == "ey") {
+    fPot->SetParameter(0, 21.);
+    plotType = 3;
+  } else if (option == "ez") {
+    fPot->SetParameter(0, 31.);
+    plotType = 4;
+  } else {
+    std::cerr << className << "::PlotSurface:\n";
+    std::cerr << "    Unknown option (" << option << ")\n";
+    std::cerr << "    Plotting the potential.\n";
+    fPot->SetParameter(0, -1.);
+  }
 
   double level[nMaxContours];
   for (int i = 0; i < nContours; ++i) {
@@ -205,14 +228,24 @@ ViewField::PlotContour() {
   fPot->SetNpy(nSamples2dY);
   fPot->GetXaxis()->SetTitle(xLabel);
   fPot->GetYaxis()->SetTitle(yLabel);
-  fPot->SetTitle("Contours of the potential");
+  if (plotType == 0) {
+    fPot->SetTitle("Contours of the potential");
+  } else if (plotType == 1) {
+    fPot->SetTitle("Contours of the electric field");
+  } else if (plotType == 2) {
+    fPot->SetTitle("Contours of the electric field (x-component)");
+  } else if (plotType == 3) {
+    fPot->SetTitle("Contours of the electric field (y-component)");
+  } else if (plotType == 4) {
+    fPot->SetTitle("Contours of the electric field (z-component)");
+  }
   fPot->Draw("CONT4Z");
   canvas->Update();
 
 }
 
 void 
-ViewField::PlotSurface() {
+ViewField::PlotSurface(const std::string option) {
 
   // Setup the canvas
   if (canvas == 0) {
@@ -225,12 +258,45 @@ ViewField::PlotSurface() {
   
   if (fPot == 0) CreateFunction();
 
-  fPot->SetRange(pxmin, pymin, pxmax, pymax);
+  int plotType = 0;
+  if (option == "v" || option == "p" || option == "phi" || 
+      option == "volt" || option == "voltage" || 
+      option == "pot" || option == "potential") {
+    fPot->SetParameter(0, -1.);
+    fPot->SetRange(pxmin, pymin, pxmax, pymax);
+  } else if (option == "e" || option == "field") {
+    fPot->SetParameter(0,  1.);
+    plotType = 1;
+  } else if (option == "ex") {
+    fPot->SetParameter(0, 11.);
+    plotType = 2;
+  } else if (option == "ey") {
+    fPot->SetParameter(0, 21.);
+    plotType = 3;
+  } else if (option == "ez") {
+    fPot->SetParameter(0, 31.);
+    plotType = 4;
+  } else {
+    std::cerr << className << "::PlotSurface:\n";
+    std::cerr << "    Unknown option (" << option << ")\n";
+    std::cerr << "    Plotting the potential.\n";
+    fPot->SetParameter(0, -1.);
+  }
   fPot->SetNpx(nSamples2dX); 
   fPot->SetNpy(nSamples2dY);
   fPot->GetXaxis()->SetTitle(xLabel);
   fPot->GetYaxis()->SetTitle(yLabel);
-  fPot->SetTitle("Surface plot of the potential");
+  if (plotType == 0) {
+    fPot->SetTitle("Surface plot of the potential");
+  } else if (plotType == 1) {
+    fPotProfile->SetTitle("Surface plot of the electric field");
+  } else if (plotType == 2) {
+    fPotProfile->SetTitle("Surface plot of the electric field (x-component)");
+  } else if (plotType == 3) {
+    fPotProfile->SetTitle("Surface plot of the electric field (y-component)");
+  } else if (plotType == 4) {
+    fPotProfile->SetTitle("Surface plot of the electric field (z-component)");
+  }
   fPot->Draw("SURF4");
   canvas->Update();
 
@@ -303,17 +369,21 @@ ViewField::PlotProfile(const double x0, const double y0, const double z0,
                          << fPotProfile->GetParameter(5) << ")\n";
   }
   fPotProfile->GetXaxis()->SetTitle("normalised distance");
-  fPotProfile->GetYaxis()->SetTitle("potential [V]");
   if (plotType == 0) {
     fPotProfile->SetTitle("Profile plot of the potential");
+    fPotProfile->GetYaxis()->SetTitle("potential [V]");
   } else if (plotType == 1) {
     fPotProfile->SetTitle("Profile plot of the electric field");
+    fPotProfile->GetYaxis()->SetTitle("field [V/cm]");
   } else if (plotType == 2) {
     fPotProfile->SetTitle("Profile plot of the electric field (x-component)");
+    fPotProfile->GetYaxis()->SetTitle("field [V/cm]");
   } else if (plotType == 3) {
     fPotProfile->SetTitle("Profile plot of the electric field (y-component)");
+    fPotProfile->GetYaxis()->SetTitle("field [V/cm]");
   } else if (plotType == 4) {
     fPotProfile->SetTitle("Profile plot of the electric field (z-component)");
+    fPotProfile->GetYaxis()->SetTitle("field [V/cm]");
   }
   fPotProfile->SetNpx(nSamples1d);
   fPotProfile->Draw();
@@ -335,7 +405,7 @@ ViewField::CreateFunction() {
   }
 
   fPot = new TF2(fname.c_str(), this, &ViewField::EvaluatePotential, 
-                 pxmin, pxmax, pymin, pymax, 0, 
+                 pxmin, pxmax, pymin, pymax, 1, 
                  "ViewField", "EvaluatePotential");
  
 }
@@ -413,8 +483,18 @@ ViewField::EvaluatePotential(double* pos, double* par) {
               << volt << ", status = " << status << "\n";
   }
  
-  if (useStatus && status != 0) volt = vBkg;
+  if (useStatus && status != 0) return vBkg;
  
+  // Select the quantity to be plotted.
+  if (par[0] > 30.) {
+    return ez;
+  } else if (par[0] > 20.) {
+    return ey;
+  } else if (par[0] > 10.) {
+    return ex;
+  } else if (par[0] > 0.) {
+    return sqrt(ex * ex + ey * ey + ez * ez);
+  }
   // Return the potential.
   return volt;
     

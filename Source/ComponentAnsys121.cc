@@ -563,9 +563,10 @@ ComponentAnsys121::SetWeightingField(std::string prnsol, std::string label) {
 }
 
 void 
-ComponentAnsys121::ElectricField(const double x, const double y, const double z,
-                                 double& ex, double& ey, double& ez, 
-                                 Medium*& m, int& status) {
+ComponentAnsys121::ElectricField(
+                    const double x, const double y, const double z,
+                    double& ex, double& ey, double& ez, 
+                    Medium*& m, int& status) {
                                  
   double v;
   ElectricField(x, y, z, ex, ey, ez, v, m, status);

@@ -37,6 +37,8 @@ class ComponentTcad2d : public ComponentBase {
     bool Initialise(const std::string gridfilename, 
                     const std::string datafilename);
 
+    // List all currently defined regions.
+    void PrintRegions();
     // Get the number of regions in the device.
     int  GetNumberOfRegions() const {return nRegions;}
     void GetRegion(const int i, std::string& name, bool& active);
@@ -49,6 +51,13 @@ class ComponentTcad2d : public ComponentBase {
     int GetNumberOfElements() const {return nElements;}
     bool GetElement(const int i, double& vol, 
                     double& dmin, double& dmax, int& type);
+    bool GetElement(const int i, double& vol,
+                    double& dmin, double& dmax, int& type,
+                    int& node1, int& node2, int& node3, int& node4,
+                    int& reg);
+    int GetNumberOfNodes() const {return nVertices;}
+    bool GetNode(const int i, double&x, double& y, 
+                 double& v, double& ex, double& ey);
 
   private:
 

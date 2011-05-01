@@ -677,7 +677,7 @@ Medium::GetElectronEnergy(const double px, const double py, const double pz,
                           double& vx, double& vy, double& vz, 
                           const int band) {
 
-  if (band != 0) {
+  if (band > 0) {
     std::cerr << className << "::GetElectronEnergy:\n";
     std::cerr << "    Unknown band index.\n";
   }
@@ -704,7 +704,7 @@ Medium::GetElectronMomentum(const double e,
   py = p * stheta * sin(phi);
   pz = p * ctheta;
  
-  band = 0;
+  band = -1;
  
 }
 
