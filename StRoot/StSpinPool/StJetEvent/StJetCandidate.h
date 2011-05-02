@@ -43,6 +43,7 @@ public:
   float py () const { return momentum().Py(); }
   float pz () const { return momentum().Pz(); }
   float detEta() const { return mDetEta; }
+  float detEta(const TVector3& vertex) const;
   float sumTrackPt() const;
   float sumTowerPt() const;
   float sumPt() const { return sumTrackPt() + sumTowerPt(); }
