@@ -385,12 +385,12 @@ class ComponentAnalyticField : public ComponentBase {
                         double& ex, double& ey, const int iplane);
     void WfieldPlaneD30(const double xpos, const double ypos,
                         double& ex, double& ey, const int iplane);
-    void WfieldStripXy(const double xpos, const double ypos,
-                       double& ex, double& ey,
-                       const int ip, const int is);
-    void WfieldStripZ(const double xpos, const double ypos, const double zpos,
-                      double& ex, double& ey, double& ez,
+    void WfieldStripZ(const double xpos, const double ypos,
+                      double& ex, double& ey,
                       const int ip, const int is);
+    void WfieldStripXy(const double xpos, const double ypos, const double zpos,
+                       double& ex, double& ey, double& ez,
+                       const int ip, const int is);
 
     // Auxiliary functions for C type cells
     double Ph2(const double xpos, const double ypos);

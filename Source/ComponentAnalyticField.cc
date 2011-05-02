@@ -1938,9 +1938,24 @@ ComponentAnalyticField::AddReadout(const char label) {
   } else {
     std::cout << className << "::AddReadout:\n";
     std::cout << "    Readout group " << label << " comprises:\n";
-    std::cout << "    " << nWiresFound << " wires\n";
-    std::cout << "    " << nPlanesFound << " planes\n";
-    std::cout << "    " << nStripsFound << " strips\n";
+    std::cout << "    " << nWiresFound;
+    if (nWiresFound > 1) {
+      std::cout << " wires\n";
+    } else {
+      std::cout << " wire\n";
+    } 
+    std::cout << "    " << nPlanesFound;
+    if (nPlanesFound > 1) {
+      std::cout << " planes\n";
+    } else {
+      std::cout << " plane\n";
+    }
+    std::cout << "    " << nStripsFound;
+    if (nStripsFound > 1) {
+      std::cout << " strips\n";
+    } else {
+      std::cout << " strip\n";
+    }
   }
   
   sigset = false;
@@ -5510,17 +5525,17 @@ ComponentAnalyticField::Wfield(
   for (int ip = 0; ip < 5; ++ip) {
     for (int istrip = 0; istrip < planes[ip].nStrips1; ++istrip) {
       if (planes[ip].strips1[istrip].ind == isw) {
-        WfieldStripXy(xpos, ypos, ex, ey, ip, istrip);
+        WfieldStripXy(xpos, ypos, zpos, ex, ey, ez, ip, istrip);
         exsum += ex;
         eysum += ey;
+        ezsum += ez;
       }
     }
     for (int istrip = 0; istrip < planes[ip].nStrips2; ++istrip) {
       if (planes[ip].strips2[istrip].ind == isw) {
-        WfieldStripZ(xpos, ypos, zpos, ex, ey, ez, ip, istrip);
+        WfieldStripZ(xpos, ypos, ex, ey, ip, istrip);
         exsum += ex;
         eysum += ey;
-        ezsum += ez;
       }
     }
   }
@@ -6476,7 +6491,7 @@ ComponentAnalyticField::WfieldPlaneD30(const double xpos, const double ypos,
 
 
 void
-ComponentAnalyticField::WfieldStripXy(
+ComponentAnalyticField::WfieldStripZ(
       const double xpos, const double ypos,
       double& ex, double& ey, 
       const int ip, const int is) {
@@ -6489,7 +6504,7 @@ ComponentAnalyticField::WfieldStripXy(
   // Initialise weighting field.
   ex = ey = 0.;
   
-  strip theStrip = planes[ip].strips1[is];
+  strip theStrip = planes[ip].strips2[is];
   // Transform to normalised coordinates.
   double xw = 0., yw = 0.;
   switch (ip) {
@@ -6555,7 +6570,7 @@ ComponentAnalyticField::WfieldStripXy(
 }
 
 void
-ComponentAnalyticField::WfieldStripZ(
+ComponentAnalyticField::WfieldStripXy(
       const double xpos, const double ypos, const double zpos,
       double& ex, double& ey, double& ez, 
       const int ip, const int is) {
@@ -6568,7 +6583,7 @@ ComponentAnalyticField::WfieldStripZ(
   // Initialise weighting field.
   ex = ey = ez = 0.;
 
-  strip theStrip = planes[ip].strips2[is];
+  strip theStrip = planes[ip].strips1[is];
   // Transform to normalised coordinates.
   double xw = 0., yw = 0.;
   switch (ip) {
