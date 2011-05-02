@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.226 2011/04/25 18:27:00 jwebb Exp $
+* $Id: geometry.g,v 1.227 2011/05/02 20:22:16 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.227  2011/05/02 20:22:16  jwebb
+* Added code to pass configuration of the MTD to the mutdgeo4 module.
+*
 * Revision 1.226  2011/04/25 18:27:00  jwebb
 * Added Y2008e tag, which implements the LOW_EM central calorimeter cuts in
 * the y2008 geometry.
@@ -1791,7 +1794,7 @@ REPLACE [exe upgr2012;] with ["y2012 FGT upgrade studies";
     exe SVTTof;      "No SVT";
     exe PHMD02;      "Photon mult detector on";
     exe SISDof;      "No sisd";
-    exe MUTD04;      "Muon telescope detector";
+    exe MUTD05;      "Muon telescope detector";
     exe CAVE04;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
 ]
@@ -4138,11 +4141,13 @@ c    write(*,*) 'FPDM'
 
 
    if (MUTD) {
+     Call AgDetp NEW ('MUTD')
      if (MutdConfig==1) Call mutdgeo;
      if (MutdConfig==2) Call mutdgeo2;
      if (MutdConfig==3) Call mutdgeo3;
      if (MutdConfig==4 | MutdConfig==5) 
      { 
+         Call AgDetp ADD( 'MTDG.config=', MutdConfig, 1);   
          Call mutdgeo4;
      } 
    }
