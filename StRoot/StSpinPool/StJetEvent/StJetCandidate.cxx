@@ -16,13 +16,18 @@ StJetCandidate::StJetCandidate(const TVector3& vertex, const TLorentzVector& fou
   , mPhi(fourMomentum.Phi())
   , mE(fourMomentum.E())
 {
+  mDetEta = detEta(vertex);
+}
+
+float StJetCandidate::detEta(const TVector3& vertex) const
+{
   // Front plate of BEMC towers or BPRS layer (See StEmcGeom/geometry/StEmcGeom.cxx)
   // This only works for BEMC jets.
   static const double BEMC_RADIUS = 225.405;
   TVector3 pos = momentum();
   pos.SetMag(BEMC_RADIUS/pos.Unit().Perp());
   pos += vertex;
-  mDetEta = pos.Eta();
+  return pos.Eta();
 }
 
 StJetTrack* StJetCandidate::leadingChargedParticle() const
