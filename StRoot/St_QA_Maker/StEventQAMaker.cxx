@@ -386,7 +386,7 @@ void StEventQAMaker::MakeHistGlob() {
   if (Debug()) 
     gMessMgr->Info(" *** in StEventQAMaker - filling global track histograms ");
   
-  if (vertExists <= 0) return;
+  if (!allTrigs && vertExists <= 0) return;
 
   StSPtrVecTrackNode &theNodes = event->trackNodes();
   StThreeVectorF pvert;
@@ -471,7 +471,7 @@ void StEventQAMaker::MakeHistGlob() {
       
       Float_t logImpact = TMath::Log10(1e-30+globtrk->impactParameter());
 
-      Float_t sImpact = dcahx.geometricSignedDistance(pvert.x(),pvert.y());
+      Float_t sImpact = (primVtx ? dcahx.geometricSignedDistance(pvert.x(),pvert.y()) : -999);
       Float_t logCurvature = TMath::Log10(1e-30+geom->curvature());
       
       // pathLength(double x,double y) should return path length at
@@ -660,7 +660,7 @@ void StEventQAMaker::MakeHistGlob() {
       else if (silHists && (map.hasHitInDetector(kSvtId) || map.hasHitInDetector(kSsdId))) {
 
         if (map.hasHitInDetector(kSsdId)) {
-          if (TMath::Abs(pvert.z())<10 && TMath::Abs(eta)<1 && 
+          if (primVtx && TMath::Abs(pvert.z())<10 && TMath::Abs(eta)<1 && 
               map.numberOfHits(kTpcId)>15) {
             StPtrVecHit ssd_hits = detInfo->hits(kSsdId);
             Float_t sphi = ssd_hits[0]->position().phi()/degree;
@@ -932,7 +932,7 @@ void StEventQAMaker::MakeHistPrim() {
   if (Debug()) 
     gMessMgr->Info(" *** in StEventQAMaker - filling primary track histograms ");
   
-  if (vertExists <= 0) return;
+  if (!allTrigs && vertExists <= 0) return;
 
   Int_t cnttrk=0;
   Int_t cnttrkg=0;
@@ -1495,7 +1495,7 @@ void StEventQAMaker::MakeHistVertex() {
   if (Debug()) 
     gMessMgr->Info(" *** in StEventQAMaker - filling vertex histograms ");
   
-  if (vertExists <= 0) return;
+  if (!allTrigs && vertExists <= 0) return;
 
   Float_t m_prmass2 = (proton_mass_c2*proton_mass_c2);
   Float_t m_pimass2 = (pion_minus_mass_c2*pion_minus_mass_c2);
@@ -2383,8 +2383,11 @@ Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.100 2011/04/14 15:31:11 perev Exp $
+// $Id: StEventQAMaker.cxx,v 2.101 2011/05/02 02:26:47 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.101  2011/05/02 02:26:47  genevb
+// QAallTrigs should allow even questionable events
+//
 // Revision 2.100  2011/04/14 15:31:11  perev
 // 1/0 fix
 //
