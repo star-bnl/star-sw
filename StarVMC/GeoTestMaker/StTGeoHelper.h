@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.12 2011/04/01 19:11:56 perev Exp $
+// $Id: StTGeoHelper.h,v 1.13 2011/05/04 17:45:14 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -232,6 +232,7 @@ const   char  *GetPath() const;
 const TGeoVolume *GetModu() const;
 const TGeoVolume *GetVolu() const;
 StVoidArr     *GetSeedHits()         const {return fSeedHits       ;}
+StVoidArr     *GetAllHits()          const {return fAllHits        ;}
 StHitPlaneHardMap *GetPlaneHardMap() const {return fHitPlaneHardMap;}
 
 StHitPlaneInfo* IsHitPlane(const TGeoVolume *volu) const;
@@ -263,6 +264,7 @@ TObjArray      *fVoluInfoArr;           // array of all StVoluIinfo
 TObjArray      *fHitPlaneArr;           // array of StHitPlane's
 StHitPlaneHardMap *fHitPlaneHardMap;    // StHitPlane[hardwarePosition]
 StVoidArr      *fSeedHits;              // Vector for hits used in seed finder
+StVoidArr      *fAllHits;               // Vector of all hits, mainly for debug
 StTGeoHitShape *fHitShape;
 char fEnd[1];
 ClassDef(StTGeoHelper,0) //
