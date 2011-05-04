@@ -17,8 +17,8 @@ public:
   StvKalmanTrackFinder(const char *name="KalmanTrackFinder");
    ~StvKalmanTrackFinder(){;}
    int	FindTracks();
-   int	Refit(StvTrack *tk,int idir);
-StvTrack *FindTrack(int idir);
+   int	Refit(int idir);
+   int  FindTrack(int idir);
    int	FindPrimaries(const StvHits &vtxs);
    void	Reset();
    void	Clear(const char *opt="");
@@ -30,6 +30,7 @@ StvTrack *FindTrack(int idir);
 protected:
 char mBeg[1];
 const THelixTrack *mSeedHelx;
+      StvTrack    *mCurrTrak;
 StvDiver *mDive;
 StvHitter *mHitter;
 char mEnd[1];

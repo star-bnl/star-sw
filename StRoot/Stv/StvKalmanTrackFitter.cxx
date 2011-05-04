@@ -9,6 +9,7 @@
 #include "Stv/StvToolkit.h"
 #include "Stv/StvHit.h"
 #include "StvUtil/StvNodePars.h"
+#include "StvUtil/StvDebug.h"
 #include "Stv/StvFitter.h"
 #include "Stv/StvConst.h"
 #include "Stv/StvStl.h"
@@ -34,14 +35,16 @@ void StvKalmanTrackFitter::Clear(const char*)
 int  StvKalmanTrackFitter::Refit(StvTrack *trak,int dir)
 {
 ///	refit or smouthe track, using the previous Kalman.
-///     idir=0 moving from out to in
-///     idir=1 moving from in to out 
+///     dir=0 moving from out to in
+///     dir=1 moving from in to out 
 static int nCall=0; nCall++;
 static const double kBigErrFact = 10;
 
-  StvFitter *fitt = StvFitter::Inst();
-  StvConst  *kons = StvConst::Inst();
+static StvFitter *fitt = StvFitter::Inst();
+static StvConst  *kons = StvConst::Inst();
 
+  StvNode *breakNode = 0;
+  trak->MakeFitTally();
   StvNodeIter it,itBeg,itEnd;
   if (dir) { //fit in ==> out
     itBeg = trak->begin();        itEnd = trak->end();
@@ -49,71 +52,128 @@ static const double kBigErrFact = 10;
     itBeg = trak->end(); --itBeg; itEnd = trak->begin();--itEnd;
   }
 
-  double Xi2[3];
-  StvNode *node,*preNode=0,*begNode=0;
-  int iNode=0,skip=0;
-  for (it=itBeg; it!=itEnd; (dir)? ++it:--it) {
-    node = *it; iNode++; skip=1;
-    do { //pseudo loop
-      if (!begNode && node->GetXi2()<1e5) begNode = node; 
-      if (!begNode) break;
-      if (begNode==node) 	{// 1st node
+
+  double myXi2;
+  StvNode *node=0,*preNode=0;
+  int iNode=0,nFitLeft=0;
+
+  for (it=itBeg; it!=itEnd; (dir)? ++it:--it) {//Main loop
+    preNode=node;
+    assert(!preNode || !preNode->Check());
+    node = *it; iNode++;
+
+enum myCase {kLeft=1,kRite=2,kHit=4};
+    int kase = 0;
+    if (nFitLeft) 						kase|=kLeft;
+    if (node->FitTally()[1-dir]  ) 				kase|=kRite;
+    if (node->GetHit() && (node->GetXi2(1-dir)<1000 || nFitLeft>2))kase|=kHit;
+// kLeft 		= left fits only, no hit
+// kLeft+kHit 		= Left fits only, now hit, 
+// kLeft+kGood 		= Left fits only, now Good Hit, 
+// kRite 		= No left, no hit, rite fits only
+// kLeft+kRite 		= left fits, no hit, rite fits
+// kHit+kRite 		= No left fits, now hit, rite fits
+// kLeft+kRite+kHit 	= Left fits,now hit, rite fits
+// kLeft+kRite+kGood 	= Left fits,now good Hit, Rite fits
+    node->SetXi2(3e33,dir);
+    switch (kase) {// 1st switch, fill prediction
+
+      default: assert(0 && "Wrong Case1");
+
+      case kLeft: 		// Left fits only, no  Hit
+      case kLeft+      kHit: 	// Left fits only, now Hit
+      case kLeft+kRite     : 	// Left fits, no Hit, Rite fits
+      case kLeft+kRite+kHit: 	// Left fits,now Hit, Rite fits
+      {
         node->mPP[dir] = node->mFP[1-dir];
-        node->mPE[dir].Set(node->mFE[1-dir],kBigErrFact);
-        node->mFP[2] = node->mFP[1-dir];
-        node->mFE[2] = node->mFE[1-dir];
-        
-      } else 		{ // normal node
-        skip = 0;
-        node->mPP[dir] = node->mFP[1-dir];
-//????		ONLY FOR dir==1
         StvFitPars delPre = preNode->mFP[dir]-preNode->mPP[1-dir];
-        if (delPre.Check()) 	return 1; 
-        
+        breakNode = (dir)? node:preNode;
+        if (delPre.Check()) { StvDebug::Count("delPre.Check");
+	                      /*trak->CutTail(breakNode);*/ return 1;}
         StvFitPars del    = delPre*preNode->mDer[dir];
-        if (del.Check()) 	return 2; 
+        if (del.Check())    { StvDebug::Count("del.Check");
+	                      /*trak->CutTail(breakNode);*/ return 2;}; 
         node->mPP[dir]+= del;node->mFP[dir]=node->mPP[dir];
-
-        
-//??        node->mPP[dir]+= ((preNode->mFP[dir]-preNode->mPP[1-dir])*node->mDer[dir]);
+//        node->mPP[dir]+= ((preNode->mFP[dir]-preNode->mPP[1-dir])*node->mDer[dir]);
         node->mPE[dir] = preNode->mFE[dir]*node->mDer[dir];
+        node->mPE[dir].SetHz(node->mPP[dir]._hz);
         node->mPE[dir].Add(preNode->mELossData,node->mPP[dir]);
-        node->mFE[dir] = node->mPE[dir];
-        if(node->mFE[dir].Check()) 	return 3; 
+        if(node->mPE[dir].Check()) { StvDebug::Count("mFE[dir].Check");
+	                             /*trak->CutTail(breakNode);*/ return 3;}; 
+        break;
+      }  
+
+      case kRite: 	// No left, no  Hit, rite fits 
+      {
+        node->SetPre(node->mFP[2],node->mFE[2],dir); 	
+        break;
       }
-//		Standard Kalman fit step.
-      node->mFP[dir] = node->mPP[dir];
-      node->mFE[dir] = node->mPE[dir];
-      Xi2[0] = 0;
-      StvHit *hit = node->GetHit();
-      if (!hit) 		break;
+      case kRite|kHit: // No left, now Hit, rite fits 
+      {
+        node->mPP[dir] = node->mFP[2]; 	
+        node->mPE[dir].Set(node->mFE[2],kBigErrFact);
+        break;
+      }
+    }//End 1st switch
 
-      fitt->Set(node->mPP+dir,node->mPE+dir,node->mFP+dir,node->mFE+dir);
-      fitt->Prep();
-      Xi2[2] = fitt->Xi2(hit);
-      if (Xi2[2] > kons->mXi2Hit) { node->SetHit(0); break;}
-      Xi2[0] = Xi2[2];
 
-      fitt->Update();
-      node->mFP[2] = node->mFP[dir];
-    } while(0);
+    switch (kase) {// 2nd switch, fill fit
 
-    preNode = node; if (skip) continue;
+      case kLeft: 	// Left fits only, no  Hit
+      case kRite: 	// Rite fits only, no  Hit
+      case kLeft+kRite: // Left fits, no Hit, Rite fits
+      {
+        node->SetFit(node->mPP[dir],node->mPE[dir],dir); 
+        break;
+      }
 
-    fitt->Set(node->mFP+0 ,node->mFE+0
-             ,node->mFP+1 ,node->mFE+1
-             ,node->mFP+2 ,node->mFE+2);
-    Xi2[1] = fitt->Xi2(); 
-    if (Xi2[1] < kons->mXi2Joi) {
-      fitt->Update();
-      node->SetXi2(Xi2[0]+Xi2[1]);}
-    else {
-      trak->CutTail(node);
-      break;
-//??      node->SetFit(node->mFP[dir],node->mFE[dir],2);
-//??      node->SetXi2(Xi2[0]);
-    }
-  }
+      case kLeft+      kHit: // Left fits only, now Hit
+      case kRite+      kHit: // No left, now Hit, rite fits 
+      case kLeft+kRite+kHit: // Left fits,now Hit, Rite fits
+      {
+	StvHit *hit = node->GetHit();
+	fitt->Set(node->mPP+dir,node->mPE+dir,node->mFP+dir,node->mFE+dir);
+	fitt->Prep();
+
+	myXi2 = fitt->Xi2(hit);
+	if (myXi2> kons->mXi2Hit)  	{
+	  node->SetFit(node->mPP[dir],node->mPE[dir],dir); 	
+          kase -= kHit;
+	} else {
+          nFitLeft++; kase|=kLeft;
+	  node->SetXi2(myXi2,dir);
+	  fitt->Update();
+        }
+        break;
+      }
+      default: assert(0 && "Wrong Case2");
+
+    }//end 2nd switch
+
+    switch (kase) {// 3rd switch,Join
+
+      case kLeft+kRite     : 	// Left fits, no Hit, Rite fits
+      case kLeft+kRite+kHit: 	// Left fits,now Hit, Rite fits
+      {
+	breakNode = (dir)? node:preNode;
+	fitt->Set(node->mFP+0 ,node->mFE+0
+        	 ,node->mFP+1 ,node->mFE+1
+        	 ,node->mFP+2 ,node->mFE+2);
+	node->SetXi2(3e33,2);
+	myXi2 = fitt->Xi2(); 
+	if (myXi2 < kons->mXi2Joi) {
+	  fitt->Update();
+	  node->SetXi2(myXi2,2);}
+	else {
+	  const char *key = (dir)? "Join111.Fail":"Join000.Fail";
+	  StvDebug::Count(key,myXi2); 
+	  /*trak->CutTail(breakNode);*/ return 4;
+	}
+      }
+
+    }//End 3rd case
+
+  }//endMainLoop
   return 0;
 }
 //_____________________________________________________________________________
