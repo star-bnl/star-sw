@@ -54,7 +54,6 @@ int StvDiver::Init()
   mSteps->Set(mELoss);
   mGen = (StvMCPrimaryGenerator*)app->GetPrimaryGenerator();
   mFld = (StvMCField*           )app->GetField();
-  mGen->Set(mHelix);
   mSteps->Set(mFld);
   
   TVirtualMC::GetMC()->DefineParticle( gMyPiPdg,"MyPi+",kPTHadron,gMyPiMass, 1,1e+10
@@ -63,6 +62,13 @@ int StvDiver::Init()
 	                             ,"pType", 0., 0, 1, 0, 1, 1, 1, 0, 1, 1);
   return 0;
 }
+//_____________________________________________________________________________
+void StvDiver::SetRZmax(double rMax,double zMax) 
+{   
+  StVMCApplication *app = (StVMCApplication*)TVirtualMCApplication::Instance();
+  app->SetRZmax(rMax,zMax);
+}
+
 //_____________________________________________________________________________
 void StvDiver::Reset() 
 {
@@ -78,35 +84,45 @@ int  StvDiver::Dive()
 {
   TRandom *myRandom = gRandom;
   gRandom = gMyRandom;
-  
-  mInpPars->get(mHelix);
-  mInpErrs->Get(mHelix);
-  mHlxDeri[0][0]=0;
-  if (!mDir) mHelix->Backward();
 
-  TVirtualMC::GetMC()->ProcessEvent();
+  mFld->SetHz(mInpPars->_hz);	//Set initial value of mag field
+  assert(fabs(mInpPars->_hz)<0.01);
 
-  TVector3 pos = mSteps->CurrentPosition().Vect();
-  TVector3 mom = mSteps->CurrentMomentum().Vect();
-  mOutPars->_x = pos.X();
-  mOutPars->_y = pos.Y();
-  mOutPars->_z = pos.Z();
-  mOutPars->_psi = mom.Phi();
-  mOutPars->_ptin = -mSteps->Charge()/mom.Pt();
-  mOutPars->_tanl = mom[2]*fabs(mOutPars->_ptin);
-  mOutPars->_hz   = mFld->GetHz();
-  mOutPars->ready(); 
+  while(1) {
+    mInpPars->get(mHelix);
+    mInpErrs->Get(mHelix);
+    mHlxDeri[0][0]=0;
+    if (!mDir) mHelix->Backward();
 
-  mOutErrs->Set(mHelix,mOutPars->_hz);
-  assert(mOutErrs->mPP>0);
-  mOutPars->convert(*mOutDeri,mHlxDeri);
+    TVirtualMC::GetMC()->ProcessEvent();
+    if (mSteps->GetExit()==kDiveBreak) return kDiveBreak;
 
+    TVector3 pos = mSteps->CurrentPosition().Vect();
+    TVector3 mom = mSteps->CurrentMomentum().Vect();
+    mOutPars->_x = pos.X();
+    mOutPars->_y = pos.Y();
+    mOutPars->_z = pos.Z();
+    mOutPars->_psi = mom.Phi();
+    mOutPars->_ptin = -mSteps->Charge()/mom.Pt();
+    mOutPars->_tanl = mom[2]*fabs(mOutPars->_ptin);
+    mOutPars->_hz   = mFld->GetHz();
+    mOutPars->ready(); 
 
-  if (!mDir) {
-    mOutPars->reverse();
-    mOutPars->reverse(*mOutDeri,*mOutDeri);
-    mOutErrs->Backward();
+    mOutErrs->Set(mHelix,mOutPars->_hz);
     assert(mOutErrs->mPP>0);
+    mOutPars->convert(*mOutDeri,mHlxDeri);
+
+
+    if (!mDir) {
+      mOutPars->reverse();
+      mOutPars->reverse(*mOutDeri,*mOutDeri);
+      mOutErrs->Backward();
+      assert(mOutErrs->mPP>0);
+    }
+    if (mSteps->GetExit() !=kDiveMany) break;
+    *mInpPars = *mOutPars;
+    double push = (mDir)?  -1:1;
+    mInpPars->move(push);
   }
   assert (mInpPars->_ptin * mOutPars->_ptin >=0);
   gRandom = myRandom;
@@ -114,14 +130,12 @@ int  StvDiver::Dive()
   return mSteps->GetExit();
 }
 //_____________________________________________________________________________
-void StvDiver::Set(const StvNodePars *inpar,const StvFitErrs *inerr,int idir)
+void StvDiver::Set(StvNodePars *inpar,const StvFitErrs *inerr,int idir)
 {
   mInpPars= inpar;
   mInpErrs= inerr;
-  assert(mInpErrs->mPP>0);
   mDir    = idir;
   mSteps->SetDir(mDir);
-  mFld->SetHz(inpar->_hz);	//Set initial value of mag field
   mGen->Set(inpar,idir);
 }
 //_____________________________________________________________________________
@@ -258,8 +272,7 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
     
     case kOUTtrack:
     case kENDEDtrack:
-      fExit = EndVolume();
-      if (!fExit) fExit=kDiveBreak;
+      fExit=kDiveBreak;
       TVirtualMC::GetMC()->StopTrack();
       break;
 
@@ -280,8 +293,11 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
      Error("Case","Unexpected case %x == %s",fCase,fCasName.Data());
      assert(0);
   }
-  if (fKaze!=myKaze) goto SWITCH;
-
+  if (fKaze!=myKaze) 			goto SWITCH;
+  if (fExit) 				return 0;
+  if (fKaze!=fLastKaze) {fLastNumb=0; fLastKaze=fKaze; return 0;}
+  fLastNumb++; if (fLastNumb<100)	return 0;
+  fExit=kDiveMany; fLastNumb=0;
   return 0;
 }		
 //_____________________________________________________________________________
@@ -307,8 +323,8 @@ static int nCall=0; nCall++;
   if (dL<1e-6) return isDca;
   fCurrentPosition.GetXYZT(pos);
   fCurrentMomentum.GetXYZT(mom);
-
-  double curva = -fField->GetHz()/fCurrentMomentum.Pt()*fCharge;
+  double pt = fCurrentMomentum.Pt();
+  double curva = -fField->GetHz()/pt*fCharge;
   double rho   = fHelix->GetRho();
   if (fabs(pos[2])<200) {
     assert (curva*rho>=-1e-6);
@@ -316,6 +332,7 @@ static int nCall=0; nCall++;
     assert (fabs(curva)+fabs(rho)< 1e-4 
           ||fabs(curva-rho)<=0.5*(fabs(curva)+fabs(rho))*(dL+1));
   } 
+
   fELossTrak->Add(dL);
   fHelix->Set((2*rho+curva)/3);
 
@@ -338,8 +355,11 @@ static int nCall=0; nCall++;
   fELossData.mTheta2 = fELossTrak->GetTheta2();
   fELossData.mOrt2   = fELossTrak->GetOrt2();
   double cosL = fHelix->GetCos();
+  double tanL = fHelix->GetTan();
   emx->mAA+=fELossData.mTheta2/(cosL*cosL);
   emx->mLL+=fELossData.mTheta2;
+  emx->mCC+=fELossData.mTheta2*pow(curva*tanL,2);
+  emx->mCL-=fELossData.mTheta2*curva*tanL;
 
   emx->mHH+= fELossData.mOrt2;
   emx->mZZ+= fELossData.mOrt2/(cosL*cosL);
@@ -441,7 +461,6 @@ ClassImp(StvMCPrimaryGenerator);
 StvMCPrimaryGenerator::StvMCPrimaryGenerator()
 {
  mPars=0;
- mHelix=0;
  mDir=0; // direction of moving 1=along track; 0=opposite
 }  
 
@@ -460,6 +479,7 @@ int StvMCPrimaryGenerator::Fun()
  // Particle momentum
  double p[3];
  mPars->getMom(p);
+
  if (!mDir) { pdg = -pdg; p[0]=-p[0]; p[1]=-p[1];p[2]=-p[2];}
  
  // Polarization

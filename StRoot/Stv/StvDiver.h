@@ -17,7 +17,7 @@ class THelixTrack;
 class StvFitErrs;
 class StvNodePars;
 typedef double Mtx55D_t[5][5];
-enum StvDiverFlags {kDiveOk=0,kDiveDca=1,kDiveBreak=2};
+enum StvDiverFlags {kDiveOk=0,kDiveDca=1,kDiveBreak=2,kDiveMany=3};
 /// \class StvDiver
 class StvDiver : public TNamed
 {
@@ -27,16 +27,17 @@ public:
 int  Init();
 void Reset();
 int  Dive();
-void Set(const StvNodePars *inpar,const StvFitErrs *inerr,int idir);
-void Set(      StvNodePars *otpar,      StvFitErrs *oterr,Mtx55D_t *deriv);
+void Set(StvNodePars *inpar,const StvFitErrs *inerr,int idir);
+void Set(StvNodePars *otpar,      StvFitErrs *oterr,Mtx55D_t *deriv);
 void SetSkip(int skip=1);
 double GetLength() const;
 const StvELossData &GetELossData() const;
+void SetRZmax(double rMax,double zMax); 
 
 protected:
 char mBeg[1];
 int mDir;
-const StvNodePars    *mInpPars;
+      StvNodePars    *mInpPars;
 const StvFitErrs     *mInpErrs;
 StvNodePars    *mOutPars;
 StvFitErrs     *mOutErrs;
@@ -101,6 +102,8 @@ char fFist[1];
 int    fKount;
 int    fExit;
 int    fSkip;
+int    fLastKaze;
+int    fLastNumb;
 float  fStartSign;
 float  fCurrentSign;
 char fMidl[1];
@@ -137,12 +140,10 @@ class StvMCPrimaryGenerator :  public GCall  {
   StvMCPrimaryGenerator();
  ~StvMCPrimaryGenerator() {}
   
-     void Set(const THelixTrack *hlx)		{mHelix=hlx ;}
      void Set(const StvNodePars *pars,int idir)	{mPars=pars; mDir =idir;}
      virtual int Fun();
  protected:
  const StvNodePars *mPars;
- const THelixTrack *mHelix;
  int mDir; // direction of moving 1=along track; 0=opposite
   ClassDef(StvMCPrimaryGenerator,0)  //StvMCPrimaryGenerator
 };
