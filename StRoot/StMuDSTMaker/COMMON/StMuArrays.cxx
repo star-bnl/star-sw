@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.cxx,v 1.22 2011/04/08 01:25:50 fisyak Exp $
+ * $Id: StMuArrays.cxx,v 1.23 2011/05/04 19:51:31 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -13,7 +13,7 @@
 const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent","PrimaryVertices",
 					                   "PrimaryTracks","GlobalTracks","OtherTracks","L3Tracks",
 					                   "RichSpectra","DetectorStates","L3AlgoAccept","L3AlgoReject",
-							   "CovGlobTrack","CovPrimTrack","pp2pp",
+							   "CovGlobTrack","CovPrimTrack","pp2pp","mtd",
 #ifndef __NO_STRANGE_MUDST__
 /*strangeArrayNames[__NSTRANGEARRAYS__]*/                  "Event","McEvent",
 							   "V0","McV0","V0Assoc",
@@ -53,7 +53,7 @@ const char** StMuArrays::eztArrayNames = StMuArrays::btofArrayNames   +__NBTOFAR
 const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent","StMuPrimaryVertex",
 					                   "StMuTrack","StMuTrack","StMuTrack","StMuTrack",
 					                   "StRichSpectra","StDetectorState","StL3AlgorithmInfo","StL3AlgorithmInfo",
-							   "StDcaGeometry","StMuPrimaryTrackCovariance","StMuRpsCollection",
+							   "StDcaGeometry","StMuPrimaryTrackCovariance","StMuRpsCollection","StMuMtdCollection",
 #ifndef __NO_STRANGE_MUDST__
 /*strangeArrayTypes[__NSTRANGEARRAYS__]*/                  "StStrangeEvMuDst","StStrangeEvMuDst",
 							   "StV0MuDst","StV0Mc","StStrangeAssoc",
@@ -87,7 +87,7 @@ const char** StMuArrays::eztArrayTypes = StMuArrays::btofArrayTypes    +__NBTOFA
 // These are intial sizes. Automatically resized if too small.
 // Choosing too large initial values gives a performance penalty when reading 
 // only selected MuDst branches 
-int   StMuArrays::arraySizes       [__NALLARRAYS__    ] = {1,10,1000,1000,1000,1000,100,100,100,100, 1000,1000,1,
+int   StMuArrays::arraySizes       [__NALLARRAYS__    ] = {1,10,1000,1000,1000,1000,100,100,100,100, 1000,1000,1,1,
 #ifndef __NO_STRANGE_MUDST__
 /*strangeArraySizes[__NSTRANGEARRAYS__]*/                  1,1,1000,100,100,1000,100,100,1000,100,100,200,
 #endif
@@ -113,7 +113,7 @@ int* StMuArrays::eztArraySizes = StMuArrays::btofArraySizes    +__NBTOFARRAYS__;
 
 //		ARRAY COUNTERS
 //============================================================================================
-int   StMuArrays::arrayCounters       [__NALLARRAYS__ ] = {0,0,0,0,0,0,0,0,0,0,0,0,0,
+int   StMuArrays::arrayCounters       [__NALLARRAYS__ ] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 #ifndef __NO_STRANGE_MUDST__
 /*strangeArrayCounters[__NSTRANGEARRAYS__]*/               0,0,0,0,0,0,0,0,0,0,0,0,
 #endif
@@ -164,6 +164,9 @@ StMuArrays::StMuArrays()
 /***************************************************************************
  *
  * $Log: StMuArrays.cxx,v $
+ * Revision 1.23  2011/05/04 19:51:31  tone421
+ * Added MTD infomation
+ *
  * Revision 1.22  2011/04/08 01:25:50  fisyak
  * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
  *

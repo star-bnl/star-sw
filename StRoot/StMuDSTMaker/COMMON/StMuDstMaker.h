@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.52 2011/04/08 01:25:50 fisyak Exp $
+ * $Id: StMuDstMaker.h,v 1.53 2011/05/04 19:51:32 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -89,6 +89,8 @@ class TClonesArray;
 class TEventList;
 
 class StMuRpsCollection;
+class StMuMtdCollection;
+
 
 /**
    \class StMuDstMaker
@@ -172,7 +174,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.52 2011/04/08 01:25:50 fisyak Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.53 2011/05/04 19:51:32 tone421 Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -272,7 +274,9 @@ virtual   void closeRead();
   void fillEvent(StEvent* ev, StMuCut* cut=0);
   void fillVertices(StEvent* ev);
   void fillpp2pp(StEvent* ev);
-  void fillsttrigger(StEvent* ev);	
+	void fillmtd(StEvent* ev);
+
+	void fillsttrigger(StEvent* ev);	
   void fillPmd(StEvent* ev);
   void fillEmc(StEvent* ev);
   void fillFms(StEvent* ev);
@@ -391,6 +395,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.53  2011/05/04 19:51:32  tone421
+ * Added MTD infomation
+ *
  * Revision 1.52  2011/04/08 01:25:50  fisyak
  * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
  *

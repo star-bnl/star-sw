@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.102 2011/04/19 22:50:08 fisyak Exp $
+ * $Id: StMuDstMaker.cxx,v 1.103 2011/05/04 19:51:32 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -43,6 +43,7 @@
 #include "StMuEvent.h"
 #include "StMuPrimaryVertex.h"
 #include "StMuRpsCollection.h"
+#include "StMuMtdCollection.h"
 #include "StMuTrack.h"
 #include "StMuDebug.h"
 #include "StMuCut.h"
@@ -927,6 +928,13 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     e.print();
     throw e;
   }
+	try {
+		fillmtd(ev);
+	}
+	catch(StMuException e) {
+		e.print();
+		throw e;
+	}
   try {
     fillTracks(ev,mTrackFilter);
   }
@@ -1216,6 +1224,20 @@ void StMuDstMaker::fillpp2pp(StEvent* ev) {
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
+
+void StMuDstMaker::fillmtd(StEvent* ev) {
+	DEBUGMESSAGE2("");
+	StTimer timer;
+	timer.start();
+	
+	StMuMtdCollection *typeOfMtd=0;
+	
+	const StMtdCollection *mtd=ev->mtdCollection();
+	if (mtd) addType( mArrays[muMtd], *mtd, typeOfMtd );
+	timer.stop();
+	DEBUGVALUE2(timer.elapsedTime());
+}
+
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -1610,6 +1632,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.103  2011/05/04 19:51:32  tone421
+ * Added MTD infomation
+ *
  * Revision 1.102  2011/04/19 22:50:08  fisyak
  * Use default size of TTree (100 GB) for ROOT >= 5.26.0
  *

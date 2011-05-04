@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.41 2011/04/08 01:25:50 fisyak Exp $
+ * $Id: StMuDst.h,v 1.42 2011/05/04 19:51:32 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -59,6 +59,8 @@ class StDcaGeometry;
 class StMuPrimaryTrackCovariance;
 
 class StMuRpsCollection;
+class StMuMtdCollection;
+
 
 #include "StPhysicalHelixD.hh"
 
@@ -244,7 +246,9 @@ public:
   static StL3AlgorithmInfo* l3AlgoReject(int i) { return (StL3AlgorithmInfo*)arrays[muReject]->UncheckedAt(i); }
   //returns pp2pp infomation
   static StMuRpsCollection* RpsCollection() { return (StMuRpsCollection*)arrays[mupp2pp]->UncheckedAt(0); }
-  static StDcaGeometry* covGlobTracks(int i) { return (StDcaGeometry*)arrays[muCovGlobTrack]->UncheckedAt(i); }
+  static StMuMtdCollection* MtdCollection() { return (StMuMtdCollection*)arrays[muMtd]->UncheckedAt(0); }
+
+	static StDcaGeometry* covGlobTracks(int i) { return (StDcaGeometry*)arrays[muCovGlobTrack]->UncheckedAt(i); }
   static StMuPrimaryTrackCovariance* covPrimTracks(int i) { return (StMuPrimaryTrackCovariance*)arrays[muCovPrimTrack]->UncheckedAt(i); }
  
 #ifndef __NO_STRANGE_MUDST__
@@ -406,6 +410,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.42  2011/05/04 19:51:32  tone421
+ * Added MTD infomation
+ *
  * Revision 1.41  2011/04/08 01:25:50  fisyak
  * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
  *

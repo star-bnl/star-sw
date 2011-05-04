@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.54 2011/04/08 01:25:50 fisyak Exp $
+ * $Id: StMuDst.cxx,v 1.55 2011/05/04 19:51:32 tone421 Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -24,6 +24,7 @@
 #include "StMuEvent.h"
 #include "StMuPrimaryVertex.h"
 #include "StMuRpsCollection.h"
+#include "StMuMtdCollection.h"
 #include "StMuTrack.h"
 #include "StMuDebug.h"
 #include "StMuEmcUtil.h"
@@ -739,6 +740,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.55  2011/05/04 19:51:32  tone421
+ * Added MTD infomation
+ *
  * Revision 1.54  2011/04/08 01:25:50  fisyak
  * Add branches for MC track and vertex information, add IdTruth to  tracks and vertices, reserve a possiblity to remove Strange MuDst
  *
