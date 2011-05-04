@@ -1,8 +1,8 @@
 #ifndef __Geometry_h__
 #define __Geometry_h__
 
-#include "StarAgmlLib/AgModule.h"
-#include "StarAgmlLib/AgStructure.h"
+#include "StarVMC/StarAgmlLib/AgModule.h"
+#include "StarVMC/StarAgmlLib/AgStructure.h"
 
 #include "TString.h"
 #include "TROOT.h"
