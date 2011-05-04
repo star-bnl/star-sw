@@ -19,6 +19,10 @@ public:
       float	mZMax;			//Max Z      for tracking
       float     mDca2dZeroXY;		//max 2d dca to X=Y=0  for primary track
       float     mDca3dVertex;  		//max 3d dca to vertex for primary track
+      float     mMaxCurv;		//Maximal allowed curvature
+      float     mMinP2;		        //Minimal allowed momentum**2
+      float     mMaxWindow;		//Maximal window to search hits
+        int     mMinHits;		//Min number of hits allowed
       char   	mEnd[1];
 static StvConst *mgConst;
 ClassDef(StvConst,0)//
