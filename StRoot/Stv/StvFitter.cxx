@@ -173,6 +173,7 @@ static int nCall=0; nCall++;
 
   *mOtPars = mTkPars;
   *mOtPars+= myJrkPars;
+  mOtErrs->SetHz(mOtPars->_hz);
 
   return 0;
 }  
@@ -182,7 +183,7 @@ int StvFitter::Vpdate()
 static int nCall=0; nCall++;
 
   mTkErrs = *mInErrs;
-  for (int i=0;i<3;i++) {mTkErrs[i]+=mHitErrs[i];}
+//???????????????  for (int i=0;i<3;i++) {mTkErrs[i]+=mHitErrs[i];}
 
 //		New Z ortogonal to X (track direction)
   StvFitPars myHitPars(mDcaP, mDcaL );
@@ -194,12 +195,12 @@ static int nCall=0; nCall++;
   double myXi2 = JoinTwo(2,myHitPars.Arr(),myHitErrs.Arr()
                         ,5,myTrkPars.Arr(),mTkErrs.Arr()
 		        ,  myJrkPars.Arr(),mOtErrs->Arr());
-  assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2));
+//??????  assert(fabs(myXi2-mXi2)<0.01*(myXi2+mXi2));
   assert(fabs(myJrkPars[0]-myHitPars[0])<1e-6);
   assert(fabs(myJrkPars[1]-myHitPars[1])<1e-6);
   *mOtPars = mTkPars;
   *mOtPars+= myJrkPars;
-
+  mOtErrs->SetHz(mOtPars->_hz);
   return 0;
 }  
 //______________________________________________________________________________
@@ -208,6 +209,7 @@ int StvFitter::Jpdate()
   *mOtPars = *mJnPars; (*mOtPars)+=mQQPars;
   assert(!mOtPars->check());
   *mOtErrs =  mQQErrs;   
+   mOtErrs->SetHz(mOtPars->_hz);
   return 0;
 }
 //______________________________________________________________________________
