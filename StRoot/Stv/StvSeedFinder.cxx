@@ -27,16 +27,15 @@ void StvSeedFinder::Show()
 void StvSeedFinder::ShowRest()
 {
    if (!fDraw) fDraw = NewDraw();
-   std::vector<float> myHits;  
+   std::vector<StvHit*> myHits;  
    const StVoidArr *hitArr =  StTGeoHelper::Inst()->GetSeedHits();
    int nHits =  hitArr->size();
    for (int iHit=0;iHit<nHits;iHit++) {
      StvHit *stiHit = (StvHit*)(*hitArr)[iHit];
      if (stiHit->timesUsed()) continue;
-     const float *x = stiHit->x();
-    fDraw->Point(x[0],x[1],x[2],kUnusedHit);
+     myHits.push_back(stiHit);
    }
-
+   fDraw->Hits(myHits,kUnusedHit);
    fDraw->UpdateModified();
 }
 //_____________________________________________________________________________
@@ -44,8 +43,6 @@ StvDraw *StvSeedFinder::NewDraw()
 {
    StvDraw *dr = new StvDraw();
    dr->SetBkColor(kWhite);
-// dr->Style(kUsedHit).Siz()  *=2;
-   dr->Style(kUnusedHit).Siz()*=20;
    return dr;
 }
 //_____________________________________________________________________________

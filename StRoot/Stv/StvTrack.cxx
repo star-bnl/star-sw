@@ -34,7 +34,7 @@ void StvTrack::reset()
 void StvTrack::unset()
 {
   mId = -1;
-  StvToolkit *kit = StvToolkit::Inst();
+  static StvToolkit *kit = StvToolkit::Inst();
   for (StvNodeIter it = begin();it != end();++it) 
   {
     StvNode *node = *it;kit->FreeNode(node);
@@ -63,8 +63,8 @@ int StvTrack::GetNHits(StDetectorId detectorId) const
     const StHitPlane *hp = node->GetHitPlane();
     if (!hp) continue;
     if (detectorId && hp->GetDetId()!=detectorId) continue;
-    if (!node->GetHit()) continue;
-    if (!node->GetXi2()>1000) continue;
+    if (!node->GetHit()) 	continue;
+    if (node->GetXi2()>1000) 	continue;
     n++;    
   }
   return n;
@@ -75,7 +75,7 @@ StvNode *StvTrack::GetNode(EPointType noTy)
   StvNode *node=0;int n=0;
   if (noTy!=kLastPoint) {
     for (StvNodeIter it = begin();it != end();++it) {
-      node = *it; n++;
+      node = *it; n++; if (node->GetXi2()>1000) continue;
       switch(noTy) {
         case kDcaPoint: if (n>2) return 0;
 	  if (node->GetType()==StvNode::kDcaNode) {return node;} 
@@ -88,17 +88,17 @@ StvNode *StvTrack::GetNode(EPointType noTy)
         case kFirstPoint:
 	  if (node->GetType()!=StvNode::kRegNode) 	break;
 	  if (!node->GetHit()) 		 		break;
-	  if (!node->GetXi2()>1000) 		 	break;
+	  if ( node->GetXi2()>1000) 		 	break;
           return node;
         default: assert("Wrong Node type" && 0);
        }//end switch
      }//end loop
    } else {
     for (StvBakwNodeIter it = rbegin();it != rend();++it) {
-      node = *it;
+      node = *it; n++; 
       if (node->GetType()!=StvNode::kRegNode) 	continue;
       if (!node->GetHit()) 		 	continue;
-      if (!node->GetXi2()>1000) 		continue;
+      if ( node->GetXi2()>1000) 		continue;
       return node;
     }
   }// end if
@@ -191,6 +191,9 @@ int StvTrack::ReleaseHits()
 //_____________________________________________________________________________
 void StvTrack::CutTail(const StvNode *start)
 {
+static StvToolkit *kit = StvToolkit::Inst();
+  if (empty()) return;
+  if (!start) start = front();
   StvNodeIter tail;
   int kase=0;
   for (StvNodeIter it = begin();it != end();++it) 
@@ -200,7 +203,7 @@ void StvTrack::CutTail(const StvNode *start)
       case 0: if (node !=start) break;
               kase=1; tail=it;
       case 1: node->SetHit(0);
-              		
+              kit->FreeNode(node);		
     }
   }
   assert(kase);
@@ -284,6 +287,25 @@ StvPoints showTrak;
   StvDraw::Inst()->Hits(showHits,kUsedHit    );
 }
 //_____________________________________________________________________________
+int StvTrack::Check(const char *tit, int dirs) const
+{
+if (!tit) tit = "";
+  int n = -1,nerr=0;
+  for (StvNodeConstIter it = begin();it != end();++it) 
+  {
+    n++; 
+    const StvNode *node = *it;
+    TString ts;
+    if (tit[0]) {ts = tit; ts+="#"; ts+=n;
+      char mybuf[40]={0}; sprintf(mybuf," node=%p ",(void*)node);
+      ts+=mybuf;
+    }
+    int fail = node->Check(ts,dirs);
+    if (fail) nerr++;
+  }
+  return nerr;
+}
+//_____________________________________________________________________________
 void StvTrack::Print(const char *opt) const
 {
   if (!opt) opt = "";
@@ -312,6 +334,29 @@ int StvTrack::GetCharge() const
   return node->GetFP().getCharge();
 }
 //_____________________________________________________________________________
+void StvTrack::MakeFitTally() 
+{
+  StvNodeConstIter it,itBeg,itEnd;
+  itBeg = end(); --itBeg; itEnd = begin();--itEnd;
+  int nFit = 0;
+  for (it=itBeg;it!=itEnd;--it) {
+    StvNode *node = (*it);
+    node->mFitTally[0] = nFit;
+    if (!node->GetHit()) 		continue;
+    if (node->GetXi2(0) > 1000 )	continue;
+    nFit++;
+  }
+  itBeg = begin(); itEnd = end();
+  nFit = 0;
+  for (it=itBeg;it!=itEnd;++it) {
+    StvNode *node = (*it);
+    node->mFitTally[1] = nFit;
+    if (!node->GetHit()) 		continue;
+    if (node->GetXi2(1) > 1000 )	continue;
+    nFit++;
+  }
+}
+//_____________________________________________________________________________
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 enum {kTotHits=10	//Min number hits for track
@@ -320,6 +365,7 @@ enum {kTotHits=10	//Min number hits for track
      ,kContNits=8	//Max length of acceptable non hit sequence
      ,kTotNits=13	//Max number of acceptable non hits
      };
+//_____________________________________________________________________________
 void StvHitCount::AddHit()
 {
   nPossHits++;  nTotHits++;nContHits++;

@@ -14,7 +14,7 @@ class StvHit;
 class StvTrack: public StvNodes
 {
  public:
- enum EPointType {kDcaPoint,kFirstPoint,kLastPoint,kPrimPoint}; 
+ enum EPointType {kPrimPoint,kDcaPoint,kFirstPoint,kLastPoint}; 
  public:
   StvTrack(); 
   
@@ -41,11 +41,11 @@ const StvNode *GetNode(EPointType poTy) const;
 
 	 /// Returns the number of hits associated and used in the fit of this track.
    int CountHits(StvHitCount &cnt) const;  
-   	/// 
 
+   	/// Delete all the nodes started form given
+  void CutTail(const StvNode *start=0);
 
-  void CutTail(const StvNode *start);
-
+  void MakeFitTally();
    /*!
      Returns the track length (in centimeters) from the :
       - first point (kFirstPoint) default;
@@ -70,7 +70,7 @@ double GetRes() const;		// Average residual
 
   double Approx(int mode=0);
   double ToBeam() const;
- 
+  int Check(const char *tit="",int dirs=3) const; 
   void Show() const;  
 
 protected:
