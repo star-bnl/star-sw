@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.13 2011/04/01 19:11:29 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.14 2011/05/04 17:45:20 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -334,6 +334,7 @@ void StTGeoHelper::InitHitPlane()
 {
   fHitPlaneHardMap = new StHitPlaneHardMap;
   fSeedHits =        new StVoidArr();
+  fAllHits  =        new StVoidArr();
   
   StTGeoIter it;
   StDetectorId detId=kUnknownId;
@@ -701,6 +702,7 @@ static int nCall = 0;  nCall++;
   }
   assert(hp);
 
+   fAllHits->push_back(hit);
    if (seed) {//add to seed hit collection
      fSeedHits->push_back(hit);
   } 
@@ -799,6 +801,7 @@ StHitPlane *StTGeoHelper::GetCurrentHitPlane ()
 //_____________________________________________________________________________
 void StTGeoHelper::ClearHits()
 {
+  fAllHits->clear();
   fSeedHits->clear();
   int n = fHitPlaneArr->GetLast()+1;
   for (int i=0;i<n;i++) {
