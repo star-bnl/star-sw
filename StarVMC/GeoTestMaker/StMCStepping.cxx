@@ -1,9 +1,8 @@
-// $Id: StMCStepping.cxx,v 1.5 2010/07/14 18:16:51 perev Exp $
+// $Id: StMCStepping.cxx,v 1.6 2011/05/04 17:43:27 perev Exp $
 //
 //
 // Class StMCStepping
 // ------------------
-// Base class for Magnetic field calculation
 
 #include <stdio.h>
 #include <string.h>
@@ -165,6 +164,10 @@ static int nCall = 0; nCall++;
       fMass   = myMC->TrackMass();
       fEdep   = 0;
       fEtot   = myMC->Etot();
+      fLastVect[6] = fCurrentMomentum.P();
+      for (int i=0;i<3;i++) {
+        fLastVect[i+0] = fCurrentPosition[i];
+        fLastVect[i+3] = fCurrentMomentum[i]/fLastVect[6];}
       }
       break;
 
@@ -174,11 +177,11 @@ static int nCall = 0; nCall++;
     case kOUTtrack:
       fEdep   = myMC->Edep();
       fEtot   = myMC->Etot();
-      if(!fDir) RecovEloss();
       myMC->TrackPosition(fCurrentPosition);
       myMC->TrackMomentum(fCurrentMomentum);
       assert(fCurrentMomentum[3]>1e-6);
       fCurrentLength     = myMC->TrackLength();
+      RecovEloss();
     break;
 
     case kIgnore:;
@@ -237,11 +240,32 @@ void StMCStepping::RecovEloss()
 // 	Update directly Geant3 common when we moving bacward the track
 //	and energy loss is negative
 
-  if (fEdep<=0.) return;
-  fEtot += fEdep*2;
-  gGctrak->getot  = fEtot;
-  gGctrak->gekin += fEdep*2;
-  gGctrak->vout[6] = sqrt(gGctrak->gekin*(fEtot+fMass));
-  ((TGeant3*)gMC)->Gekbin();
+  float *vout = gGctrak->vout;
+  do {
+    if (fEdep<=0) 	break;
+    double dL = fCurrentLength-fLastLength;
+    if (dL<1e-5) 	break;
+    double nor = sqrt(vout[3]*vout[3]+vout[4]*vout[4]);
+    double ang=(fabs(vout[3])>fabs(vout[4]))?  (vout[4]-fLastVect[4])/vout[3]
+                                             :-(vout[3]-fLastVect[3])/vout[4];
+    double Rho = ang/dL;
+    double dE = (fDir)? -fEdep:fEdep*2;
+    double dP = dE/vout[6]*fEtot;
+    double dRho = -Rho*dP/vout[6];
+    double dPhi = dRho*dL/2;
+    double dOrt = dPhi*dL/3;
+    vout[0] += -vout[4]/nor*dOrt;
+    vout[1] +=  vout[3]/nor*dOrt;
+    float v3 = vout[3];
+    vout[3] += -vout[4]*dPhi;
+    vout[4] +=      v3 *dPhi;
+    if (fDir) 		break;
+    fEtot += dE;
+    gGctrak->getot  = fEtot;
+    gGctrak->gekin += dE;
+    vout[6] = sqrt(gGctrak->gekin*(fEtot+fMass));
+    ((TGeant3*)gMC)->Gekbin();
+  } while(0);
+  fLastLength = fCurrentLength;
+  memcpy(fLastVect,vout,sizeof(fLastVect));
 }  
-  
