@@ -1,4 +1,4 @@
-// $Id: StMCStepping.h,v 1.3 2010/04/29 03:05:28 perev Exp $
+// $Id: StMCStepping.h,v 1.4 2011/05/04 17:43:32 perev Exp $
 //
 //
 // Class StMCStepping
@@ -60,6 +60,7 @@ const TLorentzVector &CurrentPosition() const 	{return fCurrentPosition;}
 const TLorentzVector &CurrentMomentum() const 	{return fCurrentMomentum;}
               double  CurrentLength()   const   {return fCurrentLength  ;}
                  int  Charge()          const   {return (int)fCharge    ;}
+
 virtual void Print(const Option_t* opt=0) const;
 static  TString CaseAsString(int kase);
 static  TString KazeAsString(int kase);
@@ -73,12 +74,14 @@ void RecovEloss();
    char   fBeg[1];
    float  fEnterLength;
    float  fCurrentLength;
+   float  fLastLength;
    float  fCharge;
    float  fMass;
    float  fEdep;
    float  fEtot;
    float  fLife;
    float  fX0;
+   float  fLastVect[7];
    double fTrackNumber;
    int    fPDG;
    int    fPid;
@@ -99,6 +102,7 @@ void RecovEloss();
    TLorentzVector fCurrentPosition;
    TLorentzVector fEnterMomentum;
    TLorentzVector fCurrentMomentum;
+   TLorentzVector fLastMomentum;
    TString fParName;
    TString fCasName;
    TString fKazName;
