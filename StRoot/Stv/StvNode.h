@@ -27,6 +27,7 @@ class StHitPlane;
 class StvNode 
 {
 public:
+friend class StvTrack;
 enum ENodeType {kRegNode=0,kDcaNode=1,kPrimNode=2};
 
 public:
@@ -66,16 +67,20 @@ public:
   void  SetELoss(const StvELossData &el,int   ) {mELossData=el;}  
 const StvELossData &GetELoss() const		{return mELossData;}  
   
- double GetXi2() const 				{ return mXi2;}
+ double GetXi2(int dir=2) const 		{ return mXi2[dir];}
  double GetLen() const 				{ return mLen;}
-   void SetXi2(double Xi2) 			{ mXi2=Xi2   ;}
+   void SetXi2(double Xi2,int dir) 		{ mXi2[dir]=Xi2; mXi2[2]=Xi2;}
    void SetPre(StvNodePars &par,StvFitErrs &err,int dir); 	
    void SetFit(StvNodePars &par,StvFitErrs &err,int dir); 
    void SetDer(const Mtx55D_t &der, int dir);
 
  StvNode::ENodeType GetType() const 			{return (StvNode::ENodeType)mType;}
                void SetType(StvNode::ENodeType ty) 	{mType =(char)ty;}
+
+const char *FitTally() const {return mFitTally;}
 StDetectorId GetDetId() const;  
+void UpdateDca();
+ int Check(const char *tit="",int dirs=3) const; 
 void Print(const char *opt) const;
  private:   
 
@@ -83,18 +88,19 @@ void Print(const char *opt) const;
 
  char mBeg[1];  
  char mType; 			//0=regular,1=dca,2=primary
+ char mFitTally[2]; 		//accumulated number of fitted nodes [0]=down
 const StHitPlane *mHitPlane;
 StvHit *mHit;
 
 ///  Z mag field in units PGev = Hz*Rcm
   mutable double mHz;
   StvNodePars mPP[2]; 	// Predicted Parameters
-  StvFitErrs  mPE[2];	// Predicted errors
   StvNodePars mFP[3];   // Fitted    Parameters
+  StvFitErrs  mPE[2];	// Predicted errors
   StvFitErrs  mFE[3];	// Fitted    errors
   Mtx55D_t    mDer[2];
   double      mHrr[3];  // Hit errors in DCA frame
-  double      mXi2; 	// Xi2 of fit to hit
+  double      mXi2[3]; 	// Xi2 of fit to hit
   double      mLen; 	// Length
   StvELossData mELossData; //EnergyLoss&MCS from the upper node 
   char   mEnd[1];

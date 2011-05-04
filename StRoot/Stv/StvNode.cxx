@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.6 2011/04/03 20:38:05 perev Exp $
+ * $Id: StvNode.cxx,v 1.7 2011/05/04 18:30:14 perev Exp $
  *
  * /author Victor Perev
  */
@@ -21,7 +21,7 @@ void StvNode::reset()
 static int myCount=0;
   memset(mBeg,0,mEnd-mBeg+1);
   mId = ++myCount; 
-  mXi2 = 3e33;
+  mXi2[0] = 3e33;mXi2[1] = 3e33;mXi2[2] = 3e33;
 }
 //______________________________________________________________________________
 void StvNode::SetPre(StvNodePars &par,StvFitErrs &err,int dir) 	
@@ -96,7 +96,7 @@ void StvNode::SetDer(const Mtx55D_t &der, int dir)
    memcpy(mDer[dir][0],der[0],sizeof(Mtx55D_t));
    mPP[dir].reverse(mDer[1-dir],der);
 } 
- //________________________________________________________________________________
+//________________________________________________________________________________
 void StvNode::SetHit(StvHit *hit)
 {
    if (mHit) mHit->addTimesUsed(-1);
@@ -105,4 +105,33 @@ void StvNode::SetHit(StvHit *hit)
    assert(!mHit->timesUsed());
    mHit->addTimesUsed(1);
 } 
+//________________________________________________________________________________
+void StvNode::UpdateDca()
+{ 
+  double dL = -( mFP[2]._x*mFP[2]._cosCA+mFP[2]._y*mFP[2]._sinCA);
+  if (fabs(dL)<1e-6) return;
+  do {
+    if (fabs(dL)<1e-1) break;
+    TCircle crk(&(mFP[2]._x),&(mFP[2]._cosCA),mFP[2]._curv);
+    double zero[2]={0};
+    dL = crk.Path(zero);
+  } while(0);
+  for (int i=0;i<5;i++) {mPP[i].move(dL);} 
+}
+//________________________________________________________________________________
+int StvNode::Check(const char *tit, int dirs) const
+{
+  if (!tit) tit="";
+  int nerr=0,ans;
+  for (int k=0;k<5;k++) {
+    TString ts;
+    if (tit[0]) {ts=tit; ts+="/par["; ts+=k;ts+="]"; }
+      int itst = (((1&k)+1)&dirs);
+      if (k==4) itst = 1;
+      if (!itst) continue;
+      ans = mPP[k].check(ts); if (ans) nerr++;
+      ans = mPE[k].Check(ts); if (ans) nerr++;
+  }
+  return nerr;
+}
 
