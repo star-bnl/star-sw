@@ -1,6 +1,7 @@
 #include "TSystem.h"
 #include "TBrowser.h"
 #include "TCernLib.h"
+#include "TVector3.h"
 #include "StvDraw.h"
 #include "Stv/StvTrack.h"
 #include "Stv/StvNode.h"
@@ -8,6 +9,7 @@
 #include "StvUtil/StvNodePars.h"
 #include "Stv/StvStl.h"
 #include "THelixTrack.h"
+#include "StarVMC/GeoTestMaker/StTGeoHelper.h"
 StvDraw *StvDraw::fgStvDraw=0;
 //_____________________________________________________________________________
 //_____________________________________________________________________________
@@ -53,9 +55,6 @@ TObject *StvDraw::Trak(const THelixTrack &helx,const std::vector<StvHit*>  &hits
   for (int i=0;i<n; i++) {
     printf("%d %g\n",i,atan2(hits[i]->x()[1],hits[i]->x()[0]));}
 
-
-
-
   std::vector<float> myTrak;  
   THelixTrack th(helx);
   const float *h = hits[0]->x();
@@ -82,14 +81,16 @@ TObject *StvDraw::Trak(const std::vector<float> &pnts, EDraw3DStyle sty)
 //_____________________________________________________________________________
 void  StvDraw::Trak(const StvTrack *tk, EDraw3DStyle sty)
 {
-  StvHits myHits;
+  StvHits myHits,ihHits;
   StvPoints  myPoits;
   const StvNode *lNode=0,*rNode;
   for (StvNodeConstIter it = tk->begin();it != tk->end();++it) {
     rNode = *it;
 //    ((StvNodePars&)(rNode->GetFP())).ready();
     StvHit  *hit  = rNode->GetHit();
-    if (hit) myHits+=hit;
+    if (hit) {
+      if (rNode->GetXi2()<1000) {myHits+=hit;} else {ihHits+=hit;}}
+      
     if (!lNode) { myPoits+=rNode->GetFP().P;}
     else        { Join(lNode,rNode,myPoits);}
 
@@ -108,9 +109,56 @@ void  StvDraw::Trak(const StvTrack *tk, EDraw3DStyle sty)
     lNode = rNode;
   }
   Hits(myHits,kUsedHit);
+  Hits(ihHits,kUnusedHit);
   Trak(myPoits,sty);
 
 }
+//_____________________________________________________________________________
+void StvDraw::Zhow(const StvTrack *tk){Inst()->Road(tk,10);}
+//_____________________________________________________________________________
+void  StvDraw::Road(const StvTrack *tk, double wide, EDraw3DStyle sty)
+{
+  Trak(tk, sty);
+  const StvNode *fist = tk->front();
+  assert(fist);  
+  const StvNode *last = tk->back();
+  assert(last);  
+  const StvNodePars &parF = fist->GetFP();
+  const StvNodePars &parL = last->GetFP();
+  TVector3 myFst(parF.P);
+  TVector3 myDir(parL._x-parF._x,parL._y-parF._y,parL._z-parF._z);
+  double dxy = myDir.Perp();;
+  double dis = myDir.Mag();;
+  double fi0 = myDir.Phi();
+  double rho = parF._curv;
+  double dfi = asin(dxy*rho/2);
+  double len = (fabs(dfi)<1e-3)? dxy:2*fabs(dfi/rho);
+
+  double dir[3]={cos(fi0-dfi),sin(fi0-dfi),myDir[2]/len};
+  THelixTrack hlx(parF.P,dir,rho);
+  double sag2 = fabs(dxy*dxy/4*rho)+wide; sag2*=sag2;
+  
+  StVoidArr *vHits = StTGeoHelper::Inst()->GetAllHits();
+  int nHits = vHits->size();
+  std::vector<StvHit*> unHits;
+  myDir=myDir.Unit();
+  for (int ih=0;ih<nHits;ih++) {//loop hit
+    StvHit *hit = (StvHit*)(*vHits)[ih];
+    TVector3 hi(hit->x()); 
+    TVector3 hl = hi-myFst;
+    double dot = hl.Dot(myDir);
+    if (dot<0 || dot >dis) 		continue;
+    if ((hl.Cross(myDir)).Mag2()>sag2)	continue;
+    double *d = &(hi[0]);
+    double dca = hlx.Dca(d);
+    if (dca>wide) 			continue;
+    unHits.push_back(hit);
+  } //End hit loop
+  if (!unHits.size()) 			return;
+  Hits(unHits,kUnusedHit);
+}
+
+
 //_____________________________________________________________________________
 void StvDraw::Join(const StvNode *left,const StvNode *rite,StvPoints &poits)
 {
@@ -172,7 +220,7 @@ void StvDraw::Wait()
     while(!ProcessEvents()){gSystem->Sleep(200);}; 
 }
 //_____________________________________________________________________________
-void StvDraw::Browse(const TObject *to)
+void StvDraw::KBrowse(const TObject *to)
 {
   new TBrowser("StvDraw",(TObject*)to);
 }
