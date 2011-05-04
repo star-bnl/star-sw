@@ -113,14 +113,14 @@ class StvFitErrs
 {
 public:	
   enum eFitErrs {kNErrs=15};
-  StvFitErrs(double hh=0,double hz=0,double zz=0):mHH(hh),mHZ(hz),mZZ(zz){}
+  StvFitErrs(double hh=0,double hz=0,double zz=0);
   void Reset();
   void Set(const StvFitErrs &fr,double errFactor);
   void Set(const THelixTrack *he,double hz);
   void Get(      THelixTrack *he)     const;
   void Get(const StvNodePars *np,  StvNodeErrs *ne)     const;
-double GetHz() const 		{ return mHz ;}
-  void SetHz(double hz)  	{ mHz=hz     ;}
+double GetHz() const   ;//?? 	{ return mHz ;}
+  void SetHz(double hz);//??  	{ mHz=hz     ;}
   const double *Arr() const 	{ return &mHH;}
         double *Arr()       	{ return &mHH;}
 double &operator[](int i) 	{ return Arr()[i];}
