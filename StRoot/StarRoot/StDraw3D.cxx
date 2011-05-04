@@ -1,4 +1,4 @@
-// $Id: StDraw3D.cxx,v 1.101 2010/06/08 21:14:13 fine Exp $
+// $Id: StDraw3D.cxx,v 1.102 2011/05/04 18:43:28 perev Exp $
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/04/2008
 #include "StDraw3D.h"
 #include "TCanvas.h"
@@ -252,8 +252,8 @@ StDraw3D::StDraw3D(const char *detectorName,TVirtualPad *pad): fPad(pad),fBkColo
    // For all names on the list one should provide the iv file with the "iv extension:
    //                         <name>.iv
 
-   static const Style_t UHitSty = 4; static const Size_t UHitSiz = 0.35; static const Color_t UHitCol=kBlue;
-   static const Style_t NHitSty = 1; static const Size_t NHitSiz = 1.00; static const Color_t NHitCol=kGreen;
+   static const Style_t UHitSty = 4; static const Size_t UHitSiz = 0.0;  static const Color_t UHitCol=kBlue;
+   static const Style_t NHitSty = 2; static const Size_t NHitSiz = 0.0;  static const Color_t NHitCol=kGreen;
    static const Style_t TrakSty = 1; static const Size_t TrakSiz = 2.00; static const Color_t TrakCol=kRed;
    static const Style_t VertSty = 5; static const Size_t VertSiz = 3.50; static const Color_t VertCol=kYellow;
    AddStyle(kVtx,         VertCol,VertSty,VertSiz);
