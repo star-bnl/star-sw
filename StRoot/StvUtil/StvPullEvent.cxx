@@ -7,7 +7,6 @@
 #include "TCernLib.h"
 #endif
 #include "StEvent/StEnumerations.h"
-#include <assert.h>
 
 ClassImp(StvPullTrk)
 ClassImp(StvPullHit)
