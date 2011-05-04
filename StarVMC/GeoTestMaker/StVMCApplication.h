@@ -1,4 +1,4 @@
-// $Id: StVMCApplication.h,v 1.2 2009/06/07 02:28:36 perev Exp $
+// $Id: StVMCApplication.h,v 1.3 2011/05/04 17:46:38 perev Exp $
 // Class StVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
@@ -57,10 +57,10 @@ class StVMCApplication : public TVirtualMCApplication
  GCall *GetFinishPrimary    () { return mFinishPrimary	  ;}
  GCall *GetFinishEvent      () { return mFinishEvent	  ;}
  GCall *GetField            () { return mField		  ;}
-
+  void  SetRZmax(double rMax,double zMax) { mRmax=rMax;mZmax=zMax; }
     
-  virtual double TrackingRmax() const { return 1.e4; }
-  virtual double TrackingZmax() const { return 1.e5; } 
+  virtual double TrackingRmax() const { return mRmax; }
+  virtual double TrackingZmax() const { return mZmax; } 
   virtual int    Debug() 	const { return mDebug;}
   
  private:
@@ -70,6 +70,8 @@ class StVMCApplication : public TVirtualMCApplication
  char   mBeg[1];
  int    mDebug;
  int    mNStepping;
+ double mRmax;
+ double mZmax;
  GCall* mInit;  
  GCall* mStepping;  
  GCall* mPrimaryGenerator;  

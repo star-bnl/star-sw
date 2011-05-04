@@ -1,4 +1,4 @@
-// $Id: StVMCApplication.cxx,v 1.3 2010/04/29 03:05:28 perev Exp $
+// $Id: StVMCApplication.cxx,v 1.4 2011/05/04 17:46:41 perev Exp $
 // Class StVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
@@ -17,7 +17,7 @@ StVMCApplication::StVMCApplication(const char *name, const char *title)
 {
   SetName(name); SetTitle(title);
   memset(mBeg,0,mEnd-mBeg+1);
-
+  mRmax = 3e33; mZmax=3e33;
 }
 //_____________________________________________________________________________
 StVMCApplication::~StVMCApplication() 
