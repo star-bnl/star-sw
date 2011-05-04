@@ -1,0 +1,10 @@
+<Document file="StarVMC/Geometry/TpceGeo/TpceGeo.xml">
+<!--
+
+  Verbatim import of tpcegeo.g for integration with starsim
+
+  -->
+<Export language="Mortran">
+<Import file="$STAR/pams/geometry/tpcegeo/tpcegeo.g" verbatim="true" />
+</Export>
+</Document>
