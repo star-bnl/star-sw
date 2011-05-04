@@ -141,6 +141,18 @@ void StObjArray::random_shuffle(int start,int end)
 
 }
 //______________________________________________________________________________
+void StObjArray::ls(const char *tit) const
+{
+  if (!tit) tit ="";
+  int n = fV.size();
+  Info("ls","%s(%s)[%d]",ClassName(),tit,n);
+  for (int i=0;i<n;i++) { 
+    TObject *to = fV[i]; if (!to) continue;
+    printf("%4d - %p %s(%s)\n",i, (void*)to,to->ClassName(),to->GetName());
+  }
+}
+
+//______________________________________________________________________________
 ClassImp(StRefArray)
 StRefArray::StRefArray(Int_t sz):StObjArray(sz){};
 StRefArray::StRefArray(const StRefArray &from):StObjArray(from){};
@@ -276,7 +288,7 @@ void StStrArray::Streamer(TBuffer &R__b)
    } else {
       R__b.WriteVersion(Class());
       StObjArray::Streamer(R__b);
-         StXRefManager::fgManager->AddColl(this);//temporaryVP
+      StXRefManager::fgManager->AddColl(this);//temporaryVP
    }
 
 }
@@ -288,3 +300,8 @@ void StStrArray::makeZombie(int flg)
    for (int i=0;i<n;i++)
    {  StObject *o = (StObject*)at(i); if (o) o->makeZombie(flg);}
 }
+//______________________________________________________________________________
+
+
+
+
