@@ -1,12 +1,15 @@
 #if 1
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.6 2011/04/03 20:45:11 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.7 2011/05/04 17:57:37 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.7  2011/05/04 17:57:37  perev
+ * Typo fixed
+ *
  * Revision 1.6  2011/04/03 20:45:11  perev
  * Cleanup
  *
@@ -1442,7 +1445,7 @@ enum {kPP=0,kMP=1,kFP=2};
     if (!h ) 			continue;
 //fill measured points
     count[0][kMP]++; count[detId][kMP]++;
-    if (!node->GetXi2()>1000) 	continue;
+    if (node->GetXi2()>1000) 	continue;
     count[0][kFP]++; count[detId][kFP]++;
   }
 }
