@@ -1,6 +1,6 @@
 /*******************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.29 2011/04/26 13:16:06 rashmi Exp $
+ * $Id: StPmdGeom.cxx,v 1.30 2011/05/04 12:27:52 rashmi Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.30  2011/05/04 12:27:52  rashmi
+ * year==12 fix in chains
+ *
  * Revision 1.29  2011/04/26 13:16:06  rashmi
  * year==12 inserted for taking new mapping
  *
@@ -2185,7 +2188,7 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
   }
   chtemp=ch+missing*64;
   chmod=chtemp;
-  //  cout<<"year,ch,chtemp,missing="<<year<<","<<ch<<","<<chtemp<<","<<missing<<endl;
+  //  cout<<"year,chain,ch,chtemp,missing="<<year<<","<<chainno<<","<<ch<<","<<chtemp<<","<<missing<<endl;
   
   if(year==8){
     if(chain==1 || chain==7 || chain==19 || chain==20 || chain==23 || chain==24) {
@@ -2202,6 +2205,7 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     if(chain==6 || chain==17 || chain == 21 ){return kStWarn;}
   }else{
     if(year==10||year==11||year==12){
+      //  cout<<"year,chain,ch,chtemp,missing="<<year<<","<<chainno<<","<<ch<<","<<chtemp<<","<<missing<<endl;
       if(chain==8||chain==12||chain==23||chain==24){
 	if(chtemp>=2304){return kStWarn;}
       }else{
@@ -2213,6 +2217,7 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
       if(chtemp>=1728){ return kStWarn;}
     }
   }
+  //  cout<<"year,chain,ch,chtemp,missing="<<year<<","<<chainno<<","<<ch<<","<<chtemp<<","<<missing<<endl;
   
   switch(chain){
     
@@ -2366,7 +2371,7 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     return kStWarn;
   }
 
-  //  cout<<"chain = "<<chain<<" chtemp="<<chtemp<<" supmod="<<supmod<<endl;
+  //  cout<<"chain = "<<chain<<" chtemp="<<chtemp<<" supmod="<<supmod<<" row="<<row<<" col="<<col<<endl;
   return kStOk;
 }
 
@@ -2518,6 +2523,7 @@ void StPmdGeom::chain1(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
   }
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -2628,6 +2634,7 @@ void StPmdGeom::chain2(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
   case 8:
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -2738,6 +2745,7 @@ void StPmdGeom::chain3(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
   case 8:
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -2848,6 +2856,7 @@ void StPmdGeom::chain4(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
   case 8:
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -2957,6 +2966,7 @@ void StPmdGeom::chain5(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
   case 8:
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -3137,6 +3147,7 @@ void StPmdGeom::chain7(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
     break;
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -3297,6 +3308,7 @@ void StPmdGeom::chain8(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
     break;
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -3472,6 +3484,7 @@ void StPmdGeom::chain9(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
     break;
   case 10:
   case 11:
+  case 12:
     switch(zone){
     case 0:
       col = 48+inorm[ch];
@@ -3631,6 +3644,7 @@ void StPmdGeom::chain10(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
     break;
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -3790,6 +3804,7 @@ void StPmdGeom::chain11(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
     break;
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -3920,6 +3935,7 @@ void StPmdGeom::chain12(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
     break;
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -4095,6 +4111,7 @@ void StPmdGeom::chain13(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
     break;
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -4159,6 +4176,7 @@ void StPmdGeom::chain14(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
   case 8:
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -4254,6 +4272,7 @@ void StPmdGeom::chain15(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
   case 8:
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -4349,6 +4368,7 @@ void StPmdGeom::chain16(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
   case 8:
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -4463,6 +4483,7 @@ void StPmdGeom::chain17(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
     break;
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -4529,6 +4550,7 @@ void StPmdGeom::chain18(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
   case 8:
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -4703,6 +4725,7 @@ void StPmdGeom::chain19(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
     break;
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -4834,6 +4857,7 @@ void StPmdGeom::chain20(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
     break;
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -4945,6 +4969,7 @@ void StPmdGeom::chain21(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
   case 8:
   case 10:
   case 11:
+  case 12:
     {
       supmod = 0;
       col = 0;
@@ -5017,6 +5042,7 @@ void StPmdGeom::chain22(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
     break;
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -5129,6 +5155,7 @@ void StPmdGeom::chain23(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
   case 8:
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -5253,6 +5280,7 @@ void StPmdGeom::chain24(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
   case 8:
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -6015,6 +6043,7 @@ void StPmdGeom::chain37(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
       }
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -6475,6 +6504,7 @@ void StPmdGeom::chain45(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
   case 8:
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -6555,6 +6585,7 @@ void StPmdGeom::chain46(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
   case 8:
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -6665,6 +6696,7 @@ void StPmdGeom::chain47(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
   case 8:
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
@@ -6774,6 +6806,7 @@ void StPmdGeom::chain48(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
   case 8:
   case 10:
   case 11:
+  case 12:
     switch(zone)
       {
       case 0:
