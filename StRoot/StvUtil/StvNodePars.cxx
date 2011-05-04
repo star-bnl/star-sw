@@ -19,6 +19,7 @@ static double MAXNODPARS[]   ={555,555,555,6.66,111, MAXTAN+1, .1};
 //                              h  z   a    l  ptin
 static double MAXFITPARS[]   ={22,22, .5 , .5 ,20};
 static double MAXFITERR[5]   ={.3,.3,0.03,0.03,1};
+static double MAXERRFACT     = 3;
 //______________________________________________________________________________ 
 void Multiply(Mtx55D_t &res, const Mtx55D_t &A,const Mtx55D_t &B)
 {
@@ -304,12 +305,19 @@ void StvHitErrs::rotate(double angle)
 
 //______________________________________________________________________________
 //______________________________________________________________________________
+StvFitErrs::StvFitErrs(double hh,double hz,double zz)
+{
+  memset(this,0,sizeof(*this));
+  mHH=hh;mHZ=hz;mZZ=zz;mHz = 3e33;
+}
+//______________________________________________________________________________
 double StvFitErrs::Sign() const {return EmxSign(5,Arr());}
 //______________________________________________________________________________
 const StvFitErrs &StvFitErrs::operator*(const Mtx55D_t &how) const
 {
 static StvFitErrs myFitErrs;
   TCL::trasat(how[0],Arr(),myFitErrs.Arr(),5,5);
+  myFitErrs.mHz = mHz;
   assert(!myFitErrs.Check("StvFitErrs::operator*") || 1);
   return myFitErrs;
 }  
@@ -317,17 +325,18 @@ static StvFitErrs myFitErrs;
 void StvFitErrs::Reset()
 {
   memset(this,0,sizeof(*this));
-  mHH =  MAXFITERR[0]*MAXFITERR[0];
-  mZZ =  MAXFITERR[1]*MAXFITERR[1];
-  mAA =  MAXFITERR[2]*MAXFITERR[2];
-  mLL =  MAXFITERR[3]*MAXFITERR[3];
-  mPP =  MAXFITERR[4]*MAXFITERR[4];
+  mHH =  MAXFITERR[0]*MAXFITERR[0]*MAXERRFACT;
+  mZZ =  MAXFITERR[1]*MAXFITERR[1]*MAXERRFACT;
+  mAA =  MAXFITERR[2]*MAXFITERR[2]*MAXERRFACT;
+  mLL =  MAXFITERR[3]*MAXFITERR[3]*MAXERRFACT;
+  mPP =  MAXFITERR[4]*MAXFITERR[4]*MAXERRFACT;
+  mHz = 3e33;
 }
 
 //______________________________________________________________________________
 void StvFitErrs::Set(const THelixTrack *he, double hz)
 {
-mHz = hz;
+mHz = hz;assert(fabs(hz)<0.002);
 const THEmx_t *emx = he->Emx();
 double  cosL = he->GetCos();
 double  sinL = he->GetSin();
@@ -352,7 +361,7 @@ mPP = emx->mCC/mHz/mHz ;
 //______________________________________________________________________________
 void StvFitErrs::Get(THelixTrack *he) const
 {
-  assert(mHz);
+  assert(mHz && fabs(mHz)<.002);
   he->SetEmx(0);
   THEmx_t *emx = he->Emx();
   double  cosL = he->GetCos();
@@ -380,6 +389,7 @@ void StvFitErrs::Set(const StvFitErrs &fr,double errFactor)
 {
   Reset();
   mHz = fr.mHz;  
+  assert(mHz && fabs(mHz)<0.002);
   double const *e =fr.Arr();
   double       *ee=   Arr();
   for (int i=0,li=0;i< 5;li+=++i) {ee[li+i] = e[li+i]*errFactor;}
@@ -402,6 +412,7 @@ int StvFitErrs::Check(const char *tit) const
     for (int j=0;j<i;j++) {
        if (e[li+j]*e[li+j]>=dia[i]*dia[j]){ierr = 100+10*i+j;goto ERR;}
     } }
+  if (!(mHz && fabs(mHz) <.002)) {ierr = 1001; goto ERR;}
   return 0;
 ERR: if (!tit) return ierr;
   printf("StvFitErrs::Check(%s)=%d\n",tit,ierr);
@@ -543,6 +554,8 @@ void StvNodePars::GetImpact(StvImpact *imp,const StvFitErrs *fe)  const
     ///     x =  -impact*sin(Psi)
     ///     y =   impact*cos(Psi)
   imp->mImp = _x*(-_sinCA) + _y*(_cosCA);
+  double tst = _x*(_cosCA) + _y*(_sinCA);
+  assert(fabs(imp->mImp) > 100*fabs(tst));
   imp->mZ   = _z;
   imp->mPsi = _psi;
   imp->mPti = _ptin;
@@ -892,3 +905,8 @@ double EmxSign(int n,const double *e)
   for (int i=0;i<n;i++) {if (EigVal[i]<ans) ans = EigVal[i];}
   return ans;
 } 
+//_____________________________________________________________________________
+void StvFitErrs::SetHz(double hz)
+{ mHz=hz; assert(mHz && fabs(mHz)<0.002) ;}
+double StvFitErrs::GetHz() const
+{assert(mHz && fabs(mHz)<0.002);  return mHz ;}
