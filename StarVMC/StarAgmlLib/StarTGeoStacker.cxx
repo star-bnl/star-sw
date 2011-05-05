@@ -435,7 +435,6 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
 #endif
 
   TString block_name = block->GetName();
-  Bool_t  FTOW = block_name == "FTOW";
 
   static Int_t numed = 1; // Why does ROOT make us keep track of this?
   static Int_t numat = 1;
@@ -513,7 +512,7 @@ Bool_t StarTGeoStacker::Build( AgBlock *block )
   if ( !medium )                                                                                     // Create if it doesn't exist
     {
 
-      Int_t mat_id = material->GetUniqueID();
+      //    Int_t mat_id = material->GetUniqueID();
       medium = new TGeoMedium(  fqmed_name,
 				numed++,
 				material->GetUniqueID(),
@@ -749,8 +748,6 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
   TString block_name = block->GetName();
   assert(block);
 
-  Bool_t TPAD = block_name == "TPAD";
-
   //
   //////////////////////////////////////////////////////////////////////////////
   //
@@ -819,7 +816,7 @@ Bool_t StarTGeoStacker::Position( AgBlock *block, AgPlacement position )
   //
   TIter next( gGeoManager -> GetListOfVolumes() ),	nextG( gGeoManager->GetListOfGVolumes() );
   TGeoVolume *vol = 0;
-  Int_t count=0;
+  //Int_t count=0;
 
   //
   //////////////////////////////////////////////////////////////////////////////
@@ -1127,7 +1124,7 @@ Bool_t StarTGeoStacker::SearchVolume( const AgShape &shape, const AgAttribute &a
   TIter next( gGeoManager -> GetListOfVolumes() ),	
         nextG( gGeoManager->GetListOfGVolumes() );
   TGeoVolume *vol = 0;
-  Int_t count=0;  
+  //Int_t count=0;  
 
   // We are attempting to find the volume which matches the specified 
   // shape and medium
