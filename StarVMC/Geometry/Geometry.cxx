@@ -560,7 +560,7 @@ Bool_t Geometry::ConstructSvtt( const Char_t *flag, Bool_t go )
   if ( go )
   if ( !CreateModule( svttGeom.module ) )
     {
-      Warning(GetName(),Form("Could not create module %s",svttGeom.module) );
+      Warning(GetName(),Form("Could not create module %s",svttGeom.module.Data()) );
       return false;
     }
   return true;
@@ -584,7 +584,7 @@ Bool_t Geometry::ConstructSisd( const Char_t *flag, Bool_t go )
   if (go)
   if ( !CreateModule( sisdGeom.module ) )
     {
-      Warning(GetName(),Form("Could not create module %s",sisdGeom.module) );
+      Warning(GetName(),Form("Could not create module %s",sisdGeom.module.Data()) );
       return false;
     }
   return true;
@@ -1015,7 +1015,6 @@ Bool_t Geometry::PipeInit() // Does this break the config=-1 scheme?
   // Pipe ala UPGR16 geometry
   pipeGeom.select="PIPE06"; pipeGeom.config=6; pipeGeom.flag=0; pipeGeom.fill();
 
-
   return true;
 }
 
@@ -1041,6 +1040,7 @@ Bool_t Geometry::SconInit()
   sconGeom.select="SCON12"; sconGeom.module="SconGeo"; sconGeom.config=2; sconGeom.fill();
   //replace [exe SCON13;] with [;SCON = on ; ConeConfig=3 " new cable weight estimate ";]
   sconGeom.select="SCON13"; sconGeom.module="SconGeo"; sconGeom.config=3; sconGeom.fill();
+  return true;
 }
 
 Bool_t Geometry::SisdInit()
@@ -1068,6 +1068,7 @@ Bool_t Geometry::SisdInit()
   sisdGeom.select="SISD65"; sisdGeom.config=65; sisdGeom.module="SisdGeo6"; sisdGeom.fill();
   //replace [exe SISD75;] with ["Silicon Strip Detector on  "; SISD=on ; SisdConfig=75;]
   sisdGeom.select="SISD75"; sisdGeom.config=75; sisdGeom.module="SisdGeo6"; sisdGeom.fill();
+  return true;
 }
 
 Bool_t Geometry::SvttInit()
@@ -1266,7 +1267,7 @@ Bool_t Geometry::SvttInit()
     svttGeom.module     = "SvttGeo11";
     svttGeom.fill();          
   }
-
+  return true;
 }
 
 Bool_t Geometry::BtofInit()
@@ -1505,12 +1506,14 @@ Bool_t Geometry::RichInit()
 Bool_t Geometry::FgtdInit()
 {
   fgtdGeom.select="FGTDon"; fgtdGeom.module="FgtdGeo2"; fgtdGeom.config=1; fgtdGeom.fill();
+  return true;
 }
 
 Bool_t Geometry::FtroInit()
 {
   ftroGeom.select="FTROon"; ftroGeom.module="FtroGeo"; ftroGeom.fill();
   ftroGeom.select="FTROof"; ftroGeom.module="None";    ftroGeom.fill();
+  return true;
 }
 
 
@@ -1584,9 +1587,7 @@ Bool_t Geometry::GeomInit()
     geom.fill(); 
   }
 
-
-
-
+  return true;
 }
 
 
