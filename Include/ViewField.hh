@@ -29,6 +29,7 @@ class ViewField {
     void SetArea(double xmin, double ymin, 
                  double xmax, double ymax);
     void SetVoltageRange(const double minval, const double maxval);
+    void SetElectricFieldRange(const double minval, const double maxval);
     void SetNumberOfContours(const int n);
     void SetDefaultProjection();
     void SetPlane(double fx, double fy, double fz, 
@@ -81,6 +82,7 @@ class ViewField {
     double pxmin, pymin, pzmin, pxmax, pymax, pzmax;
     // Function range
     double fmin, fmax;
+    double emin, emax;
     
     // Number of contours
     int nContours;

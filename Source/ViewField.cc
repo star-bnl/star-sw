@@ -21,6 +21,7 @@ ViewField::ViewField() :
   sensor(0), component(0),
   pxmin(-1.), pymin(-1.), pxmax(1.), pymax(1.),
   fmin(0.), fmax(100.),
+  emin(0.), emax(10000.),
   nContours(nMaxContours),
   nSamples1d(1000), nSamples2dX(200), nSamples2dY(200),
   canvas(0), hasExternalCanvas(false),
@@ -117,6 +118,14 @@ ViewField::SetVoltageRange(const double minval, const double maxval) {
 }
 
 void
+ViewField::SetElectricFieldRange(const double minval, const double maxval) {
+
+  emin = std::min(minval, maxval);
+  emax = std::max(minval, maxval);
+
+}
+
+void
 ViewField::SetNumberOfContours(const int n) {
 
   if (n <= nMaxContours) {
@@ -210,9 +219,17 @@ ViewField::PlotContour(const std::string option) {
   double level[nMaxContours];
   for (int i = 0; i < nContours; ++i) {
     if (nContours > 1) {
-      level[i] = fmin + i * (fmax - fmin) / (nContours - 1.);
+      if (plotType == 0) {
+        level[i] = fmin + i * (fmax - fmin) / (nContours - 1.);
+      } else {
+        level[i] = emin + i * (emax - emin) / (nContours - 1.);
+      }
     } else {
-      level[i] = (fmax + fmin) / 2.;
+      if (plotType == 0) {
+        level[i] = (fmax + fmin) / 2.;
+      } else {
+        level[i] = (emax + emin) / 2.; 
+      }
     }
   }
   fPot->SetContour(nContours, level);
@@ -289,13 +306,13 @@ ViewField::PlotSurface(const std::string option) {
   if (plotType == 0) {
     fPot->SetTitle("Surface plot of the potential");
   } else if (plotType == 1) {
-    fPotProfile->SetTitle("Surface plot of the electric field");
+    fPot->SetTitle("Surface plot of the electric field");
   } else if (plotType == 2) {
-    fPotProfile->SetTitle("Surface plot of the electric field (x-component)");
+    fPot->SetTitle("Surface plot of the electric field (x-component)");
   } else if (plotType == 3) {
-    fPotProfile->SetTitle("Surface plot of the electric field (y-component)");
+    fPot->SetTitle("Surface plot of the electric field (y-component)");
   } else if (plotType == 4) {
-    fPotProfile->SetTitle("Surface plot of the electric field (z-component)");
+    fPot->SetTitle("Surface plot of the electric field (z-component)");
   }
   fPot->Draw("SURF4");
   canvas->Update();
