@@ -97,10 +97,11 @@ my @h_filesL = script::find_hfiles($Dir);
 my @uiQT     = script::find_ui($Dir);
 my @xpmQT    = script::find_xpm($Dir);
 my @qrcQT    = script::find_qrc($Dir);
+my @xmlGeo   = script::find_xml($Dir);
 
 
-
-print "idlL = @idlL\n" if $param::debug;
+print "idlL = @idlL\n"   if $param::debug;
+# print "Geom = @xmlGeo\n";
 
 my (@src, @h_files, @idlM);
 my $CPPPATH = $env1->{CPPPATH};
@@ -566,7 +567,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     } elsif ( $Dir =~ m/StarVMC/ and $pkg =~ m/StiVMC/) {
 	$CPPPATH = "#StarVMC" . $main::PATH_SEPARATOR . $CPPPATH;
 	#    print "StarVMC change CPPPATH to $CPPPATH =========\n";
-
+	
     } elsif ( $pkg =~ m/^Vc$/){
 	#    $CPPPATH =
 	#      "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include";
@@ -758,6 +759,48 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     my $line;
     my @Defs = ();
 
+	
+    if ($#xmlGeo > -1){
+	# for the geometry package, generate the geom
+	# print join(";",@xmlGeo);
+	my($bflnm,$agM,$agF,$agX,$agH);
+	my($agml_cmd);
+	my(@ODIR)= ("StarVMC/StarGeometry/","StarVMC/xgeometry/");
+	
+	# for now, generate in-situ
+	my($in_situ)=1==1;
+
+	if ( $in_situ  && (! $IsRepo || $IsDotDev)){
+	    foreach (@ODIR){ if ( ! -d $ODIR[0] && $in_sittu ){  mkdir($ODIR[0],0755);}}
+
+	    # local or global
+	    if ( -e "mgr/agmlParser.py"){	$agml_cmd = "mgr/agmlParser.py";
+	    } else {			$agml_cmd =     "agmlParser.py";}
+
+	    foreach $xml (@xmlGeo){
+		if ( $xml =~ /StarVMC\/Geometry\// ){
+		    print "xml = $xml\n" if $param::debug;
+		    $agM   = $xml; $agM =~ s/\..*//; $agM =~ s/.*\///;
+
+		    $agX   = ($in_situ?"#":"").$ODIR[0].$agM.".cxx";
+		    $agH   = ($in_situ?"#":"").$ODIR[0].$agM.".h";
+		    $agF   = ($in_situ?"#":"").$ODIR[1].$agM.".age";
+		
+		    # print "\t$agX $xml\n";
+		    # my $GenCmd = "$agml_cmd --file=%< --export=AgROOT --module=$bflnm --path=$ODIR && echo %>";
+		    $env->{ENV}->{AGML_WARNINGS} = !$param::debug;
+		    # export AGML_WARNINGS=\$AGML_WARNINGS
+		    Command $env [$agX], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=$ODIR[0]);
+		    Command $env [$agF], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
+
+		} else {
+		    # just be sure we pick only from one tree
+		    print "Warning: found $xml but in a non-expected tree\n";
+		}
+	    }
+	}
+    }
+	
 
     if ( $#idlM > -1 ) {
 	my $include = $INCLUDE . "/" . $pkg;
