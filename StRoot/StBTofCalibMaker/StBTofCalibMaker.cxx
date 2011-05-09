@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.12 2010/10/31 05:52:11 geurts Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.13 2011/05/09 14:32:10 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.13  2011/05/09 14:32:10  geurts
+ * use appropriate log level for debug messages
+ *
  * Revision 1.12  2010/10/31 05:52:11  geurts
  * fixed module index range for read in loop for BOARD (TDIG) based calibration
  *
@@ -492,7 +495,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
         if(trayId>0&&trayId<=mNTray&&moduleId>0&&moduleId<=mNModule&&cellId>0&&cellId<=mNCell){ // trays
 	  mTofTotEdge[trayId-1][moduleId-1][cellId-1][j] = totCorr[i].tot[j];
 	  mTofTotCorr[trayId-1][moduleId-1][cellId-1][j] = totCorr[i].corr[j];
-	  if(Debug()&&j%10==0) { LOG_INFO << " j=" << j << " tot " << mTofTotEdge[trayId-1][moduleId-1][cellId-1][j] << " corr " << mTofTotCorr[trayId-1][moduleId-1][cellId-1][j] << endm; }
+	  if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofTotEdge[trayId-1][moduleId-1][cellId-1][j] << " corr " << mTofTotCorr[trayId-1][moduleId-1][cellId-1][j] << endm; }
         } 
       } // end j 0->mNBinMax
     } // end i 0->numRows
@@ -511,7 +514,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
 	  for(Int_t k=0;k<mNCell;k++){
           mTofTotEdge[trayId-1][moduleId-1][cellId-1+k][j] = totCorr[i].tot[j];
           mTofTotCorr[trayId-1][moduleId-1][cellId-1+k][j] = totCorr[i].corr[j];
-          if(Debug()&&j%10==0) { LOG_INFO << " j=" << j << " tot " << mTofTotEdge[trayId-1][moduleId-1][cellId-1+k][j] << " corr " << mTofTotCorr[trayId-1][moduleId-1][cellId-1+k][j] << endm; }
+          if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofTotEdge[trayId-1][moduleId-1][cellId-1+k][j] << " corr " << mTofTotCorr[trayId-1][moduleId-1][cellId-1+k][j] << endm; }
 	  }//duplicating entries into each cell
         }	  
       } // end j 0->mNBinMax
@@ -532,7 +535,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
 	    for(Int_t l=0;l<mNCell;l++){
               mTofTotEdge[trayId-1][moduleId-1+k][cellId-1+l][j] = totCorr[i].tot[j];
               mTofTotCorr[trayId-1][moduleId-1+k][cellId-1+l][j] = totCorr[i].corr[j];
-              if(Debug()&&j%10==0) { LOG_INFO << " j=" << j << " tot " << mTofTotEdge[trayId-1][moduleId-1+k][cellId-1+l][j] << " corr " << mTofTotCorr[trayId-1][moduleId-1+k][cellId-1+l][j] << endm; }
+              if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofTotEdge[trayId-1][moduleId-1+k][cellId-1+l][j] << " corr " << mTofTotCorr[trayId-1][moduleId-1+k][cellId-1+l][j] << endm; }
 	   }//duplicating into cells
 	  }//duplication into modules  
         }
@@ -578,7 +581,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
 	if(trayId>0&&trayId<=mNTray&&moduleId>0&&moduleId<=mNModule&&cellId>0&&cellId<=mNCell) {  // trays
 	  mTofZEdge[trayId-1][moduleId-1][cellId-1][j] = zCorr[i].z[j];
 	  mTofZCorr[trayId-1][moduleId-1][cellId-1][j] = zCorr[i].corr[j];
-	  if(Debug()&&j%10==0) { LOG_INFO << " j=" << j << " tot " << mTofZEdge[trayId-1][moduleId-1][cellId-1][j] << " corr " << mTofZCorr[trayId-1][moduleId-1][cellId-1][j] << endm; }
+	  if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofZEdge[trayId-1][moduleId-1][cellId-1][j] << " corr " << mTofZCorr[trayId-1][moduleId-1][cellId-1][j] << endm; }
 	}
       } // end j 0->mNBinMax
     } // end i 0->numRows
@@ -597,7 +600,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
 	  for(Int_t k=0;k<mNCell;k++){
             mTofZEdge[trayId-1][moduleId-1][cellId-1+k][j] = zCorr[i].z[j];
             mTofZCorr[trayId-1][moduleId-1][cellId-1+k][j] = zCorr[i].corr[j];
-            if(Debug()&&j%10==0) { LOG_INFO << " j=" << j << " tot " << mTofZEdge[trayId-1][moduleId-1][cellId-1+k][j] << " corr " << mTofZCorr[trayId-1][moduleId-1][cellId-1+k][j] << endm; }
+            if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofZEdge[trayId-1][moduleId-1][cellId-1+k][j] << " corr " << mTofZCorr[trayId-1][moduleId-1][cellId-1+k][j] << endm; }
 	  }//duplicating info to all cells
         }
       } // end j 0->mNBinMax
@@ -618,7 +621,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
 	    for(Int_t l=0;l<mNCell;l++){
               mTofZEdge[trayId-1][moduleId-1+k][cellId-1+l][j] = zCorr[i].z[j];
               mTofZCorr[trayId-1][moduleId-1+k][cellId-1+l][j] = zCorr[i].corr[j];
-          if(Debug()&&j%10==0) { LOG_INFO << " j=" << j << " tot " << mTofZEdge[trayId-1][moduleId-1+k][cellId-1+l][j] << " corr " << mTofZCorr[trayId-1][moduleId-1+k][cellId-1+l][j] << endm; }
+          if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " tot " << mTofZEdge[trayId-1][moduleId-1+k][cellId-1+l][j] << " corr " << mTofZCorr[trayId-1][moduleId-1+k][cellId-1+l][j] << endm; }
 	    }//duplicating info to cell lvl
 	  }//duplicating info to module lvl
         }
@@ -654,7 +657,7 @@ Int_t StBTofCalibMaker::initParameters(int runnumber)
       if(trayId>0&&trayId<=mNTray) {
 	for(int j=0;j<mNTOF;j++) {
 	  mTofTZero[trayId-1][j/6][j%6] = tZero[i].T0[j];
-	  if(Debug()&&j%10==0) { LOG_INFO << " j=" << j << " T0 " << mTofTZero[trayId-1][j/6][j%6] << endm; }
+	  if(Debug()&&j%10==0) { LOG_DEBUG << " j=" << j << " T0 " << mTofTZero[trayId-1][j/6][j%6] << endm; }
 	}
       }
     }
@@ -1324,7 +1327,7 @@ void StBTofCalibMaker::loadVpdData()
      mVPDLeTime[i] = mBTofHeader->vpdTime(west, i+1);
      if(mVPDLeTime[i]>0.) mTSumWest += mVPDLeTime[i];
      if(Debug()) {
-       LOG_INFO << " loading VPD West tubeId = " << i+1 << " time = " << mVPDLeTime[i] << endm;
+       LOG_DEBUG << " loading VPD West tubeId = " << i+1 << " time = " << mVPDLeTime[i] << endm;
      }
    }
 
@@ -1332,7 +1335,7 @@ void StBTofCalibMaker::loadVpdData()
      mVPDLeTime[i+mNVPD] = mBTofHeader->vpdTime(east, i+1);
      if(mVPDLeTime[i+mNVPD]>0.) mTSumEast += mVPDLeTime[i+mNVPD];
      if(Debug()) {
-       LOG_INFO << " loading VPD East tubeId = " << i+1 << " time = " << mVPDLeTime[i+mNVPD] << endm;
+       LOG_DEBUG << " loading VPD East tubeId = " << i+1 << " time = " << mVPDLeTime[i+mNVPD] << endm;
      }
    }
 
