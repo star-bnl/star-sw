@@ -10,7 +10,15 @@ import re
 # Exception handling
 #from exceptions import *
 from AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning
-from warnings import warn
+
+enable_warnings = os.getenv('AGML_WARNINGS')
+
+if enable_warnings:
+    from warnings import warn
+else:
+    def warn( aboutsomething ):
+        pass
+
 from pyparsing  import *
 
 # Control Flags
