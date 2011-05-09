@@ -129,8 +129,22 @@ bool TOFL1multHistogramGroup::fill(evpReader* evp, char* datap) {
   for(int itray=0;itray<120;itray++)for(int i=0;i<24;i++)tinohit[itray][i]=0;
 
   // TOF trigger window per THUB, subject to change anytime.
-  int trigwindowLow[4]={2830,2840,2910,2910};
-  int trigwindowHigh[4]={2910,2920,2990,2990};
+  //int trigwindowLow[4]={2830,2840,2910,2910};
+  //int trigwindowHigh[4]={2910,2920,2990,2990};
+  //trigger window per tray AuAu200
+  int trigwindowLowpertray[120]={
+  2809,2809,2806,2808,2809, 2809,2809,2809,2809,2810, 2809,2809,2809,2809,2809,
+  2809,2808,2809,2809,2808, 2809,2809,2809,2809,2806, 2809,2818,2818,2818,2818,
+  2818,2824,2826,2822,2828, 2826,2827,2825,2827,2819, 2821,2821,2820,2818,2809,
+  2809,2809,2809,2809,2809, 2784,2784,2784,2795,2796, 2797,2797,2797,2809,2809,
+  2884,2884,2871,2873,2872, 2883,2877,2884,2878,2883, 2884,2884,2884,2884,2885,
+  2884,2892,2894,2895,2893, 2894,2893,2892,2894,2884, 2884,2883,2883,2884,2875,
+  2876,2877,2875,2876,2878, 2884,2884,2890,2884,2897, 2897,2897,2897,2896,2897,
+  2896,2896,2894,2896,2897, 2896,2884,2891,2884,2884, 2884,2885,2883,2884,2884
+  };
+  int trigwindowHighpertray[120];
+  for(int iii=0;iii<120;iii++)
+    trigwindowHighpertray[iii]=trigwindowLowpertray[iii]+80;
 
   for(int ifib=0;ifib<4;ifib++){
     int ndataword = tof.ddl_words[ifib];    // 
@@ -168,9 +182,9 @@ bool TOFL1multHistogramGroup::fill(evpReader* evp, char* datap) {
       float timeDiff = time- trgTime;
       while(timeDiff<0) timeDiff += 51200;
 
-      int thub=Get_TOFTHUB(trayid);
-
-      if(timeDiff<trigwindowLow[thub] || timeDiff>trigwindowHigh[thub]) continue;   // trigger window cut
+//      int thub=Get_TOFTHUB(trayid);
+//      if(timeDiff<trigwindowLow[thub] || timeDiff>trigwindowHigh[thub]) continue;   // trigger window cut
+      if(timeDiff<trigwindowLowpertray[trayid-1] || timeDiff>trigwindowHighpertray[trayid-1]) continue;   // trigger window per tray
 
       int tdcid=(dataword & 0x0F000000)>>24;  // 0-15
       int tdigboardid=tdcid/4;   // 0-3 for half tray.
