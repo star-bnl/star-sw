@@ -34,6 +34,8 @@ void StarGeometryDb()
   y2010(); geom.Last(); setTitle("Production Geometry"); geom.select="y2010pro"; geom.fill();
   y2011(); geom.Last(); setTitle("Production Geometry"); geom.select="y2011pro"; geom.fill();
 
+  y2012(); geom.Last(); setTitle("Development Geometry"); geom.select="y2012dev"; geom.fill();
+
 }
 
 void y2000()
@@ -807,6 +809,25 @@ REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC
     setTitle("First cut");
     geom.fill();
   }
+
+}
+
+
+void y2012()
+{
+  std::cout << "+ Creating STAR y2012 Geometries" << std::endl;
+  geom.Use("select","y2011");
+  geom.select = "upgr2012"; {
+    geom.sconFlag = "SCONof"; geom.sconStat = 0;
+    geom.ftroFlag = "FTROof"; geom.ftroStat = 0;
+    geom.ftpcFlag = "FTPCof"; geom.ftpcStat = 0;
+
+    geom.fgtdFlag = "FGTD03"; geom.fgtdStat = 1;
+    geom.isdmFlag = "ISDM01"; geom.isdmStat = 1;
+
+    setTitle("Upgrade studies");
+    geom.fill();
+  };
 
 }
 

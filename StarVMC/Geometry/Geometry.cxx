@@ -43,6 +43,7 @@ ClassImp(Geometry);
 /* ClassImp(FtroGeom_t); */ FtroGeom_t ftroGeom;
 /* ClassImp(RichGeom_t); */ RichGeom_t richGeom;
 /* ClassImp(FgtdGeom_t); */ FgtdGeom_t fgtdGeom;
+/* ClassImp(IdsmGeom_t); */ IdsmGeom_t isdmGeom;
 
 // ----------------------------------------------------------------------
 Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
@@ -52,7 +53,7 @@ Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
 
   CalbInit(); CaveInit(); EcalInit(); FpdmInit(); FtpcInit(); MutdInit(); PipeInit();
   PixlInit(); SconInit(); SisdInit(); SvttInit(); BtofInit(); TpceInit(); VpddInit();
-  UpstInit(); ZcalInit(); FtroInit(); RichInit(); PhmdInit();
+  UpstInit(); ZcalInit(); FtroInit(); RichInit(); PhmdInit(); FgtdInit(); IsdmInit();
 
   GeomInit();
 
@@ -91,6 +92,7 @@ void Geometry::ConstructGeometry( const Char_t *tag )
 
   // Add in the support cone
   geom.success_scon = ConstructScon( geom.sconFlag, geom.sconStat );
+  geom.success_isdm = ConstructIsdm( geom.isdmFlag, geom.isdmStat );
 
   // Minbias trigger and vertex positioning detectors
   geom.success_bbcm = ConstructBbcm("BBCMon",       geom.bbcmStat );
@@ -106,7 +108,8 @@ void Geometry::ConstructGeometry( const Char_t *tag )
   // Tracking detectors
   geom.success_tpce = ConstructTpce( geom.tpceFlag, geom.tpceStat );
   geom.success_ftpc = ConstructFtpc( geom.ftpcFlag, geom.ftpcStat );
-  geom.success_ftro = ConstructFtro( geom.ftroFlag, geom.ftroStat ); 
+  geom.success_ftro = ConstructFtro( geom.ftroFlag, geom.ftroStat );
+  geom.success_fgtd = ConstructFgtd( geom.fgtdFlag, geom.fgtdStat );
 
 
   geom.success_svtt = ConstructSvtt( geom.svttFlag, geom.svttStat );
@@ -710,6 +713,46 @@ Bool_t Geometry::ConstructRich( const Char_t *flag, Bool_t go )
   if ( !CreateModule( richGeom.module  ) )
     {
       Warning(GetName(),"Could not create module RichGeo");
+      return false;
+    }
+  return true;
+}
+
+// ----------------------------------------------------------------------
+Bool_t Geometry::ConstructFgtd( const Char_t *flag, Bool_t go )
+{
+
+  std::cout << "============================================================ fgtd ==" << std::endl;
+  std::cout << "flag = " << flag << " go = " << go << std::endl;
+
+  if ( !fgtdGeom.Use( "select", flag ) )
+    {
+      Error(GetName(),Form("Cannot locate configuration %s",flag));
+      return false;      
+    }
+
+  if ( go )
+  if ( !CreateModule( fgtdGeom.module  ) )
+    {
+      Warning(GetName(),"Could not create module FgtdGeo");
+      return false;
+    }
+  return true;
+}
+
+// ----------------------------------------------------------------------
+Bool_t Geometry::ConstructIsdm( const Char_t *flag, Bool_t go )
+{
+  if ( !isdmGeom.Use( "select", flag ) )
+    {
+      Error(GetName(),Form("Cannot locate configuration %s",flag));
+      return false;      
+    }
+
+  if ( go )
+  if ( !CreateModule( isdmGeom.module  ) )
+    {
+      Warning(GetName(),"Could not create module IdsmGeo");
       return false;
     }
   return true;
@@ -1506,6 +1549,14 @@ Bool_t Geometry::RichInit()
 Bool_t Geometry::FgtdInit()
 {
   fgtdGeom.select="FGTDon"; fgtdGeom.module="FgtdGeo2"; fgtdGeom.config=1; fgtdGeom.fill();
+  fgtdGeom.select="FGTD03"; fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=3; fgtdGeom.fill();
+  return true;
+}
+
+Bool_t Geometry::IsdmInit()
+{
+  isdmGeom.select="ISDMon"; isdmGeom.module="IdsmGeo1"; isdmGeom.config=1; isdmGeom.fill();
+  isdmGeom.select="ISDM01"; isdmGeom.module="IdsmGeo1"; isdmGeom.config=1; isdmGeom.fill();
   return true;
 }
 
