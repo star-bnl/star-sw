@@ -22,7 +22,7 @@ class Geom_t : public AgStructure
   SetDetector(tpce);  SetDetector(calb);  SetDetector(scon);  SetDetector(svtt);
   SetDetector(phmd);  SetDetector(upst);  SetDetector(zcal);  SetDetector(cave);
   SetDetector(magp);  SetDetector(bbcm);  SetDetector(sisd);  SetDetector(rich);
-  SetDetector(mfld);  SetDetector(fgtd);
+  SetDetector(mfld);  SetDetector(fgtd);  SetDetector(isdm);
 
       ecalCuts=1;
       calbCuts=1;
@@ -46,7 +46,7 @@ class Geom_t : public AgStructure
   AddDetector(tpce);  AddDetector(calb);  AddDetector(scon);  AddDetector(svtt);
   AddDetector(phmd);  AddDetector(upst);  AddDetector(zcal);  AddDetector(cave);
   AddDetector(magp);  AddDetector(bbcm);  AddDetector(sisd);  AddDetector(rich);
-  AddDetector(mfld);  AddDetector(fgtd);
+  AddDetector(mfld);  AddDetector(fgtd);  AddDetector(isdm);
 
   Int_t ecalCuts;
   Int_t calbCuts;
@@ -410,6 +410,18 @@ class FgtdGeom_t : public AgStructure
     TString module;
     Int_t config;
 };
+// ----------------------------------------------------------------------
+class IdsmGeom_t : public AgStructure
+{ public:
+  ClassDef(IdsmGeom_t,1);
+  IdsmGeom_t(): AgStructure("IdsmGeom_t","STAR ISDM Master Geometry Table")
+    {
+      select="ISDMon"; module="IdsmGeo1"; config=1;
+    }
+    TString select;
+    TString module;
+    Int_t config;
+};
 
 //////////////////////////////////////////////////////////
 //
@@ -439,7 +451,7 @@ class Geometry : public AgModule
   Bool_t SvttInit();  Bool_t BtofInit();  Bool_t TpceInit();
   Bool_t VpddInit();  Bool_t MagpInit();  Bool_t UpstInit();
   Bool_t ZcalInit();  Bool_t FtroInit();  Bool_t RichInit();
-  Bool_t FgtdInit();
+  Bool_t FgtdInit();  Bool_t IsdmInit();
 
   Bool_t GeomInit();
 
@@ -464,7 +476,8 @@ class Geometry : public AgModule
   Bool_t ConstructUpst( const Char_t *flag, Bool_t go=true );
   Bool_t ConstructZcal( const Char_t *flag, Bool_t go=true );
   Bool_t ConstructRich( const Char_t *flag, Bool_t go=false ); // RICH is deprecated
-  //  Bool_t ConstructFgtd( const Char_t *flag, Bool_t go=true );
+  Bool_t ConstructFgtd( const Char_t *flag, Bool_t go=true );
+  Bool_t ConstructIsdm( const Char_t *flag, Bool_t go=true );
 
  public:
   AgModule *CreateModule( const Char_t *name, const Char_t *top = NULL );
