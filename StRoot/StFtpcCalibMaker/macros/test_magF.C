@@ -1,6 +1,9 @@
-// $Id: test_magF.C,v 1.3 2008/05/16 18:36:57 jcs Exp $
+// $Id: test_magF.C,v 1.4 2011/05/11 11:55:46 jcs Exp $
 //
 // $Log: test_magF.C,v $
+// Revision 1.4  2011/05/11 11:55:46  jcs
+// had to change order of library loading to avoid undefined symbols
+//
 // Revision 1.3  2008/05/16 18:36:57  jcs
 // update FTPC calibration macros
 //
@@ -17,11 +20,11 @@ void test_magF()
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
-  gSystem->Load("StTpcDb");
   gSystem->Load("StUtilities");
   gSystem->Load("StarMagField");
   gSystem->Load("StMagF");
   gSystem->Load("StDetectorDbMaker.so");
+  gSystem->Load("StTpcDb");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
