@@ -6,7 +6,7 @@ $build =~ s/\\/\//g;                                    # print "OBJ = $OBJ buil
 my $DirPath = DirPath '.';                              # print "DirPath = $DirPath\n";
 ( my $obj_dir = $DirPath ) =~ s/\\/\//g;                # print "obj_dir = $obj_dir\n";
 ( my $Dir = $obj_dir ) =~ s/$build\///g;                # print "Dir = $Dir\n";
-my $ObjDir   = "#" . $obj_dir;                          # print "ObjDir = $ObjDir\n";
+my $ObjDir       = "#" . $obj_dir;                      # print "ObjDir = $ObjDir\n";
 my $STAR_SYS     = $env->{ENV}->{STAR_SYS};
 my $STAR_VERSION = $env->{ENV}->{STAR_VERSION};         # print "#####  $STAR_VER\n";
 my $AFS_RHIC     = $env->{ENV}->{AFS_RHIC};
@@ -97,7 +97,6 @@ my @h_filesL = script::find_hfiles($Dir);
 my @uiQT     = script::find_ui($Dir);
 my @xpmQT    = script::find_xpm($Dir);
 my @qrcQT    = script::find_qrc($Dir);
-my @xmlGeo   = script::find_xml($Dir);
 
 
 print "idlL = @idlL\n"   if $param::debug;
@@ -206,6 +205,8 @@ if ($FC eq 'g77' or $FC eq 'gfortran'){
 if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "\t--- Regular case treatment (not gen not sim) ---\n" if $param::debug;
   
+            
+    # if user requested debug, print some info on what was found
     if ($param::debug) {
 	$i = 0;
 	foreach my $s(@idlML) { print "i=", $i++, " idlM = ", $s, "\n"; }
@@ -215,6 +216,70 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	foreach my $s(@h_files) { print "i=", $i++, " h_files = ", $s, "\n"; }
     }
   
+    
+    # Generate geometries first - this will be hit on any $Dir
+    # xgeometry and StarGeometry may not be created however
+    if ( $Dir =~ m/Geometry/ ){
+	my @xmlGeo   = script::find_xml($Dir);
+	if ($#xmlGeo > -1){
+	    # for the geometry package, generate the geom
+	    # print join(";",@xmlGeo);
+	    my($bflnm,$pref,$agM,$agF,$agX,$agH,$agO);
+	    my($agml_cmd);
+	    my(@ODIR)= ("StarVMC/StarGeometry/","StarVMC/xgeometry/");
+	      
+	    # for now, generate in-situ
+	    my($in_situ)=1==1;
+	    
+	    if ( $in_situ  && (! $IsRepo || $IsDotDev)){
+		foreach (@ODIR){ if ( ! -d $ODIR[0] && $in_sittu ){  mkdir($ODIR[0],0755);}}
+
+		# local or global
+		if ( -e "mgr/agmlParser.py"){	$agml_cmd = "mgr/agmlParser.py";
+		} else {			$agml_cmd =     "agmlParser.py";}
+		
+		foreach $xml (@xmlGeo){
+		    if ( $xml =~ /StarVMC\/Geometry\// ){
+			print "xml = $xml\n" if $param::debug;
+			$agM   = $xml; $agM =~ s/\..*//; $agM =~ s/.*\///;
+			
+			$pref  = ($in_situ?"#":"");
+			$agX   = $ODIR[0].$agM.".cxx";
+			$agH   = $ODIR[0].$agM.".h";
+			$agF   = $ODIR[1].$agM.".age";
+			$agO   = $ODIR[1].$agM.".o";
+			  
+		        # print "\tDEBUG $agX $xml $agO\n";
+			# my $GenCmd = "$agml_cmd --file=%< --export=AgROOT --module=$bflnm --path=$ODIR && echo %>";
+			$env->{ENV}->{AGML_WARNINGS} = !$param::debug;
+			# export AGML_WARNINGS=\$AGML_WARNINGS
+			
+			if ( $xml =~ m/Compat/ ){
+			    Depends $env [$pref.$agF], "#$xml", "#$agml_cmd";			    
+			    Command $env [$pref.$agF], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);			    
+			} else {
+			    Depends $env [$pref.$agX, $pref.$agH, $pref.$agF], "#$xml", "#$agml_cmd";
+			    Depends $env [$agO], $pref.$agX, $pref.$agH;
+			  
+			    Command $env [$pref.$agX], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
+			    Command $env [$pref.$agF], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
+		    
+			    # push(@src,"#$agX"); 
+			    # push(@Defs,$agH);
+			}
+		    
+		    } else {
+			# just be sure we pick only from one tree
+			print "Warning: found $xml but in a non-expected tree\n";
+		    }
+		}
+	    }
+	}
+    }
+	
+
+    
+
   
     foreach my $Rep(@Repo) {
 	my $RepDir = $Rep . "/" . $Dir;
@@ -234,8 +299,8 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     @src     = script::sortu(@srcL);
     @h_files = script::sortu(@h_filesL);
     @idlM    = script::sortu(@idlML);
-    #ui     /opt/star/sl305_gcc323/qt/bin/uic GeomBrowser.ui -i GeomBrowser.h -o .ui/GeomBrowser.cpp
-    #xpm    /opt/star/sl305_gcc323/qt/bin/uic  -embed -o .ui/qmake_image_collection.cpp
+    # ui     /opt/star/sl305_gcc323/qt/bin/uic GeomBrowser.ui -i GeomBrowser.h -o .ui/GeomBrowser.cpp
+    # xpm    /opt/star/sl305_gcc323/qt/bin/uic  -embed -o .ui/qmake_image_collection.cpp
     my $uic = $env->{Packages}->{QT}->{BINDIR} . "/uic";
     my $qt4 = ($env->{Packages}->{QT}->{QT_VERSION} == 4);
     my $rcc =$uic;
@@ -303,8 +368,13 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    my $out = "$dirbase". "qrc_". $stem . ".cxx"; # print "Qt4:  ut : $out ==> $qrclocal\n@xpmQT\n"; # if $param::debug ;
 	    Command $env [$out], @dep, qq(cd %1:d; $rcc %1:f -o %>:f );
 	    push @src, $out
-	    }
+	}
     }
+    
+
+    
+    
+    
     $SO_PKG = $PKG . "." . $env1->{SUFSOLIB};
     $SO_PKG_PLAIN = $SO_PKG;
     if ( $#idlM > -1 and $PKG !~ "^St" ) { $PKG = "St_" . $PKG; @PlainObj = @src; $SO_PKG = $PKG . "." . $env1->{SUFSOLIB};}
@@ -314,9 +384,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     $obj = $ObjDir;
     print "obj = $obj\n" if $param::debug;
     print "SO_PKG = $SO_PKG\n" if $param::debug;
-  
-  
+
     $SO_MAP = $PKG . ".map";
+    
+    
     #+
     # Additional flag treatment for specific makers
     # Search path depth for Makers.
@@ -608,7 +679,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	#    $extraCXXFLAGS .= " -DDO_TPCCATRACKER_EFF_PERFORMANCE"; # uncomment for CA Efficiencies output
 	$extraCXXFLAGS .= " -DNODEBUG";
 	$CXXFLAGS .= $extraCXXFLAGS;
-	#c++ `root-config --ldflags` -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -Os -DNDEBUG -fPIC -rdynamic -DENABLE_VECTORIZATION `root-config --glibs` -lEG  ./StRoot/TPCCATracker/CA.C -I/star/u/ikulakov/tests/test5/StRoot/TPCCATracker/code -I/afs/rhic.bnl.gov/star/ROOT/5.99.99/.sl53_gcc450/rootdeb/include  -I/star/u/ikulakov/tests/test5/.sl53_gcc450/include  -L/star/u/ikulakov/tests/test5/.sl53_gcc450/lib -lVc -lTPCCATracker -lTBB -o CA
+	# c++ `root-config --ldflags` -W -Wall -Wimplicit -Wswitch -Wformat -Wchar-subscripts -Wparentheses -Wmultichar -Wtrigraphs -Wpointer-arith -Wcast-align -Wreturn-type -Wno-unused-function -ansi -pedantic -Wno-long-long -Wno-variadic-macros -msse -msse2 -Wshadow -fno-threadsafe-statics -Os -DNDEBUG -fPIC -rdynamic -DENABLE_VECTORIZATION `root-config --glibs` -lEG  ./StRoot/TPCCATracker/CA.C -I/star/u/ikulakov/tests/test5/StRoot/TPCCATracker/code -I/afs/rhic.bnl.gov/star/ROOT/5.99.99/.sl53_gcc450/rootdeb/include  -I/star/u/ikulakov/tests/test5/.sl53_gcc450/include  -L/star/u/ikulakov/tests/test5/.sl53_gcc450/lib -lVc -lTPCCATracker -lTBB -o CA
 #    # stand - alone 
 #    my $libs = "-lTPCCATracker -lVc -lTBB ". $env->{Packages}->{ROOT}->{LIBS} . " -lEG";
 #    $envTPCCA = $env->clone('Package' => $pkg,
@@ -760,48 +831,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     my @Defs = ();
 
 	
-    if ($#xmlGeo > -1){
-	# for the geometry package, generate the geom
-	# print join(";",@xmlGeo);
-	my($bflnm,$agM,$agF,$agX,$agH);
-	my($agml_cmd);
-	my(@ODIR)= ("StarVMC/StarGeometry/","StarVMC/xgeometry/");
-	
-	# for now, generate in-situ
-	my($in_situ)=1==1;
-
-	if ( $in_situ  && (! $IsRepo || $IsDotDev)){
-	    foreach (@ODIR){ if ( ! -d $ODIR[0] && $in_sittu ){  mkdir($ODIR[0],0755);}}
-
-	    # local or global
-	    if ( -e "mgr/agmlParser.py"){	$agml_cmd = "mgr/agmlParser.py";
-	    } else {			$agml_cmd =     "agmlParser.py";}
-
-	    foreach $xml (@xmlGeo){
-		if ( $xml =~ /StarVMC\/Geometry\// ){
-		    print "xml = $xml\n" if $param::debug;
-		    $agM   = $xml; $agM =~ s/\..*//; $agM =~ s/.*\///;
-
-		    $agX   = ($in_situ?"#":"").$ODIR[0].$agM.".cxx";
-		    $agH   = ($in_situ?"#":"").$ODIR[0].$agM.".h";
-		    $agF   = ($in_situ?"#":"").$ODIR[1].$agM.".age";
-		
-		    # print "\t$agX $xml\n";
-		    # my $GenCmd = "$agml_cmd --file=%< --export=AgROOT --module=$bflnm --path=$ODIR && echo %>";
-		    $env->{ENV}->{AGML_WARNINGS} = !$param::debug;
-		    # export AGML_WARNINGS=\$AGML_WARNINGS
-		    Command $env [$agX], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=$ODIR[0]);
-		    Command $env [$agF], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);
-
-		} else {
-		    # just be sure we pick only from one tree
-		    print "Warning: found $xml but in a non-expected tree\n";
-		}
-	    }
-	}
-    }
-	
-
     if ( $#idlM > -1 ) {
 	my $include = $INCLUDE . "/" . $pkg;
 	print "include = $include\n" if $param::debug;

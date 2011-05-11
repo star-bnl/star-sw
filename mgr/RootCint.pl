@@ -308,6 +308,12 @@ foreach my $class (@classes) {
 		    print Out "#pragma link off all classes;\n";    #print  "#pragma link off all classes;\n";
 		    print Out "#pragma link off all functions;\n";  #print  "#pragma link off all functions;\n";
 		}
+		# Masa hints - put those prior to Name::Class
+		foreach my $name (sort keys %namespaces){
+		    my $count = $namespaces{"$name"};
+		    print     "#pragma link C++ namespace $name;\n";
+		    print Out "#pragma link C++ namespace $name;\n";
+		}
 		$opened = "YES";
 	    }
 	    if ($class_hfile{$class} =~ /_Module/) {
@@ -334,13 +340,6 @@ foreach my $class (@classes) {
 	}
     }
 }
-# impossible to have namespace and no opened, dump without check
-foreach my $name (sort keys %namespaces){
-    my $count = $namespaces{"$name"};
-    print     "#pragma link C++ namespace $name;\n";
-    print Out "#pragma link C++ namespace $name;\n";
-}
-
 
 if ($opened) {
     print Out "#endif\n";                           	#print  "#endif\n";
