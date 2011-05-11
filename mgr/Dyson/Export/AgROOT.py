@@ -11,7 +11,7 @@ import re
 #from exceptions import *
 from AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning
 
-enable_warnings = os.getenv('AGML_WARNINGS')
+enable_warnings = os.getenv('AGML_WARNINGS',False)
 
 if enable_warnings:
     from warnings import warn
@@ -2153,9 +2153,9 @@ class Translation(Handler):
         # Validate attributes
         checkAttributes( tag, attr, ['x','y','z'] )
         
-        if ( x ) : document.impl('place.TranslateX(%s);' % x.lower() , unit=current )
-        if ( y ) : document.impl('place.TranslateX(%s);' % y.lower() , unit=current ) 
-        if ( z ) : document.impl('place.TranslateX(%s);' % z.lower() , unit=current )        
+        if ( x ) : document.impl('place.TranslateX(%s);' % replacements(x.lower()) , unit=current )
+        if ( y ) : document.impl('place.TranslateX(%s);' % replacements(y.lower()) , unit=current ) 
+        if ( z ) : document.impl('place.TranslateX(%s);' % replacements(z.lower()) , unit=current )        
 
 
 class Rotation(Handler):
