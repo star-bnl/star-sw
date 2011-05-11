@@ -15,8 +15,9 @@ void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
   // ROOT TGeo stacker
   AgBlock::SetStacker( new StarTGeoStacker() );
 
-  // Load the master geometry library
+  // Load the master geometry libraries
   gROOT->ProcessLine(".L .$STAR_HOST_SYS/lib/libGeometry.so");
+  gROOT->ProcessLine(".L .$STAR_HOST_SYS/lib/libStarGeometry.so");
 
   // Instantiate the geometry builder
   build = new Geometry(); 
