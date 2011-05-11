@@ -1,6 +1,9 @@
-// $Id: gasTemp.C,v 1.3 2009/12/09 14:41:49 jcs Exp $
+// $Id: gasTemp.C,v 1.4 2011/05/11 11:55:46 jcs Exp $
 //
 // $Log: gasTemp.C,v $
+// Revision 1.4  2011/05/11 11:55:46  jcs
+// had to change order of library loading to avoid undefined symbols
+//
 // Revision 1.3  2009/12/09 14:41:49  jcs
 // delta_t0 and delta_gas can now both = 0
 //
@@ -65,12 +68,12 @@ void gasTemp(TString filename,int ftpc, int lsec, int straight, int gfit,char* t
 
   gSystem->Load("libStDb_Tables.so");
   gSystem->Load("StDetectorDbMaker.so");
+  gSystem->Load("StTpcDb");
   gSystem->Load("StDbUtilities");
   gSystem->Load("StDbLib.so");
   gSystem->Load("StDbBroker.so");
   gSystem->Load("libStDb_Tables.so");
   gSystem->Load("St_db_Maker.so");
-  gSystem->Load("StTpcDb");
 
   gSystem->Load("StFtpcCalibMaker");
   gSystem->Load("libftpc_Tables");
