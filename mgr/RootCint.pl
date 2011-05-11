@@ -24,6 +24,7 @@ my %class_hfile = (); 		# class h-file map
 my %class_hfile_depens_on = (); #
 my %class_written = ();
 my @classes = 0; 		# list of classes
+my %namespaces = ();            # hash of namespaces
 my $h_files = "";
 my $h_dir   = "";
 my $coll = 0;
@@ -232,6 +233,8 @@ for my $h  (split /\s/,$sources) {
 		# print "class: $class, written: $class_written{$class}, h: $class_hfile{$class}\n";
 	      
 		$class_hfile_depens_on{$nclass} = $includes;
+		
+		$namespaces{"$nmspc"}++ if ( $nmspc ne "" );
 	    }
 	}
 	if ($line =~ /\#define/) { next;}
@@ -292,52 +295,59 @@ for my $h  (split /\s/,$sources) {
 }
 
 my $opened = "";
-for my $class (@classes) {
-#  if ($class =~ /Iterator/ || $class =~ /PtrVec/ ||
-#      $class =~ /SPtrVec/) {$class_written{$class} = "YES";}
-  if ($class) {
-    if (!$class_written{$class}) {
-      if (!$opened) {
-	open (Out,">>$LinkDef")  or die "Can't open $LinkDef";
-	print Out "#ifdef __CINT__\n";                  #print  "#ifdef __CINT__\n";
-	if (! $off) {
-	  print Out "#pragma link off all globals;\n";    #print  "#pragma link off all globals;\n";
-	  print Out "#pragma link off all classes;\n";    #print  "#pragma link off all classes;\n";
-	  print Out "#pragma link off all functions;\n";  #print  "#pragma link off all functions;\n";
+foreach my $class (@classes) {
+    #  if ($class =~ /Iterator/ || $class =~ /PtrVec/ ||
+    #      $class =~ /SPtrVec/) {$class_written{$class} = "YES";}
+    if ($class) {
+	if (!$class_written{$class}) {
+	    if (!$opened) {
+		open (Out,">>$LinkDef")  or die "Can't open $LinkDef";
+		print Out "#ifdef __CINT__\n";                  #print  "#ifdef __CINT__\n";
+		if (! $off) {
+		    print Out "#pragma link off all globals;\n";    #print  "#pragma link off all globals;\n";
+		    print Out "#pragma link off all classes;\n";    #print  "#pragma link off all classes;\n";
+		    print Out "#pragma link off all functions;\n";  #print  "#pragma link off all functions;\n";
+		}
+		$opened = "YES";
+	    }
+	    if ($class_hfile{$class} =~ /_Module/) {
+		print Out "#pragma link C++ class $class-;\n"; 
+		print     "#pragma link C++ class $class-;\n";
+		(my $global = $class) =~ s/St_//g;
+		#  vf print Out "#pragma link C++ global $global;\n"; print  "#pragma link C++ global $global;\n";
+	    } else {
+		if ($class =~ /^St/ and $class =~ /Iterator$/) {
+		    print Out "#pragma link C++ typedef $class;\n"; 
+		    print     "#pragma link C++ typedef $class;\n";
+		} else {
+		    # print "======> |$class|\n";
+		    if ($class =~ /-$/) {
+			print Out "#pragma link C++ class $class;\n"; 
+			print     "#pragma link C++ class $class;\n";
+		    } else {
+			print Out "#pragma link C++ class $class+;\n"; 
+			print     "#pragma link C++ class $class+;\n";
+		    }
+		}
+	    }
+	    $class_written{$class} = "YES";
 	}
-	$opened = "YES";
-      }
-      if ($class_hfile{$class} =~ /_Module/) {
-	print Out "#pragma link C++ class $class-;\n"; 
-	print     "#pragma link C++ class $class-;\n";
-	(my $global = $class) =~ s/St_//g;
-#  vf 	print Out "#pragma link C++ global $global;\n"; print  "#pragma link C++ global $global;\n";
-      }
-      else {
-	if ($class =~ /^St/ and $class =~ /Iterator$/) {
-	  print Out "#pragma link C++ typedef $class;\n"; 
-	  print     "#pragma link C++ typedef $class;\n";
-	}
-	else {
-#	  print "======> |$class|\n";
-	  if ($class =~ /-$/) {
-	      print Out "#pragma link C++ class $class;\n"; 
-	      print     "#pragma link C++ class $class;\n";
-	  } else {
-	      print Out "#pragma link C++ class $class+;\n"; 
-	      print     "#pragma link C++ class $class+;\n";
-	  }
-	}
-      }
-      $class_written{$class} = "YES";
     }
-  }
 }
+# impossible to have namespace and no opened, dump without check
+foreach my $name (sort keys %namespaces){
+    my $count = $namespaces{"$name"};
+    print     "#pragma link C++ namespace $name;\n";
+    print Out "#pragma link C++ namespace $name;\n";
+}
+
+
 if ($opened) {
-  print Out "#endif\n";                           	#print  "#endif\n";
-  close (Out);
-  $opened = "";
+    print Out "#endif\n";                           	#print  "#endif\n";
+    close (Out);
+    $opened = "";
 }
+
 if ($coll) { # order h-files with Collections
   my $done = 0;
   while (!$done) {
@@ -366,6 +376,7 @@ if ($coll) { # order h-files with Collections
     if (!$add) {$done = 1;}
   }
 }
+
 for my $class (@classes) {	#loop over classes
   next if ! $class;
   my $h = $class_hfile{$class};  			#print "Class: $class h: $h written: $class_written{$class} \n";
@@ -387,12 +398,13 @@ for my $class (@classes) {	#loop over classes
   my $hh = " " . basename($h) . " "; 				#print "hh = $hh\n";
   if ($h_files !~ /$hh/ )  {$h_files .= $hh;}
 }#end loop over classes
+
 my @h_files = split ' ', $h_files;
 my $h_filesC = "";
 my $h_filesR = "";
 foreach my $h (@h_files) {
-  if ($h =~ /Collection/) {$h_filesC .= $h . " ";}
-  else                    {$h_filesR .= $h . " ";}
+    if ($h =~ /Collection/) {$h_filesC .= $h . " ";}
+    else                    {$h_filesR .= $h . " ";}
 }
 $h_files = $h_filesC . " " . $h_filesR;
 							# print "h_files= $h_files\n";
