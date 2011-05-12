@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.227 2011/05/02 20:22:16 jwebb Exp $
+* $Id: geometry.g,v 1.228 2011/05/12 19:42:42 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.228  2011/05/12 19:42:42  jwebb
+* Definition of upgr2012 geometry now includes IdsmGeo1 and FgtdGeo3 by default.
+*
 * Revision 1.227  2011/05/02 20:22:16  jwebb
 * Added code to pass configuration of the MTD to the mutdgeo4 module.
 *
@@ -1225,6 +1228,10 @@ replace [exe VPDD07;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConf
 
 
 replace [exe FGTD02;] with  [;FGTD=on;FgtdConfig=2;  "GEM forward tracker"]
+replace [exe FGTDv306;] with [;FGTD=on;FgtdConfig=306; "FGT v3 6 disks"]
+replace [exe FGTDv302;] with [;FGTD=on;FgtdConfig=302; "FGT v3 2 disks"]
+
+replace [exe IDSMv1;] with [;IDSM=on;IdsmConfig=1; "Inner Detector Support"]
 
 replace [exe FSTDof;] with  [;FSTD=off;]
 replace [exe ITSPof;] with  [;ITSP=off;] "prototype of the Inner Tracker SuPport structure"
@@ -1797,6 +1804,11 @@ REPLACE [exe upgr2012;] with ["y2012 FGT upgrade studies";
     exe MUTD05;      "Muon telescope detector";
     exe CAVE04;      "Cave and tunnel";
     exe PIPE12;      "The beam pipe";
+
+    exe IDSMv1;      "Inner detector support";
+    exe FGTDv306;    "FGT v3 6 disks";
+
+
 ]
     
 
@@ -1913,7 +1925,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               RICH,ZCAL,MFLD,BBCM,FPDM,PHMD,
               PIXL,ISTB,GEMB,FSTD,FTRO,FGTD,
               SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,
-              DUMM,SCON
+              DUMM,SCON,IDSM
 
 * Qualifiers:  TPC        TOF         etc
    Logical    emsEdit,svtWater,
@@ -1948,7 +1960,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               CalbConfig, PixlConfig, IstbConfig, GembConfig, FstdConfig, FtroConfig, ConeConfig,
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
               ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig,
-              FhcmConfig, RmaxConfig
+              FhcmConfig, RmaxConfig, IdsmConfig
 
 * The following flags select different base geometry files for the endcap
    Integer    EcalGeometry / 6 /            ! defaults to version 5
@@ -2041,7 +2053,8 @@ replace[;Case#{#;] with [
    ConeConfig  = 1 ! 1 (def) old version, 2=more copper
    DensConfig  = 0 ! gas density correction
    RmaxConfig  = 0 ! tpcegeo3 rmax
-   FgtdConfig  = 1 ! version
+   FgtdConfig  = 306 ! version
+   IdsmConfig  = 1 ! version
    FpdmConfig  = 0 ! 0 means the original source code
    FstdConfig  = 0 ! 0=no, >1=version
    FtroConfig  = 0 ! 0=no, >1=version
@@ -2076,7 +2089,11 @@ replace[;Case#{#;] with [
 
    {CAVE,PIPE,SVTT,TPCE,FTPC,BTOF,VPDD,CALB,ECAL,MAGP,MFLD,UPST,ZCAL} = on;
 * whereas some newer stuff is considered optional:
-   {BBCM,FPDM,PHMD,PIXL,ISTB,GEMB,FSTD,SISD,FTRO,FGTD,SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,DUMM,SCON} = off;
+   {BBCM,FPDM,PHMD,PIXL,
+    ISTB,GEMB,FSTD,SISD,
+    FTRO,FGTD,SHLD,QUAD,
+    MUTD,IGTD,HPDT,ITSP,
+    DUMM,SCON,IDSM} = off;
 
    {emsEdit,RICH}=off        " TimeOfFlight, EM calorimeter Sector            "
    nSvtLayer=7; nSvtVafer=0;  svtWaferDim=0; " SVT+SSD, wafer number and width as in code     "
@@ -3185,7 +3202,7 @@ If LL>0
 * prototype of the Inner Tracker SuPport structure
                    ITSP=on;
                 }
-****************************************************************************************
+*************    ***********************************************************************
   Case UPGR12   { New Tracking: HFT+HPD+IST+TPC+IGT*newRadii
 
                   exe EMCUTS(eemc,0);
@@ -4191,12 +4208,29 @@ c     write(*,*) 'FSTD'
       Call fstdgeo
    endif
 
-   if (FGTD) then
-     write(*,*) 'FGTD'
+   IF IDSM {
+
+      Call AgDETP new ('IDSM')
+      Call IdsmGeo1
+
+   }
+
+
+   IF (FGTD) THEN                                            
+
+     Call AgDETP new ('FGTD')                                     """Establish the interface to the geometry module"""
+
      if (FgtdConfig==1)    Call fgtdgeo  ! old, decomissioned
      if (FgtdConfig==2)    Call fgtdgeo1
      if (FgtdConfig==3)    Call fgtdgeo2
-   endif
+
+     IF FgtdConfig>300 {                                          """Apply FGT configuration and construct geometry"""
+        IF FgtdConfig==306 { Call AgDETP add ( 'FGTG.FgstConfig=', 2.0, 1 ); }
+        IF FgtdConfig==302 { Call AgDETP add ( 'FGTG.FgstConfig=', 1.0, 1 ); }
+        Call FgtdGeo3
+     }
+
+   ENDIF
 
    if (IGTD) then
 c    write(*,*) 'IGTD'
