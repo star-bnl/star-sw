@@ -48,6 +48,12 @@
                                                                      ============================================================
   -->
 
+<Structure name="FGTG">
+   <var name="version"     type="float" />
+   <var name="FgstConfig"  type="float" />
+   <var name="Services"    type="float" />
+</Structure>
+
 <Structure name="FGST"  >
 
    <var name="version" type="float" />
@@ -70,6 +76,18 @@
    <var name="ndisk"      type="int" />
 
 </Structure>
+
+<!--                                                                 
+                                                                     ============================================================
+                                                                          Control structure, interfaced through AgDETP
+                                                                     ============================================================
+  -->
+<Fill name="FGTG" comment="FGT Geometry Control Structure">
+   <var name="version"    value="1.0" comment="versioning" />
+   <var name="FgstConfig" value="1.0" comment="selection of FGST data structure" />
+   <var name="Services"   value="1.0" comment="cabling and support services option" />
+</Fill>
+
 
 <!--                                                                 
                                                                      ============================================================
@@ -143,7 +161,9 @@
 </Mixture>
 
 
-<Use struct="FGST" select="version" value="2.0" />
+<Use struct="FGTG" />
+<Use struct="FGST" select="version" value="FGTG_FgstConfig" />
+
                                                                    <!--  mmmmmmmmmmmm  COMPUTATION mmmmmmmmmmmmmmmmmmmmmmmmmmm -->
 
 
