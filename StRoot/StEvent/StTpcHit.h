@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.19 2011/03/31 19:25:13 fisyak Exp $
+ * $Id: StTpcHit.h,v 2.20 2011/05/12 22:25:48 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.20  2011/05/12 22:25:48  fisyak
+ * Restore hit errors as persistent, add sort to TpcHit
+ *
  * Revision 2.19  2011/03/31 19:25:13  fisyak
  * Keep ADC value for cluster
  *
@@ -118,6 +121,15 @@ public:
     UShort_t adc() const {return mAdc;}
     Float_t  chargeModified() const {return mChargeModified;}
     void     Print(Option_t *option="") const;
+    virtual Bool_t   IsSortable() const { return kTRUE; }
+    virtual Int_t    Compare(const TObject *obj) const {
+      StTpcHit *hit = (StTpcHit *) obj;
+      if (sector() > hit->sector()) return kTRUE;
+      if (padrow() > hit->padrow()) return kTRUE;
+      if (sector() > hit->sector()) return kTRUE;
+      if (TMath::Abs(position().z()) > TMath::Abs(hit->position().z())) return kTRUE;
+      return kFALSE;
+    }
     
 protected:
     static StMemoryPool mPool;  //!

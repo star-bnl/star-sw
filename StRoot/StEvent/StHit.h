@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.25 2011/01/21 18:30:45 fisyak Exp $
+ * $Id: StHit.h,v 2.26 2011/05/12 22:25:48 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.26  2011/05/12 22:25:48  fisyak
+ * Restore hit errors as persistent, add sort to TpcHit
+ *
  * Revision 2.25  2011/01/21 18:30:45  fisyak
  * fix setFlag with UShort_t
  *
@@ -152,7 +155,7 @@ protected:
     unsigned int bits(unsigned int, unsigned int) const;
     
     UInt_t         mHardwarePosition;
-    StThreeVectorF mPositionError; //!
+    StThreeVectorF mPositionError; 
     Float_t        mCharge;
     Int_t          mId;
     UShort_t       mIdTruth; // simulation track id 
@@ -161,7 +164,7 @@ protected:
     UChar_t        mTrackRefCount;
     UShort_t       mFlag;
     StHit*         mNextHit; //!
-    ClassDef(StHit,6)
+    ClassDef(StHit,7)
 };
 
 inline unsigned int StHit::bits(unsigned int bit, unsigned int nbits) const
