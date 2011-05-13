@@ -319,7 +319,13 @@
             <Par name="BIRK1" value="1."  />
             <Par name="BIRK2" value="RKB2sc"  />
             <Par name="BIRK3" value="RKB3sc"  />
-            <Hits for="CSUP" y="1:(-13,13)" birk="0:(0,10)" eta="DETA:(0,1)"  />
+
+            <Instrument block="CSUP">
+                  <Hit meas="eta"   bins="deta" min="0"   max="1"   />
+                  <Hit meas="y"    nbits="1"    min="-13" max="+13" />
+                  <Hit meas="birk" nbits="0"    min="0"   max="10"  />
+            </Instrument>
+
         </Block>
         
         <Block name="CBTW" comment="is the Module Front Back Plate"  >

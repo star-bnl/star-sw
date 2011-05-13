@@ -1163,9 +1163,9 @@
                 <Hit meas="cy" nbits="10"  />
                 <Hit meas="cz" nbits="10"  />
                 <Hit meas="sleng" nbits="16" min="0" max="500"  />
-                <Hit meas="tof" nbits="16"  />
+                <Hit meas="tof" nbits="16" min="0" max="1.0E-6"  />
                 <Hit meas="step" bins=".01"  />
-                <Hit meas="eloss" nbits="22"  />
+                <Hit meas="eloss" nbits="22" min="0." max="0.01" />
             </Instrument>
             
 

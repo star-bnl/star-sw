@@ -215,7 +215,11 @@
             <Par name="BIRK1" value="1."  />
             <Par name="BIRK2" value="0.013"  />
             <Par name="BIRK3" value="9.6E-6"  />
-            <Hits for="BPOL" birk="0:C(0,10)" tof="16:C(0,1.E-6)"  />
+
+            <Instrument block="BPOL">
+                <Hit meas="tof"  nbits="16" opts="C" min="0" max="1.0E-6" />
+                <Hit meas="birk" nbits="0"  opts="C" min="0" max="10"     />
+            </Instrument>
 
         </Block>
         

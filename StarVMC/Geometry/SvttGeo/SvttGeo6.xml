@@ -1135,8 +1135,20 @@
 
             <Call expr="%Imed,'STRA',1." routine="GSTPAR"  />
 
-            <Hits for="SVTD" sleng="16:(0,500)" step=".01:" cz="10:" cy="10:" cx="10:" eloss="22:(0,0.01)" x=".001:" y=".001:" ptot="18:(0,100)" z=".001:S" tof="16:(0,1.E-6)"  />
-
+             <Instrument block="SVTD"  >
+                <Hit meas="z" opts="S" bins=".001"  />
+                <Hit meas="y" bins=".001"  />
+                <Hit meas="x" bins=".001"  />
+                <Hit meas="ptot" nbits="18" min="0" max="100"  />
+                <Hit meas="cx" nbits="10"  />
+                <Hit meas="cy" nbits="10"  />
+                <Hit meas="cz" nbits="10"  />
+                <Hit meas="sleng" nbits="16" min="0" max="500"  />
+                <Hit meas="tof" nbits="16" min="0" max="1.0E-6"  />
+                <Hit meas="step" bins=".01"  />
+                <Hit meas="eloss" nbits="22" min="0." max="0.01" />
+            </Instrument>
+  
         </Block>
         
         <Block name="SSID" comment="is a non-sensitive left-right border of the wafer"  >
@@ -1354,7 +1366,10 @@
         <Block name="SIRT" comment="is the SVT inner end ring tube"  >
             <Material name="Berillium"  />
             <Attribute for="SIRT" seen="1" colo="2"  />
-            ir_rmin=serg_IrngPrMn*(cos(pi/8.)+sqrt(tan(pi/8.)**2.-sin(pi/8.)**2.)) 
+            <!-- Why does AgML break this line???
+            ir_rmin = serg_IrngPrMn * (cos(pi/8.) + sqrt( tan(pi/8.)**2-sin(pi/8.)**2))
+              -->
+            ir_rmin = serg_IrngPrMn * 1.08239220029239402
             <Shape type="TUBE" rmax="serg_IrngTrMx" rmin="ir_rmin" dz="serg_EndRngTh/2"  />
         </Block>
         

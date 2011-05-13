@@ -794,7 +794,21 @@
             <Medium name="sensitive" isvol="1 "  />
             <Attribute for="VRAD" seen="1" colo="3"  />
             <Shape type="TUBE" dz="vpdg_RadiThk/2"  />
-            <Hits for="VRAD" slen=".1:(0,600)" cy="10:" cz="10:" step=".01:" cx="10:" eloss="16:(0,.01)" x=".1:S" y=".1:" ptot="18:(0,100)" z=".1:" tof="18:(0,1.E-6)"  />
+
+            <Instrument block="VRAD" >
+                   <Hit meas="x" bins="0.1" opts="S" />
+                   <Hit meas="y" bins="0.1"          />
+                   <Hit meas="z" bins="0.1"          />
+                   <Hit meas="cx" nbits="10" />
+                   <Hit meas="cy" nbits="10" />
+                   <Hit meas="cz" nbits="10" />
+                   <Hit meas="step" bins="0.1" />
+                   <Hit meas="slen" bins="0.1" min="0" max="600" />
+                   <Hit meas="ptot" nbits="16" min="0" max="100" />
+                   <Hit meas="tof"  nbits="18" min="0" max="1.0E-6" />
+                   <Hit meas="eloss" nbits="16" min="0" max="0.01" />
+            </Instrument>
+
         </Block>
         
         <Block name="VPMT" comment="is the PMT inner volume"  >
