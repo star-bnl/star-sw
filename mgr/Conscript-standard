@@ -255,10 +255,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			# export AGML_WARNINGS=\$AGML_WARNINGS
 			
 			if ( $xml =~ m/Compat/ ){
-			    Depends $env [$pref.$agF], "#$xml", "#$agml_cmd";			    
+			    Depends $env [$pref.$agF], "#$xml";
 			    Command $env [$pref.$agF], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=Mortran > %>);			    
 			} else {
-			    Depends $env [$pref.$agX, $pref.$agH, $pref.$agF], "#$xml", "#$agml_cmd";
+			    Depends $env [$pref.$agX, $pref.$agH, $pref.$agF], "#$xml";
 			    Depends $env [$agO], $pref.$agX, $pref.$agH;
 			  
 			    Command $env [$pref.$agX], ("#$xml"), qq($agml_cmd --file=%1 --module=$agM --export=AgROOT --path=%>:d);
