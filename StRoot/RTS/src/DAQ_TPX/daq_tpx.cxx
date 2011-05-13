@@ -1586,11 +1586,16 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 			trgs[cou].rhic = rhic ;
 
 
-
 			switch(trgs[cou].trg) {
 			case 13 :	// L2 ABORT
+			case 14 :	// L1 ACCEPT
 			case 15 :	// L2 ACCEPT
 				break ;
+			case 2 :	// RESET
+				if((trgs[cou].t == 1) && (trgs[cou].daq == 0)) {
+					continue ;	// skip it
+				}
+				// WARNING: no "break" here!!!
 			default :
 				// check for overrun UNLESS the actual command
 				if((dta & 0x3000000) != 0x2000000) {
@@ -1640,7 +1645,7 @@ int daq_tpx::get_l2(char *addr, int words, struct daq_trg_word *trgs, int do_log
 				}
 			}
 
-			if(trgs[cou].t == 0) {
+			if((trgs[cou].t == 0)) {
 				LOG(ERR,"RDO %d: token 0 in L2 contribution 0x%08X -- skipping",rdo.rdo,dta) ;
 				err = 1 ;
 				continue ;
