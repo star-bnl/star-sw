@@ -1,0 +1,261 @@
+* This file contains BFC information on:
+*  -  DICTIONARY OF INPUTS
+*  -  DOMAINS
+*  -  CHAIN VARIABLES
+*  -  EXAMPLES OF BFC
+* ******************************************************************************
+* -- DICTIONARY OF INPUTS TO BFC.KUMAC --
+* 
+* TOP        - top level directory to search for kumacs 
+*   - change if you copy stuff to your area!
+*   - files must be in standard directory structure format:
+*                                  ~workdir/kumacs/domain
+*                                  ~workdir/pams/domain
+* calib_dir       - for ebye analysis
+* tpc_sector_first - first sector # of tpc to simulation using tss
+* tpc_sector_last -  last sector # of tpc to simulation using tss
+
+* ebye_prior_switch    - for ebye analysis
+* ebye_ensemble_switch - for ebye analysis
+* ebye_analysis_switch - for ebye analysis
+* gstar_settings - settings for loading gstar libraries 
+*        when running gstar, set 'complete 4th_off hadr_on' 
+*                   (4th_off = svt 4th layer off)
+*    !!! when not running gstar, should use 'field_only' !!!
+*     *** can put 'help' as a value in gstar_settings  ***
+*            See $STAR/pams/geometry/geometry/geometry.g 
+*                    for list of other available settings
+* domain     - list of domains to load [domain='tpc svt global]
+* chain      - list of modules to run **** HAVE TO BE IN ORDER ****
+*            - see more details below
+* skip - number of events to skip before processing starts
+* no_events  - number of events to process
+* input_data_file   - directory + input file name
+* output_file       - output file name for use with chain=fzout or evout
+* log     - log file 
+* nunit   - output ntuple file unit #
+* nfile   - output ntuple file name
+* nid     - output ntuple i.d.
+* ntable   - output ntuple table - starts from event/data/ (i.e. list your
+*           table from under this directory)
+* nid2     - output ntuple i.d. #2  (same ntuple file as above!)
+* ntable2   - output ntuple table #2
+*
+* *********************************************************************
+* 
+* --DOMAINS --
+*   gen
+*   geometry
+*   sim/gstar
+*   sim/g2t
+*   tpc
+*   emc
+*   ctf
+*   mwc
+*   svt
+*   ftpc
+*   global
+*   ebye
+*   strange
+*
+* !! In order to run tpc code, you must load BOTH geometry and tpc 
+*     e.g. domain='geometry tpc'
+* !! In order to run global code, you must load svt,tpc & global
+*     e.g. domain='tpc svt global'
+* !! In order to run some DST packages, you must load ctf 
+* !! In order to load emc, you must also load geometry
+*
+*****************************************************************
+*
+*
+* -- CHAIN VARIABLES --
+* rhij       - run hijing - uses hijev.inp in top directory as input !!!
+* mdin       - read in mini-daq data
+* evgin      - read in event generator file for running gstar
+* g2tin      - read G2T xdf file (post gstar)
+* evin       - read in simulated-data file (post gstar + more) 
+* fzin       - read in fz file (post gstar but haven't run g2t)
+* gtxin      - read in txt file for running gstar
+* dstin      - read in dst file (only dst directories on file)
+* obin       - read from objectivity database
+* calin      - find event time and read in correct calibration with cal2mem
+* rgst       - run gstar from evgin file
+* rg2t       - run g2t from rungst(gstar) stuff
+* svg        - SVT geometry initialization
+* tpg        - TPC geometry initialization
+* srs        - SVT  resolution simulator (fast)
+* sss        - SVT slow simulator - not implemented yet
+* tss        - TPC slow simulator
+* tfc        - unpacks tpc raw data into adcxyz table for diagnostics
+* tfc_r      - unpacks minidaq tpc data and reformats
+* tcl        - TPC clustering - slow sim only !
+* tcl_e      - TPC cluster evaluation - slow sim only
+* tfs        - TPC fast simulator
+* stk        - SVT tracker
+* sgr        - grouping SVT hits into tracks 
+* spr        - SVT dE/dX
+* tpt        - TPC track finding
+* tpt_r      - TPC track residuals
+* tte_t      - TPC tte tracker
+* tte_e      - TPC track evaluator
+* tid        - TPC dE/dx pid
+* ffs        - ftpc fast sim
+* fss        - ftpc slow sim
+* fcl        - ftpc clustering
+* fpt        - ftpc tracker
+* fte        - ftpc track eval
+* svm        - tpc and svt track matching
+* evr        - primary vertex reconstruction
+* egr        - refit global tracks
+* ev0        - Strange particle reconstruction (v0's)
+* ev02       - V0 reco w/separate params for SVT&TPC trks; should replace ev0 
+* ev0_e      - v0 evaluation
+* ev0d       - creates dst_v0_vertex table - call AFTER ev02! and b4 smdst!
+* ctf   - runs cts,ctu
+* mwc   - runs mws,mwu
+* trg   - runs l3cl, ftf_tpc - not implemented yet
+* ems   - runs ems_interface2 for em calorimeter simulation
+* emc   - convert em calorimeter adc counts to energy
+* jet   - runs emc_egrid,emc_erj
+* ddedx - dst dedx filler
+* dpnt  - dst point filler
+* dmsft - dst monitor software filler
+* dmhrd - dst monitor hardware filler
+* desum - dst event summary
+* drsum - dst run summary
+* dehd  - dst event header
+* drhd  - dst run header
+* ebye1 - run ebye sca analysis code
+* ev0j  - join ev0out and vertex tables and make new ev0joined table
+* sdst - strange micro dst analysis
+* sdst2 - strange micro dst analysis - runs after ev02 and ev0d !!
+* dchkt - dumps from dst files
+* user  - user kumacs called here: init_user,run_user,finish_user
+* ntup  - create output ntuple file with 1 ntuple
+* ntup2 - add 2nd ntuple to output ntuple file (must also use ntup chain!)
+* fzout - write out fz file from gstar (only works if you run gstar!)
+* evout - write event & run directories into xdf file
+* egout - write out event generator tables (used after hijing: "rhij")
+* dout  - write run/dst and event/data/global/dst directories into xdf file
+* obout - write out to objectivity database
+*
+**********************************************************************
+*
+* -- EXAMPLES OF BFC  --
+* Use the kumacs listed below as examples - they are in $STAR/kumacs/chain
+* 
+* 1. call_bfc_g2tin_to_dst.kumac
+*   - read in g2t file
+*   - do tpc,svt simulations
+*   - do tpc & svt reconstruction
+*   - do global reconstruction
+*   - dst packages
+*   - write output file
+*
+* 2. call_bfc_gstar_g2t.kumac
+*   - read in event generator file (e.g. from hijing)
+*   - run gstar
+*   - run g2t
+* 
+* 3. call_bfc_readfz_g2t.kumac
+*   - read in fz file
+*   - run g2t
+*   - write out xdf file containing full directories
+*
+*
+* 4. call_bfc_readfz_full_year1.kumac
+*   - read in fz file with year1 simulations
+*   - run g2t
+*   - run tpc & emc simulation
+*   - tpc reconstruction
+*   - global reconstruction
+*   - dst packages
+*   - write out xdf file with full directories
+*
+* 5. call_bfc_readfz_full_year2.kumac
+*   - read in fz file with year2 simulations
+*   - run g2t
+*   - run tpc & svt & emc simulation
+*   - tpc, svt reconstruction
+*   - global reconstruction
+*   - dst packages
+*   - write out xdf file with full directories
+*
+* 6. call_bfc_readfz_to_dst_year1.kumac
+*   - read in fz file with year1 simulations
+*   - run g2t
+*   - run tpc & emc simulation
+*   - tpc reconstruction
+*   - global reconstruction
+*   - dst packages
+*   - write out xdf file with dst directories
+*
+* 7. call_bfc_readfz_to_dst_year2.kumac
+*   - read in fz file with year2 simulations
+*   - run g2t
+*   - run tpc & svt & emc simulation
+*   - tpc, svt reconstruction
+*   - global reconstruction
+*   - dst packages
+*   - write out xdf file with dst directories
+*
+*
+* 8. call_bfc_reco.kumac                  
+*  - read in simulated data file (thru tss & srs)
+*  - run tpc & svt clustering
+*  - run tpc & svt tracking
+*  - run global packages
+*  - run dst packages
+*  - write xdf file containing full directories
+* 
+* 
+* 9. call_bfc_reco_trk_ftpc.kumac              
+*  - read in simulated data file (thru tss & srs)
+*  - run tpc & svt clustering
+*  - run tpc & svt tracking
+*  - run ftpc slow sim, clustering, tracking
+*  - write xdf file containing full directories
+*  
+* 10. call_bfc_svt_fast_sim_tracker.kumac
+*   - read in g2t file
+*   - run svt sim
+*   - run svt tracking
+*   - write xdf file containing full directories
+* 
+* 11. call_bfc_test_v0.kumac
+*   - read in g2t test file with lots of V0's
+*   - process thru whole chain to dst pkgs
+*   - write out ntuple
+*   - read back in ntuple and make plot and save to file
+* 
+* 12. call_bfc_tpc_fast_sim_tracker.kumac
+*   - read in g2t file
+*   - run tpc fast sim 
+*   - run tpc tracking
+*   - write xdf file containing full directories
+* 
+* 11. call_bfc_tpc_slow_sim_tracker.kumac
+*   - read in g2t file
+*   - run tpc slow sim & clustering
+*   - run tpc tracking
+*   - write xdf file containing full directories
+* 
+* 
+* 13. call_bfc_txt_gstar_g2t.kumac
+*   - read in text file
+*   - run gstar
+*   - run g2t
+*   - write xdf file containing full directories
+* 
+* 14. call_bfc_run_hijing.kumac
+*    - must have hijev.inp in directory that you're running in
+*       - get from $STAR/kumacs/gen directory
+*    - run hijing
+*    - write xdf file out
+* 
+* 15. call_bfc_mdin_tpc_reco.kumac
+*    - read in tpc minidaq data file
+*    - reformat tpc minidaq data into standard format
+*    - run tpc clustering code
+*    - write xdf file containing full directories
+*
