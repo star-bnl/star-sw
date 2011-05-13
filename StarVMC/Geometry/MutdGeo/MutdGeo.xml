@@ -342,7 +342,20 @@
             <Material name="polystyren"  />
             <Medium name="sensitive" isvol="1 "  />
             <Shape type="BOX" dz="0" dx="0" dy="0"  />
-            <Hits for="MXSA" sleng=".1:(0,500)" step=".01:" cz="10:" cy="10:" cx="10:" eloss="16:(0,0.01)" x=".01:S" y=".01:" ptot="18:(0,100)" z=".01:" tof="16:(0,1.E-6)"  />
+
+            <Instrument block="MXSA" >
+                <Hit meas="x" bins="0.01" opts="S" />
+                <Hit meas="y" bins="0.01"          />
+                <Hit meas="z" bins="0.01"          />
+                <Hit meas="ptot" nbits="18" min="0" max="100" />
+                <Hit meas="cx"   nbits="10" />
+                <Hit meas="cy"   nbits="10" />
+                <Hit meas="cz"   nbits="10" />
+                <Hit meas="sleng" bins="0.1" min="0" max="500" />
+                <Hit meas="tof"  nbits="16"  min="0" max="1.0E-6" />
+                <Hit meas="step"  bins="0.01" />
+                <Hit meas="eloss" nbits="16" min="0" max="0.01" />
+           </Instrument>
         </Block>
         
 
@@ -357,7 +370,16 @@
             <Material name="RPCgas"  />
             <Medium name="sensitive" isvol="1 "  />
             <Shape type="BOX" dz="210.82/2" dx="2.50/2." dy="57.20/2."  />
-            <Hits for="MMRP" sleng=".1:(0,500)" step=".01:" eloss="16:(0,1.E-6)" x=".01:HS" y=".01:" ptot="18:(0,100)" z=".01:" tof="16:(0,1.E-7)"  />
+            <Instrument block="MMRP" >
+                <Hit meas="x" bins="0.01" opts="HS" />
+                <Hit meas="y" bins="0.01"          />
+                <Hit meas="z" bins="0.01"          />
+                <Hit meas="ptot" nbits="18" min="0" max="100" />
+                <Hit meas="sleng" bins="0.1" min="0" max="500" />
+                <Hit meas="tof"  nbits="16"  min="0" max="1.0E-7" />
+                <Hit meas="step"  bins="0.01" />
+                <Hit meas="eloss" nbits="16" min="0" max="1.0E-6" />
+            </Instrument>
         </Block>
         
 

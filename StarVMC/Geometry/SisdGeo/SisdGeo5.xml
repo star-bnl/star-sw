@@ -971,7 +971,20 @@
 
             <Call expr="%Imed,'STRA',1." routine="GSTPAR"  />
 
-            <Hits for="SFSD" sleng="16:(0,500)" step=".01:" cz="10:" cy="10:" cx="10:" eloss="32:(0,0.01)" x=".001:S" y=".001:" ptot="16:(0,100)" z=".001:" tof="16:(0,1.E-6)"  />
+            <Instrument block="SFSD">
+                 <Hit meas="x" bins="0.001" opts="s"               />
+                 <Hit meas="y" bins="0.001"                        />
+                 <Hit meas="z" bins="0.001"                        />
+                 <Hit meas="cx" nbits="10"                         />
+                 <Hit meas="cy" nbits="10"                         />
+                 <Hit meas="cz" nbits="10"                         />
+                 <Hit meas="step" bins="0.01"                      />
+                 <Hit meas="sleng" nbits="16" min="0" max="500"    />
+                 <Hit meas="tof"   nbits="16" min="0" max="1.0E-6" />
+                 <Hit meas="ptot"  nbits="16" min="0" max="100.0"  />
+                 <Hit meas="eloss" nbits="16" min="0" max="0.01"   />
+            </Instrument>
+
         </Block>
         
         <Block name="SFSM" comment="is the mother volume of the ladder (mechanic structure)"  >

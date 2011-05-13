@@ -835,7 +835,25 @@
             <Material name="polystyren"  />
             <Medium name="sensitive" isvol="1 "  />
             <Shape type="BOX" dz="0" dx="0" dy="0"  />
-            <Hits for="BXSA" sleng=".1:(0,500)" step=".01:" cz="10:" cy="10:" cx="10:" eloss="16:(0,0.01)" x=".01:S" y=".01:" ptot="18:(0,100)" z=".01:" tof="16:(0,1.E-6)"  />
+            <Instrument block="BXSA">
+
+                <Hit meas="X" bins="0.01" opts="S" />
+                <Hit meas="Y" bins="0.01"          />
+                <Hit meas="Z" bins="0.01"          />
+
+                <Hit meas="ptot" nbits="18" min="0.0" max="100.0"  />
+
+                <Hit meas="cx"   nbits="10" />
+                <Hit meas="cy"   nbits="10" />
+                <Hit meas="cz"   nbits="10" />
+
+                <Hit meas="sleng"  bins="0.1" min="0"   max="500"    />
+                <Hit meas="tof"   nbits="16"  min="0.0" max="1.0E-6" />
+                <Hit meas="step"   bins="0.01" />
+                
+                <Hit meas="eloss" nbits="16" min="0.0" max="0.01"    />
+                
+            </Instrument>
         </Block>
         
         <Block name="BCSB" comment="is the active trigger scintillator SLAB for tof"  >
@@ -843,7 +861,25 @@
             <Material name="polystyren"  />
             <Medium name="sensitive" isvol="1 "  />
             <Shape type="BOX" dz="toff_SlatLen/2" dx="toff_SlatThck/2" dy="toff_SlatWid/2"  />
-            <Hits for="BCSB" sleng=".1:(0,500)" step=".01:" cz="10:" cy="10:" cx="10:" eloss="16:(0,0.01)" x=".01:S" y=".01:" ptot="18:(0,100)" z=".01:" tof="16:(0,1.E-6)"  />
+            <Instrument block="BCSB">
+
+                <Hit meas="X" bins="0.01" opts="S" />
+                <Hit meas="Y" bins="0.01"          />
+                <Hit meas="Z" bins="0.01"          />
+
+                <Hit meas="ptot" nbits="18" min="0.0" max="100.0"  />
+
+                <Hit meas="cx"   nbits="10" />
+                <Hit meas="cy"   nbits="10" />
+                <Hit meas="cz"   nbits="10" />
+
+                <Hit meas="sleng"  bins="0.1" min="0"   max="500"    />
+                <Hit meas="tof"   nbits="16"  min="0.0" max="1.0E-6" />
+                <Hit meas="step"   bins="0.01" />
+                
+                <Hit meas="eloss" nbits="16" min="0.0" max="0.01"    />
+                
+            </Instrument>
         </Block>
         
         <Block name="BCCV" comment="is a Ctb optical ConVerter"  >
@@ -1210,9 +1246,6 @@
         </Block>
         
 
-
-
-
         <Block name="BRIG" comment="is the Inner Glass in the TOFr module"  >
             <Attribute for="BRIG" seen="1" colo="7"  />
             <Material name="Glass"  />
@@ -1225,7 +1258,23 @@
             <Material name="RPCgas"  />
             <Medium name="sensitive" isvol="1 "  />
             <Shape type="BOX" dz="modr_IGLen/2" dx="modr_IGHgt/2" dy="modr_IGWid/2"  />
-            <Hits for="BRSG" sleng=".1:(0,500)" step=".01:" eloss="16:(0,1.E-6)" x=".01:HS" y=".01:" ptot="18:(0,100)" z=".01:" tof="16:(0,1.E-7)"  />
+
+            <Instrument block="BRSG">
+
+                <Hit meas="X" bins="0.01" opts="HS" />
+                <Hit meas="Y" bins="0.01"          />
+                <Hit meas="Z" bins="0.01"          />
+
+                <Hit meas="ptot" nbits="18" min="0.0" max="100.0"  />
+
+                <Hit meas="sleng"  bins="0.1" min="0"   max="500"    />
+                <Hit meas="tof"   nbits="16"  min="0.0" max="1.0E-7" />
+                <Hit meas="step"   bins="0.01" />
+                
+                <Hit meas="eloss" nbits="16" min="0.0" max="1.0E-6"    />
+                
+            </Instrument>
+
         </Block>
         
         <Block name="BRWG" comment="is the WedGe(support) in the TOFr module"  >

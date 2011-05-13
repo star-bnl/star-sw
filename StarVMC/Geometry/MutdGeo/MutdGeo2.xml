@@ -127,7 +127,18 @@
             <Material name="RPCgas"  />
             <Medium name="sensitive" isvol="1 "  />
             <Shape type="BOX" dz="MTDG_length/2" dx="2.50/2." dy="57.20/2."  />
-            <Hits for="MMRP" sleng=".1:(0,500)" step=".01:" eloss="16:(0,1.E-6)" x=".01:HS" y=".01:" ptot="18:(0,100)" z=".01:" tof="16:(0,1.E-7)"  />
+
+            <Instrument block="MMRP" >
+                <Hit meas="x" bins="0.01" opts="HS" />
+                <Hit meas="y" bins="0.01"          />
+                <Hit meas="z" bins="0.01"          />
+                <Hit meas="ptot" nbits="18" min="0" max="100" />
+                <Hit meas="sleng" bins="0.1" min="0" max="500" />
+                <Hit meas="tof"  nbits="16"  min="0" max="1.0E-7" />
+                <Hit meas="step"  bins="0.01" />
+                <Hit meas="eloss" nbits="16" min="0" max="1.0E-6" />
+            </Instrument>
+
         </Block>
         
 
