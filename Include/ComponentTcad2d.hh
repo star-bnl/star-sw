@@ -48,16 +48,21 @@ class ComponentTcad2d : public ComponentBase {
     void SetMedium(const int ireg, Medium* m);
     bool GetMedium(const int ireg, Medium*& m) const;
 
-    int GetNumberOfElements() const {return nElements;}
+    // Retrieve information about the mesh.
+    int  GetNumberOfElements() const {return nElements;}
     bool GetElement(const int i, double& vol, 
                     double& dmin, double& dmax, int& type);
     bool GetElement(const int i, double& vol,
                     double& dmin, double& dmax, int& type,
                     int& node1, int& node2, int& node3, int& node4,
                     int& reg);
-    int GetNumberOfNodes() const {return nVertices;}
+    int  GetNumberOfNodes() const {return nVertices;}
     bool GetNode(const int i, double&x, double& y, 
                  double& v, double& ex, double& ey);
+
+    // Mobilities
+    bool GetMobility(const double x, const double y, const double z,
+                     double& emob, double& hmob);
 
   private:
 
@@ -82,6 +87,8 @@ class ComponentTcad2d : public ComponentBase {
       double x, y;
       // Potential [V] and electric field [V / cm]
       double p, ex, ey;
+      // Mobilities [cm2 / (V ns)]
+      double emob, hmob;
       // Flag indicating if vertex belongs to more than one region
       bool   isShared;
     };
@@ -104,6 +111,12 @@ class ComponentTcad2d : public ComponentBase {
       int region; 
     };
     std::vector<element> elements;
+
+    // Available data.
+    bool hasPotential;
+    bool hasField;
+    bool hasElectronMobility;
+    bool hasHoleMobility;
 
     // Voltage range
     double pMin, pMax;

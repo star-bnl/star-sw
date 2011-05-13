@@ -8,9 +8,8 @@ ComponentUser::ComponentUser() :
   ComponentBase(), 
   hasField(false), field(0), 
   hasPotential(false), potential(0),
-  nWeightingFields(0)  {
+  hasWeightingField(false), wfield(0) {
   
-  wfields.clear();
   className = "ComponentUser";
 
 }
@@ -99,13 +98,8 @@ ComponentUser::WeightingField(const double x, const double y, const double z,
                               const std::string label) {
 
   wx = wy = wz = 0.;
-  double fx = 0., fy = 0., fz = 0.;
-  for (int i = nWeightingFields; i--;) {
-    if (label == wfields[i].label) {
-      wfields[i].field(x, y, z, fx, fy, fz);
-      wx += fx; wy += fy; wz += fz;
-    }
-  }
+  if (!hasWeightingField) return;
+  wfield(x, y, z, wx, wy, wz, label);
 
 }
 
@@ -139,19 +133,15 @@ ComponentUser::SetPotential(
 }
 
 void 
-ComponentUser::AddWeightingField(void (*f)(const double, const double, const double, double&, double&, double&),
-                                 const std::string label) {
+ComponentUser::SetWeightingField(void (*f)(const double, const double, const double, double&, double&, double&, const std::string)) {
                                  
   if (f == 0) {
-    std::cerr << className << "::AddWeightingField:\n";
+    std::cerr << className << "::SetWeightingField:\n";
     std::cerr << "    Function pointer is null.\n";
     return;
   }
-  wfield newField;
-  newField.field = f;
-  newField.label = label;
-  wfields.push_back(newField);
-  ++nWeightingFields;
+  wfield = f;
+  hasWeightingField = true;
 
 }
 
@@ -160,8 +150,10 @@ ComponentUser::Reset() {
 
   field = 0; 
   potential = 0;
+  wfield = 0;
   hasField = false;
   hasPotential = false;
+  hasWeightingField = false;
   ready = false;
   
 }

@@ -29,9 +29,7 @@ class ComponentUser : public ComponentBase {
     void SetElectricField(void (*f)(const double, const double, const double, double&, double&, double&));
     void SetPotential(void (*f)(const double, const double, const double, double&));
     
-    void AddWeightingField(void (*f)(const double, const double, const double, double&, double&, double&),
-                           const std::string label);
-    
+    void SetWeightingField(void (*f)(const double, const double, const double, double&, double&, double&, const std::string));
 
   private:
 
@@ -42,13 +40,10 @@ class ComponentUser : public ComponentBase {
     // Potential
     bool hasPotential;
     void (*potential)(const double, const double, const double, double&);
-    
-    int nWeightingFields;
-    struct wfield {
-      void (*field)(const double, const double, const double, double&, double&, double&);
-      std::string label;
-    };
-    std::vector<wfield> wfields;
+
+    // Weighting field
+    bool hasWeightingField;
+    void (*wfield)(const double, const double, const double, double&, double&, double&, const std::string);
 
     // Reset the component
     void Reset();

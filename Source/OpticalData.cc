@@ -27,7 +27,9 @@ OpticalData::IsAvailable(const std::string material) const {
   if (material == "CH4") return true;
   if (material == "C2H6") return true;
   if (material == "C2H2") return true;
-  
+ 
+  if (material == "CF4") return true;
+ 
   if (material == "N2") return true;
  
   return false;
@@ -47,6 +49,8 @@ OpticalData::GetPhotoabsorptionCrossSection(const std::string material,
   if (material == "CH4") return PhotoAbsorptionCsMethane(e, cs, eta);
   if (material == "C2H6") return PhotoAbsorptionCsEthane(e, cs, eta);
   if (material == "C2H2") return PhotoAbsorptionCsAcetylene(e, cs, eta);
+
+  if (material == "CF4") return PhotoAbsorptionCsCF4(e, cs, eta);
   
   if (material == "N2") return PhotoAbsorptionCsNitrogen(e, cs, eta);
  
@@ -1830,6 +1834,68 @@ OpticalData::PhotoAbsorptionCsAcetylene(const double e,
   eta = 1.;
   return true;
 
+}
+
+bool 
+OpticalData::PhotoAbsorptionCsCF4(const double e, 
+                                  double& cs, double& eta) {
+
+  // Sources:
+  // Photoabsorption cross-section:
+  // J. W. Au et al., Chem. Phys. 221 (1997), 151-168
+  
+  if (e < 10.) {
+    cs = eta = 0.;
+    return true;
+  }
+  
+  if (e < 35.) {
+    
+    // Differential oscillator strength
+    const int nPacsEntries = 50;
+    
+    const double xCF4[nPacsEntries] = {
+      10.0,  10.5,  11.0,  11.5,  12.0,  12.5,  13.0,  13.5,  14.0,  14.5,
+      15.0,  15.5,  16.0,  16.5,  17.0,  17.5,  18.0,  18.5,  19.0,  19.5,
+      20.0,  20.5,  21.0,  21.5,  22.0,  22.5,  23.0,  23.5,  24.0,  24.5,
+      25.0,  25.5,  26.0,  26.5,  27.0,  27.5,  28.0,  28.5,  29.0,  29.5,
+      30.0,  30.5,  31.0,  31.5,  32.0,  32.5,  33.0,  33.5,  34.0,  34.5};
+
+    const double yCF4[nPacsEntries] = {
+       0.05,  0.06,  0.10,  0.27,  1.32,  3.51, 11.97, 29.62, 31.67, 19.92,
+      16.82, 28.76, 35.24, 35.92, 39.14, 41.84, 44.86, 46.84, 48.48, 49.98,
+      51.66, 55.96, 58.65, 60.84, 62.47, 62.01, 60.63, 59.36, 57.26, 54.58, 
+      52.55, 50.40, 48.52, 47.15, 45.89, 45.11, 44.67, 44.49, 44.27, 44.27, 
+      44.35, 44.61, 44.67, 44.30, 44.56, 44.15, 44.20, 44.42, 44.23, 43.65};
+          
+    // Locate the requested energy in the tables.
+    // First the photoabsorption cross-section.
+    int iLow = 0;
+    int iUp = nPacsEntries - 1;
+    int iM;
+    while (iUp - iLow > 1) {
+      iM = (iUp + iLow) >> 1;
+      if (e >= xCF4[iM]) {
+        iLow = iM;
+      } else {
+        iUp = iM;
+      }
+    }
+
+    // Linear interpolation.
+    cs = yCF4[iLow] + (e - xCF4[iLow]) * 
+         (yCF4[iUp] - yCF4[iLow]) / (xCF4[iUp] - xCF4[iLow]);
+    // Convert from oscillator strength to photoabsorption cs.
+    cs *= 109.75e-18;
+    eta = 0.;
+   
+    return true;
+    
+  }
+  
+  cs = eta = 0.;
+  return true;
+  
 }
 
 bool 

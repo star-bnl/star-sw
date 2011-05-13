@@ -12,6 +12,9 @@ namespace Garfield {
 ComponentTcad2d::ComponentTcad2d() : 
   ComponentBase(), 
   nRegions(0), nVertices(0), nElements(0),
+  hasPotential(false), hasField(false),
+  hasElectronMobility(false), hasHoleMobility(false),
+  pMin(0.), pMax(0.),
   hasBoundingBox(false), hasRangeZ(false), 
   lastElement(0) {
 
@@ -373,6 +376,162 @@ ComponentTcad2d::GetMedium(
   return false;
 
 }
+
+bool 
+ComponentTcad2d::GetMobility(
+                      const double xin, const double yin, const double zin,
+                      double& emob, double& hmob) {
+
+  emob = hmob = 0.;
+  // Make sure the field map has been loaded.
+  if (!ready) {
+    std::cerr << className << "::GetMobility:\n";
+    std::cerr << "    Field map is not available for interpolation.\n";
+    return false;
+  }  
+ 
+  double x = xin, y = yin, z = zin;
+  // In case of periodicity, reduce to the cell volume.
+  const double cellsx = xMaxBoundingBox - xMinBoundingBox;
+  if (xPeriodic) {
+    x = xMinBoundingBox + fmod(x - xMinBoundingBox, cellsx);
+    if (x < xMinBoundingBox) x += cellsx;
+  } else if (xMirrorPeriodic) {
+    double xNew = xMinBoundingBox + fmod(x - xMinBoundingBox, cellsx);
+    if (xNew < xMinBoundingBox) xNew += cellsx;
+    int nx = int(floor(0.5 + (xNew - x) / cellsx));
+    if (nx != 2 * (nx / 2)) {
+      xNew = xMinBoundingBox + xMaxBoundingBox - xNew;
+    }
+    x = xNew;
+  } 
+  const double cellsy = xMaxBoundingBox - xMinBoundingBox;
+  if (yPeriodic) {
+    y = yMinBoundingBox + fmod(y - yMinBoundingBox, cellsy);
+    if (y < yMinBoundingBox) y += cellsy;
+  } else if (yMirrorPeriodic) {
+    double yNew = yMinBoundingBox + fmod(y - yMinBoundingBox, cellsy);
+    if (yNew < yMinBoundingBox) yNew += cellsy;
+    int ny = int(floor(0.5 + (yNew - y) / cellsy));
+    if (ny != 2 * (ny / 2)) {
+      yNew = yMinBoundingBox + yMaxBoundingBox - yNew;
+    }
+    y = yNew;
+  } 
+
+  // Check if the point is inside the bounding box.
+  if (x < xMinBoundingBox || x > xMaxBoundingBox ||
+      y < yMinBoundingBox || y > yMaxBoundingBox) {
+    return false;
+  }
+  if (hasRangeZ) {
+    if (z < zMinBoundingBox || z > zMaxBoundingBox) {
+      return false;
+    }
+  }
+  
+  // Check if the point is still located in the previously found element.
+  int i = lastElement;
+  switch (elements[i].type) {
+    case 1:
+      if (CheckLine(x, y, i)) {
+        emob = w[0] * vertices[elements[i].vertex[0]].emob + 
+               w[1] * vertices[elements[i].vertex[1]].emob;
+        hmob = w[0] * vertices[elements[i].vertex[0]].hmob + 
+               w[1] * vertices[elements[i].vertex[1]].hmob;
+        return true;
+      } 
+      break;
+    case 2:
+      if (CheckTriangle(x, y, i)) {
+        emob = w[0] * vertices[elements[i].vertex[0]].emob + 
+               w[1] * vertices[elements[i].vertex[1]].emob + 
+               w[2] * vertices[elements[i].vertex[2]].emob;
+        hmob = w[0] * vertices[elements[i].vertex[0]].hmob + 
+               w[1] * vertices[elements[i].vertex[1]].hmob + 
+               w[2] * vertices[elements[i].vertex[2]].hmob;
+        return true;
+      }
+      break;  
+    case 3:
+      if (CheckRectangle(x, y, i)) {
+        emob = w[0] * vertices[elements[i].vertex[0]].emob + 
+               w[1] * vertices[elements[i].vertex[1]].emob + 
+               w[2] * vertices[elements[i].vertex[2]].emob + 
+               w[3] * vertices[elements[i].vertex[3]].emob;
+        hmob = w[0] * vertices[elements[i].vertex[0]].hmob + 
+               w[1] * vertices[elements[i].vertex[1]].hmob + 
+               w[2] * vertices[elements[i].vertex[2]].hmob + 
+               w[3] * vertices[elements[i].vertex[3]].hmob;
+        return true;
+      }
+      break;
+    default: 
+      std::cerr << className << "::GetMobility:\n";
+      std::cerr << "    Unknown element type (" 
+                << elements[i].type << ").\n";
+      return false;
+      break;
+  }
+  
+  // The point is not in the previous element.
+  // We have to loop over all elements.
+  for (i = nElements; i--;) {
+    if (x < vertices[elements[i].vertex[0]].x) continue;
+    switch (elements[i].type) {
+      case 1:
+        if (CheckLine(x, y, i)) {
+          emob = w[0] * vertices[elements[i].vertex[0]].emob + 
+                 w[1] * vertices[elements[i].vertex[1]].emob;
+          hmob = w[0] * vertices[elements[i].vertex[0]].hmob + 
+                 w[1] * vertices[elements[i].vertex[1]].hmob;
+          lastElement = i;
+          return true;
+        }
+        break;
+      case 2:
+        if (CheckTriangle(x, y, i)) {
+          emob = w[0] * vertices[elements[i].vertex[0]].emob + 
+                 w[1] * vertices[elements[i].vertex[1]].emob + 
+                 w[2] * vertices[elements[i].vertex[2]].emob;
+          hmob = w[0] * vertices[elements[i].vertex[0]].hmob + 
+                 w[1] * vertices[elements[i].vertex[1]].hmob + 
+                 w[2] * vertices[elements[i].vertex[2]].hmob;
+          lastElement = i;
+          return true;
+        }
+        break;    
+      case 3:
+        if (CheckRectangle(x, y, i)) {
+          emob = w[0] * vertices[elements[i].vertex[0]].emob + 
+                 w[1] * vertices[elements[i].vertex[1]].emob + 
+                 w[2] * vertices[elements[i].vertex[2]].emob + 
+                 w[3] * vertices[elements[i].vertex[3]].emob;
+          hmob = w[0] * vertices[elements[i].vertex[0]].hmob + 
+                 w[1] * vertices[elements[i].vertex[1]].hmob + 
+                 w[2] * vertices[elements[i].vertex[2]].hmob + 
+                 w[3] * vertices[elements[i].vertex[3]].hmob;
+          lastElement = i;
+          return true;
+        }
+        break;
+      default:
+        std::cerr << className << "::GetMobility:\n";
+        std::cerr << "    Invalid element type (" 
+                  << elements[i].type << ").\n";
+        return false;
+        break;
+    }
+  }
+  // Point is outside the mesh.
+  if (debug) {
+    std::cerr << className << "::GetMobility:\n";
+    std::cerr << "    Point (" << x << ", " << y 
+              << ") is outside the mesh.\n";
+  }
+  return false;
+
+}
  
 bool 
 ComponentTcad2d::Initialise(const std::string gridfilename, 
@@ -385,7 +544,10 @@ ComponentTcad2d::Initialise(const std::string gridfilename,
     std::cerr << "    Importing mesh data failed.\n";
     return false;
   }
-  
+ 
+  hasPotential = hasField = false;
+  hasElectronMobility = hasHoleMobility = false;
+ 
   // Import electric field and potential from .dat file.
   if (!LoadData(datafilename)) {
     std::cerr << className << "::Initialise:\n";
@@ -418,6 +580,19 @@ ComponentTcad2d::Initialise(const std::string gridfilename,
   }
   
   std::cout << className << "::Initialise:\n";
+  std::cout << "    Available data:\n";
+  if (hasPotential) {
+    std::cout << "      Electrostatic potential\n";
+  } 
+  if (hasField) {
+    std::cout << "      Electric field\n";
+  } 
+  if (hasElectronMobility) {
+    std::cout << "      Electron mobility\n";
+  }
+  if (hasHoleMobility) {
+    std::cout << "      Hole mobility\n";
+  }
   std::cout << "    Bounding box:\n";
   std::cout << "      " << xMinBoundingBox << " < x [cm] < " 
                         << xMaxBoundingBox << "\n";
@@ -830,6 +1005,8 @@ ComponentTcad2d::LoadData(const std::string datafilename) {
     vertices[i].p = 0.;
     vertices[i].ex = 0.;
     vertices[i].ey = 0.;
+    vertices[i].emob = 0.;
+    vertices[i].hmob = 0.;
     vertices[i].isShared = false;
   }
   
@@ -928,8 +1105,8 @@ ComponentTcad2d::LoadData(const std::string datafilename) {
           if (ivertex >= nVertices) {
             std::cerr << className << "::LoadData:\n";
             std::cerr << "    Error reading file " << datafilename << "\n";
-            std::cerr << "    Dataset has more values than "
-                      << "there are vertices in region " 
+            std::cerr << "    Dataset ElectrostaticPotential:\n";
+            std::cerr << "      More values than vertices in region " 
                       << name << "\n";
             datafile.close(); Cleanup();
             return false;
@@ -938,6 +1115,7 @@ ComponentTcad2d::LoadData(const std::string datafilename) {
           ++fillCount[ivertex];
           ++ivertex;
         }
+        hasPotential = true;
       } else if (dataset == "ElectricField") {
         // Same procedure as for the potential.
         std::getline(datafile, line); std::getline(datafile, line);
@@ -1001,10 +1179,10 @@ ComponentTcad2d::LoadData(const std::string datafilename) {
           }
           if (ivertex >= nVertices) {
             std::cerr << className << "::LoadData\n"
-                      << "    Error reading file " << datafilename << "\n"
-                      << "    Dataset has more values than" 
-                      << " there are vertices in region " 
-                      << name << ".\n";
+                      << "    Error reading file " << datafilename << "\n";
+            std::cerr << "    Dataset ElectricField:\n";
+            std::cerr << "      More values than vertices in region " 
+                      << name << "\n";
             datafile.close(); Cleanup();
             return false;
           }
@@ -1012,6 +1190,169 @@ ComponentTcad2d::LoadData(const std::string datafilename) {
           vertices[ivertex].ey = val2;
           ++ivertex;
         }
+        hasField = true;
+      } else if (dataset == "eMobility") {
+        std::getline(datafile, line); std::getline(datafile, line);
+        std::getline(datafile, line); std::getline(datafile, line);
+        // Get the region name (given in brackets).
+        pBra = line.find('['); pKet = line.find(']');
+        if (pKet < pBra || 
+            pBra == std::string::npos || pKet == std::string::npos) {
+          std::cerr << className << "::LoadData:\n";
+          std::cerr << "    Error reading file " << datafilename << "\n";
+          std::cerr << "    Line:\n";
+          std::cerr << "    " << line << "\n";
+          datafile.close();
+          Cleanup();
+          return false;
+        }
+        line = line.substr(pBra + 1, pKet - pBra - 1);
+        std::string name; 
+        data.str(line); data >> name; data.clear();
+        // Check if the region name matches one from the mesh file.
+        int index = -1;
+        for (int j = 0; j < nRegions; ++j) {
+          if (name == regions[j].name) {
+            index = j;
+            break;
+          }
+        }
+        if (index == -1) {
+          std::cerr << className << "::LoadData:\n";
+          std::cerr << "    Error reading file " << datafilename << "\n";
+          std::cerr << "    Unknown region " << name << ".\n";
+          continue;
+        }
+        // Get the number of values.
+        std::getline(datafile, line);
+        pBra = line.find('('); pKet = line.find(')');
+        if (pKet < pBra || 
+            pBra == std::string::npos || pKet == std::string::npos) {
+          std::cerr << className << "::LoadData:\n";
+          std::cerr << "    Error reading file " << datafilename << "\n";
+          std::cerr << "    Line:\n";
+          std::cerr << "    " << line << "\n";
+          datafile.close(); Cleanup();
+          return false;
+        }
+        line = line.substr(pBra + 1, pKet - pBra - 1);
+        int nValues;
+        data.str(line); data >> nValues; data.clear();
+        // Mark the vertices belonging to this region.
+        for (int j = nVertices; j--;) isInRegion[j] = false;
+        for (int j = 0; j < nElements; ++j) {
+          if (elements[j].region != index) continue;
+          for (int k = 0; k <= elements[j].type; ++k) {
+            isInRegion[elements[j].vertex[k]] = true;
+          } 
+        }
+        int ivertex = 0;
+        double val;
+        for (int j = 0; j < nValues; ++j) {
+          // Read the next value.
+          datafile >> val;
+          // Find the next vertex belonging to the region.
+          while (ivertex < nVertices) {
+            if (isInRegion[ivertex]) break;
+            ++ivertex;
+          }
+          // Check if there is a mismatch between the number of vertices
+          // and the number of mobility values.
+          if (ivertex >= nVertices) {
+            std::cerr << className << "::LoadData:\n";
+            std::cerr << "    Dataset eMobility:\n";
+            std::cerr << "      More values than vertices in region " 
+                      << name << "\n";
+            datafile.close(); Cleanup();
+            return false;
+          }
+          // Convert from cm2 / (V s) to cm2 / (V ns).
+          vertices[ivertex].emob = val * 1.e-9;
+          ++fillCount[ivertex];
+          ++ivertex;
+        }
+        hasElectronMobility = true;
+      } else if (dataset == "hMobility") {
+        std::getline(datafile, line); std::getline(datafile, line);
+        std::getline(datafile, line); std::getline(datafile, line);
+        // Get the region name (given in brackets).
+        pBra = line.find('['); pKet = line.find(']');
+        if (pKet < pBra || 
+            pBra == std::string::npos || pKet == std::string::npos) {
+          std::cerr << className << "::LoadData:\n";
+          std::cerr << "    Error reading file " << datafilename << "\n";
+          std::cerr << "    Line:\n";
+          std::cerr << "    " << line << "\n";
+          datafile.close();
+          Cleanup();
+          return false;
+        }
+        line = line.substr(pBra + 1, pKet - pBra - 1);
+        std::string name; 
+        data.str(line); data >> name; data.clear();
+        // Check if the region name matches one from the mesh file.
+        int index = -1;
+        for (int j = 0; j < nRegions; ++j) {
+          if (name == regions[j].name) {
+            index = j;
+            break;
+          }
+        }
+        if (index == -1) {
+          std::cerr << className << "::LoadData:\n";
+          std::cerr << "    Error reading file " << datafilename << "\n";
+          std::cerr << "    Unknown region " << name << ".\n";
+          continue;
+        }
+        // Get the number of values.
+        std::getline(datafile, line);
+        pBra = line.find('('); pKet = line.find(')');
+        if (pKet < pBra || 
+            pBra == std::string::npos || pKet == std::string::npos) {
+          std::cerr << className << "::LoadData:\n";
+          std::cerr << "    Error reading file " << datafilename << "\n";
+          std::cerr << "    Line:\n";
+          std::cerr << "    " << line << "\n";
+          datafile.close(); Cleanup();
+          return false;
+        }
+        line = line.substr(pBra + 1, pKet - pBra - 1);
+        int nValues;
+        data.str(line); data >> nValues; data.clear();
+        // Mark the vertices belonging to this region.
+        for (int j = nVertices; j--;) isInRegion[j] = false;
+        for (int j = 0; j < nElements; ++j) {
+          if (elements[j].region != index) continue;
+          for (int k = 0; k <= elements[j].type; ++k) {
+            isInRegion[elements[j].vertex[k]] = true;
+          } 
+        }
+        int ivertex = 0;
+        double val;
+        for (int j = 0; j < nValues; ++j) {
+          // Read the next value.
+          datafile >> val;
+          // Find the next vertex belonging to the region.
+          while (ivertex < nVertices) {
+            if (isInRegion[ivertex]) break;
+            ++ivertex;
+          }
+          // Check if there is a mismatch between the number of vertices
+          // and the number of mobility values.
+          if (ivertex >= nVertices) {
+            std::cerr << className << "::LoadData:\n";
+            std::cerr << "    Dataset hMobility:\n";
+            std::cerr << "      More values than vertices in region " 
+                      << name << "\n";
+            datafile.close(); Cleanup();
+            return false;
+          }
+          // Convert from cm2 / (V s) to cm2 / (V ns).          
+          vertices[ivertex].hmob = val * 1.e-9;
+          ++fillCount[ivertex];
+          ++ivertex;
+        }
+        hasHoleMobility = true;
       }
     }
   }

@@ -1938,23 +1938,20 @@ ComponentAnalyticField::AddReadout(const char label) {
   } else {
     std::cout << className << "::AddReadout:\n";
     std::cout << "    Readout group " << label << " comprises:\n";
-    std::cout << "    " << nWiresFound;
     if (nWiresFound > 1) {
-      std::cout << " wires\n";
-    } else {
-      std::cout << " wire\n";
+      std::cout << "      " << nWiresFound << " wires\n";
+    } else if (nWiresFound == 1) {
+      std::cout << "      1 wire\n";
     } 
-    std::cout << "    " << nPlanesFound;
     if (nPlanesFound > 1) {
-      std::cout << " planes\n";
-    } else {
-      std::cout << " plane\n";
+      std::cout << "      " << nPlanesFound << " planes\n";
+    } else if (nPlanesFound == 1) {
+      std::cout << "      1 plane\n";
     }
-    std::cout << "    " << nStripsFound;
     if (nStripsFound > 1) {
-      std::cout << " strips\n";
-    } else {
-      std::cout << " strip\n";
+      std::cout << "      " << nStripsFound << " strips\n";
+    } else if (nStripsFound == 1) {
+      std::cout << "      1 strip\n";
     }
   }
   
