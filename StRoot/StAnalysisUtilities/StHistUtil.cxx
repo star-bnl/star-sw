@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.82 2011/03/15 21:05:25 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.83 2011/05/13 21:12:58 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.83  2011/05/13 21:12:58  genevb
+// Hide original prefixes in title when plotting reference hists
+//
 // Revision 2.82  2011/03/15 21:05:25  genevb
 // TPC hit phi sector labels
 //
@@ -632,11 +635,12 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
     if (obj->InheritsFrom("TH1")) { 
       TH1* hobj = (TH1*) obj;
       const char* oname = hobj->GetName();
+      const char* otitle = hobj->GetTitle();
       TString oName = oname;
       oName.ReplaceAll(' ','_');
       histReadCounter++;
       LOG_INFO << Form(" %d. Reading ... %s::%s; Title=\"%s\"\n",
-        histReadCounter,hobj->ClassName(),oname, hobj->GetTitle()) << endm;
+        histReadCounter,hobj->ClassName(),oname, otitle) << endm;
       if (!started && (m_FirstHistName.CompareTo("*")==0 ||
                        m_FirstHistName.CompareTo(oName)==0))
         started = kTRUE;
@@ -665,7 +669,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
 
           // this histogram will actually be printed/drawn!!
           LOG_INFO << Form("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",
-	    histCounter,hobj->ClassName(),oname, hobj->GetTitle()) << endm;
+	    histCounter,hobj->ClassName(),oname, otitle) << endm;
 
           // Switch to a new page...............................
 	  if (CheckOutFile(oname)) {
@@ -720,11 +724,11 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
           TH1* hobjO = hobj;
           TH1* hobjR = 0;
           if (dirListR) {
+            Int_t tempint = -1;
             // try: full name
             hobjR = (TH1*) (dirListR->FindObject(oname));
             if (!hobjR) {
               // try: strip just maker from name
-              Int_t tempint = -1;
               TString onamebase = StripPrefixes(oname,tempint,-1);
               hobjR = (TH1*) (dirListR->FindObject(onamebase.Data()));
               if (!hobjR) {
@@ -737,6 +741,11 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
                   hobjR = (TH1*) (dirListR->FindObject(onamebase.Data()));
                 }
               }
+            }
+            if (hobjR) {
+              TString htitle = StripPrefixes(hobjR->GetTitle(),tempint,0);
+              if (!htitle.BeginsWith("Ref:")) htitle.Prepend("Ref:");
+              hobjR->SetTitle(htitle.Data());
             }
           }
           TVirtualPad* objPad = 0;
