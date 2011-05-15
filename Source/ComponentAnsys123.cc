@@ -45,6 +45,15 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   bool readerror = false;
   while (fmplist.getline(line, size, '\n')) {
     il++;
+    // Skip page feed
+    if (strcmp(line,"1") == 0) {
+      fmplist.getline(line, size, '\n'); il++;
+      fmplist.getline(line, size, '\n'); il++;
+      fmplist.getline(line, size, '\n'); il++;
+      fmplist.getline(line, size, '\n'); il++;
+      fmplist.getline(line, size, '\n'); il++;
+      continue;
+    }
     // Split the line in tokens
     char* token = NULL;
     token = strtok(line, " ");
@@ -234,6 +243,15 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   int highestnode = 0;
   while (felist.getline(line, size, '\n')) {
     il++;
+    // Skip page feed
+    if (strcmp(line,"1") == 0) {
+      felist.getline(line, size, '\n'); il++;
+      felist.getline(line, size, '\n'); il++;
+      felist.getline(line, size, '\n'); il++;
+      felist.getline(line, size, '\n'); il++;
+      felist.getline(line, size, '\n'); il++;
+      continue;
+    }
     // Split the line in tokens
     char* token = NULL;
     // Split into tokens
@@ -426,6 +444,15 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   il = 0;
   while (fnlist.getline(line, size, '\n')) {
     il++;
+    // Skip page feed
+    if (strcmp(line,"1") == 0) {
+      fnlist.getline(line, size, '\n'); il++;
+      fnlist.getline(line, size, '\n'); il++;
+      fnlist.getline(line, size, '\n'); il++;
+      fnlist.getline(line, size, '\n'); il++;
+      fnlist.getline(line, size, '\n'); il++;
+      continue;
+    }
     // Split the line in tokens
     char* token = NULL;
     token = strtok(line, " ");
@@ -491,6 +518,15 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
   int nread = 0;
   while (fprnsol.getline(line, size, '\n')) {
     il++;
+    // Skip page feed
+    if (strcmp(line,"1") == 0) {
+      fprnsol.getline(line, size, '\n'); il++;
+      fprnsol.getline(line, size, '\n'); il++;
+      fprnsol.getline(line, size, '\n'); il++;
+      fprnsol.getline(line, size, '\n'); il++;
+      fprnsol.getline(line, size, '\n'); il++;
+      continue;
+    }    
     // Split the line in tokens
     char* token = NULL;
     token = strtok(line, " ");

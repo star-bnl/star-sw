@@ -2007,14 +2007,16 @@ MediumMagboltz::ComputeDeexcitationTable() {
   // Optical data (for quencher photoabsorption cs and ionization yield)
   OpticalData optData;
 
-  // Concentrations of "de-excitable" gases
+  // Presence flags, concentrations and indices of "de-excitable" gases.
   bool withAr = false; double cAr = 0.; int iAr = 0;
   bool withNe = false; double cNe = 0.; int iNe = 0;
 
   std::map<std::string, int> mapLevels;
   // Make a mapping of all excitation levels.
   for (int i = 0; i < nTerms; ++i) {
+    // Check if the level is an excitation.
     if (csType[i] % nCsTypes != ElectronCollisionTypeExcitation) continue;
+    // Extract the index of the gas.
     const int ngas = int(csType[i] / nCsTypes);
     if (gas[ngas] == "Ar") {
       // Argon
@@ -2023,6 +2025,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
         iAr = ngas;
         cAr = fraction[iAr];
       }
+      // Get the level description (as specified in Magboltz).
       std::string level = "       ";
       for (int j = 0; j < 7; ++j) level[j] = description[i][5 + j];
       if      (level == "1S5    ") mapLevels["Ar_1S5"] = i;
@@ -2137,6 +2140,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
     }
   }
 
+  // Count the excited levels.
   std::map<std::string, int> mapDxc;
   std::map<std::string, int>::iterator itMap;
   nDeexcitations = 0;
@@ -2147,6 +2151,10 @@ MediumMagboltz::ComputeDeexcitationTable() {
     ++nDeexcitations;
   }
 
+  // Conversion factor from oscillator strength to transition rate.
+  const double f2A = 2. * SpeedOfLight * FineStructureConstant / 
+                    (3. * ElectronMass * HbarC);
+
   // Radiative de-excitation channels
   // Transition rates (unless indicated otherwise) are taken from:
   //     NIST Atomic Spectra Database 
@@ -2155,9 +2163,6 @@ MediumMagboltz::ComputeDeexcitationTable() {
   // Oscillator strengths not included in the NIST database:
   //     J. Berkowitz, Atomic and Molecular Photoabsorption (2002)
   //     C.-M. Lee and K. T. Lu, Phys. Rev. A 8 (1973), 1241-1257
-  // Conversion from oscillator strength to transition probability
-  const double f2A = 2. * SpeedOfLight * FineStructureConstant / 
-                    (3. * ElectronMass * HbarC);
   deexcitation newDxc;
   for (itMap = mapLevels.begin(); itMap != mapLevels.end(); itMap++) {
     std::string level = (*itMap).first;
@@ -2172,6 +2177,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
     newDxc.p.clear(); newDxc.final.clear(); newDxc.type.clear();
     newDxc.nChannels = 0;
     if (level == "Ar_1S3" || level == "Ar_1S5") {
+      // Radiative decay of metastables is neglected.
       newDxc.p.clear(); newDxc.final.clear(); newDxc.type.clear(); 
     } else if (level == "Ar_1S4") {
       // Oscillator strength from NIST database
@@ -2286,7 +2292,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
       newDxc.p[7] = 1.1e-4;  newDxc.final[7] = mapDxc["Ar_2P2"];
     } else if (level == "Ar_3D4!") {
       int nc = 1; newDxc.nChannels = nc;
-      // Oscillator strength for 2P9 transition from Bartschat
+      // Transition probability for 2P9 transition from Bartschat
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
       newDxc.p[0] = 0.01593; newDxc.final[0] = mapDxc["Ar_2P9"];
     } else if (level == "Ar_3D4") {
@@ -2549,7 +2555,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
     } else if (level == "Ar_6D5") {
       // Oscillator strength from Lee and Lu 
       newDxc.osc = 0.00075;
-      // Berkowitz estimates f = 0.0062 for the sum of over
+      // Berkowitz estimates f = 0.0062 for the sum of
       // all "weak" nd levels with n = 6 and higher.
       int nc = 7; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -2565,7 +2571,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
     } else if (level == "Ar_5S1!") {
       // Oscillator strength from Lee and Lu 
       newDxc.osc = 0.00051;
-      // Berkowitz estimates f = 0.0562, for the sum 
+      // Berkowitz estimates f = 0.0562 for the sum 
       // of all nd' levels with n = 5 and higher.
       int nc = 2; newDxc.nChannels = nc;
       newDxc.p.resize(nc); newDxc.final.resize(nc); newDxc.type.resize(nc, 0);
@@ -2593,7 +2599,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
     } else if (level == "Ar_5S4") {
       // Oscillator strength from Lee and Lu 
       newDxc.osc = 0.0130;
-      // Berkowitz estimates f = 0.0211 for the sum over all
+      // Berkowitz estimates f = 0.0211 for the sum of all
       // ns levels with n = 8 and higher.
       newDxc.osc = 0.0211;
       int nc = 6; newDxc.nChannels = nc;
@@ -2609,7 +2615,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
     } else if (level == "Ar_6D2") {
       // Oscillator strength from Lee and Lu 
       newDxc.osc = 0.0290;
-      // Berkowitz estimates f = 0.0574 for the sum over all
+      // Berkowitz estimates f = 0.0574 for the sum of all
       // "strong" nd levels with n = 6 and higher.
       newDxc.osc = 0.0574;
       int nc = 2; newDxc.nChannels = nc;
@@ -2729,6 +2735,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
     }
   }
 
+  // Collisional deexcitation by quenching gases.
   bool withCO2  = false; double cCO2  = 0.; int iCO2  = 0;
   bool withCH4  = false; double cCH4  = 0.; int iCH4  = 0;
   bool withC2H6 = false; double cC2H6 = 0.; int iC2H6 = 0;
@@ -2753,9 +2760,136 @@ MediumMagboltz::ComputeDeexcitationTable() {
     }
   }
 
-  if (withAr && withCH4) {
-    // Methane
-    // Partial density of ethane
+  if (withAr && withCO2) {
+    // Partial density of CO2
+    const double nQ = GetNumberDensity() * cCO2;
+    for (int j = nDeexcitations; j--;) {
+      std::string level = deexcitations[j].label;
+      // Photoabsorption cross-section and ionization yield
+      double pacs = 0., eta = 0.;
+      if (!optData.GetPhotoabsorptionCrossSection("CO2", 
+                                                  deexcitations[j].energy,
+                                                  pacs, eta)) {
+        pacs = eta = 0.;
+      }
+      const double pPenning = pow(eta, 2. / 5.);
+      if (level == "Ar_1S5") {
+        // Rate constant from Velazco et al., J. Chem. Phys. 69 (1978)
+        const double kQ = 5.43e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_1S4") {
+        // Rate constant from Velazco et al., J. Chem. Phys. 69 (1978)
+        const double kQ = 5.0e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_1S3") {
+        const double kQ = 5.9e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_1S2") {
+        const double kQ = 7.4e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2P8") {
+        // Rate constant from Sadeghi et al., J. Chem. Phys. 115 (2001)
+        const double kQ = 6.4e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2P6") {
+        // Rate constant from Sadeghi et al.
+        const double kQ = 6.1e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2P5") {
+        // Rate constant from Sadeghi et al.
+        const double kQ = 6.6e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2P1") {
+        // Rate constant from Sadeghi et al.
+        const double kQ = 6.2e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2P10" || level == "Ar_2P9" ||
+                 level == "Ar_2P7"  || level == "Ar_2P4" ||
+                 level == "Ar_2P3"  || level == "Ar_2P2") {
+        // Average of rate constants given by Sadeghi et al.
+        const double kQ = 6.33e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (deexcitations[j].osc > 0.) {
+        // Higher resonance levels
+        // Calculate rate constant from Watanabe-Katsuura formula
+        const double m1 = ElectronMassGramme / (rgas[iAr]  - 1.);
+        const double m2 = ElectronMassGramme / (rgas[iCO2] - 1.);
+        // Compute the reduced mass.
+        double mR = m1 * m2 / (m1 + m2);
+        mR /= AtomicMassUnit;
+        const double uA = (RydbergEnergy / deexcitations[j].energy) * 
+                          deexcitations[j].osc;
+        const double uQ = (2 * RydbergEnergy / deexcitations[j].energy) *
+                          pacs / (4 * Pi2 * FineStructureConstant * 
+                                  BohrRadius * BohrRadius);
+        const double kQ = 2.591e-19 * 
+                          pow(uA * uQ, 2. / 5.) * 
+                          pow(temperature / mR, 3. / 10.);  
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      }
+    }  
+  } else if (withAr && withCH4) {
+    // Partial density of methane
     const double nQ = GetNumberDensity() * cCH4;
     for (int j = nDeexcitations; j--;) {
       std::string level = deexcitations[j].label;
@@ -2885,7 +3019,6 @@ MediumMagboltz::ComputeDeexcitationTable() {
       }
     }
   } else if (withAr && withC2H6) {
-    // Ethane
     // Partial density of ethane
     const double nQ = GetNumberDensity() * cC2H6;
     for (int j = nDeexcitations; j--;) {
@@ -3015,6 +3148,135 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].nChannels += 2;
       }
     }
+  } else if (withAr && withC2H2) {
+    // Partial density of acetylene
+    const double nQ = GetNumberDensity() * cC2H2;
+    for (int j = nDeexcitations; j--;) {
+      std::string level = deexcitations[j].label;
+      // Photoabsorption cross-section and ionization yield
+      double pacs = 0., eta = 0.;
+      if (!optData.GetPhotoabsorptionCrossSection("C2H2", 
+                                                  deexcitations[j].energy,
+                                                  pacs, eta)) {
+        pacs = eta = 0.;
+      }
+      const double pPenning = pow(eta, 2. / 5.);
+      if (level == "Ar_1S5") {
+        // Rate constant from Velazco et al., J. Chem. Phys. 69 (1978)
+        const double kQ = 5.1e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_1S4") {
+        // Rate constant from Velazco et al.
+        const double kQ = 4.6e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_1S3") {
+        const double kQ = 5.3e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_1S2") {
+        // Rate constant from Velazco et al.
+        const double kQ = 8.7e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2P8") {
+        // Rate constant from Sadeghi et al., J. Chem. Phys. 115 (2001)
+        const double kQ = 5.0e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2P6") {
+        // Rate constant from Sadeghi et al.
+        const double kQ = 5.7e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2P5") {
+        // Rate constant from Sadeghi et al.
+        const double kQ = 6.0e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2P1") {
+        // Rate constant from Sadeghi et al.
+        const double kQ = 5.3e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2P10" || level == "Ar_2P9" ||
+                 level == "Ar_2P7"  || level == "Ar_2P4" ||
+                 level == "Ar_2P3"  || level == "Ar_2P2") {
+        // Average of rate constants given by Sadeghi et al.
+        const double kQ = 5.5e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      } else if (deexcitations[j].osc > 0.) {
+        // Higher resonance levels
+        // Calculate rate constant from Watanabe-Katsuura formula
+        const double m1 = ElectronMassGramme / (rgas[iAr]   - 1.);
+        const double m2 = ElectronMassGramme / (rgas[iC2H2] - 1.);
+        // Compute the reduced mass.
+        double mR = m1 * m2 / (m1 + m2);
+        mR /= AtomicMassUnit;
+        const double uA = (RydbergEnergy / deexcitations[j].energy) * 
+                          deexcitations[j].osc;
+        const double uQ = (2 * RydbergEnergy / deexcitations[j].energy) *
+                          pacs / (4 * Pi2 * FineStructureConstant * 
+                                  BohrRadius * BohrRadius);
+        const double kQ = 2.591e-19 * 
+                          pow(uA * uQ, 2. / 5.) * 
+                          pow(temperature / mR, 3. / 10.);  
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      }
+    }
   } else {
     std::cout << className << "::ComputeDeexcitationTable:\n";
     std::cout << "    No data on Penning effects found.\n";
@@ -3030,7 +3292,9 @@ MediumMagboltz::ComputeDeexcitationTable() {
     std::cout << "                                     "
               << "                Ionisation      Other\n";
   }
+
   for (int i = 0; i < nDeexcitations; ++i) {
+    // Calculate the total decay rate of each level.
     deexcitations[i].rate = 0.;
     double fRad = 0., fCollIon = 0., fCollOther = 0.;
     for (int j = deexcitations[i].nChannels; j--;) {
@@ -3044,6 +3308,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
       }
     }
     if (deexcitations[i].rate > 0.) {
+      // Print the radiative and collisional decay rates.
       if (debug) {
         std::cout << std::setw(15) << deexcitations[i].label << "  "
                   << std::fixed << std::setprecision(3)
@@ -3068,6 +3333,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
           std::cout << "----------  \n";
         }
       }
+      // Normalize the decay rates.
       for (int j = 0; j < deexcitations[i].nChannels; ++j) {
         deexcitations[i].p[j] /= deexcitations[i].rate;
         if (j > 0) deexcitations[i].p[j] += deexcitations[i].p[j - 1];
