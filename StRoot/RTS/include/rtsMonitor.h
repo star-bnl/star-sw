@@ -283,6 +283,7 @@ struct rtsMonDET {
 	u_int buffs ;	// EVB/SL3 buffers free
 	u_int evtsSpur ;	// spurious events; evtsBad are only the bad ones _with_ the Trigger
 	u_char rb_status[12] ;	// USED in DDL dets!
+	u_int dbg_ctrs[10] ;	// 10 debug counters
 } ;
 
 
