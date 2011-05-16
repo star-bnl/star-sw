@@ -23,6 +23,10 @@ _isExporting = True
 
 from pyparsing import *
 
+# locator object which implements getLineNumber() and possibly other methods
+# to be set by the syntax handler when the language is defined
+locator = None
+
 # ====================================================================================================
 class NotYet( Exception ):
     def __init__(self):

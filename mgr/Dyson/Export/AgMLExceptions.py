@@ -2,6 +2,7 @@ from exceptions import Exception
 
 from Dyson.Utils.Shapes  import listOfShapes
 
+
 # ===============================================================================
 class ContentError(Exception):
     """
@@ -83,13 +84,9 @@ class AgmlNameError(Exception):
     def __str__(self):
         output = """
         
- ============-=================================================
- 
- AgML Error: %s name %s breaks backwards compatability with
-             AgSTAR.  Please limit to 4 characters, e.g. %s
+        --> AgML Error line %i: %s must be 4 characters for backwards compatibility <--
+        """%(self.locator.getLineNumber(),self.tag)
 
- ============-=================================================
- """%(self.tag,self.volume,self.volume[:4])
         return output
     
 # ===============================================================================
@@ -100,12 +97,9 @@ class AgmlCommentError(Exception):
     def __str__(self):
         output = """
         
- ============-=================================================
- 
- AgML Error: %s %s requires a comment field.
-
- ============-=================================================
- """%(self.tag,self.volume)
+        --> AgML Error line %i: %s requires a comment field <--
+        """%(self.locator.getLineNumber(),self.tag)
+        
         return output
     
 
@@ -114,21 +108,13 @@ class AgmlShapeError(Exception):
     def __init__(self,volume,shape):
         self.volume = volume
         self.shape  = shape
+
     def __str__(self):
-
-
-        
         output = """
         
- ============-=================================================
- 
- AgML Error: In volume %s, Shape %s is invalid.
+        --> AgML Error line %i: shape %s is unknown"%s" <--
+        """%(self.locator.getLineNumber(),self.shape)
 
-             Supported shapes:
-             %s
-
- ============-=================================================
- """%(self.volume, self.shape, ','.join(listOfShapes()))
         return output        
 
 # ===============================================================================
@@ -141,13 +127,9 @@ class AgmlAttributeWarning(Warning):
         self.value  = value
     def __str__(self):
         output = """
- ============-=================================================
- AgML Warning: Volume %s
-
-     %s has invalid attribute %s="%s"
-
- ============-=================================================
- """%(self.volume,self.tag,self.key,self.value)
+        
+        --> AgML Warning line %i: %s has invalid attribute %s="%s" <--
+        """%(self.locator.getLineNumber(),self.tag,self.key,self.value)
         return output
 # ===============================================================================
 class AgmlMissingAttributeWarning(Warning):
@@ -159,11 +141,7 @@ class AgmlMissingAttributeWarning(Warning):
 
     def __str__(self):
         output = """
- ============-=================================================
- AgML Warning: Volume %s
-
-     %s is missing required attribute %s="%s"
-
- ============-=================================================
- """%(self.volume,self.tag,self.key)
+        
+        --> AgML Warning line %i: %s missinge required attribute %s <--
+        """%(self.locator.getLineNumber(),self.tag,self.key)
         return output
