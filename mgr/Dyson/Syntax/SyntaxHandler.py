@@ -31,9 +31,6 @@ export_table = {
     'AgROOT'  : AgROOT
     }
 
-
-
-
 Language = export_table['AgML'] # Default language
 
 out = IOHandler();
@@ -57,6 +54,7 @@ def setExportSyntax ( syn ):
     
 #from Handler import Handler
 
+
 class SyntaxHandler ( ContentHandler ):
 
     def depth(self):
@@ -65,10 +63,17 @@ class SyntaxHandler ( ContentHandler ):
         """
         return len(self.stack)
 
+    def setDocumentLocator(self,locator):
+        self.locator = locator
+        self.language.locator = locator
+
+
     def __init__(self,options):
 
         syn = options.language
         setExportSyntax(syn)
+
+        self.language = Language
 
         self.options=options
 
@@ -77,6 +82,7 @@ class SyntaxHandler ( ContentHandler ):
         # adds a new object to the stack.  When the end tag
         # is encountered, the object is popped off the stack.
         self.stack = [ None ]
+
 
         # Dictionary of classes which handle each tag defined
         # in the AgML (Abstract geometry mortran language).
