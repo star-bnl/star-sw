@@ -8,16 +8,10 @@ import os
 import re
 
 # Exception handling
-#from exceptions import *
 from AgMLExceptions import ContentError, MissingError, AgmlArrayError, AgmlNameError, AgmlCommentError, AgmlShapeError, AgmlAttributeWarning
 
 enable_warnings = os.getenv('AGML_WARNINGS',False)
-
-if enable_warnings:
-    from warnings import warn
-else:
-    def warn( aboutsomething ):
-        pass
+from warnings import warn
 
 from pyparsing  import *
 
@@ -56,7 +50,32 @@ output = IOHandler(newline=True)
 
 current_block = "None"
 
+# locator object which implements getLineNumber() and possibly other methods
+# to be set by the syntax handler when the language is defined
+locator = None
 
+# Wrappers around the warning and exception handling in order to add the
+# locator to the exception
+def RaiseWarning( exception, warning=True ):
+
+    enable_warnings = os.getenv('AGML_WARNINGS',False)
+    if not enable_warnings:
+        return
+    
+    exception.locator = locator
+    exception.file    = document.input
+    if warning:
+        warn(exception)
+    else:
+        raise exception
+    
+def RaiseException( exception ):
+    exception.locator = locator
+    exception.file    = document.input   
+    raise exception
+
+
+###############################################################################
 
 def doxygenize( comment ): return '/// %s'%comment
 
@@ -81,10 +100,11 @@ def checkAttributes( tag, attr, mylist, skip=[], warning=True ):
         if key in mylist:
             pass
         else:
-            if warning:
-                warn(  AgmlAttributeWarning( current_block, tag, key, value ) )
-            else:
-                raise AgmlAttributeWarning( current_block, tag, key, value )
+            RaiseWarning( AgmlAttributeWarning(current_block, tag, key, value), warning )
+##            if warning:
+##                warn(  AgmlAttributeWarning( current_block, tag, key, value ) )
+##            else:
+##                raise AgmlAttributeWarning( current_block, tag, key, value )
 
 def requireAttributes( tag, attr, mylist, warning=True ):
     """
@@ -93,12 +113,13 @@ def requireAttributes( tag, attr, mylist, warning=True ):
     for key in mylist:
         value = attr.get(key, None)
 
-        if value==None:
+        if value==None:            
+            RaiseWarning( AgmlAttributeWarning(current_block, tag, key, warning ) )
 
-            if warning==True:
-                warn( AgmlMissingAttributeWarning( current_block, tag, key ) )
-            else:
-                raise AgmlMissingAttributeWarning( current_block, tag, key ) 
+#            if warning==True:
+#                warn( AgmlMissingAttributeWarning( current_block, tag, key ) )
+#            else:
+#                raise AgmlMissingAttributeWarning( current_block, tag, key ) 
 
 
 # ----------------------------------------------------------------------------------------------------
@@ -268,7 +289,8 @@ class Document( Handler ):
             if volume in self.blocks:
                 pass
             else:
-                raise MissingError(volume,self.agmodule)
+                ##raise MissingError(volume,self.agmodule)
+                RaiseException( MissingError( volume,self.agmodule ) )
         
         
     def GetModule(self):
@@ -467,9 +489,11 @@ class Block( Handler ):
 
         # Error checking
         if len(name)!= 4:
-            raise AgmlNameError( name, tag )
+            ##raise AgmlNameError( name, tag )
+            RaiseException( AgmlNameError(name,tag) )
         if comm==None:
-            raise AgmlCommentError( name, tag )
+            ##raise AgmlCommentError( name, tag )
+            RaiseException( AgmlCommentError(name,tag) )
         
         self.name    = name
         self.comment = comm
@@ -494,7 +518,8 @@ class Block( Handler ):
         if name in document.content:
             document.blocks.append( name )
         else:            
-            raise ContentError( name, document.agmodule )
+            ##raise ContentError( name, document.agmodule )
+            RaiseException( ContentError(name,document.agmodule) )
         
         
 
@@ -511,6 +536,7 @@ class Block( Handler ):
         document.head('~%s(){ };'%name)
         document.head('virtual void Block( AgCreate c );')
         document.head('virtual void End(){ };')
+
 ##        if namespace:
 ##            document.head('ClassDef(%s::%s,1);'%(document.agmodule,name))
 ##        else:
@@ -1827,7 +1853,8 @@ class Shape(Handler):
         try:
             args   = Dyson.Utils.Shapes.arglist( mytype )
         except:
-            raise AgmlShapeError( current_block, mytype )
+            ##raise AgmlShapeError( current_block, mytype )
+            RaiseWarning( AgmlShapeError( current_block, mytype ) )
 
         # Check validity of attributes and issue warning if we are provided
         # an unknown attribute

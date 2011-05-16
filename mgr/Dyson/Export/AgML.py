@@ -896,6 +896,9 @@ _soft_limit = 80 # applies a soft limit on the line length
 _depth = 0
 _prepend = '    '
 
+# locator object which implements getLineNumber() and possibly other methods
+# to be set by the syntax handler when the language is defined
+locator = None
 
 class Sanitize:
     """
@@ -954,6 +957,7 @@ class Container(Handler):
     def startElement(self,tag,attr):
         global _depth
         #out='<%s '%( tag )
+        
         out = ''
         if ( self.firstKey != None ):
 
