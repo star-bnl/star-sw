@@ -817,17 +817,24 @@ void y2012()
 {
   std::cout << "+ Creating STAR y2012 Geometries" << std::endl;
   geom.Use("select","y2011");
+
   geom.select = "upgr2012"; {
     geom.sconFlag = "SCONof"; geom.sconStat = 0;
     geom.ftroFlag = "FTROof"; geom.ftroStat = 0;
     geom.ftpcFlag = "FTPCof"; geom.ftpcStat = 0;
 
-    geom.fgtdFlag = "FGTD03"; geom.fgtdStat = 1;
-    geom.isdmFlag = "ISDM01"; geom.isdmStat = 1;
+    geom.fgtdFlag = "FGTDv306"; geom.fgtdStat = 1;
+    geom.isdmFlag = "ISDM01";   geom.isdmStat = 1;
 
-    setTitle("Upgrade studies");
+    setTitle("Upgrade studies with 6 disk FGT");
     geom.fill();
   };
+
+  geom.select = "upgr2012a"; {
+    geom.fgtdFlag = "FGTDv302"; geom.fgtdStat = 1;
+    setTitle("Upgrade studies with 2 disk FGT");
+    geom.fill();
+  }
 
 }
 
