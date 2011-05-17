@@ -722,13 +722,22 @@ Bool_t Geometry::ConstructRich( const Char_t *flag, Bool_t go )
 Bool_t Geometry::ConstructFgtd( const Char_t *flag, Bool_t go )
 {
 
-  std::cout << "============================================================ fgtd ==" << std::endl;
-  std::cout << "flag = " << flag << " go = " << go << std::endl;
 
   if ( !fgtdGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
       return false;      
+    }
+
+
+  AgStructure::AgDetpNew( fgtdGeom.module, Form("Forward GEM Tracker with configuration %s", flag));
+  if ( fgtdGeom.config == 306 ) 
+    {
+      AgStructure::AgDetpAdd( "Fgtg_t", "fgstconfig", (Float_t)2.0 );
+    }
+  if ( fgtdGeom.config == 302 )   
+    {
+      AgStructure::AgDetpAdd( "Fgtg_t", "fgstconfig", (Float_t)1.0 );
     }
 
   if ( go )
@@ -1548,8 +1557,9 @@ Bool_t Geometry::RichInit()
 
 Bool_t Geometry::FgtdInit()
 {
-  fgtdGeom.select="FGTDon"; fgtdGeom.module="FgtdGeo2"; fgtdGeom.config=1; fgtdGeom.fill();
-  fgtdGeom.select="FGTD03"; fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=3; fgtdGeom.fill();
+  fgtdGeom.select="FGTDon";   fgtdGeom.module="FgtdGeo2"; fgtdGeom.config=1;   fgtdGeom.fill();
+  fgtdGeom.select="FGTDv306"; fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=306; fgtdGeom.fill();
+  fgtdGeom.select="FGTDv302"; fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=302; fgtdGeom.fill();
   return true;
 }
 

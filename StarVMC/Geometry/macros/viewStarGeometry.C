@@ -1,4 +1,4 @@
-void viewStarGeometry( const Char_t *tag="y2012dev" )
+void viewStarGeometry( const Char_t *tag="upgr2012" )
 {
   
   // 
