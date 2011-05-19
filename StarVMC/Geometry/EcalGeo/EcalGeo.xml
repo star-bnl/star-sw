@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/ecalgeo/ecalgeo.g'}" file="pams/geometry/ecalgeo/ecalgeo.g"  >
+<Document file="StarVMC/Geometry/EcalGeo/EcalGeo.xml">
+
     <Module name="ECALGEO" comment=" is the EM EndCap Calorimeter GEOmetry "  >
         <Created date="   26 jan 1996 "  />
         <Author name="Rashid Mehdiyev"  />
@@ -790,7 +791,9 @@
             <Par name="BIRK1" value="1."  />
             <Par name="BIRK2" value="0.013"  />
             <Par name="BIRK3" value="9.6E-6"  />
-            <Hits for="ESCI" birk="0:(0,10)"  />
+            <Instrument block="ESCI">
+                 <Hit meas="birk" nbits="0" min="0" max="10" />
+            </Instrument>
         </Block>
         
         <Block name="ERAD" comment="is radiator"  >
@@ -1066,7 +1069,9 @@
             <Par name="BIRK1" value="1."  />
             <Par name="BIRK2" value="0.0130"  />
             <Par name="BIRK3" value="9.6E-6"  />
-            <Hits for="EHMS" birk="0:(0,10)"  />
+            <Instrument block="EHMS">
+                 <Hit meas="birk" nbits="0" min="0" max="10" />
+            </Instrument>
         </Block>
         
         <Block name="EXGT" comment="is the G10 layer in the Shower Max"  >

@@ -1,4 +1,4 @@
-<Document file="pams/geometry/svttgeo/svttgeo10.g">
+<Document file="StarVMC/Geometry/SvttGeo/SvttGeo10.xml">
 
     <Module name="SVTTGEO10" comment=" is evolution of svttgeo6 with carbon replacing Be as per Dave Lynn:  "  >
 

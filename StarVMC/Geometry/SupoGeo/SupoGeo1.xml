@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/supogeo/supogeo1.g'}" file="pams/geometry/supogeo/supogeo1.g"  >
+<Document file="StarVMC/Geometry/SupoGeo/SupoGeo1.xml">
+
     <Module name="SUPOGEO1" comment="  is the geometry of the Forward TPC supports in STAR "  >
         <Author name="Holm Huemmler"  />
         <Created date="  27-Okt-99 "  />

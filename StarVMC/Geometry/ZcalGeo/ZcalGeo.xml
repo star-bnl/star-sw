@@ -1,4 +1,4 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/zcalgeo/zcalgeo.g'}" file="pams/geometry/zcalgeo/zcalgeo.g"  >
+<Document file="StarVMC/Geometry/ZcalGeo/ZcalGeo.xml"  >
     <Module name="ZCALGEO" comment=" is the geometry of the Zero deg. Quartz Calorimeter "  >
         <Created date=" 10-Feb-1997 "  />
         <Author name="W.B.Christie"  />
@@ -171,7 +171,9 @@
             <Shape type="BOX" dz="calp_scdz"  />
             <Par name="CUTGAM" value="0.0005"  />
             <Par name="CUTELE" value="0.00015"  />
-            <Hits for="QSCI" eloss="0:(0,10)"  />
+            <Instrument block="QSCI">
+                <Hit meas="eloss" nbits="0" min="0" max="10" />
+            </Instrument>
         </Block>
         
     </Module>

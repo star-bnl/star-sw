@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/vpddgeo/vpddgeo1.g'}" file="pams/geometry/vpddgeo/vpddgeo1.g"  >
+<Document  file="StarVMC/Geometry/VpddGeo/VpddGeo1.g">
+
     <Module name="VPDDGEO1" comment="  is the Pseudo Vertex Position Detector of STAR "  >
         <Author name="Frank Geurts"  />
         <Created date=" 21 June 2000 "  />

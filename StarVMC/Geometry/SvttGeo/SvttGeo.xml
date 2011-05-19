@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': '/afs/rhic.bnl.gov/star/packages/DEV/pams/geometry/svttgeo/svttgeo.g'}" file="/afs/rhic.bnl.gov/star/packages/DEV/pams/geometry/svttgeo/svttgeo.g"  >
+<Document  file="StarVMC/Geometry/SvttGeo/SvttGeo.xml" >
+
     <Module name="SVTTGEO" comment="  is the SVT geometry for STAR "  >
         <Author name="Pavel Nevski, Ken Wilson"  />
         <Created date=" 05 apr 96 "  />

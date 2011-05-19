@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/svttgeo/svttgeo6.g'}" file="pams/geometry/svttgeo/svttgeo6.g"  >
+<Document file="StarVMC/Geometry/SvttGeo/SvttGeo6.xml">
+
     <Module name="SVTTGEO6" comment="  is the SVT: corrected wafers and sensitive volumes "  >
 
         <Author name="Maxim Potekhin"  />
@@ -1366,10 +1367,7 @@
         <Block name="SIRT" comment="is the SVT inner end ring tube"  >
             <Material name="Berillium"  />
             <Attribute for="SIRT" seen="1" colo="2"  />
-            <!-- Why does AgML break this line???
             ir_rmin = serg_IrngPrMn * (cos(pi/8.) + sqrt( tan(pi/8.)**2-sin(pi/8.)**2))
-              -->
-            ir_rmin = serg_IrngPrMn * 1.08239220029239402
             <Shape type="TUBE" rmax="serg_IrngTrMx" rmin="ir_rmin" dz="serg_EndRngTh/2"  />
         </Block>
         

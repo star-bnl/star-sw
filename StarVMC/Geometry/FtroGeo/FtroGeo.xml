@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/ftro/ftrogeo.g'}" file="pams/geometry/ftro/ftrogeo.g"  >
+<Document file="StarVMC/Geometry/FtroGeo/FtroGeo.xml">
+
     <Module name="FTROGEO" comment=" is the geometry of the readout structure of the FTPC "  >
         <Created date="  07/22/04 "  />
         <Author name="Maxim Potekhin"  />

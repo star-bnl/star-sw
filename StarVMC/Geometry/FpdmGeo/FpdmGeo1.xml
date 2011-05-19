@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/fpdmgeo/fpdmgeo1.g'}" file="pams/geometry/fpdmgeo/fpdmgeo1.g"  >
+<Document file="StarVMC/Geometry/FpdmGeo/FpdmGeo1.xml">
+
     <Module name="FPDMGEO1" comment=" is the Forward Pion Detector Modules GEOmetry "  >
         <Created date="   12 Nov 2003 "  />
         <Author name="Akio Ogawa"  />
@@ -465,7 +466,10 @@
             <Attribute for="FLGR" seen="1" colo="4"  />
             <Shape type="BOX" dz="FLGG_depth/2" dx="FLGG_Width/2" dy="FLGG_Width/2"  />
 
-            <Hits for="FLGR" elos="0:(0,50)"  />
+            <Instrument block="FLGR">
+                <Hit meas="elos" nbits="0" min="0" max="50" />
+            </Instrument>
+
             <If expr="FMCG_ChkvSim==1"  >
                 <Call expr="%Imed,N,E,ABSCO_PbG,EFFIC_All,RINDEX_PbG" routine="GSCKOV"  />
             </If>
@@ -478,8 +482,12 @@
             <Attribute for="LPCT" seen="1" colo="6"  />
             <Shape type="tube" dz="FLGG_PhCathDz/2.0" rmin="0" rmax="FLGG_PhCathR"  />
             <If expr="FMCG_ChkvSim==1"  >
-                <Call expr="%Imed,N,E,ABSCO_PhCath,EFFIC_PhCath,RINDEX_PhCath" routine="GSCKOV"  />
-                <Hits for="FPCT" user="0:(0,100000)"  />
+
+                <Call routine="GSCKOV"  expr="%Imed,N,E,ABSCO_PhCath,EFFIC_PhCath,RINDEX_PhCath" />
+
+                <Instrument block="FPCT">
+                    <Hit meas="user" nbits="0" min="0" max="100000" />
+                </Instrument>
             </If>
             
         </Block>
@@ -592,7 +600,9 @@
             <Par name="BIRK1" value="1."  />
             <Par name="BIRK2" value="0.0130"  />
             <Par name="BIRK3" value="9.6E-6"  />
-            <Hits for="FHMS" birk="0:(0,10)"  />
+            <Instrument block="FHMS">
+                <Hit meas="birk" nbits="0" min="0" max="10" />
+            </Instrument>            
         </Block>
         
 

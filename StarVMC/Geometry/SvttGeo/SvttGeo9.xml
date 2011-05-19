@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': '/afs/rhic.bnl.gov/star/packages/DEV/pams/geometry/svttgeo/svttgeo9.g'}" file="/afs/rhic.bnl.gov/star/packages/DEV/pams/geometry/svttgeo/svttgeo9.g"  >
+<Document file="StarVMC/Geometry/SvttGeo/SvttGeo9.xml" >
+
     <Module name="SVTTGEO9" comment="  is the SVT-less geometry of the support cones of STAR without the SVT "  >
 
         <Author name="Maxim Potekhin"  />

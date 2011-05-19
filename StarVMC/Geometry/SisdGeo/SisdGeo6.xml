@@ -1,4 +1,4 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/sisdgeo/sisdgeo6.g'}" file="pams/geometry/sisdgeo/sisdgeo6.g"  >
+<Document file="StarVMC/Geometry/SisdGeo/SisdGeo6.xml">
     <Module name="SISDGEO6" comment="  is the Silicon Strip Detector with TUP modifications "  >
         <Author name="Bouchet and Potekhin"  />
         <Created date=" 1 Feb 07 "  />

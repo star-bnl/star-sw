@@ -1,4 +1,4 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/tpcegeo/tpcegeo3a.g'}" file="pams/geometry/tpcegeo/tpcegeo3a.g"  >
+<Document  file="StarVMC/Geometry/TpceGeo/TpceGeo3a.xml"  >
 
 
     <Module name="tpceGeo3a" comment="  is the updated TPC "  >

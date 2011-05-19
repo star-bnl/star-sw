@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/pipegeo/pipegeo.g'}" file="pams/geometry/pipegeo/pipegeo.g"  >
+<Document file="StarVMC/Geometry/PipeGeo/PipeGeo.xml">
+
     <Module name="PIPEGEO" comment=" is the geometry  of the STAR beam pipe. "  >
         <Created date="  30-03-99 "  />
         <Author name="W.B.Christie"  />

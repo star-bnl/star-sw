@@ -1,4 +1,4 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/svttgeo/svttgeo11.g'}" file="pams/geometry/svttgeo/svttgeo11.g"  >
+<Document file="StarVMC/Geometry/SvttGeo/SvttGeo11.xml">
 
     <Module name="SVTTGEO11" comment=" is evolution of svttgeo6 with carbon replacing Be as per Dave Lynn:                   Based on the SVTTGEO6 code "  >
 

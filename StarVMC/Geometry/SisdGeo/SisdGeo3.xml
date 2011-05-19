@@ -1,4 +1,4 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/sisdgeo/sisdgeo3.g'}" file="pams/geometry/sisdgeo/sisdgeo3.g"  >
+<Document file="StarVMC/Geometry/SisdGeo/SisdGeo3.xml">
 
     <Module name="SISDGEO3" comment="  is the Silicon Strip Detector "  >
         <Author name="Lilian Martin"  />

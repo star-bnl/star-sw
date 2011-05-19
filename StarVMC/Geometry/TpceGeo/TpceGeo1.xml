@@ -1,4 +1,4 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/tpcegeo/tpcegeo1.g'}" file="pams/geometry/tpcegeo/tpcegeo1.g"  >
+<Document file="StarVMC/Geometry/TpceGeo/TpceGeo1.xml">
 
     <Module name="TPCEGEO1" comment="  is the TPC system in GSTAR "  >
         <Author name="David Underwood and Maxim Potekhin"  />

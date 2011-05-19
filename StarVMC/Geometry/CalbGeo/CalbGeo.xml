@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/calbgeo/calbgeo.g'}" file="pams/geometry/calbgeo/calbgeo.g"  >
+<Document file="StarVMC/Geometry/CalbGeo/CalbGeo.xml">
+
     <Module name="CALBGEO" comment=" is the geometry of the Barrel EM Calorimeter in (aG)STAR     * "  >
         <Author name="K. Shestermanov, IHEP. First version W. Llope"  />
         <Created date="   November 17 1995 "  />
@@ -482,28 +483,28 @@
 
           <Instrument block="CSDA"  >
                 <Hit meas="type=1" nbits="2"                             />
-                <Hit meas="eta"    nbits="0.1"    min="0" max="1"        />
+                <Hit meas="eta"    bins ="0.1"    min="0" max="1"        />
                 <Hit meas="etsp"   nbits="h_eta1" min="0" max="sh_eta1"  />
                 <Hit meas="eloss"  nbits="0"      min="0" max="1"        />
             </Instrument>
             
             <Instrument block="CSDA"  >
                 <Hit meas="type=2" nbits="2"                            />
-                <Hit meas="eta"    nbits="0.1"    min="0" max="1"       />
+                <Hit meas="eta"     bins="0.1"    min="0" max="1"       />
                 <Hit meas="etsp"   nbits="h_eta2" min="0" max="sh_eta2" />
                 <Hit meas="eloss"  nbits="0"      min="0" max="1"       />
             </Instrument>
             
             <Instrument block="CSDA"  >
                 <Hit meas="type=3" nbits="2"  />
-                <Hit meas="eta"    nbits="0.1"    min="0" max="1"        />
+                <Hit meas="eta"     bins="0.1"    min="0" max="1"        />
                 <Hit meas="etsp"   nbits="h_phi1" min="0" max="sh_phi1"  />
                 <Hit meas="eloss"  nbits="0"      min="0" max="1"        />
             </Instrument>
             
             <Instrument block="CSDA"  >
                 <Hit meas="type=4" nbits="2"  />
-                <Hit meas="eta"    nbits="0.1"    min="0" max="1"  />
+                <Hit meas="eta"     bins="0.1"    min="0" max="1"  />
                 <Hit meas="etsp"   nbits="h_phi2" min="0" max="sh_phi2"  />
                 <Hit meas="eloss"  nbits="0"      min="0" max="1"  />
             </Instrument>

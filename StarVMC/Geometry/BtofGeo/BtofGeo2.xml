@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/btofgeo/btofgeo2.g'}" file="pams/geometry/btofgeo/btofgeo2.g"  >
+<Document  file="StarVMC/Geometry/BtofGeo/BtofGeo2.xml">
+
     <Module name="BTOFGEO2" comment=" is the Geometry of Barrel Trigger / Time Of Flight system  "  >
 
         <Author name="W.J. Llope"  />
