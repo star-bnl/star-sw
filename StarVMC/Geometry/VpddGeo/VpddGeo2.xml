@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/vpddgeo/vpddgeo2.g'}" file="pams/geometry/vpddgeo/vpddgeo2.g"  >
+<Document file="StarVMC/Geometry/VpddGeo/VpddGeo2.g"  >
+
     <Module name="VPDDGEO2" comment="  is the StartDet and pipe support hardware "  >
         <Author name="W.J. Llope"  />
         <Created date=" 21 June 2000 "  />

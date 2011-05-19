@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/mutdgeo/mutdgeo3.g'}" file="pams/geometry/mutdgeo/mutdgeo3.g"  >
+<Document file="StarVMC/Geometry/MutdGeo/MutdGeo3.xml">
+
     <Module name="MUTDGEO3" comment=" is the geometry of the STAR muon trigger system "  >
         <CDE  >
             AGECOM

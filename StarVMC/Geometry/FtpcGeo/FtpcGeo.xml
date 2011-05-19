@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/ftpcgeo/ftpcgeo.g'}" file="pams/geometry/ftpcgeo/ftpcgeo.g"  >
+<Document file="StarVMC/Geometry/FtpcGeo/FtpcGeo.xml">
+
     <Module name="FTPCGEO" comment="  is the geometry of the Forward TPC in STAR "  >
         <Author name="Andreas Schuettauf"  />
         <Created date="  03-Apr-98 "  />

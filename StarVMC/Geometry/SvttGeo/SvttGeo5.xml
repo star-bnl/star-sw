@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': '/afs/rhic.bnl.gov/star/packages/DEV/pams/geometry/svttgeo/svttgeo5.g'}" file="/afs/rhic.bnl.gov/star/packages/DEV/pams/geometry/svttgeo/svttgeo5.g"  >
+<Document file="StarVMC/Geometry/SvttGeo/SvttGeo5.xml">
+
     <Module name="SVTTGEO5" comment="  is the SVT geometry for STAR: without the central part "  >
 
         <Author name="Maxim Potekhin"  />

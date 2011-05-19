@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/quadgeo/quadgeo.g'}" file="pams/geometry/quadgeo/quadgeo.g"  >
+<Document file="StarVMC/Geometry/QuadGeo/QuadGeo.xml">
+
     <Module name="QUADGEO" comment=" is the description of all the magnets upstream inclusive of D0 "  >
         <Created date="  02-Sep-2005  "  />
         <Author name="Maxim Potekhin"  />

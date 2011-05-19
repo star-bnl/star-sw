@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': '/afs/rhic.bnl.gov/star/packages/DEV/pams/geometry/svttgeo/svttgeo2.g'}" file="/afs/rhic.bnl.gov/star/packages/DEV/pams/geometry/svttgeo/svttgeo2.g"  >
+<Document file="StarVMC/Geometry/SvttGeo/SvttGeo2.xml">
+
     <Module name="SVTTGEO2" comment="  is the SVT geometry for STAR: corrected and augmented "  >
         <Author name="Maxim Potekhin"  />
         <Created date=" 21 Aug 03 "  />

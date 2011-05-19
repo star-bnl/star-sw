@@ -1,4 +1,5 @@
-<Document cmdline="{'path_name': './', 'module_name': None, 'language': 'AgML', 'filename': 'pams/geometry/shldgeo/shldgeo.g'}" file="pams/geometry/shldgeo/shldgeo.g"  >
+<Document file="StarVMC/Geometry/ShldGeo/ShldGeo.xml">
+
     <Module name="SHLDGEO" comment=" is the shielding "  >
         <Created date="  15-Aug-2005  "  />
         <Author name="Maxim Potekhin"  />
