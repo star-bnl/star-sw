@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCATrackParam.cxx,v 1.5 2010/08/26 15:05:52 ikulakov Exp $
+// $Id: AliHLTTPCCATrackParam.cxx,v 1.6 2011/05/20 16:11:22 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -255,7 +255,7 @@ bool  AliHLTTPCCATrackParam::TransportToX( float x, AliHLTTPCCATrackLinearisatio
   if(sin>0.999) sin = 0.999;
   if(sin<-0.999) sin = -0.999;
 //  float cos = sqrt(1-sin*sin);
-  float cos0 = sqrt(1-fP[2]*fP[2]);
+//  float cos0 = sqrt(1-fP[2]*fP[2]);
 //  float Ds = dx/cos0;    //(asin(sin) - asin(fP[2]))/(Bz*fP[4]);
 //  float yy = Y() + 1.f/(Bz*fP[4])*(cos0 - cos);
 //  float zz = Z() + fP[3] * Ds;
@@ -266,8 +266,10 @@ bool  AliHLTTPCCATrackParam::TransportToX( float x, AliHLTTPCCATrackLinearisatio
 //  float z_t = Ds;
 //  float z_p = 0.f;  //fP[3]*dx*dx*Bz*sin/(cos*cos*cos);
 //  float s_p = dx*Bz;
-
-  float rrr = (asin(t0.SinPhi() + d[2] + dxBz * d[4]));
+  float rrr3 = t0.SinPhi() + d[2] + dxBz * d[4];
+  if (rrr3 >  1) rrr3 =  1;
+  if (rrr3 < -1) rrr3 = -1;
+  float rrr = (asin(rrr3));
   rrr = CAMath::Cos(rrr);
 //  std::cout << cos <<"  "<< rrr << "     "<< fP[2] <<"  "<<dx<<"  "<<Bz <<"  "<<1-sin*sin<<"  "<< std::endl;
 
@@ -687,7 +689,7 @@ bool AliHLTTPCCATrackParam::Rotate( float alpha, float maxSinPhi )
   return 1;
 }
 
-void AliHLTTPCCATrackParam::RotateXY( float alpha, float &x, float &y, float &sin, float maxSinPhi ) const
+void AliHLTTPCCATrackParam::RotateXY( float alpha, float &x, float &y, float &sin, float /* maxSinPhi */) const
 {
   //* Rotate the coordinate system in XY on the angle alpha
 
