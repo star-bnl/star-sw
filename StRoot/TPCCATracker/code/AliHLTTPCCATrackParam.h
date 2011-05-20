@@ -1,5 +1,5 @@
 //-*- Mode: C++ -*-
-// $Id: AliHLTTPCCATrackParam.h,v 1.3 2010/08/23 19:37:02 mzyzak Exp $
+// $Id: AliHLTTPCCATrackParam.h,v 1.4 2011/05/20 16:11:22 fisyak Exp $
 // ************************************************************************
 // This file is property of and copyright by the ALICE HLT Project        *
 // ALICE Experiment at CERN, All rights reserved.                         *
@@ -39,7 +39,7 @@ class AliHLTTPCCATrackParam
     friend std::ostream &operator<<( std::ostream &, const AliHLTTPCCATrackParam & );
   public:
 
-    AliHLTTPCCATrackParam() {}
+    AliHLTTPCCATrackParam() { Reset();}
     AliHLTTPCCATrackParam( const TrackParamVector &v, int i )
       : fX( v.X()[i] ),
       fSignCosPhi( v.SignCosPhi()[i] ),
@@ -109,6 +109,7 @@ class AliHLTTPCCATrackParam
     const float *GetPar() const { return fP; }
     const float *GetCov() const { return fC; }
 
+  void Reset() {memset(beg,0, end-beg);}
     void SetPar( int i, float v ) { fP[i] = v; }
     void SetCov( int i, float v ) { fC[i] = v; }
 
@@ -184,13 +185,14 @@ class AliHLTTPCCATrackParam
     }
 
   private:
-
+  Char_t beg[1]; //!
     float fX;      // x position
     float fSignCosPhi; // sign of cosPhi
     float fP[5];   // 'active' track parameters: Y, Z, SinPhi, DzDs, q/Pt
     float fC[15];  // the covariance matrix for Y,Z,SinPhi,..
     float fChi2;   // the chi^2 value
     int   fNDF;    // the Number of Degrees of Freedom
+  Char_t end[1]; //!
 };
 
 typedef AliHLTTPCCATrackParam TrackParam;

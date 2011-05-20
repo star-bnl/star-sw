@@ -1,4 +1,4 @@
-// $Id: AliHLTTPCCAMerger.cxx,v 1.9 2010/08/26 15:05:50 ikulakov Exp $
+// $Id: AliHLTTPCCAMerger.cxx,v 1.10 2011/05/20 16:11:22 fisyak Exp $
 // **************************************************************************
 // This file is property of and copyright by the ALICE HLT Project          *
 // ALICE Experiment at CERN, All rights reserved.                           *
@@ -329,7 +329,7 @@ void AliHLTTPCCAMerger::UnpackSlices()
 
       const AliHLTTPCCASliceTrack &sTrack = slice.Track( itr );
       AliHLTTPCCATrackParam t0 = sTrack.Param();
-
+      if (! t0.NDF()) continue;
 ///mvz start 03.02.2010
 //      bool ttt = 0;
 //      if( 1./CAMath::Abs((CAMath::Abs(t0.QPt()) + CAMath::Sqrt(t0.Err2QPt()))) < 0.6 ) continue;
