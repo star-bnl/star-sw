@@ -365,9 +365,9 @@ MolecPhotoAbsCS NO_MPACS(Nitrogen_PACS, 1,
                          Oxygen_PACS, 1);
 MolecPhotoAbsCS CO_MPACS(Carbon_for_CO2_PACS, 1,
                          Oxygen_PACS, 1);
-MolecPhotoAbsCS DME_MPACS(Carbon_for_Methylal_PACS, 2,
-                          Hydrogen_for_H2_PACS, 6,
-                          Oxygen_PACS, 1);
+MolecPhotoAbsCS DME_MPACS(Carbon_for_Methylal_PACS, 4,
+                          Hydrogen_for_H2_PACS, 10,
+                          Oxygen_PACS, 2);
 MolecPhotoAbsCS C2F6_MPACS(Carbon_for_C2H6_PACS, 2,
                            Fluorine_PACS, 6);
 MolecPhotoAbsCS C3H6_MPACS(Carbon_for_C2H6_PACS, 3,

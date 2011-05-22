@@ -220,7 +220,7 @@ $(OBJDIR)/MediumMagboltz.o: \
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
 $(OBJDIR)/magboltz.o: \
-	$(SRCDIR)/magboltz-8.93.f
+	$(SRCDIR)/magboltz-8.94.f
 	@echo $@
 	@$(FC) $(FFLAGS) $< -o $@
 $(OBJDIR)/MediumSilicon.o: \

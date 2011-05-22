@@ -134,25 +134,26 @@ double PointsRan::ran(double flat_ran) const
 {
   mfunnamep("double PointsRan::ran(double flat_ran) const");
   flat_ran = integ_start + integ_active * flat_ran;
-  long q = x.get_qel();
+  // long q = x.get_qel();
   long n1 = n_start;
   long n2 = n_finish;
   long n3;
-  while( n2-n1 > 1 )
-  {
-    n3=n1 + (n2-n1)/2;
-    if(flat_ran < iy[n3])
+  while (n2-n1 > 1) {
+    n3 = n1 + (n2-n1) / 2;
+    if (flat_ran < iy[n3]) {
       n2=n3;
-    else
+    } else {
       n1=n3;
+    }
   }
   double dran = flat_ran - iy[n1];
   //double dx = sqrt(2.0 * dran);
   double dx;
-  if(a[n1] != 0.0)
+  if(a[n1] != 0.0) {
     dx =  (- y[n1] + sqrt(y[n1] * y[n1] + 2.0 * a[n1] * dran)) / a[n1];
-  else
+  } else {
     dx = (x[n2] - x[n1]) / (iy[n2] - iy[n1]) * dran; 
+  }
   //check_econd11(dx , < 0 , mcerr); // for debug
   //check_econd11(dx , > x[n2] - x[n1] , mcerr); // for debug
   double r = x[n1] + dx;

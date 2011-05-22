@@ -1773,11 +1773,12 @@ T t_value_step_ar(const M& mesh,
   double xmin = mesh.get_xmin();
   double xmax = mesh.get_xmax();
   //Iprint3n(mcout, x, xmin, xmax);
-  if(x < xmin) return 0;
-  if(s_include_last_point == 0)
-    if(x >= xmax) return 0;
-  else
-    if(x > xmax) return 0;
+  if (x < xmin) return 0;
+  if (s_include_last_point == 0) {
+    if (x >= xmax) return 0;
+  } else {
+    if (x > xmax) return 0;
+  }
   long n1, n2;
   T b1, b2;
   int i_ret=0;
@@ -1789,7 +1790,6 @@ T t_value_step_ar(const M& mesh,
 }
 
 // The same for two-dimensional array D
-
 template<class T, class D, class M1, class M2>
 T t_value_step_ar(const M1& mesh1, const M2& mesh2,   
 		  const D& y,       // array of function values          
@@ -1801,21 +1801,21 @@ T t_value_step_ar(const M1& mesh1, const M2& mesh2,
   double x1min = mesh1.get_xmin();
   double x1max = mesh1.get_xmax();
   //Iprint3n(mcout, x, xmin, xmax);
-  if(x1 < x1min) return 0;
-  if(s_include_last_point == 0)
-    if(x1 >= x1max) return 0;
-  else
-    if(x1 > x1max) return 0;
-
+  if (x1 < x1min) return 0;
+  if (s_include_last_point == 0) {
+    if (x1 >= x1max) return 0;
+  } else {
+    if (x1 > x1max) return 0;
+  }
   double x2min = mesh2.get_xmin();
   double x2max = mesh2.get_xmax();
   //Iprint3n(mcout, x, xmin, xmax);
-  if(x2 < x2min) return 0;
-  if(s_include_last_point == 0)
-    if(x2 >= x2max) return 0;
-  else
-    if(x2 > x2max) return 0;
-
+  if (x2 < x2min) return 0;
+  if (s_include_last_point == 0) {
+    if (x2 >= x2max) return 0;
+  } else {
+    if (x2 > x2max) return 0;
+  }
   long n11, n12;
   long n21, n22;
   T b1, b2;
@@ -1836,7 +1836,6 @@ T t_value_step_ar(const M1& mesh1, const M2& mesh2,
 
 // Fill the array y like a histogram adding value val (or 1) for bin
 // corresponding to abscissa x
-
 template<class T, class D, class M>
 void t_hfill_step_ar(const M& mesh,              
 		     const D& y,    // array of function values             
@@ -1849,10 +1848,11 @@ void t_hfill_step_ar(const M& mesh,
   double xmax = mesh.get_xmax();
   //Iprint3n(mcout, x, xmin, xmax);
   if(x < xmin) return;
-  if(s_include_last_point == 0)
-    if(x >= xmax) return;
-  else
-    if(x > xmax) return;
+  if (s_include_last_point == 0) {
+    if (x >= xmax) return;
+  } else {
+    if (x > xmax) return;
+  }
   long n1;
   int i_ret=0;
   i_ret = mesh.get_interval(x, 
@@ -1863,8 +1863,8 @@ void t_hfill_step_ar(const M& mesh,
 }
 
 
-// the same as above, but with "ac" access instead of "[]".
-// useful if D is DynArr.
+// The same as above, but with "ac" access instead of "[]".
+// Useful if D is DynArr.
  
 template<class T, class D, class M>
 void t_hfill_step_ar_ac(const M& mesh,              
@@ -1877,11 +1877,12 @@ void t_hfill_step_ar_ac(const M& mesh,
   double xmin = mesh.get_xmin();
   double xmax = mesh.get_xmax();
   //Iprint3n(mcout, x, xmin, xmax);
-  if(x < xmin) return;
-  if(s_include_last_point == 0)
-    if(x >= xmax) return;
-  else
-    if(x > xmax) return;
+  if (x < xmin) return;
+  if (s_include_last_point == 0) {
+    if (x >= xmax) return;
+  } else {
+    if (x > xmax) return;
+  }
   long n1;
   int i_ret=0;
   i_ret = mesh.get_interval(x, 
@@ -1905,16 +1906,18 @@ void t_hfill_step_ar_ac(const M1& mesh1, const M2& mesh2,
   double x2min = mesh2.get_xmin();
   double x2max = mesh2.get_xmax();
   //Iprint3n(mcout, x, xmin, xmax);
-  if(x1 < x1min) return;
-  if(s_include_last_point == 0)
-    if(x1 >= x1max) return;
-  else
-    if(x1 > x1max) return;
-  if(x2 < x2min) return;
-  if(s_include_last_point == 0)
-    if(x2 >= x2max) return;
-  else
-    if(x2 > x2max) return;
+  if (x1 < x1min) return;
+  if (s_include_last_point == 0) {
+    if (x1 >= x1max) return;
+  } else {
+    if (x1 > x1max) return;
+  }
+  if (x2 < x2min) return;
+  if (s_include_last_point == 0) {
+    if (x2 >= x2max) return;
+  } else {
+    if (x2 > x2max) return;
+  }
   long n1;
   int i_ret1=0;
   i_ret1 = mesh1.get_interval(x1, n1);
@@ -1958,13 +1961,10 @@ T t_integ_step_ar(const M& mesh,
   if(x1 == x2) return 0;
   long istart, iafterend; // indexes to sum total intervals
   T s(0);
-  if(x1 <= xmin) 
-  {
+  if(x1 <= xmin) {
     x1 = xmin;
     istart = 0;
-  }
-  else
-  {
+  } else {
     long n1, n2;
     T b1, b2;
     int i_ret=0;
@@ -1974,32 +1974,29 @@ T t_integ_step_ar(const M& mesh,
     //Iprint2n(mcout, x1, i_ret);
     //Iprint4n(mcout, n1, b1, n2, b2);
     check_econd11(i_ret , != 1 , mcerr);
-    if(b2 - x1 > 0)  // otherwise it could be only equal to 0
+    if (b2 - x1 > 0)  // otherwise it could be only equal to 0
     {
-      if(x2 <= b2)  // if x2 in the same interval
+      if (x2 <= b2)  // if x2 in the same interval
       {
-	if(xpower == 0)
-	  s = (x2 - x1) * y[n1];
-	else
-	  s = 0.5 * (x2* x2 - x1* x1) * y[n1];
-
-	return s;
+        if (xpower == 0) {
+          s = (x2 - x1) * y[n1];
+        } else
+          s = 0.5 * (x2* x2 - x1* x1) * y[n1];
+        }
+        return s;
       }
-      if(xpower == 0)
-	s += (b2 - x1) * y[n1];
-      else
-	s += 0.5 * (b2*b2 - x1*x1) * y[n1];
-
+      if (xpower == 0) {
+        s += (b2 - x1) * y[n1];
+      } else {
+        s += 0.5 * (b2*b2 - x1*x1) * y[n1];
+      }
     }
     istart = n2;
   }
-  if(x2 >= xmax) 
-  {
+  if (x2 >= xmax) {
     x2 = xmax;
     iafterend = qi;
-  }
-  else
-  {
+  } else {
     long n1, n2;
     T b1, b2;
     int i_ret=0;
@@ -2009,13 +2006,12 @@ T t_integ_step_ar(const M& mesh,
     //Iprint2n(mcout, x2, i_ret);
     //Iprint4n(mcout, n1, b1, n2, b2);
     check_econd11(i_ret , != 1 , mcerr);
-    if(x2 - b1 > 0)
-    {
-      if(xpower == 0)
-	s += (x2 - b1) * y[n1];
-      else
-	s += 0.5 * (x2*x2 - b1*b1) * y[n1];
-
+    if (x2 - b1 > 0) {
+      if (xpower == 0) {
+        s += (x2 - b1) * y[n1];
+      } else {
+        s += 0.5 * (x2*x2 - b1*b1) * y[n1];
+      }
     }
     iafterend = n1;
   }
@@ -2023,19 +2019,14 @@ T t_integ_step_ar(const M& mesh,
   long i;
   double b;
   mesh.get_scoor(istart, b);
-  if(xpower == 0)
-  {
-    for(i=istart; i<iafterend; i++)
-    {
+  if (xpower == 0) {
+    for (i=istart; i<iafterend; i++) {
       double a = b;
       mesh.get_scoor(i+1, b);
       s += (b - a) * y[i];
     }
-  }
-  else
-  {
-    for(i=istart; i<iafterend; i++)
-    {
+  } else {
+    for(i=istart; i<iafterend; i++) {
       double a = b;
       mesh.get_scoor(i+1, b);
       s += 0.5 * (b*b - a*a) * y[i];
@@ -2056,7 +2047,7 @@ It can be used to obtain weight in a global array.
 */
 template<class T, class D, class M>
 T t_integ_generic_step_ar(const M& mesh, 
-			  const D& y,     // array of function values         
+			  const D& y,   // array of function values  
 			  T (*fun)( long np, T xp1, T xp2, T yp, 
 				    T xmin, T xmax, T x1, T x2), 
 			  // This function should produce integral
@@ -2077,13 +2068,10 @@ T t_integ_generic_step_ar(const M& mesh,
   if(x1 == x2) return 0;
   long istart, iafterend; // indexes to sum total intervals
   T s(0);
-  if(x1 <= xmin) 
-  {
+  if (x1 <= xmin) {
     x1 = xmin;
     istart = 0;
-  }
-  else
-  {
+  } else {
     long n1, n2;
     T b1, b2;
     int i_ret=0;
@@ -2108,13 +2096,10 @@ T t_integ_generic_step_ar(const M& mesh,
     }
     istart = n2;
   }
-  if(x2 >= xmax) 
-  {
+  if(x2 >= xmax) {
     x2 = xmax;
     iafterend = qi;
-  }
-  else
-  {
+  } else {
     long n1, n2;
     T b1, b2;
     int i_ret=0;
@@ -2124,8 +2109,7 @@ T t_integ_generic_step_ar(const M& mesh,
     //Iprint2n(mcout, x2, i_ret);
     //Iprint4n(mcout, n1, b1, n2, b2);
     check_econd11(i_ret , != 1 , mcerr);
-    if(x2 - b1 > 0)
-    {
+    if(x2 - b1 > 0) {
       s += fun(n1, b1, b2, y[n1],   
 	       xmin, xmax,
 	       b1, x2);
@@ -2136,13 +2120,12 @@ T t_integ_generic_step_ar(const M& mesh,
   long i;
   double b;
   mesh.get_scoor(istart, b);
-  for(i=istart; i<iafterend; i++)
-  {
+  for (i=istart; i<iafterend; i++) {
     double a = b;
     mesh.get_scoor(i+1, b);
     s += fun(i, a, b, y[i],   
-	     xmin, xmax,
-	     a, b);
+             xmin, xmax,
+             a, b);
   }
   //Iprintn(mcout, s);
   
@@ -2174,8 +2157,7 @@ T t_total_integ_step_ar(const M& mesh,
   long i;
   double b;
   mesh.get_scoor(istart, b);
-  for(i=istart; i<iafterend; i++)
-  {
+  for (i=istart; i<iafterend; i++) {
     double a = b;
     mesh.get_scoor(i+1, b);
     s += (b - a) * y[i];
@@ -2209,13 +2191,10 @@ T t_total_integ_step_ar(const M1& mesh1, const M2& mesh2,
   long i1;
   double b1;
   mesh1.get_scoor(istart1, b1);
-  for(i1=istart1; i1<iafterend1; i1++)
-  {
+  for (i1=istart1; i1<iafterend1; i1++) {
     double a1 = b1;
     mesh1.get_scoor(i1+1, b1);
-
     // time to obtain integral by the second dimension
-
     //if(x1 > x2) return 0;
     long istart2, iafterend2; // indexes to sum total intervals
     T s2(0);
@@ -2225,15 +2204,12 @@ T t_total_integ_step_ar(const M1& mesh1, const M2& mesh2,
     long i2;
     double b2;
     mesh2.get_scoor(istart2, b2);
-    for(i2=istart2; i2<iafterend2; i2++)
-    {
+    for (i2=istart2; i2<iafterend2; i2++) {
       double a2 = b2;
       mesh2.get_scoor(i2+1, b2);
       s2 += (b2 - a2) * y[i1][i2];
-    }
-      
+    }      
     // OK, integral = s2
-
     s1 += (b1 - a1) * s2;
   }
   
@@ -2311,7 +2287,7 @@ is equal to integ.
 
 template<class T, class D, class M>
 T t_find_x_for_integ_step_ar(const M& mesh,               
-			     const D& y,   // array of function values      
+			     const D& y,   // array of function values   
 			     T integ,  
 			     int* s_err)   // for power = 0 only
 {
@@ -2340,10 +2316,8 @@ T t_find_x_for_integ_step_ar(const M& mesh,
     T step = xp2 - xp1;
     T s1 = s + y[n] * step;
     //Iprint3n(mcout, n, s1, integ);
-    if(s1 > integ)
-      break;
-    if(s1 == integ)
-      return xp2;
+    if (s1 > integ) break;
+    if (s1 == integ) return xp2;
     s = s1;
   }
 
@@ -2382,14 +2356,13 @@ T t_find_x_for_already_integ_step_ar
   //if(x1 > x2) return 0.0;
   double xmin = mesh.get_xmin();
   double xmax = mesh.get_xmax();
-  if(integ == 0.0) return xmin;
-  if(integ > y[qi-1])
-  {
+  if (integ == 0.0) return xmin;
+  if (integ > y[qi-1]) {
     *s_err = 1;
     return xmax;
   }
-  if(integ == y[qi-1]) return xmax;
-  if(integ < y[0])
+  if (integ == y[qi-1]) return xmax;
+  if (integ < y[0])
   {                  // answer in the first bin
     T xp1(0.0);
     T xp2(0.0);

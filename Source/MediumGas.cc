@@ -1820,11 +1820,11 @@ MediumGas::GetGasInfo(const std::string gasname,
   } else if (gasname == "CO") {
     a = 12.0107 + 15.9994; z = 6 + 8;
   } else if (gasname == "Methylal") {
-    a = 3 * 12.0107 + 8 * 1.00794 + 2 * 15.9994; 
-    z = 3 * 6 + 8 + 2 * 8;
+    a = 3 * 12.0107 +  8 * 1.00794 + 2 * 15.9994; 
+    z = 3 * 6 +  8 + 2 * 8;
   } else if (gasname == "DME") {
-    a = 2 * 12.0107 + 6 * 1.00794 +     15.9994; 
-    z = 2 * 6 + 6 + 8;
+    a = 4 * 12.0107 + 10 * 1.00794 + 2 * 15.9994; 
+    z = 4 * 6 + 10 + 2 * 8;
   } else if (gasname == "Reid-Step" || 
              gasname == "Mawell-Model" ||
              gasname == "Reid-Ramp") {
@@ -2107,14 +2107,16 @@ MediumGas::GetGasName(std::string input, std::string& gasname) const {
     return true;
   }
   // Helium 4
-  if (input == "HE" || input == "HELIUM" || input == "HE-4" || 
-      input == "HELIUM-4" || input == "HE4" || input == "HELIUM4") {
+  if (input == "HE" || input == "HELIUM" || 
+      input == "HE-4" || input == "HE 4" || input == "HE4" ||
+      input == "4-HE" || input == "4 HE" || input == "4HE" || 
+      input == "HELIUM-4" || input == "HELIUM 4" || input == "HELIUM4") {
     gasname = "He";
     return true;
   }
   // Helium 3
-  if (input == "HE-3" || input == "HELIUM-3" || input == "HE3" || 
-      input == "HELIUM3") {
+  if (input == "HE-3" || input == "HE3" || 
+      input == "HELIUM-3" || input == "HELIUM 3" || input == "HELIUM3") {
     gasname = "He-3";
     return true;
   }
@@ -2156,7 +2158,7 @@ MediumGas::GetGasName(std::string input, std::string& gasname) const {
   }
   // Carbon dioxide (CO2)
   if (input == "CO2" || input == "CARBON-DIOXIDE" ||
-      input == "CARBONDIOXIDE") {
+      input == "CARBON DIOXIDE" || input == "CARBONDIOXIDE") {
     gasname = "CO2"; 
     return true;
   }
@@ -2168,7 +2170,8 @@ MediumGas::GetGasName(std::string input, std::string& gasname) const {
     return true;
   }
   // Water
-  if (input == "H2O" || input == "WATER" || input == "WATER-VAPOUR") {
+  if (input == "H2O" || input == "WATER" || 
+      input == "WATER-VAPOUR" || input == "WATER VAPOUR") {
     gasname = "H2O"; 
     return true;
   }
@@ -2184,13 +2187,15 @@ MediumGas::GetGasName(std::string input, std::string& gasname) const {
     return true;
   }
   // Nitric oxide (NO)
-  if (input == "NO" || input == "NITRIC-OXIDE" || 
-      input == "NITROGEN-MONOXIDE") {
+  if (input == "NO" || 
+      input == "NITRIC-OXIDE" || input == "NITRIC OXIDE" ||  
+      input == "NITROGEN-MONOXIDE" || input == "NITROGEN MONOXIDE") {
     gasname = "NO"; 
     return true;
   }
   // Nitrous oxide (N2O)
-  if (input == "N2O" || input == "NITROUS-OXIDE" || 
+  if (input == "N2O" || 
+      input == "NITROUS-OXIDE" || input == "NITROUS OXIDE" ||  
       input == "DINITROGEN-MONOXIDE" || input == "LAUGHING-GAS") {
     gasname = "N2O"; 
     return true;
@@ -2217,7 +2222,8 @@ MediumGas::GetGasName(std::string input, std::string& gasname) const {
     return true;
   }
   // Carbon monoxide (CO)
-  if (input == "CO" || input == "CARBON-MONOXIDE") {
+  if (input == "CO" || input == "CARBON-MONOXIDE" || 
+      input == "CARBON MONOXIDE") {
     gasname = "CO"; 
     return true;
   }
@@ -2230,11 +2236,13 @@ MediumGas::GetGasName(std::string input, std::string& gasname) const {
   }
   // DME
   if (input == "DME" || 
-      input == "DIMETHYL-ETHER" || input == "DIMETHYLETHER" || 
+      input == "DIMETHYL-ETHER" || input == "DIMETHYLETHER" ||
+      input == "DIMETHYL ETHER" || input == "METHYL ETHER" || 
       input == "METHYL-ETHER" || input == "METHYLETHER" ||
       input == "WOOD-ETHER" || input == "WOODETHER" ||
+      input == "WOOD ETHER" || input == "DIMETHYL OXIDE" || 
       input == "DIMETHYL-OXIDE" || input == "DEMEON" || 
-      input == "METHOXYMETHANE" || input == "C2H6O") {
+      input == "METHOXYMETHANE" || input == "C4H10O2") {
     gasname = "DME"; 
     return true;
   }
@@ -2260,8 +2268,9 @@ MediumGas::GetGasName(std::string input, std::string& gasname) const {
     return true;
   }
   // SF6
-  if (input == "SF6" || input == "SULPHUR-HEXAFLUORIDE" || 
-      input == "SULFUR-HEXAFLUORIDE") {
+  if (input == "SF6" || 
+      input == "SULPHUR-HEXAFLUORIDE" || input == "SULFUR-HEXAFLUORIDE" ||
+      input == "SULPHUR HEXAFLUORIDE" || input == "SULFUR HEXAFLUORIDE") {
     gasname = "SF6"; 
     return true;
   }
@@ -2276,27 +2285,30 @@ MediumGas::GetGasName(std::string input, std::string& gasname) const {
     return true;
   }
   // Cyclopropane
-  if (input == "C-PROPANE" || input == "CYCLO-PROPANE" || 
-      input == "CYCLOPROPANE" || input == "C-C3H6" || 
-      input == "CC3H6" || input == "CYCLO-C3H6") {
+  if (input == "C-PROPANE" || input == "CYCLO-PROPANE" ||
+      input == "CYCLO PROPANE" || input == "CYCLOPROPANE" ||
+      input == "C-C3H6" || input == "CC3H6" || input == "CYCLO-C3H6") {
     gasname = "cC3H6"; 
     return true;
   }
   // Methanol
-  if (input == "METHANOL" || input == "METHYL-ALCOHOL" || 
+  if (input == "METHANOL" || input == "METHYL-ALCOHOL" ||
+      input == "METHYL ALCOHOL" || input == "WOOD ALCOHOL" ||  
       input == "WOOD-ALCOHOL" || input == "CH3OH") {
     gasname = "CH3OH"; 
     return true;
   }
   // Ethanol
-  if (input == "ETHANOL" || input == "ETHYL-ALCOHOL" || 
+  if (input == "ETHANOL" || input == "ETHYL-ALCOHOL" ||
+      input == "ETHYL ALCOHOL" || input == "GRAIN ALCOHOL" ||  
       input == "GRAIN-ALCOHOL" || input == "C2H5OH") {
     gasname = "C2H5OH"; 
     return true;
   }
   // Propanol
-  if (input == "PROPANOL" || input == "2-PROPANOL" || input == "ISOPROPYL" || 
-      input == "ISO-PROPANOL" || input == "ISOPROPANOL" || 
+  if (input == "PROPANOL" || input == "2-PROPANOL" || 
+      input == "ISOPROPYL" || input == "ISO-PROPANOL" || 
+      input == "ISOPROPANOL" || input == "ISOPROPYL ALCOHOL" ||
       input == "ISOPROPYL-ALCOHOL" || input == "C3H7OH") {
     gasname = "C3H7OH"; 
     return true;
@@ -2312,51 +2324,63 @@ MediumGas::GetGasName(std::string input, std::string& gasname) const {
     return true;
   }
   // CS2
-  if (input == "CS2" || input == "CARBON-DISULPHIDE" || 
-      input == "CARBON-DISULFIDE") {
+  if (input == "CS2" || 
+      input == "CARBON-DISULPHIDE" || input == "CARBON-DISULFIDE" || 
+      input == "CARBON DISULPHIDE" || input == "CARBON DISULFIDE") {
     gasname = "CS2"; 
     return true;
   }
   // COS
   if (input == "COS" || input == "CARBONYL-SULPHIDE" || 
-      input == "CARBONYL-SULFIDE") {
+      input == "CARBONYL-SULFIDE" || input == "CARBONYL SULFIDE") {
     gasname = "COS"; 
     return true;
   }
   // Deuterated methane
   if (input == "DEUT-METHANE" || input == "DEUTERIUM-METHANE" || 
-      input == "DEUTERATED-METHANE" || input == "CD4") {
+      input == "DEUTERATED-METHANE" || input == "DEUTERATED METHANE" ||
+      input == "DEUTERIUM METHANE" || input == "CD4") {
     gasname = "CD4"; 
     return true;
   }
   // BF3
-  if (input == "BF3" || input == "BORON-TRIFLUORIDE") {
+  if (input == "BF3" || input == "BORON-TRIFLUORIDE" || 
+      input == "BORON TRIFLUORIDE") {
     gasname = "BF3"; 
     return true;
   }
   // C2H2F4 (and C2HF5).
   if (input == "C2HF5" || input == "C2H2F4" || input == "C2F5H" || 
-      input == "C2F4H2" || input == "FREON-134" || input == "FREON-134-A" || 
+      input == "C2F4H2" || 
+      input == "FREON 134" || input == "FREON 134A" || 
+      input == "FREON-134" || input == "FREON-134-A" || 
+      input == "FREON 125" || input == "ZYRON 125" ||
       input == "FREON-125" || input == "ZYRON-125" || 
       input == "TETRAFLUOROETHANE" || input == "PENTAFLUOROETHANE") {
     gasname = "C2H2F4"; 
     return true;
   }
   // CHF3
-  if (input == "CHF3" || input == "FREON-23" || input == "TRIFLUOROMETHANE") {
+  if (input == "CHF3" || input == "FREON-23" || 
+      input == "TRIFLUOROMETHANE" || input == "FLUOROFORM") {
     gasname = "CHF3"; 
     return true;
   }
   // CF3Br
-  if (input == "CF3BR" || input == "TRIFLUOROBROMOMETHANE" || 
-      input == "HALON-1301" || input == "FREON-13B1") {
+  if (input == "CF3BR" || input == "TRIFLUOROBROMOMETHANE" ||
+      input == "BROMOTRIFLUOROMETHANE" ||  
+      input == "HALON-1301" || input == "HALON 1301" || 
+      input == "FREON-13B1" || input == "FREON 13BI") {
     gasname = "CF3Br"; 
     return true;
   }
   // C3F8
-  if (input == "C3F8" || input == "OCTAFLUOROPROPANE" || input == "R218" || 
+  if (input == "C3F8" || input == "OCTAFLUOROPROPANE" || 
+      input == "R218" || input == "R-218" || input == "FREON 218" || 
       input == "FREON-218" || input == "PERFLUOROPROPANE" || 
-      input == "RC-218" || input == "PFC-218") {
+      input == "RC 218" || input == "PFC 218" || 
+      input == "RC-218" || input == "PFC-218" || 
+      input == "FLUTEC PP30" || input == "GENETRON 218") {
     gasname = "C3F8"; 
     return true;
   }
@@ -2371,10 +2395,16 @@ MediumGas::GetGasName(std::string input, std::string& gasname) const {
     return true;
   }
   // H2S
-  if (input == "H2S" || input == "HYDROGEN-SULPHIDE" || input == "SEWER-GAS" ||
+  if (input == "H2S" || 
+      input == "HYDROGEN SULPHIDE" || input == "SEWER GAS" ||  
+      input == "HYDROGEN-SULPHIDE" || input == "SEWER-GAS" ||
+      input == "HYDROGEN SULFIDE" || input == "HEPATIC ACID" ||
       input == "HYDROGEN-SULFIDE" || input == "HEPATIC-ACID" ||
+      input == "SULFUR HYDRIDE" || input == "DIHYDROGEN MONOSULFIDE" || 
       input == "SULFUR-HYDRIDE" || input == "DIHYDROGEN-MONOSULFIDE" || 
-      input == "DIHYDROGEN-MONOSULPHIDE" || input == "SULPHUR-HYDRIDE" || 
+      input == "DIHYDROGEN MONOSULPHIDE" || input == "SULPHUR HYDRIDE" ||
+      input == "DIHYDROGEN-MONOSULPHIDE" || input == "SULPHUR-HYDRIDE" ||
+      input == "STINK DAMP" || input == "SULFURATED HYDROGEN" || 
       input == "STINK-DAMP" || input == "SULFURATED-HYDROGEN") {
     gasname = "H2S"; 
     return true;
@@ -2392,22 +2422,25 @@ MediumGas::GetGasName(std::string input, std::string& gasname) const {
     return true;
   }
   // Nitrogen
-  if (input == "NI-PHELPS" || 
-      input == "NITROGEN-PHELPS" ||  
+  if (input == "NI-PHELPS" || input == "NI PHELPS" || 
+      input == "NITROGEN-PHELPS" || input == "NITROGEN PHELPHS" ||
       input == "N2-PHELPS" || input == "N2 PHELPS" ||
       input == "N2 (PHELPS)") {
     gasname = "N2 (Phelps)"; 
     return true;
   }
   // Germane, GeH4
-  if (input == "GERMANE" || input == "GERM" || input == "GERMANIUM-HYDRIDE" || 
+  if (input == "GERMANE" || input == "GERM" || 
+      input == "GERMANIUM-HYDRIDE" || input == "GERMANIUM HYDRIDE" || 
+      input == "GERMANIUM TETRAHYDRIDE" ||  
       input == "GERMANIUM-TETRAHYDRIDE" || input == "GERMANOMETHANE" || 
       input == "MONOGERMANE" || input == "GEH4") {
     gasname = "GeH4"; 
     return true;
   }
   // Silane, SiH4
-  if (input == "SILANE" || input == "SIL" || input == "SILICON-HYDRIDE" ||
+  if (input == "SILANE" || input == "SIL" || 
+      input == "SILICON-HYDRIDE" || input == "SILICON HYDRIDE" || 
       input == "SILICON-TETRAHYDRIDE" || input == "SILICANE" || 
       input == "MONOSILANE" || input == "SIH4") {
     gasname = "SiH4"; 

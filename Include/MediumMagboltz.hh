@@ -133,7 +133,7 @@ class MediumMagboltz : public MediumGas {
 
     static const int nEnergySteps = 20000;
     static const int nEnergyStepsLog = 100;
-    static const int nEnergyStepsGamma = 1000;
+    static const int nEnergyStepsGamma = 5000;
     static const int nMaxInelasticTerms = 220;
     static const int nMaxLevels = 512;
     static const int nCsTypes = 6;
