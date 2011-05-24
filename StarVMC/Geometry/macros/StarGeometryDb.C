@@ -403,7 +403,7 @@ void y2005()
   //        exe ECALv6;         "Latest version of the EEMC geometry";
   //        exe EMCUTS(bemc,1); "10 keV transport cuts in the BEMC";
   //        exe EMCUTS(eemc,1); "10 keV transport cuts in the EEMC";
-  geom.select = "y2005h";
+  geom.select = "y2005i";
   geom.calbFlag = "CALB02"; geom.calbStat = 1; geom.calbCuts = 1;
   geom.ecalFlag = "ECALv6"; geom.ecalStat = 1; geom.ecalCuts = 1;
   geom.SetTitle("STAR Geometry y2005i");  

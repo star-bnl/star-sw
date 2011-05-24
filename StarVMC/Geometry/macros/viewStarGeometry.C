@@ -1,25 +1,7 @@
 void viewStarGeometry( const Char_t *tag="upgr2012" )
 {
-  
-  // 
-  // Create a ROOT file containing our geometry if we can't
-  // find it in the local directory
-  //
-  {
-    TFile *file = new TFile(Form("%s.root",tag));
-    if ( file->IsZombie() )
-      {
-	delete file;
-	gROOT -> ProcessLine(".L StarVMC/Geometry/macros/loadStarGeometry.C");
-	loadStarGeometry(tag);
-	ColorScheme();
-	gGeoManager->Export(Form("%s.root",tag));
-	gROOT -> Reset();	
-      }
-    delete file;
-  }
-
-
+ 
+  cacheGeometry(tag);
 
   //
   // Load using TEveManager
@@ -35,4 +17,19 @@ void viewStarGeometry( const Char_t *tag="upgr2012" )
   gEve->Redraw3D(kTRUE);
   
 
+}
+
+void cacheGeometry( const Char_t *tag )
+{  
+  TFile *file = new TFile(Form("%s.root",tag));
+  if ( file->IsZombie() )
+    {
+      delete file;
+      gROOT -> ProcessLine(".L StarVMC/Geometry/macros/loadStarGeometry.C");
+      loadStarGeometry(tag);
+      ColorScheme();
+      gGeoManager->Export(Form("%s.root",tag));
+    }
+  delete file;
+  gROOT -> Reset();
 }
