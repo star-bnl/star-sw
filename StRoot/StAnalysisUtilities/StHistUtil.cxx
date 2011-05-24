@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.83 2011/05/13 21:12:58 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.84 2011/05/24 20:50:43 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.84  2011/05/24 20:50:43  genevb
+// Allow limited graphics file printing
+//
 // Revision 2.83  2011/05/13 21:12:58  genevb
 // Hide original prefixes in title when plotting reference hists
 //
@@ -302,6 +305,12 @@ const char* possibleQASuffixes[10] = {
   "Jet Patch"
 };
 
+enum QAprintModes {QAprintSet,
+                   QAprintSetRef,
+                   QAprintIndiv,
+                   QAprintIndivRef};
+UInt_t QAU1 = 1;
+
 int sizeOfCharPtr = sizeof(Char_t*);
 int sizeOfTH1Ptr = sizeof(TH1*);
 
@@ -325,7 +334,10 @@ StHistUtil::StHistUtil(){
   debug = kFALSE;
   m_CurPrefix = -1;
   m_CurPage = 0;
+  m_CurFileName = "";
+  m_OutFileName = "";
   m_OutType = "ps"; // postscript output by default
+  m_PrintMode = 0;
   m_OutMultiPage = kTRUE;
   m_OutIndividuals = "";
   m_RunYear = 0;
@@ -375,7 +387,9 @@ void StHistUtil::SetOutFile(const Char_t *fileName, const Char_t* type) {
   m_OutFileName = fileName;
   if (m_OutFileName.EndsWith("+")) {
     m_OutIndividuals = ".eps"; // only option working in ROOT 5.22
-    m_OutFileName.Chop();
+    m_PrintMode |= QAU1<<QAprintIndiv;
+    if (m_OutFileName.EndsWith("++")) m_PrintMode |= QAU1<<QAprintIndivRef;
+    while (m_OutFileName.EndsWith("+")) m_OutFileName.Chop();
   }
   if (type) {
     m_OutType = type;
@@ -395,10 +409,15 @@ void StHistUtil::SetOutFile(const Char_t *fileName, const Char_t* type) {
     else if (m_OutFileName.EndsWith(".CC")) m_OutType="CC"; // Save canvases as code
     else if (m_OutFileName.EndsWith(".C")) m_OutType="C"; // Save histograms as code
     else if (m_OutFileName.EndsWith(".root")) m_OutType="root";
+    else if (m_OutFileName.EndsWith("none")) m_OutType="none"; // No output set
     else {
       LOG_INFO << "SetHistUtil::SetOutFile(): unknown type, assuming ps" << endm;
       m_OutType = "ps";
       m_OutFileName.Append(".ps");
+    }
+    if (m_OutType.CompareTo("none")) {
+      m_PrintMode |= QAU1<<QAprintSet;
+      m_PrintMode |= QAU1<<QAprintSetRef;
     }
   }
 
@@ -420,7 +439,8 @@ void StHistUtil::CloseOutFile() {
     if (m_OutType.CompareTo("CC")) {
       // single page seems to have a bug with "()" notation as of Root 5.22.00
       if (m_CurPage==1) m_CurFileName.Chop().Chop();
-      m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
+      if (m_PrintMode & QAU1<<QAprintSet)
+        m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
     } else
       m_HistCanvas->SaveSource(m_CurFileName.Data());
     if (m_refInFile) {
@@ -429,7 +449,8 @@ void StHistUtil::CloseOutFile() {
       m_CurFileNameR.Append(")");
       // single page seems to have a bug with "()" notation as of Root 5.22.00
       if (m_CurPage==1) m_CurFileNameR.Chop().Chop();
-      m_HistCanvasR->Print(m_CurFileNameR.Data(),m_OutType.Data());
+      if (m_PrintMode & QAU1<<QAprintSetRef)
+        m_HistCanvasR->Print(m_CurFileNameR.Data(),m_OutType.Data());
       // anal mode doesn't support single page output
     }
   } else {
@@ -680,7 +701,8 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             // must redraw the histcanvas for each new page!
             m_HistCanvas->Modified();
             m_HistCanvas->Update();
-	    if (m_CurPage>0 && !m_CurFileName.IsNull()) {
+	    if (m_PrintMode & QAU1<<QAprintSet &&
+                m_CurPage>0 && !m_CurFileName.IsNull()) {
               if (m_OutType.CompareTo("CC")) {
 	        m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
               } else
@@ -695,7 +717,8 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             if (m_refInFile) {
               m_HistCanvasR->Modified();
               m_HistCanvasR->Update();
-	      if (m_CurPage>0 && !m_CurFileName.IsNull()) {
+	      if (m_PrintMode & QAU1<<QAprintSetRef &&
+	          m_CurPage>0 && !m_CurFileName.IsNull()) {
 	        m_HistCanvasR->Print(m_CurFileNameR.Data(),m_OutType.Data());
 	        m_CurFileNameR.ReplaceAll("(",0); // doesn't hurt to do > once
 	      } else m_HistCanvasR->Draw();
@@ -1069,7 +1092,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
             TString score = Form("Score: %4.2f (%s vs. %4.2f)",result,
                         (analPass ? "PASS" : "FAIL"),cut);
 
-            if (m_OutIndividuals.Length())
+            if (m_PrintMode & QAU1<<QAprintIndivRef)
               gPad->Print(Form("Ref_%s%s",oName.Data(),m_OutIndividuals.Data()));
 
             if (objPad) {
@@ -1083,7 +1106,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
               objPad->Update();
               latex.SetTextColor(1);
               latex.SetTextSize(sz);
-              if (m_OutIndividuals.Length())
+              if (m_PrintMode & QAU1<<QAprintIndiv)
                 gPad->Print(Form("%s%s",oName.Data(),m_OutIndividuals.Data()));
             }
 
@@ -1095,7 +1118,7 @@ Int_t StHistUtil::DrawHists(const Char_t *dirName) {
               (*R_ostr) << m_CurPage << " " << curPad << " " << oName << " " << result << endl;
             }
           } else {
-            if (m_OutIndividuals.Length())
+            if (m_PrintMode & QAU1<<QAprintIndiv)
               gPad->Print(Form("%s%s",oName.Data(),m_OutIndividuals.Data()));
             if (strlen(m_refResultsFile)) {
               if (!R_ostr) R_ostr = new ofstream(m_refResultsFile);
