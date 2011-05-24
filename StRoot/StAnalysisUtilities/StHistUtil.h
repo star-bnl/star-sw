@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.14 2011/02/19 02:43:39 genevb Exp $
+// $Id: StHistUtil.h,v 2.15 2011/05/24 20:50:43 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.15  2011/05/24 20:50:43  genevb
+// Allow limited graphics file printing
+//
 // Revision 2.14  2011/02/19 02:43:39  genevb
 // Fix those missing consts
 //
@@ -112,6 +115,7 @@ class StHistUtil {
   const Char_t** possiblePrefixes; //!
   const Char_t** possibleSuffixes; //!
   TString m_Detectors;   // List of detectors
+  UInt_t  m_PrintMode;   // Which output files to print
 
   // For reference analyses:
   Bool_t m_analMode;
@@ -193,7 +197,7 @@ class StHistUtil {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.14 2011/02/19 02:43:39 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.15 2011/05/24 20:50:43 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
