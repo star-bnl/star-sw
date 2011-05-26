@@ -49,7 +49,7 @@ class StEventQAMaker : public StQAMakerBase {
  public: 
 
   StEventQAMaker(const char *name="EventQA", const char *title="StEvent/QA");
-  virtual       ~StEventQAMaker() {}
+  virtual       ~StEventQAMaker();
   virtual Int_t  Init();
   virtual Int_t  InitRun(int runnumber);
   virtual Int_t  Finish();
@@ -74,15 +74,18 @@ class StEventQAMaker : public StQAMakerBase {
 
   /// the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.14 2011/02/19 02:20:46 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.15 2011/05/26 19:59:38 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
 };
     
 #endif
 
-// $Id: StEventQAMaker.h,v 2.14 2011/02/19 02:20:46 genevb Exp $
+// $Id: StEventQAMaker.h,v 2.15 2011/05/26 19:59:38 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.15  2011/05/26 19:59:38  genevb
+// Cleanup in destructors
+//
 // Revision 2.14  2011/02/19 02:20:46  genevb
 // Pile-up cuts
 //

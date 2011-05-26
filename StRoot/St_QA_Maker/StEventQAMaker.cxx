@@ -89,6 +89,14 @@ StQAMakerBase(name,title,"StE"), event(0), mHitHist(0), mPmdGeom(0), maputil(0) 
   vertExists = -1.;
 }
 
+//_____________________________________________________________________________
+StEventQAMaker::~StEventQAMaker() {
+  if (mHitHist) delete mHitHist;
+  if (mPmdGeom) delete mPmdGeom;
+  if (maputil) delete maputil;
+  for (Int_t i=0; i<4; i++) {if (emcGeom[i]) delete emcGeom[i];}
+}
+
 
 //_____________________________________________________________________________
 Int_t StEventQAMaker::Finish() {
@@ -2383,8 +2391,11 @@ Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.101 2011/05/02 02:26:47 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.102 2011/05/26 19:59:38 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.102  2011/05/26 19:59:38  genevb
+// Cleanup in destructors
+//
 // Revision 2.101  2011/05/02 02:26:47  genevb
 // QAallTrigs should allow even questionable events
 //
