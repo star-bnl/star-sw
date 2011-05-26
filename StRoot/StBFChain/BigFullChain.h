@@ -556,7 +556,7 @@ Bfc_st BFC[] = { // standard chains
   {"St_svt"      ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #ifdef __KEEP_TPCDAQ_FCF__
   {"tpc_daq"  ,"tpc_raw","tpcChain","detDb,tpc_T","St_tpcdaq_Maker","StTrsMaker,St_tpcdaq_Maker","",kFALSE},
-  {"tcl"         ,"","fcf","","",              "WARNING *** Option is OBSOLETE *** use fcf instead",kFALSE},
+  {"tcl"         ,"","fcf","","","",           "WARNING *** Option is OBSOLETE *** use fcf instead",kFALSE},
   {"fcf","","tpcChain","daq,-tcl,tpc_daq,StEvent","StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker"
    ,                                                                   "Offline FCF Cluster finder",kFALSE},
 #else /* __KEEP_TPCDAQ_FCF__ */
