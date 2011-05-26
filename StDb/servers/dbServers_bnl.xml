@@ -1,6 +1,0 @@
-<StDbServer>
-<server> db </server>
-<host> db.star.bnl.gov </host>
-<port> 3316 </port>
-<socket> /tmp/mysql.3316.sock </socket>
-</StDbServer>
