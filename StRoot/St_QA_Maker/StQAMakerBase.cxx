@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.35 2009/11/19 20:34:38 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.36 2011/05/26 19:59:38 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.36  2011/05/26 19:59:38  genevb
+// Cleanup in destructors
+//
 // Revision 2.35  2009/11/19 20:34:38  genevb
 // Remove Event Summary (using defunct old software monitors)
 //
@@ -126,6 +129,7 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
 
   hists = 0;
   histsList.Expand(32);
+  histsList.SetOwner();
   Int_t i;
   for (i=0;i<32;i++) histsList.AddAt(0,i);
   histsSet = StQA_Undef;
@@ -157,6 +161,11 @@ StQAMakerBase::StQAMakerBase(const char *name, const char *title, const char* ty
 }
 //_____________________________________________________________________________
 StQAMakerBase::~StQAMakerBase() {
+  if (mNullPrimVtx) delete mNullPrimVtx;
+  if (mMultClass) delete mMultClass;
+  if (mTrigWord) delete mTrigWord;
+  if (mTrigBits) delete mTrigBits;
+  for (Int_t i=0; i<24; i++) { if (mTpcSectorPlot[i]) delete mTpcSectorPlot[i]; };
 }
 //_____________________________________________________________________________
 Int_t StQAMakerBase::Init() {
