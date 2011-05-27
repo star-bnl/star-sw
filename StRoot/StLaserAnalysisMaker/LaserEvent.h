@@ -1,5 +1,8 @@
-//$Id: LaserEvent.h,v 1.7 2008/06/02 13:48:03 fisyak Exp $
+//$Id: LaserEvent.h,v 1.8 2011/05/27 18:25:32 genevb Exp $
 //$Log: LaserEvent.h,v $
+//Revision 1.8  2011/05/27 18:25:32  genevb
+//Propagate StTrack::key => Int_t to other codes
+//
 //Revision 1.7  2008/06/02 13:48:03  fisyak
 //Add  t0 handlers for Tpx/Tpc time offsets
 //
@@ -200,7 +203,7 @@ class Track : public TObject {
   StThreeVectorD Vertex;
   // StTrack
   Int_t          mSector;
-  UShort_t       mKey;
+  Int_t       mKey;
   Short_t        mFlag;
   UShort_t       mNumberOfPossiblePointsTpc;
   Float_t        mImpactParameter;
@@ -300,7 +303,7 @@ private:
    EventHeader  *GetHeader() { return &fEvtHdr; }
    TClonesArray *GetTracks() const { return fTracks; }
    TClonesArray *GetHits() const { return fHits; }
-   ClassDef(LaserEvent,1)  //LaserEvent structure
+   ClassDef(LaserEvent,2)  //LaserEvent structure
 };
 
 #endif

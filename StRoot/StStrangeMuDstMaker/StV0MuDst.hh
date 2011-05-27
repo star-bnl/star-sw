@@ -39,8 +39,8 @@ public:
   Float_t momNegZ() const;
   StTrackTopologyMap& topologyMapPos();
   StTrackTopologyMap& topologyMapNeg();
-  UShort_t keyPos() const;             // Track id v0 daughters
-  UShort_t keyNeg() const;             // Track id v0 daughters
+  Int_t   keyPos() const;             // Track id v0 daughters
+  Int_t   keyNeg() const;             // Track id v0 daughters
 
   Float_t momV0X() const;         // Momentum components of V0
   Float_t momV0Y() const;
@@ -81,8 +81,8 @@ protected:
   Float_t mMomNegY;
   Float_t mMomNegZ;
 
-  UShort_t  mKeyPos;
-  UShort_t  mKeyNeg;
+  Int_t  mKeyPos;
+  Int_t  mKeyNeg;
 
   StTrackTopologyMap mTopologyMapPos;
   StTrackTopologyMap mTopologyMapNeg;
@@ -103,7 +103,7 @@ protected:
   UShort_t mNumDedxPos;
   UShort_t mNumDedxNeg;
 
-  ClassDef(StV0MuDst,6)
+  ClassDef(StV0MuDst,7)
 };
 
 inline StV0MuDst::StV0MuDst(StV0Vertex* v1,StStrangeEvMuDst* e1) : StV0I()
@@ -129,8 +129,8 @@ inline StTrackTopologyMap& StV0MuDst::topologyMapPos()
              { return mTopologyMapPos; }
 inline StTrackTopologyMap& StV0MuDst::topologyMapNeg()
              { return mTopologyMapNeg; }
-inline UShort_t StV0MuDst::keyPos() const { return mKeyPos; } 
-inline UShort_t StV0MuDst::keyNeg() const { return mKeyNeg; } 
+inline Int_t StV0MuDst::keyPos() const { return mKeyPos; } 
+inline Int_t StV0MuDst::keyNeg() const { return mKeyNeg; } 
 inline Float_t StV0MuDst::momV0X()  const { return mMomPosX + mMomNegX; }
 inline Float_t StV0MuDst::momV0Y()  const { return mMomPosY + mMomNegY; }
 inline Float_t StV0MuDst::momV0Z()  const { return mMomPosZ + mMomNegZ; }
@@ -154,8 +154,11 @@ inline Float_t StV0MuDst::lenDedxNeg() const { return (mNumDedxNeg/100); }
 
 
 /***********************************************************************
- * $Id: StV0MuDst.hh,v 3.10 2008/07/11 16:23:09 genevb Exp $
+ * $Id: StV0MuDst.hh,v 3.11 2011/05/27 18:25:32 genevb Exp $
  * $Log: StV0MuDst.hh,v $
+ * Revision 3.11  2011/05/27 18:25:32  genevb
+ * Propagate StTrack::key => Int_t to other codes
+ *
  * Revision 3.10  2008/07/11 16:23:09  genevb
  * bad() won't work unless chi2 allows to return negative values
  *
