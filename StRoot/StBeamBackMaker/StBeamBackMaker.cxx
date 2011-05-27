@@ -247,9 +247,9 @@ Int_t StBeamBackMaker::Make()
   // to new tracks.
   //
   info("Converting Track to StTrack");
-  unsigned short key = 0;
+  Int_t key = 0;
   for (unsigned int i = 0; i < event->trackNodes().size(); ++i) {
-    unsigned short key2 = event->trackNodes()[i]->track(global)->key();
+    Int_t key2 = event->trackNodes()[i]->track(global)->key();
     if (key < key2) key = key2;
   }
 
