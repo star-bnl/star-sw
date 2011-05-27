@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.16 2010/05/06 12:40:38 jcs Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.17 2011/05/27 18:25:32 genevb Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -117,7 +117,7 @@ StEvent* StFtpcTrackToStEvent::FillEvent(StEvent* e, TObjArray* t) {
       // filling successful, set up relationships between objects
       detInfoVec.push_back(detInfo);
       gTrack->setDetectorInfo(detInfo);	
-      gTrack->setKey((unsigned short)(++currentTrackKey));
+      gTrack->setKey(++currentTrackKey);
       trackNode->addTrack(gTrack);
       trNodeVec.push_back(trackNode);
       FillTopologyMap(gTrack, kTrack);

@@ -1,6 +1,11 @@
-// $Id: StFtpcClusterFinder.cc,v 1.79 2010/04/08 16:46:16 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.80 2011/05/21 15:33:30 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.80  2011/05/21 15:33:30  jcs
+// make corrections to save correct ChargeSum for clusters (one line of code
+// was deleted inadvertently with update 1.79 and the wrong conversion between
+// integer and float was performed when splitting merged clusters)
+//
 // Revision 1.79  2010/04/08 16:46:16  jcs
 // swap data for RDO6,RDO7 FTPC East when Calibrations_ftpc/ftpcElectronics->swapRDO6RDO7East=1
 //
@@ -1398,6 +1403,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  thispoint->SetNumberPads(Cluster->EndPad +1 - Cluster->StartPad);
 	  thispoint->SetNumberBins(Peak->Sequence.Length);
 	  thispoint->SetMaxADC((long)Peak->PeakHeight);
+          thispoint->SetCharge(ChargeSum);
 	  thispoint->SetPadPos(Peak->PadPosition);
 	  thispoint->SetTimePos(Peak->TimePosition);
 	  thispoint->SetPadPosSigma(Peak->PadSigma);
@@ -1913,8 +1919,8 @@ if (mcldebug){
 	      thispoint->SetNumberPads(Cluster->EndPad +1 - Cluster->StartPad);
 	      thispoint->SetNumberBins(Peak[iPeakIndex].Sequence.Length);
 	      thispoint->SetMaxADC((long)Peak[iPeakIndex].PeakHeight);
-	      thispoint->SetCharge(ChargeSum*(long)(Peak[iPeakIndex].PeakHeight
-				   /PeakHeightSum));
+	      thispoint->SetCharge((Long_t)(ChargeSum*(Peak[iPeakIndex].PeakHeight
+				   /PeakHeightSum)));
 	      thispoint->SetPadPos(Peak[iPeakIndex].PadPosition);
 	      thispoint->SetTimePos(Peak[iPeakIndex].TimePosition);
 	      thispoint->SetPadPosSigma(Peak[iPeakIndex].PadSigma);
