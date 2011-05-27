@@ -68,6 +68,11 @@ class ComponentAnalyticField : public ComponentBase {
     void SetPeriodicityY(const double s);
     bool GetPeriodicityX(double& s);
     bool GetPeriodicityY(double& s);
+
+    void AddCharge(const double x, const double y, const double z, 
+                   const double q);
+    void ClearCharges();
+    void PrintCharges();
  
     std::string GetCellType() {return cellType;}
     // Cells are classified according to the number 

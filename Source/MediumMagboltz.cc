@@ -33,27 +33,27 @@ MediumMagboltz::MediumMagboltz() :
   className = "MediumMagboltz";
  
   // Set physical constants in Magboltz common blocks.
-  cnsts_.echarg = ElementaryCharge;
-  cnsts_.emass = ElectronMassGramme;
-  cnsts_.amu = AtomicMassUnit;
-  cnsts_.pir2 = BohrRadius * BohrRadius * Pi;  
-  inpt_.ary = RydbergEnergy;
+  Magboltz::cnsts_.echarg = ElementaryCharge * 1.e-15;
+  Magboltz::cnsts_.emass = ElectronMassGramme;
+  Magboltz::cnsts_.amu = AtomicMassUnit;
+  Magboltz::cnsts_.pir2 = BohrRadius * BohrRadius * Pi;  
+  Magboltz::inpt_.ary = RydbergEnergy;
   
   // Set parameters in Magboltz common blocks.
-  inpt_.nGas = nComponents;  
-  inpt_.nStep = nEnergySteps;
+  Magboltz::inpt_.nGas = nComponents;  
+  Magboltz::inpt_.nStep = nEnergySteps;
   // Select the scattering model.
-  inpt_.nAniso = 2;
+  Magboltz::inpt_.nAniso = 2;
   // Max. energy [eV]
-  inpt_.efinal = eFinal;
+  Magboltz::inpt_.efinal = eFinal;
   // Energy step size [eV]
-  inpt_.estep = eStep;
+  Magboltz::inpt_.estep = eStep;
   // Temperature and pressure
-  inpt_.akt = BoltzmannConstant * temperature;
-  inpt_.tempc = temperature - ZeroCelsius;
-  inpt_.torr = pressure;
+  Magboltz::inpt_.akt = BoltzmannConstant * temperature;
+  Magboltz::inpt_.tempc = temperature - ZeroCelsius;
+  Magboltz::inpt_.torr = pressure;
   // Disable Penning transfer.
-  inpt_.ipen = 0;
+  Magboltz::inpt_.ipen = 0;
  
   // Initialise Penning parameters
   for (int i = nMaxLevels; i--;) {
@@ -96,8 +96,8 @@ MediumMagboltz::SetMaxElectronEnergy(const double e) {
   }
   
   // Set max. energy and step size also in Magboltz common block.
-  inpt_.efinal = eFinal;
-  inpt_.estep = eStep;
+  Magboltz::inpt_.efinal = eFinal;
+  Magboltz::inpt_.estep = eStep;
   
   // Force recalculation of the scattering rates table.
   isChanged = true;
@@ -1430,22 +1430,22 @@ bool
 MediumMagboltz::Mixer() {
 
   // Set constants and parameters in Magboltz common blocks.
-  cnsts_.echarg = ElementaryCharge;
-  cnsts_.emass = ElectronMassGramme;
-  cnsts_.amu = AtomicMassUnit;
-  cnsts_.pir2 = BohrRadius * BohrRadius * Pi;  
-  inpt_.ary = RydbergEnergy;
+  Magboltz::cnsts_.echarg = ElementaryCharge * 1.e-15;
+  Magboltz::cnsts_.emass = ElectronMassGramme;
+  Magboltz::cnsts_.amu = AtomicMassUnit;
+  Magboltz::cnsts_.pir2 = BohrRadius * BohrRadius * Pi;  
+  Magboltz::inpt_.ary = RydbergEnergy;
 
-  inpt_.akt = BoltzmannConstant * temperature;
-  inpt_.tempc = temperature - ZeroCelsius;
-  inpt_.torr = pressure;
+  Magboltz::inpt_.akt = BoltzmannConstant * temperature;
+  Magboltz::inpt_.tempc = temperature - ZeroCelsius;
+  Magboltz::inpt_.torr = pressure;
 
-  inpt_.nGas = nComponents;
-  inpt_.nStep = nEnergySteps;
+  Magboltz::inpt_.nGas = nComponents;
+  Magboltz::inpt_.nStep = nEnergySteps;
   if (useAnisotropic) {
-    inpt_.nAniso = 2;
+    Magboltz::inpt_.nAniso = 2;
   } else {
-    inpt_.nAniso = 0;
+    Magboltz::inpt_.nAniso = 0;
   }
   
   // Calculate the atomic density (ideal gas law).
@@ -1539,11 +1539,11 @@ MediumMagboltz::Mixer() {
   // Loop over the gases in the mixture.  
   for (int iGas = 0; iGas < nComponents; ++iGas) {
     if (eFinal <= eMinLog) {
-      inpt_.efinal = eFinal;
+      Magboltz::inpt_.efinal = eFinal;
     } else {
-      inpt_.efinal = eMinLog;
+      Magboltz::inpt_.efinal = eMinLog;
     }
-    inpt_.estep = eStep;
+    Magboltz::inpt_.estep = eStep;
   
     // Number of inelastic cross-section terms
     long long nIn = 0;
@@ -1561,9 +1561,10 @@ MediumMagboltz::Mixer() {
 
     // Retrieve the cross-section data for this gas from Magboltz.
     long long ngs = gasNumber[iGas];
-    gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, &w, 
-            pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, scrpt);
+    Magboltz::gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, &w, 
+                      pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, scrpt);
     if (debug) {
+      if (e[3] < eStep) e[3] = 0.;
       const double massAmu = (2. / e[1]) * 
                              ElectronMass / AtomicMassUnitElectronVolt;
       std::cout << "    " << name << "\n";
@@ -1728,10 +1729,10 @@ MediumMagboltz::Mixer() {
     const double rLog = pow(eFinal / eMinLog, 1. / nEnergyStepsLog);
     double emax = 0.5 * eMinLog * (1. + rLog);
     for (int iE = 0; iE < nEnergyStepsLog; ++iE) {
-      inpt_.efinal = emax;
-      inpt_.estep = emax / nEnergySteps;
-      gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, &w, 
-              pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, scrpt);
+      Magboltz::inpt_.efinal = emax;
+      Magboltz::inpt_.estep = emax / nEnergySteps;
+      Magboltz::gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, &w, 
+                        pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, scrpt);
       np = np0;
       if (useCsOutput) {
         outfile << emax << "  " << q[nEnergySteps - 1][1] 
@@ -1883,7 +1884,33 @@ MediumMagboltz::Mixer() {
   }
 
   // Set up the de-excitation channels.
-  if (useDeexcitation) ComputeDeexcitationTable();
+  if (useDeexcitation) {
+    ComputeDeexcitationTable();
+    const int dxcCount = deexcitations.size();
+    if (dxcCount != nDeexcitations) {
+      std::cerr << className << "::Mixer:\n";
+      std::cerr << "    Mismatch in deexcitation count.\n";
+      std::cerr << "    Program bug!\n";
+      std::cerr << "    Deexcitation handling is switched off.\n";
+      useDeexcitation = false;
+    } else {
+      for (int j = nDeexcitations; j--;) {
+        const int probCount = deexcitations[j].p.size();
+        const int flvlCount = deexcitations[j].final.size();
+        const int typeCount = deexcitations[j].type.size();
+        if (!(probCount == flvlCount && 
+              flvlCount == typeCount && 
+              typeCount == deexcitations[j].nChannels)) {
+          std::cerr << className << "::Mixer:\n";
+          std::cerr << "    Mismatch in deexcitation channel count.\n";
+          std::cerr << "    Program bug!\n";
+          std::cerr << "    Deexcitation handling is switched off.\n";
+          useDeexcitation = false;
+        }
+      }
+    }
+  }
+  
   // Fill the photon collision rates table.
   if (!ComputePhotonCollisionTable()) {
     std::cerr << className << "::Mixer:\n";
@@ -2013,6 +2040,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
 
   for (int i = nMaxLevels; i--;) iDeexcitation[i] = -1;
   deexcitations.clear();
+  nDeexcitations = 0;
 
   // Optical data (for quencher photoabsorption cs and ionisation yield)
   OpticalData optData;
@@ -2153,7 +2181,6 @@ MediumMagboltz::ComputeDeexcitationTable() {
   // Count the excited levels.
   std::map<std::string, int> mapDxc;
   std::map<std::string, int>::iterator itMap;
-  nDeexcitations = 0;
   for (itMap = mapLevels.begin(); itMap != mapLevels.end(); itMap++) {
     std::string level = (*itMap).first;
     mapDxc[level] = nDeexcitations;
@@ -2186,9 +2213,8 @@ MediumMagboltz::ComputeDeexcitationTable() {
     newDxc.sDoppler = newDxc.gPressure = newDxc.width = 0.;
     newDxc.p.clear(); newDxc.final.clear(); newDxc.type.clear();
     newDxc.nChannels = 0;
-    if (level == "Ar_1S3" || level == "Ar_1S5") {
-      // Radiative decay of metastables is neglected.
-      newDxc.p.clear(); newDxc.final.clear(); newDxc.type.clear(); 
+    if (level == "Ar_1S5" || level == "Ar_1S3") {
+      // Metastables
     } else if (level == "Ar_1S4") {
       // Oscillator strength from NIST database
       newDxc.osc = 0.0609;
@@ -2664,7 +2690,6 @@ MediumMagboltz::ComputeDeexcitationTable() {
   }
 
   // Collisional de-excitation channels
-  
   if (withAr) {
     // Add the Ar dimer ground state.
     newDxc.label = "Ar_Dimer";
@@ -2690,48 +2715,196 @@ MediumMagboltz::ComputeDeexcitationTable() {
     mapDxc["Ar_Excimer"] = nDeexcitations;
     deexcitations.push_back(newDxc);
     ++nDeexcitations;
-    const bool useCollDxc = false;
     const double nAr = GetNumberDensity() * cAr;
     for (int j = nDeexcitations; j--;) {
       std::string level = deexcitations[j].label;
-      if (level == "Ar_1S5" && useCollDxc) {
-        // Two-body and three-body collision rates
+      if (level == "Ar_1S5") {
+        // Two-body and three-body collision rate constants
         // K. Tachibana, Phys. Rev. A 34 (1986), 1007-1015
         // A. Bogaerts and R. Gijbels, Phys. Rev. A 52 (1995), 3743-3751
-        const double fLoss2b = 2.3e-24 * nAr;
-        const double fLoss3b = 1.4e-41 * pow(nAr, 2.);
-        // Assume that three-body collisions lead to excimer formation.
-        // Two-body collisions might lead to collisional mixing? 
-        // For now: loss
-        deexcitations[j].final.push_back(-1);
+        const double k2b = 2.3e-24 * nAr;
+        const double k3b = 1.4e-41 * nAr * nAr;
+        // Three-body collisions lead to excimer formation.
+        // Two-body collisions lead to collisional mixing. 
+        deexcitations[j].p.push_back(k2b * nAr);
+        deexcitations[j].p.push_back(k3b * nAr * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
         deexcitations[j].final.push_back(mapDxc["Ar_Excimer"]);
         deexcitations[j].type.push_back(-1);
         deexcitations[j].type.push_back(-1);
-        deexcitations[j].p.push_back(fLoss2b);
-        deexcitations[j].p.push_back(fLoss3b);
         deexcitations[j].nChannels += 2;
-      }
-      if (level == "Ar_1S3" && useCollDxc) {
-        // Two-body and three-body collision rates
+      } 
+      if (level == "Ar_1S3") {
+        // Two-body and three-body collision rate constants
         // K. Tachibana, Phys. Rev. A 34 (1986), 1007-1015
         // A. Bogaerts and R. Gijbels, Phys. Rev. A 52 (1995), 3743-3751
-        const double fLoss2b = 4.3e-24 * nAr;
-        const double fLoss3b = 1.5e-41 * pow(nAr, 2.);
-        // Assume that three-body collisions lead to excimer formation.
-        // Two-body collisions might lead to collisional mixing?
-        deexcitations[j].final.push_back(-1);
+        const double k2b = 4.3e-24;
+        const double k3b = 1.5e-41;
+        deexcitations[j].p.push_back(k2b * nAr);
+        deexcitations[j].p.push_back(k3b * nAr * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
         deexcitations[j].final.push_back(mapDxc["Ar_Excimer"]);
         deexcitations[j].type.push_back(-1);
         deexcitations[j].type.push_back(-1);
-        deexcitations[j].p.push_back(fLoss2b);
-        deexcitations[j].p.push_back(fLoss3b);
         deexcitations[j].nChannels += 2;
       }        
-      if ((level == "Ar_4D5"  || level == "Ar_3S4" || level == "Ar_4D2" ||
-           level == "Ar_4S1!" || level == "Ar_3S2" || level == "Ar_5D5" ||
-           level == "Ar_4S4"  || level == "Ar_5D2" || level == "Ar_6D5" ||
-           level == "Ar_5S1!" || level == "Ar_4S2" || level == "Ar_5S4" ||
-           level == "Ar_6D2") && useCollDxc) {
+      if (level == "Ar_2P2") {
+        // Collisional population transfer within 4p levels
+        // T. D. Nguyen and N. Sadeghi, Phys. Rev. 18 (1978), 1388-1395
+        const double k23 = 0.5e-21;
+        deexcitations[j].p.push_back(k23 * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P3"]);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 1;
+      } 
+      if (level == "Ar_2P3") {
+        // Collisional population transfer within 4p levels
+        // T. D. Nguyen and N. Sadeghi, Phys. Rev. 18 (1978), 1388-1395
+        const double k34 = 27.5e-21;
+        const double k35 =  0.3e-21;
+        const double k36 = 44.0e-21;
+        const double k37 =  1.4e-21;
+        const double k38 =  1.9e-21;
+        const double k39 =  0.8e-21;
+        deexcitations[j].p.push_back(k34 * nAr);
+        deexcitations[j].p.push_back(k35 * nAr);
+        deexcitations[j].p.push_back(k36 * nAr);
+        deexcitations[j].p.push_back(k37 * nAr);
+        deexcitations[j].p.push_back(k38 * nAr);
+        deexcitations[j].p.push_back(k39 * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P4"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P5"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P6"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P7"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P8"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P9"]);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 6;
+      }       
+      if (level == "Ar_2P4") {
+        // Collisional population transfer within 4p levels
+        // T. D. Nguyen and N. Sadeghi, Phys. Rev. 18 (1978), 1388-1395
+        const double k43 = 23.0e-21;
+        const double k45 =  0.7e-21;
+        const double k46 =  4.8e-21;
+        const double k47 =  3.2e-21;
+        const double k48 =  1.4e-21;
+        const double k49 =  3.3e-21;
+        deexcitations[j].p.push_back(k43 * nAr);
+        deexcitations[j].p.push_back(k45 * nAr);
+        deexcitations[j].p.push_back(k46 * nAr);
+        deexcitations[j].p.push_back(k47 * nAr);
+        deexcitations[j].p.push_back(k48 * nAr);
+        deexcitations[j].p.push_back(k49 * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P3"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P5"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P6"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P7"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P8"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P9"]);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 6;
+      }  
+      if (level == "Ar_2P5") {
+        // Collisional population transfer within 4p levels
+        // T. D. Nguyen and N. Sadeghi, Phys. Rev. 18 (1978), 1388-1395
+        const double k54 =  1.7e-21;
+        const double k56 = 11.3e-21;
+        const double k58 =  9.5e-21;
+        deexcitations[j].p.push_back(k54 * nAr);
+        deexcitations[j].p.push_back(k56 * nAr);
+        deexcitations[j].p.push_back(k58 * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P4"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P6"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P8"]);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 3;
+      }     
+      if (level == "Ar_2P6") {
+        // Collisional population transfer within 4p levels
+        // T. D. Nguyen and N. Sadeghi, Phys. Rev. 18 (1978), 1388-1395
+        const double k67 =  4.1e-21;
+        const double k68 =  6.0e-21;
+        const double k69 =  1.0e-21;
+        deexcitations[j].p.push_back(k67 * nAr);
+        deexcitations[j].p.push_back(k68 * nAr);
+        deexcitations[j].p.push_back(k69 * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P7"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P8"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P9"]);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 3;
+      }
+      if (level == "Ar_2P7") {
+        // Collisional population transfer within 4p levels
+        // T. D. Nguyen and N. Sadeghi, Phys. Rev. 18 (1978), 1388-1395
+        const double k76 =  2.5e-21;
+        const double k78 = 14.3e-21;
+        const double k79 = 23.3e-21;
+        deexcitations[j].p.push_back(k76 * nAr);
+        deexcitations[j].p.push_back(k78 * nAr);
+        deexcitations[j].p.push_back(k79 * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P6"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P8"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P9"]);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 3;
+      }       
+      if (level == "Ar_2P8") {
+        // Collisional population transfer within 4p levels
+        // T. D. Nguyen and N. Sadeghi, Phys. Rev. 18 (1978), 1388-1395
+        const double k86  =  0.3e-21;
+        const double k87  =  0.8e-21;
+        const double k89  = 18.2e-21;
+        const double k810 =  1.0e-21;
+        deexcitations[j].p.push_back(k86  * nAr);
+        deexcitations[j].p.push_back(k87  * nAr);
+        deexcitations[j].p.push_back(k89  * nAr);
+        deexcitations[j].p.push_back(k810 * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P6"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P7"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P9"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P10"]);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 4;
+      }
+      if (level == "Ar_2P9") {
+        // Collisional population transfer within 4p levels
+        // T. D. Nguyen and N. Sadeghi, Phys. Rev. 18 (1978), 1388-1395
+        const double k98  = 6.8e-21;
+        const double k910 = 5.1e-21;
+        deexcitations[j].p.push_back(k98  * nAr);
+        deexcitations[j].p.push_back(k910 * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P8"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P10"]);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].type.push_back(-1);
+        deexcitations[j].nChannels += 2;
+      }       
+      if (level == "Ar_4D5"  || level == "Ar_3S4" || level == "Ar_4D2" ||
+          level == "Ar_4S1!" || level == "Ar_3S2" || level == "Ar_5D5" ||
+          level == "Ar_4S4"  || level == "Ar_5D2" || level == "Ar_6D5" ||
+          level == "Ar_5S1!" || level == "Ar_4S2" || level == "Ar_5S4" ||
+          level == "Ar_6D2") {
         // Hornbeck-Molnar ionisation
         // P. Becker and F. Lampe, J. Chem. Phys. 42 (1965), 3857-3863
         // A. Bogaerts and R. Gijbels, Phys. Rev. A 52 (1995), 3743-3751
@@ -2790,7 +2963,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(-1);
         deexcitations[j].nChannels += 1;
-      } else if (level == "Ar_1S4A") {
+      } else if (level == "Ar_1S4") {
         // Rate constant from Velazco et al., J. Chem. Phys. 69 (1978)
         const double kQ = 5.0e-19;
         deexcitations[j].p.push_back(kQ * nQ);
@@ -2803,7 +2976,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(-1);
         deexcitations[j].nChannels += 1;
-      } else if (level == "Ar_1S2A") {
+      } else if (level == "Ar_1S2") {
         const double kQ = 7.4e-19;
         deexcitations[j].p.push_back(kQ * nQ);
         deexcitations[j].final.push_back(-1);
@@ -2937,7 +3110,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(-1);
         deexcitations[j].nChannels += 1;
-      } else if (level == "Ar_1S4A") {
+      } else if (level == "Ar_1S4") {
         // Rate constant from Velazco et al., J. Chem. Phys. 69 (1978)
         const double kQ = 4.5e-19;
         deexcitations[j].p.push_back(kQ * nQ);
@@ -2951,7 +3124,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(-1);
         deexcitations[j].nChannels += 1;
-      } else if (level == "Ar_1S2A") {
+      } else if (level == "Ar_1S2") {
         // Rate constant from Velazco et al.
         const double kQ = 5.7e-19;
         deexcitations[j].p.push_back(kQ * nQ);
@@ -3098,7 +3271,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].type.push_back(1);
         deexcitations[j].type.push_back(-1);
         deexcitations[j].nChannels += 2;
-      } else if (level == "Ar_1S4A") {
+      } else if (level == "Ar_1S4") {
         // Rate constant from Velazco et al., J. Chem. Phys. 69 (1978)
         const double kQ = 6.2e-19;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
@@ -3118,7 +3291,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].type.push_back(1);
         deexcitations[j].type.push_back(-1);
         deexcitations[j].nChannels += 2;
-      } else if (level == "Ar_1S2A") {
+      } else if (level == "Ar_1S2") {
         // Rate constant from Velazco et al.
         const double kQ = 10.7e-19;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
@@ -3269,7 +3442,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].type.push_back(1);
         deexcitations[j].type.push_back(-1);
         deexcitations[j].nChannels += 2;
-      } else if (level == "Ar_1S4A") {
+      } else if (level == "Ar_1S4") {
         // Rate constant from Velazco et al.
         const double kQ = 4.6e-19;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
@@ -3288,7 +3461,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].type.push_back(1);
         deexcitations[j].type.push_back(-1);
         deexcitations[j].nChannels += 2;
-      } else if (level == "Ar_1S2A") {
+      } else if (level == "Ar_1S2") {
         // Rate constant from Velazco et al.
         const double kQ = 8.7e-19;
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
@@ -3415,7 +3588,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].nChannels += 2;
       }
     }
-  } else {
+  } else if (nComponents > 1 && (withAr || withNe)) {
     std::cout << className << "::ComputeDeexcitationTable:\n";
     std::cout << "    No data on Penning effects found.\n";
   }
@@ -3764,15 +3937,15 @@ MediumMagboltz::ComputePhotonCollisionTable() {
 
 void
 MediumMagboltz::RunMagboltz(const double e, 
-                              const double bmag, const double btheta,
-                              const int ncoll, bool verbose,
-                              double& vx, double& vy, double& vz,
-                              double& dl, double& dt,
-                              double& alpha, double& eta,
-                              double& vxerr, double& vyerr, double& vzerr,
-                              double& dlerr, double& dterr, 
-                              double& alphaerr, double& etaerr,
-                              double& alphatof) {
+                            const double bmag, const double btheta,
+                            const int ncoll, bool verbose,
+                            double& vx, double& vy, double& vz,
+                            double& dl, double& dt,
+                            double& alpha, double& eta,
+                            double& vxerr, double& vyerr, double& vzerr,
+                            double& dlerr, double& dterr, 
+                            double& alphaerr, double& etaerr,
+                            double& alphatof) {
 
   // Initialize the values.
   vx = vy = vz = 0.;
@@ -3783,20 +3956,20 @@ MediumMagboltz::RunMagboltz(const double e,
   alphaerr = etaerr = 0.;
 
   // Set input parameters in Magboltz common blocks.
-  inpt_.nGas = nComponents;
-  inpt_.nStep = 4000;
-  inpt_.nAniso = 2;
+  Magboltz::inpt_.nGas = nComponents;
+  Magboltz::inpt_.nStep = 4000;
+  Magboltz::inpt_.nAniso = 2;
 
-  inpt_.tempc = temperature - ZeroCelsius;
-  inpt_.torr = pressure;
-  inpt_.ipen = 0;
-  setp_.nmax = ncoll;
+  Magboltz::inpt_.tempc = temperature - ZeroCelsius;
+  Magboltz::inpt_.torr = pressure;
+  Magboltz::inpt_.ipen = 0;
+  Magboltz::setp_.nmax = ncoll;
 
-  setp_.efield = e;
+  Magboltz::setp_.efield = e;
   // Convert from Tesla to kGauss.
-  bfld_.bmag = bmag * 10.;
+  Magboltz::bfld_.bmag = bmag * 10.;
   // Convert from radians to degree.
-  bfld_.btheta = btheta * 180. / Pi;
+  Magboltz::bfld_.btheta = btheta * 180. / Pi;
   
   // Set the gas composition in Magboltz.
   for (int i = 0; i < nComponents; ++i) {
@@ -3807,89 +3980,93 @@ MediumMagboltz::RunMagboltz(const double e,
                 << " gas number in Magboltz.\n";
       return;
     }
-    gasn_.ngasn[i] = ng;
-    ratio_.frac[i] = 100 * fraction[i];
+    Magboltz::gasn_.ngasn[i] = ng;
+    Magboltz::ratio_.frac[i] = 100 * fraction[i];
   }
 
   // Call Magboltz internal setup routine.
-  setup1_();
+  Magboltz::setup1_();
 
   // Calculate the max. energy in the table.
   if (e * temperature / (293.15 * pressure) > 15) {
     // If E/p > 15 start with 8 eV.
-    inpt_.efinal = 8.;
+    Magboltz::inpt_.efinal = 8.;
   } else {
-    inpt_.efinal = 0.5;
+    Magboltz::inpt_.efinal = 0.5;
   }
-  setp_.estart = inpt_.efinal / 50.;
+  Magboltz::setp_.estart = Magboltz::inpt_.efinal / 50.;
 
   long long ielow = 1;
   while (ielow == 1) {
-    mixer_();
+    Magboltz::mixer_();
     if (bmag == 0. || btheta == 0. || fabs(btheta) == Pi) {
-      elimit_(&ielow);
+      Magboltz::elimit_(&ielow);
     } else if (btheta == HalfPi) {
-      elimitb_(&ielow);
+      Magboltz::elimitb_(&ielow);
     } else {
-      elimitc_(&ielow);
+      Magboltz::elimitc_(&ielow);
     }
     if (ielow == 1) {
       // Increase the max. energy.
-      inpt_.efinal *= sqrt(2.);
-      setp_.estart = inpt_.efinal / 50.;
+      Magboltz::inpt_.efinal *= sqrt(2.);
+      Magboltz::setp_.estart = Magboltz::inpt_.efinal / 50.;
     }
   }
 
-  if (verbose) prnter_();
+  if (verbose) Magboltz::prnter_();
   
   // Run the Monte Carlo calculation.
   if (bmag == 0.) {
-    monte_();
+    Magboltz::monte_();
   } else if (btheta == 0. || btheta == Pi) {
-    montea_();
+    Magboltz::montea_();
   } else if (btheta == HalfPi) {
-    monteb_();
+    Magboltz::monteb_();
   } else {
-    montec_();
+    Magboltz::montec_();
   }
-  if (verbose) output_();
+  if (verbose) Magboltz::output_();
 
   // If attachment or ionisation rate is greater than sstmin,
   // include spatial gradients in the solution.
   const double sstmin = 30.;
-  double alpp = ctowns_.alpha * 760. * temperature / (pressure * 293.15);
-  double attp = ctowns_.att   * 760. * temperature / (pressure * 293.15);
+  const double epscale = 760. * temperature / (pressure * 293.15);
+  double alpp = Magboltz::ctowns_.alpha * epscale;
+  double attp = Magboltz::ctowns_.att   * epscale;
   bool useSST = false;
   if (fabs(alpp - attp) > sstmin || alpp > sstmin || attp > sstmin) {
     useSST = true;
     if (bmag == 0.) {
-      alpcalc_();
+      Magboltz::alpcalc_();
     } else if (btheta == 0. || btheta == Pi) {
-      alpclca_();
+      Magboltz::alpclca_();
     } else if (btheta == HalfPi) {
-      alpclcb_();
+      Magboltz::alpclcb_();
     } else {
-      alpclcc_();
+      Magboltz::alpclcc_();
     }
     // Calculate the (effective) TOF Townsend coefficient.
-    double alphapt = tofout_.ralpha;
-    double etapt   = tofout_.rattof;
-    double fc1 = 1.e5 * tofout_.tofwr / (2. * tofout_.tofdl);
-    double fc2 = 1.e12 * (alphapt - etapt) / tofout_.tofdl;
+    double alphapt = Magboltz::tofout_.ralpha;
+    double etapt   = Magboltz::tofout_.rattof;
+    double fc1 = 1.e5 * Magboltz::tofout_.tofwr / 
+                 (2. * Magboltz::tofout_.tofdl);
+    double fc2 = 1.e12 * (alphapt - etapt) / Magboltz::tofout_.tofdl;
     alphatof = fc1 - sqrt(fc1 * fc1 - fc2);
   }
-  if (verbose) output2_();
+  if (verbose) Magboltz::output2_();
 
   // Convert to cm / ns.
-  vx = vel_.wx * 1.e-9; vxerr = velerr_.dwx;
-  vy = vel_.wy * 1.e-9; vyerr = velerr_.dwy;
-  vz = vel_.wz * 1.e-9; vzerr = velerr_.dwz;
+  vx = Magboltz::vel_.wx * 1.e-9; vxerr = Magboltz::velerr_.dwx;
+  vy = Magboltz::vel_.wy * 1.e-9; vyerr = Magboltz::velerr_.dwy;
+  vz = Magboltz::vel_.wz * 1.e-9; vzerr = Magboltz::velerr_.dwz;
 
-  dt = sqrt(0.2 * difvel_.diftr / vz) * 1.e-4; dterr = diferl_.dfter;
-  dl = sqrt(0.2 * difvel_.difln / vz) * 1.e-4; dlerr = diferl_.dfler;
+  dt = sqrt(0.2 * Magboltz::difvel_.diftr / vz) * 1.e-4; 
+  dterr = Magboltz::diferl_.dfter;
+  dl = sqrt(0.2 * Magboltz::difvel_.difln / vz) * 1.e-4; 
+  dlerr = Magboltz::diferl_.dfler;
  
-  alpha = ctowns_.alpha; alphaerr = ctwner_.alper;
-  eta   = ctowns_.att;   etaerr = ctwner_.atter;
+  alpha = Magboltz::ctowns_.alpha; alphaerr = Magboltz::ctwner_.alper;
+  eta   = Magboltz::ctowns_.att;   etaerr   = Magboltz::ctwner_.atter;
  
   // Print the results.
   if (verbose || debug) {

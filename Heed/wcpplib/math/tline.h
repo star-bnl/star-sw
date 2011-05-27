@@ -1948,7 +1948,7 @@ T t_integ_step_ar(const M& mesh,
 {
   mfunname("double t_integ_step_ar(...)");
 
-  //mcout<<"start t_step_integ_ar\n";
+  // mcout<<"start t_step_integ_ar\n";
   check_econd21(xpower , != 0 &&  , != 1 , mcerr);
   check_econd12(x1 , > , x2 , mcerr);
   long qi = mesh.get_qi();
@@ -1956,31 +1956,29 @@ T t_integ_step_ar(const M& mesh,
   //if(x1 > x2) return 0;
   double xmin = mesh.get_xmin();
   double xmax = mesh.get_xmax();
-  if(x2 <= xmin) return 0;
-  if(x1 >= xmax) return 0;
-  if(x1 == x2) return 0;
+  if (x2 <= xmin) return 0;
+  if (x1 >= xmax) return 0;
+  if (x1 == x2)   return 0;
   long istart, iafterend; // indexes to sum total intervals
   T s(0);
-  if(x1 <= xmin) {
+  if (x1 <= xmin) {
     x1 = xmin;
     istart = 0;
   } else {
     long n1, n2;
     T b1, b2;
-    int i_ret=0;
+    int i_ret = 0;
     i_ret = mesh.get_interval(x1, 
 			      n1, b1, 
 			      n2, b2);
     //Iprint2n(mcout, x1, i_ret);
     //Iprint4n(mcout, n1, b1, n2, b2);
     check_econd11(i_ret , != 1 , mcerr);
-    if (b2 - x1 > 0)  // otherwise it could be only equal to 0
-    {
-      if (x2 <= b2)  // if x2 in the same interval
-      {
+    if (b2 - x1 > 0) {  // otherwise it could be only equal to 0
+      if (x2 <= b2) {   // if x2 in the same interval
         if (xpower == 0) {
           s = (x2 - x1) * y[n1];
-        } else
+        } else {
           s = 0.5 * (x2* x2 - x1* x1) * y[n1];
         }
         return s;
@@ -2026,10 +2024,10 @@ T t_integ_step_ar(const M& mesh,
       s += (b - a) * y[i];
     }
   } else {
-    for(i=istart; i<iafterend; i++) {
+    for (i=istart; i<iafterend; i++) {
       double a = b;
       mesh.get_scoor(i+1, b);
-      s += 0.5 * (b*b - a*a) * y[i];
+      s += 0.5 * (b * b - a * a) * y[i];
     }
   }
   //Iprintn(mcout, s);

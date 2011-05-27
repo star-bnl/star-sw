@@ -40,14 +40,14 @@ static const double RydbergEnergy =  13.60569193;
 static const double SpeedOfLight =  29.9792458;
 // Classical electron radius [cm]
 static const double ClassicalElectronRadius = 2.8179402894e-13;
-// Electron charge magnitude [C]
-static const double ElementaryCharge = 1.602176487e-19;
+// Electron charge magnitude [fC]
+static const double ElementaryCharge = 1.602176487e-4;
 // Electron cyclotron frequency / field [rad / (ns * 10-5 T)]
 static const double OmegaCyclotronOverB = 1.758820150e-3;
 // Boltzmann constant [eV / K]
 static const double BoltzmannConstant = 8.617343e-5;
-// Permittivity of free space [F / cm]
-static const double VacuumPermittivity = 8.854187817e-14;
+// Permittivity of free space [fF / cm]
+static const double VacuumPermittivity = 88.54187817;
 static const double FourPiEpsilon0     = 4. * Pi * VacuumPermittivity;
 static const double TwoPiEpsilon0      = TwoPi * VacuumPermittivity;
 // Loschmidt number [cm-3]

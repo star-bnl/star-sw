@@ -10,8 +10,7 @@
 
 namespace Garfield {
 
-double Sensor::signalConversion = ElementaryCharge * 1.e15;
-// double Sensor::signalConversion = 1.;
+double Sensor::signalConversion = ElementaryCharge;
 
 Sensor::Sensor() :
   nComponents(0), lastComponent(-1), 

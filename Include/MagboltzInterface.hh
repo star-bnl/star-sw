@@ -5,6 +5,8 @@
 
 namespace Garfield {
 
+namespace Magboltz {
+
 extern "C" {
   
   // Magboltz COMMON blocks
@@ -124,6 +126,8 @@ extern "C" {
   void prnter_();
   void output_();
   void output2_();
+
+}
 
 }
 

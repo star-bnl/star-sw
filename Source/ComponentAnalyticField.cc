@@ -631,6 +631,50 @@ ComponentAnalyticField::UpdatePeriodicity() {
   
 }
 
+void
+ComponentAnalyticField::AddCharge(
+                    const double x, const double y, const double z,
+                    const double q) {
+        
+  // Convert from fC to internal units (division by 4 pi epsilon0)
+  charge3d newCharge;
+  newCharge.x = x;
+  newCharge.y = y;
+  newCharge.z = z;
+  newCharge.e = q / FourPiEpsilon0;
+  ch3d.push_back(newCharge);
+  ++n3d;
+  
+}
+
+void
+ComponentAnalyticField::ClearCharges() {
+
+  n3d = 0;
+  ch3d.clear();
+  nTermBessel = 10;
+  nTermPoly = 100;
+
+}
+
+void
+ComponentAnalyticField::PrintCharges() {
+
+  std::cout << className << "::PrintCharges:\n";
+  if (n3d <= 0) {
+    std::cout << "    No charges present.\n";
+    return;
+  }
+  std::cout << "      x [cm]      y [cm]      z [cm]      charge [fC]\n";
+  for (int i = 0; i < n3d; ++i) {
+    std::cout << "     " << std::setw(9)  << ch3d[i].x << "   "
+                         << std::setw(9)  << ch3d[i].y << "   "
+                         << std::setw(9)  << ch3d[i].z << "   "
+                         << std::setw(11) << ch3d[i].e * FourPiEpsilon0 << "\n";
+  }
+  
+}
+
 int
 ComponentAnalyticField::GetNumberOfPlanesX() {
 
@@ -1626,7 +1670,7 @@ ComponentAnalyticField::CellCheck() {
   if (vmin == vmax || !setv) {
     std::cerr << className << "::CellCheck:\n";
     std::cerr << "    All potentials in the cell are the same.\n";
-    std::cerr << "    There is not point in going on.\n";
+    std::cerr << "    There is no point in going on.\n";
     ok = false;
     return false;
   }

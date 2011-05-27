@@ -1751,6 +1751,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
     stheta = sqrt(1. - ctheta * ctheta);
     // Add the secondary electron to the stack.
     electron newElectron;
+    newElectron.hole = false;
     newElectron.x0 = x; newElectron.x = x;
     newElectron.y0 = y; newElectron.y = y;
     newElectron.z0 = z; newElectron.z = z;
@@ -1781,6 +1782,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
         stheta = sqrt(1. - ctheta * ctheta);
         // Add the electron to the stack.
         electron newElectron;
+        newElectron.hole = false;
         newElectron.x0 = x; newElectron.x = x;
         newElectron.y0 = y; newElectron.y = y;
         newElectron.z0 = z; newElectron.z = z;
