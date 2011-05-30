@@ -109,7 +109,7 @@ OpticalData::PhotoAbsorptionCsNeon(const double e,
   const double y = ip12 / e;
   const double f = a * pow(y, 2) + b * pow(y, 3) + 
                    c * pow(y, 4) + d * pow(y, 5);
-  // Conversion from oscillator strength to photoabsorption cs
+  // Convert from oscillator strength (per Rydberg) to photoabsorption cs
   cs = 8.067283e-18 * f;
   eta = 1.;
   return true;
@@ -268,7 +268,7 @@ OpticalData::PhotoAbsorptionCsArgon(const double e,
   const double y = ip12 / e;
   const double f = a * pow(y, 2) + b * pow(y, 3) + 
                    c * pow(y, 4) + d * pow(y, 5);
-  // Conversion from oscillator strength to photoabsorption cs
+  // Convert from oscillator strength (per Rydberg) to photoabsorption cs
   cs = 8.067283e-18 * f;
   eta = 1.;
   return true;
@@ -936,7 +936,7 @@ OpticalData::PhotoAbsorptionCsCO2(const double e, double& cs, double& eta) {
   const double y = ip / e;
   const double f = a * pow(y, 2) + b * pow(y, 3) + 
                    c * pow(y, 4) + d * pow(y, 5);
-  // Conversion from oscillator strength to photoabsorption cs
+  // Convert from oscillator strength (per Rydberg) to photoabsorption cs
   cs = 8.067283e-18 * f;
   eta = 1.;
   return true;
@@ -1194,7 +1194,7 @@ OpticalData::PhotoAbsorptionCsMethane(const double e,
   const double y = 12.61 / e;
   const double f = a * pow(y, 2) + b * pow(y, 3) + 
                    c * pow(y, 4) + d * pow(y, 5);
-  // Conversion from oscillator strength to photoabsorption cs
+  // Convert from oscillator strength (per Rydberg) to photoabsorption cs
   cs = 8.067283e-18 * f;
   eta = 1.;
   return true;
@@ -1495,7 +1495,7 @@ OpticalData::PhotoAbsorptionCsEthane(const double e,
   const double y = 11.52 / e;
   const double f = a * pow(y, 2) + b * pow(y, 3) + 
                    c * pow(y, 4) + d * pow(y, 5);
-  // Conversion from oscillator strength to photoabsorption cs
+  // Convert from oscillator strength (per Rydberg) to photoabsorption cs
   cs = 8.067283e-18 * f;
   eta = 1.;
   return true;
@@ -1829,7 +1829,7 @@ OpticalData::PhotoAbsorptionCsAcetylene(const double e,
   const double y = 11.4011 / e;
   const double f = a * pow(y, 2) + b * pow(y, 3) + 
                    c * pow(y, 4) + d * pow(y, 5);
-  // Conversion from oscillator strength to photoabsorption cs
+  // Convert from oscillator strength (per Rydberg) to photoabsorption cs
   cs = 8.067283e-18 * f;
   eta = 1.;
   return true;
@@ -1843,31 +1843,93 @@ OpticalData::PhotoAbsorptionCsCF4(const double e,
   // Sources:
   // Photoabsorption cross-section:
   // J. W. Au et al., Chem. Phys. 221 (1997), 151-168
+  // Photoionisation yield:
+  // Zhang et al., Chemical Physics 137 (1989), 391-405
   
   if (e < 10.) {
     cs = eta = 0.;
     return true;
   }
   
-  if (e < 35.) {
+  if (e < 200.) {
     
     // Differential oscillator strength
-    const int nPacsEntries = 50;
+    const int nPacsEntries = 255;
     
     const double xCF4[nPacsEntries] = {
-      10.0,  10.5,  11.0,  11.5,  12.0,  12.5,  13.0,  13.5,  14.0,  14.5,
-      15.0,  15.5,  16.0,  16.5,  17.0,  17.5,  18.0,  18.5,  19.0,  19.5,
+      10.0,  10.5,  11.0,  11.5,  
+      // High resolution data (from plot)
+      11.66, 11.88, 12.06, 12.14, 12.26, 12.42, 12.58, 12.81, 12.95, 13.11,
+      13.17, 13.21, 13.25, 13.27, 13.29, 13.31, 13.35, 13.37, 13.39, 13.43,
+      13.45, 13.47, 13.49, 13.51, 13.53, 13.61, 13.67, 13.73, 13.85, 13.97,
+      14.03, 14.09, 14.13, 14.15, 14.17, 14.21, 14.23, 14.28, 14.32, 14.34,
+      14.36, 14.40, 14.42, 14.54, 14.62, 14.72, 14.82, 14.88, 14.98, 15.08,
+      15.20, 15.26, 15.36, 15.40, 15.48, 15.50, 15.52, 15.56, 15.60, 15.64,
+      15.68, 15.72, 15.75, 15.79, 15.83, 15.89, 15.95, 15.99, 16.03, 16.05,
+      16.11, 16.15, 16.19, 16.37, 16.47, 16.63, 16.75, 16.93, 17.11, 17.25,
+      17.48, 17.72, 18.00, 18.18, 18.38, 18.58, 18.81, 18.93, 19.03, 19.13,
+      19.17, 19.27, 19.43, 19.61, 19.78, 19.93,
+      // 12.0,  12.5,  13.0,  13.5,  14.0,  14.5,
+      // 15.0,  15.5,  16.0,  16.5,  17.0,  17.5,  18.0,  18.5,  19.0,  19.5,
       20.0,  20.5,  21.0,  21.5,  22.0,  22.5,  23.0,  23.5,  24.0,  24.5,
       25.0,  25.5,  26.0,  26.5,  27.0,  27.5,  28.0,  28.5,  29.0,  29.5,
-      30.0,  30.5,  31.0,  31.5,  32.0,  32.5,  33.0,  33.5,  34.0,  34.5};
+      30.0,  30.5,  31.0,  31.5,  32.0,  32.5,  33.0,  33.5,  34.0,  34.5,
+      35.0,  35.5,  36.0,  36.5,  37.0,  37.5,  38.0,  38.5,  39.0,  39.5,
+      40.0,  40.5,  41.0,  41.5,  42.0,  42.5,  43.0,  43.5,  44.0,  44.5,
+      45.0,  45.5,  46.0,  47.0,  48.0,  49.0,  50.0,  51.0,  52.0,  53.0,
+      54.0,  55.0,  56.0,  57.0,  58.0,  59.0,  60.0,  61.0,  62.0,  63.0,
+      64.0,  65.0,  66.0,  67.0,  68.0,  69.0,  70.0,  71.0,  72.0,  73.0,
+      74.0,  75.0,  76.0,  77.0,  78.0,  79.0 , 80.0,  81.0,  82.0,  83.0,
+      84.0,  85.0,  86.0,  87.0,  88.0,  89.0,  90.0,  91.0,  92.0,  93.0,
+      94.0,  95.0,  96.0,  98.0, 100.0, 102.0, 104.0, 106.0, 108.0, 110.0,
+     112.0, 114.0, 116.0, 118.0, 120.0, 122.0, 124.0, 126.0, 128.0, 130.0,
+     132.0, 134.0, 136.0, 138.0, 140.0, 142.0, 144.0, 146.0, 148.0, 150.0,
+     152.0, 154.0, 156.0, 158.0, 160.0, 162.0, 164.0, 166.0, 168.0, 170.0,
+     172.0, 174.0, 176.0, 178.0, 180.0, 182.0, 184.0, 186.0, 188.0, 190.0,
+     192.0, 194.0, 196.0, 198.0, 200.0};
 
     const double yCF4[nPacsEntries] = {
-       0.05,  0.06,  0.10,  0.27,  1.32,  3.51, 11.97, 29.62, 31.67, 19.92,
-      16.82, 28.76, 35.24, 35.92, 39.14, 41.84, 44.86, 46.84, 48.48, 49.98,
+       0.05,  0.06,  0.10,  0.27,  
+      // High resolution data (from plot) 
+       0.29,  0.29,  0.44,  1.47,  1.91,  3.08,  3.67,  3.67,  3.23,  3.37, 
+       4.11,  6.09,  8.80, 10.56, 12.32, 14.23, 18.92, 23.03, 28.53, 34.62,
+      38.88, 40.78, 42.54, 43.86, 46.65, 47.68, 46.50, 44.74, 41.96, 42.10,
+      40.49, 37.48, 34.99, 33.30, 31.69, 30.04, 28.31, 25.53, 24.21, 22.30,
+      20.83, 19.36, 18.34, 15.26, 13.20, 11.30,  9.68,  8.36,  7.63,  8.95,
+      11.00, 12.76, 15.55, 17.75, 20.39, 23.62, 25.53, 28.61, 31.69, 35.50,
+      41.00, 44.30, 47.53, 49.29, 51.05, 48.85, 44.89, 42.25, 39.32, 37.56,
+      34.47, 31.83, 29.63, 32.57, 34.03, 36.38, 38.44, 39.76, 39.46, 39.61,
+      41.81, 43.57, 45.77, 46.94, 47.82, 47.24, 46.36, 46.21, 47.53, 49.00,
+      50.46, 52.37, 54.43, 51.64, 49.58, 48.41, 
+      // 1.32,  3.51, 11.97, 29.62, 31.67, 19.92,
+      // 16.82, 28.76, 35.24, 35.92, 39.14, 41.84, 44.86, 46.84, 48.48, 49.98,
       51.66, 55.96, 58.65, 60.84, 62.47, 62.01, 60.63, 59.36, 57.26, 54.58, 
       52.55, 50.40, 48.52, 47.15, 45.89, 45.11, 44.67, 44.49, 44.27, 44.27, 
-      44.35, 44.61, 44.67, 44.30, 44.56, 44.15, 44.20, 44.42, 44.23, 43.65};
-          
+      44.35, 44.61, 44.67, 44.30, 44.56, 44.15, 44.20, 44.42, 44.23, 43.65,
+      43.44, 43.23, 42.79, 42.69, 42.52, 42.77, 42.65, 42.56, 42.98, 42.57,
+      42.33, 41.93, 41.10, 40.51, 39.84, 38.82, 37.73, 36.62, 35.71, 35.18, 
+      34.05, 33.21, 32.14, 30.72, 29.45, 28.25, 27.56, 26.71, 26.11, 25.50,
+      24.91, 24.40, 23.91, 23.60, 23.14, 22.60, 22.35, 21.92, 21.40, 21.06,
+      20.52, 20.17, 19.92, 19.55, 19.00, 18.84, 18.39, 18.05, 17.81, 17.31,
+      17.06, 16.62, 16.43, 16.02, 15.74, 15.43, 15.12, 14.64, 14.57, 14.05,
+      13.87, 13.62, 13.51, 13.24, 12.74, 12.66, 12.47, 12.18, 11.84, 11.73,
+      11.50, 11.23, 11.01, 10.61, 10.33,  9.98,  9.65,  9.31,  9.02,  8.65,
+       8.43,  8.13,  7.86,  7.64,  7.35,  7.15,  6.94,  6.71,  6.45,  6.27,
+       6.09,  5.91,  5.69,  5.56,  5.30,  5.18,  5.03,  4.87,  4.74,  4.52,
+       4.42,  4.27,  4.15,  4.13,  3.94,  3.89,  3.80,  3.75,  3.58,  3.46,
+       3.35,  3.26,  3.17,  3.10,  3.13,  2.99,  2.91,  2.79,  2.67,  2.68,
+       2.72,  2.55,  2.52,  2.45,  2.42};
+       
+    // Photoionization yield
+    const int nYieldEntries = 10;
+    double xIon[nYieldEntries] = {
+      15.5,  16.0,  16.5,  17.0,  17.5,  18.0,  18.5,  19.0,  19.5,  20.0
+    };
+                 
+    double yIon[nYieldEntries] = {
+       0.03,  0.14,  0.28,  0.50,  0.68,  0.84,  0.93,  0.95,  0.97,  1.0 
+    };
+
     // Locate the requested energy in the tables.
     // First the photoabsorption cross-section.
     int iLow = 0;
@@ -1885,10 +1947,32 @@ OpticalData::PhotoAbsorptionCsCF4(const double e,
     // Linear interpolation.
     cs = yCF4[iLow] + (e - xCF4[iLow]) * 
          (yCF4[iUp] - yCF4[iLow]) / (xCF4[iUp] - xCF4[iLow]);
+    // Data in the table are given in 0.01 eV-1.
+    cs *= 0.01;
     // Convert from oscillator strength to photoabsorption cs.
     cs *= 109.75e-18;
-    eta = 0.;
-   
+    
+    if (e < xIon[0]) {
+      eta = 0.;
+    } else if (e >= xIon[nYieldEntries - 1]) {
+      eta = 1.;
+    } else {
+      // Linear interpolation.
+      // Same procedure as for photoabsorption cross-section.
+      iLow = 0;
+      iUp = nYieldEntries - 1;
+      while (iUp - iLow > 1) {
+        iM = (iUp + iLow) >> 1;
+        if (e >= xIon[iM]) {
+          iLow = iM;
+        } else {
+          iUp = iM;
+        }
+      }
+      eta = yIon[iLow] + (e - xIon[iLow]) * 
+            (yIon[iUp] - yIon[iLow]) / (xIon[iUp] - xIon[iLow]);
+    }
+
     return true;
     
   }
@@ -2048,7 +2132,7 @@ OpticalData::PhotoAbsorptionCsNitrogen(const double e,
   const double y = 12.61 / e;
   const double f = a * pow(y, 2) + b * pow(y, 3) + 
                    c * pow(y, 4) + d * pow(y, 5);
-  // Conversion from oscillator strength to photoabsorption cs
+  // Convert from oscillator strength (per Rydberg) to photoabsorption cs
   cs = 8.067283e-18 * f;
   eta = 1.;
   return true;

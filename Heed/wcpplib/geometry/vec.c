@@ -561,6 +561,13 @@ basis::basis(const vec &pex, const vec &pey, const vec &pez,
   //strcpy(name,pname);
 }
 
+void 
+basis::print(ostream& file, int l) const {
+ 
+  file<<(*this);
+
+}
+
 ostream& operator<<(ostream& file, const basis& b)
 {
   Ifile<<"basis: name="<<b.name<<'\n';
@@ -595,6 +602,10 @@ void point::down(const abssyscoor *fasc)
 {v.down(fasc); shift(fasc->Gapiv()->v); }
 void point::up(const abssyscoor *fasc)
 {shift(-fasc->Gapiv()->v); v.up(fasc); }
+
+void point::print(ostream& file, int l) const {
+  file<<(*this);
+}
 
 ostream& operator<<(ostream& file, const point& p)
 {

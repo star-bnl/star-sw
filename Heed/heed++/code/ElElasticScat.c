@@ -297,9 +297,9 @@ double ElElasticScat::get_CS(long Z, double energy, double angle, int s_interp)
 double ElElasticScat::get_CS_Rutherford(long Z, double energy, double angle)
 {
   mfunname("double ElElasticScat::get_CS_Rutherford(long Z, double energy, double angle)");
-  long qa = atom.get_qel();
-  long na;
-  double enKeV = energy * 1000.0;
+  // long qa = atom.get_qel();
+  // long na;
+  // double enKeV = energy * 1000.0;
   //Iprintn(mcout, enKeV);
   /*
   double gamma = 1.0 + energy / ELMAS;   // energy is kinetic in MeV 

@@ -5,7 +5,7 @@
 
 
 EnergyMesh::EnergyMesh(double femin, double femax, long fq):
-  emin(femin), emax(femax), q(fq)
+  q(fq), emin(femin), emax(femax)
 {
   mfunname("EnergyMesh::EnergyMesh(double femin, double femax, long fq)");
   check_econd21( q, < 0 || , > pqener - 1 , mcerr);

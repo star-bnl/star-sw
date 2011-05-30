@@ -66,7 +66,7 @@ class MediumMagboltz : public MediumGas {
     void DisableCrossSectionOutput() {useCsOutput = false;}
 
     // Multiply excitation cross-sections by a uniform scaling factor
-    void SetExcitationScalingFactor(const double r);
+    void SetExcitationScalingFactor(const double r, std::string gasname);
 
     bool Initialise(); 
     void PrintGas();
@@ -138,7 +138,11 @@ class MediumMagboltz : public MediumGas {
     static const int nMaxLevels = 512;
     static const int nCsTypes = 6;
     static const int nCsTypesGamma = 4;
-      
+
+    static const int DxcTypeRad = 0;
+    static const int DxcTypeCollIon = 1;
+    static const int DxcTypeCollNonIon = -1;
+ 
     // Energy spacing of collision rate tables
     double eFinal, eStep;
     double eMinLog;
@@ -272,7 +276,7 @@ class MediumMagboltz : public MediumGas {
     double minIonPot;
 
     // Scaling factor for excitation cross-sections
-    double scaleExc;
+    double scaleExc[nMaxGases];
     // Flag selecting secondary electron energy distribution model
     bool useOpalBeaty;
     bool useGreenSawada;

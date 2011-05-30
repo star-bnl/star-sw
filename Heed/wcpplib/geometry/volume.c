@@ -292,6 +292,8 @@ int absvol::range(trajestep& fts, int s_ext,
   else return 0;
 }
 
+void absvol::income(gparticle* gp) {;}
+
 void absvol::print(ostream& file, int l) const
 {
   if(l>0)

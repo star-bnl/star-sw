@@ -209,6 +209,11 @@ void mparticle::curvature(int& fs_cf, vec& frelcen, vfloat& fmrange,
   
 }
 
+int mparticle::force(const point& pt, vec& f, vec& f_perp, vfloat& mrange) {
+  f=vec(0,0,0); f_perp=vec(0,0,0); mrange=max_vfloat;
+  return 0;
+}
+
 //double mparticle::speed_of_light; 
 
 /*

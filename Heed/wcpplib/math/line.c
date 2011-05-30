@@ -67,7 +67,6 @@ double lin_interpolation(double x,
 {
   mfunname("double lin_interpolation(T x, DynLinArr< double > coor, DynLinArr< double > arr)");
 
-  long n;
   check_econd12(coor.get_qel() , != , arr.get_qel() , mcerr);
   long q=coor.get_qel();
   long nstart=find_interval(x , coor);
@@ -81,7 +80,6 @@ double lin_interpolation(double x,
 {
   mfunname("double lin_interpolation(T x, double coor[], double arr[], long q)");
 
-  long n;
   long nstart=find_interval(x , coor, q);
   if(nstart < 0) return 0.0;
   return arr[nstart] + 
@@ -96,7 +94,6 @@ double double_parab_interpolation
 {
   mfunname("double double_parab_interpolation(T x, DynLinArr< double > coor, DynLinArr< double > arr)");
 
-  long n;
   check_econd12(coor.get_qel() , != , arr.get_qel() , mcerr);
   long q=coor.get_qel();
   long nstart=find_interval(x , coor);

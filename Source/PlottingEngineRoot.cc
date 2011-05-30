@@ -49,30 +49,47 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetCanvasDefW(600);
   garfieldStyle->SetPadBorderMode(0);
   garfieldStyle->SetPadColor(0);
+  garfieldStyle->SetPadLeftMargin(0.1);
+  garfieldStyle->SetPadBottomMargin(0.1);
+  garfieldStyle->SetPadRightMargin(0.1);
+  garfieldStyle->SetPadTopMargin(0.1);
   garfieldStyle->SetFrameBorderMode(0);
+  garfieldStyle->SetDrawBorder(0);
+
   garfieldStyle->SetGridColor(kGray);
   garfieldStyle->SetGridStyle(3);
   garfieldStyle->SetGridWidth(1);
   garfieldStyle->SetPadGridX(kTRUE);
   garfieldStyle->SetPadGridY(kTRUE);
+
+  const int font = 132;
+  garfieldStyle->SetTextFont(font);
   garfieldStyle->SetTitleStyle(0);
   garfieldStyle->SetTitleBorderSize(0);
   garfieldStyle->SetTitleColor(1, "xyz");
   garfieldStyle->SetTitleColor(1, "t");
   garfieldStyle->SetTitleFillColor(0);
-  garfieldStyle->SetTitleFont(132, "xyz");
-  garfieldStyle->SetTitleFont(132, "t");
+  garfieldStyle->SetTitleFont(font, "xyz");
+  garfieldStyle->SetTitleFont(font, "t");
+  garfieldStyle->SetTitleOffset(1.0, "xyz");
+  garfieldStyle->SetTitleSize(0.03, "xyz");
+  garfieldStyle->SetTitleSize(0.05, "t");
+
   garfieldStyle->SetStatStyle(0);
   garfieldStyle->SetStatBorderSize(0);    
   garfieldStyle->SetStatColor(0);
-  garfieldStyle->SetStatFont(132);
+  garfieldStyle->SetStatFont(font);
   garfieldStyle->SetStatFontSize(0.03);
   garfieldStyle->SetStatX(0.88);
   garfieldStyle->SetStatY(0.88);
   garfieldStyle->SetStatW(0.25);
-  garfieldStyle->SetStatH(0.15);
+  garfieldStyle->SetStatH(0.03);
   garfieldStyle->SetOptStat(111110);
-  garfieldStyle->SetLabelFont(132, "xyz");
+
+  garfieldStyle->SetLabelFont(font, "xyz");
+  garfieldStyle->SetLabelSize(0.03, "xyz");
+  garfieldStyle->SetLabelOffset(0.01, "xyz");
+
   garfieldStyle->SetPaperSize(TStyle::kA4);
   garfieldStyle->SetFuncWidth(2);
   garfieldStyle->SetHistLineColor(kOrange - 3);

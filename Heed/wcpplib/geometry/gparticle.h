@@ -190,7 +190,7 @@ class gparticle: public RegPassivePtr
   virtual void physics(void) {;}
   // Allows to apply any other processes, to turn the trajectory, kill
   // the particle and so on.
-  virtual void physics_mrange(double& fmrange) {;}
+  virtual void physics_mrange(double& fmrange);
   // Allows to reduce maxumal possible range due to continious processes.
   // Called from calc_step_to_bord() after the call of curvature(...)
   // but before considering the crossing with volumes.

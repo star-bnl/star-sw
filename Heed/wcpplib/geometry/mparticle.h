@@ -84,7 +84,7 @@ class mparticle: public gparticle
   // Allows to apply any other processes, to turn the trajectory, kill
   // the particle and so on.
 
-  virtual int force(const point& pt, vec& f, vec& f_perp, vfloat& mrange)
+  virtual int force(const point& pt, vec& f, vec& f_perp, vfloat& mrange);
     // Force is considered to be split to two components. 
     // One component, namely f, 
     // is directed to any direction and capable to do the work.
@@ -101,10 +101,6 @@ class mparticle: public gparticle
     // 
     // The dimension of f is [weight] * [lenght] / [time]^2
     // The dimsnsion of f_perp is [weight] / [time];
-    {
-      f=vec(0,0,0); f_perp=vec(0,0,0); mrange=max_vfloat;
-      return 0;
-    }
 
   void new_speed(void);
   // Set new speed, direction and time for currpos.

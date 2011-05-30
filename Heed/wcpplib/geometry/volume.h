@@ -181,7 +181,7 @@ class absvol: virtual public absref, public RegPassivePtr
   macro_copy_header(absvol);
   //virtual void* copy(void) const;
   //virtual absvol* copy(void) const;
-  virtual void income(gparticle* gp) {;}
+  virtual void income(gparticle* gp);
   virtual void chname(char *nm) const {strcpy(nm,"absvol");}
   virtual void print(ostream& file, int l) const;
   //virtual int mandatory(void) const {return 0;}  

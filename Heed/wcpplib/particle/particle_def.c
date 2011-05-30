@@ -204,8 +204,6 @@ void particle_def::print(ostream & file)
 void particle_def::printall(ostream & file)
 {
   Ifile<<"particle_def::printall:\n";
-  particle_def* apd=NULL;
-  int n;
   AbsList< particle_def* >& logbook = particle_def::get_logbook();
   AbsListNode<particle_def*>* an=NULL;
   while( (an = logbook.get_next_node(an)) != NULL)
@@ -221,6 +219,8 @@ void particle_def::printall(ostream & file)
     i++;
   }
 #else
+  particle_def* apd=NULL;
+  int n;
   for( n=0; (apd = particle_def::cont[n]) != NULL ; n++)
   {
     file<<(*apd);
@@ -263,8 +263,6 @@ ostream & operator << (ostream & file, const particle_def & f)
 particle_type::particle_type(const char* name, int s)
 {
   mfunname("particle_type::particle_type(const char* name, int s)");
-  particle_def* apd=NULL;
-  int n;
   //mcout<<"particle_type::particle_type(char* name):\n";
   //particle_def::printall(mcout);
   AbsListNode<particle_def*>* an=NULL;
@@ -287,6 +285,8 @@ particle_type::particle_type(const char* name, int s)
    }
   }
   /*
+  particle_def* apd=NULL;
+  int n;
 #ifdef USE_STLLIST
   list< particle_def* >::const_iterator i = particle_def::cont.begin();
   while(i != particle_def::cont.end() )

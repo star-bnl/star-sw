@@ -15,7 +15,7 @@ HeedDeltaElectronCS::HeedDeltaElectronCS
  PairProd* fpairprod, 
  int fsruth, double fmlambda, double fmthetac):
   hmd(fhmd), ees(fees), eesls(feesls), pairprod(fpairprod),
-  sruth(fsruth), mlambda(fmlambda), mthetac(fmthetac)
+  mlambda(fmlambda), sruth(fsruth), mthetac(fmthetac)
 {
   mfunname("HeedDeltaElectronCS::HeedDeltaElectronCS(...)");
   //mcout<<"starting to inite HeedDeltaElectronCS\n";
@@ -109,8 +109,8 @@ HeedDeltaElectronCS::HeedDeltaElectronCS
 #else
     coef_low_sigma = DynLinArr< double >(eesls->get_ees()->get_qe());
 #endif
-    long qat = hmd->matter->qatom();
-    long nat;
+    // long qat = hmd->matter->qatom();
+    // long nat;
     for(ne=0; ne<eesls->get_ees()->get_qe(); ne++)
     {
       //double energy = eesls->ees->get_energy_mesh(ne) * 0.001;

@@ -181,7 +181,7 @@ class absref_transmit virt_common_base_col
   absref_transmit(const absref_transmit& f) {*this=f;}
   macro_copy_header(absref_transmit);
   //virtual absref_transmit* copy(void) const ;
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(ostream& file, int l) const;
 
   virtual absref* get_other(int n); 
   // is meant to  be redefined in derived class to 
@@ -426,7 +426,7 @@ public:
  
   friend ostream& operator<<(ostream& file, const basis& b);
   AnyType_copy(basis, basis);
-  virtual void print(ostream& file, int l) const {file<<(*this);}
+  virtual void print(ostream& file, int l) const;
   virtual ~basis(void) {}
 };
 
@@ -489,7 +489,7 @@ public:
     {return not_apeq(p1.v, p2.v, prec); }
   friend ostream& operator<<(ostream& file, const point& p);
   AnyType_copy(point, point);
-  virtual void print(ostream& file, int l) const {file<<(*this);}
+  virtual void print(ostream& file, int l) const;
   virtual ~point() {}
 
 };
@@ -530,7 +530,7 @@ class abssyscoor
   abssyscoor(char* fname): name(fname) {;} 
   abssyscoor(const String& fname): name(fname) {;} 
   //abssyscoor(const abssyscoor& f): 
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(ostream& file, int l) const;
   
   virtual ~abssyscoor() {;}
 };
@@ -558,7 +558,7 @@ class fixsyscoor: public absref, public abssyscoor, public RegPassivePtr
   fixsyscoor(const abssyscoor& f): abssyscoor(f), 
       piv( (f.Gapiv()!=NULL) ? (*(f.Gapiv())) : point() ),
       bas( (f.Gabas()!=NULL) ? (*(f.Gabas())) : basis() ) {;}  
-  virtual void print(ostream& file, int l) const ;
+  virtual void print(ostream& file, int l) const;
   macro_copy_total(fixsyscoor);
   virtual ~fixsyscoor() {;}
 protected:  

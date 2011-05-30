@@ -137,6 +137,8 @@ void gparticle::curvature(int& fs_cf, vec& frelcen, vfloat& fmrange,
   */
 }
 
+void gparticle::physics_mrange(double& fmrange) {;}
+
 stvpoint gparticle::calc_step_to_bord()
 {             // calculate next point as step to border
   pvecerror("stvpoint gparticle::calc_step_to_bord()");

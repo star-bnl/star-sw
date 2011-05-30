@@ -45,18 +45,12 @@ protected:
 
 public:
 
-  circumf():piv(),dir(),rad(0){;}
-  circumf(const point& fpiv, const vec& fdir, vfloat frad):
-    piv(fpiv), dir(), rad(frad) 
-    { 
-        pvecerror("circumf(...)");
-	check_econd11(length(fdir), ==0, mcerr);
-	dir=unit_vec(fdir);
-    }
-  circumf(const circumf &f):
-    piv(f.piv), dir(f.dir), rad(f.rad) { ; }
-  circumf& operator=(const circumf& f)
-    {   piv=f.piv; dir=f.dir; rad=f.rad; return *this; }
+  circumf();
+  circumf(const point& fpiv, const vec& fdir, vfloat frad);
+  circumf(const circumf &f);
+  circumf& operator=(const circumf& f) {
+    piv=f.piv; dir=f.dir; rad=f.rad; return *this;
+  }
 
   friend int operator==(const circumf &f1, const circumf &f2);
   friend int operator!=(const circumf &f1, const circumf &f2)

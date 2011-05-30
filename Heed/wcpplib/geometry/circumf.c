@@ -20,6 +20,16 @@ The file is provided "as is" without express or implied warranty.
 absref absref::*(circumf::aref[2])=
 {(absref absref::*)&circumf::piv, (absref absref::*)&circumf::dir};
 
+circumf::circumf() : piv(),dir(),rad(0) {;}
+circumf::circumf(const point& fpiv, const vec& fdir, vfloat frad) :
+  piv(fpiv), dir(), rad(frad)
+{
+  pvecerror("circumf(...)");
+  check_econd11(length(fdir), ==0, mcerr);
+  dir=unit_vec(fdir);
+}
+circumf::circumf(const circumf &f) : piv(f.piv), dir(f.dir), rad(f.rad) {;}
+
 void circumf::get_components(ActivePtr<absref_transmit>& aref_tran)
 {
   aref_tran.pass(new absref_transmit(2, aref));
