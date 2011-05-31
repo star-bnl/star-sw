@@ -68,7 +68,7 @@ class MediumMagboltz : public MediumGas {
     // Multiply excitation cross-sections by a uniform scaling factor
     void SetExcitationScalingFactor(const double r, std::string gasname);
 
-    bool Initialise(); 
+    bool Initialise(const bool verbose = false); 
     void PrintGas();
 
     // Get the overall null-collision rate [ns-1]
@@ -298,12 +298,12 @@ class MediumMagboltz : public MediumGas {
     int nPhotonCollisions[nCsTypesGamma];
 
     bool GetGasNumberMagboltz(const std::string input, int& number) const;
-    bool Mixer();
+    bool Mixer(const bool verbose = false);
     void SetupGreenSawada();
     void ComputeAngularCut(double parIn, double& cut, double &parOut);
-    void ComputeDeexcitationTable();
+    void ComputeDeexcitationTable(const bool verbose);
     void ComputeDeexcitationInternal(int iLevel, int& fLevel);
-    bool ComputePhotonCollisionTable();
+    bool ComputePhotonCollisionTable(const bool verbose);
 
 };
 

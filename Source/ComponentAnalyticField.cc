@@ -230,20 +230,47 @@ ComponentAnalyticField::IsWireCrossed(double x0, double y0, double z0,
 }
 
 bool
-ComponentAnalyticField::IsInTrapRadius(double x0, double y0, double z0, double& xw, double& yw, double& rw){
+ComponentAnalyticField::IsInTrapRadius(double xin, double yin, double zin, 
+                                       double& xw, double& yw, double& rw) {
   
-  for(int i = 0; i < nWires;i++){
-     double xwc = w[i].x;
-     double yxc = w[i].y;
-     double r = sqrt( pow(xwc-x0,2) + pow(yxc-y0,2) );
-     double rTrap = 0.5*w[i].d*w[i].nTrap;
-     if(debug) std::cout<<"rTrap = " << rTrap << "\nr = " << r <<"\n";   
-     if(r < rTrap){
-       xw = w[i].x;
-       yw = w[i].y;
-       rw = w[i].d * 0.5;
-       return true;
-     }
+  // In case of periodicity, move the point into the basic cell.
+  double x0 = xin, y0 = yin;
+  if (perx) {
+    x0 -= sx * int(round(xin / sx));
+  }
+  double arot = 0.;
+  if (pery && tube) {
+    Cartesian2Polar(xin, yin, x0, y0);
+    arot = 180. * sy * int(round((Pi * y0) / (sy * 180.))) / Pi;
+    y0 -= arot;
+    Polar2Cartesian(x0, y0, x0, y0);
+  } else if (pery) {
+    y0 -= sy * int(round(yin / sy));
+  }
+  
+  // Move the point to the correct side of the plane.
+  if (perx && ynplan[0] && x0 <= coplan[0]) x0 += sx;
+  if (perx && ynplan[1] && x0 >= coplan[1]) x0 -= sx;
+  if (pery && ynplan[2] && y0 <= coplan[2]) y0 += sy;
+  if (pery && ynplan[3] && y0 >= coplan[3]) y0 -= sy;
+  
+  for (int i = 0; i < nWires; i++) {
+    const double xwc = w[i].x;
+    const double yxc = w[i].y;
+    const double r = sqrt(pow(xwc - x0, 2) + pow(yxc - y0, 2));
+    const double rTrap = 0.5 * w[i].d * w[i].nTrap;
+    if (debug) std::cout << "rTrap = " << rTrap << "\nr = " << r <<"\n"; 
+    if (r < rTrap) {
+      xw = w[i].x;
+      yw = w[i].y;
+      rw = w[i].d * 0.5;
+      if (debug) {
+        std::cout << className << "::IsInTrapRadius:\n";
+        std::cout << "    (" << xin << ", " << yin << ", " << zin << ")"
+                  << " within trap radius of wire " << i << ".\n";
+      } 
+      return true;
+    }
   }  
   
   return false;

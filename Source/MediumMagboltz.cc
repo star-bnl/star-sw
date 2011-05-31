@@ -433,7 +433,7 @@ MediumMagboltz::SetExcitationScalingFactor(const double r,
 }
 
 bool
-MediumMagboltz::Initialise() {
+MediumMagboltz::Initialise(const bool verbose) {
 
   if (!isChanged) {
     if (debug) {
@@ -442,7 +442,7 @@ MediumMagboltz::Initialise() {
     }
     return true;
   }
-  if (!Mixer()) {
+  if (!Mixer(verbose)) {
     std::cerr << className << "::Initialise:\n";
     std::cerr << "    Error calculating the collision rates table.\n";
     return false;
@@ -1460,7 +1460,7 @@ MediumMagboltz::GetGasNumberMagboltz(const std::string input, int& number) const
 }
 
 bool 
-MediumMagboltz::Mixer() {
+MediumMagboltz::Mixer(const bool verbose) {
 
   // Set constants and parameters in Magboltz common blocks.
   Magboltz::cnsts_.echarg = ElementaryCharge * 1.e-15;
@@ -1549,7 +1549,7 @@ MediumMagboltz::Mixer() {
     }
   }
   
-  if (debug) {
+  if (debug || verbose) {
     std::cout << className << "::Mixer:\n";
     std::cout << "    Creating table of collision rates with\n";
     std::cout << "      " << nEnergySteps 
@@ -1596,7 +1596,7 @@ MediumMagboltz::Mixer() {
     long long ngs = gasNumber[iGas];
     Magboltz::gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, &w, 
                       pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, scrpt);
-    if (debug) {
+    if (debug || verbose) {
       const double massAmu = (2. / e[1]) * 
                              ElectronMass / AtomicMassUnitElectronVolt;
       std::cout << "    " << name << "\n";
@@ -1747,7 +1747,8 @@ MediumMagboltz::Mixer() {
           scatParameter[iE][np] = pEqIn[iE][j];
         }
       }
-      if (debug && nIn > 0 && iE == nEnergySteps - 1) {
+      if ((debug || verbose) && 
+          nIn > 0 && iE == nEnergySteps - 1) {
         std::cout << "      " << nIn << " inelastic terms ("
                   << nExc << " excitations, " 
                   << nSuperEl << " superelastic, "
@@ -1836,7 +1837,7 @@ MediumMagboltz::Mixer() {
     }
   }
 
-  if (debug) {
+  if (debug || verbose) {
     std::cout << className << "::Mixer:\n";
     std::cout << "    Lowest ionisation threshold in the mixture: " 
               << minIonPot << " eV\n";
@@ -1902,7 +1903,7 @@ MediumMagboltz::Mixer() {
   for (int j = nCsTypes; j--;) nCollisions[j] = 0;
   for (int j = nTerms; j--;) nCollisionsDetailed[j] = 0;
   
-  if (debug) {
+  if (debug || verbose) {
     std::cout << className << "::Mixer:\n";
     std::cout << "    Energy [eV]    Collision Rate [ns-1]\n";
     for (int i = 0; i < 8; ++i) {
@@ -1917,7 +1918,7 @@ MediumMagboltz::Mixer() {
 
   // Set up the de-excitation channels.
   if (useDeexcitation) {
-    ComputeDeexcitationTable();
+    ComputeDeexcitationTable(verbose);
     const int dxcCount = deexcitations.size();
     if (dxcCount != nDeexcitations) {
       std::cerr << className << "::Mixer:\n";
@@ -1944,7 +1945,7 @@ MediumMagboltz::Mixer() {
   }
   
   // Fill the photon collision rates table.
-  if (!ComputePhotonCollisionTable()) {
+  if (!ComputePhotonCollisionTable(verbose)) {
     std::cerr << className << "::Mixer:\n";
     std::cerr << "    Photon collision rates could not be calculated.\n"; 
     if (useDeexcitation) {
@@ -2068,7 +2069,7 @@ MediumMagboltz::ComputeAngularCut(double parIn, double& cut, double &parOut) {
 }
 
 void
-MediumMagboltz::ComputeDeexcitationTable() {
+MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
 
   for (int i = nMaxLevels; i--;) iDeexcitation[i] = -1;
   deexcitations.clear();
@@ -2757,7 +2758,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
     deexcitations.push_back(newDxc);
   }
   
-  if (debug) {
+  if (debug || verbose) {
     std::cout << className << "::ComputeDeexcitationTable:\n"; 
     std::cout << "    Found " << nDeexcitations << " levels "
               << "with available radiative de-excitation data.\n";
@@ -3024,6 +3025,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
   bool withCO2  = false; double cCO2  = 0.; int iCO2  = 0;
   bool withCH4  = false; double cCH4  = 0.; int iCH4  = 0;
   bool withC2H6 = false; double cC2H6 = 0.; int iC2H6 = 0;
+  bool withIso  = false; double cIso  = 0.; int iIso  = 0; 
   bool withC2H2 = false; double cC2H2 = 0.; int iC2H2 = 0;
   bool withCF4  = false; double cCF4  = 0.; int iCF4  = 0;
   for (int i = nComponents; i--;) {
@@ -3047,6 +3049,10 @@ MediumMagboltz::ComputeDeexcitationTable() {
       withCF4 = true;
       cCF4 = fraction[i];
       iCF4 = i;
+    } else if (gas[i] == "iC4H10") {
+      withIso = true;
+      cIso = fraction[i];
+      iIso = i;
     }
   }
 
@@ -3128,7 +3134,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].nChannels += 1;
       } else if (deexcitations[j].osc > 0.) {
         // Higher resonance levels
-        // Calculate rate constant from Watanabe-Katsuura formula
+        // Calculate rate constant from Watanabe-Katsuura formula.
         const double m1 = ElectronMassGramme / (rgas[iAr]  - 1.);
         const double m2 = ElectronMassGramme / (rgas[iCO2] - 1.);
         // Compute the reduced mass.
@@ -3157,16 +3163,44 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].nChannels += 2;
       } else if (level == "Ar_3D6"     || level == "Ar_3D3"     || 
                  level == "Ar_3D4!"    || level == "Ar_3D4"     ||
-                 level == "Ar_3D1!!"   || level == "Ar_2S5"     || 
-                 level == "Ar_3D1!"    || level == "Ar_3S1!!!!" || 
-                 level == "Ar_3S1!!"   || level == "Ar_3S1!!!"  || 
-                 level == "Ar_2S3") {
-        // Non-resonant 3d and 5s levels
+                 level == "Ar_3D1!!"   || level == "Ar_3D1!"    || 
+                 level == "Ar_3S1!!!!" || level == "Ar_3S1!!"   || 
+                 level == "Ar_3S1!!!") {
+        // Non-resonant 3d levels
         // Collision radii
         const double rAr3d = 436.e-10;
-        const double rCO2 = 165.e-10;
+        const double rCO2  = 165.e-10;
         // Hard sphere cross-section
         const double sigma = pow(rAr3d + rCO2, 2) * Pi;
+        // Reduced mass
+        const double m1 = ElectronMass / (rgas[iAr]  - 1.);
+        const double m2 = ElectronMass / (rgas[iCO2] - 1.);
+        const double mR = m1 * m2 / (m1 + m2);
+        // Relative velocity
+        const double vel = SpeedOfLight * 
+                           sqrt(8. * BoltzmannConstant * temperature / 
+                                (Pi * mR));
+        const double kQ = sigma * vel;
+        if (debug) {
+          std::cout << className << "::ComputeDeexcitationTable:\n";
+          std::cout << "    Rate constant for coll. deexcitation of\n"
+                    << "    " << level << " by CO2 (hard sphere):\n"
+                    << "      " << kQ << " cm3 ns-1\n";
+        }
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2S5" || level == "Ar_2S3") {
+        // Non-resonant 5s levels
+        // Collision radii
+        const double rAr5s = 635.e-10;
+        const double rCO2  = 165.e-10;
+        // Hard sphere cross-section
+        const double sigma = pow(rAr5s + rCO2, 2) * Pi;
         // Reduced mass
         const double m1 = ElectronMass / (rgas[iAr]  - 1.);
         const double m2 = ElectronMass / (rgas[iCO2] - 1.);
@@ -3287,7 +3321,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].nChannels += 2;
       } else if (deexcitations[j].osc > 0.) {
         // Higher resonance levels
-        // Calculate rate constant from Watanabe-Katsuura formula
+        // Calculate rate constant from Watanabe-Katsuura formula.
         const double m1 = ElectronMassGramme / (rgas[iAr]  - 1.);
         const double m2 = ElectronMassGramme / (rgas[iCH4] - 1.);
         // Compute the reduced mass.
@@ -3316,16 +3350,44 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].nChannels += 2;
       } else if (level == "Ar_3D6"     || level == "Ar_3D3"     || 
                  level == "Ar_3D4!"    || level == "Ar_3D4"     ||
-                 level == "Ar_3D1!!"   || level == "Ar_2S5"     || 
-                 level == "Ar_3D1!"    || level == "Ar_3S1!!!!" || 
-                 level == "Ar_3S1!!"   || level == "Ar_3S1!!!"  || 
-                 level == "Ar_2S3") {
-        // Non-resonant 3d and 5s levels
+                 level == "Ar_3D1!!"   || level == "Ar_3D1!"    || 
+                 level == "Ar_3S1!!!!" || level == "Ar_3S1!!"   || 
+                 level == "Ar_3S1!!!") {
+        // Non-resonant 3d levels
         // Collision radii
         const double rAr3d = 436.e-10;
-        const double rCH4 = 190.e-10;
+        const double rCH4  = 190.e-10;
         // Hard sphere cross-section
         const double sigma = pow(rAr3d + rCH4, 2) * Pi;
+        // Reduced mass
+        const double m1 = ElectronMass / (rgas[iAr]  - 1.);
+        const double m2 = ElectronMass / (rgas[iCH4] - 1.);
+        const double mR = m1 * m2 / (m1 + m2);
+        // Relative velocity
+        const double vel = SpeedOfLight * 
+                           sqrt(8. * BoltzmannConstant * temperature / 
+                                (Pi * mR));
+        const double kQ = sigma * vel;
+        if (debug) {
+          std::cout << className << "::ComputeDeexcitationTable:\n";
+          std::cout << "    Rate constant for coll. deexcitation of\n"
+                    << "    " << level << " by CH4 (hard sphere):\n"
+                    << "      " << kQ << " cm3 ns-1\n";
+        }
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2S5" || level == "Ar_2S3") {
+        // Non-resonant 5s levels
+        // Collision radii
+        const double rAr5s = 635.e-10;
+        const double rCH4  = 190.e-10;
+        // Hard sphere cross-section
+        const double sigma = pow(rAr5s + rCH4, 2) * Pi;
         // Reduced mass
         const double m1 = ElectronMass / (rgas[iAr]  - 1.);
         const double m2 = ElectronMass / (rgas[iCH4] - 1.);
@@ -3458,7 +3520,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].nChannels += 2;
       } else if (deexcitations[j].osc > 0.) {
         // Higher resonance levels
-        // Calculate rate constant from Watanabe-Katsuura formula
+        // Calculate rate constant from Watanabe-Katsuura formula.
         const double m1 = ElectronMassGramme / (rgas[iAr]   - 1.);
         const double m2 = ElectronMassGramme / (rgas[iC2H6] - 1.);
         // Compute the reduced mass.
@@ -3485,13 +3547,12 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].type.push_back(DxcTypeCollIon);
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].nChannels += 2;
-      } else if (level == "Ar_3D6"     || level == "Ar_3D3"     || 
-                 level == "Ar_3D4!"    || level == "Ar_3D4"     ||
-                 level == "Ar_3D1!!"   || level == "Ar_2S5"     || 
-                 level == "Ar_3D1!"    || level == "Ar_3S1!!!!" || 
-                 level == "Ar_3S1!!"   || level == "Ar_3S1!!!"  || 
-                 level == "Ar_2S3") {
-        // Non-resonant 3d and 5s levels
+      } else if (level == "Ar_3D6"     || level == "Ar_3D3"   || 
+                 level == "Ar_3D4!"    || level == "Ar_3D4"   ||
+                 level == "Ar_3D1!!"   || level == "Ar_3D1!"  || 
+                 level == "Ar_3S1!!!!" || level == "Ar_3S1!!" || 
+                 level == "Ar_3S1!!!") {
+        // Non-resonant 3d levels
         // Collision radii
         const double rAr3d = 436.e-10;
         const double rC2H6 = 195.e-10;
@@ -3512,7 +3573,35 @@ MediumMagboltz::ComputeDeexcitationTable() {
                     << "    " << level << " by C2H6 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
         }
-
+        deexcitations[j].p.push_back(kQ * nQ * pPenning);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2S5" || level == "Ar_2S3") {
+        // Non-resonant 5s levels
+        // Collision radii
+        const double rAr5s = 635.e-10;
+        const double rC2H6 = 195.e-10;
+        // Hard sphere cross-section
+        const double sigma = pow(rAr5s + rC2H6, 2) * Pi;
+        // Reduced mass
+        const double m1 = ElectronMass / (rgas[iAr]  - 1.);
+        const double m2 = ElectronMass / (rgas[iC2H6] - 1.);
+        const double mR = m1 * m2 / (m1 + m2);
+        // Relative velocity
+        const double vel = SpeedOfLight * 
+                           sqrt(8. * BoltzmannConstant * temperature / 
+                                (Pi * mR));
+        const double kQ = sigma * vel;
+        if (debug) {
+          std::cout << className << "::ComputeDeexcitationTable:\n";
+          std::cout << "    Rate constant for coll. deexcitation of\n"
+                    << "    " << level << " by C2H6 (hard sphere):\n"
+                    << "      " << kQ << " cm3 ns-1\n";
+        }
         deexcitations[j].p.push_back(kQ * nQ * pPenning);
         deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
         deexcitations[j].final.push_back(-1);
@@ -3523,6 +3612,303 @@ MediumMagboltz::ComputeDeexcitationTable() {
       }
     }
   }
+  if (withAr && withIso) {
+    // Partial density of isobutane
+    const double nQ = GetNumberDensity() * cIso;
+    for (int j = nDeexcitations; j--;) {
+      std::string level = deexcitations[j].label;
+      // Photoabsorption cross-section and ionisation yield
+      double pacs = 0., eta = 0.;
+      // Use n-butane as approximation for isobutane.
+      if (!optData.GetPhotoabsorptionCrossSection("nC4H10", 
+                                                  deexcitations[j].energy,
+                                                  pacs, eta)) {
+        pacs = eta = 0.;
+      }
+      const double pPenningWK = pow(eta, 2. / 5.);
+      if (level == "Ar_1S5") {
+        // Rate constant from 
+        // Piper et al., J. Chem. Phys. 59 (1973), 3323-3340
+        const double kQ = 7.1e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_1S4") {
+        // Rate constant from Piper et al.
+        const double kQ = 6.1e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_1S3") {
+        // Rate constant for n-butane from 
+        // Velazco et al., J. Chem. Phys. 69 (1978)
+        const double kQ = 8.5e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_1S2") {
+        // Rate constant from Piper et al.
+        const double kQ = 11.0e-19;
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2P8") {
+        // Rate constant for ethane
+        const double kEth = 9.2e-19;
+        // Ar radius [pm]
+        const double r4p = 340.;
+        // Molecular radii [pm]
+        const double rEth = 195.;
+        const double rIso = 250.;
+        // Masses [amu]
+        const double mAr  = 39.9;
+        const double mEth = 30.1;
+        const double mIso = 58.1;
+        // Estimate rate constant for isobutane.
+        double kQ = kEth;
+        kQ *= pow((r4p + rIso) / (r4p + rEth), 2) * 
+              sqrt((mEth / mIso) * (mAr + mIso) / (mAr + mEth));
+        if (debug) {
+          std::cout << className << "::ComputeDeexcitationTable:\n";
+          std::cout << "    Estim. rate constant for coll. deexcitation of\n"
+                    << "    " << level << " by iC4H10:\n"
+                    << "      " << kQ << " cm3 ns-1\n";
+        }
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2P6") {
+        // Rate constant for ethane
+        const double kEth = 4.8e-19;
+        // Ar radius [pm]
+        const double r4p = 340.;
+        // Molecular radii [pm]
+        const double rEth = 195.;
+        const double rIso = 250.;
+        // Masses [amu]
+        const double mAr  = 39.9;
+        const double mEth = 30.1;
+        const double mIso = 58.1;
+        // Estimate rate constant for isobutane.
+        double kQ = kEth;
+        kQ *= pow((r4p + rIso) / (r4p + rEth), 2) * 
+              sqrt((mEth / mIso) * (mAr + mIso) / (mAr + mEth));
+        if (debug) {
+          std::cout << className << "::ComputeDeexcitationTable:\n";
+          std::cout << "    Estim. rate constant for coll. deexcitation of\n"
+                    << "    " << level << " by iC4H10:\n"
+                    << "      " << kQ << " cm3 ns-1\n";
+        }
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2P5") {
+        // Rate constant for ethane
+        const double kEth = 9.9e-19;
+        // Ar radius [pm]
+        const double r4p = 340.;
+        // Molecular radii [pm]
+        const double rEth = 195.;
+        const double rIso = 250.;
+        // Masses [amu]
+        const double mAr  = 39.9;
+        const double mEth = 30.1;
+        const double mIso = 58.1;
+        // Estimate rate constant for isobutane.
+        double kQ = kEth;
+        kQ *= pow((r4p + rIso) / (r4p + rEth), 2) * 
+              sqrt((mEth / mIso) * (mAr + mIso) / (mAr + mEth));
+        if (debug) {
+          std::cout << className << "::ComputeDeexcitationTable:\n";
+          std::cout << "    Estim. rate constant for coll. deexcitation of\n"
+                    << "    " << level << " by iC4H10:\n"
+                    << "      " << kQ << " cm3 ns-1\n";
+        }
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2P1") {
+        // Rate constant for Ethane
+        const double kEth = 11.0e-19;
+        // Ar radius [pm]
+        const double r4p = 340.;
+        // Molecular radii [pm]
+        const double rEth = 195.;
+        const double rIso = 250.;
+        // Masses [amu]
+        const double mAr  = 39.9;
+        const double mEth = 30.1;
+        const double mIso = 58.1;
+        // Estimate rate constant for isobutane.
+        double kQ = kEth;
+        kQ *= pow((r4p + rIso) / (r4p + rEth), 2) * 
+              sqrt((mEth / mIso) * (mAr + mIso) / (mAr + mEth));
+        if (debug) {
+          std::cout << className << "::ComputeDeexcitationTable:\n";
+          std::cout << "    Estim. rate constant for coll. deexcitation of\n"
+                    << "    " << level << " by iC4H10:\n"
+                    << "      " << kQ << " cm3 ns-1\n";
+        }
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2P10" || level == "Ar_2P9" ||
+                 level == "Ar_2P7"  || level == "Ar_2P4" ||
+                 level == "Ar_2P3"  || level == "Ar_2P2") {
+        // Rate constante for ethane
+        const double kEth = 5.5e-19;
+        // Ar radius [pm]
+        const double r4p = 340.;
+        // Molecular radii [pm]
+        const double rEth = 195.;
+        const double rIso = 250.;
+        // Masses [amu]
+        const double mAr  = 39.9;
+        const double mEth = 30.1;
+        const double mIso = 58.1;
+        // Estimate rate constant for isobutane.
+        double kQ = kEth;
+        kQ *= pow((r4p + rIso) / (r4p + rEth), 2) * 
+              sqrt((mEth / mIso) * (mAr + mIso) / (mAr + mEth));
+        if (debug) {
+          std::cout << className << "::ComputeDeexcitationTable:\n";
+          std::cout << "    Estim. rate constant for coll. deexcitation of\n"
+                    << "    " << level << " by iC4H10:\n"
+                    << "      " << kQ << " cm3 ns-1\n";
+        }
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      } else if (deexcitations[j].osc > 0.) {
+        // Higher resonance levels
+        // Calculate rate constant from Watanabe-Katsuura formula.
+        const double m1 = ElectronMassGramme / (rgas[iAr]   - 1.);
+        const double m2 = ElectronMassGramme / (rgas[iIso] - 1.);
+        // Compute the reduced mass.
+        double mR = m1 * m2 / (m1 + m2);
+        mR /= AtomicMassUnit;
+        const double uA = (RydbergEnergy / deexcitations[j].energy) * 
+                          deexcitations[j].osc;
+        const double uQ = (2 * RydbergEnergy / deexcitations[j].energy) *
+                          pacs / (4 * Pi2 * FineStructureConstant * 
+                                  BohrRadius * BohrRadius);
+        const double kQ = 2.591e-19 * 
+                          pow(uA * uQ, 2. / 5.) * 
+                          pow(temperature / mR, 3. / 10.);  
+        if (debug) {
+          std::cout << className << "::ComputeDeexcitationTable:\n";
+          std::cout << "    Rate constant for coll. deexcitation of\n"
+                    << "    " << level << " by C4H10 (W-K formula):\n"
+                    << "      " << kQ << " cm3 ns-1\n";
+        }
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_3D6"     || level == "Ar_3D3"   || 
+                 level == "Ar_3D4!"    || level == "Ar_3D4"   ||
+                 level == "Ar_3D1!!"   || level == "Ar_3D1!"  || 
+                 level == "Ar_3S1!!!!" || level == "Ar_3S1!!" || 
+                 level == "Ar_3S1!!!") {
+        // Non-resonant 3d levels
+        // Collision radii
+        const double rAr3d = 436.e-10;
+        const double rIso  = 250.e-10;
+        // Hard sphere cross-section
+        const double sigma = pow(rAr3d + rIso, 2) * Pi;
+        // Reduced mass
+        const double m1 = ElectronMass / (rgas[iAr]  - 1.);
+        const double m2 = ElectronMass / (rgas[iIso] - 1.);
+        const double mR = m1 * m2 / (m1 + m2);
+        // Relative velocity
+        const double vel = SpeedOfLight * 
+                           sqrt(8. * BoltzmannConstant * temperature / 
+                                (Pi * mR));
+        const double kQ = sigma * vel;
+        if (debug) {
+          std::cout << className << "::ComputeDeexcitationTable:\n";
+          std::cout << "    Rate constant for coll. deexcitation of\n"
+                    << "    " << level << " by iC4H10 (hard sphere):\n"
+                    << "      " << kQ << " cm3 ns-1\n";
+        }
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2S5" || level == "Ar_2S3") {
+        // Non-resonant 5s levels
+        // Collision radii
+        const double rAr5s = 635.e-10;
+        const double rIso  = 250.e-10;
+        // Hard sphere cross-section
+        const double sigma = pow(rAr5s + rIso, 2) * Pi;
+        // Reduced mass
+        const double m1 = ElectronMass / (rgas[iAr]  - 1.);
+        const double m2 = ElectronMass / (rgas[iIso] - 1.);
+        const double mR = m1 * m2 / (m1 + m2);
+        // Relative velocity
+        const double vel = SpeedOfLight * 
+                           sqrt(8. * BoltzmannConstant * temperature / 
+                                (Pi * mR));
+        const double kQ = sigma * vel;
+        if (debug) {
+          std::cout << className << "::ComputeDeexcitationTable:\n";
+          std::cout << "    Rate constant for coll. deexcitation of\n"
+                    << "    " << level << " by iC4H10 (hard sphere):\n"
+                    << "      " << kQ << " cm3 ns-1\n";
+        }
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      }
+    }
+  } 
   if (withAr && withC2H2) {
     // Partial density of acetylene
     const double nQ = GetNumberDensity() * cC2H2;
@@ -3632,7 +4018,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].nChannels += 2;
       } else if (deexcitations[j].osc > 0.) {
         // Higher resonance levels
-        // Compute rate constant according to Watanabe-Katsuura formula.
+        // Calculate rate constant from Watanabe-Katsuura formula.
         const double m1 = ElectronMassGramme / (rgas[iAr]   - 1.);
         const double m2 = ElectronMassGramme / (rgas[iC2H2] - 1.);
         // Compute the reduced mass.
@@ -3659,18 +4045,46 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].type.push_back(DxcTypeCollIon);
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].nChannels += 2;
-      } else if (level == "Ar_3D6"     || level == "Ar_3D3"     || 
-                 level == "Ar_3D4!"    || level == "Ar_3D4"     ||
-                 level == "Ar_3D1!!"   || level == "Ar_2S5"     || 
-                 level == "Ar_3D1!"    || level == "Ar_3S1!!!!" || 
-                 level == "Ar_3S1!!"   || level == "Ar_3S1!!!"  || 
-                 level == "Ar_2S3") {
-        // Non-resonant 3d and 5s levels
+      } else if (level == "Ar_3D6"     || level == "Ar_3D3"   || 
+                 level == "Ar_3D4!"    || level == "Ar_3D4"   ||
+                 level == "Ar_3D1!!"   || level == "Ar_3D1!"  || 
+                 level == "Ar_3S1!!!!" || level == "Ar_3S1!!" || 
+                 level == "Ar_3S1!!!") {
+        // Non-resonant 3d levels
         // Collision radii
         const double rAr3d = 436.e-10;
         const double rC2H2 = 165.e-10;
         // Hard sphere cross-section
         const double sigma = pow(rAr3d + rC2H2, 2) * Pi;
+        // Reduced mass
+        const double m1 = ElectronMass / (rgas[iAr]  - 1.);
+        const double m2 = ElectronMass / (rgas[iC2H2] - 1.);
+        const double mR = m1 * m2 / (m1 + m2);
+        // Relative velocity
+        const double vel = SpeedOfLight * 
+                           sqrt(8. * BoltzmannConstant * temperature / 
+                                (Pi * mR));
+        const double kQ = sigma * vel;
+        if (debug) {
+          std::cout << className << "::ComputeDeexcitationTable:\n";
+          std::cout << "    Rate constant for coll. deexcitation of\n"
+                    << "    " << level << " by C2H2 (hard sphere):\n"
+                    << "      " << kQ << " cm3 ns-1\n";
+        }
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 2;
+      } else if (level == "Ar_2S5" || level == "Ar_2S3") {
+        // Non-resonant 5s levels
+        // Collision radii
+        const double rAr5s = 635.e-10;
+        const double rC2H2 = 165.e-10;
+        // Hard sphere cross-section
+        const double sigma = pow(rAr5s + rC2H2, 2) * Pi;
         // Reduced mass
         const double m1 = ElectronMass / (rgas[iAr]  - 1.);
         const double m2 = ElectronMass / (rgas[iC2H2] - 1.);
@@ -3761,7 +4175,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].nChannels += 1;
       } else if (deexcitations[j].osc > 0.) {
         // Resonance levels
-        // Calculate rate constant from Watanabe-Katsuura formula
+        // Calculate rate constant from Watanabe-Katsuura formula.
         const double m1 = ElectronMassGramme / (rgas[iAr]  - 1.);
         const double m2 = ElectronMassGramme / (rgas[iCF4] - 1.);
         // Compute the reduced mass.
@@ -3785,16 +4199,15 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].nChannels += 1;
-      } else if (level == "Ar_3D6"     || level == "Ar_3D3"     || 
-                 level == "Ar_3D4!"    || level == "Ar_3D4"     ||
-                 level == "Ar_3D1!!"   || level == "Ar_2S5"     || 
-                 level == "Ar_3D1!"    || level == "Ar_3S1!!!!" || 
-                 level == "Ar_3S1!!"   || level == "Ar_3S1!!!"  || 
-                 level == "Ar_2S3") {
-        // Non-resonant 3d and 5s levels
-        // Collision radii (radius of CF4 to be checked)
+      } else if (level == "Ar_3D6"     || level == "Ar_3D3"   || 
+                 level == "Ar_3D4!"    || level == "Ar_3D4"   ||
+                 level == "Ar_3D1!!"   || level == "Ar_3D1!"  || 
+                 level == "Ar_3S1!!!!" || level == "Ar_3S1!!" || 
+                 level == "Ar_3S1!!!") {
+        // Non-resonant 3d levels
+        // Collision radii
         const double rAr3d = 436.e-10;
-        const double rCF4 = 165.e-10;
+        const double rCF4 = 235.e-10;
         // Hard sphere cross-section
         const double sigma = pow(rAr3d + rCF4, 2) * Pi;
         // Reduced mass
@@ -3816,11 +4229,37 @@ MediumMagboltz::ComputeDeexcitationTable() {
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].nChannels += 1;
-      }
+      } else if (level == "Ar_2S5" || level == "Ar_2S3") {
+        // Non-resonant 5s levels
+        // Collision radii
+        const double rAr5s = 635.e-10;
+        const double rCF4 = 190.e-10;
+        // Hard sphere cross-section
+        const double sigma = pow(rAr5s + rCF4, 2) * Pi;
+        // Reduced mass
+        const double m1 = ElectronMass / (rgas[iAr]  - 1.);
+        const double m2 = ElectronMass / (rgas[iCF4] - 1.);
+        const double mR = m1 * m2 / (m1 + m2);
+        // Relative velocity
+        const double vel = SpeedOfLight * 
+                           sqrt(8. * BoltzmannConstant * temperature / 
+                                (Pi * mR));
+        const double kQ = sigma * vel;
+        if (debug) {
+          std::cout << className << "::ComputeDeexcitationTable:\n";
+          std::cout << "    Rate constant for coll. deexcitation of\n"
+                    << "    " << level << " by CF4 (hard sphere):\n"
+                    << "      " << kQ << " cm3 ns-1\n";
+        }
+        deexcitations[j].p.push_back(kQ * nQ);
+        deexcitations[j].final.push_back(-1);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 1;
+      } 
     }  
   } 
 
-  if (debug) {
+  if (debug || verbose) {
     std::cout << className << "::ComputeDeexcitationTable:\n";
     std::cout << "      Level  Energy [eV]   "
               << "                 Lifetimes [ns]\n";
@@ -3857,7 +4296,7 @@ MediumMagboltz::ComputeDeexcitationTable() {
     }
     if (deexcitations[i].rate > 0.) {
       // Print the radiative and collisional decay rates.
-      if (debug) {
+      if (debug || verbose) {
         std::cout << std::setw(12) << deexcitations[i].label << "  "
                   << std::fixed << std::setprecision(3)
                   << std::setw(7) << deexcitations[i].energy << "  " 
@@ -4024,7 +4463,7 @@ MediumMagboltz::ComputeDeexcitationInternal(int iLevel, int& fLevel) {
 }
 
 bool
-MediumMagboltz::ComputePhotonCollisionTable() {
+MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
 
   OpticalData data;
   double cs;
@@ -4043,13 +4482,23 @@ MediumMagboltz::ComputePhotonCollisionTable() {
   for (int i = 0; i < nComponents; ++i) {
     const double prefactor = dens * SpeedOfLight * fraction[i];
     // Check if optical data for this gas is available.
-    if (!data.IsAvailable(gas[i])) return false;
+    std::string gasname = gas[i];
+    if (gasname == "iC4H10") {
+      gasname = "nC4H10";
+      if (debug || verbose) {
+        std::cout << className << "::ComputePhotonCollisionTable:\n";
+        std::cout << "    Photoabsorption cross-section for "
+                  << "iC4H10 not available.\n";
+        std::cout << "    Using n-butane cross-section instead.\n";
+      }
+    }  
+    if (!data.IsAvailable(gasname)) return false;
     csTypeGamma.push_back(i * nCsTypesGamma + PhotonCollisionTypeIonisation);
     csTypeGamma.push_back(i * nCsTypesGamma + PhotonCollisionTypeInelastic);
     nPhotonTerms += 2;
     for (int j = 0; j < nEnergyStepsGamma; ++j) {
       // Retrieve total photoabsorption cross-section and ionisation yield.
-      data.GetPhotoabsorptionCrossSection(gas[i], j * eStepGamma, 
+      data.GetPhotoabsorptionCrossSection(gasname, j * eStepGamma, 
                                           cs, eta);
       cfTotGamma[j] += cs * prefactor;
       // Ionisation
@@ -4078,7 +4527,7 @@ MediumMagboltz::ComputePhotonCollisionTable() {
     }
   }
 
-  if (debug) {
+  if (debug || verbose) {
     std::cout << className << "::ComputePhotonCollisionTable:\n";
     std::cout << "    Energy [eV]      Mean free path [um]\n";
     for (int i = 0; i < 10; ++i) { 
@@ -4142,7 +4591,7 @@ MediumMagboltz::ComputePhotonCollisionTable() {
     return true;
   }
 
-  if (debug) {
+  if (debug || verbose) {
     std::cout << className << "::ComputePhotonCollisionTable:\n";
     std::cout << "    Discrete absorption lines:\n";
     std::cout << "      Energy [eV]        Line width (FWHM) [eV]  "
@@ -4256,7 +4705,7 @@ MediumMagboltz::RunMagboltz(const double e,
     }
   }
 
-  if (verbose) Magboltz::prnter_();
+  if (debug || verbose) Magboltz::prnter_();
   
   // Run the Monte Carlo calculation.
   if (bmag == 0.) {
@@ -4268,7 +4717,7 @@ MediumMagboltz::RunMagboltz(const double e,
   } else {
     Magboltz::montec_();
   }
-  if (verbose) Magboltz::output_();
+  if (debug || verbose) Magboltz::output_();
 
   // If attachment or ionisation rate is greater than sstmin,
   // include spatial gradients in the solution.
@@ -4296,7 +4745,7 @@ MediumMagboltz::RunMagboltz(const double e,
     double fc2 = 1.e12 * (alphapt - etapt) / Magboltz::tofout_.tofdl;
     alphatof = fc1 - sqrt(fc1 * fc1 - fc2);
   }
-  if (verbose) Magboltz::output2_();
+  if (debug || verbose) Magboltz::output2_();
 
   // Convert to cm / ns.
   vx = Magboltz::vel_.wx * 1.e-9; vxerr = Magboltz::velerr_.dwx;
@@ -4312,7 +4761,7 @@ MediumMagboltz::RunMagboltz(const double e,
   eta   = Magboltz::ctowns_.att;   etaerr   = Magboltz::ctwner_.atter;
  
   // Print the results.
-  if (verbose || debug) {
+  if (debug) {
     std::cout << className << "::RunMagboltz:\n";
     std::cout << "    Results: \n";
     std::cout << "      Drift velocity along E:           " 

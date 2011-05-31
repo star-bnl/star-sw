@@ -853,7 +853,6 @@ void DynLinArr<T>::put_qel(long fqel)
   }
 }
 
-
 template<class T>
 void DynLinArr<T>::put_qel(long fqel, const T* val, ArgInterp_SingleAdr t)
   //                            By default     val == NULL  
@@ -872,6 +871,8 @@ void DynLinArr<T>::put_qel(long fqel, const T* val, ArgInterp_SingleAdr t)
     mcerr<<"fqel < 0, fqel="<<fqel<<'\n';
     mcerr<<"Type of T is (in internal notations) "<<typeid(T).name()<<'\n';
     spexit(mcerr);
+    // Avoid compiler warning because of unused variable t (HS).
+    mcerr << sizeof(t) << "\n";
   }
   check();
   if(el==NULL)

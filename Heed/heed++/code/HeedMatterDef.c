@@ -33,8 +33,8 @@ HeedMatterDef::HeedMatterDef
  MatterDef* amatter, 
  AtomPhotoAbsCS* faapacs[],  // array of size corresponding matter
  double fW, double fF):
-  energy_mesh(fenergy_mesh),
-  W(fW), F(fF)
+  W(fW), F(fF),
+  energy_mesh(fenergy_mesh)
 {
   mfunname("HeedMatterDef::HeedMatterDef(...)");
   matter.put(amatter);
@@ -79,8 +79,8 @@ HeedMatterDef::HeedMatterDef
  GasDef* agas, 
  MolecPhotoAbsCS* fampacs[],  //array of size corresponding gas
  double fW, double fF):
-  energy_mesh(fenergy_mesh),
-  W(fW), F(fF)
+  W(fW), F(fF),
+  energy_mesh(fenergy_mesh)
 {
   mfunname("HeedMatterDef::HeedMatterDef(...)");
   matter.put(agas);
@@ -157,8 +157,8 @@ HeedMatterDef::HeedMatterDef
  const String& gas_notation, 
  MolecPhotoAbsCS* fampacs[],  //array of size corresponding gas
  double fW, double fF):
-  energy_mesh(fenergy_mesh),
-  W(fW), F(fF)
+  W(fW), F(fF), 
+ energy_mesh(fenergy_mesh)
 {
   mfunnamep("HeedMatterDef::HeedMatterDef(...)");
   MatterDef* amat = MatterDef::get_MatterDef(gas_notation);
@@ -676,8 +676,8 @@ void HeedMatterDef::inite_HeedMatterDef(void)
   // To do next loop we need all epsi2
   for(ne=0; ne<qe; ne++)
   {
-    double e1 = energy_mesh->get_e(ne);
-    double e2 = energy_mesh->get_e(ne+1);
+    // double e1 = energy_mesh->get_e(ne);
+    // double e2 = energy_mesh->get_e(ne+1);
     double ec = energy_mesh->get_ec(ne);
     double ec2=ec * ec;
     double s=0;

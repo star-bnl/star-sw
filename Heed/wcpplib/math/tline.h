@@ -2848,7 +2848,7 @@ T t_value_power_2point
   check_econd11(y2 , <= 0.0, mcerr);  
   check_econd12(y1 , == , y2, mcerr);  
   check_econd12(x1 , == , x2, mcerr);
-  T res;
+  T res = y1;
   if(x1 <= 0.0 && x2 >= 0.0)
   {
     mcerr<<"T t_value_power_2point(...): \n";
@@ -3097,7 +3097,7 @@ T t_integ_generic_point_ar(const M& mesh,
   if(x1 >= xmax && s_extrap_right == 0) return 0.0;
   if(x2 <= left_bond ) return 0.0;
   if(x1 >= right_bond ) return 0.0;
-  long istart, iafterend; // indexes to sum total intervals
+  // long istart, iafterend; // indexes to sum total intervals
   T s(0.0);
   if(x1 < left_bond) x1 = left_bond;
   if(x2 > right_bond) x2 = right_bond;
