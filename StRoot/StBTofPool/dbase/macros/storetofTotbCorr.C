@@ -1,10 +1,13 @@
-// $Id: storetofTotbCorr.C,v 1.1 2010/12/14 19:27:28 geurts Exp $
+// $Id: storetofTotbCorr.C,v 1.2 2011/05/31 22:53:28 geurts Exp $
 // macro to upload tofr5 INL tables to database
 // based on http://www.star.bnl.gov/STAR/comp/db/StoreDbTable.cc.html
 //
 // Xin Dong, 02/18/2005 
 // ---
 // $Log: storetofTotbCorr.C,v $
+// Revision 1.2  2011/05/31 22:53:28  geurts
+// Store board-based input files as cell-based database entries
+//
 // Revision 1.1  2010/12/14 19:27:28  geurts
 // *** empty log message ***
 //
@@ -142,20 +145,37 @@ void storetofTotbCorr(const Bool_t mTest = 1)
   cout << "preparing database records ... " << endl;
 switch (calibSize) {
 case 960:
-  for(int i=0;i<mNTray*mNTDIG;i++) {
-    int tray = i/mNTDIG + 1;
-    int board = i%mNTDIG + 1;
-    int module = (i%mNTDIG) * 4 + 1;  // set to be the first module to this board
-    int cell = 1;  // set to 1
-    totcorr[i].trayId = (Short_t)tray;
-    totcorr[i].moduleId = (Short_t)module;
-    totcorr[i].cellId = (Short_t)cell;
-    totcorr[i].tdcId = 0;
+  int index=-1;
+  for (int tray=1;tray<mNTray+1;tray++){
+  for (int module=1;module<mNMODULE+1;module++){
+  for (int cell=1;cell<mNCELL+1;cell++){
+    index++;
+    totcorr[index].trayId = (Short_t)tray;
+    totcorr[index].moduleId = (Short_t)module;
+    totcorr[index].cellId = (Short_t)cell;
+    totcorr[index].tdcId = 0;
+    int board = module/(mNMODULE/mNTDIG) + 1;
     for(int j=0;j<60;j++) {
-      totcorr[i].tot[j] = X[tray-1][board-1][0][j];
-      totcorr[i].corr[j] = Y[tray-1][board-1][0][j];
+      totcorr[index].tot[j] = X[tray-1][board-1][0][j];
+      totcorr[index].corr[j] = Y[tray-1][board-1][0][j];   
     }
-  }
+  } // cell
+  } // module
+  } // tray
+//  for(int i=0;i<mNTray*mNTDIG;i++) {
+//    int tray = i/mNTDIG + 1;
+//    int board = i%mNTDIG + 1;
+//    int module = (i%mNTDIG) * 4 + 1;  // set to be the first module to this board
+//    int cell = 1;  // set to 1
+//    totcorr[i].trayId = (Short_t)tray;
+//    totcorr[i].moduleId = (Short_t)module;
+//    totcorr[i].cellId = (Short_t)cell;
+//    totcorr[i].tdcId = 0;
+//    for(int j=0;j<60;j++) {
+//      totcorr[i].tot[j] = X[tray-1][board-1][0][j];
+//      totcorr[i].corr[j] = Y[tray-1][board-1][0][j];
+//    }
+//  }
   break;
 case 23040:
   //for(int i=0;i<mNTray*mNMODULE*mNCELL;i++) {
@@ -182,7 +202,8 @@ case 23040:
 // Store records in test file
  cout << "Storing records in totCorr_test.dat ... " << endl;
 //  int nRow = mNTray * mNTDIG;
-  int nRow = calibSize;
+//  int nRow = calibSize;
+ int nRow = 23040;
   ofstream outData;
   outData.open("totCorr_test.dat");
   for(int i=0;i<nRow;i++) {
