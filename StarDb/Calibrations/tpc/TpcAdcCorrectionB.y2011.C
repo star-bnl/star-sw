@@ -76,7 +76,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.a[3]	 =  2.23657e-02; //   zxAdcL
     row.a[4]	 =  1.13113e+00; //   adcL  
     row.a[5]	 = -1.12153e-02; //   adcL2 
-    tableSet->AddAt 0.00000e+00(&row);     // Outer
+    tableSet->AddAt(&row);     // Outer
 memset(&row,0,tableSet->GetRowSize());
     row.type	 =         11; // ;
     row.idx	 =          2; // ;
