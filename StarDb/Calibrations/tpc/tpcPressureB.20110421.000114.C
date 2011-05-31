@@ -1,0 +1,15 @@
+TDataSet *CreateTable() { 
+// ------  Test whether this table share library was loaded ------
+  if (!gROOT->GetClass("St_tpcCorrection")) return 0;
+  tpcCorrection_st row;
+  St_tpcCorrection *tableSet = new St_tpcCorrection("tpcPressureB",1);
+  memset(&row,0,tableSet->GetRowSize()); // PressureCGFRunXI09dev_calib_pp500_production_2011_ReversedFullField
+  row.idx = 1;
+  row.nrows = 1;
+  row.npar = 2; 
+  row.a[0] = 2.13146e+01; // 2.2326e+01;
+  row.a[1] =-3.08067e+00; //-3.22795e+00;
+  tableSet->AddAt(&row);
+  // ----------------- end of code ---------------
+  return (TDataSet *)tableSet;
+}
