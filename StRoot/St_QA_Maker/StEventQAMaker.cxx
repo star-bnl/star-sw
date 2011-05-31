@@ -1709,6 +1709,7 @@ void StEventQAMaker::MakeHistPoint() {
 	  Float_t phi = hitPos.phi()/degree;
           if (phi<0) phi+=360.;
 	  hists->m_z_hits->Fill(hitPos.z());
+          Float_t tb = tpcHitsVec[k]->timeBucket();
           // scale by padrow density (1/4.8cm and 1/2.0cm) for polar xy plots
           float hit_weight = (j>12 ? 1 : 2.4);
           // TPC East is sectors 13-24, and (generally) z<0
@@ -1716,12 +1717,14 @@ void StEventQAMaker::MakeHistPoint() {
           // In StEvent, sectors are mapped starting at 0 instead of 1
 	  if (i>11) {
             rotator = 11-i;
+            hists->m_pnt_timeT->Fill(tb,0);
 	    hists->m_pnt_phiT->Fill(phi,0.);
 	    hists->m_pnt_padrowT->Fill(j+1,0.); // physical padrow numbering starts at 1
 	    hists->m_pnt_rpTE->Fill(hitPos.perp(),phi*degree,hit_weight);
 	    hists->m_pnt_xyTE->Fill(hitPos.x(),hitPos.y());
 	  } else {
             rotator = i-11;
+            hists->m_pnt_timeT->Fill(tb,1);
 	    hists->m_pnt_phiT->Fill(phi,1.);
 	    hists->m_pnt_padrowT->Fill(j+1,1.); // physical padrow numbering starts at 1
 	    hists->m_pnt_rpTW->Fill(hitPos.perp(),phi*degree,hit_weight);
@@ -2391,8 +2394,11 @@ Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.102 2011/05/26 19:59:38 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.103 2011/05/31 21:35:49 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.103  2011/05/31 21:35:49  genevb
+// TPC request: add time bucket distribution of hits
+//
 // Revision 2.102  2011/05/26 19:59:38  genevb
 // Cleanup in destructors
 //
