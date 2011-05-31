@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.64 2009/03/19 01:08:08 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.65 2011/05/31 21:35:49 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.65  2011/05/31 21:35:49  genevb
+// TPC request: add time bucket distribution of hits
+//
 // Revision 2.64  2009/03/19 01:08:08  genevb
 // Show both xy and rphi TPC hit hists
 //
@@ -681,6 +684,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pnt_rpTW=0;    //! rphi dist. of hits, tpcW
   m_pnt_phiT=0;    //! phi dist. of hits, tpc
   m_pnt_padrowT=0; //! padrow dist. of hits, tpc
+  m_pnt_timeT=0;   //! time bucket dist. of hits, tpc
   m_pnt_zS=0;      //! z dist. of hits, svt
   m_pnt_phiS=0;    //! phi dist. of hits, svt
   m_pnt_barrelS=0; //! barrel dist. of hits, svt
@@ -1710,6 +1714,10 @@ void StQABookHist::BookHistPoint(){
   m_pnt_rpTE    = QAH::H2F("QaPointRPTpcE","point: r-phi distribution of hits, tpcE",23,58.75,196.75,72,0,TMath::TwoPi());
   m_pnt_rpTW    = QAH::H2F("QaPointRPTpcW","point: r-phi distribution of hits, tpcW",20,58.75,196.75,72,0,TMath::TwoPi());
   m_z_hits      = QAH::H1F("QaPointZhits","point: z distribution of hits, tpc",100,-210,210);
+  m_pnt_timeT   = QAH::MH1F("QaPointTimeT","point: time bucket distribution of hits, tpc",45,0,450,2);
+  m_pnt_timeT->Rebin(0,"East");
+  m_pnt_timeT->Rebin(1,"West");
+  m_pnt_timeT->SetStats(kFALSE);
   m_pnt_phiT    = QAH::MH1F("QaPointPhiT","point: #phi distribution of hits, tpc",36,0,360,2);
   m_pnt_phiT->Rebin(0,"East");
   m_pnt_phiT->Rebin(1,"West");
