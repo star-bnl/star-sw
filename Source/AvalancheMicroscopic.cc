@@ -696,7 +696,7 @@ AvalancheMicroscopic::TransportElectron(
     if (fabs(k) < Small) {
       // Direction has zero norm, draw a random direction.
       const double phi = TwoPi * RndmUniform();
-      const double ctheta = 1. - 2. * RndmUniform();
+      const double ctheta = 2 * RndmUniform() - 1.;
       const double stheta = sqrt(1. - ctheta * ctheta);
       stack[0].kx = cos(phi) * stheta;
       stack[0].ky = sin(phi) * stheta;
@@ -1344,7 +1344,7 @@ AvalancheMicroscopic::TransportElectron(
                 } else {
                   // Randomise the secondary electron direction.
                   const double phi = TwoPi * RndmUniform();
-                  const double ctheta = 1. - 2. * RndmUniform();
+                  const double ctheta = 2 * RndmUniform() - 1.;
                   const double stheta = sqrt(1. - ctheta * ctheta);
                   newElectron.kx = cos(phi) * stheta;
                   newElectron.ky = sin(phi) * stheta;
@@ -1378,7 +1378,7 @@ AvalancheMicroscopic::TransportElectron(
                 } else {
                   // Randomise the secondary hole direction.
                   const double phi = TwoPi * RndmUniform();
-                  const double ctheta = 1. - 2. * RndmUniform();
+                  const double ctheta = 2 * RndmUniform() - 1.;
                   const double stheta = sqrt(1. - ctheta * ctheta);
                   newElectron.kx = cos(phi) * stheta;
                   newElectron.ky = sin(phi) * stheta;
@@ -1458,13 +1458,16 @@ AvalancheMicroscopic::TransportElectron(
                   if (!aval) continue;
                   // Penning ionisation
                   newElectron = stack[iE];
-                  // Randomise the point of creation.
-                  double phi = TwoPi * RndmUniform();
-                  double ctheta = 1. - 2 * RndmUniform();
-                  double stheta = sqrt(1. - ctheta * ctheta);
-                  const double xDxc = x + sDxc * cos(phi) * stheta;
-                  const double yDxc = y + sDxc * sin(phi) * stheta;
-                  const double zDxc = z + sDxc * ctheta;
+                  double xDxc = x, yDxc = y, zDxc = z;
+                  if (sDxc > Small) {
+                    // Randomise the point of creation
+                    double phiDxc = TwoPi * RndmUniform();
+                    double cthetaDxc = 1. - 2 * RndmUniform();
+                    double sthetaDxc = sqrt(1. - cthetaDxc * cthetaDxc);
+                    xDxc += sDxc * cos(phiDxc) * sthetaDxc;
+                    yDxc += sDxc * sin(phiDxc) * sthetaDxc;
+                    zDxc += sDxc * cthetaDxc;
+                  }
                   // Get the electric field and medium at this location.
                   Medium* dxcMedium = 0;
                   double fx = 0., fy = 0., fz = 0.;
@@ -1487,9 +1490,9 @@ AvalancheMicroscopic::TransportElectron(
                   newElectron.energy = std::max(eDxc, Small);
                   newElectron.e0 = newElectron.energy;
                   // Randomise the initial direction.
-                  phi = TwoPi * RndmUniform();
-                  ctheta = 1. - 2 * RndmUniform();
-                  stheta = sqrt(1. - ctheta * ctheta);
+                  const double phi = TwoPi * RndmUniform();
+                  const double ctheta = 2 * RndmUniform() - 1.;
+                  const double stheta = sqrt(1. - ctheta * ctheta);
                   newElectron.kx = cos(phi) * stheta;
                   newElectron.ky = sin(phi) * stheta;
                   newElectron.kz = ctheta;
@@ -1684,7 +1687,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
   double x = x0, y = y0, z = z0;
   double t = t0;
   // Initial direction (randomised)
-  double ctheta = 1. - 2 * RndmUniform();
+  double ctheta = 2 * RndmUniform() - 1.;
   double stheta = sqrt(1. - ctheta * ctheta);
   double phi = TwoPi * RndmUniform();
   double dx = cos(phi) * stheta;
@@ -1747,7 +1750,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
   if (type == PhotonCollisionTypeIonisation) {
     // Randomise secondary electron direction.
     phi = TwoPi * RndmUniform();
-    ctheta = 1. - 2. * RndmUniform();
+    ctheta = 2 * RndmUniform() - 1.;
     stheta = sqrt(1. - ctheta * ctheta);
     // Add the secondary electron to the stack.
     electron newElectron;
@@ -1778,7 +1781,7 @@ AvalancheMicroscopic::TransportPhoton(const double x0, const double y0,
       if (typeDxc == DxcProdTypeElectron) {
         // Ionisation
         phi = TwoPi * RndmUniform();
-        ctheta = 1. - 2 * RndmUniform();
+        ctheta = 2 * RndmUniform() - 1.;
         stheta = sqrt(1. - ctheta * ctheta);
         // Add the electron to the stack.
         electron newElectron;

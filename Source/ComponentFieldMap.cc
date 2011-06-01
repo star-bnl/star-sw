@@ -1123,7 +1123,7 @@ ComponentFieldMap::Coordinates3(double x, double y, double z,
 
   if (debug) {
     printf("ComponentFieldMap::Coordinates3:\n");
-    printf("   Point (%g,%g).\n", x, y);
+    printf("   Point (%g,%g,%g).\n", x, y, z);
   }
 
   // Failure flag
@@ -1297,7 +1297,7 @@ ComponentFieldMap::Coordinates4(double x, double y, double z,
   // Debugging
   if (debug) {
     printf("ComponentFieldMap::Coordinates4:\n");
-    printf("    Point (%g,%g).\n", x, y);
+    printf("    Point (%g,%g,%g).\n", x, y, z);
   }
 
   // Failure flag

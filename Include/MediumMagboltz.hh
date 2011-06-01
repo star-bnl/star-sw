@@ -139,9 +139,9 @@ class MediumMagboltz : public MediumGas {
     static const int nCsTypes = 6;
     static const int nCsTypesGamma = 4;
 
-    static const int DxcTypeRad = 0;
-    static const int DxcTypeCollIon = 1;
-    static const int DxcTypeCollNonIon = -1;
+    static const int DxcTypeRad;
+    static const int DxcTypeCollIon;
+    static const int DxcTypeCollNonIon;
  
     // Energy spacing of collision rate tables
     double eFinal, eStep;

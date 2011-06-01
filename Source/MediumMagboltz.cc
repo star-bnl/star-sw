@@ -16,9 +16,9 @@
 
 namespace Garfield {
 
-const int MediumMagboltz::DxcTypeRad;
-const int MediumMagboltz::DxcTypeCollIon;
-const int MediumMagboltz::DxcTypeCollNonIon;
+const int MediumMagboltz::DxcTypeRad        =  0;
+const int MediumMagboltz::DxcTypeCollIon    =  1;
+const int MediumMagboltz::DxcTypeCollNonIon = -1;
 
 MediumMagboltz::MediumMagboltz() :
   MediumGas(),
@@ -178,11 +178,11 @@ MediumMagboltz::EnableDeexcitation() {
   if (usePenning) {
     std::cout << "    Penning transfer will be switched off.\n";
   }
-  if (useRadTrap) {
-    std::cout << "    Radiation trapping is switched on.\n";
-  } else {
-    std::cout << "    Radiation trapping is switched off.\n";
-  }
+  // if (useRadTrap) {
+  //   std::cout << "    Radiation trapping is switched on.\n";
+  // } else {
+  //   std::cout << "    Radiation trapping is switched off.\n";
+  // }
   usePenning = false;
   useDeexcitation = true;
   isChanged = true;
@@ -790,7 +790,12 @@ MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
         // Add the secondary electron to the list.
         dxcProd newDxcProd;
         newDxcProd.t = 0.;
-        newDxcProd.s = -lambdaPenning[level] * log(RndmUniformPos());
+        newDxcProd.s = 0.;
+        if (lambdaPenning[level] > Small) {
+          // Uniform distribution within a sphere of radius lambda
+          newDxcProd.s = lambdaPenning[level] * 
+                         pow(RndmUniformPos(), 1. / 3.);
+        }
         newDxcProd.energy = esec;
         newDxcProd.type = DxcProdTypeElectron;
         dxcProducts.push_back(newDxcProd);
@@ -867,7 +872,7 @@ MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
 
 bool
 MediumMagboltz::GetDeexcitationProduct(const int i, double& t, double& s,
-                                         int& type, double& energy) {
+                                       int& type, double& energy) {
 
   if (i < 0 || i >= nDeexcitationProducts || 
       !(useDeexcitation || usePenning)) return false;
@@ -945,8 +950,8 @@ MediumMagboltz::GetPhotonCollisionRate(const double e) {
 
 bool
 MediumMagboltz::GetPhotonCollision(const double e, int& type, int& level,
-                                     double& e1, double& ctheta, 
-                                     int& nsec, double& esec) {
+                                   double& e1, double& ctheta, 
+                                   int& nsec, double& esec) {
 
   if (e > eFinalGamma && useAutoAdjust) {
     std::cerr << className << "::GetPhotonCollision:\n";
@@ -964,8 +969,8 @@ MediumMagboltz::GetPhotonCollision(const double e, int& type, int& level,
   
   if (isChanged) {
     if (!Mixer()) {
-      std::cerr << "MediumMagboltz: Error calculating" 
-                << " the collision rates table.\n";
+      std::cerr << className << "::GetPhotonCollision:\n";
+      std::cerr << "    Error calculating the collision rates table.\n";
       return false;
     }
     isChanged = false;
@@ -1050,7 +1055,7 @@ MediumMagboltz::GetPhotonCollision(const double e, int& type, int& level,
   }
 
   // Determine the scattering angle
-  ctheta = 1. - 2 * RndmUniform();
+  ctheta = 2 * RndmUniform() - 1.;
   
   return true;
 
@@ -1110,7 +1115,7 @@ MediumMagboltz::GetNumberOfLevels() {
 
 bool 
 MediumMagboltz::GetLevel(const int i, int& ngas, int& type,
-                           std::string& descr, double& e) {
+                         std::string& descr, double& e) {
 
   if (isChanged) {
     if (!Mixer()) {
@@ -4383,6 +4388,7 @@ MediumMagboltz::ComputeDeexcitationInternal(int iLevel, int& fLevel) {
   dxcProducts.clear();
 
   dxcProd newDxcProd;
+  newDxcProd.s = 0.;
   newDxcProd.t = 0.;
 
   fLevel = iLevel;
@@ -4397,7 +4403,7 @@ MediumMagboltz::ComputeDeexcitationInternal(int iLevel, int& fLevel) {
     newDxcProd.t += -log(RndmUniformPos()) / deexcitations[iLevel].rate;
     // Select the transition.
     fLevel = -1;
-    int type = 0;
+    int type = DxcTypeRad;
     const double r = RndmUniform();
     for (int j = 0; j < deexcitations[iLevel].nChannels; ++j) {
       if (r <= deexcitations[iLevel].p[j]) {
@@ -4416,6 +4422,8 @@ MediumMagboltz::ComputeDeexcitationInternal(int iLevel, int& fLevel) {
         if (newDxcProd.energy < Small) newDxcProd.energy = Small;
         dxcProducts.push_back(newDxcProd);
         ++nDeexcitationProducts;
+        // Proceed with the next level in the cascade. 
+        iLevel = fLevel;
       } else {
         // Decay to ground state.
         double delta = RndmVoigt(0., 
@@ -4444,6 +4452,8 @@ MediumMagboltz::ComputeDeexcitationInternal(int iLevel, int& fLevel) {
         ++nPenning;
         dxcProducts.push_back(newDxcProd);
         ++nDeexcitationProducts;
+        // Proceed with the next level in the cascade.
+        iLevel = fLevel;
       } else {
         // Penning ionisation
         newDxcProd.energy -= minIonPot;
@@ -4455,9 +4465,18 @@ MediumMagboltz::ComputeDeexcitationInternal(int iLevel, int& fLevel) {
         fLevel = iLevel;
         return; 
       }
+    } else if (type == DxcTypeCollNonIon) {
+      // Proceed with the next level in the cascade.
+      iLevel = fLevel;
+    } else {
+      std::cerr << className << "::ComputeDeexcitationInternal:\n";
+      std::cerr << "    Unknown deexcitation channel type (" 
+                << type << ").\n";
+      std::cerr << "    Program bug!\n";
+      // Abort the deexcitation calculation.
+      fLevel = iLevel;
+      return;
     }
-    // Proceed with the next level in the cascade. 
-    iLevel = fLevel;
   }
 
 }
