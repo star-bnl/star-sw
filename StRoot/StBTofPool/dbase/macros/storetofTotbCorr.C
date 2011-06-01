@@ -1,10 +1,13 @@
-// $Id: storetofTotbCorr.C,v 1.2 2011/05/31 22:53:28 geurts Exp $
+// $Id: storetofTotbCorr.C,v 1.3 2011/06/01 00:44:31 geurts Exp $
 // macro to upload tofr5 INL tables to database
 // based on http://www.star.bnl.gov/STAR/comp/db/StoreDbTable.cc.html
 //
 // Xin Dong, 02/18/2005 
 // ---
 // $Log: storetofTotbCorr.C,v $
+// Revision 1.3  2011/06/01 00:44:31  geurts
+// bug fix in boardId calculation
+//
 // Revision 1.2  2011/05/31 22:53:28  geurts
 // Store board-based input files as cell-based database entries
 //
@@ -26,6 +29,7 @@ void storetofTotbCorr(const Bool_t mTest = 1)
   const int mNVPD = 19;
   const int mNMODULE = 32;
   const int mNCELL = 6;
+  const int mNMODPERBOARD = 4;
 
   //-- load dBase and Table definition libraries
   gSystem->Load("St_base");
@@ -154,7 +158,7 @@ case 960:
     totcorr[index].moduleId = (Short_t)module;
     totcorr[index].cellId = (Short_t)cell;
     totcorr[index].tdcId = 0;
-    int board = module/(mNMODULE/mNTDIG) + 1;
+    int board = ((module-1)/mNMODPERBOARD) + 1 ;
     for(int j=0;j<60;j++) {
       totcorr[index].tot[j] = X[tray-1][board-1][0][j];
       totcorr[index].corr[j] = Y[tray-1][board-1][0][j];   
