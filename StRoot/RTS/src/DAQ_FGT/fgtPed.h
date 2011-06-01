@@ -34,10 +34,10 @@ private:
 
 	// cap-id equivalents for FGT are the 192 timebins
 	struct peds {
-		double ped[FGT_ARM_COU][FGT_APV_COU][FGT_TIMEBIN_COU][FGT_CH_COU] ;
-		double rms[FGT_ARM_COU][FGT_APV_COU][FGT_TIMEBIN_COU][FGT_CH_COU] ;
+		double ped[FGT_ARM_COU][FGT_APV_COU][FGT_TB_COU][FGT_CH_COU] ;
+		double rms[FGT_ARM_COU][FGT_APV_COU][FGT_TB_COU][FGT_CH_COU] ;
 		u_short thr[FGT_ARM_COU][FGT_APV_COU][FGT_CH_COU] ;	//  just 1 thr per channel!
-		u_short cou[FGT_ARM_COU][FGT_APV_COU][FGT_TIMEBIN_COU] ;
+		u_short cou[FGT_ARM_COU][FGT_APV_COU][FGT_TB_COU] ;
 	} *ped_store ;
 
 

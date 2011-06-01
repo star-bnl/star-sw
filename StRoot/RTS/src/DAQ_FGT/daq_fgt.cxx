@@ -1,6 +1,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <assert.h>
+#include <stdlib.h>
 
 #include <rtsLog.h>
 #include <rtsSystems.h>
@@ -48,6 +49,12 @@ daq_fgt::daq_fgt(daqReader *rts_caller)
 	phys = new daq_dta ;
 	ped = new daq_dta ;
 
+	// zap maps to unknown first
+	memset(adc_to_phys,0xff,sizeof(adc_to_phys)) ;
+	memset(phys_to_adc,0xff,sizeof(phys_to_adc)) ;
+
+	// create/load maps...
+
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
 }
@@ -69,6 +76,7 @@ daq_fgt::~daq_fgt()
 daq_dta *daq_fgt::get(const char *bank, int sec, int rdo, int pad, void *p1, void *p2) 
 {	
 	Make() ;
+
 	if(present == 0) return 0 ;
 
 
@@ -101,7 +109,6 @@ daq_dta *daq_fgt::handle_raw(int rdo)
 	assert(caller) ;	// sanity...
 
 	if(!present) {
-		LOG(ERR,"%s: not present?",name) ;
 		return 0 ;
 	}
 	else {
@@ -152,22 +159,221 @@ daq_dta *daq_fgt::handle_raw(int rdo)
 
 daq_dta *daq_fgt::handle_adc(int rdo)
 {
+	int r_start, r_stop ;
 
 
-	LOG(WARN,"FGT ADC not yet supported....") ;
-	return 0 ;
+	adc->create(1000,"fgt_adc",rts_id,DAQ_DTA_STRUCT(fgt_adc_t)) ;
+
+	LOG(NOTE,"FGT: doing ADC") ;
+
+	if((rdo <= 0) || (rdo > FGT_RDO_COU)){
+		r_start = 1 ;
+		r_stop = FGT_RDO_COU ;
+	}
+	else {
+		r_start = r_stop = rdo ;
+	}
+
+
+
+	for(int r=r_start;r<=r_stop;r++) {
+		daq_dta *dd = handle_raw(r) ;
+		if(dd == 0) continue ;
+
+		if(dd->iterate() == 0) continue ;
+
+		u_int *d = (u_int *) dd->Void ;
+		int words = dd->ncontent/4 ;
+
+		if(words <= 0) continue ;
+
+		int format_code = (d[2] >> 8) & 0xFF ;
+		// 0: normal code
+		// 1: test
+		// 2: null
+
+		int arm_mask = (d[3] >> 8) & 0x3F ;
+
+		u_int *dta = d + 6 ;	// start at the 6th word
+
+		for(int arm=0;arm<6;arm++) {
+			if(arm_mask & (1<<arm)) ;
+			else continue ;
+
+			LOG(NOTE,"RDO %d, ARM %d, format_code %d",r,arm,format_code) ;
+
+			int arm_id = *dta & 0x7 ;	
+			dta++ ;
+
+
+			if(arm_id != arm) {
+				LOG(ERR,"RDO %d: Bad ARM ID: expect %d, have %d",r,arm,arm_id) ;
+				continue ;
+			}
+
+			u_int apv_mask = *dta & 0x00FFFFFF ;
+			dta++ ;
+
+
+			for(int apv=0;apv<24;apv++) {
+				if(apv_mask & (1<<apv)) ;
+				else continue ;
+
+
+				fgt_adc_t *fgt_d = (fgt_adc_t *) adc->request(FGT_TB_COU*FGT_CH_COU) ;
+				int cou = 0 ;
+
+				LOG(NOTE,"  APV %d",apv) ;
+
+				int apv_id = *dta & 0x1F ;
+				int length = (*dta >> 5) & 0x3FF ;
+				int fmt = (*dta >> 16) & 0x7 ;
+
+
+
+				dta++ ;
+
+				LOG(NOTE,"  ID %d, length %d, fmt %d",apv_id,length,fmt) ;
+
+				int capid = *dta & 0xFF ;
+				int nhits = (*dta >> 8) & 0x7F ;
+				int is_error = (*dta >> 15) & 1 ;
+				int refadc = (*dta >> 16) & 0xFFF ;
+				int ntim = (*dta >> 28) & 0x7 ;
+				int is_0 = *dta & 0x80000000 ;
+
+				dta++ ;
+
+				LOG(NOTE,"  capid %d, nhits %d, is_error 0x%X, refadc %d, ntim %d, is_0 0x%X",
+				    capid, nhits, is_error, refadc, ntim, is_0) ;
+
+
+				// sanity checks
+				if((ntim <= 0) || (ntim > 7)) {
+					LOG(ERR,"Ntim %d ?!",ntim) ;
+					continue ;
+				}
+
+				// extract data here...
+				// EMULATION!!!
+				for(int ch=0;ch<128;ch++) {
+					for(int tb=0;tb<ntim;tb++) {
+						fgt_d[cou].ch = ch ;
+						fgt_d[cou].tb = tb ;
+						fgt_d[cou].adc = 1000*apv+10*ch+tb ;
+						cou++ ;
+					}
+				}
+
+				// note the reversal: sector->arm, row->rdo,
+				adc->finalize(cou, arm, r, apv) ;
+
+				dta += 3 ;	//?
+			}
+
+		}
+
+		
+#if 0
+		// HACK! EMULATION!!!
+		for(int arm=0;arm<FGT_ARM_COU;arm++) {
+		for(int apv=0;apv<FGT_APV_COU;apv++) {
+
+			fgt_adc_t *d = (fgt_adc_t *) adc->request(FGT_POINT_COU*FGT_CH_COU) ;
+
+			int cou = 0 ;
+
+			for(int pt=0;pt<FGT_POINT_COU;pt++) {
+			for(int ch=0;ch<FGT_CH_COU;ch++) {
+
+				// create 10% occupancy
+				if(drand48() < 0.9) continue ;
+
+				
+			
+				d[cou].ch = ch ;
+				d[cou].point = pt ;
+				d[cou].adc = lrand48() & 0xFFF ;	// 12 bits
+				cou++ ;
+
+			}
+			}
+
+			adc->finalize(cou,r,arm,apv) ;
+
+		}
+		}
+#endif
+	}
+
+	adc->rewind() ;
+
+	return adc ;
+			
 }
 
 daq_dta *daq_fgt::handle_ped(int rdo)
 {
 
-	LOG(WARN,"FGT PEDRMS not yet supported....") ;
+	int r_start, r_stop ;
+
+
+	LOG(NOTE,"FGT PED is not yet supported") ;
 	return 0 ;
+
+	ped->create(1000,"fgt_pedrms",rts_id,DAQ_DTA_STRUCT(fgt_pedrms_t)) ;
+
+
+
+	if((rdo <= 0) || (rdo > FGT_RDO_COU)){
+		r_start = 1 ;
+		r_stop = FGT_RDO_COU ;
+	}
+	else {
+		r_start = r_stop = rdo ;
+	}
+
+
+	// HACK! EMULATION!!!
+	for(int r=r_start;r<=r_stop;r++) {
+		for(int arm=0;arm<FGT_ARM_COU;arm++) {
+		for(int apv=0;apv<FGT_APV_COU;apv++) {
+
+			fgt_pedrms_t *d = (fgt_pedrms_t *) ped->request(FGT_TB_COU*FGT_CH_COU) ;
+
+			int cou = 0 ;
+
+			for(int tb=0;tb<FGT_TB_COU;tb++) {
+			for(int ch=0;ch<FGT_CH_COU;ch++) {
+			
+				d[cou].ch = ch ;
+				d[cou].tb = tb ;
+				d[cou].ped = drand48() * 1024.0 ;
+				d[cou].rms = 1.0/((double)(ch+1)) ;
+				cou++ ;
+
+			}
+			}
+
+			ped->finalize(cou,r,arm,apv) ;
+
+		}
+		}
+	}
+
+	ped->rewind() ;
+
+	return ped ;
+			
+
+
 }
 
 
 daq_dta *daq_fgt::handle_phys(int disk, int quadrant, int strip_type)
 {
+
+	return 0 ;
 
 	LOG(WARN,"FGT PHYS not yet supported....") ;
 	return 0 ;
@@ -177,19 +383,15 @@ daq_dta *daq_fgt::handle_phys(int disk, int quadrant, int strip_type)
 // used to grab trigger info from the event header
 int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 {
-	const int FGT_BYTES_MIN = ((2400+10+3)*4) ;	// this is the minimum
-	const int FGT_BYTES_MAX = ((2400+10+3+30)*4) ;
-//	const u_int FGT_VERSION = 0x8035 ;		// 
-	const u_int FGT_SIGNATURE = 0x42534D44 ;	// "FGT"
-	const u_int FGT_HDR_ID = 5 ;	// by some definiton somewhere...
+	const int FGT_BYTES_MIN = ((6)*4) ;	// this is the minimum
+	const int FGT_BYTES_MAX = ((8192)*4) ;
+	const u_int FGT_VERSION = 0x5555 ;		 
+	const u_int FGT_SIGNATURE = 0x46475420 ;	// "FGT"
 
 	int t_cou = 0 ;
 	int bad = 0 ;
 	u_int *d32 = (u_int *)buff ;
 	int id_check_failed = 0 ;
-
-	//HACKINTOSH!
-	words = 2413 ;
 
 	// FIRST we check the length
 	int buff_bytes = 4 * words ;
@@ -208,29 +410,27 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 		bad |= 1 ;
 	}
 
-	if(d32[9] != 0xDEADFACE) {	// deadface
+	if(d32[5] != 0xBEEFFEED) {	// deadface
 		LOG(ERR,"RDO %d: bad deadface 0x%08X",rdo,d32[9]) ;
 		bad |= 1 ;
 	}
 
 
-/* wait for it to stabilize
+	/* wait for it to stabilize */
 	if((d32[2] >> 16) != FGT_VERSION) {
 		LOG(ERR,"RDO %d: bad version 0x%04X, expect 0x%04X",rdo,d32[2] >> 16, FGT_VERSION) ;
 		bad |= 2 ;	// soft error
 	
 	}
-*/
+
 
 	if((d32[3] & 0xFFFF0000)) {	// error_flags
 		LOG(ERR,"RDO %d: error flags 0x%04X",rdo,d32[3]>>16) ;
 		bad |= 2 ;
 	}
 
-	if(((d32[3]>>8) & 0xFF) != FGT_HDR_ID) {	// det_id
-		LOG(ERR,"RDO %d: bad det_id 0x%02X",rdo,(d32[3]>>8)&0xFF) ;
-		bad |= 1 ;
-	}
+
+//	int arm_mask = (d32[3]>>8) & 0x3F ;
 
 
 	int rdo_in_dta = d32[3] & 0xFF ;	// fiber ID via jumpers...
@@ -448,7 +648,7 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 
 		rdo_warns[rdo]++ ;
 		if(rdo_warns[rdo]<2) {
-			LOG(TERR,"RDO %d: rdo check: expect 0x%02X, found 0x%02X",
+			LOG(NOTE,"RDO %d: rdo check: expect 0x%02X, found 0x%02X",
 			    rdo,rdo_id[rdo],rdo_in_dta) ;
 		}
 
@@ -458,47 +658,3 @@ int daq_fgt::get_l2(char *buff, int words, struct daq_trg_word *trg, int rdo)
 }
 
 
-#if 0
-int daq_fgt::get_l2(char *buff, int buff_bytes, struct daq_trg_word *trg, int do_log)
-{
-	u_short *us = (u_short *)buff ;
-
-	u_short t_hi = l2h16(us[2]) ;
-	u_short t_lo = l2h16(us[3]) ;
-
-	int err = 0 ;
-
-	if((t_lo & 0xFF00) || (t_hi & 0xFFF0)) {	//error
-		err = 1 ;
-		if(do_log) {
-			LOG(ERR,"Corrupt token: t_hi 0x%04X, t_lo 0x%04X",t_hi,t_lo) ;
-		}
-	}
-
-	if(err) {
-		trg[0].t = 4097 ;
-		trg[0].trg = 0 ;
-		trg[0].daq = 0 ;
-		
-		return 1 ;
-	}
-
-	// L0 part
-	trg[0].t = t_hi*256 + t_lo ;
-	trg[0].daq = 0 ;
-	trg[0].trg = 4 ;	// FGT does not give the correct L0, only L2 so we invent 4
-	trg[0].rhic = l2h16(us[4]) ;
-	
-	// L2 part
-	trg[1].t = trg[0].t ;	// copy over token
-	trg[1].trg = 15 ;	// for now! us[0] ;	// this is where the trg cmd ought to be
-	trg[1].daq = us[1] ;
-	trg[1].rhic = trg[0].rhic + 1 ;
-
-	if(us[0] != 0xF) {
-		LOG(ERR,"trg cmd not 15? 0x%04X 0x%04X 0x%04X 0x%04X 0x04X",us[0],us[1],us[2],us[3],us[4]) ;
-	}
-
-	return 2 ;
-}
-#endif
