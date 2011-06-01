@@ -223,7 +223,7 @@ void fgtPed::calc()
 
 		for(int arm=0;arm<FGT_ARM_COU;arm++) {
 		for(int apv=0;apv<FGT_APV_COU;apv++) {
-		for(cap=0;cap<FGT_TIMEBIN_COU;cap++) {
+		for(cap=0;cap<FGT_TB_COU;cap++) {
 		for(ch=0;ch<FGT_CH_COU;ch++) {
 
 			if(ped->cou[arm][apv][cap] == 0) {
@@ -261,7 +261,7 @@ void fgtPed::calc()
 
 		for(int arm=0;arm<FGT_ARM_COU;arm++) {
 		for(int apv=0;apv<FGT_APV_COU;apv++) {
-		for(cap=0;cap<FGT_TIMEBIN_COU;cap++) {
+		for(cap=0;cap<FGT_TB_COU;cap++) {
 			if(ped->cou[arm][apv][cap] < MIN_EVENTS) {
 				bad++ ;
 
@@ -321,12 +321,12 @@ int fgtPed::to_evb(char *buff)
 		*dta++ = FGT_ARM_COU ;
 		*dta++ = FGT_APV_COU ;
 		*dta++ = FGT_CH_COU ;			
-		*dta++ = FGT_TIMEBIN_COU ;	// caps
+		*dta++ = FGT_TB_COU ;	// caps
 		*dta++ = r ;			// fiber...	
 
 		for(arm=0;arm<FGT_ARM_COU;arm++) {
 		for(apv=0;apv<FGT_APV_COU;apv++) {
-		for(t=0;t<FGT_TIMEBIN_COU;t++) {
+		for(t=0;t<FGT_TB_COU;t++) {
 		for(c=0;c<FGT_CH_COU;c++) {
 
 				u_int rr, pp ;
@@ -433,7 +433,7 @@ int fgtPed::to_cache(char *fname, u_int run)
 
 		for(int arm=0;arm<FGT_ARM_COU;arm++) {
 		for(int apv=0;apv<FGT_APV_COU;apv++) {
-		for(int t=0;t<FGT_TIMEBIN_COU;t++) {
+		for(int t=0;t<FGT_TB_COU;t++) {
 		for(int c=0;c<FGT_CH_COU;c++) {
 			fprintf(f,"%d %d %d %d %d%8.3f %.3f\n",r+1,arm,apv,t,c,
 				peds->ped[arm][apv][t][c],
