@@ -925,9 +925,9 @@ static int fgt_doer(daqReader *rdr, const char *do_print)
 
 
 			if(do_print) {
-				printf("FGT: RDO %d: %d bytes\n",dd->rdo,dd->ncontent) ;
+				printf("FGT RAW: RDO %d: %d bytes, %d words\n",dd->rdo,dd->ncontent,dd->ncontent/4) ;
 				// dump a few ints
-				for(int i=0;i<10;i++) {
+				for(int i=0;i<(dd->ncontent/4);i++) {
 					printf(" %3d: 0x%08X\n",i,d[i]) ;
 				}
 			}
@@ -944,10 +944,10 @@ static int fgt_doer(daqReader *rdr, const char *do_print)
 		fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
 
 		if(do_print) {
-			printf("FGT: RDO %d, ARM %d, APV %d: %d values\n",dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
+			printf("FGT ADC: RDO %d, ARM %d, APV %d: %d values\n",dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
 			for(u_int i=0;i<dd->ncontent;i++) {
-				printf(" ch %3d, point %d = %3d\n",f[i].ch,f[i].point,f[i].adc) ;
+				printf(" %5d: ch %3d, tb %d = %3d\n",i,f[i].ch,f[i].tb,f[i].adc) ;
 			}
 		}
 	}
@@ -958,15 +958,15 @@ static int fgt_doer(daqReader *rdr, const char *do_print)
 	while(dd && dd->iterate()) {
 		found = 1 ;
 
-		fgt_phys_t *f = (fgt_phys_t *) dd->Void ;
+		fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
 
 		if(do_print) {
-			printf("FGT: disk %d, quadrant %d, type %s: %d values\n",dd->sec,dd->rdo,
+			printf("FGT phys: disk %d, quadrant %d, type %s: %d values\n",dd->sec,dd->rdo,
 			       (dd->pad==FGT_STRIP_TYPE_R)?"r-strip":"phi_strip",
 			       dd->ncontent) ;
 
 			for(u_int i=0;i<dd->ncontent;i++) {
-				printf(" strip %3d, point %d = %3d\n",f[i].strip,f[i].point,f[i].adc) ;
+				printf(" strip %3d, tb %d = %3d\n",f[i].ch,f[i].tb,f[i].adc) ;
 			}
 		}
 	}
@@ -983,7 +983,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print)
 			printf("FGT pedrms: RDO %d, ARM %d, APV %d: %d values\n",dd->rdo,dd->sec,dd->pad,dd->ncontent) ;
 
 			for(u_int i=0;i<dd->ncontent;i++) {
-				printf(" ch %3d, point %d = %.3f += %.3f\n",f[i].ch,f[i].point,f[i].ped,f[i].rms) ;
+				printf(" ch %3d, tb %d = %.3f +-%.3f\n",f[i].ch,f[i].tb,f[i].ped,f[i].rms) ;
 			}
 		}
 	}
