@@ -17,6 +17,9 @@ void StarGeometryDb()
 
   geom.bbcmFlag = "BBCMof"; geom.bbcmStat=0; // BBC defaults to off
 
+  geom.idsmFlag = "IDSMof"; geom.idsmStat=0; // IDSM defaults to off
+  geom.fgtdFlag = "FGTDof"; geom.fgtdStat=0; // FGTD defaults to off
+
 
   //
   // Setup STAR Geometries y2000 to present
@@ -511,6 +514,7 @@ void y2007()
     geom.tpceFlag = "TPCE03";  geom.tpceStat = 1;
     geom.mutdFlag = "MUTD01";  geom.mutdStat = 1;
     geom.caveFlag = "CAVE04";  geom.caveStat = 1;    
+    geom.fpdmFlag = "FPDM03";  geom.fpdmStat = 1; /* FMS geometry */
     geom.SetTitle("STAR Geometry y2007");
   }
   geom.fill();
@@ -700,6 +704,10 @@ void y2009()
     geom.fill();
   }
 
+  geom.Use("select","y2009c"); {
+    geom.sconFlag = "SCON14"; geom.sconStat = 1;
+  }
+
 }
 
 void y2010()
@@ -790,7 +798,7 @@ REPLACE [exe y2011;] with ["y2011 baseline: Essentially Y2010a with fixes to TPC
     exe PIPE12;      "The beam pipe";
   */
   geom.select = "y2011"; {
-    geom.sconFlag = "SCON13"; geom.sconStat = 1;
+    geom.sconFlag = "SCON14"; geom.sconStat = 1;
     geom.tpceFlag = "TPCE04r"; geom.tpceStat = 1;
     geom.btofFlag = "BTOF67"; geom.btofStat = 1;
     geom.calbFlag = "CALB02"; geom.calbStat = 1; geom.calbCuts = 1;
@@ -824,7 +832,7 @@ void y2012()
     geom.ftpcFlag = "FTPCof"; geom.ftpcStat = 0;
 
     geom.fgtdFlag = "FGTDv306"; geom.fgtdStat = 1;
-    geom.isdmFlag = "ISDM01";   geom.isdmStat = 1;
+    geom.idsmFlag = "ISDM01";   geom.idsmStat = 1;
 
     setTitle("Upgrade studies with 6 disk FGT");
     geom.fill();
