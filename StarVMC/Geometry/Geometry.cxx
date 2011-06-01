@@ -43,7 +43,7 @@ ClassImp(Geometry);
 /* ClassImp(FtroGeom_t); */ FtroGeom_t ftroGeom;
 /* ClassImp(RichGeom_t); */ RichGeom_t richGeom;
 /* ClassImp(FgtdGeom_t); */ FgtdGeom_t fgtdGeom;
-/* ClassImp(IdsmGeom_t); */ IdsmGeom_t isdmGeom;
+/* ClassImp(IdsmGeom_t); */ IdsmGeom_t idsmGeom;
 
 // ----------------------------------------------------------------------
 Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
@@ -53,7 +53,7 @@ Geometry::Geometry() : AgModule("Geometry","STAR Master Geometry Module")
 
   CalbInit(); CaveInit(); EcalInit(); FpdmInit(); FtpcInit(); MutdInit(); PipeInit();
   PixlInit(); SconInit(); SisdInit(); SvttInit(); BtofInit(); TpceInit(); VpddInit();
-  UpstInit(); ZcalInit(); FtroInit(); RichInit(); PhmdInit(); FgtdInit(); IsdmInit();
+  UpstInit(); ZcalInit(); FtroInit(); RichInit(); PhmdInit(); FgtdInit(); IdsmInit();
 
   GeomInit();
 
@@ -92,7 +92,7 @@ void Geometry::ConstructGeometry( const Char_t *tag )
 
   // Add in the support cone
   geom.success_scon = ConstructScon( geom.sconFlag, geom.sconStat );
-  geom.success_isdm = ConstructIsdm( geom.isdmFlag, geom.isdmStat );
+  geom.success_idsm = ConstructIdsm( geom.idsmFlag, geom.idsmStat );
 
   // Minbias trigger and vertex positioning detectors
   geom.success_bbcm = ConstructBbcm("BBCMon",       geom.bbcmStat );
@@ -722,11 +722,17 @@ Bool_t Geometry::ConstructRich( const Char_t *flag, Bool_t go )
 Bool_t Geometry::ConstructFgtd( const Char_t *flag, Bool_t go )
 {
 
+  
 
   if ( !fgtdGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
       return false;      
+    }
+
+  if ( fgtdGeom.module == "None" ) 
+    {
+      return false;
     }
 
 
@@ -750,16 +756,16 @@ Bool_t Geometry::ConstructFgtd( const Char_t *flag, Bool_t go )
 }
 
 // ----------------------------------------------------------------------
-Bool_t Geometry::ConstructIsdm( const Char_t *flag, Bool_t go )
+Bool_t Geometry::ConstructIdsm( const Char_t *flag, Bool_t go )
 {
-  if ( !isdmGeom.Use( "select", flag ) )
+  if ( !idsmGeom.Use( "select", flag ) )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
       return false;      
     }
 
   if ( go )
-  if ( !CreateModule( isdmGeom.module  ) )
+  if ( !CreateModule( idsmGeom.module  ) )
     {
       Warning(GetName(),"Could not create module IdsmGeo");
       return false;
@@ -854,7 +860,7 @@ Bool_t Geometry::EcalInit()
   //                             EcalConfig=1; " one ECAL patch, west ";
   //                             EcalGeometry=5; "old version of the geometry file";
   //                            ]
-  ecalGeom.select="ECAL31"; ecalGeom.efill=3; ecalGeom.config=1; ecalGeom.geometry=5;ecalGeom.fill();
+  ecalGeom.select="ECAL31"; ecalGeom.efill=3; ecalGeom.config=1; ecalGeom.geometry=5; ecalGeom.fill();
 
   //replace [exe ECAL11;] with [;"ECAL11"; ECAL=on;
   //                             ecalFill=1;
@@ -1086,12 +1092,10 @@ Bool_t Geometry::SconInit()
     sconGeom.config=0;
     sconGeom.SetTitle("Support Cone Master Geometry: OFF");
   }
-  //replace [exe SCON02;] with [;SCON = off; ConeConfig=2 " new cable weight estimate ";]
-  sconGeom.select="SCON02"; sconGeom.module="SconGeo"; sconGeom.config=2; sconGeom.fill();
-  //replace [exe SCON12;] with [;SCON = on ; ConeConfig=2 " new cable weight estimate ";]
+  sconGeom.select="SCON02"; sconGeom.module="NONE";    sconGeom.config=2; sconGeom.fill();
   sconGeom.select="SCON12"; sconGeom.module="SconGeo"; sconGeom.config=2; sconGeom.fill();
-  //replace [exe SCON13;] with [;SCON = on ; ConeConfig=3 " new cable weight estimate ";]
   sconGeom.select="SCON13"; sconGeom.module="SconGeo"; sconGeom.config=3; sconGeom.fill();
+  sconGeom.select="SCON14"; sconGeom.module="SconGeo"; sconGeom.config=4; sconGeom.fill();
   return true;
 }
 
@@ -1557,16 +1561,18 @@ Bool_t Geometry::RichInit()
 
 Bool_t Geometry::FgtdInit()
 {
+  fgtdGeom.select="FGTDof";   fgtdGeom.module="None";     fgtdGeom.config=0;   fgtdGeom.fill();
   fgtdGeom.select="FGTDon";   fgtdGeom.module="FgtdGeo2"; fgtdGeom.config=1;   fgtdGeom.fill();
   fgtdGeom.select="FGTDv306"; fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=306; fgtdGeom.fill();
   fgtdGeom.select="FGTDv302"; fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=302; fgtdGeom.fill();
   return true;
 }
 
-Bool_t Geometry::IsdmInit()
+Bool_t Geometry::IdsmInit()
 {
-  isdmGeom.select="ISDMon"; isdmGeom.module="IdsmGeo1"; isdmGeom.config=1; isdmGeom.fill();
-  isdmGeom.select="ISDM01"; isdmGeom.module="IdsmGeo1"; isdmGeom.config=1; isdmGeom.fill();
+  idsmGeom.select="IDSMof"; idsmGeom.module="None"    ; idsmGeom.config=0; idsmGeom.fill();
+  idsmGeom.select="IDSMon"; idsmGeom.module="IdsmGeo1"; idsmGeom.config=1; idsmGeom.fill();
+  idsmGeom.select="IDSM01"; idsmGeom.module="IdsmGeo1"; idsmGeom.config=1; idsmGeom.fill();
   return true;
 }
 
