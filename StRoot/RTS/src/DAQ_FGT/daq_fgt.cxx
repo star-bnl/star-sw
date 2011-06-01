@@ -220,8 +220,6 @@ daq_dta *daq_fgt::handle_adc(int rdo)
 				else continue ;
 
 
-				fgt_adc_t *fgt_d = (fgt_adc_t *) adc->request(FGT_TB_COU*FGT_CH_COU) ;
-				int cou = 0 ;
 
 				LOG(NOTE,"  APV %d",apv) ;
 
@@ -249,18 +247,73 @@ daq_dta *daq_fgt::handle_adc(int rdo)
 
 
 				// sanity checks
+				if(apv != apv_id) {
+					LOG(ERR,"Bad APV ID: expect %d, read %d",apv,apv_id) ;
+					continue ;
+				}
+
 				if((ntim <= 0) || (ntim > 7)) {
 					LOG(ERR,"Ntim %d ?!",ntim) ;
 					continue ;
 				}
+				if(fmt != 1) {
+					LOG(ERR,"FMT %d != 1",fmt) ;
+					continue ;
+				}
+
+				// set of Gerard's hadrcoded hacks...
+
+				if((apv < 12) || (apv >= 22)) {
+					dta += 3 ;
+					continue ;
+				}
+	
+	
+				fgt_adc_t *fgt_d = (fgt_adc_t *) adc->request(FGT_TB_COU*FGT_CH_COU) ;
+				int cou = 0 ;
 
 				// extract data here...
-				// EMULATION!!!
+
+
+				u_short *d16 = (u_short *) dta ;
+				u_short wfm[1024] ;
+				int i = 0 ;
+				
+				for(int j=0;j<250;j++) {
+					u_short wtmp ;
+
+					wfm[4*j]	= 0x0fff & d16[i] ;
+
+					wtmp		= 0x000f & (d16[i++] >> 12) ;
+
+					wfm[4*j + 1]	= (0x0ff0 & (d16[i]<<4)) | wtmp ;
+
+					wtmp		= 0x00ff & (d16[i++] >> 8) ;
+
+					wfm[4*j+2]	= (0x0f00 & (d16[i]<<8)) | wtmp ;
+					wfm[4*j+3]	= 0x0fff & (d16[i++]>>4) ;
+				}
+
+
+				dta += (length - 2) ;	// skip "length" words - 2 for the header
+
+				/*
+				u_int *o_dta = dta ;
+				dta = (u_int *)(d16 + i) ;
+
+				LOG(TERR,"Diff %d",dta-o_dta) ;
+				*/
+
+
+
 				for(int ch=0;ch<128;ch++) {
+					int rch = 32*(ch%4) + 8*(ch/4) - 31*(ch/16) ;
 					for(int tb=0;tb<ntim;tb++) {
-						fgt_d[cou].ch = ch ;
+
+						int adc = wfm[27+ch+tb*140] ;
+						fgt_d[cou].ch = rch ;
 						fgt_d[cou].tb = tb ;
-						fgt_d[cou].adc = 1000*apv+10*ch+tb ;
+						fgt_d[cou].adc = adc ;
 						cou++ ;
 					}
 				}
@@ -268,7 +321,6 @@ daq_dta *daq_fgt::handle_adc(int rdo)
 				// note the reversal: sector->arm, row->rdo,
 				adc->finalize(cou, arm, r, apv) ;
 
-				dta += 3 ;	//?
 			}
 
 		}
