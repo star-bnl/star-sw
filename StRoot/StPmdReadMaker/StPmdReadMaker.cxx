@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.36 2011/04/26 13:14:27 rashmi Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.37 2011/06/01 16:45:28 rashmi Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.37  2011/06/01 16:45:28  rashmi
+ *year==12 BadChains entered
+ *
  *Revision 1.36  2011/04/26 13:14:27  rashmi
  *mVmeCond,BadChain info changed for year==12 data
  *
@@ -260,8 +263,13 @@ void StPmdReadMaker::ReadBadChains(Int_t runNo){
   cout<<"runNo="<<runNo<<" year="<<year<<endl;
   
   if(year==12){
-    BadChain = PmdClean::BadChain_y12d0;
+    if(runNo>12114000){
+      BadChain = PmdClean::BadChain_y12d114;
+    }else{
+      BadChain = PmdClean::BadChain_y12d0;
+    }
     //    cout<<" I have read bad chains in this loop"<<endl;
+   
   }
   
   if(year==11){
