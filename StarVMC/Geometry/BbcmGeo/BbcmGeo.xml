@@ -70,12 +70,14 @@
         </Print>
         
 
+        <!-- small kludge x10000 because ROOT will cast these to (int) before computing properties -->
         <Mixture name="ALKAP" dens="1.432"  >
-            <Component name="C5" a="12" z="6" w="5"  />
-            <Component name="H4" a="1" z="1" w="4"  />
-            <Component name="O2" a="16" z="8" w="2"  />
-            <Component name="Al" a="27" z="13" w="0.2302"  />
+            <Component name="C5" a="12" z="6"  w="5*10000"  />
+            <Component name="H4" a="1"  z="1"  w="4*10000"  />
+            <Component name="O2" a="16" z="8"  w="2*10000"  />
+            <Component name="Al" a="27" z="13" w="0.2302*10000"  />
         </Mixture>
+
         
 
         <Use struct="HEXG" select="type" value="1 "  />
