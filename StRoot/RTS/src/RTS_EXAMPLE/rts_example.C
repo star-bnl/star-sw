@@ -927,7 +927,7 @@ static int fgt_doer(daqReader *rdr, const char *do_print)
 			if(do_print) {
 				printf("FGT RAW: RDO %d: %d bytes, %d words\n",dd->rdo,dd->ncontent,dd->ncontent/4) ;
 				// dump a few ints
-				for(int i=0;i<(dd->ncontent/4);i++) {
+				for(int i=0;i<10;i++) {
 					printf(" %3d: 0x%08X\n",i,d[i]) ;
 				}
 			}
