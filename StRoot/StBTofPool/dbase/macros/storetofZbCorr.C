@@ -1,4 +1,4 @@
-// $Id: storetofZbCorr.C,v 1.1 2010/12/14 19:27:28 geurts Exp $
+// $Id: storetofZbCorr.C,v 1.2 2011/06/01 00:44:01 geurts Exp $
 // macro to upload tofr5 INL tables to database
 //
 // based on http://www.star.bnl.gov/STAR/comp/db/StoreDbTable.cc.html
@@ -6,6 +6,9 @@
 // Xin Dong, 02/18/2005 
 // ---
 // $Log: storetofZbCorr.C,v $
+// Revision 1.2  2011/06/01 00:44:01  geurts
+// Store board-based input files as cell-based database entries
+//
 // Revision 1.1  2010/12/14 19:27:28  geurts
 // *** empty log message ***
 //
@@ -25,6 +28,7 @@ void storetofZbCorr(const Bool_t mTest = 1)
   const int mNVPD = 19;
   const int mNMODULE = 32;
   const int mNCELL = 6;
+  const int mNMODPERBOARD = 4;
 
   //-- load dBase and Table definition libraries
   gSystem->Load("St_base");
@@ -139,19 +143,35 @@ void storetofZbCorr(const Bool_t mTest = 1)
   cout << "preparing database records ... " << endl;
 switch (calibSize) {
  case 960:
-  for(int i=0;i<mNTray*mNTDIG;i++) {
-    int tray = i/mNTDIG + 1;
-    int board = i%mNTDIG + 1;
-    int module = (i%mNTDIG) * 4 + 1; // set to be the first module on this board
-    int cell = 1;  // set to 1
-    zcorr[i].trayId = tray;
-    zcorr[i].moduleId = module;
-    zcorr[i].cellId = cell;
+  int index=-1;
+  for (int tray=1;tray<mNTray+1;tray++){
+  for (int module=1;module<mNMODULE+1;module++){
+  for (int cell=1;cell<mNCELL+1;cell++){
+    index++;
+    zcorr[index].trayId = (Short_t)tray;
+    zcorr[index].moduleId = (Short_t)module;
+    zcorr[index].cellId = (Short_t)cell;
+    int board = ((module-1)/mNMODPERBOARD) + 1;
     for(int j=0;j<60;j++) {
-      zcorr[i].z[j] = X[tray-1][board-1][j];
-      zcorr[i].corr[j] = Y[tray-1][board-1][j];
+      zcorr[index].z[j] = X[tray-1][board-1][0][j];
+      zcorr[index].corr[j] = Y[tray-1][board-1][0][j];   
     }
-  }
+  } // cell
+  } // module
+  } // tray
+//  for(int i=0;i<mNTray*mNTDIG;i++) {
+//    int tray = i/mNTDIG + 1;
+//    int board = i%mNTDIG + 1;
+//    int module = (i%mNTDIG) * 4 + 1; // set to be the first module on this board
+//    int cell = 1;  // set to 1
+//    zcorr[i].trayId = tray;
+//    zcorr[i].moduleId = module;
+//    zcorr[i].cellId = cell;
+//    for(int j=0;j<60;j++) {
+//      zcorr[i].z[j] = X[tray-1][board-1][j];
+//      zcorr[i].corr[j] = Y[tray-1][board-1][j];
+//    }
+//  }
   break;
 case 23040:
   int index=-1;
@@ -175,7 +195,8 @@ case 23040:
 // Store records in test file
  cout << "Storing records in zCorr_test.dat ... " << endl;
 //  int nRow = mNTray * mNTDIG;
-  int nRow = calibSize;
+//  int nRow = calibSize;
+ int nRow = 23040;
   ofstream outData;
   outData.open("zCorr_test.dat");
   for(int i=0;i<nRow;i++) {
