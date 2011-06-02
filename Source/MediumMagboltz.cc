@@ -2041,7 +2041,7 @@ MediumMagboltz::SetupGreenSawada() {
     } else {
       taGreenSawada[i] = 0.;
       hasGreenSawada[i] = false;
-      if (useGreenSawada || debug) {
+      if (useGreenSawada) {
         std::cout << className << "::SetupGreenSawada:\n";
         std::cout << "    Fit parameters for " 
                   << gas[i] << " not available.\n";
@@ -2804,58 +2804,92 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         // Two-body collisions give rise to collisional mixing. 
         const bool useTachibanaData = false;
         const bool useKoltsSetserData = true;
+        const bool useCollMixing = true;
         if (useTachibanaData) {
           // K. Tachibana, Phys. Rev. A 34 (1986), 1007-1015
           const double k2b = 2.3e-24;
           const double k3b = 1.4e-41;
-          deexcitations[j].p.push_back(k2b * nAr);
           deexcitations[j].p.push_back(k3b * nAr * nAr);
-          deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
           deexcitations[j].final.push_back(mapDxc["Ar_Excimer"]);
           deexcitations[j].type.push_back(DxcTypeCollNonIon);
-          deexcitations[j].type.push_back(DxcTypeCollNonIon);
-          deexcitations[j].nChannels += 2;
+          deexcitations[j].nChannels += 1;
+          if (useCollMixing) {
+            deexcitations[j].p.push_back(k2b * nAr);
+            deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
+            deexcitations[j].type.push_back(DxcTypeCollNonIon);
+            deexcitations[j].nChannels += 1;
+          }
         } else if (useKoltsSetserData) {
           // Kolts and Setser, J. Chem. Phys. 68 (1978), 4848-4859
           const double k2b = 2.1e-24;
           const double k3b = 1.1e-41;
-          deexcitations[j].p.push_back(k2b * nAr);
           deexcitations[j].p.push_back(k3b * nAr * nAr);
-          deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
           deexcitations[j].final.push_back(mapDxc["Ar_Excimer"]);
           deexcitations[j].type.push_back(DxcTypeCollNonIon);
-          deexcitations[j].type.push_back(DxcTypeCollNonIon);
-          deexcitations[j].nChannels += 2;
+          deexcitations[j].nChannels += 1;
+          if (useCollMixing) {
+            deexcitations[j].p.push_back(k2b * nAr);
+            deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
+            deexcitations[j].type.push_back(DxcTypeCollNonIon);
+            deexcitations[j].nChannels += 1;
+          }
         }          
       } 
       if (level == "Ar_1S3") {
         // Two-body and three-body collision rate constants
         const bool useTachibanaData = false;
         const bool useKoltsSetserData = true;
+        const bool useCollMixing = true;
         if (useTachibanaData) {
           // K. Tachibana, Phys. Rev. A 34 (1986), 1007-1015
           const double k2b = 4.3e-24;
           const double k3b = 1.5e-41;
-          deexcitations[j].p.push_back(k2b * nAr);
           deexcitations[j].p.push_back(k3b * nAr * nAr);
-          deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
           deexcitations[j].final.push_back(mapDxc["Ar_Excimer"]);
           deexcitations[j].type.push_back(DxcTypeCollNonIon);
-          deexcitations[j].type.push_back(DxcTypeCollNonIon);
-          deexcitations[j].nChannels += 2;
+          deexcitations[j].nChannels += 1;
+          if (useCollMixing) {
+            deexcitations[j].p.push_back(k2b * nAr);
+            deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
+            deexcitations[j].type.push_back(DxcTypeCollNonIon);
+            deexcitations[j].nChannels += 1;
+          }
         } else if (useKoltsSetserData) {
           // Kolts and Setser, J. Chem. Phys. 68 (1978), 4848-4859
           const double k2b = 5.3e-24;
           const double k3b = 0.83e-41;
-          deexcitations[j].p.push_back(k2b * nAr);
           deexcitations[j].p.push_back(k3b * nAr * nAr);
-          deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
           deexcitations[j].final.push_back(mapDxc["Ar_Excimer"]);
           deexcitations[j].type.push_back(DxcTypeCollNonIon);
-          deexcitations[j].type.push_back(DxcTypeCollNonIon);
-          deexcitations[j].nChannels += 2;
+          deexcitations[j].nChannels += 1;
+          if (useCollMixing) {
+            deexcitations[j].p.push_back(k2b * nAr);
+            deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
+            deexcitations[j].type.push_back(DxcTypeCollNonIon);
+            deexcitations[j].nChannels += 1;
+          }
         }          
-      }       
+      }
+      if (level == "Ar_2P1") {
+        // Transfer to 4s states
+        // Inoue, Setser, and Sadeghi, J. Chem. Phys. 75 (1982), 977-983
+        // const double k4s = 2.9e-20;
+        // Sadeghi et al. J. Chem. Phys. 115 (2001), 3144-3154 
+        const double k4s = 1.6e-20; 
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S5"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S3"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S2"]);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 4;
+      }
       if (level == "Ar_2P2") {
         // Collisional population transfer within 4p levels
         // T. D. Nguyen and N. Sadeghi, Phys. Rev. 18 (1978), 1388-1395
@@ -2864,6 +2898,22 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         deexcitations[j].final.push_back(mapDxc["Ar_2P3"]);
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].nChannels += 1;
+        // Transfer to 4s states
+        // Chang and Setser, J. Chem. Phys. 69 (1978), 3885-3897
+        const double k4s = 5.3e-20;
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S5"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S3"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S2"]);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 4;
       } 
       if (level == "Ar_2P3") {
         // Collisional population transfer within 4p levels
@@ -2893,6 +2943,22 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].nChannels += 6;
+        // Transfer to 4s states
+        // Chang and Setser, J. Chem. Phys. 69 (1978), 3885-3897
+        const double k4s = 4.7e-20;
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S5"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S3"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S2"]);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 4;
       }       
       if (level == "Ar_2P4") {
         // Collisional population transfer within 4p levels
@@ -2922,6 +2988,22 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].nChannels += 6;
+        // Transfer to 4s states
+        // Chang and Setser, J. Chem. Phys. 69 (1978), 3885-3897
+        const double k4s = 3.9e-20;
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S5"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S3"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S2"]);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 4;
       }  
       if (level == "Ar_2P5") {
         // Collisional population transfer within 4p levels
@@ -2973,6 +3055,22 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].nChannels += 3;
+        // Transfer to 4s states
+        // Chang and Setser, J. Chem. Phys. 69 (1978), 3885-3897
+        const double k4s = 5.5e-20;
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S5"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S3"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S2"]);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 4;
       }       
       if (level == "Ar_2P8") {
         // Collisional population transfer within 4p levels
@@ -2994,6 +3092,22 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].nChannels += 4;
+        // Transfer to 4s states
+        // Chang and Setser, J. Chem. Phys. 69 (1978), 3885-3897
+        const double k4s = 3.e-20;
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S5"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S3"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S2"]);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 4;
       }
       if (level == "Ar_2P9") {
         // Collisional population transfer within 4p levels
@@ -3007,21 +3121,102 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].type.push_back(DxcTypeCollNonIon);
         deexcitations[j].nChannels += 2;
-      }       
+        // Transfer to 4s states
+        // Chang and Setser, J. Chem. Phys. 69 (1978), 3885-3897
+        const double k4s = 3.5e-20;
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S5"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S3"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S2"]);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 4;
+      }
+      if (level == "Ar_2P10") {
+        // Transfer to 4s states
+        // Chang and Setser, J. Chem. Phys. 69 (1978), 3885-3897
+        const double k4s = 5.3e-20;
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].p.push_back(0.25 * k4s * nAr);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S5"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S4"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S3"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_1S2"]);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        deexcitations[j].nChannels += 4;
+      }    
+      if (level == "Ar_3D6"     || level == "Ar_3D5"   || 
+          level == "Ar_3D3"     || level == "Ar_3D4!"  || 
+          level == "Ar_3D4"     || level == "Ar_3D1!!" || 
+          level == "Ar_3D1!"    || level == "Ar_3D2"   || 
+          level == "Ar_3S1!!!!" || level == "Ar_3S1!!" || 
+          level == "Ar_3S1!!!"  || level == "Ar_3S1!"  ||
+          level == "Ar_2S5"     || level == "Ar_2S4"   ||
+          level == "Ar_2S3"     || level == "Ar_2S2") {
+        // 3d and 5s levels
+        // Transfer to 4p levels
+        const double k4p = 2.e-19;
+        deexcitations[j].final.push_back(mapDxc["Ar_2P10"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P9"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P8"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P7"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P6"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P5"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P4"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P3"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P2"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P1"]);
+        for (int k = 10; k--;) {
+          deexcitations[j].p.push_back(0.1 * k4p * nAr);
+          deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        }
+        deexcitations[j].nChannels += 10;
+      }
       if (level == "Ar_4D5"  || level == "Ar_3S4" || level == "Ar_4D2" ||
           level == "Ar_4S1!" || level == "Ar_3S2" || level == "Ar_5D5" ||
           level == "Ar_4S4"  || level == "Ar_5D2" || level == "Ar_6D5" ||
           level == "Ar_5S1!" || level == "Ar_4S2" || level == "Ar_5S4" ||
           level == "Ar_6D2") {
+        // Transfer to 4p levels
+        const double k4p = 2.e-19;
+        deexcitations[j].final.push_back(mapDxc["Ar_2P10"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P9"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P8"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P7"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P6"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P5"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P4"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P3"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P2"]);
+        deexcitations[j].final.push_back(mapDxc["Ar_2P1"]);
+        for (int k = 10; k--;) {
+          deexcitations[j].p.push_back(0.1 * k4p * nAr);
+          deexcitations[j].type.push_back(DxcTypeCollNonIon);
+        }
+        deexcitations[j].nChannels += 10;
         // Hornbeck-Molnar ionisation
         // P. Becker and F. Lampe, J. Chem. Phys. 42 (1965), 3857-3863
         // A. Bogaerts and R. Gijbels, Phys. Rev. A 52 (1995), 3743-3751
-        // This value seems unrealistic, to be checked!
+        // This value seems high, to be checked!
         const double kHM = 2.e-18;
-        deexcitations[j].p.push_back(kHM * nAr);        
-        deexcitations[j].final.push_back(mapDxc["Ar_Dimer"]);
-        deexcitations[j].type.push_back(DxcTypeCollIon);
-        deexcitations[j].nChannels += 1;
+        const bool useHornbeckMolnar = true;
+        if (useHornbeckMolnar) {
+          deexcitations[j].p.push_back(kHM * nAr);        
+          deexcitations[j].final.push_back(mapDxc["Ar_Dimer"]);
+          deexcitations[j].type.push_back(DxcTypeCollIon);
+          deexcitations[j].nChannels += 1;
+        }
       }
     }
   }
@@ -3430,12 +3625,12 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                                                   pacs, eta)) {
         pacs = eta = 0.;
       }
-      const double pPenning = pow(eta, 2. / 5.);
+      const double pPenningWK = pow(eta, 2. / 5.);
       if (level == "Ar_1S5") {
         // Rate constant from Chen and Setser, J. Phys. Chem. 95 (1991)
         const double kQ = 5.29e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenning);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3444,8 +3639,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_1S4") {
         // Rate constant from Velazco et al., J. Chem. Phys. 69 (1978)
         const double kQ = 6.2e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenning);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3454,8 +3649,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_1S3") {
         // Rate constant from Chen and Setser
         const double kQ = 6.53e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenning);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3464,8 +3659,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_1S2") {
         // Rate constant from Velazco et al.
         const double kQ = 10.7e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenning);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3474,8 +3669,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P8") {
         // Rate constant from Sadeghi et al., J. Chem. Phys. 115 (2001)
         const double kQ = 9.2e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenning);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3484,8 +3679,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P6") {
         // Rate constant from Sadeghi et al.
         const double kQ = 4.8e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenning);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3494,8 +3689,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P5") {
         // Rate constant from Sadeghi et al.
         const double kQ = 9.9e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenning);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3504,8 +3699,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
       } else if (level == "Ar_2P1") {
         // Rate constant from Sadeghi et al.
         const double kQ = 11.0e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenning);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3516,8 +3711,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                  level == "Ar_2P3"  || level == "Ar_2P2") {
         // Average of rate constants given by Sadeghi et al.
         const double kQ = 8.7e-19;
-        deexcitations[j].p.push_back(kQ * nQ * pPenning);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3545,8 +3740,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                     << "    " << level << " by C2H6 (W-K formula):\n"
                     << "      " << kQ << " cm3 ns-1\n";
         }
-        deexcitations[j].p.push_back(kQ * nQ * pPenning);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3578,8 +3773,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                     << "    " << level << " by C2H6 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
         }
-        deexcitations[j].p.push_back(kQ * nQ * pPenning);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -3607,8 +3802,8 @@ MediumMagboltz::ComputeDeexcitationTable(const bool verbose) {
                     << "    " << level << " by C2H6 (hard sphere):\n"
                     << "      " << kQ << " cm3 ns-1\n";
         }
-        deexcitations[j].p.push_back(kQ * nQ * pPenning);
-        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenning));
+        deexcitations[j].p.push_back(kQ * nQ * pPenningWK);
+        deexcitations[j].p.push_back(kQ * nQ * (1. - pPenningWK));
         deexcitations[j].final.push_back(-1);
         deexcitations[j].final.push_back(-1);
         deexcitations[j].type.push_back(DxcTypeCollIon);
@@ -4591,7 +4786,7 @@ MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
                                  (ElectronMass * deexcitations[i].energy);
     // Make an estimate for the width within which a photon can be 
     // absorbed by the line
-    const int nWidths = 100;
+    const int nWidths = 20;
     // Calculate the FWHM of the Voigt distribution according to the  
     // approximation formula given in 
     // Olivero and Longbothum, J. Quant. Spectr. Rad. Trans. 17, 233-236

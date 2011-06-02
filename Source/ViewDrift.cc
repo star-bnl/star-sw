@@ -193,8 +193,8 @@ ViewDrift::NewPhotonTrack(const double x0, const double y0, const double z0,
   TPolyLine3D p(2);
   p.SetLineColor(col);
   p.SetLineStyle(7);
-  p.SetPoint(0, x0, y0, z0);
-  p.SetPoint(1, x1, y1, z1);
+  p.SetNextPoint(x0, y0, z0);
+  p.SetNextPoint(x1, y1, z1);
   driftLines.push_back(p);
   ++nDriftLines;
 
