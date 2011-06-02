@@ -44,7 +44,7 @@ struct fgt_pedrms_t {
 class daq_fgt : public daq_det {
 private:
 	class daq_dta *handle_raw(int rdo) ;
-	class daq_dta *handle_adc(int rdo) ;
+
 	class daq_dta *handle_phys(int disk, int quadrant, int strip_type) ;
 	class daq_dta *handle_ped(int rdo) ;
 
@@ -71,6 +71,10 @@ public:
                 static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
 	}
 
+
+	class daq_dta *handle_adc(int rdo, char *rdobuff = 0 ) ;
+
+#if 0
 	struct fgt_adc_to_phys_t {
 		char disk ;		// -1: doesn't exist
 		unsigned char quadrant ;
@@ -85,7 +89,7 @@ public:
 		unsigned char apv ;
 		unsigned char ch ;
 	} phys_to_adc[FGT_DISK_COU][FGT_QUADRANT_COU][FGT_STRIP_TYPE_COU][FGT_STRIP_PHI_COU] ;
-
+#endif
 
 	u_int rdo_warns[3] ;	// number of warnings issued, per rdo
 	u_char rdo_id[3] ;	// for RDO checks in get_l2

@@ -49,11 +49,13 @@ daq_fgt::daq_fgt(daqReader *rts_caller)
 	phys = new daq_dta ;
 	ped = new daq_dta ;
 
+#if 0
 	// zap maps to unknown first
 	memset(adc_to_phys,0xff,sizeof(adc_to_phys)) ;
 	memset(phys_to_adc,0xff,sizeof(phys_to_adc)) ;
 
 	// create/load maps...
+#endif
 
 	LOG(DBG,"%s: constructor: caller %p",name,rts_caller) ;
 	return ;
@@ -84,7 +86,7 @@ daq_dta *daq_fgt::get(const char *bank, int sec, int rdo, int pad, void *p1, voi
 		return handle_raw(rdo) ;
 	}
 	else if(strcasecmp(bank,"adc")==0) {
-		return handle_adc(rdo) ;
+		return handle_adc(rdo,0) ;
 	}
 	else if(strcasecmp(bank,"phys")==0) {
 		return handle_phys(sec,rdo,pad) ;
@@ -157,7 +159,7 @@ daq_dta *daq_fgt::handle_raw(int rdo)
 
 	
 
-daq_dta *daq_fgt::handle_adc(int rdo)
+daq_dta *daq_fgt::handle_adc(int rdo, char *rdobuff)
 {
 	int r_start, r_stop ;
 
@@ -177,15 +179,25 @@ daq_dta *daq_fgt::handle_adc(int rdo)
 
 
 	for(int r=r_start;r<=r_stop;r++) {
-		daq_dta *dd = handle_raw(r) ;
-		if(dd == 0) continue ;
+		u_int *d ;
 
-		if(dd->iterate() == 0) continue ;
+		if(rdobuff == 0) {
+			daq_dta *dd = handle_raw(r) ;
+			if(dd == 0) continue ;
 
-		u_int *d = (u_int *) dd->Void ;
-		int words = dd->ncontent/4 ;
+			if(dd->iterate() == 0) continue ;
 
-		if(words <= 0) continue ;
+			d = (u_int *) dd->Void ;
+			int words = dd->ncontent/4 ;
+
+			if(words <= 0) continue ;
+
+		}
+		else {
+			d = (u_int *) rdobuff ;
+		}
+
+
 
 		int format_code = (d[2] >> 8) & 0xFF ;
 		// 0: normal code
@@ -324,38 +336,6 @@ daq_dta *daq_fgt::handle_adc(int rdo)
 			}
 
 		}
-
-		
-#if 0
-		// HACK! EMULATION!!!
-		for(int arm=0;arm<FGT_ARM_COU;arm++) {
-		for(int apv=0;apv<FGT_APV_COU;apv++) {
-
-			fgt_adc_t *d = (fgt_adc_t *) adc->request(FGT_POINT_COU*FGT_CH_COU) ;
-
-			int cou = 0 ;
-
-			for(int pt=0;pt<FGT_POINT_COU;pt++) {
-			for(int ch=0;ch<FGT_CH_COU;ch++) {
-
-				// create 10% occupancy
-				if(drand48() < 0.9) continue ;
-
-				
-			
-				d[cou].ch = ch ;
-				d[cou].point = pt ;
-				d[cou].adc = lrand48() & 0xFFF ;	// 12 bits
-				cou++ ;
-
-			}
-			}
-
-			adc->finalize(cou,r,arm,apv) ;
-
-		}
-		}
-#endif
 	}
 
 	adc->rewind() ;
