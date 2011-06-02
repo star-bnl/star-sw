@@ -10,6 +10,8 @@
 #include <rtsLog.h>
 #include <daqModes.h>
 
+#include <DAQ_READER/daq_dta.h>
+
 #include "fgtPed.h"
 
 
@@ -24,16 +26,22 @@ fgtPed::fgtPed()
 	
 	sizeof_ped = sizeof(struct peds) * FGT_RDO_COU ;	// for FGT_RDO_COU RDOs
 
+	
 	ped_store = 0 ;	// unassigned!
 
-	sector = 1 ;	// only one
+	fgt_rdr = 0;
+
 	return ;
 }
 
 
 fgtPed::~fgtPed()
 {
-	if(ped_store) free(ped_store) ;
+	if(ped_store) {
+		free(ped_store) ;
+	}
+
+	if(fgt_rdr) delete fgt_rdr ;
 
 	return ;
 }
@@ -50,6 +58,8 @@ void fgtPed::init(int active_rbs)
 
 	if(ped_store == 0) {
 		ped_store = (struct peds *) malloc(sizeof_ped) ;
+
+		fgt_rdr = new daq_fgt(0) ;
 	}
 
 	memset(ped_store,0,sizeof_ped) ;
@@ -125,17 +135,8 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 {
 	LOG(WARN,"NOT DONE!") ;
 
-
-	int cap ;
-	u_short *d16 ;
-	u_int *d32 ;
 	int rdo = rdo1 - 1 ;	// since rdo1 is from 1
 
-	d16 = (u_short *) evbuff ;
-	d32 = (u_int *) evbuff ;
-
-
-	evts[rdo]++ ;
 
 
 	// skip first few events!
@@ -150,28 +151,30 @@ void fgtPed::accum(char *evbuff, int bytes, int rdo1)
 
 	struct peds *p = ped_store + rdo ;
 
+	daq_dta *dd = fgt_rdr->handle_adc(rdo1, evbuff) ;
 
-	// move to start of data
-	d16 = (u_short *)(evbuff + 10*4) ;	// start at the 10th
+	while(dd->iterate()) {
+		if(dd->rdo != rdo1) continue ;
 
-	// extract arm, apv, cap, ch
-	for(int arm=0;arm<FGT_ARM_COU;arm++) {
-	for(int apv=0;apv<FGT_APV_COU;apv++) {
+		int arm = dd->sec ;
+		int apv = dd->pad ;
 
-		cap = 0 ;	// extract cap aka timebin from data!
+		fgt_adc_t *f = (fgt_adc_t *) dd->Void ;
 
-		if(p->cou[arm][apv][cap] > 0xFFF0) continue ;	// don't count too much
+		for(u_int i=0;i<dd->ncontent;i++) {
+			int adc ;
+			int ch ;
 
-		p->cou[arm][apv][cap]++ ;
+			if(f[i].tb != 1) continue ;
 
-		for(int ch=0;ch<FGT_CH_COU;ch++) {
-			int adc = 123 ;	// extract from data!
+			ch = f[i].ch ;
+			adc = f[i].adc ;
 
-			p->ped[arm][apv][cap][ch] += (double) adc ;
-			p->rms[arm][apv][cap][ch] += (double) adc * adc ;
+			p->ped[arm][apv][ch] += (double) adc ;
+			p->rms[arm][apv][ch] += (double) (adc * adc) ;
+			p->cou[arm][apv][ch]++ ;
 		}
-	}}
-
+	}
 
 
 	return ;
@@ -194,7 +197,7 @@ void fgtPed::do_thresh(double n_sigma)
 		for(int arm=0;arm<FGT_ARM_COU;arm++) {
 		for(int apv=0;apv<FGT_APV_COU;apv++) {
 		for(int c=0;c<FGT_CH_COU;c++) {
-			p->thr[arm][apv][c] = (u_short) (p->ped[arm][apv][0][c] + p->rms[arm][apv][0][c] * n_sigma + 0.5) ;
+			p->thr[arm][apv][c] = (u_short) (p->ped[arm][apv][c] + p->rms[arm][apv][c] * n_sigma + 0.5) ;
 
 		}
 		}
@@ -207,15 +210,14 @@ void fgtPed::do_thresh(double n_sigma)
 
 void fgtPed::calc()
 {
-	int r, cap, ch ;
-	int bad ;
+
 	const u_int MIN_EVENTS = 20 ;
 
 
 	LOG(NOTE,"Calculating pedestals") ;
 
 
-	for(r=0;r<FGT_RDO_COU;r++) {
+	for(int r=0;r<FGT_RDO_COU;r++) {
 		if(rb_mask & (1<<r)) ;
 		else continue ;
 
@@ -223,37 +225,36 @@ void fgtPed::calc()
 
 		for(int arm=0;arm<FGT_ARM_COU;arm++) {
 		for(int apv=0;apv<FGT_APV_COU;apv++) {
-		for(cap=0;cap<FGT_TB_COU;cap++) {
-		for(ch=0;ch<FGT_CH_COU;ch++) {
+		for(int ch=0;ch<FGT_CH_COU;ch++) {
 
-			if(ped->cou[arm][apv][cap] == 0) {
-				ped->ped[arm][apv][cap][ch] = 0xFFFF ;
-				ped->rms[arm][apv][cap][ch] = 9.999 ;
+			if(ped->cou[arm][apv][ch] == 0) {
+				ped->ped[arm][apv][ch] = 0xFFFF ;
+				ped->rms[arm][apv][ch] = 9.999 ;
 			}
 			else {
 				double pp, rr ;
 
-				pp = ped->ped[arm][apv][cap][ch] / (double) ped->cou[arm][apv][cap] ;
-				rr = ped->rms[arm][apv][cap][ch] / (double) ped->cou[arm][apv][cap] ;
+				pp = ped->ped[arm][apv][ch] / (double) ped->cou[arm][apv][ch] ;
+				rr = ped->rms[arm][apv][ch] / (double) ped->cou[arm][apv][ch] ;
 
 				// due to roundoff I can have super small negative numbers
 				if(rr < (pp*pp)) rr = 0.0 ;
 				else rr = sqrt(rr - pp*pp) ;
 
-				ped->ped[arm][apv][cap][ch] = pp ;
-				ped->rms[arm][apv][cap][ch] = rr ;
+				ped->ped[arm][apv][ch] = pp ;
+				ped->rms[arm][apv][ch] = rr ;
 			}
 		}
 		}
 		}
-		}
+
 	}
 
 
-	bad = 0 ;
+	int bad = 0 ;
 	int real_bad = 0 ;
 
-	for(r=0;r<FGT_RDO_COU;r++) {
+	for(int r=0;r<FGT_RDO_COU;r++) {
 		if(rb_mask & (1<<r)) ;
 		else continue ;
 
@@ -261,18 +262,18 @@ void fgtPed::calc()
 
 		for(int arm=0;arm<FGT_ARM_COU;arm++) {
 		for(int apv=0;apv<FGT_APV_COU;apv++) {
-		for(cap=0;cap<FGT_TB_COU;cap++) {
-			if(ped->cou[arm][apv][cap] < MIN_EVENTS) {
+		for(int ch=0;ch<FGT_CH_COU;ch++) {
+			if(ped->cou[arm][apv][ch] < MIN_EVENTS) {
 				bad++ ;
 
 				if(bad<50) {
-					LOG(WARN,"RDO %d, ARM %2d, APV %2d: cap %3d: only %d events!",r+1,arm,apv,cap,ped->cou[cap]) ;
+					LOG(WARN,"RDO %d, ARM %d, APV %2d: CH %3d: only %d events!",r+1,arm,apv,ch,ped->cou[arm][apv][ch]) ;
 				}
 				else if(bad==50) {
 					LOG(WARN,"Stopping detailed bad cap logging...") ;
 				}
 
-				if(ped->cou[arm][apv][cap] == 0) real_bad++ ;
+				if(ped->cou[arm][apv][ch] == 0) real_bad++ ;
 			}
 		
 		}
@@ -288,7 +289,7 @@ void fgtPed::calc()
 		//LOG(TERR,"Pedestals calculated. RDO counts: %u %u %u %u %u %u",valid_evts[0],valid_evts[1],valid_evts[2],valid_evts[3],valid_evts[4],valid_evts[5]) ;
 	}
 	else {
-		LOG(ERR,"FGT pedestals not good (%d caps not good, %d missing)",bad,real_bad) ;
+		LOG(ERR,"FGT pedestals not good (%d channels not good, %d missing)",bad,real_bad) ;
 		if(!real_bad) {
 			LOG(WARN,"But since no real bad I will allow it!") ;
 			valid = 1 ;
@@ -301,7 +302,7 @@ void fgtPed::calc()
 
 int fgtPed::to_evb(char *buff)
 {
-	int r, arm, apv, t, c ;
+	int r, arm, apv, c ;
 
 
 	u_short *dta = (u_short *) buff ;	
@@ -321,26 +322,23 @@ int fgtPed::to_evb(char *buff)
 		*dta++ = FGT_ARM_COU ;
 		*dta++ = FGT_APV_COU ;
 		*dta++ = FGT_CH_COU ;			
-		*dta++ = FGT_TB_COU ;	// caps
 		*dta++ = r ;			// fiber...	
 
 		for(arm=0;arm<FGT_ARM_COU;arm++) {
 		for(apv=0;apv<FGT_APV_COU;apv++) {
-		for(t=0;t<FGT_TB_COU;t++) {
 		for(c=0;c<FGT_CH_COU;c++) {
 
 				u_int rr, pp ;
 
-				rr = (u_int)(ped->rms[arm][apv][t][c] * 8.0 + 0.5) ;
+				rr = (u_int)(ped->rms[arm][apv][c] * 8.0 + 0.5) ;
 				if(rr > 0x3F) rr = 0x3F ;	// maximum I can have!
 
 				
-				pp = (u_int)(ped->ped[arm][apv][t][c] + 0.5)  ;
+				pp = (u_int)(ped->ped[arm][apv][c] + 0.5)  ;
 				if(pp > 0x3FF) pp = 0x3FF ;	// maximum I can have!
 
 				*dta++ = (rr<<10)|pp ;
 
-		}
 		}
 		}
 		}
@@ -379,16 +377,16 @@ int fgtPed::from_cache(char *fname)
 	LOG(NOTE,"Loading pedestals from cache \"%s\"...",fn) ;
 
 	while(!feof(f)) {
-		int r, arm, apv, tb, ch ;
+		int r, arm, apv, ch ;
 		float pp, rr ;
 
-		int ret = fscanf(f,"%d %d %d %d %d %f %f",&r,&arm,&apv,&tb,&ch,&pp,&rr) ;
-		if(ret != 7) continue ;
+		int ret = fscanf(f,"%d %d %d %d %f %f",&r,&arm,&apv,&ch,&pp,&rr) ;
+		if(ret != 6) continue ;
 
 		struct peds *peds = ped_store + (r-1) ;
 
-		peds->ped[arm][apv][tb][ch] = pp ;
-		peds->rms[arm][apv][tb][ch] = rr ;
+		peds->ped[arm][apv][ch] = pp ;
+		peds->rms[arm][apv][ch] = rr ;
 	}
 
 	fclose(f) ;
@@ -433,12 +431,10 @@ int fgtPed::to_cache(char *fname, u_int run)
 
 		for(int arm=0;arm<FGT_ARM_COU;arm++) {
 		for(int apv=0;apv<FGT_APV_COU;apv++) {
-		for(int t=0;t<FGT_TB_COU;t++) {
 		for(int c=0;c<FGT_CH_COU;c++) {
-			fprintf(f,"%d %d %d %d %d%8.3f %.3f\n",r+1,arm,apv,t,c,
-				peds->ped[arm][apv][t][c],
-				peds->rms[arm][apv][t][c]) ;
-		}
+			fprintf(f,"%d %d %2d %3d %7.3f %.3f\n",r+1,arm,apv,c,
+				peds->ped[arm][apv][c],
+				peds->rms[arm][apv][c]) ;
 		}
 		}
 		}
