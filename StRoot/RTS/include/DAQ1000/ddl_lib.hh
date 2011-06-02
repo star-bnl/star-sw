@@ -20,7 +20,7 @@ public:
 	int cmd(u_char cmd, u_int param=0, u_int dest=4) ;			// send a command and wait ?
 	int read(u_int param=0) ;		// this just issues the STBRD command!
 
-	int write(char *inbuff, int bytes, int no_delay=0) ;	// write something to the device
+	int write(char *inbuff, int bytes, int no_delay=0, int param=0) ;	// write something to the device
 
 	int link_check() ;
 
