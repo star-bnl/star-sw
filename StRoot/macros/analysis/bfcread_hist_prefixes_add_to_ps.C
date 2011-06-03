@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_prefixes_add_to_ps.C,v 3.2 2010/03/16 16:23:09 fisyak Exp $
+// $Id: bfcread_hist_prefixes_add_to_ps.C,v 3.3 2011/06/03 00:09:21 genevb Exp $
 // $Log: bfcread_hist_prefixes_add_to_ps.C,v $
+// Revision 3.3  2011/06/03 00:09:21  genevb
+// Calling CopyHist twice was dangerous, AddHist handles copying if not found after first CopyHist
+//
 // Revision 3.2  2010/03/16 16:23:09  fisyak
 // StTpcDb requires StDetectorDbMaker
 //
@@ -132,20 +135,10 @@ void bfcread_hist_prefixes_add_to_ps(
     TList* dirList = HO->FindHists(MakerHistDir,HO->GetPrefix(0));
     Int_t hCCount = 0;
 
-     if (dirList->GetSize()) {
-       hCCount = HO->CopyHists(dirList);
-       cout << "bfcread_hist_prefixes_add_to_ps.C, # histograms copied with prefix " <<
-         HO->GetPrefix(0) << " = " << hCCount << endl;
-
-       HM->SetHArraySize(HO->getNewHistSize());
-       HM->SetHArray(HO->getNewHist());
-       HM->Make();
-     }
-     
      int prefixNum;
      int nPrefixes = HO->GetNumOfPosPrefixes();
      Bool_t firstSet = kTRUE;
-     for (prefixNum=1; prefixNum < nPrefixes; prefixNum++) {
+     for (prefixNum=0; prefixNum < nPrefixes; prefixNum++) {
  
 // get the TList pointer to the histograms for this branch:
       dirList = HO->FindHists(MakerHistDir,HO->GetPrefix(prefixNum));

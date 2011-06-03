@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_prefixes_add.C,v 3.2 2010/03/16 16:23:08 fisyak Exp $
+// $Id: bfcread_hist_prefixes_add.C,v 3.3 2011/06/03 00:09:21 genevb Exp $
 // $Log: bfcread_hist_prefixes_add.C,v $
+// Revision 3.3  2011/06/03 00:09:21  genevb
+// Calling CopyHist twice was dangerous, AddHist handles copying if not found after first CopyHist
+//
 // Revision 3.2  2010/03/16 16:23:08  fisyak
 // StTpcDb requires StDetectorDbMaker
 //
@@ -120,24 +123,10 @@ void bfcread_hist_prefixes_add(
      HU[nbranch]->IgnorePrefixes();
      HM[nbranch]=0;
 
-     // copy the non-prefix branches
-     dirList = HU[nbranch]->FindHists(MakerHistDir,HU[nbranch]->GetPrefix(0));
-     if (dirList->GetSize()) {
-       hCCount = HU[nbranch]->CopyHists(dirList);
-       cout << "bfcread_hist_prefixes_add.C, # histograms copied with prefix " <<
-         HU[nbranch]->GetPrefix(0) << " = " << hCCount << endl;
-
-       HM[nbranch] = new StHistMaker(MakerHistDir);
-       HM[nbranch]->Init();
-       HM[nbranch]->SetHArraySize(HU[nbranch]->getNewHistSize());
-       HM[nbranch]->SetHArray(HU[nbranch]->getNewHist());
-       HM[nbranch]->Make();
-     }
-     
      int prefixNum;
      int nPrefixes = HU[nbranch]->GetNumOfPosPrefixes();
      Bool_t firstSet = kTRUE;
-     for (prefixNum=1; prefixNum < nPrefixes; prefixNum++) {
+     for (prefixNum=0; prefixNum < nPrefixes; prefixNum++) {
  
 // get the TList pointer to the histograms for this branch:
       dirList = HU[nbranch]->FindHists(MakerHistDir,HU[nbranch]->GetPrefix(prefixNum));
