@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.55 2011/04/01 19:40:07 perev Exp $
+ * $Id: StAssociationMaker.cxx,v 1.56 2011/06/03 17:14:09 fisyak Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.56  2011/06/03 17:14:09  fisyak
+ * Set FtpcHit IdTruth and  QA
+ *
  * Revision 1.55  2011/04/01 19:40:07  perev
  * const++
  *
@@ -1206,6 +1209,7 @@ Int_t StAssociationMaker::Make()
 	      mRcFtpcHitMap->insert(rcFtpcHitMapValType (rcFtpcHit, mcFtpcHit) );
 	      mMcFtpcHitMap->insert(mcFtpcHitMapValType (mcFtpcHit, rcFtpcHit) );
 	      rcFtpcHit->SetBit(StMcHit::kMatched,1);
+	      rcFtpcHit->setIdTruth(mcFtpcHit->parentTrack()->key(),100);
 	      mcFtpcHit->SetBit(StMcHit::kMatched,1);
 	    }
 	    
