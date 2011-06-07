@@ -508,6 +508,7 @@ Bool_t Geometry::ConstructMutd( const Char_t *flag, Bool_t go )
   if (!go) return true;
 
   AgStructure::AgDetpNew( mutdGeom.module, Form("Muon Tagging Detector with configuration %s",flag));
+  AgStructure::AgDetpAdd( "Mtdg_t", "config", mutdGeom.config );
 
   if ( !CreateModule( mutdGeom.module ) )
     {
@@ -648,6 +649,11 @@ Bool_t Geometry::ConstructScon( const Char_t *flag, Bool_t go )
     {
       Error(GetName(),Form("Cannot locate configuration %s",flag));
       return false;      
+    }
+
+  if ( sconGeom.module == "NONE" )
+    {
+      return true;
     }
 
   AgStructure::AgDetpNew( "SconGeo", Form("Support Cone Configuration configuration %s",flag));
