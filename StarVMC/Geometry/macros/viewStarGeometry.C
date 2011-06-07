@@ -1,7 +1,7 @@
-void viewStarGeometry( const Char_t *tag="upgr2012" )
+void viewStarGeometry( const Char_t *tag="y2011", const Bool_t agml=true )
 {
  
-  cacheGeometry(tag);
+  cacheGeometry(tag,agml);
 
   //
   // Load using TEveManager
@@ -19,14 +19,14 @@ void viewStarGeometry( const Char_t *tag="upgr2012" )
 
 }
 
-void cacheGeometry( const Char_t *tag )
+void cacheGeometry( const Char_t *tag, const Bool_t agml )
 {  
   TFile *file = new TFile(Form("%s.root",tag));
   if ( file->IsZombie() )
     {
       delete file;
       gROOT -> ProcessLine(".L StarVMC/Geometry/macros/loadStarGeometry.C");
-      loadStarGeometry(tag);
+      loadStarGeometry(tag,agml);
       ColorScheme();
       gGeoManager->Export(Form("%s.root",tag));
     }

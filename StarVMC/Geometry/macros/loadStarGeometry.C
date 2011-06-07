@@ -37,10 +37,10 @@ void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
     }
   else
     {
-      gROOT->Macro(Form("$STAR/StarDb/VmcGeometry/%s.h",mytag));
-      //      gROOT->Macro(Form("scripts/%s.h",mytag));
+      loadStarsimGeometry( mytag );
+      // gROOT->Macro(Form("$STAR/StarDb/VmcGeometry/%s.h",mytag));
+      // gROOT->Macro(Form("scripts/%s.h",mytag));
     }
-
 
   gGeoManager->CloseGeometry();
   gGeoManager->SetVisLevel(99);        
@@ -125,5 +125,25 @@ void ColorScheme2()
       
 
     }
+
+}
+
+
+void loadStarsimGeometry( const Char_t *tag )
+{
+
+  std::cout << "Loading starsim geometry: " << tag << std::endl;
+  ofstream kumac(Form("%s.kumac",tag));
+  kumac << "DETP geom " << tag << std::endl;
+  kumac << "GEXEC $STAR_LIB/geometry.so" << std::endl;
+  kumac << "GCLOS all" << std::endl;
+  kumac << "GRFILE " << tag << ".rz" << std::endl;
+  kumac << "EXIT" << std::endl;
+  kumac.close();
+
+  gROOT->ProcessLine(Form(".!starsim -w 0 -b %s.kumac",tag));
+  gROOT->ProcessLine(Form(".!g2root %s.rz",tag));
+  gROOT->LoadMacro(Form("%s.C",tag));
+  gROOT->ProcessLine(Form("%s();",tag));
 
 }
