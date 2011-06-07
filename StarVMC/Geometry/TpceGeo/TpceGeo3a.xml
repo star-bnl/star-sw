@@ -699,10 +699,9 @@
 
         <Mixture name="G10" dens="1.7"  >
             <Component name="Si" a="28.08" z="14" w="0.6*1*28./60."  />
-            <Component name="O" a="16" z="8" w="0.6*2*16./60."  />
+            <Component name="O" a="16" z="8" w="0.6*2*16./60. + 0.4*4*16./174."  />
             <Component name="C" a="12" z="6" w="0.4*8*12./174."  />
-            <Component name="H" a="1" z="1" w="0.4*14*1./174."  />
-            <Component name="O" a="16" z="8" w="0.4*4*16./174."  />
+            <Component name="H" a="1"  z="1" w="0.4*14*1./174."  />
         </Mixture>
         
         <!-- <Material name="G10"  /> -->
@@ -996,16 +995,17 @@
 
 
         <Block name="TOIG" comment="is Insulating Gas (Nitrogen)"  >
+
             <Material name="NITROGEN_GAS"  />
             <Medium name="TOIG_nitrogen_gas" isvol="0" ifield="1" fieldm="20" tmaxfd="20" stemax="10" deemax="0.248893" epsil="0.01" stmin="1.14554" />
             <Attribute for="TOAD" seen="1" colo="kLightBlue"  />
             <Shape type="TUBE" rmax="toigOR" rmin="toigIR" dz="TPCG_dzYF2"  />
 
-			<!--
+        <!--
             <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
                 %ivolume,%volume
             </Print>
-            -->
+         -->
 
         </Block>
         
@@ -1291,14 +1291,9 @@
 
             <Attribute for="TSAS" seen="0"  />
 
-            <Create block="TALS"  />
-            <Placement block="TALS"  >
-            </Placement>
+            <Create block="TALS"/><Placement block="TALS"/>
             
-            <Create block="TSGT"  />
-            <Placement block="TSGT"  >
-            </Placement>
-            
+            <Create block="TSGT"/><Placement block="TSGT"/>
 
 
             dy = (r2 - r1)/2
@@ -1638,7 +1633,10 @@
             <Attribute for="TSGT" seen="1" colo="kBlue"  />
             <Material name="G10"  />
             <Medium name="TSGT_G10" deemax="0.20313" stmin="0.0333806" />
-            <Shape type="PGON" zi="{z1,z1+TPCG_PadPlaneThickness}" rmn="{r1,r1}" rmx="{r2,r2}" nz="2" npdiv="1" phi1="-alpha" dphi="2*alpha"  />
+            <Shape type="PGON" zi="{z1,z1+TPCG_PadPlaneThickness}" 
+                   rmn="{r1,r1}" rmx="{r2,r2}" 
+                   nz="2" npdiv="1" 
+                   phi1="-alpha" dphi="2*alpha"  />
 			<!--
             <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
                 %ivolume,%volume

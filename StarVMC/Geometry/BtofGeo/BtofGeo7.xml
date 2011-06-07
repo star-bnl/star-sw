@@ -1556,7 +1556,6 @@
                 <Component name="H2" a="1" z="1" w="2"  />
                 <Component name="O" a="16" z="8" w="1"  />
             </Mixture>
-            
             <Shape type="TUBE" rmax="0" rmin="0"  />
         </Block>
         

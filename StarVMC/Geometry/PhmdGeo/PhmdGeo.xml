@@ -16,39 +16,37 @@
 
         <Structure name="PMVR"  >
             <var name="version" type="float"  />
-            <var name="config" type="int"  />
-            <var name="" type="float"  />
+            <var name="config"  type="int"  />
         </Structure>
         
         <Structure name="PMDG"  >
-            <var name="version" type="float"  />
-            <var name="m_max" type="float"  />
-            <var name="m_min" type="float"  />
-            <var name="zdist(2)" type="float"  />
-            <var name="DPMDx" type="float"  />
-            <var name="DPMDy" type="float"  />
-            <var name="DPMDz" type="float"  />
-            <var name="PARGCz" type="float"  />
-            <var name="PARSCz" type="float"  />
-            <var name="PARFEz" type="float"  />
-            <var name="PARPBz" type="float"  />
+            <var name="version"     type="float"  />
+            <var name="m_max"       type="float"  />
+            <var name="m_min"       type="float"  />
+            <var name="zdist(2)"    type="float"  />
+            <var name="DPMDx"       type="float"  />
+            <var name="DPMDy"       type="float"  />
+            <var name="DPMDz"       type="float"  />
+            <var name="PARGCz"      type="float"  />
+            <var name="PARSCz"      type="float"  />
+            <var name="PARFEz"      type="float"  />
+            <var name="PARPBz"      type="float"  />
             <var name="cell_radius" type="float"  />
-            <var name="cell_depth" type="float"  />
-            <var name="cell_wall" type="float"  />
-            <var name="boundary" type="float"  />
-            <var name="th_base" type="float"  />
-            <var name="th_air" type="float"  />
-            <var name="th_pcb" type="float"  />
-            <var name="th_lead" type="float"  />
-            <var name="th_steel" type="float"  />
-            <var name="nx(5)" type="int"  />
-            <var name="ny(5)" type="int"  />
-            <var name="mx(7)" type="int"  />
-            <var name="my(7)" type="int"  />
-            <var name="hexd2(10)" type="float"  />
-            <var name="hexd1(10)" type="float"  />
-            <var name="dpara(6)" type="float"  />
-            <var name="" type="float"  />
+            <var name="cell_depth"  type="float"  />
+            <var name="cell_wall"   type="float"  />
+            <var name="boundary"    type="float"  />
+            <var name="th_base"     type="float"  />
+            <var name="th_air"      type="float"  />
+            <var name="th_pcb"      type="float"  />
+            <var name="th_lead"     type="float"  />
+            <var name="th_steel"    type="float"  />
+            <var name="nx(5)"       type="int"  />
+            <var name="ny(5)"       type="int"  />
+            <var name="mx(7)"       type="int"  />
+            <var name="my(7)"       type="int"  />
+            <var name="hexd2(10)"   type="float"  />
+            <var name="hexd1(10)"   type="float"  />
+            <var name="dpara(6)"    type="float"  />
         </Structure>
         
 
@@ -84,34 +82,38 @@
         </Fill>
         
 
-        <Fill name="PMDG" comment="PMD geometry"  >
-            <var name="version" value="1" comment=" geometry version "  />
-            <var name="m_max" value="135.0" comment=" Mother volume max radius "  />
-            <var name="m_min" value="22.0" comment=" Mother volume min radius "  />
-            <var name="zdist" value="{-539.,-550.}" comment=" PMD placed at 5.39 metre from the interaction point "  />
-            <var name="DPMDx" value="270" comment="  (X-halfwidth of the PMD box,was 190 earlier) "  />
-            <var name="DPMDy" value="270" comment=" Y-halfwidth of the  PMD box. "  />
-            <var name="DPMDz" value="10." comment=" total z half-width of the box. "  />
-            <var name="PARGCz" value="0.40" comment=" half thickness of gas (CPV sensitive) "  />
-            <var name="PARSCz" value="0.40" comment=" (8 mm thick gas) "  />
-            <var name="PARFEz" value="0.25" comment=" (iron frame) "  />
-            <var name="PARPBz" value="0.75" comment=" (3 X0 of lead converter) "  />
-            <var name="nx" value="{48,72,72,48,48 }" comment="  x-dimensions of modules "  />
-            <var name="ny" value="{24,48,48,72,48 }" comment="  y-dimensions of modules "  />
-            <var name="mx" value="{24,48,72,72,24,48,48 }" comment=" x-dimensions of modules "  />
-            <var name="my" value="{24,24,24,48,48,72,48 }" comment=" y-dimensions of modules "  />
-            <var name="hexd2" value="{0.,360.,6,2,-0.4,0.,0.51,0.4,0.,0.51}" comment=" inner hex "  />
-            <var name="hexd1" value="{0.,360.,6,2,-0.4,0.,0.53,0.4,0.,0.53}" comment=" outer hex "  />
-            <var name="dpara" value="{38.29,33.16,0.4,30.,0.,0.}" comment=" supermodule "  />
+        <Fill name="PMDG" comment="PMD geometry">
+
+            <var name="version" value="1"             comment=" geometry version "  />
+            <var name="m_max"   value="135.0"         comment=" Mother volume max radius "  />
+            <var name="m_min"   value="22.0"          comment=" Mother volume min radius "  />
+            <var name="zdist"   value="{-539.,-550.}" comment=" PMD placed at 5.39 metre from the interaction point "  />
+            <var name="DPMDx"   value="270"           comment="  (X-halfwidth of the PMD box,was 190 earlier) "  />
+            <var name="DPMDy"   value="270"           comment=" Y-halfwidth of the  PMD box. "  />
+            <var name="DPMDz"   value="10."           comment=" total z half-width of the box. "  />
+            <var name="PARGCz"  value="0.40"          comment=" half thickness of gas (CPV sensitive) "  />
+            <var name="PARSCz"  value="0.40"          comment=" (8 mm thick gas) "  />
+            <var name="PARFEz"  value="0.25"          comment=" (iron frame) "  />
+            <var name="PARPBz"  value="0.75"          comment=" (3 X0 of lead converter) "  />
+
+            <var name="nx"      value="{48,72,72,48,48 }"                      comment="x-dimensions of modules "  />
+            <var name="ny"      value="{24,48,48,72,48 }"                      comment="y-dimensions of modules "  />
+            <var name="mx"      value="{24,48,72,72,24,48,48 }"                comment="x-dimensions of modules "  />
+            <var name="my"      value="{24,24,24,48,48,72,48 }"                comment="y-dimensions of modules "  />
+            <var name="hexd2"   value="{0.,360.,6,2,-0.4,0.,0.51,0.4,0.,0.51}" comment="inner hex "  />
+            <var name="hexd1"   value="{0.,360.,6,2,-0.4,0.,0.53,0.4,0.,0.53}" comment="outer hex "  />
+            <var name="dpara"   value="{38.29,33.16,0.4,30.,0.,0.}"            comment="supermodule "  />
+
             <var name="CELL_RADIUS" value="0.5282" comment=" Radius of a cell "  />
-            <var name="CELL_DEPTH" value="0.8" comment=" Gas depth "  />
-            <var name="CELL_WALL" value="0.2" comment=" Cell wall thickness "  />
-            <var name="BOUNDARY" value="0.8" comment=" Boundary "  />
-            <var name="th_base" value="0.3" comment=" Thickness of the base plate "  />
-            <var name="th_air" value="0.1" comment=" Air gap "  />
-            <var name="th_pcb" value="0.16" comment=" Thickness of the PCB "  />
-            <var name="th_lead" value="1.5" comment=" Thickness of the Lead "  />
-            <var name="th_steel" value="0.5" comment=" Thickness of the steel support "  />
+            <var name="CELL_DEPTH"  value="0.8" comment=" Gas depth "  />
+            <var name="CELL_WALL"   value="0.2" comment=" Cell wall thickness "  />
+            <var name="BOUNDARY"    value="0.8" comment=" Boundary "  />
+            <var name="th_base"     value="0.3" comment=" Thickness of the base plate "  />
+            <var name="th_air"      value="0.1" comment=" Air gap "  />
+            <var name="th_pcb"      value="0.16" comment=" Thickness of the PCB "  />
+            <var name="th_lead"     value="1.5" comment=" Thickness of the Lead "  />
+            <var name="th_steel"    value="0.5" comment=" Thickness of the steel support "  />
+
         </Fill>
         
 
@@ -136,16 +138,19 @@
         </Placement>
         
         <Block name="PHMD" comment="the PMD box volume and fill with air"  >
+
             <Material name="Air"  />
             <Medium name="STandard"  />
             <Attribute for="PHMD" seen="1" colo="2"  />
             <Shape type="TUBE" rmax="pmdg_m_max" rmin="pmdg_m_min" dz="sm_thick/2."  />
+
             phideg1=90. 
             phideg2=210. 
             phideg3=330. 
             phi1=phideg1*degrad 
             phi2=phideg2*degrad 
             phi3=phideg3*degrad 
+
             ipms = 1 
             <Create block="PHMS"  />
             <Placement y="xlen3*sin(phi1)+ylen3*cos(phi1)" ncopy="1" x="xlen3*cos(phi1)-ylen3*sin(phi1)+5*pmdg_th_air" z="0" block="PHMS"  >
@@ -170,12 +175,15 @@
         </Block>
         
         <Block name="PHMS" comment="the PMD sector volume - 1/3rd of PHMD"  >
-            <Material name="Air"  />
-            <Medium name="Standard"  />
+
+            <Material  name="Air"  />
+            <Medium    name="Standard"  />
             <Attribute for="PHMS" seen="1" colo="2"  />
 
             <If expr="ipms!=3"  >
+
                 <Shape type="para" phi="0" thet="0" dz="sm_thick/2." dx="xlen3*2." dy="-ylen3" alph="30."  />
+
                 phideg =0 
                 ypos   = (SizeN(72)+SizeN(48))*root34  
                 xlen2 = -(SizeN(72)+SizeN(48))/4. 
@@ -426,10 +434,12 @@
         </Block>
         
         <Block name="PHSR" comment="is a detector box made in air"  >
+
             <Material name="Air"  />
             <Attribute for="PHSR" seen="1" serial="0" colo="6"  />
             <Shape type="PARA" phi="0" thet="0" dz="sm_thick/2" dx="xlen0-ylen1*pmdg_boundary/(2.*root32)" dy="ylen0-ylen2*pmdg_boundary*root34/root32" alph="30"  />
             xx = -sm_thick/2.+ sm_thick_a/2. 
+
             <Create block="PMDA"  />
             <Placement z="xx" block="PMDA"  >
             </Placement>
@@ -454,48 +464,49 @@
         </Block>
         
         <Block name="PMDA" comment="is a detector box made in aluminium"  >
+
             <Material name="Aluminium"  />
             <Attribute for="PMDA" seen="1" colo="6"  />
-            <Shape type="PARA" phi="0" thet="0" dz="sm_thick_a/2." dx="xlen0-ylen1*pmdg_boundary/(2.*root32)" dy="ylen0-ylen2*pmdg_boundary*root34/root32" alph="30"  />
+
+            <Shape type="PARA" dx="xlen0-ylen1*pmdg_boundary/(2.*root32)" 
+                               dy="ylen0-ylen2*pmdg_boundary*root34/root32" 
+                               dz="sm_thick_a/2." 
+                               phi="0" thet="0" alph="30"  
+            />
 
             <Create block="AIRA"  />
-            <Placement y="-pmdg_boundary/2.*zlen" x="-pmdg_boundary/(4.*root32)*xlen1" block="AIRA"  >
-            </Placement>
-            
+            <Placement block="AIRA" 
+                       x="-pmdg_boundary/(4.*root32)*xlen1"
+                       y="-pmdg_boundary/2.*zlen"     
+            />
+
         </Block>
         
         <Block name="AIRA" comment="is a detector made in air"  >
 
-            <Material name="Air"  />
+            <Material  name="Air"  />
             <Attribute for="AIRA" seen="1" colo="4"  />
-            <Shape type="PARA" dz="sm_thick_a/2." dx="xlen0-pmdg_boundary/root32" dy="ylen"  />
-
+            <Shape     type="PARA" dz="sm_thick_a/2." dx="xlen0-pmdg_boundary/root32" dy="ylen"  />
 
             zz = -sm_thick_a/2. + pmdg_th_pcb/2. 
             <Create block="PCBA"  />
-            <Placement z="zz" block="PCBA"  >
-            </Placement>
+            <Placement z="zz" block="PCBA" />
             
             zz = zz + pmdg_th_pcb/2 +3.* pmdg_th_air + pmdg_th_pcb/2. 
             <Create block="PCBA"  />
-            <Placement z="zz" block="PCBA"  >
-            </Placement>
-            
+            <Placement z="zz" block="PCBA" />
+
             zz = zz + pmdg_th_pcb/2. + pmdg_CELL_depth/2. 
             <Create block="PHCA"  />
-            <Placement z="zz" block="PHCA"  >
-            </Placement>
+            <Placement z="zz" block="PHCA" />
             
             zz = zz + pmdg_CELL_depth/2. + pmdg_th_pcb/2. 
             <Create block="PCBA"  />
-            <Placement z="zz" block="PCBA"  >
-            </Placement>
+            <Placement z="zz" block="PCBA" />
             
             zz = zz + pmdg_th_pcb/2. + pmdg_th_air + pmdg_th_base/2. 
             <Create block="BASA"  />
-            <Placement z="zz" block="BASA"  >
-            </Placement>
-            
+            <Placement z="zz" block="BASA" />
 
         </Block>
         
@@ -565,15 +576,14 @@
         </Block>
         
         <Block name="BASA" comment="is the G10 base plate"  >
+
             <Mixture name="G10" dens="1.7"  >
-                <Component name="Si" a="28.08" z="14" w="0.6*1*28./60."  />
-                <Component name="O" a="16" z="8" w="0.6*2*16./60."  />
-                <Component name="C" a="12" z="6" w="0.4*8*12./174."  />
-                <Component name="H" a="1" z="1" w="0.4*14*1./174."  />
-                <Component name="O" a="16" z="8" w="0.4*4*16./174."  />
+            <Component name="Si" a="28.08" z="14" w="0.6*1*28./60."  />
+            <Component name="O" a="16" z="8" w="0.6*2*16./60. + 0.4*4*16./174."  />
+            <Component name="C" a="12" z="6" w="0.4*8*12./174."  />
+            <Component name="H" a="1"  z="1" w="0.4*14*1./174."  />
             </Mixture>
-            
-            <Material name="G10"  />
+                    
             <Attribute for="BASA" seen="1" colo="6"  />
             <Shape type="PARA" dz="pmdg_th_base/2." dx="xlen0-pmdg_boundary/root32" dy="ylen"  />
 
@@ -585,15 +595,14 @@
         </Block>
         
         <Block name="PCBA" comment="is the chamber PCB"  >
+
             <Mixture name="G10" dens="1.7"  >
-                <Component name="Si" a="28.08" z="14" w="0.6*1*28./60."  />
-                <Component name="O" a="16" z="8" w="0.6*2*16./60."  />
-                <Component name="C" a="12" z="6" w="0.4*8*12./174."  />
-                <Component name="H" a="1" z="1" w="0.4*14*1./174."  />
-                <Component name="O" a="16" z="8" w="0.4*4*16./174."  />
+            <Component name="Si" a="28.08" z="14" w="0.6*1*28./60."  />
+            <Component name="O" a="16" z="8" w="0.6*2*16./60. + 0.4*4*16./174."  />
+            <Component name="C" a="12" z="6" w="0.4*8*12./174."  />
+            <Component name="H" a="1"  z="1" w="0.4*14*1./174."  />
             </Mixture>
-            
-            <Material name="G10"  />
+
             <Attribute for="PCBA" seen="1" colo="4"  />
             <Shape type="PARA" dz="pmdg_th_pcb/2." dx="xlen0-pmdg_boundary/root32" dy="ylen"  />
 
