@@ -1870,6 +1870,15 @@ class Shape(Handler):
 
         document.impl( '{  AgShape shape = AgShape("%s");'% camelCase(mytype), unit=current )
 
+        # Inherit shape, medium, material parameters from the previous
+        # block to the extent that they have not yet been set
+        document.impl('shape     .Inherit( AgBlock::previous() );', unit=current )
+
+        # Finally, set any paramters which haven't been set already using
+        # information passed in from Create
+        document.impl('create     .SetParameters(shape);', unit=current );
+        
+        # Set user-defined arguements from the SHAPE operator
         for a in args:
             val = attr.get(a)
             if ( val == None ): continue
@@ -1891,26 +1900,12 @@ class Shape(Handler):
                 doxy_shape += '%s=%s '%(a,val)
 
         document.impl( '/// %s' % doxy_shape, unit=current )
-
-        # Inherit shape, medium, material parameters from the previous
-        # block to the extent that they have not yet been set
-        document.impl('shape     .Inherit( AgBlock::previous() );', unit=current )
-
-        # Finally, set any paramters which haven't been set already using
-        # information passed in from Create
-        document.impl('create     .SetParameters(shape);', unit=current );
             
-        #document.impl( '_same_shape &= (_shape==shape);', unit=current )
+
         document.impl( '_same_shape &= _stacker->SearchVolume( shape, _attribute );', unit=current )
         document.impl( '_shape = shape;', unit=current )
             
-        #document.impl('if ( shape == _shape ) return;', unit=current)
-##        document.impl( 'if ( _same_shape ) return;', unit=current )
         document.impl( 'if (_same_shape) goto END_OF_%s;'%(current_block), unit=current )
-        if current_block=='ECHC':
-            document.impl( 'std::cout << "Constructing Volume %s" << std::endl;'%current_block, unit=current )
-        
-        #document.impl('_shape = shape;', unit=current )
         
         document.impl('_stacker -> Build(this);', unit=current )
         document.impl('}', unit=current )
