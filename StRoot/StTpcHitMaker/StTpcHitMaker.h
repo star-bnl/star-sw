@@ -3,9 +3,12 @@
 
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.h,v 1.12 2011/03/08 18:20:44 genevb Exp $
+ * $Id: StTpcHitMaker.h,v 1.13 2011/06/09 20:52:08 genevb Exp $
  * StTpcHitMaker - class to fill the StEvent with TPC clusters from DAQ reader
  * $Log: StTpcHitMaker.h,v $
+ * Revision 1.13  2011/06/09 20:52:08  genevb
+ * Set sanity flag
+ *
  * Revision 1.12  2011/03/08 18:20:44  genevb
  * Limit on number of hits starting at time bin 0
  *
@@ -57,6 +60,7 @@
 
 #include "StRTSBaseMaker.h"
 #include "TString.h"
+#include "StThreeVectorF.hh"
 class StTpcDigitalSector;
 class StTpcHit;
 class tpc_cl;
@@ -107,6 +111,14 @@ class StTpcHitMaker : public StRTSBaseMaker {
     
  public:
   static void AfterBurner(StTpcHitCollection *hitCollection);
+  static StTpcHit* StTpcHitFlag(const StThreeVectorF& p,
+             const StThreeVectorF& e,
+             UInt_t hw, float q, UChar_t c,
+             UShort_t idTruth, UShort_t quality,
+             UShort_t id,
+             Short_t mnpad, Short_t mxpad, Short_t mntmbk,
+             Short_t mxtmbk, Float_t cl_x, Float_t cl_t, UShort_t adc,
+             UShort_t flag);
   static Float_t fgDp;             // hardcoded errors
   static Float_t fgDt;
   static Float_t fgDperp;
