@@ -18,4 +18,6 @@
 #define FCF_IN_DOUBLE           128	// 0x80 one should use the floating point in the union
 #define FCF_CHOPPED		256	// 0x100 cluster is chopped from its neighbour: OFFLINE use only
 
+#define FCF_SANITY		512	// 0x200 cluster extents not sane
+
 #endif
