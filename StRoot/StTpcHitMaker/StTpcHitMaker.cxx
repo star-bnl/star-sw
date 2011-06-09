@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHitMaker.cxx,v 1.40 2011/04/07 23:33:12 genevb Exp $
+ * $Id: StTpcHitMaker.cxx,v 1.41 2011/06/09 20:52:08 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHitMaker.cxx,v $
+ * Revision 1.41  2011/06/09 20:52:08  genevb
+ * Set sanity flag
+ *
  * Revision 1.40  2011/04/07 23:33:12  genevb
  * Restore to version before previous commit
  *
@@ -468,7 +471,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
   Double_t q = cluster.charge * ((Double_t)St_tss_tssparC::instance()->ave_ion_pot() * 
 				 (Double_t)St_tss_tssparC::instance()->scale())/(gain*wire_coupling) ;
 
-  StTpcHit *hit = new StTpcHit(global.position(),hard_coded_errors,hw,q
+  StTpcHit *hit = StTpcHitFlag(global.position(),hard_coded_errors,hw,q
 			       , (UChar_t ) 0  // c
 			       , (UShort_t) 0  // idTruth=0
 			       , (UShort_t) 0  // quality=0,
@@ -479,8 +482,8 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const tpc_cl &cluster, Int_t sector, Int_t
 			       , cluster.t2 //  mxtmbk
 			       , pad
 			       , time 
-			       , cluster.charge);
-  hit->setFlag(cluster.flags);
+			       , cluster.charge
+			       , cluster.flags);
   if (hit->minTmbk() == 0) bin0Hits++;
 //  LOG_INFO << p << " sector " << sector << " row " << row << endm;
 
@@ -521,7 +524,7 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
 
   static StThreeVector<double> hard_coded_errors(fgDp,fgDt,fgDperp);
 
-  StTpcHit *hit = new StTpcHit(global.position(),hard_coded_errors,hw,q
+  StTpcHit *hit = StTpcHitFlag(global.position(),hard_coded_errors,hw,q
 			       , (UChar_t ) 0  // c
 			       , (UShort_t) 0  // idTruth=0
 			       , (UShort_t) 0  // quality=0,
@@ -532,8 +535,8 @@ StTpcHit *StTpcHitMaker::CreateTpcHit(const daq_cld &cluster, Int_t sector, Int_
 			       , cluster.t2 //  mxtmbk
 			       , pad
 			       , time 
-			       , cluster.charge);
-  hit->setFlag(cluster.flags);
+			       , cluster.charge
+			       , cluster.flags);
   if (hit->minTmbk() == 0) bin0Hits++;
 //  LOG_INFO << p << " sector " << sector << " row " << row << endm;
   return hit;
@@ -1051,4 +1054,26 @@ void StTpcHitMaker::AfterBurner(StTpcHitCollection *TpcHitCollection) {
     }
   }
   return;
+};
+//________________________________________________________________________________
+StTpcHit* StTpcHitMaker::StTpcHitFlag(const StThreeVectorF& p,
+             const StThreeVectorF& e,
+             UInt_t hw, float q, UChar_t c,
+             UShort_t idTruth, UShort_t quality,
+             UShort_t id,
+             Short_t mnpad, Short_t mxpad, Short_t mntmbk,
+             Short_t mxtmbk, Float_t cl_x, Float_t cl_t, UShort_t adc,
+             UShort_t flag) {
+  // New hit
+  StTpcHit* hit = new StTpcHit(p,e,hw,q,c,idTruth,quality,id,mnpad,mxpad,mntmbk,mxtmbk,cl_x,cl_t,adc);
+
+  // Check for sanity
+  if ( mntmbk<0 || mxtmbk<0 || mntmbk>32000 || mxtmbk>32000
+    || mnpad <0 || mxpad <0 || mnpad >32000 || mxpad >32000
+    || mxpad-mnpad > 100
+    || (Float_t) mntmbk>cl_t || (Float_t) mxtmbk<cl_t
+    || (Float_t) mnpad >cl_x || (Float_t) mxpad <cl_x
+     ) flag |= FCF_SANITY;
+  hit->setFlag(flag);
+  return hit;
 }

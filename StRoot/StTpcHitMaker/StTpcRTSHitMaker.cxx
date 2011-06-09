@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcRTSHitMaker.cxx,v 1.26 2011/04/07 23:33:12 genevb Exp $
+ * $Id: StTpcRTSHitMaker.cxx,v 1.27 2011/06/09 20:52:08 genevb Exp $
  *
  * Author: Valeri Fine, BNL Feb 2007
  ***************************************************************************
@@ -285,7 +285,7 @@ Int_t StTpcRTSHitMaker::Make() {
 	hw += (ntmbk << 22);  // ntmbks...
 	Double_t q = ADC2GeV*dta->sim_cld[i].cld.charge;
 	Id++;
-	StTpcHit *hit = new StTpcHit(L.position(),hard_coded_errors,hw,q
+	StTpcHit *hit = StTpcHitMaker::StTpcHitFlag(L.position(),hard_coded_errors,hw,q
 				     , (UChar_t ) 0  // counter 
 				     , (UShort_t) dta->sim_cld[i].track_id  // idTruth=0
 				     , (UShort_t) dta->sim_cld[i].quality   // quality=0,
@@ -296,12 +296,12 @@ Int_t StTpcRTSHitMaker::Make() {
 				     , dta->sim_cld[i].cld.t2 //  mxtmbk
 				     , dta->sim_cld[i].cld.pad
 				     , dta->sim_cld[i].cld.tb 
-				     , dta->sim_cld[i].cld.charge);
+				     , dta->sim_cld[i].cld.charge
+				     , dta->sim_cld[i].cld.flags);
 	/*tpxFCF.h
 	  #define FCF_ROW_EDGE            16      // 0x10 touched end of row
 	  #define FCF_BROKEN_EDGE         32      // 0x20 touches one of the mezzanine edges
 	  #define FCF_DEAD_EDGE           64      // 0x40 touches a dead pad */
-	hit->setFlag(dta->sim_cld[i].cld.flags);
         hitsAdded++;
         if (hit->minTmbk() == 0) bin0Hits++;
 	hitCollection->addHit(hit);
