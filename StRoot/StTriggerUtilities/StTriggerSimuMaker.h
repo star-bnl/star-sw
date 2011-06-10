@@ -43,7 +43,8 @@ const int numSimulators=5;
 
 class StTriggerSimuMaker : public StMaker {
 private:
-  int mYear,mMCflag; // set mcFlag=0 for real data
+  int mYear;
+  int mMCflag;			// 0=data, 1=simulation, 2=embedding
   
   /// useful pointers
   St_db_Maker *mDbMk;
@@ -79,7 +80,7 @@ public:
   void    useEmc();
   void    useL2(StGenericL2Emulator* );
   void    useL2(StGenericL2Emulator2009* );
-  void    setMC(int x) {mMCflag=x;}
+  void    setMC(int x) {mMCflag=x;} // 0=data, 1=simulation, 2=embedding
   
   virtual Int_t     Init();
   virtual Int_t     Make();
@@ -119,9 +120,12 @@ public:
 
 #endif
 
-// $Id: StTriggerSimuMaker.h,v 1.27 2010/10/05 15:49:23 rfatemi Exp $
+// $Id: StTriggerSimuMaker.h,v 1.28 2011/06/10 18:56:18 pibero Exp $
 //
 // $Log: StTriggerSimuMaker.h,v $
+// Revision 1.28  2011/06/10 18:56:18  pibero
+// Updated meaning of mMCflag variable: 0=data, 1=simulation, 2=embedding
+//
 // Revision 1.27  2010/10/05 15:49:23  rfatemi
 // Include function to test if trigger is defined in trigger code
 //

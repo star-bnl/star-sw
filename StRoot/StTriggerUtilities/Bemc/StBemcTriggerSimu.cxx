@@ -67,7 +67,7 @@ void StBemcTriggerSimu::Init(){
     LOG_WARN << "StBemcTriggerSimu couldn't get a pointer to St_db_maker -- this means trouble" << endm;
   }
   
-  if(mMCflag) {
+  if(mMCflag == 1) {
     StEmcSimulatorMaker *emcSim = static_cast<StEmcSimulatorMaker*> ( mHeadMaker->GetMakerInheritsFrom("StEmcSimulatorMaker") );
     if(!emcSim) {
       LOG_FATAL << "StBemcTriggerSimu couldn't find StEmcSimulatorMaker in chain" << endm;

@@ -11,7 +11,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// $Id: StTriggerSimuMaker.cxx,v 1.44 2010/10/05 15:49:01 rfatemi Exp $
+// $Id: StTriggerSimuMaker.cxx,v 1.45 2011/06/10 18:56:18 pibero Exp $
 
 // MySQL C API
 #include "mysql.h"
@@ -469,7 +469,7 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
   // For simulation, get run number from DB time stamp
 
-  if (mMCflag) {
+  if (mMCflag == 1) {
     //query = Form("select idx_rn from triggers where beginTime >= '%s' limit 1",GetDBTime().AsSQLString());
     query = Form("select max(idx_rn) from triggers where beginTime <= '%s'",GetDBTime().AsSQLString());
     LOG_INFO << query << endm;
@@ -715,6 +715,9 @@ bool StTriggerSimuMaker::get2009DsmRegistersFromOnlineDatabase(int runNumber)
 
 /*****************************************************************************
  * $Log: StTriggerSimuMaker.cxx,v $
+ * Revision 1.45  2011/06/10 18:56:18  pibero
+ * Updated meaning of mMCflag variable: 0=data, 1=simulation, 2=embedding
+ *
  * Revision 1.44  2010/10/05 15:49:01  rfatemi
  * Include ability to test if trigger is defined in trigger code for the database timestamp
  *
