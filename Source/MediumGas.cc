@@ -311,7 +311,7 @@ MediumGas::LoadGasFile(const std::string filename) {
   int bFieldRes = 1;
   int angRes = 1;
   
-  int versionNumber = 11;
+  int versionNumber = 12;
  
   // Start reading the data. 
   bool atTables = false;
@@ -338,7 +338,8 @@ MediumGas::LoadGasFile(const std::string filename) {
           versionNumber = atoi(token);
           // Check the version number.
           if (versionNumber != 10 && 
-              versionNumber != 11) {
+              versionNumber != 11 &&
+              versionNumber != 12) {
             std::cerr << className << "::LoadGasFile:\n";
             std::cerr << "    The file has version number " 
                       << versionNumber << ".\n";
@@ -470,7 +471,7 @@ MediumGas::LoadGasFile(const std::string filename) {
           // Get Penning probability.
           token = strtok(NULL, " :,%");
           excitationList[excCount].prob = atof(token);
-          if (versionNumber == 11) {
+          if (versionNumber >= 11) {
             // Get Penning rms distance.
             token = strtok(NULL, " :,%");
             excitationList[excCount].rms = atof(token);
@@ -636,7 +637,7 @@ MediumGas::LoadGasFile(const std::string filename) {
   for (int i = 0; i < nMagboltzGases; ++i) {
     if (mixture[i] > 0.) {
       std::string gasname = "";
-      if (!GetGasName(i + 1, gasname)) {
+      if (!GetGasName(i + 1, versionNumber, gasname)) {
         std::cerr << className << "::LoadGasFile:\n"; 
         std::cerr << "    Unknown gas (gas number ";
         std::cerr << i + 1 << ")\n";
@@ -1099,7 +1100,7 @@ MediumGas::WriteGasFile(const std::string filename) {
   std::string buffer;
   buffer = std::string(25, ' ');
   outFile << "\"none" << buffer << "\"\n";
-  const int versionNumber = 11;
+  const int versionNumber = 12;
   outFile << " Version   : " << versionNumber << "\n";
   outFile << " GASOK bits: " << gasBits << "\n";
   std::stringstream idStream;
@@ -1891,7 +1892,8 @@ MediumGas::GetGasInfo(const std::string gasname,
 }
 
 bool 
-MediumGas::GetGasName(const int gasnumber, std::string& gasname) {
+MediumGas::GetGasName(const int gasnumber, const int version,
+                      std::string& gasname) {
 
   switch (gasnumber) {
     case 1:
@@ -2024,7 +2026,11 @@ MediumGas::GetGasName(const int gasnumber, std::string& gasname) {
       gasname = "C2H2F4";   
       break;
     case 44:
-      gasname = "He-3";
+      if (version <= 11) {
+        gasname = "He-3";
+      } else {
+        gasname = "TMA";
+      }
       break;
     case 45:
       gasname = "He";
@@ -2360,6 +2366,12 @@ MediumGas::GetGasName(std::string input, std::string& gasname) const {
     gasname = "C2H2F4"; 
     return true;
   }
+  // TMA
+  if (input == "TMA" || input == "TRIMETHYLAMINE" || 
+      input == "N(CH3)3" || input == "N-(CH3)3") {
+    gasname = "TMA";
+    return true;
+  }
   // CHF3
   if (input == "CHF3" || input == "FREON-23" || 
       input == "TRIFLUOROMETHANE" || input == "FLUOROFORM") {
@@ -2631,6 +2643,10 @@ MediumGas::GetGasNumberGasFile(const std::string input, int& number) const {
   // C2HF5 and C2H2F4.
   if (input == "C2HF5" || input == "C2H2F4") {
     number = 43; return true;
+  }
+  // TMA
+  if (input == "TMA") {
+    number = 44; return true;
   }
   // CHF3
   if (input == "CHF3") {

@@ -1236,7 +1236,8 @@ MediumMagboltz::GetNumberOfPhotonCollisions(
 }
 
 bool 
-MediumMagboltz::GetGasNumberMagboltz(const std::string input, int& number) const {
+MediumMagboltz::GetGasNumberMagboltz(const std::string input, 
+                                     int& number) const {
 
   if (input == "") {
     number = 0; return false;
@@ -1412,6 +1413,10 @@ MediumMagboltz::GetGasNumberMagboltz(const std::string input, int& number) const
   // C2H2F4 (C2HF5).
   if (input == "C2HF5" || input == "C2H2F4") {
     number = 43; return true;
+  }
+  // TMA
+  if (input == "TMA") {
+    number = 44; return true;
   }
   // CHF3
   if (input == "CHF3") {
@@ -4786,7 +4791,7 @@ MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
                                  (ElectronMass * deexcitations[i].energy);
     // Make an estimate for the width within which a photon can be 
     // absorbed by the line
-    const int nWidths = 20;
+    const int nWidths = 1000;
     // Calculate the FWHM of the Voigt distribution according to the  
     // approximation formula given in 
     // Olivero and Longbothum, J. Quant. Spectr. Rad. Trans. 17, 233-236
@@ -5025,7 +5030,7 @@ MediumMagboltz::RunMagboltz(const double e,
 }
 
 void 
-MediumMagboltz::GenerateGasTable(const int numCollisions) {
+MediumMagboltz::GenerateGasTable(const int numColl, const bool verbose) {
 
   // Set the reference pressure and temperature.
   pressureTable = pressure;
@@ -5078,8 +5083,6 @@ MediumMagboltz::GenerateGasTable(const int numCollisions) {
   double alphaerr = 0., etaerr = 0.;
   double alphatof = 0.;
 
-  bool verbose = false;
-  if (debug) verbose = true;
   // Run through the grid of E- and B-fields and angles.
   for (int i = 0; i < nEfields; ++i) {
     for (int j = 0; j < nAngles; ++j) {
@@ -5091,7 +5094,7 @@ MediumMagboltz::GenerateGasTable(const int numCollisions) {
                     << " T, angle: " << bAngles[k] << " rad\n";
         }
         RunMagboltz(eFields[i], bFields[j], bAngles[k],
-                    numCollisions, verbose,
+                    numColl, verbose,
                     vx, vy, vz,
                     difl, dift,
                     alpha, eta,

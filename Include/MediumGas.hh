@@ -138,7 +138,8 @@ class MediumGas : public Medium {
     int intpIonRates;
     
     bool GetGasInfo(const std::string gasname, double& a, double& z) const;
-    bool GetGasName(const int gasnumber, std::string& gasname);
+    bool GetGasName(const int gasnumber, const int version,
+                    std::string& gasname);
     bool GetGasName(std::string input, std::string& gasname) const;
     bool GetGasNumberGasFile(const std::string input, int& number) const;
 
