@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.39 2011/06/07 18:49:53 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.40 2011/06/10 21:17:17 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.40  2011/06/10 21:17:17  genevb
+// Point Flag is EMC
+//
 // Revision 2.39  2011/06/07 18:49:53  genevb
 // FTPC, Trigger removed from QA shift
 //
@@ -201,7 +204,7 @@
   ":emc:EmcCat4_Point_Phi",
   ":emc:EmcCat4_Sigma_Eta",
   ":emc:EmcCat4_Sigma_Phi",
-  " Point Flag",
+  ":emc: Point Flag",
   "QaGRpvtxDx",
   "QaGRpvtxDy",
   "QaGRpvtxDz",
