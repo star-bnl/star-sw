@@ -30,7 +30,7 @@ public:
 
 	virtual int cmd(u_char cmd, u_int param=0, u_int dest=4) { LOG(DBG,"Sending cmd") ; return 0 ; } ;
 	virtual int read(u_int param=0) { return 0 ; } ;
-	virtual int write(char *inbuff, int bytes, int nodelay=0) { return 0 ; } ;
+	virtual int write(char *inbuff, int bytes, int nodelay=0, int param=0) { return 0 ; } ;
 	virtual int busy() { return 0 ; } ;
 	virtual int config(int emul=0) { return 0 ; } ;		// at config run
 
