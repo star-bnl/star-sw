@@ -153,6 +153,11 @@ $(OBJDIR)/ComponentAnsys123.o: \
 	$(SRCDIR)/ComponentFieldMap.cc $(INCDIR)/ComponentFieldMap.hh 
 	@echo $@
 	@$(CXX) $(CFLAGS) $< -o $@
+$(OBJDIR)/ComponentElmer.o: \
+	$(SRCDIR)/ComponentElmer.cc $(INCDIR)/ComponentElmer.hh \
+	$(SRCDIR)/ComponentFieldMap.cc $(INCDIR)/ComponentFieldMap.hh 
+	@echo $@
+	@$(CXX) $(CFLAGS) $< -o $@
 $(OBJDIR)/ComponentTcad2d.o: \
 	$(SRCDIR)/ComponentTcad2d.cc $(INCDIR)/ComponentTcad2d.hh \
 	$(SRCDIR)/ComponentBase.cc $(INCDIR)/ComponentBase.hh
