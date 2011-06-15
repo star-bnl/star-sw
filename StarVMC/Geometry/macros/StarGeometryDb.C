@@ -831,14 +831,16 @@ void y2012()
     geom.ftroFlag = "FTROof"; geom.ftroStat = 0;
     geom.ftpcFlag = "FTPCof"; geom.ftpcStat = 0;
 
+    geom.idsmFlag = "IDSM01";   geom.idsmStat = 1;
     geom.fgtdFlag = "FGTDv306"; geom.fgtdStat = 1;
-    geom.idsmFlag = "ISDM01";   geom.idsmStat = 1;
+
 
     setTitle("Upgrade studies with 6 disk FGT");
     geom.fill();
   };
 
   geom.select = "upgr2012a"; {
+    geom.idsmFlag = "IDSM01";   geom.idsmStat = 1;
     geom.fgtdFlag = "FGTDv302"; geom.fgtdStat = 1;
     setTitle("Upgrade studies with 2 disk FGT");
     geom.fill();
