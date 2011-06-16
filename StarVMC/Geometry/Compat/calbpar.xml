@@ -1,6 +1,0 @@
-<Document file="StarVMC/Compat/calbpar.xml">
-<Export language="Mortran">
-<Import file="$STAR/pams/geometry/calbgeo/calbpar.g" verbatim="true" />
-</Export>
-</Document>
-
