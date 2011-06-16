@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.37 2011/04/04 15:44:24 dmitry Exp $
+ * $Id: StDbManagerImpl.cc,v 1.38 2011/06/16 14:44:00 dmitry Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.38  2011/06/16 14:44:00  dmitry
+ * added new domain - FGT
+ *
  * Revision 1.37  2011/04/04 15:44:24  dmitry
  * fix to blacklist Calibrations_bla only
  *
@@ -389,6 +392,7 @@ addDbDomain(dbTracker,"tracker");
 addDbDomain(dbZdc,"zdc"); 
 addDbDomain(dbFms,"fms"); 
 addDbDomain(dbpp2pp,"pp2pp"); 
+addDbDomain(dbFgt,"fgt"); 
 
 }
 
