@@ -1,9 +1,0 @@
-#ifndef __L1ALGORITHM_H__
-#define __L1ALGORITHM_H__
-
-#define L1_ALGO_ACCEPT 1
-#define L1_ALGO_FUTURE_PROTECTED 2
-#define L1_ALGO_FUTURE_GUARDIAN 3
-
-
-#endif
