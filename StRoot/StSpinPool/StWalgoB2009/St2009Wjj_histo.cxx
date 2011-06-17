@@ -1,4 +1,4 @@
-// $Id: St2009Wjj_histo.cxx,v 1.3 2010/05/03 17:24:37 balewski Exp $
+// $Id: St2009Wjj_histo.cxx,v 1.4 2011/06/17 17:36:12 smirnovd Exp $
 //
 //*-- Author : Jan Balewski, MIT
 
@@ -73,6 +73,9 @@ St2009WjjMaker::initHistos(){
 
 
 // $Log: St2009Wjj_histo.cxx,v $
+// Revision 1.4  2011/06/17 17:36:12  smirnovd
+// *** empty log message ***
+//
 // Revision 1.3  2010/05/03 17:24:37  balewski
 // added spin sorting of di-jets
 //
@@ -90,7 +93,6 @@ St2009WjjMaker::initHistos(){
     ln=new TLine(par_jetPtHigh,-etaX,par_jetPtHigh,etaX);  ln->SetLineColor(kRed);  Lx->Add(ln);
     ln=new TLine(0,par_jetEtaLow,100,par_jetEtaLow);  ln->SetLineColor(kRed);  Lx->Add(ln);
     ln=new TLine(0,par_jetEtaHigh,100,par_jetEtaHigh);  ln->SetLineColor(kRed);  Lx->Add(ln);
-
 
 
   hA[12]=h=new TH2F(core+"_DJ","di-jet ; PT (GeV); eta ",25,0,50,20,-4.,4.);
