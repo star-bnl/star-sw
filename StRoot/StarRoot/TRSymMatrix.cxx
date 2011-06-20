@@ -151,25 +151,15 @@ TRSymMatrix::TRSymMatrix(const TRMatrix& A,ETRMatrixCreatorsOp kop) {
   }
 }
 //________________________________________________________________________________
-Double_t TRSymMatrix::Product(const TRVector& A,ETRMatrixCreatorsOp kop) {
+Double_t TRSymMatrix::Product(const TRVector& A,ETRMatrixCreatorsOp /* kop */) {
   Int_t M, N; // N == 1
   Double_t Value;
-  switch (kop) { // 
-  case kAxSxAT: //A[M,N]*S[N,N]*AT[M,N] => R[M,M]; 
-    M = A.GetNrows();
-    N = GetNrows();
-    assert(N == A.GetNcols());
-    TCL::trasat(A.GetArray(),GetArray(),&Value,M,N);
-    break;
-  case kATxSxA: //BT[N,M]*S[N,N]*B[N,M] => R[M,M]; 
-    M = A.GetNcols();
-    N = GetNrows();
-    assert(N == A.GetNrows());
-    TCL::tratsa(A.GetArray(),GetArray(),&Value,M,N);
-    break;
-  default:
-    Error("TRSymMatrix(ETRMatrixCreatorsOp)", "operation %d not yet implemented", kop);
-  }
+  //  case kAxSxAT: //A[M,N]*S[N,N]*AT[M,N] => R[M,M]; 
+  //  case kATxSxA: //BT[N,M]*S[N,N]*B[N,M] => R[M,M]; 
+  M = A.GetNcols();
+  N = GetNrows();
+  assert(N == A.GetNrows());
+  TCL::tratsa(A.GetArray(),GetArray(),&Value,M,N);
   return Value;
 }
 //________________________________________________________________________________
