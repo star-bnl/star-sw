@@ -25,7 +25,7 @@ class TRSymMatrix : public TRArray {
   Int_t GetNrows()  const       {return fNrows;} 
   Int_t GetNcols()  const       {return GetNrows();}
   virtual ETRMatrixType GetMatrixType() const {return kSemiPosDefinedSymMatrix;}
-  virtual Double_t Product(const TRVector& A,ETRMatrixCreatorsOp kop);
+  virtual Double_t Product(const TRVector& A,ETRMatrixCreatorsOp kop=kAxSxAT);
   virtual Int_t    SpmInv(const TRSymMatrix &S, TRVector *B = 0);
   static  Int_t    spminv(Double_t *v, Double_t *b, Int_t n, 
 			  Int_t &nrank, Double_t *diag, Bool_t *flag);

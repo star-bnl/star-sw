@@ -42,9 +42,9 @@ class TRArray : public TArrayD {
 #ifndef __CINT__
   TRArray(Int_t N,Double_t a0, ...);
 #endif
-  TRArray(Int_t N,const Double_t *Array):  TArrayD(N,Array), fValid(kTRUE) {;}
+  TRArray(Int_t N,const Double_t *Array):  TArrayD(N,Array), fValid(kTRUE), fIsNotOwn(kFALSE) {}
   TRArray(Int_t N,const Float_t *Array);
-  TRArray(const TRArray &A,const Double_t fA, TRArray &B,const Double_t fB): TArrayD(0), fValid(kTRUE)  {
+  TRArray(const TRArray &A,const Double_t fA, TRArray &B,const Double_t fB): TArrayD(0), fValid(kTRUE), fIsNotOwn(kFALSE)  {
     Int_t N = A.GetSize(); assert (N == B.GetSize()); Set(N); 
     TCL::vlinco(A.GetArray(),fA,B.GetArray(),fB,fArray,N);  
   }
