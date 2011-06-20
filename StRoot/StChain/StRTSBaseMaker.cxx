@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTSBaseMaker.cxx,v 1.13 2010/03/17 16:01:08 fine Exp $
+ * $Id: StRTSBaseMaker.cxx,v 1.14 2011/06/20 15:13:51 fisyak Exp $
  *
  * Author: Valeri Fine, BNL Feb 2008
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StRTSBaseMaker.cxx,v $
+ * Revision 1.14  2011/06/20 15:13:51  fisyak
+ * Force to call Finish with SIGTERM signal obtained from condor_vacate_job after time limit reached
+ *
  * Revision 1.13  2010/03/17 16:01:08  fine
  * RT #1880. Fix the the bug of the assert condition
  *
@@ -153,7 +156,7 @@ StRtsTable *StRTSBaseMaker::GetNext(const char* bank)
      query += "/"; query += bank;
      daqData =  GetNextDaqElement(query);
    } else {
-      LOG_ERROR << "No bank name was provided tp query DAQ data from "
+      LOG_ERROR << "No bank name was provided to query DAQ data from "
            << DetectorName() << " detector" << endm;
    }
    return daqData;

@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.242 2011/04/25 22:12:58 perev Exp $
+// $Id: StMaker.cxx,v 1.243 2011/06/20 15:13:50 fisyak Exp $
 //
 //
 /*!
@@ -1078,7 +1078,7 @@ Int_t StMaker::Make()
      assert((ret%10)>=0 && (ret%10)<=kStFatal);     
      maker->EndMaker(ret);
      
-     if (Debug() || ret) 
+     if (Debug() || ret) {
 #ifdef STAR_LOGGER     
         LOG_INFO << "*** " << maker->ClassName() << "::Make() == " 
                   << RetCodeAsString(ret) << "(" << ret << ") ***" 
@@ -1087,6 +1087,7 @@ Int_t StMaker::Make()
         printf("*** %s::Make() == %s(%d) ***\n"
                         ,maker->ClassName(),RetCodeAsString(ret),ret);
 #endif     
+     }
      maker->ResetBIT(kMakeBeg);
      StMkDeb::SetCurrent(curr);
      if ((ret%10)>kStWarn) { //something unusual
@@ -1139,7 +1140,7 @@ EDataSetPass StMaker::ClearDS (TDataSet* ds,void * )
      //if (setSize && (setSize - table->GetTableSize() > 100)) {
       if (setSize && table->GetTableSize() == 0){
         table->Warning("ReAllocate"," Table %s has purged from %d to %d "
-               ,table->GetName(),setSize,table->GetTableSize());
+		       ,table->GetName(),setSize,(Int_t) table->GetTableSize());
 	       }
      table->NaN();
   }
@@ -1662,7 +1663,7 @@ Int_t StMaker::SetAttr(const Char_t *key, const Char_t *val, const Char_t *to)
        if (!m_Attr) m_Attr = new TAttr(GetName());
        m_Attr->SetAttr(tk.Data(), tv.Data());
        if (Debug() > 1) {
-	 LOG_DEBUG << Form("SetAttr","(\"%s\",\"%s\",\"%s\")",tk.Data(),tv.Data(),fullName.Data()) << endm;
+	 LOG_DEBUG << Form("SetAttr(\"%s\",\"%s\",\"%s\")",tk.Data(),tv.Data(),fullName.Data()) << endm;
        }
      }
    }
@@ -1969,6 +1970,9 @@ Int_t StMaker::Skip(Int_t NoEventSkip)
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.243  2011/06/20 15:13:50  fisyak
+// Force to call Finish with SIGTERM signal obtained from condor_vacate_job after time limit reached
+//
 // Revision 1.242  2011/04/25 22:12:58  perev
 // y2008e
 //

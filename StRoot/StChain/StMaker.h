@@ -115,12 +115,12 @@ public:
    
    virtual void         FatalErr(Int_t Ierr, const char *Com);  
    virtual void         PrintInfo();
-   virtual void         NotifyMe(const char *about,const void *ptr){;}
+   virtual void         NotifyMe(const char */* about */,const void */* ptr */){}
    virtual void         AddMaker (StMaker *mk);
 #if 0
    virtual void   MakeDoc(const TString &stardir="$(STAR)",const TString &outdir="$(STAR)/StRoot/html",Bool_t baseClasses=kTRUE); 
 #else
-   virtual void   MakeDoc(const TString &stardir="$(STAR)",const TString &outdir="$(STAR)/StRoot/html",Bool_t baseClasses=kTRUE) {}
+   virtual void   MakeDoc(const TString &/* stardir ="$(STAR)" */,const TString &/* outdir="$(STAR)/StRoot/html" */,Bool_t /* baseClasses=kTRUE */) {}
 #endif
    ///  User methods
    virtual void  AddData (TDataSet *data,const char *dir=".data");
@@ -246,7 +246,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.97 2010/01/27 20:37:04 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.98 2011/06/20 15:13:51 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char *logInput,
                                     const StMaker *uppMk=0,
@@ -310,8 +310,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.97 2010/01/27 20:37:04 perev Exp $
+// $Id: StMaker.h,v 1.98 2011/06/20 15:13:51 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.98  2011/06/20 15:13:51  fisyak
+// Force to call Finish with SIGTERM signal obtained from condor_vacate_job after time limit reached
+//
 // Revision 1.97  2010/01/27 20:37:04  perev
 // GetValidity removed. It is St_db_Maker::GetValidity() now
 //
