@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "TROOT.h"
+#include "TError.h"
 #include "TBrowser.h"
 #include "TBenchmark.h"
 #include "TSystem.h"
@@ -46,7 +47,7 @@
 #include "StMessMgr.h"
 #include "StMemStat.h"
 #include "StCloseFileOnTerminate.h"
-
+#include "TApplication.h"
 ClassImp(StChain)
 
 //_____________________________________________________________________________
@@ -163,15 +164,23 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 #endif                
   if (jBeg > 1) Skip(jBeg-1);
   // End of the event loop as soon as the application receives TERM (-15) system signal
-  class teminator : public StTerminateNotified {
-        bool fEnd_of_time;
-     public: 
-        teminator() : StTerminateNotified(), fEnd_of_time(false){;}
-        void SetNotifiedCallBack() { fEnd_of_time = true; }
-        bool Notified() const { return !fEnd_of_time; }
+  class teminator : public  StTerminateNotified {
+    Bool_t fEnd_of_time;
+  public: 
+    teminator() : StTerminateNotified(), fEnd_of_time(kFALSE) {}
+    Bool_t Notify() {return ! fEnd_of_time;}
+    void SetNotifiedCallBack() { 
+      fEnd_of_time = true; 
+      fgStChain->Error(__FUNCTION__," Job will be terminated soon by the external signal . . . . "); 
+      if (GetTopChain()) {
+	fgStChain->Error(__FUNCTION__," Forced Finish . . . . "); 
+	GetTopChain()->Finish();
+      }
+      fgStChain->Error(__FUNCTION__,"Terminating  . . . . ");
+      gApplication->Terminate(15);
+    }
   } endOfTime;
-  
-  for (jCur=jBeg; jCur<=jEnd  && endOfTime.Notified(); jCur++) {
+  for (jCur=jBeg; jCur<=jEnd; jCur++) {
      evnt.Reset(); evnt.Start("QAInfo:");
 
      Clear();
@@ -273,8 +282,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.77 2010/04/27 21:31:44 fine Exp $
+// $Id: StChain.cxx,v 1.78 2011/06/20 15:13:50 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.78  2011/06/20 15:13:50  fisyak
+// Force to call Finish with SIGTERM signal obtained from condor_vacate_job after time limit reached
+//
 // Revision 1.77  2010/04/27 21:31:44  fine
 // remove the logger destruction side effect
 //
