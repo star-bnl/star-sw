@@ -147,6 +147,7 @@ class MediumMagboltz : public MediumGas {
     // Energy spacing of collision rate tables
     double eFinal, eStep;
     double eMinLog;
+    double lnStep;
     bool useAutoAdjust;
   
     // Flag enabling/disabling output of cross-section table to file

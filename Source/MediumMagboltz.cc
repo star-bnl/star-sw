@@ -23,7 +23,7 @@ const int MediumMagboltz::DxcTypeCollNonIon = -1;
 MediumMagboltz::MediumMagboltz() :
   MediumGas(),
   eFinal(40.), eStep(eFinal / nEnergySteps), 
-  eMinLog(10000.), 
+  eMinLog(1000.), lnStep(1.),
   useAutoAdjust(true), 
   useCsOutput(false), 
   nTerms(0), useAnisotropic(true), 
@@ -604,14 +604,15 @@ MediumMagboltz::GetElectronCollisionRate(const double e, const int band) {
   // Get the energy interval.
   int iE = 0;
   if (e <= eMinLog) {
+    // Linear binning
     iE = int(e / eStep);
     if (iE >= nEnergySteps) return cfTot[nEnergySteps - 1];
     if (iE < 0) return cfTot[0]; 
     return cfTot[iE];
   }
   
-  const double rLog = pow(eFinal / eMinLog, 1. / nEnergyStepsLog);
-  iE = int(log(e / eMinLog) / log(rLog));
+  // Logarithmic binning
+  iE = int(log(e / eMinLog) / lnStep);
   return cfTotLog[iE];
 
 }
@@ -656,6 +657,7 @@ MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
   double angPar = 0.5;
   
   if (e <= eMinLog) {
+    // Linear binning
     // Get the energy interval.
     int iE = int(e / eStep);
     if (iE >= nEnergySteps) iE = nEnergySteps - 1;
@@ -685,9 +687,9 @@ MediumMagboltz::GetElectronCollision(const double e, int& type, int& level,
     angCut = scatCut[iE][level];
     angPar = scatParameter[iE][level];
   } else {
-    const double rLog = pow(eFinal / eMinLog, 1. / nEnergyStepsLog);
+    // Logarithmic binning
     // Get the energy interval.
-    int iE = int(log(e / eMinLog) / log(rLog));
+    int iE = int(log(e / eMinLog) / lnStep);
     if (iE < 0) iE = 0;
     if (iE >= nEnergyStepsLog) iE = nEnergyStepsLog - 1;
     // Sample the scattering process.
@@ -1699,8 +1701,9 @@ MediumMagboltz::Mixer(const bool verbose) {
     for (int iE = 0; iE < nEnergySteps; ++iE) {
       np = np0;
       if (useCsOutput) {
-        outfile << iE * eStep << "  " << q[iE][1] << "  " << q[iE][2] 
-                << "  " << q[iE][3] << "  " << q[iE][4] << "  ";
+        outfile << (iE + 0.5) * eStep << "  " 
+                << q[iE][1] << "  " << q[iE][2] << "  " 
+                << q[iE][3] << "  " << q[iE][4] << "  ";
       }
       // Elastic scattering
       cf[iE][np] = q[iE][1] * van;
@@ -1737,16 +1740,16 @@ MediumMagboltz::Mixer(const bool verbose) {
         if (description[np][5] == 'D' &&
             description[np][6] == 'I' &&
             description[np][7] == 'S') {
-          // if (iE * eStep > 40.) {
+          // if ((iE + 0.5) * eStep > 40.) {
           //   cf[iE][np] *= 0.8;
-          // } else if (iE * eStep > 30.) {
-          //   cf[iE][np] *= (1. - (iE * eStep - 30.) * 0.02);
+          // } else if ((iE + 0.5) * eStep > 30.) {
+          //   cf[iE][np] *= (1. - ((iE + 0.5) * eStep - 30.) * 0.02);
           // }
         }
         if (cf[iE][np] < 0.) {
           std::cerr << className << "::Mixer:\n";
           std::cerr << "    Negative inelastic cross-section at " 
-                    << iE * eStep << " eV.\n"; 
+                    << (iE + 0.5) * eStep << " eV.\n"; 
           std::cerr << "    Set to zero.\n";
           cf[iE][np] = 0.;
         }
@@ -1768,89 +1771,95 @@ MediumMagboltz::Mixer(const bool verbose) {
     }
     
     if (eFinal <= eMinLog) continue;
-    // Fill the high-energy part.
+    // Fill the high-energy part (logarithmic binning).
     const double rLog = pow(eFinal / eMinLog, 1. / nEnergyStepsLog);
-    double emax = 0.5 * eMinLog * (1. + rLog);
+    lnStep = log(rLog);
+    double emid = 0.5 * eMinLog * (1. + rLog);
+    int imid = nEnergySteps - 1;
     for (int iE = 0; iE < nEnergyStepsLog; ++iE) {
-      Magboltz::inpt_.efinal = emax;
-      Magboltz::inpt_.estep = emax / nEnergySteps;
+      Magboltz::inpt_.estep = emid / (nEnergySteps - 0.5);
+      Magboltz::inpt_.efinal = emid + 0.5 * Magboltz::inpt_.estep;
       Magboltz::gasmix_(&ngs, q[0], qIn[0], &nIn, e, eIn, name, &virial, &w, 
                         pEqEl[0], pEqIn[0], penFra[0], kEl, kIn, scrpt);
       np = np0;
       if (useCsOutput) {
-        outfile << emax << "  " << q[nEnergySteps - 1][1] 
-                        << "  " << q[nEnergySteps - 1][2] 
-                        << "  " << q[nEnergySteps - 1][3] 
-                        << "  " << q[nEnergySteps - 1][4] << "  ";
+        outfile << emid << "  " << q[imid][1] 
+                        << "  " << q[imid][2] 
+                        << "  " << q[imid][3] 
+                        << "  " << q[imid][4] << "  ";
       }
       // Elastic scattering
-      cfLog[iE][np] = q[nEnergySteps - 1][1] * van;
+      cfLog[iE][np] = q[imid][1] * van;
       if (scatModel[np] == 1) {
-        ComputeAngularCut(pEqEl[nEnergySteps - 1][1], 
+        ComputeAngularCut(pEqEl[imid][1], 
                           scatCutLog[iE][np], 
                           scatParameterLog[iE][np]);
       } else if (scatModel[np] == 2) {
-        scatParameterLog[iE][np] = pEqEl[nEnergySteps - 1][1];
+        scatParameterLog[iE][np] = pEqEl[imid][1];
       }
       // Ionisation
       if (withIon) {
         ++np;
-        cfLog[iE][np] = q[nEnergySteps - 1][2] * van;
+        cfLog[iE][np] = q[imid][2] * van;
         if (scatModel[np] == 1) {
-          ComputeAngularCut(pEqEl[nEnergySteps - 1][2], 
+          ComputeAngularCut(pEqEl[imid][2], 
                             scatCutLog[iE][np], 
                             scatParameterLog[iE][np]);
         } else if (scatModel[np] == 2) {
-          scatParameterLog[iE][np] = pEqEl[nEnergySteps - 1][2];
+          scatParameterLog[iE][np] = pEqEl[imid][2];
         }
       }
       // Attachment
       if (withAtt) {
         ++np;
-        cfLog[iE][np] = q[nEnergySteps - 1][3] * van;
+        cfLog[iE][np] = q[imid][3] * van;
       }
       // Inelastic terms
       for (int j = 0; j < nIn; ++j) {
         ++np;
-        if (useCsOutput) outfile << qIn[nEnergySteps - 1][j] << "  ";
-        cfLog[iE][np] = qIn[nEnergySteps - 1][j] * van;
+        if (useCsOutput) outfile << qIn[imid][j] << "  ";
+        cfLog[iE][np] = qIn[imid][j] * van;
         // Scale the excitation cross-sections (for error estimates).
         cfLog[iE][np] *= scaleExc[iGas];
         if (cfLog[iE][np] < 0.) {
           std::cerr << className << "::Mixer:\n";
           std::cerr << "    Negative inelastic cross-section at " 
-                    << emax << " eV.\n"; 
+                    << emid << " eV.\n"; 
           std::cerr << "    Set to zero.\n";
           cfLog[iE][np] = 0.;
         }
         if (scatModel[np] == 1) {
-          ComputeAngularCut(pEqIn[nEnergySteps - 1][j], 
+          ComputeAngularCut(pEqIn[imid][j], 
                             scatCutLog[iE][np], 
                             scatParameterLog[iE][np]);
         } else if (scatModel[np] == 2) {
-          scatParameterLog[iE][np] = pEqIn[nEnergySteps - 1][j];
+          scatParameterLog[iE][np] = pEqIn[imid][j];
         }
       }
       if (useCsOutput) outfile << "\n";
-      emax *= rLog;
+      // Increase the energy.
+      emid *= rLog;
     }
   }
   if (useCsOutput) outfile.close();
   
   // Find the smallest ionisation threshold.
+  std::string minIonPotGas = "";
   for (int i = nMaxGases; i--;) {
     if (ionPot[i] < 0.) continue;
     if (minIonPot < 0.) {
       minIonPot = ionPot[i];
+      minIonPotGas = gas[i];
     } else if (ionPot[i] < minIonPot) {
       minIonPot = ionPot[i];
+      minIonPotGas = gas[i];
     }
   }
 
   if (debug || verbose) {
     std::cout << className << "::Mixer:\n";
-    std::cout << "    Lowest ionisation threshold in the mixture: " 
-              << minIonPot << " eV\n";
+    std::cout << "    Lowest ionisation threshold in the mixture:\n";
+    std::cout << "      " << minIonPot << " eV (" << minIonPotGas << ")\n";
   }
 
   for (int iE = nEnergySteps; iE--;) {
@@ -1859,7 +1868,7 @@ MediumMagboltz::Mixer(const bool verbose) {
       if (cf[iE][k] < 0.) {
           std::cerr << className << "::Mixer:\n";
           std::cerr << "    Negative collision rate at " 
-                    << iE * eStep << " eV. \n";
+                    << (iE + 0.5) * eStep << " eV. \n";
           std::cerr << "    Set to zero.\n";
           cf[iE][k] = 0.;
       }
@@ -4717,7 +4726,7 @@ MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
     nPhotonTerms += 2;
     for (int j = 0; j < nEnergyStepsGamma; ++j) {
       // Retrieve total photoabsorption cross-section and ionisation yield.
-      data.GetPhotoabsorptionCrossSection(gasname, j * eStepGamma, 
+      data.GetPhotoabsorptionCrossSection(gasname, (j + 0.5) * eStepGamma, 
                                           cs, eta);
       cfTotGamma[j] += cs * prefactor;
       // Ionisation
@@ -4732,7 +4741,7 @@ MediumMagboltz::ComputePhotonCollisionTable(const bool verbose) {
     std::ofstream csfile;
     csfile.open("csgamma.txt", std::ios::out);
     for (int j = 0; j < nEnergyStepsGamma; ++j) {
-      csfile << j * eStepGamma << "  ";
+      csfile << (j + 0.5) * eStepGamma << "  ";
       for (int i = 0; i < nPhotonTerms; ++i) csfile << cfGamma[j][i] << "  ";
       csfile << "\n";
     }

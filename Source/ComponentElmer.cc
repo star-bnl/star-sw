@@ -43,9 +43,9 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   // Open the header
   std::ifstream fheader;
   fheader.open(header.c_str(), std::ios::in);
-  if(fheader.fail()) {
+  if (fheader.fail()) {
     printf("ComponentElmer::Initialise:\n");
-    printf("Could not open header file %s for reading.:\n",
+    printf("    Could not open header file %s for reading.\n",
            header.c_str());
   }
 
@@ -61,7 +61,8 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   nNodes = ReadInteger(token, 0, readerror);
   token = strtok(NULL, " ");
   nElements = ReadInteger(token, 0, readerror);
-  printf("Read %i nodes and %i elements from file %s.\n",nNodes,nElements,header.c_str());
+  printf("Read %i nodes and %i elements from file %s.\n",
+         nNodes, nElements, header.c_str());
   if (readerror) {
     printf("ComponentElmer::Initialise:\n");
     printf("    Error reading file %s (line %d).\n", header.c_str(), il);
@@ -76,9 +77,9 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   // Open the nodes list
   std::ifstream fnodes;
   fnodes.open(nlist.c_str(), std::ios::in);
-  if(fnodes.fail()) {
+  if (fnodes.fail()) {
     printf("ComponentElmer::Initialise:\n");
-    printf("Could not open nodes file %s for reading.:\n",
+    printf("    Could not open nodes file %s for reading.\n",
            nlist.c_str());
   }
 
@@ -91,7 +92,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
              strcmp(unit.c_str(),"millimeter") == 0) {
     funit = 0.1;
   } else if (strcmp(unit.c_str(),"cm") == 0 || 
-            strcmp(unit.c_str(),"centimeter") == 0) {
+             strcmp(unit.c_str(),"centimeter") == 0) {
     funit = 1.0;
   } else if (strcmp(unit.c_str(),"m") == 0 || 
              strcmp(unit.c_str(),"meter") == 0) {
@@ -109,7 +110,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
 
   // Read the nodes from the file
   node newNode;
-  for(il = 0; il < nNodes; il++)	{
+  for (il = 0; il < nNodes; il++) {
 
     // Get a line from the nodes file
     fnodes.getline(line, size, '\n');
@@ -145,9 +146,9 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   // Open the potential file
   std::ifstream fvolt;
   fvolt.open(volt.c_str(), std::ios::in);
-  if(fvolt.fail()) {
+  if (fvolt.fail()) {
     printf("ComponentElmer::Initialise:\n");
-    printf("Could not open result file %s for reading.:\n",
+    printf("    Could not open result file %s for reading.\n",
            volt.c_str());
   }
 
@@ -155,29 +156,30 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   il = 1;
 
   // Read past the header
-  while(!readstop && fvolt.getline(line, size, '\n')) {
+  while (!readstop && fvolt.getline(line, size, '\n')) {
     token = strtok(line, " ");
-    if(strcmp(token, "Perm:") == 0) readstop = true;
+    if (strcmp(token, "Perm:") == 0) readstop = true;
     il++;
   }
 
   // Should have stopped: if not, print error message
-  if(!readstop) {
+  if (!readstop) {
     printf("ComponentElmer::Initialise:\n");
-    printf("Error reading past header of potentials file %s.\n", volt.c_str());  
+    printf("    Error reading past header of potentials file %s.\n", 
+           volt.c_str());  
     fnodes.close();
     ok = false;
     return false;  
   }
 
   // Read past the permutation map (number of lines = nNodes)
-  for(int tl = 0; tl < nNodes; tl++) { 
+  for (int tl = 0; tl < nNodes; tl++) { 
     fvolt.getline(line, size, '\n'); 
     il++;
   }
 
   // Read the potentials
-  for(int tl = 0; tl < nNodes; tl++) {
+  for (int tl = 0; tl < nNodes; tl++) {
     double v;
     fvolt.getline(line, size, '\n');
     token = strtok(line, " ");
@@ -199,9 +201,9 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   // Open the materials file
   std::ifstream fmplist;
   fmplist.open(mplist.c_str(), std::ios::in);
-  if(fmplist.fail()) {
+  if (fmplist.fail()) {
     printf("ComponentElmer::Initialise:\n");
-    printf("Could not open result file %s for reading.:\n",
+    printf("    Could not open result file %s for reading.\n",
            mplist.c_str());
   }
 
@@ -210,7 +212,8 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   token = strtok(line, " ");
   if (readerror) {
     printf("ComponentElmer::Initialise:\n");
-    printf("    Error reading number of materials from %s.\n", mplist.c_str());
+    printf("    Error reading number of materials from %s.\n", 
+           mplist.c_str());
     fmplist.close();
     ok = false;
     return false;
@@ -222,7 +225,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     materials[i].eps = -1;
     materials[i].medium = NULL;
   }
-  for(il = 2; il < (nMaterials+2); il++) {
+  for (il = 2; il < (nMaterials + 2); il++) {
     fmplist.getline(line, size, '\n');
     token = strtok(line, " "); ReadInteger(token, -1, readerror);
     token = strtok(NULL, " "); double dc = ReadDouble(token, -1.0, readerror);
@@ -233,9 +236,9 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
       ok = false;
       return false;
     } 
-    materials[il-2].eps = dc;
+    materials[il - 2].eps = dc;
     printf("ComponentElmer::Initialise:\n");
-    printf("Set material %i of %i to eps %f.\n",il-2,nMaterials,dc);
+    printf("    Set material %i of %i to eps %f.\n", il - 2, nMaterials, dc);
   }
 
   // Close the materials file
@@ -274,9 +277,9 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   // Open the elements file
   std::ifstream felems;
   felems.open(elist.c_str(), std::ios::in);
-  if(felems.fail()) {
+  if (felems.fail()) {
     printf("ComponentElmer::Initialise:\n");
-    printf("Could not open result file %s for reading.:\n",
+    printf("    Could not open result file %s for reading.\n",
            elist.c_str());
   }
 
@@ -285,7 +288,7 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
   int highestnode = 0;
   int nbackground = 0;
   element newElement;
-  for(il = 0; il < nElements; il++)	{
+  for (il = 0; il < nElements; il++)	{
 
     // Get a line
     felems.getline(line, size, '\n');
@@ -293,9 +296,12 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     // Split into tokens
     token = strtok(line, " ");
     // Read the 2nd-order element
-    // Note: Ordering of Elmer elements can be described in the ElmerSolver manual (appendix D. at the time of this comment)
-    // If the order read below is compared to the shape functions used eg. in ElectricField, the order is wrong, but note at the
-    //  end of this function the order of elements 5,6,7 will change to 7,5,6 when actually recorded in newElement.emap to correct for this
+    // Note: Ordering of Elmer elements can be described in the 
+    // ElmerSolver manual (appendix D. at the time of this comment)
+    // If the order read below is compared to the shape functions used 
+    // eg. in ElectricField, the order is wrong, but note at the
+    // end of this function the order of elements 5,6,7 will change to 
+    // 7,5,6 when actually recorded in newElement.emap to correct for this
     token = strtok(NULL, " "); int imat = ReadInteger(token, -1, readerror) - 1;
     token = strtok(NULL, " ");
     token = strtok(NULL, " "); int in0 = ReadInteger(token, -1, readerror);
@@ -309,8 +315,11 @@ ComponentElmer::Initialise(std::string header, std::string elist,  std::string n
     token = strtok(NULL, " "); int in8 = ReadInteger(token, -1, readerror);
     token = strtok(NULL, " "); int in9 = ReadInteger(token, -1, readerror);
    
-    if(debug && il < 10) printf("Read nodes %i, %i, %i, %i... from element %i of %i with mat %i.\n",in0,in1,in2,in3,il+1,nElements,imat);
-    
+    if (debug && il < 10) {
+      printf("Read nodes %i, %i, %i, %i... from element %i of %i with mat %i.\n",
+             in0,in1,in2,in3,il+1,nElements,imat);
+    }
+
     // Check synchronisation
     if (readerror) {
       printf("ComponentElmer::Initialise:\n");
@@ -485,7 +494,7 @@ ComponentElmer::SetWeightingField(std::string prnsol, std::string label) {
     if (inode < 1 || inode > nNodes) {
       printf("ComponentElmer::SetWeightingField:\n");
       printf("    Node number %d out of range\n", inode);
-      printf("     on potential file %s (line %d).\n", prnsol.c_str(), il);
+      printf("    on potential file %s (line %d).\n", prnsol.c_str(), il);
       ok = false;
     } else {
       nodes[inode - 1].w = volt;
@@ -855,7 +864,7 @@ ComponentElmer::GetMedium(
                  rcoordinate, rotation);
 
   // Initial values
-  m = NULL;
+  m = 0;
 
   // Do not proceed if not properly initialised.
   if (!ready) {
@@ -914,7 +923,8 @@ ComponentElmer::GetElementVolume(const int i) {
 
   if (i < 0 || i >= nElements) return 0.;
   
-  // Uses formula V = |a (dot) b x c|/6 with a => "3", b => "1", c => "2" and origin "0"
+  // Uses formula V = |a (dot) b x c|/6 
+  // with a => "3", b => "1", c => "2" and origin "0"
   const double vol = fabs(
     (nodes[elements[i].emap[3]].x - nodes[elements[i].emap[0]].x) * (
       (nodes[elements[i].emap[1]].y - nodes[elements[i].emap[0]].y) * 
