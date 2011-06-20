@@ -343,6 +343,7 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
 
   bool ok = true;
   bool trapped = false;
+  bool validAlphaEta = false;
   int abortReason = 0;
 
   if (hasTimeWindow && (t0 < tMin || t0 > tMax)) {
@@ -566,100 +567,108 @@ AvalancheMC::DriftLine(const double x0, const double y0, const double z0,
   int nHolesOld = nHoles;
   int nIonsOld = nIons;
   if ((q == -1 || q == 1) && (aval || useAttachment)) {
-    ComputeAlphaEta(q);
-
+  
+    // Compute Townsend and attachment coefficient
+    validAlphaEta = ComputeAlphaEta(q);
+    if (ok) ok = validAlphaEta;
+    
     // Subdivision of a step
     const double probth = 0.01;
 
+    // Set initial number of electrons/ions.
+    int ne = 1, ni = 0;
     // Loop over the drift line.
     for (int i = 0; i < nDrift - 1; ++i) {
       drift[i].ne = 0; drift[i].nh = 0; drift[i].ni = 0;
-      // Compute the number of subdivisions.
-      int nDiv = int((drift[i].alpha + drift[i].eta) / probth);
-      if (nDiv < 1) nDiv = 1;
-      // Probabilities for gain and loss.
-      const double alpha = std::max(drift[i].alpha / nDiv, 0.);
-      const double eta   = std::max(drift[i].eta   / nDiv, 0.);
-      // Set initial number of electrons/ions.
-      int ne = 1, ni = 0;
-      // Loop over the subdivisions.
-      for (int j = 0; j < nDiv; ++j) {
-        if (ne > 1000) {
-          // Gaussian approximation.
-          const int gain = int(ne * alpha + RndmGaussian() * 
-                               sqrt(ne * alpha * (1. - alpha)));
-          const int loss = int(ne * eta   + RndmGaussian() * 
-                               sqrt(ne * eta   * (1. - eta)));
-          ne += gain - loss;
-          ni += gain;
-        } else {
-          // Binomial approximation
-          for (int k = ne; k--;) {
-            if (RndmUniform() < alpha) {
-              ++ne; 
-              ++ni;
+      // Only attempt avalanche calculation if alpha and eta are valid.
+      if (validAlphaEta) {
+        // Compute the number of subdivisions.
+        int nDiv = int((drift[i].alpha + drift[i].eta) / probth);
+        if (nDiv < 1) nDiv = 1;
+        // Probabilities for gain and loss.
+        const double alpha = std::max(drift[i].alpha / nDiv, 0.);
+        const double eta   = std::max(drift[i].eta   / nDiv, 0.);
+        // Set initial number of electrons/ions.
+        int neInit = ne, niInit = ni;
+        // Loop over the subdivisions.
+        for (int j = 0; j < nDiv; ++j) {
+          if (ne > 1000) {
+            // Gaussian approximation.
+            const int gain = int(ne * alpha + RndmGaussian() * 
+                                 sqrt(ne * alpha * (1. - alpha)));
+            const int loss = int(ne * eta   + RndmGaussian() * 
+                                 sqrt(ne * eta   * (1. - eta)));
+            ne += gain - loss;
+            ni += gain;
+          } else {
+            // Binomial approximation
+            for (int k = ne; k--;) {
+              if (RndmUniform() < alpha) {
+                ++ne; 
+                ++ni;
+              }
+              if (RndmUniform() < eta) {
+                --ne;
+              }
             }
-            if (RndmUniform() < eta) {
-              --ne;
+          }
+          // Check if the particle has survived.
+          if (ne <= 0) {
+            trapped = true;
+            if (q == -1) {
+              --nElectrons;
+            } else if (q == 1) {
+              --nHoles;
+            } else {
+              --nIons;
             }
+            nDrift = i + 2;
+            drift[nDrift - 1].x = 0.5 * (drift[i].x + drift[i + 1].x);
+            drift[nDrift - 1].y = 0.5 * (drift[i].y + drift[i + 1].y);
+            drift[nDrift - 1].z = 0.5 * (drift[i].z + drift[i + 1].z);
+            break;
           }
         }
-        // Check if the particle has survived.
-        if (ne <= 0) {
-          trapped = true;
+        // If at least one new electron has been created,
+        // add the new electrons to the table.
+        if (ne - neInit >= 1) {
           if (q == -1) {
-            --nElectrons;
+            drift[i].ne = ne - neInit;
+            nElectrons += ne - neInit;
           } else if (q == 1) {
-            --nHoles;
+            drift[i].nh = ne - neInit;
+            nHoles += ne - neInit;
           } else {
-            --nIons;
+            drift[i].ni = ne - neInit;
+            nIons += ne - neInit;
           }
-          nDrift = i + 2;
-          drift[nDrift - 1].x = 0.5 * (drift[i].x + drift[i + 1].x);
-          drift[nDrift - 1].y = 0.5 * (drift[i].y + drift[i + 1].y);
-          drift[nDrift - 1].z = 0.5 * (drift[i].z + drift[i + 1].z);
+        }
+        if (ni - niInit >= 1) {
+          if (q == -1) {
+            if (useIons) {
+              drift[i].ni = ni - niInit;
+              nIons += ni - niInit;
+            } else {
+              drift[i].nh = ni - niInit;
+              nHoles += ni - niInit;
+            }
+          } else {
+            drift[i].ne = ni - niInit;
+            nElectrons += ni - niInit;
+          }
+        }
+        // If trapped, exit the loop over the drift line.
+        if (trapped) {
+          abortReason = StatusAttached;
+          if (debug) {
+            std::cout << className << "::DriftLine:\n";
+            std::cout << "    Particle attached.\n";
+            std::cout << "    At " << drift[nDrift - 1].x << ", " 
+                                   << drift[nDrift - 1].y << ", " 
+                                   << drift[nDrift - 1].z << "\n";
+          }
           break;
         }
-      }
-      // If at least one new electron has been created,
-      // add the new electrons to the table.
-      if (ne > 1) {
-        if (q == -1) {
-          drift[i].ne = ne - 1;
-          nElectrons += ne - 1;
-        } else if (q == 1) {
-          drift[i].nh = ne - 1;
-          nHoles += ne - 1;
-        } else {
-          drift[i].ni = ne - 1;
-          nIons += ne - 1;
-        }
-      }
-      if (ni >= 1) {
-        if (q == -1) {
-          if (useIons) {
-            drift[i].ni = ni;
-            nIons += ni;
-          } else {
-            drift[i].nh = ni;
-            nHoles += ni;
-          }
-        } else {
-          drift[i].ne = ni;
-          nElectrons += ni;
-        }
-      }
-      // If trapped, exit the loop over the drift line.
-      if (trapped) {
-        abortReason = StatusAttached;
-        if (debug) {
-          std::cout << className << "::DriftLine:\n";
-          std::cout << "    Particle attached.\n";
-          std::cout << "    At " << drift[nDrift - 1].x << ", " 
-                                 << drift[nDrift - 1].y << ", " 
-                                 << drift[nDrift - 1].z << "\n";
-        }
-        break;
       }
     }
   }
@@ -954,7 +963,7 @@ AvalancheMC::ComputeAlphaEta(const int q) {
     for (int j = 6; j--;) {
       x = drift[i].x + 0.5 * (1. + tg[j]) * delx;
       y = drift[i].y + 0.5 * (1. + tg[j]) * dely;
-      z = drift[i].x + 0.5 * (1. + tg[j]) * delz;
+      z = drift[i].z + 0.5 * (1. + tg[j]) * delz;
       sensor->ElectricField(x, y, z, ex, ey, ez, medium, status);
       // Make sure that we are in a drift medium.
       if (status != 0) {
@@ -1117,6 +1126,7 @@ AvalancheMC::ComputeAlphaEta(const int q) {
           drift[i].eta += sub2;
           sub2 = 0.;
           try2 = true;
+          break;
         } else if (drift[i + j].eta > 0.) {
           drift[i].eta += drift[i + j].eta;
           sub2 -= drift[i + j].eta;
