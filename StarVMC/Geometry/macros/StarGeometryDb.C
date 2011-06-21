@@ -24,20 +24,21 @@ void StarGeometryDb()
   //
   // Setup STAR Geometries y2000 to present
   //
-  y2000(); geom.Last(); setTitle("Production Geometry"); geom.select="y2000pro"; geom.fill();
-  y2001(); geom.Last(); setTitle("Production Geometry"); geom.select="y2001pro"; geom.fill();
-  y2002(); geom.Last(); setTitle("Production Geometry"); geom.select="y2002pro"; geom.fill();
-  y2003(); geom.Last(); setTitle("Production Geometry"); geom.select="y2003pro"; geom.fill();
-  y2004(); geom.Last(); setTitle("Production Geometry"); geom.select="y2004pro"; geom.fill();
-  y2005(); geom.Last(); setTitle("Production Geometry"); geom.select="y2005pro"; geom.fill();
-  y2006(); geom.Last(); setTitle("Production Geometry"); geom.select="y2006pro"; geom.fill();
-  y2007(); geom.Last(); setTitle("Production Geometry"); geom.select="y2007pro"; geom.fill();
-  y2008(); geom.Last(); setTitle("Production Geometry"); geom.select="y2008pro"; geom.fill();
-  y2009(); geom.Last(); setTitle("Production Geometry"); geom.select="y2009pro"; geom.fill();
-  y2010(); geom.Last(); setTitle("Production Geometry"); geom.select="y2010pro"; geom.fill();
-  y2011(); geom.Last(); setTitle("Production Geometry"); geom.select="y2011pro"; geom.fill();
+  y2000(); geom.Last(); setTitle("Year 2000 Production Geometry"); geom.select="y2000pro"; geom.fill();
+  y2001(); geom.Last(); setTitle("Year 2001 Production Geometry"); geom.select="y2001pro"; geom.fill();
+  y2002(); geom.Last(); setTitle("Year 2002 Production Geometry"); geom.select="y2002pro"; geom.fill();
+  y2003(); geom.Last(); setTitle("Year 2003 Production Geometry"); geom.select="y2003pro"; geom.fill();
+  y2004(); geom.Last(); setTitle("Year 2004 Production Geometry"); geom.select="y2004pro"; geom.fill();
+  y2005(); geom.Last(); setTitle("Year 2005 Production Geometry"); geom.select="y2005pro"; geom.fill();
+  y2006(); geom.Last(); setTitle("Year 2006 Production Geometry"); geom.select="y2006pro"; geom.fill();
+  y2007(); geom.Last(); setTitle("Year 2007 Production Geometry"); geom.select="y2007pro"; geom.fill();
+  y2008(); geom.Last(); setTitle("Year 2008 Production Geometry"); geom.select="y2008pro"; geom.fill();
+  y2009(); geom.Last(); setTitle("Year 2009 Production Geometry"); geom.select="y2009pro"; geom.fill();
+  y2010(); geom.Last(); setTitle("Year 2010 Production Geometry"); geom.select="y2010pro"; geom.fill();
+  y2011(); geom.Last(); setTitle("Year 2011 Production Geometry"); geom.select="y2011pro"; geom.fill();
 
-  y2012(); geom.Last(); setTitle("Development Geometry"); geom.select="y2012dev"; geom.fill();
+  y2012(); geom.Last(); setTitle("Year 2012 Development Geometry"); geom.select="y2012dev"; geom.fill();
+  y2013(); geom.Last(); setTitle("Year 2013 Development Geometry"); geom.select="y2013dev"; geom.fill();
 
 }
 
@@ -830,6 +831,7 @@ void y2012()
     geom.sconFlag = "SCONof"; geom.sconStat = 0;
     geom.ftroFlag = "FTROof"; geom.ftroStat = 0;
     geom.ftpcFlag = "FTPCof"; geom.ftpcStat = 0;
+    geom.svttFlag = "SVTTof"; geom.svttStat = 0;
 
     geom.idsmFlag = "IDSM01";   geom.idsmStat = 1;
     geom.fgtdFlag = "FGTDv306"; geom.fgtdStat = 1;
@@ -845,6 +847,38 @@ void y2012()
     setTitle("Upgrade studies with 2 disk FGT");
     geom.fill();
   }
+
+}
+
+void y2013()
+{
+
+  std::cout << "+ Creating STAR y2013 Geometries" << std::endl;
+
+
+
+  geom.Use("select","upgr2012");
+  geom.select = "upgr2013"; {
+    geom.pipeFlag = "PIPE12";  geom.pipeStat = 0; // User pipe
+    geom.magpFlag = "MAGPof";  geom.magpStat = 0;
+    geom.upstFlag = "UPSTof";  geom.upstStat = 0;
+    geom.zcalFlag = "ZCALof";  geom.zcalStat = 0;
+    geom.tpceFlag = "TPCE04r"; geom.tpceStat = 0; 
+    geom.btofFlag = "BTOF67";  geom.btofStat = 0;
+    geom.calbFlag = "CALB02";  geom.calbStat = 0; geom.calbCuts = 1;
+    geom.ecalFlag = "ECALv6";  geom.ecalStat = 0; geom.ecalCuts = 1;
+    geom.bbcmFlag = "BBCMon";  geom.bbcmStat = 1; // Keep the BBC
+    geom.fpdmFlag = "FPDM03";  geom.fpdmStat = 0; 
+    geom.vpddFlag = "VPDD07";  geom.vpddStat = 0;
+    geom.phmdFlag = "PHMD02"; geom.phmdStat = 0;
+    geom.sisdFlag = "SISDof"; geom.sisdStat = 0;
+    geom.ftroFlag = "FTRO01"; geom.ftroStat = 0;
+    geom.mutdFlag = "MUTD04"; geom.mutdStat = 0;
+    geom.caveFlag = "CAVE04"; geom.caveStat = 1;
+    geom.fill();
+  }
+	   
+  
 
 }
 
