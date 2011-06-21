@@ -50,6 +50,57 @@ void loadStarGeometry( const Char_t *mytag="y2009a", Bool_t agml = true )
 }
 
 
+void loadDevStarGeometry( const Char_t *mytag="upgr2012" )
+{
+  TString tag = mytag;
+  gSystem->AddIncludePath(" -IStRoot -Igeom -IStarVMC ");
+
+  gROOT   -> LoadMacro("Load.C");
+  //$$$  Load("libSt_g2t, libStarMagField.so, St_geant_Maker");
+  Load(".$STAR_HOST_SYS/lib/StarAgmlLib.so");
+
+  gErrorIgnoreLevel=9999;
+
+  // ROOT TGeo stacker
+  AgBlock::SetStacker( new StarTGeoStacker() );
+
+  // Load the master geometry libraries
+  gROOT->ProcessLine(".L .$STAR_HOST_SYS/lib/libGeometry.so");
+  gROOT->ProcessLine(".L .$STAR_HOST_SYS/lib/libStarGeometry.so");
+
+  // Instantiate the geometry builder
+  build = new Geometry(); 
+
+  // Once the geometry is created we can load in the DB
+  gROOT->ProcessLine(".L StarGeometryDb.C");
+  gROOT->ProcessLine("StarGeometryDb();");
+
+  //
+  // Setup a geometry control structure for testing purposes
+  //  
+  gROOT->ProcessLine(Form(".!mkdir %s",mytag));
+  build -> ConstructGeometry ( tag );
+  
+  std::cout << "================================================================" << std::endl;
+  std::cout << mytag << " constructed" << std::endl;
+  std::cout << "You may addModule( ... ) to add a new detector to the geometry." << std::endl;
+  std::cout << "You must closeGeometry() to visualize" << std::endl;
+
+  return;
+
+}
+
+void closeGeometry()
+{
+  gGeoManager->CloseGeometry();
+}
+
+
+void addModule( const Char_t *module )
+{
+  build -> CreateModule( module );
+}
+
 
 
 
