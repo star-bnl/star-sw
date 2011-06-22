@@ -1,7 +1,7 @@
-void viewStarGeometry( const Char_t *tag="y2011", const Bool_t agml=true )
+void viewStarGeometry( const Char_t *tag="y2011", const Char_t *addons="PipeGeo;" )
 {
  
-  cacheGeometry(tag,agml);
+  cacheGeometry(tag, addons);
 
   //
   // Load using TEveManager
@@ -19,14 +19,31 @@ void viewStarGeometry( const Char_t *tag="y2011", const Bool_t agml=true )
 
 }
 
-void cacheGeometry( const Char_t *tag, const Bool_t agml )
+void cacheGeometry( const Char_t *tag, const Char_t *addons )
 {  
   TFile *file = new TFile(Form("%s.root",tag));
   if ( file->IsZombie() )
     {
       delete file;
       gROOT -> ProcessLine(".L StarVMC/Geometry/macros/loadStarGeometry.C");
-      loadStarGeometry(tag,agml);
+
+      // Load development geometry
+      loadDevStarGeometry(tag);
+
+      TString    addOns = addons;
+      TObjArray *array  = addOns.Tokenize(" ,;");
+      
+      for ( Int_t i = 0; i<array->GetLast(); i++ )
+	{
+	  TObjString *str = (TObjString *)array->At(i);
+	  addModule ( str->String() );
+	}
+      
+
+      // Close the geometry
+      gGeoManager->CloseGeometry();
+
+
       ColorScheme();
       gGeoManager->Export(Form("%s.root",tag));
     }
