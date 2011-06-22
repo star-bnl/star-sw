@@ -33,7 +33,7 @@ void cacheGeometry( const Char_t *tag, const Char_t *addons )
       TString    addOns = addons;
       TObjArray *array  = addOns.Tokenize(" ,;");
       
-      for ( Int_t i = 0; i<array->GetLast(); i++ )
+      for ( Int_t i = 0; i<array->GetEntries(); i++ )
 	{
 	  TObjString *str = (TObjString *)array->At(i);
 	  addModule ( str->String() );
