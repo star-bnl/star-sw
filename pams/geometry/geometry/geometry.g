@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.191 2009/03/13 21:08:27 perev Exp $
+* $Id: geometry.g,v 1.191.2.1 2011/06/29 17:26:30 didenko Exp $
 * $Log: geometry.g,v $
+* Revision 1.191.2.1  2011/06/29 17:26:30  didenko
+* geometry saving
+*
 * Revision 1.191  2009/03/13 21:08:27  perev
 * y2005h, y2007h added
 *
@@ -1299,7 +1302,7 @@ replace [exe UPGR15;] with ["New Tracking: HFT+IST+TPC+SSD-SVT"
 * been a correction which resulted in new code.. We check the value
 * and divide by 10 if necessary.
 
-   character  Commands*4000
+   character  Commands*4000,Geom*8 /'Unknown '/
 
 * - - - - - - - - - - - - - - - - -
 +CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE,QUEST.
@@ -3330,5 +3333,14 @@ If LL>0
      MLEFT    = 10**Int(Alog10(Float(Nleft))-1)
      NtrSubEv = MLEFT*(NLEFT/MLEFT)
      Prin1 NtrSubEv; (' Ntrack per subevent = ',i6)
-   }
+   } 
+*
+* -------------------- persist certain global parameters -------------------
+
+   Fill GDAT                     ! GEANT run data
+      mfscale=magfield/5.0       ! magnetic field scale (nominal)
+      gtag={geom(1:4),geom(5:8)} ! geometry tag 
+   EndFill
+*
    end
+
