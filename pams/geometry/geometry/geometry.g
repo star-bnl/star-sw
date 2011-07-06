@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.228 2011/05/12 19:42:42 jwebb Exp $
+* $Id: geometry.g,v 1.229 2011/07/06 17:39:01 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.229  2011/07/06 17:39:01  jwebb
+* Defined upgr2012a: 2-disk FGT
+*
 * Revision 1.228  2011/05/12 19:42:42  jwebb
 * Definition of upgr2012 geometry now includes IdsmGeo1 and FgtdGeo3 by default.
 *
@@ -1810,6 +1813,29 @@ REPLACE [exe upgr2012;] with ["y2012 FGT upgrade studies";
 
 
 ]
+
+REPLACE [exe upgr2012a;] with ["y2012 FGT upgrade studies";
+    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
+    exe BTOF67;      "time of flight";
+    exe CALB02;      "updated bemc model";
+    exe ECALv6;      "several bugfixes in eemc geometry";
+    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
+    exe BBCMon;      "beam beam counters";
+    exe FPDM03;      "Latest version of FPD";
+    exe VPDD07;      "Latest version of VPD";
+    exe FTPCof;      "FTPC";
+    exe SVTTof;      "No SVT";
+    exe PHMD02;      "Photon mult detector on";
+    exe SISDof;      "No sisd";
+    exe MUTD05;      "Muon telescope detector";
+    exe CAVE04;      "Cave and tunnel";
+    exe PIPE12;      "The beam pipe";
+
+    exe IDSMv1;      "Inner detector support";
+    exe FGTDv302;    "FGT v3 6 disks";
+
+]
     
 
 
@@ -2525,6 +2551,10 @@ If LL>0
 
   Case upgr2012 { upgr2012 : FGT upgrade studies for 2012;
                  Geom = 'upgr2012';
+                 exe upgr2012; }
+
+  Case upgr2012 { upgr2012a : FGT upgrade studies for 2012;
+                 Geom = 'upg2012a';
                  exe upgr2012; }
 
 
