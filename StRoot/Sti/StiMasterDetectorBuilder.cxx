@@ -1,6 +1,7 @@
 #include "StiMasterDetectorBuilder.h"
 #include "TGeoManager.h"
 #include "StiDetector.h"
+#include "StMaker.h"
 StiMasterDetectorBuilder::StiMasterDetectorBuilder(bool active)
   : StiDetectorBuilder("MasterDetectorBuilder",active,"none")
 {}
@@ -22,8 +23,10 @@ void StiMasterDetectorBuilder::reset()
 void StiMasterDetectorBuilder::build(StMaker&source)
 {
   TGeoManager *gGeoManagerSV = gGeoManager; gGeoManager = 0;
-  if (gGeoManagerSV) {
-    gGeoManagerSV->Clone("Clone");
+  if (StMaker::GetChain()) {
+    cout << "StiMasterDetectorBuilder::build() -I- Create clone of VmcGeometry by reinitialization for recontruction" <<endl;
+    TDataSet *set = StMaker::GetChain()->GetDataBase("VmcGeometry/Geometry", &StMaker::GetChain()->StMaker::GetDBTime());
+    delete set;
   }
   cout << "StiMasterDetectorBuilder::build() -I- Started"<<endl;
   vector<StiDetectorBuilder*>::iterator iter;
@@ -62,7 +65,7 @@ void StiMasterDetectorBuilder::build(StMaker&source)
 	}
     }
   if (gGeoManagerSV) {
-    //    SafeDelete(gGeoManager);
+    SafeDelete(gGeoManager);
     gGeoManager = gGeoManagerSV;
   }
   cout << "StiMasterDetectorBuilder::build() -I- Done"<<endl;
