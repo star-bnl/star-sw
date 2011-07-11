@@ -8,27 +8,23 @@
 
 <!-- User defined Geant volumes -->
 <Content  >
-      IDSM,OSCA,WSCC,WSCD,WSCO,WSCF,WSCP,WSCB,TPRR,TPRT
+      IDSM,OSCA,WSCC,WSCD,WSCO,WSCP,TPRR,TPRT
 </Content>
 
-<!--                   ===============================================================================
-                       new Support Cone consit of 3 cylinders w/ 2 flats and 2 disks : 
-
-
+<!-- ===============================================================================
+  new Support Cone consit of 3 cylinders w/ 2 flats and 2 disks : 
                        (simplified implementation, East= -West)
 
+        === East cyl ===                        ====== west cyl ====
+                        |                      |         'WSCC'=WSCO
+                    east disk              west disk='WSCD'=WSCP
+                        |         'OSCA'       |
+                        ======== mid cyl =======
+         .......................+Z axis ==> ...................
 
-                               === East cyl ===                        ====== west cyl ====
-                                               |                      |         'WSCC'=WSCO+WSCF 
-                                           east disk              west disk='WSCD'=WSCP+WSCB
-                                               |         'OSCA'       |
-                                               ======== mid cyl =======
-
-                                 .......................+Z axis ==> ...................
-
-                       resistor chain volumes: TPRR,TPRT 
-                       mother volume=IDS
-                       ===============================================================================
+    resistor chain volumes: TPRR,TPRT 
+     mother volume=IDSG
+ ==============================================================================
 -->
 
         
@@ -244,24 +240,14 @@ boxR     = (outRflat + inR + IDSG_thick)/2.
     <Create    block="WSCO"/>
     <Placement block="WSCO"  z="0"  /> 
 
-    <Create    block="WSCF"/>
-    <Placement block="WSCF"  z="0"  y="outRflat*sinA" x="outRflat*cosA"> 
-          <Rotation alphaz="IDSG_angFlat"  />
-    </Placement>
 </Volume>
 
 <Volume       name="WSCO" comment=" circle carbon fiber"  >
     <Attribute for="WSCO" seen="1" colo="4"  />
     <Material name="CFiber"  />
-    <Shape type="TUBS"  rmin="IDSG_rW-IDSG_thick/2."  rmax="IDSG_rW+IDSG_thick/2." dz="IDSG_lenW/2." 
-                 phi2="phi1" phi1="phi2" />
+    <Shape type="TUBE"  rmin="IDSG_rW-IDSG_thick/2."  rmax="IDSG_rW+IDSG_thick/2." dz="IDSG_lenW/2."  />
 </Volume>
 
-<Volume       name="WSCF" comment=" flat carbon fiber"  >
-    <Attribute for="WSCF" seen="1" colo="5"  />
-    <Material name="CFiber"  />
-    <Shape type="BOX" dz="IDSG_lenW/2." dx="IDSG_thick/2." dy="IDSG_rW*sin(IDSG_angDel/180.*3.1416)/2.0+0.6" />	
-</Volume>
 
 
 <Volume       name="WSCD" comment=" east/west disk, carbon fiber"  >
@@ -272,35 +258,25 @@ boxR     = (outRflat + inR + IDSG_thick)/2.
     <Create    block="WSCP"/>
     <Placement block="WSCP"  z="0"  /> 
 
-    <Create    block="WSCB"/>
-    <Placement block="WSCB"  z="0"  y="(outRflat+inR)/2.*sinA" x="(outRflat+inR)/2.*cosA"> 
-          <Rotation alphaz="IDSG_angFlat"  />
-    </Placement>
 </Volume>
 
 
 <Volume       name="WSCP" comment=" circle carbon fiber"  >
     <Attribute for="WSCP" seen="1" colo="6"  />
     <Material name="CFiber"  />
-    <Shape type="TUBS"     rmin="IDSG_rM-IDSG_thick/2."  rmax="IDSG_rW+IDSG_thick/2." dz="IDSG_thick/2." 
-                 phi2="phi1" phi1="phi2" />
+    <Shape type="TUBE"     rmin="IDSG_rM-IDSG_thick/2."  rmax="IDSG_rW+IDSG_thick/2." dz="IDSG_thick/2."  />
 </Volume>
 
-<Volume       name="WSCB" comment=" box carbon fiber"  >
-    <Attribute for="WSCB" seen="1" colo="7"  />
-    <Material name="CFiber"  />
-    <Shape type="BOX" dz="IDSG_thick/2." dx="(outRflat-inR)/2." dy="IDSG_rW*sin(IDSG_angDel/180.*3.1416)/1.85" />	
-</Volume>
  
  <Volume       name="TPRR" comment=" TPC resistor" >
-    <Attribute for="TPRR" seen="1" colo="8"  />
+    <Attribute for="TPRR" seen="1" colo="2"  />
     <Material name="Alumina"  />
     <Shape type="BOX" dz="lengthZ/2." dx="IDSG_dxRes/2" dy="IDSG_dyRes/2." />
 </Volume>
 
 
 <Volume       name="TPRT" comment="resistor protection,  carbon fiber"  >
-    <Attribute for="TPRT" seen="1" colo="9"  />
+    <Attribute for="TPRT" seen="1" colo="3"  />
     <Material name="FR4"  />
     <Shape type="TUBE"  rmin="IDSG_r1Res"  rmax="IDSG_r2Res" dz="lengthZ/2."  />
 </Volume>

@@ -14,24 +14,34 @@
    Unit depth spacers  at the edg of a quadrant:  FGQA, FGQB, FGQC , FGQD, FGQE, FGQF
 -->
 
-<!--                                                                =============================================================
-                                                                    Declare the names of all volumes to be used in this geometry.
-                                                                    Omitting a volume or including an extra one results in a run-
-                                                                    time error.
-                                                                    =============================================================
+<!--  =============================================================
+   Declare the names of all volumes to be used in this geometry.
+   Omitting a volume or including an extra one results in a run-
+    time error.
+   =============================================================
   -->
 <Content  >
       FGTM, FGTD, FGTQ, FGZC, FGQA, 
       FGQB, FGQC, FGQD, FGQE, FGQF     
 </Content>
 
-<!--                                                                ==============================================================
-                                                                    Local variables, some of which would be better setup in struct
-                                                                    ==============================================================
+<!--    ==============================================================
+  Local variables, some of which would be better setup in struct
+   ==============================================================
   -->
 <varlist type="float"> unitSpacerDZ/3.0/ </varlist>
-<varlist type="int"> nQuad/4/ </varlist>
-  
+
+<varlist  type="float"  comment=" inner radii for physical disk" >  diskInR/10.35/  </varlist>
+<varlist  type="float"  comment=" outer radii for physical disk" >  diskOutR/39.4/ </varlist>
+<varlist  type="float"  comment=" outer radii for flat" > flatOutR/37.0/   </varlist>
+<varlist  type="float"  comment=" angle of perp.to flat (deg)">  flatPerpAng/31.0/    </varlist>
+<varlist  type="float"  comment=" width of the quadrant frame" >   frameWidth/2.15/   </varlist>
+<varlist  type="float"  comment=" angle of quadrant (deg)" >   quadTiltAng/-15.0/ </varlist>
+<varlist  type="float"  comment=" quadrant front frame thicknes" >   frameFrontDZ/2./  </varlist>
+<varlist  type="float"  comment=" quadrant sensitive volum frame thicknes" > frameSensDZ/3./ </varlist>
+<varlist  type="float"  comment=" quadrant GEM frame thicknes" >  frameGemDZ/6./ </varlist>
+<varlist  type="float"  comment=" quadrant back frame thicknes" >   frameBackDZ/2./ </varlist>
+
 
 <varlist type="REAL"  >
      centerZ,lengthZ,
@@ -43,108 +53,97 @@
 
 
 <!--                                                                 
-                                                                     ============================================================
-                                                                     Create and initialize structure defining detector parameters
-                                                                     ============================================================
+     ============================================================
+  Create and initialize structure defining detector parameters 
+  (aka configuration)
+  ============================================================
   -->
 
-<Structure name="FGTG">
-   <var name="version"     type="float" />
+<Structure name="FGGG">
    <var name="FgstConfig"  type="float" />
-   <var name="Services"    type="float" />
 </Structure>
 
 <Structure name="FGST"  >
-
-   <var name="version" type="float" />
-
-   <var name="startZ" />
-   <var name="diskInR" />
-   <var name="diskOutR" />
-
-   <var name="diskStepZ" />
-   <var name="flatOutR" />
-   <var name="flatPerpAng" />
-   <var name="frameWidth" />
-   <var name="quadTiltAng" />
-
-   <var name="frameFrontDZ" />
-   <var name="frameSensDZ" />
-   <var name="frameGemDZ" />
-   <var name="frameBackDZ" />
-
+   <var name="config" type="float" />
+   <var name="startZ"  type="float" />
+   <var name="diskStepZ" type="float"  />  
    <var name="ndisk"      type="int" />
-
+   <var name="nQuad"      type="int"/>
 </Structure>
 
 <!--                                                                 
-                                                                     ============================================================
-                                                                          Control structure, interfaced through AgDETP
-                                                                     ============================================================
+  ============================================================
+  Control structure, interfaced through AgDETP
+   ============================================================
   -->
-<Fill name="FGTG" comment="FGT Geometry Control Structure">
-   <var name="version"    value="1.0" comment="versioning" />
-   <var name="FgstConfig" value="1.0" comment="selection of FGST data structure" />
-   <var name="Services"   value="1.0" comment="cabling and support services option" />
+<Fill name="FGGG" comment="FGT Geometry Control Structure">
+   <var name="FgstConfig" value="2.0" comment="selection of no. of disks and quadrants " />
 </Fill>
 
 
 <!--                                                                 
-                                                                     ============================================================
-                                                                            Version 1.0 is a simple 2 disk installation
-                                                                     ============================================================
+  ============================================================
+  Version 1.0  has 6 3/4 disks
+ ============================================================
   -->
 <Fill name="FGST" comment="FGT Geometry data"  >
-
-   <var name="version" value="1.0" comment="versioning of the FGST geometry data" />
-
-   <var name="startZ" value="70." comment=" starting position along Z"  />
-   <var name="diskStepZ" value="26" comment=" disk separation along Z"  />
-   <var name="diskInR" value="10.35" comment=" inner radii for physical disk" />
-   <var name="diskOutR" value="39.4" comment=" outer radii for physical disk" />
-   <var name="flatOutR" value="37.0" comment=" outer radii for flat" />
-   <var name="flatPerpAng" value="31.0" comment="angle of perp.to flat (deg)" />
-   <var name="frameWidth" value="2.15" comment=" width of the quadrant frame" />
-   <var name="quadTiltAng" value="-15.0" comment="angle of quadrant (deg)" />
-
-   <var name="frameFrontDZ" value="2." comment=" quadrant front frame thicknes" />
-   <var name="frameSensDZ" value="3." comment=" quadrant sensitive volum frame thicknes" />
-   <var name="frameGemDZ" value="6." comment=" quadrant GEM frame thicknes" />
-   <var name="frameBackDZ" value="2." comment=" quadrant back frame thicknes" />
-
-   <var name="ndisk"   value="2"    comment="number of disks" />
-    
-</Fill>
-
-<!--                                                                 
-                                                                     ============================================================
-                                                                            Version 2.0 is a complete 6 disk installation
-                                                                     ============================================================
-  -->
-
-<Fill name="FGST" comment="FGT Geometry data"  >
-
-   <var name="version" value="2.0" comment="versioning of the FGST geometry data" />
+   <var name="config" value="1.0" comment="versioning of the FGST geometry data" />
 
    <var name="startZ" value="70." comment=" starting position along Z"  />
-   <var name="diskStepZ" value="10" comment=" disk separation along Z (WAG, jcw)" />
-   <var name="diskInR" value="10.35" comment=" inner radii for physical disk" />
-   <var name="diskOutR" value="39.4" comment=" outer radii for physical disk" />
-   <var name="flatOutR" value="37.0" comment=" outer radii for flat" />
-   <var name="flatPerpAng" value="31.0" comment="angle of perp.to flat (deg)" />
-   <var name="frameWidth" value="2.15" comment=" width of the quadrant frame" />
-   <var name="quadTiltAng" value="-15.0" comment="angle of quadrant (deg)" />
-
-   <var name="frameFrontDZ" value="2." comment=" quadrant front frame thicknes" />
-   <var name="frameSensDZ" value="3." comment=" quadrant sensitive volum frame thicknes" />
-   <var name="frameGemDZ" value="6." comment=" quadrant GEM frame thicknes" />
-   <var name="frameBackDZ" value="2." comment=" quadrant back frame thicknes" />
-
+   <var name="diskStepZ" value="10." comment=" disk separation along Z"  />
    <var name="ndisk"   value="6"    comment="number of disks" />
+   <var name="nQuad"   value="3"    comment="number quadrants in a disks" />
     
 </Fill>
-        
-                                                                         <!--  mmmmmmmmmmmmm  MATERIALS mmmmmmmmmmmmmmmmm    -->   
+
+
+<!--                                                                 
+  ============================================================
+  Version 2.0  has  3 full  disks
+ ============================================================
+  -->
+<Fill name="FGST" comment="FGT Geometry data"  >
+   <var name="config" value="2.0" comment="versioning of the FGST geometry data" />
+
+   <var name="startZ" value="70." comment=" starting position along Z"  />
+   <var name="diskStepZ" value="15." comment=" disk separation along Z"  />
+   <var name="ndisk"   value="3"    comment="number of disks" />
+   <var name="nQuad"   value="4"    comment="number quadrants in a disks" />
+
+</Fill>
+
+<!--                                                                 
+  ============================================================
+  Version 3.0  has  2 full  disks
+ ============================================================
+  -->
+<Fill name="FGST" comment="FGT Geometry data"  >
+   <var name="config" value="3.0" comment="versioning of the FGST geometry data" />
+
+   <var name="startZ" value="70." comment=" starting position along Z"  />
+   <var name="diskStepZ" value="50." comment=" disk separation along Z"  />
+   <var name="ndisk"   value="2"    comment="number of disks" />
+   <var name="nQuad"   value="4"    comment="number quadrants in a disks" />
+
+</Fill>
+
+<!--                                                                 
+  ============================================================
+  Version 4.0  has  6   1/4 disks
+ ============================================================
+  -->
+<Fill name="FGST" comment="FGT Geometry data"  >
+   <var name="config" value="4.0" comment="versioning of the FGST geometry data" />
+
+   <var name="startZ" value="70." comment=" starting position along Z"  />
+   <var name="diskStepZ" value="15." comment=" disk separation along Z"  />
+   <var name="ndisk"   value="6"    comment="number of disks" />
+   <var name="nQuad"   value="1"    comment="number quadrants in a disks" />
+
+</Fill>
+
+
+ <!--  mmmmmmmmmmmmm  MATERIALS mmmmmmmmmmmmmmmmm    -->   
         
 <Mixture name="ArCO2_70_30" dens="0.0018015" isvol="1"  >
    <Component name="Ar" a="39.95" z="18." w="0.7"  />
@@ -161,24 +160,24 @@
 </Mixture>
 
 
-<Use struct="FGTG" />
-<Use struct="FGST" select="version" value="FGTG_FgstConfig" />
+<Use struct="FGGG" />
+<Use struct="FGST" select="config" value="FGGG_FgstConfig" />
 
-                                                                   <!--  mmmmmmmmmmmm  COMPUTATION mmmmmmmmmmmmmmmmmmmmmmmmmmm -->
+ <!--  mmmmmmmmmmmm  COMPUTATION mmmmmmmmmmmmmmmmmmmmmmmmmmm -->
 
 
 <!--  Quad disk dept: front+sens+gem+back -->
-diskLenZ=FGST_frameFrontDZ+FGST_frameSensDZ+FGST_frameGemDZ+FGST_frameBackDZ <!-- total disk thicness -->
+diskLenZ=frameFrontDZ+frameSensDZ+frameGemDZ+frameBackDZ <!-- total disk thicness -->
 
-lengthZ = FGST_ndisk*FGST_diskStepZ+diskLenZ
+lengthZ = FGST_ndisk*(FGST_diskStepZ+diskLenZ)
 centerZ = FGST_startZ+lengthZ/2.0
 
-xx=acos(FGST_flatOutR/FGST_diskOutR) <!-- half opening angle of the flat (rad) -->
-flatAng1=FGST_flatPerpAng-xx/degrad
-flatAng2=FGST_flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
+xx=acos(flatOutR/diskOutR) <!-- half opening angle of the flat (rad) -->
+flatAng1=flatPerpAng-xx/degrad
+flatAng2=flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
 
 
-                                                               <!--  ASSEMBLE GEOMETRY, start with placing main volume in cave -->
+ <!--  ASSEMBLE GEOMETRY, start with placing main FGT volume in the support cone -->
 
 <Create    block="FGTM"  />
 <Placement block="FGTM" in="IDSM" z="centerZ" />
@@ -187,20 +186,20 @@ flatAng2=FGST_flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
 
 <Volume       name="FGTM" comment="mother volume for FGT assembly" >
 
-    <Attribute for="FGTM" seen="0" colo="6"  />
+    <Attribute for="FGTM" seen="1" colo="6"  />
     <Material name="Air"  />
-    <Shape type="TUBE" rmin="FGST_diskInR"    rmax="FGST_diskOutR"   dz="lengthZ/2.0"  />
+    <Shape type="TUBE" rmin="diskInR"    rmax="diskOutR"   dz="lengthZ/2.0"  />
 
     <!-- place disk(s) inside FGT mother volume -->
 
     <Do var="disk" from="1" to="FGST_ndisk"  >
-       diskZ=-lengthZ/2. + diskLenZ*(disk-0.5) + (disk-1.0)*FGST_diskStepZ 
+       diskZ=-lengthZ/2. +diskLenZ/2. + (disk-1.0)*FGST_diskStepZ 
        <Create    block="FGTD"  />
        <Placement block="FGTD"  z="diskZ" >
-           <Rotation alphaz="FGST_quadTiltAng"  />
+           <Rotation alphaz="quadTiltAng"  />
        </Placement>
     </Do>
-
+ 
 </Volume>
      
 
@@ -209,11 +208,11 @@ flatAng2=FGST_flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
 
     <Attribute for="FGTD" seen="0" colo="1"  />
     <Material name="Air"  />
-    <Shape type="TUBE" rmin="FGST_diskInR"    rmax="FGST_diskOutR"   dz="diskLenZ/2.0"  />   
+    <Shape type="TUBE" rmin="diskInR"    rmax="diskOutR"   dz="diskLenZ/2.0"  />   
    
     <!--  place quadrants within one disk , temporary skip quad=1 -->
 
-    <Do var="quad" from="1" to="nQuad"  >
+    <Do var="quad" from="1" to="FGST_nQuad"  >
 
        <Create    block="FGTQ"  />
        <Placement block="FGTQ" z="0." >
@@ -229,9 +228,9 @@ flatAng2=FGST_flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
 
     <Attribute for="FGTQ" seen="0" colo="4"  />
     <Material name="ArCO2_70_30"  />
-    <Shape type="TUBS"  rmin="FGST_diskInR"  rmax="FGST_diskOutR" dz="diskLenZ/2." phi1="0." phi2="90." />
+    <Shape type="TUBS"  rmin="diskInR"  rmax="diskOutR" dz="diskLenZ/2." phi1="0." phi2="90." />
     <Create    block="FGZC"  />
-    <Placement block="FGZC" z="-diskLenZ/2.+FGST_frameFrontDZ+FGST_frameSensDZ/2." /> 
+    <Placement block="FGZC" z="-diskLenZ/2.+frameFrontDZ+frameSensDZ/2." /> 
 
 </Volume> 
 
@@ -240,7 +239,7 @@ flatAng2=FGST_flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
     <Attribute for="FGZC" seen="0" colo="1"  />
     <Material name="ArCO2_70_30"  />
     <Material name="Sensitive_fgt_gas" isvol="1"  />
-    <Shape type="TUBS"  rmin="FGST_diskInR"  rmax="FGST_diskOutR" dz="FGST_frameSensDZ/2." phi1="0." phi2="90." />
+    <Shape type="TUBS"  rmin="diskInR"  rmax="diskOutR" dz="frameSensDZ/2." phi1="0." phi2="90." />
 
     <Instrument block="FGZC">
         <Hit meas="Z" bins="0.001" opts="S" />
@@ -257,20 +256,20 @@ flatAng2=FGST_flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
     </Instrument>
 
     <Create    block="FGQA"  />
-    <Placement block="FGQA" x="FGST_frameWidth/2." y="(FGST_diskOutR+FGST_diskInR)/2."/> 
+    <Placement block="FGQA" x="frameWidth/2." y="(diskOutR+diskInR)/2."/> 
 
     <Create    block="FGQB"   />
     <Placement block="FGQB" /> 
 
     <Create    block="FGQC"  />
-    <Placement block="FGQC" y="FGST_frameWidth/2." x="(FGST_diskOutR+FGST_diskInR)/2."/> 
+    <Placement block="FGQC" y="frameWidth/2." x="(diskOutR+diskInR)/2."/> 
 
     <Create    block="FGQD"  />
     <Placement block="FGQD" /> 
 
     <Create    block="FGQE"  />
-    <Placement block="FGQE" x="(FGST_flatOutR-FGST_frameWidth/2.)*cos(FGST_flatPerpAng*degrad)" y="(FGST_flatOutR-FGST_frameWidth/2.)*sin(FGST_flatPerpAng*degrad)" >
-           <Rotation alphaz="FGST_flatPerpAng-90."  />
+    <Placement block="FGQE" x="(flatOutR-frameWidth/2.)*cos(flatPerpAng*degrad)" y="(flatOutR-frameWidth/2.)*sin(flatPerpAng*degrad)" >
+           <Rotation alphaz="flatPerpAng-90."  />
     </Placement>
 
     <Create    block="FGQF"  />
@@ -283,38 +282,38 @@ flatAng2=FGST_flatPerpAng+xx/degrad <!-- angle limits of the flat (deg) -->
 <Volume       name="FGQA" comment="C-spacer"  >
     <Attribute for="FGQA" seen="1" colo="2"  />
     <Material name="FR4"  />
-    <Shape type="BOX" dz="unitSpacerDZ/2." dx="FGST_frameWidth/2." dy="(FGST_diskOutR-FGST_diskInR-FGST_frameWidth)/2."/> 
+    <Shape type="BOX" dz="unitSpacerDZ/2." dx="frameWidth/2." dy="(diskOutR-diskInR-frameWidth)/2."/> 
 </Volume>
 
 <Volume       name="FGQB" comment="B-spacer, arc"  >
     <Attribute for="FGQB" seen="1" colo="3"  />
     <Material name="FR4"  />
-    <Shape type="TUBS"  rmin="FGST_diskInR"  rmax="FGST_diskInR+FGST_frameWidth"  phi1="0." phi2="90." dz="unitSpacerDZ/2."/>
+    <Shape type="TUBS"  rmin="diskInR"  rmax="diskInR+frameWidth"  phi1="0." phi2="90." dz="unitSpacerDZ/2."/>
 </Volume>
   
 <Volume       name="FGQC" comment="C-spacer, bar"  >
     <Attribute for="FGQC" seen="1" colo="2"  />
     <Material name="FR4"  />
-    <Shape type="BOX" dz="unitSpacerDZ/2." dy="FGST_frameWidth/2." dx="(FGST_diskOutR-FGST_diskInR-FGST_frameWidth)/2."/> 
+    <Shape type="BOX" dz="unitSpacerDZ/2." dy="frameWidth/2." dx="(diskOutR-diskInR-frameWidth)/2."/> 
 </Volume>
   
 <Volume       name="FGQD" comment="D-spacer, arc"  >
     <Attribute for="FGQD" seen="1" colo="3"  />
     <Material name="FR4"  />
-    <Shape type="TUBS"  rmin="FGST_diskOutR-FGST_frameWidth"  rmax="FGST_diskOutR"  phi1="0." phi2="flatAng1" dz="unitSpacerDZ/2." />
+    <Shape type="TUBS"  rmin="diskOutR-frameWidth"  rmax="diskOutR"  phi1="0." phi2="flatAng1" dz="unitSpacerDZ/2." />
 </Volume>
 
 
 <Volume       name="FGQE" comment="E-spacer, flat"  >
     <Attribute for="FGQE" seen="1" colo="2"  />
     <Material name="FR4"  />
-    <Shape type="BOX" dz="unitSpacerDZ/2."  dy="FGST_frameWidth/2." dx="FGST_diskOutR*sin(( flatAng2-flatAng1)*degrad/2.)" /> 
+    <Shape type="BOX" dz="unitSpacerDZ/2."  dy="frameWidth/2." dx="diskOutR*sin(( flatAng2-flatAng1)*degrad/2.)" /> 
 </Volume>
 
 <Volume       name="FGQF" comment="F-spacer, arc"  >
     <Attribute for="FGQF" seen="1" colo="3"  />
     <Material name="FR4"  />
-    <Shape type="TUBS"  rmin="FGST_diskOutR-FGST_frameWidth"  rmax="FGST_diskOutR"  phi1="flatAng2" phi2="90."  dz="unitSpacerDZ/2." />
+    <Shape type="TUBS"  rmin="diskOutR-frameWidth"  rmax="diskOutR"  phi1="flatAng2" phi2="90."  dz="unitSpacerDZ/2." />
 </Volume>
 
   

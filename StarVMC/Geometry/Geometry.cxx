@@ -743,14 +743,11 @@ Bool_t Geometry::ConstructFgtd( const Char_t *flag, Bool_t go )
 
 
   AgStructure::AgDetpNew( fgtdGeom.module, Form("Forward GEM Tracker with configuration %s", flag));
-  if ( fgtdGeom.config == 306 ) 
-    {
-      AgStructure::AgDetpAdd( "Fgtg_t", "fgstconfig", (Float_t)2.0 );
-    }
-  if ( fgtdGeom.config == 302 )   
-    {
-      AgStructure::AgDetpAdd( "Fgtg_t", "fgstconfig", (Float_t)1.0 );
-    }
+
+
+  AgStructure::AgDetpAdd( "Fggg_t", "fgstconfig", (Float_t) (fgtdGeom.config%30) );
+
+
 
   if ( go )
   if ( !CreateModule( fgtdGeom.module  ) )
@@ -1567,10 +1564,12 @@ Bool_t Geometry::RichInit()
 
 Bool_t Geometry::FgtdInit()
 {
-  fgtdGeom.select="FGTDof";   fgtdGeom.module="None";     fgtdGeom.config=0;   fgtdGeom.fill();
-  fgtdGeom.select="FGTDon";   fgtdGeom.module="FgtdGeo2"; fgtdGeom.config=1;   fgtdGeom.fill();
-  fgtdGeom.select="FGTDv306"; fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=306; fgtdGeom.fill();
-  fgtdGeom.select="FGTDv302"; fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=302; fgtdGeom.fill();
+  fgtdGeom.select="FGTDof";   fgtdGeom.module="None";     fgtdGeom.config=0;    fgtdGeom.fill();
+  fgtdGeom.select="FGTDon";   fgtdGeom.module="FgtdGeo2"; fgtdGeom.config=1;    fgtdGeom.fill();
+  fgtdGeom.select="FGTD31";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=31;   fgtdGeom.fill();
+  fgtdGeom.select="FGTD32";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=32;   fgtdGeom.fill();
+  fgtdGeom.select="FGTD33";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=33;   fgtdGeom.fill();
+  fgtdGeom.select="FGTD34";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=34;   fgtdGeom.fill();
   return true;
 }
 
