@@ -100,9 +100,9 @@ ComponentAnsys123::Initialise(std::string elist,  std::string nlist,
       // Version 12 format: read property tag and value
       token = strtok(NULL, " ");
       int itype = 0;
-      if (strcmp(token,"PERX") == 0) {
+      if (strncmp(token,"PERX",4) == 0) {
         itype = 1;
-      } else if (strcmp(token,"RSVX") == 0) {
+      } else if (strncmp(token,"RSVX",4) == 0) {
         itype = 2;
       } else {
         printf("ComponentAnsys123::Initialise:\n");

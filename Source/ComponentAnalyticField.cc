@@ -2004,8 +2004,8 @@ ComponentAnalyticField::AddReadout(const char label) {
   
   if (nWiresFound == 0 && nPlanesFound == 0 && nStripsFound == 0) {
     std::cerr << className << "::AddReadout:\n";
-    std::cerr << "    At present there are no wires, planes or strips"
-              << " associated to this readout group.\n";
+    std::cerr << "    At present there are no wires, planes or strips\n";
+    std::cerr << "    associated to readout group " << label << ".\n";
   } else {
     std::cout << className << "::AddReadout:\n";
     std::cout << "    Readout group " << label << " comprises:\n";
@@ -3330,7 +3330,7 @@ ComponentAnalyticField::FieldB2Y(const double xpos, const double ypos,
     }
     // Calculate the electric field and the potential.
     ex += w[i].e * real(ecompl);
-    ey += w[i].e * imag(ecompl);
+    ey -= w[i].e * imag(ecompl);
     if (opt) volt -= 0.5 * w[i].e * log(r2);
   }
   ex *= 0.5 * (Pi / sy);

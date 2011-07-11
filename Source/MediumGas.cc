@@ -1620,7 +1620,8 @@ MediumGas::LoadIonMobility(const std::string filename) {
   // Make sure the file could actually be opened.
   if (!infile) {
     std::cerr << className << "::LoadIonMobility:\n";
-    std::cerr << "    Error opening file " << filename << ".\n";
+    std::cerr << "    Error opening file\n";
+    std::cerr << "    " << filename << ".\n";
     return false;
   }
   
@@ -1656,8 +1657,8 @@ MediumGas::LoadIonMobility(const std::string filename) {
     // Check if the data has been read correctly.
     if (infile.fail() && !infile.eof()) {
       std::cerr << className << "::LoadIonMobility:\n";
-      std::cerr << "    Error reading file "
-                << filename << " (line " << i << ").\n";
+      std::cerr << "    Error reading file\n";
+      std::cerr << "    " << filename << " (line " << i << ").\n";
       return false;
     }
     // Reset the stringstream.
