@@ -1,4 +1,4 @@
-void viewStarGeometry( const Char_t *tag="y2011", const Char_t *addons="PipeGeo;" )
+void viewStarGeometry( const Char_t *tag="y2011", const Char_t *addons="" )
 {
  
   cacheGeometry(tag, addons);
