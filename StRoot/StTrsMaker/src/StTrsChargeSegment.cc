@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.42 2011/01/18 14:40:15 fisyak Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.43 2011/07/18 21:30:31 genevb Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -13,6 +13,9 @@
  *
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.43  2011/07/18 21:30:31  genevb
+ * Unify GEANT PID discrimination to StarClassLibrary
+ *
  * Revision 1.42  2011/01/18 14:40:15  fisyak
  * Clean up TpcDb interfaces and Tpc coordinate transformation
  *
@@ -173,6 +176,8 @@ using std::random_shuffle;
 #endif
 
 #include "StPhysicalHelix.hh"
+#include "StParticleTable.hh"
+#include "StParticleDefinition.hh"
 
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StTrsDeDx.hh"
@@ -221,76 +226,17 @@ StTrsChargeSegment::~StTrsChargeSegment() {/* nopt */ }
 
 void StTrsChargeSegment::whichGEANTParticle(double& particleMass, int& charge)
 {
-    //
-    // This should really use the StParticle classes in the SCL
-    //
-    
-    switch (mPid) {
-    case 2:    // e+
-	particleMass = .00051099906*GeV;
-	charge = 1;
-	break;
-    case 3:    // e-
-	particleMass = .00051099906*GeV;
-	charge = -1;	      
-	break;
-    case 5:    // muon+
-	particleMass = .105658389*GeV;
-	charge = 1;
-	break;
-    case 6:    // muon-
-	particleMass = .105658389*GeV;
-	charge = -1;
-	break;
-    case 8:    // pion+
-	particleMass = .1395700*GeV;
-	charge = 1;
-	break;
-    case 9:    // pion-
-	particleMass = .1395700*GeV;
-	charge = -1;
-	break;
-    case 11:    // kaon+
-	particleMass = .493677*GeV;
-	charge = 1;
-	break;
-    case 12:    // kaon-
-	particleMass = .493677*GeV;
-	charge = -1;
-	break;
-    case 14:    // proton
-	particleMass = .93827231*GeV;
-	charge = 1;
-	break;
-    case 15:    // anti-proton
-	particleMass = .93827231*GeV;
-	charge = -1;
-	break;
-    case 45:  // deuteron
-        particleMass = 1.876*GeV; 
-        charge = 1;
-        break;
-    case 46:  // triton
-        particleMass = 2.809*GeV;
-        charge = 1;
-        break;
-    case 47:  // alpha
-        particleMass = 3.727*GeV;
-        charge = 2;
-        break; 
-    case 49:  // He3
-        particleMass = 2.809*GeV;
-        charge = 2;
-        break;
-
-    default: // Probably uncharged, but DO NOT BREAK IT!
-	//cout << "Mass is Undefined (" << mPid << ")" << endl;
-	particleMass = 0*GeV;
-	charge = 0;
-	//subSegments = 1;
-	break;
+    StParticleDefinition* pDef = StParticleTable::instance()->findParticleByGeantId(mPid);
+    if (pDef) {
+      particleMass = pDef->mass();
+      charge = (int) (pDef->charge());
+    } else {
+      // Probably uncharged, but DO NOT BREAK IT!
+      cout << "Mass is Undefined (" << mPid << ")" << endl;
+      particleMass = 0*GeV;
+      charge = 0;
+      //subSegments = 1;
     }
-    
 }
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
