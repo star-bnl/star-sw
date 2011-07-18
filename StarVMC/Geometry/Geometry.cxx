@@ -1567,9 +1567,11 @@ Bool_t Geometry::FgtdInit()
   fgtdGeom.select="FGTDof";   fgtdGeom.module="None";     fgtdGeom.config=0;    fgtdGeom.fill();
   fgtdGeom.select="FGTDon";   fgtdGeom.module="FgtdGeo2"; fgtdGeom.config=1;    fgtdGeom.fill();
   fgtdGeom.select="FGTD31";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=31;   fgtdGeom.fill();
-  fgtdGeom.select="FGTD32";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=32;   fgtdGeom.fill();
-  fgtdGeom.select="FGTD33";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=33;   fgtdGeom.fill();
-  fgtdGeom.select="FGTD34";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=34;   fgtdGeom.fill();
+  /*
+    fgtdGeom.select="FGTD32";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=32;   fgtdGeom.fill();
+    fgtdGeom.select="FGTD33";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=33;   fgtdGeom.fill();
+    fgtdGeom.select="FGTD34";   fgtdGeom.module="FgtdGeo3"; fgtdGeom.config=34;   fgtdGeom.fill();
+  */
   return true;
 }
 

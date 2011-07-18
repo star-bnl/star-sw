@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.229 2011/07/06 17:39:01 jwebb Exp $
+* $Id: geometry.g,v 1.230 2011/07/18 15:53:12 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.230  2011/07/18 15:53:12  jwebb
+* Reverted to single FGT "upgr2012" geometry.
+*
 * Revision 1.229  2011/07/06 17:39:01  jwebb
 * Defined upgr2012a: 2-disk FGT
 *
@@ -1231,8 +1234,7 @@ replace [exe VPDD07;] with  [;"pseudo Vertex Position Detector";VPDD=on;VpddConf
 
 
 replace [exe FGTD02;] with  [;FGTD=on;FgtdConfig=2;  "GEM forward tracker"]
-replace [exe FGTDv306;] with [;FGTD=on;FgtdConfig=306; "FGT v3 6 disks"]
-replace [exe FGTDv302;] with [;FGTD=on;FgtdConfig=302; "FGT v3 2 disks"]
+replace [exe FGTDv31;] with [;FGTD=on;FgtdConfig=31; "FGT v3 6 disks"]
 
 replace [exe IDSMv1;] with [;IDSM=on;IdsmConfig=1; "Inner Detector Support"]
 
@@ -1809,34 +1811,9 @@ REPLACE [exe upgr2012;] with ["y2012 FGT upgrade studies";
     exe PIPE12;      "The beam pipe";
 
     exe IDSMv1;      "Inner detector support";
-    exe FGTDv306;    "FGT v3 6 disks";
-
-
+    exe FGTDv31;     "FGT v3 6 disks";
 ]
 
-REPLACE [exe upgr2012a;] with ["y2012 FGT upgrade studies";
-    exe TPCE04r;     "agstar version of yf model with reduced Rmax";
-    exe BTOF67;      "time of flight";
-    exe CALB02;      "updated bemc model";
-    exe ECALv6;      "several bugfixes in eemc geometry";
-    exe EMCUTS(eemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
-    exe EMCUTS(bemc,1);   "10 keV EM thresholds in barrel and endcap calorimeters";
-    exe BBCMon;      "beam beam counters";
-    exe FPDM03;      "Latest version of FPD";
-    exe VPDD07;      "Latest version of VPD";
-    exe FTPCof;      "FTPC";
-    exe SVTTof;      "No SVT";
-    exe PHMD02;      "Photon mult detector on";
-    exe SISDof;      "No sisd";
-    exe MUTD05;      "Muon telescope detector";
-    exe CAVE04;      "Cave and tunnel";
-    exe PIPE12;      "The beam pipe";
-
-    exe IDSMv1;      "Inner detector support";
-    exe FGTDv302;    "FGT v3 6 disks";
-
-]
-    
 
 
 !//______________________________________________________________________________
@@ -2551,10 +2528,6 @@ If LL>0
 
   Case upgr2012 { upgr2012 : FGT upgrade studies for 2012;
                  Geom = 'upgr2012';
-                 exe upgr2012; }
-
-  Case upgr2012 { upgr2012a : FGT upgrade studies for 2012;
-                 Geom = 'upg2012a';
                  exe upgr2012; }
 
 
@@ -4254,9 +4227,8 @@ c     write(*,*) 'FSTD'
      if (FgtdConfig==2)    Call fgtdgeo1
      if (FgtdConfig==3)    Call fgtdgeo2
 
-     IF FgtdConfig>300 {                                          """Apply FGT configuration and construct geometry"""
-        IF FgtdConfig==306 { Call AgDETP add ( 'FGTG.FgstConfig=', 2.0, 1 ); }
-        IF FgtdConfig==302 { Call AgDETP add ( 'FGTG.FgstConfig=', 1.0, 1 ); }
+     IF FgtdConfig>30 {                                           """Apply FGT configuration and construct geometry"""
+        IF FgtdConfig==31 { Call AgDETP add ( 'FGTG.FgstConfig=', 1.0, 1 ); }
         Call FgtdGeo3
      }
 
