@@ -4,9 +4,12 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_Tpx.C,v 1.24 2011/03/03 08:32:07 hmasui Exp $
+// $Id: bfcMixer_Tpx.C,v 1.25 2011/07/18 06:27:39 zhux Exp $
 //
 // $Log: bfcMixer_Tpx.C,v $
+// Revision 1.25  2011/07/18 06:27:39  zhux
+// The chain for p+p 500 P09ig production added
+//
 // Revision 1.24  2011/03/03 08:32:07  hmasui
 // Put P10ic chain back for p+p, deleted in 1.21 by accident
 //
@@ -43,6 +46,8 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
 
    // production chain for P10ic p+p RFF & FF
    TString prodP10icpp200("DbV20100301 pp2009c ITTF BEmcChkStat btof Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -hitfilt");
+   // production chain for P09ig p+p 500 GeV RFF & FF
+   TString prodP09igpp500("DbV20091225 pp2009c ITTF BEmcChkStat btof Corr4 OSpaceZ2 OGridLeak3D VFMCE TpxClu -hitfilt");
 
   // BES Run10 chains
   TString prodP10ihAuAu39("DbV20100909 P2010a,btof,BEmcChkStat,Corr4,OSpaceZ2,OGridLeak3D,VFMCE TpxClu -VFMinuit -hitfilt");
@@ -68,6 +73,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   else if (prodName == "P08icdAu")     { chain3Opt = prodP08icdAu;      chain2Opt += geomP08ic; }
   else if (prodName == "P08iedAu")     { chain3Opt = prodP08iedAu;      chain2Opt += geomP08ic; }
   else if (prodName == "P08icAuAu200") { chain3Opt = prodP08icAuAu200;  chain2Opt += geomP08ic; }
+  else if (prodName == "P09igpp500")   { chain3Opt = prodP09igpp500;    chain2Opt += geomP10ic; }
   else if (prodName == "P10iapp")      { chain3Opt = prodP10iapp;       chain2Opt += geomP10ih; }
   else if (prodName == "P10icpp200")   { chain3Opt = prodP10icpp200;    chain2Opt += geomP10ic; }
   else if (prodName == "P10ihAuAu39")  { chain3Opt = prodP10ihAuAu39;   chain2Opt += geomP10ih; }
@@ -87,6 +93,7 @@ void bfcMixer_Tpx(const Int_t Nevents=100,
   else if (prodName == "P08icdAu")     { chain3Opt += geomP08ic; }
   else if (prodName == "P08iedAu")     { chain3Opt += geomP08ic; }
   else if (prodName == "P08icAuAu200") { chain3Opt += geomP08ic; }
+  else if (prodName == "P09igpp500")   { chain3Opt += geomP10ic; }
   else if (prodName == "P10iapp")      { chain3Opt += geomP10ih; }
   else if (prodName == "P10icpp200")   { chain3Opt += geomP10ic; }
   else if (prodName == "P10ihAuAu39")  { chain3Opt += geomP10ih; }
