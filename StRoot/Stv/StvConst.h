@@ -14,7 +14,7 @@ public:
       float 	mXi2Hit;		//Xi2 to accept new hit
       float    	mXi2Vtx;		//Xi2 to accept vertex
       float 	mXi2Joi;		//Xi2 in Refit join left & right subtrack
-      float 	mXi2Big;		//Xi2 in Refit, temporary allowed Xi2.
+      float 	mXi2Hlx;		//Xi2 in Helix, .
       float	mRxyMax;		//Max radius for tracking
       float	mZMax;			//Max Z      for tracking
       float     mDca2dZeroXY;		//max 2d dca to X=Y=0  for primary track
