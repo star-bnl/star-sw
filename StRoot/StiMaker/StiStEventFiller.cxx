@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.95 2011/05/27 18:25:33 genevb Exp $
+ * $Id: StiStEventFiller.cxx,v 2.96 2011/07/19 19:07:20 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.96  2011/07/19 19:07:20  perev
+ * Remove previous tracks & vertices in StEvrent added
+ *
  * Revision 2.95  2011/05/27 18:25:33  genevb
  * Propagate StTrack::key => Int_t to other codes
  *
@@ -620,6 +623,9 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
       return;
     }
   mEvent = e;
+  StEventHelper::Remove(mEvent,"StSPtrVecTrackNode");
+  StEventHelper::Remove(mEvent,"StSPtrVecPrimaryVertex");
+
   if (mUseAux) { mAux = new StiAux; e->Add(mAux);}
   mTrackStore = t;
   mTrkNodeMap.clear();  // need to reset for this event
