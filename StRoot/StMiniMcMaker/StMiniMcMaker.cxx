@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.37 2011/04/01 20:02:56 perev Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.38 2011/07/19 19:18:05 perev Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,9 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.38  2011/07/19 19:18:05  perev
+ * Error handling fixed
+ *
  * Revision 1.37  2011/04/01 20:02:56  perev
  * IdTruth part rewritten
  *
@@ -165,6 +168,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.38  2011/07/19 19:18:05  perev
+ * Error handling fixed
+ *
  * Revision 1.37  2011/04/01 20:02:56  perev
  * IdTruth part rewritten
  *
@@ -318,7 +324,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.37 2011/04/01 20:02:56 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.38 2011/07/19 19:18:05 perev Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -648,7 +654,7 @@ Bool_t StMiniMcMaker::initAssociation()
 Bool_t StMiniMcMaker::initVertex()
 {
 
-  if(!mRcEvent->primaryVertex(0)) {
+  if(!mRcEvent->numberOfPrimaryVertices()) {
         cout << "\tno primary vertex from stevent" << endl;
 	return kFALSE;
   }
@@ -656,8 +662,21 @@ Bool_t StMiniMcMaker::initVertex()
         cout << "\tno primary vertex from stmcevent" << endl;
         return kFALSE;
   }
+  mMainVtx = -1;
+  int maxTks = -1;
+  for (int i=0;i<(int)mRcEvent->numberOfPrimaryVertices();i++) {
+    int numTks = mRcEvent->primaryVertex(i)->numberOfDaughters();
+    if (maxTks > numTks) continue;
+    maxTks = numTks;mMainVtx = i;
+  }
+  if (maxTks <= 0) {
+        cout << "\tEmpty primary vertex from stevent" << endl;
+	return kFALSE;
+  }
 
-  mRcVertexPos = &mRcEvent->primaryVertex(0)->position();
+
+
+  mRcVertexPos = &mRcEvent->primaryVertex(mMainVtx)->position();
   mMcVertexPos = &mMcEvent->primaryVertex()->position();
 
   if(Debug()){
@@ -668,7 +687,7 @@ Bool_t StMiniMcMaker::initVertex()
     cout
       << "Position of primary vertex from StMcEvent: "<<endl
       << *mMcVertexPos << endl;
-    cout << "N daughters, StEvent   : " << mRcEvent->primaryVertex(0)->daughters().size() << endl;
+    cout << "N daughters, StEvent   : " << mRcEvent->primaryVertex(mMainVtx)->daughters().size() << endl;
     cout << "N daughters, StMcEvent : " << mMcEvent->primaryVertex()->daughters().size() << endl;
   }
   //
@@ -1009,7 +1028,7 @@ void  StMiniMcMaker::trackLoop()
   Int_t nGoodTrackEta(0), nFtpcWUncorrected(0), nFtpcEUncorrected(0);
 
   const StSPtrVecPrimaryTrack& prTracks = 
-    mRcEvent->primaryVertex(0)->daughters();
+    mRcEvent->primaryVertex(mMainVtx)->daughters();
   
   for(UInt_t i=0; i<prTracks.size(); i++){
     StPrimaryTrack* prTrack = prTracks[i];
@@ -1219,7 +1238,7 @@ void StMiniMcMaker::trackLoopIdT() // match with IdTruth
       nMcNch(0), nMcHminus(0), nMcFtpcWNch(0), nMcFtpcENch(0);
   Int_t nGoodTrackEta(0), nFtpcWUncorrected(0), nFtpcEUncorrected(0);
 
-  const StVertex *myVertex = mRcEvent->primaryVertex(0);
+  const StVertex *myVertex = mRcEvent->primaryVertex(mMainVtx);
 
   const StPtrVecMcTrack& mcTracks = mMcEvent->tracks();
   int NMcTracks = mcTracks.size();
@@ -1569,7 +1588,7 @@ void StMiniMcMaker::fillEventInfo(Int_t nGoodTrackEta, Int_t nRcGlobal, Int_t nR
 {
   mMiniMcEvent->setEventId((Int_t) mRcEvent->id());
   mMiniMcEvent->setRunId((Int_t) mRcEvent->runId());
-  mMiniMcEvent->setOriginMult((Int_t)mRcEvent->primaryVertex(0)->numberOfDaughters());
+  mMiniMcEvent->setOriginMult((Int_t)mRcEvent->primaryVertex(mMainVtx)->numberOfDaughters());
   mMiniMcEvent->setCentralMult(nGoodTrackEta);
   
   mMiniMcEvent->setImpact	(mMcEvent->impactParameter()  );
@@ -1599,7 +1618,7 @@ void StMiniMcMaker::fillEventInfo(Int_t nGoodTrackEta, Int_t nRcGlobal, Int_t nR
   mMiniMcEvent->setVertexX(mRcVertexPos->x());
   mMiniMcEvent->setVertexY(mRcVertexPos->y());
   mMiniMcEvent->setVertexZ(mRcVertexPos->z());
-  StMatrixF C(mRcEvent->primaryVertex(0)->covariantMatrix());
+  StMatrixF C(mRcEvent->primaryVertex(mMainVtx)->covariantMatrix());
   Float_t cov[6] = {C(1,1),C(2,1),C(2,2),C(3,1),C(3,2),C(3,3)};
   mMiniMcEvent->setVertexCovMatrix(cov);
   mMiniMcEvent->setMcVertexX(mMcVertexPos->x());
@@ -1739,12 +1758,13 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   const StDcaGeometry* dcaGeo = global->dcaGeometry();
   tinyRcTrack->setValidGl();
   tinyRcTrack->setRecoKey(glTrack->key());
-
+  tinyRcTrack->setDca00(1000.);
   if (dcaGeo ) { 
-
+    tinyRcTrack->setDca00(dcaGeo->params()[0]);
+    tinyRcTrack->setDca(1);
     StThreeVectorF glMom = dcaGeo->momentum();
     THelixTrack glHelix = dcaGeo->thelix();
-
+    
      
     enum {	kImpImp=0,
     		kZImp,   kZZ,
@@ -1756,13 +1776,11 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     // 0 - error on y (track position along pad row direction)
     // 1 - error on z (track position along drift direction)
     // 2 - error on C*x0 where C is the track curvature and x0 is the helix center position along x
-    // 3 - error on C, the curvature
+    // 3 - error on pt, 
     // 4 - error on tan(dipAngle)
-    float errorGl[5] = {dcaErr[kImpImp],dcaErr[kZZ],dcaErr[kPsiPsi],dcaErr[kPtiPti],dcaErr[kTanTan]};
-    float hz = dcaGeo->hz();
-    errorGl[3]*=hz*hz;
-    tinyRcTrack->setErrGl(errorGl);
-    tinyRcTrack->setPtGl(glMom.perp());
+
+    double pt = glMom.perp();
+    tinyRcTrack->setPtGl(pt);
     tinyRcTrack->setPzGl(glMom.z());
     tinyRcTrack->setEtaGl(glMom.pseudoRapidity());
     tinyRcTrack->setPhiGl(glMom.phi()); 
@@ -1770,6 +1788,11 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     tinyRcTrack->setTanLGl(dcaGeo->tanDip());
     tinyRcTrack->setSeedQuality(glTrack->seedQuality());
     tinyRcTrack->setDcaGl(dcaGeo->impact());
+    float errorGl[5] = {dcaErr[kImpImp],dcaErr[kZZ],dcaErr[kPsiPsi]
+                       ,dcaErr[kPtiPti]*pow(pt,4)
+		       ,dcaErr[kTanTan]};
+    for (int j=0;j<5;j++) {errorGl[j] = sqrt(errorGl[j]);} 
+    tinyRcTrack->setErrGl(errorGl);
     double vtx[3]={mRcVertexPos[0][0],mRcVertexPos[0][1],mRcVertexPos[0][2]};
     double dcaXY,dcaZ;
     double s = glHelix.Dca(vtx,dcaXY,dcaZ,0);
@@ -1780,22 +1803,30 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     tinyRcTrack->setDcaXYGlMcV(dcaXY);
     tinyRcTrack->setDcaZGlMcV(dcaZ);
   } else {
+    tinyRcTrack->setDca(0);
     const StThreeVectorF& glMom = glTrack->geometry()->momentum();
 
     const StPhysicalHelixD& glHelix = glTrack->geometry()->helix();
 
-    StMatrixF gCM = glTrack->fitTraits().covariantMatrix();
-    Float_t errorGl[5] = {gCM(1,1),gCM(2,2),gCM(3,3),gCM(4,4),gCM(5,5)};
 
 
-    tinyRcTrack->setPtGl(glMom.perp());
+    double pt = glMom.perp();
+    tinyRcTrack->setPtGl(pt);
     tinyRcTrack->setPzGl(glMom.z());
     tinyRcTrack->setEtaGl(glMom.pseudoRapidity());
     tinyRcTrack->setPhiGl(glMom.phi()); 
     tinyRcTrack->setCurvGl(glTrack->geometry()->curvature());
     tinyRcTrack->setTanLGl(tan(glTrack->geometry()->dipAngle()));
-    tinyRcTrack->setErrGl(errorGl);
     tinyRcTrack->setSeedQuality(glTrack->seedQuality());
+    StMatrixF gCM = glTrack->fitTraits().covariantMatrix();
+//VP Float_t errorGl[5] = {gCM(1,1),gCM(2,2),gCM(3,3),gCM(4,4),gCM(5,5)};
+    Float_t errorGl[5] = {gCM[0][0]*pow(M_PI/180,2)  		//YY
+                         ,gCM[1][1]				//ZZ
+			 ,gCM[3][3]*pow(M_PI/180,2)		//PsiPsi
+			 ,gCM[4][4]*pow(pt,4)			//PtPt
+			 ,gCM[2][2]};				//tanLtanL
+    for (int j=0;j<5;j++) {errorGl[j] = sqrt(errorGl[j]);} 
+    tinyRcTrack->setErrGl(errorGl);
     //
     // reality check
     //
@@ -1875,16 +1906,14 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     // having the primary track pointer here is optional. 
     const StThreeVectorF& prMom = prTrack->geometry()->momentum();
     const StPhysicalHelixD& prHelix = prTrack->geometry()->helix();
-    StMatrixF pCM = prTrack->fitTraits().covariantMatrix();
-    Float_t errorPr[5] = {pCM(1,1),pCM(2,2),pCM(3,3),pCM(4,4),pCM(5,5)};
     
-    tinyRcTrack->setPtPr(prMom.perp());
+    double pt = prMom.perp();
+    tinyRcTrack->setPtPr(pt);
     tinyRcTrack->setPzPr(prMom.z()); 
     tinyRcTrack->setEtaPr(prMom.pseudoRapidity());
     tinyRcTrack->setPhiPr(prMom.phi());
     tinyRcTrack->setCurvPr(prTrack->geometry()->curvature());
     tinyRcTrack->setTanLPr(tan(prTrack->geometry()->dipAngle()));
-    tinyRcTrack->setErrPr(errorPr);
     tinyRcTrack->setChi2Pr(prTrack->fitTraits().chi2());
     tinyRcTrack->setFlag(prTrack->flag());
     tinyRcTrack->setDcaPr(prTrack->impactParameter());
@@ -1896,6 +1925,14 @@ void StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     tinyRcTrack->setFitPts(prTrack->fitTraits().numberOfFitPoints(kTpcId));
     tinyRcTrack->setFitSvt(prTrack->fitTraits().numberOfFitPoints(kSvtId));
     tinyRcTrack->setFitSsd(prTrack->fitTraits().numberOfFitPoints(kSsdId));
+    StMatrixF pCM = prTrack->fitTraits().covariantMatrix();
+    Float_t errorPr[5] = {pCM[0][0]*pow(M_PI/180,2)  		//YY
+                         ,pCM[1][1]				//ZZ
+			 ,pCM[3][3]*pow(M_PI/180,2)		//PsiPsi
+			 ,pCM[4][4]*pow(pt,4)			//PtPt
+			 ,pCM[2][2]};				//tanLtanL
+    for (int j=0;j<5;j++) {errorPr[j] = sqrt(errorPr[j]);} 
+    tinyRcTrack->setErrPr(errorPr);
     size_t ftpcFitPts = 0;
     if (tinyRcTrack->etaGl()>1.8)
       ftpcFitPts = prTrack->fitTraits().numberOfFitPoints(kFtpcWestId);
@@ -2713,15 +2750,17 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
     const StPtrVecHit &recHits = recTrack->detectorInfo()->hits();	
 // 		Loop to store all the mc track keys and quality of every reco hit on the track.
     int nHits = recHits.size();
-    int tkBest=0; float qaBest=0,qaSum=0;
     for (int hi=0;hi<nHits; hi++) {
 	const StHit* rHit = recHits[hi]; 
         int id = rHit->idTruth(); if (!id) continue;
 	int qa = rHit->qaTruth(); if (!qa) qa = 1;
-        float *pqa = &idTruths[id]; *pqa+=qa;
-        qaSum +=qa;
-        if(*pqa <qaBest) continue;
-        tkBest=id; qaBest =*pqa;
+        idTruths[id]+=qa;
+    }
+    int tkBest=0; float qaBest=0,qaSum=0;
+    for (myIter_t it=idTruths.begin(); it!=idTruths.end();++it) {
+       qaSum+=(*it).second;
+       if ((*it).second<qaBest)	continue;
+       tkBest=(*it).first; qaBest=(*it).second;
     }
     dominatrackKey = tkBest; avgQuality = 100*qaBest/(qaSum+1e-10);
     for (int hi=0;hi<nHits; hi++) {
@@ -2738,9 +2777,12 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 
 //______________________________________________________________________________
 //
-// $Id: StMiniMcMaker.cxx,v 1.37 2011/04/01 20:02:56 perev Exp $
+// $Id: StMiniMcMaker.cxx,v 1.38 2011/07/19 19:18:05 perev Exp $
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.38  2011/07/19 19:18:05  perev
+// Error handling fixed
+//
 // Revision 1.37  2011/04/01 20:02:56  perev
 // IdTruth part rewritten
 //
@@ -2758,6 +2800,9 @@ void StMiniMcMaker::dominatTkInfo(const StTrack* recTrack,int &dominatrackKey ,i
 //
 //
 // $Log: StMiniMcMaker.cxx,v $
+// Revision 1.38  2011/07/19 19:18:05  perev
+// Error handling fixed
+//
 // Revision 1.37  2011/04/01 20:02:56  perev
 // IdTruth part rewritten
 //
