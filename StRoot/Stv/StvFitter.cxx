@@ -128,9 +128,9 @@ double StvFitter::Xi2(const StvHit *hit)
   mDcaP=VDOT(mDcaFrame[1],dca);
   mDcaL=VDOT(mDcaFrame[2],dca);
 
-  double G[3] = {mHitErrs[0]+mInErrs->mHH
-                ,mHitErrs[1]+mInErrs->mHZ
-                ,mHitErrs[2]+mInErrs->mZZ};
+  double G[3] = {mInErrs->mHH
+                ,mInErrs->mHZ
+                ,mInErrs->mZZ};
 //  (BB*dX*dX-2*BA*dX*dY+AAdY*dY)/det 
   mXi2 = MyXi2(G,mDcaP,mDcaL);
   return mXi2 ; 
@@ -183,7 +183,6 @@ int StvFitter::Vpdate()
 static int nCall=0; nCall++;
 
   mTkErrs = *mInErrs;
-//???????????????  for (int i=0;i<3;i++) {mTkErrs[i]+=mHitErrs[i];}
 
 //		New Z ortogonal to X (track direction)
   StvFitPars myHitPars(mDcaP, mDcaL );
@@ -201,6 +200,7 @@ static int nCall=0; nCall++;
   *mOtPars = mTkPars;
   *mOtPars+= myJrkPars;
   mOtErrs->SetHz(mOtPars->_hz);
+  for (int i=0;i<3;i++) {mOtErrs->Arr()[i]+=mHitErrs[i];}
   return 0;
 }  
 //______________________________________________________________________________

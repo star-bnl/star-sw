@@ -18,7 +18,7 @@ public:
 
 StvFitter(const char *name="DefaultFitter");
       void    Set(const StvNodePars *inPars, const StvFitErrs *inErrs
-                 ,      StvNodePars *otPars,       StvFitErrs *otErrs);
+                 ,      StvNodePars *otPars=0,     StvFitErrs *otErrs=0);
       void    Set(const StvNodePars *inPars, const StvFitErrs *inErrs
                  ,const StvNodePars *jnPars, const StvFitErrs *jnErrs
                  ,      StvNodePars *otPars,       StvFitErrs *otErrs);
