@@ -64,12 +64,12 @@ Block FSCE is the container volume for all towers
 endblock
 *---------------------------------------------------------------
 Block FSCT is a sensitive Tungsten+Sci+Epoxy tower
-*     mix of tungsten powder and epoxy
+**      Material  WSE
 	  Component W   A=183.84 Z=74   W= 92.3
-      Component C   A=12     Z=6    W= 7.1 
+      Component C   A=12.01  Z=6    W= 7.1 
       Component H   A=1      Z=1    W= 0.6 
-      Mixture  WSE    Dens=8.297
-      Material WSE
+      Mixture  WSE Dens=8.297 Radl=0.8719
+      Medium    sensitive  Isvol=1
       Attribute FSCT seen=1 colo=7 ! lightblue
       Shape BOX   dx = fscp_towerWidth,
                   dy = fscp_towerWidth,
