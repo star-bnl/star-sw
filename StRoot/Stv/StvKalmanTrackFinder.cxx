@@ -51,7 +51,7 @@ int StvKalmanTrackFinder::FindTracks()
 static int trkShow=0;
 static int kitShow=0;
 //  DoShow(2);
-  int nTrk = 0,nAdded=0,nHits=0;
+  int nTrk = 0,nAdded=0,nHits=0,nSeed=0;
 static StvToolkit *kit = StvToolkit::Inst();
 static StvConst  *kons = StvConst::Inst();
   StvSeedFinder *sf = kit->SeedFinder();
@@ -59,6 +59,7 @@ static StvConst  *kons = StvConst::Inst();
   mCurrTrak = 0;
   while ((mSeedHelx = sf->NextSeed())) 
   {
+    nSeed++;
 						if (sf->DoShow())  sf->Show();
 
     if (!mCurrTrak) mCurrTrak = kit->GetTrack();
@@ -77,8 +78,7 @@ static StvConst  *kons = StvConst::Inst();
       assert(!mCurrTrak->Check("Two",1+2));
       nAdded = FindTrack(1);
       assert(!mCurrTrak->Check("THree",2));
-      if (!nAdded) 			continue; 
-// few hits added. Refit track   
+// few hits added. Refit track to beam again 
       ans = Refit(0);
       if (ans) 				continue;
       assert(!mCurrTrak->Check("Four",3));
@@ -86,6 +86,8 @@ static StvConst  *kons = StvConst::Inst();
     if (fail) 				continue;
     nHits = mCurrTrak->GetNHits();
     if (nHits < kons->mMinHits)		continue;
+    StvNode *node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
+    if (node) node->UpdateDca();
     kit->GetTracks().push_back(mCurrTrak);
     nTrk++;
     aveRes += mCurrTrak->GetRes();
@@ -142,9 +144,8 @@ Mtx55D_t derivFit;
   mDive->Set(par+1,err+1,&derivFit);
 
 
-  while(idive==0) {
+  while(idive==kDiveHits || idive==0) {
 
-    assert (!mySkip); 
     do {//Stop tracking?
       idive = 99;
       if (!nNode)		continue;
@@ -172,7 +173,7 @@ Mtx55D_t derivFit;
     if (err[0].Check("AfterDive"))		break;
 //    assert(idive || !err[0].Check("AfterDive"));
     const StvHits *localHits = 0; 
-    if (!idive) {
+    if (idive== kDiveHits) {
 static float gate[2]={myConst->mMaxWindow,myConst->mMaxWindow};   
       localHits = mHitter->GetHits(par,gate); 
     }
@@ -203,13 +204,13 @@ if (DoShow()) {
       continue;
     }
 
-    if (!localHits)	 continue;//Never hits in node 
+    if (!localHits)	 continue;	//Never hits in node 
     node->SetHitPlane(mHitter->GetHitPlane());
     if (!localHits->size()) {//No hits in node
       hitCount.AddNit(); continue;
     } 
     fitt->Prep();
-    double minXi2 = myConst->mXi2Hit*10; 
+    double minXi2 = myConst->mXi2Hit; 
     StvHit *minHit=0; int minIdx = -1;
     for (int ihit=0;ihit<(int)localHits->size();ihit++) {
       StvHit *hit = (*localHits)[ihit];
@@ -217,9 +218,7 @@ if (DoShow()) {
       if (myXi2 > minXi2) continue;
       minXi2 = myXi2; minHit = hit; minIdx = ihit;
     }
-    if (minXi2<300) StvDebug::Count("minXi2",minXi2);
     node->SetHit(minHit); 
-    if (minXi2>myConst->mXi2Hit) minHit = 0;
     if (! minHit) {
       hitCount.AddNit(); 
     } else {
@@ -254,10 +253,18 @@ if (DoShow()) {
   } // End Dive&Fitter loop 
 
   mCurrTrak->SetTypeEnd(mySkip);
-  if (!idir && hitCount.Reject()) {
-    mCurrTrak->ReleaseHits(); mCurrTrak->unset();
-    kit->FreeTrack(mCurrTrak);mCurrTrak=0; return 0; }
-    
+  if (!idir) {
+    double eff = hitCount.Eff();
+    if (hitCount.Reject()) {
+      StvDebug::Count("BadEff",eff);
+      if (hitCount.nContNits)StvDebug::Count("BadCNits",hitCount.nContNits);
+      if (hitCount.nTotNits )StvDebug::Count("BadTNits",hitCount.nTotNits);
+      mCurrTrak->ReleaseHits(); mCurrTrak->unset();
+      kit->FreeTrack(mCurrTrak);mCurrTrak=0; return 0; }
+    if (hitCount.nContNits)StvDebug::Count("GooCNits",hitCount.nContNits);
+    if (hitCount.nTotNits )StvDebug::Count("GooTNits",hitCount.nTotNits);
+    StvDebug::Count("GoodEff",eff);
+  }
 
   if (DoShow()) { Show();}
 
@@ -280,7 +287,12 @@ static     StvTrackFitter *tkf = StvTrackFitter::Inst();
   int nTracks = 0;
   for (StvTrackIter it=traks.begin(); it!=traks.end() ;++it) {
     StvTrack *track = *it;  nTracks++;
-    if (track->ToBeam() > myConst->mDca2dZeroXY) continue;
+    double dca00 = track->ToBeam();
+    if (dca00 > myConst->mDca2dZeroXY) {
+      if (dca00 >1e11) StvDebug::Count("PrimNoDcaRej",    0);
+      else             StvDebug::Count("PrimDca00Rej",dca00);
+      continue;
+    }
     int bestVertex=-1; double bestXi2 = myConst->mXi2Vtx;
     for (int iVertex=0;iVertex<nVertex;iVertex++) {
       StvHit *vertex = vtxs[iVertex];
@@ -292,8 +304,10 @@ static     StvTrackFitter *tkf = StvTrackFitter::Inst();
     }//End vertex loop
     
     if(bestVertex<0) 				continue;
+    StvDebug::Count("PrimXi2Acc",bestXi2);
     StvNode *node = kit->GetNode();
     StvHit *hit = vtxs[bestVertex];
+    hit->addCount();
     tkf->Fit(track,hit,node);
     track->push_front(node);
     track->SetPrimary(bestVertex+1);
@@ -308,7 +322,30 @@ static     StvTrackFitter *tkf = StvTrackFitter::Inst();
 //_____________________________________________________________________________
 int StvKalmanTrackFinder::Refit(int idir)
 {
-  int ans = StvTrackFitter::Inst()->Refit(mCurrTrak,idir);
+static int nCall=0;nCall++;
+static       StvTrackFitter *tkf = StvTrackFitter::Inst();
+static const StvConst       *kon = StvConst::Inst();
+  int ans=0;
+  for (int refIt=0; refIt<5; refIt++)  {
+    ans = tkf->Refit(mCurrTrak,idir,1);
+    if (!ans) break;
+    for (int iter=0;iter<5;iter++) {
+      for (int ihlx = 0; ihlx <10; ihlx++) {
+	int nHits = mCurrTrak->GetNHits();
+	if (nHits<10) return 10;
+	tkf->Helix(mCurrTrak,1|2);
+	StvNode *node = tkf->GetWorstNode();
+	assert(node);
+	double badXi2 = tkf->GetWorstXi2();
+	if (badXi2<kon->mXi2Hlx && ihlx) break;
+	node->SetHit(0);
+      }
+      ans = tkf->Refit(mCurrTrak,idir,0);
+      if (ans) continue;
+      ans = tkf->Refit(mCurrTrak,1-idir,1);
+      if (!ans) break;
+    }
+  }
   StvNode *node = mCurrTrak->GetNode(StvTrack::kDcaPoint);
   if (!node) return ans;
   node->UpdateDca();
