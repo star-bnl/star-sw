@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doCopy.C,v 1.1 2001/04/27 18:12:31 perev Exp $
+// $Id: doCopy.C,v 1.2 2011/07/19 20:11:25 perev Exp $
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "iostream.h"
@@ -19,7 +19,7 @@ void doCopy(Int_t startEvent, Int_t nEvents,
               
 // ------------------ Here is the actual method -----------------------------------------
 
-void doCopy(Int_t startEvent, Int_t nEvents,
+"void doCopy(Int_t startEvent, Int_t nEvents,
             const Char_t *file,
             const Char_t *dirout) 
 {
