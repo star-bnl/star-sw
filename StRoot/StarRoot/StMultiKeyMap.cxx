@@ -55,11 +55,11 @@ double StMultiKeyMap::StMultiKeyMap::Quality()
   return mTop->Quality();
 }
 //______________________________________________________________________________
-void StMultiKeyMap::MakeTree()
+int StMultiKeyMap::MakeTree()
 {
    assert(!mTop);
    int nNodes = mArr.size();
-   if (!nNodes) return;
+   if (!nNodes) return 0;
 //   std::random_shuffle( mArr.begin(),mArr.end() ); // shuffle elements 
    random_shuffle(mArr); 
    mTop =  mArr[0];
@@ -68,7 +68,7 @@ void StMultiKeyMap::MakeTree()
 std::vector<StMultiKeyNode*> tmp(0);
    assert(nNodes == mTop->Size());
    mArr.swap(tmp);	//destroy internal array completely;
-   return;
+   return nNodes;
 }
 //______________________________________________________________________________
 int StMultiKeyMap::ls(const char *file) const
