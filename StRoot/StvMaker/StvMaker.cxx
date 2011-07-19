@@ -1,4 +1,4 @@
-// $Id: StvMaker.cxx,v 1.6 2011/04/03 20:44:28 perev Exp $
+// $Id: StvMaker.cxx,v 1.7 2011/07/19 20:02:30 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -82,7 +82,7 @@ More detailed: 				<br>
 #include "Stv/StvKalmanTrackFitter.h"
 #include "StvStEventFiller.h"
 #include "StvStarVertexFinder.h"
-
+#include "StvTpcActive.h"
 /// Definion of minimal primary vertex errors.
 /// Typical case,vertex got from simulations with zero errors.
 /// But zero errors could to unpredicted problems
@@ -151,7 +151,7 @@ static int initialized = 0;
   if (!initialized)
   {
 
-  StTGeoHelper::Inst()->SetActive(kTpcId);
+  StTGeoHelper::Inst()->SetActive(kTpcId,1,new StvTpcActive);
   StTGeoHelper::Inst()->Init(1+2+4);
 
   const char*  innOutNames[2]  ={"StvTpcInnerHitErrs"    ,"StvTpcOuterHitErrs"    };
@@ -271,13 +271,20 @@ Int_t StvMaker::FillPulls()
   mPullEvent->mRun  = hddr->GetRunNumber();
   mPullEvent->mEvt  = hddr->GetEventNumber();
   mPullEvent->mDate = hddr->GetDateTime();	//DAQ time (GMT)
-  const StvHit *vertex   = 0;
-  if (mVertexFinder && mVertexFinder->Result().size()) vertex = mVertexFinder->Result()[0];
-
+  const StvHit *vertex = 0; int nMaxTks=0,ivertex=0;
+  if (mVertexFinder && mVertexFinder->Result().size()) {
+    int nVtx = mVertexFinder->Result().size();
+    for (int iv=0;iv<nVtx;iv++) {
+      const StvHit *hit = mVertexFinder->Result()[iv];
+      if (nMaxTks > hit->getCount()) continue;
+      nMaxTks = hit->getCount();
+      vertex = hit; ivertex = iv+1;
+  } }
   mPullEvent->mChi2 = 0;	
   memset(mPullEvent->mVtx,0,sizeof(mPullEvent->mVtx));
   memset(mPullEvent->mEtx,0,sizeof(mPullEvent->mEtx));
   if (vertex) {
+    mPullEvent->mIVtx = ivertex;
     mPullEvent->mVtx[0] = vertex->x()[0];
     mPullEvent->mVtx[1] = vertex->x()[1];
     mPullEvent->mVtx[2] = vertex->x()[2];
