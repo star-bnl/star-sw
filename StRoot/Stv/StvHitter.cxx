@@ -27,6 +27,7 @@ const StvHits *StvHitter::GetHits(const StvNodePars *pars, const float gate[2])
   mHits.clear();
   const StHitPlane *myHitPlane = StTGeoHelper::Inst()->GetCurrentHitPlane();
   if (!myHitPlane) 		return 0;	//no sensitive volume there
+//  assert(mHitPlane != myHitPlane);
   if (mHitPlane == myHitPlane)  return 0;	//hit plane was already used
   if (!myHitPlane->GetNHits())	return &mHits;	//it is sensitive but no hits
   mHitPlane = myHitPlane;
