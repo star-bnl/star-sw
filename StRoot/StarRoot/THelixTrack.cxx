@@ -1739,7 +1739,7 @@ void  TCircleFitter::Add(double x,double y,const double *errs)
   if (fArr.GetSize()<n) {fArr.Set(n*2);fAux=0;}
   if (!fAux) fAux = GetAux(0);
   TCircleFitterAux *aux = fAux+fN-1;
-  aux->x = x; aux->y=y; aux->exy[0]=1; aux->exy[2]=1; aux->ezz=1;aux->wt=1;
+  aux->x = x; aux->y=y; aux->exy[0]=1; aux->exy[2]=1; aux->ezz=1;aux->wt=0;
   if (errs) AddErr(errs);
 }
 //______________________________________________________________________________
@@ -1751,7 +1751,7 @@ void  TCircleFitter::Add(double x,double y,double z)
   if (!fAux) fAux = GetAux(0);
   TCircleFitterAux *aux = fAux+fN-1;
   aux->x = x; aux->y=y; aux->z=z;
-  aux->exy[0]=1; aux->exy[1]=0; aux->exy[2]=1;aux->ezz=1;aux->wt=1;
+  aux->exy[0]=1; aux->exy[1]=0; aux->exy[2]=1;aux->ezz=1;aux->wt=0;
 }
 //______________________________________________________________________________
 void  TCircleFitter::AddErr(const double *errs,double ezz) 
@@ -1768,7 +1768,15 @@ void  TCircleFitter::AddErr(const double *errs,double ezz)
   if (e[2]<0 && e[2]>-1e-5*spur) {e[2]=0;e[1]=0;}
   assert(e[1]*e[1]<=1.01*e[0]*e[2]);
 
-
+  aux->wt = 0;
+  aux->ezz = ezz;
+}
+//______________________________________________________________________________
+void  TCircleFitter::AddErr(double errhh,double ezz) 
+{
+  TCircleFitterAux *aux = fAux+fN-1;
+  assert(errhh>0);
+  aux->wt = 1./errhh;
   aux->ezz = ezz;
 }
 //______________________________________________________________________________
@@ -1796,7 +1804,7 @@ static int nCall=0; nCall++;
     hord = sqrt(dx*dx+dy*dy);
     fCos = dx/hord;
     fSin = dy/hord;
-    int withErr = aux[0].exy[0]+aux[0].exy[2]>0;
+    int withErr = aux[0].exy[0]+aux[0].exy[2]>0 || aux[0].wt>0;
     fNor[0] = -fSin,fNor[1] = fCos;
     int nter= (withErr)? 2:1;
     for (int iter=0;iter<nter;iter++) {
@@ -1813,13 +1821,15 @@ static int nCall=0; nCall++;
             fNor[0]/=tmp; fNor[1]/=tmp; 
 	  } 
           const double *exy = aux[i].exy;
+          wt = aux[i].wt;
+          if (wt<=0) {
           wt = (fNor[0]*fNor[0]*exy[0]
 	       +fNor[0]*fNor[1]*exy[1]*2
 	       +fNor[1]*fNor[1]*exy[2]);
 //          assert(wt>0.);
           if (wt<1e-8) wt = 1e-8;
           wt = 1/wt;
-        }
+        } }
         aux[i].wt = wt;
         fWtot += wt;
 	fXgravity += aux[i].x *wt;
@@ -2554,6 +2564,11 @@ void THelixFitter::AddErr(const double *err2xy,double err2z)
   fCircleFitter.AddErr(err2xy,err2z);
 }  
 //______________________________________________________________________________
+void THelixFitter::AddErr(double errhh,double err2z) 
+{  
+  fCircleFitter.AddErr(errhh,err2z);
+}  
+//______________________________________________________________________________
 double THelixFitter::Fit()
 {
   TCircleFitterAux* myAux= GetAux(0);
@@ -2952,7 +2967,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.53 2011/04/01 20:10:32 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.54 2011/07/19 19:29:19 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2968,6 +2983,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.54  2011/07/19 19:29:19  perev
+ * set hh & zz errors
+ *
  * Revision 1.53  2011/04/01 20:10:32  perev
  * +Check for 0 array
  *
