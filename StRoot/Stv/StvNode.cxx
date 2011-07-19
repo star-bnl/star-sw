@@ -1,6 +1,6 @@
 //StvKalmanTrack.cxx
 /*
- * $Id: StvNode.cxx,v 1.7 2011/05/04 18:30:14 perev Exp $
+ * $Id: StvNode.cxx,v 1.8 2011/07/19 19:55:58 perev Exp $
  *
  * /author Victor Perev
  */
@@ -8,10 +8,11 @@
 #include <Stiostream.h>
 #include <math.h>
 #include <stdio.h>
+#include "TString.h"
 
 #include "Stv/StvNode.h"
 #include "Stv/StvHit.h"
-#include "TString.h"
+#include "StvUtil/StvDebug.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
 
 
@@ -21,6 +22,7 @@ void StvNode::reset()
 static int myCount=0;
   memset(mBeg,0,mEnd-mBeg+1);
   mId = ++myCount; 
+  StvDebug::Break(mId);
   mXi2[0] = 3e33;mXi2[1] = 3e33;mXi2[2] = 3e33;
 }
 //______________________________________________________________________________
@@ -55,15 +57,19 @@ static const char *txt = "XYZAPTCHREL";
 static const char *hhh = "xyzre";
   if (!opt || !opt[0]) opt = "_";
   TString myOpt(opt);
+  const char *cc = strchr(opt,'=');
+  int dir = (cc)? cc[1]-'0':4; //mPP[4]==mFP[2]
+  int djr = (dir<2)? dir:dir-2;
   if (myOpt.Contains("_")) myOpt.ReplaceAll("_","2RZErze");
   double val,err[2];
-  const StvNodePars &fp= GetFP();
-  const StvFitErrs  &fe= GetFE();
+  const StvNodePars &fp= mPP[dir];
+  const StvFitErrs  &fe= mPE[dir];
   StvHit *hit = GetHit();
-  TString ts;
-  if (hit) {ts+=(GetXi2()>1e3)? "h":"H";}
+  TString ts; if (hit) {ts = (mXi2[0]>1e3 && mXi2[1]>1e3)? "h":"H";}
+  if (GetType()==kDcaNode ) ts='D';
+  if (GetType()==kPrimNode) ts='P';
   printf("%p(%s)",(void*)this,ts.Data());
-  if (myOpt.Contains("2")) printf("\t%s=%g","Xi2",GetXi2());
+  if (myOpt.Contains("2")) printf("\t%s=%g","Xi2",GetXi2(djr));
   for (int i=0;txt[i];i++) {
     err[0]=-999;val=-999;
     if (myOpt.Index(TString(txt[i]))<0) continue;
@@ -84,7 +90,7 @@ static const char *hhh = "xyzre";
       else if (hhh[i]=='e')	{err[0] = sqrt(mHrr[0]); err[1] = sqrt(mHrr[2]);}
       else 			{val = hit->x()[i];} 
       if (abs(val+999)>1e-6) 	{printf("\th%c=%g",hhh[i],val);}
-      if (err[0]>-999)  	{ printf("\thh=%7.2g zz=%7.2g",err[0],err[1]);}
+      if (err[0]>-999)  	{printf("\thh=%7.2g zz=%7.2g",err[0],err[1]);}
     } 
   }
   printf("\n");
@@ -108,15 +114,21 @@ void StvNode::SetHit(StvHit *hit)
 //________________________________________________________________________________
 void StvNode::UpdateDca()
 { 
-  double dL = -( mFP[2]._x*mFP[2]._cosCA+mFP[2]._y*mFP[2]._sinCA);
-  if (fabs(dL)<1e-6) return;
-  do {
-    if (fabs(dL)<1e-1) break;
-    TCircle crk(&(mFP[2]._x),&(mFP[2]._cosCA),mFP[2]._curv);
-    double zero[2]={0};
-    dL = crk.Path(zero);
-  } while(0);
-  for (int i=0;i<5;i++) {mPP[i].move(dL);} 
+static double zero[2]={0};
+  const StvNodePars &P = mFP[2];
+  double dL;
+  for (int iter=0;iter<4;iter++) {
+    dL =  -( P._x*P._cosCA+P._y*P._sinCA)
+              /(1+(-P._x*P._sinCA+P._y*P._cosCA)*P._curv);
+    if (fabs(dL)<1e-6) return;
+    do {
+      if (!iter && fabs(dL*mFP[2]._curv)<1e-1) break;
+      TCircle cirk(&(P._x),&(P._cosCA),P._curv);
+      dL = cirk.Path(zero);
+    } while(0);
+    for (int i=0;i<5;i++) {mPP[i].move(dL);} 
+  }
+  assert(fabs(dL)<1e-6);
 }
 //________________________________________________________________________________
 int StvNode::Check(const char *tit, int dirs) const
