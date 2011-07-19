@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.56 2011/06/03 17:14:09 fisyak Exp $
+ * $Id: StAssociationMaker.cxx,v 1.57 2011/07/19 19:11:15 perev Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.57  2011/07/19 19:11:15  perev
+ * Cleanup
+ *
  * Revision 1.56  2011/06/03 17:14:09  fisyak
  * Set FtpcHit IdTruth and  QA
  *
@@ -1345,9 +1348,7 @@ Int_t StAssociationMaker::Make()
     if (!mEstTracksOn)
       rcTrack = dynamic_cast<const StGlobalTrack*>(trkNode->track(global));
     else { // Helen wants to keep the old global track from this node 
-      rcTrack = dynamic_cast<const StGlobalTrack*>(trkNode->track(estGlobal));
-      if( !rcTrack)
-	rcTrack = dynamic_cast<const StGlobalTrack*>(trkNode->track(global));
+      rcTrack = dynamic_cast<const StGlobalTrack*>(trkNode->track(global));
     }
     if (!rcTrack || !(rcTrack->detectorInfo()->hits().size()))
       continue; // If there are no Tpc Hits, skip track.

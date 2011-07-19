@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcPair.h,v 1.4 2007/02/23 17:07:00 fisyak Exp $
+ * $Id: StMiniMcPair.h,v 1.5 2011/07/19 19:15:05 perev Exp $
  * \file  StMiniMcPair.h
  * \brief  for simplicity, this contains both the rc and mc track information.
  * 
@@ -38,10 +38,10 @@ public:
     float avgQuality() { return mAvgQuality; }
     //    virtual void Print(Option_t *opt = "") const;
 private:
-    Short_t      mNCommonHit; /// Common Hits is now encoded, tpc + svt * 100 + ssd * 1000
-    Bool_t     mIsBestContam;
-    Short_t     mDominatrack;
-    Short_t  mDominCommonHit;///            with IdTruth             -"-           
+    Short_t      mNCommonHit; 		/// Common Hits is now encoded, tpc + svt * 100 + ssd * 1000
+    Bool_t       mIsBestContam;
+    Short_t      mDominatrack;
+    Short_t      mDominCommonHit;	///            with IdTruth             -"-           
     Float_t      mAvgQuality;
 
   ClassDef(StMiniMcPair,3)
@@ -51,6 +51,9 @@ private:
 
 //
 // $Log: StMiniMcPair.h,v $
+// Revision 1.5  2011/07/19 19:15:05  perev
+// Cleanup
+//
 // Revision 1.4  2007/02/23 17:07:00  fisyak
 // Add Ssd and DCA
 //
