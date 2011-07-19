@@ -1,4 +1,4 @@
-// $Id: StvELossTrak.cxx,v 1.4 2011/04/01 20:49:48 perev Exp $
+// $Id: StvELossTrak.cxx,v 1.5 2011/07/19 19:35:59 perev Exp $
 //
 //
 // Class StvELossTrak
@@ -83,6 +83,11 @@ double StvELossTrak::GetOrt2() const
 {
   assert(fFak>0);
   return fFak*(fMCS[2]+fTotLen*(fMCS[1]+fTotLen*fMCS[0]));
+}
+//_____________________________________________________________________________
+double StvELossTrak::dPtidL() const	
+{
+ return fTotELoss*sqrt(fP*fP+fM*fM)/(fP*fTotLen);
 }
 //______________________________________________________________________________
 //* Revision 1.1.1.1  1995/10/24 10:21:24  cernlib

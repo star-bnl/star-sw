@@ -241,10 +241,14 @@ int StvMCStepping::Fun()
 {
 static int nCall = 0;
 nCall++;
+static StTGeoHelper *tgh = StTGeoHelper::Instance();
+int meAgain = 0;
+
 mybreak(nCall);
   TString ts,modName;
   fKount++;
   Case();
+
 
   assert(fCurrentLength< 10000);
   assert(fEnterLength  < 10000);
@@ -254,16 +258,19 @@ mybreak(nCall);
 //         , fEnterLength, fCurrentLength,fCurrentPosition.Perp(),fCurrentPosition.Z());
 SWITCH: int myKaze = fKaze;
 if (GetDebug()) {printf("%d - ",nCall); Print();}
-
   switch (fKaze) {
     case kNEWtrack:;
+         meAgain = (fPrevPath == tgh->GetPath());
 
-    case kENTERtrack:;
+
+    case kENTERtrack:;{
+         double *X = &fCurrentPosition[0];
+         fHitted = (tgh->IsHitted(X) && (!meAgain));
          if (strcmp(fVolume->GetName(),"HALL")==0) fKaze=kENDEDtrack;
          if (!StTGeoHelper::Inst()->GetHitShape()->Inside(fCurrentPosition.Z(),fCurrentPosition.Perp()))
 	    fKaze=kENDEDtrack;
          if (fKaze==kENDEDtrack) break;
-         if ((fExit = BegVolume())) fKaze=kENDEDtrack;
+         if ((fExit = BegVolume())) fKaze=kENDEDtrack;}
     break;
     
     case kCONTINUEtrack:
@@ -279,12 +286,9 @@ if (GetDebug()) {printf("%d - ",nCall); Print();}
     case kEXITtrack:
     {
       fExit = EndVolume();
-      if (!fExit) {
-        if (fSkip) 			break;
-        StTGeoHelper *tgh = StTGeoHelper::Instance();
-        if (!tgh->IsSensitive(fVolume)) break;
-        if (!tgh->IsActive(0)) 		break;
-      }
+      if (!fExit) break;
+      fPrevPath ="";
+      if (fExit == kDiveHits) fPrevPath = tgh->GetPath();
       TVirtualMC::GetMC()->StopTrack();
     }
     break;
@@ -354,6 +358,10 @@ static int nCall=0; nCall++;
   assert(emx->mCC>0);
   fELossData.mTheta2 = fELossTrak->GetTheta2();
   fELossData.mOrt2   = fELossTrak->GetOrt2();
+  fELossData.mELoss  = fELossTrak->ELoss();
+  fELossData.mELossErr2 = fELossTrak->ELossErr2();
+  fELossData.mdPtidL = fELossTrak->dPtidL();
+
   double cosL = fHelix->GetCos();
   double tanL = fHelix->GetTan();
   emx->mAA+=fELossData.mTheta2/(cosL*cosL);
@@ -382,24 +390,32 @@ int StvMCStepping::IsDca00(int begEnd)
 
     case 1: { // end volume
       double dL = fCurrentLength-fEnterLength;
-      if (dL<1e-6) return 0;
-      if ((fCurrentSign<0)==(fDir==0)) return 0;
+      if (dL<1e-6) 	return 0;
+      int ans = 0;
+      if ((fCurrentSign<0) != (fDir==0)) ans = kDiveDca;
+      if (!ans && !fSkip && fHitted ) ans = kDiveHits; 
+      if (!ans) 	return 0;
       THelixTrack th(*fHelix);
-      double dcaL = th.Path(0.,0.);
-      if (dcaL< 0) return kDiveBreak;
-      double curva = -fField->GetHz()/fCurrentMomentum.Pt()*fCharge;
-      double rho = fHelix->GetRho();
-      curva = (rho*(dL-dcaL)+dcaL*curva)/dL;
-      th.Set((2*rho+curva)/3);
-      dcaL = th.Path(0.,0.);
+      double dcaL = (ans==kDiveDca)? th.Path(0.,0.) : dL/2;
+      if (dcaL< 0) 	return kDiveBreak;
+      double rho1 = -fField->GetHz()/fCurrentMomentum.Pt()*fCharge;
+      double rho0 = fHelix->GetRho();
+      double delta = rho0-rho1;
+      if (fabs(delta) > 1e-6*fabs(rho1)) { // significant change of curvature
+         delta = (delta*dcaL)/(rho1*dL);
+         double rho1 = rho0/(1+delta);
+         double rho = (fabs(delta)>1e-2)? rho0*log(1+delta)/delta:(rho0+rho1)/2;
+         th.Set(rho);
+         if (ans==kDiveDca) dcaL = th.Path(0.,0.);
+      }
   //		Update end position
       th.Move(dcaL);
       fCurrentLength=fEnterLength+dcaL;
       fCurrentPosition.SetVect(TVector3(th.Pos()));
-      double pt = fabs(fField->GetHz()*fCharge/curva);
+      double pt = fabs(fField->GetHz()*fCharge/rho1);
       double p  = pt/th.GetCos();
       fCurrentMomentum.SetVectM(TVector3(th.Dir())*p,fMass);
-      return kDiveDca;
+      return ans;
     }
   }
   return kDiveBreak;
