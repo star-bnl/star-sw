@@ -1,5 +1,5 @@
 
-// $Id: StTGeoHelper.cxx,v 1.14 2011/05/04 17:45:20 perev Exp $
+// $Id: StTGeoHelper.cxx,v 1.15 2011/07/19 19:10:15 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -218,22 +218,19 @@ void StTGeoHelper::SetModule (const char *voluName, int akt)
   SetFlag(vol,StVoluInfo::kModule,akt);
 }
 //_____________________________________________________________________________
-void StTGeoHelper::SetActive (const char *voluName, int akt)
+void StTGeoHelper::SetActive (const char *voluName, int akt,StActiveFunctor *af)
 {
   TGeoVolume *vol = gGeoManager->FindVolumeFast(voluName);
   if (!vol) { Warning("SetActive","Volume %s Not Found",voluName);return;}
-
-  SetFlag(vol,StVoluInfo::kActive,akt);
+  StVoluInfo *inf = SetFlag(vol,StVoluInfo::kActive,akt);
+  inf->SetActiveFunctor(af);
 }
 //_____________________________________________________________________________
-void StTGeoHelper::SetActive (StDetectorId did,int akt)
+void StTGeoHelper::SetActive (StDetectorId did,int akt,StActiveFunctor *af)
 {
   const char *modu = ModName(did);
   if (!*modu)  { Warning("SetActive","DetId %d Unknown",did);return;}
-
-  TGeoVolume *vol = gGeoManager->FindVolumeFast(modu);
-  if (!vol) { Warning("SetActive","Volume %s Not Found",modu);return;}
-  SetFlag(vol,StVoluInfo::kActive,akt);
+  SetActive(modu,akt,af); 
   Long64_t mask = 1; mask = mask<<(int)did;
   if (akt) { fActiveModu |=  mask; }
   else     { fActiveModu &= ~mask; }
@@ -560,6 +557,7 @@ static const float myDir[3][3][3]={{{1,0,0},{ 0,1,0},{ 0,0,1}}
 //_____________________________________________________________________________
 int StTGeoHelper::IsSensitive(const TGeoVolume *volu)
 {
+  if (!volu) volu = gGeoManager->GetCurrentVolume();
   const TGeoMedium *tm = volu->GetMedium();
   if (!tm) return 0;
   return (tm->GetParam(kISVOL)>0.);
@@ -749,8 +747,7 @@ static const float dirs[26][3] = {
   TGeoNode *node = gGeoManager->FindNode(pnt[0],pnt[1],pnt[2]);
   assert(node);
   StHitPlane *hp = GetCurrentHitPlane();     
-//     assert(hp);
-  if (hp  && hp->GetHitErrCalc()) return hp;
+  if (hp  && hp->GetHitErrCalc() && IsHitted(pnt)) return hp;
   double Rxy = sqrt(pnt[0]*pnt[0]+pnt[1]*pnt[1]);
   double myCos= pnt[0]/Rxy,mySin=pnt[1]/Rxy;
   double myDir[3];
@@ -766,12 +763,14 @@ static const float dirs[26][3] = {
     double myStep = 0;
     while (1) {
       node = gGeoManager->FindNextBoundaryAndStep();
-      if (!node) break;
+      if (!node) 					break;
       myStep +=gGeoManager->GetStep();
-      if (myStep>minDist) break;
+      if (myStep>minDist) 				break;
+      
       hp = GetCurrentHitPlane();     
-      if (!hp || !hp->GetHitErrCalc()) 	continue;
-      minDist = myStep; minHitPlane = hp; break;
+      if (!hp || !hp->GetHitErrCalc()) 			continue;
+      if (!IsHitted(gGeoManager->GetLastPoint()))	continue;
+      minDist = myStep; minHitPlane = hp; 		break;
     }
 
   }
@@ -816,14 +815,16 @@ void StTGeoHelper::Clear(const char *)
   ClearHits();
 }
 //_____________________________________________________________________________
-void StTGeoHelper::InitHits()
+int StTGeoHelper::InitHits()
 {
 
   int n = fHitPlaneArr->GetLast()+1;
+  int nHits = 0;
   for (int i=0;i<n;i++) {
     StHitPlane *hp = (StHitPlane *)fHitPlaneArr->At(i);
-    hp->InitHits();
+    nHits += hp->InitHits();
   }
+  return nHits;
 }    
 //_____________________________________________________________________________
 StDetectorId StTGeoHelper::DetId(const char *detName) 
@@ -847,6 +848,17 @@ const char *StTGeoHelper::ModName(StDetectorId detId)
  return gModName[detId];
 }
 
+//_____________________________________________________________________________
+int StTGeoHelper::IsHitted(const double X[3]) const
+{
+  if (!IsSensitive()) return 0;
+  const TGeoVolume *mo = GetModu();
+  if (!IsActive(mo)) return 0;
+  StVoluInfo *vi = GetInfo(mo->GetNumber());
+  StActiveFunctor *af = vi->GetActiveFunctor();
+  if (!af) return 1;
+  return (*af)(X);
+}
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 const char *StVoluInfo::GetName() const
@@ -950,9 +962,9 @@ int StHitPlane::GetNHits() const
 return (fHitMap)?fHitMap->Size():0;
 }
 //_____________________________________________________________________________
-void StHitPlane::InitHits()
+int StHitPlane::InitHits()
 {
-  fHitMap->MakeTree();
+  return fHitMap->MakeTree();
 }
 //_____________________________________________________________________________
 void StHitPlane::Clear(const char*)
@@ -1249,8 +1261,22 @@ void  StTGeoHelper::ShootZR(double z,double rxy)
    }
 
 }
-
-
+//_____________________________________________________________________________
+//_____________________________________________________________________________
+ClassImp(StActiveFunctor)
+//_____________________________________________________________________________
+int StActiveFunctor::GetIPath(int nLev,int *copyNums,const char **voluNams) const
+{
+  for (int iLev=0;iLev<nLev;iLev++) {
+    TGeoNode *node = gGeoManager->GetMother(iLev);
+    copyNums[iLev] = 0;
+    if (!node) 		return 1; 
+    copyNums[iLev] = node->GetNumber();
+    if (!voluNams) 	continue;
+    voluNams[iLev] = node->GetVolume()->GetName();
+  }  
+  return 0;
+}
 //_____________________________________________________________________________
 //_____________________________________________________________________________
 #if 0
