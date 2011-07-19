@@ -1,4 +1,4 @@
-// $Id: StvHitLoader.cxx,v 1.3 2011/02/05 21:55:31 perev Exp $
+// $Id: StvHitLoader.cxx,v 1.4 2011/07/19 20:00:17 perev Exp $
 /*!
 \author V Perev 2010
 
@@ -69,7 +69,7 @@ static int myGraph=0;
 StvDraw *myDraw=0;
 StvHits *myHits=0;
 if (myGraph) { //create canvas
-  myDraw = new StvDraw("tpc");
+  myDraw = new StvDraw();
   myHits = new StvHits;
 }
 
@@ -91,6 +91,7 @@ if (myGraph) { //create canvas
       Info("LoadHits","Start %s hits",StTGeoHelper::DetName(did));
       nHits=0; nHitz=0;
     }
+if (fabs(stHit->position()[2])>200) continue;//????????????????????????
     StvHit *stiHit = MakeStvHit(stHit,mHitIter->UPath());
 
 if (myHits) (*myHits)+= stiHit;   
@@ -101,7 +102,8 @@ if (myHits) (*myHits)+= stiHit;
     if (!stiHit) continue;
 
   }
-  StTGeoHelper::Inst()->InitHits();
+  int nIniHits = StTGeoHelper::Inst()->InitHits();
+  assert(nTotHits==nIniHits);
   Info("LoadHits","Loaded %d good and failed %d of all hits",nTotHits,nTotHitz);
 if (myDraw) {myDraw->Hits(*myHits,kUnusedHit); myDraw->Wait();}
 
