@@ -59,7 +59,7 @@ void StvVertex::set(const float *x,const float matrix[6])
 //_____________________________________________________________________________
 void StvVertex::reset()
 {
-  memset(mErr,0,sizeof(mErr));
+  memset(mErr,0,sizeof(mErr)); mKount=0;
   StvHit::reset();
 }
 

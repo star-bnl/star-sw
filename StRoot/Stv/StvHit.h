@@ -78,6 +78,9 @@ public:
 		  ,const float *x);
     ///Set the global position and error 
     virtual void set(const float *x,const float *err){assert(0);}
+    virtual void addCount()		{assert(0);}
+    virtual void setCount(int kount)	{assert(0);}
+    virtual  int getCount() const	{assert(0);}
     
     ///Set the position error matrix for the measurement from an float array
     ///object.
@@ -85,7 +88,7 @@ public:
 
     ///Set the number of times used
     ///Return the number of times this hit was assigned to a track
-    int timesUsed() const 	{ return (int)mTimesUsed;}
+    virtual int timesUsed() const 	{ return (int)mTimesUsed;}
     virtual void addTimesUsed(int add=1){ mTimesUsed+=add ;}
     virtual void setTimesUsed(int ijk)	{ mTimesUsed=(unsigned char)ijk; }
     virtual void reset();
@@ -117,12 +120,20 @@ public:
     void set(const StHitPlane* detector
                   ,const void *stHit
 		  ,const float *x){assert(0);}
+    virtual  int timesUsed() const 	{ return 0;}
     virtual void addTimesUsed(int){;}
     virtual void setTimesUsed(int){;}
 
+    virtual void addCount()		{mKount++ ;}
+    virtual void setCount(int kount)	{mKount=kount ;}
+    virtual  int getCount() const	{return mKount;}
+
     const float *errMtx() const   {return mErr;}
           float *errMtx()         {return mErr;}
+
+
 protected:
     float mErr[6];			//error matrix
+    int   mKount;
 };
 #endif
