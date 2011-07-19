@@ -1,4 +1,4 @@
-// $Id: StTGeoHelper.h,v 1.13 2011/05/04 17:45:14 perev Exp $
+// $Id: StTGeoHelper.h,v 1.14 2011/07/19 19:10:09 perev Exp $
 //
 //
 // Class StTGeoHelper
@@ -25,6 +25,7 @@ class StTGeoHitShape;
 class StTGeoIter;
 class StHitPlaneInfo;
 class StMultiKeyMap;
+class StActiveFunctor;
 
 // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
 struct InvertLtStr
@@ -66,7 +67,7 @@ enum E_VoluInfo {
 public:
 enum E_Kind { kVoluInfo=1,kHitPlaneInfo=2};
 
-         StVoluInfo(int voluNumber)     {SetUniqueID(voluNumber);}
+         StVoluInfo(int voluNumber)     {SetUniqueID(voluNumber);fActiveFunctor=0;}
 virtual ~StVoluInfo(){;}
         int IsModule  ()        const   {return TestBit(kModule);}
         int IsMODULE()          const   {return TestBit(kMODULE);}
@@ -75,11 +76,16 @@ virtual ~StVoluInfo(){;}
        void SetModule  (int s=1)        {SetBit(kModule,s)      ;}
        void SetMODULE  (int s=1)        {SetBit(kMODULE,s)      ;}
        void SetHitPlane(int s=1)        {SetBit(kHitPlane,s)    ;}
+       void SetActive  (int s=1)        {SetBit(kActive,s)      ;}
+       void SetActiveFunctor(StActiveFunctor *af)	
+       					{fActiveFunctor=af      ;}
         int GetNumber()         const   {return GetUniqueID()   ;}
 const  TGeoVolume* GetVolu()    const;
-virtual int Kind()              const   {return kVoluInfo;}
 const char *GetName() const;
-public:
+StActiveFunctor *GetActiveFunctor() 	{return fActiveFunctor  ;}
+virtual int Kind()              const   {return kVoluInfo;}
+protected:
+StActiveFunctor *fActiveFunctor;
 ClassDef(StVoluInfo,0) //
 };
 
@@ -121,7 +127,7 @@ public:
       StHitPlane(const char *path, int volId);
 virtual ~StHitPlane();
 void  Clear(const char *opt="");
-void  InitHits();
+int   InitHits();
 void  SetHitErrCalc(TNamed *hitErrCalc)	{fHitErrCalc = hitErrCalc;}
 TNamed *GetHitErrCalc()	const 		{return (TNamed*)fHitErrCalc;}
 
@@ -178,6 +184,18 @@ virtual ~StTGeoSele(){}
 virtual int Select(const char *path,int copyNumber, const float xyz[3]) const =0;
 ClassDef(StTGeoSele,0)
 };
+
+// _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
+class StActiveFunctor : public TNamed
+{
+public:
+    StActiveFunctor(const char *name=""):TNamed(name,""){}
+virtual ~StActiveFunctor(){}
+virtual int operator()(const double xyz[3])=0;
+int GetIPath(int nLev,int *copyNums,const char **voluNams=0) const;
+ClassDef(StActiveFunctor,0)
+};
+
 // _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ __
 class StTGeoHelper : public TObject
 {
@@ -198,7 +216,7 @@ public:
 
        void SetHitPlane(const char *moduName,const char *voluName,int axis=1);
        void InitHitPlane();
-       void InitHits();
+        int InitHits();
        void ClearHits();
        void Clear(const char *opt="");
 
@@ -210,8 +228,8 @@ public:
         void  Print(const char *tit=0) const;
         void  ls(const char* opt="Mmps")                const;
         void  SetInfo   (StVoluInfo *ext);
-        void  SetActive (const char *voluName,int act=1);
-        void  SetActive (StDetectorId did,int act=1);
+        void  SetActive (const char *voluName,int act=1,StActiveFunctor *af=0);
+        void  SetActive (StDetectorId did,int act=1,StActiveFunctor *af=0);
   StVoluInfo *SetFlag   (const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg,int act=1);
          int  IsFlag    (const TGeoVolume *volu,StVoluInfo::E_VoluInfo flg) const;
          int  IsModule  (const TGeoVolume *volu)        const;
@@ -219,7 +237,8 @@ public:
          int  IsMODULE  (const TGeoVolume *volu)        const;
          int  IsActive  (const TGeoVolume *volu=0)      const;                  
          int  IsActive  (StDetectorId did)              const;
-static   int  IsSensitive(const TGeoVolume *volu);
+         int  IsHitted  (const double X[3])             const;
+static   int  IsSensitive(const TGeoVolume *volu=0);
 static   StDetectorId  DetId(const char *detName);
 static  const char *DetName(StDetectorId detId);
 static  const char *ModName(StDetectorId detId);
