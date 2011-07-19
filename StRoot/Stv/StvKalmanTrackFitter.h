@@ -6,14 +6,16 @@
 
 /// \class StvKalmanTrackFitter
 class StvTrack;
+class StvNode;
 
 class StvKalmanTrackFitter : public StvTrackFitter
 {
 public:
   StvKalmanTrackFitter();
   virtual ~StvKalmanTrackFitter(){;}	
-  virtual  int Refit(StvTrack *trak,int dir);
+  virtual  int Refit(StvTrack *trak,int dir,int mode=1);
   virtual  int Fit(const StvTrack *trak,const StvHit *vtx,StvNode *node);
+  virtual  int Helix(StvTrack *trak,int mode);
   virtual void Clear(const char *opt="");
   
 
