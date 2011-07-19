@@ -1,12 +1,14 @@
-#if 1
 /***************************************************************************
  *
- * $Id: StvStEventFiller.cxx,v 1.7 2011/05/04 17:57:37 perev Exp $
+ * $Id: StvStEventFiller.cxx,v 1.8 2011/07/19 20:05:37 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StvStEventFiller.cxx,v $
+ * Revision 1.8  2011/07/19 20:05:37  perev
+ * Dca00 for primary into StvPull
+ *
  * Revision 1.7  2011/05/04 17:57:37  perev
  * Typo fixed
  *
@@ -497,6 +499,7 @@
 #include "Stv/StvTrack.h"
 #include "StvUtil/StvPullEvent.h"
 #include "StvUtil/StvHitErrCalculator.h"
+#include "StvUtil/StvDebug.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
 //#include "StDetectorDbMaker/StvKalmanTrackFitterParameters.h"
 
@@ -508,7 +511,6 @@
 #include <map>
 std::map<const StvTrack*, StTrackNode*> gTrkNodeMap;
 typedef std::map<const StvTrack*, StTrackNode*>::iterator TkMapIter;
-
 
 //_____________________________________________________________________________
 inline StThreeVectorF position(const StvNode *node)
@@ -1248,6 +1250,7 @@ static int nCall = 0; nCall++;
     return;
   }
   pars.GetImpact(&myImp,&errs);
+
   double signB = EmxSign(5,&myImp.mImpImp);
   if (signB<=0) {
     Warning("fillDca","-TIVE DCA errors %g %g, SKIPPED",signA,signB);
@@ -1256,6 +1259,8 @@ static int nCall = 0; nCall++;
   StDcaGeometry *dca = new StDcaGeometry;
   gTrack->setDcaGeometry(dca);
   dca->set(&myImp.mImp,&myImp.mImpImp);
+  StvDebug::Count("DcaGeo",dca->params()[0]);
+  assert(fabs(pars.getRxy()-fabs(dca->params()[0]))<1e-2*pars.getRxy());
 
 }
 //_____________________________________________________________________________
@@ -1279,9 +1284,14 @@ void StvStEventFiller::FillStHitErr(StHit *hh,const StvNode *node)
 //_____________________________________________________________________________
 void StvStEventFiller::fillPulls(const StvTrack* track, int gloPri) 
 {
+static int nCall=0; nCall++;
   //cout << "StvStEventFiller::fillDetectorInfo() -I- Started"<<endl;
   if (!mPullEvent) return;
-  if (gloPri && !track->IsPrimary()) return;
+  StvTrack::EPointType pty =  ( !gloPri) ? StvTrack::kDcaPoint : StvTrack::kPrimPoint;
+  const StvNode *node = track->GetNode(pty);
+  if (!node) return;
+
+  const StvNodePars &fp = node->GetFP();
   int dets[kMaxDetectorId][3];
   getAllPointCount(track,dets);
   StvPullTrk aux;
@@ -1294,11 +1304,6 @@ void StvStEventFiller::fillPulls(const StvTrack* track, int gloPri)
   aux.mL       = (unsigned char)track->GetLength();
   aux.mTypeEnd = (unsigned char)track->GetTypeEnd();
   aux.mChi2    = track->GetXi2();
-  StvTrack::EPointType pty =  ( !gloPri) ? StvTrack::kDcaPoint : StvTrack::kPrimPoint;
-  const StvNode *node = track->GetNode(pty);
-  assert(node || pty != StvTrack::kPrimPoint);
-  if (!node) return;
-  const StvNodePars &fp = node->GetFP();
 
 
   aux.mCurv    = fp._curv;
@@ -1310,8 +1315,22 @@ void StvStEventFiller::fillPulls(const StvTrack* track, int gloPri)
   aux.mPhi     = v3.phi();
   aux.mZ       = v3.z();
   mPullEvent->Add(aux,gloPri);
-
-
+  if (!gloPri)    { 
+    double ar[7];
+    ar[0] = aux.mRxy*cos(aux.mPhi);
+    ar[1] = aux.mRxy*sin(aux.mPhi);
+    ar[2] = aux.mZ;
+    ar[3] = cos(aux.mDip)*cos(aux.mPsi);
+    ar[4] = cos(aux.mDip)*sin(aux.mPsi);
+    ar[5] = sin(aux.mDip);
+    ar[6] = aux.mCurv;
+    THelixTrack th(ar,ar+3,ar[6]);
+    double dL = th.Path(0.,0.);
+    th.Eval(dL,ar,ar+3);
+    double dca00 = (-ar[0]*ar[4]+ar[1]*ar[3])/cos(aux.mDip);
+    StvDebug::Count("RxyPull",dca00);
+    StvDebug::Count("LLLPull",dL);
+  }
 
   double len=0,preRho,preXy[2]; int myNode=0;
   for (StvNodeConstIter tNode=track->begin();tNode!=track->end();++tNode) 
@@ -1449,4 +1468,3 @@ enum {kPP=0,kMP=1,kFP=2};
     count[0][kFP]++; count[detId][kFP]++;
   }
 }
-#endif //0
