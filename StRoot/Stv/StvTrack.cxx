@@ -9,6 +9,7 @@
 #include "Stv/StvTrack.h"
 #include "Stv/StvDraw.h"
 #include "Stv/StvToolkit.h"
+#include "Stv/StvTrackFitter.h"
 #include "StarVMC/GeoTestMaker/StTGeoHelper.h"
 int StvTrack::mgId=0;
 
@@ -75,7 +76,7 @@ StvNode *StvTrack::GetNode(EPointType noTy)
   StvNode *node=0;int n=0;
   if (noTy!=kLastPoint) {
     for (StvNodeIter it = begin();it != end();++it) {
-      node = *it; n++; if (node->GetXi2()>1000) continue;
+      node = *it; n++; 
       switch(noTy) {
         case kDcaPoint: if (n>2) return 0;
 	  if (node->GetType()==StvNode::kDcaNode) {return node;} 
@@ -210,46 +211,12 @@ static StvToolkit *kit = StvToolkit::Inst();
   erase(tail,end());
 }
 //_____________________________________________________________________________
+//_____________________________________________________________________________
 double StvTrack::Approx(int mode)
 {
-  THelixFitter hlx;
-  int iNode=0;
-  StvNode *fstNode = 0,*lstNode = 0;
-  for (StvNodeIter it=begin();it!=end(); ++it) {
-    StvNode *node = *it; iNode++;
-    const StvHit *hit= node->GetHit();
-    if (!hit) continue;
-    if (!fstNode) fstNode = node;
-    lstNode = node;
-    hlx.Add(hit->x()[0],hit->x()[1],hit->x()[2]);
-  }  
-  double Xi2 =hlx.Fit();
-  double dL = hlx.Path(fstNode->GetFP().P);
-  hlx.Move(dL);
-
-  if (!mode) {//Printout only
-    double myPsi = atan2(hlx.Dir()[1],hlx.Dir()[0]);
-    double myTan = tan(asin(hlx.Dir()[2]));
-    double myCur = hlx.GetRho();
-    printf("StvTrack::Approx(fstHelx) Xi2=%g \tPsi,Tan,Curv=%g %g %g\n",  Xi2,myPsi,myTan,myCur);
-    dL = hlx.Path(lstNode->GetFP().P); hlx.Move(dL);
-    myPsi = atan2(hlx.Dir()[1],hlx.Dir()[0]);
-    myTan = tan(asin(hlx.Dir()[2]));
-    myCur = hlx.GetRho();
-    printf("StvTrack::Approx(lstHelx) Xi2=%g \tPsi,Tan,Curv=%g %g %g\n",  Xi2,myPsi,myTan,myCur);
-    myPsi = fstNode->GetFP()._psi;
-    myTan = fstNode->GetFP()._tanl;
-    myCur = fstNode->GetFP()._curv;
-    double myXi2 = fstNode->GetXi2();
-    printf("StvTrack::Approx(fstNode) Xi2=%g \tPsi,Tan,Curv=%g %g %g\n",myXi2,myPsi,myTan,myCur);
-    myPsi = lstNode->GetFP()._psi;
-    myTan = lstNode->GetFP()._tanl;
-    myCur = lstNode->GetFP()._curv;
-    myXi2 = lstNode->GetXi2();
-    printf("StvTrack::Approx(lstNode) Xi2=%g \tPsi,Tan,Curv=%g %g %g\n",myXi2,myPsi,myTan,myCur);
-    return Xi2;
-  }
-  return Xi2;
+static StvTrackFitter *fitt = StvTrackFitter::Inst();
+  fitt->Helix(this,mode);
+  return fitt->GetXi2();
 }
 //_____________________________________________________________________________
 double StvTrack::GetRes() const
@@ -270,6 +237,7 @@ double StvTrack::GetRes() const
   }  
   return (nRes)? res/nRes:0.;
 }
+  
 
 //_____________________________________________________________________________
 void StvTrack::Show() const
@@ -363,7 +331,7 @@ enum {kTotHits=10	//Min number hits for track
      ,kGoodHits=5	//Min number good hits for track
      ,kContHits=2	//Min length of good hit sequence
      ,kContNits=8	//Max length of acceptable non hit sequence
-     ,kTotNits=13	//Max number of acceptable non hits
+     ,kTotNits=15	//Max number of acceptable non hits
      };
 //_____________________________________________________________________________
 void StvHitCount::AddHit()
@@ -371,9 +339,8 @@ void StvHitCount::AddHit()
   nPossHits++;  nTotHits++;nContHits++;
   if (!nContNits)		return;
   if (nContHits<kContHits) 	return;
-  if (nContNits>kContNits) nSeqLong++;
+  if (nContNits>kContNits) 	nSeqLong++;
   nContNits=0;nSeqNits++;
-    
 }
 
 //_____________________________________________________________________________
@@ -385,22 +352,27 @@ void StvHitCount::AddNit()
   nContHits=0;nSeqHits++;
 }
 //_____________________________________________________________________________
-int StvHitCount::Reject()
+int StvHitCount::Reject() const
 {
-    if (nContNits) {
-      if (nContNits>kContNits) nSeqLong++;
-      nContNits=0;nSeqNits++;
-    }
-    if (nContHits) {
-      if (nContHits<kContHits) {nSeqShort++;} else { nGoodHits+=nContHits;}
-      nContHits=0;nSeqHits++;
-    }
-  return nGoodHits<kGoodHits || nTotHits<kTotHits || nTotNits > kTotNits;
+  int rej = 0;
+  if (nGoodHits<kGoodHits) rej+=1;
+  if (nTotHits <kTotHits ) rej+=2;
+//if (nTotNits > kTotNits) rej+=4;
+
+  return rej;
 }
 //_____________________________________________________________________________
 int StvHitCount::Skip() const
 {
-  if (nContNits>kContNits) return 1;
-  if (nTotNits > kTotNits) return 2;
-  return 0 ;
+  int rej = 0;
+  if (nContNits>kContNits) rej+= 1;
+  if (nTotNits > kTotNits) rej+= 2;
+  return rej ;
+}
+//_____________________________________________________________________________
+double StvHitCount::Eff() const
+{
+  double p = nTotHits/(nPossHits-nContNits+1e-6);
+  double q = 1-p;
+  return p +3*sqrt(p*q/(nPossHits+1e-6));
 }
