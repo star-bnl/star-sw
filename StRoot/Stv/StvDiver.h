@@ -17,7 +17,7 @@ class THelixTrack;
 class StvFitErrs;
 class StvNodePars;
 typedef double Mtx55D_t[5][5];
-enum StvDiverFlags {kDiveOk=0,kDiveDca=1,kDiveBreak=2,kDiveMany=3};
+enum StvDiverFlags {kDiveOk=0,kDiveHits,kDiveDca,kDiveBreak,kDiveMany};
 /// \class StvDiver
 class StvDiver : public TNamed
 {
@@ -104,16 +104,18 @@ int    fExit;
 int    fSkip;
 int    fLastKaze;
 int    fLastNumb;
+int    fHitted;
 float  fStartSign;
 float  fCurrentSign;
 char fMidl[1];
-THelixTrack *fHelix;
-Mtx55D_t    *fDeriv;		//Derivative matrix in THelixTrack notation
+THelixTrack  *fHelix;
+Mtx55D_t     *fDeriv;		//Derivative matrix in THelixTrack notation
 StvELossTrak *fELossTrak;	//Energy loss calculator
 StvELossData  fELossData;	//Energy loss data
-StvMCField  *fField;		//Mag field calculator
+StvMCField   *fField;		//Mag field calculator
 const TGeoMaterial *fPrevMat;
 char fLast[1];
+TString fPrevPath;		//Path in previous Dive()
 private:
 
 ClassDef(StvMCStepping,0) // 
