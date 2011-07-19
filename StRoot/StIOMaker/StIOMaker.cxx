@@ -119,8 +119,10 @@ Int_t StIOMaker::Skip()
   
   fSkip = fCurrMk->Skip(fSkip);
   if (!fSkip) return 0;
+  SetNumber((fNumEvent+=fSkip));
   Close();
-  return Skip();
+
+  return fSkip;
 }
 
 //_____________________________________________________________________________
@@ -185,6 +187,12 @@ Int_t StIOMaker::Make(){
 AGAIN:
     iret = MakeRead();  
     SetNumber(++fNumEvent);
+
+    LOG_QA << "StIOMaker:  Event: " << GetIventNumber()
+        << "  Run: " << GetRunNumber() 
+        << "  EventId: " << GetEventNumber() <<   endm;
+
+
     if (fNumEvent > fMaxEvent) iret = kStEOF;
     if (iret != kStEOF) 	return iret;
     Close();   	
