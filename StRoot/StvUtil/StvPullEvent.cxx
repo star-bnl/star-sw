@@ -1,3 +1,4 @@
+#include <math.h>
 #include <assert.h>
 #include "StvPullEvent.h"
 #include "RVersion.h"
@@ -7,6 +8,7 @@
 #include "TCernLib.h"
 #endif
 #include "StEvent/StEnumerations.h"
+#include "StvDebug.h"
 
 ClassImp(StvPullTrk)
 ClassImp(StvPullHit)
@@ -172,5 +174,26 @@ static int nCall=0; nCall++;
     trkG->mVertex = vertex; 
     trkG->mTrackNumber= iTkG+1; 
   }
+
+  for (iTkG=0;iTkG<mNTrks[0];iTkG++) {// Loop over globs
+    trkG=(StvPullTrk*)mTrksG[iTkG]; 
+    if (trkG->mVertex != mIVtx) continue; 
+    if (trkG->nAllHits < 15)    continue; 
+    double ar[7];
+    ar[0] = cos(trkG->mPhi-trkG->mPsi);
+    assert(fabs(ar[0])<1e-3);
+    ar[0] = trkG->mRxy*cos(trkG->mPhi);
+    ar[1] = trkG->mRxy*sin(trkG->mPhi);
+    ar[2] = trkG->mZ;
+    ar[3] = cos(trkG->mDip)*cos(trkG->mPsi);
+    ar[4] = cos(trkG->mDip)*sin(trkG->mPsi);
+    ar[5] = sin(trkG->mDip);
+    ar[6] = trkG->mCurv;
+    double dca00 = (-ar[0]*ar[4]+ar[1]*ar[3])/cos(trkG->mDip);
+    StvDebug::Count("PriDca00",dca00);
+  } 
+
+
+
 }  
   

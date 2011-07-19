@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StvPullEvent.h,v 1.2 2011/04/03 20:53:54 perev Exp $
+ * $Id: StvPullEvent.h,v 1.3 2011/07/19 20:10:31 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StvPullEvent.h,v $
+ * Revision 1.3  2011/07/19 20:10:31  perev
+ * Dca00 added
+ *
  * Revision 1.2  2011/04/03 20:53:54  perev
- * Type of end tracking added
+ *  Type of end tracking added
  *
  * Revision 1.1  2010/09/25 17:52:07  perev
  * NewDir
@@ -170,6 +173,7 @@ public:
    int   mEvt;
    TDatime mDate;	//DAQ time (GMT)
 
+     int mIVtx;	        //Primary vertex id 
    float mVtx[3];	//Primary vertex position in global frame
    float mEtx[6];	//errors xx,yx,yy,zx,zy,zz
    float mChi2;         //Chi square of vertex fit
