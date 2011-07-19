@@ -124,6 +124,7 @@ int    Used() const 			{return fNuse;}
 void   Add (double x,double y,const double *errs=0); 
 void   Add (double x,double y,double z); 
 void   AddErr(const double *errs,double errz=0); 
+void   AddErr(double errh,double errz=0); 
 void   AddZ(double z,double err2z=0);
 double Fit();   
 void   MakeErrs();
@@ -314,6 +315,7 @@ int    Size() const 			{return fCircleFitter.Size();}
 int    Used() const 			{return fCircleFitter.Used();}
 void   Add (double x,double y,double z); 
 void   AddErr(const double *err2xy,double err2z); 
+void   AddErr(double errhh,double errzz); 
 double Fit();   
 void   MakeErrs();
 double FixAt(const double vals[5],int flag=1); 
