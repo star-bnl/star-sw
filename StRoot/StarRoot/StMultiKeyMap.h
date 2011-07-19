@@ -16,9 +16,9 @@ void Add(const void *obj,const double *keys);
 const StMultiKeyNode *GetTop() const {return mTop;}
       StMultiKeyNode *GetTop()       {return mTop;}
 double Quality();
-void MakeTree();
-int    ls(const char *file="") const;
-int    Size() const;
+   int MakeTree();
+   int ls(const char *file="") const;
+   int Size() const;
 // statics
 static void Test();
 static void Test2();
