@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.22 2009/08/26 20:44:08 fine Exp $
+// $Id: StObject.cxx,v 1.23 2011/07/19 19:20:21 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.23  2011/07/19 19:20:21  perev
+// More accurate counter handling
+//
 // Revision 1.22  2009/08/26 20:44:08  fine
 // fix the compilation issues under SL5_64_bits  gcc 4.3.2
 //
@@ -265,15 +268,16 @@ StXRefMain::~StXRefMain()
 void StXRefMain::Streamer(TBuffer &R__b)
 {
    StXRef::Streamer(R__b);  
+   StXRefManager::fgManager->Clear("");
 }
 //_____________________________________________________________________________
 StXRefManager::StXRefManager(const StUUId &id)
 {
    fTally = 0;
    fUpd = 0;
+   fLev = 0;
    fUUId = id;
    fMain=0;
-   fStack.push_front(0);
    fgManagerList.push_front(this);
    fColList.push_front(0);
 }
@@ -290,15 +294,7 @@ StXRefManager::~StXRefManager()
 //_____________________________________________________________________________
 void StXRefManager::Cd(StXRef *xref)
 {
-  StXRef *xrefCur=0;
   StXRefManager *man = fgManager;
-  if (man) {
-     if (man->fTally!=StObject::fgTally) {//Was modified
-        xrefCur = man->fStack.front();
-        assert(xrefCur);
-        man->fTally = StObject::fgTally;
-        xrefCur->SetTally(man->fTally);
-  }  } 
 
   if (!man || man->fUUId.Compare(xref->GetUUId())!=0) {
      StXRefManagerListIter it;
@@ -320,15 +316,13 @@ void StXRefManager::Open(StXRef *xref)
      fgManagerList.push_front(man);
      fgManager   = man;
   }
+  man->fLev++;
   if (man->fMain==0) {
      man->fMain  = xref->GetMain();
   } else {
      xref->SetMain(man->fMain);
   }
-  StXRef *xrefCur   = man->fStack.front();
-  assert(xrefCur!=xref);
-  man->fStack.push_front(xref);
-  man->fTally = StObject::fgTally = xref->GetTally();
+  if (man->fLev==1) StObject::fgTally = man->fTally;
 }
 //_____________________________________________________________________________
 void StXRefManager::Close(StXRef *xref)
@@ -336,15 +330,11 @@ void StXRefManager::Close(StXRef *xref)
   Cd(xref);
   StXRefManager *man = fgManager;
   assert(man);
-  StXRef *xrefCur   = man->fStack.front();
-  assert(xrefCur==xref);
   man->Update();
   if (man->fMain) man->fMain->Add(xref);
-  man->fStack.pop_front();
-  man->fTally = StObject::fgTally=0;
-  xrefCur   = man->fStack.front();
-  if (!xrefCur) return;
-  man->fTally = StObject::fgTally=xrefCur->GetTally();
+  man->Update(StObject::fgTally);
+  man->fLev--;
+  if (!man->fLev) StObject::fgTally = 0;
 }  
 
 
@@ -359,12 +349,13 @@ void StXRefManager::AddColl (const StStrArray *sarr)
    int size = sarr->size();
    if (!size) 	return;
    fUpd=1;
-   UInt_t u;
+   UInt_t u,uMax=0;
    const TObject *to, **p;
    const_VecTObjIter it= sarr->begin(); 
    for(int i=0;i<size;i++) {
      if (!(to = it[i]))			continue;
      if (!(u = to->GetUniqueID()))	continue;
+     if (uMax<u)uMax=u;
      p = (const TObject**)fObjTab.GET(u);
      if (*p) 	{// Used already		
        if (*p == to)			continue;
@@ -372,6 +363,7 @@ void StXRefManager::AddColl (const StStrArray *sarr)
      }
      *p = to;
    }
+   Update(uMax);
 }
 //_____________________________________________________________________________
 void StXRefManager::Update ()
@@ -381,7 +373,7 @@ void StXRefManager::Update ()
   StObjArray *arr;
   StProxyUrr *urr;
   StCollListIter it;
-  UInt_t idx,udx,sizeUrr,lst=999999;
+  UInt_t idx,udx,udxMax=0,sizeUrr,lst=999999;
   TObject **p; 
   for (it = fColList.begin(); (urr = *it);) {//List
     sizeUrr = urr->size(); 
@@ -405,15 +397,31 @@ void StXRefManager::Update ()
          if (!p || !(*p))	{(*urr)[lst++] = udx; continue;}
          arr->push_back(*p); 
       }//end RefArray loop
+      if (udxMax<udx) udxMax=udx;
     }
     if (lst) { urr->resize(lst-1);     it++;      }
     else     {it = fColList.erase(it); delete urr;}
   }//end List
-
+  Update(udxMax);
+  StObject::fgTally = fTally;
 }
 //_____________________________________________________________________________
 void StXRefManager::Clear (Option_t*)
-{}
+{
+  ULong_t **page = (ULong_t**)fObjTab.GetList();
+  if (!page) return;
+  for (;page; page = (ULong_t**)page[0]) {
+    if (!page) 		break;
+    if (!page[1]) 	continue;
+    for (int i=0;i<(int)TPageMap::kPAGE;i++) {
+      if (!page[i+2]) 	break;
+      ((TObject*)page[i+2])->SetUniqueID(0);
+    }
+  }
+  fTally = 0;
+  fObjTab.Clear();
+  StObject::fgTally=0;
+}
 
 //_____________________________________________________________________________
 TDataSet *StXRefManager::GetMain()
@@ -435,17 +443,25 @@ TPageMap::TPageMap()
 
 TPageMap::~TPageMap()
 {
+  Clear();
+}
+//_____________________________________________________________________________
+void TPageMap::Clear() {
    ULong_t *p,*n=0;
    for (p = fList; p ; p = n) 
    { n = (ULong_t*)p[0]; free(p);}
+   fList = 0;
+   fTopPage = NewPage();
+   fLstPage = 0;
+   fLstUdx  = 0;
 }     
 //_____________________________________________________________________________
 ULong_t *TPageMap::NewPage()  
 {
-   int n = sizeof(ULong_t)*(kPAGE+1);
+   int n = sizeof(ULong_t)*(kPAGE+2);
    ULong_t *p = (ULong_t*)malloc(n); memset(p,0,n);
    p[0] = (ULong_t)fList; fList = p;
-   return p+1;
+   return p+2;
 }
 
 //_____________________________________________________________________________
@@ -483,7 +499,7 @@ ULong_t *TPageMap::GET(UInt_t udx)
         b = a;
         if (!(s -=kBITS))  		break;;
       }
-      fLstPage = b;
+      fLstPage = b; fLstPage[-1]=1;
    }
    return fLstPage + (udx&kMASK);
 }

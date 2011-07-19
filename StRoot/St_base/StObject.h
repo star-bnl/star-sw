@@ -1,5 +1,8 @@
-// $Id: StObject.h,v 1.15 2007/04/26 04:16:41 perev Exp $
+// $Id: StObject.h,v 1.16 2011/07/19 19:20:17 perev Exp $
 // $Log: StObject.h,v $
+// Revision 1.16  2011/07/19 19:20:17  perev
+// More accurate counter handling
+//
 // Revision 1.15  2007/04/26 04:16:41  perev
 // Remove senseless comment
 //
@@ -125,13 +128,15 @@ ClassDef(StXRefMain,1)
 //_____________________________________________________________________________
 class TPageMap  {
 
-enum EPageMap {kPAGE=2048,kBITS=11,kBITZ=22,kMASK=0x7ff,kLAST=0xfffff800};
 public:
+enum EPageMap {kPAGE=2048,kBITS=11,kBITZ=22,kMASK=0x7ff,kLAST=0xfffff800};
  TPageMap();
 ~TPageMap();
 
 ULong_t *GET(UInt_t udx) ;
 ULong_t *Get(UInt_t udx) ;
+ULong_t *GetList() 	{return fList;}
+    void Clear();
 static  void     Test();
 private:
 ULong_t *NewPage();
@@ -189,7 +194,10 @@ public:
         void    Cd();
         void    AddColl (      StProxyUrr *rarr);
         void    AddColl (const StStrArray *sarr);
+private:
         void    Update ();
+        void    Update (UInt_t tally){ if (fTally<tally)fTally=tally;}
+public:
         void    Clear (Option_t*);
 static  void    Cd        (StXRef     *xref);
 static  void    Open      (StXRef     *xref);
@@ -198,12 +206,12 @@ static  TDataSet *GetMain();
 
 private:
         Int_t  fUpd;
+        Int_t  fLev;
         UInt_t fTally;
         StUUId fUUId;		//!
         StCollList  fColList;
         TPageMap  fObjTab;
         StXRefMain *fMain;
-        StXRefList  fStack;
 public:
 static StXRefManagerList fgManagerList;
 static StXRefManager 	*fgManager;
