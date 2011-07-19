@@ -13,7 +13,7 @@ class StvDraw : public StDraw3D
 public: 
 
     ///Default constructor.
-    StvDraw(const char *opt="TPC");
+    StvDraw(const char *opt="TIFC,TPCFEE,TPCM");
     ~StvDraw(){;}
    void  Clear(const char *opt="");
 TObject *Hits(const std::vector<     StvHit*> &hits, EDraw3DStyle sty);
