@@ -25,13 +25,14 @@ class StvFitPars
 public:	
   StvFitPars():mH(0),mZ(0),mA(0),mL(0),mP(0){}
   StvFitPars(double h,double z):mH(h),mZ(z),mA(0),mL(0),mP(0){}
-  StvFitPars(const double *arr) {memcpy(&mH,arr,5*sizeof(mH));}
+  StvFitPars(const double *arr) 		{memcpy(&mH,arr,5*sizeof(mH));}
 const StvFitPars &operator*(Mtx55D_t &t) const;    
         void Print(const char *tit=0) const;
          int Check(const char *tit=0) const;
-      double *Arr() 		{return &mH;}
-const double *Arr()  const 	{return &mH;}
-  double &operator[](int i) 	{return (&mH)[i];}
+         int TooBig() const;
+      double *Arr() 				{return &mH;}
+const double *Arr()  const 			{return &mH;}
+  double &operator[](int i) 			{return (&mH)[i];}
 public:	
 double mH;	// direction perpendicular movement and Z
 double mZ;	// Pseudo Z, direction perpendicular movement & H
@@ -45,6 +46,7 @@ double mP;	// 1/pt with curvature sign
 class StvNodePars {
 public:	
   enum eNodePars {kNPars=5};
+  StvNodePars()			{reset();}
   void reset();
   void ready();
   void set(const THelixTrack *ht, double Hz);
@@ -56,7 +58,7 @@ double getP2() const;
 double getRxy() const;
 double getCos2L() const 		{return 1./(1.+_tanl*_tanl);}
   void reverse(); 
-
+   int isValid() const 	{return  (_hz && _cosCA);};
 ///		convert THelixTrack derivativ matrix into StvFitPar one
   void convert( Mtx55D_t &fitDer , const Mtx55D_t &hlxDer) const;
 ///		invert or reverse StvFitPar derivativ matrix
@@ -73,6 +75,7 @@ double &operator[](int idx)       {return P[idx];}
     int getCharge() const {return (_ptin > 0) ? -1 : 1;}
     int     check(const char *pri=0) const;
 void  operator+=(const StvFitPars &add);
+StvNodePars &operator=(const StvNodePars &fr);
 const StvFitPars &operator-(const StvNodePars& sub) const;
 void    print() const;
   void GetRadial(double radPar[6],double *radErr=0,const StvFitErrs *fE=0)  const;
@@ -188,8 +191,11 @@ class StvELossData
 public:
   double mTheta2;	//multiple scattering angle error
   double mOrt2;		//multiple scattering position error
+  double mELoss;	//Energy loss
+  double mdPtidL;	//d(1/p)/len
+  double mELossErr2;	//Square or Energy loss error
 public:
-  void Clear() { mTheta2=0; mOrt2=0;}
+  void Clear() { mTheta2=0; mOrt2=0;mELoss=0;mELossErr2=0; }
 
 };
 //------------------------------------------------------------------------------
@@ -208,7 +214,7 @@ ClassDef(StvNodeParsTest,0)
 
 //------------------------------------------------------------------------------
 // 		StvNodePars::inlines
-inline void StvNodePars::reset(){memset(this,0,sizeof(StvNodePars));_cosCA=1;}
+inline void StvNodePars::reset(){memset(this,0,sizeof(StvNodePars));}
 //------------------------------------------------------------------------------
 inline void StvNodePars::ready(){_cosCA=cos(_psi);_sinCA=sin(_psi);_curv = _hz*_ptin;}
 //------------------------------------------------------------------------------
