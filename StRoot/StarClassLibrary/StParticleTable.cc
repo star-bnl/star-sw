@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.13 2011/03/30 17:32:50 jwebb Exp $
+ * $Id: StParticleTable.cc,v 1.14 2011/07/20 17:57:52 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
+ * Revision 1.14  2011/07/20 17:57:52  jwebb
+ * Updated StParticleTable to provide access to anti-nuclei via the "geant" ID.
+ *
  * Revision 1.13  2011/03/30 17:32:50  jwebb
  * Added anti-nuclei (deuteron, triton, alpha and helium3) to the table.
  *
@@ -76,6 +79,10 @@ long _undefined_particle_id = 2000000000;
 #include <ospace/stl/src/treeaux.cpp> // CC4.2 with ObjectSpace only
 #endif
 
+#include "StAntiDeuteron.hh"
+#include "StAntiTriton.hh"
+#include "StAntiAlpha.hh"
+#include "StAntiHelium3.hh"
 
 
 StParticleTable* StParticleTable::mParticleTable = 0;
@@ -324,6 +331,7 @@ StParticleDefinition* StParticleTable::findParticleByGeantId(int geantId) const
     //  1. If it's an elementary particle its in the PDG list 
     //  2. If it is a nucleus/ion find it via the name list
     //
+
     StParticleDefinition *p = 0;
     switch (geantId) {
     case 45:
@@ -341,6 +349,19 @@ StParticleDefinition* StParticleTable::findParticleByGeantId(int geantId) const
     case 50:
 	p = findParticle(string("opticalphoton"));
 	break;
+    case 50045:
+        p = StAntiDeuteron::instance();
+	break;
+    case 50046:
+        p = StAntiTriton::instance();
+        break;
+    case 50047:
+        p = StAntiAlpha::instance();
+        break;
+    case 50048:
+        p = StAntiHelium3::instance();
+        break;
+
     default:
 	mGeantPdgMapType::const_iterator i =  mGeantPdgMap.find(geantId);
 	if (i != mGeantPdgMap.end())

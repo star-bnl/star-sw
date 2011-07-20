@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StAntiDeuteron.cc,v 1.1 2011/03/25 18:17:45 jwebb Exp $
+ * $Id: StAntiDeuteron.cc,v 1.2 2011/07/20 17:57:52 jwebb Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StAntiDeuteron.cc,v $
+ * Revision 1.2  2011/07/20 17:57:52  jwebb
+ * Updated StParticleTable to provide access to anti-nuclei via the "geant" ID.
+ *
  * Revision 1.1  2011/03/25 18:17:45  jwebb
  * Updates to StParticleTable and additions to STAR Class Library
  *
@@ -62,7 +65,7 @@ StAntiDeuteron::StAntiDeuteron(const string  &  aName,
 //             stable         lifetime   
 //
 StAntiDeuteron StAntiDeuteron::mAntiDeuteron(
-           "deuteron",    1.875613*GeV,       0.0*MeV,  -1.0*eplus, 
+           "antideuteron",    1.875613*GeV,       0.0*MeV,  -1.0*eplus, 
 		    2,              +1,             0,          
 		    0,               0,             0,             
 	    "nucleus",               0,            -2,           0,
