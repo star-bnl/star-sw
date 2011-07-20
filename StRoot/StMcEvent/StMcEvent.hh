@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.29 2011/04/01 19:56:32 perev Exp $
+ * $Id: StMcEvent.hh,v 2.30 2011/07/20 17:35:35 perev Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.30  2011/07/20 17:35:35  perev
+ * Fsc added
+ *
  * Revision 2.29  2011/04/01 19:56:32  perev
  * Redundant Browse removed
  *
@@ -143,7 +146,6 @@ class StMcBTofHitCollection;
 class StMcPixelHitCollection;
 class StMcIstHitCollection;
 class StMcFgtHitCollection;
-class StMcFpdHitCollection;
 class StMcVertex;
 class g2t_event_st;
 
@@ -235,6 +237,9 @@ class StMcEvent : public TDataSet {
 
   StMcEmcHitCollection*          fpdHitCollection()       { return emcHitCollection("FpdHits"); }
   const StMcEmcHitCollection*    fpdHitCollection() const { return emcHitCollection("FpdHits"); }
+
+  StMcEmcHitCollection*          fscHitCollection()       { return emcHitCollection("FscHits"); }
+  const StMcEmcHitCollection*    fscHitCollection() const { return emcHitCollection("FscHits"); }
   
   StMcPixelHitCollection*      pixelHitCollection()       {return mPixelHits;}				
   const StMcPixelHitCollection*pixelHitCollection() const {return mPixelHits;}		
@@ -269,20 +274,8 @@ class StMcEvent : public TDataSet {
   void setFtpcHitCollection(StMcFtpcHitCollection*);              
   void setRichHitCollection(StMcRichHitCollection*);
   void setCtbHitCollection(StMcCtbHitCollection*);              
-#if 0
-  void setBemcHitCollection(StMcEmcHitCollection*);              
-  void setBprsHitCollection(StMcEmcHitCollection*);              
-  void setBsmdeHitCollection(StMcEmcHitCollection*);              
-  void setBsmdpHitCollection(StMcEmcHitCollection*);              
-#endif
   void setTofHitCollection(StMcTofHitCollection*);
   void setBTofHitCollection(StMcBTofHitCollection*);
-#if 0
-  void setEemcHitCollection(StMcEmcHitCollection*);              
-  void setEprsHitCollection(StMcEmcHitCollection*);              
-  void setEsmduHitCollection(StMcEmcHitCollection*);              
-  void setEsmdvHitCollection(StMcEmcHitCollection*);
-#endif
   void setPixelHitCollection(StMcPixelHitCollection*);       
   void setIstHitCollection(StMcIstHitCollection*); 
   void setFgtHitCollection(StMcFgtHitCollection*);       
