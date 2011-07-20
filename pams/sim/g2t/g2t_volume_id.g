@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.65 2011/01/31 18:05:43 jwebb Exp $
+* $Id: g2t_volume_id.g,v 1.66 2011/07/20 20:43:41 perev Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.66  2011/07/20 20:43:41  perev
+* Fsc added
+*
 * Revision 1.65  2011/01/31 18:05:43  jwebb
 * Added code to detect which version of the fpd geometry module is in use
 * so that we can decode geant volume Ids and associate with g2t volume id
@@ -151,7 +154,7 @@
       Integer          module,layer
       Integer          nEndcap,nFpd,depth,shift,nv
       Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/,istb/0/
-      Integer          ifpd/0/,ifms/0/,ifpdmgeo/0/
+      Integer          ifpd/0/,ifms/0/,ifpdmgeo/0/,ifsc/0/
       Integer          istVersion/0/,istLayer/0/
 *     FPD
       Integer          n1,n2,ew,nstb,ch,sl
@@ -195,6 +198,7 @@
 
       Structure  FMCG { Version } ! FMS/FPD++/FPD geometry
       Structure  FPDG { Version } ! FPD geometry
+      Structure  FSCG { Version } ! FSC geometry
 
       logical    first/.true./
       logical    printOnce/.true./
@@ -215,6 +219,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
           USE  /DETM/FPDM/FPDG  stat=ifpd
           USE  /DETM/FPDM/FMCG  stat=ifms
+          USE  /DETM/FSCM/FSCG  stat=ifsc
 
           call RBPOPD
           if (itpc>=0) print *,' g2t_volume_id: TPC version =',tpcg_version
@@ -242,6 +247,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
              if (ifms=7) ifpdmgeo=2      !! fpdmgeo2.g
              if (ifms=8) ifpdmgeo=3      !! fpdmgeo3.g                                       
           }
+		  if (ifsc>=0) print *,' g2t_volume_id: FSC version =',fscg_version
 
       endif
 *
@@ -773,7 +779,9 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             endif
             volume_id=ew*10000+nstb*1000+ch       
         }
-
+*24*                                 Dmitry Arkhipkin
+      else if (Csys=='fsc') then
+        volume_id = numbv(1);
       else
           print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
