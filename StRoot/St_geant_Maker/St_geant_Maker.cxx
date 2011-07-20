@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.137 2011/04/19 15:52:05 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.138 2011/07/20 17:37:12 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.138  2011/07/20 17:37:12  perev
+// Fsc added
+//
 // Revision 1.137  2011/04/19 15:52:05  fisyak
 // Restore handle for pile-up events
 //
@@ -525,6 +528,7 @@
 #include "g2t/St_g2t_pmd_Module.h"
 #include "g2t/St_g2t_bbc_Module.h"
 #include "g2t/St_g2t_fpd_Module.h"
+#include "g2t/St_g2t_fsc_Module.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StarCallf77.h" 
 #include "StMagF.h"
@@ -1242,6 +1246,16 @@ Int_t St_geant_Maker::Make()
     iRes = g2t_fpd(g2t_track,g2t_fpd_hit); if (Debug() > 1) g2t_fpd_hit->Print(0,10);
     //           ==============================
   }
+
+  nhits = 0;
+  geant3->Gfnhit("FSCH","FSCT", nhits);
+  if (nhits>0) {
+    St_g2t_emc_hit *g2t_fsc_hit = new St_g2t_emc_hit("g2t_fsc_hit",nhits);
+    m_DataSet->Add(g2t_fsc_hit);
+    iRes = g2t_fsc(g2t_track,g2t_fsc_hit); if (Debug() > 1) g2t_fsc_hit->Print(0,10);
+    //           ==============================
+  }
+
 
   //------------------------all bloody detectors done--------------------//
 #if 0

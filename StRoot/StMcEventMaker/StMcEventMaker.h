@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.23 2011/01/26 19:48:35 perev Exp $
+ * $Id: StMcEventMaker.h,v 1.24 2011/07/20 17:36:52 perev Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.24  2011/07/20 17:36:52  perev
+ * Fsc added
+ *
  * Revision 1.23  2011/01/26 19:48:35  perev
  * FPD ==> STAR Soft
  *
@@ -109,7 +112,7 @@ public:
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.23 2011/01/26 19:48:35 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.24 2011/07/20 17:36:52 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -128,6 +131,7 @@ public:
     Bool_t  doUseTof;              //!
     Bool_t  doUseEemc;             //!
     Bool_t  doUseFpd;		   //!
+    Bool_t  doUseFsc;		   //!
     Bool_t  doUsePixel;            //!
     Bool_t  doUseIst;              //!
     Bool_t  doUseFgt;              //!
@@ -138,6 +142,7 @@ protected:
     void   fillBsmd(St_g2t_emc_hit*);
     void   fillEemc(St_g2t_emc_hit* g2t_tile,St_g2t_emc_hit* g2t_smd);
     void   fillFpd(St_g2t_emc_hit*);
+    void   fillFsc(St_g2t_emc_hit*);
 
 
 private:
@@ -150,7 +155,7 @@ private:
 #endif
     StMcEvent* mCurrentMcEvent; //!  This tells CINT not to parse it.
 
-    ClassDef(StMcEventMaker,1)
+    ClassDef(StMcEventMaker,0)
 
 };
 

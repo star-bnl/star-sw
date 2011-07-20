@@ -6,11 +6,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.25 2011/01/26 19:46:24 perev Exp $
+ * $Id: StMcTrack.hh,v 2.26 2011/07/20 17:36:09 perev Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.hh,v $
+ * Revision 2.26  2011/07/20 17:36:09  perev
+ * Fsc added
+ *
  * Revision 2.25  2011/01/26 19:46:24  perev
  * FPD ==> STAR Soft
  *
@@ -187,6 +190,8 @@ public:
   const StPtrVecMcCalorimeterHit& esmdvHits() const { return mEsmdvHits; }
   StPtrVecMcCalorimeterHit& fpdHits() { return mFpdHits; }
   const StPtrVecMcCalorimeterHit& fpdHits() const { return mFpdHits; }
+  StPtrVecMcCalorimeterHit& fscHits() { return mFscHits; }
+  const StPtrVecMcCalorimeterHit& fscHits() const { return mFscHits; }
   StPtrVecMcPixelHit& pixelHits() { return mPixelHits; }
   const StPtrVecMcPixelHit& pixelHits() const { return mPixelHits; }
   StPtrVecMcIstHit& istHits() { return mIstHits; }
@@ -223,6 +228,7 @@ public:
     void setEprsHits(StPtrVecMcCalorimeterHit&); 
     void setEsmduHits(StPtrVecMcCalorimeterHit&); 
     void setEsmdvHits(StPtrVecMcCalorimeterHit&); 
+    void setFscHits(StPtrVecMcCalorimeterHit&); 
     void setPixelHits(StPtrVecMcPixelHit&); 
     void setIstHits(StPtrVecMcIstHit&); 
     void setFgtHits(StPtrVecMcFgtHit&); 
@@ -251,6 +257,7 @@ public:
     void addEsmduHit(StMcCalorimeterHit*); 
     void addEsmdvHit(StMcCalorimeterHit*); 
     void addFpdHit(StMcCalorimeterHit*);
+    void addFscHit(StMcCalorimeterHit*);
     void addPixelHit(StMcPixelHit*); 
     void addIstHit(StMcIstHit*);
     void addFgtHit(StMcFgtHit*); 
@@ -270,6 +277,7 @@ public:
     void removeEprsHit(StMcCalorimeterHit*); 
     void removeEsmduHit(StMcCalorimeterHit*); 
     void removeEsmdvHit(StMcCalorimeterHit*); 
+    void removeFscHit(StMcCalorimeterHit*); 
     void removePixelHit(StMcPixelHit*); 
     void removeIstHit(StMcIstHit*); 
     void removeFgtHit(StMcFgtHit*); 
@@ -298,6 +306,7 @@ protected:
     StPtrVecMcCalorimeterHit mEsmduHits; 
     StPtrVecMcCalorimeterHit mEsmdvHits; 
     StPtrVecMcCalorimeterHit mFpdHits; 
+    StPtrVecMcCalorimeterHit mFscHits; 
     StPtrVecMcPixelHit       mPixelHits; 
     StPtrVecMcIstHit         mIstHits;
     StPtrVecMcFgtHit         mFgtHits; 

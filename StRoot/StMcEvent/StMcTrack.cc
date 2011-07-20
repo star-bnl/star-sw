@@ -9,11 +9,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.29 2011/03/22 22:30:33 perev Exp $
+ * $Id: StMcTrack.cc,v 2.30 2011/07/20 17:35:53 perev Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.cc,v $
+ * Revision 2.30  2011/07/20 17:35:53  perev
+ * Fsc added
+ *
  * Revision 2.29  2011/03/22 22:30:33  perev
  * Bug#2111 Remove redundant zeroing
  *
@@ -71,8 +74,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.29 2011/03/22 22:30:33 perev Exp $
+ * $Id: StMcTrack.cc,v 2.30 2011/07/20 17:35:53 perev Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.30  2011/07/20 17:35:53  perev
+ * Fsc added
+ *
  * Revision 2.29  2011/03/22 22:30:33  perev
  * Bug#2111 Remove redundant zeroing
  *
@@ -199,7 +205,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.29 2011/03/22 22:30:33 perev Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.30 2011/07/20 17:35:53 perev Exp $";
 
 ClassImp(StMcTrack);
 
@@ -322,6 +328,7 @@ ostream&  operator<<(ostream& os, const StMcTrack& t)
     os << "No. Pixel Hits: " << t.pixelHits().size() << endl;
     os << "No. Ist Hits  : " << t.istHits().size()   << endl;
     os << "No. Fgt Hits  : " << t.fgtHits().size()   << endl;
+    os << "No. Fsc Hits  : " << t.fscHits().size()   << endl;
     os << "Is Shower     : " << t.isShower() << endl;
     os << "Geant Id      : " << t.geantId()  << endl;
     os << "Pdg Code      : " << t.pdgId()  << endl;
@@ -443,6 +450,8 @@ void StMcTrack::setEsmduHits(StPtrVecMcCalorimeterHit& val) { mEsmduHits = val; 
 
 void StMcTrack::setEsmdvHits(StPtrVecMcCalorimeterHit& val) { mEsmdvHits = val; }
 
+void StMcTrack::setFscHits(StPtrVecMcCalorimeterHit& val) { mFscHits = val; }
+
 void StMcTrack::setPixelHits(StPtrVecMcPixelHit& val) { mPixelHits = val; }
 
 void StMcTrack::setIstHits(StPtrVecMcIstHit& val) { mIstHits = val; }
@@ -539,6 +548,11 @@ void StMcTrack::addEsmdvHit(StMcCalorimeterHit* hit)
 void StMcTrack::addFpdHit(StMcCalorimeterHit* hit)
 {
   mFpdHits.push_back(hit);
+}
+
+void StMcTrack::addFscHit(StMcCalorimeterHit* hit)
+{
+  mFscHits.push_back(hit);
 }
 
 void StMcTrack::addPixelHit(StMcPixelHit* hit)

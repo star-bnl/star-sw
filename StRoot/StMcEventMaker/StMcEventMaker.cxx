@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.71 2011/04/01 19:58:35 perev Exp $
+ * $Id: StMcEventMaker.cxx,v 1.72 2011/07/20 17:36:32 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.72  2011/07/20 17:36:32  perev
+ * Fsc added
+ *
  * Revision 1.71  2011/04/01 19:58:35  perev
  * forse P<E fix/hack
  *
@@ -307,7 +310,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.71 2011/04/01 19:58:35 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.72 2011/07/20 17:36:32 perev Exp $";
 ClassImp(StMcEventMaker)
 #define AddHit2Track(G2Type,DET) \
   Int_t iTrkId = ( G2Type ## HitTable[ihit].track_p) - 1;	\
@@ -349,6 +352,7 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doUseTof         (kTRUE),
     doUseEemc        (kTRUE),
     doUseFpd         (kTRUE),
+    doUseFsc         (kTRUE),
     doUsePixel       (kTRUE),
     doUseIst         (kTRUE),
     doUseFgt         (kTRUE),
@@ -474,6 +478,7 @@ Int_t StMcEventMaker::Make()
     St_g2t_emc_hit *g2t_eem_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_eem_hit");
     St_g2t_emc_hit *g2t_esm_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_esm_hit");
     St_g2t_emc_hit *g2t_fpd_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_fpd_hit"); // Added FPD Hits
+    St_g2t_emc_hit *g2t_fsc_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_fsc_hit"); // Added FSC Hits
     St_g2t_pix_hit *g2t_pix_hitTablePointer =  (St_g2t_pix_hit *) geantDstI("g2t_pix_hit");
     St_g2t_ist_hit *g2t_ist_hitTablePointer =  (St_g2t_ist_hit *) geantDstI("g2t_ist_hit");
     St_g2t_fgt_hit *g2t_fgt_hitTablePointer =  (St_g2t_fgt_hit *) geantDstI("g2t_fgt_hit");
@@ -625,6 +630,15 @@ Int_t StMcEventMaker::Make()
 	  fpdHitTable = g2t_fpd_hitTablePointer->GetTable();
 	else
 	  if (Debug()) cout << "Table g2t_fpd_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+
+	//
+	// FSC Hit Table
+	//
+	g2t_emc_hit_st* fscHitTable = 0;
+	if (g2t_fsc_hitTablePointer)
+	  fscHitTable = g2t_fsc_hitTablePointer->GetTable();
+	else
+	  if (Debug()) cout << "Table g2t_fsc_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 
 	//	
 	// Pixel Hit Table
@@ -1228,6 +1242,9 @@ Int_t StMcEventMaker::Make()
 	// FPD Hits
 	if (doUseFpd) fillFpd(g2t_fpd_hitTablePointer);
 
+	// FSC Hits
+	if (doUseFsc) fillFsc(g2t_fsc_hitTablePointer);
+
 	ttemp.clear();
 	
 	//_______________________________________________________________
@@ -1530,6 +1547,40 @@ void StMcEventMaker::fillFpd(St_g2t_emc_hit* g2t_fpd_hitTablePointer)
 
   if (Debug()) cout << "Filled " << mCurrentMcEvent->fpdHitCollection()->numberOfHits() << " FPD Hits" << endl;
 }
+
+//_____________________________________________________________________________
+void StMcEventMaker::fillFsc(St_g2t_emc_hit* g2t_fsc_hitTablePointer)
+{
+  if (!g2t_fsc_hitTablePointer) {
+    if (Debug()) cout << "No FSC Hits in this event" << endl;
+    return;
+  }
+
+  g2t_emc_hit_st* fscHitTable = g2t_fsc_hitTablePointer->GetTable();
+  StMcEmcHitCollection* fscColl = mCurrentMcEvent->fscHitCollection();
+
+  for (int iHit = 0; iHit < g2t_fsc_hitTablePointer->GetNRows(); ++iHit) {
+    g2t_emc_hit_st& hit = fscHitTable[iHit];
+// 			volume_id = ew*10000+nstb*1000+ch
+    int volume_id = hit.volume_id;
+//	std::cout << "FSC vol_id: " << volume_id << "\n";
+    int module = 1; 		// only one FSC exists at the moment :)
+    int eta = floor(float(volume_id) / float(80)); // X coordinate
+    int sub = volume_id % 80; 	// Y coordinate
+    StMcTrack* track = ttemp[hit.track_p - 1];
+    // Store ew in module, nstb in sub, and ch in eta
+    StMcCalorimeterHit* fscHit = new StMcCalorimeterHit(module,eta,sub,hit.de,track);
+    StMcEmcHitCollection::EAddHit fscNew = fscColl->addHit(fscHit);
+    if (fscNew == StMcEmcHitCollection::kNew) {
+      track->addFscHit(fscHit);
+    } else {
+      delete fscHit; fscHit = 0;
+    }
+  }
+
+  if (Debug()) cout << "Filled " << mCurrentMcEvent->fscHitCollection()->numberOfHits() << " FSC Hits" << endl;
+}
+
 
 //_____________________________________________________________________________
 void StMcEventMaker::printEventInfo()
