@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.230 2011/07/18 15:53:12 jwebb Exp $
+* $Id: geometry.g,v 1.231 2011/07/20 20:23:47 jwebb Exp $
 * $Log: geometry.g,v $
+* Revision 1.231  2011/07/20 20:23:47  jwebb
+* Upgr23 tag defined with FSC geometry and FMS in open position.
+*
 * Revision 1.230  2011/07/18 15:53:12  jwebb
 * Reverted to single FGT "upgr2012" geometry.
 *
@@ -1928,7 +1931,7 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               RICH,ZCAL,MFLD,BBCM,FPDM,PHMD,
               PIXL,ISTB,GEMB,FSTD,FTRO,FGTD,
               SHLD,QUAD,MUTD,IGTD,HPDT,ITSP,
-              DUMM,SCON,IDSM
+              DUMM,SCON,IDSM,FSCE
 
 * Qualifiers:  TPC        TOF         etc
    Logical    emsEdit,svtWater,
@@ -1963,7 +1966,9 @@ replace [exe UPGR22;] with ["upgr16a + fhcm01"
               CalbConfig, PixlConfig, IstbConfig, GembConfig, FstdConfig, FtroConfig, ConeConfig,
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
               ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig, MfldConfig, EcalConfig,
-              FhcmConfig, RmaxConfig, IdsmConfig
+              FhcmConfig, RmaxConfig, IdsmConfig, FsceConfig
+
+   Integer    FpdmPosition / 0 /
 
 * The following flags select different base geometry files for the endcap
    Integer    EcalGeometry / 6 /            ! defaults to version 5
@@ -2079,6 +2084,7 @@ replace[;Case#{#;] with [
    TpceConfig  = 1 ! 1 (def) old version, 2=more structures in the backplane
    VpddConfig  = 1 ! vpd...
    FhcmConfig  = 0 ! Forward Hadron Detector off by default
+   FsceConfig  = 0 ! Forward Sphagettoni Calorimeter off by default
 
    pipeFlag = 3 ! pipe wrap + svt shield
 
@@ -2096,7 +2102,7 @@ replace[;Case#{#;] with [
     ISTB,GEMB,FSTD,SISD,
     FTRO,FGTD,SHLD,QUAD,
     MUTD,IGTD,HPDT,ITSP,
-    DUMM,SCON,IDSM} = off;
+    DUMM,SCON,IDSM,FSCE} = off;
 
    {emsEdit,RICH}=off        " TimeOfFlight, EM calorimeter Sector            "
    nSvtLayer=7; nSvtVafer=0;  svtWaferDim=0; " SVT+SSD, wafer number and width as in code     "
@@ -3749,6 +3755,23 @@ If LL>0
                }
 
 ****************************************************************************************
+****************************************************************************************
+****************************************************************************************
+  Case Upgr23 { The Forward Spaghettini Calorimeter
+
+       """Use y2010a as the baseline"""
+       EXE y2010a;
+
+       """Move the FMS N and S modules to an open position"""
+       FpdmPosition=1;
+       
+       """Switch on and configure the FSC geometry"""
+       FSCE=on;
+       FsceConfig=1;
+
+  }
+
+
   Case HADR_ON    { all Geant Physics On;                                       }
   Case HADR_OFF   { all Geant Physics on, except for hadronic interactions;
                                                                        IHADR=0}
@@ -4150,11 +4173,19 @@ c     write(*,*) 'CALB';
    }
 
    if (FPDM){
-c    write(*,*) 'FPDM'
+
+     IF FpdmPosition > 0 {
+        """Move the FMS N/S modules to an outward position"""
+        Call AgDetp NEW ( 'FPDM' );
+        Call AgDetp ADD ( 'FPOS(imod=3).x=', -50.3, 1 );
+        Call AgDetp ADD ( 'FPOS(imod=4).x=', +50.3, 1 );
+     }
+
      if (FpdmConfig==0) Call fpdmgeo
      if (FpdmConfig==1) Call fpdmgeo1
-     if (FpdmConfig==2) Call fpdmgeo2
+     if (FpdmConfig==2) Call fpdmgeo2     
      if (FpdmConfig==3) Call fpdmgeo3
+
    }
    if (ZCAL)   { write(*,*) 'ZCAL';Call zcalgeo;}
    if (MAGP)   { write(*,*) 'MAGP';Call magpgeo;}
@@ -4233,6 +4264,10 @@ c     write(*,*) 'FSTD'
      }
 
    ENDIF
+
+
+   """The Foward Spaghetti Calorimeter"""    
+   IF FSCE {  call fscegeo;  }
 
    if (IGTD) then
 c    write(*,*) 'IGTD'
