@@ -30,7 +30,9 @@ Int_t StDetectorDbMaker::Make(){
   if (! St_trigDetSumsC::instance()) {
     St_trigDetSums *table = (St_trigDetSums *) GetDataBase("Calibrations/rich/trigDetSums");
     if (table) {
+#if 0
       LOG_QA << "get trigDetSums from DB Calibrations/rich/trigDetSums" << endm;
+#endif
       new St_trigDetSumsC(table);
     }
   }
