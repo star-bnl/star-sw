@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.36 2011/01/18 14:39:43 fisyak Exp $
+ * $Id: StTpcDb.h,v 1.37 2011/07/21 16:48:53 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.37  2011/07/21 16:48:53  fisyak
+ * New schema for Sub Sector Alginement: SuperSectror position (defined by inner sub sector) and Outer sector position wrt SuperSectror position
+ *
  * Revision 1.36  2011/01/18 14:39:43  fisyak
  * Clean up TpcDb interfaces and Tpc coordinate transformation
  *
@@ -136,29 +139,35 @@ class StTpcDb {
   // Pad      = Pad -"- (x_p,y_p,z_p) (Sector12 coordinate system)
   // Tpc => Global is mTpc2GlobMatrix
   // Pad => SecL   is internal Flip matrix
-  enum ETpcSectorRotationType {kUndefSector     =-1,
+  enum ETpcSectorRotationType {kUndefSector     =-2,
+			       kFlip            =-1, // Flip * Subs[io] => SupS
 			       kSupS2Tpc        = 0, // SupS => Tpc
-			       kSubSInner2SupS  = 1, // Subs[io] => SupS
-			       kSubSOuter2SupS  = 2, // -"-
-			       kSubSInner2Tpc   = 3, // (Subs[io] => SupS) => Tpc
-			       kSubSOuter2Tpc   = 4, // -"-
-			       kSubSInner2Glob  = 5, // (Subs[io] => SupS => Tpc) => Glob
-			       kSubSOuter2Glob  = 6, // -"-
-			       kPadInner2SupS   = 7, // (Pad => SecL) => (SubS[io] => SupS)
-			       kPadOuter2SupS   = 8, // -"- 
-			       kPadInner2Tpc    = 9, // (Pad => SecL) => (SubS[io] => SupS => Tpc)
-			       kPadOuter2Tpc    =10, // -"- 
-			       kPadInner2Glob   =11, // (Pad => SecL) => (SubS[io] => SupS => Tpc => Glob)
-			       kPadOuter2Glob   =12, // -"- 
-			       kTotalTpcSectorRotaions =13}; 
+			       kSupS2Glob       = 1, // SupS => Tpc => Glob; 
+			       kSubSInner2SupS  = 2, // Subs[io] => SupS
+			       kSubSOuter2SupS  = 3, // -"-
+			       kSubSInner2Tpc   = 4, // (Subs[io] => SupS) => Tpc
+			       kSubSOuter2Tpc   = 5, // -"-
+			       kSubSInner2Glob  = 6, // (Subs[io] => SupS => Tpc) => Glob
+			       kSubSOuter2Glob  = 7, // -"-
+			       kPadInner2SupS   = 8, // (Pad => SecL) => (SubS[io] => SupS)
+			       kPadOuter2SupS   = 9, // -"- 
+			       kPadInner2Tpc    =10, // (Pad => SecL) => (SubS[io] => SupS => Tpc)
+			       kPadOuter2Tpc    =11, // -"- 
+			       kPadInner2Glob   =12, // (Pad => SecL) => (SubS[io] => SupS => Tpc => Glob)
+			       kPadOuter2Glob   =13, // -"- 
+			       
+			       kTotalTpcSectorRotaions =14}; 
  private:
+  Char_t                mBeg[1];         //!
   St_tpcDriftVelocity*  dvel;           //!
   StMagUtilities*       mExB;           //!
   Int_t                 m_Debug;        //!
+  TGeoHMatrix          *mFlip;          //!
   TGeoHMatrix          *mTpc2GlobMatrix;//!
   TGeoHMatrix          *mTpcSectorRotations[24][kTotalTpcSectorRotaions]; 
   Float_t               mDriftVel[2];   //!
   UInt_t                mUc;            //! time for which above mDriftVel have been calculated
+  Char_t                mEnd[1];         //!
  private:
   StTpcDb();
  public:
@@ -190,9 +199,11 @@ class StTpcDb {
   }
   void SetDebug(Int_t m) {m_Debug = m;}
   Int_t Debug() {return m_Debug;}
+  const TGeoHMatrix &Flip()                           const {return *mFlip;}
   const TGeoHMatrix &Tpc2GlobalMatrix()               const {return *mTpc2GlobMatrix;}
   const TGeoHMatrix &TpcRot(Int_t sector, Int_t k)    const {return *mTpcSectorRotations[sector-1][k];}
   const TGeoHMatrix &SupS2Tpc(Int_t sector = 1)       const {return TpcRot(sector,kSupS2Tpc);}
+  const TGeoHMatrix &SupS2Glob(Int_t sector = 1)      const {return TpcRot(sector,kSupS2Glob);}
   const TGeoHMatrix &SubSInner2SupS(Int_t sector = 1) const {return TpcRot(sector,kSubSInner2SupS);}
   const TGeoHMatrix &SubSOuter2SupS(Int_t sector = 1) const {return TpcRot(sector,kSubSOuter2SupS);}
   const TGeoHMatrix &SubSInner2Tpc(Int_t sector = 1)  const {return TpcRot(sector,kSubSInner2Tpc);}

@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.56 2011/01/18 14:39:43 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.57 2011/07/21 16:48:53 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.57  2011/07/21 16:48:53  fisyak
+ * New schema for Sub Sector Alginement: SuperSectror position (defined by inner sub sector) and Outer sector position wrt SuperSectror position
+ *
  * Revision 1.56  2011/01/18 14:39:43  fisyak
  * Clean up TpcDb interfaces and Tpc coordinate transformation
  *
@@ -162,21 +165,28 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "TVector3.h"
 #include "TGeoManager.h"
+#include "StDetectorDbMaker/StTpcSurveyC.h"
 StTpcDb* gStTpcDb = 0;
 // C++ routines:
 //_____________________________________________________________________________
 ClassImp(StTpcDb);
 //_____________________________________________________________________________
-StTpcDb::StTpcDb() : m_Debug(0), mUc(0) {
+StTpcDb::StTpcDb() {
   assert(gStTpcDb==0);
-  memset(this,0,sizeof(StTpcDb));
-  mExB = 0;
+  memset(mBeg,0,mEnd-mBeg+1);
   mTpc2GlobMatrix = new TGeoHMatrix("Default Tpc2Glob"); 
   for (Int_t i = 1; i <= 24; i++) {
     for (Int_t k = 0; k < kTotalTpcSectorRotaions; k++) {
       mTpcSectorRotations[i-1][k] = new TGeoHMatrix(Form("Default %02i %i",i,k));
     }
   }
+  mFlip = new TGeoHMatrix;
+  Double_t DriftDistance = Dimensions()->gatingGridZ();
+  Double_t Rotation[9] = {0, 1, 0, 
+			  1, 0, 0,
+			  0, 0,-1};
+  Double_t Translation[3] = {0, 0, DriftDistance};
+  mFlip->SetName("Flip"); mFlip->SetRotation(Rotation); mFlip->SetTranslation(Translation);
   gStTpcDb = this;
 }
 //_____________________________________________________________________________
@@ -188,6 +198,7 @@ StTpcDb::~StTpcDb() {
   }
   SafeDelete(mExB);
   SafeDelete(mTpc2GlobMatrix);
+  SafeDelete(mFlip);
   gStTpcDb = 0;
 }
 //-----------------------------------------------------------------------------
@@ -215,7 +226,7 @@ void StTpcDb::SetDriftVelocity() {
       if (! dvel0) {
 	gMessMgr->Message("StTpcDb::Error Finding Tpc DriftVelocity","E");
 	mUc = 0;
-	return;
+ 	return;
       }
       if (St_db_Maker::GetValidity(dvel0,t) < 0) {
 	gMessMgr->Message("StTpcDb::Error Wrong Validity Tpc DriftVelocity","E");
@@ -261,36 +272,42 @@ void StTpcDb::SetDriftVelocity() {
       if (mDriftVel[0] <= 0.0) mDriftVel[0] = d0->cathodeDriftVelocityWest;
       if (mDriftVel[1] <= 0.0) mDriftVel[1] = d0->cathodeDriftVelocityEast;
     }
+#if 0
     LOG_INFO << "Set Tpc Drift Velocity =" << mDriftVel[0]  << " (West) " << mDriftVel[0] << " (East) for "
 	     << StMaker::GetChain()->GetDateTime().AsString() << endm;
+#endif
     mUc = uc;
   }
 }
 //_____________________________________________________________________________
 void StTpcDb::SetTpcRotations() {
-  // pad => sector12 => localsector (flip, ideal) => subsector (subsector alignment) => sector => tpc => global
+  // Pad [== sector12 == localsector (SecL, ideal)] => subsector (SubS,local sector aligned) => flip => sector (SupS) => tpc => global
+  //                                    ------        
+  //old:  global = Tpc2GlobalMatrix() * SupS2Tpc(sector) *                                    Flip() * {SubSInner2SupS(sector) | SubSOuter2SupS(sector)}
+  //new:  global = Tpc2GlobalMatrix() * SupS2Tpc(sector) * StTpcSuperSectorPosition(sector) * Flip() * {                     I | StTpcOuterSectorPosition(sector)}
+  //      StTpcSuperSectorPosition(sector) * Flip() = Flip() * SubSInner2SupS(sector) 
+  // =>  StTpcSuperSectorPosition(sector) = Flip() * SubSInner2SupS(sector) * Flip()^-1
+  //      StTpcSuperSectorPosition(sector) * Flip() * StTpcOuterSectorPosition(sector) = Flip() *  SubSOuter2SupS(sector)
+  // =>  StTpcOuterSectorPosition(sector) = Flip()^-1 * StTpcSuperSectorPosition(sector)^-1 *  Flip() *  SubSOuter2SupS(sector)
   TGeoTranslation T123(0,123,0); T123.SetName("T123"); if (Debug() > 1) T123.Print();
-  TGeoHMatrix Flip;
-  Double_t DriftDistance = Dimensions()->gatingGridZ();
-  Double_t Rotation[9] = {0, 1, 0, 
-			  1, 0, 0,
-			  0, 0,-1};
-  Double_t Translation[3] = {0, 0, DriftDistance};
-  Flip.SetName("Flip"); Flip.SetRotation(Rotation); Flip.SetTranslation(Translation); if (Debug() > 1) Flip.Print();
   assert(Dimensions()->numberOfSectors() == 24);
-  Double_t s, phi, theta, psi, offset;
+  Double_t phi, theta, psi;
+#define __NEW__SCHEMA_FOR_ROTATION__
+#ifndef  __NEW__SCHEMA_FOR_ROTATION__
+  Double_t s, offset;
+#endif
   Int_t iphi;
   TGeoRotation *rotm = 0;
   TObjArray *listOfMatrices = 0;
   TString Rot;
   for (Int_t sector = 0; sector <= 24; sector++) {// loop over Tpc as whole, sectors, inner and outer subsectors
-    TGeoHMatrix rotA; // After alignment
     Int_t k;
     Int_t k1 = kSupS2Tpc;
     Int_t k2 = kTotalTpcSectorRotaions;
     if (sector == 0) {k2 = k1; k1 = kUndefSector;}
     for (k = k1; k < k2; k++) {
       Int_t Id     = 0;
+      TGeoHMatrix rotA; // After alignment
       if (!sector ) { // TPC Reference System
 	St_tpcGlobalPositionC *tpcGlobalPosition = St_tpcGlobalPositionC::instance();
 	assert(tpcGlobalPosition);
@@ -324,9 +341,19 @@ void StTpcDb::SetTpcRotations() {
 	    rotm->RotateZ(iphi);
 	  }
 	  rotA = *rotm;
+#ifdef  __NEW__SCHEMA_FOR_ROTATION__
+	  rotA *= StTpcSuperSectorPosition::instance()->GetMatrix(sector-1);
+#endif
 	  if (gGeoManager) rotm->RegisterYourself();
 	  else             SafeDelete(rotm);
 	  break;
+	case kSupS2Glob:      // SupS => Tpc => Glob
+	  rotA = Tpc2GlobalMatrix() * SupS2Tpc(sector); 
+	  break; 
+#ifdef  __NEW__SCHEMA_FOR_ROTATION__
+	case kSubSInner2SupS: rotA = Flip(); break;
+	case kSubSOuter2SupS: rotA = Flip() * StTpcOuterSectorPosition::instance()->GetMatrix(sector-1); break;
+#else /* !__NEW__SCHEMA_FOR_ROTATION__ */
 	case kSubSInner2SupS: // Subs[io] => SupS
 	case kSubSOuter2SupS: // -"-
 	  s = -1;
@@ -341,6 +368,10 @@ void StTpcDb::SetTpcRotations() {
 	  TIO.SetTranslation(-offset, -123, 0); if (Debug() > 1) TIO.Print();
 	  RIO.SetAngles(-phi,0,0);              if (Debug() > 1) RIO.Print();
 	  rotA = T123 * RIO * TIO;
+	  if (k != kSubSInner2SupS)
+	    rotA *= StTpcOuterSectorPosition::instance()->GetMatrix(sector-1);
+	  //	    rotA *= StTpcOuterSectorAlignment::instance()->GetMatrix(sector-1);
+#endif /* __NEW__SCHEMA_FOR_ROTATION__ */
 	  break;
 	case kSubSInner2Tpc:  rotA = SupS2Tpc(sector) * SubSInner2SupS(sector); break; // (Subs[io] => SupS) => Tpc
 	case kSubSOuter2Tpc:  rotA = SupS2Tpc(sector) * SubSOuter2SupS(sector); break; // -"-
@@ -348,13 +379,17 @@ void StTpcDb::SetTpcRotations() {
 	case kSubSInner2Glob: rotA = Tpc2GlobalMatrix() * SubSInner2Tpc(sector);  break; // Subs[io] => SupS => Tpc) => Glob
 	case kSubSOuter2Glob: rotA = Tpc2GlobalMatrix() * SubSOuter2Tpc(sector);  break; // -"-
 
-	case kPadInner2SupS:  rotA = Flip * SubSInner2SupS(sector); break; // (Pad => SecL) => (SubS[io] => SupS)
-	case kPadOuter2SupS:  rotA = Flip * SubSOuter2SupS(sector); break; // -"-
-
-	case kPadInner2Tpc:   rotA = SupS2Tpc(sector) * PadInner2SupS(sector); break; // (Pad => SecL) => (SubS[io] => SupS => Tpc)
+#ifdef  __NEW__SCHEMA_FOR_ROTATION__
+	case kPadInner2SupS:  rotA = SubSInner2SupS(sector); break; // (Pad == SecL) => (SubS[io] => SupS)
+	case kPadOuter2SupS:  rotA = SubSOuter2SupS(sector); break; // -"-
+#else /* ! __NEW__SCHEMA_FOR_ROTATION__ */
+	case kPadInner2SupS:  rotA = Flip()*SubSInner2SupS(sector); break; // (Pad == SecL) => (SubS[io] => SupS)
+	case kPadOuter2SupS:  rotA = Flip()*SubSOuter2SupS(sector); break; // -"-
+#endif /* __NEW__SCHEMA_FOR_ROTATION__ */
+	case kPadInner2Tpc:   rotA = SupS2Tpc(sector) * PadInner2SupS(sector); break; // (Pad == SecL) => (SubS[io] => SupS => Tpc)
 	case kPadOuter2Tpc:   rotA = SupS2Tpc(sector) * PadOuter2SupS(sector); break; // -"-
 
-	case kPadInner2Glob:  rotA = Tpc2GlobalMatrix() * PadInner2Tpc(sector); break; // (Pad => SecL) => (SubS[io] => SupS => Tpc => Glob)
+	case kPadInner2Glob:  rotA = Tpc2GlobalMatrix() * PadInner2Tpc(sector); break; // (Pad == SecL) => (SubS[io] => SupS => Tpc => Glob)
 	case kPadOuter2Glob:  rotA = Tpc2GlobalMatrix() * PadOuter2Tpc(sector); break; // -"-
 	default:
 	  assert(0);
@@ -375,6 +410,7 @@ void StTpcDb::SetTpcRotations() {
       rotA.SetRotation(rot);
       const Char_t *names[kTotalTpcSectorRotaions] = {
 	"SupS_%02itoTpc",
+	"SupS_%02itoGlob",
 	"SubS_%02iInner2SupS",
 	"SubS_%02iOuter2SupS",
 	"SubS_%02iInner2Tpc",
@@ -396,4 +432,5 @@ void StTpcDb::SetTpcRotations() {
       SetTpcRotationMatrix(&rotA,sector,k);
     }
   }
+#undef  __NEW__SCHEMA_FOR_ROTATION__
 }
