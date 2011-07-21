@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.17 2010/08/10 19:46:18 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.18 2011/07/21 16:52:10 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.18  2011/07/21 16:52:10  fisyak
+ * Comment out Lijuan correction which broke B3DField
+ *
  * Revision 1.17  2010/08/10 19:46:18  fisyak
  * Lock mag.field if it was initialized from GEANT
  *
@@ -387,7 +390,7 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
   z  = x[2] ;
   r  = sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi = atan2( x[1], x[0] ) ;
-  if ( phi < 0 ) phi += 2*M_PI ;             // Table uses phi from 0 to 2*Pi
+  if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
 
 
   Float_t za = fabs(z);
@@ -411,7 +414,7 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
 
   if (za <=342.20  && r>=303.29 && r <= 364.25) { // within Map
   
-    phi1=phi*180/M_PI;
+    phi1=phi*TMath::RadToDeg();
     if(phi1>12) phi1=phi1-int(phi1/12)*12;
     
     Interpolate3DBSteelfield( r, za, phi1, Br_value, Bz_value, Bphi_value ) ;
@@ -467,38 +470,31 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
 
 
 /// Bfield in Cartesian coordinates - 3D field
- 
 void StarMagField::B3DField( const Float_t x[], Float_t B[] )
-  
 {                          
-  
-  //cout<<" <<<<<<<<<<<<<<<<<<<<<<<<<<<debug 1st--- "<<endl;
-  
   Float_t r, z, phi, Br_value, Bz_value, Bphi_value ;
-  //cout<<" <<<<<<<<<<<<<<<<<<<<<<<<<<<debug 2nd--- "<<endl;
-
   Bphi_value=0;
   Br_value =  Bz_value = 0;
   B[0] = B[1] = B[2] = 0;
-  
+#if 0  
   Float_t phi1;
-  
+#endif  
   z = x[2] ;
-  
-  
-  
   r  = sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   
   if ( r != 0.0 )
     {
-      phi = atan2( x[1], x[0] ) ;
-      if ( phi < 0 ) phi += 2*M_PI ;             // Table uses phi from 0 to 2*Pi
-
+      phi = TMath::ATan2( x[1], x[0] ) ;
+      if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
+#if 0
       //added by Lijuan
-      phi1=phi*180/M_PI;
+      phi1=phi*TMath::RadToDeg();
       //added by Lijuan
 
       Interpolate3DBfield( r, z, phi1, Br_value, Bz_value, Bphi_value ) ;
+#else
+      Interpolate3DBfield( r, z, phi, Br_value, Bz_value, Bphi_value ) ;
+#endif
       B[0] = Br_value * (x[0]/r) - Bphi_value * (x[1]/r) ;
       B[1] = Br_value * (x[1]/r) + Bphi_value * (x[0]/r) ;
       B[2] = Bz_value ; 
@@ -546,20 +542,23 @@ void StarMagField::BrBz3DField( const Float_t r, const Float_t z, const Float_t 
   Bphi_value=0;
   Br_value =  Bz_value = 0;
   
+#if 0
 
   Float_t phiprime ;
 
   phiprime = phi ;
-  if ( phiprime < 0 ) phiprime += 2*M_PI ;             // Table uses phi from 0 to 2*Pi
-
+  if ( phiprime < 0 ) phiprime += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
   //added by Lijuan
-  phiprime=phiprime*180/M_PI;
+  phiprime=phiprime*TMath::RadToDeg();
   //added by Lijuan
-
+#endif
 
   if(r>0)  {
-    
+#if 0    
     Interpolate3DBfield( r, z, phiprime, Br_value, Bz_value, Bphi_value ) ;
+#else
+    Interpolate3DBfield( r, z, phi, Br_value, Bz_value, Bphi_value ) ;
+#endif
   }
 
   return;
@@ -680,7 +679,7 @@ void StarMagField::ReadField( )
 		  fgets  ( cname, sizeof(cname) , b3Dfile ) ; 
 		  sscanf ( cname, " %f %f %f %f %f %f ",
 			   &R3D[k], &Z3D[j], &Phi3D[i], &Br3D[i][j][k], &Bz3D[i][j][k], &Bphi3D[i][j][k] ) ;
-		  Phi3D[i] *= M_PI / 180. ;   // Convert to Radians  phi = 0 to 2*Pi
+		  Phi3D[i] *= TMath::Pi() / 180. ;   // Convert to Radians  phi = 0 to 2*Pi
 		}
 	    }
 	}
@@ -743,9 +742,9 @@ void StarMagField::ReadField( )
 		   &R3DSteel[k], &Z3DSteel[j], &Phi3DSteel[i], &Bx3DSteel[i][j][k], &Bz3DSteel[i][j][k], &By3DSteel[i][j][k] ) ;
 
 	  //added by Lijuan
-	  Br3DSteel[i][j][k]=cos(Phi3DSteel[i]*M_PI/180)*Bx3DSteel[i][j][k]+sin(Phi3DSteel[i]*M_PI/180)*By3DSteel[i][j][k];
+	  Br3DSteel[i][j][k]=cos(Phi3DSteel[i]*TMath::DegToRad())*Bx3DSteel[i][j][k]+sin(Phi3DSteel[i]*TMath::DegToRad())*By3DSteel[i][j][k];
 
-	  Bphi3DSteel[i][j][k]=0-sin(Phi3DSteel[i]*M_PI/180)*Bx3DSteel[i][j][k]+cos(Phi3DSteel[i]*M_PI/180)*By3DSteel[i][j][k];
+	  Bphi3DSteel[i][j][k]=0-sin(Phi3DSteel[i]*TMath::DegToRad())*Bx3DSteel[i][j][k]+cos(Phi3DSteel[i]*TMath::DegToRad())*By3DSteel[i][j][k];
 
 
 	  //cout<<R3DSteel[k]<<" "<<Z3DSteel[j]<<" "<<Phi3DSteel[i]<<" "<<Bx3DSteel[i][j][k]<<" "<<Bz3DSteel[i][j][k]<<" "<<By3DSteel[i][j][k]<<endl;
