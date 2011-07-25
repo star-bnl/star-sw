@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowSumAll.C,v 1.5 2011/03/10 18:56:34 posk Exp $
+// $Id: doFlowSumAll.C,v 1.6 2011/07/25 15:54:50 posk Exp $
 //
 // Makes root.files.<cenNo> files containing lists of flow.hist.root files
-// in all subdirectories of outDir, which is a link in this directory.
+// in the specified subdirectory/link of outDir (which is a link in this directory).
 // Adds the histograms together for all files for all specified centralities.
 // The CenNo is actually the baseRunNo + the centrality.
 // First adds all histograms, then, for some, does it again for weighted averages,
@@ -426,6 +426,9 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowSumAll.C,v $
+// Revision 1.6  2011/07/25 15:54:50  posk
+// Added correction for non-flatness of event plane.
+//
 // Revision 1.5  2011/03/10 18:56:34  posk
 // Added histogram for laboratory azimuthal distribution of particles.
 //
