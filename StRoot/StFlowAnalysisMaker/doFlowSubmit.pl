@@ -24,17 +24,17 @@ use File::Basename;
 use File::Copy;
 use Getopt::Std;
 
-#my $events = 1000;
-my $events = 100000; # in73, 1st pass: 9 hrs, 2nd pass: 9 hrs
+#my $events = 100;
+my $events = 50000; # i7links, each pass abt 1 hr when they run
 my $reCent = "kFALSE"; # must be the same as in doFlowEvents.C
 
 # For centralities 1 to 9
-#my $nJobs = 9;
-#my $firstJob = 1;
+my $nJobs = 9;
+my $firstJob = 1;
 
 # For only centrality 0, baseRunNo must end in zero
-my $nJobs = 1;
-my $firstJob = 0;
+#my $nJobs = 1;
+#my $firstJob = 0;
 
 # options
 # -t :test, no submission
@@ -74,10 +74,8 @@ my $resource = '';
 
 # which machine are we at?
 if ($ENV{HOST} =~ /pdsf/) {
-  if ($inDir eq "in4" || $inDir eq "in72" || $inDir eq "d") {
-    $resource = "-l eliza9io=$io"; # in4 or in72
-  } elsif ($inDir eq "in7" || $inDir eq "in73") {
-    $resource = "-l eliza12io=$io"; # in7
+  if ($inDir eq "in4" || $inDir eq "i125" || $inDir eq "i7links") {
+    $resource = "-l eliza9io=$io"; # in4 or i7
   } else {
     print "no io resource\n";
   }
@@ -104,11 +102,14 @@ my $subDirNo;
 
 # subdirectory loop
 my @subDirs;
-if ( `ls -l $inDir/ | grep ^d` ) { # subdirectories?
-  @subDirs = split(/\n/,`ls $inDir`); # yes
+if ( `ls -l $inDir/ | grep ^d` ) { # at least one subdirectory?
+  @subDirs = split(/\n/,`ls $inDir`); # yes, but could be empty
 } else {
   @subDirs = "."; # no subdirectories
 }
+#@subDirs = split(/\n/,`ls $inDir`); # dirs
+#@subDirs = "."; # files
+
 print "subdirectories: @subDirs\n";
 foreach my $subDir (@subDirs) {
   if ( -d "$inDir/$subDir" && `ls $inDir/$subDir/` ) { # dir exists and contains a file
@@ -117,9 +118,9 @@ foreach my $subDir (@subDirs) {
     $firstPass = "kFALSE";
     $firstPassDir = "$outDir/$inDir-$subDir-$baseRunNo";
     $subDirNo = substr($subDir, index($subDir, ".")+1, 4); # 4 chars after the dot
-# uncomment the next if running ONLY the AnalysisMaker:
+# uncomment the next section if running ONLY the AnalysisMaker:
     if ($firstJob) { # first job not zero
-      (-e "$firstPassDir/flowPhiEgt9.root" || -e "$firstPassDir/flowReCent9.root") or do {
+      (-e "$firstPassDir/flowPhiWgt9.root" || -e "$firstPassDir/flowReCent9.root") or do {
 	$job = 0;
 	$lastJob= 1;
 	$firstPass = "kTRUE";  # make firstPass files
@@ -250,8 +251,8 @@ EOF
       # execute the shell script, option N should have only 10 characters
       close FH;
       chmod 0755, $scriptName;
-      $command = "$exec -hard $resource -N $inDir$subDirNo-$runNo $scriptName";
-      #$command = "$exec -hard $resource -N dir$subDirNo-$runNo $scriptName";
+      #$command = "$exec -hard $resource -N $inDir$subDirNo-$runNo $scriptName";
+      $command = "$exec -hard $resource -N dir$subDirNo-$runNo $scriptName";
       if ($secondPassDone eq "kFALSE") {      # skip if 2nd pass completed
 	if ($firstPass eq "kTRUE") { print "firstPass\n"; }
 	print "##### ",$command,"\n";
@@ -265,6 +266,9 @@ EOF
 #///////////////////////////////////////////////////////////////////////////////
 #//
 #// $Log: doFlowSubmit.pl,v $
+#// Revision 1.5  2011/07/25 15:54:48  posk
+#// Added correction for non-flatness of event plane.
+#//
 #// Revision 1.4  2011/03/10 18:56:32  posk
 #// Added histogram for laboratory azimuthal distribution of particles.
 #//

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.102 2011/03/10 18:56:20 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.103 2011/07/25 15:54:42 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -36,6 +36,7 @@
 #include "StMessMgr.h"
 #include "TMath.h"
 #include "TText.h"
+#include "TF1.h"
 #define PR(x) cout << "##### FlowAnalysis: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowAnalysisMaker)
@@ -743,9 +744,10 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append("_Har");
       *histTitle += j+1;
       histFull[k].histFullHar[j].mHistPhiLab = new TH1F(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax / order);
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
       histFull[k].histFullHar[j].mHistPhiLab->SetXTitle("Particle Lab Angle (rad)");
       histFull[k].histFullHar[j].mHistPhiLab->SetYTitle("Counts");
+      histFull[k].histFullHar[j].mHistPhiLab->Sumw2(); // for scale
       delete histTitle;
       
       // Recenter
@@ -1266,7 +1268,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.102 2011/03/10 18:56:20 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.103 2011/07/25 15:54:42 posk Exp $");
 
   return StMaker::Init();
 }
@@ -2282,7 +2284,7 @@ Int_t StFlowAnalysisMaker::Finish() {
 
       // Calulate v = vObs / Resolution
       if (mRes[k][j]) {
-	cout << "##### Resolution of the " << j+1 << "th harmonic = " << 
+	cout << endl << "##### Resolution of the " << j+1 << "th harmonic = " << 
 	  mRes[k][j] << " +/- " << mResErr[k][j] << endl;
 	// The systematic error of the resolution is not folded in.
 	histFull[k].histFullHar[j].mHist_v2D-> Scale(1. / mRes[k][j]);
@@ -2297,8 +2299,31 @@ Int_t StFlowAnalysisMaker::Finish() {
 	totalError = fabs(content) * ::sqrt((error/content)*(error/content) +
 	       (mResErr[k][j]/mRes[k][j])*(mResErr[k][j]/mRes[k][j]));
 	histFull[k].mHist_v->SetBinError(j+1, totalError);
-	cout << "##### v" << j+1 << "= (" << content << " +/- " << error << 
-	  " +/- " << totalError << "(with syst.)) %" << endl;
+
+	// Calculate non-flatness correction
+	TF1* funcCosSin = new TF1("funcCosSin",
+		   "[3]*(1.+[0]*2./100.*cos([2]*x)+[1]*2./100.*sin([2]*x))", 0., twopi);
+	//funcCosSin->SetParNames("100*cos", "100*sin", "har");
+	funcCosSin->SetParameters(0, 0, j+1); // initial values
+	funcCosSin->SetParLimits(2, 1, 1); // har is fixed
+	histFull[k].histFullHar[j].mHistPhiLab->Fit("funcCosSin","Q,N");
+	Double_t cosParLab = funcCosSin->GetParameter(0);
+	Double_t sinParLab = funcCosSin->GetParameter(1);
+	histFull[k].histFullHar[j].mHistPsi->Fit("funcCosSin","Q,N");
+	Double_t cosParEP = funcCosSin->GetParameter(0);
+	Double_t sinParEP = funcCosSin->GetParameter(1);
+	cout << "100*cosLab = " << cosParLab << ", 100*sinLab = " << sinParLab << endl;
+	cout << "100*cosEP = " << cosParEP << ", 100*sinEP = " << sinParEP << endl;
+	delete funcCosSin;
+	float nonflat = (cosParEP*cosParLab + sinParEP*sinParLab)/mRes[k][j]/100.;
+	cout << "nonflat = " << nonflat << endl;
+
+	cout << "##### v" << j+1 << "= (" << content << " +/- " << error << ")%" << endl;
+	cout << "##### v" << j+1 << "= (" << content - nonflat << " (with nonflat corr.) +/- "
+	     << totalError << " (with syst.) )%" << endl;
+	histFull[k].mHist_v->SetBinContent(j+1, content - nonflat);
+
+
       } else {
 	cout << "##### Resolution of the " << j+1 << "th harmonic was zero."
 	     << endl;
@@ -2485,6 +2510,9 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.103  2011/07/25 15:54:42  posk
+// Added correction for non-flatness of event plane.
+//
 // Revision 1.102  2011/03/10 18:56:20  posk
 // Added histogram for laboratory azimuthal distribution of particles.
 //

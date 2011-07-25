@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.6 2011/03/10 18:56:28 posk Exp $
+// $Id: doFlowEvents.C,v 1.7 2011/07/25 15:54:47 posk Exp $
 // Put a link to this at /StRoot/macros/analysis/doFlowEvents.C
 //
 // Description: 
@@ -648,12 +648,24 @@ void doFlowEvents(Int_t nEvents, Bool_t firstPass) {
     Char_t* fileExt="st_physics_*.MuDst.root";
   }
 
+  // run 10 39 GeV
+  // muDST files
+//   Char_t* filePath="/eliza17/star/starprod/reco/2010Production/reco/AuAu39_production/ReversedFullField/P10ik/2010/";
+//   if (nEvents < 450) {
+//     Char_t* fileExt="099/11099061/st_physics_11099061_raw_5030001.MuDst.root";
+//   } else {
+//     Char_t* fileExt="st_physics_*.MuDst.root";
+//   }
+
   doFlowEvents(nEvents, filePath, fileExt, firstPass);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.7  2011/07/25 15:54:47  posk
+// Added correction for non-flatness of event plane.
+//
 // Revision 1.6  2011/03/10 18:56:28  posk
 // Added histogram for laboratory azimuthal distribution of particles.
 //

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.69 2011/03/10 18:56:39 posk Exp $
+// $Id: plot.C,v 1.70 2011/07/25 15:54:53 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -709,15 +709,15 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	cout << "  Normalized by: " << norm << endl;
 	hist->Scale(norm);                           // normalize height to one
         hist->SetMinimum(0.);
+        hist->SetMaximum(1.3);
 	TF1* funcCosSin = new TF1("funcCosSin",
-	     "1.+[0]*2./100.*cos([2]*x)+[1]*2./100.*sin([2]*x)", 0., twopi/order);
+		   "1.+[0]*2./100.*cos([2]*x)+[1]*2./100.*sin([2]*x)", 0., twopi);
 	funcCosSin->SetParNames("100*cos", "100*sin", "har");
 	funcCosSin->SetParameters(0, 0, order); // initial values
 	funcCosSin->SetParLimits(2, 1, 1); // har is fixed
 	hist->Fit("funcCosSin");
 	delete funcCosSin;
 	gStyle->SetOptFit(111);
-	hist->Scale(100.);
       } else if (strstr(shortName[pageNumber],"Phi")!=0) {  // other Phi distibutions
        	//hist->SetMinimum(0.9*(hist->GetMinimum()));
        	hist->SetMinimum(0.);
@@ -908,6 +908,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.70  2011/07/25 15:54:53  posk
+// Added correction for non-flatness of event plane.
+//
 // Revision 1.69  2011/03/10 18:56:39  posk
 // Added histogram for laboratory azimuthal distribution of particles.
 //
