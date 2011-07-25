@@ -1483,7 +1483,7 @@
             <Placement dx="tray_Foot2Thk/2" dy="tray_FootThk/2" y="+ypos" x="xpos" block="BTFT"  >
             </Placement>
             
-            xpos = (tray_SupFullH - tray_FootThk)/2 - tray_Foot2Thk  
+            xpos = (tray_SupFullH + tray_FootThk)/2 - tray_Foot2Thk  
             ypos = ypos - (tray_FootThk + tray_Foot3Len)/2 
             <Placement dx="tray_FootThk/2" dy="tray_Foot3Len/2" y="-ypos" x="xpos" block="BTFT"  >
             </Placement>
@@ -1714,10 +1714,11 @@
         
 
         <Block name="BRSG" comment="is the sensitive gas layer in the TOFr module"  >
+
             <Attribute for="BRSG" seen="0" colo="5"  />
             <Material name="RPCgas"  />
             <Medium name="sensitive" isvol="1 "  />
-            <Shape type="BOX" dz="mod7_IGLen/2" dx="mod7_SPRMax" dy="mod7_IGWid/2"  />
+            <Shape type="BOX" dz="mod7_IGLen/2" dx="mod7_IGHgt/2" dy="mod7_IGWid/2"  />
             <Instrument block="BRSG">
 
                 <Hit meas="X" bins="0.01" opts="HS" />
