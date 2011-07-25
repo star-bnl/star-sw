@@ -32,15 +32,13 @@
         <Content  >
             EAGA,EALP,ECAL,ECHC,ECVO,ECGH,EFLP,EHMS,ELED,EMGT,EMOD,EPER,EPSB,ERAD,ERCM,ERSM,ESHM,ESEC,ESCI,ESPL,ESSP,EMSS,ETAR,EXSG,EXPS,EFLS,EBLS
         </Content>
-        
-               
+                       
         <Structure name="EMCG"  >
             <var name="Version" type="float"  />
             <var name="onoff" type="int"  />
             <var name="fillmode" type="int"  />
         </Structure>
         
-
         <Structure name="EMCS"  >
             <var name="Version" type="float"  />
             <var name="Type" type="float"  />
@@ -1294,6 +1292,7 @@
 
 
         <Block name="EXSG" comment="Is another logical volume... this one acutally creates the planes"  >
+
             <Attribute for="EXSG" seen="1" serial="cut" lsty="3" colo="7"  />
             <Material name="ECAL_Air"  />
             <Shape type="TUBS" rmin="section*tan_low-1.526" rmax="(section-secwid/2)*tan_upp+dup" dz="emcs_gapsmd/3/2" phi2="emcs_phimax/emcs_nsupsec+5" phi1="emcs_phimin/emcs_nsupsec-5"  />
@@ -1307,46 +1306,46 @@
             </If>
             
             <If expr="cut&gt;0"  >
+
                 <If expr="cut==1"  >
                     nstr = 288 
-                    <Else  >
-                        nstr = 285 
-                    </Else>
-                    
+                <Else  >
+                    nstr = 285 
+                </Else>                    
                 </If>
                 
 
                 <Do var="istrip" from="1" to="nstr"  >
-                    <Call expr="section,cut,istrip,xc,yc,length" routine="ecal_get_strip"  />
+
+                    <Call routine="ecal_get_strip" expr="section,cut,istrip,xc,yc,length"/>
+
                     <If expr="mod(istrip,2)!=0"  >
+
                         <Create block="EHMS"  />
-                        <Placement y="yc" x="xc" konly="'ONLY'" block="EHMS"  >
-                            <Rotation alphaz="-45"  />
-                        </Placement>
+                        <Placement block="EHMS" y="yc" x="xc"><Rotation alphaz="-45"/></Placement> <!-- ONLY is default -->
                         
                         <Create block="EBLS"  />
-                        <Placement y="yc" x="xc" z="(+esmd_apex/2+esmd_back_layer/2)" konly="'ONLY'" block="EBLS"  >
+                        <Placement block="EBLS" y="yc" x="xc" z="(+esmd_apex/2+esmd_back_layer/2)">
                             <Rotation alphaz="-45"  />
                         </Placement>
                         
-                        <Else  >
-                            <Create block="EHMS"  />
-                            <Placement y="yc" x="xc" konly="'ONLY'" block="EHMS"  >
+                    <Else  >
+                        <Create block="EHMS"  />
+                        <Placement block="EHMS" y="yc" x="xc">
                                 <Rotation alphaz="-45"  />
                                 <Rotation ort="x-y-z"  />
-                            </Placement>
+                        </Placement>
                             
-                            <Create block="EFLS"  />
-                            <Placement y="yc" x="xc" z="(-esmd_apex/2-esmd_front_layer/2)" konly="'ONLY'" block="EFLS"  >
+                        <Create block="EFLS"  />
+                        <Placement block="EFLS" y="yc" x="xc" z="(-esmd_apex/2-esmd_front_layer/2)">
                                 <Rotation alphaz="-45"  />
                                 <Rotation ort="x-y-z"  />
-                            </Placement>
+                        </Placement>
                             
-                        </Else>
-                        
+                    </Else>                     
                     </If>
                     
-                    <Print level="1" fmt="'SMD Plane: strip=',I3,' xc=',F5.1,' yc=,'F5.1,' length=',F5.1"  >
+                    <Print level="0" fmt="'SMD Plane: strip=',I3,' xc=',F7.3,' yc=,'F7.3,' length=',F7.3"  >
                         istrip,xc,yc,length 
                     </Print>
                     
@@ -1438,67 +1437,33 @@
         </Block>
         
     </Module>
-    
 
-    <Subroutine args="['section', 'cut', 'istrip', 'xcenter', 'ycenter', 'length']" name="ecal_get_strip"  >
-        <Arguement type="real" intent="inout" name="section"  >
-        </Arguement>
-        
-        <Arguement type="integer" intent="inout" name="cut"  >
-        </Arguement>
-        
-        <Arguement type="integer" intent="inout" name="istrip"  >
-        </Arguement>
-        
-        <Arguement type="real" intent="inout" name="xcenter"  >
-        </Arguement>
-        
-        <Arguement type="real" intent="inout" name="ycenter"  >
-        </Arguement>
-        
-        <Arguement type="real" intent="inout" name="length"  >
-        </Arguement>
+    <Subroutine  name="ecal_get_strip"
+                 args="['section', 'cut', 'istrip', 'xcenter', 'ycenter', 'length']" >
+
+        <Arguement type="real"    intent="inout" name="section" />
+        <Arguement type="integer" intent="inout" name="cut"     />
+        <Arguement type="integer" intent="inout" name="istrip"  />
+        <Arguement type="real"    intent="inout" name="xcenter" />
+        <Arguement type="real"    intent="inout" name="ycenter" />
+        <Arguement type="real"    intent="inout" name="length"  />
+ 
+        <CDE>gcunit,agecom</CDE>
         
         <varlist type="INTEGER"  >
             nstrips
         </varlist>
         
         <varlist type="REAL"  >
-            rdel
+            rdel,rth,ddn,ddup,megatile,p,xleft,yleft,xright,yright,dxy,xx,yy,sqrt2,sqrt3
         </varlist>
         
-        <varlist type="REAL"  >
-            rth
-        </varlist>
-        
-        <varlist type="REAL"  >
-            ddn,ddup
-        </varlist>
-        
-        <varlist type="REAL"  >
-            megatile,p
-        </varlist>
-        
-        <varlist type="REAL"  >
-            xleft,yleft,xright,yright
-        </varlist>
-        
-        <varlist type="REAL"  >
-            dxy,xx,yy
-        </varlist>
-        
-        <varlist type="REAL"  >
-            sqrt2,sqrt3
-        </varlist>
-        
-
         <varlist type="REAL"  >
             base/1.0/ 
         </varlist>
-
         
         <varlist type="REAL"  >
-            Rbot/77.41/,Rtop/213.992/
+            Rbot/77.41/,Rtop/213.922/
         </varlist>
         
         <varlist type="REAL"  >
@@ -1519,15 +1484,25 @@
         tan_theta_min = tanf( EtaMax ) 
         tan_theta_max = tanf( EtaMin ) 
 
-        <If expr="cut==1"  >
+
+        <If expr="cut .eq. 1"  >
             rdel    = 3.938                                                                                                          
             nstrips = 288                                                                                                            
-            <Else  >
-                rdel    = -.475                                                                                                          
-                nstrips = 285                                                                                                            
-            </Else>
-            
+        <Else  >
+            rdel    = -.475                                                                                                          
+            nstrips = 285                                                                                                            
+        </Else>            
         </If>
+
+<Export language="None">
+          Prin0 'ecal_get_strip'; ('/// ',A20,30('-'));
+          Prin0 etamin;          ('eta_min       = ',F8.4);
+          Prin0 etamax;          ('eta_max       = ',F8.4);
+          Prin0 tan_theta_min;    ('tan_theta_min = ',F8.4);
+          Prin0 tan_theta_max;    ('tan_theta_max = ',F8.4);
+          Write (*,*) 'section = ', section
+          Write (*,*) 'rtop    = ', rtop
+</Export>
         
         xcenter=0.  
         ycenter=0. 
@@ -1545,69 +1520,81 @@
         p = .5*(istrip-1)*megatile + 41.3655   
 
         <If expr="p&lt;=(.5*rbot*sqrt3+rth)"  >
+
             dxy     = 1.9375*sqrt2 
             xleft  = .5*sqrt2*p*(sqrt3 + 1.) - dxy 
             yleft  = .5*sqrt2*p*(sqrt3 - 1.) - dxy  
             yright = .5*sqrt2*(sqrt( rbot*rbot - p*p) - p) 
             xright = sqrt2*p + yright 
-            <Elif expr="(.5*rbot*sqrt3+rth)&lt;p .and. p &lt;=(.5*rtop+1.5)"  >
-                dxy = 1.9375*sqrt2 
-                xleft = .5*sqrt2*p*(sqrt3 + 1.) - dxy 
-                yleft = .5*sqrt2*p*(sqrt3 - 1.) - dxy  
-                dxy = rdel*sqrt2/sqrt3 
-                yright = .5*sqrt2*p*(1.- 1./sqrt3) 
-                xright = sqrt2*p - yright - dxy 
-                yright = -yright - dxy 
-                <Elif expr="p&gt;(.5*rtop+1.5)"  >
-                    yleft = (sqrt(rtop*rtop - p*p) - p)/sqrt2 
-                    xleft = sqrt2*p + yleft 
-                    dxy = rdel*sqrt2/sqrt3 
-                    yright = .5*sqrt2*p*(1.- 1./sqrt3) 
-                    xright = sqrt2*p - yright - dxy 
-                    yright = -yright - dxy 
-                    dxy = 0.  
+
+
+        <Elif expr="(.5*rbot*sqrt3+rth)&lt;p .and. p &lt;=(.5*rtop+1.5)"  >
+
+            dxy = 1.9375*sqrt2 
+            xleft = .5*sqrt2*p*(sqrt3 + 1.) - dxy 
+            yleft = .5*sqrt2*p*(sqrt3 - 1.) - dxy  
+            dxy = rdel*sqrt2/sqrt3 
+            yright = .5*sqrt2*p*(1.- 1./sqrt3) 
+            xright = sqrt2*p - yright - dxy 
+            yright = -yright - dxy 
+
+        <Elif expr="p&gt;(.5*rtop+1.5)"  >
+
+            yleft = (sqrt(rtop*rtop - p*p) - p)/sqrt2 
+            xleft = sqrt2*p + yleft 
+            dxy = rdel*sqrt2/sqrt3 
+            yright = .5*sqrt2*p*(1.- 1./sqrt3) 
+            xright = sqrt2*p - yright - dxy 
+            yright = -yright - dxy 
+            dxy = 0.  
+
+
                     <If expr="(.5*sqrt3*160.-ddn)&lt;p .and. p &lt;=(.5*sqrt3*160.+ddup)"  >
                         xcenter = .5*(sqrt3*160.+1.846) 
                         ycenter = xcenter - .5*sqrt3*1.713 
                         <If expr="p&gt;ycenter"  >
-                            dxy = .5*sqrt2*(2/sqrt3*rdel + .5*sqrt3*1.846 +              sqrt(1.713*1.713 - (p-xcenter)*(p-xcenter))) 
-                            <Else  >
-                                dxy = sqrt2/sqrt3*(p - .5*sqrt3* 160. + ddn) 
-                            </Else>
-                            
+                            dxy = .5*sqrt2*(2/sqrt3*rdel + .5*sqrt3*1.846 + sqrt(1.713*1.713 - (p-xcenter)*(p-xcenter))) 
+                        <Else  >
+                            dxy = sqrt2/sqrt3*(p - .5*sqrt3* 160. + ddn) 
+                        </Else>                            
                         </If>
                         
-                        <Elif expr="(.5*sqrt3*195.-ddn)&lt;p .and. p &lt;=(.5*sqrt3*195.+ddup)"  >
-                            xcenter = .5*(sqrt3*195.+1.846) 
-                            ycenter = xcenter - .5*sqrt3*1.713 
+                    <Elif expr="(.5*sqrt3*195.-ddn)&lt;p .and. p &lt;=(.5*sqrt3*195.+ddup)"  >
+                         xcenter = .5*(sqrt3*195.+1.846) 
+                         ycenter = xcenter - .5*sqrt3*1.713 
+
                             <If expr="p&gt;ycenter"  >
-                                dxy = .5*sqrt2*(2/sqrt3*rdel + .5*sqrt3*1.846 +             sqrt(1.713*1.713 - (p-xcenter)*(p-xcenter))) 
-                                <Else  >
-                                    dxy = sqrt2/sqrt3*(p - .5*sqrt3*195. + ddn) 
-                                </Else>
-                                
+                                dxy = .5*sqrt2*(2/sqrt3*rdel + .5*sqrt3*1.846 + sqrt(1.713*1.713 - (p-xcenter)*(p-xcenter))) 
+                            <Else  >
+                                dxy = sqrt2/sqrt3*(p - .5*sqrt3*195. + ddn) 
+                            </Else>                                
                             </If>
                             
-                        </Elif>
-                        
+                    </Elif>                       
                     </If>
                     
-                    xright = xright + dxy 
-                    yright = yright + dxy 
-                </Elif>
-                
+            xright = xright + dxy 
+            yright = yright + dxy 
+            </Elif>                
             </Elif>
             
         </If>
         
 
-        dxy     =  section*tan_theta_max - rtop                                                                                                             
-        xcenter = .5*(xright+xleft) + dxy                                                                                                             
-        ycenter = .5*(yright+yleft)                                                                                                                   
-        xx = .5*sqrt2*(xleft+yleft)                                                                                                                
-        yy = .5*sqrt2*(xright+yright)                                                                                                              
+        dxy     =  section*tan_theta_max - rtop  
+        xcenter = .5*(xright+xleft) + dxy        
+        ycenter = .5*(yright+yleft)              
+        xx = .5*sqrt2*(xleft+yleft)              
+        yy = .5*sqrt2*(xright+yright)            
         length = xx-yy                               
+<Export language="None   ">
+Write (*,*) 'Outside of IF statements'
+Write (*,*) 'section = ', section, ' tan_theta_max = ', tan_theta_max, ' rtop = ', rtop
+Write (*,*) dxy,xcenter,xx,yy,length
+</Export>
+
         return
+
     </Subroutine>
     
 
