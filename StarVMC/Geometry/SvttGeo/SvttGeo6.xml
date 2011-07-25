@@ -12,7 +12,15 @@
         </CDE>
         
         <Content  >
-            SVTT,SLYD,SLSD,SLDI,STLI,STSI,SVTD,SBER,STAB,STRU,SPCB,SRHC,SBWC,SWCM,SXAI,SXBI,STRA,SSID,SSIR,SELE,SWCH,SWCW,SWCS,SBOI,SAGP,SDYE,SECA,SIRP,SIRT,SOER,SCON,SROD,SGRA,STAP,STAC,SHLA,SHLB,SHMA,SHMB,SWHO,SHWA,SCMY,SCAL,SWMM,SWMB,SWRP,SXRL,SYRU,SWMT,SWMS,SWMW,SOTB,SITB,SBRG,SBRM,SBRI,SOES,SIES,SOSM,SISM,SCRW,SGLA,SBSP,SAKM,SCKM,SBSR,SBCR,SBRX,SBRL,SBMM,SBMO,SBMI,SMRD,SALM,SISH,SSSH,SOSH,SCBM,SCBL,SFED,SPLS,SOUM,SOUR
+            SVTT,SLYD,SLSD,SLDI,STLI,STSI,SVTD,SBER,STAB,STRU,
+            SPCB,SRHC,SBWC,SWCM,SXAI,SXBI,STRA,SSID,SSIR,SELE,
+            SWCH,SWCW,SWCS,SBOI,SAGP,SDYE,SECA,SIRP,SIRT,SOER,
+            SCON,SROD,SGRA,STAP,STAC,SHLA,SHLB,SHMA,SHMB,SWHO,
+            SHWA,SCMY,SCAL,SWMM,SWMB,SWRP,SXRL,SYRU,SWMT,SWMS,
+            SWMW,SOTB,SITB,SBRG,SBRM,SBRI,SOES,SIES,SOSM,SISM,
+            SCRW,SGLA,SBSP,SAKM,SCKM,SBSR,SBCR,SBRX,SBRL,SBMM,
+            SBMO,SBMI,SMRD,SALM,SISH,SSSH,SOSH,SCBM,SCBL,SFED,
+            SPLS,SOUM,SOUR
         </Content>
         
         <Structure name="SVTG"  >
@@ -1124,15 +1132,19 @@
             <Shape type="BOX" dy="swca_WaferLen/2"  />
             trapY=swca_SensWid/2.0-(swca_SensWid-swca_SensGir)/2.0 
 
-            <Create block="STRA"  />
+            <Create    block="STRA"  />
+            <Placement block="STRA" y="+trapY"><Rotation alphaz="+90"/><Rotation ort="YZX" /></Placement>
+            <Placement block="STRA" y="-trapY"><Rotation alphaz="-90"/><Rotation ort="YZX" /></Placement>
+           
 
             ssidX=swca_WaferLen/2.0-(swca_WaferLen-swca_SensLen)/4.0 
             ssirY=swca_WaferWid/2.0-(swca_WaferWid-swca_SensWid)/4.0 
 
-            <Create block="SSID"  />
-            <Create block="SSIR"  />
+            <Create block="SSID"  /><Placement block="SSID" x="+ssidX" /><Placement block="SSID" x="-ssidX" />                
+            <Create block="SSIR"  /><Placement block="SSIR" y="+ssirY" /><Placement block="SSIR" y="-ssirY" />
 
             <Call expr="%Imed,'STRA',1." routine="GSTPAR"  />
+ 
 
              <Instrument block="SVTD"  >
                 <Hit meas="z" opts="S" bins=".001"  />
@@ -1277,7 +1289,20 @@
         <Block name="SELE" comment="is the electronics mother volume"  >
 
             <Material name="Air"  />
+<!--                                                                       == maxim ==
+             Note: we need to make sure the SELE block is
+             replicated in each layer, not just poistioned
+             Therefore, we need to break the symmetry by adding the Serial attribute
+             Attribute SELE  Seen=0  Colo=1  Serial=iLayer
+  -->
             <Attribute for="SELE" seen="0" serial="iLayer" colo="1"  />
+<!--                                                                       == Jason ==
+             The original AgSTAR geometry set serial=0 on this line in order to
+             make sure that daughter volumes would not be remade.  In AgML this would
+             not work.  So we add serial=0 to all of the child volumes:
+                [x]SWCH, [x]SWCS, [x]SWCW, [x]SBOI, [x]SAGP, [x]SDYE, [x]SECA, [x]SGLA
+  -->
+
             <Shape type="BOX" dz="elethk/2" dx="selc_ElcaWid/2" dy="swca_Length/2"  />
 
             <Create block="SWCH"/>
@@ -1304,13 +1329,15 @@
         
         <Block name="SDYE" comment="is the ic chip on the hybrid"  >
             <Material name="Silicon"  />
-            <Attribute for="SDYE" seen="1" colo="6" serial="0"/>
+            <Attribute for="SDYE" seen="1" colo="6" 
+                                  serial="0" />
             <Shape type="BOX" dz="selc_DyeThk/2" dx="selc_DyeWid/2" dy="svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap)"  />
         </Block>
         
         <Block name="SECA" comment="is the cable on the electronics carrier"  >
             <Material name="Copper"  />
-            <Attribute for="SECA" seen="1" colo="2" serial="0"/>
+            <Attribute for="SECA" seen="1" colo="2" 
+                       serial="0" />
             <Shape type="BOX" dz="selc_CabThk/2" dx="selc_CabWid/2" dy="swca_Length/2"  />
         </Block>
         
@@ -1318,9 +1345,9 @@
             <Mixture name="BeO" dens="2.85"  >
                 <Component name="Be" a="9" z="4" w="1"  />
                 <Component name="O" a="16" z="8" w="1"  />
-            </Mixture>
-            
-            <Attribute for="SBOI" seen="1" colo="6" serial="0" />
+            </Mixture>            
+            <Attribute for="SBOI" seen="1" colo="6" 
+                       serial="0" />
             <Shape type="BOX" dz="selc_BeOThk/2" dx="selc_ElcaWid/2" dy="svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap)"  />
         </Block>
         
@@ -1330,7 +1357,8 @@
                 <Component name="Pd" a="106" z="46" w="1"  />
             </Mixture>
             
-            <Attribute for="SAGP" seen="1" colo="2" serial="0" />
+            <Attribute for="SAGP" seen="1" colo="2" 
+                       serial="0" />
             <Shape type="BOX" dz="selc_AgPdThk/2" dx="selc_ElcaWid/2" dy="svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap)"  />
         </Block>
         
@@ -1340,7 +1368,9 @@
                 <Component name="O" a="16" z="8" w="2"  />
             </Mixture>
             
-            <Attribute for="SGLA" seen="1" colo="6" serial="0"/>
+            <Attribute for="SGLA" seen="1" colo="6" 
+                                  serial="0"/>
+
             <Shape type="BOX" dz="selc_GlassThk/2" dx="selc_ElcaWid/2" dy="svtl_Nwafer*(swca_WaferLen/2+swca_WaferGap)"  />
         </Block>
         

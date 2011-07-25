@@ -1137,13 +1137,20 @@
             <Shape type="BOX" dy="swca_WaferLen/2"  />
             trapY=swca_SensWid/2.0-(swca_SensWid-swca_SensGir)/2.0 
 
-            <Create block="STRA"  />
+            <Create    block="STRA"  />
+            <Placement block="STRA" y="+trapY"><Rotation alphaz="+90"/><Rotation ort="YZX"/></Placement>
+            <Placement block="STRA" y="-trapY"><Rotation alphaz="-90"/><Rotation ort="YZX"/></Placement>
 
             ssidX=swca_WaferLen/2.0-(swca_WaferLen-swca_SensLen)/4.0 
             ssirY=swca_WaferWid/2.0-(swca_WaferWid-swca_SensWid)/4.0 
 
             <Create block="SSID"  />
+            <Placement block="SSID" x="+ssidX"/>
+            <Placement block="SSID" x="-ssidX"/>
+
             <Create block="SSIR"  />
+            <Placement block="SSIR" y="+ssirY" />
+            <Placement block="SSID" y="-ssirY" />
 
             <Call expr="%Imed,'STRA',1." routine="GSTPAR"  />
 
