@@ -1345,10 +1345,6 @@
                     </Else>                     
                     </If>
                     
-                    <Print level="0" fmt="'SMD Plane: strip=',I3,' xc=',F7.3,' yc=,'F7.3,' length=',F7.3"  >
-                        istrip,xc,yc,length 
-                    </Print>
-                    
                 </Do>
                 
             </If>
@@ -1493,16 +1489,6 @@
             nstrips = 285                                                                                                            
         </Else>            
         </If>
-
-<Export language="None">
-          Prin0 'ecal_get_strip'; ('/// ',A20,30('-'));
-          Prin0 etamin;          ('eta_min       = ',F8.4);
-          Prin0 etamax;          ('eta_max       = ',F8.4);
-          Prin0 tan_theta_min;    ('tan_theta_min = ',F8.4);
-          Prin0 tan_theta_max;    ('tan_theta_max = ',F8.4);
-          Write (*,*) 'section = ', section
-          Write (*,*) 'rtop    = ', rtop
-</Export>
         
         xcenter=0.  
         ycenter=0. 
@@ -1587,11 +1573,6 @@
         xx = .5*sqrt2*(xleft+yleft)              
         yy = .5*sqrt2*(xright+yright)            
         length = xx-yy                               
-<Export language="None   ">
-Write (*,*) 'Outside of IF statements'
-Write (*,*) 'section = ', section, ' tan_theta_max = ', tan_theta_max, ' rtop = ', rtop
-Write (*,*) dxy,xcenter,xx,yy,length
-</Export>
 
         return
 
