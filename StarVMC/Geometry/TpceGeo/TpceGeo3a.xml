@@ -1,6 +1,5 @@
 <Document  file="StarVMC/Geometry/TpceGeo/TpceGeo3a.xml"  >
 
-
     <Module name="tpceGeo3a" comment="  is the updated TPC "  >
 
         <Author name="David Underwood corrected by Maxim Potekhin, 
@@ -18,16 +17,16 @@
         
         <varlist type="CHARACTER*4"  >
             voluName
-        </varlist>
+        </varlist> 
 
-		<!--        
-        <Content  >
-            TPCE,TOFC,TOFS,TOKA,TONX,TOAD,TOHA,TPGV,TPSS,TIFC,TIKA,TINX,TPCW,TWSS,TWGI,TPCM,TPEA,TESS,TSWH,TMWC,TMEA,TMSE,TIAG,TOAE,TPAD,TPAI,TPAO,THOL,THRA,THLA,TALC,TAEC,TCEX,TCRX,TSAW,TWGC,TWGB,TPIP,TMAN,TRDV,TRDS,TRDC,TIAD,TOIG,FEES,FEEP,FEER,FEEI,FEEA,TSAS,TWAS,TALS,TSGT,TWBT,TWRC,TWRG,TWRI,TWTR,TWMR,TRDO,TBRW,TWRB,TCOO,TCAB,TRIB,TWIR
+        <Content>
+             TPCE,TPCM,TIFC,TIKA,TINX,TIAD,TOFC,TOFS,
+             TOKA,TONX,TOAD,TOIG,TOHA,TSWH,TSAW,TSAS,
+             TWAS,FEEA,FEEP,FEER,FEEI,TALS,TSGT,TWBT,
+             TWRI,TWRG,TWRC,TWTR,TWMR,TRDO,TBRW,TWRB,
+             TCOO,TCAB,TRDC,TRIB,TWIR,THOL,FEES,TPGV,
+             TPSS,TPAD
         </Content>
-        -->
-
-        <Content>TPCE,TPCM,TIFC,TIKA,TINX,TIAD,TOFC,TOFS,TOKA,TONX,TOAD,TOIG,TOHA,TSWH,TSAW,TSAS,TWAS,FEEA,FEEP,FEER,FEEI,TALS,TSGT,TWBT,TWRI,TWRG,TWRC,TWTR,TWMR,TRDO,TBRW,TWRB,TCOO,TCAB,TRDC,TRIB,TWIR,THOL,FEES,TPGV,TPSS,TPAD</Content>
-        
 
         <varlist type="INTEGER"  >
             kInner,kOuter
