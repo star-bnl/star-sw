@@ -1156,7 +1156,7 @@
 
             <Create block="SSIR"  />
             <Placement block="SSIR" y="+ssirY" />
-            <Placement block="SSID" y="-ssirY" />
+            <Placement block="SSIR" y="-ssirY" />
 
             <Call expr="%Imed,'STRA',1." routine="GSTPAR"  />
 
