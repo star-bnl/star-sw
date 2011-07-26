@@ -9,7 +9,7 @@
 namespace Garfield {
 
 ViewSignal::ViewSignal() :
-  debug(false), sensor(0),
+  className("ViewSignal"), debug(false), sensor(0),
   canvas(0), hasExternalCanvas(false),
   hSignal(0), gCrossings(0) {
 
@@ -29,8 +29,8 @@ void
 ViewSignal::SetSensor(Sensor* s) {
 
   if (s == 0) {
-    printf("ViewSignal::SetSensor:\n");
-    printf("    Sensor pointer is null.\n");
+    std::cerr << className << "::SetSensor:\n";
+    std::cerr << "    Sensor pointer is null.\n";
     return;
   }
 
@@ -55,7 +55,7 @@ void
 ViewSignal::PlotSignal(const std::string label) {
 
   if (sensor == 0) {
-    std::cerr << "ViewSignal::PlotSignal:\n";
+    std::cerr << className << "::PlotSignal:\n";
     std::cerr << "    Sensor is not defined.\n";
     return;
   }

@@ -71,7 +71,7 @@ PlottingEngineRoot::SetDefaultStyle() {
   garfieldStyle->SetTitleFillColor(0);
   garfieldStyle->SetTitleFont(font, "xyz");
   garfieldStyle->SetTitleFont(font, "t");
-  garfieldStyle->SetTitleOffset(1.0, "xyz");
+  garfieldStyle->SetTitleOffset(1.2, "xyz");
   garfieldStyle->SetTitleSize(0.03, "xyz");
   garfieldStyle->SetTitleSize(0.05, "t");
 

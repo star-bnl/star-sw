@@ -30,6 +30,7 @@ class ViewField {
                  double xmax, double ymax);
     void SetVoltageRange(const double minval, const double maxval);
     void SetElectricFieldRange(const double minval, const double maxval);
+    void SetWeightingFieldRange(const double minval, const double maxval);
     void SetNumberOfContours(const int n);
     void SetDefaultProjection();
     void SetPlane(double fx, double fy, double fz, 
@@ -45,9 +46,14 @@ class ViewField {
     void PlotProfile(const double x0, const double y0, const double z0,
                      const double x1, const double y1, const double z1,
                      const std::string option = "v"); 
+    void PlotContourWeightingField(const std::string label,
+                                   const std::string option);
+    void PlotSurfaceWeightingField(const std::string label,
+                                   const std::string option);
 
     double EvaluatePotential(double* pos, double* par);
     double EvaluatePotentialProfile(double* pos, double* par);
+    double EvaluateWeightingField(double* pos, double* par);
 
     void EnableAcknowledgeStatus(const double v0 = 0.) {
       useStatus = true; vBkg = v0;
@@ -83,24 +89,29 @@ class ViewField {
     // Function range
     double fmin, fmax;
     double emin, emax;
+    double wmin, wmax;
     
     // Number of contours
     int nContours;
     // Number of points used to draw the functions
     int nSamples1d;
     int nSamples2dX, nSamples2dY;
-    
+    // Weighting field label
+    std::string electrode;
+ 
     // Canvas
     TCanvas* canvas;
     bool hasExternalCanvas;
 
     // Potential function
     TF2* fPot;
+    TF2* fWfield;
     TF1* fPotProfile;
     
     void Labels();
     void CreateFunction();
     void CreateProfileFunction();
+    void CreateFunctionWeightingField();
 
 };
 

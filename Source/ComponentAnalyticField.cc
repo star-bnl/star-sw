@@ -663,7 +663,7 @@ ComponentAnalyticField::AddCharge(
                     const double x, const double y, const double z,
                     const double q) {
         
-  // Convert from fC to internal units (division by 4 pi epsilon0)
+  // Convert from fC to internal units (division by 4 pi epsilon0).
   charge3d newCharge;
   newCharge.x = x;
   newCharge.y = y;

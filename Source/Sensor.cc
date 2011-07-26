@@ -97,6 +97,24 @@ Sensor::MagneticField(const double x, const double y, const double z,
 
 }
 
+void 
+Sensor::WeightingField(const double x, const double y, const double z, 
+                       double& wx, double& wy, double& wz, 
+                       const std::string label) {
+  
+  wx = wy = wz = 0.;
+  double fx = 0., fy = 0., fz = 0.;
+  // Add up field contributions from all components
+  for (int i = nElectrodes; i--;) {
+    if (electrodes[i].label == label) {
+      fx = fy = fz = 0.;
+      electrodes[i].comp->WeightingField(x, y, z, fx, fy, fz, label);
+    }
+    wx += fx; wy += fy; wz += fz;
+  }
+
+}
+
 bool 
 Sensor::GetMedium(const double x, const double y, const double z,
                   Medium*& m) {

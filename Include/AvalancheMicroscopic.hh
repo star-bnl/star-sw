@@ -85,13 +85,16 @@ class AvalancheMicroscopic {
     void EnableAvalancheSizeLimit(const int size) {sizeCut = size;}
     void DisableAvalancheSizeLimit() {sizeCut = -1;}
     int  GetAvalancheSizeLimit() const {return sizeCut;}
-    
+ 
     // Enable/disable magnetic field in stepping algorithm
     void EnableMagneticField()  {useBfield = true;}
     void DisableMagneticField() {useBfield = false;}
     
     // Set number of collisions to be skipped
     void SetCollisionSteps(const int n = 100);
+
+    void SetTimeWindow(const double t0, const double t1);
+    void UnsetTimeWindow();
 
     void GetAvalancheSize(int& ne, int& ni) const {
       ne = nElectrons; ni = nIons;
@@ -104,6 +107,11 @@ class AvalancheMicroscopic {
     void GetElectronEndpoint(const int i, 
                 double& x0, double& y0, double& z0, double& t0, double& e0,
                 double& x1, double& y1, double& z1, double& t1, double& e1,
+                int& status) const;
+    void GetElectronEndpoint(const int i, 
+                double& x0, double& y0, double& z0, double& t0, double& e0,
+                double& x1, double& y1, double& z1, double& t1, double& e1,
+                double& dx1, double& dy1, double& dz1,
                 int& status) const;
     int GetNumberOfElectronDriftLinePoints(const int i = 0) const;
     int GetNumberOfHoleDriftLinePoints(const int i = 0) const;
@@ -247,7 +255,7 @@ class AvalancheMicroscopic {
     bool useBandStructureDefault;
     bool useNullCollisionSteps;
     bool useBfield;
-    
+ 
     // Rotation matrices
     double rb11, rb12, rb13;
     double rb21, rb22, rb23;
@@ -263,6 +271,9 @@ class AvalancheMicroscopic {
 
     int nCollSkip;
     
+    bool hasTimeWindow;
+    double tMin, tMax;
+
     // User procedures
     bool hasUserHandleStep;
     bool hasUserHandleAttachment;

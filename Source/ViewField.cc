@@ -22,10 +22,12 @@ ViewField::ViewField() :
   pxmin(-1.), pymin(-1.), pxmax(1.), pymax(1.),
   fmin(0.), fmax(100.),
   emin(0.), emax(10000.),
+  wmin(0.), wmax(100.),
   nContours(nMaxContours),
   nSamples1d(1000), nSamples2dX(200), nSamples2dY(200),
+  electrode(""),
   canvas(0), hasExternalCanvas(false),
-  fPot(0), fPotProfile(0) {
+  fPot(0), fWfield(0), fPotProfile(0) {
 
   SetDefaultProjection();
   plottingEngine.SetDefaultStyle();
@@ -36,6 +38,7 @@ ViewField::~ViewField() {
 
   if (!hasExternalCanvas && canvas != 0) delete canvas;
   if (fPot != 0) delete fPot;
+  if (fWfield != 0) delete fWfield;
   if (fPotProfile != 0) delete fPotProfile;
   
 }
@@ -126,6 +129,14 @@ ViewField::SetElectricFieldRange(const double minval, const double maxval) {
 }
 
 void
+ViewField::SetWeightingFieldRange(const double minval, const double maxval) {
+
+  wmin = std::min(minval, maxval);
+  wmax = std::max(minval, maxval);
+
+}
+
+void
 ViewField::SetNumberOfContours(const int n) {
 
   if (n <= nMaxContours) {
@@ -210,7 +221,7 @@ ViewField::PlotContour(const std::string option) {
     fPot->SetParameter(0, 31.);
     plotType = 4;
   } else {
-    std::cerr << className << "::PlotSurface:\n";
+    std::cerr << className << "::PlotContour:\n";
     std::cerr << "    Unknown option (" << option << ")\n";
     std::cerr << "    Plotting the potential.\n";
     fPot->SetParameter(0, -1.);
@@ -280,7 +291,6 @@ ViewField::PlotSurface(const std::string option) {
       option == "volt" || option == "voltage" || 
       option == "pot" || option == "potential") {
     fPot->SetParameter(0, -1.);
-    fPot->SetRange(pxmin, pymin, pxmax, pymax);
   } else if (option == "e" || option == "field") {
     fPot->SetParameter(0,  1.);
     plotType = 1;
@@ -408,6 +418,132 @@ ViewField::PlotProfile(const double x0, const double y0, const double z0,
 
 }
 
+void 
+ViewField::PlotSurfaceWeightingField(const std::string label,
+                                     const std::string option) {
+
+  // Setup the canvas
+  if (canvas == 0) {
+    canvas = new TCanvas();
+    canvas->SetTitle("Field View");
+    if (hasExternalCanvas) hasExternalCanvas = false;
+  }
+  canvas->cd();
+  canvas->Range(pxmin, pymin, pxmax, pymax);
+ 
+  electrode = label;
+ 
+  if (fWfield == 0) CreateFunctionWeightingField();
+
+  int plotType = 1;
+  if (option == "e" || option == "field") {
+    fWfield->SetParameter(0,  1.);
+    plotType = 1;
+  } else if (option == "ex") {
+    fWfield->SetParameter(0, 11.);
+    plotType = 2;
+  } else if (option == "ey") {
+    fWfield->SetParameter(0, 21.);
+    plotType = 3;
+  } else if (option == "ez") {
+    fWfield->SetParameter(0, 31.);
+    plotType = 4;
+  } else {
+    std::cerr << className << "::PlotSurfaceWeightingField:\n";
+    std::cerr << "    Unknown option (" << option << ")\n";
+    std::cerr << "    Plotting the absolute value of the field.\n";
+    fWfield->SetParameter(0, 1.);
+  }
+  fWfield->SetNpx(nSamples2dX); 
+  fWfield->SetNpy(nSamples2dY);
+  fWfield->GetXaxis()->SetTitle(xLabel);
+  fWfield->GetYaxis()->SetTitle(yLabel);
+  if (plotType == 1) {
+    fWfield->SetTitle("Surface plot of the weighting field");
+  } else if (plotType == 2) {
+    fWfield->SetTitle("Surface plot of the weighting field (x-component)");
+  } else if (plotType == 3) {
+    fWfield->SetTitle("Surface plot of the weighting field (y-component)");
+  } else if (plotType == 4) {
+    fWfield->SetTitle("Surface plot of the weighting field (z-component)");
+  }
+  fWfield->Draw("SURF4");
+  canvas->Update();
+
+}
+
+void 
+ViewField::PlotContourWeightingField(const std::string label,
+                                     const std::string option) {
+
+  // Setup the canvas
+  if (canvas == 0) {
+    canvas = new TCanvas();
+    canvas->SetTitle("Field View");
+    if (hasExternalCanvas) hasExternalCanvas = false;
+  }
+  canvas->cd();
+  canvas->Range(pxmin, pymin, pxmax, pymax);
+
+  electrode = label;
+
+  if (fWfield == 0) CreateFunctionWeightingField();
+
+  int plotType = 1;
+  if (option == "e" || option == "field") {
+    fWfield->SetParameter(0,  1.);
+    plotType = 1;
+  } else if (option == "ex") {
+    fWfield->SetParameter(0, 11.);
+    plotType = 2;
+  } else if (option == "ey") {
+    fWfield->SetParameter(0, 21.);
+    plotType = 3;
+  } else if (option == "ez") {
+    fWfield->SetParameter(0, 31.);
+    plotType = 4;
+  } else {
+    std::cerr << className << "::PlotContourWeightingField:\n";
+    std::cerr << "    Unknown option (" << option << ")\n";
+    std::cerr << "    Plotting the absolute value of the field.\n";
+    fWfield->SetParameter(0, 1.);
+  }
+
+  double level[nMaxContours];
+  for (int i = 0; i < nContours; ++i) {
+    if (nContours > 1) {
+      level[i] = wmin + i * (wmax - wmin) / (nContours - 1.);
+    } else {
+      level[i] = (wmax + wmin) / 2.; 
+    }
+  }
+  fWfield->SetContour(nContours, level);
+  
+  if (debug) {
+    std::cout << className << "::PlotContour:\n";
+    std::cout << "    Number of contours: " << nContours << "\n";
+    for (int i = 0; i < nContours; ++i) {
+      std::cout << "        Level " << i << " = " << level[i] << "\n";
+    }
+  }
+  fWfield->SetNpx(nSamples2dX);
+  fWfield->SetNpy(nSamples2dY);
+  fWfield->GetXaxis()->SetTitle(xLabel);
+  fWfield->GetYaxis()->SetTitle(yLabel);
+  if (plotType == 1) {
+    fWfield->SetTitle("Contours of the weighting field");
+  } else if (plotType == 2) {
+    fWfield->SetTitle("Contours of the weighting field (x-component)");
+  } else if (plotType == 3) {
+    fWfield->SetTitle("Contours of the weighting field (y-component)");
+  } else if (plotType == 4) {
+    fWfield->SetTitle("Contours of the weighting field (z-component)");
+  }
+  fWfield->Draw("CONT4Z");
+  canvas->Update();
+
+}
+
 void
 ViewField::CreateFunction() {
 
@@ -445,6 +581,26 @@ ViewField::CreateProfileFunction() {
                         &ViewField::EvaluatePotentialProfile, 
                         0., 1., nParameters, 
                         "ViewField", "EvaluatePotentialProfile");
+ 
+}
+
+void
+ViewField::CreateFunctionWeightingField() {
+
+  int idx = 0;
+  std::string fname = "fWfield_0";
+  while (gROOT->GetListOfFunctions()->FindObject(fname.c_str())) {
+    ++idx;
+    std::stringstream ss;
+    ss << "fWfield_";
+    ss  << idx;
+    fname = ss.str();
+  }
+
+  fWfield = new TF2(fname.c_str(), this, 
+                    &ViewField::EvaluateWeightingField, 
+                    pxmin, pxmax, pymin, pymax, 1, 
+                    "ViewField", "EvaluateWeightingField");
  
 }
 
@@ -563,6 +719,47 @@ ViewField::EvaluatePotentialProfile(double* pos, double* par) {
   }
   // Return the potential.
   return volt;
+    
+}
+
+double
+ViewField::EvaluateWeightingField(double* pos, double* par) {
+
+  if (sensor == 0 && component == 0) return 0.;
+
+  // Compute the field.
+  double ex = 0., ey = 0., ez = 0.;
+  const double xpos = project[0][0] * pos[0] + project[1][0] * pos[1] + 
+                      project[2][0];
+  const double ypos = project[0][1] * pos[0] + project[1][1] * pos[1] + 
+                      project[2][1];
+  const double zpos = project[0][2] * pos[0] + project[1][2] * pos[1] + 
+                      project[2][2];
+ 
+  if (sensor == 0) {
+    component->WeightingField(xpos, ypos, zpos, ex, ey, ez, electrode);
+  } else {
+    sensor->WeightingField(xpos, ypos, zpos, ex, ey, ez, electrode);
+  }
+  if (debug) {
+    std::cout << className << "::EvaluateWeightingField:\n";
+    std::cout << "    At (u, v) = (" 
+              << pos[0] << ", " << pos[1] << "), "
+              << " (x,y,z) = (" 
+              << xpos << "," << ypos << "," << zpos << ")\n";
+    std::cout << "    E = " << ex << ", " << ey << ", " << ez << ")\n";
+  }
+ 
+  // Select the quantity to be plotted.
+  if (par[0] > 30.) {
+    return ez;
+  } else if (par[0] > 20.) {
+    return ey;
+  } else if (par[0] > 10.) {
+    return ex;
+  } else {
+    return sqrt(ex * ex + ey * ey + ez * ez);
+  }
     
 }
 

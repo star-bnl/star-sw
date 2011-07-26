@@ -39,6 +39,11 @@ class Sensor {
                        double& bx, double& by, double& bz,
                        int& status);
 
+    // Get the weighting field at (x, y, z)
+    void WeightingField(const double x, const double y, const double z,
+                        double& wx, double& wy, double& wz,
+                        const std::string label);
+
     // Get the medium at (x, y, z)
     bool GetMedium(const double x, const double y, const double z, 
                    Medium*& medium);

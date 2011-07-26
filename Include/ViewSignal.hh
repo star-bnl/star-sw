@@ -31,7 +31,9 @@ class ViewSignal {
     void DisableDebugging() {debug = false;}
 
   private:
-  
+ 
+    std::string className;
+ 
     // Options
     bool debug;
     

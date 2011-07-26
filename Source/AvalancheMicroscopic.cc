@@ -28,6 +28,7 @@ AvalancheMicroscopic::AvalancheMicroscopic() :
   rb31(0.), rb32(0.), rb33(1.), rx22(1.), rx23(0.), rx32(0.), rx33(1.),
   deltaCut(0.), gammaCut(0.),
   sizeCut(-1), nCollSkip(100),
+  hasTimeWindow(false), tMin(0.), tMax(0.),
   hasUserHandleStep(false), 
   hasUserHandleAttachment(false),
   hasUserHandleInelastic(false),
@@ -258,6 +259,28 @@ AvalancheMicroscopic::SetCollisionSteps(const int n) {
   
 }
 
+void
+AvalancheMicroscopic::SetTimeWindow(const double t0, const double t1) {
+
+  if (fabs(t1 - t0) < Small) {
+    std::cerr << className << "::SetTimeWindow:\n";
+    std::cerr << "    Time interval must be greater than zero.\n";
+    return;
+  }
+
+  tMin = std::min(t0, t1);
+  tMax = std::max(t0, t1);
+  hasTimeWindow = true;
+
+}
+
+void
+AvalancheMicroscopic::UnsetTimeWindow() {
+
+  hasTimeWindow = false;
+
+}
+
 void 
 AvalancheMicroscopic::GetElectronEndpoint(const int i, 
   double& x0, double& y0, double& z0, double& t0, double& e0,
@@ -283,6 +306,40 @@ AvalancheMicroscopic::GetElectronEndpoint(const int i,
   z1 = endpointsElectrons[i].z;
   t1 = endpointsElectrons[i].t;  
   e1 = endpointsElectrons[i].energy;  
+  status = endpointsElectrons[i].status; 
+
+}
+
+void 
+AvalancheMicroscopic::GetElectronEndpoint(const int i, 
+  double& x0, double& y0, double& z0, double& t0, double& e0,
+  double& x1, double& y1, double& z1, double& t1, double& e1,
+  double& dx1, double& dy1, double& dz1,
+  int& status) const {
+  
+  if (i < 0 || i >= nElectronEndpoints) {
+    std::cerr << className << "::GetElectronEndpoint:\n";
+    std::cerr << "    Endpoint index " << i << " out of range.\n";
+    x0 = y0 = z0 = t0 = e0 = 0.;
+    x1 = y1 = t1 = t1 = e1 = 0.;
+    dx1 = dy1 = dz1 = 0.;
+    status = 0;
+    return;
+  }
+
+  x0 = endpointsElectrons[i].x0; 
+  y0 = endpointsElectrons[i].y0; 
+  z0 = endpointsElectrons[i].z0;
+  t0 = endpointsElectrons[i].t0; 
+  e0 = endpointsElectrons[i].e0;
+  x1 = endpointsElectrons[i].x;  
+  y1 = endpointsElectrons[i].y;  
+  z1 = endpointsElectrons[i].z;
+  t1 = endpointsElectrons[i].t;  
+  e1 = endpointsElectrons[i].energy; 
+  dx1 = endpointsElectrons[i].kx;
+  dy1 = endpointsElectrons[i].ky;
+  dz1 = endpointsElectrons[i].kz; 
   status = endpointsElectrons[i].status; 
 
 }
@@ -789,6 +846,36 @@ AvalancheMicroscopic::TransportElectron(
             std::cout << "    Electron left the drift medium.\n";
           }
           std::cout << "    At " << x << ", " << y << "," << z << "\n";
+        }
+        continue;
+      }
+
+      // Check if the electrons is within the specified time window.
+      if (hasTimeWindow && (t < tMin || t > tMax)) {
+        stack[iE].x = x; 
+        stack[iE].y = y; 
+        stack[iE].z = z;
+        stack[iE].t = t; 
+        stack[iE].energy = energy; 
+        stack[iE].band = band;
+        stack[iE].kx = kx; 
+        stack[iE].ky = ky; 
+        stack[iE].kz = kz;
+        stack[iE].status = StatusOutsideTimeWindow;
+        if (hole) {
+          endpointsHoles.push_back(stack[iE]);
+        } else {
+          endpointsElectrons.push_back(stack[iE]);
+        }
+        stack.erase(stack.begin() + iE);
+        if (debug) {
+          std::cout << className << "::TransportElectron:\n";
+          if (hole) {
+            std::cout << "    Hole left the time window.\n";  
+          } else {
+            std::cout << "    Electron left the time window.\n";
+          }
+          std::cout << "    Time: " << t << "\n";
         }
         continue;
       }
