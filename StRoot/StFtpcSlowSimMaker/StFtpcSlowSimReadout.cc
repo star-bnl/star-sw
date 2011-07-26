@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.20 2009/11/14 13:18:33 jcs Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.21 2011/07/26 09:40:52 jcs Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.21  2011/07/26 09:40:52  jcs
+// Change LOG_DEBUG statement to print out 2 ftpcAmpSlope values to be able to
+// check which ftpcAmpSlope table is being used
+//
 // Revision 1.20  2009/11/14 13:18:33  jcs
 // change LOG_INFO messages to LOG_DEBUG messages
 //
@@ -367,7 +371,7 @@ void StFtpcSlowSimReadout::OutputADC()
   TF1* noise = new TF1("noise","gaus",-5,5);
   noise->SetParameters(1,0,1.5);
   LOG_DEBUG << "FTPC SlowSimulator using random noise with a sigma of 1.5" << endm;
-  LOG_DEBUG << "FTPC SlowSimulator using gain tables and amplitude offset" << endm;
+  LOG_DEBUG << "FTPC SlowSimulator using gain tables (mDb->amplitudeSlope(0,1) = "<<mDb->amplitudeSlope(0,1)<<", mDb->amplitudeSlope(1,1) = "<<mDb->amplitudeSlope(1,1)<<"), amplitude offset and adcConversion = " << mParam->adcConversion()<< endm;
 
 
   for (int row=0; row<mDb->numberOfPadrows(); row++) { 
