@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.19 2007/01/15 15:02:20 jcs Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.19.2.1 2011/07/26 13:23:24 didenko Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.19.2.1  2011/07/26 13:23:24  didenko
+// commitd for FTPC embedding
+//
 // Revision 1.19  2007/01/15 15:02:20  jcs
 // replace printf, cout and gMesMgr with Logger
 //
@@ -366,7 +369,7 @@ void StFtpcSlowSimReadout::OutputADC()
   TF1* noise = new TF1("noise","gaus",-5,5);
   noise->SetParameters(1,0,1.5);
   LOG_INFO << "FTPC SlowSimulator using random noise with a sigma of 1.5" << endm;
-  LOG_INFO << "FTPC SlowSimulator using gain tables and amplitude offset" << endm;
+  LOG_INFO << "FTPC SlowSimulator using gain tables (mDb->amplitudeSlope(1,1) = "<<mDb->amplitudeSlope(1,1)<<", mDb->amplitudeSlope(2,1) = "<<mDb->amplitudeSlope(2,1)<<"), amplitude offset and adcConversion = " << mParam->adcConversion()<< endm;
 
 
   for (int row=0; row<mDb->numberOfPadrows(); row++) { 
