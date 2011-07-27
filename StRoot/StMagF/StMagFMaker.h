@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.h,v 1.6 2005/08/29 22:54:27 fisyak Exp $
+// $Id: StMagFMaker.h,v 1.7 2009/11/10 20:50:46 fisyak Exp $
 // $Log: StMagFMaker.h,v $
+// Revision 1.7  2009/11/10 20:50:46  fisyak
+// Switch to TChair
+//
 // Revision 1.6  2005/08/29 22:54:27  fisyak
 // switch to StarMagField
 //
@@ -33,17 +36,14 @@
 #endif
 class St_MagFactor;
 class StMagFMaker : public StMaker {
- private:
-  St_MagFactor *fMagFactor; //!
- protected:
  public: 
-                  StMagFMaker(const char *name="MagField");
+                  StMagFMaker(const char *name="MagField") : StMaker(name) {}
    virtual       ~StMagFMaker();
    virtual Int_t  Init() {return kStOK;}
    virtual Int_t  InitRun(Int_t run);
    Int_t          Make() {return kStOK;}
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMagFMaker.h,v 1.6 2005/08/29 22:54:27 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMagFMaker.h,v 1.7 2009/11/10 20:50:46 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMagFMaker,0)   //StAF chain virtual base class for Makers
 };

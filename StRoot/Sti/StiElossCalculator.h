@@ -28,20 +28,18 @@ using namespace std;
 class StiElossCalculator
 {
  public:
-  StiElossCalculator(double zOverA, double ionization2, double A, double Z, double Dens) 
-    : _zOverA(zOverA), _ionization2(ionization2), _A(A), _Z(Z), _Dens(Dens) {}
+  StiElossCalculator(double zOverA, double ionization, double A, double Z, double Dens); 
 
   virtual ~StiElossCalculator();
-  double calculate(double z2, double zOverA, double m, double beta2, double ionization2 ) const;
-  double calculate(double z2, double m, double beta2) const;
-  double getzOverA() const {return _zOverA;}
+  double calculate(double charge2, double m, double beta2) const;
+  double calcError(double charge2, double m, double beta2) const;
+  double getzOverA() const 	{return _zOverA;}
   double getionization2() const {return _ionization2;}
-  double getA() const {return _A;} 
-  double getZ() const {return _Z;}
-  double getDens() const {return _Dens;}
+  double getA() const 		{return _A;} 
+  double getZ() const 		{return _Z;}
+  double getDens() const 	{return _Dens;}
  protected:  
   static const double _k;
-  static const double _mec;
 
   /// Ratio of Z to A of the scattering material
   double _zOverA;
@@ -50,8 +48,9 @@ class StiElossCalculator
   double _A;
   double _Z;
   double _Dens;
+  int    mId;
 };
 ostream& operator<<(ostream& os, const StiElossCalculator& m);
-
+typedef StiElossCalculator StiELossCalculator;
 #endif
 

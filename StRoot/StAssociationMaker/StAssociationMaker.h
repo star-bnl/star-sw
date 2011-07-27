@@ -1,7 +1,16 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.21 2005/11/22 21:44:16 fisyak Exp $
+ * $Id: StAssociationMaker.h,v 1.21.2.1 2011/07/27 14:42:07 didenko Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.21.2.1  2011/07/27 14:42:07  didenko
+ * updates for SL08e_embed
+ *
+ * Revision 1.24  2010/06/22 22:06:33  fine
+ * roll back the previous version to restore the nightly builds
+ *
+ * Revision 1.22  2009/11/10 20:19:36  fisyak
+ * Change default to ITTF
+ *
  * Revision 1.21  2005/11/22 21:44:16  fisyak
  * Add Ssd to Associator, add IdTruth options for Svt and Ssd
  *
@@ -473,6 +482,12 @@ class StAssociationMaker : public StMaker {
     void useEstTracks() {mEstTracksOn = true;}
     void useDistanceAssoc() {mDistanceAssoc = true;}
     void useIdAssoc() {mDistanceAssoc = false;}
+
+    void dontUseL3Trigger() {mL3TriggerOn = kFALSE;}
+    void dontUseInTracker() {mInTrackerOn = kFALSE;}
+    void dontUseEstTracks() {mEstTracksOn = kFALSE;}
+    void dontUseDistanceAssoc() {mDistanceAssoc = kFALSE;}
+    void dontUseIdAssoc() {mDistanceAssoc = kTRUE;}
     TH2F*     mTpcLocalHitResolution;    //! Diff btw local  x and z coords of TPC hits.
     TH2F*     mSvtHitResolution;         //! Diff btw global x and z coords of SVT hits.
     TH2F*     mSsdHitResolution;         //! Diff btw global x and z coords of SSD hits.
@@ -525,7 +540,7 @@ private:
     bool              mEstTracksOn; //!
     bool              mDistanceAssoc; //!
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.21 2005/11/22 21:44:16 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.21.2.1 2011/07/27 14:42:07 didenko Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker,0)
 

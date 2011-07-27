@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.83 2008/04/03 20:04:05 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.84 2008/08/22 13:32:52 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.84  2008/08/22 13:32:52  fisyak
+ * add one more digit in trakc flag, mFlag=zxyy, where  z = 1 for pile up track in TPC (otherwise 0)
+ *
  * Revision 2.83  2008/04/03 20:04:05  fisyak
  * Straighten out DB access via chairs
  *
@@ -939,8 +942,9 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
 ///  The track flag (mFlag accessed via flag() method) definitions with ITTF 
 ///(flag definition in EGR era can be found at  http://www.star.bnl.gov/STAR/html/all_l/html/dst_track_flags.html)
 ///
-///  mFlag=xyy, where x  indicates the detectors included in the fit and 
-///                   yy indicates the status of the fit. 
+///  mFlag=zxyy, where  z = 1 for pile up track in TPC (otherwise 0) 
+///                     x indicates the detectors included in the fit and 
+///                    yy indicates the status of the fit. 
 ///  Positive mFlag values are good fits, negative values are bad fits. 
 ///
 ///  The first digit indicates which detectors were used in the refit: 
@@ -1001,9 +1005,24 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
     Int_t NoTpcFitPoints = dinfo->numberOfPoints(kTpcId);
     Int_t NoFtpcWestId   = dinfo->numberOfPoints(kFtpcWestId);
     Int_t NoFtpcEastId   = dinfo->numberOfPoints(kFtpcEastId);
+    // Check that it could be TPC pile-up track, i.e. in the same half TPC (West East) 
+    // there are more than 2 hits with wrong Z -position
+    Int_t flag = TMath::Abs(gTrack->flag());
+    if (NoTpcFitPoints >= 11) {
+      const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
+      const StPtrVecHit& hits = dinfo->hits(kTpcId);
+      Int_t Nhits = hits.size();
+      Int_t NoWrongSignZ = 0;
+      for (Int_t i = 0; i < Nhits; i++) {
+	const StTpcHit *hit = (StTpcHit *) hits[i];
+	if (hit->position().z() < -1.0 && hit->sector() <= 12 ||
+	    hit->position().z() >  1.0 && hit->sector() >  12) NoWrongSignZ++;
+      }
+      if (NoWrongSignZ >= 2) 
+	gTrack->setFlag((flag%1000) + 1000); // +1000
+    }
     if (NoTpcFitPoints < 11 && NoFtpcWestId < 5 && NoFtpcEastId < 5) { 
       // hadrcoded number correspondant to  __MIN_HITS_TPC__ 11 in StMuFilter.cxx
-      int flag = TMath::Abs(gTrack->flag());
       //keep most sig. digit, set last digit to 2, and set negative sign
       gTrack->setFlag(-(((flag/100)*100)+2)); // -x02 
       if (gTrack->geometry()) {

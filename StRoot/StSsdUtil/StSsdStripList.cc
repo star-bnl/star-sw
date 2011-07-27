@@ -1,6 +1,9 @@
-// $Id: StSsdStripList.cc,v 1.2 2008/05/07 22:48:36 bouchet Exp $
+// $Id: StSsdStripList.cc,v 1.3 2008/10/20 19:29:37 bouchet Exp $
 //
 // $Log: StSsdStripList.cc,v $
+// Revision 1.3  2008/10/20 19:29:37  bouchet
+// Fill only one signal contribution (the higher) of GEANT hit per strip
+//
 // Revision 1.2  2008/05/07 22:48:36  bouchet
 // calculation of quality of hits used embedding
 //
@@ -308,15 +311,22 @@ void StSsdStripList::updateStrip(StSsdStrip *ptr)
     }
   else
     {
-      Int_t   dum    = stripScan->getNHits();
-      Float_t tmpSig = stripScan->getAnalogSig();
+      Int_t   dum        = stripScan->getNHits();
+      Float_t tmpSig     = stripScan->getAnalogSig();
       stripScan->setNHits(dum+1);
       stripScan->setAnalogSig(ptr->getAnalogSig()+tmpSig) ;
       if (dum<5)
 	{
-	  stripScan->setIdHit(ptr->getIdHit(0), dum);
-	  stripScan->setIdMcHit(ptr->getIdMcHit(0), dum);  
-	  stripScan->setIdMcTrack(ptr->getIdMcTrack(0), dum);	
+	  if(ptr->getAnalogSig()>tmpSig){
+	    stripScan->setIdHit(ptr->getIdHit(0), 0);
+	    stripScan->setIdMcHit(ptr->getIdMcHit(0), 0);
+	    stripScan->setIdMcTrack(ptr->getIdMcTrack(0), 0);
+	  }
+	  else{
+	    stripScan->setIdMcTrack(stripScan->getIdMcTrack(0), 0);
+	    stripScan->setIdHit(stripScan->getIdHit(0),0);
+	    stripScan->setIdMcHit(stripScan->getIdMcHit(0),0);
+	  }
 	}
       delete ptr;
       return;
@@ -328,7 +338,7 @@ StSsdStripList* StSsdStripList::addStripList(StSsdStripList *list)
   Int_t size2 = list->getSize();
   if (!size2) return this;
   
-  StSsdStrip *st1;
+  StSsdStrip *st1 =0 ;
   StSsdStrip *st2 = list->first();
   Int_t i = 0;
   for (i=0 ; i < size2 ; i++)

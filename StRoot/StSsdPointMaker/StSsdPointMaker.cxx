@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.60 2008/07/16 21:01:57 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.61 2008/10/20 19:32:39 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.61  2008/10/20 19:32:39  bouchet
+// use of new writePointToContainer method for the hit quality calculation
+//
 // Revision 1.60  2008/07/16 21:01:57  bouchet
 // calculation of hits quality removed : call of default writePointToContainer
 //
@@ -503,10 +506,17 @@ Int_t StSsdPointMaker::Make()
 	  }
       }
       //get McEvent here
-      //StMcEvent* mcEvent = 0;
-      //mcEvent = (StMcEvent*) GetDataSet("StMcEvent");
-      //Int_t nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl,scf_cluster,spa_strip,mDynamicControl,mcEvent);
-      Int_t nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl,scf_cluster);
+      Int_t nSptWritten = 0;
+      StMcEvent* mcEvent = 0;
+      mcEvent = (StMcEvent*) GetDataSet("StMcEvent");
+      if(mcEvent)
+	{	
+	  LOG_DEBUG << " mcEvent exists " << endm;
+	  nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl,scf_cluster,spa_strip,mDynamicControl,mcEvent);
+	}
+      else{
+	nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl,scf_cluster);
+      }
       LOG_INFO<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endm;
       if(mSsdHitColl){
 	if (mSsdHitColl->numberOfHits()>0) {

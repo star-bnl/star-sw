@@ -18,52 +18,20 @@ StiSortedHitIterator::StiSortedHitIterator(StiHitContainer * hitContainer,
 					   vector<StiDetector*>::iterator lastDet): _currentHit(0)
 {
   _hitContainer = hitContainer;
-  _currentDet = firstDet;
   _lastDet    = lastDet;
- if (_currentDet<_lastDet && _hitContainer->hasDetector(*_currentDet) )
-    {
+  for ( _currentDet = firstDet; _currentDet<_lastDet; ++_currentDet) {
+    if (_hitContainer->hasDetector(*_currentDet) ) {
       _currentDetHit =  _hitContainer->hitsBegin(*_currentDet);
       _lastDetHit    =  _hitContainer->hitsEnd(*_currentDet);
-      if (_currentDetHit<_lastDetHit)
-	{
-	  _currentHit = *_currentDetHit;
-	}
-      else
-	{
-	  // Current detector has no hit, traverse detectors to  look for the next detector with hits.
-	  bool go = true;
-	  while (_currentDet<_lastDet && go )
-	    {
-	      ++_currentDet;
-	      if (_currentDet<_lastDet)
-		{  
-         if ( _hitContainer->hasDetector(*_currentDet) ) {
-            // valid detector
-		  _currentDetHit =  _hitContainer->hitsBegin(*_currentDet);
-		  _lastDetHit    =  _hitContainer->hitsEnd(*_currentDet);
-		  if (_currentDetHit < _lastDetHit)
-		    {
-		      // current detector has hits done for now.
-		      _currentHit = *_currentDetHit;
-		      go = false;
-		    }
-		} }
-	      else
-		{
-		  // reached past the last detector
-		  // no more hits to serve
-		  _currentHit = 0;
-		  _currentDet = _lastDet;
-		  _currentDetHit = _lastDetHit;
-		}
-	    }
-	}
+      if (_currentDetHit<_lastDetHit) {
+	_currentHit = *_currentDetHit;
+	break;
+      }
     }
-  else
-    {
-      _currentHit = 0;
-      _currentDet = _lastDet;
-    }
+    _currentHit = 0;
+    _currentDetHit = _lastDetHit;
+  }
+  if (! _currentHit) _currentDet = _lastDet;
 }   
 
 /// Copy Constructor

@@ -28,7 +28,9 @@ The current id's definitions are:<br>
 #ifndef StEmcDecoder_HH
 #define StEmcDecoder_HH
 
-class StEmcDecoder
+#include "TObject.h"
+
+class StEmcDecoder : public TObject
 {
 protected:
 
@@ -67,7 +69,7 @@ protected:
     int       getSmdPin(int,int,int,int&) const;///<Get SMD pin number
     int       getSmdpStrip(int,int&,int&) const;///<Get SMDP strip
     void      fixTowerBugIndexes();///<fixes the array in order to correct the tower bug
-    void      fixPreshowerBugIndexes();///<fixes the array in order to correct the preshower mapping
+    void      fixPreshowerBugIndexes(int);///<fixes the array in order to correct the preshower mapping
 
     void      Init(unsigned int,unsigned int);///< Init method
 
@@ -127,12 +129,17 @@ public:
     void      PrintTowerMap(ofstream *out) const;///<Print Tower MAP
     void      PrintSmdMap(ofstream *out) const;///<Print SMD MAP
     void      PrintPsdMap(ofstream *out) const;///<Print SMD MAP
+
+    ClassDef(StEmcDecoder,1)
 };
 #endif
 
-// $Id: StEmcDecoder.h,v 2.17 2007/10/09 18:02:24 kocolosk Exp $
+// $Id: StEmcDecoder.h,v 2.18 2008/11/14 23:25:36 mattheww Exp $
 //
 // $Log: StEmcDecoder.h,v $
+// Revision 2.18  2008/11/14 23:25:36  mattheww
+// Fixed a lot of BPRS swaps
+//
 // Revision 2.17  2007/10/09 18:02:24  kocolosk
 // two extra support functions for TP <=> DSM module mapping
 //

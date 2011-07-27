@@ -1,7 +1,13 @@
 /***************************************************************************
  *
- * $Id: StTrackPairInfo.cc,v 1.6 2005/11/22 21:44:16 fisyak Exp $
+ * $Id: StTrackPairInfo.cc,v 1.6.2.1 2011/07/27 14:42:18 didenko Exp $
  * $Log: StTrackPairInfo.cc,v $
+ * Revision 1.6.2.1  2011/07/27 14:42:18  didenko
+ * updates for SL08e_embed
+ *
+ * Revision 1.8  2010/06/22 22:06:33  fine
+ * roll back the previous version to restore the nightly builds
+ *
  * Revision 1.6  2005/11/22 21:44:16  fisyak
  * Add Ssd to Associator, add IdTruth options for Svt and Ssd
  *
@@ -30,7 +36,7 @@
 #include "StMcTrack.hh"
 #include "StGlobalTrack.h"
 #include "StTrackDetectorInfo.h"
-static const char rcsid[] = "$Id: StTrackPairInfo.cc,v 1.6 2005/11/22 21:44:16 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrackPairInfo.cc,v 1.6.2.1 2011/07/27 14:42:18 didenko Exp $";
 
 StTrackPairInfo::StTrackPairInfo(StGlobalTrack* rcTrk,
 				 StMcTrack*     mcTrk,

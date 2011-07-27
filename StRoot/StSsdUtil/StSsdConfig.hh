@@ -18,12 +18,13 @@ class ssdConfiguration_st;
 
 class StSsdConfig: public StObject
 {
+ private:
+   StSsdConfig(const StSsdConfig&);
+   StSsdConfig& operator = (const StSsdConfig&);
 public:
   StSsdConfig();
   virtual ~StSsdConfig();
 
-  StSsdConfig(const StSsdConfig&);
-  StSsdConfig& operator = (const StSsdConfig&);
 
   int getNumberOfLadders() {return mNumberOfLadders;}
   int getNumberOfWafers()  {return mNumberOfWafers;}

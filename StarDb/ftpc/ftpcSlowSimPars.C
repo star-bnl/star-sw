@@ -15,7 +15,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.maxAdc                  =     255; // D=  maximum ADC value    ;
     row.numGaussIntSteps        =      21; // D=  number of gauss integration steps    ;
     row.diffusionCoarseness     =      10; // D=  diffusion coarseness    ;
-    row.adcConversion           =  1000.0; // D=  electrons/adc value    ;
+    row.adcConversion           =  2100.0; // D=  electrons/adc value    ;
     row.chamberCathodeVoltage   =  -10000; // D=  drift cathode voltage [V]    ;
     row.sigmaPadResponseFuntion =    1500; // D=  pad-response-function sigma [um]    ;
     row.shaperTime	        =     507; // D=  shaper time FWHM [ns] -> 350ns measured + 45% to match dAu data  ;

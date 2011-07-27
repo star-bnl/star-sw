@@ -8,6 +8,7 @@
 #endif
 #include "StMessMgr.h"
 
+ClassImp(StEmcDecoder)
 //--------------------------------------------------------
 /*!
 Date and time should be in GMT
@@ -46,7 +47,7 @@ void StEmcDecoder::fixTowerBugIndexes()
 fixes the software indexes for the preshower based on 2006/2007 mapping indexes
 many changes correspond to the tower mapping bugs
 */
-void StEmcDecoder::fixPreshowerBugIndexes()
+void StEmcDecoder::fixPreshowerBugIndexes(int mDate)
 {
     for(int i=0; i<4800; i++) {
         int id = i+1;
@@ -55,6 +56,40 @@ void StEmcDecoder::fixPreshowerBugIndexes()
             PreshowerBugFixIndex[newId-1] = id;
         }
     }
+    if(mDate > 20080206){
+  PreshowerBugFixIndex[2308-1] = 2325;
+  PreshowerBugFixIndex[2325-1] = 2326;
+  PreshowerBugFixIndex[2326-1] = 2308;
+  PreshowerBugFixIndex[681-1] = 722;
+  PreshowerBugFixIndex[682-1] = 721;
+  PreshowerBugFixIndex[721-1] = 681;
+  PreshowerBugFixIndex[722-1] = 682;
+  PreshowerBugFixIndex[685-1] = 726;
+  PreshowerBugFixIndex[686-1] = 725;
+  PreshowerBugFixIndex[725-1] = 685;
+  PreshowerBugFixIndex[726-1] = 686;
+
+  PreshowerBugFixIndex[3797-1] = 3837;
+  PreshowerBugFixIndex[3798-1]    = 3838;
+  PreshowerBugFixIndex[3799-1]    = 3839;
+  PreshowerBugFixIndex[3800-1]    = 3840;
+
+  PreshowerBugFixIndex[3817-1] = 3857;
+  PreshowerBugFixIndex[3818-1]    = 3858;
+  PreshowerBugFixIndex[3819-1]    = 3859;
+  PreshowerBugFixIndex[3820-1]    = 3860;
+
+  PreshowerBugFixIndex[3837-1] = 3797;
+  PreshowerBugFixIndex[3838-1]    = 3798;
+  PreshowerBugFixIndex[3839-1]    = 3799;
+  PreshowerBugFixIndex[3840-1]    = 3800;
+
+  PreshowerBugFixIndex[3857-1] = 3817;
+  PreshowerBugFixIndex[3858-1]    = 3818;
+  PreshowerBugFixIndex[3859-1]    = 3819;
+  PreshowerBugFixIndex[3860-1]    = 3820;
+    }
+
 }
 //--------------------------------------------------------
 void StEmcDecoder::SetDateTime(unsigned int date, unsigned int time)
@@ -319,8 +354,8 @@ PSDTables:
     }
     int PsdStart_tmp[60] = {2261,2181,2101,2021,1941,1861,1781,1701,1621,1541,1461,1381,1301,1221,1141,1061,
                             981,901,821,741,661,581,501,421,341,261,181,101,21,2341,
-                            4661,4741,2421,2501,2581,2661,2741,2822,2901,2981,3061,3141,3221,3301,3381,3461,
-                            3541,3621,3701,3782,3861,3941,4021,4101,4181,4261,4341,4421,4501,4581};
+                            4661,4741,2421,2501,2581,2661,2741,2821,2901,2981,3061,3141,3221,3301,3381,3461,
+                            3541,3621,3701,3781,3861,3941,4021,4101,4181,4261,4341,4421,4501,4581};
     for(int i=0;i<60;i++)
         PsdStart[i] = PsdStart_tmp[i];
 
@@ -330,10 +365,15 @@ PSDTables:
     }
     if(date >= 20060101) //use mapping determined from Run 7 for Run 6 data as well
     {
-        #include "PreshowerBug2007.txt"
-        if(date >= 20080101) fixPreshowerMap = true;
+      if(date < 20080206){
+#include "PreshowerBug2007.txt"
+      }
+      else{
+#include "PreshowerBug2008.txt"
+      }
+        if(date >= 20071101) fixPreshowerMap = true;
     }
-    fixPreshowerBugIndexes();
+    fixPreshowerBugIndexes(date);
     
     ///////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
@@ -1113,7 +1153,7 @@ int StEmcDecoder::GetPsdRDO(int id, int& RDO,int& index) const
     if(id<1 || id>4800)
         return 0;
         
-    if(fixPreshowerMap) id = PreshowerBugFixIndex[id-1];
+    //if(fixPreshowerMap) id = PreshowerBugFixIndex[id-1];
     
     RDO = PsdRDO[id-1];
     index = PsdIndex[id-1];
@@ -1250,9 +1290,18 @@ int StEmcDecoder::GetTowerIdFromBin(int m, int e, int s, int &softId) const
 	return 1;
 }
 
-// $Id: StEmcDecoder.cxx,v 2.53 2007/10/10 22:12:35 kocolosk Exp $
+// $Id: StEmcDecoder.cxx,v 2.56 2008/11/14 23:25:33 mattheww Exp $
 //
 // $Log: StEmcDecoder.cxx,v $
+// Revision 2.56  2008/11/14 23:25:33  mattheww
+// Fixed a lot of BPRS swaps
+//
+// Revision 2.55  2008/11/07 22:34:16  mattheww
+// corrected swap logic for BPRS
+//
+// Revision 2.54  2008/11/03 19:55:57  mattheww
+// fixed a typo causing a mismapping
+//
 // Revision 2.53  2007/10/10 22:12:35  kocolosk
 // SMD module date correction: 20070101, not 20071001
 //

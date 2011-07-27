@@ -524,6 +524,11 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
   {"min2trkVtx"     ,""  ,"","",""                 ,"","...only 2 tracks needed for vertex finding",kFALSE},
+
+  // WARNING: introduction of usePct4Vtx with default:false breaks backward compatibility.
+  // See related code in StBFChain.cxx for details
+  {"usePct4Vtx"     ,""  ,"","",""                ,"","Use Post-Crossing Tracks for vertex finding",kFALSE},
+
   {"svt1hit",""  ,"","",""                                     ,"","Use 1 SVT hit only combination",kFALSE},
 
 #ifndef __BFC2__
