@@ -6,11 +6,17 @@
  *
  * The Barrel TOF MatchMaker matches STAR tracks to the BTOF cells.
  * 
- * $Id: StBTofMatchMaker.h,v 1.9 2010/08/09 19:18:45 geurts Exp $
+ * $Id: StBTofMatchMaker.h,v 1.10 2011/07/27 16:13:58 geurts Exp $
  */
 /*****************************************************************
  *
  * $Log: StBTofMatchMaker.h,v $
+ * Revision 1.10  2011/07/27 16:13:58  geurts
+ * Alignment calibration modifications [Patrick Huck]:
+ *  -  modified to open the local Z window cut to determine the z offset
+ *  -  variables mZLocalCut, mCalculateAlign and mAlignFileName added
+ *  -  functions setCalculateAlign and setAlignFileName added
+ *
  * Revision 1.9  2010/08/09 19:18:45  geurts
  * Include local theta calculation in CellHit structure. Pass LocalTheta info on to TOF PID traits. [Masa]
  *
@@ -135,9 +141,13 @@ public:
     /// set ntuple output file name
     void setNtupleFileName(const Char_t*);
     /// save geometry if it will be used by following makers in the chain
-    void setSaveGeometry(Bool_t geomSave=kFALSE);
+    void setSaveGeometry(const Bool_t geomSave=kFALSE);
     /// switch between standard and ideal MC geometry
-    void setIdealGeometry(Bool_t useIdealGeometry=kTRUE);
+    void setIdealGeometry(const Bool_t useIdealGeometry=kTRUE);
+    /// switch for alignment calculation
+    void setCalculateAlign(const Bool_t calcAlign=kTRUE);
+    /// input file for alignment parameters
+    void setAlignFileName(const Char_t* infile="");
 
     /// switch to read in StEvent/MuDst
     void setMuDstIn(Bool_t muDstIn=kTRUE);
@@ -188,6 +198,7 @@ private:
 
     ///
     Float_t     mWidthPad;   //! cell pad width
+    Float_t     mZLocalCut;  //! zlocal edge, 3.05 by default, open up to 5cm for alignment calculation
 
     StEvent *mEvent;
     StBTofGeometry *mBTofGeom;         //! pointer to the TOF geometry utility class
@@ -195,12 +206,14 @@ private:
     Bool_t mHisto;    //! create, fill and write out histograms
     Bool_t mSaveTree; //! create, fill and write out trees for tpc tracks
     Bool_t mUseIdealGeometry; //! ignore alignment corrections and use the ideal MC geometry
+    Bool_t mCalculateAlign;   //! if used for alignment calculation
     
     Bool_t mOuterTrackGeometry; //! use outer track geometry (true) for extrapolation
     Bool_t mGeometrySave;    //! flag to save the geometry for others
     Bool_t mInitFromOther;   //! flag indicating geometry initialized from others
     
     string mHistoFileName; //! name of histogram file, if empty no write-out
+    string mAlignFileName; //! name of input align file
     
     StMuDst*          mMuDst;
     Bool_t            mMuDstIn;          //! switch - default is to read in StEvent
@@ -312,7 +325,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.9 2010/08/09 19:18:45 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StBTofMatchMaker.h,v 1.10 2011/07/27 16:13:58 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StBTofMatchMaker,1)
 };
@@ -332,14 +345,19 @@ inline void StBTofMatchMaker::setMaxDCA(Float_t maxdca){mMaxDCA=maxdca;}
 
 inline void StBTofMatchMaker::setHistoFileName(const Char_t* filename){mHistoFileName=filename;}
 
-inline void StBTofMatchMaker::setCreateHistoFlag(Bool_t histos){mHisto = histos;}
+inline void StBTofMatchMaker::setCreateHistoFlag(const Bool_t histos){mHisto = histos;}
 
-inline void StBTofMatchMaker::setCreateTreeFlag(Bool_t tree){mSaveTree = tree;}
+inline void StBTofMatchMaker::setCreateTreeFlag(const Bool_t tree){mSaveTree = tree;}
 
-inline void StBTofMatchMaker::setSaveGeometry(Bool_t geomSave){mGeometrySave = geomSave; }
+inline void StBTofMatchMaker::setSaveGeometry(const Bool_t geomSave){mGeometrySave = geomSave; }
 
-inline void StBTofMatchMaker::setIdealGeometry(Bool_t useIdealGeometry){mUseIdealGeometry = useIdealGeometry;}
-inline void StBTofMatchMaker::setMuDstIn(Bool_t val) { mMuDstIn = val; }
+inline void StBTofMatchMaker::setIdealGeometry(const Bool_t useIdealGeometry){mUseIdealGeometry = useIdealGeometry;}
+
+inline void StBTofMatchMaker::setCalculateAlign(const Bool_t calcAlign){mCalculateAlign = calcAlign;}
+
+inline void StBTofMatchMaker::setAlignFileName(const Char_t* infile) {mAlignFileName = infile;}
+
+inline void StBTofMatchMaker::setMuDstIn(const Bool_t val) { mMuDstIn = val; }
 
 inline StBTofGeometry* StBTofMatchMaker::getBTofGeom() { return mBTofGeom; }
 #endif
