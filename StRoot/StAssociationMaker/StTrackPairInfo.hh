@@ -1,8 +1,14 @@
 /*****************************************
  *
- * $Id: StTrackPairInfo.hh,v 1.6 2005/11/22 21:44:16 fisyak Exp $
+ * $Id: StTrackPairInfo.hh,v 1.6.2.1 2011/07/27 14:42:24 didenko Exp $
  *
  * $Log: StTrackPairInfo.hh,v $
+ * Revision 1.6.2.1  2011/07/27 14:42:24  didenko
+ * updates for SL08e_embed
+ *
+ * Revision 1.8  2010/06/22 22:06:33  fine
+ * roll back the previous version to restore the nightly builds
+ *
  * Revision 1.6  2005/11/22 21:44:16  fisyak
  * Add Ssd to Associator, add IdTruth options for Svt and Ssd
  *
