@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofMatchMaker.cxx,v 1.16 2010/08/09 19:18:45 geurts Exp $
+ * $Id: StBTofMatchMaker.cxx,v 1.17 2011/07/27 16:13:58 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,12 @@
  *****************************************************************
  *
  * $Log: StBTofMatchMaker.cxx,v $
+ * Revision 1.17  2011/07/27 16:13:58  geurts
+ * Alignment calibration modifications [Patrick Huck]:
+ *  -  modified to open the local Z window cut to determine the z offset
+ *  -  variables mZLocalCut, mCalculateAlign and mAlignFileName added
+ *  -  functions setCalculateAlign and setAlignFileName added
+ *
  * Revision 1.16  2010/08/09 19:18:45  geurts
  * Include local theta calculation in CellHit structure. Pass LocalTheta info on to TOF PID traits. [Masa]
  *
@@ -132,6 +138,7 @@ StBTofMatchMaker::StBTofMatchMaker(const Char_t *name): StMaker(name){
   mBTofGeom = 0;
 
   mWidthPad = 3.45;
+  mZLocalCut = 3.05;
 
   setOuterTrackGeometry();
   setMinHitsPerTrack(15);
@@ -145,6 +152,8 @@ StBTofMatchMaker::StBTofMatchMaker(const Char_t *name): StMaker(name){
   setSaveGeometry(kFALSE);
   mInitFromOther = kFALSE;
   mUseIdealGeometry = kFALSE;
+  mCalculateAlign   = kFALSE;
+  setAlignFileName("");
   doPrintMemoryInfo = kFALSE;
   doPrintCpuInfo    = kFALSE;
 
@@ -187,7 +196,12 @@ Int_t StBTofMatchMaker::Init(){
   mAcceptedEventCounter = 0;
   mTofEventCounter = 0;
   mAcceptAndBeam = 0;
-  
+
+  // for alignment calculate, we start from ideal geometry
+  if(mCalculateAlign) {
+    mUseIdealGeometry = kTRUE;
+    mZLocalCut = 5.0;
+  }
 
   return kStOK;
 }
@@ -218,6 +232,8 @@ Int_t StBTofMatchMaker::InitRun(Int_t runnumber){
     //fg if(runnumber<1000000) mBTofGeom->SetMCOn();
     if (mUseIdealGeometry) mBTofGeom->SetMCOn();
     else                   mBTofGeom->SetMCOff();
+    LOG_INFO << " Alignment file: " << mAlignFileName.c_str() << endm;
+    mBTofGeom->SetAlignFile(mAlignFileName.c_str());
     TVolume *starHall = (TVolume *)GetDataSet("HALL");
     mBTofGeom->Init(this, starHall);
 //    AddConst(new TObjectSet("btofGeometry",mBTofGeom));
@@ -466,7 +482,7 @@ void StBTofMatchMaker::processStEvent(){
 	    StThreeVectorD glo(global[0], global[1], global[2]);
 	    StThreeVectorD hitPos(local[0], local[1], local[2]);
 //	    delete sensor;   /// function in StBTofGeometry modified. Don't delete here.
-            if (fabs(local[2])<3.05) {   // to be consistent with GEANT geometry
+            if (fabs(local[2])<mZLocalCut) {   // to be consistent with GEANT geometry
                                          // and the alignment calibration
 //	    if (local[2]<=2.7&&local[2]>=-3.4) {
 //            if (fabs(local[2])<4.) {   // loose local z cut at first step
@@ -1154,7 +1170,7 @@ void StBTofMatchMaker::processMuDst(){
 	    StThreeVectorD glo(global[0], global[1], global[2]);
 	    StThreeVectorD hitPos(local[0], local[1], local[2]);
 //	    delete sensor;   /// function in StBTofGeometry modified. Don't delete here.
-            if (fabs(local[2])<3.05) {   // to be consistent with GEANT geometry
+            if (fabs(local[2])<mZLocalCut) {   // to be consistent with GEANT geometry
                                          // and the alignment calibration
 //	    if (local[2]<=2.7&&local[2]>=-3.4) {
 //            if (fabs(local[2])<4.) {   // loose local z cut at first step
