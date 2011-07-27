@@ -1,7 +1,7 @@
 
 /*******************************************************************
  *
- * $Id: StBTofGeometry.cxx,v 1.11 2010/09/17 20:40:09 geurts Exp $
+ * $Id: StBTofGeometry.cxx,v 1.12 2011/07/27 16:15:12 geurts Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -11,6 +11,11 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.cxx,v $
+ * Revision 1.12  2011/07/27 16:15:12  geurts
+ * Alignment calibration modifications [Patrick Huck]:
+ *  - added mAlignFile and SetAlignFile for use in StBTofMatchMaker
+ *  - phi0, x0, z0 made mNTrays dependent
+ *
  * Revision 1.11  2010/09/17 20:40:09  geurts
  * Protect Init() and InitFromStar() against non-initialized database/geant.
  * No immediate crash, but a LOG_ERROR instead.
@@ -50,6 +55,7 @@
 #include "Stiostream.h"
 #include <math.h>
 #include <vector>
+#include <string>
 #include <stdlib.h>
 #include <stdio.h>
 #include "tables/St_tofGeomAlign_Table.h"
@@ -702,6 +708,7 @@ StBTofGeometry::StBTofGeometry(const char* name, const char* title)
    mTopNode        = 0;
    mStarHall       = 0;
    mIsMC           = kFALSE;
+   SetAlignFile("");
 
    for(int i=0;i<mNTrays;i++) {
      mBTofTray[i] = 0;
@@ -755,48 +762,69 @@ void StBTofGeometry::Init(StMaker *maker, TVolume *starHall)
      mTrayZ0[i] = 0.0;
    }
 
+   double phi0[mNTrays], x0[mNTrays], z0[mNTrays];
+   for(int i=0;i<mNTrays;i++) {
+     phi0[i] = 0.0, x0[i] = 0.0; z0[i] = 0.0;
+   }
+
    // If not MC input, load the alignment parameters from the database; otherwise ignore.
    if (mIsMC) {
      LOG_INFO << "[StBTofGeometry] detected MC-mode: ignore alignment corrections" << endm;
-   }
-   else {
-     LOG_INFO << "[StBTofGeometry] retrieving geometry alignment parameters" << endm;
+   } else if (strcmp(mAlignFile.c_str(),"")!=0) {
+     LOG_INFO << "[StBTofGeometry] receiving alignment parameters from input files" << endm;
+     ifstream inData;
+     inData.open(mAlignFile.c_str());
+     if(inData.good()) {
+       for(int i=0;i<mNTrays;i++) {
+         inData >> phi0[i] >> z0[i] >> x0[i];
+       }
+     } else {
+       LOG_WARN << " Bad input file ! Use ideal geometry! " << endm;
+     }
+     inData.close();
+   } else {
+     LOG_INFO << "[StBTofGeometry] retrieving geometry alignment parameters from database" << endm;
      TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof/tofGeomAlign");
      if (!mDbTOFDataSet) {
-       LOG_ERROR << "[StBTofGeometry] unable to find Calibrations/tof/tofGeomAlign" << endm;
+       LOG_WARN << "[StBTofGeometry] unable to find Calibrations/tof/tofGeomAlign! Use ideal geometry!" << endm;
      } else {
        St_tofGeomAlign* tofGeomAlign = static_cast<St_tofGeomAlign*>(mDbTOFDataSet->Find("tofGeomAlign"));
        if(!tofGeomAlign) {
 	 LOG_WARN << "Unable to get tof geometry align parameter! Use ideal geometry!" << endm;
-       }
-       tofGeomAlign_st* geomAlign = static_cast<tofGeomAlign_st*>(tofGeomAlign->GetArray());
+       } else {
+         tofGeomAlign_st* geomAlign = static_cast<tofGeomAlign_st*>(tofGeomAlign->GetArray());
      
-       for (Int_t i=0;i<mNTrays;i++) {
-       
-	 double phi0 = geomAlign[i].phi0;
-	 double x0 = geomAlign[i].x0;
-	 double phi;
-	 if(i<60) {
-	   phi = 72 - i*6;   // phi angle of tray Id = i+1, west
-	   double cs = TMath::Cos(phi*TMath::Pi()/180.);
-	   double ss = TMath::Sin(phi*TMath::Pi()/180.);
-	   mTrayX0[i] = phi0*ss + x0*cs;
-	   mTrayY0[i] = -phi0*cs + x0*ss;
-	 } else {
-	   phi = 108 + (i-60)*6;   // phi angle of tray Id = i+1, east
-	   double cs = TMath::Cos(phi*TMath::Pi()/180.);
-	   double ss = TMath::Sin(phi*TMath::Pi()/180.);
-	   mTrayX0[i] = -phi0*ss + x0*cs;
-	   mTrayY0[i] = phi0*cs + x0*ss;
-	 }
-	 mTrayZ0[i] = geomAlign[i].z0;
-
-	 if(maker->Debug()) {
-	   LOG_DEBUG << " Tray # = " << i+1 << " Align parameters " << mTrayX0[i] << " " << mTrayY0[i] << " " << mTrayZ0[i] << endm;
-	 }
+         for (Int_t i=0;i<mNTrays;i++) {
+           phi0[i] = geomAlign[i].phi0;
+           x0[i]   = geomAlign[i].x0;
+           z0[i]   = geomAlign[i].z0;
+         }
        }
      }
    }
+
+   for(int i=0;i<mNTrays;i++) {
+     double phi;
+     if(i<60) {
+       phi = 72 - i*6;   // phi angle of tray Id = i+1, west
+       double cs = TMath::Cos(phi*TMath::Pi()/180.);
+       double ss = TMath::Sin(phi*TMath::Pi()/180.);
+       mTrayX0[i] = phi0[i]*ss + x0[i]*cs;
+       mTrayY0[i] = -phi0[i]*cs + x0[i]*ss;
+     } else {
+       phi = 108 + (i-60)*6;   // phi angle of tray Id = i+1, east
+       double cs = TMath::Cos(phi*TMath::Pi()/180.);
+       double ss = TMath::Sin(phi*TMath::Pi()/180.);
+       mTrayX0[i] = -phi0[i]*ss + x0[i]*cs;
+       mTrayY0[i] = phi0[i]*cs + x0[i]*ss;
+     }
+     mTrayZ0[i] = z0[i];
+
+     if(maker->Debug()) {
+       LOG_DEBUG << " Tray # = " << i+1 << " Align parameters " << mTrayX0[i] << " " << mTrayY0[i] << " " << mTrayZ0[i] << endm;
+     }
+   }
+
    InitFromStar(starHall);
    mStarHall = starHall;
 }
