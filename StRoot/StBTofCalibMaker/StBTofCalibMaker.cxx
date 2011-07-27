@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofCalibMaker.cxx,v 1.13 2011/05/09 14:32:10 geurts Exp $
+ * $Id: StBTofCalibMaker.cxx,v 1.14 2011/07/27 15:44:32 geurts Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StBTofCalibMaker.cxx,v $
+ * Revision 1.14  2011/07/27 15:44:32  geurts
+ * minor bug update: mProjVtxZ does not get initialized when mUseEventVertex is false, but is printed regardless.
+ *
  * Revision 1.13  2011/05/09 14:32:10  geurts
  * use appropriate log level for debug messages
  *
@@ -168,6 +171,7 @@ void StBTofCalibMaker::resetVpd()
   memset(mVPDLeTime, 0, sizeof(mVPDLeTime));
   mTStart = -9999.;
   mTDiff  = -9999.;
+  mProjVtxZ = -9999.;
   mVPDVtxZ = -9999.;
   mVPDHitPatternEast = 0;
   mVPDHitPatternWest = 0;
