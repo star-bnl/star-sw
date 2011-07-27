@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StBTofGeometry.h,v 1.7 2010/08/09 18:45:36 geurts Exp $
+ * $Id: StBTofGeometry.h,v 1.8 2011/07/27 16:15:12 geurts Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,11 @@
  *
  *******************************************************************
  * $Log: StBTofGeometry.h,v $
+ * Revision 1.8  2011/07/27 16:15:12  geurts
+ * Alignment calibration modifications [Patrick Huck]:
+ *  - added mAlignFile and SetAlignFile for use in StBTofMatchMaker
+ *  - phi0, x0, z0 made mNTrays dependent
+ *
  * Revision 1.7  2010/08/09 18:45:36  geurts
  * Include methods in StBTofNode and StBTofGeometry that calculate local theta [Masa]
  *
@@ -63,6 +68,7 @@
 #include "StMaker.h"
 
 #include <vector>
+#include <string>
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
@@ -299,6 +305,8 @@ class StBTofGeometry : public TNamed {
 
    Bool_t          mIsMC;      //!Control MC input (ignore alignment corrections)
    static Bool_t   mDebug;     //!Control message printing of this class
+   
+   string  mAlignFile;  //! filename for alignment input
 
    static const char* sectorPref ;//= "BSEC";
    static const char* trayPref   ;//= "BTRA";
@@ -331,6 +339,7 @@ class StBTofGeometry : public TNamed {
    void          SetMCOn()   { mIsMC = kTRUE; }
    void          SetMCOff()  { mIsMC = kFALSE; }
 
+   void          SetAlignFile(const Char_t *infile="") { mAlignFile = infile; }
 
    void          Init(StMaker *maker, TVolume *starHall);
    void          InitFromStar(TVolume *starHall);
