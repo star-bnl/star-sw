@@ -1,5 +1,5 @@
 <Document name="fstdgeo.xml">
 <Export language="Mortran">
-<Import file="$STAR/pams/geometry/fstdgeo/fstdgeo.g" verbatim="true" />
+<Import file="pams/geometry/fstdgeo/fstdgeo.g" verbatim="true" />
 </Export>
 </Document>
