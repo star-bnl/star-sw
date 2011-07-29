@@ -1,7 +1,7 @@
 <Document file="StarVMC/Geometry/Compat/xgeometry.xml">
 
 <Export language="Mortran">
-<Import file="$STAR/pams/geometry/geometry/geometry.g" verbatim="true" />
+<Import file="pams/geometry/geometry/geometry.g" verbatim="true" />
 </Export>
 
 <Module name="xgeometry" comment="STARSIM interface to the XML geometries">

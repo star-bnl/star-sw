@@ -5,6 +5,6 @@
 
   -->
 <Export language="Mortran">
-<Import file="$STAR/pams/geometry/tpcegeo/tpcegeo.g" verbatim="true" />
+<Import file="pams/geometry/tpcegeo/tpcegeo.g" verbatim="true" />
 </Export>
 </Document>

@@ -7,7 +7,7 @@
 
 -->
 <Export language="Mortran">
-<Import file="$STAR/pams/geometry/cavegeo/cavegeo.g" verbatim="true" />
+<Import file="pams/geometry/cavegeo/cavegeo.g" verbatim="true" />
 </Export>
 
 
