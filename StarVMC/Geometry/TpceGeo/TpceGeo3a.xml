@@ -1290,8 +1290,7 @@
 
             <Attribute for="TSAS" seen="0"  />
 
-            <Create block="TALS"/><Placement block="TALS"/>
-            
+            <Create block="TALS"/><Placement block="TALS"/>            
             <Create block="TSGT"/><Placement block="TSGT"/>
 
 
@@ -1636,11 +1635,10 @@
                    rmn="{r1,r1}" rmx="{r2,r2}" 
                    nz="2" npdiv="1" 
                    phi1="-alpha" dphi="2*alpha"  />
-			<!--
-            <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
-                %ivolume,%volume
-            </Print>
-            -->
+
+<!-- There is some odd behavior when it comes to ROOT/TGeo initializaing the deemax and
+     stmin... some inconsistency with geant and/or starsim.  We therefore introduce the
+     medium parameters by hand. -->
 
         </Block>
         
@@ -1768,23 +1766,12 @@
             <Material name="ALUMINIUM"  />
             <Medium name="TWMR_aluminium" deemax="0.18296" stmin="0.0334422" />
             myG1=TPCG_WheelR2 - (TPCG_WheelTotalRibWidth-TPCG_WheelRibWidth)/2
-            <Shape type="PGON" 
-                   zi="{  zWheel1,
-            		      zWheel1+TPCG_WheelRibHeight,
-            		      zWheel1+TPCG_WheelRibHeight,
-            		      TPCG_LengthW/2
-            		    }"  
-            	   rmn="{ TPCG_WheelR1-TPCG_WheelTotalRibWidth/2,
-            			  TPCG_WheelR1-TPCG_WheelTotalRibWidth/2,
-            	          TPCG_WheelR1-TPCG_WheelRibWidth/2,
-          		          TPCG_WheelR1-TPCG_WheelRibWidth/2
-          		         }" 
-            	   rmx="{ TPCG_WheelR1+TPCG_WheelTotalRibWidth/2,
-            			  TPCG_WheelR1+TPCG_WheelTotalRibWidth/2,
-            			  TPCG_WheelR1+TPCG_WheelRibWidth/2,
-            			  TPCG_WheelR1+TPCG_WheelRibWidth/2
-            			 }" 
-            	   nz="4" npdiv="1" phi1="-15" dphi="30"  />
+            <Shape type="PGON" nz="4" npdiv="1" phi1="-15" dphi="30" 
+                   zi="{zWheel1,zWheel1+TPCG_WheelRibHeight,zWheel1+TPCG_WheelRibHeight,TPCG_LengthW/2}"  
+            	   rmn="{ TPCG_WheelR1-TPCG_WheelTotalRibWidth/2,TPCG_WheelR1-TPCG_WheelTotalRibWidth/2,TPCG_WheelR1-TPCG_WheelRibWidth/2,TPCG_WheelR1-TPCG_WheelRibWidth/2}"
+            	   rmx="{ TPCG_WheelR1+TPCG_WheelTotalRibWidth/2,TPCG_WheelR1+TPCG_WheelTotalRibWidth/2,TPCG_WheelR1+TPCG_WheelRibWidth/2,TPCG_WheelR1+TPCG_WheelRibWidth/2}" 
+            />
+
 
 			<!--
             <Print level="1" fmt="'Creating volume ',I4,2X,A4"  >
