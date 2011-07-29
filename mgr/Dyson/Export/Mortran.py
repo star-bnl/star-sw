@@ -646,13 +646,21 @@ class External( Handler ):
     def endElement(self,tag):
         pass
 
+#  ====================================================================================================        
 class Import( Handler ):
     def __init__(self): Handler.__init__(self)
+
     def startElement(self,tag,attr):
         map  = {'true' : True, 'false' : False }
         file = attr.get('file',None)
         stat = map[ attr.get('verbatim','false') ]
         assert(stat)
+
+        # If the file does not exist, prepend $STAR to it
+        try:
+            test = open( file )
+        except IOError:
+            file = '$STAR/%s'%file
 
         if file[0]=='$': # Handle environment variable in 1st position
             temp = file.split('/')
