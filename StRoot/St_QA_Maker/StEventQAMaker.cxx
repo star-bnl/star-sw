@@ -175,6 +175,7 @@ Int_t StEventQAMaker::Make() {
   UInt_t tword = 0;
   Bool_t doEvent = kTRUE;
   Int_t evClasses[32];
+  memset(evClasses,0,32*sizeof(Int_t));
   Int_t nEvClasses = 1;
   Int_t run_num = event->runId();
   // Determine run year from run # (Oct. 1 goes to next year)
@@ -309,8 +310,9 @@ Int_t StEventQAMaker::Make() {
       gMessMgr->Warning("StEventQAMaker::Make(): No trigger info");
     }
   }  // allTrigs
-  if (run_year >=9) histsSet = StQA_run8; // for now, everything from run8 on uses this set
-  else silHists = kTRUE;
+  if (run_year >=9) {
+    if (realData) histsSet = StQA_run8; // for now, everything from run8 on uses this set
+  } else silHists = kTRUE;
   
   for (int bitn=0; bitn<32; bitn++) {
     if (tword>>(bitn) & 1U)
@@ -326,24 +328,22 @@ Int_t StEventQAMaker::Make() {
   if (!mNullPrimVtx) BookHist();
   
   multiplicity = event->trackNodes().size();
-  if (allTrigs) eventClass = 1;
-  else {
-  switch (histsSet) {
-    case (StQA_AuAuOld): {
-      if (multiplicity < 50) eventClass = 0;
-      else if (multiplicity < 500) eventClass = 1;
-      else if (multiplicity < 2500) eventClass = 2;
-      else eventClass = 3;
-      break; }
-    case (StQA_run8):
-    case (StQA_AuAu):
-    case (StQA_dAu) : {
-      eventClass = evClasses[0];
-      break; }
-    default: {
-      eventClass = 1;
+  if (allTrigs) {
+    evClasses[0] = 1;
+  } else {
+    switch (histsSet) {
+      case (StQA_AuAuOld): {
+        if (multiplicity < 50) evClasses[0] = 0;
+        else if (multiplicity < 500) evClasses[0] = 1;
+        else if (multiplicity < 2500) evClasses[0] = 2;
+        else evClasses[0] = 3;
+        break;
+      }
+      case (StQA_run8):
+      case (StQA_AuAu):
+      case (StQA_dAu) : break;
+      default: evClasses[0] = 1;
     }
-  }
   }
 
   int makeStat = kStOk;
@@ -374,8 +374,6 @@ Int_t StEventQAMaker::Make() {
     LOG_WARN << "no primary vertex found!" << endm;
   }
   mNullPrimVtx->Fill(vertExists);
-  
-  if (nEvClasses == 1) evClasses[0] = eventClass;
   
   for (int i=0; i<nEvClasses; i++) {
     eventClass = evClasses[i];
@@ -2394,8 +2392,11 @@ Int_t StEventQAMaker::PCThits(StTrackDetectorInfo* detInfo) {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.103 2011/05/31 21:35:49 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.104 2011/07/29 21:52:41 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.104  2011/07/29 21:52:41  genevb
+// Fixed improper initialization of event classes affecting future simulations
+//
 // Revision 2.103  2011/05/31 21:35:49  genevb
 // TPC request: add time bucket distribution of hits
 //
