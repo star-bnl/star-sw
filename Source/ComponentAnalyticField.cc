@@ -3944,8 +3944,7 @@ ComponentAnalyticField::Field3dA00(
 //   (Last changed on  5/12/94.)
 //-----------------------------------------------------------------------
  
-  double r, exhelp, eyhelp, ezhelp, vhelp;
-  double xxmirr = 0., yymirr = 0., rplan;
+  double exhelp, eyhelp, ezhelp, vhelp;
   
   // Initialise the potential and the electric field.
   ex = ey = ez = volt = 0.;
@@ -3953,41 +3952,47 @@ ComponentAnalyticField::Field3dA00(
   // Loop over all charges.
   for (int i = 0; i < n3d; ++i) {
     // Calculate the field in case there are no planes.
-    r = sqrt(pow(xpos - ch3d[i].x, 2) + 
-             pow(ypos - ch3d[i].y, 2) + 
-             pow(zpos - ch3d[i].z, 2));
-    if (r == 0.) continue;
-    exhelp = -(xpos - ch3d[i].x) / pow(r, 3);
-    eyhelp = -(ypos - ch3d[i].y) / pow(r, 3);
-    ezhelp = -(zpos - ch3d[i].z) / pow(r, 3);
+    const double dx = xpos - ch3d[i].x;
+    const double dy = ypos - ch3d[i].y;
+    const double dz = zpos - ch3d[i].z;
+    const double r = sqrt(dx * dx + dy * dy + dz * dz);
+    if (fabs(r) < Small) continue;
+    const double r3 = pow(r, 3);
+    exhelp = -dx / r3;
+    eyhelp = -dy / r3;
+    ezhelp = -dz / r3;
     vhelp = 1. / r;
     // Take care of a plane at constant x.
+    double dxm = 0., dym = 0.;
     if (ynplax) {
-      xxmirr = ch3d[i].x + xpos - 2 * coplax;
-      rplan = sqrt(xxmirr * xxmirr + pow(ypos -ch3d[i].y, 2));
-      if (rplan == 0.) continue;
-      exhelp += xxmirr / pow(rplan, 3);
-      eyhelp += (ypos - ch3d[i].y) / pow(rplan, 3);
-      ezhelp += (zpos - ch3d[i].z) / pow(rplan, 3);
+      dxm = ch3d[i].x + xpos - 2 * coplax;
+      const double rplan = sqrt(dxm * dxm + dy * dy);
+      if (fabs(rplan) < Small) continue;
+      const double rplan3 = pow(rplan, 3);
+      exhelp += dxm / rplan3;
+      eyhelp += dy  / rplan3;
+      ezhelp += dz  / rplan3;
       vhelp -= 1. / rplan;
     }
     // Take care of a plane at constant y.
     if (ynplay) {
-      yymirr = ch3d[i].y + ypos - 2. * coplay;
-      rplan = sqrt(pow(xpos - ch3d[i].x, 2) + yymirr * yymirr);
-      if (rplan == 0.) continue;
-      exhelp += (xpos - ch3d[i].x) / pow(rplan, 3);
-      eyhelp += yymirr / pow(rplan, 3);
-      ezhelp += (zpos - ch3d[i].z) / pow(rplan, 3);
+      dym = ch3d[i].y + ypos - 2. * coplay;
+      const double rplan = sqrt(dx * dx + dym * dym);
+      if (fabs(rplan) < Small) continue;
+      const double rplan3 = pow(rplan, 3);
+      exhelp += dx  / rplan3;
+      eyhelp += dym / rplan3;
+      ezhelp += dz  / rplan3;
       vhelp -= 1. / rplan;
     }
     // Take care of pairs of planes.
     if (ynplax && ynplay) {
-      rplan = sqrt(xxmirr * xxmirr + yymirr * yymirr);
-      if (rplan == 0.) continue;
-      exhelp -= xxmirr / pow(rplan, 3);
-      eyhelp -= yymirr / pow(rplan, 3);
-      ezhelp -= (zpos - ch3d[i].z) / pow(rplan, 3);
+      const double rplan = sqrt(dxm * dxm + dym * dym);
+      if (fabs(rplan) < Small) continue;
+      const double rplan3 = pow(rplan, 3);
+      exhelp -= dxm / rplan3;
+      eyhelp -= dym / rplan3;
+      ezhelp -= dz  / rplan3;
       vhelp += 1. / rplan;
     }
     // Add the terms to the electric field and the potential.
@@ -4015,31 +4020,33 @@ ComponentAnalyticField::Field3dB2X(
 
   const double rcut = 1.;
   
-  double rr, rrm, zzp, zzn, rr1, rr2, rm1, rm2, err, ezz;
+  double rr1, rr2, rm1, rm2, err, ezz;
   double exsum = 0., eysum = 0., ezsum = 0., vsum = 0.;
   double k0r, k1r, k0rm, k1rm;
   
   // Initialise the sums for the field components.
   ex = ey = ez = volt = 0.;
   
-  // Loop over all wires.
+  // Loop over all charges.
   for (int i = 0; i < n3d; ++i) {
     // Skip wires that are on the charge.
     if (xpos == ch3d[i].x && 
         ypos == ch3d[i].y && 
         zpos == ch3d[i].z) continue;
+    const double dx = xpos - ch3d[i].x;
+    const double dy = ypos - ch3d[i].y;
+    const double dz = zpos - ch3d[i].z;
+    const double dxm = xpos + ch3d[i].x - 2 * coplax;
     // In the far away zone, sum the modified Bessel function series.
-    if (pow(ypos - ch3d[i].y, 2) + pow(zpos - ch3d[i].z, 2) > 
-        pow(rcut * 2 * sx, 2)) {
-      //Initialise the per-wire sum.
+    if (dy * dy + dz * dz > pow(rcut * 2 * sx, 2)) {
+      // Initialise the per-wire sum.
       exsum = eysum = ezsum = vsum = 0.;
       // Loop over the terms in the series.
       for (int j = 1; j <= nTermBessel; ++j) {
         // Obtain reduced coordinates.
-        rr = Pi * j * sqrt(pow(ypos - ch3d[i].y, 2) + 
-                           pow(zpos - ch3d[i].z, 2)) / sx;
-        zzp = Pi * j * (xpos - ch3d[i].x) / sx;
-        zzn = Pi * j * (xpos + ch3d[i].x - 2 * coplax) / sx;
+        const double rr = Pi * j * sqrt(dy * dy + dz * dz) / sx;
+        const double zzp = Pi * j * dx  / sx;
+        const double zzn = Pi * j * dxm / sx;
         // Evaluate the Bessel functions for this R.
         if (rr < 2.) {
           k0r = Numerics::BesselK0S(rr); 
@@ -4049,14 +4056,14 @@ ComponentAnalyticField::Field3dB2X(
           k1r = Numerics::BesselK1L(rr);
         }
         // Get the field components.
-        vsum += (1. / sx) * k0r * (cos(zzp) - cos(zzn));
-        err = (TwoPi * j / (sx * sx)) * k1r * (cos(zzp) - cos(zzn));
+        const double czzp = cos(zzp);
+        const double czzn = cos(zzn);
+        vsum += (1. / sx) * k0r * (czzp - czzn);
+        err = (TwoPi * j / (sx * sx)) * k1r * (czzp - czzn);
         ezz = (TwoPi * j / (sx * sx)) * k0r * (sin(zzp) - sin(zzn));
         exsum += ezz;
-        eysum += err * (ypos - ch3d[i].y) / 
-                 sqrt(pow(ypos - ch3d[i].y, 2) + pow(zpos - ch3d[i].z, 2));
-        ezsum += err * (zpos - ch3d[i].z) /
-                 sqrt(pow(ypos - ch3d[i].y, 2) + pow(zpos - ch3d[i].z, 2));
+        eysum += err * dy / sqrt(dy * dy + dz * dz);
+        ezsum += err * dz / sqrt(dy * dy + dz * dz);
         continue;
       }
     } else {
@@ -4064,54 +4071,43 @@ ComponentAnalyticField::Field3dB2X(
       // Loop over the terms.
       for (int j = 0; j <= nTermPoly; ++j) {
         // Simplify the references to the distances.
-        rr1 = sqrt(pow(xpos - ch3d[i].x + j * 2 * sx, 2) +
-                   pow(ypos - ch3d[i].y, 2) + 
-                   pow(zpos - ch3d[i].z, 2));
-        rr2 = sqrt(pow(xpos - ch3d[i].x - j * 2 * sx, 2) +
-                   pow(ypos - ch3d[i].y, 2) + 
-                   pow(zpos - ch3d[i].z, 2));
-        rm1 = sqrt(pow(xpos + ch3d[i].x - j * 2 * sx - 2. * coplax, 2) +
-                   pow(ypos - ch3d[i].y, 2) + 
-                   pow(zpos - ch3d[i].z, 2));
-        rm2 = sqrt(pow(xpos + ch3d[i].x + j * 2 * sx - 2. * coplax, 2) +
-                   pow(ypos - ch3d[i].y, 2) + 
-                   pow(zpos - ch3d[i].z, 2));
-      
+        rr1 = sqrt(pow(dx  + j * 2 * sx, 2) + dy * dy + dz * dz);
+        rr2 = sqrt(pow(dx  - j * 2 * sx, 2) + dy * dy + dz * dz);
+        rm1 = sqrt(pow(dxm - j * 2 * sx, 2) + dy * dy + dz * dz);
+        rm2 = sqrt(pow(dxm + j * 2 * sx, 2) + dy * dy + dz * dz);
+        const double rr13 = pow(rr1, 3);
+        const double rm13 = pow(rm1, 3);  
         // Initialisation of the sum: only a charge and a mirror charge.
         if (j == 0) {
           vsum = 1. / rr1 - 1. / rm1;
-          exsum = (xpos - ch3d[i].x) / pow(rr1, 3) -
-                  (xpos + ch3d[i].x - 2. * coplax) / pow(rm1, 3);
-          eysum = (ypos - ch3d[i].y) * (1. / pow(rr1, 3) - 
-                                        1. / pow(rm1, 3));
-          ezsum = (zpos - ch3d[i].z) * (1. / pow(rr1, 3) - 
-                                        1. / pow(rm1, 3));
+          exsum = dx / rr13 - dxm / rm13;
+          eysum = dy * (1. / rr13 - 1. / rm13);
+          ezsum = dz * (1. / rr13 - 1. / rm13);
           continue;
         }
+        const double rr23 = pow(rr2, 3);
+        const double rm23 = pow(rm2, 3);
         // Further terms in the series: 2 charges and 2 mirror charges.
         vsum += 1. / rr1 + 1. / rr2 - 1. / rm1 - 1. / rm2;
-        exsum += (xpos - ch3d[i].x + j * 2 * sx) / pow(rr1, 3) +
-                 (xpos - ch3d[i].x - j * 2 * sx) / pow(rr2, 3) -
-                 (xpos + ch3d[i].x - j * 2 * sx - 2 * coplax) / pow(rm1, 3) - 
-                 (xpos + ch3d[i].x + j * 2 * sx - 2 * coplax) / pow(rm2, 3);
-        eysum += (ypos - ch3d[i].y) * (1. / pow(rr1, 3) + 1. / pow(rr2, 3) -
-                                       1. / pow(rm1, 3) - 1. / pow(rm2, 3));
-        ezsum += (zpos - ch3d[i].z) * (1. / pow(rr1, 3) + 1. / pow(rr2, 3) -
-                                       1. / pow(rm1, 3) - 1. / pow(rm2, 3));
+        exsum += (dx  + j * 2 * sx) / rr13 +
+                 (dx  - j * 2 * sx) / rr23 -
+                 (dxm - j * 2 * sx) / rm13 - 
+                 (dxm + j * 2 * sx) / rm23;
+        eysum += dy * (1. / rr13 + 1. / rr23 - 1. / rm13 - 1. / rm23);
+        ezsum += dz * (1. / rr13 + 1. / rr23 - 1. / rm13 - 1. / rm23);
       }
     }
     // Take care of a plane at constant y.
     if (ynplay) {
-      if (pow(ypos + ch3d[i].y - 2. * coplay, 2) + pow(zpos - ch3d[i].z, 2) >
-          pow(rcut * 2 * sx, 2)) {
+      const double dym = ypos + ch3d[i].y - 2. * coplay;
+      if (dym * dym + dz * dz > pow(rcut * 2 * sx, 2)) {
         // Bessel function series.
         // Loop over the terms in the series.
         for (int j = 1; j <= nTermBessel; ++j) {
           // Obtain reduced coordinates.
-          rrm = Pi * j * sqrt(pow(ypos * ch3d[i].y - 2 * coplay, 2) +
-                              pow(zpos - ch3d[i].z, 2)) / sx;
-          zzp = Pi * j * (xpos - ch3d[i].x) / sx;
-          zzn = Pi * j * (xpos + ch3d[i].x - 2 * coplax) / sx;
+          const double rrm = Pi * j * sqrt(dym * dym + dz * dz) / sx;
+          const double zzp = Pi * j * dx  / sx;
+          const double zzn = Pi * j * dxm / sx;
           // Evaluate the Bessel functions for this R.
           if (rrm < 2.) {
             k0rm = Numerics::BesselK0S(rrm); 
@@ -4121,58 +4117,44 @@ ComponentAnalyticField::Field3dB2X(
             k1rm = Numerics::BesselK1L(rrm);
           }
           // Get the field components.
-          vsum += (1. / sx) * k0rm * (cos(zzp) - cos(zzn));
-          err = (TwoPi / (sx * sx)) * k1rm * (cos(zzp) - cos(zzn));
+          const double czzp = cos(zzp);
+          const double czzn = cos(zzn);
+          vsum += (1. / sx) * k0rm * (czzp - czzn);
+          err = (TwoPi / (sx * sx)) * k1rm * (czzp - czzn);
           ezz = (TwoPi / (sx * sx)) * k0rm * (sin(zzp) - sin(zzn));
           exsum += ezz;
-          eysum += err * (ypos + ch3d[i].y - 2 * coplay) /
-                   sqrt(pow(ypos + ch3d[i].y - 2 * coplay, 2) +
-                        pow(zpos - ch3d[i].z, 2));
-          ezsum += err * (zpos - ch3d[i].z - 2 * coplay) /
-                   sqrt(pow(zpos - ch3d[i].z, 2));
+          eysum += err * dym / sqrt(dym * dym + dz * dz);
+          ezsum += err * dz  / sqrt(dym * dym + dz * dz);
         }
       } else {
         // Polynomial sum.
         // Loop over the terms.
         for (int j = 0; j <= nTermPoly; ++j) {
           // Simplify the references to the distances.
-          rr1 = sqrt(pow(xpos - ch3d[i].x + j * 2 * sx, 2) +
-                     pow(ypos + ch3d[i].y - 2 * coplay, 2) +
-                     pow(zpos - ch3d[i].z, 2));
-          rr2 = sqrt(pow(xpos - ch3d[i].x - j * 2 * sx, 2) +
-                     pow(ypos + ch3d[i].y - 2 * coplay, 2) +
-                     pow(zpos - ch3d[i].z, 2));
-          rm1 = sqrt(pow(xpos + ch3d[i].x - j * 2 * sx - 2 * coplax, 2) +
-                     pow(ypos + ch3d[i].y - 2 * coplay, 2) +
-                     pow(zpos - ch3d[i].z, 2));
-          rm2 = sqrt(pow(xpos + ch3d[i].x + j * 2 * sx - 2 * coplax, 2) +
-                     pow(ypos + ch3d[i].y - 2 * coplay, 2) +
-                     pow(zpos - ch3d[i].z, 2));
+          rr1 = sqrt(pow(dx  + j * 2 * sx, 2) + dym * dym + dz * dz);
+          rr2 = sqrt(pow(dx  - j * 2 * sx, 2) + dym * dym + dz * dz);
+          rm1 = sqrt(pow(dxm - j * 2 * sx, 2) + dym * dym + dz * dz);
+          rm2 = sqrt(pow(dxm + j * 2 * sx, 2) + dym * dym + dz * dz);
+          const double rr13 = pow(rr1, 3);
+          const double rm13 = pow(rm1, 3);
           // Initialisation of the sum: only a charge and a mirror charge.
           if (j == 0) {
             vsum += -1. / rr1 + 1. / rm1;
-            exsum += -(xpos - ch3d[i].x) / pow(rr1, 3) +
-                      (xpos + ch3d[i].x - 2 * coplax) / pow(rm1, 3);
-            eysum += -(ypos + ch3d[i].y - 2 * coplay) * (1. / pow(rr1, 3) -
-                                                         1. / pow(rm1, 3));
-            ezsum += -(zpos - ch3d[i].z) * (1. / pow(rr1, 3) - 
-                                            1. / pow(rm1, 3));
+            exsum += -dx / rr13 + dxm / rm13;
+            eysum += -dym * (1. / rr13 - 1. / rm13);
+            ezsum += -dz  * (1. / rr13 - 1. / rm13);
             continue;
           }
+          const double rr23 = pow(rr2, 3);
+          const double rm23 = pow(rm2, 3);
           // Further terms in the series: 2 charges and 2 mirror charges.
           vsum += - 1. / rr1 - 1. / rr2 + 1. / rm1 + 1. / rm2;
-          exsum += -(xpos - ch3d[i].x + j * 2 * sx) / pow(rr1, 3) -
-                    (xpos - ch3d[i].x - j * 2 * sx) / pow(rr2, 3) +
-                (xpos + ch3d[i].x - j * 2 * sx - 2 * coplax) / pow(rm1, 3) +
-                (xpos + ch3d[i].x + j * 2 * sx - 2 * coplax) / pow(rm2, 3);
-          eysum += -(ypos + ch3d[i].y - 2 * coplay) * (1. / pow(rr1, 3) +
-                                                       1. / pow(rr2, 3) - 
-                                                       1. / pow(rm1, 3) -
-                                                       1. / pow(rm2, 3));
-          ezsum += -(zpos - ch3d[i].z) * (1. / pow(rr1, 3) + 
-                                          1. / pow(rr2, 3) -
-                                          1. / pow(rm1, 3) - 
-                                          1. / pow(rm2, 3));
+          exsum += -(dx  + j * 2 * sx) / rr13 -
+                    (dx  - j * 2 * sx) / rr23 +
+                    (dxm - j * 2 * sx) / rm13 +
+                    (dxm + j * 2 * sx) / rm23;
+          eysum += -dym * (1. / rr13 + 1. / rr23 - 1. / rm13 - 1. / rm23);
+          ezsum += -dz  * (1. / rr13 + 1. / rr23 - 1. / rm13 - 1. / rm23);
         }
       }
     }
@@ -4200,31 +4182,33 @@ ComponentAnalyticField::Field3dB2Y(
 
   const double rcut = 1.;
   
-  double rr, rrm, zzp, zzn, rr1, rr2, rm1, rm2, err, ezz;
+  double rr1, rr2, rm1, rm2, err, ezz;
   double exsum = 0., eysum = 0., ezsum = 0., vsum = 0.;
   double k0r, k1r, k0rm, k1rm;
   
   // Initialise the sums for the field components.
   ex = ey = ez = volt = 0.;
   
-  // Loop over all wires.
-  for (int i = 0; i < n3d; ++i) {
+  // Loop over all charges.
+  for (int i = n3d; i--;) {
     // Skip wires that are on the charge.
     if (xpos == ch3d[i].x && 
         ypos == ch3d[i].y && 
         zpos == ch3d[i].z) continue;
+    const double dx = xpos - ch3d[i].x;
+    const double dy = ypos - ch3d[i].y;
+    const double dz = zpos - ch3d[i].z;
+    const double dym = ypos + ch3d[i].y - 2 * coplay;
     // In the far away zone, sum the modified Bessel function series.
-    if (pow(xpos - ch3d[i].x, 2) + pow(zpos - ch3d[i].z, 2) > 
-        pow(rcut * 2 * sx, 2)) {
-      //Initialise the per-wire sum.
+    if (dx * dx + dz * dz > pow(rcut * 2 * sy, 2)) {
+      // Initialise the per-wire sum.
       exsum = eysum = ezsum = vsum = 0.;
       // Loop over the terms in the series.
       for (int j = 1; j <= nTermBessel; ++j) {
         // Obtain reduced coordinates.
-        rr = Pi * j * sqrt(pow(xpos - ch3d[i].x, 2) + 
-                           pow(zpos - ch3d[i].z, 2)) / sy;
-        zzp = Pi * j * (ypos - ch3d[i].y) / sy;
-        zzn = Pi * j * (ypos + ch3d[i].y - 2 * coplay) / sy;
+        const double rr = Pi * j * sqrt(dx * dx + dz * dz) / sy;
+        const double zzp = Pi * j * dy  / sy;
+        const double zzn = Pi * j * dym / sy;
         // Evaluate the Bessel functions for this R.
         if (rr < 2.) {
           k0r = Numerics::BesselK0S(rr); 
@@ -4234,14 +4218,14 @@ ComponentAnalyticField::Field3dB2Y(
           k1r = Numerics::BesselK1L(rr);
         }
         // Get the field components.
-        vsum += (1. / sy) * k0r * (cos(zzp) - cos(zzn));
-        err = (TwoPi * j / (sy * sy)) * k1r * (cos(zzp) - cos(zzn));
+        const double czzp = cos(zzp);
+        const double czzn = cos(zzn);
+        vsum += (1. / sy) * k0r * (czzp - czzn);
+        err = (TwoPi * j / (sy * sy)) * k1r * (czzp - czzn);
         ezz = (TwoPi * j / (sy * sy)) * k0r * (sin(zzp) - sin(zzn));
-        exsum += err * (xpos - ch3d[i].x) / 
-                 sqrt(pow(xpos - ch3d[i].x, 2) + pow(zpos - ch3d[i].z, 2));
+        exsum += err * dx / sqrt(dx * dx + dz * dz);
+        ezsum += err * dz / sqrt(dx * dx + dz * dz);
         eysum += ezz;
-        ezsum += err * (zpos - ch3d[i].z) /
-                 sqrt(pow(xpos - ch3d[i].x, 2) + pow(zpos - ch3d[i].z, 2));
         continue;
       }
     } else {
@@ -4249,54 +4233,43 @@ ComponentAnalyticField::Field3dB2Y(
       // Loop over the terms.
       for (int j = 0; j <= nTermPoly; ++j) {
         // Simplify the references to the distances.
-        rr1 = sqrt(pow(xpos - ch3d[i].x, 2) +
-                   pow(ypos - ch3d[i].y + j * 2 * sy, 2) + 
-                   pow(zpos - ch3d[i].z, 2));
-        rr2 = sqrt(pow(xpos - ch3d[i].x, 2) + 
-                   pow(ypos - ch3d[i].y - j * 2 * sy, 2) + 
-                   pow(zpos - ch3d[i].z, 2));
-        rm1 = sqrt(pow(xpos - ch3d[i].x, 2) +
-                   pow(ypos + ch3d[i].y - j * 2 * sy - 2 * coplay, 2) + 
-                   pow(zpos - ch3d[i].z, 2));
-        rm2 = sqrt(pow(xpos - ch3d[i].x, 2) + 
-                   pow(ypos + ch3d[i].y + j * 2 * sy - 2 * coplay, 2) + 
-                   pow(zpos - ch3d[i].z, 2));
-      
+        rr1 = sqrt(dx * dx + dz * dz + pow(dy  + j * 2 * sy, 2));
+        rr2 = sqrt(dx * dx + dz * dz + pow(dy  - j * 2 * sy, 2));
+        rm1 = sqrt(dx * dx + dz * dz + pow(dym - j * 2 * sy, 2));
+        rm2 = sqrt(dx * dx + dz * dz + pow(dym + j * 2 * sy, 2)); 
+        const double rr13 = pow(rr1, 3);
+        const double rm13 = pow(rm1, 3);
         // Initialisation of the sum: only a charge and a mirror charge.
         if (j == 0) {
           vsum = 1. / rr1 - 1. / rm1;
-          exsum = (xpos - ch3d[i].x) * (1. / pow(rr1, 3) - 
-                                        1. / pow(rm1, 3));
-          eysum = (ypos - ch3d[i].y) / pow(rr1, 3) -
-                  (ypos + ch3d[i].y - 2. * coplay) / pow(rm1, 3);
-          ezsum = (zpos - ch3d[i].z) * (1. / pow(rr1, 3) - 
-                                        1. / pow(rm1, 3));
+          exsum = dx * (1. / rr13 - 1. / rm13);
+          ezsum = dz * (1. / rr13 - 1. / rm13);
+          eysum = dy / rr13 - dym / rm13;
           continue;
         }
         // Further terms in the series: 2 charges and 2 mirror charges.
+        const double rr23 = pow(rr2, 3);
+        const double rm23 = pow(rm2, 3);
         vsum += 1. / rr1 + 1. / rr2 - 1. / rm1 - 1. / rm2;
-        exsum += (xpos - ch3d[i].x) * (1. / pow(rr1, 3) + 1. / pow(rr2, 3) -
-                                       1. / pow(rm1, 3) - 1. / pow(rm2, 3));
-        eysum += (ypos - ch3d[i].y + j * 2 * sy) / pow(rr1, 3) +
-                 (ypos - ch3d[i].y - j * 2 * sy) / pow(rr2, 3) -
-                 (ypos + ch3d[i].y - j * 2 * sy - 2 * coplay) / pow(rm1, 3) - 
-                 (ypos + ch3d[i].y + j * 2 * sy - 2 * coplay) / pow(rm2, 3);
-        ezsum += (zpos - ch3d[i].z) * (1. / pow(rr1, 3) + 1. / pow(rr2, 3) -
-                                       1. / pow(rm1, 3) - 1. / pow(rm2, 3));
+        exsum += dx * (1. / rr13 + 1. / rr23 - 1. / rm13 - 1. / rm23);
+        ezsum += dz * (1. / rr13 + 1. / rr23 - 1. / rm13 - 1. / rm23);
+        eysum += (dy  + j * 2 * sy) / rr13 +
+                 (dy  - j * 2 * sy) / rr23 -
+                 (dym - j * 2 * sy) / rm13 - 
+                 (dym + j * 2 * sy) / rm23;
       }
     }
     // Take care of a plane at constant x.
     if (ynplax) {
-      if (pow(xpos + ch3d[i].x - 2. * coplax, 2) + pow(zpos - ch3d[i].z, 2) >
-          pow(rcut * 2 * sy, 2)) {
+      const double dxm = xpos + ch3d[i].x - 2. * coplax;
+      if (dxm * dxm + dz * dz > pow(rcut * 2 * sy, 2)) {
         // Bessel function series.
         // Loop over the terms in the series.
         for (int j = 1; j <= nTermBessel; ++j) {
           // Obtain reduced coordinates.
-          rrm = Pi * j * sqrt(pow(xpos * ch3d[i].x - 2 * coplax, 2) +
-                              pow(zpos - ch3d[i].z, 2)) / sy;
-          zzp = Pi * j * (ypos - ch3d[i].y) / sy;
-          zzn = Pi * j * (ypos + ch3d[i].y - 2 * coplay) / sy;
+          const double rrm = Pi * j * sqrt(dxm * dxm + dz * dz) / sy;
+          const double zzp = Pi * j * dy  / sy;
+          const double zzn = Pi * j * dym / sy;
           // Evaluate the Bessel functions for this R.
           if (rrm < 2.) {
             k0rm = Numerics::BesselK0S(rrm); 
@@ -4306,58 +4279,44 @@ ComponentAnalyticField::Field3dB2Y(
             k1rm = Numerics::BesselK1L(rrm);
           }
           // Get the field components.
-          vsum += (1. / sy) * k0rm * (cos(zzp) - cos(zzn));
-          err = (TwoPi / (sy * sy)) * k1rm * (cos(zzp) - cos(zzn));
+          const double czzp = cos(zzp);
+          const double czzn = cos(zzn);
+          vsum += (1. / sy) * k0rm * (czzp - czzn);
+          err = (TwoPi / (sy * sy)) * k1rm * (czzp - czzn);
           ezz = (TwoPi / (sy * sy)) * k0rm * (sin(zzp) - sin(zzn));
-          exsum += err * (xpos + ch3d[i].x - 2 * coplax) /
-                   sqrt(pow(xpos + ch3d[i].x - 2 * coplax, 2) +
-                        pow(zpos - ch3d[i].z, 2));
+          exsum += err * dxm / sqrt(dxm * dxm + dz * dz);
+          ezsum += err * dz  / sqrt(dxm * dxm + dz * dz);
           eysum += ezz;
-          ezsum += err * (zpos - ch3d[i].z - 2 * coplax) /
-                   sqrt(pow(zpos - ch3d[i].z, 2));
         }
       } else {
         // Polynomial sum.
         // Loop over the terms.
         for (int j = 0; j <= nTermPoly; ++j) {
           // Simplify the references to the distances.
-          rr1 = sqrt(pow(ypos - ch3d[i].y + j * 2 * sy, 2) +
-                     pow(xpos + ch3d[i].x - 2 * coplax, 2) +
-                     pow(zpos - ch3d[i].z, 2));
-          rr2 = sqrt(pow(ypos - ch3d[i].y - j * 2 * sy, 2) +
-                     pow(xpos + ch3d[i].x - 2 * coplax, 2) +
-                     pow(zpos - ch3d[i].z, 2));
-          rm1 = sqrt(pow(ypos + ch3d[i].y - j * 2 * sy - 2 * coplay, 2) +
-                     pow(xpos + ch3d[i].x - 2 * coplax, 2) +
-                     pow(zpos - ch3d[i].z, 2));
-          rm2 = sqrt(pow(ypos + ch3d[i].y + j * 2 * sy - 2 * coplay, 2) +
-                     pow(xpos + ch3d[i].x - 2 * coplax, 2) +
-                     pow(zpos - ch3d[i].z, 2));
+          rr1 = sqrt(pow(dy  + j * 2 * sy, 2) + dxm * dxm + dz * dz);
+          rr2 = sqrt(pow(dy  - j * 2 * sy, 2) + dxm * dxm + dz * dz);
+          rm1 = sqrt(pow(dym - j * 2 * sy, 2) + dxm * dxm + dz * dz);
+          rm2 = sqrt(pow(dym + j * 2 * sy, 2) + dxm * dxm + dz * dz);
+          const double rr13 = pow(rr1, 3);
+          const double rm13 = pow(rm1, 3);
           // Initialisation of the sum: only a charge and a mirror charge.
           if (j == 0) {
             vsum += -1. / rr1 + 1. / rm1;
-            exsum += -(xpos + ch3d[i].x - 2 * coplax) * (1. / pow(rr1, 3) -
-                                                         1. / pow(rm1, 3));
-            eysum += -(ypos - ch3d[i].y) / pow(rr1, 3) +
-                      (ypos + ch3d[i].y - 2 * coplay) / pow(rm1, 3);
-            ezsum += -(zpos - ch3d[i].z) * (1. / pow(rr1, 3) - 
-                                            1. / pow(rm1, 3));
+            exsum += -dxm * (1. / rr13 - 1. / rm13);
+            ezsum += -dz  * (1. / rr13 - 1. / rm13);
+            eysum += -dy / rr13 + dym / rm13;
             continue;
           }
+          const double rr23 = pow(rr2, 3);
+          const double rm23 = pow(rm2, 3);
           // Further terms in the series: 2 charges and 2 mirror charges.
           vsum += - 1. / rr1 - 1. / rr2 + 1. / rm1 + 1. / rm2;
-          exsum += -(xpos + ch3d[i].x - 2 * coplax) * (1. / pow(rr1, 3) +
-                                                       1. / pow(rr2, 3) - 
-                                                       1. / pow(rm1, 3) -
-                                                       1. / pow(rm2, 3));
-          eysum += -(ypos - ch3d[i].y + j * 2 * sy) / pow(rr1, 3) -
-                    (ypos - ch3d[i].y - j * 2 * sy) / pow(rr2, 3) +
-                (ypos + ch3d[i].y - j * 2 * sy - 2 * coplay) / pow(rm1, 3) +
-                (ypos + ch3d[i].y + j * 2 * sy - 2 * coplay) / pow(rm2, 3);
-          ezsum += -(zpos - ch3d[i].z) * (1. / pow(rr1, 3) + 
-                                          1. / pow(rr2, 3) -
-                                          1. / pow(rm1, 3) - 
-                                          1. / pow(rm2, 3));
+          exsum += -dxm * (1. / rr13 + 1. / rr23 - 1. / rm13 - 1. / rm23);
+          ezsum += -dz  * (1. / rr13 + 1. / rr23 - 1. / rm13 - 1. / rm23);
+          eysum += -(dy  + j * 2 * sy) / rr13 -
+                    (dy  - j * 2 * sy) / rr23 +
+                    (dym - j * 2 * sy) / rm13 +
+                    (dym + j * 2 * sy) / rm23;
         }
       }
     }
@@ -4387,7 +4346,7 @@ ComponentAnalyticField::Field3dD10(
 
   double x3d, y3d, z3d;
   double exsum = 0., eysum = 0., ezsum = 0., vsum = 0.;
-  double rr, zzp, zzn, rr1, rr2, rm1, rm2, err, ezz;
+  double rr1, rr2, rm1, rm2, err, ezz;
   double k0r, k1r;
   
   // Initialise the sums for the field components.
@@ -4416,19 +4375,22 @@ ComponentAnalyticField::Field3dD10(
       x3d = 0.5 * log(ch3d[i].x * ch3d[i].x + ch3d[i].y * ch3d[i].y);
       y3d = atan2(ch3d[i].y, ch3d[i].x + ii * TwoPi);
       z3d = ch3d[i].z;
+      const double dx = xpos - x3d;
+      const double dy = ypos - y3d;
+      const double dz = zpos - z3d;
+      const double dxm = xpos + x3d - 2 * cpl;
       // Skip wires that are on the charge.
       if (xpos == x3d && ypos == y3d && zpos == z3d) continue;
       // In the far away zone, sum the modified Bessel function series.
-      if (pow(ypos - y3d, 2) + pow(zpos - z3d, 2) > 
-          pow(rcut * 2 * ssx, 2)) {
+      if (dy * dy + dz * dz > pow(rcut * 2 * ssx, 2)) {
         // Initialise the per-wire sum.
         exsum = eysum = ezsum = vsum = 0.;
         // Loop over the terms in the series.
         for (int j = 1; j <= nTermBessel; ++j) {
           // Obtain reduced coordinates.
-          rr = Pi * j * sqrt(pow(ypos - y3d, 2) + pow(zpos - z3d, 2)) / ssx;
-          zzp = Pi * j * (xpos - x3d) / ssx;
-          zzn = Pi * j * (xpos + x3d - 2 * cpl) / ssx;
+          const double rr = Pi * j * sqrt(dy * dy + dz * dz) / ssx;
+          const double zzp = Pi * j * dx  / ssx;
+          const double zzn = Pi * j * dxm / ssx;
           // Evaluate the Bessel functions for this R.
           if (rr < 2.) {
             k0r = Numerics::BesselK0S(rr);
@@ -4438,55 +4400,44 @@ ComponentAnalyticField::Field3dD10(
             k1r = Numerics::BesselK1L(rr);
           }
           // Get the field components.
-          vsum += (1. / ssx) * k0r * (cos(zzp) - cos(zzn));
-          err = (j * TwoPi / (ssx * ssx)) * k1r * (cos(zzp) - cos(zzn));
+          const double czzp = cos(zzp);
+          const double czzn = cos(zzn);
+          vsum += (1. / ssx) * k0r * (czzp - czzn);
+          err = (j * TwoPi / (ssx * ssx)) * k1r * (czzp - czzn);
           ezz = (j * TwoPi / (ssx * ssx)) * k0r * (sin(zzp) - sin(zzn));
           exsum += ezz;
-          eysum += err * (ypos - y3d) /
-                   sqrt(pow(ypos - y3d, 2) + pow(zpos - z3d, 2));
-          ezsum += err * (zpos - z3d) / 
-                   sqrt(pow(ypos - y3d, 2) + pow(zpos - z3d, 2));
+          eysum += err * dy / sqrt(dy * dy + dz * dz);
+          ezsum += err * dz / sqrt(dy * dy + dz * dz);
         }
       } else {
         // Direct polynomial summing, obtain reduced coordinates.
         // Loop over the terms.
         for (int j = 0; j < nTermPoly; ++j) {
           // Simplify the references to the distances.
-          rr1 = sqrt(pow(xpos - x3d + j * 2 * ssx, 2) +
-                     pow(ypos - y3d, 2) +
-                     pow(zpos - z3d, 2));
-          rr2 = sqrt(pow(xpos - x3d - j * 2 * ssx, 2) +
-                     pow(ypos - y3d, 2) +
-                     pow(zpos - z3d, 2));
-          rm1 = sqrt(pow(xpos + x3d - j * 2 * ssx - 2 * cpl, 2) +
-                     pow(ypos - y3d, 2) + pow(zpos - z3d, 2));
-          rm2 = sqrt(pow(xpos + x3d + j * 2 * ssx - 2 * cpl, 2) +
-                     pow(ypos - y3d, 2) + pow(zpos - z3d, 2));
+          rr1 = sqrt(pow(dx  + j * 2 * ssx, 2) + dy * dy + dz * dz);
+          rr2 = sqrt(pow(dx  - j * 2 * ssx, 2) + dy * dy + dz * dz);
+          rm1 = sqrt(pow(dxm - j * 2 * ssx, 2) + dy * dy + dz * dz);
+          rm2 = sqrt(pow(dxm + j * 2 * ssx, 2) + dy * dy + dz * dz);
+          const double rr13 = pow(rr1, 3);
+          const double rm13 = pow(rm1, 3);
           // Initialisation of the sum: only a charge and a mirror charge.
           if (j == 0) {
             vsum = 1. / rr1 - 1. / rm1;
-            exsum = (xpos - x3d) / pow(rr1, 3) - 
-                    (xpos + x3d - 2 * cpl) / pow(rm1, 3);
-            eysum = (ypos - y3d) * (1. / pow(rr1, 3) -
-                                    1. / pow(rm1, 3));
-            ezsum = (zpos - z3d) * (1. / pow(rr1, 3) - 
-                                    1. / pow(rm1, 3));
+            exsum = dxm / rr13 - dxm / rm13;
+            eysum = dy * (1. / rr13 - 1. / rm13);
+            ezsum = dz * (1. / rr13 - 1. / rm13); 
             continue;
           }
+          const double rr23 = pow(rr2, 3);
+          const double rm23 = pow(rm2, 3);
           // Further terms in the series: 2 charges and 2 mirror charges.
           vsum += 1. / rr1 + 1. / rr2 - 1. / rm1 - 1. / rm2;
-          exsum += (xpos - x3d + j * 2 * ssx) / pow(rr1, 3) +
-                   (xpos - x3d - j * 2 * ssx) / pow(rr2, 3) -
-                   (xpos + x3d - j * 2 * ssx - 2 * cpl) / pow(rm1, 3) -
-                   (xpos + x3d + j * 2 * ssx - 2 * cpl) / pow(rm2, 3);
-          eysum += (ypos - y3d) * (1. / pow(rr1, 3) +
-                                   1. / pow(rr2, 3) -
-                                   1. / pow(rm1, 3) -
-                                   1. / pow(rm2, 3));
-          ezsum += (zpos - z3d) * (1. / pow(rr1, 3) +
-                                   1. / pow(rr2, 3) -
-                                   1. / pow(rm1, 3) -
-                                   1. / pow(rm2, 3));
+          exsum += (dx  + j * 2 * ssx) / rr13 +
+                   (dx  - j * 2 * ssx) / rr23 -
+                   (dxm - j * 2 * ssx) / rm13 -
+                   (dxm + j * 2 * ssx) / rm23;
+          eysum += dy * (1. / rr13 + 1. / rr23 - 1. / rm13 - 1. / rm23);
+          ezsum += dz * (1. / rr13 + 1. / rr23 - 1. / rm13 - 1. / rm23);
         }
       }
       ex += ch3d[i].e * exsum;

@@ -850,36 +850,6 @@ AvalancheMicroscopic::TransportElectron(
         continue;
       }
 
-      // Check if the electrons is within the specified time window.
-      if (hasTimeWindow && (t < tMin || t > tMax)) {
-        stack[iE].x = x; 
-        stack[iE].y = y; 
-        stack[iE].z = z;
-        stack[iE].t = t; 
-        stack[iE].energy = energy; 
-        stack[iE].band = band;
-        stack[iE].kx = kx; 
-        stack[iE].ky = ky; 
-        stack[iE].kz = kz;
-        stack[iE].status = StatusOutsideTimeWindow;
-        if (hole) {
-          endpointsHoles.push_back(stack[iE]);
-        } else {
-          endpointsElectrons.push_back(stack[iE]);
-        }
-        stack.erase(stack.begin() + iE);
-        if (debug) {
-          std::cout << className << "::TransportElectron:\n";
-          if (hole) {
-            std::cout << "    Hole left the time window.\n";  
-          } else {
-            std::cout << "    Electron left the time window.\n";
-          }
-          std::cout << "    Time: " << t << "\n";
-        }
-        continue;
-      }
-
       // If switched on, get the local magnetic field.
       if (useBfield) {
         sensor->MagneticField(x, y, z, bx, by, bz, status);
@@ -937,7 +907,38 @@ AvalancheMicroscopic::TransportElectron(
         } else if (!hole && hasElectronEnergyHistogram) {
           histElectronEnergy->Fill(energy);
         }
-        
+
+        // Check if the electrons is within the specified time window.
+        if (hasTimeWindow && (t < tMin || t > tMax)) {
+          stack[iE].x = x; 
+          stack[iE].y = y; 
+          stack[iE].z = z;
+          stack[iE].t = t; 
+          stack[iE].energy = energy; 
+          stack[iE].band = band;
+          stack[iE].kx = kx; 
+          stack[iE].ky = ky; 
+          stack[iE].kz = kz;
+          stack[iE].status = StatusOutsideTimeWindow;
+          if (hole) {
+            endpointsHoles.push_back(stack[iE]);
+          } else {
+            endpointsElectrons.push_back(stack[iE]);
+          }
+          stack.erase(stack.begin() + iE);
+          if (debug) {
+            std::cout << className << "::TransportElectron:\n";
+            if (hole) {
+              std::cout << "    Hole left the time window.\n";  
+            } else {
+              std::cout << "    Electron left the time window.\n";
+            }
+            std::cout << "    Time: " << t << "\n";
+          }
+          ok = false;
+          break;
+        }
+       
         if (medium->GetId() != id) {
           // Medium has changed.
           if (!medium->IsMicroscopic()) {
