@@ -674,9 +674,10 @@ quanC(0.0)
 #endif
   std::ofstream dcsfile;
   dcsfile.open("dcs.txt", std::ios::out);
+  dcsfile << "# energy [MeV] vs. diff. cs per electron [Mbarn / MeV]\n";
   for (int i = 0; i < qe; ++i) {
     dcsfile << hmd->energy_mesh->get_ec(i) << "  "
-            << addaC[i] << "\n";
+            << addaC[i] / C1_MEV2_MBN << "\n";
   }
   dcsfile.close(); 
 
