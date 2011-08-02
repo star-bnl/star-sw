@@ -163,6 +163,8 @@ void combineHistograms0(const char *dirName, const char **inNames, const char *o
 
     TH2D **ytyt;
     TH2D **ytytC;
+    TH2D **sytdyt;
+    TH2D **sytdytC;
     gROOT->LoadMacro("minimizeNegative.C");
     double *sFactor[2][1], *eSFactor[2][1];
     for (int it=0;it<2;it++) {
@@ -250,6 +252,8 @@ void combineHistograms0(const char *dirName, const char **inNames, const char *o
             sf[1] = sFactor[1][ibin][ic];
             ytyt  = ehelp->buildChargeTypes("YtYt",5,sf);
             ytytC = ehelp->buildCommon("YtYt",5,sf);
+            sytdyt  = ehelp->buildChargeTypes("SYtDYt",5,sf);
+            sytdytC = ehelp->buildCommon("SYtDYt",5,sf);
 
             out->cd();
             for (int icharge=0;icharge<4;icharge++) {
@@ -261,6 +265,15 @@ void combineHistograms0(const char *dirName, const char **inNames, const char *o
                 ytytC[icharge]->SetName(name.Data());
                 ytytC[icharge]->SetTitle(name.Data());
                 ytytC[icharge]->Write();
+
+                TString name("SYtDYt"); name += chargeName[icharge];  name += ic;
+                sytdyt[icharge]->SetName(name.Data());
+                sytdyt[icharge]->SetTitle(name.Data());
+                sytdyt[icharge]->Write();
+                TString name("SYtDYt"); name += chargeType[icharge];  name += ic;
+                sytdytC[icharge]->SetName(name.Data());
+                sytdytC[icharge]->SetTitle(name.Data());
+                sytdytC[icharge]->Write();
             }
             delete tf;
             delete ehelp;

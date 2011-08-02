@@ -1,4 +1,4 @@
-void selectAllM3(const char* dirname, const char *fileBase ){
+void selectAllM3(const char* dirName, const char *fileBase ){
 
   // -- example for recombining histograms by selection in new root file 
   //
@@ -7,7 +7,7 @@ void selectAllM3(const char* dirname, const char *fileBase ){
 
   gROOT->LoadMacro("load2ptLibs.C");
   load2ptLibs();
-  TString inFile(dirname);
+  TString inFile(dirName);
   inFile+="/";
   inFile+=fileBase;
   inFile+=".root";
@@ -55,7 +55,7 @@ void selectAllM3(const char* dirname, const char *fileBase ){
     for(int i=0;i<16;i++) cout<<ndata[i]<<",";
     cout<<" = "<<nin<<endl;
 
-    TString fname(dirname);
+    TString fname(dirName);
     fname+="/";
     fname+=fileBase;
     fname+=oname[k];
@@ -78,7 +78,7 @@ void selectAllM3(const char* dirname, const char *fileBase ){
     adder.addCuts(fname.Data(),tf,ndata,nin,parentSum,nParentSum,1);
   }
 
-  TString fname(dirname);
+  TString fname(dirName);
   fname+="/";
   fname+=fileBase;
   fname+="_pairDensities.root";
