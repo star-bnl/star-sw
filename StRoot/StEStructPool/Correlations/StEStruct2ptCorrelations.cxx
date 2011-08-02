@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.28 2010/09/02 21:24:07 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.29 2011/08/02 20:34:02 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -55,6 +55,7 @@ StEStruct2ptCorrelations::StEStruct2ptCorrelations(int mode) {
   initInternalData();
   manalysisMode=mode;
   mPairCuts = new StEStructPairCuts; 
+  mHcb = NULL;
 }
 
 
@@ -63,7 +64,7 @@ StEStruct2ptCorrelations::StEStruct2ptCorrelations(StEStructPairCuts* pcuts, int
   initInternalData();
   manalysisMode=mode;
   mPairCuts=pcuts;
-
+  mHcb = NULL;
 }
 
 //----------------------------------------------------------
@@ -219,6 +220,7 @@ void StEStruct2ptCorrelations::init() {
   // (Only works in cutbin mode 5, which uses PID assignments.)
   if (mdoInvariantMassHistograms) {
     cb->setCutBinHistMode(1);
+    cb->initCutBinHists();
   } else {
     cb->setCutBinHistMode(0);
   }
@@ -276,9 +278,22 @@ void StEStruct2ptCorrelations::init() {
   
 
   /* Event Mixing Parameters */
-  mHMixdZdN = new TH2D("MixedDistance","Event Mixing: delta-Z vs delta-N",50,-5,5, 50,-50,50);  // deltaZ vs deltaN
-  mHMixNdN = new TH2D("MixedMults","Event Mixing: average-N vs delta-N",75,0,1500, 50,-50,50);  // aveN vs deltaN
-  mHcb = new TH1D("hcb","Cutbin usage",ncutbins,-0.5,ncutbins - 0.5);  // local
+  mHMixZdN = new TH2D("Mixed_Z_dN","Event Mixing: average-Z vs delta-N",50,-25,25, 50,-25,25);
+  mHMixZN  = new TH2D("Mixed_Z_N","Event Mixing: average-Z vs average-N",50,-25,25, 50,0,1500);
+  mHMixZdC = new TH2D("Mixed_Z_dC","Event Mixing: average-Z vs delta-C",50,-25,25, 50,-100,100);
+  mHMixZC  = new TH2D("Mixed_Z_C","Event Mixing: average-Z vs average-C",50,-25,25,50,0,10000);
+  mHMixZdZ = new TH2D("Mixed_Z_dZ","Event Mixing: average-Z vs delta-Z",50,-25,25,50,-5,5);
+  mHMixdZdN = new TH2D("Mixed_dZ_dN","Event Mixing: delta-Z vs delta-N",50,-5,5, 50,-25,25);
+  mHMixdZN  = new TH2D("Mixed_dZ_N","Event Mixing: delta-Z vs average-N",50,-5,5, 50,0,1500);
+  mHMixdZdC = new TH2D("Mixed_dZ_dC","Event Mixing: delta-Z vs delta-C",50,-5,5, 50,-100,100);
+  mHMixdZC  = new TH2D("Mixed_dZ_C","Event Mixing: delta-Z vs average-C",50,-5,5,50,0,10000);
+  mHMixNdC = new TH2D("Mixed_N_dC","Event Mixing: average-N vs delta-C",50,0,1500, 50,-100,100);
+  mHMixNC  = new TH2D("Mixed_N_C","Event Mixing: average-N vs average-C",50,0,1500,50,0,10000);
+  mHMixNdN = new TH2D("Mixed_N_dN","Event Mixing: average-N vs delta-N",50,0,1500,50,-25,25);
+  mHMixdNdC = new TH2D("Mixed_dN_dC","Event Mixing: delta-N vs delta-C",50,-50,50, 50,-100,100);
+  mHMixdNC  = new TH2D("Mixed_dN_C","Event Mixing: delta-N vs average-C",50,-50,50,50,0,10000);
+  mHMixCdC = new TH2D("Mixed_C_dC","Event Mixing: average-C vs delta-C",50,0,10000,50,-100,100);
+  mHcb = new TH2D("hcb","Cutbin usage",ncutbins,-0.5,ncutbins - 0.5,8,-0.5,7.5);  // local
   TH1::AddDirectory(kTRUE);
 
   mInit=true;
@@ -548,7 +563,7 @@ bool StEStruct2ptCorrelations::makeSiblingAndMixedPairs() {
   //cout << i <<"\t"; mbuffer[i].Print();
   while (1) {
     if (mOneZBuffer) {
-        mMixingEvent = mOneZBuffer->nextEvent(mult,mCurrentEvent->VertexZ());
+        mMixingEvent = mOneZBuffer->nextEvent(mult,mCurrentEvent->VertexZ(),mCurrentEvent->ZDCCoincidence());
     } else {
         mMixingEvent = mbuffer[i].nextEvent(mult);
     }
@@ -568,10 +583,27 @@ bool StEStruct2ptCorrelations::makeSiblingAndMixedPairs() {
     mHNEventsPosMix[iZBin]->Fill(mMixingEvent->Npos());
     mHNEventsNegMix[iZBin]->Fill(mMixingEvent->Nneg());
     float deltaZ =  mCurrentEvent->VertexZ() - mMixingEvent->VertexZ();
+    float aveZ   = (mCurrentEvent->VertexZ() + mMixingEvent->VertexZ())/2;
     float deltaN =  mCurrentEvent->Ntrack()  - mMixingEvent->Ntrack();
     float aveN   = (mCurrentEvent->Ntrack()  + mMixingEvent->Ntrack()) / 2;
+    float deltaC =  mCurrentEvent->ZDCCoincidence() - mMixingEvent->ZDCCoincidence();
+    float aveC   = (mCurrentEvent->ZDCCoincidence() + mMixingEvent->ZDCCoincidence())/2;
+    mHMixZdN->Fill(aveZ,deltaN);
+    mHMixZN->Fill(aveZ,aveN);
+    mHMixZdC->Fill(aveZ,deltaC);
+    mHMixZC->Fill(aveZ,aveC);
+    mHMixZdZ->Fill(aveZ,deltaZ);
     mHMixdZdN->Fill(deltaZ,deltaN);
+    mHMixdZN->Fill(deltaZ,aveN);
+    mHMixdZdC->Fill(deltaZ,deltaC);
+    mHMixdZC->Fill(deltaZ,aveC);
+    mHMixNdC->Fill(aveN,deltaC);
+    mHMixNC->Fill(aveN,aveC);
     mHMixNdN->Fill(aveN,deltaN);
+    mHMixdNdC->Fill(deltaN,deltaC);
+    mHMixdNC->Fill(deltaN,aveC);
+    mHMixCdC->Fill(aveC,deltaC);
+
     makePairs(mCurrentEvent,mMixingEvent,4);
     makePairs(mCurrentEvent,mMixingEvent,5);
     makePairs(mCurrentEvent,mMixingEvent,6);
@@ -844,7 +876,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
         int icb, jcb;
         if (!cb->ignorePair(&mPair) && ((jcb=cb->getCutBin(&mPair,j)) >= 0)) {
           int ncutbins=cb->getNumBins();
-          mHcb->Fill(jcb);   // now filled for all cb modes
+          mHcb->Fill(jcb,j);   // now filled for all cb modes
           if(jcb>=ncutbins) {
               cout << "ERROR, got cutbin " << jcb << " of " << ncutbins << " possible." << endl;
               return;
@@ -1081,6 +1113,38 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
 }
 
 
+//--------------------------------------------------------------------------
+void StEStruct2ptCorrelations::debug_CheckHistograms() {
+    //===========================================
+    // Debugging. Seems I am often filling pp Mode3 twice (at least DEtaDPhi histograms.)
+    if (!mHcb) {
+        return;
+    }
+    StEStructBinning* b=StEStructBinning::Instance();
+    int numCutBins=StEStructCutBin::Instance()->getNumBins();
+    int nzb = 1;
+    if (mZBufferCutBinning) {
+        nzb = kNumBuffers;
+    }
+    for (int i=0;i<8;i++) {
+        dphiBins** jtdetadphi  = mJtDEtaDPhi[i];
+        int totDEtaDPhi = 0;
+        int totCB = 0;
+        for(int y=0;y<numCutBins;y++){
+            for (int z=0;z<nzb;z++) {
+                int yz = y*nzb + z;
+                for(int k=0;k<b->detaBins();k++){
+                    for(int j=0;j<b->dphiBins();j++){
+                        totDEtaDPhi += jtdetadphi[yz][k].dphi[j];
+                    }
+                }
+            }
+            totCB += mHcb->GetBinContent(y+1,i+1);
+        }
+        cout << "Integral of jtdetadphi = " << totDEtaDPhi << ", for i = " << i << ". Compare to hcb = " << totCB << endl;
+    }
+    //===========================================
+}
 //
 //------------ Below are init, delete, write functions -------///
 //
@@ -1100,7 +1164,7 @@ void StEStruct2ptCorrelations::fillHistograms() {
   TH1::AddDirectory(kFALSE);
 
   for(int i=0; i<8; i++){
-
+    
     phiBins** nphiphi = mNPhiPhi[i];
     qBins*    qinv;
     qBins*    nqinv;
@@ -1450,8 +1514,21 @@ void StEStruct2ptCorrelations::writeHistograms() {
       mHNEventsNegSib[j]->Write();
       mHNEventsNegMix[j]->Write();
   }
+  mHMixZdN->Write();
+  mHMixZN->Write();
+  mHMixZdC->Write();
+  mHMixZC->Write();
+  mHMixZdZ->Write();
   mHMixdZdN->Write();
+  mHMixdZN->Write();
+  mHMixdZdC->Write();
+  mHMixdZC->Write();
+  mHMixNdC->Write();
+  mHMixNC->Write();
   mHMixNdN->Write();
+  mHMixdNdC->Write();
+  mHMixdNC->Write();
+  mHMixCdC->Write();
   mHcb->Write();
 
   mHptAll->Write();
@@ -2174,8 +2251,15 @@ void StEStruct2ptCorrelations::createHist1D(TH1F*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.29  2011/08/02 20:34:02  prindle
+ * More detailed histograms for event mixing.
+ *   Buffer: increased mixed events to 4 (from 2)
+ *   CutBin: added mode 9 for exploration of p_t space, fixed place in mode 5 where
+ *           histogram was written before checking it existed.
+ *   OneBuffer: added ZDC coincidence rate to event sorting space.
+ *
  * Revision 1.28  2010/09/02 21:24:07  prindle
- * 2ptCorrelations: Fill histograms for event mixing information
+ *   2ptCorrelations: Fill histograms for event mixing information
  *                    Option for common mixing buffer
  *                    Switch to selectively fill QInv histograms (which take a long time)
  *   CutBin: Moved PID code to Track class from Pair class. Needed to update this code.

@@ -1,6 +1,6 @@
 /********************************************************************** 
  *
- * $Id: StEStructOneBuffer.cxx,v 1.1 2010/09/02 21:54:03 prindle Exp $
+ * $Id: StEStructOneBuffer.cxx,v 1.2 2011/08/02 20:34:03 prindle Exp $
  *
  * Author: Duncan Prindle
  *
@@ -29,11 +29,12 @@
 
 ClassImp(StEStructOneBuffer);
 
-StEStructOneBuffer::StEStructOneBuffer(int nMix, int deltaMultMax, double deltaZMax) {
+StEStructOneBuffer::StEStructOneBuffer(int nMix, int deltaMultMax, float deltaZMax, float deltaRateMax) {
     mNumMixed = nMix;
     mcurEvent = -1;
     mDeltaMultMax = deltaMultMax;
     mDeltaZMax = deltaZMax;
+    mDeltaRateMax = deltaRateMax;
     mEvent=new StEStructEvent*[mNumMixed+1];
     for (int i=0;i<=mNumMixed;i++) {
         mEvent[i] = NULL;
@@ -63,12 +64,15 @@ void StEStructOneBuffer::addEvent(StEStructEvent* event) {
     mEvent[0] = event;
 }
 
-StEStructEvent* StEStructOneBuffer::nextEvent(int mult, double vz) {
+StEStructEvent* StEStructOneBuffer::nextEvent(int mult, float vz, float coinc) {
     // Return next event within mDeltaMultMax and mDeltaZMax of input.
     mcurEvent++;
     while(mEvent[mcurEvent]) {
         if(abs(mult - mEvent[mcurEvent]->Ntrack()) <= mDeltaMultMax &&
-           fabs(vz-mEvent[mcurEvent]->VertexZ()) <= mDeltaZMax) break;  
+           fabs(vz-mEvent[mcurEvent]->VertexZ()) <= mDeltaZMax &&
+           fabs(coinc-mEvent[mcurEvent]->ZDCCoincidence()) <= mDeltaRateMax) {
+            break;
+        }
         mcurEvent++;
         if(mcurEvent > mNumMixed) {
             // This shouldn't happen, since mEvent[mNumMixed] == 0.
@@ -82,8 +86,15 @@ StEStructEvent* StEStructOneBuffer::nextEvent(int mult, double vz) {
 /***********************************************************************
  *
  * $Log: StEStructOneBuffer.cxx,v $
+ * Revision 1.2  2011/08/02 20:34:03  prindle
+ * More detailed histograms for event mixing.
+ *   Buffer: increased mixed events to 4 (from 2)
+ *   CutBin: added mode 9 for exploration of p_t space, fixed place in mode 5 where
+ *           histogram was written before checking it existed.
+ *   OneBuffer: added ZDC coincidence rate to event sorting space.
+ *
  * Revision 1.1  2010/09/02 21:54:03  prindle
- * OneBuffer: When we sort on z-vertex and multiplicity we can use a single event mixing buffer.
+ *   OneBuffer: When we sort on z-vertex and multiplicity we can use a single event mixing buffer.
  *
  * Revision 1.5  2006/04/04 22:10:11  porter
  * a handful of changes (specific to correlations)

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.cxx,v 1.14 2010/09/02 21:24:07 prindle Exp $
+ * $Id: StEStructCutBin.cxx,v 1.15 2011/08/02 20:34:02 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -105,6 +105,13 @@ void StEStructCutBin::setMode(int mode){
       mnumBins=6;
       mnumParentBins=3;
       strcpy(mcutModeName," Checking LS pair cuts for soft-hard combinations, 6 bins");
+      break;
+    }
+  case 9:
+    {
+      mnumBins=15;
+      mnumParentBins=5;
+      strcpy(mcutModeName," only p_t binning");
       break;
     }
   default:
@@ -506,9 +513,9 @@ void StEStructCutBin::writeCutBinHists5() {
         for (int pairCase=0;pairCase<8;pairCase++) {
             if (mHCutBinHists[pairCase]) {
                 for (int it=0;it<11;it++) {
-                    mHCutBinHists[pairCase][it]->Write();
-//                    cout << "Deleting histogram [" << pairCase << "][" << it << "]" << endl;
                     if (mHCutBinHists[pairCase][it]) {
+                        mHCutBinHists[pairCase][it]->Write();
+//                        cout << "Deleting histogram [" << pairCase << "][" << it << "]" << endl;
                         delete mHCutBinHists[pairCase][it];
                         mHCutBinHists[pairCase][it] = 0;
                     }
@@ -636,14 +643,68 @@ int StEStructCutBin::notSymmetrizedXX8(int cutBin, int pairCharge) {
     }
     return 1;
 }
+//------------------------ Mode=9 -------------------------------------------
+//
+// pt binning only. Create a grid of pt1 vs. pt2 so we can recreate
+// 1 < p_t < 3 GeV as well as exploring some pt dependence.
+
+int StEStructCutBin::getCutBinMode9(StEStructPairCuts* pc){
+
+    int mode[5][5] = {{0, 5, 9, 12, 14}, {5, 1, 6, 10, 13}, {9, 6, 2, 7, 11}, {12, 10, 7, 3, 8}, {14, 13, 11, 8, 4}};
+    int ipt1, ipt2;
+
+    float pt1 = pc->Track1()->Pt();
+    float pt2 = pc->Track2()->Pt();
+
+    // These numbers are also used in StEStructCutBin::getParentBin (change both)
+    if (pt1 < 1.0) {
+        ipt1 = 0;
+    } else if (pt1 < 2.0) {
+        ipt1 = 1;
+    } else if (pt1 < 3.0) {
+        ipt1 = 2;
+    } else if (pt1 < 4.0) {
+        ipt1 = 3;
+    } else {
+        ipt1 = 4;
+    }
+    if (pt2 < 1.0) {
+        ipt2 = 0;
+    } else if (pt2 < 2.0) {
+        ipt2 = 1;
+    } else if (pt2 < 3.0) {
+        ipt2 = 2;
+    } else if (pt2 < 4.0) {
+        ipt2 = 3;
+    } else {
+        ipt2 = 4;
+    }
+    return  mode[ipt1][ipt2];
+}
+int StEStructCutBin::symmetrizeXX9(StEStructPairCuts* pc) {
+    return 1;
+}
+int StEStructCutBin::switchXX9(StEStructPairCuts* pc) {
+    return 0;
+}
+int StEStructCutBin::notSymmetrizedXX9(int cutBin, int pairCharge) {
+    return 0;
+}
 
 
 
 /***********************************************************************
  *
  * $Log: StEStructCutBin.cxx,v $
+ * Revision 1.15  2011/08/02 20:34:02  prindle
+ * More detailed histograms for event mixing.
+ *   Buffer: increased mixed events to 4 (from 2)
+ *   CutBin: added mode 9 for exploration of p_t space, fixed place in mode 5 where
+ *           histogram was written before checking it existed.
+ *   OneBuffer: added ZDC coincidence rate to event sorting space.
+ *
  * Revision 1.14  2010/09/02 21:24:07  prindle
- * 2ptCorrelations: Fill histograms for event mixing information
+ *   2ptCorrelations: Fill histograms for event mixing information
  *                    Option for common mixing buffer
  *                    Switch to selectively fill QInv histograms (which take a long time)
  *   CutBin: Moved PID code to Track class from Pair class. Needed to update this code.
