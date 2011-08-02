@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: StarTSP.h,v 1.1 2010/09/02 21:55:43 prindle Exp $
+ *  $Id: StarTSP.h,v 1.2 2011/08/02 20:43:55 prindle Exp $
  *
  *  Author: Duncan Prindle
  *
@@ -31,7 +31,9 @@ class StarTSP {
     int* sortLists(float *mult, float *z, float *f);
 
     int dimension;
+    float mMultScale;
     float mZScale;
+    float mZDCScale;
 
     ClassDef(StarTSP,1)
 };

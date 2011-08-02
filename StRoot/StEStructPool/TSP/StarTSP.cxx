@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StarTSP.cxx,v 1.1 2010/09/02 21:55:43 prindle Exp $
+ * $Id: StarTSP.cxx,v 1.2 2011/08/02 20:43:55 prindle Exp $
  *
  * Author: Duncan Prindle
  *
@@ -24,7 +24,9 @@ ClassImp(StarTSP);
 
 StarTSP::StarTSP(int iDimension) {
     dimension = iDimension;
-    mZScale = 5.0;
+    mMultScale =  1.0;
+    mZScale    = 10.0;
+    mZDCScale  =  0.01;
 
     // Following are variables from our TSP solver.
     // Default values first.
@@ -131,7 +133,7 @@ int* StarTSP::getFileNumbers(TChain *ch, int nGood, int *index) {
 
 // This code is essentially LKHmain.c
 // I have in-lined SRC/ReadProblem.c and 
-int* StarTSP::sortLists(float *mult, float *z, float *fileIndex) {
+int* StarTSP::sortLists(float *mult, float *z, float *coincidence) {
     // Normally fileIndex is file number + (event number in chain / 10^6).
     // Create combination outside of this method for run-time flexibility.
     GainType Cost;
@@ -171,9 +173,9 @@ int* StarTSP::sortLists(float *mult, float *z, float *fileIndex) {
     for (int i = 1; i <= Dimension; i++) {
         N = &NodeSet[i];
         N->V = 1;
-        N->X = mult[i-1];
+        N->X = mMultScale*mult[i-1];
         N->Y = mZScale*z[i-1];
-        N->Z = fileIndex[i-1];
+        N->Z = mZDCScale*coincidence[i-1];
     }
     // end of Read_NODE_COORD_SECTION();
 
