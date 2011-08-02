@@ -19,7 +19,7 @@
         // First argument is number of mixed events per real event
         // Second is maximum multiplicity difference allowed
         // Third is maximum Vz distance allowed
-        mixingBuffer = new StEStructOneBuffer(4,20,5);
+        mixingBuffer = new StEStructOneBuffer(4,10,2,100);
     }
 
     // choose the mode for the binning

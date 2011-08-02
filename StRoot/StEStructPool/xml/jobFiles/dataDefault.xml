@@ -205,6 +205,9 @@
     if (ch-&gt;GetBranch("PrimaryVertices")) {
         ch-&gt;SetBranchStatus("PrimaryVertices.*",1);
     }
+    if (ch-&gt;GetBranch("BTofHeader")) {
+        ch-&gt;SetBranchStatus("BTofHeader.*",1);
+    }
 
     int counter=0, istat=0;
     mk-&gt;SetEventList(evList);
