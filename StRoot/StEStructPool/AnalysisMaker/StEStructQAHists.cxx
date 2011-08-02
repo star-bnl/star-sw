@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQAHists.cxx,v 1.9 2010/09/02 21:20:09 prindle Exp $
+ * $Id: StEStructQAHists.cxx,v 1.10 2011/08/02 20:31:25 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -114,7 +114,7 @@ void StEStructQAHists::initBaseHistograms(){
        TString bName("binary_");      bName += i;
        TString pName("participant_"); pName += i;
        aaGenBin[i]  = new TH1D(bName.Data(),bName.Data(),2000,0.5,2000.5);
-       aaGenPart[i] = new TH1D(bName.Data(),bName.Data(),2000,0.5,2000.5);
+       aaGenPart[i] = new TH1D(pName.Data(),pName.Data(),2000,0.5,2000.5);
 
      }
   }            
@@ -186,7 +186,7 @@ void StEStructQAHists::writeBaseHistograms(TFile* tf){
     for(int i=0;i<2;i++)if(aaGen[i])aaGen[i]->Write();
     for(int i=0;i<StEStructCentrality::Instance()->numCentralities()-1;i++){
       if(aaGenBin[i])aaGenBin[i]->Write();
-      if(aaGenBin[i])aaGenPart[i]->Write();
+      if(aaGenPart[i])aaGenPart[i]->Write();
     }
   } else if(mEType==2){
     for(int i=0;i<StEStructCentrality::Instance()->numCentralities()-1;i++){
@@ -208,11 +208,13 @@ void StEStructQAHists::initTrackHistograms(int numBins, int aIndex){
   mHPhi      = new TH1F*[qbins];
   mHPt       = new TH1F*[qbins];
   mHYt       = new TH1F*[qbins];
+  mHMass     = new TH1F*[qbins];
   mHdEdxPtot = new TH2F*[numBins];
   mHToFPtot  = new TH2F*[numBins];
   mHEtaPt    = new TH2F*[qbins];
 
   int nall = 100;
+  int nMass = 160;
   float xetamin = -2.0;
   float xetamax = 2.0;
   float xphimin = -M_PI;
@@ -221,6 +223,8 @@ void StEStructQAHists::initTrackHistograms(int numBins, int aIndex){
   float xptmax  = 6.0;
   float xytmin  = 0.5;
   float xytmax  = 5.0;
+  float xmassmin  = 0.0;
+  float xmassmax  = 4.0;
   
   int nx = 101;
   int ny = 101;
@@ -278,6 +282,14 @@ void StEStructQAHists::initTrackHistograms(int numBins, int aIndex){
     if(numBins>1)hdedxP+=i;   
     mHdEdxPtot[i] = new TH2F(hdedxP.Data(),hdedxP.Data(),nx,xpmin,xpmax,ny,ydmin,ydmax);
 
+    TString hmass("Mass");
+    if(mhasAIndex)hmass+=haIndex.Data();
+    if(numBins>1)hmass+=i;
+    TString hpmass("Qp"); hpmass+=hmass.Data();
+    mHMass[i]=new TH1F(hpmass.Data(),hpmass.Data(),nMass,xmassmin,xmassmax);
+    TString hmmass("Qm"); hmmass+=hmass.Data();
+    mHMass[i+numBins]=new TH1F(hmmass.Data(),hmmass.Data(),nMass,xmassmin,xmassmax);
+
     TString htofP("mass_P");
     if(mhasAIndex)htofP+=haIndex.Data();
     if(numBins>1)htofP+=i;   
@@ -315,6 +327,7 @@ void StEStructQAHists::fillTrackHistograms(StEStructTrack* t, int ib) {
     mHPt[i]->Fill(t->Pt());
     mHYt[i]->Fill(t->Yt());
     mHEtaPt[i]->Fill(t->Eta(),t->Pt());
+    mHMass[i]->Fill(t->Mass());
 
 };
 
@@ -330,6 +343,7 @@ void StEStructQAHists::writeTrackHistograms(TFile* tf){
     mHPt[i]->Write();
     mHYt[i]->Write();
     mHEtaPt[i]->Write();
+    mHMass[i]->Write();
   }
   for(int i=0;i<mntBins;i++){
     mHdEdxPtot[i]->Write();
@@ -349,8 +363,18 @@ void StEStructQAHists::writeTrackHistograms(TFile* tf){
 /**********************************************************************
  *
  * $Log: StEStructQAHists.cxx,v $
+ * Revision 1.10  2011/08/02 20:31:25  prindle
+ * Change string handling
+ *   Added event cuts for VPD, good fraction of global tracks are primary, vertex
+ *   found only from tracks on single side of TPC, good fraction of primary tracks have TOF hits..
+ *   Added methods to check if cuts imposed
+ *   Added 2010 200GeV and 62 GeV, 2011 19 GeV AuAu datasets, 200 GeV pp2pp 2009 dataset.
+ *   Added TOF vs. dEdx vs. p_t histograms
+ *   Fix participant histograms in QAHists.
+ *   Added TOFEMass cut in TrackCuts although I think we want to supersede this.
+ *
  * Revision 1.9  2010/09/02 21:20:09  prindle
- * Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
+ *   Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
  *   EventCuts: Add radius cut on vertex, ToF fraction cut. Merge 2004 AuAu 200 GeV datasets.
  *              Add 7, 11 and 39 GeV dataset selections
  *   MuDstReader: Add 2D histograms for vertex radius and ToF fraction cuts.

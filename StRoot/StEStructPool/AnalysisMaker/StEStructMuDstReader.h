@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.h,v 1.11 2010/09/02 21:20:09 prindle Exp $
+ * $Id: StEStructMuDstReader.h,v 1.12 2011/08/02 20:31:25 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -15,6 +15,8 @@
 
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TH3F.h"
+#include "StBTofHeader.h"
 #include "StEStructEventReader.h"
 #include "StEStructPool/Pileup/Pileup.h"
 
@@ -40,11 +42,16 @@ public:
   int  mNumGoodTracks;//!
   int  mhasdEdxCuts;
   int  mhasToFCuts;
+  int  mhasPrimaryCuts;
   int  mhasVertexRadiusCuts;
+  TH3F*  dEdxBetaBefore;
+  TH3F*  dEdxBetaAfter;
   TH2F*  dEdxBefore;
   TH2F*  dEdxAfter;
   TH2F*  ToFBefore;
   TH2F*  ToFAfter;
+  TH2F*  PrimaryBefore;
+  TH2F*  PrimaryAfter;
   TH2F*  VRadiusBefore;
   TH2F*  VRadiusAfter;
 
@@ -90,8 +97,18 @@ inline bool StEStructMuDstReader::done(){ return mAmDone; };
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.h,v $
+ * Revision 1.12  2011/08/02 20:31:25  prindle
+ * Change string handling
+ *   Added event cuts for VPD, good fraction of global tracks are primary, vertex
+ *   found only from tracks on single side of TPC, good fraction of primary tracks have TOF hits..
+ *   Added methods to check if cuts imposed
+ *   Added 2010 200GeV and 62 GeV, 2011 19 GeV AuAu datasets, 200 GeV pp2pp 2009 dataset.
+ *   Added TOF vs. dEdx vs. p_t histograms
+ *   Fix participant histograms in QAHists.
+ *   Added TOFEMass cut in TrackCuts although I think we want to supersede this.
+ *
  * Revision 1.11  2010/09/02 21:20:09  prindle
- * Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
+ *   Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
  *   EventCuts: Add radius cut on vertex, ToF fraction cut. Merge 2004 AuAu 200 GeV datasets.
  *              Add 7, 11 and 39 GeV dataset selections
  *   MuDstReader: Add 2D histograms for vertex radius and ToF fraction cuts.

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrackCuts.h,v 1.5 2008/12/02 23:35:36 prindle Exp $
+ * $Id: StEStructTrackCuts.h,v 1.6 2011/08/02 20:31:26 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -34,6 +34,7 @@ public:
    CutName mytName;
    CutName mphiName;
    CutName metaName;
+   CutName mTOFEMassName;
    CutName mnsigmaEName;
    CutName mnsigmaPiName;
    CutName mnsigmaKName;
@@ -51,6 +52,7 @@ public:
   float mxt[2];
   float mphi[2];
   float meta[2];  
+  float mTOFEMass[2];
   float mnsigmaE[2];
   float mnsigmaPi[2];
   float mnsigmaK[2];
@@ -80,6 +82,7 @@ public:
   bool goodYt(float p);
   bool goodPhi(float p);
   bool goodEta(float e);
+  bool goodTOFEMass(float e);
   bool goodElectron(float e);
   bool goodPion(float p);
   bool goodKaon(float k);
@@ -170,6 +173,12 @@ inline bool StEStructTrackCuts::goodEta(float c){
   
 }
 
+inline bool StEStructTrackCuts::goodTOFEMass(float c){
+  mvalues[mTOFEMassName.idx] =c;
+  return ( (mTOFEMass[0]==mTOFEMass[1] && mTOFEMass[0]==0) ||
+	   (c>=mTOFEMass[0] && c<=mTOFEMass[1])  ) ;
+
+}
 /*
 inline bool StEStructTrackCuts::goodElectron(float c) {
   mvalues[mnsigmaEName.idx] =c;
@@ -216,6 +225,16 @@ inline bool StEStructTrackCuts::goodProton(float c){
 /***********************************************************************
  *
  * $Log: StEStructTrackCuts.h,v $
+ * Revision 1.6  2011/08/02 20:31:26  prindle
+ * Change string handling
+ *   Added event cuts for VPD, good fraction of global tracks are primary, vertex
+ *   found only from tracks on single side of TPC, good fraction of primary tracks have TOF hits..
+ *   Added methods to check if cuts imposed
+ *   Added 2010 200GeV and 62 GeV, 2011 19 GeV AuAu datasets, 200 GeV pp2pp 2009 dataset.
+ *   Added TOF vs. dEdx vs. p_t histograms
+ *   Fix participant histograms in QAHists.
+ *   Added TOFEMass cut in TrackCuts although I think we want to supersede this.
+ *
  * Revision 1.5  2008/12/02 23:35:36  prindle
  * Added code for pileup rejection in EventCuts and MuDstReader.
  * Modified trigger selections for some data sets in EventCuts.
