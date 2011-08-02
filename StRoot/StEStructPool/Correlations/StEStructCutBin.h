@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.h,v 1.12 2010/09/02 21:24:08 prindle Exp $
+ * $Id: StEStructCutBin.h,v 1.13 2011/08/02 20:34:02 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -45,16 +45,20 @@ class StEStructCutBin : public TObject {
   int getCutBinMode6(StEStructPairCuts *pc, int zbin);
   int getCutBinMode7(StEStructPairCuts *pc, int zbin);
   int getCutBinMode8(StEStructPairCuts *pc);
+  int getCutBinMode9(StEStructPairCuts *pc);
   int ignorePair5(StEStructPairCuts *pc);
   int symmetrizeXX3(StEStructPairCuts *pc);
   int symmetrizeXX5(StEStructPairCuts *pc);
   int symmetrizeXX8(StEStructPairCuts *pc);
+  int symmetrizeXX9(StEStructPairCuts *pc);
   int switchXX3(StEStructPairCuts *pc);
   int switchXX5(StEStructPairCuts *pc);
   int switchXX8(StEStructPairCuts *pc);
+  int switchXX9(StEStructPairCuts *pc);
   int notSymmetrizedXX3(int cutBin, int pairCharge);
   int notSymmetrizedXX5(int cutBin, int pairCharge);
   int notSymmetrizedXX8(int cutBin, int pairCharge);
+  int notSymmetrizedXX9(int cutBin, int pairCharge);
 
   void initCutBinHists5();
   void writeCutBinHists5();
@@ -152,6 +156,11 @@ inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc, int pairCase){
      retVal=getCutBinMode8(pc);
      break;
    }
+ case 9:
+   {
+     retVal=getCutBinMode9(pc);
+     break;
+   }
  }
  return retVal;
 }
@@ -189,6 +198,20 @@ inline int StEStructCutBin::getParentBin(StEStructPairCuts *pc, StEStructTrack* 
             return 1;
         } else {                             // hard
             return 2;
+        }
+    } else if (9 == mcutMode) {
+        float pt = trkPtr->Pt();
+        // These numbers are also used in StEStructCutBin::getCutBinMode9 (change both)
+        if (pt<1.0) {
+            return 0;
+        } else if (pt<2.0) {
+            return 1;
+        } else if (pt<3.0) {
+            return 2;
+        } else if (pt<4.0) {
+            return 3;
+        } else {
+            return 4;
         }
     } else {
         return 0;
@@ -244,6 +267,9 @@ inline int StEStructCutBin::symmetrizeXX(StEStructPairCuts *pc) {
         case 8: {
             return symmetrizeXX8(pc);
         }
+        case 9: {
+            return symmetrizeXX9(pc);
+        }
         default: {
             return 1;
         }
@@ -261,6 +287,9 @@ inline int StEStructCutBin::switchXX(StEStructPairCuts *pc) {
         }
         case 8: {
             return switchXX8(pc);
+        }
+        case 9: {
+            return switchXX9(pc);
         }
         default: {
             return 0;
@@ -282,6 +311,9 @@ inline int StEStructCutBin::notSymmetrizedXX(int cutBin, int pairCharge) {
         case 8: {
             return notSymmetrizedXX8(cutBin,pairCharge);
         }
+        case 9: {
+            return notSymmetrizedXX9(cutBin,pairCharge);
+        }
         default: {
             return 0;
         }
@@ -297,8 +329,15 @@ inline int StEStructCutBin::notSymmetrizedXX(int cutBin, int pairCharge) {
 /***********************************************************************
  *
  * $Log: StEStructCutBin.h,v $
+ * Revision 1.13  2011/08/02 20:34:02  prindle
+ * More detailed histograms for event mixing.
+ *   Buffer: increased mixed events to 4 (from 2)
+ *   CutBin: added mode 9 for exploration of p_t space, fixed place in mode 5 where
+ *           histogram was written before checking it existed.
+ *   OneBuffer: added ZDC coincidence rate to event sorting space.
+ *
  * Revision 1.12  2010/09/02 21:24:08  prindle
- * 2ptCorrelations: Fill histograms for event mixing information
+ *   2ptCorrelations: Fill histograms for event mixing information
  *                    Option for common mixing buffer
  *                    Switch to selectively fill QInv histograms (which take a long time)
  *   CutBin: Moved PID code to Track class from Pair class. Needed to update this code.

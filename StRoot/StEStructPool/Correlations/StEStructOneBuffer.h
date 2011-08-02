@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructOneBuffer.h,v 1.1 2010/09/02 21:54:03 prindle Exp $
+ * $Id: StEStructOneBuffer.h,v 1.2 2011/08/02 20:34:03 prindle Exp $
  *
  * Author: Duncan Prindle 
  *
@@ -19,18 +19,19 @@ class StEStructEvent;
 
 class StEStructOneBuffer {
   public:
-    StEStructOneBuffer(int nMix, int deltaMultMax, double deltaZMax);
+    StEStructOneBuffer(int nMix, int deltaMultMax, float deltaZMax, float deltaRateMax);
     virtual ~StEStructOneBuffer();
 
     void resetCounter();
     void addEvent(StEStructEvent* event);
-    StEStructEvent* nextEvent(int mult, double vz);
+    StEStructEvent* nextEvent(int mult, float vz, float coinc);
 
     StEStructEvent** mEvent;
     int mNumMixed;  // number of events to mix
     int mcurEvent;   // index to current event 
     int mDeltaMultMax;
-    double mDeltaZMax;
+    float mDeltaZMax;
+    float mDeltaRateMax;
 
     ClassDef(StEStructOneBuffer,1)
 };

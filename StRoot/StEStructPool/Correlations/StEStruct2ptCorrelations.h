@@ -1,6 +1,6 @@
  /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.16 2010/09/02 21:24:07 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.17 2011/08/02 20:34:02 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -62,9 +62,24 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   TH1D** mHNEventsNegSib;
   TH1D** mHNEventsNegMix;
   TH1D*  mHptAll;
+  // Mixing quality
+  TH2D*  mHMixZdN;
+  TH2D*  mHMixZN;
+  TH2D*  mHMixZdC;
+  TH2D*  mHMixZC;
+  TH2D*  mHMixZdZ;
   TH2D*  mHMixdZdN;
+  TH2D*  mHMixdZN;
+  TH2D*  mHMixdZdC;
+  TH2D*  mHMixdZC;
+  TH2D*  mHMixNdC;
+  TH2D*  mHMixNC;
   TH2D*  mHMixNdN;
-  TH1D*  mHcb;  // my local hist for cutbin usage
+  TH2D*  mHMixdNdC;
+  TH2D*  mHMixdNC;
+  TH2D*  mHMixCdC;
+  // my local hist for cutbin usage
+  TH2D*  mHcb;
   TH1D **mHMeanPtP;
   TH1D **mHMeanPtM;
   TH1D **mHMeanYtP;
@@ -265,6 +280,7 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   void  cleanUp();
   void  finish();
 
+  virtual void  debug_CheckHistograms();
   virtual void  fillHistograms();
   virtual void  writeHistograms();
     void   writeQAHists(TFile * tf);
@@ -359,8 +375,15 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.17  2011/08/02 20:34:02  prindle
+ * More detailed histograms for event mixing.
+ *   Buffer: increased mixed events to 4 (from 2)
+ *   CutBin: added mode 9 for exploration of p_t space, fixed place in mode 5 where
+ *           histogram was written before checking it existed.
+ *   OneBuffer: added ZDC coincidence rate to event sorting space.
+ *
  * Revision 1.16  2010/09/02 21:24:07  prindle
- * 2ptCorrelations: Fill histograms for event mixing information
+ *   2ptCorrelations: Fill histograms for event mixing information
  *                    Option for common mixing buffer
  *                    Switch to selectively fill QInv histograms (which take a long time)
  *   CutBin: Moved PID code to Track class from Pair class. Needed to update this code.

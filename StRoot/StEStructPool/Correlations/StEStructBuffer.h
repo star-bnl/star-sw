@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBuffer.h,v 1.4 2007/01/26 17:17:09 msd Exp $
+ * $Id: StEStructBuffer.h,v 1.5 2011/08/02 20:34:02 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -15,7 +15,7 @@
 
 #include "StEStructBinning.h"
 
-#define MAXBUFFERSIZE 2  // now the actual buffer size
+#define MAXBUFFERSIZE 4  // now the actual buffer size
 #define DELTANMAX 50     // max multiplicity difference in mixed events
 
 class TFile;
@@ -57,6 +57,13 @@ inline int StEStructBuffer::numEventsDeleted(){ return mnumDeleted; };
 /***********************************************************************
  *
  * $Log: StEStructBuffer.h,v $
+ * Revision 1.5  2011/08/02 20:34:02  prindle
+ * More detailed histograms for event mixing.
+ *   Buffer: increased mixed events to 4 (from 2)
+ *   CutBin: added mode 9 for exploration of p_t space, fixed place in mode 5 where
+ *           histogram was written before checking it existed.
+ *   OneBuffer: added ZDC coincidence rate to event sorting space.
+ *
  * Revision 1.4  2007/01/26 17:17:09  msd
  * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
  *
