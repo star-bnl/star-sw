@@ -18,24 +18,24 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
 
     TFile *tf;
     StEStructSupport *ehelp;
-    TH2F **ptdedp;
-    TH2F **ptdedpC;
-    TH2F **dedp;
-    TH2F **dedpC;
-    TH2F **ptsedp;
-    TH2F **ptsedpC;
-    TH2F **sedp;
-    TH2F **sedpC;
-    TH2F **ptetaeta;
-    TH2F **ptetaetaC;
-    TH2F **etaeta;
-    TH2F **etaetaC;
-    TH2F **ptphiphi;
-    TH2F **ptphiphiC;
-    TH2F **phiphi;
-    TH2F **phiphiC;
+    TH2D **ptdedp;
+    TH2D **ptdedpC;
+    TH2D **dedp;
+    TH2D **dedpC;
+    TH2D **ptsedp;
+    TH2D **ptsedpC;
+    TH2D **sedp;
+    TH2D **sedpC;
+    TH2D **ptetaeta;
+    TH2D **ptetaetaC;
+    TH2D **etaeta;
+    TH2D **etaetaC;
+    TH2D **ptphiphi;
+    TH2D **ptphiphiC;
+    TH2D **phiphi;
+    TH2D **phiphiC;
 
-    const char* pidName[] = {"all", "pipi", "piK", "pip", "KK", "KP", "pp", "oo"};
+    const char* pidName[] = {"all", "pipi", "piK", "pip", "KK", "Kp", "pp", "oo"};
     const char* chargeName[] = {"_LS_", "_US_", "_CD_", "_CI_"};
     const char* chargeType[] = {"_PP_", "_PM_", "_MP_", "_MM_"};
     char outFileName[1024];
@@ -46,7 +46,7 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
     char inFileName[1024];
 
     for (int ic=0;ic<nCent;ic++) {
-        printf("Scale factors for centrality %2i,    ++       +-       -+       --       CI   \n",ic);
+        printf("Centrality %2i:  d2N/dEdP    pHat_{A+}   pHat_{A-}   pHat_{B+}   pHat_{B-}\n",ic);
         for (int ipid=0;ipid<8;ipid++) {
             sprintf(inFileName,"%s/%s%s.root",dirName,inNames[ic],oname[ipid]);
             tf        = new TFile(inFileName);
@@ -54,34 +54,34 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
             ehelp     = new StEStructSupport(tf,0);
             ehelp->msilent = true;
             ehelp->mapplyDEtaFix = false;
-            ehelp->mPairNormalization = false;
             if ((0 ==ipid) || (1 == ipid) || (4 == ipid) || (6 == ipid) || (7 == ipid)) {
                 ehelp->mIdenticalPair = true;
             } else {
                 ehelp->mIdenticalPair = false;
             }
+            ehelp->setBGMode(0);
             int subtract = 1;
-            ptdedpC   = (TH2F**) ehelp->buildPtCommon("DEtaDPhi",2,subtract);
-            ptsedpC   = (TH2F**) ehelp->buildPtCommon("SEtaDPhi",2,subtract);
-            ptetaetaC = (TH2F**) ehelp->buildPtCommon("EtaEta",2,subtract);
-            ptphiphiC = (TH2F**) ehelp->buildPtCommon("PhiPhi",2,subtract);
+            ehelp->mPairNormalization = false;
+            ptdedpC   = ehelp->buildPtCommon("DEtaDPhi",2,subtract);
+            ptsedpC   = ehelp->buildPtCommon("SEtaDPhi",2,subtract);
+            ptetaetaC = ehelp->buildPtCommon("EtaEta",2,subtract);
+            ptphiphiC = ehelp->buildPtCommon("PhiPhi",2,subtract);
 
-            ptdedp   = (TH2F**) ehelp->buildPtChargeTypes("DEtaDPhi",2,subtract);
-            ptsedp   = (TH2F**) ehelp->buildPtChargeTypes("SEtaDPhi",2,subtract);
-            ptetaeta = (TH2F**) ehelp->buildPtChargeTypes("EtaEta",2,subtract);
-            ptphiphi = (TH2F**) ehelp->buildPtChargeTypes("PhiPhi",2,subtract);
+            ptdedp   = ehelp->buildPtChargeTypes("DEtaDPhi",2,subtract);
+            ptsedp   = ehelp->buildPtChargeTypes("SEtaDPhi",2,subtract);
+            ptetaeta = ehelp->buildPtChargeTypes("EtaEta",2,subtract);
+            ptphiphi = ehelp->buildPtChargeTypes("PhiPhi",2,subtract);
 
-            dedpC     = (TH2F**) ehelp->buildCommon("DEtaDPhi",2);
-            ehelp->adjustCommonErrors("DEtaDPhi",dedpC,2);
-            sedpC     = (TH2F**) ehelp->buildCommon("SEtaDPhi",2);
-            etaetaC   = (TH2F**) ehelp->buildCommon("EtaEta",2);
-            phiphiC   = (TH2F**) ehelp->buildCommon("PhiPhi",2);
+            ehelp->mPairNormalization = true;
+            dedpC     = ehelp->buildCommon("DEtaDPhi",2);
+            sedpC     = ehelp->buildCommon("SEtaDPhi",2);
+            etaetaC   = ehelp->buildCommon("EtaEta",2);
+            phiphiC   = ehelp->buildCommon("PhiPhi",2);
 
-            dedp     = (TH2F**) ehelp->buildChargeTypes("DEtaDPhi",2);
-            ehelp->adjustChargeTypeErrors("DEtaDPhi",dedp,2);
-            sedp     = (TH2F**) ehelp->buildChargeTypes("SEtaDPhi",2);
-            etaeta   = (TH2F**) ehelp->buildChargeTypes("EtaEta",2);
-            phiphi   = (TH2F**) ehelp->buildChargeTypes("PhiPhi",2);
+            dedp     = ehelp->buildChargeTypes("DEtaDPhi",2);
+            sedp     = ehelp->buildChargeTypes("SEtaDPhi",2);
+            etaeta   = ehelp->buildChargeTypes("EtaEta",2);
+            phiphi   = ehelp->buildChargeTypes("PhiPhi",2);
 
             out->cd();
             for (int icharge=0;icharge<4;icharge++) {
@@ -206,9 +206,11 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
                 }
             }
             // Calculate and print scale factors
-            double *scale = ehelp->getScaleFactors();
-            printf("  bin %8s                    %7.2f  %7.2f  %7.2f  %7.2f  %7.2f\n",binName[ibin],scale[0],scale[1],scale[2],scale[3],scale[4]);
-            delete [] scale;
+            double scale = ehelp->getCIdNdEtadPhi();
+            double *ptHat = ehelp->getptHat();
+            printf("  bin %8s  %7.3f   %7.3f     %7.3f     %7.3f     %7.3f\n",pidName[ipid],scale,ptHat[0],ptHat[1],ptHat[2],ptHat[3]);
+            delete [] ptHat;
+
             delete tf;
             delete ehelp;
         }
@@ -216,125 +218,168 @@ void combineHistograms5(const char *dirName, const char **inNames, const char *o
 
     TH2D **ytyt;
     TH2D **ytytC;
-    gROOT->LoadMacro("minimizeNegative.C");
-    double *sFactor[2][3], *eSFactor[2][3];
+    TH2D **sytdyt;
+    TH2D **sytdytC;
+    gROOT->LoadMacro("minimizeNegative2.C");
+    double *sFactor[2][8];
     for (int it=0;it<2;it++) {
-        for (int ibin=0;ibin<3;ibin++) {
-            sFactor[it][ibin] = new double[nCent];
-            eSFactor[it][ibin] = new double[nCent];
+        for (int ipid=0;ipid<8;ipid++) {
+            sFactor[it][ipid] = new double[nCent];
         }
     }
     float  sf[2];
-    double argList[10];
-    double start = 0.95;
-    double step  = 0.001;
-    double bmin  = 0.9;
-    double bmax  = 1.1;
-    int errFlag = 0;
+    bool scaleYt = false;
+    double min = 0.85;
+    double max = 1.05;
+    double D = max - min;
+    int    nBins = 51;
+    double d = D/(nBins-1.0);
+    int npar = 1;
+    double gin = 10;
+    double f;
+    double par;
+    int iflag = 1;
+    double aH, bH, aL, bL;
+    TH1F *hFunc = new TH1F("hFunc","hFunc",nBins,min-d/2,max+d/2);
+    TF1 *fHigh = new TF1("HighFit","[0]+[1]*x",1.01,1.05);
+    TF1 *fLow = new TF1("LowFit","[0]+[1]*x",0.85,0.95);
+
     minData.mCorrType = 1;
     minData.mLambda   = 10;
 
     // For ytyt space pid is not yet useful because of limited range due to dE/dx.
-    int ytytBins[] = {0};
+    // Now we have ToF. Check if yt range is big enough that yty space is interesting.
     for (int ic=0;ic<nCent;ic++) {
-        for (int ibin=0;ibin<1;ibin++) {
-            sprintf(inFileName,"%s/%s%s.root",dirName,inNames[ic],binName[ytytBins[ibin]]);
+        for (int ipid=0;ipid<8;ipid++) {
+            sprintf(inFileName,"%s/%s%s.root",dirName,inNames[ic],oname[ipid]);
             tf        = new TFile(inFileName);
             tf->cd();
             ehelp     = new StEStructSupport(tf,0);
             ehelp->msilent            = true;
             ehelp->mapplyDEtaFix      = false;
-            ehelp->mPairNormalization = true;
-            ehelp->mIdenticalPair     = true;
-            ehelp->setBGMode(1);
+            ehelp->mPairNormalization = false;
+            ehelp->mYtYtNormalization = true;
+            if ((0 ==ipid) || (1 == ipid) || (4 == ipid) || (6 == ipid) || (7 == ipid)) {
+                ehelp->mIdenticalPair = true;
+            } else {
+                ehelp->mIdenticalPair = false;
+            }
 
             // Make sure LS histogram for zBin 0 is in file.
             if (0 == ehelp->histogramExists("YtYt", 0)) {
                 continue;
             }
 
-            // A lot of stuff so we can find a scaling factor for \rho_{ref}
-            // such that \Delta\rho is almost always positive.
-            minData.mSupport    = ehelp;
-            minData.mChargeType = 0;
+            if (!scaleYt) {
+                ehelp->setBGMode(0);
+                ehelp->mYtYtVolumeNormalization = true;
+                ehelp->mYtYtNormalization = false;
+                ehelp->mPairNormalization = false;
+                sf[0] = 1;
+                sf[1] = 1;
+                cout << ">>>>>Not fitting scale factors for centrality " << ic << " pid bin " << ipid << ", Using YtYtNormalization = " << ehelp->mYtYtNormalization << endl;
+                ytyt  = ehelp->buildChargeTypes("YtYt",5,sf);
+                ytytC = ehelp->buildCommon("YtYt",5,sf);
+                sytdyt  = ehelp->buildChargeTypes("SYtDYt",5,sf);
+                sytdytC = ehelp->buildCommon("SYtDYt",5,sf);
+            } else {
+                // Here we try minimizing volume of \Delta\rho/\sqrt(\rho_{ref})
+                // constraining the quantity to be mostly positive.
+                ehelp->setBGMode(1);
+                minData.mSupport    = ehelp;
+                minData.mChargeType = 0;
+                for (int ia=1;ia<=nBins;ia++) {
+                    par = min + float(ia-1)*d;
+                    minimizeNegative2(npar,&gin,f,&par,iflag);
+                    hFunc->SetBinContent(ia,f);
+                }
+                hFunc->Fit("HighFit","NORQ");
+                aH = fHigh->GetParameter(0);
+                bH = fHigh->GetParameter(1);
+                hFunc->Fit("LowFit","NORQ");
+                aL = fLow->GetParameter(0);
+                bL = fLow->GetParameter(1);
+                if (bL > 0  || bH < 0) {
+                    cout << "Suspect fit for ic = " << ic << ", ipid = " << ipid << ", LS " << endl;
+                }
+                sFactor[0][ipid][ic] = -(aH-aL)/(bH-bL);
 
-            minuit = new TMinuit(1);
-            minuit->SetFCN(minimizeNegative);
-            minuit->mnparm( 0, "rho_ref scale factor", start, step, bmin, bmax, errFlag );
-            minuit->SetErrorDef(1);
-            minuit->SetPrintLevel(-1);
-            argList[0] = 1;
-            minuit->mnexcm("SET STR",argList,1,errFlag);
-            argList[0] = 500;
-            cout << ">>>>>Starting scale factor 0 fit for centrality " << ic << " yt bin " << ibin << endl;
-            minuit->mnexcm("MIGRAD",argList,1,errFlag);
-            minuit->GetParameter(0,sFactor[0][ibin][ic],eSFactor[0][ibin][ic]);
-            if (0 != errFlag) {
-                cout << "++++Out of chesse error; Fit failed. Using scale factor = 1" << endl;
-                sFactor[0][ibin][ic]  =   1;
-                eSFactor[0][ibin][ic] = 100;
+                minData.mChargeType = 1;
+                for (int ia=1;ia<=nBins;ia++) {
+                    par = min + float(ia-1)*d;
+                    minimizeNegative2(npar,&gin,f,&par,iflag);
+                    hFunc->SetBinContent(ia,f);
+                }
+                hFunc->Fit("HighFit","NORQ");
+                aH = fHigh->GetParameter(0);
+                bH = fHigh->GetParameter(1);
+                hFunc->Fit("LowFit","NORQ");
+                aL = fLow->GetParameter(0);
+                bL = fLow->GetParameter(1);
+                if (bL > 0  || bH < 0) {
+                    cout << "Suspect fit for ic = " << ic << ", ipid = " << ipid << ", US " << endl;
+                }
+                sFactor[1][ipid][ic] = -(aH-aL)/(bH-bL);
+
+
+                sf[0] = sFactor[0][ipid][ic];
+                sf[1] = sFactor[1][ipid][ic];
+                ytyt  = ehelp->buildChargeTypes("YtYt",5,sf);
+                ytytC = ehelp->buildCommon("YtYt",5,sf);
+                sytdyt  = ehelp->buildChargeTypes("SYtDYt",5,sf);
+                sytdytC = ehelp->buildCommon("SYtDYt",5,sf);
             }
-            delete minuit;
-
-            // Seems like I should be able to reset the TMinuit object to do a
-            // different fit. Didn't work on my first attempts, so I just create
-            // a new one.
-            minData.mChargeType = 1;
-            minuit = new TMinuit(1);
-            minuit->SetFCN(minimizeNegative);
-            int errFlag = 0;
-            minuit->mnparm( 0, "rho_ref scale factor", start, step, bmin, bmax, errFlag );
-            minuit->SetErrorDef(1);
-            minuit->SetPrintLevel(-1);
-            argList[0] = 1;
-            minuit->mnexcm("SET STR",argList,1,errFlag);
-            argList[0] = 500;
-            cout << ">>>>>Starting scale factor 1 fit for centrality " << ic << " yt bin " << ibin << endl;
-            minuit->mnexcm("MIGRAD",argList,1,errFlag);
-            minuit->GetParameter(0,sFactor[1][ibin][ic],eSFactor[1][ibin][ic]);
-            if (0 != errFlag) {
-                cout << "++++Out of chesse error; Fit failed. Using scale factor = 1" << endl;
-                sFactor[1][ibin][ic]  =   1;
-                eSFactor[1][ibin][ic] = 100;
-            }
-            delete minuit;
-
-            sf[0] = sFactor[0][ibin][ic];
-            sf[1] = sFactor[1][ibin][ic];
-            ytyt  = ehelp->buildChargeTypes("YtYt",5,sf);
-            ytytC = ehelp->buildCommon("YtYt",5,sf);
 
             out->cd();
             for (int icharge=0;icharge<4;icharge++) {
-                TString name(binName[ytytBins[ibin]]);
+                TString name(pidName[ipid]);
                 name += "_YtYt"; name += chargeName[icharge];  name += ic;
                 ytyt[icharge]->SetName(name.Data());
                 ytyt[icharge]->SetTitle(name.Data());
                 ytyt[icharge]->Write();
-                TString name(binName[ytytBins[ibin]]);
+                TString name(pidName[ipid]);
                 name += "_YtYt"; name += chargeType[icharge];  name += ic;
                 ytytC[icharge]->SetName(name.Data());
                 ytytC[icharge]->SetTitle(name.Data());
                 ytytC[icharge]->Write();
+
+                TString name(pidName[ipid]);
+                name += "_SYtDYt"; name += chargeName[icharge];  name += ic;
+                sytdyt[icharge]->SetName(name.Data());
+                sytdyt[icharge]->SetTitle(name.Data());
+                sytdyt[icharge]->Write();
+                TString name(pidName[ipid]);
+                name += "_SYtDYt"; name += chargeType[icharge];  name += ic;
+                sytdytC[icharge]->SetName(name.Data());
+                sytdytC[icharge]->SetTitle(name.Data());
+                sytdytC[icharge]->Write();
             }
             delete tf;
             delete ehelp;
         }
     }
-    cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
-    cout << " Here are Yt scale factors for rho_{ref}" << endl;
-    printf(" Centrality   all LS       SS LS        AS LS        all US       SS US        AS US    \n");
-    for (int ic=0;ic<nCent;ic++) {
-        printf("%6i    %9.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f) %7.3f(%3.0f)\n",ic,
-            sFactor[0][0][ic],1000*eSFactor[0][0][ic],sFactor[0][1][ic],1000*eSFactor[0][1][ic],sFactor[0][2][ic],1000*eSFactor[0][2][ic],
-            sFactor[1][0][ic],1000*eSFactor[1][0][ic],sFactor[1][1][ic],1000*eSFactor[1][1][ic],sFactor[1][2][ic],1000*eSFactor[1][2][ic]);
+    if (scaleYt) {
+        cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
+        cout << " Here are Yt scale factors for rho_{ref}" << endl;
+        printf(" Centrality   all     pi_pi   pi_K    pi_p    K_K     K_p     p_p     o_o\n");
+        for (int ic=0;ic<nCent;ic++) {
+            printf("%4i US     %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f\n",ic,
+                    sFactor[0][0][ic],sFactor[0][1][ic],
+                    sFactor[0][2][ic],sFactor[0][3][ic],
+                    sFactor[0][4][ic],sFactor[0][5][ic],
+                    sFactor[0][6][ic],sFactor[0][7][ic]);
+            printf("%4i LS     %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f\n",ic,
+                    sFactor[1][0][ic],sFactor[1][1][ic],
+                    sFactor[1][2][ic],sFactor[1][3][ic],
+                    sFactor[1][4][ic],sFactor[1][5][ic],
+                    sFactor[1][6][ic],sFactor[1][7][ic]);
+        }
     }
     out->Close();
 //    delete out;
     for (int it=0;it<2;it++) {
-        for (int ibin=0;ibin<3;ibin++) {
-            delete sFactor[it][ibin];
-            delete eSFactor[it][ibin];
+        for (int ipid=0;ipid<8;ipid++) {
+            delete sFactor[it][ipid];
         }
     }
 }

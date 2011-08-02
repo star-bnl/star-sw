@@ -104,8 +104,22 @@ cout << "Input file " << fileName.Data() << endl;
     TH1D *mHcb;
     TH1D *mHptAll;
     TH2D *tmp2;
-    TH2D *mHMixedDistance;
-    TH2D *mHMixedMults;
+
+    TH2D *mMix_Z_dN;
+    TH2D *mMix_Z_N;
+    TH2D *mMix_Z_dC;
+    TH2D *mMix_Z_C;
+    TH2D *mMix_Z_dZ;
+    TH2D *mMix_dZ_dN;
+    TH2D *mMix_dZ_N;
+    TH2D *mMix_dZ_dC;
+    TH2D *mMix_dZ_C;
+    TH2D *mMix_N_C;
+    TH2D *mMix_N_dC;
+    TH2D *mMix_N_dN;
+    TH2D *mMix_dN_C;
+    TH2D *mMix_dN_dC;
+    TH2D *mMix_C_dC;
 
     // Hack: Should do memory allocation, but since these are only arrays of pointers
     // I will just declare them to be bigger than I need.
@@ -211,7 +225,9 @@ cout << "Opening input file " << jf << endl;
 //        } else {
 //            mHmix->Add(tmp);
 //        }
-        in->GetObject("hcb",tmp);
+        // Seem to have changed hcb to a 2D histogram at some point.
+        // Use explicit cast.
+        tmp = (TH1D *) in->Get("hcb");
         out->cd();
         if (0 == jf) {
             mHcb    = (TH1D *) tmp->Clone();
@@ -225,19 +241,111 @@ cout << "Opening input file " << jf << endl;
         } else {
             mHptAll->Add(tmp);
         }
-        in->GetObject("MixedDistance",tmp2);
+
+        in->GetObject("Mixed_Z_dN",tmp2);
         out->cd();
         if (0 == jf) {
-            mHMixedDistance = (TH2D *) tmp2->Clone();
+            mHMixed_Z_dN = (TH2D *) tmp2->Clone();
         } else {
-            mHMixedDistance->Add(tmp2);
+            mHMixed_Z_dN->Add(tmp2);
         }
-        in->GetObject("MixedMults",tmp2);
+        in->GetObject("Mixed_Z_N",tmp2);
         out->cd();
         if (0 == jf) {
-            mHMixedMults = (TH2D *) tmp2->Clone();
+            mHMixed_Z_N = (TH2D *) tmp2->Clone();
         } else {
-            mHMixedMults->Add(tmp2);
+            mHMixed_Z_N->Add(tmp2);
+        }
+        in->GetObject("Mixed_Z_dC",tmp2);
+        out->cd();
+        if (0 == jf) {
+            mHMixed_Z_dC = (TH2D *) tmp2->Clone();
+        } else {
+            mHMixed_Z_dC->Add(tmp2);
+        }
+        in->GetObject("Mixed_Z_C",tmp2);
+        out->cd();
+        if (0 == jf) {
+            mHMixed_Z_C = (TH2D *) tmp2->Clone();
+        } else {
+            mHMixed_Z_C->Add(tmp2);
+        }
+        in->GetObject("Mixed_Z_dZ",tmp2);
+        out->cd();
+        if (0 == jf) {
+            mHMixed_Z_dZ = (TH2D *) tmp2->Clone();
+        } else {
+            mHMixed_Z_dZ->Add(tmp2);
+        }
+        in->GetObject("Mixed_dZ_dN",tmp2);
+        out->cd();
+        if (0 == jf) {
+            mHMixed_dZ_dN = (TH2D *) tmp2->Clone();
+        } else {
+            mHMixed_dZ_dN->Add(tmp2);
+        }
+        in->GetObject("Mixed_dZ_N",tmp2);
+        out->cd();
+        if (0 == jf) {
+            mHMixed_dZ_N = (TH2D *) tmp2->Clone();
+        } else {
+            mHMixed_dZ_N->Add(tmp2);
+        }
+        in->GetObject("Mixed_dZ_dC",tmp2);
+        out->cd();
+        if (0 == jf) {
+            mHMixed_dZ_dC = (TH2D *) tmp2->Clone();
+        } else {
+            mHMixed_dZ_dC->Add(tmp2);
+        }
+        in->GetObject("Mixed_dZ_C",tmp2);
+        out->cd();
+        if (0 == jf) {
+            mHMixed_dZ_C = (TH2D *) tmp2->Clone();
+        } else {
+            mHMixed_dZ_C->Add(tmp2);
+        }
+        in->GetObject("Mixed_N_dC",tmp2);
+        out->cd();
+        if (0 == jf) {
+            mHMixed_N_dC = (TH2D *) tmp2->Clone();
+        } else {
+            mHMixed_N_dC->Add(tmp2);
+        }
+        in->GetObject("Mixed_N_C",tmp2);
+        out->cd();
+        if (0 == jf) {
+            mHMixed_N_C = (TH2D *) tmp2->Clone();
+        } else {
+            mHMixed_N_C->Add(tmp2);
+        }
+        in->GetObject("Mixed_N_dN",tmp2);
+        out->cd();
+        if (0 == jf) {
+            mHMixed_N_dN = (TH2D *) tmp2->Clone();
+        } else {
+            mHMixed_N_dN->Add(tmp2);
+        }
+        in->GetObject("Mixed_dN_dC",tmp2);
+        out->cd();
+        if (0 == jf) {
+            mHMixed_dN_dC = (TH2D *) tmp2->Clone();
+        } else {
+            mHMixed_dN_dC->Add(tmp2);
+        }
+        in->GetObject("Mixed_dN_C",tmp2);
+        out->cd();
+        if (0 == jf) {
+            mHMixed_dN_C = (TH2D *) tmp2->Clone();
+        } else {
+            mHMixed_dN_C->Add(tmp2);
+        }
+        in->GetObject("Mixed_C_dC",tmp2);
+        out->cd();
+        if (0 == jf) {
+            mHMixed_C_dC = (TH2D *) tmp2->Clone();
+        } else {
+            mHMixed_C_dC->Add(tmp2);
         }
 
 
@@ -789,8 +897,22 @@ cout << "Closing input file " << jf << endl;
 //    mHmix->Write();
     mHcb->Write();
     mHptAll->Write();
-    mHMixedDistance->Write();
-    mHMixedMults->Write();
+
+    mHMixed_Z_dN->Write();
+    mHMixed_Z_N->Write();
+    mHMixed_Z_dC->Write();
+    mHMixed_Z_C->Write();
+    mHMixed_Z_dZ->Write();
+    mHMixed_dZ_dN->Write();
+    mHMixed_dZ_N->Write();
+    mHMixed_dZ_dC->Write();
+    mHMixed_dZ_C->Write();
+    mHMixed_N_dC->Write();
+    mHMixed_N_C->Write();
+    mHMixed_N_dN->Write();
+    mHMixed_dN_dC->Write();
+    mHMixed_dN_C->Write();
+    mHMixed_C_dC->Write();
 
     for (int iz=0;iz<nTotZBins;iz++) {
         mHNEventsSib[iz]->Write();

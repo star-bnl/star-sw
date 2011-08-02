@@ -29,6 +29,7 @@ void selectAllM5(const char* dirName, const char* inFile){
                        "K_o",  "K_K",   "K_p",
                        "p_o",  "p_p",
                        "o_o",  "all"};
+  int symmXX[] = {0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1};
   int parentDist[10][2] = {1,0, 1,1, 1,2, 1,3,  2,0, 2,2, 2,3,  3,0, 3,3,  0,0};
 
   int nList[10];
@@ -42,8 +43,7 @@ void selectAllM5(const char* dirName, const char* inFile){
   fname+=inFile;
   fname+="all";
   fname+=".root";
-  int symm=1;
-  adder.addCuts(fname.Data(),tf,nList,10,parentSum,nParentDist,symm);
+  adder.addCuts(fname.Data(),tf,nList,10,parentSum,nParentDist,symmXX[10]);
   TFile * tfComb=new TFile(fname.Data(),"UPDATE");
   tfComb->cd();
   adder.combineUS(tfComb);
@@ -62,10 +62,10 @@ void selectAllM5(const char* dirName, const char* inFile){
     nList[0] = k;
     parentD[0][0] = parentDist[k][0];
     parentD[0][1] = parentDist[k][1];
-    adder.addCuts(fname.Data(),tf,nList,1,parentD,nParentDist);
+    adder.addCuts(fname.Data(),tf,nList,1,parentD,nParentDist,symmXX[k]);
   }
 
-  TString fname(dirname);
+  TString fname(dirName);
   fname+="/";
   fname+=fileBase;
   fname+="_pairDensities.root";
