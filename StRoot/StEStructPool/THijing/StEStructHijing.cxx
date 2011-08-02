@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHijing.cxx,v 1.8 2010/09/02 21:31:48 prindle Exp $
+ * $Id: StEStructHijing.cxx,v 1.9 2011/08/02 20:43:07 prindle Exp $
  *
  * Author: Chunhui Han
  *
@@ -163,6 +163,7 @@ void StEStructHijing::fillTracks(StEStructEvent* estructEvent) {
         eTrack->SetPz(p[2]);
         eTrack->SetEta(eta);
         eTrack->SetPhi(phi);
+        eTrack->SetBeta(0);
         eTrack->SetDedx(0);
         eTrack->SetChi2(1);
         eTrack->SetTopologyMapData(0, 0xffffff80);
@@ -189,8 +190,9 @@ void StEStructHijing::fillTracks(StEStructEvent* estructEvent) {
 // No histogramming or copying data around.
 bool StEStructHijing::isTrackGood(int i) {
     int pid = mHijing->GetPdg(i);
+    bool useTrack = true;
     if (!measureable(pid)) {     // checks if pi,k,p or e
-        return false;
+        useTrack = false;
     }
     float p[3];
     float v[3];
@@ -211,7 +213,6 @@ bool StEStructHijing::isTrackGood(int i) {
     float _r = pt/0.139;
     float yt = log(sqrt(1+_r*_r)+_r);
 
-    bool useTrack = true;
     useTrack = (mTCuts->goodGlobalDCA(gdca[3]) && useTrack);
     useTrack = (mTCuts->goodCharge(q) && useTrack);
     useTrack = (mTCuts->goodPt(pt) && useTrack);
