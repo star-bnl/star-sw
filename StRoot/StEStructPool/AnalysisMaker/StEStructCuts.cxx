@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.cxx,v 1.9 2010/09/02 21:20:08 prindle Exp $
+ * $Id: StEStructCuts.cxx,v 1.10 2011/08/02 20:31:25 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -365,12 +365,15 @@ void StEStructCuts::fillHistogram(const char* name, float val1, float val2, bool
     }
 
   // Add "2D" to name.
-  char *hName = new char[strlen(name)+2];
-  sprintf(hName,"%s2D",name);
+  string hName = name;   hName += "2D";
+//  char *hName = (char *) malloc(strlen(name)+2);
+//  sprintf(hName,"%s2D",name);
   int i;
-  for(i=0; i<mnumVars; i++)if(strstr(mvarName[i],hName)) break;
+  for(i=0; i<mnumVars; i++)if(strstr(mvarName[i],hName.c_str())) break;
 
-  if(i==mnumVars) return;
+  if(i==mnumVars) {
+      return;
+  }
 
   TAxis *x = mvarHistsNoCut[i]->GetXaxis();
   val1 = (val1 > x->GetXmin()) ? val1 : x->GetXmin()+0.5;
@@ -447,8 +450,18 @@ void StEStructCuts::printCuts(const char* fileName){
 /***********************************************************************
  *
  * $Log: StEStructCuts.cxx,v $
+ * Revision 1.10  2011/08/02 20:31:25  prindle
+ * Change string handling
+ *   Added event cuts for VPD, good fraction of global tracks are primary, vertex
+ *   found only from tracks on single side of TPC, good fraction of primary tracks have TOF hits..
+ *   Added methods to check if cuts imposed
+ *   Added 2010 200GeV and 62 GeV, 2011 19 GeV AuAu datasets, 200 GeV pp2pp 2009 dataset.
+ *   Added TOF vs. dEdx vs. p_t histograms
+ *   Fix participant histograms in QAHists.
+ *   Added TOFEMass cut in TrackCuts although I think we want to supersede this.
+ *
  * Revision 1.9  2010/09/02 21:20:08  prindle
- * Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
+ *   Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
  *   EventCuts: Add radius cut on vertex, ToF fraction cut. Merge 2004 AuAu 200 GeV datasets.
  *              Add 7, 11 and 39 GeV dataset selections
  *   MuDstReader: Add 2D histograms for vertex radius and ToF fraction cuts.

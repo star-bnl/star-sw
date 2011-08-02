@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrackCuts.cxx,v 1.4 2008/12/02 23:35:35 prindle Exp $
+ * $Id: StEStructTrackCuts.cxx,v 1.5 2011/08/02 20:31:26 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -44,6 +44,7 @@ void StEStructTrackCuts::initCuts(){
    mxt[0]=mxt[1]=0;
    mphi[0]=mphi[1]=0;
    meta[0]=meta[1]=0;  
+   mTOFEMass[0]=mTOFEMass[1]=0;
    mnsigmaE[0]=mnsigmaE[1]=0;
    mnsigmaPi[0]=mnsigmaPi[1]=0;
    mnsigmaK[0]=mnsigmaK[1]=0;
@@ -65,6 +66,7 @@ void StEStructTrackCuts::initNames(){
   strcpy(mxtName.name,"Xt") ;
   strcpy(mphiName.name,"Phi");
   strcpy(metaName.name,"Eta");
+  strcpy(mTOFEMassName.name,"TOFEMass");
   strcpy(mnsigmaEName.name,"NSigmaElectron");
   strcpy(mnsigmaPiName.name,"NSigmaPion");
   strcpy(mnsigmaKName.name,"NSigmaKaon");
@@ -152,6 +154,12 @@ bool StEStructTrackCuts::loadBaseCuts(const char* name, const char** vals, int n
     return true;
   }
 
+  if(!strcmp(name,mTOFEMassName.name)){ 
+    mTOFEMass[0]=atof(vals[0]); mTOFEMass[1]=atof(vals[1]);
+    mTOFEMassName.idx = createCutHists(name,mTOFEMass);
+    return true;
+  }
+
   if(!strcmp(name,mnsigmaEName.name)){ 
     mnsigmaE[0]=atof(vals[0]); mnsigmaE[1]=atof(vals[1]);
     mnsigmaEName.idx = createCutHists(name,mnsigmaE);
@@ -200,6 +208,7 @@ void StEStructTrackCuts::printCutStats(ostream& ofs){
   ofs<<mytName.name<<","<<myt[0]<<","<<myt[1]<<"\t\t\t"<<" # yt cut"<<endl;
   ofs<<mphiName.name<<","<<mphi[0]/M_PI<<","<<mphi[1]/M_PI<<"\t\t\t"<<" # phi cut in factor of pi"<<endl;
   ofs<<metaName.name<<","<<meta[0]<<","<<meta[1]<<"\t\t\t"<<" # eta cut"<<endl;
+  ofs<<mTOFEMassName.name<<","<<mTOFEMass[0]<<","<<mTOFEMass[1]<<"\t\t"<<" # num TOF electron Mass cut"<<endl;
   ofs<<mnsigmaEName.name<<","<<mnsigmaE[0]<<","<<mnsigmaE[1]<<"\t\t"<<" # num sigma electron cut"<<endl;
   ofs<<mnsigmaPiName.name<<","<<mnsigmaPi[0]<<","<<mnsigmaPi[1]<<"\t\t\t"<<" # num sigma Pion cut"<<endl;
   ofs<<mnsigmaKName.name<<","<<mnsigmaK[0]<<","<<mnsigmaK[1]<<"\t\t\t"<<" # num sigma Kaon cut"<<endl;
@@ -212,6 +221,16 @@ void StEStructTrackCuts::printCutStats(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructTrackCuts.cxx,v $
+ * Revision 1.5  2011/08/02 20:31:26  prindle
+ * Change string handling
+ *   Added event cuts for VPD, good fraction of global tracks are primary, vertex
+ *   found only from tracks on single side of TPC, good fraction of primary tracks have TOF hits..
+ *   Added methods to check if cuts imposed
+ *   Added 2010 200GeV and 62 GeV, 2011 19 GeV AuAu datasets, 200 GeV pp2pp 2009 dataset.
+ *   Added TOF vs. dEdx vs. p_t histograms
+ *   Fix participant histograms in QAHists.
+ *   Added TOFEMass cut in TrackCuts although I think we want to supersede this.
+ *
  * Revision 1.4  2008/12/02 23:35:35  prindle
  * Added code for pileup rejection in EventCuts and MuDstReader.
  * Modified trigger selections for some data sets in EventCuts.

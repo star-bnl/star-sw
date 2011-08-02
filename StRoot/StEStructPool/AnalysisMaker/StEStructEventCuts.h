@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.h,v 1.15 2010/09/02 21:20:09 prindle Exp $
+ * $Id: StEStructEventCuts.h,v 1.16 2011/08/02 20:31:25 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -29,20 +29,26 @@ protected:
 
    CutName mtWordName;
    CutName mpVertexZName;
+   CutName mpVPDVertexName;
    CutName mpVertexRadiusName;
    CutName mcentralityName;  
    CutName mgoodtoffractionName;  
+   CutName mgoodprimaryfractionName;  
    CutName mZVertSepName;  
+   CutName mZVertMatchName;  
 
 
   char         mRunPeriod[1024];
   bool         mtrgByRunPeriod;
   unsigned int mtWord[2];  
   float        mpVertexZ[2]; 
+  float        mpVPDVertex[2]; 
   float        mpVertexRadius[2]; 
   float        mcentrality[2];
   float        mgoodtoffraction[2];
+  float        mgoodprimaryfraction[2];
   float        mZVertSep[2];
+  float        mZVertMatch[2];
   int badTrigger;
 
   void init();
@@ -63,18 +69,28 @@ public:
   bool goodTrigger(StMuDst* muDst);
   bool goodVertexTopology(StMuDst* muDst);
   bool goodPrimaryVertexZ( float z );
+  bool goodVPDVertex( float dz );
   bool goodPrimaryVertexRadius( float r );
+  bool hasPrimaryVertexRadiusCut();
   bool goodCentrality( float n);
   bool goodToFFraction(int ndEdx, int nToF);
+  bool hasToFFractionCut();
+  bool goodPrimaryFraction(int ndPrimary, int nGlobal);
+  bool hasPrimaryFractionCut();
   bool goodZVertSep(float dz);
   bool hasZVertSepCut();
+  bool goodZVertMatch(float dz);
+  bool hasZVertMatchCut();
 
   char* triggerWordName(){ return (char*)mtWordName.name; };
   char* primaryVertexZName() { return (char*) mpVertexZName.name; };
+  char* primaryVPDVertexName() { return (char*) mpVPDVertexName.name; };
   char* primaryVertexRadiusName() { return (char*) mpVertexRadiusName.name; };
   char* centralityName() { return (char*) mcentralityName.name; };
   char* goodtoffractionName() { return (char*) mgoodtoffractionName.name; };
+  char* goodprimaryfractionName() { return (char*) mgoodprimaryfractionName.name; };
   char* zVertSepName() { return (char*) mZVertSepName.name; };
+  char* zVertMatchName() { return (char*) mZVertMatchName.name; };
 
 
   ClassDef(StEStructEventCuts,1)
@@ -91,12 +107,23 @@ inline bool StEStructEventCuts::goodPrimaryVertexZ(float z) {
   return (z>=mpVertexZ[0] && z<=mpVertexZ[1]);
 }
 
+inline bool StEStructEventCuts::goodVPDVertex(float dz) {
+  mvalues[mpVPDVertexName.idx] = dz;
+  if (mpVPDVertex[0]==mpVPDVertex[1] && mpVPDVertex[0]==0) {
+    return true;
+  }
+  return (dz>=mpVPDVertex[0] && dz<=mpVPDVertex[1]);
+}
+
 inline bool StEStructEventCuts::goodPrimaryVertexRadius(float r) {
   mvalues[mpVertexRadiusName.idx] = r;
   if (mpVertexRadius[0]==mpVertexRadius[1] && mpVertexRadius[0]==0) {
     return true;
   }
   return (r>=mpVertexRadius[0] && r<=mpVertexRadius[1]);
+}
+inline bool StEStructEventCuts::hasPrimaryVertexRadiusCut() {
+  return (mpVertexRadius[1]!=0);
 }
 
 inline bool StEStructEventCuts::goodCentrality(float c){
@@ -109,6 +136,10 @@ inline bool StEStructEventCuts::goodToFFraction(int ndEdx, int nToF) {
     if (mgoodtoffraction[0]==mgoodtoffraction[1] && mgoodtoffraction[0]==0) {
         return true;
     }
+    // Need to check this cut at 2 is reasonable. May cause problem at low multiplicity
+    if (nToF < 2) {
+        return false;
+    }
     float sToF = nToF - ndEdx * mgoodtoffraction[0];
     if ((fabs(sToF) < mgoodtoffraction[1]) &&
         (sToF > -0.5*ndEdx)) {
@@ -116,15 +147,41 @@ inline bool StEStructEventCuts::goodToFFraction(int ndEdx, int nToF) {
     }
     return false;
 }
+inline bool StEStructEventCuts::hasToFFractionCut() {
+    return (mgoodtoffraction[0]!=mgoodtoffraction[1]);
+}
+
+inline bool StEStructEventCuts::goodPrimaryFraction(int nPrimary, int nGlobal) {
+    if (mgoodprimaryfraction[0]==mgoodprimaryfraction[1] && mgoodprimaryfraction[0]==0) {
+        return true;
+    }
+    float dPrim = nGlobal/mgoodprimaryfraction[0] - nPrimary;
+    if (dPrim < mgoodprimaryfraction[1]) {
+        return true;
+    }
+    return false;
+}
+inline bool StEStructEventCuts::hasPrimaryFractionCut() {
+    return (mgoodprimaryfraction[0]!=mgoodprimaryfraction[1]);
+}
 
 inline bool StEStructEventCuts::goodZVertSep(float dz){
   mvalues[mZVertSepName.idx] = dz;
   return (  (mZVertSep[0]==mZVertSep[1] && mZVertSep[0]==0) ||
             (dz<mZVertSep[0] || mZVertSep[1]<dz) );
 }
-
 inline bool StEStructEventCuts::hasZVertSepCut() {
     return (mZVertSep[0]!=mZVertSep[1]);
+}
+
+inline bool StEStructEventCuts::goodZVertMatch(float dz){
+  // If dz is between cuts we want to reject vertex
+  mvalues[mZVertMatchName.idx] = dz;
+  return (  (mZVertMatch[0]==mZVertMatch[1] && mZVertMatch[0]==0) ||
+            (dz<mZVertMatch[0] || mZVertMatch[1]<dz) );
+}
+inline bool StEStructEventCuts::hasZVertMatchCut() {
+    return (mZVertMatch[0]!=mZVertMatch[1]);
 }
 
 #endif
@@ -132,8 +189,18 @@ inline bool StEStructEventCuts::hasZVertSepCut() {
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.h,v $
+ * Revision 1.16  2011/08/02 20:31:25  prindle
+ * Change string handling
+ *   Added event cuts for VPD, good fraction of global tracks are primary, vertex
+ *   found only from tracks on single side of TPC, good fraction of primary tracks have TOF hits..
+ *   Added methods to check if cuts imposed
+ *   Added 2010 200GeV and 62 GeV, 2011 19 GeV AuAu datasets, 200 GeV pp2pp 2009 dataset.
+ *   Added TOF vs. dEdx vs. p_t histograms
+ *   Fix participant histograms in QAHists.
+ *   Added TOFEMass cut in TrackCuts although I think we want to supersede this.
+ *
  * Revision 1.15  2010/09/02 21:20:09  prindle
- * Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
+ *   Cuts:   Add flag to not fill histograms. Important when scanning files for sorting.
  *   EventCuts: Add radius cut on vertex, ToF fraction cut. Merge 2004 AuAu 200 GeV datasets.
  *              Add 7, 11 and 39 GeV dataset selections
  *   MuDstReader: Add 2D histograms for vertex radius and ToF fraction cuts.
