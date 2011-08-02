@@ -104,7 +104,7 @@ void doEStruct( const char* filelist,
             TTimeStamp TS;
             cout &lt;&lt; "analyzing event =" &lt;&lt; counter &lt;&lt; " at " &lt;&lt; TS.GetSec()-startTime &lt;&lt; " seconds after start of loop." &lt;&lt; endl;
         }
-        if ( maxNumEvents!=0 &amp;&amp; i&gt;=maxNumEvents ) {
+        if ( maxNumEvents!=0 &amp;&amp; counter&gt;=maxNumEvents ) {
             istat=2;
         }
         <variable refersTo='postEvent'/>

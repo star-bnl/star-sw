@@ -115,7 +115,7 @@
         <doEStructMacro>
             <analysisType id='analysisType' widget='combobox'>StEStructCorrelation</analysisType>
             <libraries id='libraries' widget='none'>
-    gROOT->LoadMacro("getRandomSeed.C");
+    gROOT-&gt;LoadMacro("getRandomSeed.C");
     gSystem-&gt;Load("THijing");
     char buffer[1024];
     sprintf(buffer,"%s/hijev.inp",scriptDir);
@@ -139,36 +139,42 @@
             <preLoop id='preLoop' widget = 'text'>
     // Put special processing that needs to be done before the event loop here.
     // In this case we may want to sort Hijing accoring to multiplicity or impact parameter.
+    TTimeStamp TS;
+    int startTime = TS.GetSec();
     int **iv = new int*[maxNumEvents];
     if (sortEvents) {
+        StEStructEvent *ev;
         for (int ie=0;ie&lt;maxNumEvents;ie++) {
             iv[ie] = new int[25];
         }
-        int preCount=0, preStat=0, preI=0;
-        estructMaker->SetSorting(true);
-        double *centMeasure = new double [maxNumEvents];
+        int preStat=0, ie = 0;
+        double *centMeasure = new double[maxNumEvents];
         while (preStat!=2) {
-            hijingGenerator-&gt;SaveRandomSeeds(iv[preI]);
-            preStat=estructMaker-&gt;Make();
-            centMeasure[preI] = cent->GetCentValue();
-
-            preI++; preCount++;
-            if (preCount==200) {
-                cout&lt;&lt;"checking event ="&lt;&lt;preI&lt;&lt;endl;
-                preCount=0;
+            hijingGenerator-&gt;SaveRandomSeeds(iv[ie]);
+            ev = reader-&gt;next();
+            if (!ev) {
+                continue;
             }
-            if ( maxNumEvents!=0 &amp;&amp; preI&gt;=maxNumEvents ) {
+            centMeasure[ie] = ev-&gt;Centrality();
+
+            ie++;
+            if ((ie%200) == 0) {
+                TTimeStamp TS;
+                cout &lt;&lt; "checking event =" &lt;&lt; ie &lt;&lt; " at " &lt;&lt; TS.GetSec()-startTime &lt;&lt; " seconds after start of loop." &lt;&lt; endl;
+            }
+            if ( maxNumEvents!=0 &amp;&amp; ie&gt;=maxNumEvents ) {
                 preStat=2;
             }
+            delete ev;
         }
-        estructMaker->SetSorting(false);
-        estructMaker->quickSort(centMeasure,maxNumEvents);
+        estructMaker-&gt;quickSort(centMeasure,maxNumEvents);
+        delete [] centMeasure;
     }
             </preLoop>
             <preEvent id='preEvent' widget = 'text'>
         // Special processing before each event can go here.
         if (sortEvents) {
-            int ie = estructMaker-&gt;GetSortedIndex(i);
+            int ie = estructMaker-&gt;GetSortedIndex(counter);
             hijingGenerator-&gt;RestoreRandomSeeds(iv[ie]);
         }
             </preEvent>
@@ -182,7 +188,6 @@
             delete iv[ie];
         }
         delete [] iv;
-        delete [] centMeasure;
     }
             </postLoop>
         </doEStructMacro>
